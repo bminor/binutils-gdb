@@ -1,3 +1,14 @@
+Sat Mar  7 18:44:50 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: commented out gdb-all.texinfo rule.  This is
+	  temporary.
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
+
 Fri Dec 13 09:47:31 1991  John Gilmore  (gnu at cygnus.com)
 
 	* gdb.texinfo:  Improve how we ask for bug reports.

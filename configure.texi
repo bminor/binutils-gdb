@@ -14,7 +14,7 @@
 This document attempts to describe the Cygnus Support version of
 @code{configure}.
 
-Copyright (C) 1991 Cygnus Support
+Copyright (C) 1991, 1992 Cygnus Support
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
 are preserved on all copies.
@@ -46,7 +46,7 @@ by Cygnus Support.
 @page
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991 Cygnus Support
+Copyright @copyright{} 1991, 1992 Cygnus Support
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -76,11 +76,6 @@ END-INFO-DIR-ENTRY
 This file documents the configuration system used and distributed by
 Cygnus Support.
 
-NOTE: support for a Cygnus experimental option, @code{-subdirs} is at
-least temporarily suspended.  Most of the code is still in configure but
-the option is disabled.  This document describes that feature, but those
-parts are prominently marked with NOTE's like this one. FIXME-soon
-
 @menu
 * What Configure Does::		What Configure Does
 * Invoking::			Invoking
@@ -91,28 +86,59 @@ parts are prominently marked with NOTE's like this one. FIXME-soon
 * Variables Index::		Variable Index
 * Concept Index::		Concept Index
 
+ --- The Detailed Node Listing ---
+
+Using Configure
+
+* Install Locations::		Where to install things once they are built
+* Build Directories::		Where to build object files
+* Host::			Telling @code{configure} what will source will
+			  be built
+* Target::			Telling @code{configure} what the source will
+			  target
+* Local Conventions::		Adding information about local conventions
+
+Install Locations
+
+* prefix::		Changing the default install directory
+* exec_prefix::		How to separate host independent files
+			  from host dependent files when
+			  installing for multiple hosts
+* Install Details::	Full descriptions of all installation
+			  subdirectories
+
+Porting with Configure
+
+* Programs::			Adding configure to new programs
+* Hosts and Targets::		Adding hosts and targets
+* Sites::			Adding site info
+
+Gory details described
+
+* Makefile Extensions::		Extensions to the @sc{gnu} coding standards
+* configure.in::		The format of the configure.in file
+* config.status::		config.status
+* Makefile Fragments::		Makefile Fragments
+
+The format of the @file{configure.in} file
+
+* Minimal::			A minimal configure.in
+* Configure Variables::		Variables available to configure.in
+* Declarations::		For each invocation
+* Per-host::			For each host
+* Per-target::			For each target
+* Post-target::			After each target
+* Example::			An example configure.in
 @end menu
 
 @end ifinfo
-
-@iftex
-@unnumbered Preface
-NOTE: support for a Cygnus experimental option, @code{-subdirs} is at
-least temporarily suspended.  Most of the code is still in configure but
-the option is disabled.  This document describes that feature, but those
-parts are prominently marked with NOTE's like this one. FIXME-soon
-@end iftex
 
 @node What Configure Does, Invoking, top, top
 @chapter What Configure Does
 
 @code{configure} prepares source directories for building working
 programs.  A program cannot be built until its source has been
-configured.  When configure runs, it does the following things for each source
-directory for each host and target combination.
-@*
-NOTE: support for multiple hosts and targets is at least temporarily
-suspended.
+configured.  When configure runs, it does the following things.
 
 @table @emph
 @item Create build directories
@@ -121,26 +147,16 @@ suspended.
 directory, creating under it a directory tree that parallels the
 directory structure under the source directory.  (See @ref{Invoking}).
 
-NOTE: support for @code{-subdirs} is at least temporarily suspended.
-@*
-When you run @code{configure} with the @code{-subdirs} option, it
-creates a build subdirectory in each source directory.
-
-If you use both @code{-subdirs} and @code{-srcdir=}, a tree that
-parallels the source directory structure is created in the current
-directory, and the subdirectories are created in this directory tree
-rather than in the source directories.
-
 @item Generate makefiles
 A makefile template from the source directory, usually called
 @file{Makefile.in}, is copied to an output file in the build directory.
 The output file is usually named @file{Makefile}.  @code{configure}
-places definitions for a number of standard makefile
-macros at the beginning of the output file.  If @code{-prefix=} or
-@code{-datadir=} were specified on the @code{configure} command line,
-corresponding makefile variables are set accordingly.  If host, target, or
-site specific makefile fragments exist, these are inserted into the
-output file.  (See @ref{Makefiles, , , make, Makefiles}.)
+places definitions for a number of standard makefile macros at the
+beginning of the output file.  If @code{-prefix=} or @code{-exec_prefix}
+were specified on the @code{configure} command line, corresponding
+makefile variables are set accordingly.  If host, target, or site
+specific makefile fragments exist, these are inserted into the output
+file.  (See @ref{Makefiles, , , make, Makefiles}.)
 
 @item Generate @file{.gdbinit} If the source directory contains a
 @file{.gdbinit} file and the build directory is not the same as the
@@ -185,24 +201,18 @@ This prepares the source to be compiled in a
 @var{host} environment with programs and files to be installed in
 @file{/usr/local}.
 
-NOTE: support for multiple hosts is at least temporarily suspended.
-FIXME-soon
-@*
-If more than one host is specified on the command line, then
-configurations are created for each and @code{-subdirs} is assumed.
-
 @code{configure} prepares the source as you specify by selecting and
 using script and Makefile fragments prepared in advance, and stored with
 the source.  @code{configure}'s command line options also allow you to
 specify other aspects of the source configuration:
 
 @table @code
-@item -datadir=@var{dir}
-Configure the source to install host independent files in @var{dir}.
+@item -exec_prefix=@var{dir}
+Configure the source to install host dependent files in @var{dir}.
 
-This option sets the @code{configure} variable @code{datadir}.
-Generated Makefiles will have their @code{datadir} variables set to this
-value. (See @ref{Install Details}.)
+This option sets the @code{configure} variable @code{exec_prefix}.
+Generated Makefiles will have their @code{exec_prefix} variables set to
+this value. (See @ref{Install Details}.)
 
 @item -gas
 Configure to use the @sc{GNU} assembler.
@@ -214,18 +224,6 @@ Display a quick summary of how to invoke @code{configure}.
 FIXME-soon: I don't think this option should be documented.
 @c Then why does it exist?  /Pesch 7jan92
 
-@item -namesubdir=@var{name}
-NOTE: support for this @code{-namesubdir=} is at least temporarily
-suspended. FIXME-soon
-
-Name any subdirectories created by the @code{-subdirs} option
-@file{@var{name}}.   
-
-@emph{Warning:} Avoid using this option if you specify multiple hosts
-simultaneously.  There is no way to specify separate names for
-subdirectories, when you configure for multiple hosts in a single
-invocation of @code{configure}.
-
 @item -nfp
 @emph{No floating point} unit available on the target; configure to
 avoid dependencies on hardware floating point.
@@ -234,13 +232,6 @@ avoid dependencies on hardware floating point.
 Configure only this directory; ignore any subdirectories.  This is used
 by the executable shell script @file{config.status} to reconfigure the
 current directory.  (see @ref{config.status}).
-
-@ignore
-@c This is complicated enough without "no longer supported" entries.
-@c Should really delete this, but for ease of discourse...
-@item -objdir=@var{dir}
-This option is no longer supported.  Use @code{-srcdir=} instead.
-@end ignore
 
 @item -prefix=@var{dir}
 Configure the source to install programs and files under directory
@@ -268,28 +259,10 @@ Generate Makefiles using site specific Makefile fragments for
 Build Makefiles to use the sources located in directory @file{@var{dir}}.  The
 build directory is assumed to be @file{.}.
 
-@item -subdirs
-NOTE: support for this @code{-subdirs} is at least temporary suspended.
-FIXME-soon
-
-Place configurations in subdirectories of each build directory.
-@code{configure} builds a separate subdirectory for each host specified,
-and names it @file{H-@var{host}}.  If a configuration is not native,
-(@var{host} is not @var{target}), then the subdirectory is named
-@file{X-@var{host}-@var{target}} instead.  You can also name a
-subdirectory explicitly using the @samp{-namesubdir} option, but this is
-effective only when you specify one configuration at a time.
-
 @item -target=@var{target}
 Requests that the sources be configured to target the @var{target}
 machine.  If no target is specified explicitly, the target is assumed
 to be the same as the host.  
-
-NOTE: support for multiple targets is at least temporarily suspended.
-FIXME-soon
-@* 
-If multiple targets are specified, configurations for each
-are created and @code{-subdirs} is assumed.
 
 @item -tmpdir=@var{tmpdir}
 Use the directory @var{tmpdir} for @code{configure}'s temporary files.
@@ -336,14 +309,14 @@ often correct for native tools installed on only one host.
 
 @menu
 * prefix::		Changing the default install directory
-* datadir::		How to separate host independent files
+* exec_prefix::		How to separate host independent files
 			  from host dependent files when
 			  installing for multiple hosts
 * Install Details::	Full descriptions of all installation
 			  subdirectories
 @end menu
 
-@node prefix, datadir, Install Locations, Install Locations
+@node prefix, exec_prefix, Install Locations, Install Locations
 @subsection Changing the default install directory
 @cindex Changing the default install directory
 @cindex Prefix directory
@@ -364,17 +337,17 @@ To make this easier, the value of the @code{configure} variable
 using the option @code{-prefix=}.  
 
 
-@node datadir, Install Details, prefix, Install Locations
+@node exec_prefix, Install Details, prefix, Install Locations
 @subsection Installing for multiple hosts
 @cindex Configuring for multiple hosts
 @cindex Sharing host independent files
-@cindex The @file{datadir} directory
+@cindex The @file{exec_prefix} directory
 @cindex Installing host independent files
 
-By default, host independent files are installed in subdirectories of
-@file{@var{prefix}/lib}.  The location is determined by the value of the
-@code{configure} variable @code{datadir}, which determines the value of
-the Makefile variable @code{datadir}.  This makes it simpler to install
+By default, host dependent files are installed in subdirectories of
+@file{@var{exec_prefix}}.  The location is determined by the value of the
+@code{configure} variable @code{exec_prefix}, which determines the value of
+the Makefile variable @code{exec_prefix}.  This makes it simpler to install
 for a single host, and simplifies changing the default location for the
 install tree; but the default doesn't allow for multiple hosts to
 effectively share host independent files.
@@ -383,24 +356,21 @@ To configure so that multiple hosts can share common files, use
 something like:
 
 @example
-configure @var{host1} -prefix=/usr/gnu/H-@var{host1} -datadir=/usr/gnu/H-independent
+configure @var{host1} -prefix=/usr/gnu -exec_prefix=/usr/gnu/H-host1
 make all info install install-info clean
 
-configure @var{host2} -prefix=/usr/gnu/H-@var{host2} -datadir=/usr/gnu/H-independent
+configure @var{host2} -prefix=/usr/gnu -exec_prefix=/usr/gnu/H-host2
 make all info install install-info
 @end example
 
 The first line configures the source for @var{host1} to place host
-specific programs in subdirectories of @file{/usr/gnu/H-@var{host1}},
-and host independent files in @file{/usr/gnu/H-independent}.  
+specific programs in subdirectories of @file{/usr/gnu/H-@var{host1}}.  
 
 The second line builds and installs all programs for @var{host1},
 including both host independent and host specific files.
 
 The third line reconfigures the source for @var{host2} to place host
-specific programs in subdirectories of @file{/usr/gnu/H-@var{host2}},
-and host independent files (once again) in
-@file{/usr/gnu/H-independent}.
+specific programs in subdirectories of @file{/usr/gnu/H-@var{host2}}.
 
 The fourth line builds and installs all programs for @var{host2}.  Host
 specific files are installed in new directories, but the host
@@ -408,17 +378,7 @@ independent files are installed @emph{on top of} the host
 independent files installed for @var{host1}.  This results in a single
 copy of the host independent files, suitable for use by both hosts.
 
-NOTE: support for @code{-subdirs} and multiple hosts is at least
-temporarily suspended. FIXME-soon
-@*
-Previously this was:
-
-@example
-configure @var{host1} @var{host2} -prefix=/usr/gnu
-make all install
-@end example
-
-@node Install Details,  , datadir, Install Locations
+@node Install Details,  , exec_prefix, Install Locations
 @subsection Full descriptions of all installation subdirectories
 
 During any install, a number of standard directories are created.  Their
@@ -462,12 +422,12 @@ The default value for @code{bindir} depends on @code{prefix};
 The default value for @code{bindir} is @file{$(prefix)/bin}.
 @end defvr
 
-@vindex datadir
-@defvr {Makefile and configure} datadir
-A directory for host independent files.  You can specify the Makefile
-default value by using the @code{-datadir=} option to @code{configure}.
-(See also @ref{Invoking}.)  The default value for @code{datadir} is
-@file{$(prefix)/lib}.
+@vindex exec_prefix
+@defvr {Makefile and configure} exec_prefix
+A directory for host dependent files.  You can specify the Makefile
+default value by using the @code{-exec_prefix=} option to @code{configure}.
+(See also @ref{Invoking}.)  The default value for @code{exec_prefix} is
+@file{$(prefix)}.
 @end defvr
 
 @vindex libdir
@@ -483,7 +443,7 @@ changed only indirectly through @code{prefix}.  The default value for
 A directory for @code{man} format documentation (``man pages'').  The
 default value for @code{mandir} depends on @code{prefix};
 @code{mandir} is normally changed only indirectly through @code{prefix}.
-The default value for @code{mandir} is @file{$(datadir)/man}.
+The default value for @code{mandir} is @file{$(prefix)/man}.
 @end defvr
 
 @vindex man@var{N}dir
@@ -512,7 +472,7 @@ not clear.  (See also @ref{Makefile Extensions}.)
 A directory for @emph{info} format documentation.  The default value for
 @code{infodir} depends indirectly on @code{prefix}; @code{infodir} is
 normally changed only through @code{prefix}.  The default value for
-@code{infodir} is @file{$(datadir)/info}.
+@code{infodir} is @file{$(prefix)/info}.
 @end defvr
 
 @vindex docdir
@@ -570,69 +530,8 @@ where @var{builddir} is the directory where you wish to build,
 If you were to do this twice with different values for @var{builddir}
 and @var{host}, then you could @code{make} for both at the same time.
 
-@quotation
-@emph{NOTE:} The rest of this section describes the @code{-subdirs} feature for
-which support is at least temporarily suspended.  FIXME-soon.
-@end quotation
-
-Another way to specify the build directory is with the @samp{-subdirs}
-option.  For example:
-
-@example
-configure @var{host} -subdirs
-@end example
-
-Using this option, @code{configure} will create a subdirectory named
-@file{H-@var{host}} to act as the build directory for each source
-directory.
-
-Since building for multiple hosts is so common, @code{configure}
-recognizes this situation as special.  For example:
-
-@example
-configure @var{host1} @var{host2}
-@end example
-
-is precisely the same as:
-
-@example
-configure @var{host1} -subdirs
-configure @var{host2} -subdirs
-@end example
-
-That is, configuring for multiple hosts or multiple targets implies
-@samp{-subdirs}.
-
-When configuring for cross tools (the converse of native tools: when the
-host is not the target), as in:
-
-@example
-configure @var{host} +target=@var{targ} -subdirs
-@end example
-
-@noindent
-the subdirectories are named @file{X-@var{host}-@var{targ}}.  This is
-especially useful when configuring for multiple targets.
-
-If you use both @samp{-subdirs} and @samp{-srcdir=}, a tree that
-parallels the source directory structure is created in the current
-directory, and the subdirectories are created in this directory
-tree rather than in the source directories.
-
-@emph{NOTE:} previously, @samp{-subdirs} built two-level subdirectories
-as @file{./H-@var{host}/T-@var{target}}, created
-@file{./H-@var{host}/Makefile} for building across all targets,
-@file{./Makefile} for building across all hosts, and
-@file{./config.status} and @file{./H-@var{host}/config.status} for
-rebuilding these Makefiles.
-
 @node Host, Target, Build Directories, Using Configure
 @section Host
-
-@quotation
-@emph{NOTE:} support for multiple hosts is at least temporarily suspended.
-FIXME-soon.
-@end quotation
 
 The arguments to @code{configure} are @emph{hosts}.  By @emph{host} we
 mean the environment in which the source will be compiled.  This need
@@ -964,22 +863,15 @@ of @code{manext}?
 
 @kindex datadir
 @item datadir
-is used for @emph{all} host independent files.  This makes it possible
-to share host independent files across multiple hosts without resorting
-to symbolic links or to multiple mount points.  This also makes it possible
-build an install tree that contains multiple host binaries, write
-the binaries to tape, and extract any of the hosts without extracting
-the others.
+is used for host independent data files.
 
 @kindex mandir
 @item mandir
-The default path for @code{mandir} depends on @code{datadir}, since man
-pages are host independent.
+The default path for @code{mandir} depends on @code{prefix}.
 
 @kindex infodir
 @item infodir
-The default path for @code{infodir} depends on @code{datadir}, since
-info files are host independent.
+The default path for @code{infodir} depends on @code{prefix}.
 
 @kindex BISON
 @item BISON
@@ -1100,18 +992,6 @@ host and target configurations.
 @c this? (FIXME).
 @end defvar
 
-@defvar{target_dependent}
-NOTE: support for multiple targets is currently suspended.
-@*
-If this variable is not empty and @code{-subdirs} is in effect then
-configure will create separate build directories for each target.  This
-is usually set in the declarations section of @file{configure.in}.  The
-default is to assume that a directory is target independent, and to create
-only one real directory with symlinks from the other names.  This means that
-a target independent directory will be built exactly once regardless of
-how many targets are being built.
-@end defvar
-
 @defvar{host}
 Contains the name that the user entered for the host.  Since many things
 that the user could enter would map to the same output from
@@ -1203,12 +1083,10 @@ on all hosts, regardless of what is normally available on them.
 @end defvar
 
 @defvar{srcdir}
-NOTE: support for @code{-subdirs} is at least temporarily suspended.
-@*
 Is set to the name of the directory containing the source for this
 program.  This will be different from @file{.} if the user has specified
-either the @code{-srcdir=} or the @code{-subdirs} options.  Note that
-@code{srcdir} is not necessarily an absolute path.
+the @code{-srcdir=} option.  Note that @code{srcdir} is not necessarily
+an absolute path.
 @end defvar
 
 @defvar{host_makefile_frag}
@@ -1272,10 +1150,7 @@ of @file{configure.in} up to a line beginning with @samp{# Per-host:}
 immediately after parsing command line arguments.  The variables
 @code{srctrigger} and @code{srcname} @emph{must} be set here.
 
-You might also want to set the variables @code{configdirs} or
-@code{target_dependent} here.
-@*
-FIXME-soon.  target_dependent isn't useful without multiple targets.
+You might also want to set the variable @code{configdirs} here.
 
 @node Per-host, Per-target, Declarations, configure.in
 @subsection For each host
@@ -1391,7 +1266,7 @@ They are used for target dependent compile time options.
 Site specific Makefile fragments conventionally reside in the
 @file{./config} directory with names of the form @file{ms-@var{site}}.
 They are used to override host and target independent compile time
-options.  Note that you can also overridde these options on the
+options.  Note that you can also override these options on the
 @code{make} invocation line.
 
 @node Known Bugs, Variables Index, Reference, top

@@ -1,4 +1,4 @@
-##Copyright (C) 1991 Free Software Foundation, Inc.
+##Copyright (C) 1991, 1992 Free Software Foundation, Inc.
 
 # Makefile for GDB documentation.
 # This file is part of GDB.
@@ -21,10 +21,12 @@ srcdir = .
 
 prefix = /usr/local
 
-bindir = $(prefix)/bin
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+
 datadir = $(prefix)/lib
-libdir = $(prefix)/lib
-mandir = $(datadir)/man
+mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -34,7 +36,7 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(datadir)/info
+infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
@@ -173,16 +175,17 @@ gdbVN.m4 : $(srcdir)/${gdbdir}/Makefile.in
 #   source directory for the benefit of people who *don't* use this makefile,
 #   VPATH will often tell make not to bother building it, because the one
 #   in the srcdir is up to date.  (if not, then make should build one here).
-gdb-all.texi: ${SFILES_DOCDIR}
-	if [ ! -f ./gdbVN.m4 ]; then \
-		ln -s $(srcdir)/gdbVN.m4 . || \
-		ln $(srcdir)/gdbVN.m4 . || \
-		cp $(srcdir)/gdbVN.m4 . ; else true; fi
-	rm -f foobus.texinfo
-	${M4} $(srcdir)/pretex.m4 $(srcdir)/none.m4 $(srcdir)/all.m4 \
-		gdbVN.m4 $(srcdir)/gdb.texinfo  >foobus.texinfo
-	rm -f gdb-all.texi
-	mv foobus.texinfo ./gdb-all.texi
+
+#gdb-all.texi: ${SFILES_DOCDIR}
+#	if [ ! -f ./gdbVN.m4 ]; then \
+#		ln -s $(srcdir)/gdbVN.m4 . || \
+#		ln $(srcdir)/gdbVN.m4 . || \
+#		cp $(srcdir)/gdbVN.m4 . ; else true; fi
+#	rm -f foobus.texinfo
+#	${M4} $(srcdir)/pretex.m4 $(srcdir)/none.m4 $(srcdir)/all.m4 \
+#		gdbVN.m4 $(srcdir)/gdb.texinfo  >foobus.texinfo
+#	rm -f gdb-all.texi
+#	mv foobus.texinfo ./gdb-all.texi
 
 # GDB MANUAL: TeX dvi file
 gdb.dvi : gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
@@ -197,7 +200,7 @@ gdb.dvi : gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
 # cope with all the markup.  In the meantime, we distribute the info
 # files 
 gdb.info: gdb-${CONFIG}.texi
-	$(MAKEINFO) -o ./gdb.info gdb-${CONFIG}.texi
+	$(MAKEINFO) -o ./gdb.info $(srcdir)/gdb-${CONFIG}.texi
 
 # GDB MANUAL: roff translations
 # Try to use a recent texi2roff.  v2 was put on prep in jan91.

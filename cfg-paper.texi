@@ -10,7 +10,7 @@ This document attempts to describe the general concepts behind
 configuration of the Cygnus Support release of the @sc{gnu} Development
 Tools.  It also discusses common usage..
 
-Copyright (C) 1991 Cygnus Support
+Copyright (C) 1991, 1992 Cygnus Support
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
 are preserved on all copies.
@@ -41,7 +41,7 @@ by Cygnus Support.
 @page
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991 Cygnus Support
+Copyright @copyright{} 1991, 1992 Cygnus Support
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -214,13 +214,14 @@ while for a sun4 with postfix you might use:
 ./configure sun4 -notation=postfix
 @end example
 
-If we wanted to build both at the same time, in the same directory
-structure, the intermediate pieces used in the build process must be
-kept separate.
+If we wanted to build both at the same time, the intermediate pieces
+used in the build process must be kept separate.
 
 @example
-./configure sun4 -subdirs -notation=postfix
-./configure sun3 -subdirs -notation=infix
+mkdir ../objdir.sun4
+(cd ../objdir.sun4 ; ./configure sun4 -notation=postfix -srcdir=../src)
+mkdir ../objdir.sun3
+(cd ../objdir.sun3 ; ./configure sun3 -notation=infix -srcdir=../src)
 @end example
 
 @noindent
@@ -228,13 +229,14 @@ will create subdirectories for the intermediate pieces of the sun4 and
 sun3 configurations.  This is necessary as previous systems were only
 capable of one configuration at a time.  Otherwise, a second
 configuration would write over the first.  We've chosen to retain this
-behaviour so the @code{-subdirs} configuration option is necessary to
-get the new behaviour.  The order of the arguments doesn't matter.
-There should be exactly one argument without a leading @samp{-} sign
-and that argument will be assumed to be the host name.
+behaviour so the obj directories and the @code{-srcdir} configuration
+option are necessary to get the new behaviour.  The order of the
+arguments doesn't matter.  There should be exactly one argument without
+a leading @samp{-} sign and that argument will be assumed to be the host
+name.
 
 From here on the examples will assume that you want to build the tools
-@emph{in place} and won't show the @code{-subdirs} option, but remember
+@emph{in place} and won't show the @code{-srcdir} option, but remember
 that it is available.
 
 In order to actually install the program, the configuration system needs
@@ -687,10 +689,6 @@ configures this directory, perhaps recursively, for a single host+target
 pair where the host is @var{hostname} and target is @var{targetname}.
 If a previous configuration existed, it will be overwritten.
 
-@item ./configure -subdirs @var{hostname} -target=@var{targetname}
-creates a subdirectories @file{H-@var{hostname}} if @var{hostname} is @var{targetname} or
-@file{X-@var{hostname}-@var{targetname}} if it is not and configures the new directory.
-
 @end table
 
 @menu
@@ -709,7 +707,7 @@ The Makefile is created by prepending some variable definitions to a
 Makefile template called @file{Makefile.in} and then inserting host and
 target specific Makefile fragments.  The variables are set based on the
 chosen host+target pair and build style, that is, if you use
-subdirectories or not.  The host and target specific Makefile may or may
+@code{-srcdir} or not.  The host and target specific Makefile may or may
 not exist.
 
 @itemize @bullet

@@ -19,6 +19,9 @@
 #   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
 
+# This file was written, and is maintained by K. Richard Pixley
+# <rich@cygnus.com>.
+
 # This file is a shell script that supplies the information necessary
 # to tailor a template configure script into the configure script
 # appropriate for this directory.  For more information, check any

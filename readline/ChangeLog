@@ -1,3 +1,17 @@
+Sat Mar  7 00:15:36 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: remove FIXME's on info and install-info targets.
+
+Fri Mar  6 22:02:04 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added check target.
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
+
 Fri Feb 21 14:37:32 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* readline.c, examples/fileman.c: patches from DJ to support DOS

@@ -1,0 +1,13 @@
+Sat Mar  7 00:06:25 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: commented out line for building as-all.texinfo.
+	  This is temporary.
+
+	* as.texinfo, as-all.texinfo: added menu item hooks.
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
+

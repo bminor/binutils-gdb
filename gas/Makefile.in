@@ -28,10 +28,14 @@ srcdir = .
 
 prefix = /usr/local
 
-bindir = $(prefix)/bin
+program_prefix =
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+tooldir = $(libdir)
+
 datadir = $(prefix)/lib
-libdir = $(prefix)/lib
-mandir = $(datadir)/man
+mandir = $(prefix)/man
 man1dir = $(mandir)/man1
 man2dir = $(mandir)/man2
 man3dir = $(mandir)/man3
@@ -41,7 +45,7 @@ man6dir = $(mandir)/man6
 man7dir = $(mandir)/man7
 man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
-infodir = $(datadir)/info
+infodir = $(prefix)/info
 includedir = $(prefix)/include
 docdir = $(datadir)/doc
 
@@ -113,7 +117,6 @@ REAL_HEADERS = \
 	$(srcdir)/struc-symbol.h \
 	$(srcdir)/subsegs.h \
 	$(srcdir)/symbols.h \
-	$(srcdir)/syscalls.h \
 	$(srcdir)/write.h
 
 LINKED_HEADERS = \
@@ -205,6 +208,8 @@ as.new: $(OBJS) $(LIBDEPS)
 	-mv -f as.new as.old
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
+check:
+
 config.status:
 	@echo You must configure gas.  Look at the INSTALL file for details.
 	@false
@@ -273,6 +278,7 @@ read.o : read.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
    
+strerror.o : strerror.c
 strstr.o : strstr.c   
 subsegs.o : subsegs.c as.h host.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
@@ -325,11 +331,10 @@ distclean: clean
 
 # Copy the files into directories where they will be run.
 install:
-	if [ "$(host_alias)" = "$(target_alias)" ] ; then \
-		$(INSTALL_PROGRAM) as.new $(bindir)/as ; \
-	else \
-		$(INSTALL_PROGRAM) as.new $(bindir)/as-$(target_alias) ; \
-	fi
+	-rm -f $(bindir)/$(program_prefix)as
+	$(INSTALL_PROGRAM) as.new $(bindir)/$(program_prefix)as
+	-rm -f  $(tooldir)/as
+	ln $(bindir)/$(program_prefix)as $(tooldir)/as
 
 # Create the installation directory.
 install-dir:
@@ -348,7 +353,7 @@ uninstall:
 # These exist for maintenance purposes.
 
 tags TAGS: force
-	etags $(REAL_SOURCES) $(REAL_HEADERS) $(srcdir)/README $(srcdir)/Makefile $(srcdir)/config/*.[hc]
+	etags $(REAL_HEADERS) $(REAL_SOURCES) $(srcdir)/config/*.[hc] $(srcdir)/README $(srcdir)/Makefile.in
 	
 bootstrap: as.new force
 	$(MAKE) stage1

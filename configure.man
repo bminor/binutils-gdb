@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
-.\" Copyright (c) 1991 Cygnus Support
-.\" $Id$
+.\" Copyright (c) 1991, 1992 Cygnus Support
+.\" written by K. Richard Pixley
 .TH configure 1 "13 December 1991" "cygnus support" "Cygnus Support"
 .de BP
 .sp
@@ -12,9 +12,9 @@
 configure \(em\& prepare source code to be built
 
 .SH SYNOPSIS
-configure host1 [host2 [host3 ...]] [-datadir=dir] [-gas] [-help]
-[-host=h] [-namesubdir=name] [-nfp] [-norecursion] [-objdir=dir]
-[-prefix=dir] [-recurring] [-rm] [-site=s] [-srcdir=dir] [-subdirs]
+configure host1 [host2 [host3 ...]] [-exec_prefix=dir] [-gas] [-help]
+[-host=h] [-nfp] [-norecursion]
+[-prefix=dir] [-s] [-rm] [-site=s] [-srcdir=dir]
 [-target=t] [-v] [-x]
 
 .SH DESCRIPTION
@@ -28,9 +28,11 @@ directories, and some other miscellaneous file editting.
 accepts the following options:
 
 .TP
-.I \-datadir=dir
-sets the root directory for host independent files to
+.I \-exec_prefix=dir
+sets the root directory for host dependent files to
 .I dir.
+The default location is the same as
+.I prefix.
 
 .TP
 .I \-gas
@@ -50,12 +52,6 @@ This option is very confusing and is best ignored.  FIXME: I don't
 think it should even be documented.
 
 .TP
-.I \-namesubdir=name
-When using -subdirs, this option sets the name of the subdir to be
-created.  This isn't very useful when configuring for multiple hosts.
-NOTE: support for this option is temporarily suspended.
-
-.TP
 .I \-nfp
 Notifies configure that all of the specified hosts have
 .I no floating point
@@ -67,17 +63,12 @@ asks that only the current directory be configured.  Normally
 configure recurs on subdirectories.
 
 .TP
-.I \-objdir=dir
-asks that the build directories be created in dir.  NOTE: support for
-this option is at least temporarily suspended.
-
-.TP
 .I \-prefix=dir
 sets the default location in which to install files to dir.  The
 default is "/usr/local".
 
 .TP
-.I \-recurring
+.I \-s
 used internally by configure to supress status messages on
 subdirectory recursions.
 
@@ -95,20 +86,10 @@ building Makefiles.
 tells configure to find the source in srcdir.
 
 .TP
-.I \-subdirs
-asks configure to create subdirectories of the build directory named
-"H-host" for each host.  If the configuration is not native, (host is
-not target), the the directory will be named "X-host-target" instead.
-NOTE: support for this option is temporarily suspended.
-
-.TP
 .I \-target=t
 Requests that the sources be configured to target the t machine.  If
 no targets are specified explicitly, the target is assumed to be the
-same as the host.  If multiple targets are specified, configurations
-for each are created and -subdirs is assumed.
-
-NOTE: support for multiple targets is at least temporarily suspended.
+same as the host. 
 
 .TP
 .I \-tmpdir=dir
@@ -128,7 +109,7 @@ available on this machine, even if they are not normally available.
 
 .SH FILES
 configure.in	for each directory's individual needs
-config.subr	for parsing configuration names
+config.sub	for parsing configuration names
 
 .SH "SEE ALSO"
 .RB "`\|" configure "\|'"
