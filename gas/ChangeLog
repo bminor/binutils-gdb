@@ -1,3 +1,11 @@
+2002-03-04  H.J. Lu <hjl@gnu.org>
+
+	* config/obj-elf.c (special_section): Add .init_array,
+	.fini_array and .preinit_array.
+
+	* config/tc-ia64.h (ELF_TC_SPECIAL_SECTIONS): Remove
+	.init_array and .fini_array.
+
 2002-03-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/obj-elf.c (elf_copy_symbol_attributes): Don't copy
