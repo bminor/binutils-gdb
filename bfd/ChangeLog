@@ -4,6 +4,10 @@
 	* cache.c (bfd_cache_lookup_worker): Call abort() rather than
 	returning NULL as most users of this function do not check its
 	return value.
+	* hppabsd-core.c (hppabsd_core_core_file_p): Do not check result
+	of bfd_cache_lookup().
+	* sco5-core.c (sco5_core_file_p): Likewise.
+	* trad-core.c (trad_unix_core_file_p): Likewise.
 
 2004-05-05  Nick Clifton  <nickc@redhat.com>
 
