@@ -1,3 +1,8 @@
+2002-02-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c (bfd_scan_vma): Clamp overflows to max bfd_vma value.
+	Correct value returned in "end" for "0x<non-hex>".
+
 2002-02-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* cpu-arm.c (processors): Replace 'arch' field with 'mach'.
