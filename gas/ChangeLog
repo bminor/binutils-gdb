@@ -1,3 +1,9 @@
+2000-06-24  Frank Ch. Eigler  <fche@redhat.com>
+ 
+	* cgen.c (expr_jmp_buf_p): New validity flag for expr_jmp_buf.
+	(gas_cgen_parse_operand): Set it around expression() call.
+	(gas_cgen_md_operand): Test for it before longjmp().
+
 2000-06-24  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-h8500.c: Remove all uses of DEFUN.

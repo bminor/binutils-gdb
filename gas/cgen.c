@@ -232,6 +232,7 @@ gas_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
 
 /* Used for communication between the next two procedures.  */
 static jmp_buf expr_jmp_buf;
+static int expr_jmp_buf_p;
 
 /* Callback for cgen interface.  Parse the expression at *STRP.
    The result is an error message or NULL for success (in which case
@@ -279,12 +280,15 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
      This is done via gas_cgen_md_operand.  */
   if (setjmp (expr_jmp_buf) != 0)
     {
+      expr_jmp_buf_p = 0;
       input_line_pointer = (char *) hold;
       * resultP_1 = CGEN_PARSE_OPERAND_RESULT_ERROR;
       return "illegal operand";
     }
 
+  expr_jmp_buf_p = 1;
   expression (& exp);
+  expr_jmp_buf_p = 0;
 
   * strP = input_line_pointer;
   input_line_pointer = hold;
@@ -328,7 +332,9 @@ void
 gas_cgen_md_operand (expressionP)
      expressionS * expressionP;
 {
-  longjmp (expr_jmp_buf, 1);
+  /* Don't longjmp if we're not called from within cgen_parse_operand().  */
+  if (expr_jmp_buf_p)
+    longjmp (expr_jmp_buf, 1);
 }
 
 /* Finish assembling instruction INSN.
