@@ -372,10 +372,8 @@ find_pc_psymtab (pc)
 
   ALL_PSYMTABS (objfile, pst)
     {
-      if (pc >= pst -> textlow && pc < pst -> texthigh)
-	{
-	  return (pst);
-	}
+      if (pc >= pst->textlow && pc < pst->texthigh)
+	return (pst);
     }
   return (NULL);
 }
@@ -836,6 +834,8 @@ lookup_partial_symbol (pst, name, global, namespace)
 }
 
 /* Find the psymtab containing main(). */
+/* FIXME:  What about languages without main() or specially linked
+   executables that have no main() ? */
 
 struct partial_symtab *
 find_main_psymtab ()
@@ -961,7 +961,8 @@ block_function (bl)
   return BLOCK_FUNCTION (bl);
 }
 
-/* Subroutine of find_pc_line */
+/* Find the symtab associated with PC.  Look through the psymtabs and read in
+   another symtab if necessary. */
 
 struct symtab *
 find_pc_symtab (pc)
@@ -981,24 +982,16 @@ find_pc_symtab (pc)
       b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
       if (BLOCK_START (b) <= pc
 	  && BLOCK_END (b) > pc)
-	goto found;
+	return (s);
     }
 
-  if (!s)
+  ps = find_pc_psymtab (pc);
+  if (ps)
     {
-      ps = find_pc_psymtab (pc);
-      if (ps && ps->readin)
-	{
-	  printf_filtered ("(Internal error: pc 0x%x in read in psymtab, but not in symtab.)\n", pc);
-	}
-      if (ps)
-	{
-	  s = PSYMTAB_TO_SYMTAB (ps);
-	}
+      if (ps->readin)
+	printf_filtered ("(Internal error: pc 0x%x in read in psymtab, but not in symtab.)\n", pc);
+      s = PSYMTAB_TO_SYMTAB (ps);
     }
-
-found:
-  return (s);
 }
 
 /* Find the source file and line number for a given PC value.
@@ -1018,14 +1011,13 @@ find_pc_line (pc, notcurrent)
   register struct linetable *l;
   register int len;
   register int i;
-  register struct linetable_entry *item;
+  register struct linetable_entry item;
   struct symtab_and_line val;
   struct blockvector *bv;
 
   /* Info on best line seen so far, and where it starts, and its file.  */
 
-  int best_line = 0;
-  CORE_ADDR best_pc = 0;
+  struct linetable_entry best;
   CORE_ADDR best_end = 0;
   struct symtab *best_symtab = 0;
 
@@ -1034,19 +1026,17 @@ find_pc_line (pc, notcurrent)
      If we don't find a line whose range contains PC,
      we will use a line one less than this,
      with a range from the start of that file to the first line's pc.  */
-  int alt_line = 0;
-  CORE_ADDR alt_pc = 0;
+  struct linetable_entry alt;
   struct symtab *alt_symtab = 0;
 
   /* Info on best line seen in this file.  */
 
-  int prev_line;
-  CORE_ADDR prev_pc;
+  struct linetable_entry prev;
 
-  /* Info on first line of this file.  */
-
-  int first_line;
-  CORE_ADDR first_pc;
+  best.line = 0;
+  best.pc = 0;
+  alt.line = 0;
+  alt.pc = 0;
 
   /* If this pc is not from the current frame,
      it is the address of the end of a call instruction.
@@ -1057,7 +1047,7 @@ find_pc_line (pc, notcurrent)
   if (notcurrent) pc -= 1;
 
   s = find_pc_symtab (pc);
-  if (s == 0)
+  if (!s)
     {
       val.symtab = 0;
       val.line = 0;
@@ -1079,65 +1069,81 @@ find_pc_line (pc, notcurrent)
       if (!l)
         continue;
       len = l->nitems;
-      prev_line = -1;
-      first_line = -1;
+      if (len <= 0)
+	{
+	  fprintf (stderr, "Inconsistent line number info for %s\n",
+		   s->filename);
+	  continue;
+	}
+
+      prev.line = -1;
+      item = l->item[0];	/* Get first line info */
+
+      /* Is this file's first line closer than the first lines of other files?
+	 If so, record this file, and its first line, as best alternate.  */
+      if (item.pc > pc && (alt.pc == 0 || item.pc < alt.pc))
+	{
+	  alt = item;
+	  alt_symtab = s;
+	}
+
       for (i = 0; i < len; i++)
 	{
-	  item = &(l->item[i]);
-	  
-	  if (first_line < 0)
-	    {
-	      first_line = item->line;
-	      first_pc = item->pc;
-	    }
+	  item = l->item[i];
+
 	  /* Return the last line that did not start after PC.  */
-	  if (pc >= item->pc)
-	    {
-	      prev_line = item->line;
-	      prev_pc = item->pc;
-	    }
-	  else
+	  if (item.pc > pc)
 	    break;
+
+	  prev = item;
 	}
+
+      /* At this point, prev points at the line whose start addr is <= pc, and
+	 item points at the next line.  If we ran off the end of the linetable
+	 (pc >= start of the last line), then prev == item.  If pc < start of
+	 the first line, prev will not be set.  */
 
       /* Is this file's best line closer than the best in the other files?
 	 If so, record this file, and its best line, as best so far.  */
-      if (prev_line >= 0 && prev_pc > best_pc)
+
+      if (prev.line >= 0 && prev.pc > best.pc)
 	{
-	  best_pc = prev_pc;
-	  best_line = prev_line;
+	  best = prev;
 	  best_symtab = s;
 	  /* If another line is in the linetable, and its PC is closer
 	     than the best_end we currently have, take it as best_end.  */
-	  if (i < len && (best_end == 0 || best_end > item->pc))
-	    best_end = item->pc;
-	}
-      /* Is this file's first line closer than the first lines of other files?
-	 If so, record this file, and its first line, as best alternate.  */
-      if (first_line >= 0 && first_pc > pc
-	  && (alt_pc == 0 || first_pc < alt_pc))
-	{
-	  alt_pc = first_pc;
-	  alt_line = first_line;
-	  alt_symtab = s;
+	  if (i < len && (best_end == 0 || best_end > item.pc))
+	    best_end = item.pc;
 	}
     }
-  if (best_symtab == 0)
+
+  if (!best_symtab)
     {
-      val.symtab = alt_symtab;
-      val.line = alt_line - 1;
-      val.pc = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
-      val.end = alt_pc;
+      if (!alt_symtab)
+	{			/* If we didn't find any line # info, just
+				 return zeros.  */
+	  val.symtab = 0;
+	  val.line = 0;
+	  val.pc = pc;
+	  val.end = 0;
+	}
+      else
+	{
+	  val.symtab = alt_symtab;
+	  val.line = alt.line - 1;
+	  val.pc = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
+	  val.end = alt.pc;
+	}
     }
   else
     {
       val.symtab = best_symtab;
-      val.line = best_line;
-      val.pc = best_pc;
-      if (best_end && (alt_pc == 0 || best_end < alt_pc))
+      val.line = best.line;
+      val.pc = best.pc;
+      if (best_end && (alt.pc == 0 || best_end < alt.pc))
 	val.end = best_end;
-      else if (alt_pc)
-	val.end = alt_pc;
+      else if (alt.pc)
+	val.end = alt.pc;
       else
 	val.end = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
     }
@@ -1484,7 +1490,36 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line)
      int default_line;
 {
   struct symtabs_and_lines values;
+#ifdef HPPA_COMPILER_BUG
+  /* FIXME: The native HP 9000/700 compiler has a bug which appears
+     when optimizing this file with target i960-vxworks.  I haven't
+     been able to construct a simple test case.  The problem is that
+     in the second call to SKIP_PROLOGUE below, the compiler somehow
+     does not realize that the statement val = find_pc_line (...) will
+     change the values of the fields of val.  It extracts the elements
+     into registers at the top of the block, and does not update the
+     registers after the call to find_pc_line.  You can check this by
+     inserting a printf at the end of find_pc_line to show what values
+     it is returning for val.pc and val.end and another printf after
+     the call to see what values the function actually got (remember,
+     this is compiling with cc -O, with this patch removed).  You can
+     also examine the assembly listing: search for the second call to
+     skip_prologue; the LDO statement before the next call to
+     find_pc_line loads the address of the structure which
+     find_pc_line will return; if there is a LDW just before the LDO,
+     which fetches an element of the structure, then the compiler
+     still has the bug.
+
+     Setting val to volatile avoids the problem.  We must undef
+     volatile, because the HPPA native compiler does not define
+     __STDC__, although it does understand volatile, and so volatile
+     will have been defined away in defs.h.  */
+#undef volatile
+  volatile struct symtab_and_line val;
+#define volatile /*nothing*/
+#else
   struct symtab_and_line val;
+#endif
   register char *p, *p1;
   char *q, *q1;
   register struct symtab *s;

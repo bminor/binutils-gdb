@@ -1,3 +1,12 @@
+Fri Nov 13 20:24:10 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* infcmd.c (step_over_calls):  Improve comments.
+	* symtab.c (find_pc_psymtab):  Clean up a bit.
+	* (find_pc_symtab):  Fix comments, clean up code.
+	* (find_pc_line):  General cleanups, efficiency improvements.
+	Also, don't return garbage when some line info exists, but there
+	was no good match.
+
 Wed Nov 11 17:09:17 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in:  Remove dependancies for 29k-share/dfe/yank.o and
