@@ -1,3 +1,10 @@
+Thu Feb 16 10:30:24 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in, gdb.{base,c++,chill}/Makefile.in (GDB, GDBFLAGS):
+	  Removed, these values are set by lib/gdb.exp.
+
+	* lib/gdb.exp: If GDBFLAGS is unset, set it to -nx.
+
 Wed Feb 15 14:23:28 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/vx-gdb.exp (spawn_vxgdb): Use default_gdb_start instead

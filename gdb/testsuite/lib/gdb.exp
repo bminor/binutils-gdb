@@ -30,7 +30,7 @@ if ![info exists GDB] then {
 
 global GDBFLAGS
 if ![info exists GDBFLAGS] then {
-    set GDBFLAGS ""
+    set GDBFLAGS "-nx"
 }
 
 # set the prompt if it doesn't exist
@@ -220,16 +220,8 @@ proc gdb_test { args } {
     }
 
     set result -1
-    set errmess ""
     if ![string match $command ""] {
-	# trap the send so any problems don't crash things
-	catch "send \"$command\n\"" errmess
-	if [string match "write.spawn_id=\[0-9\]+.:" $errmess] then {
-	    perror "sent \"$command\" got expect error \"$errmess\""
-	    catch "close"
-	    gdb_start
-	    return -1
-	}
+	send "$command\n"
     }
 
     expect {
@@ -298,11 +290,11 @@ proc gdb_test { args } {
 #	Second one is string to match gdb result to
 #	Third one is an optional message to be printed
 #
-# This differs from gdb_test in a few ways: (1) no catch on the send (there is
-# no reason for this to be different from gdb_test but I think the lack of 
-# catch is correct), (2) it tests for the " =" (that could easily be moved
-# to the callers, (3) the pattern must be followed by \r\n and the prompt,
-# not other garbage as in gdb_test (this feature seems kind of worthwhile).
+# This differs from gdb_test in a few ways: (1) handling of empty
+# sendthis (I suspect test_print_accept callers never use this), (2)
+# it tests for the " =" (that could easily be moved to the callers,
+# (3) the pattern must be followed by \r\n and the prompt, not other
+# garbage as in gdb_test (this feature seems kind of worthwhile).
 
 proc test_print_accept { args } {
     global prompt
