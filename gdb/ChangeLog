@@ -18,6 +18,9 @@
 
 2002-04-12  Michael Snyder  <msnyder@redhat.com>
 
+	* d10v-tdep.c (d10v_make_iaddr): Make it idempotent,
+	in case it gets applied to an address that is already
+	in the instruction space.
 	* cli/cli-decode.c (help_list): Allow long lines to wrap.
 	* symfile.c: Fix indentation, long lines.
 	* source.c: White space fix-up.

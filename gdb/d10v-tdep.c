@@ -356,18 +356,6 @@ d10v_register_virtual_type (int reg_nr)
     return builtin_type_int16;
 }
 
-static CORE_ADDR
-d10v_make_daddr (CORE_ADDR x)
-{
-  return ((x) | DMEM_START);
-}
-
-static CORE_ADDR
-d10v_make_iaddr (CORE_ADDR x)
-{
-  return (((x) << 2) | IMEM_START);
-}
-
 static int
 d10v_daddr_p (CORE_ADDR x)
 {
@@ -380,6 +368,20 @@ d10v_iaddr_p (CORE_ADDR x)
   return (((x) & 0x3000000) == IMEM_START);
 }
 
+static CORE_ADDR
+d10v_make_daddr (CORE_ADDR x)
+{
+  return ((x) | DMEM_START);
+}
+
+static CORE_ADDR
+d10v_make_iaddr (CORE_ADDR x)
+{
+  if (d10v_iaddr_p (x))
+    return x;	/* Idempotency -- x is already in the IMEM space. */
+  else
+    return (((x) << 2) | IMEM_START);
+}
 
 static CORE_ADDR
 d10v_convert_iaddr_to_raw (CORE_ADDR x)
