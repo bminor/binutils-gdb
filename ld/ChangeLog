@@ -1,4 +1,32 @@
+Tue Sep 27 14:56:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* Makefile.in (CC): Define.
+	(CXX): Move definition, change from g++ to gcc.
+	(EXPECT, RUNTEST): Copy definitions from top level Makefile.in.
+	(RUNTEST_CC, RUNTEST_CFLAGS): Remove.
+	(RUNTEST_CXX, RUNTEST_CXXFLAGS): Remove.
+	(CC_FOR_TARGET, CXX_FOR_TARGET): Copy from top level Makefile.in.
+	(.cc.o): Comment out.
+	(testdir): Remove.
+	(site.exp): Don't create testdir or set tmpdir.
+	(check): Run checks even if not running native.  Use CC_FOR_TARGET
+	instead of RUNTEST_CC, and likewise for CXX.
+	(cdtest targets): Comment out.
+	* config/solaris2.mh (HOSTING_LIBS): Only mention crtend.o once.
+	* cdtest-bar.cc, cdtest-foo.cc, cdtest-foo.h: Remove.
+	* cdtest-main.cc, cdtest.exp: Remove.
+
 Mon Sep 26 11:40:30 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* emulparams/elf32bmip.sh: Rename from elf32mipb.sh to avoid DOS
+	file naming problems.
+	* emulparams/elf32lmip.sh: Rename from elf32mipl.sh.
+	* Makefile.in (ALL_EMULATIONS): Rename eelf32mipb.o to
+	eelf32bmip.o and eelf32mipl.o to eelf32lmip.o.
+	(eelf32bmip.c): Rename from eelf32mipb.c.  Use elf32bmip.sh.
+	(eelf32lmip.c): Rename from eelf32mipl.c.  Use elf32lmip.sh.
+	* config/mipsb-elf32.mt (EMUL): Use elf32bmip, not elf32mipb.
+	* config/mipsl-elf32.mt (EMUL): Use elf32lmip, not elf32mipl.
 
 	* genscripts.sh: Always search /usr/local/TARGET/lib.
 
