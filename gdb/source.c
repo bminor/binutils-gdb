@@ -364,7 +364,7 @@ mod_path (dirname, which_path)
 	    fprintf_unfiltered (gdb_stderr, "Warning: ");
 	    print_sys_errmsg (name, save_errno);
 	  }
-	else if (!S_ISDIR(st.st_mode))
+	else if ((st.st_mode & S_IFMT) != S_IFDIR)
 	  warning ("%s is not a directory.", name);
       }
 
