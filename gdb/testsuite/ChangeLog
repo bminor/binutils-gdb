@@ -1,3 +1,12 @@
+Mon Mar  7 13:45:54 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t03/gdbme.c:  gcc version 1 puts out the wrong stabs for
+	the primary1 test, use work around if __GNUC__ < 2.
+	* gdb.t06/signals.c:  Add comments for signals.exp pattern matching.
+	* gdb.t06/signals.exp:  Add XFAILs for i386 bsd and vax ultrix.
+	Test for bad output rather than waiting for timeout.  Issue
+	second continue only if first continue failed.
+
 Wed Mar  2 10:08:01 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.t21/cplusfuncs.exp (test_paddr_operator_functions): Do
