@@ -1,3 +1,8 @@
+1998-06-18  Ulrich Drepper  <drepper@cygnus.com>
+
+	* i386-dis.c: Add support for fxsave, fxrstor, sysenter and
+	sysexit.
+
 Thu Jun 18 10:22:24 1998  John Metzler  <jmetzler@cygnus.com>
 
 	* mips-dis.c (print_insn_little_mips): Previously, instruction
@@ -134,11 +139,11 @@ Mon Jun  1 10:27:26 1998  Jeffrey A Law  (law@cygnus.com)
 end-sanitize-r5900
 start-sanitize-vr5400
 Thu May 28 08:46:09 1998  Catherine Moore <clm@cygnus.com>
- 
+
        * mips-opc.c (macc, maccu, macchi, macchiu, msac, msacu, msachi, msachiu):
        Change pinfo to use WR_HILO.
 
-end-sanitize-vr5400 
+end-sanitize-vr5400
 start-sanitize-d30v
 Wed May 27 15:29:13 1998  Nick Clifton  <nickc@cygnus.com>
 
@@ -160,7 +165,7 @@ Tue May 26 16:14:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* d30v-opc.c (d30v_format_table): Change definition of SHORT_B3
 	and SHORT_B3b formats to use Rb instead of Ra.
-	
+
 	Add FLAG_MUL16 to MUL2XH opcode.
 
 	Add FLAG_ADDSUBppp to SRC and SATHp opcodes to implement extension
@@ -225,10 +230,10 @@ start-sanitize-m32rx
 Tue May 12 13:39:51 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* m32r-opc.c: Regenerated - SPECIAL attribute added to some
-	insns. 
+	insns.
 	* m32r-opc.h: Regenerated - SPECIAL attribute added to some
 	insns.
-	
+
 end-sanitize-m32rx
 start-sanitize-d30v
 Tue May 12 11:46:31 1998  Richard Henderson  <rth@cygnus.com>
@@ -238,7 +243,7 @@ Tue May 12 11:46:31 1998  Richard Henderson  <rth@cygnus.com>
 end-sanitize-d30v
 start-sanitize-r5900
 Mon May 11 13:12:15 1998  Frank Ch. Eigler  <fche@cygnus.com>
-	
+
 	* mips-opc.c (break): Added 20-bit single-operand break
 	instruction for R5900 only.
 
@@ -355,7 +360,7 @@ end-sanitize-d30v
 	* dis-buf.c: Internationalised.
 start-sanitize-sky
 	* dvp-dis.c: Internationalised.
-	* dvp-opc.c: Internationalised. 
+	* dvp-opc.c: Internationalised.
 end-sanitize-sky
 	* h8300-dis.c: Internationalised.
 	* h8500-dis.c: Internationalised.
@@ -439,7 +444,7 @@ end-sanitize-r5900
 Mon Apr 13 16:59:39 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-dis.c (print_insn_arm): Add "_all" extension to 'C'
-	operator. 
+	operator.
 
 Mon Apr 13 16:50:27 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -489,14 +494,14 @@ Wed Apr  1 16:20:27 1998  Ian Dall  <Ian.Dall@dsto.defence.gov.au>
 
         * ns32k-dis.c (bit_extract_simple): New function to extract bits
         from an arbitrary valid buffer instead of fetching them on demand
-        using fetch_data().                                            
+        using fetch_data().
         (invalid_float): use bit_extract_simple() instead of bit_extract().
 
 start-sanitize-m32rx
 Wed Apr  1 14:57:54 1998  Nick Clifton  <nickc@cygnus.com>
 
-	* m32r-opc.c: Fix SATB bit pattern.  Add extra control registers. 
-	* m32r-opc.h: Add extra control registers. 
+	* m32r-opc.c: Fix SATB bit pattern.  Add extra control registers.
+	* m32r-opc.h: Add extra control registers.
 
 end-sanitize-m32rx
 Tue Mar 31 11:09:08 1998  Ian Lance Taylor  <ian@cygnus.com>
@@ -686,7 +691,7 @@ Thu Mar 19 15:46:53 1998  Nick Clifton  <nickc@cygnus.com>
 
 	These patches are courtesy of Jonathan Walton and Tony Thompson
 	(athompso@cambridge.arm.com).
-	
+
 	* arm-dis.c (print_insn_thumb): Ignore bottom two bits of PC
 	relative addresses.
 
@@ -962,8 +967,8 @@ Fri Feb 13 13:12:14 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Fri Feb 13 09:50:32 1998  Nick Clifton  <nickc@cygnus.com>
 
-	* m32r-opc.c: Regenerate. 
-	* m32r-opc.h: Regenerate. 
+	* m32r-opc.c: Regenerate.
+	* m32r-opc.h: Regenerate.
 
 Thu Feb 12 11:01:40 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -1202,12 +1207,12 @@ Wed Dec 10 17:42:35 1997  Nick Clifton  <nickc@cygnus.com>
 	* arm-dis.c (print_insn_little_arm): Prevent examination of stored
 	symbol if none is present.
 	(print_insn_big_arm):  Prevent examination of stored symbol if
-	none is present. 
+	none is present.
 
 Thu Oct 23 21:13:37 1997  Fred Fish  <fnf@cygnus.com>
- 
+
 	* d10v-opc.c (d10v_opcodes): Correct entry for RTE.
- 
+
 Mon Dec  8 11:21:07 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* disassemble.c: Remove disasm_symaddr() function.
@@ -1291,7 +1296,7 @@ end-sanitize-vr5400
 start-sanitize-tx49
 Wed Oct 29 15:10:56 1997  Gavin Koch  <gavin@cygnus.com>
 
-	* mips-opc.c (deret,dmult,dmultu,madd,maddu,pref,sdbbp): 
+	* mips-opc.c (deret,dmult,dmultu,madd,maddu,pref,sdbbp):
 	Add tx49 insns and configury.
 
 end-sanitize-tx49
@@ -1423,7 +1428,7 @@ Thu Sep 18 11:21:43 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 Tue Sep 16 15:18:20 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* v850-opc.c (v850_opcodes): Further rearrangements. 
+	* v850-opc.c (v850_opcodes): Further rearrangements.
 
 start-sanitize-d30v
 Tue Sep 16 16:12:11 1997  Ken Raeburn  <raeburn@cygnus.com>
@@ -1471,7 +1476,7 @@ Wed Aug 27 21:42:39 1997  Ken Raeburn  <raeburn@cygnus.com>
 	and cmp instructions.
 
 	* d30v-opc.c: Correct entries for repeat*, and sat*.
-	Make IMM5 unsigned. Create IMM6U and IMM12S3U operand 
+	Make IMM5 unsigned. Create IMM6U and IMM12S3U operand
 	types. Correct several formats.
 
 	* d30v-opc.c: (pre_defined_registers): Add dpsw and dpc.
@@ -1492,7 +1497,7 @@ Wed Aug 27 21:42:39 1997  Ken Raeburn  <raeburn@cygnus.com>
 	New form: SHORT_A2; a SHORT_A form that needs an even
 	register as the first operand.
 
-	* d30v-dis.c (print_insn_d30v): Fix problem where the last 
+	* d30v-dis.c (print_insn_d30v): Fix problem where the last
 	instruction was not being disassembled if there were an odd
 	number of instructions.
 
@@ -1604,18 +1609,18 @@ Wed Aug 13 18:52:11 1997  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-v850e
 	* v850-dis.c (disassemble): Add support for v850EA instructions.
-	
+
 	* v850-opc.c (insert_i5div, extract_i5div): New Functions.
 	(v850_opcodes): Add v850EA instructions.
 
 	* v850-dis.c (disassemble): Add support for v850E instructions.
-	
+
 	* v850-opc.c (insert_d5_4, extract_d5_4, insert_d16_16,
 	extract_d16_16, insert_i9, extract_i9, insert_u9, extract_u9,
 	insert_spe, extract_spe): New Functions.
 	(v850_opcodes): Add v850E instructions.
 end-sanitize-v850e
-	
+
 	* v850-opc.c: Reorganised and re-layed out to improve readability
 	and portability.
 
@@ -1700,7 +1705,7 @@ Wed Jun 25 15:25:57 1997  Felix Lee  <flee@cirdan.cygnus.com>
  	negating it.
 	(UNUSED): remove one level of parens, so MSVC doesn't choke on
  	nesting depth when all the macros are expanded.
-	
+
 Tue Jun 17 17:02:17 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc-opc.c: The fcmp v9a instructions take an integer register
@@ -1759,7 +1764,7 @@ Thu May 22 14:06:02 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 Tue May 20 11:26:27 1997  Gavin Koch  <gavin@cygnus.com>
 
-	* mips-opc.c (mips_builtin_opcodes): Moved INSN_ISA field into new 
+	* mips-opc.c (mips_builtin_opcodes): Moved INSN_ISA field into new
 	  field membership.
 	* mips16-opc.c (mip16_opcodes): same.
 
@@ -1931,7 +1936,7 @@ Wed Mar 19 06:53:58 1997  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Provide coldfire division module
  	instructions.
-	
+
 end-sanitize-coldfire
 Tue Mar 18 14:17:03 1997  Jeffrey A Law  (law@cygnus.com)
 
@@ -1942,7 +1947,7 @@ Mon Mar 17 08:48:03 1997  J.T. Conklin  <jtc@beauty.cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Provide correct entries for mulsl and
  	mulul insns on the coldfire.
-	
+
 Sat Mar 15 17:13:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* arm-dis.c (print_insn_arm): Don't print instruction bytes.
@@ -1990,7 +1995,7 @@ Mon Mar  3 07:45:20 1997  J.T. Conklin  <jtc@cygnus.com>
 
 	* m68k-opc.c (m68k_opcodes): Added entries for the tst insns on
  	the mc68000.
- 	
+
 Thu Feb 27 14:04:32 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* m68k-opc.c (m68k_opcodes): Added swbegl pseudo-instruction.
@@ -2019,7 +2024,7 @@ Mon Feb 24 19:26:12 1997  Dawn Perchik  <dawn@cygnus.com>
 
 Mon Feb 24 15:19:01 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* d10v-dis.c, d10v-opc.c: Change pre_defined_registers to 
+	* d10v-dis.c, d10v-opc.c: Change pre_defined_registers to
 	d10v_predefined_registers and reg_name_cnt to d10v_reg_name_cnt.
 
 start-sanitize-tic80
@@ -2035,9 +2040,9 @@ end-sanitize-tic80
 Sat Feb 22 21:25:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* mips-opc.c: Add macros for cop0, cop1 cop2 and cop3.
-	Change mips_opcodes from const array to a pointer, 
+	Change mips_opcodes from const array to a pointer,
 	and change bfd_mips_num_opcodes from const int to int,
-	so that we can increase the size of the mips opcodes table 
+	so that we can increase the size of the mips opcodes table
 	dynamically.
 
 start-sanitize-tic80
@@ -2055,7 +2060,7 @@ Fri Feb 21 16:31:18 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d30v-opc.c: Removed references to FLAG_X.
 
-end-sanitize-d30v	
+end-sanitize-d30v
 Wed Feb 19 14:51:20 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Add dependencies on ../bfd/bfd.h as required.
@@ -2070,11 +2075,11 @@ Tue Feb 18 17:43:43 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* d30v-opc.c: New file.
 	* disassemble.c (disassembler) Add entry for d30v.
 
-end-sanitize-d30v	
+end-sanitize-d30v
 start-sanitize-tic80
 Tue Feb 18 16:32:08 1997  Fred Fish  <fnf@cygnus.com>
 
-	* tic80-opc.c (tic80_predefined_symbols): Add symbolic 
+	* tic80-opc.c (tic80_predefined_symbols): Add symbolic
 	representations for the floating point BITNUM values.
 
 Fri Feb 14 12:14:05 1997  Fred Fish  <fnf@cygnus.com>
@@ -2138,9 +2143,9 @@ Tue Feb 11 15:26:47 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 start-sanitize-r5900
 Fri Feb  7 11:12:44 1997  Gavin Koch  <gavin@cygnus.com>
-        
+
         * mips-opc.c: add r5900.
-        
+
 end-sanitize-r5900
 start-sanitize-tic80
 Mon Feb 10 10:12:41 1997  Fred Fish  <fnf@cygnus.com>
@@ -2205,7 +2210,7 @@ Fri Jan 24 12:08:21 1997  J.T. Conklin  <jtc@cygnus.com>
 	* m68k-opc.c (m68k_opcodes): Changed operand specifier for the
  	coldfire moveb instruction to not allow an address register as
  	destination.  Although the documentation does not indicate that
-	this is invalid, experiments uncovered unexpected behavior.  
+	this is invalid, experiments uncovered unexpected behavior.
 	Added a comment explaining the situation.  Thanks to Andreas
 	Schwab for pointing this out to me.
 
@@ -2216,7 +2221,7 @@ Wed Jan 22 20:13:51 1997  Fred Fish  <fnf@cygnus.com>
  	entries are presorted so that entries with the same mnemonic are
 	adjacent to each other in the table.  Sort the entries for each
 	instruction so that this is true.
-	
+
 end-sanitize-tic80
 Mon Jan 20 12:48:57 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
@@ -2231,7 +2236,7 @@ Sat Jan 18 15:15:05 1997  Fred Fish  <fnf@cygnus.com>
 	"vsub", "vst", "xnor", and "xor" instructions.
 	(V_a1): Renamed from V_a, msb of accumulator reg number.
 	(V_a0): Add macro, lsb of accumulator reg number.
-	
+
 Fri Jan 17 18:24:31 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-dis.c (print_insn_tic80): Broke excessively long
@@ -2241,13 +2246,13 @@ Fri Jan 17 18:24:31 1997  Fred Fish  <fnf@cygnus.com>
 	math instruction packed into a single opcode.
 	* tic80-opc.c (tic80_opcodes): Expand comment for vld opcode
 	to explain why it comes after the other vector opcodes.
-	
+
 end-sanitize-tic80
 Fri Jan 17 16:19:15 1997  J.T. Conklin  <jtc@beauty.cygnus.com>
 
-	* m68k-opc.c (m68k_opcodes): add b, w, or l specifier to coldfire 
+	* m68k-opc.c (m68k_opcodes): add b, w, or l specifier to coldfire
 	move insns to handle immediate operands.
-	
+
 Thu Jan 17 16:19:00 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-opc.c (m68k_opcodes): Delete duplicate entry for "cmpil".
@@ -2263,7 +2268,7 @@ Thu Jan 16 20:54:40 1997  Fred Fish  <fnf@cygnus.com>
 	Remove some opcodes that are possible, but illegal, such
 	as long immediate instructions with doubles for immediate
 	values.  Add "vadd" and "vld" instructions.
-	
+
 Wed Jan 15 18:59:51 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-opc.c (tic80_operands): Reorder some table entries to make
@@ -2289,7 +2294,7 @@ Tue Jan 14 19:42:50 1997  Fred Fish  <fnf@cygnus.com>
  	followed by a tab.  Use renamed TIC80_OPERAND_PCREL flag bit rather
  	than old TIC80_OPERAND_RELATIVE.  Add support for new
 	TIC80_OPERAND_BASEREL flag bit.
-	
+
 Mon Jan 13 15:58:56 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-dis.c (print_insn_tic80): Print floating point operands
@@ -2304,8 +2309,8 @@ Mon Jan 13 15:58:56 1997  Fred Fish  <fnf@cygnus.com>
 	(P2): Macro for the 'P2' field.
 	(P1): Macro for the 'P1' field.
 	(tic80_opcodes): Add entries for "exts", "extu", "fadd",
-	"fcmp", and "fdiv". 
-	
+	"fcmp", and "fdiv".
+
 end-sanitize-tic80
 Mon Jan  6 15:06:55 1997  Jeffrey A Law  (law@cygnus.com)
 
@@ -2319,14 +2324,14 @@ Mon Jan  6 10:56:25 1997  Fred Fish  <fnf@cygnus.com>
 	(print_insn_tic80): If R_SCALED then print ":s" modifier for operand.
 	* tic80-opc.c (REG0, REG22, REG27, SSOFF, LSOFF): Names
 	changed to REG_0, REG_22, REG_DEST, OFF_SS, OFF_SL respectively.
-	(SICR, LICR, REGM_SI, REGM_LI): Names changed to CR_SI, CR_LI, 
+	(SICR, LICR, REGM_SI, REGM_LI): Names changed to CR_SI, CR_LI,
 	REG_BASE_M_SI, REG_BASE_M_LI respectively.
 	(REG_SCALED, LSI_SCALED): New operand types.
 	(E): New macro for 'E' bit at bit 27.
 	(tic80_opcodes): Add and test dld, dld.u, dst, estop, and etrap
 	opcodes, including the various size flavors (b,h,w,d) for
 	the direct load and store instructions.
-	
+
 Sun Jan  5 12:18:14 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-dis.c (M_SI, M_LI): Add macros to test for ":m" modifier bit
@@ -2338,7 +2343,7 @@ Sun Jan  5 12:18:14 1997  Fred Fish  <fnf@cygnus.com>
 	(MASK_LI_M, MASK_SI_M, MASK_REG_M): Remove and replace in opcode
 	masks with "MASK_* & ~M_*" to get the M bit reset.
 	(tic80_opcodes): Add bsr, bsr.a, cmnd, cmp, dcachec, and dcachef.
-	
+
 Sat Jan  4 19:05:05 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80-dis.c (print_insn_tic80): Print TIC80_OPERAND_RELATIVE
@@ -2395,7 +2400,7 @@ Mon Dec 30 17:02:11 1996  Fred Fish  <fnf@cygnus.com>
 start-sanitize-tic80
 	(tic80-dis.o, tic80-opc.o): Add rules per comment in Makefile.in.
 end-sanitize-tic80
-	
+
 Mon Dec 30 11:38:01 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips16-opc.c: Add "abs".
@@ -2415,7 +2420,7 @@ Fri Dec 27 22:30:57 1996  Fred Fish  <fnf@cygnus.com>
 	* configure: Regenerate with autoconf.
 	* tic80-dis.c: Add file.
 	* tic80-opc.c: Add file.
-	
+
 end-sanitize-tic80
 Fri Dec 20 14:30:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
@@ -2542,7 +2547,7 @@ Mon Nov 25 16:15:17 1996  J.T. Conklin  <jtc@cygnus.com>
 	* m68k-opc.c (m68k_opcodes): The coldfire (mcf5200) can only use
  	register operands for immediate arithmetic, not, neg, negx, and
 	set according to condition instructions.
-	
+
 	* m68k-opc.c (m68k_opcodes): Consistantly Use "s" as the storage
  	specifier of the effective-address operand in immediate forms of
  	arithmetic instructions.  The specifier for the immediate operand
@@ -2553,7 +2558,7 @@ Mon Nov 25 11:17:01 1996  Jeffrey A Law  (law@cygnus.com)
 	* mn10300-opc.c (mn10300_opcodes): Remove redundant "lcc"
 	opcode.
 
-	* mn10300-dis.c (disassemble): Use '$' instead of '%' for 
+	* mn10300-dis.c (disassemble): Use '$' instead of '%' for
 	register prefix.
 
 	* mn10300-dis.c (disassemble): Prefix registers with '%'.
@@ -2584,7 +2589,7 @@ Tue Nov 19 13:33:01 1996  Jeffrey A Law  (law@cygnus.com)
 	* mn10300-opc.c (mn10300_operands): Add "REGS" for a register
 	list.
 	(mn10300_opcodes): Use REGS for register list in "movm" instructions.
-	
+
 Mon Nov 18 15:20:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* d10v-opc.c (d10v_opcodes): Add3 sets the carry.
@@ -2604,7 +2609,7 @@ Wed Nov  6 13:42:32 1996  Jeffrey A Law  (law@cygnus.com)
 	* mn10300-opc.c (mn10300_operands): Hijack "bits" field
 	in MN10300_OPERAND_SPLIT operands for how many bits
 	appear in the basic insn word.  Add IMM32_HIGH24,
-	IMM32_HIGH24_LOWSHIFT8, IMM8E_SHIFT8.  
+	IMM32_HIGH24_LOWSHIFT8, IMM8E_SHIFT8.
 	(mn10300_opcodes): Use new operands as needed.
 
 	* mn10300-opc.c (mn10300_operands): Add IMM32_LOWSHIFT8
@@ -2645,7 +2650,7 @@ Fri Nov  1 10:29:11 1996  Richard Henderson  <rth@tamu.edu>
 	standard disassembly.
 
 	* alpha-opc.c (alpha_operands): Rearrange flags slot.
-	(alpha_opcodes): Add new BWX, CIX, and MAX instructions.  
+	(alpha_opcodes): Add new BWX, CIX, and MAX instructions.
 	Recategorize PALcode instructions.
 
 Wed Oct 30 16:46:58 1996  Jeffrey A Law  (law@cygnus.com)
@@ -2713,7 +2718,7 @@ Wed Oct  9 11:19:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_opcodes): Add "extended" instructions,
 	"putx", "getx", "mulq", "mulqu", "sat16", "sat24", "bsch".
-	
+
 Tue Oct  8 11:55:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (mn10300_operands): Remove "REGS" operand.
@@ -2734,7 +2739,7 @@ Mon Oct  7 16:48:45 1996  Jeffrey A Law  (law@cygnus.com)
 	Update many operand fields to deal with signed vs unsigned
 	issues.  Fix one or two typos in the "mov" instruction
 	opcode, mask and/or operand fields.
- 
+
 Mon Oct  7 11:39:49 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* m68k-opc.c (plusha): Prefer encoding for m68040up, in case
@@ -2983,7 +2988,7 @@ Tue Aug 20 14:41:03 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	* configure: (bfd_v850v_arch) Add new case.
 	* configure.in: (bfd_v850_arch) Add new case.
 	* v850-opc.c: New file.
-	
+
 Mon Aug 19 15:21:38 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-dis.c (print_insn_sparc): Handle little endian sparcs.
@@ -3717,7 +3722,7 @@ Wed Sep  6 15:08:09 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-opc.h (sh_arg_type): Add F_FR0.
 	(sh_table, case fmac): Add F_FR0 as first argument.
-	
+
 Wed Sep  6 15:08:09 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* sh-opc.h (sh_opcode_info): Increase arg array size to 4.
@@ -3936,7 +3941,7 @@ Wed May 24 14:16:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* sh-opc.h: Added bsrf and braf.
 
-Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)	
+Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
 
 	* arm-opc.h (arm_opcodes): Add 64-bit multiply patterns.  Delete
 	bogus [ls]fm{ea,fd} patterns.
@@ -3984,7 +3989,7 @@ Mon Apr 10 15:55:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	* mpw-config.in (target_arch): Compute from canonical target.
 	(m68k, mips, powerpc, sparc): Add architectures.
 	* mpw-make.in (disassemble.c.o): Add.
-	(ALL_CFLAGS): Remove special flags (-mc68020 -mc68881 -model far). 
+	(ALL_CFLAGS): Remove special flags (-mc68020 -mc68881 -model far).
 
 	* mpw-config.in (BFD_MACHINES): Set to a default value.
 	* mpw-make.in (BFD_MACHINES): Remove wired-in value.
@@ -4483,7 +4488,7 @@ Fri Jan 21 19:01:39 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 Mon Jan 17 20:05:49 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-dis.c (print_insn_hppa): Handle 'N' in assembler template.
-	No space before 'u', 'f', or 'N'. 
+	No space before 'u', 'f', or 'N'.
 
 Sun Jan 16 14:20:16 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
@@ -4515,7 +4520,7 @@ Mon Nov  8 12:37:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 Sun Nov  7 23:52:34 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* alpha-opc.h, alpha-dis.c (print_insn_alpha):  Add
-	FLOAT_MEMORY_FORMAT_CODE, FLOAT_BRANCH_FORMAT_CODE, correct 
+	FLOAT_MEMORY_FORMAT_CODE, FLOAT_BRANCH_FORMAT_CODE, correct
 	FLOAT_FORMAT_CODE to put out floating point register names.
 
 Mon Nov  1 18:17:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
@@ -4788,7 +4793,7 @@ Fri Jun 11 18:40:21 1993  Ken Raeburn  (raeburn@cygnus.com)
 	defined, since gdb has been fixed.
 
 	Changes from Jeff Law, law@cs.utah.edu:
-	* hppa-dis.c (print_insn_hppa): Last argument to fput_reg, 
+	* hppa-dis.c (print_insn_hppa): Last argument to fput_reg,
 	fput_reg_r, fput_creg, fput_const, and fputs_filtered should
 	be a *disassemble_info, not a *FILE.
 	* hppa-dis.c: Support 'd', '!', and 'a'.

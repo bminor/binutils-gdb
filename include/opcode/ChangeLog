@@ -1,3 +1,16 @@
+1998-06-18  Ulrich Drepper  <drepper@cygnus.com>
+
+	* i386.h: Add support for fxsave, fxrstor, sysenter and sysexit.
+
+start-sanitize-am33
+Wed Jun 17 17:54:08 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (MN10300_OPERAND_USP): Define.
+	(MN10300_OPERAND_SSP, MN10300_OPERAND_MSP): Likewise.
+	(MN10300_OPERAND_PC, MN10300_OPERAND_EPSW): Likewise.
+	(MN10300_OPERAND_RREG): Likewise.
+
+end-sanitize-am33
 Sat Jun 13 11:31:35 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386.h (i386_optab): Add general form of aad and aam.  Add ud2a
@@ -303,7 +316,7 @@ Thu Jan 22 17:54:56 1998  Nick Clifton  <nickc@cygnus.com>
 
 Wed Jan 14 17:21:43 1998  Nick Clifton  <nickc@cygnus.com>
 
-	* cgen.h: Formatting changes to improve readability. 
+	* cgen.h: Formatting changes to improve readability.
 
 Mon Jan 12 11:37:36 1998  Doug Evans  <devans@seba.cygnus.com>
 
@@ -349,7 +362,7 @@ Thu Nov 13 11:04:24 1997  Gavin Koch  <gavin@cygnus.com>
 start-sanitize-tx49
 Wed Oct 29 17:33:37 1997  Gavin Koch  <gavin@cygnus.com>
 
-	* mips.h (INSN_4900): Added. 
+	* mips.h (INSN_4900): Added.
 
 end-sanitize-tx49
 Fri Oct 24 22:36:20 1997  Ken Raeburn  <raeburn@cygnus.com>
@@ -394,7 +407,7 @@ Mon Sep 15 11:29:43 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	Merge changes from Martin Hunt:
 
-	* d30v.h: Allow up to 64 control registers. Add 
+	* d30v.h: Allow up to 64 control registers. Add
 	SHORT_A5S format.
 
 	* d30v.h (LONG_Db): New form for delayed branches.
@@ -403,9 +416,9 @@ Mon Sep 15 11:29:43 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* d30v.h (SHORT_D2B): New form.
 
-	* d30v.h (SHORT_A2): New form. 
+	* d30v.h (SHORT_A2): New form.
 
-	* d30v.h (OPERAND_2REG): Add new operand to indicate 2 
+	* d30v.h (OPERAND_2REG): Add new operand to indicate 2
 	registers are used.  Needed for VLIW optimization.
 
 end-sanitize-d30v
@@ -417,7 +430,7 @@ Mon Sep  8 14:05:45 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 Tue Sep  2 15:32:32 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* v850.h (V850_OPREAND_ADJUST_SHORT_MEMORY): Removed. 
+	* v850.h (V850_OPREAND_ADJUST_SHORT_MEMORY): Removed.
 
 Tue Aug 26 12:21:52 1997  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -440,13 +453,13 @@ Fri Aug 22 10:38:29 1997  Nick Clifton  <nickc@cygnus.com>
 
 Mon Aug 18 11:05:58 1997  Nick Clifton  <nickc@cygnus.com>
 
-	* v850.h (struct v850_opcode): Remove flags field. 
+	* v850.h (struct v850_opcode): Remove flags field.
 
 Wed Aug 13 18:45:48 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850.h (struct v850_opcode): Add flags field.
 	(struct v850_operand): Extend meaning of 'bits' and 'shift'
-	fields. 
+	fields.
 
 start-sanitize-v850e
 	(V850E_INSTRUCTION, V850EA_INSTRUCTION): New flags.
@@ -560,17 +573,17 @@ Thu Mar  6 14:18:30 1997  Jeffrey A Law  (law@cygnus.com)
 
 Mon Feb 24 15:15:56 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* d10v.h: Change pre_defined_registers to 
+	* d10v.h: Change pre_defined_registers to
 	d10v_predefined_registers and reg_name_cnt to d10v_reg_name_cnt.
 
 Sat Feb 22 21:25:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* mips.h: Add macros for cop0, cop1 cop2 and cop3.
-	Change mips_opcodes from const array to a pointer, 
+	Change mips_opcodes from const array to a pointer,
 	and change bfd_mips_num_opcodes from const int to int,
-	so that we can increase the size of the mips opcodes table 
+	so that we can increase the size of the mips opcodes table
 	dynamically.
-	
+
 start-sanitize-d30v
 Fri Feb 21 16:34:18 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
@@ -591,9 +604,9 @@ Fri Feb 14 13:16:15 1997  Fred Fish  <fnf@cygnus.com>
 end-sanitize-tic80
 start-sanitize-r5900
 Fri Feb  7 11:12:44 1997  Gavin Koch  <gavin@cygnus.com>
-        
+
         * mips.h: add r5900.
-        
+
 end-sanitize-r5900
 start-sanitize-tic80
 Mon Feb 10 10:32:17 1997  Fred Fish  <fnf@cygnus.com>
@@ -638,7 +651,7 @@ Thu Jan 16 20:48:55 1997  Fred Fish  <fnf@cygnus.com>
 	(TIC80_VECTOR): Define a flag bit for the flags.  This one means
 	that the opcode can have two vector instructions in a single
 	32 bit word and we have to encode/decode both.
-	
+
 Tue Jan 14 19:37:09 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80.h (TIC80_OPERAND_PCREL): Renamed from
@@ -696,7 +709,7 @@ Sat Dec 14 10:48:31 1996  Fred Fish  <fnf@ninemoons.com>
 	* mn10200.h: Fix comment, mn10200_operand not powerpc_operand.
 	* mn10300.h: Fix comment, mn10300_operand not powerpc_operand.
 	* v850.h: Fix comment, v850_operand not powerpc_operand.
-	
+
 Mon Dec  9 16:45:39 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200.h: Flesh out structures and definitions needed by
@@ -849,7 +862,7 @@ Mon Jul 22 12:15:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 Wed Jul 17 14:46:38 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* d10v.h: New file. 
+	* d10v.h: New file.
 
 Thu Jul 11 12:09:15 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -891,7 +904,7 @@ Tue Jun 18 16:06:00 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 	(EBITOP): Likewise.
 	(O_LAST): Bump.
 	(ldc, stc, movb, movw, movl): Use 32bit offsets and absolutes.
-	
+
 	* h8300.h (EXR, SHIFT_2, MACREG, SHIFT_IMM, RDINC): Define.
 	(O_TAS, O_CLRMAC, O_LDMAC, O_MAC, O_LDM, O_STM): Define.
 	(BITOP, EBITOP): Handle new H8/S addressing modes for
@@ -899,7 +912,7 @@ Tue Jun 18 16:06:00 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 	(UNOP3): Handle new shift/rotate insns on the H8/S.
 	(insns using exr): New instructions.
 	(tas, mac, ldmac, clrmac, ldm, stm): New instructions.
-	
+
 Thu May 23 16:56:48 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* h8300.h (add.l): Undo Apr 5th change.  The manual I had
@@ -1187,7 +1200,7 @@ Sun Jul 10 11:01:09 1994  Ian Dall  (dall@hfrd.dsto.gov.au)
 
 Thu Jul  7 12:34:48 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
-	* h8300.h (xor.l) :fix bit pattern. 
+	* h8300.h (xor.l) :fix bit pattern.
 	(L_2): New size of operand.
 	(trapa): Use it.
 
@@ -1288,7 +1301,7 @@ Sat Dec 11 16:14:06 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 Wed Dec  1 12:15:32 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
-	* From Hisashi MINAMINO <minamino@sramhc.sra.co.jp>     
+	* From Hisashi MINAMINO <minamino@sramhc.sra.co.jp>
 	* hppa.h: #undef NONE to avoid conflict with hiux include files.
 
 Sun Nov 21 22:06:57 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
@@ -1441,11 +1454,11 @@ Fri Jun 11 18:38:44 1993  Ken Raeburn  (raeburn@cygnus.com)
 	Patches from Jeff Law, law@cs.utah.edu:
 	* hppa.h: Clean up some of the OLD_TABLE, non-OLD_TABLE braindamage.
 	Make the tables be the same for the following instructions:
-	"bb", "addb[tf]", "addib[tf]", "add", "add[loc]", "addco", 
+	"bb", "addb[tf]", "addib[tf]", "add", "add[loc]", "addco",
 	"sh[123]add", "sh[123]add[lo]", "sub", "sub[obt]", "sub[bt]o",
-	"ds", "comclr", "addi", "addi[ot]", "addito", "subi", "subio", 
-	"comiclr", "fadd", "fsub", "fmpy", "fdiv", "fsqrt", "fabs", 
-	"frnd", "fcpy", "fcnvff", "fcnvxf", "fcnvfx", "fcnvfxt", 
+	"ds", "comclr", "addi", "addi[ot]", "addito", "subi", "subio",
+	"comiclr", "fadd", "fsub", "fmpy", "fdiv", "fsqrt", "fabs",
+	"frnd", "fcpy", "fcnvff", "fcnvxf", "fcnvfx", "fcnvfxt",
 	"fcmp", and "ftest".
 
 	* hppa.h: Make new and old tables the same for "break", "mtctl",
@@ -1466,7 +1479,7 @@ Fri Jun  4 15:41:37 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 Thu Jun  3 15:42:59 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* Patches from Jeffrey Law <law@cs.utah.edu>.
-	* hppa.h: Rework single precision FP 
+	* hppa.h: Rework single precision FP
 	instructions so that they correctly disassemble code
 	PA1.1 code.
 
@@ -1513,7 +1526,7 @@ Thu Feb 18 02:03:14 1993  John Gilmore  (gnu@cygnus.com)
 
 	* m68k.h (BREAK_UP_BIG_DECL, AND_OTHER_PART):  Add kludge which
 	allows callers to break up the large initialized struct full of
-	opcodes into two half-sized ones.  This permits GCC to compile 
+	opcodes into two half-sized ones.  This permits GCC to compile
 	this module, since it takes exponential space for initializers.
 	(numopcodes, endop):  Revise to use AND_OTHER_PART in size calcs.
 
@@ -1736,7 +1749,7 @@ Tue Dec 10 00:22:20 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 Sat Nov 30 20:40:51 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
-	* a29k.h, arm.h, h8300.h,  i386.h,  i860.h, i960.h , m68k.h, 
+	* a29k.h, arm.h, h8300.h,  i386.h,  i860.h, i960.h , m68k.h,
 	m88k.h, mips.h , np1.h, ns32k.h, pn.h, pyr.h, sparc.h, tahoe.h,
 	vax.h, ChangeLog: renamed from ../<foo>-opcode.h
 
