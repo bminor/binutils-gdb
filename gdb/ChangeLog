@@ -1,3 +1,10 @@
+2003-08-18  Andrew Cagney  <cagney@redhat.com>
+
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Do not set
+	"dwarf2_build_frame_info".  Append "m68k_frame_sniffer" instead of
+	"m68k_frame_p".
+	(m68hc11_frame_sniffer): Replace "m68hc11_frame_p".
+
 2003-08-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-tdep.c (x86_64_dwarf_regmap): Remove trailing whitespace.
