@@ -1677,6 +1677,8 @@ enum bfd_architecture
 #define bfd_mach_sh            1
 #define bfd_mach_sh2        0x20
 #define bfd_mach_sh_dsp     0x2d
+#define bfd_mach_sh2a       0x2a
+#define bfd_mach_sh2a_nofpu 0x2b
 #define bfd_mach_sh2e       0x2e
 #define bfd_mach_sh3        0x30
 #define bfd_mach_sh3_nommu  0x31
@@ -2637,6 +2639,14 @@ field in the instruction.  */
 /* Renesas / SuperH SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,
   BFD_RELOC_SH_PCDISP12BY2,
+  BFD_RELOC_SH_IMM3,
+  BFD_RELOC_SH_IMM3U,
+  BFD_RELOC_SH_DISP12,
+  BFD_RELOC_SH_DISP12BY2,
+  BFD_RELOC_SH_DISP12BY4,
+  BFD_RELOC_SH_DISP12BY8,
+  BFD_RELOC_SH_DISP20,
+  BFD_RELOC_SH_DISP20BY8,
   BFD_RELOC_SH_IMM4,
   BFD_RELOC_SH_IMM4BY2,
   BFD_RELOC_SH_IMM4BY4,

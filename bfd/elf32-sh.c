@@ -6913,7 +6913,13 @@ sh_elf_merge_private_data (bfd *ibfd, bfd *obfd)
     }
 
   if (! sh_merge_bfd_arch (ibfd, obfd))
-    return FALSE;
+    {
+      _bfd_error_handler ("%s: uses instructions which are incompatible "
+			  "with instructions used in previous modules",
+			  bfd_archive_filename (ibfd));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   elf_elfheader (obfd)->e_flags =
     sh_elf_get_flags_from_mach (bfd_get_mach (obfd));

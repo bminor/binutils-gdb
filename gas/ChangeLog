@@ -1,3 +1,28 @@
+2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	Introduce SH2a support.
+	2004-02-24  Corinna Vinschen  <vinschen@redhat.com>
+	* config/tc-sh.c (get_specific): Change arch_sh2a_up to
+	arch_sh2a_nofpu_up.
+	2004-02-24  Corinna Vinschen  <vinschen@redhat.com>
+	* config/tc-sh.c (md_parse_option): Add sh2a-nofpu ISA handling.
+	2004-02-20  Corinna Vinschen  <vinschen@redhat.com>
+	* config/tc-sh.c (sh_elf_final_processing): Move sh2a recognition
+	to end of conditional expression.
+	2004-02-20  Corinna Vinschen  <vinschen@redhat.com>
+	* config/tc-sh.c: Add sh2a-nofpu support.
+	2003-12-29  DJ Delorie  <dj@redhat.com>
+	* tc-sh.c: Add sh2a support.
+	(parse_reg): Add tbr.
+	(parse_at): Support @@(disp,tbr).
+	(get_specific): Support sh2a opcodes.
+	(insert4): New, for 4 byte relocs.
+	(build_Mytes): Support sh2a opcodes.
+	(md_apply_fix3_Mytes): Support sh2a opcodes.
+	2003-12-02  Michael Snyder  <msnyder@redhat.com>
+	* config/tc-sh.c (md_parse_option): Handle sh2a.
+	(sh_elf_final_processing): Ditto.
+
 2004-07-27  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/tc-hppa.h (TARGET_FORMAT): Set to "elf32-hppa-netbsd"

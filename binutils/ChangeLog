@@ -1,3 +1,8 @@
+2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	* readelf.c (get_machine_flags <EM_SH>): Handle EF_SH2A and
+	EF_SH2A_NOFPU.
+
 2004-07-28  Alexandre Oliva  <aoliva@redhat.com>
 
 	2003-07-08  Alexandre Oliva  <aoliva@redhat.com>

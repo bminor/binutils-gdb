@@ -38,6 +38,8 @@
 #define SH4_NOFPU_NEXT &arch_info_struct[11]
 #define SH4_NOMMU_NOFPU_NEXT &arch_info_struct[12]
 #define SH4A_NOFPU_NEXT &arch_info_struct[13]
+#define SH2A_NEXT       &arch_info_struct[14]
+#define SH2A_NOFPU_NEXT &arch_info_struct[15]
 #define SH64_NEXT    NULL
 
 static const bfd_arch_info_type arch_info_struct[] =
@@ -225,6 +227,34 @@ static const bfd_arch_info_type arch_info_struct[] =
     SH4A_NOFPU_NEXT
   },
   {
+    32,				/* 32 bits in a word.  */
+    32,				/* 32 bits in an address.  */
+    8,				/* 8 bits in a byte.  */
+    bfd_arch_sh,
+    bfd_mach_sh2a,
+    "sh",			/* Arch_name.  */
+    "sh2a",			/* Printable name.  */
+    1,
+    FALSE,			/* Not the default.  */
+    bfd_default_compatible,
+    bfd_default_scan,
+    SH2A_NEXT
+  },
+  {
+    32,				/* 32 bits in a word.  */
+    32,				/* 32 bits in an address.  */
+    8,				/* 8 bits in a byte.  */
+    bfd_arch_sh,
+    bfd_mach_sh2a_nofpu,
+    "sh",			/* Arch_name.  */
+    "sh2a-nofpu",		/* Printable name.  */
+    1,
+    FALSE,			/* Not the default.  */
+    bfd_default_compatible,
+    bfd_default_scan,
+    SH2A_NOFPU_NEXT
+  },
+  {
     64,				/* 64 bits in a word */
     64,				/* 64 bits in an address */
     8,				/* 8 bits in a byte */
@@ -269,6 +299,8 @@ static struct { unsigned long bfd_mach, arch, arch_up; } bfd_to_arch_table[] =
   { bfd_mach_sh2,             arch_sh2,             arch_sh2_up },
   { bfd_mach_sh2e,            arch_sh2e,            arch_sh2e_up },
   { bfd_mach_sh_dsp,          arch_sh_dsp,          arch_sh_dsp_up },
+  { bfd_mach_sh2a,            arch_sh2a,            arch_sh2a_up },
+  { bfd_mach_sh2a_nofpu,      arch_sh2a_nofpu,      arch_sh2a_nofpu_up },
   { bfd_mach_sh3,             arch_sh3,             arch_sh3_up },
   { bfd_mach_sh3_nommu,       arch_sh3_nommu,       arch_sh3_nommu_up },
   { bfd_mach_sh3_dsp,         arch_sh3_dsp,         arch_sh3_dsp_up },

@@ -1098,6 +1098,12 @@ parse_reg (char *src, int *mode, int *reg)
       return 3;
     }
 
+  if (l0 == 't' && l1 == 'b' && TOLOWER (src[2]) == 'r'
+      && ! IDENT_CHAR ((unsigned char) src[3]))
+    {
+      *mode = A_TBR;
+      return 3;
+    }
   if (l0 == 'm' && l1 == 'a' && TOLOWER (src[2]) == 'c'
       && ! IDENT_CHAR ((unsigned char) src[4]))
     {
@@ -1268,7 +1274,15 @@ parse_at (char *src, sh_operand_info *op)
   int len;
   int mode;
   src++;
-  if (src[0] == '-')
+  if (src[0] == '@')
+    {
+      src = parse_at (src, op);
+      if (op->type == A_DISP_TBR)
+	op->type = A_DISP2_TBR;
+      else
+	as_bad (_("illegal double indirection"));
+    }
+  else if (src[0] == '-')
     {
       /* Must be predecrement.  */
       src++;
@@ -1340,6 +1354,10 @@ parse_at (char *src, sh_operand_info *op)
 	      else if (mode == A_GBR)
 		{
 		  op->type = A_DISP_GBR;
+		}
+	      else if (mode == A_TBR)
+		{
+		  op->type = A_DISP_TBR;
 		}
 	      else if (mode == A_PC)
 		{
@@ -1542,6 +1560,36 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	  sh_operand_info *user = operands + n;
 	  sh_arg_type arg = this_try->arg[n];
 
+	  if (SH_MERGE_ARCH_SET_VALID (valid_arch, arch_sh2a_nofpu_up)
+	      && (   arg == A_DISP_REG_M
+		  || arg == A_DISP_REG_N))
+	    {
+	      /* Check a few key IMM* fields for overflow.  */
+	      int opf;
+	      long val = user->immediate.X_add_number;
+
+	      for (opf = 0; opf < 4; opf ++)
+		switch (this_try->nibbles[opf])
+		  {
+		  case IMM0_4:
+		  case IMM1_4:
+		    if (val < 0 || val > 15)
+		      goto fail;
+		    break;
+		  case IMM0_4BY2:
+		  case IMM1_4BY2:
+		    if (val < 0 || val > 15 * 2)
+		      goto fail;
+		    break;
+		  case IMM0_4BY4:
+		  case IMM1_4BY4:
+		    if (val < 0 || val > 15 * 4)
+		      goto fail;
+		    break;
+		  default:
+		    break;
+		  }
+	    }
 	  switch (arg)
 	    {
 	    case A_DISP_PC:
@@ -1552,6 +1600,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	    case A_BDISP12:
 	    case A_BDISP8:
 	    case A_DISP_GBR:
+	    case A_DISP2_TBR:
 	    case A_MACH:
 	    case A_PR:
 	    case A_MACL:
@@ -1596,6 +1645,7 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	      reg_n = user->reg;
 	      break;
 	    case A_GBR:
+	    case A_TBR:
 	    case A_SR:
 	    case A_VBR:
 	    case A_DSR:
@@ -1614,6 +1664,22 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	      if (user->type != arg)
 		goto fail;
 	      reg_b = user->reg;
+	      break;
+
+	    case A_INC_R15:
+	      if (user->type != A_INC_N)
+		goto fail;
+	      if (user->reg != 15)
+		goto fail;
+	      reg_n = user->reg;
+	      break;
+
+	    case A_DEC_R15:
+	      if (user->type != A_DEC_N)
+		goto fail;
+	      if (user->reg != 15)
+		goto fail;
+	      reg_n = user->reg;
 	      break;
 
 	    case A_REG_M:
@@ -2041,6 +2107,16 @@ insert (char *where, int how, int pcrel, sh_operand_info *op)
 }
 
 static void
+insert4 (char * where, int how, int pcrel, sh_operand_info * op)
+{
+  fix_new_exp (frag_now,
+	       where - frag_now->fr_literal,
+	       4,
+	       & op->immediate,
+	       pcrel,
+	       how);
+}
+static void
 build_relax (sh_opcode_info *opcode, sh_operand_info *op)
 {
   int high_byte = target_big_endian ? 0 : 1;
@@ -2126,16 +2202,31 @@ static unsigned int
 build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 {
   int index;
-  char nbuf[4];
-  char *output = frag_more (2);
+  char nbuf[8];
+  char *output;
   unsigned int size = 2;
   int low_byte = target_big_endian ? 1 : 0;
+  int max_index = 4;
+
   nbuf[0] = 0;
   nbuf[1] = 0;
   nbuf[2] = 0;
   nbuf[3] = 0;
+  nbuf[4] = 0;
+  nbuf[5] = 0;
+  nbuf[6] = 0;
+  nbuf[7] = 0;
 
-  for (index = 0; index < 4; index++)
+  if (SH_MERGE_ARCH_SET (opcode->arch, arch_op32))
+    {
+      output = frag_more (4);
+      size = 4;
+      max_index = 8;
+    }
+  else
+    output = frag_more (2);
+
+  for (index = 0; index < max_index; index++)
     {
       sh_nibble_type i = opcode->nibbles[index];
       if (i < 16)
@@ -2166,6 +2257,48 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	      break;
 	    case REG_N_B01:
 	      nbuf[index] = reg_n | 0x01;
+	      break;
+	    case IMM0_3s:
+	      nbuf[index] |= 0x08;
+	    case IMM0_3c:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM3, 0, operand);
+	      break;
+	    case IMM0_3Us:
+	      nbuf[index] |= 0x80;
+	    case IMM0_3Uc:
+	      insert (output + low_byte, BFD_RELOC_SH_IMM3U, 0, operand);
+	      break;
+	    case DISP0_12:
+	      insert (output + 2, BFD_RELOC_SH_DISP12, 0, operand);
+	      break;
+	    case DISP0_12BY2:
+	      insert (output + 2, BFD_RELOC_SH_DISP12BY2, 0, operand);
+	      break;
+	    case DISP0_12BY4:
+	      insert (output + 2, BFD_RELOC_SH_DISP12BY4, 0, operand);
+	      break;
+	    case DISP0_12BY8:
+	      insert (output + 2, BFD_RELOC_SH_DISP12BY8, 0, operand);
+	      break;
+	    case DISP1_12:
+	      insert (output + 2, BFD_RELOC_SH_DISP12, 0, operand+1);
+	      break;
+	    case DISP1_12BY2:
+	      insert (output + 2, BFD_RELOC_SH_DISP12BY2, 0, operand+1);
+	      break;
+	    case DISP1_12BY4:
+	      insert (output + 2, BFD_RELOC_SH_DISP12BY4, 0, operand+1);
+	      break;
+	    case DISP1_12BY8:
+	      insert (output + 2, BFD_RELOC_SH_DISP12BY8, 0, operand+1);
+	      break;
+	    case IMM0_20_4:
+	      break;
+	    case IMM0_20:
+	      insert4 (output, BFD_RELOC_SH_DISP20, 0, operand);
+	      break;
+	    case IMM0_20BY8:
+	      insert4 (output, BFD_RELOC_SH_DISP20BY8, 0, operand);
 	      break;
 	    case IMM0_4BY4:
 	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY4, 0, operand);
@@ -2230,6 +2363,19 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
     {
       output[0] = (nbuf[0] << 4) | (nbuf[1]);
       output[1] = (nbuf[2] << 4) | (nbuf[3]);
+    }
+  if (SH_MERGE_ARCH_SET (opcode->arch, arch_op32))
+    {
+      if (!target_big_endian)
+	{
+	  output[3] = (nbuf[4] << 4) | (nbuf[5]);
+	  output[2] = (nbuf[6] << 4) | (nbuf[7]);
+	}
+      else
+	{
+	  output[2] = (nbuf[4] << 4) | (nbuf[5]);
+	  output[3] = (nbuf[6] << 4) | (nbuf[7]);
+	}
     }
   return size;
 }
@@ -3722,6 +3868,57 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   shift = 0;
   switch (fixP->fx_r_type)
     {
+    case BFD_RELOC_SH_IMM3:
+      max = 0x7;
+      * buf = (* buf & 0xf8) | (val & 0x7);
+      break;
+    case BFD_RELOC_SH_IMM3U:
+      max = 0x7;
+      * buf = (* buf & 0x8f) | ((val & 0x7) << 4);
+      break;
+    case BFD_RELOC_SH_DISP12:
+      max = 0xfff;
+      buf[lowbyte] = val & 0xff;
+      buf[highbyte] |= (val >> 8) & 0x0f;
+      break;
+    case BFD_RELOC_SH_DISP12BY2:
+      max = 0xfff;
+      shift = 1;
+      buf[lowbyte] = (val >> 1) & 0xff;
+      buf[highbyte] |= (val >> 9) & 0x0f;
+      break;
+    case BFD_RELOC_SH_DISP12BY4:
+      max = 0xfff;
+      shift = 2;
+      buf[lowbyte] = (val >> 2) & 0xff;
+      buf[highbyte] |= (val >> 10) & 0x0f;
+      break;
+    case BFD_RELOC_SH_DISP12BY8:
+      max = 0xfff;
+      shift = 3;
+      buf[lowbyte] = (val >> 3) & 0xff;
+      buf[highbyte] |= (val >> 11) & 0x0f;
+      break;
+    case BFD_RELOC_SH_DISP20:
+      if (! target_big_endian)
+	abort();
+      max = 0x7ffff;
+      min = -0x80000;
+      buf[1] = (buf[1] & 0x0f) | (val >> 12) & 0xf0;
+      buf[2] = (val >> 8) & 0xff;
+      buf[3] = val & 0xff;
+      break;
+    case BFD_RELOC_SH_DISP20BY8:
+      if (!target_big_endian)
+	abort();
+      max = 0x7ffff;
+      min = -0x80000;
+      shift = 8;
+      buf[1] = (buf[1] & 0x0f) | (val >> 20) & 0xf0;
+      buf[2] = (val >> 16) & 0xff;
+      buf[3] = (val >> 8) & 0xff;
+      break;
+
     case BFD_RELOC_SH_IMM4:
       max = 0xf;
       *buf = (*buf & 0xf0) | (val & 0xf);

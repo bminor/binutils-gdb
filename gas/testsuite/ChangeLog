@@ -1,3 +1,10 @@
+2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-12-30  DJ Delorie  <dj@redhat.com>
+	* gas/sh/sh2a.s: New.
+	* gas/sh/sh2a.d: New.
+	* gas/sh/basic.exp: Add it.
+
 2004-07-27  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* gas/all/gas.exp (do_930509a): Disable test for crx.

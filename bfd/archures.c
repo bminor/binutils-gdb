@@ -229,6 +229,8 @@ DESCRIPTION
 .#define bfd_mach_sh            1
 .#define bfd_mach_sh2        0x20
 .#define bfd_mach_sh_dsp     0x2d
+.#define bfd_mach_sh2a       0x2a
+.#define bfd_mach_sh2a_nofpu 0x2b
 .#define bfd_mach_sh2e       0x2e
 .#define bfd_mach_sh3        0x30
 .#define bfd_mach_sh3_nommu  0x31

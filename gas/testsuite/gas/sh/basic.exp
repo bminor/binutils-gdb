@@ -160,6 +160,7 @@ if [istarget sh*-*-*] then {
 
 	# Test -renesas.
 	run_dump_test "renesas-1"
+	run_dump_test "sh2a"
     }
 }
 

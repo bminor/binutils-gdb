@@ -2009,8 +2009,10 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case EF_SH5: strcat (buf, ", sh5"); break;
 	    case EF_SH2E: strcat (buf, ", sh2e"); break;
 	    case EF_SH4A: strcat (buf, ", sh4a"); break;
+	    case EF_SH2A: strcat (buf, ", sh2a"); break;
 	    case EF_SH4_NOFPU: strcat (buf, ", sh4-nofpu"); break;
 	    case EF_SH4A_NOFPU: strcat (buf, ", sh4a-nofpu"); break;
+	    case EF_SH2A_NOFPU: strcat (buf, ", sh2a-nofpu"); break;
 	    default: strcat (buf, ", unknown ISA"); break;
 	    }
 
