@@ -81,12 +81,39 @@ else
 	done
 fi
 
+echo Looking for signs of \"life\"...
+
+# Don't try to clean directories here, as the 'mv' command will fail.
+# Also, grep fails on NFS mounted directories.
+if ( echo $* | grep keep\-life > /dev/null ) ; then
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-life $i > /dev/null) ; then
+			echo Keeping life stuff in $i
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-life $i > /dev/null) ; then
+			echo Cleaning the \"life\" out of $i...
+			cp $i new
+			sed '/start\-sanitize\-life/,/end-\sanitize\-life/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 echo Done in `pwd`.
 
 #
 #
 # $Log$
-# Revision 1.18  1991/10/10 01:08:04  rich
+# Revision 1.19  1991/10/21 22:10:13  gnu
+# Handle "life" sanity, which Tiemann half-implemented in config.sub.
+#
+# Revision 1.18  1991/10/10  01:08:04  rich
 # copy the old file to the new before cleaning it.  This should
 # propogate mode bits like execute.
 #
