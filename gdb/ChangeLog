@@ -1,5 +1,8 @@
 Mon Jun  1 16:16:12 1992  Michael Tiemann  (tiemann@cygnus.com)
 
+	* remote-vx.c (vx_load_command,add_symbol_stub): Default READNOW
+	parameter in call to `symbol_file_add' to 0.
+
 	* xm-sun4os4.h (MALLOC_INCOMPATIBLE): Define it.
 
 Sun May 31 06:38:27 1992  Michael Tiemann  (tiemann@cygnus.com)

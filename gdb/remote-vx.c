@@ -712,7 +712,7 @@ vx_load_command (arg_string, from_tty)
   immediate_quit--;
 
   /* FIXME, for now we ignore data_addr and bss_addr.  */
-  (void) symbol_file_add (arg_string, from_tty, text_addr, 0, 0);
+  (void) symbol_file_add (arg_string, from_tty, text_addr, 0, 0, 0);
 }
 
 #ifdef FIXME  /* Not ready for prime time */
@@ -1036,7 +1036,7 @@ add_symbol_stub (arg)
   struct ldfile *pLoadFile = (struct ldfile *)arg;
 
   printf("\t%s: ", pLoadFile->name);
-  (void) symbol_file_add (pLoadFile->name, 0, pLoadFile->txt_addr, 0, 0);
+  (void) symbol_file_add (pLoadFile->name, 0, pLoadFile->txt_addr, 0, 0, 0);
   printf ("ok\n");
   return 1;
 }
