@@ -48,6 +48,7 @@ udi-gdb.exp
 unix-gdb.exp
 unknown.exp
 vx-gdb.exp
+vxworks29k.exp
 
 Things-to-lose:
 
