@@ -1,3 +1,12 @@
+Tue Feb  8 15:55:50 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* coff-alpha.c (reloc_nil): New function.
+	(alpha_howto_table): Use it as special_function to prevent certain
+	relocs from being adjusted by bfd_perform_relocation.  IGNORE
+	reloc should be partial_inplace.
+	(alpha_ecoff_get_relocated_section_contents): Accept a LITERAL
+	reloc on an "ldl" instruction too.
+
 Tue Feb  8 00:32:28 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* elf32-hppa.c (CURRENT_STUB_OFFSET, hppa_elf_build_arg_reloc_stub,

@@ -1,5 +1,5 @@
 /* BFD back-end for ALPHA Extended-Coff files.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
    Modified from coff-mips.c by Steve Chamberlain <sac@cygnus.com> and
    Ian Lance Taylor <ian@cygnus.com>.
 
@@ -111,6 +111,18 @@ static boolean alpha_relocate_section PARAMS ((bfd *, struct bfd_link_info *,
 
 /* How to process the various reloc types.  */
 
+static bfd_reloc_status_type
+reloc_nil (abfd, reloc, sym, data, sec, output_bfd)
+     bfd *abfd;
+     arelent *reloc;
+     asymbol *sym;
+     PTR data;
+     asection *sec;
+     bfd *output_bfd;
+{
+  return bfd_reloc_ok;
+}
+
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
 #define MINUS_ONE	(((bfd_vma)0) - 1)
@@ -127,9 +139,9 @@ static reloc_howto_type alpha_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 0,			/* special_function */
+	 reloc_nil,		/* special_function */
 	 "IGNORE",		/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
 	 true),			/* pcrel_offset */
@@ -214,7 +226,7 @@ static reloc_howto_type alpha_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 0,			/* special_function */
+	 reloc_nil,		/* special_function */
 	 "LITUSE",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -239,7 +251,7 @@ static reloc_howto_type alpha_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 0,			/* special_function */
+	 reloc_nil,		/* special_function */
 	 "GPDISP",		/* name */
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -827,9 +839,10 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	    unsigned long insn;
 
 	    /* I believe that the LITERAL reloc will only apply to a
-	       ldq instruction, so check my assumption.  */
+	       ldq or ldl instruction, so check my assumption.  */
 	    insn = bfd_get_32 (input_bfd, data + rel->address);
-	    BFD_ASSERT (((insn >> 26) & 0x3f) == 0x29);
+	    BFD_ASSERT (((insn >> 26) & 0x3f) == 0x29
+			|| ((insn >> 26) & 0x3f) == 0x28);
 
 	    rel->addend -= gp;
 	    r = bfd_perform_relocation (input_bfd, rel, data, input_section,
@@ -1852,10 +1865,10 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 {
   /* COFF backend structure.  */
   {
-    (void (*) PARAMS ((bfd *,PTR,int,int,PTR))) bfd_void, /* aux_in */
+    (void (*) PARAMS ((bfd *,PTR,int,int,int,int,PTR))) bfd_void, /* aux_in */
     (void (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* sym_in */
     (void (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* lineno_in */
-    (unsigned (*) PARAMS ((bfd *,PTR,int,int,PTR))) bfd_void, /* aux_out */
+    (unsigned (*) PARAMS ((bfd *,PTR,int,int,int,int,PTR)))bfd_void,/*aux_out*/
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* sym_out */
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* lineno_out */
     (unsigned (*) PARAMS ((bfd *,PTR,PTR))) bfd_void, /* reloc_out */
