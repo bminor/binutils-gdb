@@ -1,3 +1,7 @@
+2003-07-29  Michael Meissner  <gnu@the-meissners.org>
+
+	* MAINTAINERS: Updated my email address.
+
 2003-07-29  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c: Update to Iso C.
