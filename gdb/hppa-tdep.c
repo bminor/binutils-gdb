@@ -437,13 +437,28 @@ frame_chain_valid (chain, thisframe)
   if (!chain)
     return 0;
 
-  msym = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
+  if (use_unwind)
+    {
 
-  if (msym
-      && (strcmp (SYMBOL_NAME (msym), "_start") == 0))
-    return 0;
+      struct unwind_table_entry *u;
+
+      u = find_unwind_entry (thisframe->pc);
+
+      if (u && (u->Save_SP || u->Total_frame_size))
+	return 1;
+      else
+	return 0;
+    }
   else
-    return 1;
+    {
+      msym = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
+
+      if (msym
+	  && (strcmp (SYMBOL_NAME (msym), "_start") == 0))
+	return 0;
+      else
+	return 1;
+    }
 }
 
 /*
