@@ -1,3 +1,8 @@
+202001-10-15  Jim Ingham  <jingham@inghji.apple.com>
+
+        * valarith.c (value_sub): Don't pass a raw type to
+        value_from_pointer, it has to go through check_typedef first.
+
 2001-10-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (fallbackdefault): Set to one when predefault is
