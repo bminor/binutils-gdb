@@ -46,6 +46,7 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
+
 proc test_return_simple {} {
     global mi_gdb_prompt
     global hex

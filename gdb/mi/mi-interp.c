@@ -129,7 +129,6 @@ mi_interpreter_resume (void *data)
   /* Replace all the hooks that we know about.  There really needs to
      be a better way of doing this... */
   clear_interpreter_hooks ();
-  set_gdb_event_hooks (&mi_event_handlers);
 
   show_load_progress = mi_load_progress;
 

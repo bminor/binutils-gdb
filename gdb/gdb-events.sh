@@ -86,6 +86,7 @@ f:void:selected_thread_changed:int thread_num:thread_num
 #*:void:warning_hook:const char *string, va_list args:string, args
 #*:void:target_output_hook:char *b:b
 #*:void:interactive_hook:void
+#*:void:registers_changed_hook:void
 #*:void:readline_begin_hook:char *format, ...:format
 #*:char *:readline_hook:char *prompt:prompt
 #*:void:readline_end_hook:void
@@ -100,6 +101,7 @@ f:void:selected_thread_changed:int thread_num:thread_num
 #*:int:gdb_load_progress_hook:char *section, unsigned long num:section, num
 #*:void:pre_add_symbol_hook:char *name:name
 #*:void:post_add_symbol_hook:void
+#*:void:selected_frame_level_changed_hook:int level:level
 #*:int:gdb_loop_hook:int signo:signo
 ##*:void:solib_create_inferior_hook:void
 ##*:void:xcoff_relocate_symtab_hook:unsigned int

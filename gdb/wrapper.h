@@ -21,10 +21,8 @@
 #include "gdb.h"
 
 struct value;
-struct block;
 struct expression;
-struct ui_out;
-struct type;
+struct block;
 
 /* Use this struct to pass arguments to wrapper routines. */
 struct gdb_wrapper_arguments;
@@ -49,4 +47,5 @@ extern enum gdb_rc gdb_value_struct_elt (struct ui_out *uiout, struct value **re
 extern int gdb_value_ind (struct value *val, struct value ** rval);
 
 extern int gdb_parse_and_eval_type (char *, int, struct type **);
+
 #endif /* WRAPPER_H */

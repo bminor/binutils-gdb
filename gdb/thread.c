@@ -694,12 +694,10 @@ do_captured_thread_select (struct ui_out *uiout,
 			   void *tidstr)
 {
   int num;
-  ptid_t old_ptid;
   struct thread_info *tp;
 
   num = value_as_long (parse_and_eval (tidstr));
 
-  old_ptid = inferior_ptid;
   tp = find_thread_id (num);
 
   if (!tp)
@@ -722,10 +720,6 @@ do_captured_thread_select (struct ui_out *uiout,
 
   print_stack_frame (deprecated_selected_frame,
 		     frame_relative_level (deprecated_selected_frame), 1);
-
-  if (!ptid_equal (old_ptid, inferior_ptid))
-    selected_thread_changed_event (pid_to_thread_id (inferior_ptid));
-
   return GDB_RC_OK;
 }
 

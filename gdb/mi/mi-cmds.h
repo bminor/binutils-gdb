@@ -27,7 +27,7 @@
 enum mi_cmd_result
   {
     /* Report the command as ``done''.  Display both the ``NNN^done''
-       message and the completion prompt. */
+       message and the completion prompt.  */
     MI_CMD_DONE = 0,
     /* The command is still running in the forground.  Main loop should
        display the completion prompt. */
@@ -130,4 +130,5 @@ extern struct ui_file *raw_stdout;
 extern char *mi_error_message;
 extern void mi_error_last_message (void);
 extern void mi_execute_command (char *cmd, int from_tty);
+
 #endif
