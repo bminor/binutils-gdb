@@ -1,5 +1,5 @@
 # Makefile template for Configure for the i960 simulator
-# Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 1998, 1999, 2004 Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
 #
 # This file is part of GDB, the GNU debugger.
@@ -125,6 +125,6 @@ stamp-desc: $(CGEN_READ_SCM) $(CGEN_DESC_SCM) \
 		$(CGEN_CPU_DIR)/sparc.cpu $(CGEN_CPU_DIR)/sparccom.cpu $(CGEN_CPU_DIR)/i960.cpu $(CGEN_CPU_DIR)/i960.cpu
 	$(MAKE) cgen-desc $(CGEN_FLAGS_TO_PASS) \
 	  cpu=i960 mach=all \
-	  archfile=$(CGEN_CPU_DIR)/i960.cpu
+	  archfile=$(CGEN_CPU_DIR)/i960.cpu opcfile=$(CGEN_CPU_DIR)/i960.opc
 	touch stamp-desc
 i960-desc.c i960-desc.h i960-opc.h: $(CGEN_MAINT) stamp-desc
