@@ -1992,7 +1992,6 @@ bpstat_do_actions (bpstat *bsp)
 {
   bpstat bs;
   struct cleanup *old_chain;
-  struct command_line *cmd;
 
   /* Avoid endless recursion if a `source' command is contained
      in bs->commands.  */
@@ -2017,7 +2016,23 @@ top:
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
+      struct command_line *cmd;
+      struct cleanup *this_cmd_tree_chain;
+
+      /* Take ownership of the BSP's command tree, if it has one.
+
+         The command tree could legitimately contain commands like
+         'step' and 'next', which call clear_proceed_status, which
+         frees stop_bpstat's command tree.  To make sure this doesn't
+         free the tree we're executing out from under us, we need to
+         take ownership of the tree ourselves.  Since a given bpstat's
+         commands are only executed once, we don't need to copy it; we
+         can clear the pointer in the bpstat, and make sure we free
+         the tree when we're done.  */
       cmd = bs->commands;
+      bs->commands = 0;
+      this_cmd_tree_chain = make_cleanup_free_command_lines (&cmd);
+
       while (cmd != NULL)
 	{
 	  execute_control_command (cmd);
@@ -2027,14 +2042,16 @@ top:
 	  else
 	    cmd = cmd->next;
 	}
+
+      /* We can free this command tree now.  */
+      do_cleanups (this_cmd_tree_chain);
+
       if (breakpoint_proceeded)
 	/* The inferior is proceeded by the command; bomb out now.
 	   The bpstat chain has been blown away by wait_for_inferior.
 	   But since execution has stopped again, there is a new bpstat
 	   to look at, so start over.  */
 	goto top;
-      else
-	free_command_lines (&bs->commands);
     }
   do_cleanups (old_chain);
 }

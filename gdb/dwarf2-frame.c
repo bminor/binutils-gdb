@@ -557,28 +557,19 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
   }
 
   /* Go through the DWARF2 CFI generated table and save its register
-     location information in the cache.  */
+     location information in the cache.  Note that we don't skip the
+     return address column; it's perfectly all right for it to
+     correspond to a real register.  If it doesn't correspond to a
+     real register, or if we shouldn't treat it as such,
+     DWARF2_REG_TO_REGNUM should be defined to return a number outside
+     the range [0, NUM_REGS).  */
   {
     int column;		/* CFI speak for "register number".  */
 
     for (column = 0; column < fs->regs.num_regs; column++)
       {
-	int regnum;
-	
-	/* Skip the return address column.  */
-	if (column == fs->retaddr_column)
-	  /* NOTE: cagney/2003-06-07: Is this right?  What if
-	     RETADDR_COLUMN corresponds to a real register (and,
-	     worse, that isn't the PC_REGNUM)?  I'm guessing that the
-	     PC_REGNUM further down is trying to handle this.  That
-	     can't be right though; PC_REGNUM may not be valid (it can
-	     be negative).  I think, instead when RETADDR_COLUM isn't
-	     a real register, it should map itself onto
-	     frame_pc_unwind.  */
-	  continue;
-
 	/* Use the GDB register number as the destination index.  */
-	regnum = DWARF2_REG_TO_REGNUM (column);
+	int regnum = DWARF2_REG_TO_REGNUM (column);
 
 	/* If there's no corresponding GDB register, ignore it.  */
 	if (regnum < 0 || regnum >= num_regs)

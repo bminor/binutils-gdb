@@ -1,3 +1,24 @@
+2003-12-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Don't skip the return
+	address column.
+
+2003-12-21  Jim Blandy  <jimb@redhat.com>
+
+	* breakpoint.c (bpstat_do_actions): To ensure that
+	clear_proceed_status doesn't free the command tree we're
+	evaluating out from under us, zero the bpstat's pointer to it, and
+	take care of freeing it ourselves.
+	* cli/cli-script.c (make_cleanup_free_command_lines): Make this
+	function externally visible.
+	* cli/cli-script.h (make_cleanup_free_command_lines): New
+	declaration.
+
+2003-12-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c (x86_64_dwarf_regmap): Map the Return Address to
+	RIP.
+
 2003-12-18  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* hppa-tdep.c (hppa_gdbarch_init): Set long double floating

@@ -47,6 +47,8 @@ extern void print_command_lines (struct ui_out *,
 
 extern struct command_line * copy_command_lines (struct command_line *cmds);
 
+struct cleanup *make_cleanup_free_command_lines (struct command_line **arg);
+
 /* Exported to gdb/infrun.c */
 
 extern void execute_user_command (struct cmd_list_element *c, char *args);
