@@ -116,7 +116,7 @@ struct gdbarch_tdep
 #if GDB_MULTI_ARCH
 #undef MIPS_EABI
 #define MIPS_EABI (gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI32 \
-		   || gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI32)
+		   || gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_EABI64)
 #endif
 
 #if GDB_MULTI_ARCH
