@@ -38,9 +38,9 @@
 
 @c This is a dir.info fragment to support semi-automated addition of
 @c manuals to an info tree.
-@dircategory Programming & development tools.
+@dircategory Software development
 @direntry
-* Gdb: (gdb).                     The @sc{gnu} debugger.
+* Gdb: (gdb).                     The GNU debugger.
 @end direntry
 
 @ifinfo
