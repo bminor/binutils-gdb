@@ -1336,12 +1336,12 @@ insert_jumpflags (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_unopmacro (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg ATTRIBUTE_UNUSED;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg ATTRIBUTE_UNUSED;
 {
   insn |= ((insn >> ARC_SHIFT_REGB) & ARC_MASK_REG) << operand->shift;
   return insn;
@@ -1351,12 +1351,12 @@ insert_unopmacro (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_reladdr (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value;
-  const char **errmsg;
+     arc_insn insn;
+     const struct arc_operand *operand;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value;
+     const char **errmsg;
 {
   if (value & 3)
     *errmsg = "branch address not on 4 byte boundary";
@@ -1380,12 +1380,12 @@ insert_reladdr (insn, operand, mods, reg, value, errmsg)
 
 static arc_insn
 insert_absaddr (insn, operand, mods, reg, value, errmsg)
-  arc_insn insn;
-  const struct arc_operand *operand ATTRIBUTE_UNUSED;
-  int mods ATTRIBUTE_UNUSED;
-  const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
-  long value ATTRIBUTE_UNUSED;
-  const char **errmsg;
+     arc_insn insn;
+     const struct arc_operand *operand ATTRIBUTE_UNUSED;
+     int mods ATTRIBUTE_UNUSED;
+     const struct arc_operand_value *reg ATTRIBUTE_UNUSED;
+     long value ATTRIBUTE_UNUSED;
+     const char **errmsg;
 {
   if (limm_p)
     {

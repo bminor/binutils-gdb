@@ -1,3 +1,7 @@
+2001-05-23  Alan Modra  <amodra@one.net.au>
+
+	* arc-opc.c: Whitespace changes.
+
 2001-05-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris-opc.c (cris_spec_regs): Add missing initializer field for
@@ -13,7 +17,7 @@
 	(std_reg_names): Replace by mips32_reg_names and mips64_reg_names.
 	(print_insn_arg): Remove $ prefix of register names.
 	(set_mips_isa_type): Remove.
-	(imps_isa_type): New function.
+	(mips_isa_type): New function.
 	(get_mips_isa): New Function.
 	(print_insn_mips): Rename _print_insn_mips.
 	(_print_insn_mips): New function, contains code which was
