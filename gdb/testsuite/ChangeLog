@@ -1,3 +1,7 @@
+2000-10-24  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.base/commands.exp: Break up long lines, and re-indent.
+
 2000-10-19  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/gdbserver.exp:  Rewritten from the ground up, to make it

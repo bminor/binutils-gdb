@@ -45,9 +45,11 @@ proc gdbvar_simple_if_test {} {
 
     gdb_test "set \$foo = 0" "" "set foo in gdbvar_simple_if_test"
     # All this test should do is print 0xdeadbeef once.
-    gdb_test "if \$foo == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xdeadbeef" "gdbvar_simple_if_test #1"
+    gdb_test "if \$foo == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
+	    "\\\$\[0-9\]* = 0xdeadbeef" "gdbvar_simple_if_test #1"
     # All this test should do is print 0xfeedface once.
-    gdb_test "if \$foo == 0\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xfeedface" "gdbvar_simple_if_test #2"
+    gdb_test "if \$foo == 0\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
+	    "\\\$\[0-9\]* = 0xfeedface" "gdbvar_simple_if_test #2"
 }
 
 proc gdbvar_simple_while_test {} {
@@ -55,7 +57,9 @@ proc gdbvar_simple_while_test {} {
 
     gdb_test "set \$foo = 5" "" "set foo in gdbvar_simple_while_test"
     # This test should print 0xfeedface five times.
-    gdb_test "while \$foo > 0\np/x 0xfeedface\nset \$foo -= 1\nend" "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "gdbvar_simple_while_test #1"
+    gdb_test "while \$foo > 0\np/x 0xfeedface\nset \$foo -= 1\nend" \
+	    "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
+	    "gdbvar_simple_while_test #1"
 }
 
 proc gdbvar_complex_if_while_test {} {
@@ -63,7 +67,9 @@ proc gdbvar_complex_if_while_test {} {
 
     gdb_test "set \$foo = 4" "" "set foo in gdbvar complex_if_while_test"
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while \$foo > 0\nset \$foo -= 1\nif \(\$foo % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "gdbvar_complex_if_while_test #1"
+    gdb_test "while \$foo > 0\nset \$foo -= 1\nif \(\$foo % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" \
+	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
+	    "gdbvar_complex_if_while_test #1"
 }
 
 proc progvar_simple_if_test {} {
@@ -75,13 +81,17 @@ proc progvar_simple_if_test {} {
     }
 
     if { ![runto factorial] } then { gdb_suppress_tests; }
-    # Don't depend upon argument passing, since most simulators don't currently
-    # support it.  Bash value variable to be what we want.
+    # Don't depend upon argument passing, since most simulators don't
+    # currently support it.  Bash value variable to be what we want.
     gdb_test "p value=5" "" "set value to 5 in progvar_simple_if_test #1"
     # All this test should do is print 0xdeadbeef once.
-    gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xdeadbeef" "progvar_simple_if_test #1"
+    gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
+	    "\\\$\[0-9\]* = 0xdeadbeef" \
+	    "progvar_simple_if_test #1"
     # All this test should do is print 0xfeedface once.
-    gdb_test "if value == 5\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xfeedface" "progvar_simple_if_test #2"
+    gdb_test "if value == 5\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
+	    "\\\$\[0-9\]* = 0xfeedface" \
+	    "progvar_simple_if_test #2"
     gdb_stop_suppressing_tests;
 }
 
@@ -95,11 +105,13 @@ proc progvar_simple_while_test {} {
 
     gdb_test "set args 5" "" "set args in progvar_simple_while_test"
     if { ![runto factorial] } then { gdb_suppress_tests }
-    # Don't depend upon argument passing, since most simulators don't currently
-    # support it.  Bash value variable to be what we want.
+    # Don't depend upon argument passing, since most simulators don't
+    # currently support it.  Bash value variable to be what we want.
     gdb_test "p value=5" "" "set value to 5 in progvar_simple_if_test #2"
     # This test should print 0xfeedface five times.
-    gdb_test "while value > 0\np/x 0xfeedface\nset value -= 1\nend" "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "progvar_simple_while_test #1"
+    gdb_test "while value > 0\np/x 0xfeedface\nset value -= 1\nend" \
+	    "\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
+	    "progvar_simple_while_test #1"
     gdb_stop_suppressing_tests;
 }
 
@@ -113,11 +125,13 @@ proc progvar_complex_if_while_test {} {
 
     gdb_test "set args 4" "" "set args in progvar_complex_if_while_test"
     if { ![runto factorial] } then { gdb_suppress_tests }
-    # Don't depend upon argument passing, since most simulators don't currently
-    # support it.  Bash value variable to be what we want.
+    # Don't depend upon argument passing, since most simulators don't
+    # currently support it.  Bash value variable to be what we want.
     gdb_test "p value=4" "" "set value to 4 in progvar_simple_if_test"
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "progvar_complex_if_while_test #1"
+    gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend" \
+	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
+	    "progvar_complex_if_while_test #1"
     gdb_stop_suppressing_tests;
 }
 
@@ -129,8 +143,8 @@ proc if_while_breakpoint_command_test {} {
 
     gdb_test "set args 5" "" "set args in if_while_breakpoint_command_test"
     if { ![runto factorial] } then { gdb_suppress_tests }
-    # Don't depend upon argument passing, since most simulators don't currently
-    # support it.  Bash value variable to be what we want.
+    # Don't depend upon argument passing, since most simulators don't
+    # currently support it.  Bash value variable to be what we want.
     gdb_test "p value=5" "" "set value to 5 in progvar_simple_if_test"
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #1"
@@ -145,9 +159,15 @@ proc if_while_breakpoint_command_test {} {
 	}
     }
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" "" "commands part 2 in if_while_breakpoint_command_test"
-    gdb_test "continue" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "if_while_breakpoint_command_test #1"
-   gdb_test "info break" "while.*set.*if.*p/x.*else.*p/x.*end.*" "info break in if_while_breakpoint_command_test"
+    gdb_test "while value > 0\nset value -= 1\nif \(value % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" \
+	    "" \
+	    "commands part 2 in if_while_breakpoint_command_test"
+    gdb_test "continue" \
+	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
+	    "if_while_breakpoint_command_test #1"
+   gdb_test "info break" \
+	   "while.*set.*if.*p/x.*else.*p/x.*end.*" \
+	   "info break in if_while_breakpoint_command_test"
     gdb_stop_suppressing_tests;
 }
 
@@ -160,8 +180,8 @@ proc infrun_breakpoint_command_test {} {
 
     gdb_test "set args 6" "" "set args in progvar_simple_while_test"
     if { ![runto factorial] } then { gdb_suppress_tests }
-    # Don't depend upon argument passing, since most simulators don't currently
-    # support it.  Bash value variable to be what we want.
+    # Don't depend upon argument passing, since most simulators don't
+    # currently support it.  Bash value variable to be what we want.
     gdb_test "p value=6" "" "set value to 6 in progvar_simple_if_test #1"
     delete_breakpoints
     gdb_test "break factorial if value == 5" "Breakpoint.*at.*"
@@ -184,11 +204,11 @@ proc infrun_breakpoint_command_test {} {
 
     if { [istarget "hppa*-hp-hpux*"] } {
 	gdb_test "continue" \
-	    "Continuing.*.*.*Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*\[0-9\]*\[      \]*if \\(value > 1\\) \{.*\[0-9\]*\[      \]*value \\*= factorial \\(value - 1\\);.*" \
-	    "continue in infrun_breakpoint_command_test"
+		"Continuing.*.*.*Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*\[0-9\]*\[      \]*if \\(value > 1\\) \{.*\[0-9\]*\[      \]*value \\*= factorial \\(value - 1\\);.*" \
+		"continue in infrun_breakpoint_command_test"
     } else {
 	gdb_test "continue" \
-	    "Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*
+		"Breakpoint \[0-9\]*, factorial \\(value=5\\).*at.*
 \[0-9\]*\[ 	\]*if \\(value > 1\\) \{.*
 \[0-9\]*\[ 	\]*value \\*= factorial \\(value - 1\\);.*
 factorial \\(value=4\\) at.*\[0-9\]*\[ 	\]*if \\(value > 1\\) \{.*
@@ -200,7 +220,7 @@ factorial \\(value=3\\) at .*
 #2  \[0-9a-fx\]* in factorial \\(value=5\\).*
 #3  \[0-9a-fx\]* in factorial \\(value=6\\).*
 #4  \[0-9a-fx\]* in main \\(.*\\).*" \
-	    "continue in infrun_breakpoint_command_test";
+		"continue in infrun_breakpoint_command_test";
     }
 
     gdb_stop_suppressing_tests;
@@ -214,14 +234,15 @@ proc breakpoint_command_test {} {
 
     gdb_test "set args 6" "" "set args in breakpoint_command_test"
     if { ![runto factorial] } then { gdb_suppress_tests; }
-    # Don't depend upon argument passing, since most simulators don't currently
-    # support it.  Bash value variable to be what we want.
+    # Don't depend upon argument passing, since most simulators don't
+    # currently support it.  Bash value variable to be what we want.
     gdb_test "p value=6" "" "set value to 6 in progvar_simple_if_test #2"
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #2"
     gdb_test "commands\nprintf \"Now the value is %d\\n\", value\nend" \
 	"End with.*" "commands in breakpoint_command_test"
-    gdb_test "continue" "Breakpoint \[0-9\]*, factorial.*Now the value is 5" \
+    gdb_test "continue" \
+	    "Breakpoint \[0-9\]*, factorial.*Now the value is 5" \
 	"continue in breakpoint_command_test"
     gdb_test "print value" " = 5" "print value in breakpoint_command_test"
     gdb_stop_suppressing_tests;
@@ -243,10 +264,16 @@ proc user_defined_command_test {} {
 	}
     }
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
-    gdb_test "while \$arg0 > 0\nset \$arg0 -= 1\nif \(\$arg0 % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" "" "enter commands in user_defined_command_test"
+    gdb_test "while \$arg0 > 0\nset \$arg0 -= 1\nif \(\$arg0 % 2\) == 1\np/x 0xdeadbeef\nelse\np/x 0xfeedface\nend\nend\nend" \
+	    "" \
+	    "enter commands in user_defined_command_test"
 
-    gdb_test "mycommand \$foo" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "execute user defined command in user_defined_command_test"
-   gdb_test "show user mycommand" "while.*set.*if.*p/x.*else.*p/x.*end.*" "display user command in user_defined_command_test"
+    gdb_test "mycommand \$foo" \
+	    "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" \
+	    "execute user defined command in user_defined_command_test"
+   gdb_test "show user mycommand" \
+	   "while.*set.*if.*p/x.*else.*p/x.*end.*" \
+	   "display user command in user_defined_command_test"
 }
 
 proc watchpoint_command_test {} {
@@ -290,41 +317,36 @@ proc watchpoint_command_test {} {
 
     send_gdb "commands $wp_id\n"
     gdb_expect {
-      -re "Type commands for when breakpoint $wp_id is hit, one per line.*>"\
-              {pass "begin commands on watch"}
-      -re "$gdb_prompt $"\
-              {fail "begin commands on watch"}
-      timeout {fail "(timeout) begin commands on watch"}
+      -re "Type commands for when breakpoint $wp_id is hit, one per line.*>" {
+	  pass "begin commands on watch"
+      }
+      -re "$gdb_prompt $" {fail "begin commands on watch"}
+      timeout             {fail "(timeout) begin commands on watch"}
     }
     send_gdb "print value\n"
     gdb_expect {
-      -re ">"\
-              {pass "add print command to watch"}
-      -re "$gdb_prompt $"\
-              {fail "add print command to watch"}
-      timeout {fail "(timeout) add print command to watch"}
+	-re ">"               {pass "add print command to watch"}
+	-re "$gdb_prompt $"   {fail "add print command to watch"}
+	timeout               {fail "(timeout) add print command to watch"}
     }
     send_gdb "continue\n"
     gdb_expect {
-      -re ">"\
-              {pass "add continue command to watch"}
-      -re "$gdb_prompt $"\
-              {fail "add continue command to watch"}
-      timeout {fail "(timeout) add continue command to watch"}
+	-re ">"               {pass "add continue command to watch"}
+	-re "$gdb_prompt $"   {fail "add continue command to watch"}
+	timeout               {fail "(timeout) add continue command to watch"}
     }
     send_gdb "end\n"
     gdb_expect {
-      -re "$gdb_prompt $"\
-              {pass "begin commands on watch"}
-      timeout {fail "(timeout) begin commands on watch"}
+	-re "$gdb_prompt $"   {pass "begin commands on watch"}
+	timeout               {fail "(timeout) begin commands on watch"}
     }
     send_gdb "continue\n"
     gdb_expect {
-      -re "Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:57.*$gdb_prompt $"\
-              {pass "continue with watch"}
-      -re "$gdb_prompt $"\
-              {fail "continue with watch"}
-      timeout {fail "(timeout) continue with watch"}
+	-re "Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:57.*$gdb_prompt $" {
+	    pass "continue with watch"
+	}
+	-re "$gdb_prompt $"   {fail "continue with watch"}
+	timeout               {fail "(timeout) continue with watch"}
     }
 }
 
@@ -337,39 +359,56 @@ proc test_command_prompt_position {} {
     }
 
     if { ![runto factorial] } then { gdb_suppress_tests; }
-    # Don't depend upon argument passing, since most simulators don't currently
-    # support it.  Bash value variable to be what we want.
+    # Don't depend upon argument passing, since most simulators don't
+    # currently support it.  Bash value variable to be what we want.
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #2"
     gdb_test "p value=5" "" "set value to 5 in test_command_prompt_position"
     # All this test should do is print 0xdeadbeef once.
-    gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" "\\\$\[0-9\]* = 0xdeadbeef" "if test in test_command_prompt_position"
-
-# Now let's test for the correct position of the '>' in gdb's prompt for commands.
-# It should be at the beginning of the line, and not after one space.
+    gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
+	    "\\\$\[0-9\]* = 0xdeadbeef" \
+	    "if test in test_command_prompt_position"
+    
+    # Now let's test for the correct position of the '>' in gdb's
+    # prompt for commands.  It should be at the beginning of the line,
+    # and not after one space.
 
     send_gdb "commands\n"
     gdb_expect {
-	    -re "Type commands.*End with.*\[\r\n\]>$" \
-                { send_gdb "printf \"Now the value is %d\\n\", value\n"
-	          gdb_expect {
-                          -re "^printf.*value\r\n>$" \
-			       { send_gdb "end\n"
-                                 gdb_expect {
-			               -re "^end\r\n$gdb_prompt $" { pass "> OK in test_command_prompt_position" }
-				       -re ".*$gdb_prompt $" { fail "some other message in test_command_prompt_position" }
-				       timeout  { fail "(timeout) 1 in test_command_prompt_position" }
-				 }
-			       }
-			   -re "^ >$" { fail "> not OK in test_command_prompt_position" }
-			   -re ".*$gdb_prompt $"   { fail "wrong message in test_command_prompt_position" }
-			   timeout    { fail "(timeout) 2 in test_command_prompt_position " }
-		       }
-		 }
-		 -re "Type commands.*End with.*\[\r\n\] >$" { fail "prompt not OK in test_command_prompt_position" }
-	   -re ".*$gdb_prompt $" { fail "commands in test_command_prompt_position" }
-	   timeout { fail "(timeout) 3 commands in test_command_prompt_position" }
+	-re "Type commands.*End with.*\[\r\n\]>$" { 
+	    send_gdb "printf \"Now the value is %d\\n\", value\n"
+	    gdb_expect {
+		-re "^printf.*value\r\n>$" {
+		    send_gdb "end\n"
+		    gdb_expect {
+			-re "^end\r\n$gdb_prompt $" { 
+			    pass "> OK in test_command_prompt_position" 
+			}
+			-re ".*$gdb_prompt $" { 
+			    fail "some other message in test_command_prompt_position" 
+			}
+			timeout  { 
+			    fail "(timeout) 1 in test_command_prompt_position"
+			}
+		    }
+		}
+		-re "^ >$" { fail "> not OK in test_command_prompt_position" }
+		-re ".*$gdb_prompt $"   { 
+		    fail "wrong message in test_command_prompt_position" 
+		}
+		timeout    { 
+		    fail "(timeout) 2 in test_command_prompt_position " 
+		}
+	    }
 	}
+	-re "Type commands.*End with.*\[\r\n\] >$" { 
+	    fail "prompt not OK in test_command_prompt_position" 
+	}
+	-re ".*$gdb_prompt $" { 
+	    fail "commands in test_command_prompt_position" 
+	}
+	timeout { fail "(timeout) 3 commands in test_command_prompt_position" }
+    }
 
     gdb_stop_suppressing_tests;
 }
@@ -377,27 +416,39 @@ proc test_command_prompt_position {} {
 
 
 proc deprecated_command_test {} {
-    
-    
     gdb_test "maintenance deprecate blah" "Can't find command.*" \
           "tried to deprecate non-existsing command"
 
     gdb_test "maintenance deprecate p \"new_p\"" ""
-    gdb_test "p 5" "Warning: 'p', an alias for the command 'print' is deprecated.*Use 'new_p'.*" "p deprecated warning, with replacement"
+    gdb_test "p 5" \
+	    "Warning: 'p', an alias for the command 'print' is deprecated.*Use 'new_p'.*" \
+	    "p deprecated warning, with replacement"
     gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away"
 
     gdb_test "maintenance deprecate p \"new_p\"" ""
     gdb_test "maintenance deprecate print \"new_print\"" ""
-    gdb_test "p 5" "Warning: command 'print' \\(p\\) is deprecated.*Use 'new_print'.*" "both alias and command are deprecated"
+    gdb_test "p 5" \
+	    "Warning: command 'print' \\(p\\) is deprecated.*Use 'new_print'.*" \
+	    "both alias and command are deprecated"
     gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away"
 
-    gdb_test "maintenance deprecate set remote memory-read-packet-size \"srm\" " "" "deprecate long comamnd"
-    gdb_test "set remote memory-read-packet-size" "Warning: command 'set remote memory-read-packet-size' is deprecated.*Use 'srm'.*" "long command deprecated"
+    gdb_test "maintenance deprecate set remote memory-read-packet-size \"srm\" " \
+	    "" \
+	    "deprecate long comamnd"
+    gdb_test "set remote memory-read-packet-size" \
+	    "Warning: command 'set remote memory-read-packet-size' is deprecated.*Use 'srm'.*" \
+	    "long command deprecated"
 
-    gdb_test "maintenance deprecate set remote memory-read-packet-size" "" "deprecate long comamnd"
-    gdb_test "set remote memory-read-packet-size" "Warning: command 'set remote memory-read-packet-size' is deprecated.*No alternative known.*" "long command deprecated with no alternative."
+    gdb_test "maintenance deprecate set remote memory-read-packet-size" \
+	    "" \
+	    "deprecate long comamnd"
+    gdb_test "set remote memory-read-packet-size" \
+	    "Warning: command 'set remote memory-read-packet-size' is deprecated.*No alternative known.*" \
+	    "long command deprecated with no alternative."
 
-    gdb_test "maintenance deprecate" "\"maintenance deprecate\".*" "deprecate with no arguments"
+    gdb_test "maintenance deprecate" \
+	    "\"maintenance deprecate\".*" \
+	    "deprecate with no arguments"
 }
 
 
