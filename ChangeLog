@@ -1,4 +1,12 @@
+Wed Oct 26 16:19:35 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config.sub: Update for recent FSF changes.  Remove obsolete
+	h8300hds entry.  Add -windows* and -osx as basic os.  Minor
+	spacing changes.
+
 Thu Oct 20 18:41:56 1994  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* configure.in (target_libs):  Remove libstdc++ for libg++-2.6.1.
 
 	* config.guess:  Merge with FSF.
 	* configure.in:  Match on i?86-ncr-sysv4.3, not i?86-ncr-sysv43.
