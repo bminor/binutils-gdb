@@ -1,3 +1,7 @@
+2002-05-16  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* config/tc-avr.c (mcu_types): Update for new devices.
+
 2002-05-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (macro): Warn about wrong la/dla use.

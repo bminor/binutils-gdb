@@ -75,8 +75,9 @@ static struct mcu_type_s mcu_types[] =
   {"at90s2313", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s2323", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s2333", AVR_ISA_2xxx,     bfd_mach_avr2}, /* XXX -> 4433 */
-  {"attiny22" , AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s2343", AVR_ISA_2xxx,     bfd_mach_avr2},
+  {"attiny22",  AVR_ISA_2xxx,     bfd_mach_avr2}, /* XXX -> 2343 */
+  {"attiny26",  AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s4433", AVR_ISA_2xxx,     bfd_mach_avr2},
   {"at90s4414", AVR_ISA_2xxx,     bfd_mach_avr2}, /* XXX -> 8515 */
   {"at90s4434", AVR_ISA_2xxx,     bfd_mach_avr2}, /* XXX -> 8535 */
@@ -86,18 +87,20 @@ static struct mcu_type_s mcu_types[] =
   {"atmega603", AVR_ISA_M603,     bfd_mach_avr3}, /* XXX -> m103 */
   {"atmega103", AVR_ISA_M103,     bfd_mach_avr3},
   {"at43usb320",AVR_ISA_M103,     bfd_mach_avr3},
+  {"at43usb355",AVR_ISA_M603,     bfd_mach_avr3},
   {"at76c711",  AVR_ISA_M603,     bfd_mach_avr3},
   {"atmega8",   AVR_ISA_M8,       bfd_mach_avr4},
   {"atmega83",  AVR_ISA_M8,       bfd_mach_avr4}, /* XXX -> m163 */
   {"atmega85",  AVR_ISA_M8,       bfd_mach_avr4}, /* XXX -> m8 */
+  {"atmega8515",AVR_ISA_M8,       bfd_mach_avr4},
   {"atmega16",  AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega161", AVR_ISA_M161,     bfd_mach_avr5},
+  {"atmega162", AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega163", AVR_ISA_M161,     bfd_mach_avr5},
   {"atmega32",  AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega323", AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega64",  AVR_ISA_M323,     bfd_mach_avr5},
   {"atmega128", AVR_ISA_M128,     bfd_mach_avr5},
-  {"at43usb355",AVR_ISA_94K,      bfd_mach_avr5},
   {"at94k",     AVR_ISA_94K,      bfd_mach_avr5},
   {NULL, 0, 0}
 };
