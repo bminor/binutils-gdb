@@ -1,5 +1,8 @@
 2004-02-15  Andrew Cagney  <cagney@redhat.com>
 
+	* config/vax/tm-vaxbsd.h: Do not include "tm-vax.h".
+	* config/vax/tm-vax.h: Delete file.
+
 	* config/mips/tm-nbsd.h (SIGCONTEXT_PC_OFFSET): Delete macro.
 	* config/i386/tm-i386bsd.h (SIGCONTEXT_PC_OFFSET): Delete macro.
 	* config/arm/tm-linux.h (SIGCONTEXT_PC_OFFSET): Delete macro.
