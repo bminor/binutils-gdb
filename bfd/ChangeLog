@@ -1,3 +1,10 @@
+2000-09-02  H.J. Lu  <hjl@gnu.org>
+
+	* reloc.c (BFD_RELOC_SH_COPY, BFD_RELOC_SH_GLOB_DAT,
+	BFD_RELOC_SH_JMP_SLOT, BFD_RELOC_SH_RELATIVE,
+	BFD_RELOC_SH_GOTPC): Move them from the MIPS section to the SH
+	section.
+
 2000-09-02  Jason Eckhardt  <jle@cygnus.com>
 
 	* elf32-i860.c (bfd_elf32_bfd_is_local_label_name): Define macro.
