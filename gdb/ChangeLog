@@ -1,3 +1,9 @@
+Sat May  8 12:36:03 1993  Fred Fish  (fnf@cygnus.com)
+
+	* config/pa/xm-hppah.h (MALLOC_INCOMPATIBLE):  Define it, and
+	include declarations for malloc/realloc/free.  Both malloc and
+	realloc return 'void *' for non-ANSI compilations.
+
 Sat May  8 01:39:30 1993  (pes@regent.e-technik.tu-muenchen.de)
 
 	* coffread.c (read_coff_symtab): Don't fclose stream as it is no

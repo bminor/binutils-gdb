@@ -57,3 +57,16 @@ memcpy PARAMS ((void *, const void *, size_t));		/* 4.11.2.1 */
 extern void *
 memset PARAMS ((void *, int, size_t));			/* 4.11.6.1 */
 
+/* HP defines malloc and realloc as returning void *, even for non-ANSI
+   compilations (such as with the native compiler). */
+
+#define MALLOC_INCOMPATIBLE
+
+extern void *
+malloc PARAMS ((size_t));
+
+extern void *
+realloc PARAMS ((void *, size_t));
+
+extern void
+free PARAMS ((void *));
