@@ -1,5 +1,9 @@
 2003-10-06  Andrew Cagney  <cagney@redhat.com>
 
+	* MAINTAINERS: Mention that h8500, mn10200, and z8k were deleted.
+	No longer list PA as as obsolete candidate.  List m32r as
+	broken instead of obsolete.
+	
 	* config/nm-m3.h, config/h8500/h8500.mt: Delete obsolete files.
 	* config/h8500/tm-h8500.h, config/i386/nm-ptx4.h: Ditto.
 	* config/i386/nm-symmetry.h, config/i386/ptx.mh: Ditto.
