@@ -1,5 +1,10 @@
 Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* inflow.c (generic_mourn_inferior): Call reinit_frame_cache
+	instead	of doing it ourself.
+	* blockframe.c (reinit_frame_cache): Use code which was in
+	generic_mourn_inferior so we can use this function even when
+	we have switched targets.
 	* corelow.c (core_detach): Call reinit_frame_cache.
 	* target.c (target_detach): Don't call generic_mourn_inferior
 	(revert yesterday's change, now handled by core_detach).

@@ -186,10 +186,17 @@ flush_cached_frames ()
 void
 reinit_frame_cache ()
 {
-  FRAME fr = current_frame;
   flush_cached_frames ();
-  if (fr)
-    set_current_frame ( create_new_frame (read_fp (), read_pc ()));
+  if (target_has_stack)
+    {
+      set_current_frame (create_new_frame (read_fp (), read_pc ()));
+      select_frame (get_current_frame (), 0);
+    }
+  else
+    {
+      set_current_frame (0);
+      select_frame ((FRAME) 0, -1);
+    }
 }
 
 /* Return a structure containing various interesting information
@@ -262,7 +269,7 @@ struct frame_info *
 get_prev_frame_info (next_frame)
      FRAME next_frame;
 {
-  FRAME_ADDR address;
+  FRAME_ADDR address = 0;
   struct frame_info *prev;
   int fromleaf = 0;
   char *name;
@@ -725,7 +732,7 @@ find_pc_partial_function (pc, name, address, endaddr)
 }
 
 /* Return the innermost stack frame executing inside of BLOCK,
-   or zero if there is no such frame.  If BLOCK is NULL, just return NULL.  */
+   or NULL if there is no such frame.  If BLOCK is NULL, just return NULL.  */
 
 FRAME
 block_innermost_frame (block)
@@ -733,11 +740,14 @@ block_innermost_frame (block)
 {
   struct frame_info *fi;
   register FRAME frame;
-  register CORE_ADDR start = BLOCK_START (block);
-  register CORE_ADDR end = BLOCK_END (block);
+  register CORE_ADDR start;
+  register CORE_ADDR end;
 
   if (block == NULL)
     return NULL;
+
+  start = BLOCK_START (block);
+  end = BLOCK_END (block);
 
   frame = 0;
   while (1)
