@@ -1017,8 +1017,8 @@ all-flex: all-libiberty all-byacc
 all-gas: all-libiberty all-opcodes all-bfd
 all-gash: all-tcl
 all-gawk:
-ALL_GCC = all_gcc
-all_gcc: all-libiberty all-byacc all-binutils all-gas all-ld
+ALL_GCC = all-gcc
+all-gcc: all-libiberty all-byacc all-binutils all-gas all-ld
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-byacc all-sim $(gdbnlmrequirements)
 all-gprof: all-libiberty all-bfd
 all-grep: all-libiberty
