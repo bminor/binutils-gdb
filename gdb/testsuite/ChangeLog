@@ -1,3 +1,13 @@
+Wed Apr 19 13:47:16 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/watchpoint.exp: Don't run
+	test_watchpoint_triggered_in_syscall for sunos.
+
+Mon Apr 17 12:48:52 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/{break.c,run.c}: Don't include vxWorks.h or stdioLib.h;
+	they don't seem to exist.  Do include stdio.h.
+
 Fri Apr 14 09:40:22 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/a1-selftest.exp: Add alpha xfail.
