@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Core file support */
 
 #ifdef HAVE_SYS_PROCFS_H		/* Some core file support requires host /proc files */
+#include <signal.h>
 #include <sys/procfs.h>
 #else
 #define bfd_prstatus(abfd, descdata, descsz, filepos) true
@@ -366,11 +367,11 @@ elf_core_file_p (abfd)
   switch (x_ehdr.e_ident[EI_DATA])
     {
     case ELFDATA2MSB:		/* Big-endian */
-      if (abfd->xvec->byteorder_big_p == false)
+      if (! bfd_big_endian (abfd))
 	goto wrong;
       break;
     case ELFDATA2LSB:		/* Little-endian */
-      if (abfd->xvec->byteorder_big_p == true)
+      if (! bfd_little_endian (abfd))
 	goto wrong;
       break;
     case ELFDATANONE:		/* No data encoding specified */
