@@ -1,3 +1,8 @@
+2002-01-20  Jiri Smid  <smid@suse.cz>
+
+	* configure.host, configure.tgt: Support x86-64.
+	* NEWS: Note new target x86-64.
+
 2002-01-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* utils.c: Remove #ifndef MALLOC_INCOMPATIBLE.
@@ -5,7 +10,7 @@
 	* config/sparc/nm-sun4os4.h (PTRACE_ARG3_TYPE): ... to here.
 	* config/sparc/xm-sun4os4.h: Delete file.
 	* config/sparc/sun4os4.mh (XM_FILE): Delete makefile variable.
-	
+
 2002-01-19  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/sparc/sparclynx.mh (XM_FILE): Delete.
@@ -102,25 +107,25 @@
 
 2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
 
-	* alpha-tdep.c (frame_extra_info): New.  
-	(alpha_find_saved_regs): Make static.  Use 
+	* alpha-tdep.c (frame_extra_info): New.
+	(alpha_find_saved_regs): Make static.  Use
 	frame->extra_info.
 	(alpha_frame_init_saved_regs): New function.
-	(alpha_frame_saved_pc): Use frame->extra_info. 
-	(temp_saved_regs): Don't declare as struct frame_saved_regs. 
-	(heuristic_proc_desc): Adjust for temp_saved_regs changes. 
+	(alpha_frame_saved_pc): Use frame->extra_info.
+	(temp_saved_regs): Don't declare as struct frame_saved_regs.
+	(heuristic_proc_desc): Adjust for temp_saved_regs changes.
 	(init_extra_frame_info): Rename to...
 	(alpha_init_extra_frame_info): ...this.  Use frame->extra_info.
-	(alpha_print_extra_frame_info): New function. 
+	(alpha_print_extra_frame_info): New function.
 	(alpha_frame_locals_address): Ditto.
 	(alpha_frame_args_address): Ditto.
-	(alpha_pop_frame): Use frame->extra_info. 
+	(alpha_pop_frame): Use frame->extra_info.
 	* config/alpha/tm-alpha.h (FRAME_ARGS_ADDRESS): Use
 	alpha_frame_args_address.
-	(FRAME_LOCALS_ADDRESS): Use alpha_frame_locals_address. 
+	(FRAME_LOCALS_ADDRESS): Use alpha_frame_locals_address.
 	(alpha_find_saved_regs): Remove prototype.
-	(FRAME_INIT_SAVED_REGS): Use alpha_frame_init_saved_regs. 
-	(EXTRA_FRAME_INFO): Remove. 
+	(FRAME_INIT_SAVED_REGS): Use alpha_frame_init_saved_regs.
+	(EXTRA_FRAME_INFO): Remove.
 	(INIT_EXTRA_FRAME_INFO): Use alpha_init_extra_frame_info.
 	(PRINT_EXTRA_FRAME_INFO): Use alpha_print_extra_frame_info.
 
@@ -157,7 +162,7 @@
 
 2002-01-18  Jason Thorpe  <thorpej@wasabisystems.com>
 
-	* alpha-tdep.c (alpha_register_name): New function. 
+	* alpha-tdep.c (alpha_register_name): New function.
 	* config/alpha/tm-alpha.h (REGISTER_NAMES): Remove.
 	(REGISTER_NAME): Define.
 
@@ -343,7 +348,7 @@
 
 2002-01-15  Elena Zannoni  <ezannoni@redhat.com>
 
-	[Based on work by Jim Blandy] 
+	[Based on work by Jim Blandy]
 	* gdbtypes.h (builtin_type_v16qi, builtin_type_v8hi): Export.
 	(builtin_type_vec128): Export.
 	* gdbtypes.c (builtin_type_v16qi, builtin_type_v8hi): New SIMD
@@ -354,7 +359,7 @@
 	builtin_type_v8hi. Create the vec128 register builtin type
 	structure.
 	(build_builtin_type_vec128): New function.
- 	(_initialize_gdbtypes): Register builtin_type_v16qi and
+	(_initialize_gdbtypes): Register builtin_type_v16qi and
 	builtin_type_v8hi with gdbarch. Same for builtin_type_vec128.
 	* rs6000-tdep.c (rs6000_register_virtual_type): Change type of
 	AltiVec register to new builtin type.
@@ -387,7 +392,7 @@
 
 	* signals.c (target_signal_to_name): Rewrite.  Only use
 	signals[].name when in bounds and non-NULL.
-	
+
 2002-01-13  Andrew Cagney  <ac131313@redhat.com>
 
 	From Petr Ledvina <ledvinap@kae.zcu.cz>:
@@ -621,8 +626,8 @@
 
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
-	* linux-proc.c: New file.  Implement child_pid_to_exec_file, 
-	so that attaching to a pid will automatically read the process's 
+	* linux-proc.c: New file.  Implement child_pid_to_exec_file,
+	so that attaching to a pid will automatically read the process's
 	symbol file and shlibs.
 	* Makefile.in: Add rule for linux-proc.o.
 	* config/nm-linux.h: Define CHILD_PID_TO_EXEC_FILE.
@@ -645,7 +650,7 @@
 	* solib.c (info_sharedlibrary_command): Use TARGET_PTR_BIT
 	instead of bfd_get_arch_size.  Don't bail out just because
 	there's no exec_bfd.
-	
+
 	* cp-valprint.c (cp_print_value): FIXME comment, alloca size.
 	* p-valprint.c (pascal_object_print_value): Ditto.
 	* somread.c (som_symtab_read): Ditto.
@@ -659,7 +664,7 @@
 
 	* infptrace.c (GDB_MAX_ALLOCA): New define.
 	(child_xfer_memory): Use xmalloc/xfree instead of alloca if the
-	size of the buffer exceeds GDB_MAX_ALLOCA (default 1 megabyte, 
+	size of the buffer exceeds GDB_MAX_ALLOCA (default 1 megabyte,
 	can be overridden with whatever value is appropriate to the host).
 	* infttrace.c (child_xfer_memory): Add FIXME warning about use of
 	alloca to allocate potentially large buffer.
@@ -674,12 +679,12 @@
 
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
-	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets): 
+	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets):
 	Don't use exec_bfd if it's NULL.
 
 2002-01-06  Mark Kettenis  <kettenis@gnu.org>
 
-	* valops.c (value_arg_coerce): Fix formatting. 
+	* valops.c (value_arg_coerce): Fix formatting.
 
 2002-01-06  Andrew Cagney  <ac131313@redhat.com>
 
@@ -871,10 +876,10 @@
 	* scm-lang.c (scm_lookup_name): Ditto.
 
 2002-01-03  Michael Snyder  <msnyder@redhat.com>
- 
+
 	Abstract the functionality of iterating over mapped memory
 	regions into a general purpose iterator function.
-	* procfs.c (iterate_over_mappings): New function, general purpose 
+	* procfs.c (iterate_over_mappings): New function, general purpose
 	iterator for memory sections.
 	(proc_iterate_over_mappings): Reimplement using iterate_over_mappings.
 	(solib_mappings_callback): New function, callback for above.

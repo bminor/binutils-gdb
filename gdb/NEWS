@@ -23,6 +23,7 @@ is found, will then attempt to open it as a corefile.
 * New native configurations
 
 x86 OpenBSD					i[3456]86-*-openbsd*
+AMD x86-64 running Linux			x86_64-*-linux-*
 
 * New targets
 
