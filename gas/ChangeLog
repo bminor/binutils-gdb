@@ -1,3 +1,22 @@
+Fri Nov  1 10:42:49 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-alpha.c: Change uses of void * to PTR.  Change the
+	alpha_macro emit field to expect a const argument, and change the
+	arg field to be const.  Fix some spacing to follow the GNU
+	standard.
+
+Fri Nov  1 10:32:03 1996  Richard Henderson  <rth@tamu.edu>
+
+	* config/tc-alpha.c (md_parse_option): Add knowledge of 21164pc
+	(pca56) and 21264 (ev6) cpus.
+	(md_apply_fix): Private relocation types are now negative.
+	(alpha_force_relocation): Likewise.
+	(tc_gen_reloc): Likewise.
+	(emit_insn): Likewise.
+	(emit_ldXu): Do the right thing when the hardware can do byte insns.
+	(emit_stX): Likewise.
+	(emit_sextX): Likewise.
+
 Thu Oct 31 16:33:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (do_relocs_for): Call resolve_symbol_value on
