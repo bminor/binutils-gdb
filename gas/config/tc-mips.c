@@ -4604,6 +4604,12 @@ macro (ip)
       /* Load the address of a symbol into a register.  If breg is not
 	 zero, we then add a base register to it.  */
 
+      if (dbl && HAVE_32BIT_GPRS)
+	as_warn (_("dla used to load 32-bit register"));
+
+      if (! dbl && HAVE_64BIT_ADDRESSES)
+	as_warn (_("la used to load 64-bit address"));
+
       if (treg == breg)
 	{
 	  tempreg = AT;
