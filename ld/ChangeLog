@@ -1,3 +1,8 @@
+2000-05-10  H.J. Lu  <hjl@gnu.org>
+
+	* ldlang.c (open_input_bfds): Don't load the same file within
+	a group again if the whole archive has been loaded already.
+
 2000-05-03  Alan Modra  <alan@linuxcare.com.au>
 
 	From Ulf Carlsson <ulfc@engr.sgi.com> and Andreas Jaeger <aj@suse.de>

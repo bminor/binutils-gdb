@@ -1864,8 +1864,10 @@ open_input_bfds (s, force)
 
 	      /* If we are being called from within a group, and this
                  is an archive which has already been searched, then
-                 force it to be researched.  */
+                 force it to be researched unless the whole archive
+		 has been loaded already.  */
 	      if (force
+		  && !s->input_statement.whole_archive
 		  && s->input_statement.loaded
 		  && bfd_check_format (s->input_statement.the_bfd,
 				       bfd_archive))
