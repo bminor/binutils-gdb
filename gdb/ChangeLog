@@ -1,3 +1,13 @@
+2001-01-24  J.T. Conklin  <jtc@redback.com>
+
+	* dcache.c (dcache_write_line): Fix typo.
+
+	* memattr.c (delete_mem_region): Replace free() with xfree().
+	(mem_number): Add explicit type.
+
+	* sol-thread.c (sol_thread_xfer_memory): Add attrib argument.
+	(rw_common): Likewise.
+
 2001-01-24  Fernando Nasser  <fnasser@redhat.com>
 
 	* infcmd.c (get_inferior_args, set_inferior_args): Accessor functions

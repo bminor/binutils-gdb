@@ -300,7 +300,7 @@ dcache_write_line (DCACHE *dcache, register struct dcache_block *db)
 	      if (res <= 0)
 		return 0;
 
-	      memset (db->state[XFORM(memaddr)], ENTRY_OK, res);
+	      memset (&db->state[XFORM(memaddr)], ENTRY_OK, res);
 	      memaddr   += res;
 	      myaddr    += res;
 	      dirty_len -= res;

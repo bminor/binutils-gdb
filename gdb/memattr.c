@@ -28,7 +28,7 @@ const struct mem_attrib default_mem_attrib =
 };
 
 static struct mem_region *mem_region_chain = NULL;
-static mem_number = 0;
+static int mem_number = 0;
 
 static struct mem_region *
 create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
@@ -71,7 +71,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 static void
 delete_mem_region (struct mem_region *m)
 {
-  free (m);
+  xfree (m);
 }
 
 /*

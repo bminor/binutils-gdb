@@ -762,6 +762,7 @@ sol_thread_prepare_to_store (void)
 
 static int
 sol_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+			struct mem_attrib *attrib,
 			struct target_ops *target)
 {
   int retval;
@@ -775,10 +776,11 @@ sol_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
   /* Note: don't need to call switch_to_thread; we're just reading memory.  */
 
   if (target_has_execution)
-    retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, target);
+    retval = procfs_ops.to_xfer_memory (memaddr, myaddr, len, 
+					dowrite, attrib, target);
   else
     retval = orig_core_ops.to_xfer_memory (memaddr, myaddr, len,
-					   dowrite, target);
+					   dowrite, attrib, target);
 
   do_cleanups (old_chain);
 
@@ -1060,10 +1062,13 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
     {
       int cc;
 
+      /* FIXME: passing 0 as attrib argument.  */
       if (target_has_execution)
-	cc = procfs_ops.to_xfer_memory (addr, buf, size, dowrite, &procfs_ops);
+	cc = procfs_ops.to_xfer_memory (addr, buf, size, 
+					dowrite, 0, &procfs_ops);
       else
-	cc = orig_core_ops.to_xfer_memory (addr, buf, size, dowrite, &core_ops);
+	cc = orig_core_ops.to_xfer_memory (addr, buf, size, 
+					   dowrite, 0, &core_ops);
 
       if (cc < 0)
 	{
