@@ -376,7 +376,7 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
 
       if (ptrace (PTRACE_ATTACH, GET_LWP (ptid), 0, 0) < 0)
 	error ("Can't attach %s: %s", target_pid_to_str (ptid),
-	       strerror (errno));
+	       safe_strerror (errno));
 
       pid = waitpid (GET_LWP (ptid), &status, 0);
       if (pid == -1 && errno == ECHILD)
@@ -454,7 +454,7 @@ detach_callback (struct lwp_info *lp, void *data)
       if (ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0,
 		  WSTOPSIG (lp->status)) < 0)
 	error ("Can't continue %s: %s", target_pid_to_str (lp->ptid),
-	       strerror (errno));
+	       safe_strerror (errno));
 
       lp->stopped = 0;
       lp->signalled = 0;
@@ -471,7 +471,7 @@ detach_callback (struct lwp_info *lp, void *data)
       if (ptrace (PTRACE_DETACH, GET_LWP (lp->ptid), 0,
 		  WSTOPSIG (lp->status)) < 0)
 	error ("Can't detach %s: %s", target_pid_to_str (lp->ptid),
-	       strerror (errno));
+	       safe_strerror (errno));
 
       delete_lwp (lp->ptid);
     }
@@ -973,7 +973,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   if (pid == -1)
     {
-      warning ("Child process unexpectedly missing: %s", strerror (errno));
+      warning ("Child process unexpectedly missing: %s", safe_strerror (errno));
 
       /* Claim it exited with unknown signal.  */
       ourstatus->kind = TARGET_WAITKIND_SIGNALLED;

@@ -299,7 +299,7 @@ proc_update_sc (struct proc *proc)
 
   proc_debug (proc, "is %s", err ? "dead" : running ? "running" : "suspended");
   if (err)
-    proc_debug (proc, "err = %s", strerror (err));
+    proc_debug (proc, "err = %s", safe_strerror (err));
 
   if (running)
     {
@@ -468,7 +468,7 @@ proc_steal_exc_port (struct proc *proc, mach_port_t exc_port)
 	proc->exc_port = exc_port;
       else
 	warning ("Error setting exception port for %s: %s",
-		 proc_string (proc), strerror (err));
+		 proc_string (proc), safe_strerror (err));
     }
 }
 
@@ -498,7 +498,7 @@ proc_restore_exc_port (struct proc *proc)
 	proc->exc_port = MACH_PORT_NULL;
       else
 	warning ("Error setting exception port for %s: %s",
-		 proc_string (proc), strerror (err));
+		 proc_string (proc), safe_strerror (err));
     }
 }
 
@@ -575,7 +575,7 @@ make_proc (struct inf *inf, mach_port_t port, int tid)
 				    &prev_port);
   if (err)
     warning ("Couldn't request notification for port %d: %s",
-	     port, strerror (err));
+	     port, safe_strerror (err));
   else
     {
       proc_debug (proc, "notifications to: %d", inf->event_port);
@@ -724,7 +724,7 @@ inf_startup (struct inf *inf, int pid)
   err = mach_port_allocate (mach_task_self (),
 			    MACH_PORT_RIGHT_RECEIVE, &inf->event_port);
   if (err)
-    error ("Error allocating event port: %s", strerror (err));
+    error ("Error allocating event port: %s", safe_strerror (err));
 
   /* Make a send right for it, so we can easily copy it for other people.  */
   mach_port_insert_right (mach_task_self (), inf->event_port,
@@ -748,7 +748,7 @@ inf_set_pid (struct inf *inf, pid_t pid)
     {
       error_t err = proc_pid2task (proc_server, pid, &task_port);
       if (err)
-	error ("Error getting task for pid %d: %s", pid, strerror (err));
+	error ("Error getting task for pid %d: %s", pid, safe_strerror (err));
     }
 
   inf_debug (inf, "setting task: %d", task_port);
@@ -890,7 +890,7 @@ inf_set_traced (struct inf *inf, int on)
 	}
       else if (err)
 	warning ("Can't modify tracing state for pid %d: %s",
-		 inf->pid, strerror (err));
+		 inf->pid, safe_strerror (err));
       else
 	inf->traced = on;
     }
@@ -1366,7 +1366,7 @@ inf_signal (struct inf *inf, enum target_signal sig)
     /* Can't do too much... */
     warning ("Can't deliver signal %s: No signal thread.", NAME);
   else if (err)
-    warning ("Delivering signal %s: %s", NAME, strerror (err));
+    warning ("Delivering signal %s: %s", NAME, safe_strerror (err));
 
 #undef NAME
 }
@@ -1397,7 +1397,7 @@ inf_continue (struct inf *inf)
     }
 
   if (err)
-    warning ("Can't continue process: %s", strerror (err));
+    warning ("Can't continue process: %s", safe_strerror (err));
 }
 
 
@@ -1460,7 +1460,7 @@ rewait:
       err =
 	proc_wait_request (proc_server, inf->event_port, inf->pid, WUNTRACED);
       if (err)
-	warning ("wait request failed: %s", strerror (err));
+	warning ("wait request failed: %s", safe_strerror (err));
       else
 	{
 	  inf_debug (inf, "waits pending: %d", proc_waits_pending);
@@ -1496,7 +1496,7 @@ rewait:
   if (err == EMACH_RCV_INTERRUPTED)
     inf_debug (inf, "interrupted");
   else if (err)
-    error ("Couldn't wait for an event: %s", strerror (err));
+    error ("Couldn't wait for an event: %s", safe_strerror (err));
   else
     {
       struct
@@ -1520,7 +1520,7 @@ rewait:
 
       if (reply.err)
 	error ("Handling event, msgid = %d: %s",
-	       msg.hdr.msgh_id, strerror (reply.err));
+	       msg.hdr.msgh_id, safe_strerror (reply.err));
     }
 
   if (inf->pending_execs)
@@ -1796,7 +1796,7 @@ S_proc_wait_reply (mach_port_t reply, error_t err,
   struct inf *inf = waiting_inf;
 
   inf_debug (inf, "err = %s, pid = %d, status = 0x%x, sigcode = %d",
-	     err ? strerror (err) : "0", pid, status, sigcode);
+	     err ? safe_strerror (err) : "0", pid, status, sigcode);
 
   if (err && proc_wait_pid && (!inf->task || !inf->task->port))
     /* Ack.  The task has died, but the task-died notification code didn't
@@ -1817,7 +1817,7 @@ S_proc_wait_reply (mach_port_t reply, error_t err,
     {
       if (err != EINTR)
 	{
-	  warning ("Can't wait for pid %d: %s", inf->pid, strerror (err));
+	  warning ("Can't wait for pid %d: %s", inf->pid, safe_strerror (err));
 	  inf->no_wait = 1;
 
 	  /* Since we can't see the inferior's signals, don't trap them.  */
@@ -1873,7 +1873,7 @@ S_msg_sig_post_untraced_reply (mach_port_t reply, error_t err)
       inf->wait.status.value.sig = TARGET_SIGNAL_0;
     }
   else if (err)
-    warning ("Signal delivery failed: %s", strerror (err));
+    warning ("Signal delivery failed: %s", safe_strerror (err));
 
   if (err)
     /* We only get this reply when we've posted a signal to a process which we
@@ -2259,13 +2259,13 @@ gnu_read_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
   err = hurd_safe_copyin (myaddr, (void *) addr - low_address + copied, length);
   if (err)
     {
-      warning ("Read from inferior faulted: %s", strerror (err));
+      warning ("Read from inferior faulted: %s", safe_strerror (err));
       length = 0;
     }
 
   err = vm_deallocate (mach_task_self (), copied, copy_count);
   if (err)
-    warning ("gnu_read_inferior vm_deallocate failed: %s", strerror (err));
+    warning ("gnu_read_inferior vm_deallocate failed: %s", safe_strerror (err));
 
   return length;
 }
@@ -2781,7 +2781,7 @@ steal_exc_port (struct proc *proc, mach_port_t name)
 				 &port, &port_type);
   if (err)
     error ("Couldn't extract send right %d from inferior: %s",
-	   name, strerror (err));
+	   name, safe_strerror (err));
 
   if (proc->saved_exc_port)
     /* Get rid of our reference to the old one.  */
@@ -2796,7 +2796,7 @@ steal_exc_port (struct proc *proc, mach_port_t name)
       proc->exc_port = proc->inf->event_port;
       err = proc_set_exception_port (proc, proc->exc_port);
       error ("Can't set exception port for %s: %s",
-	     proc_string (proc), strerror (err));
+	     proc_string (proc), safe_strerror (err));
     }
 }
 
@@ -2970,7 +2970,7 @@ info_port_rights (char *args, mach_port_type_t only)
 	  print_port_info (right, 0, inf->task->port, PORTINFO_DETAILS,
 			   stdout);
 	  if (err)
-	    error ("%ld: %s.", right, strerror (err));
+	    error ("%ld: %s.", right, safe_strerror (err));
 	}
     }
   else
@@ -2980,7 +2980,7 @@ info_port_rights (char *args, mach_port_type_t only)
       print_task_ports_info (inf->task->port, only, PORTINFO_DETAILS,
 			     stdout);
       if (err)
-	error ("%s.", strerror (err));
+	error ("%s.", safe_strerror (err));
     }
 
   value_free_to_mark (vmark);
@@ -3241,7 +3241,7 @@ thread_takeover_sc_cmd (char *args, int from_tty)
   error_t err =
   thread_info (thread->port, THREAD_BASIC_INFO, (int *) &info, &info_len);
   if (err)
-    error ("%s.", strerror (err));
+    error ("%s.", safe_strerror (err));
   thread->sc = info->suspend_count;
   if (from_tty)
     printf_unfiltered ("Suspend count was %d.\n", thread->sc);
@@ -3352,6 +3352,6 @@ flush_inferior_icache (CORE_ADDR pc, int amount)
 			      MATTR_CACHE,
 			      &flush);
   if (ret != KERN_SUCCESS)
-    warning ("Error flushing inferior's cache : %s", strerror (ret));
+    warning ("Error flushing inferior's cache : %s", safe_strerror (ret));
 }
 #endif /* FLUSH_INFERIOR_CACHE */

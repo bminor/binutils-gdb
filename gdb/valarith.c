@@ -759,7 +759,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
         case BINOP_EXP:
           v = pow (v1, v2);
           if (errno)
-            error ("Cannot perform exponentiation: %s", strerror (errno));
+            error ("Cannot perform exponentiation: %s", safe_strerror (errno));
           break;
 
 	default:
@@ -897,7 +897,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
             case BINOP_EXP:
               v = pow (v1, v2);
               if (errno)
-                error ("Cannot perform exponentiation: %s", strerror (errno));
+                error ("Cannot perform exponentiation: %s", safe_strerror (errno));
               break;
 
 	    case BINOP_REM:
@@ -1021,7 +1021,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
             case BINOP_EXP:
               v = pow (v1, v2);
               if (errno)
-                error ("Cannot perform exponentiation: %s", strerror (errno));
+                error ("Cannot perform exponentiation: %s", safe_strerror (errno));
 	      break;
 
 	    case BINOP_REM:

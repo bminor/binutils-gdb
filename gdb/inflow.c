@@ -171,7 +171,7 @@ gdb_has_a_terminal (void)
 #define	OOPSY(what)	\
   if (result == -1)	\
     fprintf_unfiltered(gdb_stderr, "[%s failed in terminal_inferior: %s]\n", \
-	    what, strerror (errno))
+	    what, safe_strerror (errno))
 
 static void terminal_ours_1 (int);
 
@@ -374,7 +374,7 @@ terminal_ours_1 (int output_only)
 	     such situations as well.  */
 	  if (result == -1)
 	    fprintf_unfiltered (gdb_stderr, "[tcsetpgrp failed in terminal_ours: %s]\n",
-				strerror (errno));
+				safe_strerror (errno));
 #endif
 #endif /* termios */
 

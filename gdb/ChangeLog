@@ -1,3 +1,12 @@
+2002-03-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* valarith.c: Replace strerror with safe_strerror.
+	* tracepoint.c: Ditto.
+	* lin-lwp.c: Ditto.
+	* go32-nat.c: Ditto.
+	* inflow.c: Ditto.
+	* gnu-nat.c: Ditto.
+
 2002-03-27  Andreas Schwab  <schwab@suse.de>
 
 	* event-top.c (command_line_handler): Remove useless if.

@@ -2280,7 +2280,7 @@ tracepoint_save_command (char *args, int from_tty)
   pathname = tilde_expand (args);
   if (!(fp = fopen (pathname, "w")))
     error ("Unable to open file '%s' for saving tracepoints (%s)",
-	   args, strerror (errno));
+	   args, safe_strerror (errno));
   xfree (pathname);
   
   ALL_TRACEPOINTS (tp)
