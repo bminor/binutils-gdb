@@ -2,7 +2,7 @@
 #as: -little
 #ld: -EL -e 0x1000
 #objdump: -st
-
+#target: sh*-*-elf
 
 .*/dump:     file format elf32-shl
 

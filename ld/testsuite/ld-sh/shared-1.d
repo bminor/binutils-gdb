@@ -3,7 +3,7 @@
 #as: -little
 #ld: -shared -EL
 #readelf: -r -x4 -x5
-#target: sh*-*-elf sh*-*-linux*
+#target: sh*-*-elf
 
 # Make sure relocations against global and local symbols with relative and
 # absolute 32-bit relocs don't come out wrong after ld -r.  Remember that

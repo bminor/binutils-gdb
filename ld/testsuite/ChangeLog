@@ -1,5 +1,8 @@
 2001-10-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* ld-sh/sub2l-1.d, ld-sh/shared-1.d, ld-sh/weak1.d: Only run on
+	sh*-*-elf.
+
 	* lib/ld-lib.exp (run_dump_test): Fix typo: asflags(), not asflags{}.
 
 	* ld-sh/rd-sh.exp: New framework file.
