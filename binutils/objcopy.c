@@ -195,6 +195,7 @@ static struct symlist *strip_specific_list = NULL;
 static struct symlist *strip_unneeded_list = NULL;
 static struct symlist *keep_specific_list = NULL;
 static struct symlist *localize_specific_list = NULL;
+static struct symlist *globalize_specific_list = NULL;
 static struct symlist *keepglobal_specific_list = NULL;
 static struct symlist *weaken_specific_list = NULL;
 static struct redefine_node *redefine_sym_list = NULL;
@@ -236,6 +237,8 @@ enum command_line_switch
     OPTION_STRIP_UNNEEDED_SYMBOLS,
     OPTION_KEEP_SYMBOLS,
     OPTION_LOCALIZE_SYMBOLS,
+    OPTION_GLOBALIZE_SYMBOL,
+    OPTION_GLOBALIZE_SYMBOLS,
     OPTION_KEEPGLOBAL_SYMBOLS,
     OPTION_WEAKEN_SYMBOLS,
     OPTION_RENAME_SECTION,
@@ -306,6 +309,8 @@ static struct option copy_options[] =
   {"discard-locals", no_argument, 0, 'X'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
+  {"globalize-symbol", required_argument, 0, OPTION_GLOBALIZE_SYMBOL},
+  {"globalize-symbols", required_argument, 0, OPTION_GLOBALIZE_SYMBOLS},
   {"help", no_argument, 0, 'h'},
   {"impure", no_argument, 0, OPTION_IMPURE},
   {"info", no_argument, 0, OPTION_FORMATS_INFO},
@@ -416,6 +421,7 @@ copy_usage (FILE *stream, int exit_status)
      --only-keep-debug             Strip everything but the debug information\n\
   -K --keep-symbol <name>          Only copy symbol <name>\n\
   -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n\
+     --globalize-symbol <name>     Force symbol <name> to be marked as a global\n\
   -G --keep-global-symbol <name>   Localize all symbols except <name>\n\
   -W --weaken-symbol <name>        Force symbol <name> to be marked as a weak\n\
      --weaken                      Force all global symbols to be marked as weak\n\
@@ -456,6 +462,7 @@ copy_usage (FILE *stream, int exit_status)
                                      in <file>\n\
      --keep-symbols <file>         -K for all symbols listed in <file>\n\
      --localize-symbols <file>     -L for all symbols listed in <file>\n\
+     --globalize-symbols <file>    --globalize-symbol for all in <file>\n\
      --keep-global-symbols <file>  -G for all symbols listed in <file>\n\
      --weaken-symbols <file>       -W for all symbols listed in <file>\n\
      --alt-machine-code <index>    Use alternate machine code for output\n\
@@ -923,23 +930,35 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
       if (keep && is_strip_section (abfd, bfd_get_section (sym)))
 	keep = 0;
 
-      if (keep && (flags & BSF_GLOBAL) != 0
-	  && (weaken || is_specified_symbol (name, weaken_specific_list)))
-	{
-	  sym->flags &=~ BSF_GLOBAL;
-	  sym->flags |= BSF_WEAK;
-	}
-      if (keep && !undefined && (flags & (BSF_GLOBAL | BSF_WEAK))
-	  && (is_specified_symbol (name, localize_specific_list)
-	      || (keepglobal_specific_list != NULL
-		  && ! is_specified_symbol (name, keepglobal_specific_list))))
-	{
-	  sym->flags &= ~(BSF_GLOBAL | BSF_WEAK);
-	  sym->flags |= BSF_LOCAL;
-	}
-
       if (keep)
-	to[dst_count++] = sym;
+	{
+	  if ((flags & BSF_GLOBAL) != 0
+	      && (weaken || is_specified_symbol (name, weaken_specific_list)))
+	    {
+	      sym->flags &= ~ BSF_GLOBAL;
+	      sym->flags |= BSF_WEAK;
+	    }
+
+	  if (!undefined
+	      && (flags & (BSF_GLOBAL | BSF_WEAK))
+	      && (is_specified_symbol (name, localize_specific_list)
+		  || (keepglobal_specific_list != NULL
+		      && ! is_specified_symbol (name, keepglobal_specific_list))))
+	    {
+	      sym->flags &= ~ (BSF_GLOBAL | BSF_WEAK);
+	      sym->flags |= BSF_LOCAL;
+	    }
+
+	  if (!undefined
+	      && (flags & BSF_LOCAL) 
+	      && is_specified_symbol (name, globalize_specific_list))
+	    {
+	      sym->flags &= ~ BSF_LOCAL;
+	      sym->flags |= BSF_GLOBAL;
+	    }
+
+	  to[dst_count++] = sym;
+	}
     }
 
   to[dst_count] = NULL;
@@ -1389,6 +1408,7 @@ copy_object (bfd *ibfd, bfd *obfd)
       || strip_specific_list != NULL
       || keep_specific_list != NULL
       || localize_specific_list != NULL
+      || globalize_specific_list != NULL
       || keepglobal_specific_list != NULL
       || weaken_specific_list != NULL
       || prefix_symbols_string
@@ -2548,6 +2568,10 @@ copy_main (int argc, char *argv[])
 	  add_specific_symbol (optarg, &localize_specific_list);
 	  break;
 
+	case OPTION_GLOBALIZE_SYMBOL:
+	  add_specific_symbol (optarg, &globalize_specific_list);
+	  break;
+
 	case 'G':
 	  add_specific_symbol (optarg, &keepglobal_specific_list);
 	  break;
@@ -2887,6 +2911,10 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_LOCALIZE_SYMBOLS:
 	  add_specific_symbols (optarg, &localize_specific_list);
+	  break;
+
+	case OPTION_GLOBALIZE_SYMBOLS:
+	  add_specific_symbols (optarg, &globalize_specific_list);
 	  break;
 
 	case OPTION_KEEPGLOBAL_SYMBOLS:

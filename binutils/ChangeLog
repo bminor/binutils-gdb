@@ -1,3 +1,20 @@
+2005-03-15  Daniel Marques  <marques@cs.cornell.edu>
+            Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (globalize_specific_list): New linked list of symbols
+	to convert from local binding into global binding.
+	(command_line_switch): Add OPTION_GLOBALIZE_SYMBOL and
+	OPTION_GLOBALIZE_SYMBOLS.
+	(copy_options): Add "globalize-symbol" and "globalize-symbols".
+	(copy_usage): Document the new switches.
+	(filter_symbols): Convert defined local symbols mentioned on the
+	globalize_specific_list into global symbols.
+	(copy_object): Perform actions if the globalize_specific_list is
+	not empty.
+	(copy_main): Handle new switches.
+	* NEWS: Mention new feature.
+	* doc/binutils.texi: Document new switches.
+
 2005-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/es.po: Commit new Spanish translation.

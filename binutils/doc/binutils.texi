@@ -30,7 +30,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -55,7 +55,7 @@ notice identical to this one except for the removal of this paragraph
 @c  "objdump", "nm", "size", "strings", "strip", "readelf" and "ranlib".
 @c
 @c Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-@c 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+@c 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c Free Documentation License.
@@ -81,7 +81,7 @@ notice identical to this one except for the removal of this paragraph
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
@@ -950,6 +950,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--strip-unneeded-symbol=}@var{symbolname}]
         [@option{-G} @var{symbolname}|@option{--keep-global-symbol=}@var{symbolname}]
         [@option{-L} @var{symbolname}|@option{--localize-symbol=}@var{symbolname}]
+        [@option{--globalize-symbol=}@var{symbolname}]
         [@option{-W} @var{symbolname}|@option{--weaken-symbol=}@var{symbolname}]
         [@option{-w}|@option{--wildcard}]
         [@option{-x}|@option{--discard-all}]
@@ -982,6 +983,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--strip-unneeded-symbols=}@var{filename}]
         [@option{--keep-global-symbols=}@var{filename}]
         [@option{--localize-symbols=}@var{filename}]
+        [@option{--globalize-symbols=}@var{filename}]
         [@option{--weaken-symbols=}@var{filename}]
         [@option{--alt-machine-code=}@var{index}]
         [@option{--prefix-symbols=}@var{string}]
@@ -1126,6 +1128,11 @@ visible externally.  This option may be given more than once.
 @item -W @var{symbolname}
 @itemx --weaken-symbol=@var{symbolname}
 Make symbol @var{symbolname} weak. This option may be given more than once.
+
+@item --globalize-symbol=@var{symbolname}
+Give symbol @var{symbolname} global scoping so that it is visible
+outside of the file in which it is defined.  This option may be given
+more than once.
 
 @item -w
 @itemx --wildcard
@@ -1367,6 +1374,12 @@ character.  This option may be given more than once.
 
 @item --localize-symbols=@var{filename}
 Apply @option{--localize-symbol} option to each symbol listed in the file
+@var{filename}.  @var{filename} is simply a flat file, with one symbol
+name per line.  Line comments may be introduced by the hash character.
+This option may be given more than once.
+
+@item --globalize-symbols=@var{filename}
+Apply @option{--globalize-symbol} option to each symbol listed in the file
 @var{filename}.  @var{filename} is simply a flat file, with one symbol
 name per line.  Line comments may be introduced by the hash character.
 This option may be given more than once.

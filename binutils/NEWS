@@ -1,5 +1,10 @@
 -*- text -*-
 
+* Add "--globalize-symbol <name>" and "--globalize-symbols <filename>" switches
+  to objcopy to convert local symbols into global symbols.
+
+Changes in 2.16:
+
 * objcopy recognizes two new options --strip-unneeded-symbol and
   --strip-unneeded-symbols, namely for use together with the wildcard
   matching the original --strip-symbol/--strip-symbols provided, but
