@@ -158,6 +158,11 @@ do
 		   ;;
 		esac
 		;;
+	--disable-*)
+		enableopt=`echo ${option} | sed 's:^--disable-:enable_:;s:-:_:g'`
+		eval $enableopt=no
+		disableoptions="$disableoptions $option"
+		;;
 	--enable-*)
 		case "$option" in
 		*=*)	;;
@@ -257,7 +262,7 @@ do
 		withoptions="$withoptions $option"
 		;;
 	--without-*)
-		withopt=`echo ${option} | sed 's:^--::;s:out::;s:-:_:g'`		
+		withopt=`echo ${option} | sed 's:^--::;s:out::;s:-:_:g'`
 		eval $withopt=no
 		withoutoptions="$withoutoptions $option"
 		;;
@@ -371,6 +376,7 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
 	echo ' --with-FOO, --with-FOO=BAR package FOO is available (parameter BAR)'
 	echo ' --without-FOO		 package FOO is NOT available'
 	echo ' --enable-FOO, --enable-FOO=BAR include feature FOO (parameter BAR)'
+	echo ' --disable-FOO		 do not include feature FOO'
 	echo
 	echo 'Where HOST and TARGET are something like "vax", "sun3", "encore", etc.'
 	echo
@@ -931,7 +937,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 			if [ ! -z "${recprog}" ] ; then
 	                        if eval ${config_shell} ${recprog} ${verbose} ${buildopt} --host=${host_alias} --target=${target_alias} \
         	                        ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${removing} ${other_options} ${redirect} ; then
+                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${enableoptions} ${disableoptions} ${removing} ${other_options} ${redirect} ; then
 	                                true
         	                else
 					echo Configure in `pwd` failed, exiting. 1>&2

@@ -1,3 +1,7 @@
+Wed Mar 30 21:37:38 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* configure: Support --disable-FEATURE.
+
 Tue Mar 29 19:15:05 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.guess: Recognize NCR running SVR4.3.
