@@ -12,7 +12,7 @@
    architectures if desired. */
 
 /* Control via a build boolean for the moment */
-#if 1 && defined(__GNUC__)
+#if defined(__GNUC__)
 
 typedef long long word64;
 typedef unsigned long long uword64;
@@ -63,7 +63,7 @@ typedef struct word64 {
    8bits, and from this: */
 #define CHECKSIM() {\
                      if (sizeof(int) != (4 * sizeof(char)))\
-                      SignalException(SimulatorFault,"sizeof(int) != 4");\a
+                      SignalException(SimulatorFault,"sizeof(int) != 4");\
                    }
 
 #endif /* non-GCC build */
