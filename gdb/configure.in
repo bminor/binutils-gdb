@@ -51,35 +51,76 @@ no)	enable_gdbtk=no  ;;
 esac])
 
 if test "${enable_gdbtk}" = "yes"; then
-	AC_PATH_X
-	AC_PATH_XTRA
+    AC_PATH_X
+    AC_PATH_XTRA
 
-	CYGNUS_PATH_TK
-	CYGNUS_PATH_TCL
+    CYGNUS_PATH_TK
+    CYGNUS_PATH_TCL
 
-	ENABLE_GDBTK=1
+    ENABLE_GDBTK=1
 
-	if test "x$x_includes" != "x" ; 
-	then
-		X_INCDIR="-I$x_includes"
-	else
-		X_INCDIR=""
-	fi
-
-	if test "x$x_libraries" != "x" ;
-	then
-		X_LIBDIR="-L$x_libraries"
-	else
-		X_LIBDIR=""
-	fi
-
-	TCL_LIBS='$(TCL) $(TK) $(X11)'
-	ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS} -lm"
-	ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
+    if test "x$no_x" != "xyes"; then
+        if test "x$x_includes" != "x" ;
+        then
+            X_CFLAGS="-I$x_includes"
+        else
+            X_CFLAGS=""
+        fi
+    
+        if test "x$x_libraries" != "x" ;
+        then
+            X_LDFLAGS="-L$x_libraries"
+        else
+            X_LDFLAGS=""
+        fi
+    
+        case "$host" in
+#
+# gdb linked statically w/ Solaris iff GCC is used, otherwise dynamic
+#
+            sparc-sun-solaris2*)
+                if test "x$GCC" = "xyes";
+                then
+                    X_LIBS="-Wl,-Bstatic -lX11 -lXext -lX11 -Wl,-Bdynamic"
+                else
+                    if test "x$x_libraries" != "x" ;
+                    then
+                        X_LDFLAGS="$X_LDFLAGS -R$x_libraries"
+                    fi
+                    X_LIBS="-lX11 -lXext -lX11"
+                fi ;;
+#
+# gdb linked statically w/ SunOS or HPUX
+#
+            m68k-hp-hpux*|hppa*-hp-hpux*|sparc-sun-sunos*)
+                if test "x$x_libraries" != "x" ;
+                then
+                    X_LIBS="$x_libraries/libX11.a"
+                else
+                    X_LIBS="/usr/lib/libX11.a"
+                fi ;;
+#
+# default is to link dynamically
+#
+            *)
+                X_LIBS="-lX11" ;;
+        esac
+    else
+        X_LDLAGS=""
+        X_CFLAGS=""
+        X_LIBS=""
+        AC_MSG_WARN([No X based programs will be built])
+    fi
+    
+    TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
+    ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS} -lm"
+    ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
 fi
+
 AC_SUBST(ENABLE_GDBTK)
-AC_SUBST(X_INCDIR)
-AC_SUBST(X_LIBDIR)
+AC_SUBST(X_CLFAGS)
+AC_SUBST(X_LDFLAGS)
+AC_SUBST(X_LIBS)
 # end-sanitize-gdbtk
 
 AC_SUBST(ENABLE_CFLAGS)

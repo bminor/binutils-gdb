@@ -74,8 +74,8 @@ MAKEINFO=makeinfo
 
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.
-#CC-LD=gcc -static
-CC-LD=$(CC)
+#CC_LD=gcc -static
+CC_LD=$(CC)
 
 # Where is our "include" directory?  Typically $(srcdir)/../include.
 # This is essentially the header file directory for the library
@@ -90,12 +90,13 @@ LIBIBERTY = ../libiberty/libiberty.a
 # Note that mmalloc can still be used on systems without mmap().
 # To use your system malloc, comment out the following defines.
 MMALLOC_DIR = ../mmalloc
+MMALLOC_SRC = $(srcdir)/$(MMALLOC_DIR)
 MMALLOC = $(MMALLOC_DIR)/libmmalloc.a
 # To use your system malloc, uncomment MMALLOC_DISABLE.
 #MMALLOC_DISABLE = -DNO_MMALLOC
 # To use mmalloc but disable corruption checking, uncomment MMALLOC_CHECK
 #MMALLOC_CHECK = -DNO_MMALLOC_CHECK
-MMALLOC_CFLAGS = -I$(srcdir)/$(MMALLOC_DIR) $(MMALLOC_CHECK) $(MMALLOC_DISABLE)
+MMALLOC_CFLAGS = -I$(MMALLOC_SRC) $(MMALLOC_CHECK) $(MMALLOC_DISABLE)
 
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
@@ -133,8 +134,9 @@ TCL_CFLAGS = @TCLHDIR@
 TK = @TKLIB@
 TK_CFLAGS = @TKHDIR@
 
-X11 = @X_LIBDIR@ @X_PRE_LIBS@ -lX11 @X_EXTRA_LIBS@
-X11_CFLAGS = @X_INCDIR@
+X11_CFLAGS = @X_CFLAGS@ $(X11_EXTRA_CFLAGS)
+X11_LDFLAGS = @X_LDFLAGS@
+X11_LIBS = @X_LIBS@ $(X11_EXTRA_LIBS)
 
 ENABLE_GDBTK= @ENABLE_GDBTK@
 #end-sanitize-gdbtk
@@ -224,7 +226,7 @@ RUNTESTFLAGS=
 # part of libiberty) a POSIX interface.  But at least for now the
 # host-dependent makefile fragment might need to use something else
 # besides ser-unix.o
-SER_HARDWIRE=ser-unix.o
+SER_HARDWIRE = ser-unix.o
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
@@ -601,7 +603,7 @@ init.c: $(OBS) $(TSOBS)
 # Removing the old gdb first works better if it is running, at least on SunOS.
 gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
 	rm -f gdb
-	$(CC-LD) $(INTERNAL_LDFLAGS) -o gdb \
+	$(CC_LD) $(INTERNAL_LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 nlm:	force
@@ -643,7 +645,7 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 # A Mach 3.0 program to force gdb back to command level
 
 stop-gdb: stop-gdb.o
-	${CC-LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o stop-gdb \
+	${CC_LD} $(GLOBAL_CFLAGS) $(LDFLAGS) -o stop-gdb \
 	stop-gdb.o $(CLIBS) $(LOADLIBES)
 
 # This is useful when debugging GDB, because some Unix's don't let you run GDB
@@ -1405,6 +1407,8 @@ rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h xcoffsolib.h
 
 ser-go32.o: ser-go32.c $(defs_h) serial.h 
+
+ser-mac.o: ser-mac.c $(defs_h) serial.h signals.h
 
 ser-tcp.o: ser-tcp.c $(defs_h) serial.h signals.h
 
