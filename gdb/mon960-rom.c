@@ -45,8 +45,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 static struct target_ops mon960_ops;
 
-static struct monitor_ops mon960_cmds;
-
 static void mon960_open PARAMS ((char *args, int from_tty));
 
 #ifdef USE_GENERIC_LOAD
@@ -98,9 +96,9 @@ mon960_load (desc, file, hashmark)
 	printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
 			 s->vma + s->_raw_size);
 	gdb_flush (gdb_stdout);
-	monitor_printf (mon960_cmds.load, s->vma);
-	if (mon960_cmds.loadresp)
-	  monitor_expect (mon960_cmds.loadresp, NULL, 0);
+	monitor_printf (current_monitor->load, s->vma);
+	if (current_monitor->loadresp)
+	  monitor_expect (current_monitor->loadresp, NULL, 0);
 	xmodem_init_xfer (desc);
 	section_size = bfd_section_size (abfd, s);
 	for (i = 0; i < section_size; i += XMODEM_DATASIZE)
@@ -136,11 +134,11 @@ mon960_load (desc, file, hashmark)
 /* NOTE: "ip" is documented as "ir" in the Mon960 UG. */
 /* NOTE: "ir" can't be accessed... but there's an ip and rip. */
 static char *mon960_regnames[NUM_REGS] = {
-  /*  0 */ "pfp", "sp",  "rip", "r3",  "r4",  "r5",  "r6",  "r7", \
-  /*  8 */ "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",\
-  /* 16 */ "g0",  "g1",  "g2",  "g3",  "g4",  "g5",  "g6",  "g7", \
-  /* 24 */ "g8",  "g9",  "g10", "g11", "g12", "g13", "g14", "fp", \
-  /* 32 */ "pc",  "ac",  "tc",  "ip",  "fp0", "fp1", "fp2", "fp3",\
+  /*  0 */ "pfp", "sp",  "rip", "r3",  "r4",  "r5",  "r6",  "r7",
+  /*  8 */ "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",
+  /* 16 */ "g0",  "g1",  "g2",  "g3",  "g4",  "g5",  "g6",  "g7",
+  /* 24 */ "g8",  "g9",  "g10", "g11", "g12", "g13", "g14", "fp",
+  /* 32 */ "pc",  "ac",  "tc",  "ip",  "fp0", "fp1", "fp2", "fp3",
   };
 
 /* Define the monitor command strings. Since these are passed directly
@@ -245,8 +243,8 @@ _initialize_mon960 ()
   mon960_ops.to_remove_breakpoint = memory_remove_breakpoint; 
 
   mon960_ops.to_doc = 
-    "Use an Intel 960 board running the MON960 debug monitor.\n"
-    "Specify the serial device it is connected to (e.g. /dev/ttya).";
+    "Use an Intel 960 board running the MON960 debug monitor.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
 
   mon960_ops.to_open = mon960_open;
   add_target (&mon960_ops);

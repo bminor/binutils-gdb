@@ -1,3 +1,10 @@
+Sun Apr 28 15:08:05 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mon960-rom.c (mon960_cmds): Remove forward decl.
+	(mon960_load): Use current_monitor instead of mon960_cmds.
+	(mon960_regnames): Remove backslashes from line ends.
+	(_initialize_mon960): Fix documentation string.
+
 Sun Apr 28 12:10:35 1996  Fred Fish  <fnf@cygnus.com>
 
 	* symfile.h (psymbol_allocation_list):  Expand comments which
