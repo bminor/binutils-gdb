@@ -225,8 +225,9 @@ scale_and_align_entries ()
 	{
 	  DBG (SAMPLEDEBUG,
 	       printf ("[scale_and_align_entries] pushing 0x%lx to 0x%lx\n",
-		 sym->hist.scaled_addr, sym->scaled_addr + UNITS_TO_CODE));
-	  sym->scaled_addr += UNITS_TO_CODE;
+		       sym->hist.scaled_addr,
+		       sym->hist.scaled_addr + UNITS_TO_CODE));
+	  sym->hist.scaled_addr += UNITS_TO_CODE;
 	}
     }
 }
