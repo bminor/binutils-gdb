@@ -180,24 +180,24 @@ static void fde_chunks_need_space ();
 static void unwind_tmp_obstack_init ();
 static void unwind_tmp_obstack_free ();
 
-static unsigned int read_1u (bfd * abfd, char **p);
-static int read_1s (bfd * abfd, char **p);
-static unsigned int read_2u (bfd * abfd, char **p);
-static int read_2s (bfd * abfd, char **p);
-static unsigned int read_4u (bfd * abfd, char **p);
-static int read_4s (bfd * abfd, char **p);
-static ULONGEST read_8u (bfd * abfd, char **p);
-static LONGEST read_8s (bfd * abfd, char **p);
+static unsigned int read_1u (bfd *abfd, char **p);
+static int read_1s (bfd *abfd, char **p);
+static unsigned int read_2u (bfd *abfd, char **p);
+static int read_2s (bfd *abfd, char **p);
+static unsigned int read_4u (bfd *abfd, char **p);
+static int read_4s (bfd *abfd, char **p);
+static ULONGEST read_8u (bfd *abfd, char **p);
+static LONGEST read_8s (bfd *abfd, char **p);
 
-static ULONGEST read_uleb128 (bfd * abfd, char **p);
-static LONGEST read_sleb128 (bfd * abfd, char **p);
-static CORE_ADDR read_pointer (bfd * abfd, char **p);
-static CORE_ADDR read_encoded_pointer (bfd * abfd, char **p,
+static ULONGEST read_uleb128 (bfd *abfd, char **p);
+static LONGEST read_sleb128 (bfd *abfd, char **p);
+static CORE_ADDR read_pointer (bfd *abfd, char **p);
+static CORE_ADDR read_encoded_pointer (bfd *abfd, char **p,
 				       unsigned char encoding);
 static enum ptr_encoding pointer_encoding (unsigned char encoding);
 
-static LONGEST read_initial_length (bfd * abfd, char *buf, int *bytes_read);
-static ULONGEST read_length (bfd * abfd, char *buf, int *bytes_read,
+static LONGEST read_initial_length (bfd *abfd, char *buf, int *bytes_read);
+static ULONGEST read_length (bfd *abfd, char *buf, int *bytes_read,
 			     int dwarf64);
 
 static int is_cie (ULONGEST cie_id, int dwarf64);
@@ -304,26 +304,17 @@ context_cpy (struct context *dst, struct context *src)
   int regs_size = sizeof (struct context_reg) * NUM_REGS;
   struct context_reg *dreg;
 
-  /* Structure dst contains a pointer to an array of
-   * registers of a given frame as well as src does. This
-   * array was already allocated before dst was passed to
-   * context_cpy but the pointer to it was overriden by
-   * '*dst = *src' and the array was lost. This led to the
-   * situation, that we've had a copy of src placed in dst,
-   * but both of them pointed to the same regs array and
-   * thus we've sometimes blindly rewritten it.  Now we save
-   * the pointer before copying src to dst, return it back
-   * after that and copy the registers into their new place
-   * finally.   ---   mludvig@suse.cz  */
+  /* Since `struct context' contains a pointer to an array with
+     register values, make sure we end up with a copy of that array,
+     and not with a copy of the pointer to that array.  */
   dreg = dst->reg;
   *dst = *src;
   dst->reg = dreg;
-
   memcpy (dst->reg, src->reg, regs_size);
 }
 
 static unsigned int
-read_1u (bfd * abfd, char **p)
+read_1u (bfd *abfd, char **p)
 {
   unsigned ret;
 
@@ -333,7 +324,7 @@ read_1u (bfd * abfd, char **p)
 }
 
 static int
-read_1s (bfd * abfd, char **p)
+read_1s (bfd *abfd, char **p)
 {
   int ret;
 
@@ -343,7 +334,7 @@ read_1s (bfd * abfd, char **p)
 }
 
 static unsigned int
-read_2u (bfd * abfd, char **p)
+read_2u (bfd *abfd, char **p)
 {
   unsigned ret;
 
@@ -353,7 +344,7 @@ read_2u (bfd * abfd, char **p)
 }
 
 static int
-read_2s (bfd * abfd, char **p)
+read_2s (bfd *abfd, char **p)
 {
   int ret;
 
@@ -363,7 +354,7 @@ read_2s (bfd * abfd, char **p)
 }
 
 static unsigned int
-read_4u (bfd * abfd, char **p)
+read_4u (bfd *abfd, char **p)
 {
   unsigned int ret;
 
@@ -373,7 +364,7 @@ read_4u (bfd * abfd, char **p)
 }
 
 static int
-read_4s (bfd * abfd, char **p)
+read_4s (bfd *abfd, char **p)
 {
   int ret;
 
@@ -383,7 +374,7 @@ read_4s (bfd * abfd, char **p)
 }
 
 static ULONGEST
-read_8u (bfd * abfd, char **p)
+read_8u (bfd *abfd, char **p)
 {
   ULONGEST ret;
 
@@ -393,7 +384,7 @@ read_8u (bfd * abfd, char **p)
 }
 
 static LONGEST
-read_8s (bfd * abfd, char **p)
+read_8s (bfd *abfd, char **p)
 {
   LONGEST ret;
 
@@ -403,7 +394,7 @@ read_8s (bfd * abfd, char **p)
 }
 
 static ULONGEST
-read_uleb128 (bfd * abfd, char **p)
+read_uleb128 (bfd *abfd, char **p)
 {
   ULONGEST ret;
   int i, shift;
@@ -427,7 +418,7 @@ read_uleb128 (bfd * abfd, char **p)
 }
 
 static LONGEST
-read_sleb128 (bfd * abfd, char **p)
+read_sleb128 (bfd *abfd, char **p)
 {
   LONGEST ret;
   int i, shift, size, num_read;
@@ -457,7 +448,7 @@ read_sleb128 (bfd * abfd, char **p)
 }
 
 static CORE_ADDR
-read_pointer (bfd * abfd, char **p)
+read_pointer (bfd *abfd, char **p)
 {
   switch (TARGET_ADDR_BIT / TARGET_CHAR_BIT)
     {
@@ -470,11 +461,11 @@ read_pointer (bfd * abfd, char **p)
     }
 }
 
-/* This functions only reads appropriate amount of data from *p 
- * and returns the resulting value. Calling function must handle
- * different encoding possibilities itself!  */
+/* Read the appropriate amount of data from *P and return the
+   resulting value based on ENCODING, which the calling function must
+   provide.  */
 static CORE_ADDR
-read_encoded_pointer (bfd * abfd, char **p, unsigned char encoding)
+read_encoded_pointer (bfd *abfd, char **p, unsigned char encoding)
 {
   CORE_ADDR ret;
 
@@ -519,10 +510,10 @@ read_encoded_pointer (bfd * abfd, char **p, unsigned char encoding)
   return ret;
 }
 
-/* Variable 'encoding' carries 3 different flags:
- * - encoding & 0x0f : size of the address (handled in read_encoded_pointer())
- * - encoding & 0x70 : type (absolute, relative, ...)
- * - encoding & 0x80 : indirect flag (DW_EH_PE_indirect == 0x80).  */
+/* The variable 'encoding' carries three different flags:
+   - encoding & 0x0f : size of the address (handled in read_encoded_pointer())
+   - encoding & 0x70 : type (absolute, relative, ...)
+   - encoding & 0x80 : indirect flag (DW_EH_PE_indirect == 0x80).  */
 enum ptr_encoding
 pointer_encoding (unsigned char encoding)
 {
@@ -547,7 +538,7 @@ pointer_encoding (unsigned char encoding)
 }
 
 static LONGEST
-read_initial_length (bfd * abfd, char *buf, int *bytes_read)
+read_initial_length (bfd *abfd, char *buf, int *bytes_read)
 {
   LONGEST ret = 0;
 
@@ -567,7 +558,7 @@ read_initial_length (bfd * abfd, char *buf, int *bytes_read)
 }
 
 static ULONGEST
-read_length (bfd * abfd, char *buf, int *bytes_read, int dwarf64)
+read_length (bfd *abfd, char *buf, int *bytes_read, int dwarf64)
 {
   if (dwarf64)
     {

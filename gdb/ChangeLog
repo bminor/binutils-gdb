@@ -1,5 +1,8 @@
 2002-10-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf2cfi.c: Fix some formatting problems.
+	(context_cpy, read_encoded_pointer): Clarify comments.
+
 	* x86-64-tdep.c (x86_64_breakpoint_from_pc): Constify.
 	(x86_64_init_abi): Move set_gdbarch_* calls that overlap with the
 	i386 target back into x86_64_gdbarch_init.  Add some comments and
