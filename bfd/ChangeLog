@@ -1,10 +1,19 @@
 2002-08-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-m68hc11.c: Formatting fixes.
+	(elf32_m68hc11_gc_mark_hook): Correct params.  Remove unnecessary test.
+	* elf32-m68hc12.c: Formatting fixes.
+	(elf32_m68hc11_gc_mark_hook): Correct params.  Remove unnecessary test.
+
+2002-08-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* coff-rs6000.c (rs6000coff_vec <object_flags>): Add SEC_CODE and
 	SEC_DATA.
 	(pmac_xcoff_vec): Likewise.
 	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
 	(aix5coff64_vec): Likewise.
+
+2002-08-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_backend_data): Add struct elf_backend_data
 	param to elf_backend_copy_indirect_symbol.

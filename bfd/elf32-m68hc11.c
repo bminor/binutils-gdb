@@ -27,44 +27,39 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/m68hc11.h"
 
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
-PARAMS ((bfd * abfd, bfd_reloc_code_real_type code));
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void m68hc11_info_to_howto_rel
-PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
 
 static bfd_reloc_status_type m68hc11_elf_ignore_reloc
-PARAMS ((bfd *abfd, arelent *reloc_entry,
-         asymbol *symbol, PTR data, asection *input_section,
-         bfd *output_bfd, char **error_message));
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 /* GC mark and sweep.  */
 static asection *elf32_m68hc11_gc_mark_hook
-PARAMS ((bfd *abfd, struct bfd_link_info *info,
-         Elf_Internal_Rela *rel, struct elf_link_hash_entry *h,
-         Elf_Internal_Sym *sym));
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
+	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean elf32_m68hc11_gc_sweep_hook
-PARAMS ((bfd *abfd, struct bfd_link_info *info,
-         asection *sec, const Elf_Internal_Rela *relocs));
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 static boolean elf32_m68hc11_check_relocs
-PARAMS ((bfd * abfd, struct bfd_link_info * info,
-         asection * sec, const Elf_Internal_Rela * relocs));
+  PARAMS ((bfd *, struct bfd_link_info *, asection *,
+	   const Elf_Internal_Rela *));
 static boolean elf32_m68hc11_relocate_section
-PARAMS ((bfd *output_bfd, struct bfd_link_info *info,
-         bfd *input_bfd, asection *input_section,
-         bfd_byte *contents, Elf_Internal_Rela *relocs,
-         Elf_Internal_Sym *local_syms, asection **local_sections));
+  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static boolean m68hc11_elf_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 static void m68hc11_elf_relax_delete_bytes
-PARAMS ((bfd *abfd, asection *sec, bfd_vma addr, int count));
+  PARAMS ((bfd *, asection *, bfd_vma, int));
 static void m68hc11_relax_group
-PARAMS ((bfd *abfd, asection *sec, bfd_byte *contents,
-         unsigned value, unsigned long offset, unsigned long end_group));
-static int compare_reloc PARAMS ((const void*, const void*));
+  PARAMS ((bfd *, asection *, bfd_byte *, unsigned,
+	   unsigned long, unsigned long));
+static int compare_reloc PARAMS ((const void *, const void *));
 
 
-boolean _bfd_m68hc11_elf_merge_private_bfd_data PARAMS ((bfd*, bfd*));
-boolean _bfd_m68hc11_elf_set_private_flags PARAMS ((bfd*, flagword));
-boolean _bfd_m68hc11_elf_print_private_bfd_data PARAMS ((bfd*, PTR));
+boolean _bfd_m68hc11_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
+boolean _bfd_m68hc11_elf_set_private_flags PARAMS ((bfd *, flagword));
+boolean _bfd_m68hc11_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
 
 /* Use REL instead of RELA to save space */
 #define USE_REL
@@ -407,8 +402,8 @@ m68hc11_info_to_howto_rel (abfd, cache_ptr, dst)
 }
 
 static asection *
-elf32_m68hc11_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+elf32_m68hc11_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
@@ -434,15 +429,8 @@ elf32_m68hc11_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      if (!(elf_bad_symtab (abfd)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && !((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-	       && sym->st_shndx != SHN_COMMON))
-	{
-	  return bfd_section_from_elf_index (abfd, sym->st_shndx);
-	}
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
   return NULL;
 }
 
