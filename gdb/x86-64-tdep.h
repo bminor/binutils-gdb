@@ -37,5 +37,6 @@ gdbarch_pc_in_sigtramp_ftype x86_64_linux_in_sigtramp;
 CORE_ADDR x86_64_linux_frame_chain (struct frame_info *fi);
 CORE_ADDR x86_64_init_frame_pc (int fromleaf, struct frame_info *fi);
 
+void x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
 #endif

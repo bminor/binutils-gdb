@@ -1,3 +1,17 @@
+2002-12-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.h (x86_64_init_abi): New prototype.
+	* x86-64-tdep.c (i386_fp_regnum_p): Remove function.
+	(x86_64_init_abi): Make non-static.  Set number of pseudo
+	registers to 0.
+	(x86_64_gdbarch_init): Remove function.
+	(_initialize_x86_64_tdep): Renove register_gdbarch_init call.
+	Remove code dealing with dissambly.
+	* x86-64-linux-tdep.c (x86_64_linux_init_abi): New function.
+	(_initialize_x86_64_linux_tdep): New function.
+	* config/i386/x86-64linux.mt (TDEPFILES): Add i386-tdep.o and
+	i386-tdep.o.
+
 2002-12-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* osabi.c: Include "gdb_assert.h" and "gdb_string.h".

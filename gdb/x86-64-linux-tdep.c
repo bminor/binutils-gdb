@@ -189,3 +189,20 @@ x86_64_init_frame_pc (int fromleaf, struct frame_info *fi)
   else
     return cfi_init_frame_pc (fromleaf, fi);
 }
+
+
+static void
+x86_64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  x86_64_init_abi (info, gdbarch);
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_x86_64_linux_tdep (void);
+
+void
+_initialize_x86_64_linux_tdep (void)
+{
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_LINUX,
+			  x86_64_linux_init_abi);
+}
