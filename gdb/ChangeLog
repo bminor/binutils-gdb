@@ -1,3 +1,8 @@
+2004-05-10  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-setshow.c (cmd_show_list): Check for "show" in the middle
+	of prefixes.  Don't print the prefix twice in the CLI.
+
 2004-05-10  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-tdep.h (struct gdbarch_tdep): Change definition of
