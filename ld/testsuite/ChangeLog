@@ -1,4 +1,9 @@
 2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
+
+	* ld-sh/sh64/gotplt.d, ld-sh/sh64/gotplt.map,
+	ld-sh/sh64/gotplt.s: New test.
+	
+2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
 	* ld-sh/sh64/cmpct1.sd : Fix linked file name.
 	* ld-sh/sh64/crange3.dd: Likewise.
 	
