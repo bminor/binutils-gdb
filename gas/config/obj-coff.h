@@ -278,6 +278,8 @@ obj_symbol_type;
 
 #else /* BFD_ASSEMBLER */
 
+extern void obj_coff_section PARAMS ((int));
+
 /* The number of auxiliary entries */
 #define S_GET_NUMBER_AUXILIARY(s)	(coffsymbol((s)->bsym)->native->u.syment.n_numaux)
 /* The number of auxiliary entries */
@@ -286,8 +288,10 @@ obj_symbol_type;
 /* True if a symbol name is in the string table, i.e. its length is > 8. */
 #define S_IS_STRING(s)		(strlen(S_GET_NAME(s)) > 8 ? 1 : 0)
 
+extern int S_SET_DATA_TYPE PARAMS ((struct symbol *, int));
 extern int S_SET_STORAGE_CLASS PARAMS ((struct symbol *, int));
 extern int S_GET_STORAGE_CLASS PARAMS ((struct symbol *));
+extern void SA_SET_SYM_ENDNDX PARAMS ((struct symbol *, struct symbol *));
 
 #endif /* ! BFD_ASSEMBLER */
 
@@ -609,6 +613,8 @@ extern void coff_frob_symbol PARAMS ((struct symbol *, int *));
 extern void coff_frob_file PARAMS ((void));
 #define obj_frob_symbol(S,P) 	coff_frob_symbol(S,&P)
 #define obj_frob_file()		coff_frob_file ()
+
+extern struct symbol *coff_last_function;
 
 /* Forward the segment of a forwarded symbol.  */
 #ifndef TE_I386AIX

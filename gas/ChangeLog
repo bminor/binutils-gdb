@@ -1,3 +1,8 @@
+Mon Mar 28 14:38:23 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/obj-coff.h (SEPARATE_STAB_SECTIONS): Always define.
+	(OBJ_PROCESS_STAB): Don't define.
+
 Mon Mar 28 12:40:25 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-aout.c (obj_aout_frob_symbols): Don't let BFD clobber
