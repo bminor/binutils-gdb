@@ -560,6 +560,7 @@ extern const bfd_target m68klinux_vec;
 extern const bfd_target m68klynx_aout_vec;
 extern const bfd_target m68klynx_coff_vec;
 extern const bfd_target m68knetbsd_vec;
+extern const bfd_target m68ksysvcoff_vec;
 extern const bfd_target m68k4knetbsd_vec;
 extern const bfd_target m88kbcs_vec;
 extern const bfd_target m88kmach3_vec;
@@ -760,6 +761,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&m68klynx_aout_vec,
 	&m68klynx_coff_vec,
 	&m68knetbsd_vec,
+	&m68ksysvcoff_vec,
 	&m88kbcs_vec,
 	&m88kmach3_vec,
 	&newsos3_vec,
@@ -849,7 +851,7 @@ const bfd_target * const bfd_target_vector[] = {
 /* bfd_default_vector[0] contains either the address of the default vector,
    if there is one, or zero if there isn't.  */
 
-const bfd_target * const bfd_default_vector[] = {
+const bfd_target *bfd_default_vector[] = {
 #ifdef DEFAULT_VECTOR
 	&DEFAULT_VECTOR,
 #endif
@@ -860,7 +862,7 @@ const bfd_target * const bfd_default_vector[] = {
    names of the matching targets in an array.  This variable is the maximum
    number of entries that the array could possibly need.  */
 const size_t _bfd_target_vector_entries = sizeof(bfd_target_vector)/sizeof(*bfd_target_vector);
-
+
 /* This array maps configuration triplets onto BFD vectors.  */
 
 struct targmatch
@@ -881,6 +883,101 @@ static const struct targmatch bfd_target_match[] = {
 #include "targmatch.h"
   { NULL, NULL }
 };
+
+static const bfd_target *find_target PARAMS ((const char *));
+
+/* Find a target vector, given a name or configuration triplet.  */
+
+static const bfd_target *
+find_target (name)
+     const char *name;
+{
+  const bfd_target * const *target;
+  const struct targmatch *match;
+
+  for (target = &bfd_target_vector[0]; *target != NULL; target++)
+    if (strcmp (name, (*target)->name) == 0)
+      return *target;
+
+  /* If we couldn't match on the exact name, try matching on the
+     configuration triplet.  FIXME: We should run the triplet through
+     config.sub first, but that is hard.  */
+  for (match = &bfd_target_match[0]; match->triplet != NULL; match++)
+    {
+      if (fnmatch (match->triplet, name, 0) == 0)
+	{
+	  while (match->vector == NULL)
+	    ++match;
+	  if (match->vector != UNSUPPORTED_TARGET)
+	    return match->vector;
+	  break;
+	}
+    }
+
+  bfd_set_error (bfd_error_invalid_target);
+  return NULL;
+}
+
+/*
+FUNCTION
+	bfd_set_default_target
+
+SYNOPSIS
+	boolean bfd_set_default_target (const char *name);
+
+DESCRIPTION
+	Set the default target vector to use when recognizing a BFD.
+	This takes the name of the target, which may be a BFD target
+	name or a configuration triplet.
+*/
+
+boolean
+bfd_set_default_target (name)
+     const char *name;
+{
+  const bfd_target *old_default;
+  const bfd_target *target;
+
+  old_default = bfd_default_vector[0];
+  if (old_default != NULL)
+    {
+      register const struct targmatch *match;
+
+      /* Try to save some strcmp and fnmatch calls by seeing if we
+         already have the default.  */
+
+      if (strcmp (name, old_default->name) == 0)
+	return true;
+
+      for (match = &bfd_target_match[0]; match->triplet != NULL; match++)
+	{
+	  if (match->vector == old_default)
+	    {
+	      const struct targmatch *back;
+
+	      back = match;
+	      do
+		{
+		  if (fnmatch (back->triplet, name, 0) == 0)
+		    return true;
+
+		  if (back == &bfd_target_match[0])
+		    break;
+
+		  --back;
+		}
+	      while (back->vector == NULL);
+	    }
+	}
+    }
+
+  target = find_target (name);
+  if (target == NULL)
+    return false;
+
+  bfd_default_vector[0] = target;
+  return true;
+}
 
 /*
 FUNCTION
@@ -906,9 +1003,8 @@ bfd_find_target (target_name, abfd)
      const char *target_name;
      bfd *abfd;
 {
-  const bfd_target * const *target;
   const char *targname;
-  const struct targmatch *match;
+  const bfd_target *target;
 
   if (target_name != NULL)
     targname = target_name;
@@ -919,44 +1015,22 @@ bfd_find_target (target_name, abfd)
   if (targname == NULL || strcmp (targname, "default") == 0)
     {
       abfd->target_defaulted = true;
-      abfd->xvec = bfd_target_vector[0];
-      return bfd_target_vector[0];
+      if (bfd_default_vector[0] != NULL)
+	abfd->xvec = bfd_default_vector[0];
+      else
+	abfd->xvec = bfd_target_vector[0];
+      return abfd->xvec;
     }
 
   abfd->target_defaulted = false;
 
-  for (target = &bfd_target_vector[0]; *target != NULL; target++)
-    {
-      if (strcmp (targname, (*target)->name) == 0)
-	{
-	  abfd->xvec = *target;
-	  return *target;
-	}
-    }
+  target = find_target (targname);
+  if (target == NULL)
+    return NULL;
 
-  /* If we couldn't match on the exact name, try matching on the
-     configuration triplet.  FIXME: We should run the triplet through
-     config.sub first, but that is hard.  */
-  for (match = &bfd_target_match[0]; match->triplet != NULL; match++)
-    {
-      if (fnmatch (match->triplet, targname, 0) == 0)
-	{
-	  while (match->vector == NULL)
-	    ++match;
-	  if (match->vector != UNSUPPORTED_TARGET)
-	    {
-	      abfd->xvec = match->vector;
-	      return match->vector;
-	    }
-	  break;
-	}
-    }
-
-  bfd_set_error (bfd_error_invalid_target);
-
-  return NULL;
+  abfd->xvec = target;
+  return target;
 }
-
 
 /*
 FUNCTION

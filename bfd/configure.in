@@ -293,6 +293,7 @@ changequote([,])dnl
   rs6000-*-*)		COREFILE=rs6000-core.o ;;
   powerpc-*-aix4*)	COREFILE=rs6000-core.o ;;
   powerpc-*-aix*)	COREFILE=rs6000-core.o ;;
+  powerpc-*-beos*)	;;
   sparc-*-netbsd*)
 	COREFILE=netbsd-core.o
 	;;
@@ -443,9 +444,7 @@ do
     bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.o elf32.o $elf ecofflink.o" ;;
     bfd_elf64_bigmips_vec) 	tb="$tb elf64-mips.o elf64.o elf32-mips.o elf32.o $elf ecofflink.o"
 				target64=true ;;
-# start-sanitize-d10v
     bfd_elf32_d10v_vec)		tb="$tb elf32-d10v.o elf32.o $elf" ;;
-# end-sanitize-d10v
 # start-sanitize-d30v
     bfd_elf32_d30v_vec)		tb="$tb elf32-d30v.o elf32.o $elf" ;;
 # end-sanitize-d30v
@@ -482,6 +481,7 @@ do
 				target64=true ;;
     ecoff_big_vec)		tb="$tb coff-mips.o ecoff.o ecofflink.o" ;;
     ecoff_little_vec)		tb="$tb coff-mips.o ecoff.o ecofflink.o" ;;
+    ecoff_biglittle_vec)	tb="$tb coff-mips.o ecoff.o ecofflink.o" ;;
     ecoffalpha_little_vec)	tb="$tb coff-alpha.o ecoff.o ecofflink.o"
 				target64=true ;;
     evax_alpha_vec)		tb="$tb evax-alpha.o evax-emh.o evax-egsd.o evax-etir.o evax-misc.o"
@@ -517,6 +517,7 @@ do
     m68knetbsd_vec)		tb="$tb m68knetbsd.o aout32.o" ;;
     m68k4knetbsd_vec)		tb="$tb m68k4knetbsd.o aout32.o" ;;
     m68kaux_coff_vec)		tb="$tb coff-aux.o coff-m68k.o cofflink.o" ;;
+    m68ksysvcoff_vec)		tb="$tb coff-svm68k.o cofflink.o" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
     newsos3_vec)		tb="$tb newsos3.o aout32.o" ;;
     nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;

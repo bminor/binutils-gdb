@@ -108,11 +108,9 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-# start-sanitize-d10v
   d10v-*-*)
     targ_defvec=bfd_elf32_d10v_vec
     ;;
-# end-sanitize-d10v
 
 # start-sanitize-d30v
   d30v-*-*)
@@ -262,6 +260,9 @@ case "${targ}" in
     targ_defvec=m68kcoffun_vec
     targ_underscore=yes
     ;;
+  m68*-motorola-sysv*)
+    targ_defvec=m68ksysvcoff_vec
+    ;;
   m68*-hp-bsd*)
     targ_defvec=hp300bsd_vec
     targ_underscore=yes
@@ -387,6 +388,10 @@ case "${targ}" in
     targ_defvec=ecoff_big_vec
     targ_selvecs=ecoff_little_vec
     ;;
+  mips*-*-lnews*)
+    targ_defvec=ecoff_biglittle_vec
+    targ_selvecs="ecoff_little_vec ecoff_big_vec"
+    ;;
   mips*-*-mach3*)
     targ_defvec=aout_mips_little_vec
     targ_cflags=-DSTAT_FOR_EXEC
@@ -437,7 +442,7 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  powerpc-*-aix*)
+  powerpc-*-aix* | powerpc-*-beos*)
     targ_defvec=rs6000coff_vec
     ;;
   powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \

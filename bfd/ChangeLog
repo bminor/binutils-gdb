@@ -1,5 +1,23 @@
 Thu Mar 20 12:39:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from Philippe De Muyter <phdm@info.ucl.ac.be>.
+	* coff-svm68k.c: New file.  Just defines some macros and includes
+	coff-m68k.c.
+	* coff-m68k.c: Add functions to handle common addends, moved in
+	from cf-m68klynx.c.  Control them using COFF_COMMON_ADDEND macro.
+	Control whether relocs are visible using STATIC_RELOCS.
+	* cf-m68klynx.c: Simplify greatly: just define macros to control
+	coff-m68k.c.
+	* coff-aux.c: Likewise.  Just leave add_one_symbol routine.
+	* targets. (m68ksysvcoff_vec): Declare.
+	(bfd_target_vector): Add m68ksysvcoff_vec.
+	* config.bfd (m68*-motorola-sysv*): New target.
+	* configure.in (m68ksysvcoff_vec): New vector.
+	* configure: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+ 	(BFD32_BACKENDS): Add coff-svm68k.o.
+	(BFD32_BACKENDS_CFILES): Add coff-svm68k.c.
+
 	* binary.c (binary_set_section_contents): Don't get misled if the
  	first section is not loadable.  From Matthew L. Martin
  	<mlm@xedia.com>.

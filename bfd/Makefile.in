@@ -205,6 +205,7 @@ BFD32_BACKENDS = \
 	coff-rs6000.o \
 	coff-sh.o \
 	coff-sparc.o \
+	coff-svm68k.o \
 	$(start-sanitize-tic80) \
 	coff-tic80.o \
 	$(end-sanitize-tic80) \
@@ -315,6 +316,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-rs6000.c \
 	coff-sh.c \
 	coff-sparc.c \
+	coff-svm68k.c \
 	coff-u68k.c \
 	coff-we32k.c \
 	coff-w65.c \
@@ -1015,6 +1017,9 @@ coff-sh.o: coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-sparc.o: coff-sparc.c $(INCDIR)/coff/sparc.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+coff-svm68k.o: coff-svm68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
+  $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
+  coffcode.h coffswap.h
 coff-u68k.o: coff-u68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
@@ -1033,7 +1038,8 @@ ecoff.o: ecoff.c $(INCDIR)/bfdlink.h $(INCDIR)/aout/ar.h \
   libcoff.h libecoff.h
 ecofflink.o: ecofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/objalloc.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/coff/internal.h \
-  $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h
+  $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
+  libcoff.h libecoff.h
 elf32-gen.o: elf32-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h

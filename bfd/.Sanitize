@@ -117,6 +117,7 @@ coff-ppc.c
 coff-rs6000.c
 coff-sh.c
 coff-sparc.c
+coff-svm68k.c
 coff-u68k.c
 coff-we32k.c
 coff-w65.c
