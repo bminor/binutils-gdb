@@ -3287,7 +3287,8 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		  }
 
 		if (*p++ != ';')
-		  error ("Remote register badly formatted: %s\nhere:", buf, p);
+		  error ("Remote register badly formatted: %s\nhere: %s",
+			 buf, p);
 	      }
 	  }
 	  /* fall through */
