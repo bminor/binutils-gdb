@@ -3699,7 +3699,11 @@ elf32_arm_final_write_processing (abfd, linker)
 
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
+#ifdef __QNXTARGET__
+#define ELF_MAXPAGESIZE			0x1000
+#else
 #define ELF_MAXPAGESIZE			0x8000
+#endif
 
 #define bfd_elf32_bfd_copy_private_bfd_data	elf32_arm_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	elf32_arm_merge_private_bfd_data

@@ -7331,7 +7331,11 @@ elf32_shlin_grok_psinfo (abfd, note)
 #define TARGET_LITTLE_NAME	"elf32-shl"
 #define ELF_ARCH		bfd_arch_sh
 #define ELF_MACHINE_CODE	EM_SH
-#define ELF_MAXPAGESIZE		128
+#ifdef __QNXTARGET__
+#define ELF_MAXPAGESIZE		0x1000
+#else
+#define ELF_MAXPAGESIZE		0x80
+#endif
 
 #define elf_symbol_leading_char '_'
 

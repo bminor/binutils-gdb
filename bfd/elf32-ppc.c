@@ -6026,7 +6026,11 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 #define TARGET_BIG_NAME		"elf32-powerpc"
 #define ELF_ARCH		bfd_arch_powerpc
 #define ELF_MACHINE_CODE	EM_PPC
+#ifdef __QNXTARGET__
+#define ELF_MAXPAGESIZE		0x1000
+#else
 #define ELF_MAXPAGESIZE		0x10000
+#endif
 #define elf_info_to_howto	ppc_elf_info_to_howto
 
 #ifdef  EM_CYGNUS_POWERPC

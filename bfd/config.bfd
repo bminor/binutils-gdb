@@ -155,6 +155,7 @@ case "${targ}" in
     targ_defvec=armnetbsd_vec
     targ_selvecs="bfd_elf32_littlearm_vec bfd_elf32_bigarm_vec"
     targ_underscore=yes
+    targ_cflags=-D__QNXTARGET__
     ;;
   arm-*-nto* | nto*arm*)
     targ_defvec=bfd_elf32_littlearm_vec

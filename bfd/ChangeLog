@@ -1,3 +1,10 @@
+2003-07-12  Jeff Baker  <jbaker@qnx.com>
+
+	* bfd/config.bfd (__QNXTARGET__): Define for Neutrino architectures.
+	* bfd/elf32-arm.h (ELF_MAXPAGESIZE): Set to 4k for Neutrino.
+	* bfd/elf32-sh.c (ELF_MAXPAGESIZE): Set to 4k for Neutrino.
+	* bfd/elf32-ppc.c (ELF_MAXPAGESIZE): Set to 4k for Neutrino.
+
 2003-07-12  Jeff Muizelaar  <muizelaar@rogers.com>
 
 	* coffcode.h (coff_set_section_contents): Set the
