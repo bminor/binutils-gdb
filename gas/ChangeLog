@@ -1,3 +1,9 @@
+2004-09-30  Vladimir Ivanov  <vladitx@nucleusys.com>
+
+	* gas/config/tc-arm.c (mav_reg_required_here): Allow REG_TYPE_CN
+	as alternative when REG_TYPE_MVF, REG_TYPE_MVD, REG_TYPE_MVFX or
+	REG_TYPE_MVDX is expected.
+
 2004-09-29  Marc Bevand  <m.bevand@gmail.com>
 
 	* doc/c-i386.texi (i386-Mnemonics): Fix typo.

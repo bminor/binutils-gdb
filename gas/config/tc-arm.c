@@ -10254,6 +10254,24 @@ mav_reg_required_here (str, shift, regtype)
   /* Restore the start point.  */
   *str = start;
 
+  /* Try generic coprocessor name if applicable.  */
+  if (regtype == REG_TYPE_MVF ||
+      regtype == REG_TYPE_MVD ||
+      regtype == REG_TYPE_MVFX ||
+      regtype == REG_TYPE_MVDX)
+    {
+      if ((reg = arm_reg_parse (str, all_reg_maps[REG_TYPE_CN].htab)) != FAIL)
+	{
+	  if (shift >= 0)
+	    inst.instruction |= reg << shift;
+
+	  return reg;
+	}
+
+      /* Restore the start point.  */
+      *str = start;
+    }
+
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
   inst.error = _(all_reg_maps[regtype].expected);
@@ -10494,7 +10512,7 @@ do_mav_quad_6a (str)
      char * str;
 {
   do_mav_quad (str, MAV_MODE6, REG_TYPE_MVAX, REG_TYPE_MVFX, REG_TYPE_MVFX,
-	     REG_TYPE_MVFX);
+	       REG_TYPE_MVFX);
 }
 
 static void
@@ -10502,7 +10520,7 @@ do_mav_quad_6b (str)
      char * str;
 {
   do_mav_quad (str, MAV_MODE6, REG_TYPE_MVAX, REG_TYPE_MVAX, REG_TYPE_MVFX,
-	     REG_TYPE_MVFX);
+	       REG_TYPE_MVFX);
 }
 
 /* cfmvsc32<cond> DSPSC,MVDX[15:0].  */
