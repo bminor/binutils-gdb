@@ -1175,8 +1175,10 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
   lang_statement_union_type **os_tail;
   etree_type *load_base;
   int isdyn = 0;
+  asection *sec;
 
   secname = bfd_get_section_name (s->owner, s);
+
   if (! link_info.relocatable
       && link_info.combreloc
       && (s->flags & SEC_ALLOC)
@@ -1260,8 +1262,12 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 
   /* Choose a unique name for the section.  This will be needed if the
      same section name appears in the input file with different
-     loadable or allocatable characteristics.  */
-  if (bfd_get_section_by_name (output_bfd, secname) != NULL)
+     loadable or allocatable characteristics.  But if the section
+     already exists but does not have any flags set, then it has been
+     been created by the linker, probably as a result of a --section-start
+     command line switch.  */
+  if ((sec = bfd_get_section_by_name (output_bfd, secname)) != NULL
+      && bfd_get_section_flags (output_bfd, sec) != 0)
     {
       secname = bfd_get_unique_section_name (output_bfd, secname, &count);
       if (secname == NULL)

@@ -612,6 +612,7 @@ lang_output_section_find_1 (const char *const name, int constraint)
   for (u = lang_output_section_statement.head; u != NULL; u = lookup->next)
     {
       lookup = &u->output_section_statement;
+      
       if (strcmp (name, lookup->name) == 0
 	  && lookup->constraint != -1
 	  && (constraint == 0 || constraint == lookup->constraint))
