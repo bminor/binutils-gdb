@@ -1976,7 +1976,8 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 		      auxp->x_file.x_n.x_offset = STRING_SIZE_SIZE + indx;
 		    }
 		}
-	      else if (isymp->n_sclass != C_STAT || isymp->n_type != T_NULL)
+	      else if ((isymp->n_sclass != C_STAT || isymp->n_type != T_NULL)
+		       && isymp->n_sclass != C_NT_WEAK)
 		{
 		  unsigned long indx;
 
@@ -2935,25 +2936,32 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
               if (h->class == C_NT_WEAK && h->numaux == 1)
 		{
 		  /* See _Microsoft Portable Executable and Common Object
-                   * File Format Specification_, section 5.5.3.
-		   * Note that weak symbols without aux records are a GNU
-		   * extension.
-		   * FIXME: All weak externals are treated as having
-		   * characteristics IMAGE_WEAK_EXTERN_SEARCH_LIBRARY (2).
-		   * There are no known uses of the other two types of
-		   * weak externals.
-		   */
+                     File Format Specification_, section 5.5.3.
+		     Note that weak symbols without aux records are a GNU
+		     extension.
+		     FIXME: All weak externals are treated as having
+		     characteristics IMAGE_WEAK_EXTERN_SEARCH_LIBRARY (2).
+		     There are no known uses of the other two types of
+		     weak externals.  */
 		  asection *sec;
 		  struct coff_link_hash_entry *h2 =
 		    input_bfd->tdata.coff_obj_data->sym_hashes[
 		    h->aux->x_sym.x_tagndx.l];
 
-		  sec = h2->root.u.def.section;
-		  val = h2->root.u.def.value + sec->output_section->vma
-		    + sec->output_offset;
+		  if (!h2 || h2->root.type == bfd_link_hash_undefined)
+		    {
+		      sec = bfd_abs_section_ptr;
+		      val = 0;
+		    }
+		  else
+		    {
+		      sec = h2->root.u.def.section;
+		      val = h2->root.u.def.value
+			+ sec->output_section->vma + sec->output_offset;
+		    }
 		}
 	      else
-                /* This is a GNU extension. */
+                /* This is a GNU extension.  */
 		val = 0;
 	    }
 
