@@ -1,5 +1,8 @@
 Thu Feb  9 12:43:56 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.stabs/weird.exp: Remove "Haven't examined" comment which
+	went with the const70 xfail.  The xfail went away a year ago.
+
 	* gdb.base/signals.exp: Rename a bunch of tests to give unique names.
 
 	* gdb.base/corefile.exp: Give backtrace test unique name.  xfail
