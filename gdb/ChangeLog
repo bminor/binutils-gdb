@@ -1,3 +1,11 @@
+Wed Jun 17 13:08:33 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* xcoffexec.c:  Remove ' from comment.
+
+	* xm-sun3os4.h:  Define MALLOC_INCOMPATIBLE to avoid conflicts
+	with decls of malloc in c-exp.tab.c (as produced by yacc).
+	There's got to be a better way to do this...
+
 Wed Jun 17 11:10:40 1992  Fred Fish  (fnf@cygnus.com)
 
 	* partial-stab.h: Convert single rindex use to strrchr.
