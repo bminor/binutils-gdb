@@ -1103,30 +1103,36 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       break;
 
     case CLI_COMMAND:
-      /* A CLI command was read from the input stream */
-      /* This will be removed as soon as we have a complete set of
-         mi commands */
-      /* echo the command on the console. */
-      fprintf_unfiltered (gdb_stdlog, "%s\n", context->command);
-      mi_execute_cli_command (context->command, 0, NULL);
+      {
+	char *argv[2];
+	/* A CLI command was read from the input stream.  */
+	/* This "feature" will be removed as soon as we have a
+	   complete set of mi commands.  */
+	/* Echo the command on the console.  */
+	fprintf_unfiltered (gdb_stdlog, "%s\n", context->command);
+	/* Call the "console" interpreter.  */
+	argv[0] = "console";
+	argv[1] = context->command;
+	mi_cmd_interpreter_exec ("-interpreter-exec", argv, 2);
 
-      /* If we changed interpreters, DON'T print out anything. */
-      if (current_interp_named_p (INTERP_MI)
-	  || current_interp_named_p (INTERP_MI1)
-	  || current_interp_named_p (INTERP_MI2)
-	  || current_interp_named_p (INTERP_MI3))
-	{
-	  /* print the result */
-	  /* FIXME: Check for errors here. */
-	  fputs_unfiltered (context->token, raw_stdout);
-	  fputs_unfiltered ("^done", raw_stdout);
-	  mi_out_put (uiout, raw_stdout);
-	  mi_out_rewind (uiout);
-	  fputs_unfiltered ("\n", raw_stdout);
-	  args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
-	  args->rc = MI_CMD_DONE;
-	}
-      break;
+	/* If we changed interpreters, DON'T print out anything. */
+	if (current_interp_named_p (INTERP_MI)
+	    || current_interp_named_p (INTERP_MI1)
+	    || current_interp_named_p (INTERP_MI2)
+	    || current_interp_named_p (INTERP_MI3))
+	  {
+	    /* print the result */
+	    /* FIXME: Check for errors here. */
+	    fputs_unfiltered (context->token, raw_stdout);
+	    fputs_unfiltered ("^done", raw_stdout);
+	    mi_out_put (uiout, raw_stdout);
+	    mi_out_rewind (uiout);
+	    fputs_unfiltered ("\n", raw_stdout);
+	    args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
+	    args->rc = MI_CMD_DONE;
+	  }
+	break;
+      }
 
     }
 

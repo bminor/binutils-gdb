@@ -1,5 +1,8 @@
 2005-02-20  Andrew Cagney  <cagney@gnu.org>
 
+	* mi/mi-main.c (captured_mi_execute_command): Use
+	mi_cmd_interpreter_exec.
+
 	* cli/cli-decode.c (add_setshow_optional_filename_cmd): New
 	function.
 	* cli/cli-setshow.c (deprecated_show_value_hack) 
