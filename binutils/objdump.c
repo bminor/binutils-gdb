@@ -170,11 +170,11 @@ DEFUN (slurp_symtab, (abfd),
 /* Sort symbols into value order */
 static int 
 comp (ap, bp)
-     asymbol **ap;
-     asymbol **bp;
+     PTR ap;
+     PTR bp;
 {
-  asymbol *a = *ap;
-  asymbol *b = *bp;
+  asymbol *a = *(asymbol **)ap;
+  asymbol *b = *(asymbol **)bp;
   int diff;
 
   if (a->name == (char *) NULL || (a->flags & (BSF_DEBUGGING)))

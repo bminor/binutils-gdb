@@ -1,4 +1,23 @@
-/*** size.c -- report size of various sections of an executable file */
+/* size.c -- report size of various sections of an executable file.
+   Copyright (C) 1991 Free Software Foundation, Inc.
+
+This file is part of GNU Binutils.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+
 /* Extensions/incompatibilities:
    o - BSD output has filenames at the end.
    o - BSD output can appear in different radicies.
@@ -9,10 +28,10 @@
    If you write shell scripts which manipulate this info then you may be
    out of luck; there's no +predantic switch.
 */
-#include "sysdep.h"
-#include "bfd.h"
-#include "getopt.h"
 
+#include "bfd.h"
+#include "sysdep.h"
+#include "getopt.h"
 
 #ifndef BSD_DEFAULT
 #define BSD_DEFAULT 1
@@ -27,6 +46,8 @@ enum {decimal, octal, hex} radix = decimal;
 int berkeley_format = BSD_DEFAULT; /* 0 means use AT&T-style output */
 int show_version = 0;
 int show_help = 0;
+
+int return_code = 0;
 
 /* IMPORTS */
 extern char *program_version;
@@ -57,12 +78,12 @@ usage ()
   exit(1);
 }
 
-struct option long_options[] = {{"radix",   1, 0, 0},
-				{"format",  1, 0, 0},
-				{"version", 0, &show_version, 1},
-				{"target",  2, NULL, NULL},
-				{"help",    0, &show_help, 1},
-				{0, 0, 0, 0}};
+struct option long_options[] = {{"radix",   no_argument, 0, 0},
+				{"format",  required_argument, 0, 0},
+				{"version", no_argument, &show_version, 1},
+				{"target",  optional_argument, NULL, NULL},
+				{"help",    no_argument, &show_help, 1},
+				{0, no_argument, 0, 0}};
 
 int
 main (argc, argv)
@@ -74,6 +95,8 @@ main (argc, argv)
   int option_index = 0;
   extern int optind;		/* steps thru options */
   program_name = *argv;
+
+  bfd_init();
 
   while ((c = getopt_long(argc, argv, "ABVdox", long_options,
 			  &option_index)) != EOF)
@@ -121,21 +144,13 @@ main (argc, argv)
   if (show_version) printf("%s version %s\n", program_name, program_version);
   if (show_help) usage();
 	
-  if (berkeley_format)
-#if 0	/* intel doesn't like bss/stk b/c they don't gave core files */
-    puts((radix == octal) ? "text\tdata\tbss/stk\toct\thex\tfilename" :
-	 "text\tdata\tbss/stk\tdec\thex\tfilename");
-#else
-    puts((radix == octal) ? "text\tdata\tbss\toct\thex\tfilename" :
-	 "text\tdata\tbss\tdec\thex\tfilename");
-#endif
   if (optind == argc)
     display_file ("a.out");
   else
     for (; optind < argc;)
       display_file (argv[optind++]);
 
-  return 0;
+  return return_code;
 }
 
 /** Display a file's stats */
@@ -144,7 +159,7 @@ void
 display_bfd (abfd)
      bfd *abfd;
 {
-  char *core_cmd;
+  CONST  char *core_cmd;
 
   if (bfd_check_format(abfd, bfd_archive)) return;
 
@@ -165,6 +180,7 @@ display_bfd (abfd)
   }
   
   printf("Unknown file format: %s.", bfd_get_filename(abfd));
+  return_code = 3;
 
  done:
 
@@ -182,6 +198,7 @@ display_file(filename)
   file = bfd_openr (filename, target);
   if (file == NULL) {
     bfd_perror (filename);
+    return_code = 1;
     return;
   }
 
@@ -192,8 +209,10 @@ display_file(filename)
 
        arfile = bfd_openr_next_archived_file (file, arfile);
       if (arfile == NULL) {
-	if (bfd_error != no_more_archived_files)
+	if (bfd_error != no_more_archived_files) {
 	  bfd_perror (bfd_get_filename (file));
+	  return_code = 2;
+        }
 	return;
       }
 
@@ -232,6 +251,7 @@ static char *text_section_name = ".text";
 void print_berkeley_format(abfd)
 bfd *abfd;
 {
+  static int files_seen = 0;
   sec_ptr bsssection = NULL;
   sec_ptr datasection = NULL;
   sec_ptr textsection = NULL;
@@ -243,12 +263,12 @@ bfd *abfd;
   
   if ((textsection = bfd_get_section_by_name (abfd, text_section_name))
       != NULL) {
-    textsize = bfd_section_size (abfd, textsection);
+    textsize = bfd_get_section_size_before_reloc (textsection);
   }
 
   if ((datasection = bfd_get_section_by_name (abfd, data_section_name))
       != NULL) {
-    datasize = bfd_section_size(abfd, datasection);
+    datasize = bfd_get_section_size_before_reloc ( datasection);
   }
 	
   if (bfd_get_format (abfd) == bfd_object) {
@@ -262,6 +282,15 @@ bfd *abfd;
       bsssize = bfd_section_size(abfd, bsssection);
     }
   }
+
+  if (files_seen++ == 0)
+#if 0	/* intel doesn't like bss/stk b/c they don't gave core files */
+    puts((radix == octal) ? "text\tdata\tbss/stk\toct\thex\tfilename" :
+	 "text\tdata\tbss/stk\tdec\thex\tfilename");
+#else
+    puts((radix == octal) ? "text\tdata\tbss\toct\thex\tfilename" :
+	 "text\tdata\tbss\tdec\thex\tfilename");
+#endif
 	
   total = textsize + datasize + bsssize;
 	
@@ -278,19 +307,26 @@ bfd *abfd;
 int svi_total = 0;
 
 void
-sysv_internal_printer(file, sec)
+sysv_internal_printer(file, sec, ignore)
      bfd *file;
      sec_ptr sec;
+     PTR ignore;
 {
   int size = bfd_section_size (file, sec);
-
-  svi_total += size;
+  if (sec!= &bfd_abs_section 
+      && sec!= &bfd_com_section
+      && sec!=&bfd_und_section) 
+  {
+  
+    svi_total += size;
 	
-  printf ("%-12s", bfd_section_name(file, sec));
-  rprint_number (8, size);
-  printf(" ");
-  rprint_number (8, bfd_section_vma(file, sec));
-  printf ("\n");
+    printf ("%-12s", bfd_section_name(file, sec));
+    rprint_number (8, size);
+    printf(" ");
+    rprint_number (8, bfd_section_vma(file, sec));
+    printf ("\n");
+  }
+
 }
 
 void
@@ -303,7 +339,7 @@ print_sysv_format(file)
   if (file->my_archive) printf (" (ex %s)", file->my_archive->filename);
 
   puts(":\nsection\t\tsize\t     addr");
-  bfd_map_over_sections (file, sysv_internal_printer, NULL);
+  bfd_map_over_sections (file, sysv_internal_printer, (PTR)NULL);
 
   printf("Total       ");
   rprint_number(8, svi_total);
