@@ -28,6 +28,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#include "hashtab.h"
+
 /* Align an address upward to a boundary, expressed as a number of bytes.
    E.g. align to an 8-byte boundary with argument of 8.  Take care never
    to wrap around if the address is within boundary-1 of the end of the
@@ -62,7 +64,7 @@ struct bfd_in_memory
 struct artdata {
   file_ptr first_file_filepos;
   /* Speed up searching the armap */
-  struct ar_cache *cache;
+  htab_t cache;
   bfd *archive_head;		/* Only interesting in output routines */
   carsym *symdefs;		/* the symdef entries */
   symindex symdef_count;	/* how many there are */

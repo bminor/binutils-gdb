@@ -133,6 +133,7 @@ DESCRIPTION
 #include "aout/ar.h"
 #include "aout/ranlib.h"
 #include "safe-ctype.h"
+#include "hashtab.h"
 
 #ifndef errno
 extern int errno;
@@ -146,8 +147,7 @@ extern int errno;
    to the front of the contents!  */
 struct ar_cache {
   file_ptr ptr;
-  bfd *arelt;
-  struct ar_cache *next;
+  bfd *arbfd;
 };
 
 #define ar_padchar(abfd) ((abfd)->xvec->ar_pad_char)
@@ -247,14 +247,36 @@ bfd_set_archive_head (bfd *output_archive, bfd *new_head)
 bfd *
 _bfd_look_for_bfd_in_cache (bfd *arch_bfd, file_ptr filepos)
 {
-  struct ar_cache *current;
+  struct ar_cache m;
+  m.ptr = filepos;
 
-  for (current = bfd_ardata (arch_bfd)->cache; current != NULL;
-       current = current->next)
-    if (current->ptr == filepos)
-      return current->arelt;
+  htab_t hash_table = bfd_ardata (arch_bfd)->cache;
+  if (hash_table)
+    {
+      struct ar_cache *entry = (struct ar_cache *) htab_find (hash_table, &m);
+      if (!entry)
+	return NULL;
+      else
+	return entry->arbfd;
+    }
+  else
+    return NULL;
+}
 
-  return NULL;
+static hashval_t
+hash_file_ptr (const PTR p)
+{
+  return (hashval_t) (((struct ar_cache *) p)->ptr);
+}
+
+/* Returns non-zero if P1 and P2 are equal.  */
+
+static int
+eq_file_ptr (const PTR p1, const PTR p2)
+{
+  struct ar_cache *arc1 = (struct ar_cache *) p1;
+  struct ar_cache *arc2 = (struct ar_cache *) p2;
+  return arc1->ptr == arc2->ptr;
 }
 
 /* Kind of stupid to call cons for each one, but we don't do too many.  */
@@ -262,25 +284,24 @@ _bfd_look_for_bfd_in_cache (bfd *arch_bfd, file_ptr filepos)
 bfd_boolean
 _bfd_add_bfd_to_archive_cache (bfd *arch_bfd, file_ptr filepos, bfd *new_elt)
 {
-  bfd_size_type amt = sizeof (struct ar_cache);
+  struct ar_cache *cache;
+  htab_t hash_table = bfd_ardata (arch_bfd)->cache;
 
-  struct ar_cache *new_cache = bfd_zalloc (arch_bfd, amt);
-  if (new_cache == NULL)
-    return FALSE;
-
-  new_cache->ptr = filepos;
-  new_cache->arelt = new_elt;
-  new_cache->next = NULL;
-  if (bfd_ardata (arch_bfd)->cache == NULL)
-    bfd_ardata (arch_bfd)->cache = new_cache;
-  else
+  /* If the hash table hasn't been created, create it.  */
+  if (hash_table == NULL)
     {
-      struct ar_cache *current = bfd_ardata (arch_bfd)->cache;
-
-      while (current->next != NULL)
-	current = current->next;
-      current->next = new_cache;
+      hash_table = htab_create_alloc (16, hash_file_ptr, eq_file_ptr,
+				      NULL, calloc, free);
+      if (hash_table == NULL)
+	return FALSE;
+      bfd_ardata (arch_bfd)->cache = hash_table;
     }
+
+  /* Insert new_elt into the hash table by filepos.  */
+  cache = bfd_zalloc (arch_bfd, sizeof (struct ar_cache));
+  cache->ptr = filepos;
+  cache->arbfd = new_elt;
+  *htab_find_slot (hash_table, (const void *) cache, INSERT) = cache;
 
   return TRUE;
 }

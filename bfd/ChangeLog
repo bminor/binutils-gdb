@@ -1,3 +1,15 @@
+2005-03-10  Ben Elliston  <bje@au.ibm.com>
+
+	* archive.c: Include hashtab.h.
+	(struct ar_cache): Rename `arelt' to `arbfd' and remove `next'.
+	(_bfd_look_for_bfd_in_cache): Reimplement using htab_find.
+	(hash_file_ptr): New function.
+	(eq_file_ptr): Likewise.
+	(_bfd_add_bfd_to_archive_cache): Reimplement using a hash table.
+	* libbfd-in.h: Include hashtab.h.
+	(struct artdata): Change `cache' member type to htab_t.
+	* libbfd.h: Rebuild.
+
 2005-03-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.in: Bump version to 2.16.90.
