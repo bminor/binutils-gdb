@@ -2,8 +2,8 @@
 
 	* config/tc-cris.h (tc_fix_adjustable): Allow only
 	BFD_RELOC_CRIS_32_GOTREL of the PIC relocs.
-	* config/tc-cris.c (cris_get_pic_suffix): Correct reloc used in
-	example to valid.
+	* config/tc-cris.c (cris_get_pic_suffix): Correct reloc type in
+	example in comment to valid type.
 
 2001-03-28  H.J. Lu  <hjl@gnu.org>
 
