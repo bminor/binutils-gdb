@@ -2139,9 +2139,9 @@ elf_bfd_final_link (abfd, info)
 
 		h = elf_link_hash_lookup (elf_hash_table (info), name,
 					  false, false, true);
-		BFD_ASSERT (h != NULL);
-		if (h->root.type == bfd_link_hash_defined
-		    || h->root.type == bfd_link_hash_defweak)
+		if (h != NULL
+		    && (h->root.type == bfd_link_hash_defined
+			|| h->root.type == bfd_link_hash_defweak))
 		  {
 		    dyn.d_un.d_val = h->root.u.def.value;
 		    o = h->root.u.def.section;
@@ -2149,11 +2149,14 @@ elf_bfd_final_link (abfd, info)
 		      dyn.d_un.d_val += (o->output_section->vma
 					 + o->output_offset);
 		    else
-		      /* The symbol is imported from another shared
-			 library and does not apply to this one.  */
-		      dyn.d_un.d_val = 0;
+		      {
+			/* The symbol is imported from another shared
+			   library and does not apply to this one.  */
+			dyn.d_un.d_val = 0;
+		      }
+
+		    elf_swap_dyn_out (dynobj, &dyn, dyncon);
 		  }
-		elf_swap_dyn_out (dynobj, &dyn, dyncon);
 	      }
 	      break;
 

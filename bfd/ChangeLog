@@ -1,4 +1,42 @@
+Fri Sep  1 15:18:50 1995  Kazumoto Kojima  <kkojima@info.kanagawa-u.ac.jp>
+
+	* elflink.h (elf_bfd_final_link): Don't change a DT_INIT or
+	DT_FINI entry if the appropriate symbol is not in the hash table.
+
+	* libelf.h (struct elf_backend_data): Add create_program_headers
+	and want_hdr_in_seg fields.
+	* elfxx-target.h (elf_backend_want_hdr_in_seg): Define if not
+	defined.
+	(elf_backend_create_program_headers): Likewise.
+	(elfNN_bed): Initialize create_program_headers and
+	want_hdr_in_seg.
+	* elf.c (get_program_header_size): Call create_program_headers
+	backend routine.
+	(map_program_segments): Check want_hdr_in_seg backend field.  Call
+	create_program_headers backend routine.
+
+	* elf.c (assign_file_positions_except_relocs): Align non allocated
+	sections when creating an executable.
+
+	* elfcode.h (elf_swap_phdr_in): Make non static.
+	(elf_swap_phdr_out): Make non static.
+	* libelf.h (bfd_elf32_swap_phdr_in): Declare.
+	(bfd_elf32_swap_phdr_out): Declare.
+	(bfd_elf64_swap_phdr_in): Declare.
+	(bfd_elf64_swap_phdr_out): Declare.
+
+	* ecofflink.c (ecoff_collect_shuffle): New static function.
+	(_bfd_ecoff_get_accumulated_pdr): New function.
+	(_bfd_ecoff_get_accumulated_sym): New function.
+	(_bfd_ecoff_get_accumulated_ss): New function.
+	* libbfd-in.h (_bfd_ecoff_get_accumulated_pdr): Declare.
+	(_bfd_ecoff_get_accumulated_sym): Declare.
+	(_bfd_ecoff_get_accumulated_ss): Declare.
+	* libbfd.h: Rebuild.
+
 Fri Sep  1 13:20:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libecoff.h (_bfd_ecoff_bfd_print_private_bfd_data): Fix typo.
 
 	* elflink.h (elf_link_add_object_symbols): Handle indirect and
 	warning symbols.  If any section is named .gnu.warning.XXX, treat

@@ -412,6 +412,14 @@ struct elf_backend_data
   void (*elf_backend_final_write_processing)
     PARAMS ((bfd *, boolean linker));
 
+  /* A function to create any special program headers required by the
+     backend.  PHDRS are the program headers, and PHDR_COUNT is the
+     number of them.  If PHDRS is NULL, this just counts headers
+     without creating them.  This returns an updated value for
+     PHDR_COUNT.  */
+  int (*elf_backend_create_program_headers)
+    PARAMS ((bfd *, Elf_Internal_Phdr *phdrs, int phdr_count));
+
   /* The swapping table to use when dealing with ECOFF information.
      Used for the MIPS ELF .mdebug section.  */
   const struct ecoff_debug_swap *elf_backend_ecoff_debug_swap;
@@ -425,6 +433,9 @@ struct elf_backend_data
   unsigned want_got_plt : 1;
   unsigned plt_readonly : 1;
   unsigned want_plt_sym : 1;
+
+  /* Put ELF and program headers in the first loadable segment.  */
+  unsigned want_hdr_in_seg : 1;
 };
 
 /* Information stored for each BFD section in an ELF file.  This
@@ -654,6 +665,10 @@ extern void bfd_elf32_swap_reloca_in
   PARAMS ((bfd *, Elf32_External_Rela *, Elf_Internal_Rela *));
 extern void bfd_elf32_swap_reloca_out
   PARAMS ((bfd *, Elf_Internal_Rela *, Elf32_External_Rela *));
+extern void bfd_elf32_swap_phdr_in
+  PARAMS ((bfd *, Elf32_External_Phdr *, Elf_Internal_Phdr *));
+extern void bfd_elf32_swap_phdr_out
+  PARAMS ((bfd *, Elf_Internal_Phdr *, Elf32_External_Phdr *));
 extern void bfd_elf32_swap_dyn_in
   PARAMS ((bfd *, const Elf32_External_Dyn *, Elf_Internal_Dyn *));
 extern void bfd_elf32_swap_dyn_out
@@ -686,6 +701,10 @@ extern void bfd_elf64_swap_reloca_in
   PARAMS ((bfd *, Elf64_External_Rela *, Elf_Internal_Rela *));
 extern void bfd_elf64_swap_reloca_out
   PARAMS ((bfd *, Elf_Internal_Rela *, Elf64_External_Rela *));
+extern void bfd_elf64_swap_phdr_in
+  PARAMS ((bfd *, Elf64_External_Phdr *, Elf_Internal_Phdr *));
+extern void bfd_elf64_swap_phdr_out
+  PARAMS ((bfd *, Elf_Internal_Phdr *, Elf64_External_Phdr *));
 extern void bfd_elf64_swap_dyn_in
   PARAMS ((bfd *, const Elf64_External_Dyn *, Elf_Internal_Dyn *));
 extern void bfd_elf64_swap_dyn_out
