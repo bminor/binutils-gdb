@@ -1,3 +1,9 @@
+Tue Mar 24 16:09:43 1998  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* ieee.c (do_one): Check section before dereferencing it.
+	(ieee_canonicalize_reloc): Likewise with src->relent.sym_ptr_ptr.
+	(ieee_generic_stat_arch_elt): Likewise with abfd->my_archive.
+
 Mon Mar 23 18:51:47 1998  Joel Sherrill  <joel@OARcorp.com>
 
 	* config.bfd: (sh*-*-rtems*): Switched from ELF to COFF.
