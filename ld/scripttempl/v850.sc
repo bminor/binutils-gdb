@@ -72,10 +72,12 @@ SECTIONS
   }
   .got           : { *(.got.plt) *(.got) }
   .dynamic       : { *(.dynamic) }
+  ${RELOCATING+ __ep = ALIGN (4) + 0x80;}
   .tdata     : { *(.tdata) }
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
+  ${RELOCATING+ __gp = ALIGN(4) + 0x8000;}
   .sdata     : { *(.rosdata) *(.sdata) }
   _edata  =  .;
   PROVIDE (edata = .);

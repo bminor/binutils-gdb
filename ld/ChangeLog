@@ -1,3 +1,9 @@
+start-sanitize-v850
+Fri Oct 18 12:58:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* scripttempl/v850.sc (__gp, __ep): Define.
+
+end-sanitize-v850
 Thu Oct 17 18:14:07 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo: Try to consistently use a single or a double dash
