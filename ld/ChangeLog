@@ -1,4 +1,16 @@
+Tue Nov 14 17:08:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Use the
+	environment variable LD_RUN_PATH if neither -rpath nor -rpath-link
+	were used.
+	(gld${EMULATION_NAME}_before_allocation): Use the environment
+	variable LD_RUN_PATH if -rpath was not used.
+	* ld.texinfo, ld.1: Document LD_RUN_PATH.
+
 Thu Nov  9 13:09:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_parse_args): Recognize
+	-bl and -bloadmap options.
 
 	* ldfile.c (ldfile_try_open_bfd): If bfd_error_invalid_target,
 	report a better error.

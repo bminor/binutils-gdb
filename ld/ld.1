@@ -709,7 +709,12 @@ option is also used when locating shared objects which are needed by
 shared objects explicitly included in the link; see the description of
 the
 .B \-rpath\-link
-option.
+option.  If
+.B \-rpath
+is not used when linking an ELF executable, the contents of the
+environment variable
+.B LD_RUN_PATH
+will be used if it is defined.
 
 The
 .B \-rpath
