@@ -44,12 +44,12 @@
 /* FIXME.  The lack of a place to put things which are both target cpu
    and target format dependent makes hacks like this necessary.  */
 #ifdef OBJ_ELF
-#include "../bfd/elf32-hppa.h"
+#include "bfd/elf32-hppa.h"
 #define TARGET_FORMAT "elf32-hppa"
 #endif
 
 #ifdef OBJ_SOM
-#include "../bfd/som.h"
+#include "bfd/som.h"
 #define TARGET_FORMAT "som"
 #endif
 
@@ -67,9 +67,6 @@
 /* Labels are not required to have a colon for a suffix.  */
 #define LABELS_WITHOUT_COLONS
 
-extern void hppa_tc_make_sections PARAMS ((bfd *));
-extern void hppa_tc_symbol PARAMS ((bfd *, elf_symbol_type *, int));
-
 /* FIXME.  This should be static and declared in tc-hppa.c, but 
    pa_define_label gets used outside of tc-hppa.c via tc_frob_label.
    Should also be PARAMized, but symbolS isn't available here.  */
@@ -80,6 +77,11 @@ extern void parse_cons_expression_hppa ();
 extern void cons_fix_new_hppa ();
 extern int hppa_force_relocation ();
 
+/* This gets called before writing the object file to make sure
+   things like entry/exit and proc/procend pairs match.  */
+extern void pa_check_eof PARAMS ((void));
+#define tc_frob_file pa_check_eof
+
 #define tc_frob_label(sym) pa_define_label (sym)
 
 /* The PA does not need support for either of these.  */
@@ -87,14 +89,13 @@ extern int hppa_force_relocation ();
 #define tc_headers_hook(headers) {;}
 
 #define RELOC_EXPANSION_POSSIBLE
-#define MAX_RELOC_EXPANSION 5
+#define MAX_RELOC_EXPANSION 6
 
 /* FIXME.  More things which are both HPPA and ELF specific.  There is 
    nowhere to put such things.  */
 #ifdef OBJ_ELF
-#define elf_tc_symbol		hppa_tc_symbol
-#define elf_tc_make_sections	hppa_tc_make_sections
 #define elf_tc_final_processing	elf_hppa_final_processing
+void elf_hppa_final_processing PARAMS ((void));
 #endif
 
 /* The PA needs to parse field selectors in .byte, etc.  */
@@ -121,6 +122,7 @@ extern int hppa_force_relocation ();
    normally appear safe to handle it completely within GAS.  */
 #define TC_FORCE_RELOCATION(FIXP) hppa_force_relocation (FIXP)
 
+#ifdef OBJ_SOM
 /* If a symbol is imported, but never used, then the symbol should
    *not* end up in the symbol table.  Likewise for absolute symbols
    with local scope.  */
@@ -129,5 +131,24 @@ extern int hppa_force_relocation ();
 	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
 	    && (sym->bsym->flags & BSF_EXPORT) == 0)) \
       punt = 1
+#endif
+
+#ifdef OBJ_ELF
+/* Arggg.  The generic BFD ELF code always adds in the section->vma
+   to non-common symbols.  This is a lose on the PA.   To make matters
+   worse, the generic ELF code already defined obj_frob_symbol.  */
+#define tc_frob_symbol(sym,punt) \
+  { \
+    if (S_GET_SEGMENT (sym) != &bfd_com_section \
+	&& S_GET_SEGMENT (sym) != &bfd_und_section) \
+      S_SET_VALUE ((sym), (S_GET_VALUE (sym) - (sym)->bsym->section->vma)); \
+    if ((S_GET_SEGMENT (sym) == &bfd_und_section && sym->sy_used == 0) \
+	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
+	    && (sym->bsym->flags & BSF_EXPORT) == 0)) \
+      punt = 1; \
+  }
+#endif
+
+#define md_operand(x)
 
 #endif /* _TC_HPPA_H */

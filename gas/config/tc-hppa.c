@@ -2604,7 +2604,8 @@ tc_gen_reloc (section, fixp)
   codes = (bfd_reloc_code_real_type **) hppa_gen_reloc_type (stdoutput,
 			       fixp->fx_r_type,
 			       hppa_fixp->fx_r_format,
-			       hppa_fixp->fx_r_field);
+			       hppa_fixp->fx_r_field,
+			       fixp->fx_subsy != NULL);
 
   for (n_relocs = 0; codes[n_relocs]; n_relocs++)
     ;
@@ -2687,6 +2688,32 @@ tc_gen_reloc (section, fixp)
 
       switch (code)
 	{
+	case R_COMP2:
+	  /* The only time we ever use a R_COMP2 fixup is for the difference
+	     of two symbols.  With that in mind we fill in all four
+	     relocs now and break out of the loop.  */
+	  assert (i == 1);
+	  relocs[0]->sym_ptr_ptr = &bfd_abs_symbol;
+	  relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
+	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[0]->addend = 0;
+	  relocs[0]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+	  relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
+	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[1]->addend = 0;
+	  relocs[2]->sym_ptr_ptr = &fixp->fx_subsy->bsym;
+	  relocs[2]->howto = bfd_reloc_type_lookup (stdoutput, *codes[2]);
+	  relocs[2]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[2]->addend = 0;
+	  relocs[3]->sym_ptr_ptr = &bfd_abs_symbol;
+	  relocs[3]->howto = bfd_reloc_type_lookup (stdoutput, *codes[3]);
+	  relocs[3]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[3]->addend = 0;
+	  relocs[4]->sym_ptr_ptr = &bfd_abs_symbol;
+	  relocs[4]->howto = bfd_reloc_type_lookup (stdoutput, *codes[4]);
+	  relocs[4]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[4]->addend = 0;
+	  goto done;
 	case R_PCREL_CALL:
 	case R_ABS_CALL:
 	  relocs[i]->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
@@ -2732,6 +2759,7 @@ tc_gen_reloc (section, fixp)
     }
 #endif
 
+done:
   return relocs;
 }
 
@@ -4100,7 +4128,7 @@ pa_build_unwind_subspace (call_info)
   /* Get some space to hold relocation information for the unwind
      descriptor.  */
   p = frag_more (4);
-  md_number_to_chars (p, 0.opcode, 4);
+  md_number_to_chars (p, 0, 4);
 
   /* Relocation info. for start offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
@@ -4108,7 +4136,7 @@ pa_build_unwind_subspace (call_info)
 		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0, NULL);
 
   p = frag_more (4);
-  md_number_to_chars (p, 0.opcode, 4);
+  md_number_to_chars (p, 0, 4);
 
   /* Relocation info. for end offset of the function.
 
@@ -6204,6 +6232,21 @@ hppa_fix_adjustable (fixp)
   /* Reject reductions of symbols in 32bit relocs.  */
   if (fixp->fx_r_type == R_HPPA && hppa_fix->fx_r_format == 32)
     return 0;
+
+  /* Reject reductions of symbols in sym1-sym2 expressions when
+     the fixup will occur in a CODE subspace. 
+
+     XXX FIXME: Long term we probably want to reject all of these;
+     for example reducing in the debug section would lose if we ever
+     supported using the optimizing hp linker.  */
+  if (fixp->fx_addsy
+      && fixp->fx_subsy
+      && (hppa_fix->segment->flags & SEC_CODE))
+    {
+      /* Apparently sy_used_in_reloc never gets set for sub symbols.  */
+      fixp->fx_subsy->sy_used_in_reloc = 1;
+      return 0;
+    }
 #endif
 
   /* Reject reductions of symbols in DLT relative relocs,
@@ -6240,7 +6283,9 @@ hppa_force_relocation (fixp)
 
   hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
 #ifdef OBJ_SOM
-  if (fixp->fx_r_type == R_HPPA_ENTRY || fixp->fx_r_type == R_HPPA_EXIT)
+  if (fixp->fx_r_type == R_HPPA_ENTRY || fixp->fx_r_type == R_HPPA_EXIT
+      || (fixp->fx_addsy != NULL && fixp->fx_subsy != NULL
+	  && (hppa_fixp->segment->flags & SEC_CODE) != 0))
     return 1;
 #endif
 

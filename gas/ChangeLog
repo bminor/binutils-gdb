@@ -1,3 +1,14 @@
+Mon Jul  3 15:58:16 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.h (MAX_RELOC_EXPANSION): Bump to 6.
+	* config/tc-hppa.c (tc_gen_reloc, SOM version): Handle
+	relocations for the difference of two (possibly external)
+	symbols.
+	(hppa_fix_adjustable): For SOM, reject reductions involving
+	the difference of two symbols.
+	(hppa_force_relocation): Force relocations for expressions
+	involving the difference of two symbols.
+
 Mon Jul  3 14:22:59 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure[.in] (i386-*-win32): New host and target.
