@@ -1,5 +1,27 @@
 2002-02-27  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (check_u64): New function which in the future will
+	check whether 64-bit instructions are usable and signal an
+	exception if not.  Currently a no-op.
+	(DADD, DADDI, DADDIU, DADDU, DDIV, DDIVU, DMULT, DMULTU, DSLL,
+	DSLL32, DSLLV, DSRA, DSRA32, DSRAV, DSRL, DSRL32, DSRLV, DSUB,
+	DSUBU, LD, LDL, LDR, LLD, LWU, SCD, SD, SDL, SDR, DMxC1, LDXC1,
+	LWXC1, SDXC1, SWXC1, DMFC0, DMTC0): Use check_u64.
+
+	* mips.igen (check_fpu): New function which in the future will
+	check whether FPU instructions are usable and signal an exception
+	if not.  Currently a no-op.
+	(ABS.fmt, ADD.fmt, BC1a, BC1b, C.cond.fmta, C.cond.fmtb,
+	CEIL.L.fmt, CEIL.W, CxC1, CVT.D.fmt, CVT.L.fmt, CVT.S.fmt,
+	CVT.W.fmt, DIV.fmt, DMxC1, DMxC1, FLOOR.L.fmt, FLOOR.W.fmt, LDC1,
+	LDXC1, LWC1, LWXC1, MADD.D, MADD.S, MxC1, MOV.fmt, MOVtf,
+	MOVtf.fmt, MOVN.fmt, MOVZ.fmt, MSUB.D, MSUB.S, MUL.fmt, NEG.fmt,
+	NMADD.D, NMADD.S, NMSUB.D, NMSUB.S, RECIP.fmt, ROUND.L.fmt,
+	ROUND.W.fmt, RSQRT.fmt, SDC1, SDXC1, SQRT.fmt, SUB.fmt, SWC1,
+	SWXC1, TRUNC.L.fmt, TRUNC.W): Use check_fpu.
+
+2002-02-27  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (do_load_left, do_load_right): Move to be immediately
 	following do_load.
 	(do_store_left, do_store_right): Move to be immediately following
