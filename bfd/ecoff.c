@@ -50,8 +50,7 @@ static long ecoff_sec_to_styp_flags PARAMS ((const char *name,
 					     flagword flags));
 static boolean ecoff_slurp_symbolic_header PARAMS ((bfd *abfd));
 static boolean ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
-					   asymbol *asym, int ext,
-					   asymbol **indirect_ptr_ptr));
+					   asymbol *asym, int ext));
 static void ecoff_emit_aggregate PARAMS ((bfd *abfd, FDR *fdr,
 					  char *string,
 					  RNDXR *rndx, long isym,
@@ -658,45 +657,16 @@ _bfd_ecoff_make_empty_symbol (abfd)
 /* Set the BFD flags and section for an ECOFF symbol.  */
 
 static boolean
-ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext, indirect_ptr_ptr)
+ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext)
      bfd *abfd;
      SYMR *ecoff_sym;
      asymbol *asym;
      int ext;
-     asymbol **indirect_ptr_ptr;
 {
   asym->the_bfd = abfd;
   asym->value = ecoff_sym->value;
   asym->section = &bfd_debug_section;
   asym->udata.i = 0;
-
-  /* An indirect symbol requires two consecutive stabs symbols.  */
-  if (*indirect_ptr_ptr != (asymbol *) NULL)
-    {
-      BFD_ASSERT (ECOFF_IS_STAB (ecoff_sym));
-
-      /* @@ Stuffing pointers into integers is a no-no.
-	 We can usually get away with it if the integer is
-	 large enough though.  */
-      if (sizeof (asym) > sizeof (bfd_vma))
-	abort ();
-      (*indirect_ptr_ptr)->value = (bfd_vma) asym;
-
-      asym->flags = BSF_DEBUGGING;
-      asym->section = bfd_und_section_ptr;
-      *indirect_ptr_ptr = NULL;
-      return true;
-    }
-
-  if (ECOFF_IS_STAB (ecoff_sym)
-      && (ECOFF_UNMARK_STAB (ecoff_sym->index) | N_EXT) == (N_INDR | N_EXT))
-    {
-      asym->flags = BSF_DEBUGGING | BSF_INDIRECT;
-      asym->section = bfd_ind_section_ptr;
-      /* Pass this symbol on to the next call to this function.  */
-      *indirect_ptr_ptr = asym;
-      return true;
-    }
 
   /* Most symbol types are just for debugging.  */
   switch (ecoff_sym->st)
@@ -948,7 +918,6 @@ _bfd_ecoff_slurp_symbol_table (abfd)
   bfd_size_type internal_size;
   ecoff_symbol_type *internal;
   ecoff_symbol_type *internal_ptr;
-  asymbol *indirect_ptr;
   char *eraw_src;
   char *eraw_end;
   FDR *fdr_ptr;
@@ -974,7 +943,6 @@ _bfd_ecoff_slurp_symbol_table (abfd)
     }
 
   internal_ptr = internal;
-  indirect_ptr = NULL;
   eraw_src = (char *) ecoff_data (abfd)->debug_info.external_ext;
   eraw_end = (eraw_src
 	      + (ecoff_data (abfd)->debug_info.symbolic_header.iextMax
@@ -987,7 +955,7 @@ _bfd_ecoff_slurp_symbol_table (abfd)
       internal_ptr->symbol.name = (ecoff_data (abfd)->debug_info.ssext
 				   + internal_esym.asym.iss);
       if (!ecoff_set_symbol_info (abfd, &internal_esym.asym,
-			     &internal_ptr->symbol, 1, &indirect_ptr))
+				  &internal_ptr->symbol, 1))
 	return false;
       /* The alpha uses a negative ifd field for section symbols.  */
       if (internal_esym.ifd >= 0)
@@ -998,7 +966,6 @@ _bfd_ecoff_slurp_symbol_table (abfd)
       internal_ptr->local = false;
       internal_ptr->native = (PTR) eraw_src;
     }
-  BFD_ASSERT (indirect_ptr == (asymbol *) NULL);
 
   /* The local symbols must be accessed via the fdr's, because the
      string and aux indices are relative to the fdr information.  */
@@ -1023,14 +990,13 @@ _bfd_ecoff_slurp_symbol_table (abfd)
 				       + fdr_ptr->issBase
 				       + internal_sym.iss);
 	  if (!ecoff_set_symbol_info (abfd, &internal_sym,
-				      &internal_ptr->symbol, 0, &indirect_ptr))
+				      &internal_ptr->symbol, 0))
 	    return false;
 	  internal_ptr->fdr = fdr_ptr;
 	  internal_ptr->local = true;
 	  internal_ptr->native = (PTR) lraw_src;
 	}
     }
-  BFD_ASSERT (indirect_ptr == (asymbol *) NULL);
 
   ecoff_data (abfd)->canonical_symbols = internal;
 

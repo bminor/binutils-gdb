@@ -1682,15 +1682,14 @@ typedef struct symbol_cache_entry
 	 /* Signal that the symbol is the label of constructor section. */
 #define BSF_CONSTRUCTOR   0x800
 
-	 /* Signal that the symbol is a warning symbol. If the symbol
-	   is a warning symbol, then the value field (I know this is
-	   tacky) will point to the asymbol which when referenced will
-	   cause the warning. */
+	 /* Signal that the symbol is a warning symbol.  The name is a
+	   warning.  The name of the next symbol is the one to warn about;
+	   if a reference is made to a symbol with the same name as the next
+	   symbol, a warning is issued by the linker. */
 #define BSF_WARNING       0x1000
 
-	 /* Signal that the symbol is indirect. The value of the symbol
-	   is a pointer to an undefined asymbol which contains the
-	   name to use instead. */
+	 /* Signal that the symbol is indirect.  This symbol is an indirect
+	   pointer to the symbol with the same name as the next symbol. */
 #define BSF_INDIRECT      0x2000
 
 	 /* BSF_FILE marks symbols that contain a file name.  This is used

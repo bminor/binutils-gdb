@@ -1,3 +1,17 @@
+Tue Sep 26 12:48:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (translate_from_native_sym_flags): Don't try to stuff
+	pointers into value field for warning and indirect symbols; just
+	leave the value field alone.
+	* linker.c (generic_link_add_symbol_list): Use next symbol for
+	warning and indirect symbols, rather than looking in symbol value.
+	* ecoff.c (ecoff_set_symbol_info): Remove indirect_ptr_ptr
+	parameter.  Change all callers.  Remove support for indirect
+	symbols; it didn't work anyhow.
+	(_bfd_ecoff_slurp_symbol_table): Remove indirect_ptr variable.
+	* syms.c: Change comments about BSF_WARNING and BSF_INDIRECT.
+	* bfd-in2.h: Rebuild.
+
 Mon Sep 25 16:04:09 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_howto_raw): For all 14-bit branch relocs,

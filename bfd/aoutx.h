@@ -1481,16 +1481,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	 symbol is the symbol to associate the warning with.  If a
 	 reference is made to that symbol, a warning is issued.  */
       cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_WARNING;
-
-      /* @@ Stuffing pointers into integers is a no-no.  We can
-	 usually get away with it if the integer is large enough
-	 though.  */
-      if (sizeof (cache_ptr + 1) > sizeof (bfd_vma))
-	abort ();
-      cache_ptr->symbol.value = (bfd_vma) (cache_ptr + 1);
-
       cache_ptr->symbol.section = bfd_abs_section_ptr;
-
       break;
 
     case N_INDR: case N_INDR | N_EXT:
@@ -1499,16 +1490,7 @@ translate_from_native_sym_flags (abfd, cache_ptr)
 	 symbol is the name of the target.  A reference to the first
 	 symbol becomes a reference to the second.  */
       cache_ptr->symbol.flags = BSF_DEBUGGING | BSF_INDIRECT | visible;
-
-      /* @@ Stuffing pointers into integers is a no-no.  We can
-	 usually get away with it if the integer is large enough
-	 though.  */
-      if (sizeof (cache_ptr + 1) > sizeof (bfd_vma))
-	abort ();
-      cache_ptr->symbol.value = (bfd_vma) (cache_ptr + 1);
-
       cache_ptr->symbol.section = bfd_ind_section_ptr;
-
       break;
 
     case N_WEAKU:
