@@ -1,3 +1,10 @@
+Wed Oct 22 17:33:21 1997  Richard Henderson  <rth@cygnus.com>
+
+	* sparc-opc.c: Add wr & rd for v9a asr's.
+	* sparc-dis.c (print_insn_sparc): Recognize '_' and '/' for v9a asr's.
+	(v9a_asr_reg_names): New variable.
+	Patch from David Miller <davem@vger.rutgers.edu>.
+
 Wed Oct 22 17:18:02 1997  Richard Henderson  <rth@cygnus.com>
 
 	* sparc-opc.c (v9notv9a): New insn type.
