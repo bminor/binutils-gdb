@@ -1,3 +1,27 @@
+2003-06-04  Jeff Johnston  <jjohnstn@redhat.com>
+ 
+	* acconfig.h: Add HAVE_TKILL_SYSCALL definition check.
+	* config.in: Regenerated.
+	* configure.in: Add test for syscall function and check for
+	__NR_tkill macro in <syscall.h> to set HAVE_TKILL_SYSCALL.
+	* configure: Regenerated.
+	* lin-lwp.c [HAVE_TKILL_SYSCALL]: Include <unistd.h> and
+	<sys/syscall.h>.
+	(kill_lwp): New function that uses tkill syscall or
+	uses kill, depending on whether threading model is nptl or not.
+	All callers of kill() changed to use kill_lwp().
+	(lin_lwp_wait): Make special check when WIFEXITED occurs to
+	see if all threads have already exited in the nptl model.
+	(stop_and_resume_callback): New callback function used by the
+	lin_lwp_wait thread exit handling code.
+	(stop_wait_callback): Check for threads already having exited and
+	delete such threads fromt the lwp list when discovered.
+	(stop_callback): Don't assert retcode of kill call.
+ 
+	Roland McGrath  <roland@redhat.com>
+	* i386-linux-nat.c (ps_get_thread_area): New function needed by
+	nptl libthread_db.
+
 2003-06-03  Richard Henderson  <rth@redhat.com>
 
 	* alpha-tdep.c (alpha_next_pc): Use alpha_read_insn.
