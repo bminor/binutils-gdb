@@ -49,6 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "29k-share/udi/udiproc.h"
 #include "gdbcmd.h"
+#include "bfd.h"
 
 /* access the register store directly, without going through
    the normal handler functions. This avoids an extra data copy.  */
@@ -56,17 +57,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static int kiodebug;
 extern int stop_soon_quietly;           /* for wait_for_inferior */
 extern struct value *call_function_by_hand();
-static void udi_resume();
-static void udi_fetch_registers ();
-static void udi_load();
-static void fetch_register ();
-static void udi_store_registers ();
-static int store_register ();
-static int regnum_to_srnum();
-static void  udi_close ();
-static CPUSpace udi_memory_space();
-static int udi_write_inferior_memory();
-static int udi_read_inferior_memory();
+static void udi_resume PARAMS ((int step, int sig));
+static void udi_fetch_registers PARAMS ((int regno));
+static void udi_load PARAMS ((char *args, int from_tty));
+static void fetch_register PARAMS ((int regno));
+static void udi_store_registers PARAMS ((int regno));
+static int store_register PARAMS ((int regno));
+static int regnum_to_srnum PARAMS ((int regno));
+static void udi_close PARAMS ((int quitting));
+static CPUSpace udi_memory_space PARAMS ((CORE_ADDR addr));
+static int udi_write_inferior_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
+					      int len));
+static int udi_read_inferior_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
+					     int len));
+static void download PARAMS ((char *load_arg_string, int from_tty));
 char   CoffFileName[100] = "";
 /*
  * Processor types. 
@@ -96,16 +100,21 @@ extern struct target_ops udi_ops;             /* Forward declaration */
 /* Descriptor for I/O to remote machine.  Initialize it to -1 so that
    udi_open knows that we don't have a file open when the program
    starts.  */
-  UDISessionId udi_session_id = -1;
 
-  CPUOffset	IMemStart = 0;
-  CPUSizeT	IMemSize = 0;
-  CPUOffset	DMemStart = 0;
-  CPUSizeT	DMemSize = 0;
-  CPUOffset	RMemStart = 0;
-  CPUSizeT	RMemSize = 0;
-  UDIUInt32	CPUPRL;
-  UDIUInt32	CoProcPRL;
+UDISessionId udi_session_id = -1;
+
+CPUOffset IMemStart = 0;
+CPUSizeT IMemSize = 0;
+CPUOffset DMemStart = 0;
+CPUSizeT DMemSize = 0;
+CPUOffset RMemStart = 0;
+CPUSizeT RMemSize = 0;
+UDIUInt32 CPUPRL;
+UDIUInt32 CoProcPRL;
+
+UDIMemoryRange address_ranges[2]; /* Text and data */
+UDIResource entry = {0, 0};	/* Entry point */
+CPUSizeT stack_sizes[2];	/* Regular and memory stacks */
 
 #define	SBUF_MAX	1024	/* maximum size of string handling buffer */
 char sbuf[SBUF_MAX];
@@ -121,15 +130,9 @@ typedef	struct 	bkpt_entry_str
 static bkpt_entry_t	bkpt_table[BKPT_TABLE_SIZE];
 extern	char	dfe_errmsg[];		/* error string */
 
-/*********************************************************** SIGNAL SUPPORT */
 /* Called when SIGALRM signal sent due to alarm() timeout.  */
 #ifndef HAVE_TERMIO
 
-#ifndef __STDC__
-# ifndef volatile
-#  define volatile /**/
-# endif
-#endif
 volatile int n_alarms;
 
 static void
@@ -146,50 +149,61 @@ udi_timer ()
 /* malloc'd name of the program on the remote system.  */
 static char *prog_name = NULL;
 
-
 /* Number of SIGTRAPs we need to simulate.  That is, the next
    NEED_ARTIFICIAL_TRAP calls to udi_wait should just return
    SIGTRAP without actually waiting for anything.  */
 
-/******************************************************* UDI_CREATE_INFERIOR */
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
+
 static void
 udi_create_inferior (execfile, args, env)
      char *execfile;
      char *args;
      char **env;
 {
+  char *args1;
 
   if (execfile)
-  { if (prog_name != NULL)
-       free (prog_name);
-    prog_name = savestring (execfile, strlen (execfile));
-  }
+    {
+      if (prog_name != NULL)
+	free (prog_name);
+      prog_name = savestring (execfile, strlen (execfile));
+    }
+  else if (entry.Offset)
+    execfile = "";
+  else
+    error ("No image loaded into target.");
 
-  if (prog_name == 0 /* || exec_bfd == 0 */ )
-    error ("No exec file specified");
-
-  if (udi_session_id < 0){
-        printf("UDI connection not open yet.\n");
-	return;
-  }
+  if (udi_session_id < 0)
+    {
+      printf("UDI connection not open yet.\n");
+      return;
+    }
 
   inferior_pid = 40000;
 
-#if defined(ULTRA3) && defined(KERNEL_DEBUGGING)
-   /* On ultra3 (NYU) we assume the kernel is already running so there is
-    *   no file to download
-    */
-#else
-  udi_load(args, 0);
-#endif  /* !ULTRA3 */
+  if (!entry.Offset)
+    download(execfile, 0);
+
+  args1 = alloca (strlen(execfile) + strlen(args) + 2);
+
+  strcpy (args1, execfile);
+  strcat (args1, " ");
+  strcat (args1, args);
+
+  UDIInitializeProcess (address_ranges,		/* ProcessMemory[] */
+			(UDIInt)2,		/* NumberOfRanges */
+			entry,			/* EntryPoint */
+			stack_sizes,		/* *StackSizes */
+			(UDIInt)2,		/* NumberOfStacks */
+			args1);			/* ArgString */
 
   init_wait_for_inferior ();
   clear_proceed_status ();
   proceed(-1,-1,0);
 }
-/******************************************************* UDI_MOURN_INFERIOR */
+
 static void
 udi_mourn()
 {
@@ -201,7 +215,7 @@ udi_mourn()
 ** Open a connection to remote TIP.
    NAME is the socket domain used for communication with the TIP,
    then a space and the socket name or TIP-host name.
-   '<udi_udi_config_id> [progname]' for example.
+   '<udi_udi_config_id>' for example.
  */
 
 /* XXX - need cleanups for udiconnect for various failures!!! */
@@ -212,41 +226,27 @@ udi_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  unsigned int	prl;
-  char		*p;
-  int		cnt;
+  unsigned int prl;
+  char *p;
+  int cnt;
   UDIMemoryRange KnownMemory[10];
-  UDIUInt32	ChipVersions[10];
-  UDIInt	NumberOfRanges = 10;
-  UDIInt	NumberOfChips = 10;
-  UDIPId	PId;
-  UDIUInt32	TIPId, TargetId, DFEId, DFE, TIP, DFEIPCId, TIPIPCId;
+  UDIUInt32 ChipVersions[10];
+  UDIInt NumberOfRanges = 10;
+  UDIInt NumberOfChips = 10;
+  UDIPId PId;
+  UDIUInt32 TIPId, TargetId, DFEId, DFE, TIP, DFEIPCId, TIPIPCId;
 
   target_preopen(from_tty);
 
-  /* Find the first whitespace character, it separates udi_config_id
-     from prog_name.  */
-  if(!name) goto erroid;
-    for (p = name;
-         *p != '\0' && !isspace (*p); p++)
-      ;
-  if (*p == '\0')
-erroid:
-    error("Usage: target udi config_id progname, where config_id appears in udi_soc file");
+  if (udi_config_id)
+    free (udi_config_id);
 
-  udi_config_id = (char*)malloc (p - name + 1);
-  strncpy (udi_config_id, name, p - name);
-  udi_config_id[p - name] = '\0';
+  if (!name)
+    error("Usage: target udi config_id, where config_id appears in udi_soc file");
 
-  /* Skip over the whitespace after udi_config_id */
-  for (; isspace (*p); p++)
-    /*EMPTY*/;
-  
-  if (prog_name != NULL)
-    free (prog_name);
-  prog_name = savestring (p, strlen (p));
+  udi_config_id = strdup (strtok (name, " \t"));
 
-  if (UDIConnect(udi_config_id, &udi_session_id))
+  if (UDIConnect (udi_config_id, &udi_session_id))
     error("UDIConnect() failed: %s\n", dfe_errmsg);
 
   push_target (&udi_ops);
@@ -272,80 +272,77 @@ erroid:
   /*
   ** Initialize target configuration structure (global)
   */
-  if(UDIGetTargetConfig( KnownMemory, &NumberOfRanges,
-  		ChipVersions, &NumberOfChips))
+  if (UDIGetTargetConfig (KnownMemory, &NumberOfRanges,
+			  ChipVersions, &NumberOfChips))
     error ("UDIGetTargetConfig() failed");
-  if(NumberOfChips > 2)
-    fprintf(stderr,"Taret has more than one processor\n");
-  for(cnt=0; cnt<NumberOfRanges; cnt++)
-  {     switch(KnownMemory[cnt].Space)
+  if (NumberOfChips > 2)
+    fprintf(stderr,"Target has more than one processor\n");
+  for (cnt=0; cnt < NumberOfRanges; cnt++)
+    {
+      switch(KnownMemory[cnt].Space)
 	{
-	default: fprintf(stderr, "UDIGetTargetConfig() unknown memory space\n");
-		break;
+	default:
+	  fprintf(stderr, "UDIGetTargetConfig() unknown memory space\n");
+	  break;
 	case UDI29KCP_S:
-		break;
+	  break;
 	case UDI29KIROMSpace:
-		RMemStart = KnownMemory[cnt].Offset;
-		RMemSize = KnownMemory[cnt].Size;
-		break;
+	  RMemStart = KnownMemory[cnt].Offset;
+	  RMemSize = KnownMemory[cnt].Size;
+	  break;
 	case UDI29KIRAMSpace:
-		IMemStart = KnownMemory[cnt].Offset;
-		IMemSize = KnownMemory[cnt].Size;
-		break;
+	  IMemStart = KnownMemory[cnt].Offset;
+	  IMemSize = KnownMemory[cnt].Size;
+	  break;
 	case UDI29KDRAMSpace:
-		DMemStart = KnownMemory[cnt].Offset;
-		DMemSize = KnownMemory[cnt].Size;
-		break;
+	  DMemStart = KnownMemory[cnt].Offset;
+	  DMemSize = KnownMemory[cnt].Size;
+	  break;
 	}
-  }
+    }
 
   /* Determine the processor revision level */
-  prl = (unsigned int)read_register(CFG_REGNUM) >> 24;
+  prl = (unsigned int)read_register (CFG_REGNUM) >> 24;
   if ((prl&0xe0) == 0)
-  {   fprintf_filtered(stderr,
- 	 	"Remote debugging Am29000 rev %c\n",'A'+(prl&0x1f));
+    {
+      fprintf_filtered (stderr,
+			"Remote debugging Am29000 rev %c\n",'A'+(prl&0x1f));
       processor_type = TYPE_A29000;
-  } else if ((prl&0xe0) == 0x40)       /* 29030 = 0x4* */
-  {   fprintf_filtered(stderr,
-		"Remote debugging Am2903* rev %c\n",'A'+(prl&0x1f));
+    }
+  else if ((prl&0xe0) == 0x40)       /* 29030 = 0x4* */
+    {
+      fprintf_filtered (stderr,
+			"Remote debugging Am2903* rev %c\n",'A'+(prl&0x1f));
       processor_type = TYPE_A29030;
-  } else if ((prl&0xe0) == 0x20)       /* 29050 = 0x2* */
-  {   fprintf_filtered(stderr,
-		"Remote debugging Am29050 rev %c\n",'A'+(prl&0x1f));
+    }
+  else if ((prl&0xe0) == 0x20)       /* 29050 = 0x2* */
+    {
+      fprintf_filtered (stderr,
+			"Remote debugging Am29050 rev %c\n",'A'+(prl&0x1f));
       processor_type = TYPE_A29050;
-  } else {
+    }
+  else
+    {
       processor_type = TYPE_UNKNOWN;
-      fprintf_filtered(stderr,"WARNING: processor type unknown.\n");
-  }
-  if(UDICreateProcess(&PId))
+      fprintf_filtered (stderr,"WARNING: processor type unknown.\n");
+    }
+  if (UDICreateProcess (&PId))
      fprintf(stderr, "UDICreateProcess() failed\n");
 
   /* Print out some stuff, letting the user now what's going on */
-  if(UDICapabilities( &TIPId, &TargetId, DFEId, DFE, &TIP, &DFEIPCId,
-	&TIPIPCId, sbuf))
+  if (UDICapabilities (&TIPId, &TargetId, DFEId, DFE, &TIP, &DFEIPCId,
+		       &TIPIPCId, sbuf))
     error ("UDICapabilities() failed");
-  if (from_tty) {
-    printf_filtered("Remote debugging an %s connected via UDI socket,\n\
+  if (from_tty)
+    {
+      printf_filtered ("Remote debugging an %s connected via UDI socket,\n\
  DFE-IPC version %x.%x.%x  TIP-IPC version %x.%x.%x  TIP version %x.%x.%x\n %s\n",
-	processor_name[processor_type],
-	(DFEIPCId>>8)&0xf, (DFEIPCId>>4)&0xf, DFEIPCId&0xf,
-	(TIPIPCId>>8)&0xf, (TIPIPCId>>4)&0xf, TIPIPCId&0xf,
-	(TargetId>>8)&0xf, (TargetId>>4)&0xf, TargetId&0xf,
-	sbuf);
-#ifdef ULTRA3
-    /* FIXME: can this restriction be removed? */
-    printf_filtered("Remote debugging using virtual addresses works only\n");
-    printf_filtered(" when virtual addresses map 1:1 to physical addresses.\n");
-#endif
-  }
-#ifdef ULTRA3
-  if (processor_type != TYPE_A29050) {
-        fprintf_filtered(stderr,
-        "Freeze-mode debugging can only be done on an Am29050,\n");
-        fprintf_filtered(stderr,
-        " unless GDB is being used with a 29K simulator.\n");
-  }
-#endif
+		       processor_name[processor_type],
+		       (DFEIPCId>>8)&0xf, (DFEIPCId>>4)&0xf, DFEIPCId&0xf,
+		       (TIPIPCId>>8)&0xf, (TIPIPCId>>4)&0xf, TIPIPCId&0xf,
+		       (TargetId>>8)&0xf, (TargetId>>4)&0xf, TargetId&0xf,
+		       sbuf);
+    }
 }
 
 /******************************************************************* UDI_CLOSE
@@ -356,15 +353,13 @@ static void
 udi_close (quitting)	/*FIXME: how is quitting used */
      int quitting;
 {
-  int	Terminate = -1;
-
   if (udi_session_id < 0)
-    error ("Can't close udi connection: not debugging remotely.");
+    return;
 
   /* We should never get here if there isn't something valid in
-     udi_session_id.
+     udi_session_id. */
 
-  if(UDIDisconnect(udi_stream, Terminate);)
+  if (UDIDisconnect (udi_session_id, UDITerminateSession))
     error ("UDIDisconnect() failed in udi_close");
 
   /* Do not try to close udi_session_id again, later in the program.  */
@@ -419,10 +414,14 @@ udi_detach (args,from_tty)
      char *args;
      int from_tty;
 {
+
   remove_breakpoints();		/* Just in case there were any left in */
-  if(UDIDisconnect(udi_session_id))
+
+  if (UDIDisconnect (udi_session_id, UDIContinueSession))
     error ("UDIDisconnect() failed in udi_detach");
+
   pop_target();         	/* calls udi_close to do the real work */
+
   if (from_tty)
     printf ("Ending remote debugging\n");
 }
@@ -947,82 +946,265 @@ udi_remove_breakpoint (addr, contents_cache)
   error("UDIClearBreakpoint returned error code %d\n", err);
 }
 
-/***************************************************************** UDI_KILL */
 static void
 udi_kill(arg,from_tty)
-char    *arg;
-int     from_tty;
+     char *arg;
+     int from_tty;
 {
-	char	buf[4];
 
-#if defined(ULTRA3) && defined(KERNEL_DEBUGGING)
-	/* We don't ever kill the kernel */
-	if (from_tty) {
-		printf_filtered("Kernel not killed, but left in current state.\n");
-	 	printf_filtered("Use detach to leave kernel running.\n");
-	}
+#if 0
+/*
+UDIStop does not really work as advertised.  It causes the TIP to close it's
+connection, which usually results in GDB dying with a SIGPIPE.  For now, we
+just invoke udi_close, which seems to get things right.
+*/
+  UDIStop();
+
+  udi_session_id = -1;
+  inferior_pid = 0;
+
+  if (from_tty)
+    printf("Target has been stopped.");
 #else
-	UDIStop();
-	inferior_pid = 0;
-	if (from_tty) {
-		printf("Target has been stopped.");
-	}
-	pop_target();
-#endif 
+  udi_close(0);
+#endif
+  pop_target();
 }
 
-
-
-/***************************************************************** UDI_LOAD */
 /* 
- * Load a program into the target.
- */
+   Load a program into the target.  Args are: `program {options}'.  The options
+   are used to control loading of the program, and are NOT passed onto the
+   loaded code as arguments.  (You need to use the `run' command to do that.)
+
+   The options are:
+ 		-ms %d	Set mem stack size to %d
+		-rs %d	Set regular stack size to %d
+		-i	send init info (default)
+		-noi	don't send init info
+		-[tT]  	Load Text section
+		-[dD]	Load Data section
+		-[bB]	Load BSS section
+		-[lL]	Load Lit section
+  */
+
 static void
-udi_load(arg_string,from_tty)
-char	*arg_string;
-int	from_tty;
+download(load_arg_string, from_tty)
+     char *load_arg_string;
+     int from_tty;
 {
-#define MAX_TOKENS 25
-#define BUFFER_SIZE 256
-   int	token_count;
-   char	*token[MAX_TOKENS];
-   char	cmd_line[BUFFER_SIZE];
+#define DEFAULT_MEM_STACK_SIZE 		0x6000
+#define DEFAULT_REG_STACK_SIZE 		0x2000
+
+  char *token;
+  char *filename;
+  asection *section;
+  bfd *pbfd;
+  UDIError err;
+  int load_text = 1, load_data = 1, load_bss = 1, load_lit = 1;
+
+  address_ranges[0].Space = UDI29KIRAMSpace;
+  address_ranges[0].Offset = 0xffffffff;
+  address_ranges[0].Size = 0;
+
+  address_ranges[1].Space = UDI29KDRAMSpace;
+  address_ranges[1].Offset = 0xffffffff;
+  address_ranges[1].Size = 0;
+
+  stack_sizes[0] = DEFAULT_REG_STACK_SIZE;
+  stack_sizes[1] = DEFAULT_MEM_STACK_SIZE;
 
   dont_repeat ();
 
-#if defined(KERNEL_DEBUGGING) && defined(ULTRA3)
-  printf("The kernel had better be loaded already!  Loading not done.\n");
-#else
-  if (prog_name == 0)
-    error ("No program name");
-  arg_string = tilde_expand (arg_string);
-  sprintf(cmd_line,"y %s %s", prog_name, arg_string);
+  filename = strtok(load_arg_string, " \t");
+  if (!filename)
+    error ("Must specify at least a file name with the load command");
 
-  token_count = 0;
-  token[0] = cmd_line;
+  filename = tilde_expand (filename);
+  make_cleanup (free, filename);
 
-  if (cmd_line[0] != '\0')
-  { token[token_count] = strtok(cmd_line, " \t,;\n\r");
+  while (token = strtok (NULL, " \t"))
+    {
+      if (token[0] == '-')
+	{
+	  token++;
 
-    if (token[token_count] != NULL)
-    { do {
-            token_count = token_count + 1;
-            token[token_count] = strtok((char *) NULL, " \t,;\n\r");
-         } while ((token[token_count] != NULL) &&
-                     (token_count < MAX_TOKENS));
+	  if (strcmp (token, "ms") == 0)
+	    stack_sizes[1] = atol (strtok (NULL, " \t"));
+	  else if (strcmp (token, "rs") == 0)
+	    stack_sizes[0] = atol (strtok (NULL, " \t"));
+	  else
+	    {
+	      load_text = load_data = load_bss = load_lit = 0;
+
+	      while (*token)
+		{
+		  switch (*token++)
+		    {
+		    case 't':
+		    case 'T':
+		      load_text = 1;
+		      break;
+		    case 'd':
+		    case 'D':
+		      load_data = 1;
+		      break;
+		    case 'b':
+		    case 'B':
+		      load_bss = 1;
+		      break;
+		    case 'l':
+		    case 'L':
+		      load_lit = 1;
+		      break;
+		    default:
+		      error ("Unknown UDI load option -%s", token-1);
+		    }
+		}
+	    }
+	}
     }
-    else
-         *token[0] = '\0';
-  }
-  make_cleanup (free, arg_string);
+
+  pbfd = bfd_openr (filename, 0);
+
+  if (!pbfd) 
+    perror_with_name (filename);
+  
+  make_cleanup (bfd_close, pbfd);
+
   QUIT;
   immediate_quit++;
-  if(yank_cmd(token, token_count))
-  	error("Failure when tring to load program");
-  immediate_quit--;
-  symbol_file_add (prog_name, from_tty, 0, 0, 0, 0);/*DEBUG need to add text_addr */
-#endif
 
+  if (!bfd_check_format (pbfd, bfd_object)) 
+    error ("It doesn't seem to be an object file");
+  
+  for (section = pbfd->sections; section; section = section->next) 
+    {
+      if (bfd_get_section_flags (pbfd, section) & SEC_ALLOC)
+	{
+	  UDIResource To;
+	  UDICount Count;
+	  unsigned long section_size, section_end;
+	  const char *section_name;
+
+	  section_name = bfd_get_section_name (pbfd, section);
+	  if (strcmp (section_name, ".text") == 0 && !load_text)
+	    continue;
+	  else if (strcmp (section_name, ".data") == 0 && !load_data)
+	    continue;
+	  else if (strcmp (section_name, ".bss") == 0 && !load_bss)
+	    continue;
+	  else if (strcmp (section_name, ".lit") == 0 && !load_lit)
+	    continue;
+
+	  To.Offset = bfd_get_section_vma (pbfd, section);
+	  section_size = bfd_section_size (pbfd, section);
+	  section_end = To.Offset + section_size;
+
+	  printf("[Loading section %s at %x (%d bytes)]\n",
+		 section_name,
+		 To.Offset,
+		 section_size);
+
+	  if (bfd_get_section_flags (pbfd, section) & SEC_CODE)
+	    {
+	      To.Space = UDI29KIRAMSpace;
+
+	      address_ranges[0].Offset = min (address_ranges[0].Offset,
+					      To.Offset);
+	      address_ranges[0].Size = max (address_ranges[0].Size,
+					    section_end
+					    - address_ranges[0].Offset);
+	    }
+	  else
+	    {
+	      To.Space = UDI29KDRAMSpace;
+
+	      address_ranges[1].Offset = min (address_ranges[1].Offset,
+					      To.Offset);
+	      address_ranges[1].Size = max (address_ranges[1].Size,
+					    section_end
+					    - address_ranges[1].Offset);
+	    }
+
+	  if (bfd_get_section_flags (pbfd, section) & SEC_LOAD) /* Text, data or lit */
+	    {
+	      file_ptr fptr;
+
+	      fptr = 0;
+
+	      while (section_size > 0)
+		{
+		  char buffer[1024];
+
+		  Count = min (section_size, 1024);
+
+		  bfd_get_section_contents (pbfd, section, buffer, fptr,
+					    Count);
+
+		  err = UDIWrite ((UDIHostMemPtr)buffer, /* From */
+				  To,			/* To */
+				  Count,		/* Count */
+				  (UDISizeT)1,		/* Size */
+				  &Count,		/* CountDone */
+				  (UDIBool)0);		/* HostEndian */
+		  if (err)
+		    error ("UDIWrite failed, error = %d", err);
+
+		  To.Offset += Count;
+		  fptr += Count;
+		  section_size -= Count;
+		}
+	    }
+	  else			/* BSS */
+	    {
+	      UDIResource From;
+	      char zero = 0;
+
+	      /* Write a zero byte at the vma */
+	      err = UDIWrite ((UDIHostMemPtr)&zero,	/* From */
+			      To,			/* To */
+			      (UDICount)1,		/* Count */
+			      (UDISizeT)1,		/* Size */
+			      &Count,			/* CountDone */
+			      (UDIBool)0);		/* HostEndian */
+	      if (err)
+		error ("UDIWrite failed, error = %d", err);
+
+	      From = To;
+	      To.Offset++;
+
+	      /* Now, duplicate it for the length of the BSS */
+	      err = UDICopy (From,			/* From */
+			     To,			/* To */
+			     (UDICount)section_size - 1, /* Count */
+			     (UDISizeT)1,		/* Size */
+			     &Count,			/* CountDone */
+			     (UDIBool)1);		/* Direction */
+	      if (err)
+		error ("UDICopy failed, error = %d", err);
+	    }
+
+	}
+    }
+
+  entry.Space = UDI29KIRAMSpace;
+  entry.Offset = bfd_get_start_address (pbfd);
+  
+  immediate_quit--;
+}
+
+/* User interface to download an image into the remote target.  See download()
+ * for details on args.
+ */
+
+static void
+udi_load(args, from_tty)
+     char *args;
+     int from_tty;
+{
+  download (args, from_tty);
+
+  symbol_file_add (strtok (args, " \t"), from_tty, 0, 0, 0, 0);
 }
 
 /*************************************************** UDI_WRITE_INFERIOR_MEMORY
@@ -1042,7 +1224,7 @@ udi_write_inferior_memory (memaddr, myaddr, len)
   UDICount	CountDone = 0;
   UDIBool	HostEndian = 0;
   
-  To.Space = udi_memory_space(memaddr);	
+  To.Space = udi_memory_space(memaddr);
   From = (UDIUInt32*)myaddr;
 
   while (nwritten < len)
@@ -1282,7 +1464,7 @@ int	regno;
  */
 static CPUSpace
 udi_memory_space(addr)
-CORE_ADDR	*addr;
+CORE_ADDR	addr;
 {
 	UDIUInt32 tstart = IMemStart;
 	UDIUInt32 tend   = tstart + IMemSize;  

@@ -1,11 +1,3 @@
-mini2udi.o : ${srcdir}/29k-share/dfe/mini2udi.c ${srcdir}/29k-share/dfe/../include/main.h ${srcdir}/29k-share/dfe/../include/types.h \
-  ${srcdir}/29k-share/dfe/../include/memspcs.h ${srcdir}/29k-share/dfe/../include/macros.h ${srcdir}/29k-share/dfe/../include/miniint.h \
-  ${srcdir}/29k-share/dfe/../udi/udiproc.h ${srcdir}/29k-share/dfe/../udi/udiphcfg.h ${srcdir}/29k-share/dfe/../udi/udiphsun.h \
-  ${srcdir}/29k-share/dfe/../udi/udiptcfg.h ${srcdir}/29k-share/dfe/../udi/udipt29k.h ${srcdir}/29k-share/dfe/../udi/udiids.h \
-  ${srcdir}/29k-share/dfe/../include/udiext.h ${srcdir}/29k-share/dfe/../include/versions.h 
-yank.o : ${srcdir}/29k-share/dfe/yank.c ${srcdir}/29k-share/dfe/../include/coff.h ${srcdir}/29k-share/dfe/../include/memspcs.h \
-  ${srcdir}/29k-share/dfe/../include/main.h ${srcdir}/29k-share/dfe/../include/types.h ${srcdir}/29k-share/dfe/../include/miniint.h \
-  ${srcdir}/29k-share/dfe/../include/macros.h ${srcdir}/29k-share/dfe/../include/error.h 
 udip2soc.o : ${srcdir}/29k-share/udi/udip2soc.c ${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udiphcfg.h \
   ${srcdir}/29k-share/udi/udiphsun.h ${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udipt29k.h ${srcdir}/29k-share/udi/udisoc.h 
 udr.o : ${srcdir}/29k-share/udi/udr.c ${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udiphcfg.h \

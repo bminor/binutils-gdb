@@ -89,7 +89,6 @@ xcoffsolib.c
 
 ALLDEPFILES_SUBDIR=\
 nindy-share/Onindy.c\
-29k-share/dfe/mini2udi.c\
 nindy-share/nindy.c\
 nindy-share/ttybreak.c\
 nindy-share/ttyflush.c\
@@ -98,8 +97,7 @@ nindy-share/ttyflush.c\
 vx-share/xdr_ld.c\
 vx-share/xdr_ptrace.c\
 vx-share/xdr_rdb.c\
-vx-share/xdr_regs.c\
-29k-share/dfe/yank.c
+vx-share/xdr_regs.c
 
 ALLPARAM=\
 tm-29k.h\

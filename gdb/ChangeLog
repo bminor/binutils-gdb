@@ -1,3 +1,33 @@
+Wed Nov 11 17:09:17 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* Makefile.in:  Remove dependancies for 29k-share/dfe/yank.o and
+	29k-share/dfe/mini2udi.o.
+	* config/a29k-udi.mt:  Remove yank.o and mini2udi.o.
+	* alldeps.mak, depend:  Update to deal with removal of
+	aforementioned files.
+	* remote-udi.c:  Major cleanups.  Clean up udi_open and drop
+	requirement for useless 'program' argument.  Clean up
+	udi_create_inferior, and udi_load to call common download()
+	routine.  Create download routine to load remote hosts directly
+	(with the help of BFD) so that we don't need yank.c and
+	mini2udi.c.
+	Fix udi_detach to call UDIDisconnect with
+	the right arguments.  Clean up udi_resume, don't assign tip_error
+	twice.  Clean up udi_wait, straighten out status codes.  Make
+	udi_kill really work.
+
+Fri Nov  6 10:26:01 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+    	* c-exp.y: separated host/target idea of integer type size,
+	removed redundant parse rules. (YYSTYPE): added typed_val, removed
+	UINT and CHAR rules. (parse_number): work out the targetwise type
+	of a number based upon it's size and qualifiers. (yylex): chars
+	are now treated the same way as ints.
+
+	* source.c (indentify_source_line): don't core dump if wanted
+	line is larger than number of lines in source. (can happen when
+	coff gets confused about #included source).
+
 Fri Nov  6 03:00:39 1992  John Gilmore  (gnu@cygnus.com)
 
 	Fix problems noticed by Allan Steel, <allan@maths.su.oz.au>,
