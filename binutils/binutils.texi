@@ -604,25 +604,61 @@ local; if uppercase, the symbol is global (external).
 @c would be nice.
 @table @code
 @item A
-Absolute.
+The symbol's value is absolute, and will not be changed by further
+linking.
 
 @item B
-BSS (uninitialized data).
+The symbol is in the uninitialized data section (known as BSS).
 
 @item C
-Common.
+The symbol is common.  Common symbols are uninitialized data.  When
+linking, multiple common symbols may appear with the same name.  If the
+symbol is defined anywhere, the common symbols are treated as undefined
+references.  For more details on common symbols, see the discussion of
+--warn-common in @ref{Options,,Linker options,ld.info,The GNU linker}.
 
 @item D
-Initialized data.
+The symbol is in the initialized data section.
+
+@item G
+The symbol is in a initialized data section for small objects.  Some
+object file formats permit more efficient access to small data objects,
+such as a global int variable as opposed to a large global array.
 
 @item I
-Indirect reference.
+The symbol is an indirect reference to another symbol.  This is a GNU
+extension to the a.out object file format which is rarely used.
+
+@item N
+The symbol is a debugging symbol.
+
+@item R
+The symbol is in a read only data section.
+
+@item S
+The symbol is in a uninitialized data section for small objects.
 
 @item T
-Text (program code).
+The symbol is in the text (code) section.
 
 @item U
-Undefined.
+The symbol is undefined.
+
+@item W
+The symbol is weak.  When a weak defined symbol is linked with a normal
+defined symbol, the normal defined symbol is used with no error.  When a
+weak undefined symbol is linked and the symbol is not defined, the value
+of the weak symbol becomes zero with no error.
+
+@item -
+The symbol is a stabs symbol in an a.out object file.  In this case, the
+next values printed are the stabs other field, the stabs desc field, and
+the stab type.  Stabs symbols are used to hold debugging information;
+for more information, see @ref{Top,Stabs,Stabs Overview,stabs.info, The
+``stabs'' debug format}.
+
+@item ?
+The symbol type is unknown, or object file format specific.
 @end table
 
 @item
@@ -1128,7 +1164,8 @@ ELF file.  This is only useful on systems (such as Solaris 2.0) in which
 @code{.stab} debugging symbol-table entries are carried in an ELF
 section.  In most other file formats, debugging symbol-table entries are
 interleaved with linkage symbols, and are visible in the @samp{--syms}
-output.
+output.  For more information on stabs symbols, see @ref{Top,Stabs,Stabs
+Overview,stabs.info, The ``stabs'' debug format}.
 
 @item --start-address=@var{address}
 @cindex start-address

@@ -1,3 +1,9 @@
+Fri Jan 26 11:53:42 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils.texi (nm): Improve documentation on symbol types.
+	(objdump): Reference the stabs manual from the discussion of the
+	--stabs option.
+
 Thu Jan 25 11:21:46 1996  Raymond Jou  <rjou@mexican.cygnus.com>
 
 	* mpw-make.sed: Add a "stamps" target.
