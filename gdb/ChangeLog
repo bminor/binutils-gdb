@@ -187,6 +187,11 @@
 	* breakpoint.c: Include cli/cli-script.h.
 	* Makefile.in (breakpoint.o): Update dependencies.
 
+2002-08-26  Michael Snyder  <msnyder@redhat.com>
+
+	* breakpoint.c (insert_breakpoints): Protect all references
+	to 'process_warning'.  Shorten long lines.
+
 2002-08-26  Joel Brobecker  <brobecker@gnat.com>
 
 	* cli/cli-script.c (copy_command_lines): New function.

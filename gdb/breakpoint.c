@@ -717,14 +717,12 @@ insert_breakpoints (void)
   int val = 0;
   int disabled_breaks = 0;
   int hw_breakpoint_error = 0;
+#ifdef ONE_PROCESS_WRITETEXT
   int process_warning = 0;
+#endif
 
   static char message1[] = "Error inserting catchpoint %d:\n";
   static char message[sizeof (message1) + 30];
-
-#ifdef ONE_PROCESS_WRITETEXT
-  process_warning = 1;
-#endif
 
   struct ui_file *tmp_error_stream = mem_fileopen ();
   make_cleanup_ui_file_delete (tmp_error_stream);
@@ -837,17 +835,21 @@ insert_breakpoints (void)
 		if (!disabled_breaks)
 		  {
 		    fprintf_unfiltered (tmp_error_stream, 
-					"Cannot insert breakpoint %d.\n", b->number);
+					"Cannot insert breakpoint %d.\n", 
+					b->number);
 		    fprintf_unfiltered (tmp_error_stream, 
 					"Temporarily disabling shared library breakpoints:\n");
 		  }
 		disabled_breaks = 1;
-		fprintf_unfiltered (tmp_error_stream, "breakpoint #%d\n", b->number);
+		fprintf_unfiltered (tmp_error_stream, 
+				    "breakpoint #%d\n", b->number);
 	      }
 	    else
 #endif
 	      {
+#ifdef ONE_PROCESS_WRITETEXT
 		process_warning = 1;
+#endif
 		if (b->type == bp_hardware_breakpoint)
 		  {
 		    hw_breakpoint_error = 1;
@@ -857,8 +859,11 @@ insert_breakpoints (void)
 		  }
 		else
 		  {
-		    fprintf_unfiltered (tmp_error_stream, "Cannot insert breakpoint %d.\n", b->number);
-		    fprintf_filtered (tmp_error_stream, "Error accessing memory address ");
+		    fprintf_unfiltered (tmp_error_stream, 
+					"Cannot insert breakpoint %d.\n", 
+					b->number);
+		    fprintf_filtered (tmp_error_stream, 
+				      "Error accessing memory address ");
 		    print_address_numeric (b->address, 1, tmp_error_stream);
 		    fprintf_filtered (tmp_error_stream, ": %s.\n",
 				      safe_strerror (val));
@@ -893,7 +898,8 @@ insert_breakpoints (void)
 	    fprintf_unfiltered (tmp_error_stream, 
 				"Cannot insert catchpoint %d; disabling it.\n",
 				b->number);
-	    fprintf_filtered (tmp_error_stream, "Error accessing memory address ");
+	    fprintf_filtered (tmp_error_stream, 
+			      "Error accessing memory address ");
 	    print_address_numeric (b->address, 1, tmp_error_stream);
 	    fprintf_filtered (tmp_error_stream, ": %s.\n",
 			      safe_strerror (val));
@@ -1022,11 +1028,11 @@ insert_breakpoints (void)
 	       value chain brings us here.  */
 	    if (!b->inserted)
 	      {
-		process_warning = 1;
 		remove_breakpoint (b, mark_uninserted);
 		hw_breakpoint_error = 1;
 		fprintf_unfiltered (tmp_error_stream,
-				    "Cannot insert hardware watchpoint %d.\n", b->number);
+				    "Could not insert hardware watchpoint %d.\n", 
+				    b->number);
 		val = -1;
 	      }               
 	  }
@@ -1073,7 +1079,8 @@ insert_breakpoints (void)
 	  }
 	if (val < 0)
 	  {
-	    fprintf_unfiltered (tmp_error_stream, "Cannot insert catchpoint %d.", b->number);
+	    fprintf_unfiltered (tmp_error_stream, 
+				"Cannot insert catchpoint %d.", b->number);
 	  }
 	else
 	  b->inserted = 1;
@@ -1089,13 +1096,15 @@ insert_breakpoints (void)
          message about possibly exhausted resources.  */
       if (hw_breakpoint_error)  
 	{
-	  fprintf_unfiltered (tmp_error_stream, "Could not insert hardware breakpoints:\n" 
-			      "You may have requested too many hardware breakpoints/watchpoints.\n");
+	  fprintf_unfiltered (tmp_error_stream, 
+			      "Could not insert hardware breakpoints:\n\
+You may have requested too many hardware breakpoints/watchpoints.\n");
 	}
-
+#ifdef ONE_PROCESS_WRITETEXT
       if (process_warning)
-	fprintf_unfiltered (tmp_error_stream,"The same program may be running in another process.");
-
+	fprintf_unfiltered (tmp_error_stream,
+			    "The same program may be running in another process.");
+#endif
       target_terminal_ours_for_output ();
       error_stream (tmp_error_stream);
     }
