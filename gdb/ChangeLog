@@ -1,5 +1,8 @@
 2004-01-24  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc_fetch_instruction): Return zero if we can't
+	read the instruction at PC.
+
 	* sparcnbsd-tdep.c (GDB_OSABI_NETBSD_CORE): Define, based on the
 	value of GDB_OSABI_DEFAULT.
 	(sparcnbsd_core_osabi_sniffer): Return GDB_OSABI_NETBSD_CORE

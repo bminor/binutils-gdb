@@ -96,7 +96,9 @@ sparc_fetch_instruction (CORE_ADDR pc)
   unsigned long insn;
   int i;
 
-  read_memory (pc, buf, sizeof (buf));
+  /* If we can't read the instruction at PC, return zero.  */
+  if (target_read_memory (pc, buf, sizeof (buf)))
+    return 0;
 
   insn = 0;
   for (i = 0; i < sizeof (buf); i++)
