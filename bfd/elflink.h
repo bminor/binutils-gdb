@@ -2508,6 +2508,12 @@ elf_link_output_extsym (h, data)
 
     case bfd_link_hash_indirect:
     case bfd_link_hash_warning:
+      /* We can't represent these symbols in ELF.  A warning symbol
+         may have come from a .gnu.warning.SYMBOL section anyhow.  We
+         just put the target symbol in the hash table.  If the target
+         symbol does not really exist, don't do anything.  */
+      if (h->root.u.i.link->type == bfd_link_hash_new)
+	return true;
       return (elf_link_output_extsym
 	      ((struct elf_link_hash_entry *) h->root.u.i.link, data));
     }
