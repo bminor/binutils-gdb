@@ -1,5 +1,9 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* interp.c (do_format_3): Get operands correctly and call
+	the target function.
+	* simops.c: Handle bCC instructions.
+
 	* simops.c: Add condition code handling to shift insns.
 	Fix minor typos in condition code handling for other insns.
 

@@ -22,99 +22,273 @@ OP_760 ()
 {
 }
 
+/* bv disp9 */
 void
 OP_580 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_OV) != 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
-void
-OP_700 ()
-{
-}
-
+/* bl disp9 */
 void
 OP_581 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_CY) != 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* be disp9 */
 void
 OP_582 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_Z) != 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bnh disp 9*/
 void
 OP_583 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) != 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bn disp9 */
 void
 OP_584 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_S) != 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* br disp9 */
 void
 OP_585 ()
 {
+  unsigned int op0;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  State.pc += op0;
 }
 
+/* blt disp9 */
 void
 OP_586 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) != 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* ble disp9 */
 void
 OP_587 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((((psw & PSW_Z) != 0)
+       || (((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0))) != 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bnv disp9 */
 void
 OP_588 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_OV) == 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bnl disp9 */
 void
 OP_589 ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_CY) == 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bne disp9 */
 void
 OP_58A ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_Z) == 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bh disp9 */
 void
 OP_58B ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((((psw & PSW_CY) != 0) | ((psw & PSW_Z) != 0)) == 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bp disp9 */
 void
 OP_58C ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_S) == 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
-void
-OP_400 ()
-{
-}
-
-void
-OP_160 ()
-{
-}
-
+/* bsa disp9 */
 void
 OP_58D ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((psw & PSW_SAT) != 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bge disp9 */
 void
 OP_58E ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0)) == 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
+/* bgt disp9 */
 void
 OP_58F ()
 {
+  unsigned int op0, psw;
+  int temp;
+
+  temp = (State.regs[OP[0]] << 23) >> 23;
+  op0 = temp;
+  psw = State.psw;
+  
+  if ((((psw & PSW_Z) != 0)
+       || (((psw & PSW_S) != 0) ^ ((psw & PSW_OV) != 0))) == 0)
+    State.pc += op0;
+  else
+    State.pc += 2;
 }
 
 void
@@ -785,5 +959,20 @@ void
 OP_4007E0 ()
 {
   abort ();
+}
+
+void
+OP_400 ()
+{
+}
+
+void
+OP_160 ()
+{
+}
+
+void
+OP_700 ()
+{
 }
 

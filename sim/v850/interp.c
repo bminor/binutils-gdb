@@ -167,7 +167,12 @@ static void
 do_format_3 (insn)
      uint32 insn;
 {
+  struct hash_entry *h;
   printf("format 3 0x%x\n", insn);
+
+  h = lookup_hash (insn);
+  OP[0] = (((insn & 0x70) >> 4) | ((insn & 0xf800) >> 8)) << 1;
+  (h->ops->func) ();
 }
 
 static void
