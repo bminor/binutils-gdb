@@ -1,3 +1,65 @@
+2003-06-18  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c: Include frame.h, frame-unwind.h, frame-base.h, and
+	trad-frame.h.
+	(AVR_MAX_PROLOGUE_SIZE): Increase from 56 to 64.
+	(AVR_ARG1_REGNUM, AVR_ARGN_REGNUM): Define.
+	(AVR_RET1_REGNUM, AVR_RETN_REGNUM): Define.
+	(AVR_PROLOGUE_*): Enumerate prologue types.
+	(struct frame_extra_info): Remove.
+	(struct avr_unwind_cache): Define.
+	(avr_write_sp): Delete function.
+	(avr_read_fp): Ditto.
+	(avr_init_extra_frame_info): Ditto.
+	(avr_pop_frame): Ditto.
+	(avr_frame_saved_pc): Ditto.
+	(avr_saved_pc_after_call): Ditto.
+	(avr_push_return_address): Ditto.
+	(avr_frame_chain): Ditto.
+	(avr_store_struct_return): Ditto.
+	(avr_push_arguments): Ditto.
+	(avr_scan_prologue): Update comments. Changed to set up the info for
+	cache unwinding. Now returns end of prologue PC.
+	(avr_skip_prologue): Better handling of functions lacking a prologue
+	by using avr_scan_prologue.
+	(avr_scan_arg_moves): New function.
+	(avr_saved_regs_unwinder): Ditto.
+	(avr_frame_unwind_cache): Ditto.
+	(avr_unwind_pc): Ditto.
+	(avr_frame_this_id): Ditto.
+	(avr_frame_prev_register): Ditto.
+	(avr_frame_p): Ditto.
+	(avr_frame_base_address ): Ditto.
+	(avr_unwind_dummy_id): Ditto.
+	(avr_push_dummy_code): Ditto.
+	(push_stack_item): Ditto.
+	(pop_stack_item): Ditto.
+	(avr_push_dummy_call): Ditto.
+	(struct stack_item): Define.
+	(avr_frame_unwind): Declare structure.
+	(avr_frame_base): Ditto.
+	(avr_gdbarch_init): Remove calls to
+	set_gdbarch_deprecated_init_frame_pc,
+	set_gdbarch_deprecated_target_read_fp,
+	set_gdbarch_deprecated_dummy_write_sp,
+	set_gdbarch_deprecated_fp_regnum,
+	set_gdbarch_deprecated_push_arguments,
+	set_gdbarch_deprecated_push_return_address,
+	set_gdbarch_deprecated_pop_frame,
+	set_gdbarch_deprecated_store_struct_return,
+	set_gdbarch_deprecated_frame_init_saved_regs,
+	set_gdbarch_deprecated_init_extra_frame_info,
+	set_gdbarch_deprecated_frame_chain,
+	set_gdbarch_deprecated_frame_saved_pc,
+	set_gdbarch_deprecated_saved_pc_after_call.
+	Add calls to set_gdbarch_push_dummy_call,
+	set_gdbarch_push_dummy_code,
+	frame_unwind_append_predicate,
+	frame_base_set_default,
+	set_gdbarch_unwind_dummy_id,
+	set_gdbarch_unwind_pc.
+	Wrap a long line.
+
 2003-06-18  Corinna Vinschen  <vinschen@redhat.com>
 
 	* h8300-tdep.c (h8300s_register_name): Enable MACH and MACL
