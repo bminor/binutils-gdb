@@ -2,6 +2,9 @@ Wed Apr 28 13:19:07 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* */Makefile.in (CFLAGS): add CFLAGS = -g to all subdirectory
 	  Makefiles.
+	  (check): depend on just-check.
+	  (just-check): added so that tests can be run without a noop
+	  build pass.
 
 Fri Apr 23 18:13:28 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 

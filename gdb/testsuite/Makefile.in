@@ -84,10 +84,6 @@ EXPECT = `if [ -f $${rootme}../../expect/expect ] ; \
 	then echo $${rootme}../../expect/expect ; \
 	else echo expect; fi`
 
-SUBDIRS=gdb.t00 gdb.t01 gdb.t02 gdb.t03 gdb.t04 gdb.t05 gdb.t06 \
-	gdb.t07 gdb.t08 gdb.t09 gdb.t10 gdb.t11 gdb.t12 gdb.t13 gdb.t15 \
-	gdb.t16 gdb.t17 gdb.t20 gdb.t21 gdb.t22 gdb.t23 gdb.t30 gdb.t31
-
 #### host, target, and site specific Makefile frags come in here.
 
 FLAGS_TO_PASS = \
@@ -148,7 +144,8 @@ site.exp: ./config.status Makefile
 	-@rm -f ./tmp?
 
 installcheck:
-check: site.exp all
+check: site.exp all just-check
+just-check:
 	rootme=`pwd`; export rootme; \
 	$(RUNTEST) $(RUNTESTFLAGS) --tool gdb GDB=$(GDB) --srcdir $(srcdir)
 
@@ -197,5 +194,5 @@ distclean realclean: clean
 		(cd $$dir; $(MAKE) distclean); \
 	done
 
-Makefile : $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
+Makefile : $(srcdir)/Makefile.in $(srcdir)/configure.in $(host_makefile_frag) $(target_makefile_frag)
 	$(SHELL) ./config.status
