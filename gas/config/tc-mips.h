@@ -58,10 +58,6 @@ extern void mips_handle_align (struct frag *);
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2)
 
-/* We permit PC relative difference expressions when generating
-   embedded PIC code.  */
-#define DIFF_EXPR_OK
-
 /* Tell assembler that we have an itbl_mips.h header file to include.  */
 #define HAVE_ITBL_CPU
 
@@ -79,12 +75,6 @@ enum mips_pic_level
 
   /* Generate PIC code as in the SVR4 MIPS ABI.  */
   SVR4_PIC,
-
-  /* Generate PIC code without using a global offset table: the data
-     segment has a maximum size of 64K, all data references are off
-     the $gp register, and all text references are PC relative.  This
-     is used on some embedded systems.  */
-  EMBEDDED_PIC
 };
 
 extern enum mips_pic_level mips_pic;
@@ -129,14 +119,12 @@ extern int mips_fix_adjustable (struct fix *);
 /* Values passed to md_apply_fix3 don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
-/* Global syms must not be resolved, to support ELF shared libraries.
-   When generating embedded code, we don't have shared libs.  */
+/* Global syms must not be resolved, to support ELF shared libraries.  */
 #define EXTERN_FORCE_RELOC			\
-  (OUTPUT_FLAVOR == bfd_target_elf_flavour	\
-   && mips_pic != EMBEDDED_PIC)
+  (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 
-/* When generating embedded PIC code we must keep PC relative
-   relocations.  */
+/* When generating NEWABI code, we may need to have to keep combined
+   relocations which don't have symbols.  */
 #define TC_FORCE_RELOCATION(FIX) mips_force_relocation (FIX)
 extern int mips_force_relocation (struct fix *);
 

@@ -1,3 +1,18 @@
+2004-04-28  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (HAVE_32BIT_ADDRESSES, append_insn, macro_build)
+	(load_address, macro, mips_ip, md_parse_option)
+	(mips_force_relocation, mips_validate_fix, md_apply_fix3)
+	(s_change_sec, pic_need_relax, tc_gen_reloc): Remove all
+	embedded-PIC handling, and update comments.
+	(SWITCH_TABLE): Remove.
+	* config/tc-mips.h (DIFF_EXPR_OK): Delete.
+	(enum mips_pic_level): Remove EMBEDDED_PIC.
+	(EXTERN_FORCE_RELOC): Remove embedded-PIC handling.
+	(TC_FORCE_RELOCATION): Update comment.
+	* ecoff.c (ecoff_build_lineno): Add comment about some code that
+	might be safe to remove now that MIPS embedded-PIC is gone.
+
 2004-04-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* config/obj-som.c (obj_som_init_stab_section): Add new arguments in

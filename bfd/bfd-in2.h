@@ -2289,12 +2289,6 @@ to compensate for the borrow when the low bits are added.  */
 /* Low 16 bits.  */
   BFD_RELOC_LO16,
 
-/* Like BFD_RELOC_HI16_S, but PC relative.  */
-  BFD_RELOC_PCREL_HI16_S,
-
-/* Like BFD_RELOC_LO16, but PC relative.  */
-  BFD_RELOC_PCREL_LO16,
-
 /* Relocation against a MIPS literal section.  */
   BFD_RELOC_MIPS_LITERAL,
 

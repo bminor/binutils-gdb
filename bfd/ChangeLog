@@ -1,3 +1,9 @@
+2004-04-28  Chris Demetriou  <cgd@broadcom.com>
+
+	* reloc.c: Remove BFD_RELOC_PCREL_HI16_S and BFD_RELOC_PCREL_LO16.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+
 2004-04-28  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* som.c (struct som_misc_symbol_info): Add is_comdat, is_common and

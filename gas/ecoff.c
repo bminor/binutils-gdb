@@ -3685,6 +3685,8 @@ ecoff_build_lineno (const struct ecoff_debug_swap *backend,
   iline = 0;
   totcount = 0;
 
+  /* FIXME?  Now that MIPS embedded-PIC is gone, it may be safe to
+     remove this code.  */
   /* For some reason the address of the first procedure is ignored
      when reading line numbers.  This doesn't matter if the address of
      the first procedure is 0, but when gcc is generating MIPS
