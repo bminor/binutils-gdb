@@ -1,3 +1,16 @@
+Tue May 27 11:02:08 1997  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c (dis386[], dis386_twobyte[]): change pushl/popl
+	to pushS/popS for segment regs and byte constant so that
+	pushw/popw printed when in 16 bit data mode.
+
+	* i386-dis.c (dis386[]): change cwtl, cltd to cWtS, cStd to
+	print cbtw, cwtd in 16 bit data mode.
+	* i386-dis.c (putop): extra case W to support above.
+
+	* i386-dis.c (print_insn_x86): print addr32 prefix when given
+	address size prefix in 16 bit address mode.
+
 Fri May 23 16:47:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sh-dis.c: Reindent.  Rename local variable fprintf to
