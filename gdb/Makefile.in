@@ -2183,7 +2183,7 @@ s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 	$(objfiles_h) $(tm_h) $(__bfd_bfd_h) $(floatformat_h) $(regcache_h) \
 	$(trad_frame_h) $(frame_base_h) $(frame_unwind_h) \
 	$(reggroups_h) $(regset_h) $(value_h) $(gdb_assert_h) $(dis_asm_h) \
-	$(s390_tdep_h)
+	$(solib_svr4_h) $(s390_tdep_h)
 scm-exp.o: scm-exp.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(value_h) $(c_lang_h) $(scm_lang_h) \
 	$(scm_tags_h)

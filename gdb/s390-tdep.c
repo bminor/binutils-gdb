@@ -43,6 +43,7 @@
 #include "value.h"
 #include "gdb_assert.h"
 #include "dis-asm.h"
+#include "solib-svr4.h"         /* For struct link_map_offsets.  */
 
 #include "s390-tdep.h"
 
@@ -2848,6 +2849,75 @@ s390_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name
 }
 
 
+/* Link map offsets.  */
+
+static struct link_map_offsets *
+s390_svr4_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = NULL;
+
+  if (lmp == NULL)
+    {
+      lmp = &lmo;
+
+      lmo.r_debug_size = 8;
+
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      lmo.link_map_size = 20;
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
+    }
+
+  return lmp;
+}
+
+static struct link_map_offsets *
+s390x_svr4_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = NULL;
+
+  if (lmp == NULL)
+    {
+      lmp = &lmo;
+
+      lmo.r_debug_size = 16;   /* All we need.  */
+
+      lmo.r_map_offset = 8;
+      lmo.r_map_size   = 8;
+
+      lmo.link_map_size = 40;   /* All we need.  */
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 8;
+
+      lmo.l_name_offset = 8;
+      lmo.l_name_size   = 8;
+
+      lmo.l_next_offset = 24;
+      lmo.l_next_size   = 8;
+
+      lmo.l_prev_offset = 32;
+      lmo.l_prev_size   = 8;
+    }
+
+  return lmp;
+}
+
+
 /* Set up gdbarch struct.  */
 
 static struct gdbarch *
@@ -2927,6 +2997,9 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
       set_gdbarch_pseudo_register_read (gdbarch, s390_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, s390_pseudo_register_write);
+      set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					     s390_svr4_fetch_link_map_offsets);
+
       break;
     case bfd_mach_s390_64:
       tdep->abi = ABI_LINUX_ZSERIES;
@@ -2941,6 +3014,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_pseudo_register_read (gdbarch, s390x_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, s390x_pseudo_register_write);
+      set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					     s390x_svr4_fetch_link_map_offsets);
       set_gdbarch_address_class_type_flags (gdbarch,
                                             s390_address_class_type_flags);
       set_gdbarch_address_class_type_flags_to_name (gdbarch,

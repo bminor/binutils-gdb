@@ -47,6 +47,18 @@
 
 #define regmap_fpregset s390_regmap_fpregset
 
+/* When debugging a 32-bit executable running under a 64-bit kernel,
+   we have to fix up the 64-bit registers we get from the kernel
+   to make them look like 32-bit registers.  */
+#ifdef __s390x__
+#define SUBOFF(i) \
+	((TARGET_PTR_BIT == 32 \
+	  && ((i) == S390_PSWA_REGNUM \
+	      || ((i) >= S390_R0_REGNUM && (i) <= S390_R15_REGNUM)))? 4 : 0)
+#else
+#define SUBOFF(i) 0
+#endif
+
 
 /* Fill GDB's register array with the general-purpose register values
    in *REGP.  */
@@ -57,7 +69,7 @@ supply_gregset (gregset_t *regp)
   for (i = 0; i < S390_NUM_REGS; i++)
     if (regmap_gregset[i] != -1)
       regcache_raw_supply (current_regcache, i, 
-			   (char *)regp + regmap_gregset[i]);
+			   (char *)regp + regmap_gregset[i] + SUBOFF (i));
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -71,7 +83,7 @@ fill_gregset (gregset_t *regp, int regno)
     if (regmap_gregset[i] != -1)
       if (regno == -1 || regno == i)
 	regcache_raw_collect (current_regcache, i, 
-			      (char *)regp + regmap_gregset[i]);
+			      (char *)regp + regmap_gregset[i] + SUBOFF (i));
 }
 
 /* Fill GDB's register array with the floating-point register values

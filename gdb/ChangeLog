@@ -2,6 +2,15 @@
 
 	Committed by Jim Blandy  <jimb@redhat.com>.
 
+	* s390-nat.c (SUBOFF): New macro.
+	(supply_gregset, fill_gregset): Use it to handle debugging
+	of 32-bit exectuables running under a 64-bit kernel.
+	* s390-tdep.c: Include "solib-svr4.h".
+	(s390_svr4_fetch_link_map_offset): New function.
+	(s390x_svr_fetch_link_map_offset): Likewise.
+	(s390_gdbarch_init): Call set_solib_svr4_fetch_link_map_offsets.
+	* Makefile.in (s390-tdep.o): Update dependencies.
+
 	* s390-tdep.c: Include "trad-frame.h", "frame-base.h", and
 	"frame-unwind.h".
 	(s390_readinstruction): Reformat.  Use read_memory_nobpt.
