@@ -151,6 +151,10 @@ struct internal_lineno {
 
 /********************** SYMBOLS **********************/
 
+#define SYMNMLEN	8	/* # characters in a symbol name	*/
+#define FILNMLEN	14	/* # characters in a file name		*/
+#define DIMNUM		4	/* # array dimensions in auxiliary entry */
+
 struct internal_syment {
 	union {
 		char	_n_name[SYMNMLEN];	/* old COFF version	*/

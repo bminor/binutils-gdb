@@ -151,14 +151,14 @@ struct lineno{
 
 /********************** SYMBOLS **********************/
 
-#define SYMNMLEN	8	/* # characters in a symbol name	*/
-#define FILNMLEN	14	/* # characters in a file name		*/
-#define DIMNUM		4	/* # array dimensions in auxiliary entry */
+#define E_SYMNMLEN	8	/* # characters in a symbol name	*/
+#define E_FILNMLEN	14	/* # characters in a file name		*/
+#define E_DIMNUM	4	/* # array dimensions in auxiliary entry */
 
 
 struct syment {
 	union {
-		char	_n_name[SYMNMLEN];	/* old COFF version	*/
+		char	_n_name[E_SYMNMLEN];	/* old COFF version	*/
 		struct {
 			long	_n_zeroes;	/* new == 0		*/
 			long	_n_offset;	/* offset into string table */
@@ -245,14 +245,14 @@ union auxent {
 			    long x_endndx;	/* entry ndx past block end */
 			} x_fcn;
 			struct {		/* if ISARY, up to 4 dimen. */
-			    unsigned short x_dimen[DIMNUM];
+			    unsigned short x_dimen[E_DIMNUM];
 			} x_ary;
 		} x_fcnary;
 		unsigned short x_tvndx;		/* tv index */
 	} x_sym;
 
 	union {
-		char x_fname[FILNMLEN];
+		char x_fname[E_FILNMLEN];
 		struct {
 			long x_zeroes;
 			long x_offset;

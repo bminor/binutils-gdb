@@ -203,12 +203,12 @@ struct external_lineno
 ** Symbol entry declaration and related definitions
 */
 
-#define	SYMNMLEN	8	/* Number of characters in a symbol name */
+#define	E_SYMNMLEN	8	/* Number of characters in a symbol name */
 
 struct external_syment
 {
   union {
-    char e_name[SYMNMLEN];
+    char e_name[E_SYMNMLEN];
     struct {
       char e_zeroes[4];
       char e_offset[4];
@@ -253,8 +253,8 @@ struct external_syment
 ** definitions.
 */
 
-#define FILNMLEN	14      /* # characters in a file name	  */
-#define DIMNUM	  	4       /* # array dimensions in auxiliary entry */
+#define E_FILNMLEN	14      /* # characters in a file name	  */
+#define E_DIMNUM  	4       /* # array dimensions in auxiliary entry */
 
 union external_auxent {
 	struct {
@@ -272,14 +272,14 @@ union external_auxent {
 			    char x_endndx[4];   /* entry ndx past block end */
 			} x_fcn;
 			struct {		/* if ISARY, up to 4 dimen. */
-			    char x_dimen[DIMNUM][2];
+			    char x_dimen[E_DIMNUM][2];
 			} x_ary;
 		} x_fcnary;
 		char x_tvndx[2];		/* tv index */
 	} x_sym;
 
 	union {
-		char x_fname[FILNMLEN];
+		char x_fname[E_FILNMLEN];
 		struct {
 			char x_zeroes[4];
 			char x_offset[4];
