@@ -1,3 +1,7 @@
+Thu Sep  8 16:30:37 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+        * scripttempl/h8500b.sc: Put rdata stuff into own segment.
+
 Thu Sep  8 13:25:24 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* emulparams/elf32ppc.sh (OTHER_READWRITE_SECTIONS): Don't define;
