@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "value.h"
 #include "gdbcmd.h"
+#include "language.h"
 
 #ifdef USG
 #include <sys/types.h>
