@@ -1,3 +1,7 @@
+2002-11-27  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.host: Fix generic FreeBSD configuration entry.
+
 2002-11-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf64ppc.sh (DATA_ADDR): Don't define.
