@@ -1291,7 +1291,7 @@ value_from_longest (type, num)
       break;
       
     default:
-      error ("Unexpected type encountered for integer constant.");
+      error ("Unexpected type (%d) encountered for integer constant.", code);
     }
   return val;
 }
