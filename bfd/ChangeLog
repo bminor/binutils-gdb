@@ -1,3 +1,18 @@
+Fri Jun 21 12:35:27 1996  Richard Henderson  <rth@tamu.edu>
+
+	* elf64-alpha.c: New file.
+	* config.bfd (alpha-*-linuxecoff*): New target.
+	(alpha-*-linux*, alpha-*-elf*): New targets.
+	* configure.in (bfd_elf64_alpha_vec): New vector.
+	* configure: Rebuild.
+	* targets.c (bfd_elf64_alpha_vec): Declare.
+	(bfd_target_vector): Add bfd_elf64_alpha_vec if BFD64.
+	* reloc.c (BFD_RELOC_ALPHA_GPDISP): Define.
+	* bfd-in2.h, libbfd.h: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+ 	(BFD64_BACKENDS): Add elf64-alpha.o.
+	(BFD64_BACKENDS_CFILES): Add elf64-alpha.c.
+
 Thu Jun 20 18:14:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (ecoff_armap_hash): If hlog is 0, just return 0, rather

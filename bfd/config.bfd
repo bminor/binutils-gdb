@@ -47,6 +47,17 @@ case "${targ}" in
     targ_defvec=ecoffalpha_little_vec
     targ_selvecs=nlm32_alpha_vec
     ;;
+  alpha-*-linuxecoff*)
+    targ_defvec=ecoffalpha_little_vec
+    targ_selvecs=bfd_elf64_alpha_vec
+    ;;
+  alpha-*-linux* | alpha-*-elf*)
+    targ_defvec=bfd_elf64_alpha_vec
+    targ_selvecs=ecoffalpha_little_vec
+    ;;
+  alpha-*-*vms*)
+    targ_defvec=evax_alpha_vec
+    ;;
   alpha-*-*)
     targ_defvec=ecoffalpha_little_vec
     ;;
@@ -57,7 +68,6 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_bigarg_vec
     ;;
 # end-sanitize-arc
-
   arm-*-riscix*)
     targ_defvec=riscix_vec
     ;;
@@ -107,12 +117,6 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-# start-sanitize-rce
-  rce-*-aout*)
-    targ_defvec=rce_aout_vec
-    ;;
-
-# end-sanitize-rce
   hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-sysv4*)
     targ_defvec=bfd_elf32_hppa_vec
     ;;
