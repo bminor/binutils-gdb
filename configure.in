@@ -750,7 +750,7 @@ case "${target}" in
     ;;
 # start-sanitize-sky
   txvu-*-elf*)
-    noconfigdirs="$noconfigdirs gcc gdb"
+    noconfigdirs="$noconfigdirs gcc"
     noconfigdirs="$noconfigdirs target-newlib target-libgloss target-libiberty"
     noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio"
     ;;
