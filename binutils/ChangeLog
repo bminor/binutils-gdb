@@ -1,3 +1,8 @@
+1998-07-20 07:45  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (process_symbol_table): Fix little alignment problem
+	in printed table header.
+
 1998-07-20 07:14  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c: Correct reading of .dynamic section.

@@ -2860,7 +2860,7 @@ process_symbol_table (file)
 	  printf (_("\nSymbol table '%s' contains %d entries:\n"),
 		  SECTION_NAME (section),
 		  section->sh_size / section->sh_entsize);
-	  fputs (_("  Num:    Value  Size Type    Bind   Ot Ndx Name\n"),
+	  fputs (_("  Num:    Value  Size Type    Bind   Ot Ndx   Name\n"),
 		 stdout);
 
 	  symtab = get_elf_symbols (file, section->sh_offset,
