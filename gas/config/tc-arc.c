@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -33,7 +34,7 @@ extern int arc_insn_not_jl PARAMS ((arc_insn));
 extern int arc_limm_fixup_adjust PARAMS ((arc_insn));
 extern int arc_get_noshortcut_flag PARAMS ((void));
 extern int arc_set_ext_seg PARAMS ((void));
-extern void arc_code_symbol PARAMS((expressionS *));
+extern void arc_code_symbol PARAMS ((expressionS *));
 
 static arc_insn arc_insert_operand PARAMS ((arc_insn,
 					    const struct arc_operand *, int,
@@ -73,8 +74,7 @@ const struct syntax_classes {
 
 #define MAXSYNTAXCLASS (sizeof (syntaxclass) / sizeof (struct syntax_classes))
 
-const pseudo_typeS md_pseudo_table[] =
-{
+const pseudo_typeS md_pseudo_table[] = {
   { "align", s_align_bytes, 0 }, /* Defaulting is invalid (0) */
   { "comm", arc_common, 0 },
   { "common", arc_common, 0 },
@@ -139,8 +139,7 @@ static int cpu_tables_init_p = 0;
 static struct hash_control *arc_suffix_hash = NULL;
 
 const char *md_shortopts = "";
-struct option md_longopts[] =
-{
+struct option md_longopts[] = {
 #define OPTION_EB (OPTION_MD_BASE + 0)
   {"EB", no_argument, NULL, OPTION_EB},
 #define OPTION_EL (OPTION_MD_BASE + 1)
@@ -162,14 +161,10 @@ size_t md_longopts_size = sizeof (md_longopts);
 #define IS_SYMBOL_OPERAND(o) \
  ((o) == 'b' || (o) == 'c' || (o) == 's' || (o) == 'o' || (o) == 'O')
 
-struct arc_operand_value *get_ext_suffix(char *s);
+struct arc_operand_value *get_ext_suffix (char *s);
 
-/*
- * md_parse_option
- *
- * Invocation line includes a switch not recognized by the base assembler.
- * See if it's a processor-specific option.
- */
+/* Invocation line includes a switch not recognized by the base assembler.
+   See if it's a processor-specific option.  */
 
 int
 md_parse_option (c, arg)
@@ -277,7 +272,7 @@ init_opcode_tables (mach)
 
   for (i = 0; i < arc_reg_names_count; i++)
     {
-      if (symbol_find(arc_reg_names[i].name))
+      if (symbol_find (arc_reg_names[i].name))
 	continue;
       /* Use symbol_create here instead of symbol_new so we don't try to
 	 output registers into the object file's symbol table.  */
@@ -360,8 +355,7 @@ arc_insert_operand (insn, operand, mods, reg, val, file, line)
    we go, because that would require us to first create the frag, and
    that would screw up references to ``.''.  */
 
-struct arc_fixup
-{
+struct arc_fixup {
   /* index into `arc_operands' */
   int opindex;
   expressionS exp;
@@ -406,7 +400,7 @@ md_assemble (str)
   /* Keep looking until we find a match.  */
 
   start = str;
-  for (opcode = (ext_opcode ? ext_opcode : std_opcode) ;
+  for (opcode = (ext_opcode ? ext_opcode : std_opcode);
        opcode != NULL;
        opcode = (ARC_OPCODE_NEXT_ASM (opcode)
 		 ? ARC_OPCODE_NEXT_ASM (opcode)
@@ -438,7 +432,7 @@ md_assemble (str)
 
       /* We don't check for (*str != '\0') here because we want to parse
 	 any trailing fake arguments in the syntax string.  */
-      for (str = start, syn = opcode->syntax; *syn != '\0'; )
+      for (str = start, syn = opcode->syntax; *syn != '\0';)
 	{
 	  int mods;
 	  const struct arc_operand *operand;
@@ -495,10 +489,10 @@ md_assemble (str)
 			as_warn (errmsg);
 		      break;
 		    }
-		  if(limm_reloc_p
-		     && (operand->flags && operand->flags & ARC_OPERAND_LIMM)
-		     && (operand->flags &
-			 (ARC_OPERAND_ABSOLUTE_BRANCH | ARC_OPERAND_ADDRESS)))
+		  if (limm_reloc_p
+		      && (operand->flags && operand->flags & ARC_OPERAND_LIMM)
+		      && (operand->flags &
+			  (ARC_OPERAND_ABSOLUTE_BRANCH | ARC_OPERAND_ADDRESS)))
 		    {
 		      fixups[fix_up_at].opindex = arc_operand_map[operand->fmt];
 		    }
@@ -510,8 +504,8 @@ md_assemble (str)
 	    {
 	      int found;
 	      char c;
-	      char *s,*t;
-	      const struct arc_operand_value *suf,*suffix_end;
+	      char *s, *t;
+	      const struct arc_operand_value *suf, *suffix_end;
 	      const struct arc_operand_value *suffix = NULL;
 
 	      if (!(operand->flags & ARC_OPERAND_SUFFIX))
@@ -549,7 +543,7 @@ md_assemble (str)
 		continue;
 	      c = *t;
 	      *t = '\0';
-	      if ((suf = get_ext_suffix(s)))
+	      if ((suf = get_ext_suffix (s)))
 		ext_suffix_p = 1;
 	      else
 		suf = hash_find (arc_suffix_hash, s);
@@ -608,7 +602,8 @@ md_assemble (str)
 		}
 	      ++syn;
 	      if (!found)
-		; /* Wrong type.  Just go on to try next insn entry.  */
+		/* Wrong type.  Just go on to try next insn entry.  */
+		;
 	      else
 		{
 		  if (num_suffixes == MAX_SUFFIXES)
@@ -655,12 +650,12 @@ md_assemble (str)
 		}
 #define IS_REG_DEST_OPERAND(o) ((o) == 'a')
 	      else if (IS_REG_DEST_OPERAND (*syn))
-		as_bad("symbol as destination register");
+		as_bad ("symbol as destination register");
 	      else
 		{
-		  if(!strncmp(str,"@h30",4))
+		  if (!strncmp (str, "@h30", 4))
 		    {
-		      arc_code_symbol(&exp);
+		      arc_code_symbol (&exp);
 		      str += 4;
 		    }
 		  /* We need to generate a fixup for this expression.  */
@@ -668,9 +663,9 @@ md_assemble (str)
 		    as_fatal ("too many fixups");
 		  fixups[fc].exp = exp;
 		  /* We don't support shimm relocs. break here to force
-		     the assembler to output a limm  */
+		     the assembler to output a limm.  */
 #define IS_REG_SHIMM_OFFSET(o) ((o) == 'd')
-		  if(IS_REG_SHIMM_OFFSET(*syn))
+		  if (IS_REG_SHIMM_OFFSET (*syn))
 		    break;
 		  /* If this is a register constant (IE: one whose
 		     register value gets stored as 61-63) then this
@@ -682,7 +677,7 @@ md_assemble (str)
 		    {
 		      const char *junk;
 		      limm_reloc_p = 1;
-		      /* save this, we don't yet know what reloc to use */
+		      /* Save this, we don't yet know what reloc to use.  */
 		      fix_up_at = fc;
 		      /* Tell insert_reg we need a limm.  This is
 			 needed because the value at this point is
@@ -763,13 +758,13 @@ md_assemble (str)
 	      {
 		switch (arc_operands[insn_suffixes[i]->type].fmt)
 		  {
-		  case 'n' :
+		  case 'n':
 		    delay_slot_type = insn_suffixes[i]->value;
 		    break;
-		  case 'q' :
+		  case 'q':
 		    conditional = insn_suffixes[i]->value;
 		    break;
-		  case 'f' :
+		  case 'f':
 		    cc_set_p = 1;
 		    break;
 		  }
@@ -781,7 +776,7 @@ md_assemble (str)
 	    if (in_delay_slot_p && limm_p)
 	      as_warn ("8 byte instruction in delay slot");
 	    if (delay_slot_type != ARC_DELAY_NONE
-		&& limm_p && arc_insn_not_jl(insn)) /* except for jl  addr */
+		&& limm_p && arc_insn_not_jl (insn)) /* except for jl  addr */
 	      as_warn ("8 byte jump instruction with delay slot");
 	    in_delay_slot_p = (delay_slot_type != ARC_DELAY_NONE) && !limm_p;
 
@@ -838,8 +833,8 @@ md_assemble (str)
 
 	      if (arc_operands[fixups[i].opindex].flags & ARC_OPERAND_LIMM)
 		{
-		  /* modify the fixup addend as required by the cpu */
-		  fixups[i].exp.X_add_number += arc_limm_fixup_adjust(insn);
+		  /* Modify the fixup addend as required by the cpu.  */
+		  fixups[i].exp.X_add_number += arc_limm_fixup_adjust (insn);
 		  op_type = fixups[i].opindex;
 		  /* FIXME: can we add this data to the operand table?  */
 		  if (op_type == arc_operand_map['L']
@@ -877,14 +872,12 @@ md_assemble (str)
       /* Try the next entry.  */
     }
 
-  if(NULL == last_errmsg)
+  if (NULL == last_errmsg)
     as_bad ("bad instruction `%s'", start);
   else
     as_bad (last_errmsg);
 }
-
 
-
 static void
 arc_extoper (opertype)
      int opertype;
@@ -903,18 +896,18 @@ arc_extoper (opertype)
 
   name = input_line_pointer;
   c = get_symbol_end ();
-  name = xstrdup(name);
+  name = xstrdup (name);
   if (NULL == name)
     {
-      ignore_rest_of_line();
+      ignore_rest_of_line ();
       return;
     }
 
   p = name;
   while (*p)
     {
-      if (isupper(*p))
-	*p = tolower(*p);
+      if (isupper (*p))
+	*p = tolower (*p);
       p++;
     }
 
@@ -927,55 +920,55 @@ arc_extoper (opertype)
     {
       as_bad ("expected comma after operand name");
       ignore_rest_of_line ();
-      free(name);
+      free (name);
       return;
     }
 
   input_line_pointer++;		/* skip ',' */
   number = get_absolute_expression ();
 
-  if(number < 0)
+  if (number < 0)
     {
-      as_bad ("negative operand number %d",number);
-      ignore_rest_of_line();
-      free(name);
+      as_bad ("negative operand number %d", number);
+      ignore_rest_of_line ();
+      free (name);
       return;
     }
 
   if (opertype)
     {
-      SKIP_WHITESPACE();
+      SKIP_WHITESPACE ();
 
       if (*input_line_pointer != ',')
 	{
 	  as_bad ("expected comma after register-number");
 	  ignore_rest_of_line ();
-	  free(name);
+	  free (name);
 	  return;
 	}
 
       input_line_pointer++;		/* skip ',' */
       mode = input_line_pointer;
 
-      if (!strncmp(mode, "r|w",3))
+      if (!strncmp (mode, "r|w", 3))
 	{
 	  imode = 0;
 	  input_line_pointer += 3;
 	}
       else
 	{
-	  if (!strncmp(mode,"r",1))
+	  if (!strncmp (mode, "r", 1))
 	    {
 	      imode = ARC_REGISTER_READONLY;
 	      input_line_pointer += 1;
 	    }
 	  else
 	    {
-	      if (strncmp(mode,"w",1))
+	      if (strncmp (mode, "w", 1))
 		{
 		  as_bad ("invalid mode");
-		  ignore_rest_of_line();
-		  free(name);
+		  ignore_rest_of_line ();
+		  free (name);
 		  return;
 		}
 	      else
@@ -985,31 +978,31 @@ arc_extoper (opertype)
 		}
 	    }
 	}
-      SKIP_WHITESPACE();
+      SKIP_WHITESPACE ();
       if (1 == opertype)
 	{
 	  if (*input_line_pointer != ',')
 	    {
 	      as_bad ("expected comma after register-mode");
 	      ignore_rest_of_line ();
-	      free(name);
+	      free (name);
 	      return;
 	    }
 
 	  input_line_pointer++;             /* skip ',' */
 
-	  if(!strncmp(input_line_pointer,"cannot_shortcut",15))
+	  if (!strncmp (input_line_pointer, "cannot_shortcut", 15))
 	    {
-	      imode |= arc_get_noshortcut_flag();
+	      imode |= arc_get_noshortcut_flag ();
 	      input_line_pointer += 15;
 	    }
 	  else
 	    {
-	      if(strncmp(input_line_pointer,"can_shortcut",12))
+	      if (strncmp (input_line_pointer, "can_shortcut", 12))
 		{
 		  as_bad ("shortcut designator invalid");
-		  ignore_rest_of_line();
-		  free(name);
+		  ignore_rest_of_line ();
+		  free (name);
 		  return;
 		}
 	      else
@@ -1022,42 +1015,42 @@ arc_extoper (opertype)
 
   if ((opertype == 1) && number > 60)
     {
-      as_bad("core register value (%d) too large", number);
-      ignore_rest_of_line();
-      free(name);
+      as_bad ("core register value (%d) too large", number);
+      ignore_rest_of_line ();
+      free (name);
       return;
     }
 
   if ((opertype == 0) && number > 31)
     {
-      as_bad("condition code value (%d) too large", number);
-      ignore_rest_of_line();
-      free(name);
+      as_bad ("condition code value (%d) too large", number);
+      ignore_rest_of_line ();
+      free (name);
       return;
     }
 
   ext_oper = (struct arc_ext_operand_value *) \
-    xmalloc(sizeof (struct arc_ext_operand_value));
+    xmalloc (sizeof (struct arc_ext_operand_value));
 
-  if(opertype)
+  if (opertype)
     {
-      /* if the symbol already exists, point it at the new definition */
+      /* If the symbol already exists, point it at the new definition.  */
       if ((symbolP = symbol_find (name)))
 	{
-	  if (S_GET_SEGMENT(symbolP) == reg_section)
-	    S_SET_VALUE(symbolP,(int)&ext_oper->operand);
+	  if (S_GET_SEGMENT (symbolP) == reg_section)
+	    S_SET_VALUE (symbolP, (int) &ext_oper->operand);
 	  else
 	    {
-	      as_bad("attempt to override symbol: %s",name);
-	      ignore_rest_of_line();
-	      free(name);
-	      free(ext_oper);
+	      as_bad ("attempt to override symbol: %s", name);
+	      ignore_rest_of_line ();
+	      free (name);
+	      free (ext_oper);
 	      return;
 	    }
 	}
       else
 	{
-	  /* If its not there, add it */
+	  /* If its not there, add it.  */
 	  symbol_table_insert (symbol_create (name, reg_section,
 					      (int) &ext_oper->operand, &zero_address_frag));
 	}
@@ -1065,83 +1058,83 @@ arc_extoper (opertype)
 
   ext_oper->operand.name  = name;
   ext_oper->operand.value = number;
-  ext_oper->operand.type  = arc_operand_type(opertype);
+  ext_oper->operand.type  = arc_operand_type (opertype);
   ext_oper->operand.flags = imode;
 
   ext_oper->next = arc_ext_operands;
   arc_ext_operands = ext_oper;
 
-  /* ok, now that we know what this operand is, put a description
-     in the arc extension section of the output file */
+  /* OK, now that we know what this operand is, put a description in
+     the arc extension section of the output file.  */
 
   old_sec    = now_seg;
   old_subsec = now_subseg;
 
-  arc_set_ext_seg();
+  arc_set_ext_seg ();
 
   switch (opertype)
     {
     case 0:
-      p = frag_more(1);
-      *p = 3 + strlen(name) + 1;
-      p = frag_more(1);
+      p = frag_more (1);
+      *p = 3 + strlen (name) + 1;
+      p = frag_more (1);
       *p = EXT_COND_CODE;
-      p = frag_more(1);
+      p = frag_more (1);
       *p = number;
-      p = frag_more(strlen(name) + 1);
-      strcpy(p,name);
+      p = frag_more (strlen (name) + 1);
+      strcpy (p, name);
       break;
     case 1:
-      p = frag_more(1);
-      *p = 3 + strlen(name) + 1;
-      p = frag_more(1);
+      p = frag_more (1);
+      *p = 3 + strlen (name) + 1;
+      p = frag_more (1);
       *p = EXT_CORE_REGISTER;
-      p = frag_more(1);
+      p = frag_more (1);
       *p = number;
-      p = frag_more(strlen(name) + 1);
-      strcpy(p,name);
+      p = frag_more (strlen (name) + 1);
+      strcpy (p, name);
       break;
     case 2:
-      p = frag_more(1);
-      *p = 6 + strlen(name) + 1;
-      p = frag_more(1);
+      p = frag_more (1);
+      *p = 6 + strlen (name) + 1;
+      p = frag_more (1);
       *p = EXT_AUX_REGISTER;
-      p = frag_more(1);
+      p = frag_more (1);
       *p = number >> 24 & 0xff;
-      p = frag_more(1);
+      p = frag_more (1);
       *p = number >> 16 & 0xff;
-      p = frag_more(1);
+      p = frag_more (1);
       *p = number >>  8 & 0xff;
-      p = frag_more(1);
+      p = frag_more (1);
       *p = number       & 0xff;
-      p = frag_more(strlen(name) + 1);
-      strcpy(p,name);
+      p = frag_more (strlen (name) + 1);
+      strcpy (p, name);
       break;
     default:
-      as_bad("invalid opertype");
-      ignore_rest_of_line();
-      free(name);
+      as_bad ("invalid opertype");
+      ignore_rest_of_line ();
+      free (name);
       return;
       break;
     }
 
   subseg_set (old_sec, old_subsec);
 
-  /* enter all registers into the symbol table */
+  /* Enter all registers into the symbol table.  */
 
-  demand_empty_rest_of_line();
+  demand_empty_rest_of_line ();
 }
 
 static void
 arc_extinst (ignore)
-    int ignore ATTRIBUTE_UNUSED;
+     int ignore ATTRIBUTE_UNUSED;
 {
   unsigned char syntax[129];
   char *name;
   char *p;
   char c;
   int suffixcode = -1;
-  int opcode,subopcode;
+  int opcode, subopcode;
   int i;
   int class = 0;
   int name_len;
@@ -1152,14 +1145,14 @@ arc_extinst (ignore)
 
   name = input_line_pointer;
   c = get_symbol_end ();
-  name = xstrdup(name);
+  name = xstrdup (name);
   if (NULL == name)
     {
-      ignore_rest_of_line();
+      ignore_rest_of_line ();
       return;
     }
-  strcpy(syntax,name);
-  name_len = strlen(name);
+  strcpy (syntax, name);
+  name_len = strlen (name);
 
   /* just after name is now '\0' */
   p = input_line_pointer;
@@ -1189,19 +1182,19 @@ arc_extinst (ignore)
   input_line_pointer++;		/* skip ',' */
   subopcode = get_absolute_expression ();
 
-  if(subopcode < 0)
+  if (subopcode < 0)
     {
-      as_bad ("negative subopcode %d",subopcode);
-      ignore_rest_of_line();
+      as_bad ("negative subopcode %d", subopcode);
+      ignore_rest_of_line ();
       return;
     }
 
-  if(subopcode)
+  if (subopcode)
     {
-      if(3 != opcode)
+      if (3 != opcode)
 	{
 	  as_bad ("subcode value found when opcode not equal 0x03");
-	  ignore_rest_of_line();
+	  ignore_rest_of_line ();
 	  return;
 	}
       else
@@ -1209,7 +1202,7 @@ arc_extinst (ignore)
 	  if (subopcode < 0x09 || subopcode == 0x3f)
 	    {
 	      as_bad ("invalid subopcode %d", subopcode);
-	      ignore_rest_of_line();
+	      ignore_rest_of_line ();
 	      return;
 	    }
 	}
@@ -1226,9 +1219,9 @@ arc_extinst (ignore)
 
   input_line_pointer++;         /* skip ',' */
 
-  for(i = 0; i < (int) MAXSUFFIXCLASS; i++)
+  for (i = 0; i < (int) MAXSUFFIXCLASS; i++)
     {
-      if(!strncmp(suffixclass[i].name,input_line_pointer, suffixclass[i].len))
+      if (!strncmp (suffixclass[i].name,input_line_pointer, suffixclass[i].len))
 	{
 	  suffixcode = i;
 	  input_line_pointer += suffixclass[i].len;
@@ -1236,7 +1229,7 @@ arc_extinst (ignore)
 	}
     }
 
-  if(-1 == suffixcode)
+  if (-1 == suffixcode)
     {
       as_bad ("invalid suffix class");
       ignore_rest_of_line ();
@@ -1254,9 +1247,9 @@ arc_extinst (ignore)
 
   input_line_pointer++;         /* skip ',' */
 
-  for(i = 0; i < (int) MAXSYNTAXCLASS; i++)
+  for (i = 0; i < (int) MAXSYNTAXCLASS; i++)
     {
-      if(!strncmp(syntaxclass[i].name,input_line_pointer, syntaxclass[i].len))
+      if (!strncmp (syntaxclass[i].name,input_line_pointer, syntaxclass[i].len))
 	{
 	  class = syntaxclass[i].class;
 	  input_line_pointer += syntaxclass[i].len;
@@ -1264,14 +1257,14 @@ arc_extinst (ignore)
 	}
     }
 
-  if(0 == (SYNTAX_VALID & class))
+  if (0 == (SYNTAX_VALID & class))
     {
       as_bad ("invalid syntax class");
       ignore_rest_of_line ();
       return;
     }
 
-  if ((0x3 == opcode) & (class &  SYNTAX_3OP))
+  if ((0x3 == opcode) & (class & SYNTAX_3OP))
     {
       as_bad ("opcode 0x3 and SYNTAX_3OP invalid");
       ignore_rest_of_line ();
@@ -1281,86 +1274,86 @@ arc_extinst (ignore)
   switch (suffixcode)
     {
     case 0:
-      strcat(syntax,"%.q%.f ");
+      strcat (syntax, "%.q%.f ");
       break;
     case 1:
-      strcat(syntax,"%.f ");
+      strcat (syntax, "%.f ");
       break;
     case 2:
-      strcat(syntax,"%.q ");
+      strcat (syntax, "%.q ");
       break;
     case 3:
-      strcat(syntax," ");
+      strcat (syntax, " ");
       break;
     default:
-      as_bad("unknown suffix class");
-      ignore_rest_of_line();
+      as_bad ("unknown suffix class");
+      ignore_rest_of_line ();
       return;
       break;
     };
 
-  strcat(syntax,((opcode == 0x3) ? "%a,%b" : ((class & SYNTAX_3OP) ? "%a,%b,%c" : "%b,%c")));
-  if(suffixcode < 2)
-    strcat(syntax,"%F");
-  strcat(syntax,"%S%L");
+  strcat (syntax, ((opcode == 0x3) ? "%a,%b" : ((class & SYNTAX_3OP) ? "%a,%b,%c" : "%b,%c")));
+  if (suffixcode < 2)
+    strcat (syntax, "%F");
+  strcat (syntax, "%S%L");
 
-  ext_op = (struct arc_opcode *) xmalloc(sizeof (struct arc_opcode));
-  if(NULL == ext_op)
+  ext_op = (struct arc_opcode *) xmalloc (sizeof (struct arc_opcode));
+  if (NULL == ext_op)
     {
       ignore_rest_of_line ();
       return;
     }
 
-  ext_op->syntax = xstrdup(syntax);
+  ext_op->syntax = xstrdup (syntax);
   if (NULL == ext_op->syntax)
     {
       ignore_rest_of_line ();
       return;
     }
 
-  ext_op->mask  = I(-1) | ((0x3 == opcode) ? C(-1) : 0 );
-  ext_op->value = I(opcode) | ((0x3 == opcode) ? C(subopcode) : 0 );
+  ext_op->mask  = I (-1) | ((0x3 == opcode) ? C (-1) : 0);
+  ext_op->value = I (opcode) | ((0x3 == opcode) ? C (subopcode) : 0);
   ext_op->flags = class;
   ext_op->next_asm = arc_ext_opcodes;
   ext_op->next_dis = arc_ext_opcodes;
   arc_ext_opcodes = ext_op;
 
-  /* ok, now that we know what this inst is, put a description in
-     the arc extension section of the output file */
+  /* OK, now that we know what this inst is, put a description in the
+     arc extension section of the output file.  */
 
   old_sec    = now_seg;
   old_subsec = now_subseg;
 
-  arc_set_ext_seg();
+  arc_set_ext_seg ();
 
-  p = frag_more(1);
-  *p = 5 + name_len +1;
-  p = frag_more(1);
+  p = frag_more (1);
+  *p = 5 + name_len + 1;
+  p = frag_more (1);
   *p = EXT_INSTRUCTION;
-  p = frag_more(1);
+  p = frag_more (1);
   *p = opcode;
-  p = frag_more(1);
+  p = frag_more (1);
   *p = subopcode;
-  p = frag_more(1);
+  p = frag_more (1);
   *p = (class & (OP1_MUST_BE_IMM | OP1_IMM_IMPLIED) ? IGNORE_FIRST_OPD : 0);
-  p = frag_more(name_len);
-  strncpy(p,syntax,name_len);
-  p = frag_more(1);
+  p = frag_more (name_len);
+  strncpy (p, syntax, name_len);
+  p = frag_more (1);
   *p = '\0';
 
   subseg_set (old_sec, old_subsec);
 
-  demand_empty_rest_of_line();
+  demand_empty_rest_of_line ();
 }
 
 int
-arc_set_ext_seg()
+arc_set_ext_seg ()
 {
   if (!arcext_section)
     {
       arcext_section = subseg_new (".arcextmap", 0);
       bfd_set_section_flags (stdoutput, arcext_section,
-                             SEC_READONLY | SEC_HAS_CONTENTS);
+			     SEC_READONLY | SEC_HAS_CONTENTS);
     }
   else
     subseg_set (arcext_section, 0);
@@ -1374,7 +1367,7 @@ arc_common (localScope)
   char *name;
   char c;
   char *p;
-  int  align, size;
+  int align, size;
   symbolS *symbolP;
 
   name = input_line_pointer;
@@ -1411,8 +1404,8 @@ arc_common (localScope)
       ignore_rest_of_line ();
       return;
     }
-  if ( ((int) S_GET_VALUE (symbolP) != 0) \
-       && ((int) S_GET_VALUE (symbolP) != size) )
+  if (((int) S_GET_VALUE (symbolP) != 0) \
+      && ((int) S_GET_VALUE (symbolP) != size))
     {
       as_warn ("length of symbol \"%s\" already %ld, ignoring %d",
 	       S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
@@ -1446,15 +1439,16 @@ arc_common (localScope)
       subseg_set (bss_section, 0);  /* ??? subseg_set (bss_section, 1); ??? */
 
       if (align)
-	frag_align (align, 0, 0); /* do alignment */
+	/* Do alignment.  */
+	frag_align (align, 0, 0);
 
-      /* detach from old frag */
+      /* Detach from old frag.  */
       if (S_GET_SEGMENT (symbolP) == bss_section)
 	symbolP->sy_frag->fr_symbol = NULL;
 
       symbolP->sy_frag = frag_now;
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-		        (offsetT) size, (char *) 0);
+			(offsetT) size, (char *) 0);
       *pfrag = 0;
 
       S_SET_SIZE       (symbolP, size);
@@ -1476,14 +1470,12 @@ arc_common (localScope)
   demand_empty_rest_of_line ();
   return;
 }
-
 
-
 /* Select the cpu we're assembling for.  */
 
 static void
 arc_option (ignore)
-    int ignore ATTRIBUTE_UNUSED;
+     int ignore ATTRIBUTE_UNUSED;
 {
   int mach;
   char c;
@@ -1528,21 +1520,20 @@ arc_option (ignore)
   as_bad ("invalid identifier for \".option\"");
   ignore_rest_of_line ();
 }
-
 
-/* Turn a string in input_line_pointer into a floating point constant of type
-   type, and store the appropriate bytes in *litP.  The number of LITTLENUMS
-   emitted is stored in *sizeP.
-   An error message is returned, or NULL on OK.  */
+/* Turn a string in input_line_pointer into a floating point constant
+   of type TYPE, and store the appropriate bytes in *LITP.  The number
+   of LITTLENUMS emitted is stored in *SIZEP.  An error message is
+   returned, or NULL on OK.  */
 
 /* Equal to MAX_PRECISION in atof-ieee.c  */
 #define MAX_LITTLENUMS 6
 
 char *
 md_atof (type, litP, sizeP)
-  char type;
-  char *litP;
-  int *sizeP;
+     char type;
+     char *litP;
+     int *sizeP;
 {
   int prec;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
@@ -1630,7 +1621,7 @@ md_convert_frag (abfd, sec, fragp)
 }
 
 void
-arc_code_symbol(expressionP)
+arc_code_symbol (expressionP)
      expressionS *expressionP;
 {
   if (expressionP->X_op == O_symbol && expressionP->X_add_number == 0
@@ -1644,9 +1635,11 @@ arc_code_symbol(expressionP)
       two.X_add_number = 2;
       expressionP->X_op_symbol = make_expr_symbol (&two);
     }
-  /* allow %st(sym1-sym2) */
-  else if (expressionP->X_op == O_subtract && expressionP->X_add_symbol != NULL
-	   && expressionP->X_op_symbol != NULL && expressionP->X_add_number == 0)
+  /* Allow %st(sym1-sym2) */
+  else if (expressionP->X_op == O_subtract
+	   && expressionP->X_add_symbol != NULL
+	   && expressionP->X_op_symbol != NULL
+	   && expressionP->X_add_number == 0)
     {
       expressionS two;
       expressionP->X_add_symbol = make_expr_symbol (expressionP);
@@ -1680,7 +1673,7 @@ md_operand (expressionP)
   char *p = input_line_pointer;
 
   if (*p == '%')
-    if(strncmp (p, "%st(", 4) == 0)
+    if (strncmp (p, "%st(", 4) == 0)
       {
 	input_line_pointer += 4;
 	expression (expressionP);
@@ -1690,18 +1683,18 @@ md_operand (expressionP)
 	    return;
 	  }
 	++input_line_pointer;
-	arc_code_symbol(expressionP);
+	arc_code_symbol (expressionP);
       }
     else
-      {       /* it could be a register */
-	int i,l;
+      {       /* It could be a register.  */
+	int i, l;
 	struct arc_ext_operand_value *ext_oper = arc_ext_operands;
 	p++;
 
 	while (ext_oper)
 	  {
-	    l = strlen(ext_oper->operand.name);
-	    if(!strncmp(p,ext_oper->operand.name,l) && !isalnum(*(p + l)))
+	    l = strlen (ext_oper->operand.name);
+	    if (!strncmp (p, ext_oper->operand.name, l) && !isalnum(*(p + l)))
 	      {
 		input_line_pointer += l + 1;
 		expressionP->X_op = O_register;
@@ -1712,12 +1705,12 @@ md_operand (expressionP)
 	  }
 	for (i = 0; i < arc_reg_names_count; i++)
 	  {
-	    l = strlen(arc_reg_names[i].name);
-	    if(!strncmp(p,arc_reg_names[i].name,l) && !isalnum(*(p + l)))
+	    l = strlen (arc_reg_names[i].name);
+	    if (!strncmp (p, arc_reg_names[i].name, l) && !isalnum (*(p + l)))
 	      {
 		input_line_pointer += l + 1;
 		expressionP->X_op = O_register;
-		expressionP->X_add_number = (int)  &arc_reg_names[i];
+		expressionP->X_add_number = (int) &arc_reg_names[i];
 		break;
 	      }
 	  }
@@ -1744,22 +1737,22 @@ md_undefined_symbol (name)
 
 void
 arc_parse_cons_expression (exp, nbytes)
-  expressionS *exp;
-  unsigned int nbytes ATTRIBUTE_UNUSED;
+     expressionS *exp;
+     unsigned int nbytes ATTRIBUTE_UNUSED;
 {
   char *p = input_line_pointer;
   int code_symbol_fix = 0;
 
-  for (;! is_end_of_line[(unsigned char) *p]; p++)
-    if (*p == '@' && !strncmp(p,"@h30",4))
+  for (; ! is_end_of_line[(unsigned char) *p]; p++)
+    if (*p == '@' && !strncmp (p, "@h30", 4))
       {
 	code_symbol_fix = 1;
-	strcpy(p,";   ");
+	strcpy (p, ";   ");
       }
   expr (0, exp);
   if (code_symbol_fix)
     {
-      arc_code_symbol(exp);
+      arc_code_symbol (exp);
       input_line_pointer = p;
     }
 }
@@ -1885,7 +1878,9 @@ md_apply_fix3 (fixP, valueP, seg)
      valueT *valueP;
      segT seg;
 {
-  /*char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;*/
+#if 0
+  char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
+#endif
   valueT value;
 
   /* FIXME FIXME FIXME: The value we are passed in *valueP includes
@@ -2057,16 +2052,18 @@ tc_gen_reloc (section, fixP)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    "internal error: can't export reloc type %d (`%s')",
-		    fixP->fx_r_type, bfd_get_reloc_code_name (fixP->fx_r_type));
+		    fixP->fx_r_type,
+		    bfd_get_reloc_code_name (fixP->fx_r_type));
       return NULL;
     }
 
   assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
 
-/* set addend to account for PC being advanced one insn before the target
-   address is computed, drop fx_addnumber as it is handled elsewhere  mlm */
+  /* Set addend to account for PC being advanced one insn before the
+     target address is computed, drop fx_addnumber as it is handled
+     elsewhere mlm  */
 
-  reloc->addend = ( fixP->fx_pcrel ? -4 : 0 );
+  reloc->addend = (fixP->fx_pcrel ? -4 : 0);
 
   return reloc;
 }
