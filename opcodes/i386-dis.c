@@ -197,7 +197,7 @@ fetch_data (info, addr)
 #define indirEv OP_indirE, v_mode
 #define Ew OP_E, w_mode
 #define Ma OP_E, v_mode
-#define M OP_E, 0		/* lea */
+#define M OP_E, 0		/* lea, lgdt, etc. */
 #define Mp OP_E, 0		/* 32 or 48 bit memory operand for LDS, LES etc */
 #define Gb OP_G, b_mode
 #define Gv OP_G, v_mode
@@ -1315,14 +1315,14 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP7 */
   {
-    { "sgdt", Ew, XX, XX },
-    { "sidt", Ew, XX, XX },
-    { "lgdt", Ew, XX, XX },
-    { "lidt", Ew, XX, XX },
-    { "smsw", Ew, XX, XX },
-    { "(bad)", XX, XX, XX },
-    { "lmsw", Ew, XX, XX },
-    { "invlpg", Ew, XX, XX },
+    { "sgdtQ",	 M, XX, XX },
+    { "sidtQ",	 M, XX, XX },
+    { "lgdtQ",	 M, XX, XX },
+    { "lidtQ",	 M, XX, XX },
+    { "smsw",	Ew, XX, XX },
+    { "(bad)",	XX, XX, XX },
+    { "lmsw",	Ew, XX, XX },
+    { "invlpg",	Ew, XX, XX },
   },
   /* GRP8 */
   {

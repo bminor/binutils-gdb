@@ -1,3 +1,8 @@
+2001-07-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (grps): Print l or w suffix, and require mem modrm
+	for lgdt, lidt, sgdt, sidt.
+
 2001-07-13  Philip Blundell  <philb@gnu.org>
 
 	* arm-dis.c (print_insn_arm): Use decimal for offsets in LDR/STR.
