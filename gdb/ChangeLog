@@ -1,3 +1,10 @@
+Tue Jan 30 18:26:19 1996  Fred Fish  <fnf@cygnus.com>
+
+	* defs.h (errno.h>:  Move #include closer to head of file to solve
+	obscure problem with systems that declare perror with const arg, in
+ 	both errno.h and stdio.h, and const is defined away by intervening
+ 	local include.
+
 Tue Jan 30 15:41:10 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Jon Reeves <reeves@zk3.dec.com>:
