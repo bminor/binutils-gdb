@@ -107,10 +107,18 @@ alpha_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (REGISTER_NAME (regnum) == NULL || *REGISTER_NAME (regnum) == '\0')
     return 0;
 
-  /* Since we implement no pseudo registers, save/restore is equal to all. */
-  if (group == all_reggroup
-      || group == save_reggroup
-      || group == restore_reggroup)
+  if (group == all_reggroup)
+    return 1;
+
+  /* Zero should not be saved or restored.  Technically it is a general
+     register (just as $f31 would be a float if we represented it), but
+     there's no point displaying it during "info regs", so leave it out
+     of all groups except for "all".  */
+  if (regnum == ALPHA_ZERO_REGNUM)
+    return 0;
+
+  /* All other registers are saved and restored.  */
+  if (group == save_reggroup || group == restore_reggroup)
     return 1;
 
   /* All other groups are non-overlapping.  */

@@ -1,5 +1,10 @@
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
+	* alpha-tdep.c (alpha_register_reggroup_p): Zero is only
+	a member of all_reggroup.
+
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
 	* alpha-tdep.c (alpha_register_type): Change from _virtual_type.
 	(alpha_convert_flt_dbl, alpha_convert_dbl_flt): Remove.
 	(alpha_lds, alpha_sts): New.
