@@ -7,6 +7,9 @@
 	(ui_loop_hook): New stub hook for standalone use.
 	* sim-events.c (sim_events_process): Call ui_loop_hook
 	periodically on CYGWIN host.
+
+	* sim-reason.c (sim_stop_reason): Return host signal numbers
+	to gdb on sim_stopped and sim_signalled cases.
 	* sim-engine.c (sim_engine_halt): Call SIM_CPU_EXCEPTION_SUSPEND
  	hook just before longjmp.
 	* sim-resume.c (sim_resume): Call SIM_CPU_EXCEPTION_RESUME
@@ -15,9 +18,6 @@
 	* sim-n-core.h (sim_core_trace_M): Allay const warning.
 	* sim-trace.h (trace_generic): Ditto.
 	* sim-trace.c (trace_generic): Ditto.
-	
-	* sim-reason.c (sim_stop_reason): Return host signal numbers
-	to gdb on sim_stopped and sim_signalled cases.
 	
 1998-12-14  Doug Evans  <devans@casey.cygnus.com>
 
