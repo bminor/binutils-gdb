@@ -155,14 +155,16 @@ SIM_RC sim_load PARAMS ((SIM_DESC sd, char *prog, struct _bfd *abfd, int from_tt
 SIM_RC sim_create_inferior PARAMS ((SIM_DESC sd, struct _bfd *abfd, char **argv, char **env));
 
 
-/* Read LENGTH bytes of the simulated program's memory and store in
-   BUF.  Result is number of bytes read, or zero if error.  */
+/* Fetch LENGTH bytes of the simulated program's memory.  Start fetch
+   at virtual address MEM and store in BUF.  Result is number of bytes
+   read, or zero if error.  */
 
 int sim_read PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length));
 
 
-/* Store LENGTH bytes from BUF in the simulated program's memory.
-   Result is number of bytes write, or zero if error.  */
+/* Store LENGTH bytes from BUF into the simulated program's
+   memory. Store bytes starting at virtual address MEM. Result is
+   number of bytes write, or zero if error.  */
 
 int sim_write PARAMS ((SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length));
 
@@ -202,10 +204,13 @@ int sim_stop PARAMS ((SIM_DESC sd));
    SIM_EXITED: The program has terminated. SIGRC indicates the target
    dependant exit status.
 
-   SIM_STOPPED: The program has stopped.  SIGRC indicates the reason:
-   program interrupted by user via a sim_stop request (SIGINT); a
-   breakpoint instruction (SIGTRAP); a completed step (SIGTRAP); an
-   internal error condition (SIGABRT).
+   SIM_STOPPED: The program has stopped.  SIGRC uses the host's signal
+   numbering as a way of identifying the reaon: program interrupted by
+   user via a sim_stop request (SIGINT); a breakpoint instruction
+   (SIGTRAP); a completed single step (SIGTRAP); an internal error
+   condition (SIGABRT); an illegal instruction (SIGILL); Access to an
+   undefined memory region (SIGSEGV); Mis-aligned memory access
+   (SIGBUS).
 
    SIM_SIGNALLED: The simulator encountered target code that requires
    the signal SIGRC to be delivered to the simulated program.
