@@ -1019,13 +1019,13 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
    FIXME-tiemann: should work with dossier entries as well.  */
 
 static value
-value_headof (arg, btype, dtype)
-     value arg;
+value_headof (in_arg, btype, dtype)
+     value in_arg;
      struct type *btype, *dtype;
 {
   /* First collect the vtables we must look at for this object.  */
   /* FIXME-tiemann: right now, just look at top-most vtable.  */
-  value vtbl, entry, best_entry = 0;
+  value arg, vtbl, entry, best_entry = 0;
   int i, nelems;
   int offset, best_offset = 0;
   struct symbol *sym;
@@ -1035,11 +1035,10 @@ value_headof (arg, btype, dtype)
 
   btype = TYPE_VPTR_BASETYPE (dtype);
   check_stub_type (btype);
+  arg = in_arg;
   if (btype != dtype)
-    vtbl = value_cast (lookup_pointer_type (btype), arg);
-  else
-    vtbl = arg;
-  vtbl = value_ind (value_field (value_ind (vtbl), TYPE_VPTR_FIELDNO (btype)));
+    arg = value_cast (lookup_pointer_type (btype), arg);
+  vtbl = value_ind (value_field (value_ind (arg), TYPE_VPTR_FIELDNO (btype)));
 
   /* Check that VTBL looks like it points to a virtual function table.  */
   msymbol = lookup_minimal_symbol_by_pc (VALUE_ADDRESS (vtbl));
@@ -1050,10 +1049,10 @@ value_headof (arg, btype, dtype)
 	 know that we aren't happy, but don't throw an error.
 	 FIXME: there has to be a better way to do this.  */
       struct type *error_type = (struct type *)xmalloc (sizeof (struct type));
-      memcpy (error_type, VALUE_TYPE (arg), sizeof (struct type));
+      memcpy (error_type, VALUE_TYPE (in_arg), sizeof (struct type));
       TYPE_NAME (error_type) = savestring ("suspicious *", sizeof ("suspicious *"));
-      VALUE_TYPE (arg) = error_type;
-      return arg;
+      VALUE_TYPE (in_arg) = error_type;
+      return in_arg;
     }
 
   /* Now search through the virtual function table.  */
@@ -1098,6 +1097,7 @@ value_headof (arg, btype, dtype)
       arg = value_add (value_cast (builtin_type_int, arg),
 		       value_field (best_entry, 0));
     }
+  else arg = in_arg;
   VALUE_TYPE (arg) = lookup_pointer_type (SYMBOL_TYPE (sym));
   return arg;
 }
