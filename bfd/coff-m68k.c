@@ -50,7 +50,7 @@ reloc_howto_type m68kcoff_howto_table[] =
 
 #ifdef ONLY_DECLARE_RELOCS
 extern void m68k_rtype2howto PARAMS ((arelent *internal, int relocentry));
-extern int m68k_howto2rtype PARAMS ((struct reloc_howto_struct *));
+extern int m68k_howto2rtype PARAMS ((CONST struct reloc_howto_struct *));
 #else
 void
 m68k_rtype2howto(internal, relocentry)
@@ -71,7 +71,7 @@ m68k_rtype2howto(internal, relocentry)
 
 int 
 m68k_howto2rtype (internal)
-     struct reloc_howto_struct *internal;
+     CONST struct reloc_howto_struct *internal;
 {
   if (internal->pc_relative) 
   {

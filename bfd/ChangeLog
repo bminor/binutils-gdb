@@ -1,5 +1,7 @@
 Tue Jul 20 15:02:23 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
+	* coff-m68k.c (m68k_howto2rtype):  Make arg CONST to match callers.
+
 	* elfcode.h:  Fix several illegal pointer combination warnings for
 	usages of bfd_alloc and alloca.
 
