@@ -167,16 +167,116 @@ xstormy16_reg_virtual_type (int regnum)
 }
 
 /* Function: xstormy16_get_saved_register
-   Find a register's saved value on the call stack. */
+   Find a register's saved value on the call stack.
+
+   Find register number REGNUM relative to FRAME and put its (raw,
+   target format) contents in *RAW_BUFFER.
+
+   Set *OPTIMIZED if the variable was optimized out (and thus can't be
+   fetched).  Note that this is never set to anything other than zero
+   in this implementation.
+
+   Set *LVAL to lval_memory, lval_register, or not_lval, depending on
+   whether the value was fetched from memory, from a register, or in a
+   strange and non-modifiable way (e.g. a frame pointer which was
+   calculated rather than fetched).  We will use not_lval for values
+   fetched from generic dummy frames.
+
+   Set *ADDRP to the address, either in memory or as a
+   DEPRECATED_REGISTER_BYTE offset into the registers array.  If the
+   value is stored in a dummy frame, set *ADDRP to zero.
+
+   The argument RAW_BUFFER must point to aligned memory.
+
+   The GET_SAVED_REGISTER architecture interface is entirely
+   redundant.  New architectures should implement per-frame unwinders
+   (ref "frame-unwind.h").  */
 
 static void
-xstormy16_get_saved_register (char *raw_buffer,
-			      int *optimized,
+xstormy16_get_saved_register (char *raw_buffer, int *optimized,
 			      CORE_ADDR *addrp,
-			      struct frame_info *fi,
-			      int regnum, enum lval_type *lval)
+			      struct frame_info *frame, int regnum,
+			      enum lval_type *lval)
 {
-  deprecated_generic_get_saved_register (raw_buffer, optimized, addrp, fi, regnum, lval);
+  if (!target_has_registers)
+    error ("No registers.");
+
+  /* Normal systems don't optimize out things with register numbers.  */
+  if (optimized != NULL)
+    *optimized = 0;
+
+  if (addrp)			/* default assumption: not found in memory */
+    *addrp = 0;
+
+  /* Note: since the current frame's registers could only have been
+     saved by frames INTERIOR TO the current frame, we skip examining
+     the current frame itself: otherwise, we would be getting the
+     previous frame's registers which were saved by the current frame.  */
+
+  if (frame != NULL)
+    {
+      for (frame = get_next_frame (frame);
+	   get_frame_type (frame) != SENTINEL_FRAME;
+	   frame = get_next_frame (frame))
+	{
+	  if (get_frame_type (frame) == DUMMY_FRAME)
+	    {
+	      if (lval)		/* found it in a CALL_DUMMY frame */
+		*lval = not_lval;
+	      if (raw_buffer)
+		{
+		  LONGEST val;
+		  /* FIXME: cagney/2002-06-26: This should be via the
+		     gdbarch_register_read() method so that it, on the
+		     fly, constructs either a raw or pseudo register
+		     from the raw register cache.  */
+		  val = deprecated_read_register_dummy (get_frame_pc (frame),
+							get_frame_base (frame),
+							regnum);
+		  store_unsigned_integer (raw_buffer,
+					  DEPRECATED_REGISTER_RAW_SIZE (regnum),
+					  val);
+		}
+	      return;
+	    }
+
+	  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
+	  if (deprecated_get_frame_saved_regs (frame) != NULL
+	      && deprecated_get_frame_saved_regs (frame)[regnum] != 0)
+	    {
+	      if (lval)		/* found it saved on the stack */
+		*lval = lval_memory;
+	      if (regnum == SP_REGNUM)
+		{
+		  if (raw_buffer)	/* SP register treated specially */
+		    /* NOTE: cagney/2003-05-09: In-line store_address()
+                       with it's body - store_unsigned_integer().  */
+		    store_unsigned_integer (raw_buffer,
+					    DEPRECATED_REGISTER_RAW_SIZE (regnum),
+					    deprecated_get_frame_saved_regs (frame)[regnum]);
+		}
+	      else
+		{
+		  if (addrp)	/* any other register */
+		    *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
+		  if (raw_buffer)
+		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], raw_buffer,
+				 DEPRECATED_REGISTER_RAW_SIZE (regnum));
+		}
+	      return;
+	    }
+	}
+    }
+
+  /* If we get thru the loop to this point, it means the register was
+     not saved in any frame.  Return the actual live-register value.  */
+
+  if (lval)			/* found it in a live register */
+    *lval = lval_register;
+  if (addrp)
+    *addrp = DEPRECATED_REGISTER_BYTE (regnum);
+  if (raw_buffer)
+    deprecated_read_register_gen (regnum, raw_buffer);
 }
 
 /* Function: xstormy16_type_is_scalar
@@ -433,7 +533,7 @@ xstormy16_frame_saved_register (struct frame_info *fi, int regnum)
   int size = xstormy16_register_raw_size (regnum);
   char *buf = (char *) alloca (size);
 
-  deprecated_generic_get_saved_register (buf, NULL, NULL, fi, regnum, NULL);
+  xstormy16_get_saved_register (buf, NULL, NULL, fi, regnum, NULL);
   return (CORE_ADDR) extract_unsigned_integer (buf, size);
 }
 

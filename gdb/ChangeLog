@@ -1,3 +1,16 @@
+2004-05-01  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (deprecated_generic_get_saved_register): Delete
+	function, moved to "xstormy16-tdep.c".
+	* xstormy16-tdep.c (xstormy16_get_saved_register): Inline
+	deprecated_generic_get_saved_register from "frame.c".
+	(xstormy16_frame_saved_register): Call
+	xstormy16_get_saved_register.
+	* dummy-frame.c (deprecated_find_dummy_frame_regcache): Make
+	static.
+	* dummy-frame.h (deprecated_find_dummy_frame_regcache): Delete.
+	* frame.h (deprecated_generic_get_saved_register): Delete.
+
 2004-05-01  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* dwarfread.c: Update documentation on the state of dwarf-1.
@@ -20,8 +33,6 @@
 	* frame.h (enum frame_type): Add SENTINEL_FRAME.
 	* s390-tdep.c (s390_prologue_frame_unwind_cache): Delete calls to
 	frame_relative_level.
-
-2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (deprecated_set_frame_type): Delete declaration.
 	* frame.c (deprecated_set_frame_type): Delete function, update

@@ -574,13 +574,6 @@ extern int deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp,
 extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
 
 
-/* The DEPRECATED_GET_SAVED_REGISTER architecture interface is
-   entirely redundant.  New architectures should implement per-frame
-   unwinders (ref "frame-unwind.h").  */
-extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
-						   struct frame_info *, int,
-						   enum lval_type *);
-
 extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
 
 /* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a

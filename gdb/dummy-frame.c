@@ -112,7 +112,7 @@ find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp)
   return NULL;
 }
 
-struct regcache *
+static struct regcache *
 deprecated_find_dummy_frame_regcache (CORE_ADDR pc, CORE_ADDR fp)
 {
   struct dummy_frame *dummy = find_dummy_frame (pc, fp);

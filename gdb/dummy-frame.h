@@ -32,12 +32,4 @@ struct frame_id;
 
 extern const struct frame_unwind *dummy_frame_sniffer (struct frame_info *next_frame);
 
-/* Return the regcache that belongs to the dummy-frame identifed by PC
-   and FP, or NULL if no such frame exists.  */
-/* FIXME: cagney/2002-11-08: The function only exists because of
-   deprecated_generic_get_saved_register.  Eliminate that function and
-   this, to, can go.  */
-
-extern struct regcache *deprecated_find_dummy_frame_regcache (CORE_ADDR pc,
-							      CORE_ADDR fp);
 #endif /* !defined (DUMMY_FRAME_H)  */
