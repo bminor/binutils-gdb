@@ -183,6 +183,10 @@ gr_open(args, from_tty, gr)
 
   SERIAL_RAW (sr_get_desc());
 
+  /* If there is something sitting in the buffer we might take it as a
+     response to a command, which would be bad.  */
+  SERIAL_FLUSH_INPUT (sr_get_desc ());
+
   /* default retries */
   if (sr_get_retries() == 0)
     sr_set_retries(1);

@@ -302,6 +302,10 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   SERIAL_RAW (remote_desc);
 
+  /* If there is something sitting in the buffer we might take it as a
+     response to a command, which would be bad.  */
+  SERIAL_FLUSH_INPUT (remote_desc);
+
   if (from_tty)
     {
       puts_filtered ("Remote debugging using ");
