@@ -1,3 +1,7 @@
+2000-02-22  Andrew Haley  <aph@cygnus.com>
+
+	* doc/c-mips.texi (MIPS Opts): Document -mgp32 and -mgp64.
+
 1999-12-30  Andrew Haley  <aph@cygnus.com>
 
 	* config/tc-mips.c (mips_gp32): New variable.

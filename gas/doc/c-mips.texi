@@ -67,6 +67,19 @@ Generate code for a particular MIPS Instruction Set Architecture level.
 @sc{r10000} processors.  You can also switch instruction sets during the
 assembly; see @ref{MIPS ISA,, Directives to override the ISA level}.
 
+@item -mgp32
+Assume that 32-bit general purpose registers are available.  This
+affects synthetic instructions such as @code{move}, which will assemble
+to a 32-bit or a 64-bit instruction depending on this flag.  On some
+MIPS variants there is be a 32-bit mode flag; when this flag is set,
+64-bit instructions generate a trap.  Also, some 32-bit OSes only save
+the 32-bit registers on a context switch, so it is essential never to
+use the 64-bit registers.
+
+@item -mgp64
+Assume that 64-bit general purpose registers are available.  This is
+provided in the interests of symmetry with -gp32.
+
 @item -mips16
 @itemx -no-mips16
 Generate code for the MIPS 16 processor.  This is equivalent to putting
