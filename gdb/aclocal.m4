@@ -479,3 +479,59 @@ dnl    AC_SUBST(TK_EXEC_PREFIX)
     AC_SUBST(TK_LIB_SPEC)
 ])
 
+
+# check for Itcl headers. 
+
+AC_DEFUN(CY_AC_PATH_ITCLH, [
+AC_MSG_CHECKING(for Itcl private headers. srcdir=${srcdir})
+if test x"${ac_cv_c_itclh}" = x ; then
+  for i in ${srcdir}/../itcl ${srcdir}/../../itcl ${srcdir}/../../../itcl ; do
+    if test -f $i/src/itcl.h ; then
+      ac_cv_c_itclh=`(cd $i/src; pwd)`
+      break
+    fi
+  done
+fi
+if test x"${ac_cv_c_itclh}" = x ; then
+  ITCLHDIR="# no Itcl private headers found"
+  AC_MSG_ERROR([Can't find Itcl private headers])
+fi
+if test x"${ac_cv_c_itclh}" != x ; then
+     ITCLHDIR="-I${ac_cv_c_itclh}"
+fi
+# should always be here
+     ITCLLIB="../itcl/src/libitcl.a"
+AC_SUBST(ITCLHDIR)
+AC_SUBST(ITCLLIB)
+])
+
+# check for Tix headers. 
+
+AC_DEFUN(CY_AC_PATH_TIX, [
+AC_MSG_CHECKING(for Tix private headers. srcdir=${srcdir})
+if test x"${ac_cv_c_tixh}" = x ; then
+  for i in ${srcdir}/../tix ${srcdir}/../../tix ${srcdir}/../../../tix ; do
+    if test -f $i/generic/tix.h ; then
+      ac_cv_c_tixh=`(cd $i/generic; pwd)`
+      break
+    fi
+  done
+fi
+if test x"${ac_cv_c_tixh}" = x ; then
+  TIXHDIR="# no Tix private headers found"
+  AC_MSG_ERROR([Can't find Tix private headers])
+fi
+if test x"${ac_cv_c_tixh}" != x ; then
+     TIXHDIR="-I${ac_cv_c_tixh}"
+fi
+# need to do better than this...
+case "${host}" in
+*-*-cygwin32*)
+  TIXLIB="../tix/win/tk4.2/libtix4.1.7.6.a" ;;
+*)
+  TIXLIB="../tix/unix/tk4.2/libtix4.1.7.6.a" ;;
+esac 
+AC_SUBST(TIXHDIR)
+AC_SUBST(TIXLIB)
+])
+

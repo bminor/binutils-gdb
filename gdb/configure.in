@@ -239,6 +239,16 @@ esac])
 # end-sanitize-gm
 
 # start-sanitize-gdbtk
+ENABLE_IDE=
+AC_ARG_ENABLE(ide, [  --enable-ide            Enable IDE support])
+if test "$enable_ide" = yes; then
+   enable_ide=yes
+   ENABLE_IDE=1
+else
+   enable_ide=no
+fi
+AC_SUBST(ENABLE_IDE)
+
 ENABLE_GDBTK=
 
 AC_ARG_ENABLE(gdbtk,
@@ -292,11 +302,17 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CY_AC_LOAD_TKCONFIG
 	   CY_AC_PATH_TCLH
 	   CY_AC_PATH_TKH
+	   CY_AC_PATH_ITCLH
+	   CY_AC_PATH_TIX
 
 	   ENABLE_GDBTK=1
 
 	   # Include some libraries that Tcl and Tk want.
-	   TCL_LIBS='$(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	   if test "${enable_ide}" = "yes"; then	
+	      TCL_LIBS='$(IDE) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	   else
+	      TCL_LIBS='$(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	   fi
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
 	   # after Tcl/Tk.

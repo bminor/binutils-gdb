@@ -372,7 +372,7 @@ static void stop_sig PARAMS ((int));
 /* Called after most modules have been initialized, but before taking users
    command file.  */
 
-void (*init_ui_hook) PARAMS ((void));
+void (*init_ui_hook) PARAMS ((char *argv0));
 
 /* Called instead of command_loop at top level.  Can be invoked via
    return_to_top_level.  */
@@ -633,7 +633,8 @@ extern void init_proc PARAMS ((void));
 void (*pre_init_ui_hook) PARAMS ((void));
 
 void
-gdb_init ()
+gdb_init (argv0)
+     char *argv0;
 {
   if (pre_init_ui_hook)
     pre_init_ui_hook ();
@@ -659,7 +660,7 @@ gdb_init ()
   expected_language = current_language;	/* don't warn about the change.  */
 
   if (init_ui_hook)
-    init_ui_hook ();
+    init_ui_hook (argv0);
 }
 
 /* Allocate, initialize a new command line structure for one of the

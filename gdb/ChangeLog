@@ -1,3 +1,32 @@
+start-sanitize-gdbtk
+Thu Jul 10 00:02:41 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* Makefile.in, configure.in, aclocal.m4: Add Itcl, Tix, and 
+	IDE configuration information.
+
+	* gdbtk.c (breakpoint_notify): Send address, linenumber and 
+	filename when a breakpoint is set.  Avoids call to bp_info.
+ 	(gdbtk_init): Call Tcl_FindExecutable(). Add code to handle 
+	Itcl, Tix and IDE initialization.
+
+	* defs.h (init_ui_hook): Change prototype to accept one arg.
+
+	* main.c (gdb_init): Change prototype to accept one arg.
+
+	* top.c (gdb_init): Accepts one argument which it uses to
+	call (*init_ui_hook), which will be gdbtk_init(). This is
+ 	used for calling Tcl_FindExecutable().
+	
+	* gdbtcl/breakpoint.tcl (gdbtk_tcl_breakpoint): Change to
+	accept variable number of args for compatibility with
+	cchanges in gdbtk.c.
+	
+	* configure: Regenerated.
+
+	* gdbtcl/tclIndex: Regenerated.
+	
+end-sanitize-gdbtk
+	
 Fri Jul  4 14:49:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* source.c (OPEN_MODE, FDOPEN_MODE): Define; value depends upon

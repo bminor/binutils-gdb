@@ -139,11 +139,33 @@ TCL_CFLAGS = @TCLHDIR@
 TK = @TK_BUILD_LIB_SPEC@
 TK_CFLAGS = @TKHDIR@
 
+# Where is Itcl?  Typically in ../itcl.
+ITCL_CFLAGS = @ITCLHDIR@
+ITCL = @ITCLLIB@
+
+# Where is Tix?  Typically in ../tix.
+TIX_CFLAGS = @TIXHDIR@
+TIX = @TIXLIB@
+
 X11_CFLAGS = @TK_XINCLUDES@
 X11_LDFLAGS =
 X11_LIBS =
 
 ENABLE_GDBTK= @ENABLE_GDBTK@
+ENABLE_IDE= @ENABLE_IDE@
+
+IDE_CFLAGS_X = ` \
+  if [ x"$(ENABLE_IDE)" != x ] ; then \
+    echo -DIDE -I$(srcdir)/../libide/src -I$(srcdir)/../ilu/runtime/mainloop;\
+  fi`
+
+IDE_X = ` \
+  if [ x"$(ENABLE_IDE)" != x ] ; then \
+    echo -L../libide/src -lide -L../ilu/runtime/mainloop -lilu-Tk -L../ilu/runtime/c -lilu-c -L../ilu/runtime/kernel -lilu;\
+  fi`
+
+IDE=$(IDE_X) 
+IDE_CFLAGS=$(IDE_CFLAGS_X)
 #end-sanitize-gdbtk
 
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
@@ -1162,7 +1184,8 @@ fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 # start-sanitize-gdbtk
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
+	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(srcdir)/gdbtk.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
 # end-sanitize-gdbtk
 

@@ -29,7 +29,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include <tcl.h>
 #include <tk.h>
-/* #include <itcl.h> */
+#include <itcl.h> 
+#include <tix.h> 
+
+#ifdef IDE
+#include "event.h"
+#include "idetcl.h"
+#endif
+
 #ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
@@ -69,7 +76,7 @@ static void gdbtk_flush PARAMS ((FILE *));
 static void gdbtk_fputs PARAMS ((const char *, FILE *));
 static int gdbtk_query PARAMS ((const char *, va_list));
 static char *gdbtk_readline PARAMS ((char *));
-static void gdbtk_init PARAMS ((void));
+static void gdbtk_init PARAMS ((char *));
 static void tk_command_loop PARAMS ((void));
 static void gdbtk_call_command PARAMS ((struct cmd_list_element *, char *, int));
 static int gdbtk_wait PARAMS ((int, struct target_waitstatus *));
@@ -191,7 +198,6 @@ gdbtk_fputs (ptr, stream)
      const char *ptr;
      FILE *stream;
 {
-
   if (result_ptr)
     Tcl_DStringAppend (result_ptr, (char *)ptr, -1);
   else
@@ -203,7 +209,7 @@ gdbtk_fputs (ptr, stream)
       Tcl_DStringAppend (&str, "gdbtk_tcl_fputs", -1);
       Tcl_DStringAppendElement (&str, (char *)ptr);
 
-      Tcl_Eval (interp, Tcl_DStringValue (&str));
+      Tcl_Eval (interp, Tcl_DStringValue (&str)); 
       Tcl_DStringFree (&str);
     }
 }
@@ -423,13 +429,16 @@ breakpoint_notify(b, action)
 {
   char buf[100];
   int v;
+  struct symtab_and_line sal;
 
   if (b->type != bp_breakpoint)
     return;
 
   /* We ensure that ACTION contains no special Tcl characters, so we
      can do this.  */
-  sprintf (buf, "gdbtk_tcl_breakpoint %s %d", action, b->number);
+  sal = find_pc_line (b->address, 0);
+  sprintf (buf, "gdbtk_tcl_breakpoint %s %d 0x%lx %d {%s}", action, b->number, 
+	   (long)b->address, sal.line, symtab_to_filename (sal.symtab));
 
   v = Tcl_Eval (interp, buf);
 
@@ -513,7 +522,9 @@ gdb_loc (clientData, interp, argc, argv)
 
   dsprintf_append_element (result_ptr, "%d", sal.line); /* line number */
 
-  dsprintf_append_element (result_ptr, "0x%s", paddr_nz(pc)); /* PC */
+  dsprintf_append_element (result_ptr, "0x%s", paddr_nz(pc)); /* PC in current frame */
+
+  dsprintf_append_element (result_ptr, "0x%s", paddr_nz(stop_pc)); /* Real PC */
 
   return TCL_OK;
 }
@@ -1265,8 +1276,8 @@ gdbtk_call_command (cmdblk, arg, from_tty)
       running_now = 1;
       Tcl_Eval (interp, "gdbtk_tcl_busy");
       (*cmdblk->function.cfunc)(arg, from_tty);
-      Tcl_Eval (interp, "gdbtk_tcl_idle");
       running_now = 0;
+      Tcl_Eval (interp, "gdbtk_tcl_idle");
     }
   else
     (*cmdblk->function.cfunc)(arg, from_tty);
@@ -1287,13 +1298,19 @@ tk_command_loop ()
 }
 
 static void
-gdbtk_init ()
+gdbtk_init ( argv0 )
+     char *argv0;
 {
   struct cleanup *old_chain;
   char *lib, *gdbtk_lib, gdbtk_lib_tmp[1024],gdbtk_file[128];
   int i, found_main;
   struct sigaction action;
   static sigset_t nullsigmask = {0};
+#ifdef IDE
+  struct ide_event_handle *h;
+  const char *errmsg;
+  char *libexecdir;
+#endif 
 
   /* If there is no DISPLAY environment variable, Tk_Init below will fail,
      causing gdb to abort.  If instead we simply return here, gdb will
@@ -1307,7 +1324,7 @@ gdbtk_init ()
   old_chain = make_cleanup (cleanup_init, 0);
 
   /* First init tcl and tk. */
-
+  Tcl_FindExecutable (argv0); 
   interp = Tcl_CreateInterp ();
 
   if (!interp)
@@ -1316,13 +1333,52 @@ gdbtk_init ()
   if (Tcl_Init(interp) != TCL_OK)
     error ("Tcl_Init failed: %s", interp->result);
 
-  /*
-    if (Itcl_Init(interp) == TCL_ERROR) 
-  error ("Itcl_Init failed: %s", interp->result);
-    */
-  
   if (Tk_Init(interp) != TCL_OK)
     error ("Tk_Init failed: %s", interp->result);
+
+  if (Itcl_Init(interp) == TCL_ERROR) 
+    error ("Itcl_Init failed: %s", interp->result);
+
+  if (Tix_Init(interp) != TCL_OK)
+    error ("Tix_Init failed: %s", interp->result);
+
+#ifdef IDE
+  /* Initialize the Paths variable.  
+  if (ide_initialize_paths (interp, "gdb") != TCL_OK)
+    return (TCL_ERROR);
+    */
+  /* Find the directory where we expect to find idemanager.  We ignore
+     errors since it doesn't really matter if this fails.  */
+  libexecdir = Tcl_GetVar2 (interp, "Paths", "libexecdir", TCL_GLOBAL_ONLY);
+
+  IluTk_Init ();
+
+  h = ide_event_init_client (&errmsg, libexecdir);
+  if (h == NULL)
+    {
+      Tcl_AppendResult (interp, "can't initialize event system: ", errmsg,
+			(char *) NULL);
+      fprintf(stderr, "WARNING: ide_event_init_client failed: %s\n", interp->result);
+    }
+  else 
+    {
+      if (ide_create_tclevent_command (interp, h) != TCL_OK)
+	error ("ide_create_tclevent_command failed: %s", interp->result);
+      if (ide_create_edit_command (interp, h) != TCL_OK)
+	error ("ide_create_edit_command failed: %s", interp->result);
+      
+      if (ide_create_property_command (interp, h) != TCL_OK)
+	error ("ide_create_property_command failed: %s", interp->result);
+      
+      /*
+	if (ide_initialize (interp, "gdb") != TCL_OK)
+	error ("ide_initialize failed: %s", interp->result);
+      */
+    }
+  Tcl_SetVar (interp, "GDBTK_IDE", "1", 0);
+#else
+  Tcl_SetVar (interp, "GDBTK_IDE", "0", 0);
+#endif /* IDE */
 
   Tcl_CreateCommand (interp, "gdb_cmd", call_wrapper, gdb_cmd, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", call_wrapper, gdb_loc, NULL);
