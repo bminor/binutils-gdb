@@ -1596,13 +1596,13 @@ s390_insn (ignore)
   if (exp.X_op == O_constant)
     {
       if (   (   opformat->oplen == 6
-	      && exp.X_add_number >= 0
+	      && (addressT) exp.X_add_number >= 0
 	      && (addressT) exp.X_add_number < (1ULL << 48))
 	  || (   opformat->oplen == 4
-	      && exp.X_add_number >= 0
+	      && (addressT) exp.X_add_number >= 0
 	      && (addressT) exp.X_add_number < (1ULL << 32))
 	  || (   opformat->oplen == 2
-	      && exp.X_add_number >= 0
+	      && (addressT) exp.X_add_number >= 0
 	      && (addressT) exp.X_add_number < (1ULL << 16)))
 	md_number_to_chars (insn, exp.X_add_number, opformat->oplen);
       else

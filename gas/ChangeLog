@@ -1,3 +1,8 @@
+2004-06-15  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (s390_insn): Avoid incorrect signed/unsigned
+	comparison in .insn pseudo operation.
+
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-coff.c (coff_adjust_section_syms): Use
