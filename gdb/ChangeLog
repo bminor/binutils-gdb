@@ -1,5 +1,48 @@
 2003-09-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h: Put opaque declarations in alphabetical
+	order.  Remove spurious whitespace.
+	(struct gdbarch_tdep): add st0_regnum and mm0_regnum members.
+	(i386_sse_regnum_p, i386_mxcsr_regnum_p): Remove prototypes.
+	* i386-tdep.c (MM0_REGNUM): Remove define.
+	(i386_mmx_regnum_p): Add gdbarch argument.
+	(i386_sse_regnum_p, i386_mxcsr_regnum_p): Add gdbarch argument.
+	Rewrite using new macro definitions for FPU/SSE registers.
+	(i386_fp_regnum_p, i386_fpc_regnum_p): Rewrite using new macro
+	definitions from i387-tdep.h.
+	(i386_register_name): Update.
+	(i386_stab_reg_to_regnum, i386_dwarf_reg_to_regnum): Update to use
+	new macro definitions for FPU/SSE registers.
+	(i386_extract_return_value): Determine whether floating-point
+	registers are present by examining REGCACHE's architecture.
+	(i386_store_return_value): Likewise.  Use I386_MAX_REGISTER_SIZE
+	instead of FPU_REG_RAW_SIZE.  Use new macro definitions for
+	FPU/SSE registers.
+	(i386_register_type): Update.
+	(i386_mmx_regnum_to_fp_regnum): Rewrite using new macro
+	definitions for FPU registers.  Use REGCACHE's architecture to
+	determine the appropriate register numbers.
+	(i386_pseudo_register_read, i386_pseudo_register_write,
+	i386_register_reggroup_p): Update.
+	(i386_gdbarch_init): Initialize TDEP->st0_regnum and
+	TDEP->mm0_regnum.
+	* i387-tdep.h (I387_FCTRL_REGNUM, I387_FSTAT_REGNUM,
+	I387_FTAG_REGNUM, I387_FISEG_REGNUM, I387_FIOFF_REGNUM,
+	I387_FOSEG_REGNUM, I387_FOOFF_REGNUM, I387_FOP_REGNUM,
+	I387_XMM0_REGNUM, I387_MXCSR_REGNUM): New defines.
+	(i387_supply_fsave, i387_fill_fsave, i387_supply_fxsave,
+	i387_fill_fxsave): Change type of fsave/fxsave argument from `char
+	*' to `void *'.
+	* i387-tdep.c (i387_print_float_info, fsave_offset, FSAVE_ADDR,
+	i387_supply_fsave, i387_fill_fsave, fxsave_offset, FXSAVE_ADDR,
+	i387_supply_fxsave, i387_fill_fxsave): Update to use new macro
+	definitions for FPU/SSE registers.
+	(FXSAVE_MXCSR_ADDR): New define.
+	* x86-64-tdep.c (x86_64_init_abi): Override TDEP->st0_regnum and
+	TDEP->mm0_regnum.
+	(I387_FISEG_REGNUM, I387_FOSEG_REGNUM): Remove defines.
+	(I387_ST0_REGNUM): Define.
+
 	* regcache.h (get_regcache_arch): New prototype.
 	* regcache.c (get_regcache_arch): New function.
 

@@ -1,4 +1,5 @@
-/* Target-dependent code for GDB, the GNU debugger.
+/* Target-dependent code for the i386.
+
    Copyright 2001, 2002, 2003
    Free Software Foundation, Inc.
 
@@ -22,9 +23,9 @@
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
 
-struct reggroup;
-struct gdbarch;
 struct frame_info;
+struct gdbarch;
+struct reggroup;
 
 /* GDB's i386 target supports both the 32-bit Intel Architecture
    (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses
@@ -55,6 +56,15 @@ enum struct_return
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
+  /* Register number for %st(0).  The register numbers for the other
+     registers follow from this one.  Set this to -1 to indicate the
+     absence of an FPU.  */
+  int st0_regnum;
+
+  /* Register number for %mm0.  Set this to -1 to indicate the absence
+     of MMX support.  */
+  int mm0_regnum;
+
   /* Number of SSE registers.  */
   int num_xmm_regs;
 
@@ -131,11 +141,6 @@ extern int i386_fpc_regnum_p (int regnum);
 #define MXCSR_REGNUM \
   (XMM0_REGNUM + gdbarch_tdep (current_gdbarch)->num_xmm_regs)
 
-/* Return non-zero if REGNUM matches the SSE register and the SSE
-   register set is active.  */
-extern int i386_sse_regnum_p (int regnum);
-extern int i386_mxcsr_regnum_p (int regnum);
-
 /* FIXME: kettenis/2001-11-24: Obsolete macro's.  */
 #define FCS_REGNUM FISEG_REGNUM
 #define FCOFF_REGNUM FIOFF_REGNUM
@@ -194,4 +199,3 @@ extern int i386obsd_sc_reg_offset[];
 extern int i386bsd_sc_reg_offset[];
 
 #endif /* i386-tdep.h */
-

@@ -27,6 +27,27 @@ struct ui_file;
 struct frame_info;
 struct type;
 
+/* Because the number of general-purpose registers is different for
+   AMD64, the floating-point registers and SSE registers get shifted.
+   The following definitions are intended to help writing code that
+   needs the register numbers of floating-point registers and SSE
+   registers.  In order to use these, one should provide a definition
+   for I387_ST0_REGNUM, and possibly I387_NUM_XMM_REGS, preferably by
+   using a local "#define" in the body of the function that uses this.
+   Please "#undef" them before the end of the function.  */
+
+#define I387_FCTRL_REGNUM	(I387_ST0_REGNUM + 8)
+#define I387_FSTAT_REGNUM	(I387_FCTRL_REGNUM + 1)
+#define I387_FTAG_REGNUM	(I387_FCTRL_REGNUM + 2)
+#define I387_FISEG_REGNUM	(I387_FCTRL_REGNUM + 3)
+#define I387_FIOFF_REGNUM	(I387_FCTRL_REGNUM + 4)
+#define I387_FOSEG_REGNUM	(I387_FCTRL_REGNUM + 5)
+#define I387_FOOFF_REGNUM	(I387_FCTRL_REGNUM + 6)
+#define I387_FOP_REGNUM		(I387_FCTRL_REGNUM + 7)
+#define I387_XMM0_REGNUM	(I387_ST0_REGNUM + 16)
+#define I387_MXCSR_REGNUM	(I387_XMM0_REGNUM + I387_NUM_XMM_REGS)
+
+
 /* Print out the i387 floating point state.  */
 
 extern void i387_print_float_info (struct gdbarch *gdbarch,
@@ -56,26 +77,26 @@ extern void i387_value_to_register (struct frame_info *frame, int regnum,
    value from *FSAVE.  This function masks off any of the reserved
    bits in *FSAVE.  */
 
-extern void i387_supply_fsave (const char *fsave, int regnum);
+extern void i387_supply_fsave (const void *fsave, int regnum);
 
 /* Fill register REGNUM (if it is a floating-point register) in *FSAVE
    with the value in GDB's register cache.  If REGNUM is -1, do this
    for all registers.  This function doesn't touch any of the reserved
    bits in *FSAVE.  */
 
-extern void i387_fill_fsave (char *fsave, int regnum);
+extern void i387_fill_fsave (void *fsave, int regnum);
 
 /* Fill register REGNUM in GDB's register cache with the appropriate
    floating-point or SSE register value from *FXSAVE.  This function
    masks off any of the reserved bits in *FXSAVE.  */
 
-extern void i387_supply_fxsave (const char *fxsave, int regnum);
+extern void i387_supply_fxsave (const void *fxsave, int regnum);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
    *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
    this for all registers.  This function doesn't touch any of the
    reserved bits in *FXSAVE.  */
 
-extern void i387_fill_fxsave (char *fxsave, int regnum);
+extern void i387_fill_fxsave (void *fxsave, int regnum);
 
 #endif /* i387-tdep.h */

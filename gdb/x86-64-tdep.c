@@ -1209,7 +1209,8 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* The x86-64 has 16 SSE registers.  */
+  /* AMD64 has an FPU and 16 SSE registers.  */
+  tdep->st0_regnum = X86_64_ST0_REGNUM;
   tdep->num_xmm_regs = 16;
 
   /* This is what all the fuss is about.  */
@@ -1264,6 +1265,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Avoid wiring in the MMX registers for now.  */
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
+  tdep->mm0_regnum = -1;
 
   set_gdbarch_unwind_dummy_id (gdbarch, x86_64_unwind_dummy_id);
 
@@ -1278,8 +1280,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-#define I387_FISEG_REGNUM FISEG_REGNUM
-#define I387_FOSEG_REGNUM FOSEG_REGNUM
+#define I387_ST0_REGNUM X86_64_ST0_REGNUM
 
 /* The 64-bit FXSAVE format differs from the 32-bit format in the
    sense that the instruction pointer and data pointer are simply
