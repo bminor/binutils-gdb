@@ -1,3 +1,11 @@
+Thu Jun  4 17:51:06 1998  Mark Alexander  <marka@cygnus.com>
+
+	* sparc-tdep.c (sparc_fix_call_dummy): Byte-swap the call dummy
+	on bi-endian machines.
+	(sparc_extract_return_value): Handle values smaller than int on
+	machines with little-endian data.
+	(sparc_target_architecture_hook): Set bi_endian flag.
+
 Thu Jun  4 12:14:48 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* printcmd.c (disassemble_command): Fix off-by-one error for
