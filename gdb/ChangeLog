@@ -1,3 +1,8 @@
+2003-08-23  Andreas Jaeger  <aj@suse.de>
+
+        * x86-64-tdep.c (x86_64_supply_fxsave): Adjust call to
+        i387_supply_fxsave.
+
 2003-08-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* go32-nat.c (fetch_register): Call i387_supply_fsave instead of

@@ -1295,7 +1295,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 void
 x86_64_supply_fxsave (char *fxsave)
 {
-  i387_supply_fxsave (fxsave);
+  i387_supply_fxsave (fxsave, -1);
 
   if (fxsave)
     {
