@@ -162,9 +162,18 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *frag));
 #define tc_headers_hook(a)		{;}	/* not used */
 
 #define MAX_OPERANDS 3		/* max operands per insn */
-#define MAX_PREFIXES 5		/* max prefixes per opcode */
-#define MAX_IMMEDIATE_OPERANDS 2/* max immediates per insn */
+#define MAX_IMMEDIATE_OPERANDS 2/* max immediates per insn (lcall, ljmp) */
 #define MAX_MEMORY_OPERANDS 2	/* max memory refs per insn (string ops) */
+
+/* Prefixes will be emitted in the order defined below.
+   WAIT_PREFIX must be the first prefix since FWAIT is really is an
+   instruction, and so must come before any prefixes. */
+#define WAIT_PREFIX	0
+#define LOCKREP_PREFIX	1
+#define ADDR_PREFIX	2
+#define DATA_PREFIX	3
+#define SEG_PREFIX	4
+#define MAX_PREFIXES	5	/* max prefixes per opcode */
 
 /* we define the syntax here (modulo base,index,scale syntax) */
 #define REGISTER_PREFIX '%'

@@ -52,7 +52,7 @@ static int fits_in_unsigned_byte PARAMS ((long));
 static int fits_in_unsigned_word PARAMS ((long));
 static int fits_in_signed_word PARAMS ((long));
 static int smallest_imm_type PARAMS ((long));
-static int check_prefix PARAMS ((int));
+static int add_prefix PARAMS ((unsigned char));
 static void set_16bit_code_flag PARAMS ((int));
 #ifdef BFD_ASSEMBLER
 static bfd_reloc_code_real_type reloc
@@ -113,11 +113,6 @@ struct _i386_insn
        PREFIXES is the number of prefix opcodes.  */
     unsigned int prefixes;
     unsigned char prefix[MAX_PREFIXES];
-
-    /* Wait prefix needs to come before any other prefixes, so handle
-       it specially.  wait_prefix will hold the opcode modifier flag
-       FWait if a wait prefix is given.  */
-    int wait_prefix;
 
     /* RM and BI are the modrm byte and the base index byte where the
        addressing modes of this insn are encoded. */
@@ -184,8 +179,10 @@ static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
    assembler instruction). */
 static char save_stack[32];
 static char *save_stack_p;	/* stack pointer */
-#define END_STRING_AND_SAVE(s)      *save_stack_p++ = *s; *s = '\0'
-#define RESTORE_END_STRING(s)       *s = *--save_stack_p
+#define END_STRING_AND_SAVE(s) \
+	do { *save_stack_p++ = *(s); *(s) = '\0'; } while (0)
+#define RESTORE_END_STRING(s) \
+	do { *(s) = *--save_stack_p; } while (0)
 
 /* The instruction we're assembling. */
 static i386_insn i;
@@ -434,79 +431,56 @@ smallest_imm_type (num)
 	  : (Imm32));
 }				/* smallest_imm_type() */
 
+/* Returns 0 if attempting to add a prefix where one from the same
+   class already exists, 1 if non rep/repne added, 2 if rep/repne
+   added.  */
 static int
-check_prefix (prefix)
-     int prefix;
+add_prefix (prefix)
+     unsigned char prefix;
 {
+  int ret = 1;
   int q;
 
-  for (q = 0; q < i.prefixes; q++)
+  switch (prefix)
     {
-      switch (prefix)
-	{
-	case CS_PREFIX_OPCODE:
-	case DS_PREFIX_OPCODE:
-	case ES_PREFIX_OPCODE:
-	case FS_PREFIX_OPCODE:
-	case GS_PREFIX_OPCODE:
-	case SS_PREFIX_OPCODE:
-	  switch (i.prefix[q])
-	    {
-	    case CS_PREFIX_OPCODE:
-	    case DS_PREFIX_OPCODE:
-	    case ES_PREFIX_OPCODE:
-	    case FS_PREFIX_OPCODE:
-	    case GS_PREFIX_OPCODE:
-	    case SS_PREFIX_OPCODE:
-	      as_bad ("same type of prefix used twice");
-	      return 0;
-	    }
-	  break;
+    case CS_PREFIX_OPCODE:
+    case DS_PREFIX_OPCODE:
+    case ES_PREFIX_OPCODE:
+    case FS_PREFIX_OPCODE:
+    case GS_PREFIX_OPCODE:
+    case SS_PREFIX_OPCODE:
+      q = SEG_PREFIX;
+      break;
 
-	case REPNE:
-	case REPE:
-	  switch (i.prefix[q])
-	    {
-	    case REPNE:
-	    case REPE:
-	      as_bad ("same type of prefix used twice");
-	      return 0;
-	    }
-	  break;
+    case REPNE:
+    case REPE:
+      ret = 2;
+      /* fall thru */
+    case LOCK_PREFIX_OPCODE:
+      q = LOCKREP_PREFIX;
+      break;
 
-	case FWAIT_OPCODE:
-	  if (i.wait_prefix != 0)
-	    {
-	      as_bad ("same type of prefix used twice");
-	      return 0;
-	    }
-	  break;
+    case FWAIT_OPCODE:
+      q = WAIT_PREFIX;
+      break;
 
-	default:
-	  if (i.prefix[q] == prefix)
-	    {
-	      as_bad ("same type of prefix used twice");
-	      return 0;
-	    }
-	}
+    case ADDR_PREFIX_OPCODE:
+      q = ADDR_PREFIX;
+      break;
+
+    case WORD_PREFIX_OPCODE:
+      q = DATA_PREFIX;
     }
 
-  if (i.prefixes == MAX_PREFIXES && prefix != FWAIT_OPCODE)
+  if (i.prefix[q])
     {
-      char *p = "another"; /* paranoia */
-
-      for (q = 0;
-	   q < sizeof (i386_prefixtab) / sizeof (i386_prefixtab[0]);
-	   q++)
-	if (i386_prefixtab[q].prefix_code == prefix)
-	  p = i386_prefixtab[q].prefix_name;
-
-      as_bad ("%d prefixes given and `%%%s' prefix gives too many",
-	      MAX_PREFIXES, p);
+      as_bad (_("same type of prefix used twice"));
       return 0;
     }
 
-  return 1;
+  i.prefixes += 1;
+  i.prefix[q] = prefix;
+  return ret;
 }
 
 static void
@@ -984,19 +958,13 @@ md_assemble (line)
 		return;
 	      }
 	    RESTORE_END_STRING (l);
-	    /* check for repeated prefix */
-	    if (! check_prefix (prefix->prefix_code))
-	      return;
-	    if (prefix->prefix_code == FWAIT_OPCODE)
+	    /* add prefix, checking for repeated prefixes */
+	    switch (add_prefix (prefix->prefix_code))
 	      {
-		i.wait_prefix = FWait;
-	      }
-	    else
-	      {
-		i.prefix[i.prefixes++] = prefix->prefix_code;
-		if (prefix->prefix_code == REPE
-		    || prefix->prefix_code == REPNE)
-		  expecting_string_instruction = prefix->prefix_name;
+	      case 0: return;
+	      case 2:
+		expecting_string_instruction = prefix->prefix_name;
+		break;
 	      }
 	    /* Skip past PREFIX_SEPARATOR and reset token_start.  */
 	    token_start = ++l;
@@ -1057,7 +1025,8 @@ md_assemble (line)
 		if (!is_space_char (*l))
 		  {
 		    as_bad (_("invalid character %s before operand %d"),
-			    output_invalid (*l), i.operands);
+			    output_invalid (*l),
+			    i.operands + 1);
 		    return;
 		  }
 		l++;
@@ -1071,7 +1040,7 @@ md_assemble (line)
 		    if (paren_not_balanced)
 		      {
 			as_bad (_("unbalanced parenthesis in operand %d."),
-				i.operands);
+				i.operands + 1);
 			return;
 		      }
 		    else
@@ -1080,7 +1049,8 @@ md_assemble (line)
 		else if (!is_operand_char (*l) && !is_space_char (*l))
 		  {
 		    as_bad (_("invalid character %s in operand %d"),
-			    output_invalid (*l), i.operands);
+			    output_invalid (*l),
+			    i.operands + 1);
 		    return;
 		  }
 		if (*l == '(')
@@ -1246,7 +1216,9 @@ md_assemble (line)
 
     /* Copy the template we found.  */
     i.tm = *t;
-    i.tm.opcode_modifier |= i.wait_prefix;
+    if (i.tm.opcode_modifier & FWait)
+      if (! add_prefix (FWAIT_OPCODE))
+	return;
 
     if (found_reverse_match)
       {
@@ -1262,8 +1234,9 @@ md_assemble (line)
 	  {
 	    if (i.seg[0] != (seg_entry *) 0 && i.seg[0] != (seg_entry *) &es)
 	      {
-		as_bad ("`%s' operand %d must use `%%es' segment",
-			i.tm.name, mem_op);
+		as_bad (_("`%s' operand %d must use `%%es' segment"),
+			i.tm.name,
+			mem_op + 1);
 		return;
 	      }
 	    /* There's only ever one segment override allowed per instruction.
@@ -1276,8 +1249,9 @@ md_assemble (line)
 	  {
 	    if (i.seg[1] != (seg_entry *) 0 && i.seg[1] != (seg_entry *) &es)
 	      {
-		as_bad ("`%s' operand %d must use `%%es' segment",
-			i.tm.name, mem_op + 1);
+		as_bad (_("`%s' operand %d must use `%%es' segment"),
+			i.tm.name,
+			mem_op + 2);
 		return;
 	      }
 	  }
@@ -1408,9 +1382,12 @@ md_assemble (line)
 	   size prefix. */
 	if ((i.suffix == WORD_OPCODE_SUFFIX) ^ flag_16bit_code)
 	  {
-	    if (! check_prefix (WORD_PREFIX_OPCODE))
+	    unsigned char prefix = WORD_PREFIX_OPCODE;
+	    if (i.tm.opcode_modifier & JumpByte) /* jcxz, loop */
+	      prefix = ADDR_PREFIX_OPCODE;
+
+	    if (! add_prefix (prefix))
 	      return;
-	    i.prefix[i.prefixes++] = WORD_PREFIX_OPCODE;
 	  }
       }
 
@@ -1427,9 +1404,9 @@ md_assemble (line)
 	int uses_mem_addrmode = 0;
 
 
-	/* If we found a reverse match we must alter the opcode direction bit
-	   found_reverse_match holds bit to set (different for int &
-	   float insns). */
+	/* If we found a reverse match we must alter the opcode
+	   direction bit.  found_reverse_match holds bits to change
+	   (different for int & float insns).  */
 
 	i.tm.base_opcode ^= found_reverse_match;
 
@@ -1644,7 +1621,7 @@ md_assemble (line)
 	  {
 	    if (i.tm.base_opcode == POP_SEG_SHORT && i.regs[0]->reg_num == 1)
 	      {
-		as_bad ("you can't `pop %%cs' on the 386.");
+		as_bad (_("you can't `pop %%cs' on the 386."));
 		return;
 	      }
 	    i.tm.base_opcode |= (i.regs[0]->reg_num << 3);
@@ -1678,9 +1655,8 @@ md_assemble (line)
 	   always spew out an address size prefix.  */
 	if (uses_mem_addrmode && flag_16bit_code)
 	  {
-	    if (! check_prefix (ADDR_PREFIX_OPCODE))
+	    if (! add_prefix (ADDR_PREFIX_OPCODE))
 	      return;
-	    i.prefix[i.prefixes++] = ADDR_PREFIX_OPCODE;
 	  }
 
 	/* If a segment was explicitly specified,
@@ -1691,9 +1667,8 @@ md_assemble (line)
 	   and the specified segment prefix will always be used.  */
 	if ((i.seg[0]) && (i.seg[0] != default_seg))
 	  {
-	    if (! check_prefix (i.seg[0]->seg_prefix))
+	    if (! add_prefix (i.seg[0]->seg_prefix))
 	      return;
-	    i.prefix[i.prefixes++] = i.seg[0]->seg_prefix;
 	  }
       }
   }
@@ -1715,7 +1690,7 @@ md_assemble (line)
 	unsigned long n = i.disps[0]->X_add_number;
 
 	if (i.prefixes != 0)
-	  as_warn ("skipping prefixes on this instruction");
+	  as_warn (_("skipping prefixes on this instruction"));
 
 	if (i.disps[0]->X_op == O_constant)
 	  {
@@ -1790,38 +1765,18 @@ md_assemble (line)
 	unsigned long n = i.disps[0]->X_add_number;
 	unsigned char *q;
 
-	/* The jcx/jecx instruction might need a data size prefix.  */
-	for (q = i.prefix; q < i.prefix + i.prefixes; q++)
+	if (size == 1) /* then this is a loop or jecxz type instruction */
 	  {
-	    if (*q == WORD_PREFIX_OPCODE)
+	    if (i.prefix[ADDR_PREFIX])
 	      {
-		/* The jcxz/jecxz instructions are marked with Data16
-		   and Data32, which means that they may get
-		   WORD_PREFIX_OPCODE added to the list of prefixes.
-		   However, the are correctly distinguished using
-		   ADDR_PREFIX_OPCODE.  Here we look for
-		   WORD_PREFIX_OPCODE, and actually emit
-		   ADDR_PREFIX_OPCODE.  This is a hack, but, then, so
-		   is the instruction itself.
-
-		   If an explicit suffix is used for the loop
-		   instruction, that actually controls whether we use
-		   cx vs. ecx.  This is also controlled by
-		   ADDR_PREFIX_OPCODE.
-
-		   I don't know if there is any valid case in which we
-		   want to emit WORD_PREFIX_OPCODE, but I am keeping
-		   the old behaviour for safety.  */
-
-		if (IS_JUMP_ON_CX_ZERO (i.tm.base_opcode)
-		    || IS_LOOP_ECX_TIMES (i.tm.base_opcode))
-		  FRAG_APPEND_1_CHAR (ADDR_PREFIX_OPCODE);
-		else
-		  FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
-	        insn_size += 1;
-		break;
+		FRAG_APPEND_1_CHAR (ADDR_PREFIX_OPCODE);
+		i.prefixes -= 1;
+		insn_size += 1;
 	      }
 	  }
+
+	if (i.prefixes != 0)
+	  as_warn (_("skipping prefixes on this instruction"));
 
 	if ((size == 4) && (flag_16bit_code))
 	  {
@@ -1864,7 +1819,7 @@ md_assemble (line)
     else if (i.tm.opcode_modifier & JumpInterSegment)
       {
 	if (i.prefixes != 0)
-	  as_warn ("skipping prefixes on this instruction");
+	  as_warn (_("skipping prefixes on this instruction"));
 
 	if (flag_16bit_code)
 	  {
@@ -1889,21 +1844,17 @@ md_assemble (line)
 	/* Output normal instructions here. */
 	unsigned char *q;
 
-	/* Hack for fwait.  It must come before any prefixes, as it
-	   really is an instruction rather than a prefix. */
-	if ((i.tm.opcode_modifier & FWait) != 0)
-	  {
-	    p = frag_more (1);
-	    insn_size += 1;
-	    md_number_to_chars (p, (valueT) FWAIT_OPCODE, 1);
-	  }
-
 	/* The prefix bytes. */
-	for (q = i.prefix; q < i.prefix + i.prefixes; q++)
+	for (q = i.prefix;
+	     q < i.prefix + sizeof (i.prefix) / sizeof (i.prefix[0]);
+	     q++)
 	  {
-	    p = frag_more (1);
-	    insn_size += 1;
-	    md_number_to_chars (p, (valueT) *q, 1);
+	    if (*q)
+	      {
+		p = frag_more (1);
+		insn_size += 1;
+		md_number_to_chars (p, (valueT) *q, 1);
+	      }
 	  }
 
 	/* Now the opcode; be careful about word order here! */
@@ -2448,6 +2399,7 @@ i386_operand (operand_string)
 	  register expressionS *exp;
 	  segT exp_seg = 0;
 	  char *save_input_line_pointer;
+
 	  exp = &disp_expressions[i.disp_operands];
 	  i.disps[this_operand] = exp;
 	  i.disp_reloc[this_operand] = NO_RELOC;
@@ -2531,6 +2483,7 @@ i386_operand (operand_string)
 		    input_line_pointer);
 	  RESTORE_END_STRING (displacement_string_end);
 	  input_line_pointer = save_input_line_pointer;
+#if 0 /* this is handled in expr */
 	  if (exp->X_op == O_absent)
 	    {
 	      /* missing expr becomes absolute 0 */
@@ -2542,7 +2495,9 @@ i386_operand (operand_string)
 	      exp->X_add_symbol = (symbolS *) 0;
 	      exp->X_op_symbol = (symbolS *) 0;
 	    }
-	  else if (exp->X_op == O_constant)
+	  else
+#endif
+	  if (exp->X_op == O_constant)
 	    {
 	      i.types[this_operand] |= SMALLEST_DISP_TYPE (exp->X_add_number);
 	    }
@@ -2589,7 +2544,8 @@ i386_operand (operand_string)
   else
     {				/* it's not a memory operand; argh! */
       as_bad (_("invalid char %s begining operand %d `%s'"),
-	      output_invalid (*op_string), this_operand,
+	      output_invalid (*op_string),
+	      this_operand + 1,
 	      op_string);
       return 0;
     }
@@ -3115,7 +3071,7 @@ md_undefined_symbol (name)
 	    if(!GOT_symbol)
 	      {
 		if(symbol_find(name)) 
-		  as_bad(_("GOT already in symbol table"));
+		  as_bad (_("GOT already in symbol table"));
 		GOT_symbol = symbol_new (name, undefined_section, 
 					 (valueT) 0, &zero_address_frag);
 	      };

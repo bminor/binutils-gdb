@@ -1,4 +1,4 @@
-Wed Jun  3 18:21:56 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+Wed Jun	 3 18:21:56 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (SCALE1_WHEN_NO_INDEX): Define.
 	(ebp, esp): Remove static variables.
@@ -8,6 +8,27 @@ Wed Jun  3 18:21:56 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 	(md_assemble): Simplify and correct modrm and sib generation.
 	(i386_operand): Add warning for scale without index.
 	Rewrite checks for valid base/index combinations.
+
+	* config/tc-i386.c (END_STRING_AND_SAVE): Protect arguments of
+	macros and enclose in do while(0).
+	(RESTORE_END_STRING): Likewise.
+	(md_assemble): Add one to printed operand number so we start
+	from 1 not 0.  Add some more gettext invocations.
+	(i386_operand): Fix `%%s' -> `%%%s'. Inc printed operand
+	number here too.
+
+	* config/tc-i386.h (WAIT_PREFIX, LOCKREP_PREFIX, ADDR_PREFIX,
+	DATA_PREFIX, SEG_PREFIX): Define.
+	* config/tc-i386.c (struct _i386_insn): Remove wait_prefix field.
+	(check_prefix): Remove function.
+	(add_prefix): New function.  Add prefix to i.prefix as well as
+	doing checks.
+	(md_assemble): Changes for add_prefix.	Remove hack for wait
+	prefix, instead always output prefixes in fixed order.	Test
+	for jcxz/loop when selecting between word & dword operations,
+	and add address size prefix rather than operand size prefix.
+	Remove operand -> address size hack when emitting jcxz/loop.
+	(i386_operand): Remove O_Absent check as it's done in expr.
 
 Wed Jun  3 15:09:10 1998  Ian Lance Taylor  <ian@cygnus.com>
 
