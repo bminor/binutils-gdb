@@ -23,6 +23,16 @@ static char vu1_mem_buffer[VU1_MEM1_SIZE]  __attribute__ ((aligned(16)));
 void init_vu1(void);
 void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer);
 
+static void dump_mem() {
+    int i;
+    typedef int T[2048][4];  
+    T *mem = (T*)&vu1_mem_buffer;
+
+    for (i = 0; i < 200; i++) {
+	printf("%d: %x %x %x %x\n", i, (*mem)[i][0], (*mem)[i][1], (*mem)[i][2], (*mem)[i][3]);
+    }
+}
+
 void 
 vu1_issue(void) 
 {

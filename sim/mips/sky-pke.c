@@ -883,6 +883,11 @@ pke_check_stall(struct pke_device* me, enum pke_check_target what)
 void
 pke_flip_dbf(struct pke_device* me)
 {
+  /* compute new ITOP and TOP */
+  PKE_REG_MASK_SET(me, ITOP, ITOP,
+		   PKE_REG_MASK_GET(me, ITOPS, ITOPS));
+  PKE_REG_MASK_SET(me, TOP, TOP,
+		   PKE_REG_MASK_GET(me, TOPS, TOPS));
   /* flip DBF */
   PKE_REG_MASK_SET(me, DBF, DF,
 		   PKE_REG_MASK_GET(me, DBF, DF) ? 0 : 1);
@@ -892,11 +897,6 @@ pke_flip_dbf(struct pke_device* me)
 		   (PKE_REG_MASK_GET(me, BASE, BASE) +
 		    (PKE_REG_MASK_GET(me, DBF, DF) *
 		     PKE_REG_MASK_GET(me, OFST, OFFSET))));
-  /* compute new ITOP and TOP */
-  PKE_REG_MASK_SET(me, ITOP, ITOP,
-		   PKE_REG_MASK_GET(me, ITOPS, ITOPS));
-  PKE_REG_MASK_SET(me, TOP, TOP,
-		   PKE_REG_MASK_GET(me, TOPS, TOPS));
 }
 
 
@@ -1428,7 +1428,7 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      /* imm: in 64-bit units for MPG instruction */
 	      /* VU*_MEM0 : instruction memory */
 	      vu_addr_base = (me->pke_number == 0) ?
-		VU0_MEM0_WINDOW_START : VU0_MEM0_WINDOW_START;
+		VU0_MEM0_WINDOW_START : VU1_MEM0_WINDOW_START;
 	      vu_addr = vu_addr_base + (imm + i) * 8;
 
 	      /* XXX: overflow check! */
