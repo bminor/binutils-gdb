@@ -33,7 +33,7 @@
 #include "dwarf2dbg.h"
 #include "subsegs.h"
 
-#include <elf/dwarf2.h>
+#include "elf/dwarf2.h"
 
 /* Since we can't generate the prolog until the body is complete, we
    use three different subsegments for .debug_line: one holding the

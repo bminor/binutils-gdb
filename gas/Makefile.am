@@ -888,8 +888,9 @@ atof-generic.o: atof-generic.c
 bignum-copy.o: bignum-copy.c
 cond.o: cond.c macro.h sb.h $(INCDIR)/obstack.h
 depend.o: depend.c
-dwarf2dbg.o: dwarf2dbg.c dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h
-ecoff.o: ecoff.c
+dwarf2dbg.o: dwarf2dbg.c dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/elf/dwarf2.h
+ecoff.o: ecoff.c ecoff.h
 ehopt.o: ehopt.c subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
 expr.o: expr.c $(INCDIR)/obstack.h
 flonum-copy.o: flonum-copy.c

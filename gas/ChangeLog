@@ -1,5 +1,9 @@
 1999-06-12  Ian Lance Taylor  <ian@zembu.com>
 
+	* dwarf2dbg.c: Include elf/dwarf2.h with "", not <>.
+	* Makefile.am: Rebuild dependencies.
+	* Makefile.in: Rebuild.
+
 	* config/tc-i386.c (i386_immediate): Remove unused label
 	seg_unimplemented.
 
