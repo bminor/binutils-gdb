@@ -1,3 +1,37 @@
+Wed Jun 15 20:44:46 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (config-stamp): If $(defs) contains multiple words,
+	emit a #define line for each.
+	* configure.in: For sparc64 target, use sparc cpu files and add
+	sparcv9 to extra_defs.  No longer treat sparc64-*-aout* specially.
+
+	* config/tc-sparc.c (membar_masks): Now static and const.
+	(md_show_usage) [!NO_V9]: Add -Av9 to usage message.
+	(current_architecture) [sparcv9]: Initialize to v9.
+	(md_begin) [sparcv9]: Don't bother changing it unconditionally
+	here.
+	(s_reserve): Don't pass unexpected argument to as_bad with
+	bad-segment message.
+
+	* as.h (bfd_alloc_by_size_t) [BFD_ASSEMBLER]: Declare.
+
+	* config/atof-ieee.c (int_to_gen): Commented out unused routine.
+
+	* config/tc-vax.c (md_assemble): Removed check of operand section.
+
+	Fri Jun  3 17:25:08 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.h (DBG_S_C_COMPLX4, DBG_S_C_COMPLX8): define
+	these new VMS symbol-type macros for `complex float' and
+	`complex double' support.  Their values come from the existing
+	DSC$K_DTYPE_FC and DSC$K_DTYPE_DC macros in <descrip.h>.
+	(DBG_S_C_REAL8_G, DBG_S_C_COMPLX8_G): G_float versions of
+	REAL8 and COMPLX8; not used yet, because gcc outputs the same
+	.stabs for `double' regardless of whether `-mg' is used.
+	config/obj-vms.c (VMS_typedef_parse) [case 'r']: add entries
+	for gcc2's predefined types "complex float", "complex double",
+	and "complex long double" (identical to complex double).
+
 Wed Jun 15 12:32:55 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-coff.c (coff_frob_symbol): Use C_STAT for the .text
