@@ -1930,8 +1930,9 @@ hppa_elf_stub_finish (output_bfd)
 	  bfd *stub_bfd = stub_list->this_bfd;
 	  asection *stub_sec = bfd_get_section_by_name (stub_bfd,
 							".hppa_linker_stubs");
-	  bfd_size_type reloc_size;
+	  long reloc_size;
 	  arelent **reloc_vector;
+	  long reloc_count;
 
 	  /* Some sanity checking.  */
 	  BFD_ASSERT (stub_sec == stub_list->stub_sec);
@@ -1944,6 +1945,11 @@ hppa_elf_stub_finish (output_bfd)
 
 	  /* Make space to hold the relocations for the stub section.  */
 	  reloc_size = bfd_get_reloc_upper_bound (stub_bfd, stub_sec);
+	  if (reloc_size < 0)
+	    {
+	      /* FIXME: Should return an error.  */
+	      abort ();
+	    }
 	  reloc_vector = (arelent **) malloc (reloc_size);
 	  if (reloc_vector == NULL && reloc_size != 0)
 	    {
@@ -1953,8 +1959,15 @@ hppa_elf_stub_finish (output_bfd)
 	    }
 
 	  /* If we have relocations, do them.  */
-	  if (bfd_canonicalize_reloc (stub_bfd, stub_sec, reloc_vector,
-				      output_bfd->outsymbols))
+	  reloc_count = bfd_canonicalize_reloc (stub_bfd, stub_sec,
+						reloc_vector,
+						output_bfd->outsymbols);
+	  if (reloc_count < 0)
+	    {
+	      /* FIXME: Should return an error.  */
+	      abort ();
+	    }
+	  if (reloc_count > 0)
 	    {
 	      arelent **parent;
 	      for (parent = reloc_vector; *parent != NULL; parent++)
@@ -2742,21 +2755,28 @@ hppa_look_for_stubs_in_section (stub_bfd, abfd, output_bfd, asec,
 	 location.  */
       if (bfd_get_outsymbols (abfd) == NULL)
 	{
-	  size_t symsize;
+	  long symsize;
+	  long symcount;
 
-	  symsize = get_symtab_upper_bound (abfd);
+	  symsize = bfd_get_symtab_upper_bound (abfd);
+	  if (symsize < 0)
+	    goto error_return;
 	  abfd->outsymbols = (asymbol **) bfd_alloc (abfd, symsize);
-	  if (!abfd->outsymbols)
+	  if (!abfd->outsymbols && symsize != 0)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
 	      goto error_return;
 	    }
-	  abfd->symcount = bfd_canonicalize_symtab (abfd, abfd->outsymbols);
+	  symcount = bfd_canonicalize_symtab (abfd, abfd->outsymbols);
+	  if (symcount < 0)
+	    goto error_return;
+	  abfd->symcount = symcount;
 	}
 
       /* Now get the relocations.  */
-      bfd_canonicalize_reloc (abfd, asec, reloc_vector,
-			      bfd_get_outsymbols (abfd));
+      if (bfd_canonicalize_reloc (abfd, asec, reloc_vector,
+				  bfd_get_outsymbols (abfd)) < 0)
+	goto error_return;
 
       /* Examine each relocation entry in this section.  */
       for (i = 0; i < asec->reloc_count; i++)

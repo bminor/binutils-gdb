@@ -515,8 +515,8 @@ NAME (lynx, squirt_out_relocs) (abfd, section)
 }
 
 /* This is stupid.  This function should be a boolean predicate */
-unsigned int
-NAME (lynx, canonicalize_reloc) (abfd, section, relptr, symbols)
+long
+NAME(lynx,canonicalize_reloc) (abfd, section, relptr, symbols)
      bfd *abfd;
      sec_ptr section;
      arelent **relptr;
@@ -526,7 +526,7 @@ NAME (lynx, canonicalize_reloc) (abfd, section, relptr, symbols)
   unsigned int count;
 
   if (!(tblptr || NAME (lynx, slurp_reloc_table) (abfd, section, symbols)))
-    return 0;
+    return -1;
 
   if (section->flags & SEC_CONSTRUCTOR)
     {
@@ -541,7 +541,7 @@ NAME (lynx, canonicalize_reloc) (abfd, section, relptr, symbols)
     {
       tblptr = section->relocation;
       if (!tblptr)
-	return 0;
+	return -1;
 
       for (count = 0; count++ < section->reloc_count;)
 	{

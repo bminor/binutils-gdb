@@ -1,5 +1,5 @@
 /* BFD COFF object file private structure.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define obj_relocbase(bfd)	(coff_data(bfd)->relocbase)
 #define obj_raw_syments(bfd)	(coff_data(bfd)->raw_syments)
+#define obj_raw_syment_count(bfd)	(coff_data(bfd)->raw_syment_count)
 #define obj_convert(bfd)	(coff_data(bfd)->conversion_table)
 #define obj_conv_table_size(bfd) (coff_data(bfd)->conv_table_size)
 #if CFILE_STUFF
@@ -76,22 +77,25 @@ typedef struct coff_tdata
 /* Functions in coffgen.c.  */
 extern bfd_target *coff_object_p PARAMS ((bfd *));
 extern struct sec *coff_section_from_bfd_index PARAMS ((bfd *, int));
-extern unsigned int coff_get_symtab_upper_bound PARAMS ((bfd *));
-extern unsigned int coff_get_symtab PARAMS ((bfd *, asymbol **));
-extern void coff_count_linenumbers PARAMS ((bfd *));
+extern long coff_get_symtab_upper_bound PARAMS ((bfd *));
+extern long coff_get_symtab PARAMS ((bfd *, asymbol **));
+extern int coff_count_linenumbers PARAMS ((bfd *));
 extern struct coff_symbol_struct *coff_symbol_from PARAMS ((bfd *, asymbol *));
-extern void coff_renumber_symbols PARAMS ((bfd *));
+extern boolean coff_renumber_symbols PARAMS ((bfd *));
 extern void coff_mangle_symbols PARAMS ((bfd *));
 extern void coff_write_symbols PARAMS ((bfd *));
-extern void coff_write_linenumbers PARAMS ((bfd *));
+extern boolean coff_write_linenumbers PARAMS ((bfd *));
 extern alent *coff_get_lineno PARAMS ((bfd *, asymbol *));
 extern asymbol *coff_section_symbol PARAMS ((bfd *, char *));
 extern struct coff_ptr_struct *coff_get_normalized_symtab PARAMS ((bfd *));
-extern unsigned int coff_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
+extern long coff_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
 extern asymbol *coff_make_empty_symbol PARAMS ((bfd *));
 extern void coff_print_symbol PARAMS ((bfd *, PTR filep, asymbol *,
 				       bfd_print_symbol_type how));
-extern asymbol *coff_make_debug_symbol PARAMS ((bfd *, PTR, unsigned long));
+extern void coff_get_symbol_info PARAMS ((bfd *, asymbol *,
+					  symbol_info *ret));
+extern asymbol *coff_bfd_make_debug_symbol PARAMS ((bfd *, PTR,
+						    unsigned long));
 extern boolean coff_find_nearest_line PARAMS ((bfd *,
 					       asection *,
 					       asymbol **,
@@ -100,13 +104,17 @@ extern boolean coff_find_nearest_line PARAMS ((bfd *,
 					       CONST char **functionname_ptr,
 					       unsigned int *line_ptr));
 extern int coff_sizeof_headers PARAMS ((bfd *, boolean reloc));
-extern boolean bfd_coff_reloc16_relax_section PARAMS ((bfd *,
-						       asection *,
-						       asymbol **));
+extern boolean bfd_coff_reloc16_relax_section
+  PARAMS ((bfd *, asection *, struct bfd_link_info *, boolean *));
 extern bfd_byte *bfd_coff_reloc16_get_relocated_section_contents
-  PARAMS ((bfd *, struct bfd_seclet *, bfd_byte *, boolean relocateable));
+  PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
+	   bfd_byte *, boolean relocateable, asymbol **));
 extern bfd_vma bfd_coff_reloc16_get_value PARAMS ((arelent *,
-						   struct bfd_seclet *));
+						   struct bfd_link_info *,
+						   asection *));
+extern void bfd_perform_slip PARAMS ((bfd *abfd, unsigned int slip,
+				      asection *input_section,
+				      bfd_vma val));
 
 /* And more taken from the source .. */
 

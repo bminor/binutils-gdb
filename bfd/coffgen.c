@@ -274,12 +274,12 @@ coff_section_from_bfd_index (abfd, index)
 
 /* Get the upper bound of a COFF symbol table.  */
 
-unsigned int
+long
 coff_get_symtab_upper_bound(abfd)
 bfd            *abfd;
 {
   if (!bfd_coff_slurp_symbol_table(abfd))
-    return 0;
+    return -1;
 
   return (bfd_get_symcount(abfd) + 1) * (sizeof(coff_symbol_type *));
 }
@@ -287,7 +287,7 @@ bfd            *abfd;
 
 /* Canonicalize a COFF symbol table.  */
 
-unsigned int
+long
 coff_get_symtab (abfd, alocation)
      bfd            *abfd;
      asymbol       **alocation;
@@ -296,7 +296,7 @@ coff_get_symtab (abfd, alocation)
     coff_symbol_type *symbase;
     coff_symbol_type **location = (coff_symbol_type **) (alocation);
     if (!bfd_coff_slurp_symbol_table(abfd))
-     return 0;
+     return -1;
 
     symbase = obj_symbols(abfd);
     while (counter <  bfd_get_symcount(abfd))
@@ -1337,14 +1337,14 @@ coff_get_normalized_symtab (abfd)
   return (internal);
 }				/* coff_get_normalized_symtab() */
 
-unsigned int
+long
 coff_get_reloc_upper_bound (abfd, asect)
      bfd            *abfd;
      sec_ptr         asect;
 {
   if (bfd_get_format(abfd) != bfd_object) {
     bfd_set_error (bfd_error_invalid_operation);
-    return 0;
+    return -1;
   }
   return (asect->reloc_count + 1) * sizeof(arelent *);
 }

@@ -797,7 +797,7 @@ b_out_squirt_out_relocs (abfd, section)
 }
 
 /* This is stupid.  This function should be a boolean predicate */
-static unsigned int
+static long
 b_out_canonicalize_reloc (abfd, section, relptr, symbols)
      bfd *abfd;
      sec_ptr section;
@@ -807,9 +807,11 @@ b_out_canonicalize_reloc (abfd, section, relptr, symbols)
   arelent *tblptr = section->relocation;
   unsigned int count = 0;
 
- if (!(tblptr || b_out_slurp_reloc_table (abfd, section, symbols))) return 0;
+ if (!(tblptr || b_out_slurp_reloc_table (abfd, section, symbols)))
+   return -1;
   tblptr = section->relocation;
- if (!tblptr) return 0;
+ if (!tblptr)
+   return -1;
 
   for (; count++ < section->reloc_count;)
     *relptr++ = tblptr++;
@@ -819,14 +821,14 @@ b_out_canonicalize_reloc (abfd, section, relptr, symbols)
   return section->reloc_count;
 }
 
-static unsigned int
+static long
 b_out_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
   if (bfd_get_format (abfd) != bfd_object) {
     bfd_set_error (bfd_error_invalid_operation);
-    return 0;
+    return -1;
   }
 
   if (asect == obj_datasec (abfd))
@@ -843,7 +845,7 @@ b_out_get_reloc_upper_bound (abfd, asect)
     return 0;
 
   bfd_set_error (bfd_error_invalid_operation);
-  return 0;
+  return -1;
 }
 
 static boolean
@@ -1099,8 +1101,11 @@ b_out_relax_section (abfd, i, link_info, again)
   asection *input_section = i;
   int shrink = 0 ;
   arelent **reloc_vector = NULL;
-  bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
-						       input_section);
+  long reloc_size = bfd_get_reloc_upper_bound(input_bfd,
+					      input_section);
+
+  if (reloc_size < 0)
+    return false;
 
   /* We only run this relaxation once.  It might work to run it
      multiple times, but it hasn't been tested.  */
@@ -1108,6 +1113,8 @@ b_out_relax_section (abfd, i, link_info, again)
 
   if (reloc_size)
     {
+      long reloc_count;
+
       reloc_vector = (arelent **) malloc (reloc_size);
       if (reloc_vector == NULL && reloc_size != 0)
 	{
@@ -1116,8 +1123,12 @@ b_out_relax_section (abfd, i, link_info, again)
 	}
 
       /* Get the relocs and think about them */
-      if (bfd_canonicalize_reloc(input_bfd, input_section, reloc_vector,
-				 _bfd_generic_link_get_symbols (input_bfd)))
+      reloc_count =
+	bfd_canonicalize_reloc (input_bfd, input_section, reloc_vector,
+				_bfd_generic_link_get_symbols (input_bfd));
+      if (reloc_count < 0)
+	goto error_return;
+      if (reloc_count > 0)
 	{
 	  arelent **parent;
 	  for (parent = reloc_vector; *parent; parent++)
@@ -1165,9 +1176,13 @@ b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
   /* Get enough memory to hold the stuff */
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;
-  bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
-						       input_section);
+  long reloc_size = bfd_get_reloc_upper_bound(input_bfd,
+					      input_section);
   arelent **reloc_vector = NULL;
+  long reloc_count;
+
+  if (reloc_size < 0)
+    goto error_return;
 
   /* If producing relocateable output, don't bother to relax.  */
   if (relocateable)
@@ -1192,10 +1207,13 @@ b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
 					       0,
 					       input_section->_raw_size));
 
-  if (bfd_canonicalize_reloc(input_bfd,
-			     input_section,
-			     reloc_vector,
-			     symbols) )
+  reloc_count = bfd_canonicalize_reloc (input_bfd,
+					input_section,
+					reloc_vector,
+					symbols);
+  if (reloc_count < 0)
+    goto error_return;
+  if (reloc_count > 0)
     {
       arelent **parent = reloc_vector;
       arelent *reloc ;

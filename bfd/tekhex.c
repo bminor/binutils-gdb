@@ -358,7 +358,7 @@ find_chunk (abfd, vma)
 
       if (!sname || !d)
 	{
-	  bfd_error = no_memory;
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
 
@@ -422,7 +422,7 @@ first_phase (abfd, type, src)
 
 	  if (!n)
 	    {
-	      bfd_error = no_memory;
+	      bfd_set_error (bfd_error_no_memory);
 	      abort();		/* FIXME */
 	    }
 	  memcpy (n, sym, len + 1);
@@ -456,7 +456,7 @@ first_phase (abfd, type, src)
 
 		if (!new)
 		  {
-		    bfd_error = no_memory;
+		    bfd_set_error (bfd_error_no_memory);
 		    abort();	/* FIXME */
 		  }
 		new->symbol.the_bfd = abfd;
@@ -469,7 +469,7 @@ first_phase (abfd, type, src)
 		new->symbol.name = bfd_alloc (abfd, len + 1);
 		if (!new->symbol.name)
 		  {
-		    bfd_error = no_memory;
+		    bfd_set_error (bfd_error_no_memory);
 		    abort();	/* FIXME */
 		  }
 		memcpy ((char *) (new->symbol.name), sym, len + 1);
@@ -533,7 +533,7 @@ static void
 
 }
 
-unsigned int
+long
 tekhex_get_symtab (abfd, table)
      bfd *abfd;
      asymbol **table;
@@ -552,7 +552,7 @@ tekhex_get_symtab (abfd, table)
   return bfd_get_symcount (abfd);
 }
 
-unsigned int
+long
 tekhex_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
@@ -568,7 +568,7 @@ tekhex_mkobject (abfd)
 
   if (!tdata)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return false;
     }
   abfd->tdata.tekhex_data = tdata;
@@ -913,7 +913,7 @@ tekhex_write_object_contents (abfd)
 	      break;
 	    case 'C':
 	    case 'U':
-	      bfd_error = wrong_format;
+	      bfd_set_error (bfd_error_wrong_format);
 	      return false;
 	    }
 
@@ -946,7 +946,7 @@ tekhex_make_empty_symbol (abfd)
 
   if (!new)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
   new->symbol.the_bfd = abfd;
@@ -995,8 +995,8 @@ tekhex_print_symbol (ignore_abfd, filep, symbol, how)
 
 #define FOO PROTO
 #define tekhex_new_section_hook (FOO(boolean, (*), (bfd *, asection *)))bfd_true
-#define tekhex_get_reloc_upper_bound (FOO(unsigned int, (*),(bfd*, asection *)))bfd_false
-#define tekhex_canonicalize_reloc (FOO(unsigned int, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0
+#define tekhex_get_reloc_upper_bound (FOO(long, (*),(bfd*, asection *)))bfd_0l
+#define tekhex_canonicalize_reloc (FOO(long, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0l
 
 #define tekhex_openr_next_archived_file (FOO(bfd *, (*), (bfd*,bfd*))) bfd_nullvoidptr
 #define tekhex_find_nearest_line (FOO(boolean, (*),(bfd*,asection*,asymbol**,bfd_vma, CONST char**, CONST char**, unsigned int *))) bfd_false
@@ -1023,6 +1023,11 @@ tekhex_print_symbol (ignore_abfd, filep, symbol, how)
 #define tekhex_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define tekhex_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define tekhex_bfd_final_link _bfd_generic_final_link
+#define tekhex_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+#define tekhex_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#define tekhex_bfd_is_local_label bfd_generic_is_local_label
 
 bfd_target tekhex_vec =
 {

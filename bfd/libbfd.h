@@ -117,6 +117,7 @@ boolean	bfd_true PARAMS ((bfd *ignore));
 PTR	bfd_nullvoidptr PARAMS ((bfd *ignore));
 int	bfd_0 PARAMS ((bfd *ignore));
 unsigned int	bfd_0u PARAMS ((bfd *ignore));
+long	bfd_0l PARAMS ((bfd *ignore));
 void	bfd_void PARAMS ((bfd *ignore));
 
 bfd *	_bfd_new_bfd_contained_in PARAMS ((bfd *));
@@ -307,7 +308,7 @@ bfd_generic_relax_section
  PARAMS ((bfd *abfd,
     asection *section,
     struct bfd_link_info *,
-    asymbol **symbols));
+    boolean *));
 
 bfd_byte *
 

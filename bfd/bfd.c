@@ -168,6 +168,7 @@ CODE_FRAGMENT
 .      struct sgi_core_struct *sgi_core_data;
 .      struct lynx_core_struct *lynx_core_data;
 .      struct osf_core_struct *osf_core_data;
+.      struct cisco_core_struct *cisco_core_data;
 .      PTR any;
 .      } tdata;
 .  
@@ -366,24 +367,24 @@ FUNCTION
 	bfd_get_reloc_upper_bound
 
 SYNOPSIS
-	unsigned int bfd_get_reloc_upper_bound(bfd *abfd, asection *sect);
+	long bfd_get_reloc_upper_bound(bfd *abfd, asection *sect);
 
 DESCRIPTION
 	Return the number of bytes required to store the
 	relocation information associated with section @var{sect}
-	attached to bfd @var{abfd}.
+	attached to bfd @var{abfd}.  If an error occurs, return -1.
 
 */
 
 
-unsigned int
+long
 bfd_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
   if (abfd->format != bfd_object) {
     bfd_set_error (bfd_error_invalid_operation);
-    return 0;
+    return -1;
   }
 
   return BFD_SEND (abfd, _get_reloc_upper_bound, (abfd, asect));
@@ -394,7 +395,7 @@ FUNCTION
 	bfd_canonicalize_reloc
 
 SYNOPSIS
-	unsigned int bfd_canonicalize_reloc
+	long bfd_canonicalize_reloc
         	(bfd *abfd,
 		asection *sec,
 		arelent **loc,
@@ -406,14 +407,15 @@ DESCRIPTION
 	information attached to @var{sec} into the internal canonical
 	form.  Place the table into memory at @var{loc}, which has
 	been preallocated, usually by a call to
-	<<bfd_get_reloc_upper_bound>>.
+	<<bfd_get_reloc_upper_bound>>.  Returns the number of relocs, or
+	-1 on error.
 
 	The @var{syms} table is also needed for horrible internal magic
 	reasons.
 
 
 */
-unsigned int
+long
 bfd_canonicalize_reloc (abfd, asect, location, symbols)
      bfd *abfd;
      sec_ptr asect;
@@ -422,7 +424,7 @@ bfd_canonicalize_reloc (abfd, asect, location, symbols)
 {
   if (abfd->format != bfd_object) {
     bfd_set_error (bfd_error_invalid_operation);
-    return 0;
+    return -1;
   }
   return BFD_SEND (abfd, _bfd_canonicalize_reloc,
 		   (abfd, asect, location, symbols));
@@ -739,6 +741,27 @@ bfd_scan_vma (string, end, base)
 
 /*
 FUNCTION
+	bfd_copy_private_bfd_data
+
+SYNOPSIS
+	boolean bfd_copy_private_bfd_data(bfd *ibfd, bfd *obfd);
+
+DESCRIPTION
+	Copy private BFD information from the BFD @var{ibfd} to the 
+	the BFD @var{obfd}.  Return <<true>> on success, <<false>> on error.
+	Possible error returns are:
+
+	o <<bfd_error_no_memory>> -
+	Not enough memory exists to create private data for @var{obfd}.
+
+.#define bfd_copy_private_bfd_data(ibfd, obfd) \
+.     BFD_SEND (ibfd, _bfd_copy_private_bfd_data, \
+.		(ibfd, obfd))
+
+*/
+
+/*
+FUNCTION
 	stuff
 
 DESCRIPTION
@@ -771,9 +794,8 @@ DESCRIPTION
 .	BFD_SEND (abfd, _bfd_get_relocated_section_contents, \
 .                 (abfd, link_info, link_order, data, relocateable, symbols))
 . 
-.#define bfd_relax_section(abfd, section, link_info, symbols) \
-.       BFD_SEND (abfd, _bfd_relax_section, \
-.                 (abfd, section, link_info, symbols))
+.#define bfd_relax_section(abfd, section, link_info, again) \
+.       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
 .
 .#define bfd_link_hash_table_create(abfd) \
 .	BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))

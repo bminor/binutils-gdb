@@ -80,7 +80,7 @@ ptrace_unix_core_file_p (abfd)
       || u.pt_rev != _BCS_PTRACE_REV)
     {
       /* Too small to be a core file */
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return 0;
     }
 
@@ -92,7 +92,7 @@ ptrace_unix_core_file_p (abfd)
 		bfd_zalloc (abfd, sizeof (struct trad_core_struct));
 
   if (rawptr == NULL) {
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     return 0;
   }
   
@@ -103,10 +103,10 @@ ptrace_unix_core_file_p (abfd)
   /* Create the sections.  This is raunchy, but bfd_close wants to free
      them separately.  */
 
-  core_stacksec(abfd) = (asection *) zalloc (sizeof (asection));
+  core_stacksec(abfd) = (asection *) bfd_zmalloc (sizeof (asection));
   if (core_stacksec (abfd) == NULL) {
   loser:
-    bfd_error = no_memory;
+    bfd_set_error (bfd_error_no_memory);
     free ((void *)rawptr);
     return 0;
   }
@@ -203,17 +203,17 @@ ptrace_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define	ptrace_unix_close_and_cleanup		bfd_generic_close_and_cleanup
 #define	ptrace_unix_set_section_contents		(boolean (*) PARAMS	\
         ((bfd *abfd, asection *section, PTR data, file_ptr offset,	\
-        bfd_size_type count))) bfd_false
+        bfd_size_type count))) bfd_generic_set_section_contents
 #define	ptrace_unix_get_section_contents		bfd_generic_get_section_contents
 #define	ptrace_unix_new_section_hook		(boolean (*) PARAMS	\
 	((bfd *, sec_ptr))) bfd_true
-#define	ptrace_unix_get_symtab_upper_bound	bfd_0u
-#define	ptrace_unix_get_symtab			(unsigned int (*) PARAMS \
-        ((bfd *, struct symbol_cache_entry **))) bfd_0u
-#define	ptrace_unix_get_reloc_upper_bound		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr))) bfd_0u
-#define	ptrace_unix_canonicalize_reloc		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
+#define	ptrace_unix_get_symtab_upper_bound	bfd_0l
+#define	ptrace_unix_get_symtab			(long (*) PARAMS \
+        ((bfd *, struct symbol_cache_entry **))) bfd_0l
+#define	ptrace_unix_get_reloc_upper_bound	(long (*) PARAMS \
+	((bfd *, sec_ptr))) bfd_0l
+#define	ptrace_unix_canonicalize_reloc		(long (*) PARAMS \
+	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
 #define	ptrace_unix_make_empty_symbol		(struct symbol_cache_entry * \
 	(*) PARAMS ((bfd *))) bfd_false
 #define	ptrace_unix_print_symbol			(void (*) PARAMS	\
@@ -249,6 +249,12 @@ ptrace_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define ptrace_unix_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define ptrace_unix_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_false)
+#define ptrace_unix_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
+#define ptrace_unix_bfd_is_local_label \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
@@ -256,9 +262,10 @@ swap_abort()
 {
   abort(); /* This way doesn't require any declaration for ANSI to fuck up */
 }
-#define	NO_GET	((bfd_vma (*) PARAMS ((         bfd_byte *))) swap_abort )
+#define	NO_GET	((bfd_vma (*) PARAMS ((   const bfd_byte *))) swap_abort )
 #define	NO_PUT	((void    (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort )
-#define	NO_SIGNED_GET ((bfd_signed_vma (*) PARAMS ((bfd_byte *))) swap_abort )
+#define	NO_SIGNED_GET \
+  ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
 bfd_target ptrace_core_vec =
   {

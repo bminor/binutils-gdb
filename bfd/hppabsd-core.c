@@ -130,7 +130,7 @@ hppabsd_core_core_file_p (abfd)
   val = bfd_read ((void *) &u, 1, sizeof u, abfd);
   if (val != sizeof u)
     {
-      bfd_error = wrong_format;
+      bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 
@@ -145,19 +145,19 @@ hppabsd_core_core_file_p (abfd)
     struct stat statbuf;
     if (stream == NULL || fstat (fileno (stream), &statbuf) < 0)
       {
-	bfd_error = system_call_error;
+	bfd_set_error (bfd_error_system_call);
 	return NULL;
       }
     if (NBPG * (UPAGES + u.u_dsize + u.u_ssize) > statbuf.st_size)
       {
-	bfd_error = file_truncated;
+	bfd_set_error (bfd_error_file_truncated);
 	return NULL;
       }
     if (clicksz * (UPAGES + u.u_dsize + u.u_ssize) < statbuf.st_size)
       {
 	/* The file is too big.  Maybe it's not a core file
 	   or we otherwise have bad values for u_dsize and u_ssize).  */
-	bfd_error = wrong_format;
+	bfd_set_error (bfd_error_wrong_format);
 	return NULL;
       }
   }
@@ -168,7 +168,7 @@ hppabsd_core_core_file_p (abfd)
     bfd_zalloc (abfd, sizeof (struct hppabsd_core_struct));
   if (!coredata)
     {
-      bfd_error = no_memory;
+      bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
@@ -245,13 +245,13 @@ hppabsd_core_core_file_matches_executable_p (core_bfd, exec_bfd)
 	bfd_generic_get_section_contents
 #define	hppabsd_core_new_section_hook		(boolean (*) PARAMS	\
 	((bfd *, sec_ptr))) bfd_true
-#define	hppabsd_core_get_symtab_upper_bound	bfd_0u
-#define	hppabsd_core_get_symtab			(unsigned int (*) PARAMS \
-        ((bfd *, struct symbol_cache_entry **))) bfd_0u
-#define	hppabsd_core_get_reloc_upper_bound	(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr))) bfd_0u
-#define	hppabsd_core_canonicalize_reloc		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
+#define	hppabsd_core_get_symtab_upper_bound	bfd_0l
+#define	hppabsd_core_get_symtab			(long (*) PARAMS \
+        ((bfd *, struct symbol_cache_entry **))) bfd_0l
+#define	hppabsd_core_get_reloc_upper_bound	(long (*) PARAMS \
+	((bfd *, sec_ptr))) bfd_0l
+#define	hppabsd_core_canonicalize_reloc		(long (*) PARAMS \
+	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
 #define	hppabsd_core_print_symbol		(void (*) PARAMS	\
 	((bfd *, PTR, struct symbol_cache_entry  *,			\
 	bfd_print_symbol_type))) bfd_false
@@ -285,6 +285,12 @@ hppabsd_core_core_file_matches_executable_p (core_bfd, exec_bfd)
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define hppabsd_core_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define hppabsd_core_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_false)
+#define hppabsd_core_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
+#define hppabsd_core_bfd_is_local_label \
+  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void

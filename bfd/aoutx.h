@@ -1998,7 +1998,7 @@ NAME(aout,write_syms) (abfd)
 }
 
 
-unsigned int
+long
 NAME(aout,get_symtab) (abfd, location)
      bfd *abfd;
      asymbol **location;
@@ -2006,7 +2006,8 @@ NAME(aout,get_symtab) (abfd, location)
     unsigned int counter = 0;
     aout_symbol_type *symbase;
 
-    if (!NAME(aout,slurp_symbol_table)(abfd)) return 0;
+    if (!NAME(aout,slurp_symbol_table)(abfd))
+      return -1;
 
     for (symbase = obj_aout_symbols(abfd); counter++ < bfd_get_symcount (abfd);)
       *(location++) = (asymbol *)( symbase++);
@@ -2504,7 +2505,7 @@ NAME(aout,squirt_out_relocs) (abfd, section)
 }
 
 /* This is stupid.  This function should be a boolean predicate */
-unsigned int
+long
 NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
      bfd *abfd;
      sec_ptr section;
@@ -2515,7 +2516,7 @@ NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
   unsigned int count;
 
   if (!(tblptr || NAME(aout,slurp_reloc_table)(abfd, section, symbols)))
-    return 0;
+    return -1;
 
   if (section->flags & SEC_CONSTRUCTOR) {
     arelent_chain *chain = section->constructor_chain;
@@ -2538,7 +2539,7 @@ NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
   return section->reloc_count;
 }
 
-unsigned int
+long
 NAME(aout,get_reloc_upper_bound) (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
@@ -2547,7 +2548,7 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
 
   if (bfd_get_format (abfd) != bfd_object) {
     bfd_set_error (bfd_error_invalid_operation);
-    return 0;
+    return -1;
   }
   if (asect->flags & SEC_CONSTRUCTOR) {
     return (sizeof (arelent *) * (asect->reloc_count+1));
@@ -2561,7 +2562,7 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
       dynrel_count = ((*aout_backend_info (abfd)->read_dynamic_relocs)
 		      (abfd, &dynrels));
       if (dynrel_count == (bfd_size_type) -1)
-	return 0;
+	return -1;
     }
 
   if (asect == obj_datasec (abfd))
@@ -2575,15 +2576,16 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
 	     + dynrel_count + 1));
 
   bfd_set_error (bfd_error_invalid_operation);
-  return 0;
+  return -1;
 }
 
 
-unsigned int
+long
 NAME(aout,get_symtab_upper_bound) (abfd)
      bfd *abfd;
 {
-  if (!NAME(aout,slurp_symbol_table)(abfd)) return 0;
+  if (!NAME(aout,slurp_symbol_table)(abfd))
+    return -1;
 
   return (bfd_get_symcount (abfd)+1) * (sizeof (aout_symbol_type *));
 }

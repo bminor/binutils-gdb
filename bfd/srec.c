@@ -859,16 +859,17 @@ srec_make_empty_symbol (abfd)
   return new;
 }
 
-static unsigned int
+static long
 srec_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
   /* Read in all the info */
-  srec_get_section_contents (abfd, abfd->sections, 0, 0, 0);
+  if (! srec_get_section_contents (abfd, abfd->sections, 0, 0, 0))
+    return -1;
   return (bfd_get_symcount (abfd) + 1) * (sizeof (asymbol *));
 }
 
-static unsigned int
+static long
 srec_get_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
@@ -919,8 +920,8 @@ srec_print_symbol (ignore_abfd, afile, symbol, how)
 #define FOO PROTO
 #define srec_new_section_hook (FOO(boolean, (*), (bfd *, asection *)))bfd_true
 
-#define srec_get_reloc_upper_bound (FOO(unsigned int, (*),(bfd*, asection *)))bfd_false
-#define srec_canonicalize_reloc (FOO(unsigned int, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0
+#define srec_get_reloc_upper_bound (FOO(long, (*),(bfd*, asection *)))bfd_0l
+#define srec_canonicalize_reloc (FOO(long, (*),(bfd*,asection *, arelent **, asymbol **))) bfd_0l
 
 
 
@@ -950,6 +951,12 @@ srec_print_symbol (ignore_abfd, afile, symbol, how)
 #define srec_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define srec_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define srec_bfd_final_link _bfd_generic_final_link
+
+#define srec_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+#define srec_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#define srec_bfd_is_local_label bfd_generic_is_local_label
 
 bfd_target srec_vec =
 {

@@ -81,6 +81,14 @@ bfd_0u (ignore)
    return 0;
 }
 
+/*ARGUSED*/
+long
+bfd_0l (ignore)
+     bfd *ignore;
+{
+  return 0;
+}
+
 /*ARGSUSED*/
 void 
 bfd_void (ignore)

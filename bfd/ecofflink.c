@@ -966,6 +966,8 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
   asymbol **symbols;
   asymbol **sym_ptr;
   asymbol **sym_end;
+  long symsize;
+  long symcount;
   PTR external_fdr;
 
   memset ((PTR) &fdr, 0, sizeof fdr);
@@ -988,14 +990,19 @@ bfd_ecoff_debug_accumulate_other (handle, output_bfd, output_debug,
   fdr.isymBase = output_symhdr->isymMax;
 
   /* Get the local symbols from the input BFD.  */
-  symbols = (asymbol **) bfd_alloc (output_bfd,
-				    get_symtab_upper_bound (input_bfd));
+  symsize = bfd_get_symtab_upper_bound (input_bfd);
+  if (symsize < 0)
+    return false;
+  symbols = (asymbol **) bfd_alloc (output_bfd, symsize);
   if (symbols == (asymbol **) NULL)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  sym_end = symbols + bfd_canonicalize_symtab (input_bfd, symbols);
+  symcount = bfd_canonicalize_symtab (input_bfd, symbols);
+  if (symcount < 0)
+    return false;
+  sym_end = symbols + symcount;
 
   /* Handle the local symbols.  Any external symbols are handled
      separately.  */

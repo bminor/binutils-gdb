@@ -147,7 +147,7 @@ trad_unix_core_file_p (abfd)
   /* Allocate both the upage and the struct core_data at once, so
      a single free() will free them both.  */
   rawptr = (struct trad_core_struct *)
-		bfd_zmalloc (abfd, sizeof (struct trad_core_struct));
+		bfd_zmalloc (sizeof (struct trad_core_struct));
   if (rawptr == NULL) {
     bfd_set_error (bfd_error_no_memory);
     return 0;
@@ -297,13 +297,13 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 #define	trad_unix_get_section_contents		bfd_generic_get_section_contents
 #define	trad_unix_new_section_hook		(boolean (*) PARAMS	\
 	((bfd *, sec_ptr))) bfd_true
-#define	trad_unix_get_symtab_upper_bound	bfd_0u
-#define	trad_unix_get_symtab			(unsigned int (*) PARAMS \
-        ((bfd *, struct symbol_cache_entry **))) bfd_0u
-#define	trad_unix_get_reloc_upper_bound		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr))) bfd_0u
-#define	trad_unix_canonicalize_reloc		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
+#define	trad_unix_get_symtab_upper_bound	bfd_0l
+#define	trad_unix_get_symtab			(long (*) PARAMS \
+        ((bfd *, struct symbol_cache_entry **))) bfd_0l
+#define	trad_unix_get_reloc_upper_bound		(long (*) PARAMS \
+	((bfd *, sec_ptr))) bfd_0l
+#define	trad_unix_canonicalize_reloc		(long (*) PARAMS \
+	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
 #define	trad_unix_make_empty_symbol		(struct symbol_cache_entry * \
 	(*) PARAMS ((bfd *))) bfd_false
 #define	trad_unix_print_symbol			(void (*) PARAMS	\

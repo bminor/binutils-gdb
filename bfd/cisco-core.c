@@ -112,8 +112,9 @@ cisco_core_file_p (abfd)
 
   /* OK, we believe you.  You're a core file.  */
 
-  abfd->tdata.cisco_core_data = (struct cisco_core_struct *)
-    bfd_zmalloc (abfd, sizeof (struct cisco_core_struct));
+  abfd->tdata.cisco_core_data =
+    ((struct cisco_core_struct *)
+     bfd_zmalloc (sizeof (struct cisco_core_struct)));
   if (abfd->tdata.cisco_core_data == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -245,7 +246,7 @@ cisco_core_file_p (abfd)
 	free (asect);
 	asect = nextsect;
       }
-    free (abfd->tdata);
+    free (abfd->tdata.cisco_core_data);
     return NULL;
   }
 }
@@ -290,13 +291,13 @@ cisco_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define	cisco_get_section_contents		bfd_generic_get_section_contents
 #define	cisco_new_section_hook		(boolean (*) PARAMS	\
 	((bfd *, sec_ptr))) bfd_true
-#define	cisco_get_symtab_upper_bound	bfd_0u
-#define	cisco_get_symtab			(unsigned int (*) PARAMS \
-        ((bfd *, struct symbol_cache_entry **))) bfd_0u
-#define	cisco_get_reloc_upper_bound		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr))) bfd_0u
-#define	cisco_canonicalize_reloc		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
+#define	cisco_get_symtab_upper_bound	bfd_0l
+#define	cisco_get_symtab			(long (*) PARAMS \
+        ((bfd *, struct symbol_cache_entry **))) bfd_0l
+#define	cisco_get_reloc_upper_bound		(long (*) PARAMS \
+	((bfd *, sec_ptr))) bfd_0l
+#define	cisco_canonicalize_reloc		(long (*) PARAMS \
+	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
 #define	cisco_make_empty_symbol		(struct symbol_cache_entry * \
 	(*) PARAMS ((bfd *))) bfd_false
 #define	cisco_print_symbol			(void (*) PARAMS	\
@@ -337,7 +338,7 @@ cisco_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define cisco_bfd_copy_private_bfd_data \
   ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
 #define cisco_bfd_is_local_label \
-  ((boolean (*) PARAMS ((bfd *, asection *))) bfd_false)
+  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
 
 bfd_target cisco_core_vec =
   {

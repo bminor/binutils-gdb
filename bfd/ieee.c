@@ -586,7 +586,7 @@ get_symbol (abfd,
   return last_symbol;
 }
 
-static void
+static boolean
 ieee_slurp_external_symbols (abfd)
      bfd *abfd;
 {
@@ -613,7 +613,8 @@ ieee_slurp_external_symbols (abfd)
 	  symbol = get_symbol (abfd, ieee, symbol, &symbol_count,
 			       &prev_symbols_ptr,
 			       &ieee->external_symbol_max_index, 'D');
-
+	  if (symbol == NULL)
+	    return false;
 
 	  symbol->symbol.the_bfd = abfd;
 	  symbol->symbol.name = read_id (&(ieee->h));
@@ -626,7 +627,8 @@ ieee_slurp_external_symbols (abfd)
 	  symbol = get_symbol (abfd, ieee, symbol, &symbol_count,
 			       &prev_symbols_ptr,
 			       &ieee->external_symbol_max_index, 'D');
-
+	  if (symbol == NULL)
+	    return false;
 
 	  BFD_ASSERT (symbol->index >= ieee->external_symbol_min_index);
 
@@ -710,7 +712,8 @@ ieee_slurp_external_symbols (abfd)
 	  symbol = get_symbol (abfd, ieee, symbol, &symbol_count,
 			       &prev_reference_ptr,
 			       &ieee->external_reference_max_index, 'X');
-
+	  if (symbol == NULL)
+	    return false;
 
 	  symbol->symbol.the_bfd = abfd;
 	  symbol->symbol.name = read_id (&(ieee->h));
@@ -760,24 +763,29 @@ ieee_slurp_external_symbols (abfd)
 
   *prev_symbols_ptr = (ieee_symbol_type *) NULL;
   *prev_reference_ptr = (ieee_symbol_type *) NULL;
+
+  return true;
 }
 
-static void
+static boolean
 ieee_slurp_symbol_table (abfd)
      bfd *abfd;
 {
   if (IEEE_DATA (abfd)->read_symbols == false)
     {
-      ieee_slurp_external_symbols (abfd);
+      if (! ieee_slurp_external_symbols (abfd))
+	return false;
       IEEE_DATA (abfd)->read_symbols = true;
     }
+  return true;
 }
 
-unsigned int
+long
 ieee_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
-  ieee_slurp_symbol_table (abfd);
+  if (! ieee_slurp_symbol_table (abfd))
+    return -1;
 
   return (abfd->symcount != 0) ?
     (abfd->symcount + 1) * (sizeof (ieee_symbol_type *)) : 0;
@@ -790,7 +798,7 @@ symbol index order
 
 extern bfd_target ieee_vec;
 
-unsigned int
+long
 ieee_get_symtab (abfd, location)
      bfd *abfd;
      asymbol **location;
@@ -805,7 +813,8 @@ ieee_get_symtab (abfd, location)
     {
       ieee_data_type *ieee = IEEE_DATA (abfd);
       dummy_bfd.xvec = &ieee_vec;
-      ieee_slurp_symbol_table (abfd);
+      if (! ieee_slurp_symbol_table (abfd))
+	return -1;
 
       if (ieee->symbol_table_full == false)
 	{
@@ -1684,12 +1693,13 @@ ieee_new_section_hook (abfd, newsect)
   return true;
 }
 
-unsigned int
+long
 ieee_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
-  ieee_slurp_section_data (abfd);
+  if (! ieee_slurp_section_data (abfd))
+    return -1;
   return (asect->reloc_count + 1) * sizeof (arelent *);
 }
 
@@ -1707,7 +1717,7 @@ ieee_get_section_contents (abfd, section, location, offset, count)
   return true;
 }
 
-unsigned int
+long
 ieee_canonicalize_reloc (abfd, section, relptr, symbols)
      bfd *abfd;
      sec_ptr section;
@@ -3310,6 +3320,11 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 #define ieee_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define ieee_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define ieee_bfd_final_link _bfd_generic_final_link
+#define ieee_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+#define ieee_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#define ieee_bfd_is_local_label bfd_generic_is_local_label
 
 /*SUPPRESS 460 */
 bfd_target ieee_vec =

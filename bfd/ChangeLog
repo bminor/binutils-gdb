@@ -1,3 +1,131 @@
+Wed Mar 30 16:25:41 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Changes to let BFD return an error indication from
+	get_symtab_upper_bound, bfd_canonicalize_symtab,
+	bfd_get_reloc_upper_bound, and bfd_canonicalize_reloc.  They now
+	return long instead of unsigned int, and use -1 to indicate an
+	error.  Along the way, rename get_symtab_upper_bound to
+	bfd_get_symtab_upper_bound.
+	* bfd.c (bfd_get_reloc_upper_bound): Return long, and -1 on
+	errors.
+	(bfd_canonicalize_reloc): Likewise.
+	* syms.c (bfd_get_symtab_upper_bound): Renamed from
+	get_symtab_upper_bound.
+	* targets.c (bfd_target): Renamed _get_symtab_upper_bound to
+	_bfd_get_symtab_upper_bound, and changed it and
+	_bfd_canonicalize_symtab and _get_reloc_upper_bound and
+	_bfd_canonicalize_reloc to all return long.
+	* aoutx.h (NAME(aout,get_symtab)): Return long, and -1 on errors.
+	(NAME(aout,canonicalize_reloc)): Likewise.
+	(NAME(aout,get_reloc_upper_bound)): Likewise.
+	(NAME(aout,get_symtab_upper_bound)): Likewise.
+	* bout.c (b_out_canonicalize_reloc): Likewise.
+	(b_out_get_reloc_upper_bound): Likewise.
+	* coffcode.h (coff_canonicalize_reloc): Likewise.
+	* coffgen.c (coff_get_symtab_upper_bound): Likewise.
+	(coff_get_symtab): Likewise.
+	(coff_get_reloc_upper_bound): Likewise.
+	* ecoff.c (ecoff_get_symtab_upper_bound): Likewise.
+	(ecoff_get_symtab): Likewise.
+	(ecoff_canonicalize_reloc): Likewise.
+	* elfcode.h (elf_get_symtab_upper_bound): Likewise.
+	(elf_get_reloc_upper_bound): Likewise.
+	(elf_canonicalize_reloc): Likewise.
+	(elf_get_symtab): Likewise.
+	* hp300hpux.c (MY(get_symtab)): Likewise.
+	(MY(get_symtab_upper_bound)): Likewise.
+	(MY(canonicalize_reloc)): Likewise.
+	* i386lynx.c (NAME(lynx,canonicalize_reloc)): Likewise.
+	* ieee.c (ieee_slurp_external_symbols): Change return type to
+	boolean.  Check for errors from get_symbol.
+	(ieee_slurp_symbol_table): Change return type to boolean.  Check
+	for errors from ieee_slurp_external_symbols.
+	(ieee_get_symtab_upper_bound): Return long, and -1 on errors.
+	(ieee_get_symtab): Likewise.
+	(ieee_get_reloc_upper_bound): Likewise.
+	(ieee_canonicalize_reloc): Likewise.
+	* mipsbsd.c (MY(canonicalize_reloc)): Likewise.
+	* nlmcode.h (nlm_get_symtab_upper_bound): Likewise.
+	(nlm_get_symtab): Likewise.
+	(nlm_get_reloc_upper_bound): Likewise.
+	(nlm_canonicalize_reloc): Likewise.
+	* oasys.c (oasys_get_symtab_upper_bound): Likewise.
+	(oasys_get_symtab): Likewise.
+	(oasys_get_reloc_upper_bound): Likewise.
+	(oasys_canonicalize_reloc): Likewise.
+	* som.c (som_get_symtab_upper_bound): Likewise.
+	(som_get_symtab): Likewise.
+	(som_get_reloc_upper_bound): Likewise.
+	(som_canonicalize_reloc): Likewise.
+	* srec.c (srec_get_symtab_upper_bound): Likewise.
+	(srec_get_symtab): Likewise.
+	(srec_get_reloc_upper_bound): Define as bfd_0l.
+	(srec_canonicalize_reloc): Likewise.
+	* tekhex.c (tekhex_get_symtab): Return long, and -1 on errors.
+	(tekhex_get_symtab_upper_bound): Likewise.
+	(tekhex_get_reloc_upper_bound): Define as bfd_0l.
+	(tekhex_canonicalize_reloc): Likewise.
+	* libaout.h (NAME(aout,get_symtab_upper_bound)): Change
+	declaration to return long.
+	(NAME(aout,get_symtab)): Likewise.
+	(NAME(aout,canonicalize_reloc)): Likewise.
+	(NAME(aout,get_reloc_upper_bound)): Likewise.
+	* libcoff-in.h (coff_get_symtab_upper_bound): Likewise.
+	(coff_get_symtab): Likewise.
+	(coff_get_reloc_upper_bound): Likewise.
+	* libecoff.h (ecoff_get_symtab_upper_bound): Likewise.
+	(ecoff_get_symtab): Likewise.
+	(ecoff_canonicalize_reloc): Likewise.
+	* libelf.h (bfd_elf32_get_symtab_upper_bound): Likewise.
+	(bfd_elf32_get_symtab): Likewise.
+	(bfd_elf32_get_reloc_upper_bound): Likewise.
+	(bfd_elf32_canonicalize_reloc): Likewise.
+	(bfd_elf64_get_symtab_upper_bound): Likewise.
+	(bfd_elf64_get_symtab): Likewise.
+	(bfd_elf64_get_reloc_upper_bound): Likewise.
+	(bfd_elf64_canonicalize_reloc): Likewise.
+	* libnlm.h (nlmNAME(get_symtab_upper_bound)): Likewise.
+	(nlmNAME(get_symtab)): Likewise.
+	(nlmNAME(get_reloc_upper_bound)): Likewise.
+	(nlmNAME(canonicalize_reloc)): Likewise.
+	* archive.c (compute_and_write_armap): Use error_return and
+	no_memory_return labels rather than freeing information in various
+	places.  Change storage, symcount and src_count to long.  Check
+	errors from bfd_get_symtab_upper_bound and
+	bfd_canonicalize_symtab.
+	* bout.c (b_out_relax_section): Change reloc_size to long.  Check
+	for errors from bfd_get_reloc_upper_bound and
+	bfd_canonicalize_reloc.
+	(b_out_get_relocated_section_contents): Likewise.
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents):
+	Likewise.
+	* elf32-mips.c: Likewise.
+	* elf32-hppa.c (hppa_elf_stub_finish): Likewise.
+	(hppa_look_for_stubs_in_section): Check for errors from
+	bfd_get_symtab_upper_bound, bfd_canonicalize_symtab, and
+	bfd_canonicalize_reloc.
+	* ecofflink.c (bfd_ecoff_debug_accumulate_other): Check for errors
+	from bfd_get_symtab_upper_bound and bfd_canonicalize_symtab.
+	* linker.c (generic_link_read_symbols): Likewise.
+	(_bfd_generic_final_link): Check for errors from
+	bfd_get_reloc_upper_bound and bfd_canonicalize_reloc.
+	* reloc.c (bfd_generic_get_relocated_section_contents): Likewise.
+	* reloc16.c (bfd_coff_reloc16_relax_section): Likewise.
+	(bfd_coff_reloc16_get_relocated_section_contents): Likewise.
+	* libbfd.c (bfd_0l): New function.
+	* libbfd-in.h (bfd_0l): Declare.
+	* aix386-core.c: Change get_symtab_upper_bound, get_symtab,
+	get_reloc_upper_bound, and canonicalize_reloc to use bfd_0l rather
+	than bfd_0u.
+	* cisco-core.c, hppabsd-core.c, hpux-core.c: Likewise.
+	* irix-core.c, osf-core.c, ptrace-core.c, trad-core.c: Likewise.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.h: Rebuilt.
+	* libcoff.h: Rebuilt.
+
+	* nlm32-sparc.c (nlm_sparc_read_reloc): Remove unused variables
+	temp and name.
+
 Wed Mar 30 08:33:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/dpx2.h: Define POSIX_UTIME.

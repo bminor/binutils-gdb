@@ -1212,12 +1212,14 @@ ecoff_slurp_symbol_table (abfd)
 
 /* Return the amount of space needed for the canonical symbols.  */
 
-unsigned int
+long
 ecoff_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
-  if (ecoff_slurp_symbolic_info (abfd) == false
-      || bfd_get_symcount (abfd) == 0)
+  if (! ecoff_slurp_symbolic_info (abfd))
+    return -1;
+
+  if (bfd_get_symcount (abfd) == 0)
     return 0;
 
   return (bfd_get_symcount (abfd) + 1) * (sizeof (ecoff_symbol_type *));
@@ -1225,7 +1227,7 @@ ecoff_get_symtab_upper_bound (abfd)
 
 /* Get the canonical symbols.  */
 
-unsigned int
+long
 ecoff_get_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
@@ -1234,8 +1236,9 @@ ecoff_get_symtab (abfd, alocation)
   ecoff_symbol_type *symbase;
   ecoff_symbol_type **location = (ecoff_symbol_type **) alocation;
 
-  if (ecoff_slurp_symbol_table (abfd) == false
-      || bfd_get_symcount (abfd) == 0)
+  if (ecoff_slurp_symbol_table (abfd) == false)
+    return -1;
+  if (bfd_get_symcount (abfd) == 0)
     return 0;
 
   symbase = ecoff_data (abfd)->canonical_symbols;
@@ -1901,7 +1904,7 @@ ecoff_slurp_reloc_table (abfd, section, symbols)
 
 /* Get a canonical list of relocs.  */
 
-unsigned int
+long
 ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
      bfd *abfd;
      asection *section;
@@ -1927,11 +1930,11 @@ ecoff_canonicalize_reloc (abfd, section, relptr, symbols)
       arelent *tblptr;
 
       if (ecoff_slurp_reloc_table (abfd, section, symbols) == false)
-	return 0;
+	return -1;
 
       tblptr = section->relocation;
       if (tblptr == (arelent *) NULL)
-	return 0;
+	return -1;
 
       for (count = 0; count < section->reloc_count; count++)
 	*relptr++ = tblptr++;

@@ -714,14 +714,17 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 {
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;
-  size_t reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
+  long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
   arelent **reloc_vector = NULL;
+  long reloc_count;
   bfd *output_bfd = relocateable ? abfd : (bfd *) NULL;
   bfd_vma gp;
   boolean gp_undefined;
   bfd_vma stack[RELOC_STACKSIZE];
   int tos = 0;
 
+  if (reloc_size < 0)
+    goto error_return;
   reloc_vector = (arelent **) malloc (reloc_size);
   if (reloc_vector == NULL && reloc_size != 0)
     {
@@ -737,9 +740,11 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
   input_section->_cooked_size = input_section->_raw_size;
   input_section->reloc_done = true;
 
-  if (bfd_canonicalize_reloc (input_bfd, input_section, reloc_vector,
-			      symbols)
-      == 0)
+  reloc_count = bfd_canonicalize_reloc (input_bfd, input_section,
+					reloc_vector, symbols);
+  if (reloc_count < 0)
+    goto error_return;
+  if (reloc_count == 0)
     goto successful_return;
 
   /* Get the GP value for the output BFD.  */

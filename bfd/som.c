@@ -138,16 +138,16 @@ static bfd_target * som_object_p PARAMS ((bfd *));
 static boolean som_write_object_contents PARAMS ((bfd *));
 static boolean som_slurp_string_table PARAMS ((bfd *));
 static unsigned int som_slurp_symbol_table PARAMS ((bfd *));
-static unsigned int som_get_symtab_upper_bound PARAMS ((bfd *));
-static unsigned int som_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
-						    arelent **, asymbol **));
-static unsigned int som_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
+static long som_get_symtab_upper_bound PARAMS ((bfd *));
+static long som_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
+					    arelent **, asymbol **));
+static long som_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
 static unsigned int som_set_reloc_info PARAMS ((unsigned char *, unsigned int,
 						arelent *, asection *,
 						asymbol **, boolean));
 static boolean som_slurp_reloc_table PARAMS ((bfd *, asection *,
 					      asymbol **, boolean));
-static unsigned int som_get_symtab PARAMS ((bfd *, asymbol **));
+static long som_get_symtab PARAMS ((bfd *, asymbol **));
 static asymbol * som_make_empty_symbol PARAMS ((bfd *));
 static void som_print_symbol PARAMS ((bfd *, PTR,
 				      asymbol *, bfd_print_symbol_type));
@@ -3544,12 +3544,12 @@ som_slurp_string_table (abfd)
 /* Return the amount of data (in bytes) required to hold the symbol
    table for this object.  */
 
-static unsigned int
+static long
 som_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
   if (!som_slurp_symbol_table (abfd))
-    return 0;
+    return -1;
 
   return (bfd_get_symcount (abfd) + 1) * (sizeof (asymbol *));
 }
@@ -3774,7 +3774,7 @@ som_slurp_symbol_table (abfd)
 /* Canonicalize a SOM symbol table.  Return the number of entries
    in the symbol table.  */
 
-static unsigned int
+static long
 som_get_symtab (abfd, location)
      bfd *abfd;
      asymbol **location;
@@ -3783,7 +3783,7 @@ som_get_symtab (abfd, location)
   som_symbol_type *symbase;
 
   if (!som_slurp_symbol_table (abfd))
-    return 0;
+    return -1;
 
   i = bfd_get_symcount (abfd);
   symbase = obj_som_symtab (abfd);
@@ -4169,7 +4169,7 @@ som_slurp_reloc_table (abfd, section, symbols, just_count)
 /* Return the number of bytes required to store the relocation
    information associated with the given section.  */ 
 
-static unsigned int
+static long
 som_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
@@ -4178,18 +4178,18 @@ som_get_reloc_upper_bound (abfd, asect)
      and parse it to determine how many relocations exist.  */
   if (asect->flags & SEC_RELOC)
     {
-      if (som_slurp_reloc_table (abfd, asect, NULL, true))
-	return (asect->reloc_count + 1) * sizeof (arelent);
+      if (! som_slurp_reloc_table (abfd, asect, NULL, true))
+	return false;
+      return (asect->reloc_count + 1) * sizeof (arelent);
     }
-  /* Either there are no relocations or an error occurred while 
-     reading and parsing the relocation stream.  */ 
+  /* There are no relocations.  */
   return 0;
 }
 
 /* Convert relocations from SOM (external) form into BFD internal
    form.  Return the number of relocations.  */
 
-static unsigned int
+static long
 som_canonicalize_reloc (abfd, section, relptr, symbols)
      bfd *abfd;
      sec_ptr section;
@@ -4200,12 +4200,12 @@ som_canonicalize_reloc (abfd, section, relptr, symbols)
   int count;
 
   if (som_slurp_reloc_table (abfd, section, symbols, false) == false)
-    return 0;
+    return -1;
 
   count = section->reloc_count;
   tblptr = section->relocation;
   if (tblptr == (arelent *) NULL)
-    return 0;
+    return -1;
 
   while (count--)
     *relptr++ = tblptr++;

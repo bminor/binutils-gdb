@@ -261,13 +261,13 @@ aix386_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define	aix386_get_section_contents		bfd_generic_get_section_contents
 #define	aix386_new_section_hook		(PROTO (boolean, (*),	\
 	(bfd *, sec_ptr))) bfd_true
-#define	aix386_get_symtab_upper_bound	bfd_0u
-#define	aix386_get_symtab			(PROTO (unsigned int, (*), \
-        (bfd *, struct symbol_cache_entry **))) bfd_0u
-#define	aix386_get_reloc_upper_bound		(PROTO (unsigned int, (*), \
-	(bfd *, sec_ptr))) bfd_0u
-#define	aix386_canonicalize_reloc		(PROTO (unsigned int, (*), \
-	(bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
+#define	aix386_get_symtab_upper_bound	bfd_0l
+#define	aix386_get_symtab			(PROTO (long, (*), \
+        (bfd *, struct symbol_cache_entry **))) bfd_0l
+#define	aix386_get_reloc_upper_bound		(PROTO (long, (*), \
+	(bfd *, sec_ptr))) bfd_0l
+#define	aix386_canonicalize_reloc		(PROTO (long, (*), \
+	(bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
 #define	aix386_make_empty_symbol		(PROTO (		\
 	struct symbol_cache_entry *, (*), (bfd *))) bfd_false
 #define	aix386_print_symbol			(PROTO (void, (*),	\

@@ -201,11 +201,12 @@ oasys_slurp_symbol_table (abfd)
   return true;
 }
 
-static unsigned int
+static long
 oasys_get_symtab_upper_bound (abfd)
      bfd *CONST abfd;
 {
-  oasys_slurp_symbol_table (abfd);
+  if (! oasys_slurp_symbol_table (abfd))
+    return -1;
 
   return (abfd->symcount + 1) * (sizeof (oasys_symbol_type *));
 }
@@ -215,7 +216,7 @@ oasys_get_symtab_upper_bound (abfd)
 
 extern bfd_target oasys_vec;
 
-unsigned int
+long
 oasys_get_symtab (abfd, location)
      bfd *abfd;
      asymbol **location;
@@ -224,7 +225,7 @@ oasys_get_symtab (abfd, location)
   unsigned int counter;
   if (oasys_slurp_symbol_table (abfd) == false)
     {
-      return 0;
+      return -1;
     }
   symbase = OASYS_DATA (abfd)->symbols;
   for (counter = 0; counter < abfd->symcount; counter++)
@@ -800,12 +801,13 @@ oasys_new_section_hook (abfd, newsect)
 }
 
 
-static unsigned int
+static long
 oasys_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
 {
-  oasys_slurp_section_data (abfd);
+  if (! oasys_slurp_section_data (abfd))
+    return -1;
   return (asect->reloc_count + 1) * sizeof (arelent *);
 }
 
@@ -831,7 +833,7 @@ oasys_get_section_contents (abfd, section, location, offset, count)
 }
 
 
-unsigned int
+long
 oasys_canonicalize_reloc (ignore_abfd, section, relptr, symbols)
      bfd *ignore_abfd;
      sec_ptr section;
@@ -1435,6 +1437,11 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define oasys_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define oasys_bfd_final_link _bfd_generic_final_link
+#define oasys_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+#define oasys_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#define oasys_bfd_is_local_label bfd_generic_is_local_label
 
 /*SUPPRESS 460 */
 bfd_target oasys_vec =

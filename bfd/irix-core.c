@@ -178,7 +178,8 @@ irix_core_make_empty_symbol (abfd)
      bfd *abfd;
 {
   asymbol *new = (asymbol *) bfd_zalloc (abfd, sizeof (asymbol));
-  new->the_bfd = abfd;
+  if (new)
+    new->the_bfd = abfd;
   return new;
 }
 
@@ -194,17 +195,17 @@ irix_core_make_empty_symbol (abfd)
 #define	irix_core_close_and_cleanup		bfd_generic_close_and_cleanup
 #define	irix_core_set_section_contents		(boolean (*) PARAMS	\
         ((bfd *abfd, asection *section, PTR data, file_ptr offset,	\
-        bfd_size_type count))) bfd_false
+        bfd_size_type count))) bfd_generic_set_section_contents
 #define	irix_core_get_section_contents		bfd_generic_get_section_contents
 #define	irix_core_new_section_hook		(boolean (*) PARAMS	\
 	((bfd *, sec_ptr))) bfd_true
-#define	irix_core_get_symtab_upper_bound	bfd_0u
-#define	irix_core_get_symtab			(unsigned int (*) PARAMS \
-        ((bfd *, struct symbol_cache_entry **))) bfd_0u
-#define	irix_core_get_reloc_upper_bound		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr))) bfd_0u
-#define	irix_core_canonicalize_reloc		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
+#define	irix_core_get_symtab_upper_bound	bfd_0l
+#define	irix_core_get_symtab			(long (*) PARAMS \
+        ((bfd *, struct symbol_cache_entry **))) bfd_0l
+#define	irix_core_get_reloc_upper_bound		(long (*) PARAMS \
+	((bfd *, sec_ptr))) bfd_0l
+#define	irix_core_canonicalize_reloc		(long (*) PARAMS \
+	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
 #define	irix_core_print_symbol			(void (*) PARAMS	\
 	((bfd *, PTR, struct symbol_cache_entry  *,			\
 	bfd_print_symbol_type))) bfd_false
@@ -239,15 +240,23 @@ irix_core_make_empty_symbol (abfd)
 #define irix_core_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 
+#define irix_core_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_false)
+#define irix_core_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
+#define irix_core_bfd_is_local_label \
+  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
+
 /* If somebody calls any byte-swapping routines, shoot them.  */
 void
 swap_abort()
 {
   abort(); /* This way doesn't require any declaration for ANSI to fuck up */
 }
-#define	NO_GET	((bfd_vma (*) PARAMS ((         bfd_byte *))) swap_abort )
+#define	NO_GET	((bfd_vma (*) PARAMS ((   const bfd_byte *))) swap_abort )
 #define	NO_PUT	((void    (*) PARAMS ((bfd_vma, bfd_byte *))) swap_abort )
-#define	NO_SIGNED_GET ((bfd_signed_vma (*) PARAMS ((bfd_byte *))) swap_abort )
+#define	NO_SIGNED_GET \
+  ((bfd_signed_vma (*) PARAMS ((const bfd_byte *))) swap_abort )
 
 bfd_target irix_core_vec =
   {

@@ -142,7 +142,7 @@ osf_core_core_file_p (abfd)
 	  secname = bfd_alloc (abfd, 40);
 	  if (!secname)
 	    {
-	      bfd_error = no_memory;
+	      bfd_set_error (bfd_error_no_memory);
 	      return NULL;
 	    }
 	  sprintf (secname, ".data%d", dseccnt++);
@@ -212,13 +212,13 @@ osf_core_core_file_matches_executable_p (core_bfd, exec_bfd)
 #define	osf_core_get_section_contents		bfd_generic_get_section_contents
 #define	osf_core_new_section_hook		(boolean (*) PARAMS	\
 	((bfd *, sec_ptr))) bfd_true
-#define	osf_core_get_symtab_upper_bound	bfd_0u
-#define	osf_core_get_symtab			(unsigned int (*) PARAMS \
-        ((bfd *, struct symbol_cache_entry **))) bfd_0u
-#define	osf_core_get_reloc_upper_bound		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr))) bfd_0u
-#define	osf_core_canonicalize_reloc		(unsigned int (*) PARAMS \
-	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0u
+#define	osf_core_get_symtab_upper_bound	bfd_0l
+#define	osf_core_get_symtab			(long (*) PARAMS \
+        ((bfd *, struct symbol_cache_entry **))) bfd_0l
+#define	osf_core_get_reloc_upper_bound		(long (*) PARAMS \
+	((bfd *, sec_ptr))) bfd_0l
+#define	osf_core_canonicalize_reloc		(long (*) PARAMS \
+	((bfd *, sec_ptr, arelent **, struct symbol_cache_entry**))) bfd_0l
 #define	osf_core_print_symbol			(void (*) PARAMS	\
 	((bfd *, PTR, struct symbol_cache_entry  *,			\
 	bfd_print_symbol_type))) bfd_false
@@ -252,6 +252,12 @@ osf_core_core_file_matches_executable_p (core_bfd, exec_bfd)
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
 #define osf_core_bfd_final_link \
   ((boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) bfd_false)
+#define osf_core_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_false)
+#define osf_core_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_false)
+#define osf_core_bfd_is_local_label \
+  ((boolean (*) PARAMS ((bfd *, asymbol *))) bfd_false)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void

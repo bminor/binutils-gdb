@@ -1596,15 +1596,15 @@ compute_and_write_armap (arch, elength)
      bfd *arch;
      unsigned int elength;
 {
-  char *first_name;
+  char *first_name = NULL;
   bfd *current;
   file_ptr elt_no = 0;
-  struct orl *map;
+  struct orl *map = NULL;
   int orl_max = 1024;		/* fine initial default */
   int orl_count = 0;
   int stridx = 0;		/* string index */
   asymbol **syms = NULL;
-  unsigned int syms_max = 0;
+  long syms_max = 0;
   boolean ret;
 
   /* Dunno if this is the best place for this info... */
@@ -1614,20 +1614,13 @@ compute_and_write_armap (arch, elength)
 
   map = (struct orl *) malloc (orl_max * sizeof (struct orl));
   if (map == NULL)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    goto no_memory_return;
 
   /* We put the symbol names on the arch obstack, and then discard
      them when done.  */
   first_name = bfd_alloc (arch, 1);
   if (first_name == NULL)
-    {
-      free (map);
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
+    goto no_memory_return;
 
   /* Drop all the files called __.SYMDEF, we're going to make our
      own */
@@ -1643,11 +1636,14 @@ compute_and_write_armap (arch, elength)
       if ((bfd_check_format (current, bfd_object) == true)
 	  && ((bfd_get_file_flags (current) & HAS_SYMS)))
 	{
-	  unsigned int storage;
-	  unsigned int symcount;
-	  unsigned int src_count;
+	  long storage;
+	  long symcount;
+	  long src_count;
 
-	  storage = get_symtab_upper_bound (current);
+	  storage = bfd_get_symtab_upper_bound (current);
+	  if (storage < 0)
+	    goto error_return;
+
 	  if (storage != 0)
 	    {
 	      if (storage > syms_max)
@@ -1655,16 +1651,13 @@ compute_and_write_armap (arch, elength)
 		  if (syms_max > 0)
 		    free (syms);
 		  syms_max = storage;
-		  syms = (asymbol **) malloc (syms_max);
+		  syms = (asymbol **) malloc ((size_t) syms_max);
 		  if (syms == NULL)
-		    {
-		      free (map);
-		      bfd_release (arch, first_name);
-		      bfd_set_error (bfd_error_no_memory);
-		      return false;
-		    }
+		    goto no_memory_return;
 		}
 	      symcount = bfd_canonicalize_symtab (current, syms);
+	      if (symcount < 0)
+		goto error_return;
 
 	      /* Now map over all the symbols, picking out the ones we want */
 	      for (src_count = 0; src_count < symcount; src_count++)
@@ -1689,14 +1682,7 @@ compute_and_write_armap (arch, elength)
 				     realloc ((PTR) map,
 					      orl_max * sizeof (struct orl)));
 			  if (new_map == (struct orl *) NULL)
-			    {
-			    free_and_quit:
-			      free (syms);
-			      free (map);
-			      bfd_release (arch, first_name);
-			      bfd_set_error (bfd_error_no_memory);
-			      return false;
-			    }
+			    goto no_memory_return;
 
 			  map = new_map;
 			}
@@ -1706,10 +1692,10 @@ compute_and_write_armap (arch, elength)
 					     bfd_alloc (arch,
 							sizeof (char *)));
 		      if (map[orl_count].name == NULL)
-			goto free_and_quit;
+			goto no_memory_return;
 		      *(map[orl_count].name) = bfd_alloc (arch, namelen + 1);
 		      if (*(map[orl_count].name) == NULL)
-			goto free_and_quit;
+			goto no_memory_return;
 		      strcpy (*(map[orl_count].name), syms[src_count]->name);
 		      (map[orl_count]).pos = (file_ptr) current;
 		      (map[orl_count]).namidx = stridx;
@@ -1728,10 +1714,25 @@ compute_and_write_armap (arch, elength)
 
   if (syms_max > 0)
     free (syms);
-  free (map);
-  bfd_release (arch, first_name);
+  if (map != NULL)
+    free (map);
+  if (first_name != NULL)
+    bfd_release (arch, first_name);
 
   return ret;
+
+ no_memory_return:
+  bfd_set_error (bfd_error_no_memory);
+
+ error_return:
+  if (syms_max > 0)
+    free (syms);
+  if (map != NULL)
+    free (map);
+  if (first_name != NULL)
+    bfd_release (arch, first_name);
+
+  return false;
 }
 
 boolean

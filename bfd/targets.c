@@ -275,12 +275,12 @@ Standard stuff.
 
 Symbols and relocations.
 
-.  unsigned int  (*_get_symtab_upper_bound) PARAMS ((bfd *));
-.  unsigned int  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
-.                                              struct symbol_cache_entry **));
-.  unsigned int  (*_get_reloc_upper_bound) PARAMS ((bfd *, sec_ptr));
-.  unsigned int  (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
-.                                              struct symbol_cache_entry **));
+.  long  (*_bfd_get_symtab_upper_bound) PARAMS ((bfd *));
+.  long  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
+.                                             struct symbol_cache_entry **));
+.  long  (*_get_reloc_upper_bound) PARAMS ((bfd *, sec_ptr));
+.  long  (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
+.                                            struct symbol_cache_entry **));
 .  struct symbol_cache_entry  *
 .                (*_bfd_make_empty_symbol) PARAMS ((bfd *));
 .  void          (*_bfd_print_symbol) PARAMS ((bfd *, PTR,

@@ -122,9 +122,7 @@ nlm_sparc_read_reloc (abfd, sym, secp, rel)
      asection **secp;
      arelent *rel;
 {
-  bfd_byte temp[4];
   bfd_vma val, addend;
-  const char *name;
   int index;
   unsigned int type;
   struct nlm32_sparc_reloc_ext tmp_reloc;

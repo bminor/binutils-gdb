@@ -1469,14 +1469,16 @@ mips_elf_final_link (abfd, info)
 		{
 		  asection *input_section;
 		  bfd *input_bfd;
-		  bfd_size_type relsize;
+		  long relsize;
 		  arelent **relocs;
-		  bfd_size_type reloc_count;
+		  long reloc_count;
 
 		  input_section = p->u.indirect.section;
 		  input_bfd = input_section->owner;
 		  relsize = bfd_get_reloc_upper_bound (input_bfd,
 						       input_section);
+		  if (relsize < 0)
+		    return false;
 		  relocs = (arelent **) malloc (relsize);
 		  if (!relocs && relsize != 0)
 		    {
@@ -1487,6 +1489,8 @@ mips_elf_final_link (abfd, info)
 		    bfd_canonicalize_reloc (input_bfd, input_section,
 					    relocs,
 					    bfd_get_outsymbols (input_bfd));
+		  if (reloc_count < 0)
+		    return false;
 		  BFD_ASSERT (reloc_count == input_section->reloc_count);
 		  o->reloc_count += reloc_count;
 		  free (relocs);

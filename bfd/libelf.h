@@ -259,12 +259,11 @@ extern boolean bfd_elf32_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 						       file_ptr,
 						       bfd_size_type));
 
-extern unsigned int bfd_elf32_get_symtab_upper_bound PARAMS ((bfd *));
-extern unsigned int bfd_elf32_get_symtab PARAMS ((bfd *, asymbol **));
-extern unsigned int bfd_elf32_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
-extern unsigned int bfd_elf32_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
-							  arelent **,
-							  asymbol **));
+extern long bfd_elf32_get_symtab_upper_bound PARAMS ((bfd *));
+extern long bfd_elf32_get_symtab PARAMS ((bfd *, asymbol **));
+extern long bfd_elf32_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
+extern long bfd_elf32_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
+						  arelent **, asymbol **));
 extern asymbol *bfd_elf32_make_empty_symbol PARAMS ((bfd *));
 extern void bfd_elf32_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 					    bfd_print_symbol_type));
@@ -296,12 +295,11 @@ extern boolean bfd_elf64_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 						       file_ptr,
 						       bfd_size_type));
 
-extern unsigned int bfd_elf64_get_symtab_upper_bound PARAMS ((bfd *));
-extern unsigned int bfd_elf64_get_symtab PARAMS ((bfd *, asymbol **));
-extern unsigned int bfd_elf64_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
-extern unsigned int bfd_elf64_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
-							  arelent **,
-							  asymbol **));
+extern long bfd_elf64_get_symtab_upper_bound PARAMS ((bfd *));
+extern long bfd_elf64_get_symtab PARAMS ((bfd *, asymbol **));
+extern long bfd_elf64_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
+extern long bfd_elf64_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
+						  arelent **, asymbol **));
 extern asymbol *bfd_elf64_make_empty_symbol PARAMS ((bfd *));
 extern void bfd_elf64_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 					    bfd_print_symbol_type));

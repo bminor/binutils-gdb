@@ -217,19 +217,18 @@ extern boolean ecoff_slurp_symbolic_info PARAMS ((bfd *));
 
 /* Generic ECOFF BFD backend vectors.  */
 extern asymbol *ecoff_make_empty_symbol PARAMS ((bfd *abfd));
-extern unsigned int ecoff_get_symtab_upper_bound PARAMS ((bfd *abfd));
-extern unsigned int ecoff_get_symtab PARAMS ((bfd *abfd,
-					      asymbol **alocation));
+extern long ecoff_get_symtab_upper_bound PARAMS ((bfd *abfd));
+extern long ecoff_get_symtab PARAMS ((bfd *abfd, asymbol **alocation));
 extern void ecoff_get_symbol_info PARAMS ((bfd *abfd,
 					   asymbol *symbol,
 					   symbol_info *ret));
 extern void ecoff_print_symbol PARAMS ((bfd *abfd, PTR filep,
 					asymbol *symbol,
 					bfd_print_symbol_type how));
-extern unsigned int ecoff_canonicalize_reloc PARAMS ((bfd *abfd,
-						      asection *section,
-						      arelent **relptr,
-						      asymbol **symbols));
+extern long ecoff_canonicalize_reloc PARAMS ((bfd *abfd,
+					      asection *section,
+					      arelent **relptr,
+					      asymbol **symbols));
 extern boolean ecoff_find_nearest_line PARAMS ((bfd *abfd,
 						asection *section,
 						asymbol **symbols,

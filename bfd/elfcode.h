@@ -2740,14 +2740,14 @@ error_return:
    the vector allocated based on this size.  However, the ELF symbol table
    always has a dummy entry as symbol #0, so it ends up even.  */
 
-unsigned int
+long
 elf_get_symtab_upper_bound (abfd)
      bfd *abfd;
 {
-  unsigned int symcount;
-  unsigned int symtab_size = 0;
-
+  long symcount;
+  long symtab_size;
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->symtab_hdr;
+
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
   symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
 
@@ -2760,7 +2760,7 @@ elf_get_symtab_upper_bound (abfd)
 	attached to bfd <<abfd>>
 
 */
-unsigned int
+long
 elf_get_reloc_upper_bound (abfd, asect)
      bfd *abfd;
      sec_ptr asect;
@@ -3038,7 +3038,7 @@ elf_slurp_reloc_table (abfd, asect, symbols)
   return true;
 }
 
-unsigned int
+long
 elf_canonicalize_reloc (abfd, section, relptr, symbols)
      bfd *abfd;
      sec_ptr section;
@@ -3051,13 +3051,19 @@ elf_canonicalize_reloc (abfd, section, relptr, symbols)
 
   /* snarfed from coffcode.h */
   if (use_rela_p)
-    elf_slurp_reloca_table (abfd, section, symbols);
+    {
+      if (! elf_slurp_reloca_table (abfd, section, symbols))
+	return -1;
+    }
   else
-    elf_slurp_reloc_table (abfd, section, symbols);
+    {
+      if (! elf_slurp_reloc_table (abfd, section, symbols))
+	return -1;
+    }
 
   tblptr = section->relocation;
   if (!tblptr)
-    return 0;
+    return -1;
 
   for (; count++ < section->reloc_count;)
     *relptr++ = tblptr++;
@@ -3066,16 +3072,15 @@ elf_canonicalize_reloc (abfd, section, relptr, symbols)
   return section->reloc_count;
 }
 
-unsigned int
+long
 elf_get_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {
-
   if (!elf_slurp_symbol_table (abfd, alocation))
-    return 0;
-  else
-    return bfd_get_symcount (abfd);
+    return -1;
+
+  return bfd_get_symcount (abfd);
 }
 
 asymbol *

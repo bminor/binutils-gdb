@@ -2376,7 +2376,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 
 
 /* This is stupid.  This function should be a boolean predicate.  */
-static unsigned int
+static long
 coff_canonicalize_reloc (abfd, section, relptr, symbols)
      bfd * abfd;
      sec_ptr section;
@@ -2402,12 +2402,12 @@ coff_canonicalize_reloc (abfd, section, relptr, symbols)
     }
   else
     {
-      coff_slurp_reloc_table (abfd, section, symbols);
-
+      if (! coff_slurp_reloc_table (abfd, section, symbols))
+	return -1;
 
       tblptr = section->relocation;
       if (!tblptr)
-	return 0;
+	return -1;
 
       for (; count++ < section->reloc_count;)
 	*relptr++ = tblptr++;

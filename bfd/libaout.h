@@ -44,9 +44,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BYTES_IN_WORD 4
 #endif /* ARCH_SIZE==32 */
 
-/* Declare at file level, since it isused in parameter lists, which
-   have weird scope.  */
+/* Declare at file level, since used in parameter lists, which have
+   weird scope.  */
 struct external_exec;
+struct external_nlist;
 
 /* Back-end information for various a.out targets.  */
 struct aout_backend_data
@@ -76,6 +77,25 @@ struct aout_backend_data
      to the size of the text section in the file for alignment purposes but
      does *not* get counted in the length of the text section. */
   unsigned char exec_header_not_counted;
+
+  /* A callback function to read in the dynamic symbols of an object
+     which is dynamically linked.  This returns the number of symbols
+     read (or -1 on error) and sets *SYMS to a buffer holding an array
+     of external_nlist structures and *STRS and *STRSIZE to the
+     associated string table.  (This interface works for SunOS, but
+     can be changed if some other interface is better for some other
+     shared library implementation).  */
+  bfd_size_type (*read_dynamic_symbols) PARAMS ((bfd *,
+						 struct external_nlist **syms,
+						 char **strs,
+						 bfd_size_type *strsize));
+
+  /* A callback function to read in the dynamic relocs of an object
+     which is dynamically linked.  This returns the number of relocs
+     read (or -1 on error) and sets *RELOCS to a buffer holding an
+     array of external reloc structures (the type depends upon the
+     type of object file).  */
+  bfd_size_type (*read_dynamic_relocs) PARAMS ((bfd *, PTR *relocs));
 };
 #define aout_backend_info(abfd) \
 	((CONST struct aout_backend_data *)((abfd)->xvec->backend_data))
@@ -133,7 +153,7 @@ enum machine_type {
   M_HPUX = (0x20c % 256)/* HP 200/300 HPUX binary */
 };
 
-#define N_DYNAMIC(exec) ((exec).a_info & 0x8000000)
+#define N_DYNAMIC(exec) ((exec).a_info & 0x80000000)
 
 #ifndef N_MAGIC
 # define N_MAGIC(exec) ((exec).a_info & 0xffff)
@@ -152,6 +172,12 @@ enum machine_type {
 ((exec).a_info = ((magic) & 0xffff) \
  | (((int)(type) & 0xff) << 16) \
  | (((flags) & 0xff) << 24))
+#endif
+
+#ifndef N_SET_DYNAMIC
+# define N_SET_DYNAMIC(exec, dynamic) \
+((exec).a_info = (dynamic) ? ((exec).a_info | 0x80000000) : \
+((exec).a_info & 0x7fffffff))
 #endif
 
 #ifndef N_SET_MAGIC
@@ -227,6 +253,9 @@ struct aoutdata {
   bfd_size_type external_sym_count;
   char *external_strings;
   struct aout_link_hash_entry **sym_hashes;
+
+  /* A pointer for shared library information.  */
+  PTR dynamic_info;
 };
 
 struct  aout_data_struct {
@@ -249,6 +278,7 @@ struct  aout_data_struct {
 #define obj_aout_external_sym_count(bfd) (adata(bfd).external_sym_count)
 #define obj_aout_external_strings(bfd) (adata(bfd).external_strings)
 #define obj_aout_sym_hashes(bfd) (adata(bfd).sym_hashes)
+#define obj_aout_dynamic_info(bfd) (adata(bfd).dynamic_info)
 
 /* We take the address of the first element of an asymbol to ensure that the
    macro is only ever applied to an asymbol */
@@ -294,21 +324,21 @@ NAME(aout,write_syms) PARAMS ((bfd *abfd));
 void
 NAME(aout,reclaim_symbol_table) PARAMS ((bfd *abfd));
 
-unsigned int
+long
 NAME(aout,get_symtab_upper_bound) PARAMS ((bfd *abfd));
 
-unsigned int
+long
 NAME(aout,get_symtab) PARAMS ((bfd *abfd, asymbol **location));
 
 boolean
 NAME(aout,slurp_reloc_table) PARAMS ((bfd *abfd, sec_ptr asect,
 				      asymbol **symbols));
 
-unsigned int
+long
 NAME(aout,canonicalize_reloc) PARAMS ((bfd *abfd, sec_ptr section,
 				       arelent **relptr, asymbol **symbols));
 
-unsigned int
+long
 NAME(aout,get_reloc_upper_bound) PARAMS ((bfd *abfd, sec_ptr asect));
 
 void
@@ -373,6 +403,18 @@ aout_stab_name PARAMS ((int code));
 #define	aout_64_close_and_cleanup	bfd_generic_close_and_cleanup
 #ifndef NO_WRITE_HEADER_KLUDGE
 #define NO_WRITE_HEADER_KLUDGE 0
+#endif
+
+#ifndef aout_32_bfd_copy_private_section_data
+#define aout_32_bfd_copy_private_section_data \
+  ((boolean (*) PARAMS ((bfd *, asection *, bfd *, asection *))) bfd_true)
+#endif
+#ifndef aout_32_bfd_copy_private_bfd_data
+#define aout_32_bfd_copy_private_bfd_data \
+  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
+#endif
+#ifndef aout_32_bfd_is_local_label
+#define aout_32_bfd_is_local_label bfd_generic_is_local_label
 #endif
 
 #ifndef WRITE_HEADERS

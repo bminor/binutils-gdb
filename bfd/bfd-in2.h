@@ -1640,8 +1640,8 @@ typedef struct symbol_cache_entry
   PTR udata;
 
 } asymbol;
-#define get_symtab_upper_bound(abfd) \
-     BFD_SEND (abfd, _get_symtab_upper_bound, (abfd))
+#define bfd_get_symtab_upper_bound(abfd) \
+     BFD_SEND (abfd, _bfd_get_symtab_upper_bound, (abfd))
 boolean 
 bfd_is_local_label PARAMS ((bfd *abfd, asymbol *sym));
 
@@ -1802,6 +1802,7 @@ struct _bfd
       struct sgi_core_struct *sgi_core_data;
       struct lynx_core_struct *lynx_core_data;
       struct osf_core_struct *osf_core_data;
+      struct cisco_core_struct *cisco_core_data;
       PTR any;
       } tdata;
   
@@ -1845,10 +1846,10 @@ bfd_errmsg  PARAMS ((bfd_error_type error_tag));
 void 
 bfd_perror  PARAMS ((CONST char *message));
 
-unsigned int 
+long 
 bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
 
-unsigned int 
+long 
 bfd_canonicalize_reloc
  PARAMS ((bfd *abfd,
     asection *sec,
@@ -1915,9 +1916,8 @@ bfd_copy_private_bfd_data PARAMS ((bfd *ibfd, bfd *obfd));
 	BFD_SEND (abfd, _bfd_get_relocated_section_contents, \
                  (abfd, link_info, link_order, data, relocateable, symbols))
  
-#define bfd_relax_section(abfd, section, link_info, symbols) \
-       BFD_SEND (abfd, _bfd_relax_section, \
-                 (abfd, section, link_info, symbols))
+#define bfd_relax_section(abfd, section, link_info, again) \
+       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
 
 #define bfd_link_hash_table_create(abfd) \
 	BFD_SEND (abfd, _bfd_link_hash_table_create, (abfd))
@@ -2040,12 +2040,12 @@ typedef struct bfd_target
   boolean       (*_bfd_copy_private_section_data) PARAMS ((bfd *, sec_ptr,
 							bfd *, sec_ptr));
   boolean	 (*_bfd_copy_private_bfd_data) PARAMS ((bfd *, bfd *));
-  unsigned int  (*_get_symtab_upper_bound) PARAMS ((bfd *));
-  unsigned int  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
-                                              struct symbol_cache_entry **));
-  unsigned int  (*_get_reloc_upper_bound) PARAMS ((bfd *, sec_ptr));
-  unsigned int  (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
-                                              struct symbol_cache_entry **));
+  long  (*_bfd_get_symtab_upper_bound) PARAMS ((bfd *));
+  long  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
+                                             struct symbol_cache_entry **));
+  long  (*_get_reloc_upper_bound) PARAMS ((bfd *, sec_ptr));
+  long  (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
+                                            struct symbol_cache_entry **));
   struct symbol_cache_entry  *
                 (*_bfd_make_empty_symbol) PARAMS ((bfd *));
   void          (*_bfd_print_symbol) PARAMS ((bfd *, PTR,
@@ -2083,7 +2083,7 @@ typedef struct bfd_target
                     struct symbol_cache_entry **));
 
   boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
-                    struct bfd_link_info *, struct symbol_cache_entry **));
+                    struct bfd_link_info *, boolean *again));
 
   /* See documentation on reloc types.  */
  CONST struct reloc_howto_struct *
