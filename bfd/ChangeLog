@@ -1,5 +1,10 @@
 Sun Dec  6 16:30:33 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* srec.c (srec_set_section_contents): Correct test to avoid
+	switching to 4 byte addresses after seeing a second section which
+	requires 3 byte addresses.  From Joel Schantz
+	<joel.schantz@argosys.boeing.com>.
+
 	* config.bfd (m68*-*-gnu*): New target.  From Aymeric Vincent
 	<aymeric.vincent@emi.u-bordeaux.fr>.
 
