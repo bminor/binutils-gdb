@@ -8,6 +8,7 @@
 #include "sim-main.h"
 
 void vu0_attach(SIM_DESC sd);
+void vu0_issue();
 
 #define VU0_MEM0_WINDOW_START 	0x11000000
 #define VU0_MEM0_SIZE  		0x1000	/* 4K = 4096 */

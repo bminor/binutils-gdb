@@ -9,4 +9,6 @@
 
 void create_devices(SIM_DESC sd);
 
+#define NUMBER_CPUS 5
+
 #endif

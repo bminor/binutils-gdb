@@ -8,6 +8,7 @@
 #include "sim-main.h"
 
 void pke0_attach(SIM_DESC sd);
+void pke0_issue();
 
 #define PKE0_REGISTER_WINDOW_START 0x10000800
 #define PKE0_REGISTER_WINDOW_END   0x10000980

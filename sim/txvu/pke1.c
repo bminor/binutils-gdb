@@ -7,6 +7,11 @@
 #include "device.h"
 #include "pke1.h"
 
+void 
+pke1_issue() 
+{
+}
+
 int
 pke1_io_read_buffer(device *me,
                       void *dest,

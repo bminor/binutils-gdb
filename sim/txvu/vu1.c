@@ -10,6 +10,11 @@
 static char vu1_mem0_buffer[VU1_MEM0_SIZE];
 static char vu1_mem1_buffer[VU1_MEM1_SIZE];
 
+void 
+vu1_issue() 
+{
+}
+
 int
 vu1_io_read_buffer(device *me,
                       void *dest,

@@ -32,6 +32,8 @@
 
 #include "sim-assert.h"
 
+#include "hardware.h"
+
 enum {
   /* greater or equal to zero => table */
   function_entry = -1,
@@ -55,37 +57,66 @@ INLINE_ENGINE\
   sim_cpu *processor = NULL;
   instruction_address cia;
   int current_cpu = next_cpu_nr;
+  instruction_word instruction_0;
 
   /* Hard coded main loop.  Not pretty, but should work. */
+  ASSERT(current_cpu >= 0 && current_cpu < NUMBER_CPUS);
 
-  SIM_ASSERT (current_cpu == 0);
-  processor = STATE_CPU (sd, current_cpu);
-  cia = CPU_CIA (processor);
+  cia = CPU_CIA (0);			/* Only the 5900 uses this. */
+  processor = STATE_CPU (sd, 0);	/* Only the 5900 uses this. */
 
+  switch(current_cpu) 
+    {
+    case 0:
+      goto cpu_0;
+    case 1:
+      goto cpu_1;
+    case 2:
+      goto cpu_2;
+    case 3:
+      goto cpu_3;
+    case 4:
+      goto cpu_4;
+    }
+  
   while (1)
     {
-      instruction_address nia;
 
-      instruction_word instruction_0 = IMEM (cia);
+cpu_0:
+
+      cia = CPU_CIA (processor);
+      instruction_0 = IMEM (cia);
 
 #if defined (ENGINE_ISSUE_PREFIX_HOOK)
       ENGINE_ISSUE_PREFIX_HOOK();
 #endif
 
-      nia = idecode_issue(sd, instruction_0, cia);
+      cia = idecode_issue(sd, instruction_0, cia);
 
 #if defined (ENGINE_ISSUE_POSTFIX_HOOK)
       ENGINE_ISSUE_POSTFIX_HOOK();
 #endif
 
-
       /* Update the instruction address */
-      cia = nia;
+      CPU_CIA (processor) = cia;
+
+cpu_1:
+	pke0_issue();
+
+cpu_2:
+	pke1_issue();
+
+cpu_3:
+	vu0_issue();
+
+cpu_4:
+	vu1_issue();
+
+events:
 
       /* process any events */
       if (sim_events_tick (sd))
         {
-          CPU_CIA (processor) = cia;
           sim_events_process (sd);
         }
     }
