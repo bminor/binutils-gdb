@@ -82,20 +82,22 @@ CC-LD=$(CC)
 # routines in libiberty.
 INCLUDE_DIR =  $(srcdir)/../include
 INCLUDE_CFLAGS = -I$(INCLUDE_DIR)
-# Where is the "-liberty" library, containing getopt and obstack?
+
+# Where is the "-liberty" library?  Typically in ../libiberty.
 LIBIBERTY = ../libiberty/libiberty.a
 
-# Where is the MMALLOC library?  Typically ../mmalloc.
+# Where is the MMALLOC library?  Typically in ../mmalloc.
 # Note that mmalloc can still be used on systems without mmap().
 # To use your system malloc, comment out the following defines.
-MMALLOC = ../mmalloc/libmmalloc.a
+MMALLOC_DIR = ../mmalloc
+MMALLOC = $(MMALLOC_DIR)/libmmalloc.a
 # To use your system malloc, uncomment MMALLOC_DISABLE.
 #MMALLOC_DISABLE = -DNO_MMALLOC
 # To use mmalloc but disable corruption checking, uncomment MMALLOC_CHECK
 #MMALLOC_CHECK = -DNO_MMALLOC_CHECK
-MMALLOC_CFLAGS = $(MMALLOC_CHECK) $(MMALLOC_DISABLE)
+MMALLOC_CFLAGS = -I$(srcdir)/$(MMALLOC_DIR) $(MMALLOC_CHECK) $(MMALLOC_DISABLE)
 
-# Where are the BFD library?
+# Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
 BFD = $(BFD_DIR)/libbfd.a
 BFD_SRC = $(srcdir)/$(BFD_DIR)
@@ -112,7 +114,7 @@ READLINE_CFLAGS = -I$(READLINE_SRC)
 # in INCLUDE_DIR.
 # Where is the "-lopcodes" library, with (some of) the opcode tables and
 # disassemblers?
-OPCODES = ./../opcodes/libopcodes.a
+OPCODES = ../opcodes/libopcodes.a
 # Where are the other opcode tables which only have header file
 # versions?
 OP_INCLUDE = $(INCLUDE_DIR)/opcode
