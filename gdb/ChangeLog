@@ -1,5 +1,8 @@
 2003-06-06  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-tdep.c (ppc64_desc_entry_point): New function.
+	(ppc64_standard_linkage_target): Use it.
+
 	* ppc-linux-nat.c (ppc_register_u_addr): Correctly compute u-area
 	offsets for floating-point registers in both 32- and 64-bit
 	interfaces.
