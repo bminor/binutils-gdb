@@ -17,6 +17,8 @@ nm\(em\&list symbols from object files.
 .B nm
 .RB "[\|" \-a | \-\-debug\-syms "\|]" 
 .RB "[\|" \-g | \-\-extern\-only "\|]"
+.RB "[\|" \-B "\|]"  
+.RB "[\|" \-C | \-\-demangle "\|]" 
 .RB "[\|" \-s | \-\-print\-armap "\|]" 
 .RB "[\|" \-o | \-\-print\-file\-name "\|]"  
 .RB "[\|" \-n | \-\-numeric\-sort "\|]" 
@@ -70,6 +72,14 @@ Display debugger-only symbols; normally these are not listed.
 The same as
 .B \-\-format=bsd
 (for compatibility with the MIPS \fBnm\fP).
+
+.TP
+.B \-C
+.TP
+.B \-\-demangle
+Decode (\fIdemangle\fP) low-level symbol names into user-level names.
+Besides removing any initial underscore prepended by the system, this
+makes C++ function names readable.
 
 .TP
 .B "\-f \fIformat"

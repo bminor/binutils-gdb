@@ -639,7 +639,8 @@ The GNU linker @code{ld} is now described in a separate manual.
 @kindex nm
 
 @smallexample
-nm [ -a | --debug-syms ]  [ -g | --extern-only ]  [ -B ]
+nm [ -a | --debug-syms ]  [ -g | --extern-only ]
+   [ -B ]  [ -C | --demangle ]
    [ -s | --print-armap ]  [ -A | -o | --print-file-name ]  
    [ -n | -v | --numeric-sort ]  [ -p | --no-sort ]
    [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
@@ -716,7 +717,15 @@ listed.
 @item -B
 @cindex @code{nm} format
 @cindex @code{nm} compatibility
-The same as @samp{--format=bsd}.
+The same as @samp{--format=bsd} (for compatibility with the MIPS @code{nm}).
+
+@item -C
+@itemx --demangle
+@cindex demangling C++ symbols
+Decode (@dfn{demangle}) low-level symbol names into user-level names.
+Besides removing any initial underscore prepended by the system, this
+makes C++ function names readable.  @xref{c++filt}, for more information
+on demangling.
 
 @item -f @var{format}
 @itemx --format=@var{format}
@@ -1188,7 +1197,7 @@ archives, @samp{strip -v} lists all members of the archive.
 @smallexample
 c++filt [ -_ | --strip-underscores ]
         [ -s @var{format} | --format=@var{format} ]
-        [ --help ]  [ --version ]  [ @var{arg}@dots{} ]
+        [ --help ]  [ --version ]  [ @var{symbol}@dots{} ]
 @end smallexample
 
 The C++ language provides function overloading, which means that you can
@@ -1204,20 +1213,15 @@ dollars, or periods) seen in the input is a potential label.  If the
 label decodes into a C++ name, the C++ name replaces the low-level
 name in the output.
 
-A typical use of @code{c++filt} is to pipe the output of @code{nm}
-though it, using @code{c++filt} as a filter:
-
-@example
-nm @var{objfile} | c++filt
-@end example
-
-You can also use @code{c++filt} to decipher individual symbols:
+You can use @code{c++filt} to decipher individual symbols:
 
 @example
 c++filt @var{symbol}
 @end example
 
-All results are printed on the standard output.
+If no @var{symbol} arguments are given, @code{c++filt} reads symbol
+names from the standard input and writes the demangled names to the
+standard output.  All results are printed on the standard output.
 
 @table @code
 @item -_
