@@ -1,5 +1,8 @@
 Tue Feb 25 13:17:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in (itbl-lex.o): Remove -Wall.
+	(itbl-parse.o): Likewise.
+
 	* cond.c (s_ifdef): If we should omit conditionals from listings,
 	call listing_list.
 	(s_if, s_ifc, s_endif, s_else, s_ifeqs): Likewise.

@@ -111,7 +111,7 @@ RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
 RUNTESTFLAGS=
 
 # use @target_cpu_type@ for refering to configured target name
-IT_HDRS=itbl-parse.h $(srcdir)/itbl-ops.h itbl-cpu.h 
+IT_HDRS=itbl-parse.h $(srcdir)/itbl-ops.h 
 IT_SRCS=itbl-parse.c itbl-lex.c $(srcdir)/itbl-ops.c
 IT_DEPS=$(srcdir)/itbl-parse.y $(srcdir)/itbl-lex.l $(srcdir)/config/itbl-@target_cpu_type@.h
 IT_OBJS=itbl-parse.o itbl-lex.o itbl-ops.o
@@ -175,8 +175,7 @@ LINKED_HEADERS = \
 	targ-env.h \
 	targ-cpu.h \
 	obj-format.h \
-	atof-targ.h \
-	itbl-cpu.h
+	atof-targ.h 
 
 HEADERS = $(LINKED_HEADERS) $(REAL_HEADERS)
 
@@ -433,27 +432,26 @@ itbl-lex.c: $(srcdir)/itbl-lex.l
 	mv -f lex.yy.c itbl-lex.c
 
 itbl-lex.o: itbl-lex.c 
-	$(CC) -Wall -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-lex.c
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-lex.c
 
 itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
 	$(YACC) -d $(YACCFLAGS) $(srcdir)/itbl-parse.y
 	mv -f y.tab.c itbl-parse.c
 	mv -f y.tab.h itbl-parse.h
 
-itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h itbl-cpu.h
-	$(CC) -Wall -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-parse.c
+itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h
+	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) itbl-parse.c
 
 itbl-ops.o: $(srcdir)/itbl-ops.c \
-	$(srcdir)/itbl-ops.h itbl-cpu.h itbl-parse.h
+	$(srcdir)/itbl-ops.h itbl-parse.h
 	$(CC) -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/itbl-ops.c
 
 # stand-alone itbl assembler & disassembler
 itbl-test-ops.o: $(srcdir)/itbl-ops.c \
-	$(srcdir)/itbl-ops.h itbl-cpu.h itbl-parse.h
+	$(srcdir)/itbl-ops.h itbl-parse.h
 	$(CC) -o itbl-test-ops.o -DSTAND_ALONE -c $(ALL_CFLAGS) $(CPPFLAGS) $(INCLUDES) $(srcdir)/itbl-ops.c
 
-itbl-test.o: $(srcdir)/testsuite/gas/all/itbl-test.c $(srcdir)/itbl-ops.h\
-	itbl-cpu.h
+itbl-test.o: $(srcdir)/testsuite/gas/all/itbl-test.c $(srcdir)/itbl-ops.h
 	$(CC) -c -DSTAND_ALONE $(ALL_CFLAGS) $(INCLUDES)\
 	$(srcdir)/testsuite/gas/all/itbl-test.c
 
