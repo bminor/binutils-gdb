@@ -1,3 +1,12 @@
+2003-07-22  Andrew Cagney  <cagney@redhat.com>
+
+	* config/pa/tm-hppa64.h (FRAME_SAVED_PC_IN_SIGTRAMP): Use
+	get_frame_base.
+	(FRAME_BASE_BEFORE_SIGTRAMP): Ditto.
+	(FRAME_FIND_SAVED_REGS_IN_SIGTRAMP): Ditto.
+	(struct value): Add opaque declaration.
+	(DEPRECATED_FRAME_ARGS_ADDRESS): Delete.
+
 2003-07-21  Andrew Cagney  <cagney@redhat.com>
 
 	From 2003-07-04 Kei Sakamoto <sakamoto.kei@renesas.com>:
