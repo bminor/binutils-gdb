@@ -1,3 +1,8 @@
+Mon Oct 21 11:38:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/obj-aout.h (S_IS_DEFINE): non BFD_ASSEMBLER version:
+	Don't check S_GET_OTHER.
+
 Fri Oct 18 14:06:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_ip): Accept an odd floating point
