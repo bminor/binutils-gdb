@@ -1,3 +1,19 @@
+Mon Dec 19 14:15:07 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Reduce useless symbols for ELF in an attempt to make smaller
+	objects and speed up the linker.
+	* config/tc-hppa.c (struct call_info): Replace end_symbol field
+	with a size field.
+	(hppa_elf_mark_end_function): Delete unneeded function.
+	(pa_build_unwind_subspace): For the 2nd unwind relocation, use
+	the function symbol + function size instead of a special symbol
+	for the end of the function.
+	(process_exit): Compute the function size here.  Don't call 
+	hppa_elf_mark_end_of_function anymore.
+	(pa_procend): Likewise.
+	(hppa_fix_adjustable): Only reject 32bit relocations for SOM.
+	(elf_hppa_final_processing): Simplify.
+
 start-sanitize-arc
 Mon Dec 19 12:57:09 1994  Doug Evans  <dje@canuck.cygnus.com>
 

@@ -145,8 +145,8 @@ struct call_info
     /* Name of this function.  */
     symbolS *start_symbol;
 
-    /* (temporary) symbol used to mark the end of this function.  */
-    symbolS *end_symbol;
+    /* Size of the function in bytes.  */
+    unsigned long function_size;
 
     /* Next entry in the chain.  */
     struct call_info *ci_next;
@@ -451,6 +451,7 @@ struct selector_entry
 
 /* Prototypes for functions local to tc-hppa.c.  */
 
+static void pa_check_current_space_and_subspace PARAMS ((void));
 static fp_operand_format pa_parse_fp_format PARAMS ((char **s));
 static void pa_cons PARAMS ((int));
 static void pa_data PARAMS ((int));
@@ -539,7 +540,6 @@ static int log2 PARAMS ((int));
 static int pa_next_subseg PARAMS ((sd_chain_struct *));
 static unsigned int pa_stringer_aux PARAMS ((char *));
 static void pa_spaces_begin PARAMS ((void));
-static void hppa_elf_mark_end_of_function PARAMS ((void));
 
 /* File and gloally scoped variable declarations.  */
 
@@ -1058,6 +1058,31 @@ static struct default_space_dict pa_def_spaces[] =
 
 /* Actual functions to implement the PA specific code for the assembler.  */
 
+/* Called before writing the object file.  Make sure entry/exit and
+   proc/procend pairs match.  */
+
+void
+pa_check_eof ()
+{
+  if (within_entry_exit)
+    as_fatal ("Missing .exit\n");
+
+  if (within_procedure)
+    as_fatal ("Missing .procend\n");
+}
+
+/* Check to make sure we have a valid space and subspace.  */
+
+static void
+pa_check_current_space_and_subspace ()
+{
+  if (current_space == NULL)
+    as_fatal ("Not in a space.\n");
+
+  if (current_subspace == NULL)
+    as_fatal ("Not in a subspace.\n");
+}
+
 /* Returns a pointer to the label_symbol_struct for the current space.
    or NULL if no label_symbol_struct exists for the current space.  */
 
@@ -1366,6 +1391,9 @@ pa_ip (str)
   int cmpltr, nullif, flag, cond, num;
   unsigned long opcode;
   struct pa_opcode *insn;
+
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
 
   /* Skip to something interesting.  */
   for (s = str; isupper (*s) || islower (*s) || (*s >= '0' && *s <= '3'); ++s)
@@ -2568,15 +2596,7 @@ tc_gen_reloc (section, fixp)
 
       reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
       reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
-      /* Ugh.  Yet another case where the generic ELF code's
-	 handling of section vmas makes life a living hell.
-
-	 The generic ELF code will subtract out section->vma from
-	 the relocation offset before the relocs are written.  So
-	 we have to add section->vma into the offset here so the
-	 net sum is zero.  */
-      reloc->address = (fixp->fx_frag->fr_address + fixp->fx_where
-			+ section->vma);
+      reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
       reloc->addend = 0;	/* default */
 
       assert (reloc->howto && code == reloc->howto->type);
@@ -3856,6 +3876,9 @@ pa_parse_neg_add_cmpltr (s, isbranch)
 static void
 pa_align (bytes)
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   /* Let the generic gas code do most of the work.  */
   s_align_bytes (bytes);
 
@@ -3875,6 +3898,9 @@ pa_block (z)
   long int temp_fill;
   unsigned int temp_size;
   int i;
+
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
 
   temp_size = get_absolute_expression ();
 
@@ -3906,6 +3932,9 @@ static void
 pa_call (unused)
      int unused;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   pa_call_args (&last_call_desc);
   demand_empty_rest_of_line ();
 }
@@ -4025,7 +4054,8 @@ pa_build_unwind_subspace (call_info)
 
   /* Relocation info. for end offset of the function.  */
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
-		call_info->end_symbol, (offsetT) 0,
+		call_info->start_symbol,
+		call_info->function_size,
 		(expressionS *) NULL, 0, R_PARISC_DIR32, e_fsel, 32, 0, NULL);
 
   /* Dump it. */
@@ -4053,6 +4083,9 @@ pa_callinfo (unused)
 {
   char *name, c, *p;
   int temp;
+
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
 
   /* .CALLINFO must appear within a procedure definition.  */
   if (!within_procedure)
@@ -4189,24 +4222,11 @@ static void
 pa_code (unused)
      int unused;
 {
-  sd_chain_struct *sdchain;
-
-  /* First time through it might be necessary to create the
-     $TEXT$ space.  */
-  if ((sdchain = is_defined_space ("$TEXT$")) == NULL)
-    {
-      sdchain = create_new_space (pa_def_spaces[0].name,
-				  pa_def_spaces[0].spnum,
-				  pa_def_spaces[0].loadable,
-				  pa_def_spaces[0].defined,
-				  pa_def_spaces[0].private,
-				  pa_def_spaces[0].sort,
-				  pa_def_spaces[0].segment, 0);
-    }
-
-  SPACE_DEFINED (sdchain) = 1;
-  subseg_set (text_section, SUBSEG_CODE);
-  demand_empty_rest_of_line ();
+  current_space = is_defined_space ("$TEXT$");
+  current_subspace
+    = pa_subsegment_to_subspace (current_space->sd_seg, 0);
+  s_text (0);
+  pa_undefine_label ();
 }
 
 /* This is different than the standard GAS s_comm(). On HP9000/800 machines,
@@ -4279,6 +4299,9 @@ static void
 pa_enter (unused)
      int unused;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   abort ();
 }
 
@@ -4288,6 +4311,9 @@ static void
 pa_entry (unused)
      int unused;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   if (!within_procedure)
     as_bad ("Misplaced .entry. Ignored.");
   else
@@ -4361,11 +4387,13 @@ process_exit ()
 
   where = frag_more (0);
 
+  last_call_info->function_size
+    = where - frag_now->fr_literal - S_GET_VALUE (last_call_info->start_symbol);
+
 #ifdef OBJ_ELF
   /* Mark the end of the function, stuff away the location of the frag
      for the end of the function, and finally call pa_build_unwind_subspace
      to add an entry in the unwind table.  */
-  hppa_elf_mark_end_of_function ();
   pa_build_unwind_subspace (last_call_info);
 #else
   /* SOM defers building of unwind descriptors until the link phase.
@@ -4390,6 +4418,9 @@ static void
 pa_exit (unused)
      int unused;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   if (!within_procedure)
     as_bad (".EXIT must appear within a procedure");
   else
@@ -4678,6 +4709,9 @@ static void
 pa_leave (unused)
      int unused;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   abort ();
 }
 
@@ -4687,6 +4721,9 @@ static void
 pa_origin (unused)
      int unused;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   s_org (0);
   pa_undefine_label ();
 }
@@ -4734,6 +4771,10 @@ pa_proc (unused)
      int unused;
 {
   struct call_info *call_info;
+
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   if (within_procedure)
     as_fatal ("Nested procedures");
 
@@ -4798,6 +4839,9 @@ pa_procend (unused)
      int unused;
 {
 
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   /* If we are within a procedure definition, make sure we've
      defined a label for the procedure; handle case where the
      label was defined after the .PROC directive.
@@ -4845,12 +4889,8 @@ pa_procend (unused)
   if (within_entry_exit)
     as_bad ("Missing .EXIT for a .ENTRY");
 
-#ifdef OBJ_ELF
-  /* ELF needs to mark the end of each function so that it can compute
-     the size of the function (apparently its needed in the symbol table).  */
-  hppa_elf_mark_end_of_function ();
-#endif
-
+  last_call_info->function_size
+    = frag_more (0) - frag_now->fr_literal - S_GET_VALUE (last_call_info->start_symbol);
   within_procedure = FALSE;
   demand_empty_rest_of_line ();
   pa_undefine_label ();
@@ -5158,6 +5198,9 @@ pa_subspace (unused)
   sd_chain_struct *space;
   ssd_chain_struct *ssd;
   asection *section;
+
+  if (current_space == NULL)
+    as_fatal ("Must be in a space before changing or declaring subspaces.\n");
 
   if (within_procedure)
     {
@@ -5861,6 +5904,10 @@ pa_stringer_aux (s)
      char *s;
 {
   unsigned int c = *s & CHAR_MASK;
+
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   switch (c)
     {
     case '\"':
@@ -6009,6 +6056,9 @@ static void
 pa_fill (unused)
      int unused;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   s_fill (0);
   pa_undefine_label ();
 }
@@ -6019,6 +6069,9 @@ static void
 pa_lcomm (needs_align)
      int needs_align;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   s_lcomm (needs_align);
   pa_undefine_label ();
 }
@@ -6029,6 +6082,9 @@ static void
 pa_lsym (unused)
      int unused;
 {
+  /* We must have a valid space and subspace.  */
+  pa_check_current_space_and_subspace ();
+
   s_lsym (0);
   pa_undefine_label ();
 }
@@ -6082,9 +6138,11 @@ hppa_fix_adjustable (fixp)
 
   hppa_fix = (struct hppa_fix_struct *) fixp->tc_fix_data;
 
-  /* Reject reductions of symbols in 32bit plabel relocs.  */
+#ifdef OBJ_SOM
+  /* Reject reductions of symbols in 32bit relocs.  */
   if (fixp->fx_r_type == R_HPPA && hppa_fix->fx_r_format == 32)
     return 0;
+#endif
 
   /* Reject reductions of symbols in DLT relative relocs.  */
   if (hppa_fix->fx_r_field == e_tsel
@@ -6139,66 +6197,8 @@ hppa_force_relocation (fixp)
 
 /* Now for some ELF specific code.  FIXME.  */
 #ifdef OBJ_ELF
-/* Mark the end of a function so that it's possible to compute
-   the size of the function in hppa_elf_final_processing.  */
-
-static void
-hppa_elf_mark_end_of_function ()
-{
-  /* ELF does not have EXIT relocations.  All we do is create a
-     temporary symbol marking the end of the function.  */
-  char *name = (char *)
-    xmalloc (strlen ("L$\001end_") +
-	     strlen (S_GET_NAME (last_call_info->start_symbol)) + 1);
-
-  if (name)
-    {
-      symbolS *symbolP;
-
-      strcpy (name, "L$\001end_");
-      strcat (name, S_GET_NAME (last_call_info->start_symbol));
-
-      /* If we have a .exit followed by a .procend, then the
-	 symbol will have already been defined.  */
-      symbolP = symbol_find (name);
-      if (symbolP)
-	{
-	  /* The symbol has already been defined!  This can
-	     happen if we have a .exit followed by a .procend.
-
-	     This is *not* an error.  All we want to do is free
-	     the memory we just allocated for the name and continue.  */
-	  xfree (name);
-	}
-      else
-	{
-	  /* symbol value should be the offset of the
-	     last instruction of the function */
-	  symbolP = symbol_new (name, now_seg,
-				(valueT) (obstack_next_free (&frags)
-					  - frag_now->fr_literal - 4),
-				frag_now);
-
-	  assert (symbolP);
-	  symbolP->bsym->flags = BSF_LOCAL;
-	  symbol_table_insert (symbolP);
-	}
-
-      if (symbolP)
-	last_call_info->end_symbol = symbolP;
-      else
-	as_bad ("Symbol '%s' could not be created.", name);
-
-    }
-  else
-    as_bad ("No memory for symbol name.");
-
-}
-
 /* For ELF, this function serves one purpose:  to setup the st_size
-   field of STT_FUNC symbols.  To do this, we need to scan the
-   call_info structure list, determining st_size in by taking the
-   difference in the address of the beginning/end marker symbols.  */
+   field of STT_FUNC symbols.  */
 
 void
 elf_hppa_final_processing ()
@@ -6211,9 +6211,7 @@ elf_hppa_final_processing ()
     {
       elf_symbol_type *esym
       = (elf_symbol_type *) call_info_pointer->start_symbol->bsym;
-      esym->internal_elf_sym.st_size =
-	S_GET_VALUE (call_info_pointer->end_symbol)
-	- S_GET_VALUE (call_info_pointer->start_symbol) + 4;
+      esym->internal_elf_sym.st_size = call_info_pointer->function_size;
     }
 }
 #endif
