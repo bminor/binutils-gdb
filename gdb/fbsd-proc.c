@@ -52,20 +52,19 @@ static int
 read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
 	      char *protection)
 {
+  /* FreeBSD 5.1-RELEASE uses a 256-byte buffer.  */
+  char buf[256];
   int resident, privateresident;
   unsigned long obj;
-  int ref_count, shadow_count;
-  unsigned flags;
-  char cow[5], access[4];
-  char type[8];
-  int ret;
+  int ret = EOF;
 
-  /* The layout is described in /usr/src/miscfs/procfs/procfs_map.c.  */
-  ret = fscanf (mapfile, "%lx %lx %d %d %lx %s %d %d %x %s %s %s\n",
-		start, end,
-		&resident, &privateresident, &obj,
-		protection,
-		&ref_count, &shadow_count, &flags, cow, access, type);
+  /* As of FreeBSD 5.0-RELEASE, the layout is described in
+     /usr/src/sys/fs/procfs/procfs_map.c.  Somewhere in 5.1-CURRENT a
+     new column was added to the procfs map.  Therefore we can't use
+     fscanf since we need to support older releases too.  */
+  if (fgets (buf, sizeof buf, mapfile) != NULL)
+    ret = sscanf (buf, "%lx %lx %d %d %lx %s", start, end,
+		  &resident, &privateresident, &obj, protection);
 
   return (ret != 0 && ret != EOF);
 }
