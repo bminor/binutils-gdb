@@ -85,7 +85,7 @@ BFD_LIBS = \
 	archive.o archures.o bfd.o cache.o coffgen.o core.o \
 	format.o init.o libbfd.o opncls.o reloc.o \
 	section.o syms.o targets.o hash.o linker.o \
-	elf.o srec.o binary.o tekhex.o 
+	elf.o elflink.o srec.o binary.o tekhex.o 
 
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
@@ -714,7 +714,9 @@ mipsbsd.o: mipsbsd.c libaout.h $(INCDIR)/bfdlink.h \
 cpu-sh.o: cpu-sh.c
 elf.o: elf.c $(INCDIR)/bfdlink.h libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
-elf32.o: elf32.c elfcode.h $(INCDIR)/bfdlink.h libelf.h \
+elflink.o : elflink.c $(INCDIR)/bfdlink.h libelf.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
+elf32.o: elf32.c elfcode.h $(INCDIR)/bfdlink.h libelf.h elfcore.h elflink.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 elf32-sparc.o: elf32-sparc.c $(INCDIR)/bfdlink.h libelf.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
@@ -747,7 +749,7 @@ elf32-gen.o: elf32-gen.c libelf.h $(INCDIR)/elf/common.h \
 elf32-ppc.o: elf32-ppc.c $(INCDIR)/bfdlink.h libelf.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/ppc.h elf32-target.h
-elf64.o: elf64.c elfcode.h $(INCDIR)/bfdlink.h libelf.h \
+elf64.o: elf64.c elfcode.h $(INCDIR)/bfdlink.h libelf.h elfcore.h elflink.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 elf64-gen.o: elf64-gen.c libelf.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \

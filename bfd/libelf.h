@@ -170,6 +170,26 @@ struct elf_link_hash_table
 
 /* Constant information held for an ELF backend.  */
 
+struct elf_size_info {
+  unsigned char sizeof_ehdr, sizeof_phdr, sizeof_shdr;
+  unsigned char sizeof_rel, sizeof_rela, sizeof_sym, sizeof_dyn, sizeof_note;
+
+  unsigned char arch_size, file_align;
+  unsigned char elfclass, ev_current;
+  int (*write_out_phdrs) PARAMS ((bfd *, Elf_Internal_Phdr *, int));
+  boolean (*write_shdrs_and_ehdr) PARAMS ((bfd *));
+  void (*write_relocs) PARAMS ((bfd *, asection *, PTR));
+  void (*swap_symbol_out) PARAMS ((bfd *, Elf_Internal_Sym *, char *));
+  boolean (*slurp_reloc_table) PARAMS ((bfd *, asection *, asymbol **));
+  long (*slurp_symbol_table) PARAMS ((bfd *, asymbol **, boolean));
+};
+
+#define elf_symbol_from(ABFD,S) \
+	(((S)->the_bfd->xvec->flavour == bfd_target_elf_flavour \
+	  && (S)->the_bfd->tdata.elf_obj_data != 0) \
+	 ? (elf_symbol_type *) (S) \
+	 : 0)
+
 struct elf_backend_data
 {
   /* Whether the backend uses REL or RELA relocations.  FIXME: some
@@ -399,6 +419,12 @@ struct elf_backend_data
   /* Alternate EM_xxxx machine codes for this backend.  */
   int elf_machine_alt1;
   int elf_machine_alt2;
+
+  const struct elf_size_info *s;
+
+  unsigned char want_got_plt : 1;
+  unsigned char plt_readonly : 1;
+  unsigned char want_plt_sym : 1;
 };
 
 /* Information stored for each BFD section in an ELF file.  This
@@ -516,11 +542,13 @@ struct elf_obj_tdata
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_ppc_flags_init(bfd)	(elf_tdata(bfd) -> ppc_flags_init)
 
-extern char * elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
-extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
+extern char * bfd_elf_string_from_elf_section PARAMS ((bfd *, unsigned, unsigned));
+extern char * bfd_elf_get_str_section PARAMS ((bfd *, unsigned));
 
 extern void bfd_elf_print_symbol PARAMS ((bfd *, PTR, asymbol *,
 					  bfd_print_symbol_type));
+#define elf_string_from_elf_strtab(abfd,strindex) \
+     bfd_elf_string_from_elf_section(abfd,elf_elfheader(abfd)->e_shstrndx,strindex)
 
 #define bfd_elf32_print_symbol	bfd_elf_print_symbol
 #define bfd_elf64_print_symbol	bfd_elf_print_symbol
@@ -551,8 +579,54 @@ extern boolean _bfd_elf_link_hash_table_init
 				       struct bfd_hash_table *,
 				       const char *)));
 
-extern boolean bfd_elf32_write_object_contents PARAMS ((bfd *));
-extern boolean bfd_elf64_write_object_contents PARAMS ((bfd *));
+extern boolean _bfd_elf_write_object_contents PARAMS ((bfd *));
+extern boolean _bfd_elf_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
+						       file_ptr,
+						       bfd_size_type));
+extern long _bfd_elf_get_symtab_upper_bound PARAMS ((bfd *));
+extern long _bfd_elf_get_symtab PARAMS ((bfd *, asymbol **));
+extern long _bfd_elf_get_dynamic_symtab_upper_bound PARAMS ((bfd *));
+extern long _bfd_elf_canonicalize_dynamic_symtab PARAMS ((bfd *, asymbol **));
+extern long _bfd_elf_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
+extern long _bfd_elf_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
+						  arelent **, asymbol **));
+extern asymbol *_bfd_elf_make_empty_symbol PARAMS ((bfd *));
+extern void _bfd_elf_get_symbol_info PARAMS ((bfd *, asymbol *,
+					       symbol_info *));
+extern alent *_bfd_elf_get_lineno PARAMS ((bfd *, asymbol *));
+extern boolean _bfd_elf_set_arch_mach PARAMS ((bfd *, enum bfd_architecture,
+						unsigned long));
+extern boolean _bfd_elf_find_nearest_line PARAMS ((bfd *, asection *,
+						    asymbol **,
+						    bfd_vma, CONST char **,
+						    CONST char **,
+						    unsigned int *));
+extern int _bfd_elf_sizeof_headers PARAMS ((bfd *, boolean));
+extern boolean _bfd_elf_new_section_hook PARAMS ((bfd *, asection *));
+
+/* If the target doesn't have reloc handling written yet:  */
+extern void _bfd_elf_no_info_to_howto PARAMS ((bfd *, arelent *,
+					       Elf_Internal_Rela *));
+
+asection *bfd_section_from_elf_index PARAMS ((bfd *, unsigned int));
+boolean _bfd_elf_create_dynamic_sections PARAMS ((bfd *,
+						  struct bfd_link_info *));
+struct bfd_strtab_hash *_bfd_elf_stringtab_init PARAMS ((void));
+boolean
+_bfd_elf_link_record_dynamic_symbol PARAMS ((struct bfd_link_info *,
+					     struct elf_link_hash_entry *));
+boolean
+_bfd_elf_compute_section_file_positions PARAMS ((bfd *,
+						 struct bfd_link_info *));
+void _bfd_elf_assign_file_positions_for_relocs PARAMS ((bfd *));
+file_ptr _bfd_elf_assign_file_position_for_section PARAMS ((Elf_Internal_Shdr *,
+							    file_ptr,
+							    boolean));
+
+boolean _bfd_elf_create_dynamic_sections PARAMS ((bfd *,
+						  struct bfd_link_info *));
+boolean _bfd_elf_create_got_section PARAMS ((bfd *,
+					     struct bfd_link_info *));
 
 extern const bfd_target *bfd_elf32_object_p PARAMS ((bfd *));
 extern const bfd_target *bfd_elf32_core_file_p PARAMS ((bfd *));
@@ -560,30 +634,7 @@ extern char *bfd_elf32_core_file_failing_command PARAMS ((bfd *));
 extern int bfd_elf32_core_file_failing_signal PARAMS ((bfd *));
 extern boolean bfd_elf32_core_file_matches_executable_p PARAMS ((bfd *,
 								 bfd *));
-extern boolean bfd_elf32_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
-						       file_ptr,
-						       bfd_size_type));
 
-extern long bfd_elf32_get_symtab_upper_bound PARAMS ((bfd *));
-extern long bfd_elf32_get_symtab PARAMS ((bfd *, asymbol **));
-extern long bfd_elf32_get_dynamic_symtab_upper_bound PARAMS ((bfd *));
-extern long bfd_elf32_canonicalize_dynamic_symtab PARAMS ((bfd *, asymbol **));
-extern long bfd_elf32_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
-extern long bfd_elf32_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
-						  arelent **, asymbol **));
-extern asymbol *bfd_elf32_make_empty_symbol PARAMS ((bfd *));
-extern void bfd_elf32_get_symbol_info PARAMS ((bfd *, asymbol *,
-					       symbol_info *));
-extern alent *bfd_elf32_get_lineno PARAMS ((bfd *, asymbol *));
-extern boolean bfd_elf32_set_arch_mach PARAMS ((bfd *, enum bfd_architecture,
-						unsigned long));
-extern boolean bfd_elf32_find_nearest_line PARAMS ((bfd *, asection *,
-						    asymbol **,
-						    bfd_vma, CONST char **,
-						    CONST char **,
-						    unsigned int *));
-extern int bfd_elf32_sizeof_headers PARAMS ((bfd *, boolean));
-extern boolean bfd_elf32_new_section_hook PARAMS ((bfd *, asection *));
 extern boolean bfd_elf32_bfd_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf32_bfd_final_link
@@ -592,7 +643,7 @@ extern boolean bfd_elf32_bfd_final_link
 extern void bfd_elf32_swap_symbol_in
   PARAMS ((bfd *, Elf32_External_Sym *, Elf_Internal_Sym *));
 extern void bfd_elf32_swap_symbol_out
-  PARAMS ((bfd *, Elf_Internal_Sym *, Elf32_External_Sym *));
+  PARAMS ((bfd *, Elf_Internal_Sym *, char *));
 extern void bfd_elf32_swap_reloc_in
   PARAMS ((bfd *, Elf32_External_Rel *, Elf_Internal_Rel *));
 extern void bfd_elf32_swap_reloc_out
@@ -609,12 +660,6 @@ extern boolean bfd_elf32_add_dynamic_entry
   PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 extern boolean bfd_elf32_link_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-extern boolean bfd_elf32_link_record_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-
-/* If the target doesn't have reloc handling written yet:  */
-extern void bfd_elf32_no_info_to_howto PARAMS ((bfd *, arelent *,
-						Elf32_Internal_Rela *));
 
 extern const bfd_target *bfd_elf64_object_p PARAMS ((bfd *));
 extern const bfd_target *bfd_elf64_core_file_p PARAMS ((bfd *));
@@ -622,30 +667,6 @@ extern char *bfd_elf64_core_file_failing_command PARAMS ((bfd *));
 extern int bfd_elf64_core_file_failing_signal PARAMS ((bfd *));
 extern boolean bfd_elf64_core_file_matches_executable_p PARAMS ((bfd *,
 								 bfd *));
-extern boolean bfd_elf64_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
-						       file_ptr,
-						       bfd_size_type));
-
-extern long bfd_elf64_get_symtab_upper_bound PARAMS ((bfd *));
-extern long bfd_elf64_get_symtab PARAMS ((bfd *, asymbol **));
-extern long bfd_elf64_get_dynamic_symtab_upper_bound PARAMS ((bfd *));
-extern long bfd_elf64_canonicalize_dynamic_symtab PARAMS ((bfd *, asymbol **));
-extern long bfd_elf64_get_reloc_upper_bound PARAMS ((bfd *, sec_ptr));
-extern long bfd_elf64_canonicalize_reloc PARAMS ((bfd *, sec_ptr,
-						  arelent **, asymbol **));
-extern asymbol *bfd_elf64_make_empty_symbol PARAMS ((bfd *));
-extern void bfd_elf64_get_symbol_info PARAMS ((bfd *, asymbol *,
-					       symbol_info *));
-extern alent *bfd_elf64_get_lineno PARAMS ((bfd *, asymbol *));
-extern boolean bfd_elf64_set_arch_mach PARAMS ((bfd *, enum bfd_architecture,
-						unsigned long));
-extern boolean bfd_elf64_find_nearest_line PARAMS ((bfd *, asection *,
-						    asymbol **,
-						    bfd_vma, CONST char **,
-						    CONST char **,
-						    unsigned int *));
-extern int bfd_elf64_sizeof_headers PARAMS ((bfd *, boolean));
-extern boolean bfd_elf64_new_section_hook PARAMS ((bfd *, asection *));
 extern boolean bfd_elf64_bfd_link_add_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf64_bfd_final_link
@@ -671,11 +692,8 @@ extern boolean bfd_elf64_add_dynamic_entry
   PARAMS ((struct bfd_link_info *, bfd_vma, bfd_vma));
 extern boolean bfd_elf64_link_create_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-extern boolean bfd_elf64_link_record_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 
-/* If the target doesn't have reloc handling written yet:  */
-extern void bfd_elf64_no_info_to_howto PARAMS ((bfd *, arelent *,
-						Elf64_Internal_Rela *));
+#define bfd_elf32_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
+#define bfd_elf64_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
 
 #endif /* _LIBELF_H_ */

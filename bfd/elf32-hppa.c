@@ -865,9 +865,9 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	sym_name = h->root.root.string;
       else
 	{
-	  sym_name = elf_string_from_elf_section (input_bfd,
-						  symtab_hdr->sh_link,
-						  sym->st_name);
+	  sym_name = bfd_elf_string_from_elf_section (input_bfd,
+						      symtab_hdr->sh_link,
+						      sym->st_name);
 	  if (sym_name == NULL)
 	    return false;
 	  if (*sym_name == '\0')
@@ -1167,8 +1167,8 @@ elf32_hppa_set_section_contents (abfd, section, location, offset, count)
   if (!strcmp (section->name, ".PARISC.symextn") && !symext_chain_size)
     return true;
   else
-    return bfd_elf32_set_section_contents (abfd, section, location,
-					   offset, count);
+    return _bfd_elf_set_section_contents (abfd, section, location,
+					  offset, count);
 }
 
 /* Translate from an elf into field into a howto relocation pointer.  */
@@ -2007,7 +2007,7 @@ elf32_hppa_read_symext_info (input_bfd, symtab_hdr, args_hash_table, local_syms)
 
 	      hdr = elf_elfsections (input_bfd)[local_syms[current_index].st_shndx];
 	      sym_sec = hdr->bfd_section;
-	      sym_name = elf_string_from_elf_section (input_bfd,
+	      sym_name = bfd_elf_string_from_elf_section (input_bfd,
 						      symtab_hdr->sh_link,
 	 			        local_syms[current_index].st_name);
 	      len = strlen (sym_name) + 10;
@@ -2529,7 +2529,7 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
      struct bfd_link_info *link_info;
 {
   bfd *input_bfd;
-  asection *section, *stub_sec;
+  asection *section, *stub_sec = 0;
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Sym *local_syms, *isym, **all_local_syms;
   Elf32_External_Sym *ext_syms, *esym;
@@ -2803,9 +2803,9 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 		  sym = local_syms + r_index;
 		  hdr = elf_elfsections (input_bfd)[sym->st_shndx];
 		  sym_sec = hdr->bfd_section;
-		  sym_name = elf_string_from_elf_section (input_bfd,
-							  symtab_hdr->sh_link,
-							  sym->st_name);
+		  sym_name = bfd_elf_string_from_elf_section (input_bfd,
+							      symtab_hdr->sh_link,
+							      sym->st_name);
 		  sym_value = (ELF_ST_TYPE (sym->st_info) == STT_SECTION
 			       ? 0 : sym->st_value);
 		  destination = (sym_value

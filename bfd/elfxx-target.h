@@ -31,6 +31,39 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elfNN_get_section_contents _bfd_generic_get_section_contents
 #endif
 
+#define bfd_elfNN_canonicalize_dynamic_symtab _bfd_elf_canonicalize_dynamic_symtab
+#define bfd_elfNN_canonicalize_reloc	_bfd_elf_canonicalize_reloc
+#ifndef bfd_elfNN_find_nearest_line
+#define bfd_elfNN_find_nearest_line	_bfd_elf_find_nearest_line
+#endif
+#define bfd_elfNN_get_dynamic_symtab_upper_bound _bfd_elf_get_dynamic_symtab_upper_bound
+#define bfd_elfNN_get_lineno		_bfd_elf_get_lineno
+#define bfd_elfNN_get_reloc_upper_bound _bfd_elf_get_reloc_upper_bound
+#define bfd_elfNN_get_symbol_info	_bfd_elf_get_symbol_info
+#define bfd_elfNN_get_symtab		_bfd_elf_get_symtab
+#define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
+#if 0 /* done in libelf.h */
+#define bfd_elfNN_link_record_dynamic_symbol _bfd_elf_link_record_dynamic_symbol
+#endif
+#define bfd_elfNN_make_empty_symbol	_bfd_elf_make_empty_symbol
+#define bfd_elfNN_new_section_hook	_bfd_elf_new_section_hook
+#define bfd_elfNN_set_arch_mach		_bfd_elf_set_arch_mach
+#ifndef bfd_elfNN_set_section_contents
+#define bfd_elfNN_set_section_contents	_bfd_elf_set_section_contents
+#endif
+#define bfd_elfNN_sizeof_headers	_bfd_elf_sizeof_headers
+#define bfd_elfNN_write_object_contents _bfd_elf_write_object_contents
+
+#ifndef elf_backend_want_got_plt
+#define elf_backend_want_got_plt 0
+#endif
+#ifndef elf_backend_plt_readonly
+#define elf_backend_plt_readonly 0
+#endif
+#ifndef elf_backend_want_plt_sym
+#define elf_backend_want_plt_sym 0
+#endif
+
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
 #define bfd_elfNN_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
@@ -179,6 +212,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ELF_MACHINE_ALT2 0
 #endif
 
+extern const struct elf_size_info _bfd_elfNN_size_info;
+
 static CONST struct elf_backend_data elfNN_bed =
 {
 #ifdef USE_REL
@@ -213,7 +248,11 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_final_write_processing,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
-  ELF_MACHINE_ALT2
+  ELF_MACHINE_ALT2,
+  &_bfd_elfNN_size_info,
+  elf_backend_want_got_plt,
+  elf_backend_plt_readonly,
+  elf_backend_want_plt_sym,
 };
 
 #ifdef TARGET_BIG_SYM

@@ -25,19 +25,39 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "bfdlink.h"
 #include "libbfd.h"
 #include "libelf.h"
+#include "elf/ppc.h"
 
 static bfd_reloc_status_type ppc_elf_unsupported_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_reloc_status_type ppc_elf_std_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+
+static bfd_vma ppc_elf_addr16_ha_inner PARAMS ((asection *, bfd_vma, bfd_vma));
 static bfd_reloc_status_type ppc_elf_addr16_ha_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static bfd_vma ppc_elf_got16_inner PARAMS ((asection *sec));
 static bfd_reloc_status_type ppc_elf_got16_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
+static reloc_howto_type *ppc_elf_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
-static void powerpc_info_to_howto
+static void ppc_elf_info_to_howto
   PARAMS ((bfd *abfd, arelent *cache_ptr, Elf32_Internal_Rela *dst));
+static void ppc_elf_howto_init PARAMS ((void));
+static boolean ppc_elf_set_private_flags PARAMS ((bfd *, flagword));
+static boolean ppc_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
+static boolean ppc_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
+
+static boolean ppc_elf_relocate_section PARAMS ((bfd *,
+						 struct bfd_link_info *info,
+						 bfd *,
+						 asection *,
+						 bfd_byte *,
+						 Elf_Internal_Rela *relocs,
+						 Elf_Internal_Sym *local_syms,
+						 asection **));
 
 #define USE_RELA
 
@@ -104,7 +124,10 @@ enum reloc_type
   R_PPC_max
 };
 
-static reloc_howto_type elf_powerpc_howto_table[] =
+
+static reloc_howto_type *ppc_elf_howto_table[ (int)R_PPC_max ];
+
+static reloc_howto_type ppc_elf_howto_raw[] =
 {
   /* This reloc does nothing.  */
   HOWTO (R_PPC_NONE,	        /* type */
@@ -114,7 +137,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_NONE",          /* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -129,7 +152,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_ADDR32",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -145,7 +168,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_ADDR24",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -160,7 +183,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_ADDR16",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -175,7 +198,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_ADDR16_LO",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -190,7 +213,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_ADDR16_HI",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -222,7 +245,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_ADDR14",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -271,7 +294,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_REL24",		/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -286,7 +309,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_REL14",		/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -335,7 +358,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 16,	                /* bitsize */
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc_elf_got16_reloc,	/* special_function */
 	 "R_PPC_GOT16",		/* name */
 	 false,	                /* partial_inplace */
@@ -400,7 +423,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_PLT24",		/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -419,7 +442,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_COPY",		/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -435,7 +458,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_GLOB_DAT",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -450,7 +473,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_JMP_SLOT",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -467,7 +490,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_RELATIVE",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -499,7 +522,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_UADDR32",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -514,7 +537,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_UADDR16",	/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -529,7 +552,7 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc, /* special_function */
+	 ppc_elf_std_reloc,	/* special_function */
 	 "R_PPC_REL32",		/* name */
 	 false,	                /* partial_inplace */
 	 0,		        /* src_mask */
@@ -774,6 +797,224 @@ static reloc_howto_type elf_powerpc_howto_table[] =
 	 false),                /* pcrel_offset */
 };
 
+
+/* Initialize the ppc_elf_howto_table, so that linear accesses can be done.  */
+
+static void
+ppc_elf_howto_init ()
+{
+  unsigned int i, type;
+
+  for (i = 0; i < sizeof (ppc_elf_howto_raw) / sizeof (ppc_elf_howto_raw[0]); i++)
+    {
+      type = ppc_elf_howto_raw[i].type;
+      BFD_ASSERT (type < sizeof(ppc_elf_howto_table) / sizeof(ppc_elf_howto_table[0]));
+      ppc_elf_howto_table[type] = &ppc_elf_howto_raw[i];
+    }
+}
+
+
+static reloc_howto_type *
+ppc_elf_reloc_type_lookup (abfd, code)
+     bfd *abfd;
+     bfd_reloc_code_real_type code;
+{
+  if (!ppc_elf_howto_table[ R_PPC_ADDR32 ])	/* Initialize howto table if needed */
+    ppc_elf_howto_init ();
+
+  switch ((int)code)
+    {
+    case BFD_RELOC_NONE:	return ppc_elf_howto_table[ (int) R_PPC_NONE ];
+    case BFD_RELOC_32:		return ppc_elf_howto_table[ (int) R_PPC_ADDR32 ];
+    case BFD_RELOC_32_PCREL:	return ppc_elf_howto_table[ (int) R_PPC_REL32 ];
+    case BFD_RELOC_CTOR:	return ppc_elf_howto_table[ (int) R_PPC_ADDR32 ];
+    case BFD_RELOC_PPC_B26:	return ppc_elf_howto_table[ (int) R_PPC_REL24 ];
+    case BFD_RELOC_PPC_BA26:	return ppc_elf_howto_table[ (int) R_PPC_ADDR24 ];
+    case BFD_RELOC_PPC_TOC16:	return ppc_elf_howto_table[ (int) R_PPC_GOT16 ];
+    case BFD_RELOC_LO16:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_LO ];
+    case BFD_RELOC_HI16:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_HI ];
+    case BFD_RELOC_HI16_S:	return ppc_elf_howto_table[ (int) R_PPC_ADDR16_HA ];
+    }
+
+  return (reloc_howto_type *)NULL;
+};
+
+/* Set the howto pointer for a PowerPC ELF reloc.  */
+
+static void
+ppc_elf_info_to_howto (abfd, cache_ptr, dst)
+     bfd *abfd;
+     arelent *cache_ptr;
+     Elf32_Internal_Rela *dst;
+{
+  if (!ppc_elf_howto_table[ R_PPC_ADDR32 ])	/* Initialize howto table if needed */
+    ppc_elf_howto_init ();
+
+  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_PPC_max);
+  cache_ptr->howto = ppc_elf_howto_table[ELF32_R_TYPE (dst->r_info)];
+}
+
+/* Function to set whether a module needs the -mrelocatable bit set. */
+
+static boolean
+ppc_elf_set_private_flags (abfd, flags)
+     bfd *abfd;
+     flagword flags;
+{
+  BFD_ASSERT (!elf_ppc_flags_init (abfd)
+	      || elf_elfheader (abfd)->e_flags == flags);
+
+  elf_elfheader (abfd)->e_flags = flags;
+  elf_ppc_flags_init (abfd) = true;
+  return true;
+}
+
+/* Copy backend specific data from one object module to another */
+static boolean
+ppc_elf_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  /* This function is selected based on the input vector.  We only
+     want to copy information over if the output BFD also uses Elf
+     format.  */
+  if (bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  BFD_ASSERT (!elf_ppc_flags_init (obfd)
+	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
+
+  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+  elf_ppc_flags_init (obfd) = true;
+  return true;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking */
+static boolean
+ppc_elf_merge_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  flagword old_flags;
+  flagword new_flags;
+
+  /* Check if we have the same endianess */
+  if (ibfd->xvec->byteorder_big_p != obfd->xvec->byteorder_big_p)
+    {
+      fprintf (stderr,
+	       "%s: compiled for a %s endian system and target is %s endian.\n",
+	       bfd_get_filename (ibfd),
+	       (ibfd->xvec->byteorder_big_p) ? "big" : "little",
+	       (obfd->xvec->byteorder_big_p) ? "big" : "little");
+
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
+
+  /* This function is selected based on the input vector.  We only
+     want to copy information over if the output BFD also uses Elf
+     format.  */
+  if (bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  old_flags = elf_elfheader (obfd)->e_flags;
+  if (!elf_ppc_flags_init (obfd))	/* First call, no flags set */
+    {
+      elf_ppc_flags_init (obfd) = true;
+      elf_elfheader (obfd)->e_flags = new_flags;
+    }
+
+  else if (new_flags == old_flags)	/* Compatible flags are ok */
+    ;
+
+  else					/* Incompatible flags */
+    {
+      /* Warn about -mrelocatable mismatch */
+      if ((new_flags & EF_PPC_RELOCATABLE) != 0 && (old_flags & EF_PPC_RELOCATABLE) == 0)
+	{
+	  new_flags &= ~EF_PPC_RELOCATABLE;
+	  fprintf (stderr,
+		   "%s: compiled with -mrelocatable and linked with modules compiled normally\n",
+		   bfd_get_filename (ibfd));
+	}
+      else if ((new_flags & EF_PPC_RELOCATABLE) == 0 && (old_flags & EF_PPC_RELOCATABLE) != 0)
+	{
+	  old_flags &= ~EF_PPC_RELOCATABLE;
+	  fprintf (stderr,
+		   "%s: compiled normally and linked with modules compiled with -mrelocatable\n",
+		   bfd_get_filename (ibfd));
+	}
+
+      /* Warn about eabi vs. V.4 mismatch */
+      if ((new_flags & EF_PPC_EMB) != 0 && (old_flags & EF_PPC_EMB) == 0)
+	{
+	  new_flags &= ~EF_PPC_EMB;
+	  fprintf (stderr,
+		   "%s: compiled for the eabi and linked with modules compiled for System V\n",
+		   bfd_get_filename (ibfd));
+	}
+      else if ((new_flags & EF_PPC_EMB) == 0 && (old_flags & EF_PPC_EMB) != 0)
+	{
+	  old_flags &= ~EF_PPC_EMB;
+	  fprintf (stderr,
+		   "%s: compiled for System V and linked with modules compiled for eabi\n",
+		   bfd_get_filename (ibfd));
+	}
+
+      /* Warn about any other mismatches */
+      if (new_flags != old_flags)
+	fprintf (stderr,
+		 "%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)\n",
+		 bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
+
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  return true;
+}
+
+
+/* ELF relocs are against symbols.  If we are producing relocateable
+   output, and the reloc is against an external symbol, and nothing
+   has given us any additional addend, the resulting reloc will also
+   be against the same symbol.  In such a case, we don't want to
+   change anything about the way the reloc is handled, since it will
+   all be done at final link time.  Rather than put special case code
+   into bfd_perform_relocation, all the reloc types use this howto
+   function.  It just short circuits the reloc if producing
+   relocateable output against an external symbol.  */
+
+/*ARGSUSED*/
+static bfd_reloc_status_type
+ppc_elf_std_reloc (abfd,
+		   reloc_entry,
+		   symbol,
+		   data,
+		   input_section,
+		   output_bfd,
+		   error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (! reloc_entry->howto->partial_inplace || reloc_entry->addend == 0))
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  return bfd_reloc_continue;
+}
+
 /* Don't pretend we can deal with unsupported relocs.  */
 
 /*ARGSUSED*/
@@ -788,11 +1029,39 @@ ppc_elf_unsupported_reloc (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
-  abort ();
+  BFD_ASSERT (reloc_entry->howto != (reloc_howto_type *)0);
+  fprintf (stderr,
+	   "%s: Relocation %s (%d) is not currently supported.\n",
+	   bfd_get_filename (abfd),
+	   reloc_entry->howto->name,
+	   reloc_entry->howto->type);
+
+  return bfd_reloc_notsupported;
+}
+
+/* Internal function to return the adjustment to the addend for relocations
+   that return the upper 16 bits after sign extending the lower 16 bits, ie
+   for use with a ORIS instruction followed by a memory reference using the
+   bottom 16 bits.  */
+
+INLINE
+static bfd_vma
+ppc_elf_addr16_ha_inner (sec, value, addend)
+     asection *sec;
+     bfd_vma value;
+     bfd_vma addend;
+{
+  bfd_vma relocation = (value
+			+ sec->output_section->vma
+			+ sec->output_offset
+			+ addend);
+
+  return (relocation & 0x8000) << 1;
 }
 
 /* Handle the ADDR16_HA reloc by adjusting the reloc addend.  */
 
+/*ARGSUSED*/
 static bfd_reloc_status_type
 ppc_elf_addr16_ha_reloc (abfd, reloc_entry, symbol, data, input_section,
 		         output_bfd, error_message)
@@ -804,25 +1073,29 @@ ppc_elf_addr16_ha_reloc (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
-  bfd_vma relocation;
-
   if (output_bfd != (bfd *) NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
-				  input_section, output_bfd, error_message);
+    return ppc_elf_std_reloc (abfd, reloc_entry, symbol, data,
+			      input_section, output_bfd, error_message);
 
-  if (bfd_is_com_section (symbol->section))
-    relocation = 0;
-  else
-    relocation = symbol->value;
-
-  relocation += (symbol->section->output_section->vma
-		 + symbol->section->output_offset
-		 + reloc_entry->addend);
-
-  if ((relocation & 0x8000) != 0)
-    reloc_entry->addend += 0x10000;
-
+  reloc_entry->addend += ppc_elf_addr16_ha_inner (symbol->section,
+						  (bfd_is_com_section (symbol->section)) ? 0 : symbol->value,
+						  reloc_entry->addend);
   return bfd_reloc_continue;
+}
+
+/* Internal function to return the addjustment to the addend for GOT16
+   entries */
+
+INLINE
+static bfd_vma
+ppc_elf_got16_inner (sec)
+     asection *sec;
+{
+  BFD_ASSERT (bfd_is_und_section (sec)
+	      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
+	      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0);
+
+  return -(sec->output_section->vma + 0x8000);
 }
 
 /* Handle the GOT16 reloc.  We want to use the offset within the .got
@@ -831,6 +1104,7 @@ ppc_elf_addr16_ha_reloc (abfd, reloc_entry, symbol, data, input_section,
    AIX .toc section.  When and if we support PIC code, we will have to
    change this, perhaps by switching off on the e_type field.  */
 
+/*ARGSUSED*/
 static bfd_reloc_status_type
 ppc_elf_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
 		     output_bfd, error_message)
@@ -842,78 +1116,272 @@ ppc_elf_got16_reloc (abfd, reloc_entry, symbol, data, input_section,
      bfd *output_bfd;
      char **error_message;
 {
-  asection *sec;
-
   if (output_bfd != (bfd *) NULL)
-    return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
-				  input_section, output_bfd, error_message);
+    return ppc_elf_std_reloc (abfd, reloc_entry, symbol, data,
+			      input_section, output_bfd, error_message);
 
-  sec = bfd_get_section (*reloc_entry->sym_ptr_ptr);
-  BFD_ASSERT (bfd_is_und_section (sec)
-	      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
-	      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0);
-  reloc_entry->addend -= sec->output_section->vma;
+  reloc_entry->addend += ppc_elf_got16_inner (bfd_get_section (*reloc_entry->sym_ptr_ptr));
   return bfd_reloc_continue;
 }
 
-/* Map BFD reloc types to PowerPC ELF reloc types.  */
+
+/* The RELOCATE_SECTION function is called by the ELF backend linker
+   to handle the relocations for a section.
 
-struct powerpc_reloc_map
+   The relocs are always passed as Rela structures; if the section
+   actually uses Rel structures, the r_addend field will always be
+   zero.
+
+   This function is responsible for adjust the section contents as
+   necessary, and (if using Rela relocs and generating a
+   relocateable output file) adjusting the reloc addend as
+   necessary.
+
+   This function does not have to worry about setting the reloc
+   address or the reloc symbol index.
+
+   LOCAL_SYMS is a pointer to the swapped in local symbols.
+
+   LOCAL_SECTIONS is an array giving the section in the input file
+   corresponding to the st_shndx field of each local symbol.
+
+   The global hash table entry for the global symbols can be found
+   via elf_sym_hashes (input_bfd).
+
+   When generating relocateable output, this function must handle
+   STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
+   going to be the section symbol corresponding to the output
+   section, which means that the addend must be adjusted
+   accordingly.  */
+
+static boolean
+ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
+			  contents, relocs, local_syms, local_sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     Elf_Internal_Rela *relocs;
+     Elf_Internal_Sym *local_syms;
+     asection **local_sections;
 {
-  unsigned char bfd_reloc_val;
-  unsigned char elf_reloc_val;
-};
+  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
+  Elf_Internal_Rela *rel = relocs;
+  Elf_Internal_Rela *relend = relocs + input_section->reloc_count;
+  boolean ret = true;
 
-static const struct powerpc_reloc_map powerpc_reloc_map[] =
-{
-  { BFD_RELOC_NONE, R_PPC_NONE, },
-  { BFD_RELOC_32, R_PPC_ADDR32 },
-  { BFD_RELOC_32_PCREL, R_PPC_REL32 },
-  { BFD_RELOC_CTOR, R_PPC_ADDR32 },
-  { BFD_RELOC_PPC_B26, R_PPC_REL24 },
-  { BFD_RELOC_PPC_BA26, R_PPC_ADDR24 },
-  { BFD_RELOC_PPC_TOC16, R_PPC_GOT16 },
-  { BFD_RELOC_LO16, R_PPC_ADDR16_LO },
-  { BFD_RELOC_HI16, R_PPC_ADDR16_HI },
-  { BFD_RELOC_HI16_S, R_PPC_ADDR16_HA }
-};
+#ifdef DEBUG
+  fprintf (stderr, "ppc_elf_relocate_section called for %s section %s, %ld relocations%s\n",
+	   bfd_get_filename (input_bfd),
+	   bfd_section_name(input_bfd, input_section),
+	   (long)input_section->reloc_count,
+	   (info->relocateable) ? " (relocatable)" : "");
+#endif
 
-static reloc_howto_type *
-bfd_elf32_bfd_reloc_type_lookup (abfd, code)
-     bfd *abfd;
-     bfd_reloc_code_real_type code;
-{
-  int i;
+  if (!ppc_elf_howto_table[ R_PPC_ADDR32 ])	/* Initialize howto table if needed */
+    ppc_elf_howto_init ();
 
-  for (i = 0;
-       i < sizeof (powerpc_reloc_map) / sizeof (struct powerpc_reloc_map);
-       i++)
+  for (; rel < relend; rel++)
     {
-      if (powerpc_reloc_map[i].bfd_reloc_val == code)
-	return &elf_powerpc_howto_table[powerpc_reloc_map[i].elf_reloc_val];
+      enum reloc_type r_type = (enum reloc_type)ELF32_R_TYPE (rel->r_info);
+      bfd_vma offset = rel->r_offset;
+      bfd_vma addend = rel->r_addend;
+      bfd_reloc_status_type r = bfd_reloc_other;
+      Elf_Internal_Sym *sym = (Elf_Internal_Sym *)0;
+      asection *sec = (asection *)0;
+      struct elf_link_hash_entry *h = (struct elf_link_hash_entry *)0;
+      reloc_howto_type *howto;
+      unsigned long r_symndx;
+      bfd_vma relocation;
+
+      /* Unknown relocation handling */
+      if ((unsigned)r_type >= (unsigned)R_PPC_max || !ppc_elf_howto_table[(int)r_type])
+	{
+	  fprintf (stderr,
+		   "%s: Unknown relocation type %d\n",
+		   bfd_get_filename (input_bfd),
+		   (int)r_type);
+
+	  bfd_set_error (bfd_error_bad_value);
+	  ret = false;
+	  continue;
+	}
+
+      howto = ppc_elf_howto_table[(int)r_type];
+      r_symndx = ELF32_R_SYM (rel->r_info);
+
+      if (info->relocateable)
+	{
+	  /* This is a relocateable link.  We don't have to change
+	     anything, unless the reloc is against a section symbol,
+	     in which case we have to adjust according to where the
+	     section symbol winds up in the output section.  */
+	  if (r_symndx < symtab_hdr->sh_info)
+	    {
+	      sym = local_syms + r_symndx;
+	      if ((unsigned)ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+		{
+		  sec = local_sections[r_symndx];
+		  addend = rel->r_addend += sec->output_offset + sym->st_value;
+		}
+	    }
+
+#ifdef DEBUG
+	  fprintf (stderr, "\ttype = %s (%d), symbol index = %ld, offset = %ld, addend = %ld\n",
+		   howto->name,
+		   (int)r_type,
+		   r_symndx,
+		   (long)offset,
+		   (long)addend);
+#endif
+	  continue;
+	}
+
+      /* This is a final link.  */
+
+      /* Complain about known relocation that are not yet supported */
+      if (howto->special_function == ppc_elf_unsupported_reloc)
+	{
+	  fprintf (stderr,
+		   "%s: Relocation %s (%d) is not currently supported.\n",
+		   bfd_get_filename (input_bfd),
+		   howto->name,
+		   (int)r_type);
+
+	  bfd_set_error (bfd_error_bad_value);
+	  ret = false;
+	  continue;
+	}
+
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  sec = local_sections[r_symndx];
+	  relocation = (sec->output_section->vma
+			+ sec->output_offset
+			+ sym->st_value);
+	}
+      else
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      sec = h->root.u.def.section;
+	      relocation = (h->root.u.def.value
+			    + sec->output_section->vma
+			    + sec->output_offset);
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak)
+	    relocation = 0;
+	  else if (info->shared)
+	    relocation = 0;
+	  else
+	    {
+	      (*info->callbacks->undefined_symbol)(info,
+						   h->root.root.string,
+						   input_bfd,
+						   input_section,
+						   rel->r_offset);
+	      ret = false;
+	      continue;
+	    }
+	}
+
+      switch ((int)r_type)
+	{
+	default:
+	  break;
+
+	case (int)R_PPC_GOT16:		/* GOT16 relocations */
+	case (int)R_PPC_GOT16_LO:
+	case (int)R_PPC_GOT16_HI:
+	  BFD_ASSERT (sec != (asection *)0);
+	  addend += ppc_elf_got16_inner (sec);
+	  break;
+
+	case (int)R_PPC_ADDR16_HA:	/* arithmetic adjust relocations */
+	  BFD_ASSERT (sec != (asection *)0);
+	  addend += ppc_elf_addr16_ha_inner (sec, relocation, addend);
+	  break;
+	}
+
+
+#ifdef DEBUG
+      fprintf (stderr, "\ttype = %s (%d), symbol index = %ld, offset = %ld, addend = %ld\n",
+	       howto->name,
+	       (int)r_type,
+	       r_symndx,
+	       (long)offset,
+	       (long)addend);
+#endif
+
+      r = _bfd_final_link_relocate (howto,
+				    input_bfd,
+				    input_section,
+				    contents,
+				    offset,
+				    relocation,
+				    addend);
+
+      if (r != bfd_reloc_ok)
+	{
+	  ret = false;
+	  switch (r)
+	    {
+	    default:
+	      break;
+
+	    case bfd_reloc_overflow:
+	      {
+		const char *name;
+
+		if (h != NULL)
+		  name = h->root.root.string;
+		else
+		  {
+		    name = bfd_elf_string_from_elf_section (input_bfd,
+							    symtab_hdr->sh_link,
+							    sym->st_name);
+		    if (name == NULL)
+		      break;
+
+		    if (*name == '\0')
+		      name = bfd_section_name (input_bfd, sec);
+		  }
+
+		(*info->callbacks->reloc_overflow)(info,
+						   name,
+						   howto->name,
+						   (bfd_vma) 0,
+						   input_bfd,
+						   input_section,
+						   offset);
+	      }
+	      break;
+
+	    }
+	}
     }
 
-  return NULL;
+
+#ifdef DEBUG
+  fprintf (stderr, "\n");
+#endif
+
+  return ret;
 }
 
-/* Set the howto pointer for a PowerPC ELF reloc.  */
-
-static void
-powerpc_info_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd;
-     arelent *cache_ptr;
-     Elf32_Internal_Rela *dst;
-{
-  BFD_ASSERT (ELF32_R_TYPE (dst->r_info) < (unsigned int) R_PPC_max);
-  cache_ptr->howto = &elf_powerpc_howto_table[ELF32_R_TYPE (dst->r_info)];
-}
-
+#define TARGET_LITTLE_SYM	bfd_elf32_powerpcle_vec
+#define TARGET_LITTLE_NAME	"elf32-powerpcle"
 #define TARGET_BIG_SYM		bfd_elf32_powerpc_vec
 #define TARGET_BIG_NAME		"elf32-powerpc"
 #define ELF_ARCH		bfd_arch_powerpc
 #define ELF_MACHINE_CODE	EM_PPC
 #define ELF_MAXPAGESIZE		0x10000
-#define elf_info_to_howto	powerpc_info_to_howto
+#define elf_info_to_howto	ppc_elf_info_to_howto
 
 #ifdef  EM_CYGNUS_POWERPC
 #define ELF_MACHINE_ALT1	EM_CYGNUS_POWERPC
@@ -922,5 +1390,11 @@ powerpc_info_to_howto (abfd, cache_ptr, dst)
 #ifdef EM_PPC_OLD
 #define ELF_MACHINE_ALT2	EM_PPC_OLD
 #endif
+
+#define bfd_elf32_bfd_copy_private_bfd_data	ppc_elf_copy_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data	ppc_elf_merge_private_bfd_data
+#define bfd_elf32_bfd_set_private_flags		ppc_elf_set_private_flags
+#define bfd_elf32_bfd_reloc_type_lookup		ppc_elf_reloc_type_lookup
+#define elf_backend_relocate_section		ppc_elf_relocate_section
 
 #include "elf32-target.h"

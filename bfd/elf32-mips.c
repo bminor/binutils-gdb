@@ -1587,9 +1587,9 @@ mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 
   /* Fall back on the generic ELF find_nearest_line routine.  */
 
-  return bfd_elf32_find_nearest_line (abfd, section, symbols, offset,
-				      filename_ptr, functionname_ptr,
-				      line_ptr);
+  return _bfd_elf_find_nearest_line (abfd, section, symbols, offset,
+				     filename_ptr, functionname_ptr,
+				     line_ptr);
 }
 
 /* The MIPS ELF linker needs additional information for each symbol in
@@ -2713,9 +2713,9 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  name = h->root.root.string;
 		else
 		  {
-		    name = elf_string_from_elf_section (input_bfd,
-							symtab_hdr->sh_link,
-							sym->st_name);
+		    name = bfd_elf_string_from_elf_section (input_bfd,
+							    symtab_hdr->sh_link,
+							    sym->st_name);
 		    if (name == NULL)
 		      return false;
 		    if (*name == '\0')
@@ -2788,7 +2788,7 @@ elf32_mips_get_relocated_section_contents (abfd, link_info, link_order, data,
       arelent **parent;
       /* for mips */
       int gp_found;
-      bfd_vma gp;
+      bfd_vma gp = 0x12345678;	/* initialize just to shut gcc up */
 
       {
 	struct bfd_hash_entry *h;

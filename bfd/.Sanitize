@@ -141,6 +141,9 @@ elf64-sparc.c
 elf64.c
 elfxx-target.h
 elfcode.h
+elfcore.h
+elflink.c
+elflink.h
 filemode.c
 format.c
 gen-aout.c

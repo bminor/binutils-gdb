@@ -1,3 +1,22 @@
+Wed Jul  5 20:17:14 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* elfcore.h, elflink.h, elfcode.h, elf.c, elflink.c: Moved some
+ 	primarily size-independent code from elfcode.h to elf.c and new
+ 	file elflink.c; moved out other core- or linker-related routines
+ 	into other new .h files for clarity.  Renamed many routines to
+ 	start with bfd_elf or _bfd_elf.  Added a structure of
+ 	size-dependent but target-independent info to elfcode.h.
+	* Makefile.in: Build elflink.o.  Update dependencies.
+	* libelf.h: Updated some declarations.  Added a definition for the
+	new structure in elfcode.h.  Added more fields to elf backend data
+	structure.
+	* elfxx-target.h: Refer to the appropriate size-dependent info.
+	* elf32-*.c: Changed some function names.  Moved common
+	create_dynamic_sections code from m68k, sparc, and i386 support
+	into elflink.c.  Define some new macros to fill in new fields of
+	back end data.  Also clean up some "gcc -Wall" warnings regarding
+	unused or uninitialized variables.
+
 Wed Jul  5 10:31:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_object_p): Unconditionally set
