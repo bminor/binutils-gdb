@@ -753,7 +753,7 @@ internal_vproblem (struct internal_problem *problem,
   {
     char *msg;
     xvasprintf (&msg, fmt, ap);
-    xasprintf (&reason, "\
+    reason = xstrprintf ("\
 %s:%d: %s: %s\n\
 A problem internal to GDB has been detected,\n\
 further debugging may prove unreliable.", file, line, problem->name, msg);

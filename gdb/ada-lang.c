@@ -4369,8 +4369,7 @@ is_package_name (const char *name)
   if (strstr (name, "__") != NULL)
     return 0;
 
-  fun_name = (char *) alloca (strlen (name) + 5 + 1);
-  xasprintf (&fun_name, "_ada_%s", name);
+  fun_name = xstrprintf ("_ada_%s", name);
 
   return (standard_lookup (fun_name, NULL, VAR_DOMAIN) == NULL);
 }

@@ -651,12 +651,12 @@ add_packet_config_cmd (struct packet_config *config,
   config->title = title;
   config->detect = AUTO_BOOLEAN_AUTO;
   config->support = PACKET_SUPPORT_UNKNOWN;
-  xasprintf (&set_doc, "Set use of remote protocol `%s' (%s) packet",
-	     name, title);
-  xasprintf (&show_doc, "Show current use of remote protocol `%s' (%s) packet",
-	     name, title);
+  set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet",
+			name, title);
+  show_doc = xstrprintf ("Show current use of remote protocol `%s' (%s) packet",
+			 name, title);
   /* set/show TITLE-packet {auto,on,off} */
-  xasprintf (&cmd_name, "%s-packet", title);
+  cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc, show_doc,
 				set_func, show_func,
@@ -665,7 +665,7 @@ add_packet_config_cmd (struct packet_config *config,
   if (legacy)
     {
       char *legacy_name;
-      xasprintf (&legacy_name, "%s-packet", name);
+      legacy_name = xstrprintf ("%s-packet", name);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
 		     set_remote_list);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,

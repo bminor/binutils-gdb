@@ -48,11 +48,11 @@ xcoff_solib_address (CORE_ADDR addr)
     if (vp->tstart <= addr && addr < vp->tend)
       {
 	xfree (buffer);
-	xasprintf (&buffer, "%s%s%s%s",
-			    vp->name,
-			    *vp->member ? "(" : "",
-			    vp->member,
-			    *vp->member ? ")" : "");
+	buffer = xstrprintf ("%s%s%s%s",
+			     vp->name,
+			     *vp->member ? "(" : "",
+			     vp->member,
+			     *vp->member ? ")" : "");
 	return buffer;
       }
   return NULL;

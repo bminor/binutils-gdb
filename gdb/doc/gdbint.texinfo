@@ -4942,7 +4942,7 @@ allocation of small temporary values (such as strings).
 restrict the memory being allocated to no more than a few kilobytes.}
 
 @value{GDBN} uses the string function @code{xstrdup} and the print
-function @code{xasprintf}.
+function @code{xstrprintf}.
 
 @emph{Pragmatics: @code{asprintf} and @code{strdup} can fail.  Print
 functions such as @code{sprintf} are very prone to buffer overflow

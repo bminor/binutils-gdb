@@ -38,7 +38,7 @@ child_pid_to_exec_file (int pid)
   char *path;
   char *buf;
 
-  xasprintf (&path, "/proc/%d/file", pid);
+  path = xstrprintf ("/proc/%d/file", pid);
   buf = xcalloc (MAXPATHLEN, sizeof (char));
   make_cleanup (xfree, path);
   make_cleanup (xfree, buf);
@@ -82,7 +82,7 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
   char protection[4];
   int read, write, exec;
 
-  xasprintf (&mapfilename, "/proc/%ld/map", (long) pid);
+  mapfilename = xstrprintf ("/proc/%ld/map", (long) pid);
   mapfile = fopen (mapfilename, "r");
   if (mapfile == NULL)
     error ("Couldn't open %s\n", mapfilename);

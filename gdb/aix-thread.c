@@ -1629,10 +1629,10 @@ aix_thread_pid_to_str (ptid_t ptid)
     return base_target.to_pid_to_str (ptid);
 
   /* Free previous return value; a new one will be allocated by
-     xasprintf().  */
+     xstrprintf().  */
   xfree (ret);
 
-  xasprintf (&ret, "Thread %ld", ptid_get_tid (ptid));
+  ret = xstrprintf ("Thread %ld", ptid_get_tid (ptid));
   return ret;
 }
 

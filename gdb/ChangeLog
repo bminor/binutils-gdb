@@ -1,3 +1,22 @@
+2004-06-28  Andrew Cagney  <cagney@gnu.org>
+
+	* xcoffsolib.c (xcoff_solib_address): Replace xasprintf with
+	xstrprintf.
+	* varobj.c (varobj_gen_name, create_child, c_name_of_child)
+	(c_value_of_variable): Ditto.
+	* utils.c (internal_vproblem): Ditto.
+	* solib-aix5.c (build_so_list_from_mapfile): Ditto.
+	* remote.c (add_packet_config_cmd): Ditto.
+	* remote-rdp.c (rdp_set_command_line): Ditto.
+	* regcache.c (regcache_dump): Ditto.
+	* frv-tdep.c (new_variant, new_variant): Ditto.
+	* fbsd-proc.c (child_pid_to_exec_file): Ditto.
+	(fbsd_find_memory_regions): Ditto.
+	* breakpoint.c (create_thread_event_breakpoint) 
+	(create_breakpoints): Ditto.
+	* aix-thread.c (aix_thread_pid_to_str): Ditto.
+	* ada-lang.c (is_package_name): Ditto.  Also delete xmalloc call.
+
 2004-06-28  Joel Brobecker  <brobecker@gnat.com>
 
 	* ada-lang.c: Re-indent file, with some massaging to help indent

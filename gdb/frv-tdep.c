@@ -197,7 +197,7 @@ new_variant (void)
   for (r = acc0_regnum; r <= acc7_regnum; r++)
     {
       char *buf;
-      xasprintf (&buf, "acc%d", r - acc0_regnum);
+      buf = xstrprintf ("acc%d", r - acc0_regnum);
       var->register_names[r] = buf;
     }
 
@@ -210,7 +210,7 @@ new_variant (void)
   for (r = accg0_regnum; r <= accg7_regnum; r++)
     {
       char *buf;
-      xasprintf (&buf, "accg%d", r - accg0_regnum);
+      buf = xstrprintf ("accg%d", r - accg0_regnum);
       var->register_names[r] = buf;
     }
 

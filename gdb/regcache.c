@@ -1572,7 +1572,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 		char *n;
 		if (!footnote_register_type_name_null)
 		  footnote_register_type_name_null = ++footnote_nr;
-		xasprintf (&n, "*%d", footnote_register_type_name_null);
+		n = xstrprintf ("*%d", footnote_register_type_name_null);
 		make_cleanup (xfree, n);
 		t = n;
 	      }
