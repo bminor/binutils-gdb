@@ -27,6 +27,7 @@ Things-to-keep:
 
 
 ChangeLog
+alpha-ext.h
 common.h
 external.h
 internal.h
