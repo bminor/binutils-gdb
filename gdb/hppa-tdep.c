@@ -702,7 +702,7 @@ find_unwind_entry (CORE_ADDR pc)
 const unsigned char *
 hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 {
-  static const char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
+  static const unsigned char breakpoint[] = {0x00, 0x01, 0x00, 0x04};
   (*len) = sizeof (breakpoint);
   return breakpoint;
 }
@@ -4149,7 +4149,7 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 	      && extract_14 (inst) >= 0)
 	    frame_saved_regs[reg] = get_frame_base (frame_info);
 	  /* A std has explicit post_modify forms.  */
-	  else if ((inst & 0xfc00000c0) == 0x70000008)
+	  else if ((inst & 0xfc00000c) == 0x70000008)
 	    frame_saved_regs[reg] = get_frame_base (frame_info);
 	  else
 	    {
