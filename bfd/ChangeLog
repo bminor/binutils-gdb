@@ -1,3 +1,16 @@
+Mon Sep  4 14:02:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.bfd: Rewrite to incorporate the contents of the Makefile
+	fragments by setting shell variables, rather than merely returning
+	the name of a Makefile fragment.
+	* configure.in: Use shell variables set by config.bfd rather than
+	looking at the target Makefile fragment files.  Don't substitute
+	target_makefile_frag.  Do substitute TDEFINES.
+	* configure: Rebuild.
+	* Makefile.in (@target_makefile_frag@): Remove.
+	(ALL_CFLAGS): Change $(TDEFINES) to @TDEFINES@.
+	* config/*.mt: Remove.
+
 Mon Sep  4 03:13:28 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Put changequote lines around "i[345]86" patterns

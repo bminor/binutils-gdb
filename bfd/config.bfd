@@ -1,187 +1,445 @@
-#!/bin/sh
-
 # config.bfd
 # Convert a canonical host type into a BFD host type.
-# Call with canonical name as the argument.
-# Echos the result.
-# If second argument is _, echoes whether underscores are stripped.
-
-canon="$1"
-cpu=`echo $canon | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+# Set shell variable targ to canonical target name, and run
+# using ``. config.bfd''.
+# Sets the following shell variables:
+#  targ_defvec		Default vector for this target
+#  targ_selvecs		Vectors to build for this target
+#  targ_archs		Architectures for this target
+#  targ_cflags		$(CFLAGS) for this target (FIXME: pretty bogus)
+#  targ_undercore	Whether underscores are used: yes or no
 
 # The binutils c++filt program wants to know whether underscores are
-# stripped or not.  It uses this information to choose a default.
-# This information is duplicated in the symbol_leading_char field of
-# the BFD target vector, but c++filt does not deal with object files
-# and is not linked against libbfd.a.  It is not terribly important
-# that c++filt get this right; it is just convenient.
-strip_underscore=no
+# stripped or not.  That is why we set targ_underscore.  c++filt uses
+# this information to choose a default.  This information is
+# duplicated in the symbol_leading_char field of the BFD target
+# vector, but c++filt does not deal with object files and is not
+# linked against libbfd.a.  It is not terribly important that c++filt
+# get this right; it is just convenient.
+
+targ_defvec=
+targ_selvecs=
+targ_cflags=
+targ_underscore=no
+
+targ_cpu=`echo $targ | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+case "${targ_cpu}" in
+arm*)	targ_archs=bfd_arm_arch ;;
+hppa*)	targ_archs=bfd_hppa_arch ;;
+i[345]86) targ_archs=bfd_i386_arch ;;
+m68*)	targ_archs=bfd_m68k_arch ;;
+m88*)	targ_archs=bfd_m88k_arch ;;
+mips*)	targ_archs=bfd_mips_arch ;;
+powerpc*) targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
+rs6000)	targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
+sparc*)	targ_archs=bfd_sparc_arch ;;
+z8k*)	targ_archs=bfd_z8k_arch ;;
+*)	targ_archs=bfd_${targ_cpu}_arch ;;
+esac
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
 #  can get spurious matches.  Even for unambiguous cases, do this as a
 #  convention, else the table becomes a real mess to understand and maintain.
 
-case "${canon}" in
-  alpha-*-netware*)	bfd_name=alpha-nlm ;;
-  alpha-*-*)		bfd_name=alphaosf ;;
+case "${targ}" in
+  alpha-*-netware*)
+    targ_defvec=ecoffalpha_little_vec
+    targ_selvecs=nlm32_alpha_vec
+    ;;
+  alpha-*-*)
+    targ_defvec=ecoffalpha_little_vec
+    ;;
+
 # start-sanitize-arc
-  arc-*-elf*)		bfd_name=arc-elf ;;
+  arc-*-elf*)
+    targ_defvec=bfd_elf32_littlearc_vec
+    targ_selvecs=bfd_elf32_bigarg_vec
+    ;;
 # end-sanitize-arc
-  arm-*-riscix*)	bfd_name=riscix ;;
-  arm-*-pe*)		bfd_name=arm-pe  strip_underscore=yes ;;
+
+  arm-*-riscix*)
+    targ_defvec=riscix_vec
+    ;;
+  arm-*-pe*)
+    targ_defvec=armpe_little_vec
+    targ_selvecs="armpe_little_vec armpe_big_vec armpei_little_vec armpei_big_vec"
+    targ_underscore=yes
+    ;;
   arm-*-aout | armel-*-aout)	
-			bfd_name=arml-aout ;;
-  armeb-*-aout)		bfd_name=armb-aout ;;
-  a29k-*-ebmon*)	bfd_name=a29k-coff strip_underscore=yes ;;
-  a29k-*-udi*)		bfd_name=a29k-coff strip_underscore=yes ;;
-  a29k-*-aout*)		bfd_name=a29k-aout strip_underscore=yes ;;
-  a29k-*-coff*)		bfd_name=a29k-coff strip_underscore=yes ;;
-  a29k-*-sym1*)		bfd_name=a29k-coff strip_underscore=yes ;;
-  a29k-*-vxworks*)      bfd_name=a29k-coff strip_underscore=yes ;;
-  h8300*-*-*)		bfd_name=h8300-coff strip_underscore=yes ;;
-  h8500-*-*)		bfd_name=h8500-coff strip_underscore=yes ;;
-  sh-*-*)		bfd_name=sh-coff strip_underscore=yes ;;
+    targ_defvec=aout_arm_little_vec
+    targ_selvecs=aout_arm_big_vec
+    ;;
+  armeb-*-aout)
+    targ_defvec=aout_arm_big_vec
+    targ_selvecs=aout_arm_little_vec
+    ;;
+
+  a29k-*-ebmon* | a29k-*-udi* | a29k-*-coff* | a29k-*-sym1* | \
+  a29k-*-vxworks* | a29k-*-sysv*)
+    targ_defvec=a29kcoff_big_vec
+    targ_selvecs=sunos_big_vec
+    targ_underscore=yes
+    ;;
+  a29k-*-aout* | a29k-*-bsd* | a29k-*-vsta*)
+    targ_defvec=sunos_big_vec
+    targ_underscore=yes
+    ;;
+
+  h8300*-*-*)
+    targ_defvec=h8300coff_vec
+    targ_underscore=yes
+    ;;
+
+  h8500-*-*)
+    targ_defvec=h8500coff_vec
+    targ_underscore=yes
+    ;;
+
+  sh-*-*)
+    targ_selvecs="shcoff_vec shlcoff_vec"
+    targ_underscore=yes
+    ;;
+
 # start-sanitize-rce
-  rce-*-aout)		bfd_name=rce-aout ;;
+  rce-*-aout*)
+    targ_defvec=rce_aout_vec
+    ;;
+
 # end-sanitize-rce
-  hppa*-*-*elf*)	bfd_name=hppa-elf ;;
-  hppa*-*-lites*)	bfd_name=hppa-elf ;;
-  hppa*-*-bsd*)		bfd_name=hppabsd ;;
-  hppa*-*-hpux*)	bfd_name=hppahpux ;;
-  hppa*-*-hiux*)	bfd_name=hppahpux ;;
-  hppa*-*-osf*)		bfd_name=hppaosf ;;
-  i[345]86-*-sysv4*)	bfd_name=i386-elf ;;
-  i[345]86-*-unixware)	bfd_name=i386-elf ;;
-  i[345]86-*-solaris2*)	bfd_name=i386-elf ;;
-  i[345]86-*-sysv*)	bfd_name=i386-coff ;;
-  i[345]86-*-isc*)	bfd_name=i386-coff ;;
-  i[345]86-*-sco*)	bfd_name=i386-coff ;;
-  i[345]86-sequent-bsd*) bfd_name=i386-dynix strip_underscore=yes ;;
-  i[345]86-*-bsd*)	bfd_name=i386-bsd strip_underscore=yes ;;
-  i[345]86-*-coff)	bfd_name=i386-coff ;;
-  i[345]86-*-aix*)	bfd_name=i386-coff ;;
-  i[345]86-*-elf)	bfd_name=i386-elf ;;
-  i[345]86-*-freebsd*)	bfd_name=i386-bsd strip_underscore=yes ;;
-  i[345]86-*-netbsd*)	bfd_name=i386-nbsd strip_underscore=yes ;;
-  i[345]86-*-netware*)	bfd_name=i386-nlm ;;
-  i[345]86-*-linuxaout*) bfd_name=i386-laout strip_underscore=yes ;;
-  i[345]86-*-linux*)	bfd_name=i386-linux strip_underscore=yes ;;
-  i[345]86-*-lynxos*)	bfd_name=i386-lynx ;;
-  i[345]86-*-gnu*)	bfd_name=i386-gelf strip_underscore=yes ;;
-  i[345]86-*-mach*)	bfd_name=i386-mach3 strip_underscore=yes ;;
-  i[345]86-*-osf1mk*)	bfd_name=i386-mach3 strip_underscore=yes ;;
-  i[345]86-*-os9k)	bfd_name=i386-os9k ;;
-  i[345]86-*-msdos*)	bfd_name=i386-msdos ;;
-  i[345]86-*-moss*)	bfd_name=i386-moss ;;
-  i[345]86-*-win32)	bfd_name=i386-pe ;;
-  i[345]86-*-winnt)	bfd_name=i386-pe ;;
-  i[345]86-*-pe)	bfd_name=i386-pe ;;
-  i[345]86-none-*)	bfd_name=i386-coff ;;
-  i960-*-vxworks4*)	bfd_name=i960-bout strip_underscore=yes ;;
-  i960-*-vxworks5.0)	bfd_name=i960-bout strip_underscore=yes ;;
-  i960-*-vxworks5.*)	bfd_name=i960-coff strip_underscore=yes ;;
-  i960-*-vxworks*)	bfd_name=i960-bout strip_underscore=yes ;;
-  i960-*-aout*)		bfd_name=i960-bout strip_underscore=yes ;;
-  i960-*-bout*)		bfd_name=i960-bout strip_underscore=yes ;;
-  i960-*-coff*)		bfd_name=i960-coff strip_underscore=yes ;;
-  i960-*-nindy*)	bfd_name=i960-bout strip_underscore=yes ;;
-  m68*-apollo-*)	bfd_name=apollo ;;
-  m68*-bull-sysv*)	bfd_name=u68k-coff strip_underscore=yes ;;
-  m68*-hp-bsd*)		bfd_name=hp300bsd strip_underscore=yes ;;
-  m68*-*-aout*)		bfd_name=m68k-0aout strip_underscore=yes ;;
-  m68*-*-coff*)		bfd_name=m68k-coff ;;
-  m68*-*-elf*)		bfd_name=m68k-elf ;;
-  m68*-*-hpux*)		bfd_name=hp300hpux strip_underscore=yes ;;
-  m68*-*-lynxos*)	bfd_name=m68k-lynx ;;
-  m68*-*-netbsd*)	bfd_name=m68k-nbsd strip_underscore=yes ;;
-  m68*-*-os68k*)	bfd_name=m68k-aout strip_underscore=yes ;;
-  m68*-*-sunos*)	bfd_name=m68k-aout strip_underscore=yes ;;
-  m68*-*-sysv4*)	bfd_name=m68k-elf ;;
-  m68*-*-sysv*)		bfd_name=m68k-coff ;;
-  m68*-*-vxworks*)	bfd_name=m68k-aout strip_underscore=yes ;;
-  m68*-ericsson-*)	bfd_name=m68k-ose strip_underscore=yes ;;
-  m68*-netx-*)		bfd_name=m68k-aout strip_underscore=yes ;;
+  hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-sysv4*)
+    targ_defvec=bfd_elf32_hppa_vec
+    ;;
+  hppa*-*-bsd*)
+    targ_defvec=som_vec
+    targ_selvecs=bfd_elf32_hppa_vec
+    ;;
+  hppa*-*-hpux* | hppa*-*-hiux*)
+    targ_defvec=som_vec
+    ;;
+  hppa*-*-osf*)
+    targ_defvec=som_vec
+    targ_selvecs=bfd_elf32_hppa_vec
+    ;;
 
-  m88*-harris-cxux*)	bfd_name=m88k-elf ;;
-  # DGUX used to use COFF, but now (Jan 94) I believe it uses ELF by default.
-  m88*-*-dgux*)		bfd_name=m88k-elf ;;
-  m88*-*-mach3*)	bfd_name=m88k-mach3 ;;
-  m88*-*-sysv4*)	bfd_name=m88k-elf ;;
-  m88*-*-*)		bfd_name=m88k-coff strip_underscore=yes ;;
+  i[345]86-*-sysv4* | i[345]86-*-unixware | i[345]86-*-solaris2* | \
+  i[345]86-*-elf)
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selvecs=i386coff_vec
+    ;;
+  i[345]86-*-sysv* | i[345]86-*-isc* | i[345]86-*-sco* | i[345]86-*-coff | \
+  i[345]86-*-aix* | i[345]86-*-go32*)
+    targ_defvec=i386coff_vec
+    ;;
+  i[345]86-sequent-bsd*)
+    targ_defvec=i386dynix_vec
+    targ_underscore=yes
+    ;;
+  i[345]86-*-bsd* | i[345]86-*-freebsd*)
+    targ_defvec=i386bsd_vec
+    targ_underscore=yes
+    ;;
+  i[345]86-*-netbsd*)
+    targ_defvec=i386netbsd_vec
+    targ_selvecs=i386bsd_vec
+    targ_underscore=yes
+    ;;
+  i[345]86-*-netware*)
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selvecs="nlm32_i386_vec i386coff_vec i386aout_vec"
+    ;;
+  i[345]86-*-linuxaout*)
+    targ_defvec=i386linux_vec
+    targ_selvecs=bfd_elf32_i386_vec
+    targ_underscore=yes
+    ;;
+  i[345]86-*-linux*)
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selvecs=i386linux_vec
+    targ_underscore=yes
+    ;;
+  i[345]86-*-lynxos*)
+    targ_defvec=i386lynx_coff_vec
+    targ_selvecs=i386lynx_aout_vec
+    ;;
+  i[345]86-*-gnu*)
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selvecs=i386mach3_vec
+    targ_cflags=-DSTAT_FOR_EXEC
+    targ_underscore=yes
+    ;;
+  i[345]86-*-mach* | i[345]86-*-osf1mk*)
+    targ_defvec=i386mach3_vec
+    targ_cflags=-DSTAT_FOR_EXEC
+    targ_underscore=yes
+    ;;
+  i[345]86-*-os9k)
+    targ_defvec=i386os9k_vec
+    ;;
+  i[345]86-*-msdos*)
+    targ_defvec=i386aout_vec
+    targ_selvecs=i386msdos_vec
+    ;;
+  i[345]86-*-moss*)
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selvecs="i386msdos_vec i386aout_vec"
+    ;;
+  i[345]86-*-win32 | i[345]86-*-winnt | i[345]86-*-pe)
+    targ_defvec=i386pe_ve
+    targ_selvecs="i386pe_vec i386pei_vec"
+    ;;
+  i[345]86-none-*)
+    targ_defvec=i386coff_vec
+    ;;
+  i[345]86-*-aout* | i[345]86*-*-vsta*)
+    targ_defvec=i386_aout_vec
+    ;;
 
-  mips*-big-*)		bfd_name=bigmips ;;
-  mips*-dec-bsd*)       bfd_name=mipsdecbsd strip_underscore=yes ;;
-  mips*-dec-mach3*)     bfd_name=mips-mach3 ;;
-  mips*-dec-*)		bfd_name=decstation ;;
-  mips*el-*-ecoff*)	bfd_name=decstation ;;
-  mips*-*-ecoff*)	bfd_name=bigmips ;;
-  mips*-*-irix5*)	bfd_name=mipsbelf ;;
-  mips*-sgi-*)		bfd_name=bigmips ;;
-  mips*-*-mach3*)	bfd_name=mips-mach3 ;;
-  mips*-*-sysv4*)	bfd_name=mipsbelf ;;
-  mips*-*-sysv*)	bfd_name=riscos ;;
-  mips*-*-riscos*)	bfd_name=riscos ;;
-  mips*-*-bsd*)		bfd_name=bigmips ;; # Sony News
-# CYGNUS LOCAL jsmith/vr4300 : we use the existing definition for little-endian
-  mips*vr4300-*-elf*)	bfd_name=mipsbvr4300 ;; # NEC VR4300 ELF only
-# END CYGNUS LOCAL
-  mips*el-*-elf*)	bfd_name=mipslelf ;;
-  mips*-*-elf*)		bfd_name=mipsbelf ;;
-  ns32k-pc532-mach*)	bfd_name=pc532-mach strip_underscore=yes;;
-  ns32k-*-netbsd*)	bfd_name=ns32k-nbsd strip_underscore=yes;;
-  powerpc-*-aix*)	bfd_name=rs6000 ;;
-  powerpc-*-elf*)	bfd_name=ppc-elf ;;
-  powerpc-*-sysv4*)	bfd_name=ppc-elf ;;
-  powerpc-*-eabi*)	bfd_name=ppc-elf ;;
-  powerpc-*-netware*)	bfd_name=ppc-nlm ;;
-  powerpcle-*-elf*)	bfd_name=ppcle-elf ;;
-  powerpcle-*-sysv4*)	bfd_name=ppcle-elf ;;
-  powerpcle-*-eabi*)	bfd_name=ppcle-elf ;;
-  rs6000-*-*)		bfd_name=rs6000 ;;
-  sparc-*-lynxos*)	bfd_name=sparc-lynx ;;
-  sparc-*-netbsd*)	bfd_name=sparc-nbsd strip_underscore=yes;;
-  sparc-*-solaris2*)	bfd_name=sparc-elf ;;
-  sparc-*-sysv4*)	bfd_name=sparc-elf ;;
-  sparc64-*-aout*)	bfd_name=sparc-aout strip_underscore=yes ;;
-  sparc64-*-elf*)	bfd_name=sparc64-elf ;;
-  sparc-*-netware*)	bfd_name=sparc-nlm ;;
-  sparc*-*-coff*)	bfd_name=sparc-coff ;;
-  sparc*-*-*)		bfd_name=sparc-aout strip_underscore=yes ;;
-  tahoe-*-*)		bfd_name=tahoe strip_underscore=yes ;;
-  vax-*-vms*)		bfd_name=vax-vms ;;
-  vax-*-*)		bfd_name=vax strip_underscore=yes ;;
-  we32k-*-*)		bfd_name=we32k ;;
-  w65-*-*)		bfd_name=w65 ;;
-  z8k*-*-*)		bfd_name=z8k-coff strip_underscore=yes ;;
+  i860-*-sysv4*)
+    targ_defvec=bfd_elf32_i860_vec
+    ;;
 
-  *-*-aout*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
-  *-*-bsd*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
-  *-*-ieee*)		bfd_name=ieee ;;
-  *-*-netware*)		bfd_name=${cpu}-nlm ;;
-  *-*-sysv4*)		bfd_name=${cpu}-elf ;;
-  *-*-solaris2*)	bfd_name=${cpu}-elf ;;
-  *-*-vsta*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
-  *-*-go32*)		bfd_name=${cpu}-coff ;;
-  *-*-sysv*)		bfd_name=${cpu}-coff ;;
+  i960-*-vxworks4* | i960-*-vxworks5.0)
+    targ_defvec=b_out_vec_little_host
+    targ_selvecs="b_out_vec_big_host icoff_little_vec icoff_big_vec"
+    targ_underscore=yes
+    ;;
+  i960-*-vxworks5.* | i960-*-coff* | i960-*-sysv*)
+    targ_defvec=icoff_little_vec
+    targ_selvecs="icoff_big_vec b_out_vec_little_host b_out_vec_big_host"
+    targ_underscore=yes
+    ;;
+  i960-*-vxworks* | i960-*-aout* | i960-*-bout* | i960-*-nindy*)
+    targ_defvec=b_out_vec_little_host
+    targ_selvecs="b_out_vec_big_host icoff_little_vec icoff_big_vec"
+    targ_underscore=yes
+    ;;
 
-  *-*-aout64*)		bfd_name=${cpu}-aout64 strip_underscore=yes ;;
-  *-*-elf64*)		bfd_name=${cpu}-elf64 ;;
+  m68*-apollo-*)
+    targ_defvec=apollocoff_vec
+    ;;
+  m68*-bull-sysv*)
+    targ_defvec=m68kcoffun_vec
+    targ_underscore=yes
+    ;;
+  m68*-hp-bsd*)
+    targ_defvec=hp300bsd_vec
+    targ_underscore=yes
+    ;;
+  m68*-*-aout*)
+    targ_defvec=aout0_big_vec
+    # We include this here, rather than making a separate cisco
+    # configuration, so that cisco-core.c gets routinely tested at
+    # least for compilation.
+    targ_selvecs=cisco_core_vec
+    targ_underscore=yes
+    ;;
+  m68*-*-elf* | m68*-*-sysv4* | m68*-cbm-*)
+    targ_defvec=bfd_elf32_m68k_vec
+    targ_selvecs=m68kcoff_vec
+    ;;
+  m68*-*-coff* | m68*-*-sysv*)
+    targ_defvec=m68kcoff_vec
+    targ_selvecs="m68kcoff_vec versados_vec"
+    ;;
+  m68*-*-hpux*)
+    targ_defvec=hp300hpux_vec
+    targ_underscore=yes
+    ;;
+  m68*-*-lynxos*)
+    targ_defvec=m68klynx_coff_vec
+    targ_selvecs=m68klynx_aout_vec
+    ;;
+  m68*-*-netbsd*)
+    targ_defvec=m68knetbsd_vec
+    targ_selvecs="hp300bsd_vec sunos_big_vec"
+    targ_underscore=yes
+    ;;
+  m68*-*-sunos* | m68*-*-os68k* | m68*-*-vxworks* | m68*-netx-* | \
+  m68*-*-bsd* | m68*-*-vsta*)
+    targ_defvec=sunos_big_vec
+    targ_underscore=yes
+    ;;
+  m68*-ericsson-*)
+    targ_defvec=sunos_big_vec
+    targ_selvecs="m68kcoff_vec tekhex_vec"
+    targ_underscore=yes
+    ;;
 
-  *-adobe-*)		bfd_name=adobe strip_underscore=yes ;;
-  *-sony-*)		bfd_name=news strip_underscore=yes ;;
-  *-intel-*)		bfd_name=${cpu}-coff ;;
-  *-stratus-*)		bfd_name=${cpu}-elf ;;
-  *-cbm-*)		bfd_name=${cpu}-elf ;;
-  *-ncr-*)		bfd_name=${cpu}-elf ;;
-  *-tandem-*)		bfd_name=st2000 ;;
+  m88*-harris-cxux* | m88*-*-dgux* | m88*-*-sysv4*)
+    targ_defvec=bfd_elf32_m88k_vec
+    targ_selvecs=m88kbcs_vec
+    ;;
+  m88*-*-mach3*)
+    targ_defvec=m88kmach3_vec
+    targ_cflags=-DSTAT_FOR_EXEC
+    ;;
+  m88*-*-*)
+    targ_defvec=m88kbcs_vec
+    targ_underscore=yes
+    ;;
 
-  # Allow targets that config.sub doesn't recognize, like "all".
-  *)			bfd_name=$canon ;;
+  mips*-big-*)
+    targ_defvec=ecoff_big_vec
+    targ_selvecs=ecoff_little_vec
+    ;;
+  mips*-dec-bsd*)
+    targ_defvec=aout_mips_little_vec
+    targ_underscore=yes
+    ;;
+  mips*-dec-mach3*)
+    targ_defvec=aout_mips_little_vec
+    targ_cflags=-DSTAT_FOR_EXEC
+    ;;
+  mips*-dec-* | mips*el-*-ecoff*)
+    targ_defvec=ecoff_little_vec
+    targ_selvecs=ecoff_big_vec
+    ;;
+  mips*-*-ecoff*)
+    targ_defvec=ecoff_big_vec
+    targ_selvecs=ecoff_little_vec
+    ;;
+  mips*-*-irix5*)
+    targ_defvec=bfd_elf32_bigmips_vec
+    targ_selvecs="bfd_elf32_littlemips_vec ecoff_big_vec ecoff_little_vec"
+    ;;
+  mips*-sgi-* | mips*-*-bsd*)
+    targ_defvec=ecoff_big_vec
+    targ_selvecs=ecoff_little_vec
+    ;;
+  mips*-*-mach3*)
+    targ_defvec=aout_mips_little_vec
+    targ_cflags=-DSTAT_FOR_EXEC
+    ;;
+  mips*-*-sysv4*)
+    targ_defvec=bfd_elf32_bigmips_vec
+    targ_selvecs="bfd_elf32_littlemips_vec ecoff_big_vec ecoff_little_vec"
+    ;;
+  mips*-*-sysv* | mips*-*-riscos*)
+    targ_defvec=ecoff_big_vec
+    targ_selvecs=ecoff_little_vec
+    ;;
+  mips*el-*-elf*)
+    targ_defvec=bfd_elf32_littlemips_vec
+    targ_selvecs=bfd_elf32_bigmips_vec
+    ;;
+  mips*-*-elf*)
+    targ_defvec=bfd_elf32_bigmips_vec
+    targ_selvecs=bfd_elf32_littlemips_vec
+    ;;
+
+  ns32k-pc532-mach*)
+    targ_defvec=pc532machaout_vec
+    targ_underscore=yes
+    ;;
+  ns32k-*-netbsd*)
+    targ_defvec=pc532netbsd_vec
+    targ_underscore=yes
+    ;;
+
+  powerpc-*-aix*)
+    targ_defvec=rs6000coff_vec
+    ;;
+  powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | powerpc-*-solaris2*)
+    targ_defvec=bfd_elf32_powerpc_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec"
+    ;;
+  powerpc-*-netware*)
+    targ_defvec=bfd_elf32_powerpc_vec
+    targ_selvecs="nlm32_powerpc_vec rs6000coff_vec"
+    ;;
+  powerpcle-*-elf* | powerpcle-*-sysv4* | powerpcle-*-eabi* | \
+  powerpcle-*-solaris2*)
+    targ_defvec=bfd_elf32_powerpcle_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec"
+    ;;
+
+  rs6000-*-*)
+    targ_defvec=rs6000coff_vec
+    ;;
+
+  sparc-*-lynxos*)
+    targ_defvec=sparclynx_coff_vec
+    targ_selvecs=sparclynx_aout_vec
+    ;;
+  sparc-*-netbsd*)
+    targ_defvec=sparcnetbsd_vec
+    targ_underscore=yes
+    ;;
+  sparc-*-solaris2* | sparc-*-sysv4*)
+    targ_defvec=bfd_elf32_sparc_vec
+    targ_selvecs=sunos_big_vec
+    ;;
+  sparc64-*-aout*)
+    targ_defvec=sunos_big_vec
+    targ_underscore=yes
+    ;;
+  sparc64-*-elf* | sparc64-*-sysv4* | sparc64-*-solaris2*)
+    targ_defvec=bfd_elf64_sparc_vec
+    targ_selvecs=bfd_elf32_sparc_vec
+    ;;    
+  sparc-*-netware*)
+    targ_defvec=bfd_elf32_sparc_vec
+    targ_selvecs="nlm32_sparc_vec sunos_big_vec"
+    ;;
+  sparc*-*-coff*)
+    targ_defvec=sparccoff_vec
+    ;;
+  sparc*-*-*)
+    targ_defvec=sunos_big_vec
+    targ_underscore=yes
+    ;;
+
+  tahoe-*-*)
+    targ_defvec=host_aout_vec
+    targ_underscore=yes
+    ;;
+
+  vax-*-vms*)
+    echo 1>&2 "*** BFD does not support target ${targ}."
+    echo 1>&2 "*** Look in bfd/config.bfd for supported targets."
+    exit 1
+    ;;
+  vax-*-*)
+    targ_defvec=host_aout_vec
+    targ_underscore=yes
+    ;;
+
+  we32k-*-*)
+    targ_defvec=we32kcoff_vec
+    ;;
+
+  w65-*-*)
+    targ_defvec=w65_vec
+    ;;
+
+  z8k*-*-*)
+    targ_defvec=z8kcoff_vec
+    targ_underscore=yes
+    ;;
+
+  *-*-ieee*)
+    targ_defvec=ieee_vec
+    ;;
+
+  *-adobe-*)
+    targ_defvec=a_aout_adobe_vec
+    targ_underscore=yes
+    ;;
+
+  *-sony-*)
+    targ_defvec=newsos3_vec
+    targ_underscore=yes
+    ;;
+
+  *-tandem-*)
+    targ_defvec=m68kcoff_vec
+    targ_selvecs=ieee_vec
+    ;;
+
+  *)
+    echo 1>&2 "*** BFD does not support target ${targ}."
+    echo 1>&2 "*** Look in bfd/config.bfd for supported targets."
+    exit 1
+    ;;
 esac
-
-if [ "x$2" = "x_" ]; then
-  echo $strip_underscore
-else
-  echo $bfd_name
-fi

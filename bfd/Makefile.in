@@ -234,7 +234,6 @@ TDEFAULTS = @tdefaults@
 all:
 
 #### host and target dependent Makefile fragments come in here.
-# @target_makefile_frag@
 # @host_makefile_frag@
 ###
 
@@ -254,7 +253,7 @@ FLAGS_TO_PASS = \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"BISON=$(BISON)"
 
-ALL_CFLAGS=$(CFLAGS) $(HDEFINES) @COREFLAG@ $(TDEFINES) $(CSEARCH) $(CSWITCHES)
+ALL_CFLAGS=$(CFLAGS) $(HDEFINES) @COREFLAG@ @TDEFINES@ $(CSEARCH) $(CSWITCHES)
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
 

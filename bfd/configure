@@ -603,6 +603,11 @@ else
 	host_makefile_frag=/dev/null
 fi
 
+frags=
+if test $host_makefile_frag != /dev/null ; then
+    frags="$host_makefile_frag"
+fi
+
 
 # If we are configured native, pick a core file support file.
 COREFILE=
@@ -691,34 +696,24 @@ if test -n "$enable_targets" ; then
 fi
 
 all_targets=false
-
+defvec=
+selvecs=
+selarchs=
+TDEFINES=
 for targ in $target $canon_targets
 do
-    bfd_target=`${config_shell} $srcdir/config.bfd $targ`
-
-    if test "x$bfd_target" = "xall" ; then
+    if test "x$targ" = "xall"; then
         all_targets=true
     else
-	if test ! -f ${srcdir}/config/${bfd_target}.mt ; then
-	    { echo "configure: error: *** No file ${srcdir}/config/${bfd_target}.mt.
-*** BFD does not support target ${bfd_target}.
-*** Look in bfd/config.bfd for supported targets." 1>&2; exit 1; }
-	    exit 1
+	. $srcdir/config.bfd
+	if test "x$targ" = "x$target"; then
+	    defvec=$targ_defvec
 	fi
-
-	if test "x$targ" = "x$target" ; then
-	    target_makefile_frag=${srcdir}/config/${bfd_target}.mt
-	else
-	    target_extra_frags="$target_extra_frags ${srcdir}/config/${bfd_target}.mt"
-	fi
+	selvecs="$selvecs $targ_defvec $targ_selvecs"
+	selarchs="$selarchs $targ_archs"
+	TDEFINES="$TDEFINES $targ_cflags"
     fi
 done
-
-frags=$target_makefile_frag
-if test $host_makefile_frag != /dev/null ; then
-    frags="$frags $host_makefile_frag"
-fi
-
 
 
 # This processing still needs to be done if we're to decide properly whether
@@ -728,48 +723,32 @@ fi
 # no "--with-64-bit-bfd" option is given, even if "--with-targets=all" is
 # used.
 
-# The default vector in the primary target.
-DEFAULT_VECTOR=`sed -n '
-s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' $target_makefile_frag`
-
-allfrags="$target_makefile_frag $target_extra_frags"
-
-# The default and selected vectors in all the configured targets.
-SELECT_VECS=`sed -n '
-s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-s/SELECT_VECS[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-' $allfrags`
-# uniq the list.
+# uniq the default and selected vectors in all the configured targets.
 f=""
-for i in $SELECT_VECS ; do
+for i in $selvecs ; do
     case " $f " in
     *" $i "*) ;;
     *) f="$f $i" ;;
     esac
 done
-SELECT_VECS="$f"
+selvecs="$f"
 
-# The architectures in all the configured targets.
-SELECT_ARCHITECTURES=`sed -n '
-s/SELECT_ARCHITECTURES[ 	]*=[ 	]*//p
-' $allfrags`
-# uniq the list.
+# uniq the architectures in all the configured targets.
 f=""
-for i in $SELECT_ARCHITECTURES ; do
+for i in $selarchs ; do
     case " $f " in
     *" $i "*) ;;
     *) f="$f $i" ;;
     esac
 done
-SELECT_ARCHITECTURES="$f"
+selarchs="$f"
 
 # Target backend .o files.
 tb=
 
 elf="elf.o elflink.o"
 
-for vec in $SELECT_VECS
+for vec in $selvecs
 do
     case "$vec" in
     # This list is alphabetized to make it easy to compare
@@ -879,7 +858,7 @@ do
 done
 
 # Target architecture .o files.
-ta=`echo $SELECT_ARCHITECTURES | sed -e s/bfd_/cpu-/g -e s/_arch/.o/g`
+ta=`echo $selarchs | sed -e s/bfd_/cpu-/g -e s/_arch/.o/g`
 
 # Weed out duplicate .o files.
 f=""
@@ -906,12 +885,14 @@ bfd_machines="$ta"
 if test x${all_targets} = xtrue ; then
   bfd_backends="${bfd_backends}"' $(ALL_BACKENDS)'
   bfd_machines="${bfd_machines}"' $(ALL_MACHINES)'
+  selvecs=
+  selarchs=
 else	# all_targets is true
   # Only set these if they will be nonempty, for the clever echo.
-  test -n "$SELECT_VECS" &&
-    selvecs=`echo $SELECT_VECS | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
-  test -n "SELECT_ARCHITECTURES" &&
-    selarchs=`echo $SELECT_ARCHITECTURES | sed -e 's/ \(.\)/,\1/g'`
+  test -n "$selvecs" &&
+    selvecs=`echo $selvecs | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
+  test -n "$selarchs" &&
+    selarchs=`echo $selarchs | sed -e 's/ \(.\)/,\1/g'`
 fi	# all_targets is true
 
 case ${host64}-${target64}-${want64} in
@@ -929,8 +910,6 @@ esac
 
 
 
-
-test -n "$DEFAULT_VECTOR" && defvec="$DEFAULT_VECTOR"
 
 tdefaults=""
 test -n "${defvec}" && tdefaults="${tdefaults} -DDEFAULT_VECTOR=${defvec}"
@@ -1071,11 +1050,10 @@ s%@build_os@%$build_os%g
 s%@RANLIB@%$RANLIB%g
 /@host_makefile_frag@/r $host_makefile_frag
 s%@host_makefile_frag@%%g
+s%@frags@%$frags%g
 s%@COREFILE@%$COREFILE%g
 s%@COREFLAG@%$COREFLAG%g
-/@target_makefile_frag@/r $target_makefile_frag
-s%@target_makefile_frag@%%g
-s%@frags@%$frags%g
+s%@TDEFINES@%$TDEFINES%g
 s%@wordsize@%$wordsize%g
 s%@all_backends@%$all_backends%g
 s%@bfd_backends@%$bfd_backends%g
