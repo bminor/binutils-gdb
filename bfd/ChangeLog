@@ -1,6 +1,8 @@
 Fri Feb  6 11:50:22 1998  Jeffrey A Law  (law@cygnus.com)
 
+start-sanitize-r5900
         * cpu-mips.c (arch_info_struct): Make r5900 pointer size 32bits.
+end-sanitize-r5900
 	* elf32-mips.c (bfd_elf32_bfd_reloc_type_lookup): For BFD_RELOC_CTOR
 	get the size from bfd_arch_bits_per_address instead of directly
 	from the isa.
