@@ -53,6 +53,8 @@ hppabsd.mt
 hppahpux.mh
 hppahpux.mt
 i386aout.mt
+i386bsd.mh
+i386bsd.mt
 i386mach.mh
 i386sco.mh
 i386sol2.mh
