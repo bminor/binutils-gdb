@@ -141,7 +141,7 @@ FreeBSD/amd64					x86_64-*-freebsd*
 * Multi-arched targets.
 
 HP/PA HPUX11                                    hppa*-*-hpux*
-Mitsubishi M32R/D w/simulator			m32r-*-elf*
+Renesas M32R/D w/simulator			m32r-*-elf*
 
 * OBSOLETE configurations and files
 

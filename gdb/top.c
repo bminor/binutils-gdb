@@ -147,7 +147,7 @@ int baud_rate = -1;
    In mid-1996, remote_timeout was moved from remote.c to top.c and 
    it began being used in other remote-* targets.  It appears that the
    default was changed to 20 seconds at that time, perhaps because the
-   Hitachi E7000 ICE didn't always respond in a timely manner.
+   Renesas E7000 ICE didn't always respond in a timely manner.
 
    But if 5 seconds is a long time to sit and wait for retransmissions,
    20 seconds is far worse.  This demonstrates the difficulty of using 

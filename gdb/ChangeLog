@@ -1,3 +1,26 @@
+2003-10-10  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* NEWS: Replace "Hitachi" and "Mitsubishi" with "Renesas".
+	* README: Ditto.
+	* d10v-tdep.c: Ditto.
+	* h8300-tdep.c: Ditto.
+	* remote-e7000.c: Ditto.
+	* remote-hms.c: Ditto.
+	* ser-e7kpc.c: Ditto.
+	* sh-stub.c: Ditto.
+	* sh-tdep.c: Ditto.
+	* sh-tdep.h: Ditto.
+	* sh3-rom.c: Ditto.
+	* sh64-tdep.c: Ditto.
+	* top.c: Ditto.
+	* wince.c: Ditto.
+	* config/d10v/d10v.mt: Ditto.
+	* config/sh/embed.mt: Ditto.
+	* config/sh/linux.mt: Ditto.
+	* config/sh/tm-linux.h: Ditto.
+	* config/sh/tm-sh.h: Ditto.
+	* config/sh/wince.mt: Ditto.
+
 2003-10-09  Andrew Cagney  <cagney@redhat.com>
 
 	* ppc-tdep.h (struct type): Declare opaque.

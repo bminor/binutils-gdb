@@ -1,4 +1,4 @@
-/* Remote debugging interface for Hitachi E7000 ICE, for GDB
+/* Remote debugging interface for Renesas E7000 ICE, for GDB
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
    2002, 2003 Free Software Foundation, Inc.
@@ -24,8 +24,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* The E7000 is an in-circuit emulator for the Hitachi H8/300-H and
-   Hitachi-SH processor.  It has serial port and a lan port.  
+/* The E7000 is an in-circuit emulator for the Renesas H8/300-H and
+   Renesas-SH processor.  It has serial port and a lan port.  
 
    The monitor command set makes it difficult to load large ammounts of
    data over the lan without using ftp - so try not to issue load
@@ -2131,8 +2131,8 @@ static void
 init_e7000_ops (void)
 {
   e7000_ops.to_shortname = "e7000";
-  e7000_ops.to_longname = "Remote Hitachi e7000 target";
-  e7000_ops.to_doc = "Use a remote Hitachi e7000 ICE connected by a serial line;\n\
+  e7000_ops.to_longname = "Remote Renesas e7000 target";
+  e7000_ops.to_doc = "Use a remote Renesas e7000 ICE connected by a serial line;\n\
 or a network connection.\n\
 Arguments are the name of the device for the serial line,\n\
 the speed to connect at in bits per second.\n\

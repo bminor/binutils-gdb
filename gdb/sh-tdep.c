@@ -1,4 +1,4 @@
-/* Target-dependent code for Hitachi Super-H, for GDB.
+/* Target-dependent code for Renesas Super-H, for GDB.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
@@ -614,7 +614,7 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
 /* Function: push_dummy_call (formerly push_arguments)
    Setup the function arguments for calling a function in the inferior.
 
-   On the Hitachi SH architecture, there are four registers (R4 to R7)
+   On the Renesas SH architecture, there are four registers (R4 to R7)
    which are dedicated for passing function arguments.  Up to the first
    four arguments (depending on size) may go into these registers.
    The rest go on the stack.
