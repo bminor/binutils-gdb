@@ -1,3 +1,11 @@
+Fri Dec 15 12:05:57 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffgen.c (make_a_section_from_file): Set lma to s_paddr, not
+	s_vaddr.
+	* coffcode.h (coff_write_object_contents): Set s_paddr to lma, not
+	vma.
+	* ecoff.c (_bfd_ecoff_write_object_contents): Likewise.
+
 Fri Dec 15 07:32:09 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* pe[i]-i386.c (TARGET_UNDERSCORE): Define to '_'.

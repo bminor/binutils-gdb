@@ -2499,7 +2499,7 @@ _bfd_ecoff_write_object_contents (abfd)
       else
 	section.s_vaddr = vma;
 
-      section.s_paddr = vma;
+      section.s_paddr = current->lma;
       section.s_size = bfd_get_section_size_before_reloc (current);
 
       /* If this section is unloadable then the scnptr will be 0.  */

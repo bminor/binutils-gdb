@@ -2222,7 +2222,7 @@ coff_write_object_contents (abfd)
 	section.s_vaddr = 0;
       else
 #endif
-      section.s_vaddr = current->lma;
+      section.s_vaddr = current->vma;
       section.s_paddr = current->lma;
       section.s_size =  current->_raw_size;
 
