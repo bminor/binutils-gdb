@@ -1,3 +1,8 @@
+2001-06-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh-opc.h (sh_table): Complete last element entry to avoid
+	compiler warning.
+
 2001-05-16  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* mips-dis.c (mips_isa_type): Add MIPS r12k support.
