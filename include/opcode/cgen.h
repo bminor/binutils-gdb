@@ -31,13 +31,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Enums must be defined before they can be used.
    Allow them to be used in struct definitions, even though the enum must
    be defined elsewhere.
-   if CGEN_ARCH isn't defined, this file is being included by something other
-   than <arch>-cpu.h.  */
+   If CGEN_ARCH isn't defined, this file is being included by something other
+   than <arch>-desc.h.  */
 
-/* Prepend the arch name, defined in <arch>-cpu.h, and _cgen_ to symbol S.
+/* Prepend the arch name, defined in <arch>-desc.h, and _cgen_ to symbol S.
    The lack of spaces in the arg list is important for non-stdc systems.
-   This file is included by <arch>-cpu.h.
-   It can be included independently of <arch>-cpu.h, in which case the arch
+   This file is included by <arch>-desc.h.
+   It can be included independently of <arch>-desc.h, in which case the arch
    dependent portions will be declared as "unknown_cgen_foo".  */
 
 #ifndef CGEN_SYM
@@ -606,7 +606,7 @@ extern const CGEN_OPERAND CGEN_SYM (operand_table)[];
 enum cgen_operand_type;
 
 #define CGEN_OPERAND_INDEX(cd, operand) ((operand) - (cd)->operand_table)
-/* FIXME: Rename, cpu-cpu.h defines this as the typedef of the enum.  */
+/* FIXME: Rename, arch-desc.h defines this as the typedef of the enum.  */
 #define CGEN_OPERAND_TYPE(cd, operand) \
   ((enum cgen_operand_type) CGEN_OPERAND_INDEX ((cd), (operand)))
 #define CGEN_OPERAND_ENTRY(cd, n) (& (cd)->operand_table[n])
@@ -841,6 +841,15 @@ typedef struct
 #define CGEN_INSN_NBOOL_ATTRS 1
 #endif
 typedef CGEN_ATTR_TYPE (CGEN_INSN_NBOOL_ATTRS) CGEN_INSN_ATTR_TYPE;
+
+/* Enum of architecture independent attributes.  */
+
+#ifndef CGEN_ARCH
+/* ??? Numbers here are recorded in two places.  */
+typedef enum cgen_insn_attr {
+  CGEN_INSN_ALIAS = 32
+} CGEN_INSN_ATTR;
+#endif
 
 /* This struct defines each entry in the instruction table.  */
 
