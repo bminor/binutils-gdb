@@ -417,6 +417,12 @@ static int islocal;		/* Variable is at the returned offset
 				   this function, so we can't say
 				   which register it's relative to;
 				   use LOC_LOCAL.  */
+static int is_thread_local;     /* Variable is at a constant offset in the
+                                   thread-local storage block for the
+                                   current thread and the dynamic linker
+                                   module containing this expression.
+                                   decode_locdesc returns the offset from
+                                   that base.  */
 
 /* DW_AT_frame_base values for the current function.
    frame_base_reg is -1 if DW_AT_frame_base is missing, otherwise it
@@ -689,6 +695,10 @@ static struct complaint dwarf2_macro_spaces_in_definition =
 static struct complaint dwarf2_invalid_attrib_class =
 {
   "invalid attribute class or form for '%s' in '%s'", 0, 0
+};
+static struct complaint dwarf2_invalid_pointer_size = 
+{
+  "invalid pointer size %d", 0, 0
 };
 
 /* local function prototypes */
@@ -1443,7 +1453,10 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	  /* If this is the end of a DW_TAG_namespace entry, then
 	     decrease the file_scope_level, too.  */
 	  if (nesting_level < file_scope_level)
-	    file_scope_level--;
+	    {
+	      file_scope_level--;
+	      gdb_assert (nesting_level == file_scope_level);
+	    }
 	}
     }
 
@@ -3038,7 +3051,9 @@ read_tag_pointer_type (struct die_info *die, struct objfile *objfile,
 		       const struct comp_unit_head *cu_header)
 {
   struct type *type;
-  struct attribute *attr;
+  struct attribute *attr_byte_size;
+  struct attribute *attr_address_class;
+  int byte_size, addr_class;
 
   if (die->type)
     {
@@ -3046,15 +3061,42 @@ read_tag_pointer_type (struct die_info *die, struct objfile *objfile,
     }
 
   type = lookup_pointer_type (die_type (die, objfile, cu_header));
-  attr = dwarf_attr (die, DW_AT_byte_size);
-  if (attr)
-    {
-      TYPE_LENGTH (type) = DW_UNSND (attr);
-    }
+
+  attr_byte_size = dwarf_attr (die, DW_AT_byte_size);
+  if (attr_byte_size)
+    byte_size = DW_UNSND (attr_byte_size);
   else
+    byte_size = cu_header->addr_size;
+
+  attr_address_class = dwarf_attr (die, DW_AT_address_class);
+  if (attr_address_class)
+    addr_class = DW_UNSND (attr_address_class);
+  else
+    addr_class = DW_ADDR_none;
+
+  /* If the pointer size or address class is different than the
+     default, create a type variant marked as such and set the
+     length accordingly.  */
+  if (TYPE_LENGTH (type) != byte_size || addr_class != DW_ADDR_none)
     {
-      TYPE_LENGTH (type) = cu_header->addr_size;
+      if (ADDRESS_CLASS_TYPE_FLAGS_P ())
+	{
+	  int type_flags;
+
+	  type_flags = ADDRESS_CLASS_TYPE_FLAGS (byte_size, addr_class);
+	  gdb_assert ((type_flags & ~TYPE_FLAG_ADDRESS_CLASS_ALL) == 0);
+	  type = make_type_with_address_space (type, type_flags);
+	}
+      else if (TYPE_LENGTH (type) != byte_size)
+	{
+	  complain (&dwarf2_invalid_pointer_size, byte_size);
+	}
+      else {
+	/* Should we also complain about unhandled address classes?  */
+      }
     }
+
+  TYPE_LENGTH (type) = byte_size;
   die->type = type;
 }
 
@@ -4864,6 +4906,14 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
                                 "external variable");
                     }
 		  add_symbol_to_list (sym, &global_symbols);
+                  if (is_thread_local)
+                    {
+                      /* SYMBOL_VALUE_ADDRESS contains at this point the
+		         offset of the variable within the thread local
+			 storage.  */
+                      SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
+                      SYMBOL_OBJFILE (sym) = objfile;
+                    }
 
 		  /* In shared libraries the address of the variable
 		     in the location descriptor might still be relocatable,
@@ -4872,7 +4922,7 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		     value is zero, the address of the variable will then
 		     be determined from the minimal symbol table whenever
 		     the variable is referenced.  */
-		  if (SYMBOL_VALUE_ADDRESS (sym))
+		  else if (SYMBOL_VALUE_ADDRESS (sym))
 		    {
 		      fixup_symbol_section (sym, objfile);
 		      SYMBOL_VALUE_ADDRESS (sym) +=
@@ -4922,6 +4972,11 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		    {
 		      SYMBOL_CLASS (sym) = LOC_LOCAL;
 		    }
+                  else if (is_thread_local)
+                    {
+                      SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
+                      SYMBOL_OBJFILE (sym) = objfile;
+                    }
 		  else
 		    {
 		      fixup_symbol_section (sym, objfile);
@@ -6512,6 +6567,7 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
   offreg = 0;
   isderef = 0;
   islocal = 0;
+  is_thread_local = 0;
   optimized_out = 1;
 
   while (i < size)
@@ -6734,6 +6790,16 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  if (i < size)
 	    complain (&dwarf2_complex_location_expr);
 	  break;
+
+        case DW_OP_GNU_push_tls_address:
+          is_thread_local = 1;
+	  /* The top of the stack has the offset from the beginning
+	     of the thread control block at which the variable is located.  */
+	  /* Nothing should follow this operator, so the top of stack would
+	     be returned.  */
+	  if (i < size)
+	    complain (&dwarf2_complex_location_expr);
+          break;
 
 	default:
 	  complain (&dwarf2_unsupported_stack_op, dwarf_stack_op_name (op));

@@ -38,7 +38,7 @@ static bfd_reloc_status_type  or32_elf_jumptarg_reloc          PARAMS ((bfd *, a
 
 /* Try to minimize the amount of space occupied by relocation tables
    on the ROM (not that the ROM won't be swamped by other ELF overhead).  */
-#define USE_REL
+#define USE_REL	1
 
 static reloc_howto_type elf_or32_howto_table[] =
 {

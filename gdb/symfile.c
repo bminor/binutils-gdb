@@ -1921,6 +1921,7 @@ init_filename_language_table (void)
       /* OBSOLETE add_filename_language (".ch", language_chill); */
       /* OBSOLETE add_filename_language (".c186", language_chill); */
       /* OBSOLETE add_filename_language (".c286", language_chill); */
+      add_filename_language (".m", language_objc);
       add_filename_language (".f", language_fortran);
       add_filename_language (".F", language_fortran);
       add_filename_language (".s", language_asm);

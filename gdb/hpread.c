@@ -5741,7 +5741,7 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 	{
 	  /* Thread-local variable.
 	   */
-	  SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
+	  SYMBOL_CLASS (sym) = LOC_HP_THREAD_LOCAL_STATIC;
 	  SYMBOL_BASEREG (sym) = CR27_REGNUM;
 
 	  if (objfile->flags & OBJF_SHARED)

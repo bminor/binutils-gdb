@@ -3348,13 +3348,11 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
-#ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM		bfd_elf32_i386_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
 #define ELF_MACHINE_CODE		EM_386
 #define ELF_MAXPAGESIZE			0x1000
-#endif /* ELF_ARCH */
 
 #define elf_backend_can_gc_sections	1
 #define elf_backend_can_refcount	1
@@ -3389,6 +3387,62 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
 
-#ifndef ELF32_I386_C_INCLUDED
 #include "elf32-target.h"
+
+/* FreeBSD support.  */
+
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_i386_freebsd_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-i386-freebsd"
+
+/* The kernel recognizes executables as valid only if they carry a
+   "FreeBSD" label in the ELF header.  So we put this label on all
+   executables and (for simplicity) also all other object files.  */
+
+static void elf_i386_post_process_headers
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+static void
+elf_i386_post_process_headers (abfd, link_info)
+     bfd *abfd;
+     struct bfd_link_info *link_info ATTRIBUTE_UNUSED;
+{
+  Elf_Internal_Ehdr *i_ehdrp;
+
+  i_ehdrp = elf_elfheader (abfd);
+
+  /* Put an ABI label supported by FreeBSD >= 4.1.  */
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
+#ifdef OLD_FREEBSD_ABI_LABEL
+  /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
+  memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
 #endif
+}
+
+#undef	elf_backend_post_process_headers
+#define	elf_backend_post_process_headers      elf_i386_post_process_headers
+
+#define	elf32_bed			elf32_i386_fbsd_bed
+
+#include "elf32-target.h"
+
+#undef	elf_backend_post_process_headers
+#undef	elf32_bed
+
+/* QNX support.  */
+#include "elf32-qnx.h"
+
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_i386qnx_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-i386-nto"
+
+#define	elf32_bed			elf32_i386_qnx_bed
+
+#include "elf32-target.h"
+
+#undef	elf_backend_set_nonloadable_filepos
+#undef	elf_backend_is_contained_by_filepos
+#undef	elf_backend_copy_private_bfd_data_p
+#undef	elf32_bed

@@ -254,6 +254,7 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   struct varobj *var;
   struct varobj **childlist;
   struct varobj **cc;
+  struct cleanup *cleanup_children;
   int numchild;
   char *type;
 
@@ -271,11 +272,12 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   if (numchild <= 0)
     return MI_CMD_DONE;
 
-  ui_out_tuple_begin (uiout, "children");
+  cleanup_children = make_cleanup_ui_out_tuple_begin_end (uiout, "children");
   cc = childlist;
   while (*cc != NULL)
     {
-      ui_out_tuple_begin (uiout, "child");
+      struct cleanup *cleanup_child;
+      cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, "child");
       ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
       ui_out_field_string (uiout, "exp", varobj_get_expression (*cc));
       ui_out_field_int (uiout, "numchild", varobj_get_num_children (*cc));
@@ -283,10 +285,10 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
       /* C++ pseudo-variables (public, private, protected) do not have a type */
       if (type)
 	ui_out_field_string (uiout, "type", varobj_get_type (*cc));
-      ui_out_tuple_end (uiout);
+      do_cleanups (cleanup_child);
       cc++;
     }
-  ui_out_tuple_end (uiout);
+  do_cleanups (cleanup_children);
   xfree (childlist);
   return MI_CMD_DONE;
 }

@@ -1588,6 +1588,35 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      continue;
 	    }
+	  else if (! howto->partial_inplace)
+	    {
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	      relocation |= ((sym->st_other & STO_SH5_ISA32) != 0);
+	    }
+	  else if ((sec->flags & SEC_MERGE)
+		   && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      asection *msec;
+
+	      if (howto->rightshift || howto->src_mask != 0xffffffff)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s(%s+0x%lx): %s relocation against SEC_MERGE section"),
+		     bfd_archive_filename (input_bfd),
+		     bfd_get_section_name (input_bfd, input_section),
+		     (long) rel->r_offset, howto->name);
+		  return false;
+		}
+
+              addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
+              msec = sec;
+              addend =
+		_bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend)
+		- relocation;
+	      addend += msec->output_section->vma + msec->output_offset;
+	      bfd_put_32 (input_bfd, addend, contents + rel->r_offset);
+	      addend = 0;
+	    }
 	}
       else
 	{
@@ -4129,8 +4158,6 @@ sh64_elf64_finish_dynamic_sections (output_bfd, info)
   return true;
 }
 
-
-#ifndef ELF_ARCH
 #define TARGET_BIG_SYM		bfd_elf64_sh64_vec
 #define TARGET_BIG_NAME		"elf64-sh64"
 #define TARGET_LITTLE_SYM	bfd_elf64_sh64l_vec
@@ -4140,7 +4167,6 @@ sh64_elf64_finish_dynamic_sections (output_bfd, info)
 #define ELF_MAXPAGESIZE		128
 
 #define elf_symbol_leading_char '_'
-#endif /* ELF_ARCH */
 
 #define bfd_elf64_bfd_reloc_type_lookup	sh_elf64_reloc_type_lookup
 #define elf_info_to_howto		sh_elf64_info_to_howto
@@ -4194,4 +4220,35 @@ sh64_elf64_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_got_header_size	24
 #define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
+#include "elf64-target.h"
+
+/* NetBSD support.  */
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM			bfd_elf64_sh64nbsd_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf64-sh64-nbsd"
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf64_sh64lnbsd_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf64-sh64l-nbsd"
+#undef	ELF_MAXPAGESIZE
+#define	ELF_MAXPAGESIZE			0x10000
+#undef	elf_symbol_leading_char
+#define	elf_symbol_leading_char		0
+
+#define	elf64_bed			elf64_sh64_nbsd_bed
+
+#include "elf64-target.h"
+
+/* Linux support.  */
+#undef	TARGET_BIG_SYM
+#define	TARGET_BIG_SYM			bfd_elf64_sh64blin_vec
+#undef	TARGET_BIG_NAME
+#define	TARGET_BIG_NAME			"elf64-sh64big-linux"
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf64_sh64lin_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf64-sh64-linux"
+
+#define	INCLUDED_TARGET_FILE
 #include "elf64-target.h"

@@ -205,6 +205,7 @@ enum language
     language_auto,		/* Placeholder for automatic setting */
     language_c,			/* C */
     language_cplus,		/* C++ */
+    language_objc,		/* Objective-C */
     language_java,		/* Java */
     /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
@@ -441,6 +442,8 @@ extern int putchar_unfiltered (int c);
 extern void puts_filtered (const char *);
 
 extern void puts_unfiltered (const char *);
+
+extern void puts_filtered_tabular (char *string, int width, int right);
 
 extern void puts_debug (char *prefix, char *string, char *suffix);
 

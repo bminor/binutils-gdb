@@ -793,6 +793,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_bigarc_vec,
 	&bfd_elf32_bigarm_oabi_vec,
 	&bfd_elf32_bigarm_vec,
+	&bfd_elf32_bigarmqnx_vec,
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_cris_vec,
 	&bfd_elf32_d10v_vec,
@@ -819,6 +820,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_littlearc_vec,
 	&bfd_elf32_littlearm_oabi_vec,
 	&bfd_elf32_littlearm_vec,
+	&bfd_elf32_littlearmqnx_vec,
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_m32r_vec,
 	&bfd_elf32_m68hc11_vec,
@@ -849,7 +851,9 @@ static const bfd_target * const _bfd_target_vector[] = {
         &bfd_elf32_shl_vec,
         &bfd_elf32_shlin_vec,
 	&bfd_elf32_shlnbsd_vec,
+	&bfd_elf32_shlqnx_vec,
 	&bfd_elf32_shnbsd_vec,
+	&bfd_elf32_shqnx_vec,
 #ifdef BFD64
 	&bfd_elf32_sh64_vec,
 	&bfd_elf32_sh64l_vec,
@@ -1273,14 +1277,17 @@ bfd_target_list ()
     vec_length++;
 
   amt = (vec_length + 1) * sizeof (char **);
-  name_ptr = name_list = (const char **) bfd_zmalloc (amt);
+  name_ptr = name_list = (const char **) bfd_malloc (amt);
 
   if (name_list == NULL)
     return NULL;
 
   for (target = &bfd_target_vector[0]; *target != NULL; target++)
-    *(name_ptr++) = (*target)->name;
+    if (target == &bfd_target_vector[0]
+	|| *target != bfd_target_vector[0])
+      *name_ptr++ = (*target)->name;
 
+  *name_ptr = NULL;
   return name_list;
 }
 

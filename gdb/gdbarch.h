@@ -2611,6 +2611,55 @@ extern void set_gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch, i
 #endif
 #endif
 
+#if defined (ADDRESS_CLASS_TYPE_FLAGS)
+/* Legacy for systems yet to multi-arch ADDRESS_CLASS_TYPE_FLAGS */
+#if !defined (ADDRESS_CLASS_TYPE_FLAGS_P)
+#define ADDRESS_CLASS_TYPE_FLAGS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (ADDRESS_CLASS_TYPE_FLAGS_P)
+#define ADDRESS_CLASS_TYPE_FLAGS_P() (0)
+#endif
+
+extern int gdbarch_address_class_type_flags_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (ADDRESS_CLASS_TYPE_FLAGS_P)
+#error "Non multi-arch definition of ADDRESS_CLASS_TYPE_FLAGS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (ADDRESS_CLASS_TYPE_FLAGS_P)
+#define ADDRESS_CLASS_TYPE_FLAGS_P() (gdbarch_address_class_type_flags_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (ADDRESS_CLASS_TYPE_FLAGS)
+#define ADDRESS_CLASS_TYPE_FLAGS(byte_size, dwarf2_addr_class) (internal_error (__FILE__, __LINE__, "ADDRESS_CLASS_TYPE_FLAGS"), 0)
+#endif
+
+typedef int (gdbarch_address_class_type_flags_ftype) (int byte_size, int dwarf2_addr_class);
+extern int gdbarch_address_class_type_flags (struct gdbarch *gdbarch, int byte_size, int dwarf2_addr_class);
+extern void set_gdbarch_address_class_type_flags (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_ftype *address_class_type_flags);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (ADDRESS_CLASS_TYPE_FLAGS)
+#error "Non multi-arch definition of ADDRESS_CLASS_TYPE_FLAGS"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (ADDRESS_CLASS_TYPE_FLAGS)
+#define ADDRESS_CLASS_TYPE_FLAGS(byte_size, dwarf2_addr_class) (gdbarch_address_class_type_flags (current_gdbarch, byte_size, dwarf2_addr_class))
+#endif
+#endif
+
+extern int gdbarch_address_class_type_flags_to_name_p (struct gdbarch *gdbarch);
+
+typedef char * (gdbarch_address_class_type_flags_to_name_ftype) (struct gdbarch *gdbarch, int type_flags);
+extern char * gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags);
+extern void set_gdbarch_address_class_type_flags_to_name (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_to_name_ftype *address_class_type_flags_to_name);
+
+extern int gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, char *name, int *type_flags_ptr);
+extern int gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, char *name, int *type_flags_ptr);
+extern void set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

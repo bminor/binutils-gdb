@@ -976,7 +976,7 @@ name_not_typename :	NAME
    name_not_typename (=variable, =exp) or just an exp.  If
    name_not_typename was ever used in an lvalue context where only a
    name could occur, this might be useful.  */
-  	| NAME_OR_INT */
+/*  	| NAME_OR_INT */
 	;
 
 %%

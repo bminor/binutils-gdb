@@ -1,3 +1,32 @@
+2002-10-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/schedlock.c (args): Make unsigned.
+
+2002-10-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.asm/asm-source.exp: Add "mips*-*" pattern.  Update line
+	numbers.  Allow "foo2|selected stack frame".
+	* gdb.asm/asmsrc1.s: Use gdbasm_declare and gdbasm_end.
+	* gdb.asm/asmsrc2.s: Likewise.
+	* gdb.asm/common.inc: Define gdbasm_declare and gdbasm_end.  Update
+	comments.
+	* gdb.asm/mips.inc: New file.
+
+2002-10-18  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.base/default.exp: Update expected output to include 'ObjC'.
+	* gdb.base/help.exp: Likewise.
+
+2002-10-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/constvars.c (struct crass, struct crisp): New structs.
+	* gdb.base/constvars.exp (ptype crass, ptype crisp): New tests.
+
+2002-10-25  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Change all of the setup_xfail tests that
+	I added into setup_kfails.
+
 2002-10-17  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/namespace.cc: Add namespace renaming, using directives,

@@ -905,7 +905,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
 
 /* Sequence of bytes for breakpoint instruction.  */
 static unsigned char *
-x86_64_breakpoint_from_pc (CORE_ADDR * pc, int *lenptr)
+x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0xcc };
   *lenptr = 1;
@@ -1027,7 +1027,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* FRAME_CHAIN takes a frame's nominal address and produces the frame's
      chain-pointer.  */
-  set_gdbarch_frame_chain (gdbarch, cfi_frame_chain);
+  set_gdbarch_frame_chain (gdbarch, x86_64_linux_frame_chain);
 
   set_gdbarch_frameless_function_invocation (gdbarch,
 					     x86_64_frameless_function_invocation);
@@ -1042,10 +1042,10 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_init_saved_regs (gdbarch, x86_64_frame_init_saved_regs);
 
 /* Frame pc initialization is handled by unwind informations.  */
-  set_gdbarch_init_frame_pc (gdbarch, cfi_init_frame_pc);
+  set_gdbarch_init_frame_pc (gdbarch, x86_64_init_frame_pc);
 
 /* Initialization of unwind informations.  */
-  set_gdbarch_init_extra_frame_info (gdbarch, cfi_init_extra_frame_info);
+  set_gdbarch_init_extra_frame_info (gdbarch, x86_64_init_extra_frame_info);
 
 /* Getting saved registers is handled by unwind informations.  */
   set_gdbarch_get_saved_register (gdbarch, cfi_get_saved_register);
@@ -1055,8 +1055,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Cons up virtual frame pointer for trace */
   set_gdbarch_virtual_frame_pointer (gdbarch, cfi_virtual_frame_pointer);
 
-
-  set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
+  set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
@@ -1092,12 +1091,14 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
-  set_gdbarch_deprecated_extract_return_value (gdbarch, x86_64_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       x86_64_extract_return_value);
 
 
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
-  set_gdbarch_deprecated_store_return_value (gdbarch, x86_64_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch,
+					     x86_64_store_return_value);
 
 
 /* Offset from address of function to start of its code.  */
@@ -1122,6 +1123,8 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Use dwarf2 debug frame informations.  */
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, x86_64_dwarf2_reg_to_regnum);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);
 
   return gdbarch;
 }

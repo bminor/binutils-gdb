@@ -88,7 +88,11 @@ asection * m32r_elf_gc_mark_hook
    This only saves space in libraries and object files, but perhaps
    relocs will be put in ROM?  All in all though, REL relocs are a pain
    to work with.  */
-#define USE_REL
+#define USE_REL	1
+
+#ifndef USE_REL
+#define USE_REL	0
+#endif
 
 static reloc_howto_type m32r_elf_howto_table[] =
 {
@@ -982,7 +986,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   /* Assume success.  */
   boolean ret = true;
 
-#ifndef USE_REL
+#if !USE_REL
   if (info->relocateable)
     return true;
 #endif
@@ -1026,7 +1030,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       howto = m32r_elf_howto_table + r_type;
       r_symndx = ELF32_R_SYM (rel->r_info);
 
-#ifdef USE_REL
+#if USE_REL
       if (info->relocateable)
 	{
 	  /* This is a relocateable link.  We don't have to change
@@ -1102,7 +1106,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      sym = local_syms + r_symndx;
 	      sec = local_sections[r_symndx];
 	      sym_name = "<local symbol>";
-#ifndef USE_REL
+#if !USE_REL
 	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
 	      addend = rel->r_addend;
 #else
@@ -1507,7 +1511,7 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
 	     will be at least 4 bytes closer if we can relax.  It'll actually
 	     be 4 or 8 bytes closer, but we don't know which just yet and
 	     the difference isn't significant enough to worry about.  */
-#ifndef USE_REL /* put in for learning purposes */
+#if !USE_REL /* put in for learning purposes */
 	  pcrel_value += irel->r_addend;
 #else
 	  addend = bfd_get_signed_16 (abfd, contents + irel->r_offset + 2);
@@ -1536,7 +1540,7 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
 		     We OR in CODE just in case it's not a nop (technically,
 		     CODE currently must be a nop, but for cleanness we
 		     allow it to be anything).  */
-#ifndef USE_REL /* put in for learning purposes */
+#if !USE_REL /* put in for learning purposes */
 		  code = 0x7e000000 | MAKE_PARALLEL (code);
 #else
 		  code = (0x7e000000 + (((addend >> 2) & 0xff) << 16)) | MAKE_PARALLEL (code);
@@ -1546,7 +1550,7 @@ m32r_elf_relax_section (abfd, sec, link_info, again)
 	      else
 		{
 		  /* Change the seth rN,foo to a bl24 foo.  */
-#ifndef USE_REL /* put in for learning purposes */
+#if !USE_REL /* put in for learning purposes */
 		  code = 0xfe000000;
 #else
 		  code = 0xfe000000 + ((addend >> 2) & 0xffffff);
@@ -2107,7 +2111,7 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 #define elf_backend_check_relocs                m32r_elf_check_relocs
 
 #define elf_backend_can_gc_sections             1
-#ifndef USE_REL
+#if !USE_REL
 #define elf_backend_rela_normal			1
 #endif
 #if 0 /* not yet */

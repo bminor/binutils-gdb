@@ -103,9 +103,9 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
       if (current_frame_addr > 0)
 	{
 	  ptr_to_lower_bound =
-	    read_memory_integer (current_frame_addr +
-				 TYPE_ARRAY_LOWER_BOUND_VALUE (type),
-				 4);
+	    read_memory_typed_address (current_frame_addr +
+				       TYPE_ARRAY_LOWER_BOUND_VALUE (type),
+				       builtin_type_void_data_ptr);
 	  *lower_bound = read_memory_integer (ptr_to_lower_bound, 4);
 	}
       else
@@ -166,9 +166,9 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
       if (current_frame_addr > 0)
 	{
 	  ptr_to_upper_bound =
-	    read_memory_integer (current_frame_addr +
-				 TYPE_ARRAY_UPPER_BOUND_VALUE (type),
-				 4);
+	    read_memory_typed_address (current_frame_addr +
+				       TYPE_ARRAY_UPPER_BOUND_VALUE (type),
+				       builtin_type_void_data_ptr);
 	  *upper_bound = read_memory_integer (ptr_to_upper_bound, 4);
 	}
       else

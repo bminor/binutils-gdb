@@ -392,7 +392,7 @@ symbol_read_needs_frame (struct symbol *sym)
     case LOC_LOCAL_ARG:
     case LOC_BASEREG:
     case LOC_BASEREG_ARG:
-    case LOC_THREAD_LOCAL_STATIC:
+    case LOC_HP_THREAD_LOCAL_STATIC:
       return 1;
 
     case LOC_UNDEF:
@@ -530,7 +530,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_BASEREG:
     case LOC_BASEREG_ARG:
-    case LOC_THREAD_LOCAL_STATIC:
+    case LOC_HP_THREAD_LOCAL_STATIC:
       {
 	struct value *regval;
 
@@ -541,6 +541,29 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	addr = value_as_address (regval);
 	addr += SYMBOL_VALUE (var);
 	break;
+      }
+
+    case LOC_THREAD_LOCAL_STATIC:
+      {
+#if 0
+	/* FIXME: ezannoni 2002-10-21: Temporarly disable the code
+           below, until the rest of the TLS support code is checked
+           in.  */
+
+        /* We want to let the target / ABI-specific code construct
+           this value for us, so we need to dispose of the value
+           allocated for us above.  */
+        if (target_get_thread_local_address_p ())
+          addr = target_get_thread_local_address (inferior_ptid,
+                                                  SYMBOL_OBJFILE (var),
+                                                  SYMBOL_VALUE_ADDRESS (var));
+        /* It wouldn't be wrong here to try a gdbarch method, too;
+           finding TLS is an ABI-specific thing.  But we don't do that
+           yet.  */
+        else
+#endif
+          error ("Cannot find thread-local variables on this target");
+        break;
       }
 
     case LOC_TYPEDEF:

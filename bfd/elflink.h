@@ -1298,6 +1298,14 @@ elf_link_add_object_symbols (abfd, info)
       const char *name;
       bfd_size_type oldsize;
       bfd_size_type strindex;
+      struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
+
+      /* ld --just-symbols and dynamic objects don't mix very well.
+	 Test for --just-symbols by looking at info set up by
+	 _bfd_elf_link_just_syms.  */
+      if ((s = abfd->sections) != NULL
+	  && elf_section_data (s)->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+	goto error_return;
 
       /* Find the name to use in a DT_NEEDED entry that refers to this
 	 object.  If the object has a DT_SONAME entry, we use it.
@@ -1327,8 +1335,6 @@ elf_link_add_object_symbols (abfd, info)
 	  Elf_External_Dyn *extdynend;
 	  int elfsec;
 	  unsigned long shlink;
-	  int rpath;
-	  int runpath;
 
 	  dynbuf = (Elf_External_Dyn *) bfd_malloc (s->_raw_size);
 	  if (dynbuf == NULL)
@@ -1345,8 +1351,6 @@ elf_link_add_object_symbols (abfd, info)
 
 	  extdyn = dynbuf;
 	  extdynend = extdyn + s->_raw_size / sizeof (Elf_External_Dyn);
-	  rpath = 0;
-	  runpath = 0;
 	  for (; extdyn < extdynend; extdyn++)
 	    {
 	      Elf_Internal_Dyn dyn;
@@ -1390,13 +1394,6 @@ elf_link_add_object_symbols (abfd, info)
 		  char *fnm, *anm;
 		  unsigned int tagv = dyn.d_un.d_val;
 
-		  /* When we see DT_RPATH before DT_RUNPATH, we have
-		     to clear runpath.  Do _NOT_ bfd_release, as that
-		     frees all more recently bfd_alloc'd blocks as
-		     well.  */
-		  if (rpath && hash_table->runpath)
-		    hash_table->runpath = NULL;
-
 		  amt = sizeof (struct bfd_link_needed_list);
 		  n = (struct bfd_link_needed_list *) bfd_alloc (abfd, amt);
 		  fnm = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
@@ -1410,13 +1407,11 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = & hash_table->runpath;
+		  for (pn = & runpath;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
 		  *pn = n;
-		  runpath = 1;
-		  rpath = 0;
 		}
 	      /* Ignore DT_RPATH if we have seen DT_RUNPATH.  */
 	      if (!runpath && dyn.d_tag == DT_RPATH)
@@ -1442,16 +1437,30 @@ elf_link_add_object_symbols (abfd, info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = & hash_table->runpath;
+		  for (pn = & rpath;
 		       *pn != NULL;
 		       pn = &(*pn)->next)
 		    ;
 		  *pn = n;
-		  rpath = 1;
 		}
 	    }
 
 	  free (dynbuf);
+	}
+
+      /* DT_RUNPATH overrides DT_RPATH.  Do _NOT_ bfd_release, as that
+	 frees all more recently bfd_alloc'd blocks as well.  */
+      if (runpath)
+	rpath = runpath;
+
+      if (rpath)
+	{
+	  struct bfd_link_needed_list **pn;
+	  for (pn = & hash_table->runpath;
+	       *pn != NULL;
+	       pn = &(*pn)->next)
+	    ;
+	  *pn = rpath;
 	}
 
       /* We do not want to include any of the sections in a dynamic
@@ -4660,8 +4669,9 @@ struct elf_link_sort_rela
   enum elf_reloc_type_class type;
   union
   {
-    Elf_Internal_Rel rel;
-    Elf_Internal_Rela rela;
+    /* We use these as arrays of size int_rels_per_ext_rel.  */
+    Elf_Internal_Rel rel[1];
+    Elf_Internal_Rela rela[1];
   } u;
 };
 
@@ -4681,13 +4691,13 @@ elf_link_sort_cmp1 (A, B)
     return 1;
   if (relativea > relativeb)
     return -1;
-  if (ELF_R_SYM (a->u.rel.r_info) < ELF_R_SYM (b->u.rel.r_info))
+  if (ELF_R_SYM (a->u.rel->r_info) < ELF_R_SYM (b->u.rel->r_info))
     return -1;
-  if (ELF_R_SYM (a->u.rel.r_info) > ELF_R_SYM (b->u.rel.r_info))
+  if (ELF_R_SYM (a->u.rel->r_info) > ELF_R_SYM (b->u.rel->r_info))
     return 1;
-  if (a->u.rel.r_offset < b->u.rel.r_offset)
+  if (a->u.rel->r_offset < b->u.rel->r_offset)
     return -1;
-  if (a->u.rel.r_offset > b->u.rel.r_offset)
+  if (a->u.rel->r_offset > b->u.rel->r_offset)
     return 1;
   return 0;
 }
@@ -4711,9 +4721,9 @@ elf_link_sort_cmp2 (A, B)
     return -1;
   if (copya > copyb)
     return 1;
-  if (a->u.rel.r_offset < b->u.rel.r_offset)
+  if (a->u.rel->r_offset < b->u.rel->r_offset)
     return -1;
-  if (a->u.rel.r_offset > b->u.rel.r_offset)
+  if (a->u.rel->r_offset > b->u.rel->r_offset)
     return 1;
   return 0;
 }
@@ -4731,6 +4741,7 @@ elf_link_sort_relocs (abfd, info, psec)
   size_t i, j, ret;
   struct elf_link_sort_rela *rela;
   struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  int i2e = bed->s->int_rels_per_ext_rel;
 
   reldyn = bfd_get_section_by_name (abfd, ".rela.dyn");
   if (reldyn == NULL || reldyn->_raw_size == 0)
@@ -4754,7 +4765,23 @@ elf_link_sort_relocs (abfd, info, psec)
   if (size != reldyn->_raw_size)
     return 0;
 
-  rela = (struct elf_link_sort_rela *) bfd_zmalloc (sizeof (*rela) * count);
+  /* We waste some memory here when N = i2e is greater than 1, since
+     we allocate space for N * sizeof (*rela) where sizeof (*rela) +
+     (N - 1) * sizeof (Elf_Internal_Rel/Rela) would do.  Also, we use
+     rela[k] only when k is a multiple of N, and then we index the
+     array within the union, such that rela[k].u.rel[i], i < N, is the
+     (i+1)th internal relocation corresponding to the (k/N)th external
+     relocation.  This is done such that the relocation swap-in and
+     swap-out functions can gen pointers to arrays of internal
+     relocations that form a single external relocation.
+
+     If C permitted arrays of structures with dynamic sizes, we could
+     do better, but trying to avoid wasting space at the end of the
+     chunk from rela[k] to rela[k+N-1] would require us to allocate a
+     separate array of pointers and since most ports have N == 1, this
+     would be more wasteful.  */
+  rela = (struct elf_link_sort_rela *) bfd_zmalloc
+    (sizeof (*rela) * count * i2e);
   if (rela == NULL)
     {
       (*info->callbacks->warning)
@@ -4775,15 +4802,16 @@ elf_link_sort_relocs (abfd, info, psec)
 
 	    erel = (Elf_External_Rel *) o->contents;
 	    erelend = (Elf_External_Rel *) (o->contents + o->_raw_size);
-	    s = rela + o->output_offset / sizeof (Elf_External_Rel);
-	    for (; erel < erelend; erel++, s++)
+	    s = rela + (o->output_offset / sizeof (Elf_External_Rel) * i2e);
+	    for (; erel < erelend; erel++, s += i2e)
 	      {
 		if (bed->s->swap_reloc_in)
-		  (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel, &s->u.rel);
+		  (*bed->s->swap_reloc_in) (abfd, (bfd_byte *) erel,
+					    s->u.rel);
 		else
-		  elf_swap_reloc_in (abfd, erel, &s->u.rel);
+		  elf_swap_reloc_in (abfd, erel, s->u.rel);
 
-		s->type = (*bed->elf_backend_reloc_type_class) (&s->u.rela);
+		s->type = (*bed->elf_backend_reloc_type_class) (s->u.rela);
 	      }
 	  }
 	else
@@ -4793,30 +4821,34 @@ elf_link_sort_relocs (abfd, info, psec)
 
 	    erela = (Elf_External_Rela *) o->contents;
 	    erelaend = (Elf_External_Rela *) (o->contents + o->_raw_size);
-	    s = rela + o->output_offset / sizeof (Elf_External_Rela);
-	    for (; erela < erelaend; erela++, s++)
+	    s = rela + (o->output_offset / sizeof (Elf_External_Rela) * i2e);
+	    for (; erela < erelaend; erela++, s += i2e)
 	      {
 		if (bed->s->swap_reloca_in)
 		  (*bed->s->swap_reloca_in) (dynobj, (bfd_byte *) erela,
-					     &s->u.rela);
+					     s->u.rela);
 		else
-		  elf_swap_reloca_in (dynobj, erela, &s->u.rela);
+		  elf_swap_reloca_in (dynobj, erela, s->u.rela);
 
-		s->type = (*bed->elf_backend_reloc_type_class) (&s->u.rela);
+		s->type = (*bed->elf_backend_reloc_type_class) (s->u.rela);
 	      }
 	  }
       }
 
-  qsort (rela, (size_t) count, sizeof (*rela), elf_link_sort_cmp1);
-  for (ret = 0; ret < count && rela[ret].type == reloc_class_relative; ret++)
+  qsort (rela, (size_t) count, sizeof (*rela) * i2e, elf_link_sort_cmp1);
+  for (ret = 0; ret < count * i2e && rela[ret].type == reloc_class_relative;
+       ret += i2e)
     ;
-  for (i = ret, j = ret; i < count; i++)
+  for (i = ret, j = ret; i < count * i2e; i += i2e)
     {
-      if (ELF_R_SYM (rela[i].u.rel.r_info) != ELF_R_SYM (rela[j].u.rel.r_info))
+      if (ELF_R_SYM (rela[i].u.rel->r_info)
+	  != ELF_R_SYM (rela[j].u.rel->r_info))
 	j = i;
-      rela[i].offset = rela[j].u.rel.r_offset;
+      rela[i].offset = rela[j].u.rel->r_offset;
     }
-  qsort (rela + ret, (size_t) count - ret, sizeof (*rela), elf_link_sort_cmp2);
+  ret /= i2e;
+  qsort (rela + ret, (size_t) count - ret,
+	 sizeof (*rela) * i2e, elf_link_sort_cmp2);
 
   for (o = dynobj->sections; o != NULL; o = o->next)
     if ((o->flags & (SEC_HAS_CONTENTS|SEC_LINKER_CREATED))
@@ -4830,14 +4862,14 @@ elf_link_sort_relocs (abfd, info, psec)
 
 	    erel = (Elf_External_Rel *) o->contents;
 	    erelend = (Elf_External_Rel *) (o->contents + o->_raw_size);
-	    s = rela + o->output_offset / sizeof (Elf_External_Rel);
-	    for (; erel < erelend; erel++, s++)
+	    s = rela + (o->output_offset / sizeof (Elf_External_Rel) * i2e);
+	    for (; erel < erelend; erel++, s += i2e)
 	      {
 		if (bed->s->swap_reloc_out)
-		  (*bed->s->swap_reloc_out) (abfd, &s->u.rel,
+		  (*bed->s->swap_reloc_out) (abfd, s->u.rel,
 					     (bfd_byte *) erel);
 		else
-		  elf_swap_reloc_out (abfd, &s->u.rel, erel);
+		  elf_swap_reloc_out (abfd, s->u.rel, erel);
 	      }
 	  }
 	else
@@ -4847,14 +4879,14 @@ elf_link_sort_relocs (abfd, info, psec)
 
 	    erela = (Elf_External_Rela *) o->contents;
 	    erelaend = (Elf_External_Rela *) (o->contents + o->_raw_size);
-	    s = rela + o->output_offset / sizeof (Elf_External_Rela);
-	    for (; erela < erelaend; erela++, s++)
+	    s = rela + (o->output_offset / sizeof (Elf_External_Rela) * i2e);
+	    for (; erela < erelaend; erela++, s += i2e)
 	      {
 		if (bed->s->swap_reloca_out)
-		  (*bed->s->swap_reloca_out) (dynobj, &s->u.rela,
+		  (*bed->s->swap_reloca_out) (dynobj, s->u.rela,
 					      (bfd_byte *) erela);
 		else
-		  elf_swap_reloca_out (dynobj, &s->u.rela, erela);
+		  elf_swap_reloca_out (dynobj, s->u.rela, erela);
 	      }
 	  }
       }

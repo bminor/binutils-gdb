@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -119,7 +119,6 @@ bfd_default_target_size = @bfd_default_target_size@
 bfd_libs = @bfd_libs@
 bfd_machines = @bfd_machines@
 bfd_version = @bfd_version@
-bfd_version_date = @bfd_version_date@
 bfd_version_string = @bfd_version_string@
 bfdincludedir = @bfdincludedir@
 bfdlibdir = @bfdlibdir@
@@ -332,7 +331,7 @@ uninstall-info:
 	else ii=; fi; \
 	list='$(INFO_DEPS)'; \
 	for file in $$list; do \
-	  test -z "$ii" \
+	  test -z "$$ii" \
 	    || install-info --info-dir=$(DESTDIR)$(infodir) --remove $$file; \
 	done
 	@$(NORMAL_UNINSTALL)
