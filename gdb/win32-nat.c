@@ -32,7 +32,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <windows.h>
+#include "windefs.h"
 #include "buildsym.h"
 #include "symfile.h"
 #include "objfiles.h"

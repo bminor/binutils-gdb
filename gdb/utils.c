@@ -2268,10 +2268,11 @@ floatformat_from_doublest (fmt, from, to)
       if (mant_bits_left == fmt->man_len
 	  && fmt->intbit == floatformat_intbit_no)
 	{
-	  mant_long &= 0x7fffffff;
+	  mant_long <<= 1;
 	  mant_bits -= 1;
 	}
-      else if (mant_bits < 32)
+
+      if (mant_bits < 32)
 	{
 	  /* The bits we want are in the most significant MANT_BITS bits of
 	     mant_long.  Move them to the least significant.  */
@@ -2284,3 +2285,63 @@ floatformat_from_doublest (fmt, from, to)
       mant_bits_left -= mant_bits;
     }
 }
+
+/* temporary storage using circular buffer */
+#define MAXCELLS 16
+#define CELLSIZE 32
+char* 
+get_cell()
+{
+  static char buf[MAXCELLS][CELLSIZE];
+  static int cell=0;
+  if (++cell>MAXCELLS) cell=0;
+  return buf[cell];
+}
+
+/* print routines to handle variable size regs, etc */
+char* 
+paddr(addr)
+  t_addr addr;
+{
+  char *paddr_str=get_cell();
+  switch (sizeof(t_addr))
+    {
+      case 8:
+        sprintf(paddr_str,"%08x%08x",
+		(unsigned long)(addr>>32),(unsigned long)(addr&0xffffffff));
+	break;
+      case 4:
+        sprintf(paddr_str,"%08x",(unsigned long)addr);
+	break;
+      case 2:
+        sprintf(paddr_str,"%04x",(unsigned short)(addr&0xffff));
+	break;
+      default:
+        sprintf(paddr_str,"%x",addr);
+    }
+  return paddr_str;
+}
+
+char* 
+preg(reg)
+  t_reg reg;
+{
+  char *preg_str=get_cell();
+  switch (sizeof(t_reg))
+    {
+      case 8:
+        sprintf(preg_str,"%08x%08x",
+		(unsigned long)(reg>>32),(unsigned long)(reg&0xffffffff));
+	break;
+      case 4:
+        sprintf(preg_str,"%08x",(unsigned long)reg);
+	break;
+      case 2:
+        sprintf(preg_str,"%04x",(unsigned short)(reg&0xffff));
+	break;
+      default:
+        sprintf(preg_str,"%x",reg);
+    }
+  return preg_str;
+}
+

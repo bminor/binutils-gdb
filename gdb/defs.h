@@ -67,8 +67,12 @@ extern char *strsignal PARAMS ((int));
 
 typedef bfd_vma CORE_ADDR;
 
+#ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
 
 /* Gdb does *lots* of string compares.  Use macros to speed them up by
    avoiding function calls if the first characters are not the same. */
@@ -90,11 +94,17 @@ extern int sevenbit_strings;
 
 extern void quit PARAMS ((void));
 
+#ifdef QUIT
+/* do twice to force compiler warning */
+#define FIXME "FIXME"
+#define FIXME "ignoring redefinition of QUIT"
+#else
 #define QUIT { \
   if (quit_flag) quit (); \
   if (interactive_hook) interactive_hook (); \
   PROGRESS (1); \
 }
+#endif
 
 /* Command classes are top-level categories into which commands are broken
    down for "help" purposes.  
@@ -206,10 +216,6 @@ extern int inside_main_func PARAMS ((CORE_ADDR pc));
 extern char *chill_demangle PARAMS ((const char *));
 
 /* From utils.c */
-
-extern PTR xmalloc PARAMS ((long));
-
-extern PTR xrealloc PARAMS ((PTR, long));
 
 extern void notice_quit PARAMS ((void));
 
@@ -329,6 +335,12 @@ extern char *n_spaces PARAMS ((int));
 extern void gdb_printchar PARAMS ((int, GDB_FILE *, int));
 
 extern void gdb_print_address PARAMS ((void *, GDB_FILE *));
+
+typedef bfd_vma t_addr;
+typedef bfd_vma t_reg;
+extern char* paddr PARAMS ((t_addr addr));
+
+extern char* preg PARAMS ((t_reg reg));
 
 extern void fprintf_symbol_filtered PARAMS ((GDB_FILE *, char *,
 					     enum language, int));
@@ -559,9 +571,15 @@ extern char *strsave PARAMS ((const char *));
 
 extern char *mstrsave PARAMS ((void *, const char *));
 
+#ifdef _WIN32 /* FIXME; was long, but this causes compile errors in msvc if already defined */
+extern PTR xmmalloc PARAMS ((PTR, size_t));
+
+extern PTR xmrealloc PARAMS ((PTR, PTR, size_t));
+#else
 extern PTR xmmalloc PARAMS ((PTR, long));
 
 extern PTR xmrealloc PARAMS ((PTR, PTR, long));
+#endif
 
 extern int parse_escape PARAMS ((char **));
 
@@ -627,7 +645,18 @@ extern char *getenv PARAMS ((const char *));
 #endif
 
 #ifdef HAVE_STDLIB_H
+#if defined(_MSC_VER) && !defined(__cplusplus)
+/* msvc defines these in stdlib.h for c code */
+#undef min
+#undef max
+#endif
 #include <stdlib.h>
+#endif
+#ifndef min
+#define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
 

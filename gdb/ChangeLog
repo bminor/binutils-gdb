@@ -1,3 +1,14 @@
+
+Mon Nov 11 12:59:00 1996  Dawn Perchik <dawn@critters.cygnus.com>
+
+	* mips-tdep.c, remote-mips.c, values.c, mdebugread.c,
+	config/mips/tm-mips.h: Add/fix bugs for 64-bit mips support.
+	* defs.h: Cleanup; add prototypess
+	* corefile.c: Change FIXME #ifdef
+	* win32-nat.c: Include windefs instead of windows.h.
+	* utils.c: Add routines for printing addresses and registers 
+	based on type size.
+
 Sat Nov  9 01:05:10 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* alpha-tdep.c (heuristic_proc_desc):  Stop examining the prologue

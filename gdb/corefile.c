@@ -137,7 +137,7 @@ specify_exec_file_hook (hook)
 void
 close_exec_file ()
 {
-#ifdef FIXME
+#if 0 /* FIXME */
   if (exec_bfd)
     bfd_tempclose (exec_bfd);
 #endif
@@ -146,7 +146,7 @@ close_exec_file ()
 void
 reopen_exec_file ()
 {
-#ifdef FIXME
+#if 0 /* FIXME */
   if (exec_bfd)
     bfd_reopen (exec_bfd);
 #endif

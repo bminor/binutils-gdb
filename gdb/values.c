@@ -675,7 +675,16 @@ unpack_double (type, valaddr, invp)
   else if (nosign)
     {
       /* Unsigned -- be sure we compensate for signed LONGEST.  */
+#ifndef _MSC_VER
       return (unsigned LONGEST) unpack_long (type, valaddr);
+#else
+#if (_MSC_VER > 800)
+      return (unsigned LONGEST) unpack_long (type, valaddr);
+#else
+      /* FIXME!!! msvc22 doesn't support unsigned __int64 -> double */
+      return (LONGEST) unpack_long (type, valaddr);
+#endif
+#endif /* _MSC_VER */
     }
   else
     {

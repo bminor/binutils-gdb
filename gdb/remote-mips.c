@@ -61,8 +61,8 @@ static void mips_send_command PARAMS ((const char *cmd, int prompt));
 static int mips_receive_packet PARAMS ((char *buff, int throw_error,
 					int timeout));
 
-static int mips_request PARAMS ((int cmd, unsigned int addr,
-				 unsigned int data, int *perr, int timeout,
+static CORE_ADDR mips_request PARAMS ((int cmd, CORE_ADDR addr,
+				 CORE_ADDR data, int *perr, int timeout,
 				 char *buff));
 
 static void mips_initialize PARAMS ((void));
@@ -92,9 +92,9 @@ static void mips_prepare_to_store PARAMS ((void));
 
 static void mips_store_registers PARAMS ((int regno));
 
-static int mips_fetch_word PARAMS ((CORE_ADDR addr));
+static unsigned int mips_fetch_word PARAMS ((CORE_ADDR addr));
 
-static int mips_store_word PARAMS ((CORE_ADDR addr, int value,
+static int mips_store_word PARAMS ((CORE_ADDR addr, unsigned int value,
 				    char *old_contents));
 
 static int mips_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
@@ -1070,11 +1070,11 @@ mips_receive_packet (buff, throw_error, timeout)
    occurs, it sets *PERR to 1 and sets errno according to what the
    target board reports.  */
 
-static int
+static CORE_ADDR 
 mips_request (cmd, addr, data, perr, timeout, buff)
      int cmd;
-     unsigned int addr;
-     unsigned int data;
+     CORE_ADDR addr;
+     CORE_ADDR data;
      int *perr;
      int timeout;
      char *buff;
@@ -1093,7 +1093,7 @@ mips_request (cmd, addr, data, perr, timeout, buff)
     {
       if (mips_need_reply)
 	fatal ("mips_request: Trying to send command before reply");
-      sprintf (buff, "0x0 %c 0x%x 0x%x", cmd, addr, data);
+      sprintf (buff, "0x0 %c 0x%s 0x%s", cmd, paddr(addr), paddr(data));
       mips_send_packet (buff, 1);
       mips_need_reply = 1;
     }
@@ -1755,7 +1755,7 @@ mips_fetch_registers (regno)
         val = (unsigned)mips_request ('t', (unsigned int) mips_map_regno (regno),
                             (unsigned int) 0, &err, mips_receive_wait, NULL);
       else
-        val = (unsigned)mips_request ('r', (unsigned int) mips_map_regno (regno),
+        val = mips_request ('r', (unsigned int) mips_map_regno (regno),
                             (unsigned int) 0, &err, mips_receive_wait, NULL);
       if (err)
 	mips_error ("Can't read register %d: %s", regno,
@@ -1796,7 +1796,7 @@ mips_store_registers (regno)
     }
 
   mips_request ('R', (unsigned int) mips_map_regno (regno),
-		(unsigned int) read_register (regno),
+		read_register (regno),
 		&err, mips_receive_wait, NULL);
   if (err)
     mips_error ("Can't write register %d: %s", regno, safe_strerror (errno));
@@ -1804,22 +1804,25 @@ mips_store_registers (regno)
 
 /* Fetch a word from the target board.  */
 
-static int 
+static unsigned int 
 mips_fetch_word (addr)
      CORE_ADDR addr;
 {
-  int val;
+  unsigned int val;
   int err;
 
-  val = mips_request ('d', (unsigned int) addr, (unsigned int) 0, &err,
+  /* FIXME! addr was cast to uint! */
+  val = mips_request ('d', addr, (unsigned int) 0, &err,
 		      mips_receive_wait, NULL);
   if (err)
     {
       /* Data space failed; try instruction space.  */
-      val = mips_request ('i', (unsigned int) addr, (unsigned int) 0, &err,
+      /* FIXME! addr was cast to uint! */
+      val = mips_request ('i', addr, (unsigned int) 0, &err,
 			  mips_receive_wait, NULL);
       if (err)
-	mips_error ("Can't read address 0x%x: %s", addr, safe_strerror (errno));
+        mips_error ("Can't read address 0x%s: %s",
+	      paddr(addr), safe_strerror (errno));
     }
   return val;
 }
@@ -1828,22 +1831,23 @@ mips_fetch_word (addr)
    success.  If OLD_CONTENTS is non-NULL, put the old contents of that
    memory location there.  */
 
+/* FIXME! make sure only 32-bit quantities get stored! */
 static int
 mips_store_word (addr, val, old_contents)
      CORE_ADDR addr;
-     int val;
+     unsigned int val;
      char *old_contents;
 {
   int err;
   unsigned int oldcontents;
 
-  oldcontents = mips_request ('D', (unsigned int) addr, (unsigned int) val,
+  oldcontents = mips_request ('D', addr, (unsigned int) val,
 			      &err,
 			      mips_receive_wait, NULL);
   if (err)
     {
       /* Data space failed; try instruction space.  */
-      oldcontents = mips_request ('I', (unsigned int) addr,
+      oldcontents = mips_request ('I', addr,
 				  (unsigned int) val, &err,
 				  mips_receive_wait, NULL);
       if (err)
@@ -2142,6 +2146,8 @@ pmon_insert_breakpoint (addr, contents_cache)
       tbuff[0] = '0';
       tbuff[1] = 'x';
 
+      /* FIXME!! only 8 bytes!  need to expand for Bfd64; 
+         which targets return 64-bit addresses?  PMON returns only 32! */
       if (!mips_getstring (&tbuff[2], 8))
         return 1;
       tbuff[10] = '\0'; /* terminate the string */
@@ -2191,7 +2197,7 @@ pmon_remove_breakpoint (addr, contents_cache)
 
       if (bpnum >= PMON_MAX_BP)
         {
-          fprintf_unfiltered (stderr, "pmon_remove_breakpoint: Failed to find breakpoint at address 0x%x\n", addr);
+          fprintf_unfiltered (stderr, "pmon_remove_breakpoint: Failed to find breakpoint at address 0x%s\n", paddr(addr));
           return 1;
         }
 
@@ -2344,8 +2350,8 @@ common_breakpoint (cmd, addr, mask, flags)
       if (mips_monitor == MON_DDB)
         rresponse = rerrflg;
       if (rresponse != 22) /* invalid argument */
-	fprintf_unfiltered (stderr, "common_breakpoint (0x%x):  Got error: 0x%x\n",
-			    (unsigned int)addr, rresponse);
+	fprintf_unfiltered (stderr, "common_breakpoint (0x%s):  Got error: 0x%x\n",
+			    paddr(addr), rresponse);
       return 1;
     }
 
@@ -2421,6 +2427,7 @@ mips_load_srec (args)
 	{
 	  int numbytes;
 
+	  /* FIXME!  vma too small?? */
 	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma,
 			   s->vma + s->_raw_size);
 	  gdb_flush (gdb_stdout);
@@ -2516,6 +2523,7 @@ mips_make_srec (buf, type, memaddr, myaddr, len)
   /* Create the header for the srec. addr_size is the number of bytes in the address,
      and 1 is the number of bytes in the count.  */
 
+  /* FIXME!! bigger buf required for 64-bit! */
   buf[0] = 'S';
   buf[1] = type;
   buf[2] = len + 4 + 1;		/* len + 4 byte address + 1 byte checksum */
@@ -2981,8 +2989,8 @@ struct target_ops pmon_ops =
   "pmon",			/* to_shortname */
   "Remote MIPS debugging over serial line",	/* to_longname */
   "\
-Debug a board using the PMON MIPS remote debugging protocol over a serial line.\n\
-The argument is the device it is connected to or, if it contains a\n\
+Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
+line. The argument is the device it is connected to or, if it contains a\n\
 colon, HOST:PORT to access a board over a network",  /* to_doc */
   pmon_open,			/* to_open */
   mips_close,			/* to_close */
@@ -3031,8 +3039,8 @@ struct target_ops ddb_ops =
   "ddb",			/* to_shortname */
   "Remote MIPS debugging over serial line",	/* to_longname */
   "\
-Debug a board using the DDBVR4300 (PMON) MIPS remote debugging protocol over a serial line.\n\
-The argument is the device it is connected to or, if it contains a\n\
+Debug a board using the PMON MIPS remote debugging protocol over a serial\n\
+line. The argument is the device it is connected to or, if it contains a\n\
 colon, HOST:PORT to access a board over a network",  /* to_doc */
   ddb_open,			/* to_open */
   mips_close,			/* to_close */

@@ -32,17 +32,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbtypes.h"
+#include "target.h"
 
 #include "opcode/mips.h"
 
-#define VM_MIN_ADDRESS (unsigned)0x400000
+#define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
 /* FIXME: Put this declaration in frame.h.  */
 extern struct obstack frame_cache_obstack;
+
+/* FIXME! this code assumes 4-byte instructions.  */
+#define MIPS_INSTLEN 4
+#define MIPS_NUMREGS 32	/* FIXME! how many on 64-bit mips? */
+typedef unsigned long t_inst;
+
 
 #if 0
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 #endif
+
+static int gdb_print_insn_mips PARAMS ((bfd_vma, disassemble_info *));
 
 static void mips_print_register PARAMS ((int, int));
 
@@ -51,7 +60,7 @@ heuristic_proc_desc PARAMS ((CORE_ADDR, CORE_ADDR, struct frame_info *));
 
 static CORE_ADDR heuristic_proc_start PARAMS ((CORE_ADDR));
 
-static int read_next_frame_reg PARAMS ((struct frame_info *, int));
+static CORE_ADDR read_next_frame_reg PARAMS ((struct frame_info *, int));
 
 static void mips_set_fpu_command PARAMS ((char *, int,
 					  struct cmd_list_element *));
@@ -181,7 +190,7 @@ struct {
 static unsigned int heuristic_fence_post = 0;
 
 #define PROC_LOW_ADDR(proc) ((proc)->pdr.adr) /* least address */
-#define PROC_HIGH_ADDR(proc) ((proc)->pdr.iline) /* upper address bound */
+#define PROC_HIGH_ADDR(proc) ((proc)->high_addr) /* upper address bound */
 #define PROC_FRAME_OFFSET(proc) ((proc)->pdr.frameoffset)
 #define PROC_FRAME_REG(proc) ((proc)->pdr.framereg)
 #define PROC_REG_MASK(proc) ((proc)->pdr.regmask)
@@ -265,23 +274,26 @@ mips_find_saved_regs (fci)
 #ifndef SIGFRAME_BASE
 /* To satisfy alignment restrictions, sigcontext is located 4 bytes
    above the sigtramp frame.  */
-#define SIGFRAME_BASE		4
-#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * 4)
-#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * 4)
-#define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_REGSAVE_OFF + 32 * 4 + 3 * 4)
+#define SIGFRAME_BASE		MIPS_REGSIZE
+/* FIXME!  Are these correct?? */
+#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * MIPS_REGSIZE)
+#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * MIPS_REGSIZE)
+#define SIGFRAME_FPREGSAVE_OFF	\
+        (SIGFRAME_REGSAVE_OFF + MIPS_NUMREGS * MIPS_REGSIZE + 3 * MIPS_REGSIZE)
 #endif
 #ifndef SIGFRAME_REG_SIZE
-#define SIGFRAME_REG_SIZE	4
+/* FIXME!  Is this correct?? */
+#define SIGFRAME_REG_SIZE	MIPS_REGSIZE
 #endif
   if (fci->signal_handler_caller)
     {
-      for (ireg = 0; ireg < 32; ireg++)
+      for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
  	  reg_position = fci->frame + SIGFRAME_REGSAVE_OFF
 			 + ireg * SIGFRAME_REG_SIZE;
  	  fci->saved_regs->regs[ireg] = reg_position;
 	}
-      for (ireg = 0; ireg < 32; ireg++)
+      for (ireg = 0; ireg < MIPS_NUMREGS; ireg++)
 	{
  	  reg_position = fci->frame + SIGFRAME_FPREGSAVE_OFF
 			 + ireg * SIGFRAME_REG_SIZE;
@@ -327,8 +339,8 @@ mips_find_saved_regs (fci)
 
       CORE_ADDR addr;
       int status;
-      char buf[4];
-      unsigned long inst;
+      char buf[MIPS_INSTLEN];
+      t_inst inst;
 
       /* Bitmasks; set if we have found a save for the register.  */
       unsigned long gen_save_found = 0;
@@ -337,12 +349,12 @@ mips_find_saved_regs (fci)
       for (addr = PROC_LOW_ADDR (proc_desc);
 	   addr < fci->pc /*&& (gen_mask != gen_save_found
 			      || float_mask != float_save_found)*/;
-	   addr += 4)
+	   addr += MIPS_INSTLEN)
 	{
-	  status = read_memory_nobpt (addr, buf, 4);
+	  status = read_memory_nobpt (addr, buf, MIPS_INSTLEN);
 	  if (status)
 	    memory_error (status, addr);
-	  inst = extract_unsigned_integer (buf, 4);
+	  inst = extract_unsigned_integer (buf, MIPS_INSTLEN);
 	  if (/* sw reg,n($sp) */
 	      (inst & 0xffe00000) == 0xafa00000
 
@@ -381,7 +393,7 @@ mips_find_saved_regs (fci)
   /* Fill in the offsets for the registers which gen_mask says
      were saved.  */
   reg_position = fci->frame + PROC_REG_OFFSET (proc_desc);
-  for (ireg= 31; gen_mask; --ireg, gen_mask <<= 1)
+  for (ireg= MIPS_NUMREGS-1; gen_mask; --ireg, gen_mask <<= 1)
     if (gen_mask & 0x80000000)
       {
 	fci->saved_regs->regs[ireg] = reg_position;
@@ -393,8 +405,14 @@ mips_find_saved_regs (fci)
 
   /* The freg_offset points to where the first *double* register
      is saved.  So skip to the high-order word. */
-  reg_position += 4;
-  for (ireg = 31; float_mask; --ireg, float_mask <<= 1)
+  if (! GDB_TARGET_IS_MIPS64)
+    reg_position += 4;
+
+  /* FIXME!  this code looks scary... 
+   * Looks like it's trying to do stuff with a register, 
+   * but .... ???
+   */
+  for (ireg = MIPS_NUMREGS-1; float_mask; --ireg, float_mask <<= 1)
     if (float_mask & 0x80000000)
       {
 	fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
@@ -404,7 +422,7 @@ mips_find_saved_regs (fci)
   fci->saved_regs->regs[PC_REGNUM] = fci->saved_regs->regs[RA_REGNUM];
 }
 
-static int
+static CORE_ADDR
 read_next_frame_reg(fi, regno)
      struct frame_info *fi;
      int regno;
@@ -426,10 +444,11 @@ read_next_frame_reg(fi, regno)
   return read_register (regno);
 }
 
-int
+CORE_ADDR
 mips_frame_saved_pc(frame)
      struct frame_info *frame;
 {
+  CORE_ADDR saved_pc;
   mips_extra_func_info_t proc_desc = frame->proc_desc;
   /* We have to get the saved pc from the sigcontext
      if it is a signal handler frame.  */
@@ -437,9 +456,22 @@ mips_frame_saved_pc(frame)
 	      : (proc_desc ? PROC_PC_REG(proc_desc) : RA_REGNUM);
 
   if (proc_desc && PROC_DESC_IS_DUMMY(proc_desc))
-      return read_memory_integer(frame->frame - 4, 4);
+    saved_pc = read_memory_integer(frame->frame - MIPS_REGSIZE, MIPS_REGSIZE);
+  else
+    saved_pc = read_next_frame_reg(frame, pcreg);
 
-  return read_next_frame_reg(frame, pcreg);
+  if (GDB_TARGET_IS_MIPS64 && strcmp(current_target.to_shortname,"pmon")==0)
+    {
+      /* This hack is a work-around for PMON. 
+       * The PMON version in the Vr4300 board has been
+       * compiled without the 64bit register access commands. 
+       * Thus, the upper word of the PC may be sign extended to all 1s.
+       * If so, change it to zero.  */
+      if (saved_pc >> 32 == (CORE_ADDR)0xffffffff)
+        saved_pc &= (CORE_ADDR)0xffffffff;
+    }
+
+  return saved_pc;
 }
 
 static struct mips_extra_func_info temp_proc_desc;
@@ -463,7 +495,7 @@ heuristic_proc_start(pc)
       fence = VM_MIN_ADDRESS;
 
     /* search back for previous return */
-    for (start_pc -= 4; ; start_pc -= 4)
+    for (start_pc -= MIPS_INSTLEN; ; start_pc -= MIPS_INSTLEN) /* FIXME!! */
 	if (start_pc < fence)
 	  {
 	    /* It's not clear to me why we reach this point when
@@ -498,11 +530,11 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 	else if (ABOUT_TO_RETURN(start_pc))
 	    break;
 
-    start_pc += 8; /* skip return, and its delay slot */
+    start_pc += 8; /* skip return, and its delay slot */ /* FIXME!! */
 #if 0
     /* skip nops (usually 1) 0 - is this */
-    while (start_pc < pc && read_memory_integer (start_pc, 4) == 0)
-	start_pc += 4;
+    while (start_pc < pc && read_memory_integer (start_pc, MIPS_INSTLEN) == 0)
+	start_pc += MIPS_INSTLEN;
 #endif
     return start_pc;
 }
@@ -514,9 +546,9 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 {
     CORE_ADDR sp = read_next_frame_reg (next_frame, SP_REGNUM);
     CORE_ADDR cur_pc;
-    int frame_size;
+    unsigned long frame_size;
     int has_frame_reg = 0;
-    int reg30 = 0; /* Value of $r30. Used by gcc for frame-pointer */
+    CORE_ADDR reg30 = 0; /* Value of $r30. Used by gcc for frame-pointer */
     unsigned long reg_mask = 0;
 
     if (start_pc == 0) return NULL;
@@ -528,14 +560,14 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
       limit_pc = start_pc + 200;
   restart:
     frame_size = 0;
-    for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += 4) {
-        char buf[4];
+    for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN) {
+        char buf[MIPS_INSTLEN];
 	unsigned long word;
 	int status;
 
-	status = read_memory_nobpt (cur_pc, buf, 4); 
+	status = (unsigned long) read_memory_nobpt (cur_pc, buf, MIPS_INSTLEN); /* FIXME!! */ 
 	if (status) memory_error (status, cur_pc);
-	word = extract_unsigned_integer (buf, 4);
+	word = (unsigned long) extract_unsigned_integer (buf, MIPS_INSTLEN); /* FIXME!! */
 
 	if ((word & 0xFFFF0000) == 0x27bd0000) /* addiu $sp,$sp,-i */
 	    frame_size += (-word) & 0xFFFF;
@@ -550,10 +582,10 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 	    if ((word & 0xffff) != frame_size)
 		reg30 = sp + (word & 0xffff);
 	    else if (!has_frame_reg) {
-		int alloca_adjust;
+		unsigned alloca_adjust;
 		has_frame_reg = 1;
 		reg30 = read_next_frame_reg(next_frame, 30);
-		alloca_adjust = reg30 - (sp + (word & 0xffff));
+		alloca_adjust = (unsigned)(reg30 - (sp + (word & 0xffff)));
 		if (alloca_adjust > 0) {
 		    /* FP > SP + frame_size. This may be because
 		     * of an alloca or somethings similar.
@@ -744,6 +776,7 @@ init_extra_frame_info(fci)
 
       /* hack: if argument regs are saved, guess these contain args */
       if ((PROC_REG_MASK(proc_desc) & 0xF0) == 0) fci->num_args = -1;
+/* FIXME!  Increase this for MIPS EABI */
       else if ((PROC_REG_MASK(proc_desc) & 0x80) == 0) fci->num_args = 4;
       else if ((PROC_REG_MASK(proc_desc) & 0x40) == 0) fci->num_args = 3;
       else if ((PROC_REG_MASK(proc_desc) & 0x20) == 0) fci->num_args = 2;
@@ -787,16 +820,34 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   CORE_ADDR struct_addr;
 {
   register i;
-  int accumulate_size = struct_return ? MIPS_REGSIZE : 0;
+  int accumulate_size;
   struct mips_arg { char *contents; int len; int offset; };
-  struct mips_arg *mips_args =
-      (struct mips_arg*)alloca((nargs + 4) * sizeof(struct mips_arg));
+  struct mips_arg *mips_args;
   register struct mips_arg *m_arg;
   int fake_args = 0;
+  int len;
 
+  /* Macro to round n up to the next a boundary (a must be a power of two) */
+  #define ALIGN(n,a) (((n)+(a)-1) & ~((a)-1))
+  
+  /* First ensure that the stack and structure return address (if any)
+     are properly aligned. */
+
+  sp = ALIGN (sp, MIPS_REGSIZE);
+  struct_addr = ALIGN (struct_addr, MIPS_REGSIZE);
+      
+  accumulate_size = struct_return ? MIPS_REGSIZE : 0;
+  
+  /* Allocate descriptors for each argument, plus some extras for the
+     dummies we will create to zero-fill the holes left when we align
+     arguments passed in registers that are smaller than a register.  */
+  mips_args = /* FIXME!  Should this 4 be increased for MIPS64? */
+    (struct mips_arg*) alloca ((nargs + 4) * sizeof (struct mips_arg));
+
+  /* Build up the list of argument descriptors.  */
   for (i = 0, m_arg = mips_args; i < nargs; i++, m_arg++) {
     value_ptr arg = args[i];
-    m_arg->len = TYPE_LENGTH (VALUE_TYPE (arg));
+    len = m_arg->len = TYPE_LENGTH (VALUE_TYPE (arg));
     /* This entire mips-specific routine is because doubles must be aligned
      * on 8-byte boundaries. It still isn't quite right, because MIPS decided
      * to align 'struct {int a, b}' on 4-byte boundaries (even though this
@@ -807,27 +858,46 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
      * using eight bytes each, so that we can load them up correctly
      * in CALL_DUMMY.
      */
-    if (m_arg->len > 4)
-      accumulate_size = (accumulate_size + 7) & -8;
+    if (len > 4) /* FIXME? */
+      accumulate_size = ALIGN (accumulate_size, 8);
     m_arg->offset = accumulate_size;
     m_arg->contents = VALUE_CONTENTS(arg);
     if (! GDB_TARGET_IS_MIPS64)
-      accumulate_size = (accumulate_size + m_arg->len + 3) & -4;
+      /* For 32-bit targets, align the next argument on a 32-bit boundary.  */
+      accumulate_size = ALIGN (accumulate_size + len, 4);
     else
       {
+	/* If the argument is being passed on the stack, not a register,
+	   adjust the size of the argument upward to account for stack
+	   alignment.  The EABI allows 8 arguments to be passed in
+	   registers; the old ABI allows only four.  This code seems
+	   bogus to me: shouldn't we be right-aligning small arguments
+	   as we do below for the args-in-registers case?  FIXME!! */
+#if MIPS_EABI
+	if (accumulate_size >= 8 * MIPS_REGSIZE)  /* Ignores FP.  FIXME!! */
+	  accumulate_size = ALIGN (accumulate_size + len, 8);
+#else
 	if (accumulate_size >= 4 * MIPS_REGSIZE)
-	  accumulate_size = (accumulate_size + m_arg->len + 3) &~ 4;
+	  accumulate_size = ALIGN (accumulate_size + len, 4);
+#endif
 	else
 	  {
-	    static char zeroes[8] = { 0 };
-	    int len = m_arg->len;
-
-	    if (len < 8)
+	    if (len < MIPS_REGSIZE)
 	      {
+	      /* The argument is being passed in a register, but is smaller
+		 than a register.  So it it must be right-aligned in the
+		 register image being placed in the stack, and the rest
+		 of the register image must be zero-filled.  */
+		static char zeroes[MIPS_REGSIZE] = { 0 };
+
+		/* Align the arg in the rightmost part of the 64-bit word.  */
 		if (TARGET_BYTE_ORDER == BIG_ENDIAN)
-		  m_arg->offset += 8 - len;
+		  m_arg->offset += MIPS_REGSIZE - len;
+
+		/* Create a fake argument to zero-fill the unsused part
+		   of the 64-bit word.  */
 		++m_arg;
-		m_arg->len = 8 - len;
+		m_arg->len = MIPS_REGSIZE - len;
 		m_arg->contents = zeroes;
 		if (TARGET_BYTE_ORDER == BIG_ENDIAN)
 		  m_arg->offset = accumulate_size;
@@ -835,11 +905,11 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
 		  m_arg->offset = accumulate_size + len;
 		++fake_args;
 	      }
-	    accumulate_size = (accumulate_size + len + 7) & ~8;
+	    accumulate_size = ALIGN (accumulate_size + len, MIPS_REGSIZE);
 	  }
       }
   }
-  accumulate_size = (accumulate_size + 7) & (-8);
+  accumulate_size = ALIGN (accumulate_size, 8);
   if (accumulate_size < 4 * MIPS_REGSIZE)
     accumulate_size = 4 * MIPS_REGSIZE;
   sp -= accumulate_size;
@@ -855,23 +925,35 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   return sp;
 }
 
-/* MASK(i,j) == (1<<i) + (1<<(i+1)) + ... + (1<<j)). Assume i<=j<31. */
+void
+mips_push_register(CORE_ADDR *sp, int regno)
+{
+  char buffer[MAX_REGISTER_RAW_SIZE];
+  int regsize = REGISTER_RAW_SIZE (regno);
+
+  *sp -= regsize;
+  read_register_gen (regno, buffer);
+  write_memory (*sp, buffer, regsize);
+}
+
+/* MASK(i,j) == (1<<i) + (1<<(i+1)) + ... + (1<<j)). Assume i<=j<(MIPS_NUMREGS-1). */
 #define MASK(i,j) (((1 << ((j)+1))-1) ^ ((1 << (i))-1))
 
 void
 mips_push_dummy_frame()
 {
-  char buffer[MAX_REGISTER_RAW_SIZE];
   int ireg;
   struct linked_proc_info *link = (struct linked_proc_info*)
       xmalloc(sizeof(struct linked_proc_info));
   mips_extra_func_info_t proc_desc = &link->info;
   CORE_ADDR sp = read_register (SP_REGNUM);
-  CORE_ADDR save_address;
+  CORE_ADDR old_sp = sp;
   link->next = linked_proc_desc_table;
   linked_proc_desc_table = link;
+
+/* FIXME!   are these correct ? */
 #define PUSH_FP_REGNUM 16 /* must be a register preserved across calls */
-#define GEN_REG_SAVE_MASK MASK(1,16)|MASK(24,28)|(1<<31)
+#define GEN_REG_SAVE_MASK MASK(1,16)|MASK(24,28)|(1<<(MIPS_NUMREGS-1))
 #define GEN_REG_SAVE_COUNT 22
 #define FLOAT_REG_SAVE_MASK MASK(0,19)
 #define FLOAT_REG_SAVE_COUNT 20
@@ -882,8 +964,9 @@ mips_push_dummy_frame()
   /*
    * The registers we must save are all those not preserved across
    * procedure calls. Dest_Reg (see tm-mips.h) must also be saved.
-   * In addition, we must save the PC, and PUSH_FP_REGNUM.
-   * (Ideally, we should also save MDLO/-HI and FP Control/Status reg.)
+   * In addition, we must save the PC, PUSH_FP_REGNUM, MMLO/-HI
+   * and FP Control/Status registers.
+   * 
    *
    * Dummy frame layout:
    *  (high memory)
@@ -900,72 +983,35 @@ mips_push_dummy_frame()
    *	Parameter build area (not yet implemented)
    *  (low memory)
    */
-  PROC_REG_MASK(proc_desc) = GEN_REG_SAVE_MASK;
-  switch (mips_fpu)
-    {
-    case MIPS_FPU_DOUBLE:
-      PROC_FREG_MASK(proc_desc) = FLOAT_REG_SAVE_MASK;
-      break;
-    case MIPS_FPU_SINGLE:
-      PROC_FREG_MASK(proc_desc) = FLOAT_SINGLE_REG_SAVE_MASK;
-      break;
-    case MIPS_FPU_NONE:
-      PROC_FREG_MASK(proc_desc) = 0;
-      break;
-    }
-  PROC_REG_OFFSET(proc_desc) = /* offset of (Saved R31) from FP */
-      -sizeof(long) - 4 * SPECIAL_REG_SAVE_COUNT;
-  PROC_FREG_OFFSET(proc_desc) = /* offset of (Saved D18) from FP */
-      -sizeof(double) - 4 * (SPECIAL_REG_SAVE_COUNT + GEN_REG_SAVE_COUNT);
-  /* save general registers */
-  save_address = sp + PROC_REG_OFFSET(proc_desc);
-  for (ireg = 32; --ireg >= 0; )
-    if (PROC_REG_MASK(proc_desc) & (1 << ireg))
-      {
-	read_register_gen (ireg, buffer);
 
-	/* Need to fix the save_address decrement below, and also make sure
-	   that we don't run into problems with the size of the dummy frame
-	   or any of the offsets within it.  */
-	if (REGISTER_RAW_SIZE (ireg) > 4)
-	  error ("Cannot call functions on mips64");
-
-	write_memory (save_address, buffer, REGISTER_RAW_SIZE (ireg));
-	save_address -= 4;
-      }
-  /* save floating-points registers starting with high order word */
-  save_address = sp + PROC_FREG_OFFSET(proc_desc) + 4;
-  for (ireg = 32; --ireg >= 0; )
-    if (PROC_FREG_MASK(proc_desc) & (1 << ireg))
-      {
-	read_register_gen (ireg + FP0_REGNUM, buffer);
-
-	if (REGISTER_RAW_SIZE (ireg + FP0_REGNUM) > 4)
-	  error ("Cannot call functions on mips64");
-
-	write_memory (save_address, buffer,
-		      REGISTER_RAW_SIZE (ireg + FP0_REGNUM));
-	save_address -= 4;
-      }
+  /* Save special registers (PC, MMHI, MMLO, FPC_CSR) */
   write_register (PUSH_FP_REGNUM, sp);
   PROC_FRAME_REG(proc_desc) = PUSH_FP_REGNUM;
   PROC_FRAME_OFFSET(proc_desc) = 0;
-  read_register_gen (PC_REGNUM, buffer);
-  write_memory (sp - 4, buffer, REGISTER_RAW_SIZE (PC_REGNUM));
-  read_register_gen (HI_REGNUM, buffer);
-  write_memory (sp - 8, buffer, REGISTER_RAW_SIZE (HI_REGNUM));
-  read_register_gen (LO_REGNUM, buffer);
-  write_memory (sp - 12, buffer, REGISTER_RAW_SIZE (LO_REGNUM));
-  if (mips_fpu != MIPS_FPU_NONE)
-    read_register_gen (FCRCS_REGNUM, buffer);
-  else
-    memset (buffer, 0, REGISTER_RAW_SIZE (FCRCS_REGNUM));
-  write_memory (sp - 16, buffer, REGISTER_RAW_SIZE (FCRCS_REGNUM));
-  sp -= 4 * (GEN_REG_SAVE_COUNT + SPECIAL_REG_SAVE_COUNT);
-  if (mips_fpu == MIPS_FPU_DOUBLE)
-    sp -= 4 * FLOAT_REG_SAVE_COUNT;
-  else if (mips_fpu == MIPS_FPU_SINGLE)
-    sp -= 4 * FLOAT_SINGLE_REG_SAVE_COUNT;
+  mips_push_register (&sp, PC_REGNUM);
+  mips_push_register (&sp, HI_REGNUM);
+  mips_push_register (&sp, LO_REGNUM);
+  mips_push_register (&sp, mips_fpu == MIPS_FPU_NONE ? 0 : FCRCS_REGNUM);
+
+  /* Save general CPU registers */
+  PROC_REG_MASK(proc_desc) = GEN_REG_SAVE_MASK;
+  PROC_REG_OFFSET(proc_desc) = sp - old_sp; /* offset of (Saved R31) from FP */
+  for (ireg = 32; --ireg >= 0; )
+    if (PROC_REG_MASK(proc_desc) & (1 << ireg))
+      mips_push_register (&sp, ireg);
+
+  /* Save floating point registers starting with high order word */
+  PROC_FREG_MASK(proc_desc) = 
+    mips_fpu == MIPS_FPU_DOUBLE ? FLOAT_REG_SAVE_MASK
+    : mips_fpu == MIPS_FPU_SINGLE ? FLOAT_SINGLE_REG_SAVE_MASK : 0;
+  PROC_FREG_OFFSET(proc_desc) = sp - old_sp; /* offset of (Saved D18) from FP */
+  for (ireg = 32; --ireg >= 0; )
+    if (PROC_FREG_MASK(proc_desc) & (1 << ireg))
+      mips_push_register (&sp, ireg + FP0_REGNUM);
+
+  /* Update the stack pointer.  Set the procedure's starting and ending
+     addresses to point to the place on the stack where we'll be writing the
+     dummy code (in mips_push_arguments). */
   write_register (SP_REGNUM, sp);
   PROC_LOW_ADDR(proc_desc) = sp - CALL_DUMMY_SIZE + CALL_DUMMY_START_OFFSET;
   PROC_HIGH_ADDR(proc_desc) = sp;
@@ -987,15 +1033,15 @@ mips_pop_frame()
     mips_find_saved_regs (frame);
   if (proc_desc)
     {
-      for (regnum = 32; --regnum >= 0; )
+      for (regnum = MIPS_NUMREGS; --regnum >= 0; )
 	if (PROC_REG_MASK(proc_desc) & (1 << regnum))
 	  write_register (regnum,
 			  read_memory_integer (frame->saved_regs->regs[regnum],
-					       4));
-      for (regnum = 32; --regnum >= 0; )
+					       MIPS_REGSIZE)); 
+      for (regnum = MIPS_NUMREGS; --regnum >= 0; )
 	if (PROC_FREG_MASK(proc_desc) & (1 << regnum))
 	  write_register (regnum + FP0_REGNUM,
-			  read_memory_integer (frame->saved_regs->regs[regnum + FP0_REGNUM], 4));
+			  read_memory_integer (frame->saved_regs->regs[regnum + FP0_REGNUM], MIPS_REGSIZE)); 
     }
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
@@ -1022,10 +1068,13 @@ mips_pop_frame()
 
       free (pi_ptr);
 
-      write_register (HI_REGNUM, read_memory_integer(new_sp - 8, 4));
-      write_register (LO_REGNUM, read_memory_integer(new_sp - 12, 4));
+      write_register (HI_REGNUM,
+	        read_memory_integer (new_sp - 2*MIPS_REGSIZE, MIPS_REGSIZE));
+      write_register (LO_REGNUM,
+	        read_memory_integer (new_sp - 3*MIPS_REGSIZE, MIPS_REGSIZE));
       if (mips_fpu != MIPS_FPU_NONE)
-	write_register (FCRCS_REGNUM, read_memory_integer(new_sp - 16, 4));
+	write_register (FCRCS_REGNUM,
+	        read_memory_integer (new_sp - 4*MIPS_REGSIZE, MIPS_REGSIZE));
     }
 }
 
@@ -1043,13 +1092,13 @@ mips_print_register (regnum, all)
     }
 
   /* If an even floating pointer register, also print as double. */
-  if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+32
+  if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+MIPS_NUMREGS
       && !((regnum-FP0_REGNUM) & 1))
     {
       char dbuffer[MAX_REGISTER_RAW_SIZE]; 
 
       read_relative_register_raw_bytes (regnum, dbuffer);
-      read_relative_register_raw_bytes (regnum+1, dbuffer+4);
+      read_relative_register_raw_bytes (regnum+1, dbuffer+4); /* FIXME!! */
 #ifdef REGISTER_CONVERT_TO_TYPE
       REGISTER_CONVERT_TO_TYPE(regnum, builtin_type_double, dbuffer);
 #endif
@@ -1064,7 +1113,7 @@ mips_print_register (regnum, all)
      the user can't use them on input.  Probably the best solution is to
      fix it so that either the numeric or the funky (a2, etc.) names
      are accepted on input.  */
-  if (regnum < 32)
+  if (regnum < MIPS_NUMREGS)
     printf_filtered ("(r%d): ", regnum);
   else
     printf_filtered (": ");
@@ -1161,12 +1210,12 @@ int
 mips_step_skips_delay (pc)
      CORE_ADDR pc;
 {
-  char buf[4];
+  char buf[4]; /* FIXME!! */
 
-  if (target_read_memory (pc, buf, 4) != 0)
+  if (target_read_memory (pc, buf, 4) != 0) /* FIXME!! */
     /* If error reading memory, guess that it is not a delayed branch.  */
     return 0;
-  return is_delayed (extract_unsigned_integer (buf, 4));
+  return is_delayed ((unsigned long)extract_unsigned_integer (buf, 4)); /* FIXME */
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
@@ -1183,8 +1232,8 @@ mips_skip_prologue (pc, lenient)
      CORE_ADDR pc;
      int lenient;
 {
-    unsigned long inst;
-    int offset;
+    t_inst inst;
+    unsigned offset; 
     int seen_sp_adjust = 0;
     int load_immediate_bytes = 0;
     CORE_ADDR post_prologue_pc;
@@ -1204,15 +1253,15 @@ mips_skip_prologue (pc, lenient)
     /* Skip the typical prologue instructions. These are the stack adjustment
        instruction and the instructions that save registers on the stack
        or in the gcc frame.  */
-    for (offset = 0; offset < 100; offset += 4)
+    for (offset = 0; offset < 100; offset += MIPS_INSTLEN) /* FIXME!! */
       {
-	char buf[4];
+	char buf[MIPS_INSTLEN];
 	int status;
 
-	status = read_memory_nobpt (pc + offset, buf, 4);
+	status = read_memory_nobpt (pc + offset, buf, MIPS_INSTLEN);
 	if (status)
 	  memory_error (status, pc + offset);
-	inst = extract_unsigned_integer (buf, 4);
+	inst = (unsigned long)extract_unsigned_integer (buf, MIPS_INSTLEN);
 
 #if 0
 	if (lenient && is_delayed (inst))
@@ -1257,7 +1306,7 @@ mips_skip_prologue (pc, lenient)
 	    if ((inst & 0xffff0000) == 0x3c010000 ||	  /* lui $at,n */
 		(inst & 0xffff0000) == 0x3c080000)	  /* lui $t0,n */
 	      {
-		load_immediate_bytes += 4;
+		load_immediate_bytes += MIPS_INSTLEN; /* FIXME!! */
 		continue;
 	      }
 	    else if ((inst & 0xffff0000) == 0x34210000 || /* ori $at,$at,n */
@@ -1265,7 +1314,7 @@ mips_skip_prologue (pc, lenient)
 		     (inst & 0xffff0000) == 0x34010000 || /* ori $at,$zero,n */
 		     (inst & 0xffff0000) == 0x34080000)   /* ori $t0,$zero,n */
 	      {
-		load_immediate_bytes += 4;
+		load_immediate_bytes += MIPS_INSTLEN; /* FIXME!! */
 		continue;
 	      }
 	    else
@@ -1315,7 +1364,7 @@ mips_extract_return_value (valtype, regbuf, valbuf)
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
        && (mips_fpu == MIPS_FPU_DOUBLE
-	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4)))
+	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4))) /* FIXME!! */
     regnum = FP0_REGNUM;
 
   if (TARGET_BYTE_ORDER == BIG_ENDIAN
@@ -1343,7 +1392,7 @@ mips_store_return_value (valtype, valbuf)
   regnum = 2;
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
        && (mips_fpu == MIPS_FPU_DOUBLE
-	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4)))
+	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4))) /* FIXME!! */
     regnum = FP0_REGNUM;
 
   memcpy(raw_buffer, valbuf, TYPE_LENGTH (valtype));
@@ -1501,7 +1550,7 @@ mips_set_processor_type (str)
 char *
 mips_read_processor_type ()
 {
-  int prid;
+  CORE_ADDR prid;
 
   prid = read_register (PRID_REGNUM);
 
@@ -1523,7 +1572,7 @@ reinit_frame_cache_sfunc (args, from_tty, c)
   reinit_frame_cache ();
 }
 
-int
+static int
 gdb_print_insn_mips (memaddr, info)
      bfd_vma memaddr;
      disassemble_info *info;

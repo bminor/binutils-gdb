@@ -305,7 +305,7 @@ extern CORE_ADDR mips_frame_chain PARAMS ((struct frame_info *));
 /* Saved Pc.  */
 
 #define FRAME_SAVED_PC(FRAME)	(mips_frame_saved_pc(FRAME))
-extern int mips_frame_saved_pc PARAMS ((struct frame_info *));
+extern CORE_ADDR mips_frame_saved_pc PARAMS ((struct frame_info *));
 
 #define FRAME_ARGS_ADDRESS(fi)	(fi)->frame
 
@@ -479,6 +479,7 @@ extern void ecoff_relocate_efi PARAMS ((struct symbol *, CORE_ADDR));
 
 typedef struct mips_extra_func_info {
 	long	numargs;	/* number of args to procedure (was iopt) */
+	bfd_vma high_addr;      /* upper address bound */
 	PDR	pdr;		/* Procedure descriptor record */
 } *mips_extra_func_info_t;
 
@@ -543,6 +544,8 @@ extern void fixup_sigtramp PARAMS ((void));
 /* Defined in mips-tdep.c and used in remote-mips.c */
 extern char *mips_read_processor_type PARAMS ((void));
 
+#ifndef TARGET_MIPS
 #define TARGET_MIPS
+#endif
 
 #endif	/* TM_MIPS_H */
