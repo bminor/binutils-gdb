@@ -558,15 +558,9 @@ dwarf_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       break;
 
     case REG_SAVED_REG:
-      *optimizedp = 0;
-      *lvalp = lval_register;
-      *addrp = 0;
-      *realnump = DWARF2_REG_TO_REGNUM (cache->reg[regnum].loc.reg);
-      if (valuep)
-	{
-	  /* Read the value from the register.  */
-	  frame_unwind_register (next_frame, *realnump, valuep);
-	}
+      regnum = DWARF2_REG_TO_REGNUM (cache->reg[regnum].loc.reg);
+      frame_register_unwind (next_frame, regnum,
+			     optimizedp, lvalp, addrp, realnump, valuep);
       break;
 
     case REG_UNMODIFIED:
