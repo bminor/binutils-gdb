@@ -1,3 +1,22 @@
+2002-05-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* arm-tdep.c (arm_skip_prologue): Handle generic dummy frames.
+	(thumb_scan_prologue): Ditto.
+	(arm_find_callers_reg): Ditto.
+	(arm_frame_chain): Ditto.
+	(arm_init_extra_frame_info): Ditto.
+	(arm_frame_saved_pc): Ditto.
+	(arm_pop_frame): Ditto.
+	(arm_push_return_address): New function.
+	(arm_gdbarch_init): Initialize use_generic_dummy_frames,
+	call_dummy_location, call_dummy_breakpoint_offset_p,
+	call_dummy_breakpoint_offset, call_dummy_p,
+	call_dummy_stack_adjust_p, call_dummy_words,
+	sizeof_call_dummy_words, call_dummy_start_offset,
+	call_dummy_length, fix_call_dummy, pc_in_call_dummy,
+	call_dummy_address, push_return_address and push_dummy_frame for
+	generic dummy frames.
+
 2002-05-07  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* sh-tdep.c (sh_nofp_frame_init_saved_regs): Fix error in
