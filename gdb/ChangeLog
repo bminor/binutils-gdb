@@ -15,8 +15,9 @@ Fri Aug 27 09:30:40 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 	gdbserver/remote-inflow-sparc.c -> gdbserver/low-sparc.c
 	gdbserver/remote-server.c -> gdbserver/server.c
 	remote-monitor.c -> remote-mon.c
-	* Makefile.in, gdbserver/Makefile.in, config/m68k/monitor.mt,
-	config/i386/i386lynx.mh, config/sparc/sun4os4.mh: Change accordingly.
+	* Makefile.in, gdbserver/Makefile.in, gdbserver/configure.in,
+	config/m68k/monitor.mt,	config/i386/i386lynx.mh,
+	config/sparc/sun4os4.mh: Change accordingly.
 	* gdbserver/Makefile.in: Remove more junk inherited from gdb Makefile.
 
 Thu Aug 26 14:32:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)

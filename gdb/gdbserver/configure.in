@@ -1,5 +1,5 @@
 srcname="Remote GDB server"
-srctrigger=remote-server.c
+srctrigger=server.c
 gdb_serial_driver=../ser-unix.c
 
 # per-host:
