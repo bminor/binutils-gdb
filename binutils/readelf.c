@@ -25,7 +25,7 @@
 
   Both programs are capabale of displaying the contents of ELF format files,
   so why does the binutils project have two file dumpers ?
-  
+
   The reason is that objdump sees an ELF file through a BFD filter of the
   world; if BFD has a bug where, say, it disagrees about a machine constant
   in e_flags, then the odds are good that it will remain internally
@@ -2271,7 +2271,7 @@ get_ia64_section_type_name (unsigned int sh_type)
   /* If the top 8 bits are 0x78 the next 8 are the os/abi ID. */
   if ((sh_type & 0xFF000000) == SHT_IA_64_LOPSREG)
     return get_osabi_name ((sh_type & 0x00FF0000) >> 16);
-      
+
   switch (sh_type)
     {
     case SHT_IA_64_EXT:		  return "IA_64_EXT";
@@ -3478,7 +3478,7 @@ process_section_headers (FILE *file)
 
       if (string_table == NULL)
 	return 0;
-      
+
       string_table_length = section->sh_size;
     }
 
@@ -3706,7 +3706,7 @@ process_relocs (FILE *file)
       const char *name;
       int has_dynamic_reloc;
       unsigned int i;
-      
+
       has_dynamic_reloc = 0;
 
       for (i = 0; i < ARRAY_SIZE (dynamic_relocations); i++)
@@ -4364,7 +4364,7 @@ dynamic_segment_ia64_val (Elf_Internal_Dyn *entry)
 {
   switch (entry->d_tag)
     {
-    case DT_IA_64_PLT_RESERVE: 
+    case DT_IA_64_PLT_RESERVE:
       /* First 3 slots reserved.  */
       print_vma (entry->d_un.d_ptr, PREFIX_HEX);
       printf (" -- ");
@@ -6279,7 +6279,7 @@ find_section (const char * name)
 {
   Elf_Internal_Shdr *sec;
   unsigned int i;
-  
+
   for (i = elf_header.e_shnum, sec = section_headers + i - 1;
        i; --i, --sec)
     if (strcmp (SECTION_NAME (sec), name) == 0)
@@ -6382,7 +6382,7 @@ get_debug_line_pointer_sizes (FILE * file)
 	{
 	  /* For 32-bit DWARF, the 1-byte address_size field is 10 bytes from
 	     the start of the section:
-	     
+
 	     unit_length:          4 bytes
 	     version:              2 bytes
 	     debug_abbrev_offset:  4 bytes
@@ -9892,6 +9892,7 @@ get_note_type (unsigned e_type)
 
   switch (e_type)
     {
+    case NT_AUXV: 	return _("NT_AUXV (auxiliary vector)");
     case NT_PRSTATUS:	return _("NT_PRSTATUS (prstatus structure)");
     case NT_FPREGSET:	return _("NT_FPREGSET (floating point registers)");
     case NT_PRPSINFO:	return _("NT_PRPSINFO (prpsinfo structure)");
