@@ -1,5 +1,6 @@
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* hpux-thread.c: Whitespace tweaks.
 	* hppa-hpux-tdep.c: Whitespace tweaks.
 	* gdbcore.h: Whitespace tweaks.
 	* gdbcmd.h: Whitespace tweaks.
