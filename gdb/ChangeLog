@@ -1,3 +1,9 @@
+1998-12-17  J.T. Conklin  <jtc@redbacknetworks.com>
+
+	* blockframe.c (get_frame_saved_regs): If the saved_regs_addr ptr
+	is null, ensure that saved registers are copied from the local
+	variable that was used to obtain them.
+
 Sat Dec 19 09:55:09 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* mips-tdep.c (mips32_heuristic_proc_desc):  Clear temp_saved_regs
