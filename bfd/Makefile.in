@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the BFD library.
-#    Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+#    Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
@@ -115,6 +115,7 @@ ALL_MACHINES = \
 	cpu-sparc.o \
 	cpu-vax.o \
 	cpu-we32k.o \
+	cpu-w65.o \
 	cpu-z8k.o
 
 # The .o files needed by all of the 32 bit vectors that are configured into
@@ -146,6 +147,7 @@ BFD32_BACKENDS = \
 	coff-sparc.o \
 	coff-u68k.o \
 	coff-we32k.o \
+	coff-w65.o \
 	coff-z8k.o \
 	cofflink.o \
 	ecoff.o \
@@ -253,9 +255,9 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c \
 	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c cisco-core.c newsos3.c \
 	 i386aout.c i386linux.c i386mach3.c i386netbsd.c i386os9k.c \
-	 bout.c aout-adobe.c coff-we32k.c \
+	 bout.c aout-adobe.c coff-we32k.c coff-w65.c \
 	 i386bsd.c i386dynix.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
-	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-powerpc.c \
+	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-powerpc.c cpu-w65.c \
 	 cpu-rs6000.c coff-h8300.c som.c cpu-hppa.c cpu-we32k.c reloc16.c \
 	 mipsbsd.c cpu-sh.c \
 	 elf.c elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c \
@@ -647,6 +649,8 @@ aout-adobe.o: aout-adobe.c $(INCDIR)/aout/adobe.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def libaout.h $(INCDIR)/bfdlink.h
 coff-we32k.o: coff-we32k.c $(INCDIR)/coff/we32k.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
+coff-w65.o: coff-w65.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/w65.h \
+  $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 i386bsd.o: i386bsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -664,6 +668,7 @@ cpu-mips.o: cpu-mips.c
 cpu-a29k.o: cpu-a29k.c
 cpu-i386.o: cpu-i386.c
 cpu-powerpc.o: cpu-powerpc.c
+cpu-w65.o: cpu-w65.c
 cpu-rs6000.o: cpu-rs6000.c
 coff-h8300.o: coff-h8300.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/h8300.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
