@@ -1,3 +1,18 @@
+Tue Feb  3 17:19:40 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-opc.c (cgen_set_cpu): Initialize hardware table.
+	* m32r-opc.h, m32r-opc.c, m32r-asm.c, m32r-dis.c: Regenerate.
+
+Mon Feb  2 19:22:15 1998  Steve Haworth  <steve@pm.cse.rmit.EDU.AU>
+
+	* tic30-dis.c: New file.
+	* disassemble.c	(disassembler): Add bfd_arch_tic30 case.
+	* configure.in: Handle bfd_tic30_arch.
+	* Makefile.am: Rebuild dependencies.
+	(CFILES): Add tic30-dis.c
+	(ALL_MACHINES): Add tic30-dis.lo.
+	* configure, Makefile.in: Rebuild.
+
 start-sanitize-m32rx
 Mon Feb  2 11:04:08 1998  Nick Clifton  <nickc@cygnus.com>
 
