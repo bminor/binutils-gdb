@@ -656,16 +656,13 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
       /* We either created a new mapped symbol table, mapped an existing
 	 symbol table file which has not had initial symbol reading
 	 performed, or need to read an unmapped symbol table. */
-      if (from_tty || info_verbose)
-	{
       if (pre_add_symbol_hook)
         pre_add_symbol_hook (name);
-      else
-        {
-          printf_filtered ("Reading symbols from %s...", name);
-          wrap_here ("");
-          gdb_flush (gdb_stdout);
-        }
+      if (from_tty || info_verbose)
+	{
+      printf_filtered ("Reading symbols from %s...", name);
+      wrap_here ("");
+      gdb_flush (gdb_stdout);
 	}
       syms_from_objfile (objfile, addr, mainline, from_tty);
     }      
@@ -692,15 +689,12 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	}
     }
 
+  if (post_add_symbol_hook)
+    post_add_symbol_hook ();
   if (from_tty || info_verbose)
     {
-      if (post_add_symbol_hook)
-        post_add_symbol_hook ();
-      else
-        {
-          printf_filtered ("done.\n");
-          gdb_flush (gdb_stdout);
-        }
+      printf_filtered ("done.\n");
+      gdb_flush (gdb_stdout);
     }
 
   new_symfile_objfile (objfile, mainline, from_tty);
@@ -1437,8 +1431,10 @@ deduce_language_from_filename (filename)
   else if (STREQ (c, ".cc") || STREQ (c, ".C") || STREQ (c, ".cxx")
 	   || STREQ (c, ".cpp") || STREQ (c, ".cp") || STREQ (c, ".c++"))
     return language_cplus;
+  /* start-sanitize-java */
   else if (STREQ (c, ".java") || STREQ (c, ".class"))
     return language_java;
+  /* end-sanitize-java */
   else if (STREQ (c, ".ch") || STREQ (c, ".c186") || STREQ (c, ".c286"))
     return language_chill;
   else if (STREQ (c, ".f") || STREQ (c, ".F"))
@@ -2330,6 +2326,8 @@ unmap_overlay_command (args, from_tty)
 
 static void
 overlay_auto_command (args, from_tty)
+     char *args;
+     int   from_tty;
 {
   overlay_debugging = -1;
   if (info_verbose)
@@ -2342,6 +2340,8 @@ overlay_auto_command (args, from_tty)
 
 static void
 overlay_manual_command (args, from_tty)
+     char *args;
+     int   from_tty;
 {
   overlay_debugging = 1;
   if (info_verbose)
@@ -2354,6 +2354,8 @@ overlay_manual_command (args, from_tty)
 
 static void
 overlay_off_command (args, from_tty)
+     char *args;
+     int   from_tty;
 {
   overlay_debugging = 0;
   if (info_verbose)
@@ -2362,6 +2364,8 @@ overlay_off_command (args, from_tty)
 
 static void
 overlay_load_command (args, from_tty)
+     char *args;
+     int   from_tty;
 {
   if (target_overlay_update)
     (*target_overlay_update) (NULL);

@@ -2674,8 +2674,6 @@ gdb_get_vars_command (clientData, interp, objc, objv)
           default:
           case LOC_UNDEF:		  /* catches errors        */
           case LOC_CONST:	      /* constant              */
-          case LOC_STATIC:	      /* static                */
-          case LOC_REGISTER:      /* register              */
           case LOC_TYPEDEF:	      /* local typedef         */
           case LOC_LABEL:	      /* local label           */
           case LOC_BLOCK:	      /* local function        */
@@ -2694,6 +2692,8 @@ gdb_get_vars_command (clientData, interp, objc, objv)
                                         Tcl_NewStringObj (SYMBOL_NAME (sym), -1));
             break;
           case LOC_LOCAL:	      /* stack local           */
+          case LOC_STATIC:	      /* static                */
+          case LOC_REGISTER:      /* register              */
           case LOC_BASEREG:	      /* basereg local         */
             if (!arguments)
               Tcl_ListObjAppendElement (interp, result,
