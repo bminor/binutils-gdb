@@ -625,6 +625,44 @@ find_unwind_entry (CORE_ADDR pc)
   return NULL;
 }
 
+/* The epilogue is defined here as the area either on the `bv' instruction 
+   itself or an instruction which destroys the function's stack frame. 
+   
+   We do not assume that the epilogue is at the end of a function as we can
+   also have return sequences in the middle of a function.  */
+static int
+hppa_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  unsigned long status;
+  unsigned int inst;
+  char buf[4];
+  int off;
+
+  status = deprecated_read_memory_nobpt (pc, buf, 4);
+  if (status != 0)
+    return 0;
+
+  inst = extract_unsigned_integer (buf, 4);
+
+  /* The most common way to perform a stack adjustment ldo X(sp),sp 
+     We are destroying a stack frame if the offset is negative.  */
+  if ((inst & 0xffffc000) == 0x37de0000
+      && hppa_extract_14 (inst) < 0)
+    return 1;
+
+  /* ldw,mb D(sp),X or ldd,mb D(sp),X */
+  if (((inst & 0x0fc010e0) == 0x0fc010e0 
+       || (inst & 0x0fc010e0) == 0x0fc010e0)
+      && hppa_extract_14 (inst) < 0)
+    return 1;
+
+  /* bv %r0(%rp) or bv,n %r0(%rp) */
+  if (inst == 0xe840c000 || inst == 0xe840c002)
+    return 1;
+
+  return 0;
+}
+
 static const unsigned char *
 hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 {
@@ -2578,6 +2616,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The following gdbarch vector elements do not depend on the address
      size, or in any other gdbarch element previously set.  */
   set_gdbarch_skip_prologue (gdbarch, hppa_skip_prologue);
+  set_gdbarch_in_function_epilogue_p (gdbarch,
+				      hppa_in_function_epilogue_p);
   set_gdbarch_inner_than (gdbarch, core_addr_greaterthan);
   set_gdbarch_sp_regnum (gdbarch, HPPA_SP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, HPPA_FP0_REGNUM);

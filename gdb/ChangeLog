@@ -1,3 +1,8 @@
+2004-12-14  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_in_function_epilogue_p): New function.
+	(hppa_gdbarch_init): Set in_epilogue_p method.
+
 2004-12-14  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c (sh_extract_return_value_nofpu): Rename from
