@@ -229,7 +229,7 @@ mips.o: mips.c gprof.h $(BFDDIR)/sysdep.h $(INCDIR)/ansidecl.h \
   ../bfd/bfd.h $(INCDIR)/symcat.h gconfig.h $(INCDIR)/bin-bugs.h \
   search_list.h source.h symtab.h cg_arcs.h corefile.h \
   hist.h
-flat_bl.o: flat_bl.c
-bsd_callg_bl.o: bsd_callg_bl.c
-fsf_callg_bl.o: fsf_callg_bl.c
+flat_bl.o: flat_bl.c $(INCDIR)/ansidecl.h
+bsd_callg_bl.o: bsd_callg_bl.c $(INCDIR)/ansidecl.h
+fsf_callg_bl.o: fsf_callg_bl.c $(INCDIR)/ansidecl.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
