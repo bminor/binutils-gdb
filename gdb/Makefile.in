@@ -1225,6 +1225,7 @@ ALLDEPFILES = a68v-nat.c \
 	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-nat.c \
+	mips-irix-tdep.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	nbsd-tdep.c \
@@ -1244,7 +1245,7 @@ ALLDEPFILES = a68v-nat.c \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
 	sh-tdep.c shnbsd-tdep.c shnbsd-nat.c \
-	solib.c solib-svr4.c solib-sunos.c sparc-linux-nat.c \
+	solib.c solib-irix.c solib-svr4.c solib-sunos.c sparc-linux-nat.c \
 	sparc-nat.c \
 	sparc64nbsd-nat.c sparcnbsd-nat.c sparcnbsd-tdep.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c \
@@ -1817,6 +1818,8 @@ mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 
 mips-nat.o: mips-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
+mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) osabi.h $(BFD_SRC)/elf-bfd.h
+
 mips-tdep.o: mips-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h) \
 	$(inferior_h) $(language_h) $(objfiles_h) $(symfile_h) \
@@ -2096,6 +2099,9 @@ mon960-rom.o: mon960-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 solib.o: solib.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(objfiles_h) $(gdb_regex_h) $(symfile_h) $(target_h) $(gdb_string_h) \
 	$(solist_h) $(completer_h)
+
+solib-irix.o: solib-irix.c $(defs_h) $(gdbcore_h) $(inferior_h) $(objfiles_h) \
+	$(symfile_h) $(target_h) $(solist_h) solib-svr4.h
 
 solib-sunos.o: solib-sunos.c $(defs_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcore_h) $(inferior_h) $(solist_h)
