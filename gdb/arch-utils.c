@@ -413,7 +413,7 @@ set_arch (const struct bfd_arch_info *arch,
       break;
     }
   if (gdbarch_debug)
-    gdbarch_dump ();
+    gdbarch_dump (current_gdbarch, gdb_stdlog);
 }
 
 /* Set the architecture from arch/machine (deprecated) */
@@ -564,7 +564,7 @@ set_gdbarch_from_file (abfd)
 extern const bfd_arch_info_type DEFAULT_BFD_ARCH;
 static const bfd_arch_info_type *default_bfd_arch = &DEFAULT_BFD_ARCH;
 #else
-static const bfd_arch_info_type *default_bfd_arch
+static const bfd_arch_info_type *default_bfd_arch;
 #endif
 
 #ifdef DEFAULT_BFD_VEC

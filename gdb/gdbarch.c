@@ -93,6 +93,7 @@ struct gdbarch
 
   /* target specific vector. */
   struct gdbarch_tdep *tdep;
+  gdbarch_dump_tdep_ftype *dump_tdep;
 
   /* per-architecture data-pointers */
   int nr_data;
@@ -232,12 +233,13 @@ struct gdbarch
 
 extern const struct bfd_arch_info bfd_default_arch_struct;
 
-struct gdbarch startup_gdbarch = {
+struct gdbarch startup_gdbarch =
+{
   /* basic architecture information */
   &bfd_default_arch_struct,
   BIG_ENDIAN,
-  /* target specific vector */
-  NULL,
+  /* target specific vector and its dump routine */
+  NULL, NULL,
   /*per-architecture data-pointers and swap regions */
   0, NULL, NULL,
   /* Multi-arch values */
@@ -340,6 +342,7 @@ struct gdbarch startup_gdbarch = {
   0,
   /* startup_gdbarch() */
 };
+
 struct gdbarch *current_gdbarch = &startup_gdbarch;
 
 
@@ -406,6 +409,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
    However, if an architecture's init function encounters an error
    building the structure, it may need to clean up a partially
    constructed gdbarch.  */
+
 void
 gdbarch_free (struct gdbarch *arch)
 {
@@ -655,567 +659,1184 @@ verify_gdbarch (struct gdbarch *gdbarch)
 
 /* Print out the details of the current architecture. */
 
+/* NOTE/WARNING: The parameter is called ``current_gdbarch'' so that it
+   just happens to match the global variable ``current_gdbarch''.  That
+   way macros refering to that variable get the local and not the global
+   version - ulgh.  Once everything is parameterised with gdbarch, this
+   will go away. */
+
 void
-gdbarch_dump (void)
+gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 {
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: GDB_MULTI_ARCH = %d\n",
+                      GDB_MULTI_ARCH);
+#ifdef TARGET_ARCHITECTURE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_ARCHITECTURE # %s\n",
+                      XSTRING (TARGET_ARCHITECTURE));
+#endif
+#ifdef TARGET_BYTE_ORDER
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_BYTE_ORDER # %s\n",
+                      XSTRING (TARGET_BYTE_ORDER));
+#endif
+#ifdef TARGET_BFD_VMA_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_BFD_VMA_BIT # %s\n",
+                      XSTRING (TARGET_BFD_VMA_BIT));
+#endif
+#ifdef TARGET_PTR_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_PTR_BIT # %s\n",
+                      XSTRING (TARGET_PTR_BIT));
+#endif
+#ifdef TARGET_SHORT_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_SHORT_BIT # %s\n",
+                      XSTRING (TARGET_SHORT_BIT));
+#endif
+#ifdef TARGET_INT_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_INT_BIT # %s\n",
+                      XSTRING (TARGET_INT_BIT));
+#endif
+#ifdef TARGET_LONG_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_LONG_BIT # %s\n",
+                      XSTRING (TARGET_LONG_BIT));
+#endif
+#ifdef TARGET_LONG_LONG_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_LONG_LONG_BIT # %s\n",
+                      XSTRING (TARGET_LONG_LONG_BIT));
+#endif
+#ifdef TARGET_FLOAT_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_FLOAT_BIT # %s\n",
+                      XSTRING (TARGET_FLOAT_BIT));
+#endif
+#ifdef TARGET_DOUBLE_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_DOUBLE_BIT # %s\n",
+                      XSTRING (TARGET_DOUBLE_BIT));
+#endif
+#ifdef TARGET_LONG_DOUBLE_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_LONG_DOUBLE_BIT # %s\n",
+                      XSTRING (TARGET_LONG_DOUBLE_BIT));
+#endif
+#ifdef IEEE_FLOAT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: IEEE_FLOAT # %s\n",
+                      XSTRING (IEEE_FLOAT));
+#endif
+#ifdef TARGET_READ_PC
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_READ_PC(pid)",
+                      XSTRING (TARGET_READ_PC (pid)));
+#endif
+#ifdef TARGET_WRITE_PC
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_WRITE_PC(val, pid)",
+                      XSTRING (TARGET_WRITE_PC (val, pid)));
+#endif
+#ifdef TARGET_READ_FP
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_READ_FP()",
+                      XSTRING (TARGET_READ_FP ()));
+#endif
+#ifdef TARGET_WRITE_FP
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_WRITE_FP(val)",
+                      XSTRING (TARGET_WRITE_FP (val)));
+#endif
+#ifdef TARGET_READ_SP
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_READ_SP()",
+                      XSTRING (TARGET_READ_SP ()));
+#endif
+#ifdef TARGET_WRITE_SP
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "TARGET_WRITE_SP(val)",
+                      XSTRING (TARGET_WRITE_SP (val)));
+#endif
+#ifdef NUM_REGS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NUM_REGS # %s\n",
+                      XSTRING (NUM_REGS));
+#endif
+#ifdef SP_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SP_REGNUM # %s\n",
+                      XSTRING (SP_REGNUM));
+#endif
+#ifdef FP_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FP_REGNUM # %s\n",
+                      XSTRING (FP_REGNUM));
+#endif
+#ifdef PC_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: PC_REGNUM # %s\n",
+                      XSTRING (PC_REGNUM));
+#endif
+#ifdef FP0_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FP0_REGNUM # %s\n",
+                      XSTRING (FP0_REGNUM));
+#endif
+#ifdef NPC_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NPC_REGNUM # %s\n",
+                      XSTRING (NPC_REGNUM));
+#endif
+#ifdef NNPC_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NNPC_REGNUM # %s\n",
+                      XSTRING (NNPC_REGNUM));
+#endif
+#ifdef REGISTER_NAME
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_NAME(regnr)",
+                      XSTRING (REGISTER_NAME (regnr)));
+#endif
+#ifdef REGISTER_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_SIZE # %s\n",
+                      XSTRING (REGISTER_SIZE));
+#endif
+#ifdef REGISTER_BYTES
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_BYTES # %s\n",
+                      XSTRING (REGISTER_BYTES));
+#endif
+#ifdef REGISTER_BYTE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_BYTE(reg_nr)",
+                      XSTRING (REGISTER_BYTE (reg_nr)));
+#endif
+#ifdef REGISTER_RAW_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_RAW_SIZE(reg_nr)",
+                      XSTRING (REGISTER_RAW_SIZE (reg_nr)));
+#endif
+#ifdef MAX_REGISTER_RAW_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: MAX_REGISTER_RAW_SIZE # %s\n",
+                      XSTRING (MAX_REGISTER_RAW_SIZE));
+#endif
+#ifdef REGISTER_VIRTUAL_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_VIRTUAL_SIZE(reg_nr)",
+                      XSTRING (REGISTER_VIRTUAL_SIZE (reg_nr)));
+#endif
+#ifdef MAX_REGISTER_VIRTUAL_SIZE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: MAX_REGISTER_VIRTUAL_SIZE # %s\n",
+                      XSTRING (MAX_REGISTER_VIRTUAL_SIZE));
+#endif
+#ifdef REGISTER_VIRTUAL_TYPE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_VIRTUAL_TYPE(reg_nr)",
+                      XSTRING (REGISTER_VIRTUAL_TYPE (reg_nr)));
+#endif
+#ifdef USE_GENERIC_DUMMY_FRAMES
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: USE_GENERIC_DUMMY_FRAMES # %s\n",
+                      XSTRING (USE_GENERIC_DUMMY_FRAMES));
+#endif
+#ifdef CALL_DUMMY_LOCATION
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_LOCATION # %s\n",
+                      XSTRING (CALL_DUMMY_LOCATION));
+#endif
+#ifdef CALL_DUMMY_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "CALL_DUMMY_ADDRESS()",
+                      XSTRING (CALL_DUMMY_ADDRESS ()));
+#endif
+#ifdef CALL_DUMMY_START_OFFSET
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_START_OFFSET # %s\n",
+                      XSTRING (CALL_DUMMY_START_OFFSET));
+#endif
+#ifdef CALL_DUMMY_BREAKPOINT_OFFSET
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET # %s\n",
+                      XSTRING (CALL_DUMMY_BREAKPOINT_OFFSET));
+#endif
+#ifdef CALL_DUMMY_BREAKPOINT_OFFSET_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET_P # %s\n",
+                      XSTRING (CALL_DUMMY_BREAKPOINT_OFFSET_P));
+#endif
+#ifdef CALL_DUMMY_LENGTH
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_LENGTH # %s\n",
+                      XSTRING (CALL_DUMMY_LENGTH));
+#endif
+#ifdef PC_IN_CALL_DUMMY
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PC_IN_CALL_DUMMY(pc, sp, frame_address)",
+                      XSTRING (PC_IN_CALL_DUMMY (pc, sp, frame_address)));
+#endif
+#ifdef CALL_DUMMY_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_P # %s\n",
+                      XSTRING (CALL_DUMMY_P));
+#endif
+#ifdef CALL_DUMMY_WORDS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_WORDS # %s\n",
+                      XSTRING (CALL_DUMMY_WORDS));
+#endif
+#ifdef SIZEOF_CALL_DUMMY_WORDS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS # %s\n",
+                      XSTRING (SIZEOF_CALL_DUMMY_WORDS));
+#endif
+#ifdef CALL_DUMMY_STACK_ADJUST_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_STACK_ADJUST_P # %s\n",
+                      XSTRING (CALL_DUMMY_STACK_ADJUST_P));
+#endif
+#ifdef CALL_DUMMY_STACK_ADJUST
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_STACK_ADJUST # %s\n",
+                      XSTRING (CALL_DUMMY_STACK_ADJUST));
+#endif
+#ifdef FIX_CALL_DUMMY
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p)",
+                      XSTRING (FIX_CALL_DUMMY (dummy, pc, fun, nargs, args, type, gcc_p)));
+#endif
+#ifdef BELIEVE_PCC_PROMOTION
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: BELIEVE_PCC_PROMOTION # %s\n",
+                      XSTRING (BELIEVE_PCC_PROMOTION));
+#endif
+#ifdef BELIEVE_PCC_PROMOTION_TYPE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: BELIEVE_PCC_PROMOTION_TYPE # %s\n",
+                      XSTRING (BELIEVE_PCC_PROMOTION_TYPE));
+#endif
+#ifdef COERCE_FLOAT_TO_DOUBLE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "COERCE_FLOAT_TO_DOUBLE(formal, actual)",
+                      XSTRING (COERCE_FLOAT_TO_DOUBLE (formal, actual)));
+#endif
+#ifdef GET_SAVED_REGISTER
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval)",
+                      XSTRING (GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval)));
+#endif
+#ifdef REGISTER_CONVERTIBLE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_CONVERTIBLE(nr)",
+                      XSTRING (REGISTER_CONVERTIBLE (nr)));
+#endif
+#ifdef REGISTER_CONVERT_TO_VIRTUAL
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to)",
+                      XSTRING (REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to)));
+#endif
+#ifdef REGISTER_CONVERT_TO_RAW
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_CONVERT_TO_RAW(type, regnum, from, to)",
+                      XSTRING (REGISTER_CONVERT_TO_RAW (type, regnum, from, to)));
+#endif
+#ifdef POINTER_TO_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "POINTER_TO_ADDRESS(type, buf)",
+                      XSTRING (POINTER_TO_ADDRESS (type, buf)));
+#endif
+#ifdef ADDRESS_TO_POINTER
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "ADDRESS_TO_POINTER(type, buf, addr)",
+                      XSTRING (ADDRESS_TO_POINTER (type, buf, addr)));
+#endif
+#ifdef RETURN_VALUE_ON_STACK
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "RETURN_VALUE_ON_STACK(type)",
+                      XSTRING (RETURN_VALUE_ON_STACK (type)));
+#endif
+#ifdef EXTRACT_RETURN_VALUE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "EXTRACT_RETURN_VALUE(type, regbuf, valbuf)",
+                      XSTRING (EXTRACT_RETURN_VALUE (type, regbuf, valbuf)));
+#endif
+#ifdef PUSH_ARGUMENTS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr)",
+                      XSTRING (PUSH_ARGUMENTS (nargs, args, sp, struct_return, struct_addr)));
+#endif
+#ifdef PUSH_DUMMY_FRAME
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PUSH_DUMMY_FRAME(-)",
+                      XSTRING (PUSH_DUMMY_FRAME (-)));
+#endif
+#ifdef PUSH_RETURN_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PUSH_RETURN_ADDRESS(pc, sp)",
+                      XSTRING (PUSH_RETURN_ADDRESS (pc, sp)));
+#endif
+#ifdef POP_FRAME
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "POP_FRAME(-)",
+                      XSTRING (POP_FRAME (-)));
+#endif
+#ifdef D10V_MAKE_DADDR
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "D10V_MAKE_DADDR(x)",
+                      XSTRING (D10V_MAKE_DADDR (x)));
+#endif
+#ifdef D10V_MAKE_IADDR
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "D10V_MAKE_IADDR(x)",
+                      XSTRING (D10V_MAKE_IADDR (x)));
+#endif
+#ifdef D10V_DADDR_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "D10V_DADDR_P(x)",
+                      XSTRING (D10V_DADDR_P (x)));
+#endif
+#ifdef D10V_IADDR_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "D10V_IADDR_P(x)",
+                      XSTRING (D10V_IADDR_P (x)));
+#endif
+#ifdef D10V_CONVERT_DADDR_TO_RAW
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "D10V_CONVERT_DADDR_TO_RAW(x)",
+                      XSTRING (D10V_CONVERT_DADDR_TO_RAW (x)));
+#endif
+#ifdef D10V_CONVERT_IADDR_TO_RAW
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "D10V_CONVERT_IADDR_TO_RAW(x)",
+                      XSTRING (D10V_CONVERT_IADDR_TO_RAW (x)));
+#endif
+#ifdef STORE_STRUCT_RETURN
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "STORE_STRUCT_RETURN(addr, sp)",
+                      XSTRING (STORE_STRUCT_RETURN (addr, sp)));
+#endif
+#ifdef STORE_RETURN_VALUE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "STORE_RETURN_VALUE(type, valbuf)",
+                      XSTRING (STORE_RETURN_VALUE (type, valbuf)));
+#endif
+#ifdef EXTRACT_STRUCT_VALUE_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "EXTRACT_STRUCT_VALUE_ADDRESS(regbuf)",
+                      XSTRING (EXTRACT_STRUCT_VALUE_ADDRESS (regbuf)));
+#endif
+#ifdef USE_STRUCT_CONVENTION
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "USE_STRUCT_CONVENTION(gcc_p, value_type)",
+                      XSTRING (USE_STRUCT_CONVENTION (gcc_p, value_type)));
+#endif
+#ifdef FRAME_INIT_SAVED_REGS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_INIT_SAVED_REGS(frame)",
+                      XSTRING (FRAME_INIT_SAVED_REGS (frame)));
+#endif
+#ifdef INIT_EXTRA_FRAME_INFO
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INIT_EXTRA_FRAME_INFO(fromleaf, frame)",
+                      XSTRING (INIT_EXTRA_FRAME_INFO (fromleaf, frame)));
+#endif
+#ifdef SKIP_PROLOGUE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SKIP_PROLOGUE(ip)",
+                      XSTRING (SKIP_PROLOGUE (ip)));
+#endif
+#ifdef PROLOGUE_FRAMELESS_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PROLOGUE_FRAMELESS_P(ip)",
+                      XSTRING (PROLOGUE_FRAMELESS_P (ip)));
+#endif
+#ifdef INNER_THAN
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "INNER_THAN(lhs, rhs)",
+                      XSTRING (INNER_THAN (lhs, rhs)));
+#endif
+#ifdef BREAKPOINT_FROM_PC
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "BREAKPOINT_FROM_PC(pcptr, lenptr)",
+                      XSTRING (BREAKPOINT_FROM_PC (pcptr, lenptr)));
+#endif
+#ifdef MEMORY_INSERT_BREAKPOINT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "MEMORY_INSERT_BREAKPOINT(addr, contents_cache)",
+                      XSTRING (MEMORY_INSERT_BREAKPOINT (addr, contents_cache)));
+#endif
+#ifdef MEMORY_REMOVE_BREAKPOINT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "MEMORY_REMOVE_BREAKPOINT(addr, contents_cache)",
+                      XSTRING (MEMORY_REMOVE_BREAKPOINT (addr, contents_cache)));
+#endif
+#ifdef DECR_PC_AFTER_BREAK
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DECR_PC_AFTER_BREAK # %s\n",
+                      XSTRING (DECR_PC_AFTER_BREAK));
+#endif
+#ifdef FUNCTION_START_OFFSET
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FUNCTION_START_OFFSET # %s\n",
+                      XSTRING (FUNCTION_START_OFFSET));
+#endif
+#ifdef REMOTE_TRANSLATE_XFER_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REMOTE_TRANSLATE_XFER_ADDRESS(gdb_addr, gdb_len, rem_addr, rem_len)",
+                      XSTRING (REMOTE_TRANSLATE_XFER_ADDRESS (gdb_addr, gdb_len, rem_addr, rem_len)));
+#endif
+#ifdef FRAME_ARGS_SKIP
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_ARGS_SKIP # %s\n",
+                      XSTRING (FRAME_ARGS_SKIP));
+#endif
+#ifdef FRAMELESS_FUNCTION_INVOCATION
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAMELESS_FUNCTION_INVOCATION(fi)",
+                      XSTRING (FRAMELESS_FUNCTION_INVOCATION (fi)));
+#endif
+#ifdef FRAME_CHAIN
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_CHAIN(frame)",
+                      XSTRING (FRAME_CHAIN (frame)));
+#endif
+#ifdef FRAME_CHAIN_VALID
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_CHAIN_VALID(chain, thisframe)",
+                      XSTRING (FRAME_CHAIN_VALID (chain, thisframe)));
+#endif
+#ifdef FRAME_SAVED_PC
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_SAVED_PC(fi)",
+                      XSTRING (FRAME_SAVED_PC (fi)));
+#endif
+#ifdef FRAME_ARGS_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_ARGS_ADDRESS(fi)",
+                      XSTRING (FRAME_ARGS_ADDRESS (fi)));
+#endif
+#ifdef FRAME_LOCALS_ADDRESS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_LOCALS_ADDRESS(fi)",
+                      XSTRING (FRAME_LOCALS_ADDRESS (fi)));
+#endif
+#ifdef SAVED_PC_AFTER_CALL
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SAVED_PC_AFTER_CALL(frame)",
+                      XSTRING (SAVED_PC_AFTER_CALL (frame)));
+#endif
+#ifdef FRAME_NUM_ARGS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "FRAME_NUM_ARGS(frame)",
+                      XSTRING (FRAME_NUM_ARGS (frame)));
+#endif
+#ifdef STACK_ALIGN
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "STACK_ALIGN(sp)",
+                      XSTRING (STACK_ALIGN (sp)));
+#endif
+#ifdef REG_STRUCT_HAS_ADDR
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REG_STRUCT_HAS_ADDR(gcc_p, type)",
+                      XSTRING (REG_STRUCT_HAS_ADDR (gcc_p, type)));
+#endif
+#ifdef SAVE_DUMMY_FRAME_TOS
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SAVE_DUMMY_FRAME_TOS(sp)",
+                      XSTRING (SAVE_DUMMY_FRAME_TOS (sp)));
+#endif
+#ifdef TARGET_FLOAT_FORMAT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_FLOAT_FORMAT # %s\n",
+                      XSTRING (TARGET_FLOAT_FORMAT));
+#endif
+#ifdef TARGET_DOUBLE_FORMAT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_DOUBLE_FORMAT # %s\n",
+                      XSTRING (TARGET_DOUBLE_FORMAT));
+#endif
+#ifdef TARGET_LONG_DOUBLE_FORMAT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_LONG_DOUBLE_FORMAT # %s\n",
+                      XSTRING (TARGET_LONG_DOUBLE_FORMAT));
+#endif
 #ifdef TARGET_ARCHITECTURE
   if (TARGET_ARCHITECTURE != NULL)
-    fprintf_unfiltered (gdb_stdlog,
-                        "gdbarch_update: TARGET_ARCHITECTURE = %s\n",
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_ARCHITECTURE = %s\n",
                         TARGET_ARCHITECTURE->printable_name);
 #endif
 #ifdef TARGET_BYTE_ORDER
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_BYTE_ORDER = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_BYTE_ORDER = %ld\n",
                       (long) TARGET_BYTE_ORDER);
 #endif
 #ifdef TARGET_BFD_VMA_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_BFD_VMA_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_BFD_VMA_BIT = %ld\n",
                       (long) TARGET_BFD_VMA_BIT);
 #endif
 #ifdef TARGET_PTR_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_PTR_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_PTR_BIT = %ld\n",
                       (long) TARGET_PTR_BIT);
 #endif
 #ifdef TARGET_SHORT_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_SHORT_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_SHORT_BIT = %ld\n",
                       (long) TARGET_SHORT_BIT);
 #endif
 #ifdef TARGET_INT_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_INT_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_INT_BIT = %ld\n",
                       (long) TARGET_INT_BIT);
 #endif
 #ifdef TARGET_LONG_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_LONG_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_LONG_BIT = %ld\n",
                       (long) TARGET_LONG_BIT);
 #endif
 #ifdef TARGET_LONG_LONG_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_LONG_LONG_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_LONG_LONG_BIT = %ld\n",
                       (long) TARGET_LONG_LONG_BIT);
 #endif
 #ifdef TARGET_FLOAT_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_FLOAT_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_FLOAT_BIT = %ld\n",
                       (long) TARGET_FLOAT_BIT);
 #endif
 #ifdef TARGET_DOUBLE_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_DOUBLE_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_DOUBLE_BIT = %ld\n",
                       (long) TARGET_DOUBLE_BIT);
 #endif
 #ifdef TARGET_LONG_DOUBLE_BIT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_LONG_DOUBLE_BIT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_LONG_DOUBLE_BIT = %ld\n",
                       (long) TARGET_LONG_DOUBLE_BIT);
 #endif
 #ifdef IEEE_FLOAT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: IEEE_FLOAT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: IEEE_FLOAT = %ld\n",
                       (long) IEEE_FLOAT);
 #endif
 #ifdef TARGET_READ_PC
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_READ_PC = 0x%08lx\n",
-                      (long) current_gdbarch->read_pc
-                      /*TARGET_READ_PC ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_READ_PC = 0x%08lx\n",
+                        (long) current_gdbarch->read_pc
+                        /*TARGET_READ_PC ()*/);
 #endif
 #ifdef TARGET_WRITE_PC
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_WRITE_PC = 0x%08lx\n",
-                      (long) current_gdbarch->write_pc
-                      /*TARGET_WRITE_PC ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_WRITE_PC = 0x%08lx\n",
+                        (long) current_gdbarch->write_pc
+                        /*TARGET_WRITE_PC ()*/);
 #endif
 #ifdef TARGET_READ_FP
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_READ_FP = 0x%08lx\n",
-                      (long) current_gdbarch->read_fp
-                      /*TARGET_READ_FP ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_READ_FP = 0x%08lx\n",
+                        (long) current_gdbarch->read_fp
+                        /*TARGET_READ_FP ()*/);
 #endif
 #ifdef TARGET_WRITE_FP
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_WRITE_FP = 0x%08lx\n",
-                      (long) current_gdbarch->write_fp
-                      /*TARGET_WRITE_FP ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_WRITE_FP = 0x%08lx\n",
+                        (long) current_gdbarch->write_fp
+                        /*TARGET_WRITE_FP ()*/);
 #endif
 #ifdef TARGET_READ_SP
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_READ_SP = 0x%08lx\n",
-                      (long) current_gdbarch->read_sp
-                      /*TARGET_READ_SP ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_READ_SP = 0x%08lx\n",
+                        (long) current_gdbarch->read_sp
+                        /*TARGET_READ_SP ()*/);
 #endif
 #ifdef TARGET_WRITE_SP
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_WRITE_SP = 0x%08lx\n",
-                      (long) current_gdbarch->write_sp
-                      /*TARGET_WRITE_SP ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: TARGET_WRITE_SP = 0x%08lx\n",
+                        (long) current_gdbarch->write_sp
+                        /*TARGET_WRITE_SP ()*/);
 #endif
 #ifdef NUM_REGS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: NUM_REGS = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NUM_REGS = %ld\n",
                       (long) NUM_REGS);
 #endif
 #ifdef SP_REGNUM
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: SP_REGNUM = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SP_REGNUM = %ld\n",
                       (long) SP_REGNUM);
 #endif
 #ifdef FP_REGNUM
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FP_REGNUM = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FP_REGNUM = %ld\n",
                       (long) FP_REGNUM);
 #endif
 #ifdef PC_REGNUM
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: PC_REGNUM = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: PC_REGNUM = %ld\n",
                       (long) PC_REGNUM);
 #endif
 #ifdef FP0_REGNUM
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FP0_REGNUM = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FP0_REGNUM = %ld\n",
                       (long) FP0_REGNUM);
 #endif
 #ifdef NPC_REGNUM
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: NPC_REGNUM = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NPC_REGNUM = %ld\n",
                       (long) NPC_REGNUM);
 #endif
 #ifdef NNPC_REGNUM
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: NNPC_REGNUM = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: NNPC_REGNUM = %ld\n",
                       (long) NNPC_REGNUM);
 #endif
 #ifdef REGISTER_NAME
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_NAME = 0x%08lx\n",
-                      (long) current_gdbarch->register_name
-                      /*REGISTER_NAME ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_NAME = 0x%08lx\n",
+                        (long) current_gdbarch->register_name
+                        /*REGISTER_NAME ()*/);
 #endif
 #ifdef REGISTER_SIZE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_SIZE = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_SIZE = %ld\n",
                       (long) REGISTER_SIZE);
 #endif
 #ifdef REGISTER_BYTES
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_BYTES = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: REGISTER_BYTES = %ld\n",
                       (long) REGISTER_BYTES);
 #endif
 #ifdef REGISTER_BYTE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_BYTE = 0x%08lx\n",
-                      (long) current_gdbarch->register_byte
-                      /*REGISTER_BYTE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_BYTE = 0x%08lx\n",
+                        (long) current_gdbarch->register_byte
+                        /*REGISTER_BYTE ()*/);
 #endif
 #ifdef REGISTER_RAW_SIZE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_RAW_SIZE = 0x%08lx\n",
-                      (long) current_gdbarch->register_raw_size
-                      /*REGISTER_RAW_SIZE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_RAW_SIZE = 0x%08lx\n",
+                        (long) current_gdbarch->register_raw_size
+                        /*REGISTER_RAW_SIZE ()*/);
 #endif
 #ifdef MAX_REGISTER_RAW_SIZE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: MAX_REGISTER_RAW_SIZE = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: MAX_REGISTER_RAW_SIZE = %ld\n",
                       (long) MAX_REGISTER_RAW_SIZE);
 #endif
 #ifdef REGISTER_VIRTUAL_SIZE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_VIRTUAL_SIZE = 0x%08lx\n",
-                      (long) current_gdbarch->register_virtual_size
-                      /*REGISTER_VIRTUAL_SIZE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_VIRTUAL_SIZE = 0x%08lx\n",
+                        (long) current_gdbarch->register_virtual_size
+                        /*REGISTER_VIRTUAL_SIZE ()*/);
 #endif
 #ifdef MAX_REGISTER_VIRTUAL_SIZE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: MAX_REGISTER_VIRTUAL_SIZE = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: MAX_REGISTER_VIRTUAL_SIZE = %ld\n",
                       (long) MAX_REGISTER_VIRTUAL_SIZE);
 #endif
 #ifdef REGISTER_VIRTUAL_TYPE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_VIRTUAL_TYPE = 0x%08lx\n",
-                      (long) current_gdbarch->register_virtual_type
-                      /*REGISTER_VIRTUAL_TYPE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_VIRTUAL_TYPE = 0x%08lx\n",
+                        (long) current_gdbarch->register_virtual_type
+                        /*REGISTER_VIRTUAL_TYPE ()*/);
 #endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: USE_GENERIC_DUMMY_FRAMES = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: USE_GENERIC_DUMMY_FRAMES = %ld\n",
                       (long) USE_GENERIC_DUMMY_FRAMES);
 #endif
 #ifdef CALL_DUMMY_LOCATION
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: CALL_DUMMY_LOCATION = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_LOCATION = %ld\n",
                       (long) CALL_DUMMY_LOCATION);
 #endif
 #ifdef CALL_DUMMY_ADDRESS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: CALL_DUMMY_ADDRESS = 0x%08lx\n",
-                      (long) current_gdbarch->call_dummy_address
-                      /*CALL_DUMMY_ADDRESS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: CALL_DUMMY_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->call_dummy_address
+                        /*CALL_DUMMY_ADDRESS ()*/);
 #endif
 #ifdef CALL_DUMMY_START_OFFSET
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: CALL_DUMMY_START_OFFSET = 0x%08lx\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_START_OFFSET = 0x%08lx\n",
                       (long) CALL_DUMMY_START_OFFSET);
 #endif
 #ifdef CALL_DUMMY_BREAKPOINT_OFFSET
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: CALL_DUMMY_BREAKPOINT_OFFSET = 0x%08lx\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET = 0x%08lx\n",
                       (long) CALL_DUMMY_BREAKPOINT_OFFSET);
 #endif
 #ifdef CALL_DUMMY_BREAKPOINT_OFFSET_P
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: CALL_DUMMY_BREAKPOINT_OFFSET_P = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET_P = %ld\n",
                       (long) CALL_DUMMY_BREAKPOINT_OFFSET_P);
 #endif
 #ifdef CALL_DUMMY_LENGTH
   if (CALL_DUMMY_LOCATION == BEFORE_TEXT_END || CALL_DUMMY_LOCATION == AFTER_TEXT_END)
-    fprintf_unfiltered (gdb_stdlog,
-                        "gdbarch_update: CALL_DUMMY_LENGTH = %ld\n",
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: CALL_DUMMY_LENGTH = %ld\n",
                         (long) CALL_DUMMY_LENGTH);
 #endif
 #ifdef PC_IN_CALL_DUMMY
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: PC_IN_CALL_DUMMY = 0x%08lx\n",
-                      (long) current_gdbarch->pc_in_call_dummy
-                      /*PC_IN_CALL_DUMMY ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: PC_IN_CALL_DUMMY = 0x%08lx\n",
+                        (long) current_gdbarch->pc_in_call_dummy
+                        /*PC_IN_CALL_DUMMY ()*/);
 #endif
 #ifdef CALL_DUMMY_P
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: CALL_DUMMY_P = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_P = %ld\n",
                       (long) CALL_DUMMY_P);
 #endif
 #ifdef CALL_DUMMY_WORDS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: CALL_DUMMY_WORDS = 0x%08lx\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_WORDS = 0x%08lx\n",
                       (long) CALL_DUMMY_WORDS);
 #endif
 #ifdef SIZEOF_CALL_DUMMY_WORDS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: SIZEOF_CALL_DUMMY_WORDS = 0x%08lx\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS = 0x%08lx\n",
                       (long) SIZEOF_CALL_DUMMY_WORDS);
 #endif
 #ifdef CALL_DUMMY_STACK_ADJUST_P
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: CALL_DUMMY_STACK_ADJUST_P = 0x%08lx\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: CALL_DUMMY_STACK_ADJUST_P = 0x%08lx\n",
                       (long) CALL_DUMMY_STACK_ADJUST_P);
 #endif
 #ifdef CALL_DUMMY_STACK_ADJUST
   if (CALL_DUMMY_STACK_ADJUST_P)
-    fprintf_unfiltered (gdb_stdlog,
-                        "gdbarch_update: CALL_DUMMY_STACK_ADJUST = 0x%08lx\n",
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: CALL_DUMMY_STACK_ADJUST = 0x%08lx\n",
                         (long) CALL_DUMMY_STACK_ADJUST);
 #endif
 #ifdef FIX_CALL_DUMMY
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FIX_CALL_DUMMY = 0x%08lx\n",
-                      (long) current_gdbarch->fix_call_dummy
-                      /*FIX_CALL_DUMMY ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FIX_CALL_DUMMY = 0x%08lx\n",
+                        (long) current_gdbarch->fix_call_dummy
+                        /*FIX_CALL_DUMMY ()*/);
 #endif
 #ifdef BELIEVE_PCC_PROMOTION
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: BELIEVE_PCC_PROMOTION = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: BELIEVE_PCC_PROMOTION = %ld\n",
                       (long) BELIEVE_PCC_PROMOTION);
 #endif
 #ifdef BELIEVE_PCC_PROMOTION_TYPE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: BELIEVE_PCC_PROMOTION_TYPE = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: BELIEVE_PCC_PROMOTION_TYPE = %ld\n",
                       (long) BELIEVE_PCC_PROMOTION_TYPE);
 #endif
 #ifdef COERCE_FLOAT_TO_DOUBLE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: COERCE_FLOAT_TO_DOUBLE = 0x%08lx\n",
-                      (long) current_gdbarch->coerce_float_to_double
-                      /*COERCE_FLOAT_TO_DOUBLE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: COERCE_FLOAT_TO_DOUBLE = 0x%08lx\n",
+                        (long) current_gdbarch->coerce_float_to_double
+                        /*COERCE_FLOAT_TO_DOUBLE ()*/);
 #endif
 #ifdef GET_SAVED_REGISTER
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: GET_SAVED_REGISTER = 0x%08lx\n",
-                      (long) current_gdbarch->get_saved_register
-                      /*GET_SAVED_REGISTER ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: GET_SAVED_REGISTER = 0x%08lx\n",
+                        (long) current_gdbarch->get_saved_register
+                        /*GET_SAVED_REGISTER ()*/);
 #endif
 #ifdef REGISTER_CONVERTIBLE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_CONVERTIBLE = 0x%08lx\n",
-                      (long) current_gdbarch->register_convertible
-                      /*REGISTER_CONVERTIBLE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_CONVERTIBLE = 0x%08lx\n",
+                        (long) current_gdbarch->register_convertible
+                        /*REGISTER_CONVERTIBLE ()*/);
 #endif
 #ifdef REGISTER_CONVERT_TO_VIRTUAL
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_CONVERT_TO_VIRTUAL = 0x%08lx\n",
-                      (long) current_gdbarch->register_convert_to_virtual
-                      /*REGISTER_CONVERT_TO_VIRTUAL ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_CONVERT_TO_VIRTUAL = 0x%08lx\n",
+                        (long) current_gdbarch->register_convert_to_virtual
+                        /*REGISTER_CONVERT_TO_VIRTUAL ()*/);
 #endif
 #ifdef REGISTER_CONVERT_TO_RAW
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REGISTER_CONVERT_TO_RAW = 0x%08lx\n",
-                      (long) current_gdbarch->register_convert_to_raw
-                      /*REGISTER_CONVERT_TO_RAW ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_CONVERT_TO_RAW = 0x%08lx\n",
+                        (long) current_gdbarch->register_convert_to_raw
+                        /*REGISTER_CONVERT_TO_RAW ()*/);
 #endif
 #ifdef POINTER_TO_ADDRESS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: POINTER_TO_ADDRESS = 0x%08lx\n",
-                      (long) current_gdbarch->pointer_to_address
-                      /*POINTER_TO_ADDRESS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: POINTER_TO_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->pointer_to_address
+                        /*POINTER_TO_ADDRESS ()*/);
 #endif
 #ifdef ADDRESS_TO_POINTER
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: ADDRESS_TO_POINTER = 0x%08lx\n",
-                      (long) current_gdbarch->address_to_pointer
-                      /*ADDRESS_TO_POINTER ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: ADDRESS_TO_POINTER = 0x%08lx\n",
+                        (long) current_gdbarch->address_to_pointer
+                        /*ADDRESS_TO_POINTER ()*/);
 #endif
 #ifdef RETURN_VALUE_ON_STACK
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: RETURN_VALUE_ON_STACK = 0x%08lx\n",
-                      (long) current_gdbarch->return_value_on_stack
-                      /*RETURN_VALUE_ON_STACK ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: RETURN_VALUE_ON_STACK = 0x%08lx\n",
+                        (long) current_gdbarch->return_value_on_stack
+                        /*RETURN_VALUE_ON_STACK ()*/);
 #endif
 #ifdef EXTRACT_RETURN_VALUE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: EXTRACT_RETURN_VALUE = 0x%08lx\n",
-                      (long) current_gdbarch->extract_return_value
-                      /*EXTRACT_RETURN_VALUE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: EXTRACT_RETURN_VALUE = 0x%08lx\n",
+                        (long) current_gdbarch->extract_return_value
+                        /*EXTRACT_RETURN_VALUE ()*/);
 #endif
 #ifdef PUSH_ARGUMENTS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: PUSH_ARGUMENTS = 0x%08lx\n",
-                      (long) current_gdbarch->push_arguments
-                      /*PUSH_ARGUMENTS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: PUSH_ARGUMENTS = 0x%08lx\n",
+                        (long) current_gdbarch->push_arguments
+                        /*PUSH_ARGUMENTS ()*/);
 #endif
 #ifdef PUSH_DUMMY_FRAME
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: PUSH_DUMMY_FRAME = 0x%08lx\n",
-                      (long) current_gdbarch->push_dummy_frame
-                      /*PUSH_DUMMY_FRAME ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: PUSH_DUMMY_FRAME = 0x%08lx\n",
+                        (long) current_gdbarch->push_dummy_frame
+                        /*PUSH_DUMMY_FRAME ()*/);
 #endif
 #ifdef PUSH_RETURN_ADDRESS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: PUSH_RETURN_ADDRESS = 0x%08lx\n",
-                      (long) current_gdbarch->push_return_address
-                      /*PUSH_RETURN_ADDRESS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: PUSH_RETURN_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->push_return_address
+                        /*PUSH_RETURN_ADDRESS ()*/);
 #endif
 #ifdef POP_FRAME
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: POP_FRAME = 0x%08lx\n",
-                      (long) current_gdbarch->pop_frame
-                      /*POP_FRAME ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: POP_FRAME = 0x%08lx\n",
+                        (long) current_gdbarch->pop_frame
+                        /*POP_FRAME ()*/);
 #endif
 #ifdef D10V_MAKE_DADDR
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: D10V_MAKE_DADDR = 0x%08lx\n",
-                      (long) current_gdbarch->d10v_make_daddr
-                      /*D10V_MAKE_DADDR ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: D10V_MAKE_DADDR = 0x%08lx\n",
+                        (long) current_gdbarch->d10v_make_daddr
+                        /*D10V_MAKE_DADDR ()*/);
 #endif
 #ifdef D10V_MAKE_IADDR
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: D10V_MAKE_IADDR = 0x%08lx\n",
-                      (long) current_gdbarch->d10v_make_iaddr
-                      /*D10V_MAKE_IADDR ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: D10V_MAKE_IADDR = 0x%08lx\n",
+                        (long) current_gdbarch->d10v_make_iaddr
+                        /*D10V_MAKE_IADDR ()*/);
 #endif
 #ifdef D10V_DADDR_P
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: D10V_DADDR_P = 0x%08lx\n",
-                      (long) current_gdbarch->d10v_daddr_p
-                      /*D10V_DADDR_P ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: D10V_DADDR_P = 0x%08lx\n",
+                        (long) current_gdbarch->d10v_daddr_p
+                        /*D10V_DADDR_P ()*/);
 #endif
 #ifdef D10V_IADDR_P
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: D10V_IADDR_P = 0x%08lx\n",
-                      (long) current_gdbarch->d10v_iaddr_p
-                      /*D10V_IADDR_P ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: D10V_IADDR_P = 0x%08lx\n",
+                        (long) current_gdbarch->d10v_iaddr_p
+                        /*D10V_IADDR_P ()*/);
 #endif
 #ifdef D10V_CONVERT_DADDR_TO_RAW
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: D10V_CONVERT_DADDR_TO_RAW = 0x%08lx\n",
-                      (long) current_gdbarch->d10v_convert_daddr_to_raw
-                      /*D10V_CONVERT_DADDR_TO_RAW ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: D10V_CONVERT_DADDR_TO_RAW = 0x%08lx\n",
+                        (long) current_gdbarch->d10v_convert_daddr_to_raw
+                        /*D10V_CONVERT_DADDR_TO_RAW ()*/);
 #endif
 #ifdef D10V_CONVERT_IADDR_TO_RAW
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: D10V_CONVERT_IADDR_TO_RAW = 0x%08lx\n",
-                      (long) current_gdbarch->d10v_convert_iaddr_to_raw
-                      /*D10V_CONVERT_IADDR_TO_RAW ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: D10V_CONVERT_IADDR_TO_RAW = 0x%08lx\n",
+                        (long) current_gdbarch->d10v_convert_iaddr_to_raw
+                        /*D10V_CONVERT_IADDR_TO_RAW ()*/);
 #endif
 #ifdef STORE_STRUCT_RETURN
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: STORE_STRUCT_RETURN = 0x%08lx\n",
-                      (long) current_gdbarch->store_struct_return
-                      /*STORE_STRUCT_RETURN ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: STORE_STRUCT_RETURN = 0x%08lx\n",
+                        (long) current_gdbarch->store_struct_return
+                        /*STORE_STRUCT_RETURN ()*/);
 #endif
 #ifdef STORE_RETURN_VALUE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: STORE_RETURN_VALUE = 0x%08lx\n",
-                      (long) current_gdbarch->store_return_value
-                      /*STORE_RETURN_VALUE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: STORE_RETURN_VALUE = 0x%08lx\n",
+                        (long) current_gdbarch->store_return_value
+                        /*STORE_RETURN_VALUE ()*/);
 #endif
 #ifdef EXTRACT_STRUCT_VALUE_ADDRESS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: EXTRACT_STRUCT_VALUE_ADDRESS = 0x%08lx\n",
-                      (long) current_gdbarch->extract_struct_value_address
-                      /*EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->extract_struct_value_address
+                        /*EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
 #endif
 #ifdef USE_STRUCT_CONVENTION
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: USE_STRUCT_CONVENTION = 0x%08lx\n",
-                      (long) current_gdbarch->use_struct_convention
-                      /*USE_STRUCT_CONVENTION ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: USE_STRUCT_CONVENTION = 0x%08lx\n",
+                        (long) current_gdbarch->use_struct_convention
+                        /*USE_STRUCT_CONVENTION ()*/);
 #endif
 #ifdef FRAME_INIT_SAVED_REGS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAME_INIT_SAVED_REGS = 0x%08lx\n",
-                      (long) current_gdbarch->frame_init_saved_regs
-                      /*FRAME_INIT_SAVED_REGS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAME_INIT_SAVED_REGS = 0x%08lx\n",
+                        (long) current_gdbarch->frame_init_saved_regs
+                        /*FRAME_INIT_SAVED_REGS ()*/);
 #endif
 #ifdef INIT_EXTRA_FRAME_INFO
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: INIT_EXTRA_FRAME_INFO = 0x%08lx\n",
-                      (long) current_gdbarch->init_extra_frame_info
-                      /*INIT_EXTRA_FRAME_INFO ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: INIT_EXTRA_FRAME_INFO = 0x%08lx\n",
+                        (long) current_gdbarch->init_extra_frame_info
+                        /*INIT_EXTRA_FRAME_INFO ()*/);
 #endif
 #ifdef SKIP_PROLOGUE
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: SKIP_PROLOGUE = 0x%08lx\n",
-                      (long) current_gdbarch->skip_prologue
-                      /*SKIP_PROLOGUE ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SKIP_PROLOGUE = 0x%08lx\n",
+                        (long) current_gdbarch->skip_prologue
+                        /*SKIP_PROLOGUE ()*/);
 #endif
 #ifdef PROLOGUE_FRAMELESS_P
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: PROLOGUE_FRAMELESS_P = 0x%08lx\n",
-                      (long) current_gdbarch->prologue_frameless_p
-                      /*PROLOGUE_FRAMELESS_P ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: PROLOGUE_FRAMELESS_P = 0x%08lx\n",
+                        (long) current_gdbarch->prologue_frameless_p
+                        /*PROLOGUE_FRAMELESS_P ()*/);
 #endif
 #ifdef INNER_THAN
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: INNER_THAN = 0x%08lx\n",
-                      (long) current_gdbarch->inner_than
-                      /*INNER_THAN ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: INNER_THAN = 0x%08lx\n",
+                        (long) current_gdbarch->inner_than
+                        /*INNER_THAN ()*/);
 #endif
 #ifdef BREAKPOINT_FROM_PC
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: BREAKPOINT_FROM_PC = 0x%08lx\n",
-                      (long) current_gdbarch->breakpoint_from_pc
-                      /*BREAKPOINT_FROM_PC ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: BREAKPOINT_FROM_PC = 0x%08lx\n",
+                        (long) current_gdbarch->breakpoint_from_pc
+                        /*BREAKPOINT_FROM_PC ()*/);
 #endif
 #ifdef MEMORY_INSERT_BREAKPOINT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: MEMORY_INSERT_BREAKPOINT = 0x%08lx\n",
-                      (long) current_gdbarch->memory_insert_breakpoint
-                      /*MEMORY_INSERT_BREAKPOINT ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: MEMORY_INSERT_BREAKPOINT = 0x%08lx\n",
+                        (long) current_gdbarch->memory_insert_breakpoint
+                        /*MEMORY_INSERT_BREAKPOINT ()*/);
 #endif
 #ifdef MEMORY_REMOVE_BREAKPOINT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: MEMORY_REMOVE_BREAKPOINT = 0x%08lx\n",
-                      (long) current_gdbarch->memory_remove_breakpoint
-                      /*MEMORY_REMOVE_BREAKPOINT ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: MEMORY_REMOVE_BREAKPOINT = 0x%08lx\n",
+                        (long) current_gdbarch->memory_remove_breakpoint
+                        /*MEMORY_REMOVE_BREAKPOINT ()*/);
 #endif
 #ifdef DECR_PC_AFTER_BREAK
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: DECR_PC_AFTER_BREAK = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
 #endif
 #ifdef FUNCTION_START_OFFSET
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FUNCTION_START_OFFSET = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FUNCTION_START_OFFSET = %ld\n",
                       (long) FUNCTION_START_OFFSET);
 #endif
 #ifdef REMOTE_TRANSLATE_XFER_ADDRESS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REMOTE_TRANSLATE_XFER_ADDRESS = 0x%08lx\n",
-                      (long) current_gdbarch->remote_translate_xfer_address
-                      /*REMOTE_TRANSLATE_XFER_ADDRESS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REMOTE_TRANSLATE_XFER_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->remote_translate_xfer_address
+                        /*REMOTE_TRANSLATE_XFER_ADDRESS ()*/);
 #endif
 #ifdef FRAME_ARGS_SKIP
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAME_ARGS_SKIP = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: FRAME_ARGS_SKIP = %ld\n",
                       (long) FRAME_ARGS_SKIP);
 #endif
 #ifdef FRAMELESS_FUNCTION_INVOCATION
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAMELESS_FUNCTION_INVOCATION = 0x%08lx\n",
-                      (long) current_gdbarch->frameless_function_invocation
-                      /*FRAMELESS_FUNCTION_INVOCATION ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAMELESS_FUNCTION_INVOCATION = 0x%08lx\n",
+                        (long) current_gdbarch->frameless_function_invocation
+                        /*FRAMELESS_FUNCTION_INVOCATION ()*/);
 #endif
 #ifdef FRAME_CHAIN
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAME_CHAIN = 0x%08lx\n",
-                      (long) current_gdbarch->frame_chain
-                      /*FRAME_CHAIN ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAME_CHAIN = 0x%08lx\n",
+                        (long) current_gdbarch->frame_chain
+                        /*FRAME_CHAIN ()*/);
 #endif
 #ifdef FRAME_CHAIN_VALID
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAME_CHAIN_VALID = 0x%08lx\n",
-                      (long) current_gdbarch->frame_chain_valid
-                      /*FRAME_CHAIN_VALID ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAME_CHAIN_VALID = 0x%08lx\n",
+                        (long) current_gdbarch->frame_chain_valid
+                        /*FRAME_CHAIN_VALID ()*/);
 #endif
 #ifdef FRAME_SAVED_PC
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAME_SAVED_PC = 0x%08lx\n",
-                      (long) current_gdbarch->frame_saved_pc
-                      /*FRAME_SAVED_PC ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAME_SAVED_PC = 0x%08lx\n",
+                        (long) current_gdbarch->frame_saved_pc
+                        /*FRAME_SAVED_PC ()*/);
 #endif
 #ifdef FRAME_ARGS_ADDRESS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAME_ARGS_ADDRESS = 0x%08lx\n",
-                      (long) current_gdbarch->frame_args_address
-                      /*FRAME_ARGS_ADDRESS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAME_ARGS_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->frame_args_address
+                        /*FRAME_ARGS_ADDRESS ()*/);
 #endif
 #ifdef FRAME_LOCALS_ADDRESS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAME_LOCALS_ADDRESS = 0x%08lx\n",
-                      (long) current_gdbarch->frame_locals_address
-                      /*FRAME_LOCALS_ADDRESS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAME_LOCALS_ADDRESS = 0x%08lx\n",
+                        (long) current_gdbarch->frame_locals_address
+                        /*FRAME_LOCALS_ADDRESS ()*/);
 #endif
 #ifdef SAVED_PC_AFTER_CALL
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: SAVED_PC_AFTER_CALL = 0x%08lx\n",
-                      (long) current_gdbarch->saved_pc_after_call
-                      /*SAVED_PC_AFTER_CALL ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SAVED_PC_AFTER_CALL = 0x%08lx\n",
+                        (long) current_gdbarch->saved_pc_after_call
+                        /*SAVED_PC_AFTER_CALL ()*/);
 #endif
 #ifdef FRAME_NUM_ARGS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: FRAME_NUM_ARGS = 0x%08lx\n",
-                      (long) current_gdbarch->frame_num_args
-                      /*FRAME_NUM_ARGS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: FRAME_NUM_ARGS = 0x%08lx\n",
+                        (long) current_gdbarch->frame_num_args
+                        /*FRAME_NUM_ARGS ()*/);
 #endif
 #ifdef STACK_ALIGN
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: STACK_ALIGN = 0x%08lx\n",
-                      (long) current_gdbarch->stack_align
-                      /*STACK_ALIGN ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: STACK_ALIGN = 0x%08lx\n",
+                        (long) current_gdbarch->stack_align
+                        /*STACK_ALIGN ()*/);
 #endif
 #ifdef REG_STRUCT_HAS_ADDR
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: REG_STRUCT_HAS_ADDR = 0x%08lx\n",
-                      (long) current_gdbarch->reg_struct_has_addr
-                      /*REG_STRUCT_HAS_ADDR ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REG_STRUCT_HAS_ADDR = 0x%08lx\n",
+                        (long) current_gdbarch->reg_struct_has_addr
+                        /*REG_STRUCT_HAS_ADDR ()*/);
 #endif
 #ifdef SAVE_DUMMY_FRAME_TOS
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: SAVE_DUMMY_FRAME_TOS = 0x%08lx\n",
-                      (long) current_gdbarch->save_dummy_frame_tos
-                      /*SAVE_DUMMY_FRAME_TOS ()*/);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SAVE_DUMMY_FRAME_TOS = 0x%08lx\n",
+                        (long) current_gdbarch->save_dummy_frame_tos
+                        /*SAVE_DUMMY_FRAME_TOS ()*/);
 #endif
 #ifdef TARGET_FLOAT_FORMAT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_FLOAT_FORMAT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_FLOAT_FORMAT = %ld\n",
                       (long) TARGET_FLOAT_FORMAT);
 #endif
 #ifdef TARGET_DOUBLE_FORMAT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_DOUBLE_FORMAT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_DOUBLE_FORMAT = %ld\n",
                       (long) TARGET_DOUBLE_FORMAT);
 #endif
 #ifdef TARGET_LONG_DOUBLE_FORMAT
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: TARGET_LONG_DOUBLE_FORMAT = %ld\n",
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_LONG_DOUBLE_FORMAT = %ld\n",
                       (long) TARGET_LONG_DOUBLE_FORMAT);
 #endif
-  fprintf_unfiltered (gdb_stdlog,
-                      "gdbarch_update: GDB_MULTI_ARCH = %d\n",
-                      GDB_MULTI_ARCH);
+  if (current_gdbarch->dump_tdep != NULL)
+    current_gdbarch->dump_tdep (current_gdbarch, file);
 }
 
 struct gdbarch_tdep *
@@ -3059,15 +3680,16 @@ swapin_gdbarch_swap (struct gdbarch *gdbarch)
 
 /* Keep a registrary of the architectures known by GDB. */
 
-struct gdbarch_init_registration
+struct gdbarch_registration
 {
   enum bfd_architecture bfd_architecture;
   gdbarch_init_ftype *init;
+  gdbarch_dump_tdep_ftype *dump_tdep;
   struct gdbarch_list *arches;
-  struct gdbarch_init_registration *next;
+  struct gdbarch_registration *next;
 };
 
-static struct gdbarch_init_registration *gdbarch_init_registrary = NULL;
+static struct gdbarch_registration *gdbarch_registrary = NULL;
 
 static void
 append_name (const char ***buf, int *nr, const char *name)
@@ -3087,8 +3709,8 @@ gdbarch_printable_names (void)
       enum bfd_architecture a;
       int nr_arches = 0;
       const char **arches = NULL;
-      struct gdbarch_init_registration *rego;
-      for (rego = gdbarch_init_registrary;
+      struct gdbarch_registration *rego;
+      for (rego = gdbarch_registrary;
 	   rego != NULL;
 	   rego = rego->next)
 	{
@@ -3114,10 +3736,11 @@ gdbarch_printable_names (void)
 
 
 void
-register_gdbarch_init (enum bfd_architecture bfd_architecture,
-                       gdbarch_init_ftype *init)
+gdbarch_register (enum bfd_architecture bfd_architecture,
+                  gdbarch_init_ftype *init,
+		  gdbarch_dump_tdep_ftype *dump_tdep)
 {
-  struct gdbarch_init_registration **curr;
+  struct gdbarch_registration **curr;
   const struct bfd_arch_info *bfd_arch_info;
   /* Check that BFD reconizes this architecture */
   bfd_arch_info = bfd_lookup_arch (bfd_architecture, 0);
@@ -3126,7 +3749,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
       internal_error ("gdbarch: Attempt to register unknown architecture (%d)", bfd_architecture);
     }
   /* Check that we haven't seen this architecture before */
-  for (curr = &gdbarch_init_registrary;
+  for (curr = &gdbarch_registrary;
        (*curr) != NULL;
        curr = &(*curr)->next)
     {
@@ -3140,11 +3763,25 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 			bfd_arch_info->printable_name,
 			(long) init);
   /* Append it */
-  (*curr) = XMALLOC (struct gdbarch_init_registration);
+  (*curr) = XMALLOC (struct gdbarch_registration);
   (*curr)->bfd_architecture = bfd_architecture;
   (*curr)->init = init;
+  (*curr)->dump_tdep = dump_tdep;
   (*curr)->arches = NULL;
   (*curr)->next = NULL;
+  /* When non- multi-arch, install what ever target dump routine we've
+     been provided - hopefully that routine has been writen correct
+     and works regardless of multi-arch. */
+  if (!GDB_MULTI_ARCH && dump_tdep != NULL
+      && startup_gdbarch.dump_tdep == NULL)
+    startup_gdbarch.dump_tdep = dump_tdep;
+}
+
+void
+register_gdbarch_init (enum bfd_architecture bfd_architecture,
+		       gdbarch_init_ftype *init)
+{
+  gdbarch_register (bfd_architecture, init, NULL);
 }
 
 
@@ -3175,7 +3812,7 @@ gdbarch_update (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
   struct gdbarch_list **list;
-  struct gdbarch_init_registration *rego;
+  struct gdbarch_registration *rego;
 
   /* Fill in any missing bits. Most important is the bfd_architecture
      which is used to select the target architecture. */
@@ -3209,9 +3846,11 @@ gdbarch_update (struct gdbarch_info info)
   /* A default for abfd? */
 
   /* Find the target that knows about this architecture. */
-  for (rego = gdbarch_init_registrary;
-       rego != NULL && rego->bfd_architecture != info.bfd_architecture;
-       rego = rego->next);
+  for (rego = gdbarch_registrary;
+       rego != NULL;
+       rego = rego->next)
+    if (rego->bfd_architecture == info.bfd_architecture)
+      break;
   if (rego == NULL)
     {
       if (gdbarch_debug)
@@ -3276,7 +3915,8 @@ gdbarch_update (struct gdbarch_info info)
       if ((*list)->gdbarch == new_gdbarch)
 	{
 	  if (gdbarch_debug)
-	    fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Previous architecture 0x%08lx (%s) selected\n",
+	    fprintf_unfiltered (gdb_stdlog,
+                                "gdbarch_update: Previous architecture 0x%08lx (%s) selected\n",
 				(long) new_gdbarch,
 				new_gdbarch->bfd_arch_info->printable_name);
 	  current_gdbarch = new_gdbarch;
@@ -3284,7 +3924,7 @@ gdbarch_update (struct gdbarch_info info)
 	  return 1;
 	}
     }
-    
+
   /* Append this new architecture to this targets list. */
   (*list) = XMALLOC (struct gdbarch_list);
   (*list)->next = NULL;
@@ -3298,10 +3938,11 @@ gdbarch_update (struct gdbarch_info info)
 			  "gdbarch_update: New architecture 0x%08lx (%s) selected\n",
 			  (long) new_gdbarch,
 			  new_gdbarch->bfd_arch_info->printable_name);
-      gdbarch_dump ();
     }
   
-  /* Check that the newly installed architecture is valid.  */
+  /* Check that the newly installed architecture is valid.  Plug in
+     any post init values.  */
+  new_gdbarch->dump_tdep = rego->dump_tdep;
   verify_gdbarch (new_gdbarch);
 
   /* Initialize the per-architecture memory (swap) areas.
@@ -3314,9 +3955,11 @@ gdbarch_update (struct gdbarch_info info)
      must be updated before these modules are called. */
   init_gdbarch_data (new_gdbarch);
   
+  if (gdbarch_debug)
+    gdbarch_dump (current_gdbarch, gdb_stdlog);
+
   return 1;
 }
-
 
 
 /* Disassembler */

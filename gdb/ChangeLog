@@ -1,3 +1,22 @@
+Fri Jun  9 15:06:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (struct gdbarch): Add member dump_tdep.
+	(struct gdbarch_registration): Ditto.
+	(gdbarch_dump): Add ui_file and gdbarch arguments.  Add support
+ 	for external dump functions.  Dump the macro value.  Call target
+ 	dump routine.
+	(gdbarch_register): New function.
+	(gdbarch_registrary): Replace gdbarch_init_registrary.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.c (set_arch): Update.
+	
+	* mips-tdep.c (mips_dump_tdep): New function. Move dump code here.
+	(mips_gdbarch_init): From here.
+
+	* maint.c (maintenance_print_architecture): New function.
+	(_initialize_maint_cmds): Add command ``maintenance print
+ 	architecture''.
+
 2000-06-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* command.h, monitor.h: Eliminate use of PARAMS from these
