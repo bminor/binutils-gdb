@@ -233,7 +233,7 @@ typedef struct xtensa_relax_info_struct xtensa_relax_info;
    The actual PLT code must be split into multiple sections and all
    the sections have to be created before size_dynamic_sections,
    where we figure out the exact number of PLT entries that will be
-   needed.  It is OK is this count is an overestimate, e.g., some
+   needed.  It is OK if this count is an overestimate, e.g., some
    relocations may be removed by GC.  */
 
 static int plt_reloc_count = 0;
@@ -1264,12 +1264,9 @@ elf_xtensa_size_dynamic_sections (output_bfd, info)
 	    continue;
 	  for (s = abfd->sections; s != NULL; s = s->next)
 	    {
-	      /* Skip input sections that are being discarded.  */
-	      if (!bfd_is_abs_section (s)
-		  && bfd_is_abs_section (s->output_section))
-		continue;
-
-	      if (xtensa_is_littable_section (s) && s != spltlittbl)
+	      if (! elf_discarded_section (s)
+		  && xtensa_is_littable_section (s)
+		  && s != spltlittbl)
 		sgotloc->_raw_size += s->_raw_size;
 	    }
 	}
@@ -2259,7 +2256,11 @@ elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc)
   sgotloc_size = (sgotloc->_cooked_size != 0
 		  ? sgotloc->_cooked_size : sgotloc->_raw_size);
   if (sgotloc_size != section_size)
-    return -1;
+    {
+      (*_bfd_error_handler)
+	("internal inconsistency in size of .got.loc section");
+      return -1;
+    }
 
   contents = (bfd_byte *) bfd_malloc (section_size);
   table = (property_table_entry *)
@@ -2479,8 +2480,7 @@ elf_xtensa_finish_dynamic_sections (output_bfd, info)
   BFD_ASSERT (! info->relocatable);
   sxtlit = bfd_get_section_by_name (output_bfd, ".xt.lit");
   sgotloc = bfd_get_section_by_name (dynobj, ".got.loc");
-  if (!sxtlit || !sgotloc)
-    return FALSE;
+  BFD_ASSERT (sxtlit && sgotloc);
   num_xtlit_entries =
     elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc);
   if (num_xtlit_entries < 0)
@@ -2578,7 +2578,7 @@ elf_xtensa_merge_private_bfd_data (ibfd, obfd)
   if (out_mach != in_mach) 
     {
       (*_bfd_error_handler)
-	("%s: incompatible machine type. Output is 0x%x. Input is 0x%x\n",
+	("%s: incompatible machine type. Output is 0x%x. Input is 0x%x",
 	 bfd_archive_filename (ibfd), out_mach, in_mach);
       bfd_set_error (bfd_error_wrong_format);
       return FALSE;
@@ -2824,6 +2824,24 @@ elf_xtensa_discard_info_for_section (abfd, cookie, info, sec)
       sec->_cooked_size = section_size - removed_bytes;
       /* Also shrink _raw_size.  See comments in relax_property_section.  */
       sec->_raw_size = sec->_cooked_size;
+
+      if (xtensa_is_littable_section (sec))
+	{
+	  bfd *dynobj = elf_hash_table (info)->dynobj;
+	  if (dynobj)
+	    {
+	      asection *sgotloc =
+		bfd_get_section_by_name (dynobj, ".got.loc");
+	      if (sgotloc)
+		{
+		  bfd_size_type sgotloc_size =
+		    (sgotloc->_cooked_size ? sgotloc->_cooked_size
+		     : sgotloc->_raw_size);
+		  sgotloc->_cooked_size = sgotloc_size - removed_bytes;
+		  sgotloc->_raw_size = sgotloc_size - removed_bytes;
+		}
+	    }
+	}
     }
   else
     {
@@ -3102,7 +3120,7 @@ elf_xtensa_do_asm_simplify (contents, address, content_length)
   if (content_length < address)
     {
       (*_bfd_error_handler)
-	("Attempt to convert L32R/CALLX to CALL failed\n");
+	("Attempt to convert L32R/CALLX to CALL failed");
       return bfd_reloc_other;
     }
 
@@ -3111,7 +3129,7 @@ elf_xtensa_do_asm_simplify (contents, address, content_length)
   if (direct_call_opcode == XTENSA_UNDEFINED)
     {
       (*_bfd_error_handler)
-	("Attempt to convert L32R/CALLX to CALL failed\n");
+	("Attempt to convert L32R/CALLX to CALL failed");
       return bfd_reloc_other;
     }
   

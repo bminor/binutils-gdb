@@ -1,3 +1,15 @@
+2003-07-23  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (plt_reloc_count): Fix typo in comment.
+	(elf_xtensa_size_dynamic_sections): Use elf_discarded_section.
+	(elf_xtensa_combine_prop_entries): Avoid returning non-zero without
+	first printing an error message.
+	(elf_xtensa_finish_dynamic_sections): Likewise.
+	(elf_xtensa_discard_info_for_section): Adjust size of .got.loc when
+	discarding literal table entries.
+	(elf_xtensa_merge_private_bfd_data): Remove newline from error message.
+	(elf_xtensa_do_asm_simplify): Likewise.
+
 2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* elf32-m68hc1x.c (elf32_m68hc11_size_stubs): Avoid crash when
