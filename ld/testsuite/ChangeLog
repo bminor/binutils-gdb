@@ -1,9 +1,19 @@
 2005-03-05  Alan Modra  <amodra@bigpond.net.au>
 
-	* ld-powerpc/tlsexe.g: Update.
-	* ld-powerpc/tlsexe.r: Update.
-	* ld-powerpc/tlsexetoc.g: Update.
-	* ld-powerpc/tlsexetoc.r: Update.
+	* ld-alpha/tlsbin.dd: Update to suit changed section layout and
+	removed section symbols.
+	* ld-alpha/tlsbin.rd: Likewise.
+	* ld-alpha/tlsbin.sd: Likewise.
+	* ld-alpha/tlsbinr.dd: Likewise.
+	* ld-alpha/tlsbinr.rd: Likewise.
+	* ld-alpha/tlspic.dd: Likewise.
+	* ld-alpha/tlspic.rd: Likewise.
+	* ld-alpha/tlspic.sd: Likewise.
+
+	* ld-powerpc/tlsexe.g: Update for removed dot-symbols.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
 
 2005-03-04  David Daney  <ddaney@avtrex.com>
 
