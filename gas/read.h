@@ -90,8 +90,7 @@ enum linkonce_type {
   LINKONCE_SAME_CONTENTS
 };
 
-#define IGNORE_OPCODE_CASE
-#ifdef  IGNORE_OPCODE_CASE
+#ifndef TC_CASE_SENSITIVE
 extern char original_case_string[];
 #endif
 

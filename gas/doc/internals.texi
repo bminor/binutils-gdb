@@ -1033,6 +1033,11 @@ arguments, the character before the @kbd{=} character, and the value of
 If you define this macro, it should return nonzero if the current input line
 pointer should be treated as the end of a line.
 
+@item TC_CASE_SENSITIVE
+@cindex TC_CASE_SENSITIVE
+Define this macro if instruction mnemonics and pseudos are case sensitive.
+The default is to have it undefined giving case insensitive names.
+
 @item md_parse_name
 @cindex md_parse_name
 If this macro is defined, GAS will call it for any symbol found in an

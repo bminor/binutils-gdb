@@ -1,3 +1,10 @@
+2004-02-09  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* read.h (IGNORE_OPCODE_CASE): Do not define. Replace with ...
+	(TC_CASE_SENSITIVE): ... this.
+	* read.c: Replace IGNORE_OPCODE_CASE with TC_CASE_SENSITIVE.
+	* doc/internals.texi (TC_CASE_SENSITIVE): Document.
+
 2004-02-06  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (dot_endp): Delete call to output_endp.

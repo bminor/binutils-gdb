@@ -155,7 +155,7 @@ char is_end_of_line[256] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0	/* */
 };
 
-#ifdef  IGNORE_OPCODE_CASE
+#ifndef TC_CASE_SENSITIVE
 char original_case_string[128];
 #endif
 
@@ -720,7 +720,7 @@ read_a_source_file (char *name)
 		  /* Expect pseudo-op or machine instruction.  */
 		  pop = NULL;
 
-#ifdef IGNORE_OPCODE_CASE
+#ifndef TC_CASE_SENSITIVE
 		  {
 		    char *s2 = s;
 
