@@ -1,3 +1,14 @@
+2002-02-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbserver/configure.srv: New file.
+	* gdbserver/configure.in: Use configure.srv instead
+	of the host/target makefile fragments.  Set GDBSERVER_DEPFILES
+	from it.
+	* gdbserver/configure: Regenerated.
+	* gdbserver/terminal.h: New file.
+	* gdbserver/Makefile.in: Update for configure changes.  Remove
+	more unneeded include paths.
+
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	From wiz at danbala:

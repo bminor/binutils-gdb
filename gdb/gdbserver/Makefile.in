@@ -81,12 +81,9 @@ READLINE_DEP = $$(READLINE_DIR)
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
-# -I.. for gdb's config files (especially config.h)
-# -I${srcdir} possibly for regex.h also.
-# -I${srcdir}/config for more generic config files.
-# -I$(srcdir)/../regformats for regdef.h
-INCLUDE_CFLAGS = -I. -I.. -I${srcdir} -I${srcdir}/.. \
-	-I$(srcdir)/../regformats
+# -I${srcdir} for our headers.
+# -I$(srcdir)/../regformats for regdef.h.
+INCLUDE_CFLAGS = -I. -I${srcdir} -I$(srcdir)/../regformats
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -111,11 +108,6 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= $(BFD_CFLAGS)
 
-# Host and target-dependent makefile fragments come in here.
-@host_makefile_frag@
-@target_makefile_frag@
-# End of host and target-dependent makefile fragments
-
 # All source files that go into linking GDB remote server.
 
 SFILES = $(srcdir)/low-hppabsd.c $(srcdir)/low-linux.c $(srcdir)/low-lynx.c \
@@ -123,12 +115,12 @@ SFILES = $(srcdir)/low-hppabsd.c $(srcdir)/low-linux.c $(srcdir)/low-lynx.c \
 	 $(srcdir)/low-sun3.c $(srcdir)/utils.c $(srcdir)/server.c \
 	 $(srcdir)/remote-utils.c
 
-DEPFILES = $(GDBSERVER_DEPFILES)
+DEPFILES = @GDBSERVER_DEPFILES@
 
-SOURCES = $(SFILES) $(ALLDEPFILES)
+SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
 
-OBS = utils.o $(GDBSERVER_DEPFILES) server.o remote-utils.o regcache.o
+OBS = utils.o $(DEPFILES) server.o remote-utils.o regcache.o
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -203,7 +195,7 @@ maintainer-clean realclean: clean
 
 STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 
-Makefile: Makefile.in config.status @frags@
+Makefile: Makefile.in config.status
 	$(SHELL) ./config.status
 
 config.status: configure
@@ -236,7 +228,7 @@ regcache_h = $(srcdir)/regcache.h
 server_h = $(srcdir)/server.h $(regcache_h)
 
 server.o: server.c $(server_h)
-remote-utils.o: remote-utils.c $(server_h)
+remote-utils.o: remote-utils.c terminal.h $(server_h)
 utils.o: utils.c $(server_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
 

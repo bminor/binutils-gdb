@@ -1146,40 +1146,11 @@ fi
 done
 
 
-. ${srcdir}/../configure.host
+. ${srcdir}/configure.srv
 
-. ${srcdir}/../configure.tgt
-
-frags=
-host_makefile_frag=${srcdir}/../config/${gdb_host_cpu}/${gdb_host}.mh
-if test ! -f ${host_makefile_frag}; then
-	{ echo "configure: error: "*** GDB remote does not support host ${host}"" 1>&2; exit 1; }
-fi
-frags="$frags $host_makefile_frag"
-
-target_makefile_frag=${srcdir}/../config/${gdb_target_cpu}/${gdb_target}.mt
-if test ! -f ${target_makefile_frag}; then
-	{ echo "configure: error: "*** GDB remote does not support target ${target}"" 1>&2; exit 1; }
-fi
-frags="$frags $target_makefile_frag"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj"
 
 
-
-
-
-hostfile=`sed -n '
-s/XM_FILE[	 ]*=[	 ]*\([^	 ]*\)/\1/p
-' ${host_makefile_frag}`
-
-targetfile=`sed -n '
-s/TM_FILE[	 ]*=[	 ]*\([^	 ]*\)/\1/p
-' ${target_makefile_frag}`
-
-if test "${target}" = "${host}"; then
-nativefile=`sed -n '
-s/NAT_FILE[	 ]*=[	 ]*\([^	 ]*\)/\1/p
-' ${host_makefile_frag}`
-fi
 
 trap '' 1 2 15
 cat > confcache <<\EOF
@@ -1334,11 +1305,7 @@ s%@INSTALL_PROGRAM@%$INSTALL_PROGRAM%g
 s%@INSTALL_SCRIPT@%$INSTALL_SCRIPT%g
 s%@INSTALL_DATA@%$INSTALL_DATA%g
 s%@CPP@%$CPP%g
-/@host_makefile_frag@/r $host_makefile_frag
-s%@host_makefile_frag@%%g
-/@target_makefile_frag@/r $target_makefile_frag
-s%@target_makefile_frag@%%g
-s%@frags@%$frags%g
+s%@GDBSERVER_DEPFILES@%$GDBSERVER_DEPFILES%g
 
 CEOF
 EOF

@@ -32,41 +32,10 @@ AC_HEADER_STDC
 
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h)
 
-. ${srcdir}/../configure.host
+. ${srcdir}/configure.srv
 
-. ${srcdir}/../configure.tgt
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj"
 
-frags=
-host_makefile_frag=${srcdir}/../config/${gdb_host_cpu}/${gdb_host}.mh
-if test ! -f ${host_makefile_frag}; then
-	AC_MSG_ERROR("*** GDB remote does not support host ${host}")
-fi
-frags="$frags $host_makefile_frag"
-
-target_makefile_frag=${srcdir}/../config/${gdb_target_cpu}/${gdb_target}.mt
-if test ! -f ${target_makefile_frag}; then
-	AC_MSG_ERROR("*** GDB remote does not support target ${target}")
-fi
-frags="$frags $target_makefile_frag"
-
-AC_SUBST_FILE(host_makefile_frag)
-AC_SUBST_FILE(target_makefile_frag)
-AC_SUBST(frags)
-
-changequote(,)dnl
-hostfile=`sed -n '
-s/XM_FILE[	 ]*=[	 ]*\([^	 ]*\)/\1/p
-' ${host_makefile_frag}`
-
-targetfile=`sed -n '
-s/TM_FILE[	 ]*=[	 ]*\([^	 ]*\)/\1/p
-' ${target_makefile_frag}`
-
-if test "${target}" = "${host}"; then
-nativefile=`sed -n '
-s/NAT_FILE[	 ]*=[	 ]*\([^	 ]*\)/\1/p
-' ${host_makefile_frag}`
-fi
-changequote([,])dnl
+AC_SUBST(GDBSERVER_DEPFILES)
 
 AC_OUTPUT(Makefile)

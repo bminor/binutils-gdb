@@ -1,0 +1,41 @@
+# Mappings from configuration triplets to gdbserver build options.
+# This is invoked from the autoconf-generated configure script, to
+# produce the appropriate Makefile substitutions.
+
+# This file sets the following shell variables:
+#   srv_regobj		The register protocol appropriate for this target.
+#   srv_tgtobj		Any other target-specific modules appropriate
+#			for this target.
+#
+# In addition, on GNU/Linux the following shell variables will be set:
+#   srv_linux_regsets	Set to "yes" if ptrace(PTRACE_GETREGS) and friends
+#			may be available on this platform;  unset otherwise.
+
+# Input is taken from the "${target}" variable.
+
+case "${target}" in
+  arm*-*-linux*)	srv_regobj=reg-arm.o
+			srv_tgtobj="linux-low.o linux-arm-low.o"
+			;;
+  i[3456]86-*-linux*)	srv_regobj=reg-i386.o
+			srv_tgtobj="linux-low.o linux-i386-low.o"
+			;;
+  ia64-*-linux*)	srv_regobj=reg-ia64.o
+			srv_tgtobj="linux-low.o linux-ia64-low.o"
+			;;
+  m68*-*-linux*)	srv_regobj=reg-m68k.o
+			srv_tgtobj="linux-low.o linux-m68k-low.o"
+			;;
+  mips*-*-linux*)	srv_regobj=reg-mips.o
+			srv_tgtobj="linux-low.o linux-mips-low.o"
+			;;
+  powerpc*-*-linux*)	srv_regobj=reg-ppc.o
+			srv_tgtobj="linux-low.o linux-ppc-low.o"
+			;;
+  sh*-*-linux*)		srv_regobj=reg-sh.o
+			srv_tgtobj="linux-low.o linux-sh-low.o"
+			;;
+  *)			echo "Error: target not supported by gdbserver."
+			exit 1
+			;;
+esac
