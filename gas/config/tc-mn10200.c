@@ -649,7 +649,7 @@ keep_going:
       if (match == 0)
         {
 	  next_opcode = opcode + 1;
-	  if (next_opcode->opcode != 0 && !strcmp(next_opcode->name, opcode->name))
+	  if (!strcmp(next_opcode->name, opcode->name))
 	    {
 	      opcode = next_opcode;
 	      continue;
@@ -887,8 +887,8 @@ mn10200_insert_operand (insnp, extensionp, operand, val, file, line, shift)
      unsigned int line;
      unsigned int shift;
 {
-  /* No need to check 32bit operands for a bit.  */
-  if (operand->bits != 32)
+  /* No need to check 24 or 32bit operands for a bit.  */
+  if (operand->bits < 24)
     {
       long min, max;
       offsetT test;
@@ -943,8 +943,8 @@ check_operand (insn, operand, val)
      const struct mn10200_operand *operand;
      offsetT val;
 {
-  /* No need to check 32bit operands for a bit.  */
-  if (operand->bits != 32)
+  /* No need to check 24bit or 32bit operands for a bit.  */
+  if (operand->bits < 24)
     {
       long min, max;
       offsetT test;

@@ -1,3 +1,9 @@
+Mon Dec 16 10:08:46 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10200.c (mn10200_insert_operand): Don't
+	check 24bit operands for overflow.
+	(check_operand): Likewise.
+
 Mon Dec 16 11:50:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo (Section): Document how to use the .section
