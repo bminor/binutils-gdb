@@ -1,7 +1,7 @@
 # Host: Sun 4 or Sparcstation, running Solaris 2
 
 XM_FILE= xm-sun4sol2.h
-XDEPFILES= 
+XDEPFILES= ser-tcp.o
 XM_CLIBS= -lsocket -lnsl
 
 NAT_FILE= nm-sysv4.h
