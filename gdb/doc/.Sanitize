@@ -43,6 +43,7 @@ pretex.m4
 rc-cm.tex
 rc-ps.tex
 rc-pslong.tex
+rdl-apps.texinfo
 refcard.tex
 sparc.m4
 threecol.tex
@@ -55,7 +56,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 2.4  1991/08/07 00:15:02  pesch
+# Revision 2.5  1991/08/22 07:59:45  gnu
+# Keep rdl-apps.texinfo for users who don't read the doc on how to build the doc.
+#
+# Revision 2.4  1991/08/07  00:15:02  pesch
 # Makefile: GDB documentation nos has its own Makefile
 # .Sanitize: add Makefile; recognize renamed refcard.tex (formerly gdbrc.tex)
 # gdbint.texinfo: add markup in "Cleanups" chapter
