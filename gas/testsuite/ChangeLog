@@ -1,3 +1,11 @@
+Mon Aug 31 12:45:49 1998  Richard Henderson  <rth@cygnus.com>
+
+	* gas/vtable/vtable.exp: New.
+	* gas/vtable/{entry0.s,entry0.d}: New.
+	* gas/vtable/{entry1.s,entry1.d}: New.
+	* gas/vtable/{inherit0.s,inherit0.d}: New.
+	* gas/vtable/{inherit1.s,inherit1.l}: New.
+
 Thu Aug 20 23:18:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/i386/white.l: Revert patch of August 12.
