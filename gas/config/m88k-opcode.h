@@ -41,7 +41,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
   f = fcr (5:6)
   c = cr (5:6)
   V = VEC9 (0:9)
-  o = O6 field of "prot" insn (7:4)
+  o = O6 field of "prot" insn (10:7)
   ? = Give warning for this insn/operand combination
  */
 
@@ -225,10 +225,10 @@ static struct m88k_opcode m88k_opcodes[] =
   _MC88xxx (0xf400e800, "ff1",		"d,2")
   _MC88xxx (0x80004800, "fldcr",	"d,f")
   _MC88xxx (0x84002020, "flt.ds",	"d,2")
-  _MC88110 (0x84002220, "flt.ds",	"xd,x2")
+  _MC88110 (0x84002220, "flt.ds",	"xd,2")
   _MC88xxx (0x84002000, "flt.ss",	"d,2")
-  _MC88110 (0x84002200, "flt.ss",	"xd,x2")
-  _MC88110 (0x84002240, "flt.xs",	"xd,x2")
+  _MC88110 (0x84002200, "flt.ss",	"xd,2")
+  _MC88110 (0x84002240, "flt.xs",	"xd,2")
   _MC88xxx (0x84000000, "fmul.sss",	"d,1,2")
   _MC88110 (0x84008000, "fmul.sss",	"xd,x1,x2")
   _MC88xxx (0x84000080, "fmul.ssd",	"d,1,2")
@@ -380,6 +380,7 @@ static struct m88k_opcode m88k_opcodes[] =
   _MC88xxx (0xf4003200, "lda.d",	"d,1[2]")
   _MC88xxx (0xf4006000, "lda.d",	"?d,1,2")	/* Output addu */
   _MC88xxx (0x60000000, "lda.d",	"?d,1,I")	/* Output addu */
+  _MC88110 (0xf4003e00, "lda.x",	"d,1[2]")
   _MC88xxx (0xf4003a00, "lda.h",	"d,1[2]")
   _MC88xxx (0xf4006000, "lda.h",	"?d,1,2")	/* Output addu */
   _MC88xxx (0x60000000, "lda.h",	"?d,1,I")	/* Output addu */
@@ -395,6 +396,8 @@ static struct m88k_opcode m88k_opcodes[] =
   _MC88110 (0x8400c300, "mov",		"xd,x2")
   _MC88xxx (0xf4006c00, "mul",		"d,1,2")
   _MC88xxx (0x6c000000, "mul",		"d,1,I")
+  _MC88xxx (0xf4006c00, "muls",		"d,1,2")
+  _MC88xxx (0x6c000000, "muls",		"d,1,I")
   _MC88xxx (0xf4006c00, "mulu",		"d,1,2")	/* synonym for mul */
   _MC88xxx (0x6c000000, "mulu",		"d,1,I")	/* synonym for mul */
   _MC88110 (0xf4006d00, "mulu.d",	"d,1,2")

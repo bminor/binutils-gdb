@@ -1,3 +1,33 @@
+Fri Sep 24 12:37:59 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* config/m88k-opcode.h (m88k_opcodes): comment change; o6 field is
+	  in bits 10 through 7.  flt.[dxs]s requires an r register in the
+	  second argument.  New instruction lda.x.  New instruction muls
+	  (alias for mul).
+
+Fri Sep 24 13:43:30 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (distclean): Recurse like clean.
+	* doc/Makefile.in (distclean): New target.
+
+	* config/tc-mips.c (md_begin): Set BFD architecture and machine
+	based on MIPS ISA level.
+
+Thu Sep 23 17:58:58 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* as.c (main): "exhausted", not "exhuasted".
+
+	* struc-symbol.h (struct symbol): Add sy_used_in_reloc field.
+	* write.c (adjust_reloc_syms): Set sy_used_in_reloc.
+	(write_object_file): Never strip symbols with sy_used_in_reloc
+	set.
+
+	* config/obj-elf.c (obj_elf_section): Rewrote to handle both
+	Solaris and SVR4 style .section pseudo-ops.
+	(obj_elf_ident): Set SEC_READONLY for .comment section.
+	* config/tc-sparc.c (md_apply_fix): If this is ELF, and we're
+	generating a reloc, don't apply a fix.
+
 Thu Sep 23 13:16:58 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/obj-coffbfd.c (relax_align): Now static.
