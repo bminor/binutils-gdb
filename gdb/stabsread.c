@@ -1075,7 +1075,13 @@ define_symbol (valu, string, desc, type, objfile)
 
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
 	{
-	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+	  /* gcc-2.6 or later (when using -fvtable-thunks)
+	     emits a unique named type for a vtable entry.
+	     Some gdb code depends on that specific name. */
+	  extern const char vtbl_ptr_name[];
+
+	  if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+	       && strcmp (SYMBOL_NAME (sym), vtbl_ptr_name))
 	      || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to

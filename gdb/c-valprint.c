@@ -146,6 +146,15 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	  print_scalar_formatted (valaddr, type, format, 0, stream);
 	  break;
 	}
+      if (vtblprint && cp_is_vtbl_ptr_type(type))
+	{
+          /* Print the unmangled name if desired.  */
+	  /* Print vtable entry - we only get here if we ARE using
+	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
+	  print_address_demangle(extract_address (valaddr, TYPE_LENGTH (type)),
+				 stream, demangle);
+	  break;
+	}
       if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
 	{
 	  cp_print_class_method (valaddr, type, stream);
@@ -290,6 +299,8 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       if (vtblprint && cp_is_vtbl_ptr_type(type))
 	{
           /* Print the unmangled name if desired.  */
+	  /* Print vtable entry - we only get here if NOT using
+	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_PTR.) */
 	  print_address_demangle(*((int *) (valaddr +	/* FIXME bytesex */
 	      TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8)),
 	      stream, demangle);

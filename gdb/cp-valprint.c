@@ -150,6 +150,13 @@ cp_print_class_method (valaddr, type, stream)
     }
 }
 
+/* This was what it was for gcc 2.4.5 and earlier.  */
+static const char vtbl_ptr_name_old[] =
+  { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
+/* It was changed to this after 2.4.5.  */
+const char vtbl_ptr_name[] =
+  { '_','_','v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
+
 /* Return truth value for assertion that TYPE is of the type
    "pointer to virtual function".  */
 
@@ -158,12 +165,6 @@ cp_is_vtbl_ptr_type(type)
      struct type *type;
 {
   char *typename = type_name_no_tag (type);
-  /* This was what it was for gcc 2.4.5 and earlier.  */
-  static const char vtbl_ptr_name_old[] =
-    { CPLUS_MARKER,'v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
-  /* It was changed to this after 2.4.5.  */
-  static const char vtbl_ptr_name[] =
-    { '_','_','v','t','b','l','_','p','t','r','_','t','y','p','e', 0 };
 
   return (typename != NULL
 	  && (STREQ (typename, vtbl_ptr_name)
@@ -178,14 +179,20 @@ cp_is_vtbl_member(type)
      struct type *type;
 {
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    type = TYPE_TARGET_TYPE (type);
-  else
-    return 0;
-
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
-      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT)
-    /* Virtual functions tables are full of pointers to virtual functions.  */
-    return cp_is_vtbl_ptr_type (TYPE_TARGET_TYPE (type));
+    {
+      type = TYPE_TARGET_TYPE (type);
+      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	{
+	  type = TYPE_TARGET_TYPE (type);
+	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT /* if not using thunks */
+	      || TYPE_CODE (type) == TYPE_CODE_PTR) /* if using thunks */
+	    {
+	      /* Virtual functions tables are full of pointers
+		 to virtual functions. */
+	      return cp_is_vtbl_ptr_type (type);
+	    }
+	}
+    }
   return 0;
 }
 

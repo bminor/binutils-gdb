@@ -1,3 +1,19 @@
+Wed May  4 15:30:39 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	Add partial support for g++ code compiled with -fvtable-thunks.
+	* c-valprint.c (c_val_print):  Add vtblprint support
+	when using thunks.
+	* cp-valprint.c (cp_is_vtbl_member):  A vtable can be an array of
+	pointers (if using thunks) as well as array of structs (otherwise).
+	* cp-valprint.c (vtbl_ptr_name_old, vtbl_ptr_name):  Move to global
+	level, and make the latter non-static (so define_symbol can use it).
+	* stabsread.c (define_symbol):  If the type being defined is a
+	pointer type named "__vtbl_ptr_type", set the TYPE_NAME to that name.
+	* symtab.h (VTBL_PREFIX_P):  Allow "_VT" as well as "_vt".
+	* values.c (value_virtual_fn_field):  Handle thunks.
+	* values.c (value_headof):  Minor efficiency hack.
+	* values.c (value_headof):   Incomplete thunk support.  FIXME.
+
 Wed May  4 06:56:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* valprint.c (print_longest): Clarify comment about use_local.

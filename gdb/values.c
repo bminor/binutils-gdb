@@ -880,16 +880,23 @@ value_virtual_fn_field (arg1p, f, j, type, offset)
      a virtual function.  */
   entry = value_subscript (vtbl, vi);
 
-  /* Move the `this' pointer according to the virtual function table. */ 
-  VALUE_OFFSET (arg1) += value_as_long (value_field (entry, 0))/* + offset*/;
-
-  if (! VALUE_LAZY (arg1))
+  if (TYPE_CODE (VALUE_TYPE (entry)) == TYPE_CODE_STRUCT)
     {
-      VALUE_LAZY (arg1) = 1;
-      value_fetch_lazy (arg1);
-    }
+      /* Move the `this' pointer according to the virtual function table. */
+      VALUE_OFFSET (arg1) += value_as_long (value_field (entry, 0));
+      
+      if (! VALUE_LAZY (arg1))
+	{
+	  VALUE_LAZY (arg1) = 1;
+	  value_fetch_lazy (arg1);
+	}
 
-  vfn = value_field (entry, 2);
+      vfn = value_field (entry, 2);
+    }
+  else if (TYPE_CODE (VALUE_TYPE (entry)) == TYPE_CODE_PTR)
+    vfn = entry;
+  else
+    error ("I'm confused:  virtual function table has bad type");
   /* Reinstantiate the function pointer with the correct type.  */
   VALUE_TYPE (vfn) = lookup_pointer_type (TYPE_FN_FIELD_TYPE (f, j));
 
@@ -931,7 +938,8 @@ value_headof (in_arg, btype, dtype)
   /* Check that VTBL looks like it points to a virtual function table.  */
   msymbol = lookup_minimal_symbol_by_pc (VALUE_ADDRESS (vtbl));
   if (msymbol == NULL
-      || !VTBL_PREFIX_P (demangled_name = SYMBOL_NAME (msymbol)))
+      || (demangled_name = SYMBOL_NAME (msymbol)) == NULL
+      || !VTBL_PREFIX_P (demangled_name))
     {
       /* If we expected to find a vtable, but did not, let the user
 	 know that we aren't happy, but don't throw an error.
@@ -950,6 +958,9 @@ value_headof (in_arg, btype, dtype)
     {
       entry = value_subscript (vtbl, value_from_longest (builtin_type_int, 
 						      (LONGEST) i));
+      /* This won't work if we're using thunks. */
+      if (TYPE_CODE (VALUE_TYPE (entry)) != TYPE_CODE_STRUCT)
+	break;
       offset = longest_to_int (value_as_long (value_field (entry, 0)));
       /* If we use '<=' we can handle single inheritance
        * where all offsets are zero - just use the first entry found. */
