@@ -74,10 +74,6 @@ d30v-opc.c
 dep-in.sed
 dis-buf.c
 disassemble.c
-fr30-asm.c
-fr30-dis.c
-fr30-opc.c
-fr30-opc.h
 h8300-dis.c
 h8500-dis.c
 h8500-opc.h
@@ -123,6 +119,11 @@ z8k-opc.h
 z8kgen.c
 
 Things-to-lose:
+
+fr30-asm.c
+fr30-dis.c
+fr30-opc.c
+fr30-opc.h
 
 Do-last:
 
