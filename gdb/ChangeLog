@@ -1,3 +1,8 @@
+Thu Mar  7 12:09:51 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* i386b-nat.c: Revert part of Mar 5 change.  FreeBSD collapsed the
+ 	s* and t* symbols too.
+
 Thu Mar  7 15:18:51 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* symfile.c (generic_load): Avoid division by zero.
