@@ -31,6 +31,7 @@
 #include "gdb_assert.h"
 #include <ctype.h>
 #include "target.h"
+#include <readline/readline.h>
 
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 

@@ -1,3 +1,25 @@
+2002-12-08  Elena Zannoni  <ezannoni@redhat.com>
+
+	More cleanup from import of readline 4.3.
+	* completer.h (complete_line, readline_line_completion_function):
+	Update prototypes.
+	(line_completion_function): Removed, not used outside of completer.c.
+	* completer.c (readline_line_completion_function,
+	complete_function, line_completion_function): Use const for first
+	parameter.
+	(line_completion_function): Make static.
+	(filename_completer): filename_completion_function is now called
+	rl_filename_completion_function
+	* corelow.c: Include <readline/readline.h>.
+	* exec.c: Ditto.
+	* solib.c: Ditto.
+	* source.c: Ditto.
+	* symfile.c: Ditto.
+	* symmisc.c: Ditto.
+	* top.c (init_main): No need to coerce
+	readline_line_completion_function anymore.
+	* cli/cli-dump.c: Include <readline/readline.h>.
+
 2002-12-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* stack.c (frame_info): Use get_prev_frame.

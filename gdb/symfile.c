@@ -42,6 +42,7 @@
 #include "gdb_obstack.h"
 #include "completer.h"
 #include "bcache.h"
+#include <readline/readline.h>
 
 #include <sys/types.h>
 #include <fcntl.h>

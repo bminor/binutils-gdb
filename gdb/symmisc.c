@@ -34,6 +34,7 @@
 #include "bcache.h"
 
 #include "gdb_string.h"
+#include <readline/readline.h>
 
 #ifndef DEV_TTY
 #define DEV_TTY "/dev/tty"

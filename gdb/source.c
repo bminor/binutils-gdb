@@ -44,6 +44,7 @@
 #include "filenames.h"		/* for DOSish file names */
 #include "completer.h"
 #include "ui-out.h"
+#include <readline/readline.h>
 
 #ifdef CRLF_SOURCE_FILES
 

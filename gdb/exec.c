@@ -36,6 +36,7 @@
 #endif
 
 #include <fcntl.h>
+#include <readline/readline.h>
 #include "gdb_string.h"
 
 #include "gdbcore.h"

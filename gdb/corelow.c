@@ -38,6 +38,7 @@
 #include "gdbthread.h"
 #include "regcache.h"
 #include "symfile.h"
+#include <readline/readline.h>
 
 #ifndef O_BINARY
 #define O_BINARY 0
