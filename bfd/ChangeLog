@@ -1,3 +1,10 @@
+2003-12-04  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
+
+	* coff-arm.c (coff_arm_relocate_section, bfd_arm_process_before_allocation):
+	Change ARM26* to ARM_26* in comments to match definitions.
+	(coff_arm_adjust_symndx): Replace hard-coded constants with
+	appropriate definitions (ARM_26*).
+
 2003-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-i860.c (coff_i860_reloc_nyi): Return bfd_reloc_not_supported.

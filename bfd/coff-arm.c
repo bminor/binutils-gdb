@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -1248,7 +1248,7 @@ coff_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 
       /* The relocation_section function will skip pcrel_offset relocs
          when doing a relocatable link.  However, we want to convert
-         ARM26 to ARM26D relocs if possible.  We return a fake howto in
+         ARM_26 to ARM_26D relocs if possible.  We return a fake howto in
          this case without pcrel_offset set, and adjust the addend to
          compensate.  */
       if (rel->r_type == ARM_26
@@ -2198,8 +2198,8 @@ bfd_arm_process_before_allocation (abfd, info, support_old_code)
 #define coff_bfd_copy_private_bfd_data          coff_arm_copy_private_bfd_data
 #define coff_bfd_link_hash_table_create		coff_arm_link_hash_table_create
 
-/* When doing a relocatable link, we want to convert ARM26 relocs
-   into ARM26D relocs.  */
+/* When doing a relocatable link, we want to convert ARM_26 relocs
+   into ARM_26D relocs.  */
 
 static bfd_boolean
 coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
@@ -2210,7 +2210,7 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
      struct internal_reloc *irel;
      bfd_boolean *adjustedp;
 {
-  if (irel->r_type == 3)
+  if (irel->r_type == ARM_26)
     {
       struct coff_link_hash_entry *h;
 
@@ -2219,7 +2219,7 @@ coff_arm_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 	  && (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	  && h->root.u.def.section->output_section == sec->output_section)
-	irel->r_type = 7;
+	irel->r_type = ARM_26D;
     }
   *adjustedp = FALSE;
   return TRUE;
