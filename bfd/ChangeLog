@@ -1,3 +1,9 @@
+2002-06-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Simplify code.
+	Fix RELA addends to get not shifted in the result. Don't do special
+	handling of R_MIPS_64 for NewABI.
+
 2002-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* aoutx.h (NAME(aout,slurp_symbol_table)): Use bfd_zmalloc.

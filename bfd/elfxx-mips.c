@@ -5013,8 +5013,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     space.  Thus, when they use an R_MIPS_64 they mean what is
 	     usually meant by R_MIPS_32, with the exception that the
 	     stored value is sign-extended to 64 bits.  */
-	  howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, R_MIPS_32,
-					   NEWABI_P (input_bfd));
+	  howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, R_MIPS_32, false);
 
 	  /* On big-endian systems, we need to lie about the position
 	     of the reloc.  */
@@ -5049,6 +5048,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      addend = mips_elf_obtain_contents (howto, rel, input_bfd,
 						 contents);
 	      addend &= howto->src_mask;
+	      addend <<= howto->rightshift;
 
 	      /* For some kinds of relocations, the ADDEND is a
 		 combination of the addend stored in two different
@@ -5081,11 +5081,11 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    return false;
 
 		  /* Obtain the addend kept there.  */
-		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, lo,
-							rela_relocation_p);
+		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, lo, false);
 		  l = mips_elf_obtain_contents (lo16_howto, lo16_relocation,
 						input_bfd, contents);
 		  l &= lo16_howto->src_mask;
+		  l <<= lo16_howto->rightshift;
 		  l = mips_elf_sign_extend (l, 16);
 
 		  addend <<= 16;
@@ -5144,13 +5144,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      || r_type == R_MIPS_LITERAL)
 	    addend -= (_bfd_get_gp_value (output_bfd)
 		       - _bfd_get_gp_value (input_bfd));
-	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26
-		   || r_type == R_MIPS_GNU_REL16_S2)
-	    /* The addend is stored without its two least
-	       significant bits (which are always zero.)  In a
-	       non-relocateable link, calculate_relocation will do
-	       this shift; here, we must do it ourselves.  */
-	    addend <<= 2;
 
 	  r_symndx = ELF_R_SYM (output_bfd, rel->r_info);
 	  sym = local_syms + r_symndx;
@@ -5158,23 +5151,20 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    /* Adjust the addend appropriately.  */
 	    addend += local_sections[r_symndx]->output_offset;
 
-	  /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
-	     then we only want to write out the high-order 16 bits.
-	     The subsequent R_MIPS_LO16 will handle the low-order bits.  */
-	  if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16
-	      || r_type == R_MIPS_GNU_REL_HI16)
-	    addend = mips_elf_high (addend);
-	  else if (r_type == R_MIPS_HIGHER)
-	    addend = mips_elf_higher (addend);
-	  else if (r_type == R_MIPS_HIGHEST)
-	    addend = mips_elf_highest (addend);
-
-	  /* If the relocation is for an R_MIPS_26 relocation, then
-	     the two low-order bits are not stored in the object file;
-	     they are implicitly zero.  */
-	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26
-		   || r_type == R_MIPS_GNU_REL16_S2)
-	    addend >>= 2;
+	  if (howto->partial_inplace)
+	    {
+	      /* If the relocation is for a R_MIPS_HI16 or R_MIPS_GOT16,
+		 then we only want to write out the high-order 16 bits.
+		 The subsequent R_MIPS_LO16 will handle the low-order bits.
+	       */
+	      if (r_type == R_MIPS_HI16 || r_type == R_MIPS_GOT16
+		  || r_type == R_MIPS_GNU_REL_HI16)
+		addend = mips_elf_high (addend);
+	      else if (r_type == R_MIPS_HIGHER)
+		addend = mips_elf_higher (addend);
+	      else if (r_type == R_MIPS_HIGHEST)
+		addend = mips_elf_highest (addend);
+	    }
 
 	  if (rela_relocation_p)
 	    /* If this is a RELA relocation, just update the addend.
@@ -5187,9 +5177,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 destination mask because the place to which we are
 		 writing will be source of the addend in the final
 		 link.  */
+	      addend >>= howto->rightshift;
 	      addend &= howto->src_mask;
 
-	      if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
+	      if (r_type == R_MIPS_64 && ! NEWABI_P (output_bfd))
 		/* See the comment above about using R_MIPS_64 in the 32-bit
 		   ABI.  Here, we need to update the addend.  It would be
 		   possible to get away with just using the R_MIPS_32 reloc
@@ -5249,6 +5240,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	use_saved_addend_p = true;
       else
 	use_saved_addend_p = false;
+
+      addend >>= howto->rightshift;
 
       /* Figure out what value we are supposed to relocate.  */
       switch (mips_elf_calculate_relocation (output_bfd, input_bfd,
