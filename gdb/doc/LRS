@@ -1,21 +1,23 @@
 What's LRS?
 ===========
 
-LRS, or Live Range Splitting is an optimization technique which allows a user
-variable to reside in different locations during different parts of a function.
+LRS, or Live Range Splitting is an optimization technique which allows
+a user variable to reside in different locations during different parts
+of a function.
 
-For example, a variable might reside in the stack for part of a function and
-in a register during a loop and in a different register during another loop.
+For example, a variable might reside in the stack for part of a function
+and in a register during a loop and in a different register during
+another loop.
 
-Clearly, if a variable may reside in different locations, then the compiler
-must describe to the debugger where the variable resides for any given part
-of the function.
+Clearly, if a variable may reside in different locations, then the
+compiler must describe to the debugger where the variable resides for
+any given part of the function.
 
-This document describes the debug format for encoding these extensions in
-stabs.
+This document describes the debug format for encoding these extensions
+in stabs.
 
-Since these extensions are gcc specific, these additional symbols and stabs 
-can be disabled by the gcc command option -gstabs.
+Since these extensions are gcc specific, these additional symbols and
+stabs can be disabled by the gcc command option -gstabs.
 
 
 GNU extensions for LRS under stabs:
@@ -25,25 +27,25 @@ GNU extensions for LRS under stabs:
 range symbols:
 -------------
 
-    A range symbol will be used to mark the beginning or end of a live range
-    (the range which describes where a symbol is active, or live).
-    These symbols will later be referenced in the stabs for debug purposes.
-    For simplicity, we'll use the terms "range_start" and "range_end" to 
-    identify the range symbols which mark the beginning and end of a live 
-    range respectively.
+    A range symbol will be used to mark the beginning or end of a
+    live range (the range which describes where a symbol is active,
+    or live).  These symbols will later be referenced in the stabs for
+    debug purposes.  For simplicity, we'll use the terms "range_start"
+    and "range_end" to identify the range symbols which mark the beginning
+    and end of a live range respectively.
 
-    Any text symbol which would normally appear in the symbol table (eg. a 
-    function name) can be used as range symbol.  If an address is needed to 
-    delimit a live range and does not match any of the values of symbols 
-    which would normally appear in the symbol table, a new symbol will be 
-    added to the table whose value is that address.
+    Any text symbol which would normally appear in the symbol table
+    (eg. a function name) can be used as range symbol.  If an address
+    is needed to delimit a live range and does not match any of the
+    values of symbols which would normally appear in the symbol table,
+    a new symbol will be added to the table whose value is that address.
 
     The three new symbol types described below have been added for this 
     purpose.
 
-    For efficiency, the compiler should use existing symbols as range symbols 
-    whenever possible; this reduces the number of additional symbols which 
-    need to be added to the symbol table.
+    For efficiency, the compiler should use existing symbols as range
+    symbols whenever possible; this reduces the number of additional
+    symbols which need to be added to the symbol table.
 
     
 New debug symbol type for defining ranges:
@@ -71,14 +73,16 @@ New debug symbol type for defining ranges:
 Live range:
 -----------
 
-    The compiler and debugger view a variable with multiple homes as a primary
-    symbol and aliases for that symbol.  The primary symbol describes the default
-    home of the variable while aliases describe alternate homes for the variable.
+    The compiler and debugger view a variable with multiple homes as
+    a primary symbol and aliases for that symbol.  The primary symbol
+    describes the default home of the variable while aliases describe
+    alternate homes for the variable.
 
-    A live range defines the interval of instructions beginning with 
-    range_start and ending at range_end-1, and is used to specify a range of 
-    instructions where an alias is active or "live".  So, the actual end of 
-    the range will be one less than the value of the range_end symbol.
+    A live range defines the interval of instructions beginning with
+    range_start and ending at range_end-1, and is used to specify a
+    range of instructions where an alias is active or "live".  So,
+    the actual end of the range will be one less than the value of the
+    range_end symbol.
 
     Ranges do not have to be nested. Eg. Two ranges may intersect while 
         each range contains subranges which are not in the other range.
@@ -88,17 +92,19 @@ Live range:
         range_end, while one symbol's range_start can be another symbol's
         range_end.
 
-    When a variable's storage class changes (eg. from stack to register, or
-	from one register to another), a new symbol entry will be added to 
-	the symbol table with stabs describing the new type, and appropriate 
-	live ranges refering to the variable's initial symbol index.
+    When a variable's storage class changes (eg. from stack to register,
+	or from one register to another), a new symbol entry will be
+	added to the symbol table with stabs describing the new type,
+	and appropriate live ranges refering to the variable's initial
+	symbol index.
 
-    For variables which are defined in the source but optimized away, a symbol
-        should be emitted with the live range l(0,0).
+    For variables which are defined in the source but optimized away,
+        a symbol should be emitted with the live range l(0,0).
 
-    Live ranges for aliases of a particular variable should always be disjoint.	
-	Overlapping ranges for aliases of the same variable will be treated as
-	an error by the debugger, and the overlapping range will be ignored.
+    Live ranges for aliases of a particular variable should always
+	be disjoint.  Overlapping ranges for aliases of the same variable
+	will be treated as an error by the debugger, and the overlapping
+	range will be ignored.
 
     If no live range information is given, the live range will be assumed to 
 	span the symbol's entire lexical scope.
@@ -169,15 +175,15 @@ Consider a program of the form:
       ..
     }
 
-Assume that "a" lives in the stack at offset -8, except for inside the loop where
-"a" resides in register "r5".
+Assume that "a" lives in the stack at offset -8, except for inside the
+loop where "a" resides in register "r5".
 
-The way to describe this is to create a stab for the variable "a" which describes
-"a" as living in the stack and an alias for the variable "a" which describes it
-as living in register "r5" in the loop.
+The way to describe this is to create a stab for the variable "a" which
+describes "a" as living in the stack and an alias for the variable "a"
+which describes it as living in register "r5" in the loop.
 
-Let's assume that "#1" and "#2" are symbols which bound the area where "a" lives
-in a register.
+Let's assume that "#1" and "#2" are symbols which bound the area where
+"a" lives in a register.
 
 The stabs to describe "a" and its alias would look like this:
 
@@ -185,11 +191,7 @@ The stabs to describe "a" and its alias would look like this:
         .stabs "#3:r1;l(#1,#2)",64,0,0,5
 
 
-
-
-This design implies that the debugger will keep a chain of aliases for any
-given variable with aliases and that chain will be searched first to find
-out if an alias is active.  If no alias is active, then the debugger will
-assume that the main variable is active.
-
-
+This design implies that the debugger will keep a chain of aliases for
+any given variable with aliases and that chain will be searched first
+to find out if an alias is active.  If no alias is active, then the
+debugger will assume that the main variable is active.
