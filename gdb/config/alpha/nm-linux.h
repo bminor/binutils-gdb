@@ -39,7 +39,7 @@
 
 /* The alpha does not step over a breakpoint, the manpage is lying again.  */
 
-#define CANNOT_STEP_BREAKPOINT
+#define CANNOT_STEP_BREAKPOINT 1
 
 /* Given a pointer to either a gregset_t or fpregset_t, return a
    pointer to the first register.  */

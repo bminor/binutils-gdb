@@ -1760,6 +1760,8 @@ i386nbsd-tdep.o: i386nbsd-tdep.c $(defs_h) $(gdbtypes_h) $(gdbcore_h) \
 	$(regcache_h) $(arch_utils_h) $(i386_tdep_h) $(i387_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
 i386obsd-nat.o: i386obsd-nat.c $(defs_h)
+i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
+	$(regcache_h) $(i386_tdep_h) $(i387_tdep_h)
 i386v-nat.o: i386v-nat.c $(defs_h) $(frame_h) $(inferior_h) $(language_h) \
 	$(gdbcore_h) $(gdb_stat_h) $(floatformat_h) $(target_h)
 i386v4-nat.o: i386v4-nat.c $(defs_h) $(value_h) $(inferior_h) $(regcache_h) \
@@ -1822,7 +1824,7 @@ lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(completer_h) \
-	$(cp_abi_h) $(source_h)
+	$(cp_abi_h) $(source_h) $(parser_defs_h)
 linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) \
 	$(cli_decode_h) $(gdb_string_h)
@@ -2129,7 +2131,8 @@ solib-legacy.o: solib-legacy.c $(defs_h) $(gdbcore_h) $(solib_svr4_h)
 solib-osf.o: solib-osf.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(target_h) $(inferior_h) $(solist_h)
 solib-sunos.o: solib-sunos.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h)
+	$(symfile_h) $(objfiles_h) $(gdbcore_h) $(inferior_h) $(solist_h) \
+	$(bcache_h) $(regcache_h)
 solib-svr4.o: solib-svr4.c $(defs_h) $(elf_external_h) $(elf_common_h) \
 	$(elf_mips_h) $(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcore_h) $(target_h) $(inferior_h) $(solist_h) $(solib_svr4_h)
@@ -2341,7 +2344,7 @@ install-gdbtk:
 	else \
 	  true ; \
 	fi ; \
-	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir)
+	$(SHELL) $(srcdir)/../mkinstalldirs $(bindir); \
 	$(INSTALL_PROGRAM) insight$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(GDBTK_LIBRARY) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(libdir)/insight$(GDBTK_VERSION) ; \

@@ -35,13 +35,3 @@ extern int in_plt_section (CORE_ADDR, char *);
    where the function itself actually starts.  If not, return 0.  */
 
 #define SKIP_TRAMPOLINE_CODE(pc)  find_solib_trampoline_target (pc)
-
-/* It is unknown which, if any, SVR4 assemblers do not accept dollar signs
-   in identifiers.  The default in G++ is to use dots instead, for all SVR4
-   systems, so we make that our default also.  FIXME: There should be some
-   way to get G++ to tell us what CPLUS_MARKER it is using, perhaps by
-   stashing it in the debugging information as part of the name of an
-   invented symbol ("gcc_cplus_marker$" for example). */
-
-#undef CPLUS_MARKER
-#define CPLUS_MARKER '.'

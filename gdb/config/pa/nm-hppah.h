@@ -196,7 +196,7 @@ extern int hppa_require_detach (int, int);
    by removing all eventpoints; stepping past the instruction that caused
    the trigger; reinserting eventpoints; and checking whether any watched
    location changed. */
-#define HAVE_NONSTEPPABLE_WATCHPOINT
+#define HAVE_NONSTEPPABLE_WATCHPOINT 1
 
 /* Our implementation of "hardware" watchpoints uses memory page-protection
    faults.  However, HP-UX has unfortunate interactions between these and

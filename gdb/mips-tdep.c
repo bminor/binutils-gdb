@@ -6194,9 +6194,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: CAUSE_REGNUM = %d\n",
 		      CAUSE_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: CPLUS_MARKER = %c\n",
-		      CPLUS_MARKER);
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: DO_REGISTERS_INFO # %s\n",
 		      XSTRING (DO_REGISTERS_INFO));
   fprintf_unfiltered (file,

@@ -2480,6 +2480,7 @@ elf64_alpha_create_dynamic_sections (abfd, info)
 {
   asection *s;
   struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *bh;
 
   /* We need to create .plt, .rela.plt, .got, and .rela.got sections.  */
 
@@ -2495,13 +2496,13 @@ elf64_alpha_create_dynamic_sections (abfd, info)
 
   /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
      .plt section.  */
-  h = NULL;
+  bh = NULL;
   if (! (_bfd_generic_link_add_one_symbol
 	 (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s,
 	  (bfd_vma) 0, (const char *) NULL, false,
-	  get_elf_backend_data (abfd)->collect,
-	  (struct bfd_link_hash_entry **) &h)))
+	  get_elf_backend_data (abfd)->collect, &bh)))
     return false;
+  h = (struct elf_link_hash_entry *) bh;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
@@ -2539,13 +2540,13 @@ elf64_alpha_create_dynamic_sections (abfd, info)
      dynobj's .got section.  We don't do this in the linker script
      because we don't want to define the symbol if we are not creating
      a global offset table.  */
-  h = NULL;
+  bh = NULL;
   if (!(_bfd_generic_link_add_one_symbol
 	(info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL,
 	 alpha_elf_tdata(abfd)->got, (bfd_vma) 0, (const char *) NULL,
-	 false, get_elf_backend_data (abfd)->collect,
-	 (struct bfd_link_hash_entry **) &h)))
+	 false, get_elf_backend_data (abfd)->collect, &bh)))
     return false;
+  h = (struct elf_link_hash_entry *) bh;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
@@ -3099,7 +3100,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 
 	case R_ALPHA_REFLONG:
 	case R_ALPHA_REFQUAD:
-	  if (info->shared || maybe_dynamic)
+	  if ((info->shared && (sec->flags & SEC_ALLOC)) || maybe_dynamic)
 	    need = NEED_DYNREL;
 	  break;
 
@@ -4576,7 +4577,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      case STO_ALPHA_NOPV:
 	        break;
 	      case STO_ALPHA_STD_GPLOAD:
-		addend += 8;
+		value += 8;
 		break;
 	      default:
 		if (h != NULL)
@@ -5509,13 +5510,11 @@ static const struct elf_size_info alpha_elf_size_info =
   NULL
 };
 
-#ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM	bfd_elf64_alpha_vec
 #define TARGET_LITTLE_NAME	"elf64-alpha"
 #define ELF_ARCH		bfd_arch_alpha
 #define ELF_MACHINE_CODE	EM_ALPHA
 #define ELF_MAXPAGESIZE	0x10000
-#endif /* ELF_ARCH */
 
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_alpha_bfd_link_hash_table_create
@@ -5579,5 +5578,44 @@ static const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 0
 #define elf_backend_plt_header_size PLT_HEADER_SIZE
+
+#include "elf64-target.h"
+
+/* FreeBSD support.  */
+
+#undef TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM	bfd_elf64_alpha_freebsd_vec
+#undef TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME	"elf64-alpha-freebsd"
+
+/* The kernel recognizes executables as valid only if they carry a
+   "FreeBSD" label in the ELF header.  So we put this label on all
+   executables and (for simplicity) also all other object files.  */
+
+static void elf64_alpha_fbsd_post_process_headers
+  PARAMS ((bfd *, struct bfd_link_info *));
+
+static void
+elf64_alpha_fbsd_post_process_headers (abfd, link_info)
+     bfd * abfd;
+     struct bfd_link_info * link_info ATTRIBUTE_UNUSED;
+{
+  Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
+
+  i_ehdrp = elf_elfheader (abfd);
+
+  /* Put an ABI label supported by FreeBSD >= 4.1.  */
+  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
+#ifdef OLD_FREEBSD_ABI_LABEL
+  /* The ABI label supported by FreeBSD <= 4.0 is quite nonstandard.  */
+  memcpy (&i_ehdrp->e_ident[EI_ABIVERSION], "FreeBSD", 8);
+#endif
+}
+
+#undef elf_backend_post_process_headers
+#define elf_backend_post_process_headers \
+  elf64_alpha_fbsd_post_process_headers
+
+#define elf64_bed elf64_alpha_fbsd_bed
 
 #include "elf64-target.h"

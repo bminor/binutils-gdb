@@ -24,7 +24,7 @@
 
 /* pick up more generic x86 sysv4 stuff */
 
-#include "i386/tm-i386v4.h"
+#include "i386/tm-i386.h"
 
 /* define to select for other sysv4.2mp weirdness (see procfs.c) */
 
