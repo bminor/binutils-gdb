@@ -1,6 +1,10 @@
-start-sanitize-gdbtk	
 Fri Aug  8 15:59:24 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/i386/cygwin32.mh ($(BDM_LIBNAME)): Rename target from
+	libwigglers.def.
+	(libwigglers.a): Remove target.
+
+start-sanitize-gdbtk
 	* gdbtk.c (gdbtk_cleanup): New static function.
 	(gdbtk_init): Add gdbtk_cleanup as a final cleanup.  Uncomment
 	call to ide_initialize_paths.  If we can't initialize the event

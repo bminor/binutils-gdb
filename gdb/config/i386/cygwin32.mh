@@ -13,7 +13,5 @@ BDM_LIBNAME = libwigglers.a
 BDM_DEFFILE = $(srcdir)/wigglers.def
 
 # Makefile target for making BDM_LIBNAME
-libwigglers.def:
+$(BDM_LIBNAME): $(BDM_DEFFILE)
 	$(DLLTOOL) --as=i386-cygwin32-as -k --dllname $(BDM_DLLNAME) --output-lib $(BDM_LIBNAME) --def $(BDM_DEFFILE)
-
-libwigglers.a: libwigglers.def
