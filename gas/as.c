@@ -214,13 +214,22 @@ parse_args (pargc, pargv)
 
   char *shortopts;
   extern CONST char *md_shortopts;
-#ifdef VMS
-  /* -v takes an argument on VMS, so we don't make it a generic option.  */
-  CONST char *std_shortopts = "-JKLRWZfa::DI:o:wX";
-#else
-  CONST char *std_shortopts = "-JKLRWZfa::DI:o:vwX";
+  static const char std_shortopts[] =
+    {
+      '-', 'J',
+#ifndef WORKING_DOT_WORD
+      /* -K is not meaningful if .word is not being hacked.  */
+      'K',
 #endif
-
+      'L', 'R', 'W', 'Z', 'f', 'a', ':', ':', 'D', 'I', ':', 'o', ':',
+#ifndef VMS
+      /* -v takes an argument on VMS, so we don't make it a generic
+         option.  */
+      'v',
+#endif
+      'w', 'X',
+      '\0'
+    };
   struct option *longopts;
   extern struct option md_longopts[];
   extern size_t md_longopts_size;
@@ -348,9 +357,11 @@ parse_args (pargc, pargv)
 	  flag_signed_overflow_ok = 1;
 	  break;
 
+#ifndef WORKING_DOT_WORD
 	case 'K':
 	  flag_warn_displacement = 1;
 	  break;
+#endif
 
 	case 'L':
 	  flag_keep_locals = 1;

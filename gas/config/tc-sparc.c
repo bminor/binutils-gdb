@@ -38,8 +38,6 @@ static int warn_on_bump;
 
 extern int target_big_endian;
 
-const relax_typeS md_relax_table[1];
-
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash;
 
@@ -77,8 +75,6 @@ const pseudo_typeS md_pseudo_table[] =
   {NULL, 0, 0},
 };
 
-const int md_short_jump_size = 4;
-const int md_long_jump_size = 4;
 const int md_reloc_size = 12;	/* Size of relocation record */
 
 /* This array holds the chars that always start a comment.  If the
@@ -719,7 +715,7 @@ sparc_ip (str)
   char *s;
   const char *args;
   char c;
-  struct sparc_opcode *insn;
+  const struct sparc_opcode *insn;
   char *argsStart;
   unsigned long opcode;
   unsigned int mask = 0;
@@ -745,10 +741,10 @@ sparc_ip (str)
       break;
 
     default:
-      as_bad ("Unknown opcode: `%s'", str);
-      exit (1);
+      as_fatal ("Unknown opcode: `%s'", str);
     }
-  if ((insn = (struct sparc_opcode *) hash_find (op_hash, str)) == NULL)
+  insn = (struct sparc_opcode *) hash_find (op_hash, str);
+  if (insn == NULL)
     {
       as_bad ("Unknown opcode: `%s'", str);
       return;
@@ -1544,23 +1540,6 @@ sparc_ip (str)
 
 	    case 'A':
 	      {
-#ifdef NO_V9
-		char *push = input_line_pointer;
-		expressionS e;
-
-		input_line_pointer = s;
-
-		expression (&e);
-		if (e.X_op == O_constant)
-		  {
-		    opcode |= e.X_add_number << 5;
-		    s = input_line_pointer;
-		    input_line_pointer = push;
-		    continue;
-		  }		/* if absolute */
-
-		break;
-#else
 		int asi = 0;
 
 		/* Parse an asi.  */
@@ -1585,11 +1564,19 @@ sparc_ip (str)
 			goto error;
 		      }
 		  }
-		else if (isdigit (*s))
+		else
 		  {
 		    char *push = input_line_pointer;
+		    expressionS e;
 		    input_line_pointer = s;
-		    asi = get_absolute_expression ();
+
+		    expression (&e);
+		    if (e.X_op != O_constant)
+		      {
+			error_message = ": constant required for ASI";
+			goto error;
+		      }
+		    asi = e.X_add_number;
 		    s = input_line_pointer;
 		    input_line_pointer = push;
 		    
@@ -1599,14 +1586,8 @@ sparc_ip (str)
 			goto error;
 		      }
 		  }
-		else
-		  {
-		    error_message = ": unrecognizable asi";
-		    goto error;
-		  }
 		opcode |= ASI (asi);
 		continue;
-#endif
 	      }			/* alternate space */
 
 	    case 'p':
@@ -1718,7 +1699,8 @@ sparc_ip (str)
 	{
 	  /* Args don't match. */
 	  if (((unsigned) (&insn[1] - sparc_opcodes)) < NUMOPCODES
-	      && !strcmp (insn->name, insn[1].name))
+	      && (insn->name == insn[1].name
+		  || !strcmp (insn->name, insn[1].name)))
 	    {
 	      ++insn;
 	      s = argsStart;
@@ -1895,9 +1877,18 @@ md_apply_fix (fixP, value)
 #ifdef OBJ_ELF
   /* FIXME: SPARC ELF relocations don't use an addend in the data
      field itself.  This whole approach should be somehow combined
-     with the calls to bfd_perform_relocation.  */
+     with the calls to bfd_perform_relocation.  Also, the value passed
+     in by fixup_segment includes the value of a defined symbol.  We
+     don't want to include the value of an externally visible symbol.  */
   if (fixP->fx_addsy != NULL)
-    return 1;
+    {
+      if (S_IS_EXTERN (fixP->fx_addsy)
+	  && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section
+	  && S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
+	  && ! bfd_is_com_section (S_GET_SEGMENT (fixP->fx_addsy)))
+	fixP->fx_addnumber -= S_GET_VALUE (fixP->fx_addsy);
+      return 1;
+    }
 #endif
 
   /* This is a hack.  There should be a better way to
@@ -2107,6 +2098,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_32_PCREL_S2:
     case BFD_RELOC_SPARC13:
     case BFD_RELOC_SPARC_BASE13:
+    case BFD_RELOC_SPARC_WDISP16:
+    case BFD_RELOC_SPARC_WDISP19:
     case BFD_RELOC_SPARC_WDISP22:
     case BFD_RELOC_64:
     case BFD_RELOC_SPARC_10:
@@ -2133,16 +2126,25 @@ tc_gen_reloc (section, fixp)
   assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
 
   /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
+#ifdef OBJ_AOUT
+
   if (reloc->howto->pc_relative == 0)
     reloc->addend = fixp->fx_addnumber;
-#if defined (OBJ_ELF) || defined (OBJ_COFF)
+  else
+    reloc->addend = fixp->fx_offset - reloc->address;
+
+#else /* elf or coff */
+
+  if (reloc->howto->pc_relative == 0)
+    reloc->addend = fixp->fx_addnumber;
   else if ((fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
     reloc->addend = (section->vma
 		     + fixp->fx_addnumber
 		     + md_pcrel_from (fixp));
-#endif
   else
-    reloc->addend = fixp->fx_offset - reloc->address;
+    reloc->addend = fixp->fx_offset;
+
+#endif
 
   return reloc;
 }
@@ -2237,7 +2239,7 @@ print_insn (insn)
  */
 
 #ifdef OBJ_ELF
-CONST char *md_shortopts = "A:VQ:sq";
+CONST char *md_shortopts = "A:K:VQ:sq";
 #else
 CONST char *md_shortopts = "A:";
 #endif
@@ -2314,6 +2316,15 @@ md_parse_option (c, arg)
     case 'q':
       /* quick -- native assembler does fewer checks */
       break;
+
+    case 'K':
+      if (strcmp (arg, "PIC") != 0)
+	as_warn ("Unrecognized option following -K");
+      else
+	{
+	  as_warn ("gas does not currently support PIC code for the SPARC");
+	  as_fatal ("use /usr/ccs/bin/as instead");
+	}
 #endif
 
     default:
@@ -2358,17 +2369,6 @@ md_undefined_symbol (name)
   return 0;
 }				/* md_undefined_symbol() */
 
-/* Parse an operand that is machine-specific.
-   We just return without modifying the expression if we have nothing
-   to do. */
-
-/* ARGSUSED */
-void 
-md_operand (expressionP)
-     expressionS *expressionP;
-{
-}
-
 /* Round up a section size to the appropriate boundary. */
 valueT
 md_section_align (segment, size)
@@ -2378,7 +2378,8 @@ md_section_align (segment, size)
 #ifndef OBJ_ELF
   /* This is not right for ELF; a.out wants it, and COFF will force
      the alignment anyways.  */
-  valueT align = (valueT) 1 << (valueT) (stdoutput->xvec->align_power_min);
+  valueT align = ((valueT) 1
+		  << (valueT) bfd_get_section_alignment (stdoutput, segment));
   valueT newsize;
   /* turn alignment value into a mask */
   align--;

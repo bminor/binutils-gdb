@@ -473,7 +473,9 @@ COMMON fragS bss_address_frag;
 COMMON unsigned char flag_no_comments; /* -f */
 COMMON unsigned char flag_debug; /* -D */
 COMMON unsigned char flag_signed_overflow_ok; /* -J */
+#ifndef WORKING_DOT_WORD
 COMMON unsigned char flag_warn_displacement; /* -K */
+#endif
 
 /* True if local symbols should be retained.  */
 COMMON unsigned char flag_keep_locals; /* -L */
@@ -627,6 +629,9 @@ valueT add_to_literal_pool PARAMS ((struct symbol *, valueT, segT, int));
 #include "tc.h"
 #include "obj.h"
 
+#ifdef USE_EMULATIONS
+#include "emul.h"
+#endif
 #include "listing.h"
 
 #ifndef LOCAL_LABELS_DOLLAR

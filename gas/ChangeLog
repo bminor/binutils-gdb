@@ -1,5 +1,15 @@
 Wed Jul  5 12:01:49 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-sparc.c (md_shortopts): Add "K:" if OBJ_ELF.
+	(md_parse_option): If OBJ_ELF, check for -K.  Die if -K PIC, since
+	PIC code is not currently supported.
+
+	* as.c (parse_args): Change std_shortopts to be an array rather
+	than a constant string.  Only include 'K' if WORKING_DOT_WORD is
+	not defined.  Only check for 'K' in that case as well.
+	* as.h (flag_warn_displacement): Only declare if WORKING_DOT_WORD
+	is not defined.
+
 	* conf.in: Add undef of HAVE_SBRK.
 
 	* config/obj-coff.c (obj_coff_line): Call listing_source_line, in
