@@ -1,3 +1,8 @@
+o - size
+    Currently assumes that the only relevant sections are named .text,
+    .data and either .bss or .stack.  This is not very general, and it
+    doesn't work for ECOFF.
+
 o - strip
     Make faster by using ftruncate if available (and format is suitable).
 
