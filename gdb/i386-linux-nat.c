@@ -112,6 +112,8 @@ int have_ptrace_getxfpregs =
 ;
 
 
+/* Fetching registers directly from the U area, one at a time.  */
+
 /* FIXME: kettenis/2000-03-05: This duplicates code from `inptrace.c'.
    The problem is that we define FETCH_INFERIOR_REGISTERS since we
    want to use our own versions of {fetch,store}_inferior_registers
