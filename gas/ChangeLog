@@ -1,3 +1,8 @@
+Mon Nov  6 18:51:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-alpha.c: Undefine inline if not __GNUC__.
+	(md_pseudo_table): Don't define "extern".
+
 Sat Nov  4 00:51:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (ppc_biei): Force symbol into text_section.
