@@ -152,53 +152,100 @@ myresume (step, signal)
 #undef offsetof
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 
-static struct econtext *
-lynx_registers_addr()
-{
-  st_t *stblock;
-  int ecpoff = offsetof(st_t, ecp);
-  CORE_ADDR ecp;
-
-  errno = 0;
-  stblock = (st_t *) ptrace (PTRACE_THREADUSER, inferior_pid,
-			     (PTRACE_ARG3_TYPE)0, 0);
-  if (errno)
-    perror_with_name ("PTRACE_THREADUSER");
-
-  ecp = (CORE_ADDR) ptrace (PTRACE_PEEKTHREAD, inferior_pid,
-			    (PTRACE_ARG3_TYPE)ecpoff, 0);
-  ecp -= (CORE_ADDR)stblock;
-  if (errno)
-    perror_with_name ("lynx_registers_addr(PTRACE_PEEKTHREAD)");
-
-  return (struct econtext *)ecp;
-}
-
-static struct econtext *ecp;
-
 /* Mapping between GDB register #s and offsets into econtext.  Must be
-   consistent with REGISTER_NAMES macro in tm-i386v.h. */
+   consistent with REGISTER_NAMES macro in various tmXXX.h files. */
 
-#define X(ENTRY)(offsetof(struct econtext, ENTRY) / 4)
-static int regmap[] = {
+#define X(ENTRY)(offsetof(struct econtext, ENTRY))
+
+#ifdef I386
+/* Mappings from tm-i386v.h */
+
+static int regmap[] =
+{
   X(eax),
   X(ecx),
   X(edx),
   X(ebx),
-  X(esp),
-  X(ebp),
+  X(esp),			/* sp */
+  X(ebp),			/* fp */
   X(esi),
   X(edi),
-  X(eip),
+  X(eip),			/* pc */
   X(flags),			/* ps */
   X(cs),
   X(ss),
   X(ds),
   X(es),
   X(ecode),			/* Lynx doesn't give us either fs or gs, so */
-  X(fault)			/* we just substitute these two in the hopes
+  X(fault),			/* we just substitute these two in the hopes
 				   that they are useful. */
-  };
+};
+#endif
+
+#ifdef M68K
+/* Mappings from tm-m68k.h */
+
+static int regmap[] =
+{
+  X(regs[0]),			/* d0 */
+  X(regs[1]),			/* d1 */
+  X(regs[2]),			/* d2 */
+  X(regs[3]),			/* d3 */
+  X(regs[4]),			/* d4 */
+  X(regs[5]),			/* d5 */
+  X(regs[6]),			/* d6 */
+  X(regs[7]),			/* d7 */
+  X(regs[8]),			/* a0 */
+  X(regs[9]),			/* a1 */
+  X(regs[10]),			/* a2 */
+  X(regs[11]),			/* a3 */
+  X(regs[12]),			/* a4 */
+  X(regs[13]),			/* a5 */
+  X(regs[14]),			/* fp */
+  0,				/* sp */
+  X(status),			/* ps */
+  X(pc),
+
+  X(fregs[0*3]),		/* fp0 */
+  X(fregs[1*3]),		/* fp1 */
+  X(fregs[2*3]),		/* fp2 */
+  X(fregs[3*3]),		/* fp3 */
+  X(fregs[4*3]),		/* fp4 */
+  X(fregs[5*3]),		/* fp5 */
+  X(fregs[6*3]),		/* fp6 */
+  X(fregs[7*3]),		/* fp7 */
+
+  X(fcregs[0]),			/* fpcontrol */
+  X(fcregs[1]),			/* fpstatus */
+  X(fcregs[2]),			/* fpiaddr */
+  X(ssw),			/* fpcode */
+  X(fault),			/* fpflags */
+};
+#endif
+
+/* Return the offset relative to the start of the per-thread data to the
+   saved context block.  */
+
+static unsigned long
+lynx_registers_addr()
+{
+  CORE_ADDR stblock;
+  int ecpoff = offsetof(st_t, ecp);
+  CORE_ADDR ecp;
+
+  errno = 0;
+  stblock = (CORE_ADDR) ptrace (PTRACE_THREADUSER, inferior_pid,
+				(PTRACE_ARG3_TYPE)0, 0);
+  if (errno)
+    perror_with_name ("PTRACE_THREADUSER");
+
+  ecp = (CORE_ADDR) ptrace (PTRACE_PEEKTHREAD, inferior_pid,
+			    (PTRACE_ARG3_TYPE)ecpoff, 0);
+  if (errno)
+    perror_with_name ("lynx_registers_addr(PTRACE_PEEKTHREAD)");
+
+  return ecp - stblock;
+}
 
 /* Fetch one or more registers from the inferior.  REGNO == -1 to get
    them all.  We actually fetch more than requested, when convenient,
@@ -210,15 +257,21 @@ fetch_inferior_registers (ignored)
 {
   int regno;
   unsigned long reg;
-  struct econtext *ecp;
+  unsigned long ecp;
 
   ecp = lynx_registers_addr();
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
+      int ptrace_fun = PTRACE_PEEKTHREAD;
+
+#ifdef PTRACE_PEEKUSP
+      ptrace_fun = regno == SP_REGNUM ? PTRACE_PEEKUSP : PTRACE_PEEKTHREAD;
+#endif
+
       errno = 0;
-      reg = ptrace (PTRACE_PEEKTHREAD, inferior_pid,
-		    (PTRACE_ARG3_TYPE) (&ecp->fault + regmap[regno]), 0);
+      reg = ptrace (ptrace_fun, inferior_pid,
+		    (PTRACE_ARG3_TYPE) (ecp + regmap[regno]), 0);
       if (errno)
 	perror_with_name ("fetch_inferior_registers(PTRACE_PEEKTHREAD)");
   
@@ -236,17 +289,23 @@ store_inferior_registers (ignored)
 {
   int regno;
   unsigned long reg;
-  struct econtext *ecp;
+  unsigned long ecp;
 
   ecp = lynx_registers_addr();
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
+      int ptrace_fun = PTRACE_POKEUSER;
+
+#ifdef PTRACE_POKEUSP
+      ptrace_fun = regno == SP_REGNUM ? PTRACE_POKEUSP : PTRACE_POKEUSER;
+#endif
+
       reg = *(unsigned long *)&registers[REGISTER_BYTE (regno)];
 
       errno = 0;
-      ptrace (PTRACE_POKEUSER, inferior_pid,
-	      (PTRACE_ARG3_TYPE) (&ecp->fault + regmap[regno]), reg);
+      ptrace (ptrace_fun, inferior_pid,
+	      (PTRACE_ARG3_TYPE) (ecp + regmap[regno]), reg);
       if (errno)
 	perror_with_name ("PTRACE_POKEUSER");
     }

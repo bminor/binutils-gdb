@@ -67,7 +67,7 @@ coff_solib_add (arg_string, from_tty, target)
 
       libsize = bfd_section_size (exec_bfd, libsect);
 
-      lib = alloca (libsize);
+      lib = (unsigned char *) alloca (libsize);
 
       bfd_get_section_contents (exec_bfd, libsect, lib, 0, libsize);
 

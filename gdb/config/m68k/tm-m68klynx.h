@@ -20,9 +20,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef TM_M68KLYNX_H
 #define TM_M68KLYNX_H
 
+/* If PC-2 contains this instruction, then we know what we are in a system
+   call stub, and the return PC is is at SP+4, instead of SP. */
+
+#define SYSCALL_TRAP 0x4e4a	/* trap #10 */
+#define SYSCALL_TRAP_OFFSET 2	/* PC is after trap instruction */
+
 /* Use the generic 68k definitions. */
 
 #include "m68k/tm-m68k.h"
+
+/* Disable dumbshit alternate breakpoint mechanism needed by 68k stub. */
+#undef REMOTE_BREAKPOINT
 
 /* Include COFF shared library support.  */
 

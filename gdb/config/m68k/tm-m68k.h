@@ -42,8 +42,14 @@ extern CORE_ADDR m68k_skip_prologue PARAMS ((CORE_ADDR ip));
    the new frame is not set up until the new function executes
    some instructions.  */
 
+#ifdef __STDC__
+struct frame_info;
+#endif
+
+extern CORE_ADDR m68k_saved_pc_after_call PARAMS ((struct frame_info *));
+
 #define SAVED_PC_AFTER_CALL(frame) \
-read_memory_integer (read_register (SP_REGNUM), 4)
+  m68k_saved_pc_after_call(frame)
 
 /* Stack grows downward.  */
 
@@ -88,29 +94,22 @@ read_memory_integer (read_register (SP_REGNUM), 4)
 
 #define REGISTER_TYPE long
 
-#define REGISTER_BYTES_SUN3 (16*4 + 8 + 8*12 + 3*4 + 4)
 #define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
 #define REGISTER_BYTES_NOFP (16*4 + 8)
 
-#if defined (GDB_TARGET_IS_SUN3)
-  /* Sun3 status includes fpflags, which shows whether the FPU has been used
-     by the process, and whether the FPU was done with an instruction or 
-     was interrupted in the middle of a long instruction.  See
-     <machine/reg.h>.  */
-  /*                      a&d, pc,sr, fp, fpstat, fpflags   */
-#  define NUM_REGS 31
-#  define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4 + 4)
-#  define REGISTER_BYTES_OK(b) \
-     ((b) == REGISTER_BYTES_SUN3 \
-      || (b) == REGISTER_BYTES_FP \
-      || (b) == REGISTER_BYTES_NOFP)
-#else /* Not sun3.  */
-#  define NUM_REGS 29
-#  define REGISTER_BYTES_OK(b) \
-     ((b) == REGISTER_BYTES_FP \
-      || (b) == REGISTER_BYTES_NOFP)
-#  define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4)
-#endif /* Not sun3.  */
+#ifndef NUM_REGS
+#define NUM_REGS 29
+#endif
+
+#ifndef REGISTER_BYTES_OK
+#define REGISTER_BYTES_OK(b) \
+   ((b) == REGISTER_BYTES_FP \
+    || (b) == REGISTER_BYTES_NOFP)
+#endif
+
+#ifndef REGISTER_BYTES
+#define REGISTER_BYTES (16*4 + 8 + 8*12 + 3*4)
+#endif
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
@@ -360,8 +359,8 @@ extern const struct ext_format ext_format_68881;
    We use the BFD routines to store a big-endian value of known size.  */
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)     \
-{ bfd_putb32 (fun,     (char *) dummyname + CALL_DUMMY_START_OFFSET + 2);  \
-  bfd_putb32 (nargs*4, (char *) dummyname + CALL_DUMMY_START_OFFSET + 8); }
+{ bfd_putb32 (fun,     (unsigned char *) dummyname + CALL_DUMMY_START_OFFSET + 2);  \
+  bfd_putb32 (nargs*4, (unsigned char *) dummyname + CALL_DUMMY_START_OFFSET + 8); }
 
 /* Push an empty stack frame, to record the current PC, etc.  */
 

@@ -1,3 +1,24 @@
+Fri Nov 12 10:39:31 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* coff-solib.c (coff_solib_add):  Cast result of alloca().
+	* m68k-tdep.c (m68k_saved_pc_after_call):  Get rid of
+	GDB_TARGET_IS_SUN3.  Use more general SYSCALL_TRAP macro.
+	* config/m68k/m68klynx.mh (NATDEPFILES):  Remove exec.o (it's
+	already in TDEPFILES).
+	* config/m68k/tm-m68k.h (SAVED_PC_AFTER_CALL):  Use
+	m68k_saved_pc_after_call.
+	* Remove all Sun3 specific stuff.
+	* (FIX_CALL_DUMMY):  Cast arg to bfd_putb32 to unsigned char *.
+	* config/m68k/tm-m68klynx.h:  Define SYSCALL_TRAP as trap #10.
+	Disable REMOTE_BREAKPOINT mechanism.
+	* config/m68k/tm-sun3.h:  Get rid of GDB_TARGET_IS_SUN3.
+	* Protect from multiple includion.
+	* Move Sun3 specific stuff from tm-m68k.h to here.
+	* Define SYSCALL_TRAP as trap #0.
+	* Remove def of SAVED_PC_AFTER_CALL (now in tm-m68k.h).
+	* gdbserver/low-lynx.c:  Redo all register store/fetch stuff to
+	make it portable for 386 and 68k.
+
 Fri Nov 12 09:53:26 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* mips-tdep.c (init_extra_frame_info): Check to see whether the
