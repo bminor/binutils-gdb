@@ -1,3 +1,8 @@
+2004-07-25  Daniel Jacobowitz  <dan@debian.org>
+
+	* doc/as.texinfo (Section, PushSection): Correct documentation
+	for ELF.
+
 2004-07-21  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (optimize_imm): Adjust immediates to only those

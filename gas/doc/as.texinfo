@@ -5056,9 +5056,9 @@ This is one of the ELF section stack manipulation directives.  The others are
 @code{.popsection} (@pxref{PopSection}), and @code{.previous} 
 (@pxref{Previous}).
 
-This directive is a synonym for @code{.section}.  It pushes the current section
-(and subsection) onto the top of the section stack, and then replaces the
-current section and subsection with @code{name} and @code{subsection}.
+This directive pushes the current section (and subsection) onto the
+top of the section stack, and then replaces the current section and
+subsection with @code{name} and @code{subsection}.
 @end ifset
 
 @node Quad
@@ -5309,10 +5309,10 @@ section is executable
 section is used for thread local storage
 @end table
 
-This directive replaces the current section and subsection.  The replaced
-section and subsection are pushed onto the section stack.  See the contents of
-the gas testsuite directory @code{gas/testsuite/gas/elf} for some examples of
-how this directive and the other section stack directives work.
+This directive replaces the current section and subsection.  See the
+contents of the gas testsuite directory @code{gas/testsuite/gas/elf} for
+some examples of how this directive and the other section stack directives
+work.
 @end ifset
 @end ifset
 
