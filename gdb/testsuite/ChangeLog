@@ -1,3 +1,8 @@
+Sun Jul 30 17:50:35 1995  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/a2-run.exp: Change messages to be more explicit about
+	the status of args, and quote binfile in results.
+
 Sun Jul 30 10:24:20 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/callfuncs.exp: Add tests for passing structs to
@@ -1434,11 +1439,6 @@ Sun May 29 22:31:42 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 	* gdb.t31/Makefile.in:  Add definitions for CHILLFLAGS,
 	CHILL, and CHILL_LIB.
 
-Wed May 25 17:10:38 1994  Per Bothner  (bothner@kalessin.cygnus.com)
-
-	* Makefile.in (TARGET_FLAGS_TO_PASS): Fix syntax of
-	sanitize-chill comments.
-
 Sat May 21 10:05:08 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Revert the previous changes.  Please see Rob's directory
@@ -1485,14 +1485,6 @@ Fri May 13 18:00:27 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* config/mt-i960-vx (LDFLAGS): Add '-r' option for test links.
           (CFLAGS): Delete it from here.
-
-Thu May 12 14:06:34 1994  Bill Cox  (bill@rtl.cygnus.com)
-
-	* .Sanitize: Drop the gdb.t30 and gdb.t31 directories
-	  unless keep-chill was specified on the command line.
-	* Makefile.in, config/makefile.rel.in: : Add comment lines
-          to Sanitize out CHILL references unless keep-chill
-           was specified.
 
 Tue May  3 16:08:09 1994  Kung Hsu  (kung@mexican.cygnus.com)
 

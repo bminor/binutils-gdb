@@ -15,12 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-chill > /dev/null ) ; then
-	keep_these_too="gdb.chill"
-else
-	lose_these_too="gdb.chill"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -37,6 +31,7 @@ config
 configure.in
 gdb.base
 gdb.c++
+gdb.chill
 gdb.disasm
 gdb.fortran
 gdb.stabs
