@@ -212,11 +212,11 @@ struct elf_link_hash_entry
    it's necessary for shared libs to also reference the .plt even
    though the symbol is really local to the shared lib.  */
 #define SYMBOL_REFERENCES_LOCAL(INFO, H) \
-  _bfd_elf_dynamic_symbol_p (H, INFO, 1)
+  !_bfd_elf_dynamic_symbol_p (H, INFO, 1)
 
 /* Will _calls_ to this symbol always call the version in this object?  */
 #define SYMBOL_CALLS_LOCAL(INFO, H) \
-  _bfd_elf_dynamic_symbol_p (H, INFO, 0)
+  !_bfd_elf_dynamic_symbol_p (H, INFO, 0)
 
 /* Records local symbols to be emitted in the dynamic symbol table.  */
 

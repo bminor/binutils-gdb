@@ -1,3 +1,11 @@
+2003-07-18  H.J. Lu <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (SYMBOL_REFERENCES_LOCAL): Fix a typo.
+	(SYMBOL_CALLS_LOCAL): Likewise.
+
+	* elflink.c (_bfd_elf_dynamic_symbol_p): Return TRUE
+	immediately if symbol isn't defined locally.
+
 2003-07-18  Richard Henderson  <rth@redhat.com>
 
 	* elflink.c (_bfd_elf_dynamic_symbol_p): New.
