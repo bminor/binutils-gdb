@@ -1,3 +1,14 @@
+2002-12-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (process_program_headers): When setting loadaddr, don't
+	assume segment size is 4k.  Use p_align instead.
+	(loadaddr): Change from int to long.
+	(dynamic_addr, dynamic_info, version_info): Likewise.
+	(process_dynamic_segment <syminsz>): Likewise.
+	(process_dynamic_segment): Adjust print format string.
+	(rela_addr, rela_size): Delete.
+	(process_relocs): Formatting.
+
 2002-12-05  Jim Wilson  <wilson@redhat.com>
 
 	* configure.in (OBJDUMP_DEFS): Define SKIP_ZEROES as 16 for IA-64.

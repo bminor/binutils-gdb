@@ -90,10 +90,8 @@
 #include "getopt.h"
 
 char *program_name = "readelf";
-unsigned int dynamic_addr;
+unsigned long dynamic_addr;
 bfd_size_type dynamic_size;
-unsigned int rela_addr;
-unsigned int rela_size;
 char *dynamic_strings;
 char *string_table;
 unsigned long string_table_length;
@@ -103,9 +101,9 @@ Elf_Internal_Syminfo *dynamic_syminfo;
 unsigned long dynamic_syminfo_offset;
 unsigned int dynamic_syminfo_nent;
 char program_interpreter[64];
-int dynamic_info[DT_JMPREL + 1];
-int version_info[16];
-int loadaddr = 0;
+long dynamic_info[DT_JMPREL + 1];
+long version_info[16];
+long loadaddr = 0;
 Elf_Internal_Ehdr elf_header;
 Elf_Internal_Shdr *section_headers;
 Elf_Internal_Dyn *dynamic_segment;
@@ -160,222 +158,222 @@ typedef enum print_mode
 print_mode;
 
 /* Forward declarations for dumb compilers.  */
-static void print_vma		     
+static void print_vma
   PARAMS ((bfd_vma, print_mode));
-static void print_symbol		     
+static void print_symbol
   PARAMS ((int, const char *));
-static bfd_vma (*byte_get)                  
+static bfd_vma (*byte_get)
   PARAMS ((unsigned char *, int));
-static bfd_vma byte_get_little_endian     
+static bfd_vma byte_get_little_endian
   PARAMS ((unsigned char *, int));
-static bfd_vma byte_get_big_endian        
+static bfd_vma byte_get_big_endian
   PARAMS ((unsigned char *, int));
-static const char *get_mips_dynamic_type      
+static const char *get_mips_dynamic_type
   PARAMS ((unsigned long));
-static const char *get_sparc64_dynamic_type   
+static const char *get_sparc64_dynamic_type
   PARAMS ((unsigned long));
-static const char *get_ppc64_dynamic_type     
+static const char *get_ppc64_dynamic_type
   PARAMS ((unsigned long));
-static const char *get_parisc_dynamic_type    
+static const char *get_parisc_dynamic_type
   PARAMS ((unsigned long));
-static const char *get_dynamic_type           
+static const char *get_dynamic_type
   PARAMS ((unsigned long));
-static int slurp_rela_relocs	     
+static int slurp_rela_relocs
   PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **,
 	   unsigned long *));
-static int slurp_rel_relocs	     
+static int slurp_rel_relocs
   PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **,
 	   unsigned long *));
-static int dump_relocations           
+static int dump_relocations
   PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *,
 	   unsigned long, char *, int));
-static char *get_file_type              
+static char *get_file_type
   PARAMS ((unsigned));
-static char *get_machine_name           
+static char *get_machine_name
   PARAMS ((unsigned));
-static void decode_ARM_machine_flags   
+static void decode_ARM_machine_flags
   PARAMS ((unsigned, char[]));
-static char *get_machine_flags          
+static char *get_machine_flags
   PARAMS ((unsigned, unsigned));
-static const char *get_mips_segment_type      
+static const char *get_mips_segment_type
   PARAMS ((unsigned long));
-static const char *get_parisc_segment_type    
+static const char *get_parisc_segment_type
   PARAMS ((unsigned long));
-static const char *get_ia64_segment_type      
+static const char *get_ia64_segment_type
   PARAMS ((unsigned long));
-static const char *get_segment_type           
+static const char *get_segment_type
   PARAMS ((unsigned long));
-static const char *get_mips_section_type_name 
+static const char *get_mips_section_type_name
   PARAMS ((unsigned int));
 static const char *get_parisc_section_type_name
   PARAMS ((unsigned int));
-static const char *get_ia64_section_type_name 
+static const char *get_ia64_section_type_name
   PARAMS ((unsigned int));
-static const char *get_section_type_name      
+static const char *get_section_type_name
   PARAMS ((unsigned int));
-static const char *get_symbol_binding         
+static const char *get_symbol_binding
   PARAMS ((unsigned int));
-static const char *get_symbol_type            
+static const char *get_symbol_type
   PARAMS ((unsigned int));
-static const char *get_symbol_visibility      
+static const char *get_symbol_visibility
   PARAMS ((unsigned int));
-static const char *get_symbol_index_type      
+static const char *get_symbol_index_type
   PARAMS ((unsigned int));
-static const char *get_dynamic_flags	     
+static const char *get_dynamic_flags
   PARAMS ((bfd_vma));
-static void usage                      
+static void usage
   PARAMS ((void));
-static void parse_args                 
+static void parse_args
   PARAMS ((int, char **));
-static int process_file_header        
+static int process_file_header
   PARAMS ((void));
-static int process_program_headers    
+static int process_program_headers
   PARAMS ((FILE *));
-static int process_section_headers    
+static int process_section_headers
   PARAMS ((FILE *));
-static int process_unwind	     
+static int process_unwind
   PARAMS ((FILE *));
-static void dynamic_segment_mips_val   
+static void dynamic_segment_mips_val
   PARAMS ((Elf_Internal_Dyn *));
-static void dynamic_segment_parisc_val 
+static void dynamic_segment_parisc_val
   PARAMS ((Elf_Internal_Dyn *));
-static int process_dynamic_segment    
+static int process_dynamic_segment
   PARAMS ((FILE *));
-static int process_symbol_table       
+static int process_symbol_table
   PARAMS ((FILE *));
-static int process_syminfo            
+static int process_syminfo
   PARAMS ((FILE *));
-static int process_section_contents   
+static int process_section_contents
   PARAMS ((FILE *));
-static void process_mips_fpe_exception 
+static void process_mips_fpe_exception
   PARAMS ((int));
-static int process_mips_specific      
+static int process_mips_specific
   PARAMS ((FILE *));
-static int process_file               
+static int process_file
   PARAMS ((char *));
-static int process_relocs             
+static int process_relocs
   PARAMS ((FILE *));
-static int process_version_sections   
+static int process_version_sections
   PARAMS ((FILE *));
-static char *get_ver_flags              
+static char *get_ver_flags
   PARAMS ((unsigned int));
-static int get_32bit_section_headers  
+static int get_32bit_section_headers
   PARAMS ((FILE *, unsigned int));
-static int get_64bit_section_headers  
+static int get_64bit_section_headers
   PARAMS ((FILE *, unsigned int));
-static int get_32bit_program_headers  
+static int get_32bit_program_headers
   PARAMS ((FILE *, Elf_Internal_Phdr *));
-static int get_64bit_program_headers  
+static int get_64bit_program_headers
   PARAMS ((FILE *, Elf_Internal_Phdr *));
-static int get_file_header            
+static int get_file_header
   PARAMS ((FILE *));
-static Elf_Internal_Sym *get_32bit_elf_symbols      
+static Elf_Internal_Sym *get_32bit_elf_symbols
   PARAMS ((FILE *, Elf_Internal_Shdr *));
-static Elf_Internal_Sym *get_64bit_elf_symbols      
+static Elf_Internal_Sym *get_64bit_elf_symbols
   PARAMS ((FILE *, Elf_Internal_Shdr *));
-static const char *get_elf_section_flags	     
+static const char *get_elf_section_flags
   PARAMS ((bfd_vma));
-static int *get_dynamic_data           
+static int *get_dynamic_data
   PARAMS ((FILE *, unsigned int));
-static int get_32bit_dynamic_segment  
+static int get_32bit_dynamic_segment
   PARAMS ((FILE *));
-static int get_64bit_dynamic_segment  
+static int get_64bit_dynamic_segment
   PARAMS ((FILE *));
 #ifdef SUPPORT_DISASSEMBLY
-static int disassemble_section        
+static int disassemble_section
   PARAMS ((Elf_Internal_Shdr *, FILE *));
 #endif
-static int dump_section               
+static int dump_section
   PARAMS ((Elf_Internal_Shdr *, FILE *));
-static int display_debug_section      
+static int display_debug_section
   PARAMS ((Elf_Internal_Shdr *, FILE *));
-static int display_debug_info         
+static int display_debug_info
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
 static int display_debug_not_supported
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int prescan_debug_info         
+static int prescan_debug_info
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_lines        
+static int display_debug_lines
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_pubnames     
+static int display_debug_pubnames
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_abbrev       
+static int display_debug_abbrev
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_aranges      
+static int display_debug_aranges
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_frames       
+static int display_debug_frames
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_macinfo      
+static int display_debug_macinfo
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_str          
+static int display_debug_str
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static int display_debug_loc          
+static int display_debug_loc
   PARAMS ((Elf_Internal_Shdr *, unsigned char *, FILE *));
-static unsigned char *process_abbrev_section     
+static unsigned char *process_abbrev_section
   PARAMS ((unsigned char *, unsigned char *));
-static void load_debug_str             
+static void load_debug_str
   PARAMS ((FILE *));
-static void free_debug_str             
+static void free_debug_str
   PARAMS ((void));
-static const char *fetch_indirect_string      
+static const char *fetch_indirect_string
   PARAMS ((unsigned long));
-static void load_debug_loc             
+static void load_debug_loc
   PARAMS ((FILE *));
-static void free_debug_loc             
+static void free_debug_loc
   PARAMS ((void));
-static unsigned long read_leb128                
+static unsigned long read_leb128
   PARAMS ((unsigned char *, int *, int));
-static int process_extended_line_op   
+static int process_extended_line_op
   PARAMS ((unsigned char *, int, int));
-static void reset_state_machine        
+static void reset_state_machine
   PARAMS ((int));
-static char *get_TAG_name               
+static char *get_TAG_name
   PARAMS ((unsigned long));
-static char *get_AT_name                
+static char *get_AT_name
   PARAMS ((unsigned long));
-static char *get_FORM_name              
+static char *get_FORM_name
   PARAMS ((unsigned long));
-static void free_abbrevs               
+static void free_abbrevs
   PARAMS ((void));
-static void add_abbrev                 
+static void add_abbrev
   PARAMS ((unsigned long, unsigned long, int));
-static void add_abbrev_attr            
+static void add_abbrev_attr
   PARAMS ((unsigned long, unsigned long));
-static unsigned char *read_and_display_attr      
+static unsigned char *read_and_display_attr
   PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long,
 	   unsigned long));
 static unsigned char *read_and_display_attr_value
   PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long,
 	   unsigned long));
-static unsigned char *display_block              
+static unsigned char *display_block
   PARAMS ((unsigned char *, unsigned long));
-static void decode_location_expression 
+static void decode_location_expression
   PARAMS ((unsigned char *, unsigned int, unsigned long));
-static void request_dump               
+static void request_dump
   PARAMS ((unsigned int, int));
-static const char *get_elf_class              
+static const char *get_elf_class
   PARAMS ((unsigned int));
-static const char *get_data_encoding          
+static const char *get_data_encoding
   PARAMS ((unsigned int));
-static const char *get_osabi_name             
+static const char *get_osabi_name
   PARAMS ((unsigned int));
-static int guess_is_rela              
+static int guess_is_rela
   PARAMS ((unsigned long));
-static const char *get_note_type		        
+static const char *get_note_type
   PARAMS ((unsigned int));
-static const char *get_netbsd_elfcore_note_type  
+static const char *get_netbsd_elfcore_note_type
   PARAMS ((unsigned int));
-static int process_note		        
+static int process_note
   PARAMS ((Elf_Internal_Note *));
-static int process_corefile_note_segment 
+static int process_corefile_note_segment
   PARAMS ((FILE *, bfd_vma, bfd_vma));
 static int process_corefile_note_segments
   PARAMS ((FILE *));
-static int process_corefile_contents	
+static int process_corefile_contents
   PARAMS ((FILE *));
-static int process_arch_specific		
+static int process_arch_specific
   PARAMS ((FILE *));
-static int process_gnu_liblist		
+static int process_gnu_liblist
   PARAMS ((FILE *));
 
 typedef int Elf32_Word;
@@ -3142,8 +3140,14 @@ process_program_headers (file)
 	{
 	case PT_LOAD:
 	  if (loadaddr == -1)
-	    loadaddr = (segment->p_vaddr & 0xfffff000)
-	      - (segment->p_offset & 0xfffff000);
+	    {
+	      unsigned long align_mask = -segment->p_align;
+
+	      if (align_mask == 0)
+		--align_mask;
+	      loadaddr = ((segment->p_vaddr & align_mask)
+			  - (segment->p_offset & align_mask));
+	    }
 	  break;
 
 	case PT_DYNAMIC:
@@ -3787,7 +3791,8 @@ process_relocs (file)
 	     rel_offset, rel_size);
 
 	  dump_relocations (file, rel_offset - loadaddr, rel_size,
-			    dynamic_symbols, num_dynamic_syms, dynamic_strings, is_rela);
+			    dynamic_symbols, num_dynamic_syms, dynamic_strings,
+			    is_rela);
 	}
       else
 	printf (_("\nThere are no dynamic relocations in this file.\n"));
@@ -4653,7 +4658,7 @@ process_dynamic_segment (file)
   /* And find the syminfo section if available.  */
   if (dynamic_syminfo == NULL)
     {
-      unsigned int syminsz = 0;
+      unsigned long syminsz = 0;
 
       for (i = 0, entry = dynamic_segment;
 	   i < dynamic_size;
@@ -4703,7 +4708,7 @@ process_dynamic_segment (file)
     }
 
   if (do_dynamic && dynamic_addr)
-    printf (_("\nDynamic segment at offset 0x%x contains %ld entries:\n"),
+    printf (_("\nDynamic segment at offset 0x%lx contains %ld entries:\n"),
 	    dynamic_addr, (long) dynamic_size);
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
