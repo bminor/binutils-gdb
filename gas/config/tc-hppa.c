@@ -619,6 +619,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"copyright", pa_copyright, 0},
   {"data", pa_data, 0},
   {"double", pa_float_cons, 'd'},
+  {"dword", pa_cons, 8},
   {"end", pa_end, 0},
   {"end_brtab", pa_brtab, 0},
   {"end_try", pa_try, 0},
@@ -1291,7 +1292,7 @@ cons_fix_new_hppa (frag, where, size, exp)
 
   fix_new_hppa (frag, where, size,
 		(symbolS *) NULL, (offsetT) 0, exp, 0, rel_type,
-		hppa_field_selector, 32, 0, NULL);
+		hppa_field_selector, size * 8, 0, NULL);
 
   /* Reset field selector to its default state.  */
   hppa_field_selector = 0;
