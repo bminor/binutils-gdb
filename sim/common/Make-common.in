@@ -312,6 +312,7 @@ sim_main_headers = \
 	$(srccom)/sim-profile.h \
 	$(srccom)/sim-signal.h \
 	$(srccom)/sim-trace.h \
+	$(srccom)/sim-utils.h \
 	$(srccom)/sim-watch.h \
 	tconfig.h \
 	$(SIM_EXTRA_DEPS)
@@ -472,7 +473,7 @@ sim-utils.o: $(srccom)/sim-utils.c $(sim_main_headers)
 sim-watch.o: $(srccom)/sim-watch.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-watch.c $(ALL_CFLAGS)
 
-sim-load.o: $(srccom)/sim-load.c $(callback_h)
+sim-load.o: $(srccom)/sim-load.c $(callback_h) $(sim_main_headers) $(remote_sim_h)
 	$(CC) -c $(srccom)/sim-load.c $(ALL_CFLAGS)
 
 
