@@ -23,8 +23,8 @@ if ![is_elf_format] {
     return
 }
 
-# No shared lib support on these targets.
-if { [istarget "mcore-*-*"] || [istarget "cris-*-elf"] } {
+# No shared lib support on this target.
+if { [istarget "mcore-*-*"] } {
     return
 }
 
