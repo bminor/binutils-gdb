@@ -1,5 +1,10 @@
 Thu Jan  9 09:08:43 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (emit_expr): Check for overflow of a negative value
+	correctly.
+	* write.c (fixup_segment): Likewise.
+	* config/obj-coff.c (fixup_segment): Likewise.
+
 	* config/tc-m68k.c (struct label_line): Define.
 	(labels, current_label): New static variables.
 	(md_assemble): Mark current_label as text, and clear it.

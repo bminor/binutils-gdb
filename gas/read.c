@@ -3198,14 +3198,25 @@ emit_expr (exp, nbytes)
       register valueT get;
       register valueT use;
       register valueT mask;
+      valueT hibit;
       register valueT unmask;
 
       /* JF << of >= number of bits in the object is undefined.  In
 	 particular SPARC (Sun 4) has problems */
       if (nbytes >= sizeof (valueT))
-	mask = 0;
+	{
+	  mask = 0;
+	  if (nbytes > sizeof (valueT))
+	    hibit = 0;
+	  else
+	    hibit = (valueT) 1 << (nbytes * BITS_PER_CHAR - 1);
+	}
       else
-	mask = ~(valueT) 0 << (BITS_PER_CHAR * nbytes);	/* Don't store these bits. */
+	{
+	  /* Don't store these bits. */
+	  mask = ~(valueT) 0 << (BITS_PER_CHAR * nbytes);
+	  hibit = (valueT) 1 << (nbytes * BITS_PER_CHAR - 1);
+	}
 
       unmask = ~mask;		/* Do store these bits. */
 
@@ -3216,7 +3227,9 @@ emit_expr (exp, nbytes)
 
       get = exp->X_add_number;
       use = get & unmask;
-      if ((get & mask) != 0 && (get & mask) != mask)
+      if ((get & mask) != 0
+	  && ((get & mask) != mask
+	      || (get & hibit) == 0))
 	{		/* Leading bits contain both 0s & 1s. */
 	  as_warn ("Value 0x%lx truncated to 0x%lx.",
 		   (unsigned long) get, (unsigned long) use);
