@@ -43,6 +43,7 @@ typedef struct fpreg fpregset_t;
 #endif
 
 #include "gregset.h"
+#include "i386-tdep.h"
 
 
 /* In older BSD versions we cannot get at some of the segment
@@ -125,7 +126,7 @@ supply_gregset (gregset_t *gregsetp)
 {
   int i;
 
-  for (i = 0; i < NUM_GREGS; i++)
+  for (i = 0; i < I386_NUM_GREGS; i++)
     {
       if (CANNOT_FETCH_REGISTER (i))
 	supply_register (i, NULL);
@@ -143,7 +144,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 {
   int i;
 
-  for (i = 0; i < NUM_GREGS; i++)
+  for (i = 0; i < I386_NUM_GREGS; i++)
     if ((regno == -1 || regno == i) && ! CANNOT_STORE_REGISTER (i))
       regcache_collect (i, REG_ADDR (gregsetp, i));
 }

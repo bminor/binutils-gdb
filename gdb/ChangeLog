@@ -1,5 +1,9 @@
 2002-06-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-nat.c: Include "i386-tdep.h".
+	(supply_gregset, fill_gregset): Replace usage of NUM_GREGS with
+	I386_NUM_GREGS.
+
 	* i386v-nat.c: Remove copnditional inclusion of <asm/debugreg.h>,
 	and associated comment.  They no longer make any sense, since we
 	don't use this file anymore on Linux.
