@@ -176,14 +176,14 @@ do
     i386coff_vec)		tb="$tb coff-i386.o" ;;
     i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
     i386lynx_aout_vec)		tb="$tb i386lynx.o lynx-core.o aout32.o stab-syms.o" ;;
-    i386lynx_coff_vec)		tb="$tb coff-i386lynx.o lynx-core.o stab-syms.o" ;;
+    i386lynx_coff_vec)		tb="$tb i386lynx-cf.o lynx-core.o stab-syms.o" ;;
     icoff_big_vec)		tb="$tb coff-i960.o" ;;
     icoff_little_vec)		tb="$tb coff-i960.o" ;;
     ieee_vec)			tb="$tb ieee.o" ;;
     m68kcoff_vec)		tb="$tb coff-m68k.o" ;;
     m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o" ;;
     m68klynx_aout_vec)		tb="$tb m68klynx.o lynx-core.o aout32.o stab-syms.o" ;;
-    m68klynx_coff_vec)		tb="$tb m68klynx.o lynx-core.o aout32.o stab-syms.o" ;;
+    m68klynx_coff_vec)		tb="$tb m68klynx-cf.o lynx-core.o stab-syms.o" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
     newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
     nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
@@ -233,15 +233,15 @@ ta="$f"
 bfd_backends="$tb"
 bfd_machines="$ta"
 
-# Only set these if they will be nonempty, for the clever echo.
-test -n "$SELECT_VECS" &&
-  selvecs=`echo $SELECT_VECS | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
-test -n "SELECT_ARCHITECTURES" &&
-  selarchs=`echo $SELECT_ARCHITECTURES | sed -e 's/ \(.\)/,\1/g'`
-
 if [ x${all_targets} = xtrue ]; then
   bfd_backends="${bfd_backends}"' $(ALL_BACKENDS)'
   bfd_machines="${bfd_machines}"' $(ALL_MACHINES)'
+else	# all_targets is true
+  # Only set these if they will be nonempty, for the clever echo.
+  test -n "$SELECT_VECS" &&
+    selvecs=`echo $SELECT_VECS | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
+  test -n "SELECT_ARCHITECTURES" &&
+    selarchs=`echo $SELECT_ARCHITECTURES | sed -e 's/ \(.\)/,\1/g'`
 fi	# all_targets is true
 
 case ${host64}-${target64}-${want64} in

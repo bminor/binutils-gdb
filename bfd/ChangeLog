@@ -1,3 +1,8 @@
+Fri Oct  8 02:34:21 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in:  Do not define SELECT_VECS, SELECT_ARCHITECTURES
+	if configuring --with-targets=all.
+
 Thu Oct  7 17:34:07 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* aoutx.h (howto_table_std): Correct the "size" field in some
