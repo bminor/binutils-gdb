@@ -50,6 +50,17 @@
 #include "gdb_assert.h"
 #include "block.h"
 
+/* Standard set of definitions for printing, dumping, prefixifying,
+ * and evaluating expressions.  */
+
+const struct exp_descriptor exp_descriptor_standard = 
+  {
+    print_subexp_standard,
+    operator_length_standard,
+    op_name_standard,
+    dump_subexp_body_standard,
+    evaluate_subexp_standard
+  };
 
 /* Symbols which architectures can redefine.  */
 
@@ -810,12 +821,22 @@ length_of_subexp (struct expression *expr, int endpos)
 void
 operator_length (struct expression *expr, int endpos, int *oplenp, int *argsp)
 {
+  expr->language_defn->la_exp_desc->operator_length (expr, endpos,
+						     oplenp, argsp);
+}
+
+/* Default value for operator_length in exp_descriptor vectors.  */
+
+void
+operator_length_standard (struct expression *expr, int endpos,
+			  int *oplenp, int *argsp)
+{
   int oplen = 1;
   int args = 0;
   int i;
 
   if (endpos < 1)
-    error ("?error in operator_length");
+    error ("?error in operator_length_standard");
 
   i = (int) expr->elts[endpos - 1].opcode;
 

@@ -322,7 +322,27 @@ enum exp_opcode
     OP_EXPRSTRING,
 
     /* An Objective C Foundation Class NSString constant */
-    OP_OBJC_NSSTRING
+    OP_OBJC_NSSTRING,
+
+     /* First extension operator.  Individual language modules define
+        extra operators they need as constants with values 
+        OP_LANGUAGE_SPECIFIC0 + k, for k >= 0, using a separate 
+        enumerated type definition:
+           enum foo_extension_operator {
+             BINOP_MOGRIFY = OP_EXTENDED0,
+ 	     BINOP_FROB,
+ 	     ...
+           };      */
+    OP_EXTENDED0,
+  
+    /* Last possible extension operator.  Defined to provide an
+       explicit and finite number of extended operators. */
+    OP_EXTENDED_LAST = 0xff
+    /* NOTE: Eventually, we expect to convert to an object-oriented 
+       formulation for expression operators that does away with the
+       need for these extension operators, and indeed for this
+       entire enumeration type.  Therefore, consider the OP_EXTENDED
+       definitions to be a temporary measure. */
   };
 
 union exp_element

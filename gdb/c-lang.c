@@ -543,9 +543,9 @@ const struct language_defn c_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
-  evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -599,9 +599,9 @@ const struct language_defn cplus_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
-  evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -632,9 +632,9 @@ const struct language_defn asm_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
-  evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
@@ -670,9 +670,9 @@ const struct language_defn minimal_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   c_preprocess_and_parse,
   c_error,
-  evaluate_subexp_standard,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */

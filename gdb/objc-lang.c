@@ -659,9 +659,9 @@ const struct language_defn objc_language_defn = {
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   objc_parse,
   objc_error,
-  evaluate_subexp_standard,
   objc_printchar,		/* Print a character constant */
   objc_printstr,		/* Function to print string constant */
   objc_emit_char,
@@ -1537,8 +1537,8 @@ print_object_command (char *args, int from_tty)
       make_cleanup (free_current_contents, &expr);
     int pc = 0;
 
-    object = expr->language_defn->evaluate_exp (builtin_type_void_data_ptr,
-						expr, &pc, EVAL_NORMAL);
+    object = expr->language_defn->la_exp_desc->evaluate_exp 
+      (builtin_type_void_data_ptr, expr, &pc, EVAL_NORMAL);
     do_cleanups (old_chain);
   }
 

@@ -167,6 +167,11 @@ struct language_defn
     /* Default case sensitivity */
     enum case_sensitivity la_case_sensitivity;
 
+    /* Definitions related to expression printing, prefixifying, and
+       dumping */
+
+    const struct exp_descriptor *la_exp_desc;
+
     /* Parser function. */
 
     int (*la_parser) (void);
@@ -174,10 +179,6 @@ struct language_defn
     /* Parser error function */
 
     void (*la_error) (char *);
-
-    /* Evaluate an expression. */
-    struct value *(*evaluate_exp) (struct type *, struct expression *,
-				   int *, enum noside);
 
     void (*la_printchar) (int ch, struct ui_file * stream);
 

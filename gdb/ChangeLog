@@ -1,3 +1,77 @@
+2003-09-24  Paul N. Hilfinger  <hilfingr@nile.gnat.com>
+
+	* parser-defs.h (struct exp_descriptor): New definition, containing 
+	language-specific info for printing, prefixifying, dumping, and 
+	evaluating expressions.
+	(exp_descriptor_standard): Declare new variable.
+	(print_subexp): Make global and declare here (from expprint.c).
+	(dump_subexp): Ditto.
+	(dump_subexp_body_standard): Declare.
+	(operator_length_standard): Declare.
+	(op_name_standard): Declare.
+	(print_subexp): Declare.
+	(print_subexp_standard): Declare.
+
+	* language.h (struct language_defn): Add la_exp_desc field to hold
+	pointer to table for language-specific operators.
+	Remove evaluate_exp field, which is now in struct exp_descriptor.
+	
+	* parse.c (operator_length): Move most code to new 
+	operator_length_standard function.  Use language-specific information.
+	(operator_length_standard): New function taking most code from 
+	operator_length.
+	(exp_descriptor_standard): New constant.
+	
+	* expression.h (enum exp_opcode): Add definitions of OP_EXTENDED0 
+	and OP_EXTENDED_LAST.
+	
+	* expprint.c (print_subexp): Use language-specific print_subexp.  
+	Make global; remove static declaration.
+	Move most code to print_subexp_standard.
+	(print_subexp_standard): New function, containing code formerly in 
+	print_subexp.
+	(op_name): Add expression to argument signature.
+	Use langauge-specific op_name. 
+	Move most code to op_name_standard.
+	(op_name_standard): New function, containing code formerly in op_name.
+	(dump_subexp): 	Use new version of op_name function.
+	Use language-specific dump_subexp_body, and move most existing code to
+	dump_subexp_body_standard.
+	(dump_raw_expression): Use new op_name interface.
+	(dump_subexp_body): Move most code to dump_subexp_body_standard.
+	(dump_subexp_body_standard): New function, containing code formerly
+	in dump_subexp_body.
+	
+	* language.c (unknown_language): Add default la_exp_desc field and
+	remove evaluate_exp field.
+	(auto_language): Ditto.
+	(local_language): Ditto.
+	* f-lang.c (f_language_defn): Ditto.
+	* c-lang.c (c_language_defn): Ditto.
+	(cplus_language_defn): Ditto.
+	(asm_language_defn): Ditto.
+	(minimal_language_defn): Ditto.
+	* p-lang.c (pascal_language_defn): Ditto.
+	* m2-lang.c (m2_language_defn): Ditto.
+	* objc-lang.c (objc_language_defn): Ditto.
+	
+	* jv-lang.c (exp_descriptor_java): New variable, containing 
+	Java-specific expression evaluator.
+	(java_language_defn): Add la_exp_desc field and remove evaluate_exp
+	field.
+	* scm-lang.c (exp_descriptor_scm): New variable, containing 
+	Scheme-specific expression evaluator.
+	(scm_language_defn): Add la_exp_desc field and remove evaluate_exp
+	field.
+	* objc-lang.c (print_object_command): Take evaluate_exp from the
+	la_exp_desc field.
+	
+	* Makefile.in (eval.o): Add dependency on parser-defs.h.
+	
+	* eval.c: Include parser-defs.h for the full declaration of 
+	la_exp_desc's type.
+	(evaluate_subexp): Get evaluate_exp out of la_exp_desc field.
+	
 2003-09-23  Paul N. Hilfinger  <hilfingr@nile.gnat.com>
 
 	* parser-defs.h (operator_length): Declare.

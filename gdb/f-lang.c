@@ -462,9 +462,9 @@ const struct language_defn f_language_defn =
   range_check_on,
   type_check_on,
   case_sensitive_off,
+  &exp_descriptor_standard,
   f_parse,			/* parser */
   f_error,			/* parser error function */
-  evaluate_subexp_standard,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_emit_char,			/* Function to print a single character */
