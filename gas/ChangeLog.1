@@ -1390,14 +1390,12 @@ Wed Jul 19 11:49:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* config/tc-m68k.c (md_convert_frag): Likewise.
 	* config/tc-m88k.h (md_convert_frag): Likewise.
 	* config/tc-ns32k.c (md_convert_frag): Likewise.
-	* config/tc-rce.c (md_convert_frag): Likewise.
 	* config/tc-tahoe.c (md_convert_frag): Likewise.
 	* config/tc-vax.c (md_convert_frag): Likewise.
 	* config/tc-w65.c (md_convert_frag): Likewise.
 	* config/tc-z8k.c (md_convert_frag): Likewise.
 	* config/tc-h8300.h (TC_RELOC_MANGLE): Add segment argument.
 	* config/tc-h8500.h (TC_RELOC_MANGLE): Likewise.
-	* config/tc-rce.h (TC_RELOC_MANGLE): Likewise.
 	* config/tc-w65.h (TC_RELOC_MANGLE): Likewise.
 	* config/tc-z8k.h (TC_RELOC_MANGLE): Likewise.
 
@@ -2391,9 +2389,6 @@ end-sanitize-arc
 	* config/m88kcoff.mt (TARG_CPU_DEPENDENTS): Deleted.
 	* config/mips-big.mt (TARG_CPU_DEPENDENTS): Deleted.
 	* config/mips-lit.mt (TARG_CPU_DEPENDENTS): Deleted.
-start-sanitize-rce
-	* config/rce.mt: Deleted.
-end-sanitize-rce
 	* config/sh.mt: Deleted.
 	* config/w65.mt: Deleted.
 	* config/z8k.mt: Deleted.
@@ -2608,10 +2603,6 @@ start-sanitize-arc
 	* config/tc-arc.c (md_relax_table, md_short_jump_size,
 	md_long_jump_size): Deleted.
 end-sanitize-arc
-start-sanitize-rce
-	* config/tc-rce.h: Declare md_relax_table here, and define
-	TC_GENERIC_RELAX_TABLE to expand to it.
-end-sanitize-rce
 	* doc/internals.texi: Describe TC_GENERIC_RELAX_TABLE and
 	WORKING_DOT_WORD.  Mention md_*_jump_size (but description needs
 	to be fleshed out later).  Note m68k PCINDEX mode has been checked
@@ -2877,9 +2868,6 @@ Tue Feb 28 18:29:27 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	config/tc-ppc.*, config/tc-sh.*, config/tc-sparc.*,
 	config/tc-tahoe.*, config/tc-vax.*, config/tc-w65.*,
 	config/tc-z8k.*: Ditto.
-start-sanitize-rce
-	* config/tc-rce.*: Ditto.
-end-sanitize-rce
 	* config/tc-m68k.*: Ditto.
 
 	* config/tc-m68k.c (mote_pseudo_table): Removed dots from opcode
@@ -3347,9 +3335,6 @@ Wed Jan 11 17:51:38 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	* config/tc-h8300.h (COFF_FLAGS): Don't define.
 	* config/tc-h8500.h (COFF_FLAGS), config/tc-sh.h (COFF_FLAGS),
 	config/tc-z8k.h (COFF_FLAGS): Ditto.
-start-sanitize-rce
-	* config/tc-rce.h (COFF_FLAGS): Ditto.
-end-sanitize-rce
 
 	* config/obj-coff.c (KEEP_RELOC_INFO): Make sure it's always
 	defined.
@@ -3466,9 +3451,6 @@ Tue Dec 20 14:56:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	config/obj-som.h, config/tc-h8500.c, config/tc-hppa.c,
 	config/tc-hppa.h, config/tc-sh.c, config/tc-z8k.c: Don't rely on
 	use of ".." when including header files.
-start-sanitize-rce
-	* config/tc-rce.c: Ditto.
-end-sanitize-rce
 
 	* config/obj-coff.c (fixup_segment): Reformat condition in an `if'
 	statement.
@@ -3665,14 +3647,6 @@ Tue Nov 29 13:58:10 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	(got_sig): Unused function deleted, declaration deleted.
 	(SIGTY): Macro deleted.
 	(main): Deleted disabled code for establishing signal handler.
-
-start-sanitize-rce
-	Tiemann should've noted something like this:
-	* config/tc-rce.c, config/tc-rce.h: New files.
-	* as.c (main) [TC_RCE]: Call dump_literals.
-	* configure.in: Handle rce-*-aout.
-	* configure: Regenerated.
-end-sanitize-rce
 
 Mon Nov 28 11:37:35 1994  Doug Evans  <dje@canuck.cygnus.com>
 

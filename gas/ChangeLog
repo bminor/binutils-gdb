@@ -1,3 +1,12 @@
+Wed Jun  5 17:09:26 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (next_char_of_string): Warn if a newline is seen in the
+	middle of a string.  Call bump_line_counters when appropriate.
+
+Wed Jun  5 17:08:36 1996  Richard Henderson  <rth@tamu.edu>
+
+	* symbols.c (colon): Use LOCAL_LABEL.
+
 Tue Jun  4 10:55:16 1996  Tom Tromey  <tromey@csk3.cygnus.com>
 
 	* Makefile.in (install): Don't check to see if tooldir exists.
@@ -1343,10 +1352,6 @@ Wed Nov 15 03:52:00 1995  Ken Raeburn  <raeburn@cygnus.com>
 	* as.c (main): Move md_end call to just after call to
 	perform_an_assembly_pass.  Delete cpu-specific code here.
 	* config/tc-i960.h (md_end): New macro, calls brtab_emit.
-start-sanitize-rce
-	* config/tc-rce.c (md_end): Deleted.
-	* config/tc-rce.h (md_end): New macro, calls dump_literals.
-end-sanitize-rce
 	* config/tc-arm.c (md_end): Unused function deleted.
 	* config/tc-ns32k.c (md_end): Ditto.
 

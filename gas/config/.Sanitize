@@ -15,14 +15,6 @@
 
 Do-first:
 
-rce_files="tc-rce.c tc-rce.h"
-
-if ( echo $* | grep keep\-rce > /dev/null ) ; then
-	keep_these_too="${rce_files} ${keep_these_too}"
-else
-	lose_these_too="${rce_files} ${lose_these_too}"
-fi
-
 arc_files="tc-arc.c tc-arc.h"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
