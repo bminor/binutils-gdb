@@ -1,3 +1,8 @@
+Sat Sep  5 19:17:10 1998  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* dlltool.c (scan_all_symbols): Don't re-export symbols exported
+	by other DLLs.
+
 1998-09-02 14:50  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c (process_dynamic_segment): Print DT_* value only if
