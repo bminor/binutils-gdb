@@ -1,3 +1,7 @@
+Thu Nov 21 10:31:31 1996  Rob Savoye  (rob@cygnus.com)
+	
+	* config.bfd: Added VersaDOS format to the Ericsson configuration.
+
 Wed Nov 20 16:31:31 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10300.c: Rough cut at relocs for the mn10300.
