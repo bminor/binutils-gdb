@@ -1,3 +1,8 @@
+Mon Apr  7 10:53:52 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* bfd-in.h bfd-in2.h: add bfd_section_lma macro to correspond
+	with bfd_section_vma.
+
 Fri Apr  4 11:37:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Update file names for bfd_elf32_mn10[23]00_vec.
