@@ -70,3 +70,4 @@ extern void* malloc PARAMS (());
 extern void* realloc PARAMS (());
 extern void free PARAMS (());
 
+extern char *strdup();
