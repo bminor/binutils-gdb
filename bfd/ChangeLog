@@ -1,5 +1,10 @@
 2004-08-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-m32r.c (m32r_elf_relocate_section): Don't compare with
+	TRUE or FALSE.
+
+2004-08-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-i386.c (elf_i386_relocate_section): Tweak last change so
 	that pcrel correction is applied for R_386_PC32.
 

@@ -1,3 +1,7 @@
+2004-08-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_init): Don't compare with TRUE.
+
 2004-08-25  Dmitry Diky  <diwil@spec.ru>
 
 	* emulparams/msp430all.sh: Fix RAM sizes for all targets.

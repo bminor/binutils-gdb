@@ -506,8 +506,8 @@ lang_init (void)
      simpler to re-use working machinery than using a linked list in terms
      of code-complexity here in ld, besides the initialization which just
      looks like other code here.  */
-  if (bfd_hash_table_init_n (&lang_definedness_table,
-			     lang_definedness_newfunc, 3) != TRUE)
+  if (!bfd_hash_table_init_n (&lang_definedness_table,
+			      lang_definedness_newfunc, 3))
     einfo (_("%P%F: out of memory during initialization"));
 
   /* Callers of exp_fold_tree need to increment this.  */
