@@ -1,3 +1,8 @@
+Wed May 26 10:28:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* mipsread.c (parse_symbol, parse_partial_symbols): Deal with Fortran
+	common blocks.
+
 Tue May 25 20:44:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (print_formatted, case 'i'): Pass a tab to wrap_here.
