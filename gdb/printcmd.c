@@ -2319,20 +2319,6 @@ disassemble_command (char *arg, int from_tty)
       else if (tui_version)
 	low = tuiGetLowDisassemblyAddress (low, pc);
 #endif
-#if 0
-      if (overlay_debugging)
-	{
-	  section = find_pc_overlay (pc);
-	  if (pc_in_unmapped_range (pc, section))
-	    {
-	      /* find_pc_partial_function will have returned low and high
-	         relative to the symbolic (mapped) address range.  Need to
-	         translate them back to the unmapped range where PC is.  */
-	      low = overlay_unmapped_address (low, section);
-	      high = overlay_unmapped_address (high, section);
-	    }
-	}
-#endif
       low += FUNCTION_START_OFFSET;
     }
   else
