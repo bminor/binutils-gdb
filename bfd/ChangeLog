@@ -1,3 +1,9 @@
+Tue Sep 20 13:17:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* libaout.h: Fix comment.
+	* ns32knbsd.h: Changed M_NS32K_NETBSD to M_532_NETBSD to match
+	  libaout.h.
+
 Tue Sep 20 15:23:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* coff-sh.c (rtype2howto): Remove; unused.
