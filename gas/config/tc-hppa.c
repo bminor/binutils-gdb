@@ -579,6 +579,8 @@ static int pa_parse_ftest_gfx_completer PARAMS ((char **));
 #ifdef OBJ_ELF
 static void hppa_elf_mark_end_of_function PARAMS ((void));
 static void pa_build_unwind_subspace PARAMS ((struct call_info *));
+static void pa_vtable_entry PARAMS ((int));
+static void pa_vtable_inherit  PARAMS ((int));
 #endif
 
 /* File and gloally scoped variable declarations.  */
@@ -695,6 +697,10 @@ const pseudo_typeS md_pseudo_table[] =
   {"text", pa_text, 0},
 #endif
   {"version", pa_version, 0},
+#ifdef OBJ_ELF
+  {"vtable_entry", pa_vtable_entry, 0},
+  {"vtable_inherit", pa_vtable_inherit, 0},
+#endif
   {"word", pa_cons, 4},
   {NULL, 0, 0}
 };
@@ -1308,9 +1314,10 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
 
   /* foo-$global$ is used to access non-automatic storage.  $global$
      is really just a marker and has served its purpose, so eliminate
-     it now so as not to confuse write.c.  */
+     it now so as not to confuse write.c.  Ditto for $PIC_pcrel$0.  */
   if (new_fix->fx_subsy
-      && !strcmp (S_GET_NAME (new_fix->fx_subsy), "$global$"))
+      && (strcmp (S_GET_NAME (new_fix->fx_subsy), "$global$") == 0
+	  || strcmp (S_GET_NAME (new_fix->fx_subsy), "$PIC_pcrel$0") == 0))
     new_fix->fx_subsy = NULL;
 }
 
@@ -4099,9 +4106,8 @@ tc_gen_reloc (section, fixp)
 	case R_PARISC_PLABEL14R:
 	  /* For plabel relocations, the addend of the
 	     relocation should be either 0 (no static link) or 2
-	     (static link required).
-
-	     FIXME: We always assume no static link!
+	     (static link required).  This adjustment is done in
+	     bfd/elf32-hppa.c:elf32_hppa_relocate_section.
 
 	     We also slam a zero addend into the DLT relative relocs;
 	     it doesn't make a lot of sense to use any addend since
@@ -4115,52 +4121,10 @@ tc_gen_reloc (section, fixp)
 	case R_PARISC_PCREL17C:
 	case R_PARISC_DIR17R:
 	case R_PARISC_DIR17F:
-	  {
-	    char *buf = fixp->fx_where + fixp->fx_frag->fr_literal;
-	    int insn = bfd_get_32 (stdoutput, buf);
-
-#ifdef ELF_ARG_RELOC_INSN
-	    /* Store the arg reloc in the instruction.  */
-	    insn = ((insn & ~ 0x1ff8)
-		    | ((hppa_fixp->fx_arg_reloc << 3) & 0x1ff8));
-	    bfd_put_32 (stdoutput, insn, buf);
-	    reloc->addend = fixp->fx_offset;
-#else
-	    /* The high 22 bits of the constant are stored in the
-	       reloc.  The remaining 10 bits can be retrieved from the
-	       instruction.  */
-	    insn = (insn & ~ 0x7f8) | ((fixp->fx_offset & 0x3fc) << 1);
-	    bfd_put_32 (stdoutput, insn, buf);
-	    reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc,
-					   fixp->fx_offset >> 10);
-#endif
-	  }
-	  break;
-
 	case R_PARISC_PCREL21L:
 	case R_PARISC_DIR21L:
-	  {
-	    char *buf = fixp->fx_where + fixp->fx_frag->fr_literal;
-	    int insn = bfd_get_32 (stdoutput, buf);
-
-#ifdef ELF_ARG_RELOC_INSN
-	    /* Store the arg reloc in the instruction.  */
-	    insn = ((insn & ~ 0xff9)
-		    | ((hppa_fixp->fx_arg_reloc >> 9) & 1)
-		    | ((hppa_fixp->fx_arg_reloc << 3) & 0xff8));
-	    bfd_put_32 (stdoutput, insn, buf);
-	    reloc->addend = fixp->fx_offset;
-#else
-	    /* In this case, the instruction stores the high bits, so
-	       the reloc stores the low 22 bits.  */
-	    insn = ((insn & ~ 0xff9)
-		    | ((fixp->fx_offset >> 31) & 1)
-		    | ((fixp->fx_offset >> 19) & 0xff8));
-	    bfd_put_32 (stdoutput, insn, buf);
-	    reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc,
-					   fixp->fx_offset);
-#endif
-	  }
+	  reloc->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc,
+					 fixp->fx_offset);
 	  break;
 #endif
 
@@ -4453,6 +4417,11 @@ md_apply_fix (fixP, valp)
       fixP->fx_offset = *valp;
       return 1;
     }
+#endif
+#ifdef OBJ_ELF
+  if (fixP->fx_r_type == (int) R_PARISC_GNU_VTENTRY
+      || fixP->fx_r_type == (int) R_PARISC_GNU_VTINHERIT)
+    return 1;
 #endif
 
   insn = bfd_get_32 (stdoutput, (unsigned char *) buf);
@@ -6643,12 +6612,13 @@ pa_type_args (symbolP, is_export)
   char *name, c, *p;
   unsigned int temp, arg_reloc;
   pa_symbol_type type = SYMBOL_TYPE_UNKNOWN;
+  asymbol *bfdsym = symbol_get_bfdsym (symbolP);
 
   if (strncasecmp (input_line_pointer, "absolute", 8) == 0)
 
     {
       input_line_pointer += 8;
-      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
+      bfdsym->flags &= ~BSF_FUNCTION;
       S_SET_SEGMENT (symbolP, bfd_abs_section_ptr);
       type = SYMBOL_TYPE_ABSOLUTE;
     }
@@ -6667,50 +6637,58 @@ pa_type_args (symbolP, is_export)
 	    as_tsktsk (_("Using ENTRY rather than CODE in export directive for %s"),
 		       S_GET_NAME (symbolP));
 
-	  symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
+	  bfdsym->flags |= BSF_FUNCTION;
 	  type = SYMBOL_TYPE_ENTRY;
 	}
       else
 	{
-	  symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
+	  bfdsym->flags &= ~BSF_FUNCTION;
 	  type = SYMBOL_TYPE_CODE;
 	}
     }
   else if (strncasecmp (input_line_pointer, "data", 4) == 0)
     {
       input_line_pointer += 4;
-      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
-      symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
+      bfdsym->flags &= ~BSF_FUNCTION;
+      bfdsym->flags |= BSF_OBJECT;
       type = SYMBOL_TYPE_DATA;
     }
   else if ((strncasecmp (input_line_pointer, "entry", 5) == 0))
     {
       input_line_pointer += 5;
-      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
+      bfdsym->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_ENTRY;
     }
   else if (strncasecmp (input_line_pointer, "millicode", 9) == 0)
     {
       input_line_pointer += 9;
-      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
+      bfdsym->flags |= BSF_FUNCTION;
+#ifdef OBJ_ELF
+      {
+	elf_symbol_type *elfsym = (elf_symbol_type *) bfdsym;
+	elfsym->internal_elf_sym.st_info =
+	  ELF_ST_INFO (ELF_ST_BIND (elfsym->internal_elf_sym.st_info),
+		       STT_PARISC_MILLI);
+      }
+#endif
       type = SYMBOL_TYPE_MILLICODE;
     }
   else if (strncasecmp (input_line_pointer, "plabel", 6) == 0)
     {
       input_line_pointer += 6;
-      symbol_get_bfdsym (symbolP)->flags &= ~BSF_FUNCTION;
+      bfdsym->flags &= ~BSF_FUNCTION;
       type = SYMBOL_TYPE_PLABEL;
     }
   else if (strncasecmp (input_line_pointer, "pri_prog", 8) == 0)
     {
       input_line_pointer += 8;
-      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
+      bfdsym->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_PRI_PROG;
     }
   else if (strncasecmp (input_line_pointer, "sec_prog", 8) == 0)
     {
       input_line_pointer += 8;
-      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
+      bfdsym->flags |= BSF_FUNCTION;
       type = SYMBOL_TYPE_SEC_PROG;
     }
 
@@ -6718,7 +6696,7 @@ pa_type_args (symbolP, is_export)
      than BFD understands.  This is how we get this information
      to the SOM BFD backend.  */
 #ifdef obj_set_symbol_type
-  obj_set_symbol_type (symbol_get_bfdsym (symbolP), (int) type);
+  obj_set_symbol_type (bfdsym, (int) type);
 #endif
 
   /* Now that the type of the exported symbol has been handled,
@@ -6766,8 +6744,7 @@ pa_type_args (symbolP, is_export)
 	  input_line_pointer++;
 	  temp = atoi (input_line_pointer);
 #ifdef OBJ_SOM
-	  ((obj_symbol_type *) symbol_get_bfdsym (symbolP))
-	    ->tc_data.ap.hppa_priv_level = temp;
+	  ((obj_symbol_type *) bfdsym)->tc_data.ap.hppa_priv_level = temp;
 #endif
 	  c = get_symbol_end ();
 	  *input_line_pointer = c;
@@ -8368,6 +8345,12 @@ hppa_fix_adjustable (fixp)
     return 0;
 #endif
 
+#ifdef OBJ_ELF
+  if (fixp->fx_r_type == (int) R_PARISC_GNU_VTINHERIT
+      || fixp->fx_r_type ==  (int) R_PARISC_GNU_VTENTRY)
+    return 0;
+#endif
+
   /* Reject reductions of symbols in sym1-sym2 expressions when
      the fixup will occur in a CODE subspace.
 
@@ -8428,7 +8411,8 @@ hppa_fix_adjustable (fixp)
       || hppa_fix->fx_r_field == e_lpsel)
     return 0;
 
-  if (fixp->fx_addsy && S_IS_EXTERNAL (fixp->fx_addsy))
+  if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
+			 || S_IS_WEAK (fixp->fx_addsy)))
     return 0;
 
   /* Reject absolute calls (jumps).  */
@@ -8463,6 +8447,11 @@ hppa_force_relocation (fixp)
       || fixp->fx_r_type == (int) R_HPPA_END_TRY
       || (fixp->fx_addsy != NULL && fixp->fx_subsy != NULL
 	  && (hppa_fixp->segment->flags & SEC_CODE) != 0))
+    return 1;
+#endif
+#ifdef OBJ_ELF
+  if (fixp->fx_r_type == (int) R_PARISC_GNU_VTINHERIT
+      || fixp->fx_r_type == (int) R_PARISC_GNU_VTENTRY)
     return 1;
 #endif
 
@@ -8580,5 +8569,49 @@ pa_end_of_source ()
 {
   if (debug_type == DEBUG_DWARF2)
     dwarf2_finish ();
+}
+
+static void
+pa_vtable_entry (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  struct fix *new_fix;
+
+  new_fix = obj_elf_vtable_entry (0);
+
+  if (new_fix)
+    {
+      struct hppa_fix_struct *hppa_fix = (struct hppa_fix_struct *)
+	obstack_alloc (&notes, sizeof (struct hppa_fix_struct));
+      hppa_fix->fx_r_type = R_HPPA;
+      hppa_fix->fx_r_field = e_fsel;
+      hppa_fix->fx_r_format = 32;
+      hppa_fix->fx_arg_reloc = 0;
+      hppa_fix->segment = now_seg;
+      new_fix->tc_fix_data = (void *) hppa_fix;
+      new_fix->fx_r_type = (int) R_PARISC_GNU_VTENTRY;
+    }
+}
+
+static void
+pa_vtable_inherit (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  struct fix *new_fix;
+
+  new_fix = obj_elf_vtable_inherit (0);
+
+  if (new_fix)
+    {
+      struct hppa_fix_struct *hppa_fix = (struct hppa_fix_struct *)
+	obstack_alloc (&notes, sizeof (struct hppa_fix_struct));
+      hppa_fix->fx_r_type = R_HPPA;
+      hppa_fix->fx_r_field = e_fsel;
+      hppa_fix->fx_r_format = 32;
+      hppa_fix->fx_arg_reloc = 0;
+      hppa_fix->segment = now_seg;
+      new_fix->tc_fix_data = (void *) hppa_fix;
+      new_fix->fx_r_type = (int) R_PARISC_GNU_VTINHERIT;
+    }
 }
 #endif

@@ -99,14 +99,6 @@ extern void pa_check_eof PARAMS ((void));
 #define RELOC_EXPANSION_POSSIBLE
 #define MAX_RELOC_EXPANSION 6
 
-/* FIXME.  More things which are both HPPA and ELF specific.  There is 
-   nowhere to put such things.  */
-#ifdef OBJ_ELF
-#define elf_tc_final_processing	elf_hppa_final_processing
-void elf_hppa_final_processing PARAMS ((void));
-void pa_end_of_source PARAMS ((void));
-#endif
-
 /* The PA needs to parse field selectors in .byte, etc.  */
 
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) \
@@ -154,20 +146,35 @@ int hppa_fix_adjustable PARAMS((struct fix *));
 #endif
 
 #ifdef OBJ_ELF
+/* Handle .type psuedo.  Given a type string of `millicode', set the
+   internal elf symbol type to STT_PARISC_MILLI, and return
+   BSF_FUNCTION for the BFD symbol type.  */
+#define md_elf_symbol_type(name, sym, elf)				\
+  ((strcmp ((name), "millicode") == 0					\
+    || strcmp ((name), "STT_PARISC_MILLI") == 0)			\
+   ? (((elf)->internal_elf_sym.st_info = ELF_ST_INFO			\
+       (ELF_ST_BIND ((elf)->internal_elf_sym.st_info), STT_PARISC_MILLI)\
+       ), BSF_FUNCTION)							\
+   : -1)
+
 #define tc_frob_symbol(sym,punt) \
   { \
     if ((S_GET_SEGMENT (sym) == &bfd_und_section && ! symbol_used_p (sym)) \
 	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
 	    && ! S_IS_EXTERNAL (sym)) \
-	|| strcmp (S_GET_NAME (sym), "$global$") == 0) \
+	|| strcmp (S_GET_NAME (sym), "$global$") == 0 \
+	|| strcmp (S_GET_NAME (sym), "$PIC_pcrel$0") == 0) \
       punt = 1; \
   }
-#endif
+
+#define elf_tc_final_processing	elf_hppa_final_processing
+void elf_hppa_final_processing PARAMS ((void));
+
+#define md_end() pa_end_of_source ()
+void pa_end_of_source PARAMS ((void));
+#endif /* OBJ_ELF */
 
 #define md_operand(x)
-#ifdef OBJ_ELF
-#define md_end() pa_end_of_source ()
-#endif
 
 #define TC_FIX_TYPE PTR
 #define TC_INIT_FIX_DATA(FIXP) ((FIXP)->tc_fix_data = NULL)

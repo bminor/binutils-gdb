@@ -151,6 +151,8 @@ extern void obj_elf_version PARAMS ((int));
 extern void obj_elf_common PARAMS ((int));
 extern void obj_elf_data PARAMS ((int));
 extern void obj_elf_text PARAMS ((int));
+extern struct fix *obj_elf_vtable_inherit PARAMS ((int));
+extern struct fix *obj_elf_vtable_entry PARAMS ((int));
 
 /* BFD wants to write the udata field, which is a no-no for the
    globally defined sections.  */

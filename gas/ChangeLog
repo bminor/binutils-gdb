@@ -1,3 +1,36 @@
+2000-09-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c: (md_apply_fix): Handle vtable relocs.
+	(hppa_force_relocation): Handle vtable relocs.
+	(pa_vtable_entry): New.
+	(pa_vtable_inherit): New.
+	(md_pseudo_table): Add entries for vtable pseudos.
+	(hppa_fix_adjustable): Reject reduction of R_PARISC_GNU_VTINHERIT
+	and R_PARISC_GNU_VTENTRY relocs.  Reject reduction of relocs
+	against weak syms.
+	(tc_gen_reloc): Remove ELF_ARG_RELOC_INSN code.
+	(pa_type_args): Don't call symbol_get_bfdsym multiple times.
+	Set STT_PARISC_MILLICODE for OBJ_ELF when encountering a
+	millicode import.
+	* config/obj-elf.c (obj_elf_type): Allow md_elf_symbol_type to
+	specify a symbol type.
+
+	* config/tc-hppa.h: Reorganize file a little, grouping OBJ_ELF
+	dependent things together.
+	(md_elf_symbol_type): Define.
+
+	* config/tc-hppa.c (fix_new_hppa): Elide "$PIC_pcrel$0" pseudo
+	symbol.
+	* config/tc-hppa.h (tc_frob_symbol): Elide "$PIC_pcrel$0" here too.
+
+	* config/obj-elf.h (obj_elf_vtable_inherit): Declare.
+	(obj_elf_vtable_entry): Declare.
+
+	* config/obj-elf.c (obj_elf_vtable_inherit): Return struct fix *
+	and export function.
+	(obj_elf_vtable_entry): Similarly.
+	(elf_pseudo_table): Fix the damage with a cast.
+
 2000-09-03  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-ia64.c (emit_one_bundle): Stop collecting insns

@@ -75,8 +75,6 @@ static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
 static void obj_elf_visibility PARAMS ((int));
 static void obj_elf_symver PARAMS ((int));
-static void obj_elf_vtable_inherit PARAMS ((int));
-static void obj_elf_vtable_entry PARAMS ((int));
 static void obj_elf_subsection PARAMS ((int));
 static void obj_elf_popsection PARAMS ((int));
 
@@ -113,8 +111,8 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"subsection", obj_elf_subsection, 0},
 
   /* These are GNU extensions to aid in garbage collecting C++ vtables.  */
-  {"vtable_inherit", obj_elf_vtable_inherit, 0},
-  {"vtable_entry", obj_elf_vtable_entry, 0},
+  {"vtable_inherit", (void (*) PARAMS ((int))) &obj_elf_vtable_inherit, 0},
+  {"vtable_entry", (void (*) PARAMS ((int))) &obj_elf_vtable_entry, 0},
 
   /* These are used for dwarf. */
   {"2byte", cons, 2},
@@ -1156,7 +1154,7 @@ obj_elf_symver (ignore)
    to the linker the hierarchy in which a particular table resides.  The
    syntax is ".vtable_inherit CHILDNAME, PARENTNAME".  */
 
-static void
+struct fix *
 obj_elf_vtable_inherit (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
@@ -1189,7 +1187,7 @@ obj_elf_vtable_inherit (ignore)
     {
       as_bad ("expected comma after name in .vtable_inherit");
       ignore_rest_of_line ();
-      return;
+      return NULL;
     }
 
   ++input_line_pointer;
@@ -1216,19 +1214,19 @@ obj_elf_vtable_inherit (ignore)
   demand_empty_rest_of_line ();
 
   if (bad)
-    return;
+    return NULL;
 
   assert (symbol_get_value_expression (csym)->X_op == O_constant);
-  fix_new (symbol_get_frag (csym),
-	   symbol_get_value_expression (csym)->X_add_number, 0, psym, 0, 0,
-	   BFD_RELOC_VTABLE_INHERIT);
+  return fix_new (symbol_get_frag (csym),
+		  symbol_get_value_expression (csym)->X_add_number,
+		  0, psym, 0, 0, BFD_RELOC_VTABLE_INHERIT);
 }
 
 /* This handles the .vtable_entry pseudo-op, which is used to indicate
    to the linker that a vtable slot was used.  The syntax is
    ".vtable_entry tablename, offset".  */
 
-static void
+struct fix *
 obj_elf_vtable_entry (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
@@ -1250,7 +1248,7 @@ obj_elf_vtable_entry (ignore)
     {
       as_bad ("expected comma after name in .vtable_entry");
       ignore_rest_of_line ();
-      return;
+      return NULL;
     }
 
   ++input_line_pointer;
@@ -1259,10 +1257,10 @@ obj_elf_vtable_entry (ignore)
 
   offset = get_absolute_expression ();
 
-  fix_new (frag_now, frag_now_fix (), 0, sym, offset, 0,
-	   BFD_RELOC_VTABLE_ENTRY);
-
   demand_empty_rest_of_line ();
+
+  return fix_new (frag_now, frag_now_fix (), 0, sym, offset, 0,
+		  BFD_RELOC_VTABLE_ENTRY);
 }
 
 void
@@ -1424,10 +1422,12 @@ obj_elf_type (ignore)
   int type;
   const char *typename;
   symbolS *sym;
+  elf_symbol_type *elfsym;
 
   name = input_line_pointer;
   c = get_symbol_end ();
   sym = symbol_find_or_make (name);
+  elfsym = (elf_symbol_type *) symbol_get_bfdsym (sym);
   *input_line_pointer = c;
 
   SKIP_WHITESPACE ();
@@ -1451,6 +1451,10 @@ obj_elf_type (ignore)
   else if (strcmp (typename, "object") == 0
 	   || strcmp (typename, "STT_OBJECT") == 0)
     type = BSF_OBJECT;
+#ifdef md_elf_symbol_type
+  else if ((type = md_elf_symbol_type (typename, sym, elfsym)) != -1)
+    ;
+#endif
   else
     as_bad (_("ignoring unrecognized symbol type \"%s\""), typename);
 
@@ -1459,7 +1463,7 @@ obj_elf_type (ignore)
   if (*input_line_pointer == '"')
     ++input_line_pointer;
 
-  symbol_get_bfdsym (sym)->flags |= type;
+  elfsym->symbol.flags |= type;
 
   demand_empty_rest_of_line ();
 }
