@@ -1,3 +1,12 @@
+Thu Feb 11 16:18:31 1999  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-i386.c: Prototype many functions.
+	(set_intel_syntax): Accept `prefix'/`noprefix' specifiers.
+	(i386_immediate): Remove unused second argument.
+	(i386_intel_operand): Fix i386_is_reg typo.
+	(i386_operand): Use allow_naked_reg.
+	(output_invalid): Make operand int for K&R.
+
 Thu Feb 11 11:21:02 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (EXTRA_as_new_SOURCES): Uncomment--fixed by automake
