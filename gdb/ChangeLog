@@ -1,3 +1,10 @@
+2002-05-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (gdbarch_update_p): Swap out the old architecture
+	before probing for a new one.  Detect errorenous gdbarch_init
+	functions.
+	* gdbarch.c: Regenerate.
+
 2002-05-01  Andrew Cagney  <cagney@redhat.com>
 
 	* config/mn10200/tm-mn10200.h: Include "symfile.h" and "symtab.h".
