@@ -1,3 +1,8 @@
+Mon Apr  8 14:05:07 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* remote-e7000.c: don't append :23 to target port if __WIN32__
+	is defined (it's WinGDB).
+
 Sun Apr  7 22:34:29 1996  Fred Fish  <fnf@cygnus.com>
 
 	From: Miles Bader  <miles@gnu.ai.mit.edu>
