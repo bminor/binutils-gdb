@@ -1,5 +1,8 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* infcall.c (legacy_push_dummy_code): Delete function.
+	(push_dummy_code): Delete call.
+
 	* gdbarch.sh (DEPRECATED_USE_GENERIC_DUMMY_FRAMES): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* blockframe.c (legacy_frame_chain_valid): Simplify by eliminating
