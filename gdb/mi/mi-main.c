@@ -378,7 +378,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 static int
 register_changed_p (int regnum)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
   if (read_relative_register_raw_bytes (regnum, raw_buffer))
     return -1;
@@ -483,8 +483,8 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 static int
 get_register (int regnum, int format)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
+  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char *virtual_buffer = alloca (MAX_REGISTER_VIRTUAL_SIZE);
   int optim;
   static struct ui_stream *stb = NULL;
 
@@ -551,7 +551,6 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
   int regnum;
   int i;
   int numregs;
-  char *buffer;
   LONGEST value;
   char format;
 
@@ -602,14 +601,19 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  && REGISTER_NAME (regnum) != NULL
 	  && *REGISTER_NAME (regnum) != '\000')
 	{
+	  void *buffer;
+	  struct cleanup *old_chain;
+
 	  /* Get the value as a number */
 	  value = parse_and_eval_address (argv[i + 1]);
 	  /* Get the value into an array */
-	  buffer = (unsigned char *) xmalloc (REGISTER_SIZE);
+	  buffer = xmalloc (REGISTER_SIZE);
+	  old_chain = make_cleanup (xfree, buffer);
 	  store_signed_integer (buffer, REGISTER_SIZE, value);
 	  /* Write it down */
 	  write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_RAW_SIZE (regnum));
-	  /* write_register_bytes (REGISTER_BYTE (regnum), buffer, REGISTER_SIZE); */
+	  /* Free the buffer.  */
+	  do_cleanups (old_chain);
 	}
       else
 	{
@@ -973,7 +977,8 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   /* FIXME: ezannoni 2000-02-17 LONGEST could possibly not be big
      enough when using a compiler other than GCC. */
   LONGEST value;
-  unsigned char *buffer;
+  void *buffer;
+  struct cleanup *old_chain;
   long offset = 0;
   int optind = 0;
   char *optarg;
@@ -1025,10 +1030,13 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   /* Get the value as a number */
   value = parse_and_eval_address (argv[3]);
   /* Get the value into an array */
-  buffer = (unsigned char *) xmalloc (word_size);
+  buffer = xmalloc (word_size);
+  old_chain = make_cleanup (xfree, buffer);
   store_signed_integer (buffer, word_size, value);
   /* Write it down to memory */
   write_memory (addr, buffer, word_size);
+  /* Free the buffer.  */
+  do_cleanups (old_chain);
 
   return MI_CMD_DONE;
 }

@@ -1,3 +1,12 @@
+2001-07-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* mi-main.c (register_changed_p, get_register): Use alloca()
+	to allocate space previously allocated via gcc's
+	variable-length array extension.
+	(mi_cmd_data_write_register_values, mi_cmd_data_write_memory):
+	Change type of ``buffer'' to ``void *''.  Don't cast return value
+	from xmalloc().  Add a cleanup to free the xmalloc'd buffer.
+
 2001-07-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c (mi_cmd_data_evaluate_expression): Replace value_ptr
