@@ -1,3 +1,10 @@
+2004-07-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/fnchange.lst: Add remapping for bfd/elf32-cr*.c,
+	bfd/elf32-sh-symbian.c, bfd/elf32-sh64-com.c,
+	sim/testsuite/sim/mips/hilo-hazard-[123].s, and
+	sim/testsuite/sim/mips/fpu64-ps-sb1.s.
+
 2004-07-17  Andrew Cagney  <cagney@gnu.org>
 
 	* NEWS, PROBLEMS: Update for 6.2.

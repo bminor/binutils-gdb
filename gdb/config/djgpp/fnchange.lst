@@ -15,6 +15,9 @@
 @V@/bfd/cpu-m68hc12.c @V@/bfd/cm68hc12.c
 @V@/bfd/efi-app-ia32.c @V@/bfd/efi-ia32-app.c
 @V@/bfd/efi-app-ia64.c @V@/bfd/efi-ia64-app.c
+@V@/bfd/elf32-crx.c @V@/bfd/elf32crx.c
+@V@/bfd/elf32-cris.c @V@/bfd/elf32cris.c
+@V@/bfd/elf32-cr16c.c @V@/bfd/elf32cr16c.c
 @V@/bfd/elf32-fr30.c @V@/bfd/elf32f30.c
 @V@/bfd/elf32-frv.c @V@/bfd/elf32fv.c
 @V@/bfd/elf32-i370.c @V@/bfd/e32i370.c
@@ -26,6 +29,8 @@
 @V@/bfd/elf32-ppc.c @V@/bfd/e32ppc.c
 @V@/bfd/elf32-sh.c @V@/bfd/e32sh.c
 @V@/bfd/elf32-sh64.c @V@/bfd/e32sh64.c
+@V@/bfd/elf32-sh-symbian.c @V@/bfd/e32sh-symbian.c
+@V@/bfd/elf32-sh64-com.c @V@/bfd/e32sh64-com.c
 @V@/bfd/elf64-alpha.c @V@/bfd/e64alphf.c
 @V@/bfd/elf64-sh64.c @V@/bfd/e64sh64.c
 @V@/dejagnu/baseboards/mn10200-cygmon.exp @V@/dejagnu/baseboards/mn10200cygmon.exp
@@ -338,6 +343,7 @@
 @V@/sim/testsuite/sim/arm/misaligned1.ms @V@/sim/testsuite/sim/arm/mis1.ms
 @V@/sim/testsuite/sim/arm/misaligned2.ms @V@/sim/testsuite/sim/arm/mis2.ms
 @V@/sim/testsuite/sim/arm/misaligned3.ms @V@/sim/testsuite/sim/arm/mis3.ms
+@V@/sim/testsuite/sim/mips/fpu64-ps-sb1.s @V@/sim/testsuite/sim/mips/fpu64ps-sb1.s
 @V@/sim/testsuite/sim/frv/interrupts/Ipipe-fr400.cgs @V@/sim/testsuite/sim/frv/interrupts/Ip-fr400.cgs
 @V@/sim/testsuite/sim/frv/interrupts/Ipipe-fr500.cgs @V@/sim/testsuite/sim/frv/interrupts/Ip-fr500.cgs
 @V@/sim/testsuite/sim/frv/interrupts/badalign-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-badalign.cgs
@@ -345,6 +351,9 @@
 @V@/sim/testsuite/sim/frv/interrupts/data_store_error-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-data_store_error.cgs
 @V@/sim/testsuite/sim/frv/interrupts/fp_exception-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-fp_exception.cgs
 @V@/sim/testsuite/sim/frv/interrupts/insn_access_error-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-insn_access_error.cgs
+@V@/sim/testsuite/sim/mips/hilo-hazard-1.s @V@/sim/testsuite/sim/mips/hilo-hz-1.s
+@V@/sim/testsuite/sim/mips/hilo-hazard-2.s @V@/sim/testsuite/sim/mips/hilo-hz-2.s
+@V@/sim/testsuite/sim/mips/hilo-hazard-3.s @V@/sim/testsuite/sim/mips/hilo-hz-3.s
 @V@/sim/testsuite/sim/sh64/compact/ldsl-mach.cgs @V@/sim/testsuite/sim/sh64/compact/mach-ldsl.cgs
 @V@/sim/testsuite/sim/sh64/compact/ldsl-macl.cgs @V@/sim/testsuite/sim/sh64/compact/macl-ldsl.cgs
 @V@/sim/testsuite/sim/sh64/compact/stsl-mach.cgs @V@/sim/testsuite/sim/sh64/compact/mach-stsl.cgs
