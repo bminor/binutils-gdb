@@ -1,3 +1,7 @@
+2000-08-08  Tom Tromey  <tromey@cygnus.com>
+
+	* jv-valprint.c (java_value_print): Only print non-null Strings.
+
 2000-08-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* core-sol2.c (fetch_core_registers): Protoize; add prefatory

@@ -198,9 +198,10 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
   if (TYPE_CODE (type) == TYPE_CODE_PTR
       && TYPE_TARGET_TYPE (type)
       && TYPE_NAME (TYPE_TARGET_TYPE (type))
-    && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "java.lang.String") == 0
+      && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "java.lang.String") == 0
       && (format == 0 || format == 's')
-      && address != 0)
+      && address != 0
+      && value_as_pointer (val) != 0)
     {
       value_ptr data_val;
       CORE_ADDR data;
