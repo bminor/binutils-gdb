@@ -374,9 +374,9 @@ subseg_set (seg, subseg)	/* begin assembly for a new sub-segment */
 #else /* BFD_ASSEMBLER */
 
 segT
-subseg_new (segname, subseg)
+subseg_get (segname, force_new)
      const char *segname;
-     subsegT subseg;
+     int force_new;
 {
   segT secptr;
   segment_info_type *seginfo;
@@ -384,13 +384,17 @@ subseg_new (segname, subseg)
 			      ? bfd_get_section_name (stdoutput, now_seg)
 			      : 0);
 
-  if (now_seg_name
+  if (!force_new
+      && now_seg_name
       && (now_seg_name == segname
-	  || !strcmp (now_seg_name, segname))
-      && subseg == now_subseg)
+	  || !strcmp (now_seg_name, segname)))
     return now_seg;
 
-  secptr = bfd_make_section_old_way (stdoutput, segname);
+  if (!force_new)
+    secptr = bfd_make_section_old_way (stdoutput, segname);
+  else
+    secptr = bfd_make_section_anyway (stdoutput, segname);
+
   seginfo = seg_info (secptr);
   if (! seginfo)
     {
@@ -400,16 +404,48 @@ subseg_new (segname, subseg)
       seginfo->fix_tail = 0;
       seginfo->bfd_section = secptr;
       bfd_set_section_userdata (stdoutput, secptr, (char *) seginfo);
-      subseg_set_rest (secptr, subseg);
-      seginfo->frchainP = frchain_now;
+      seginfo->frchainP = 0;
       seginfo->lineno_list_head = seginfo->lineno_list_tail = 0;
       seginfo->sym = 0;
       seginfo->dot = 0;
       seginfo->hadone = 0;
       seginfo->user_stuff = 0;
+      seginfo->stabu.stab_string_size = 0;
     }
-  else
-    subseg_set_rest (secptr, subseg);
+  return secptr;
+}
+
+segT
+subseg_new (segname, subseg)
+     const char *segname;
+     subsegT subseg;
+{
+  segT secptr;
+  segment_info_type *seginfo;
+
+  secptr = subseg_get (segname, 0);
+  subseg_set_rest (secptr, subseg);
+  seginfo = seg_info (secptr);
+  if (! seginfo->frchainP)
+    seginfo->frchainP = frchain_now;
+  return secptr;
+}
+
+/* Like subseg_new, except a new section is always created, even if
+   a section with that name already exists.  */
+segT
+subseg_force_new (segname, subseg)
+     const char *segname;
+     subsegT subseg;
+{
+  segT secptr;
+  segment_info_type *seginfo;
+
+  secptr = subseg_get (segname, 1);
+  subseg_set_rest (secptr, subseg);
+  seginfo = seg_info (secptr);
+  if (! seginfo->frchainP)
+    seginfo->frchainP = frchain_now;
   return secptr;
 }
 
@@ -420,6 +456,25 @@ subseg_set (secptr, subseg)
 {
   if (! (secptr == now_seg && subseg == now_subseg))
     subseg_set_rest (secptr, subseg);
+}
+
+symbolS *
+section_symbol (sec)
+     segT sec;
+{
+  segment_info_type *seginfo = seg_info (sec);
+
+  if (seginfo == 0)
+    abort ();
+  if (seginfo->sym)
+    return seginfo->sym;
+  seginfo->sym = symbol_find (sec->name);
+  if (!seginfo->sym)
+    {
+      seginfo->sym = symbol_make (sec->name);
+      seginfo->sym->bsym = sec->symbol;
+    }
+  return seginfo->sym;
 }
 
 #endif /* BFD_ASSEMBLER */
