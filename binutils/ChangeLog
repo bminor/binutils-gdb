@@ -1,3 +1,7 @@
+2003-09-09  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* MAINTAINERS: Update my e-mail address.
+
 2003-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Make it clear what should be done with patches to
