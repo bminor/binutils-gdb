@@ -1,3 +1,9 @@
+2000-05-26  Nick Clifton  <nickc@cygnus.com>
+
+	* gprof.c (main): When calling getopt_long indicate that the 'd'
+	switch takes an optional argument, whereas the 'D' switch takes no
+	argument at all.
+
 2000-05-26  Alan Modra  <alan@linuxcare.com.au>
 
 	* dep-in.sed: Copy from ../binutils.

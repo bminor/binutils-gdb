@@ -179,7 +179,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
   xmalloc_set_program_name (whoami);
 
   while ((ch = getopt_long (argc, argv,
-	"aA::bBcCdD::e:E:f:F:hiI:J::k:lLm:n::N::O:p::P::q::Q::st:Tvw:xyzZ::",
+	"aA::bBcCd::De:E:f:F:hiI:J::k:lLm:n::N::O:p::P::q::Q::st:Tvw:xyzZ::",
 			    long_options, 0))
 	 != EOF)
     {
