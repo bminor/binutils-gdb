@@ -1,3 +1,8 @@
+2000-04-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/djgpp/fnchange.lst (ia64-linux-nat.c): Map to
+	ia64linux-nat.c.
+
 Wed Apr 26 13:50:35 2000  Philippe De Muyter  <phdm@macqel.be>
 
 	* ax-gdb.c (agent_command): Remove now useless cast of
