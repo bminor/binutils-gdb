@@ -6662,7 +6662,8 @@ elf_link_input_bfd (finfo, input_bfd)
 		      if (sec != NULL && elf_discarded_section (sec))
 			{
 #if BFD_VERSION_DATE < 20031005
-			  if ((o->flags & SEC_DEBUGGING) != 0)
+			  if ((o->flags & SEC_DEBUGGING) != 0
+			      || (sec->flags & SEC_LINK_ONCE) != 0)
 			    {
 #if BFD_VERSION_DATE > 20021005
 			      (*finfo->info->callbacks->warning)

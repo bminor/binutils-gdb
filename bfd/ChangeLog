@@ -1,5 +1,10 @@
 2002-03-26  H.J. Lu  (hjl@gnu.org)
 
+	* elflink.h (elf_link_input_bfd): Revert the last change since
+	the gcc exception handling isn't fixed yet.
+
+2002-03-26  H.J. Lu  (hjl@gnu.org)
+
 	* elflink.h (elf_link_input_bfd): Complain about relocations
 	against local symbols in discarded sections.
 
