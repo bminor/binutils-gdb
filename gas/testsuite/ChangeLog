@@ -1,3 +1,12 @@
+Tue Dec 16 22:19:25 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	* gas/mips/lb-xgot.d, gas/mips/rol.d, gas/mips/jal-svr4pic.d,
+	gas/mips/jal-xgot.d: Add assembler option to select a specific
+	target chip, the R3000.
+	* gas/mips/lb-xgot-ilocks.d: New test, specifically selecting
+	R3900.
+	* gas/mips/mips.exp: Run it.
+
 start-sanitize-r5900
 Tue Dec 16 12:54:30 1997  Jeffrey A Law  (law@cygnus.com)
 
