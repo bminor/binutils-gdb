@@ -15,15 +15,23 @@ struct internal_filehdr
  *	F_EXEC		file is executable (no unresolved external references)
  *	F_LNNO		line numbers stripped from file
  *	F_LSYMS		local symbols stripped from file
- *	F_AR32WR	file has byte ordering of an AR32WR machine (e.g. vax)
+ *	F_AR16WR	file is 16-bit little-endian
+ *	F_AR32WR	file is 32-bit little-endian
+ *	F_AR32W		file is 32-bit big-endian
+ *	F_DYNLOAD	rs/6000 aix: dynamically loadable w/imports & exports
+ *	F_SHROBJ	rs/6000 aix: file is a shared object
  */
 
-#define F_RELFLG	(0x0001)
-#define F_EXEC		(0x0002)
-#define F_LNNO		(0x0004)
-#define F_LSYMS		(0x0008)
-#define F_AR32WR	(0x0010)
-#define F_AR32W     0x200
+#define	F_RELFLG	(0x0001)
+#define	F_EXEC		(0x0002)
+#define	F_LNNO		(0x0004)
+#define	F_LSYMS		(0x0008)
+#define	F_AR16WR	(0x0080)
+#define	F_AR32WR	(0x0100)
+#define	F_AR32W     	(0x0200)
+#define	F_DYNLOAD	(0x1000)
+#define	F_SHROBJ	(0x2000)
+
 /********************** AOUT "OPTIONAL HEADER" **********************/
 struct internal_aouthdr {
 	short		magic;	/* type of file				*/
@@ -34,7 +42,22 @@ struct internal_aouthdr {
 	unsigned long	entry;	/* entry pt.				*/
 	unsigned long	text_start;	/* base of text used for this file */
 	unsigned long	data_start;	/* base of data used for this file */
+
+	/* i960 stuff */
 	unsigned long	tagentries;	/* number of tag entries to follow */
+
+	/* RS/6000 stuff */
+        ulong   o_toc;          /* address of TOC                       */
+        short   o_snentry;      /* section number for entry point       */
+        short   o_sntext;       /* section number for text              */
+        short   o_sndata;       /* section number for data              */
+        short   o_sntoc;        /* section number for toc               */
+        short   o_snloader;     /* section number for loader section    */
+        short   o_snbss;        /* section number for bss               */
+        short   o_algntext;     /* max alignment for text               */
+        short   o_algndata;     /* max alignment for data               */
+        short   o_modtype;      /* Module type field, 1R,RE,RO          */
+        ulong   o_maxstack;     /* max stack size allowed.              */
 } ;
 
 /********************** STORAGE CLASSES **********************/
@@ -81,6 +104,28 @@ struct internal_aouthdr {
 #define C_DEFINE	110	/* Preprocessor #define		*/
 #define C_PRAGMA	111	/* Advice to compiler or linker	*/
 #define C_SEGMENT	112	/* 80960 segment name		*/
+
+	/* New storage classes for RS/6000 */
+#define C_HIDEXT        107     /* Un-named external symbol */
+#define C_BINCL         108     /* Marks beginning of include file */
+#define C_EINCL         109     /* Marks ending of include file */
+
+	/* storage classes for stab symbols for RS/6000 */
+#define C_GSYM          0x80
+#define C_LSYM          0x81
+#define C_PSYM          0x82
+#define C_RSYM          0x83
+#define C_RPSYM         0x84
+#define C_STSYM         0x85
+#define C_TCSYM         0x86
+#define C_BCOMM         0x87
+#define C_ECOML         0x88
+#define C_ECOMM         0x89
+#define C_DECL          0x8c
+#define C_ENTRY         0x8d
+#define C_FUN           0x8e
+#define C_BSTAT         0x8f
+#define C_ESTAT         0x90
 
 /********************** SECTION HEADER **********************/
 struct internal_scnhdr {
@@ -234,6 +279,7 @@ union internal_auxent
       long l;			/* str, un, or enum tag indx */
       struct coff_ptr_struct *p;
     } x_tagndx;
+
     union {
       struct {
 	unsigned short x_lnno;	/* declaration line number */
@@ -241,22 +287,21 @@ union internal_auxent
       } x_lnsz;
       long x_fsize;		/* size of function */
     } x_misc;
-    union {
 
+    union {
       struct {			/* if ISFCN, tag, or .bb */
 	long x_lnnoptr;		/* ptr to fcn line # */
 	union { 		/* entry ndx past block end */
 	  long  l;
 	  struct coff_ptr_struct *p;
-
 	} x_endndx;
-
-
       } x_fcn;
+
       struct {			/* if ISARY, up to 4 dimen. */
 	unsigned short x_dimen[DIMNUM];
       } x_ary;
     } x_fcnary;
+
     unsigned short x_tvndx;	/* tv index */
   } x_sym;
 
@@ -278,7 +323,22 @@ union internal_auxent
     long		x_tvfill; /* tv fill value */
     unsigned short	x_tvlen; /* length of .tv */
     unsigned short	x_tvran[2]; /* tv range */
-  } x_tv;			/* info about .tv section (in auxent of symbol .tv)) */
+  } x_tv;		/* info about .tv section (in auxent of symbol .tv)) */
+
+  /******************************************
+   * RS/6000-specific auxent - last auxent for every external symbol
+   ******************************************/
+  struct {
+    long            x_scnlen;       /* csect length */
+    long            x_parmhash;     /* parm type hash index */
+    unsigned short  x_snhash;       /* sect num with parm hash */
+    unsigned char   x_smtyp;        /* symbol align and type */
+				    /* 0-4 - Log 2 of alignment */
+				    /* 5-7 - symbol type */
+    unsigned char   x_smclas;       /* storage mapping class */
+    long            x_stab;         /* dbx stab info index */
+    unsigned short  x_snstab;       /* sect num with dbx stab */
+  } x_csect; /* csect definition information */
 
   /******************************************
    *  I960-specific *2nd* aux. entry formats
@@ -298,7 +358,6 @@ union internal_auxent
     char 	x_idstring[20];	/* producer identity string */
   } x_ident;			/* Producer ident info */
 
-
 };
 
 /********************** RELOCATION DIRECTIVES **********************/
@@ -307,6 +366,11 @@ struct internal_reloc {
 	long r_vaddr;		/* Virtual address of reference */
 	long r_symndx;		/* Index into symbol table	*/
 	unsigned short r_type;	/* Relocation type		*/
+
+#if AIXCOFF_C
+	unsigned char  r_size;
+#endif
+
 #if M88
 	unsigned short r_offset;
 #endif

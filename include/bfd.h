@@ -204,7 +204,8 @@ typedef enum bfd_error {
 	      no_more_archived_files, malformed_archive,
 	      symbol_not_found, file_not_recognized,
 	      file_ambiguously_recognized, no_contents,
-		bfd_error_nonrepresentable_section,
+	      bfd_error_nonrepresentable_section,
+	      no_debug_section,
 	      invalid_error_code} bfd_ec;
 
 extern bfd_ec bfd_error;
@@ -742,8 +743,8 @@ who's name matches that provided, otherwise NULL. @xref{Sections}, for more info
  bfd_make_section
 This function creates a new empty section called @var{name} and attaches it
 to the end of the chain of sections for the BFD supplied. An attempt to
-create a section with a name which is already in use, returns the old
-section by that name instead.
+create a section with a name which is already in use, returns NULL without
+changing the section chain.
 
 Possible errors are:
 @table @code
@@ -906,12 +907,13 @@ enum bfd_architecture
   bfd_arch_ns32k,     /* National Semiconductor 32xxx */
   bfd_arch_tahoe,     /* CCI/Harris Tahoe */
   bfd_arch_i860,      /* Intel 860 */
-  bfd_arch_romp,      /* IBM ROMP RS/6000 */
+  bfd_arch_romp,      /* IBM ROMP PC/RT */
   bfd_arch_alliant,   /* Alliant */
   bfd_arch_convex,    /* Convex */
   bfd_arch_m88k,      /* Motorola 88xxx */
   bfd_arch_pyramid,   /* Pyramid Technology */
   bfd_arch_h8300,     /* Hitachi H8/300 */
+  bfd_arch_rs6000,    /* IBM RS/6000 */
   bfd_arch_last
   };
 

@@ -55,6 +55,7 @@ enum machine_type {
   /* skip a bunch so we don't run into any of sun's numbers */
   M_386 = 100,
   M_29K = 101,
+  M_RS6000 = 102,	/* IBM RS/6000 */
   /* HP/BSD formats */
   M_HP200 = 200,	/* hp200 (68010) BSD binary */
   M_HP300 = 300,	/* hp300 (68020+68881) BSD binary */
@@ -252,7 +253,9 @@ struct reloc_info_extended
 # define	r_symbolnum  r_index
   unsigned	r_extern:1;
   unsigned	:2;
-  enum reloc_type r_type:5;
+/*  RS/6000 compiler does not support enum bitfield 
+  enum reloc_type r_type:5; */
+  enum reloc_type r_type;
   long int	r_addend;
 };
 
