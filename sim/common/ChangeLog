@@ -1,3 +1,18 @@
+Sun Mar 22 15:09:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-device.h (hw_attach_address_callback,
+ 	hw_detach_address_callback): Attach to a single space not a space
+ 	mask. Clarify interpretation of SPACE:ADDR parameters.
+
+	* hw-base.c (passthrough_hw_attach_address,
+ 	passthrough_hw_detach_address): Update.
+	* dv-core.c (dv_core_attach_address_callback): Ditto.
+	* dv-pal.c (hw_pal_attach_address): Ditto.
+
+Thu Mar 19 00:41:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-options.h: Document additional CPU arg to OPTION_HANDLER.
+
 Wed Mar 18 14:13:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Make-common.in (SIM_HW_OBJS, SIM_HW_SRC, SIM_DV_OBJS): Define.
