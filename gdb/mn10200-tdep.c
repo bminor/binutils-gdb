@@ -532,6 +532,7 @@ mn10200_push_arguments (nargs, args, sp, struct_return, struct_addr)
   int argnum = 0;
   int len = 0;
   int stack_offset = 0;
+  int regsused = struct_return ? 1 : 0;
 
   /* This should be a nop, but align the stack just in case something
      went wrong.  Stacks are two byte aligned on the mn10200.  */
@@ -542,19 +543,45 @@ mn10200_push_arguments (nargs, args, sp, struct_return, struct_addr)
      XXX This doesn't appear to handle pass-by-invisible reference
      arguments.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 1) & ~1);
+    {
+      int arg_length = (TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 1) & ~1;
+
+      /* If we've used all argument registers, then this argument is
+	 pushed.  */
+      if (regsused >= 2 || arg_length > 4)
+	{
+	  regsused = 2;
+	  len += arg_length;
+	}
+      /* We know we've got some arg register space left.  If this argument
+	 will fit entirely in regs, then put it there.  */
+      else if (arg_length <= 2
+	       || TYPE_CODE (VALUE_TYPE (args[argnum])) == TYPE_CODE_PTR) 
+	{
+	  regsused++;
+	}
+      else if (regsused == 0)
+	{
+	  regsused = 2;
+	}
+      else
+	{
+	  regsused = 2;
+	  len += arg_length;
+	}
+    }
 
   /* Allocate stack space.  */
   sp -= len;
 
+  regsused = struct_return ? 1 : 0;
   /* Push all arguments onto the stack. */
   for (argnum = 0; argnum < nargs; argnum++)
     {
       int len;
       char *val;
 
-      /* XXX Check this.  What about UNIONS?  Size check looks
-	 wrong too.  */
+      /* XXX Check this.  What about UNIONS?  */
       if (TYPE_CODE (VALUE_TYPE (*args)) == TYPE_CODE_STRUCT
 	  && TYPE_LENGTH (VALUE_TYPE (*args)) > 8)
 	{
@@ -568,14 +595,30 @@ mn10200_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	  val = (char *)VALUE_CONTENTS (*args);
 	}
 
-      while (len > 0)
+      if (regsused < 2
+	  && (len <= 2
+	      || TYPE_CODE (VALUE_TYPE (*args)) == TYPE_CODE_PTR))
 	{
-	  /* XXX This looks wrong; we can have one and two byte args.  */
-	  write_memory (sp + stack_offset, val, 2);
+	  write_register (regsused, extract_unsigned_integer (val, 4));
+	  regsused++;
+	}
+      else if (regsused == 0 && len == 4)
+	{
+	  write_register (regsused, extract_unsigned_integer (val, 2));
+	  write_register (regsused + 1, extract_unsigned_integer (val + 2, 2));
+	  regsused = 2;
+	}
+      else
+	{
+	  regsused = 2;
+	  while (len > 0)
+	    {
+	      write_memory (sp + stack_offset, val, 2);
 
-	  len -= 2;
-	  val += 2;
-	  stack_offset += 2;
+	      len -= 2;
+	      val += 2;
+	      stack_offset += 2;
+	    }
 	}
       args++;
     }
@@ -608,19 +651,9 @@ mn10200_store_struct_return (addr, sp)
      CORE_ADDR addr;
      CORE_ADDR sp;
 {
-  unsigned char buf1[4];
-  unsigned char buf2[4];
-
-  /* Get the saved PC and hold onto it.  */
-  target_read_memory (sp, buf1, 4);
-
-  /* Now push the structure value address.  */
-  store_unsigned_integer (buf2, 4, addr);
-  write_memory (sp, buf2, 4);
-
-  /* Now push the saved PC back onto the stack.  */
-  target_write_memory (sp - 4, buf1, 4);
-  return sp - 4;
+  /* The structure return address is passed as the first argument.  */
+  write_register (0, addr);
+  return sp;
 }
  
 /* Function: frame_saved_pc 

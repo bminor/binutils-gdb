@@ -1,3 +1,19 @@
+Wed Mar  5 12:59:27 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10200-tdep.c (mn10200_push_arguments): Handle new calling
+	conventions.
+	(mn10200_store_struct_return): Likewise.
+
+Tue Mar  4 10:31:02 1997  Mark Alexander  <marka@cygnus.com>
+
+	* mips-tdep.c (mips_fetch_instruction): New function; replace
+	common code throughout with calls to it.
+	(mips_find_saved_regs): Examine MIPS16 entry instruction to determine
+	correct saved addresses of $s0 and $s1.
+	(mips_find_saved_regs, mips16_heuristic_proc_desc):  Use MIPS_REGSIZE
+	instead of hardcoded 4.
+	(mips16_skip_prologue): Handle extended instructions correctly.
+
 Mon Mar  3 12:29:20 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* defs.h (LONGEST): Move #ifndef LONGEST to outside.
