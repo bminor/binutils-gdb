@@ -18,8 +18,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-   USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Work in progress */
 
@@ -332,19 +331,11 @@ _initialize_gdb_events (void)
   queue_event_hooks.tracepoint_modify = queue_tracepoint_modify;
   queue_event_hooks.architecture_changed = queue_architecture_changed;
 
-  c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,
-		   (char *) (&gdb_events_debug), "Set event debugging.\n\
-When non-zero, event/notify debugging is enabled.", &setlist);
-  deprecate_cmd (c, "set debug event");
-  deprecate_cmd (deprecated_add_show_from_set (c, &showlist),
-		 "show debug event");
-
   deprecated_add_show_from_set (add_set_cmd ("event",
 					     class_maintenance,
 					     var_zinteger,
 					     (char *) (&gdb_events_debug),
 					     "Set event debugging.\n\
-When non-zero, event/notify debugging is enabled.", 
-					     &setdebuglist),
+When non-zero, event/notify debugging is enabled.", &setdebuglist),
 				&showdebuglist);
 }

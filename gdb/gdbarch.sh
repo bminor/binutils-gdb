@@ -2224,15 +2224,6 @@ _initialize_gdbarch (void)
 		  "Set architecture debugging.\\n\\
 When non-zero, architecture debugging is enabled.", &setdebuglist),
      &showdebuglist);
-  c = add_set_cmd ("archdebug",
-		   class_maintenance,
-		   var_zinteger,
-		   (char *)&gdbarch_debug,
-		   "Set architecture debugging.\\n\\
-When non-zero, architecture debugging is enabled.", &setlist);
-
-  deprecate_cmd (c, "set debug arch");
-  deprecate_cmd (deprecated_add_show_from_set (c, &showlist), "show debug arch");
 }
 EOF
 

@@ -3,6 +3,19 @@
 
 *** Changes since GDB 6.3
 
+* Deprecated commands removed
+
+The following commands, that were deprecated in 2000, have been
+removed:
+
+  Command				Replacement
+  set|show arm disassembly-flavor	set|show arm disassembler
+  othernames				set arm disassembler
+  set|show remotedebug			set|show debug remote
+  set|show archdebug			set|show debug arch
+  set|show eventdebug			set|show debug event
+  regs					info registers
+
 * New BSD user-level threads support
 
 It is now possible to debug programs using the user-level threads

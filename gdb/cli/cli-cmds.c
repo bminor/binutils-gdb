@@ -1182,15 +1182,6 @@ This value is used to set the speed of the serial port when debugging\n\
 using remote targets.", &setlist),
 		     &showlist);
 
-  c = add_set_cmd ("remotedebug", no_class, var_zinteger,
-		   (char *) &remote_debug,
-		   "Set debugging of remote protocol.\n\
-When enabled, each packet sent or received with the remote target\n\
-is displayed.", &setlist);
-  deprecate_cmd (c, "set debug remote");
-  deprecate_cmd (deprecated_add_show_from_set (c, &showlist),
-		 "show debug remote");
-
   deprecated_add_show_from_set
     (add_set_cmd ("remote", no_class, var_zinteger,
 		  (char *) &remote_debug,

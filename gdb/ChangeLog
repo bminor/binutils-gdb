@@ -1,5 +1,21 @@
 2005-02-09  Andrew Cagney  <cagney@gnu.org>
 
+	* NEWS: Mention removed commands.
+	* m68hc11-tdep.c (show_regs): Delete, unused.
+	(_initialize_m68hc11_tdep): Delete deprecated "regs" command.
+	* gdb-events.sh: Delete deprecated "set eventdebug" and "show
+	eventdebug" commands.
+	* gdb-events.c: Regenerate.
+	* gdbarch.sh: Delete deprecated "set archdebug" and "show
+	archdebug" commands.
+	* gdbarch.c: Regenerate.
+	* cli/cli-cmds.c (init_cli_cmds): Delete deprecated "set
+	remotedebug" and "show remotedebug".
+	* arm-tdep.c (_initialize_arm_tdep): Delete deprecated "set arm
+	disassembly-flavor", "show arm disassembly-flavor", and
+	"othernames" commands.
+	(arm_othernames): Delete unused function.
+
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call)
 	(convert_code_addr_to_desc_addr): Convert any function code
 	address to the corresponding function's descriptor.

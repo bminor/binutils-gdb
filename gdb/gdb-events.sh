@@ -1,7 +1,9 @@
 #!/bin/sh
 
 # User Interface Events.
-# Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+#
+# Copyright 1999, 2000, 2001, 2002, 2004, 2005 Free Software
+# Foundation, Inc.
 #
 # Contributed by Cygnus Solutions.
 #
@@ -57,7 +59,8 @@ copyright ()
   cat <<EOF
 /* User Interface Events.
 
-   Copyright 1999, 2001, 2002, 2004 Free Software Foundation, Inc.
+   Copyright 1999, 2001, 2002, 2004, 2005 Free Software Foundation,
+   Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -470,13 +473,6 @@ do
   esac
 done
 cat <<EOF
-
-  c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,
-		   (char *) (&gdb_events_debug), "Set event debugging.\n\\
-When non-zero, event/notify debugging is enabled.", &setlist);
-  deprecate_cmd (c, "set debug event");
-  deprecate_cmd (deprecated_add_show_from_set (c, &showlist),
-                 "show debug event");
 
   deprecated_add_show_from_set (add_set_cmd ("event",
 					     class_maintenance,

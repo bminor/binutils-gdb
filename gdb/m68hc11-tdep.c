@@ -1157,14 +1157,6 @@ m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     }
 }
 
-/* Same as 'info reg' but prints the registers in a different way.  */
-static void
-show_regs (char *args, int from_tty)
-{
-  m68hc11_print_registers_info (current_gdbarch, gdb_stdout,
-                                get_current_frame (), -1, 1);
-}
-
 static CORE_ADDR
 m68hc11_stack_align (CORE_ADDR addr)
 {
@@ -1574,9 +1566,5 @@ _initialize_m68hc11_tdep (void)
   register_gdbarch_init (bfd_arch_m68hc11, m68hc11_gdbarch_init);
   register_gdbarch_init (bfd_arch_m68hc12, m68hc11_gdbarch_init);
   m68hc11_init_reggroups ();
-
-  deprecate_cmd (add_com ("regs", class_vars, show_regs,
-                          "Print all registers"),
-                 "info registers");
 } 
 

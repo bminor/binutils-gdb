@@ -2461,19 +2461,6 @@ set_disassembly_style (void)
   set_arm_regname_option (current);
 }
 
-/* arm_othernames implements the "othernames" command.  This is deprecated
-   by the "set arm disassembly" command.  */
-
-static void
-arm_othernames (char *names, int n)
-{
-  /* Circle through the various flavors.  */
-  current_option = (current_option + 1) % num_disassembly_options;
-
-  disassembly_style = valid_disassembly_styles[current_option];
-  set_disassembly_style ();
-}
-
 /* Test whether the coff symbol specific value corresponds to a Thumb
    function.  */
 
@@ -2892,20 +2879,6 @@ _initialize_arm_tdep (void)
   helptext = ui_file_xstrdup (stb, &length);
   ui_file_delete (stb);
 
-  /* Add the deprecated disassembly-flavor command.  */
-  add_setshow_enum_cmd("disassembly-flavor", no_class,
-		       valid_disassembly_styles,
-		       &disassembly_style,
-		       _("Set the disassembly style."),
-		       _("Show the disassembly style."),
-		       helptext,
-		       _("The disassembly style is \"%s\"."),
-		       set_disassembly_style_sfunc, NULL,
-		       &setlist, &showlist, &new_set, &new_show);
-  deprecate_cmd (new_set, "set arm disassembly");
-  deprecate_cmd (new_show, "show arm disassembly");
-
-  /* And now add the new interface.  */
   add_setshow_enum_cmd("disassembler", no_class,
 		       valid_disassembly_styles, &disassembly_style,
 		       _("Set the disassembly style."),
@@ -2935,11 +2908,6 @@ vfp - VFP co-processor."),
 			_("The floating point type is \"%s\"."),
 			set_fp_model_sfunc, show_fp_model,
 			&setarmcmdlist, &showarmcmdlist, NULL, NULL);
-
-  /* Add the deprecated "othernames" command.  */
-  deprecate_cmd (add_com ("othernames", class_obscure, arm_othernames,
-			  _("Switch to the next set of register names.")),
-		 "set arm disassembly");
 
   /* Debugging flag.  */
   add_setshow_boolean_cmd ("arm", class_maintenance, &arm_debug,
