@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-//#define DEBUGIFY
+/*#define DEBUGIFY*/
 #include "debugify.h"
 
 #define RMT_DBG(x) if (remote_debug) printf_unfiltered x
@@ -159,16 +159,13 @@ static void win_mem_get (unsigned char *buf, int offset, int len)
     DBG(("win_mem_get(&buf=<x%x> offset=<x%x> len=<%d>)\n", buf, offset, len));
     if (remote_debug!=last_remote_debug && pwin_remote_debug)
     {
-	//DBG(("calling pwin_remote_debug\n"));
 	pwin_remote_debug(remote_debug);
         last_remote_debug=remote_debug;
     }
     if (pwin_mem_get) 
     {
-	//DBG(("calling pwin_mem_get\n"));
         pwin_mem_get (buf, offset, len);
     }
-    //DBG(("leaving win_mem_get; buf=<%s>\n", buf));
 }
 
 static void win_mem_put (unsigned char *buf, int offset, int len)
@@ -240,8 +237,6 @@ e7000pc_init ()
       RMT_DBG(("e7000pc_init: looking for board's signature, try=%d\n", try));
 
       val = GET_WORD (ready);
-
-      //DBG(("e7000pc_init: GET_WORD returns x%x\n", val));
 
       if (val == (0xaaa0  | sigs[try].sw))
 	{
@@ -335,14 +330,12 @@ dosasync_read (fd, buf, len, timeout)
   while (i < len)
     {
       int ch = e7000_get();
-      //DBG(("%d: e7000_get gotta x%x\n", i, ch\n"));
       
       /* While there's room in the buffer, and we've already
        * read the stuff in, suck it over */
       if (ch != -1) 
 	{
 	  buf[i++] = ch;
-	  //DBG(("e7000_get got x%x; before loop2: len=x%x, pbuf_index=x%x, pbuf_size=x%x\n", ch, len, pbuf_index, pbuf_size));
 	  while (i < len && pbuf_index < pbuf_size )
 	    {
 	      ch = e7000_get();
@@ -365,7 +358,6 @@ dosasync_read (fd, buf, len, timeout)
 	  return i;
 	}
     }
-  //DBG(("Yay! read x%x chars\n", len));
   return len;
 }
 
@@ -490,14 +482,12 @@ e7000pc_open (scb, name)
         printf_filtered("Failed to initialize dll for e7000pc support.\n" );
         return -1;
     }
-  //DBG(("calling win_load_e7kpc\n"));
   if (win_load_e7kpc () != 0)
     {
       errno = ENOENT;
       return -1;
     }
 #endif /* _WIN32 */
-  //DBG(("calling e7000pc_init\n"));
   scb->fd = e7000pc_init ();
 
   if (!scb->fd)

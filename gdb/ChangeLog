@@ -1,4 +1,8 @@
 
+Thu Feb 13 18:18:18 1997  Dawn Perchik  <dawn@cygnus.com>
+
+	* remote-e7000.c, ser-e7kpc.c, serial.c: Remove // comments.
+
 Wed Feb 12 15:58:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* debugify.c, debugify.h: Make safe for non-ansi compilers.
