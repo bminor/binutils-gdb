@@ -409,7 +409,10 @@ bfd_elf_local_sym_name (bfd *abfd, Elf_Internal_Sym *isym)
 {
   unsigned int iname = isym->st_name;
   unsigned int shindex = elf_tdata (abfd)->symtab_hdr.sh_link;
-  if (iname == 0 && ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+  if (iname == 0 && ELF_ST_TYPE (isym->st_info) == STT_SECTION
+      /* Check for a bogus st_shndx to avoid crashing.  */
+      && isym->st_shndx < elf_numsections (abfd)
+      && !(isym->st_shndx >= SHN_LORESERVE && isym->st_shndx <= SHN_HIRESERVE))
     {
       iname = elf_elfsections (abfd)[isym->st_shndx]->sh_name;
       shindex = elf_elfheader (abfd)->e_shstrndx;
