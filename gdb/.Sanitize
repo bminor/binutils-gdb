@@ -334,31 +334,11 @@ xmodem.c
 xmodem.h
 z8k-tdep.c
 
-
 # Things which are explicitly *not* kept, for now.
-# energize		- Part of Lucid support.
-# energize-patches	- Part of Lucid support.
-# energize.c		- Part of Lucid support.
-# energize.h		- Part of Lucid support.
-# remote-sa.sparc.c	- Remote target for a standalone SPARC, using
-#			  the FORTH console ROMs.  We never got the paperwork
-#			  straight, since Sun's lawyers messed with the
-#			  FSF contract and RMS didn't accept the changes.
-#			  Written at SunLabs.
-# state.c		- Not used at the moment, keep for reference (fnf)
-# state.h		- Not used at the moment, keep for reference (fnf)
 
 Things-to-lose:
 
-energize
-energize-patches
-energize.c
-energize.h
-remote-mon.c
-remote-sa.sparc.c
 ser-go32-para.c
-state.c
-state.h
 
 Do-last:
 
