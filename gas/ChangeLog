@@ -1,3 +1,7 @@
+2000-11-09  Kazu Hirata  <kazu@hxi.com>
+
+	* itbl-ops.c: Fix comment typos.
+
 2000-11-08  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-ia64.c (struct unw_rec_list): Add slot_frag field.

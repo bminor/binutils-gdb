@@ -516,7 +516,7 @@ itbl_assemble (char *name, char *s)
 	break;
     }
   if (!e)
-    return 0;			/* opcode not in table; invalid instrustion */
+    return 0;			/* opcode not in table; invalid instruction */
   opcode = build_opcode (e);
 
   /* parse opcode's args (if any) */
@@ -606,7 +606,7 @@ itbl_disassemble (char *s, unsigned long insn)
   /* find entry in list */
   e = find_entry_byval (processor, e_insn, insn, 0);
   if (!e)
-    return 0;			/* opcode not in table; invalid instrustion */
+    return 0;			/* opcode not in table; invalid instruction */
   strcpy (s, e->name);
 
   /* Parse insn's args (if any).  */
