@@ -1504,8 +1504,6 @@ s_get_segment (x)
   return SEG_INFO_FROM_SECTION_NUMBER (x->sy_symbol.ost_entry.n_scnum).seg_t;
 }
 
-
-
 /* calculate the size of the frag chain and fill in the section header
    to contain all of it, also fill in the addr of the sections */
 static unsigned int
@@ -2856,9 +2854,8 @@ glue_symbols (head, tail)
      symbolS **tail;
 {
   unsigned int symbol_number = 0;
-  symbolS *symbolP;
 
-  for (symbolP = *head; *head != NULL;)
+  while (*head != NULL)
     {
       symbolS *tmp = *head;
 
@@ -2888,14 +2885,11 @@ static unsigned int
 tie_tags ()
 {
   unsigned int symbol_number = 0;
-
   symbolS *symbolP;
-  for (symbolP = symbol_rootP; symbolP; symbolP =
-       symbol_next (symbolP))
+
+  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
     {
       symbolP->sy_number = symbol_number;
-
-
 
       if (SF_GET_TAGGED (symbolP))
 	{
@@ -2906,8 +2900,8 @@ tie_tags ()
 
       symbol_number += 1 + S_GET_NUMBER_AUXILIARY (symbolP);
     }
-  return symbol_number;
 
+  return symbol_number;
 }
 
 static void
@@ -2932,12 +2926,12 @@ crawl_symbols (h, abfd)
    * undefined symbols at the end of the list.
    */
 
+  /* Is there a .file symbol ? If not insert one at the beginning. */
   if (symbol_rootP == NULL
       || S_GET_STORAGE_CLASS (symbol_rootP) != C_FILE)
     {
       c_dot_file_symbol ("fake");
     }
-  /* Is there a .file symbol ? If not insert one at the beginning. */
 
   /*
    * Build up static symbols for the sections, they are filled in later
@@ -3606,16 +3600,9 @@ c_dot_file_symbol (filename)
   /* Make sure that the symbol is first on the symbol chain */
   if (symbol_rootP != symbolP)
     {
-      if (symbolP == symbol_lastP)
-	{
-	  symbol_lastP = symbol_lastP->sy_previous;
-	}			/* if it was the last thing on the list */
-
       symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
       symbol_insert (symbolP, symbol_rootP, &symbol_rootP, &symbol_lastP);
-      symbol_rootP = symbolP;
-    }				/* if not first on the list */
-
+    }
 }				/* c_dot_file_symbol() */
 
 /*
@@ -4117,11 +4104,15 @@ fixup_segment (segP, this_segment_type)
 		      continue;
 		    }		/* COBR */
 #endif /* TC_I960 */
-#if (defined (TC_I386) || defined (TE_LYNX) || defined (TE_AUX)) && !defined(TE_PE)
+#if ((defined (TC_I386) || defined (TE_LYNX) || defined (TE_AUX)) && !defined(TE_PE)) || defined (COFF_COMMON_ADDEND)
 		  /* 386 COFF uses a peculiar format in which the
 		     value of a common symbol is stored in the .text
 		     segment (I've checked this on SVR3.2 and SCO
 		     3.2.2) Ian Taylor <ian@cygnus.com>.  */
+		  /* This is also true for 68k COFF on sysv machines
+		     (Checked on Motorola sysv68 R3V6 and R3V7.1, and also on
+		     UNIX System V/M68000, Release 1.0 from ATT/Bell Labs)
+		     Philippe De Muyter <phdm@info.ucl.ac.be>. */
 		  if (S_IS_COMMON (add_symbolP))
 		    add_number += S_GET_VALUE (add_symbolP);
 #endif

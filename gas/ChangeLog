@@ -1,3 +1,9 @@
+Thu Mar 20 12:48:45 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* config/te-delta.h (COFF_COMMON_ADDEND): Define.
+	* config/obj-coff.c (fixup_segment): Check COFF_COMMON_ADDEND when
+	storing the value of a common symbol.
+
 Wed Mar 19 11:37:57 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 	* config/obj-coff.c (glue_symbols): Unused variable symbolP
