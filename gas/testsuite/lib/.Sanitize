@@ -27,6 +27,13 @@ Do-first:
 Things-to-keep:
 
 gas-defs.exp
+doboth
+doobjcmp
+dostriptest
+dotest
+dounsreloc
+dounssym
+run
 
 Do-last:
 
