@@ -1,3 +1,16 @@
+Thu Jan 22 17:29:07 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/high-1.d: Add hash prefix to constants.
+
+	* gas/m32r/allinsn.s: Add hash prefix to some constants.
+	* gas/m32r/allinsn.d: Add hash prefix to constants.
+start-sanitize-m32rx
+	* gas/m32r/m32rx.s: Add tests for automatic parallelisation.
+	* gas/m32r/m32rx.d: Add results of automatic parallelisation.
+	* gas/m32r/relax-1.d: Add results of automatic parallelisation.
+	* gas/m32r/uppercase.d: Add results of automatic parallelisation.
+end-sanitize-m32rx
+
 Wed Jan 21 21:24:08 1998  Manfred Hollstein  <manfred@s-direktnet.de>
 
 	* gas/m88k/init.d: Fix hexadecimal offsets.
@@ -6,8 +19,10 @@ Wed Jan 14 17:49:22 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/m32r/uppercase.d: Fix white space matching.
 	* gas/m32r/relax-1.d: Fix white space matching.
+start-sanitize-m32rx	
 	* gas/m32r/m32rx.d: Add expected results.
 	* gas/m32r/m32rx.s: Correct typos in test cases.
+end-sanitize-m32rx	
 
 Wed Jan 14 15:44:32 1998  Jeffrey A Law  (law@cygnus.com)
 

@@ -132,44 +132,44 @@ rach:
 	.text
 	.global bc__add
 bc__add:
-	bc branchpoint || add fp, fp
-	bc branchpoint
+	bc bcl || add fp, fp
+	bc bcl
 	add fp, fp
 
 	.text
 	.global bcl__addi
 bcl__addi:	
-	bcl branchpoint || addi fp, #77
+	bcl bcl || addi fp, #77
 	addi fp, #77
-	bcl branchpoint
+	bcl bcl
 
 	.text
 	.global bl__addv
 bl__addv:
-	bl branchpoint || addv fp, fp
+	bl bcl || addv fp, fp
 	addv fp, fp
-	bl branchpoint
+	bl bcl
 	
 	.text
 	.global bnc__addx
 bnc__addx:
-	bnc branchpoint || addx fp, fp
-	bnc branchpoint
+	bnc bcl || addx fp, fp
+	bnc bcl
 	addx fp, fp
 
 	.text
 	.global bncl__and
 bncl__and:
-	bncl branchpoint || and fp, fp
-	bncl branchpoint
+	bncl bcl || and fp, fp
+	bncl bcl
 	and fp, fp
 
 	.text
 	.global bra__cmp
 bra__cmp:
-	bra branchpoint || cmp fp, fp
+	bra bcl || cmp fp, fp
 	cmp fp, fp
-	bra branchpoint
+	bra bcl
 	
 	.text
 	.global jl__cmpeq
@@ -335,8 +335,8 @@ sth__mullo:
 	.text
 	.global trap__mulwhi
 trap__mulwhi:
-	trap 2 || mulwhi r2, fp
-	trap 2
+	trap #2 || mulwhi r2, fp
+	trap #2
 	mulwhi r2, fp
 
 	.text
@@ -480,7 +480,79 @@ snc__neg:
 	snc 
 	neg fp, r2
 	
-	
-	
+# Test automatic and explicit parallelisation of instructions
+	.text
+	.global nop__sadd
+nop__sadd:
+label:		
+	nop
+	sadd
 
+	.text
+	.global sadd__nop
+sadd__nop:
+	sadd
+	nop
+
+	.text
+	.global sadd__nop_reverse
+sadd__nop_reverse:
+	sadd || nop
+
+	.text
+	.global add__not
+add__not:
+	add  r0, r1
+	not  r3, r5
+
+	.text
+	.global add__not__dest_clash
+add__not_dest_clash:
+	add  r3, r4
+	not  r3, r5
+
+	.text
+	.global add__not__src_clash
+add__not__src_clash:
+	add  r3, r4
+	not  r5, r3
+
+	.text
+	.global add__not__no_clash
+add__not__no_clash:
+	add  r3, r4
+	not  r4, r5
+
+	.text
+	.global mul__sra
+mul__sra:
+	mul  r1, r2
+	sra  r3, r4
 	
+	.text
+	.global mul__sra__reverse_src_clash
+mul__sra__reverse_src_clash:
+	mul  r1, r3
+	sra  r3, r4
+	
+	.text
+	.global bc__add_
+bc__add_:
+	bc label
+	add r1, r2
+
+	.text
+	.global add__bc
+add__bc:
+	add r3, r4
+	bc  label
+
+	.text
+	.global bc__add__forced_parallel
+bc__add__forced_parallel:
+	bc label || add r5, r6
+
+	.text
+	.global add__bc__forced_parallel
+add__bc__forced_parallel:
+	add r7, r8 || bc label
