@@ -1,7 +1,9 @@
+start-sanitize-gdbtk
 Fri Apr  5 13:25:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* gdbtk.c (SIOCSPGRP, linux): If on Linux, undef SIOCSPGRP, since
 	some versions of the kernel don't support it.
+end-sanitize-gdbtk
 
 Thu Apr  4 20:16:55 1996  Fred Fish  <fnf@cygnus.com>
 
