@@ -1,5 +1,16 @@
 2004-08-25  Andrew Cagney  <cagney@gnu.org>
 
+	* infrun.c (struct execution_control_state): Delete field
+	"stepping_through_sigtramp".
+	(init_execution_control_state): Do not set same.
+	(context_switch): Do not pass same to save_infrun_state and
+	load_infrun_state.
+	* gdbthread.h (struct thread_info): Delete field
+	stepping_through_sigtramp.
+	(save_infrun_state, load_infrun_state): Delete parameter
+	stepping_through_sigtramp.
+	* thread.c (load_infrun_state, save_infrun_state): Update.
+
 	* infrun.c: Re-indent.  Move expression operators to the beginning
 	of the line.  Remove long disabled #if 0 code.
 

@@ -923,7 +923,6 @@ struct execution_control_state
   int stepping_through_solib_after_catch;
   bpstat stepping_through_solib_catchpoints;
   int enable_hw_watchpoints_after_wait;
-  int stepping_through_sigtramp;
   int new_thread_event;
   struct target_waitstatus tmpstatus;
   enum infwait_states infwait_state;
@@ -1074,7 +1073,6 @@ init_execution_control_state (struct execution_control_state *ecs)
   ecs->stepping_through_solib_after_catch = 0;
   ecs->stepping_through_solib_catchpoints = NULL;
   ecs->enable_hw_watchpoints_after_wait = 0;
-  ecs->stepping_through_sigtramp = 0;
   ecs->sal = find_pc_line (prev_pc, 0);
   ecs->current_line = ecs->sal.line;
   ecs->current_symtab = ecs->sal.symtab;
@@ -1128,7 +1126,6 @@ context_switch (struct execution_control_state *ecs)
 			 ecs->handling_longjmp, ecs->another_trap,
 			 ecs->stepping_through_solib_after_catch,
 			 ecs->stepping_through_solib_catchpoints,
-			 ecs->stepping_through_sigtramp,
 			 ecs->current_line, ecs->current_symtab);
 
       /* Load infrun state for the new thread.  */
@@ -1139,7 +1136,6 @@ context_switch (struct execution_control_state *ecs)
 			 &ecs->handling_longjmp, &ecs->another_trap,
 			 &ecs->stepping_through_solib_after_catch,
 			 &ecs->stepping_through_solib_catchpoints,
-			 &ecs->stepping_through_sigtramp,
 			 &ecs->current_line, &ecs->current_symtab);
     }
   inferior_ptid = ecs->ptid;

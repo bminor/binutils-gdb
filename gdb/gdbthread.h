@@ -65,10 +65,6 @@ struct thread_info
      when we finally do stop stepping.  */
   bpstat stepping_through_solib_catchpoints;
 
-  /* This is set to TRUE when this thread is in a signal handler
-     trampoline and we're single-stepping through it.  */
-  int stepping_through_sigtramp;
-
   /* Private data used by the target vector implementation.  */
   struct private_thread_info *private;
 };
@@ -123,7 +119,6 @@ extern void save_infrun_state (ptid_t ptid,
 			       int       another_trap,
 			       int       stepping_through_solib_after_catch,
 			       bpstat    stepping_through_solib_catchpoints,
-			       int       stepping_through_sigtramp,
 			       int       current_line,
 			       struct symtab *current_symtab);
 
@@ -140,7 +135,6 @@ extern void load_infrun_state (ptid_t ptid,
 			       int       *another_trap,
 			       int       *stepping_through_solib_affter_catch,
 			       bpstat    *stepping_through_solib_catchpoints,
-			       int       *stepping_through_sigtramp,
 			       int       *current_line,
 			       struct symtab **current_symtab);
 

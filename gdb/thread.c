@@ -301,7 +301,6 @@ load_infrun_state (ptid_t ptid,
 		   int *another_trap,
 		   int *stepping_through_solib_after_catch,
 		   bpstat *stepping_through_solib_catchpoints,
-		   int *stepping_through_sigtramp,
 		   int *current_line,
 		   struct symtab **current_symtab)
 {
@@ -325,7 +324,6 @@ load_infrun_state (ptid_t ptid,
     tp->stepping_through_solib_after_catch;
   *stepping_through_solib_catchpoints =
     tp->stepping_through_solib_catchpoints;
-  *stepping_through_sigtramp = tp->stepping_through_sigtramp;
   *current_line = tp->current_line;
   *current_symtab = tp->current_symtab;
 }
@@ -344,7 +342,6 @@ save_infrun_state (ptid_t ptid,
 		   int another_trap,
 		   int stepping_through_solib_after_catch,
 		   bpstat stepping_through_solib_catchpoints,
-		   int stepping_through_sigtramp,
 		   int current_line,
 		   struct symtab *current_symtab)
 {
@@ -366,7 +363,6 @@ save_infrun_state (ptid_t ptid,
   tp->another_trap = another_trap;
   tp->stepping_through_solib_after_catch = stepping_through_solib_after_catch;
   tp->stepping_through_solib_catchpoints = stepping_through_solib_catchpoints;
-  tp->stepping_through_sigtramp = stepping_through_sigtramp;
   tp->current_line = current_line;
   tp->current_symtab = current_symtab;
 }
