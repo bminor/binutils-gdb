@@ -134,4 +134,6 @@ int main() {
     wait_until_idle();
     start_DMA_ch1_source_chain(&gpu_refresh);
     wait_a_while();
+
+    return 0;
 }
