@@ -486,7 +486,7 @@ avr_scan_prologue (struct frame_info *fi)
      frame pointer, adjust the stack pointer, and save registers.  */
 
   get_frame_extra_info (fi)->framesize = 0;
-  prologue_len = prologue_end - prologue_start;
+  prologue_len = min (prologue_end - prologue_start, AVR_MAX_PROLOGUE_SIZE);
   read_memory (prologue_start, prologue, prologue_len);
 
   /* Scanning main()'s prologue
