@@ -252,6 +252,7 @@ typedef struct _TuiCommandInfo
   {
     int curLine;		/* The current line position */
     int curch;			/* The current cursor position */
+    int start_line;
   }
 TuiCommandInfo, *TuiCommandInfoPtr;
 

@@ -117,6 +117,7 @@ tui_puts (const char *string)
     }
   getyx (w, cmdWin->detail.commandInfo.curLine,
          cmdWin->detail.commandInfo.curch);
+  cmdWin->detail.commandInfo.start_line = cmdWin->detail.commandInfo.curLine;
 
   /* We could defer the following.  */
   wrefresh (w);
@@ -144,7 +145,7 @@ tui_redisplay_readline (void)
   c_pos = -1;
   c_line = -1;
   w = cmdWin->generic.handle;
-  start_line = cmdWin->detail.commandInfo.curLine;
+  start_line = cmdWin->detail.commandInfo.start_line;
   wmove (w, start_line, 0);
   prev_col = 0;
   height = 1;
@@ -177,7 +178,7 @@ tui_redisplay_readline (void)
 	}
       if (c == '\n')
         {
-          getyx (w, cmdWin->detail.commandInfo.curLine,
+          getyx (w, cmdWin->detail.commandInfo.start_line,
                  cmdWin->detail.commandInfo.curch);
         }
       getyx (w, line, col);
@@ -186,13 +187,16 @@ tui_redisplay_readline (void)
       prev_col = col;
     }
   wclrtobot (w);
-  getyx (w, cmdWin->detail.commandInfo.curLine,
+  getyx (w, cmdWin->detail.commandInfo.start_line,
          cmdWin->detail.commandInfo.curch);
   if (c_line >= 0)
-    wmove (w, c_line, c_pos);
+    {
+      wmove (w, c_line, c_pos);
+      cmdWin->detail.commandInfo.curLine = c_line;
+      cmdWin->detail.commandInfo.curch = c_pos;
+    }
+  cmdWin->detail.commandInfo.start_line -= height - 1;
 
-  cmdWin->detail.commandInfo.curLine -= height - 1;
-  
   wrefresh (w);
   fflush(stdout);
 }
@@ -307,6 +311,12 @@ tui_cont_sig (int sig)
 
       /* Force a refresh of the screen.  */
       tuiRefreshAll ();
+
+      /* Update cursor position on the screen.  */
+      wmove (cmdWin->generic.handle,
+             cmdWin->detail.commandInfo.start_line,
+             cmdWin->detail.commandInfo.curch);
+      wrefresh (cmdWin->generic.handle);
     }
   signal (sig, tui_cont_sig);
 }
