@@ -1,3 +1,10 @@
+2004-12-07  Randolph Chung  <tausq@debian.org>
+
+	* solib-som.c: New file.
+	* solib-som.h: New file.
+	* solib-pa64.c: New file.
+	* solib-pa64.h: New file.
+
 2004-12-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (inf-ttrace.o): Fix typo.
