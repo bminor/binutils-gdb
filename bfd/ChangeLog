@@ -12,6 +12,28 @@ Fri Mar 18 19:12:47 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Fri Mar 18 18:13:49 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.h (som_copyable_section_data_struct): New structure
+	containing all the private section information which needs
+	to be copied from input section to output section during
+	objcopy or strip.
+	(som_section_data_struct): Remove several fields now in
+	som_copyable_section_data_struct.  Make the space and 
+	subspace dictionaries be pointers (to save space when
+	only reading objects).
+
+	* som.c (bfd_som_set_section_attributes): Now returns a boolean;
+	some references changed.  Allocate a copyable data stucture if
+	none exists.  Store info into the copyable data structure.
+	(bfd_som_set_subsection_attributes): Likewise.
+	(som_is_space, som_is_subspace, som_is_container): New functions.
+	Use these instead of directly accessing private data.
+	(som_prep_headers): Allocate space and subspace headers here.
+	Fill in some fields in the space/subspace headers from the
+	copyable data.
+	(som_bfd_copy_private_section_data): Only copy the stuff
+	that we really need to make objcopy and strip work.  Allocate
+	the copy_data structure for the output bfd before copying.
+
 	* som.h (struct som_exec_data): New structure to hold exec
 	info that must be preserved when running objcopy/strip.
 	(struct somdata): Add new "exec_data" field and accessor

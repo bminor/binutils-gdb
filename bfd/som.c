@@ -229,6 +229,9 @@ static boolean som_bfd_ar_write_symbol_stuff PARAMS ((bfd *, unsigned int,
 						      unsigned int,
 						      struct lst_header));
 static CONST char *normalize PARAMS ((CONST char *file));
+static boolean som_is_space PARAMS ((asection *));
+static boolean som_is_subspace PARAMS ((asection *));
+static boolean som_is_container PARAMS ((asection *, asection *));
 	
 /* Map SOM section names to POSIX/BSD single-character symbol types.
 
@@ -1667,9 +1670,10 @@ setup_sections (abfd, file_hdr)
 	space_asect->flags |= SEC_DEBUGGING;
 
       /* Set up all the attributes for the space.  */
-      bfd_som_set_section_attributes (space_asect, space.is_defined,
-				      space.is_private, space.sort_key,
-				      space.space_number);
+      if (bfd_som_set_section_attributes (space_asect, space.is_defined,
+					  space.is_private, space.sort_key,
+					  space.space_number) == false)
+	goto error_return;
 
       /* Now, read in the first subspace for this space */
       if (bfd_seek (abfd, file_hdr->subspace_location
@@ -1720,10 +1724,11 @@ setup_sections (abfd, file_hdr)
 	    goto error_return;
 
 	  /* Store private information about the section.  */
-	  bfd_som_set_subsection_attributes (subspace_asect, space_asect,
-					     subspace.access_control_bits,
-					     subspace.sort_key,
-					     subspace.quadrant);
+	  if (bfd_som_set_subsection_attributes (subspace_asect, space_asect,
+						 subspace.access_control_bits,
+						 subspace.sort_key,
+						 subspace.quadrant) == false)
+	    goto error_return;
 
 	  /* Keep an easy mapping between subspaces and sections.  */
 	  subspace_asect->target_index = total_subspaces++;
@@ -1983,46 +1988,132 @@ som_prep_headers (abfd)
     {
       /* Ignore anything which has not been marked as a space or
 	 subspace.  */
-      if (som_section_data (section)->is_space == 0
-
-	  && som_section_data (section)->is_subspace == 0)
+      if (!som_is_space (section) && !som_is_subspace (section))
 	continue;
-
-      if (som_section_data (section)->is_space)
+      
+      if (som_is_space (section))
 	{
+	  /* Allocate space for the space dictionary.  */
+	  som_section_data (section)->space_dict
+	    = (struct space_dictionary_record *)
+	      bfd_zalloc (abfd, sizeof (struct space_dictionary_record));
+	  if (som_section_data (section)->space_dict == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
 	  /* Set space attributes.  Note most attributes of SOM spaces
 	     are set based on the subspaces it contains.  */
-	  som_section_data (section)->space_dict.loader_fix_index = -1;
-	  som_section_data (section)->space_dict.init_pointer_index = -1;
+	  som_section_data (section)->space_dict->loader_fix_index = -1;
+	  som_section_data (section)->space_dict->init_pointer_index = -1;
+
+	  /* Set more attributes that were stuffed away in private data.  */
+	  som_section_data (section)->space_dict->sort_key = 
+	    som_section_data (section)->copy_data->sort_key;
+	  som_section_data (section)->space_dict->is_defined = 
+	    som_section_data (section)->copy_data->is_defined;
+	  som_section_data (section)->space_dict->is_private = 
+	    som_section_data (section)->copy_data->is_private;
+	  som_section_data (section)->space_dict->space_number =
+	    section->target_index;
 	}
       else
 	{
+	  /* Allocate space for the subspace dictionary.  */
+	  som_section_data (section)->subspace_dict
+	    = (struct subspace_dictionary_record *)
+	      bfd_zalloc (abfd, sizeof (struct subspace_dictionary_record));
+	  if (som_section_data (section)->subspace_dict == NULL)
+	    {
+	      bfd_set_error (bfd_error_no_memory);
+	      return false;
+	    }
+
 	  /* Set subspace attributes.  Basic stuff is done here, additional
 	     attributes are filled in later as more information becomes
 	     available.  */
 	  if (section->flags & SEC_IS_COMMON)
 	    {
-	      som_section_data (section)->subspace_dict.dup_common = 1;
-	      som_section_data (section)->subspace_dict.is_common = 1;
+	      som_section_data (section)->subspace_dict->dup_common = 1;
+	      som_section_data (section)->subspace_dict->is_common = 1;
 	    }
 
 	  if (section->flags & SEC_ALLOC)
-	    som_section_data (section)->subspace_dict.is_loadable = 1;
+	    som_section_data (section)->subspace_dict->is_loadable = 1;
 
 	  if (section->flags & SEC_CODE)
-	    som_section_data (section)->subspace_dict.code_only = 1;
+	    som_section_data (section)->subspace_dict->code_only = 1;
 
-	  som_section_data (section)->subspace_dict.subspace_start = 
+	  som_section_data (section)->subspace_dict->subspace_start = 
 	    section->vma;
-	  som_section_data (section)->subspace_dict.subspace_length =
+	  som_section_data (section)->subspace_dict->subspace_length =
 	    bfd_section_size (abfd, section);
-	  som_section_data (section)->subspace_dict.initialization_length =
+	  som_section_data (section)->subspace_dict->initialization_length =
 	    bfd_section_size (abfd, section);
-	  som_section_data (section)->subspace_dict.alignment = 
+	  som_section_data (section)->subspace_dict->alignment = 
 	    1 << section->alignment_power;
+
+	  /* Set more attributes that were stuffed away in private data.  */
+	  som_section_data (section)->subspace_dict->sort_key =
+	    som_section_data (section)->copy_data->sort_key;
+	  som_section_data (section)->subspace_dict->access_control_bits =
+	    som_section_data (section)->copy_data->access_control_bits;
+	  som_section_data (section)->subspace_dict->quadrant =
+	    som_section_data (section)->copy_data->quadrant;
 	}
     }
   return true;
+}
+
+/* Return true if the given section is a SOM space, false otherwise.  */
+
+static boolean
+som_is_space (section)
+     asection *section;
+{
+  /* If no copy data is available, then it's neither a space nor a
+     subspace.  */
+  if (som_section_data (section)->copy_data == NULL)
+    return false;
+
+  /* If the containing space isn't the same as the given section,
+     then this isn't a space.  */
+  if (som_section_data (section)->copy_data->container != section)
+    return false;
+
+  /* OK.  Must be a space.  */
+  return true;
+}
+
+/* Return true if the given section is a SOM subspace, false otherwise.  */
+
+static boolean
+som_is_subspace (section)
+     asection *section;
+{
+  /* If no copy data is available, then it's neither a space nor a
+     subspace.  */
+  if (som_section_data (section)->copy_data == NULL)
+    return false;
+
+  /* If the containing space is the same as the given section,
+     then this isn't a subspace.  */
+  if (som_section_data (section)->copy_data->container == section)
+    return false;
+
+  /* OK.  Must be a subspace.  */
+  return true;
+}
+
+/* Return true if the given space containins the given subspace.  It
+   is safe to assume space really is a space, and subspace really
+   is a subspace.  */
+
+static boolean
+som_is_container (space, subspace)
+     asection *space, *subspace;
+{
+  return som_section_data (subspace)->copy_data->container == space;
 }
 
 /* Count and return the number of spaces attached to the given BFD.  */
@@ -2035,7 +2126,7 @@ som_count_spaces (abfd)
   asection *section;
 
   for (section = abfd->sections; section != NULL; section = section->next)
-    count += som_section_data (section)->is_space;
+      count += som_is_space (section);
 
   return count;
 }
@@ -2050,7 +2141,7 @@ som_count_subspaces (abfd)
   asection *section;
 
   for (section = abfd->sections; section != NULL; section = section->next)
-    count += som_section_data (section)->is_subspace;
+    count += som_is_subspace (section);
 
   return count;
 }
@@ -2215,7 +2306,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
       asection *subsection;
 
       /* Find a space.  */
-      while (som_section_data (section)->is_space == 0)
+      while (!som_is_space (section))
 	section = section->next;
 
       /* Now iterate through each of its subspaces.  */
@@ -2226,22 +2317,22 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	  int reloc_offset, current_rounding_mode;
 
 	  /* Find a subspace of this space.  */
-	  if (som_section_data (subsection)->is_subspace == 0
-	      || som_section_data (subsection)->containing_space != section)
+	  if (!som_is_subspace (subsection)
+	      || !som_is_container (section, subsection))
 	    continue;
 
 	  /* If this subspace had no relocations, then we're finished 
 	     with it.  */
 	  if (subsection->reloc_count <= 0)
 	    {
-	      som_section_data (subsection)->subspace_dict.fixup_request_index
+	      som_section_data (subsection)->subspace_dict->fixup_request_index
 		= -1;
 	      continue;
 	    }
 
 	  /* This subspace has some relocations.  Put the relocation stream
 	     index into the subspace record.  */
-	  som_section_data (subsection)->subspace_dict.fixup_request_index
+	  som_section_data (subsection)->subspace_dict->fixup_request_index
 	    = total_reloc_size;
 
 	  /* To make life easier start over with a clean slate for 
@@ -2465,7 +2556,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	  p = tmp_space;
 
 	  total_reloc_size += subspace_reloc_size;
-	  som_section_data (subsection)->subspace_dict.fixup_request_quantity
+	  som_section_data (subsection)->subspace_dict->fixup_request_quantity
 	    = subspace_reloc_size;
 	}
       section = section->next;
@@ -2508,8 +2599,7 @@ som_write_space_strings (abfd, current_offset, string_sizep)
 
       /* Only work with space/subspaces; avoid any other sections
 	 which might have been made (.text for example).  */
-      if (som_section_data (section)->is_space == 0
-	  && som_section_data (section)->is_subspace == 0)
+      if (!som_is_space (section) && !som_is_subspace (section))
 	continue;
 
       /* Get the length of the space/subspace name.  */
@@ -2537,10 +2627,10 @@ som_write_space_strings (abfd, current_offset, string_sizep)
       strings_size += 4;
 
       /* Record the index in the space/subspace records.  */
-      if (som_section_data (section)->is_space)
-	som_section_data (section)->space_dict.name.n_strx = strings_size;
+      if (som_is_space (section))
+	som_section_data (section)->space_dict->name.n_strx = strings_size;
       else
-	som_section_data (section)->subspace_dict.name.n_strx = strings_size;
+	som_section_data (section)->subspace_dict->name.n_strx = strings_size;
 
       /* Next comes the string itself + a null terminator.  */
       strcpy (p, section->name);
@@ -2866,7 +2956,7 @@ som_begin_writing (abfd)
       int first_subspace;
 
       /* Find a space.  */
-      while (som_section_data (section)->is_space == 0)
+      while (!som_is_space (section))
 	section = section->next;
 
       first_subspace = 1;
@@ -2876,8 +2966,8 @@ som_begin_writing (abfd)
 	   subsection = subsection->next)
 	{
 
-	  if (som_section_data (subsection)->is_subspace == 0
-	      || som_section_data (subsection)->containing_space != section
+	  if (!som_is_subspace (subsection)
+	      || !som_is_container (section, subsection)
 	      || (subsection->flags & SEC_ALLOC) == 0)
 	    continue;
 
@@ -2923,7 +3013,7 @@ som_begin_writing (abfd)
 	      else if (abfd->flags & EXEC_P
 		       && subsection->flags & SEC_DATA)
 		exec_header.exec_dsize += subsection->_cooked_size;
-	      som_section_data (subsection)->subspace_dict.file_loc_init_value
+	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= current_offset;
 	      section->filepos = current_offset;
 	      current_offset += bfd_section_size (abfd, subsection); 
@@ -2935,9 +3025,9 @@ som_begin_writing (abfd)
 	      if (abfd->flags & EXEC_P)
 		exec_header.exec_bsize += subsection->_cooked_size;
 
-	      som_section_data (subsection)->subspace_dict.file_loc_init_value
+	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= 0;
-	      som_section_data (subsection)->subspace_dict.
+	      som_section_data (subsection)->subspace_dict->
 		initialization_length = 0;
 	    }
 	}
@@ -2959,7 +3049,7 @@ som_begin_writing (abfd)
       asection *subsection;
 
       /* Find a space.  */
-      while (som_section_data (section)->is_space == 0)
+      while (!som_is_space (section))
 	section = section->next;
 
       current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
@@ -2970,8 +3060,8 @@ som_begin_writing (abfd)
 	   subsection = subsection->next)
 	{
 	  
-	  if (som_section_data (subsection)->is_subspace == 0
-	      || som_section_data (subsection)->containing_space != section
+	  if (!som_is_subspace (subsection)
+	      || !som_is_container (section, subsection)
 	      || (subsection->flags & SEC_ALLOC) != 0)
 	    continue;
 
@@ -2979,7 +3069,7 @@ som_begin_writing (abfd)
 	  /* This is real data to be loaded from the file.  */
 	  if ((subsection->flags & SEC_LOAD) == 0)
 	    {
-	      som_section_data (subsection)->subspace_dict.file_loc_init_value
+	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= current_offset;
 	      section->filepos = current_offset;
 	      current_offset += bfd_section_size (abfd, subsection); 
@@ -2987,9 +3077,9 @@ som_begin_writing (abfd)
 	  /* Looks like uninitialized data.  */
 	  else
 	    {
-	      som_section_data (subsection)->subspace_dict.file_loc_init_value
+	      som_section_data (subsection)->subspace_dict->file_loc_init_value
 		= 0;
-	      som_section_data (subsection)->subspace_dict.
+	      som_section_data (subsection)->subspace_dict->
 		initialization_length = bfd_section_size (abfd, subsection);
 	    }
 	}
@@ -3076,7 +3166,7 @@ som_write_headers (abfd)
       asection *subsection;
 
       /* Find a space.  */
-      while (som_section_data (section)->is_space == 0)
+      while (!som_is_space (section))
 	section = section->next;
 
       /* Now look for all its subspaces.  */
@@ -3088,8 +3178,8 @@ som_write_headers (abfd)
 	  /* Skip any section which does not correspond to a space
 	     or subspace.  Or does not have SEC_ALLOC set (and therefore
 	     has no real bits on the disk).  */
-	  if (som_section_data (subsection)->is_subspace == 0
-	      || som_section_data (subsection)->containing_space != section
+	  if (!som_is_subspace (subsection)
+	      || !som_is_container (section, subsection)
 	      || (subsection->flags & SEC_ALLOC) == 0)
 	    continue;
 
@@ -3097,24 +3187,24 @@ som_write_headers (abfd)
 	     the index of the subspace in its containing space.  Also
 	     set "is_loadable" in the containing space.  */
 
-	  if (som_section_data (section)->space_dict.subspace_quantity == 0)
+	  if (som_section_data (section)->space_dict->subspace_quantity == 0)
 	    {
-	      som_section_data (section)->space_dict.is_loadable = 1;
-	      som_section_data (section)->space_dict.subspace_index
+	      som_section_data (section)->space_dict->is_loadable = 1;
+	      som_section_data (section)->space_dict->subspace_index
 		= subspace_index;
 	    }
 
 	  /* Increment the number of subspaces seen and the number of
 	     subspaces contained within the current space.  */
 	  subspace_index++;
-	  som_section_data (section)->space_dict.subspace_quantity++;
+	  som_section_data (section)->space_dict->subspace_quantity++;
 
 	  /* Mark the index of the current space within the subspace's
 	     dictionary record.  */
-	  som_section_data (subsection)->subspace_dict.space_index = i;
+	  som_section_data (subsection)->subspace_dict->space_index = i;
 	  
 	  /* Dump the current subspace header.  */
-	  if (bfd_write ((PTR) &som_section_data (subsection)->subspace_dict,
+	  if (bfd_write ((PTR) som_section_data (subsection)->subspace_dict,
 			 sizeof (struct subspace_dictionary_record), 1, abfd)
 	      != sizeof (struct subspace_dictionary_record))
 	    {
@@ -3134,7 +3224,7 @@ som_write_headers (abfd)
       asection *subsection;
 
       /* Find a space.  */
-      while (som_section_data (section)->is_space == 0)
+      while (!som_is_space (section))
 	section = section->next;
 
       /* Now look for all its subspaces.  */
@@ -3147,8 +3237,8 @@ som_write_headers (abfd)
 	     subspace, or which SEC_ALLOC set (and therefore handled
 	     in the loadable spaces/subspaces code above.  */
 
-	  if (som_section_data (subsection)->is_subspace == 0
-	      || som_section_data (subsection)->containing_space != section
+	  if (!som_is_subspace (subsection)
+	      || !som_is_container (section, subsection)
 	      || (subsection->flags & SEC_ALLOC) != 0)
 	    continue;
 
@@ -3156,24 +3246,24 @@ som_write_headers (abfd)
 	     the index of the subspace in its containing space.  Clear
 	     "is_loadable".  */
 
-	  if (som_section_data (section)->space_dict.subspace_quantity == 0)
+	  if (som_section_data (section)->space_dict->subspace_quantity == 0)
 	    {
-	      som_section_data (section)->space_dict.is_loadable = 0;
-	      som_section_data (section)->space_dict.subspace_index
+	      som_section_data (section)->space_dict->is_loadable = 0;
+	      som_section_data (section)->space_dict->subspace_index
 		= subspace_index;
 	    }
 
 	  /* Increment the number of subspaces seen and the number of
 	     subspaces contained within the current space.  */
-	  som_section_data (section)->space_dict.subspace_quantity++;
+	  som_section_data (section)->space_dict->subspace_quantity++;
 	  subspace_index++; 
 
 	  /* Mark the index of the current space within the subspace's
 	     dictionary record.  */
-	  som_section_data (subsection)->subspace_dict.space_index = i;
+	  som_section_data (subsection)->subspace_dict->space_index = i;
 	  
 	  /* Dump this subspace header.  */
-	  if (bfd_write ((PTR) &som_section_data (subsection)->subspace_dict,
+	  if (bfd_write ((PTR) som_section_data (subsection)->subspace_dict,
 			 sizeof (struct subspace_dictionary_record), 1, abfd)
 	      != sizeof (struct subspace_dictionary_record))
 	    {
@@ -3198,11 +3288,11 @@ som_write_headers (abfd)
     {
 
       /* Find a space.  */
-      while (som_section_data (section)->is_space == 0)
+      while (!som_is_space (section))
 	section = section->next;
 
       /* Dump its header  */
-      if (bfd_write ((PTR) &som_section_data (section)->space_dict,
+      if (bfd_write ((PTR) som_section_data (section)->space_dict,
 		     sizeof (struct space_dictionary_record), 1, abfd)
 	  != sizeof (struct space_dictionary_record))
 	{
@@ -4173,16 +4263,27 @@ som_bfd_copy_private_section_data (ibfd, isection, obfd, osection)
 {
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_som_flavour
-      || obfd->xvec->flavour != bfd_target_som_flavour)
+      || obfd->xvec->flavour != bfd_target_som_flavour
+      || (!som_is_space (isection) && !som_is_subspace (isection)))
     return false;
 
-  memcpy (som_section_data (osection), som_section_data (isection),
-	  sizeof (struct som_section_data_struct));
+  som_section_data (osection)->copy_data
+    = (struct som_copyable_section_data_struct *)
+      bfd_zalloc (obfd, sizeof (struct som_copyable_section_data_struct));
+  if (som_section_data (osection)->copy_data == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+
+  memcpy (som_section_data (osection)->copy_data,
+	  som_section_data (isection)->copy_data,
+	  sizeof (struct som_copyable_section_data_struct));
 
   /* Reparent if necessary.  */
-  if (som_section_data (osection)->containing_space)
-    som_section_data (osection)->containing_space =
-      som_section_data (osection)->containing_space->output_section;
+  if (som_section_data (osection)->copy_data->container)
+    som_section_data (osection)->copy_data->container =
+      som_section_data (osection)->copy_data->container->output_section;
 
   return true;
 }
@@ -4218,7 +4319,7 @@ som_bfd_copy_private_bfd_data (ibfd, obfd)
 /* Set backend info for sections which can not be described
    in the BFD data structures.  */
 
-void
+boolean
 bfd_som_set_section_attributes (section, defined, private, sort_key, spnum)
      asection *section;
      int defined;
@@ -4226,20 +4327,31 @@ bfd_som_set_section_attributes (section, defined, private, sort_key, spnum)
      unsigned int sort_key;
      int spnum;
 {
-  struct space_dictionary_record *space_dict;
-
-  som_section_data (section)->is_space = 1;
-  space_dict = &som_section_data (section)->space_dict;
-  space_dict->is_defined = defined;
-  space_dict->is_private = private;
-  space_dict->sort_key = sort_key;
-  space_dict->space_number = spnum;
+  /* Allocate memory to hold the magic information.  */
+  if (som_section_data (section)->copy_data == NULL)
+    {
+      som_section_data (section)->copy_data
+	= (struct som_copyable_section_data_struct *)
+	  bfd_zalloc (section->owner,
+		      sizeof (struct som_copyable_section_data_struct));
+      if (som_section_data (section)->copy_data == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+    }
+  som_section_data (section)->copy_data->sort_key = sort_key;
+  som_section_data (section)->copy_data->is_defined = defined;
+  som_section_data (section)->copy_data->is_private = private;
+  som_section_data (section)->copy_data->container = section;
+  section->target_index = spnum;
+  return true;
 }
 
 /* Set backend info for subsections which can not be described 
    in the BFD data structures.  */
 
-void
+boolean
 bfd_som_set_subsection_attributes (section, container, access,
 				   sort_key, quadrant)
      asection *section;
@@ -4248,13 +4360,24 @@ bfd_som_set_subsection_attributes (section, container, access,
      unsigned int sort_key;
      int quadrant;
 {
-  struct subspace_dictionary_record *subspace_dict;
-  som_section_data (section)->is_subspace = 1;
-  subspace_dict = &som_section_data (section)->subspace_dict;
-  subspace_dict->access_control_bits = access;
-  subspace_dict->sort_key = sort_key;
-  subspace_dict->quadrant = quadrant;
-  som_section_data (section)->containing_space = container;
+  /* Allocate memory to hold the magic information.  */
+  if (som_section_data (section)->copy_data == NULL)
+    {
+      som_section_data (section)->copy_data
+	= (struct som_copyable_section_data_struct *)
+	  bfd_zalloc (section->owner,
+		      sizeof (struct som_copyable_section_data_struct));
+      if (som_section_data (section)->copy_data == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+    }
+  som_section_data (section)->copy_data->sort_key = sort_key;
+  som_section_data (section)->copy_data->access_control_bits = access;
+  som_section_data (section)->copy_data->quadrant = quadrant;
+  som_section_data (section)->copy_data->container = container;
+  return true;
 }
 
 /* Set the full SOM symbol type.  SOM needs far more symbol information
@@ -4357,13 +4480,13 @@ som_set_section_contents (abfd, section, location, offset, count)
 
   /* Only write subspaces which have "real" contents (eg. the contents
      are not generated at run time by the OS).  */
-  if (som_section_data (section)->is_subspace != 1
+  if (!som_is_subspace (section)
       || ((section->flags & (SEC_LOAD | SEC_DEBUGGING)) == 0))
     return true;
 
   /* Seek to the proper offset within the object file and write the
      data.  */
-  offset += som_section_data (section)->subspace_dict.file_loc_init_value; 
+  offset += som_section_data (section)->subspace_dict->file_loc_init_value; 
   if (bfd_seek (abfd, offset, SEEK_SET) == -1)
     {
       bfd_set_error (bfd_error_system_call);
