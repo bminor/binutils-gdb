@@ -2,7 +2,9 @@
 
 	* ia64-linux-nat.c: Include gdb_string.h.
 	* alpha-nat.c: Ditto.
-	* ia64-linux-nat.c: Ditto.
+	* ppc-linux-nat.c: Ditto.
+	* Makefile.in (ia64-linux-nat.o, alpha-nat.o, ppc-linux-nat.o):
+	Update dependencies.
 
 2002-12-05  Andrew Cagney  <ac131313@redhat.com>
 
