@@ -1,5 +1,11 @@
 2001-03-21  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.sh: Allow a non- multi-arch target to override a
+	predicate.
+	* gdbarch.h: Regenerate.
+
+2001-03-21  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbarch.sh: Avoid use of ``!''.
 
 2001-03-20  Andrew Cagney  <ac131313@redhat.com>

@@ -623,7 +623,9 @@ extern void set_gdbarch_register_sim_regno (struct gdbarch *gdbarch, gdbarch_reg
 
 #if defined (REGISTER_BYTES_OK)
 /* Legacy for systems yet to multi-arch REGISTER_BYTES_OK */
+#if !defined (REGISTER_BYTES_OK_P)
 #define REGISTER_BYTES_OK_P() (1)
+#endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
@@ -1310,7 +1312,9 @@ extern void set_gdbarch_frame_num_args (struct gdbarch *gdbarch, gdbarch_frame_n
 
 #if defined (STACK_ALIGN)
 /* Legacy for systems yet to multi-arch STACK_ALIGN */
+#if !defined (STACK_ALIGN_P)
 #define STACK_ALIGN_P() (1)
+#endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
@@ -1352,7 +1356,9 @@ extern void set_gdbarch_extra_stack_alignment_needed (struct gdbarch *gdbarch, i
 
 #if defined (REG_STRUCT_HAS_ADDR)
 /* Legacy for systems yet to multi-arch REG_STRUCT_HAS_ADDR */
+#if !defined (REG_STRUCT_HAS_ADDR_P)
 #define REG_STRUCT_HAS_ADDR_P() (1)
+#endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
@@ -1381,7 +1387,9 @@ extern void set_gdbarch_reg_struct_has_addr (struct gdbarch *gdbarch, gdbarch_re
 
 #if defined (SAVE_DUMMY_FRAME_TOS)
 /* Legacy for systems yet to multi-arch SAVE_DUMMY_FRAME_TOS */
+#if !defined (SAVE_DUMMY_FRAME_TOS_P)
 #define SAVE_DUMMY_FRAME_TOS_P() (1)
+#endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
