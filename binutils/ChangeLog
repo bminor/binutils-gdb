@@ -1,3 +1,14 @@
+Wed Jun 10 07:53:24 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* objdump.c(display_info), patches from
+	mohring@informatik.tu-muenchen.de to print the table much more
+	nicely.
+
+Thu May 28 13:36:16 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* objdump.c:  Add another enum->int cast, for the sake of
+	old compilers (such as PCC).
+
 Wed May 27 13:01:44 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* arlex.l:  Don't include <sysdep.h> (unneeded conflicts).
