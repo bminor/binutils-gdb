@@ -130,6 +130,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 			 (struct symtab **) NULL)))
     {
       int method_counter;
+      int name_len = strlen (name);
 
       CHECK_TYPEDEF (t);
 
@@ -202,7 +203,9 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		     */
 		  }
 	      }
-	  else if (strcmp_iw (class_name, name) == 0)
+	  else if (strncmp (class_name, name, name_len) == 0
+		   && (class_name[name_len] == '\0'
+		       || class_name[name_len] == '<'))
 	    {
 	      /* For GCC 3.x and stabs, constructors and destructors have names
 		 like __base_ctor and __complete_dtor.  Check the physname for now
@@ -298,7 +301,9 @@ build_canonical_line_spec (struct symtab_and_line *sal, char *symname,
 
 /* Find an instance of the character C in the string S that is outside
    of all parenthesis pairs, single-quoted strings, and double-quoted
-   strings.  */
+   strings.  Also, ignore the char within a template name, like a ','
+   within foo<int, int>.  */
+
 static char *
 find_toplevel_char (char *s, char c)
 {
@@ -321,9 +326,9 @@ find_toplevel_char (char *s, char c)
 	return scan;
       else if (*scan == '"' || *scan == '\'')
 	quoted = *scan;
-      else if (*scan == '(')
+      else if (*scan == '(' || *scan == '<')
 	depth++;
-      else if (*scan == ')' && depth > 0)
+      else if ((*scan == ')' || *scan == '>') && depth > 0)
 	depth--;
     }
 
@@ -929,20 +934,12 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       if ((*p == '"') && is_quote_enclosed)
 	--p;
       copy = (char *) alloca (p - *argptr + 1);
-      if ((**argptr == '"') && is_quote_enclosed)
-	{
-	  memcpy (copy, *argptr + 1, p - *argptr - 1);
-	  /* It may have the ending quote right after the file name */
-	  if (copy[p - *argptr - 2] == '"')
-	    copy[p - *argptr - 2] = 0;
-	  else
-	    copy[p - *argptr - 1] = 0;
-	}
+      memcpy (copy, *argptr, p - *argptr);
+      /* It may have the ending quote right after the file name */
+      if (is_quote_enclosed && copy[p - *argptr - 1] == '"')
+	copy[p - *argptr - 1] = 0;
       else
-	{
-	  memcpy (copy, *argptr, p - *argptr);
-	  copy[p - *argptr] = 0;
-	}
+	copy[p - *argptr] = 0;
 
       /* Find that file's data.  */
       s = lookup_symtab (copy);

@@ -502,11 +502,11 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	  char *tmp;
 
 	  if (TARGET_ADDR_BIT <= 32)
-	    tmp = longest_local_hex_string_custom (t->address
-						   & (CORE_ADDR) 0xffffffff, 
-						   "08l");
+	    tmp = local_hex_string_custom (t->address
+					   & (CORE_ADDR) 0xffffffff, 
+					   "08l");
 	  else
-	    tmp = longest_local_hex_string_custom (t->address, "016l");
+	    tmp = local_hex_string_custom (t->address, "016l");
 
 	  printf_filtered ("%s ", tmp);
 	}

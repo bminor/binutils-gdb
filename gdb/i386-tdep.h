@@ -40,11 +40,27 @@
    differs and is determined by the num_xmm_regs member of `struct
    gdbarch_tdep'.  */
 
+/* ABI variants that we know about.  */
+enum i386_abi
+{
+  I386_ABI_UNKNOWN = 0,
+
+  /* ELF */
+  I386_ABI_SVR4,		/* This is the default.  */
+  I386_ABI_NETBSD,
+  I386_ABI_LINUX,
+  I386_ABI_HURD,
+  I386_ABI_SOLARIS,
+  I386_ABI_FREEBSD,
+
+  I386_ABI_INVALID = -1
+};
+
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
-  /* OS/ABI.  */
-  int os_ident;
+  /* ABI.  */
+  enum i386_abi abi;
 
   /* Number of SSE registers.  */
   int num_xmm_regs;
@@ -112,5 +128,9 @@ struct gdbarch_tdep
 #define IS_FP_REGNUM(n) FP_REGNUM_P (n)
 #define IS_FPU_CTRL_REGNUM(n) FPC_REGNUM_P (n)
 #define IS_SSE_REGNUM(n) SSE_REGNUM_P (n)
+
+void i386_gdbarch_register_os_abi (enum i386_abi,
+				   void (*init_abi)(struct gdbarch_info,
+						    struct gdbarch *));
 
 #endif /* i386-tdep.h */

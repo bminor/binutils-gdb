@@ -1,6 +1,7 @@
 /* Target-machine dependent code for Motorola 88000 series, for GDB.
-   Copyright 1988, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000,
-   2001 Free Software Foundation, Inc.
+
+   Copyright 1988, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
+   2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -38,6 +39,32 @@ void frame_find_saved_regs ();
    relevance for the ways in which we screw with instruction pointers.  */
 
 int target_is_m88110 = 0;
+
+void
+m88k_target_write_pc (CORE_ADDR pc, ptid_t ptid)
+{
+  /* According to the MC88100 RISC Microprocessor User's Manual,
+     section 6.4.3.1.2:
+
+     ... can be made to return to a particular instruction by placing
+     a valid instruction address in the SNIP and the next sequential
+     instruction address in the SFIP (with V bits set and E bits
+     clear).  The rte resumes execution at the instruction pointed to
+     by the SNIP, then the SFIP.
+
+     The E bit is the least significant bit (bit 0).  The V (valid)
+     bit is bit 1.  This is why we logical or 2 into the values we are
+     writing below.  It turns out that SXIP plays no role when
+     returning from an exception so nothing special has to be done
+     with it.  We could even (presumably) give it a totally bogus
+     value.
+
+     -- Kevin Buettner */
+
+  write_register_pid (SXIP_REGNUM, pc, ptid);
+  write_register_pid (SNIP_REGNUM, (pc | 2), ptid);
+  write_register_pid (SFIP_REGNUM, (pc | 2) + 4, ptid);
+}
 
 /* The type of a register.  */
 struct type *

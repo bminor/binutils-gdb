@@ -790,6 +790,9 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   bfd *dynobj;
   asection *splt;
 
+  if (info->relocateable)
+    return true;
+
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
@@ -818,28 +821,6 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	continue;
       
       r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections [r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
       howto  = xstormy16_elf_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
@@ -1108,6 +1089,7 @@ xstormy16_elf_gc_sweep_hook (abfd, info, sec, relocs)
   xstormy16_elf_finish_dynamic_sections
 
 #define elf_backend_can_gc_sections		1
+#define elf_backend_rela_normal			1
 
 #define bfd_elf32_bfd_reloc_type_lookup		xstormy16_reloc_type_lookup
 #define bfd_elf32_bfd_relax_section		xstormy16_elf_relax_section

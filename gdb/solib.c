@@ -1,7 +1,7 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -652,13 +652,13 @@ info_sharedlibrary_command (char *ignore, int from_tty)
 
 	  printf_unfiltered ("%-*s", addr_width,
 			     so->textsection != NULL 
-			       ? longest_local_hex_string_custom (
+			       ? local_hex_string_custom (
 			           (LONGEST) so->textsection->addr,
 	                           addr_fmt)
 			       : "");
 	  printf_unfiltered ("%-*s", addr_width,
 			     so->textsection != NULL 
-			       ? longest_local_hex_string_custom (
+			       ? local_hex_string_custom (
 			           (LONGEST) so->textsection->endaddr,
 	                           addr_fmt)
 			       : "");

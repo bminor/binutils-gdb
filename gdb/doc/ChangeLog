@@ -1,3 +1,32 @@
+2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Debug Session): Document new `udp:' and `tcp:'
+	options for `target remote'.
+
+2002-05-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation on NNPC_REGNUM.
+
+2002-05-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	REGISTER_TO_VALUE and VALUE_TO_REGISTER and CONVERT_REGISTER_P.
+	(Target Architecture Definition): Revise section `Using Different
+	Register and Memory Data Representations'.  Add section `Raw and
+	Virtual Register Representations'.
+
+2002-05-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Mention
+	defaults for REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE.
+	(Target Architecture Definition): Mention same.  Add references to
+	web pages.
+
+2002-05-08  Michael Snyder  <msnyder@redhat.com>
+
+	* stabs.texinfo (Attributes): Document new "vector" attribute.
+
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Releasing GDB): Revise `Create a Release'.

@@ -2663,7 +2663,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
   set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
   set_gdbarch_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
+  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 16);
   set_gdbarch_register_virtual_type (gdbarch, rs6000_register_virtual_type);
   set_gdbarch_do_registers_info (gdbarch, rs6000_do_registers_info);

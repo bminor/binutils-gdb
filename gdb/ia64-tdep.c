@@ -564,6 +564,7 @@ ia64_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
   int slotnum = (int) (addr & 0x0f) / SLOT_MULTIPLIER;
   long long instr;
   int val;
+  int template;
 
   if (slotnum > 2)
     error("Can't insert breakpoint for slot numbers greater than 2.");
@@ -571,6 +572,15 @@ ia64_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
   addr &= ~0x0f;
 
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
+
+  /* Check for L type instruction in 2nd slot, if present then
+     bump up the slot number to the 3rd slot */
+  template = extract_bit_field (bundle, 0, 5);
+  if (slotnum == 1 && template_encoding_table[template][1] == L)
+    {
+      slotnum = 2;
+    }
+
   instr = slotN_contents (bundle, slotnum);
   memcpy(contents_cache, &instr, sizeof(instr));
   replace_slotN_contents (bundle, BREAKPOINT, slotnum);
@@ -587,10 +597,20 @@ ia64_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
   int slotnum = (addr & 0x0f) / SLOT_MULTIPLIER;
   long long instr;
   int val;
+  int template;
 
   addr &= ~0x0f;
 
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
+
+  /* Check for L type instruction in 2nd slot, if present then
+     bump up the slot number to the 3rd slot */
+  template = extract_bit_field (bundle, 0, 5);
+  if (slotnum == 1 && template_encoding_table[template][1] == L)
+    {
+      slotnum = 2;
+    }
+
   memcpy (&instr, contents_cache, sizeof instr);
   replace_slotN_contents (bundle, instr, slotnum);
   if (val == 0)

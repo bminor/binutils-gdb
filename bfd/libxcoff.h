@@ -222,4 +222,14 @@ extern boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
 extern boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
      (XCOFF_COMPLAIN_FUNCTION_ARGS);
 
+/* Relocation functions */
+boolean xcoff_reloc_type_noop PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+boolean xcoff_reloc_type_fail PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+boolean xcoff_reloc_type_pos PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+boolean xcoff_reloc_type_neg PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+boolean xcoff_reloc_type_rel PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+boolean xcoff_reloc_type_toc PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+boolean xcoff_reloc_type_ba PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+boolean xcoff_reloc_type_crel PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+
 #endif /* LIBXCOFF_H */

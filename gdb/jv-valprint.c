@@ -497,18 +497,17 @@ java_val_print (struct type *type, char *valaddr, int embedded_offset,
       return i;
 
     case TYPE_CODE_CHAR:
-      format = format ? format : output_format;
-      if (format)
-	print_scalar_formatted (valaddr, type, format, 0, stream);
-      else
-	LA_PRINT_CHAR ((int) unpack_long (type, valaddr), stream);
-      break;
-
     case TYPE_CODE_INT:
-      /* Can't just call c_val_print because that print bytes as C chars. */
+      /* Can't just call c_val_print because that prints bytes as C
+	 chars.  */
       format = format ? format : output_format;
       if (format)
 	print_scalar_formatted (valaddr, type, format, 0, stream);
+      else if (TYPE_CODE (type) == TYPE_CODE_CHAR
+	       || (TYPE_CODE (type) == TYPE_CODE_INT
+		   && TYPE_LENGTH (type) == 2
+		   && strcmp (TYPE_NAME (type), "char") == 0))
+	LA_PRINT_CHAR ((int) unpack_long (type, valaddr), stream);
       else
 	val_print_type_code_int (type, valaddr, stream);
       break;

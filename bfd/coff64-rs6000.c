@@ -152,6 +152,42 @@ static boolean xcoff64_generate_rtinit
   PARAMS ((bfd *, const char *, const char *, boolean));
 static boolean xcoff64_bad_format_hook PARAMS ((bfd *, PTR ));
 
+/* Relocation functions */
+static boolean xcoff64_reloc_type_br PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
+
+boolean (*xcoff64_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
+     (XCOFF_RELOC_FUNCTION_ARGS) =
+{
+  xcoff_reloc_type_pos,  /* R_POS   (0x00) */
+  xcoff_reloc_type_neg,  /* R_NEG   (0x01) */
+  xcoff_reloc_type_rel,  /* R_REL   (0x02) */
+  xcoff_reloc_type_toc,  /* R_TOC   (0x03) */
+  xcoff_reloc_type_fail, /* R_RTB   (0x04) */
+  xcoff_reloc_type_toc,  /* R_GL    (0x05) */
+  xcoff_reloc_type_toc,  /* R_TCL   (0x06) */
+  xcoff_reloc_type_fail, /*         (0x07) */
+  xcoff_reloc_type_ba,   /* R_BA    (0x08) */
+  xcoff_reloc_type_fail, /*         (0x09) */
+  xcoff64_reloc_type_br, /* R_BR    (0x0a) */
+  xcoff_reloc_type_fail, /*         (0x0b) */
+  xcoff_reloc_type_pos,  /* R_RL    (0x0c) */
+  xcoff_reloc_type_pos,  /* R_RLA   (0x0d) */
+  xcoff_reloc_type_fail, /*         (0x0e) */
+  xcoff_reloc_type_noop, /* R_REF   (0x0f) */
+  xcoff_reloc_type_fail, /*         (0x10) */
+  xcoff_reloc_type_fail, /*         (0x11) */
+  xcoff_reloc_type_toc,  /* R_TRL   (0x12) */
+  xcoff_reloc_type_toc,  /* R_TRLA  (0x13) */
+  xcoff_reloc_type_fail, /* R_RRTBI (0x14) */
+  xcoff_reloc_type_fail, /* R_RRTBA (0x15) */
+  xcoff_reloc_type_ba,   /* R_CAI   (0x16) */
+  xcoff_reloc_type_crel, /* R_CREL  (0x17) */
+  xcoff_reloc_type_ba,   /* R_RBA   (0x18) */
+  xcoff_reloc_type_ba,   /* R_RBAC  (0x19) */
+  xcoff64_reloc_type_br, /* R_RBR   (0x1a) */
+  xcoff_reloc_type_ba,   /* R_RBRC  (0x1b) */
+};
+
 /* coffcode.h needs these to be defined.  */
 /* Internalcoff.h and coffcode.h modify themselves based on these flags.  */
 #define XCOFF64
@@ -1030,6 +1066,84 @@ xcoff64_write_object_contents (abfd)
   return true;
 }
 
+static boolean 
+xcoff64_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto, 
+		       val, addend, relocation, contents)
+     bfd *input_bfd;
+     asection *input_section;
+     bfd *output_bfd ATTRIBUTE_UNUSED;
+     struct internal_reloc *rel;
+     struct internal_syment *sym ATTRIBUTE_UNUSED;
+     struct reloc_howto_struct *howto;
+     bfd_vma val;
+     bfd_vma addend;
+     bfd_vma *relocation;
+     bfd_byte *contents;
+{
+  struct xcoff_link_hash_entry *h;
+
+  if (0 > rel->r_symndx) 
+    return false;
+
+  h = obj_xcoff_sym_hashes (input_bfd)[rel->r_symndx];
+
+  /* If we see an R_BR or R_RBR reloc which is jumping to global
+     linkage code, and it is followed by an appropriate cror nop
+     instruction, we replace the cror with ld r2,40(r1).  This
+     restores the TOC after the glink code.  Contrariwise, if the
+     call is followed by a ld r2,40(r1), but the call is not
+     going to global linkage code, we can replace the load with a
+     cror.  */
+  if (NULL != h 
+      && bfd_link_hash_defined == h->root.type 
+      && (rel->r_vaddr - input_section->vma + 8 <= 
+	  input_section->_cooked_size)) 
+    {
+      bfd_byte *pnext;
+      unsigned long next;
+      
+      pnext = contents + (rel->r_vaddr - input_section->vma) + 4;
+      next = bfd_get_32 (input_bfd, pnext);
+      
+      /* The _ptrgl function is magic.  It is used by the AIX compiler to call 
+	 a function through a pointer.  */
+      if (h->smclas == XMC_GL || strcmp (h->root.root.string, "._ptrgl") == 0) 
+	{
+	  if (next == 0x4def7b82 		       /* cror 15,15,15  */
+	      || next == 0x4ffffb82  	               /* cror 31,31,31  */
+	      || next == 0x60000000)                   /* ori  r0,r0,0   */
+	    bfd_put_32 (input_bfd, 0xe8410028, pnext); /* ld   r2,40(r1) */
+	} 
+      else 
+	{
+	  if (next == 0xe8410028)		       /* ld r2,40(r1)   */
+	    bfd_put_32 (input_bfd, 0x60000000, pnext); /* ori r0,r0,0    */
+	}
+    } 
+  else if (NULL != h && bfd_link_hash_undefined == h->root.type) 
+    {
+      /* Normally, this relocation is against a defined symbol.  In the
+	 case where this is a partial link and the output section offset
+	 is greater than 2^25, the linker will return an invalid error 
+	 message that the relocation has been truncated.  Yes it has been
+	 truncated but no it not important.  For this case, disable the 
+	 overflow checking. */
+      howto->complain_on_overflow = complain_overflow_dont;
+    }
+  
+  howto->pc_relative = true;
+  howto->src_mask &= ~3;
+  howto->dst_mask = howto->src_mask;
+  
+  /* A PC relative reloc includes the section address.  */
+  addend += input_section->vma;
+  
+  *relocation = val + addend;
+  *relocation -= (input_section->output_section->vma + 
+		  input_section->output_offset);
+  return true;
+}
+
 /* This is the relocation function for the PowerPC64.
    See xcoff_ppc_relocation_section for more information. */
 
@@ -1146,7 +1260,7 @@ xcoff64_ppc_relocate_section (output_bfd, info, input_bfd,
 	}
       
       if (rel->r_type >= XCOFF_MAX_CALCULATE_RELOCATION 
-	  || (false == xcoff_calculate_relocation[rel->r_type]
+	  || (false == xcoff64_calculate_relocation[rel->r_type]
 	      (input_bfd, input_section, output_bfd, rel, sym, &howto, val, 
 	       addend, &relocation, contents))) 
 	return false;

@@ -197,6 +197,8 @@ print_objfile_statistics (void)
 		     obstack_memory_used (&objfile->psymbol_obstack));
     printf_filtered ("  Total memory used for psymbol cache: %d\n",
 		     obstack_memory_used (&objfile->psymbol_cache.cache));
+    printf_filtered ("  Total memory used for macro cache: %d\n",
+		     obstack_memory_used (&objfile->macro_cache.cache));
     printf_filtered ("  Total memory used for symbol obstack: %d\n",
 		     obstack_memory_used (&objfile->symbol_obstack));
     printf_filtered ("  Total memory used for type obstack: %d\n",

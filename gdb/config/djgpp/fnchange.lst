@@ -52,6 +52,8 @@
 @V@/gdb/ChangeLog-2000 @V@/gdb/ChangeLog.000
 @V@/gdb/ChangeLog-2001 @V@/gdb/ChangeLog.001
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
+@V@/gdb/alphanbsd-nat.c @V@/gdb/alphnb-nat.c
+@V@/gdb/alphanbsd-tdep.c @V@/gdb/alphnb-tdep.c
 @V@/gdb/arm-linux-nat.c @V@/gdb/armlin-nat.c
 @V@/gdb/arm-linux-tdep.c @V@/gdb/armlin-tdep.c
 @V@/gdb/armnbsd-nat.c @V@/gdb/armnbd-nat.c

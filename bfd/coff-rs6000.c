@@ -155,15 +155,7 @@ static boolean do_copy PARAMS((bfd *, bfd *));
 static boolean do_shared_object_padding PARAMS ((bfd *, bfd *, ufile_ptr *, int));
 
 /* Relocation functions */
-static boolean xcoff_reloc_type_noop PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-static boolean xcoff_reloc_type_fail PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-static boolean xcoff_reloc_type_pos PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-static boolean xcoff_reloc_type_neg PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-static boolean xcoff_reloc_type_rel PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-static boolean xcoff_reloc_type_toc PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-static boolean xcoff_reloc_type_ba PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
 static boolean xcoff_reloc_type_br PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
-static boolean xcoff_reloc_type_crel PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
 
 static boolean xcoff_complain_overflow_dont_func 
   PARAMS ((XCOFF_COMPLAIN_FUNCTION_ARGS));
@@ -2726,7 +2718,7 @@ xcoff_swap_ldrel_out (abfd, src, d)
 }
 
 
-static boolean 
+boolean 
 xcoff_reloc_type_noop (input_bfd, input_section, output_bfd, rel, sym, howto, 
 		       val, addend, relocation, contents)
      bfd *input_bfd ATTRIBUTE_UNUSED;
@@ -2743,7 +2735,7 @@ xcoff_reloc_type_noop (input_bfd, input_section, output_bfd, rel, sym, howto,
   return true;
 }
 
-static boolean 
+boolean 
 xcoff_reloc_type_fail (input_bfd, input_section, output_bfd, rel, sym, howto, 
 		       val, addend, relocation, contents)
      bfd *input_bfd;
@@ -2764,7 +2756,7 @@ xcoff_reloc_type_fail (input_bfd, input_section, output_bfd, rel, sym, howto,
   return false;
 }
 
-static boolean 
+boolean 
 xcoff_reloc_type_pos (input_bfd, input_section, output_bfd, rel, sym, howto, 
 		      val, addend, relocation, contents)
      bfd *input_bfd ATTRIBUTE_UNUSED;
@@ -2782,7 +2774,7 @@ xcoff_reloc_type_pos (input_bfd, input_section, output_bfd, rel, sym, howto,
   return true;
 }
 
-static boolean 
+boolean 
 xcoff_reloc_type_neg (input_bfd, input_section, output_bfd, rel, sym, howto, 
 		      val, addend, relocation, contents)
      bfd *input_bfd ATTRIBUTE_UNUSED;
@@ -2800,7 +2792,7 @@ xcoff_reloc_type_neg (input_bfd, input_section, output_bfd, rel, sym, howto,
   return true;
 }
 
-static boolean 
+boolean 
 xcoff_reloc_type_rel (input_bfd, input_section, output_bfd, rel, sym, howto, 
 		      val, addend, relocation, contents)
      bfd *input_bfd ATTRIBUTE_UNUSED;
@@ -2824,7 +2816,8 @@ xcoff_reloc_type_rel (input_bfd, input_section, output_bfd, rel, sym, howto,
 		  input_section->output_offset);
   return true;
 }
-static boolean 
+
+boolean 
 xcoff_reloc_type_toc (input_bfd, input_section, output_bfd, rel, sym, howto, 
 		      val, addend, relocation, contents)
      bfd *input_bfd;
@@ -2866,7 +2859,8 @@ xcoff_reloc_type_toc (input_bfd, input_section, output_bfd, rel, sym, howto,
 		 (sym->n_value - xcoff_data (input_bfd)->toc));
   return true;
 }
-static boolean 
+
+boolean 
 xcoff_reloc_type_ba (input_bfd, input_section, output_bfd, rel, sym, howto, 
 		     val, addend, relocation, contents)
      bfd *input_bfd ATTRIBUTE_UNUSED;
@@ -2967,7 +2961,7 @@ xcoff_reloc_type_br (input_bfd, input_section, output_bfd, rel, sym, howto,
   return true;
 }
 
-static boolean 
+boolean 
 xcoff_reloc_type_crel (input_bfd, input_section, output_bfd, rel, sym, howto, 
 		       val, addend, relocation, contents)
      bfd *input_bfd ATTRIBUTE_UNUSED;

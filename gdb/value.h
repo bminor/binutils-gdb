@@ -375,7 +375,7 @@ extern struct value *value_struct_elt_for_reference (struct type *domain,
 extern struct value *value_static_field (struct type *type, int fieldno);
 
 extern struct fn_field *value_find_oload_method_list (struct value **, char *,
-						      int, int *, int *,
+						      int, int *,
 						      struct type **, int *);
 
 extern int find_overload_match (struct type **arg_types, int nargs,
@@ -404,9 +404,6 @@ extern struct value *value_zero (struct type *type, enum lval_type lv);
 extern struct value *value_repeat (struct value *arg1, int count);
 
 extern struct value *value_subscript (struct value *array, struct value *idx);
-
-extern struct value *value_from_vtable_info (struct value *arg,
-					     struct type *type);
 
 extern struct value *value_being_returned (struct type *valtype,
 					   char *retbuf, int struct_return);

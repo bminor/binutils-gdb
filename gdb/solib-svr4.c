@@ -1293,7 +1293,7 @@ static struct link_map_offsets *
 svr4_fetch_link_map_offsets (void)
 {
   struct link_map_offsets *(*flmo)(void) =
-    gdbarch_data (fetch_link_map_offsets_gdbarch_data);
+    gdbarch_data (current_gdbarch, fetch_link_map_offsets_gdbarch_data);
 
   if (flmo == NULL)
     {
@@ -1330,7 +1330,7 @@ static void *
 init_fetch_link_map_offsets (struct gdbarch *gdbarch)
 {
   struct link_map_offsets *(*flmo) =
-    gdbarch_data (fetch_link_map_offsets_gdbarch_data);
+    gdbarch_data (gdbarch, fetch_link_map_offsets_gdbarch_data);
 
   if (flmo == NULL)
     return legacy_fetch_link_map_offsets;

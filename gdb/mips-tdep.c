@@ -199,7 +199,7 @@ mips2_fp_compat (void)
   if ((read_register (PS_REGNUM) & ST0_FR) == 0)
     return 1;
 #endif
-  
+
   return 0;
 }
 
@@ -288,6 +288,9 @@ static CORE_ADDR after_prologue (CORE_ADDR pc,
 
 static void mips_read_fp_register_single (int regno, char *rare_buffer);
 static void mips_read_fp_register_double (int regno, char *rare_buffer);
+
+static struct type *mips_float_register_type (void);
+static struct type *mips_double_register_type (void);
 
 /* This value is the model of MIPS in use.  It is derived from the value
    of the PrID register.  */
@@ -522,7 +525,7 @@ mips_mask_address_p (void)
       internal_error (__FILE__, __LINE__,
 		      "mips_mask_address_p: bad switch");
       return -1;
-    }      
+    }
 }
 
 static void
@@ -544,7 +547,7 @@ show_mask_address (char *cmd, int from_tty)
       internal_error (__FILE__, __LINE__,
 		      "show_mask_address: bad switch");
       break;
-    }      
+    }
 }
 
 /* Should call_function allocate stack space for a struct return?  */
@@ -2135,7 +2138,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
    we basically have to look at symbol information for the function
    that we stopped in, which tells us *which* register (if any) is
    the base of the frame pointer, and what offset from that register
-   the frame itself is at.  
+   the frame itself is at.
 
    This presents a problem when trying to examine a stack in memory
    (that isn't executing at the moment), using the "frame" command.  We
@@ -2179,7 +2182,7 @@ static int
 mips_type_needs_double_align (struct type *type)
 {
   enum type_code typecode = TYPE_CODE (type);
-  
+
   if (typecode == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8)
     return 1;
   else if (typecode == TYPE_CODE_STRUCT)
@@ -2190,7 +2193,7 @@ mips_type_needs_double_align (struct type *type)
     }
   else if (typecode == TYPE_CODE_UNION)
     {
-      int i, n;    
+      int i, n;
 
       n = TYPE_NFIELDS (type);
       for (i = 0; i < n; i++)
@@ -2437,7 +2440,7 @@ mips_push_arguments (int nargs,
 		      fprintf_unfiltered (gdb_stdlog, " longword_offset=0x%lx",
 					  (long) longword_offset);
 		    }
-		    
+
 		  addr = sp + stack_offset + longword_offset;
 
 		  if (mips_debug)
@@ -2462,7 +2465,7 @@ mips_push_arguments (int nargs,
 		{
 		  LONGEST regval = extract_unsigned_integer (val, partial_len);
 
-		  /* A non-floating-point argument being passed in a 
+		  /* A non-floating-point argument being passed in a
 		     general register.  If a struct or union, and if
 		     the remaining length is smaller than the register
 		     size, we have to adjust the register value on
@@ -2594,7 +2597,7 @@ mips_push_dummy_frame (void)
    * procedure calls. Dest_Reg (see tm-mips.h) must also be saved.
    * In addition, we must save the PC, PUSH_FP_REGNUM, MMLO/-HI
    * and FP Control/Status registers.
-   * 
+   *
    *
    * Dummy frame layout:
    *  (high memory)
@@ -2738,6 +2741,24 @@ mips_pop_frame (void)
    regs could be 32 bits wide in one frame and 64 on the frame above
    and below).  */
 
+static struct type *
+mips_float_register_type (void)
+{
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    return builtin_type_ieee_single_big;
+  else
+    return builtin_type_ieee_single_little;
+}
+
+static struct type *
+mips_double_register_type (void)
+{
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    return builtin_type_ieee_double_big;
+  else
+    return builtin_type_ieee_double_little;
+}
+
 /* Copy a 32-bit single-precision value from the current frame
    into rare_buffer.  */
 
@@ -2798,7 +2819,7 @@ mips_read_fp_register_double (int regno, char *rare_buffer)
 	  mips_read_fp_register_single (regno, rare_buffer + 4);
 	  mips_read_fp_register_single (regno + 1, rare_buffer);
 	}
-      else      
+      else
 	{
 	  mips_read_fp_register_single (regno, rare_buffer);
 	  mips_read_fp_register_single (regno + 1, rare_buffer + 4);
@@ -2831,7 +2852,7 @@ mips_print_register (int regnum, int all)
       mips_read_fp_register_double (regnum, dbuffer);
 
       printf_filtered ("(d%d: ", regnum - FP0_REGNUM);
-      val_print (builtin_type_double, dbuffer, 0, 0,
+      val_print (mips_double_register_type (), dbuffer, 0, 0,
 		 gdb_stdout, 0, 1, 0, Val_pretty_default);
       printf_filtered ("); ");
     }
@@ -2855,10 +2876,10 @@ mips_print_register (int regnum, int all)
 	int offset = 4 * (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG);
 
 	printf_filtered (" (float) ");
-	val_print (builtin_type_float, raw_buffer + offset, 0, 0,
+	val_print (mips_float_register_type (), raw_buffer + offset, 0, 0,
 		   gdb_stdout, 0, 1, 0, Val_pretty_default);
 	printf_filtered (", (double) ");
-	val_print (builtin_type_double, raw_buffer, 0, 0,
+	val_print (mips_double_register_type (), raw_buffer, 0, 0,
 		   gdb_stdout, 0, 1, 0, Val_pretty_default);
       }
     else
@@ -2873,14 +2894,14 @@ mips_print_register (int regnum, int all)
         offset = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
       else
 	offset = 0;
-	
+
       print_scalar_formatted (raw_buffer + offset,
 			      REGISTER_VIRTUAL_TYPE (regnum),
 			      'x', 0, gdb_stdout);
     }
 }
 
-/* Replacement for generic do_registers_info.  
+/* Replacement for generic do_registers_info.
    Print regs in pretty columns.  */
 
 static int
@@ -2897,14 +2918,14 @@ do_fp_register_row (int regnum)
       /* 4-byte registers: we can fit two registers per row.  */
       /* Also print every pair of 4-byte regs as an 8-byte double.  */
       mips_read_fp_register_single (regnum, raw_buffer);
-      flt1 = unpack_double (builtin_type_float, raw_buffer, &inv1);
+      flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
 
       mips_read_fp_register_single (regnum + 1, raw_buffer);
-      flt2 = unpack_double (builtin_type_float, raw_buffer, &inv2);
+      flt2 = unpack_double (mips_float_register_type (), raw_buffer, &inv2);
 
       mips_read_fp_register_double (regnum, raw_buffer);
-      doub = unpack_double (builtin_type_double, raw_buffer, &inv3);
-      
+      doub = unpack_double (mips_double_register_type (), raw_buffer, &inv3);
+
       printf_filtered (" %-5s", REGISTER_NAME (regnum));
       if (inv1)
 	printf_filtered (": <invalid float>");
@@ -2931,11 +2952,11 @@ do_fp_register_row (int regnum)
     {
       /* Eight byte registers: print each one as float AND as double.  */
       mips_read_fp_register_single (regnum, raw_buffer);
-      flt1 = unpack_double (builtin_type_double, raw_buffer, &inv1);
+      flt1 = unpack_double (mips_double_register_type (), raw_buffer, &inv1);
 
       mips_read_fp_register_double (regnum, raw_buffer);
-      doub = unpack_double (builtin_type_double, raw_buffer, &inv3);
-      
+      doub = unpack_double (mips_double_register_type (), raw_buffer, &inv3);
+
       printf_filtered (" %-5s: ", REGISTER_NAME (regnum));
       if (inv1)
 	printf_filtered ("<invalid float>");
@@ -3676,10 +3697,10 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
      it's definitely a 16-bit function.  Otherwise, we have to just
      guess that if the address passed in is odd, it's 16-bits.  */
   if (proc_desc)
-    info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ? 
+    info->mach = pc_is_mips16 (PROC_LOW_ADDR (proc_desc)) ?
       bfd_mach_mips16 : TM_PRINT_INSN_MACH;
   else
-    info->mach = pc_is_mips16 (memaddr) ? 
+    info->mach = pc_is_mips16 (memaddr) ?
       bfd_mach_mips16 : TM_PRINT_INSN_MACH;
 
   /* Round down the instruction address to the appropriate boundary.  */
@@ -4072,7 +4093,7 @@ mips_stab_reg_to_regnum (int num)
 {
   if (num < 32)
     return num;
-  else 
+  else
     return num + FP0_REGNUM - 38;
 }
 
@@ -4236,7 +4257,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 4 - 1;
       tdep->mips_regs_have_home_p = 1;
       tdep->gdb_target_is_mips64 = 1;
-      tdep->default_mask_address_p = 0; 
+      tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -4318,7 +4339,7 @@ mips_gdbarch_init (struct gdbarch_info info,
      flag in object files because to do so would make it impossible to
      link with libraries compiled without "-gp32". This is
      unnecessarily restrictive.
- 
+
      We could solve this problem by adding "-gp32" multilibs to gcc,
      but to set this flag before gcc is built with such multilibs will
      break too many systems.''
@@ -4958,4 +4979,3 @@ that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
 When non-zero, mips specific debugging is enabled.", &setdebuglist),
 		     &showdebuglist);
 }
-

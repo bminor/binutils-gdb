@@ -71,6 +71,7 @@ static void alloc_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_data (struct gdbarch *);
 static void free_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
+static void clear_gdbarch_swap (struct gdbarch *);
 static void swapout_gdbarch_swap (struct gdbarch *);
 static void swapin_gdbarch_swap (struct gdbarch *);
 
@@ -154,7 +155,6 @@ struct gdbarch
   int ps_regnum;
   int fp0_regnum;
   int npc_regnum;
-  int nnpc_regnum;
   gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum;
   gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum;
   gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum;
@@ -199,6 +199,9 @@ struct gdbarch
   gdbarch_register_convertible_ftype *register_convertible;
   gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual;
   gdbarch_register_convert_to_raw_ftype *register_convert_to_raw;
+  gdbarch_convert_register_p_ftype *convert_register_p;
+  gdbarch_register_to_value_ftype *register_to_value;
+  gdbarch_value_to_register_ftype *value_to_register;
   gdbarch_fetch_pseudo_register_ftype *fetch_pseudo_register;
   gdbarch_store_pseudo_register_ftype *store_pseudo_register;
   gdbarch_pointer_to_address_ftype *pointer_to_address;
@@ -310,10 +313,9 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  generic_register_size,
   0,
-  generic_register_raw_size,
-  0,
-  generic_register_virtual_size,
+  generic_register_size,
   0,
   0,
   0,
@@ -398,6 +400,9 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
+  0,
+  0,
   generic_in_function_epilogue_p,
   construct_inferior_arguments,
   0,
@@ -414,6 +419,9 @@ void
 initialize_non_multiarch ()
 {
   alloc_gdbarch_data (&startup_gdbarch);
+  /* Ensure that all swap areas are zeroed so that they again think
+     they are starting from scratch.  */
+  clear_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_data (&startup_gdbarch);
 }
@@ -466,7 +474,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->ps_regnum = -1;
   current_gdbarch->fp0_regnum = -1;
   current_gdbarch->npc_regnum = -1;
-  current_gdbarch->nnpc_regnum = -1;
   current_gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
@@ -475,7 +482,9 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_name = legacy_register_name;
   current_gdbarch->register_size = -1;
   current_gdbarch->register_bytes = -1;
+  current_gdbarch->register_raw_size = generic_register_size;
   current_gdbarch->max_register_raw_size = -1;
+  current_gdbarch->register_virtual_size = generic_register_size;
   current_gdbarch->max_register_virtual_size = -1;
   current_gdbarch->do_registers_info = do_registers_info;
   current_gdbarch->print_float_info = default_print_float_info;
@@ -495,6 +504,9 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->init_frame_pc = init_frame_pc_default;
   current_gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   current_gdbarch->register_convertible = generic_register_convertible_not;
+  current_gdbarch->convert_register_p = legacy_convert_register_p;
+  current_gdbarch->register_to_value = legacy_register_to_value;
+  current_gdbarch->value_to_register = legacy_value_to_register;
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
   current_gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
@@ -595,7 +607,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of ps_regnum, invalid_p == 0 */
   /* Skip verify of fp0_regnum, invalid_p == 0 */
   /* Skip verify of npc_regnum, invalid_p == 0 */
-  /* Skip verify of nnpc_regnum, invalid_p == 0 */
   /* Skip verify of stab_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
@@ -611,15 +622,11 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->register_byte == 0))
     fprintf_unfiltered (log, "\n\tregister_byte");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_raw_size == 0))
-    fprintf_unfiltered (log, "\n\tregister_raw_size");
+  /* Skip verify of register_raw_size, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->max_register_raw_size == -1))
     fprintf_unfiltered (log, "\n\tmax_register_raw_size");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_virtual_size == 0))
-    fprintf_unfiltered (log, "\n\tregister_virtual_size");
+  /* Skip verify of register_virtual_size, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->max_register_virtual_size == -1))
     fprintf_unfiltered (log, "\n\tmax_register_virtual_size");
@@ -680,6 +687,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
   /* Skip verify of register_convert_to_raw, invalid_p == 0 */
+  /* Skip verify of convert_register_p, invalid_p == 0 */
+  /* Skip verify of register_to_value, invalid_p == 0 */
+  /* Skip verify of value_to_register, invalid_p == 0 */
   /* Skip verify of fetch_pseudo_register, has predicate */
   /* Skip verify of store_pseudo_register, has predicate */
   /* Skip verify of pointer_to_address, invalid_p == 0 */
@@ -1008,6 +1018,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: CONVERT_FROM_FUNC_PTR_ADDR = 0x%08lx\n",
                         (long) current_gdbarch->convert_from_func_ptr_addr
                         /*CONVERT_FROM_FUNC_PTR_ADDR ()*/);
+#endif
+#ifdef CONVERT_REGISTER_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "CONVERT_REGISTER_P(regnum)",
+                      XSTRING (CONVERT_REGISTER_P (regnum)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: CONVERT_REGISTER_P = 0x%08lx\n",
+                        (long) current_gdbarch->convert_register_p
+                        /*CONVERT_REGISTER_P ()*/);
 #endif
 #ifdef DECR_PC_AFTER_BREAK
   fprintf_unfiltered (file,
@@ -1414,14 +1435,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->memory_remove_breakpoint
                         /*MEMORY_REMOVE_BREAKPOINT ()*/);
 #endif
-#ifdef NNPC_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NNPC_REGNUM # %s\n",
-                      XSTRING (NNPC_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NNPC_REGNUM = %d\n",
-                      NNPC_REGNUM);
-#endif
 #ifdef NPC_REGNUM
   fprintf_unfiltered (file,
                       "gdbarch_dump: NPC_REGNUM # %s\n",
@@ -1698,6 +1711,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: REGISTER_SIZE = %d\n",
                       REGISTER_SIZE);
+#endif
+#ifdef REGISTER_TO_VALUE
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "REGISTER_TO_VALUE(regnum, type, from, to)",
+                      XSTRING (REGISTER_TO_VALUE (regnum, type, from, to)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: REGISTER_TO_VALUE = 0x%08lx\n",
+                        (long) current_gdbarch->register_to_value
+                        /*REGISTER_TO_VALUE ()*/);
 #endif
 #ifdef REGISTER_VIRTUAL_SIZE
   fprintf_unfiltered (file,
@@ -2153,6 +2180,20 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: USE_STRUCT_CONVENTION = 0x%08lx\n",
                         (long) current_gdbarch->use_struct_convention
                         /*USE_STRUCT_CONVENTION ()*/);
+#endif
+#ifdef VALUE_TO_REGISTER
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "VALUE_TO_REGISTER(type, regnum, from, to)",
+                      XSTRING (VALUE_TO_REGISTER (type, regnum, from, to)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: VALUE_TO_REGISTER = 0x%08lx\n",
+                        (long) current_gdbarch->value_to_register
+                        /*VALUE_TO_REGISTER ()*/);
 #endif
   if (current_gdbarch->dump_tdep != NULL)
     current_gdbarch->dump_tdep (current_gdbarch, file);
@@ -2678,23 +2719,6 @@ set_gdbarch_npc_regnum (struct gdbarch *gdbarch,
                         int npc_regnum)
 {
   gdbarch->npc_regnum = npc_regnum;
-}
-
-int
-gdbarch_nnpc_regnum (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of nnpc_regnum, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_nnpc_regnum called\n");
-  return gdbarch->nnpc_regnum;
-}
-
-void
-set_gdbarch_nnpc_regnum (struct gdbarch *gdbarch,
-                         int nnpc_regnum)
-{
-  gdbarch->nnpc_regnum = nnpc_regnum;
 }
 
 int
@@ -3535,6 +3559,63 @@ set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch,
                                      gdbarch_register_convert_to_raw_ftype register_convert_to_raw)
 {
   gdbarch->register_convert_to_raw = register_convert_to_raw;
+}
+
+int
+gdbarch_convert_register_p (struct gdbarch *gdbarch, int regnum)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->convert_register_p == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_convert_register_p invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_convert_register_p called\n");
+  return gdbarch->convert_register_p (regnum);
+}
+
+void
+set_gdbarch_convert_register_p (struct gdbarch *gdbarch,
+                                gdbarch_convert_register_p_ftype convert_register_p)
+{
+  gdbarch->convert_register_p = convert_register_p;
+}
+
+void
+gdbarch_register_to_value (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->register_to_value == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_register_to_value invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_to_value called\n");
+  gdbarch->register_to_value (regnum, type, from, to);
+}
+
+void
+set_gdbarch_register_to_value (struct gdbarch *gdbarch,
+                               gdbarch_register_to_value_ftype register_to_value)
+{
+  gdbarch->register_to_value = register_to_value;
+}
+
+void
+gdbarch_value_to_register (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->value_to_register == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_value_to_register invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_value_to_register called\n");
+  gdbarch->value_to_register (type, regnum, from, to);
+}
+
+void
+set_gdbarch_value_to_register (struct gdbarch *gdbarch,
+                               gdbarch_value_to_register_ftype value_to_register)
+{
+  gdbarch->value_to_register = value_to_register;
 }
 
 int
@@ -4799,10 +4880,10 @@ set_gdbarch_data (struct gdbarch *gdbarch,
    data-pointer. */
 
 void *
-gdbarch_data (struct gdbarch_data *data)
+gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 {
-  gdb_assert (data->index < current_gdbarch->nr_data);
-  return current_gdbarch->data[data->index];
+  gdb_assert (data->index < gdbarch->nr_data);
+  return gdbarch->data[data->index];
 }
 
 
@@ -4851,6 +4932,17 @@ register_gdbarch_swap (void *data,
   (*rego)->sizeof_data = sizeof_data;
 }
 
+static void
+clear_gdbarch_swap (struct gdbarch *gdbarch)
+{
+  struct gdbarch_swap *curr;
+  for (curr = gdbarch->swap;
+       curr != NULL;
+       curr = curr->next)
+    {
+      memset (curr->source->data, 0, curr->source->sizeof_data);
+    }
+}
 
 static void
 init_gdbarch_swap (struct gdbarch *gdbarch)
@@ -4867,7 +4959,6 @@ init_gdbarch_swap (struct gdbarch *gdbarch)
 	  (*curr)->source = rego;
 	  (*curr)->swap = xmalloc (rego->sizeof_data);
 	  (*curr)->next = NULL;
-	  memset (rego->data, 0, rego->sizeof_data);
 	  curr = &(*curr)->next;
 	}
       if (rego->init != NULL)
@@ -5033,6 +5124,7 @@ int
 gdbarch_update_p (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
+  struct gdbarch *old_gdbarch;
   struct gdbarch_registration *rego;
 
   /* Fill in missing parts of the INFO struct using a number of
@@ -5101,29 +5193,47 @@ gdbarch_update_p (struct gdbarch_info info)
       return 0;
     }
 
+  /* Swap the data belonging to the old target out setting the
+     installed data to zero.  This stops the ->init() function trying
+     to refer to the previous architecture's global data structures.  */
+  swapout_gdbarch_swap (current_gdbarch);
+  clear_gdbarch_swap (current_gdbarch);
+
+  /* Save the previously selected architecture, setting the global to
+     NULL.  This stops ->init() trying to use the previous
+     architecture's configuration.  The previous architecture may not
+     even be of the same architecture family.  The most recent
+     architecture of the same family is found at the head of the
+     rego->arches list.  */
+  old_gdbarch = current_gdbarch;
+  current_gdbarch = NULL;
+
   /* Ask the target for a replacement architecture. */
   new_gdbarch = rego->init (info, rego->arches);
 
-  /* Did the target like it?  No. Reject the change. */
+  /* Did the target like it?  No. Reject the change and revert to the
+     old architecture.  */
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Target rejected architecture\n");
+      swapin_gdbarch_swap (old_gdbarch);
+      current_gdbarch = old_gdbarch;
       return 0;
     }
 
-  /* Did the architecture change?  No. Do nothing. */
-  if (current_gdbarch == new_gdbarch)
+  /* Did the architecture change?  No.  Oops, put the old architecture
+     back.  */
+  if (old_gdbarch == new_gdbarch)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\n",
 			    (long) new_gdbarch,
 			    new_gdbarch->bfd_arch_info->printable_name);
+      swapin_gdbarch_swap (old_gdbarch);
+      current_gdbarch = old_gdbarch;
       return 1;
     }
-
-  /* Swap all data belonging to the old target out */
-  swapout_gdbarch_swap (current_gdbarch);
 
   /* Is this a pre-existing architecture?  Yes. Move it to the front
      of the list of architectures (keeping the list sorted Most

@@ -98,8 +98,8 @@ proc test_integer_literals_rejected {} {
     global gdb_prompt
 
     test_print_reject "p 0x" 
-    gdb_test "p ''" "Empty character constant\\."
-    gdb_test "p '''" "Empty character constant\\."
+    gdb_test "p ''" "(Empty character constant\\.|A character constant must contain at least one character\\.)"
+    gdb_test "p '''" "(Empty character constant\\.|A character constant must contain at least one character\\.)"
     test_print_reject "p '\\'"
 
     # Note that this turns into "p '\\\'" at gdb's input.
@@ -627,7 +627,7 @@ proc test_print_string_constants {} {
     gdb_test "p *\"foo\""		" = 102 'f'"
     gdb_test "ptype *\"foo\""		" = char"
     gdb_test "p &*\"foo\""		" = \"foo\""
-    setup_xfail "*-*-*"
+    # setup_kfail "gdb/538"
     gdb_test "ptype &*\"foo\""	"type = char \\*"
     gdb_test "p (char *)\"foo\""	" = \"foo\""
 }

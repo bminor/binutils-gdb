@@ -1,5 +1,5 @@
 /* OpenRISC-specific support for 32-bit ELF.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Contributed by Johan Rydberg, jrydberg@opencores.org
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -338,6 +338,9 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
+  if (info->relocateable)
+    return true;
+
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend = relocs + input_section->reloc_count;
@@ -360,25 +363,6 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       if (r_type == R_OPENRISC_GNU_VTINHERIT
 	  || r_type == R_OPENRISC_GNU_VTENTRY)
 	continue;
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-	  continue;
-	}
 
       if ((unsigned int) r_type >
 	  (sizeof openrisc_elf_howto_table / sizeof (reloc_howto_type)))
@@ -645,6 +629,7 @@ openrisc_elf_final_write_processing (abfd, linker)
 #define elf_backend_check_relocs	openrisc_elf_check_relocs
 
 #define elf_backend_can_gc_sections	1
+#define elf_backend_rela_normal		1
 
 #define bfd_elf32_bfd_reloc_type_lookup openrisc_reloc_type_lookup
 

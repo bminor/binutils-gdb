@@ -67,6 +67,10 @@ if [istarget "xstormy16-*-*"] then {
     set asm-arch xstormy16
     set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
 }
+if [istarget "v850-*-*"] then {
+    set asm-arch v850
+    set gdb_wrapper_initialized 1
+}
 if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }

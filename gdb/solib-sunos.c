@@ -137,6 +137,8 @@ allocate_rt_common_objfile (void)
   objfile->md = NULL;
   obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
 			      xmalloc, xfree);
+  obstack_specify_allocation (&objfile->macro_cache.cache, 0, 0,
+			      xmalloc, xfree);
   obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
 			      xfree);
   obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,

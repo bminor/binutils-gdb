@@ -832,7 +832,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       else
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
-	  if (STREQ (name, "malloc") && t->code == TYPE_CODE_VOID)
+	  if (STREQ (name, "malloc") && TYPE_CODE (t) == TYPE_CODE_VOID)
 	    {
 	      /* I don't know why, but, at least under Alpha GNU/Linux,
 	         when linking against a malloc without debugging
@@ -1604,7 +1604,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
          dereference them.  */
       while (TYPE_CODE (tp) == TYPE_CODE_PTR
 	     || TYPE_CODE (tp) == TYPE_CODE_ARRAY)
-	tp = tp->target_type;
+	tp = TYPE_TARGET_TYPE (tp);
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
          Any type may be returned from cross_ref if file indirect entries

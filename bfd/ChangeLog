@@ -1,3 +1,79 @@
+2002-05-10  Tom Rix  <trix@redhat.com>
+
+	* coff64-rs6000.c (xcoff64_reloc_type_br): New function for 
+	xcoff64_ppc_relocate_section.
+	* coff-rs6000.c : Extern common xcoff_reloc_type functions.
+	* libxcoff.h: Common xcoff_reloc_type function declaration.
+
+2002-05-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (elf_i386_relocate_section): Remove overflow checks
+	addend in 2002-05-09 commit.
+
+	* elf32-hppa.c (elf32_hppa_size_stubs): Revert part of 2002-05-04,
+	don't look for stubs on all undefined syms.
+
+2002-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (RA_REGISTER_MASK, RA_REGISTER_SHIFT): Delete.
+	(ppc64_elf_howto_raw <R_PPC64_RELATIVE>): Not pc_relative or
+	pcrel_offset.
+
+	* elf32-i386.c (elf_howto_table): Comments.
+	(elf_i386_relocate_section): Handle more relocs for relocatable
+	linking and against SEC_MERGE sections.
+
+2002-05-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_create_got): New function.
+	(ppc_elf_create_dynamic_sections): Call ppc_elf_create_got before
+	_bfd_elf_create_dynamic_sections.  Correct .plt flags. 
+	(ppc_elf_check_relocs): Use ppc_elf_create_got in place of
+	_bfd_elf_create_got_section.
+
+2002-05-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Add rela_normal.
+	* elfxx-target.h (elf_backend_rela_normal): Define.
+	(elfNN_bed): Init rela_normal.
+	* elflink.h (elf_link_input_bfd <emit_relocs>): Handle adjustment
+	for section symbols here if rela_normal.  Simplify abs section test.
+	* elf-m10200.c (mn10200_elf_relocate_section): If relocatable,
+	return immediately.  Remove code handling relocatable linking.
+	* elf-m10300.c (mn10300_elf_relocate_section): Likewise.
+	* elf32-fr30.c (fr30_elf_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-i860.c (elf32_i860_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-openrisc.c (openrisc_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+	* elf32-arm.h (elf32_arm_relocate_section): Likewise #ifndef USE_REL.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf-m10200.c (elf_backend_rela_normal): Define.
+	* elf-m10300.c (elf_backend_rela_normal): Define.
+	* elf32-fr30.c (elf_backend_rela_normal): Define.
+	* elf32-i370.c (elf_backend_rela_normal): Define.
+	* elf32-i860.c (elf_backend_rela_normal): Define.
+	* elf32-m68k.c (elf_backend_rela_normal): Define.
+	* elf32-mcore.c (elf_backend_rela_normal): Define.
+	* elf32-openrisc.c (elf_backend_rela_normal): Define.
+	* elf32-ppc.c (elf_backend_rela_normal): Define.
+	* elf32-s390.c (elf_backend_rela_normal): Define.
+	* elf32-xstormy16.c (elf_backend_rela_normal): Define.
+	* elf64-ppc.c (elf_backend_rela_normal): Define.
+	* elf64-s390.c (elf_backend_rela_normal): Define.
+	* elf64-x86-64.c (elf_backend_rela_normal): Define.
+	* elfxx-ia64.c (elf_backend_rela_normal): Define.
+	* elf32-arm.h (elf_backend_rela_normal): Define #ifndef USE_REL.
+	* elf32-m32r.c (elf_backend_rela_normal): Likewise.
+
 2002-05-06  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-arm.h (elf32_arm_final_link_relocate): Convert
@@ -60,7 +136,7 @@
 	(elf32_hppa_size_stubs): Adjust for split out functions.  Look for
 	stubs on undefined syms too.
 	(elf32_hppa_set_gp): Use bfd_link_hash* instead of elf_link_hash*.
-	Only access htab elf fields when we have and elf hash table.
+	Only access htab elf fields when we have an elf hash table.
 	* elf32-hppa.h (elf32_hppa_setup_section_lists): Declare.
 	(elf32_hppa_next_input_section): Declare.
 

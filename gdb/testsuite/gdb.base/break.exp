@@ -1,5 +1,5 @@
 #   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 1999,
-#   2000
+#   2000, 2002
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -84,6 +84,13 @@ gdb_test "break main" \
     "breakpoint function"
 
 #
+# test break at quoted function
+#
+gdb_test "break \"marker2\"" \
+    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "breakpoint quoted function"
+
+#
 # test break at function in file
 #
 gdb_test "break $srcfile:factorial" \
@@ -150,6 +157,7 @@ if {$hp_aCC_compiler} {
 gdb_test "info break" \
     "Num Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in marker2 at .*$srcfile:4\[49\].*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in factorial$proto at .*$srcfile:96.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:79.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:79.*
@@ -208,6 +216,11 @@ for {set i 6} {$i >= 1} {incr i -1} {
 			"run until file:function($i) breakpoint"
 }
 
+#
+# Run until the breakpoint set at a quoted function
+#
+gdb_test continue "Continuing\\..*Breakpoint \[0-9\]+, (0x\[0-9a-f\]+ in )?marker2 \\(a=43\\) at .*$srcfile:4\[49\].*" \
+		"run until quoted breakpoint"
 #
 # run until the file:function breakpoint at a line number in a file
 #

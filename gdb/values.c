@@ -41,8 +41,6 @@ void _initialize_values (void);
 
 /* Prototypes for local functions. */
 
-static struct value *value_headof (struct value *, struct type *, struct type *);
-
 static void show_values (char *, int);
 
 static void show_convenience (char *, int);
@@ -1020,93 +1018,6 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
   return v;
 }
 
-/* ARG is a pointer to an object we know to be at least
-   a DTYPE.  BTYPE is the most derived basetype that has
-   already been searched (and need not be searched again).
-   After looking at the vtables between BTYPE and DTYPE,
-   return the most derived type we find.  The caller must
-   be satisfied when the return value == DTYPE.
-
-   FIXME-tiemann: should work with dossier entries as well.
-   NOTICE - djb: I see no good reason at all to keep this function now that
-   we have RTTI support. It's used in literally one place, and it's
-   hard to keep this function up to date when it's purpose is served
-   by value_rtti_type efficiently.
-   Consider it gone for 5.1. */
-
-static struct value *
-value_headof (struct value *in_arg, struct type *btype, struct type *dtype)
-{
-  /* First collect the vtables we must look at for this object.  */
-  struct value *arg;
-  struct value *vtbl;
-  struct symbol *sym;
-  char *demangled_name;
-  struct minimal_symbol *msymbol;
-
-  btype = TYPE_VPTR_BASETYPE (dtype);
-  CHECK_TYPEDEF (btype);
-  arg = in_arg;
-  if (btype != dtype)
-      arg = value_cast (lookup_pointer_type (btype), arg);
-  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_REF)
-      {
-	  /*
-	   * Copy the value, but change the type from (T&) to (T*).
-	   * We keep the same location information, which is efficient,
-	   * and allows &(&X) to get the location containing the reference.
-	   */
-	  arg = value_copy (arg);
-	  VALUE_TYPE (arg) = lookup_pointer_type (TYPE_TARGET_TYPE (VALUE_TYPE (arg)));
-      }
-  if (VALUE_ADDRESS(value_field (value_ind(arg), TYPE_VPTR_FIELDNO (btype)))==0)
-      return arg;
-
-  vtbl = value_ind (value_field (value_ind (arg), TYPE_VPTR_FIELDNO (btype)));
-  /* Turn vtable into typeinfo function */
-  VALUE_OFFSET(vtbl)+=4;
-
-  msymbol = lookup_minimal_symbol_by_pc ( value_as_address(value_ind(vtbl)) );
-  if (msymbol == NULL
-      || (demangled_name = SYMBOL_NAME (msymbol)) == NULL)
-      {
-	  /* If we expected to find a vtable, but did not, let the user
-	     know that we aren't happy, but don't throw an error.
-	     FIXME: there has to be a better way to do this.  */
-	  struct type *error_type = (struct type *) xmalloc (sizeof (struct type));
-	  memcpy (error_type, VALUE_TYPE (in_arg), sizeof (struct type));
-	  TYPE_NAME (error_type) = savestring ("suspicious *", sizeof ("suspicious *"));
-	  VALUE_TYPE (in_arg) = error_type;
-	  return in_arg;
-      }
-  demangled_name = cplus_demangle(demangled_name,DMGL_ANSI);
-  *(strchr (demangled_name, ' ')) = '\0';
-
-  sym = lookup_symbol (demangled_name, 0, VAR_NAMESPACE, 0, 0);
-  if (sym == NULL)
-      error ("could not find type declaration for `%s'", demangled_name);
-
-  arg = in_arg;
-  VALUE_TYPE (arg) = lookup_pointer_type (SYMBOL_TYPE (sym));
-  return arg;
-}
-
-/* ARG is a pointer object of type TYPE.  If TYPE has virtual
-   function tables, probe ARG's tables (including the vtables
-   of its baseclasses) to figure out the most derived type that ARG
-   could actually be a pointer to.  */
-
-struct value *
-value_from_vtable_info (struct value *arg, struct type *type)
-{
-  /* Take care of preliminaries.  */
-  if (TYPE_VPTR_FIELDNO (type) < 0)
-    fill_in_vptr_fieldno (type);
-  if (TYPE_VPTR_FIELDNO (type) < 0)
-    return 0;
-
-  return value_headof (arg, 0, type);
-}
 
 /* Unpack a field FIELDNO of the specified TYPE, from the anonymous object at
    VALADDR.

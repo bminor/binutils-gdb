@@ -2961,12 +2961,12 @@ print_msymbol_info (struct minimal_symbol *msymbol)
   char *tmp;
 
   if (TARGET_ADDR_BIT <= 32)
-    tmp = longest_local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
-					   & (CORE_ADDR) 0xffffffff,
-					   "08l");
+    tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
+				   & (CORE_ADDR) 0xffffffff,
+				   "08l");
   else
-    tmp = longest_local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol),
-					   "016l");
+    tmp = local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol),
+				   "016l");
   printf_filtered ("%s  %s\n",
 		   tmp, SYMBOL_SOURCE_NAME (msymbol));
 }

@@ -25,7 +25,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
-#include "i387-nat.h"
+#include "i387-tdep.h"
 #include "gdb_assert.h"
 #include "x86-64-tdep.h"
 
@@ -405,12 +405,6 @@ static struct core_fns linux_elf_core_fns = {
 #if !defined (offsetof)
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
-
-/* Record the value of the debug control register.  */
-static long debug_control_mirror;
-
-/* Record which address associates with which register.  */
-static CORE_ADDR address_lookup[DR_LASTADDR - DR_FIRSTADDR + 1];
 
 /* Return the address of register REGNUM.  BLOCKEND is the value of
    u.u_ar0, which should point to the registers.  */

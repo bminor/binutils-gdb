@@ -539,6 +539,34 @@ default_symfile_offsets (struct objfile *objfile,
   if (sect) 
     objfile->sect_index_rodata = sect->index;
 
+  /* This is where things get really weird...  We MUST have valid
+     indices for the various sect_index_* members or gdb will abort.
+     So if for example, there is no ".text" section, we have to
+     accomodate that.  Except when explicitly adding symbol files at
+     some address, section_offsets contains nothing but zeros, so it
+     doesn't matter which slot in section_offsets the individual
+     sect_index_* members index into.  So if they are all zero, it is
+     safe to just point all the currently uninitialized indices to the
+     first slot. */
+
+  for (i = 0; i < objfile->num_sections; i++)
+    {
+      if (ANOFFSET (objfile->section_offsets, i) != 0)
+	{
+	  break;
+	}
+    }
+  if (i == objfile->num_sections)
+    {
+      if (objfile->sect_index_text == -1)
+	objfile->sect_index_text = 0;
+      if (objfile->sect_index_data == -1)
+	objfile->sect_index_data = 0;
+      if (objfile->sect_index_bss == -1)
+	objfile->sect_index_bss = 0;
+      if (objfile->sect_index_rodata == -1)
+	objfile->sect_index_rodata = 0;
+    }
 }
 
 /* Process a symbol file, as either the main file or as a dynamically
@@ -1713,6 +1741,7 @@ reread_symbols (void)
 
 	      /* Free the obstacks for non-reusable objfiles */
 	      free_bcache (&objfile->psymbol_cache);
+	      free_bcache (&objfile->macro_cache);
 	      obstack_free (&objfile->psymbol_obstack, 0);
 	      obstack_free (&objfile->symbol_obstack, 0);
 	      obstack_free (&objfile->type_obstack, 0);
@@ -1737,6 +1766,8 @@ reread_symbols (void)
 	      /* obstack_specify_allocation also initializes the obstack so
 	         it is empty.  */
 	      obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
+					  xmalloc, xfree);
+	      obstack_specify_allocation (&objfile->macro_cache.cache, 0, 0,
 					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0,
 					  xmalloc, xfree);

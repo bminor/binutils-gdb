@@ -417,9 +417,14 @@ arm_skip_prologue (CORE_ADDR pc)
 {
   unsigned long inst;
   CORE_ADDR skip_pc;
-  CORE_ADDR func_addr, func_end;
+  CORE_ADDR func_addr, func_end = 0;
   char *func_name;
   struct symtab_and_line sal;
+
+  /* If we're in a dummy frame, don't even try to skip the prologue.  */
+  if (USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (pc, 0, 0))
+    return pc;
 
   /* See what the symbol table says.  */
 
@@ -444,74 +449,63 @@ arm_skip_prologue (CORE_ADDR pc)
 
   /* Can't find the prologue end in the symbol table, try it the hard way
      by disassembling the instructions.  */
-  skip_pc = pc;
-  inst = read_memory_integer (skip_pc, 4);
-  /* "mov ip, sp" is no longer a required part of the prologue.  */
-  if (inst == 0xe1a0c00d)			/* mov ip, sp */
+
+  /* Like arm_scan_prologue, stop no later than pc + 64. */
+  if (func_end == 0 || func_end > pc + 64)
+    func_end = pc + 64;
+
+  for (skip_pc = pc; skip_pc < func_end; skip_pc += 4)
     {
-      skip_pc += 4;
       inst = read_memory_integer (skip_pc, 4);
+
+      /* "mov ip, sp" is no longer a required part of the prologue.  */
+      if (inst == 0xe1a0c00d)			/* mov ip, sp */
+	continue;
+
+      /* Some prologues begin with "str lr, [sp, #-4]!".  */
+      if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
+	continue;
+
+      if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4} */
+	continue;
+
+      if ((inst & 0xfffff800) == 0xe92dd800)	/* stmfd sp!,{fp,ip,lr,pc} */
+	continue;
+
+      /* Any insns after this point may float into the code, if it makes
+	 for better instruction scheduling, so we skip them only if we
+	 find them, but still consider the function to be frame-ful.  */
+
+      /* We may have either one sfmfd instruction here, or several stfe
+	 insns, depending on the version of floating point code we
+	 support.  */
+      if ((inst & 0xffbf0fff) == 0xec2d0200)	/* sfmfd fn, <cnt>, [sp]! */
+	continue;
+
+      if ((inst & 0xffff8fff) == 0xed6d0103)	/* stfe fn, [sp, #-12]! */
+	continue;
+
+      if ((inst & 0xfffff000) == 0xe24cb000)	/* sub fp, ip, #nn */
+	continue;
+
+      if ((inst & 0xfffff000) == 0xe24dd000)	/* sub sp, sp, #nn */
+	continue;
+
+      if ((inst & 0xffffc000) == 0xe54b0000 ||	/* strb r(0123),[r11,#-nn] */
+	  (inst & 0xffffc0f0) == 0xe14b00b0 ||	/* strh r(0123),[r11,#-nn] */
+	  (inst & 0xffffc000) == 0xe50b0000)	/* str  r(0123),[r11,#-nn] */
+	continue;
+
+      if ((inst & 0xffffc000) == 0xe5cd0000 ||	/* strb r(0123),[sp,#nn] */
+	  (inst & 0xffffc0f0) == 0xe1cd00b0 ||	/* strh r(0123),[sp,#nn] */
+	  (inst & 0xffffc000) == 0xe58d0000)	/* str  r(0123),[sp,#nn] */
+	continue;
+
+      /* Un-recognized instruction; stop scanning.  */
+      break;
     }
 
-  /* Some prologues begin with "str lr, [sp, #-4]!".  */
-  if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4} */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  if ((inst & 0xfffff800) == 0xe92dd800)	/* stmfd sp!,{fp,ip,lr,pc} */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  /* Any insns after this point may float into the code, if it makes
-     for better instruction scheduling, so we skip them only if we
-     find them, but still consider the function to be frame-ful.  */
-
-  /* We may have either one sfmfd instruction here, or several stfe
-     insns, depending on the version of floating point code we
-     support.  */
-  if ((inst & 0xffbf0fff) == 0xec2d0200)	/* sfmfd fn, <cnt>, [sp]! */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-  else
-    {
-      while ((inst & 0xffff8fff) == 0xed6d0103)	/* stfe fn, [sp, #-12]! */
-	{
-	  skip_pc += 4;
-	  inst = read_memory_integer (skip_pc, 4);
-	}
-    }
-
-  if ((inst & 0xfffff000) == 0xe24cb000)	/* sub fp, ip, #nn */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  if ((inst & 0xfffff000) == 0xe24dd000)	/* sub sp, sp, #nn */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  while ((inst & 0xffffcfc0) == 0xe50b0000)	/* str r(0123), [r11, #-nn] */
-    {
-      skip_pc += 4;
-      inst = read_memory_integer (skip_pc, 4);
-    }
-
-  return skip_pc;
+  return skip_pc;		/* End of prologue */
 }
 
 /* *INDENT-OFF* */
@@ -552,6 +546,12 @@ thumb_scan_prologue (struct frame_info *fi)
   */
   int findmask = 0;
   int i;
+
+  /* Don't try to scan dummy frames.  */
+  if (USE_GENERIC_DUMMY_FRAMES
+      && fi != NULL
+      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+    return;
 
   if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
     {
@@ -597,7 +597,7 @@ thumb_scan_prologue (struct frame_info *fi)
 	     whether to save LR (R14).  */
 	  mask = (insn & 0xff) | ((insn & 0x100) << 6);
 
-	  /* Calculate offsets of saved R0-R7 and LR. */
+	  /* Calculate offsets of saved R0-R7 and LR.  */
 	  for (regno = ARM_LR_REGNUM; regno >= 0; regno--)
 	    if (mask & (1 << regno))
 	      {
@@ -611,7 +611,7 @@ thumb_scan_prologue (struct frame_info *fi)
       else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
 						   sub sp, #simm */
 	{
-	  if ((findmask & 1) == 0)  		/* before push?  */
+	  if ((findmask & 1) == 0)		/* before push?  */
 	    continue;
 	  else
 	    findmask |= 4;			/* add/sub sp found */
@@ -857,7 +857,7 @@ arm_scan_prologue (struct frame_info *fi)
      Be careful, however, and if it doesn't look like a prologue,
      don't try to scan it.  If, for instance, a frameless function
      begins with stmfd sp!, then we will tell ourselves there is
-     a frame, which will confuse stack traceback, as well ad"finish" 
+     a frame, which will confuse stack traceback, as well as "finish" 
      and other operations that rely on a knowledge of the stack
      traceback.
 
@@ -870,7 +870,7 @@ arm_scan_prologue (struct frame_info *fi)
      [Note further: The "mov ip,sp" only seems to be missing in
      frameless functions at optimization level "-O2" or above,
      in which case it is often (but not always) replaced by
-     "str lr, [sp, #-4]!".  - Michael Snyder, 2002-04-23]   */
+     "str lr, [sp, #-4]!".  - Michael Snyder, 2002-04-23]  */
 
   sp_offset = fp_offset = 0;
 
@@ -904,7 +904,16 @@ arm_scan_prologue (struct frame_info *fi)
 		fi->saved_regs[regno] = sp_offset;
 	      }
 	}
-      else if ((insn & 0xffffcfc0) == 0xe50b0000)	/* str rx, [r11, -n] */
+      else if ((insn & 0xffffc000) == 0xe54b0000 ||	/* strb rx,[r11,#-n] */
+	       (insn & 0xffffc0f0) == 0xe14b00b0 ||	/* strh rx,[r11,#-n] */
+	       (insn & 0xffffc000) == 0xe50b0000)	/* str  rx,[r11,#-n] */
+	{
+	  /* No need to add this to saved_regs -- it's just an arg reg.  */
+	  continue;
+	}
+      else if ((insn & 0xffffc000) == 0xe5cd0000 ||	/* strb rx,[sp,#n] */
+	       (insn & 0xffffc0f0) == 0xe1cd00b0 ||	/* strh rx,[sp,#n] */
+	       (insn & 0xffffc000) == 0xe58d0000)	/* str  rx,[sp,#n] */
 	{
 	  /* No need to add this to saved_regs -- it's just an arg reg.  */
 	  continue;
@@ -960,7 +969,7 @@ arm_scan_prologue (struct frame_info *fi)
 	}
       else if ((insn & 0xf0000000) != 0xe0000000)
 	break;			/* Condition not true, exit early */
-      else if ((insn & 0xfe200000) == 0xe8200000) /* ldm? */
+      else if ((insn & 0xfe200000) == 0xe8200000)	/* ldm? */
 	break;			/* Don't scan past a block load */
       else
 	/* The optimizer might shove anything into the prologue,
@@ -990,16 +999,27 @@ arm_scan_prologue (struct frame_info *fi)
 static CORE_ADDR
 arm_find_callers_reg (struct frame_info *fi, int regnum)
 {
+  /* NOTE: cagney/2002-05-03: This function really shouldn't be
+     needed.  Instead the (still being written) register unwind
+     function could be called directly.  */
   for (; fi; fi = fi->next)
-
-#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
-    if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-      return generic_read_register_dummy (fi->pc, fi->frame, regnum);
-    else
-#endif
-    if (fi->saved_regs[regnum] != 0)
-      return read_memory_integer (fi->saved_regs[regnum],
-				  REGISTER_RAW_SIZE (regnum));
+    {
+      if (USE_GENERIC_DUMMY_FRAMES
+	  && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+	{
+	  return generic_read_register_dummy (fi->pc, fi->frame, regnum);
+	}
+      else if (fi->saved_regs[regnum] != 0)
+	{
+	  /* NOTE: cagney/2002-05-03: This would normally need to
+             handle ARM_SP_REGNUM as a special case as, according to
+             the frame.h comments, saved_regs[SP_REGNUM] contains the
+             SP value not its address.  It appears that the ARM isn't
+             doing this though.  */
+	  return read_memory_integer (fi->saved_regs[regnum],
+				      REGISTER_RAW_SIZE (regnum));
+	}
+    }
   return read_register (regnum);
 }
 /* Function: frame_chain Given a GDB frame, determine the address of
@@ -1011,34 +1031,19 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
 static CORE_ADDR
 arm_frame_chain (struct frame_info *fi)
 {
-#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
-  CORE_ADDR fn_start, callers_pc, fp;
-
-  /* Is this a dummy frame?  */
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return fi->frame;		/* dummy frame same as caller's frame */
-
-  /* Is caller-of-this a dummy frame?  */
-  callers_pc = FRAME_SAVED_PC (fi);	/* find out who called us: */
-  fp = arm_find_callers_reg (fi, ARM_FP_REGNUM);
-  if (PC_IN_CALL_DUMMY (callers_pc, fp, fp))
-    return fp;		/* dummy frame's frame may bear no relation to ours */
-
-  if (find_pc_partial_function (fi->pc, 0, &fn_start, 0))
-    if (fn_start == entry_point_address ())
-      return 0;			/* in _start fn, don't chain further */
-#endif
-  CORE_ADDR caller_pc, fn_start;
+  CORE_ADDR caller_pc;
   int framereg = fi->extra_info->framereg;
+
+  if (USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+    /* A generic call dummy's frame is the same as caller's.  */
+    return fi->frame;
 
   if (fi->pc < LOWEST_PC)
     return 0;
 
   /* If the caller is the startup code, we're at the end of the chain.  */
   caller_pc = FRAME_SAVED_PC (fi);
-  if (find_pc_partial_function (caller_pc, 0, &fn_start, 0))
-    if (fn_start == entry_point_address ())
-      return 0;
 
   /* If the caller is Thumb and the caller is ARM, or vice versa,
      the frame register of the caller is different from ours.
@@ -1109,24 +1114,16 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   memset (fi->saved_regs, '\000', sizeof fi->saved_regs);
 
-#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    {
-      /* We need to setup fi->frame here because run_stack_dummy gets
-         it wrong by assuming it's always FP.  */
-      fi->frame = generic_read_register_dummy (fi->pc, fi->frame,
-					       ARM_SP_REGNUM);
-      fi->extra_info->framesize = 0;
-      fi->extra_info->frameoffset = 0;
-      return;
-    }
-  else
-#endif
-
   /* Compute stack pointer for this frame.  We use this value for both
      the sigtramp and call dummy cases.  */
   if (!fi->next)
     sp = read_sp();
+  else if (USE_GENERIC_DUMMY_FRAMES
+	   && PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+    /* For generic dummy frames, pull the value direct from the frame.
+       Having an unwind function to do this would be nice.  */
+    sp = generic_read_register_dummy (fi->next->pc, fi->next->frame,
+				      ARM_SP_REGNUM);
   else
     sp = (fi->next->frame - fi->next->extra_info->frameoffset
 	  + fi->next->extra_info->framesize);
@@ -1188,6 +1185,11 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       if (!fi->next)
 	/* This is the innermost frame?  */
 	fi->frame = read_register (fi->extra_info->framereg);
+      else if (USE_GENERIC_DUMMY_FRAMES
+	       && PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+	/* Next inner most frame is a dummy, just grab its frame.
+           Dummy frames always have the same FP as their caller.  */
+	fi->frame = fi->next->frame;
       else if (fi->extra_info->framereg == ARM_FP_REGNUM
 	       || fi->extra_info->framereg == THUMB_FP_REGNUM)
 	{
@@ -1224,11 +1226,11 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 arm_frame_saved_pc (struct frame_info *fi)
 {
-#if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
-  if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  /* If a dummy frame, pull the PC out of the frame's register buffer.  */
+  if (USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (fi->pc, 0, 0))
     return generic_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
-  else
-#endif
+
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
 			fi->frame))
     {
@@ -1268,6 +1270,16 @@ arm_frame_init_saved_regs (struct frame_info *fip)
     return;
 
   arm_init_extra_frame_info (0, fip);
+}
+
+/* Set the return address for a generic dummy frame.  ARM uses the
+   entry point.  */
+
+static CORE_ADDR
+arm_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
+{
+  write_register (ARM_LR_REGNUM, CALL_DUMMY_ADDRESS ());
+  return sp;
 }
 
 /* Push an empty stack frame, to record the current PC, etc.  */
@@ -1523,6 +1535,14 @@ arm_pop_frame (void)
   struct frame_info *frame = get_current_frame ();
   CORE_ADDR old_SP = (frame->frame - frame->extra_info->frameoffset
 		      + frame->extra_info->framesize);
+
+  if (USE_GENERIC_DUMMY_FRAMES
+      && PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+    {
+      generic_pop_dummy_frame ();
+      flush_cached_frames ();
+      return;
+    }
 
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (frame->saved_regs[regnum] != 0)
@@ -2050,7 +2070,7 @@ arm_get_next_pc (CORE_ADDR pc)
 static void
 arm_software_single_step (enum target_signal sig, int insert_bpt)
 {
-  static int next_pc;		/* State between setting and unsetting.  */
+  static int next_pc;		 /* State between setting and unsetting.  */
   static char break_mem[BREAKPOINT_MAX]; /* Temporary storage for mem@bpt */
 
   if (insert_bpt)
@@ -2336,7 +2356,7 @@ arm_store_return_value (struct type *type, char *valbuf)
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-      char buf[MAX_REGISTER_RAW_SIZE];
+      char buf[ARM_MAX_REGISTER_RAW_SIZE];
 
       switch (tdep->fp_model)
 	{
@@ -2344,7 +2364,7 @@ arm_store_return_value (struct type *type, char *valbuf)
 
 	  convert_to_extended (valbuf, buf);
 	  write_register_bytes (REGISTER_BYTE (ARM_F0_REGNUM), buf,
-				MAX_REGISTER_RAW_SIZE);
+				FP_REGISTER_RAW_SIZE);
 	  break;
 
 	case ARM_FLOAT_SOFT:
@@ -2893,6 +2913,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
+#if OLD_STYLE_ARM_DUMMY_FRAMES
+  /* NOTE: cagney/2002-05-07: Enable the below to restore the old ARM
+     specific (non-generic) dummy frame code.  Might be useful if
+     there appears to be a problem with the generic dummy frame
+     mechanism that replaced it.  */
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
 
   /* Call dummy code.  */
@@ -2912,6 +2937,27 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fix_call_dummy (gdbarch, arm_fix_call_dummy);
 
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
+#else
+  set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
+  set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
+
+  set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
+  set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
+
+  set_gdbarch_call_dummy_p (gdbarch, 1);
+  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
+
+  set_gdbarch_call_dummy_words (gdbarch, arm_call_dummy_words);
+  set_gdbarch_sizeof_call_dummy_words (gdbarch, 0);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
+
+  set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
+  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
+
+  set_gdbarch_call_dummy_address (gdbarch, entry_point_address);
+  set_gdbarch_push_return_address (gdbarch, arm_push_return_address);
+#endif
 
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
   set_gdbarch_push_arguments (gdbarch, arm_push_arguments);
@@ -2931,7 +2977,15 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
+#if OLD_STYLE_ARM_DUMMY_FRAMES
+  /* NOTE: cagney/2002-05-07: Enable the below to restore the old ARM
+     specific (non-generic) dummy frame code.  Might be useful if
+     there appears to be a problem with the generic dummy frame
+     mechanism that replaced it.  */
   set_gdbarch_push_dummy_frame (gdbarch, arm_push_dummy_frame);
+#else
+  set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
+#endif
   set_gdbarch_pop_frame (gdbarch, arm_pop_frame);
 
   /* Address manipulation.  */

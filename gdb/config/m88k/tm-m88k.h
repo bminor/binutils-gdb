@@ -1,7 +1,7 @@
 /* Target machine description for generic Motorola 88000, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993, 1994, 1996, 1998,
-   1999, 2000
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993, 1994, 1996,
+   1998, 1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -266,7 +266,8 @@ extern CORE_ADDR m88k_addr_bits_remove (CORE_ADDR);
 
 #define PC_REGNUM SXIP_REGNUM	/* Program Counter */
 #define NPC_REGNUM SNIP_REGNUM	/* Next Program Counter */
-#define NNPC_REGNUM SFIP_REGNUM	/* Next Next Program Counter */
+#define M88K_NNPC_REGNUM SFIP_REGNUM        /* Next Next Program Counter */
+
 
 #define PSR_REGNUM 32		/* Processor Status Register */
 #define FPSR_REGNUM 33		/* Floating Point Status Register */
@@ -330,7 +331,7 @@ if (!target_is_m88110) \
     CORE_ADDR npc = read_register (NPC_REGNUM); \
     if (pc != npc) \
     { \
-	write_register (NNPC_REGNUM, npc); \
+	write_register (M88K_NNPC_REGNUM, npc); \
 	write_register (NPC_REGNUM, pc); \
     } \
 }
@@ -582,8 +583,5 @@ extern void m88k_push_dummy_frame ();
    -- Kevin Buettner
  */
 
-#define TARGET_WRITE_PC(val, pid) { \
-  write_register_pid(SXIP_REGNUM, (long) val, pid); \
-  write_register_pid(SNIP_REGNUM, (long) val | 2, pid); \
-  write_register_pid(SFIP_REGNUM, ((long) val | 2) + 4, pid); \
-}
+extern void m88k_target_write_pc (CORE_ADDR pc, ptid_t ptid);
+#define TARGET_WRITE_PC(VAL, PID) m88k_target_write_pc (VAL, PID)

@@ -447,7 +447,6 @@ v:2:PC_REGNUM:int:pc_regnum::::-1:-1::0
 v:2:PS_REGNUM:int:ps_regnum::::-1:-1::0
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
 v:2:NPC_REGNUM:int:npc_regnum::::0:-1::0
-v:2:NNPC_REGNUM:int:nnpc_regnum::::0:-1::0
 # Convert stab register number (from \`r\' declaration) to a gdb REGNUM.
 f:2:STAB_REG_TO_REGNUM:int:stab_reg_to_regnum:int stab_regnr:stab_regnr:::no_op_reg_to_regnum::0
 # Provide a default mapping from a ecoff register number to a gdb REGNUM.
@@ -463,9 +462,9 @@ f:2:REGISTER_NAME:char *:register_name:int regnr:regnr:::legacy_register_name::0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
 f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::0:0
-f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_raw_size:0
+f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 v:2:MAX_REGISTER_RAW_SIZE:int:max_register_raw_size::::0:-1
-f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_virtual_size:0
+f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
 v:2:MAX_REGISTER_VIRTUAL_SIZE:int:max_register_virtual_size::::0:-1
 f:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
 f:2:DO_REGISTERS_INFO:void:do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs:::do_registers_info::0
@@ -514,6 +513,10 @@ f:1:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized,
 f:2:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not::0
 f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0
 f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int regnum, char *from, char *to:type, regnum, from, to:::0::0
+#
+f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum:regnum::0:legacy_convert_register_p::0
+f:1:REGISTER_TO_VALUE:void:register_to_value:int regnum, struct type *type, char *from, char *to:regnum, type, from, to::0:legacy_register_to_value::0
+f:1:VALUE_TO_REGISTER:void:value_to_register:struct type *type, int regnum, char *from, char *to:type, regnum, from, to::0:legacy_value_to_register::0
 # This function is called when the value of a pseudo-register needs to
 # be updated.  Typically it will be defined on a per-architecture
 # basis.
@@ -1108,7 +1111,7 @@ extern void set_gdbarch_data (struct gdbarch *gdbarch,
 			      struct gdbarch_data *data,
 			      void *pointer);
 
-extern void *gdbarch_data (struct gdbarch_data*);
+extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
 
 /* Register per-architecture memory region.
@@ -1249,6 +1252,7 @@ static void alloc_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_data (struct gdbarch *);
 static void free_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
+static void clear_gdbarch_swap (struct gdbarch *);
 static void swapout_gdbarch_swap (struct gdbarch *);
 static void swapin_gdbarch_swap (struct gdbarch *);
 
@@ -1373,6 +1377,9 @@ void
 initialize_non_multiarch ()
 {
   alloc_gdbarch_data (&startup_gdbarch);
+  /* Ensure that all swap areas are zeroed so that they again think
+     they are starting from scratch.  */
+  clear_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_data (&startup_gdbarch);
 }
@@ -1849,10 +1856,10 @@ set_gdbarch_data (struct gdbarch *gdbarch,
    data-pointer. */
 
 void *
-gdbarch_data (struct gdbarch_data *data)
+gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 {
-  gdb_assert (data->index < current_gdbarch->nr_data);
-  return current_gdbarch->data[data->index];
+  gdb_assert (data->index < gdbarch->nr_data);
+  return gdbarch->data[data->index];
 }
 
 
@@ -1901,6 +1908,17 @@ register_gdbarch_swap (void *data,
   (*rego)->sizeof_data = sizeof_data;
 }
 
+static void
+clear_gdbarch_swap (struct gdbarch *gdbarch)
+{
+  struct gdbarch_swap *curr;
+  for (curr = gdbarch->swap;
+       curr != NULL;
+       curr = curr->next)
+    {
+      memset (curr->source->data, 0, curr->source->sizeof_data);
+    }
+}
 
 static void
 init_gdbarch_swap (struct gdbarch *gdbarch)
@@ -1917,7 +1935,6 @@ init_gdbarch_swap (struct gdbarch *gdbarch)
 	  (*curr)->source = rego;
 	  (*curr)->swap = xmalloc (rego->sizeof_data);
 	  (*curr)->next = NULL;
-	  memset (rego->data, 0, rego->sizeof_data);
 	  curr = &(*curr)->next;
 	}
       if (rego->init != NULL)
@@ -2083,6 +2100,7 @@ int
 gdbarch_update_p (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
+  struct gdbarch *old_gdbarch;
   struct gdbarch_registration *rego;
 
   /* Fill in missing parts of the INFO struct using a number of
@@ -2151,29 +2169,47 @@ gdbarch_update_p (struct gdbarch_info info)
       return 0;
     }
 
+  /* Swap the data belonging to the old target out setting the
+     installed data to zero.  This stops the ->init() function trying
+     to refer to the previous architecture's global data structures.  */
+  swapout_gdbarch_swap (current_gdbarch);
+  clear_gdbarch_swap (current_gdbarch);
+
+  /* Save the previously selected architecture, setting the global to
+     NULL.  This stops ->init() trying to use the previous
+     architecture's configuration.  The previous architecture may not
+     even be of the same architecture family.  The most recent
+     architecture of the same family is found at the head of the
+     rego->arches list.  */
+  old_gdbarch = current_gdbarch;
+  current_gdbarch = NULL;
+
   /* Ask the target for a replacement architecture. */
   new_gdbarch = rego->init (info, rego->arches);
 
-  /* Did the target like it?  No. Reject the change. */
+  /* Did the target like it?  No. Reject the change and revert to the
+     old architecture.  */
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Target rejected architecture\\n");
+      swapin_gdbarch_swap (old_gdbarch);
+      current_gdbarch = old_gdbarch;
       return 0;
     }
 
-  /* Did the architecture change?  No. Do nothing. */
-  if (current_gdbarch == new_gdbarch)
+  /* Did the architecture change?  No.  Oops, put the old architecture
+     back.  */
+  if (old_gdbarch == new_gdbarch)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\\n",
 			    (long) new_gdbarch,
 			    new_gdbarch->bfd_arch_info->printable_name);
+      swapin_gdbarch_swap (old_gdbarch);
+      current_gdbarch = old_gdbarch;
       return 1;
     }
-
-  /* Swap all data belonging to the old target out */
-  swapout_gdbarch_swap (current_gdbarch);
 
   /* Is this a pre-existing architecture?  Yes. Move it to the front
      of the list of architectures (keeping the list sorted Most

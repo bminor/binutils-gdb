@@ -521,6 +521,15 @@ proc gdb_test { args } {
 	    fail "$errmsg"
 	    return -1
 	}
+	 -re "EXIT code \[0-9\r\n\]+Program exited normally.*$gdb_prompt $" {
+	    if ![string match "" $message] then {
+		set errmsg "$message: the program exited"
+	    } else {
+		set errmsg "$command: the program exited"
+	    }
+	    fail "$errmsg"
+	    return -1
+	}
 	 -re "The program is not being run.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message: the program is no longer running"
@@ -618,6 +627,14 @@ proc test_print_reject { args } {
 	    pass "reject $sendthis"
 	    return 1
 	}
+        -re "Unmatched single quote.*$gdb_prompt $" {
+            pass "reject $sendthis"
+            return 1
+        }
+        -re "A character constant must contain at least one character.*$gdb_prompt $" {
+            pass "reject $sendthis"
+            return 1
+        }
 	-re "$expectthis.*$gdb_prompt $" {
 	    pass "reject $sendthis"
 	    return 1
@@ -1092,8 +1109,34 @@ proc gdb_preprocess {source dest args} {
     return $result;
 }
 
+set gdb_wrapper_initialized 0
+
+proc gdb_wrapper_init { args } {
+    global gdb_wrapper_initialized;
+    global gdb_wrapper_file;
+    global gdb_wrapper_flags;
+
+    if { $gdb_wrapper_initialized == 1 } { return; }
+
+    if {[target_info exists needs_status_wrapper] && \
+	    [target_info needs_status_wrapper] != "0" && \
+	    ![info exists gdb_wrapper_file]} {
+	set result [build_wrapper "testglue.o"];
+	if { $result != "" } {
+	    set gdb_wrapper_file [lindex $result 0];
+	    set gdb_wrapper_flags [lindex $result 1];
+	} else {
+	    warning "Status wrapper failed to build."
+	}
+    }
+    set gdb_wrapper_initialized 1
+}
+
 proc gdb_compile {source dest type options} {
     global GDB_TESTCASE_OPTIONS;
+    global gdb_wrapper_file;
+    global gdb_wrapper_flags;
+    global gdb_wrapper_initialized;
 
     if [target_info exists gdb_stub] {
 	set options2 { "additional_flags=-Dusestubs" }
@@ -1110,6 +1153,15 @@ proc gdb_compile {source dest type options} {
     }
     verbose "options are $options"
     verbose "source is $source $dest $type $options"
+
+    if { $gdb_wrapper_initialized == 0 } { gdb_wrapper_init }
+
+    if {[target_info exists needs_status_wrapper] && \
+	    [target_info needs_status_wrapper] != "0" && \
+	    [info exists gdb_wrapper_file]} {
+	lappend options "libs=${gdb_wrapper_file}"
+	lappend options "ldflags=${gdb_wrapper_flags}"
+    }
 
     set result [target_compile $source $dest $type $options];
     regsub "\[\r\n\]*$" "$result" "" result;
@@ -1570,7 +1622,7 @@ proc gdb_continue_to_end {mssg} {
     # Don't bother to check the output of the program, that may be
     # extremely tough for some remote systems.
     gdb_test "continue"\
-      "Continuing.\[\r\n0-9\]+Program exited normally\\..*"\
+      "Continuing.\[\r\n0-9\]+(... EXIT code 0\[\r\n\]+|)Program exited normally\\..*"\
       "continue until exit at $mssg"
   }
 }

@@ -36,7 +36,7 @@
 #include "i386-tdep.h"
 
 #include "gnu-nat.h"
-#include "i387-nat.h"
+#include "i387-tdep.h"
 
 #ifdef HAVE_SYS_PROCFS_H
 # include <sys/procfs.h>

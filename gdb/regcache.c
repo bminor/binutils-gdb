@@ -45,7 +45,13 @@ char *registers;
 /* REGISTER_VALID is 0 if the register needs to be fetched,
                      1 if it has been fetched, and
 		    -1 if the register value was not available.  
-   "Not available" means don't try to fetch it again.  */
+
+   "Not available" indicates that the target is not not able to supply
+   the register at this state.  The register may become available at a
+   later time (after the next resume).  This often occures when GDB is
+   manipulating a target that contains only a snapshot of the entire
+   system being debugged - some of the registers in such a system may
+   not have been saved.  */
 
 signed char *register_valid;
 
@@ -654,8 +660,6 @@ generic_target_write_pc (CORE_ADDR pc, ptid_t ptid)
     write_register_pid (PC_REGNUM, pc, ptid);
   if (NPC_REGNUM >= 0)
     write_register_pid (NPC_REGNUM, pc + 4, ptid);
-  if (NNPC_REGNUM >= 0)
-    write_register_pid (NNPC_REGNUM, pc + 8, ptid);
 #else
   internal_error (__FILE__, __LINE__,
 		  "generic_target_write_pc");

@@ -334,7 +334,7 @@ print_subexp (register struct expression *exp, register int *pos,
       (*pos) += 2;
       if ((int) prec > (int) PREC_PREFIX)
 	fputs_filtered ("(", stream);
-      if (exp->elts[pc + 1].type->code == TYPE_CODE_FUNC &&
+      if (TYPE_CODE (exp->elts[pc + 1].type) == TYPE_CODE_FUNC &&
 	  exp->elts[pc + 3].opcode == OP_LONG)
 	{
 	  /* We have a minimal symbol fn, probably.  It's encoded

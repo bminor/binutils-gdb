@@ -401,21 +401,13 @@ legacy_virtual_frame_pointer (CORE_ADDR pc,
   *frame_offset = 0;
 }
 
-/* Assume the world is flat.  Every register is large enough to fit a
-   target integer.  */
+/* Assume the world is sane, every register's virtual and real size
+   is identical.  */
 
 int
-generic_register_raw_size (int regnum)
+generic_register_size (int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
-  return TARGET_INT_BIT / HOST_CHAR_BIT;
-}
-
-/* Assume the virtual size corresponds to the virtual type.  */
-
-int
-generic_register_virtual_size (int regnum)
-{
   return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum));
 }
 
@@ -435,6 +427,26 @@ int
 legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   return IN_SIGTRAMP(pc, name);
+}
+
+int
+legacy_convert_register_p (int regnum)
+{
+  return REGISTER_CONVERTIBLE (regnum);
+}
+
+void
+legacy_register_to_value (int regnum, struct type *type,
+			  char *from, char *to)
+{
+  REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
+}
+
+void
+legacy_value_to_register (struct type *type, int regnum,
+			  char *from, char *to)
+{
+  REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
 }
 
 

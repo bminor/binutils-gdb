@@ -20,6 +20,7 @@ mips*)			gdb_host_cpu=mips ;;
 powerpc*)		gdb_host_cpu=powerpc ;;
 sparcv9 | sparc64)	gdb_host_cpu=sparc ;;
 s390*)			gdb_host_cpu=s390 ;;
+sh*)			gdb_host_cpu=sh ;;
 x86_64*)		gdb_host_cpu=i386 ;;
 *)			gdb_host_cpu=$host_cpu ;;
 
@@ -135,6 +136,8 @@ rs6000-*-aix4*)		gdb_host=aix4 ;;
 rs6000-*-*)		gdb_host=rs6000 ;;
 
 s390*-*-*)		gdb_host=s390 ;;
+
+sh*-*-netbsdelf*)	gdb_host=nbsd ;;
 
 sparc-*-linux*)		gdb_host=linux ;;
 sparc-*-lynxos*)	gdb_host=sparclynx ;;

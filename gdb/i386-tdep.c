@@ -1215,52 +1215,195 @@ gdb_print_insn_i386 (bfd_vma memaddr, disassemble_info *info)
 }
 
 
-static void
-process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
+/* This table matches the indices assigned to enum i386_abi.  Keep
+   them in sync.  */
+static const char * const i386_abi_names[] =
 {
-  int *os_ident_ptr = obj;
+  "<unknown>",
+  "SVR4",
+  "NetBSD",
+  "GNU/Linux",
+  "GNU/Hurd",
+  "Solaris",
+  "FreeBSD",
+  NULL
+};
+
+
+#define ABI_TAG_OS_GNU_LINUX	I386_ABI_LINUX
+#define ABI_TAG_OS_GNU_HURD	I386_ABI_HURD
+#define ABI_TAG_OS_GNU_SOLARIS	I386_ABI_INVALID
+#define ABI_TAG_OS_FREEBSD	I386_ABI_FREEBSD
+#define ABI_TAG_OS_NETBSD	I386_ABI_NETBSD
+
+static void
+process_note_sections (bfd *abfd, asection *sect, void *obj)
+{
+  int *abi = obj;
   const char *name;
-  unsigned int sect_size;
+  unsigned int sectsize;
 
   name = bfd_get_section_name (abfd, sect);
-  sect_size = bfd_section_size (abfd, sect);
-  if (strcmp (name, ".note.ABI-tag") == 0 && sect_size > 0)
+  sectsize = bfd_section_size (abfd, sect);
+
+  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
     {
       unsigned int name_length, data_length, note_type;
-      char *note = alloca (sect_size);
+      char *note;
+
+      /* If the section is larger than this, it's probably not what we
+	 are looking for.  */
+      if (sectsize > 128)
+	sectsize = 128;
+
+      note = alloca (sectsize);
 
       bfd_get_section_contents (abfd, sect, note,
-                                (file_ptr) 0, (bfd_size_type) sect_size);
+				(file_ptr) 0, (bfd_size_type) sectsize);
 
       name_length = bfd_h_get_32 (abfd, note);
       data_length = bfd_h_get_32 (abfd, note + 4);
       note_type = bfd_h_get_32 (abfd, note + 8);
 
-      if (name_length == 4 && data_length == 16 && note_type == 1
-          && strcmp (note + 12, "GNU") == 0)
-        {
-          int os_number = bfd_h_get_32 (abfd, note + 16);
+      if (name_length == 4 && data_length == 16
+	  && note_type == NT_GNU_ABI_TAG
+	  && strcmp (note + 12, "GNU") == 0)
+	{
+	  int abi_tag_os = bfd_h_get_32 (abfd, note + 16);
 
-          /* The case numbers are from abi-tags in glibc.  */
-          switch (os_number)
-            {
-            case 0:
-              *os_ident_ptr = ELFOSABI_LINUX;
-              break;
-            case 1:
-              *os_ident_ptr = ELFOSABI_HURD;
-              break;
-            case 2:
-              *os_ident_ptr = ELFOSABI_SOLARIS;
-              break;
-            default:
-              internal_error (__FILE__, __LINE__,
-                              "process_note_abi_sections: "
-                              "unknown OS number %d", os_number);
-              break;
-            }
-        }
+	  /* The case numbers are from abi-tags in glibc.  */
+	  switch (abi_tag_os)
+	    {
+	    case GNU_ABI_TAG_LINUX:
+	      *abi = ABI_TAG_OS_GNU_LINUX;
+	      break;
+
+	    case GNU_ABI_TAG_HURD:
+	      *abi = ABI_TAG_OS_GNU_HURD;
+	      break;
+
+	    case GNU_ABI_TAG_SOLARIS:
+	      *abi = ABI_TAG_OS_GNU_SOLARIS;
+	      break;
+
+	    default:
+	      internal_error
+		(__FILE__, __LINE__,
+		 "process_note_abi_sections: unknown ABI OS tag %d",
+		 abi_tag_os);
+	      break;
+	    }
+	}
+      else if (name_length == 8 && data_length == 4
+	       && note_type == NT_FREEBSD_ABI_TAG
+	       && strcmp (note + 12, "FreeBSD") == 0)
+	*abi = ABI_TAG_OS_FREEBSD;
     }
+  /* NetBSD uses a similar trick.  */
+  else if (strcmp (name, ".note.netbsd.ident") == 0 && sectsize > 0)
+    {
+      unsigned int name_length, desc_length, note_type;
+      char *note;
+
+      /* If the section is larger than this, it's probably not what we are
+         looking for.  */
+      if (sectsize > 128)
+	sectsize = 128;
+
+      note = alloca (sectsize);
+
+      bfd_get_section_contents (abfd, sect, note,
+				(file_ptr) 0, (bfd_size_type) sectsize);
+
+      name_length = bfd_h_get_32 (abfd, note);
+      desc_length = bfd_h_get_32 (abfd, note + 4);
+      note_type = bfd_h_get_32 (abfd, note + 8);
+
+      if (name_length == 7 && desc_length == 4
+	  && note_type == NT_NETBSD_IDENT
+	  && strcmp (note + 12, "NetBSD") == 0)
+	*abi = ABI_TAG_OS_NETBSD;
+    }
+}
+
+static int
+i386_elf_abi_from_note (bfd *abfd)
+{
+  enum i386_abi abi = I386_ABI_UNKNOWN;
+  
+  bfd_map_over_sections (abfd, process_note_sections, &abi);
+
+  return abi;
+}
+
+static enum i386_abi
+i386_elf_abi (bfd *abfd)
+{
+  int elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
+
+  /* The fact that the EI_OSABI byte is set to ELFOSABI_NONE doesn't
+     necessarily mean that this is a System V ELF binary.  To further
+     distinguish between binaries for differens operating systems,
+     check for vendor-specific note elements.  */
+  if (elfosabi == ELFOSABI_NONE)
+    {
+      enum i386_abi abi = i386_elf_abi_from_note (abfd);
+
+      if (abi != I386_ABI_UNKNOWN)
+	return abi;
+
+      /* FreeBSD folks are naughty; they stored the string "FreeBSD"
+	 in the padding of the e_ident field of the ELF header.  */
+      if (strcmp (&elf_elfheader (abfd)->e_ident[8], "FreeBSD") == 0)
+	return I386_ABI_FREEBSD;
+    }
+
+  switch (elfosabi)
+    {
+    case ELFOSABI_NONE:
+      return I386_ABI_SVR4;
+    case ELFOSABI_FREEBSD:
+      return I386_ABI_FREEBSD;
+    }
+
+  return I386_ABI_UNKNOWN;
+}
+
+struct i386_abi_handler
+{
+  struct i386_abi_handler *next;
+  enum i386_abi abi;
+  void (*init_abi)(struct gdbarch_info, struct gdbarch *);
+};
+
+struct i386_abi_handler *i386_abi_handler_list = NULL;
+
+void
+i386_gdbarch_register_os_abi (enum i386_abi abi,
+			      void (*init_abi)(struct gdbarch_info,
+					       struct gdbarch *))
+{
+  struct i386_abi_handler **handler_p;
+
+  for (handler_p = &i386_abi_handler_list; *handler_p != NULL;
+       handler_p = &(*handler_p)->next)
+    {
+      if ((*handler_p)->abi == abi)
+	{
+	  internal_error
+	    (__FILE__, __LINE__,
+	     "i386_gdbarch_register_abi: A handler for this ABI variant "
+	     "(%d) has already been registered", (int) abi);
+	  /* If user wants to continue, override previous definition.  */
+	  (*handler_p)->init_abi = init_abi;
+	  return;
+	}
+    }
+  (*handler_p)
+    = (struct i386_abi_handler *) xmalloc (sizeof (struct i386_abi_handler));
+  (*handler_p)->next = NULL;
+  (*handler_p)->abi = abi;
+  (*handler_p)->init_abi = init_abi;
 }
 
 struct gdbarch *
@@ -1268,42 +1411,31 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  int os_ident;
+  enum i386_abi abi = I386_ABI_UNKNOWN;
+  struct i386_abi_handler *abi_handler;
 
-  if (info.abfd != NULL
-      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+  if (info.abfd != NULL)
     {
-      os_ident = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
-
-      /* If os_ident is 0, it is not necessarily the case that we're
-         on a SYSV system.  (ELFOSABI_NONE is defined to be 0.)
-         GNU/Linux uses a note section to record OS/ABI info, but
-         leaves e_ident[EI_OSABI] zero.  So we have to check for note
-         sections too.  */
-      if (os_ident == ELFOSABI_NONE)
-	bfd_map_over_sections (info.abfd,
-			       process_note_abi_tag_sections,
-			       &os_ident);
-	  
-      /* If that didn't help us, revert to some non-standard checks.  */
-      if (os_ident == ELFOSABI_NONE)
+      switch (bfd_get_flavour (info.abfd))
 	{
-	  /* FreeBSD folks are naughty; they stored the string
-	     "FreeBSD" in the padding of the e_ident field of the ELF
-	     header.  */
-	  if (strcmp (&elf_elfheader (info.abfd)->e_ident[8], "FreeBSD") == 0)
-	    os_ident = ELFOSABI_FREEBSD;
-        }
-    }
-  else
-    os_ident = -1;
+	case bfd_target_elf_flavour:
+	  abi= i386_elf_abi (info.abfd);
+	  break;
 
+	default:
+	  /* Not sure what to do here, leave the ABI as unknown.  */
+	  break;
+	}
+    }
+
+  /* Find a candidate among extant architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
+      /* Make sure the ABI selection matches.  */
       tdep = gdbarch_tdep (arches->gdbarch);
-      if (tdep && tdep->os_ident == os_ident)
+      if (tdep && tdep->abi == abi)
         return arches->gdbarch;
     }
 
@@ -1311,7 +1443,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  tdep->os_ident = os_ident;
+  tdep->abi = abi;
 
   /* FIXME: kettenis/2001-11-24: Although not all IA-32 processors
      have the SSE registers, it's easier to set the default to 8.  */
@@ -1338,6 +1470,40 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      tm-ptx.h, tm-symmetry.h currently override this.  Sigh.  */
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SSE_REGS);
 
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  if (abi == I386_ABI_UNKNOWN)
+    {
+      /* Don't complain about not knowing the ABI variant if we don't
+	 have an inferior.  */
+      if (info.abfd)
+	fprintf_filtered
+	  (gdb_stderr, "GDB doesn't recognize the ABI of the inferior.  "
+	   "Attempting to continue with the default i386 settings");
+    }
+  else
+    {
+      for (abi_handler = i386_abi_handler_list; abi_handler != NULL;
+	   abi_handler = abi_handler->next)
+	if (abi_handler->abi == abi)
+	  break;
+
+      if (abi_handler)
+	abi_handler->init_abi (info, gdbarch);
+      else
+	{
+	  /* We assume that if GDB_MULTI_ARCH is less than
+	     GDB_MULTI_ARCH_TM that an ABI variant can be supported by
+	     overriding definitions in this file.  */
+	  if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+	    fprintf_filtered
+	      (gdb_stderr,
+	       "A handler for the ABI variant \"%s\" is not built into this "
+	       "configuration of GDB.  "
+	       "Attempting to continue with the default i386 settings",
+	       i386_abi_names[abi]);
+	}
+    }
+  
   return gdbarch;
 }
 

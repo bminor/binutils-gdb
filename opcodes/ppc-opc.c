@@ -3065,6 +3065,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "addo.",   XO(31,266,1,1), XO_MASK,	PPCCOM,		{ RT, RA, RB } },
 { "caxo.",   XO(31,266,1,1), XO_MASK,	PWRCOM,		{ RT, RA, RB } },
 
+{ "tlbiel",  X(31,274), XRTRA_MASK,	POWER4,		{ RB } },
+
 { "mfapidi", X(31,275), X_MASK,		BOOKE,		{ RT, RA } },
 
 { "lscbx",   XRC(31,277,0), X_MASK,	M601,		{ RT, RA, RB } },

@@ -1,5 +1,6 @@
 /* Memory attributes support, for GDB.
-   Copyright 2001 Free Software Foundation, Inc.
+
+   Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -238,16 +239,16 @@ mem_info_command (char *args, int from_tty)
 		       m->number,
 		       m->enabled_p ? 'y' : 'n');
       if (TARGET_ADDR_BIT <= 32)
-	tmp = longest_local_hex_string_custom ((unsigned long) m->lo, "08l");
+	tmp = local_hex_string_custom ((unsigned long) m->lo, "08l");
       else
-	tmp = longest_local_hex_string_custom ((unsigned long) m->lo, "016l");
+	tmp = local_hex_string_custom ((unsigned long) m->lo, "016l");
       
       printf_filtered ("%s ", tmp);
       
       if (TARGET_ADDR_BIT <= 32)
-	tmp = longest_local_hex_string_custom ((unsigned long) m->hi, "08l");
+	tmp = local_hex_string_custom ((unsigned long) m->hi, "08l");
       else
-	tmp = longest_local_hex_string_custom ((unsigned long) m->hi, "016l");
+	tmp = local_hex_string_custom ((unsigned long) m->hi, "016l");
       
       printf_filtered ("%s ", tmp);
 
