@@ -1,5 +1,7 @@
 2004-07-23  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/sparc/obsd64.mt (TDEPFILES): Add sparcobsd-tdep.o.
+
 	* sparcnbsd-nat.c (sparc32nbsd_supply_pcb): Fix typo in comment.
 
 2004-07-21  Andrew Cagney  <cagney@gnu.org>
