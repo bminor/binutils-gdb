@@ -588,6 +588,29 @@ symbol_make (name)
   return (symbolP);
 }
 
+static const char temp_label_name[] = ".L0\001";
+
+symbolS *
+symbol_temp_new (seg, ofs, frag)
+     segT seg;
+     valueT ofs;
+     fragS *frag;
+{
+  return symbol_new (temp_label_name, seg, ofs, frag);
+}
+
+symbolS *
+symbol_temp_new_now ()
+{
+  return symbol_temp_new (now_seg, frag_now_fix (), frag_now);
+}
+
+symbolS *
+symbol_temp_make ()
+{
+  return symbol_make (temp_label_name);
+}
+
 /* Implement symbol table lookup.
    In:	A symbol's name as a string: '\0' can't be part of a symbol name.
    Out:	NULL if the name was not in the symbol table, else the address
@@ -2059,6 +2082,17 @@ symbol_set_value_expression (s, exp)
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
   s->sy_value = *exp;
+}
+
+/* Set the value of SYM to the current position in the current segment.  */
+
+void
+symbol_set_value_now (sym)
+     symbolS *sym;
+{
+  S_SET_SEGMENT (sym, now_seg);
+  S_SET_VALUE (sym, frag_now_fix ());
+  symbol_set_frag (sym, frag_now);
 }
 
 /* Set the frag of a symbol.  */

@@ -157,9 +157,6 @@ static bfd_boolean loc_directive_seen;
 /* Current location as indicated by the most recent .loc directive.  */
 static struct dwarf2_line_info current;
 
-/* Fake label name.  */
-static char const fake_label_name[] = ".L0\001";
-
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
 
@@ -174,8 +171,6 @@ static void out_two PARAMS ((int));
 static void out_four PARAMS ((int));
 static void out_abbrev PARAMS ((int, int));
 static void out_uleb128 PARAMS ((addressT));
-static symbolS *symbol_new_now PARAMS ((void));
-static void set_symbol_value_now PARAMS ((symbolS *));
 static offsetT get_frag_fix PARAMS ((fragS *));
 static void out_set_addr PARAMS ((segT, fragS *, addressT));
 static int size_inc_line_addr PARAMS ((int, addressT));
@@ -621,25 +616,6 @@ out_abbrev (name, form)
   out_uleb128 (form);
 }
 
-/* Create a new fake symbol whose value is the current position.  */
-
-static symbolS *
-symbol_new_now ()
-{
-  return symbol_new (fake_label_name, now_seg, frag_now_fix (), frag_now);
-}
-
-/* Set the value of SYM to the current position in the current segment.  */
-
-static void
-set_symbol_value_now (sym)
-     symbolS *sym;
-{
-  S_SET_SEGMENT (sym, now_seg);
-  S_SET_VALUE (sym, frag_now_fix ());
-  symbol_set_frag (sym, frag_now);
-}
-
 /* Get the size of a fragment.  */
 
 static offsetT
@@ -676,7 +652,7 @@ out_set_addr (seg, frag, ofs)
   expressionS expr;
   symbolS *sym;
 
-  sym = symbol_new (fake_label_name, seg, ofs, frag);
+  sym = symbol_temp_new (seg, ofs, frag);
 
   out_opcode (DW_LNS_extended_op);
   out_uleb128 (sizeof_address + 1);
@@ -894,8 +870,8 @@ relax_inc_line_addr (line_delta, seg, to_frag, to_ofs, from_frag, from_ofs)
   expressionS expr;
   int max_chars;
 
-  to_sym = symbol_new (fake_label_name, seg, to_ofs, to_frag);
-  from_sym = symbol_new (fake_label_name, seg, from_ofs, from_frag);
+  to_sym = symbol_temp_new (seg, to_ofs, to_frag);
+  from_sym = symbol_temp_new (seg, from_ofs, from_frag);
 
   expr.X_op = O_subtract;
   expr.X_add_symbol = to_sym;
@@ -1124,9 +1100,9 @@ out_debug_line (line_seg)
 
   subseg_set (line_seg, 0);
 
-  line_start = symbol_new_now ();
-  prologue_end = symbol_make (fake_label_name);
-  line_end = symbol_make (fake_label_name);
+  line_start = symbol_temp_new_now ();
+  prologue_end = symbol_temp_make ();
+  line_end = symbol_temp_make ();
 
   /* Total length of the information for this compilation unit.  */
   expr.X_op = O_subtract;
@@ -1188,13 +1164,13 @@ out_debug_line (line_seg)
 
   out_file_list ();
 
-  set_symbol_value_now (prologue_end);
+  symbol_set_value_now (prologue_end);
 
   /* For each section, emit a statement program.  */
   for (s = all_segs; s; s = s->next)
     process_entries (s->seg, s->head->head);
 
-  set_symbol_value_now (line_end);
+  symbol_set_value_now (line_end);
 }
 
 /* Emit data for .debug_aranges.  */
@@ -1250,11 +1226,11 @@ out_debug_aranges (aranges_seg, info_seg)
       symbolS *beg, *end;
 
       frag = first_frag_for_seg (s->seg);
-      beg = symbol_new (fake_label_name, s->seg, 0, frag);
+      beg = symbol_temp_new (s->seg, 0, frag);
       s->text_start = beg;
 
       frag = last_frag_for_seg (s->seg);
-      end = symbol_new (fake_label_name, s->seg, get_frag_fix (frag), frag);
+      end = symbol_temp_new (s->seg, get_frag_fix (frag), frag);
       s->text_end = end;
 
       expr.X_op = O_symbol;
@@ -1322,8 +1298,8 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
 
   subseg_set (info_seg, 0);
 
-  info_start = symbol_new_now ();
-  info_end = symbol_make (fake_label_name);
+  info_start = symbol_temp_new_now ();
+  info_end = symbol_temp_make ();
 
   /* Compilation Unit length.  */
   expr.X_op = O_subtract;
@@ -1421,7 +1397,7 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
      dwarf2 draft has no standard code for assembler.  */
   out_two (DW_LANG_Mips_Assembler);
 
-  set_symbol_value_now (info_end);
+  symbol_set_value_now (info_end);
 }
 
 void

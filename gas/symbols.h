@@ -59,6 +59,10 @@ symbolS *symbol_create PARAMS ((const char *name, segT segment, valueT value,
 				fragS * frag));
 struct local_symbol *local_symbol_make PARAMS ((const char *name, segT section, 
 					 valueT value, fragS * frag));
+symbolS *symbol_temp_new PARAMS ((segT, valueT, fragS *));
+symbolS *symbol_temp_new_now PARAMS ((void));
+symbolS *symbol_temp_make PARAMS ((void));
+
 symbolS *colon PARAMS ((const char *sym_name));
 void local_colon PARAMS ((int n));
 void symbol_begin PARAMS ((void));
@@ -172,6 +176,7 @@ extern symbolS *symbol_next PARAMS ((symbolS *));
 extern expressionS *symbol_get_value_expression PARAMS ((symbolS *));
 extern void symbol_set_value_expression PARAMS ((symbolS *,
 						 const expressionS *));
+extern void symbol_set_value_now PARAMS ((symbolS *));
 extern void symbol_set_frag PARAMS ((symbolS *, fragS *));
 extern fragS *symbol_get_frag PARAMS ((symbolS *));
 extern void symbol_mark_used PARAMS ((symbolS *));

@@ -1,3 +1,12 @@
+2003-05-27  Richard Henderson  <rth@redhat.com>
+
+	* symbols.c (temp_label_name): New.
+	(symbol_temp_new, symbol_temp_new_now, symbol_temp_make): New.
+	(symbol_set_value_now): New.
+	* symbols.h: Prototype them.
+	* dwarf2dbg.c: Use them.
+	(fake_label_name, symbol_new_now, set_symbol_value_now): Remove.
+
 2003-05-23  Jason Eckhardt  <jle@rice.edu>
 
 	* config/tc-i860.c (target_xp): Declare variable.
