@@ -365,7 +365,7 @@ extern boolean _bfd_dwarf1_find_nearest_line
 /* Find the nearest line using DWARF 2 debugging information.  */
 extern boolean _bfd_dwarf2_find_nearest_line
   PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
-	   const char **, unsigned int *));
+	   const char **, unsigned int *, unsigned int));
 
 /* A routine to create entries for a bfd_link_hash_table.  */
 extern struct bfd_hash_entry *_bfd_link_hash_newfunc

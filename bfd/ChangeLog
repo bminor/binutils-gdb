@@ -1,3 +1,16 @@
+1999-07-02  Mark Mitchell  <mark@codesourcery.com>
+
+	* dwarf2.c (parse_comp_unit): Add ABBREV_LENGTH parameter.
+	(_bfd_dwarf2_find_nearest_line): Add ADDR_SIZE parameter.
+	* elf.c (_bfd_elf_find_nearest_line): Pass it.
+	* elf32-arm.h (elf32_arm_find_nearest_line): Likewise.
+	* elf32-mips.c (ABI_64_P): New macro.
+	(IRIX_COMPAT): We are IRIX6-compatible if ABI_64_P.
+	(_bfd_mips_elf_find_nearest_line): Adjust call to
+	_bfd_dwarf2_find_nearest_line.
+	* libbfd-in.h (_bfd_dwarf2_find_nearest_line): Update prototype.
+	* libbfd.h: Regenerated.
+
 1999-07-02  Ian Lance Taylor  <ian@zembu.com>
 
 	* config.bfd: Add * at the end of i[3456]86-*-unixware.

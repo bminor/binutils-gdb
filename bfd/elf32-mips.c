@@ -235,12 +235,17 @@ typedef enum {
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
 
+/* Nonzero if ABFD is using the 64-bit ABI.  FIXME: This is never
+   true, yet.  */
+#define ABI_64_P(abfd) \
+  ((elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64) != 0)
+
 /* What version of Irix we are trying to be compatible with.  FIXME:
    At the moment, we never generate "normal" MIPS ELF ABI executables;
    we always use some version of Irix.  */
 
 #define IRIX_COMPAT(abfd) \
-  (ABI_N32_P (abfd) ? ict_irix6 : ict_irix5)
+  ((ABI_N32_P (abfd) || ABI_64_P (abfd)) ? ict_irix6 : ict_irix5)
 
 /* Whether we are trying to be compatible with IRIX at all.  */
 
@@ -3517,7 +3522,8 @@ _bfd_mips_elf_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 
   if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr))
+				     line_ptr, 
+				     ABI_64_P (abfd) ? 8 : 0))
     return true;
 
   msec = bfd_get_section_by_name (abfd, ".mdebug");

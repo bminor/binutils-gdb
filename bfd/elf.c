@@ -4616,7 +4616,7 @@ _bfd_elf_find_nearest_line (abfd,
 
   if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr))
+				     line_ptr, 0))
     return true;
 
   if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,

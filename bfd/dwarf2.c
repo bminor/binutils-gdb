@@ -1216,19 +1216,22 @@ scan_unit_for_functions (unit)
 
 
 
-/* Parse a DWARF2 compilation unit starting at INFO_PTR.  This includes
-   the compilation unit header that proceeds the DIE's, but does not
-   include the length field that preceeds each compilation unit header.
-   END_PTR points one past the end of this comp unit.
+/* Parse a DWARF2 compilation unit starting at INFO_PTR.  This
+   includes the compilation unit header that proceeds the DIE's, but
+   does not include the length field that preceeds each compilation
+   unit header.  END_PTR points one past the end of this comp unit.
+   If ABBREV_LENGTH is 0, then the length of the abbreviation offset
+   is assumed to be four bytes.  Otherwise, it it is the size given.
 
    This routine does not read the whole compilation unit; only enough
    to get to the line number information for the compilation unit.  */
 
 static struct comp_unit *
-parse_comp_unit (abfd, info_ptr, end_ptr)
+parse_comp_unit (abfd, info_ptr, end_ptr, abbrev_length)
      bfd* abfd;
      char* info_ptr;
      char* end_ptr;
+     unsigned int abbrev_length;
 {
   struct comp_unit* unit;
 
@@ -1243,8 +1246,14 @@ parse_comp_unit (abfd, info_ptr, end_ptr)
 
   version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
-  abbrev_offset = read_4_bytes (abfd, info_ptr);
-  info_ptr += 4;
+  BFD_ASSERT (abbrev_length == 0
+	      || abbrev_length == 4
+	      || abbrev_length == 8);
+  if (abbrev_length == 0 || abbrev_length == 4)
+    abbrev_offset = read_4_bytes (abfd, info_ptr);
+  else if (abbrev_length == 8)
+    abbrev_offset = read_8_bytes (abfd, info_ptr);
+  info_ptr += abbrev_length;
   addr_size = read_1_byte (abfd, info_ptr);
   info_ptr += 1;
 
@@ -1435,12 +1444,17 @@ comp_unit_find_nearest_line (unit, addr,
   return line_p || func_p;
 }
 
-/* The DWARF2 version of find_nearest line.
-   Return true if the line is found without error. */
+/* The DWARF2 version of find_nearest line.  Return true if the line
+   is found without error.  ADDR_SIZE is the number of bytes in the
+   initial .debug_info length field and in the abbreviation offset.
+   You may use zero to indicate that the default value should be
+   used.  */
 
 boolean
 _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
-			  filename_ptr, functionname_ptr, linenumber_ptr)
+			       filename_ptr, functionname_ptr,
+			       linenumber_ptr,
+			       addr_size)
      bfd *abfd;
      asection *section;
      asymbol **symbols;
@@ -1448,6 +1462,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
      const char **filename_ptr;
      const char **functionname_ptr;
      unsigned int *linenumber_ptr;
+     unsigned int addr_size;
 {
   /* Read each compilation unit from the section .debug_info, and check
      to see if it contains the address we are searching for.  If yes,
@@ -1470,6 +1485,13 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   *functionname_ptr = NULL;
   *linenumber_ptr = 0;
 
+  /* The DWARF2 spec says that the initial length field, and the
+     offset of the abbreviation table, should both be 4-byte values.
+     However, some compilers do things differently.  */
+  if (addr_size == 0)
+    addr_size = 4;
+  BFD_ASSERT (addr_size == 4 || addr_size == 8);
+    
   if (! stash)
     {
       asection *msec;
@@ -1540,16 +1562,20 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   while (stash->info_ptr < stash->info_ptr_end)
     {
       struct comp_unit* each;
-      unsigned int length;
+      bfd_vma length;
       boolean found;
 
-      length = read_4_bytes (abfd, stash->info_ptr);
-      stash->info_ptr += 4;
+      if (addr_size == 4)
+	length = read_4_bytes (abfd, stash->info_ptr);
+      else
+	length = read_8_bytes (abfd, stash->info_ptr);
+      stash->info_ptr += addr_size;
 
       if (length > 0)
         {
 	  each = parse_comp_unit (abfd, stash->info_ptr, 
-				  stash->info_ptr + length);
+				  stash->info_ptr + length,
+				  addr_size);
 	  stash->info_ptr += length;
 
 	  if (each)
