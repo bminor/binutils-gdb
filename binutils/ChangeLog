@@ -1,3 +1,11 @@
+Thu Oct  5 17:25:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (compare_symbols): Sort gnu_compiled and gcc2_compiled
+	symbols after other symbols with the same value.  Likewise for
+	symbols which look like file names.
+	(objdump_print_address): Always chose the first reasonable symbol
+	with a given value.
+
 Tue Oct  3 22:38:55 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* arsup.c (ar_save): Use rename, not unlink/link/unlink.

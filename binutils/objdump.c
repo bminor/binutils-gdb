@@ -324,6 +324,9 @@ compare_symbols (ap, bp)
 {
   const asymbol *a = *(const asymbol **)ap;
   const asymbol *b = *(const asymbol **)bp;
+  const char *an, *bn;
+  size_t anl, bnl;
+  boolean af, bf;
 
   if (bfd_asymbol_value (a) > bfd_asymbol_value (b))
     return 1;
@@ -334,6 +337,44 @@ compare_symbols (ap, bp)
     return 1;
   else if (a->section < b->section)
     return -1;
+
+  an = bfd_asymbol_name (a);
+  bn = bfd_asymbol_name (b);
+  anl = strlen (an);
+  bnl = strlen (bn);
+
+  /* The symbols gnu_compiled and gcc2_compiled convey no real
+     information, so put them after other symbols with the same value.  */
+
+  af = (strstr (an, "gnu_compiled") != NULL
+	|| strstr (an, "gcc2_compiled") != NULL);
+  bf = (strstr (bn, "gnu_compiled") != NULL
+	|| strstr (bn, "gcc2_compiled") != NULL);
+
+  if (af && ! bf)
+    return 1;
+  if (! af && bf)
+    return -1;
+
+  /* We use a heuristic for the file name, to try to sort it after
+     more useful symbols.  It may not work on non Unix systems, but it
+     doesn't really matter; the only difference is precisely which
+     symbol names get printed.  */
+
+#define file_symbol(s, sn, snl)			\
+  (((s)->flags & BSF_FILE) != 0			\
+   || ((sn)[(snl) - 2] == '.'			\
+       && ((sn)[(snl) - 1] == 'o'		\
+	   || (sn)[(snl) - 1] == 'a')))
+
+  af = file_symbol (a, an, anl);
+  bf = file_symbol (b, bn, bnl);
+
+  if (af && ! bf)
+    return 1;
+  if (! af && bf)
+    return -1;
+
   return 0;
 }
 
@@ -410,6 +451,10 @@ objdump_print_address (vma, info)
   /* The symbol we want is now in min, the low end of the range we
      were searching.  */
   thisplace = min;
+  while (thisplace > 0
+	 && (bfd_asymbol_value (sorted_syms[thisplace])
+	     == bfd_asymbol_value (sorted_syms[thisplace - 1])))
+    --thisplace;
 
   {
     /* If this symbol isn't global, search for one with the same value
@@ -470,7 +515,11 @@ objdump_print_address (vma, info)
 	--i;
 	for (; i >= 0; i--)
 	  {
-	    if (sorted_syms[i]->section == aux->sec)
+	    if (sorted_syms[i]->section == aux->sec
+		&& (i == 0
+		    || sorted_syms[i - 1]->section != aux->sec
+		    || (bfd_asymbol_value (sorted_syms[i])
+			!= bfd_asymbol_value (sorted_syms[i - 1]))))
 	      {
 		thisplace = i;
 		break;
@@ -717,7 +766,6 @@ disassemble_data (abfd)
      bfd *abfd;
 {
   long i;
-  unsigned int (*print) () = 0; /* Old style */
   disassembler_ftype disassemble_fn = 0; /* New style */
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
@@ -745,7 +793,7 @@ disassemble_data (abfd)
 
   if (machine != (char *) NULL)
     {
-      bfd_arch_info_type *info = bfd_scan_arch (machine);
+      const bfd_arch_info_type *info = bfd_scan_arch (machine);
       if (info == NULL)
 	{
 	  fprintf (stderr, "%s: Can't use supplied machine %s\n",
@@ -756,22 +804,13 @@ disassemble_data (abfd)
       abfd->arch_info = info;
     }
 
-  /* See if we can disassemble using bfd.  */
-
-  if (abfd->arch_info->disassemble)
+  disassemble_fn = disassembler (abfd);
+  if (!disassemble_fn)
     {
-      print = abfd->arch_info->disassemble;
-    }
-  else
-    {
-      disassemble_fn = disassembler (abfd);
-      if (!disassemble_fn)
-	{
-	  fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
-		   program_name,
-		   bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
-	  exit (1);
-	}
+      fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
+	       program_name,
+	       bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
+      exit (1);
     }
 
   for (section = abfd->sections;
@@ -874,18 +913,10 @@ disassemble_data (abfd)
 	      aux.require_sec = false;
 	      putchar (' ');
 
-	      if (disassemble_fn)
-		{
-		  /* New style */
-		  bytes = (*disassemble_fn) (section->vma + i, &disasm_info);
-		  if (bytes < 0)
-		    break;
-		}
-	      else
-		{
-		  /* Old style */
-		  bytes = print (section->vma + i, data + i, stdout);
-		}
+	      bytes = (*disassemble_fn) (section->vma + i, &disasm_info);
+	      if (bytes < 0)
+		break;
+
 	      if (!wide_output)
 		putchar ('\n');
 	      else
