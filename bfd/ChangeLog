@@ -1,3 +1,10 @@
+2002-01-31  David O'Brien  <obrien@FreeBSD>
+
+	* configure.in: Recognize the differences in core files from FreeBSD
+	4.{0,1} and later versions of 4.x.  This treats 4.2+ the same as
+	5-CURRENT.
+	* configure: Regenerate.
+
 2001-10-24  Richard Henderson  <rth@redhat.com>
 
 	* peXXigen.c (_bfd_XX_print_private_bfd_data_common): Copy
