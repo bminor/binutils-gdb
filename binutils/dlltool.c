@@ -1,5 +1,5 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -1865,7 +1865,7 @@ gen_exp_file ()
 	if (!exp->noname || show_allnames)
 	  {
 	    fprintf (f, "n%d:	%s	\"%s\"\n",
-		     exp->ordinal, ASM_TEXT, exp->name);
+		     exp->ordinal, ASM_TEXT, xlate (exp->name));
 	    if (exp->forward != 0)
 	      fprintf (f, "f%d:	%s	\"%s\"\n",
 		       exp->forward, ASM_TEXT, exp->internal_name);

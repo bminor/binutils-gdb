@@ -1,3 +1,57 @@
+2002-04-27  Alan Modra  <amodra@bigpond.net.au>
+
+	Merge from mainline
+	2002-04-25  Elena Zannoni <ezannoni@redhat.com>
+        * readelf.c (get_AT_name): Handle DW_AT_GNU_vector.
+
+	2002-04-16  Nick Clifton  <nickc@cambridge.redhat.com>
+	* readelf.c (fetch_location_list): Remove unused function.
+	* readelf.c (process_corefile_note_segment): Catch corrupt notes
+	and display a warning message, then exit the loop.
+
+	2002-04-24  Christian Groessler <chris@groessler.org>
+	* MAINTAINERS: Changed my email address.
+
+	2002-04-09  J"orn Rennecke <joern.rennecke@superh.com>
+	* MAINTAINERS: Update my email address.
+
+	2002-03-27  Peter Targett  <peter.targett@arc.com>
+	* MAINTAINERS: Update my email address.
+
+	2002-03-20  Daniel Berlin  <dan@dberlin.org>
+	* readelf.c: Add support for displaying dwarf2 location lists.
+	(do_debug_loc, debug_loc_section, debug_loc_size): New.
+	(parse_args): Use 'O' as shorthand for displaying location list
+	section.
+	(process_section_headers): Handle debug_loc as well.
+	(load_debug_loc): New.
+	(free_debug_loc): New.
+	(fetch_location_list): New.
+	(display_debug_loc): New.
+	(display_debug_info): Call load_debug_loc and free_debug_loc.
+	(debug_displays): We can display .debug_loc now, too.
+	(usage): Update usage string.
+	(read_and_display_attr_value): Note location lists, but don't
+	display them inline.
+
+	2002-03-01  Dmitry Timoshkov <dmitry@baikal.ru>
+	* dlltool.c (gen_exp_file): Take into account --kill-at (-k) while
+	generating .exp file.
+
+	2002-02-21  Nick Clifton  <nickc@cambridge.redhat.com>
+	* readelf.c (dump_relocations): Fix typo.
+
+	2002-02-18  Timothy Daly  <remote_bob@yahoo.com>
+	* readelf.c (dump_relocations): Display 2nd and 3rd reloc 
+	types for 64-bit MIPS.  Narrow some fields for 80-char 
+	output.
+	(dump_relocations): Change spelling from 'unrecognised' 
+	to 'unrecognized'.
+	(decode_ARM_machine_flags): Likewise.
+	(parse_args): Likewise.
+	(read_and_display_attr_value): Likewise.
+	(display_debug_section): Likewise.
+
 2002-04-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Cope with absolute paths.
