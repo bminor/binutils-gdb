@@ -17,7 +17,6 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
 /*
   Written By Steve Chamberlain
   sac@cygnus.com
@@ -33,18 +32,13 @@
 #include <ctype.h>
 #include "listing.h"
 
-<<<<<<< tc-z8k.c
-char comment_chars[]=
+const char comment_chars[] =
 {'!', 0};
-char line_separator_chars[]=
+const char line_separator_chars[] =
 {';', 0};
-=======
-const char  comment_chars[]  = { '!',0 };
-const char line_separator_chars[] = { ';' ,0};
-const char line_comment_chars[] = "";
->>>>>>> 1.5
+const char line_comment_chars[] = { '#', 0};
 
-extern int machine  ;
+extern int machine;
 extern int coff_flags;
 int segmented_mode;
 int md_reloc_size;
@@ -58,8 +52,7 @@ int md_reloc_size;
 
 void cons ();
 
-
-void 
+void
 s_segm ()
 {
   segmented_mode = 1;
@@ -67,50 +60,92 @@ s_segm ()
   coff_flags = F_Z8001;
 }
 
-void 
+void
 s_unseg ()
 {
   segmented_mode = 0;
   machine = bfd_mach_z8002;
   coff_flags = F_Z8002;
 }
-const pseudo_typeS md_pseudo_table[]=
+
+static 
+void even()
 {
-  {"int", cons, 2},
-  {"data.b", cons, 1},
-  {"data.w", cons, 2},
-  {"data.l", cons, 4},
-  {"form", listing_psize, 0},
-  {"heading", listing_title, 0},
-  {"import", s_ignore, 0},
-  {"page", listing_eject, 0},
-  {"program", s_ignore, 0},
-  {"z8001", s_segm, 0},
-  {"z8002", s_unseg, 0},
-  {0, 0, 0}
+  frag_align (1, 0);
+  record_alignment(now_seg,1);
+}
+void obj_coff_section();
+
+int tohex(c)
+int c;
+{
+if (isdigit(c)) return c - '0';
+if (islower(c)) return c - 'a' + 10;
+return c - 'A' + 10;
+}
+void sval()
+{
+
+  SKIP_WHITESPACE();
+  if (*input_line_pointer == '\'') {
+    int c;
+    input_line_pointer++;
+    c = *input_line_pointer++;
+    while (c != '\'') {
+      if (c== '%') {
+	c = (tohex(input_line_pointer[0])  << 4)
+	 | tohex(input_line_pointer[1]);
+	input_line_pointer+=2;
+      }
+      FRAG_APPEND_1_CHAR(c);
+      c = *input_line_pointer++;
+    }
+    demand_empty_rest_of_line();
+  }
+
+}
+const pseudo_typeS md_pseudo_table[] =
+{
+ {"int", cons, 2},
+ {"data.b", cons, 1},
+ {"data.w", cons, 2},
+ {"data.l", cons, 4},
+ {"form", listing_psize, 0},
+ {"heading", listing_title, 0},
+ {"import", s_ignore, 0},
+ {"page", listing_eject, 0},
+ {"program", s_ignore, 0},
+ {"z8001", s_segm, 0},
+ {"z8002", s_unseg, 0},
+
+
+ {"segm", s_segm, 0},
+ {"unsegm", s_unseg, 0},
+ {"name", s_app_file, 0},
+ {"global",s_globl,0},
+ {"wval",cons,2},
+ {"lval",cons,4},
+ {"bval",cons,1},
+ {"sval",sval,0},
+ {"rsect",obj_coff_section,0},
+ {"sect",obj_coff_section,0},
+ {"block",s_space,0},
+ {"even",even,0},
+ {0, 0, 0}
 };
 
-
-const char EXP_CHARS[]= "eE";
+const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
-<<<<<<< tc-z8k.c
-char FLT_CHARS[]= "rRsSfFdDxXpP";
-=======
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
->>>>>>> 1.5
-
 
 const relax_typeS md_relax_table[1];
 
-
 static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
-
-
-void 
+void
 md_begin ()
 {
   opcode_entry_type *opcode;
@@ -118,7 +153,6 @@ md_begin ()
   int idx = 0;
 
   opcode_hash_control = hash_new ();
-
 
   for (opcode = z8k_table; opcode->name; opcode++)
     {
@@ -134,10 +168,22 @@ md_begin ()
       prev_name = opcode->name;
     }
 
-/* default to z8002 */
-s_unseg();
-}
+  /* default to z8002 */
+  s_unseg ();
 
+  /* insert the pseudo ops too */
+  for (idx = 0; md_pseudo_table[idx].poc_name; idx++) 
+  {
+    opcode_entry_type *fake_opcode;
+    fake_opcode = (opcode_entry_type*)malloc(sizeof(opcode_entry_type));
+    fake_opcode->name = md_pseudo_table[idx].poc_name,
+    fake_opcode->func = (void *)(md_pseudo_table+idx);
+    fake_opcode->opcode = 250;
+
+    hash_insert(opcode_hash_control,fake_opcode->name,fake_opcode);
+    
+  }
+}
 
 struct z8k_exp
 {
@@ -154,13 +200,12 @@ typedef struct z8k_op
 
   unsigned int x_reg;		/* any other register associated with the mode */
   expressionS exp;		/* any expression */
-}      op_type;
+}
 
-
+op_type;
 
 static expressionS *da_operand;
 static expressionS *imm_operand;
-
 
 int reg[16];
 int the_cc;
@@ -198,7 +243,6 @@ DEFUN (whatreg, (reg, src),
 
   */
 
-
 /* try and parse a reg name, returns number of chars consumed */
 char *
 DEFUN (parse_reg, (src, mode, reg),
@@ -208,37 +252,48 @@ DEFUN (parse_reg, (src, mode, reg),
 {
   char *res = 0;
 
-  if (src[0] == 'r')
-    {
-      if (src[1] == 'r')
-	{
-	  *mode = CLASS_REG_LONG;
-	  res = whatreg (reg, src + 2);
-	}
-      else if (src[1] == 'h')
-	{
-	  *mode = CLASS_REG_BYTE;
-	  res = whatreg (reg, src + 2);
-	}
-      else if (src[1] == 'l')
-	{
-	  *mode = CLASS_REG_BYTE;
-	  res = whatreg (reg, src + 2) ;
-	  *reg += 8;
-	}
-      else if (src[1] == 'q')
-	{
-	  *mode = CLASS_REG_QUAD;
-	  res = whatreg (reg, src + 2);
-	}
-      else
-	{
-	  *mode = CLASS_REG_WORD;
-	  res = whatreg (reg, src + 1);
-	}
+  if (src[0] == 's' && src[1]=='p') {
+    if (segmented_mode) {
+      *mode = CLASS_REG_LONG;
+      *reg = 14;
     }
+    else 
+    {
+      *mode = CLASS_REG_WORD;
+      *reg = 15;
+    }
+    return src+2;
+  }
+  if (src[0] == 'r')
+  {
+    if (src[1] == 'r')
+    {
+      *mode = CLASS_REG_LONG;
+      res = whatreg (reg, src + 2);
+    }
+    else if (src[1] == 'h' )
+    {
+      *mode = CLASS_REG_BYTE;
+      res = whatreg (reg, src + 2) ;
+    }
+    else if (src[1] == 'l'  )
+    {
+      *mode = CLASS_REG_BYTE;
+      res = whatreg (reg, src + 2);
+      *reg += 8;
+    }
+    else if (src[1] == 'q')
+    {
+      *mode = CLASS_REG_QUAD;
+      res = whatreg (reg, src + 2);
+    }
+    else
+    {
+      *mode = CLASS_REG_WORD;
+      res = whatreg (reg, src + 1);
+    }
+  }
   return res;
-
 
 }
 
@@ -341,10 +396,9 @@ struct cc_names
   int value;
   char *name;
 
-
 };
 
-struct cc_names table[]=
+struct cc_names table[] =
 {
   0x0, "f",
   0x1, "lt",
@@ -416,7 +470,6 @@ DEFUN (get_operand, (ptr, mode, dst),
   unsigned int size;
 
   mode->mode = 0;
-
 
   while (*src == ' ')
     src++;
@@ -526,70 +579,71 @@ DEFUN (get_operands, (opcode, op_end, operand),
   char *ptr = op_end;
 
   switch (opcode->noperands)
-  {
-   case 0:
-    operand[0].mode = 0;
-    operand[1].mode = 0;
-    break;
-
-   case 1:
-    ptr++;
-    if (opcode->arg_info[0] == CLASS_CC)
     {
-      get_cc_operand (&ptr, operand + 0, 0);
-    }
-    else
-    {
+    case 0:
+      operand[0].mode = 0;
+      operand[1].mode = 0;
+      break;
 
+    case 1:
+      ptr++;
+      if (opcode->arg_info[0] == CLASS_CC)
+	{
+	  get_cc_operand (&ptr, operand + 0, 0);
+	}
+      else
+	{
+
+	  get_operand (&ptr, operand + 0, 0);
+	}
+      operand[1].mode = 0;
+      break;
+
+    case 2:
+      ptr++;
+      if (opcode->arg_info[0] == CLASS_CC)
+	{
+	  get_cc_operand (&ptr, operand + 0, 0);
+	}
+      else
+	{
+
+	  get_operand (&ptr, operand + 0, 0);
+	}
+      if(ptr == 0) 
+       return;
+      if (*ptr == ',')
+	ptr++;
+      get_operand (&ptr, operand + 1, 1);
+      break;
+
+    case 3:
+      ptr++;
       get_operand (&ptr, operand + 0, 0);
-    }
-    operand[1].mode = 0;
-    break;
+      if (*ptr == ',')
+	ptr++;
+      get_operand (&ptr, operand + 1, 1);
+      if (*ptr == ',')
+	ptr++;
+      get_operand (&ptr, operand + 2, 2);
+      break;
 
-   case 2:
-    ptr++;
-    if (opcode->arg_info[0] == CLASS_CC)
-    {
-      get_cc_operand (&ptr, operand + 0, 0);
-    }
-    else
-    {
-
+    case 4:
+      ptr++;
       get_operand (&ptr, operand + 0, 0);
+      if (*ptr == ',')
+	ptr++;
+      get_operand (&ptr, operand + 1, 1);
+      if (*ptr == ',')
+	ptr++;
+      get_operand (&ptr, operand + 2, 2);
+      if (*ptr == ',')
+	ptr++;
+      get_cc_operand (&ptr, operand + 3, 3);
+      break;
+    default:
+      abort ();
     }
-    if (*ptr == ',')
-     ptr++;
-    get_operand (&ptr, operand + 1, 1);
-    break;
-
-   case 3:
-    ptr++;
-    get_operand (&ptr, operand + 0, 0);
-    if (*ptr == ',')
-     ptr++;
-    get_operand (&ptr, operand + 1, 1);
-    if (*ptr == ',')
-     ptr++;
-    get_operand (&ptr, operand + 2, 2);
-    break;
-
-   case 4:
-    ptr++;
-    get_operand (&ptr, operand + 0, 0);
-    if (*ptr == ',')
-     ptr++;
-    get_operand (&ptr, operand + 1, 1);
-    if (*ptr == ',')
-     ptr++;
-    get_operand (&ptr, operand + 2, 2);
-    if (*ptr == ',')
-     ptr++;
-    get_cc_operand (&ptr, operand + 3, 3);
-    break;
-   default:
-    abort ();
-  }
-
 
   return ptr;
 }
@@ -598,9 +652,6 @@ DEFUN (get_operands, (opcode, op_end, operand),
    addressing modes, return the opcode which matches the opcodes
    provided
    */
-
-
-
 
 static
 opcode_entry_type *
@@ -617,80 +668,81 @@ DEFUN (get_specific, (opcode, operands),
   unsigned int this_index = opcode->idx;
 
   while (this_index == opcode->idx && !found)
-  {
-    unsigned int i;
-
-    this_try = opcode++;
-    for (i = 0; i < noperands; i++)
     {
-      int mode = operands[i].mode;
+      unsigned int i;
 
-      if ((mode & CLASS_MASK) != (this_try->arg_info[i] & CLASS_MASK))
-      {
-	/* it could be an pc rel operand, if this is a da mode and
+      this_try = opcode++;
+      for (i = 0; i < noperands; i++)
+	{
+	  int mode = operands[i].mode;
+
+	  if ((mode & CLASS_MASK) != (this_try->arg_info[i] & CLASS_MASK))
+	    {
+	      /* it could be an pc rel operand, if this is a da mode and
 	   we like disps, then insert it */
 
-	if (mode == CLASS_DA && this_try->arg_info[i] == CLASS_DISP)
-	{
-	  /* This is the case */
-	  operands[i].mode = CLASS_DISP;
-	}
-	else if (mode == CLASS_BA && this_try->arg_info[i])
-	{
-	  /* Can't think of a way to turn what we've been given into
+	      if (mode == CLASS_DA && this_try->arg_info[i] == CLASS_DISP)
+		{
+		  /* This is the case */
+		  operands[i].mode = CLASS_DISP;
+		}
+	      else if (mode == CLASS_BA && this_try->arg_info[i])
+		{
+		  /* Can't think of a way to turn what we've been given into
 	     something that's ok */
-	  goto fail;
+		  goto fail;
+		}
+	      else
+		goto fail;
+	    }
+	  switch (mode & CLASS_MASK)
+	    {
+	    default:
+	      break;
+	    case CLASS_X:
+	    case CLASS_IR:
+	    case CLASS_BA:
+	    case CLASS_BX:
+	    case CLASS_DISP:
+	    case CLASS_REG:
+	    case CLASS_REG_WORD:
+	    case CLASS_REG_BYTE:
+	    case CLASS_REG_QUAD:
+	    case CLASS_REG_LONG:
+	    case CLASS_REGN0:
+	      reg[this_try->arg_info[i] & ARG_MASK] = operands[i].reg;
+	      break;
+	    }
 	}
-	else goto fail;
-      }
-      switch (mode & CLASS_MASK)
-      {
-       default: 
-	break;
-       case CLASS_X:
-       case CLASS_IR:
-       case CLASS_BA:
-       case CLASS_BX:
-       case CLASS_DISP:
-       case CLASS_REG:
-       case CLASS_REG_WORD:
-       case CLASS_REG_BYTE:
-       case CLASS_REG_QUAD:
-       case CLASS_REG_LONG:
-       case CLASS_REGN0:
-	reg[this_try->arg_info[i] & ARG_MASK] = operands[i].reg;
-	break;
-      }
+
+      found = 1;
+    fail:;
     }
-	     
-    found = 1;
-   fail:;
-  }
   if (found)
-   return this_try;
+    return this_try;
   else
-   return 0;
+    return 0;
 }
-	     
+
 static void
 DEFUN (check_operand, (operand, width, string),
-    struct z8k_op *operand AND
-	     unsigned int width AND
-    char *string)
+       struct z8k_op *operand AND
+       unsigned int width AND
+       char *string)
 {
   if (operand->exp.X_add_symbol == 0
       && operand->exp.X_subtract_symbol == 0)
-  {
-	     
-    /* No symbol involved, let's look at offset, it's dangerous if any of
+    {
+
+      /* No symbol involved, let's look at offset, it's dangerous if any of
        the high bits are not 0 or ff's, find out by oring or anding with
        the width and seeing if the answer is 0 or all fs*/
-    if ((operand->exp.X_add_number & ~width) != 0 &&
-	(operand->exp.X_add_number | width) != (~0))
-    {
-      as_warn ("operand %s0x%x out of range.", string, operand->exp.X_add_number);
+      if ((operand->exp.X_add_number & ~width) != 0 &&
+	  (operand->exp.X_add_number | width) != (~0))
+	{
+	  as_warn ("operand %s0x%x out of range.", string, operand->exp.X_add_number);
+	}
     }
-  }
 
 }
 
@@ -718,36 +770,37 @@ DEFUN (newfix, (ptr, type, operand),
 }
 
 static char *
-DEFUN (apply_fix,(ptr, type, operand, size),
-       char* ptr AND
+DEFUN (apply_fix, (ptr, type, operand, size),
+       char *ptr AND
        int type AND
-       expressionS *operand AND
+       expressionS * operand AND
        int size)
 {
   int n = operand->X_add_number;
+
   operand->X_add_number = n;
-  newfix((ptr - buffer)/2, type, operand);
+  newfix ((ptr - buffer) / 2, type, operand);
 #if 1
-  switch (size) {
-   case 8:			/* 8 nibbles == 32 bits */
-    *ptr++ = n>> 28;
-    *ptr++ = n>> 24;
-    *ptr++ = n>> 20;
-    *ptr++ = n>> 16;
-   case 4:			/* 4 niblles == 16 bits */
-    *ptr++ = n >> 12;
-    *ptr++ = n >> 8;
-   case 2:
-    *ptr++ = n >> 4;
-   case 1:
-    *ptr++ =   n >> 0;
-    break;
-  }
+  switch (size)
+    {
+    case 8:			/* 8 nibbles == 32 bits */
+      *ptr++ = n >> 28;
+      *ptr++ = n >> 24;
+      *ptr++ = n >> 20;
+      *ptr++ = n >> 16;
+    case 4:			/* 4 niblles == 16 bits */
+      *ptr++ = n >> 12;
+      *ptr++ = n >> 8;
+    case 2:
+      *ptr++ = n >> 4;
+    case 1:
+      *ptr++ = n >> 0;
+      break;
+    }
 #endif
-  return ptr;  
+  return ptr;
 
 }
-
 
 /* Now we know what sort of opcodes it is, lets build the bytes -
  */
@@ -768,118 +821,136 @@ DEFUN (build_bytes, (this_try, operand),
   int nib;
   int nibble;
   unsigned short *class_ptr;
-   frag_wane (frag_now);
-   frag_new (0);
+
+  frag_wane (frag_now);
+  frag_new (0);
 
   memset (buffer, 20, 0);
   class_ptr = this_try->byte_info;
- top:;
+top:;
 
   for (nibble = 0; c = *class_ptr++; nibble++)
-  {
-
-    switch (c & CLASS_MASK)
     {
-     default:
 
-      abort ();
-     case CLASS_ADDRESS:
-      /* Direct address, we don't cope with the SS mode right now */
-      if (segmented_mode)
-      {
-	output_ptr = apply_fix (output_ptr , R_DA | R_SEG, da_operand, 8);
-      }
-      else
-      {
-	output_ptr = apply_fix(output_ptr, R_DA, da_operand, 4);
-      }
-      da_operand = 0;
-      break;
-     case CLASS_DISP8:
-      /* pc rel 8 bit */
-output_ptr =       apply_fix (output_ptr, R_JR, da_operand, 2);
-      da_operand = 0;
-
-      break;
-
-     case CLASS_CC:
-      *output_ptr++ = the_cc;
-      break;
-     case CLASS_BIT:
-      *output_ptr++ = c & 0xf;
-      break;
-     case CLASS_REGN0:
-      if (reg[c & 0xf] == 0)
-      {
-	as_bad ("can't use R0 here");
-      }
-     case CLASS_REG:
-     case CLASS_REG_BYTE:
-     case CLASS_REG_WORD:
-     case CLASS_REG_LONG:
-     case CLASS_REG_QUAD:
-      /* Insert bit mattern of
-	 right reg */
-      *output_ptr++ = reg[c & 0xf];
-      break;
-     case CLASS_DISP:
-      output_ptr =  apply_fix (output_ptr,  R_DA, da_operand, 4);
-      da_operand = 0;
-      break;
-     case CLASS_IMM:
-     {
-       nib = 0;
-       switch (c & ARG_MASK)
-       {
-	case ARG_IMM4:
-	 output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
-	 break;
-	case ARG_IMM4M1:
-	 imm_operand->X_add_number--;
-	 output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
-	 break;
-	case ARG_IMMNMINUS1:
-	 imm_operand->X_add_number--;
-	 output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand,1);
-	 break;
-	case ARG_NIM8:
-	 imm_operand->X_add_number = -imm_operand->X_add_number;
-	case ARG_IMM8:
-	 output_ptr = apply_fix (output_ptr , R_IMM8, imm_operand, 2);
-	 break;
-
-
-	case ARG_IMM16:
-	 output_ptr= apply_fix(output_ptr, R_DA, 	imm_operand, 4);
-	 break;
-
-	case ARG_IMM32:
-	 output_ptr = apply_fix (output_ptr, R_IMM32, imm_operand, 8);
-	 break;
-
+      switch (c & CLASS_MASK)
+	{
 	default:
-	 abort ();
-       }
-     }
+
+	  abort ();
+	case CLASS_ADDRESS:
+	  /* Direct address, we don't cope with the SS mode right now */
+	  if (segmented_mode)
+	    {
+	      da_operand->X_add_number |= 0x80000000;
+	      output_ptr = apply_fix (output_ptr, R_IMM32, da_operand, 8);
+	    }
+	  else
+	    {
+	      output_ptr = apply_fix (output_ptr, R_IMM16, da_operand, 4);
+	    }
+	  da_operand = 0;
+	  break;
+	case CLASS_DISP8:
+	  /* pc rel 8 bit */
+	  output_ptr = apply_fix (output_ptr, R_JR, da_operand, 2);
+	  da_operand = 0;
+
+	  break;
+	case CLASS_BIT_1OR2:
+	  *output_ptr = c & 0xf;
+	  if (imm_operand)  
+	  {
+	    if (imm_operand->X_add_number==2)
+	    {
+	      *output_ptr |= 2;
+	    }
+	    else if (imm_operand->X_add_number != 1)
+	    {
+	      as_bad("immediate must be 1 or 2");
+	    }
+	  }
+	  else 
+	  {
+	    as_bad("immediate 1 or 2 expected");
+	  }
+	  output_ptr++;
+	  break;
+	case CLASS_CC:
+	  *output_ptr++ = the_cc;
+	  break;
+	case CLASS_BIT:
+	  *output_ptr++ = c & 0xf;
+	  break;
+	case CLASS_REGN0:
+	  if (reg[c & 0xf] == 0)
+	    {
+	      as_bad ("can't use R0 here");
+	    }
+	case CLASS_REG:
+	case CLASS_REG_BYTE:
+	case CLASS_REG_WORD:
+	case CLASS_REG_LONG:
+	case CLASS_REG_QUAD:
+	  /* Insert bit mattern of
+	 right reg */
+	  *output_ptr++ = reg[c & 0xf];
+	  break;
+	case CLASS_DISP:
+	  output_ptr = apply_fix (output_ptr, R_IMM16, da_operand, 4);
+	  da_operand = 0;
+	  break;
+	  
+	case CLASS_IMM:
+	  {
+	    nib = 0;
+	    switch (c & ARG_MASK)
+	      {
+	      case ARG_IMM4:
+		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
+		break;
+	      case ARG_IMM4M1:
+		imm_operand->X_add_number--;
+		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
+		break;
+	      case ARG_IMMNMINUS1:
+		imm_operand->X_add_number--;
+		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
+		break;
+	      case ARG_NIM8:
+		imm_operand->X_add_number = -imm_operand->X_add_number;
+	      case ARG_IMM8:
+		output_ptr = apply_fix (output_ptr, R_IMM8, imm_operand, 2);
+		break;
+	      case ARG_IMM16:
+		output_ptr = apply_fix (output_ptr, R_IMM16, imm_operand, 4);
+		break;
+
+	      case ARG_IMM32:
+		output_ptr = apply_fix (output_ptr, R_IMM32, imm_operand, 8);
+		break;
+
+	      default:
+		abort ();
+	      }
+	  }
+	}
     }
-  }
 
   /* Copy from the nibble buffer into the frag */
 
- {
-   int length = (output_ptr - buffer) / 2;
-   char *src = buffer;
-   char *fragp = frag_more (length);
+  {
+    int length = (output_ptr - buffer) / 2;
+    char *src = buffer;
+    char *fragp = frag_more (length);
 
-   while (src < output_ptr)
-   {
-     *fragp = (src[0] << 4) | src[1];
-     src += 2;
-     fragp++;
-   }
+    while (src < output_ptr)
+      {
+	*fragp = (src[0] << 4) | src[1];
+	src += 2;
+	fragp++;
+      }
 
-
- }
+  }
 
 }
 
@@ -887,8 +958,6 @@ output_ptr =       apply_fix (output_ptr, R_JR, da_operand, 2);
    machine dependent instruction.  This funciton is supposed to emit
    the frags/bytes it assembles to.
    */
-
-
 
 void
 DEFUN (md_assemble, (str),
@@ -906,21 +975,21 @@ DEFUN (md_assemble, (str),
 
   /* Drop leading whitespace */
   while (*str == ' ')
-    str++;
+   str++;
 
   /* find the op code end */
   for (op_start = op_end = str;
        *op_end != 0 && *op_end != ' ';
        op_end++)
-    {
-    }
+  {
+  }
 
   ;
 
   if (op_end == op_start)
-    {
-      as_bad ("can't find opcode ");
-    }
+  {
+    as_bad ("can't find opcode ");
+  }
   c = *op_end;
 
   *op_end = 0;
@@ -928,21 +997,45 @@ DEFUN (md_assemble, (str),
   opcode = (opcode_entry_type *) hash_find (opcode_hash_control,
 					    op_start);
 
+
   if (opcode == NULL)
-    {
-      as_bad ("unknown opcode");
-      return;
-    }
+  {
+    as_bad ("unknown opcode");
+    return;
+  }
 
+  if (opcode->opcode == 250) 
+  {
+    /* was really a pseudo op */
 
-  input_line_pointer = get_operands (opcode, op_end,
-				     operand);
-  *op_end = c;
-  prev_opcode = opcode;
+    pseudo_typeS *p ;
+    char oc;
 
-  opcode = get_specific (opcode, operand);
+    char *old = input_line_pointer;
+    *op_end = c;
 
-  if (opcode == 0)
+     
+    input_line_pointer = op_end;
+
+    oc = *old;
+    *old = '\n';
+    while (*input_line_pointer == ' ')
+     input_line_pointer++;
+    p = (pseudo_typeS *)(opcode->func);
+
+    (p->poc_handler)(p->poc_val);
+    input_line_pointer = old;
+    *old = oc;
+  }
+  else {
+    input_line_pointer = get_operands (opcode, op_end,
+				       operand);
+    *op_end = c;
+    prev_opcode = opcode;
+
+    opcode = get_specific (opcode, operand);
+
+    if (opcode == 0)
     {
       /* Couldn't find an opcode which matched the operands */
       char *where = frag_more (2);
@@ -954,7 +1047,8 @@ DEFUN (md_assemble, (str),
       return;
     }
 
-  build_bytes (opcode, operand);
+    build_bytes (opcode, operand);
+  }
 }
 
 void
@@ -1053,20 +1147,27 @@ md_parse_option (argP, cntP, vecP)
      char ***vecP;
 
 {
-  return 0;
-
+  if (!strcmp(*argP,"z8001")) {
+    s_segm();
+  }
+  else if (!strcmp(*argP,"z8002")) {
+    s_unseg();
+  }
+  else return 0;
+  **argP = 0;
+  return 1;
 }
 
 int md_short_jump_size;
 
-void 
+void
 tc_aout_fix_to_chars ()
 {
   printf ("call to tc_aout_fix_to_chars \n");
   abort ();
 }
 
-void 
+void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
      long from_addr;
@@ -1122,15 +1223,13 @@ md_apply_fix (fixP, val)
     case R_JR:
 
       *buf++ = val;
-/*    if (val != 0) abort();*/
+      /*    if (val != 0) abort();*/
       break;
-
 
     case R_IMM8:
       buf[0] += val;
       break;
-      break;
-    case R_DA:
+     case R_IMM16:
       *buf++ = (val >> 8);
       *buf++ = val;
       break;
@@ -1140,19 +1239,22 @@ md_apply_fix (fixP, val)
       *buf++ = (val >> 8);
       *buf++ = val;
       break;
+#if 0
     case R_DA | R_SEG:
       *buf++ = (val >> 16);
       *buf++ = 0x00;
       *buf++ = (val >> 8);
       *buf++ = val;
       break;
+#endif
+
     default:
       abort ();
 
     }
 }
 
-void 
+void
 DEFUN (md_operand, (expressionP), expressionS * expressionP)
 {
 }
@@ -1169,7 +1271,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 
 /* Put number into target byte order */
 
-void 
+void
 DEFUN (md_number_to_chars, (ptr, use, nbytes),
        char *ptr AND
        long use AND
@@ -1177,7 +1279,8 @@ DEFUN (md_number_to_chars, (ptr, use, nbytes),
 {
   switch (nbytes)
     {
-      case 4:*ptr++ = (use >> 24) & 0xff;
+    case 4:
+      *ptr++ = (use >> 24) & 0xff;
     case 3:
       *ptr++ = (use >> 16) & 0xff;
     case 2:
@@ -1189,20 +1292,19 @@ DEFUN (md_number_to_chars, (ptr, use, nbytes),
       abort ();
     }
 }
-long 
+long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
   abort ();
 }
 
-void 
+void
 tc_coff_symbol_emit_hook ()
 {
 }
 
-
-void 
+void
 tc_reloc_mangle (fix_ptr, intr, base)
      fixS *fix_ptr;
      struct internal_reloc *intr;
@@ -1216,36 +1318,38 @@ tc_reloc_mangle (fix_ptr, intr, base)
   /* If this relocation is attached to a symbol then it's ok
      to output it */
   if (fix_ptr->fx_r_type == 0)
+  {
+    /* cons likes to create reloc32's whatever the size of the reloc..
+     */
+    switch (fix_ptr->fx_size)
     {
-      /* cons likes to create reloc32's whatever the size of the reloc..
-       */
-      switch (fix_ptr->fx_size)
-	{
 
-	case 2:
-	  intr->r_type = R_DA;
-	  break;
-	case 1:
-	  intr->r_type = R_IMM8;
-	  break;
-	default:
-	  abort ();
-
-	}
+     case 2:
+      intr->r_type = R_IMM16;
+      break;
+     case 1:
+      intr->r_type = R_IMM8;
+      break;
+     case 4:
+      intr->r_type = R_IMM32;
+      break;
+     default:
+      abort ();
 
     }
+
+  }
   else
-    {
-      intr->r_type = fix_ptr->fx_r_type;
-    }
+  {
+    intr->r_type = fix_ptr->fx_r_type;
+  }
 
   intr->r_vaddr = fix_ptr->fx_frag->fr_address + fix_ptr->fx_where + base;
   intr->r_offset = fix_ptr->fx_offset;
 
   if (symbol_ptr)
-    intr->r_symndx = symbol_ptr->sy_number;
+   intr->r_symndx = symbol_ptr->sy_number;
   else
-    intr->r_symndx = -1;
-
+   intr->r_symndx = -1;
 
 }
