@@ -109,13 +109,13 @@ struct pd_thread {
 
 /* This module's target-specific operations, active while pd_able is true.  */
 
-static struct target_ops ops;
+static struct target_ops aix_thread_ops;
 
 /* Copy of the target over which ops is pushed.  
    This is more convenient than a pointer to child_ops or core_ops,
    because they lack current_target's default callbacks.  */
 
-static struct target_ops base_ops;
+static struct target_ops base_target;
 
 /* Address of the function that libpthread will call when libpthdebug
    is ready to be initialized.  */
@@ -266,7 +266,7 @@ ptrace32 (int req, int id, int *addr, int data, int *buf)
 {
   errno = 0;
   return ptrace_check (req, id, 
-		       ptrace (req, id, (int *)addr, data, buf));
+		       ptrace (req, id, (int *) addr, data, buf));
 }
 
 /* If *PIDP is a composite process/thread id, convert it to a
@@ -351,7 +351,7 @@ pdc_read_regs (pthdb_user_t user,
   
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, "pdc_read_regs tid=%d flags=%llx\n",
-                        (int)tid, flags);
+                        (int) tid, flags);
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
@@ -417,22 +417,22 @@ pdc_write_regs (pthdb_user_t user,
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, "pdc_write_regs tid=%d flags=%llx\n",
-                        (int)tid, flags);
+                        (int) tid, flags);
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
     {
       if (arch64)
 	ptrace64aix (PTT_WRITE_GPRS, tid, 
-		     (unsigned long)context->gpr, 0, NULL);
+		     (unsigned long) context->gpr, 0, NULL);
       else
-	ptrace32 (PTT_WRITE_GPRS, tid, (int *)context->gpr, 0, NULL);
+	ptrace32 (PTT_WRITE_GPRS, tid, (int *) context->gpr, 0, NULL);
     }
 
  /* Floating-point registers.  */
   if (flags & PTHDB_FLAG_FPRS)
     {
-      ptrace32 (PTT_WRITE_FPRS, tid, (int *)context->fpr, 0, NULL);
+      ptrace32 (PTT_WRITE_FPRS, tid, (int *) context->fpr, 0, NULL);
     }
 
   /* Special-purpose registers.  */
@@ -445,7 +445,7 @@ pdc_write_regs (pthdb_user_t user,
 	}
       else
 	{
-	  ptrace32 (PTT_WRITE_SPRS, tid, (int *)&context->msr, 0, NULL);
+	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &context->msr, 0, NULL);
 	}
     }
   return 0;
@@ -876,8 +876,8 @@ pd_enable (void)
     return;
 
   /* Prepare for thread debugging.  */
-  base_ops = current_target;
-  push_target (&ops);
+  base_target = current_target;
+  push_target (&aix_thread_ops);
   pd_able = 1;
 
   /* If we're debugging a core file or an attached inferior, the
@@ -896,7 +896,7 @@ pd_disable (void)
   if (pd_active)
     pd_deactivate ();
   pd_able = 0;
-  unpush_target (&ops);
+  unpush_target (&aix_thread_ops);
 }
 
 /* target_new_objfile_hook callback.
@@ -921,26 +921,26 @@ new_objfile (struct objfile *objfile)
 /* Attach to process specified by ARGS.  */
 
 static void
-ops_attach (char *args, int from_tty)
+aix_thread_attach (char *args, int from_tty)
 {
-  base_ops.to_attach (args, from_tty);
+  base_target.to_attach (args, from_tty);
   pd_activate (1);
 }
 
-/* Detach from the process attached to by ops_attach().  */
+/* Detach from the process attached to by aix_thread_attach().  */
 
 static void
-ops_detach (char *args, int from_tty)
+aix_thread_detach (char *args, int from_tty)
 {
   pd_deactivate ();
-  base_ops.to_detach (args, from_tty);
+  base_target.to_detach (args, from_tty);
 }
 
 /* Tell the inferior process to continue running thread PID if != -1
    and all threads otherwise.  */
 
 static void
-ops_resume (ptid_t ptid, int step, enum target_signal sig)
+aix_thread_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   struct thread_info *thread;
   pthdb_tid_t tid[2];
@@ -949,7 +949,7 @@ ops_resume (ptid_t ptid, int step, enum target_signal sig)
     {
       struct cleanup *cleanup = save_inferior_ptid ();
       inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-      base_ops.to_resume (ptid, step, sig);
+      base_target.to_resume (ptid, step, sig);
       do_cleanups (cleanup);
     }
   else
@@ -967,10 +967,10 @@ ops_resume (ptid_t ptid, int step, enum target_signal sig)
 
       if (arch64)
 	ptrace64aix (PTT_CONTINUE, tid[0], 1, 
-		     target_signal_to_host (sig), (int *)tid);
+		     target_signal_to_host (sig), (int *) tid);
       else
 	ptrace32 (PTT_CONTINUE, tid[0], (int *) 1,
-		  target_signal_to_host (sig), (int *)tid);
+		  target_signal_to_host (sig), (int *) tid);
     }
 }
 
@@ -979,14 +979,14 @@ ops_resume (ptid_t ptid, int step, enum target_signal sig)
    thread.  */
 
 static ptid_t
-ops_wait (ptid_t ptid, struct target_waitstatus *status)
+aix_thread_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct cleanup *cleanup = save_inferior_ptid ();
 
   pid_to_prc (&ptid);
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  ptid = base_ops.to_wait (ptid, status);
+  ptid = base_target.to_wait (ptid, status);
   do_cleanups (cleanup);
 
   if (PIDGET (ptid) == -1)
@@ -1073,13 +1073,14 @@ supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
    function.  */
 
 static void
-fetch_regs_lib (pthdb_pthread_t pdtid)
+fetch_regs_user_thread (pthdb_pthread_t pdtid)
 {
   int status, i;
   pthdb_context_t ctx;
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "fetch_regs_lib %lx\n", (long)pdtid);
+    fprintf_unfiltered (gdb_stdlog, 
+			"fetch_regs_user_thread %lx\n", (long) pdtid);
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
     error ("aix-thread: fetch_registers: pthdb_pthread_context returned %s",
@@ -1121,7 +1122,7 @@ fetch_regs_lib (pthdb_pthread_t pdtid)
    be retrieved.  */
 
 static void
-fetch_regs_kern (int regno, pthdb_tid_t tid)
+fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 {
   uint64_t gprs64[32];
   uint32_t gprs32[32];
@@ -1132,8 +1133,8 @@ fetch_regs_kern (int regno, pthdb_tid_t tid)
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-			"fetch_regs_kern tid=%lx regno=%d arch64=%d\n",
-			(long)tid, regno, arch64);
+	"fetch_regs_kernel_thread tid=%lx regno=%d arch64=%d\n",
+	(long) tid, regno, arch64);
 
   /* General-purpose registers.  */
   if (regno == -1 || regno < FP0_REGNUM)
@@ -1193,22 +1194,22 @@ fetch_regs_kern (int regno, pthdb_tid_t tid)
    thread/process specified by inferior_ptid.  */
 
 static void
-ops_fetch_registers (int regno)
+aix_thread_fetch_registers (int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
 
   if (!PD_TID (inferior_ptid))
-    base_ops.to_fetch_registers (regno);
+    base_target.to_fetch_registers (regno);
   else
     {
       thread = find_thread_pid (inferior_ptid);
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
-	fetch_regs_lib (thread->private->pdtid);
+	fetch_regs_user_thread (thread->private->pdtid);
       else
-	fetch_regs_kern (regno, tid);
+	fetch_regs_kernel_thread (regno, tid);
     }
 }
 
@@ -1303,7 +1304,7 @@ fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
    but I doubt it's worth the effort.  */
 
 static void
-store_regs_lib (pthdb_pthread_t pdtid)
+store_regs_user_thread (pthdb_pthread_t pdtid)
 {
   int status, i;
   pthdb_context_t ctx;
@@ -1313,7 +1314,7 @@ store_regs_lib (pthdb_pthread_t pdtid)
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
-			"store_regs_lib %lx\n", (long)pdtid);
+			"store_regs_user_thread %lx\n", (long) pdtid);
 
   /* Retrieve the thread's current context for its non-register
      values.  */
@@ -1385,7 +1386,7 @@ store_regs_lib (pthdb_pthread_t pdtid)
    group.  */
 
 static void
-store_regs_kern (int regno, pthdb_tid_t tid)
+store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 {
   uint64_t gprs64[32];
   uint32_t gprs32[32];
@@ -1395,8 +1396,9 @@ store_regs_kern (int regno, pthdb_tid_t tid)
   int i;
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "store_regs_kern tid=%lx regno=%d\n",
-                        (long)tid, regno);
+    fprintf_unfiltered (gdb_stdlog, 
+			"store_regs_kernel_thread tid=%lx regno=%d\n",
+                        (long) tid, regno);
 
   /* General-purpose registers.  */
   if (regno == -1 || regno < FP0_REGNUM)
@@ -1463,22 +1465,22 @@ store_regs_kern (int regno, pthdb_tid_t tid)
    thread/process specified by inferior_ptid.  */
 
 static void
-ops_store_registers (int regno)
+aix_thread_store_registers (int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
 
   if (!PD_TID (inferior_ptid))
-    base_ops.to_store_registers (regno);
+    base_target.to_store_registers (regno);
   else
     {
       thread = find_thread_pid (inferior_ptid);
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
-	store_regs_lib (thread->private->pdtid);
+	store_regs_user_thread (thread->private->pdtid);
       else
-	store_regs_kern (regno, tid);
+	store_regs_kernel_thread (regno, tid);
     }
 }
 
@@ -1486,16 +1488,16 @@ ops_store_registers (int regno)
    address MEMADDR if WRITE and vice versa otherwise.  */
 
 static int
-ops_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-                 struct mem_attrib *attrib,
-		 struct target_ops *target)
+aix_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		      struct mem_attrib *attrib,
+		      struct target_ops *target)
 {
   int n;
   struct cleanup *cleanup = save_inferior_ptid ();
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  n = base_ops.to_xfer_memory (memaddr, myaddr, len, 
-			       write, attrib, &base_ops);
+  n = base_target.to_xfer_memory (memaddr, myaddr, len, 
+				  write, attrib, &base_target);
   do_cleanups (cleanup);
 
   return n;
@@ -1504,31 +1506,31 @@ ops_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 /* Kill and forget about the inferior process.  */
 
 static void
-ops_kill (void)
+aix_thread_kill (void)
 {
   struct cleanup *cleanup = save_inferior_ptid ();
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  base_ops.to_kill ();
+  base_target.to_kill ();
   do_cleanups (cleanup);
 }
 
 /* Clean up after the inferior exits.  */
 
 static void
-ops_mourn_inferior (void)
+aix_thread_mourn_inferior (void)
 {
   pd_deactivate ();
-  base_ops.to_mourn_inferior ();
+  base_target.to_mourn_inferior ();
 }
 
 /* Return whether thread PID is still valid.  */
 
 static int
-ops_thread_alive (ptid_t ptid)
+aix_thread_thread_alive (ptid_t ptid)
 {
   if (!PD_TID (ptid))
-    return base_ops.to_thread_alive (ptid);
+    return base_target.to_thread_alive (ptid);
 
   /* We update the thread list every time the child stops, so all
      valid threads should be in the thread list.  */
@@ -1539,12 +1541,12 @@ ops_thread_alive (ptid_t ptid)
    "info threads" output.  */
 
 static char *
-ops_pid_to_str (ptid_t ptid)
+aix_thread_pid_to_str (ptid_t ptid)
 {
   static char *ret = NULL;
 
   if (!PD_TID (ptid))
-    return base_ops.to_pid_to_str (ptid);
+    return base_target.to_pid_to_str (ptid);
 
   /* Free previous return value; a new one will be allocated by
      xasprintf().  */
@@ -1558,7 +1560,7 @@ ops_pid_to_str (ptid_t ptid)
    THREAD, for use in "info threads" output.  */
 
 static char *
-ops_extra_thread_info (struct thread_info *thread)
+aix_thread_extra_thread_info (struct thread_info *thread)
 {
   struct ui_file *buf;
   int status;
@@ -1611,31 +1613,31 @@ ops_extra_thread_info (struct thread_info *thread)
   return ret;
 }
 
-/* Initialize target ops.  */
+/* Initialize target aix_thread_ops.  */
 
 static void
-init_ops (void)
+init_aix_thread_ops (void)
 {
-  ops.to_shortname          = "aix-threads";
-  ops.to_longname           = "AIX pthread support";
-  ops.to_doc                = "AIX pthread support";
+  aix_thread_ops.to_shortname          = "aix-threads";
+  aix_thread_ops.to_longname           = "AIX pthread support";
+  aix_thread_ops.to_doc                = "AIX pthread support";
 
-  ops.to_attach             = ops_attach;
-  ops.to_detach             = ops_detach;
-  ops.to_resume             = ops_resume;
-  ops.to_wait               = ops_wait;
-  ops.to_fetch_registers    = ops_fetch_registers;
-  ops.to_store_registers    = ops_store_registers;
-  ops.to_xfer_memory        = ops_xfer_memory;
-  /* No need for ops.to_create_inferior, because we activate thread
+  aix_thread_ops.to_attach             = aix_thread_attach;
+  aix_thread_ops.to_detach             = aix_thread_detach;
+  aix_thread_ops.to_resume             = aix_thread_resume;
+  aix_thread_ops.to_wait               = aix_thread_wait;
+  aix_thread_ops.to_fetch_registers    = aix_thread_fetch_registers;
+  aix_thread_ops.to_store_registers    = aix_thread_store_registers;
+  aix_thread_ops.to_xfer_memory        = aix_thread_xfer_memory;
+  /* No need for aix_thread_ops.to_create_inferior, because we activate thread
      debugging when the inferior reaches pd_brk_addr.  */
-  ops.to_kill               = ops_kill;
-  ops.to_mourn_inferior     = ops_mourn_inferior;
-  ops.to_thread_alive       = ops_thread_alive;
-  ops.to_pid_to_str         = ops_pid_to_str;
-  ops.to_extra_thread_info  = ops_extra_thread_info;
-  ops.to_stratum            = thread_stratum;
-  ops.to_magic              = OPS_MAGIC;
+  aix_thread_ops.to_kill               = aix_thread_kill;
+  aix_thread_ops.to_mourn_inferior     = aix_thread_mourn_inferior;
+  aix_thread_ops.to_thread_alive       = aix_thread_thread_alive;
+  aix_thread_ops.to_pid_to_str         = aix_thread_pid_to_str;
+  aix_thread_ops.to_extra_thread_info  = aix_thread_extra_thread_info;
+  aix_thread_ops.to_stratum            = thread_stratum;
+  aix_thread_ops.to_magic              = OPS_MAGIC;
 }
 
 /* Module startup initialization function, automagically called by
@@ -1644,8 +1646,8 @@ init_ops (void)
 void
 _initialize_aix_thread (void)
 {
-  init_ops ();
-  add_target (&ops);
+  init_aix_thread_ops ();
+  add_target (&aix_thread_ops);
 
   /* Notice when object files get loaded and unloaded.  */
   target_new_objfile_chain = target_new_objfile_hook;

@@ -1,3 +1,25 @@
+2002-07-19  Michael Snyder  <msnyder@redhat.com>
+
+	* aix-thread.c (ops): Rename to aix_thread_ops.
+	(base_ops): Rename to base_target.
+	(ops_attach): Rename to aix_thread_attach.
+	(ops_detach): Rename to aix_thread_detach.
+	(ops_resume): Rename to aix_thread_detach.
+	(ops_wait):   Rename to aix_thread_wait.
+	(ops_kill):   Rename to aix_thread_kill.
+	(init_ops):   Rename to init_aix_thread_ops.
+	(ops_fetch_register): Rename to aix_thread_fetch_register.
+	(ops_store_register): Rename to aix_thread_store_register.
+	(ops_mourn_inferior): Rename to aix_thread_mourn_inferior.
+	(ops_thread_alive):   Rename to aix_thread_thread_alive.
+	(ops_extra_thread_info: Rename to aix_thread_extra_thread_info.
+	(ops_pid_to_str):  Rename to aix_thread_pid_to_str.
+	(ops_xfer_memory): Rename to aix_thread_xfer_memory.
+	(fetch_regs_lib):  Rename to fetch_regs_user_thread.
+	(fetch_regs_kern): Rename to fetch_regs_kernel_thread.
+	(store_regs_lib):  Rename to store_regs_user_thread.
+	(store_regs_kern): Rename to store_regs_kernel_thread.
+
 2002-07-18  Michael Snyder  <msnyder@redhat.com>
 
 	* aix-thread.c (ops_prepare_to_store): Eliminate.
