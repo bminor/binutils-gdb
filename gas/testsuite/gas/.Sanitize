@@ -27,6 +27,7 @@ Do-first:
 Things-to-keep:
 
 all
+hppa
 i386
 ieee.fp
 m68k
