@@ -1,3 +1,17 @@
+2000-07-01  Koundinya K  <kk@ddeorg.soft.net>
+
+        * config.bfd: Change targ_defvec and targ_selvecs for mips*-*-sysv4*
+        to add a new target for traditional mips i.e
+        bfd_elf32_tradbigmips_vec and bfd_elf32_tradlittlemips_vec.
+        * configure.in: Likewise.
+        * configure: Rebuild.
+        * targets.c (bfd_elf32_tradbigmips_vec): Declare and put in
+	bfd_target_vector.
+	(bfd_elf32_tradlittlemips_vec): Likewise.
+        * elfxx-target.h: Add macro INCLUDED_TARGET_FILE which is more a test
+        to see that elfNN_bed does not get redefined even if the target file
+        is included twice for a chip. See elf32-mips.c.
+	
 2000-07-01  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am (DEP): Fix 2000-06-22.  grep after running dep.sed

@@ -580,8 +580,8 @@ case "${targ}" in
     targ_underscore=yes
     ;;
   mips*-*-sysv4*)
-    targ_defvec=bfd_elf32_bigmips_vec
-    targ_selvecs="bfd_elf32_littlemips_vec ecoff_big_vec ecoff_little_vec"
+    targ_defvec=bfd_elf32_tradbigmips_vec
+    targ_selvecs="bfd_elf32_tradlittlemips_vec ecoff_big_vec ecoff_little_vec"
     ;;
   mips*-*-sysv* | mips*-*-riscos*)
     targ_defvec=ecoff_big_vec
