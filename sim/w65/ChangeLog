@@ -1,3 +1,12 @@
+Tue Apr 15 14:55:10 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Set to @INSTALL@.
+	(INSTALL_XFORM, INSTALL_XFORM1): Remove.
+	(install): Depend upon installdirs.  Use $(program_transform_name)
+	directly, rather than using $(INSTALL_XFORM) and
+	$(INSTALL_XFORM1).
+	(installdirs): New target.
+
 Mon Apr 14 16:30:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (INSTALL): Change install.sh to install-sh.
