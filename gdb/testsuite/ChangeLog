@@ -1,3 +1,16 @@
+Wed Apr 28 13:19:07 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* */Makefile.in (CFLAGS): add CFLAGS = -g to all subdirectory
+	  Makefiles.
+
+Fri Apr 23 18:13:28 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	Switch to using configure's configdirs.
+	* Makefile.in (Makefile): add configure.in dependency.
+	  (SUBDIRS): removed redundant assignment.
+	* configure.in: switch subdirs assignment to configdirs.
+	* gdb.t*/configure.in: new files.
+
 Thu Apr 22 08:27:53 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* gdb.t07/watchpoint.exp: Removed a29k expected failure which now
