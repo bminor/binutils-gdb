@@ -1,5 +1,7 @@
 Fri Jul 14 12:11:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/mipsecoff.em (check_sections): Use %P, not %F.
+
 	* ldver.c (help): Update list of options to match currently
 	supported list.
 
