@@ -2226,7 +2226,7 @@ c++filt @var{option} @var{symbol}
 @smallexample
 @c man begin SYNOPSIS addr2line
 addr2line [@option{-b} @var{bfdname}|@option{--target=}@var{bfdname}]
-          [@option{-C}|@option{--demangle}[=@var{style}]
+          [@option{-C}|@option{--demangle}[=@var{style}]]
           [@option{-e} @var{filename}|@option{--exe=}@var{filename}]
           [@option{-f}|@option{--functions}] [@option{-s}|@option{--basename}]
           [@option{-H}|@option{--help}] [@option{-V}|@option{--version}]
