@@ -1,3 +1,11 @@
+Mon Apr  7 16:47:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.host: Set SHLIB_LIBS.
+	* configure.in: Substitute SHLIB_LIBS.
+	* configure: Rebuild.
+	* Makefile.in (SHLIB_LIBS): New variable.
+	($(SHLIB)): Use $(SHLIB_LIBS).
+
 Mon Apr  7 10:53:52 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* bfd-in.h bfd-in2.h: add bfd_section_lma macro to correspond

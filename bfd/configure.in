@@ -99,6 +99,7 @@ AC_SUBST(PICFLAG)
 AC_SUBST(SHLIB)
 AC_SUBST(SHLIB_CC)
 AC_SUBST(SHLIB_CFLAGS)
+AC_SUBST(SHLIB_LIBS)
 if test "${commonbfdlib}" = "true"; then
   COMMON_SHLIB=yes
   PICLIST=piclist
