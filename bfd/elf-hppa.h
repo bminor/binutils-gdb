@@ -1220,12 +1220,41 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	   to the local symbol's value).
 
 	   So, if this is a local symbol (h == NULL), then we need to
-	   fill in its DLT entry.  */
+	   fill in its DLT entry. 
+
+	   Similarly we may still need to set up an entry in .opd for
+	   a local function which had its address taken.  */
 	if (dyn_h->h == NULL)
 	  {
 	    bfd_put_64 (hppa_info->dlt_sec->owner,
 			value,
 			hppa_info->dlt_sec->contents + dyn_h->dlt_offset);
+
+	    /* Now handle .opd creation if needed.  */
+	    if (r_type == R_PARISC_LTOFF_FPTR14R
+		|| r_type == R_PARISC_LTOFF_FPTR14DR
+		|| r_type == R_PARISC_LTOFF_FPTR14WR
+		|| r_type == R_PARISC_LTOFF_FPTR21L
+		|| r_type == R_PARISC_LTOFF_FPTR16F
+		|| r_type == R_PARISC_LTOFF_FPTR16WF
+		|| r_type == R_PARISC_LTOFF_FPTR16DF)
+	      {
+		/* The first two words of an .opd entry are zero.  */
+		memset (hppa_info->opd_sec->contents + dyn_h->opd_offset,
+			0, 16);
+
+		/* The next word is the address of the function.  */
+		bfd_put_64 (hppa_info->opd_sec->owner, value,
+			    (hppa_info->opd_sec->contents
+			     + dyn_h->opd_offset + 16));
+
+		/* The last word is our local __gp value.  */
+		value = _bfd_get_gp_value
+			  (hppa_info->opd_sec->output_section->owner);
+		bfd_put_64 (hppa_info->opd_sec->owner, value,
+			    (hppa_info->opd_sec->contents
+			     + dyn_h->opd_offset + 24));
+	      }
 	  }
 
 	/* We want the value of the DLT offset for this symbol, not
@@ -1353,6 +1382,25 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 
     case R_PARISC_LTOFF_FPTR32:
       {
+	/* We may still need to create the FPTR itself if it was for
+	   a local symbol.  */
+	if (dyn_h->h == NULL)
+	  {
+	    /* The first two words of an .opd entry are zero.  */
+	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
+
+	    /* The next word is the address of the function.  */
+	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+			(hppa_info->opd_sec->contents
+			 + dyn_h->opd_offset + 16));
+
+	    /* The last word is our local __gp value.  */
+	    value = _bfd_get_gp_value
+		      (hppa_info->opd_sec->output_section->owner);
+	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
+	  }
+
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  */
 	value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
@@ -1363,6 +1411,25 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_LTOFF_FPTR64:
     case R_PARISC_LTOFF_TP64:
       {
+	/* We may still need to create the FPTR itself if it was for
+	   a local symbol.  */
+	if (dyn_h->h == NULL && r_type == R_PARISC_LTOFF_FPTR64)
+	  {
+	    /* The first two words of an .opd entry are zero.  */
+	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
+
+	    /* The next word is the address of the function.  */
+	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+			(hppa_info->opd_sec->contents
+			 + dyn_h->opd_offset + 16));
+
+	    /* The last word is our local __gp value.  */
+	    value = _bfd_get_gp_value
+		      (hppa_info->opd_sec->output_section->owner);
+	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
+	  }
+
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  */
 	value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
@@ -1433,14 +1500,35 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 
 
     case R_PARISC_FPTR64:
-      /* We want the value of the OPD offset for this symbol, not
-          the symbol's actual address.  */
-      value = (dyn_h->opd_offset
-	       + hppa_info->opd_sec->output_offset
-	       + hppa_info->opd_sec->output_section->vma);
+      {
+	/* We may still need to create the FPTR itself if it was for
+	   a local symbol.  */
+	if (dyn_h->h == NULL)
+	  {
+	    /* The first two words of an .opd entry are zero.  */
+	    memset (hppa_info->opd_sec->contents + dyn_h->opd_offset, 0, 16);
+
+	    /* The next word is the address of the function.  */
+	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+			(hppa_info->opd_sec->contents
+			 + dyn_h->opd_offset + 16));
+
+	    /* The last word is our local __gp value.  */
+	    value = _bfd_get_gp_value
+		      (hppa_info->opd_sec->output_section->owner);
+	    bfd_put_64 (hppa_info->opd_sec->owner, value,
+			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
+	  }
+
+	/* We want the value of the OPD offset for this symbol, not
+           the symbol's actual address.  */
+	value = (dyn_h->opd_offset
+		 + hppa_info->opd_sec->output_offset
+		 + hppa_info->opd_sec->output_section->vma);
 	       
-      bfd_put_64 (input_bfd, value + addend, hit_data);
-      return bfd_reloc_ok;
+	bfd_put_64 (input_bfd, value + addend, hit_data);
+	return bfd_reloc_ok;
+      }
 
     /* Something we don't know how to handle.  */
     default:
