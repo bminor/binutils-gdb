@@ -5,6 +5,9 @@
 
 2000-02-22  H.J. Lu  <hjl@gnu.org>
 
+	* elflink.h (elf_link_add_object_symbols): If a version symbol is
+	not defined, don't add a second ELF_VER_CHR.
+
         * elflink.h (elf_bfd_final_link): Call output_extsym for global
 	symbols converted to local symbols even when stripping all
 	symbols.

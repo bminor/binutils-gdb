@@ -1444,7 +1444,11 @@ elf_link_add_object_symbols (abfd, info)
 		  strcpy (newname, name);
 		  p = newname + namelen;
 		  *p++ = ELF_VER_CHR;
-		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0)
+		  /* If this is a defined non-hidden version symbol,
+		     we add another @ to the name.  This indicates the
+		     default version of the symbol.  */
+		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
+		      && sym.st_shndx != SHN_UNDEF)
 		    *p++ = ELF_VER_CHR;
 		  strcpy (p, verstr);
 
