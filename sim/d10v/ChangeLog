@@ -1,3 +1,8 @@
+Fri Sep 20 15:36:45 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* interp.c (sim_create_inferior): Reinitialize State every time 
+	sim_create_inferior() is called.
+
 Thu Sep 19 21:38:20 1996  Michael Meissner  <meissner@wogglebug.ziplink.net>
 
 	* simops.c (OP_{401,2000000,601,3000000,23000000}): Get sign right
