@@ -1,3 +1,8 @@
+2002-09-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (dummy_sse_values): Only try to fill in the SSE
+	registers if the target really has them.
+
 2002-08-31  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.in (mipsnbsd-tdep.o): Use $(nbsd_tdep_h) rather
@@ -149,6 +154,9 @@
 	* sol-thread.c (init_sol_thread_ops): Likewise.
 
 2002-08-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* defs.h: Move inclusion of "ansidecl.h" before "gdb_locale.h".
+	Fix some whitespace problems.
 
 	* i386-tdep.c (i386_store_return_value): Undeprecate.  Convert to
 	use regcache_* functions.

@@ -541,15 +541,17 @@ store_fpxregs (int tid, int regno)
 static void
 dummy_sse_values (void)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* C doesn't have a syntax for NaN's, so write it out as an array of
      longs.  */
   static long dummy[4] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
   static long mxcsr = 0x1f80;
   int reg;
 
-  for (reg = 0; reg < 8; reg++)
+  for (reg = 0; reg < tdep->num_xmm_regs; reg++)
     supply_register (XMM0_REGNUM + reg, (char *) dummy);
-  supply_register (MXCSR_REGNUM, (char *) &mxcsr);
+  if (tdep->num_xmm_regs > 0)
+    supply_register (MXCSR_REGNUM, (char *) &mxcsr);
 }
 
 #else
