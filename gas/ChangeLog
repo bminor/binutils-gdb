@@ -1,3 +1,17 @@
+2002-02-26  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (mips_need_elf_addend_fixup): For embedded-PIC
+	only, undo the changes made on 2001-06-08, with the
+	effect being that common or extern symbols are
+	adjusted for embedded-PIC, but weak symbols are not.
+	(md_estimate_size_before_relax: Likewise, with the effect
+	that extern symbols are treated the same as weak symbols
+	only if not embedded-PIC.
+	(mips_fix_adjustable) Likewise, with the effect that
+	weak or extern symbols are not adjusted for embedded-PIC.
+	(md_apply_fix3): Tweak so that the case where value is zero
+	is handled more correctly for embedded-PIC code.
+
 2002-02-26  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (LINGUAS): Add es.po.

@@ -10419,8 +10419,12 @@ mips_need_elf_addend_fixup (fixP)
 {
   if (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16)
     return 1;
-  if ((S_IS_WEAK (fixP->fx_addsy)
-       || S_IS_EXTERN (fixP->fx_addsy))
+  if (mips_pic == EMBEDDED_PIC
+      && S_IS_WEAK (fixP->fx_addsy))
+    return 1;
+  if (mips_pic != EMBEDDED_PIC
+      && (S_IS_WEAK (fixP->fx_addsy)
+	  || S_IS_EXTERN (fixP->fx_addsy))
       && !S_IS_COMMON (fixP->fx_addsy))
     return 1;
   if (symbol_used_in_reloc_p (fixP->fx_addsy)
@@ -10714,7 +10718,10 @@ md_apply_fix3 (fixP, valP, seg)
       /* If 'value' is zero, the remaining reloc code won't actually
 	 do the store, so it must be done here.  This is probably
 	 a bug somewhere.  */
-      if (!fixP->fx_done)
+      if (!fixP->fx_done
+	  && (fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
+	      || fixP->fx_addsy == NULL			/* ??? */
+	      || ! S_IS_DEFINED (fixP->fx_addsy)))
 	value -= fixP->fx_frag->fr_address + fixP->fx_where;
 
       value = (offsetT) value >> 2;
@@ -12208,7 +12215,8 @@ md_estimate_size_before_relax (fragp, segtype)
 #ifdef OBJ_ELF
 		/* A global or weak symbol is treated as external.  */
 	  	&& (OUTPUT_FLAVOR != bfd_target_elf_flavour
-		    || (! S_IS_EXTERN (sym) && ! S_IS_WEAK (sym)))
+		    || (! S_IS_WEAK (sym)
+			&& (! S_IS_EXTERN (sym) || mips_pic == EMBEDDED_PIC)))
 #endif
 		);
     }
@@ -12249,6 +12257,7 @@ mips_fix_adjustable (fixp)
 #ifdef OBJ_ELF
   /* Prevent all adjustments to global symbols.  */
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+      && mips_pic != EMBEDDED_PIC
       && (S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)))
     return 0;
 #endif
