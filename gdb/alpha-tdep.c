@@ -1458,8 +1458,8 @@ alpha_register_convert_to_virtual (int regnum, struct type *valtype,
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
-      double d = extract_floating (raw_buffer, REGISTER_RAW_SIZE (regnum));
-      store_floating (virtual_buffer, TYPE_LENGTH (valtype), d);
+      double d = deprecated_extract_floating (raw_buffer, REGISTER_RAW_SIZE (regnum));
+      deprecated_store_floating (virtual_buffer, TYPE_LENGTH (valtype), d);
     }
   else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
     {
@@ -1484,8 +1484,8 @@ alpha_register_convert_to_raw (struct type *valtype, int regnum,
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
-      double d = extract_floating (virtual_buffer, TYPE_LENGTH (valtype));
-      store_floating (raw_buffer, REGISTER_RAW_SIZE (regnum), d);
+      double d = deprecated_extract_floating (virtual_buffer, TYPE_LENGTH (valtype));
+      deprecated_store_floating (raw_buffer, REGISTER_RAW_SIZE (regnum), d);
     }
   else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
     {

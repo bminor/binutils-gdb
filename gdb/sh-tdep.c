@@ -2414,7 +2414,7 @@ sh3e_sh4_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	floatformat_to_doublest (&floatformat_ieee_double_big,
 				 (char *) regbuf + REGISTER_BYTE (return_register),
 				 &val);
-      store_floating (valbuf, len, val);
+      deprecated_store_floating (valbuf, len, val);
     }
   else if (len <= 4)
     {
@@ -2467,7 +2467,7 @@ sh64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	  else
 	    floatformat_to_doublest (&floatformat_ieee_double_big,
 				     (char *) regbuf + offset, &val);
-	  store_floating (valbuf, len, val);
+	  deprecated_store_floating (valbuf, len, val);
 	}
     }
   else
@@ -3403,7 +3403,7 @@ sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
     {
       DOUBLEST val;
       floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword, from, &val);
-      store_floating (to, TYPE_LENGTH (type), val);
+      deprecated_store_floating (to, TYPE_LENGTH (type), val);
     }
   else
     error ("sh_register_convert_to_virtual called with non DR register number");
@@ -3429,7 +3429,7 @@ sh_sh64_register_convert_to_virtual (int regnum, struct type *type,
     {
       DOUBLEST val;
       floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword, from, &val);
-      store_floating(to, TYPE_LENGTH(type), val);
+      deprecated_store_floating(to, TYPE_LENGTH(type), val);
     }
   else
     error("sh_register_convert_to_virtual called with non DR register number");
@@ -3444,7 +3444,7 @@ sh_sh4_register_convert_to_raw (struct type *type, int regnum,
   if (regnum >= tdep->DR0_REGNUM 
       && regnum <= tdep->DR_LAST_REGNUM)
     {
-      DOUBLEST val = extract_floating (from, TYPE_LENGTH(type));
+      DOUBLEST val = deprecated_extract_floating (from, TYPE_LENGTH(type));
       floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword, &val, to);
     }
   else
@@ -3469,7 +3469,7 @@ sh_sh64_register_convert_to_raw (struct type *type, int regnum,
       || (regnum >= tdep->DR0_C_REGNUM 
 	  && regnum <= tdep->DR_LAST_C_REGNUM))
     {
-      DOUBLEST val = extract_floating (from, TYPE_LENGTH(type));
+      DOUBLEST val = deprecated_extract_floating (from, TYPE_LENGTH(type));
       floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword, &val, to);
     }
   else

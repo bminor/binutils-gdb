@@ -1892,8 +1892,8 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, REGISTER_RAW_SIZE (n));
-      store_floating (to, TYPE_LENGTH (type), val);
+      double val = deprecated_extract_floating (from, REGISTER_RAW_SIZE (n));
+      deprecated_store_floating (to, TYPE_LENGTH (type), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
@@ -1908,8 +1908,8 @@ rs6000_register_convert_to_raw (struct type *type, int n,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, TYPE_LENGTH (type));
-      store_floating (to, REGISTER_RAW_SIZE (n), val);
+      double val = deprecated_extract_floating (from, TYPE_LENGTH (type));
+      deprecated_store_floating (to, REGISTER_RAW_SIZE (n), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));

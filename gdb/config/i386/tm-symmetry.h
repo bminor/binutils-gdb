@@ -236,7 +236,7 @@ switch (regno) { \
 { \
   DOUBLEST val; \
   floatformat_to_doublest (&floatformat_i387_ext, (FROM), &val); \
-  store_floating ((TO), TYPE_LENGTH (TYPE), val); \
+  deprecated_store_floating ((TO), TYPE_LENGTH (TYPE), val); \
 }
 
 /* Convert data from virtual format with type TYPE in buffer FROM
@@ -245,7 +245,7 @@ switch (regno) { \
 #undef REGISTER_CONVERT_TO_RAW
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
 { \
-  DOUBLEST val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
+  DOUBLEST val = deprecated_extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
   floatformat_from_doublest (&floatformat_i387_ext, &val, (TO)); \
 }
 

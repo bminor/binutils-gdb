@@ -1,3 +1,32 @@
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
+	* doublest.h: Update copyright.
+	(deprecated_store_floating, deprecated_extract_floating): Rename
+	store_floating and extract_floating.  Update comments.
+	* doublest.c: Update copyright.
+	(extract_floating_by_length): Replace extract_floating.
+	(store_floating_by_length): Replace store_floating.
+	(deprecated_extract_floating): New function.
+	(deprecated_store_floating): New function.
+	(extract_typed_floating): Call extract_floating_by_length.
+	(store_typed_floating): Call store_floating_by_length.
+	* x86-64-tdep.c (x86_64_store_return_value): Update.
+	* sh-tdep.c (sh3e_sh4_extract_return_value): Update.
+	(sh64_extract_return_value): Update.
+	(sh_sh4_register_convert_to_virtual): Update.
+	(sh_sh64_register_convert_to_virtual): Update.
+	(sh_sh4_register_convert_to_raw): Update.
+	(sh_sh64_register_convert_to_raw): Update.
+	* rs6000-tdep.c (rs6000_register_convert_to_virtual): Update.
+	(rs6000_register_convert_to_raw): Update.
+	* ia64-tdep.c (ia64_register_convert_to_virtual): Update.
+	(ia64_register_convert_to_raw): Update.
+	* config/i386/tm-symmetry.h (REGISTER_CONVERT_TO_RAW): Update.
+	(REGISTER_CONVERT_TO_VIRTUAL): Update.
+	* arm-linux-tdep.c (arm_linux_push_arguments): Update.
+	* alpha-tdep.c (alpha_register_convert_to_virtual): Update.
+	(alpha_register_convert_to_raw): Update.
+
 2003-04-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (SAVED_PC_AFTER_CALL): Add a predicate.

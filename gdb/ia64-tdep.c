@@ -273,7 +273,7 @@ ia64_register_convert_to_virtual (int regnum, struct type *type,
     {
       DOUBLEST val;
       floatformat_to_doublest (&floatformat_ia64_ext, from, &val);
-      store_floating(to, TYPE_LENGTH(type), val);
+      deprecated_store_floating (to, TYPE_LENGTH(type), val);
     }
   else
     error("ia64_register_convert_to_virtual called with non floating point register number");
@@ -285,7 +285,7 @@ ia64_register_convert_to_raw (struct type *type, int regnum,
 {
   if (regnum >= IA64_FR0_REGNUM && regnum <= IA64_FR127_REGNUM)
     {
-      DOUBLEST val = extract_floating (from, TYPE_LENGTH(type));
+      DOUBLEST val = deprecated_extract_floating (from, TYPE_LENGTH(type));
       floatformat_from_doublest (&floatformat_ia64_ext, &val, to);
     }
   else
