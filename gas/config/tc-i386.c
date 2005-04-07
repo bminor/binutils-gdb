@@ -5380,6 +5380,13 @@ tc_gen_reloc (section, fixp)
 #endif
       code = fixp->fx_r_type;
       break;
+    case BFD_RELOC_X86_64_32S:
+      if (!fixp->fx_pcrel)
+	{
+	  /* Don't turn BFD_RELOC_X86_64_32S into BFD_RELOC_32.  */
+	  code = fixp->fx_r_type;
+	  break;
+	}
     default:
       if (fixp->fx_pcrel)
 	{
