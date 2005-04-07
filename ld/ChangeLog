@@ -1,3 +1,8 @@
+2005-04-07  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/m68kcoff.em: Include ldexp.h and ldlang.h so that
+	ldfile.h can use the lang_input_statement type. 
+
 2005-04-06  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldlang.c: Formatting.
