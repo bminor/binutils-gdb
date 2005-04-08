@@ -1,5 +1,9 @@
 2005-04-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* config/fnchange.lst: Add testsuite/gdb.gdbserver entries.
+
+2005-04-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2-frame.c (struct dwarf2_frame_cache): New field
 	undefined_retaddr.
 	(dwarf2_frame_cache): Initialize undefined_retaddr.

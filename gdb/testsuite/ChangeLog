@@ -1,3 +1,15 @@
+2005-04-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.gdbserver.
+	* configure.ac: Create gdb.gdbserver/Makefile.
+	* configure: Regenerated.
+	* lib/gdbserver-support.exp: New file, derived from
+	config/gdbserver.exp.
+	* config/gdbserver.exp: Use gdbserver-support.exp.
+	* gdb.gdbserver/Makefile.in: New file.
+	* gdb.gdbserver/server.c: New file.
+	* gdb.gdbserver/server-run.exp: New file.
+
 2005-04-06  Paul Gilliam  <pgilliam@us.ibm.com>
 
         * lib/gdb.exp (test_compiler_info): Return compiler_info
