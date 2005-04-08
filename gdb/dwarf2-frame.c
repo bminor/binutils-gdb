@@ -610,6 +610,9 @@ struct dwarf2_frame_cache
   /* DWARF Call Frame Address.  */
   CORE_ADDR cfa;
 
+  /* Set if the return address column was marked as undefined.  */
+  int undefined_retaddr;
+
   /* Saved registers, indexed by GDB register number, not by DWARF
      register number.  */
   struct dwarf2_frame_state_reg *reg;
@@ -791,6 +794,10 @@ incomplete CFI data; unspecified registers (e.g., %s) at 0x%s"),
       }
   }
 
+  if (fs->retaddr_column < fs->regs.num_regs
+      && fs->regs.reg[fs->retaddr_column].how == DWARF2_FRAME_REG_UNDEFINED)
+    cache->undefined_retaddr = 1;
+
   do_cleanups (old_chain);
 
   *this_cache = cache;
@@ -803,6 +810,9 @@ dwarf2_frame_this_id (struct frame_info *next_frame, void **this_cache,
 {
   struct dwarf2_frame_cache *cache =
     dwarf2_frame_cache (next_frame, this_cache);
+
+  if (cache->undefined_retaddr)
+    return;
 
   (*this_id) = frame_id_build (cache->cfa, frame_func_unwind (next_frame));
 }

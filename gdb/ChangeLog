@@ -1,3 +1,11 @@
+2005-04-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2-frame.c (struct dwarf2_frame_cache): New field
+	undefined_retaddr.
+	(dwarf2_frame_cache): Initialize undefined_retaddr.
+	(dwarf2_frame_this_id): Return an invalid frame ID if
+	undefined_retaddr.
+
 2005-04-05  Jim Blandy  <jimb@redhat.com>
 
 	Move construction of IA-32 vector types to i386-tdep.c.
