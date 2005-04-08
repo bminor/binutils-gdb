@@ -1636,19 +1636,34 @@ find_arm_glue (struct bfd_link_info *link_info,
   return myh;
 }
 
-/* ARM->Thumb glue:
+/* ARM->Thumb glue (static images):
 
    .arm
    __func_from_arm:
    ldr r12, __func_addr
    bx  r12
    __func_addr:
-   .word func    @ behave as if you saw a ARM_32 reloc.  */
+   .word func    @ behave as if you saw a ARM_32 reloc.  
 
-#define ARM2THUMB_GLUE_SIZE 12
+   (relocatable images)
+   .arm
+   __func_from_arm:
+   ldr r12, __func_offset
+   add r12, r12, pc
+   bx  r12
+   __func_offset:
+   .word func - .
+   */
+
+#define ARM2THUMB_STATIC_GLUE_SIZE 12
 static const insn32 a2t1_ldr_insn = 0xe59fc000;
 static const insn32 a2t2_bx_r12_insn = 0xe12fff1c;
 static const insn32 a2t3_func_addr_insn = 0x00000001;
+
+#define ARM2THUMB_PIC_GLUE_SIZE 16
+static const insn32 a2t1p_ldr_insn = 0xe59fc004;
+static const insn32 a2t2p_add_pc_insn = 0xe08cc00f;
+static const insn32 a2t3p_bx_r12_insn = 0xe12fff1c;
 
 /* Thumb->ARM:                          Thumb->(non-interworking aware) ARM
 
@@ -1769,7 +1784,10 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
 
   free (tmp_name);
 
-  globals->arm_glue_size += ARM2THUMB_GLUE_SIZE;
+  if ((link_info->shared || globals->root.is_relocatable_executable))
+    globals->arm_glue_size += ARM2THUMB_PIC_GLUE_SIZE;
+  else
+    globals->arm_glue_size += ARM2THUMB_STATIC_GLUE_SIZE;
 
   return;
 }
@@ -2342,15 +2360,39 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
       --my_offset;
       myh->root.u.def.value = my_offset;
 
-      bfd_put_32 (output_bfd, (bfd_vma) a2t1_ldr_insn,
-		  s->contents + my_offset);
+      if ((info->shared || globals->root.is_relocatable_executable))
+	{
+	  /* For relocatable objects we can't use absolute addresses,
+	     so construct the address from a relative offset.  */
+	  /* TODO: If the offset is small it's probably worth
+	     constructing the address with adds.  */
+	  bfd_put_32 (output_bfd, (bfd_vma) a2t1p_ldr_insn,
+		      s->contents + my_offset);
+	  bfd_put_32 (output_bfd, (bfd_vma) a2t2p_add_pc_insn,
+		      s->contents + my_offset + 4);
+	  bfd_put_32 (output_bfd, (bfd_vma) a2t3p_bx_r12_insn,
+		      s->contents + my_offset + 8);
+	  /* Adjust the offset by 4 for the position of the add,
+	     and 8 for the pipeline offset.  */
+	  ret_offset = (val - (s->output_offset
+			       + s->output_section->vma
+			       + my_offset + 12))
+		       | 1;
+	  bfd_put_32 (output_bfd, ret_offset,
+		      s->contents + my_offset + 12);
+	}
+      else
+	{
+	  bfd_put_32 (output_bfd, (bfd_vma) a2t1_ldr_insn,
+		      s->contents + my_offset);
 
-      bfd_put_32 (output_bfd, (bfd_vma) a2t2_bx_r12_insn,
-		  s->contents + my_offset + 4);
+	  bfd_put_32 (output_bfd, (bfd_vma) a2t2_bx_r12_insn,
+		      s->contents + my_offset + 4);
 
-      /* It's a thumb address.  Add the low order bit.  */
-      bfd_put_32 (output_bfd, val | a2t3_func_addr_insn,
-		  s->contents + my_offset + 8);
+	  /* It's a thumb address.  Add the low order bit.  */
+	  bfd_put_32 (output_bfd, val | a2t3_func_addr_insn,
+		      s->contents + my_offset + 8);
+	}
     }
 
   BFD_ASSERT (my_offset <= globals->arm_glue_size);
