@@ -10393,9 +10393,9 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
       flagword flags;
 
       flags = bfd_get_section_flags (stdoutput, sec);
-      if (flags & SEC_DEBUGGING)
-	continue;
-      if (!(flags & SEC_ALLOC))
+      if ((flags & SEC_DEBUGGING)
+	  || !(flags & SEC_ALLOC)
+	  || (flags & SEC_MERGE))
 	continue;
 
       if (section_has_xproperty (sec, flag_fn))
