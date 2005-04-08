@@ -1,3 +1,8 @@
+2005-04-08  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_create_xproperty_segments): Skip
+	SEC_MERGE sections.
+
 2005-04-05  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 
