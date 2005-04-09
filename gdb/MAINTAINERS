@@ -223,8 +223,6 @@ testsuite		Michael Chastain	mec.gnu@mindspring.com
 			(Global Maintainers)			
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   c++ (gdb.cp) 		Michael Chastain	mec.gnu@mindspring.com
-  mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
-                        Andrew Cagney           cagney@redhat.com
   threads (gdb.threads) Michael Snyder          msnyder@redhat.com
 			Michael Chastain	mec.gnu@mindspring.com
   trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
