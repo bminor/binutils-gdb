@@ -2748,7 +2748,7 @@ end_repeat (int extra)
 }
 
 static void
-assign_symbol (const char *name, int no_reassign)
+assign_symbol (char *name, int no_reassign)
 {
   symbolS *symbolP;
 
@@ -2777,18 +2777,15 @@ assign_symbol (const char *name, int no_reassign)
       if (listing & LISTING_SYMBOLS)
 	{
 	  extern struct list_info_struct *listing_tail;
-	  fragS *dummy_frag = (fragS *) xcalloc (sizeof (fragS));
+	  fragS *dummy_frag = (fragS *) xcalloc (1, sizeof (fragS));
 	  dummy_frag->line = listing_tail;
 	  dummy_frag->fr_symbol = symbolP;
 	  symbol_set_frag (symbolP, dummy_frag);
 	}
 #endif
-#if defined (OBJ_COFF) || defined (OBJ_MAYBE_COFF)
-#if defined (BFD_ASSEMBLER) && defined (OBJ_MAYBE_COFF)
-      if (OUTPUT_FLAVOR == bfd_target_coff_flavour)
-#endif
-	/* "set" symbols are local unless otherwise specified.  */
-	SF_SET_LOCAL (symbolP);
+#ifdef OBJ_COFF
+      /* "set" symbols are local unless otherwise specified.  */
+      SF_SET_LOCAL (symbolP);
 #endif
     }
 
@@ -2799,8 +2796,6 @@ assign_symbol (const char *name, int no_reassign)
     as_bad (_("symbol `%s' is already defined"), name);
 
   pseudo_set (symbolP);
-
-  demand_empty_rest_of_line ();
 }
 
 /* Handle the .equ, .equiv and .set directives.  If EQUIV is 1, then
@@ -2845,6 +2840,8 @@ s_set (int equiv)
 
   assign_symbol (name, equiv);
   *end_name = delim;
+
+  demand_empty_rest_of_line ();
 }
 
 void
@@ -4923,7 +4920,10 @@ equals (char *sym_name, int reassign)
   assign_symbol (sym_name, !reassign);
 
   if (flag_mri)
-    mri_comment_end (stop, stopc);
+    {
+      demand_empty_rest_of_line ();
+      mri_comment_end (stop, stopc);
+    }
 }
 
 /* .incbin -- include a file verbatim at the current location.  */

@@ -1,5 +1,10 @@
 2005-04-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* read.c (assign_symbol): Remove const from parm.  Fix xcalloc
+	call.  Don't do the COFF hacks for multi-emulation gas.  Move
+	demand_empty_rest_of_line back to caller.
+	(s_set, equals): demand_empty_rest_of_line here.
+
 	PR gas/827
 	* as.h (rs_dummy): Define.
 	* symbols.c (symbol_X_add_number): New function.
