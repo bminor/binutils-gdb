@@ -1,3 +1,8 @@
+2005-04-08  Andrew Cagney  <cagney@gnu.org>
+
+	* MAINTAINERS (GDB/MI): Andrew Cagney, Elena Zannoni, and Fernando
+	Nasser have decided to step back from GDB/MI.
+
 2005-04-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/fnchange.lst: Add testsuite/gdb.gdbserver entries.

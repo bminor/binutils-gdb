@@ -241,9 +241,6 @@ gdbtk (c & tcl)		Jim Ingham		jingham@apple.com
 			Keith Seitz		keiths@redhat.com
 libgui (w/foundry, sn)	Jim Ingham              jingham@apple.com
 			Keith Seitz		keiths@redhat.com
-mi (gdb/mi)		Andrew Cagney		cagney@redhat.com
-			Elena Zannoni           ezannoni@redhat.com
-			Fernando Nasser		fnasser@redhat.com
 tui			Stephane Carrez		stcarrez@nerim.fr
 			(Global Maintainers)
 
