@@ -195,7 +195,7 @@ effects of one bug and go on to learn about another.
 @end itemize
 
 You can use @value{GDBN} to debug programs written in C and C@t{++}.
-For more information, see @ref{Support,,Supported languages}.
+For more information, see @ref{Supported languages,,Supported languages}.
 For more information, see @ref{C,,C and C++}.
 
 @cindex Modula-2
@@ -1202,6 +1202,7 @@ arguments.  This is equivalent to @samp{shell make @var{make-args}}.
 @node Logging output
 @section Logging output
 @cindex logging @value{GDBN} output
+@cindex save @value{GDBN} output to a file
 
 You may want to save the output of @value{GDBN} commands to a file.
 There are several commands to control @value{GDBN}'s logging.
@@ -1212,6 +1213,7 @@ There are several commands to control @value{GDBN}'s logging.
 Enable logging.
 @item set logging off
 Disable logging.
+@cindex logging file name
 @item set logging file @var{file}
 Change the name of the current logfile.  The default logfile is @file{gdb.txt}.
 @item set logging overwrite [on|off]
@@ -1574,7 +1576,7 @@ exceptional in lacking corresponding @code{set} commands:
 
 @table @code
 @kindex show version
-@cindex version number
+@cindex @value{GDBN} version number
 @item show version
 Show what version of @value{GDBN} is running.  You should include this
 information in @value{GDBN} bug-reports.  If multiple versions of
@@ -1588,6 +1590,7 @@ The version number is the same as the one announced when you start
 
 @kindex show copying
 @kindex info copying
+@cindex display @value{GDBN} copyright
 @item show copying
 @itemx info copying
 Display information about permission for copying @value{GDBN}.
@@ -2274,6 +2277,7 @@ As with the @samp{[New @dots{}]} message, the form of the text after
 @samp{Switching to} depends on your system's conventions for identifying
 threads.
 
+@kindex thread apply
 @item thread apply [@var{threadno}] [@var{all}]  @var{args}
 The @code{thread apply} command allows you to apply a command to one or
 more threads.  Specify the numbers of the threads that you want affected
@@ -2340,7 +2344,7 @@ use the command @w{@code{set follow-fork-mode}}.
 @item set follow-fork-mode @var{mode}
 Set the debugger response to a program call of @code{fork} or
 @code{vfork}.  A call to @code{fork} or @code{vfork} creates a new
-process.  The @var{mode} can be:
+process.  The @var{mode} argument can be:
 
 @table @code
 @item parent
@@ -2353,6 +2357,7 @@ unimpeded.
 
 @end table
 
+@kindex show follow-fork-mode
 @item show follow-fork-mode
 Display the current debugger response to a @code{fork} or @code{vfork} call.
 @end table
@@ -2581,7 +2586,9 @@ example, on the DSU, only two data breakpoints can be set at a time, and
 @value{GDBN} will reject this command if more than two are used.  Delete
 or disable unused hardware breakpoints before setting new ones
 (@pxref{Disabling, ,Disabling}).  @xref{Conditions, ,Break conditions}.
-@xref{set remote hardware-breakpoint-limit}.
+For remote targets, you can restrict the number of hardware
+breakpoints @value{GDBN} will use, see @ref{set remote
+hardware-breakpoint-limit}.
 
 
 @kindex thbreak
@@ -2803,6 +2810,20 @@ the underlying system supports them.  (Note that hardware-assisted
 watchpoints that were set @emph{before} setting
 @code{can-use-hw-watchpoints} to zero will still use the hardware
 mechanism of watching expressiion values.)
+
+@table @code
+@item set can-use-hw-watchpoints
+@kindex set can-use-hw-watchpoints
+Set whether or not to use hardware watchpoints.
+
+@item show can-use-hw-watchpoints
+@kindex show can-use-hw-watchpoints
+Show the current mode of using hardware watchpoints.
+@end table
+
+For remote targets, you can restrict the number of hardware
+watchpoints @value{GDBN} will use, see @ref{set remote
+hardware-breakpoint-limit}.
 
 When you issue the @code{watch} command, @value{GDBN} reports
 
@@ -3602,6 +3623,10 @@ want @value{GDBN} to automatically skip over this function.
 Causes the @code{step} command to step over any functions which contains no
 debug information.  This is the default.
 
+@item show step-mode
+Show whether @value{GDBN} will stop in or step over functions without
+source line debug information.
+
 @kindex finish
 @item finish
 Continue running until just after function in the selected stack frame
@@ -3935,6 +3960,8 @@ thread to run.
 
 @table @code
 @item set scheduler-locking @var{mode}
+@cindex scheduler locking mode
+@cindex lock scheduler
 Set the scheduler locking mode.  If it is @code{off}, then there is no
 locking and any thread may run at any time.  If @code{on}, then only the
 current thread may run when the inferior is resumed.  The @code{step}
@@ -4392,6 +4419,7 @@ Stack}), this prints lines centered around that line.
 Print lines just before the lines last printed.
 @end table
 
+@cindex @code{list}, how many lines to display
 By default, @value{GDBN} prints ten source lines with any of these forms of
 the @code{list} command.  You can change this using @code{set listsize}:
 
@@ -4762,6 +4790,10 @@ Currently this command is only defined for the Intel x86 family.  You
 can set @var{instruction-set} to either @code{intel} or @code{att}.
 The default is @code{att}, the AT&T flavor used by default by Unix
 assemblers for x86-based targets.
+
+@kindex show disassembly-flavor
+@item show disassembly-flavor
+Show the current setting of the disassembly flavor.
 @end table
 
 
@@ -5440,7 +5472,8 @@ it prints a symbolic address:
 
 @table @code
 @item set print symbol-filename on
-@cindex closest symbol and offset for an address
+@cindex source file and line of a symbol
+@cindex symbol, source file and line
 Tell @value{GDBN} to print the source file name and line number of a
 symbol in the symbolic form of an address.
 
@@ -5512,6 +5545,7 @@ arrays.
 
 @item set print elements @var{number-of-elements}
 @cindex number of array elements to print
+@cindex limit on number of printed array elements
 Set a limit on how many elements of an array @value{GDBN} will print.
 If @value{GDBN} is printing a large array, it stops printing after it has
 printed the number of elements set by the @code{set print elements} command.
@@ -5523,6 +5557,20 @@ Setting  @var{number-of-elements} to zero means that the printing is unlimited.
 Display the number of elements of a large array that @value{GDBN} will print.
 If the number is 0, then the printing is unlimited.
 
+@item set print repeats
+@cindex repeated array elements
+Set the threshold for suppressing display of repeated array
+elelments.  When the number of consecutive identical elements of an
+array exceeds the threshold, @value{GDBN} prints the string
+@code{"<repeats @var{n} times>"}, where @var{n} is the number of
+identical repetitions, instead of displaying the identical elements
+themselves.  Setting the threshold to zero will cause all elements to
+be individually printed.  The default threshold is 10.
+
+@item show print repeats
+Display the current threshold for printing repeated identical
+elements.
+
 @item set print null-stop
 @cindex @sc{null} elements in arrays
 Cause @value{GDBN} to stop printing the characters of an array when the first
@@ -5530,7 +5578,13 @@ Cause @value{GDBN} to stop printing the characters of an array when the first
 contain only short strings.
 The default is off.
 
+@item show print null-stop
+Show whether @value{GDBN} stops printing an array on the first
+@sc{null} character.
+
 @item set print pretty on
+@cindex print structures in indented form
+@cindex indentation in structure display
 Cause @value{GDBN} to print structures in an indented format with one member
 per line, like this:
 
@@ -5581,15 +5635,17 @@ Show whether or not @value{GDBN} is printing only seven-bit characters.
 
 @item set print union on
 @cindex unions in structures, printing
-Tell @value{GDBN} to print unions which are contained in structures.  This
-is the default setting.
+Tell @value{GDBN} to print unions which are contained in structures
+and other unions.  This is the default setting.
 
 @item set print union off
-Tell @value{GDBN} not to print unions which are contained in structures.
+Tell @value{GDBN} not to print unions which are contained in
+structures and other unions.  @value{GDBN} will print @code{"@{...@}"}
+instead.
 
 @item show print union
 Ask @value{GDBN} whether or not it will print unions which are contained in
-structures.
+structures and other unions.
 
 For example, given the declarations
 
@@ -5623,6 +5679,10 @@ and with @code{set print union off} in effect it would print
 @smallexample
 $1 = @{it = Tree, form = @{...@}@}
 @end smallexample
+
+@noindent
+@code{set print union} affects programs written in C-like languages
+and in Pascal.
 @end table
 
 @need 1000
@@ -5686,6 +5746,7 @@ Display the encoding style currently in use for decoding C@t{++} symbols.
 @item set print object
 @itemx set print object on
 @cindex derived type of an object, printing
+@cindex display derived types
 When displaying a pointer to an object, identify the @emph{actual}
 (derived) type of the object rather than the @emph{declared} type, using
 the virtual function table.
@@ -5706,12 +5767,26 @@ Print static members when displaying a C@t{++} object.  The default is on.
 Do not print static members when displaying a C@t{++} object.
 
 @item show print static-members
-Show whether C@t{++} static members are printed, or not.
+Show whether C@t{++} static members are printed or not.
+
+@item set print pascal_static-members
+@itemx set print pascal_static-members on
+@cindex static members of Pacal objects
+@cindex Pacal objects, static members display
+Print static members when displaying a Pascal object.  The default is on.
+
+@item set print pascal_static-members off
+Do not print static members when displaying a Pascal object.
+
+@item show print pascal_static-members
+Show whether Pascal static members are printed or not.
 
 @c These don't work with HP ANSI C++ yet.
 @item set print vtbl
 @itemx set print vtbl on
 @cindex pretty print C@t{++} virtual function tables
+@cindex virtual functions (C@t{++}) display
+@cindex VTBL display
 Pretty print C@t{++} virtual function tables.  The default is off.
 (The @code{vtbl} commands do not work on programs compiled with the HP
 ANSI C@t{++} compiler (@code{aCC}).)
@@ -5727,6 +5802,7 @@ Show whether C@t{++} virtual function tables are pretty printed, or not.
 @section Value history
 
 @cindex value history
+@cindex history of values printed by @value{GDBN}
 Values printed by the @code{print} command are saved in the @value{GDBN}
 @dfn{value history}.  This allows you to refer to them in other expressions.
 Values are kept until the symbol table is re-read or discarded
@@ -5804,6 +5880,7 @@ same effect as @samp{show values +}.
 @section Convenience variables
 
 @cindex convenience variables
+@cindex user-defined variables
 @value{GDBN} provides @dfn{convenience variables} that you can use within
 @value{GDBN} to hold on to a value and refer to it later.  These variables
 exist entirely within @value{GDBN}; they are not part of your program, and
@@ -5839,6 +5916,7 @@ variable, when used as an expression, has the type of its current value.
 
 @table @code
 @kindex show convenience
+@cindex show all user variables
 @item show convenience
 Print a list of convenience variables used so far, and their values.
 Abbreviated @code{show conv}.
@@ -6027,7 +6105,10 @@ binary values that tell system libraries important details about the
 hardware, operating system, and process.  Each value's purpose is
 identified by an integer tag; the meanings are well-known but system-specific.
 Depending on the configuration and operating system facilities,
-@value{GDBN} may be able to show you this information.
+@value{GDBN} may be able to show you this information.  For remote
+targets, this functionality may further depend on the remote stub's
+support of the @samp{qPart:auxv:read} packet, see @ref{Remote
+configuration, auxiliary vector}.
 
 @table @code
 @kindex info auxv
@@ -7815,7 +7896,7 @@ language}.
 * Setting::                     Switching between source languages
 * Show::                        Displaying the language
 * Checks::                      Type and range checks
-* Support::                     Supported languages
+* Supported languages::         Supported languages
 * Unsupported languages::       Unsupported languages
 @end menu
 
@@ -7953,9 +8034,9 @@ case frees you from having to set the working language manually.
 The following commands help you find out which language is the
 working language, and also what language source files were written in.
 
-@kindex show language
 @table @code
 @item show language
+@kindex show language
 Display the current working language.  This is the
 language you can use with commands such as @code{print} to
 build and compute expressions that may involve variables in your program.
@@ -7978,14 +8059,14 @@ In unusual circumstances, you may have source files with extensions
 not in the standard list.  You can then set the extension associated
 with a language explicitly:
 
-@kindex set extension-language
-@kindex info extensions
 @table @code
 @item set extension-language @var{ext} @var{language}
+@kindex set extension-language
 Tell @value{GDBN} that source files with extension @var{ext} are to be
 assumed as written in the source language @var{language}.
 
 @item info extensions
+@kindex info extensions
 List all the filename extensions and the associated languages.
 @end table
 
@@ -8008,12 +8089,13 @@ by eliminating type mismatches, and providing active checks for range
 errors when your program is running.
 
 @value{GDBN} can check for conditions like the above if you wish.
-Although @value{GDBN} does not check the statements in your program, it
-can check expressions entered directly into @value{GDBN} for evaluation via
-the @code{print} command, for example.  As with the working language,
-@value{GDBN} can also decide whether or not to check automatically based on
-your program's source language.  @xref{Support, ,Supported languages},
-for the default settings of supported languages.
+Although @value{GDBN} does not check the statements in your program,
+it can check expressions entered directly into @value{GDBN} for
+evaluation via the @code{print} command, for example.  As with the
+working language, @value{GDBN} can also decide whether or not to check
+automatically based on your program's source language.
+@xref{Supported languages, ,Supported languages}, for the default
+settings of supported languages.
 
 @menu
 * Type Checking::               An overview of type checking
@@ -8058,7 +8140,7 @@ Each language defines to what degree it is strict about type.  For
 instance, both Modula-2 and C require the arguments to arithmetical
 operators to be numbers.  In C, enumerated types and pointers can be
 represented as numbers, so that they are valid arguments to mathematical
-operators.  @xref{Support, ,Supported languages}, for further
+operators.  @xref{Supported languages, ,Supported languages}, for further
 details on specific languages.
 
 @value{GDBN} provides some additional commands for controlling the type checker:
@@ -8068,7 +8150,7 @@ details on specific languages.
 @table @code
 @item set check type auto
 Set type checking on or off based on the current working language.
-@xref{Support, ,Supported languages}, for the default settings for
+@xref{Supported languages, ,Supported languages}, for the default settings for
 each language.
 
 @item set check type on
@@ -8118,7 +8200,7 @@ the largest integer value, and @var{s} is the smallest, then
 @end smallexample
 
 This, too, is specific to individual languages, and in some cases
-specific to individual compilers or machines.  @xref{Support, ,
+specific to individual compilers or machines.  @xref{Supported languages, ,
 Supported languages}, for further details on specific languages.
 
 @value{GDBN} provides some additional commands for controlling the range checker:
@@ -8128,7 +8210,7 @@ Supported languages}, for further details on specific languages.
 @table @code
 @item set check range auto
 Set range checking on or off based on the current working language.
-@xref{Support, ,Supported languages}, for the default settings for
+@xref{Supported languages, ,Supported languages}, for the default settings for
 each language.
 
 @item set check range on
@@ -8150,10 +8232,11 @@ Show the current setting of the range checker, and whether or not it is
 being set automatically by @value{GDBN}.
 @end table
 
-@node Support
+@node Supported languages
 @section Supported languages
 
-@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, assembly, Modula-2, and Ada.
+@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, Pascal,
+assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -8173,6 +8256,7 @@ language reference or tutorial.
 * C::                           C and C@t{++}
 * Objective-C::                 Objective-C
 * Fortran::                     Fortran
+* Pascal::                      Pascal
 * Modula-2::                    Modula-2
 * Ada::                         Ada
 @end menu
@@ -8682,6 +8766,10 @@ overloaded functions that are class member functions, @value{GDBN}
 searches for a function whose signature @emph{exactly} matches the
 argument types.
 
+@kindex show overload-resolution
+@item show overload-resolution
+Show the current setting of overload resolution.
+
 @item @r{Overloaded symbol names}
 You can specify a particular definition of an overloaded symbol, using
 the same notation that is used to declare such symbols in C@t{++}: type
@@ -8808,6 +8896,19 @@ Fortran symbols are usually case-insensitive, so @value{GDBN} by
 default uses case-insensitive matches for Fortran symbols.  You can
 change that with the @samp{set case-insensitive} command, see
 @ref{Symbols}, for the details.
+
+@node Pascal
+@subsection Pascal
+
+@cindex Pascal support in @value{GDBN}, limitations
+Debugging Pascal programs which use sets, subranges, file variables, or
+nested functions does not currently work.  @value{GDBN} does not support
+entering expressions, printing values, or similar features using Pascal
+syntax.
+
+The Pascal-specific command @code{set print pascal_static-members}
+controls whether static members of Pascal objects are displayed.
+@xref{Print Settings, pascal_static-members}.
 
 @node Modula-2
 @subsection Modula-2
@@ -9650,8 +9751,8 @@ suitable for the source language.  The default is case-sensitive
 matches for all languages except for Fortran, for which the default is
 case-insensitive matches.
 
-@kindex show case-insensitive
-@item show case-insensitive
+@kindex show case-sensitive
+@item show case-sensitive
 This command shows the current setting of case sensitivity for symbols
 lookups.
 
@@ -9669,6 +9770,7 @@ the exact address of the current instantiation of the variable.
 
 @kindex info symbol
 @cindex symbol from address
+@cindex closest symbol and offset for an address
 @item info symbol @var{addr}
 Print the name of a symbol which is stored at the address @var{addr}.
 If no symbol is stored exactly at @var{addr}, @value{GDBN} prints the
@@ -9877,6 +9979,7 @@ name.
 Show the current @code{on} or @code{off} setting.
 @end table
 
+@cindex opaque data types
 @kindex set opaque-type-resolution
 @item set opaque-type-resolution on
 Tell @value{GDBN} to resolve opaque types.  An opaque type is a type
@@ -10164,6 +10267,7 @@ detail.
 @c @group
 @node Signaling
 @section Giving your program a signal
+@cindex deliver a signal to a program
 
 @table @code
 @kindex signal
@@ -10229,7 +10333,7 @@ selected stack frame returns naturally.
 @cindex calling functions
 @cindex inferior functions, calling
 @item print @var{expr}
-Evaluate the expression @var{expr} and displaying the resuling value.
+Evaluate the expression @var{expr} and display the resuling value.
 @var{expr} may include calls to functions in the program being
 debugged.
 
@@ -10244,6 +10348,29 @@ execute a function from your program that does not return anything
 with @code{void} returned values that @value{GDBN} will otherwise
 print.  If the result is not void, it is printed and saved in the
 value history.
+@end table
+
+It is possible for the function you call via the @code{print} or
+@code{call} command to generate a signal (e.g., if there's a bug in
+the function, or if you passed it incorrect arguments).  What happens
+in that case is controlled by the @code{set unwindonsignal} command.
+
+@table @code
+@item set unwindonsignal
+@kindex set unwindonsignal
+@cindex unwind stack in called functions
+@cindex call dummy stack unwinding
+Set unwinding of the stack if a signal is received while in a function
+that @value{GDBN} called in the program being debugged.  If set to on,
+@value{GDBN} unwinds the stack it created for the call and restores
+the context to what it was before the call.  If set to off (the
+default), @value{GDBN} stops in the frame where the signal was
+received.
+
+@item show unwindonsignal
+@kindex show unwindonsignal
+Show the current setting of stack unwinding in the functions called by
+@value{GDBN}.
 @end table
 
 @cindex weak alias functions
@@ -10601,6 +10728,7 @@ Section contains common symbols.
 @end table
 @end table
 @kindex set trust-readonly-sections
+@cindex read-only sections
 @item set trust-readonly-sections on
 Tell @value{GDBN} that readonly sections in your object file
 really are read-only (i.e.@: that their contents will not change).
@@ -10615,6 +10743,9 @@ The default is off.
 Tell @value{GDBN} not to trust readonly sections.  This means that
 the contents of the section might change while the program is running,
 and must therefore be fetched from the target when needed.
+
+@item show trust-readonly-sections
+Show the current setting of trusting readonly sections.
 @end table
 
 All file-specifying commands allow both absolute and relative file names
@@ -10622,8 +10753,8 @@ as arguments.  @value{GDBN} always converts the file name to an absolute file
 name and remembers it that way.
 
 @cindex shared libraries
-@value{GDBN} supports GNU/Linux, MS-Windows, HP-UX, SunOS, SVr4, Irix
-5, and IBM RS/6000 shared libraries.
+@value{GDBN} supports GNU/Linux, MS-Windows, HP-UX, SunOS, SVr4, Irix,
+and IBM RS/6000 AIX shared libraries.
 
 @value{GDBN} automatically loads symbol definitions from shared libraries
 when you use the @code{run} command, or when you examine a core file.
@@ -11069,6 +11200,13 @@ supported architectures.
 
 @item show architecture
 Show the current target architecture.
+
+@item set processor
+@itemx processor
+@kindex set processor
+@kindex show processor
+These are alias commands for, respectively, @code{set architecture}
+and @code{show architecture}.
 @end table
 
 @menu
@@ -11387,7 +11525,8 @@ program as the first argument.
 @cindex serial line, @code{target remote}
 If you're using a serial line, you may want to give @value{GDBN} the
 @w{@samp{--baud}} option, or use the @code{set remotebaud} command
-before the @code{target} command.
+(@pxref{Remote configuration, set remotebaud}) before the
+@code{target} command.
 
 After that, use @code{target remote} to establish communications with
 the target machine.  Its argument specifies how to communicate---either
@@ -11635,18 +11774,210 @@ Connecting to a remote target}).
 @node Remote configuration
 @section Remote configuration
 
-The following configuration options are available when debugging remote
-programs:
+@kindex set remote
+@kindex show remote
+This section documents the configuration options available when
+debugging remote programs.  For the options related to the File I/O
+extensions of the remote protocol, see @ref{The system call,
+system-call-allowed}.
 
 @table @code
-@kindex set remote hardware-watchpoint-limit
-@kindex set remote hardware-breakpoint-limit
+@item set remoteaddresssize @var{bits}
+@cindex adress size for remote targets
+@cindex bits in remote address
+Set the maximum size of address in a memory packet to the specified
+number of bits.  @value{GDBN} will mask off the address bits above
+that number, when it passes addresses to the remote target.  The
+default value is the number of bits in the target's address.
+
+@item show remoteaddresssize
+Show the current value of remote address size in bits.
+
+@item set remotebaud @var{n}
+@cindex baud rate for remote targets
+Set the baud rate for the remote serial I/O to @var{n} baud.  The
+value is used to set the speed of the serial port used for debugging
+remote targets.
+
+@item show remotebaud
+Show the current speed of the remote connection.
+
+@item set remotebreak
+@cindex interrupt remote programs
+@cindex BREAK signal instead of Ctrl-C
+If set to on, @value{GDBN} sends a @code{BREAK} signal to the remote
+when you press the @key{Ctrl-C} key to interrupt the program running
+on the remote.  If set to off, @value{GDBN} sends the @samp{Strl-C}
+character instead.  The default is off, since most remote systems
+expect to see @samp{Ctrl-C} as the interrupt signal.
+
+@item show remotebreak
+Show whether @value{GDBN} sends @code{BREAK} or @samp{Ctrl-C} to
+interrupt the remote program.
+
+@item set remotedebug
+@cindex debug remote protocol
+@cindex remote protocol debugging
+@cindex display remote packets
+Control the debugging of the remote protocol.  When enabled, each
+packet sent to or received from the remote target is displayed.  The
+defaults is off.
+
+@item show remotedebug
+Show the current setting of the remote protocol debugging.
+
+@item set remotedevice @var{device}
+@cindex serial port name
+Set the name of the serial port through which to communicate to the
+remote target to @var{device}.  This is the device used by
+@value{GDBN} to open the serial communications line to the remote
+target.  There's no default, so you must set a valid port name for the
+remote serial communications to work.  (Some varieties of the
+@code{target} command accept the port name as part of their
+arguments.)
+
+@item show remotedevice
+Show the current name of the serial port.
+
+@item set remotelogbase @var{base}
+Set the base (a.k.a.@: radix) of logging serial protocol
+communications to @var{base}.  Supported values of @var{base} are:
+@code{ascii}, @code{octal}, and @code{hex}.  The default is
+@code{ascii}.
+
+@item show remotelogbase
+Show the current setting of the radix for logging remote serial
+protocol.
+
+@item set remotelogfile @var{file}
+@cindex record serial communications on file
+Record remote serial communications on the named @var{file}.  The
+default is not to record at all.
+
+@item show remotelogfile.
+Show the current setting  of the file name on which to record the
+serial communications.
+
+@item set remotetimeout @var{num}
+@cindex timeout for serial communications
+@cindex remote timeout
+Set the timeout limit to wait for the remote target to respond to
+@var{num} seconds.  The default is 2 seconds.
+
+@item show remotetimeout
+Show the current number of seconds to wait for the remote target
+responses.
+
+@cindex limit hardware breakpoints and watchpoints
+@cindex remote target, limit break- and watchpoints
 @anchor{set remote hardware-watchpoint-limit}
 @anchor{set remote hardware-breakpoint-limit}
 @item set remote hardware-watchpoint-limit @var{limit}
 @itemx set remote hardware-breakpoint-limit @var{limit}
 Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
 watchpoints.  A limit of -1, the default, is treated as unlimited.
+
+@item set remote fetch-register-packet
+@itemx set remote set-register-packet
+@itemx set remote P-packet
+@itemx set remote p-packet
+@cindex P-packet
+@cindex fetch registers from remote targets
+@cindex set registers in remote targets
+Determine whether @value{GDBN} can set and fetch registers from the
+remote target using the @samp{P} packets.  The default depends on the
+remote stub's support of the @samp{P} packets (@value{GDBN} queries
+the stub when this packet is first required).
+
+@item show remote fetch-register-packet
+@itemx show remote set-register-packet
+@itemx show remote P-packet
+@itemx show remote p-packet
+Show the current setting of using the @samp{P} packets for setting and
+fetching registers from the remote target.
+
+@cindex binary downloads
+@cindex X-packet
+@item set remote binary-download-packet
+@itemx set remote X-packet
+Determine whether @value{GDBN} sends downloads in binary mode using
+the @samp{X} packets.  The default is on.
+
+@item show remote binary-download-packet
+@itemx show remote X-packet
+Show the current setting of using the @samp{X} packets for binary
+downloads.
+
+@item set remote read-aux-vector-packet
+@cindex auxiliary vector of remote target
+@cindex @code{auxv}, and remote targets
+Set the use of the remote protocol's @samp{qPart:auxv:read} (target
+auxiliary vector read) request.  This request is used to fetch the
+remote target's @dfn{auxiliary vector}, see @ref{Auxiliary Vector}.
+The default setting depends on the remote stub's support of this
+request (@value{GDBN} queries the stub when this request is first
+required).  @xref{General Query Packets, qPart}, for more information
+about this request.
+
+@item show remote read-aux-vector-packet
+Show the current setting of use of the @samp{qPart:auxv:read} request.
+
+@item set remote symbol-lookup-packet
+@cindex remote symbol lookup request
+Set the use of the remote protocol's @samp{qSymbol} (target symbol
+lookup) request.  This request is used to communicate symbol
+information to the remote target, e.g., whenever a new shared library
+is loaded by the remote (@pxref{Files, shared libraries}).  The
+default setting depends on the remote stub's support of this request
+(@value{GDBN} queries the stub when this request is first required).
+@xref{General Query Packets, qSymbol}, for more information about this
+request.
+
+@item show remote symbol-lookup-packet
+Show the current setting of use of the @samp{qSymbol} request.
+
+@item set remote verbose-resume-packet
+@cindex resume remote target
+@cindex signal thread, and remote targets
+@cindex single-step thread, and remote targets
+@cindex thread-specific operations on remote targets
+Set the use of the remote protocol's @samp{vCont} (descriptive resume)
+request.  This request is used to resume specific threads in the
+remote target, and to single-step or signal them.  The default setting
+depends on the remote stub's support of this request (@value{GDBN}
+queries the stub when this request is first required).  This setting
+affects debugging of multithreaded programs: if @samp{vCont} cannot be
+used, @value{GDBN} might be unable to single-step a specific thread,
+especially under @code{set scheduler-locking off}; it is also
+impossible to pause a specific thread.  @xref{Packets, vCont}, for
+more details.
+
+@item show remote verbose-resume-packet
+Show the current setting of use of the @samp{vCont} request
+
+@item set remote software-breakpoint-packet
+@itemx set remote hardware-breakpoint-packet
+@itemx set remote write-watchpoint-packet
+@itemx set remote read-watchpoint-packet
+@itemx set remote access-watchpoint-packet
+@itemx set remote Z-packet
+@cindex Z-packet
+@cindex remote hardware breakpoints and watchpoints
+These commands enable or disable the use of @samp{Z} packets for
+setting breakpoints and watchpoints in the remote target.  The default
+depends on the remote stub's support of the @samp{Z} packets
+(@value{GDBN} queries the stub when each packet is first required).
+The command @code{set remote Z-packet}, kept for back-compatibility,
+turns on or off all the features that require the use of @samp{Z}
+packets.
+
+@item show remote software-breakpoint-packet
+@itemx show remote hardware-breakpoint-packet
+@itemx show remote write-watchpoint-packet
+@itemx show remote read-watchpoint-packet
+@itemx show remote access-watchpoint-packet
+@itemx show remote Z-packet
+Show the current setting of @samp{Z} packets usage.
 @end table
 
 @node remote stub
@@ -11996,6 +12327,7 @@ configurations.
 On HP-UX systems, if you refer to a function or variable name that
 begins with a dollar sign, @value{GDBN} searches for a user or system
 name first, before it searches for a convenience variable.
+
 
 @node BSD libkvm Interface
 @subsection BSD libkvm Interface
@@ -12836,7 +13168,7 @@ your development board.
 
 @kindex target hms@r{, and serial protocol}
 Now that serial communications are set up, and the development board is
-connected, you can start up @value{GDBN}.  Call @code{@value{GDBP}} with
+connected, you can start up @value{GDBN}.  Call @code{@value{GDBN}} with
 the name of your program as the argument.  @code{@value{GDBN}} prompts
 you, as usual, with the prompt @samp{(@value{GDBP})}.  Use two special
 commands to begin your debugging session: @samp{target hms} to specify
@@ -13062,18 +13394,6 @@ Array Tech LSI33K RAID controller board.
 @value{GDBN} also supports these special commands for MIPS targets:
 
 @table @code
-@item set processor @var{args}
-@itemx show processor
-@kindex set processor @var{args}
-@kindex show processor
-Use the @code{set processor} command to set the type of MIPS
-processor when you want to access processor-type-specific registers.
-For example, @code{set processor @var{r3041}} tells @value{GDBN}
-to use the CPU registers appropriate for the 3041 chip.
-Use the @code{show processor} command to see what MIPS processor @value{GDBN}
-is using.  Use the @code{info reg} command to see what registers
-@value{GDBN} is using.
-
 @item set mipsfpu double
 @itemx set mipsfpu single
 @itemx set mipsfpu none
@@ -13100,20 +13420,6 @@ and @samp{set mipsfpu off} will select no floating point.
 
 As usual, you can inquire about the @code{mipsfpu} variable with
 @samp{show mipsfpu}.
-
-@item set remotedebug @var{n}
-@itemx show remotedebug
-@kindex set remotedebug@r{, MIPS protocol}
-@kindex show remotedebug@r{, MIPS protocol}
-@cindex @code{remotedebug}, MIPS protocol
-@cindex MIPS @code{remotedebug} protocol
-@c FIXME! For this to be useful, you must know something about the MIPS
-@c FIXME...protocol.  Where is it described?
-You can see some debugging information about communications with the board
-by setting the @code{remotedebug} variable.  If you set it to @code{1} using
-@samp{set remotedebug 1}, every packet is displayed.  If you set it
-to @code{2}, every character is displayed.  You can check the current value
-at any time with the command @samp{show remotedebug}.
 
 @item set timeout @var{seconds}
 @itemx set retransmit-timeout @var{seconds}
@@ -13583,10 +13889,33 @@ This section describes characteristics of architectures that affect
 all uses of @value{GDBN} with the architecture, both native and cross.
 
 @menu
+* i386::
 * A29K::
 * Alpha::
 * MIPS::
 @end menu
+
+@node i386
+@subsection x86 Architecture-specific issues.
+
+@table @code
+@item set struct-convention @var{mode}
+@kindex set struct-convention
+@cindex struct return convention
+@cindex struct/union returned in registers
+Set the convention used by the inferior to return @code{struct}s and
+@code{union}s from functions to @var{mode}.  Possible values of
+@var{mode} are @code{"pcc"}, @code{"reg"}, and @code{"default"} (the
+default).  @code{"default"} or @code{"pcc"} means that @code{struct}s
+are returned on the stack, while @code{"reg"} means that a
+@code{struct} or a @code{union} whose size is 1, 2, 4, or 8 bytes will
+be returned in a register.
+
+@item show struct-convention
+@kindex show struct-convention
+Show the current setting of the convention to return @code{struct}s
+from functions.
+@end table
 
 @node A29K
 @subsection A29K
@@ -13764,8 +14093,8 @@ to the value of the environment variable @code{GDBHISTFILE}, or to
 @file{./.gdb_history} (@file{./_gdb_history} on MS-DOS) if this variable
 is not set.
 
-@cindex history save
-@kindex set history
+@cindex save command history
+@kindex set history save
 @item set history save
 @itemx set history save on
 Record command history in a file, whose name may be specified with the
@@ -13775,6 +14104,7 @@ Record command history in a file, whose name may be specified with the
 Stop recording command history in a file.
 
 @cindex history size
+@kindex set history size
 @item set history size @var{size}
 Set the number of commands which @value{GDBN} keeps in its history list.
 This defaults to the value of the environment variable
@@ -13817,7 +14147,9 @@ These commands display the state of the @value{GDBN} history parameters.
 @end table
 
 @table @code
-@kindex shows
+@kindex show commands
+@cindex show last commands
+@cindex display command history
 @item show commands
 Display the last ten commands in the command history.
 
@@ -13868,6 +14200,16 @@ file or to an editor buffer.
 
 Likewise, you can specify @samp{set width 0} to prevent @value{GDBN}
 from wrapping its output.
+
+@item set pagination on
+@itemx set pagination off
+@kindex set pagination
+Turn the output pagination on or off; the default is on.  Turning
+pagination off is the alternative to @code{set height 0}.
+
+@item show pagination
+@kindex show pagination
+Show the current pagination mode.
 @end table
 
 @node Numbers
@@ -13893,14 +14235,14 @@ specified either unambiguously or using the current default radix; for
 example, any of
 
 @smallexample
-set radix 012
-set radix 10.
-set radix 0xa
+set input-radix 012
+set input-radix 10.
+set input-radix 0xa
 @end smallexample
 
 @noindent
-sets the base to decimal.  On the other hand, @samp{set radix 10}
-leaves the radix unchanged no matter what it was.
+sets the input base to decimal.  On the other hand, @samp{set input-radix 10}
+leaves the input radix unchanged, no matter what it was.
 
 @kindex set output-radix
 @item set output-radix @var{base}
@@ -13915,6 +14257,16 @@ Display the current default base for numeric input.
 @kindex show output-radix
 @item show output-radix
 Display the current default base for numeric display.
+
+@item set radix @r{[}@var{base}@r{]}
+@itemx show radix
+@kindex set radix
+@kindex show radix
+These commands set and show the default base for both input and output
+of numbers.  @code{set radix} sets the radix of input and output to
+the same base; without an argument, it resets the radix back to its
+default value of 10.
+
 @end table
 
 @node ABI
@@ -13972,6 +14324,10 @@ to an unprototyped function.  This is the default setting.
 @item set coerce-float-to-double off
 Arguments of type @code{float} will be passed directly to unprototyped
 functions.
+
+@kindex show coerce-float-to-double
+@item show coerce-float-to-double
+Show the current setting of promoting @code{float} to @code{double}.
 @end table
 
 @kindex set cp-abi
@@ -14003,6 +14359,8 @@ Set the current C@t{++} ABI to @var{abi}, or return to automatic detection.
 @node Messages/Warnings
 @section Optional warnings and messages
 
+@cindex verbose operation
+@cindex optional warnings
 By default, @value{GDBN} is silent about its inner workings.  If you are
 running on a slow machine, you may want to use the @code{set verbose}
 command.  This makes @value{GDBN} tell you when it does a lengthy
@@ -14271,6 +14629,7 @@ Display the @value{GDBN} commands used to define @var{commandname} (but
 not its documentation).  If no @var{commandname} is given, display the
 definitions for all user-defined commands.
 
+@cindex infinite recusrion in user-defined commands
 @kindex show max-user-call-depth
 @kindex set max-user-call-depth
 @item show max-user-call-depth
@@ -19212,6 +19571,10 @@ Interface, annotate, GDB's Obsolete Annotations}).
 @item set annotate @var{level}
 The @value{GDB} command @code{set annotate} sets the level of
 annotations to the specified @var{level}.
+
+@item show annotate
+@kindex show annotate
+Show the current annotation level.
 @end table
 
 This chapter describes level 3 annotations.
@@ -20387,6 +20750,21 @@ command also allows to find symbols in other sections.
 
 @end table
 
+The following command is useful for non-interactive invocations of
+@value{GDBN}, such as in the test suite.
+
+@table @code
+@item set watchdog @var{nsec}
+@kindex set watchdog
+@cindex watchdog timer
+@cindex timeout for commands
+Set the maximum number of seconds @value{GDBN} will wait for the
+target operation to finish.  If this time expires, @value{GDBN}
+reports and error and the command is aborted.
+
+@item show watchdog
+Show the current setting of the target wait timeout.
+@end table
 
 @node Remote Protocol
 @appendix @value{GDBN} Remote Serial Protocol
@@ -20506,6 +20884,8 @@ optional.
 
 The following table provides a complete list of all currently defined
 @var{command}s and their corresponding response @var{data}.
+@xref{File-I/O remote protocol extension}, for details about the File
+I/O extension of the remote protocol.
 
 @table @r
 
@@ -21183,13 +21563,15 @@ packet from the target.  The latest @samp{C}, @samp{c}, @samp{S} or
 
 @node General Query Packets
 @section General Query Packets
+@cindex remote query requests
 
 The following set and query packets have already been defined.
 
 @table @r
 
 @item @code{q}@code{C} --- current thread
-
+@cindex current thread, remote request
+@cindex @code{qC} packet
 Return the current thread id.
 
 Reply:
@@ -21201,7 +21583,8 @@ Any other reply implies the old pid.
 @end table
 
 @item @code{q}@code{fThreadInfo} -- all thread ids
-
+@cindex list active threads, remote request
+@cindex @code{qfThreadInfo} packet
 @code{q}@code{sThreadInfo}
 
 Obtain a list of active thread ids from the target (OS).  Since there
@@ -21230,7 +21613,8 @@ ids (using the @code{qs} form of the query), until the target responds
 with @code{l} (lower-case el, for @code{'last'}).
 
 @item @code{q}@code{ThreadExtraInfo}@code{,}@var{id} --- extra thread info
-
+@cindex thread attributes info, remote request
+@cindex @code{qThreadExtraInfo} packet
 Where @var{id} is a thread-id in big-endian hex.  Obtain a printable
 string description of a thread's attributes from the target OS.  This
 string may contain anything that the target OS thinks is interesting for
@@ -21271,7 +21655,8 @@ digits).  See @code{remote.c:parse_threadlist_response()}.
 @end table
 
 @item @code{q}@code{CRC:}@var{addr}@code{,}@var{length} --- compute CRC of memory block
-
+@cindex CRC of memory block, remote request
+@cindex @code{qCRC} packet
 Reply:
 @table @samp
 @item @code{E}@var{NN}
@@ -21281,7 +21666,8 @@ A 32 bit cyclic redundancy check of the specified memory region.
 @end table
 
 @item @code{q}@code{Offsets} --- query sect offs
-
+@cindex section offsets, remote request
+@cindex @code{qOffsets} packet
 Get section offsets that the target used when re-locating the downloaded
 image.  @emph{Note: while a @code{Bss} offset is included in the
 response, @value{GDBN} ignores this and instead applies the @code{Data}
@@ -21293,7 +21679,8 @@ Reply:
 @end table
 
 @item @code{q}@code{P}@var{mode}@var{threadid} --- thread info request
-
+@cindex thread information, remote request
+@cindex @code{qP} packet
 Returns information on @var{threadid}.  Where: @var{mode} is a hex
 encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
 
@@ -21305,7 +21692,8 @@ Reply:
 See @code{remote.c:remote_unpack_thread_info_response()}.
 
 @item @code{q}@code{Rcmd,}@var{command} --- remote command
-
+@cindex execute remote command, remote request
+@cindex @code{qRcmd} packet
 @var{command} (hex encoded) is passed to the local interpreter for
 execution.  Invalid commands should be reported using the output string.
 Before the final result packet, the target may also respond with a
@@ -21324,9 +21712,10 @@ Indicate a badly formed request.
 @item @samp{}
 When @samp{q}@samp{Rcmd} is not recognized.
 @end table
-
+z
 @item @code{qSymbol::} --- symbol lookup
-
+@cindex symbol lookup, remote request
+@cindex @code{qSymbol} packet
 Notify the target that @value{GDBN} is prepared to serve symbol lookup
 requests.  Accept requests from the target for the values of symbols.
 
@@ -21362,7 +21751,8 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 @end table
 
 @item @code{qPart}:@var{object}:@code{read}:@var{annex}:@var{offset},@var{length} --- read special data
-
+@cindex read special object, remote request
+@cindex @code{qPart} packet
 Read uninterpreted bytes from the target's special data area
 identified by the keyword @code{object}.
 Request @var{length} bytes starting at @var{offset} bytes into the data.
@@ -21375,7 +21765,8 @@ requests use the same reply formats, listed below.
 
 @table @asis
 @item @code{qPart}:@code{auxv}:@code{read}::@var{offset},@var{length}
-Access the target's @dfn{auxiliary vector}.  @xref{Auxiliary Vector}.
+Access the target's @dfn{auxiliary vector}.  @xref{Auxiliary Vector},
+and see @ref{Remote configuration, read-aux-vector-packet}.
 Note @var{annex} must be empty.
 @end table
 
@@ -21402,7 +21793,7 @@ recognized by the stub.
 @end table
 
 @item @code{qPart}:@var{object}:@code{write}:@var{annex}:@var{offset}:@var{data@dots{}}
-
+@cindex write data into object, remote request
 Write uninterpreted bytes into the target's special data area
 identified by the keyword @code{object},
 starting at @var{offset} bytes into the data.
@@ -21439,7 +21830,8 @@ not recognize the @var{object} keyword, or its support for
 the stub must respond with an empty packet.
 
 @item @code{qGetTLSAddr}:@var{thread-id},@var{offset},@var{lm} --- get thread local storage address
-
+@cindex get thread-local storage address, remote request
+@cindex @code{qGetTLSAddr} packet
 Fetch the address associated with thread local storage specified
 by @var{thread-id}, @var{offset}, and @var{lm}.
 
@@ -21554,15 +21946,15 @@ Example sequence of a target being stepped by a single instruction:
 @subsection File-I/O Overview
 @cindex file-i/o overview
 
-The File I/O remote protocol extension (short: File-I/O) allows the
-target to use the hosts file system and console I/O when calling various
+The @dfn{File I/O remote protocol extension} (short: File-I/O) allows the
+target to use the host's file system and console I/O when calling various
 system calls.  System calls on the target system are translated into a
 remote protocol packet to the host system which then performs the needed
 actions and returns with an adequate response packet to the target system.
 This simulates file system operations even on targets that lack file systems.
 
 The protocol is defined host- and target-system independent.  It uses
-it's own independent representation of datatypes and values.  Both,
+its own independent representation of datatypes and values.  Both,
 @value{GDBN} and the target's @value{GDBN} stub are responsible for
 translating the system dependent values into the unified protocol values
 when data is transmitted.
@@ -21816,7 +22208,7 @@ is stopped on users request.
 @cindex isatty call, file-i/o protocol
 
 A special case in this protocol is the library call @code{isatty} which
-is implemented as it's own call inside of this protocol.  It returns
+is implemented as its own call inside of this protocol.  It returns
 1 to the target if the file descriptor given as parameter is attached
 to the @value{GDBN} console, 0 otherwise.  Implementing through system calls
 would require implementing @code{ioctl} and would be more complex than
@@ -21827,34 +22219,27 @@ needed.
 @cindex system call, file-i/o protocol
 
 The other special case in this protocol is the @code{system} call which
-is implemented as it's own call, too.  @value{GDBN} is taking over the full
+is implemented as its own call, too.  @value{GDBN} is taking over the full
 task of calling the necessary host calls to perform the @code{system}
 call.  The return value of @code{system} is simplified before it's returned
 to the target.  Basically, the only signal transmitted back is @code{EINTR}
 in case the user pressed @kbd{Ctrl-C}.  Otherwise the return value consists
 entirely of the exit status of the called command.
 
-Due to security concerns, the @code{system} call is refused to be called
-by @value{GDBN} by default.  The user has to allow this call explicitly by
-entering
+Due to security concerns, the @code{system} call is by default refused
+by @value{GDBN}.  The user has to allow this call explicitly with the
+@kbd{set remote system-call-allowed 1} command.
 
-@table @samp
-@kindex set remote system-call-allowed 1
-@item @code{set remote system-call-allowed 1}
-@end table
+@table @code
+@item set remote system-call-allowed
+@kindex set remote system-call-allowed
+Control whether to allow the @code{system} calls in the File I/O
+protocol for the remote target.  The default is zero (disabled).
 
-Disabling the @code{system} call is done by
-
-@table @samp
-@kindex set remote system-call-allowed 0
-@item @code{set remote system-call-allowed 0}
-@end table
-
-The current setting is shown by typing
-
-@table @samp
+@item show remote system-call-allowed
 @kindex show remote system-call-allowed
-@item @code{show remote system-call-allowed}
+Show the current setting of system calls for the remote File I/O
+protocol.
 @end table
 
 @node List of supported calls

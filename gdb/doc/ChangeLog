@@ -1,3 +1,51 @@
+2005-04-09  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Print Settings): Document "set/show print
+	pascal_static-members", "set print repeats", "show print
+	null-stop".  Improve indexing.  Fix documentation of "set print
+	union".
+	(Pascal): New section.
+	(Supported languages): Rename from "Support"; all references
+	updated.  Add a menu item for Pascal.
+	(Numbers): Document "set radix.
+	(Screen Size): Document "set/show pagination".
+	(MIPS Embedded): Remove "set processor" documentation.
+	(Remote configuration): Document "set/show X/P/Z-packet",
+	"set/show read-aux-vector-packet", "set/show remote
+	symbol-lookup-packet", "set/show remote verbose-resume-packet",
+	"set/show remoteaddresssize", "set/show remotebaud", "set/show
+	remotedebug", "set/show remotebreak", "set/show remotedevice",
+	"set/show remotelogfile".
+	(Auxiliary Vector): Add reference to the description of the
+	read-aux-vector-packet setting.
+	(Set Watchpoints): Add a cross-reference to "set remote
+	hardware-breakpoint-limit".
+	(General Query Packets): Add indexing of requests and
+	cross-references to related commands in "Remote configuration".
+	(File-I/O Overview, The system call): Fix wording and typos.
+	(Thread Stops): Add index entries.
+	(Continuing and Stepping): Document "show step-mode".
+	(i386): New node.  Document "set/show struct-convention".
+	(Files): Document "show trust-readonly-sections".
+	(Calling): Document "set/show unwindonsignal".
+	(Messages/Warnings): Add index entries.
+	(Maintenance Commands): Document "set/show watchdog".
+	(Annotations Overview): Document "show annotate".
+	(Set Watchpoints): Add index entries.
+	(Symbols): Fix doc of case-sensitive.
+	(ABI): Document "show coerce-float-to-double".
+	(Convenience Vars, Help): Improve indexing.
+	(Machine Code): Document "show disassembly-flavor".
+	(Debugging C plus plus): Document "show overload-resolution".
+	(Value History, Signaling): Add index entries.
+
+2005-04-08  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Show): Move @kindex entries to their proper places.
+	(Processes): Fix wording.
+	(History, List, Logging output, Define, Symbols, Print Settings):
+	Improve indexing.
+
 2005-04-03  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Targets): Document "set/show architecture".  Remove
