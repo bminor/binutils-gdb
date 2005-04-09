@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/powerpc.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,8 +24,10 @@
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
-#include "gdb_assert.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
 
+#include "gdb_assert.h"
 #include "gdb_string.h"
 
 #include "ppc-tdep.h"
@@ -111,6 +113,59 @@ ppcobsd_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 
+/* Signal trampolines.  */
+
+static void
+ppcobsd_sigtramp_cache_init (const struct tramp_frame *self,
+			     struct frame_info *next_frame,
+			     struct trad_frame_cache *this_cache,
+			     CORE_ADDR func)
+{
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR addr, base;
+  int i;
+
+  base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+  addr = base + 0x18 + 2 * tdep->wordsize;
+  for (i = 0; i < ppc_num_gprs; i++, addr += tdep->wordsize)
+    {
+      int regnum = i + tdep->ppc_gp0_regnum;
+      trad_frame_set_reg_addr (this_cache, regnum, addr);
+    }
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_lr_regnum, addr);
+  addr += tdep->wordsize;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_cr_regnum, addr);
+  addr += tdep->wordsize;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_xer_regnum, addr);
+  addr += tdep->wordsize;
+  trad_frame_set_reg_addr (this_cache, tdep->ppc_ctr_regnum, addr);
+  addr += tdep->wordsize;
+  trad_frame_set_reg_addr (this_cache, PC_REGNUM, addr); /* SRR0? */
+  addr += tdep->wordsize;
+
+  /* Construct the frame ID using the function start.  */
+  trad_frame_set_id (this_cache, frame_id_build (base, func));
+}
+
+static const struct tramp_frame ppcobsd_sigtramp =
+{
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { 0x3821fff0, -1 },		/* add r1,r1,-16 */
+    { 0x4e800021, -1 },		/* blrl */
+    { 0x38610018, -1 },		/* addi r3,r1,24 */
+    { 0x38000067, -1 },		/* li r0,103 */
+    { 0x44000002, -1 },		/* sc */
+    { 0x38000001, -1 },		/* li r0,1 */
+    { 0x44000002, -1 },		/* sc */
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  ppcobsd_sigtramp_cache_init
+};
+
+
 static void
 ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -120,6 +175,8 @@ ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_regset_from_core_section
     (gdbarch, ppcobsd_regset_from_core_section);
+
+  tramp_frame_prepend_unwinder (gdbarch, &ppcobsd_sigtramp);
 }
 
 
