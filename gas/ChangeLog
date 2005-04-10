@@ -1,3 +1,7 @@
+2005-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-mips.c (md_apply_fix3): Fix typos in BFD_RELOC_64.
+
 2005-04-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (assign_symbol): Remove const from parm.  Fix xcalloc

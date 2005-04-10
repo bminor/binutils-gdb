@@ -10986,9 +10986,9 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		hiv = 0xffffffff;
 	      else
 		hiv = 0;
-	      md_number_to_chars ((char *)(buf + target_big_endian ? 4 : 0),
+	      md_number_to_chars ((char *)(buf + (target_big_endian ? 4 : 0)),
 				  *valP, 4);
-	      md_number_to_chars ((char *)(buf + target_big_endian ? 0 : 4),
+	      md_number_to_chars ((char *)(buf + (target_big_endian ? 0 : 4)),
 				  hiv, 4);
 	    }
 	}
