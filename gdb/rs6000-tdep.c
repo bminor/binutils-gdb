@@ -395,7 +395,7 @@ ppc_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   offset = offsets->f0_offset;
   for (i = tdep->ppc_fp0_regnum;
        i < tdep->ppc_fp0_regnum + ppc_num_fprs;
-       i++, offset += 4)
+       i++, offset += 8)
     {
       if (regnum == -1 || regnum == i)
 	ppc_supply_reg (regcache, i, fpregs, offset);
@@ -474,10 +474,10 @@ ppc_collect_fpregset (const struct regset *regset,
   offset = offsets->f0_offset;
   for (i = tdep->ppc_fp0_regnum;
        i <= tdep->ppc_fp0_regnum + ppc_num_fprs;
-       i++, offset += 4)
+       i++, offset += 8)
     {
       if (regnum == -1 || regnum == i)
-	ppc_collect_reg (regcache, regnum, fpregs, offset);
+	ppc_collect_reg (regcache, i, fpregs, offset);
     }
 
   if (regnum == -1 || regnum == tdep->ppc_fpscr_regnum)
