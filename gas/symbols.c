@@ -2032,7 +2032,7 @@ symbol_X_add_number (symbolS *s)
     return &((struct local_symbol *) s)->lsy_value;
 #endif
 
-  return &s->sy_value.X_add_number;
+  return (valueT *)&s->sy_value.X_add_number;
 }
 
 /* Set the value of SYM to the current position in the current segment.  */
