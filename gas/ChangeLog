@@ -1,5 +1,10 @@
 2005-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-m68k.c (md_begin): Support 64bit host.
+	(get_num): Support 64bit BFD on 32bit host.
+
+2005-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-mips.c (md_apply_fix3): Fix typos in BFD_RELOC_64.
 
 2005-04-09  Alan Modra  <amodra@bigpond.net.au>
