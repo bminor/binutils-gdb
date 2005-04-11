@@ -206,9 +206,6 @@
 @V@/gdb/testsuite/gdb.base/coremaker2.c @V@/gdb/testsuite/gdb.base/core2maker.c
 @V@/gdb/testsuite/gdb.cp/m-static1.cc @V@/gdb/testsuite/gdb.cp/m-stat1.cc
 @V@/gdb/testsuite/gdb.cp/namespace1.cc @V@/gdb/testsuite/gdb.cp/namesp1.cc
-@V@/gdb/testsuite/gdb.gdbserver/Makefile.in @V@/gdb/testsuite/gdb.srv/Makefile.in
-@V@/gdb/testsuite/gdb.gdbserver/server-run.exp @V@/gdb/testsuite/gdb.srv/server-run.exp
-@V@/gdb/testsuite/gdb.gdbserver/server.c @V@/gdb/testsuite/gdb.srv/server.c
 @V@/gdb/testsuite/gdb.gdbtk/ChangeLog @V@/gdb/testsuite/gdb.tk/ChangeLog
 @V@/gdb/testsuite/gdb.gdbtk/Makefile.in @V@/gdb/testsuite/gdb.tk/Makefile.in
 @V@/gdb/testsuite/gdb.gdbtk/browser.exp @V@/gdb/testsuite/gdb.tk/browser.exp

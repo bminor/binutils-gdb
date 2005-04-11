@@ -1,5 +1,18 @@
 2005-04-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (ALL_SUBDIRS): Replace gdb.gdbserver with
+	gdb.server.
+	* configure.ac: Likewise.
+	* configure: Regenerated.
+	* gdb.gdbserver/Makefile.in: Moved to...
+	* gdb.server/Makefile.in: ... here.
+	* gdb.gdbserver/server.c: Moved to...
+	* gdb.server/server.c: ... here.
+	* gdb.gdbserver/server-run.exp: Moved to...
+	* gdb.server/server-run.exp: ... here.
+
+2005-04-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (ALL_SUBDIRS): Add gdb.gdbserver.
 	* configure.ac: Create gdb.gdbserver/Makefile.
 	* configure: Regenerated.

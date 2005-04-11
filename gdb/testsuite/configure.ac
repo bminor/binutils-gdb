@@ -112,6 +112,6 @@ AC_OUTPUT([Makefile \
   gdb.ada/Makefile \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
   gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile \
-  gdb.fortran/Makefile gdb.gdbserver/Makefile \
+  gdb.fortran/Makefile gdb.server/Makefile \
   gdb.java/Makefile gdb.mi/Makefile \
   gdb.objc/Makefile gdb.threads/Makefile gdb.trace/Makefile])
