@@ -1,3 +1,8 @@
+2005-04-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* gas/all/gas.exp: Don't run fastcall labels test on
+	i*86-*-openbsd*.
+
 2005-04-11  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/macros/dot.[ls]: New.
