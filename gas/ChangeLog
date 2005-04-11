@@ -1,3 +1,8 @@
+2005-04-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* symbols.c (symbol_X_add_number): Change return type to "offsetT *".
+	* symbols.h (symbol_X_add_number): Update prototype.
+
 2005-04-10  Eric Christopher  <echristo@redhat.com>
 
 	* symbols.c (symbol_X_add_number): Fix warning.

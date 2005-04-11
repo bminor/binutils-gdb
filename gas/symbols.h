@@ -175,7 +175,7 @@ extern symbolS *symbol_next (symbolS *);
 
 extern expressionS *symbol_get_value_expression (symbolS *);
 extern void symbol_set_value_expression (symbolS *, const expressionS *);
-extern valueT *symbol_X_add_number (symbolS *);
+extern offsetT *symbol_X_add_number (symbolS *);
 extern void symbol_set_value_now (symbolS *);
 extern void symbol_set_frag (symbolS *, fragS *);
 extern fragS *symbol_get_frag (symbolS *);

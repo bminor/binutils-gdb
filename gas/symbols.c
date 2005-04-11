@@ -2024,15 +2024,15 @@ symbol_set_value_expression (symbolS *s, const expressionS *exp)
 
 /* Return a pointer to the X_add_number component of a symbol.  */
 
-valueT *
+offsetT *
 symbol_X_add_number (symbolS *s)
 {
 #ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
-    return &((struct local_symbol *) s)->lsy_value;
+    return (offsetT *) &((struct local_symbol *) s)->lsy_value;
 #endif
 
-  return (valueT *)&s->sy_value.X_add_number;
+  return &s->sy_value.X_add_number;
 }
 
 /* Set the value of SYM to the current position in the current segment.  */
