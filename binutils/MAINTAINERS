@@ -81,6 +81,7 @@ responsibility among the other maintainers.
   ix86 PE	   Christopher Faylor <cgf@redhat.com>
   ix86 COFF	   DJ Delorie <dj@redhat.com>
   ix86		   H.J.Lu <hjl@gnu.org>
+  ix86 INTEL MODE  Jan Beulich <jbeulich@novell.com>
   M68HC11 M68HC12  Stephane Carrez <stcarrez@nerim.fr>
   M68k		   Ben Elliston <bje@gnu.org>
   M88k		   Mark Kettenis <kettenis@gnu.org>
