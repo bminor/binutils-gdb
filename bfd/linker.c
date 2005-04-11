@@ -2363,12 +2363,14 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	abort ();
 
       /* If this symbol is in a section which is not being included
-	 in the output file, then we don't want to output the symbol.
-
-	 Gross.  .bss and similar sections won't have the linker_mark
-	 field set.  */
-      if ((sym->section->flags & SEC_HAS_CONTENTS) != 0
-	  && ! sym->section->linker_mark)
+	 in the output file, then we don't want to output the
+	 symbol.  .bss and similar sections won't have the linker_mark
+	 field set.  We also check if its output section has been
+	 removed from the output file.  */
+      if (((sym->section->flags & SEC_HAS_CONTENTS) != 0
+	   && ! sym->section->linker_mark)
+	  || bfd_section_removed_from_list (output_bfd,
+					    sym->section->output_section))
 	output = FALSE;
 
       if (output)

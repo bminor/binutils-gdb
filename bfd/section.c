@@ -546,6 +546,8 @@ CODE_FRAGMENT
 .      *_ps = _s->next;					\
 .      if (_s->next == NULL)				\
 .        (ABFD)->section_tail = _ps;			\
+.      else						\
+.        _s->next = NULL;				\
 .    }							\
 .  while (0)
 .#define bfd_section_list_insert(ABFD, PS, S) \
@@ -559,6 +561,8 @@ CODE_FRAGMENT
 .        (ABFD)->section_tail = &_s->next;		\
 .    }							\
 .  while (0)
+.#define bfd_section_removed_from_list(ABFD, S)	\
+.  ((S)->next == NULL && &(S)->next != (ABFD)->section_tail)
 .
 */
 

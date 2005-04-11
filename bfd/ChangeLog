@@ -1,3 +1,14 @@
+2005-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* linker.c (_bfd_generic_link_output_symbols): Also check if
+	the output section of an input section has been removed from
+	the output file.
+
+	* section.c (bfd_section_list_remove): Clear the next field
+	of the removed section.
+	(bfd_section_removed_from_list): New.
+	* bfd-in2.h: Regenerated.
+
 2005-04-11  David S. Miller  <davem@davemloft.net>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section,
