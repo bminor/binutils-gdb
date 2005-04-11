@@ -1,3 +1,8 @@
+2005-03-15  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (INVLPG_Fixup): Decode rdtscp; change code to allow for
+	easier future additions.
+
 2005-03-19  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmix-opc.c (O, Z): Force expression as unsigned long.
