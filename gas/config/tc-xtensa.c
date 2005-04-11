@@ -6421,7 +6421,7 @@ check_t1_t2_reads_and_writes (TInsn *t1, TInsn *t2)
 	{
 	  xtensa_interface t1_int
 	    = xtensa_interfaceOperand_interface (isa, t1->opcode, j);
-	  int t1_class = xtensa_interface_class_id (isa, t2_int);
+	  int t1_class = xtensa_interface_class_id (isa, t1_int);
 
 	  t1_inout = xtensa_interface_inout (isa, i);
 	  if (xtensa_interface_has_side_effect (isa, t1_int) == 1)
