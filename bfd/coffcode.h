@@ -307,7 +307,7 @@ CODE_FRAGMENT
 #include "coffswap.h"
 #endif
 
-#define STRING_SIZE_SIZE (4)
+#define STRING_SIZE_SIZE 4
 
 #define DOT_DEBUG	".debug"
 #define GNU_LINKONCE_WI ".gnu.linkonce.wi."

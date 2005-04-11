@@ -1,3 +1,7 @@
+2005-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coffcode.h (STRING_SIZE_SIZE): Updated to match libcoff-in.h.
+
 2005-04-11  Nick Clifton  <nickc@redhat.com>
 	
 	* aout-target.h:  Convert to ISO C.
