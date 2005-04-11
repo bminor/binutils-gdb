@@ -1,5 +1,11 @@
 2005-03-15  Jan Beulich  <jbeulich@novell.com>
 
+	* i386-dis.c (PNI_Fixup): Neither mwait nor monitor have any
+	visible operands in Intel mode. The first operand of monitor is
+	%rax in 64-bit mode.
+
+2005-03-15  Jan Beulich  <jbeulich@novell.com>
+
 	* i386-dis.c (INVLPG_Fixup): Decode rdtscp; change code to allow for
 	easier future additions.
 

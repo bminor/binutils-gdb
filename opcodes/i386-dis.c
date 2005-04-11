@@ -4372,16 +4372,32 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 	{
 	  /* mwait %eax,%ecx  */
 	  strcpy (p, "mwait");
+	  if (!intel_syntax)
+	    strcpy (op1out, names32[0]);
 	}
       else
 	{
 	  /* monitor %eax,%ecx,%edx"  */
 	  strcpy (p, "monitor");
-	  strcpy (op3out, names32[2]);
+	  if (!intel_syntax)
+	    {
+	      if (!mode_64bit)
+		strcpy (op1out, names32[0]);
+	      else if (!(prefixes & PREFIX_ADDR))
+		strcpy (op1out, names64[0]);
+	      else
+		{
+		  strcpy (op1out, names32[0]);
+		  used_prefixes |= PREFIX_ADDR;
+		}
+	      strcpy (op3out, names32[2]);
+	    }
 	}
-      strcpy (op1out, names32[0]);
-      strcpy (op2out, names32[1]);
-      two_source_ops = 1;
+      if (!intel_syntax)
+	{
+	  strcpy (op2out, names32[1]);
+	  two_source_ops = 1;
+	}
 
       codep++;
     }
