@@ -230,6 +230,9 @@ gld${EMULATION_NAME}_stat_needed (lang_input_statement_type *s)
     return;
   if (s->the_bfd == NULL)
     return;
+  if (s->as_needed
+      && (bfd_elf_get_dyn_lib_class (s->the_bfd) & DYN_AS_NEEDED) != 0)
+    return;
 
   if (bfd_stat (s->the_bfd, &st) != 0)
     {
@@ -735,6 +738,13 @@ static void
 gld${EMULATION_NAME}_check_needed (lang_input_statement_type *s)
 {
   if (global_found)
+    return;
+
+  /* If this input file was an as-needed entry, and wasn't found to be
+     needed at the stage it was linked, then don't say we have loaded it.  */
+  if (s->as_needed
+      && (s->the_bfd == NULL
+	  || (bfd_elf_get_dyn_lib_class (s->the_bfd) & DYN_AS_NEEDED) != 0))
     return;
 
   if (s->filename != NULL)
