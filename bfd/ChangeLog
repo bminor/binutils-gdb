@@ -1,3 +1,13 @@
+2005-04-11  David S. Miller  <davem@davemloft.net>
+
+	* elf32-sparc.c (elf32_sparc_relocate_section,
+	R_SPARC_TLS_LDO_{HIX22,LOX10}): When not shared, transition to
+	R_SPARC_TLS_LE_{HIX22,LOX10}.
+	(elf32_sparc_relocate_section, R_SPARC_TLS_{LDO,LE}_HIX22): Only
+	xor relocation with 0xffffffff if R_SPARC_TLS_LE_HIX22.
+	(elf32_sparc_relocate_section, R_SPARC_TLS_{LDO,LE}_LOX10): Only
+	or 0x1c00 into relocation if R_SPARC_TLS_LE_HIX22.
+
 2005-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coffcode.h (STRING_SIZE_SIZE): Updated to match libcoff-in.h.

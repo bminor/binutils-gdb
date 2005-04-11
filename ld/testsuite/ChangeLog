@@ -1,3 +1,10 @@
+2005-04-11  David S. Miller  <davem@davemloft.net>
+
+	* ld-sparc/tlssunbin32.dd: Update for TLS relocation fixes.
+	* ld-sparc/tlssunbin32.rd: Likewise.
+	* ld-sparc/tlssunbin32.sd: Likewise.
+	* ld-sparc/tlssunpic32.dd: Likewise.
+
 2005-03-30  Julian Brown  <julian@codesourcery.com>
 
 	* ld-arm/arm-app-abs32.d: Update expected output due to mapping symbols

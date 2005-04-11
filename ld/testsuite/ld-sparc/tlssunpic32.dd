@@ -105,15 +105,15 @@ Disassembly of section .text:
  +1168:	01 00 00 00 	nop *
  +116c:	40 00 44 02 	call  [0-9a-f]+ <__tls_get_addr@plt>
  +1170:	01 00 00 00 	nop *
- +1174:	27 3f ff ff 	sethi  %hi\(0xfffffc00\), %l3
+ +1174:	27 00 00 00 	sethi  %hi\(0\), %l3
  +1178:	01 00 00 00 	nop *
- +117c:	a8 1c fc 20 	xor  %l3, -992, %l4
+ +117c:	a8 1c e0 20 	xor  %l3, 0x20, %l4
  +1180:	01 00 00 00 	nop *
  +1184:	aa 02 00 14 	add  %o0, %l4, %l5
  +1188:	01 00 00 00 	nop *
- +118c:	25 3f ff ff 	sethi  %hi\(0xfffffc00\), %l2
+ +118c:	25 00 00 00 	sethi  %hi\(0\), %l2
  +1190:	01 00 00 00 	nop *
- +1194:	a6 1c bc 26 	xor  %l2, -986, %l3
+ +1194:	a6 1c a0 26 	xor  %l2, 0x26, %l3
  +1198:	01 00 00 00 	nop *
  +119c:	ec 12 00 13 	lduh  \[ %o0 \+ %l3 \], %l6
  +11a0:	01 00 00 00 	nop *
@@ -121,13 +121,13 @@ Disassembly of section .text:
  +11a8:	01 00 00 00 	nop *
  +11ac:	01 00 00 00 	nop *
  +11b0:	13 00 00 00 	sethi  %hi\(0\), %o1
- +11b4:	27 3f ff ff 	sethi  %hi\(0xfffffc00\), %l3
+ +11b4:	27 00 00 00 	sethi  %hi\(0\), %l3
  +11b8:	94 02 60 14 	add  %o1, 0x14, %o2
- +11bc:	25 3f ff ff 	sethi  %hi\(0xfffffc00\), %l2
+ +11bc:	25 00 00 00 	sethi  %hi\(0\), %l2
  +11c0:	90 05 c0 0a 	add  %l7, %o2, %o0
- +11c4:	a8 1c fc 40 	xor  %l3, -960, %l4
+ +11c4:	a8 1c e0 40 	xor  %l3, 0x40, %l4
  +11c8:	40 00 43 eb 	call  [0-9a-f]+ <__tls_get_addr@plt>
- +11cc:	a6 1c bc 45 	xor  %l2, -955, %l3
+ +11cc:	a6 1c a0 45 	xor  %l2, 0x45, %l3
  +11d0:	aa 02 00 14 	add  %o0, %l4, %l5
  +11d4:	ec 0a 00 13 	ldub  \[ %o0 \+ %l3 \], %l6
  +11d8:	01 00 00 00 	nop *
@@ -135,13 +135,13 @@ Disassembly of section .text:
  +11e0:	01 00 00 00 	nop *
  +11e4:	01 00 00 00 	nop *
  +11e8:	13 00 00 00 	sethi  %hi\(0\), %o1
- +11ec:	27 3f ff ff 	sethi  %hi\(0xfffffc00\), %l3
+ +11ec:	27 00 00 00 	sethi  %hi\(0\), %l3
  +11f0:	94 02 60 14 	add  %o1, 0x14, %o2
- +11f4:	25 3f ff ff 	sethi  %hi\(0xfffffc00\), %l2
+ +11f4:	25 00 00 00 	sethi  %hi\(0\), %l2
  +11f8:	90 05 c0 0a 	add  %l7, %o2, %o0
- +11fc:	a8 1c fc 63 	xor  %l3, -925, %l4
+ +11fc:	a8 1c e0 63 	xor  %l3, 0x63, %l4
  +1200:	40 00 43 dd 	call  [0-9a-f]+ <__tls_get_addr@plt>
- +1204:	a6 1c bc 64 	xor  %l2, -924, %l3
+ +1204:	a6 1c a0 64 	xor  %l2, 0x64, %l3
  +1208:	aa 02 00 14 	add  %o0, %l4, %l5
  +120c:	ec 02 00 13 	ld  \[ %o0 \+ %l3 \], %l6
  +1210:	01 00 00 00 	nop *

@@ -2678,10 +2678,14 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_SPARC_TLS_LDO_HIX22:
 	case R_SPARC_TLS_LDO_LOX10:
 	  if (info->shared)
-	    relocation -= dtpoff_base (info);
-	  else
-	    relocation = tpoff (info, relocation);
-	  break;
+	    {
+	      relocation -= dtpoff_base (info);
+	      break;
+	    }
+
+	  r_type = (r_type == R_SPARC_TLS_LDO_HIX22
+		    ? R_SPARC_TLS_LE_HIX22 : R_SPARC_TLS_LE_LOX10);
+	  /* Fall through.  */
 
 	case R_SPARC_TLS_LE_HIX22:
 	case R_SPARC_TLS_LE_LOX10:
@@ -2900,7 +2904,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_vma x;
 
 	  relocation += rel->r_addend;
-	  relocation = relocation ^ 0xffffffff;
+	  if (r_type == R_SPARC_TLS_LE_HIX22)
+	    relocation = relocation ^ 0xffffffff;
 
 	  x = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	  x = (x & ~(bfd_vma) 0x3fffff) | ((relocation >> 10) & 0x3fffff);
@@ -2913,7 +2918,9 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_vma x;
 
 	  relocation += rel->r_addend;
-	  relocation = (relocation & 0x3ff) | 0x1c00;
+	  relocation &= 0x3ff;
+	  if (r_type == R_SPARC_TLS_LE_LOX10)
+	    relocation |= 0x1c00;
 
 	  x = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	  x = (x & ~(bfd_vma) 0x1fff) | relocation;
