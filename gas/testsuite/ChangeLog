@@ -1,3 +1,8 @@
+2005-04-11  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/macros/dot.[ls]: New.
+	* gas/macros/macros.exp: Run new test.
+
 2005-04-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/x86-64-pcrel.s: Test R_X86_64_32S.

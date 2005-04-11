@@ -187,21 +187,37 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	     the first column, since we can't tell what's a label and
 	     whats a pseudoop.  */
 
-	  /* Skip leading whitespace.  */
-	  while (i < ptr->len && ISWHITE (ptr->ptr[i]))
-	    i++;
+	  if (! LABELS_WITHOUT_COLONS)
+	    {
+	      /* Skip leading whitespace.  */
+	      while (i < ptr->len && ISWHITE (ptr->ptr[i]))
+		i++;
+	    }
 
-	  /* Skip over a label.  */
-	  while (i < ptr->len
-		 && (ISALNUM (ptr->ptr[i])
-		     || ptr->ptr[i] == '_'
-		     || ptr->ptr[i] == '$'))
-	    i++;
-
-	  /* And a colon.  */
-	  if (i < ptr->len
-	      && ptr->ptr[i] == ':')
-	    i++;
+	  for (;;)
+	    {
+	      /* Skip over a label, if any.  */
+	      if (i >= ptr->len || ! is_name_beginner (ptr->ptr[i]))
+		break;
+	      i++;
+	      while (i < ptr->len && is_part_of_name (ptr->ptr[i]))
+		i++;
+	      if (i < ptr->len && is_name_ender (ptr->ptr[i]))
+		i++;
+	      if (LABELS_WITHOUT_COLONS)
+		break;
+	      /* Skip whitespace.  */
+	      while (i < ptr->len && ISWHITE (ptr->ptr[i]))
+		i++;
+	      /* Check for the colon.  */
+	      if (i >= ptr->len || ptr->ptr[i] != ':')
+		{
+		  i = line_start;
+		  break;
+		}
+	      i++;
+	      line_start = i;
+	    }
 
 	}
       /* Skip trailing whitespace.  */
@@ -226,11 +242,13 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	       ? strncasecmp (ptr->ptr + i, from, from_len) == 0
 	       : from_len > 0)
 	      && (ptr->len == (i + from_len)
-		  || ! ISALNUM (ptr->ptr[i + from_len])))
+		  || ! (is_part_of_name (ptr->ptr[i + from_len])
+			|| is_name_ender (ptr->ptr[i + from_len]))))
 	    depth++;
 	  if (strncasecmp (ptr->ptr + i, to, to_len) == 0
 	      && (ptr->len == (i + to_len)
-		  || ! ISALNUM (ptr->ptr[i + to_len])))
+		  || ! (is_part_of_name (ptr->ptr[i + to_len])
+			|| is_name_ender (ptr->ptr[i + to_len]))))
 	    {
 	      depth--;
 	      if (depth == 0)
@@ -258,15 +276,16 @@ static int
 get_token (int idx, sb *in, sb *name)
 {
   if (idx < in->len
-      && (ISALPHA (in->ptr[idx])
-	  || in->ptr[idx] == '_'
-	  || in->ptr[idx] == '$'))
+      && is_name_beginner (in->ptr[idx]))
     {
       sb_add_char (name, in->ptr[idx++]);
       while (idx < in->len
-	     && (ISALNUM (in->ptr[idx])
-		 || in->ptr[idx] == '_'
-		 || in->ptr[idx] == '$'))
+	     && is_part_of_name (in->ptr[idx]))
+	{
+	  sb_add_char (name, in->ptr[idx++]);
+	}
+      if (idx < in->len
+	     && is_name_ender (in->ptr[idx]))
 	{
 	  sb_add_char (name, in->ptr[idx++]);
 	}
@@ -692,13 +711,14 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	  else
 	    {
 	      /* FIXME: Why do we do this?  */
+	      /* At least in alternate mode this seems correct.  */
 	      src = sub_actual (src + 1, in, &t, formal_hash, '&', out, 0);
 	    }
 	}
       else if (in->ptr[src] == '\\')
 	{
 	  src++;
-	  if (in->ptr[src] == '(')
+	  if (src < in->len && in->ptr[src] == '(')
 	    {
 	      /* Sub in till the next ')' literally.  */
 	      src++;
@@ -709,9 +729,9 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	      if (in->ptr[src] == ')')
 		src++;
 	      else
-		return _("missplaced )");
+		return _("misplaced `)'");
 	    }
-	  else if (in->ptr[src] == '@')
+	  else if (src < in->len && in->ptr[src] == '@')
 	    {
 	      /* Sub in the macro invocation number.  */
 
@@ -720,7 +740,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	      sprintf (buffer, "%d", macro_number);
 	      sb_add_string (out, buffer);
 	    }
-	  else if (in->ptr[src] == '&')
+	  else if (src < in->len && in->ptr[src] == '&')
 	    {
 	      /* This is a preprocessor variable name, we don't do them
 		 here.  */
@@ -728,7 +748,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	      sb_add_char (out, '&');
 	      src++;
 	    }
-	  else if (macro_mri && ISALNUM (in->ptr[src]))
+	  else if (macro_mri && src < in->len && ISALNUM (in->ptr[src]))
 	    {
 	      int ind;
 	      formal_entry *f;
@@ -759,9 +779,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	    }
 	}
       else if ((macro_alternate || macro_mri)
-	       && (ISALPHA (in->ptr[src])
-		   || in->ptr[src] == '_'
-		   || in->ptr[src] == '$')
+	       && is_name_beginner (in->ptr[src])
 	       && (! inquote
 		   || ! macro_strip_at
 		   || (src > 0 && in->ptr[src - 1] == '@')))
@@ -1086,16 +1104,14 @@ check_macro (const char *line, sb *expand,
   macro_entry *macro;
   sb line_sb;
 
-  if (! ISALPHA (*line)
-      && *line != '_'
-      && *line != '$'
+  if (! is_name_beginner (*line)
       && (! macro_mri || *line != '.'))
     return 0;
 
   s = line + 1;
-  while (ISALNUM (*s)
-	 || *s == '_'
-	 || *s == '$')
+  while (is_part_of_name (*s))
+    ++s;
+  if (is_name_ender (*s))
     ++s;
 
   copy = (char *) alloca (s - line + 1);

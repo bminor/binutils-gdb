@@ -68,5 +68,14 @@ run_dump_test app3
 run_dump_test app4
 
 run_list_test badarg ""
+case $target_triplet in {
+    { *c54x*-*-* } { }
+    { *c4x*-*-* } { }
+    { h8500-*-* } { }
+    { m68*-*-* } { }
+    { m88*-*-* } { }
+    { mmix-* } { }
+    default { run_list_test dot "-alm" }
+}
 run_list_test end ""
 run_list_test redef ""

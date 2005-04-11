@@ -4594,6 +4594,9 @@ is equivalent to assembling
         move    d3,sp@@-
 @end example
 
+For some caveats with the spelling of @var{symbol}, see also the discussion
+at @xref{Macro}.
+
 @node Irpc
 @section @code{.irpc @var{symbol},@var{values}}@dots{}
 
@@ -4621,6 +4624,9 @@ is equivalent to assembling
         move    d2,sp@@-
         move    d3,sp@@-
 @end example
+
+For some caveats with the spelling of @var{symbol}, see also the discussion
+at @xref{Macro}.
 
 @node Lcomm
 @section @code{.lcomm @var{symbol} , @var{length}}
@@ -4868,6 +4874,32 @@ After the definition is complete, you can call the macro either as
 When you call a macro, you can specify the argument values either by
 position, or by keyword.  For example, @samp{sum 9,17} is equivalent to
 @samp{sum to=17, from=9}.
+
+Note that since each of the @var{macargs} can be an identifier exactly
+as any other one permitted by the target architecture, there may be
+occasional problems if the target hand-crafts special meanings to certain
+characters when they occur in a special position.  For example, if colon
+(@code{:}) is generally permitted to be part of a symbol name, but the
+architecture specific code special-cases it when occuring as the final
+character of a symbol (to denote a label), then the macro parameter
+replacement code will have no way of knowing that and consider the whole
+construct (including the colon) an identifier, and check only this
+identifier for being the subject to parameter substitution.  In this
+example, besides the potential of just separating identifier and colon
+by white space, using alternate macro syntax (@xref{Altmacro}.) and
+ampersand (@code{&}) as the character to separate literal text from macro
+parameters (or macro parameters from one another) would provide a way to
+achieve the same effect:
+
+@example
+	.altmacro
+	.macro label l
+l&:
+	.endm
+@end example
+
+This applies identically to the identifiers used in @code{.irp} (@xref{Irp}.)
+and @code{.irpc} (@xref{Irpc}.).
 
 @item .endm
 @cindex @code{endm} directive

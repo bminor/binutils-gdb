@@ -1,3 +1,19 @@
+2005-04-11  Jan Beulich  <jbeulich@novell.com>
+
+	* NEWS: Mention these changes and their effects.
+	* macro.c (get_token): Use is_name_beginner/is_part_of_name/
+	is_name_ender.
+	(check_macro): Likewise.
+	(buffer_and_nest): Likewise. Permit multiple labels. Don't discard
+	labels together with the closing pseudo-op.
+	(macro_expand_body): Adjust comment. Range-check input before use.
+	Adjust mis-spelled diagnostic. Use is_name_beginner.
+	* read.c (try_macro): New.
+	(read_a_source_file): New static variable last_eol. Don't list
+	macro expansion lines more than once. Call try_macro.
+	(s_macro): Set section of line_label to absolute instead of undefined.
+	* doc/as.texinfo: Add information on the caveats of these changes.
+
 2005-04-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (symbol_X_add_number): Change return type to "offsetT *".

@@ -520,6 +520,32 @@ scrub_from_string (char *buf, int buflen)
   return copy;
 }
 
+/* Helper function of read_a_source_file, which tries to expand a macro.  */
+static int
+try_macro (char term, const char *line)
+{
+  sb out;
+  const char *err;
+  macro_entry *macro;
+
+  if (check_macro (line, &out, &err, &macro))
+    {
+      if (err != NULL)
+	as_bad ("%s", err);
+      *input_line_pointer++ = term;
+      input_scrub_include_sb (&out,
+			      input_line_pointer, 1);
+      sb_kill (&out);
+      buffer_limit =
+	input_scrub_next_buffer (&input_line_pointer);
+#ifdef md_macro_info
+      md_macro_info (macro);
+#endif
+      return 1;
+    }
+  return 0;
+}
+
 /* We read the file, putting things into a web that represents what we
    have been reading.  */
 void
@@ -547,6 +573,13 @@ read_a_source_file (char *name)
 
   while ((buffer_limit = input_scrub_next_buffer (&input_line_pointer)) != 0)
     {				/* We have another line to parse.  */
+#ifndef NO_LISTING
+      /* In order to avoid listing macro expansion lines with labels
+	 multiple times, keep track of which line was last issued.  */
+      static char *last_eol;
+
+      last_eol = NULL;
+#endif
       know (buffer_limit[-1] == '\n');	/* Must have a sentinel.  */
 
       while (input_line_pointer < buffer_limit)
@@ -666,17 +699,21 @@ read_a_source_file (char *name)
 		    if (is_end_of_line[(unsigned char) *s])
 		      break;
 
-		  /* Copy it for safe keeping.  Also give an indication of
-		     how much macro nesting is involved at this point.  */
-		  len = s - (input_line_pointer - 1);
-		  copy = (char *) xmalloc (len + macro_nest + 2);
-		  memset (copy, '>', macro_nest);
-		  copy[macro_nest] = ' ';
-		  memcpy (copy + macro_nest + 1, input_line_pointer - 1, len);
-		  copy[macro_nest + 1 + len] = '\0';
+		  if (s != last_eol)
+		    {
+		      last_eol = s;
+		      /* Copy it for safe keeping.  Also give an indication of
+			 how much macro nesting is involved at this point.  */
+		      len = s - (input_line_pointer - 1);
+		      copy = (char *) xmalloc (len + macro_nest + 2);
+		      memset (copy, '>', macro_nest);
+		      copy[macro_nest] = ' ';
+		      memcpy (copy + macro_nest + 1, input_line_pointer - 1, len);
+		      copy[macro_nest + 1 + len] = '\0';
 
-		  /* Install the line with the listing facility.  */
-		  listing_newline (copy);
+		      /* Install the line with the listing facility.  */
+		      listing_newline (copy);
+		    }
 		}
 	      else
 		listing_newline (NULL);
@@ -816,9 +853,18 @@ read_a_source_file (char *name)
 		      /* Print the error msg now, while we still can.  */
 		      if (pop == NULL)
 			{
-			  as_bad (_("unknown pseudo-op: `%s'"), s);
+			  char *end = input_line_pointer;
+
 			  *input_line_pointer = c;
 			  s_ignore (0);
+			  c = *--input_line_pointer;
+			  *input_line_pointer = '\0';
+			  if (! macro_defined || ! try_macro (c, s))
+			    {
+			      *end = '\0';
+			      as_bad (_("unknown pseudo-op: `%s'"), s);
+			      *input_line_pointer++ = c;
+			    }
 			  continue;
 			}
 
@@ -874,28 +920,8 @@ read_a_source_file (char *name)
 
 		      generate_lineno_debug ();
 
-		      if (macro_defined)
-			{
-			  sb out;
-			  const char *err;
-			  macro_entry *macro;
-
-			  if (check_macro (s, &out, &err, &macro))
-			    {
-			      if (err != NULL)
-				as_bad ("%s", err);
-			      *input_line_pointer++ = c;
-			      input_scrub_include_sb (&out,
-						      input_line_pointer, 1);
-			      sb_kill (&out);
-			      buffer_limit =
-				input_scrub_next_buffer (&input_line_pointer);
-#ifdef md_macro_info
-			      md_macro_info (macro);
-#endif
-			      continue;
-			    }
-			}
+		      if (macro_defined && try_macro (c, s))
+			continue;
 
 		      if (mri_pending_align)
 			{
@@ -2319,7 +2345,7 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
     {
       if (line_label != NULL)
 	{
-	  S_SET_SEGMENT (line_label, undefined_section);
+	  S_SET_SEGMENT (line_label, absolute_section);
 	  S_SET_VALUE (line_label, 0);
 	  symbol_set_frag (line_label, &zero_address_frag);
 	}
