@@ -1,3 +1,40 @@
+2005-04-11  Nick Clifton  <nickc@redhat.com>
+	
+	* aout-target.h:  Convert to ISO C.
+	* aoutf1.h:  Convert to ISO C.
+	* aoutx.h:  Convert to ISO C.
+	* bout.c:  Convert to ISO C.
+	* dwarf1.c:  Convert to ISO C.
+	* ecoffswap.h:  Convert to ISO C.
+	* freebsd.h:  Convert to ISO C.
+	* genlink.h:  Convert to ISO C.
+	* ieee.c:  Convert to ISO C.
+	* ihex.c:  Convert to ISO C.
+	* libcoff-in.h:  Convert to ISO C.
+	* mach-o.c:  Convert to ISO C.
+	* mach-o.h:  Convert to ISO C.
+	* netbsd.h:  Convert to ISO C.
+	* ns32k.h:  Convert to ISO C.
+	* ns32knetbsd.c:  Convert to ISO C.
+	* oasys.c:  Convert to ISO C.
+	* pdp11.c:  Convert to ISO C.
+	* pef-traceback.h:  Convert to ISO C.
+	* pef.c:  Convert to ISO C.
+	* pef.h:  Convert to ISO C.
+	* riscix.c:  Convert to ISO C.
+	* som.c:  Convert to ISO C.
+	* som.h:  Convert to ISO C.
+	* srec.c:  Convert to ISO C.
+	* stabs.c:  Convert to ISO C.
+	* sunos.c:  Convert to ISO C.
+	* tekhex.c:  Convert to ISO C.
+	* versados.c:  Convert to ISO C.
+	* version.h:  Convert to ISO C.
+	* xcoff-target.h:  Convert to ISO C.
+	* xcofflink.c:  Convert to ISO C.
+	* xsym.c:  Convert to ISO C.
+	* xsym.h:  Convert to ISO C.
+
 2005-04-08  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (ARM2THUMB_GLUE_SIZE): Rename...

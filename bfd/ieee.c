@@ -1490,9 +1490,8 @@ do_one (ieee_data_type *ieee,
 		  bfd_boolean pcrel = FALSE;
 		  asection *section;
 		  ieee_reloc_type *r;
-		  bfd_size_type amt = sizeof (ieee_reloc_type);
 
-		  r = bfd_alloc (ieee->h.abfd, amt);
+		  r = bfd_alloc (ieee->h.abfd, sizeof (* r));
 		  if (!r)
 		    return FALSE;
 
@@ -3709,12 +3708,12 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 #define ieee_slurp_extended_name_table bfd_true
 #define ieee_construct_extended_name_table \
   ((bfd_boolean (*) \
-    PARAMS ((bfd *, char **, bfd_size_type *, const char **))) \
+    (bfd *, char **, bfd_size_type *, const char **)) \
    bfd_true)
 #define ieee_truncate_arname bfd_dont_truncate_arname
 #define ieee_write_armap \
   ((bfd_boolean (*) \
-    PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
+    (bfd *, unsigned int, struct orl *, unsigned int, int)) \
    bfd_true)
 #define ieee_read_ar_hdr bfd_nullvoidptr
 #define ieee_update_armap_timestamp bfd_true
@@ -3752,27 +3751,27 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 
 const bfd_target ieee_vec =
 {
-  "ieee",			/* name */
+  "ieee",			/* Name.  */
   bfd_target_ieee_flavour,
-  BFD_ENDIAN_UNKNOWN,		/* target byte order */
-  BFD_ENDIAN_UNKNOWN,		/* target headers byte order */
-  (HAS_RELOC | EXEC_P |		/* object flags */
+  BFD_ENDIAN_UNKNOWN,		/* Target byte order.  */
+  BFD_ENDIAN_UNKNOWN,		/* Target headers byte order.  */
+  (HAS_RELOC | EXEC_P |		/* Object flags.  */
    HAS_LINENO | HAS_DEBUG |
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
   (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
-   | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* section flags */
-  '_',				/* leading underscore */
-  ' ',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
+   | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* Section flags.  */
+  '_',				/* Leading underscore.  */
+  ' ',				/* AR_pad_char.  */
+  16,				/* AR_max_namelen.  */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* data */
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* Data.  */
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,
-  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* hdrs */
+  bfd_getb16, bfd_getb_signed_16, bfd_putb16,	/* Headers.  */
 
   {_bfd_dummy_target,
-   ieee_object_p,		/* bfd_check_format */
+   ieee_object_p,		/* bfd_check_format.  */
    ieee_archive_p,
    _bfd_dummy_target,
   },
@@ -3829,5 +3828,5 @@ const bfd_target ieee_vec =
 
   NULL,
 
-  (void *) 0
+  NULL
 };
