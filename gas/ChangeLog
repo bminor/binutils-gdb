@@ -1,3 +1,7 @@
+2005-04-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt (generic_target): Add support for OpenBSD/i386 ELF.
+
 2005-04-11  Jan Beulich  <jbeulich@novell.com>
 
 	* NEWS: Mention these changes and their effects.
