@@ -1,3 +1,8 @@
+2005-04-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/tc-i386.c (output_insn): Handle VIA PadLock instructions
+	similar to other instructions now that they're marked as ImmExt.
+
 2005-04-12  Nick Clifton  <nickc@redhat.com>
 
 	* hash.c (DEFAULT_SIZE): Delete.  Replace with:
