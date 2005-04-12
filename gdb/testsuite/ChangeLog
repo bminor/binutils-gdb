@@ -1,3 +1,7 @@
+2005-04-12  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * lib/gdb.exp (test_compiler_info): Give argument a default value.
+
 2005-04-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (ALL_SUBDIRS): Replace gdb.gdbserver with

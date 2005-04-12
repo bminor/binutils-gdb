@@ -1291,7 +1291,7 @@ proc get_compiler_info {binfile args} {
     return 0;
 }
 
-proc test_compiler_info { compiler } {
+proc test_compiler_info { {compiler ""} } {
     global compiler_info
 
      # if no arg, return the compiler_info string
