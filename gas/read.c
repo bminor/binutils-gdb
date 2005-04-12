@@ -2747,6 +2747,57 @@ end_repeat (int extra)
     buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
 
+static void
+assign_symbol (char *name, int no_reassign)
+{
+  symbolS *symbolP;
+
+  if (name[0] == '.' && name[1] == '\0')
+    {
+      /* Turn '. = mumble' into a .org mumble.  */
+      segT segment;
+      expressionS exp;
+
+      segment = get_known_segmented_expression (&exp);
+
+      if (!need_pass_2)
+	do_org (segment, &exp, 0);
+
+      return;
+    }
+
+  if ((symbolP = symbol_find (name)) == NULL
+      && (symbolP = md_undefined_symbol (name)) == NULL)
+    {
+      symbolP = symbol_find_or_make (name);
+#ifndef NO_LISTING
+      /* When doing symbol listings, play games with dummy fragments living
+	 outside the normal fragment chain to record the file and line info
+	 for this symbol.  */
+      if (listing & LISTING_SYMBOLS)
+	{
+	  extern struct list_info_struct *listing_tail;
+	  fragS *dummy_frag = (fragS *) xcalloc (1, sizeof (fragS));
+	  dummy_frag->line = listing_tail;
+	  dummy_frag->fr_symbol = symbolP;
+	  symbol_set_frag (symbolP, dummy_frag);
+	}
+#endif
+#ifdef OBJ_COFF
+      /* "set" symbols are local unless otherwise specified.  */
+      SF_SET_LOCAL (symbolP);
+#endif
+    }
+
+  /* Permit register names to be redefined.  */
+  if (no_reassign
+      && S_IS_DEFINED (symbolP)
+      && S_GET_SEGMENT (symbolP) != reg_section)
+    as_bad (_("symbol `%s' is already defined"), name);
+
+  pseudo_set (symbolP);
+}
+
 /* Handle the .equ, .equiv and .set directives.  If EQUIV is 1, then
    this is .equiv, and it is an error if the symbol is already
    defined.  */
@@ -2754,10 +2805,9 @@ end_repeat (int extra)
 void
 s_set (int equiv)
 {
-  register char *name;
-  register char delim;
-  register char *end_name;
-  register symbolS *symbolP;
+  char *name;
+  char delim;
+  char *end_name;
 
   /* Especial apologies for the random logic:
      this just grew, and could be parsed much more simply!
@@ -2788,58 +2838,9 @@ s_set (int equiv)
   input_line_pointer++;
   *end_name = 0;
 
-  if (name[0] == '.' && name[1] == '\0')
-    {
-      /* Turn '. = mumble' into a .org mumble.  */
-      register segT segment;
-      expressionS exp;
-
-      segment = get_known_segmented_expression (&exp);
-
-      if (!need_pass_2)
-	do_org (segment, &exp, 0);
-
-      *end_name = delim;
-      return;
-    }
-
-  if ((symbolP = symbol_find (name)) == NULL
-      && (symbolP = md_undefined_symbol (name)) == NULL)
-    {
-#ifndef NO_LISTING
-      /* When doing symbol listings, play games with dummy fragments living
-	 outside the normal fragment chain to record the file and line info
-	 for this symbol.  */
-      if (listing & LISTING_SYMBOLS)
-	{
-	  extern struct list_info_struct *listing_tail;
-	  fragS *dummy_frag = (fragS *) xmalloc (sizeof (fragS));
-	  memset (dummy_frag, 0, sizeof (fragS));
-	  dummy_frag->fr_type = rs_fill;
-	  dummy_frag->line = listing_tail;
-	  symbolP = symbol_new (name, undefined_section, 0, dummy_frag);
-	  dummy_frag->fr_symbol = symbolP;
-	}
-      else
-#endif
-	symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
-
-#ifdef OBJ_COFF
-      /* "set" symbols are local unless otherwise specified.  */
-      SF_SET_LOCAL (symbolP);
-#endif /* OBJ_COFF */
-    }
-
-  symbol_table_insert (symbolP);
-
+  assign_symbol (name, equiv);
   *end_name = delim;
 
-  if (equiv
-      && S_IS_DEFINED (symbolP)
-      && S_GET_SEGMENT (symbolP) != reg_section)
-    as_bad (_("symbol `%s' is already defined"), S_GET_NAME (symbolP));
-
-  pseudo_set (symbolP);
   demand_empty_rest_of_line ();
 }
 
@@ -3177,6 +3178,16 @@ discard_rest_of_line (void)
   know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
 
+/* Sets frag for given symbol to zero_address_frag, except when the
+   symbol frag is already set to a dummy listing frag.  */
+
+static void
+set_zero_frag (symbolS *symbolP)
+{
+  if (symbol_get_frag (symbolP)->fr_type != rs_dummy)
+    symbol_set_frag (symbolP, &zero_address_frag);
+}
+
 /* In:	Pointer to a symbol.
 	Input_line_pointer->expression.
 
@@ -3188,14 +3199,12 @@ void
 pseudo_set (symbolS *symbolP)
 {
   expressionS exp;
+  segT seg;
 #if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
   int ext;
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
   know (symbolP);		/* NULL pointer is logic error.  */
-#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
-  ext = S_IS_EXTERNAL (symbolP);
-#endif /* OBJ_AOUT or OBJ_BOUT */
 
   (void) expression (&exp);
 
@@ -3220,6 +3229,15 @@ pseudo_set (symbolS *symbolP)
 			  - S_GET_VALUE (exp.X_op_symbol));
     }
 
+  if (symbol_section_p (symbolP))
+    {
+      as_bad ("attempt to set value of section symbol");
+      return;
+    }
+#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
+  ext = S_IS_EXTERNAL (symbolP);
+#endif /* OBJ_AOUT or OBJ_BOUT */
+
   switch (exp.X_op)
     {
     case O_illegal:
@@ -3229,53 +3247,55 @@ pseudo_set (symbolS *symbolP)
       /* Fall through.  */
     case O_constant:
       S_SET_SEGMENT (symbolP, absolute_section);
-#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
-      if (ext)
-	S_SET_EXTERNAL (symbolP);
-      else
-	S_CLEAR_EXTERNAL (symbolP);
-#endif /* OBJ_AOUT or OBJ_BOUT */
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
-      if (exp.X_op != O_constant)
-	symbol_set_frag (symbolP, &zero_address_frag);
+      set_zero_frag (symbolP);
       break;
 
     case O_register:
       S_SET_SEGMENT (symbolP, reg_section);
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
-      symbol_set_frag (symbolP, &zero_address_frag);
+      set_zero_frag (symbolP);
       break;
 
     case O_symbol:
-      if (S_GET_SEGMENT (exp.X_add_symbol) == undefined_section
-	  || exp.X_add_number != 0)
-	symbol_set_value_expression (symbolP, &exp);
-      else if (symbol_section_p (symbolP))
-	as_bad ("attempt to set value of section symbol");
-      else
+      seg = S_GET_SEGMENT (exp.X_add_symbol);
+      /* For x=undef+const, create an expression symbol.
+	 For x=x+const, just update x except when x is an undefined symbol
+	 For x=defined+const, evaluate x.  */
+      if (symbolP == exp.X_add_symbol
+	  && (seg != undefined_section
+	      || !symbol_constant_p (symbolP)))
+	{
+	  *symbol_X_add_number (symbolP) += exp.X_add_number;
+	  break;
+	}
+      else if (seg != undefined_section)
 	{
 	  symbolS *s = exp.X_add_symbol;
 
-	  S_SET_SEGMENT (symbolP, S_GET_SEGMENT (s));
-#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
-	  if (ext)
-	    S_SET_EXTERNAL (symbolP);
-	  else
-	    S_CLEAR_EXTERNAL (symbolP);
-#endif /* OBJ_AOUT or OBJ_BOUT */
-	  S_SET_VALUE (symbolP,
-		       exp.X_add_number + S_GET_VALUE (s));
+	  S_SET_SEGMENT (symbolP, seg);
+	  S_SET_VALUE (symbolP, exp.X_add_number + S_GET_VALUE (s));
 	  symbol_set_frag (symbolP, symbol_get_frag (s));
 	  copy_symbol_attributes (symbolP, s);
+	  break;
 	}
-      break;
+      /* Fall thru */
 
     default:
       /* The value is some complex expression.
-	 FIXME: Should we set the segment to anything?  */
+	 Set segment and frag back to that of a newly created symbol.  */
+      S_SET_SEGMENT (symbolP, undefined_section);
       symbol_set_value_expression (symbolP, &exp);
+      set_zero_frag (symbolP);
       break;
     }
+
+#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
+  if (ext)
+    S_SET_EXTERNAL (symbolP);
+  else
+    S_CLEAR_EXTERNAL (symbolP);
+#endif /* OBJ_AOUT or OBJ_BOUT */
 }
 
 /*			cons()
@@ -4884,7 +4904,6 @@ is_it_end_of_statement (void)
 void
 equals (char *sym_name, int reassign)
 {
-  register symbolS *symbolP;	/* Symbol we are working with.  */
   char *stop = NULL;
   char stopc;
 
@@ -4898,44 +4917,10 @@ equals (char *sym_name, int reassign)
   if (flag_mri)
     stop = mri_comment_field (&stopc);
 
-  if (sym_name[0] == '.' && sym_name[1] == '\0')
-    {
-      /* Turn '. = mumble' into a .org mumble.  */
-      register segT segment;
-      expressionS exp;
-
-      segment = get_known_segmented_expression (&exp);
-      if (!need_pass_2)
-	do_org (segment, &exp, 0);
-    }
-  else
-    {
-#ifdef OBJ_COFF
-      int local;
-
-      symbolP = symbol_find (sym_name);
-      local = symbolP == NULL;
-      if (local)
-#endif /* OBJ_COFF */
-      symbolP = symbol_find_or_make (sym_name);
-      /* Permit register names to be redefined.  */
-      if (!reassign
-	  && S_IS_DEFINED (symbolP)
-	  && S_GET_SEGMENT (symbolP) != reg_section)
-	as_bad (_("symbol `%s' is already defined"), S_GET_NAME (symbolP));
-
-#ifdef OBJ_COFF
-      /* "set" symbols are local unless otherwise specified.  */
-      if (local)
-	SF_SET_LOCAL (symbolP);
-#endif /* OBJ_COFF */
-
-      pseudo_set (symbolP);
-    }
+  assign_symbol (sym_name, !reassign);
 
   if (flag_mri)
     {
-      /* Check garbage after the expression.  */
       demand_empty_rest_of_line ();
       mri_comment_end (stop, stopc);
     }

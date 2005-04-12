@@ -1,3 +1,20 @@
+2005-04-12  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/827
+	* as.h (rs_dummy): Define.
+	* symbols.c (symbol_X_add_number): New function.
+	* symbols.h (symbol_X_add_number): Declare.
+	* stabs.c (aout_process_stab): Tidy symbol frag setting.
+	* read.c (assign_symbol): New function, split out from s_set.
+	Use symbol_find_or_make.  Leave fr_type of dummy frag as rs_dummy.
+	(s_set): Call assign_symbol.  Remove "register" keyword.
+	(set_zero_frag): New function.
+	(pseudo_set): Always check for assignment to section syms.
+	Always set segment and frag of symbol, and likewise extern for
+	aout/bout.  Handle assignment of sym=sym+/-const specially.  Don't
+	special case exp.X_add_number non-zero for O_symbol expressions.
+	(equals): Use assign_symbol.
+
 2005-04-11  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 

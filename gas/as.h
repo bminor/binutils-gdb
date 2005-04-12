@@ -321,10 +321,13 @@ extern segT text_section, data_section, bss_section;
 
 enum _relax_state
 {
+  /* Dummy frag used by listing code.  */
+  rs_dummy = 0,
+
   /* Variable chars to be repeated fr_offset times.
      Fr_symbol unused. Used with fr_offset == 0 for a
      constant length frag.  */
-  rs_fill = 1,
+  rs_fill,
 
   /* Align.  The fr_offset field holds the power of 2 to which to
      align.  The fr_var field holds the number of characters in the

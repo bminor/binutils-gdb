@@ -2022,6 +2022,19 @@ symbol_set_value_expression (symbolS *s, const expressionS *exp)
   s->sy_value = *exp;
 }
 
+/* Return a pointer to the X_add_number component of a symbol.  */
+
+offsetT *
+symbol_X_add_number (symbolS *s)
+{
+#ifdef BFD_ASSEMBLER
+  if (LOCAL_SYMBOL_CHECK (s))
+    return (offsetT *) &((struct local_symbol *) s)->lsy_value;
+#endif
+
+  return &s->sy_value.X_add_number;
+}
+
 /* Set the value of SYM to the current position in the current segment.  */
 
 void

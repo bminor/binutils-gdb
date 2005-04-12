@@ -1,6 +1,6 @@
 /* symbols.h -
    Copyright 1987, 1990, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -175,6 +175,7 @@ extern symbolS *symbol_next (symbolS *);
 
 extern expressionS *symbol_get_value_expression (symbolS *);
 extern void symbol_set_value_expression (symbolS *, const expressionS *);
+extern offsetT *symbol_X_add_number (symbolS *);
 extern void symbol_set_value_now (symbolS *);
 extern void symbol_set_frag (symbolS *, fragS *);
 extern fragS *symbol_get_frag (symbolS *);
