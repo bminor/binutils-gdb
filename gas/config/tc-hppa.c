@@ -811,6 +811,7 @@ static int print_errors = 1;
 
    %r26 - %r23 have %arg0 - %arg3 as synonyms
    %r28 - %r29 have %ret0 - %ret1 as synonyms
+   %fr4 - %fr7 have %farg0 - %farg3 as synonyms
    %r30 has %sp as a synonym
    %r27 has %dp as a synonym
    %r2  has %rp as a synonym
@@ -854,10 +855,10 @@ static const struct pd_reg pre_defined_registers[] =
   {"%dp",    27},
   {"%eiem",  15},
   {"%eirr",  23},
-  {"%farg0",  5},
-  {"%farg1",  6},
-  {"%farg2",  7},
-  {"%farg3",  8},
+  {"%farg0",  4 + FP_REG_BASE},
+  {"%farg1",  5 + FP_REG_BASE},
+  {"%farg2",  6 + FP_REG_BASE},
+  {"%farg3",  7 + FP_REG_BASE},
   {"%fr0",    0 + FP_REG_BASE},
   {"%fr0l",   0 + FP_REG_BASE},
   {"%fr0r",   0 + FP_REG_BASE + FP_REG_RSEL},

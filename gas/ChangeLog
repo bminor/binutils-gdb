@@ -1,3 +1,9 @@
+2005-04-12  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/818
+	* config/tc-hppa.c (pre_defined_registers): Fix %farg[0-3]
+	synonyms.
+
 2005-04-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
