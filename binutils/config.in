@@ -151,11 +151,11 @@
 /* Define if your locale.h file contains LC_MESSAGES. */
 #undef HAVE_LC_MESSAGES
 
-/* Define to 1 if NLS is requested */
-#undef ENABLE_NLS
-
 /* Define as 1 if you have gettext and don't want to use GNU gettext. */
 #undef HAVE_GETTEXT
+
+/* Define to 1 if NLS is requested */
+#undef ENABLE_NLS
 
 /* Does the platform use an executable suffix? */
 #undef HAVE_EXECUTABLE_SUFFIX
@@ -178,7 +178,7 @@
 /* Is the type time_t defined in <sys/types.h>? */
 #undef HAVE_TIME_T_IN_TYPES_H
 
-/* Is the prototype for getopt in <unistd.h> in the expected format?  */
+/* Is the prototype for getopt in <unistd.h> in the expected format? */
 #undef HAVE_DECL_GETOPT
 
 /* Does <utime.h> define struct utimbuf? */

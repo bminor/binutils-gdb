@@ -417,6 +417,15 @@ OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
 
 STAGESTUFF = *.o ldscripts/* e*.c
 
+# Disable -Werror, if it has been enabled, since old versions of bison/
+# yacc will produce working code which contain compile time warnings. 
+ldgram.o:
+	$(COMPILE) -c $< -Wno-error
+ldlex.o:
+	$(COMPILE) -c $< -Wno-error
+deffilep.o:
+	$(COMPILE) -c $< -Wno-error
+
 # At the moment this is just a list of those emulation template files
 # that contain internationalised strings.
 EMULATION_FILES = emultempl/pe.em emultempl/armcoff.em
@@ -1739,8 +1748,8 @@ ldctor.o: ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h ld.h $(INCDIR)/bin-bugs.h \
   ldexp.h ldlang.h ldmisc.h ldgram.h ldmain.h ldctor.h
-ldemul.o: ldemul.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
+ldemul.o: ldemul.c config.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h sysdep.h $(INCDIR)/fopen-same.h \
   ld.h $(INCDIR)/bin-bugs.h ldmisc.h ldexp.h ldlang.h \
   ldfile.h ldemul.h ldmain.h ldemul-list.h
 ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
@@ -1781,8 +1790,8 @@ ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h \
   ld.h $(INCDIR)/bin-bugs.h ldexp.h ldlang.h ldwrite.h \
   ldmisc.h ldgram.h ldmain.h
-lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
+lexsup.o: lexsup.c config.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h sysdep.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(INCDIR)/bfdlink.h \
   ld.h $(INCDIR)/bin-bugs.h ldmain.h ldmisc.h ldexp.h \
   ldlang.h ldgram.h ldlex.h ldfile.h ldver.h ldemul.h \

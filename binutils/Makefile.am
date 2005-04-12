@@ -223,16 +223,16 @@ sysinfo$(EXEEXT_FOR_BUILD): sysinfo.o syslex.o
 
 syslex.o:
 	if [ -r syslex.c ]; then \
-	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS)  syslex.c  ; \
+	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) syslex.c -Wno-error ; \
 	else \
-	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS) $(CFLAGS) $(srcdir)/syslex.c ;\
+	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS) $(CFLAGS) $(srcdir)/syslex.c -Wno-error ;\
 	fi
 
 sysinfo.o:
 	if [ -r sysinfo.c ]; then \
-	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS)  sysinfo.c  ; \
+	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) sysinfo.c -Wno-error ; \
 	else \
-	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) $(srcdir)/sysinfo.c ; \
+	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) $(srcdir)/sysinfo.c -Wno-error ; \
 	fi
 
 # We need these for parallel make.
@@ -241,6 +241,25 @@ defparse.h: defparse.c
 nlmheader.h: nlmheader.c
 rcparse.h: rcparse.c
 sysinfo.h: sysinfo.c
+
+# Disable -Werror, if it has been enabled, since old versions of bison/
+# yacc will produce working code which contain compile time warnings. 
+arparse.o:
+	$(COMPILE) -c $< -Wno-error
+arlex.o:
+	$(COMPILE) -c $< -Wno-error
+sysroff.o:
+	$(COMPILE) -c $< -Wno-error
+defparse.o:
+	$(COMPILE) -c $< -Wno-error
+deflex.o:
+	$(COMPILE) -c $< -Wno-error
+nlmheader.o:
+	$(COMPILE) -c $< -Wno-error
+rcparse.o:
+	$(COMPILE) -c $< -Wno-error
+rclex.o:
+	$(COMPILE) -c $< -Wno-error
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 
@@ -363,15 +382,15 @@ install-exec-local: install-binPROGRAMS $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-addr2line.o: addr2line.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
+addr2line.o: addr2line.c config.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/getopt.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/demangle.h bucomm.h config.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/demangle.h bucomm.h $(INCDIR)/bin-bugs.h \
   $(INCDIR)/fopen-same.h budemang.h
 ar.o: ar.c ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/libiberty.h $(INCDIR)/progress.h bucomm.h \
   config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/aout/ar.h $(BFDDIR)/libbfd.h arsup.h $(INCDIR)/filenames.h \
-  binemul.h
+  $(INCDIR)/aout/ar.h $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h \
+  arsup.h $(INCDIR)/filenames.h binemul.h
 arsup.o: arsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h arsup.h $(INCDIR)/libiberty.h bucomm.h \
   config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
@@ -382,7 +401,7 @@ binemul.o: binemul.c binemul.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h ../bfd/bfdver.h $(INCDIR)/libiberty.h \
   bucomm.h config.h $(INCDIR)/bin-bugs.h $(INCDIR)/fopen-same.h \
-  $(INCDIR)/filenames.h $(BFDDIR)/libbfd.h
+  $(INCDIR)/filenames.h $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h
 budemang.o: budemang.c config.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/libiberty.h $(INCDIR)/demangle.h \
   budemang.h

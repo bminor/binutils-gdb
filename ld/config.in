@@ -154,6 +154,9 @@
 /* Define to 1 if NLS is requested */
 #undef ENABLE_NLS
 
+/* Is the prototype for getopt in <unistd.h> in the expected format? */
+#undef HAVE_DECL_GETOPT
+
 /* Use b modifier when opening binary files? */
 #undef USE_BINARY_FOPEN
 
@@ -175,5 +178,3 @@
 /* Additional extension a shared object might have. */
 #undef EXTRA_SHLIB_EXTENSION
 
-/* Is the prototype for getopt in <unistd.h> in the expected format?  */
-#undef HAVE_DECL_GETOPT

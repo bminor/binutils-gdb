@@ -1,3 +1,10 @@
+2005-04-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	(ldgram.o, ldlex.o, deffilep.o): Add -Wno-error to command.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+
 2005-04-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_stat_needed): Ignore

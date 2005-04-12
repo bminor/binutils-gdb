@@ -366,7 +366,7 @@ extern void bfd_perform_slip
 
 /* Functions and types in cofflink.c.  */
 
-#define STRING_SIZE_SIZE (4)
+#define STRING_SIZE_SIZE 4
 
 /* We use a hash table to merge identical enum, struct, and union
    definitions in the linker.  */

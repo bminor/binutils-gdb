@@ -1,3 +1,14 @@
+2005-04-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	(syslex.o, sysinfo.o, arparse.o, arlex.o): Add -Wno-error to command.
+	(sysroff.o, defparse.o, deflex.o): Likewise.
+	(nlmheader.o, rcparse.o, rclex.o): Likewise.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2005-04-11  Jan Beulich  <jbeulich@novell.com>
 
 	* MAINTAINERS: Add myself as ix86 Intel mode maintainer.

@@ -1,3 +1,10 @@
+2005-04-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* libcoff.h: Regenerate.
+
 2005-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* linker.c (_bfd_generic_link_output_symbols): Also check if
