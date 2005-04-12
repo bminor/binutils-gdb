@@ -3358,7 +3358,7 @@ dep-am: DEP
 #MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.
 app.o: app.c $(INCDIR)/symcat.h
 as.o: as.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
-  output-file.h sb.h macro.h dwarf2dbg.h dw2gencfi.h \
+  output-file.h sb.h macro.h dwarf2dbg.h dw2gencfi.h hash.h \
   $(INCDIR)/elf/dwarf2.h $(BFDVER_H)
 atof-generic.o: atof-generic.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h
 bignum-copy.o: bignum-copy.c $(INCDIR)/symcat.h

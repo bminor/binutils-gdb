@@ -42,6 +42,7 @@
 #include "macro.h"
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
+#include "hash.h"
 
 #ifdef BFD_ASSEMBLER
 #include "bfdver.h"
@@ -292,6 +293,8 @@ Options:\n\
   fprintf (stream, _("\
   --gdwarf-2              generate DWARF2 debugging information\n"));
   fprintf (stream, _("\
+  --hash-size=<value>     set the hash table size close to <value>\n"));
+  fprintf (stream, _("\
   --help                  show this message and exit\n"));
   fprintf (stream, _("\
   --target-help           show target specific options\n"));
@@ -313,6 +316,10 @@ Options:\n\
   -o OBJFILE              name the object-file output OBJFILE (default a.out)\n"));
   fprintf (stream, _("\
   -R                      fold data section into text section\n"));
+  fprintf (stream, _("\
+  --reduce-memory-overheads \n\
+                          prefer smaller memory use at the cost of longer\n\
+                          assembly times\n"));
   fprintf (stream, _("\
   --statistics            print various measured statistics from execution\n"));
   fprintf (stream, _("\
@@ -426,6 +433,8 @@ parse_args (int * pargc, char *** pargv)
       OPTION_EXECSTACK,
       OPTION_NOEXECSTACK,
       OPTION_ALTERNATE,
+      OPTION_HASH_TABLE_SIZE,
+      OPTION_REDUCE_MEMORY_OVERHEADS,
       OPTION_WARN_FATAL
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
@@ -457,6 +466,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"gen-debug", no_argument, NULL, 'g'}
     ,{"gstabs", no_argument, NULL, OPTION_GSTABS}
     ,{"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS}
+    ,{"hash-size", required_argument, NULL, OPTION_HASH_TABLE_SIZE}
     ,{"help", no_argument, NULL, OPTION_HELP}
     /* New option for extending instruction set (see also -t above).
        The "-t file" or "--itbl file" option extends the basic set of
@@ -478,6 +488,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"mri", no_argument, NULL, 'M'}
     ,{"nocpp", no_argument, NULL, OPTION_NOCPP}
     ,{"no-warn", no_argument, NULL, 'W'}
+    ,{"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS}
     ,{"statistics", no_argument, NULL, OPTION_STATISTICS}
     ,{"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
     ,{"version", no_argument, NULL, OPTION_VERSION}
@@ -865,6 +876,24 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case 'X':
 	  /* -X means treat warnings as errors.  */
 	  break;
+
+	case OPTION_REDUCE_MEMORY_OVERHEADS:
+	  /* The only change we make at the moment is to reduce
+	     the size of the hash tables that we use.  */
+	  set_gas_hash_table_size (4051);
+	  break;
+
+	case OPTION_HASH_TABLE_SIZE:
+	  {
+	    bfd_size_type new_size;
+
+            new_size = strtoul (optarg, NULL, 0);
+            if (new_size)
+              set_gas_hash_table_size (new_size);
+            else
+              as_fatal (_("--hash-size needs a numeric argument"));
+	    break;
+	  }
 	}
     }
 

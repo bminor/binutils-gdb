@@ -1,5 +1,26 @@
 2005-04-12  Nick Clifton  <nickc@redhat.com>
 
+	* hash.c (DEFAULT_SIZE): Delete.  Replace with:
+	(gas_hash_table_size): New static variable.
+	(set_gas_hash_table_size): New function:  Records a requested size
+	for the hash tables.
+	(get_gas_hash_table_size): New function: Return a prime number
+	near the requested size of the hash table.
+	(hash_new): Use get_gas_hash_table_size.
+	* hash.h: Add a prototype for set_gas_hash_table_size.
+	* as.c (show_usage): Add description of new switches: --hash-size
+	and --reduce-memory-overheads.
+	(option_values): Add OPTION_HASH_TABLE_SIZE and
+	OPTION_REDUCE_MEMORY_OVERHEADS.
+	(std_longpopts): Add entries for the new options.
+	(parse_args): Handle the new options.
+	* Makefile.am: Add a dependency of as.c on hash.h.
+	* Makefile.in: Regenerate.
+	* doc/as.texinfo: Document the new switches.
+	* NEWS: Mention the new switches.
+
+2005-04-12  Nick Clifton  <nickc@redhat.com>
+
 	PR gas/818
 	* config/tc-hppa.c (pre_defined_registers): Fix %farg[0-3]
 	synonyms.

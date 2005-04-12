@@ -1,6 +1,6 @@
 /* hash.c -- gas hash table code
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2002, 2003
+   2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -32,10 +32,6 @@
 #include "as.h"
 #include "safe-ctype.h"
 #include "obstack.h"
-
-/* The default number of entries to use when creating a hash table.  */
-
-#define DEFAULT_SIZE (4051)
 
 /* An entry in a hash table.  */
 
@@ -72,6 +68,40 @@ struct hash_control {
 #endif /* HASH_STATISTICS */
 };
 
+/* The default number of entries to use when creating a hash table.
+   Note this value can be reduced to 4051 by using the command line
+   switch --reduce-memory-overheads, or set to other values by using
+   the --hash-size=<NUMBER> switch.  */
+
+static unsigned int gas_hash_table_size = 65537;
+
+void
+set_gas_hash_table_size (unsigned int size)
+{
+  gas_hash_table_size = size;
+}
+
+/* FIXME: This function should be amalgmated with bfd/hash.c:bfd_hash_set_default_size().  */
+static unsigned int
+get_gas_hash_table_size (void)
+{
+  /* Extend this prime list if you want more granularity of hash table size.  */
+  static const unsigned int hash_size_primes[] =
+    {
+      1021, 4051, 8599, 16699, 65537
+    };
+  unsigned int index;
+
+  /* Work out the best prime number near the hash_size.
+     FIXME: This could be a more sophisticated algorithm,
+     but is it really worth implementing it ?   */
+  for (index = 0; index < ARRAY_SIZE (hash_size_primes) - 1; ++index)
+    if (gas_hash_table_size <= hash_size_primes[index])
+      break;
+
+  return hash_size_primes[index];
+}
+
 /* Create a hash table.  This return a control block.  */
 
 struct hash_control *
@@ -81,12 +111,12 @@ hash_new (void)
   struct hash_control *ret;
   unsigned int alloc;
 
-  size = DEFAULT_SIZE;
+  size = get_gas_hash_table_size ();
 
-  ret = (struct hash_control *) xmalloc (sizeof *ret);
+  ret = xmalloc (sizeof *ret);
   obstack_begin (&ret->memory, chunksize);
   alloc = size * sizeof (struct hash_entry *);
-  ret->table = (struct hash_entry **) obstack_alloc (&ret->memory, alloc);
+  ret->table = obstack_alloc (&ret->memory, alloc);
   memset (ret->table, 0, alloc);
   ret->size = size;
 

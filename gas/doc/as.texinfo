@@ -227,14 +227,15 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @smallexample
 @c man begin SYNOPSIS
 @value{AS} [@b{-a}[@b{cdhlns}][=@var{file}]] [@b{--alternate}] [@b{-D}]
- [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}] [@b{--gstabs+}]
- [@b{--gdwarf-2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}] [@b{-K}] [@b{-L}]
- [@b{--listing-lhs-width}=@var{NUM}] [@b{--listing-lhs-width2}=@var{NUM}]
- [@b{--listing-rhs-width}=@var{NUM}] [@b{--listing-cont-lines}=@var{NUM}]
- [@b{--keep-locals}] [@b{-o} @var{objfile}] [@b{-R}] [@b{--statistics}] [@b{-v}]
- [@b{-version}] [@b{--version}] [@b{-W}] [@b{--warn}] [@b{--fatal-warnings}] 
- [@b{-w}] [@b{-x}] [@b{-Z}] [@b{--target-help}] [@var{target-options}] 
- [@b{--}|@var{files} @dots{}]
+ [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
+ [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
+ [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
+ [@b{--listing-lhs-width2}=@var{NUM}] [@b{--listing-rhs-width}=@var{NUM}]
+ [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}] [@b{-o}
+ @var{objfile}] [@b{-R}] [@b{--reduce-memory-overheads}] [@b{--statistics}]
+ [@b{-v}] [@b{-version}] [@b{--version}] [@b{-W}] [@b{--warn}]
+ [@b{--fatal-warnings}] [@b{-w}] [@b{-x}] [@b{-Z}] [@b{--target-help}]
+ [@var{target-options}] [@b{--}|@var{files} @dots{}]
 @c
 @c Target dependent options are listed below.  Keep the list sorted.
 @c Add an empty line for separation. 
@@ -553,6 +554,18 @@ Name the object-file output from @command{@value{AS}} @var{objfile}.
 
 @item -R
 Fold the data section into the text section.
+
+@kindex --hash-size=@var{number}
+Set the default size of GAS's hash tables to a prime number close to
+@var{number}.  Increasing this value can reduce the length of time it takes the
+assembler to perform its tasks, at the expense of increasing the assembler's
+memory requirements.  Similarly reducing this value can reduce the memory
+requirements at the expense of speed.
+
+@item --reduce-memory-overheads
+This option reduces GAS's memory requirements, at the expense of making the
+assembly processes slower.  Currently this switch is a synonym for
+@samp{--hash-size=4051}, but in the future it may have other effects as well.
 
 @item --statistics
 Print the maximum space (in bytes) and total time (in seconds) used by
