@@ -1,3 +1,67 @@
+2005-04-14  David S. Miller  <davem@davemloft.net>
+
+	Add TLS support for 64-bit Sparc ELF.
+	*  elf64-sparc.c (sparc64_elf_dyn_relocs,
+	sparc64_elf_link_hash_entry, sparc64_elf_obj_tdata): New structs.
+	(GOT_UNKNOWN, GOT_NORMAL, GOT_TLD_GD, GOT_TLD_IE,
+	sparc64_elf_hash_entry, sparc64_elf_tdata,
+	sparc64_elf_local_got_tls_type): New defines.
+	(sparc64_elf_mkobject): New function.
+	(sparc64_elf_link_hash_table): Add members for dynamic linker
+	sections PLT, RELPLT, DYNBSS, and RELBSS.  Add tls_ldm_got
+	uion to track TLS GOT references.  Add sym_sec to cache
+	mappings from local sym to section.
+	(link_hash_newfunc): New function.
+	(sparc64_elf_bfd_link_hash_table_create): Rename to
+	sparc64_elf_link_hash_table_create for consistency.
+	Pass link_hash_newfunc to _bfd_elf_link_hash_table_init.
+	(sparc64_elf_create_dynamic_sections): Initialize new section
+	members of sparc64_elf_link_hash_table.  Only init srelbss
+	if not-shared.
+	(sparc64_elf_copy_indirect_symbol, sparc64_elf_tls_transition):
+	New functions.
+	(SPARC_NOP): Define.
+	(sparc64_elf_build_plt, sparc64_elf_plt_entry_offset,
+	sparc64_elf_plt_ptr_offset): Delete.
+	(sparc64_plt_entry_build): New function to build PLT entries
+	gradually instread of all at once at the end of linking.
+	(sparc64_elf_check_relocs): Delete dynobj, sgot, and srelgot
+	local vars.  Get them from sparc64_elf_hash_table instead.
+	Check early on if r_symndx is in bounds.  Handle TLS transitions.
+	Account for TLS GOT references and DF_STATIC_TLS, as needed.
+	For TLS relocs, record the tls_type in either
+	sparc64_elf_local_got_tls_type or sparc64_elf_hash_entry as
+	appropriate.  For R_SPARC_TLS_{GD,LDM}_CALL, emit a reference
+	to the __tls_get_addr symbol.  For PLT relocs, track references
+	via h->plt.refcount.  When R_SPARC_{PC10,PC22,PC_HH22,PC_HM10,
+	PC_LM22} and h not-NULL, set h->non_got_ref.  For global data
+	symbol references, count the number of relocations needed for
+	that symbol.  For default switch case, don't error, this lets
+	the TLS relocs not explicitly handled by this function get
+	accepted.
+	(sparc64_elf_gc_mark_hook, sparc64_gc_sweep_hook): New functions.
+	(sparc64_elf_adjust_dynamic_symbol): Remove dynobj local var, get
+	it from sparc64_elf_hash_table.  Store the real PLT offset
+	in h->plt.offset, and build PLT entries one at a time.  Also
+	get .dynbss section pointer from htab.
+	(allocate_dynrelocs, readonly_dynrelocs,
+	sparc64_omit_section_dynsym): New functions.
+	(sparc64_elf_omit_section_dynsym): Use these new functions as
+	helpers.
+	(dtpoff_base, tpoff): New functions.
+	(sparc64_elf_relocate_section): Kill dynobj, sgot, and splt
+	locals, get them from sparc64_elf_hash_table.  Handle TLS
+	relocations and refcounting in main relocation loop.
+	(sparc64_elf_finish_dynamic_symbol): Use
+	sparc64_elf_link_hash_table.  Build PLT entries as we see
+	them.  Handle TLS GOT relocations.
+	(sparc64_elf_finish_dynamic_sections): Get sgot and dynobj
+	from sparc64_elf_hash_table.  Initialize only PLT header
+	not all entries since we not build PLT entries one by one.
+	(elf_backend_copy_indirect_symbol, bfd_elf64_mkobject,
+	elf_backend_gc_mark_hook, elf_backend_gc_sweep_hook,
+	elf_backend_can_gc_sections, elf_backend_can_refcount): Define.
+
 2005-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elflink.c (elf_link_input_bfd): Update check for removed
@@ -294,7 +358,7 @@
 
 2005-03-29  Joel Brobecker  <brobecker@gnat.com>
 
-        * irix-core.c: Remove some unnecessary prototypes.
+	* irix-core.c: Remove some unnecessary prototypes.
 
 2005-03-28  Joel Brobecker  <brobecker@adacore.com>
 

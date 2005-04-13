@@ -85,7 +85,7 @@ foreach testitem $seltests {
 	setup_xfail $xfail_target
     }
     setup_xfail "alpha*-*" "arc*-*" "d30v*-*" "dlx*-*" "i370*-*" "i860*-*"
-    setup_xfail "i960*-*" "mn10200-*" "or32-*" "pj-*" "sparc64*-*"
+    setup_xfail "i960*-*" "mn10200-*" "or32-*" "pj-*"
 
     # It's either C or C++ at the moment.
     if { $testtype == "C++" } {

@@ -1,3 +1,18 @@
+2005-04-14  David S. Miller  <davem@davemloft.net>
+
+	* ld-selective/sel-dump.exp: Do not exclude sparc64-*.
+	* ld-selective/selective.exp: Likewise.
+	* ld-sparc/sparc.exp: Add {32,64}-bit prefix to test
+	names so we know which one is failing.  Run sparc64 TLS
+	tests on multi-arch sparc platforms.
+	* ld-sparc/tls64.sd, ld-sparc/tlssunbin64.dd,
+	ld-sparc/tlssunbin64.rd, ld/testsuite/ld-sparc/tlssunbin64.sd,
+	ld-sparc/tlssunbin64.td, ld-sparc/tlssunnopic64.dd,
+	ld-sparc/tlssunnopic64.rd, ld-sparc/tlssunnopic64.sd,
+	ld-sparc/tlssunpic64.dd, ld-sparc/tlssunpic64.rd,
+	ld-sparc/tlssunpic64.sd, ld-sparc/tlssunpic64.td): Update now
+	that sparc64 ELF does support TLS.
+	
 2005-04-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/empty.d: New file.
