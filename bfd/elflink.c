@@ -6869,6 +6869,11 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		  && (isec->flags & SEC_EXCLUDE) != 0)))
 	continue;
 
+      /* If the section is not in the output BFD's section list, it is not
+	 being output.  */
+      if (bfd_section_removed_from_list (output_bfd, isec->output_section))
+	continue;
+
       /* Get the name of the symbol.  */
       name = bfd_elf_string_from_elf_section (input_bfd, symtab_hdr->sh_link,
 					      isym->st_name);

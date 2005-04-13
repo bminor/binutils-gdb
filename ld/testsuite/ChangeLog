@@ -1,3 +1,8 @@
+2005-04-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/empty.d: New file.
+	* ld-elf/empty.s: Likewise.
+
 2005-04-11  David S. Miller  <davem@davemloft.net>
 
 	* ld-sparc/tlssunbin32.dd: Update for TLS relocation fixes.
