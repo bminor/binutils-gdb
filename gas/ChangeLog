@@ -1,3 +1,16 @@
+2005-04-13  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (IS_ZEXT_32BIT_NUM): New macro.
+	(normalize_address_expr): New function to sign-extend address
+	offsets that fit into 32 bits in 32-bit mode.
+	(macro_build_ldst_constoffset): Use normalize_address_expr()
+	instead of a handcoded sequence.
+	(load_register): Likewise.  Report oversized numbers in a useful
+	way.
+	(macro) [ld_st, ldd_std]: Reject all oversized offsets, not only
+	for constant addresses.  Report oversized numbers in a useful way.
+	(mips_ip): Use normalize_address_expr() for addresses.
+
 2005-04-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/tc-i386.c (output_insn): Handle VIA PadLock instructions

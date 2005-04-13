@@ -727,7 +727,17 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "hwr-names-mips64r2"
 
     run_dump_test "ldstla-32"
+    run_dump_test "ldstla-32-mips3"
     run_dump_test "ldstla-32-shared"
+    run_dump_test "ldstla-32-mips3-shared"
+    run_list_test "ldstla-32-1" "-mabi=32" \
+	"MIPS ld-st-la bad constants (ABI o32)"
+    run_list_test "ldstla-32-mips3-1" "-mabi=32" \
+	"MIPS ld-st-la bad constants (ABI o32, mips3)"
+    run_list_test "ldstla-32-1" "-KPIC -mabi=32" \
+	"MIPS ld-st-la bad constants (ABI o32, shared)"
+    run_list_test "ldstla-32-mips3-1" "-KPIC -mabi=32" \
+	"MIPS ld-st-la bad constants (ABI o32, mips3, shared)"
     run_dump_test "ldstla-eabi64"
     if $has_newabi {
 	run_dump_test "ldstla-n64"

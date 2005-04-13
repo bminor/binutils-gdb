@@ -1,3 +1,4 @@
+	.set	mips3
 	.text
 	ld $2, 0xffffffffffffffff($4)
 	ld $2, 0xffffffffabcdef01($4)
