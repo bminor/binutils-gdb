@@ -1,3 +1,21 @@
+2005-04-13  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/ldstla-32.s: Exclude offsets that are now meant to fail
+	and include more instructions/offsets that are meant to succeed.
+	Use $4 instead $3 to avoid register dependencies.
+	* gas/mips/ldstla-32.d: Update accordingly.
+	* gas/mips/ldstla-32-shared.d: Likewise.
+	* gas/mips/ldstla-32-mips3.d: New test based on the above, except
+	for mips3.
+	* gas/mips/ldstla-32-mips3-shared.d: Similarly, for PIC.
+	* gas/mips/ldstla-32-mips3.s: Source for the new tests.
+	* gas/mips/ldstla-32-1.s: New test for offsets that are meant to
+	fail.
+	* gas/mips/ldstla-32-mips3-1.s: Likewise, for mips3.
+	* gas/mips/ldstla-32-1.l: Stderr output for the new test.
+	* gas/mips/ldstla-32-mips3-1.l: Likewise.
+	* gas/mips/mips.exp: Run the new tests.
+
 2005-04-13  Jan Beulich  <jbeulich@novell.com>
             H.J. Lu  <hongjiu.lu@intel.com>
 
