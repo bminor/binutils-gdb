@@ -4792,6 +4792,7 @@ md_apply_fix3 (fixP, valP, seg)
 	  break;
 
 	case BFD_RELOC_32:
+	case BFD_RELOC_X86_64_32S:
 	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
 	  break;
 	case BFD_RELOC_16:
@@ -5355,7 +5356,6 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_386_TLS_GOTIE:
     case BFD_RELOC_386_TLS_LE_32:
     case BFD_RELOC_386_TLS_LE:
-    case BFD_RELOC_X86_64_32S:
     case BFD_RELOC_X86_64_TLSGD:
     case BFD_RELOC_X86_64_TLSLD:
     case BFD_RELOC_X86_64_DTPOFF32:
@@ -5369,6 +5369,13 @@ tc_gen_reloc (section, fixp)
 #endif
       code = fixp->fx_r_type;
       break;
+    case BFD_RELOC_X86_64_32S:
+      if (!fixp->fx_pcrel)
+	{
+	  /* Don't turn BFD_RELOC_X86_64_32S into BFD_RELOC_32.  */
+	  code = fixp->fx_r_type;
+	  break;
+	}
     default:
       if (fixp->fx_pcrel)
 	{

@@ -1,3 +1,9 @@
+2005-04-13  Jan Beulich  <jbeulich@novell.com>
+            H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_apply_fix3): Also handle BFD_RELOC_X86_64_32S.
+	(tc_gen_reloc): Handle BFD_RELOC_X86_64_32S specially.
+
 2005-04-12  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/827
