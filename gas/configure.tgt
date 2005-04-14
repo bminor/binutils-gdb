@@ -375,11 +375,18 @@ case ${generic_target} in
   sparc-*-sysv4*)			fmt=elf ;;
   sparc-*-solaris*)			fmt=elf ;;
   sparc-*-netbsdelf*)			fmt=elf em=nbsd ;;
-  sparc-*-*n*bsd*)
+  sparc-*-netbsd*)
     case ${cpu} in
       sparc64)				fmt=elf em=nbsd ;;
       *)				fmt=aout em=nbsd ;;
     esac ;;
+  sparc-*-openbsd[0-2].* | \
+  sparc-*-openbsd3.[0-1])
+    case ${cpu} in
+      sparc64)				fmt=elf em=nbsd ;;
+      *)				fmt=aout em=nbsd ;;
+    esac ;;
+  sparc-*-openbsd*)			fmt=elf em=nbsd ;;
 
   tic30-*-*aout*)			fmt=aout bfd_gas=yes ;;
   tic30-*-*coff*)			fmt=coff bfd_gas=yes ;;

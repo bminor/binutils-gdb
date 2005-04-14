@@ -1,5 +1,7 @@
 2005-04-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.tgt: Add support for OpenBSD/sparc ELF.
+
 	* configure.tgt: Set emulation for mips-*-openbsd*.
 	Remove broken mips-dec-openbsd* config.
 	* configure.in: Set default ABI for mips64-*-openbsd*.
