@@ -1,6 +1,6 @@
 /* corefile.c
 
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -142,6 +142,9 @@ void
 core_init (const char *aout_name)
 {
   int core_sym_bytes;
+  asymbol *synthsyms;
+  long synth_count;
+
   core_bfd = bfd_openr (aout_name, 0);
 
   if (!core_bfd)
@@ -188,6 +191,23 @@ core_init (const char *aout_name)
       fprintf (stderr, "%s: %s: %s\n", whoami, aout_name,
 	       bfd_errmsg (bfd_get_error ()));
       done (1);
+    }
+
+  synth_count = bfd_get_synthetic_symtab (core_bfd, core_num_syms, core_syms,
+					  0, NULL, &synthsyms);
+  if (synth_count > 0)
+    {
+      asymbol **symp;
+      long new_size;
+      long i;
+
+      new_size = (core_num_syms + synth_count + 1) * sizeof (*core_syms);
+      core_syms = xrealloc (core_syms, new_size);
+      symp = core_syms + core_num_syms;
+      core_num_syms += synth_count;
+      for (i = 0; i < synth_count; i++)
+	*symp++ = synthsyms + i;
+      *symp = 0;
     }
 
   min_insn_size = 1;
