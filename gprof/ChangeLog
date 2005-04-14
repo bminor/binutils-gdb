@@ -1,3 +1,7 @@
+2005-04-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* corefile.c (core_init): Call bfd_get_synthetic_symtab.
+
 2005-03-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.
