@@ -1,3 +1,9 @@
+2005-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: New translation: Finnish.
+	* configure.in (ALL_LINGUAS): Add fi.
+	* configure: Regenerate.
+
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (NO_WERROR): Define.
