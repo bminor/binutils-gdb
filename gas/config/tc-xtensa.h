@@ -227,8 +227,12 @@ struct xtensa_frag_type
   fragS *literal_frag;
 
   /* The destination segment for literal frags.  (Note that this is only
-     valid after xtensa_move_literals.  */
+     valid after xtensa_move_literals.)  This field is also used for
+     LITERAL_POOL_END frags.  */
   segT lit_seg;
+
+  /* Frag chain for LITERAL_POOL_BEGIN frags.  */
+  struct frchain *lit_frchain;
 
   /* For the relaxation scheme, some literal fragments can have their
      expansions modified by an instruction that relaxes.  */

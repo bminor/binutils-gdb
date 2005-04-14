@@ -2247,7 +2247,7 @@ xg_translate_sysreg_op (char **popname, int *pnum_args, char **arg_strings)
       if (sr == XTENSA_UNDEFINED)
 	{
 	  as_bad (_("invalid register number (%ld) for '%s' instruction"),
-		  val, opname);
+		  (long) val, opname);
 	  return -1;
 	}
     }
@@ -2316,7 +2316,7 @@ xtensa_translate_old_userreg_ops (char **popname)
       if (sr == XTENSA_UNDEFINED)
 	{
 	  as_bad (_("invalid register number (%ld) for '%s'"),
-		  val, opname);
+		  (long) val, opname);
 	  return -1;
 	}
     }
@@ -4645,15 +4645,15 @@ xtensa_mark_literal_pool_location (void)
   frag_align (2, 0, 0);
   record_alignment (now_seg, 2);
 
-  /* We stash info in the fr_var of these frags
-     so we can later move the literal's fixes into this
-     frchain's fix list.  We can use fr_var because fr_var's
-     interpretation depends solely on the fr_type and subtype.  */
+  /* We stash info in these frags so we can later move the literal's
+     fixes into this frchain's fix list.  */
   pool_location = frag_now;
-  frag_variant (rs_machine_dependent, 0, (int) frchain_now,
+  frag_now->tc_frag_data.lit_frchain = frchain_now;
+  frag_variant (rs_machine_dependent, 0, 0,
 		RELAX_LITERAL_POOL_BEGIN, NULL, 0, NULL);
   xtensa_set_frag_assembly_state (frag_now);
-  frag_variant (rs_machine_dependent, 0, (int) now_seg,
+  frag_now->tc_frag_data.lit_seg = now_seg;
+  frag_variant (rs_machine_dependent, 0, 0,
 		RELAX_LITERAL_POOL_END, NULL, 0, NULL);
   xtensa_set_frag_assembly_state (frag_now);
 
@@ -4882,7 +4882,7 @@ xtensa_find_unaligned_branch_targets (bfd *abfd ATTRIBUTE_UNUSED,
 	      if (frag_addr + op_size > branch_align)
 		as_warn_where (frag->fr_file, frag->fr_line,
 			       _("unaligned branch target: %d bytes at 0x%lx"),
-			       op_size, frag->fr_address);
+			       op_size, (long) frag->fr_address);
 	    }
 	  frag = frag->fr_next;
 	}
@@ -4921,7 +4921,7 @@ xtensa_find_unaligned_loops (bfd *abfd ATTRIBUTE_UNUSED,
 	      if (frag_addr + op_size > xtensa_fetch_width)
 		as_warn_where (frag->fr_file, frag->fr_line,
 			       _("unaligned loop: %d bytes at 0x%lx"),
-			       op_size, frag->fr_address);
+			       op_size, (long) frag->fr_address);
 	    }
 	  frag = frag->fr_next;
 	}
@@ -7462,7 +7462,7 @@ xtensa_fix_close_loop_end_frags (void)
 			  
 			  if (fragP->fr_var < length)
 			    as_fatal (_("fr_var %lu < length %d"),
-				      fragP->fr_var, length);
+				      (long) fragP->fr_var, length);
 			  else
 			    {
 			      assemble_nop (length,
@@ -8410,7 +8410,7 @@ relax_frag_add_nop (fragS *fragP)
 
   if (fragP->fr_var < length)
     {
-      as_fatal (_("fr_var (%ld) < length (%d)"), fragP->fr_var, length);
+      as_fatal (_("fr_var (%ld) < length (%d)"), (long) fragP->fr_var, length);
       return 0;
     }
 
@@ -9869,17 +9869,15 @@ xtensa_move_literals (void)
 	    {
 	      literal_pool = search_frag->tc_frag_data.literal_frag;
 	      assert (literal_pool->fr_subtype == RELAX_LITERAL_POOL_BEGIN);
-	      /* Note that we set this fr_var to be a fix
-		 chain when we created the literal pool location
-		 as RELAX_LITERAL_POOL_BEGIN.  */
-	      frchain_to = (frchainS *) literal_pool->fr_var;
+	      frchain_to = literal_pool->tc_frag_data.lit_frchain;
+	      assert (frchain_to);
 	    }
 	  insert_after = literal_pool;
 
 	  while (insert_after->fr_next->fr_subtype != RELAX_LITERAL_POOL_END)
 	    insert_after = insert_after->fr_next;
 
-	  dest_seg = (segT) insert_after->fr_next->fr_var;
+	  dest_seg = insert_after->fr_next->tc_frag_data.lit_seg;
 
 	  *frag_splice = next_frag;
 	  search_frag->fr_next = insert_after->fr_next;
