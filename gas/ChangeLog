@@ -1,3 +1,8 @@
+2005-04-14  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (macro) [ldd_std]: Don't attempt the GP
+	optimization for constant addresses.
+
 2005-04-13  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (IS_ZEXT_32BIT_NUM): New macro.

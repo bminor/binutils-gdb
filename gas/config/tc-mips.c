@@ -6417,7 +6417,8 @@ macro (struct mips_cl_insn *ip)
 	     If there is a base register, we add it to $at after the
 	     lui instruction.  If there is a constant, we always use
 	     the last case.  */
-	  if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
+	  if (offset_expr.X_op == O_symbol
+	      && (valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
 	      && !nopic_need_relax (offset_expr.X_add_symbol, 1))
 	    {
 	      relax_start (offset_expr.X_add_symbol);
