@@ -246,6 +246,9 @@ changequote([,])dnl
 	  mips*-linux*)
 	    mips_default_abi=O32_ABI
 	    ;;
+	  mips64*-openbsd*)
+	    mips_default_abi=N64_ABI
+	    ;;
 	  *)
 	    mips_default_abi=NO_ABI
 	    ;;

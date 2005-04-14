@@ -1,3 +1,10 @@
+2005-04-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt: Set emulation for mips-*-openbsd*.
+	Remove broken mips-dec-openbsd* config.
+	* configure.in: Set default ABI for mips64-*-openbsd*.
+	* configure: Regenerate.
+
 2005-04-14  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (macro) [ldd_std]: Don't attempt the GP
