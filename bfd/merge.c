@@ -656,6 +656,11 @@ alloc_failure:
 	}
     }
   secinfo->sec->size = size;
+  if (secinfo->sec->alignment_power != 0)
+    {
+      bfd_size_type align = (bfd_size_type) 1 << secinfo->sec->alignment_power;
+      secinfo->sec->size = (secinfo->sec->size + align - 1) & -align;
+    }
 
   /* And now adjust the rest, removing them from the chain (but not hashtable)
      at the same time.  */
