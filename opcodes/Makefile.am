@@ -9,6 +9,7 @@ BFDDIR = $(srcdir)/../bfd
 MKDEP = gcc -MM
 
 WARN_CFLAGS = @WARN_CFLAGS@
+NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
 
 bfdlibdir = @bfdlibdir@

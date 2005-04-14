@@ -18,6 +18,7 @@ bfdincludedir = @bfdincludedir@
 bfdlib_LTLIBRARIES = libbfd.la
 
 WARN_CFLAGS = @WARN_CFLAGS@
+NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
 
 # bfd.h goes here, for now

@@ -134,6 +134,7 @@ YFLAGS = -d
 LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 
 WARN_CFLAGS = @WARN_CFLAGS@
+NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
 
 # We put the scripts in the directory $(scriptdir)/ldscripts.
@@ -1168,11 +1169,11 @@ mostlyclean distclean maintainer-clean
 # Disable -Werror, if it has been enabled, since old versions of bison/
 # yacc will produce working code which contain compile time warnings. 
 ldgram.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 ldlex.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 deffilep.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \

@@ -1,5 +1,14 @@
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am (NO_WERROR): Define.
+	* warning.m4: New file
+	* acinclude.m4: Include warning.m4.
+	* configure.in: Invoke AM_BINUTILS_WARNINGS.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
+2005-04-14  Alan Modra  <amodra@bigpond.net.au>
+
 	* merge.c (sec_merge_emit): Tidy.  Check for bfd_zmalloc errors.
 	Write trailing padding.
 

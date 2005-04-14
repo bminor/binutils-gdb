@@ -42,8 +42,8 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/../config/accross.m4 \
 	$(top_srcdir)/../config/acx.m4 $(top_srcdir)/../bfd/bfd.m4 \
-	$(top_srcdir)/../libtool.m4 $(top_srcdir)/../gettext.m4 \
-	$(top_srcdir)/configure.in
+	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../libtool.m4 \
+	$(top_srcdir)/../gettext.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
@@ -132,6 +132,7 @@ MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
+NO_WERROR = @NO_WERROR@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@

@@ -20,6 +20,7 @@ YFLAGS = -d
 LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 
 WARN_CFLAGS = @WARN_CFLAGS@
+NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
 
 # these two are almost the same program
@@ -245,21 +246,21 @@ sysinfo.h: sysinfo.c
 # Disable -Werror, if it has been enabled, since old versions of bison/
 # yacc will produce working code which contain compile time warnings. 
 arparse.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 arlex.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 sysroff.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 defparse.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 deflex.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 nlmheader.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 rcparse.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 rclex.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 

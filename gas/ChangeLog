@@ -1,3 +1,12 @@
+2005-04-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (NO_WERROR): Define.  Use instead of -Wno-error.
+	* acinclude.m4: Include ../bfd/warning.m4.
+	* configure.in: Invoke AM_BINUTILS_WARNINGS.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2005-04-13  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (IS_ZEXT_32BIT_NUM): New macro.

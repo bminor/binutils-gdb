@@ -16,6 +16,7 @@ YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison 
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo @LEX@ ; fi`
 
 WARN_CFLAGS = @WARN_CFLAGS@
+NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
 
 MKDEP = gcc -MM
@@ -644,7 +645,7 @@ m68k-parse.c: $(srcdir)/config/m68k-parse.y
 # Disable -Werror, if it has been enabled, since old versions of bison/
 # yacc will produce working code which contain compile time warnings. 
 m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 
 # Don't let the .y.h rule clobber m68k-parse.h.
 m68k-parse.h: ; @true
@@ -658,7 +659,7 @@ itbl-lex.o: itbl-lex.c itbl-parse.h $(srcdir)/itbl-lex.h
 # Disable -Werror, if it has been enabled, since old versions of bison/
 # yacc will produce working code which contain compile time warnings. 
 itbl-parse.o: itbl-parse.c itbl-parse.h $(srcdir)/itbl-ops.h $(srcdir)/itbl-lex.h
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 
 itbl-ops.o: $(srcdir)/itbl-ops.c $(srcdir)/itbl-ops.h itbl-parse.h
 

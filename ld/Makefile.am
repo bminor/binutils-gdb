@@ -14,6 +14,7 @@ YFLAGS = -d
 LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 
 WARN_CFLAGS = @WARN_CFLAGS@
+NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
 
 # We put the scripts in the directory $(scriptdir)/ldscripts.
@@ -420,11 +421,11 @@ STAGESTUFF = *.o ldscripts/* e*.c
 # Disable -Werror, if it has been enabled, since old versions of bison/
 # yacc will produce working code which contain compile time warnings. 
 ldgram.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 ldlex.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 deffilep.o:
-	$(COMPILE) -c $< -Wno-error
+	$(COMPILE) -c $< $(NO_WERROR)
 
 # At the moment this is just a list of those emulation template files
 # that contain internationalised strings.

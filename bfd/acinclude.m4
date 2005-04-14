@@ -1,6 +1,7 @@
 sinclude(../config/accross.m4)
 sinclude(../config/acx.m4)
 sinclude(../bfd/bfd.m4)
+sinclude(../bfd/warning.m4)
 
 dnl See whether we need to use fopen-bin.h rather than fopen-same.h.
 AC_DEFUN([BFD_BINARY_FOPEN],

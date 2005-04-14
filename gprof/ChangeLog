@@ -1,3 +1,12 @@
+2005-04-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (NO_WERROR): Define.
+	* acinclude.m4: Include ../bfd/warning.m4.
+	* configure.in: Invoke AM_BINUTILS_WARNINGS.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2005-04-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/rw.po: New translation: Kinyarwanda

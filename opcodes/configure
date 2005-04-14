@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LN_S LIBTOOL WARN_CFLAGS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir CPP EGREP ALLOCA USE_NLS MSGFMT GMSGFMT XGETTEXT USE_INCLUDED_LIBINTL CATALOGS CATOBJEXT DATADIRNAME GMOFILES INSTOBJEXT INTLDEPS INTLLIBS INTLOBJS POFILES POSUB INCLUDE_LOCALE_H GT_NO GT_YES MKINSTALLDIRS l CC_FOR_BUILD EXEEXT_FOR_BUILD HDEFINES CGEN_MAINT_TRUE CGEN_MAINT_FALSE cgendir WIN32LDFLAGS WIN32LIBADD archdefs BFD_MACHINES LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE AR ac_ct_AR RANLIB ac_ct_RANLIB LN_S LIBTOOL WARN_CFLAGS NO_WERROR MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_LIBBFD_TRUE INSTALL_LIBBFD_FALSE host_noncanonical target_noncanonical bfdlibdir bfdincludedir CPP EGREP ALLOCA USE_NLS MSGFMT GMSGFMT XGETTEXT USE_INCLUDED_LIBINTL CATALOGS CATOBJEXT DATADIRNAME GMOFILES INSTOBJEXT INTLDEPS INTLLIBS INTLOBJS POFILES POSUB INCLUDE_LOCALE_H GT_NO GT_YES MKINSTALLDIRS l CC_FOR_BUILD EXEEXT_FOR_BUILD HDEFINES CGEN_MAINT_TRUE CGEN_MAINT_FALSE cgendir WIN32LDFLAGS WIN32LIBADD archdefs BFD_MACHINES LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -859,7 +859,7 @@ Optional Features:
   --enable-targets        alternative target configurations
   --enable-commonbfdlib   build shared BFD/opcodes/libiberty library
   --enable-werror    treat compile warnings as errors
-  --enable-build-warnings Enable build-time compiler warnings if gcc is used
+  --enable-build-warnings Enable build-time compiler warnings
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
   --enable-install-libbfd controls installation of libbfd and related headers
@@ -4242,7 +4242,8 @@ echo "$as_me: error: bad value ${enableval} for opcodes commonbfdlib option" >&2
    { (exit 1); exit 1; }; } ;;
 esac
 fi;
-build_warnings="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
+
+WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 
 # Check whether --enable-werror or --disable-werror was given.
 if test "${enable_werror+set}" = set; then
@@ -4256,11 +4257,15 @@ echo "$as_me: error: bad value ${enableval} for --enable-werror" >&2;}
    esac
 fi;
 
-# Enable -Werror by default, suppressing it only for --disable-werror
-# or --disable-build-warnings.
-if test "${ERROR_ON_WARNING}" != no
-then
-  build_warnings="$build_warnings -Werror"
+# Enable -Werror by default when using gcc
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+    ERROR_ON_WARNING=yes
+fi
+
+NO_WERROR=
+if test "${ERROR_ON_WARNING}" = yes ; then
+    WARN_CFLAGS="$WARN_CFLAGS -Werror"
+    NO_WERROR="-Wno-error"
 fi
 
 # Check whether --enable-build-warnings or --disable-build-warnings was given.
@@ -4268,20 +4273,21 @@ if test "${enable_build_warnings+set}" = set; then
   enableval="$enable_build_warnings"
   case "${enableval}" in
   yes)	;;
-  no)	build_warnings="-w";;
+  no)	WARN_CFLAGS="-w";;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
+        WARN_CFLAGS="${WARN_CFLAGS} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
-  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+        WARN_CFLAGS="${t} ${WARN_CFLAGS}";;
+  *)    WARN_CFLAGS=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
-if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
-  echo "Setting warning flags = $build_warnings" 6>&1
+fi;
+
+if test x"$silent" != x"yes" && test x"$WARN_CFLAGS" != x""; then
+  echo "Setting warning flags = $WARN_CFLAGS" 6>&1
 fi
-fi; WARN_CFLAGS=""
-if test "x${build_warnings}" != x -a "x$GCC" = xyes ; then
-    WARN_CFLAGS="${build_warnings}"
-fi
+
+
+
 
 
           ac_config_headers="$ac_config_headers config.h:config.in"
@@ -9529,6 +9535,7 @@ s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
 s,@LN_S@,$LN_S,;t t
 s,@LIBTOOL@,$LIBTOOL,;t t
 s,@WARN_CFLAGS@,$WARN_CFLAGS,;t t
+s,@NO_WERROR@,$NO_WERROR,;t t
 s,@MAINTAINER_MODE_TRUE@,$MAINTAINER_MODE_TRUE,;t t
 s,@MAINTAINER_MODE_FALSE@,$MAINTAINER_MODE_FALSE,;t t
 s,@MAINT@,$MAINT,;t t
