@@ -1335,6 +1335,35 @@ proc gdb_compile {source dest type options} {
     global gdb_wrapper_flags;
     global gdb_wrapper_initialized;
 
+     # Add platform-specific options if a shared library was specified using
+     # "shlib=librarypath" in OPTIONS.
+     set new_options ""
+     set shlib_found 0
+     foreach opt $options {
+        if [regexp {^shlib=(.*)} $opt dummy_var shlib_name] {
+            if [test_compiler_info "xlc-*"] {
+               # IBM xlc compiler doesn't accept shared library named other  
+               # than .so: use "-Wl," to bypass this
+               lappend source "-Wl,$shlib_name"
+            } else {
+               lappend source $shlib_name
+            }
+            if {$shlib_found == 0} {
+                set shlib_found 1
+                if { ([test_compiler_info "gcc-*"]
+                      &&  ([istarget "powerpc*-*-aix*"]
+                        || [istarget "rs6000*-*-aix*"] )) } {
+                    lappend options "additional_flags=-L${objdir}/${subdir}"
+                } elseif { [istarget "mips-sgi-irix*"] } {
+                    lappend options "additional_flags=-rpath ${objdir}/${subdir}"
+                }
+            }
+        } else {
+            lappend new_options $opt
+        }
+     }
+     set options $new_options
+
     if [target_info exists gdb_stub] {
 	set options2 { "additional_flags=-Dusestubs" }
 	lappend options "libs=[target_info gdb_stub]";
@@ -1402,6 +1431,63 @@ proc gdb_compile_pthreads {source dest type options} {
     if {!$built_binfile} {
         unsupported "Couldn't compile $source: ${why_msg}"
         return -1
+    }
+}
+
+# Build a shared library from SOURCES.  You must use get_compiler_info
+# first.
+
+proc gdb_compile_shlib {sources dest options} {
+    set obj_options $options
+
+    switch -glob [test_compiler_info] {
+        "xlc-*" {
+            lappend obj_options "additional_flags=-qpic"
+        }
+        "gcc-*" {
+            if { !([istarget "powerpc*-*-aix*"]
+                   || [istarget "rs6000*-*-aix*"]) } {
+                lappend obj_options "additional_flags=-fpic"
+            }
+        }
+        default {
+            switch -glob [istarget] {
+                "hppa*-hp-hpux*" {
+                    lappend obj_options "additional_flags=+z"
+                }
+                "mips-sgi-irix*" {
+                    # Disable SGI compiler's implicit -Dsgi
+                    lappend obj_options "additional_flags=-Usgi"
+                } 
+                default {
+                    # don't know what the compiler is...
+                }
+            }
+        }
+    }
+
+    set outdir [file dirname $dest]
+    set objects ""
+    foreach source $sources {
+       set sourcebase [file tail $source]
+       if {[gdb_compile $source "${outdir}/${sourcebase}.o" object $obj_options] != ""} {
+           return -1
+       }
+       lappend objects ${outdir}/${sourcebase}.o
+    }
+
+    if [istarget "hppa*-*-hpux*"] {
+       remote_exec build "ld -b ${objects} -o ${dest}"
+    } else {
+       set link_options $options
+       if [test_compiler_info "xlc-*"] {
+          lappend link_options "additional_flags=-qmkshrobj"
+       } else {
+          lappend link_options "additional_flags=-shared"
+       }
+       if {[gdb_compile "${objects}" "${dest}" executable $link_options] != ""} {
+           return -1
+       }
     }
 }
 

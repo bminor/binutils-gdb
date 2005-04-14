@@ -1,3 +1,9 @@
+2005-04-14  Paul Gilliam  <pgilliam@us.ibm.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* lib/gdb.exp (gdb_compile): Handle shlib=.
+	(gdb_compile_shlib): New function.
+
 2005-04-12  Paul Gilliam  <pgilliam@us.ibm.com>
 
         * lib/gdb.exp (test_compiler_info): Give argument a default value.
