@@ -1,3 +1,15 @@
+2005-04-14  Bob Wilson  <bob.wilson@acm.org>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-xtensa.h (struct xtensa_frag_type): Add lit_frchain field.
+	* config/tc-xtensa.c (xg_translate_sysreg_op,
+	xtensa_translate_old_userregs_ops,
+	xtensa_find_unaligned_branch_targets,
+	xtensa_find_unaligned_loops, xtensa_fix_close_loop_end_frags,
+	relax_frag_add_nop): Support 64-bit host.
+	(xtensa_mark_literal_pool_location, xtensa_move_literals): Use
+	tc_frag_data lit_frchain and lit_seg fields instead of fr_var.
+
 2005-04-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.tgt: Add support for OpenBSD/sparc ELF.
