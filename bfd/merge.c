@@ -288,24 +288,27 @@ sec_merge_emit (bfd *abfd, struct sec_merge_hash_entry *entry)
 {
   struct sec_merge_sec_info *secinfo = entry->secinfo;
   asection *sec = secinfo->sec;
-  char *pad = "";
+  char *pad = NULL;
   bfd_size_type off = 0;
   int alignment_power = sec->output_section->alignment_power;
 
   if (alignment_power)
-    pad = bfd_zmalloc ((bfd_size_type) 1 << alignment_power);
+    {
+      pad = bfd_zmalloc ((bfd_size_type) 1 << alignment_power);
+      if (pad == NULL)
+	return FALSE;
+    }
 
   for (; entry != NULL && entry->secinfo == secinfo; entry = entry->next)
     {
-      register const char *str;
-      register size_t len;
+      const char *str;
+      bfd_size_type len;
 
-      len = off & (entry->alignment - 1);
-      if (len)
+      len = -off & (entry->alignment - 1);
+      if (len != 0)
 	{
-	  len = entry->alignment - len;
 	  if (bfd_bwrite (pad, len, abfd) != len)
-	    break;
+	    goto err;
 	  off += len;
 	}
 
@@ -313,15 +316,25 @@ sec_merge_emit (bfd *abfd, struct sec_merge_hash_entry *entry)
       len = entry->len;
 
       if (bfd_bwrite (str, len, abfd) != len)
-	break;
+	goto err;
 
       off += len;
     }
 
-  if (alignment_power)
-    free (pad);
+  /* Trailing alignment needed?  */
+  off = sec->size - off;
+  if (off != 0
+      && bfd_bwrite (pad, off, abfd) != off)
+    goto err;
 
-  return entry == NULL || entry->secinfo != secinfo;
+  if (pad != NULL)
+    free (pad);
+  return TRUE;
+
+ err:
+  if (pad != NULL)
+    free (pad);
+  return FALSE;
 }
 
 /* Register a SEC_MERGE section as a candidate for merging.

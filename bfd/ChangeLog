@@ -1,5 +1,8 @@
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* merge.c (sec_merge_emit): Tidy.  Check for bfd_zmalloc errors.
+	Write trailing padding.
+
 	* merge.c (merge_strings): Round up section size for alignment.
 
 2005-04-14  David S. Miller  <davem@davemloft.net>
