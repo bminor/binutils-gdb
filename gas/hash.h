@@ -26,7 +26,7 @@ struct hash_control;
 
 /* Set the size of the hash table used.  */
 
-void set_gas_hash_table_size (unsigned int);
+void set_gas_hash_table_size (unsigned long);
 
 /* Create a hash table.  This return a control block.  */
 

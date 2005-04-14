@@ -1,3 +1,11 @@
+2005-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (main): Move parse_args before symbol_begin and frag_init
+	so that the hash table size can be set before it is used.
+	* hash.c: Use an unsigned long type for the size of the hash
+	tables.
+	* hash.h (set_gas_hash_table_size): Update the prototype.	
+
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (NO_WERROR): Define.  Use instead of -Wno-error.

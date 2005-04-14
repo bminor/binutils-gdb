@@ -885,7 +885,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 
 	case OPTION_HASH_TABLE_SIZE:
 	  {
-	    bfd_size_type new_size;
+	    unsigned long new_size;
 
             new_size = strtoul (optarg, NULL, 0);
             if (new_size)
@@ -1114,10 +1114,12 @@ main (int argc, char ** argv)
 #endif
 
   PROGRESS (1);
+  /* Call parse_args before any of the init/begin functions
+     so that switches like --hash-size can be honored.  */
+  parse_args (&argc, &argv);
   symbol_begin ();
   frag_init ();
   subsegs_begin ();
-  parse_args (&argc, &argv);
   read_begin ();
   input_scrub_begin ();
   expr_begin ();

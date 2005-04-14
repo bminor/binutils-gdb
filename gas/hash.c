@@ -73,20 +73,20 @@ struct hash_control {
    switch --reduce-memory-overheads, or set to other values by using
    the --hash-size=<NUMBER> switch.  */
 
-static unsigned int gas_hash_table_size = 65537;
+static unsigned long gas_hash_table_size = 65537;
 
 void
-set_gas_hash_table_size (unsigned int size)
+set_gas_hash_table_size (unsigned long size)
 {
   gas_hash_table_size = size;
 }
 
 /* FIXME: This function should be amalgmated with bfd/hash.c:bfd_hash_set_default_size().  */
-static unsigned int
+static unsigned long
 get_gas_hash_table_size (void)
 {
   /* Extend this prime list if you want more granularity of hash table size.  */
-  static const unsigned int hash_size_primes[] =
+  static const unsigned long hash_size_primes[] =
     {
       1021, 4051, 8599, 16699, 65537
     };
@@ -107,9 +107,9 @@ get_gas_hash_table_size (void)
 struct hash_control *
 hash_new (void)
 {
-  unsigned int size;
+  unsigned long size;
+  unsigned long alloc;
   struct hash_control *ret;
-  unsigned int alloc;
 
   size = get_gas_hash_table_size ();
 
