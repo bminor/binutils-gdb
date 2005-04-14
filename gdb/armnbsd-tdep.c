@@ -78,7 +78,8 @@ arm_netbsd_aout_init_abi (struct gdbarch_info info,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   arm_netbsd_init_abi_common (info, gdbarch);
-  tdep->fp_model = ARM_FLOAT_SOFT_FPA;
+  if (tdep->fp_model == ARM_FLOAT_AUTO)
+    tdep->fp_model = ARM_FLOAT_SOFT_FPA;
 }
 
 static void
@@ -92,7 +93,8 @@ arm_netbsd_elf_init_abi (struct gdbarch_info info,
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 
-  tdep->fp_model = ARM_FLOAT_SOFT_VFP;
+  if (tdep->fp_model == ARM_FLOAT_AUTO)
+    tdep->fp_model = ARM_FLOAT_SOFT_VFP;
 }
 
 static enum gdb_osabi

@@ -480,7 +480,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
   tdep->thumb_breakpoint_size = sizeof (arm_linux_thumb_le_breakpoint);
 
-  tdep->fp_model = ARM_FLOAT_FPA;
+  if (tdep->fp_model == ARM_FLOAT_AUTO)
+    tdep->fp_model = ARM_FLOAT_FPA;
 
   tdep->jb_pc = ARM_LINUX_JB_PC;
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;

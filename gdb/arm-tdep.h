@@ -113,12 +113,22 @@ enum arm_float_model
   ARM_FLOAT_LAST	/* Keep at end.  */
 };
 
-/* A method to the setting based on user's choice and ABI setting.  */
-enum arm_float_model arm_get_fp_model (struct gdbarch *);
+/* ABI used by the inferior.  */
+enum arm_abi_kind
+{
+  ARM_ABI_AUTO,
+  ARM_ABI_APCS,
+  ARM_ABI_AAPCS,
+  ARM_ABI_LAST
+};
 
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
+  /* The ABI for this architecture.  It should never be set to
+     ARM_ABI_AUTO.  */
+  enum arm_abi_kind arm_abi;
+
   enum arm_float_model fp_model; /* Floating point calling conventions.  */
 
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 

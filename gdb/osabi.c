@@ -71,9 +71,6 @@ static const char * const gdb_osabi_names[] =
   "HP/UX ELF",
   "HP/UX SOM",
 
-  "ARM EABI v1",
-  "ARM EABI v2",
-  "ARM APCS",
   "QNX Neutrino",
 
   "Cygwin",

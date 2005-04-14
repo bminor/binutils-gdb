@@ -1,3 +1,34 @@
+2005-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (fp_model_strings): Add terminating NULL.
+	(arm_abi_strings, arm_abi_global, arm_abi_string): New
+	variables.
+	(arm_extract_return_value, arm_store_return_value): Don't use
+	arm_get_fp_model.
+	(arm_get_fp_model, arm_set_fp): Delete.
+	(arm_update_current_architecture): New function.
+	(set_fp_model_sfunc): Call arm_update_current_architecture.
+	(show_fp_model): Update output messages.
+	(arm_set_abi, arm_show_abi): New functions.
+	(arm_elf_osabi_sniffer): Only handle ELFOSABI_ARM.
+	(arm_gdbarch_init): Infer the object's ABI separately from its
+	OSABI.  Search for a matching architecture.  Honor the global
+	ABI and FPU settings.  Set floating point format based on the
+	architecture.
+	(arm_init_abi_eabi_v1, arm_init_abi_eabi_v2, arm_init_abi_apcs):
+	Delete.
+	(_initialize_arm_tdep): Don't call gdbarch_register_osabi.
+	Create "arm set abi" command.
+	* arm-tdep.h (arm_get_fp_model): Delete prototype.
+	(enum arm_abi_kind): New type.
+	(struct gdbarch_tdep): Add arm_abi field.
+	* arm-linux-tdep.c (arm_linux_init_abi): Only override
+	tdep->fp_model if it is ARM_FLOAT_AUTO.
+	* armnbsd-tdep.c (arm_netbsd_aout_init_abi): Likewise.
+	(arm_netbsd_elf_init_abi): Likewise.
+	* defs.h (enum gdb_osabi): Delete ARM-specific OSABIs.
+	* osabi.c (gdb_osabi_name): Likewise.
+
 2005-04-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/djgpp/fnchange.lst: Remove entries for gdb.gdbserver.

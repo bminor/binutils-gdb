@@ -107,12 +107,26 @@ static const char *fp_model_strings[] =
   "softfpa",
   "fpa",
   "softvfp",
-  "vfp"
+  "vfp",
+  NULL
 };
 
 /* A variable that can be configured by the user.  */
 static enum arm_float_model arm_fp_model = ARM_FLOAT_AUTO;
 static const char *current_fp_model = "auto";
+
+/* The ABI to use.  Keep this in sync with arm_abi_kind.  */
+static const char *arm_abi_strings[] =
+{
+  "auto",
+  "APCS",
+  "AAPCS",
+  NULL
+};
+
+/* A variable that can be configured by the user.  */
+static enum arm_abi_kind arm_abi_global = ARM_ABI_AUTO;
+static const char *arm_abi_string = "auto";
 
 /* Number of different reg name sets (options).  */
 static int num_disassembly_options;
@@ -2007,7 +2021,7 @@ arm_extract_return_value (struct type *type,
 
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
-      switch (arm_get_fp_model (current_gdbarch))
+      switch (gdbarch_tdep (current_gdbarch)->fp_model)
 	{
 	case ARM_FLOAT_FPA:
 	  {
@@ -2204,7 +2218,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
     {
       char buf[MAX_REGISTER_SIZE];
 
-      switch (arm_get_fp_model (current_gdbarch))
+      switch (gdbarch_tdep (current_gdbarch)->fp_model)
 	{
 	case ARM_FLOAT_FPA:
 
@@ -2361,34 +2375,20 @@ show_arm_command (char *args, int from_tty)
   cmd_show_list (showarmcmdlist, from_tty, "");
 }
 
-enum arm_float_model
-arm_get_fp_model (struct gdbarch *gdbarch)
-{
-  if (arm_fp_model == ARM_FLOAT_AUTO)
-    return gdbarch_tdep (gdbarch)->fp_model;
-
-  return arm_fp_model;
-}
-
 static void
-arm_set_fp (struct gdbarch *gdbarch)
+arm_update_current_architecture (void)
 {
-  enum arm_float_model fp_model = arm_get_fp_model (gdbarch);
+  struct gdbarch_info info;
 
-  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE 
-      && (fp_model == ARM_FLOAT_SOFT_FPA || fp_model == ARM_FLOAT_FPA))
-    {
-      set_gdbarch_double_format	(gdbarch,
-				 &floatformat_ieee_double_littlebyte_bigword);
-      set_gdbarch_long_double_format
-	(gdbarch, &floatformat_ieee_double_littlebyte_bigword);
-    }
-  else
-    {
-      set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_little);
-      set_gdbarch_long_double_format (gdbarch,
-				      &floatformat_ieee_double_little);
-    }
+  /* If the current architecture is not ARM, we have nothing to do.  */
+  if (gdbarch_bfd_arch_info (current_gdbarch)->arch != bfd_arch_arm)
+    return;
+
+  /* Update the architecture.  */
+  gdbarch_info_init (&info);
+
+  if (!gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "could not update architecture");
 }
 
 static void
@@ -2408,8 +2408,7 @@ set_fp_model_sfunc (char *args, int from_tty,
     internal_error (__FILE__, __LINE__, _("Invalid fp model accepted: %s."),
 		    current_fp_model);
 
-  if (gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_arm)
-    arm_set_fp (current_gdbarch);
+  arm_update_current_architecture ();
 }
 
 static void
@@ -2418,12 +2417,51 @@ show_fp_model (struct ui_file *file, int from_tty,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  deprecated_show_value_hack (file, from_tty, c, value);
-  if (arm_fp_model == ARM_FLOAT_AUTO 
+  if (arm_fp_model == ARM_FLOAT_AUTO
       && gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_arm)
-    /* i18n: "the default [floating point model] for the current ABI..." */
-    printf_filtered (_("  - the default for the current ABI is \"%s\".\n"),
-		     fp_model_strings[tdep->fp_model]);
+    fprintf_filtered (file, _("\
+The current ARM floating point model is \"auto\" (currently \"%s\").\n"),
+		      fp_model_strings[tdep->fp_model]);
+  else
+    fprintf_filtered (file, _("\
+The current ARM floating point model is \"%s\".\n"),
+		      fp_model_strings[arm_fp_model]);
+}
+
+static void
+arm_set_abi (char *args, int from_tty,
+	     struct cmd_list_element *c)
+{
+  enum arm_abi_kind arm_abi;
+
+  for (arm_abi = ARM_ABI_AUTO; arm_abi != ARM_ABI_LAST; arm_abi++)
+    if (strcmp (arm_abi_string, arm_abi_strings[arm_abi]) == 0)
+      {
+	arm_abi_global = arm_abi;
+	break;
+      }
+
+  if (arm_abi == ARM_ABI_LAST)
+    internal_error (__FILE__, __LINE__, _("Invalid ABI accepted: %s."),
+		    arm_abi_string);
+
+  arm_update_current_architecture ();
+}
+
+static void
+arm_show_abi (struct ui_file *file, int from_tty,
+	     struct cmd_list_element *c, const char *value)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (arm_abi_global == ARM_ABI_AUTO
+      && gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_arm)
+    fprintf_filtered (file, _("\
+The current ARM ABI is \"auto\" (currently \"%s\").\n"),
+		      arm_abi_strings[tdep->arm_abi]);
+  else
+    fprintf_filtered (file, _("The current ARM ABI is \"%s\".\n"),
+		      arm_abi_string);
 }
 
 /* If the user changes the register disassembly style used for info
@@ -2540,71 +2578,14 @@ arm_elf_osabi_sniffer (bfd *abfd)
 
   elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
 
-  switch (elfosabi)
-    {
-    case ELFOSABI_NONE:  
-      /* When elfosabi is ELFOSABI_NONE (0), then the ELF structures in the
-	 file are conforming to the base specification for that machine 
-	 (there are no OS-specific extensions).  In order to determine the 
-	 real OS in use we must look for OS notes that have been added.  */
-      bfd_map_over_sections (abfd,
-			     generic_elf_osabi_sniff_abi_tag_sections,  
-			     &osabi);
-      if (osabi == GDB_OSABI_UNKNOWN)
-	{
-	  /* Existing ARM tools don't set this field, so look at the EI_FLAGS
-	     field for more information.  */
-	  eflags = EF_ARM_EABI_VERSION(elf_elfheader(abfd)->e_flags);
-	  switch (eflags)
-	    {
-	    case EF_ARM_EABI_VER1:
-	      osabi = GDB_OSABI_ARM_EABI_V1;
-	      break;
+  if (elfosabi == ELFOSABI_ARM)
+    /* GNU tools use this value.  Check note sections in this case,
+       as well.  */
+    bfd_map_over_sections (abfd,
+			   generic_elf_osabi_sniff_abi_tag_sections, 
+			   &osabi);
 
-	    case EF_ARM_EABI_VER2:
-	      osabi = GDB_OSABI_ARM_EABI_V2;
-	      break;
-
-	    case EF_ARM_EABI_UNKNOWN:
-	      /* Assume GNU tools.  */
-	      osabi = GDB_OSABI_ARM_APCS;
-	      break;
-
-	    default:
-	      internal_error (__FILE__, __LINE__,
-			      _("\
-arm_elf_osabi_sniffer: Unknown ARM EABI version 0x%x"),
-			      eflags);
-	    }
-	}
-      break;
-
-    case ELFOSABI_ARM:
-      /* GNU tools use this value.  Check note sections in this case,
-	 as well.  */
-      bfd_map_over_sections (abfd,
-			     generic_elf_osabi_sniff_abi_tag_sections, 
-			     &osabi);
-      if (osabi == GDB_OSABI_UNKNOWN)
-	{
-	  /* Assume APCS ABI.  */
-	  osabi = GDB_OSABI_ARM_APCS;
-	}
-      break;
-
-    case ELFOSABI_FREEBSD:
-      osabi = GDB_OSABI_FREEBSD_ELF;
-      break;
-
-    case ELFOSABI_NETBSD:
-      osabi = GDB_OSABI_NETBSD_ELF;
-      break;
-
-    case ELFOSABI_LINUX:
-      osabi = GDB_OSABI_LINUX;
-      break;
-    }
-
+  /* Anything else will be handled by the generic ELF sniffer.  */
   return osabi;
 }
 
@@ -2621,42 +2602,120 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
+  struct gdbarch_list *best_arch;
+  enum arm_abi_kind arm_abi = arm_abi_global;
+  enum arm_float_model fp_model = arm_fp_model;
 
-  /* Try to deterimine the ABI of the object we are loading.  */
+  /* If we have an object to base this architecture on, try to determine
+     its ABI.  */
 
-  if (info.abfd != NULL && info.osabi == GDB_OSABI_UNKNOWN)
+  if (arm_abi == ARM_ABI_AUTO && info.abfd != NULL)
     {
+      int ei_osabi;
+
       switch (bfd_get_flavour (info.abfd))
 	{
 	case bfd_target_aout_flavour:
 	  /* Assume it's an old APCS-style ABI.  */
-	  info.osabi = GDB_OSABI_ARM_APCS;
+	  arm_abi = ARM_ABI_APCS;
 	  break;
 
 	case bfd_target_coff_flavour:
 	  /* Assume it's an old APCS-style ABI.  */
 	  /* XXX WinCE?  */
-	  info.osabi = GDB_OSABI_ARM_APCS;
+	  arm_abi = ARM_ABI_APCS;
+	  break;
+
+	case bfd_target_elf_flavour:
+	  ei_osabi = elf_elfheader (info.abfd)->e_ident[EI_OSABI];
+	  if (ei_osabi == ELFOSABI_ARM)
+	    {
+	      /* GNU tools used to use this value, but do not for EABI
+		 objects.  There's nowhere to tag an EABI version anyway,
+		 so assume APCS.  */
+	      arm_abi = ARM_ABI_APCS;
+	    }
+	  else if (ei_osabi == ELFOSABI_NONE)
+	    {
+	      int e_flags, eabi_ver;
+
+	      e_flags = elf_elfheader (info.abfd)->e_flags;
+	      eabi_ver = EF_ARM_EABI_VERSION (e_flags);
+
+	      switch (eabi_ver)
+		{
+		case EF_ARM_EABI_UNKNOWN:
+		  /* Assume GNU tools.  */
+		  arm_abi = ARM_ABI_APCS;
+		  break;
+
+		case EF_ARM_EABI_VER4:
+		  arm_abi = ARM_ABI_AAPCS;
+		  break;
+
+		default:
+		  warning (_("unknown ARM EABI version 0x%x"), eabi_ver);
+		  arm_abi = ARM_ABI_APCS;
+		  break;
+		}
+	    }
 	  break;
 
 	default:
-	  /* Leave it as "unknown".  */
+	  /* Leave it as "auto".  */
 	  break;
 	}
     }
 
-  /* If there is already a candidate, use it.  */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
+  /* Now that we have inferred any architecture settings that we
+     can, try to inherit from the last ARM ABI.  */
   if (arches != NULL)
-    return arches->gdbarch;
+    {
+      if (arm_abi == ARM_ABI_AUTO)
+	arm_abi = gdbarch_tdep (arches->gdbarch)->arm_abi;
 
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+      if (fp_model == ARM_FLOAT_AUTO)
+	fp_model = gdbarch_tdep (arches->gdbarch)->fp_model;
+    }
+  else
+    {
+      /* There was no prior ARM architecture; fill in default values.  */
+
+      if (arm_abi == ARM_ABI_AUTO)
+	arm_abi = ARM_ABI_APCS;
+
+      /* We used to default to FPA for generic ARM, but almost nobody
+	 uses that now, and we now provide a way for the user to force
+	 the model.  So default to the most useful variant.  */
+      if (fp_model == ARM_FLOAT_AUTO)
+	fp_model = ARM_FLOAT_SOFT_FPA;
+    }
+
+  /* If there is already a candidate, use it.  */
+  for (best_arch = gdbarch_list_lookup_by_info (arches, &info);
+       best_arch != NULL;
+       best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
+    {
+      if (arm_abi != gdbarch_tdep (best_arch->gdbarch)->arm_abi)
+	continue;
+
+      if (fp_model != gdbarch_tdep (best_arch->gdbarch)->fp_model)
+	continue;
+
+      /* Found a match.  */
+      break;
+    }
+
+  if (best_arch != NULL)
+    return best_arch->gdbarch;
+
+  tdep = xcalloc (1, sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* We used to default to FPA for generic ARM, but almost nobody uses that
-     now, and we now provide a way for the user to force the model.  So 
-     default to the most useful variant.  */
-  tdep->fp_model = ARM_FLOAT_SOFT_FPA;
+  /* Record additional information about the architecture we are defining.
+     These are gdbarch discriminators, like the OSABI.  */
+  tdep->arm_abi = arm_abi;
+  tdep->fp_model = fp_model;
 
   /* Breakpoints.  */
   switch (info.byte_order)
@@ -2772,12 +2831,23 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
       set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_big);
       set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
-      
       break;
 
     case BFD_ENDIAN_LITTLE:
       set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
-      arm_set_fp (gdbarch);
+      if (fp_model == ARM_FLOAT_SOFT_FPA || fp_model == ARM_FLOAT_FPA)
+	{
+	  set_gdbarch_double_format
+	    (gdbarch, &floatformat_ieee_double_littlebyte_bigword);
+	  set_gdbarch_long_double_format
+	    (gdbarch, &floatformat_ieee_double_littlebyte_bigword);
+	}
+      else
+	{
+	  set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_little);
+	  set_gdbarch_long_double_format (gdbarch,
+					  &floatformat_ieee_double_little);
+	}
       break;
 
     default:
@@ -2798,27 +2868,6 @@ arm_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 
   fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx"),
 		      (unsigned long) tdep->lowest_pc);
-}
-
-static void
-arm_init_abi_eabi_v1 (struct gdbarch_info info,
-		      struct gdbarch *gdbarch)
-{
-  /* Place-holder.  */
-}
-
-static void
-arm_init_abi_eabi_v2 (struct gdbarch_info info,
-		      struct gdbarch *gdbarch)
-{
-  /* Place-holder.  */
-}
-
-static void
-arm_init_abi_apcs (struct gdbarch_info info,
-		   struct gdbarch *gdbarch)
-{
-  /* Place-holder.  */
 }
 
 extern initialize_file_ftype _initialize_arm_tdep; /* -Wmissing-prototypes */
@@ -2843,14 +2892,6 @@ _initialize_arm_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_arm,
 				  bfd_target_elf_flavour,
 				  arm_elf_osabi_sniffer);
-
-  /* Register some ABI variants for embedded systems.  */
-  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V1,
-                          arm_init_abi_eabi_v1);
-  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V2,
-                          arm_init_abi_eabi_v2);
-  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_APCS,
-                          arm_init_abi_apcs);
 
   /* Get the number of possible sets of register names defined in opcodes.  */
   num_disassembly_options = get_arm_regname_num_options ();
@@ -2927,6 +2968,13 @@ fpa - FPA co-processor (GCC compiled).\n\
 softvfp - Software FP with pure-endian doubles.\n\
 vfp - VFP co-processor."),
 			set_fp_model_sfunc, show_fp_model,
+			&setarmcmdlist, &showarmcmdlist);
+
+  /* Add a command to allow the user to force the ABI.  */
+  add_setshow_enum_cmd ("abi", class_support, arm_abi_strings, &arm_abi_string,
+			_("Set the ABI."),
+			_("Show the ABI."),
+			NULL, arm_set_abi, arm_show_abi,
 			&setarmcmdlist, &showarmcmdlist);
 
   /* Debugging flag.  */
