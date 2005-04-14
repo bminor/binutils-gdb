@@ -1,3 +1,7 @@
+2005-04-12  Jonathan Larmour  <jifl@eCosCentric.com>
+
+	* gencode.c (tab): Avoid inserting code before variables all declared.
+
 2005-03-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure: Regenerate.
