@@ -1,3 +1,14 @@
+2005-04-15  Corinna VInschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Change sh64-elf state to non-broken.
+	* Makefile.in: Fix dependencies for sh64-tdep.o.
+	* configure.tgt: Add sh64-*-elf case.
+	* sh-tdep.c (sh_gdbarch_init): Reactivate bfd_mach_sh5 case.
+	* sh64-tdep.c: Rework to replace all deprecated mechanisms with
+	modern methods.
+	* config/sh/embed.mt (TDEPFILES): Add sh64-tdep.o.
+	* config/sh/sh64.mt: Resurrect.
+
 2005-04-15  Kei Sakamoto <sakamoto.kei@renesas.com>
 
 	* regformats/reg-m32r.dat: New file.
