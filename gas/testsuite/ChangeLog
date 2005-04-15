@@ -1,3 +1,8 @@
+2005-04-15  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/elf/struct.[sd]: New.
+	* gas/elf/elf.exp: Run new test.
+
 2005-04-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/all/assign.s: New.

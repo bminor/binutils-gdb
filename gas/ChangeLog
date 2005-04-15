@@ -1,3 +1,8 @@
+2005-04-15  Jan Beulich  <jbeulich@novell.com>
+
+	* config/obj-elf.c (obj_elf_struct): New.
+	(elf_pseudo_table). Use it for .offset and .struct.
+
 2005-04-14  Bob Wilson  <bob.wilson@acm.org>
 	    Sterling Augustine  <sterling@tensilica.com>
 
