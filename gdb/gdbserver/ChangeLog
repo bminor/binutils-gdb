@@ -1,3 +1,9 @@
+2005-04-15    Ke Sakamoto  <sakamoto.kei@renesas.com>
+
+	* Makefile.in: Add linux-m32r-low.o, reg-m32r.c and reg-m32r.o.
+	* configure.srv: Add m32r*-*-linux*.
+	* linux-m32r-low.c: New file.
+
 2005-03-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (stamp-h): Set CONFIG_HEADERS explicitly.

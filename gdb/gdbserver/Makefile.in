@@ -121,6 +121,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/linux-arm-low.c $(srcdir)/linux-i386-low.c \
 	$(srcdir)/i387-fp.c \
 	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
+	$(srcdir)/linux-m32r-low.c \
 	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
 	$(srcdir)/linux-ppc-low.c $(srcdir)/linux-s390-low.c \
 	$(srcdir)/linux-sh-low.c $(srcdir)/linux-x86-64-low.c
@@ -198,7 +199,7 @@ tags: TAGS
 clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f gdbserver gdbreplay core make.log
-	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m68k.c reg-mips.c
+	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c reg-mips.c
 	rm -f reg-ppc.c reg-sh.c reg-x86-64.c reg-i386-linux.c
 
 maintainer-clean realclean distclean: clean
@@ -263,6 +264,7 @@ linux-low.o: linux-low.c $(linux_low_h) $(server_h)
 linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h)
 linux-i386-low.o: linux-i386-low.c $(linux_low_h) $(server_h)
 linux-ia64-low.o: linux-ia64-low.c $(linux_low_h) $(server_h)
+linux-m32r-low.o: linux-m32r-low.c $(linux_low_h) $(server_h)
 linux-mips-low.o: linux-mips-low.c $(linux_low_h) $(server_h)
 linux-ppc-low.o: linux-ppc-low.c $(linux_low_h) $(server_h)
 linux-s390-low.o: linux-s390-low.c $(linux_low_h) $(server_h)
@@ -281,6 +283,9 @@ reg-i386-linux.c : $(srcdir)/../regformats/reg-i386-linux.dat $(regdat_sh)
 reg-ia64.o : reg-ia64.c $(regdef_h)
 reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
+reg-m32r.o : reg-m32r.c $(regdef_h)
+reg-m32r.c : $(srcdir)/../regformats/reg-m32r.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-m32r.dat reg-m32r.c
 reg-m68k.o : reg-m68k.c $(regdef_h)
 reg-m68k.c : $(srcdir)/../regformats/reg-m68k.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-m68k.dat reg-m68k.c
