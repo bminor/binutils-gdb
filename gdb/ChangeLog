@@ -1,5 +1,20 @@
 2005-04-15  Kevin Buettner  <kevinb@redhat.com>
 
+	* remote.c (remote_protocol_qGetTLSAddr): New static global variable.
+	(set_remote_protocol_qGetTLSAddr_packet_cmd)
+	(show_remote_protocol_qGetTLSAddr_packet_cmd)
+	(remote_get_thread_local_address): New functions.
+	(init_all_packet_configs): Initialize remote_protocol_qGetTLSAddr
+	variable.
+	(init_remote_ops): Initialize ``to_get_thread_local_address'' in
+	target vector.
+	(show_remote_cmd): Call show_remote_protocol_qGetTLS_Addr_packet_cmd().
+	(_initialize_remote):  Register the following commands:
+	"set remote get-thread-local-storage-address-packet" and
+	"show remote get-thread-local-address-packet".
+
+2005-04-15  Kevin Buettner  <kevinb@redhat.com>
+
 	* remote.c (add_packet_config_cmd): Delete unused variables.
 
 2005-04-15  Kevin Buettner  <kevinb@redhat.com>

@@ -967,6 +967,24 @@ show_remote_protocol_qPart_auxv_packet_cmd (struct ui_file *file, int from_tty,
   show_packet_config_cmd (&remote_protocol_qPart_auxv);
 }
 
+/* Should we try the 'qGetTLSAddr' (Get Thread Local Storage Address) request? */
+static struct packet_config remote_protocol_qGetTLSAddr;
+
+static void
+set_remote_protocol_qGetTLSAddr_packet_cmd (char *args, int from_tty,
+				  struct cmd_list_element *c)
+{
+  update_packet_config (&remote_protocol_qGetTLSAddr);
+}
+
+static void
+show_remote_protocol_qGetTLSAddr_packet_cmd (struct ui_file *file, int from_tty,
+					     struct cmd_list_element *c,
+					     const char *value)
+{
+  show_packet_config_cmd (&remote_protocol_qGetTLSAddr);
+}
+
 static struct packet_config remote_protocol_p;
 
 static void
@@ -2095,6 +2113,7 @@ init_all_packet_configs (void)
      downloading.  */
   update_packet_config (&remote_protocol_binary_download);
   update_packet_config (&remote_protocol_qPart_auxv);
+  update_packet_config (&remote_protocol_qGetTLSAddr);
 }
 
 /* Symbol look-up.  */
@@ -5314,6 +5333,56 @@ remote_pid_to_str (ptid_t ptid)
   return buf;
 }
 
+/* Get the address of the thread local variable in OBJFILE which is
+   stored at OFFSET within the thread local storage for thread PTID.  */
+
+static CORE_ADDR
+remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
+{
+  if (remote_protocol_qGetTLSAddr.support != PACKET_DISABLE)
+    {
+      struct remote_state *rs = get_remote_state ();
+      char *buf = alloca (rs->remote_packet_size);
+      char *p = buf;
+
+      strcpy (p, "qGetTLSAddr:");
+      p += strlen (p);
+      p += hexnumstr (p, PIDGET (ptid));
+      *p++ = ',';
+      p += hexnumstr (p, offset);
+      *p++ = ',';
+      p += hexnumstr (p, lm);
+      *p++ = '\0';
+
+      putpkt (buf);
+      getpkt (buf, rs->remote_packet_size, 0);
+      if (packet_ok (buf, &remote_protocol_qGetTLSAddr) == PACKET_OK)
+	{
+	  ULONGEST result;
+
+	  unpack_varlen_hex (buf, &result);
+	  return result;
+	}
+      else
+	{
+	  struct exception e
+	    = { RETURN_ERROR, TLS_GENERIC_ERROR,
+		"Remote target failed to process qGetTLSAddr request" };
+	  throw_exception (e);
+
+	}
+    }
+  else
+    {
+      struct exception e
+	= { RETURN_ERROR, TLS_GENERIC_ERROR,
+	    "TLS not supported or disabled on this target" };
+      throw_exception (e);
+    }
+  /* Not reached.  */
+  return 0;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -5353,6 +5422,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_stop = remote_stop;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
+  remote_ops.to_get_thread_local_address = remote_get_thread_local_address;
   remote_ops.to_stratum = process_stratum;
   remote_ops.to_has_all_memory = 1;
   remote_ops.to_has_memory = 1;
@@ -5528,6 +5598,7 @@ show_remote_cmd (char *args, int from_tty)
   show_remote_protocol_vcont_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
   show_remote_protocol_binary_download_cmd (gdb_stdout, from_tty, NULL, NULL);
   show_remote_protocol_qPart_auxv_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
+  show_remote_protocol_qGetTLSAddr_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
 }
 
 static void
@@ -5755,6 +5826,13 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			 "qPart_auxv", "read-aux-vector",
 			 set_remote_protocol_qPart_auxv_packet_cmd,
 			 show_remote_protocol_qPart_auxv_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_qGetTLSAddr,
+			 "qGetTLSAddr", "get-thread-local-storage-address",
+			 set_remote_protocol_qGetTLSAddr_packet_cmd,
+			 show_remote_protocol_qGetTLSAddr_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
