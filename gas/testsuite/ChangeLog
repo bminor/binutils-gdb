@@ -1,3 +1,9 @@
+2005-04-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/all/assign.s: New.
+	* gas/all/assign.d: New.
+	* gas/all/gas.exp: Run it.
+
 2005-04-13  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/ldstla-32.s: Exclude offsets that are now meant to fail
