@@ -1,3 +1,7 @@
+2005-04-15  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (normalize_constant_expr): Fix formatting.
+
 2005-04-15  Jan Beulich  <jbeulich@novell.com>
 
 	* config/obj-elf.c (obj_elf_struct): New.

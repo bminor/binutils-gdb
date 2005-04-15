@@ -3258,11 +3258,11 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
   append_insn (&insn, ep, r);
 }
 
-static void
 /*
  * Sign-extend 32-bit mode constants that have bit 31 set and all
  * higher bits unset.
  */
+static void
 normalize_constant_expr (expressionS *ex)
 {
   if ((ex->X_op == O_constant && HAVE_32BIT_GPRS)
