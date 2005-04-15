@@ -2932,8 +2932,11 @@ elf_smash_syms (struct elf_link_hash_entry *h, void *data)
   if (h->ref_regular)
     abort ();
 
-  /* Set sym back to newly created state, but keep undefs list pointer.  */
+  /* Set sym back to newly created state, but keep undef.next if it is
+     being used as a list pointer.  */
   bh = h->root.u.undef.next;
+  if (bh == &h->root)
+    bh = NULL;
   if (bh != NULL || inf->htab->root.undefs_tail == &h->root)
     inf->twiddled = TRUE;
   (*inf->htab->root.table.newfunc) (&h->root.root,
