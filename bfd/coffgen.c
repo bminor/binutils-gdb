@@ -1895,28 +1895,14 @@ coff_print_symbol (bfd *abfd,
 	  else
 	    val = combined->u.syment.n_value - (unsigned long) root;
 
-#ifndef XCOFF64
-	  fprintf (file,
-		   "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x%08lx %s",
+	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d)",
 		   combined->u.syment.n_scnum,
 		   combined->u.syment.n_flags,
 		   combined->u.syment.n_type,
 		   combined->u.syment.n_sclass,
-		   combined->u.syment.n_numaux,
-		   (unsigned long) val,
-		   symbol->name);
-#else
-	  /* Print out the wide, 64 bit, symbol value.  */
-	  fprintf (file,
-		   "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x%016llx %s",
-		   combined->u.syment.n_scnum,
-		   combined->u.syment.n_flags,
-		   combined->u.syment.n_type,
-		   combined->u.syment.n_sclass,
-		   combined->u.syment.n_numaux,
-		   val,
-		   symbol->name);
-#endif
+		   combined->u.syment.n_numaux);
+	  fprintf_vma (file, val);
+	  fprintf (file, " %s", symbol->name);
 
 	  for (aux = 0; aux < combined->u.syment.n_numaux; aux++)
 	    {
@@ -1995,10 +1981,8 @@ coff_print_symbol (bfd *abfd,
 	      l++;
 	      while (l->line_number)
 		{
-		  fprintf (file, "\n%4d : 0x%lx",
-			   l->line_number,
-			   ((unsigned long)
-			    (l->u.offset + symbol->section->vma)));
+		  fprintf (file, "\n%4d : ", l->line_number);
+		  fprintf_vma (file, l->u.offset + symbol->section->vma);
 		  l++;
 		}
 	    }

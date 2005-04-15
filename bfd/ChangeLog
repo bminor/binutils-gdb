@@ -1,3 +1,8 @@
+2005-04-15  Nick Clifton  <nickc@redhat.com>
+
+	* coffgen.c (coff_print_symbol): Use fprintf_vma to print vma
+	values.
+
 2005-04-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/815
