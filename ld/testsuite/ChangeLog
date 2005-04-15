@@ -1,3 +1,7 @@
+2005-04-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-d10v/default_layout.d: Update for unused section removal.
+
 2005-04-14  David S. Miller  <davem@davemloft.net>
 
 	* ld-selective/sel-dump.exp: Do not exclude sparc64-*.
