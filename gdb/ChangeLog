@@ -1,3 +1,7 @@
+2005-04-15  Kei Sakamoto <sakamoto.kei@renesas.com>
+
+	* regformats/reg-m32r.dat: New file.
+
 2005-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (fp_model_strings): Add terminating NULL.
