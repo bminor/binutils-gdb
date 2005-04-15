@@ -1,3 +1,8 @@
+2005-04-15  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Hurd Native): New subsection, documents
+	Hurd-specific commands.
+
 2005-04-09  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Print Settings): Document "set/show print
