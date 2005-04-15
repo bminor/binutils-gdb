@@ -1,3 +1,13 @@
+2005-04-15  Julian Brown  <julian@codesourcery.com>
+
+	* ld.texinfo: Document --use-blx.
+	* emultempl/armelf.em (use_blx): New variable.
+	(arm_elf_create_output_section_statements): Communicate value of
+	use_blx to bfd.
+	(PARSE_AND_LIST_PROLOGUE): Add OPTION_USE_BLX.
+	(PARSE_AND_LIST_OPTIONS): Add --use-blx option.
+	(PARSE_AND_LIST_ARGS_CASES): Add OPTION_USE_BLX case.
+
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (NO_WERROR): Define.  Use instead of -Wno-error.

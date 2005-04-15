@@ -5262,6 +5262,17 @@ linker, which causes v4t @code{BX rM} instructions to be rewritten as
 In the former case, the switch should not be used, and @samp{R_ARM_V4BX}
 relocations are ignored.
 
+@cindex USE_BLX
+@kindex --use-blx
+The @samp{--use-blx} switch enables the linker to use ARM/Thumb
+BLX instructions (available on ARMv5t and above) in various
+situations. Currently it is used to perform calls via the PLT from Thumb
+code using BLX rather than using BX and a mode-switching stub before
+each PLT entry. This should lead to such calls executing slightly faster.
+
+This option is enabled implicitly for SymbianOS, so there is no need to
+specify it if you are using that target.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

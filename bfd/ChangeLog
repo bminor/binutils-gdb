@@ -1,3 +1,19 @@
+2004-04-15  Julian Brown  <julian@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Update prototype.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (elf32_arm_link_hash_table): New field, 'use_blx'.
+	(elf32_arm_link_hash_table_create): Initialise fix_v4bx, use_blx.
+	(bfd_elf32_arm_set_target_relocs): Handle use_blx.
+	(elf32_arm_final_link_relocate): Use Thumb BLX for R_ARM_THM_PC22
+	relocations if requested to.
+	(allocate_dynrelocs): Don't count size of omitted Thumb stubs based on
+	use_blx rather than symbian_p.
+	(elf32_arm_finish_dynamic_symbol): Don't output Thumb PLT stubs if
+	use_blx is in effect.
+	(elf32_arm_symbian_link_hash_table_create): Enable use_blx by default
+	for SymbianOS.
+
 2005-04-15  Nick Clifton  <nickc@redhat.com>
 
 	* coffgen.c (coff_print_symbol): Use fprintf_vma to print vma

@@ -1324,6 +1324,9 @@ struct elf32_arm_link_hash_table
     /* Nonzero to fix BX instructions for ARMv4 targets.  */
     int fix_v4bx;
 
+    /* Nonzero if the ARM/Thumb BLX instructions are available for use.  */
+    int use_blx;
+
     /* The number of bytes in the initial entry in the PLT.  */
     bfd_size_type plt_header_size;
 
@@ -1559,6 +1562,8 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->plt_header_size = 20;
   ret->plt_entry_size = 12;
 #endif
+  ret->fix_v4bx = 0;
+  ret->use_blx = 0;
   ret->symbian_p = 0;
   ret->use_rel = 1;
   ret->sym_sec.abfd = NULL;
@@ -2125,7 +2130,8 @@ void
 bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
 				 int target1_is_rel,
 				 char * target2_type,
-                                 int fix_v4bx)
+                                 int fix_v4bx,
+				 int use_blx)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -2144,6 +2150,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
 			  target2_type);
     }
   globals->fix_v4bx = fix_v4bx;
+  globals->use_blx |= use_blx;
 }
 #endif
 
@@ -2893,6 +2900,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 	bfd_vma check;
 	bfd_signed_vma signed_check;
+	bfd_boolean thumb_plt_call = FALSE;
 
 	/* Need to refetch the addend and squish the two 11 bit pieces
 	   together.  */
@@ -2942,8 +2950,19 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    value = (splt->output_section->vma
 		     + splt->output_offset
 		     + h->plt.offset);
-	    /* Target the Thumb stub before the ARM PLT entry.  */
-	    value -= 4;
+ 	    if (globals->use_blx)
+ 	      {
+ 		/* If the Thumb BLX instruction is available, convert the
+		   BL to a BLX instruction to call the ARM-mode PLT entry.  */
+ 		if ((lower_insn & (0x3 << 11)) == 0x3 << 11)
+		  {
+		    lower_insn = (lower_insn & ~(0x3 << 11)) | 0x1 << 11;
+		    thumb_plt_call = TRUE;
+		  }
+ 	      }
+ 	    else
+ 	      /* Target the Thumb stub before the ARM PLT entry.  */
+ 	      value -= PLT_THUMB_STUB_SIZE;
 	    *unresolved_reloc_p = FALSE;
 	  }
 
@@ -2967,8 +2986,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  overflow = TRUE;
 
 #ifndef OLD_ARM_ABI
-	if (r_type == R_ARM_THM_XPC22
-	    && ((lower_insn & 0x1800) == 0x0800))
+	if ((r_type == R_ARM_THM_XPC22
+	     && ((lower_insn & 0x1800) == 0x0800))
+	    || thumb_plt_call)
 	  /* For a BLX instruction, make sure that the relocation is rounded up
 	     to a word boundary.  This follows the semantics of the instruction
 	     which specifies that bit 1 of the target address will come from bit
@@ -5059,7 +5079,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
 	  /* If we will insert a Thumb trampoline before this PLT, leave room
 	     for it.  */
-	  if (!htab->symbian_p && eh->plt_thumb_refcount > 0)
+	  if (!htab->use_blx && eh->plt_thumb_refcount > 0)
 	    {
 	      h->plt.offset += PLT_THUMB_STUB_SIZE;
 	      s->size += PLT_THUMB_STUB_SIZE;
@@ -5632,7 +5652,7 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
 
 	  BFD_ASSERT ((got_displacement & 0xf0000000) == 0);
 
-	  if (eh->plt_thumb_refcount > 0)
+	  if (!htab->use_blx && eh->plt_thumb_refcount > 0)
 	    {
 	      bfd_put_16 (output_bfd, elf32_arm_plt_thumb_stub[0],
 			  splt->contents + h->plt.offset - 4);
@@ -6505,6 +6525,8 @@ elf32_arm_symbian_link_hash_table_create (bfd *abfd)
       /* The PLT entries are each three instructions.  */
       htab->plt_entry_size = 4 * NUM_ELEM (elf32_arm_symbian_plt_entry);
       htab->symbian_p = 1;
+      /* Symbian uses armv5t or above, so use_blx is always true.  */
+      htab->use_blx = 1;
       htab->root.is_relocatable_executable = 1;
     }
   return ret;
