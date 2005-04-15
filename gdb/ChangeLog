@@ -1,5 +1,11 @@
 2005-04-15  Kevin Buettner  <kevinb@redhat.com>
 
+	* remote.c (remote_get_thread_local_address): Throw a more
+	meaningful exception when remote target doesn't have support
+	for the qGetTLSAddr packet.
+
+2005-04-15  Kevin Buettner  <kevinb@redhat.com>
+
 	* remote.c (remote_protocol_qGetTLSAddr): New static global variable.
 	(set_remote_protocol_qGetTLSAddr_packet_cmd)
 	(show_remote_protocol_qGetTLSAddr_packet_cmd)

@@ -5344,6 +5344,7 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
       struct remote_state *rs = get_remote_state ();
       char *buf = alloca (rs->remote_packet_size);
       char *p = buf;
+      enum packet_result result;
 
       strcpy (p, "qGetTLSAddr:");
       p += strlen (p);
@@ -5356,12 +5357,20 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
 
       putpkt (buf);
       getpkt (buf, rs->remote_packet_size, 0);
-      if (packet_ok (buf, &remote_protocol_qGetTLSAddr) == PACKET_OK)
+      result = packet_ok (buf, &remote_protocol_qGetTLSAddr);
+      if (result == PACKET_OK)
 	{
 	  ULONGEST result;
 
 	  unpack_varlen_hex (buf, &result);
 	  return result;
+	}
+      else if (result == PACKET_UNKNOWN)
+	{
+	  struct exception e
+	    = { RETURN_ERROR, TLS_GENERIC_ERROR,
+		"Remote target doesn't support qGetTLSAddr packet" };
+	  throw_exception (e);
 	}
       else
 	{
