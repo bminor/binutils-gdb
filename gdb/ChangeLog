@@ -1,5 +1,9 @@
 2005-04-15  Kevin Buettner  <kevinb@redhat.com>
 
+	* remote.c (add_packet_config_cmd): Delete unused variables.
+
+2005-04-15  Kevin Buettner  <kevinb@redhat.com>
+
 	* remote.c (show_remote_protocol_vcont_packet_cmd )
 	(show_remote_protocol_qSymbol_packet_cmd)
 	(show_remote_protocol_P_packet_cmd)

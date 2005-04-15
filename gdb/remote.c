@@ -640,13 +640,10 @@ add_packet_config_cmd (struct packet_config *config,
 		       struct cmd_list_element **show_remote_list,
 		       int legacy)
 {
-  struct cmd_list_element *set_cmd;
-  struct cmd_list_element *show_cmd;
   char *set_doc;
   char *show_doc;
-  char *help_doc;
-  char *print;
   char *cmd_name;
+
   config->name = name;
   config->title = title;
   config->detect = AUTO_BOOLEAN_AUTO;
@@ -655,8 +652,6 @@ add_packet_config_cmd (struct packet_config *config,
 			name, title);
   show_doc = xstrprintf ("Show current use of remote protocol `%s' (%s) packet",
 			 name, title);
-  print = xstrprintf ("Current use of remote protocol `%s' (%s) is %%s",
-		      name, title);
   /* set/show TITLE-packet {auto,on,off} */
   cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
