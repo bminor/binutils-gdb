@@ -2,6 +2,9 @@
 
 	* gdb.texinfo (Hurd Native): New subsection, documents
 	Hurd-specific commands.
+	(Maintenance Commands): Add cross-reference to "Debugging
+	Output".
+	(Debugging Output): Document "set/show debug lin-lwp".
 
 2005-04-09  Eli Zaretskii  <eliz@gnu.org>
 

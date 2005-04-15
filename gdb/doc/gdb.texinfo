@@ -14613,6 +14613,11 @@ Displays state of confirmation requests.
 @section Optional messages about internal happenings
 @cindex optional debugging messages
 
+@value{GDBN} has commands that enable optional debugging messages from
+various @value{GDBN} subsystems; normally these commands are of
+interest to @value{GDBN} maintainers, or when reporting a bug.  This
+section documents those commands.
+
 @table @code
 @kindex set exec-done-display
 @item set exec-done-display
@@ -14659,6 +14664,12 @@ The default is off.  @file{infrun.c} contains GDB's runtime state machine used
 for implementing operations such as single-stepping the inferior.
 @item show debug infrun
 Displays the current state of @value{GDBN} inferior debugging.
+@item set debug lin-lwp
+@cindex @sc{gnu}/Linux LWP debug messages
+@cindex Linux lightweight processes
+Turns on or off debugging messages from the LWP debug support.
+@item show debug lin-lwp
+Show the current state of Linux LWP debugging messages.
 @item set debug observer
 @cindex observer debugging info
 Turns on or off display of @value{GDBN} observer debugging.  This
@@ -20644,7 +20655,8 @@ needed for special purposes only.
 In addition to commands intended for @value{GDBN} users, @value{GDBN}
 includes a number of commands intended for @value{GDBN} developers,
 that are not documented elsewhere in this manual.  These commands are
-provided here for reference.
+provided here for reference.  (For commands that turn on debugging
+messages, see @ref{Debugging Output}.)
 
 @table @code
 @kindex maint agent
