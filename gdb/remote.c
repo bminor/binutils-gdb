@@ -2351,9 +2351,6 @@ remote_detach (char *args, int from_tty)
 static void
 remote_disconnect (char *args, int from_tty)
 {
-  struct remote_state *rs = get_remote_state ();
-  char *buf = alloca (rs->remote_packet_size);
-
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));
 
@@ -2569,7 +2566,6 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size);
   int pid = PIDGET (ptid);
-  char *p;
 
   last_sent_signal = siggnal;
   last_sent_step = step;
@@ -2870,7 +2866,6 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	  continue;
 	case 'T':		/* Status with PC, SP, FP, ...  */
 	  {
-	    int i;
 	    char regs[MAX_REGISTER_SIZE];
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat.  */
@@ -3066,7 +3061,6 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	  continue;
 	case 'T':		/* Status with PC, SP, FP, ...  */
 	  {
-	    int i;
 	    char regs[MAX_REGISTER_SIZE];
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat.  */
@@ -3444,7 +3438,6 @@ store_register_using_P (int regnum)
   char *buf = alloca (rs->remote_packet_size);
   char regp[MAX_REGISTER_SIZE];
   char *p;
-  int i;
 
   sprintf (buf, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
@@ -3465,7 +3458,6 @@ remote_store_registers (int regnum)
   struct remote_state *rs = get_remote_state ();
   char *buf;
   char *regs;
-  int i;
   char *p;
 
   set_thread (PIDGET (inferior_ptid), 1);
@@ -5098,7 +5090,6 @@ remote_rcmd (char *command,
 	     struct ui_file *outbuf)
 {
   struct remote_state *rs = get_remote_state ();
-  int i;
   char *buf = alloca (rs->remote_packet_size);
   char *p = buf;
 
@@ -5638,7 +5629,6 @@ _initialize_remote (void)
 {
   static struct cmd_list_element *remote_set_cmdlist;
   static struct cmd_list_element *remote_show_cmdlist;
-  struct cmd_list_element *tmpcmd;
 
   /* architecture specific data */
   remote_gdbarch_data_handle = 
