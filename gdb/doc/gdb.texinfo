@@ -12320,6 +12320,7 @@ configurations.
 * DJGPP Native::                Features specific to the DJGPP port
 * Cygwin Native::		Features specific to the Cygwin port
 * Hurd Native::                 Features specific to @sc{gnu} Hurd
+* Neutrino::                    Features specific to QNX Neutrino
 @end menu
 
 @node HP-UX
@@ -13010,6 +13011,25 @@ the non-default commands.
 @end table
 
 
+@node Neutrino
+@subsection QNX Neutrino
+@cindex QNX Neutrino
+
+@value{GDBN} provides the following commands specific to the QNX
+Neutrino target:
+
+@table @code
+@item set debug nto-debug
+@kindex set debug nto-debug
+When set to on, enables debugging messages specific to the QNX
+Neutrino support.
+
+@item show debug nto-debug
+@kindex show debug nto-debug
+Show the current state of QNX Neutrino messages.
+@end table
+
+
 @node Embedded OS
 @section Embedded Operating Systems
 
@@ -13208,6 +13228,9 @@ configurations.
 * Sparclite::                   Fujitsu Sparclite
 * ST2000::                      Tandem ST2000
 * Z8000::                       Zilog Z8000
+* AVR::                         Atmel AVR
+* CRIS::                        CRIS
+* Super-H::                     Renesas Super-H
 @end menu
 
 @node ARM
@@ -13627,6 +13650,7 @@ Array Tech LSI33K RAID controller board.
 @item set mipsfpu double
 @itemx set mipsfpu single
 @itemx set mipsfpu none
+@itemx set mipsfpu auto
 @itemx show mipsfpu
 @kindex set mipsfpu
 @kindex show mipsfpu
@@ -14112,6 +14136,62 @@ conventions; for example, @w{@samp{b fputc if $cycles>5000}} sets a
 conditional breakpoint that suspends only after at least 5000
 simulated clock ticks.
 
+@node AVR
+@subsection Atmel AVR
+@cindex AVR
+
+When configured for debugging the Atmel AVR, @value{GDBN} supports the
+following AVR-specific commands:
+
+@table @code
+@item info io_registers
+@kindex info io_registers@r{, AVR}
+@cindex I/O registers (Atmel AVR)
+This command displays information about the AVR I/O registers.  For
+each register, @value{GDBN} prints its number and value.
+@end table
+
+@node CRIS
+@subsection CRIS
+@cindex CRIS
+
+When configured for debugging CRIS, @value{GDBN} provides the
+following CRIS-specific commands:
+
+@table @code
+@item set cris-version @var{ver}
+@cindex CRIS version
+Set the current CRIS version to @var{ver}.  The CRIS version affects
+register names and sizes.  This command is useful in case
+autodetection of the CRIS version fails.
+
+@item show cris-version
+Show the current CRIS version.
+
+@item set cris-dwarf2-cfi
+@cindex DWARF-2 CFI and CRIS
+Set the usage of DWARF-2 CFI for CRIS debugging.  The default is off
+if using @code{gcc-cris} whose version is below @code{R59}, otherwise
+on.
+
+@item show cris-dwarf2-cfi
+Show the current state of using DWARF-2 CFI.
+@end table
+
+@node Super-H
+@subsection Renesas Super-H
+@cindex Super-H
+
+For the Renesas Super-H processor, @value{GDBN} provides these
+commands:
+
+@table @code
+@item regs
+@kindex regs@r{, Super-H}
+Show the values of all Super-H registers.
+@end table
+
+
 @node Architectures
 @section Architectures
 
@@ -14123,6 +14203,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * A29K::
 * Alpha::
 * MIPS::
+* HPPA::               HP PA architecture
 @end menu
 
 @node i386
@@ -14212,6 +14293,122 @@ Display the current limit.
 @noindent
 These commands are available @emph{only} when @value{GDBN} is configured
 for debugging programs on Alpha or MIPS processors.
+
+Several MIPS-specific commands are available when debugging MIPS
+programs:
+
+@table @code
+@item set mips saved-gpreg-size @var{size}
+@kindex set mips saved-gpreg-size
+@cindex MIPS GP register size on stack
+Set the size of MIPS general-purpose registers saved on the stack.
+The argument @var{size} can be one of the following:
+
+@table @samp
+@item 32
+32-bit GP registers
+@item 64
+64-bit GP registers
+@item auto
+Use the target's default setting or autodetect the saved size from the
+information contained in the executable.  This is the default
+@end table
+
+@item show mips saved-gpreg-size
+@kindex show mips saved-gpreg-size
+Show the current size of MIPS GP registers on the stack.
+
+@item set mips stack-arg-size @var{size}
+@kindex set mips stack-arg-size
+@cindex MIPS stack space for arguments
+Set the amount of stack space reserved for arguments to functions.
+The argument can be one of @code{"32"}, @code{"64"} or @code{"auto"}
+(the default).
+
+@item set mips abi @var{arg}
+@kindex set mips abi
+@cindex set ABI for MIPS
+Tell @value{GDBN} which MIPS ABI is used by the inferior.  Possible
+values of @var{arg} are:
+
+@table @samp
+@item auto
+The default ABI associated with the current binary (this is the
+default).
+@item o32
+@item o64
+@item n32
+@item n64
+@item eabi32
+@item eabi64
+@item auto
+@end table
+
+@item show mips abi
+@kindex show mips abi
+Show the MIPS ABI used by @value{GDBN} to debug the inferior.
+
+@item set mipsfpu
+@itemx show mipsfpu
+@xref{MIPS Embedded, set mipsfpu}.
+
+@item set mips mask-address @var{arg}
+@kindex set mips mask-address
+@cindex MIPS addresses, masking
+This command determines whether the most-significant 32 bits of 64-bit
+MIPS addresses are masked off.  The argument @var{arg} can be
+@samp{on}, @samp{off}, or @samp{auto}.  The latter is the default
+setting, which lets @value{GDBN} determine the correct value.
+
+@item show mips mask-address
+@kindex show mips mask-address
+Show whether the upper 32 bits of MIPS addresses are masked off or
+not.
+
+@item set remote-mips64-transfers-32bit-regs
+@kindex set remote-mips64-transfers-32bit-regs
+This command controls compatibility with 64-bit MIPS targets that
+transfer data in 32-bit quantities.  If you have an old MIPS 64 target
+that transfers 32 bits for some registers, like @sc{sr} and @sc{fsr},
+and 64 bits for other registers, set this option to @samp{on}.
+
+@item show remote-mips64-transfers-32bit-regs
+@kindex show remote-mips64-transfers-32bit-regs
+Show the current setting of compatibility with older MIPS 64 targets.
+
+@item set debug mips
+@kindex set debug mips
+This command turns on and off debugging messages for the MIPS-specific
+target code in @value{GDBN}.
+
+@item show debug mips
+@kindex show debug mips
+Show the current setting of MIPS debugging messages.
+@end table
+
+
+@node HPPA
+@subsection HPPA
+@cindex HPPA support
+
+When @value{GDBN} is debugging te HP PA architecture, it provides the
+following special commands:
+
+@table @code
+@item set debug hppa
+@kindex set debug hppa
+THis command determines whether HPPA architecture specific debugging
+messages are to be displayed.
+
+@item show debug hppa
+Show whether HPPA debugging messages are displayed.
+
+@item maint print unwind @var{address}
+@kindex maint print unwind@r{, HPPA}
+This command displays the contents of the unwind table entry at the
+given @var{address}.
+
+@end table
 
 
 @node Controlling GDB

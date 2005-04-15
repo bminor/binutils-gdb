@@ -2,11 +2,20 @@
 
 	* gdb.texinfo (Hurd Native): New subsection, documents
 	Hurd-specific commands.
-	(Maintenance Commands): Add cross-reference to "Debugging
-	Output".
+	(Maintenance Commands): Add cross-reference to "Debugging Output".
 	(Debugging Output): Document "set/show debug lin-lwp".
-	(MIPS): Improve documentation of heuristic-fence-post.
+	(MIPS): Improve documentation of heuristic-fence-post.  Document
+	"set/show mips abi", "set/show mips saved-gpreg-size", "set/show
+	mips stack-arg-size", "set/show mips mask-address", "set/show mips
+	remote-mips64-transfers-32bit-regs", "set/show debug mips".
 	(ARM): Document ARM-specific commands.
+	(AVR): New section.  Document "info io_registers".
+	(CRIS): New section.  Document "set/show cris-version" and
+	"set/show cris-dwarf2-cfi".
+	(HPPA): New section.  Document "set/show debug hppa" and "maint
+	print unwind".
+	(Netrino): New subsection.  Document "set/show debug nto-debug".
+	(Super-H): New section.  Document the "regs" command.
 
 2005-04-09  Eli Zaretskii  <eliz@gnu.org>
 
