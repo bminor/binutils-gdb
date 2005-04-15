@@ -13227,6 +13227,61 @@ ARM Demon monitor.
 
 @end table
 
+@value{GDBN} provides the following ARM-specific commands:
+
+@table @code
+@item set arm disassembler
+@kindex set arm
+This commands selects from a list of disassembly styles.  The
+@code{"std"} style is the standard style.
+
+@item show arm disassembler
+@kindex show arm
+Show the current disassembly style.
+
+@item set arm apcs32
+@cindex ARM 32-bit mode
+This command toggles ARM operation mode between 32-bit and 26-bit.
+
+@item show arm apcs32
+Display the current usage of the ARM 32-bit mode.
+
+@item set arm fpu @var{fputype}
+This command sets the ARM floating-point unit (FPU) type.  The
+argument @var{fputype} can be one of these:
+
+@table @code
+@item auto
+Determine the FPU type by querying the OS ABI.
+@item softfpa
+Software FPU, with mixed-endian doubles on little-endian ARM
+processors.
+@item fpa
+GCC-compiled FPA co-processor.
+@item softvfp
+Software FPU with pure-endian doubles.
+@item vfp
+VFP co-processor.
+@end table
+
+@item show arm fpu
+Show the current type of the FPU.
+
+@item set arm abi
+This command forces @value{GDBN} to use the specified ABI.
+
+@item show arm abi
+Show the currently used ABI.
+
+@item set debug arm
+Toggle whether to display ARM-specific debugging messages from the ARM
+target support subsystem.
+
+@item show debug arm
+Show whether ARM-specific debugging messages are enabled.
+@end table
+
+
 @node H8/300
 @subsection Renesas H8/300
 
@@ -14147,7 +14202,8 @@ Restrict @value{GDBN} to examining at most @var{limit} bytes in its
 search for the beginning of a function.  A value of @var{0} (the
 default) means there is no limit.  However, except for @var{0}, the
 larger the limit the more bytes @code{heuristic-fence-post} must search
-and therefore the longer it takes to run.
+and therefore the longer it takes to run.  You should only need to use
+this command when debugging a stripped executable.
 
 @item show heuristic-fence-post
 Display the current limit.

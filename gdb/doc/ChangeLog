@@ -5,6 +5,8 @@
 	(Maintenance Commands): Add cross-reference to "Debugging
 	Output".
 	(Debugging Output): Document "set/show debug lin-lwp".
+	(MIPS): Improve documentation of heuristic-fence-post.
+	(ARM): Document ARM-specific commands.
 
 2005-04-09  Eli Zaretskii  <eliz@gnu.org>
 
