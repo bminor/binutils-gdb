@@ -1,3 +1,12 @@
+2005-04-15  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.ac: New file.
+	* configure.in: Remove.
+	* configure: Regenerate.
+	* defs-media.h (sem_fields): Add missing sfmt_ldhil member.
+	* sim-if.c (sim_open): Use struct bfd instead of struct _bfd.
+	(sim_create_inferior): Ditto.
+
 2004-12-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure: Regenerate for ../common/aclocal.m4 update.

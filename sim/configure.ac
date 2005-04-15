@@ -99,7 +99,12 @@ if test "${enable_sim}" != no; then
 	   common=yes
 	   igen=yes
 	   ;;
-       sh*-*-*)
+       sh64-*-*)
+           AC_CONFIG_SUBDIRS(sh64)
+	   testsuite=yes
+	   common=yes
+	   ;;
+       sh-*-*)
            AC_CONFIG_SUBDIRS(sh)
 	   testsuite=yes
 	   common=yes

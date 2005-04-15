@@ -283,6 +283,7 @@ ac_subdirs_all="$ac_subdirs_all m68hc11"
 ac_subdirs_all="$ac_subdirs_all mcore"
 ac_subdirs_all="$ac_subdirs_all mips"
 ac_subdirs_all="$ac_subdirs_all mn10300"
+ac_subdirs_all="$ac_subdirs_all sh64"
 ac_subdirs_all="$ac_subdirs_all sh"
 ac_subdirs_all="$ac_subdirs_all ppc"
 ac_subdirs_all="$ac_subdirs_all v850"
@@ -3498,7 +3499,15 @@ subdirs="$subdirs mn10300"
 	   common=yes
 	   igen=yes
 	   ;;
-       sh*-*-*)
+       sh64-*-*)
+
+
+subdirs="$subdirs sh64"
+
+	   testsuite=yes
+	   common=yes
+	   ;;
+       sh-*-*)
 
 
 subdirs="$subdirs sh"

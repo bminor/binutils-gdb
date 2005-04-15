@@ -106,6 +106,11 @@ union sem_fields {
     UINT f_left;
     UINT f_right;
   } sfmt_add;
+  struct {
+    INT f_disp6;
+    UINT f_dest;
+    UINT f_left;
+  } sfmt_ldhil;
 #if WITH_SCACHE_PBB
   /* Writeback handler.  */
   struct {

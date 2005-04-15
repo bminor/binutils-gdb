@@ -1,9 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
-sinclude(../common/aclocal.m4)
-AC_PREREQ(2.5)dnl
+AC_PREREQ(2.59)dnl
 AC_INIT(Makefile.in)
+AC_CONFIG_HEADER(config.h:config.in)
 
-SIM_AC_COMMON
+sinclude(../common/aclocal.m4)
+
+sinclude(../common/common.m4)
 
 SIM_AC_OPTION_ENDIAN([], BIG_ENDIAN)
 SIM_AC_OPTION_ALIGNMENT(STRICT_ALIGNMENT)

@@ -1,3 +1,8 @@
+2005-04-15  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.ac: Add explicit sh64 case.
+	* configure: Regenerate.
+
 2005-03-30  Paul Brook  <paul@codesourcery.com>
 
 	* arm/wrapper.c: Provide SIGTRAP and SIGBUS.
