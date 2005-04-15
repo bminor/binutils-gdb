@@ -754,7 +754,6 @@ show_remote_protocol_vcont_packet_cmd (struct ui_file *file, int from_tty,
 				       struct cmd_list_element *c,
 				       const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_vcont);
 }
 
@@ -773,7 +772,6 @@ show_remote_protocol_qSymbol_packet_cmd (struct ui_file *file, int from_tty,
 					 struct cmd_list_element *c,
 					 const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_qSymbol);
 }
 
@@ -793,7 +791,6 @@ show_remote_protocol_P_packet_cmd (struct ui_file *file, int from_tty,
 				   struct cmd_list_element *c,
 				   const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_P);
 }
 
@@ -826,7 +823,6 @@ show_remote_protocol_Z_software_bp_packet_cmd (struct ui_file *file, int from_tt
 					       struct cmd_list_element *c,
 					       const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_SOFTWARE_BP]);
 }
 
@@ -842,7 +838,6 @@ show_remote_protocol_Z_hardware_bp_packet_cmd (struct ui_file *file, int from_tt
 					       struct cmd_list_element *c,
 					       const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_HARDWARE_BP]);
 }
 
@@ -858,7 +853,6 @@ show_remote_protocol_Z_write_wp_packet_cmd (struct ui_file *file, int from_tty,
 					    struct cmd_list_element *c,
 					    const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_WRITE_WP]);
 }
 
@@ -874,7 +868,6 @@ show_remote_protocol_Z_read_wp_packet_cmd (struct ui_file *file, int from_tty,
 					   struct cmd_list_element *c,
 					   const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_READ_WP]);
 }
 
@@ -890,7 +883,6 @@ show_remote_protocol_Z_access_wp_packet_cmd (struct ui_file *file, int from_tty,
 					     struct cmd_list_element *c,
 					     const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_ACCESS_WP]);
 }
 
@@ -959,7 +951,6 @@ show_remote_protocol_binary_download_cmd (struct ui_file *file, int from_tty,
 					  struct cmd_list_element *c,
 					  const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_binary_download);
 }
 
@@ -978,7 +969,6 @@ show_remote_protocol_qPart_auxv_packet_cmd (struct ui_file *file, int from_tty,
 					    struct cmd_list_element *c,
 					    const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_qPart_auxv);
 }
 
@@ -996,7 +986,6 @@ show_remote_protocol_p_packet_cmd (struct ui_file *file, int from_tty,
 				   struct cmd_list_element *c,
 				   const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
   show_packet_config_cmd (&remote_protocol_p);
 }
 

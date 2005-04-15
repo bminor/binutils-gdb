@@ -1,3 +1,18 @@
+2005-04-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote.c (show_remote_protocol_vcont_packet_cmd )
+	(show_remote_protocol_qSymbol_packet_cmd)
+	(show_remote_protocol_P_packet_cmd)
+	(show_remote_protocol_Z_software_bp_packet_cmd)
+	(show_remote_protocol_Z_hardware_bp_packet_cmd)
+	(show_remote_protocol_Z_write_wp_packet_cmd)
+	(show_remote_protocol_Z_read_wp_packet_cmd)
+	(show_remote_protocol_Z_access_wp_packet_cmd)
+	(show_remote_protocol_binary_download_cmd)
+	(show_remote_protocol_qPart_auxv_packet_cmd)
+	(show_remote_protocol_p_packet_cmd ): Delete calls to
+	deprecated_show_value_hack().
+
 2005-04-15  Corinna VInschen  <vinschen@redhat.com>
 
 	* MAINTAINERS: Change sh64-elf state to non-broken.
