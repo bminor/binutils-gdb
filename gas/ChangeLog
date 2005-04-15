@@ -1,4 +1,10 @@
 2005-04-14  Bob Wilson  <bob.wilson@acm.org>
+	    Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (get_aligned_diff): Handle target_size larger
+	than the section alignment.
+
+2005-04-14  Bob Wilson  <bob.wilson@acm.org>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-xtensa.h (struct xtensa_frag_type): Add lit_frchain field.

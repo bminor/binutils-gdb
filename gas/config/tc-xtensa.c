@@ -8190,6 +8190,9 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
 	target_size = 3;
       align_power = branch_align_power (now_seg);
       branch_align = 1 << align_power;
+      /* Don't count on the section alignment being as large as the target.  */
+      if (target_size > branch_align)
+	target_size = branch_align;
       opt_diff = get_text_align_fill_size (address, align_power,
 					   target_size, FALSE, FALSE);
 
