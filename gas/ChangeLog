@@ -1,3 +1,7 @@
+2005-04-15  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (normalize_constant_expr): Fix formatting.
+
 2005-04-14  Bob Wilson  <bob.wilson@acm.org>
 	    Sterling Augustine  <sterling@tensilica.com>
 
