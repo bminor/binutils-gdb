@@ -1701,6 +1701,7 @@ copy_file (const char *input_filename, const char *output_filename,
 
   if (get_file_size (input_filename) < 1)
     {
+      non_fatal (_("error: the input file '%s' is empty"), input_filename);
       status = 1;
       return;
     }

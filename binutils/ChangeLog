@@ -1,3 +1,8 @@
+2005-04-15  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_file): Issue an error message when attmepting to
+	copy an empty input file.
+
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (NO_WERROR): Define.  Use instead of -Wno-error.
