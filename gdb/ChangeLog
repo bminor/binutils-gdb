@@ -1,5 +1,16 @@
 2005-04-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* ppcobsd-nat.c: Update copyright year.  Include "inf-ptrace.h".
+	(ppcobsd_fetch_registers): Renamed from fetch_inferior_registers;
+	made static.
+	(ppcobsd_store_registers): Renamed from store_inferior_registers;
+	made static.
+	(_initialize_ppcobsd_nat): Construct and add target vector.
+	* config/powerpc/obsd.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-ptrace.o.
+	(NAT_FILE): Remove.
+	* Makefile.in (ppcobsd-nat.o): Update dependencies.
+
 	* ppcobsd-tdep.c: Include "floatformat.h".
 	(ppcobsd_init_abi): Set long_double_bit and long_double_format.
 	* Makefile.in (ppcobsd-tdep.o): Update dependencies.
