@@ -1,7 +1,7 @@
 2005-04-16  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (OS Information): Renamed from Auxiliary Vector; all
-	references changed.  Add descriptgion of "info udot".
+	references changed.  Add description of "info udot".
 	(Files): Document "set/show stop-on-solib-events".
 	(M32R/D): Document "set/show download-path", "set/show
 	board-address", "set/show server-address", "upload", "tload".
@@ -32,7 +32,7 @@
 	"set/show cris-dwarf2-cfi".
 	(HPPA): New section.  Document "set/show debug hppa" and "maint
 	print unwind".
-	(Netrino): New subsection.  Document "set/show debug nto-debug".
+	(Neutrino): New subsection.  Document "set/show debug nto-debug".
 	(Super-H): New section.  Document the "regs" command.
 	(Debugging Output): Document "set/show debug aix-thread".
 
