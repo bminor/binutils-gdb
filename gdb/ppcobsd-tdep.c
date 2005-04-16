@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "floatformat.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
@@ -169,6 +170,10 @@ static const struct tramp_frame ppcobsd_sigtramp =
 static void
 ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  /* OpenBSD doesn't support the 128-bit `long double' from the psABI.  */
+  set_gdbarch_long_double_bit (gdbarch, 64);
+  set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+
   /* OpenBSD uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
