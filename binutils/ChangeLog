@@ -1,3 +1,8 @@
+2005-04-16  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (debug_apply_rela_addends): Remove redundant %s from
+	printf string.
+
 2005-04-15  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_file): Issue an error message when attmepting to

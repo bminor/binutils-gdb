@@ -7387,7 +7387,7 @@ debug_apply_rela_addends (FILE *file,
 		     example of this see the _clz.o binary in libgcc.a.  */
 		  && ELF32_ST_TYPE (sym->st_info) != STT_OBJECT)
 		{
-		  warn (_("%s: skipping unexpected symbol type %s in relocation in section .rela%s\n"),
+		  warn (_("skipping unexpected symbol type %s in relocation in section .rela%s\n"),
 			get_symbol_type (ELF32_ST_TYPE (sym->st_info)),
 			SECTION_NAME (section));
 		  continue;
