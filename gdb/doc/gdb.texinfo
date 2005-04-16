@@ -1119,7 +1119,7 @@ communicate with @value{GDBN} using it as a back end.
 
 @samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
 @value{GDBN} to use the @dfn{@sc{gdb/mi} interface} (@pxref{GDB/MI, ,
-The @sc{gdb/mi} Interface}) included since @var{GDBN} version 6.0.  The
+The @sc{gdb/mi} Interface}) included since @value{GDBN} version 6.0.  The
 previous @sc{gdb/mi} interface, included in @value{GDBN} version 5.3 and
 selected with @samp{--interpreter=mi1}, is deprecated.  Earlier
 @sc{gdb/mi} interfaces are no longer supported.
@@ -16457,9 +16457,11 @@ each value is printed in its own window.
 @unnumberedsec Function and Purpose
 
 @cindex @sc{gdb/mi}, its purpose
-@sc{gdb/mi} is a line based machine oriented text interface to @value{GDBN}.  It is
-specifically intended to support the development of systems which use
-the debugger as just one small component of a larger system.
+@sc{gdb/mi} is a line based machine oriented text interface to
+@value{GDBN} and is activated by specifying using the
+@option{--interpreter} command line option (@pxref{Mode Options}).  It
+is specifically intended to support the development of systems which
+use the debugger as just one small component of a larger system.
 
 This chapter is a specification of the @sc{gdb/mi} interface.  It is written
 in the form of a reference manual.
