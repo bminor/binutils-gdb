@@ -1930,6 +1930,7 @@ specify files}.
 
 @table @code
 @kindex cd
+@cindex change working directory
 @item cd @var{directory}
 Set the @value{GDBN} working directory to @var{directory}.
 
@@ -4852,7 +4853,7 @@ Table}.
 * Registers::                   Registers
 * Floating Point Hardware::     Floating point hardware
 * Vector Unit::                 Vector Unit
-* Auxiliary Vector::            Auxiliary data provided by operating system
+* OS Information::              Auxiliary data provided by operating system
 * Memory Region Attributes::    Memory region attributes
 * Dump/Restore Files::          Copy between memory and a file
 * Core File Generation::        Cause a program dump its core
@@ -6093,11 +6094,33 @@ Display information about the vector unit.  The exact contents and
 layout vary depending on the hardware.
 @end table
 
-@node Auxiliary Vector
-@section Operating system auxiliary vector
+@node OS Information
+@section Operating system auxiliary information
+@cindex OS information
+
+@value{GDBN} provides interfaces to useful OS facilities that can help
+you debug your program.
+
+@cindex @code{ptrace} system call
+@cindex @code{struct user} contents
+When @value{GDBN} runs on a @dfn{Posix system} (such as GNU or Unix
+machines), it interfaces with the inferior via the @code{ptrace}
+system call.  The operating system creates a special sata structure,
+called @code{struct user}, for this interface.  You can use the
+command @code{info udot} to display the contents of this data
+structure.
+
+@table @code
+@item info udot
+@kindex info udot
+Display the contents of the @code{struct user} maintained by the OS
+kernel for the program being debugged.  @value{GDBN} displays the
+contents of @code{struct user} as a list of hex numbers, similar to
+the @code{examine} command.
+@end table
+
 @cindex auxiliary vector
 @cindex vector, auxiliary
-
 Some operating systems supply an @dfn{auxiliary vector} to programs at
 startup.  This is akin to the arguments and environment that you
 specify for a program, but contains a system-dependent variety of
@@ -6121,6 +6144,7 @@ pointers to strings or other data.  @value{GDBN} displays each value in the
 most appropriate form for a recognized tag, and in hexadecimal for
 an unrecognized tag.
 @end table
+
 
 @node Memory Region Attributes
 @section Memory region attributes
@@ -8784,7 +8808,9 @@ available choices, or to finish the type list for you.
 
 @cindex Objective-C
 This section provides information about some commands and command
-options that are useful for debugging Objective-C code.
+options that are useful for debugging Objective-C code.  See also
+@ref{Symbols, info classes}, and @ref{Symbols, info selectors}, for a
+few more commands specific to Objective-C support.
 
 @menu
 * Method Names in Commands::
@@ -8859,6 +8885,7 @@ clear -[NSWindow makeKeyAndOrderFront:]
 
 @node The Print Command with Objective-C
 @subsubsection The Print Command With Objective-C
+@cindex Objective-C, print objects
 @kindex print-object
 @kindex po @r{(@code{print-object})}
 
@@ -9925,6 +9952,7 @@ variables) whose names contain a match for regular expression
 @var{regexp}.
 
 @kindex info classes
+@cindex Objective-C, classes and selectors
 @item info classes
 @itemx info classes @var{regexp}
 Display all Objective-C classes in your program, or
@@ -10853,6 +10881,24 @@ Mb).
 Display the current autoloading size threshold, in megabytes.
 @end table
 
+Sometimes you may wish that @value{GDBN} stops and gives you control
+when any of shared library events happen.  Use the @code{set
+stop-on-solib-events} command for this:
+
+@table @code
+@item set stop-on-solib-events
+@kindex set stop-on-solib-events
+This command controls whether @value{GDBN} should give you control
+when the dynamic linker notifies it about some shared library event.
+The most common event of interest is loading or unloading of a new
+shared library.
+
+@item show stop-on-solib-events
+@kindex show stop-on-solib-events
+Show whether @value{GDBN} stops and gives you control when shared
+library events happen.
+@end table
+
 Shared libraries are also supported in many cross or remote debugging
 configurations.  A copy of the target's libraries need to be present on the
 host system; they need to be the same as the target libraries, although the
@@ -11360,10 +11406,10 @@ NetROM ROM emulator.  This target only supports downloading.
 Different targets are available on different configurations of @value{GDBN};
 your configuration may have more or fewer targets.
 
-Many remote targets require you to download the executable's code
-once you've successfully established a connection.  You may wish to
-control the size of the data chunks used by @value{GDBN} to download
-program parts to the remote target.
+Many remote targets require you to download the executable's code once
+you've successfully established a connection.  You may wish to control
+various aspects of this process, such as the size of the data chunks
+used by @value{GDBN} to download program parts to the remote target.
 
 @table @code
 @kindex set download-write-size
@@ -11376,7 +11422,31 @@ memory cache.
 
 @kindex show download-write-size
 @item show download-write-size
+@kindex show download-write-size
 Show the current value of the write size.
+
+@item set hash
+@kindex set hash@r{, for remote monitors}
+@cindex hash mark while downloading
+This command controls whether a hash mark @samp{#} is displayed while
+downloading a file to the remote monitor.  If on, a hash mark is
+displayed after each S-record is successfully downloaded to the
+monitor.
+
+@item show hash
+@kindex show hash@r{, for remote monitors}
+Show the current status of displaying the hash mark.
+
+@item set debug monitor
+@kindex set debug monitor
+@cindex display remote monitor communications
+Enable or disable display of communications messages between
+@value{GDBN} and the remote monitor.
+
+@item show debug monitor
+@kindex show debug monitor
+Show the current status of displaying communications between
+@value{GDBN} and the remote monitor.
 @end table
 
 @table @code
@@ -11913,11 +11983,11 @@ downloads.
 @cindex @code{auxv}, and remote targets
 Set the use of the remote protocol's @samp{qPart:auxv:read} (target
 auxiliary vector read) request.  This request is used to fetch the
-remote target's @dfn{auxiliary vector}, see @ref{Auxiliary Vector}.
-The default setting depends on the remote stub's support of this
-request (@value{GDBN} queries the stub when this request is first
-required).  @xref{General Query Packets, qPart}, for more information
-about this request.
+remote target's @dfn{auxiliary vector}, see @ref{OS Information,
+Auxiliary Vector}.  The default setting depends on the remote stub's
+support of this request (@value{GDBN} queries the stub when this
+request is first required).  @xref{General Query Packets, qPart}, for
+more information about this request.
 
 @item show remote read-aux-vector-packet
 Show the current setting of use of the @samp{qPart:auxv:read} request.
@@ -12364,7 +12434,7 @@ available:
 @table @code
 @kindex kvm
 @item kvm pcb
-Set current context from pcb address.
+Set current context from the @dfn{Process Control Block} (PCB) address.
 
 @item kvm proc
 Set current context from proc address.  This command isn't available on
@@ -12443,6 +12513,48 @@ its children.
 Report on the process IDs related to your program: its own process ID,
 the ID of its parent, the process group ID, and the session ID.
 @end ignore
+
+@item set procfs-trace
+@kindex set procfs-trace
+@cindex @code{procfs} API calls
+This command enables and disables tracing of @code{procfs} API calls.
+
+@item show procfs-trace
+@kindex show procfs-trace
+Show the current state of @code{procfs} API call tracing.
+
+@item set procfs-file @var{file}
+@kindex set procfs-file
+Tell @value{GDBN} to write @code{procfs} API trace to the named
+@var{file}.  @value{GDBN} appends the trace info to the previous
+contents of the file.  The default is to display the trace on the
+standard output.
+
+@item show procfs-file
+@kindex show procfs-file
+Show the file to which @code{procfs} API trace is written.
+
+@item proc-trace-entry
+@itemx proc-trace-exit
+@itemx proc-untrace-entry
+@itemx proc-untrace-exit
+@kindex proc-trace-entry
+@kindex proc-trace-exit
+@kindex proc-untrace-entry
+@kindex proc-untrace-exit
+These commands enable and disable tracing of entries into and exits
+from the @code{syscall} interface.
+
+@item info pidlist
+@kindex info pidlist
+@cindex process list, QNX Neutrino
+For QNX Neutrino only, this command displays the list of all the
+processes and all the threads within each process.
+
+@item info meminfo
+@kindex info meminfo
+@cindex mapinfo list, QNX Neutrino
+For QNX Neutrino only, this command displays the list of all mapinfos.
 @end table
 
 @node DJGPP Native
@@ -13532,7 +13644,6 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @subsection Renesas M32R/D
 
 @table @code
-
 @kindex target m32r
 @item target m32r @var{dev}
 Renesas M32R/D ROM monitor.
@@ -13540,7 +13651,48 @@ Renesas M32R/D ROM monitor.
 @kindex target m32rsdi
 @item target m32rsdi @var{dev}
 Renesas M32R SDI server, connected via parallel port to the board.
+@end table
 
+The following @value{GDBN} commands are specific to the M32R monitor:
+
+@table @code
+@item set download-path @var{path}
+@kindex set download-path
+@cindex find downloadable @sc{srec} files (M32R)
+Set the default path for finding donwloadable @sc{srec} files.
+
+@item show download-path
+@kindex show download-path
+Show the default path for downloadable @sc{srec} files.
+
+@item set board-address @var{addr}
+@kindex set board-address
+@cindex M32-EVA target board address
+Set the IP address for the M32R-EVA target board.
+
+@item show board-address
+@kindex show board-address
+Show the current IP address of the target board.
+
+@item set server-address @var{addr}
+@kindex set server-address
+@cindex download server address (M32R)
+Set the IP address for the download server, which is the @value{GDBN}'s
+host machine.
+
+@item show server-address
+@kindex show server-address
+Display the IP address of the download server.
+
+@item upload @r{[}@var{file}@r{]}
+@kindex upload@r{, M32R}
+Upload the specified @sc{srec} @var{file} via the monitor's Ethernet
+upload capability.  If no @var{file} argument is given, the current
+executable file is uploaded.
+
+@item tload @r{[}@var{file}@r{]}
+@kindex tload@r{, M32R}
+Test the @code{upload} command.
 @end table
 
 @node M68K
@@ -14889,6 +15041,12 @@ Turns on or off display of gdbarch debugging info.  The default is off
 @kindex show debug
 @item show debug arch
 Displays the current state of displaying gdbarch debugging info.
+@item set debug aix-thread
+@cindex AIX threads
+Display debugging messages about inner workings of the AIX thread
+module.
+@item show debug aix-thread
+Show the current state of AIX thread debugging info display.
 @item set debug event
 @cindex event debugging info
 Turns on or off display of @value{GDBN} event debugging info.  The
@@ -14898,11 +15056,11 @@ Displays the current state of displaying @value{GDBN} event debugging
 info.
 @item set debug expression
 @cindex expression debugging info
-Turns on or off display of @value{GDBN} expression debugging info.  The
-default is off.
+Turns on or off display of debugging info about @value{GDBN}
+expression parsing.  The default is off.
 @item show debug expression
-Displays the current state of displaying @value{GDBN} expression
-debugging info.
+Displays the current state of displaying debugging info about
+@value{GDBN} expression parsing.
 @item set debug frame
 @cindex frame debugging info
 Turns on or off display of @value{GDBN} frame debugging info.  The
@@ -14920,7 +15078,7 @@ Displays the current state of @value{GDBN} inferior debugging.
 @item set debug lin-lwp
 @cindex @sc{gnu}/Linux LWP debug messages
 @cindex Linux lightweight processes
-Turns on or off debugging messages from the LWP debug support.
+Turns on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
 @item set debug observer
@@ -20980,7 +21138,10 @@ the replacement as part of the warning.
 
 @kindex maint dump-me
 @item maint dump-me
+@cindex @code{SIGQUIT} signal, dump core of @value{GDBN}
 Cause a fatal signal in the debugger and force it to dump its core.
+This is supported only on systems which support aborting a program
+with the @code{SIGQUIT} signal.
 
 @kindex maint internal-error
 @kindex maint internal-warning
@@ -21023,7 +21184,6 @@ Print the entire architecture configuration.  The optional argument
 
 @kindex maint print dummy-frames
 @item maint print dummy-frames
-
 Prints the contents of @value{GDBN}'s internal dummy-frame stack.
 
 @smallexample
@@ -22205,9 +22365,9 @@ requests use the same reply formats, listed below.
 
 @table @asis
 @item @code{qPart}:@code{auxv}:@code{read}::@var{offset},@var{length}
-Access the target's @dfn{auxiliary vector}.  @xref{Auxiliary Vector},
-and see @ref{Remote configuration, read-aux-vector-packet}.
-Note @var{annex} must be empty.
+Access the target's @dfn{auxiliary vector}.  @xref{OS Information,
+auxiliary vector}, and see @ref{Remote configuration,
+read-aux-vector-packet}.  Note @var{annex} must be empty.
 @end table
 
 Reply:

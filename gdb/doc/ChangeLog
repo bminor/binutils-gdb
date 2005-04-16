@@ -1,3 +1,21 @@
+2005-04-16  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (OS Information): Renamed from Auxiliary Vector; all
+	references changed.  Add descriptgion of "info udot".
+	(Files): Document "set/show stop-on-solib-events".
+	(M32R/D): Document "set/show download-path", "set/show
+	board-address", "set/show server-address", "upload", "tload".
+	(Maintenance Commands): Improve indexing.
+	(Target Commands): Document "set/show hash", "set/show debug
+	monitor".
+	(SVR4 Process Information): Document "info pidlist" and "info
+	meminfo".  Document "set/show procfs-tarce" and "set/show
+	procfs-file".  Document "proc-trace-*" and "proc-untrace-*".
+	(Symbols, The Print Command with Objective-C): Improve indexing.
+	(Objective-C): Add references to "info classes" and "info
+	selectors".
+	(Debugging Output): Improve wording.
+
 2005-04-15  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Hurd Native): New subsection, documents
@@ -16,6 +34,7 @@
 	print unwind".
 	(Netrino): New subsection.  Document "set/show debug nto-debug".
 	(Super-H): New section.  Document the "regs" command.
+	(Debugging Output): Document "set/show debug aix-thread".
 
 2005-04-09  Eli Zaretskii  <eliz@gnu.org>
 
