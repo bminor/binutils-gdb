@@ -16,12 +16,28 @@
 	(Symbols, The Print Command with Objective-C): Improve indexing.
 	(Objective-C): Add references to "info classes" and "info
 	selectors".
-	(Debugging Output): Improve wording.
+	(Debugging Output): Improve wording.  Document "set/show debug
+	solib-frv".  Fix "set/show debugvarobj".
 	(Set Breaks): Add index entry for "hardware breakpoints".
 	(Renesas ICE): Document "e7000", "ftplogin", "ftpload", "drain",
 	and "set/show usehardbreakpoints".
 	(MIPS Embedded): Document "se/show syn-garbage-limit", "set/show
 	monitor-prompt", "set/show monitor-warnings", "pmon".
+	(ARM): Document "rdilogfile", "rdilogenable", "set/show
+	rdiromatzero", "set/show rdiheartbeat".
+	(PowerPC): Document SDS-specific commands "set/show sdstimeout",
+	"sds".
+	(Embedded Processors): Document the "sim" command.
+	(Remote): Document the "remote" command.
+	(DJGPP Native): Document the "info serial" command.
+	(Threads): Document "maint info sol-threads".
+	(Files): Document "nosharedlibrary", "add-symbol-file-from-memory".
+	(Set Breaks): Improve indexing.
+	(Command Syntax): Add a reference to dont-repeat.
+	(Define): Document "dont-repeat".
+	(TUI Commands): Document "tabset".
+	(WinCE): New subsection.  Document "set/show remotedirectory",
+	"set/show remoteupload", "set/show remoteaddhost".
 
 2005-04-15  Eli Zaretskii  <eliz@gnu.org>
 

@@ -1267,7 +1267,8 @@ A blank line as input to @value{GDBN} (typing just @key{RET}) means to
 repeat the previous command.  Certain commands (for example, @code{run})
 will not repeat this way; these are commands whose unintentional
 repetition might cause trouble and which you are unlikely to want to
-repeat.
+repeat.  User-defined commands can disable this feature; see
+@ref{Define, dont-repeat}.
 
 The @code{list} and @code{x} commands, when you repeat them with
 @key{RET}, construct new arguments rather than repeating
@@ -2257,6 +2258,16 @@ For example,
                                from /usr/lib/libc.2
 @end smallexample
 
+On Solaris, you can display more information about user threads with a
+Solaris-specific command:
+
+@table @code
+@item maint info sol-threads
+@kindex maint info sol-threads
+@cindex thread info (Solaris)
+Display info on Solaris user threads.
+@end table
+
 @table @code
 @kindex thread @var{threadno}
 @item thread @var{threadno}
@@ -2606,6 +2617,8 @@ See also @ref{Conditions, ,Break conditions}.
 
 @kindex rbreak
 @cindex regular expression
+@cindex breakpoints in functions matching a regexp
+@cindex set breakpoints in many functions
 @item rbreak @var{regex}
 Set breakpoints on all functions matching the regular expression
 @var{regex}.  This command sets an unconditional breakpoint on all
@@ -10675,6 +10688,19 @@ You can use the @samp{-mapped} and @samp{-readnow} options just as with
 the @code{symbol-file} command, to change how @value{GDBN} manages the symbol
 table information for @var{filename}.
 
+@kindex add-symbol-file-from-memory
+@cindex @code{syscall DSO}
+@cindex load symbols from memory
+@item add-symbol-file-from-memory @var{address}
+Load symbols from the given @var{address} in a dynamically loaded
+object file whose image is mapped directly into the inferior's memory.
+For example, the Linux kernel maps a @code{syscall DSO} into each
+process's address space; this DSO provides kernel-specific code for
+some system calls.  The argument can be any expression whose
+evaluation yields the address of the file's shared object file header.
+For this command to work, you must have used @code{symbol-file} or
+@code{exec-file} commands in advance.
+
 @kindex add-shared-symbol-files
 @kindex assf
 @item add-shared-symbol-files @var{library-file}
@@ -10830,6 +10856,7 @@ the libraries whose symbols you want to be loaded.
 Display the current autoloading mode.
 @end table
 
+@cindex load shared library
 To explicitly load shared library symbols, use the @code{sharedlibrary}
 command:
 
@@ -10850,6 +10877,14 @@ As with files loaded automatically, it only loads shared libraries
 required by your program for a core file or after typing @code{run}.  If
 @var{regex} is omitted all shared libraries required by your program are
 loaded.
+
+@item nosharedlibrary
+@kindex nosharedlibrary
+@cindex unload symbols from shared libraries
+Unload all shared object library symbols.  This discards all symbols
+that have been loaded from all shared libraries.  Symbols from shared
+libraries that were loaded by explicit user requests are not
+discarded.
 @end table
 
 On some systems, such as HP-UX systems, @value{GDBN} supports
@@ -11527,6 +11562,17 @@ communicate with @value{GDBN}.
 
 Other remote targets may be available in your
 configuration of @value{GDBN}; use @code{help target} to list them.
+
+Once you've connected to the remote target, @value{GDBN} allows you to
+send arbitrary commands to the remote monitor:
+
+@table @code
+@item remote @var{command}
+@kindex remote@r{, a command}
+@cindex send command to remote monitor
+Send an arbitrary @var{command} string to the remote monitor.
+@end table
+
 
 @node KOD
 @section Kernel Object Display
@@ -12698,6 +12744,7 @@ mapped 1:1, i.e.@: the physical and linear addresses are identical.
 This command is supported only with some DPMI servers.
 @end table
 
+@cindex DOS serial data link, remote debugging
 In addition to native debugging, the DJGPP port supports remote
 debugging via a serial data link.  The following commands are specific
 to remote serial debugging in the DJGPP port of @value{GDBN}.
@@ -12734,6 +12781,14 @@ other 3 COM ports.
 The related commands @samp{show com1base}, @samp{show com1irq} etc.@:
 display the current settings of the base address and the @code{IRQ}
 lines used by the COM ports.
+
+@item info serial
+@kindex info serial
+@cindex DOS serial port status
+This command prints the status of the 4 DOS serial ports.  For each
+port, it prints whether it's active or not, its I/O base address and
+IRQ number, whether it uses a 16550-style FIFO, its baudrate, and the
+counts of various errors encountered so far.
 @end table
 
 
@@ -13325,9 +13380,21 @@ the time of attachment.
 This section goes into details specific to particular embedded
 configurations.
 
+@cindex send command to simulator
+Whenever a specific embedded processor has a simulator, @value{GDBN}
+allows to send an arbitrary command to the simulator.
+
+@table @code
+@item sim @var{command}
+@kindex sim@r{, a command}
+Send an arbitrary @var{command} string to the simulator.  Consult the
+documentation for the specific simulator in use for information about
+acceptable commands.
+@end table
+
 
 @menu
-* ARM::                         ARM
+* ARM::                         ARM RDI
 * H8/300::                      Renesas H8/300
 * H8/500::                      Renesas H8/500
 * M32R/D::                      Renesas M32R/D
@@ -13344,13 +13411,14 @@ configurations.
 * AVR::                         Atmel AVR
 * CRIS::                        CRIS
 * Super-H::                     Renesas Super-H
+* WinCE::                       Windows CE child processes
 @end menu
 
 @node ARM
 @subsection ARM
+@cindex ARM RDI
 
 @table @code
-
 @kindex target rdi
 @item target rdi @var{dev}
 ARM Angel monitor, via RDI library interface to ADP protocol.  You may
@@ -13415,6 +13483,50 @@ target support subsystem.
 
 @item show debug arm
 Show whether ARM-specific debugging messages are enabled.
+@end table
+
+The following commands are available when an ARM target is debugged
+using the RDI interface:
+
+@table @code
+@item rdilogfile @r{[}@var{file}@r{]}
+@kindex rdilogfile
+@cindex ADP (Angel Debugger Protocol) logging
+Set the filename for the ADP (Angel Debugger Protocol) packet log.
+With an argument, sets the log file to the specified @var{file}.  With
+no argument, show the current log file name.  The default log file is
+@file{rdi.log}.
+
+@item rdilogenable @r{[}@var{arg}@r{]}
+@kindex rdilogenable
+Control logging of ADP packets.  With an argument of 1 or @code{"yes"}
+enables logging, with an argument 0 or @code{"no"} disables it.  With
+no arguments displays the current setting.  When logging is enabled,
+ADP packets exchanged between @value{GDBN} and the RDI target device
+are logged to a file.
+
+@item set rdiromatzero
+@kindex set rdiromatzero
+@cindex ROM at zero address, RDI
+Tell @value{GDBN} whether the target has ROM at address 0.  If on,
+vector catching is disabled, so that zero address can be used.  If off
+(the default), vector catching is enabled.  For this command to take
+effect, it needs to be invoked prior to the @code{target rdi} command.
+
+@item show rdiromatzero
+@kindex show rdiromatzero
+Show the current setting of ROM at zero address.
+
+@item set rdiheartbeat
+@kindex set rdiheartbeat
+@cindex RDI heartbeat
+Enable or disable RDI heartbeat packets.  It is not recommended to
+turn on this option, since it confuses ARM and EPI JTAG interface, as
+well as the Angel monitor.
+
+@item show rdiheartbeat
+@kindex show rdiheartbeat
+Show the setting of RDI heartbeat packets.
 @end table
 
 
@@ -14088,7 +14200,6 @@ Set suspend trace mode.
 @subsection PowerPC
 
 @table @code
-
 @kindex target dink32
 @item target dink32 @var{dev}
 DINK32 ROM monitor.
@@ -14102,8 +14213,27 @@ PPCBUG ROM monitor for PowerPC.
 @kindex target sds
 @item target sds @var{dev}
 SDS monitor, running on a PowerPC board (such as Motorola's ADS).
-
 @end table
+
+@cindex SDS protocol
+The following commands specifi to the SDS protocol are supported
+by@value{GDBN}:
+
+@table @code
+@item set sdstimeout @var{nsec}
+@kindex set sdstimeout
+Set the timeout for SDS protocol reads to be @var{nsec} seconds.  The
+default is 2 seconds.
+
+@item show sdstimeout
+@kindex show sdstimeout
+Show the current value of the SDS timeout.
+
+@item sds @var{command}
+@kindex sds@r{, a command}
+Send the specified @var{command} string to the SDS monitor.
+@end table
+
 
 @node PA
 @subsection HP PA Embedded
@@ -14459,6 +14589,44 @@ commands:
 @item regs
 @kindex regs@r{, Super-H}
 Show the values of all Super-H registers.
+@end table
+
+@node WinCE
+@subsection Windows CE
+@cindex Windows CE
+
+The following commands are available for Windows CE:
+
+@table @code
+@item set remotedirectory @var{dir}
+@kindex set remotedirectory
+Tell @value{GDBN} to upload files from the named directory @var{dir}.
+The default is @file{/gdb}, i.e.@: the root directory on the current
+drive.
+
+@item show remotedirectory
+@kindex show remotedirectory
+Show the current value of the upload directory.
+
+@item set remoteupload @var{method}
+@kindex set remoteupload
+Set the method used to upload files to remote device.  Valid values
+for @var{method} are @samp{always}, @samp{newer}, and @samp{never}.
+The default is @samp{newer}.
+
+@item show remoteupload
+@kindex show remoteupload
+Show the current setting of the upload method.
+
+@item set remoteaddhost
+@kindex set remoteaddhost
+Tell @value{GDBN} whether to add this host to the remote stub's
+arguments when you debug over a network.
+
+@item show remoteaddhost
+@kindex show remoteaddhost
+Show whether to add this host to remote stub's arguments when
+debugging over a network.
 @end table
 
 
@@ -15227,6 +15395,12 @@ default is off.
 @item show debug serial
 Displays the current state of displaying @value{GDBN} serial debugging
 info.
+@item set debug solib-frv
+@cindex FR-V shared-library debugging
+Turns on or off debugging messages for FR-V shared-library code.
+@item show debug solib-frv
+Display the current state of FR-V shared-library code debugging
+messages.
 @item set debug target
 @cindex target debugging info
 Turns on or off display of @value{GDBN} target debugging info. This info
@@ -15237,11 +15411,11 @@ until the next time you connect to a target or use the @code{run} command.
 @item show debug target
 Displays the current state of displaying @value{GDBN} target debugging
 info.
-@item set debug varobj
+@item set debugvarobj
 @cindex variable object debugging info
 Turns on or off display of @value{GDBN} variable object debugging
 info. The default is off.
-@item show debug varobj
+@item show debugvarobj
 Displays the current state of displaying @value{GDBN} variable object
 debugging info.
 @end table
@@ -15331,6 +15505,13 @@ After the @code{document} command is finished, @code{help} on command
 You may use the @code{document} command again to change the
 documentation of a command.  Redefining the command with @code{define}
 does not change the documentation.
+
+@kindex dont-repeat
+@cindex don't repeat command
+@item dont-repeat
+Used inside a user-defined command, this tells @value{GDBN} that this
+command should not be repeated when the user hits @key{RET}
+(@pxref{Command Syntax, repeat last command}).
 
 @kindex help user-defined
 @item help user-defined
@@ -16052,6 +16233,10 @@ Update the source window and the current execution point.
 Change the height of the window @var{name} by @var{count}
 lines.  Positive counts increase the height, while negative counts
 decrease it.
+
+@item tabset
+@kindex tabset @var{nchars}
+Set the width of tab stops to be @var{nchars} characters.
 
 @end table
 
