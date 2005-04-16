@@ -1,3 +1,9 @@
+2005-04-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* ppcobsd-tdep.c: Fix typo in comment.
+	(_initialize_ppcobsd_tdep): Register GDB_OSABI_OPENBSD_ELF for
+	bfd_arch_rs6000 too.
+
 2005-04-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote.c (remote_get_thread_local_address): Throw a more
