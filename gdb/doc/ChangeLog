@@ -5,6 +5,8 @@
 	(Files): Document "set/show stop-on-solib-events".
 	(M32R/D): Document "set/show download-path", "set/show
 	board-address", "set/show server-address", "upload", "tload".
+	Document "sdireset", "sdistatus", "debug_chaos", "use_debug_dma",
+	"use_mon_code", "use_ib_break", "use_dbt_break".
 	(Maintenance Commands): Improve indexing.
 	(Target Commands): Document "set/show hash", "set/show debug
 	monitor".
@@ -15,6 +17,11 @@
 	(Objective-C): Add references to "info classes" and "info
 	selectors".
 	(Debugging Output): Improve wording.
+	(Set Breaks): Add index entry for "hardware breakpoints".
+	(Renesas ICE): Document "e7000", "ftplogin", "ftpload", "drain",
+	and "set/show usehardbreakpoints".
+	(MIPS Embedded): Document "se/show syn-garbage-limit", "set/show
+	monitor-prompt", "set/show monitor-warnings", "pmon".
 
 2005-04-15  Eli Zaretskii  <eliz@gnu.org>
 

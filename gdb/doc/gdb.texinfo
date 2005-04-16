@@ -2572,6 +2572,7 @@ way, but the breakpoint is automatically deleted after the first time your
 program stops there.  @xref{Disabling, ,Disabling breakpoints}.
 
 @kindex hbreak
+@cindex hardware breakpoints
 @item hbreak @var{args}
 Set a hardware-assisted breakpoint.  @var{args} are the same as for the
 @code{break} command and the breakpoint is set in the same way, but the
@@ -13607,6 +13608,41 @@ If your E7000 is installed as a host on a TCP/IP network, you can just
 specify its hostname; @value{GDBN} uses @code{telnet} to connect.
 @end table
 
+The following special commands are available when debugging with the
+Renesas E7000 ICE:
+
+@table @code
+@item e7000 @var{command}
+@kindex e7000
+@cindex send command to E7000 monitor
+This sends the specified @var{command} to the E7000 monitor.
+
+@item ftplogin @var{machine} @var{username} @var{password} @var{dir}
+@kindex ftplogin@r{, E7000}
+This command records information for subsequent interface with the
+E7000 monitor via the FTP protocol: @value{GDBN} will log into the
+named @var{machine} using specified @var{username} and @var{password},
+and then chdir to the named directory @var{dir}.
+
+@item ftpload @var{file}
+@kindex ftpload@r{, E7000}
+This command uses credentials recorded by @code{ftplogin} to fetch and
+load the named @var{file} from the E7000 monitor.
+
+@item drain
+@kindex drain@r{, E7000}
+This command drains any pending text buffers stored on the E7000.
+
+@item set usehardbreakpoints
+@itemx show usehardbreakpoints
+@kindex set usehardbreakpoints@r{, E7000}
+@kindex show usehardbreakpoints@r{, E7000}
+@cindex hardware breakpoints, and E7000
+These commands set and show the use of hardware breakpoints for all
+breakpoints.  @xref{Set Breaks, hardware-assisted breakpoint}, for
+more information about using hardware breakpoints selectively.
+@end table
+
 @node Renesas Special
 @subsubsection Special @value{GDBN} commands for Renesas micros
 
@@ -13641,7 +13677,7 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @end table
 
 @node M32R/D
-@subsection Renesas M32R/D
+@subsection Renesas M32R/D and M32R/SDI
 
 @table @code
 @kindex target m32r
@@ -13693,6 +13729,40 @@ executable file is uploaded.
 @item tload @r{[}@var{file}@r{]}
 @kindex tload@r{, M32R}
 Test the @code{upload} command.
+@end table
+
+The following commands are available for M32R/SDI:
+
+@table @code
+@item sdireset
+@kindex sdireset
+@cindex reset SDI connection, M32R
+This command resets the SDI connection.
+
+@item sdistatus
+@kindex sdistatus
+This command shows the SDI connection status.
+
+@item debug_chaos
+@kindex debug_chaos
+@cindex M32R/Chaos debugging
+Instructs the remote that M32R/Chaos debugging is to be used.
+
+@item use_debug_dma
+@kindex use_debug_dma
+Instructs the remote to use the DEBUG_DMA method of accessing memory.
+
+@item use_mon_code
+@kindex use_mon_code
+Instructs the remote to use the MON_CODE method of accessing memory.
+
+@item use_ib_break
+@kindex use_ib_break
+Instructs the remote to set breakpoints by IB break.
+
+@item use_dbt_break
+@kindex use_dbt_break
+Instructs the remote to set breakpoints by DBT.
 @end table
 
 @node M68K
@@ -13850,6 +13920,54 @@ The timeout set by @code{set timeout} does not apply when @value{GDBN}
 is waiting for your program to stop.  In that case, @value{GDBN} waits
 forever because it has no way of knowing how long the program is going
 to run before stopping.
+
+@item set syn-garbage-limit @var{num}
+@kindex set syn-garbage-limit@r{, MIPS remote}
+@cindex synchronize with remote MIPS target
+Limit the maximum number of characters @value{GDBN} should ignore when
+it tries to synchronize with the remote target.  The default is 10
+characters.  Setting the limit to -1 means there's no limit.
+
+@item show syn-garbage-limit
+@kindex show syn-garbage-limit@r{, MIPS remote}
+Show the current limit on the number of characters to ignore when
+trying to synchronize with the remote system.
+
+@item set monitor-prompt @var{prompt}
+@kindex set monitor-prompt@r{, MIPS remote}
+@cindex remote monitor prompt
+Tell @value{GDBN} to expect the specified @var{prompt} string from the
+remote monitor.  The default depends on the target:
+@table @asis
+@item pmon target
+@samp{PMON}
+@item ddb target
+@samp{NEC010}
+@item lsi target
+@samp{PMON>}
+@end table
+
+@item show monitor-prompt
+@kindex show monitor-prompt@r{, MIPS remote}
+Show the current strings @value{GDBN} expects as the prompt from the
+remote monitor.
+
+@item set monitor-warnings
+@kindex set monitor-warnings@r{, MIPS remote}
+Enable or disable monitor warnings about hardware breakpoints.  This
+has effect only for the @code{lsi} target.  When on, @value{GDBN} will
+display warning messages whose codes are returned by the @code{lsi}
+PMON monitor for breakpoint commands.
+
+@item show monitor-warnings
+@kindex show monitor-warnings@r{, MIPS remote}
+Show the current setting of printing monitor warnings.
+
+@item pmon @var{command}
+@kindex pmon@r{, MIPS remote}
+@cindex send PMON command
+This command allows sending an arbitrary @var{command} string to the
+monitor.  The monitor must be in debug mode for this to work.
 @end table
 
 @node OpenRISC 1000
