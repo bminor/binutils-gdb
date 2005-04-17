@@ -1994,7 +1994,7 @@ go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) $(gdb_wait_h) $(gdbcore_h) \
 hpacc-abi.o: hpacc-abi.c $(defs_h) $(value_h) $(gdb_regex_h) $(gdb_string_h) \
 	$(gdbtypes_h) $(gdbcore_h) $(cp_abi_h) $(gnu_v2_abi_h)
 hppabsd-nat.o: hppabsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(hppa_tdep_h)
+	$(target_h) $(hppa_tdep_h) $(inf_ptrace_h)
 hppabsd-tdep.o: hppabsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
 	$(regcache_h) $(regset_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(hppa_tdep_h) $(solib_svr4_h)

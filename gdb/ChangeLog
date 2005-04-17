@@ -1,3 +1,17 @@
+2005-04-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppabsd-nat.c: Update copyright year.  Include "target.h" and
+	"inf-ptrace.h".
+	(hppabsd_fetch_registers): Renamed from fetch_inferior_registers;
+	made static.
+	(hppabsd_store_registers): Renamed from store_inferior_registers;
+	made static.
+	(_initialize_hppabsd_nat): New function and prototype.
+	* config/pa/obsd.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-ptrace.o.
+	(NAT_FILE): Remove.
+	* Makefile.in (hppabsd-nat.o): Update dependencies.
+
 2005-04-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* pa64solib.c, pa64solib.h: Remove files.

@@ -1,6 +1,6 @@
 /* Native-dependent code for HP PA-RISC BSD's.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,12 +22,14 @@
 #include "defs.h"
 #include "inferior.h"
 #include "regcache.h"
+#include "target.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
 #include "hppa-tdep.h"
+#include "inf-ptrace.h"
 
 static int
 hppabsd_gregset_supplies_p (int regnum)
@@ -79,8 +81,8 @@ hppabsd_collect_gregset (const struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating-point registers).  */
 
-void
-fetch_inferior_registers (int regnum)
+static void
+hppabsd_fetch_registers (int regnum)
 {
   struct regcache *regcache = current_regcache;
 
@@ -99,8 +101,8 @@ fetch_inferior_registers (int regnum)
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating-point registers).  */
 
-void
-store_inferior_registers (int regnum)
+static void
+hppabsd_store_registers (int regnum)
 {
   if (regnum == -1 || hppabsd_gregset_supplies_p (regnum))
     {
@@ -116,4 +118,19 @@ store_inferior_registers (int regnum)
 	          (PTRACE_TYPE_ARG3) &regs, 0) == -1)
         perror_with_name (_("Couldn't write registers"));
     }
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_hppabsd_nat (void);
+
+void
+_initialize_hppabsd_nat (void)
+{
+  struct target_ops *t;
+
+  /* Add in local overrides.  */
+  t = inf_ptrace_target ();
+  t->to_fetch_registers = hppabsd_fetch_registers;
+  t->to_store_registers = hppabsd_store_registers;
+  add_target (t);
 }
