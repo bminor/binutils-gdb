@@ -38,6 +38,16 @@
 #include <machine/reg.h>
 #include <sys/file.h>
 
+static bfd_reloc_status_type hppa_som_reloc
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
+static bfd_boolean som_mkobject (bfd *);
+static bfd_boolean som_is_space (asection *);
+static bfd_boolean som_is_subspace (asection *);
+static int compare_subspaces (const void *, const void *);
+static unsigned long som_compute_checksum (bfd *);
+static bfd_boolean som_build_and_write_symbol_table (bfd *);
+static unsigned int som_slurp_symbol_table (bfd *);
+
 /* Magic not defined in standard HP-UX header files until 8.0.  */
 
 #ifndef CPU_PA_RISC1_0
@@ -1313,7 +1323,7 @@ static bfd_reloc_status_type
 hppa_som_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 		arelent *reloc_entry,
 		asymbol *symbol_in ATTRIBUTE_UNUSED,
-		void * data ATTRIBUTE_UNUSED,
+		void *data ATTRIBUTE_UNUSED,
 		asection *input_section,
 		bfd *output_bfd,
 		char **error_message ATTRIBUTE_UNUSED)
@@ -2407,7 +2417,7 @@ som_count_subspaces (bfd *abfd)
    count.  Doing so compacts the relocation stream.  */
 
 static int
-compare_syms (const void * arg1, const void * arg2)
+compare_syms (const void *arg1, const void *arg2)
 {
   asymbol **sym1 = (asymbol **) arg1;
   asymbol **sym2 = (asymbol **) arg2;
@@ -2437,7 +2447,7 @@ compare_syms (const void * arg1, const void * arg2)
    and subspace.  */
 
 static int
-compare_subspaces (const void * arg1, const void * arg2)
+compare_subspaces (const void *arg1, const void *arg2)
 {
   asection **subspace1 = (asection **) arg1;
   asection **subspace2 = (asection **) arg2;
@@ -4436,7 +4446,7 @@ som_make_empty_symbol (bfd *abfd)
 
 static void
 som_print_symbol (bfd *abfd,
-		  void * afile,
+		  void *afile,
 		  asymbol *symbol,
 		  bfd_print_symbol_type how)
 {
@@ -5070,16 +5080,16 @@ som_bfd_print_private_bfd_data (bfd *abfd, void *farg)
       fprintf (f, "\n");
       fprintf (f, "  type               %#x\n", auxhdr->type);
       fprintf (f, "  length             %#x\n", auxhdr->length);
-      fprintf (f, "  text size          %#x\n", exec_header->exec_tsize);
-      fprintf (f, "  text memory offset %#x\n", exec_header->exec_tmem);
-      fprintf (f, "  text file offset   %#x\n", exec_header->exec_tfile);
-      fprintf (f, "  data size          %#x\n", exec_header->exec_dsize);
-      fprintf (f, "  data memory offset %#x\n", exec_header->exec_dmem);
-      fprintf (f, "  data file offset   %#x\n", exec_header->exec_dfile);
-      fprintf (f, "  bss size           %#x\n", exec_header->exec_bsize);
-      fprintf (f, "  entry point        %#x\n", exec_header->exec_entry);
-      fprintf (f, "  loader flags       %#x\n", exec_header->exec_flags);
-      fprintf (f, "  bss initializer    %#x\n", exec_header->exec_bfill);
+      fprintf (f, "  text size          %#lx\n", exec_header->exec_tsize);
+      fprintf (f, "  text memory offset %#lx\n", exec_header->exec_tmem);
+      fprintf (f, "  text file offset   %#lx\n", exec_header->exec_tfile);
+      fprintf (f, "  data size          %#lx\n", exec_header->exec_dsize);
+      fprintf (f, "  data memory offset %#lx\n", exec_header->exec_dmem);
+      fprintf (f, "  data file offset   %#lx\n", exec_header->exec_dfile);
+      fprintf (f, "  bss size           %#lx\n", exec_header->exec_bsize);
+      fprintf (f, "  entry point        %#lx\n", exec_header->exec_entry);
+      fprintf (f, "  loader flags       %#lx\n", exec_header->exec_flags);
+      fprintf (f, "  bss initializer    %#lx\n", exec_header->exec_bfill);
     }
 
   return TRUE;
@@ -5240,7 +5250,7 @@ bfd_som_attach_compilation_unit (bfd *abfd,
 static bfd_boolean
 som_get_section_contents (bfd *abfd,
 			  sec_ptr section,
-			  void * location,
+			  void *location,
 			  file_ptr offset,
 			  bfd_size_type count)
 {
@@ -5256,7 +5266,7 @@ som_get_section_contents (bfd *abfd,
 static bfd_boolean
 som_set_section_contents (bfd *abfd,
 			  sec_ptr section,
-			  const void * location,
+			  const void *location,
 			  file_ptr offset,
 			  bfd_size_type count)
 {
@@ -6229,6 +6239,9 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 #define som_bfd_is_group_section	        bfd_generic_is_group_section
 #define som_bfd_discard_group		        bfd_generic_discard_group
 #define som_section_already_linked              _bfd_generic_section_already_linked
+#define som_bfd_merge_private_bfd_data		_bfd_generic_bfd_merge_private_bfd_data
+#define som_bfd_copy_private_header_data	_bfd_generic_bfd_copy_private_header_data
+#define som_bfd_set_private_flags		_bfd_generic_bfd_set_private_flags
 
 const bfd_target som_vec =
 {

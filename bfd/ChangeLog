@@ -1,3 +1,17 @@
+2005-04-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* som.c (hppa_som_reloc, som_mkobject, som_is_space)
+	(som_is_subspace, compare_subspaces, som_compute_checksum)
+	(som_build_and_write_symbol_table, som_slurp_symbol_table): New
+	protoypes.
+	(hppa_som_reloc, compare_syms, compare_subspaces)
+	(som_print_symbol, som_get_section_contents)
+	(som_set_section_contents): Remove space after 'void *'.
+	(som_bfd_print_private_bfd_data): Use %lx to print longs.
+	(som_bfd_merge_private_bfd_data)
+	(som_bfd_copy_private_header_data, som_bfd_set_private_flags): New
+	defines.
+
 2004-04-15  Julian Brown  <julian@codesourcery.com>
 
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Update prototype.
