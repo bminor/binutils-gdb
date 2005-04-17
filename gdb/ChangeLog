@@ -1,3 +1,9 @@
+2005-04-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* pa64solib.c, pa64solib.h: Remove files.
+	* Makefile.in (pa64solib_h): Remove variable
+	(pa64solib.o): Remove dependency.
+
 2005-04-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* ppcobsd-nat.c: Update copyright year.  Include "inf-ptrace.h".
