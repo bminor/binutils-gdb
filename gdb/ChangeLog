@@ -1,5 +1,7 @@
 2005-04-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/nm-bsd.h: Remove file.
+
 	* hppabsd-nat.c: Update copyright year.  Include "target.h" and
 	"inf-ptrace.h".
 	(hppabsd_fetch_registers): Renamed from fetch_inferior_registers;
