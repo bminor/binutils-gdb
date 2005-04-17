@@ -336,6 +336,7 @@ dump_section_header (bfd *abfd, asection *section,
   if (bfd_get_flavour (abfd) == bfd_target_coff_flavour)
     PF (SEC_COFF_SHARED, "SHARED");
   PF (SEC_THREAD_LOCAL, "THREAD_LOCAL");
+  PF (SEC_GROUP, "GROUP");
 
   if ((section->flags & SEC_LINK_ONCE) != 0)
     {

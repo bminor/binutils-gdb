@@ -1,3 +1,7 @@
+2005-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (dump_section_header): Support SEC_GROUP.
+
 2005-04-16  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (debug_apply_rela_addends): Remove redundant %s from
