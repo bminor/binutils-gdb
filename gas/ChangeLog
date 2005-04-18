@@ -1,3 +1,12 @@
+2005-04-18  Jan Beulich  <jbeulich@novell.com>
+
+	* macro.c (free_token): New, freeing all the memory associated with a
+	macro.
+	(do_formals): Move initializers to ...
+	(define_macro): ... here.
+	(delete_macro): Convert passed in name to lower case. Warn when
+	purging macro that doesn't exist. Use hash_jam instead of hash_delete.
+
 2005-04-15  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (normalize_constant_expr): Fix formatting.

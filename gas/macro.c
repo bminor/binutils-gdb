@@ -77,6 +77,7 @@ static int sub_actual (int, sb *, sb *, struct hash_control *, int, sb *, int);
 static const char *macro_expand_body
   (sb *, sb *, formal_entry *, struct hash_control *, int);
 static const char *macro_expand (int, sb *, macro_entry *, sb *);
+static void free_macro(macro_entry *);
 
 #define ISWHITE(x) ((x) == ' ' || (x) == '\t')
 
@@ -471,8 +472,6 @@ do_formals (macro_entry *macro, int idx, sb *in)
 {
   formal_entry **p = &macro->formals;
 
-  macro->formal_count = 0;
-  macro->formal_hash = hash_new ();
   idx = sb_skip_white (idx, in);
   while (idx < in->len)
     {
@@ -568,6 +567,7 @@ define_macro (int idx, sb *in, sb *label,
 
   macro->formal_count = 0;
   macro->formals = 0;
+  macro->formal_hash = hash_new ();
 
   idx = sb_skip_white (idx, in);
   if (! buffer_and_nest ("MACRO", "ENDM", &macro->sub, get_line))
@@ -1142,12 +1142,52 @@ check_macro (const char *line, sb *expand,
   return 1;
 }
 
+/* Free the memory allocated to a macro.  */
+
+static void
+free_macro(macro_entry *macro)
+{
+  formal_entry *formal;
+
+  for (formal = macro->formals; formal; )
+    {
+      void *ptr;
+
+      sb_kill (&formal->name);
+      sb_kill (&formal->def);
+      sb_kill (&formal->actual);
+      ptr = formal;
+      formal = formal->next;
+      free (ptr);
+    }
+  hash_die (macro->formal_hash);
+  sb_kill (&macro->sub);
+  free (macro);
+}
+
 /* Delete a macro.  */
 
 void
 delete_macro (const char *name)
 {
-  hash_delete (macro_hash, name);
+  char *copy;
+  size_t i, len;
+  macro_entry *macro;
+
+  len = strlen (name);
+  copy = (char *) alloca (len + 1);
+  for (i = 0; i < len; ++i)
+    copy[i] = TOLOWER (name[i]);
+  copy[i] = '\0';
+
+  /* Since hash_delete doesn't free memory, just clear out the entry.  */
+  if ((macro = hash_find (macro_hash, copy)) != NULL)
+    {
+      hash_jam (macro_hash, copy, NULL);
+      free_macro (macro);
+    }
+  else
+    as_warn (_("Attempt to purge non-existant macro `%s'"), copy);
 }
 
 /* Handle the MRI IRP and IRPC pseudo-ops.  These are handled as a

@@ -78,4 +78,5 @@ case $target_triplet in {
     default { run_list_test dot "-alm" }
 }
 run_list_test end ""
+run_list_test purge "--hash-size=8000"
 run_list_test redef ""
