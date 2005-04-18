@@ -3265,7 +3265,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 static void
 normalize_constant_expr (expressionS *ex)
 {
-  if ((ex->X_op == O_constant && HAVE_32BIT_GPRS)
+  if (ex->X_op == O_constant
       && IS_ZEXT_32BIT_NUM (ex->X_add_number))
     ex->X_add_number = (((ex->X_add_number & 0xffffffff) ^ 0x80000000)
 			- 0x80000000);
@@ -3425,9 +3425,11 @@ check_absolute_expr (struct mips_cl_insn *ip, expressionS *ex)
   if (ex->X_op == O_big)
     as_bad (_("unsupported large constant"));
   else if (ex->X_op != O_constant)
-    as_bad (_("Instruction %s requires absolute expression"), ip->insn_mo->name);
+    as_bad (_("Instruction %s requires absolute expression"),
+	    ip->insn_mo->name);
 
-  normalize_constant_expr (ex);
+  if (HAVE_32BIT_GPRS)
+    normalize_constant_expr (ex);
 }
 
 /* Count the leading zeroes by performing a binary chop. This is a
@@ -8103,7 +8105,8 @@ do_msbd:
 		  if (imm2_expr.X_op != O_big
 		      && imm2_expr.X_op != O_constant)
 		  insn_error = _("absolute expression required");
-		  normalize_constant_expr (&imm2_expr);
+		  if (HAVE_32BIT_GPRS)
+		    normalize_constant_expr (&imm2_expr);
 		  s = expr_end;
 		  continue;
 
@@ -8571,7 +8574,8 @@ do_msbd:
 	      if (imm_expr.X_op != O_big
 		  && imm_expr.X_op != O_constant)
 		insn_error = _("absolute expression required");
-	      normalize_constant_expr (&imm_expr);
+	      if (HAVE_32BIT_GPRS)
+		normalize_constant_expr (&imm_expr);
 	      s = expr_end;
 	      continue;
 

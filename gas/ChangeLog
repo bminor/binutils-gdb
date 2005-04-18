@@ -1,3 +1,13 @@
+2005-04-18  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (normalize_constant_expr): Don't check for
+	HAVE_32BIT_GPRS.
+	(check_absolute_expr): Only call normalize_constant_expr() if
+	HAVE_32BIT_GPRS.
+	(mips_ip): Likewise.
+
+	* config/tc-mips.c (check_absolute_expr): Fix formatting.
+
 2005-04-15  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (normalize_constant_expr): Fix formatting.
