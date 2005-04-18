@@ -1469,14 +1469,14 @@ static const struct dis386 grps[][8] = {
   },
   /* GRPPADLCK1 */
   {
-    { "xstorerng", OP_0f07, 0, XX, XX },
-    { "xcryptecb", OP_0f07, 0, XX, XX },
-    { "xcryptcbc", OP_0f07, 0, XX, XX },
-    { "(bad)",	   OP_0f07, 0, XX, XX },
-    { "xcryptcfb", OP_0f07, 0, XX, XX },
-    { "xcryptofb", OP_0f07, 0, XX, XX },
-    { "(bad)",	   OP_0f07, 0, XX, XX },
-    { "(bad)",	   OP_0f07, 0, XX, XX },
+    { "xstore-rng", OP_0f07, 0, XX, XX },
+    { "xcrypt-ecb", OP_0f07, 0, XX, XX },
+    { "xcrypt-cbc", OP_0f07, 0, XX, XX },
+    { "xcrypt-ctr", OP_0f07, 0, XX, XX },
+    { "xcrypt-cfb", OP_0f07, 0, XX, XX },
+    { "xcrypt-ofb", OP_0f07, 0, XX, XX },
+    { "(bad)",	OP_0f07, 0, XX, XX },
+    { "(bad)",	OP_0f07, 0, XX, XX },
   },
   /* GRPPADLCK2 */
   {

@@ -1,3 +1,7 @@
+2005-04-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/tc-i386.c (md_begin): Allow hyphens in mnemonics.
+
 2005-04-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (normalize_constant_expr): Don't check for
