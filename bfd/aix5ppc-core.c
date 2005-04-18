@@ -220,7 +220,7 @@ xcoff64_core_p (abfd)
 	}
     }
 
-  return_value = abfd->xvec;	/* This is garbage for now.  */
+  return_value = (bfd_target *) abfd->xvec;	/* This is garbage for now.  */
 
  xcoff64_core_p_error:
   if (bfd_get_error () != bfd_error_system_call)

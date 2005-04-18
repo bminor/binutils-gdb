@@ -1,3 +1,8 @@
+2005-04-18  Nick Clifton  <nickc@redhat.com>
+
+	* aix5ppc-core.c (xcoff64_core_p): Fix compile time warning
+	assigning a value to return_value.
+
 2005-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 855
