@@ -1,5 +1,6 @@
 2005-04-18  Michael Snyder  <msnyder@redhat.com>
 
+	* config/mn10300/mn10300.mt: Add mn10300-prologue module.
 	* ia64-tdep.c (ia64_get_dyn_info_list): Fix indent.
 
 2005-04-18  Mark Kettenis  <kettenis@gnu.org>
