@@ -1,6 +1,12 @@
 2005-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 855
+	* elf.c (_bfd_elf_copy_private_section_data): Don't copy linker
+	created group data.
+
+2005-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 855
 	* elf.c (setup_group): Properly handle zero group count.
 
 2005-04-17  Mark Kettenis  <kettenis@gnu.org>

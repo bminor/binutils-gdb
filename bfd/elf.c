@@ -5519,9 +5519,14 @@ _bfd_elf_copy_private_section_data (bfd *ibfd,
 
   /* Set things up for objcopy.  The output SHT_GROUP section will
      have its elf_next_in_group pointing back to the input group
-     members.  */
-  elf_next_in_group (osec) = elf_next_in_group (isec);
-  elf_group_name (osec) = elf_group_name (isec);
+     members.  Ignore linker created group section.  See
+     elfNN_ia64_object_p in elfxx-ia64.c.  */
+  if (elf_sec_group (isec) == NULL
+      || (elf_sec_group (isec)->flags & SEC_LINKER_CREATED) == 0)
+    {
+      elf_next_in_group (osec) = elf_next_in_group (isec);
+      elf_group_name (osec) = elf_group_name (isec);
+    }
 
   osec->use_rela_p = isec->use_rela_p;
 
