@@ -1,5 +1,13 @@
 2005-04-18  Michael Snyder  <msnyder@redhat.com>
 
+	* mn10300-tdep.c: Assimilate code from mn10300-prologue.c.
+	* mn10300-prologue.c: Remove.
+	* mn10300-tdep.h: Add enums from mn10300-prologue.c.
+	Remove prototypes.
+	* config/mn10300/mn10300.mt: Remove mn10300-prologue module.
+
+2005-04-18  Michael Snyder  <msnyder@redhat.com>
+
 	* config/mn10300/mn10300.mt: Add mn10300-prologue module.
 	* ia64-tdep.c (ia64_get_dyn_info_list): Fix indent.
 

@@ -50,6 +50,25 @@ enum {
   E_NUM_REGS = 32
 };
 
+enum movm_register_bits {
+  movm_exother_bit = 0x01,
+  movm_exreg1_bit  = 0x02,
+  movm_exreg0_bit  = 0x04,
+  movm_other_bit   = 0x08,
+  movm_a3_bit      = 0x10,
+  movm_a2_bit      = 0x20,
+  movm_d3_bit      = 0x40,
+  movm_d2_bit      = 0x80
+};
+
+/* Values for frame_info.status */
+
+enum frame_kind {
+  MY_FRAME_IN_SP = 0x1,
+  MY_FRAME_IN_FP = 0x2,
+  NO_MORE_FRAMES = 0x4
+};
+
 /* mn10300 private data */
 struct gdbarch_tdep
 {
@@ -58,9 +77,4 @@ struct gdbarch_tdep
 
 #define AM33_MODE (gdbarch_tdep (current_gdbarch)->am33_mode)
 
-extern CORE_ADDR mn10300_analyze_prologue (struct frame_info *, 
-					   void **, CORE_ADDR);
-
-extern struct trad_frame_cache *mn10300_frame_unwind_cache (struct frame_info*,
-							    void **);
 
