@@ -1,3 +1,10 @@
+2005-04-18  Nick Clifton  <nickc@redhat.com>
+
+	* iwmmxt.c (WMAC, WMADD): Move casts from the LHS of an assignment
+	operator to the RHS.
+	(WSLL, WSRA, WSRL, WUNPCKEH, WUNPACKEL): Use ULL suffix to
+	indicate an unsigned long long constant.
+
 2005-03-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure: Regenerate.
