@@ -2524,7 +2524,7 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
 
 static void
 ia64_libunwind_frame_this_id (struct frame_info *next_frame, void **this_cache,
-		      struct frame_id *this_id)
+			      struct frame_id *this_id)
 {
   char buf[8];
   CORE_ADDR bsp;
