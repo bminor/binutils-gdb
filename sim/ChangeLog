@@ -1,3 +1,9 @@
+2005-04-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/traps.c (cris_break_13_handler) <case TARGET_SYS_mmap2>:
+	For ((len & 8191) != 0 && fd == (USI) -1), don't say this isn't
+	implemented.  In call to create_map, pad length argument to 8k. 
+
 2005-04-15  Corinna Vinschen  <vinschen@redhat.com>
 
 	* configure.ac: Add explicit sh64 case.

@@ -1530,8 +1530,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		    && flags != TARGET_MAP_PRIVATE
 		    && flags != TARGET_MAP_SHARED)
 		|| (fd != (USI) -1 && prot != TARGET_PROT_READ)
-		|| pgoff != 0
-		|| ((len & 8191) != 0 && fd == (USI) -1))
+		|| pgoff != 0)
 	      {
 		sim_io_eprintf (sd, "Unimplemented mmap2 call "
 				"(0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx, 0x%lx)\n",
@@ -1611,7 +1610,8 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	    else
 	      {
 		USI newaddr
-		  = create_map (sd, &current_cpu->highest_mmapped_page, addr, len);
+		  = create_map (sd, &current_cpu->highest_mmapped_page, addr,
+				(len + 8191) & ~8191);
 
 		if (newaddr >= (USI) -8191)
 		  retval = -cb_host_to_target_errno (cb, -(SI) newaddr);
