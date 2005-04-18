@@ -1,3 +1,8 @@
+2005-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 855
+	* elf.c (setup_group): Properly handle zero group count.
+
 2005-04-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* som.c (hppa_som_reloc, som_mkobject, som_is_space)

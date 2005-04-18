@@ -481,14 +481,18 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 	}
 
       if (num_group == 0)
-	num_group = (unsigned) -1;
-      elf_tdata (abfd)->num_group = num_group;
-
-      if (num_group > 0)
+	{
+	  num_group = (unsigned) -1;
+	  elf_tdata (abfd)->num_group = num_group;
+	}
+      else
 	{
 	  /* We keep a list of elf section headers for group sections,
 	     so we can find them quickly.  */
-	  bfd_size_type amt = num_group * sizeof (Elf_Internal_Shdr *);
+	  bfd_size_type amt;
+	  
+	  elf_tdata (abfd)->num_group = num_group;
+	  amt = num_group * sizeof (Elf_Internal_Shdr *);
 	  elf_tdata (abfd)->group_sect_ptr = bfd_alloc (abfd, amt);
 	  if (elf_tdata (abfd)->group_sect_ptr == NULL)
 	    return FALSE;
