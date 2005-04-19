@@ -1,5 +1,12 @@
 2005-04-19  Jan Beulich  <jbeulich@novell.com>
 
+	* config/te-sysv32.h: Remove.
+	* Makefile.am (TARG_ENV_HFILES): Remove reference to
+	config/te-sysv32.h.
+	* Makefile.in (TARG_ENV_HFILES): Likewise.
+
+2005-04-19  Jan Beulich  <jbeulich@novell.com>
+
 	PR/847
 	* config/tc-ia64.c (ia64_canonicalize_symbol_name): Re-allow zero-
 	length symbols.
