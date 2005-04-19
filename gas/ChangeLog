@@ -1,3 +1,9 @@
+2005-04-19  Jan Beulich  <jbeulich@novell.com>
+
+	PR/847
+	* config/tc-ia64.c (ia64_canonicalize_symbol_name): Re-allow zero-
+	length symbols.
+
 2005-04-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/tc-i386.c (md_begin): Allow hyphens in mnemonics.

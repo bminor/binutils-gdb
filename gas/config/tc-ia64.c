@@ -8022,8 +8022,6 @@ ia64_canonicalize_symbol_name (name)
     {
       if (full > 0)
 	as_bad ("Standalone `#' is illegal");
-      else
-	as_bad ("Zero-length symbol is illegal");
     }
   else if (len < full - 1)
     as_warn ("Redundant `#' suffix operators");
