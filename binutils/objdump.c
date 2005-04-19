@@ -299,6 +299,11 @@ dump_section_header (bfd *abfd, asection *section,
   char *comma = "";
   unsigned int opb = bfd_octets_per_byte (abfd);
 
+  /* Ignore linker created section.  See elfNN_ia64_object_p in
+     bfd/elfxx-ia64.c.  */
+  if (section->flags & SEC_LINKER_CREATED)
+    return;
+
   printf ("%3d %-13s %08lx  ", section->index,
 	  bfd_get_section_name (abfd, section),
 	  (unsigned long) bfd_section_size (abfd, section) / opb);

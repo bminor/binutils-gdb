@@ -1,3 +1,7 @@
+2005-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (dump_section_header): Skip linker created section.
+
 2005-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objdump.c (dump_section_header): Support SEC_GROUP.
