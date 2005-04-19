@@ -1,3 +1,8 @@
+2005-04-19  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-ia64.c (md_assemble): Fix error message for wrong
+	access to application registers.
+
 2005-04-19  Jan Beulich  <jbeulich@novell.com>
 
 	* config/te-sysv32.h: Remove.

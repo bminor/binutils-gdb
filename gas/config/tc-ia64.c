@@ -10692,7 +10692,7 @@ md_assemble (str)
 	  else if (ar_is_only_in_memory_unit (CURR_SLOT.opnd[rop].X_add_number))
 	    unit = 'm';
 	  if (unit != 'a' && unit != idesc->name [4])
-	    as_bad ("AR %d cannot be accessed by %c-unit",
+	    as_bad ("AR %d can only be accessed by %c-unit",
 		    (int) (CURR_SLOT.opnd[rop].X_add_number - REG_AR),
 		    TOUPPER (unit));
 	}

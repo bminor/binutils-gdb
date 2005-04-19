@@ -1,3 +1,7 @@
+2005-04-19  Andreas Schwab  <schwab@suse.de>
+
+	* gas/ia64/invalid-ar.l: Adapt to changed error message.
+
 2005-04-18  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/macros/purge.[ls]: New.
