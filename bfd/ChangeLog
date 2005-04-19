@@ -1,3 +1,11 @@
+2005-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Don't bother with
+	dynamic relocs in non-SEC_ALLOC sections.
+	(ppc_elf_gc_sweep_hook): Likewise.
+	(ppc_elf_relax_section): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+
 2005-04-18  Nick Clifton  <nickc@redhat.com>
 
 	* aix5ppc-core.c (xcoff64_core_p): Fix compile time warning

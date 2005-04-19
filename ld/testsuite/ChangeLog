@@ -1,3 +1,7 @@
+2005-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/reloc.d: Update to suit removal of non-alloc relocs.
+
 2005-04-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-d10v/default_layout.d: Update for unused section removal.
