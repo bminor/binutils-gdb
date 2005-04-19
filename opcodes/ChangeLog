@@ -1,3 +1,9 @@
+2005-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (RTO): Define.
+	(powerpc_opcodes <tlbsx, tlbsx., tlbre>): Combine PPC403 and BOOKE
+	entries to suit PPC440.
+
 2005-03-15  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (PNI_Fixup): Neither mwait nor monitor have any
