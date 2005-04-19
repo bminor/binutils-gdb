@@ -1,3 +1,7 @@
+2005-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/padlock.d: Updated.
+
 2005-04-19  Andreas Schwab  <schwab@suse.de>
 
 	* gas/ia64/invalid-ar.l: Adapt to changed error message.
