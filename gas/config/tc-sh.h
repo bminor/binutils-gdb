@@ -135,8 +135,6 @@ extern void sh_frob_file (void);
 #ifdef OBJ_COFF
 /* COFF specific definitions.  */
 
-#define DO_NOT_STRIP 0
-
 /* This macro translates between an internal fix and a coff reloc type.  */
 #define TC_COFF_FIX2RTYPE(fix) ((fix)->fx_r_type)
 

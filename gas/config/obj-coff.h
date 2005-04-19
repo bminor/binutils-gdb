@@ -265,8 +265,6 @@
 #define SYM_AUXINFO(S) \
   (&coffsymbol (symbol_get_bfdsym (S))->native[1])
 
-#define DO_NOT_STRIP	0
-
 /* The number of auxiliary entries.  */
 #define S_GET_NUMBER_AUXILIARY(s) \
   (coffsymbol (symbol_get_bfdsym (s))->native->u.syment.n_numaux)
@@ -453,9 +451,6 @@ typedef struct
   unsigned int ost_flags;
 } obj_symbol_type;
 
-#ifndef DO_NOT_STRIP
-#define DO_NOT_STRIP	0
-#endif
 /* Symbol table macros and constants.  */
 
 /* Possible and useful section number in symbol table

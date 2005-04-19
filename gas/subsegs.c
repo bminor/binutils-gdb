@@ -524,7 +524,7 @@ section_symbol (segT sec)
   else
     {
       segT seg;
-      s = symbol_find_base (sec->symbol->name, 0);
+      s = symbol_find (sec->symbol->name);
       /* We have to make sure it is the right symbol when we
 	 have multiple sections with the same section name.  */
       if (s == NULL

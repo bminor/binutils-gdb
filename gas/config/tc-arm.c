@@ -1137,10 +1137,6 @@ symbol_locate (symbolS *    symbolP,
   name_length = strlen (name) + 1;   /* +1 for \0.  */
   obstack_grow (&notes, name, name_length);
   preserved_copy_of_name = obstack_finish (&notes);
-#ifdef STRIP_UNDERSCORE
-  if (preserved_copy_of_name[0] == '_')
-    preserved_copy_of_name++;
-#endif
 
 #ifdef tc_canonicalize_symbol_name
   preserved_copy_of_name =

@@ -44,7 +44,6 @@ struct internal_reloc;
 extern void tc_reloc_mangle
   PARAMS ((struct fix *, struct internal_reloc *, bfd_vma));
 
-#define DO_NOT_STRIP 0
 #define LISTING_HEADER "Zilog Z8000 GAS "
 #define NEED_FX_R_TYPE 1
 #define RELOC_32 1234

@@ -1,3 +1,28 @@
+2005-04-19  Jan Beulich  <jbeulich@novell.com>
+
+	* symbols.h (symbol_find_base): Remove prototype.
+	* symbols.c (save_symbol_name): Remove code section conditional upon
+	STRIP_UNDERSCORE.
+	(symbol_find): Remove.
+	(symbol_find_base): Rename to symbol_find.
+	* subsegs.c (section_symbol): Replace use of symbol_find_base with
+	symbol_find.
+	* config/obj-coff.c (tag_insert): Remove code section conditional
+	upon STRIP_UNDERSCORE.
+	(obj_coff_def): Likewise.
+	(obj_coff_endef): Replace use of symbol_find_base with symbol_find.
+	(coff_frob_symbol): Likewise.
+	(yank_symbols): Likewise.
+	(c_section_symbol): Likewise.
+	* config/obj-coff.h (DO_NOT_STRIP): Remove.
+	* config/tc-arm.c (symbol_locate): Remove code section conditional
+	upon STRIP_UNDERSCORE.
+	* config/tc-h8300.h (DO_NOT_STRIP): Remove.
+	* config/tc-h8500.h (DO_NOT_STRIP): Remove.
+	* config/tc-sh.h (DO_NOT_STRIP): Remove.
+	* config/tc-w65.h (DO_NOT_STRIP): Remove.
+	* config/tc-z8k.h (DO_NOT_STRIP): Remove.
+
 2005-04-19  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-ia64.c (md_assemble): Fix error message for wrong

@@ -50,7 +50,6 @@ extern int symbols_case_sensitive;
 char *decode_local_label_name (char *s);
 symbolS *symbol_find (const char *name);
 symbolS *symbol_find_exact (const char *name);
-symbolS *symbol_find_base (const char *name, int strip_underscore);
 symbolS *symbol_find_or_make (const char *name);
 symbolS *symbol_make (const char *name);
 symbolS *symbol_new (const char *name, segT segment, valueT value,

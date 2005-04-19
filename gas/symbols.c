@@ -113,11 +113,6 @@ save_symbol_name (const char *name)
   obstack_grow (&notes, name, name_length);
   ret = obstack_finish (&notes);
 
-#ifdef STRIP_UNDERSCORE
-  if (ret[0] == '_')
-    ++ret;
-#endif
-
 #ifdef tc_canonicalize_symbol_name
   ret = tc_canonicalize_symbol_name (ret);
 #endif
@@ -600,16 +595,6 @@ symbol_temp_make (void)
    of a struct symbol associated with that name.  */
 
 symbolS *
-symbol_find (const char *name)
-{
-#ifdef STRIP_UNDERSCORE
-  return (symbol_find_base (name, 1));
-#else /* STRIP_UNDERSCORE */
-  return (symbol_find_base (name, 0));
-#endif /* STRIP_UNDERSCORE */
-}
-
-symbolS *
 symbol_find_exact (const char *name)
 {
 #ifdef BFD_ASSEMBLER
@@ -626,11 +611,8 @@ symbol_find_exact (const char *name)
 }
 
 symbolS *
-symbol_find_base (const char *name, int strip_underscore)
+symbol_find (const char *name)
 {
-  if (strip_underscore && *name == '_')
-    name++;
-
 #ifdef tc_canonicalize_symbol_name
   {
     char *copy;

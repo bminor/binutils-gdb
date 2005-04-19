@@ -137,10 +137,6 @@ tag_insert (const char *name, symbolS *symbolP)
 static symbolS *
 tag_find (char *name)
 {
-#ifdef STRIP_UNDERSCORE
-  if (*name == '_')
-    name++;
-#endif /* STRIP_UNDERSCORE */
   return (symbolS *) hash_find (tag_hash, name);
 }
 
@@ -529,11 +525,6 @@ obj_coff_def (int what ATTRIBUTE_UNUSED)
   SKIP_WHITESPACES ();
 
   symbol_name = input_line_pointer;
-#ifdef STRIP_UNDERSCORE
-  if (symbol_name[0] == '_' && symbol_name[1] != 0)
-    symbol_name++;
-#endif
-
   name_end = get_symbol_end ();
   symbol_name_length = strlen (symbol_name);
   symbol_name_copy = xmalloc (symbol_name_length + 1);
@@ -723,8 +714,7 @@ obj_coff_endef (int ignore ATTRIBUTE_UNUSED)
 	  && !SF_GET_TAG (def_symbol_in_progress))
       || S_GET_SEGMENT (def_symbol_in_progress) == absolute_section
       || ! symbol_constant_p (def_symbol_in_progress)
-      || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress),
-				      DO_NOT_STRIP)) == NULL
+      || (symbolP = symbol_find (S_GET_NAME (def_symbol_in_progress))) == NULL
       || SF_GET_TAG (def_symbol_in_progress) != SF_GET_TAG (symbolP))
     {
       /* If it already is at the end of the symbol list, do nothing */
@@ -771,8 +761,7 @@ obj_coff_endef (int ignore ATTRIBUTE_UNUSED)
     {
       symbolS *oldtag;
 
-      oldtag = symbol_find_base (S_GET_NAME (def_symbol_in_progress),
-				 DO_NOT_STRIP);
+      oldtag = symbol_find (S_GET_NAME (def_symbol_in_progress));
       if (oldtag == NULL || ! SF_GET_TAG (oldtag))
 	tag_insert (S_GET_NAME (def_symbol_in_progress),
 		    def_symbol_in_progress);
@@ -1245,7 +1234,7 @@ coff_frob_symbol (symbolS *symp, int *punt)
 	  && !SF_GET_STATICS (symp)
 	  && S_GET_STORAGE_CLASS (symp) != C_LABEL
 	  && symbol_constant_p (symp)
-	  && (real = symbol_find_base (S_GET_NAME (symp), DO_NOT_STRIP))
+	  && (real = symbol_find (S_GET_NAME (symp)))
 	  && S_GET_STORAGE_CLASS (real) == C_NULL
 	  && real != symp)
 	{
@@ -2453,13 +2442,7 @@ obj_coff_def (int what ATTRIBUTE_UNUSED)
 #endif
 
   /* Initialize the new symbol.  */
-#ifdef STRIP_UNDERSCORE
-  S_SET_NAME (def_symbol_in_progress, (*symbol_name_copy == '_'
-				       ? symbol_name_copy + 1
-				       : symbol_name_copy));
-#else /* STRIP_UNDERSCORE */
   S_SET_NAME (def_symbol_in_progress, symbol_name_copy);
-#endif /* STRIP_UNDERSCORE */
   /* free(symbol_name_copy); */
   def_symbol_in_progress->sy_name_offset = (unsigned long) ~0;
   def_symbol_in_progress->sy_number = ~0;
@@ -2611,7 +2594,7 @@ obj_coff_endef (int ignore ATTRIBUTE_UNUSED)
 	  && !SF_GET_TAG (def_symbol_in_progress))
       || S_GET_SEGMENT (def_symbol_in_progress) == absolute_section
       || def_symbol_in_progress->sy_value.X_op != O_constant
-      || (symbolP = symbol_find_base (S_GET_NAME (def_symbol_in_progress), DO_NOT_STRIP)) == NULL
+      || (symbolP = symbol_find (S_GET_NAME (def_symbol_in_progress))) == NULL
       || (SF_GET_TAG (def_symbol_in_progress) != SF_GET_TAG (symbolP)))
     {
       symbol_append (def_symbol_in_progress, symbol_lastP, &symbol_rootP,
@@ -2654,8 +2637,7 @@ obj_coff_endef (int ignore ATTRIBUTE_UNUSED)
     {
       symbolS *oldtag;
 
-      oldtag = symbol_find_base (S_GET_NAME (def_symbol_in_progress),
-				 DO_NOT_STRIP);
+      oldtag = symbol_find (S_GET_NAME (def_symbol_in_progress));
       if (oldtag == NULL || ! SF_GET_TAG (oldtag))
 	tag_insert (S_GET_NAME (def_symbol_in_progress),
 		    def_symbol_in_progress);
@@ -2977,7 +2959,7 @@ yank_symbols (void)
 	      && !SF_GET_STATICS (symbolP)
 	      && S_GET_STORAGE_CLASS (symbolP) != C_LABEL
 	      && symbolP->sy_value.X_op == O_constant
-	      && (real_symbolP = symbol_find_base (S_GET_NAME (symbolP), DO_NOT_STRIP))
+	      && (real_symbolP = symbol_find (S_GET_NAME (symbolP)))
 	      && real_symbolP != symbolP)
 	    {
 	      /* FIXME-SOON: where do dups come from?
@@ -3240,7 +3222,7 @@ c_section_symbol (char *name, int idx)
 {
   symbolS *symbolP;
 
-  symbolP = symbol_find_base (name, DO_NOT_STRIP);
+  symbolP = symbol_find (name);
   if (symbolP == NULL)
     symbolP = symbol_new (name, idx, 0, &zero_address_frag);
   else

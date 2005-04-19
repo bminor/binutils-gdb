@@ -88,7 +88,6 @@ extern void tc_reloc_mangle (struct fix *, struct internal_reloc *, bfd_vma);
 
 #define TC_CONS_RELOC          (Hmode ? R_RELLONG: R_RELWORD)
 
-#define DO_NOT_STRIP 0
 #define LISTING_HEADER "Renesas H8/300 GAS "
 #define NEED_FX_R_TYPE 1
 #ifndef OBJ_ELF

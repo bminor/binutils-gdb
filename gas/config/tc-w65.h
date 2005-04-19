@@ -41,7 +41,6 @@ struct fix;
 #define TC_RELOC_MANGLE(s,a,b,c) tc_reloc_mangle (a,b,c)
 extern void tc_reloc_mangle (struct fix *, struct internal_reloc *, bfd_vma);
 
-#define DO_NOT_STRIP 0
 #define LISTING_HEADER "W65816 GAS "
 #define NEED_FX_R_TYPE 1
 #define RELOC_32 1234
