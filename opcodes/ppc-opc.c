@@ -428,6 +428,7 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The RS field of the tlbwe instruction, which is optional.  */
 #define RSO RTQ + 1
+#define RTO RSO
   { 5, 21, NULL, NULL, PPC_OPERAND_GPR | PPC_OPERAND_OPTIONAL },
 
   /* The SH field in an X or M form instruction.  */
@@ -4336,10 +4337,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mbar",    X(31,854),	X_MASK,		BOOKE,		{ MO } },
 { "eieio",   X(31,854),	0xffffffff,	PPC,		{ 0 } },
 
-{ "tlbsx",   XRC(31,914,0), X_MASK,	BOOKE,		{ RA, RB } },
-{ "tlbsx",   XRC(31,914,0), X_MASK, 	PPC403,		{ RT, RA, RB } },
-{ "tlbsx.",  XRC(31,914,1), X_MASK,	BOOKE,		{ RA, RB } },
-{ "tlbsx.",  XRC(31,914,1), X_MASK, 	PPC403,		{ RT, RA, RB } },
+{ "tlbsx",   XRC(31,914,0), X_MASK, 	PPC403|BOOKE,	{ RTO, RA, RB } },
+{ "tlbsx.",  XRC(31,914,1), X_MASK, 	PPC403|BOOKE,	{ RTO, RA, RB } },
 { "tlbsxe",  XRC(31,915,0), X_MASK,	BOOKE64,	{ RA, RB } },
 { "tlbsxe.", XRC(31,915,1), X_MASK,	BOOKE64,	{ RA, RB } },
 
@@ -4364,8 +4363,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "tlbrehi", XTLB(31,946,0), XTLB_MASK,	PPC403,		{ RT, RA } },
 { "tlbrelo", XTLB(31,946,1), XTLB_MASK,	PPC403,		{ RT, RA } },
-{ "tlbre",   X(31,946),	X_MASK,		BOOKE,		{ 0 } },
-{ "tlbre",   X(31,946),	X_MASK,		PPC403,		{ RS, RA, SH } },
+{ "tlbre",   X(31,946),	X_MASK,		PPC403|BOOKE,	{ RSO, RAOPT, SHO } },
 
 { "sraiq",   XRC(31,952,0), X_MASK,	M601,		{ RA, RS, SH } },
 { "sraiq.",  XRC(31,952,1), X_MASK,	M601,		{ RA, RS, SH } },

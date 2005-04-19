@@ -1,3 +1,9 @@
+2005-04-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (RTO): Define.
+	(powerpc_opcodes <tlbsx, tlbsx., tlbre>): Combine PPC403 and BOOKE
+	entries to suit PPC440.
+
 2005-04-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-dis.c: Insert hyphens into selected VIA PadLock extensions.
