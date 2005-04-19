@@ -1304,11 +1304,12 @@ md_assemble (str)
 
   know (str);
   special_case = sparc_ip (str, &insn);
+  if (insn == NULL)
+    return;
 
   /* We warn about attempts to put a floating point branch in a delay slot,
      unless the delay slot has been annulled.  */
-  if (insn != NULL
-      && last_insn != NULL
+  if (last_insn != NULL
       && (insn->flags & F_FBR) != 0
       && (last_insn->flags & F_DELAYED) != 0
       /* ??? This test isn't completely accurate.  We assume anything with
@@ -1321,7 +1322,6 @@ md_assemble (str)
      point instruction and a floating point branch.  We insert one
      automatically, with a warning.  */
   if (max_architecture < SPARC_OPCODE_ARCH_V9
-      && insn != NULL
       && last_insn != NULL
       && (insn->flags & F_FBR) != 0
       && (last_insn->flags & F_FLOAT) != 0)
@@ -1417,7 +1417,9 @@ sparc_ip (str, pinsn)
       break;
 
     default:
-      as_fatal (_("Unknown opcode: `%s'"), str);
+      as_bad (_("Unknown opcode: `%s'"), str);
+      *pinsn = NULL;
+      return special_case;
     }
   insn = (struct sparc_opcode *) hash_find (op_hash, str);
   *pinsn = insn;

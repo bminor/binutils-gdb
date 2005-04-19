@@ -1,3 +1,10 @@
+2005-04-19  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (md_assemble): If sparc_ip gives us a
+	NULL insn, exit early.  Remove now spurious NULL checks.
+	(sparc_ip): Use as_bad for unknown opcode errors, set *pinsn
+	to NULL and exit.
+
 2005-04-19  Jan Beulich  <jbeulich@novell.com>
 
 	* symbols.h (symbol_find_base): Remove prototype.
