@@ -1,3 +1,19 @@
+2005-04-19  David S. Miller  <davem@davemloft.net>
+
+	* elfxx-sparc.c: New file.
+	* elfxx-sparc.h: New file.
+	* Makefile.in (BFD32_BACKENDS): Add elfxx-sparc.lo
+	(BFD32_BACKENDS_CFILES): Add elfxx-sparc.c
+	(elfxx-sparc.lo): New rule.
+	(elf32-sparc.lo): Add elfxx-sparc.h dependency.
+	(elf64-sparc.lo): Likewise.
+	* configure.in (bfd_elf32_sparc_vec): Add elfxx-sparc.lo
+	(bfd_elf64_sparc_vec): Likewise.
+	* configure: Regenerate.
+	* elf32-sparc.c: Remove common code now in elfxx-sparc.c
+	* elf64-sparc.c: Likewise, also use elf64_sparc_*() naming
+	which is more consistent with elf32-sparc.c
+
 2005-04-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elfxx-mips.c (struct mips_elf_link_hash_entry): Update comment.
