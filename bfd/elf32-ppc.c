@@ -1647,8 +1647,11 @@ ppc_elf_relax_section (bfd *abfd,
 
   *again = FALSE;
 
-  /* Nothing to do if there are no relocations.  */
-  if ((isec->flags & SEC_RELOC) == 0 || isec->reloc_count == 0)
+  /* Nothing to do if there are no relocations, and no need to do
+     anything with non-alloc sections.  */
+  if ((isec->flags & SEC_ALLOC) == 0
+      || (isec->flags & SEC_RELOC) == 0
+      || isec->reloc_count == 0)
     return TRUE;
 
   trampoff = (isec->size + 3) & (bfd_vma) -4;
@@ -3562,6 +3565,15 @@ ppc_elf_check_relocs (bfd *abfd,
   if (info->relocatable)
     return TRUE;
 
+  /* Don't do anything special with non-loaded, non-alloced sections.
+     In particular, any relocs in such sections should not affect GOT
+     and PLT reference counting (ie. we don't allow them to create GOT
+     or PLT entries), there's no possibility or desire to optimize TLS
+     relocs, and there's not much point in propagating relocs to shared
+     libs that the dynamic linker won't relocate.  */
+  if ((sec->flags & SEC_ALLOC) == 0)
+    return TRUE;
+
 #ifdef DEBUG
   _bfd_error_handler ("ppc_elf_check_relocs called for section %A in %B",
 		      sec, abfd);
@@ -3893,7 +3905,6 @@ ppc_elf_check_relocs (bfd *abfd,
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
-		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
 		      || !h->def_regular)))
@@ -3930,9 +3941,8 @@ ppc_elf_check_relocs (bfd *abfd,
 
 		      sreloc = bfd_make_section (htab->elf.dynobj, name);
 		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
-			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-		      if ((sec->flags & SEC_ALLOC) != 0)
-			flags |= SEC_ALLOC | SEC_LOAD;
+			       | SEC_IN_MEMORY | SEC_LINKER_CREATED
+			       | SEC_ALLOC | SEC_LOAD);
 		      if (sreloc == NULL
 			  || ! bfd_set_section_flags (htab->elf.dynobj,
 						      sreloc, flags)
@@ -4043,6 +4053,9 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
+
+  if ((sec->flags & SEC_ALLOC) == 0)
+    return TRUE;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -5284,6 +5297,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    break;
 	  /* Fall thru.  */
 
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    break;
+	  /* Fall thru.  */
+
 	  if ((info->shared
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
@@ -5292,7 +5309,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
-		  && (input_section->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && h->dynindx != -1
 		  && !h->non_got_ref
