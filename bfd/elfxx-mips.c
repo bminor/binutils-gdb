@@ -242,7 +242,8 @@ struct mips_elf_link_hash_entry
      being called returns a floating point value.  */
   asection *call_fp_stub;
 
-  /* Are we forced local?  .*/
+  /* Are we forced local?  This will only be set if we have converted
+     the initial global GOT entry to a local GOT entry.  */
   bfd_boolean forced_local;
 
 #define GOT_NORMAL	0
@@ -2463,7 +2464,7 @@ mips_elf_create_local_got_entry (bfd *abfd, bfd *ibfd,
      global entry then.  It doesn't matter whether an entry is local
      or global for TLS, since the dynamic linker does not
      automatically relocate TLS GOT entries.  */
-  BFD_ASSERT (h == NULL || h->forced_local);
+  BFD_ASSERT (h == NULL || h->root.forced_local);
   if (TLS_RELOC_P (r_type))
     {
       struct mips_got_entry *p;

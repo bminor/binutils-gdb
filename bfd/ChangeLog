@@ -1,3 +1,8 @@
+2005-04-19  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfxx-mips.c (struct mips_elf_link_hash_entry): Update comment.
+	(mips_elf_create_local_got_entry): Check h->root.forced_local.
+
 2005-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Don't bother with
