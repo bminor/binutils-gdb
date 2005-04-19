@@ -1,3 +1,7 @@
+2005-04-19  Ben Elliston  <bje@au.ibm.com>
+
+	* c-lang.c (c_create_fundamental_type): Comment fix.
+
 2005-04-18  Michael Snyder  <msnyder@redhat.com>
 
 	* mn10300-tdep.c: Assimilate code from mn10300-prologue.c.

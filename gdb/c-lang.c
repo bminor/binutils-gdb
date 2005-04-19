@@ -202,7 +202,7 @@ c_printstr (struct ui_file *stream, const bfd_byte *string,
    gdb test suite since we don't have to account for the differences
    in output depending upon what the compiler and debugging format
    support.  We will probably have to re-examine the issue when gdb
-   starts taking it's fundamental type information directly from the
+   starts taking its fundamental type information directly from the
    debugging information supplied by the compiler.  fnf@cygnus.com */
 
 struct type *
