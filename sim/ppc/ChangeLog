@@ -1,4 +1,5 @@
 2005-04-18  Manoj Iyer  <manjo@austin.ibm.com>
+
 	* configure.ac: Added check for long long.
 	* config.in: Regenerated.
 	* configure: Regenerated.
