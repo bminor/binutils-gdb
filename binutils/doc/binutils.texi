@@ -3222,6 +3222,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-h}|@option{--file-header}]
         [@option{-l}|@option{--program-headers}|@option{--segments}]
         [@option{-S}|@option{--section-headers}|@option{--sections}]
+        [@option{-g}|@option{--section-groups}]
         [@option{-e}|@option{--headers}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
         [@option{-n}|@option{--notes}]
@@ -3290,6 +3291,12 @@ has any.
 @itemx --section-headers
 @cindex ELF section information
 Displays the information contained in the file's section headers, if it
+has any.
+
+@item -g
+@itemx --section-groups
+@cindex ELF section group information
+Displays the information contained in the file's section groups, if it
 has any.
 
 @item -s

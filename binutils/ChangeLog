@@ -1,3 +1,8 @@
+2005-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/binutils.texi: Document new readelf option,
+	"-g/--section-groups".
+
 2005-04-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* NEWS: Mention unsupported targets and new readelf option.
