@@ -1,5 +1,59 @@
 -*- text -*-
 
+* Binutils-2.16 will be the last release for a number of targets due to
+  lack of maintenance (of course, if maintainers step up, then this list
+  will change!).  The targets are:
+
+    a29k-*-*
+    d10v-*-*
+    d30v-*-*
+    dlx-*-*
+    h8300-*-coff
+    h8300-*-rtems*
+    h8500-*-coff
+    h8500-*-rtems*
+    i370-*-*
+    i960-*-*
+    i960-*-bout
+    i960-*-coff
+    i960-*-nindy*
+    i960-*-rtems*
+    i960-*-vxworks*
+    i960-*-vxworks5.*
+    i960-*-vxworks5.0
+    m68k-*-coff
+    m68k-*-hpux*
+    m68k-*-linux*aout*
+    m68k-*-rtemscoff*
+    m68k-*-sunos*
+    m68k-*-sysv*
+    m68k-*-vxworks*
+    m68k-apollo-*
+    m68k-apple-aux*
+    m68k-bull-sysv3*
+    m68k-ericsson-ose
+    m68k-motorola-sysv*
+    m88k-*-*					(*)
+    mn10200-*-*
+    openrisc-*-*
+    or32-*-*
+    or32-*-coff
+    pj*-*-*
+    sh-*-coff*
+    sh-*-rtemscoff*
+    tic80-*-*
+    vax-*-bsd*					(*)
+    vax-*-netbsd* excluding vax-*-netbsdelf	(*)
+    vax-*-ultrix*				(*)
+    w65-*-*
+    xscale-*-coff
+    *-*-linux*aout*
+    *-*-linux*oldld
+
+    (*) bfd and opcodes support will be kept.
+
+* Add "-g/--section-groups" to readelf to display section groups.
+
 * objcopy recognizes two new options --strip-unneeded-symbol and
   --strip-unneeded-symbols, namely for use together with the wildcard
   matching the original --strip-symbol/--strip-symbols provided, but
