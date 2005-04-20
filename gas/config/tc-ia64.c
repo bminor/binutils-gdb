@@ -8171,9 +8171,15 @@ specify_resource (dep, idesc, type, specs, note, path)
   tmpl.qp_regno = CURR_SLOT.qp_regno;
   tmpl.link_to_qp_branch = 1;
   tmpl.mem_offset.hint = 0;
+  tmpl.mem_offset.offset = 0;
+  tmpl.mem_offset.base = 0;
   tmpl.specific = 1;
   tmpl.index = -1;
   tmpl.cmp_type = CMP_NONE;
+  tmpl.depind = 0;
+  tmpl.file = NULL;
+  tmpl.line = 0;
+  tmpl.path = 0;
 
 #define UNHANDLED \
 as_warn (_("Unhandled dependency %s for %s (%s), note %d"), \

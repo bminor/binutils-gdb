@@ -1,3 +1,7 @@
+2005-04-20  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-ia64.c (specify_resource): Initialize all of tmpl.
+
 2005-04-19  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (md_assemble): If sparc_ip gives us a
