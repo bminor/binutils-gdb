@@ -800,7 +800,7 @@ iq2000_fix_adjustable (fixS * fixP)
     return TRUE;
 
   /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
+  if (S_IS_EXTERNAL (fixP->fx_addsy))
     return FALSE;
 
   if (S_IS_WEAK (fixP->fx_addsy))

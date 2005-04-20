@@ -3309,7 +3309,7 @@ mmix_adjust_symtab (void)
       {
 	if (sym == regsec)
 	  {
-	    if (S_IS_EXTERN (sym) || symbol_used_in_reloc_p (sym))
+	    if (S_IS_EXTERNAL (sym) || symbol_used_in_reloc_p (sym))
 	      abort ();
 	    symbol_remove (sym, &symbol_rootP, &symbol_lastP);
 	  }

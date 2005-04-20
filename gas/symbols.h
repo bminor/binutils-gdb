@@ -98,7 +98,6 @@ extern int S_IS_DEFINED (symbolS *);
 extern int S_FORCE_RELOC (symbolS *, int);
 extern int S_IS_DEBUG (symbolS *);
 extern int S_IS_LOCAL (symbolS *);
-extern int S_IS_EXTERN (symbolS *);
 extern int S_IS_STABD (symbolS *);
 extern const char *S_GET_NAME (symbolS *);
 extern segT S_GET_SEGMENT (symbolS *);

@@ -1823,12 +1823,6 @@ S_IS_LOCAL (symbolS *s)
 }
 
 int
-S_IS_EXTERN (symbolS *s)
-{
-  return S_IS_EXTERNAL (s);
-}
-
-int
 S_IS_STABD (symbolS *s)
 {
   return S_GET_NAME (s) == 0;
@@ -2405,7 +2399,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
 	fprintf (file, " used");
       if (S_IS_LOCAL (sym))
 	fprintf (file, " local");
-      if (S_IS_EXTERN (sym))
+      if (S_IS_EXTERNAL (sym))
 	fprintf (file, " extern");
       if (S_IS_DEBUG (sym))
 	fprintf (file, " debug");

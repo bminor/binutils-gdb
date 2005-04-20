@@ -5637,7 +5637,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
          symbol, the relocation will entirely be performed at link time, not
          at assembly time.  bfd_perform_reloc doesn't know about this sort
          of thing, and as a result we need to fake it out here.  */
-      if ((S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)
+      if ((S_IS_EXTERNAL (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)
 	   || (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE)
 	   || (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_THREAD_LOCAL))
 	  && !S_IS_COMMON (fixp->fx_addsy))

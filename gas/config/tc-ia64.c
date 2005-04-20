@@ -10844,7 +10844,7 @@ ia64_fix_adjustable (fix)
      fixS *fix;
 {
   /* Prevent all adjustments to global symbols */
-  if (S_IS_EXTERN (fix->fx_addsy) || S_IS_WEAK (fix->fx_addsy))
+  if (S_IS_EXTERNAL (fix->fx_addsy) || S_IS_WEAK (fix->fx_addsy))
     return 0;
 
   switch (fix->fx_r_type)

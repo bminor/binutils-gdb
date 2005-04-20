@@ -502,10 +502,6 @@ typedef struct
        && !S_IS_EXTERNAL (s) \
        && (s)->sy_symbol.ost_entry.n_scnum == C_ABS_SECTION))
 
-/* True if a symbol is not defined in this file.  */
-#define S_IS_EXTERN(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \
-				 && S_GET_VALUE (s) == 0)
-
 /* True if a symbol can be multiply defined (bss symbols have this def
    though it is bad practice).  */
 #define S_IS_COMMON(s)		((s)->sy_symbol.ost_entry.n_scnum == 0 \

@@ -1956,10 +1956,10 @@ write_object_file (void)
 	  if (symp == abs_section_sym
 	      || (! EMIT_SECTION_SYMBOLS
 		  && symbol_section_p (symp))
-	      /* Note that S_IS_EXTERN and S_IS_LOCAL are not always
+	      /* Note that S_IS_EXTERNAL and S_IS_LOCAL are not always
 		 opposites.  Sometimes the former checks flags and the
 		 latter examines the name...  */
-	      || (!S_IS_EXTERN (symp)
+	      || (!S_IS_EXTERNAL (symp)
 		  && (punt || S_IS_LOCAL (symp))
 		  && ! symbol_used_in_reloc_p (symp)))
 	    {

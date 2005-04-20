@@ -2205,7 +2205,7 @@ m32r_fix_adjustable (fixS *fixP)
     return 1;
 
   /* Prevent all adjustments to global symbols.  */
-  if (S_IS_EXTERN (fixP->fx_addsy))
+  if (S_IS_EXTERNAL (fixP->fx_addsy))
     return 0;
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;

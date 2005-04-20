@@ -284,7 +284,7 @@ shmedia_frob_file_before_adjust (void)
 
       if (mainsym != NULL
 	  && S_GET_OTHER (mainsym) != STO_SH5_ISA32
-	  && (S_IS_EXTERN (mainsym) || S_IS_WEAK (mainsym)))
+	  && (S_IS_EXTERNAL (mainsym) || S_IS_WEAK (mainsym)))
 	{
 	  symp->sy_value.X_op = O_symbol;
 	  symp->sy_value.X_add_symbol = mainsym;
@@ -823,7 +823,7 @@ shmedia_md_convert_frag (bfd *output_bfd ATTRIBUTE_UNUSED,
        || sh_relax
        || symbolP == NULL
        || ! S_IS_DEFINED (symbolP)
-       || S_IS_EXTERN (symbolP)
+       || S_IS_EXTERNAL (symbolP)
        || S_IS_WEAK (symbolP)
        || (S_GET_SEGMENT (fragP->fr_symbol) != absolute_section
 	   && S_GET_SEGMENT (fragP->fr_symbol) != seg));

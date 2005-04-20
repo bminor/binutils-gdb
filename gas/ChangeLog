@@ -1,3 +1,23 @@
+2005-04-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-aout.h (S_IS_EXTERN): Removed.
+	* config/obj-bout.h (S_IS_EXTERN): Likewise.
+	* config/obj-coff.h (S_IS_EXTERN): Likewise.
+	* symbols.c (S_IS_EXTERN): Likewise.
+	* symbols.h (S_IS_EXTERN): Likewise.
+
+	* config/tc-alpha.c (tc_gen_reloc): Replace S_IS_EXTERN with
+	S_IS_EXTERNAL.
+	* config/tc-d10v.c (md_apply_fix3): Likewise.
+	* config/tc-ia64.c (ia64_fix_adjustable): Likewise.
+	* config/tc-iq2000.c (iq2000_fix_adjustable): Likewise.
+	* config/tc-m32r.c (m32r_fix_adjustable): Likewise.
+	* config/tc-mmix.c (mmix_adjust_symtab): Likewise.
+	* config/tc-sh64.c (shmedia_frob_file_before_adjust): Likewise.
+	(shmedia_md_convert_frag): Likewise.
+	* symbols.c (print_symbol_value_1): Likewise.
+	* write.c (write_object_file): Likewise.
+
 2005-04-20  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-xtensa.c (get_aligned_diff): Change type of

@@ -1572,7 +1572,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 symbol, then ignore the offset.
          XXX - Do we have to worry about branches to a symbol + offset ?  */
       if (fixP->fx_addsy != NULL
-	  && S_IS_EXTERN (fixP->fx_addsy) )
+	  && S_IS_EXTERNAL (fixP->fx_addsy) )
         {
           segT fseg = S_GET_SEGMENT (fixP->fx_addsy);
           segment_info_type *segf = seg_info(fseg);
