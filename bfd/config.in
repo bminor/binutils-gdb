@@ -28,6 +28,22 @@
    don't. */
 #undef HAVE_DECL_BASENAME
 
+/* Define to 1 if you have the declaration of `fseeko', and to 0 if you don't.
+   */
+#undef HAVE_DECL_FSEEKO
+
+/* Define to 1 if you have the declaration of `fseeko64', and to 0 if you
+   don't. */
+#undef HAVE_DECL_FSEEKO64
+
+/* Define to 1 if you have the declaration of `ftello', and to 0 if you don't.
+   */
+#undef HAVE_DECL_FTELLO
+
+/* Define to 1 if you have the declaration of `ftello64', and to 0 if you
+   don't. */
+#undef HAVE_DECL_FTELLO64
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H

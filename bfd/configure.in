@@ -127,7 +127,11 @@ AC_HEADER_DIRENT
 AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid)
 AC_CHECK_FUNCS(strtoull)
 
-AC_CHECK_DECLS(basename, , , [#include "sysdep.h"])
+AC_CHECK_DECLS(basename)
+AC_CHECK_DECLS(ftello)
+AC_CHECK_DECLS(ftello64)
+AC_CHECK_DECLS(fseeko)
+AC_CHECK_DECLS(fseeko64)
 
 BFD_BINARY_FOPEN
 

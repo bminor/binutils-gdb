@@ -129,6 +129,30 @@ extern PTR realloc ();
 extern char *strstr ();
 #endif
 
+#ifdef HAVE_FTELLO
+#if !HAVE_DECL_FTELLO
+extern off_t ftello (FILE *stream);
+#endif
+#endif
+
+#ifdef HAVE_FTELLO64
+#if !HAVE_DECL_FTELLO64
+extern off64_t ftello64 (FILE *stream);
+#endif
+#endif
+
+#ifdef HAVE_FSEEKO
+#if !HAVE_DECL_FSEEKO
+extern int fseeko (FILE *stream, off_t offset, int whence);
+#endif
+#endif
+
+#ifdef HAVE_FSEEKO64
+#if !HAVE_DECL_FSEEKO64
+extern int fseeko64 (FILE *stream, off64_t offset, int whence);
+#endif
+#endif
+
 /* Define offsetof for those systems which lack it */
 
 #ifndef offsetof

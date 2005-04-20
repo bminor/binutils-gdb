@@ -1,3 +1,11 @@
+2005-04-20  Jerome Guitton  <guitton@gnat.com>
+
+	* configure.in: Fix the check for basename declaration. Add check
+	for declarations of ftello, ftello64, fseeko, fseeko64.
+	* configure: Regenerate.
+	* config.in: Ditto.
+	* sysdep.h: If needed, declare ftello, ftello64, fseeko, fseeko64.
+
 2005-04-19  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.c: New file.
