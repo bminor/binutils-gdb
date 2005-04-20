@@ -1,3 +1,10 @@
+2005-04-18  Manoj Iyer  <manjo@austin.ibm.com>
+	* configure.ac: Added check for long long.
+	* config.in: Regenerated.
+	* configure: Regenerated.
+	* words.h: Modified logic to check for HAVE_LONG_LONG instead of
+	__GNUC__, added config.h header file.
+
 2005-03-25  Anthony Green  <green@redhat.com>
 
 	* tree.c (parse_reg_property): Fix memset usage.

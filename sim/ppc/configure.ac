@@ -681,6 +681,8 @@ if test $ac_cv_struct_statfs = yes; then
 	    [Define if struct statfs is defined in <sys/mount.h>])
 fi
 
+AC_CHECK_TYPES(long long)
+
 dnl Figure out if /dev/zero exists or not
 sim_devzero=""
 AC_MSG_CHECKING(for /dev/zero)

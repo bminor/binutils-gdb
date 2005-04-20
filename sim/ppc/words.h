@@ -44,6 +44,10 @@
 */
 
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /* bit based */
 typedef char natural8;
 typedef short natural16;
