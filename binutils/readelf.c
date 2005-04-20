@@ -10709,6 +10709,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	    case DW_CFA_def_cfa_sf:
 	      fc->cfa_reg = LEB ();
 	      fc->cfa_offset = SLEB ();
+	      fc->cfa_offset = fc->cfa_offset * fc->data_factor;
 	      fc->cfa_exp = 0;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_sf: r%d ofs %d\n",
@@ -10717,6 +10718,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 
 	    case DW_CFA_def_cfa_offset_sf:
 	      fc->cfa_offset = SLEB ();
+	      fc->cfa_offset = fc->cfa_offset * fc->data_factor;
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_def_cfa_offset_sf: %d\n", fc->cfa_offset);
 	      break;

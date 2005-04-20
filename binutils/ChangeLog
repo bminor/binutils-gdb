@@ -1,3 +1,8 @@
+2005-04-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* readelf.c (display_debug_frames): Use data factor for
+	DW_CFA_def_cfa_sf and DW_CFA_def_cfa_offset_sf.
+
 2005-04-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objdump.c (dump_section_header): Skip linker created section.
