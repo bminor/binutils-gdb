@@ -1,6 +1,6 @@
 /* The common simulator framework for GDB, the GNU Debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2005 Free Software Foundation, Inc.
 
    Contributed by Andrew Cagney and Red Hat.
 
@@ -112,11 +112,11 @@ typedef struct { signed64 a[2]; } signed128;
 typedef signed char signed8;
 typedef signed short signed16;
 #if defined (__ALPHA__)
-typedef signed int unsigned32;
-typedef signed long unsigned64;
+typedef signed int signed32;
+typedef signed long signed64;
 #else
-typedef signed long unsigned32;
-typedef signed long long unsigned64;
+typedef signed long signed32;
+typedef signed long long signed64;
 #endif
 
 typedef unsigned char unsigned8;
