@@ -1,3 +1,8 @@
+2005-04-20  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/elf/struct.s: Adjust to not get into alignment issues.
+	* gas/elf/struct.d: Adjust for the above and the test's name.
+
 2005-04-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/padlock.d: Updated.
