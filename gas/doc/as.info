@@ -22,7 +22,7 @@ Free Documentation License".
 Indirect:
 as.info-1: 778
 as.info-2: 299494
-as.info-3: 569799
+as.info-3: 569898
 
 Tag Table:
 (Indirect)
@@ -352,139 +352,139 @@ Node: M88K-Dependent371790
 Node: M88K Directives372041
 Node: MIPS-Dependent373561
 Node: MIPS Opts374648
-Node: MIPS Object381517
-Node: MIPS Stabs383083
-Node: MIPS symbol sizes383805
-Node: MIPS ISA385474
-Node: MIPS autoextend386623
-Node: MIPS insn387353
-Node: MIPS option stack387850
-Node: MIPS ASE instruction generation overrides388624
-Node: MMIX-Dependent389397
-Node: MMIX-Opts389777
-Node: MMIX-Expand393381
-Node: MMIX-Syntax394696
-Ref: mmixsite395053
-Node: MMIX-Chars395894
-Node: MMIX-Symbols396548
-Node: MMIX-Regs398616
-Node: MMIX-Pseudos399641
-Ref: MMIX-loc399782
-Ref: MMIX-local400862
-Ref: MMIX-is401394
-Ref: MMIX-greg401665
-Ref: GREG-base402584
-Ref: MMIX-byte403901
-Ref: MMIX-constants404372
-Ref: MMIX-prefix405018
-Ref: MMIX-spec405392
-Node: MMIX-mmixal405726
-Node: MSP430-Dependent409223
-Node: MSP430 Options409689
-Node: MSP430 Syntax409881
-Node: MSP430-Macros410197
-Node: MSP430-Chars410928
-Node: MSP430-Regs411241
-Node: MSP430-Ext411801
-Node: MSP430 Floating Point413622
-Node: MSP430 Directives413846
-Node: MSP430 Opcodes414637
-Node: MSP430 Profiling Capability415032
-Node: PDP-11-Dependent417361
-Node: PDP-11-Options417750
-Node: PDP-11-Pseudos422821
-Node: PDP-11-Syntax423166
-Node: PDP-11-Mnemonics423917
-Node: PDP-11-Synthetic424219
-Node: PJ-Dependent424437
-Node: PJ Options424662
-Node: PPC-Dependent424939
-Node: PowerPC-Opts425226
-Node: PowerPC-Pseudo427191
-Node: SH-Dependent427790
-Node: SH Options428202
-Node: SH Syntax429056
-Node: SH-Chars429329
-Node: SH-Regs429623
-Node: SH-Addressing430237
-Node: SH Floating Point431146
-Node: SH Directives432240
-Node: SH Opcodes432610
-Node: SH64-Dependent436932
-Node: SH64 Options437295
-Node: SH64 Syntax439012
-Node: SH64-Chars439295
-Node: SH64-Regs439595
-Node: SH64-Addressing440691
-Node: SH64 Directives441874
-Node: SH64 Opcodes442984
-Node: Sparc-Dependent443700
-Node: Sparc-Opts444085
-Node: Sparc-Aligned-Data446342
-Node: Sparc-Float447197
-Node: Sparc-Directives447398
-Node: TIC54X-Dependent449358
-Node: TIC54X-Opts450084
-Node: TIC54X-Block451127
-Node: TIC54X-Env451487
-Node: TIC54X-Constants451835
-Node: TIC54X-Subsyms452237
-Node: TIC54X-Locals454146
-Node: TIC54X-Builtins454890
-Node: TIC54X-Ext457361
-Node: TIC54X-Directives457932
-Node: TIC54X-Macros468834
-Node: TIC54X-MMRegs470944
-Node: Z8000-Dependent471160
-Node: Z8000 Options472124
-Node: Z8000 Syntax472341
-Node: Z8000-Chars472631
-Node: Z8000-Regs472864
-Node: Z8000-Addressing473654
-Node: Z8000 Directives474771
-Node: Z8000 Opcodes476380
-Node: Vax-Dependent486322
-Node: VAX-Opts486839
-Node: VAX-float490574
-Node: VAX-directives491206
-Node: VAX-opcodes492067
-Node: VAX-branch492456
-Node: VAX-operands494963
-Node: VAX-no495726
-Node: V850-Dependent495963
-Node: V850 Options496361
-Node: V850 Syntax498750
-Node: V850-Chars498990
-Node: V850-Regs499155
-Node: V850 Floating Point500723
-Node: V850 Directives500929
-Node: V850 Opcodes502072
-Node: Xtensa-Dependent507964
-Node: Xtensa Options508695
-Node: Xtensa Syntax511466
-Node: Xtensa Opcodes513355
-Node: Xtensa Registers515149
-Node: Xtensa Optimizations515782
-Node: Density Instructions516234
-Node: Xtensa Automatic Alignment517336
-Node: Xtensa Relaxation520082
-Node: Xtensa Branch Relaxation520990
-Node: Xtensa Call Relaxation522362
-Node: Xtensa Immediate Relaxation524148
-Node: Xtensa Directives526722
-Node: Schedule Directive528430
-Node: Longcalls Directive528770
-Node: Transform Directive529314
-Node: Literal Directive530056
-Node: Literal Position Directive531841
-Node: Literal Prefix Directive533540
-Node: Absolute Literals Directive535703
-Node: Reporting Bugs537010
-Node: Bug Criteria537734
-Node: Bug Reporting538499
-Node: Acknowledgements545132
-Ref: Acknowledgements-Footnote-1550051
-Node: GNU Free Documentation License550077
-Node: Index569799
+Node: MIPS Object381616
+Node: MIPS Stabs383182
+Node: MIPS symbol sizes383904
+Node: MIPS ISA385573
+Node: MIPS autoextend386722
+Node: MIPS insn387452
+Node: MIPS option stack387949
+Node: MIPS ASE instruction generation overrides388723
+Node: MMIX-Dependent389496
+Node: MMIX-Opts389876
+Node: MMIX-Expand393480
+Node: MMIX-Syntax394795
+Ref: mmixsite395152
+Node: MMIX-Chars395993
+Node: MMIX-Symbols396647
+Node: MMIX-Regs398715
+Node: MMIX-Pseudos399740
+Ref: MMIX-loc399881
+Ref: MMIX-local400961
+Ref: MMIX-is401493
+Ref: MMIX-greg401764
+Ref: GREG-base402683
+Ref: MMIX-byte404000
+Ref: MMIX-constants404471
+Ref: MMIX-prefix405117
+Ref: MMIX-spec405491
+Node: MMIX-mmixal405825
+Node: MSP430-Dependent409322
+Node: MSP430 Options409788
+Node: MSP430 Syntax409980
+Node: MSP430-Macros410296
+Node: MSP430-Chars411027
+Node: MSP430-Regs411340
+Node: MSP430-Ext411900
+Node: MSP430 Floating Point413721
+Node: MSP430 Directives413945
+Node: MSP430 Opcodes414736
+Node: MSP430 Profiling Capability415131
+Node: PDP-11-Dependent417460
+Node: PDP-11-Options417849
+Node: PDP-11-Pseudos422920
+Node: PDP-11-Syntax423265
+Node: PDP-11-Mnemonics424016
+Node: PDP-11-Synthetic424318
+Node: PJ-Dependent424536
+Node: PJ Options424761
+Node: PPC-Dependent425038
+Node: PowerPC-Opts425325
+Node: PowerPC-Pseudo427290
+Node: SH-Dependent427889
+Node: SH Options428301
+Node: SH Syntax429155
+Node: SH-Chars429428
+Node: SH-Regs429722
+Node: SH-Addressing430336
+Node: SH Floating Point431245
+Node: SH Directives432339
+Node: SH Opcodes432709
+Node: SH64-Dependent437031
+Node: SH64 Options437394
+Node: SH64 Syntax439111
+Node: SH64-Chars439394
+Node: SH64-Regs439694
+Node: SH64-Addressing440790
+Node: SH64 Directives441973
+Node: SH64 Opcodes443083
+Node: Sparc-Dependent443799
+Node: Sparc-Opts444184
+Node: Sparc-Aligned-Data446441
+Node: Sparc-Float447296
+Node: Sparc-Directives447497
+Node: TIC54X-Dependent449457
+Node: TIC54X-Opts450183
+Node: TIC54X-Block451226
+Node: TIC54X-Env451586
+Node: TIC54X-Constants451934
+Node: TIC54X-Subsyms452336
+Node: TIC54X-Locals454245
+Node: TIC54X-Builtins454989
+Node: TIC54X-Ext457460
+Node: TIC54X-Directives458031
+Node: TIC54X-Macros468933
+Node: TIC54X-MMRegs471043
+Node: Z8000-Dependent471259
+Node: Z8000 Options472223
+Node: Z8000 Syntax472440
+Node: Z8000-Chars472730
+Node: Z8000-Regs472963
+Node: Z8000-Addressing473753
+Node: Z8000 Directives474870
+Node: Z8000 Opcodes476479
+Node: Vax-Dependent486421
+Node: VAX-Opts486938
+Node: VAX-float490673
+Node: VAX-directives491305
+Node: VAX-opcodes492166
+Node: VAX-branch492555
+Node: VAX-operands495062
+Node: VAX-no495825
+Node: V850-Dependent496062
+Node: V850 Options496460
+Node: V850 Syntax498849
+Node: V850-Chars499089
+Node: V850-Regs499254
+Node: V850 Floating Point500822
+Node: V850 Directives501028
+Node: V850 Opcodes502171
+Node: Xtensa-Dependent508063
+Node: Xtensa Options508794
+Node: Xtensa Syntax511565
+Node: Xtensa Opcodes513454
+Node: Xtensa Registers515248
+Node: Xtensa Optimizations515881
+Node: Density Instructions516333
+Node: Xtensa Automatic Alignment517435
+Node: Xtensa Relaxation520181
+Node: Xtensa Branch Relaxation521089
+Node: Xtensa Call Relaxation522461
+Node: Xtensa Immediate Relaxation524247
+Node: Xtensa Directives526821
+Node: Schedule Directive528529
+Node: Longcalls Directive528869
+Node: Transform Directive529413
+Node: Literal Directive530155
+Node: Literal Position Directive531940
+Node: Literal Prefix Directive533639
+Node: Absolute Literals Directive535802
+Node: Reporting Bugs537109
+Node: Bug Criteria537833
+Node: Bug Reporting538598
+Node: Acknowledgements545231
+Ref: Acknowledgements-Footnote-1550150
+Node: GNU Free Documentation License550176
+Node: Index569898
 
 End Tag Table

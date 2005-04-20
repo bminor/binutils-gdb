@@ -128,7 +128,7 @@
 .\" ========================================================================
 .\"
 .IX Title "LD 1"
-.TH LD 1 "2005-03-08" "binutils-2.15.96" "GNU Development Tools"
+.TH LD 1 "2005-04-20" "binutils-2.15.97" "GNU Development Tools"
 .SH "NAME"
 ld \- Using LD, the GNU linker
 .SH "SYNOPSIS"
@@ -173,7 +173,7 @@ object files on a standard, supported Unix system.  On such a system, to
 link a file \f(CW\*(C`hello.o\*(C'\fR:
 .PP
 .Vb 1
-\&        ld -o <output> /lib/crt0.o hello.o -lc
+\&        ld \-o <output> /lib/crt0.o hello.o \-lc
 .Ve
 .PP
 This tells \fBld\fR to produce a file called \fIoutput\fR as the
@@ -239,7 +239,7 @@ prefixed by \fB\-Wl,\fR (or whatever is appropriate for the particular
 compiler driver) like this:
 .PP
 .Vb 1
-\&          gcc -Wl,--startgroup foo.o bar.o -Wl,--endgroup
+\&          gcc \-Wl,\-\-startgroup foo.o bar.o \-Wl,\-\-endgroup
 .Ve
 .PP
 This is important, because otherwise the compiler driver program may
@@ -1803,7 +1803,7 @@ a variable, or b) make the 'constant' index a variable.  Thus:
 .Sp
 .Vb 3
 \&        extern type extern_array[];
-\&        extern_array[1] --> 
+\&        extern_array[1] \-\-> 
 \&           { volatile type *t=extern_array; t[1] }
 .Ve
 .Sp
@@ -1811,7 +1811,7 @@ or
 .Sp
 .Vb 3
 \&        extern type extern_array[];
-\&        extern_array[1] --> 
+\&        extern_array[1] \-\-> 
 \&           { volatile int t=1; extern_array[t] }
 .Ve
 .Sp
@@ -1820,15 +1820,15 @@ is to make the struct itself (or the long long, or the ...) variable:
 .Sp
 .Vb 3
 \&        extern struct s extern_struct;
-\&        extern_struct.field --> 
-\&           { volatile struct s *t=&extern_struct; t->field }
+\&        extern_struct.field \-\-> 
+\&           { volatile struct s *t=&extern_struct; t\->field }
 .Ve
 .Sp
 or
 .Sp
 .Vb 3
 \&        extern long long extern_ll;
-\&        extern_ll -->
+\&        extern_ll \-\->
 \&          { volatile long long * local_ll=&extern_ll; *local_ll }
 .Ve
 .Sp
@@ -1844,9 +1844,9 @@ constant offset' problem, you should consider typical real-world usage:
 Original:
 .Sp
 .Vb 7
-\&        --foo.h
+\&        \-\-foo.h
 \&        extern int arr[];
-\&        --foo.c
+\&        \-\-foo.c
 \&        #include "foo.h"
 \&        void main(int argc, char **argv){
 \&          printf("%d\en",arr[1]);
@@ -1856,9 +1856,9 @@ Original:
 Solution 1:
 .Sp
 .Vb 9
-\&        --foo.h
+\&        \-\-foo.h
 \&        extern int arr[];
-\&        --foo.c
+\&        \-\-foo.c
 \&        #include "foo.h"
 \&        void main(int argc, char **argv){
 \&          /* This workaround is for win32 and cygwin; do not "optimize" */
@@ -1870,8 +1870,8 @@ Solution 1:
 Solution 2:
 .Sp
 .Vb 14
-\&        --foo.h
-\&        /* Note: auto-export is assumed (no __declspec(dllexport)) */
+\&        \-\-foo.h
+\&        /* Note: auto\-export is assumed (no __declspec(dllexport)) */
 \&        #if (defined(_WIN32) || defined(__CYGWIN__)) && \e
 \&          !(defined(FOO_BUILD_DLL) || defined(FOO_STATIC))
 \&        #define FOO_IMPORT __declspec(dllimport)
@@ -1879,7 +1879,7 @@ Solution 2:
 \&        #define FOO_IMPORT
 \&        #endif
 \&        extern FOO_IMPORT int arr[];
-\&        --foo.c
+\&        \-\-foo.c
 \&        #include "foo.h"
 \&        void main(int argc, char **argv){
 \&          printf("%d\en",arr[1]);

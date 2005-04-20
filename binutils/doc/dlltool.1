@@ -128,7 +128,7 @@
 .\" ========================================================================
 .\"
 .IX Title "DLLTOOL 1"
-.TH DLLTOOL 1 "2005-03-08" "binutils-2.15.96" "GNU Development Tools"
+.TH DLLTOOL 1 "2005-04-20" "binutils-2.15.97" "GNU Development Tools"
 .SH "NAME"
 dlltool \- Create files needed to build and use DLLs.
 .SH "SYNOPSIS"
@@ -181,7 +181,7 @@ section of the object file.  This can be done in C by using the
 .PP
 .Vb 2
 \&          asm (".section .drectve");  
-\&          asm (".ascii \e"-export:my_func\e"");
+\&          asm (".ascii \e"\-export:my_func\e"");
 .Ve
 .PP
 .Vb 1
@@ -214,10 +214,10 @@ also creating a program (from an object file called \fBprogram.o\fR)
 that uses that \s-1DLL:\s0
 .PP
 .Vb 4
-\&          gcc -c dll.c
-\&          dlltool -e exports.o -l dll.lib dll.o
-\&          gcc dll.o exports.o -o dll.dll
-\&          gcc program.o dll.lib -o program
+\&          gcc \-c dll.c
+\&          dlltool \-e exports.o \-l dll.lib dll.o
+\&          gcc dll.o exports.o \-o dll.dll
+\&          gcc program.o dll.lib \-o program
 .Ve
 .SH "OPTIONS"
 .IX Header "OPTIONS"

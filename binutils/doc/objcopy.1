@@ -128,7 +128,7 @@
 .\" ========================================================================
 .\"
 .IX Title "OBJCOPY 1"
-.TH OBJCOPY 1 "2005-03-08" "binutils-2.15.96" "GNU Development Tools"
+.TH OBJCOPY 1 "2005-04-20" "binutils-2.15.97" "GNU Development Tools"
 .SH "NAME"
 objcopy \- copy and translate object files
 .SH "SYNOPSIS"
@@ -370,7 +370,7 @@ point (!) then the sense of the switch is reversed for that symbol.
 For example:
 .Sp
 .Vb 1
-\&          -w -W !foo -W fo*
+\&          \-w \-W !foo \-W fo*
 .Ve
 .Sp
 would cause objcopy to weaken all symbols that start with ``fo''
@@ -546,8 +546,8 @@ you wanted instead to create a section called .rodata containing binary
 data you could use the following command line to achieve it:
 .Sp
 .Vb 3
-\&          objcopy -I binary -O <output_format> -B <architecture> \e
-\&           --rename-section .data=.rodata,alloc,load,readonly,data,contents \e
+\&          objcopy \-I binary \-O <output_format> \-B <architecture> \e
+\&           \-\-rename\-section .data=.rodata,alloc,load,readonly,data,contents \e
 \&           <input_binary_file> <output_object_file>
 .Ve
 .IP "\fB\-\-change\-leading\-char\fR" 4

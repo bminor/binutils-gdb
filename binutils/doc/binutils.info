@@ -37,7 +37,7 @@ Introduction
 ************
 
 This brief manual contains documentation for the GNU binary utilities
-(collectively version 2.15.96):
+(collectively version 2.15.97):
 
    This document is distributed under the terms of the GNU Free
 Documentation License.  A copy of the license is included in the
@@ -2663,6 +2663,7 @@ File: binutils.info,  Node: readelf,  Next: size,  Prev: ranlib,  Up: Top
              [`-h'|`--file-header']
              [`-l'|`--program-headers'|`--segments']
              [`-S'|`--section-headers'|`--sections']
+             [`-g'|`--section-groups']
              [`-e'|`--headers']
              [`-s'|`--syms'|`--symbols']
              [`-n'|`--notes']
@@ -2717,6 +2718,11 @@ equivalent.  At least one option besides `-v' or `-H' must be given.
      Displays the information contained in the file's section headers,
      if it has any.
 
+`-g'
+`--section-groups'
+     Displays the information contained in the file's section groups,
+     if it has any.
+
 `-s'
 `--symbols'
 `--syms'
@@ -2735,12 +2741,6 @@ equivalent.  At least one option besides `-v' or `-H' must be given.
 `--relocs'
      Displays the contents of the file's relocation section, if it has
      one.
-
-`-u'
-`--unwind'
-     Displays the contents of the file's unwind section, if it has one.
-     Only the unwind sections for IA64 ELF files are currently
-     supported.
 
 `-u'
 `--unwind'
@@ -3562,15 +3562,16 @@ Index
 * dynamic symbol table entries, printing: objdump.            (line 334)
 * dynamic symbols:                       nm.                  (line 136)
 * ELF dynamic section information:       readelf.             (line  97)
-* ELF file header information:           readelf.             (line  49)
+* ELF file header information:           readelf.             (line  50)
 * ELF file information:                  readelf.             (line   6)
-* ELF notes:                             readelf.             (line  76)
+* ELF notes:                             readelf.             (line  82)
 * ELF object file format:                objdump.             (line 310)
-* ELF program header information:        readelf.             (line  55)
-* ELF reloc information:                 readelf.             (line  80)
-* ELF section information:               readelf.             (line  61)
-* ELF segment information:               readelf.             (line  55)
-* ELF symbol table information:          readelf.             (line  67)
+* ELF program header information:        readelf.             (line  56)
+* ELF reloc information:                 readelf.             (line  86)
+* ELF section group information:         readelf.             (line  67)
+* ELF section information:               readelf.             (line  62)
+* ELF segment information:               readelf.             (line  56)
+* ELF symbol table information:          readelf.             (line  73)
 * ELF version sections informations:     readelf.             (line 101)
 * endianness:                            objdump.             (line 125)
 * error on valid input:                  Bug Criteria.        (line  12)
@@ -3644,7 +3645,7 @@ Index
 * symbols, discarding:                   strip.               (line   6)
 * undefined symbols:                     nm.                  (line 217)
 * Unix compatibility, ar:                ar cmdline.          (line   8)
-* unwind information:                    readelf.             (line  85)
+* unwind information:                    readelf.             (line  91)
 * updating an archive:                   ar cmdline.          (line 180)
 * version:                               Top.                 (line   6)
 * VMA in objdump:                        objdump.             (line  65)
@@ -3673,13 +3674,13 @@ Node: windres83483
 Node: dlltool89216
 Node: def file format99642
 Node: readelf101380
-Node: Selecting The Target System105783
-Node: Target Selection106708
-Node: Architecture Selection108690
-Node: Reporting Bugs109518
-Node: Bug Criteria110297
-Node: Bug Reporting110850
-Node: GNU Free Documentation License117944
-Node: Index137671
+Node: Selecting The Target System105769
+Node: Target Selection106694
+Node: Architecture Selection108676
+Node: Reporting Bugs109504
+Node: Bug Criteria110283
+Node: Bug Reporting110836
+Node: GNU Free Documentation License117930
+Node: Index137657
 
 End Tag Table

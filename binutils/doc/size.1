@@ -128,7 +128,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SIZE 1"
-.TH SIZE 1 "2005-03-08" "binutils-2.15.96" "GNU Development Tools"
+.TH SIZE 1 "2005-04-20" "binutils-2.15.97" "GNU Development Tools"
 .SH "NAME"
 size \- list section sizes and total size.
 .SH "SYNOPSIS"
@@ -169,7 +169,7 @@ Here is an example of the Berkeley (default) format of output from
 \&\fBsize\fR: 
 .Sp
 .Vb 4
-\&        $ size --format=Berkeley ranlib size
+\&        $ size \-\-format=Berkeley ranlib size
 \&        text    data    bss     dec     hex     filename
 \&        294880  81920   11592   388392  5ed28   ranlib
 \&        294880  81920   11888   388688  5ee50   size
@@ -178,7 +178,7 @@ Here is an example of the Berkeley (default) format of output from
 This is the same data, but displayed closer to System V conventions:
 .Sp
 .Vb 7
-\&        $ size --format=SysV ranlib size
+\&        $ size \-\-format=SysV ranlib size
 \&        ranlib  :
 \&        section         size         addr
 \&        .text         294880         8192       
