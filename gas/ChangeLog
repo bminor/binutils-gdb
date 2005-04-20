@@ -1,3 +1,9 @@
+2005-04-20  Jan Beulich  <jbeulich@novell.com>
+
+	PR/847
+	* config/tc-ia64.c (ia64_canonicalize_symbol_name): Re-allow zero-
+	length symbols.
+
 2005-04-18  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (normalize_constant_expr): Don't check for
