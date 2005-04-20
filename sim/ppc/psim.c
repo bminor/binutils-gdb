@@ -49,6 +49,7 @@
 
 
 #include "bfd.h"
+#include "libiberty.h"
 
 
 /* system structure, actual size of processor array determined at
