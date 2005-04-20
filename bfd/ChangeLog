@@ -1,3 +1,9 @@
+2005-04-20  David S. Miller  <davem@davemloft.net>
+
+	* elfxx-sparc.c (sparc_elf_r_symndx_64): Fix compiler warning.
+	(_bfd_sparc_elf_link_hash_table_create): Likewise.
+	(allocate_dynrelocs): Likewise.
+
 2005-04-20  Jerome Guitton  <guitton@gnat.com>
 
 	* configure.in: Fix the check for basename declaration. Add check

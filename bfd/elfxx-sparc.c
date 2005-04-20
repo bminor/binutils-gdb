@@ -538,7 +538,8 @@ sparc_elf_r_info_32 (Elf_Internal_Rela *in_rel ATTRIBUTE_UNUSED,
 static bfd_vma
 sparc_elf_r_symndx_64 (bfd_vma r_info)
 {
-  return ELF64_R_SYM (r_info);
+  bfd_vma r_symndx = ELF32_R_SYM (r_info);
+  return (r_symndx >> 24);
 }
 
 static bfd_vma
@@ -777,7 +778,8 @@ _bfd_sparc_elf_link_hash_table_create (bfd *abfd)
       ret->align_power_max = 4;
       ret->bytes_per_word = 8;
       ret->bytes_per_rela = sizeof (Elf64_External_Rela);
-      ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
+      ret->dynamic_interpreter =
+	(const unsigned char *) ELF64_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
     }
   else
@@ -794,7 +796,8 @@ _bfd_sparc_elf_link_hash_table_create (bfd *abfd)
       ret->align_power_max = 3;
       ret->bytes_per_word = 4;
       ret->bytes_per_rela = sizeof (Elf32_External_Rela);
-      ret->dynamic_interpreter = ELF32_DYNAMIC_INTERPRETER;
+      ret->dynamic_interpreter =
+	(const unsigned char *) ELF32_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF32_DYNAMIC_INTERPRETER;
     }
 
@@ -1790,7 +1793,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 	  /* The procedure linkage table size is bounded by the magnitude
 	     of the offset we can describe in the entry.  */
 	  if (s->size >= (SPARC_ELF_WORD_BYTES(htab) == 8 ?
-			  (bfd_vma)1 << 32 : 0x400000))
+			  (((bfd_vma)1 << 31) << 1) : 0x400000))
 	    {
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
