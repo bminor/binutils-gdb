@@ -1,3 +1,9 @@
+2005-04-20  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mips.c (macro): Use sprintf_vma to convert a > 32 bit
+	number into a readable string.
+	(load_register): Likewise.
+
 2005-04-20  Jan Beulich  <jbeulich@novell.com>
 
 	PR/847

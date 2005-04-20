@@ -3555,9 +3555,10 @@ load_register (int reg, expressionS *ep, int dbl)
 
   if (!dbl || HAVE_32BIT_GPRS)
     {
-      as_bad (_("Number (0x%lx%08lx) larger than 32 bits"),
-	      (unsigned long) (ep->X_add_number >> 32),
-	      (unsigned long) (ep->X_add_number & 0xffffffff));
+      char value[32];
+
+      sprintf_vma (value, ep->X_add_number);
+      as_bad (_("Number (%s) larger than 32 bits"), value);
       macro_build (ep, "addiu", "t,r,j", reg, 0, BFD_RELOC_LO16);
       return;
     }
@@ -5800,9 +5801,12 @@ macro (struct mips_cl_insn *ip)
 
       if (HAVE_32BIT_ADDRESSES
 	  && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
-	as_bad (_("Number (0x%lx%08lx) larger than 32 bits"),
-		(unsigned long) (offset_expr.X_add_number >> 32),
-		(unsigned long) (offset_expr.X_add_number & 0xffffffff));
+	{
+	  char value [32];
+
+	  sprintf_vma (value, offset_expr.X_add_number);
+	  as_bad (_("Number (%s) larger than 32 bits"), value);
+	}
 
       /* A constant expression in PIC code can be handled just as it
 	 is in non PIC code.  */
@@ -6391,9 +6395,12 @@ macro (struct mips_cl_insn *ip)
 
       if (HAVE_32BIT_ADDRESSES
 	  && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
-	as_bad (_("Number (0x%lx%08lx) larger than 32 bits"),
-		(unsigned long) (offset_expr.X_add_number >> 32),
-		(unsigned long) (offset_expr.X_add_number & 0xffffffff));
+	{
+	  char value [32];
+
+	  sprintf_vma (value, offset_expr.X_add_number);
+	  as_bad (_("Number (%s) larger than 32 bits"), value);
+	}
 
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  We set coproc if we must
@@ -11012,9 +11019,9 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		hiv = 0xffffffff;
 	      else
 		hiv = 0;
-	      md_number_to_chars ((char *)(buf + target_big_endian ? 4 : 0),
+	      md_number_to_chars ((char *)(buf + (target_big_endian ? 4 : 0)),
 				  *valP, 4);
-	      md_number_to_chars ((char *)(buf + target_big_endian ? 0 : 4),
+	      md_number_to_chars ((char *)(buf + (target_big_endian ? 0 : 4)),
 				  hiv, 4);
 	    }
 	}
