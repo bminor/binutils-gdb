@@ -1,5 +1,9 @@
 2005-04-20  Nick Clifton  <nickc@redhat.com>
 
+	* config/tc-xtensa.c (get_aligned_diff): Change type of
+	branch_align to offsetT so that its signedness matches that of
+	target_size.
+
 	* config/tc-mips.c (macro): Use sprintf_vma to convert a > 32 bit
 	number into a readable string.
 	(load_register): Likewise.

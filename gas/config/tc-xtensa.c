@@ -8179,7 +8179,7 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
   bfd_boolean is_loop;
   int align_power;
   offsetT opt_diff;
-  addressT branch_align;
+  offsetT branch_align;
 
   assert (fragP->fr_type == rs_machine_dependent);
   switch (fragP->fr_subtype)
