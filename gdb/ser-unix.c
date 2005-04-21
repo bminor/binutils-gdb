@@ -70,9 +70,6 @@ static void hardwire_raw (struct serial *scb);
 static int wait_for (struct serial *scb, int timeout);
 static int hardwire_readchar (struct serial *scb, int timeout);
 static int do_hardwire_readchar (struct serial *scb, int timeout);
-static int generic_readchar (struct serial *scb, int timeout,
-			     int (*do_readchar) (struct serial *scb,
-						 int timeout));
 static int rate_to_code (int rate);
 static int hardwire_setbaudrate (struct serial *scb, int rate);
 static void hardwire_close (struct serial *scb);
@@ -422,7 +419,7 @@ hardwire_raw (struct serial *scb)
  */
 
 /* FIXME: cagney/1999-09-16: Don't replace this with the equivalent
-   ser_unix*() until the old TERMIOS/SGTTY/... timer code has been
+   ser_base*() until the old TERMIOS/SGTTY/... timer code has been
    flushed. . */
 
 /* NOTE: cagney/1999-09-30: Much of the code below is dead.  The only
@@ -542,13 +539,13 @@ wait_for (struct serial *scb, int timeout)
    dropped dead, or SERIAL_ERROR for any other error (see errno in that case).  */
 
 /* FIXME: cagney/1999-09-16: Don't replace this with the equivalent
-   ser_unix*() until the old TERMIOS/SGTTY/... timer code has been
+   ser_base*() until the old TERMIOS/SGTTY/... timer code has been
    flushed. */
 
 /* NOTE: cagney/1999-09-16: This function is not identical to
-   ser_unix_readchar() as part of replacing it with ser_unix*()
+   ser_base_readchar() as part of replacing it with ser_base*()
    merging will be required - this code handles the case where read()
-   times out due to no data while ser_unix_readchar() doesn't expect
+   times out due to no data while ser_base_readchar() doesn't expect
    that. */
 
 static int
@@ -863,191 +860,7 @@ hardwire_close (struct serial *scb)
   close (scb->fd);
   scb->fd = -1;
 }
-
 
-/* Wait for input on scb, with timeout seconds.  Returns 0 on success,
-   otherwise SERIAL_TIMEOUT or SERIAL_ERROR. */
-
-static int
-ser_unix_wait_for (struct serial *scb, int timeout)
-{
-  while (1)
-    {
-      int numfds;
-      struct timeval tv;
-      fd_set readfds, exceptfds;
-
-      /* NOTE: Some OS's can scramble the READFDS when the select()
-         call fails (ex the kernel with Red Hat 5.2).  Initialize all
-         arguments before each call. */
-
-      tv.tv_sec = timeout;
-      tv.tv_usec = 0;
-
-      FD_ZERO (&readfds);
-      FD_ZERO (&exceptfds);
-      FD_SET (scb->fd, &readfds);
-      FD_SET (scb->fd, &exceptfds);
-
-      if (timeout >= 0)
-	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, &tv);
-      else
-	numfds = select (scb->fd + 1, &readfds, 0, &exceptfds, 0);
-
-      if (numfds <= 0)
-	{
-	  if (numfds == 0)
-	    return SERIAL_TIMEOUT;
-	  else if (errno == EINTR)
-	    continue;
-	  else
-	    return SERIAL_ERROR;	/* Got an error from select or poll */
-	}
-
-      return 0;
-    }
-}
-
-/* Read a character with user-specified timeout.  TIMEOUT is number of seconds
-   to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
-   char if successful.  Returns -2 if timeout expired, EOF if line dropped
-   dead, or -3 for any other error (see errno in that case). */
-
-static int
-do_unix_readchar (struct serial *scb, int timeout)
-{
-  int status;
-  int delta;
-
-  /* We have to be able to keep the GUI alive here, so we break the
-     original timeout into steps of 1 second, running the "keep the
-     GUI alive" hook each time through the loop.
-
-     Also, timeout = 0 means to poll, so we just set the delta to 0,
-     so we will only go through the loop once.  */
-
-  delta = (timeout == 0 ? 0 : 1);
-  while (1)
-    {
-
-      /* N.B. The UI may destroy our world (for instance by calling
-         remote_stop,) in which case we want to get out of here as
-         quickly as possible.  It is not safe to touch scb, since
-         someone else might have freed it.  The
-         deprecated_ui_loop_hook signals that we should exit by
-         returning 1.  */
-
-      if (deprecated_ui_loop_hook)
-	{
-	  if (deprecated_ui_loop_hook (0))
-	    return SERIAL_TIMEOUT;
-	}
-
-      status = ser_unix_wait_for (scb, delta);
-      if (timeout > 0)
-        timeout -= delta;
-
-      /* If we got a character or an error back from wait_for, then we can 
-         break from the loop before the timeout is completed. */
-
-      if (status != SERIAL_TIMEOUT)
-	{
-	  break;
-	}
-
-      /* If we have exhausted the original timeout, then generate
-         a SERIAL_TIMEOUT, and pass it out of the loop. */
-
-      else if (timeout == 0)
-	{
-	  status = SERIAL_TIMEOUT;
-	  break;
-	}
-    }
-
-  if (status < 0)
-    return status;
-
-  while (1)
-    {
-      status = read (scb->fd, scb->buf, BUFSIZ);
-      if (status != -1 || errno != EINTR)
-	break;
-    }
-
-  if (status <= 0)
-    {
-      if (status == 0)
-	return SERIAL_TIMEOUT;	/* 0 chars means timeout [may need to
-				   distinguish between EOF & timeouts
-				   someday] */
-      else
-	return SERIAL_ERROR;	/* Got an error from read */
-    }
-
-  scb->bufcnt = status;
-  scb->bufcnt--;
-  scb->bufp = scb->buf;
-  return *scb->bufp++;
-}
-
-/* Perform operations common to both old and new readchar. */
-
-/* Return the next character from the input FIFO.  If the FIFO is
-   empty, call the SERIAL specific routine to try and read in more
-   characters.
-
-   Initially data from the input FIFO is returned (fd_event()
-   pre-reads the input into that FIFO.  Once that has been emptied,
-   further data is obtained by polling the input FD using the device
-   specific readchar() function.  Note: reschedule() is called after
-   every read.  This is because there is no guarentee that the lower
-   level fd_event() poll_event() code (which also calls reschedule())
-   will be called. */
-
-static int
-generic_readchar (struct serial *scb, int timeout,
-		  int (do_readchar) (struct serial *scb, int timeout))
-{
-  int ch;
-  if (scb->bufcnt > 0)
-    {
-      ch = *scb->bufp;
-      scb->bufcnt--;
-      scb->bufp++;
-    }
-  else if (scb->bufcnt < 0)
-    {
-      /* Some errors/eof are are sticky. */
-      ch = scb->bufcnt;
-    }
-  else
-    {
-      ch = do_readchar (scb, timeout);
-      if (ch < 0)
-	{
-	  switch ((enum serial_rc) ch)
-	    {
-	    case SERIAL_EOF:
-	    case SERIAL_ERROR:
-	      /* Make the error/eof stick. */
-	      scb->bufcnt = ch;
-	      break;
-	    case SERIAL_TIMEOUT:
-	      scb->bufcnt = 0;
-	      break;
-	    }
-	}
-    }
-  reschedule (scb);
-  return ch;
-}
-
-int
-ser_unix_readchar (struct serial *scb, int timeout)
-{
-  return generic_readchar (scb, timeout, do_unix_readchar);
-}
 
 void
 _initialize_ser_hardwire (void)
@@ -1058,7 +871,7 @@ _initialize_ser_hardwire (void)
   ops->next = 0;
   ops->open = hardwire_open;
   ops->close = hardwire_close;
-  /* FIXME: Don't replace this with the equivalent ser_unix*() until
+  /* FIXME: Don't replace this with the equivalent ser_base*() until
      the old TERMIOS/SGTTY/... timer code has been flushed. cagney
      1999-09-16. */
   ops->readchar = hardwire_readchar;
@@ -1075,5 +888,29 @@ _initialize_ser_hardwire (void)
   ops->setstopbits = hardwire_setstopbits;
   ops->drain_output = hardwire_drain_output;
   ops->async = ser_base_async;
+  ops->read_prim = ser_unix_read_prim;
+  ops->write_prim = ser_unix_write_prim;
   serial_add_interface (ops);
+}
+
+int
+ser_unix_read_prim (struct serial *scb, size_t count)
+{
+  int status;
+
+  while (1)
+    {
+      status = read (scb->fd, scb->buf, count);
+      if (status != -1 || errno != EINTR)
+	break;
+    }
+  return status;
+}
+
+int
+ser_unix_write_prim (struct serial *scb, const void *buf, size_t len)
+{
+  /* ??? Historically, GDB has not retried calls to "write" that
+     result in EINTR.  */
+  return write (scb->fd, buf, len);
 }

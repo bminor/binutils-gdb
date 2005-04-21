@@ -232,6 +232,12 @@ struct serial_ops
        the specified function when ever there is something
        interesting.  */
     void (*async) (struct serial *scb, int async_p);
+    /* Perform a low-level read operation, reading (at most) COUNT
+       bytes into SCB->BUF.  */
+    int (*read_prim)(struct serial *scb, size_t count);
+    /* Perform a low-level write operation, writing (at most) COUNT
+       bytes from BUF.  */
+    int (*write_prim)(struct serial *scb, const void *buf, size_t count);
   };
 
 /* Add a new serial interface to the interface list */

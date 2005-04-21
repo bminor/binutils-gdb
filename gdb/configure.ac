@@ -1187,6 +1187,18 @@ if test x$gdb_cv_os_cygwin = xyes; then
 	;;
     esac
 fi
+
+# The ser-tcp.c module requires sockets.
+case ${host} in
+  *mingw32*)
+    AC_DEFINE(USE_WIN32API, 1,
+              [Define if we should use the Windows API, instead of the 
+	       POSIX API.  On Windows, we use the Windows API when 
+	       building for MinGW, but the POSIX API when building 
+	       for Cygwin.])
+    WIN32LIBS="$WIN32LIBS -lws2_32"
+    ;;
+esac	    
 AC_SUBST(WIN32LIBS)
 
 LIBGUI="../libgui/src/libgui.a"

@@ -1,3 +1,44 @@
+2005-04-20  Mark Mitchell  <mark@codesourcery.com>
+
+	* configure.ac: On MinGW, define USE_WIN32API and link with
+	-lws2_32.
+	* ser-tcp.c (<winsock2.h>): Include, for Windows.
+	(ETIMEDOUT): Define, for Windows.
+	(ioctl): Likewise.
+	(closesocket): Define, for POSIX.
+	(net_open): Adjust for differences in socket functions between
+	Windows and UNIX.
+	(net_close): Likweise.
+	(net_read_prim): New function.
+	(net_write_prim): Likewise.
+	(_initialize_ser_tcp): Initialize winsock.  Fill in read_prim and
+	write_prim.
+	* ser-unix.h (ser_unix_readcchar): Remove.
+	(ser_unix_read_prim): Declare.
+	(ser_unix_write_prim): Likewise.
+	* ser-unix.c (generic_readchar): Move to ser-base.c.
+	(ser_unix_wait_for): Likewise.
+	(do_unix_readchar): Likewise.
+	(ser_unix_readchar): Likewise.
+	(_initialize_ser_hardwire): Initialize read_prim and write_prim.
+	(ser_unix_read_prim): New function.
+	(ser_unix_write_prim): Likewise.
+	* ser-base.h (generic_readchar): Declare.
+	(ser_base_readchar): Likewise.
+	* ser-base.c (<winsock2.h>): Include, for windows.
+	(fd_event): Use the read primitive specified by the serial
+	interface.
+	(ser_base_wait_for): Moved from ser-unix.c
+	(do_ser_base_read_char): Likewise.
+	(generic_readchar): Likewise.
+	(ser_base_readchar): Likewise.
+	(ser_base_write): Use the write primitive specified by the serial
+	interface.
+	* ser-pipe.c (_initialize_ser_pipe): Use ser_base_readchar, not
+	ser_unix_readchar.  Initialize read_prim and write_prim.
+	* serial.c (struct serial_ops): Add read_prim and write_prim.
+	* configure: Regenerate.
+
 2005-04-19  Ben Elliston  <bje@au.ibm.com>
 
 	* c-lang.c (c_create_fundamental_type): Comment fix.
