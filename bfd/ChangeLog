@@ -1,3 +1,41 @@
+2005-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* aout-adobe.c: Convert to ISO C and fix formatting.
+	* aout-arm.c: Convert to ISO C and fix formatting.
+	* aout-cris.c: Convert to ISO C and fix formatting.
+	* aout-ns32k.c: Convert to ISO C and fix formatting.
+	* aout-tic30.c: Convert to ISO C and fix formatting.
+	* coffcode.h: Convert to ISO C and fix formatting.
+	* coffswap.h: Convert to ISO C and fix formatting.
+	* i386aout.c: Convert to ISO C and fix formatting.
+	* libaout.h: Convert to ISO C and fix formatting.
+	* libcoff-in.h: Convert to ISO C and fix formatting.
+	* libcoff.h: Convert to ISO C and fix formatting.
+	* libecoff.h: Convert to ISO C and fix formatting.
+	* libnlm.h: Convert to ISO C and fix formatting.
+	* libpei.h: Convert to ISO C and fix formatting.
+	* libxcoff.h: Convert to ISO C and fix formatting.
+	* nlm-target.h: Convert to ISO C and fix formatting.
+	* nlm.c: Convert to ISO C and fix formatting.
+	* nlm32-alpha.c: Convert to ISO C and fix formatting.
+	* nlm32-i386.c: Convert to ISO C and fix formatting.
+	* nlm32-ppc.c: Convert to ISO C and fix formatting.
+	* nlm32-sparc.c: Convert to ISO C and fix formatting.
+	* nlmcode.h: Convert to ISO C and fix formatting.
+	* nlmswap.h: Convert to ISO C and fix formatting.
+	* pe-mips.c: Convert to ISO C and fix formatting.
+	* peXXigen.c: Convert to ISO C and fix formatting.
+	* peicode.h: Convert to ISO C and fix formatting.
+	* vms-gsd.c: Convert to ISO C and fix formatting.
+	* vms-hdr.c: Convert to ISO C and fix formatting.
+	* vms-misc.c: Convert to ISO C and fix formatting.
+	* vms-tir.c: Convert to ISO C and fix formatting.
+	* vms.c: Convert to ISO C and fix formatting.
+	* vms.h: Convert to ISO C and fix formatting.
+
+	* coffgen.c (coff_print_symbol): Restore correct formatting of
+	output.
+
 2005-04-20  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.c (sparc_elf_r_symndx_64): Fix compiler warning.

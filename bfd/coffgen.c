@@ -1895,7 +1895,7 @@ coff_print_symbol (bfd *abfd,
 	  else
 	    val = combined->u.syment.n_value - (unsigned long) root;
 
-	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d)",
+	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x",
 		   combined->u.syment.n_scnum,
 		   combined->u.syment.n_flags,
 		   combined->u.syment.n_type,
