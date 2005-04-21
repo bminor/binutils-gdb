@@ -66,7 +66,7 @@ struct _bfd_sparc_elf_link_hash_table
   bfd_vma (*r_info) (Elf_Internal_Rela *, bfd_vma, bfd_vma);
   bfd_vma (*r_symndx) (bfd_vma);
   int (*build_plt_entry) (bfd *, asection *, bfd_vma, bfd_vma, bfd_vma *);
-  const unsigned char *dynamic_interpreter;
+  const char *dynamic_interpreter;
   int dynamic_interpreter_size;
   unsigned int word_align_power;
   unsigned int align_power_max;

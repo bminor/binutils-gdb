@@ -1,5 +1,10 @@
 2005-04-21  Andreas Schwab  <schwab@suse.de>
 
+	* elfxx-sparc.h (struct _bfd_sparc_elf_link_hash_table): Remove
+	unsigned from type of dynamic_interpreter.
+	* elfxx-sparc.c (_bfd_sparc_elf_link_hash_table_create): Remove
+	casts again.
+
 	* elf.c (assign_section_numbers): Fix comment.
 
 2005-04-21  Jerome Guitton  <guitton@gnat.com>

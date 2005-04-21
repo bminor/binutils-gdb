@@ -778,8 +778,7 @@ _bfd_sparc_elf_link_hash_table_create (bfd *abfd)
       ret->align_power_max = 4;
       ret->bytes_per_word = 8;
       ret->bytes_per_rela = sizeof (Elf64_External_Rela);
-      ret->dynamic_interpreter =
-	(const unsigned char *) ELF64_DYNAMIC_INTERPRETER;
+      ret->dynamic_interpreter = ELF64_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF64_DYNAMIC_INTERPRETER;
     }
   else
@@ -796,8 +795,7 @@ _bfd_sparc_elf_link_hash_table_create (bfd *abfd)
       ret->align_power_max = 3;
       ret->bytes_per_word = 4;
       ret->bytes_per_rela = sizeof (Elf32_External_Rela);
-      ret->dynamic_interpreter =
-	(const unsigned char *) ELF32_DYNAMIC_INTERPRETER;
+      ret->dynamic_interpreter = ELF32_DYNAMIC_INTERPRETER;
       ret->dynamic_interpreter_size = sizeof ELF32_DYNAMIC_INTERPRETER;
     }
 
