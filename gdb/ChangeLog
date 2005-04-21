@@ -1,3 +1,21 @@
+2005-04-20  David S. Miller  <davem@davemloft.net>
+
+	* sparc-linux-tdep.c (sparc32_linux_sigtramp_p): Fix
+	signal return stub symbol names, __restore and __restore_rt are
+	the i386 symbol names not the sparc ones.
+	(sparc32_linux_sigtramp_frame_cache): Document bits/sigcontext.h
+	as where the offsets were obtained from.
+	* sparc64-linux-tdep.c (LINUX64_RT_SIGTRAMP_INSN0,
+	LINUX64_RT_SIGTRAMP_INSN1): New defines.
+	(sparc64_linux_sigtramp_start, sparc64_linux_sigtramp_p,
+	sparc64_linux_sigtramp_frame_cache,
+	sparc64_linux_sigtramp_frame_this_id,
+	sparc64_linux_sigtramp_frame_prev_register,
+	sparc64_linux_sigtramp_frame_sniffer): New functions.
+	(sparc64_linux_sigtramp_frame_unwind): New frame unwinder.
+	(sparc64_linux_init_abi): Register sigtramp frame sniffer.
+	* Makefile.in (sparc64-linux-tdep.o): Update dependencies.
+
 2005-04-20  Mark Mitchell  <mark@codesourcery.com>
 
 	* configure.ac: On MinGW, define USE_WIN32API and link with

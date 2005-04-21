@@ -144,16 +144,17 @@ sparc32_linux_sigtramp_p (struct frame_info *next_frame)
   find_pc_partial_function (pc, &name, NULL, NULL);
 
   /* If we have NAME, we can optimize the search.  The trampolines are
-     named __restore and __restore_rt.  However, they aren't dynamically
-     exported from the shared C library, so the trampoline may appear to
-     be part of the preceding function.  This should always be sigaction,
-     __sigaction, or __libc_sigaction (all aliases to the same function).  */
+     named __sigreturn_stub and __rt_sigreturn_stub.  However, they
+     aren't dynamically exported from the shared C library, so the
+     trampoline may appear to be part of the preceding function.  This
+     should always be sigaction, __sigaction, or __libc_sigaction (all
+     aliases to the same function).  */
   if (name == NULL || strstr (name, "sigaction") != NULL)
     return (sparc32_linux_sigtramp_start (next_frame) != 0
 	    || sparc32_linux_rt_sigtramp_start (next_frame) != 0);
 
-  return (strcmp ("__restore", name) == 0
-	  || strcmp ("__restore_rt", name) == 0);
+  return (strcmp ("__sigreturn_stub", name) == 0
+	  || strcmp ("__rt_sigreturn_stub", name) == 0);
 }
 
 static struct sparc_frame_cache *
@@ -191,6 +192,8 @@ sparc32_linux_sigtramp_frame_cache (struct frame_info *next_frame,
   cache->pc = addr;
 
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  /* Offsets from <bits/sigcontext.h> */
 
   cache->saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 0;
   cache->saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 4;
