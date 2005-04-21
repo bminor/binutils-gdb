@@ -1,3 +1,8 @@
+2005-04-21  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (md_assemble): Fix buffer overrun in operand[]
+	array.
+
 2005-04-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-aout.h (S_IS_EXTERN): Removed.
