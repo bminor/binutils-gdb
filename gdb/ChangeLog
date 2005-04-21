@@ -1,3 +1,30 @@
+2005-04-21  David S. Miller  <davem@davemloft.net>
+
+	* sparc-linux-tdep.c (sparc32_linux_sigframe_init): New function.
+	(sparc32_linux_sigframe, sparc32_linux_rt_sigframe): New tramp_frames.
+	(sparc_linux_sigtramp_start, sparc32_linux_sigtramp_start,
+	sparc32_linux_rt_sigtramp_start, sparc32_linux_sigtramp_p,
+	sparc32_linux_sigtramp_frame_cache,
+	sparc32_linux_sigtramp_frame_this_id,
+	sparc32_linux_sigtramp_frame_prev_register,
+	sparc32_linux_sigtramp_frame_unwind,
+	sparc32_linux_sigtramp_frame_sniffer): Delete.
+	(sparc32_linux_init_abi): Register new tramp unwinders.  Kill
+	register of old sigtramp sniffer.
+	* sparc64-linux-tdep.c (sparc64_linux_sigframe_init): New
+	function.
+	(sparc64_linux_rt_sigframe): New tramp frame.
+	(sparc64_linux_sigtramp_start, sparc64_linux_sigtramp_p,
+	sparc64_linux_sigtramp_frame_cache,
+	sparc64_linux_sigtramp_frame_this_id,
+	sparc64_linux_sigtramp_frame_prev_register,
+	sparc64_linux_sigtramp_frame_unwind,
+	sparc64_linux_sigtramp_frame_sniffer): Delete.
+	(sparc64_linux_init_abi): Register new tramp unwinders.  Kill
+	register of old sigtramp sniffer.
+	Makefile.in (sparc64-linux-tdep.o): Update dependencies.
+	(sparc-linux-tdep.o): Likewise.
+
 2005-04-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* ser-base.c: Include "gdb_string.h".

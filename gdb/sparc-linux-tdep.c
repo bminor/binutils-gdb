@@ -23,6 +23,7 @@
 #include "floatformat.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "tramp-frame.h"
 #include "gdbarch.h"
 #include "gdbcore.h"
 #include "osabi.h"
@@ -31,12 +32,9 @@
 #include "symtab.h"
 #include "trad-frame.h"
 
-#include "gdb_assert.h"
-#include "gdb_string.h"
-
 #include "sparc-tdep.h"
 
-/* Recognizing signal handler frames.  */
+/* Signal trampoline support.  */
 
 /* GNU/Linux has two flavors of signals.  Normal signal handlers, and
    "realtime" (RT) signals.  The RT signals can provide additional
@@ -69,195 +67,86 @@
 
 /* The instruction sequence for RT signals is
        mov __NR_rt_sigreturn, %g1	! hex: 0x82102065
-       ta  {0x10,0x6d}			! hex: 0x91d02010 or 0x91d0206d
+       ta  {0x10,0x6d}			! hex: 0x91d02010
 
-   The effect is to call the system call rt_sigreturn.  The trap number
-   is variable based upon whether this is a 32-bit or 64-bit sparc binary.
+   The effect is to call the system call rt_sigreturn.
    Note that 64-bit binaries only use this RT signal return method.  */
 
 #define LINUX32_RT_SIGTRAMP_INSN0	0x82102065
 #define LINUX32_RT_SIGTRAMP_INSN1	0x91d02010
 
-/* If PC is in a sigtramp routine consisting of the instructions INSN0
-   and INSN1, return the address of the start of the routine.
-   Otherwise, return 0.  */
+static void sparc32_linux_sigframe_init (const struct tramp_frame *self,
+					 struct frame_info *next_frame,
+					 struct trad_frame_cache *this_cache,
+					 CORE_ADDR func);
 
-CORE_ADDR
-sparc_linux_sigtramp_start (struct frame_info *next_frame,
-			    ULONGEST insn0, ULONGEST insn1)
+static const struct tramp_frame sparc32_linux_sigframe = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { LINUX32_SIGTRAMP_INSN0, -1 },
+    { LINUX32_SIGTRAMP_INSN1, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  sparc32_linux_sigframe_init
+};
+
+static const struct tramp_frame sparc32_linux_rt_sigframe = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { LINUX32_RT_SIGTRAMP_INSN0, -1 },
+    { LINUX32_RT_SIGTRAMP_INSN1, -1 },
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  sparc32_linux_sigframe_init
+};
+
+static void
+sparc32_linux_sigframe_init (const struct tramp_frame *self,
+			     struct frame_info *next_frame,
+			     struct trad_frame_cache *this_cache,
+			     CORE_ADDR func)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  ULONGEST word0, word1;
-  unsigned char buf[8];		/* Two instructions.  */
-
-  /* We only recognize a signal trampoline if PC is at the start of
-     one of the instructions.  We optimize for finding the PC at the
-     start of the instruction sequence, as will be the case when the
-     trampoline is not the first frame on the stack.  We assume that
-     in the case where the PC is not at the start of the instruction
-     sequence, there will be a few trailing readable bytes on the
-     stack.  */
-
-  if (!safe_frame_unwind_memory (next_frame, pc, buf, sizeof buf))
-    return 0;
-
-  word0 = extract_unsigned_integer (buf, 4);
-  if (word0 != insn0)
-    {
-      if (word0 != insn1)
-	return 0;
-
-      pc -= 4;
-      if (!safe_frame_unwind_memory (next_frame, pc, buf, sizeof buf))
-	return 0;
-
-      word0 = extract_unsigned_integer (buf, 4);
-    }
-
-  word1 = extract_unsigned_integer (buf + 4, 4);
-  if (word0 != insn0 || word1 != insn1)
-    return 0;
-
-  return pc;
-}
-
-static CORE_ADDR
-sparc32_linux_sigtramp_start (struct frame_info *next_frame)
-{
-  return sparc_linux_sigtramp_start (next_frame, LINUX32_SIGTRAMP_INSN0,
-				     LINUX32_SIGTRAMP_INSN1);
-}
-
-static CORE_ADDR
-sparc32_linux_rt_sigtramp_start (struct frame_info *next_frame)
-{
-  return sparc_linux_sigtramp_start (next_frame, LINUX32_RT_SIGTRAMP_INSN0,
-				     LINUX32_RT_SIGTRAMP_INSN1);
-}
-
-static int
-sparc32_linux_sigtramp_p (struct frame_info *next_frame)
-{
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  char *name;
-
-  find_pc_partial_function (pc, &name, NULL, NULL);
-
-  /* If we have NAME, we can optimize the search.  The trampolines are
-     named __sigreturn_stub and __rt_sigreturn_stub.  However, they
-     aren't dynamically exported from the shared C library, so the
-     trampoline may appear to be part of the preceding function.  This
-     should always be sigaction, __sigaction, or __libc_sigaction (all
-     aliases to the same function).  */
-  if (name == NULL || strstr (name, "sigaction") != NULL)
-    return (sparc32_linux_sigtramp_start (next_frame) != 0
-	    || sparc32_linux_rt_sigtramp_start (next_frame) != 0);
-
-  return (strcmp ("__sigreturn_stub", name) == 0
-	  || strcmp ("__rt_sigreturn_stub", name) == 0);
-}
-
-static struct sparc_frame_cache *
-sparc32_linux_sigtramp_frame_cache (struct frame_info *next_frame,
-				    void **this_cache)
-{
-  struct sparc_frame_cache *cache;
-  CORE_ADDR sigcontext_addr, addr;
+  CORE_ADDR base, addr;
   int regnum;
 
-  if (*this_cache)
-    return *this_cache;
-
-  cache = sparc32_frame_cache (next_frame, this_cache);
-  gdb_assert (cache == *this_cache);
-
-  /* ??? What about signal trampolines that aren't frameless?  */
-  regnum = SPARC_SP_REGNUM;
-  cache->base = frame_unwind_register_unsigned (next_frame, regnum);
-
-  regnum = SPARC_O1_REGNUM;
-  sigcontext_addr = frame_unwind_register_unsigned (next_frame, regnum);
-
-  addr = sparc32_linux_sigtramp_start (next_frame);
-  if (addr == 0)
-    {
-      /* If this is a RT signal trampoline, adjust SIGCONTEXT_ADDR
-         accordingly.  */
-      addr = sparc32_linux_rt_sigtramp_start (next_frame);
-      if (addr)
-	sigcontext_addr += 128;
-      else
-	addr = frame_func_unwind (next_frame);
-    }
-  cache->pc = addr;
-
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  base = frame_unwind_register_unsigned (next_frame, SPARC_O1_REGNUM);
+  if (self == &sparc32_linux_rt_sigframe)
+    base += 128;
 
   /* Offsets from <bits/sigcontext.h> */
 
-  cache->saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 0;
-  cache->saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 4;
-  cache->saved_regs[SPARC32_NPC_REGNUM].addr = sigcontext_addr + 8;
-  cache->saved_regs[SPARC32_Y_REGNUM].addr = sigcontext_addr + 12;
+  trad_frame_set_reg_addr (this_cache, SPARC32_PSR_REGNUM, base + 0x00);
+  trad_frame_set_reg_addr (this_cache, SPARC32_PC_REGNUM,  base + 0x04);
+  trad_frame_set_reg_addr (this_cache, SPARC32_NPC_REGNUM, base + 0x08);
+  trad_frame_set_reg_addr (this_cache, SPARC32_Y_REGNUM,   base + 0x0c);
 
   /* Since %g0 is always zero, keep the identity encoding.  */
-  for (regnum = SPARC_G1_REGNUM, addr = sigcontext_addr + 20;
-       regnum <= SPARC_O7_REGNUM; regnum++, addr += 4)
-    cache->saved_regs[regnum].addr = addr;
+  addr = base + 0x14;
+  for (regnum = SPARC_G1_REGNUM; regnum <= SPARC_O7_REGNUM; regnum++)
+    {
+      trad_frame_set_reg_addr (this_cache, regnum, addr);
+      addr += 4;
+    }
 
-  for (regnum = SPARC_L0_REGNUM, addr = cache->base;
-       regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
-    cache->saved_regs[regnum].addr = addr;
-
-  return cache;
+  base = addr = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+  for (regnum = SPARC_L0_REGNUM; regnum <= SPARC_I7_REGNUM; regnum++)
+    {
+      trad_frame_set_reg_addr (this_cache, regnum, addr);
+      addr += 4;
+    }
+  trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
-static void
-sparc32_linux_sigtramp_frame_this_id (struct frame_info *next_frame,
-				      void **this_cache,
-				      struct frame_id *this_id)
-{
-  struct sparc_frame_cache *cache =
-    sparc32_linux_sigtramp_frame_cache (next_frame, this_cache);
-
-  (*this_id) = frame_id_build (cache->base, cache->pc);
-}
-
-static void
-sparc32_linux_sigtramp_frame_prev_register (struct frame_info *next_frame,
-					    void **this_cache,
-					    int regnum, int *optimizedp,
-					    enum lval_type *lvalp,
-					    CORE_ADDR *addrp,
-					    int *realnump, void *valuep)
-{
-  struct sparc_frame_cache *cache =
-    sparc32_linux_sigtramp_frame_cache (next_frame, this_cache);
-
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
-}
-
-static const struct frame_unwind sparc32_linux_sigtramp_frame_unwind =
-{
-  SIGTRAMP_FRAME,
-  sparc32_linux_sigtramp_frame_this_id,
-  sparc32_linux_sigtramp_frame_prev_register
-};
-
-static const struct frame_unwind *
-sparc32_linux_sigtramp_frame_sniffer (struct frame_info *next_frame)
-{
-  if (sparc32_linux_sigtramp_p (next_frame))
-    return &sparc32_linux_sigtramp_frame_unwind;
-
-  return NULL;
-}
 
 
 static void
 sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  tramp_frame_prepend_unwinder (gdbarch, &sparc32_linux_sigframe);
+  tramp_frame_prepend_unwinder (gdbarch, &sparc32_linux_rt_sigframe);
+
   /* GNU/Linux is very similar to Solaris ...  */
   sparc32_sol2_init_abi (info, gdbarch);
 
@@ -267,8 +156,6 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux doesn't support the 128-bit `long double' from the psABI.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
-
-  frame_unwind_append_sniffer (gdbarch, sparc32_linux_sigtramp_frame_sniffer);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
