@@ -1,3 +1,8 @@
+2005-04-21  Jerome Guitton  <guitton@gnat.com>
+
+	* som.c (som_bfd_print_private_bfd_data): Add explicit cast to long
+	for struct som_exec_auxhdr fields.
+
 2005-04-21  Nick Clifton  <nickc@redhat.com>
 
 	* aout-adobe.c: Convert to ISO C and fix formatting.

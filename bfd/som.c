@@ -5080,16 +5080,20 @@ som_bfd_print_private_bfd_data (bfd *abfd, void *farg)
       fprintf (f, "\n");
       fprintf (f, "  type               %#x\n", auxhdr->type);
       fprintf (f, "  length             %#x\n", auxhdr->length);
-      fprintf (f, "  text size          %#lx\n", exec_header->exec_tsize);
-      fprintf (f, "  text memory offset %#lx\n", exec_header->exec_tmem);
-      fprintf (f, "  text file offset   %#lx\n", exec_header->exec_tfile);
-      fprintf (f, "  data size          %#lx\n", exec_header->exec_dsize);
-      fprintf (f, "  data memory offset %#lx\n", exec_header->exec_dmem);
-      fprintf (f, "  data file offset   %#lx\n", exec_header->exec_dfile);
-      fprintf (f, "  bss size           %#lx\n", exec_header->exec_bsize);
-      fprintf (f, "  entry point        %#lx\n", exec_header->exec_entry);
-      fprintf (f, "  loader flags       %#lx\n", exec_header->exec_flags);
-      fprintf (f, "  bss initializer    %#lx\n", exec_header->exec_bfill);
+
+      /* Note that, depending on the HP-UX version, the following fields can be
+         either ints, or longs.  */
+
+      fprintf (f, "  text size          %#lx\n", (long) exec_header->exec_tsize);
+      fprintf (f, "  text memory offset %#lx\n", (long) exec_header->exec_tmem);
+      fprintf (f, "  text file offset   %#lx\n", (long) exec_header->exec_tfile);
+      fprintf (f, "  data size          %#lx\n", (long) exec_header->exec_dsize);
+      fprintf (f, "  data memory offset %#lx\n", (long) exec_header->exec_dmem);
+      fprintf (f, "  data file offset   %#lx\n", (long) exec_header->exec_dfile);
+      fprintf (f, "  bss size           %#lx\n", (long) exec_header->exec_bsize);
+      fprintf (f, "  entry point        %#lx\n", (long) exec_header->exec_entry);
+      fprintf (f, "  loader flags       %#lx\n", (long) exec_header->exec_flags);
+      fprintf (f, "  bss initializer    %#lx\n", (long) exec_header->exec_bfill);
     }
 
   return TRUE;
