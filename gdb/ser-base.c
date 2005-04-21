@@ -28,6 +28,8 @@
 #include <winsock2.h>
 #endif
 
+#include "gdb_string.h"
+
 static timer_handler_func push_event;
 static handler_func fd_event;
 
