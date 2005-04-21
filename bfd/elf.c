@@ -2930,7 +2930,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		      elfsec = elf_shdrp[elfsec]->sh_link;
 		      /* PR 290:
 			 The Intel C compiler generates SHT_IA_64_UNWIND with
-			 SHF_LINK_ORDER.  But it doesn't set theh sh_link or
+			 SHF_LINK_ORDER.  But it doesn't set the sh_link or
 			 sh_info fields.  Hence we could get the situation
 		         where elfsec is 0.  */
 		      if (elfsec == 0)
