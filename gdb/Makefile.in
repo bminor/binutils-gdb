@@ -2483,7 +2483,8 @@ sentinel-frame.o: sentinel-frame.c $(defs_h) $(regcache_h) \
 ser-e7kpc.o: ser-e7kpc.c $(defs_h) $(serial_h) $(gdb_string_h)
 ser-go32.o: ser-go32.c $(defs_h) $(gdbcmd_h) $(serial_h) $(gdb_string_h)
 serial.o: serial.c $(defs_h) $(serial_h) $(gdb_string_h) $(gdbcmd_h)
-ser-base.o: ser-base.c $(defs_h) $(serial_h) $(ser_base_h) $(event_loop_h)
+ser-base.o: ser-base.c $(defs_h) $(serial_h) $(ser_base_h) $(event_loop_h) \
+	$(gdb_string_h)
 ser-pipe.o: ser-pipe.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
 	$(gdb_vfork_h) $(gdb_string_h)
 ser-tcp.o: ser-tcp.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
@@ -2567,8 +2568,7 @@ sparc64-linux-nat.o: sparc64-linux-nat.c $(defs_h) $(sparc64_tdep_h) \
 	$(sparc_nat_h)
 sparc64-linux-tdep.o: sparc64-linux-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(osabi_h) $(solib_svr4_h) \
-	$(symtab_h) $(trad_frame_h) \
-	$(sparc64_tdep_h)
+	$(symtab_h) $(trad_frame_h) $(tramp_frame_h) $(sparc64_tdep_h)
 sparc64-nat.o: sparc64-nat.c $(defs_h) $(gdbarch_h) $(sparc64_tdep_h) \
 	$(sparc_nat_h)
 sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(regcache_h) $(target_h) \
@@ -2590,7 +2590,7 @@ sparc64-tdep.o: sparc64-tdep.c $(defs_h) $(arch_utils_h) $(floatformat_h) \
 	$(sparc64_tdep_h)
 sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(gdbcore_h) $(osabi_h) $(regcache_h) \
-	$(solib_svr4_h) $(symtab_h) $(trad_frame_h) \
+	$(solib_svr4_h) $(symtab_h) $(trad_frame_h) $(tramp_frame_h) \
 	$(sparc_tdep_h)
 sparc-nat.o: sparc-nat.c $(defs_h) $(inferior_h) $(regcache_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) $(sparc_tdep_h) \
