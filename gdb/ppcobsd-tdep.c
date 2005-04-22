@@ -174,6 +174,9 @@ ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
 
+  /* OpenBSD currently uses a broken GCC.  */
+  set_gdbarch_return_value (gdbarch, ppc_sysv_abi_broken_return_value);
+
   /* OpenBSD uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);

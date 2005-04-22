@@ -1,5 +1,7 @@
 2005-04-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* ppcobsd-tdep.c (ppcobsd_init_abi): Set return_value.
+
 	* sparc-linux-tdep.c: Reorder includes.  Tweak a few comments.
 	(LINUX32_SIGTRAMP_INSN0, LINUX32_SIGTRAMP_INSN1)
 	(LINUX32_RT_SIGTRAMP_INSN0, LINUX32_RT_SIGTRAMP_INSN1): Remove
