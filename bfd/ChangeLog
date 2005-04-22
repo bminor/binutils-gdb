@@ -1,3 +1,13 @@
+2005-04-21  Jerome Guitton  <guitton@gnat.com>
+
+	* configure.in: Replace BFD_NEED_DECLARATION checks by the
+	corresponding AC_CHECK_DECLS.
+	* sysdep.h: Replace NEED_DECLARATION_* checks by the corresponding
+	HAVE_DECL_*.
+	* bfd.m4 (BFD_NEED_DECLARATION): Remove, obsolete.
+	* configure: Regenerate.
+	* config.in: Ditto.
+
 2005-04-21  Andreas Schwab  <schwab@suse.de>
 
 	* elfxx-sparc.h (struct _bfd_sparc_elf_link_hash_table): Remove

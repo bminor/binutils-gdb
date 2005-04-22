@@ -28,6 +28,13 @@
    don't. */
 #undef HAVE_DECL_BASENAME
 
+/* Define to 1 if you have the declaration of `ffs', and to 0 if you don't. */
+#undef HAVE_DECL_FFS
+
+/* Define to 1 if you have the declaration of `free', and to 0 if you don't.
+   */
+#undef HAVE_DECL_FREE
+
 /* Define to 1 if you have the declaration of `fseeko', and to 0 if you don't.
    */
 #undef HAVE_DECL_FSEEKO
@@ -43,6 +50,22 @@
 /* Define to 1 if you have the declaration of `ftello64', and to 0 if you
    don't. */
 #undef HAVE_DECL_FTELLO64
+
+/* Define to 1 if you have the declaration of `getenv', and to 0 if you don't.
+   */
+#undef HAVE_DECL_GETENV
+
+/* Define to 1 if you have the declaration of `malloc', and to 0 if you don't.
+   */
+#undef HAVE_DECL_MALLOC
+
+/* Define to 1 if you have the declaration of `realloc', and to 0 if you
+   don't. */
+#undef HAVE_DECL_REALLOC
+
+/* Define to 1 if you have the declaration of `strstr', and to 0 if you don't.
+   */
+#undef HAVE_DECL_STRSTR
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -256,24 +279,6 @@
 
 /* Define to 1 if you have the `__argz_stringify' function. */
 #undef HAVE___ARGZ_STRINGIFY
-
-/* Define if ffs is not declared in system header files. */
-#undef NEED_DECLARATION_FFS
-
-/* Define if free is not declared in system header files. */
-#undef NEED_DECLARATION_FREE
-
-/* Define if getenv is not declared in system header files. */
-#undef NEED_DECLARATION_GETENV
-
-/* Define if malloc is not declared in system header files. */
-#undef NEED_DECLARATION_MALLOC
-
-/* Define if realloc is not declared in system header files. */
-#undef NEED_DECLARATION_REALLOC
-
-/* Define if strstr is not declared in system header files. */
-#undef NEED_DECLARATION_STRSTR
 
 /* Name of package */
 #undef PACKAGE

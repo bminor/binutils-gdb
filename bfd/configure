@@ -9916,9 +9916,9 @@ _ACEOF
  ;;
 esac
 
-echo "$as_me:$LINENO: checking whether ffs must be declared" >&5
-echo $ECHO_N "checking whether ffs must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_ffs+set}" = set; then
+echo "$as_me:$LINENO: checking whether ffs is declared" >&5
+echo $ECHO_N "checking whether ffs is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_ffs+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -9927,25 +9927,14 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+$ac_includes_default
 int
 main ()
 {
-char *(*pfn) = (char *(*)) ffs
+#ifndef ffs
+  char *p = (char *) ffs;
+#endif
+
   ;
   return 0;
 }
@@ -9972,29 +9961,36 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_ffs=no
+  ac_cv_have_decl_ffs=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-bfd_cv_decl_needed_ffs=yes
+ac_cv_have_decl_ffs=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_ffs" >&5
+echo "${ECHO_T}$ac_cv_have_decl_ffs" >&6
+if test $ac_cv_have_decl_ffs = yes; then
 
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_ffs" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_ffs" >&6
-if test $bfd_cv_decl_needed_ffs = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_FFS 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_FFS 1
 _ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_FFS 0
+_ACEOF
+
 
 fi
 
-echo "$as_me:$LINENO: checking whether free must be declared" >&5
-echo $ECHO_N "checking whether free must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_free+set}" = set; then
+
+echo "$as_me:$LINENO: checking whether free is declared" >&5
+echo $ECHO_N "checking whether free is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_free+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -10003,25 +9999,14 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+$ac_includes_default
 int
 main ()
 {
-char *(*pfn) = (char *(*)) free
+#ifndef free
+  char *p = (char *) free;
+#endif
+
   ;
   return 0;
 }
@@ -10048,29 +10033,36 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_free=no
+  ac_cv_have_decl_free=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-bfd_cv_decl_needed_free=yes
+ac_cv_have_decl_free=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_free" >&5
+echo "${ECHO_T}$ac_cv_have_decl_free" >&6
+if test $ac_cv_have_decl_free = yes; then
 
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_free" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_free" >&6
-if test $bfd_cv_decl_needed_free = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_FREE 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_FREE 1
 _ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_FREE 0
+_ACEOF
+
 
 fi
 
-echo "$as_me:$LINENO: checking whether getenv must be declared" >&5
-echo $ECHO_N "checking whether getenv must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_getenv+set}" = set; then
+
+echo "$as_me:$LINENO: checking whether getenv is declared" >&5
+echo $ECHO_N "checking whether getenv is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_getenv+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -10079,25 +10071,14 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+$ac_includes_default
 int
 main ()
 {
-char *(*pfn) = (char *(*)) getenv
+#ifndef getenv
+  char *p = (char *) getenv;
+#endif
+
   ;
   return 0;
 }
@@ -10124,29 +10105,36 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_getenv=no
+  ac_cv_have_decl_getenv=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-bfd_cv_decl_needed_getenv=yes
+ac_cv_have_decl_getenv=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_getenv" >&5
+echo "${ECHO_T}$ac_cv_have_decl_getenv" >&6
+if test $ac_cv_have_decl_getenv = yes; then
 
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_getenv" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_getenv" >&6
-if test $bfd_cv_decl_needed_getenv = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_GETENV 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETENV 1
 _ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETENV 0
+_ACEOF
+
 
 fi
 
-echo "$as_me:$LINENO: checking whether malloc must be declared" >&5
-echo $ECHO_N "checking whether malloc must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_malloc+set}" = set; then
+
+echo "$as_me:$LINENO: checking whether malloc is declared" >&5
+echo $ECHO_N "checking whether malloc is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_malloc+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -10155,25 +10143,14 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+$ac_includes_default
 int
 main ()
 {
-char *(*pfn) = (char *(*)) malloc
+#ifndef malloc
+  char *p = (char *) malloc;
+#endif
+
   ;
   return 0;
 }
@@ -10200,29 +10177,36 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_malloc=no
+  ac_cv_have_decl_malloc=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-bfd_cv_decl_needed_malloc=yes
+ac_cv_have_decl_malloc=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_malloc" >&5
+echo "${ECHO_T}$ac_cv_have_decl_malloc" >&6
+if test $ac_cv_have_decl_malloc = yes; then
 
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_malloc" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_malloc" >&6
-if test $bfd_cv_decl_needed_malloc = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_MALLOC 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_MALLOC 1
 _ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_MALLOC 0
+_ACEOF
+
 
 fi
 
-echo "$as_me:$LINENO: checking whether realloc must be declared" >&5
-echo $ECHO_N "checking whether realloc must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_realloc+set}" = set; then
+
+echo "$as_me:$LINENO: checking whether realloc is declared" >&5
+echo $ECHO_N "checking whether realloc is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_realloc+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -10231,25 +10215,14 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+$ac_includes_default
 int
 main ()
 {
-char *(*pfn) = (char *(*)) realloc
+#ifndef realloc
+  char *p = (char *) realloc;
+#endif
+
   ;
   return 0;
 }
@@ -10276,29 +10249,36 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_realloc=no
+  ac_cv_have_decl_realloc=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-bfd_cv_decl_needed_realloc=yes
+ac_cv_have_decl_realloc=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_realloc" >&5
+echo "${ECHO_T}$ac_cv_have_decl_realloc" >&6
+if test $ac_cv_have_decl_realloc = yes; then
 
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_realloc" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_realloc" >&6
-if test $bfd_cv_decl_needed_realloc = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_REALLOC 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_REALLOC 1
 _ACEOF
+
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_REALLOC 0
+_ACEOF
+
 
 fi
 
-echo "$as_me:$LINENO: checking whether strstr must be declared" >&5
-echo $ECHO_N "checking whether strstr must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_strstr+set}" = set; then
+
+echo "$as_me:$LINENO: checking whether strstr is declared" >&5
+echo $ECHO_N "checking whether strstr is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_strstr+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -10307,25 +10287,14 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+$ac_includes_default
 int
 main ()
 {
-char *(*pfn) = (char *(*)) strstr
+#ifndef strstr
+  char *p = (char *) strstr;
+#endif
+
   ;
   return 0;
 }
@@ -10352,25 +10321,32 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_strstr=no
+  ac_cv_have_decl_strstr=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-bfd_cv_decl_needed_strstr=yes
+ac_cv_have_decl_strstr=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_strstr" >&5
+echo "${ECHO_T}$ac_cv_have_decl_strstr" >&6
+if test $ac_cv_have_decl_strstr = yes; then
 
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_strstr" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_strstr" >&6
-if test $bfd_cv_decl_needed_strstr = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_STRSTR 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRSTR 1
 _ACEOF
 
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRSTR 0
+_ACEOF
+
+
 fi
+
 
 
 # If we are configured native, pick a core file support file.

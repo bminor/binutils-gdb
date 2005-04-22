@@ -105,27 +105,27 @@ extern char *strrchr ();
 
 #include "filenames.h"
 
-#ifdef NEED_DECLARATION_FFS
+#if !HAVE_DECL_FFS
 extern int ffs (int);
 #endif
 
-#ifdef NEED_DECLARATION_FREE
+#if !HAVE_DECL_FREE
 extern void free ();
 #endif
 
-#ifdef NEED_DECLARATION_GETENV
+#if !HAVE_DECL_GETENV
 extern char *getenv ();
 #endif
 
-#ifdef NEED_DECLARATION_MALLOC
+#if !HAVE_DECL_MALLOC
 extern PTR malloc ();
 #endif
 
-#ifdef NEED_DECLARATION_REALLOC
+#if !HAVE_DECL_REALLOC
 extern PTR realloc ();
 #endif
 
-#ifdef NEED_DECLARATION_STRSTR
+#if !HAVE_DECL_STRSTR
 extern char *strstr ();
 #endif
 

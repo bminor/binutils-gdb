@@ -135,12 +135,12 @@ AC_CHECK_DECLS(fseeko64)
 
 BFD_BINARY_FOPEN
 
-BFD_NEED_DECLARATION(ffs)
-BFD_NEED_DECLARATION(free)
-BFD_NEED_DECLARATION(getenv)
-BFD_NEED_DECLARATION(malloc)
-BFD_NEED_DECLARATION(realloc)
-BFD_NEED_DECLARATION(strstr)
+AC_CHECK_DECLS(ffs)
+AC_CHECK_DECLS(free)
+AC_CHECK_DECLS(getenv)
+AC_CHECK_DECLS(malloc)
+AC_CHECK_DECLS(realloc)
+AC_CHECK_DECLS(strstr)
 
 # If we are configured native, pick a core file support file.
 COREFILE=
