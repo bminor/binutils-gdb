@@ -1,3 +1,12 @@
+2005-04-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Remote configuration): Document "set/show
+	get-thread-local-storage-address".  Add cross-reference to the
+	description of the qGetTLSAddr packet.
+	(General Query Packets): Mention "set remote
+	get-thread-local-storage-address" and add a reference to its
+	description.
+
 2005-04-19  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (Backtrace): Describe 'bt full'.

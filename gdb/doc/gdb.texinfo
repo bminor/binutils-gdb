@@ -12099,6 +12099,19 @@ packets.
 @itemx show remote access-watchpoint-packet
 @itemx show remote Z-packet
 Show the current setting of @samp{Z} packets usage.
+
+@item set remote get-thread-local-storage-address
+@kindex set remote get-thread-local-storage-address
+@cindex thread local storage of remote targets
+This command enables or disables the use of the @samp{qGetTLSAddr}
+(Get Thread Local Storage Address) request packet.  The default
+depends on whether the remote stub supports this request.
+@xref{General Query Packets, qGetTLSAddr}, for more details about this
+packet.
+
+@item show remote get-thread-local-storage-address
+@kindex show remote get-thread-local-storage-address
+Show the current setting of @samp{qGetTLSAddr} packet usage.
 @end table
 
 @node remote stub
@@ -22770,6 +22783,10 @@ An error occurred.
 @item @code{""} (empty)
 An empty reply indicates that @code{qGetTLSAddr} is not supported by the stub.
 @end table
+
+Use of this request packet is controlled by the @code{set remote
+get-thread-local-storage-address} command (@pxref{Remote
+configuration, set remote get-thread-local-storage-address}).
 
 @end table
 
