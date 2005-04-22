@@ -891,6 +891,6 @@ _initialize_remote_sim (void)
   init_gdbsim_ops ();
   add_target (&gdbsim_ops);
 
-  add_com ("sim <command>", class_obscure, simulator_command,
+  add_com ("sim", class_obscure, simulator_command,
 	   _("Send a command to the simulator."));
 }

@@ -3416,7 +3416,7 @@ When enabled, monitor warnings about hardware breakpoints will be displayed."),
 			    NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_com ("pmon <command>", class_obscure, pmon_command,
+  add_com ("pmon", class_obscure, pmon_command,
 	   _("Send a packet to PMON (must be in debug mode)."));
 
   add_setshow_boolean_cmd ("mask-address", no_class, &mask_address_p, _("\

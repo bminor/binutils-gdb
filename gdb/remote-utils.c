@@ -604,7 +604,7 @@ This device is used as the serial port when debugging using remote targets."),
 			    NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);
 
-  add_com ("remote <command>", class_obscure, sr_com,
+  add_com ("remote", class_obscure, sr_com,
 	   _("Send a command to the remote monitor."));
 
 }

@@ -1,3 +1,14 @@
+2005-04-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* remote-st.c (_initialize_remote_st2000): Remove the extraneous
+	"<command>" string from the call to add_com.
+
+	* remote-sim.c (_initialize_remote_sim): Ditto.
+
+	* remote-utils.c (_initialize_sr_support): Ditto.
+
+	* remote-mips.c (_initialize_remote_mips): Ditto.
+
 2005-04-21  David S. Miller  <davem@davemloft.net>
 
 	* sparc-linux-tdep.c (sparc32_linux_sigframe_init): New function.
