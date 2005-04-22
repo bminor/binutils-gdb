@@ -1,3 +1,7 @@
+2005-04-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* ser-base.c: Include "ser-base.h" instead of "ser-unix.h".
+
 2005-04-22  Mark Mitchell  <mark@codesourcery.com>
 
 	* ser-base.c (<sys/time.h>): Include.

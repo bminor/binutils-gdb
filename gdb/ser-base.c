@@ -22,14 +22,15 @@
 
 #include "defs.h"
 #include "serial.h"
-#include "ser-unix.h"
+#include "ser-base.h"
 #include "event-loop.h"
+
+#include "gdb_string.h"
 #include <sys/time.h>
 #ifdef USE_WIN32API
 #include <winsock2.h>
 #endif
 
-#include "gdb_string.h"
 
 static timer_handler_func push_event;
 static handler_func fd_event;
