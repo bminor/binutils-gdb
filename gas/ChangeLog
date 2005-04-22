@@ -1,3 +1,12 @@
+2005-04-22  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xg_get_build_instr_size): Remove.
+	(xg_is_narrow_insn, xg_expand_narrow): Remove.  Merge into...
+	(xg_is_single_relaxable_insn): ...here.  Add "targ" and "narrow_only"
+	parameters.
+	(xg_assembly_relax, xg_find_narrowest_format, relaxation_requirements,
+	convert_frag_narrow): Use new version of xg_is_single_relaxable_insn.
+
 2005-04-21  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (md_assemble): Fix buffer overrun in operand[]

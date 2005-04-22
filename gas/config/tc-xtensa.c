@@ -435,6 +435,8 @@ static bfd_reloc_code_real_type xtensa_elf_suffix (char **, expressionS *);
 
 /* Various Other Internal Functions.  */
 
+extern bfd_boolean xg_is_single_relaxable_insn (TInsn *, TInsn *, bfd_boolean);
+static bfd_boolean xg_build_to_insn (TInsn *, TInsn *, BuildInstr *);
 static void xtensa_mark_literal_pool_location (void);
 static addressT get_expanded_loop_offset (xtensa_opcode);
 static fragS *get_literal_pool_location (segT);
@@ -2984,20 +2986,23 @@ is_unique_insn_expansion (TransitionRule *r)
 }
 
 
-static int
-xg_get_build_instr_size (BuildInstr *insn)
-{
-  assert (insn->typ == INSTR_INSTR);
-  return xg_get_single_size (insn->opcode);
-}
+/* Check if there is exactly one relaxation for INSN that converts it to
+   another instruction of equal or larger size.  If so, and if TARG is
+   non-null, go ahead and generate the relaxed instruction into TARG.  If
+   NARROW_ONLY is true, then only consider relaxations that widen a narrow
+   instruction, i.e., ignore relaxations that convert to an instruction of
+   equal size.  In some contexts where this function is used, only
+   a single widening is allowed and the NARROW_ONLY argument is used to 
+   exclude cases like ADDI being "widened" to an ADDMI, which may
+   later be relaxed to an ADDMI/ADDI pair.  */
 
-
-static bfd_boolean
-xg_is_narrow_insn (TInsn *insn)
+bfd_boolean
+xg_is_single_relaxable_insn (TInsn *insn, TInsn *targ, bfd_boolean narrow_only)
 {
   TransitionTable *table = xg_build_widen_table (&transition_rule_cmp);
   TransitionList *l;
-  int num_match = 0;
+  TransitionRule *match = 0;
+
   assert (insn->insn_type == ITYPE_INSN);
   assert (insn->opcode < table->num_opcodes);
 
@@ -3006,53 +3011,21 @@ xg_is_narrow_insn (TInsn *insn)
       TransitionRule *rule = l->rule;
 
       if (xg_instruction_matches_rule (insn, rule)
-	  && is_unique_insn_expansion (rule))
+	  && is_unique_insn_expansion (rule)
+	  && (xg_get_single_size (insn->opcode) + (narrow_only ? 1 : 0)
+	      <= xg_get_single_size (rule->to_instr->opcode)))
 	{
-	  /* It only generates one instruction... */
-	  assert (insn->insn_type == ITYPE_INSN);
-	  /* ...and it is a larger instruction.  */
-	  if (xg_get_single_size (insn->opcode)
-	      < xg_get_build_instr_size (rule->to_instr))
-	    {
-	      num_match++;
-	      if (num_match > 1)
-		return FALSE;
-	    }
+	  if (match)
+	    return FALSE;
+	  match = rule;
 	}
     }
-  return (num_match == 1);
-}
+  if (!match)
+    return FALSE;
 
-
-static bfd_boolean
-xg_is_single_relaxable_insn (TInsn *insn)
-{
-  TransitionTable *table = xg_build_widen_table (&transition_rule_cmp);
-  TransitionList *l;
-  int num_match = 0;
-  assert (insn->insn_type == ITYPE_INSN);
-  assert (insn->opcode < table->num_opcodes);
-
-  for (l = table->table[insn->opcode]; l != NULL; l = l->next)
-    {
-      TransitionRule *rule = l->rule;
-
-      if (xg_instruction_matches_rule (insn, rule)
-	  && is_unique_insn_expansion (rule))
-	{
-	  /* It only generates one instruction... */
-	  assert (insn->insn_type == ITYPE_INSN);
-	  /* ... and it is a larger instruction.  */
-	  if (xg_get_single_size (insn->opcode)
-	      <= xg_get_build_instr_size (rule->to_instr))
-	    {
-	      num_match++;
-	      if (num_match > 1)
-		return FALSE;
-	    }
-	}
-    }
-  return (num_match == 1);
+  if (targ)
+    xg_build_to_insn (targ, insn, match->to_instr);
+  return TRUE;
 }
 
 
@@ -3580,34 +3553,6 @@ xg_expand_to_stack (IStack *istack, TInsn *insn, int lateral_steps)
   return FALSE;
 }
 
-
-static bfd_boolean
-xg_expand_narrow (TInsn *targ, TInsn *insn)
-{
-  TransitionTable *table = xg_build_widen_table (&transition_rule_cmp);
-  TransitionList *l;
-
-  assert (insn->insn_type == ITYPE_INSN);
-  assert (insn->opcode < table->num_opcodes);
-
-  for (l = table->table[insn->opcode]; l != NULL; l = l->next)
-    {
-      TransitionRule *rule = l->rule;
-      if (xg_instruction_matches_rule (insn, rule)
-	  && is_unique_insn_expansion (rule))
-	{
-	  /* Is it a larger instruction?  */
-	  if (xg_get_single_size (insn->opcode)
-	      <= xg_get_build_instr_size (rule->to_instr))
-	    {
-	      xg_build_to_insn (targ, insn, rule->to_instr);
-	      return FALSE;
-	    }
-	}
-    }
-  return TRUE;
-}
-
 
 /* Relax the assembly instruction at least "min_steps".
    Return the number of steps taken.  */
@@ -3644,12 +3589,8 @@ xg_assembly_relax (IStack *istack,
   current_insn = *insn;
 
   /* Walk through all of the single instruction expansions.  */
-  while (xg_is_single_relaxable_insn (&current_insn))
+  while (xg_is_single_relaxable_insn (&current_insn, &single_target, FALSE))
     {
-      int error_val = xg_expand_narrow (&single_target, &current_insn);
-
-      assert (!error_val);
-
       if (xg_symbolic_immeds_fit (&single_target, pc_seg, pc_frag, pc_offset,
 				  stretch))
 	{
@@ -6492,22 +6433,11 @@ xg_find_narrowest_format (vliw_insn *vinsn)
 		  /* Try the widened version.  */
 		  if (!v_copy.slots[slot].keep_wide
 		      && !v_copy.slots[slot].is_specific_opcode
-		      && xg_is_narrow_insn (&v_copy.slots[slot])
-		      && !xg_expand_narrow (&widened, &v_copy.slots[slot])
+		      && xg_is_single_relaxable_insn (&v_copy.slots[slot],
+						      &widened, TRUE)
 		      && opcode_fits_format_slot (widened.opcode,
 						  format, slot))
 		    {
-		      /* The xg_is_narrow clause requires some explanation:
-
-			 addi can be "widened" to an addmi, which is then
-			 expanded to an addmi/addi pair if the immediate
-			 requires it, but here we must have a single widen
-			 only.
-
-			 xg_is_narrow tells us that addi isn't really
-			 narrow.  The widen_spec_list says that there are
-			 other cases.  */
-
 		      v_copy.slots[slot] = widened;
 		      fit++;
 		    }
@@ -6548,7 +6478,7 @@ relaxation_requirements (vliw_insn *vinsn)
 	{
 	  /* A narrow instruction could be widened later to help
 	     alignment issues.  */
-	  if (xg_is_narrow_insn (tinsn)
+	  if (xg_is_single_relaxable_insn (tinsn, 0, TRUE)
 	      && !tinsn->is_specific_opcode
 	      && vinsn->num_slots == 1)
 	    {
@@ -9146,7 +9076,7 @@ convert_frag_narrow (segT segP, fragS *fragP, xtensa_format fmt, int slot)
 {
   TInsn tinsn, single_target;
   xtensa_format single_fmt;
-  int size, old_size, diff, error_val;
+  int size, old_size, diff;
   offsetT frag_offset;
 
   assert (slot == 0);
@@ -9181,8 +9111,7 @@ convert_frag_narrow (segT segP, fragS *fragP, xtensa_format fmt, int slot)
   tinsn_init (&single_target);
   frag_offset = fragP->fr_opcode - fragP->fr_literal;
 
-  error_val = xg_expand_narrow (&single_target, &tinsn);
-  if (error_val)
+  if (! xg_is_single_relaxable_insn (&tinsn, &single_target, FALSE))
     {
       as_bad (_("unable to widen instruction"));
       return;
