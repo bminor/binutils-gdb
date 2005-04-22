@@ -1,5 +1,10 @@
 2005-04-22  Bob Wilson  <bob.wilson@acm.org>
 
+	* config/tc-xtensa.c (LOOKAHEAD_ALIGNER): Delete macro.
+	(future_alignment_required): Remove ifdefs that use it.
+
+2005-04-22  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/tc-xtensa.c (xg_get_build_instr_size): Remove.
 	(xg_is_narrow_insn, xg_expand_narrow): Remove.  Merge into...
 	(xg_is_single_relaxable_insn): ...here.  Add "targ" and "narrow_only"

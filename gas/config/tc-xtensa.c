@@ -8492,11 +8492,6 @@ find_address_of_next_align_frag (fragS **fragPP,
 
 static long bytes_to_stretch (fragS *, int, int, int, int);
 
-/* Undefine LOOKAHEAD_ALIGNER to get the older behavior.
-   I'll leave this in until I am more confident this works.  */
-
-#define LOOKAHEAD_ALIGNER 1
-
 static long
 future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
 {
@@ -8524,7 +8519,7 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
       assert (max_diff >= opt_diff);
       if (max_diff == 0) 
 	return 0;
-#ifdef LOOKAHEAD_ALIGNER
+
       if (fragP)
 	fragP = fragP->fr_next;
 
@@ -8573,7 +8568,7 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
 	      fragP = fragP->fr_next;
 	    }
 	}
-#endif /* LOOKAHEAD_ALIGNER */
+
       /* If there are enough wideners in between, do it.  */
       if (paddable)
 	{
@@ -8587,7 +8582,6 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
       local_stretch_amount 
 	= bytes_to_stretch (this_frag, wide_nops, narrow_nops,
 			    num_widens, local_opt_diff);
-#ifdef LOOKAHEAD_ALIGNER
       global_stretch_amount 
 	= bytes_to_stretch (this_frag, wide_nops, narrow_nops, 
 			    num_widens, opt_diff);
@@ -8599,9 +8593,7 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
 	stretch_amount = local_stretch_amount;
       else
 	stretch_amount = global_stretch_amount;
-#else /* ! LOOKAHEAD_ALIGNER */
-      stretch_amount = local_stretch_amount;
-#endif /* ! LOOKAHEAD_ALIGNER */
+
       if (this_frag->fr_subtype == RELAX_SLOTS
 	  && this_frag->tc_frag_data.slot_subtypes[0] == RELAX_NARROW)
 	assert (stretch_amount <= 1);
