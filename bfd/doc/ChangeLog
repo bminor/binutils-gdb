@@ -1,3 +1,9 @@
+2005-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (INCLUDES): New. Add -D_GNU_SOURCE.
+	(chew.o): Use it.
+	* Makefile.in: Regenerate.
+
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
