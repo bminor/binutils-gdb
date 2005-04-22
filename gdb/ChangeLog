@@ -1,3 +1,16 @@
+2005-04-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-linux-tdep.c: Update copyright year.
+	(sparc32_linux_init_abi): Set skip_trampoline_code and
+	solib_svr4_fetch_link_map_offsets.  Set TDEP->plt_entry_size.
+	Don't set software_single_step and don't call
+	sparc32_sol2_init_abi.
+	* sparc64-linux-tdep.c: Update copyright year.
+	(sparc64_linux_init_abi): Set skip_trampoline_code and
+	solib_svr4_fetch_link_map_offsets.  Set TDEP->plt_entry_size.
+	Don't set software_single_step and don't call
+	sparc64_sol2_init_abi.
+
 2005-04-22  Eli Zaretskii  <eliz@gnu.org>
 
 	* remote-st.c (_initialize_remote_st2000): Remove the extraneous

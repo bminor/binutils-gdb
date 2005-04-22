@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux SPARC.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -144,14 +144,19 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
 static void
 sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   tramp_frame_prepend_unwinder (gdbarch, &sparc32_linux_sigframe);
   tramp_frame_prepend_unwinder (gdbarch, &sparc32_linux_rt_sigframe);
 
-  /* GNU/Linux is very similar to Solaris ...  */
-  sparc32_sol2_init_abi (info, gdbarch);
+  /* GNU/Linux has SVR4-style shared libraries...  */
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
-  /* ... but doesn't have kernel-assisted single-stepping support.  */
-  set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
+  /* ...which means that we need some special handling when doing
+     prologue analysis.  */
+  tdep->plt_entry_size = 12;
 
   /* GNU/Linux doesn't support the 128-bit `long double' from the psABI.  */
   set_gdbarch_long_double_bit (gdbarch, 64);

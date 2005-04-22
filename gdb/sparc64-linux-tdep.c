@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux UltraSPARC.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -106,11 +106,14 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tramp_frame_prepend_unwinder (gdbarch, &sparc64_linux_rt_sigframe);
 
-  /* GNU/Linux is very similar to Solaris ...  */
-  sparc64_sol2_init_abi (info, gdbarch);
+  /* GNU/Linux has SVR4-style shared libraries...  */
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 
-  /* ... but doesn't have kernel-assisted single-stepping support.  */
-  set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
+  /* ...which means that we need some special handling when doing
+     prologue analysis.  */
+  tdep->plt_entry_size = 16;
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
