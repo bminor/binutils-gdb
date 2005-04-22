@@ -22,37 +22,32 @@
 #include "defs.h"
 #include "frame.h"
 #include "frame-unwind.h"
-#include "tramp-frame.h"
 #include "gdbarch.h"
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "symtab.h"
 #include "trad-frame.h"
+#include "tramp-frame.h"
 
 #include "sparc64-tdep.h"
 
-/* The instruction sequence for RT signals is
-       mov __NR_rt_sigreturn, %g1	! hex: 0x82102065
-       ta  0x6d				! hex: 0x91d0206d
-
-   The effect is to call the system call rt_sigreturn.
-   Note that 64-bit binaries only use this RT signal return method.  */
-
-#define LINUX64_RT_SIGTRAMP_INSN0	0x82102065
-#define LINUX64_RT_SIGTRAMP_INSN1	0x91d0206d
-
+/* Signal trampoline support.  */
 
 static void sparc64_linux_sigframe_init (const struct tramp_frame *self,
 					 struct frame_info *next_frame,
 					 struct trad_frame_cache *this_cache,
 					 CORE_ADDR func);
 
-static const struct tramp_frame sparc64_linux_rt_sigframe = {
+/* See sparc-linux-tdep.c for details.  Note that 64-bit binaries only
+   use RT signals.  */
+
+static const struct tramp_frame sparc64_linux_rt_sigframe =
+{
   SIGTRAMP_FRAME,
   4,
   {
-    { LINUX64_RT_SIGTRAMP_INSN0, -1 },
-    { LINUX64_RT_SIGTRAMP_INSN1, -1 },
+    { 0x82102065, -1 },		/* mov __NR_rt_sigreturn, %g1 */
+    { 0x91d0206d, -1 },		/* ta  0x6d */
     { TRAMP_SENTINEL_INSN, -1 }
   },
   sparc64_linux_sigframe_init
@@ -70,21 +65,21 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
   base = frame_unwind_register_unsigned (next_frame, SPARC_O1_REGNUM);
   base += 128;
 
-  /* Offsets from <bits/sigcontext.h> */
+  /* Offsets from <bits/sigcontext.h>.  */
 
   /* Since %g0 is always zero, keep the identity encoding.  */
-  addr = base + 0x08;
+  addr = base + 8;
   for (regnum = SPARC_G1_REGNUM; regnum <= SPARC_O7_REGNUM; regnum++)
     {
       trad_frame_set_reg_addr (this_cache, regnum, addr);
       addr += 8;
     }
 
-  trad_frame_set_reg_addr (this_cache, SPARC64_STATE_REGNUM, addr + 0x00);
-  trad_frame_set_reg_addr (this_cache, SPARC64_PC_REGNUM,    addr + 0x08);
-  trad_frame_set_reg_addr (this_cache, SPARC64_NPC_REGNUM,   addr + 0x10);
-  trad_frame_set_reg_addr (this_cache, SPARC64_Y_REGNUM,     addr + 0x18);
-  trad_frame_set_reg_addr (this_cache, SPARC64_FPRS_REGNUM,  addr + 0x1c);
+  trad_frame_set_reg_addr (this_cache, SPARC64_STATE_REGNUM, addr + 0);
+  trad_frame_set_reg_addr (this_cache, SPARC64_PC_REGNUM, addr + 8);
+  trad_frame_set_reg_addr (this_cache, SPARC64_NPC_REGNUM, addr + 16);
+  trad_frame_set_reg_addr (this_cache, SPARC64_Y_REGNUM, addr + 24);
+  trad_frame_set_reg_addr (this_cache, SPARC64_FPRS_REGNUM, addr + 28);
 
   addr = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
   if (addr & 1)
@@ -99,6 +94,7 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
+
 static void
 sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -119,6 +115,7 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
 }
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern void _initialize_sparc64_linux_tdep (void);

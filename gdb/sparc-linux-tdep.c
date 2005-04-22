@@ -23,7 +23,6 @@
 #include "floatformat.h"
 #include "frame.h"
 #include "frame-unwind.h"
-#include "tramp-frame.h"
 #include "gdbarch.h"
 #include "gdbcore.h"
 #include "osabi.h"
@@ -31,10 +30,16 @@
 #include "solib-svr4.h"
 #include "symtab.h"
 #include "trad-frame.h"
+#include "tramp-frame.h"
 
 #include "sparc-tdep.h"
 
 /* Signal trampoline support.  */
+
+static void sparc32_linux_sigframe_init (const struct tramp_frame *self,
+					 struct frame_info *next_frame,
+					 struct trad_frame_cache *this_cache,
+					 CORE_ADDR func);
 
 /* GNU/Linux has two flavors of signals.  Normal signal handlers, and
    "realtime" (RT) signals.  The RT signals can provide additional
@@ -45,58 +50,36 @@
 
 /* When the sparc Linux kernel calls a signal handler and the
    SA_RESTORER flag isn't set, the return address points to a bit of
-   code on the stack.  This function returns whether the PC appears to
-   be within this bit of code.
+   code on the stack.  This code checks whether the PC appears to be
+   within this bit of code.
 
-   The instruction sequence for normal signals is
-	mov __NR_sigreturn, %g1		! hex: 0x821020d8
-	ta  0x10			! hex: 0x91d02010
-
+   The instruction sequence for normal signals is encoded below.
    Checking for the code sequence should be somewhat reliable, because
    the effect is to call the system call sigreturn.  This is unlikely
-   to occur anywhere other than a signal trampoline.
+   to occur anywhere other than a signal trampoline.  */
 
-   It kind of sucks that we have to read memory from the process in
-   order to identify a signal trampoline, but there doesn't seem to be
-   any other way.  However, sparc32_linux_pc_in_sigtramp arranges to
-   only call us if no function name could be identified, which should
-   be the case since the code is on the stack.  */
-
-#define LINUX32_SIGTRAMP_INSN0	0x821020d8	/* mov __NR_sigreturn, %g1 */
-#define LINUX32_SIGTRAMP_INSN1	0x91d02010	/* ta  0x10 */
-
-/* The instruction sequence for RT signals is
-       mov __NR_rt_sigreturn, %g1	! hex: 0x82102065
-       ta  {0x10,0x6d}			! hex: 0x91d02010
-
-   The effect is to call the system call rt_sigreturn.
-   Note that 64-bit binaries only use this RT signal return method.  */
-
-#define LINUX32_RT_SIGTRAMP_INSN0	0x82102065
-#define LINUX32_RT_SIGTRAMP_INSN1	0x91d02010
-
-static void sparc32_linux_sigframe_init (const struct tramp_frame *self,
-					 struct frame_info *next_frame,
-					 struct trad_frame_cache *this_cache,
-					 CORE_ADDR func);
-
-static const struct tramp_frame sparc32_linux_sigframe = {
+static const struct tramp_frame sparc32_linux_sigframe =
+{
   SIGTRAMP_FRAME,
   4,
   {
-    { LINUX32_SIGTRAMP_INSN0, -1 },
-    { LINUX32_SIGTRAMP_INSN1, -1 },
+    { 0x821020d8, -1 },		/* mov __NR_sugreturn, %g1 */
+    { 0x91d02010, -1 },		/* ta  0x10 */
     { TRAMP_SENTINEL_INSN, -1 }
   },
   sparc32_linux_sigframe_init
 };
 
-static const struct tramp_frame sparc32_linux_rt_sigframe = {
+/* The instruction sequence for RT signals is slightly different.  The
+   effect is to call the system call rt_sigreturn.  */
+
+static const struct tramp_frame sparc32_linux_rt_sigframe =
+{
   SIGTRAMP_FRAME,
   4,
   {
-    { LINUX32_RT_SIGTRAMP_INSN0, -1 },
-    { LINUX32_RT_SIGTRAMP_INSN1, -1 },
+    { 0x82102065, -1 },		/* mov __NR_rt_sigreturn, %g1 */
+    { 0x91d02010, -1 },		/* ta  0x10 */
     { TRAMP_SENTINEL_INSN, -1 }
   },
   sparc32_linux_sigframe_init
@@ -115,15 +98,15 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
   if (self == &sparc32_linux_rt_sigframe)
     base += 128;
 
-  /* Offsets from <bits/sigcontext.h> */
+  /* Offsets from <bits/sigcontext.h>.  */
 
-  trad_frame_set_reg_addr (this_cache, SPARC32_PSR_REGNUM, base + 0x00);
-  trad_frame_set_reg_addr (this_cache, SPARC32_PC_REGNUM,  base + 0x04);
-  trad_frame_set_reg_addr (this_cache, SPARC32_NPC_REGNUM, base + 0x08);
-  trad_frame_set_reg_addr (this_cache, SPARC32_Y_REGNUM,   base + 0x0c);
+  trad_frame_set_reg_addr (this_cache, SPARC32_PSR_REGNUM, base + 0);
+  trad_frame_set_reg_addr (this_cache, SPARC32_PC_REGNUM, base + 4);
+  trad_frame_set_reg_addr (this_cache, SPARC32_NPC_REGNUM, base + 8);
+  trad_frame_set_reg_addr (this_cache, SPARC32_Y_REGNUM, base + 12);
 
   /* Since %g0 is always zero, keep the identity encoding.  */
-  addr = base + 0x14;
+  addr = base + 20;
   for (regnum = SPARC_G1_REGNUM; regnum <= SPARC_O7_REGNUM; regnum++)
     {
       trad_frame_set_reg_addr (this_cache, regnum, addr);
@@ -138,7 +121,6 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
     }
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
-
 
 
 static void

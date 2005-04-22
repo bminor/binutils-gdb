@@ -1,5 +1,18 @@
 2005-04-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-linux-tdep.c: Reorder includes.  Tweak a few comments.
+	(LINUX32_SIGTRAMP_INSN0, LINUX32_SIGTRAMP_INSN1)
+	(LINUX32_RT_SIGTRAMP_INSN0, LINUX32_RT_SIGTRAMP_INSN1): Remove
+	macros.
+	(sparc32_linux_sigframe, sparc32_linux_rt_sigframe): Hardcode
+	instructions.
+	* sparc64-linux-tdep.c: Reorder includes.  Tweak a few comments.
+	(LINUX64_RT_SIGTRAMP_INSN0, LINUX64_RT_SIGTRAMP_INSN1): Remove
+	macros.
+	(sparc64_linux_rt_sigframe): Hardcode instructions.
+	* Makefile.in (sparc-linux-tdep.o, sparc64-linux-tdep.o): Update
+	dependencies.
+
 	* sparc-linux-tdep.c: Update copyright year.
 	(sparc32_linux_init_abi): Set skip_trampoline_code and
 	solib_svr4_fetch_link_map_offsets.  Set TDEP->plt_entry_size.
