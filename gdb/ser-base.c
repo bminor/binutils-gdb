@@ -24,6 +24,7 @@
 #include "serial.h"
 #include "ser-unix.h"
 #include "event-loop.h"
+#include <sys/time.h>
 #ifdef USE_WIN32API
 #include <winsock2.h>
 #endif
