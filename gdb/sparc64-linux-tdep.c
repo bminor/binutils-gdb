@@ -102,6 +102,8 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tramp_frame_prepend_unwinder (gdbarch, &sparc64_linux_rt_sigframe);
 
+  sparc64_init_abi (info, gdbarch);
+
   /* GNU/Linux has SVR4-style shared libraries...  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_solib_svr4_fetch_link_map_offsets

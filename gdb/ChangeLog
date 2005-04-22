@@ -1,3 +1,8 @@
+2005-04-22  David S. Miller  <davem@davemloft.net>
+
+	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Add call to
+	sparc64_init_abi().
+
 2005-04-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* ser-base.c: Include "ser-base.h" instead of "ser-unix.h".
