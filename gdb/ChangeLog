@@ -1,3 +1,9 @@
+2005-04-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.c: Include "dwarf2-frame.h".
+	(sparc64_dwarf2_frame_init_reg): New function.
+	* Makefile.in (sparc64-tdep.o): Update dependencies.
+
 2005-04-22  David S. Miller  <davem@davemloft.net>
 
 	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Add call to

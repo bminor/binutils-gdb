@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "dwarf2-frame.h"
 #include "floatformat.h"
 #include "frame.h"
 #include "frame-base.h"
@@ -1103,6 +1104,32 @@ sparc64_return_value (struct gdbarch *gdbarch, struct type *type,
 }
 
 
+static void
+sparc64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+			       struct dwarf2_frame_state_reg *reg)
+{
+  switch (regnum)
+    {
+    case SPARC_G0_REGNUM:
+      /* Since %g0 is always zero, there is no point in saving it, and
+	 people will be inclined omit it from the CFI.  Make sure we
+	 don't warn about that.  */
+      reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+      break;
+    case SPARC_SP_REGNUM:
+      reg->how = DWARF2_FRAME_REG_CFA;
+      break;
+    case SPARC64_PC_REGNUM:
+      reg->how = DWARF2_FRAME_REG_RA_OFFSET;
+      reg->loc.offset = 8;
+      break;
+    case SPARC64_NPC_REGNUM:
+      reg->how = DWARF2_FRAME_REG_RA_OFFSET;
+      reg->loc.offset = 12;
+      break;
+    }
+}
+
 void
 sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1136,6 +1163,11 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, default_stabs_argument_has_addr);
 
   set_gdbarch_skip_prologue (gdbarch, sparc64_skip_prologue);
+
+  /* Hook in the DWARF CFI frame unwinder.  */
+  dwarf2_frame_set_init_reg (gdbarch, sparc64_dwarf2_frame_init_reg);
+  /* FIXME: kettenis/20050423: Don't enable the unwinder until the
+     StackGhost issues have been resolved.  */
 
   frame_unwind_append_sniffer (gdbarch, sparc64_frame_sniffer);
   frame_base_set_default (gdbarch, &sparc64_frame_base);
