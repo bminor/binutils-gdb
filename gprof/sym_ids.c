@@ -28,7 +28,7 @@
 #include "cg_arcs.h"
 #include "sym_ids.h"
 
-struct sym_id
+static struct sym_id
   {
     struct sym_id *next;
     char *spec;			/* Parsing modifies this.  */
@@ -59,7 +59,7 @@ static void extend_match
 Sym_Table syms[NUM_TABLES];
 
 #ifdef DEBUG
-const char *table_name[] =
+static const char *table_name[] =
 {
   "INCL_GRAPH", "EXCL_GRAPH",
   "INCL_ARCS", "EXCL_ARCS",

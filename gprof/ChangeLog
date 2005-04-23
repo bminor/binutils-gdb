@@ -1,3 +1,14 @@
+2005-04-24  Ben Elliston  <bje@au.ibm.com>
+
+	* corefile.c (core_num_syms): Make static.
+	(core_syms): Likewise.
+	(min_insn_size): Likewise.
+	* gprof.c (abfd): Remove unused variable.
+	* hist.c (hist_dimension): Make static.
+	(hist_dimension_abbrev): Likewise.
+	* sym_ids.c (id_list): Likewise.
+	(table_name): Likewise.
+
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* corefile.c (core_init): Call bfd_get_synthetic_symtab.

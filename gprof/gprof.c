@@ -77,8 +77,6 @@ char copyright[] =
 
 static char *gmon_name = GMONNAME;	/* profile filename */
 
-bfd *abfd;
-
 /*
  * Functions that get excluded by default:
  */

@@ -48,8 +48,8 @@ bfd_vma lowpc, highpc;		/* Same, but expressed in UNITs.  */
 unsigned int hist_num_bins = 0;	/* Number of histogram samples.  */
 int *hist_sample = 0;		/* Histogram samples (shorts in the file!).  */
 double hist_scale;
-char hist_dimension[16] = "seconds";
-char hist_dimension_abbrev = 's';
+static char hist_dimension[16] = "seconds";
+static char hist_dimension_abbrev = 's';
 
 static double accum_time;	/* Accumulated time so far for print_line(). */
 static double total_time;	/* Total time for all routines.  */

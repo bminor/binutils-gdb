@@ -28,12 +28,12 @@
 #include "corefile.h"
 
 bfd *core_bfd;
-int core_num_syms;
-asymbol **core_syms;
+static int core_num_syms;
+static asymbol **core_syms;
 asection *core_text_sect;
 PTR core_text_space;
 
-int min_insn_size;
+static int min_insn_size;
 int offset_to_code;
 
 /* For mapping symbols to specific .o files during file ordering.  */
