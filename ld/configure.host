@@ -67,6 +67,12 @@ case "${host}" in
   fi
   ;;
 
+*-*-openbsd*)
+  HOSTING_CRT0="-dynamic-linker /usr/libexec/ld.so /usr/lib/crt0.o"
+  HOSTING_CRT0="$HOSTING_CRT0 /usr/lib/crtbegin.o"
+  HOSTING_LIBS="$HOSTING_LIBS /usr/lib/crtend.o"
+  ;;
+
 esac
 
 #
@@ -228,6 +234,9 @@ x86_64-*-linux-*)
   ;;
 
 *-*-netbsd*)
+  ;;
+
+*-*-openbsd*)
   ;;
 
 alpha*-*-*)
