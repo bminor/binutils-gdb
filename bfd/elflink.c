@@ -7048,6 +7048,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			    (_("`%s' referenced in section `%A' of %B: "
 			       "defined in discarded section `%A' of %B"),
 			     o, input_bfd, sec, sec->owner, sym_name);
+			  bfd_set_error (bfd_error_bad_value);
+			  return FALSE;
 			}
 
 		      /* Try to do the best we can to support buggy old

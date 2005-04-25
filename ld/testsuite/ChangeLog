@@ -1,3 +1,9 @@
+2005-04-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-discard/extern.d: Expect error.
+	* ld-discard/start.d: Likewise.
+	* ld-discard/static.d: Likewise.
+
 2005-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/reloc.d: Update to suit removal of non-alloc relocs.

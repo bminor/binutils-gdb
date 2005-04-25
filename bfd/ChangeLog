@@ -1,3 +1,9 @@
+2005-04-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 858
+	* elflink.c (elf_link_input_bfd): Make non-debugging reference
+	to discarded section an error.
+
 2005-04-21  Jerome Guitton  <guitton@gnat.com>
 
 	* configure.in: Replace BFD_NEED_DECLARATION checks by the
