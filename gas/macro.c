@@ -75,7 +75,7 @@ static int do_formals (macro_entry *, int, sb *);
 static int get_apost_token (int, sb *, sb *, int);
 static int sub_actual (int, sb *, sb *, struct hash_control *, int, sb *, int);
 static const char *macro_expand_body
-  (sb *, sb *, formal_entry *, struct hash_control *, int);
+  (sb *, sb *, formal_entry *, struct hash_control *, const macro_entry *);
 static const char *macro_expand (int, sb *, macro_entry *, sb *);
 static void free_macro(macro_entry *);
 
@@ -471,6 +471,7 @@ static int
 do_formals (macro_entry *macro, int idx, sb *in)
 {
   formal_entry **p = &macro->formals;
+  const char *name;
 
   idx = sb_skip_white (idx, in);
   while (idx < in->len)
@@ -501,7 +502,15 @@ do_formals (macro_entry *macro, int idx, sb *in)
 	}
 
       /* Add to macro's hash table.  */
-      hash_jam (macro->formal_hash, sb_terminate (&formal->name), formal);
+      name = sb_terminate (&formal->name);
+      if (! hash_find (macro->formal_hash, name))
+	hash_jam (macro->formal_hash, name, formal);
+      else
+	as_bad_where (macro->file,
+		      macro->line,
+		      _("A parameter named `%s' already exists for macro `%s'"),
+		      name,
+		      macro->name);
 
       formal->index = macro->formal_count++;
       cidx = idx;
@@ -519,7 +528,6 @@ do_formals (macro_entry *macro, int idx, sb *in)
   if (macro_mri)
     {
       formal_entry *formal;
-      const char *name;
 
       /* Add a special NARG formal, which macro_expand will set to the
          number of arguments.  */
@@ -539,6 +547,12 @@ do_formals (macro_entry *macro, int idx, sb *in)
       sb_add_string (&formal->name, name);
 
       /* Add to macro's hash table.  */
+      if (hash_find (macro->formal_hash, name))
+	as_bad_where (macro->file,
+		      macro->line,
+		      _("Reserved word `%s' used as parameter in macro `%s'"),
+		      name,
+		      macro->name);
       hash_jam (macro->formal_hash, name, formal);
 
       formal->index = NARG_INDEX;
@@ -555,15 +569,19 @@ do_formals (macro_entry *macro, int idx, sb *in)
 
 const char *
 define_macro (int idx, sb *in, sb *label,
-	      int (*get_line) (sb *), const char **namep)
+	      int (*get_line) (sb *),
+	      char *file, unsigned int line,
+	      const char **namep)
 {
   macro_entry *macro;
   sb name;
-  const char *namestr;
+  const char *error = NULL;
 
   macro = (macro_entry *) xmalloc (sizeof (macro_entry));
   sb_new (&macro->sub);
   sb_new (&name);
+  macro->file = file;
+  macro->line = line;
 
   macro->formal_count = 0;
   macro->formals = 0;
@@ -571,17 +589,19 @@ define_macro (int idx, sb *in, sb *label,
 
   idx = sb_skip_white (idx, in);
   if (! buffer_and_nest ("MACRO", "ENDM", &macro->sub, get_line))
-    return _("unexpected end of file in macro definition");
+    error = _("unexpected end of file in macro `%s' definition");
   if (label != NULL && label->len != 0)
     {
       sb_add_sb (&name, label);
+      macro->name = sb_terminate (&name);
       if (idx < in->len && in->ptr[idx] == '(')
 	{
 	  /* It's the label: MACRO (formals,...)  sort  */
 	  idx = do_formals (macro, idx + 1, in);
-	  if (idx >= in->len || in->ptr[idx] != ')')
-	    return _("missing ) after formals");
-	  idx = sb_skip_white (idx + 1, in);
+	  if (idx < in->len && in->ptr[idx] == ')')
+	    idx = sb_skip_white (idx + 1, in);
+	  else if (!error)
+	    error = _("missing `)' after formals in macro definition `%s'");
 	}
       else
 	{
@@ -594,8 +614,9 @@ define_macro (int idx, sb *in, sb *label,
       int cidx;
 
       idx = get_token (idx, in, &name);
+      macro->name = sb_terminate (&name);
       if (name.len == 0)
-	return _("Missing macro name");
+	error = _("Missing macro name");
       cidx = sb_skip_white (idx, in);
       idx = sb_skip_comma (cidx, in);
       if (idx == cidx || idx < in->len)
@@ -603,23 +624,26 @@ define_macro (int idx, sb *in, sb *label,
       else
 	idx = cidx;
     }
-  if (idx < in->len)
-    return _("Bad macro parameter list");
+  if (!error && idx < in->len)
+    error = _("Bad parameter list for macro `%s'");
 
   /* And stick it in the macro hash table.  */
   for (idx = 0; idx < name.len; idx++)
     name.ptr[idx] = TOLOWER (name.ptr[idx]);
-  namestr = sb_terminate (&name);
-  if (hash_find (macro_hash, namestr))
-    return _("Macro with this name was already defined");
-  hash_jam (macro_hash, namestr, (PTR) macro);
-
-  macro_defined = 1;
+  if (hash_find (macro_hash, macro->name))
+    error = _("Macro `%s' was already defined");
+  if (!error)
+    error = hash_jam (macro_hash, macro->name, (PTR) macro);
 
   if (namep != NULL)
-    *namep = namestr;
+    *namep = macro->name;
 
-  return NULL;
+  if (!error)
+    macro_defined = 1;
+  else
+    free_macro (macro);
+
+  return error;
 }
 
 /* Scan a token, and then skip KIND.  */
@@ -687,16 +711,16 @@ sub_actual (int start, sb *in, sb *t, struct hash_control *formal_hash,
 
 static const char *
 macro_expand_body (sb *in, sb *out, formal_entry *formals,
-		   struct hash_control *formal_hash, int locals)
+		   struct hash_control *formal_hash, const macro_entry *macro)
 {
   sb t;
-  int src = 0;
-  int inquote = 0;
+  int src = 0, inquote = 0, macro_line = 0;
   formal_entry *loclist = NULL;
+  const char *err = NULL;
 
   sb_new (&t);
 
-  while (src < in->len)
+  while (src < in->len && !err)
     {
       if (in->ptr[src] == '&')
 	{
@@ -711,7 +735,8 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	  else
 	    {
 	      /* FIXME: Why do we do this?  */
-	      /* At least in alternate mode this seems correct.  */
+	      /* At least in alternate mode this seems correct; without this
+	         one can't append a literal to a parameter.  */
 	      src = sub_actual (src + 1, in, &t, formal_hash, '&', out, 0);
 	    }
 	}
@@ -726,10 +751,12 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 		{
 		  sb_add_char (out, in->ptr[src++]);
 		}
-	      if (in->ptr[src] == ')')
+	      if (src < in->len)
 		src++;
+	      else if (!macro)
+		err = _("missing `)'");
 	      else
-		return _("misplaced `)'");
+		as_bad_where (macro->file, macro->line + macro_line, _("missing `)'"));
 	    }
 	  else if (src < in->len && in->ptr[src] == '@')
 	    {
@@ -784,7 +811,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 		   || ! macro_strip_at
 		   || (src > 0 && in->ptr[src - 1] == '@')))
 	{
-	  if (! locals
+	  if (! macro
 	      || src + 5 >= in->len
 	      || strncasecmp (in->ptr + src, "LOCAL", 5) != 0
 	      || ! ISWHITE (in->ptr[src + 5]))
@@ -796,31 +823,43 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	    }
 	  else
 	    {
-	      formal_entry *f;
-
 	      src = sb_skip_white (src + 5, in);
 	      while (in->ptr[src] != '\n')
 		{
-		  static int loccnt;
-		  char buf[20];
-		  const char *err;
+		  const char *name;
+		  formal_entry *f;
 
 		  f = (formal_entry *) xmalloc (sizeof (formal_entry));
 		  sb_new (&f->name);
-		  sb_new (&f->def);
-		  sb_new (&f->actual);
-		  f->index = LOCAL_INDEX;
-		  f->next = loclist;
-		  loclist = f;
-
 		  src = get_token (src, in, &f->name);
-		  ++loccnt;
-		  sprintf (buf, IS_ELF ? ".LL%04x" : "LL%04x", loccnt);
-		  sb_add_string (&f->actual, buf);
+		  name = sb_terminate (&f->name);
+		  if (! hash_find (formal_hash, name))
+		    {
+		      static int loccnt;
+		      char buf[20];
 
-		  err = hash_jam (formal_hash, sb_terminate (&f->name), f);
-		  if (err != NULL)
-		    return err;
+		      sb_new (&f->def);
+		      sb_new (&f->actual);
+		      f->index = LOCAL_INDEX;
+		      f->next = loclist;
+		      loclist = f;
+
+		      sprintf (buf, IS_ELF ? ".LL%04x" : "LL%04x", ++loccnt);
+		      sb_add_string (&f->actual, buf);
+
+		      err = hash_jam (formal_hash, name, f);
+		      if (err != NULL)
+			break;
+		    }
+		  else
+		    {
+		      as_bad_where (macro->file,
+				    macro->line + macro_line,
+				    _("`%s' was already used as parameter (or another local) name"),
+				    name);
+		      sb_kill (&f->name);
+		      free (f);
+		    }
 
 		  src = sb_skip_comma (src, in);
 		}
@@ -880,6 +919,8 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	}
       else
 	{
+	  if (in->ptr[src] == '\n')
+	    ++macro_line;
 	  sb_add_char (out, in->ptr[src++]);
 	}
     }
@@ -901,7 +942,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
       loclist = f;
     }
 
-  return NULL;
+  return err;
 }
 
 /* Assign values to the formal parameters of a macro, and expand the
@@ -1060,9 +1101,7 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
       sb_add_string (&ptr->actual, buffer);
     }
 
-  err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash, 1);
-  if (err != NULL)
-    return err;
+  err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash, m);
 
   /* Discard any unnamed formal arguments.  */
   if (macro_mri)
@@ -1087,9 +1126,10 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
     }
 
   sb_kill (&t);
-  macro_number++;
+  if (!err)
+    macro_number++;
 
-  return NULL;
+  return err;
 }
 
 /* Check for a macro.  If one is found, put the expansion into
@@ -1231,8 +1271,6 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
     {
       /* Expand once with a null string.  */
       err = macro_expand_body (&sub, out, &f, h, 0);
-      if (err != NULL)
-	return err;
     }
   else
     {
@@ -1261,7 +1299,7 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
 	    }
 	  err = macro_expand_body (&sub, out, &f, h, 0);
 	  if (err != NULL)
-	    return err;
+	    break;
 	  if (!irpc)
 	    idx = sb_skip_comma (idx, in);
 	  else
@@ -1272,5 +1310,5 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
   hash_die (h);
   sb_kill (&sub);
 
-  return NULL;
+  return err;
 }

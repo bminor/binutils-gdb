@@ -2338,9 +2338,9 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
   if (line_label != NULL)
     sb_add_string (&label, S_GET_NAME (line_label));
 
-  err = define_macro (0, &s, &label, get_line_sb, &name);
+  err = define_macro (0, &s, &label, get_line_sb, file, line, &name);
   if (err != NULL)
-    as_bad_where (file, line, "%s", err);
+    as_bad_where (file, line, err, name);
   else
     {
       if (line_label != NULL)
@@ -2355,7 +2355,9 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 	  || (!flag_m68k_mri
 	      && *name == '.'
 	      && hash_find (po_hash, name + 1) != NULL))
-	as_warn (_("attempt to redefine pseudo-op `%s' ignored"),
+	as_warn_where (file,
+		 line,
+		 _("attempt to redefine pseudo-op `%s' ignored"),
 		 name);
     }
 

@@ -1,3 +1,9 @@
+2005-04-25  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/macros/badarg.s: Add tests for collisions between/among macro
+	parameters and local symbols.
+	* gas/macros/badarg.l: Adjust.
+
 2005-04-20  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/elf/struct.s: Adjust to not get into alignment issues.

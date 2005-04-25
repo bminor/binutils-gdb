@@ -60,6 +60,9 @@ typedef struct macro_struct
   int formal_count;			/* Number of formal args.  */
   formal_entry *formals;		/* Pointer to list of formal_structs.  */
   struct hash_control *formal_hash;	/* Hash table of formals.  */
+  const char *name;			/* Macro name.  */
+  char *file;				/* File the macro was defined in.  */
+  unsigned int line;			/* Line number of definition.  */
 } macro_entry;
 
 /* Whether any macros have been defined.  */
@@ -76,7 +79,7 @@ extern void macro_init
 extern void macro_set_alternate (int);
 extern void macro_mri_mode (int);
 extern const char *define_macro
-  (int, sb *, sb *, int (*) (sb *), const char **);
+  (int, sb *, sb *, int (*) (sb *), char *, unsigned int, const char **);
 extern int check_macro (const char *, sb *, const char **, macro_entry **);
 extern void delete_macro (const char *);
 extern const char *expand_irp (int, int, sb *, sb *, int (*) (sb *));

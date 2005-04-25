@@ -1,3 +1,28 @@
+2005-04-25  Jan Beulich  <jbeulich@novell.com>
+
+	* macro.c (macro_expand_body): Replace locals indicator parameters
+	with actual macro_entry. New local variables macro_line and err.
+	Don't return when encountering an error, just record the fact.
+	Detect local symbol name colliding with parameter. Track line number
+	inside of macro expansion.
+	(do_formals): Move local variable name to wider scope. Check
+	parameter of the same name doesn't already exist. In MRI mode, also
+	check it doesn't collide with the argument count pseudo-parameter).
+	(define_macro): Add file and line number parameters. Remove local
+	variable namestr. New local variable error. Initialize macro_entry
+	members file, line, and name. Don't return when encountering an
+	error, just record the fact. Use %s in some diagnostics for read.c
+	to insert the macro name. Free macro_entry on error.
+	(macro_expand): Pass macro_entry to macro_epand_body. Don't return
+	when encountering an error, just record the fact.
+	(expand_irp): Don't return when encountering an error, just record
+	the fact.
+	* macro.h (macro_struct): New members name, file, and line.
+	(define_macro): Add file and line number parameters.
+	* read.c (s_macro): Pass file and line to define_macro. Tag warning
+	regarding pseudo-op redefinition with the file/line that macro
+	definition started at.
+
 2005-04-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (LOOKAHEAD_ALIGNER): Delete macro.
