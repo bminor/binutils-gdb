@@ -760,7 +760,10 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	 if something starts using it.  */
       gdb_assert (!FD_ISSET (fd, writefds));
       if (FD_ISSET (fd, readfds))
-	handles[num_handles++] = (HANDLE) _get_osfhandle (fd);
+	{
+	  gdb_assert (num_handles < MAXIMUM_WAIT_OBJECTS);
+	  handles[num_handles++] = (HANDLE) _get_osfhandle (fd);
+	}
     }
   event = WaitForMultipleObjects (num_handles,
 				  handles,
@@ -779,15 +782,17 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
     return 0;
   /* Run through the READFDS, clearing bits corresponding to descriptors
      for which input is unavailable.  */
-  num_ready = num_handlers; 
+  num_ready = num_handles; 
   h = handles[event - WAIT_OBJECT_0];
   for (fd = 0; fd < n; ++fd)
     {
-      HANDLE fd_h = (HANDLE) _get_osfhandle (fd);
+      HANDLE fd_h;
+      if (!FD_ISSET (fd, readfds))
+	continue;
+      fd_h = (HANDLE) _get_osfhandle (fd);
       /* This handle might be ready, even though it wasn't the handle
 	 returned by WaitForMultipleObjects.  */
-      if (FD_ISSET (fd, readfds) && fd_h != h
-	  && WaitForSingleObject (fd_h, 0) != WAIT_OBJECT_0)
+      if (fd_h != h && WaitForSingleObject (fd_h, 0) != WAIT_OBJECT_0)
 	{
 	  FD_CLR (fd, readfds);
 	  --num_ready;

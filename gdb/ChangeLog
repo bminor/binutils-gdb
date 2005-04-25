@@ -1,5 +1,7 @@
 2005-04-25  Mark Mitchell  <mark@codesourcery.com>
 
+	* event-loop.c (gdb_select): Program defensively.
+
 	* event-loop.c (gdb_assert.h): Include.
 	(<windows.h>): Include under Windows.
 	(<io.h>): Likeiwse.
