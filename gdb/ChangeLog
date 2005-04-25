@@ -1,3 +1,12 @@
+2005-04-25  Mark Mitchell  <mark@codesourcery.com>
+
+	* event-loop.c (gdb_assert.h): Include.
+	(<windows.h>): Include under Windows.
+	(<io.h>): Likeiwse.
+	(gdb_select): New function.
+	(gdb_wait_for_event): Use it.
+	* Makefile.in (event-loop.o): Depend on $(gdb_assert_h).
+	
 2005-04-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-tdep.c: Include "dwarf2-frame.h".

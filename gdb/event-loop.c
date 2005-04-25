@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include "exceptions.h"
+#include "gdb_assert.h"
 
 typedef struct gdb_event gdb_event;
 typedef void (event_handler_func) (int);
@@ -132,6 +133,11 @@ event_queue;
 #endif /* HAVE_POLL */
 
 static unsigned char use_poll = USE_POLL;
+
+#ifdef USE_WIN32API
+#include <windows.h>
+#include <io.h>
+#endif
 
 static struct
   {
@@ -725,6 +731,79 @@ handle_file_event (int event_file_desc)
     }
 }
 
+/* Wrapper for select.  This function is not yet exported from this
+   file because it is not sufficiently general.  For example,
+   ser-base.c uses select to check for socket activity, and this
+   function does not support sockets under Windows, so we do not want
+   to use gdb_select in ser-base.c.  */
+
+static int 
+gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
+	    struct timeval *timeout)
+{
+#ifdef USE_WIN32API
+  HANDLE handles[MAXIMUM_WAIT_OBJECTS];
+  HANDLE h;
+  DWORD event;
+  DWORD num_handles;
+  int fd;
+  int num_ready;
+
+  num_handles = 0;
+  for (fd = 0; fd < n; ++fd)
+    {
+      /* EXCEPTFDS is silently ignored.  GDB always sets GDB_EXCEPTION
+	 when calling add_file_handler, but there is no natural analog
+	 under Windows.  */
+      /* There is no support yet for WRITEFDS.  At present, this isn't
+	 used by GDB -- but we do not want to silently ignore WRITEFDS
+	 if something starts using it.  */
+      gdb_assert (!FD_ISSET (fd, writefds));
+      if (FD_ISSET (fd, readfds))
+	handles[num_handles++] = (HANDLE) _get_osfhandle (fd);
+    }
+  event = WaitForMultipleObjects (num_handles,
+				  handles,
+				  FALSE,
+				  timeout 
+				  ? (timeout->tv_sec * 1000 + timeout->tv_usec)
+				  : INFINITE);
+  /* EVENT can only be a value in the WAIT_ABANDONED_0 range if the
+     HANDLES included an abandoned mutex.  Since GDB doesn't use
+     mutexes, that should never occur.  */
+  gdb_assert (!(WAIT_ABANDONED_0 <= event
+		&& event < WAIT_ABANDONED_0 + num_handles));
+  if (event == WAIT_FAILED)
+    return -1;
+  if (event == WAIT_TIMEOUT)
+    return 0;
+  /* Run through the READFDS, clearing bits corresponding to descriptors
+     for which input is unavailable.  */
+  num_ready = num_handlers; 
+  h = handles[event - WAIT_OBJECT_0];
+  for (fd = 0; fd < n; ++fd)
+    {
+      HANDLE fd_h = (HANDLE) _get_osfhandle (fd);
+      /* This handle might be ready, even though it wasn't the handle
+	 returned by WaitForMultipleObjects.  */
+      if (FD_ISSET (fd, readfds) && fd_h != h
+	  && WaitForSingleObject (fd_h, 0) != WAIT_OBJECT_0)
+	{
+	  FD_CLR (fd, readfds);
+	  --num_ready;
+	}
+    }
+  /* We never report any descriptors available for writing or with
+     exceptional conditions.  */ 
+  FD_ZERO (writefds);
+  FD_ZERO (exceptfds);
+
+  return num_ready;
+#else
+  return select (n, readfds, writefds, exceptfds, timeout);
+#endif
+}
+
 /* Called by gdb_do_one_event to wait for new events on the 
    monitored file descriptors. Queue file events as they are 
    detected by the poll. 
@@ -769,12 +848,12 @@ gdb_wait_for_event (void)
       gdb_notifier.ready_masks[0] = gdb_notifier.check_masks[0];
       gdb_notifier.ready_masks[1] = gdb_notifier.check_masks[1];
       gdb_notifier.ready_masks[2] = gdb_notifier.check_masks[2];
-      num_found = select (gdb_notifier.num_fds,
-			  &gdb_notifier.ready_masks[0],
-			  &gdb_notifier.ready_masks[1],
-			  &gdb_notifier.ready_masks[2],
-			  gdb_notifier.timeout_valid
-			  ? &gdb_notifier.select_timeout : NULL);
+      num_found = gdb_select (gdb_notifier.num_fds,
+			      &gdb_notifier.ready_masks[0],
+			      &gdb_notifier.ready_masks[1],
+			      &gdb_notifier.ready_masks[2],
+			      gdb_notifier.timeout_valid
+			      ? &gdb_notifier.select_timeout : NULL);
 
       /* Clear the masks after an error from select. */
       if (num_found == -1)
