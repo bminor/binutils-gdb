@@ -1627,6 +1627,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
       l = xmalloc (sizeof (struct name_list));
       l->name = output_name;
       l->next = list;
+      l->obfd = NULL;
       list = l;
 
       if (output_bfd == NULL)

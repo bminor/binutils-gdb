@@ -1,6 +1,11 @@
 2005-04-25  Nick Clifton  <nickc@redhat.com>
 
+	PR872
+	* objcopy.c (copy_archive): Initialise 'obfd' field of new
+	name_list structure.
+	
 	* objcopy.c (copy_usage): Fix description of -K switch.
+
 	* doc/binutils.texi (strip, objcopy): Fix description of -K
 	switch.
 
