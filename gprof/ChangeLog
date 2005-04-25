@@ -1,3 +1,9 @@
+2005-04-25  Ben Elliston  <bje@au.ibm.com>
+
+	* corefile.h (core_num_syms): Remove unused extern declaration.
+	(core_syms): Likewise.
+	(min_insn_size): Likewise.
+
 2005-04-24  Ben Elliston  <bje@au.ibm.com>
 
 	* corefile.c (core_num_syms): Make static.

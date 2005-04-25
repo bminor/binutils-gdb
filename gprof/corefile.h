@@ -31,11 +31,8 @@ extern struct function_map *symbol_map;
 extern unsigned int symbol_map_count;
 
 extern bfd *core_bfd;		/* BFD for core-file.  */
-extern int core_num_syms;	/* # of entries in symbol-table.  */
-extern asymbol **core_syms;	/* Symbol table in a.out.  */
 extern asection *core_text_sect;/* Core text section.  */
 extern PTR core_text_space;	/* Text space of a.out in core.  */
-extern int min_insn_size;	/* Size of smallest instruction, in bytes.  */
 extern int offset_to_code;	/* Offset (in bytes) of code from entry
 				   address of routine.  */
 
