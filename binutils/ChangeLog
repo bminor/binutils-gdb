@@ -1,3 +1,9 @@
+2005-04-25  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_usage): Fix description of -K switch.
+	* doc/binutils.texi (strip, objcopy): Fix description of -K
+	switch.
+
 2005-04-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* readelf.c (display_debug_frames): Use data factor for

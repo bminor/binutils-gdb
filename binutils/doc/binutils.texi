@@ -1102,8 +1102,8 @@ Strip all symbols that are not needed for relocation processing.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
-Copy only symbol @var{symbolname} from the source file.  This option may
-be given more than once.
+When stripping symbols, keep symbol @var{symbolname} even if it would
+normally be stripped.  This option may be given more than once.
 
 @item -N @var{symbolname}
 @itemx --strip-symbol=@var{symbolname}
@@ -2277,8 +2277,8 @@ Remove all symbols that are not needed for relocation processing.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
-Keep only symbol @var{symbolname} from the source file.  This option may
-be given more than once.
+When stripping symbols, keep symbol @var{symbolname} even if it would
+normally be stripped.  This option may be given more than once.
 
 @item -N @var{symbolname}
 @itemx --strip-symbol=@var{symbolname}
