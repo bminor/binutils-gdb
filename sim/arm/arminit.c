@@ -129,6 +129,7 @@ ARMul_NewState (void)
   state->is_v5e = LOW;
   state->is_XScale = LOW;
   state->is_iWMMXt = LOW;
+  state->is_v6 = LOW;
 
   ARMul_Reset (state);
 
@@ -161,6 +162,7 @@ ARMul_SelectProcessor (ARMul_State * state, unsigned properties)
   state->is_XScale = (properties & ARM_XScale_Prop) ? HIGH : LOW;
   state->is_iWMMXt = (properties & ARM_iWMMXt_Prop) ? HIGH : LOW;
   state->is_ep9312 = (properties & ARM_ep9312_Prop) ? HIGH : LOW;
+  state->is_v6 = (properties & ARM_v6_Prop) ? HIGH : LOW;
 
   /* Only initialse the coprocessor support once we
      know what kind of chip we are dealing with.  */

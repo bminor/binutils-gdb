@@ -269,6 +269,211 @@ extern int stop_simulator;
      break;                                            		\
 }
 
+/* Attempt to emulate an ARMv6 instruction.
+   Returns non-zero upon success.  */
+
+static int
+handle_v6_insn (ARMul_State * state, ARMword instr)
+{
+  switch (BITS (20, 27))
+    {
+#if 0
+    case 0x03: printf ("Unhandled v6 insn: ldr\n"); break;
+    case 0x04: printf ("Unhandled v6 insn: umaal\n"); break;
+    case 0x06: printf ("Unhandled v6 insn: mls/str\n"); break;
+    case 0x16: printf ("Unhandled v6 insn: smi\n"); break;
+    case 0x18: printf ("Unhandled v6 insn: strex\n"); break;
+    case 0x19: printf ("Unhandled v6 insn: ldrex\n"); break;
+    case 0x1a: printf ("Unhandled v6 insn: strexd\n"); break;
+    case 0x1b: printf ("Unhandled v6 insn: ldrexd\n"); break;
+    case 0x1c: printf ("Unhandled v6 insn: strexb\n"); break;
+    case 0x1d: printf ("Unhandled v6 insn: ldrexb\n"); break;
+    case 0x1e: printf ("Unhandled v6 insn: strexh\n"); break;
+    case 0x1f: printf ("Unhandled v6 insn: ldrexh\n"); break;
+    case 0x30: printf ("Unhandled v6 insn: movw\n"); break;
+    case 0x32: printf ("Unhandled v6 insn: nop/sev/wfe/wfi/yield\n"); break;
+    case 0x34: printf ("Unhandled v6 insn: movt\n"); break;
+    case 0x3f: printf ("Unhandled v6 insn: rbit\n"); break;
+#endif
+    case 0x61: printf ("Unhandled v6 insn: sadd/ssub\n"); break;
+    case 0x62: printf ("Unhandled v6 insn: qadd/qsub\n"); break;
+    case 0x63: printf ("Unhandled v6 insn: shadd/shsub\n"); break;
+    case 0x65: printf ("Unhandled v6 insn: uadd/usub\n"); break;
+    case 0x66: printf ("Unhandled v6 insn: uqadd/uqsub\n"); break;
+    case 0x67: printf ("Unhandled v6 insn: uhadd/uhsub\n"); break;
+    case 0x68: printf ("Unhandled v6 insn: pkh/sxtab/selsxtb\n"); break;
+    case 0x6c: printf ("Unhandled v6 insn: uxtb16/uxtab16\n"); break;
+    case 0x70: printf ("Unhandled v6 insn: smuad/smusd/smlad/smlsd\n"); break;
+    case 0x74: printf ("Unhandled v6 insn: smlald/smlsld\n"); break;
+    case 0x75: printf ("Unhandled v6 insn: smmla/smmls/smmul\n"); break;
+    case 0x78: printf ("Unhandled v6 insn: usad/usada8\n"); break;
+    case 0x7a: printf ("Unhandled v6 insn: usbfx\n"); break;
+    case 0x7c: printf ("Unhandled v6 insn: bfc/bfi\n"); break;
+
+    case 0x6a:
+      {
+	ARMword Rm;
+	int ror = -1;
+	  
+	switch (BITS (4, 11))
+	  {
+	  case 0x07: ror = 0; break;
+	  case 0x47: ror = 8; break;
+	  case 0x87: ror = 16; break;
+	  case 0xc7: ror = 24; break;
+
+	  case 0x01:
+	  case 0xf3:
+	    printf ("Unhandled v6 insn: ssat\n");
+	    return 0;
+	  default:
+	    break;
+	  }
+	
+	if (ror == -1)
+	  {
+	    if (BITS (4, 6) == 0x7)
+	      {
+		printf ("Unhandled v6 insn: ssat\n");
+		return 0;
+	      }
+	    break;
+	  }
+
+	Rm = ((state->Reg[BITS (0, 3)] >> ror) & 0xFF);
+	if (Rm & 0x80)
+	  Rm |= 0xffffff00;
+
+	if (BITS (16, 19) == 0xf)
+	   /* SXTB */
+	  state->Reg[BITS (12, 15)] = Rm;
+	else
+	  /* SXTAB */
+	  state->Reg[BITS (12, 15)] += Rm;
+      }
+      return 1;
+
+    case 0x6b:
+      {
+	ARMword Rm;
+	int ror = -1;
+	  
+	switch (BITS (4, 11))
+	  {
+	  case 0x07: ror = 0; break;
+	  case 0x47: ror = 8; break;
+	  case 0x87: ror = 16; break;
+	  case 0xc7: ror = 24; break;
+
+	  case 0xfb:
+	    printf ("Unhandled v6 insn: rev\n");
+	    return 0;
+	  default:
+	    break;
+	  }
+	
+	if (ror == -1)
+	  break;
+
+	Rm = ((state->Reg[BITS (0, 3)] >> ror) & 0xFFFF);
+	if (Rm & 8000)
+	  Rm |= 0xffff0000;
+
+	if (BITS (16, 19) == 0xf)
+	  /* SXTH */
+	  state->Reg[BITS (12, 15)] = Rm;
+	else
+	  /* SXTAH */
+	  state->Reg[BITS (12, 15)] = state->Reg[BITS (16, 19)] + Rm;
+      }
+      return 1;
+
+    case 0x6e:
+      {
+	ARMword Rm;
+	int ror = -1;
+	  
+	switch (BITS (4, 11))
+	  {
+	  case 0x07: ror = 0; break;
+	  case 0x47: ror = 8; break;
+	  case 0x87: ror = 16; break;
+	  case 0xc7: ror = 24; break;
+
+	  case 0x01:
+	  case 0xf3:
+	    printf ("Unhandled v6 insn: usat\n");
+	    return 0;
+	  default:
+	    break;
+	  }
+	
+	if (ror == -1)
+	  {
+	    if (BITS (4, 6) == 0x7)
+	      {
+		printf ("Unhandled v6 insn: usat\n");
+		return 0;
+	      }
+	    break;
+	  }
+
+	Rm = ((state->Reg[BITS (0, 3)] >> ror) & 0xFF);
+
+	if (BITS (16, 19) == 0xf)
+	   /* UXTB */
+	  state->Reg[BITS (12, 15)] = Rm;
+	else
+	  /* UXTAB */
+	  state->Reg[BITS (12, 15)] = state->Reg[BITS (16, 19)] + Rm;
+      }
+      return 1;
+
+    case 0x6f:
+      {
+	ARMword Rm;
+	int ror = -1;
+	  
+	switch (BITS (4, 11))
+	  {
+	  case 0x07: ror = 0; break;
+	  case 0x47: ror = 8; break;
+	  case 0x87: ror = 16; break;
+	  case 0xc7: ror = 24; break;
+
+	  case 0xfb:
+	    printf ("Unhandled v6 insn: revsh\n");
+	    return 0;
+	  default:
+	    break;
+	  }
+	
+	if (ror == -1)
+	  break;
+
+	Rm = ((state->Reg[BITS (0, 3)] >> ror) & 0xFFFF);
+
+	if (BITS (16, 19) == 0xf)
+	  /* UXT */
+	  state->Reg[BITS (12, 15)] = Rm;
+	else
+	  {
+	    /* UXTAH */
+	    state->Reg[BITS (12, 15)] = state->Reg [BITS (16, 19)] + Rm;
+	  }
+	}
+      return 1;
+
+#if 0
+    case 0x84: printf ("Unhandled v6 insn: srs\n"); break;
+#endif
+    default:
+      break;
+    }
+  printf ("Unhandled v6 insn: UNKNOWN: %08x\n", instr);
+  return 0;
+}
+
 /* EMULATION of ARM6.  */
 
 /* The PC pipeline value depends on whether ARM
@@ -2537,6 +2742,11 @@ check_PMUintr:
 	    case 0x61:		/* Load Word, No WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2553,6 +2763,11 @@ check_PMUintr:
 	    case 0x62:		/* Store Word, WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2570,6 +2785,11 @@ check_PMUintr:
 	    case 0x63:		/* Load Word, WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2603,6 +2823,11 @@ check_PMUintr:
 	    case 0x65:		/* Load Byte, No WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2619,6 +2844,11 @@ check_PMUintr:
 	    case 0x66:		/* Store Byte, WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2636,6 +2866,11 @@ check_PMUintr:
 	    case 0x67:		/* Load Byte, WriteBack, Post Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2654,6 +2889,11 @@ check_PMUintr:
 	    case 0x68:		/* Store Word, No WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2685,6 +2925,11 @@ check_PMUintr:
 	    case 0x6a:		/* Store Word, WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2702,6 +2947,11 @@ check_PMUintr:
 	    case 0x6b:		/* Load Word, WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2720,6 +2970,11 @@ check_PMUintr:
 	    case 0x6c:		/* Store Byte, No WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2751,6 +3006,11 @@ check_PMUintr:
 	    case 0x6e:		/* Store Byte, WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2768,6 +3028,11 @@ check_PMUintr:
 	    case 0x6f:		/* Load Byte, WriteBack, Post Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2787,6 +3052,11 @@ check_PMUintr:
 	    case 0x70:		/* Store Word, No WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2835,6 +3105,11 @@ check_PMUintr:
 	    case 0x74:		/* Store Byte, No WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2844,6 +3119,11 @@ check_PMUintr:
 	    case 0x75:		/* Load Byte, No WriteBack, Pre Dec, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2883,6 +3163,11 @@ check_PMUintr:
 	    case 0x78:		/* Store Word, No WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2901,6 +3186,11 @@ check_PMUintr:
 	    case 0x7a:		/* Store Word, WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
@@ -2931,6 +3221,11 @@ check_PMUintr:
 	    case 0x7c:		/* Store Byte, No WriteBack, Pre Inc, Reg.  */
 	      if (BIT (4))
 		{
+#ifdef MODE32
+		  if (state->is_v6
+		      && handle_v6_insn (state, instr))
+		    break;
+#endif
 		  ARMul_UndefInstr (state, instr);
 		  break;
 		}
