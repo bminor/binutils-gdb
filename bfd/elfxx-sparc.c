@@ -500,13 +500,17 @@ sparc_put_word_64 (bfd *bfd, bfd_vma val, void *ptr)
 }
 
 static void
-sparc_elf_append_rela_64 (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
+sparc_elf_append_rela_64 (bfd *abfd ATTRIBUTE_UNUSED,
+			  asection *s ATTRIBUTE_UNUSED,
+			  Elf_Internal_Rela *rel ATTRIBUTE_UNUSED)
 {
+#ifdef BFD64
   Elf64_External_Rela *loc64;
 
   loc64 = (Elf64_External_Rela *) s->contents;
   loc64 += s->reloc_count++;
   bfd_elf64_swap_reloca_out (abfd, rel, (bfd_byte *) loc64);
+#endif
 }
 
 static void
@@ -520,7 +524,9 @@ sparc_elf_append_rela_32 (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
 }
 
 static bfd_vma
-sparc_elf_r_info_64 (Elf_Internal_Rela *in_rel, bfd_vma index, bfd_vma type)
+sparc_elf_r_info_64 (Elf_Internal_Rela *in_rel ATTRIBUTE_UNUSED,
+		     bfd_vma index ATTRIBUTE_UNUSED,
+		     bfd_vma type ATTRIBUTE_UNUSED)
 {
   return ELF64_R_INFO (index,
 		       (in_rel ?
@@ -3421,12 +3427,14 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	 thus .plt[4] has corresponding .rela.plt[0] and so on.  */
 
       loc = srela->contents;
+#ifdef BFD64
       if (ABI_64_P (output_bfd))
 	{
 	  loc += rela_index * sizeof (Elf64_External_Rela);
 	  bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
 	}
       else
+#endif
 	{
 	  loc += rela_index * sizeof (Elf32_External_Rela);
 	  bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
@@ -3521,6 +3529,7 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 /* Finish up the dynamic sections.  */
 
+#ifdef BFD64
 static bfd_boolean
 sparc64_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
 		    bfd *dynobj, asection *sdyn,
@@ -3577,6 +3586,7 @@ sparc64_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
     }
   return TRUE;
 }
+#endif
 
 static bfd_boolean
 sparc32_finish_dyn (bfd *output_bfd,
@@ -3644,9 +3654,11 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
       splt = bfd_get_section_by_name (dynobj, ".plt");
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
+#ifdef BFD64
       if (ABI_64_P (output_bfd))
 	ret = sparc64_finish_dyn (output_bfd, info, dynobj, sdyn, splt);
       else
+#endif
 	ret = sparc32_finish_dyn (output_bfd, info, dynobj, sdyn, splt);
 
       if (ret != TRUE)

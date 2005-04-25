@@ -1,3 +1,10 @@
+2005-04-25  David S. Miller  <davem@davemloft.net>
+
+	* elfxx-sparc.c (sparc_elf_append_rela_64): Add BFD64 protection.
+	(sparc_elf_r_info_64, _bfd_sparc_elf_finish_dynamic_symbol,
+	sparc64_finish_dyn, _bfd_sparc_elf_finish_dynamic_sections):
+	Likewise.
+
 2005-04-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 858
