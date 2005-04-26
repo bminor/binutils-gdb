@@ -2662,44 +2662,23 @@ not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
 field in the instruction.  */
   BFD_RELOC_THUMB_PCREL_BLX,
 
-/* These relocs are only used within the ARM assembler.  They are not
-(at present) written to any object files.  */
-  BFD_RELOC_ARM_IMMEDIATE,
-  BFD_RELOC_ARM_ADRL_IMMEDIATE,
+/* Thumb 7-, 9-, 12-, 20-, 23-, and 25-bit pc-relative branches.
+The lowest bit must be zero and is not stored in the instruction.
+Note that the corresponding ELF R_ARM_THM_JUMPnn constant has an
+"nn" one smaller in all cases.  Note further that BRANCH23
+corresponds to R_ARM_THM_CALL.  */
+  BFD_RELOC_THUMB_PCREL_BRANCH7,
+  BFD_RELOC_THUMB_PCREL_BRANCH9,
+  BFD_RELOC_THUMB_PCREL_BRANCH12,
+  BFD_RELOC_THUMB_PCREL_BRANCH20,
+  BFD_RELOC_THUMB_PCREL_BRANCH23,
+  BFD_RELOC_THUMB_PCREL_BRANCH25,
+
+/* 12-bit immediate offset, used in ARM-format ldr and str instructions.  */
   BFD_RELOC_ARM_OFFSET_IMM,
-  BFD_RELOC_ARM_SHIFT_IMM,
-  BFD_RELOC_ARM_SMI,
-  BFD_RELOC_ARM_SWI,
-  BFD_RELOC_ARM_MULTI,
-  BFD_RELOC_ARM_CP_OFF_IMM,
-  BFD_RELOC_ARM_CP_OFF_IMM_S2,
-  BFD_RELOC_ARM_ADR_IMM,
-  BFD_RELOC_ARM_LDR_IMM,
-  BFD_RELOC_ARM_LITERAL,
-  BFD_RELOC_ARM_IN_POOL,
-  BFD_RELOC_ARM_OFFSET_IMM8,
-  BFD_RELOC_ARM_HWLITERAL,
-  BFD_RELOC_ARM_THUMB_ADD,
-  BFD_RELOC_ARM_THUMB_IMM,
-  BFD_RELOC_ARM_THUMB_SHIFT,
+
+/* 5-bit immediate offset, used in Thumb-format ldr and str instructions.  */
   BFD_RELOC_ARM_THUMB_OFFSET,
-  BFD_RELOC_ARM_GOT12,
-  BFD_RELOC_ARM_GOT32,
-  BFD_RELOC_ARM_JUMP_SLOT,
-  BFD_RELOC_ARM_COPY,
-  BFD_RELOC_ARM_GLOB_DAT,
-  BFD_RELOC_ARM_PLT32,
-  BFD_RELOC_ARM_RELATIVE,
-  BFD_RELOC_ARM_GOTOFF,
-  BFD_RELOC_ARM_GOTPC,
-  BFD_RELOC_ARM_TLS_GD32,
-  BFD_RELOC_ARM_TLS_LDO32,
-  BFD_RELOC_ARM_TLS_LDM32,
-  BFD_RELOC_ARM_TLS_DTPOFF32,
-  BFD_RELOC_ARM_TLS_DTPMOD32,
-  BFD_RELOC_ARM_TLS_TPOFF32,
-  BFD_RELOC_ARM_TLS_IE32,
-  BFD_RELOC_ARM_TLS_LE32,
 
 /* Pc-relative or absolute relocation depending on target.  Used for
 entries in .init_array sections.  */
@@ -2711,13 +2690,55 @@ entries in .init_array sections.  */
 /* Data segment base relative address.  */
   BFD_RELOC_ARM_SBREL32,
 
-/* This reloc is used for References to RTTI dta from exception handling
+/* This reloc is used for references to RTTI data from exception handling
 tables.  The actual definition depends on the target.  It may be a
 pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARM_TARGET2,
 
 /* 31-bit PC relative address.  */
   BFD_RELOC_ARM_PREL31,
+
+/* Relocations for setting up GOTs and PLTs for shared libraries.  */
+  BFD_RELOC_ARM_JUMP_SLOT,
+  BFD_RELOC_ARM_GLOB_DAT,
+  BFD_RELOC_ARM_GOT32,
+  BFD_RELOC_ARM_PLT32,
+  BFD_RELOC_ARM_RELATIVE,
+  BFD_RELOC_ARM_GOTOFF,
+  BFD_RELOC_ARM_GOTPC,
+
+/* ARM thread-local storage relocations.  */
+  BFD_RELOC_ARM_TLS_GD32,
+  BFD_RELOC_ARM_TLS_LDO32,
+  BFD_RELOC_ARM_TLS_LDM32,
+  BFD_RELOC_ARM_TLS_DTPOFF32,
+  BFD_RELOC_ARM_TLS_DTPMOD32,
+  BFD_RELOC_ARM_TLS_TPOFF32,
+  BFD_RELOC_ARM_TLS_IE32,
+  BFD_RELOC_ARM_TLS_LE32,
+
+/* These relocs are only used within the ARM assembler.  They are not
+(at present) written to any object files.  */
+  BFD_RELOC_ARM_IMMEDIATE,
+  BFD_RELOC_ARM_ADRL_IMMEDIATE,
+  BFD_RELOC_ARM_T32_IMMEDIATE,
+  BFD_RELOC_ARM_SHIFT_IMM,
+  BFD_RELOC_ARM_SMI,
+  BFD_RELOC_ARM_SWI,
+  BFD_RELOC_ARM_MULTI,
+  BFD_RELOC_ARM_CP_OFF_IMM,
+  BFD_RELOC_ARM_CP_OFF_IMM_S2,
+  BFD_RELOC_ARM_ADR_IMM,
+  BFD_RELOC_ARM_LDR_IMM,
+  BFD_RELOC_ARM_LITERAL,
+  BFD_RELOC_ARM_IN_POOL,
+  BFD_RELOC_ARM_OFFSET_IMM8,
+  BFD_RELOC_ARM_T32_OFFSET_U8,
+  BFD_RELOC_ARM_T32_OFFSET_IMM,
+  BFD_RELOC_ARM_HWLITERAL,
+  BFD_RELOC_ARM_THUMB_ADD,
+  BFD_RELOC_ARM_THUMB_IMM,
+  BFD_RELOC_ARM_THUMB_SHIFT,
 
 /* Renesas / SuperH SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,
@@ -2810,12 +2831,6 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_SH_TLS_DTPMOD32,
   BFD_RELOC_SH_TLS_DTPOFF32,
   BFD_RELOC_SH_TLS_TPOFF32,
-
-/* Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
-be zero and is not stored in the instruction.  */
-  BFD_RELOC_THUMB_PCREL_BRANCH9,
-  BFD_RELOC_THUMB_PCREL_BRANCH12,
-  BFD_RELOC_THUMB_PCREL_BRANCH23,
 
 /* ARC Cores relocs.
 ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are

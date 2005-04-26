@@ -6,121 +6,121 @@ load_store:
 	cfldrsvc	mvf2, [r12, #-956]
 	cfldrslt	mvf0, [sl, #-1020]
 	cfldrscc	mvf12, [r1, #-156]
-	cfldrs	mvf13, [r15, #416]!
+	cfldrs	mvf13, [r9, #416]!
 	cfldrscs	mvf9, [r0, #-1020]!
 	cfldrsls	mvf4, [r1, #-156]!
-	cfldrsle	mvf7, [pc, #416]!
+	cfldrsle	mvf7, [r9, #416]!
 	cfldrsvs	mvf11, [r0, #-1020]!
 	cfldrscc	mvf12, [r1], #-156
-	cfldrs	mvf13, [r15], #416
+	cfldrs	mvf13, [r9], #416
 	cfldrscs	mvf9, [r0], #-1020
 	cfldrsls	mvf4, [r1], #-156
-	cfldrsle	mvf7, [pc], #416
+	cfldrsle	mvf7, [r9], #416
 	cfldrdvs	mvd11, [r0, #-1020]
 	cfldrdcc	mvd12, [r1, #-156]
-	cfldrd	mvd13, [r15, #416]
+	cfldrd	mvd13, [r9, #416]
 	cfldrdcs	mvd9, [r0, #-1020]
 	cfldrdls	mvd4, [r1, #-156]
-	cfldrdle	mvd7, [pc, #416]!
+	cfldrdle	mvd7, [r9, #416]!
 	cfldrdvs	mvd11, [r0, #-1020]!
 	cfldrdcc	mvd12, [r1, #-156]!
-	cfldrd	mvd13, [r15, #416]!
+	cfldrd	mvd13, [r9, #416]!
 	cfldrdcs	mvd9, [r0, #-1020]!
 	cfldrdls	mvd4, [r1], #-156
-	cfldrdle	mvd7, [pc], #416
+	cfldrdle	mvd7, [r9], #416
 	cfldrdvs	mvd11, [r0], #-1020
 	cfldrdcc	mvd12, [r1], #-156
-	cfldrd	mvd13, [r15], #416
+	cfldrd	mvd13, [r9], #416
 	cfldr32cs	mvfx9, [r0, #-1020]
 	cfldr32ls	mvfx4, [r1, #-156]
-	cfldr32le	mvfx7, [pc, #416]
+	cfldr32le	mvfx7, [r9, #416]
 	cfldr32vs	mvfx11, [r0, #-1020]
 	cfldr32cc	mvfx12, [r1, #-156]
-	cfldr32	mvfx13, [r15, #416]!
+	cfldr32	mvfx13, [r9, #416]!
 	cfldr32cs	mvfx9, [r0, #-1020]!
 	cfldr32ls	mvfx4, [r1, #-156]!
-	cfldr32le	mvfx7, [pc, #416]!
+	cfldr32le	mvfx7, [r9, #416]!
 	cfldr32vs	mvfx11, [r0, #-1020]!
 	cfldr32cc	mvfx12, [r1], #-156
-	cfldr32	mvfx13, [r15], #416
+	cfldr32	mvfx13, [r9], #416
 	cfldr32cs	mvfx9, [r0], #-1020
 	cfldr32ls	mvfx4, [r1], #-156
-	cfldr32le	mvfx7, [pc], #416
+	cfldr32le	mvfx7, [r9], #416
 	cfldr64vs	mvdx11, [r0, #-1020]
 	cfldr64cc	mvdx12, [r1, #-156]
-	cfldr64	mvdx13, [r15, #416]
+	cfldr64	mvdx13, [r9, #416]
 	cfldr64cs	mvdx9, [r0, #-1020]
 	cfldr64ls	mvdx4, [r1, #-156]
-	cfldr64le	mvdx7, [pc, #416]!
+	cfldr64le	mvdx7, [r9, #416]!
 	cfldr64vs	mvdx11, [r0, #-1020]!
 	cfldr64cc	mvdx12, [r1, #-156]!
-	cfldr64	mvdx13, [r15, #416]!
+	cfldr64	mvdx13, [r9, #416]!
 	cfldr64cs	mvdx9, [r0, #-1020]!
 	cfldr64ls	mvdx4, [r1], #-156
-	cfldr64le	mvdx7, [pc], #416
+	cfldr64le	mvdx7, [r9], #416
 	cfldr64vs	mvdx11, [r0], #-1020
 	cfldr64cc	mvdx12, [r1], #-156
-	cfldr64	mvdx13, [r15], #416
+	cfldr64	mvdx13, [r9], #416
 	cfstrscs	mvf9, [r0, #-1020]
 	cfstrsls	mvf4, [r1, #-156]
-	cfstrsle	mvf7, [pc, #416]
+	cfstrsle	mvf7, [r9, #416]
 	cfstrsvs	mvf11, [r0, #-1020]
 	cfstrscc	mvf12, [r1, #-156]
-	cfstrs	mvf13, [r15, #416]!
+	cfstrs	mvf13, [r9, #416]!
 	cfstrscs	mvf9, [r0, #-1020]!
 	cfstrsls	mvf4, [r1, #-156]!
-	cfstrsle	mvf7, [pc, #416]!
+	cfstrsle	mvf7, [r9, #416]!
 	cfstrsvs	mvf11, [r0, #-1020]!
 	cfstrscc	mvf12, [r1], #-156
-	cfstrs	mvf13, [r15], #416
+	cfstrs	mvf13, [r9], #416
 	cfstrscs	mvf9, [r0], #-1020
 	cfstrsls	mvf4, [r1], #-156
-	cfstrsle	mvf7, [pc], #416
+	cfstrsle	mvf7, [r9], #416
 	cfstrdvs	mvd11, [r0, #-1020]
 	cfstrdcc	mvd12, [r1, #-156]
-	cfstrd	mvd13, [r15, #416]
+	cfstrd	mvd13, [r9, #416]
 	cfstrdcs	mvd9, [r0, #-1020]
 	cfstrdls	mvd4, [r1, #-156]
-	cfstrdle	mvd7, [pc, #416]!
+	cfstrdle	mvd7, [r9, #416]!
 	cfstrdvs	mvd11, [r0, #-1020]!
 	cfstrdcc	mvd12, [r1, #-156]!
-	cfstrd	mvd13, [r15, #416]!
+	cfstrd	mvd13, [r9, #416]!
 	cfstrdcs	mvd9, [r0, #-1020]!
 	cfstrdls	mvd4, [r1], #-156
-	cfstrdle	mvd7, [pc], #416
+	cfstrdle	mvd7, [r9], #416
 	cfstrdvs	mvd11, [r0], #-1020
 	cfstrdcc	mvd12, [r1], #-156
-	cfstrd	mvd13, [r15], #416
+	cfstrd	mvd13, [r9], #416
 	cfstr32cs	mvfx9, [r0, #-1020]
 	cfstr32ls	mvfx4, [r1, #-156]
-	cfstr32le	mvfx7, [pc, #416]
+	cfstr32le	mvfx7, [r9, #416]
 	cfstr32vs	mvfx11, [r0, #-1020]
 	cfstr32cc	mvfx12, [r1, #-156]
-	cfstr32	mvfx13, [r15, #416]!
+	cfstr32	mvfx13, [r9, #416]!
 	cfstr32cs	mvfx9, [r0, #-1020]!
 	cfstr32ls	mvfx4, [r1, #-156]!
-	cfstr32le	mvfx7, [pc, #416]!
+	cfstr32le	mvfx7, [r9, #416]!
 	cfstr32vs	mvfx11, [r0, #-1020]!
 	cfstr32cc	mvfx12, [r1], #-156
-	cfstr32	mvfx13, [r15], #416
+	cfstr32	mvfx13, [r9], #416
 	cfstr32cs	mvfx9, [r0], #-1020
 	cfstr32ls	mvfx4, [r1], #-156
-	cfstr32le	mvfx7, [pc], #416
+	cfstr32le	mvfx7, [r9], #416
 	cfstr64vs	mvdx11, [r0, #-1020]
 	cfstr64cc	mvdx12, [r1, #-156]
-	cfstr64	mvdx13, [r15, #416]
+	cfstr64	mvdx13, [r9, #416]
 	cfstr64cs	mvdx9, [r0, #-1020]
 	cfstr64ls	mvdx4, [r1, #-156]
-	cfstr64le	mvdx7, [pc, #416]!
+	cfstr64le	mvdx7, [r9, #416]!
 	cfstr64vs	mvdx11, [r0, #-1020]!
 	cfstr64cc	mvdx12, [r1, #-156]!
-	cfstr64	mvdx13, [r15, #416]!
+	cfstr64	mvdx13, [r9, #416]!
 	cfstr64cs	mvdx9, [r0, #-1020]!
 	cfstr64ls	mvdx4, [r1], #-156
-	cfstr64le	mvdx7, [pc], #416
+	cfstr64le	mvdx7, [r9], #416
 	cfstr64vs	mvdx11, [r0], #-1020
 	cfstr64cc	mvdx12, [r1], #-156
-	cfstr64	mvdx13, [r15], #416
+	cfstr64	mvdx13, [r9], #416
 move:
 	cfmvsrcs	mvf9, r0
 	cfmvsrpl	mvf15, r7

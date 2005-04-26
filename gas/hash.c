@@ -120,19 +120,13 @@ hash_die (struct hash_control *table)
    Each time we look up a string, we move it to the start of the list
    for its hash code, to take advantage of referential locality.  */
 
-static struct hash_entry *hash_lookup (struct hash_control *,
-				       const char *,
-				       struct hash_entry ***,
-				       unsigned long *);
-
 static struct hash_entry *
-hash_lookup (struct hash_control *table, const char *key,
+hash_lookup (struct hash_control *table, const char *key, size_t len,
 	     struct hash_entry ***plist, unsigned long *phash)
 {
-  register unsigned long hash;
-  unsigned int len;
-  register const unsigned char *s;
-  register unsigned int c;
+  unsigned long hash;
+  size_t n;
+  unsigned int c;
   unsigned int index;
   struct hash_entry **list;
   struct hash_entry *p;
@@ -143,13 +137,11 @@ hash_lookup (struct hash_control *table, const char *key,
 #endif
 
   hash = 0;
-  len = 0;
-  s = (const unsigned char *) key;
-  while ((c = *s++) != '\0')
+  for (n = 0; n < len; n++)
     {
+      c = key[n];
       hash += c + (c << 17);
       hash ^= hash >> 2;
-      ++len;
     }
   hash += len + (len << 17);
   hash ^= hash >> 2;
@@ -176,7 +168,7 @@ hash_lookup (struct hash_control *table, const char *key,
 	  ++table->string_compares;
 #endif
 
-	  if (strcmp (p->string, key) == 0)
+	  if (strncmp (p->string, key, len) == 0 && p->string[len] == '\0')
 	    {
 	      if (prev != NULL)
 		{
@@ -207,7 +199,7 @@ hash_insert (struct hash_control *table, const char *key, PTR value)
   struct hash_entry **list;
   unsigned long hash;
 
-  p = hash_lookup (table, key, &list, &hash);
+  p = hash_lookup (table, key, strlen (key), &list, &hash);
   if (p != NULL)
     return "exists";
 
@@ -237,7 +229,7 @@ hash_jam (struct hash_control *table, const char *key, PTR value)
   struct hash_entry **list;
   unsigned long hash;
 
-  p = hash_lookup (table, key, &list, &hash);
+  p = hash_lookup (table, key, strlen (key), &list, &hash);
   if (p != NULL)
     {
 #ifdef HASH_STATISTICS
@@ -274,7 +266,7 @@ hash_replace (struct hash_control *table, const char *key, PTR value)
   struct hash_entry *p;
   PTR ret;
 
-  p = hash_lookup (table, key, NULL, NULL);
+  p = hash_lookup (table, key, strlen (key), NULL, NULL);
   if (p == NULL)
     return NULL;
 
@@ -297,7 +289,22 @@ hash_find (struct hash_control *table, const char *key)
 {
   struct hash_entry *p;
 
-  p = hash_lookup (table, key, NULL, NULL);
+  p = hash_lookup (table, key, strlen (key), NULL, NULL);
+  if (p == NULL)
+    return NULL;
+
+  return p->data;
+}
+
+/* As hash_find, but KEY is of length LEN and is not guaranteed to be
+   NUL-terminated.  */
+
+PTR
+hash_find_n (struct hash_control *table, const char *key, size_t len)
+{
+  struct hash_entry *p;
+
+  p = hash_lookup (table, key, len, NULL, NULL);
   if (p == NULL)
     return NULL;
 
@@ -313,7 +320,7 @@ hash_delete (struct hash_control *table, const char *key)
   struct hash_entry *p;
   struct hash_entry **list;
 
-  p = hash_lookup (table, key, &list, NULL);
+  p = hash_lookup (table, key, strlen (key), &list, NULL);
   if (p == NULL)
     return NULL;
 

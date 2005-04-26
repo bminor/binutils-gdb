@@ -202,3 +202,8 @@ iwmmxt:
 	wxorne		wr3, wr4, wr5
 
 	wzeroge		wr7
+
+	@ a.out-required section size padding
+	nop
+	nop
+	nop

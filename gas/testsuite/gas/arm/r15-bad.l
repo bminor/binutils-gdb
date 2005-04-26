@@ -1,6 +1,6 @@
 [^:]*: Assembler messages:
-[^:]*:5: Error: r15 not allowed here -- `mul r15,r1'
-[^:]*:6: Error: r15 not allowed here -- `mul r1,r15'
+[^:]*:5: Error: r15 not allowed here -- `mul r15,r1,r2'
+[^:]*:6: Error: r15 not allowed here -- `mul r1,r15,r2'
 [^:]*:7: Error: r15 not allowed here -- `mla r15,r2,r3,r4'
 [^:]*:8: Error: r15 not allowed here -- `mla r1,r15,r3,r4'
 [^:]*:9: Error: r15 not allowed here -- `mla r1,r2,r15,r4'
@@ -59,6 +59,6 @@
 [^:]*:62: Error: r15 not allowed here -- `pkhtb r1,r2,r15'
 [^:]*:63: Error: r15 not allowed here -- `ldrex r15,[[]r2[]]'
 [^:]*:64: Error: r15 not allowed here -- `ldrex r1,[[]r15[]]'
-[^:]*:65: Error: r15 not allowed in swap -- `swp r15,r2,[[]r3[]]'
-[^:]*:66: Error: r15 not allowed in swap -- `swp r1,r15,[[]r3[]]'
+[^:]*:65: Error: r15 not allowed here -- `swp r15,r2,[[]r3[]]'
+[^:]*:66: Error: r15 not allowed here -- `swp r1,r15,[[]r3[]]'
 [^:]*:67: Error: r15 not allowed here -- `swp r1,r2,[[]r15[]]'

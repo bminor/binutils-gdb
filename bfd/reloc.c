@@ -2622,12 +2622,102 @@ ENUMDOC
   Thumb 22 bit pc-relative branch.  The lowest bit must be zero and is
   not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
   field in the instruction.
+
+ENUM
+  BFD_RELOC_THUMB_PCREL_BRANCH7
+ENUMX
+  BFD_RELOC_THUMB_PCREL_BRANCH9
+ENUMX
+  BFD_RELOC_THUMB_PCREL_BRANCH12
+ENUMX
+  BFD_RELOC_THUMB_PCREL_BRANCH20
+ENUMX
+  BFD_RELOC_THUMB_PCREL_BRANCH23
+ENUMX
+  BFD_RELOC_THUMB_PCREL_BRANCH25
+ENUMDOC
+  Thumb 7-, 9-, 12-, 20-, 23-, and 25-bit pc-relative branches.
+  The lowest bit must be zero and is not stored in the instruction.
+  Note that the corresponding ELF R_ARM_THM_JUMPnn constant has an
+  "nn" one smaller in all cases.  Note further that BRANCH23
+  corresponds to R_ARM_THM_CALL.
+
+ENUM
+  BFD_RELOC_ARM_OFFSET_IMM
+ENUMDOC
+  12-bit immediate offset, used in ARM-format ldr and str instructions.
+
+ENUM
+  BFD_RELOC_ARM_THUMB_OFFSET
+ENUMDOC
+  5-bit immediate offset, used in Thumb-format ldr and str instructions.
+
+ENUM
+  BFD_RELOC_ARM_TARGET1
+ENUMDOC
+  Pc-relative or absolute relocation depending on target.  Used for
+  entries in .init_array sections.
+ENUM
+  BFD_RELOC_ARM_ROSEGREL32
+ENUMDOC
+  Read-only segment base relative address.
+ENUM
+  BFD_RELOC_ARM_SBREL32
+ENUMDOC
+  Data segment base relative address.
+ENUM
+  BFD_RELOC_ARM_TARGET2
+ENUMDOC
+  This reloc is used for references to RTTI data from exception handling
+  tables.  The actual definition depends on the target.  It may be a
+  pc-relative or some form of GOT-indirect relocation.
+ENUM
+  BFD_RELOC_ARM_PREL31
+ENUMDOC
+  31-bit PC relative address.
+
+ENUM
+  BFD_RELOC_ARM_JUMP_SLOT
+ENUMX
+  BFD_RELOC_ARM_GLOB_DAT
+ENUMX
+  BFD_RELOC_ARM_GOT32
+ENUMX
+  BFD_RELOC_ARM_PLT32
+ENUMX
+  BFD_RELOC_ARM_RELATIVE
+ENUMX
+  BFD_RELOC_ARM_GOTOFF
+ENUMX
+  BFD_RELOC_ARM_GOTPC
+ENUMDOC
+  Relocations for setting up GOTs and PLTs for shared libraries.
+
+ENUM
+  BFD_RELOC_ARM_TLS_GD32
+ENUMX
+  BFD_RELOC_ARM_TLS_LDO32
+ENUMX
+  BFD_RELOC_ARM_TLS_LDM32
+ENUMX
+  BFD_RELOC_ARM_TLS_DTPOFF32
+ENUMX
+  BFD_RELOC_ARM_TLS_DTPMOD32
+ENUMX
+  BFD_RELOC_ARM_TLS_TPOFF32
+ENUMX
+  BFD_RELOC_ARM_TLS_IE32
+ENUMX
+  BFD_RELOC_ARM_TLS_LE32
+ENUMDOC
+  ARM thread-local storage relocations.
+
 ENUM
   BFD_RELOC_ARM_IMMEDIATE
 ENUMX
   BFD_RELOC_ARM_ADRL_IMMEDIATE
 ENUMX
-  BFD_RELOC_ARM_OFFSET_IMM
+  BFD_RELOC_ARM_T32_IMMEDIATE
 ENUMX
   BFD_RELOC_ARM_SHIFT_IMM
 ENUMX
@@ -2651,6 +2741,10 @@ ENUMX
 ENUMX
   BFD_RELOC_ARM_OFFSET_IMM8
 ENUMX
+  BFD_RELOC_ARM_T32_OFFSET_U8
+ENUMX
+  BFD_RELOC_ARM_T32_OFFSET_IMM
+ENUMX
   BFD_RELOC_ARM_HWLITERAL
 ENUMX
   BFD_RELOC_ARM_THUMB_ADD
@@ -2658,68 +2752,9 @@ ENUMX
   BFD_RELOC_ARM_THUMB_IMM
 ENUMX
   BFD_RELOC_ARM_THUMB_SHIFT
-ENUMX
-  BFD_RELOC_ARM_THUMB_OFFSET
-ENUMX
-  BFD_RELOC_ARM_GOT12
-ENUMX
-  BFD_RELOC_ARM_GOT32
-ENUMX
-  BFD_RELOC_ARM_JUMP_SLOT
-ENUMX
-  BFD_RELOC_ARM_COPY
-ENUMX
-  BFD_RELOC_ARM_GLOB_DAT
-ENUMX
-  BFD_RELOC_ARM_PLT32
-ENUMX
-  BFD_RELOC_ARM_RELATIVE
-ENUMX
-  BFD_RELOC_ARM_GOTOFF
-ENUMX
-  BFD_RELOC_ARM_GOTPC
-ENUMX
-  BFD_RELOC_ARM_TLS_GD32
-ENUMX
-  BFD_RELOC_ARM_TLS_LDO32
-ENUMX
-  BFD_RELOC_ARM_TLS_LDM32
-ENUMX
-  BFD_RELOC_ARM_TLS_DTPOFF32
-ENUMX
-  BFD_RELOC_ARM_TLS_DTPMOD32
-ENUMX
-  BFD_RELOC_ARM_TLS_TPOFF32
-ENUMX
-  BFD_RELOC_ARM_TLS_IE32
-ENUMX
-  BFD_RELOC_ARM_TLS_LE32
 ENUMDOC
   These relocs are only used within the ARM assembler.  They are not
   (at present) written to any object files.
-ENUM
-  BFD_RELOC_ARM_TARGET1
-ENUMDOC
-  Pc-relative or absolute relocation depending on target.  Used for
-  entries in .init_array sections.
-ENUM
-  BFD_RELOC_ARM_ROSEGREL32
-ENUMDOC
-  Read-only segment base relative address.
-ENUM
-  BFD_RELOC_ARM_SBREL32
-ENUMDOC
-  Data segment base relative address.
-ENUM
-  BFD_RELOC_ARM_TARGET2
-ENUMDOC
-  This reloc is used for References to RTTI dta from exception handling
-  tables.  The actual definition depends on the target.  It may be a
-  pc-relative or some form of GOT-indirect relocation.
-ENUM
-  BFD_RELOC_ARM_PREL31
-ENUMDOC
-  31-bit PC relative address.
 
 ENUM
   BFD_RELOC_SH_PCDISP8BY2
@@ -2903,16 +2938,6 @@ ENUMX
   BFD_RELOC_SH_TLS_TPOFF32
 ENUMDOC
   Renesas / SuperH SH relocs.  Not all of these appear in object files.
-
-ENUM
-  BFD_RELOC_THUMB_PCREL_BRANCH9
-ENUMX
-  BFD_RELOC_THUMB_PCREL_BRANCH12
-ENUMX
-  BFD_RELOC_THUMB_PCREL_BRANCH23
-ENUMDOC
-  Thumb 23-, 12- and 9-bit pc-relative branches.  The lowest bit must
-  be zero and is not stored in the instruction.
 
 ENUM
   BFD_RELOC_ARC_B22_PCREL

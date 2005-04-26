@@ -140,7 +140,6 @@ struct fix;
 #define TC_FORCE_RELOCATION_LOCAL(FIX)			\
   (!(FIX)->fx_pcrel					\
    || (FIX)->fx_plt					\
-   || (FIX)->fx_r_type == BFD_RELOC_ARM_GOT12		\
    || (FIX)->fx_r_type == BFD_RELOC_ARM_GOT32		\
    || (FIX)->fx_r_type == BFD_RELOC_32			\
    || TC_FORCE_RELOCATION (FIX))

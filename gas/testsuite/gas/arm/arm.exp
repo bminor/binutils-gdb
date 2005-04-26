@@ -28,14 +28,13 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 	run_dump_test "copro"
     }
 
-    gas_test "arm3.s" "-mcpu=arm3" $stdoptlist "Arm 3 instructions"
-    gas_test "arm6.s" "-mcpu=arm6" $stdoptlist "Arm 6 instructions"
-    gas_test "arm7dm.s" "-mcpu=arm7dm" $stdoptlist "Arm 7DM instructions"
-    gas_test "arch4t.s" "-march=armv4t" $stdoptlist "Arm architecture 4t instructions"
-    gas_test "immed.s" "" $stdoptlist "immediate expressions"
-    gas_test "float.s" "-mcpu=arm7tdmi -mfpu=fpa" $stdoptlist "Core floating point instructions"
-    gas_test "offset.s" "" $stdoptlist "OFFSET_IMM regression"
-
+    run_dump_test "arm3"
+    run_dump_test "arm6"
+    run_dump_test "arm7dm"
+    run_dump_test "arch4t"
+    run_dump_test "immed"
+    run_dump_test "float"
+    run_dump_test "offset"
     run_dump_test "armv1"
     run_dump_test "arch5tej"
     run_dump_test "fpa-monadic"
@@ -53,12 +52,17 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_dump_test "thumbv6"
     run_dump_test "thumbv6k"
     run_dump_test "arch6zk"
+    run_dump_test "tcompat"
+    run_dump_test "tcompat2"
+    run_dump_test "iwmmxt"
     
     run_errors_test "vfp-bad" "-mfpu=vfp" "VFP errors"
     run_errors_test "req" "-mcpu=arm7m" ".req errors"
     run_errors_test "armv1-bad" "-mcpu=arm7m" "ARM v1 errors"
     run_errors_test "r15-bad" "" "Invalid use of r15 errors"
     run_errors_test "archv6t2-bad" "-march=armv6t2" "Invalid V6T2 instructions"
+    run_errors_test "t16-bad" "-march=armv6k" "Valid ARM, invalid Thumb"
+    run_errors_test "iwmmxt-bad" "-mcpu=iwmmxt" "iWMMXt errors"
 
     if {[istarget *-*-*coff] || [istarget *-*-pe] || [istarget *-*-wince] ||
         [istarget *-*-*aout*] || [istarget *-*-netbsd] || [istarget *-*-riscix*]} then {
@@ -70,29 +74,20 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
        
 	run_dump_test "pic"
 	run_dump_test "mapping"
-	gas_test "bignum1.s" "" $stdoptlist "bignums"
+	run_dump_test "bignum1"
 	run_dump_test "unwind"
-
 	run_dump_test "tls"
     }
 
+    # The arm-aout port does not support Thumb branch relocations.
     if {! [istarget arm*-*-aout] && ![istarget arm-*-pe]} then {
-	# The arm-aout port does not support Thumb mode.
-	gas_test "thumb.s" "-mcpu=arm7t" $stdoptlist "Thumb instructions"
+	run_dump_test "thumb"
+	run_dump_test "thumb32"
     }
-}
 
-# Not all arm targets are bi-endian, so only run this test on ones
-# we know that are.  FIXME: We should probably also key off armeb/armel.
-
-if [istarget arm-*-pe] {
-    run_dump_test "le-fpconst"
-
-    # Since big-endian numbers have the normal format, this doesn't exist.
-    #run_dump_test "be-fpconst"
-}
-
-if [istarget xscale-*] {
-    run_dump_test "iwmmxt"
-    run_errors_test "iwmmxt-bad" "-mcpu=iwmmxt" "iWMMXt errors"
+    # Not all arm targets are bi-endian, so only run this test on ones
+    # we know that are.  FIXME: We should probably also key off armeb/armel.
+    if [istarget *-*-pe] {
+	run_dump_test "le-fpconst"
+    }
 }

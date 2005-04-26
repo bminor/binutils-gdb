@@ -7,7 +7,7 @@
 Disassembly of section .text:
 0+000 <[^>]*> b666 *	cpsie	ai
 0+002 <[^>]*> b675 *	cpsid	af
-0+004 <[^>]*> 4623 *	cpy	r3, r4
+0+004 <[^>]*> 4623 *	mov	r3, r4
 0+006 <[^>]*> ba3a *	rev	r2, r7
 0+008 <[^>]*> ba4d *	rev16	r5, r1
 0+00a <[^>]*> baf3 *	revsh	r3, r6
