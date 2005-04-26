@@ -1246,12 +1246,8 @@ thread_db_get_thread_local_address (ptid_t ptid,
 
       /* glibc doesn't provide the needed interface.  */
       if (!td_thr_tls_get_addr_p)
-	{
-	  struct gdb_exception e 
-	    = { RETURN_ERROR, TLS_NO_LIBRARY_SUPPORT_ERROR, 0 };
-
-	  throw_exception (e);
-	}
+	throw_error (TLS_NO_LIBRARY_SUPPORT_ERROR,
+		     _("No TLS library support"));
 
       /* Caller should have verified that lm != 0.  */
       gdb_assert (lm != 0);
@@ -1267,26 +1263,17 @@ thread_db_get_thread_local_address (ptid_t ptid,
 #ifdef THREAD_DB_HAS_TD_NOTALLOC
       /* The memory hasn't been allocated, yet.  */
       if (err == TD_NOTALLOC)
-	{
 	  /* Now, if libthread_db provided the initialization image's
 	     address, we *could* try to build a non-lvalue value from
 	     the initialization image.  */
-
-	  struct gdb_exception e
-	    = { RETURN_ERROR, TLS_NOT_ALLOCATED_YET_ERROR, 0 };
-
-	  throw_exception (e);
-	}
+        throw_error (TLS_NOT_ALLOCATED_YET_ERROR,
+                     _("TLS not allocated yet"));
 #endif
 
       /* Something else went wrong.  */
       if (err != TD_OK)
-	{
-	  struct gdb_exception e
-	    = { RETURN_ERROR, TLS_GENERIC_ERROR, thread_db_err_str (err) };
-
-	  throw_exception (e);
-	}
+        throw_error (TLS_GENERIC_ERROR,
+                     (("%s")), thread_db_err_str (err));
 
       /* Cast assuming host == target.  Joy.  */
       return (CORE_ADDR) address;
@@ -1295,13 +1282,8 @@ thread_db_get_thread_local_address (ptid_t ptid,
   if (target_beneath->to_get_thread_local_address)
     return target_beneath->to_get_thread_local_address (ptid, lm, offset);
   else
-    {
-      struct gdb_exception e
-	= { RETURN_ERROR, TLS_GENERIC_ERROR,
-	    "TLS not supported on this target" };
-
-      throw_exception (e);
-    }
+    throw_error (TLS_GENERIC_ERROR,
+	         _("TLS not supported on this target"));
 }
 
 static void

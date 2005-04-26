@@ -1286,7 +1286,8 @@ script_from_file (FILE *stream, char *file)
       case RETURN_ERROR:
 	/* Re-throw the error, but with the file name information
 	   prepended.  */
-	throw_error (e.error, "%s:%d: Error in sourced command file:\n%s",
+	throw_error (e.error,
+		     _("%s:%d: Error in sourced command file:\n%s"),
 		     source_file_name, source_line_number, e.message);
       default:
 	internal_error (__FILE__, __LINE__, _("bad reason"));

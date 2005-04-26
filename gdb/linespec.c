@@ -1529,7 +1529,7 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
 	error (_("No symbol table is loaded.  Use the \"file\" command."));
       if (not_found_ptr)
 	*not_found_ptr = 1;
-      throw_error (NOT_FOUND_ERROR, "No source file named %s.", copy);
+      throw_error (NOT_FOUND_ERROR, _("No source file named %s."), copy);
     }
 
   /* Discard the file name from the arg.  */
@@ -1741,7 +1741,7 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
 
   if (not_found_ptr)
     *not_found_ptr = 1;
-  throw_error (NOT_FOUND_ERROR, "Function \"%s\" not defined.", copy);
+  throw_error (NOT_FOUND_ERROR, _("Function \"%s\" not defined."), copy);
 }
 
 

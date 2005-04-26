@@ -1,5 +1,16 @@
 2005-04-26  Andrew Cagney  <cagney@gnu.org>
 
+	* remote.c (remote_open_1): Move "ex"'s declaration to where it is
+	used.
+	(remote_get_thread_local_address): Use throw_error, include a
+	printed string.
+	* linux-thread-db.c (thread_db_get_thread_local_address): Ditto.
+	* dwarf2loc.c (dwarf_expr_tls_address): Ditto.
+	* cli/cli-script.c (script_from_file): Mark up throw_error message.
+	* linespec.c (symtab_from_filename, decode_variable): Ditto.
+
+2005-04-26  Andrew Cagney  <cagney@gnu.org>
+
 	Rename 'struct exception' to 'struct gdb_exception'.
 	* wrapper.c: Update.
 	* varobj.c: Update.

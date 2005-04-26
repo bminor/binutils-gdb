@@ -2179,7 +2179,6 @@ static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	       int extended_p, int async_p)
 {
-  struct gdb_exception ex;
   struct remote_state *rs = get_remote_state ();
   if (name == 0)
     error (_("To open a remote debug connection, you need to specify what\n"
@@ -2282,14 +2281,17 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
      been fixed - the function set_cmd_context() makes it possible for
      all the ``target ....'' commands to share a common callback
      function.  See cli-dump.c.  */
-  ex = catch_exception (uiout, remote_start_remote, NULL, RETURN_MASK_ALL);
-  if (ex.reason < 0)
-    {
-      pop_target ();
-      if (async_p)
-	wait_forever_enabled_p = 1;
-      throw_exception (ex);
-    }
+  {
+    struct gdb_exception ex
+      = catch_exception (uiout, remote_start_remote, NULL, RETURN_MASK_ALL);
+    if (ex.reason < 0)
+      {
+	pop_target ();
+	if (async_p)
+	  wait_forever_enabled_p = 1;
+	throw_exception (ex);
+      }
+  }
 
   if (async_p)
     wait_forever_enabled_p = 1;
@@ -5357,28 +5359,15 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
 	  return result;
 	}
       else if (result == PACKET_UNKNOWN)
-	{
-	  struct gdb_exception e
-	    = { RETURN_ERROR, TLS_GENERIC_ERROR,
-		"Remote target doesn't support qGetTLSAddr packet" };
-	  throw_exception (e);
-	}
+	throw_error (TLS_GENERIC_ERROR,
+		     _("Remote target doesn't support qGetTLSAddr packet"));
       else
-	{
-	  struct gdb_exception e
-	    = { RETURN_ERROR, TLS_GENERIC_ERROR,
-		"Remote target failed to process qGetTLSAddr request" };
-	  throw_exception (e);
-
-	}
+	throw_error (TLS_GENERIC_ERROR,
+		     _("Remote target failed to process qGetTLSAddr request"));
     }
   else
-    {
-      struct gdb_exception e
-	= { RETURN_ERROR, TLS_GENERIC_ERROR,
-	    "TLS not supported or disabled on this target" };
-      throw_exception (e);
-    }
+    throw_error (TLS_GENERIC_ERROR,
+		 _("TLS not supported or disabled on this target"));
   /* Not reached.  */
   return 0;
 }

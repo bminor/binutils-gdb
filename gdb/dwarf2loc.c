@@ -204,12 +204,8 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
 	                                                   objfile);
 	  /* If it's 0, throw the appropriate exception.  */
 	  if (lm_addr == 0)
-	    {
-	      struct gdb_exception e
-		= { RETURN_ERROR, TLS_LOAD_MODULE_NOT_FOUND_ERROR, 0 };
-
-	      throw_exception (e);
-	    }
+	    throw_error (TLS_LOAD_MODULE_NOT_FOUND_ERROR,
+			 _("TLS load module not found"));
 
 	  addr = target_get_thread_local_address (ptid, lm_addr, offset);
 	}
