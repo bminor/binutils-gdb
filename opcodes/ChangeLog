@@ -1,3 +1,8 @@
+2005-04-26  Jerome Guitton  <guitton@gnat.com>
+
+	* configure.in: Fix the check for basename declaration.
+	* configure: Regenerate.
+
 2005-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (RTO): Define.

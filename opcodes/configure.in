@@ -72,7 +72,7 @@ AC_PROG_INSTALL
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
 
-AC_CHECK_DECLS(basename, , , [#include "sysdep.h"])
+AC_CHECK_DECLS(basename)
 
 cgen_maint=no
 cgendir='$(srcdir)/../cgen'
