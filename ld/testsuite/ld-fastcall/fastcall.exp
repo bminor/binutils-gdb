@@ -21,7 +21,7 @@ if {![istarget "i*86-*-*"]} {
     return
 }
 
-if {![istarget "i*86-*-*pe*"] \
+if {  !([istarget "i*86-*-*pe*"] && ![istarget "i*86-*-opensd*"]) \
     && ![istarget "i*86-*-cygwin*"] \
     && ![istarget "i*86-*-mingw32*"] } {
     return

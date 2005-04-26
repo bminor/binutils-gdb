@@ -1,5 +1,7 @@
 2005-04-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* ld-fastcall/fastcall.exp: Don't run on i*86-*-openbsd*.
+
 	* ld-srec/srec.exp (run_srec_test): Deal with ProPolice on
 	*-*-openbsd*.
 
