@@ -1,3 +1,7 @@
+2005-04-26  Jerome Guitton  <guitton@gnat.com>
+
+	* bfd.m4 (BFD_NEED_DECLARATION): Restore.
+
 2005-04-25  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.c (sparc_elf_append_rela_64): Add BFD64 protection.
