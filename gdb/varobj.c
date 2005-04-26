@@ -1452,7 +1452,7 @@ variable_default_display (struct varobj *var)
 static int
 my_value_equal (struct value *val1, struct value *volatile val2, int *error2)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   /* As a special case, if both are null, we say they're equal.  */
   if (val1 == NULL && val2 == NULL)

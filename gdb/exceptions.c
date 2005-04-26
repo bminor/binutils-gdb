@@ -32,7 +32,7 @@
 #include "gdb_string.h"
 #include "serial.h"
 
-const struct exception exception_none = { 0, NO_ERROR, NULL };
+const struct gdb_exception exception_none = { 0, NO_ERROR, NULL };
 
 /* Possible catcher states.  */
 enum catcher_state {
@@ -58,7 +58,7 @@ struct catcher
   /* Jump buffer pointing back at the exception handler.  */
   EXCEPTIONS_SIGJMP_BUF buf;
   /* Status buffer belonging to the exception handler.  */
-  volatile struct exception *exception;
+  volatile struct gdb_exception *exception;
   /* Saved/current state.  */
   int mask;
   struct ui_out *saved_uiout;
@@ -72,7 +72,7 @@ static struct catcher *current_catcher;
 
 EXCEPTIONS_SIGJMP_BUF *
 exceptions_state_mc_init (struct ui_out *func_uiout,
-			  volatile struct exception *exception,
+			  volatile struct gdb_exception *exception,
 			  return_mask mask)
 {
   struct catcher *new_catcher = XZALLOC (struct catcher);
@@ -174,7 +174,7 @@ exceptions_state_mc (enum catcher_action action)
 	{
 	case CATCH_ITER:
 	  {
-	    struct exception exception = *current_catcher->exception;
+	    struct gdb_exception exception = *current_catcher->exception;
 	    if (current_catcher->mask & RETURN_MASK (exception.reason))
 	      {
 		/* Exit normally if this catcher can handle this
@@ -212,7 +212,7 @@ exceptions_state_mc_action_iter_1 (void)
 /* Return EXCEPTION to the nearest containing catch_errors().  */
 
 NORETURN void
-throw_exception (struct exception exception)
+throw_exception (struct gdb_exception exception)
 {
   quit_flag = 0;
   immediate_quit = 0;
@@ -241,7 +241,7 @@ static char *last_message;
 NORETURN void
 deprecated_throw_reason (enum return_reason reason)
 {
-  struct exception exception;
+  struct gdb_exception exception;
   memset (&exception, 0, sizeof exception);
 
   exception.reason = reason;
@@ -289,7 +289,7 @@ print_flush (void)
 }
 
 static void
-print_exception (struct ui_file *file, struct exception e)
+print_exception (struct ui_file *file, struct gdb_exception e)
 {
   /* KLUGE: cagney/2005-01-13: Write the string out one line at a time
      as that way the MI's behavior is preserved.  */
@@ -324,7 +324,7 @@ print_exception (struct ui_file *file, struct exception e)
 }
 
 void
-exception_print (struct ui_file *file, struct exception e)
+exception_print (struct ui_file *file, struct gdb_exception e)
 {
   if (e.reason < 0 && e.message != NULL)
     {
@@ -334,7 +334,7 @@ exception_print (struct ui_file *file, struct exception e)
 }
 
 void
-exception_fprintf (struct ui_file *file, struct exception e,
+exception_fprintf (struct ui_file *file, struct gdb_exception e,
 		   const char *prefix, ...)
 {
   if (e.reason < 0 && e.message != NULL)
@@ -354,7 +354,7 @@ exception_fprintf (struct ui_file *file, struct exception e,
 
 void
 print_any_exception (struct ui_file *file, const char *prefix,
-		     struct exception e)
+		     struct gdb_exception e)
 {
   if (e.reason < 0 && e.message != NULL)
     {
@@ -377,7 +377,7 @@ NORETURN static void
 throw_it (enum return_reason reason, enum errors error, const char *fmt,
 	  va_list ap)
 {
-  struct exception e;
+  struct gdb_exception e;
   char *new_message;
 
   /* Save the message.  Create the new message before deleting the
@@ -457,13 +457,13 @@ catch_exceptions (struct ui_out *uiout,
   return catch_exceptions_with_msg (uiout, func, func_args, NULL, mask);
 }
 
-struct exception
+struct gdb_exception
 catch_exception (struct ui_out *uiout,
 		 catch_exception_ftype *func,
 		 void *func_args,
 		 return_mask mask)
 {
-  volatile struct exception exception;
+  volatile struct gdb_exception exception;
   TRY_CATCH (exception, mask)
     {
       (*func) (uiout, func_args);
@@ -478,7 +478,7 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 			   char **gdberrmsg,
 		  	   return_mask mask)
 {
-  volatile struct exception exception;
+  volatile struct gdb_exception exception;
   volatile int val = 0;
   TRY_CATCH (exception, mask)
     {
@@ -509,7 +509,7 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 	      return_mask mask)
 {
   volatile int val = 0;
-  volatile struct exception exception;
+  volatile struct gdb_exception exception;
   TRY_CATCH (exception, mask)
     {
       val = func (func_args);
@@ -524,7 +524,7 @@ int
 catch_command_errors (catch_command_errors_ftype * command,
 		      char *arg, int from_tty, return_mask mask)
 {
-  volatile struct exception e;
+  volatile struct gdb_exception e;
   TRY_CATCH (e, mask)
     {
       command (arg, from_tty);

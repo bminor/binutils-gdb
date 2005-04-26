@@ -1247,7 +1247,7 @@ thread_db_get_thread_local_address (ptid_t ptid,
       /* glibc doesn't provide the needed interface.  */
       if (!td_thr_tls_get_addr_p)
 	{
-	  struct exception e 
+	  struct gdb_exception e 
 	    = { RETURN_ERROR, TLS_NO_LIBRARY_SUPPORT_ERROR, 0 };
 
 	  throw_exception (e);
@@ -1272,7 +1272,7 @@ thread_db_get_thread_local_address (ptid_t ptid,
 	     address, we *could* try to build a non-lvalue value from
 	     the initialization image.  */
 
-	  struct exception e
+	  struct gdb_exception e
 	    = { RETURN_ERROR, TLS_NOT_ALLOCATED_YET_ERROR, 0 };
 
 	  throw_exception (e);
@@ -1282,7 +1282,7 @@ thread_db_get_thread_local_address (ptid_t ptid,
       /* Something else went wrong.  */
       if (err != TD_OK)
 	{
-	  struct exception e
+	  struct gdb_exception e
 	    = { RETURN_ERROR, TLS_GENERIC_ERROR, thread_db_err_str (err) };
 
 	  throw_exception (e);
@@ -1296,7 +1296,7 @@ thread_db_get_thread_local_address (ptid_t ptid,
     return target_beneath->to_get_thread_local_address (ptid, lm, offset);
   else
     {
-      struct exception e
+      struct gdb_exception e
 	= { RETURN_ERROR, TLS_GENERIC_ERROR,
 	    "TLS not supported on this target" };
 

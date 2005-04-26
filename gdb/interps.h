@@ -33,15 +33,16 @@ extern int interp_resume (struct interp *interp);
 extern int interp_suspend (struct interp *interp);
 extern int interp_prompt_p (struct interp *interp);
 extern int interp_exec_p (struct interp *interp);
-extern struct exception interp_exec (struct interp *interp,
-				     const char *command);
+extern struct gdb_exception interp_exec (struct interp *interp,
+					 const char *command);
 extern int interp_quiet_p (struct interp *interp);
 
 typedef void *(interp_init_ftype) (void);
 typedef int (interp_resume_ftype) (void *data);
 typedef int (interp_suspend_ftype) (void *data);
 typedef int (interp_prompt_p_ftype) (void *data);
-typedef struct exception (interp_exec_ftype) (void *data, const char *command);
+typedef struct gdb_exception (interp_exec_ftype) (void *data,
+						  const char *command);
 typedef void (interp_command_loop_ftype) (void *data);
 
 struct interp_procs

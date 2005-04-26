@@ -145,10 +145,10 @@ mi_interpreter_suspend (void *data)
   return 1;
 }
 
-static struct exception
+static struct gdb_exception
 mi_interpreter_exec (void *data, const char *command)
 {
-  static struct exception ok;
+  static struct gdb_exception ok;
   char *tmp = alloca (strlen (command) + 1);
   strcpy (tmp, command);
   mi_execute_command_wrapper (tmp);
@@ -238,7 +238,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
          and then set it back to 0 when we are done. */
       sync_execution = 1;
       {
-	struct exception e = interp_exec (interp_to_use, argv[i]);
+	struct gdb_exception e = interp_exec (interp_to_use, argv[i]);
 	if (e.reason < 0)
 	  {
 	    mi_error_message = xstrdup (e.message);

@@ -68,15 +68,15 @@ enum errors {
   TLS_NOT_ALLOCATED_YET_ERROR,
 
   /* Something else went wrong while attempting to find thread local
-     storage.  The ``struct exception'' message field provides more
-     detail.  */
+     storage.  The ``struct gdb_exception'' message field provides
+     more detail.  */
   TLS_GENERIC_ERROR,
 
   /* Add more errors here.  */
   NR_ERRORS
 };
 
-struct exception
+struct gdb_exception
 {
   enum return_reason reason;
   enum errors error;
@@ -84,7 +84,7 @@ struct exception
 };
 
 /* A pre-defined non-exception.  */
-extern const struct exception exception_none;
+extern const struct gdb_exception exception_none;
 
 /* Wrap set/long jmp so that it's more portable (internal to
    exceptions).  */
@@ -102,7 +102,7 @@ extern const struct exception exception_none;
 /* Functions to drive the exceptions state m/c (internal to
    exceptions).  */
 EXCEPTIONS_SIGJMP_BUF *exceptions_state_mc_init (struct ui_out *func_uiout,
-						 volatile struct exception *
+						 volatile struct gdb_exception *
 						 exception,
 						 return_mask mask);
 int exceptions_state_mc_action_iter (void);
@@ -119,7 +119,7 @@ int exceptions_state_mc_action_iter_1 (void);
 
    *INDENT-OFF*
 
-   volatile struct exception e;
+   volatile struct gdb_exception e;
    TRY_CATCH (e, RETURN_MASK_ERROR)
      {
      }
@@ -144,12 +144,12 @@ int exceptions_state_mc_action_iter_1 (void);
 
 /* If E is an exception, print it's error message on the specified
    stream. for _fprintf, prefix the message with PREFIX...  */
-extern void exception_print (struct ui_file *file, struct exception e);
-extern void exception_fprintf (struct ui_file *file, struct exception e,
+extern void exception_print (struct ui_file *file, struct gdb_exception e);
+extern void exception_fprintf (struct ui_file *file, struct gdb_exception e,
 			       const char *prefix,
 			       ...) ATTR_FORMAT (printf, 3, 4);
 
-/* Throw an exception (as described by "struct exception").  Will
+/* Throw an exception (as described by "struct gdb_exception").  Will
    execute a LONG JUMP to the inner most containing exception handler
    established using catch_exceptions() (or similar).
 
@@ -160,7 +160,7 @@ extern void exception_fprintf (struct ui_file *file, struct exception e,
    be a good thing or a dangerous thing.'' -- the Existential
    Wombat.  */
 
-extern NORETURN void throw_exception (struct exception exception) ATTR_NORETURN;
+extern NORETURN void throw_exception (struct gdb_exception exception) ATTR_NORETURN;
 extern NORETURN void throw_verror (enum errors, const char *fmt,
 				   va_list ap) ATTR_NORETURN;
 extern NORETURN void throw_vfatal (const char *fmt, va_list ap) ATTR_NORETURN;
@@ -212,10 +212,10 @@ extern int catch_exceptions_with_msg (struct ui_out *uiout,
 /* This function, in addition, suppresses the printing of the captured
    error message.  It's up to the client to print it.  */
 
-extern struct exception catch_exception (struct ui_out *uiout,
-					 catch_exception_ftype *func,
-					 void *func_args,
-					 return_mask mask);
+extern struct gdb_exception catch_exception (struct ui_out *uiout,
+					     catch_exception_ftype *func,
+					     void *func_args,
+					     return_mask mask);
 
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
    otherwize the result from CATCH_ERRORS_FTYPE is returned. It is

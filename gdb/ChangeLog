@@ -1,3 +1,22 @@
+2005-04-26  Andrew Cagney  <cagney@gnu.org>
+
+	Rename 'struct exception' to 'struct gdb_exception'.
+	* wrapper.c: Update.
+	* varobj.c: Update.
+	* tui/tui-interp.c: Update.
+	* remote.c: Update.
+	* mi/mi-main.c: Update.
+	* mi/mi-interp.c: Update.
+	* linux-thread-db.c: Update.
+	* interps.h: Update.
+	* interps.c: Update.
+	* exceptions.h: Update.
+	* exceptions.c: Update.
+	* dwarf2loc.c: Update.
+	* cli/cli-interp.c: Update.
+	* cli/cli-script.c: Update.
+	* breakpoint.c: Update.
+
 2005-04-25  Mark Mitchell  <mark@codesourcery.com>
 
 	* event-loop.c (gdb_select): Program defensively.

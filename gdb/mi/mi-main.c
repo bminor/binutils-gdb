@@ -1156,7 +1156,7 @@ mi_execute_command (char *cmd, int from_tty)
 
   if (command != NULL)
     {
-      struct exception result;
+      struct gdb_exception result;
       /* FIXME: cagney/1999-11-04: Can this use of catch_exceptions either
          be pushed even further down or even eliminated? */
       args.command = command;

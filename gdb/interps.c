@@ -305,7 +305,7 @@ interp_exec_p (struct interp *interp)
   return interp->procs->exec_proc != NULL;
 }
 
-struct exception
+struct gdb_exception
 interp_exec (struct interp *interp, const char *command_str)
 {
   if (interp->procs->exec_proc != NULL)
@@ -398,7 +398,7 @@ interpreter_exec_cmd (char *args, int from_tty)
 
   for (i = 1; i < nrules; i++)
     {
-      struct exception e = interp_exec (interp_to_use, prules[i]);
+      struct gdb_exception e = interp_exec (interp_to_use, prules[i]);
       if (e.reason < 0)
 	{
 	  interp_set (old_interp);

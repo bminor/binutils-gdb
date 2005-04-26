@@ -193,7 +193,7 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
     {
       ptid_t ptid = inferior_ptid;
       struct objfile *objfile = debaton->objfile;
-      volatile struct exception ex;
+      volatile struct gdb_exception ex;
 
       TRY_CATCH (ex, RETURN_MASK_ALL)
 	{
@@ -205,7 +205,7 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
 	  /* If it's 0, throw the appropriate exception.  */
 	  if (lm_addr == 0)
 	    {
-	      struct exception e
+	      struct gdb_exception e
 		= { RETURN_ERROR, TLS_LOAD_MODULE_NOT_FOUND_ERROR, 0 };
 
 	      throw_exception (e);

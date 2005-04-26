@@ -27,7 +27,7 @@ int
 gdb_parse_exp_1 (char **stringptr, struct block *block, int comma,
 		 struct expression **expression)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
@@ -42,7 +42,7 @@ gdb_parse_exp_1 (char **stringptr, struct block *block, int comma,
 int
 gdb_evaluate_expression (struct expression *exp, struct value **value)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
@@ -57,7 +57,7 @@ gdb_evaluate_expression (struct expression *exp, struct value **value)
 int
 gdb_value_fetch_lazy (struct value *val)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
@@ -72,7 +72,7 @@ gdb_value_fetch_lazy (struct value *val)
 int
 gdb_value_equal (struct value *val1, struct value *val2, int *result)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
@@ -88,7 +88,7 @@ int
 gdb_value_assign (struct value *val1, struct value *val2,
 		  struct value **result)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
@@ -104,7 +104,7 @@ int
 gdb_value_subscript (struct value *val1, struct value *val2,
 		     struct value **result)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
@@ -119,7 +119,7 @@ gdb_value_subscript (struct value *val1, struct value *val2,
 int
 gdb_value_ind (struct value *val, struct value **result)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
@@ -134,7 +134,7 @@ gdb_value_ind (struct value *val, struct value **result)
 int
 gdb_parse_and_eval_type (char *p, int length, struct type **type)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
@@ -151,7 +151,7 @@ gdb_value_struct_elt (struct ui_out *uiout, struct value **result,
 		      struct value **argp, struct value **args, char *name,
 		      int *static_memfuncp, char *err)
 {
-  volatile struct exception except;
+  volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {

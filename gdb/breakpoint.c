@@ -1088,8 +1088,8 @@ in which its expression is valid.\n"),
 	   || bpt->owner->type == bp_catch_vfork
 	   || bpt->owner->type == bp_catch_exec)
     {
-      struct exception e = catch_exception (uiout, insert_catchpoint,
-					    bpt->owner, RETURN_MASK_ERROR);
+      struct gdb_exception e = catch_exception (uiout, insert_catchpoint,
+						bpt->owner, RETURN_MASK_ERROR);
       exception_fprintf (gdb_stderr, e, "warning: inserting catchpoint %d: ",
 			 bpt->owner->number);
       if (e.reason < 0)
@@ -5105,7 +5105,7 @@ do_captured_parse_breakpoint (struct ui_out *ui, void *data)
 static int
 break_command_1 (char *arg, int flag, int from_tty, struct breakpoint *pending_bp)
 {
-  struct exception e;
+  struct gdb_exception e;
   int tempflag, hardwareflag;
   struct symtabs_and_lines sals;
   struct expression **cond = 0;

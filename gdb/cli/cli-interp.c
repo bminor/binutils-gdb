@@ -34,8 +34,8 @@ struct ui_out *cli_uiout;
 /* These are the ui_out and the interpreter for the console interpreter.  */
 
 /* Longjmp-safe wrapper for "execute_command".  */
-static struct exception safe_execute_command (struct ui_out *uiout,
-					      char *command, int from_tty);
+static struct gdb_exception safe_execute_command (struct ui_out *uiout,
+						  char *command, int from_tty);
 struct captured_execute_command_args
 {
   char *command;
@@ -92,11 +92,11 @@ cli_interpreter_display_prompt_p (void *data)
     return 1;
 }
 
-static struct exception
+static struct gdb_exception
 cli_interpreter_exec (void *data, const char *command_str)
 {
   struct ui_file *old_stream;
-  struct exception result;
+  struct gdb_exception result;
 
   /* FIXME: cagney/2003-02-01: Need to const char *propogate
      safe_execute_command.  */
@@ -122,10 +122,10 @@ do_captured_execute_command (struct ui_out *uiout, void *data)
   execute_command (args->command, args->from_tty);
 }
 
-static struct exception
+static struct gdb_exception
 safe_execute_command (struct ui_out *uiout, char *command, int from_tty)
 {
-  struct exception e;
+  struct gdb_exception e;
   struct captured_execute_command_args args;
   args.command = command;
   args.from_tty = from_tty;

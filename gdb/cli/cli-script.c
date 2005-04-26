@@ -1274,7 +1274,7 @@ script_from_file (FILE *stream, char *file)
   error_pre_print = "";
 
   {
-    struct exception e;
+    struct gdb_exception e;
     struct wrapped_read_command_file_args args;
     args.stream = stream;
     e = catch_exception (uiout, wrapped_read_command_file, &args,
