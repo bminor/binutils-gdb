@@ -1,3 +1,8 @@
+2005-04-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt (*-*-freebsd*): Set gdb_osabi to
+	GDB_OSABI_FREEBSD_ELF.  Partial fix for PR gdb/1922.
+
 2005-04-26  Andrew Cagney  <cagney@gnu.org>
 
 	* remote.c (remote_open_1): Move "ex"'s declaration to where it is
