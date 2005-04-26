@@ -1,3 +1,7 @@
+2005-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/all/assign.s: Make `x' and `y' global.
+
 2005-04-25  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/macros/badarg.s: Add tests for collisions between/among macro

@@ -3301,6 +3301,10 @@ pseudo_set (symbolS *symbolP)
 	{
 	  symbolS *s = exp.X_add_symbol;
 
+	  if (S_IS_COMMON (s))
+	    as_bad (_("`%s' can't be equated to common symbol '%s'"),
+		    S_GET_NAME (symbolP), S_GET_NAME (s));
+
 	  S_SET_SEGMENT (symbolP, seg);
 	  S_SET_VALUE (symbolP, exp.X_add_number + S_GET_VALUE (s));
 	  symbol_set_frag (symbolP, symbol_get_frag (s));

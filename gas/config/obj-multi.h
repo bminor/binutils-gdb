@@ -146,6 +146,8 @@
 
 #define EMIT_SECTION_SYMBOLS (this_format->emit_section_symbols)
 
+#define FAKE_LABEL_NAME (this_emulation->fake_label_name)
+
 #ifdef OBJ_MAYBE_ELF
 /* We need OBJ_SYMFIELD_TYPE so that symbol_get_obj is defined in symbol.c
    We also need various STAB defines for stab.c  */

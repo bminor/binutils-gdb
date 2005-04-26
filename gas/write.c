@@ -787,12 +787,20 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	if (fixp->fx_subsy != NULL)
 	  resolve_symbol_value (fixp->fx_subsy);
 
-	/* If this symbol is equated to an undefined symbol, convert
-           the fixup to being against that symbol.  */
+	/* If this symbol is equated to an undefined or common symbol,
+	   convert the fixup to being against that symbol.  */
 	if (symbol_equated_reloc_p (sym))
 	  {
+	    symbolS *new_sym
+	      = symbol_get_value_expression (sym)->X_add_symbol;
+	    const char *name = S_GET_NAME (sym);
+	    if (!S_IS_COMMON (new_sym)
+		&& strcmp (name, FAKE_LABEL_NAME)
+		&& (!S_IS_EXTERNAL (sym) || S_IS_LOCAL (sym)))
+	      as_bad (_("Local symbol `%s' can't be equated to undefined symbol `%s'"),
+		      name, S_GET_NAME (new_sym));
 	    fixp->fx_offset += symbol_get_value_expression (sym)->X_add_number;
-	    sym = symbol_get_value_expression (sym)->X_add_symbol;
+	    sym = new_sym;
 	    fixp->fx_addsy = sym;
 	  }
 
@@ -1927,9 +1935,15 @@ write_object_file (void)
              symbols.  */
 	  if (symbol_equated_reloc_p (symp))
 	    {
-	      if (S_IS_COMMON (symp))
-		as_bad (_("`%s' can't be equated to common symbol"),
-			S_GET_NAME (symp));
+	      const char *name = S_GET_NAME (symp);
+	      if (S_IS_COMMON (symp)
+		  && strcmp (name, FAKE_LABEL_NAME)
+		  && (!S_IS_EXTERNAL (symp) || S_IS_LOCAL (symp)))
+		{
+		  expressionS *e = symbol_get_value_expression (symp);
+		  as_bad (_("Local symbol `%s' can't be equated to common symbol `%s'"),
+			  name, S_GET_NAME (e->X_add_symbol));
+		}
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 	      continue;
 	    }

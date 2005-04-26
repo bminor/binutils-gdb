@@ -1,3 +1,15 @@
+2005-04-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-multi.h (FAKE_LABEL_NAME): Defined.
+
+	* read.c (pseudo_set): Disallow symbol set to common symbol.
+
+	PR 857
+	* write.c (write_object_file): Report common symbol name when
+	disallowing local symbol set to common symbol.
+	(adjust_reloc_syms): Disallow local symbol set to undefined
+	symbol.
+
 2005-04-25  Jan Beulich  <jbeulich@novell.com>
 
 	* macro.c (macro_expand_body): Replace locals indicator parameters
