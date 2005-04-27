@@ -1412,11 +1412,6 @@ _initialize_svr4_solib (void)
 {
   solib_svr4_data = gdbarch_data_register_pre_init (solib_svr4_init);
 
-  /* FIXME: Eliminate this ASAP.  */
-#ifdef SVR4_FETCH_LINK_MAP_OFFSETS
-  svr4_legacy_fetch_link_map_offsets = SVR4_FETCH_LINK_MAP_OFFSETS;
-#endif
-
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;
   svr4_so_ops.clear_solib = svr4_clear_solib;

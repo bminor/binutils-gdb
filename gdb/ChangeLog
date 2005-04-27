@@ -1,5 +1,9 @@
 2005-04-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib-svr4.c (_initialize_svr4_solib)
+	[SVR4_FETCH_LINK_MAP_OFFSETS]: Don't set non-existent variable
+	svr4_legacy_fetch_link_map_offsets.
+
 	* sh-tdep.c (sh_linux_svr4_fetch_link_map_offsets): Remove function.
 	(sh_gdbarch_init): Remove redundant prototype.
 	* sh-linux-tdep.c: New file.
