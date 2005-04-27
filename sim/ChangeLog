@@ -1,3 +1,7 @@
+2005-04-27  Paul Brook  <paul@codesourcery.com>
+
+	* common/Make-common.in: Add $(EXEEXT) to "run".
+
 2005-04-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/traps.c (cris_break_13_handler) <case TARGET_SYS_mmap2>:
