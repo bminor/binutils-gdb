@@ -1,3 +1,7 @@
+2005-04-27  Ben Elliston  <bje@au.ibm.com>
+
+	* link.cmd: Remove.
+
 2005-04-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-multi.h (FAKE_LABEL_NAME): Defined.
