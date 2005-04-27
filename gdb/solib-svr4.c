@@ -1,7 +1,7 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2003, 2004
+   2000, 2001, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -35,30 +35,20 @@
 #include "target.h"
 #include "inferior.h"
 
+#include "gdb_assert.h"
+
 #include "solist.h"
 #include "solib-svr4.h"
 
 #include "bfd-target.h"
 #include "exec.h"
 
-#ifndef SVR4_FETCH_LINK_MAP_OFFSETS
-#define SVR4_FETCH_LINK_MAP_OFFSETS() svr4_fetch_link_map_offsets ()
-#endif
-
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
-static struct link_map_offsets *legacy_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
 
-/* fetch_link_map_offsets_gdbarch_data is a handle used to obtain the
-   architecture specific link map offsets fetching function.  */
-
-static struct gdbarch_data *fetch_link_map_offsets_gdbarch_data;
-
-/* legacy_svr4_fetch_link_map_offsets_hook is a pointer to a function
-   which is used to fetch link map offsets.  It will only be set
-   by solib-legacy.c, if at all.  */
-
-struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook) (void) = 0;
+/* This hook is set to a function that provides native link map
+   offsets if the code in solib-legacy.c is linked in.  */
+struct link_map_offsets *(*legacy_svr4_fetch_link_map_offsets_hook) (void);
 
 /* Link map info to include in an allocated so_list entry */
 
@@ -138,7 +128,7 @@ static char *main_name_list[] =
 static CORE_ADDR
 LM_ADDR (struct so_list *so)
 {
-  struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
   return (CORE_ADDR) extract_signed_integer (so->lm_info->lm + lmo->l_addr_offset, 
 					     lmo->l_addr_size);
@@ -147,7 +137,7 @@ LM_ADDR (struct so_list *so)
 static CORE_ADDR
 LM_NEXT (struct so_list *so)
 {
-  struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
   /* Assume that the address is unsigned.  */
   return extract_unsigned_integer (so->lm_info->lm + lmo->l_next_offset,
@@ -157,7 +147,7 @@ LM_NEXT (struct so_list *so)
 static CORE_ADDR
 LM_NAME (struct so_list *so)
 {
-  struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
   /* Assume that the address is unsigned.  */
   return extract_unsigned_integer (so->lm_info->lm + lmo->l_name_offset,
@@ -167,7 +157,7 @@ LM_NAME (struct so_list *so)
 static int
 IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 {
-  struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
 
   /* Assume that the address is unsigned.  */
   return extract_unsigned_integer (so->lm_info->lm + lmo->l_prev_offset,
@@ -477,7 +467,7 @@ static CORE_ADDR
 first_link_map_member (void)
 {
   CORE_ADDR lm = 0;
-  struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   char *r_map_buf = xmalloc (lmo->r_map_size);
   struct cleanup *cleanups = make_cleanup (xfree, r_map_buf);
 
@@ -524,7 +514,7 @@ open_symbol_file_object (void *from_ttyp)
   char *filename;
   int errcode;
   int from_tty = *(int *)from_ttyp;
-  struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   char *l_name_buf = xmalloc (lmo->l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
 
@@ -612,7 +602,7 @@ svr4_current_sos (void)
   lm = first_link_map_member ();  
   while (lm)
     {
-      struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
+      struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
       struct so_list *new
 	= (struct so_list *) xmalloc (sizeof (struct so_list));
       struct cleanup *old_chain = make_cleanup (xfree, new);
@@ -694,7 +684,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
   while (lm)
     {
       /* Get info on the layout of the r_debug and link_map structures. */
-      struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
+      struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
       int errcode;
       char *buffer;
       struct lm_info objfile_lm_info;
@@ -1283,91 +1273,64 @@ svr4_relocate_section_addresses (struct so_list *so,
   sec->addr    = svr4_truncate_ptr (sec->addr    + LM_ADDR (so));
   sec->endaddr = svr4_truncate_ptr (sec->endaddr + LM_ADDR (so));
 }
+
 
+/* Architecture-specific operations.  */
 
-/* Fetch a link_map_offsets structure for native targets using struct
-   definitions from link.h.  See solib-legacy.c for the function
-   which does the actual work.
-   
-   Note: For non-native targets (i.e. cross-debugging situations),
-   a target specific fetch_link_map_offsets() function should be
-   defined and registered via set_solib_svr4_fetch_link_map_offsets().  */
+/* Per-architecture data key.  */
+static struct gdbarch_data *solib_svr4_data;
 
-static struct link_map_offsets *
-legacy_fetch_link_map_offsets (void)
+struct solib_svr4_ops
 {
-  if (legacy_svr4_fetch_link_map_offsets_hook)
-    return legacy_svr4_fetch_link_map_offsets_hook ();
-  else
-    {
-      internal_error (__FILE__, __LINE__,
-                      _("legacy_fetch_link_map_offsets called without legacy "
-		      "link_map support enabled."));
-      return 0;
-    }
+  /* Return a description of the layout of `struct link_map'.  */
+  struct link_map_offsets *(*fetch_link_map_offsets)(void);
+};
+
+/* Return a default for the architecture-specific operations.  */
+
+static void *
+solib_svr4_init (struct obstack *obstack)
+{
+  struct solib_svr4_ops *ops;
+
+  ops = OBSTACK_ZALLOC (obstack, struct solib_svr4_ops);
+  ops->fetch_link_map_offsets = legacy_svr4_fetch_link_map_offsets_hook;
+  return ops;
 }
 
-/* Fetch a link_map_offsets structure using the method registered in the
-   architecture vector.  */
-
-static struct link_map_offsets *
-svr4_fetch_link_map_offsets (void)
-{
-  struct link_map_offsets *(*flmo)(void) =
-    gdbarch_data (current_gdbarch, fetch_link_map_offsets_gdbarch_data);
-
-  if (flmo == NULL)
-    {
-      internal_error (__FILE__, __LINE__, 
-                      _("svr4_fetch_link_map_offsets: fetch_link_map_offsets "
-		      "method not defined for this architecture."));
-      return 0;
-    }
-  else
-    return (flmo ());
-}
-
-/* Return 1 if a link map offset fetcher has been defined, 0 otherwise.  */
-static int
-svr4_have_link_map_offsets (void)
-{
-  struct link_map_offsets *(*flmo)(void) =
-    gdbarch_data (current_gdbarch, fetch_link_map_offsets_gdbarch_data);
-  if (flmo == NULL
-      || (flmo == legacy_fetch_link_map_offsets 
-          && legacy_svr4_fetch_link_map_offsets_hook == NULL))
-    return 0;
-  else
-    return 1;
-}
-
-/* set_solib_svr4_fetch_link_map_offsets() is intended to be called by
-   a <arch>_gdbarch_init() function.  It is used to establish an
-   architecture specific link_map_offsets fetcher for the architecture
-   being defined.  */
+/* Set the architecture-specific `struct link_map_offsets' fetcher for
+   GDBARCH to FLMO.  */
 
 void
 set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
                                        struct link_map_offsets *(*flmo) (void))
 {
-  deprecated_set_gdbarch_data (gdbarch, fetch_link_map_offsets_gdbarch_data, flmo);
+  struct solib_svr4_ops *ops = gdbarch_data (gdbarch, solib_svr4_data);
+
+  ops->fetch_link_map_offsets = flmo;
 }
 
-/* Initialize the architecture-specific link_map_offsets fetcher.
-   This is called after <arch>_gdbarch_init() has set up its `struct
-   gdbarch' for the new architecture, and is only called if the
-   link_map_offsets fetcher isn't already initialized (which is
-   usually done by calling set_solib_svr4_fetch_link_map_offsets()
-   above in <arch>_gdbarch_init()).  Therefore we attempt to provide a
-   reasonable alternative (for native targets anyway) if the
-   <arch>_gdbarch_init() fails to call
-   set_solib_svr4_fetch_link_map_offsets().  */
+/* Fetch a link_map_offsets structure using the architecture-specific
+   `struct link_map_offsets' fetcher.  */
 
-static void *
-init_fetch_link_map_offsets (struct gdbarch *gdbarch)
+static struct link_map_offsets *
+svr4_fetch_link_map_offsets (void)
 {
-  return legacy_fetch_link_map_offsets;
+  struct solib_svr4_ops *ops = gdbarch_data (current_gdbarch, solib_svr4_data);
+
+  gdb_assert (ops->fetch_link_map_offsets);
+  return ops->fetch_link_map_offsets ();
 }
+
+/* Return 1 if a link map offset fetcher has been defined, 0 otherwise.  */
+
+static int
+svr4_have_link_map_offsets (void)
+{
+  struct solib_svr4_ops *ops = gdbarch_data (current_gdbarch, solib_svr4_data);
+  return (ops->fetch_link_map_offsets != NULL);
+}
+
 
 /* Most OS'es that have SVR4-style ELF dynamic libraries define a
    `struct r_debug' and a `struct link_map' that are binary compatible
@@ -1447,8 +1410,12 @@ extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
 void
 _initialize_svr4_solib (void)
 {
-  fetch_link_map_offsets_gdbarch_data =
-    gdbarch_data_register_post_init (init_fetch_link_map_offsets);
+  solib_svr4_data = gdbarch_data_register_pre_init (solib_svr4_init);
+
+  /* FIXME: Eliminate this ASAP.  */
+#ifdef SVR4_FETCH_LINK_MAP_OFFSETS
+  svr4_legacy_fetch_link_map_offsets = SVR4_FETCH_LINK_MAP_OFFSETS;
+#endif
 
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;

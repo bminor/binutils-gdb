@@ -1,3 +1,27 @@
+2005-04-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib-svr4.c: Update copyright year.  Include "gdb_assert.h".
+	(SVR4_FETCH_LINK_MAP_OFFSETS): Don't define if not already
+	defined.
+	(legacy_fetch_link_map_offsets): Remove prototype.
+	(fetch_link_map_offsets_gdbarch_data): Remove.
+	(LM_ADDR, LM_NEXT, IGNORE_FIRST_LINK_MAP_ENTRY)
+	(first_link_map_member, open_symbol_file_object, svr4_current_sos)
+	(svr4_fetch_objfile_link_map): Call svr4_fetch_link_map_offsets
+	instead of SVR4_FETCH_LINK_MAP_OFFSETS.
+	(solib_svr4_data): New variable.
+	(struct solib_svr4_ops): New.
+	(solib_svr4_init): New fynction.
+	(legacy_fetch_link_map_offsets, init_fetch_link_map_offsets):
+	Remove functions.
+	(svr4_fetch_link_map_offsets, svr4_have_link_map_offsets): Rewrite
+	using the new `struct solib_svr4_ops'.
+	(_initialize_svr4_solib): Replace registration of per-architecture
+	data.  Add temporary hack to set
+	svr4_legacy_fetch_link_map_offsets if SVR4_FETCH_LINK_MAP_OFFSETS
+	is set.
+	* Makefile.in (solib-svr4.o): Update dependencies.
+
 2005-04-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.tgt (*-*-freebsd*): Set gdb_osabi to
