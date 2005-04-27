@@ -7019,7 +7019,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			  && finfo->sections[r_symndx] == NULL))
 		    {
 		      h = sym_hashes[r_symndx - extsymoff];
-		      
+
 		      /* Badly formatted input files can contain relocs that
 			 reference non-existant symbols.  Check here so that
 			 we do not seg fault.  */
