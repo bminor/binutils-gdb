@@ -1,3 +1,12 @@
+2005-04-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ChangeLog: Correct some 2003-01-13 dates.
+	* gdb.base/sigbpt.exp, gdb.base/signull.exp, gdb.cp/bs15503.exp,
+	gdb.cp/exception.exp, gdb.cp/userdef.cc, gdb.cp/userdef.exp,
+	gdb.mi/mi-console.exp, gdb.mi/mi2-console.exp,
+	gdb.trace/collection.exp, gdb.trace/passc-dyn.exp,
+	gdb.trace/tfind.exp: Update copyright years.
+
 2005-04-14  Paul Gilliam  <pgilliam@us.ibm.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -3654,12 +3663,12 @@
 	(ptype &*"foo").
 	* gdb.c++/local.exp: Enable setup_kfail for gdb/482.
 
-2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.mi/mi-console.exp: Remove extra "(known bug)".
 	* gdb.mi/mi1-console.exp: Likewise.
 
-2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.mi/mi-console.exp: Add KFAIL for "Hello message (known bug)".
 	* gdb.mi/mi1-console.exp: Likewise.
