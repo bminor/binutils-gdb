@@ -4014,7 +4014,9 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		  (*_bfd_error_handler)
 		    (_("%B: non-pic code with imm relocation against dynamic symbol `%s'"),
 		     input_bfd,
-		     h->root.root.string);
+		     h ? h->root.root.string
+		       : bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+					   sym_sec));
 		  ret_val = FALSE;
 		  continue;
 
@@ -4078,7 +4080,10 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	      (*_bfd_error_handler)
 		(_("%B: @gprel relocation against dynamic symbol %s"),
-		 input_bfd, h->root.root.string);
+		 input_bfd,
+		 h ? h->root.root.string
+		   : bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+				       sym_sec));
 	      ret_val = FALSE;
 	      continue;
 	    }
@@ -4279,7 +4284,12 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		msg = _("%B: speculation fixup to dynamic symbol %s");
 	      else
 		msg = _("%B: @pcrel relocation against dynamic symbol %s");
-	      (*_bfd_error_handler) (msg, input_bfd, h->root.root.string);
+	      (*_bfd_error_handler) (msg, input_bfd,
+				     h ? h->root.root.string
+				       : bfd_elf_sym_name (input_bfd,
+							   symtab_hdr,
+							   sym,
+							   sym_sec));
 	      ret_val = FALSE;
 	      continue;
 	    }
@@ -4476,15 +4486,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (h)
 	      name = h->root.root.string;
 	    else
-	      {
-		name = bfd_elf_string_from_elf_section (input_bfd,
-							symtab_hdr->sh_link,
-							sym->st_name);
-		if (name == NULL)
-		  return FALSE;
-		if (*name == '\0')
-		  name = bfd_section_name (input_bfd, input_section);
-	      }
+	      name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+				       sym_sec);
 	    if (!(*info->callbacks->warning) (info, _("unsupported reloc"),
 					      name, input_bfd,
 					      input_section, rel->r_offset))
@@ -4503,15 +4506,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (h)
 	      name = h->root.root.string;
 	    else
-	      {
-		name = bfd_elf_string_from_elf_section (input_bfd,
-							symtab_hdr->sh_link,
-							sym->st_name);
-		if (name == NULL)
-		  return FALSE;
-		if (*name == '\0')
-		  name = bfd_section_name (input_bfd, sym_sec);
-	      }
+	      name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym,
+				       sym_sec);
 
 	    switch (r_type)
 	      {

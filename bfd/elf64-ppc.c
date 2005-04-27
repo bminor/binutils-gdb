@@ -6186,7 +6186,8 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	      if (h != NULL)
 		sym_name = h->root.root.string;
 	      else
-		sym_name = bfd_elf_sym_name (ibfd, symtab_hdr, sym);
+		sym_name = bfd_elf_sym_name (ibfd, symtab_hdr, sym,
+					     sym_sec);
 
 	      (*_bfd_error_handler)
 		(_("%B: undefined sym `%s' in .opd section"),
@@ -7221,7 +7222,8 @@ ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		      {
 			(*_bfd_error_handler)
 			  (_("%s defined in removed toc entry"),
-			   bfd_elf_sym_name (ibfd, symtab_hdr, sym));
+			   bfd_elf_sym_name (ibfd, symtab_hdr, sym,
+					     NULL));
 			sym->st_value = 0;
 			sym->st_shndx = SHN_ABS;
 		      }
@@ -9473,7 +9475,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  sym_name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym);
+	  sym_name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, sec);
 	  sym_type = ELF64_ST_TYPE (sym->st_info);
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	  opd_adjust = get_opd_info (sec);

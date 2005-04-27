@@ -1,3 +1,19 @@
+2005-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (bfd_elf_sym_name): Also take "asection *".
+
+	* elf.c (bfd_elf_sym_name): Updated.
+	(group_signature): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_edit_opd): Likewise.
+	(ppc64_elf_edit_toc): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	* elfcode.h (elf_slurp_symbol_table): Likewise.
+	* elflink.c (elf_link_input_bfd): Likewise.
+
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Call
+	bfd_elf_sym_name to get local symbol name when reporting errors.
+
 2005-04-27  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_link_input_bfd): Handle the case where a badly

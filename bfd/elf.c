@@ -407,10 +407,13 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 const char *
 bfd_elf_sym_name (bfd *abfd,
 		  Elf_Internal_Shdr *symtab_hdr,
-		  Elf_Internal_Sym *isym)
+		  Elf_Internal_Sym *isym,
+		  asection *sym_sec)
 {
+  const char *name;
   unsigned int iname = isym->st_name;
   unsigned int shindex = symtab_hdr->sh_link;
+
   if (iname == 0 && ELF_ST_TYPE (isym->st_info) == STT_SECTION
       /* Check for a bogus st_shndx to avoid crashing.  */
       && isym->st_shndx < elf_numsections (abfd)
@@ -420,7 +423,13 @@ bfd_elf_sym_name (bfd *abfd,
       shindex = elf_elfheader (abfd)->e_shstrndx;
     }
 
-  return bfd_elf_string_from_elf_section (abfd, shindex, iname);
+  name = bfd_elf_string_from_elf_section (abfd, shindex, iname);
+  if (name == NULL)
+    name = "(null)";
+  else if (sym_sec && *name == '\0')
+    name = bfd_section_name (abfd, sym_sec);
+
+  return name;
 }
 
 /* Elf_Internal_Shdr->contents is an array of these for SHT_GROUP
@@ -453,7 +462,7 @@ group_signature (bfd *abfd, Elf_Internal_Shdr *ghdr)
 			    &isym, esym, &eshndx) == NULL)
     return NULL;
 
-  return bfd_elf_sym_name (abfd, hdr, &isym);
+  return bfd_elf_sym_name (abfd, hdr, &isym, NULL);
 }
 
 /* Set next_in_group list pointer, and group name for NEWSECT.  */

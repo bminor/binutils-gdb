@@ -7051,7 +7051,9 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		    {
 		      Elf_Internal_Sym *sym = isymbuf + r_symndx;
 		      ps = &finfo->sections[r_symndx];
-		      sym_name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym);
+		      sym_name = bfd_elf_sym_name (input_bfd,
+						   symtab_hdr,
+						   sym, *ps);
 		    }
 
 		  /* Complain if the definition comes from a
