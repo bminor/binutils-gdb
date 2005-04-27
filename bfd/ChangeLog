@@ -1,3 +1,9 @@
+2005-04-27  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_input_bfd): Handle the case where a badly
+	formatted input file results in a reloc which has no associated
+	global symbol.
+
 2005-04-26  Jerome Guitton  <guitton@gnat.com>
 
 	* bfd.m4 (BFD_NEED_DECLARATION): Restore.
