@@ -1,3 +1,8 @@
+2005-04-27  Ben Elliston  <bje@au.ibm.com>
+
+	* syslex.l: Adjust top-of-file comment: this file is part of GNU
+	binutils, not GNU ld.
+
 2005-04-25  Nick Clifton  <nickc@redhat.com>
 
 	PR872
