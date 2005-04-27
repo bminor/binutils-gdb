@@ -1,5 +1,15 @@
 2005-04-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* sh-tdep.c (sh_linux_svr4_fetch_link_map_offsets): Remove function.
+	(sh_gdbarch_init): Remove redundant prototype.
+	* sh-linux-tdep.c: New file.
+	* config/sh/tm-linux.h (sh_linux_svr4_fetch_link_map_offsets):
+	Remove prototype.
+	(SVR4_FETCH_LINK_MAP_OFFSETS): Remove define.
+	* config/sh/linux.mt (TDEPFILES): Add sh64-tdep.o, remove
+	solib-legacy.o.
+	* Makefile.in (sh-linux-tdep.o): New.
+
 	* solib-svr4.c: Update copyright year.  Include "gdb_assert.h".
 	(SVR4_FETCH_LINK_MAP_OFFSETS): Don't define if not already
 	defined.

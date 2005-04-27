@@ -1,7 +1,6 @@
-/* Target-specific definitions for GNU/Linux running on a Renesas
-   Super-H.
+/* Target-dependent code for GNU/Linux Super-H.
 
-   Copyright 2000, 2002 Free Software Foundation, Inc.
+   Copyright 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,9 +19,24 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Pull in GNU/Linux generic defs.  */
-#include "config/tm-linux.h"
+#include "defs.h"
+#include "osabi.h"
 
-/* Pull in sh-target defs */
-#include "sh/tm-sh.h"
+#include "solib-svr4.h"
 
+static void
+sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  /* GNU/Linux uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_sh_linux_tdep (void);
+
+void
+_initialize_sh_linux_tdep (void)
+{
+  gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_LINUX, sh_linux_init_abi);
+}
