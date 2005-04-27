@@ -1,4 +1,4 @@
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
 # Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -229,6 +229,8 @@ send_gdb "break printf\n"
 gdb_expect {
   -re  "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex.*$gdb_prompt$" \
 	    { pass "breakpoint printf" }
+  -re  "\r\n\032\032post-prompt\r\nwarning: Breakpoint address adjusted from $hex to $hex.\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex.*$gdb_prompt$" \
+	    { pass "breakpoint printf"}
   -re ".*$gdb_prompt$"     { fail "break printf" }
   timeout	            { fail "break printf (timeout)" }
 }
@@ -240,6 +242,9 @@ send_gdb "continue\n"
 gdb_expect {
   -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
 	  { pass "continue to printf" }
+  -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\nwarning: Breakpoint 3 address previously adjusted from $hex to $hex.\r\n\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*.*\032\032frame-function-name\r\n.printf\r\n\032\032frame-args\r\n.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
+	  { pass "continue to printf" }
+
   -re ".*$gdb_prompt$"     { fail "continue to printf" }
   timeout	            { fail "continue to printf (timeout)" }
 }
