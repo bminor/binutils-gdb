@@ -1,3 +1,8 @@
+2005-04-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Backtrace): Describe backtraces with arguments that
+	were optimized away.
+
 2005-04-22  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Remote configuration): Document "set/show

@@ -4170,6 +4170,35 @@ The display for frame zero does not begin with a program counter
 value, indicating that your program has stopped at the beginning of the
 code for line @code{993} of @code{builtin.c}.
 
+@cindex value optimized out, in backtrace
+@cindex function call arguments, optimized out
+If your program was compiled with optimizations, some compilers will
+optimize away arguments passed to functions if those arguments are
+never used after the call.  Such optimizations generate code that
+passes arguments through registers, but doesn't store those arguments
+in the stack frame.  @value{GDBN} has no way of displaying such
+arguments in stack frames other than the innermost one.  Here's what
+such a backtrace might look like:
+
+@smallexample
+@group
+#0  m4_traceon (obs=0x24eb0, argc=1, argv=0x2b8c8)
+    at builtin.c:993
+#1  0x6e38 in expand_macro (sym=<value optimized out>) at macro.c:242
+#2  0x6840 in expand_token (obs=0x0, t=<value optimized out>, td=0xf7fffb08)
+    at macro.c:71
+(More stack frames follow...)
+@end group
+@end smallexample
+
+@noindent
+The values of arguments that were not saved in their stack frames are
+shown as @samp{<value optimized out>}.
+
+If you need to display the values of such optimized-out arguments,
+either deduce that from other variables whose values depend on the one
+you are interested in, or recompile without optimizations.
+
 @cindex backtrace beyond @code{main} function
 @cindex program entry point
 @cindex startup code, and backtrace
