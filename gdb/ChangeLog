@@ -1,3 +1,9 @@
+2005-04-28  Eli Zaretskii  <eliz@gnu.org>
+
+	* cli/cli-cmds.c (edit_command): If symtab->fullname is not yet
+	set, use symtab_to_fullname, instead of trying to do its job.  Use
+	xstrprintf instead of malloc and sprintf.
+
 2005-04-28  Kevin Buettner  <kevinb@redhat.com>
 
 	* remote.c (init_remote_state): Eliminate use of

@@ -554,7 +554,7 @@ edit_command (char *arg, int from_tty)
   int cmdlen, log10;
   unsigned m;
   char *editor;
-  char *p;
+  char *p, *fn;
 
   /* Pull in the current default source line if necessary */
   if (arg == 0)
@@ -627,25 +627,26 @@ edit_command (char *arg, int from_tty)
 
   if ((editor = (char *) getenv ("EDITOR")) == NULL)
       editor = "/bin/ex";
-  
+
   /* Approximate base-10 log of line to 1 unit for digit count */
   for(log10=32, m=0x80000000; !(sal.line & m) && log10>0; log10--, m=m>>1);
   log10 = 1 + (int)((log10 + (0 == ((m-1) & sal.line)))/3.32192809);
 
-  cmdlen = strlen(editor) + 1
-         + (NULL == sal.symtab->dirname ? 0 : strlen(sal.symtab->dirname) + 1)
-	 + (NULL == sal.symtab->filename? 0 : strlen(sal.symtab->filename)+ 1)
-	 + log10 + 2;
-  
-  p = xmalloc(cmdlen);
-  sprintf(p,"%s +%d %s%s",editor,sal.line,
-     (NULL == sal.symtab->dirname ? "./" :
-        (NULL != sal.symtab->filename && *(sal.symtab->filename) != '/') ?
-	   sal.symtab->dirname : ""),
-     (NULL == sal.symtab->filename ? "unknown" : sal.symtab->filename)
-  );
-  shell_escape(p, from_tty);
+  /* If we don't already know the full absolute file name of the
+     source file, find it now.  */
+  if (!sal.symtab->fullname)
+    {
+      fn = symtab_to_fullname (sal.symtab);
+      if (!fn)
+	fn = "unknown";
+    }
+  else
+    fn = sal.symtab->fullname;
 
+  /* Quote the file name, in case it has whitespace or other special
+     characters.  */
+  p = xstrprintf ("%s +%d \"%s\"", editor, sal.line, fn);
+  shell_escape(p, from_tty);
   xfree(p);
 }
 
