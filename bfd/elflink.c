@@ -9808,9 +9808,11 @@ _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
 			 bfd_vma val)
 {
   struct elf_link_hash_entry *h;
+
   h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE,
 			    FALSE);
-  if (h != NULL && h->root.type == bfd_link_hash_undefined)
+  if (h != NULL && (h->root.type == bfd_link_hash_undefined
+	            || h->root.type == bfd_link_hash_undefweak))
     {
       h->root.type = bfd_link_hash_defined;
       h->root.u.def.section = bfd_abs_section_ptr;
