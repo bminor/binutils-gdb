@@ -1,3 +1,8 @@
+2005-04-28  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (md_assemble): Fix buffer overrun in operand[]
+	array.
+
 2005-04-20  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mips.c (macro): Use sprintf_vma to convert a > 32 bit
