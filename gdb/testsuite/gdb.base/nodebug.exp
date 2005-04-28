@@ -1,4 +1,4 @@
-# Copyright 1997, 1999, 2004 Free Software Foundation, Inc.
+# Copyright 1997, 1999, 2004, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,17 +27,27 @@ set prms_id 0
 set bug_id 0
 
 set testfile nodebug
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ""] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
+set srcfile $srcdir/$subdir/$testfile.c
+set binfile $objdir/$subdir/$testfile
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
 if [get_compiler_info ${binfile}] {
     return -1;
 }
+
+if [test_compiler_info "xlc-*"] {
+    # By default, IBM'x xlc compiler doesn't add static variables into the symtab.
+    # Use "-qstatsym" to do so. 
+    set exec_opts additional_flags=-qstatsym
+} else {
+    set exec_opts ""
+}
+
+if  { [gdb_compile $srcfile $binfile executable $exec_opts] != "" } {
+    untested "Couldn't compile $srcfile."
+    return -1
+}
+
+# Start with a fresh gdb.
 
 gdb_exit
 gdb_start
@@ -68,20 +78,20 @@ if [runto inner] then {
     # Irix6 gcc emits no debug info at all for static functions and
     # variables, so all tests involving statics fail.
     
-    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }
+    if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }
     gdb_test "p top" \
 	"\{(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))\} \[0-9a-fx]* <top(\\(int\\)|)>"
-    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }
+    if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix5*" "mips-sgi-irix6*" }
     gdb_test "whatis top" \
 	"(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))"
-    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix6*" }
     gdb_test "ptype top" "(short|int) \\((|void|int|<non-float parameter>|<non-float parameter>, <non-float parameter>)\\)"
     
-    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
+    if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix5*" }
     setup_xfail "mips-sgi-irix6*"
     gdb_test "p middle" \
 	"\{(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))\} \[0-9a-fx]* <middle(\\(int\\)|)>"
-    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix5*" }
+    if {![test_compiler_info "gcc-*"]} then { setup_xfail "mips-sgi-irix5*" }
     setup_xfail "mips-sgi-irix6*"
     gdb_test "whatis middle" \
 	"(<(text variable|function), no debug info>|short \\(int\\)|short \\(\\))"
@@ -98,41 +108,70 @@ if [runto inner] then {
     # doesn't know the variables exist at all.
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
-    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if [test_compiler_info "gcc-*"] {
+        setup_xfail "mips-sgi-irix6*"
+    } else {
+        setup_xfail "hppa*-*-hpux*"
+    }
+
     gdb_test "p datalocal" "= 4"
+
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
-    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if [test_compiler_info "gcc-*"] {
+        setup_xfail "mips-sgi-irix6*"
+    } else {
+        setup_xfail "hppa*-*-hpux*"
+    }
+
     gdb_test "whatis datalocal" "<(data variable|variable), no debug info>"
+
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
-    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if [test_compiler_info "gcc-*"] {
+        setup_xfail "mips-sgi-irix6*"
+    } else {
+        setup_xfail "hppa*-*-hpux*"
+    }
+
     gdb_test "ptype datalocal" "<(data variable|variable), no debug info>"
-    
     gdb_test "p bssglobal" "= 0"
     gdb_test "whatis bssglobal" "<(data variable|variable), no debug info>|int"
     gdb_test "ptype bssglobal" "<(data variable|variable), no debug info>|int"
     
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
-    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if [test_compiler_info "gcc-*"] {
+        setup_xfail "mips-sgi-irix6*"
+    } else {
+        setup_xfail "hppa*-*-hpux*"
+    }
+
     gdb_test "p bsslocal" "= 0"
+
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
-    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if [test_compiler_info "gcc-*"] {
+        setup_xfail "mips-sgi-irix6*"
+    } else {
+        setup_xfail "hppa*-*-hpux*"
+    }
+
     gdb_test "whatis bsslocal" "<(data variable|variable), no debug info>"
+
     setup_xfail "rs6000*-*-aix*"
     setup_xfail "powerpc*-*-aix*"
-    if {!$gcc_compiled} then { setup_xfail "hppa*-*-hpux*" }
-    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if [test_compiler_info "gcc-*"] {
+        setup_xfail "mips-sgi-irix6*"
+    } else {
+        setup_xfail "hppa*-*-hpux*"
+    }
     gdb_test "ptype bsslocal" "<(data variable|variable), no debug info>"
     
-    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if [test_compiler_info "gcc-*"] {
+        setup_xfail "mips-sgi-irix6*" 
+    }
+
     gdb_test "backtrace 10" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*" \
 	"backtrace from inner in nodebug.exp"
     # Or if that doesn't work, at least hope for the external symbols
@@ -143,7 +182,9 @@ if [runto inner] then {
     
     # This test is not as obscure as it might look.  `p getenv ("TERM")'
     # is a real-world example, at least on many systems.
-    if {!$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if { ! [test_compiler_info "gcc-*"]} {
+        setup_xfail "mips-sgi-irix6*" 
+    }
     if [target_info exists gdb,cannot_call_functions] {
 	setup_xfail "*-*-*" 2416
 	fail "p/c array_index(\"abcdef\",2)"
@@ -171,7 +212,9 @@ if [runto inner] then {
     
     # Now, try that we can give names of file-local symbols which happen
     # to be unique, and have it still work
-    if {$gcc_compiled} then { setup_xfail "mips-sgi-irix6*" }
+    if [test_compiler_info "gcc-*"] {
+        setup_xfail "mips-sgi-irix6*"
+    }
     if [runto middle] then {
 	gdb_test "backtrace 10" "#0.*middle.*#1.*top.*#2.*main.*" \
 	    "backtrace from middle in nodebug.exp"

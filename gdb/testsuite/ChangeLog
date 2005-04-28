@@ -1,3 +1,8 @@
+2005-04-28  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * gdb.base/nodebug.exp: Allow for compiling by IBM's xlc compiler,
+        use test_compiler_info instead of gcc_compiled, and update copyright.
+
 2005-04-27  Paul Gilliam  <pgilliam@us.ibm.com>
 
         * gdb.base/annota1.exp : Deal with messages caused by breakpoints in
@@ -13349,6 +13354,6 @@ Sun Feb 21 10:55:55 1993  Mike Werner  (mtw@poseidon.cygnus.com)
 ;; End:
 
     Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-    2003, 2004 Free Software Foundation, Inc.
+    2003, 2004, 2005 Free Software Foundation, Inc.
   Copying and distribution of this file, with or without modification,
   are permitted provided the copyright notice and this notice are preserved.
