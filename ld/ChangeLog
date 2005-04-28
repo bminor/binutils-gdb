@@ -1,3 +1,9 @@
+2005-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_bound_symbols):
+	Use the first SEC_ALLOC section which isn't SEC_READONLY or the
+	last SEC_ALLOC section if such a section doesn't exist.
+
 2005-04-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.host: Add *-*-openbsd support.
