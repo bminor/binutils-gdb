@@ -1,3 +1,8 @@
+2005-04-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote.c (init_remote_state): Eliminate use of
+	deprecated_register_bytes().
+
 2005-04-28  Andrew Cagney  <cagney@gnu.org>
 
 	* valops.c (check_field): Make buffer a bfd_byte.

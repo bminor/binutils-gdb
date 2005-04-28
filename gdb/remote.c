@@ -248,10 +248,7 @@ init_remote_state (struct gdbarch *gdbarch)
   int regnum;
   struct remote_state *rs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_state);
 
-  if (deprecated_register_bytes () != 0)
-    rs->sizeof_g_packet = deprecated_register_bytes ();
-  else
-    rs->sizeof_g_packet = 0;
+  rs->sizeof_g_packet = 0;
 
   /* Assume a 1:1 regnum<->pnum table.  */
   rs->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS + NUM_PSEUDO_REGS,
@@ -266,8 +263,8 @@ init_remote_state (struct gdbarch *gdbarch)
       /* ...name = REGISTER_NAME (regnum); */
 
       /* Compute packet size by accumulating the size of all registers.  */
-      if (deprecated_register_bytes () == 0)
-        rs->sizeof_g_packet += register_size (current_gdbarch, regnum);
+      if (regnum < NUM_REGS)
+	rs->sizeof_g_packet += register_size (current_gdbarch, regnum);
     }
 
   /* Default maximum number of characters in a packet body. Many
