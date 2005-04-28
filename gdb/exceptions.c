@@ -282,8 +282,11 @@ print_flush (void)
 
   /* 3.  The system-level buffer.  */
   gdb_stdout_serial = serial_fdopen (1);
-  serial_drain_output (gdb_stdout_serial);
-  serial_un_fdopen (gdb_stdout_serial);
+  if (gdb_stdout_serial)
+    {
+      serial_drain_output (gdb_stdout_serial);
+      serial_un_fdopen (gdb_stdout_serial);
+    }
 
   annotate_error_begin ();
 }
