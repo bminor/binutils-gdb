@@ -46,10 +46,9 @@
 #endif
 
 static enum section_type sectype;
+static lang_memory_region_type *region;
 
-lang_memory_region_type *region;
-
-bfd_boolean ldgram_want_filename = TRUE;
+static bfd_boolean ldgram_want_filename = TRUE;
 FILE *saved_script_handle = NULL;
 bfd_boolean force_make_executable = FALSE;
 

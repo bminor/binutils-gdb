@@ -44,14 +44,14 @@ struct section_name_struct {
   int ok_to_load;
 };
 
-unsigned int symbol_truncate = 10000;
-struct section_name_struct *order;
-struct section_name_struct *only_load;
-struct section_name_struct *address;
-struct section_name_struct *alias;
+static unsigned int symbol_truncate = 10000;
+static struct section_name_struct *order;
+static struct section_name_struct *only_load;
+static struct section_name_struct *address;
+static struct section_name_struct *alias;
 
-struct section_name_struct *alignment;
-struct section_name_struct *subalignment;
+static struct section_name_struct *alignment;
+static struct section_name_struct *subalignment;
 
 static struct section_name_struct **
 lookup (const char *name, struct section_name_struct **list)

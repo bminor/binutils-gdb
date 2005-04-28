@@ -54,8 +54,6 @@ extern void ldfile_open_file
   (struct lang_input_statement_struct *);
 extern bfd_boolean ldfile_try_open_bfd
   (const char *, struct lang_input_statement_struct *);
-extern FILE *ldfile_find_command_file
-  (const char *name, const char *extend);
 extern void ldfile_set_output_arch
   (const char *, enum bfd_architecture);
 extern bfd_boolean ldfile_open_file_search

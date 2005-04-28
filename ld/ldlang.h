@@ -432,8 +432,6 @@ struct orphan_save {
   lang_output_section_statement_type **os_tail;
 };
 
-extern struct unique_sections *unique_section_list;
-
 extern lang_output_section_statement_type *abs_output_section;
 extern lang_statement_list_type lang_output_section_statement;
 extern bfd_boolean lang_has_input_file;

@@ -34,7 +34,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldmain.h"
 #include "ldemul-list.h"
 
-ld_emulation_xfer_type *ld_emulation;
+static ld_emulation_xfer_type *ld_emulation;
 
 void
 ldemul_hll (char *name)

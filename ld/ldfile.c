@@ -45,12 +45,12 @@ enum bfd_architecture ldfile_output_architecture;
 search_dirs_type * search_head;
 
 #ifdef VMS
-char * slash = "";
+static char * slash = "";
 #else
 #if defined (_WIN32) && ! defined (__CYGWIN32__)
-char * slash = "\\";
+static char * slash = "\\";
 #else
-char * slash = "/";
+static char * slash = "/";
 #endif
 #endif
 
@@ -462,7 +462,7 @@ try_open (const char *name, const char *exten)
 /* Try to open NAME; if that fails, look for it in any directories
    specified with -L, without and with EXTEND appended.  */
 
-FILE *
+static FILE *
 ldfile_find_command_file (const char *name, const char *extend)
 {
   search_dirs_type *search;

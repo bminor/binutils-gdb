@@ -20,8 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef MRI_H
 #define MRI_H
 
-extern unsigned int symbol_truncate;
-
 extern void mri_output_section (const char *, etree_type *);
 extern void mri_only_load (const char *);
 extern void mri_base (etree_type *);
