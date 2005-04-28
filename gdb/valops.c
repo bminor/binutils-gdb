@@ -2317,7 +2317,7 @@ check_field_in (struct type *type, const char *name)
    target structure/union is defined, otherwise, return 0.  */
 
 int
-check_field (struct value *arg1, const char *name)
+check_field (struct value *arg1, const bfd_byte *name)
 {
   struct type *t;
 

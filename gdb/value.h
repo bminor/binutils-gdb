@@ -262,11 +262,12 @@ extern LONGEST value_as_long (struct value *val);
 extern DOUBLEST value_as_double (struct value *val);
 extern CORE_ADDR value_as_address (struct value *val);
 
-extern LONGEST unpack_long (struct type *type, const char *valaddr);
-extern DOUBLEST unpack_double (struct type *type, const char *valaddr,
+extern LONGEST unpack_long (struct type *type, const bfd_byte *valaddr);
+extern DOUBLEST unpack_double (struct type *type, const bfd_byte *valaddr,
 			       int *invp);
-extern CORE_ADDR unpack_pointer (struct type *type, const char *valaddr);
-extern LONGEST unpack_field_as_long (struct type *type, const char *valaddr,
+extern CORE_ADDR unpack_pointer (struct type *type, const bfd_byte *valaddr);
+extern LONGEST unpack_field_as_long (struct type *type,
+				     const bfd_byte *valaddr,
 				     int fieldno);
 
 extern struct value *value_from_longest (struct type *type, LONGEST num);
@@ -451,14 +452,15 @@ extern void release_value (struct value *val);
 
 extern int record_latest_value (struct value *val);
 
-extern void modify_field (char *addr, LONGEST fieldval, int bitpos,
+extern void modify_field (bfd_byte *addr, LONGEST fieldval, int bitpos,
 			  int bitsize);
 
 extern void type_print (struct type *type, char *varstring,
 			struct ui_file *stream, int show);
 
-extern char *baseclass_addr (struct type *type, int index, char *valaddr,
-			     struct value **valuep, int *errp);
+extern bfd_byte *baseclass_addr (struct type *type, int index,
+				 bfd_byte *valaddr,
+				 struct value **valuep, int *errp);
 
 extern void print_longest (struct ui_file *stream, int format,
 			   int use_local, LONGEST val);
@@ -493,7 +495,7 @@ extern void print_variable_value (struct symbol *var,
 				  struct frame_info *frame,
 				  struct ui_file *stream);
 
-extern int check_field (struct value *, const char *);
+extern int check_field (struct value *, const bfd_byte *);
 
 extern void typedef_print (struct type *type, struct symbol *news,
 			   struct ui_file *stream);

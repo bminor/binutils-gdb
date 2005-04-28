@@ -1,3 +1,10 @@
+2005-04-28  Andrew Cagney  <cagney@gnu.org>
+
+	* valops.c (check_field): Make buffer a bfd_byte.
+	* value.c (unpack_long, unpack_double, unpack_pointer) 
+	(unpack_field_as_long, modify_field): Ditto.
+	* value.h: Update declarations.
+
 2005-04-28  Paul Brook  <paul@codesourcery.com>
 
 	* exceptions.c (print_flush): Handle NULL gdb_stdout_serial.
