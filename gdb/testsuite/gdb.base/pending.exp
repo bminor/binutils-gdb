@@ -1,4 +1,4 @@
-#   Copyright 2003, 2004
+#   Copyright 2003, 2004, 2005
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -15,12 +15,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
 # This file was created by Jeff Johnston. (jjohnstn@redhat.com)
-# The shared library compilation portion was copied from shlib-call.exp which was
-# written by Elena Zannoni (ezannoni@redhat.com).
 
 if $tracelevel then {
     strace $tracelevel
@@ -39,64 +34,25 @@ if ![isnative] then {
 
 set testfile "pending"
 set libfile "pendshr"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set srcfile $testfile.c
+set libsrc  $srcdir/$subdir/$libfile.c
+set binfile $objdir/$subdir/$testfile
+set lib_sl  $objdir/$subdir/$libfile.sl
+
+set lib_opts  debug
+set exec_opts [list debug shlib=$lib_sl]
 
 if [get_compiler_info ${binfile}] {
     return -1
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}.o" object {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
+     || [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""} {
+    untested "Could not compile either $libsrc or $srcdir/$subdir/$srcfile."
+    return -1
 }
 
-# Build the shared libraries this test case needs.
-#
-
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-	set additional_flags "additional_flags=+z"
-    } elseif { [istarget "mips-sgi-irix*"] } {
-	# Disable SGI compiler's implicit -Dsgi
-	set additional_flags "additional_flags=-Usgi"
-    } else {
-	# don't know what the compiler is...
-	set additional_flags ""
-    }
-} else {
-    if { ([istarget "powerpc*-*-aix*"]
-       || [istarget "rs6000*-*-aix*"]) } {
-	set additional_flags ""
-    } else {
-	set additional_flags "additional_flags=-fpic"
-    }
-}
-
-if {[gdb_compile "${srcdir}/${subdir}/${libfile}.c" "${objdir}/${subdir}/${libfile}.o" object [list debug $additional_flags]] != ""} {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
-
-if [istarget "hppa*-*-hpux*"] {
-    remote_exec build "ld -b ${objdir}/${subdir}/${libfile}.o -o ${objdir}/${subdir}/${libfile}.sl"
-} else {
-    set additional_flags "additional_flags=-shared"
-    if {[gdb_compile "${objdir}/${subdir}/${libfile}.o" "${objdir}/${subdir}/${libfile}.sl" executable [list debug $additional_flags]] != ""} {
-	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-    }
-}
-
-if { ($gcc_compiled 
-      &&  ([istarget "powerpc*-*-aix*"]
-	|| [istarget "rs6000*-*-aix*"] )) } {
-    set additional_flags "additional_flags=-L${objdir}/${subdir}"
-} elseif { [istarget "mips-sgi-irix*"] } {
-    set additional_flags "additional_flags=-rpath ${objdir}/${subdir}"
-} else {
-    set additional_flags ""
-}
-if {[gdb_compile "${objdir}/${subdir}/${testfile}.o ${objdir}/${subdir}/${libfile}.sl" "${binfile}" executable [list debug $additional_flags]] != ""} {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
+# Start with a fresh gdb.
 
 gdb_exit
 gdb_start

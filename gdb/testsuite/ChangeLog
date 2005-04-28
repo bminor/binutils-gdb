@@ -1,5 +1,10 @@
 2005-04-28  Paul Gilliam  <pgilliam@us.ibm.com>
 
+        * gdb.base/pending.exp: Change to use new shared library
+        infrastructure.
+
+2005-04-28  Paul Gilliam  <pgilliam@us.ibm.com>
+
         * gdb.base/nodebug.exp: Allow for compiling by IBM's xlc compiler,
         use test_compiler_info instead of gcc_compiled, and update copyright.
 
