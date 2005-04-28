@@ -1182,7 +1182,7 @@ md_assemble (char *str)
   char c;
   char *op_start;
   char *op_end;
-  struct z8k_op operand[3];
+  struct z8k_op operand[4];
   opcode_entry_type *opcode;
 
   /* Drop leading whitespace.  */
