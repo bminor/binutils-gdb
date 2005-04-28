@@ -252,14 +252,14 @@ RUNTESTFLAGS =
 callback_h = $(srcroot)/include/gdb/callback.h
 remote_sim_h = $(srcroot)/include/gdb/remote-sim.h
 
-all: $(SIM_EXTRA_ALL) libsim.a run .gdbinit
+all: $(SIM_EXTRA_ALL) libsim.a run$(EXEEXT) .gdbinit
 
 libsim.a: $(LIB_OBJS)
 	rm -f libsim.a
 	$(AR) $(AR_FLAGS) libsim.a $(LIB_OBJS)
 	$(RANLIB) libsim.a
 
-run: $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
+run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) -o run$(EXEEXT) \
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
 
@@ -646,7 +646,7 @@ TAGS: force
 
 clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core
-	rm -f run libsim.a
+	rm -f run$(EXEEXT) libsim.a
 	rm -f gentmap targ-map.c targ-vals.h stamp-tvals
 	if [ ! -f Make-common.in ] ; then \
 		rm -f $(BUILT_SRC_FROM_COMMON) ; \
