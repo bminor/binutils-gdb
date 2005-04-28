@@ -1,3 +1,12 @@
+2005-04-28  Paul Brook  <paul@codesourcery.com>
+
+	Merge changes only applied to Makefile.in.
+	* Makefile.am (BFD32_BACKENDS): Add elfxx-sparc.lo
+	(BFD32_BACKENDS_CFILES): Add elfxx-sparc.c
+	(elfxx-sparc.lo): New rule.
+	(elf32-sparc.lo): Add elfxx-sparc.h dependency.
+	(elf64-sparc.lo): Likewise.
+
 2005-04-28  Julian Brown  <julian@codesourcery.com>
 
 	* elflink.c (_bfd_elf_provide_symbol): Provide symbol for weak
