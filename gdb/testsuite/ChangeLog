@@ -1,5 +1,10 @@
 2005-04-28  Paul Gilliam  <pgilliam@us.ibm.com>
 
+	* gdb.base/shlib-call.exp: Change to use new shared library
+	infrastructure.
+
+2005-04-28  Paul Gilliam  <pgilliam@us.ibm.com>
+
         * gdb.base/pending.exp: Change to use new shared library
         infrastructure.
 

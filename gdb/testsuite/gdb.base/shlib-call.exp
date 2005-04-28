@@ -45,77 +45,28 @@ if ![isnative] then {
 }
 
 set testfile "shmain"
-set libfile "shr"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set libfile1 "shr1"
+set libfile2 "shr2"
+set srcfile  ${srcdir}/${subdir}/${testfile}.c
+set lib1src  ${srcdir}/${subdir}/${libfile1}.c
+set lib2src  ${srcdir}/${subdir}/${libfile2}.c
+set lib1     ${objdir}/${subdir}/${libfile1}.sl
+set lib2     ${objdir}/${subdir}/${libfile2}.sl
+set binfile  ${objdir}/${subdir}/${testfile}
 
-# build the first test case
+set lib_opts "debug"
+set exec_opts [list debug shlib=${lib1} shlib=${lib2}]
+
 if [get_compiler_info ${binfile}] {
     return -1
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}.o" object {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+if { [gdb_compile_shlib ${lib1src} ${lib1} $lib_opts] != ""
+     || [gdb_compile_shlib ${lib2src} ${lib2} $lib_opts] != ""
+     || [gdb_compile ${srcfile} ${binfile} executable $exec_opts] != ""} {
+    untested "Could not compile $lib1, $lib2, or $srcfile."
+    return -1
 }
-
-
-# Build the shared libraries this test case needs.
-#
-
-if {$gcc_compiled == 0} {
-    if [istarget "hppa*-hp-hpux*"] then {
-	set additional_flags "additional_flags=+z"
-    } elseif { [istarget "mips-sgi-irix*"] } {
-	# Disable SGI compiler's implicit -Dsgi
-	set additional_flags "additional_flags=-Usgi"
-    } else {
-	# don't know what the compiler is...
-	set additional_flags ""
-    }
-} else {
-    if { ([istarget "powerpc*-*-aix*"]
-       || [istarget "rs6000*-*-aix*"]) } {
-	set additional_flags ""
-    } else {
-	set additional_flags "additional_flags=-fpic"
-    }
-}
-
-if {[gdb_compile "${srcdir}/${subdir}/${libfile}1.c" "${objdir}/${subdir}/${libfile}1.o" object [list debug $additional_flags]] != ""} {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
-
-if {[gdb_compile "${srcdir}/${subdir}/${libfile}2.c" "${objdir}/${subdir}/${libfile}2.o" object [list debug $additional_flags]] != ""} {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
-
-if [istarget "hppa*-*-hpux*"] {
-    remote_exec build "ld -b ${objdir}/${subdir}/${libfile}1.o -o ${objdir}/${subdir}/${libfile}1.sl"
-    remote_exec build "ld -b ${objdir}/${subdir}/${libfile}2.o -o ${objdir}/${subdir}/${libfile}2.sl"
-} else {
-    set additional_flags "additional_flags=-shared"
-    if {[gdb_compile "${objdir}/${subdir}/${libfile}1.o" "${objdir}/${subdir}/${libfile}1.sl" executable [list debug $additional_flags]] != ""} {
-	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-    }
-    if {[gdb_compile "${objdir}/${subdir}/${libfile}2.o" "${objdir}/${subdir}/${libfile}2.sl" executable [list debug $additional_flags]] != ""} {
-	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-    }
-}
-
-if { ($gcc_compiled 
-      &&  ([istarget "powerpc*-*-aix*"]
-	|| [istarget "rs6000*-*-aix*"] )) } {
-    set additional_flags "additional_flags=-L${objdir}/${subdir}"
-} elseif { [istarget "mips-sgi-irix*"] } {
-    set additional_flags "additional_flags=-rpath ${objdir}/${subdir}"
-} else {
-    set additional_flags ""
-}
-if {[gdb_compile "${objdir}/${subdir}/${testfile}.o ${objdir}/${subdir}/${libfile}1.sl ${objdir}/${subdir}/${libfile}2.sl" "${binfile}" executable [list debug $additional_flags]] != ""} {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
-}
-
-
 
 # Start with a fresh gdb.
 
