@@ -280,7 +280,7 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
       /* Add the sentinel required by read.c.  */
       sb_add_char (&from_sb, '\n');
     }
-  sb_add_sb (&from_sb, from);
+  sb_scrub_and_add_sb (&from_sb, from);
   sb_index = 1;
 
   /* These variables are reset by input_scrub_push.  Restore them

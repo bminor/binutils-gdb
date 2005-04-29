@@ -70,7 +70,7 @@
 [^:]*:53: Error: unshifted register required -- `sbc r0,#12'
 [^:]*:53: Error: unshifted register required -- `sbc r0,r1,lsl#2'
 [^:]*:53: Error: unshifted register required -- `sbc r0,r1,lsl r3'
-[^:]*:54: Error: dest and source2 must be the same register -- `mul r1,r2,r3'
+[^:]*:54: Error: dest must overlap one source register -- `mul r1,r2,r3'
 [^:]*:54: Error: lo register required -- `mul r8,r0'
 [^:]*:54: Error: lo register required -- `mul r0,r8'
 [^:]*:62: Error: lo register required -- `asr r8,r0,#12'

@@ -82,6 +82,7 @@ extern void sb_build (sb *, int);
 extern void sb_new (sb *);
 extern void sb_kill (sb *);
 extern void sb_add_sb (sb *, sb *);
+extern void sb_scrub_and_add_sb (sb *, sb *);
 extern void sb_reset (sb *);
 extern void sb_add_char (sb *, int);
 extern void sb_add_string (sb *, const char *);

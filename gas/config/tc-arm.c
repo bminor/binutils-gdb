@@ -6025,7 +6025,7 @@ do_t_arit3c (void)
       if (Rd == Rs)
 	inst.instruction |= Rn << 3;
       else if (Rd == Rn)
-	inst.instruction |= Rn << 3;
+	inst.instruction |= Rs << 3;
       else
 	constraint (1, _("dest must overlap one source register"));
     }
@@ -6735,15 +6735,18 @@ do_t_mul (void)
     {
       constraint (!thumb32_mode
 		  && inst.instruction == T_MNEM_muls, BAD_THUMB32);
-      constraint (inst.operands[0].reg > 7 || inst.operands[1].reg > 7, BAD_HIREG);
-      constraint (inst.operands[0].reg != inst.operands[2].reg,
-		  _("dest and source2 must be the same register"));
-      if (inst.operands[0].reg == inst.operands[1].reg)
-	as_tsktsk (_("dest and source must be different in MUL"));
+      constraint (inst.operands[0].reg > 7 || inst.operands[1].reg > 7,
+		  BAD_HIREG);
 
       inst.instruction = THUMB_OP16 (inst.instruction);
       inst.instruction |= inst.operands[0].reg;
-      inst.instruction |= inst.operands[1].reg << 3;
+
+      if (inst.operands[0].reg == inst.operands[1].reg)
+	inst.instruction |= inst.operands[2].reg << 3;
+      else if (inst.operands[0].reg == inst.operands[2].reg)
+	inst.instruction |= inst.operands[1].reg << 3;
+      else
+	constraint (1, _("dest must overlap one source register"));
     }
 }
 

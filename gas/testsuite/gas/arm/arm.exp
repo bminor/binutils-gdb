@@ -55,6 +55,7 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_dump_test "tcompat"
     run_dump_test "tcompat2"
     run_dump_test "iwmmxt"
+    run_dump_test "macro1"
     
     run_errors_test "vfp-bad" "-mfpu=vfp" "VFP errors"
     run_errors_test "req" "-mcpu=arm7m" ".req errors"
