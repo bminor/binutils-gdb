@@ -1,3 +1,8 @@
+2005-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bucomm.c: Undo the last change.
+	* bucomm.h: Likewise.
+
 2005-04-29  Ben Elliston  <bje@au.ibm.com>
 
 	* syslex.l (word, number, unit): Remove unused variables.

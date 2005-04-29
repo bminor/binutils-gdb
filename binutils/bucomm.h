@@ -152,6 +152,8 @@ void bfd_nonfatal (const char *);
 
 void bfd_fatal (const char *) ATTRIBUTE_NORETURN;
 
+void report (const char *, va_list);
+
 void fatal (const char *, ...) ATTRIBUTE_PRINTF_1 ATTRIBUTE_NORETURN;
 
 void non_fatal (const char *, ...) ATTRIBUTE_PRINTF_1;

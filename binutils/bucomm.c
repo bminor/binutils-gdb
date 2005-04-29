@@ -65,7 +65,7 @@ bfd_fatal (const char *string)
   xexit (1);
 }
 
-static void
+void
 report (const char * format, va_list args)
 {
   fprintf (stderr, "%s: ", program_name);
