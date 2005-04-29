@@ -1,3 +1,11 @@
+2005-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/Makefile.am (gasver.texi): Depend on bfd/configure instead
+	of Makefile.
+	(DISTCLEANFILES): Remove.
+	(MAINTAINERCLEANFILES): Add asconfig.texi.
+	* doc/Makefile.in: Regenerated.
+
 2005-04-28  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (md_assemble): Fix buffer overrun in operand[]

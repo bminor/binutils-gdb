@@ -1,3 +1,9 @@
+2005-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/Makefile.am: Remove stamp rules.  Depend on chew.c
+	instead of $(MKDOC).
+	* aclocal.m4, Makefile.in, doc/Makefile.in: Regnerated.
+
 2005-04-27  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_link_input_bfd): Handle the case where a badly
