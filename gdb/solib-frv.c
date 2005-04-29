@@ -1109,6 +1109,10 @@ find_canonical_descriptor_in_load_object
   if (abfd == 0)
     return 0;
 
+  /* Nothing to do if no link map.  */
+  if (lm == 0)
+    return 0;
+
   /* We want to scan the dynamic relocs for R_FRV_FUNCDESC relocations.
      (More about this later.)  But in order to fetch the relocs, we
      need to first fetch the dynamic symbols.  These symbols need to

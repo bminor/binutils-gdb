@@ -1079,6 +1079,13 @@ find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
 {
   CORE_ADDR descr;
   char valbuf[4];
+  CORE_ADDR start_addr;
+
+  /* If we can't find the function in the symbol table, then we assume
+     that the function address is already in descriptor form.  */
+  if (!find_pc_partial_function (entry_point, NULL, &start_addr, NULL)
+      || entry_point != start_addr)
+    return entry_point;
 
   descr = frv_fdpic_find_canonical_descriptor (entry_point);
 
