@@ -1,3 +1,8 @@
+2005-04-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add h8300 to supported targets.
+	* gdb.asm/h8300.inc: New file.
+
 2005-04-28  Paul Gilliam  <pgilliam@us.ibm.com>
 
 	* gdb.base/shlib-call.exp: Change to use new shared library
