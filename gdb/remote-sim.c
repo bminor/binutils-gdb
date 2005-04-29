@@ -44,6 +44,10 @@
 #include "sim-regno.h"
 #include "arch-utils.h"
 
+#ifndef SIGTRAP
+#define SIGTRAP 5
+#endif
+
 /* Prototypes */
 
 extern void _initialize_remote_sim (void);
