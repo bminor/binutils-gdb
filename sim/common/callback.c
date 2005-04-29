@@ -60,6 +60,10 @@
 #include <unistd.h>
 #endif
 
+#ifndef PIPE_BUF
+#define PIPE_BUF 512
+#endif
+
 /* ??? sim_cb_printf should be cb_printf, but until the callback support is
    broken out of the simulator directory, these are here to not require
    sim-utils.h.  */
@@ -577,7 +581,11 @@ os_lstat (p, file, buf)
      struct stat *buf;
 {
   /* NOTE: hpn/2004-12-12: Same issue here as with os_fstat.  */
+#ifdef HAVE_LSTAT
   return wrap (p, lstat (file, buf));
+#else
+  return wrap (p, stat (file, buf));
+#endif
 }
 
 static int 
@@ -596,7 +604,12 @@ os_ftruncate (p, fd, len)
     }
   if (result)
     return result;
+#ifdef HAVE_FTRUNCATE
   result = wrap (p, ftruncate (fdmap (p, fd), len));
+#else
+  p->last_errno = EINVAL;
+  result = -1;
+#endif
   return result;
 }
 
@@ -606,7 +619,12 @@ os_truncate (p, file, len)
      const char *file;
      long len;
 {
+#ifdef HAVE_TRUNCATE
   return wrap (p, truncate (file, len));
+#else
+  p->last_errno = EINVAL;
+  return -1;
+#endif
 }
 
 static int

@@ -1,3 +1,13 @@
+2005-04-29  Paul Brook  <paul@codesourcery.com>
+
+	* common/callback.c (PIPE_BUF): Provide default refinition.
+	(os_lstat): Use stat if lstat is not available on the host.
+	(os_ftruncate): Return EINVAL if not available on the host.
+	(os_truncate): Ditto.
+	* common/configure.ac: Check for lstat, truncate and ftruncate.
+	* common/configure: Regenerate.
+	* common/config.in: Regenerate.
+
 2005-04-27  Paul Brook  <paul@codesourcery.com>
 
 	* common/Make-common.in: Add $(EXEEXT) to "run".
