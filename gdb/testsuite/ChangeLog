@@ -1,5 +1,9 @@
 2005-04-29  Paul Gilliam  <pgilliam@us.ibm.com>
 
+	* gdb.base/unload.exp: Use new shared library infrastructure.
+
+2005-04-29  Paul Gilliam  <pgilliam@us.ibm.com>
+
 	* gdb.base/so-impl-ld.exp: Use new shared library
         infrastructure.
 
