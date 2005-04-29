@@ -73,7 +73,7 @@ the native maintainer when resolving ABI issues.
 
 	frv		--target=frv-elf ,-Werror
 
-	h8300		Deleted
+	h8300		--target=h8300-elf, -Werror
 
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org

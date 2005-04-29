@@ -1,7 +1,7 @@
 /* Target-machine dependent code for Renesas H8/300, for GDB.
 
    Copyright 1988, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,40 +27,15 @@
 
 #include "defs.h"
 #include "value.h"
-#include "inferior.h"
-#include "symfile.h"
 #include "arch-utils.h"
 #include "regcache.h"
 #include "gdbcore.h"
 #include "objfiles.h"
-#include "gdbcmd.h"
 #include "gdb_assert.h"
 #include "dis-asm.h"
 #include "dwarf2-frame.h"
-#include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
-
-/* Extra info which is saved in each frame_info. */
-struct frame_extra_info
-{
-  CORE_ADDR from_pc;
-};
-
-enum
-{
-  h8300_reg_size = 2,
-  h8300h_reg_size = 4,
-  h8300_max_reg_size = 4,
-};
-
-static int is_h8300hmode (struct gdbarch *gdbarch);
-static int is_h8300smode (struct gdbarch *gdbarch);
-static int is_h8300sxmode (struct gdbarch *gdbarch);
-static int is_h8300_normal_mode (struct gdbarch *gdbarch);
-
-#define BINWORD (is_h8300hmode (current_gdbarch) && \
-		  !is_h8300_normal_mode (current_gdbarch) ? h8300h_reg_size : h8300_reg_size)
 
 enum gdb_regnum
 {
@@ -90,17 +65,106 @@ enum gdb_regnum
 #define E_PSEUDO_CCR_REGNUM (NUM_REGS)
 #define E_PSEUDO_EXR_REGNUM (NUM_REGS+1)
 
-#define UNSIGNED_SHORT(X) ((X) & 0xffff)
+struct h8300_frame_cache
+{
+  /* Base address.  */
+  CORE_ADDR base;
+  CORE_ADDR sp_offset;
+  CORE_ADDR pc;
 
-#define IS_PUSH(x) ((x & 0xfff0)==0x6df0)
-#define IS_PUSH_FP(x) (x == 0x6df6)
-#define IS_MOVE_FP(x) (x == 0x0d76 || x == 0x0ff6)
-#define IS_MOV_SP_FP(x) (x == 0x0d76 || x == 0x0ff6)
-#define IS_SUB2_SP(x) (x==0x1b87)
-#define IS_SUB4_SP(x) (x==0x1b97)
-#define IS_SUBL_SP(x) (x==0x7a37)
-#define IS_MOVK_R5(x) (x==0x7905)
-#define IS_SUB_R5SP(x) (x==0x1957)
+  /* Flag showing that a frame has been created in the prologue code. */
+  int uses_fp;
+
+  /* Saved registers.  */
+  CORE_ADDR saved_regs[H8300_MAX_NUM_REGS];
+  CORE_ADDR saved_sp;
+};
+
+enum
+{
+  h8300_reg_size = 2,
+  h8300h_reg_size = 4,
+  h8300_max_reg_size = 4,
+};
+
+static int is_h8300hmode (struct gdbarch *gdbarch);
+static int is_h8300smode (struct gdbarch *gdbarch);
+static int is_h8300sxmode (struct gdbarch *gdbarch);
+static int is_h8300_normal_mode (struct gdbarch *gdbarch);
+
+#define BINWORD ((is_h8300hmode (current_gdbarch) \
+		  && !is_h8300_normal_mode (current_gdbarch)) \
+		 ? h8300h_reg_size : h8300_reg_size)
+
+static CORE_ADDR
+h8300_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_unsigned (next_frame, E_PC_REGNUM);
+}
+
+static CORE_ADDR
+h8300_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_unsigned (next_frame, E_SP_REGNUM);
+}
+
+static struct frame_id
+h8300_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_id_build (h8300_unwind_sp (gdbarch, next_frame),
+  			 frame_pc_unwind (next_frame));
+}
+
+/* Normal frames.  */
+
+/* Allocate and initialize a frame cache.  */
+
+static void
+h8300_init_frame_cache (struct h8300_frame_cache *cache)
+{
+  int i;
+
+  /* Base address.  */
+  cache->base = 0;
+  cache->sp_offset = 0;
+  cache->pc = 0;
+
+  /* Frameless until proven otherwise.  */
+  cache->uses_fp = 0;
+
+  /* Saved registers.  We initialize these to -1 since zero is a valid
+     offset (that's where %fp is supposed to be stored).  */
+  for (i = 0; i < NUM_REGS; i++)
+    cache->saved_regs[i] = -1;
+}
+
+#define IS_MOVB_RnRm(x)		(((x) & 0xff88) == 0x0c88)
+#define IS_MOVW_RnRm(x)		(((x) & 0xff88) == 0x0d00)
+#define IS_MOVL_RnRm(x)		(((x) & 0xff88) == 0x0f80)
+#define IS_MOVB_Rn16_SP(x)	(((x) & 0xfff0) == 0x6ee0)
+#define IS_MOVB_EXT(x)		((x) == 0x7860)
+#define IS_MOVB_Rn24_SP(x)	(((x) & 0xfff0) == 0x6aa0)
+#define IS_MOVW_Rn16_SP(x)	(((x) & 0xfff0) == 0x6fe0)
+#define IS_MOVW_EXT(x)		((x) == 0x78e0)
+#define IS_MOVW_Rn24_SP(x)	(((x) & 0xfff0) == 0x6ba0)
+/* Same instructions as mov.w, just prefixed with 0x0100 */
+#define IS_MOVL_PRE(x)		((x) == 0x0100)
+#define IS_MOVL_Rn16_SP(x)	(((x) & 0xfff0) == 0x6fe0)
+#define IS_MOVL_EXT(x)		((x) == 0x78e0)
+#define IS_MOVL_Rn24_SP(x)	(((x) & 0xfff0) == 0x6ba0)
+
+#define IS_PUSHFP_MOVESPFP(x)	((x) == 0x6df60d76)
+#define IS_PUSH_FP(x)		((x) == 0x01006df6)
+#define IS_MOV_SP_FP(x)		((x) == 0x0ff6)
+#define IS_SUB2_SP(x)		((x) == 0x1b87)
+#define IS_SUB4_SP(x)		((x) == 0x1b97)
+#define IS_ADD_IMM_SP(x)	((x) == 0x7a1f)
+#define IS_SUB_IMM_SP(x)	((x) == 0x7a3f)
+#define IS_SUBL4_SP(x)		((x) == 0x1acf)
+#define IS_MOV_IMM_Rn(x)	(((x) & 0xfff0) == 0x7905)
+#define IS_SUB_RnSP(x)		(((x) & 0xff0f) == 0x1907)
+#define IS_ADD_RnSP(x)		(((x) & 0xff0f) == 0x0907)
+#define IS_PUSH(x)		(((x) & 0xfff0) == 0x6df0)
 
 /* If the instruction at PC is an argument register spill, return its
    length.  Otherwise, return zero.
@@ -118,27 +182,20 @@ h8300_is_argument_spill (CORE_ADDR pc)
 {
   int w = read_memory_unsigned_integer (pc, 2);
 
-  if (((w & 0xff88) == 0x0c88	/* mov.b Rsl, Rdl */
-       || (w & 0xff88) == 0x0d00	/* mov.w Rs, Rd */
-       || (w & 0xff88) == 0x0f80)	/* mov.l Rs, Rd */
+  if ((IS_MOVB_RnRm (w) || IS_MOVW_RnRm (w) || IS_MOVL_RnRm (w))
       && (w & 0x70) <= 0x20	/* Rs is R0, R1 or R2 */
       && (w & 0x7) >= 0x3 && (w & 0x7) <= 0x5)	/* Rd is R3, R4 or R5 */
     return 2;
 
-  if ((w & 0xfff0) == 0x6ee0	/* mov.b Rs,@(d:16,er6) */
+  if (IS_MOVB_Rn16_SP (w)
       && 8 <= (w & 0xf) && (w & 0xf) <= 10)	/* Rs is R0L, R1L, or R2L  */
     {
-      int w2 = read_memory_integer (pc + 2, 2);
-
-      /* ... and d:16 is negative.  */
-      if (w2 < 0)
+      if (read_memory_integer (pc + 2, 2) < 0)	/* ... and d:16 is negative.  */
 	return 4;
     }
-  else if (w == 0x7860)
+  else if (IS_MOVB_EXT (w))
     {
-      int w2 = read_memory_integer (pc + 2, 2);
-
-      if ((w2 & 0xfff0) == 0x6aa0)	/* mov.b Rs, @(d:24,er6) */
+      if (IS_MOVB_Rn24_SP (read_memory_unsigned_integer (pc + 2, 2)))
 	{
 	  LONGEST disp = read_memory_integer (pc + 4, 4);
 
@@ -147,20 +204,16 @@ h8300_is_argument_spill (CORE_ADDR pc)
 	    return 8;
 	}
     }
-  else if ((w & 0xfff0) == 0x6fe0	/* mov.w Rs,@(d:16,er6) */
+  else if (IS_MOVW_Rn16_SP (w)
 	   && (w & 0xf) <= 2)	/* Rs is R0, R1, or R2 */
     {
-      int w2 = read_memory_integer (pc + 2, 2);
-
       /* ... and d:16 is negative.  */
-      if (w2 < 0)
+      if (read_memory_integer (pc + 2, 2) < 0)
 	return 4;
     }
-  else if (w == 0x78e0)
+  else if (IS_MOVW_EXT (w))
     {
-      int w2 = read_memory_integer (pc + 2, 2);
-
-      if ((w2 & 0xfff0) == 0x6ba0)	/* mov.b Rs, @(d:24,er6) */
+      if (IS_MOVW_Rn24_SP (read_memory_unsigned_integer (pc + 2, 2)))
 	{
 	  LONGEST disp = read_memory_integer (pc + 4, 4);
 
@@ -169,24 +222,22 @@ h8300_is_argument_spill (CORE_ADDR pc)
 	    return 8;
 	}
     }
-  else if (w == 0x0100)
+  else if (IS_MOVL_PRE (w))
     {
       int w2 = read_memory_integer (pc + 2, 2);
 
-      if ((w2 & 0xfff0) == 0x6fe0	/* mov.l Rs,@(d:16,er6) */
+      if (IS_MOVL_Rn16_SP (w2)
 	  && (w2 & 0xf) <= 2)	/* Rs is ER0, ER1, or ER2 */
 	{
-	  int w3 = read_memory_integer (pc + 4, 2);
-
 	  /* ... and d:16 is negative.  */
-	  if (w3 < 0)
+	  if (read_memory_integer (pc + 4, 2) < 0)
 	    return 6;
 	}
-      else if (w2 == 0x78e0)
+      else if (IS_MOVL_EXT (w2))
 	{
 	  int w3 = read_memory_integer (pc + 4, 2);
 
-	  if ((w3 & 0xfff0) == 0x6ba0)	/* mov.l Rs, @(d:24,er6) */
+	  if (IS_MOVL_Rn24_SP (read_memory_integer (pc + 4, 2)))
 	    {
 	      LONGEST disp = read_memory_integer (pc + 6, 4);
 
@@ -199,297 +250,6 @@ h8300_is_argument_spill (CORE_ADDR pc)
 
   return 0;
 }
-
-static CORE_ADDR
-h8300_skip_prologue (CORE_ADDR start_pc)
-{
-  short int w;
-  int adjust = 0;
-
-  /* Skip past all push and stm insns.  */
-  while (1)
-    {
-      w = read_memory_unsigned_integer (start_pc, 2);
-      /* First look for push insns.  */
-      if (w == 0x0100 || w == 0x0110 || w == 0x0120 || w == 0x0130)
-	{
-	  w = read_memory_unsigned_integer (start_pc + 2, 2);
-	  adjust = 2;
-	}
-
-      if (IS_PUSH (w))
-	{
-	  start_pc += 2 + adjust;
-	  w = read_memory_unsigned_integer (start_pc, 2);
-	  continue;
-	}
-      adjust = 0;
-      break;
-    }
-
-  /* Skip past a move to FP, either word or long sized */
-  w = read_memory_unsigned_integer (start_pc, 2);
-  if (w == 0x0100)
-    {
-      w = read_memory_unsigned_integer (start_pc + 2, 2);
-      adjust += 2;
-    }
-
-  if (IS_MOVE_FP (w))
-    {
-      start_pc += 2 + adjust;
-      w = read_memory_unsigned_integer (start_pc, 2);
-    }
-
-  /* Check for loading either a word constant into r5;
-     long versions are handled by the SUBL_SP below.  */
-  if (IS_MOVK_R5 (w))
-    {
-      start_pc += 2;
-      w = read_memory_unsigned_integer (start_pc, 2);
-    }
-
-  /* Now check for subtracting r5 from sp, word sized only.  */
-  if (IS_SUB_R5SP (w))
-    {
-      start_pc += 2 + adjust;
-      w = read_memory_unsigned_integer (start_pc, 2);
-    }
-
-  /* Check for subs #2 and subs #4. */
-  while (IS_SUB2_SP (w) || IS_SUB4_SP (w))
-    {
-      start_pc += 2 + adjust;
-      w = read_memory_unsigned_integer (start_pc, 2);
-    }
-
-  /* Check for a 32bit subtract.  */
-  if (IS_SUBL_SP (w))
-    start_pc += 6 + adjust;
-
-  /* Skip past another possible stm insn for registers R3 to R5 (possibly used
-     for register qualified arguments.  */
-  w = read_memory_unsigned_integer (start_pc, 2);
-  /* First look for push insns.  */
-  if (w == 0x0110 || w == 0x0120 || w == 0x0130)
-    {
-      w = read_memory_unsigned_integer (start_pc + 2, 2);
-      if (IS_PUSH (w) && (w & 0xf) >= 0x3 && (w & 0xf) <= 0x5)
-	start_pc += 4;
-    }
-
-  /* Check for spilling an argument register to the stack frame.
-     This could also be an initializing store from non-prologue code,
-     but I don't think there's any harm in skipping that.  */
-  for (;;)
-    {
-      int spill_size = h8300_is_argument_spill (start_pc);
-      if (spill_size == 0)
-	break;
-      start_pc += spill_size;
-    }
-
-  return start_pc;
-}
-
-static CORE_ADDR
-h8300_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  char buf[8];
-
-  frame_unwind_register (next_frame, E_PC_REGNUM, buf);
-  return extract_typed_address (buf, builtin_type_void_func_ptr);
-}
-
-static struct frame_id
-h8300_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
-{
-  char buf[4];
-  CORE_ADDR fp;
-
-  frame_unwind_register (next_frame, E_FP_REGNUM, buf);
-  fp = extract_unsigned_integer (buf, 4);
-
-  return frame_id_build (fp, frame_pc_unwind (next_frame));
-}
-
-struct h8300_frame_cache
-{
-  /* Base address.  */
-  CORE_ADDR base;
-  CORE_ADDR sp_offset;
-  CORE_ADDR pc;
-
-  /* Saved registers.  */
-  CORE_ADDR saved_regs[H8300_MAX_NUM_REGS];
-  CORE_ADDR saved_sp;
-
-  /* Stack space reserved for local variables.  */
-  long locals;
-};
-
-/* Normal frames.  */
-
-/* Allocate and initialize a frame cache.  */
-
-static struct h8300_frame_cache *
-h8300_alloc_frame_cache (void)
-{
-  struct h8300_frame_cache *cache;
-  int i;
-
-  cache = FRAME_OBSTACK_ZALLOC (struct h8300_frame_cache);
-
-  /* Base address.  */
-  cache->base = 0;
-  cache->sp_offset = -4;
-  cache->pc = 0;
-
-  /* Saved registers.  We initialize these to -1 since zero is a valid
-     offset (that's where %fp is supposed to be stored).  */
-  for (i = 0; i < NUM_REGS; i++)
-    cache->saved_regs[i] = -1;
-
-  /* Frameless until proven otherwise.  */
-  cache->locals = -1;
-
-  return cache;
-}
-
-/* Check whether PC points at a code that sets up a new stack frame.
-   If so, it updates CACHE and returns the address of the first
-   instruction after the sequence that sets removes the "hidden"
-   argument from the stack or CURRENT_PC, whichever is smaller.
-   Otherwise, return PC.  */
-
-static CORE_ADDR
-h8300_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
-			   struct h8300_frame_cache *cache)
-{
-  unsigned int op;
-  int subs_count;
-
-  if (pc >= current_pc)
-    return current_pc;
-
-  op = read_memory_unsigned_integer (pc, 4);
-
-  if (op == 0x6df60d76)
-    {
-      /* mov.w r6,@-sp; mov.w sp,r6 */
-      cache->saved_regs[E_FP_REGNUM] = 0;
-      cache->sp_offset += 2;
-      op = read_memory_unsigned_integer (pc + 4, 4);
-      if (((op >> 16) & 0xfff0) == 0x7900)
-	{
-	  /* mov.w #imm,rN */
-	  cache->locals = -(short) (op & 0xffff);
-	  return pc + 8;
-	}
-      else if ((op >> 16) == 0x1b87)
-	{
-	  /* subs #2,sp */
-	  for (cache->locals = 0, pc += 4;
-	       read_memory_unsigned_integer (pc, 2) == 0x1b87;
-	       pc += 2, cache->locals += 2);
-	  return pc;
-	}
-    }
-  else if (op == 0x01006df6)
-    {
-      /* mov.l er6,@-sp */
-      op = read_memory_unsigned_integer (pc + 4, 2);
-      if (op == 0x0ff6)
-	{
-	  /* mov.l sp,er6 */
-	  op = read_memory_unsigned_integer (pc + 6, 2);
-	  if (op == 0x7a17)
-	    {
-	      /* add.l #-n,sp */
-	      cache->locals = -read_memory_unsigned_integer (pc + 8, 4);
-	      return pc + 12;
-	    }
-	  else if (op == 0x1b97)
-	    {
-	      /* subs #4,sp */
-	      for (cache->locals = 0, pc += 6;
-		   read_memory_unsigned_integer (pc, 2) == 0x1b97;
-		   pc += 2, cache->locals += 2);
-	      return pc;
-	    }
-	}
-    }
-
-  return pc;
-}
-
-/* Check whether PC points at code that saves registers on the stack.
-   If so, it updates CACHE and returns the address of the first
-   instruction after the register saves or CURRENT_PC, whichever is
-   smaller.  Otherwise, return PC.  */
-
-static CORE_ADDR
-h8300_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
-			      struct h8300_frame_cache *cache)
-{
-  if (cache->locals >= 0)
-    {
-      CORE_ADDR offset;
-      int op;
-      int i, regno;
-
-      offset = -cache->locals;
-      while (pc < current_pc)
-	{
-	  op = read_memory_unsigned_integer (pc, 2);
-	  if ((op & 0xfff0) == 0x6df0)
-	    {
-	      /* mov.w rN,@-sp */
-	      regno = op & 0x000f;
-	      cache->saved_regs[regno] = offset;
-	      offset -= 2;
-	      pc += 2;
-	    }
-	  else if (op == 0x0100)
-	    {
-	      op = read_memory_unsigned_integer (pc + 2, 2);
-	      if ((op & 0xfff0) == 0x6df0)
-		{
-		  /* mov.l erN,@-sp */
-		  regno = op & 0x000f;
-		  cache->saved_regs[regno] = offset;
-		  offset -= 4;
-		  pc += 4;
-		}
-	      else
-		break;
-	    }
-	  else if ((op & 0xffcf) == 0x0100)
-	    {
-	      int op1;
-	      op1 = read_memory_unsigned_integer (pc + 2, 2);
-	      if ((op1 & 0xfff0) == 0x6df0)
-		{
-		  /* stm.l reglist,@-sp */
-		  i = ((op & 0x0030) >> 4) + 1;
-		  regno = op1 & 0x000f;
-		  for (; i > 0; regno++, --i)
-		    {
-		      cache->saved_regs[regno] = offset;
-		      offset -= 4;
-		    }
-		  pc += 4;
-		}
-	      else
-		break;
-	    }
-	  else
-	    break;
-	}
-    }
-  return pc;
-}
-
 
 /* Do a full analysis of the prologue at PC and update CACHE
    accordingly.  Bail out early if CURRENT_PC is reached.  Return the
@@ -524,10 +284,6 @@ h8300_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
    mov.l erN,@-sp
    stm.l reglist,@-sp
 
-   For setting up the PIC register:
-
-   Future equivalence...
-
    */
 
 static CORE_ADDR
@@ -535,13 +291,131 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 			struct h8300_frame_cache *cache)
 {
   unsigned int op;
+  int regno, i, spill_size;
 
-  pc = h8300_analyze_frame_setup (pc, current_pc, cache);
-  pc = h8300_analyze_register_saves (pc, current_pc, cache);
+  cache->sp_offset = 0;
+
   if (pc >= current_pc)
     return current_pc;
 
-  /* PIC support */
+  op = read_memory_unsigned_integer (pc, 4);
+
+  if (IS_PUSHFP_MOVESPFP (op))
+    {
+      cache->saved_regs[E_FP_REGNUM] = 0;
+      cache->uses_fp = 1;
+      pc += 4;
+    }
+  else if (IS_PUSH_FP (op))
+    {
+      cache->saved_regs[E_FP_REGNUM] = 0;
+      pc += 4;
+      if (pc >= current_pc)
+        return current_pc;
+      op = read_memory_unsigned_integer (pc, 2);
+      if (IS_MOV_SP_FP (op))
+	{
+	  cache->uses_fp = 1;
+	  pc += 2;
+	}
+    }
+
+  while (pc < current_pc)
+    {
+      op = read_memory_unsigned_integer (pc, 2);
+      if (IS_SUB2_SP (op))
+	{
+	  cache->sp_offset += 2;
+	  pc += 2;
+	}
+      else if (IS_SUB4_SP (op))
+	{
+	  cache->sp_offset += 4;
+	  pc += 2;
+	}
+      else if (IS_ADD_IMM_SP (op))
+	{
+	  cache->sp_offset += -read_memory_integer (pc + 2, 2);
+	  pc += 4;
+	}
+      else if (IS_SUB_IMM_SP (op))
+	{
+	  cache->sp_offset += read_memory_integer (pc + 2, 2);
+	  pc += 4;
+	}
+      else if (IS_SUBL4_SP (op))
+	{
+	  cache->sp_offset += 4;
+	  pc += 2;
+	}
+      else if (IS_MOV_IMM_Rn (op))
+        {
+	  int offset = read_memory_integer (pc + 2, 2);
+	  regno = op & 0x000f;
+	  op = read_memory_unsigned_integer (pc + 4, 2);
+	  if (IS_ADD_RnSP (op) && (op & 0x00f0) == regno)
+	    {
+	      cache->sp_offset -= offset;
+	      pc += 6;
+	    }
+	  else if (IS_SUB_RnSP (op) && (op & 0x00f0) == regno)
+	    {
+	      cache->sp_offset += offset;
+	      pc += 6;
+	    }
+	  else
+	    break;
+	}
+      else if (IS_PUSH (op))
+	{
+	  regno = op & 0x000f;
+	  cache->sp_offset += 2;
+	  cache->saved_regs[regno] = cache->sp_offset;
+	  pc += 2;
+	}
+      else if (op == 0x0100)
+	{
+	  op = read_memory_unsigned_integer (pc + 2, 2);
+	  if (IS_PUSH (op))
+	    {
+	      regno = op & 0x000f;
+	      cache->sp_offset += 4;
+	      cache->saved_regs[regno] = cache->sp_offset;
+	      pc += 4;
+	    }
+	  else
+	    break;
+	}
+      else if ((op & 0xffcf) == 0x0100)
+	{
+	  int op1;
+	  op1 = read_memory_unsigned_integer (pc + 2, 2);
+	  if (IS_PUSH (op1))
+	    {
+	      /* Since the prefix is 0x01x0, this is not a simple pushm but a
+	         stm.l reglist,@-sp */
+	      i = ((op & 0x0030) >> 4) + 1;
+	      regno = op1 & 0x000f;
+	      for (; i > 0; regno++, --i)
+		{
+		  cache->sp_offset += 4;
+		  cache->saved_regs[regno] = cache->sp_offset;
+		}
+	      pc += 4;
+	    }
+	  else
+	    break;
+	}
+      else
+	break;
+    }
+
+  /* Check for spilling an argument register to the stack frame.
+     This could also be an initializing store from non-prologue code,
+     but I don't think there's any harm in skipping that.  */
+  while ((spill_size = h8300_is_argument_spill (pc)) > 0
+         && pc + spill_size <= current_pc)
+    pc += spill_size;
 
   return pc;
 }
@@ -552,35 +426,33 @@ h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
   struct h8300_frame_cache *cache;
   char buf[4];
   int i;
+  CORE_ADDR current_pc;
 
   if (*this_cache)
     return *this_cache;
 
-  cache = h8300_alloc_frame_cache ();
+  cache = FRAME_OBSTACK_ZALLOC (struct h8300_frame_cache);
+  h8300_init_frame_cache (cache);
   *this_cache = cache;
 
   /* In principle, for normal frames, %fp holds the frame pointer,
      which holds the base address for the current stack frame.
      However, for functions that don't need it, the frame pointer is
      optional.  For these "frameless" functions the frame pointer is
-     actually the frame pointer of the calling frame.  Signal
-     trampolines are just a special case of a "frameless" function.
-     They (usually) share their frame pointer with the frame that was
-     in progress when the signal occurred.  */
+     actually the frame pointer of the calling frame.  */
 
-  frame_unwind_register (next_frame, E_FP_REGNUM, buf);
-  cache->base = extract_unsigned_integer (buf, 4);
+  cache->base = frame_unwind_register_unsigned (next_frame, E_FP_REGNUM);
   if (cache->base == 0)
     return cache;
 
-  /* For normal frames, %pc is stored at 4(%fp).  */
-  cache->saved_regs[E_PC_REGNUM] = 4;
+  cache->saved_regs[E_PC_REGNUM] = -BINWORD;
 
   cache->pc = frame_func_unwind (next_frame);
+  current_pc = frame_pc_unwind (next_frame);
   if (cache->pc != 0)
-    h8300_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+    h8300_analyze_prologue (cache->pc, current_pc, cache);
 
-  if (cache->locals < 0)
+  if (!cache->uses_fp)
     {
       /* We didn't find a valid frame, which means that CACHE->base
          currently holds the frame pointer for our calling frame.  If
@@ -590,19 +462,22 @@ h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
          frame by looking at the stack pointer.  For truly "frameless"
          functions this might work too.  */
 
-      frame_unwind_register (next_frame, E_SP_REGNUM, buf);
-      cache->base = extract_unsigned_integer (buf, 4) + cache->sp_offset;
+      cache->base = frame_unwind_register_unsigned (next_frame, E_SP_REGNUM)
+		    + cache->sp_offset;
+      cache->saved_sp = cache->base + BINWORD;
+      cache->saved_regs[E_PC_REGNUM] = 0;
     }
-
-  /* Now that we have the base address for the stack frame we can
-     calculate the value of %sp in the calling frame.  */
-  cache->saved_sp = cache->base;
+  else
+    {
+      cache->saved_sp = cache->base + 2 * BINWORD;
+      cache->saved_regs[E_PC_REGNUM] = -BINWORD;
+    }
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
   for (i = 0; i < NUM_REGS; i++)
     if (cache->saved_regs[i] != -1)
-      cache->saved_regs[i] += cache->base;
+      cache->saved_regs[i] = cache->base - cache->saved_regs[i];
 
   return cache;
 }
@@ -618,8 +493,7 @@ h8300_frame_this_id (struct frame_info *next_frame, void **this_cache,
   if (cache->base == 0)
     return;
 
-  /* See the end of m68k_push_dummy_call.  */
-  *this_id = frame_id_build (cache->base, cache->pc);
+  *this_id = frame_id_build (cache->saved_sp, cache->pc);
 }
 
 static void
@@ -640,10 +514,7 @@ h8300_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *addrp = 0;
       *realnump = -1;
       if (valuep)
-	{
-	  /* Store the value.  */
-	  store_unsigned_integer (valuep, 4, cache->saved_sp);
-	}
+	store_unsigned_integer (valuep, BINWORD, cache->saved_sp);
       return;
     }
 
@@ -654,11 +525,7 @@ h8300_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       *addrp = cache->saved_regs[regnum];
       *realnump = -1;
       if (valuep)
-	{
-	  /* Read the value in from memory.  */
-	  read_memory (*addrp, valuep,
-		       register_size (current_gdbarch, regnum));
-	}
+	read_memory (*addrp, valuep, register_size (current_gdbarch, regnum));
       return;
     }
 
@@ -676,6 +543,45 @@ static const struct frame_unwind *
 h8300_frame_sniffer (struct frame_info *next_frame)
 {
   return &h8300_frame_unwind;
+}
+
+static CORE_ADDR
+h8300_frame_base_address (struct frame_info *next_frame, void **this_cache)
+{
+  struct h8300_frame_cache *cache = h8300_frame_cache (next_frame, this_cache);
+  return cache->base;
+}
+
+static const struct frame_base h8300_frame_base = {
+  &h8300_frame_unwind,
+  h8300_frame_base_address,
+  h8300_frame_base_address,
+  h8300_frame_base_address
+};
+
+static CORE_ADDR
+h8300_skip_prologue (CORE_ADDR pc)
+{
+  CORE_ADDR func_addr = 0 , func_end = 0;
+
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    {
+      struct symtab_and_line sal;
+      struct h8300_frame_cache cache;
+
+      /* Found a function.  */
+      sal = find_pc_line (func_addr, 0);
+      if (sal.end && sal.end < func_end)
+        /* Found a line number, use it as end of prologue.  */
+        return sal.end;
+
+      /* No useable line symbol.  Use prologue parsing method.  */
+      h8300_init_frame_cache (&cache);
+      return h8300_analyze_prologue (func_addr, func_end, &cache);
+    }
+
+  /* No function symbol -- just return the PC.  */
+  return (CORE_ADDR) pc;
 }
 
 /* Function: push_dummy_call
@@ -836,7 +742,9 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Update stack pointer.  */
   regcache_cooked_write_unsigned (regcache, E_SP_REGNUM, sp);
 
-  return sp;
+  /* Return the new stack pointer minus the return address slot since
+     that's what DWARF2/GCC uses as the frame's CFA.  */
+  return sp + wordsize;
 }
 
 /* Function: extract_return_value
@@ -896,9 +804,10 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
     case 8:			/* long long is now 8 bytes.  */
       if (TYPE_CODE (type) == TYPE_CODE_INT)
 	{
-	  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &addr);
-	  c = read_memory_unsigned_integer ((CORE_ADDR) addr, len);
-	  store_unsigned_integer (valbuf, len, c);
+	  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
+	  store_unsigned_integer (valbuf, 4, c);
+	  regcache_cooked_read_unsigned (regcache, E_RET1_REGNUM, &c);
+	  store_unsigned_integer ((void *) ((char *) valbuf + 4), 4, c);
 	}
       else
 	{
@@ -908,6 +817,34 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
+int
+h8300_use_struct_convention (struct type *value_type)
+{
+  /* Types of 1, 2 or 4 bytes are returned in R0/R1, everything else on the
+     stack. */
+
+  if (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (value_type) == TYPE_CODE_UNION)
+    return 1;
+  return !(TYPE_LENGTH (value_type) == 1
+	   || TYPE_LENGTH (value_type) == 2
+	   || TYPE_LENGTH (value_type) == 4);
+}
+
+int
+h8300h_use_struct_convention (struct type *value_type)
+{
+  /* Types of 1, 2 or 4 bytes are returned in R0, INT types of 8 bytes are
+     returned in R0/R1, everything else on the stack. */
+  if (TYPE_CODE (value_type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (value_type) == TYPE_CODE_UNION)
+    return 1;
+  return !(TYPE_LENGTH (value_type) == 1
+	   || TYPE_LENGTH (value_type) == 2
+	   || TYPE_LENGTH (value_type) == 4
+	   || (TYPE_LENGTH (value_type) == 8
+	       && TYPE_CODE (value_type) == TYPE_CODE_INT));
+}
 
 /* Function: store_return_value
    Place the appropriate value in the appropriate registers.
@@ -955,11 +892,52 @@ h8300h_store_return_value (struct type *type, struct regcache *regcache,
       val = extract_unsigned_integer (valbuf, len);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
       break;
-    case 8:			/* long long, double and long double are all defined
-				   as 4 byte types so far so this shouldn't happen.  */
-      error ("I don't know how to return an 8 byte value.");
+    case 8:
+      val = extract_unsigned_integer (valbuf, len);
+      regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
+				      (val >> 32) & 0xffffffff);
+      regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM,
+				      val & 0xffffffff);
       break;
     }
+}
+
+static enum return_value_convention
+h8300_return_value (struct gdbarch *gdbarch, struct type *type,
+		    struct regcache *regcache,
+		    void *readbuf, const void *writebuf)
+{
+  if (h8300_use_struct_convention (type))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  if (writebuf)
+    h8300_store_return_value (type, regcache, writebuf);
+  else if (readbuf)
+    h8300_extract_return_value (type, regcache, readbuf);
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
+static enum return_value_convention
+h8300h_return_value (struct gdbarch *gdbarch, struct type *type,
+		     struct regcache *regcache,
+		     void *readbuf, const void *writebuf)
+{
+  if (h8300h_use_struct_convention (type))
+    {
+      if (readbuf)
+	{
+	  ULONGEST addr;
+
+	  regcache_raw_read_unsigned (regcache, E_R0_REGNUM, &addr);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
+  if (writebuf)
+    h8300h_store_return_value (type, regcache, writebuf);
+  else if (readbuf)
+    h8300h_extract_return_value (type, regcache, readbuf);
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 static struct cmd_list_element *setmachinelist;
@@ -1208,14 +1186,6 @@ h8300s_dbg_reg_to_regnum (int regno)
   return regno;
 }
 
-static CORE_ADDR
-h8300_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST addr;
-  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &addr);
-  return addr;
-}
-
 const static unsigned char *
 h8300_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
@@ -1224,22 +1194,6 @@ h8300_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
   *lenptr = sizeof (breakpoint);
   return breakpoint;
-}
-
-static CORE_ADDR
-h8300_push_dummy_code (struct gdbarch *gdbarch,
-		       CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc,
-		       struct value **args, int nargs,
-		       struct type *value_type,
-		       CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
-{
-  /* Allocate space sufficient for a breakpoint.  */
-  sp = (sp - 2) & ~1;
-  /* Store the address of that breakpoint */
-  *bp_addr = sp;
-  /* h8300 always starts the call at the callee's entry point.  */
-  *real_pc = funaddr;
-  return sp;
 }
 
 static void
@@ -1281,8 +1235,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_name (gdbarch, h8300_register_name);
       set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
       set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
-      set_gdbarch_extract_return_value (gdbarch, h8300_extract_return_value);
-      set_gdbarch_store_return_value (gdbarch, h8300_store_return_value);
+      set_gdbarch_return_value (gdbarch, h8300_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300);
       break;
     case bfd_mach_h8300h:
@@ -1304,8 +1257,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	  set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	}
-      set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
-      set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
+      set_gdbarch_return_value (gdbarch, h8300h_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300h);
       break;
     case bfd_mach_h8300s:
@@ -1327,8 +1279,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	  set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	}
-      set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
-      set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
+      set_gdbarch_return_value (gdbarch, h8300h_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300s);
       break;
     case bfd_mach_h8300sx:
@@ -1350,8 +1301,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	  set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
 	}
-      set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
-      set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
+      set_gdbarch_return_value (gdbarch, h8300h_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300s);
       break;
     }
@@ -1364,7 +1314,6 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    */
 
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
-  set_gdbarch_deprecated_fp_regnum (gdbarch, E_FP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_register_type (gdbarch, h8300_register_type);
   set_gdbarch_print_registers_info (gdbarch, h8300_print_registers_info);
@@ -1376,11 +1325,10 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_prologue (gdbarch, h8300_skip_prologue);
 
   /* Frame unwinder.  */
-  set_gdbarch_unwind_dummy_id (gdbarch, h8300_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, h8300_unwind_pc);
-
-  /* Hook in the DWARF CFI frame unwinder.  */
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  set_gdbarch_unwind_sp (gdbarch, h8300_unwind_sp);
+  set_gdbarch_unwind_dummy_id (gdbarch, h8300_unwind_dummy_id);
+  frame_base_set_default (gdbarch, &h8300_frame_base);
 
   /* 
    * Miscelany
@@ -1388,14 +1336,10 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Stack grows up. */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
-						       h8300_extract_struct_value_address);
-  set_gdbarch_deprecated_use_struct_convention (gdbarch,
-						always_use_struct_convention);
   set_gdbarch_breakpoint_from_pc (gdbarch, h8300_breakpoint_from_pc);
-  set_gdbarch_push_dummy_code (gdbarch, h8300_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, h8300_push_dummy_call);
 
+  set_gdbarch_char_signed (gdbarch, 0);
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
@@ -1404,9 +1348,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  /* Char is unsigned.  */
-  set_gdbarch_char_signed (gdbarch, 0);
-
+  /* Hook in the DWARF CFI frame unwinder.  */
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, h8300_frame_sniffer);
 
   return gdbarch;

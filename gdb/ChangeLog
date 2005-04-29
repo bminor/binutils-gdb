@@ -1,3 +1,47 @@
+2005-04-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Revert h8300 state to un-deleted.
+	* Makefile.in: Re-add h8300-tdep.o dependencies.
+	* h8300-tdep.c: Slightly rearrange type definitions and functions.
+	(struct frame_extra_info): Remove.
+	(struct h8300_frame_cache): Replace locals with differently defined
+	uses_fp member.
+	(h8300_unwind_pc): Simplify.
+	(h8300_unwind_sp): New function.
+	(h8300_unwind_dummy_id): Simplify.
+	(h8300_init_frame_cache): New function.
+	(h8300_is_argument_spill): Use reworked defines for opcode scanning.
+	(h8300_skip_prologue): Rewrite.
+	(h8300_alloc_frame_cache): Remove.
+	(h8300_analyze_frame_setup): Remove.
+	(h8300_analyze_register_saves): Remove.
+	(h8300_analyze_prologue): Rewrite.
+	(h8300_frame_cache): Use h8300_init_frame_cache instead of
+	h8300_alloc_frame_cache.  Use BINWORD instead of constant 4 to
+	accomodate 16 bit mode.  Fix saved_sp and register offset evaluation.
+	(h8300_frame_this_id): Correctly calculate this_id using saved stack
+	pointer instead of base.
+	(h8300_frame_prev_register): Drop needless braces.
+	(h8300_frame_base_address): New function.
+	(h8300_frame_base): New frame_base.
+	(h8300_push_dummy_call): Return correct CFA value.
+	(h8300h_extract_return_value): Fix 8 byte value handling.
+	(h8300_use_struct_convention): New function.
+	(h8300h_use_struct_convention): New function.
+	(h8300h_store_return_value): Fix 8 byte value handling.
+	(h8300_return_value): New function.
+	(h8300h_return_value): New function.
+	(h8300_extract_struct_value_address): Remove deprecated functionality.
+	(h8300_push_dummy_code): Remove.
+	(h8300_gdbarch_init): Replace set_gdbarch_extract_return_value and
+	set_gdbarch_store_return_value calls by set_gdbarch_return_value.
+	Remove calls to set_gdbarch_deprecated_fp_regnum,
+	set_gdbarch_deprecated_extract_struct_value_address,
+	set_gdbarch_deprecated_use_struct_convention and
+	set_gdbarch_push_dummy_code.
+	Add calls to set_gdbarch_unwind_sp and frame_base_set_default.
+	Slightly rearrange code.
+
 2005-04-28  Jim Blandy  <jimb@redhat.com>
 
 	* parse.c (namecopy): Change allocation conventions.
