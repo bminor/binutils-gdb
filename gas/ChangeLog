@@ -1,3 +1,8 @@
+2005-04-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* hash.c: Undo the last change.
+	* hash.h: Likewise.
+
 2005-04-29  Ben Elliston  <bje@au.ibm.com>
 
 	* Makefile.am (GAS_CFILES): Remove bignum-copy.c.

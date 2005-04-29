@@ -51,10 +51,22 @@ extern const char *hash_insert (struct hash_control *,
 extern const char *hash_jam (struct hash_control *,
 			     const char *key, PTR value);
 
+/* Replace an existing entry in a hash table.  This returns the old
+   value stored for the entry.  If the entry is not found in the hash
+   table, this does nothing and returns NULL.  */
+
+extern PTR hash_replace (struct hash_control *, const char *key,
+			 PTR value);
+
 /* Find an entry in a hash table, returning its value.  Returns NULL
    if the entry is not found.  */
 
 extern PTR hash_find (struct hash_control *, const char *key);
+
+/* Delete an entry from a hash table.  This returns the value stored
+   for that entry, or NULL if there is no such entry.  */
+
+extern PTR hash_delete (struct hash_control *, const char *key);
 
 /* Traverse a hash table.  Call the function on every entry in the
    hash table.  */

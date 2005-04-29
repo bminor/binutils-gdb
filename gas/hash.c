@@ -294,6 +294,31 @@ hash_jam (struct hash_control *table, const char *key, PTR value)
   return NULL;
 }
 
+/* Replace an existing entry in a hash table.  This returns the old
+   value stored for the entry.  If the entry is not found in the hash
+   table, this does nothing and returns NULL.  */
+
+PTR
+hash_replace (struct hash_control *table, const char *key, PTR value)
+{
+  struct hash_entry *p;
+  PTR ret;
+
+  p = hash_lookup (table, key, NULL, NULL);
+  if (p == NULL)
+    return NULL;
+
+#ifdef HASH_STATISTICS
+  ++table->replacements;
+#endif
+
+  ret = p->data;
+
+  p->data = value;
+
+  return ret;
+}
+
 /* Find an entry in a hash table, returning its value.  Returns NULL
    if the entry is not found.  */
 
@@ -305,6 +330,35 @@ hash_find (struct hash_control *table, const char *key)
   p = hash_lookup (table, key, NULL, NULL);
   if (p == NULL)
     return NULL;
+
+  return p->data;
+}
+
+/* Delete an entry from a hash table.  This returns the value stored
+   for that entry, or NULL if there is no such entry.  */
+
+PTR
+hash_delete (struct hash_control *table, const char *key)
+{
+  struct hash_entry *p;
+  struct hash_entry **list;
+
+  p = hash_lookup (table, key, &list, NULL);
+  if (p == NULL)
+    return NULL;
+
+  if (p != *list)
+    abort ();
+
+#ifdef HASH_STATISTICS
+  ++table->deletions;
+#endif
+
+  *list = p->next;
+
+  /* Note that we never reclaim the memory for this entry.  If gas
+     ever starts deleting hash table entries in a big way, this will
+     have to change.  */
 
   return p->data;
 }
