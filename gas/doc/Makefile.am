@@ -58,9 +58,9 @@ CPU_DOCS = \
 	c-xtensa.texi \
 	c-z8k.texi
 
-gasver.texi: Makefile
+gasver.texi: $(srcdir)/../../bfd/configure
 	rm -f $@
-	echo '@set VERSION $(VERSION)' > $@
+	eval `grep '^ *VERSION=' $<`; echo '@set VERSION $$VERSION' > $@
 
 $(srcdir)/as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
@@ -73,9 +73,7 @@ install-data-local: install-info
 
 noinst_TEXINFOS = internals.texi
 
-DISTCLEANFILES = asconfig.texi
-
-MAINTAINERCLEANFILES = gasver.texi
+MAINTAINERCLEANFILES = asconfig.texi gasver.texi
 
 BASEDIR = $(srcdir)/../..
 BFDDIR = $(BASEDIR)/bfd
