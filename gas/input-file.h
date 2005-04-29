@@ -58,7 +58,6 @@
 char *input_file_give_next_buffer (char *where);
 char *input_file_push (void);
 unsigned int input_file_buffer_size (void);
-int input_file_is_open (void);
 void input_file_begin (void);
 void input_file_close (void);
 void input_file_end (void);

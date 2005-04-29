@@ -1,3 +1,55 @@
+2005-04-29  Ben Elliston  <bje@au.ibm.com>
+
+	* Makefile.am (GAS_CFILES): Remove bignum-copy.c.
+	(GENERIC_OBJS): Likewise, remove bignum-copy.o.
+	(bignum-copy.o): Remove.
+	* Makefile.in: Regenerate.
+	* makefile.vms (OBJS): Remove bignum-copy.obj.
+	* symbols.h (local_symbol_make): Remove declaration.
+	(verify_symbol_chain_2): Likewise.
+	* symbols.c (local_symbol_make): Make static.
+	(max_indent_level): Likewise.
+	(verify_symbol_chain_2): Remove.
+	* macro.c (macro_hash): Make static.
+	* messages.c (fprint_value): Remove.
+	* read.h (get_absolute_expr): Remove.
+	(emit_leb128_expr): Likewise.
+	(do_s_func): Likewise.
+	* read.c (do_s_func): Make static.
+	(emit_leb128_expr): Likewise.
+	(get_absolute_expr): Likewise.
+	* as.h (as_howmuch): Remove declaration.
+	(fprint_value): Likewise.
+	* as.c (myname): Make static.
+	* input-scrub.c (as_howmuch): Remove.
+	(as_1_char): Likewise.
+	* input-file.h (input_file_is_open): Remove.
+	* input-file.c (input_file_is_open): Likewise.
+	* expr.h (expr_build_unary): Remove declaration.
+	(expr_build_binary): Likewise.
+	* expr.c (expr_build_unary): Remove.
+	(expr_build_binary): Likewise.
+	* hash.h (hash_replace): Remove declaration.
+	(hash_delete): Likewise.
+	* hash.c (hash_replace): Remove.
+	(hash_delete): Likewise.
+	* bignum-copy.c (bignum_copy): Move from here ..
+	* config/tc-vax.c (bignum_copy): .. to here.
+	* bignum.h (LOG_TO_BASE_2_OF_10): Remove.
+	(bignum_copy): Remove extern declaration.
+	* sb.h (string_count): Remove extern declaration.
+	(sb_build, sb_add_buffer, sb_print, sb_print_at): Likewise.
+	(sb_name): Likewise.
+	* sb.c (dsize): Replace preprocessor macro with static int.
+	(string_count): Make static.
+	(sb_build, sb_add_buffer, sb_print, sb_print_at): Likewise.
+	(sb_name): Likewise.
+	* config/obj-coff.c (dim_index): Make static.
+	* config/tc-i386.c (GOT_symbol): Likewise.
+	(output_invalid_buf): Likewise.
+	* doc/internals.texi (Warning and error messages): Remove the
+	prototype for fprint_value.
+
 2005-04-27  Ben Elliston  <bje@au.ibm.com>
 
 	* link.cmd: Remove.

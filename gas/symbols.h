@@ -56,8 +56,6 @@ symbolS *symbol_new (const char *name, segT segment, valueT value,
 		     fragS * frag);
 symbolS *symbol_create (const char *name, segT segment, valueT value,
 			fragS * frag);
-struct local_symbol *local_symbol_make (const char *name, segT section,
-					valueT value, fragS * frag);
 symbolS *symbol_temp_new (segT, valueT, fragS *);
 symbolS *symbol_temp_new_now (void);
 symbolS *symbol_temp_make (void);
@@ -164,7 +162,6 @@ extern symbolS *symbol_previous (symbolS *);
 #endif /* SYMBOLS_NEED_BACKPOINTERS */
 
 void verify_symbol_chain (symbolS * rootP, symbolS * lastP);
-void verify_symbol_chain_2 (symbolS * symP);
 
 void symbol_append (symbolS * addme, symbolS * target,
 		    symbolS ** rootP, symbolS ** lastP);

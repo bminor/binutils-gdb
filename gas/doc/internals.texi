@@ -1893,9 +1893,8 @@ after all input has been read, but messages about fixups should refer to the
 original filename and line number that they are applicable to.
 @end deftypefun
 
-@deftypefun @{@} void fprint_value (FILE *@var{file}, valueT @var{val})
-@deftypefunx @{@} void sprint_value (char *@var{buf}, valueT @var{val})
-These functions are helpful for converting a @code{valueT} value into printable
+@deftypefun @{@} void sprint_value (char *@var{buf}, valueT @var{val})
+This function is helpful for converting a @code{valueT} value into printable
 format, in case it's wider than modes that @code{*printf} can handle.  If the
 type is narrow enough, a decimal number will be produced; otherwise, it will be
 in hexadecimal.  The value itself is not examined to make this determination.

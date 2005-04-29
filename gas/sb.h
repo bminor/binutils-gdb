@@ -76,19 +76,12 @@ typedef struct
     sb_element *size[sb_max_power_two];
   } sb_list_vector;
 
-extern int string_count[sb_max_power_two];
-
-extern void sb_build (sb *, int);
 extern void sb_new (sb *);
 extern void sb_kill (sb *);
 extern void sb_add_sb (sb *, sb *);
 extern void sb_reset (sb *);
 extern void sb_add_char (sb *, int);
 extern void sb_add_string (sb *, const char *);
-extern void sb_add_buffer (sb *, const char *, int);
-extern void sb_print (FILE *, sb *);
-extern void sb_print_at (FILE *, int, sb *);
-extern char *sb_name (sb *);
 extern char *sb_terminate (sb *);
 extern int sb_skip_white (int, sb *);
 extern int sb_skip_comma (int, sb *);

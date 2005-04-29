@@ -211,6 +211,7 @@ static int dwarf_file_string;
 #endif
 #endif
 
+static void do_s_func (int end_p, const char *default_prefix);
 static void do_align (int, char *, int, int);
 static void s_align (int, int);
 static void s_altmacro (int);
@@ -437,6 +438,27 @@ static const pseudo_typeS potable[] = {
   {"zero", s_space, 0},
   {NULL, NULL, 0}			/* End sentinel.  */
 };
+
+static offsetT
+get_absolute_expr (expressionS *exp)
+{
+  expression (exp);
+  if (exp->X_op != O_constant)
+    {
+      if (exp->X_op != O_absent)
+	as_bad (_("bad or irreducible absolute expression"));
+      exp->X_add_number = 0;
+    }
+  return exp->X_add_number;
+}
+
+offsetT
+get_absolute_expression (void)
+{
+  expressionS exp;
+
+  return get_absolute_expr (&exp);
+}
 
 static int pop_override_ok = 0;
 static const char *pop_table_name;
@@ -4461,7 +4483,7 @@ output_big_leb128 (char *p, LITTLENUM_TYPE *bignum, int size, int sign)
 /* Generate the appropriate fragments for a given expression to emit a
    leb128 value.  */
 
-void
+static void
 emit_leb128_expr (expressionS *exp, int sign)
 {
   operatorT op = exp->X_op;
@@ -4828,27 +4850,6 @@ get_known_segmented_expression (register expressionS *expP)
   return (retval);
 }
 
-offsetT
-get_absolute_expr (expressionS *exp)
-{
-  expression (exp);
-  if (exp->X_op != O_constant)
-    {
-      if (exp->X_op != O_absent)
-	as_bad (_("bad or irreducible absolute expression"));
-      exp->X_add_number = 0;
-    }
-  return exp->X_add_number;
-}
-
-offsetT
-get_absolute_expression (void)
-{
-  expressionS exp;
-
-  return get_absolute_expr (&exp);
-}
-
 char				/* Return terminator.  */
 get_absolute_expression_and_terminator (long *val_pointer /* Return value of expression.  */)
 {
@@ -5209,7 +5210,7 @@ s_func (int end_p)
 /* Subroutine of s_func so targets can choose a different default prefix.
    If DEFAULT_PREFIX is NULL, use the target's "leading char".  */
 
-void
+static void
 do_s_func (int end_p, const char *default_prefix)
 {
   /* Record the current function so that we can issue an error message for

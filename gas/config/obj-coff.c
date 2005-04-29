@@ -2475,7 +2475,7 @@ c_symbol_merge (symbolS *debug, symbolS *normal)
   SF_SET_DEBUG_FIELD (normal, SF_GET_DEBUG_FIELD (debug));
 }
 
-unsigned int dim_index;
+static unsigned int dim_index;
 
 static void
 obj_coff_endef (int ignore ATTRIBUTE_UNUSED)

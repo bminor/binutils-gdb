@@ -123,7 +123,6 @@ struct input_save {
 
 static struct input_save *input_scrub_push (char *saved_position);
 static char *input_scrub_pop (struct input_save *arg);
-static void as_1_char (unsigned int c, FILE * stream);
 
 /* Saved information about the file that .include'd this one.  When we hit EOF,
    we automatically pop to that file.  */
@@ -475,40 +474,4 @@ as_where (char **namep, unsigned int *linep)
       if (linep != NULL)
 	*linep = 0;
     }
-}
-
-/* Output to given stream how much of line we have scanned so far.
-   Assumes we have scanned up to and including input_line_pointer.
-   No free '\n' at end of line.  */
-
-void
-as_howmuch (FILE *stream /* Opened for write please.  */)
-{
-  register char *p;		/* Scan input line.  */
-
-  for (p = input_line_pointer - 1; *p != '\n'; --p)
-    {
-    }
-  ++p;				/* p->1st char of line.  */
-  for (; p <= input_line_pointer; p++)
-    {
-      /* Assume ASCII. EBCDIC & other micro-computer char sets ignored.  */
-      as_1_char ((unsigned char) *p, stream);
-    }
-}
-
-static void
-as_1_char (unsigned int c, FILE *stream)
-{
-  if (c > 127)
-    {
-      (void) putc ('%', stream);
-      c -= 128;
-    }
-  if (c < 32)
-    {
-      (void) putc ('^', stream);
-      c += '@';
-    }
-  (void) putc (c, stream);
 }

@@ -470,24 +470,6 @@ as_abort (const char *file, int line, const char *fn)
 /* Support routines.  */
 
 void
-fprint_value (FILE *file, valueT val)
-{
-  if (sizeof (val) <= sizeof (long))
-    {
-      fprintf (file, "%ld", (long) val);
-      return;
-    }
-#ifdef BFD_ASSEMBLER
-  if (sizeof (val) <= sizeof (bfd_vma))
-    {
-      fprintf_vma (file, val);
-      return;
-    }
-#endif
-  abort ();
-}
-
-void
 sprint_value (char *buf, valueT val)
 {
   if (sizeof (val) <= sizeof (long))

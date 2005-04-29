@@ -80,12 +80,6 @@ input_file_buffer_size (void)
   return (BUFFER_SIZE);
 }
 
-int
-input_file_is_open (void)
-{
-  return f_in != (FILE *) 0;
-}
-
 /* Push the state of our input, returning a pointer to saved info that
    can be restored with input_file_pop ().  */
 

@@ -166,6 +166,4 @@ extern symbolS *make_expr_symbol (expressionS * expressionP);
 extern int expr_symbol_where (symbolS *, char **, unsigned int *);
 
 extern symbolS *expr_build_uconstant (offsetT);
-extern symbolS *expr_build_unary (operatorT, symbolS *);
-extern symbolS *expr_build_binary (operatorT, symbolS *, symbolS *);
 extern symbolS *expr_build_dot (void);

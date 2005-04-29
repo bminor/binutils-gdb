@@ -197,7 +197,7 @@ static unsigned long local_symbol_conversion_count;
 
 /* Create a local symbol and insert it into the local hash table.  */
 
-struct local_symbol *
+static struct local_symbol *
 local_symbol_make (const char *name, segT section, valueT value, fragS *frag)
 {
   char *name_copy;
@@ -792,19 +792,6 @@ verify_symbol_chain (symbolS *rootP, symbolS *lastP)
     }
 
   assert (lastP == symbolP);
-}
-
-void
-verify_symbol_chain_2 (symbolS *sym)
-{
-  symbolS *p = sym, *n = sym;
-#ifdef SYMBOLS_NEED_BACKPOINTERS
-  while (symbol_previous (p))
-    p = symbol_previous (p);
-#endif
-  while (symbol_next (n))
-    n = symbol_next (n);
-  verify_symbol_chain (p, n);
 }
 
 static void
@@ -2361,7 +2348,7 @@ int indent_level;
 
 /* Maximum indent level.
    Available for modification inside a gdb session.  */
-int max_indent_level = 8;
+static int max_indent_level = 8;
 
 void
 print_symbol_value_1 (FILE *file, symbolS *sym)

@@ -177,7 +177,6 @@ GAS_CFILES = \
 	app.c \
 	as.c \
 	atof-generic.c \
-	bignum-copy.c \
 	cond.c \
 	depend.c \
 	dwarf2dbg.c \
@@ -427,7 +426,6 @@ GENERIC_OBJS = \
 	app.o \
 	as.o \
 	atof-generic.o \
-	bignum-copy.o \
 	cond.o \
 	depend.o \
 	dwarf2dbg.o \
@@ -2444,7 +2442,6 @@ as.o: as.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
   output-file.h sb.h macro.h dwarf2dbg.h dw2gencfi.h hash.h \
   $(INCDIR)/elf/dwarf2.h $(BFDVER_H)
 atof-generic.o: atof-generic.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h
-bignum-copy.o: bignum-copy.c $(INCDIR)/symcat.h
 cond.o: cond.c $(INCDIR)/symcat.h macro.h sb.h $(INCDIR)/obstack.h
 depend.o: depend.c $(INCDIR)/symcat.h
 dwarf2dbg.o: dwarf2dbg.c $(INCDIR)/symcat.h dwarf2dbg.h \

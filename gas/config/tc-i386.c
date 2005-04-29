@@ -324,7 +324,7 @@ static unsigned int cpu_arch_flags = CpuUnknownFlags | CpuNo64;
 static unsigned int no_cond_jump_promotion = 0;
 
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
-symbolS *GOT_symbol;
+static symbolS *GOT_symbol;
 
 /* The dwarf2 return column, adjusted for 32 or 64 bit.  */
 unsigned int x86_dwarf2_return_column;
@@ -4971,7 +4971,7 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
-char output_invalid_buf[8];
+static char output_invalid_buf[8];
 
 static char *
 output_invalid (c)

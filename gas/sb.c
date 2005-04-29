@@ -50,21 +50,18 @@
 
 */
 
-#define dsize 5
-
+static int dsize = 5;
 static void sb_check (sb *, int);
 
 /* Statistics of sb structures.  */
-
-int string_count[sb_max_power_two];
+static int string_count[sb_max_power_two];
 
 /* Free list of sb structures.  */
-
 static sb_list_vector free_list;
 
 /* initializes an sb.  */
 
-void
+static void
 sb_build (sb *ptr, int size)
 {
   /* see if we can find one to allocate */
@@ -166,54 +163,6 @@ sb_add_string (sb *ptr, const char *s)
   sb_check (ptr, len);
   memcpy (ptr->ptr + ptr->len, s, len);
   ptr->len += len;
-}
-
-/* add string at s of length len to sb at ptr */
-
-void
-sb_add_buffer (sb *ptr, const char *s, int len)
-{
-  sb_check (ptr, len);
-  memcpy (ptr->ptr + ptr->len, s, len);
-  ptr->len += len;
-}
-
-/* print the sb at ptr to the output file */
-
-void
-sb_print (FILE *outfile, sb *ptr)
-{
-  int i;
-  int nc = 0;
-
-  for (i = 0; i < ptr->len; i++)
-    {
-      if (nc)
-	{
-	  fprintf (outfile, ",");
-	}
-      fprintf (outfile, "%d", ptr->ptr[i]);
-      nc = 1;
-    }
-}
-
-void
-sb_print_at (FILE *outfile, int idx, sb *ptr)
-{
-  int i;
-  for (i = idx; i < ptr->len; i++)
-    putc (ptr->ptr[i], outfile);
-}
-
-/* put a null at the end of the sb at in and return the start of the
-   string, so that it can be used as an arg to printf %s.  */
-
-char *
-sb_name (sb *in)
-{
-  /* stick a null on the end of the string */
-  sb_add_char (in, 0);
-  return in->ptr;
 }
 
 /* like sb_name, but don't include the null byte in the string.  */
