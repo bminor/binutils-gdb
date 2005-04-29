@@ -1,3 +1,8 @@
+2005-04-29  Ralf Corsepius <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Add h8300*-*-rtemscoff.
+	Switch h8300*-*-rtems* to elf.
+
 2005-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* hash.c: Undo the last change.

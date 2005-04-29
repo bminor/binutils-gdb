@@ -161,9 +161,9 @@ case ${generic_target} in
   hppa-*-bsd*)				fmt=som em=hppa ;;
   hppa-*-hiux*)				fmt=som em=hppa ;;
 
-  h8300-*-rtems*)			fmt=coff ;;
+  h8300-*-rtemscoff*)			fmt=coff ;;
   h8300-*-coff)				fmt=coff ;;
-  h8300-*-elf)				fmt=elf ;;
+  h8300-*-elf | h8300-*-rtems*)		fmt=elf ;;
   h8500-*-rtems*)			fmt=coff ;;
   h8500-*-coff)				fmt=coff ;;
 
