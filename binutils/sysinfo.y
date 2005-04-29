@@ -21,22 +21,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <stdlib.h>
 
-extern char *word;
-extern char writecode;
-extern int number;
-extern int unit;
-char nice_name[1000];
-char *it;
-int sofar;
-int width;
-int code;
-char * repeat;
-char *oldrepeat;
-char *name;
-int rdepth;
-char *loop [] = {"","n","m","/*BAD*/"};
-char *names[] = {" ","[n]","[n][m]"};
-char *pnames[]= {"","*","**"};
+static char writecode;
+static char *it;
+static int code;
+static char * repeat;
+static char *oldrepeat;
+static char *name;
+static int rdepth;
+static char *names[] = {" ","[n]","[n][m]"};
+static char *pnames[]= {"","*","**"};
 
 static int yyerror (char *s);
 extern int yylex (void);
@@ -415,7 +408,6 @@ enum_list:
    -c write code to print info in human form */
 
 int yydebug;
-char writecode;
 
 int 
 main (int ac, char **av)

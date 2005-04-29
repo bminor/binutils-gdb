@@ -27,9 +27,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #endif
 #endif
 #include "sysinfo.h"
-char *word;
-int number;
-int unit;
 
 #define YY_NO_UNPUT
 

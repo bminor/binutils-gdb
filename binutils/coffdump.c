@@ -38,11 +38,9 @@ static void dump_coff_lines (struct coff_line *);
 static void dump_coff_type (struct coff_type *);
 static void dump_coff_where (struct coff_where *);
 static void dump_coff_visible (struct coff_visible *);
-extern void dump_coff_symbol (struct coff_symbol *);
 static void dump_coff_scope (struct coff_scope *);
 static void dump_coff_sfile (struct coff_sfile *);
 static void dump_coff_section (struct coff_section *);
-extern void coff_dump (struct coff_ofile *);
 static void show_usage (FILE *, int);
 extern int main (int, char **);
 
@@ -325,7 +323,7 @@ dump_coff_visible (struct coff_visible *p)
   tab (-1);
 }
 
-void
+static void
 dump_coff_symbol (struct coff_symbol *p)
 {
   tab (1);
@@ -436,7 +434,7 @@ dump_coff_section (struct coff_section *ptr)
   tab (-1);
 }
 
-void
+static void
 coff_dump (struct coff_ofile *ptr)
 {
   int i;

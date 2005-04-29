@@ -54,16 +54,9 @@ static void derived_type (void);
 static void module (void);
 static void show_usage (FILE *, int);
 
-extern char *getCHARS (unsigned char *, int *, int, int);
-extern int fillup (unsigned char *);
-extern barray getBARRAY (unsigned char *, int *, int, int);
-extern int getINT (unsigned char *, int *, int, int);
-extern int getBITS (unsigned char *, int *, int, int);
-extern void sysroff_swap_tr_in (void);
-extern void sysroff_print_tr_out (void);
 extern int main (int, char **);
 
-char *
+static char *
 getCHARS (unsigned char *ptr, int *idx, int size, int max)
 {
   int oc = *idx / 8;
@@ -120,7 +113,7 @@ dh (unsigned char *ptr, int size)
     }
 }
 
-int
+static int
 fillup (unsigned char *ptr)
 {
   int size;
@@ -143,7 +136,7 @@ fillup (unsigned char *ptr)
   return size - 1;
 }
 
-barray
+static barray
 getBARRAY (unsigned char *ptr, int *idx, int dsize ATTRIBUTE_UNUSED,
 	   int max ATTRIBUTE_UNUSED)
 {
@@ -161,7 +154,7 @@ getBARRAY (unsigned char *ptr, int *idx, int dsize ATTRIBUTE_UNUSED,
   return res;
 }
 
-int
+static int
 getINT (unsigned char *ptr, int *idx, int size, int max)
 {
   int n = 0;
@@ -197,7 +190,7 @@ getINT (unsigned char *ptr, int *idx, int size, int max)
   return n;
 }
 
-int
+static int
 getBITS (unsigned char *ptr, int *idx, int size, int max)
 {
   int byte = *idx / 8;
@@ -262,7 +255,7 @@ pbarray (barray *y)
 
 #define IT_tr_CODE	0x7f
 
-void
+static void
 sysroff_swap_tr_in (void)
 {
   unsigned char raw[255];
@@ -271,7 +264,7 @@ sysroff_swap_tr_in (void)
   fillup (raw);
 }
 
-void
+static void
 sysroff_print_tr_out (void)
 {
   itheader ("tr", IT_tr_CODE);

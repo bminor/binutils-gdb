@@ -1,5 +1,17 @@
 2005-04-29  Ben Elliston  <bje@au.ibm.com>
 
+	* syslex.l (word, number, unit): Remove unused variables.
+	* nlmheader.y (keyword_tokens): Make static.
+	* coffdump.c (dump_coff_symbol, coff_dump): Make static.
+	* coffgrok.c (lofile, last_function_symbol, last_function_type,
+	last_struct, last_enum, cur_sfile): Make variables static.
+	* sysdump.c (getCHARS, fillup, getBARRAY, getINT, getBITS,
+	sysroff_swap_tr_in, sysroff_print_tr_out): Make static.
+	* sysinfo.y (writecode, it, code, repeat, oldrepeat, name, rdepth,
+	names, pnames): Likewise.
+
+2005-04-29  Ben Elliston  <bje@au.ibm.com>
+
 	* ar.c (mri_mode): Make static.
 	* arsup.c (obfd, real_name, outfile): Likewise.
 	* binemul.c (ar_emul_create): Remove unused function.

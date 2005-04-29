@@ -586,7 +586,7 @@ struct keyword_tokens_struct
   int token;
 };
 
-struct keyword_tokens_struct keyword_tokens[] =
+static struct keyword_tokens_struct keyword_tokens[] =
 {
   { "CHECK", CHECK },
   { "CODESTART", CODESTART },
