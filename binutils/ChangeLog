@@ -1,3 +1,24 @@
+2005-04-29  Ben Elliston  <bje@au.ibm.com>
+
+	* ar.c (mri_mode): Make static.
+	* arsup.c (obfd, real_name, outfile): Likewise.
+	* binemul.c (ar_emul_create): Remove unused function.
+	(ar_emul_default_create): Likewise.
+	* binemul.h (ar_emul_create): Remove declaration.
+	(ar_emul_default_create): Likewise.
+	(struct bin_emulation_xfer_struct): Remove ar_create member.
+	* bucomm.c (report): Make static.
+	* bucomm.h (report): Remove declaration.
+	* cxxfilt.c (mbuffer): Make static.
+	(main): Use unsigned ints for some loop control variables.
+	* readelf.c: Make many global variables static.
+	* size.c (berkeley_format): Make static.
+	(long_options): Likewise.
+	* emul_aix.c (bin_aix_emulation): Remove ar_emul_default_create
+	structure initialiser.
+	(bin_aix5_emulation): Likewise.
+	* emul_vanilla.c (bin_vanilla_emulation): Likewise.
+
 2005-04-27  Ben Elliston  <bje@au.ibm.com>
 
 	* syslex.l: Adjust top-of-file comment: this file is part of GNU

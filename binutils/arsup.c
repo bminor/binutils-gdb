@@ -38,6 +38,10 @@ static void ar_addlib_doer (bfd *, bfd *);
 
 extern int verbose;
 
+static bfd *obfd;
+static char *real_name;
+static FILE *outfile;
+
 static void
 map_over_list (bfd *arch, void (*function) (bfd *, bfd *), struct list *list)
 {
@@ -86,7 +90,6 @@ map_over_list (bfd *arch, void (*function) (bfd *, bfd *), struct list *list)
 }
 
 
-FILE *outfile;
 
 static void
 ar_directory_doer (bfd *abfd, bfd *ignore ATTRIBUTE_UNUSED)
@@ -140,9 +143,6 @@ maybequit (void)
     xexit (9);
 }
 
-
-bfd *obfd;
-char *real_name;
 
 void
 ar_open (char *name, int t)

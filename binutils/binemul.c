@@ -90,47 +90,6 @@ ar_emul_default_replace (bfd **after_bfd, char *file_name,
 }
 
 bfd_boolean
-ar_emul_create (bfd **abfd_out, char *archive_file_name, char *file_name)
-{
-  if (bin_dummy_emulation.ar_create)
-    return bin_dummy_emulation.ar_create (abfd_out, archive_file_name,
-					  file_name);
-
-  return FALSE;
-}
-
-bfd_boolean
-ar_emul_default_create (bfd **abfd_out, char *archive_file_name,
-			char *file_name)
-{
-  char *target = NULL;
-
-  /* Try to figure out the target to use for the archive from the
-     first object on the list.  */
-  if (file_name != NULL)
-    {
-      bfd *obj;
-
-      obj = bfd_openr (file_name, NULL);
-      if (obj != NULL)
-	{
-	  if (bfd_check_format (obj, bfd_object))
-	    target = bfd_get_target (obj);
-	  (void) bfd_close (obj);
-	}
-    }
-
-  /* Create an empty archive.  */
-  *abfd_out = bfd_openw (archive_file_name, target);
-  if (*abfd_out == NULL
-      || ! bfd_set_format (*abfd_out, bfd_archive)
-      || ! bfd_close (*abfd_out))
-    bfd_fatal (archive_file_name);
-
-  return TRUE;
-}
-
-bfd_boolean
 ar_emul_parse_arg (char *arg)
 {
   if (bin_dummy_emulation.ar_parse_arg)

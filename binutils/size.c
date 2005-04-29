@@ -45,7 +45,9 @@ enum
   }
 radix = decimal;
 
-int berkeley_format = BSD_DEFAULT;	/* 0 means use AT&T-style output.  */
+/* 0 means use AT&T-style output.  */
+static int berkeley_format = BSD_DEFAULT;
+
 int show_version = 0;
 int show_help = 0;
 int show_totals = 0;
@@ -100,7 +102,7 @@ usage (FILE *stream, int status)
   exit (status);
 }
 
-struct option long_options[] =
+static struct option long_options[] =
 {
   {"format", required_argument, 0, 200},
   {"radix", required_argument, 0, 201},

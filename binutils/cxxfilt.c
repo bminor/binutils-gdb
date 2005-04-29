@@ -92,8 +92,7 @@ Usage: %s [-_] [-n] [--strip-underscores] [--no-strip-underscores]\n\
   exit (status);
 }
 
-#define MBUF_SIZE 32767
-char mbuffer[MBUF_SIZE];
+static char mbuffer[32767];
 
 int strip_underscore = 0;
 
@@ -243,19 +242,19 @@ main (int argc, char **argv)
 
       for (;;)
 	{
-	  int i = 0;
+	  unsigned i = 0;
 	  c = getchar ();
 	  /* Try to read a label.  */
 	  while (c != EOF && (ISALNUM (c) || strchr (valid_symbols, c)))
 	    {
-	      if (i >= MBUF_SIZE-1)
+	      if (i >= sizeof (mbuffer) - 1)
 		break;
 	      mbuffer[i++] = c;
 	      c = getchar ();
 	    }
 	  if (i > 0)
 	    {
-	      int skip_first = 0;
+	      unsigned skip_first = 0;
 
 	      mbuffer[i] = 0;
 	      if (mbuffer[0] == '.' || mbuffer[0] == '$')

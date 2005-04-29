@@ -30,8 +30,6 @@ extern bfd_boolean ar_emul_append (bfd **, char *, bfd_boolean);
 extern bfd_boolean ar_emul_default_append (bfd **, char *, bfd_boolean);
 extern bfd_boolean ar_emul_replace (bfd **, char *, bfd_boolean);
 extern bfd_boolean ar_emul_default_replace (bfd **, char *, bfd_boolean);
-extern bfd_boolean ar_emul_create (bfd **, char *, char *);
-extern bfd_boolean ar_emul_default_create (bfd **, char *, char *);
 extern bfd_boolean ar_emul_parse_arg (char *);
 extern bfd_boolean ar_emul_default_parse_arg (char *);
 
@@ -56,7 +54,6 @@ typedef struct bin_emulation_xfer_struct
   void (* ar_usage) (FILE *fp);
   bfd_boolean (* ar_append) (bfd **, char *, bfd_boolean);
   bfd_boolean (* ar_replace) (bfd **, char *, bfd_boolean);
-  bfd_boolean (* ar_create) (bfd **, char *, char *);
   bfd_boolean (* ar_parse_arg) (char *);
 }
 bin_emulation_xfer_type;

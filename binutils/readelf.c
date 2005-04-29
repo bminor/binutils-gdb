@@ -117,61 +117,61 @@
 #include "libiberty.h"
 
 char *program_name = "readelf";
-long archive_file_offset;
-unsigned long archive_file_size;
-unsigned long dynamic_addr;
-bfd_size_type dynamic_size;
-unsigned int dynamic_nent;
-char *dynamic_strings;
-unsigned long dynamic_strings_length;
-char *string_table;
-unsigned long string_table_length;
-unsigned long num_dynamic_syms;
-Elf_Internal_Sym *dynamic_symbols;
-Elf_Internal_Syminfo *dynamic_syminfo;
-unsigned long dynamic_syminfo_offset;
-unsigned int dynamic_syminfo_nent;
-char program_interpreter[64];
-bfd_vma dynamic_info[DT_JMPREL + 1];
-bfd_vma version_info[16];
-Elf_Internal_Ehdr elf_header;
-Elf_Internal_Shdr *section_headers;
-Elf_Internal_Phdr *program_headers;
-Elf_Internal_Dyn *dynamic_section;
-Elf_Internal_Shdr *symtab_shndx_hdr;
-int show_name;
-int do_dynamic;
-int do_syms;
-int do_reloc;
-int do_sections;
-int do_section_groups;
-int do_full_section_name;
-int do_segments;
-int do_unwind;
-int do_using_dynamic;
-int do_header;
-int do_dump;
-int do_version;
-int do_wide;
-int do_histogram;
-int do_debugging;
-int do_debug_info;
-int do_debug_abbrevs;
-int do_debug_lines;
-int do_debug_pubnames;
-int do_debug_aranges;
-int do_debug_ranges;
-int do_debug_frames;
-int do_debug_frames_interp;
-int do_debug_macinfo;
-int do_debug_str;
-int do_debug_loc;
-int do_arch;
-int do_notes;
-int is_32bit_elf;
-int have_frame_base;
-int need_base_address;
-bfd_vma eh_addr_size;
+static long archive_file_offset;
+static unsigned long archive_file_size;
+static unsigned long dynamic_addr;
+static bfd_size_type dynamic_size;
+static unsigned int dynamic_nent;
+static char *dynamic_strings;
+static unsigned long dynamic_strings_length;
+static char *string_table;
+static unsigned long string_table_length;
+static unsigned long num_dynamic_syms;
+static Elf_Internal_Sym *dynamic_symbols;
+static Elf_Internal_Syminfo *dynamic_syminfo;
+static unsigned long dynamic_syminfo_offset;
+static unsigned int dynamic_syminfo_nent;
+static char program_interpreter[64];
+static bfd_vma dynamic_info[DT_JMPREL + 1];
+static bfd_vma version_info[16];
+static Elf_Internal_Ehdr elf_header;
+static Elf_Internal_Shdr *section_headers;
+static Elf_Internal_Phdr *program_headers;
+static Elf_Internal_Dyn *dynamic_section;
+static Elf_Internal_Shdr *symtab_shndx_hdr;
+static int show_name;
+static int do_dynamic;
+static int do_syms;
+static int do_reloc;
+static int do_sections;
+static int do_section_groups;
+static int do_full_section_name;
+static int do_segments;
+static int do_unwind;
+static int do_using_dynamic;
+static int do_header;
+static int do_dump;
+static int do_version;
+static int do_wide;
+static int do_histogram;
+static int do_debugging;
+static int do_debug_info;
+static int do_debug_abbrevs;
+static int do_debug_lines;
+static int do_debug_pubnames;
+static int do_debug_aranges;
+static int do_debug_ranges;
+static int do_debug_frames;
+static int do_debug_frames_interp;
+static int do_debug_macinfo;
+static int do_debug_str;
+static int do_debug_loc;
+static int do_arch;
+static int do_notes;
+static int is_32bit_elf;
+static int have_frame_base;
+static int need_base_address;
+static bfd_vma eh_addr_size;
 
 struct group_list
 {
@@ -185,10 +185,9 @@ struct group
   unsigned int group_index;
 };
 
-struct group *section_groups;
-size_t group_count;
-
-struct group **section_headers_groups;
+static size_t group_count;
+static struct group *section_groups;
+static struct group **section_headers_groups;
 
 /* A dynamic array of flags indicating for which sections a hex dump
    has been requested (via the -x switch) and/or a disassembly dump
@@ -2577,7 +2576,7 @@ get_section_type_name (unsigned int sh_type)
 
 #define OPTION_DEBUG_DUMP	512
 
-struct option options[] =
+static struct option options[] =
 {
   {"all",	       no_argument, 0, 'a'},
   {"file-header",      no_argument, 0, 'h'},
@@ -4244,7 +4243,7 @@ process_section_groups (FILE *file)
   return 1;
 }
 
-struct
+static struct
 {
   const char *name;
   int reloc;
@@ -10790,7 +10789,7 @@ display_debug_not_supported (Elf_Internal_Shdr *section,
 
 /* A structure containing the name of a debug section
    and a pointer to a function that can decode it.  */
-struct
+static struct
 {
   const char *const name;
   int (*display) (Elf_Internal_Shdr *, unsigned char *, FILE *);

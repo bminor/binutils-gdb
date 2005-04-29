@@ -161,7 +161,6 @@ struct bin_emulation_xfer_struct bin_aix_emulation =
   ar_emul_aix_usage,
   ar_emul_aix_append,
   ar_emul_aix_replace,
-  ar_emul_default_create,
   ar_emul_aix_parse_arg,
 };
 
@@ -170,6 +169,5 @@ struct bin_emulation_xfer_struct bin_aix5_emulation =
   ar_emul_aix_usage,
   ar_emul_aix5_append,
   ar_emul_aix5_replace,
-  ar_emul_default_create,
   ar_emul_aix_parse_arg,
 };
