@@ -1,3 +1,11 @@
+2005-04-28  Jim Blandy  <jimb@redhat.com>
+
+	* parse.c (namecopy): Change allocation conventions.
+	(namecopy_size): New variable.
+	(copy_name): Allocate namecopy using xrealloc, instead of assuming
+	it has adequate space allocated to it.
+	(parse_exp_1): Don't try to allocate space for namecopy here.
+
 2005-04-28  Eli Zaretskii  <eliz@gnu.org>
 
 	* cli/cli-cmds.c (edit_command): If symtab->fullname is not yet

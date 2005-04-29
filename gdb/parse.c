@@ -76,9 +76,18 @@ union type_stack_elt *type_stack;
 int type_stack_depth, type_stack_size;
 char *lexptr;
 char *prev_lexptr;
-char *namecopy;
 int paren_depth;
 int comma_terminates;
+
+/* A temporary buffer for identifiers, so we can null-terminate them.
+
+   We allocate this with xrealloc.  parse_exp_1 used to allocate with
+   alloca, using the size of the whole expression as a conservative
+   estimate of the space needed.  However, macro expansion can
+   introduce names longer than the original expression; there's no
+   practical way to know beforehand how large that might be.  */
+char *namecopy;
+size_t namecopy_size;
 
 static int expressiondebug = 0;
 static void
@@ -758,8 +767,16 @@ find_template_name_end (char *p)
 char *
 copy_name (struct stoken token)
 {
+  /* Make sure there's enough space for the token.  */
+  if (namecopy_size < token.length + 1)
+    {
+      namecopy_size = token.length + 1;
+      namecopy = xrealloc (namecopy, token.length + 1);
+    }
+      
   memcpy (namecopy, token.ptr, token.length);
   namecopy[token.length] = 0;
+
   return namecopy;
 }
 
@@ -1044,7 +1061,6 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
   else
     expression_context_block = get_selected_block (&expression_context_pc);
 
-  namecopy = (char *) alloca (strlen (lexptr) + 1);
   expout_size = 10;
   expout_ptr = 0;
   expout = (struct expression *)
