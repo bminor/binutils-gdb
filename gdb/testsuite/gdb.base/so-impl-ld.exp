@@ -1,4 +1,5 @@
-# Copyright 1997, 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+# Copyright 1997, 1998, 1999, 2000, 2001, 2003, 2005
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,10 +13,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 if $tracelevel then {
 	strace $tracelevel
@@ -29,70 +27,33 @@ if ![isnative] then {
     return
 }
 
-# This test is presently only valid on HP-UX, since it requires
-# that we use HP-UX-specific compiler & linker options to build
-# the testcase.
-# Actually this test works on solaris, and linux too.
- 
-if {! ([istarget "hppa*-*-*hpux*"]
-       || [istarget "sparc-sun-solaris*"]
-       || [istarget "*-*-linux-gnu*"]) } {
-	 return
-}
-
-set libfile "solib"
 set testfile "so-impl-ld"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set libfile "solib1"
+set srcfile $srcdir/$subdir/$testfile.c
+set libsrc  $srcdir/$subdir/$libfile.c
+set binfile $objdir/$subdir/$testfile
+set lib_sl  $objdir/$subdir/$libfile.sl
+
+set lib_opts  debug
+set exec_opts [list debug shlib=$lib_sl]
 
 if [get_compiler_info ${binfile}] {
     return -1
 }
 
-# Build the shared libraries this test case needs.
-#
-#cd ${subdir}
-#remote_exec build "$CC -g +z -c ${libfile}1.c -o ${libfile}1.o"
-
-
-if { [test_compiler_info gcc-*-*] } then {
-    set additional_flags "additional_flags=-fpic"
-} else {
-    if [istarget "hppa*-hp-hpux*"] then {
-	set additional_flags "additional_flags=+z"
-    } else {
-	# don't know that the compiler is, hope for the best...
-	set additional_flags ""
-    }
-}
-
-if {[gdb_compile "${srcdir}/${subdir}/${libfile}1.c" "${libfile}1.o" object [list debug $additional_flags]] != ""} {
-    perror "Couldn't compile ${libfile}1.c"
+if [get_compiler_info ${binfile}] {
     return -1
 }
 
-if [istarget "hppa*-hp-hpux*"] then {
-    remote_exec build "ld -b ${libfile}1.o -o ${objdir}/${subdir}/${libfile}1.sl"
-} else {
-    set additional_flags "additional_flags=-shared"
-    gdb_compile "${libfile}1.o" "${objdir}/${subdir}/${libfile}1.sl" executable [list debug $additional_flags]
+if [test_compiler_info "hpcc-*"] {
+    lappend exec_opts "additional_flags=-Ae"
 }
 
-# Build the test case
-#remote_exec build "$CC -Aa -g ${srcfile} ${libfile}1.sl -o ${binfile}"
-
-
-if {$hp_cc_compiler} {
-    set additional_flags "additional_flags=-Ae"
-} else {
-    set additional_flags ""
-}
-
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile} ${objdir}/${subdir}/${libfile}1.sl" "${binfile}" executable [list debug $additional_flags]] != ""} {
-    perror "Couldn't build ${binfile}"
+if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
+     || [gdb_compile $srcfile $binfile executable $exec_opts] != ""} {
+    untested "Couldn't compile $libsrc or $srcfile."
     return -1
 }
-#cd ..
 
 # Start with a fresh gdb
 
@@ -120,7 +81,7 @@ gdb_expect {
 #
 send_gdb "step\n"
 gdb_expect {
-  -re "solib_main .arg=10000. at.*${libfile}1.c:17.*$gdb_prompt $"\
+  -re "solib_main .arg=10000. at.*${libfile}.c:17.*$gdb_prompt $"\
           {pass "step into solib call"}
   -re "$gdb_prompt $"\
           {fail "step into solib call"}
