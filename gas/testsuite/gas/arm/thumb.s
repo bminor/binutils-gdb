@@ -192,3 +192,11 @@ forwardonly:
 	.space	(1 << 11)	@ leave space to force long offsets
 .local:
 	bl	.back
+
+	ldr	r0, .target
+	ldr	r0, .target
+	ldr	r0, [pc, #4]
+	ldr	r0, [pc, #4]
+.target:
+	nop	@ pad for a.out
+	nop

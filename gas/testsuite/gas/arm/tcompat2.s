@@ -25,3 +25,8 @@ m:
 
 	sbc	r0,r0,r1
 
+	@ section padding for a.out's sake
+	nop
+	nop
+	nop
+	nop

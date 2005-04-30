@@ -194,6 +194,7 @@ branches:
 	bra	bal.n
 	bra	b.n
 	@ bl, blx have no short form.
+	.balign 4
 1:
 	bra	beq
 	bra	bne
@@ -218,9 +219,8 @@ branches:
 	bra	b
 	bra	bl
 	bra	blx
+	.balign 4
 1:
-
-	bx	r0
 	bx	r9
 	blx	r0
 	blx	r9

@@ -5639,6 +5639,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
 	    inst.instruction |= 0x00000100;
 	}
       inst.reloc.type = BFD_RELOC_ARM_T32_OFFSET_IMM;
+      inst.reloc.pc_rel = is_pc;
     }
   else if (inst.operands[i].postind)
     {
@@ -5672,7 +5673,6 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(asrs,  1000, fa50f000),			\
   X(bic,   4380, ea200000),			\
   X(bics,  4380, ea300000),			\
-  X(blx,   4780, f000c000),			\
   X(cmn,   42c0, eb100f00),			\
   X(cmp,   2800, ebb00f00),			\
   X(cpsie, b660, f3af8400),			\
@@ -6454,8 +6454,6 @@ do_t_ldst (void)
 
       inst.instruction |= inst.operands[0].reg << 8;
       inst.reloc.type = BFD_RELOC_ARM_THUMB_OFFSET;
-      if (inst.reloc.pc_rel)
-	inst.reloc.exp.X_add_number -= 4;  /* pipeline offset */
       return;
     }
 
@@ -9664,12 +9662,21 @@ md_pcrel_from (fixS * fixP)
       && fixP->fx_subsy == NULL)
     return 0;
 
-  if (fixP->fx_pcrel && (fixP->fx_r_type == BFD_RELOC_ARM_THUMB_ADD))
+  /* PC relative addressing on the Thumb is slightly odd as the bottom
+     two bits of the PC are forced to zero for the calculation.  This
+     happens *after* application of the pipeline offset.  However,
+     Thumb adrl already adjusts for this, so we need not do it again.  */
+  switch (fixP->fx_r_type)
     {
-      /* PC relative addressing on the Thumb is slightly odd
-	 as the bottom two bits of the PC are forced to zero
-	 for the calculation.  */
+    case BFD_RELOC_ARM_THUMB_ADD:
       return (fixP->fx_where + fixP->fx_frag->fr_address) & ~3;
+
+    case BFD_RELOC_ARM_THUMB_OFFSET:
+    case BFD_RELOC_ARM_T32_OFFSET_IMM:
+      return (fixP->fx_where + fixP->fx_frag->fr_address + 4) & ~3;
+
+    default:
+      break;
     }
 
 #ifdef TE_WINCE
@@ -9866,7 +9873,7 @@ md_apply_fix3 (fixS *	fixP,
 
   /* If this symbol is in a different section then we need to leave it for
      the linker to deal with.  Unfortunately, md_pcrel_from can't tell,
-     so we have to undo it's effects here.  */
+     so we have to undo its effects here.  */
   if (fixP->fx_pcrel)
     {
       if (fixP->fx_addsy != NULL
@@ -10073,7 +10080,7 @@ md_apply_fix3 (fixS *	fixP,
 	    }
 	  newval &= ~0xff;
 	}
-      else if ((newval & 0x0000f000) == 0x0000f0000)
+      else if ((newval & 0x000f0000) == 0x000f0000)
 	{
 	  /* PC-relative, 12-bit offset.  */
 	  if (value >= 0)
@@ -10680,24 +10687,20 @@ md_apply_fix3 (fixS *	fixP,
 	{
 	case 4: /* PC load.  */
 	  /* Thumb PC loads are somewhat odd, bit 1 of the PC is
-	     forced to zero for these loads, so we will need to round
-	     up the offset if the instruction address is not word
-	     aligned (since the final address produced must be, and
-	     we can only describe word-aligned immediate offsets).  */
-
+	     forced to zero for these loads; md_pcrel_from has already
+	     compensated for this.  */
 	  if (value & 3)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid offset, target not word aligned (0x%08lX)"),
 			  (((unsigned int) fixP->fx_frag->fr_address
 			    + (unsigned int) fixP->fx_where) & ~3) + value);
 
-	  if ((value + 2) & ~0x3fe)
+	  if (value & ~0x3fc)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid offset, value too big (0x%08lX)"),
 			  (long) value);
 
-	  /* Round up, since pc will be rounded down.  */
-	  newval |= (value + 2) >> 2;
+	  newval |= value >> 2;
 	  break;
 
 	case 9: /* SP load/store.  */

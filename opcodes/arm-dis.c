@@ -2278,61 +2278,75 @@ print_insn_thumb32 (pc, info, given)
 		  unsigned int op  = (given & 0x00000f00) >> 8;
 		  unsigned int i12 = (given & 0x00000fff);
 		  unsigned int i8  = (given & 0x000000ff);
+		  bfd_boolean writeback = FALSE, postind = FALSE;
+		  int offset = 0;
 
 		  func (stream, "[%s", arm_regnames[Rn]);
 		  if (U) /* 12-bit positive immediate offset */
-		    {
-		      if (i12)
-			func (stream, ", #%u", i12);
-		      func (stream, "]");
-		    }
+		    offset = i12;
 		  else if (Rn == 15) /* 12-bit negative immediate offset */
-		    func (stream, ", #-%u]", i12);
+		    offset = -(int)i12;
+		  else if (op == 0x0) /* shifted register offset */
+		    {
+		      unsigned int Rm = (i8 & 0x0f);
+		      unsigned int sh = (i8 & 0x30) >> 4;
+		      func (stream, ", %s", arm_regnames[Rm]);
+		      if (sh)
+			func (stream, ", lsl #%u", sh);
+		      func (stream, "]");
+		      break;
+		    }
 		  else switch (op)
 		    {
-		    case 0x0:  /* shifted register offset */
-		      {
-			unsigned int Rm = (i8 & 0x0f);
-			unsigned int sh = (i8 & 0x30) >> 4;
-			func (stream, ", %s", arm_regnames[Rm]);
-			if (sh)
-			  func (stream, ", lsl #%u", sh);
-			func (stream, "]");
-		      }
-		      break;
-
 		    case 0xE:  /* 8-bit positive immediate offset */
-		      if (i8)
-			func (stream, ", #%u", i8);
-		      func (stream, "]");
+		      offset = i8;
 		      break;
 
 		    case 0xC:  /* 8-bit negative immediate offset */
-		      func (stream, ", #-%u]", i8);
+		      offset = -i8;
 		      break;
 
 		    case 0xB:  /* 8-bit + preindex with wb */
-		      if (i8)
-			func (stream, ", #%u", i8);
-		      func (stream, "]!");
+		      offset = i8;
+		      writeback = TRUE;
 		      break;
 
 		    case 0x9:  /* 8-bit - preindex with wb */
-		      func (stream, ", #-%u]!", i8);
+		      offset = -i8;
+		      writeback = TRUE;
 		      break;
 
 		    case 0xF:  /* 8-bit + postindex */
-		      func (stream, "], #%u", i8);
+		      offset = i8;
+		      postind = TRUE;
 		      break;
 
 		    case 0xD:  /* 8-bit - postindex */
-		      func (stream, "], #-%u", i8);
+		      offset = -i8;
+		      postind = TRUE;
 		      break;
 
 		    default:
 		      func (stream, ", <undefined>]");
+		      goto skip;
+		    }
+
+		  if (postind)
+		    func (stream, "], #%d", offset);
+		  else
+		    {
+		      if (offset)
+			func (stream, ", #%d", offset);
+		      func (stream, writeback ? "]!" : "]");
+		    }
+
+		  if (Rn == 15)
+		    {
+		      func (stream, "\t; ");
+		      info->print_address_func (((pc + 4) & ~3) + offset, info);
 		    }
 		}
+	      skip:
 		break;
 
 	      case 'A':
@@ -2425,7 +2439,7 @@ print_insn_thumb32 (pc, info, given)
 		  unsigned int S = (given & 0x04000000u) >> 26;
 		  unsigned int J1 = (given & 0x00002000u) >> 13;
 		  unsigned int J2 = (given & 0x00000800u) >> 11;
-		  unsigned int offset = 0;
+		  int offset = 0;
 
 		  offset |= !S << 20;
 		  offset |= J2 << 19;
@@ -2434,7 +2448,7 @@ print_insn_thumb32 (pc, info, given)
 		  offset |= (given & 0x000007ff) << 1;
 		  offset -= (1 << 20);
 
-		  info->print_address_func ((bfd_vma)offset + pc + 4, info);
+		  info->print_address_func (pc + 4 + offset, info);
 		}
 		break;
 
@@ -2443,7 +2457,7 @@ print_insn_thumb32 (pc, info, given)
 		  unsigned int S = (given & 0x04000000u) >> 26;
 		  unsigned int I1 = (given & 0x00002000u) >> 13;
 		  unsigned int I2 = (given & 0x00000800u) >> 11;
-		  unsigned int offset = 0;
+		  int offset = 0;
 
 		  offset |= !S << 24;
 		  offset |= !(I1 ^ S) << 23;
@@ -2452,7 +2466,7 @@ print_insn_thumb32 (pc, info, given)
 		  offset |= (given & 0x000007ffu) << 1;
 		  offset -= (1 << 24);
 
-		  info->print_address_func ((bfd_vma)offset + pc + 4, info);
+		  info->print_address_func (pc + 4 + offset, info);
 		}
 		break;
 
