@@ -1,6 +1,6 @@
 # static.exp -- test script, for GDB, the GNU debugger.
 
-# Copyright 2004 Free Software Foundation, Inc.
+# Copyright 2004, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -62,10 +62,17 @@ gdb_test_multiple "continue" "$test" {
 # See if handle SIG32 helps (a little) with a static multi-threaded
 # program.
 
+set sig "SIG32"
+
+# SIGRTMIN is 37 on hppa-linux and hpux
+if [istarget hppa*-*-*] {
+  set sig "SIG37"
+}
+
 rerun_to_main
-gdb_test "handle SIG32 nostop noprint pass"
-set test "Handle SIG32 helps"
-gdb_test "continue" " sem_post .*" "handle SIG32 helps"
+gdb_test "handle $sig nostop noprint pass"
+set test "Handle $sig helps"
+gdb_test "continue" " .*sem_post .*" "handle $sig helps"
 
 
 # See if info threads produces anything approaching a thread list.

@@ -1,3 +1,8 @@
+2005-04-30  Randolph Chung  <tausq@debian.org>
+
+	* gdb.threads/staticthreads.exp: Override signal to check for hppa.
+	Slightly relax "sem_post" name checking.
+
 2005-04-29  Paul Gilliam  <pgilliam@us.ibm.com>
 
 	* gdb.base/unload.exp: Use new shared library infrastructure.
