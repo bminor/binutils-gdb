@@ -1,5 +1,6 @@
 	.text
-	.thumb32
+	.thumb
+	.syntax unified
 
 encode_thumb32_immediate:
 	orr	r0, r1, #0x00000000
@@ -254,8 +255,8 @@ cpy:
 	cpy.w	r0, r9
 
 czb:
-	czbne	r0, 2f
-	czbeq	r5, 1f
+	cbnz	r0, 2f
+	cbz	r5, 1f
 
 nop_hint:
 	nop

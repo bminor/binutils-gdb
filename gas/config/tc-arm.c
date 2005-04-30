@@ -184,13 +184,30 @@ const int md_reloc_size = 8;
       instructions.  */
 static int thumb_mode = 0;
 
-/* If "thumb32_mode" is not true, we are processing old-style
-   Thumb assembly.  Most importantly, that means that a large number
-   of arithmetic mnemonics set the flags even though they don't have
-   an 's' suffix.  Note that encoders for instructions that only exist
-   in V6T2 or later, ignore thumb32_mode.  */
+/* If unified_syntax is true, we are processing the new unified
+   ARM/Thumb syntax.  Important differences from the old ARM mode:
 
-static bfd_boolean thumb32_mode = FALSE;
+     - Immediate operands do not require a # prefix.
+     - Conditional affixes always appear at the end of the
+       instruction.  (For backward compatibility, those instructions
+       that formerly had them in the middle, continue to accept them
+       there.)
+     - The IT instruction may appear, and if it does is validated
+       against subsequent conditional affixes.  It does not generate
+       machine code.
+
+   Important differences from the old Thumb mode:
+
+     - Immediate operands do not require a # prefix.
+     - Most of the V6T2 instructions are only available in unified mode.
+     - The .N and .W suffixes are recognized and honored (it is an error
+       if they cannot be honored).
+     - All instructions set the flags if and only if they have an 's' affix.
+     - Conditional affixes may be used.  They are validated against
+       preceding IT instructions.  Unlike ARM mode, you cannot use a
+       conditional affix except in the scope of an IT instruction.  */
+
+static bfd_boolean unified_syntax = FALSE;
 
 struct arm_it
 {
@@ -198,6 +215,7 @@ struct arm_it
   unsigned long instruction;
   int		size;
   int		size_req;
+  int		cond;
   struct
   {
     bfd_reloc_code_real_type type;
@@ -258,8 +276,7 @@ struct asm_cond
   unsigned long value;
 };
 
-#define COND_ALWAYS 0xe0000000
-#define COND_MASK   0xf0000000
+#define COND_ALWAYS 0xE
 
 struct asm_psr
 {
@@ -363,11 +380,14 @@ struct asm_opcode
   /* Parameters to instruction.	 */
   unsigned char operands[8];
 
+  /* Conditional tag - see opcode_lookup.  */
+  unsigned int tag : 4;
+
   /* Basic instruction code.  */
-  unsigned long avalue;
+  unsigned int avalue : 28;
 
   /* Thumb-format instruction code.  */
-  unsigned long tvalue;
+  unsigned int tvalue;
 
   /* Which architecture variant provides this instruction.  */
   unsigned long avariant;
@@ -596,6 +616,10 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
 {
   char * save_in;
   segT	 seg;
+
+  /* In unified syntax, all prefixes are optional.  */
+  if (unified_syntax)
+    prefix_mode = GE_OPT_PREFIX;
 
   switch (prefix_mode)
     {
@@ -1424,7 +1448,6 @@ opcode_select (int width)
 	    as_bad (_("selected processor does not support THUMB opcodes"));
 
 	  thumb_mode = 1;
-	  thumb32_mode = FALSE;
 	  /* No need to force the alignment, since we will have been
 	     coming from ARM mode, which is word-aligned.  */
 	  record_alignment (now_seg, 1);
@@ -1468,16 +1491,6 @@ s_thumb (int ignore ATTRIBUTE_UNUSED)
 }
 
 static void
-s_thumb32 (int ignore ATTRIBUTE_UNUSED)
-{
-  opcode_select (16);
-  if (! (cpu_variant & ARM_EXT_V6T2))
-    as_bad (_("selected processor does not support 32-bit Thumb opcodes"));
-  thumb32_mode = TRUE;
-  demand_empty_rest_of_line ();
-}
-
-static void
 s_code (int unused ATTRIBUTE_UNUSED)
 {
   int temp;
@@ -1506,8 +1519,6 @@ s_force_thumb (int ignore ATTRIBUTE_UNUSED)
   if (! thumb_mode)
     {
       thumb_mode = 2;
-      thumb32_mode = FALSE;
-
       record_alignment (now_seg, 1);
     }
 
@@ -1518,16 +1529,6 @@ static void
 s_thumb_func (int ignore ATTRIBUTE_UNUSED)
 {
   s_thumb (0);
-
-  /* The following label is the name/address of the start of a Thumb function.
-     We need to know this for the interworking support.	 */
-  label_is_thumb_function_name = TRUE;
-}
-
-static void
-s_thumb32_func (int ignore ATTRIBUTE_UNUSED)
-{
-  s_thumb32 (0);
 
   /* The following label is the name/address of the start of a Thumb function.
      We need to know this for the interworking support.	 */
@@ -1622,6 +1623,32 @@ s_thumb_set (int equiv)
 #if defined OBJ_ELF || defined OBJ_COFF
   ARM_SET_INTERWORK (symbolP, support_interwork);
 #endif
+}
+
+/* Directives: Mode selection.  */
+
+/* .syntax [unified|divided] - choose the new unified syntax
+   (same for Arm and Thumb encoding, modulo slight differences in what
+   can be represented) or the old divergent syntax for each mode.  */
+static void
+s_syntax (int unused ATTRIBUTE_UNUSED)
+{
+  char *name, delim;
+
+  name = input_line_pointer;
+  delim = get_symbol_end ();
+
+  if (!strcasecmp (name, "unified"))
+    unified_syntax = TRUE;
+  else if (!strcasecmp (name, "divided"))
+    unified_syntax = FALSE;
+  else
+    {
+      as_bad (_("unrecognized syntax mode \"%s\""), name);
+      return;
+    }
+  *input_line_pointer = delim;
+  demand_empty_rest_of_line ();
 }
 
 /* Directives: sectioning and alignment.  */
@@ -2770,15 +2797,14 @@ const pseudo_typeS md_pseudo_table[] =
   { "align",	   s_align,	  0 },
   { "arm",	   s_arm,	  0 },
   { "thumb",	   s_thumb,	  0 },
-  { "thumb32",     s_thumb32,	  0 },
   { "code",	   s_code,	  0 },
   { "force_thumb", s_force_thumb, 0 },
   { "thumb_func",  s_thumb_func,  0 },
-  { "thumb32_func",s_thumb32_func,0 },
   { "thumb_set",   s_thumb_set,	  0 },
   { "even",	   s_even,	  0 },
   { "ltorg",	   s_ltorg,	  0 },
   { "pool",	   s_ltorg,	  0 },
+  { "syntax",	   s_syntax,	  0 },
 #ifdef OBJ_ELF
   { "word",	   s_arm_elf_cons, 4 },
   { "long",	   s_arm_elf_cons, 4 },
@@ -4447,7 +4473,7 @@ do_blx (void)
     {
       /* Arg is an address; this instruction cannot be executed
 	 conditionally, and the opcode must be adjusted.  */
-      constraint ((inst.instruction & COND_MASK) != COND_ALWAYS, BAD_COND);
+      constraint (inst.cond != COND_ALWAYS, BAD_COND);
       inst.instruction = 0xfafffffe;
       encode_branch (BFD_RELOC_ARM_PCREL_BLX);
     }
@@ -4542,6 +4568,14 @@ do_cpsi (void)
 {
   inst.instruction |= inst.operands[0].imm << 6;
   inst.instruction |= inst.operands[1].imm;
+}
+
+static void
+do_it (void)
+{
+  /* There is no IT instruction in ARM mode.  We
+     process it but do not generate code for it.  */
+  inst.size = 0;
 }
 
 static void
@@ -5422,7 +5456,7 @@ do_iwmmxt_wldstw (void)
   /* RIWR_RIWC clears .isreg for a control register.  */
   if (!inst.operands[0].isreg)
     {
-      constraint ((inst.instruction & COND_MASK) != COND_ALWAYS, BAD_COND);
+      constraint (inst.cond != COND_ALWAYS, BAD_COND);
       inst.instruction |= 0xf0000000;
     }
 
@@ -5760,7 +5794,7 @@ do_t_add_sub (void)
 	? inst.operands[1].reg    /* Rd, Rs, foo */
 	: inst.operands[0].reg);  /* Rd, foo -> Rd, Rd, foo */
 
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       if (!inst.operands[2].isreg)
 	{
@@ -5892,7 +5926,7 @@ do_t_arit3 (void)
 	: inst.operands[0].reg);  /* Rd, foo -> Rd, Rd, foo */
   Rn = inst.operands[2].reg;
 
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       if (!inst.operands[2].isreg)
 	{
@@ -5963,7 +5997,7 @@ do_t_arit3c (void)
 	: inst.operands[0].reg);  /* Rd, foo -> Rd, Rd, foo */
   Rn = inst.operands[2].reg;
 
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       if (!inst.operands[2].isreg)
 	{
@@ -6105,26 +6139,30 @@ do_t_blx (void)
 static void
 do_t_branch (void)
 {
-  if (thumb32_mode && inst.size_req != 2)
+  if (unified_syntax && inst.size_req != 2)
     {
-      if (inst.instruction == T_OPCODE_BRANCH)
+      if (inst.cond == COND_ALWAYS)
 	{
 	  inst.instruction = 0xf7ffbffe;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH25;
 	}
       else
 	{
-	  int cond = inst.instruction & 0x0f00;
-	  constraint (cond == 0xE00 || cond == 0xF00,
-		      _("invalid condition for wide conditional branch"));
-	  inst.instruction = (cond << 14) | 0xf43faffe;
+	  assert (inst.cond != 0xF);
+	  inst.instruction = (inst.cond << 22) | 0xf43faffe;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH20;
 	}
     }
   else
-    inst.reloc.type = (inst.instruction == T_OPCODE_BRANCH
-		       ? BFD_RELOC_THUMB_PCREL_BRANCH12
-		       : BFD_RELOC_THUMB_PCREL_BRANCH9);
+    {
+      if (inst.cond == COND_ALWAYS)
+	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH12;
+      else
+	{
+	  inst.instruction = 0xd0fe | (inst.cond << 8);
+	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH9;
+	}
+    }
 
   inst.reloc.pc_rel = 1;
 }
@@ -6187,7 +6225,7 @@ do_t_clz (void)
 static void
 do_t_cpsi (void)
 {
-  if (thumb32_mode
+  if (unified_syntax
       && (inst.operands[1].present || inst.size_req == 4))
     {
       unsigned int imod = (inst.instruction & 0x0030) >> 4;
@@ -6237,7 +6275,7 @@ do_t_czb (void)
 static void
 do_t_hint (void)
 {
-  if (thumb32_mode && inst.size_req == 4)
+  if (unified_syntax && inst.size_req == 4)
     inst.instruction = THUMB_OP32 (inst.instruction);
   else
     inst.instruction = THUMB_OP16 (inst.instruction);
@@ -6276,7 +6314,7 @@ do_t_ldmstm (void)
   constraint (inst.operands[1].writeback,
 	      _("Thumb load/store multiple does not support {reglist}^"));
 
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       /* See if we can use a 16-bit instruction.  */
       if (inst.instruction < 0xffff /* not ldmdb/stmdb */
@@ -6392,7 +6430,7 @@ do_t_ldrexd (void)
 static void
 do_t_ldst (void)
 {
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       /* Generation of 16-bit instructions for anything other than
 	 Rd, [Rn, Ri] is deferred to section relaxation time.  */
@@ -6534,7 +6572,7 @@ do_t_mlal (void)
 static void
 do_t_mov_cmp (void)
 {
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       int r0off = (inst.instruction == T_MNEM_mov
 		   || inst.instruction == T_MNEM_movs) ? 8 : 16;
@@ -6639,7 +6677,7 @@ do_t_mov16 (void)
 static void
 do_t_mvn_tst (void)
 {
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       int r0off = (inst.instruction == T_MNEM_mvn
 		   || inst.instruction == T_MNEM_mvns) ? 8 : 16;
@@ -6722,7 +6760,7 @@ do_t_mul (void)
     inst.operands[2].reg = inst.operands[0].reg;
 
   /* There is no 32-bit MULS and no 16-bit MUL. */
-  if (thumb32_mode && inst.instruction == T_MNEM_mul)
+  if (unified_syntax && inst.instruction == T_MNEM_mul)
     {
       inst.instruction = THUMB_OP32 (inst.instruction);
       inst.instruction |= inst.operands[0].reg << 8;
@@ -6731,7 +6769,7 @@ do_t_mul (void)
     }
   else
     {
-      constraint (!thumb32_mode
+      constraint (!unified_syntax
 		  && inst.instruction == T_MNEM_muls, BAD_THUMB32);
       constraint (inst.operands[0].reg > 7 || inst.operands[1].reg > 7,
 		  BAD_HIREG);
@@ -6763,7 +6801,7 @@ do_t_mull (void)
 static void
 do_t_nop (void)
 {
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       if (inst.size_req == 4 || inst.operands[0].imm > 15)
 	{
@@ -6787,7 +6825,7 @@ do_t_nop (void)
 static void
 do_t_neg (void)
 {
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       if (inst.operands[0].reg > 7 || inst.operands[1].reg > 7
 	  || !THUMB_SETS_FLAGS (inst.instruction)
@@ -6865,7 +6903,7 @@ do_t_push_pop (void)
       inst.instruction |= THUMB_PP_PC_LR;
       inst.operands[0].imm &= 0xff;
     }
-  else if (thumb32_mode)
+  else if (unified_syntax)
     {
       if (inst.operands[1].imm & (1 << 13))
 	as_warn (_("SP should not be in register list"));
@@ -6909,7 +6947,7 @@ do_t_rev (void)
       inst.instruction |= inst.operands[0].reg;
       inst.instruction |= inst.operands[1].reg << 3;
     }
-  else if (thumb32_mode)
+  else if (unified_syntax)
     {
       inst.instruction = THUMB_OP32 (inst.instruction);
       inst.instruction |= inst.operands[0].reg << 8;
@@ -6954,7 +6992,7 @@ do_t_shift (void)
   if (!inst.operands[1].present)
     inst.operands[1].reg = inst.operands[0].reg;
 
-  if (thumb32_mode)
+  if (unified_syntax)
     {
       if (inst.operands[0].reg > 7
 	  || inst.operands[1].reg > 7
@@ -7170,7 +7208,7 @@ do_t_sxth (void)
       inst.instruction |= inst.operands[0].reg;
       inst.instruction |= inst.operands[1].reg << 3;
     }
-  else if (thumb32_mode)
+  else if (unified_syntax)
     {
       if (inst.instruction <= 0xffff)
 	inst.instruction = THUMB_OP32 (inst.instruction);
@@ -7272,6 +7310,8 @@ output_inst (const char * str)
       as_bad ("%s -- `%s'", inst.error, str);
       return;
     }
+  if (inst.size == 0)
+    return;
 
   to = frag_more (inst.size);
 
@@ -7300,10 +7340,208 @@ output_inst (const char * str)
 #endif
 }
 
-void
-md_assemble (char * str)
+/* Tag values used in struct asm_opcode's tag field.  */
+enum opcode_tag
 {
-  char *p;
+  OT_unconditional,	/* Instruction cannot be conditionalized.
+			   The ARM condition field is still 0xE.  */
+  OT_unconditionalF,	/* Instruction cannot be conditionalized
+			   and carries 0xF in its ARM condition field.  */
+  OT_csuffix,		/* Instruction takes a conditional suffix.  */
+  OT_cinfix3,		/* Instruction takes a conditional infix,
+			   beginning at character index 3.  (In
+			   unified mode, it becomes a suffix.)  */
+  OT_csuf_or_in3,	/* Instruction takes either a conditional
+			   suffix or an infix at character index 3.
+			   (In unified mode, a suffix only.  */
+  OT_odd_infix_unc,	/* This is the unconditional variant of an
+			   instruction that takes a conditional infix
+			   at an unusual position.  In unified mode,
+			   this variant will accept a suffix.  */
+  OT_odd_infix_0	/* Values greater than or equal to OT_odd_infix_0
+			   are the conditional variants of instructions that
+			   take conditional infixes in unusual positions.
+			   The infix appears at character index
+			   (tag - OT_odd_infix_0).  These are not accepted
+			   in unified mode.  */
+};
+
+/* Subroutine of md_assemble, responsible for looking up the primary
+   opcode from the mnemonic the user wrote.  STR points to the
+   beginning of the mnemonic.
+
+   This is not simply a hash table lookup, because of conditional
+   variants.  Most instructions have conditional variants, which are
+   expressed with a _conditional affix_ to the mnemonic.  If we were
+   to encode each conditional variant as a literal string in the opcode
+   table, it would have approximately 20,000 entries.
+
+   Most mnemonics take this affix as a suffix, and in unified syntax,
+   'most' is upgraded to 'all'.  However, in the divided syntax, some
+   instructions take the affix as an infix, notably the s-variants of
+   the arithmetic instructions.  Of those instructions, all but six
+   have the infix appear after the third character of the mnemonic.
+
+   Accordingly, the algorithm for looking up primary opcodes given
+   an identifier is:
+
+   1. Look up the identifier in the opcode table.
+      If we find a match, go to step U.
+
+   2. Look up the last two characters of the identifier in the
+      conditions table.  If we find a match, look up the first N-2
+      characters of the identifier in the opcode table.  If we
+      find a match, go to step CE.
+
+   3. Look up the fourth and fifth characters of the identifier in
+      the conditions table.  If we find a match, extract those
+      characters from the identifier, and look up the remaining
+      characters in the opcode table.  If we find a match, go
+      to step CM.
+
+   4. Fail.
+
+   U. Examine the tag field of the opcode structure, in case this is
+      one of the six instructions with its conditional infix in an
+      unusual place.  If it is, the tag tells us where to find the
+      infix; look it up in the conditions table and set inst.cond
+      accordingly.  Otherwise, this is an unconditional instruction.
+      Again set inst.cond accordingly.  Return the opcode structure.
+
+  CE. Examine the tag field to make sure this is an instruction that
+      should receive a conditional suffix.  If it is not, fail.
+      Otherwise, set inst.cond from the suffix we already looked up,
+      and return the opcode structure.
+
+  CM. Examine the tag field to make sure this is an instruction that
+      should receive a conditional infix after the third character.
+      If it is not, fail.  Otherwise, undo the edits to the current
+      line of input and proceed as for case CE.  */
+
+static const struct asm_opcode *
+opcode_lookup (char **str)
+{
+  char *end, *base;
+  char *affix;
+  const struct asm_opcode *opcode;
+  const struct asm_cond *cond;
+
+  /* Scan up to the end of the mnemonic, which must end in white space,
+     '.' (in unified mode only), or end of string.  */
+  for (base = end = *str; *end != '\0'; end++)
+    if (*end == ' ' || (unified_syntax && *end == '.'))
+      break;
+
+  if (end == base)
+    return 0;
+
+  /* Handle a possible width suffix.  */
+  if (end[0] == '.')
+    {
+      if (end[1] == 'w' && (end[2] == ' ' || end[2] == '\0'))
+	inst.size_req = 4;
+      else if (end[1] == 'n' && (end[2] == ' ' || end[2] == '\0'))
+	inst.size_req = 2;
+      else
+	return 0;
+
+      *str = end + 2;
+    }
+  else
+    *str = end;
+
+  /* Look for unaffixed or special-case affixed mnemonic.  */
+  opcode = hash_find_n (arm_ops_hsh, base, end - base);
+  if (opcode)
+    {
+      /* step U */
+      if (opcode->tag < OT_odd_infix_0)
+	{
+	  inst.cond = COND_ALWAYS;
+	  return opcode;
+	}
+
+      if (unified_syntax)
+	as_warn (_("conditional infixes are deprecated in unified syntax"));
+      affix = base + (opcode->tag - OT_odd_infix_0);
+      cond = hash_find_n (arm_cond_hsh, affix, 2);
+      assert (cond);
+
+      inst.cond = cond->value;
+      return opcode;
+    }
+
+  /* Cannot have a conditional suffix on a mnemonic of less than two
+     characters.  */
+  if (end - base < 3)
+    return 0;
+
+  /* Look for suffixed mnemonic.  */
+  affix = end - 2;
+  cond = hash_find_n (arm_cond_hsh, affix, 2);
+  opcode = hash_find_n (arm_ops_hsh, base, affix - base);
+  if (opcode && cond)
+    {
+      /* step CE */
+      switch (opcode->tag)
+	{
+	case OT_cinfix3:
+	case OT_odd_infix_unc:
+	  if (!unified_syntax)
+	    return 0;
+	  /* else fall through */
+
+	case OT_csuffix:
+	case OT_csuf_or_in3:
+	  inst.cond = cond->value;
+	  return opcode;
+
+	case OT_unconditional:
+	case OT_unconditionalF:
+	  /* delayed diagnostic */
+	  inst.error = BAD_COND;
+	  inst.cond = COND_ALWAYS;
+	  return opcode;
+
+	default:
+	  return 0;
+	}
+    }
+
+  /* Cannot have a usual-position infix on a mnemonic of less than
+     six characters (five would be a suffix).  */
+  if (end - base < 6)
+    return 0;
+
+  /* Look for infixed mnemonic in the usual position.  */
+  affix = base + 3;
+  cond = hash_find_n (arm_cond_hsh, affix, 2);
+  if (cond)
+    {
+      char save[2];
+      memcpy (save, affix, 2);
+      memmove (affix, affix + 2, (end - affix) - 2);
+      opcode = hash_find_n (arm_ops_hsh, base, (end - base) - 2);
+      memmove (affix + 2, affix, (end - affix) - 2);
+      memcpy (affix, save, 2);
+    }
+  if (opcode && (opcode->tag == OT_cinfix3 || opcode->tag == OT_csuf_or_in3))
+    {
+      /* step CM */
+      if (unified_syntax)
+	as_warn (_("conditional infixes are deprecated in unified syntax"));
+
+      inst.cond = cond->value;
+      return opcode;
+    }
+
+  return 0;
+}
+
+void
+md_assemble (char *str)
+{
+  char *p = str;
   const struct asm_opcode * opcode;
 
   /* Align the previous label if needed.  */
@@ -7317,86 +7555,68 @@ md_assemble (char * str)
   memset (&inst, '\0', sizeof (inst));
   inst.reloc.type = BFD_RELOC_UNUSED;
 
-  /* Scan up to the end of the op-code, which must end in white space or
-     end of string.  */
-  for (p = str; *p != '\0'; p++)
-    if (*p == ' ' || (thumb32_mode && *p == '.'))
-      break;
-
-  if (p == str)
+  opcode = opcode_lookup (&p);
+  if (!opcode)
     {
-      as_bad (_("no operator -- statement `%s'\n"), str);
+      /* It wasn't an instruction, but it might be a register alias of
+	 the form alias .req reg.  */
+      if (!create_register_alias (str, p))
+	as_bad (_("bad instruction `%s'"), str);
+
       return;
     }
 
-  opcode = hash_find_n (arm_ops_hsh, str, p - str);
-  if (opcode)
+  if (thumb_mode)
     {
-      if (thumb_mode)
+      /* Check that this instruction is supported for this CPU.  */
+      if (thumb_mode == 1 && (opcode->tvariant & cpu_variant) == 0)
 	{
-	  /* Check that this instruction is supported for this CPU.  */
-	  if (thumb_mode == 1 && (opcode->tvariant & cpu_variant) == 0)
+	  as_bad (_("selected processor does not support `%s'"), str);
+	  return;
+	}
+
+      mapping_state (MAP_THUMB);
+      inst.instruction = opcode->tvalue;
+
+      if (!parse_operands (p, opcode->operands))
+	opcode->tencode ();
+
+      if (!inst.error)
+	{
+	  assert (inst.instruction < 0xe800 || inst.instruction > 0xffff);
+	  inst.size = (inst.instruction > 0xffff ? 4 : 2);
+	  if (inst.size_req && inst.size_req != inst.size)
 	    {
-	      as_bad (_("selected processor does not support `%s'"), str);
+	      as_bad (_("cannot honor width suffix -- `%s'"), str);
 	      return;
 	    }
-	  mapping_state (MAP_THUMB);
-	  inst.instruction = opcode->tvalue;
-
-	  /* Check for .W or .N suffix.  */
-	  if (thumb32_mode && p[0] == '.')
-	    {
-	      if (p[1] == 'w')
-		inst.size_req = 4;
-	      else if (p[1] == 'n')
-		inst.size_req = 2;
-	      else
-		{
-		  as_bad (_("unrecognized width suffix -- `%s'"), str);
-		  return;
-		}
-	      p += 2;
-	    }
-
-	  if (!parse_operands (p, opcode->operands))
-	    opcode->tencode ();
-
-	  if (!inst.error)
-	    {
-	      assert (inst.instruction < 0xe800 || inst.instruction > 0xffff);
-	      inst.size = (inst.instruction > 0xffff ? 4 : 2);
-	      if (inst.size_req && inst.size_req != inst.size)
-		{
-		  as_bad (_("cannot honor width suffix -- `%s'"), str);
-		  return;
-		}
-	    }
 	}
+    }
+  else
+    {
+      /* Check that this instruction is supported for this CPU.  */
+      if ((opcode->avariant & cpu_variant) == 0)
+	{
+	  as_bad (_("selected processor does not support `%s'"), str);
+	  return;
+	}
+      if (inst.size_req)
+	{
+	  as_bad (_("width suffixes are invalid in ARM mode -- `%s'"), str);
+	  return;
+	}
+
+      mapping_state (MAP_ARM);
+      inst.instruction = opcode->avalue;
+      if (opcode->tag == OT_unconditionalF)
+	inst.instruction |= 0xF << 28;
       else
-	{
-	  /* Check that this instruction is supported for this CPU.  */
-	  if ((opcode->avariant & cpu_variant) == 0)
-	    {
-	      as_bad (_("selected processor does not support `%s'"), str);
-	      return;
-	    }
-
-	  mapping_state (MAP_ARM);
-	  inst.instruction = opcode->avalue;
-	  inst.size = INSN_SIZE;
-	  if (!parse_operands (p, opcode->operands))
-	    opcode->aencode ();
-	}
-      output_inst (str);
-      return;
+	inst.instruction |= inst.cond << 28;
+      inst.size = INSN_SIZE;
+      if (!parse_operands (p, opcode->operands))
+	opcode->aencode ();
     }
-
-  /* It wasn't an instruction, but it might be a register alias of the form
-     alias .req reg.  */
-  if (create_register_alias (str, p))
-    return;
-
-  as_bad (_("bad instruction `%s'"), str);
+  output_inst (str);
 }
 
 /* Various frobbings of labels and their addresses.  */
@@ -7698,7 +7918,7 @@ static struct reloc_entry reloc_names[] =
 };
 #endif
 
-/* Table of all conditional suffixes.  0xF is not defined as a condition code.  */
+/* Table of all conditional affixes.  0xF is not defined as a condition code.  */
 static const struct asm_cond conds[] =
 {
   {"eq", 0x0},
@@ -7720,7 +7940,9 @@ static const struct asm_cond conds[] =
 
 /* Table of ARM-format instructions.	*/
 
-/* Macros for gluing together operand strings.	*/
+/* Macros for gluing together operand strings.  N.B. In all cases
+   other than OPS0, the trailing OP_stop comes from default
+   zero-initialization of the unspecified elements of the array.  */
 #define OPS0()		  { OP_stop, }
 #define OPS1(a)		  { OP_##a, }
 #define OPS2(a,b)	  { OP_##a,OP_##b, }
@@ -7729,174 +7951,166 @@ static const struct asm_cond conds[] =
 #define OPS5(a,b,c,d,e)	  { OP_##a,OP_##b,OP_##c,OP_##d,OP_##e, }
 #define OPS6(a,b,c,d,e,f) { OP_##a,OP_##b,OP_##c,OP_##d,OP_##e,OP_##f, }
 
-/* These macros assemble the conditional variants of each instruction
-   from its bare form.	*/
+/* These macros abstract out the exact format of the mnemonic table and
+   save some repeated characters.  */
 
-#define TxCE(mnem, op, top, nops, ops, ae, te)				\
-  { #mnem,	OPS##nops ops, 0xe##op, top,     ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##te }, \
-  { #mnem "eq", OPS##nops ops, 0x0##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "ne", OPS##nops ops, 0x1##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "cs", OPS##nops ops, 0x2##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "hs", OPS##nops ops, 0x2##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "cc", OPS##nops ops, 0x3##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "ul", OPS##nops ops, 0x3##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "lo", OPS##nops ops, 0x3##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "mi", OPS##nops ops, 0x4##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "pl", OPS##nops ops, 0x5##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "vs", OPS##nops ops, 0x6##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "vc", OPS##nops ops, 0x7##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "hi", OPS##nops ops, 0x8##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "ls", OPS##nops ops, 0x9##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "ge", OPS##nops ops, 0xa##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "lt", OPS##nops ops, 0xb##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "gt", OPS##nops ops, 0xc##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "le", OPS##nops ops, 0xd##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
-  { #mnem "al", OPS##nops ops, 0xe##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }
+/* The normal sort of mnemonic; has a Thumb variant; takes a conditional suffix.  */
+#define TxCE(mnem, op, top, nops, ops, ae, te) \
+  { #mnem, OPS##nops ops, OT_csuffix, 0x##op, top, ARM_VARIANT, \
+    do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
 
+/* Two variants of the above - TCE for a numeric Thumb opcode, tCE for
+   a T_MNEM_xyz enumerator.  */
 #define TCE(mnem, aop, top, nops, ops, ae, te) \
        TxCE(mnem, aop, 0x##top, nops, ops, ae, te)
 #define tCE(mnem, aop, top, nops, ops, ae, te) \
        TxCE(mnem, aop, T_MNEM_##top, nops, ops, ae, te)
 
-#define TCC(mnem, op, tu, t1, t2, nops, ops, ae, te)			\
-  { #mnem,	OPS##nops ops,0xe##op,0x##tu,       ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "eq", OPS##nops ops,0x0##op,0x##t1##0##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "ne", OPS##nops ops,0x1##op,0x##t1##1##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "cs", OPS##nops ops,0x2##op,0x##t1##2##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "hs", OPS##nops ops,0x2##op,0x##t1##2##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "cc", OPS##nops ops,0x3##op,0x##t1##3##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "ul", OPS##nops ops,0x3##op,0x##t1##3##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "lo", OPS##nops ops,0x3##op,0x##t1##3##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "mi", OPS##nops ops,0x4##op,0x##t1##4##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "pl", OPS##nops ops,0x5##op,0x##t1##5##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "vs", OPS##nops ops,0x6##op,0x##t1##6##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "vc", OPS##nops ops,0x7##op,0x##t1##7##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "hi", OPS##nops ops,0x8##op,0x##t1##8##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "ls", OPS##nops ops,0x9##op,0x##t1##9##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "ge", OPS##nops ops,0xa##op,0x##t1##a##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "lt", OPS##nops ops,0xb##op,0x##t1##b##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "gt", OPS##nops ops,0xc##op,0x##t1##c##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "le", OPS##nops ops,0xd##op,0x##t1##d##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }, \
-  { #mnem "al", OPS##nops ops,0xe##op,0x##t1##e##t2,ARM_VARIANT,THUMB_VARIANT,do_##ae,do_##te }
+/* Second most common sort of mnemonic: has a Thumb variant, takes a conditional
+   infix after the third character.  */
+#define TxC3(mnem, op, top, nops, ops, ae, te) \
+  { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, top, ARM_VARIANT, \
+    do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
+#define TC3(mnem, aop, top, nops, ops, ae, te) \
+       TxC3(mnem, aop, 0x##top, nops, ops, ae, te)
+#define tC3(mnem, aop, top, nops, ops, ae, te) \
+       TxC3(mnem, aop, T_MNEM_##top, nops, ops, ae, te)
 
-#define TxCM(m1, m2, op, top, nops, ops, ae, te)				\
- { #m1	    #m2, OPS##nops ops, 0xe##op, top,     ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##te }, \
- { #m1 "eq" #m2, OPS##nops ops, 0x0##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "ne" #m2, OPS##nops ops, 0x1##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "cs" #m2, OPS##nops ops, 0x2##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "hs" #m2, OPS##nops ops, 0x2##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "cc" #m2, OPS##nops ops, 0x3##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "ul" #m2, OPS##nops ops, 0x3##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "lo" #m2, OPS##nops ops, 0x3##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "mi" #m2, OPS##nops ops, 0x4##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "pl" #m2, OPS##nops ops, 0x5##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "vs" #m2, OPS##nops ops, 0x6##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "vc" #m2, OPS##nops ops, 0x7##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "hi" #m2, OPS##nops ops, 0x8##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "ls" #m2, OPS##nops ops, 0x9##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "ge" #m2, OPS##nops ops, 0xa##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "lt" #m2, OPS##nops ops, 0xb##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "gt" #m2, OPS##nops ops, 0xc##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "le" #m2, OPS##nops ops, 0xd##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }, \
- { #m1 "al" #m2, OPS##nops ops, 0xe##op, 0,       ARM_VARIANT, 0,             do_##ae, 0       }
+/* Mnemonic with a conditional infix in an unusual place.  Each and every variant has to
+   appear in the condition table.  */
+#define TxCM_(m1, m2, m3, op, top, nops, ops, ae, te)	\
+  { #m1 #m2 #m3, OPS##nops ops, sizeof(#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof(#m1) - 1, \
+    0x##op, top, ARM_VARIANT, do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
+
+#define TxCM(m1, m2, op, top, nops, ops, ae, te)	\
+  TxCM_(m1,   , m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, eq, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, ne, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, cs, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, hs, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, cc, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, ul, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, lo, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, mi, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, pl, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, vs, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, vc, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, hi, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, ls, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, ge, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, lt, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, gt, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, le, m2, op, top, nops, ops, ae, te),	\
+  TxCM_(m1, al, m2, op, top, nops, ops, ae, te)
 
 #define TCM(m1,m2, aop, top, nops, ops, ae, te)		\
        TxCM(m1,m2, aop, 0x##top, nops, ops, ae, te)
 #define tCM(m1,m2, aop, top, nops, ops, ae, te)			\
        TxCM(m1,m2, aop, T_MNEM_##top, nops, ops, ae, te)
 
+/* Mnemonic that cannot be conditionalized.  The ARM condition-code
+   field is still 0xE.  */
 #define TUE(mnem, op, top, nops, ops, ae, te)				\
-  { #mnem, OPS##nops ops, 0xe##op, 0x##top, ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##te }
+  { #mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
+    do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
 
+/* Mnemonic that cannot be conditionalized, and bears 0xF in its ARM
+   condition code field.  */
 #define TUF(mnem, op, top, nops, ops, ae, te)				\
-  { #mnem, OPS##nops ops, 0xf##op, 0x##top, ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##te }
+  { #mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0x##top, ARM_VARIANT, \
+    do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
 
+/* ARM-only variants of all the above.  */
 #define CE(mnem,  op, nops, ops, ae) TCE(mnem,  op, 0, nops, ops, ae, 0)
+#define C3(mnem,  op, nops, ops, ae) TC3(mnem,  op, 0, nops, ops, ae, 0)
 #define CM(m1,m2, op, nops, ops, ae) TCM(m1,m2, op, 0, nops, ops, ae, 0)
 #define UE(mnem,  op, nops, ops, ae) TUE(mnem,  op, 0, nops, ops, ae, 0)
 #define UF(mnem,  op, nops, ops, ae) TUF(mnem,  op, 0, nops, ops, ae, 0)
 #define do_0 0
 
-/* unconditional Thumb-only */
-#define UT(mnem,  op, nops, ops, te) \
-  { #mnem, OPS##nops ops, 0, 0x##op, 0, THUMB_VARIANT, 0, do_##te }
+/* Thumb-only, unconditional.  */
+#define UT(mnem,  op, nops, ops, te) TUE(mnem,  0, op, nops, ops, 0, te)
 
+/* ARM-only, takes either a suffix or a position-3 infix
+   (for an FPA corner case). */
+#define C3E(mnem, op, nops, ops, ae) \
+  { #mnem, OPS##nops ops, OT_csuf_or_in3, 0x##op, 0, ARM_VARIANT, 0, do_##ae, 0 }
 
 static const struct asm_opcode insns[] =
 {
 #define ARM_VARIANT ARM_EXT_V1 /* Core ARM Instructions.  */
 #define THUMB_VARIANT ARM_EXT_V4T
  tCE(and,	0000000, and,      3, (RR, oRR, SH), arit, t_arit3c),
- tCM(and,s,	0100000, ands,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tC3(ands,	0100000, ands,	   3, (RR, oRR, SH), arit, t_arit3c),
  tCE(eor,	0200000, eor,	   3, (RR, oRR, SH), arit, t_arit3c),
- tCM(eor,s,	0300000, eors,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tC3(eors,	0300000, eors,	   3, (RR, oRR, SH), arit, t_arit3c),
  tCE(sub,	0400000, sub,	   3, (RR, oRR, SH), arit, t_add_sub),
- tCM(sub,s,	0500000, subs,	   3, (RR, oRR, SH), arit, t_add_sub),
+ tC3(subs,	0500000, subs,	   3, (RR, oRR, SH), arit, t_add_sub),
  tCE(add,	0800000, add,	   3, (RR, oRR, SH), arit, t_add_sub),
- tCM(add,s,	0900000, adds,	   3, (RR, oRR, SH), arit, t_add_sub),
+ tC3(adds,	0900000, adds,	   3, (RR, oRR, SH), arit, t_add_sub),
  tCE(adc,	0a00000, adc,	   3, (RR, oRR, SH), arit, t_arit3c),
- tCM(adc,s,	0b00000, adcs,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tC3(adcs,	0b00000, adcs,	   3, (RR, oRR, SH), arit, t_arit3c),
  tCE(sbc,	0c00000, sbc,	   3, (RR, oRR, SH), arit, t_arit3),
- tCM(sbc,s,	0d00000, sbcs,	   3, (RR, oRR, SH), arit, t_arit3),
+ tC3(sbcs,	0d00000, sbcs,	   3, (RR, oRR, SH), arit, t_arit3),
  tCE(orr,	1800000, orr,	   3, (RR, oRR, SH), arit, t_arit3c),
- tCM(orr,s,	1900000, orrs,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tC3(orrs,	1900000, orrs,	   3, (RR, oRR, SH), arit, t_arit3c),
  tCE(bic,	1c00000, bic,	   3, (RR, oRR, SH), arit, t_arit3),
- tCM(bic,s,	1d00000, bics,	   3, (RR, oRR, SH), arit, t_arit3),
+ tC3(bics,	1d00000, bics,	   3, (RR, oRR, SH), arit, t_arit3),
 
  /* The p-variants of tst/cmp/cmn/teq (below) are the pre-V6 mechanism
     for setting PSR flag bits.  They are obsolete in V6 and do not
     have Thumb equivalents. */
  tCE(tst,	1100000, tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
- tCM(tst,s,	1100000, tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
-  CM(tst,p,	110f000,     	   2, (RR, SH),      cmp),
+ tC3(tsts,	1100000, tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
+  C3(tstp,	110f000,     	   2, (RR, SH),      cmp),
  tCE(cmp,	1500000, cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
- tCM(cmp,s,	1500000, cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
-  CM(cmp,p,	150f000,     	   2, (RR, SH),      cmp),
+ tC3(cmps,	1500000, cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
+  C3(cmpp,	150f000,     	   2, (RR, SH),      cmp),
  tCE(cmn,	1700000, cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
- tCM(cmn,s,	1700000, cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
-  CM(cmn,p,	170f000,     	   2, (RR, SH),      cmp),
+ tC3(cmns,	1700000, cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
+  C3(cmnp,	170f000,     	   2, (RR, SH),      cmp),
 
  tCE(mov,	1a00000, mov,	   2, (RR, SH),      mov,  t_mov_cmp),
- tCM(mov,s,	1b00000, movs,	   2, (RR, SH),      mov,  t_mov_cmp),
+ tC3(movs,	1b00000, movs,	   2, (RR, SH),      mov,  t_mov_cmp),
  tCE(mvn,	1e00000, mvn,	   2, (RR, SH),      mov,  t_mvn_tst),
- tCM(mvn,s,	1f00000, mvns,	   2, (RR, SH),      mov,  t_mvn_tst),
+ tC3(mvns,	1f00000, mvns,	   2, (RR, SH),      mov,  t_mvn_tst),
 
  tCE(ldr,	4100000, ldr,	   2, (RR, ADDR),    ldst, t_ldst),
- tCM(ldr,b,	4500000, ldrb,	   2, (RR, ADDR),    ldst, t_ldst),
+ tC3(ldrb,	4500000, ldrb,	   2, (RR, ADDR),    ldst, t_ldst),
  tCE(str,	4000000, str,	   2, (RR, ADDR),    ldst, t_ldst),
- tCM(str,b,	4400000, strb,	   2, (RR, ADDR),    ldst, t_ldst),
+ tC3(strb,	4400000, strb,	   2, (RR, ADDR),    ldst, t_ldst),
 
- tCM(stm,ia,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
- tCM(stm,ea,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
- tCM(ldm,ia,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
- tCM(ldm,fd,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tC3(stmia,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tC3(stmea,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tC3(ldmia,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tC3(ldmfd,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
 
  TCE(swi,	f000000, df00,     1, (EXPi),        swi, t_swi),
 #ifdef TE_WINCE
   /* XXX This is the wrong place to do this.  Think multi-arch.	 */
- TCC(b,		a000000, e7fe, d,fe, 1, (EXPr),	    branch, t_branch),
+ TCE(b,		a000000, e7fe,	     1, (EXPr),	    branch, t_branch),
  TCE(bl,	b000000, f7fffffe,   1, (EXPr),	    branch, t_branch23),
 #else
- TCC(b,		afffffe, e7fe, d,fe, 1, (EXPr),	    branch, t_branch),
+ TCE(b,		afffffe, e7fe,	     1, (EXPr),	    branch, t_branch),
  TCE(bl,	bfffffe, f7fffffe,   1, (EXPr),	    branch, t_branch23),
 #endif
 
   /* Pseudo ops.  */
  TCE(adr,	28f0000, 000f,	   2, (RR, EXP),    adr,  t_adr),
-  CM(adr,l,	28f0000,           2, (RR, EXP),    adrl),
+  C3(adrl,	28f0000,           2, (RR, EXP),    adrl),
  tCE(nop,	1a00000, nop,	   1, (oI255c),	    nop,  t_nop),
 
   /* Thumb-compatibility pseudo ops.  */
  tCE(lsl,	1a00000, lsl,	   3, (RR, oRR, SH), shift, t_shift),
- tCM(lsl,s,	1b00000, lsls,	   3, (RR, oRR, SH), shift, t_shift),
+ tC3(lsls,	1b00000, lsls,	   3, (RR, oRR, SH), shift, t_shift),
  tCE(lsr,	1a00020, lsr,	   3, (RR, oRR, SH), shift, t_shift),
- tCM(lsr,s,	1b00020, lsrs,	   3, (RR, oRR, SH), shift, t_shift),
+ tC3(lsrs,	1b00020, lsrs,	   3, (RR, oRR, SH), shift, t_shift),
  tCE(asr,	1a00040, asr,	   3, (RR, oRR, SH), shift, t_shift),
- tCM(asr,s,     1b00040, asrs,     3, (RR, oRR, SH), shift, t_shift),
+ tC3(asrs,     1b00040, asrs,     3, (RR, oRR, SH), shift, t_shift),
  tCE(ror,	1a00060, ror,	   3, (RR, oRR, SH), shift, t_shift),
- tCM(ror,s,	1b00060, rors,	   3, (RR, oRR, SH), shift, t_shift),
+ tC3(rors,	1b00060, rors,	   3, (RR, oRR, SH), shift, t_shift),
  tCE(neg,	2600000, neg,	   2, (RR, RR),      rd_rn, t_neg),
- tCM(neg,s,	2700000, negs,	   2, (RR, RR),      rd_rn, t_neg),
+ tC3(negs,	2700000, negs,	   2, (RR, RR),      rd_rn, t_neg),
  tCE(push,	92d0000, push,     1, (REGLST),	     push_pop, t_push_pop),
  tCE(pop,	8bd0000, pop,	   1, (REGLST),	     push_pop, t_push_pop),
 
@@ -7908,60 +8122,60 @@ static const struct asm_opcode insns[] =
 #undef THUMB_VARIANT
 #define THUMB_VARIANT ARM_EXT_V6T2
  TCE(rsb,	0600000, ebc00000, 3, (RR, oRR, SH), arit, t_rsb),
- TCM(rsb,s,	0700000, ebd00000, 3, (RR, oRR, SH), arit, t_rsb),
+ TC3(rsbs,	0700000, ebd00000, 3, (RR, oRR, SH), arit, t_rsb),
  TCE(teq,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
- TCM(teq,s,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
-  CM(teq,p,	130f000,           2, (RR, SH),      cmp),
+ TC3(teqs,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
+  C3(teqp,	130f000,           2, (RR, SH),      cmp),
 
- TCM(ldr,t,	4300000, f8500e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TCM(ldr,bt,	4700000, f8300e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TCM(str,t,	4200000, f8400e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TCM(str,bt,	4600000, f8200e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3(ldrt,	4300000, f8500e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3(ldrbt,	4700000, f8300e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3(strt,	4200000, f8400e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3(strbt,	4600000, f8200e00, 2, (RR, ADDR),    ldstt, t_ldstt),
 
- TCM(stm,db,	9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
- TCM(stm,fd,    9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(stmdb,	9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(stmfd,    9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
 
- TCM(ldm,db,	9100000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
- TCM(ldm,ea,	9100000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(ldmdb,	9100000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(ldmea,	9100000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
 
  /* V1 instructions with no Thumb analogue at all.  */
   CE(rsc,	0e00000,	   3, (RR, oRR, SH), arit),
-  CM(rsc,s,	0f00000,	   3, (RR, oRR, SH), arit),
+  C3(rscs,	0f00000,	   3, (RR, oRR, SH), arit),
 
-  CM(stm,ib,	9800000,	   2, (RRw, REGLST), ldmstm),
-  CM(stm,fa,	9800000,	   2, (RRw, REGLST), ldmstm),
-  CM(stm,da,	8000000,	   2, (RRw, REGLST), ldmstm),
-  CM(stm,ed,	8000000,	   2, (RRw, REGLST), ldmstm),
-  CM(ldm,ib,	9900000,	   2, (RRw, REGLST), ldmstm),
-  CM(ldm,ed,	9900000,	   2, (RRw, REGLST), ldmstm),
-  CM(ldm,da,	8100000,	   2, (RRw, REGLST), ldmstm),
-  CM(ldm,fa,	8100000,	   2, (RRw, REGLST), ldmstm),
+  C3(stmib,	9800000,	   2, (RRw, REGLST), ldmstm),
+  C3(stmfa,	9800000,	   2, (RRw, REGLST), ldmstm),
+  C3(stmda,	8000000,	   2, (RRw, REGLST), ldmstm),
+  C3(stmed,	8000000,	   2, (RRw, REGLST), ldmstm),
+  C3(ldmib,	9900000,	   2, (RRw, REGLST), ldmstm),
+  C3(ldmed,	9900000,	   2, (RRw, REGLST), ldmstm),
+  C3(ldmda,	8100000,	   2, (RRw, REGLST), ldmstm),
+  C3(ldmfa,	8100000,	   2, (RRw, REGLST), ldmstm),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT ARM_EXT_V2	/* ARM 2 - multiplies.	*/
 #undef THUMB_VARIANT
 #define THUMB_VARIANT ARM_EXT_V4T
  tCE(mul,	0000090, mul,	   3, (RRnpc, RRnpc, oRR), mul, t_mul),
- tCM(mul,s,	0100090, muls,	   3, (RRnpc, RRnpc, oRR), mul, t_mul),
+ tC3(muls,	0100090, muls,	   3, (RRnpc, RRnpc, oRR), mul, t_mul),
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT ARM_EXT_V6T2
  TCE(mla,	0200090, fb000000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas, t_mla),
-  CM(mla,s,	0300090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas),
+  C3(mlas,	0300090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas),
 
   /* Generic coprocessor instructions.	*/
  TCE(cdp,	e000000, ee000000, 6, (RCP, I15b, RCN, RCN, RCN, oI7b), cdp,    cdp),
  TCE(ldc,	c100000, ec100000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
- TCM(ldc,l,	c500000, ec500000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
+ TC3(ldcl,	c500000, ec500000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
  TCE(stc,	c000000, ec000000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
- TCM(stc,l,	c400000, ec400000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
+ TC3(stcl,	c400000, ec400000, 3, (RCP, RCN, ADDR),		        lstc,   lstc),
  TCE(mcr,	e000010, ee000010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
  TCE(mrc,	e100010, ee100010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT ARM_EXT_V2S /* ARM 3 - swp instructions.  */
   CE(swp,	1000090,           3, (RRnpc, RRnpc, RRnpcb), rd_rm_rn),
-  CM(swp,b,	1400090,           3, (RRnpc, RRnpc, RRnpcb), rd_rm_rn),
+  C3(swpb,	1400090,           3, (RRnpc, RRnpc, RRnpcb), rd_rm_rn),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT ARM_EXT_V3	/* ARM 6 Status register instructions.	*/
@@ -7983,10 +8197,10 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT ARM_EXT_V4	/* ARM Architecture 4.	*/
 #undef THUMB_VARIANT
 #define THUMB_VARIANT ARM_EXT_V4T
- tCM(ldr,h,	01000b0, ldrh,     2, (RR, ADDR), ldstv4, t_ldst),
- tCM(str,h,	00000b0, strh,     2, (RR, ADDR), ldstv4, t_ldst),
- tCM(ldr,sh,	01000f0, ldrsh,    2, (RR, ADDR), ldstv4, t_ldst),
- tCM(ldr,sb,	01000d0, ldrsb,    2, (RR, ADDR), ldstv4, t_ldst),
+ tC3(ldrh,	01000b0, ldrh,     2, (RR, ADDR), ldstv4, t_ldst),
+ tC3(strh,	00000b0, strh,     2, (RR, ADDR), ldstv4, t_ldst),
+ tC3(ldrsh,	01000f0, ldrsh,    2, (RR, ADDR), ldstv4, t_ldst),
+ tC3(ldrsb,	01000d0, ldrsb,    2, (RR, ADDR), ldstv4, t_ldst),
  tCM(ld,sh,	01000f0, ldrsh,    2, (RR, ADDR), ldstv4, t_ldst),
  tCM(ld,sb,	01000d0, ldrsb,    2, (RR, ADDR), ldstv4, t_ldst),
 
@@ -8048,8 +8262,8 @@ static const struct asm_opcode insns[] =
 #undef ARM_VARIANT
 #define ARM_VARIANT ARM_EXT_V5E /*  ARM Architecture 5TE.  */
  TUF(pld,	450f000, f810f000, 1, (ADDR),		     pld,  t_pld),
- TCM(ldr,d,	00000d0, e9500000, 3, (RRnpc, oRRnpc, ADDR), ldrd, t_ldstd),
- TCM(str,d,	00000f0, e9400000, 3, (RRnpc, oRRnpc, ADDR), ldrd, t_ldstd),
+ TC3(ldrd,	00000d0, e9500000, 3, (RRnpc, oRRnpc, ADDR), ldrd, t_ldstd),
+ TC3(strd,	00000f0, e9400000, 3, (RRnpc, oRRnpc, ADDR), ldrd, t_ldstd),
 
  TCE(mcrr,	c400000, ec400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
  TCE(mrrc,	c500000, ec500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
@@ -8200,28 +8414,29 @@ static const struct asm_opcode insns[] =
  TCE(movt,	3400000, f2c00000, 2, (RRnpc, Iffff),		    mov16, t_mov16),
  TCE(rbit,	3ff0f30, fa90f0a0, 2, (RR, RR),			    rd_rm, t_rbit),
 
- TCM(ldr,ht,	03000b0, f8300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
- TCM(ldr,sht,	03000f0, f9300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
- TCM(ldr,sbt,	03000d0, f9100e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
- TCM(str,ht,	02000b0, f8200e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
+ TC3(ldrht,	03000b0, f8300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
+ TC3(ldrsht,	03000f0, f9300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
+ TC3(ldrsbt,	03000d0, f9100e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
+ TC3(strht,	02000b0, f8200e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
 
-  UT(czbne,     b900,    2, (RR, EXP), t_czb),
-  UT(czbeq,     b100,    2, (RR, EXP), t_czb),
-  UT(it,        bf08,    1, (COND),    t_it),
-  UT(itt,       bf0c,    1, (COND),    t_it),
-  UT(ite,       bf04,    1, (COND),    t_it),
-  UT(ittt,      bf0e,    1, (COND),    t_it),
-  UT(itet,      bf06,    1, (COND),    t_it),
-  UT(itte,      bf0a,    1, (COND),    t_it),
-  UT(itee,      bf02,    1, (COND),    t_it),
-  UT(itttt,     bf0f,    1, (COND),    t_it),
-  UT(itett,     bf07,    1, (COND),    t_it),
-  UT(ittet,     bf0b,    1, (COND),    t_it),
-  UT(iteet,     bf03,    1, (COND),    t_it),
-  UT(ittte,     bf0d,    1, (COND),    t_it),
-  UT(itete,     bf05,    1, (COND),    t_it),
-  UT(ittee,     bf09,    1, (COND),    t_it),
-  UT(iteee,     bf01,    1, (COND),    t_it),
+  UT(cbnz,      b900,    2, (RR, EXP), t_czb),
+  UT(cbz,       b100,    2, (RR, EXP), t_czb),
+ /* ARM does not really have an IT instruction.  */
+ TUE(it,        0, bf08, 1, (COND),    it, t_it),
+ TUE(itt,       0, bf0c, 1, (COND),    it, t_it),
+ TUE(ite,       0, bf04, 1, (COND),    it, t_it),
+ TUE(ittt,      0, bf0e, 1, (COND),    it, t_it),
+ TUE(itet,      0, bf06, 1, (COND),    it, t_it),
+ TUE(itte,      0, bf0a, 1, (COND),    it, t_it),
+ TUE(itee,      0, bf02, 1, (COND),    it, t_it),
+ TUE(itttt,     0, bf0f, 1, (COND),    it, t_it),
+ TUE(itett,     0, bf07, 1, (COND),    it, t_it),
+ TUE(ittet,     0, bf0b, 1, (COND),    it, t_it),
+ TUE(iteet,     0, bf03, 1, (COND),    it, t_it),
+ TUE(ittte,     0, bf0d, 1, (COND),    it, t_it),
+ TUE(itete,     0, bf05, 1, (COND),    it, t_it),
+ TUE(ittee,     0, bf09, 1, (COND),    it, t_it),
+ TUE(iteee,     0, bf01, 1, (COND),    it, t_it),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT FPU_FPA_EXT_V1  /* Core FPA instruction set (V1).  */
@@ -8230,415 +8445,410 @@ static const struct asm_opcode insns[] =
   CE(wfc,	e400110, 1, (RR),	     rd),
   CE(rfc,	e500110, 1, (RR),	     rd),
 
-  CM(ldf,s,	c100100, 2, (RF, ADDR),	     rd_cpaddr),
-  CM(ldf,d,	c108100, 2, (RF, ADDR),	     rd_cpaddr),
-  CM(ldf,e,	c500100, 2, (RF, ADDR),	     rd_cpaddr),
-  CM(ldf,p,	c508100, 2, (RF, ADDR),	     rd_cpaddr),
+  C3(ldfs,	c100100, 2, (RF, ADDR),	     rd_cpaddr),
+  C3(ldfd,	c108100, 2, (RF, ADDR),	     rd_cpaddr),
+  C3(ldfe,	c500100, 2, (RF, ADDR),	     rd_cpaddr),
+  C3(ldfp,	c508100, 2, (RF, ADDR),	     rd_cpaddr),
 
-  CM(stf,s,	c000100, 2, (RF, ADDR),	     rd_cpaddr),
-  CM(stf,d,	c008100, 2, (RF, ADDR),	     rd_cpaddr),
-  CM(stf,e,	c400100, 2, (RF, ADDR),	     rd_cpaddr),
-  CM(stf,p,	c408100, 2, (RF, ADDR),	     rd_cpaddr),
+  C3(stfs,	c000100, 2, (RF, ADDR),	     rd_cpaddr),
+  C3(stfd,	c008100, 2, (RF, ADDR),	     rd_cpaddr),
+  C3(stfe,	c400100, 2, (RF, ADDR),	     rd_cpaddr),
+  C3(stfp,	c408100, 2, (RF, ADDR),	     rd_cpaddr),
 
-  CM(mvf,s,	e008100, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,sp,	e008120, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,sm,	e008140, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,sz,	e008160, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,d,	e008180, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,dp,	e0081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,dm,	e0081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,dz,	e0081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,e,	e088100, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,ep,	e088120, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,em,	e088140, 2, (RF, RF_IF),     rd_rm),
-  CM(mvf,ez,	e088160, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfs,	e008100, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfsp,	e008120, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfsm,	e008140, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfsz,	e008160, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfd,	e008180, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfdp,	e0081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfdm,	e0081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfdz,	e0081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfe,	e088100, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfep,	e088120, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfem,	e088140, 2, (RF, RF_IF),     rd_rm),
+  C3(mvfez,	e088160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(mnf,s,	e108100, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,sp,	e108120, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,sm,	e108140, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,sz,	e108160, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,d,	e108180, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,dp,	e1081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,dm,	e1081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,dz,	e1081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,e,	e188100, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,ep,	e188120, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,em,	e188140, 2, (RF, RF_IF),     rd_rm),
-  CM(mnf,ez,	e188160, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfs,	e108100, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfsp,	e108120, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfsm,	e108140, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfsz,	e108160, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfd,	e108180, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfdp,	e1081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfdm,	e1081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfdz,	e1081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfe,	e188100, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfep,	e188120, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfem,	e188140, 2, (RF, RF_IF),     rd_rm),
+  C3(mnfez,	e188160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(abs,s,	e208100, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,sp,	e208120, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,sm,	e208140, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,sz,	e208160, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,d,	e208180, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,dp,	e2081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,dm,	e2081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,dz,	e2081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,e,	e288100, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,ep,	e288120, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,em,	e288140, 2, (RF, RF_IF),     rd_rm),
-  CM(abs,ez,	e288160, 2, (RF, RF_IF),     rd_rm),
+  C3(abss,	e208100, 2, (RF, RF_IF),     rd_rm),
+  C3(abssp,	e208120, 2, (RF, RF_IF),     rd_rm),
+  C3(abssm,	e208140, 2, (RF, RF_IF),     rd_rm),
+  C3(abssz,	e208160, 2, (RF, RF_IF),     rd_rm),
+  C3(absd,	e208180, 2, (RF, RF_IF),     rd_rm),
+  C3(absdp,	e2081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(absdm,	e2081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(absdz,	e2081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(abse,	e288100, 2, (RF, RF_IF),     rd_rm),
+  C3(absep,	e288120, 2, (RF, RF_IF),     rd_rm),
+  C3(absem,	e288140, 2, (RF, RF_IF),     rd_rm),
+  C3(absez,	e288160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(rnd,s,	e308100, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,sp,	e308120, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,sm,	e308140, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,sz,	e308160, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,d,	e308180, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,dp,	e3081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,dm,	e3081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,dz,	e3081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,e,	e388100, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,ep,	e388120, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,em,	e388140, 2, (RF, RF_IF),     rd_rm),
-  CM(rnd,ez,	e388160, 2, (RF, RF_IF),     rd_rm),
+  C3(rnds,	e308100, 2, (RF, RF_IF),     rd_rm),
+  C3(rndsp,	e308120, 2, (RF, RF_IF),     rd_rm),
+  C3(rndsm,	e308140, 2, (RF, RF_IF),     rd_rm),
+  C3(rndsz,	e308160, 2, (RF, RF_IF),     rd_rm),
+  C3(rndd,	e308180, 2, (RF, RF_IF),     rd_rm),
+  C3(rnddp,	e3081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(rnddm,	e3081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(rnddz,	e3081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(rnde,	e388100, 2, (RF, RF_IF),     rd_rm),
+  C3(rndep,	e388120, 2, (RF, RF_IF),     rd_rm),
+  C3(rndem,	e388140, 2, (RF, RF_IF),     rd_rm),
+  C3(rndez,	e388160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(sqt,s,	e408100, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,sp,	e408120, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,sm,	e408140, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,sz,	e408160, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,d,	e408180, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,dp,	e4081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,dm,	e4081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,dz,	e4081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,e,	e488100, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,ep,	e488120, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,em,	e488140, 2, (RF, RF_IF),     rd_rm),
-  CM(sqt,ez,	e488160, 2, (RF, RF_IF),     rd_rm),
+  C3(sqts,	e408100, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtsp,	e408120, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtsm,	e408140, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtsz,	e408160, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtd,	e408180, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtdp,	e4081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtdm,	e4081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtdz,	e4081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(sqte,	e488100, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtep,	e488120, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtem,	e488140, 2, (RF, RF_IF),     rd_rm),
+  C3(sqtez,	e488160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(log,s,	e508100, 2, (RF, RF_IF),     rd_rm),
-  CM(log,sp,	e508120, 2, (RF, RF_IF),     rd_rm),
-  CM(log,sm,	e508140, 2, (RF, RF_IF),     rd_rm),
-  CM(log,sz,	e508160, 2, (RF, RF_IF),     rd_rm),
-  CM(log,d,	e508180, 2, (RF, RF_IF),     rd_rm),
-  CM(log,dp,	e5081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(log,dm,	e5081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(log,dz,	e5081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(log,e,	e588100, 2, (RF, RF_IF),     rd_rm),
-  CM(log,ep,	e588120, 2, (RF, RF_IF),     rd_rm),
-  CM(log,em,	e588140, 2, (RF, RF_IF),     rd_rm),
-  CM(log,ez,	e588160, 2, (RF, RF_IF),     rd_rm),
+  C3(logs,	e508100, 2, (RF, RF_IF),     rd_rm),
+  C3(logsp,	e508120, 2, (RF, RF_IF),     rd_rm),
+  C3(logsm,	e508140, 2, (RF, RF_IF),     rd_rm),
+  C3(logsz,	e508160, 2, (RF, RF_IF),     rd_rm),
+  C3(logd,	e508180, 2, (RF, RF_IF),     rd_rm),
+  C3(logdp,	e5081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(logdm,	e5081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(logdz,	e5081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(loge,	e588100, 2, (RF, RF_IF),     rd_rm),
+  C3(logep,	e588120, 2, (RF, RF_IF),     rd_rm),
+  C3(logem,	e588140, 2, (RF, RF_IF),     rd_rm),
+  C3(logez,	e588160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(lgn,s,	e608100, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,sp,	e608120, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,sm,	e608140, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,sz,	e608160, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,d,	e608180, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,dp,	e6081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,dm,	e6081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,dz,	e6081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,e,	e688100, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,ep,	e688120, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,em,	e688140, 2, (RF, RF_IF),     rd_rm),
-  CM(lgn,ez,	e688160, 2, (RF, RF_IF),     rd_rm),
+  C3(lgns,	e608100, 2, (RF, RF_IF),     rd_rm),
+  C3(lgnsp,	e608120, 2, (RF, RF_IF),     rd_rm),
+  C3(lgnsm,	e608140, 2, (RF, RF_IF),     rd_rm),
+  C3(lgnsz,	e608160, 2, (RF, RF_IF),     rd_rm),
+  C3(lgnd,	e608180, 2, (RF, RF_IF),     rd_rm),
+  C3(lgndp,	e6081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(lgndm,	e6081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(lgndz,	e6081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(lgne,	e688100, 2, (RF, RF_IF),     rd_rm),
+  C3(lgnep,	e688120, 2, (RF, RF_IF),     rd_rm),
+  C3(lgnem,	e688140, 2, (RF, RF_IF),     rd_rm),
+  C3(lgnez,	e688160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(exp,s,	e708100, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,sp,	e708120, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,sm,	e708140, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,sz,	e708160, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,d,	e708180, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,dp,	e7081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,dm,	e7081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,dz,	e7081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,e,	e788100, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,ep,	e788120, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,em,	e788140, 2, (RF, RF_IF),     rd_rm),
-  CM(exp,dz,	e788160, 2, (RF, RF_IF),     rd_rm),
+  C3(exps,	e708100, 2, (RF, RF_IF),     rd_rm),
+  C3(expsp,	e708120, 2, (RF, RF_IF),     rd_rm),
+  C3(expsm,	e708140, 2, (RF, RF_IF),     rd_rm),
+  C3(expsz,	e708160, 2, (RF, RF_IF),     rd_rm),
+  C3(expd,	e708180, 2, (RF, RF_IF),     rd_rm),
+  C3(expdp,	e7081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(expdm,	e7081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(expdz,	e7081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(expe,	e788100, 2, (RF, RF_IF),     rd_rm),
+  C3(expep,	e788120, 2, (RF, RF_IF),     rd_rm),
+  C3(expem,	e788140, 2, (RF, RF_IF),     rd_rm),
+  C3(expdz,	e788160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(sin,s,	e808100, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,sp,	e808120, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,sm,	e808140, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,sz,	e808160, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,d,	e808180, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,dp,	e8081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,dm,	e8081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,dz,	e8081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,e,	e888100, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,ep,	e888120, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,em,	e888140, 2, (RF, RF_IF),     rd_rm),
-  CM(sin,ez,	e888160, 2, (RF, RF_IF),     rd_rm),
+  C3(sins,	e808100, 2, (RF, RF_IF),     rd_rm),
+  C3(sinsp,	e808120, 2, (RF, RF_IF),     rd_rm),
+  C3(sinsm,	e808140, 2, (RF, RF_IF),     rd_rm),
+  C3(sinsz,	e808160, 2, (RF, RF_IF),     rd_rm),
+  C3(sind,	e808180, 2, (RF, RF_IF),     rd_rm),
+  C3(sindp,	e8081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(sindm,	e8081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(sindz,	e8081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(sine,	e888100, 2, (RF, RF_IF),     rd_rm),
+  C3(sinep,	e888120, 2, (RF, RF_IF),     rd_rm),
+  C3(sinem,	e888140, 2, (RF, RF_IF),     rd_rm),
+  C3(sinez,	e888160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(cos,s,	e908100, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,sp,	e908120, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,sm,	e908140, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,sz,	e908160, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,d,	e908180, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,dp,	e9081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,dm,	e9081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,dz,	e9081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,e,	e988100, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,ep,	e988120, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,em,	e988140, 2, (RF, RF_IF),     rd_rm),
-  CM(cos,ez,	e988160, 2, (RF, RF_IF),     rd_rm),
+  C3(coss,	e908100, 2, (RF, RF_IF),     rd_rm),
+  C3(cossp,	e908120, 2, (RF, RF_IF),     rd_rm),
+  C3(cossm,	e908140, 2, (RF, RF_IF),     rd_rm),
+  C3(cossz,	e908160, 2, (RF, RF_IF),     rd_rm),
+  C3(cosd,	e908180, 2, (RF, RF_IF),     rd_rm),
+  C3(cosdp,	e9081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(cosdm,	e9081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(cosdz,	e9081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(cose,	e988100, 2, (RF, RF_IF),     rd_rm),
+  C3(cosep,	e988120, 2, (RF, RF_IF),     rd_rm),
+  C3(cosem,	e988140, 2, (RF, RF_IF),     rd_rm),
+  C3(cosez,	e988160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(tan,s,	ea08100, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,sp,	ea08120, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,sm,	ea08140, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,sz,	ea08160, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,d,	ea08180, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,dp,	ea081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,dm,	ea081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,dz,	ea081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,e,	ea88100, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,ep,	ea88120, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,em,	ea88140, 2, (RF, RF_IF),     rd_rm),
-  CM(tan,ez,	ea88160, 2, (RF, RF_IF),     rd_rm),
+  C3(tans,	ea08100, 2, (RF, RF_IF),     rd_rm),
+  C3(tansp,	ea08120, 2, (RF, RF_IF),     rd_rm),
+  C3(tansm,	ea08140, 2, (RF, RF_IF),     rd_rm),
+  C3(tansz,	ea08160, 2, (RF, RF_IF),     rd_rm),
+  C3(tand,	ea08180, 2, (RF, RF_IF),     rd_rm),
+  C3(tandp,	ea081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(tandm,	ea081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(tandz,	ea081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(tane,	ea88100, 2, (RF, RF_IF),     rd_rm),
+  C3(tanep,	ea88120, 2, (RF, RF_IF),     rd_rm),
+  C3(tanem,	ea88140, 2, (RF, RF_IF),     rd_rm),
+  C3(tanez,	ea88160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(asn,s,	eb08100, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,sp,	eb08120, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,sm,	eb08140, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,sz,	eb08160, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,d,	eb08180, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,dp,	eb081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,dm,	eb081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,dz,	eb081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,e,	eb88100, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,ep,	eb88120, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,em,	eb88140, 2, (RF, RF_IF),     rd_rm),
-  CM(asn,ez,	eb88160, 2, (RF, RF_IF),     rd_rm),
+  C3(asns,	eb08100, 2, (RF, RF_IF),     rd_rm),
+  C3(asnsp,	eb08120, 2, (RF, RF_IF),     rd_rm),
+  C3(asnsm,	eb08140, 2, (RF, RF_IF),     rd_rm),
+  C3(asnsz,	eb08160, 2, (RF, RF_IF),     rd_rm),
+  C3(asnd,	eb08180, 2, (RF, RF_IF),     rd_rm),
+  C3(asndp,	eb081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(asndm,	eb081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(asndz,	eb081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(asne,	eb88100, 2, (RF, RF_IF),     rd_rm),
+  C3(asnep,	eb88120, 2, (RF, RF_IF),     rd_rm),
+  C3(asnem,	eb88140, 2, (RF, RF_IF),     rd_rm),
+  C3(asnez,	eb88160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(acs,s,	ec08100, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,sp,	ec08120, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,sm,	ec08140, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,sz,	ec08160, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,d,	ec08180, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,dp,	ec081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,dm,	ec081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,dz,	ec081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,e,	ec88100, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,ep,	ec88120, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,em,	ec88140, 2, (RF, RF_IF),     rd_rm),
-  CM(acs,ez,	ec88160, 2, (RF, RF_IF),     rd_rm),
+  C3(acss,	ec08100, 2, (RF, RF_IF),     rd_rm),
+  C3(acssp,	ec08120, 2, (RF, RF_IF),     rd_rm),
+  C3(acssm,	ec08140, 2, (RF, RF_IF),     rd_rm),
+  C3(acssz,	ec08160, 2, (RF, RF_IF),     rd_rm),
+  C3(acsd,	ec08180, 2, (RF, RF_IF),     rd_rm),
+  C3(acsdp,	ec081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(acsdm,	ec081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(acsdz,	ec081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(acse,	ec88100, 2, (RF, RF_IF),     rd_rm),
+  C3(acsep,	ec88120, 2, (RF, RF_IF),     rd_rm),
+  C3(acsem,	ec88140, 2, (RF, RF_IF),     rd_rm),
+  C3(acsez,	ec88160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(atn,s,	ed08100, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,sp,	ed08120, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,sm,	ed08140, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,sz,	ed08160, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,d,	ed08180, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,dp,	ed081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,dm,	ed081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,dz,	ed081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,e,	ed88100, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,ep,	ed88120, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,em,	ed88140, 2, (RF, RF_IF),     rd_rm),
-  CM(atn,ez,	ed88160, 2, (RF, RF_IF),     rd_rm),
+  C3(atns,	ed08100, 2, (RF, RF_IF),     rd_rm),
+  C3(atnsp,	ed08120, 2, (RF, RF_IF),     rd_rm),
+  C3(atnsm,	ed08140, 2, (RF, RF_IF),     rd_rm),
+  C3(atnsz,	ed08160, 2, (RF, RF_IF),     rd_rm),
+  C3(atnd,	ed08180, 2, (RF, RF_IF),     rd_rm),
+  C3(atndp,	ed081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(atndm,	ed081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(atndz,	ed081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(atne,	ed88100, 2, (RF, RF_IF),     rd_rm),
+  C3(atnep,	ed88120, 2, (RF, RF_IF),     rd_rm),
+  C3(atnem,	ed88140, 2, (RF, RF_IF),     rd_rm),
+  C3(atnez,	ed88160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(urd,s,	ee08100, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,sp,	ee08120, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,sm,	ee08140, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,sz,	ee08160, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,d,	ee08180, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,dp,	ee081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,dm,	ee081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,dz,	ee081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,e,	ee88100, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,ep,	ee88120, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,em,	ee88140, 2, (RF, RF_IF),     rd_rm),
-  CM(urd,ez,	ee88160, 2, (RF, RF_IF),     rd_rm),
+  C3(urds,	ee08100, 2, (RF, RF_IF),     rd_rm),
+  C3(urdsp,	ee08120, 2, (RF, RF_IF),     rd_rm),
+  C3(urdsm,	ee08140, 2, (RF, RF_IF),     rd_rm),
+  C3(urdsz,	ee08160, 2, (RF, RF_IF),     rd_rm),
+  C3(urdd,	ee08180, 2, (RF, RF_IF),     rd_rm),
+  C3(urddp,	ee081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(urddm,	ee081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(urddz,	ee081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(urde,	ee88100, 2, (RF, RF_IF),     rd_rm),
+  C3(urdep,	ee88120, 2, (RF, RF_IF),     rd_rm),
+  C3(urdem,	ee88140, 2, (RF, RF_IF),     rd_rm),
+  C3(urdez,	ee88160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(nrm,s,	ef08100, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,sp,	ef08120, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,sm,	ef08140, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,sz,	ef08160, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,d,	ef08180, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,dp,	ef081a0, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,dm,	ef081c0, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,dz,	ef081e0, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,e,	ef88100, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,ep,	ef88120, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,em,	ef88140, 2, (RF, RF_IF),     rd_rm),
-  CM(nrm,ez,	ef88160, 2, (RF, RF_IF),     rd_rm),
+  C3(nrms,	ef08100, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmsp,	ef08120, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmsm,	ef08140, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmsz,	ef08160, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmd,	ef08180, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmdp,	ef081a0, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmdm,	ef081c0, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmdz,	ef081e0, 2, (RF, RF_IF),     rd_rm),
+  C3(nrme,	ef88100, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmep,	ef88120, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmem,	ef88140, 2, (RF, RF_IF),     rd_rm),
+  C3(nrmez,	ef88160, 2, (RF, RF_IF),     rd_rm),
 
-  CM(adf,s,	e000100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,sp,	e000120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,sm,	e000140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,sz,	e000160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,d,	e000180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,dp,	e0001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,dm,	e0001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,dz,	e0001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,e,	e080100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,ep,	e080120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,em,	e080140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(adf,ez,	e080160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfs,	e000100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfsp,	e000120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfsm,	e000140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfsz,	e000160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfd,	e000180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfdp,	e0001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfdm,	e0001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfdz,	e0001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfe,	e080100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfep,	e080120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfem,	e080140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(adfez,	e080160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(suf,s,	e200100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,sp,	e200120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,sm,	e200140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,sz,	e200160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,d,	e200180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,dp,	e2001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,dm,	e2001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,dz,	e2001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,e,	e280100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,ep,	e280120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,em,	e280140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(suf,ez,	e280160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufs,	e200100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufsp,	e200120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufsm,	e200140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufsz,	e200160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufd,	e200180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufdp,	e2001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufdm,	e2001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufdz,	e2001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufe,	e280100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufep,	e280120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufem,	e280140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(sufez,	e280160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(rsf,s,	e300100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,sp,	e300120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,sm,	e300140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,sz,	e300160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,d,	e300180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,dp,	e3001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,dm,	e3001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,dz,	e3001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,e,	e380100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,ep,	e380120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,em,	e380140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rsf,ez,	e380160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfs,	e300100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfsp,	e300120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfsm,	e300140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfsz,	e300160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfd,	e300180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfdp,	e3001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfdm,	e3001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfdz,	e3001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfe,	e380100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfep,	e380120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfem,	e380140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rsfez,	e380160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(muf,s,	e100100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,sp,	e100120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,sm,	e100140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,sz,	e100160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,d,	e100180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,dp,	e1001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,dm,	e1001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,dz,	e1001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,e,	e180100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,ep,	e180120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,em,	e180140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(muf,ez,	e180160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufs,	e100100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufsp,	e100120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufsm,	e100140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufsz,	e100160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufd,	e100180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufdp,	e1001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufdm,	e1001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufdz,	e1001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufe,	e180100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufep,	e180120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufem,	e180140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(mufez,	e180160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(dvf,s,	e400100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,sp,	e400120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,sm,	e400140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,sz,	e400160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,d,	e400180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,dp,	e4001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,dm,	e4001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,dz,	e4001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,e,	e480100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,ep,	e480120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,em,	e480140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(dvf,ez,	e480160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfs,	e400100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfsp,	e400120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfsm,	e400140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfsz,	e400160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfd,	e400180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfdp,	e4001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfdm,	e4001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfdz,	e4001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfe,	e480100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfep,	e480120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfem,	e480140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(dvfez,	e480160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(rdf,s,	e500100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,sp,	e500120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,sm,	e500140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,sz,	e500160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,d,	e500180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,dp,	e5001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,dm,	e5001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,dz,	e5001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,e,	e580100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,ep,	e580120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,em,	e580140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rdf,ez,	e580160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfs,	e500100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfsp,	e500120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfsm,	e500140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfsz,	e500160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfd,	e500180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfdp,	e5001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfdm,	e5001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfdz,	e5001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfe,	e580100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfep,	e580120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfem,	e580140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rdfez,	e580160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(pow,s,	e600100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,sp,	e600120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,sm,	e600140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,sz,	e600160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,d,	e600180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,dp,	e6001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,dm,	e6001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,dz,	e6001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,e,	e680100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,ep,	e680120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,em,	e680140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pow,ez,	e680160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(pows,	e600100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powsp,	e600120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powsm,	e600140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powsz,	e600160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powd,	e600180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powdp,	e6001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powdm,	e6001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powdz,	e6001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powe,	e680100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powep,	e680120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powem,	e680140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(powez,	e680160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(rpw,s,	e700100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,sp,	e700120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,sm,	e700140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,sz,	e700160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,d,	e700180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,dp,	e7001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,dm,	e7001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,dz,	e7001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,e,	e780100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,ep,	e780120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,em,	e780140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rpw,ez,	e780160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpws,	e700100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwsp,	e700120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwsm,	e700140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwsz,	e700160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwd,	e700180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwdp,	e7001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwdm,	e7001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwdz,	e7001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwe,	e780100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwep,	e780120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwem,	e780140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rpwez,	e780160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(rmf,s,	e800100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,sp,	e800120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,sm,	e800140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,sz,	e800160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,d,	e800180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,dp,	e8001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,dm,	e8001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,dz,	e8001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,e,	e880100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,ep,	e880120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,em,	e880140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(rmf,ez,	e880160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfs,	e800100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfsp,	e800120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfsm,	e800140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfsz,	e800160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfd,	e800180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfdp,	e8001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfdm,	e8001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfdz,	e8001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfe,	e880100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfep,	e880120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfem,	e880140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(rmfez,	e880160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(fml,s,	e900100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,sp,	e900120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,sm,	e900140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,sz,	e900160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,d,	e900180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,dp,	e9001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,dm,	e9001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,dz,	e9001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,e,	e980100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,ep,	e980120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,em,	e980140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fml,ez,	e980160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmls,	e900100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmlsp,	e900120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmlsm,	e900140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmlsz,	e900160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmld,	e900180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmldp,	e9001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmldm,	e9001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmldz,	e9001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmle,	e980100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmlep,	e980120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmlem,	e980140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fmlez,	e980160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(fdv,s,	ea00100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,sp,	ea00120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,sm,	ea00140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,sz,	ea00160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,d,	ea00180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,dp,	ea001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,dm,	ea001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,dz,	ea001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,e,	ea80100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,ep,	ea80120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,em,	ea80140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(fdv,ez,	ea80160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvs,	ea00100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvsp,	ea00120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvsm,	ea00140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvsz,	ea00160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvd,	ea00180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvdp,	ea001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvdm,	ea001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvdz,	ea001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdve,	ea80100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvep,	ea80120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvem,	ea80140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(fdvez,	ea80160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(frd,s,	eb00100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,sp,	eb00120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,sm,	eb00140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,sz,	eb00160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,d,	eb00180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,dp,	eb001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,dm,	eb001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,dz,	eb001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,e,	eb80100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,ep,	eb80120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,em,	eb80140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(frd,ez,	eb80160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frds,	eb00100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frdsp,	eb00120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frdsm,	eb00140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frdsz,	eb00160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frdd,	eb00180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frddp,	eb001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frddm,	eb001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frddz,	eb001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frde,	eb80100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frdep,	eb80120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frdem,	eb80140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(frdez,	eb80160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
-  CM(pol,s,	ec00100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,sp,	ec00120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,sm,	ec00140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,sz,	ec00160, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,d,	ec00180, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,dp,	ec001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,dm,	ec001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,dz,	ec001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,e,	ec80100, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,ep,	ec80120, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,em,	ec80140, 3, (RF, RF, RF_IF), rd_rn_rm),
-  CM(pol,ez,	ec80160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(pols,	ec00100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(polsp,	ec00120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(polsm,	ec00140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(polsz,	ec00160, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(pold,	ec00180, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(poldp,	ec001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(poldm,	ec001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(poldz,	ec001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(pole,	ec80100, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(polep,	ec80120, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(polem,	ec80140, 3, (RF, RF, RF_IF), rd_rn_rm),
+  C3(polez,	ec80160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
   CE(cmf,	e90f110, 2, (RF, RF_IF),     fpa_cmp),
-  CM(cmf,e,	ed0f110, 2, (RF, RF_IF),     fpa_cmp),
+ C3E(cmfe,	ed0f110, 2, (RF, RF_IF),     fpa_cmp),
   CE(cnf,	eb0f110, 2, (RF, RF_IF),     fpa_cmp),
-  CM(cnf,e,	ef0f110, 2, (RF, RF_IF),     fpa_cmp),
-  /* The FPA10 data sheet suggests that the 'E' of cmfe/cnfe should
-     not be an optional suffix, but part of the instruction.  To be
-     compatible, we accept either.  */
-  CE(cmfe,	ed0f110, 2, (RF, RF_IF),     fpa_cmp),
-  CE(cnfe,	ef0f110, 2, (RF, RF_IF),     fpa_cmp),
+ C3E(cnfe,	ef0f110, 2, (RF, RF_IF),     fpa_cmp),
 
-  CM(flt,s,	e000110, 2, (RF, RR),	     rn_rd),
-  CM(flt,sp,	e000130, 2, (RF, RR),	     rn_rd),
-  CM(flt,sm,	e000150, 2, (RF, RR),	     rn_rd),
-  CM(flt,sz,	e000170, 2, (RF, RR),	     rn_rd),
-  CM(flt,d,	e000190, 2, (RF, RR),	     rn_rd),
-  CM(flt,dp,	e0001b0, 2, (RF, RR),	     rn_rd),
-  CM(flt,dm,	e0001d0, 2, (RF, RR),	     rn_rd),
-  CM(flt,dz,	e0001f0, 2, (RF, RR),	     rn_rd),
-  CM(flt,e,	e080110, 2, (RF, RR),	     rn_rd),
-  CM(flt,ep,	e080130, 2, (RF, RR),	     rn_rd),
-  CM(flt,em,	e080150, 2, (RF, RR),	     rn_rd),
-  CM(flt,ez,	e080170, 2, (RF, RR),	     rn_rd),
+  C3(flts,	e000110, 2, (RF, RR),	     rn_rd),
+  C3(fltsp,	e000130, 2, (RF, RR),	     rn_rd),
+  C3(fltsm,	e000150, 2, (RF, RR),	     rn_rd),
+  C3(fltsz,	e000170, 2, (RF, RR),	     rn_rd),
+  C3(fltd,	e000190, 2, (RF, RR),	     rn_rd),
+  C3(fltdp,	e0001b0, 2, (RF, RR),	     rn_rd),
+  C3(fltdm,	e0001d0, 2, (RF, RR),	     rn_rd),
+  C3(fltdz,	e0001f0, 2, (RF, RR),	     rn_rd),
+  C3(flte,	e080110, 2, (RF, RR),	     rn_rd),
+  C3(fltep,	e080130, 2, (RF, RR),	     rn_rd),
+  C3(fltem,	e080150, 2, (RF, RR),	     rn_rd),
+  C3(fltez,	e080170, 2, (RF, RR),	     rn_rd),
 
   /* The implementation of the FIX instruction is broken on some
      assemblers, in that it accepts a precision specifier as well as a
@@ -8646,28 +8856,28 @@ static const struct asm_opcode insns[] =
      To be more compatible, we accept it as well, though of course it
      does not set any bits.  */
   CE(fix,	e100110, 2, (RR, RF),	     rd_rm),
-  CM(fix,p,	e100130, 2, (RR, RF),	     rd_rm),
-  CM(fix,m,	e100150, 2, (RR, RF),	     rd_rm),
-  CM(fix,z,	e100170, 2, (RR, RF),	     rd_rm),
-  CM(fix,sp,	e100130, 2, (RR, RF),	     rd_rm),
-  CM(fix,sm,	e100150, 2, (RR, RF),	     rd_rm),
-  CM(fix,sz,	e100170, 2, (RR, RF),	     rd_rm),
-  CM(fix,dp,	e100130, 2, (RR, RF),	     rd_rm),
-  CM(fix,dm,	e100150, 2, (RR, RF),	     rd_rm),
-  CM(fix,dz,	e100170, 2, (RR, RF),	     rd_rm),
-  CM(fix,ep,	e100130, 2, (RR, RF),	     rd_rm),
-  CM(fix,em,	e100150, 2, (RR, RF),	     rd_rm),
-  CM(fix,ez,	e100170, 2, (RR, RF),	     rd_rm),
+  C3(fixp,	e100130, 2, (RR, RF),	     rd_rm),
+  C3(fixm,	e100150, 2, (RR, RF),	     rd_rm),
+  C3(fixz,	e100170, 2, (RR, RF),	     rd_rm),
+  C3(fixsp,	e100130, 2, (RR, RF),	     rd_rm),
+  C3(fixsm,	e100150, 2, (RR, RF),	     rd_rm),
+  C3(fixsz,	e100170, 2, (RR, RF),	     rd_rm),
+  C3(fixdp,	e100130, 2, (RR, RF),	     rd_rm),
+  C3(fixdm,	e100150, 2, (RR, RF),	     rd_rm),
+  C3(fixdz,	e100170, 2, (RR, RF),	     rd_rm),
+  C3(fixep,	e100130, 2, (RR, RF),	     rd_rm),
+  C3(fixem,	e100150, 2, (RR, RF),	     rd_rm),
+  C3(fixez,	e100170, 2, (RR, RF),	     rd_rm),
 
   /* Instructions that were new with the real FPA, call them V2.  */
 #undef ARM_VARIANT
 #define ARM_VARIANT FPU_FPA_EXT_V2
   CE(lfm,	c100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
-  CM(lfm,fd,	c900200, 3, (RF, I4b, ADDR), fpa_ldmstm),
-  CM(lfm,ea,	d100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+  C3(lfmfd,	c900200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+  C3(lfmea,	d100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
   CE(sfm,	c000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
-  CM(sfm,fd,	d000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
-  CM(sfm,ea,	c800200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+  C3(sfmfd,	d000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+  C3(sfmea,	c800200, 3, (RF, I4b, ADDR), fpa_ldmstm),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT FPU_VFP_EXT_V1xD  /* VFP V1xD (single precision).  */

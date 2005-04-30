@@ -645,8 +645,8 @@ static const struct thumb_opcode thumb_opcodes[] =
   {ARM_EXT_V6K, 0xbf00, 0xff0f, "nop\t{%4-7d}"},
 
   /* ARM V6T2 instructions.  */
-  {ARM_EXT_V6T2, 0xb900, 0xfd00, "czbne\t%0-2r, %b"},
-  {ARM_EXT_V6T2, 0xb100, 0xfd00, "czbeq\t%0-2r, %b"},
+  {ARM_EXT_V6T2, 0xb900, 0xfd00, "cbnz\t%0-2r, %b"},
+  {ARM_EXT_V6T2, 0xb100, 0xfd00, "cbz\t%0-2r, %b"},
   {ARM_EXT_V6T2, 0xbf08, 0xff0f, "it\t%4-7c"},
   {ARM_EXT_V6T2, 0xbf14, 0xff17, "it%3?te\t%4-7c"},
   {ARM_EXT_V6T2, 0xbf04, 0xff17, "it%3?et\t%4-7c"},
