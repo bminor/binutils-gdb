@@ -47,6 +47,29 @@
 #include "observer.h"
 #include "readline/readline.h"
 
+/* Architecture-specific operations.  */
+
+/* Per-architecture data key.  */
+static struct gdbarch_data *solib_data;
+
+static void *
+solib_init (struct obstack *obstack)
+{
+  struct target_so_ops **ops;
+
+  ops = OBSTACK_ZALLOC (obstack, struct target_so_ops *);
+  *ops = current_target_so_ops;
+  return ops;
+}
+
+static struct target_so_ops *
+solib_ops (struct gdbarch *gdbarch)
+{
+  struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
+  return *ops;
+}
+
+
 /* external data declarations */
 
 /* FIXME: gdbarch needs to control this variable */
@@ -119,6 +142,7 @@ The search path for loading non-absolute shared library symbol files is %s.\n"),
 int
 solib_open (char *in_pathname, char **found_pathname)
 {
+  struct target_so_ops *ops = solib_ops (current_gdbarch);
   int found_file = -1;
   char *temp_pathname = NULL;
   char *p = in_pathname;
@@ -179,9 +203,9 @@ solib_open (char *in_pathname, char **found_pathname)
                         &temp_pathname);
 
   /* If not found, try to use target supplied solib search method */
-  if (found_file < 0 && TARGET_SO_FIND_AND_OPEN_SOLIB != NULL)
-    found_file = TARGET_SO_FIND_AND_OPEN_SOLIB
-                 (in_pathname, O_RDONLY, &temp_pathname);
+  if (found_file < 0 && ops->find_and_open_solib)
+    found_file = ops->find_and_open_solib (in_pathname, O_RDONLY,
+					   &temp_pathname);
 
   /* If not found, next search the inferior's $PATH environment variable. */
   if (found_file < 0 && solib_absolute_prefix == NULL)
@@ -284,10 +308,12 @@ solib_map_sections (void *arg)
 
   for (p = so->sections; p < so->sections_end; p++)
     {
+      struct target_so_ops *ops = solib_ops (current_gdbarch);
+
       /* Relocate the section binding addresses as recorded in the shared
          object's file by the base address to which the object was actually
          mapped. */
-      TARGET_SO_RELOCATE_SECTION_ADDRESSES (so, p);
+      ops->relocate_section_addresses (so, p);
       if (strcmp (p->the_bfd_section->name, ".text") == 0)
 	{
 	  so->textsection = p;
@@ -324,6 +350,7 @@ solib_map_sections (void *arg)
 void
 free_so (struct so_list *so)
 {
+  struct target_so_ops *ops = solib_ops (current_gdbarch);
   char *bfd_filename = 0;
 
   if (so->sections)
@@ -340,7 +367,7 @@ free_so (struct so_list *so)
   if (bfd_filename)
     xfree (bfd_filename);
 
-  TARGET_SO_FREE_SO (so);
+  ops->free_so (so);
 
   xfree (so);
 }
@@ -439,7 +466,8 @@ solib_read_symbols (struct so_list *so, int from_tty)
 static void
 update_solib_list (int from_tty, struct target_ops *target)
 {
-  struct so_list *inferior = TARGET_SO_CURRENT_SOS ();
+  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  struct so_list *inferior = ops->current_sos();
   struct so_list *gdb, **gdb_link;
 
   /* If we are attaching to a running process for which we 
@@ -447,7 +475,7 @@ update_solib_list (int from_tty, struct target_ops *target)
      symbols now!  */
   if (attach_flag &&
       symfile_objfile == NULL)
-    catch_errors (TARGET_SO_OPEN_SYMBOL_FILE_OBJECT, &from_tty, 
+    catch_errors (ops->open_symbol_file_object, &from_tty, 
 		  "Error reading attached process's symbol file.\n",
 		  RETURN_MASK_ALL);
 
@@ -635,11 +663,13 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
 
     if (loaded_any_symbols)
       {
+	struct target_so_ops *ops = solib_ops (current_gdbarch);
+
 	/* Getting new symbols may change our opinion about what is
 	   frameless.  */
 	reinit_frame_cache ();
 
-	TARGET_SO_SPECIAL_SYMBOL_HANDLING ();
+	ops->special_symbol_handling ();
       }
   }
 }
@@ -760,6 +790,8 @@ solib_address (CORE_ADDR address)
 void
 clear_solib (void)
 {
+  struct target_so_ops *ops = solib_ops (current_gdbarch);
+
   /* This function is expected to handle ELF shared libraries.  It is
      also used on Solaris, which can run either ELF or a.out binaries
      (for compatibility with SunOS 4), both of which can use shared
@@ -793,7 +825,7 @@ clear_solib (void)
       free_so (so);
     }
 
-  TARGET_SO_CLEAR_SOLIB ();
+  ops->clear_solib ();
 }
 
 static void
@@ -821,7 +853,8 @@ do_clear_solib (void *dummy)
 void
 solib_create_inferior_hook (void)
 {
-  TARGET_SO_SOLIB_CREATE_INFERIOR_HOOK ();
+  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  ops->solib_create_inferior_hook();
 }
 
 /* GLOBAL FUNCTION
@@ -843,7 +876,8 @@ solib_create_inferior_hook (void)
 int
 in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
-  return TARGET_SO_IN_DYNSYM_RESOLVE_CODE (pc);
+  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  return ops->in_dynsym_resolve_code (pc);
 }
 
 /*
@@ -909,6 +943,8 @@ void
 _initialize_solib (void)
 {
   struct cmd_list_element *c;
+
+  solib_data = gdbarch_data_register_pre_init (solib_init);
 
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   _("Load shared object library symbols for files matching REGEXP."));
