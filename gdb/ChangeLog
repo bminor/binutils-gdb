@@ -1,5 +1,9 @@
 2005-05-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* somsolib.c, somsolib.h: Remove files.
+	* Makefile.in (somsolib_h): Remove.
+	(somsolib.o): Remove dependency.
+
 	* fbsd-nat.c: Include <sys/sysctl.h>.
 	(fbsd_pid_to_exec_file): Use KERN_PROC_PATHNAME sysctl if
 	available.  Plug memory leak.  Fixes PR gdb/1922.
