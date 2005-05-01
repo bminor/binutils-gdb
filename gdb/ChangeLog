@@ -1,5 +1,8 @@
 2005-05-01  Andrew Cagney  <cagney@gnu.org>
 
+	* MAINTAINERS: Note that cris, m68k, mn10300, sh64, sparc and vax
+	do not build.
+
 	* gdbarch.sh (deprecated_extract_return_value)
 	(breakpoint_from_pc, deprecated_store_return_value)
 	(memory_insert_breakpoint, memory_remove_breakpoint): Change type

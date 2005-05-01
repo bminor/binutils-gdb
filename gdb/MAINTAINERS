@@ -67,13 +67,14 @@ the native maintainer when resolving ABI issues.
 	avr		--target=avr ,-Werror
 			Theodore A. Roth	troth@openavr.org
 
-	cris		--target=cris-elf ,-Werror
+	cris		--target=cris-elf broken
+			(sim/cris/modelv10.c:4181 crisv10f_engine_run_full?)
 
 	d10v		OBSOLETE
 
 	frv		--target=frv-elf ,-Werror
 
-	h8300		--target=h8300-elf, -Werror
+	h8300		--target=h8300-elf ,-Werror
 
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
@@ -87,7 +88,8 @@ the native maintainer when resolving ABI issues.
 	m68hc11		--target=m68hc11-elf ,-Werror ,
 			Stephane Carrez		stcarrez@nerim.fr
 
-	m68k		--target=m68k-elf ,-Werror
+	m68k		--target=m68k-elf broken
+			(opcodes/m68k-dis.c:338 longjmp clober)
 
 	m88k		--target=m88k-openbsd ,-Werror
 			Mark Kettenis		kettenis@gnu.org
@@ -96,7 +98,8 @@ the native maintainer when resolving ABI issues.
 
 	mips		--target=mips-elf ,-Werror
 
-	mn10300		--target=mn10300-elf
+	mn10300		--target=mn10300-elf broken
+			(sim/ dies with make -j)
 			Michael Snyder		msnyder@redhat.com
 
 	ns32k		Deleted
@@ -108,13 +111,16 @@ the native maintainer when resolving ABI issues.
 	s390		--target=s390-linux-gnu ,-Werror
 
 	sh		--target=sh-elf ,-Werror
-			--target=sh64-elf ,-Werror
+			--target=sh64-elf broken
+			(sim/ dies)
 
-	sparc		--target=sparc-elf ,-Werror
+	sparc		--target=sparc-elf broken
+			(bfd/elfxx-sparc:512 bfd_elf64_swap_reloca_out undef)
 
 	v850		Deleted
 
-	vax		--target=vax-netbsd ,-Werror
+	vax		--target=vax-netbsd broken
+			(opcodes/vax-dis.c:224 longjmp clober)
 
 	x86-64		--target=x86_64-linux-gnu ,-Werror
 
