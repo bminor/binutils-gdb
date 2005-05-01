@@ -1665,7 +1665,8 @@ rs6000_use_struct_convention (int gcc_p, struct type *value_type)
 }
 
 static void
-rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
+rs6000_extract_return_value (struct type *valtype, bfd_byte *regbuf,
+			     bfd_byte *valbuf)
 {
   int offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);

@@ -136,9 +136,9 @@ static void get_offsets (void);
 
 static long read_frame (char *buf, long sizeof_buf);
 
-static int remote_insert_breakpoint (CORE_ADDR, char *);
+static int remote_insert_breakpoint (CORE_ADDR, bfd_byte *);
 
-static int remote_remove_breakpoint (CORE_ADDR, char *);
+static int remote_remove_breakpoint (CORE_ADDR, bfd_byte *);
 
 static int hexnumlen (ULONGEST num);
 
@@ -4497,7 +4497,7 @@ static unsigned char little_break_insn[] = DEPRECATED_LITTLE_REMOTE_BREAKPOINT;
    of bytes returned by BREAKPOINT_FROM_PC.  */
 
 static int
-remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+remote_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   struct remote_state *rs = get_remote_state ();
 #ifdef DEPRECATED_REMOTE_BREAKPOINT
@@ -4557,7 +4557,7 @@ remote_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 }
 
 static int
-remote_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+remote_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   struct remote_state *rs = get_remote_state ();
   int bp_size;

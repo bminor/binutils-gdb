@@ -42,7 +42,7 @@
    is accomplished via BREAKPOINT_MAX).  */
 
 int
-default_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+default_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   int val;
   const unsigned char *bp;
@@ -65,9 +65,9 @@ default_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 
 
 int
-default_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+default_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
-  const unsigned char *bp;
+  const bfd_byte *bp;
   int bplen;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
@@ -80,13 +80,13 @@ default_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 
 
 int
-memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   return MEMORY_INSERT_BREAKPOINT(addr, contents_cache);
 }
 
 int
-memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   return MEMORY_REMOVE_BREAKPOINT(addr, contents_cache);
 }

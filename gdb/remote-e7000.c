@@ -1702,7 +1702,7 @@ static CORE_ADDR breakaddr[MAX_BREAKPOINTS] =
 {0};
 
 static int
-e7000_insert_breakpoint (CORE_ADDR addr, char *shadow)
+e7000_insert_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
 {
   int i;
   char buf[200];
@@ -1745,7 +1745,7 @@ e7000_insert_breakpoint (CORE_ADDR addr, char *shadow)
 }
 
 static int
-e7000_remove_breakpoint (CORE_ADDR addr, char *shadow)
+e7000_remove_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
 {
   int i;
   char buf[200];

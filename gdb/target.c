@@ -114,9 +114,9 @@ static int deprecated_debug_xfer_memory (CORE_ADDR, char *, int, int,
 
 static void debug_to_files_info (struct target_ops *);
 
-static int debug_to_insert_breakpoint (CORE_ADDR, char *);
+static int debug_to_insert_breakpoint (CORE_ADDR, bfd_byte *);
 
-static int debug_to_remove_breakpoint (CORE_ADDR, char *);
+static int debug_to_remove_breakpoint (CORE_ADDR, bfd_byte *);
 
 static int debug_to_can_use_hw_breakpoint (int, int, int);
 
@@ -2068,7 +2068,7 @@ debug_to_files_info (struct target_ops *target)
 }
 
 static int
-debug_to_insert_breakpoint (CORE_ADDR addr, char *save)
+debug_to_insert_breakpoint (CORE_ADDR addr, bfd_byte *save)
 {
   int retval;
 
@@ -2082,7 +2082,7 @@ debug_to_insert_breakpoint (CORE_ADDR addr, char *save)
 }
 
 static int
-debug_to_remove_breakpoint (CORE_ADDR addr, char *save)
+debug_to_remove_breakpoint (CORE_ADDR addr, bfd_byte *save)
 {
   int retval;
 

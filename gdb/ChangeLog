@@ -1,3 +1,37 @@
+2005-05-01  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh (deprecated_extract_return_value)
+	(breakpoint_from_pc, deprecated_store_return_value)
+	(memory_insert_breakpoint, memory_remove_breakpoint): Change type
+	of buffer to a bfd_byte pointer.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* mem-break.c (memory_insert_breakpoint) 
+	(memory_remove_breakpoint, default_memory_insert_breakpoint)
+	(default_memory_remove_breakpoint): Update.
+	* target.h (memory_insert_breakpoint)
+	(memory_remove_breakpoint, default_memory_insert_breakpoint)
+	(default_memory_remove_breakpoint): Update declarations.
+	(struct target_ops): Update to_insert_breakpoint and
+	to_remove_breakpoint.
+	* target.c (debug_to_remove_breakpoint) 
+	(debug_to_insert_breakpoint): Update.
+	* remote-m32r-sdi.c (m32r_remove_breakpoint) 
+	(m32r_insert_breakpoint): Update.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint) 
+	(m32r_memory_remove_breakpoint): Update.
+	* remote-e7000.c (e7000_insert_breakpoint) 
+	(e7000_remove_breakpoint): Update.
+	* remote-rdi.c (arm_rdi_insert_breakpoint) 
+	(arm_rdi_remove_breakpoint): Update.
+	* remote-sim.c (gdbsim_insert_breakpoint) 
+	(gdbsim_remove_breakpoint): Update.
+	* exec.c (ignore): Update.
+	* rs6000-tdep.c (rs6000_extract_return_value): Update.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint) 
+	(ia64_memory_remove_breakpoint): Update.
+	* remote-rdp.c (remote_rdp_insert_breakpoint) 
+	(remote_rdp_remove_breakpoint): Update.
+
 2005-05-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* somsolib.c, somsolib.h: Remove files.

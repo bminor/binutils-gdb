@@ -805,13 +805,13 @@ gdbsim_mourn_inferior (void)
 }
 
 static int
-gdbsim_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+gdbsim_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   return memory_insert_breakpoint (addr, contents_cache);
 }
 
 static int
-gdbsim_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+gdbsim_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   return memory_remove_breakpoint (addr, contents_cache);
 }

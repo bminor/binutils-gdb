@@ -523,7 +523,7 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
 #define IA64_BREAKPOINT 0x00003333300LL
 
 static int
-ia64_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+ia64_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   char bundle[BUNDLE_LEN];
   int slotnum = (int) (addr & 0x0f) / SLOT_MULTIPLIER;
@@ -556,7 +556,7 @@ ia64_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 }
 
 static int
-ia64_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+ia64_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   char bundle[BUNDLE_LEN];
   int slotnum = (addr & 0x0f) / SLOT_MULTIPLIER;

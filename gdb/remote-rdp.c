@@ -1053,7 +1053,7 @@ rdp_execute (void)
 }
 
 static int
-remote_rdp_insert_breakpoint (CORE_ADDR addr, char *save)
+remote_rdp_insert_breakpoint (CORE_ADDR addr, bfd_byte *save)
 {
   int res;
   if (ds.rdi_level > 0)
@@ -1077,7 +1077,7 @@ remote_rdp_insert_breakpoint (CORE_ADDR addr, char *save)
 }
 
 static int
-remote_rdp_remove_breakpoint (CORE_ADDR addr, char *save)
+remote_rdp_remove_breakpoint (CORE_ADDR addr, bfd_byte *save)
 {
   int res;
   if (ds.rdi_level > 0)

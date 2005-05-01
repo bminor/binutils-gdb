@@ -62,7 +62,7 @@ static void set_section_command (char *, int);
 
 static void exec_files_info (struct target_ops *);
 
-static int ignore (CORE_ADDR, char *);
+static int ignore (CORE_ADDR, bfd_byte *);
 
 static void init_exec_ops (void);
 
@@ -676,7 +676,7 @@ set_section_command (char *args, int from_tty)
    breakpoint_init_inferior).  */
 
 static int
-ignore (CORE_ADDR addr, char *contents)
+ignore (CORE_ADDR addr, bfd_byte *contents)
 {
   return 0;
 }

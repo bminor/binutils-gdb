@@ -1141,7 +1141,7 @@ m32r_mourn_inferior (void)
 }
 
 static int
-m32r_insert_breakpoint (CORE_ADDR addr, char *shadow)
+m32r_insert_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
 {
   int ib_breakpoints;
   unsigned char buf[13];
@@ -1183,7 +1183,7 @@ m32r_insert_breakpoint (CORE_ADDR addr, char *shadow)
 }
 
 static int
-m32r_remove_breakpoint (CORE_ADDR addr, char *shadow)
+m32r_remove_breakpoint (CORE_ADDR addr, bfd_byte *shadow)
 {
   int i;
 

@@ -335,8 +335,8 @@ struct target_ops
 				   struct target_ops *target);
 
     void (*to_files_info) (struct target_ops *);
-    int (*to_insert_breakpoint) (CORE_ADDR, char *);
-    int (*to_remove_breakpoint) (CORE_ADDR, char *);
+    int (*to_insert_breakpoint) (CORE_ADDR, bfd_byte *);
+    int (*to_remove_breakpoint) (CORE_ADDR, bfd_byte *);
     int (*to_can_use_hw_breakpoint) (int, int, int);
     int (*to_insert_hw_breakpoint) (CORE_ADDR, char *);
     int (*to_remove_hw_breakpoint) (CORE_ADDR, char *);
@@ -1137,13 +1137,13 @@ struct section_table *target_section_by_addr (struct target_ops *target,
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint (CORE_ADDR, char *);
+extern int memory_remove_breakpoint (CORE_ADDR, bfd_byte *);
 
-extern int memory_insert_breakpoint (CORE_ADDR, char *);
+extern int memory_insert_breakpoint (CORE_ADDR, bfd_byte *);
 
-extern int default_memory_remove_breakpoint (CORE_ADDR, char *);
+extern int default_memory_remove_breakpoint (CORE_ADDR, bfd_byte *);
 
-extern int default_memory_insert_breakpoint (CORE_ADDR, char *);
+extern int default_memory_insert_breakpoint (CORE_ADDR, bfd_byte *);
 
 
 /* From target.c */

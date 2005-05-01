@@ -74,9 +74,9 @@ static void arm_rdi_kill (void);
 
 static void arm_rdi_detach (char *args, int from_tty);
 
-static int arm_rdi_insert_breakpoint (CORE_ADDR, char *);
+static int arm_rdi_insert_breakpoint (CORE_ADDR, bfd_byte *);
 
-static int arm_rdi_remove_breakpoint (CORE_ADDR, char *);
+static int arm_rdi_remove_breakpoint (CORE_ADDR, bfd_byte *);
 
 static char *rdi_error_message (int err);
 
@@ -668,7 +668,7 @@ arm_rdi_mourn_inferior (void)
    here.  */
 
 static int
-arm_rdi_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
+arm_rdi_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   int rslt;
   PointHandle point;
@@ -692,7 +692,7 @@ arm_rdi_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 }
 
 static int
-arm_rdi_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+arm_rdi_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   int rslt;
   PointHandle point;
