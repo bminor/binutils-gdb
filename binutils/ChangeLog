@@ -1,3 +1,8 @@
+2005-05-01  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* doc/binutils.texi (strip, objcopy): Clarify the description of
+	the "--strip-debug" option.  Fix a typo.
+
 2005-04-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bucomm.c: Undo the last change.

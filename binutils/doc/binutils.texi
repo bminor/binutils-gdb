@@ -1428,8 +1428,9 @@ Creates a .gnu_debuglink section which contains a reference to @var{path-to-file
 and adds it to the output file.
 
 @item --only-keep-debug
-Strip a file, removing any sections that would be stripped by
-@option{--strip-debug} and leaving the debugging sections.
+Strip a file, removing contents of any sections that would not be
+stripped by @option{--strip-debug} and leaving the debugging sections
+intact.
 
 The intention is that this option will be used in conjunction with
 @option{--add-gnu-debuglink} to create a two part executable.  One a
@@ -1460,7 +1461,7 @@ optional.  You could instead do this:
 @item Run @code{objcopy --add-gnu-debuglink=foo.full foo}
 @end enumerate
 
-ie the file pointed to by the @option{--add-gnu-debuglink} can be the
+i.e. the file pointed to by the @option{--add-gnu-debuglink} can be the
 full executable.  It does not have to be a file created by the
 @option{--only-keep-debug} switch.
 
