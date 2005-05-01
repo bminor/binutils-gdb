@@ -2393,6 +2393,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	  switch (r_type)
 	    {
 	    case R_ARM_PC24:
+	    case R_ARM_PLT32:
 #ifndef OLD_ARM_ABI
 	    case R_ARM_CALL:
 	    case R_ARM_JUMP24:
@@ -2413,7 +2414,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	      break;
 
 	    default:
-	      break;
+	      abort ();
 	    }
 	}
 
@@ -3993,6 +3994,7 @@ arm_add_to_rel (bfd *              abfd,
 	  break;
 
 	case R_ARM_PC24:
+	case R_ARM_PLT32:
 #ifndef OLD_ARM_ABI
 	case R_ARM_CALL:
 	case R_ARM_JUMP24:
