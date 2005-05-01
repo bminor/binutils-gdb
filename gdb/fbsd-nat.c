@@ -27,8 +27,9 @@
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
-#include <sys/procfs.h>
 #include <sys/types.h>
+#include <sys/procfs.h>
+#include <sys/sysctl.h>
 
 #include "elf-bfd.h"
 #include "fbsd-nat.h"
@@ -39,18 +40,30 @@
 char *
 fbsd_pid_to_exec_file (int pid)
 {
+  size_t len = MAXPATHLEN;
+  char *buf = xcalloc (len, sizeof (char));
   char *path;
-  char *buf;
+
+#ifdef KERN_PROC_PATHNAME
+  int mib[4];
+
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROC;
+  mib[2] = KERN_PROC_PATHNAME;
+  mib[3] = pid;
+  if (sysctl (mib, 4, buf, &len, NULL, 0) == 0)
+    return buf;
+#endif
 
   path = xstrprintf ("/proc/%d/file", pid);
-  buf = xcalloc (MAXPATHLEN, sizeof (char));
-  make_cleanup (xfree, path);
-  make_cleanup (xfree, buf);
+  if (readlink (path, buf, MAXPATHLEN) == -1)
+    {
+      xfree (buf);
+      buf = NULL;
+    }
 
-  if (readlink (path, buf, MAXPATHLEN) > 0)
-    return buf;
-
-  return NULL;
+  xfree (path);
+  return buf;
 }
 
 static int
