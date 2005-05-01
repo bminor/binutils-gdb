@@ -12585,7 +12585,7 @@ the process-related information, including the user ID and group ID;
 how many threads are there in the process; its virtual memory usage;
 the signals that are pending, blocked, and ignored; its TTY; its
 consumption of system and user time; its stack size; its @samp{nice}
-value; etc.  For more information, see the @samp{proc(5)} man page
+value; etc.  For more information, see the @samp{proc} man page
 (type @kbd{man 5 proc} from your shell prompt).
 
 @item info proc all
@@ -23159,7 +23159,7 @@ either another @code{read(0, @dots{})} is requested by the target or debugging
 is stopped on users request.
 
 @node The isatty call
-@subsection The isatty(3) call
+@subsection The @samp{isatty} function call
 @cindex isatty call, file-i/o protocol
 
 A special case in this protocol is the library call @code{isatty} which
@@ -23170,7 +23170,7 @@ would require implementing @code{ioctl} and would be more complex than
 needed.
 
 @node The system call
-@subsection The system(3) call
+@subsection The @samp{system} function call
 @cindex system call, file-i/o protocol
 
 The other special case in this protocol is the @code{system} call which
