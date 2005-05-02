@@ -703,7 +703,6 @@ static void gen_lib_file (void);
 static int pfunc (const void *, const void *);
 static int nfunc (const void *, const void *);
 static void remove_null_names (export_type **);
-static void dtab (export_type **);
 static void process_duplicates (export_type **);
 static void fill_ordinals (export_type **);
 static int alphafunc (const void *, const void *);
@@ -2857,27 +2856,6 @@ remove_null_names (export_type **ptr)
 }
 
 static void
-dtab (export_type **ptr ATTRIBUTE_UNUSED)
-{
-#ifdef SACDEBUG
-  int i;
-  for (i = 0; i < d_nfuncs; i++)
-    {
-      if (ptr[i])
-	{
-	  printf ("%d %s @ %d %s%s%s\n",
-		  i, ptr[i]->name, ptr[i]->ordinal,
-		  ptr[i]->noname ? "NONAME " : "",
-		  ptr[i]->constant ? "CONSTANT" : "",
-		  ptr[i]->data ? "DATA" : "");
-	}
-      else
-	printf ("empty\n");
-    }
-#endif
-}
-
-static void
 process_duplicates (export_type **d_export_vec)
 {
   int more = 1;
@@ -2889,7 +2867,6 @@ process_duplicates (export_type **d_export_vec)
       /* Remove duplicates.  */
       qsort (d_export_vec, d_nfuncs, sizeof (export_type *), nfunc);
 
-      dtab (d_export_vec);
       for (i = 0; i < d_nfuncs - 1; i++)
 	{
 	  if (strcmp (d_export_vec[i]->name,
@@ -2918,9 +2895,7 @@ process_duplicates (export_type **d_export_vec)
 	      d_export_vec[i] = 0;
 	    }
 
-	  dtab (d_export_vec);
 	  remove_null_names (d_export_vec);
-	  dtab (d_export_vec);
 	}
     }
 
