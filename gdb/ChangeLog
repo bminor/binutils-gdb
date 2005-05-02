@@ -1,3 +1,8 @@
+2005-05-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* bsd-uthread.c: Include "solib.h".
+	* Makefile.in (bsd-uthread.o): Update dependencies.
+
 2005-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbarch.sh (deprecated_current_gdbarch_select_hack): Flush
