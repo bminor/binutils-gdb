@@ -1075,6 +1075,13 @@ _bfd_elf_merge_symbol (bfd *abfd,
       || h->root.type == bfd_link_hash_undefined)
     *size_change_ok = TRUE;
 
+  /* Skip weak definitions of symbols that are already defined.  */
+  if (newdef && olddef && newweak && !oldweak)
+    {
+      *skip = TRUE;
+      return TRUE;
+    }
+
   /* NEWDYNCOMMON and OLDDYNCOMMON indicate whether the new or old
      symbol, respectively, appears to be a common symbol in a dynamic
      object.  If a symbol appears in an uninitialized section, and is
