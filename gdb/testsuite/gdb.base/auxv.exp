@@ -37,7 +37,8 @@ set corefile ${objdir}/${subdir}/${testfile}.corefile
 set gcorefile ${objdir}/${subdir}/${testfile}.gcore
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested "couldn't compile ${srcdir}/${subdir}/${srcfile}"
+    return -1
 }
 
 # Use a fresh directory to confine the native core dumps.

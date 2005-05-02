@@ -1,3 +1,8 @@
+2005-05-02  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/auxv.exp: Call 'untested' and return -1 instead of
+	calling gdb_suppress_entire_file.
+
 2005-04-30  Randolph Chung  <tausq@debian.org>
 
 	* gdb.threads/staticthreads.exp: Override signal to check for hppa.
