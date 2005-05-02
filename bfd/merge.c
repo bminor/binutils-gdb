@@ -241,7 +241,8 @@ sec_merge_init (unsigned int entsize, bfd_boolean strings)
   if (table == NULL)
     return NULL;
 
-  if (! bfd_hash_table_init (&table->table, sec_merge_hash_newfunc))
+  if (! bfd_hash_table_init_n (&table->table, sec_merge_hash_newfunc,
+			       16699))
     {
       free (table);
       return NULL;
