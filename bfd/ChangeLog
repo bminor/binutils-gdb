@@ -1,5 +1,10 @@
 2005-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (_bfd_elf_new_section_hook): Don't call
+	_bfd_elf_get_sec_type_attr on sections from input files.
+
+2005-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* merge.c (sec_merge_init): Call bfd_hash_table_init_n with
 	hash table size 16699 instead of bfd_hash_table_init.
 

@@ -2245,12 +2245,17 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
       sec->used_by_bfd = sdata;
     }
 
-  elf_section_type (sec) = SHT_NULL;
-  ssect = _bfd_elf_get_sec_type_attr (abfd, sec->name);
-  if (ssect != NULL)
+  /* When we read a file, we don't need section type and flags.
+     They will be overridden in _bfd_elf_make_section_from_shdr
+     anyway.  */
+  if (abfd->direction != read_direction)
     {
-      elf_section_type (sec) = ssect->type;
-      elf_section_flags (sec) = ssect->attr;
+      ssect = _bfd_elf_get_sec_type_attr (abfd, sec->name);
+      if (ssect != NULL)
+	{
+	  elf_section_type (sec) = ssect->type;
+	  elf_section_flags (sec) = ssect->attr;
+	}
     }
 
   /* Indicate whether or not this section should use RELA relocations.  */
