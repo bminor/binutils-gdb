@@ -10924,36 +10924,6 @@ libraries that were loaded by explicit user requests are not
 discarded.
 @end table
 
-On some systems, such as HP-UX systems, @value{GDBN} supports
-autoloading shared library symbols until a limiting threshold size is
-reached.  This provides the benefit of allowing autoloading to remain on
-by default, but avoids autoloading excessively large shared libraries,
-up to a threshold that is initially set, but which you can modify if you
-wish.
-
-Beyond that threshold, symbols from shared libraries must be explicitly
-loaded.  To load these symbols, use the command @code{sharedlibrary
-@var{filename}}.  The base address of the shared library is determined
-automatically by @value{GDBN} and need not be specified.
-
-To display or set the threshold, use the commands:
-
-@table @code
-@kindex set auto-solib-limit
-@item set auto-solib-limit @var{threshold}
-Set the autoloading size threshold, in an integral number of megabytes.
-If @var{threshold} is nonzero and shared library autoloading is enabled,
-symbols from all shared object libraries will be loaded until the total
-size of the loaded shared library symbols exceeds this threshold.
-Otherwise, symbols must be loaded manually, using the
-@code{sharedlibrary} command.  The default threshold is 100 (i.e.@: 100
-Mb).
-
-@kindex show auto-solib-limit
-@item show auto-solib-limit
-Display the current autoloading size threshold, in megabytes.
-@end table
-
 Sometimes you may wish that @value{GDBN} stops and gives you control
 when any of shared library events happen.  Use the @code{set
 stop-on-solib-events} command for this:

@@ -1,3 +1,7 @@
+2005-05-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.texinfo (Files): Remove documentation for auto-solib-limit.
+
 2005-05-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (SVR4 Process Information, The isatty call)
