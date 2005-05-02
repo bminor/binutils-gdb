@@ -1,3 +1,9 @@
+2005-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am: Set RELEASE.
+	* configure.in: Bump version to 2.16.
+	* Makefile.in, configure: Regenerated.
+
 2005-05-01  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (bfd_elf32_arm_process_before_allocation): Treat
