@@ -3,6 +3,7 @@
 	* gdb.texinfo (SVR4 Process Information, The isatty call)
 	(The system call): Don't use foo(N) notation for man pages and
 	functions.
+	(Compilation, DJGPP Native): Improve wording.
 
 2005-04-27  Eli Zaretskii  <eliz@gnu.org>
 

@@ -1643,21 +1643,13 @@ and addresses in the executable code.
 To request debugging information, specify the @samp{-g} option when you run
 the compiler.
 
-Most compilers do not include information about preprocessor macros in
-the debugging information if you specify the @option{-g} flag alone,
-because this information is rather large.  Version 3.1 of @value{NGCC},
-the @sc{gnu} C compiler, provides macro information if you specify the
-options @option{-gdwarf-2} and @option{-g3}; the former option requests
-debugging information in the Dwarf 2 format, and the latter requests
-``extra information''.  In the future, we hope to find more compact ways
-to represent macro information, so that it can be included with
-@option{-g} alone.
-
-Many C compilers are unable to handle the @samp{-g} and @samp{-O}
-options together.  Using those compilers, you cannot generate optimized
+Programs that are to be shipped to your customers are compiled with
+optimizations, using the @samp{-O} compiler option.  However, many
+compilers are unable to handle the @samp{-g} and @samp{-O} options
+together.  Using those compilers, you cannot generate optimized
 executables containing debugging information.
 
-@value{NGCC}, the @sc{gnu} C compiler, supports @samp{-g} with or
+@value{NGCC}, the @sc{gnu} C/C@t{++} compiler, supports @samp{-g} with or
 without @samp{-O}, making it possible to debug optimized code.  We
 recommend that you @emph{always} use @samp{-g} whenever you compile a
 program.  You may think your program is correct, but there is no sense
@@ -1681,6 +1673,18 @@ please report it to us as a bug (including a test case!).
 Older versions of the @sc{gnu} C compiler permitted a variant option
 @w{@samp{-gg}} for debugging information.  @value{GDBN} no longer supports this
 format; if your @sc{gnu} C compiler has this option, do not use it.
+
+@value{GDBN} knows about preprocessor macros and can show you their
+expansion (@pxref{Macros}).  Most compilers do not include information
+about preprocessor macros in the debugging information if you specify
+the @option{-g} flag alone, because this information is rather large.
+Version 3.1 and later of @value{NGCC}, the @sc{gnu} C compiler,
+provides macro information if you specify the options
+@option{-gdwarf-2} and @option{-g3}; the former option requests
+debugging information in the Dwarf 2 format, and the latter requests
+``extra information''.  In the future, we hope to find more compact
+ways to represent macro information, so that it can be included with
+@option{-g} alone.
 
 @need 2000
 @node Starting
@@ -12656,7 +12660,8 @@ For QNX Neutrino only, this command displays the list of all mapinfos.
 @cindex native @sc{djgpp} debugging
 @cindex MS-DOS-specific commands
 
-@sc{djgpp} is the port of @sc{gnu} development tools to MS-DOS and
+@cindex DPMI
+@sc{djgpp} is a port of the @sc{gnu} development tools to MS-DOS and
 MS-Windows.  @sc{djgpp} programs are 32-bit protected-mode programs
 that use the @dfn{DPMI} (DOS Protected-Mode Interface) API to run on
 top of real-mode DOS systems and their emulations.
@@ -12748,11 +12753,11 @@ These commands are supported only with some DPMI servers.
 @cindex physical address from linear address
 @item info dos address-pte @var{addr}
 This command displays the Page Table entry for a specified linear
-address.  The argument linear address @var{addr} should already have the
-appropriate segment's base address added to it, because this command
-accepts addresses which may belong to @emph{any} segment.  For
-example, here's how to display the Page Table entry for the page where
-the variable @code{i} is stored:
+address.  The argument @var{addr} is a linear address which should
+already have the appropriate segment's base address added to it,
+because this command accepts addresses which may belong to @emph{any}
+segment.  For example, here's how to display the Page Table entry for
+the page where a variable @code{i} is stored:
 
 @smallexample
 @exdent @code{(@value{GDBP}) info dos address-pte __djgpp_base_address + (char *)&i}
@@ -12762,7 +12767,7 @@ the variable @code{i} is stored:
 
 @noindent
 This says that @code{i} is stored at offset @code{0xd30} from the page
-whose physical base address is @code{0x02698000}, and prints all the
+whose physical base address is @code{0x02698000}, and shows all the
 attributes of that page.
 
 Note that you must cast the addresses of variables to a @code{char *},
@@ -12783,9 +12788,10 @@ transfer buffer:
 
 @noindent
 (The @code{+ 3} offset is because the transfer buffer's address is the
-3rd member of the @code{_go32_info_block} structure.)  The output of
-this command clearly shows that addresses in conventional memory are
-mapped 1:1, i.e.@: the physical and linear addresses are identical.
+3rd member of the @code{_go32_info_block} structure.)  The output
+clearly shows that this DPMI server maps the addresses in conventional
+memory 1:1, i.e.@: the physical (@code{0x00029000} + @code{0x110}) and
+linear (@code{0x29110}) addresses are identical.
 
 This command is supported only with some DPMI servers.
 @end table
