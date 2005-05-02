@@ -100,10 +100,6 @@ typedef enum isa_attr {
 #define MAX_ISAS  ((int) ISA_MAX)
 #define MAX_MACHS ((int) MACH_MAX)
 
-/* Ifield support.  */
-
-extern const struct cgen_ifld sh_cgen_ifld_table[];
-
 /* Ifield attribute indices.  */
 
 /* Enum declaration for cgen_ifld attrs.  */
@@ -242,6 +238,10 @@ extern CGEN_KEYWORD sh_cgen_opval_drc_names;
 extern CGEN_KEYWORD sh_cgen_opval_xf_names;
 extern CGEN_KEYWORD sh_cgen_opval_frc_names;
 extern CGEN_KEYWORD sh_cgen_opval_h_fvc;
+
+/* Ifield support.  */
+
+extern const struct cgen_ifld sh_cgen_ifld_table[];
 
 
 

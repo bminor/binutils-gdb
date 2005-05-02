@@ -1,3 +1,8 @@
+2005-05-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-desc.h: Move extern declaration of sh_cgen_ifld_table after
+	inclusion of cgen.h.
+
 2005-04-15  Corinna Vinschen  <vinschen@redhat.com>
 
 	* configure.ac: New file.
