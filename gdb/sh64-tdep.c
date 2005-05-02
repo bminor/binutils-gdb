@@ -1120,7 +1120,8 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
 	      if (int_argreg > ARGLAST_REGNUM)
 		{			
 		  /* must go on the stack */
-		  write_memory (sp + stack_offset, val, argreg_size);
+		  write_memory (sp + stack_offset, (const bfd_byte *) val,
+		  		argreg_size);
 		  stack_offset += 8;/*argreg_size;*/
 		}
 	      /* NOTE WELL!!!!!  This is not an "else if" clause!!!
@@ -1962,13 +1963,13 @@ static void
 sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
 		     struct frame_info *frame, int regnum)
 {				/* do values for FP (float) regs */
-  char *raw_buffer;
+  unsigned char *raw_buffer;
   double flt;	/* double extracted from raw hex data */
   int inv;
   int j;
 
   /* Allocate space for the float.  */
-  raw_buffer = (char *) alloca (register_size (gdbarch, FP0_REGNUM));
+  raw_buffer = (unsigned char *) alloca (register_size (gdbarch, FP0_REGNUM));
 
   /* Get the data in raw format.  */
   if (!frame_register_read (frame, regnum, raw_buffer))
@@ -1993,7 +1994,7 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
     {
       int idx = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? j
 	: register_size (gdbarch, regnum) - 1 - j;
-      fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
+      fprintf_filtered (file, "%02x", raw_buffer[idx]);
     }
   fprintf_filtered (file, ")");
   fprintf_filtered (file, "\n");
@@ -2074,7 +2075,7 @@ static void
 sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
 		  struct frame_info *frame, int regnum)
 {
-  char raw_buffer[MAX_REGISTER_SIZE];
+  unsigned char raw_buffer[MAX_REGISTER_SIZE];
 
   fputs_filtered (REGISTER_NAME (regnum), file);
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);

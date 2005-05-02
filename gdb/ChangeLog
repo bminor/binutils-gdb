@@ -1,3 +1,10 @@
+2005-05-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Remove hint that sh64 doesn't build.
+	* sh64-tdep.c (sh64_push_dummy_call): Cast buf in call to write_memory.
+	(sh64_do_fp_register): make raw_buffer unsigned.
+	(sh64_do_register): Ditto.
+
 2005-05-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* bsd-uthread.c: Include "solib.h".

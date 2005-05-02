@@ -111,8 +111,7 @@ the native maintainer when resolving ABI issues.
 	s390		--target=s390-linux-gnu ,-Werror
 
 	sh		--target=sh-elf ,-Werror
-			--target=sh64-elf broken
-			(sim/ dies)
+			--target=sh64-elf ,-Werror
 
 	sparc		--target=sparc-elf broken
 			(bfd/elfxx-sparc:512 bfd_elf64_swap_reloca_out undef)
