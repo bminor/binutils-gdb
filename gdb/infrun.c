@@ -1233,11 +1233,10 @@ int stepped_after_stopped_by_watchpoint;
 void
 handle_inferior_event (struct execution_control_state *ecs)
 {
-  /* NOTE: cagney/2003-03-28: If you're looking at this code and
-     thinking that the variable stepped_after_stopped_by_watchpoint
-     isn't used, then you're wrong!  The macro STOPPED_BY_WATCHPOINT,
-     defined in the file "config/pa/nm-hppah.h", accesses the variable
-     indirectly.  Mutter something rude about the HP merge.  */
+  /* NOTE: bje/2005-05-02: If you're looking at this code and thinking
+     that the variable stepped_after_stopped_by_watchpoint isn't used,
+     then you're wrong!  See remote.c:remote_stopped_data_address.  */
+
   int sw_single_step_trap_p = 0;
   int stopped_by_watchpoint = -1;	/* Mark as unknown.  */
 
