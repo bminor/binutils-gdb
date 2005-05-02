@@ -60,7 +60,7 @@ CPU_DOCS = \
 
 gasver.texi: $(srcdir)/../../bfd/configure
 	rm -f $@
-	eval `grep '^ *VERSION=' $<`; echo '@set VERSION $$VERSION' > $@
+	eval `grep '^ *VERSION=' $<`; echo "@set VERSION $$VERSION" > $@
 
 $(srcdir)/as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
