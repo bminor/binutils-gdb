@@ -1,3 +1,17 @@
+2005-05-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* section.c (bfd_section_list_remove): Don't clear s->next.
+	(bfd_section_list_append): Always init s->prev.
+	(bfd_section_list_prepend): Define.
+	(bfd_section_list_insert_after): Minor optimization.
+	(bfd_section_removed_from_list): Rewrite.
+	* elf.c (assign_section_numbers): Simplify list traversal now that
+	bfd_section_list_remove doesn't destroy removed section next ptr.
+	* sunos.c (sunos_add_dynamic_symbols): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_object_p): Use bfd_section_list_prepend.
+	* xcofflink.c (_bfd_xcoff_bfd_final_link): Simplify list traversal.
+	* bfd-in2.h: Regenerate.
+
 2005-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd): Remove section_tail and add section_last.

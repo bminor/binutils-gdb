@@ -2762,14 +2762,11 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   /* SHT_GROUP sections are in relocatable files only.  */
   if (link_info == NULL || link_info->relocatable)
     {
-      asection *n;
-
       /* Put SHT_GROUP sections first.  */
-      for (sec = abfd->sections; sec; sec = n)
+      for (sec = abfd->sections; sec != NULL; sec = sec->next)
 	{
 	  d = elf_section_data (sec);
 
-	  n = sec->next;
 	  if (d->this_hdr.sh_type == SHT_GROUP)
 	    { 
 	      if (sec->flags & SEC_LINKER_CREATED)

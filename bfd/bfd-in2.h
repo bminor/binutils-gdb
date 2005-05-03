@@ -1451,10 +1451,7 @@ extern const struct bfd_symbol * const bfd_ind_symbol;
       else                                             \
         (ABFD)->sections = _next;                      \
       if (_next)                                       \
-        {                                              \
-          _next->prev = _prev;                         \
-          _s->next = NULL;                             \
-        }                                              \
+        _next->prev = _prev;                           \
       else                                             \
         (ABFD)->section_last = _prev;                  \
     }                                                  \
@@ -1471,8 +1468,30 @@ extern const struct bfd_symbol * const bfd_ind_symbol;
           _abfd->section_last->next = _s;              \
         }                                              \
       else                                             \
-        _abfd->sections = _s;                          \
+        {                                              \
+          _s->prev = NULL;                             \
+          _abfd->sections = _s;                        \
+        }                                              \
       _abfd->section_last = _s;                        \
+    }                                                  \
+  while (0)
+#define bfd_section_list_prepend(ABFD, S) \
+  do                                                   \
+    {                                                  \
+      asection *_s = S;                                \
+      bfd *_abfd = ABFD;                               \
+      _s->prev = NULL;                                 \
+      if (_abfd->sections)                             \
+        {                                              \
+          _s->next = _abfd->sections;                  \
+          _abfd->sections->prev = _s;                  \
+        }                                              \
+      else                                             \
+        {                                              \
+          _s->next = NULL;                             \
+          _abfd->section_last = _s;                    \
+        }                                              \
+      _abfd->sections = _s;                            \
     }                                                  \
   while (0)
 #define bfd_section_list_insert_after(ABFD, A, S) \
@@ -1485,7 +1504,7 @@ extern const struct bfd_symbol * const bfd_ind_symbol;
       _s->prev = _a;                                   \
       _a->next = _s;                                   \
       if (_next)                                       \
-        _s->next->prev = _s;                           \
+        _next->prev = _s;                              \
       else                                             \
         (ABFD)->section_last = _s;                     \
     }                                                  \
@@ -1506,7 +1525,7 @@ extern const struct bfd_symbol * const bfd_ind_symbol;
     }                                                  \
   while (0)
 #define bfd_section_removed_from_list(ABFD, S) \
-  ((S)->next == NULL && (S) != (ABFD)->section_last)
+  ((S)->next == NULL ? (ABFD)->section_last != (S) : (S)->next->prev != (S))
 
 void bfd_section_list_clear (bfd *);
 

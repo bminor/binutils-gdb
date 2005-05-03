@@ -859,11 +859,10 @@ sunos_add_dynamic_symbols (bfd *abfd,
     abfd->sections = NULL;
   else
     {
-      asection *s, *n;
+      asection *s;
 
-      for (s = abfd->sections; s != NULL; s = n)
+      for (s = abfd->sections; s != NULL; s = s->next)
 	{
-	  n = s->next;
 	  if ((s->flags & SEC_LINKER_CREATED) == 0)
 	    bfd_section_list_remove (abfd, s);
 	}

@@ -5436,19 +5436,18 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 	{
 	  bfd_boolean saw_contents;
 	  int indx;
-	  asection **op;
 	  file_ptr sofar;
 
 	  /* Insert .pad sections before every section which has
 	     contents and is loaded, if it is preceded by some other
 	     section which has contents and is loaded.  */
 	  saw_contents = TRUE;
-	  for (op = &abfd->sections; *op != NULL; op = &(*op)->next)
+	  for (o = abfd->sections; o != NULL; o = o->next)
 	    {
-	      if (strcmp ((*op)->name, ".pad") == 0)
+	      if (strcmp (o->name, ".pad") == 0)
 		saw_contents = FALSE;
-	      else if (((*op)->flags & SEC_HAS_CONTENTS) != 0
-		       && ((*op)->flags & SEC_LOAD) != 0)
+	      else if ((o->flags & SEC_HAS_CONTENTS) != 0
+		       && (o->flags & SEC_LOAD) != 0)
 		{
 		  if (! saw_contents)
 		    saw_contents = TRUE;
@@ -5465,9 +5464,7 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 		      n->alignment_power = 0;
 
 		      bfd_section_list_remove (abfd, n);
-		      bfd_section_list_insert_before (abfd, *op, n);
-
-		      op = &n->next;
+		      bfd_section_list_insert_before (abfd, o, n);
 		      saw_contents = FALSE;
 		    }
 		}

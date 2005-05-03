@@ -4934,7 +4934,7 @@ elfNN_ia64_object_p (bfd *abfd)
 
 	  /* Move the fake group section to the beginning.  */
 	  bfd_section_list_remove (abfd, group);
-	  bfd_section_list_insert_before (abfd, abfd->sections, group);
+	  bfd_section_list_prepend (abfd, group);
 
 	  elf_next_in_group (group) = sec;
 
