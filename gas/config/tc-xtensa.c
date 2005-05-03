@@ -9682,39 +9682,6 @@ set_subseg_freq (segT seg, subsegT subseg, float total_f, float target_f)
 
 /* Segment Lists and emit_state Stuff.  */
 
-/* Remove the segment from the global sections list.  */
-
-static void
-xtensa_remove_section (segT sec)
-{
-  /* Handle brain-dead bfd_section_list_remove macro, which
-     expect the address of the prior section's "next" field, not
-     just the address of the section to remove.  */
-  segT ps_next_ptr = stdoutput->sections;
-
-  while (ps_next_ptr != sec && ps_next_ptr != NULL) 
-    ps_next_ptr = ps_next_ptr->next;
-  
-  assert (ps_next_ptr != NULL);
-
-  bfd_section_list_remove (stdoutput, ps_next_ptr);
-}
-
-
-static void
-xtensa_insert_section (segT after_sec, segT sec)
-{
-  segT after_sec_next;
-
-  if (after_sec == NULL)
-    after_sec_next = stdoutput->sections;
-  else
-    after_sec_next = after_sec->next;
-
-  bfd_section_list_insert_after (stdoutput, after_sec_next, sec);
-}
-
-
 static void
 xtensa_move_seg_list_to_beginning (seg_list *head)
 {
@@ -9725,9 +9692,11 @@ xtensa_move_seg_list_to_beginning (seg_list *head)
 
       /* Move the literal section to the front of the section list.  */
       assert (literal_section);
-      xtensa_remove_section (literal_section);
-      xtensa_insert_section (NULL, literal_section);
-
+      if (literal_section != stdoutput->sections)
+	{
+	  bfd_section_list_remove (stdoutput, literal_section);
+	  bfd_section_list_prepend (stdoutput, literal_section);
+	}
       head = head->next;
     }
 }
@@ -9893,8 +9862,8 @@ xtensa_reorder_seg_list (seg_list *head, segT after)
       assert (literal_section);
       if (literal_section != after)
 	{
-	  xtensa_remove_section (literal_section);
-	  xtensa_insert_section (after, literal_section);
+	  bfd_section_list_remove (stdoutput, literal_section);
+	  bfd_section_list_insert_after (stdoutput, after, literal_section);
 	}
 
       head = head->next;

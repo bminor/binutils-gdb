@@ -1,3 +1,16 @@
+2005-05-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-ecoff.c (ecoff_frob_file_before_fix): Correct section
+	list traversal.  Use bfd_section_list_prepend.
+	* config/tc-mmix.c (mmix_frob_file): Don't needlessly iterate
+	over the section list.
+	* config/tc-xtensa.c (xtensa_remove_section): Delete.
+	(xtensa_insert_section): Delete.
+	(xtensa_move_seg_list_to_beginning): Use bfd_section_list_remove
+	and bfd_section_list_prepend.
+	(xtensa_reorder_seg_list): Use bfd_section_list_remove and
+	bfd_section_list_insert_after.
+
 2005-05-03  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-ecoff.c (ecoff_frob_file_before_fix): Fix invocations

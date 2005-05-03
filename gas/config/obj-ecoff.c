@@ -37,7 +37,7 @@ void
 ecoff_frob_file_before_fix (void)
 {
   bfd_vma addr;
-  asection **sec;
+  asection *sec;
 
   /* Set the section VMA values.  We force the .sdata and .sbss
      sections to the end to ensure that their VMA addresses are close
@@ -80,20 +80,19 @@ ecoff_frob_file_before_fix (void)
   for (i = 0; i < n_names; i++)
     secs[i] = NULL;
 
-  for (sec = &stdoutput->sections; *sec !=  NULL;)
+  for (sec = stdoutput->sections; sec != NULL; sec = sec->next)
     {
       for (i = 0; i < n_names; i++)
-	if (!strcmp ((*sec)->name, names[i]))
+	if (!strcmp (sec->name, names[i]))
 	  {
-	    secs[i] = *sec;
-	    bfd_section_list_remove (stdoutput, *sec);
+	    secs[i] = sec;
+	    bfd_section_list_remove (stdoutput, sec);
 	    break;
 	  }
       if (i == n_names)
 	{
-	  bfd_set_section_vma (stdoutput, *sec, addr);
-	  addr += bfd_section_size (stdoutput, *sec);
-	  sec = &(*sec)->next;
+	  bfd_set_section_vma (stdoutput, sec, addr);
+	  addr += bfd_section_size (stdoutput, sec);
 	}
     }
   for (i = 0; i < n_names; i++)
@@ -104,7 +103,7 @@ ecoff_frob_file_before_fix (void)
       }
   for (i = n_names - 1; i >= 0; i--)
     if (secs[i])
-      bfd_section_list_insert_after (stdoutput, stdoutput->sections, secs[i]);
+      bfd_section_list_prepend (stdoutput, secs[i]);
 
   /* Fill in the register masks.  */
   {
