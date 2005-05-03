@@ -8870,7 +8870,6 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
 bfd_boolean
 _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 {
-  asection **secpp;
   asection *o;
   struct bfd_link_order *p;
   asection *reginfo_sec, *mdebug_sec, *gptab_data_sec, *gptab_bss_sec;
@@ -9285,11 +9284,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      o->link_order_head = NULL;
 
 	      /* Really remove the section.  */
-	      for (secpp = &abfd->sections;
-		   *secpp != o;
-		   secpp = &(*secpp)->next)
-		;
-	      bfd_section_list_remove (abfd, secpp);
+	      bfd_section_list_remove (abfd, o);
 	      --abfd->section_count;
 
 	      continue;

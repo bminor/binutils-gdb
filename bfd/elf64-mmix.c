@@ -2249,7 +2249,6 @@ mmix_elf_final_link (abfd, info)
   /* We never output a register section, though we create one for
      temporary measures.  Check that nobody entered contents into it.  */
   asection *reg_section;
-  asection **secpp;
 
   reg_section = bfd_get_section_by_name (abfd, MMIX_REG_SECTION_NAME);
 
@@ -2260,11 +2259,7 @@ mmix_elf_final_link (abfd, info)
 	_bfd_abort (__FILE__, __LINE__, _("Register section has contents\n"));
 
       /* Really remove the section.  */
-      for (secpp = &abfd->sections;
-	   *secpp != reg_section;
-	   secpp = &(*secpp)->next)
-	;
-      bfd_section_list_remove (abfd, secpp);
+      bfd_section_list_remove (abfd, reg_section);
       --abfd->section_count;
     }
 

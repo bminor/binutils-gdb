@@ -1,3 +1,13 @@
+2005-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_strip_empty_section):
+	Updated for bfd_section_list_remove change.
+	* ldlang.c (lang_insert_orphan): Likewise.
+	(strip_excluded_output_sections): Likewise.
+	(sort_sections_by_lma): New.
+	(lang_check_section_addresses): Sort the sections before
+	checking addresses.
+
 2005-04-29  Ralf Corsepius <ralf.corsepius@rtems.org>
 
 	* configure.tgt: Add h8300*-*-rtemscoff.

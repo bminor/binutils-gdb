@@ -5454,20 +5454,18 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 		    saw_contents = TRUE;
 		  else
 		    {
-		      asection *n, **st;
+		      asection *n;
 
 		      /* Create a pad section and place it before the section
 			 that needs padding.  This requires unlinking and
 			 relinking the bfd's section list.  */
 
-		      st = abfd->section_tail;
 		      n = bfd_make_section_anyway (abfd, ".pad");
 		      n->flags = SEC_HAS_CONTENTS;
 		      n->alignment_power = 0;
 
-		      BFD_ASSERT (*st == n);
-		      bfd_section_list_remove (abfd, st);
-		      bfd_section_list_insert (abfd, op, n);
+		      bfd_section_list_remove (abfd, n);
+		      bfd_section_list_insert_before (abfd, *op, n);
 
 		      op = &n->next;
 		      saw_contents = FALSE;

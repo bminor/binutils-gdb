@@ -832,7 +832,6 @@ sunos_add_dynamic_symbols (bfd *abfd,
   bfd *dynobj;
   struct sunos_dynamic_info *dinfo;
   unsigned long need;
-  asection **ps;
 
   /* Make sure we have all the required sections.  */
   if (info->hash->creator == abfd->xvec)
@@ -856,12 +855,18 @@ sunos_add_dynamic_symbols (bfd *abfd,
      want, because that one still implies that the section takes up
      space in the output file.  If this is the first object we have
      seen, we must preserve the dynamic sections we just created.  */
-  for (ps = &abfd->sections; *ps != NULL; )
+  if (abfd != dynobj)
+    abfd->sections = NULL;
+  else
     {
-      if (abfd != dynobj || ((*ps)->flags & SEC_LINKER_CREATED) == 0)
-	bfd_section_list_remove (abfd, ps);
-      else
-	ps = &(*ps)->next;
+      asection *s, *n;
+
+      for (s = abfd->sections; s != NULL; s = n)
+	{
+	  n = s->next;
+	  if ((s->flags & SEC_LINKER_CREATED) == 0)
+	    bfd_section_list_remove (abfd, s);
+	}
     }
 
   /* The native linker seems to just ignore dynamic objects when -r is

@@ -1717,7 +1717,6 @@ coff_set_alignment_hook (bfd *abfd, asection *section, void * scnhdr)
 {
   struct internal_scnhdr *hdr = (struct internal_scnhdr *) scnhdr;
   asection *real_sec;
-  asection **ps;
 
   if ((hdr->s_flags & STYP_OVRFLO) == 0)
     return;
@@ -1729,14 +1728,10 @@ coff_set_alignment_hook (bfd *abfd, asection *section, void * scnhdr)
   real_sec->reloc_count = hdr->s_paddr;
   real_sec->lineno_count = hdr->s_vaddr;
 
-  for (ps = &abfd->sections; *ps != NULL; ps = &(*ps)->next)
+  if (!bfd_section_removed_from_list (abfd, section))
     {
-      if (*ps == section)
-	{
-	  bfd_section_list_remove (abfd, ps);
-	  --abfd->section_count;
-	  break;
-	}
+      bfd_section_list_remove (abfd, section);
+      --abfd->section_count;
     }
 }
 
@@ -3033,11 +3028,12 @@ coff_compute_section_file_positions (bfd * abfd)
     /* Rethread the linked list into sorted order; at the same time,
        assign target_index values.  */
     target_index = 1;
-    abfd->sections = section_list[0];
+    abfd->sections = NULL;
+    abfd->section_last = NULL;
     for (i = 0; i < count; i++)
       {
 	current = section_list[i];
-	current->next = section_list[i + 1];
+	bfd_section_list_append (abfd, current);
 
 	/* Later, if the section has zero size, we'll be throwing it
 	   away, so we don't want to number it now.  Note that having
@@ -3056,7 +3052,6 @@ coff_compute_section_file_positions (bfd * abfd)
 	else
 	  current->target_index = target_index++;
       }
-    abfd->section_tail = &current->next;
 
     free (section_list);
   }

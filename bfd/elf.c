@@ -2762,22 +2762,21 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   /* SHT_GROUP sections are in relocatable files only.  */
   if (link_info == NULL || link_info->relocatable)
     {
-      asection **secp;
+      asection *n;
 
       /* Put SHT_GROUP sections first.  */
-      secp = &abfd->sections;
-      while (*secp)
+      for (sec = abfd->sections; sec; sec = n)
 	{
-	  d = elf_section_data (*secp);
+	  d = elf_section_data (sec);
 
+	  n = sec->next;
 	  if (d->this_hdr.sh_type == SHT_GROUP)
 	    { 
-	      if ((*secp)->flags & SEC_LINKER_CREATED)
+	      if (sec->flags & SEC_LINKER_CREATED)
 		{
 		  /* Remove the linker created SHT_GROUP sections.  */
-		  bfd_section_list_remove (abfd, secp);
+		  bfd_section_list_remove (abfd, sec);
 		  abfd->section_count--;
-		  continue;
 		}
 	      else 
 		{
@@ -2786,8 +2785,6 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		  d->this_idx = section_number++;
 		}
 	    }
-
-	  secp = &(*secp)->next;
 	}
     }
 

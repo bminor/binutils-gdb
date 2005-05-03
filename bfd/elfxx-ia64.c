@@ -4885,7 +4885,6 @@ static bfd_boolean
 elfNN_ia64_object_p (bfd *abfd)
 {
   asection *sec;
-  asection **tail;
   asection *group, *unwi, *unw;
   flagword flags;
   const char *name;
@@ -4926,8 +4925,6 @@ elfNN_ia64_object_p (bfd *abfd)
 	  strcpy (stpcpy (unw_name, ".gnu.linkonce.ia64unw."), name);
 	  unw = bfd_get_section_by_name (abfd, unw_name);
 
-	  tail = abfd->section_tail;
-
 	  /* We need to create a fake group section for it and its
 	     unwind sections.  */
 	  group = bfd_make_section_anyway (abfd, name);
@@ -4936,9 +4933,8 @@ elfNN_ia64_object_p (bfd *abfd)
 	    return FALSE;
 
 	  /* Move the fake group section to the beginning.  */
-	  BFD_ASSERT (*tail == group);
-	  bfd_section_list_remove (abfd, tail);
-	  bfd_section_list_insert (abfd, &abfd->sections, group);
+	  bfd_section_list_remove (abfd, group);
+	  bfd_section_list_insert_before (abfd, abfd->sections, group);
 
 	  elf_next_in_group (group) = sec;
 

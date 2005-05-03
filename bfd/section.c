@@ -164,6 +164,9 @@ CODE_FRAGMENT
 .  {* The next section in the list belonging to the BFD, or NULL.  *}
 .  struct bfd_section *next;
 .
+.  {* The previous section in the list belonging to the BFD, or NULL.  *}
+.  struct bfd_section *prev;
+.
 .  {* The field flags contains attributes of the section. Some
 .     flags are read in from the object file, and some are
 .     synthesized from other information.  *}
@@ -538,31 +541,73 @@ CODE_FRAGMENT
 .{* Macros to handle insertion and deletion of a bfd's sections.  These
 .   only handle the list pointers, ie. do not adjust section_count,
 .   target_index etc.  *}
-.#define bfd_section_list_remove(ABFD, PS) \
+.#define bfd_section_list_remove(ABFD, S) \
 .  do							\
 .    {							\
-.      asection **_ps = PS;				\
-.      asection *_s = *_ps;				\
-.      *_ps = _s->next;					\
-.      if (_s->next == NULL)				\
-.        (ABFD)->section_tail = _ps;			\
-.      else						\
-.        _s->next = NULL;				\
-.    }							\
-.  while (0)
-.#define bfd_section_list_insert(ABFD, PS, S) \
-.  do							\
-.    {							\
-.      asection **_ps = PS;				\
 .      asection *_s = S;				\
-.      _s->next = *_ps;					\
-.      *_ps = _s;					\
-.      if (_s->next == NULL)				\
-.        (ABFD)->section_tail = &_s->next;		\
+.      asection *_next = _s->next;			\
+.      asection *_prev = _s->prev;			\
+.      if (_prev)					\
+.        _prev->next = _next;				\
+.      else						\
+.        (ABFD)->sections = _next;			\
+.      if (_next)					\
+.        {						\
+.          _next->prev = _prev;				\
+.          _s->next = NULL;				\
+.        }						\
+.      else						\
+.        (ABFD)->section_last = _prev;			\
 .    }							\
 .  while (0)
-.#define bfd_section_removed_from_list(ABFD, S)	\
-.  ((S)->next == NULL && &(S)->next != (ABFD)->section_tail)
+.#define bfd_section_list_append(ABFD, S) \
+.  do							\
+.    {							\
+.      asection *_s = S;				\
+.      bfd *_abfd = ABFD;				\
+.      _s->next = NULL;					\
+.      if (_abfd->section_last)				\
+.        {						\
+.          _s->prev = _abfd->section_last;		\
+.          _abfd->section_last->next = _s;		\
+.        }						\
+.      else						\
+.        _abfd->sections = _s;				\
+.      _abfd->section_last = _s;			\
+.    }							\
+.  while (0)
+.#define bfd_section_list_insert_after(ABFD, A, S) \
+.  do							\
+.    {							\
+.      asection *_a = A;				\
+.      asection *_s = S;				\
+.      asection *_next = _a->next;			\
+.      _s->next = _next;				\
+.      _s->prev = _a;					\
+.      _a->next = _s;					\
+.      if (_next)					\
+.        _s->next->prev = _s;				\
+.      else						\
+.        (ABFD)->section_last = _s;			\
+.    }							\
+.  while (0)
+.#define bfd_section_list_insert_before(ABFD, B, S) \
+.  do							\
+.    {							\
+.      asection *_b = B;				\
+.      asection *_s = S;				\
+.      asection *_prev = _b->prev;			\
+.      _s->prev = _prev;				\
+.      _s->next = _b;					\
+.      _b->prev = _s;					\
+.      if (_prev)					\
+.        _prev->next = _s;				\
+.      else						\
+.        (ABFD)->sections = _s;				\
+.    }							\
+.  while (0)
+.#define bfd_section_removed_from_list(ABFD, S) \
+.  ((S)->next == NULL && (S) != (ABFD)->section_last)
 .
 */
 
@@ -592,8 +637,8 @@ static const asymbol global_syms[] =
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)				\
   const asymbol * const SYM = (asymbol *) &global_syms[IDX]; 		\
   asection SEC = 							\
-    /* name, id,  index, next, flags, user_set_vma,                  */	\
-    { NAME,  IDX, 0,     NULL, FLAGS, 0,				\
+    /* name, id,  index, next, prev, flags, user_set_vma,            */	\
+    { NAME,  IDX, 0,     NULL, NULL, FLAGS, 0,				\
 									\
     /* linker_mark, linker_has_input, gc_mark, segment_mark,         */	\
        0,           0,                1,       0,			\
@@ -705,8 +750,7 @@ bfd_section_init (bfd *abfd, asection *newsect)
 
   section_id++;
   abfd->section_count++;
-  *abfd->section_tail = newsect;
-  abfd->section_tail = &newsect->next;
+  bfd_section_list_append (abfd, newsect);
   return newsect;
 }
 
@@ -736,7 +780,7 @@ void
 bfd_section_list_clear (bfd *abfd)
 {
   abfd->sections = NULL;
-  abfd->section_tail = &abfd->sections;
+  abfd->section_last = NULL;
   abfd->section_count = 0;
   memset (abfd->section_htab.table, 0,
 	  abfd->section_htab.size * sizeof (struct bfd_hash_entry *));

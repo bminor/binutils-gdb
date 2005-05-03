@@ -77,7 +77,7 @@ _bfd_new_bfd (void)
       return NULL;
     }
   nbfd->sections = NULL;
-  nbfd->section_tail = &nbfd->sections;
+  nbfd->section_last = NULL;
   nbfd->format = bfd_unknown;
   nbfd->my_archive = NULL;
   nbfd->origin = 0;

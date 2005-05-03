@@ -1063,6 +1063,9 @@ typedef struct bfd_section
   /* The next section in the list belonging to the BFD, or NULL.  */
   struct bfd_section *next;
 
+  /* The previous section in the list belonging to the BFD, or NULL.  */
+  struct bfd_section *prev;
+
   /* The field flags contains attributes of the section. Some
      flags are read in from the object file, and some are
      synthesized from other information.  */
@@ -1437,31 +1440,87 @@ extern const struct bfd_symbol * const bfd_ind_symbol;
 /* Macros to handle insertion and deletion of a bfd's sections.  These
    only handle the list pointers, ie. do not adjust section_count,
    target_index etc.  */
-#define bfd_section_list_remove(ABFD, PS) \
+#define bfd_section_double_list_remove(ABFD, S) \
   do                                                   \
     {                                                  \
-      asection **_ps = PS;                             \
-      asection *_s = *_ps;                             \
-      *_ps = _s->next;                                 \
-      if (_s->next == NULL)                            \
-        (ABFD)->section_tail = _ps;                    \
+      asection *_s = S;                                \
+      asection *_next = _s->next;                      \
+      asection *_prev = _s->prev;                      \
+      if (_prev)                                       \
+        _prev->next = _next;                           \
       else                                             \
-        _s->next = NULL;                               \
+        (ABFD)->sections = _next;                      \
+      if (_next)                                       \
+        {                                              \
+          _next->prev = _prev;                         \
+          _s->next = NULL;                             \
+        }                                              \
+      else                                             \
+        (ABFD)->section_last = _prev;                  \
+    }                                                  \
+  while (0)
+#define bfd_section_list_remove(ABFD, PS) \
+  bfd_section_double_list_remove ((ABFD), *(PS))
+#define bfd_section_double_list_append(ABFD, S) \
+  do                                                   \
+    {                                                  \
+      asection *_s = S;                                \
+      bfd *_abfd = ABFD;                               \
+      _s->next = NULL;                                 \
+      if (_abfd->section_last)                         \
+        {                                              \
+          _s->prev = _abfd->section_last;              \
+          _abfd->section_last->next = _s;              \
+        }                                              \
+      else                                             \
+        _abfd->sections = _s;                          \
+      _abfd->section_last = _s;                        \
+    }                                                  \
+  while (0)
+#define bfd_section_double_list_insert_after(ABFD, A, S) \
+  do                                                   \
+    {                                                  \
+      asection *_a = A;                                \
+      asection *_s = S;                                \
+      if (_a)                                          \
+        {                                              \
+          asection *_next = _a->next;                  \
+          _s->next = _next;                            \
+          _s->prev = _a;                               \
+          _a->next = _s;                               \
+          if (_next)                                   \
+            _s->next->prev = _s;                       \
+          else                                         \
+            (ABFD)->section_last = _s;                 \
+        }                                              \
+      else                                             \
+        bfd_section_double_list_append ((ABFD), (S));  \
+    }                                                  \
+  while (0)
+#define bfd_section_double_list_insert_before(ABFD, B, S) \
+  do                                                   \
+    {                                                  \
+      asection *_b = B;                                \
+      asection *_s = S;                                \
+      if (_b)                                          \
+        {                                              \
+          asection *_prev = _b->prev;                  \
+          _s->prev = _prev;                            \
+          _s->next = _b;                               \
+          _b->prev = _s;                               \
+          if (_prev)                                   \
+            _prev->next = _s;                          \
+          else                                         \
+            (ABFD)->sections = _s;                     \
+        }                                              \
+      else                                             \
+        bfd_section_double_list_append ((ABFD), (S));  \
     }                                                  \
   while (0)
 #define bfd_section_list_insert(ABFD, PS, S) \
-  do                                                   \
-    {                                                  \
-      asection **_ps = PS;                             \
-      asection *_s = S;                                \
-      _s->next = *_ps;                                 \
-      *_ps = _s;                                       \
-      if (_s->next == NULL)                            \
-        (ABFD)->section_tail = &_s->next;              \
-    }                                                  \
-  while (0)
+  bfd_section_double_list_insert_before ((ABFD), *(PS), (S))
 #define bfd_section_removed_from_list(ABFD, S) \
-  ((S)->next == NULL && &(S)->next != (ABFD)->section_tail)
+  ((S)->next == NULL && (S) != (ABFD)->section_last)
 
 void bfd_section_list_clear (bfd *);
 
@@ -4026,8 +4085,8 @@ struct bfd
   /* Pointer to linked list of sections.  */
   struct bfd_section *sections;
 
-  /* The place where we add to the section list.  */
-  struct bfd_section **section_tail;
+  /* The last section on the section list.  */
+  struct bfd_section *section_last;
 
   /* The number of sections.  */
   unsigned int section_count;
@@ -4287,7 +4346,7 @@ struct bfd_preserve
   flagword flags;
   const struct bfd_arch_info *arch_info;
   struct bfd_section *sections;
-  struct bfd_section **section_tail;
+  struct bfd_section *section_last;
   unsigned int section_count;
   struct bfd_hash_table section_htab;
 };

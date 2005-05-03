@@ -756,18 +756,12 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 
       if (strip)
 	{
-	  asection **spp;
-
-	  for (spp = &s->output_section->owner->sections;
-	       *spp != NULL;
-	       spp = &(*spp)->next)
+	  if (!bfd_section_removed_from_list (s->output_section->owner,
+					      s->output_section))
 	    {
-	      if (*spp == s->output_section)
-		{
-		  bfd_section_list_remove (s->output_section->owner, spp);
-		  --s->output_section->owner->section_count;
-		  break;
-		}
+	      bfd_section_list_remove (s->output_section->owner,
+				       s->output_section);
+	      --s->output_section->owner->section_count;
 	    }
 	  continue;
 	}

@@ -1542,17 +1542,13 @@ gld${EMULATION_NAME}_strip_empty_sections (void)
 	  if (os == abs_output_section || os->constraint == -1)
 	    continue;
 	  s = os->bfd_section;
-	  if (s != NULL && s->size == 0 && (s->flags & SEC_KEEP) == 0)
+	  if (s != NULL
+	      && s->size == 0
+	      && (s->flags & SEC_KEEP) == 0
+	      && !bfd_section_removed_from_list (output_bfd, s))
 	    {
-	      asection **p;
-
-	      for (p = &output_bfd->sections; *p; p = &(*p)->next)
-		if (*p == s)
-		  {
-		    bfd_section_list_remove (output_bfd, p);
-		    output_bfd->section_count--;
-		    break;
-		  }
+	      bfd_section_list_remove (output_bfd, s);
+	      output_bfd->section_count--;
 	    }
 	}
     }

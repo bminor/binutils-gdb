@@ -1202,7 +1202,6 @@ lang_insert_orphan (lang_input_statement_type *file,
   etree_type *load_base;
   lang_output_section_statement_type *os;
   lang_output_section_statement_type **os_tail;
-  asection **bfd_tail;
 
   /* Start building a list of statements for this section.
      First save the current statement pointer.  */
@@ -1256,7 +1255,6 @@ lang_insert_orphan (lang_input_statement_type *file,
 
   os_tail = ((lang_output_section_statement_type **)
 	     lang_output_section_statement.tail);
-  bfd_tail = output_bfd->section_tail;
   os = lang_enter_output_section_statement (secname, address, 0, NULL, NULL,
 					    load_base, 0);
 
@@ -1288,7 +1286,7 @@ lang_insert_orphan (lang_input_statement_type *file,
 
   if (after != NULL && os->bfd_section != NULL)
     {
-      asection *snew;
+      asection *snew, *as;
 
       snew = os->bfd_section;
 
@@ -1314,12 +1312,15 @@ lang_insert_orphan (lang_input_statement_type *file,
       if (place->section == NULL)
 	place->section = &output_bfd->sections;
 
-      /* Unlink the section.  */
-      ASSERT (*bfd_tail == snew);
-      bfd_section_list_remove (output_bfd, bfd_tail);
+      as = *place->section;
+      if (as != snew && as->prev != snew)
+	{
+	  /* Unlink the section.  */
+	  bfd_section_list_remove (output_bfd, snew);
 
-      /* Now tack it back on in the right place.  */
-      bfd_section_list_insert (output_bfd, place->section, snew);
+	  /* Now tack it back on in the right place.  */
+	  bfd_section_list_insert_before (output_bfd, as, snew);
+	}
 
       /* Save the end of this list.  Further ophans of this type will
 	 follow the one we've just added.  */
@@ -3044,17 +3045,12 @@ strip_excluded_output_sections (void)
       s = os->bfd_section;
       if (s != NULL && (s->flags & SEC_EXCLUDE) != 0)
 	{
-	  asection **p;
-
 	  os->bfd_section = NULL;
-
-	  for (p = &output_bfd->sections; *p; p = &(*p)->next)
-	    if (*p == s)
-	      {
-		bfd_section_list_remove (output_bfd, p);
-		output_bfd->section_count--;
-		break;
-	      }
+	  if (!bfd_section_removed_from_list (output_bfd, s))
+	    {
+	      bfd_section_list_remove (output_bfd, s);
+	      output_bfd->section_count--;
+	    }
 	}
     }
 }
@@ -3683,6 +3679,22 @@ size_input_section
   return dot;
 }
 
+static int
+sort_sections_by_lma (const void *arg1, const void *arg2)
+{
+  const asection *sec1 = *(const asection **) arg1;
+  const asection *sec2 = *(const asection **) arg2;
+
+  if (bfd_section_lma (sec1->owner, sec1)
+      < bfd_section_lma (sec2->owner, sec2))
+    return -1;
+  else if (bfd_section_lma (sec1->owner, sec1)
+	   > bfd_section_lma (sec2->owner, sec2))
+    return 1;
+
+  return 0;
+}
+
 #define IGNORE_SECTION(s) \
   ((s->flags & SEC_NEVER_LOAD) != 0				\
    || (s->flags & SEC_ALLOC) == 0				\
@@ -3696,52 +3708,62 @@ size_input_section
 static void
 lang_check_section_addresses (void)
 {
-  asection *s;
+  asection *s, *os;
+  asection **sections, **spp;
+  unsigned int count;
+  bfd_vma s_start;
+  bfd_vma s_end;
+  bfd_vma os_start;
+  bfd_vma os_end;
+  bfd_size_type amt;
+
+  if (bfd_count_sections (output_bfd) <= 1)
+    return;
+
+  amt = bfd_count_sections (output_bfd) * sizeof (asection *);
+  sections = xmalloc (amt);
 
   /* Scan all sections in the output list.  */
+  count = 0;
   for (s = output_bfd->sections; s != NULL; s = s->next)
     {
-      asection *os;
-
-      /* Ignore sections which are not loaded or which have no contents.  */
+      /* Only consider loadable sections with real contents.  */
       if (IGNORE_SECTION (s) || s->size == 0)
 	continue;
 
-      /* Once we reach section 's' stop our seach.  This prevents two
-	 warning messages from being produced, one for 'section A overlaps
-	 section B' and one for 'section B overlaps section A'.  */
-      for (os = output_bfd->sections; os != s; os = os->next)
-	{
-	  bfd_vma s_start;
-	  bfd_vma s_end;
-	  bfd_vma os_start;
-	  bfd_vma os_end;
-
-	  /* Only consider loadable sections with real contents.  */
-	  if (IGNORE_SECTION (os) || os->size == 0)
-	    continue;
-
-	  /* We must check the sections' LMA addresses not their
-	     VMA addresses because overlay sections can have
-	     overlapping VMAs but they must have distinct LMAs.  */
-	  s_start = bfd_section_lma (output_bfd, s);
-	  os_start = bfd_section_lma (output_bfd, os);
-	  s_end = s_start + TO_ADDR (s->size) - 1;
-	  os_end = os_start + TO_ADDR (os->size) - 1;
-
-	  /* Look for an overlap.  */
-	  if ((s_end < os_start) || (s_start > os_end))
-	    continue;
-
-	  einfo (
-_("%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"),
-		 s->name, s_start, s_end, os->name, os_start, os_end);
-
-	  /* Once we have found one overlap for this section,
-	     stop looking for others.  */
-	  break;
-	}
+      sections[count] = s;
+      count++;
     }
+  
+  if (count <= 1)
+    return;
+
+  qsort (sections, (size_t) count, sizeof (asection *),
+	 sort_sections_by_lma);
+
+  spp = sections;
+  s = *spp++;
+  s_start = bfd_section_lma (output_bfd, s);
+  s_end = s_start + TO_ADDR (s->size) - 1;
+  for (count--; count; count--)
+    {
+      /* We must check the sections' LMA addresses not their VMA
+	 addresses because overlay sections can have overlapping VMAs
+	 but they must have distinct LMAs.  */
+      os = s;
+      os_start = s_start; 
+      os_end = s_end;
+      s = *spp++;
+      s_start = bfd_section_lma (output_bfd, s);
+      s_end = s_start + TO_ADDR (s->size) - 1;
+
+      /* Look for an overlap.  */
+      if (s_end >= os_start && s_start <= os_end)
+	einfo (_("%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"),
+	       s->name, s_start, s_end, os->name, os_start, os_end);
+    }
+
+  free (sections);
 }
 
 /* Make sure the new address is within the region.  We explicitly permit the

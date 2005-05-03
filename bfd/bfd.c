@@ -111,8 +111,8 @@ CODE_FRAGMENT
 .  {* Pointer to linked list of sections.  *}
 .  struct bfd_section *sections;
 .
-.  {* The place where we add to the section list.  *}
-.  struct bfd_section **section_tail;
+.  {* The last section on the section list.  *}
+.  struct bfd_section *section_last;
 .
 .  {* The number of sections.  *}
 .  unsigned int section_count;
@@ -1390,7 +1390,7 @@ CODE_FRAGMENT
 .  flagword flags;
 .  const struct bfd_arch_info *arch_info;
 .  struct bfd_section *sections;
-.  struct bfd_section **section_tail;
+.  struct bfd_section *section_last;
 .  unsigned int section_count;
 .  struct bfd_hash_table section_htab;
 .};
@@ -1424,7 +1424,7 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve)
   preserve->arch_info = abfd->arch_info;
   preserve->flags = abfd->flags;
   preserve->sections = abfd->sections;
-  preserve->section_tail = abfd->section_tail;
+  preserve->section_last = abfd->section_last;
   preserve->section_count = abfd->section_count;
   preserve->section_htab = abfd->section_htab;
 
@@ -1435,7 +1435,7 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve)
   abfd->arch_info = &bfd_default_arch_struct;
   abfd->flags &= BFD_IN_MEMORY;
   abfd->sections = NULL;
-  abfd->section_tail = &abfd->sections;
+  abfd->section_last = NULL;
   abfd->section_count = 0;
 
   return TRUE;
@@ -1465,7 +1465,7 @@ bfd_preserve_restore (bfd *abfd, struct bfd_preserve *preserve)
   abfd->flags = preserve->flags;
   abfd->section_htab = preserve->section_htab;
   abfd->sections = preserve->sections;
-  abfd->section_tail = preserve->section_tail;
+  abfd->section_last = preserve->section_last;
   abfd->section_count = preserve->section_count;
 
   /* bfd_release frees all memory more recently bfd_alloc'd than

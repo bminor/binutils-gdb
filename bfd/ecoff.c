@@ -52,8 +52,8 @@
 /* This stuff is somewhat copied from coffcode.h.  */
 static asection bfd_debug_section =
 {
-  /* name,      id,  index, next, flags, user_set_vma,             */
-     "*DEBUG*", 0,   0,     NULL, 0,     0,
+  /* name,      id,  index, next, prev, flags, user_set_vma,       */
+     "*DEBUG*", 0,   0,     NULL, NULL, 0,     0,
   /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
      0,           0,                0,       0,
   /* sec_info_type, use_rela_p, has_tls_reloc, has_gp_reloc,       */

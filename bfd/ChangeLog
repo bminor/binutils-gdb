@@ -1,5 +1,38 @@
 2005-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* bfd.c (bfd): Remove section_tail and add section_last.
+	(bfd_preserve): Likewise.
+	(bfd_preserve_save): Likewise.
+	(bfd_preserve_restore): Likewise.
+	* opncls.c (_bfd_new_bfd): Likewise.
+
+	* coffcode.h (coff_compute_section_file_positions): Updated.
+	(coff_compute_section_file_positions): Likewise.
+	* elf.c (assign_section_numbers): Likewise.
+	* elf32-i370.c (i370_elf_size_dynamic_sections): Likewise.
+	* elf64-mmix.c (mmix_elf_final_link): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_object_p): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_link_hash_table_create): Likewise.
+	* sunos.c (sunos_add_dynamic_symbols): Likewise.
+	* xcofflink.c (_bfd_xcoff_bfd_final_link): Likewise.
+
+	* ecoff.c (bfd_debug_section): Initialize prev.
+
+	* section.c (bfd_section): Add prev.
+	(bfd_section_list_remove): Updated.
+	(bfd_section_list_append): New.
+	(bfd_section_list_insert_after): New.
+	(bfd_section_list_insert_before): New.
+	(bfd_section_list_insert): Removed.
+	(bfd_section_removed_from_list): Updated.
+	(STD_SECTION): Initialize prev.
+	(bfd_section_init): Updated.
+	(bfd_section_list_clear): Updated.
+
+	* bfd-in2.h: Regenerated.
+
+2005-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf.c (_bfd_elf_new_section_hook): Don't call
 	_bfd_elf_get_sec_type_attr on sections from input files.
 
