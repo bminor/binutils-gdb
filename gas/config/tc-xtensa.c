@@ -9690,12 +9690,12 @@ xtensa_remove_section (segT sec)
   /* Handle brain-dead bfd_section_list_remove macro, which
      expect the address of the prior section's "next" field, not
      just the address of the section to remove.  */
+  segT ps_next_ptr = stdoutput->sections;
 
-  segT *ps_next_ptr = &stdoutput->sections;
-  while (*ps_next_ptr != sec && *ps_next_ptr != NULL) 
-    ps_next_ptr = &(*ps_next_ptr)->next;
+  while (ps_next_ptr != sec && ps_next_ptr != NULL) 
+    ps_next_ptr = ps_next_ptr->next;
   
-  assert (*ps_next_ptr != NULL);
+  assert (ps_next_ptr != NULL);
 
   bfd_section_list_remove (stdoutput, ps_next_ptr);
 }
@@ -9704,13 +9704,14 @@ xtensa_remove_section (segT sec)
 static void
 xtensa_insert_section (segT after_sec, segT sec)
 {
-  segT *after_sec_next;
-  if (after_sec == NULL)
-    after_sec_next = &stdoutput->sections;
-  else
-    after_sec_next = &after_sec->next;
+  segT after_sec_next;
 
-  bfd_section_list_insert (stdoutput, after_sec_next, sec);
+  if (after_sec == NULL)
+    after_sec_next = stdoutput->sections;
+  else
+    after_sec_next = after_sec->next;
+
+  bfd_section_list_insert_after (stdoutput, after_sec_next, sec);
 }
 
 

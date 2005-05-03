@@ -73,6 +73,10 @@ extern int macro_defined;
 
 extern int macro_nest;
 
+/* The macro hash table.  */
+
+extern struct hash_control *macro_hash;
+
 extern int buffer_and_nest (const char *, const char *, sb *, int (*) (sb *));
 extern void macro_init
   (int, int, int, int (*) (const char *, int, sb *, int *));

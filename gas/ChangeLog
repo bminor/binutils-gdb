@@ -1,3 +1,14 @@
+2005-05-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-ecoff.c (ecoff_frob_file_before_fix): Fix invocations
+	of bfd_section_list... macros.
+	* config/tc-mmix.c (mmix_frob_file): Likewise.
+	* config/tc-xtensa.c (xtensa_remove_section): Likewise.
+	(xtensa_insert_section): Likewise.
+
+	* macro.c (macro_hash): Remove static.
+	* macro.h (macro_hash): Provide an external declaration.
+
 2005-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* write.c (write_object_file): Use bfd_section_double_list_remove

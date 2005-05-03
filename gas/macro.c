@@ -94,7 +94,7 @@ static void free_macro(macro_entry *);
 
 /* The macro hash table.  */
 
-static struct hash_control *macro_hash;
+struct hash_control *macro_hash;
 
 /* Whether any macros have been defined.  */
 

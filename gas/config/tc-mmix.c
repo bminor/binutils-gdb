@@ -3747,18 +3747,18 @@ mmix_frob_file (void)
 
   if (real_reg_section != NULL)
     {
-      asection **secpp;
+      asection *secp;
 
       /* FIXME: Pass error state gracefully.  */
       if (bfd_get_section_flags (stdoutput, real_reg_section) & SEC_HAS_CONTENTS)
 	as_fatal (_("register section has contents\n"));
 
       /* Really remove the section.  */
-      for (secpp = &stdoutput->sections;
-	   *secpp != real_reg_section;
-	   secpp = &(*secpp)->next)
+      for (secp = stdoutput->sections;
+	   secp != real_reg_section;
+	   secp = secp->next)
 	;
-      bfd_section_list_remove (stdoutput, secpp);
+      bfd_section_list_remove (stdoutput, secp);
       --stdoutput->section_count;
     }
 

@@ -78,7 +78,7 @@ ecoff_frob_file_before_fix (void)
 
   addr = 0;
   for (i = 0; i < n_names; i++)
-    secs[i] = 0;
+    secs[i] = NULL;
 
   for (sec = &stdoutput->sections; *sec !=  NULL;)
     {
@@ -86,7 +86,7 @@ ecoff_frob_file_before_fix (void)
 	if (!strcmp ((*sec)->name, names[i]))
 	  {
 	    secs[i] = *sec;
-	    bfd_section_list_remove (stdoutput, sec);
+	    bfd_section_list_remove (stdoutput, *sec);
 	    break;
 	  }
       if (i == n_names)
@@ -104,7 +104,7 @@ ecoff_frob_file_before_fix (void)
       }
   for (i = n_names - 1; i >= 0; i--)
     if (secs[i])
-      bfd_section_list_insert (stdoutput, &stdoutput->sections, secs[i]);
+      bfd_section_list_insert_after (stdoutput, stdoutput->sections, secs[i]);
 
   /* Fill in the register masks.  */
   {
