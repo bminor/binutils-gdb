@@ -1,3 +1,8 @@
+2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Only skip weak definitions
+	at the end, if a strong definition has already been seen.
+
 2005-05-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* section.c (struct bfd_section): Replace link_order_head and
