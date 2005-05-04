@@ -1,3 +1,8 @@
+2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_bound_symbols):
+	Call _bfd_elf_provide_section_bound_symbols.
+
 2005-05-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldemul.c: Include bfdlink.h.

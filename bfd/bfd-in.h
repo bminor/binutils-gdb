@@ -700,6 +700,9 @@ extern struct bfd_section *_bfd_elf_tls_setup
 extern void _bfd_elf_provide_symbol
   (struct bfd_link_info *, const char *, bfd_vma);
 
+extern void _bfd_elf_provide_section_bound_symbols
+  (struct bfd_link_info *, struct bfd_section *sec, const char *, const char *);
+
 extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 

@@ -1453,35 +1453,8 @@ gld${EMULATION_NAME}_provide_bound_symbols (const char *sec,
 					    const char *start,
 					    const char *end)
 {
-  asection *s;
-  bfd_vma start_val, end_val;
-
-  s = bfd_get_section_by_name (output_bfd, sec);
-  if (s != NULL)
-    {
-      start_val = s->vma;
-      end_val = start_val + s->size;
-    }
-  else
-    {
-      /* We have to choose those values very carefully.  Some targets,
-	 like alpha, may have relocation overflow with 0.  We use the
-	 first SEC_ALLOC section which isn't SEC_READONLY or the last
-	 SEC_ALLOC section.   */
-      start_val = 0;
-      for (s = output_bfd->sections; s != NULL; s = s->next)
-	{
-	  if ((s->flags & SEC_ALLOC) != 0)
-	    {
-	      start_val = s->vma;
-	      if ((s->flags & SEC_READONLY) == 0)
-		break;
-	    }
-	}
-      end_val = start_val;
-    }
-  _bfd_elf_provide_symbol (&link_info, start, start_val);
-  _bfd_elf_provide_symbol (&link_info, end, end_val);
+  asection *s = bfd_get_section_by_name (output_bfd, sec);
+  _bfd_elf_provide_section_bound_symbols (&link_info, s, start, end);
 }
 
 /* If not building a shared library, provide

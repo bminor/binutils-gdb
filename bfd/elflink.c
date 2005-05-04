@@ -9824,6 +9824,18 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
   bfd_section_already_linked_table_insert (already_linked_list, sec);
 }
 
+static void
+bfd_elf_set_symbol (struct elf_link_hash_entry *h, bfd_vma val)
+{
+  h->root.type = bfd_link_hash_defined;
+  h->root.u.def.section = bfd_abs_section_ptr;
+  h->root.u.def.value = val;
+  h->def_regular = 1;
+  h->type = STT_OBJECT;
+  h->other = STV_HIDDEN | (h->other & ~ ELF_ST_VISIBILITY (-1));
+  h->forced_local = 1;
+}
+
 /* Set NAME to VAL if the symbol exists and is undefined.  */
 
 void
@@ -9836,13 +9848,61 @@ _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
 			    FALSE);
   if (h != NULL && (h->root.type == bfd_link_hash_undefined
 	            || h->root.type == bfd_link_hash_undefweak))
+    bfd_elf_set_symbol (h, val);
+}
+
+/* Set START and END to boundaries of SEC if they exist and are
+   undefined.  */
+
+void
+_bfd_elf_provide_section_bound_symbols (struct bfd_link_info *info,
+					asection *sec,
+					const char *start,
+					const char *end)
+{
+  struct elf_link_hash_entry *hs, *he;
+  bfd_vma start_val, end_val;
+  bfd_boolean do_start, do_end;
+
+  /* Check if we need them or not first.  */
+  hs = elf_link_hash_lookup (elf_hash_table (info), start, FALSE,
+			     FALSE, FALSE);
+  do_start = (hs != NULL
+	      && (hs->root.type == bfd_link_hash_undefined
+		  || hs->root.type == bfd_link_hash_undefweak));
+
+  he = elf_link_hash_lookup (elf_hash_table (info), end, FALSE,
+			     FALSE, FALSE);
+  do_end = (he != NULL
+	    && (he->root.type == bfd_link_hash_undefined
+		|| he->root.type == bfd_link_hash_undefweak));
+
+  if (!do_start && !do_end)
+    return;
+
+  if (sec != NULL)
     {
-      h->root.type = bfd_link_hash_defined;
-      h->root.u.def.section = bfd_abs_section_ptr;
-      h->root.u.def.value = val;
-      h->def_regular = 1;
-      h->type = STT_OBJECT;
-      h->other = STV_HIDDEN | (h->other & ~ ELF_ST_VISIBILITY (-1));
-      h->forced_local = 1;
+      start_val = sec->vma;
+      end_val = start_val + sec->size;
     }
+  else
+    {
+      /* We have to choose those values very carefully.  Some targets,
+	 like alpha, may have relocation overflow with 0. "_edata"
+	 should be defined in all cases.  */
+      struct elf_link_hash_entry *h
+	= elf_link_hash_lookup (elf_hash_table (info), "_edata",
+				FALSE, FALSE, FALSE);
+      if (h != NULL && h->root.type == bfd_link_hash_defined)
+	start_val = h->root.u.def.value;
+      else
+	start_val = 0;
+      end_val = start_val;
+    }
+
+  if (do_start)
+    bfd_elf_set_symbol (hs, start_val);
+
+  if (do_end)
+    bfd_elf_set_symbol (he, end_val);
 }

@@ -1,5 +1,14 @@
 2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* bfd-in.h (_bfd_elf_provide_section_bound_symbols): New.
+	* bfd-in2.h: Regenerated.
+
+	* elflink.c (bfd_elf_set_symbol): New.
+	(_bfd_elf_provide_symbol): Call it.
+	(_bfd_elf_provide_section_bound_symbols): New.
+
+2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elflink.c (_bfd_elf_merge_symbol): Only skip weak definitions
 	at the end, if a strong definition has already been seen.
 
