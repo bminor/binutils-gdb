@@ -1,5 +1,5 @@
 /* libthread_db helper functions for the remote server for GDB.
-   Copyright 2002, 2004
+   Copyright 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
@@ -113,13 +113,15 @@ ps_err_e
 ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 {
 #ifdef HAVE_REGSETS
+  struct process_info *process;
   struct thread_info *reg_inferior, *save_inferior;
 
-  reg_inferior = (struct thread_info *) find_inferior_id (&all_threads,
-							  lwpid);
-  if (reg_inferior == NULL)
+  process = (struct process_info *) find_inferior_id (&all_processes,
+						      lwpid);
+  if (process == NULL)
     return PS_ERR;
 
+  reg_inferior = get_process_thread (process);
   save_inferior = current_inferior;
   current_inferior = reg_inferior;
 

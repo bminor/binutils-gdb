@@ -1,5 +1,10 @@
 2005-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* proc-service.c (ps_lgetregs): Search all_processes instead of
+	all_threads.
+
+2005-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* server.c (start_inferior): Change return type to int.
 	(attach_inferior): Change sigptr to int *.
 	(handle_v_cont, handle_v_requests): Change signal to int *.
