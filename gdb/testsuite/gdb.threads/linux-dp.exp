@@ -42,7 +42,7 @@ set prms_id 0
 set bug_id 0
 
 # This only works with Linux configurations.
-if ![istarget *-*-linux-gnu] then {
+if ![istarget *-*-linux-gnu*] then {
     return
 }
 
