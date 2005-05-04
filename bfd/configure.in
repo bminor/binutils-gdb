@@ -140,6 +140,7 @@ AC_CHECK_DECLS(free)
 AC_CHECK_DECLS(getenv)
 AC_CHECK_DECLS(malloc)
 AC_CHECK_DECLS(realloc)
+AC_CHECK_DECLS(stpcpy)
 AC_CHECK_DECLS(strstr)
 
 # If we are configured native, pick a core file support file.
