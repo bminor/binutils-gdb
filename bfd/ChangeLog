@@ -1,3 +1,7 @@
+2005-05-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sysdep.h (stpcpy): Wrap declaration in parentheses.
+
 2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (ARCH_SIZE): New.

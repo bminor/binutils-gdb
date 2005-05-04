@@ -126,7 +126,9 @@ extern PTR realloc ();
 #endif
 
 #if !HAVE_DECL_STPCPY
-extern char *stpcpy (char *__dest, const char *__src);
+/* With glibc, not exposed without -D__USE_GNU, but some old versions
+   (2.2.5-34 on RH 7.3) still expose the macro.  */
+extern char *(stpcpy) (char *__dest, const char *__src);
 #endif
 
 #if !HAVE_DECL_STRSTR
