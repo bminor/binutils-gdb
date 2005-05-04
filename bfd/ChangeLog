@@ -1,3 +1,27 @@
+2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (ARCH_SIZE): New.
+	(LOG_SECTION_ALIGN): Likewise.
+	(elfNN_ia64_create_dynamic_sections): Use LOG_SECTION_ALIGN to
+	align relocation sections.
+	(get_fptr): Likewise.
+	(get_reloc_section): Likewise.
+	(elfNN_ia64_tprel_base): Likewise.
+	(elfNN_ia64_check_relocs): Support 32bit relocations.
+	(allocate_global_fptr_got): Likewise.
+	(allocate_dynrel_entries): Likewise.
+	(set_got_entry): Likewise.
+	(set_pltoff_entry): Likewise.
+	(elfNN_ia64_relocate_section): Likewise.
+
+2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in: Add AC_CHECK_DECLS(stpcpy).
+	* configure: Regenerate.
+	* config.in: Likewise.
+
+	* sysdep.h (stpcpy): New.
+
 2005-05-04  Nick Clifton  <nickc@redhat.com>
 
 	* Update the address and phone number of the FSF organization in
