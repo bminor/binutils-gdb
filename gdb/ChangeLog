@@ -1,3 +1,8 @@
+2005-05-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/cygwin.mh (XM_FILE): Remove variable.
+	* config/i386/xm-cygwin.h: Remove file.
+
 2005-05-03  Ben Elliston  <bje@au.ibm.com>
 
 	* infrun.c (handle_inferior_event): Update the comment about users
