@@ -378,7 +378,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
 static void
 ds (asection *s)
 {
-  struct bfd_link_order *l = s->link_order_head;
+  struct bfd_link_order *l = s->map_head.link_order;
   printf ("vma %x size %x\n", s->vma, s->size);
   while (l)
     {
@@ -410,7 +410,7 @@ sanity_check (bfd *abfd)
     {
       struct bfd_link_order *p;
       bfd_vma prev = 0;
-      for (p = s->link_order_head; p; p = p->next)
+      for (p = s->map_head.link_order; p; p = p->next)
 	{
 	  if (p->offset > 100000)
 	    abort ();
@@ -447,7 +447,7 @@ split_sections (bfd *abfd, struct bfd_link_info *info)
 
       /* Count up the relocations and line entries to see if anything
 	 would be too big to fit.  Accumulate section size too.  */
-      for (l = NULL, p = cursor->link_order_head; p != NULL; p = l->next)
+      for (l = NULL, p = cursor->map_head.link_order; p != NULL; p = l->next)
 	{
 	  unsigned int thislines = 0;
 	  unsigned int thisrelocs = 0;
@@ -488,9 +488,9 @@ split_sections (bfd *abfd, struct bfd_link_info *info)
 
 	      /* Attach the link orders to the new section and snip
 		 them off from the old section.  */
-	      n->link_order_head = p;
-	      n->link_order_tail = cursor->link_order_tail;
-	      cursor->link_order_tail = l;
+	      n->map_head.link_order = p;
+	      n->map_tail.link_order = cursor->map_tail.link_order;
+	      cursor->map_tail.link_order = l;
 	      l->next = NULL;
 	      l = p;
 

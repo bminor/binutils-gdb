@@ -644,7 +644,10 @@ extern bfd_boolean bfd_elf_get_bfd_needed_list
   (bfd *, struct bfd_link_needed_list **);
 extern bfd_boolean bfd_elf_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char * const *,
-   struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
+   struct bfd_link_info *, struct bfd_section **,
+   struct bfd_elf_version_tree *);
+extern bfd_boolean bfd_elf_size_dynsym_hash_dynstr
+  (bfd *, struct bfd_link_info *);
 extern void bfd_elf_set_dt_needed_name
   (bfd *, const char *);
 extern const char *bfd_elf_get_dt_soname
@@ -1396,8 +1399,14 @@ typedef struct bfd_section
   struct bfd_symbol *symbol;
   struct bfd_symbol **symbol_ptr_ptr;
 
-  struct bfd_link_order *link_order_head;
-  struct bfd_link_order *link_order_tail;
+  /* Early in the link process, map_head and map_tail are used to build
+     a list of input sections attached to an output section.  Later,
+     output sections use these fields for a list of bfd_link_order
+     structs.  */
+  union {
+    struct bfd_link_order *link_order;
+    struct bfd_section *s;
+  } map_head, map_tail;
 } asection;
 
 /* These sections are global, and are managed by BFD.  The application
@@ -1579,9 +1588,6 @@ bfd_boolean bfd_copy_private_section_data
 #define bfd_copy_private_section_data(ibfd, isection, obfd, osection) \
      BFD_SEND (obfd, _bfd_copy_private_section_data, \
                (ibfd, isection, obfd, osection))
-void _bfd_strip_section_from_output
-   (struct bfd_link_info *info, asection *section);
-
 bfd_boolean bfd_generic_is_group_section (bfd *, const asection *sec);
 
 bfd_boolean bfd_generic_discard_group (bfd *abfd, asection *group);

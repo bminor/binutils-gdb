@@ -1,3 +1,29 @@
+2005-05-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldemul.c: Include bfdlink.h.
+	(ldemul_before_allocation): Assume before_allocation is non-zero.
+	(before_allocation_default): Call strip_excluded_output_sections.
+	* ldlang.c (stripped_excluded_sections): New variable.
+	(lang_add_section): Build input section list for each output
+	section, attached via map_head and map_tail pointers.
+	(strip_excluded_output_sections): Make global.  Traverse the
+	input section lists to find which output sections can go.  Clear
+	link_order pointers and set stripped_excluded_sections.
+	(lang_process): Call strip_excluded_output_sections.
+	* ldlang.h (strip_excluded_output_sections): Declare.
+	* ldwrite.c: Update throuhout for link_order_head -> map_head change.
+	* emultempl/aix.em (before_allocation): Call
+	strip_excluded_output_sections.
+	* emultempl/armcoff.em (before_allocation): Likewise.
+	* emultempl/beos.em (before_allocation): Likewise.
+	* emultempl/linux.em (before_allocation): Likewise.
+	* emultempl/pe.em (before_allocation): Likewise.
+	* emultempl/sunos.em (before_allocation): Likewise.
+	* emultempl/elf32.em (before_allocation): Likewise.  Call
+	bfd_elf_size_dynsym_hash_dynstr too.
+	* emultempl/lnk960.em (lnk960_before_allocation): Delete.
+	(ld_lnk960): Use before_allocation_default.
+
 2005-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_strip_empty_section):

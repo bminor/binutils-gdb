@@ -130,11 +130,6 @@ lnk960_after_parse (void)
 }
 
 static void
-lnk960_before_allocation (void)
-{
-}
-
-static void
 lnk960_after_allocation (void)
 {
   if (!link_info.relocatable)
@@ -273,7 +268,7 @@ struct ld_emulation_xfer_struct ld_lnk960_emulation =
   lnk960_after_allocation,
   lnk960_set_output_arch,
   lnk960_choose_target,
-  lnk960_before_allocation,
+  before_allocation_default,
   lnk960_get_script,
   "lnk960",
   "",

@@ -10,7 +10,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* AIX emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004
+   2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    AIX support by Ian Lance Taylor <ian@cygnus.com>
@@ -787,6 +787,9 @@ gld${EMULATION_NAME}_before_allocation (void)
 				 &is->header.next);
 	}
     }
+
+  if (!link_info.relocatable)
+    strip_excluded_output_sections ();
 }
 
 static char *

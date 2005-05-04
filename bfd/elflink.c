@@ -5289,12 +5289,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      bfd_size_type dynsymcount;
       unsigned long section_sym_count;
       asection *s;
-      size_t bucketcount = 0;
-      size_t hash_entry_size;
-      unsigned int dtagcount;
 
       /* Set up the version definition section.  */
       s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
@@ -5309,7 +5305,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	verdefs = verdefs->next;
 
       if (verdefs == NULL && !info->create_default_symver)
-	_bfd_strip_section_from_output (info, s);
+	s->flags |= SEC_EXCLUDE;
       else
 	{
 	  unsigned int cdefs;
@@ -5563,7 +5559,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 				&sinfo);
 
 	if (elf_tdata (output_bfd)->verref == NULL)
-	  _bfd_strip_section_from_output (info, s);
+	  s->flags |= SEC_EXCLUDE;
 	else
 	  {
 	    Elf_Internal_Verneed *t;
@@ -5652,6 +5648,37 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  }
       }
 
+      if ((elf_tdata (output_bfd)->cverrefs == 0
+	   && elf_tdata (output_bfd)->cverdefs == 0)
+	  || _bfd_elf_link_renumber_dynsyms (output_bfd, info,
+					     &section_sym_count) == 0)
+	{
+	  s = bfd_get_section_by_name (dynobj, ".gnu.version");
+	  s->flags |= SEC_EXCLUDE;
+	}
+    }
+  return TRUE;
+}
+
+bfd_boolean
+bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
+{
+  if (!is_elf_hash_table (info->hash))
+    return TRUE;
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      bfd *dynobj;
+      const struct elf_backend_data *bed;
+      asection *s;
+      bfd_size_type dynsymcount;
+      unsigned long section_sym_count;
+      size_t bucketcount = 0;
+      size_t hash_entry_size;
+      unsigned int dtagcount;
+
+      dynobj = elf_hash_table (info)->dynobj;
+
       /* Assign dynsym indicies.  In a shared library we generate a
 	 section symbol for each output section, which come first.
 	 Next come all of the back-end allocated local dynamic syms,
@@ -5663,17 +5690,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       /* Work out the size of the symbol version section.  */
       s = bfd_get_section_by_name (dynobj, ".gnu.version");
       BFD_ASSERT (s != NULL);
-      if (dynsymcount == 0
-	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL
-	      && !info->create_default_symver))
-	{
-	  _bfd_strip_section_from_output (info, s);
-	  /* The DYNSYMCOUNT might have changed if we were going to
-	     output a dynamic symbol table entry for S.  */
-	  dynsymcount = _bfd_elf_link_renumber_dynsyms (output_bfd, info,
-							&section_sym_count);
-	}
-      else
+      if (dynsymcount != 0
+	  && (s->flags & SEC_EXCLUDE) == 0)
 	{
 	  s->size = dynsymcount * sizeof (Elf_External_Versym);
 	  s->contents = bfd_zalloc (output_bfd, s->size);
@@ -5692,6 +5710,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	 section as we went along in elf_link_add_object_symbols.  */
       s = bfd_get_section_by_name (dynobj, ".dynsym");
       BFD_ASSERT (s != NULL);
+      bed = get_elf_backend_data (output_bfd);
       s->size = dynsymcount * bed->s->sizeof_sym;
 
       if (dynsymcount != 0)
@@ -5957,7 +5976,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   count = reldyn->size / ext_size;
 
   size = 0;
-  for (lo = reldyn->link_order_head; lo != NULL; lo = lo->next)
+  for (lo = reldyn->map_head.link_order; lo != NULL; lo = lo->next)
     if (lo->type == bfd_indirect_link_order)
       {
 	asection *o = lo->u.indirect.section;
@@ -5982,7 +6001,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
   else
     r_sym_mask = ~(bfd_vma) 0xffffffff;
 
-  for (lo = reldyn->link_order_head; lo != NULL; lo = lo->next)
+  for (lo = reldyn->map_head.link_order; lo != NULL; lo = lo->next)
     if (lo->type == bfd_indirect_link_order)
       {
 	bfd_byte *erel, *erelend;
@@ -6032,7 +6051,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 
   qsort (s_non_relative, count - ret, sort_elt, elf_link_sort_cmp2);
 
-  for (lo = reldyn->link_order_head; lo != NULL; lo = lo->next)
+  for (lo = reldyn->map_head.link_order; lo != NULL; lo = lo->next)
     if (lo->type == bfd_indirect_link_order)
       {
 	bfd_byte *erel, *erelend;
@@ -7655,7 +7674,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   
   seen_other = 0;
   seen_linkorder = 0;
-  for (p = o->link_order_head; p != NULL; p = p->next)
+  for (p = o->map_head.link_order; p != NULL; p = p->next)
     {
       if (p->type == bfd_indirect_link_order
 	  && (bfd_get_flavour ((sub = p->u.indirect.section->owner))
@@ -7689,7 +7708,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
     xmalloc (seen_linkorder * sizeof (struct bfd_link_order *));
   seen_linkorder = 0;
   
-  for (p = o->link_order_head; p != NULL; p = p->next)
+  for (p = o->map_head.link_order; p != NULL; p = p->next)
     {
       sections[seen_linkorder++] = p;
     }
@@ -7803,7 +7822,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       struct bfd_elf_section_data *esdo = elf_section_data (o);
       o->reloc_count = 0;
 
-      for (p = o->link_order_head; p != NULL; p = p->next)
+      for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  unsigned int reloc_count = 0;
 	  struct bfd_elf_section_data *esdi = NULL;
@@ -8143,7 +8162,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      struct bfd_link_order *o;
 
-	      for (o = sec->link_order_head; o != NULL; o = o->next)
+	      for (o = sec->map_head.link_order; o != NULL; o = o->next)
 		if (size < o->offset + o->size)
 		  size = o->offset + o->size;
 	    }
@@ -8185,7 +8204,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     sub->output_has_begun = FALSE;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      for (p = o->link_order_head; p != NULL; p = p->next)
+      for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  if (p->type == bfd_indirect_link_order
 	      && (bfd_get_flavour ((sub = p->u.indirect.section->owner))

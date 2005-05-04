@@ -5539,7 +5539,7 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
   elf_link_hash_traverse (&htab->elf, func_desc_adjust, info);
 
   if (htab->sfpr->size == 0)
-    _bfd_strip_section_from_output (info, htab->sfpr);
+    htab->sfpr->flags |= SEC_EXCLUDE;
 
   return TRUE;
 }
@@ -7687,7 +7687,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (s->size == 0)
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  s->flags |= SEC_EXCLUDE;
 	  continue;
 	}
 
@@ -7716,7 +7716,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s != NULL && s != htab->got)
 	{
 	  if (s->size == 0)
-	    _bfd_strip_section_from_output (info, s);
+	    s->flags |= SEC_EXCLUDE;
 	  else
 	    {
 	      s->contents = bfd_zalloc (ibfd, s->size);
@@ -7728,7 +7728,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s != NULL)
 	{
 	  if (s->size == 0)
-	    _bfd_strip_section_from_output (info, s);
+	    s->flags |= SEC_EXCLUDE;
 	  else
 	    {
 	      s->contents = bfd_zalloc (ibfd, s->size);
@@ -8336,7 +8336,7 @@ ppc64_elf_setup_section_lists (bfd *output_bfd,
 
   /* We can't use output_bfd->section_count here to find the top output
      section index as some sections may have been removed, and
-     _bfd_strip_section_from_output doesn't renumber the indices.  */
+     strip_excluded_output_sections doesn't renumber the indices.  */
   for (section = output_bfd->sections, top_index = 0;
        section != NULL;
        section = section->next)

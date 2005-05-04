@@ -1,3 +1,47 @@
+2005-05-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* section.c (struct bfd_section): Replace link_order_head and
+	link_order_tail with map_head and map_tail union.
+	(STD_SECTION): Update.
+	(_bfd_strip_section_from_output): Delete.
+	* aoutx.h: Update throughout for above changes.
+	* coff-ppc.c: Likewise.
+	* cofflink.c: Likewise.
+	* ecoff.c: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* linker.c: Likewise.
+	* merge.c: Likewise.
+	* pdp11.c: Likewise.
+	* xcofflink.c: Likewise.
+	* elflink.c (bfd_boolean bfd_elf_size_dynsym_hash_dynstr): Split
+	out from bfd_elf_size_dynamic_sections.
+	* bfd-in.h (bfd_boolean bfd_elf_size_dynsym_hash_dynstr): Declare.
+	* bfd-in2.h: Regenerate.
+
 2005-05-04  Nick Clifton  <nickc@redhat.com>
 
 	* COPYING, aix386-core.c, aix5ppc-core.c, aout-adobe.c,

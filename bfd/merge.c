@@ -697,8 +697,10 @@ alloc_failure:
    with _bfd_merge_section.  */
 
 bfd_boolean
-_bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info,
-		     void *xsinfo, void (*remove_hook) (bfd *, asection *))
+_bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED,
+		     struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		     void *xsinfo,
+		     void (*remove_hook) (bfd *, asection *))
 {
   struct sec_merge_info *sinfo;
 
@@ -763,7 +765,7 @@ _bfd_merge_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info,
 	   the hash table at all.  */
 	for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
 	  if (secinfo->first_str == NULL)
-	    _bfd_strip_section_from_output (info, secinfo->sec);
+	    secinfo->sec->flags |= SEC_EXCLUDE;
     }
 
   return TRUE;

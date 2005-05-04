@@ -1,6 +1,6 @@
 /* ldemul.c -- clearing house for ld emulation states
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003
+   2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
@@ -24,6 +24,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "bfd.h"
 #include "sysdep.h"
 #include "getopt.h"
+#include "bfdlink.h"
 
 #include "ld.h"
 #include "ldmisc.h"
@@ -75,8 +76,7 @@ ldemul_after_allocation (void)
 void
 ldemul_before_allocation (void)
 {
-  if (ld_emulation->before_allocation)
-    ld_emulation->before_allocation ();
+  ld_emulation->before_allocation ();
 }
 
 void
@@ -212,6 +212,8 @@ after_allocation_default (void)
 void
 before_allocation_default (void)
 {
+  if (!link_info.relocatable)
+    strip_excluded_output_sections ();
 }
 
 void

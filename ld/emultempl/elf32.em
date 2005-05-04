@@ -1069,6 +1069,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 	  (const char * const *) command_line.auxiliary_filters,
 	  &link_info, &sinterp, lang_elf_version_info)))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+
 ${ELF_INTERPRETER_SET_DEFAULT}
   /* Let the user override the dynamic linker we are using.  */
   if (command_line.interpreter != NULL
@@ -1125,6 +1126,12 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	s->flags |= SEC_EXCLUDE;
       }
   }
+
+  if (!link_info.relocatable)
+    strip_excluded_output_sections ();
+
+  if (!bfd_elf_size_dynsym_hash_dynstr (output_bfd, &link_info))
+    einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 }
 
 EOF

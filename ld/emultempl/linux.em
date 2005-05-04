@@ -10,7 +10,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* Linux a.out emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    Linux support by Eric Youngdale <ericy@cais.cais.com>
 
@@ -121,6 +121,8 @@ gld${EMULATION_NAME}_before_allocation (void)
      dynamic linking.  */
   if (! bfd_${EMULATION_NAME}_size_dynamic_sections (output_bfd, &link_info))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+
+  strip_excluded_output_sections ();
 }
 
 static char *

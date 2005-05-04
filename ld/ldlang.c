@@ -54,6 +54,7 @@ static struct obstack map_obstack;
 static const char *startup_file;
 static lang_statement_list_type input_file_chain;
 static bfd_boolean placed_commons = FALSE;
+static bfd_boolean stripped_excluded_sections = FALSE;
 static lang_output_section_statement_type *default_common_section;
 static bfd_boolean map_option_f;
 static bfd_vma print_dot;
@@ -1721,6 +1722,19 @@ lang_add_section (lang_statement_list_type *ptr,
       first = ! output->bfd_section->linker_has_input;
       output->bfd_section->linker_has_input = 1;
 
+      if (!link_info.relocatable
+	  && !stripped_excluded_sections)
+	{
+	  asection *s = output->bfd_section->map_tail.s;
+	  output->bfd_section->map_tail.s = section;
+	  section->map_head.s = NULL;
+	  section->map_tail.s = s;
+	  if (s != NULL)
+	    s->map_head.s = section;
+	  else
+	    output->bfd_section->map_head.s = section;
+	}
+
       /* Add a section reference to the list.  */
       new = new_stat (lang_input_section, ptr);
 
@@ -3029,7 +3043,7 @@ map_input_to_output_sections
    added.  For example, ldemul_before_allocation can remove dynamic
    sections if they turn out to be not needed.  Clean them up here.  */
 
-static void
+void
 strip_excluded_output_sections (void)
 {
   lang_output_section_statement_type *os;
@@ -3042,9 +3056,20 @@ strip_excluded_output_sections (void)
 
       if (os->constraint == -1)
 	continue;
-      s = os->bfd_section;
-      if (s != NULL && (s->flags & SEC_EXCLUDE) != 0)
+
+      if (os->bfd_section == NULL || os->bfd_section->map_head.s == NULL)
+	continue;
+
+      for (s = os->bfd_section->map_head.s; s != NULL; s = s->map_head.s)
+	if ((s->flags & SEC_EXCLUDE) == 0)
+	  break;
+
+      os->bfd_section->map_head.link_order = NULL;
+      os->bfd_section->map_tail.link_order = NULL;
+
+      if (s == NULL)
 	{
+	  s = os->bfd_section;
 	  os->bfd_section = NULL;
 	  if (!bfd_section_removed_from_list (output_bfd, s))
 	    {
@@ -3053,6 +3078,10 @@ strip_excluded_output_sections (void)
 	    }
 	}
     }
+
+  /* Stop future calls to lang_add_section from messing with map_head
+     and map_tail link_order fields.  */
+  stripped_excluded_sections = TRUE;
 }
 
 static void
@@ -5225,9 +5254,6 @@ lang_process (void)
   /* Do anything special before sizing sections.  This is where ELF
      and other back-ends size dynamic sections.  */
   ldemul_before_allocation ();
-
-  if (!link_info.relocatable)
-    strip_excluded_output_sections ();
 
   /* We must record the program headers before we try to fix the
      section positions, since they will affect SIZEOF_HEADERS.  */

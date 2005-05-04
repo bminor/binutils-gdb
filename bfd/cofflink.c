@@ -693,7 +693,7 @@ _bfd_coff_final_link (bfd *abfd,
     {
       o->reloc_count = 0;
       o->lineno_count = 0;
-      for (p = o->link_order_head; p != NULL; p = p->next)
+      for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  if (p->type == bfd_indirect_link_order)
 	    {
@@ -888,7 +888,7 @@ _bfd_coff_final_link (bfd *abfd,
 
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      for (p = o->link_order_head; p != NULL; p = p->next)
+      for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  if (p->type == bfd_indirect_link_order
 	      && bfd_family_coff (p->u.indirect.section->owner))

@@ -2448,7 +2448,7 @@ printf("m32r_elf_size_dynamic_sections()\n");
              adjust_dynamic_symbol is called, and it is that
              function which decides whether anything needs to go
              into these sections.  */
-          _bfd_strip_section_from_output (info, s);
+          s->flags |= SEC_EXCLUDE;
           continue;
         }
 

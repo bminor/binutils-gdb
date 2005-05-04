@@ -853,8 +853,8 @@ _bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 
 /* This function is called from size_dynamic_sections.
    It needs to decide whether .eh_frame_hdr should be output or not,
-   because later on it is too late for calling _bfd_strip_section_from_output,
-   since dynamic symbol table has been sized.  */
+   because when the dynamic symbol table has been sized it is too late
+   to strip sections.  */
 
 bfd_boolean
 _bfd_elf_maybe_strip_eh_frame_hdr (struct bfd_link_info *info)
@@ -888,7 +888,7 @@ _bfd_elf_maybe_strip_eh_frame_hdr (struct bfd_link_info *info)
 
   if (abfd == NULL)
     {
-      _bfd_strip_section_from_output (info, hdr_info->hdr_sec);
+      hdr_info->hdr_sec->flags |= SEC_EXCLUDE;
       hdr_info->hdr_sec = NULL;
       return TRUE;
     }

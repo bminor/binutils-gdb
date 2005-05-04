@@ -962,7 +962,7 @@ mips_elf_create_procedure_table (void *handle, bfd *abfd,
 
   /* Skip this section later on (I don't think this currently
      matters, but someday it might).  */
-  s->link_order_head = NULL;
+  s->map_head.link_order = NULL;
 
   if (epdr != NULL)
     free (epdr);
@@ -6796,7 +6796,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  s->flags |= SEC_EXCLUDE;
 	  continue;
 	}
 
@@ -8986,7 +8986,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  /* We have found the .reginfo section in the output file.
 	     Look through all the link_orders comprising it and merge
 	     the information together.  */
-	  for (p = o->link_order_head; p != NULL; p = p->next)
+	  for (p = o->map_head.link_order; p != NULL; p = p->next)
 	    {
 	      asection *input_section;
 	      bfd *input_bfd;
@@ -9029,7 +9029,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	  /* Skip this section later on (I don't think this currently
 	     matters, but someday it might).  */
-	  o->link_order_head = NULL;
+	  o->map_head.link_order = NULL;
 
 	  reginfo_sec = o;
 	}
@@ -9102,7 +9102,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		return FALSE;
 	    }
 
-	  for (p = o->link_order_head; p != NULL; p = p->next)
+	  for (p = o->map_head.link_order; p != NULL; p = p->next)
 	    {
 	      asection *input_section;
 	      bfd *input_bfd;
@@ -9242,7 +9242,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	  /* Skip this section later on (I don't think this currently
 	     matters, but someday it might).  */
-	  o->link_order_head = NULL;
+	  o->map_head.link_order = NULL;
 
 	  mdebug_sec = o;
 	}
@@ -9261,7 +9261,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	     not used in executables files.  */
 	  if (! info->relocatable)
 	    {
-	      for (p = o->link_order_head; p != NULL; p = p->next)
+	      for (p = o->map_head.link_order; p != NULL; p = p->next)
 		{
 		  asection *input_section;
 
@@ -9281,7 +9281,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      /* Skip this section later on (I don't think this
 		 currently matters, but someday it might).  */
-	      o->link_order_head = NULL;
+	      o->map_head.link_order = NULL;
 
 	      /* Really remove the section.  */
 	      bfd_section_list_remove (abfd, o);
@@ -9331,7 +9331,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  tab[0].gt_header.gt_unused = 0;
 
 	  /* Combine the input sections.  */
-	  for (p = o->link_order_head; p != NULL; p = p->next)
+	  for (p = o->map_head.link_order; p != NULL; p = p->next)
 	    {
 	      asection *input_section;
 	      bfd *input_bfd;
@@ -9454,7 +9454,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	  /* Skip this section later on (I don't think this currently
 	     matters, but someday it might).  */
-	  o->link_order_head = NULL;
+	  o->map_head.link_order = NULL;
 	}
     }
 

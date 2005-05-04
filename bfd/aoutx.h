@@ -5318,11 +5318,11 @@ NAME (aout, final_link) (bfd *abfd,
     {
       if (obj_textsec (abfd) != NULL)
 	trsize += (_bfd_count_link_order_relocs (obj_textsec (abfd)
-						 ->link_order_head)
+						 ->map_head.link_order)
 		   * obj_reloc_entry_size (abfd));
       if (obj_datasec (abfd) != NULL)
 	drsize += (_bfd_count_link_order_relocs (obj_datasec (abfd)
-						 ->link_order_head)
+						 ->map_head.link_order)
 		   * obj_reloc_entry_size (abfd));
     }
 
@@ -5414,7 +5414,7 @@ NAME (aout, final_link) (bfd *abfd,
      include.  */
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      for (p = o->link_order_head; p != NULL; p = p->next)
+      for (p = o->map_head.link_order; p != NULL; p = p->next)
 	if (p->type == bfd_indirect_link_order)
 	  p->u.indirect.section->linker_mark = TRUE;
     }
@@ -5422,7 +5422,7 @@ NAME (aout, final_link) (bfd *abfd,
   have_link_order_relocs = FALSE;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      for (p = o->link_order_head;
+      for (p = o->map_head.link_order;
 	   p != NULL;
 	   p = p->next)
 	{
@@ -5467,7 +5467,7 @@ NAME (aout, final_link) (bfd *abfd,
     {
       for (o = abfd->sections; o != NULL; o = o->next)
 	{
-	  for (p = o->link_order_head;
+	  for (p = o->map_head.link_order;
 	       p != NULL;
 	       p = p->next)
 	    {

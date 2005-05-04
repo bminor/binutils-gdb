@@ -5,7 +5,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* emulate the original gld for the given ${EMULATION_NAME}
    Copyright 1991, 1993, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+   2004, 2005 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -125,6 +125,9 @@ gld${EMULATION_NAME}_before_allocation (void)
 
   /* We have seen it all. Allocate it, and carry on */
   bfd_arm_allocate_interworking_sections (& link_info);
+
+  if (!link_info.relocatable)
+    strip_excluded_output_sections ();
 }
 
 static void

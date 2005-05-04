@@ -76,8 +76,8 @@ static asection bfd_debug_section =
      NULL,
   /* symbol_ptr_ptr,                                               */
      NULL,
-  /* link_order_head, link_order_tail                              */
-     NULL,            NULL
+  /* map_head, map_tail                                            */
+     { NULL }, { NULL }
 };
 
 /* Create an ECOFF object.  */
@@ -4523,7 +4523,7 @@ _bfd_ecoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
       for (o = abfd->sections; o != NULL; o = o->next)
 	{
 	  o->reloc_count = 0;
-	  for (p = o->link_order_head;
+	  for (p = o->map_head.link_order;
 	       p != NULL;
 	       p = p->next)
 	    if (p->type == bfd_indirect_link_order)
@@ -4593,7 +4593,7 @@ _bfd_ecoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      for (p = o->link_order_head;
+      for (p = o->map_head.link_order;
 	   p != NULL;
 	   p = p->next)
 	{

@@ -497,8 +497,14 @@ CODE_FRAGMENT
 .  struct bfd_symbol *symbol;
 .  struct bfd_symbol **symbol_ptr_ptr;
 .
-.  struct bfd_link_order *link_order_head;
-.  struct bfd_link_order *link_order_tail;
+.  {* Early in the link process, map_head and map_tail are used to build
+.     a list of input sections attached to an output section.  Later,
+.     output sections use these fields for a list of bfd_link_order
+.     structs.  *}
+.  union {
+.    struct bfd_link_order *link_order;
+.    struct bfd_section *s;
+.  } map_head, map_tail;
 .} asection;
 .
 .{* These sections are global, and are managed by BFD.  The application
@@ -692,8 +698,8 @@ static const asymbol global_syms[] =
     /* symbol_ptr_ptr,                                               */	\
        (struct bfd_symbol **) &SYM,					\
 									\
-    /* link_order_head, link_order_tail                              */	\
-       NULL,            NULL						\
+    /* map_head, map_tail                                            */	\
+       { NULL }, { NULL }						\
     }
 
 STD_SECTION (bfd_com_section, SEC_IS_COMMON, bfd_com_symbol,
@@ -1440,50 +1446,6 @@ DESCRIPTION
 .     BFD_SEND (obfd, _bfd_copy_private_section_data, \
 .		(ibfd, isection, obfd, osection))
 */
-
-/*
-FUNCTION
-	_bfd_strip_section_from_output
-
-SYNOPSIS
-	void _bfd_strip_section_from_output
-	  (struct bfd_link_info *info, asection *section);
-
-DESCRIPTION
-	Remove @var{section} from the output.  If the output section
-	becomes empty, remove it from the output bfd.
-
-	This function won't actually do anything except twiddle flags
-	if called too late in the linking process, when it's not safe
-	to remove sections.
-*/
-void
-_bfd_strip_section_from_output (struct bfd_link_info *info, asection *s)
-{
-  asection *os;
-  asection *is;
-  bfd *abfd;
-
-  s->flags |= SEC_EXCLUDE;
-
-  /* If the section wasn't assigned to an output section, or the
-     section has been discarded by the linker script, there's nothing
-     more to do.  */
-  os = s->output_section;
-  if (os == NULL || os->owner == NULL)
-    return;
-
-  /* If the output section has other (non-excluded) input sections, we
-     can't remove it.  */
-  for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link_next)
-    for (is = abfd->sections; is != NULL; is = is->next)
-      if (is->output_section == os && (is->flags & SEC_EXCLUDE) == 0)
-	return;
-
-  /* If the output section is empty, flag it for removal too.
-     See ldlang.c:strip_excluded_output_sections for the action.  */
-  os->flags |= SEC_EXCLUDE;
-}
 
 /*
 FUNCTION

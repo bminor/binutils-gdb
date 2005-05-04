@@ -2499,7 +2499,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
 	  struct bfd_link_order *l;
 	  asection *elt;
 
-	  for (l = asect->link_order_head; l != NULL; l = l->next)
+	  for (l = asect->map_head.link_order; l != NULL; l = l->next)
 	    if (l->type == bfd_indirect_link_order
 		&& (elt = elf_next_in_group (l->u.indirect.section)) != NULL)
 	      do
@@ -2616,7 +2616,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
 	  struct bfd_link_order *o;
 
 	  this_hdr->sh_size = 0;
-	  for (o = asect->link_order_head; o != NULL; o = o->next)
+	  for (o = asect->map_head.link_order; o != NULL; o = o->next)
 	    if (this_hdr->sh_size < o->offset + o->size)
 	      this_hdr->sh_size = o->offset + o->size;
 	  if (this_hdr->sh_size)
@@ -2722,7 +2722,7 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
   /* If this is a relocatable link, then the above did nothing because
      SEC is the output section.  Look through the input sections
      instead.  */
-  for (l = sec->link_order_head; l != NULL; l = l->next)
+  for (l = sec->map_head.link_order; l != NULL; l = l->next)
     if (l->type == bfd_indirect_link_order
 	&& (elt = elf_next_in_group (l->u.indirect.section)) != NULL)
       do
@@ -2924,7 +2924,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 
 	      /* Find out what the corresponding section in output
 		 is.  */
-	      for (p = sec->link_order_head; p != NULL; p = p->next)
+	      for (p = sec->map_head.link_order; p != NULL; p = p->next)
 		{
 		  s = p->u.indirect.section;
 		  if (p->type == bfd_indirect_link_order
@@ -4295,7 +4295,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 		  struct bfd_link_order *o;
 		  bfd_vma tbss_size = 0;
 
-		  for (o = sec->link_order_head; o != NULL; o = o->next)
+		  for (o = sec->map_head.link_order; o != NULL; o = o->next)
 		    if (tbss_size < o->offset + o->size)
 		      tbss_size = o->offset + o->size;
 

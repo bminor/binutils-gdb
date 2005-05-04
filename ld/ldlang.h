@@ -549,6 +549,8 @@ extern void lang_for_each_statement
   (void (*) (lang_statement_union_type *));
 extern void *stat_alloc
   (size_t);
+extern void strip_excluded_output_sections
+  (void);
 extern void dprint_statement
   (lang_statement_union_type *, int);
 extern bfd_vma lang_size_sections

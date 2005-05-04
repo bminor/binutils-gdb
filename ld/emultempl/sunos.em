@@ -809,6 +809,8 @@ gld${EMULATION_NAME}_before_allocation (void)
 	hdyn->u.def.section = sdyn;
       else
 	hdyn->u.def.section = bfd_abs_section_ptr;
+
+      strip_excluded_output_sections ();
     }
 }
 

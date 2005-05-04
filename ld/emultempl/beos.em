@@ -661,6 +661,9 @@ gld_${EMULATION_NAME}_before_allocation (void)
 #endif /* TARGET_IS_ppcpe */
 
   sort_sections (stat_ptr->head);
+
+  if (!link_info.relocatable)
+    strip_excluded_output_sections ();
 }
 
 /* Place an orphan section.  We use this to put sections with a '\$' in them

@@ -2181,7 +2181,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 
       if (strip)
 	{
-	  _bfd_strip_section_from_output (info, s);
+	  s->flags |= SEC_EXCLUDE;
 	  continue;
 	}
 

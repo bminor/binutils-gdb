@@ -2124,7 +2124,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	     function which decides whether anything needs to go
 	     into these sections.  */
 
-	  _bfd_strip_section_from_output (info, s);
+	  s->flags |= SEC_EXCLUDE;
 	  continue;
 	}
 

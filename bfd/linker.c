@@ -309,7 +309,7 @@ SUBSUBSECTION
 	of the <<bfd>> structure.
 
 	Each section in the output file will have a list of
-	<<link_order>> structures attached to the <<link_order_head>>
+	<<link_order>> structures attached to the <<map_head.link_order>>
 	field (the <<link_order>> structure is defined in
 	<<bfdlink.h>>).  These structures describe how to create the
 	contents of the output section in terms of the contents of
@@ -2009,7 +2009,7 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Mark all sections which will be included in the output file.  */
   for (o = abfd->sections; o != NULL; o = o->next)
-    for (p = o->link_order_head; p != NULL; p = p->next)
+    for (p = o->map_head.link_order; p != NULL; p = p->next)
       if (p->type == bfd_indirect_link_order)
 	p->u.indirect.section->linker_mark = TRUE;
 
@@ -2038,7 +2038,7 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
       for (o = abfd->sections; o != NULL; o = o->next)
 	{
 	  o->reloc_count = 0;
-	  for (p = o->link_order_head; p != NULL; p = p->next)
+	  for (p = o->map_head.link_order; p != NULL; p = p->next)
 	    {
 	      if (p->type == bfd_section_reloc_link_order
 		  || p->type == bfd_symbol_reloc_link_order)
@@ -2094,7 +2094,7 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Handle all the link order information for the sections.  */
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      for (p = o->link_order_head; p != NULL; p = p->next)
+      for (p = o->map_head.link_order; p != NULL; p = p->next)
 	{
 	  switch (p->type)
 	    {
@@ -2614,11 +2614,11 @@ bfd_new_link_order (bfd *abfd, asection *section)
 
   new->type = bfd_undefined_link_order;
 
-  if (section->link_order_tail != NULL)
-    section->link_order_tail->next = new;
+  if (section->map_tail.link_order != NULL)
+    section->map_tail.link_order->next = new;
   else
-    section->link_order_head = new;
-  section->link_order_tail = new;
+    section->map_head.link_order = new;
+  section->map_tail.link_order = new;
 
   return new;
 }

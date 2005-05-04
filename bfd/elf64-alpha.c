@@ -4058,7 +4058,7 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 	}
 
       if (strip)
-	_bfd_strip_section_from_output (info, s);
+	s->flags |= SEC_EXCLUDE;
       else
 	{
 	  /* Allocate memory for the section contents.  */
@@ -5184,7 +5184,7 @@ elf64_alpha_final_link (abfd, info)
 		}
 	    }
 
-	  for (p = o->link_order_head;
+	  for (p = o->map_head.link_order;
 	       p != (struct bfd_link_order *) NULL;
 	       p = p->next)
 	    {
@@ -5305,7 +5305,7 @@ elf64_alpha_final_link (abfd, info)
 
 	  /* Skip this section later on (I don't think this currently
 	     matters, but someday it might).  */
-	  o->link_order_head = (struct bfd_link_order *) NULL;
+	  o->map_head.link_order = (struct bfd_link_order *) NULL;
 
 	  mdebug_sec = o;
 	}

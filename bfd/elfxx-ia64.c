@@ -1558,7 +1558,7 @@ elfNN_ia64_modify_segment_map (abfd, info)
 	int i;
 	for (i = m->count - 1; i >= 0; --i)
 	  {
-	    struct bfd_link_order *order = m->sections[i]->link_order_head;
+	    struct bfd_link_order *order = m->sections[i]->map_head.link_order;
 	    while (order)
 	      {
 		if (order->type == bfd_indirect_link_order)
@@ -3052,7 +3052,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	}
 
       if (strip)
-	_bfd_strip_section_from_output (info, sec);
+	sec->flags |= SEC_EXCLUDE;
       else
 	{
 	  /* Allocate memory for the section contents.  */
