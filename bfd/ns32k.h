@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02110-1301, USA.  */
 
 extern bfd_reloc_status_type _bfd_ns32k_relocate_contents   (reloc_howto_type *, bfd *, bfd_vma, bfd_byte *);
 extern bfd_reloc_status_type _bfd_do_ns32k_reloc_contents   (reloc_howto_type *, bfd *, bfd_vma, bfd_byte *, bfd_vma (*) (bfd_byte *, int), void (*) (bfd_vma, bfd_byte *, int));

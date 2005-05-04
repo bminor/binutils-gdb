@@ -18,7 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   02110-1301, USA.  */
 
 #define TARGET_IS_BIG_ENDIAN_P
 #define N_HEADER_IN_TEXT(x)	1

@@ -17,7 +17,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02110-1301, USA.  */
 
 /* RISC iX overloads the MAGIC field to indicate more than just the usual
    [ZNO]MAGIC values.  Also included are squeezing information and
