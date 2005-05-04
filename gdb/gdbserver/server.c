@@ -43,7 +43,7 @@ jmp_buf toplevel;
 
 unsigned long signal_pid;
 
-static unsigned char
+static int
 start_inferior (char *argv[], char *statusptr)
 {
   signal (SIGTTOU, SIG_DFL);
@@ -63,7 +63,7 @@ start_inferior (char *argv[], char *statusptr)
 }
 
 static int
-attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
+attach_inferior (int pid, char *statusptr, int *sigptr)
 {
   /* myattach should return -1 if attaching is unsupported,
      0 if it succeeded, and call error() otherwise.  */
@@ -150,7 +150,7 @@ handle_query (char *own_buf)
 
 /* Parse vCont packets.  */
 void
-handle_v_cont (char *own_buf, char *status, unsigned char *signal)
+handle_v_cont (char *own_buf, char *status, int *signal)
 {
   char *p, *q;
   int n = 0, i = 0;
@@ -255,7 +255,7 @@ err:
 
 /* Handle all of the extended 'v' packets.  */
 void
-handle_v_requests (char *own_buf, char *status, unsigned char *signal)
+handle_v_requests (char *own_buf, char *status, int *signal)
 {
   if (strncmp (own_buf, "vCont;", 6) == 0)
     {
@@ -315,7 +315,7 @@ main (int argc, char *argv[])
 {
   char ch, status, *own_buf, mem_buf[2000];
   int i = 0;
-  unsigned char signal;
+  int signal;
   unsigned int len;
   CORE_ADDR mem_addr;
   int bad_attach;

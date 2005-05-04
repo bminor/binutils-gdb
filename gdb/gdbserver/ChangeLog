@@ -1,4 +1,11 @@
-2005-04-15    Ke Sakamoto  <sakamoto.kei@renesas.com>
+2005-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (start_inferior): Change return type to int.
+	(attach_inferior): Change sigptr to int *.
+	(handle_v_cont, handle_v_requests): Change signal to int *.
+	(main): Change signal to int.
+
+2005-04-15  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* Makefile.in: Add linux-m32r-low.o, reg-m32r.c and reg-m32r.o.
 	* configure.srv: Add m32r*-*-linux*.
