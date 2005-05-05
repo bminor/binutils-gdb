@@ -1,3 +1,8 @@
+2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (INCLUDES): Remove -D_GNU_SOURCE.
+	* Makefile.in: Regenerate.
+
 2005-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (INCLUDES): New. Add -D_GNU_SOURCE.
