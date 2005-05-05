@@ -1,5 +1,10 @@
 2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elflink.c (_bfd_elf_provide_section_bound_symbols): Use
+	"__bss_start" instead of "_edata" as fallback.
+
+2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* bfd-in2.h: Regenerated.
 
 2005-05-05  Paul Brook  <paul@codesourcery.com>

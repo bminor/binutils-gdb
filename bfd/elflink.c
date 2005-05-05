@@ -9883,10 +9883,10 @@ _bfd_elf_provide_section_bound_symbols (struct bfd_link_info *info,
   else
     {
       /* We have to choose those values very carefully.  Some targets,
-	 like alpha, may have relocation overflow with 0. "_edata"
+	 like alpha, may have relocation overflow with 0. "__bss_start"
 	 should be defined in all cases.  */
       struct elf_link_hash_entry *h
-	= elf_link_hash_lookup (elf_hash_table (info), "_edata",
+	= elf_link_hash_lookup (elf_hash_table (info), "__bss_start",
 				FALSE, FALSE, FALSE);
       if (h != NULL && h->root.type == bfd_link_hash_defined)
 	start_val = h->root.u.def.value;

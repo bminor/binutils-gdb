@@ -1,3 +1,7 @@
+2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* scripttempl/elf.sc: Document the usage of __bss_start.
+
 2005-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* Makefile.am: Add eelf_i386_vxworks.
