@@ -1,3 +1,9 @@
+2005-05-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* ld-srec/srec.exp: Replace linux-gnu with linux-* to allow for
+	versions of Linux which do not use glibc.
+	* ld-sh/sh.exp: Likewise
+
 2005-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* lib/ld-lib.exp (regexp_diff): Pass test if last line is "#...".

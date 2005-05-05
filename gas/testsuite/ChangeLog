@@ -1,3 +1,9 @@
+2005-05-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* gas/sh/basic.exp: Replace linux-gnu with linux-* to allow for
+	versions of Linux which do not use glibc.
+	* gas/vax/vax.exp: Likewise.
+
 2005-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* lib/gas-defs.exp (regexp_diff): Pass test if last line is "#...".

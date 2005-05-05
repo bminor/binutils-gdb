@@ -15,7 +15,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 # Get the offset from an S-record line to the start of the data.
 
@@ -385,7 +385,7 @@ setup_xfail "arm*-*-linux*"
 setup_xfail "v850*-*-elf"
 
 # The S-record linker doesn't handle Alpha Elf relaxation.
-setup_xfail "alpha*-*-elf*" "alpha*-*-linux-gnu*" "alpha*-*-gnu*"
+setup_xfail "alpha*-*-elf*" "alpha*-*-linux-*" "alpha*-*-gnu*"
 setup_xfail "alpha*-*-netbsd*"
 
 # The S-record linker hasn't any hope of coping with HPPA relocs.
@@ -424,7 +424,7 @@ setup_xfail "strongarm*-*-*"
 setup_xfail "thumb-*-*"
 setup_xfail "powerpc*-*-eabi*"
 setup_xfail "v850*-*-elf"
-setup_xfail "alpha*-*-elf*" "alpha*-*-linux-gnu*" "alpha*-*-gnu*"
+setup_xfail "alpha*-*-elf*" "alpha*-*-linux-*" "alpha*-*-gnu*"
 setup_xfail "alpha*-*-netbsd*"
 setup_xfail "hppa*-*-*"
 setup_xfail "ia64-*-*"

@@ -20,7 +20,7 @@
 
 # Written by Cygnus Support.
 
-if [istarget "sh*-*-linux-gnu"] {
+if [istarget "sh*-*-linux-*"] {
     global ASFLAGS
     set ASFLAGS "$ASFLAGS -big"
 }
