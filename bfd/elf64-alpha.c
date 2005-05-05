@@ -2371,11 +2371,11 @@ elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
       if (scomm == NULL)
 	{
-	  scomm = bfd_make_section (abfd, ".scommon");
-	  if (scomm == NULL
-	      || !bfd_set_section_flags (abfd, scomm, (SEC_ALLOC
-						       | SEC_IS_COMMON
-						       | SEC_LINKER_CREATED)))
+	  scomm = bfd_make_section_with_flags (abfd, ".scommon",
+					       (SEC_ALLOC
+						| SEC_IS_COMMON
+						| SEC_LINKER_CREATED));
+	  if (scomm == NULL)
 	    return FALSE;
 	}
 
@@ -2403,12 +2403,11 @@ elf64_alpha_create_got_section(abfd, info)
       return TRUE;
     }
 
-  s = bfd_make_section (abfd, ".got");
+  s = bfd_make_section_with_flags (abfd, ".got", (SEC_ALLOC | SEC_LOAD
+						  | SEC_HAS_CONTENTS
+						  | SEC_IN_MEMORY
+						  | SEC_LINKER_CREATED));
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, (SEC_ALLOC | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | SEC_LINKER_CREATED))
       || !bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
 
@@ -2430,13 +2429,13 @@ elf64_alpha_create_dynamic_sections (abfd, info)
 
   /* We need to create .plt, .rela.plt, .got, and .rela.got sections.  */
 
-  s = bfd_make_section (abfd, ".plt");
+  s = bfd_make_section_with_flags (abfd, ".plt",
+				   (SEC_ALLOC | SEC_LOAD
+				    | SEC_HAS_CONTENTS
+				    | SEC_IN_MEMORY
+				    | SEC_LINKER_CREATED
+				    | SEC_CODE));
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, (SEC_ALLOC | SEC_LOAD
-					    | SEC_HAS_CONTENTS
-					    | SEC_IN_MEMORY
-					    | SEC_LINKER_CREATED
-					    | SEC_CODE))
       || ! bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
 
@@ -2456,13 +2455,13 @@ elf64_alpha_create_dynamic_sections (abfd, info)
       && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
-  s = bfd_make_section (abfd, ".rela.plt");
+  s = bfd_make_section_with_flags (abfd, ".rela.plt",
+				   (SEC_ALLOC | SEC_LOAD
+				    | SEC_HAS_CONTENTS
+				    | SEC_IN_MEMORY
+				    | SEC_LINKER_CREATED
+				    | SEC_READONLY));
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, (SEC_ALLOC | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | SEC_LINKER_CREATED
-					   | SEC_READONLY))
       || ! bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
 
@@ -2472,13 +2471,13 @@ elf64_alpha_create_dynamic_sections (abfd, info)
   if (!elf64_alpha_create_got_section (abfd, info))
     return FALSE;
 
-  s = bfd_make_section(abfd, ".rela.got");
+  s = bfd_make_section_with_flags (abfd, ".rela.got",
+				   (SEC_ALLOC | SEC_LOAD
+				    | SEC_HAS_CONTENTS
+				    | SEC_IN_MEMORY
+				    | SEC_LINKER_CREATED
+				    | SEC_READONLY));
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, (SEC_ALLOC | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | SEC_LINKER_CREATED
-					   | SEC_READONLY))
       || !bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
 
@@ -3147,13 +3146,14 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		{
 		  flagword flags;
 
-		  sreloc = bfd_make_section (dynobj, rel_sec_name);
 		  flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY
 			   | SEC_LINKER_CREATED | SEC_READONLY);
 		  if (sec->flags & SEC_ALLOC)
 		    flags |= SEC_ALLOC | SEC_LOAD;
+		  sreloc = bfd_make_section_with_flags (dynobj,
+							rel_sec_name,
+							flags);
 		  if (sreloc == NULL
-		      || !bfd_set_section_flags (dynobj, sreloc, flags)
 		      || !bfd_set_section_alignment (dynobj, sreloc, 3))
 		    return FALSE;
 		}

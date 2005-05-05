@@ -449,24 +449,24 @@ i370_elf_create_dynamic_sections (abfd, info)
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
 
-  s = bfd_make_section (abfd, ".dynsbss");
-  if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
+  s = bfd_make_section_with_flags (abfd, ".dynsbss",
+				   SEC_ALLOC | SEC_LINKER_CREATED);
+  if (s == NULL)
     return FALSE;
 
   if (! info->shared)
     {
-      s = bfd_make_section (abfd, ".rela.sbss");
+      s = bfd_make_section_with_flags (abfd, ".rela.sbss",
+				       flags | SEC_READONLY);
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
     }
 
    /* xxx beats me, seem to need a rela.text ...  */
-   s = bfd_make_section (abfd, ".rela.text");
+   s = bfd_make_section_with_flags (abfd, ".rela.text",
+				    flags | SEC_READONLY);
    if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, 2))
     return FALSE;
   return TRUE;
@@ -930,13 +930,13 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
 		{
 		  flagword flags;
 
-		  sreloc = bfd_make_section (dynobj, name);
 		  flags = (SEC_HAS_CONTENTS | SEC_READONLY
 			   | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 		  if ((sec->flags & SEC_ALLOC) != 0)
 		    flags |= SEC_ALLOC | SEC_LOAD;
+		  sreloc = bfd_make_section_with_flags (dynobj, name,
+							flags);
 		  if (sreloc == NULL
-		      || ! bfd_set_section_flags (dynobj, sreloc, flags)
 		      || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 		    return FALSE;
 		}

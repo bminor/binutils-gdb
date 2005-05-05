@@ -2245,10 +2245,11 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
       sec->used_by_bfd = sdata;
     }
 
-  /* When we read a file, we don't need section type and flags.
-     They will be overridden in _bfd_elf_make_section_from_shdr
-     anyway.  */
-  if (abfd->direction != read_direction)
+  /* When we read a file, we don't need section type and flags unless
+     it is a linker created section.  They will be overridden in
+     _bfd_elf_make_section_from_shdr anyway.  */
+  if (abfd->direction != read_direction
+      || (sec->flags & SEC_LINKER_CREATED) != 0)
     {
       ssect = _bfd_elf_get_sec_type_attr (abfd, sec->name);
       if (ssect != NULL)

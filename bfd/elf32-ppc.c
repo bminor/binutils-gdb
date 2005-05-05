@@ -2220,12 +2220,13 @@ ppc_elf_create_got (bfd *abfd, struct bfd_link_info *info)
   if (!bfd_set_section_flags (abfd, s, flags))
     return FALSE;
 
-  htab->relgot = bfd_make_section (abfd, ".rela.got");
+  htab->relgot = bfd_make_section_with_flags (abfd, ".rela.got",
+					      SEC_ALLOC | SEC_LOAD
+					      | SEC_HAS_CONTENTS
+					      | SEC_IN_MEMORY
+					      | SEC_LINKER_CREATED
+					      | SEC_READONLY);
   if (!htab->relgot
-      || ! bfd_set_section_flags (abfd, htab->relgot,
-				  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-				   | SEC_IN_MEMORY | SEC_LINKER_CREATED
-				   | SEC_READONLY))
       || ! bfd_set_section_alignment (abfd, htab->relgot, 2))
     return FALSE;
 
@@ -2256,17 +2257,19 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	   | SEC_LINKER_CREATED);
 
   htab->dynbss = bfd_get_section_by_name (abfd, ".dynbss");
-  htab->dynsbss = s = bfd_make_section (abfd, ".dynsbss");
-  if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, SEC_ALLOC | SEC_LINKER_CREATED))
+  htab->dynsbss = s = bfd_make_section_with_flags (abfd, ".dynsbss",
+						   SEC_ALLOC
+						   | SEC_LINKER_CREATED);
+  if (s == NULL)
     return FALSE;
 
   if (! info->shared)
     {
       htab->relbss = bfd_get_section_by_name (abfd, ".rela.bss");
-      htab->relsbss = s = bfd_make_section (abfd, ".rela.sbss");
+      htab->relsbss = s = bfd_make_section_with_flags (abfd,
+						       ".rela.sbss",
+						       flags | SEC_READONLY);
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
     }
@@ -2384,9 +2387,10 @@ ppc_elf_add_symbol_hook (bfd *abfd,
 	  if (!htab->elf.dynobj)
 	    htab->elf.dynobj = abfd;
 
-	  htab->sbss = bfd_make_section_anyway (htab->elf.dynobj, ".sbss");
-	  if (htab->sbss == NULL
-	      || ! bfd_set_section_flags (htab->elf.dynobj, htab->sbss, flags))
+	  htab->sbss = bfd_make_section_anyway_with_flags (htab->elf.dynobj,
+							   ".sbss",
+							   flags);
+	  if (htab->sbss == NULL)
 	    return FALSE;
 	}
 
@@ -2415,9 +2419,10 @@ ppc_elf_create_linker_section (bfd *abfd,
   if (!htab->elf.dynobj)
     htab->elf.dynobj = abfd;
 
-  s = bfd_make_section_anyway (htab->elf.dynobj, lsect->name);
+  s = bfd_make_section_anyway_with_flags (htab->elf.dynobj,
+					  lsect->name,
+					  flags);
   if (s == NULL
-      || !bfd_set_section_flags (htab->elf.dynobj, s, flags)
       || !bfd_set_section_alignment (htab->elf.dynobj, s, 2))
     return FALSE;
   lsect->section = s;
@@ -2947,13 +2952,13 @@ ppc_elf_check_relocs (bfd *abfd,
 		    {
 		      flagword flags;
 
-		      sreloc = bfd_make_section (htab->elf.dynobj, name);
 		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
 			       | SEC_IN_MEMORY | SEC_LINKER_CREATED
 			       | SEC_ALLOC | SEC_LOAD);
+		      sreloc = bfd_make_section_with_flags (htab->elf.dynobj,
+							    name,
+							    flags);
 		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (htab->elf.dynobj,
-						      sreloc, flags)
 			  || ! bfd_set_section_alignment (htab->elf.dynobj,
 							  sreloc, 2))
 			return FALSE;

@@ -470,16 +470,16 @@ xstormy16_elf_check_relocs (abfd, info, sec, relocs)
 	      splt = bfd_get_section_by_name (dynobj, ".plt");
 	      if (splt == NULL)
 		{
-		  splt = bfd_make_section (dynobj, ".plt");
+		  splt = bfd_make_section_with_flags (dynobj, ".plt",
+						      (SEC_ALLOC
+						       | SEC_LOAD
+						       | SEC_HAS_CONTENTS
+						       | SEC_IN_MEMORY
+						       | SEC_LINKER_CREATED
+						       | SEC_READONLY
+						       | SEC_CODE));
+
 		  if (splt == NULL
-		      || ! bfd_set_section_flags (dynobj, splt,
-						  (SEC_ALLOC
-						   | SEC_LOAD
-						   | SEC_HAS_CONTENTS
-						   | SEC_IN_MEMORY
-						   | SEC_LINKER_CREATED
-						   | SEC_READONLY
-						   | SEC_CODE))
 		      || ! bfd_set_section_alignment (dynobj, splt, 1))
 		    return FALSE;
 		}

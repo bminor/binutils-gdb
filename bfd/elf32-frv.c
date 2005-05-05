@@ -4213,11 +4213,11 @@ elf32_frv_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
       if (scomm == NULL)
 	{
-	  scomm = bfd_make_section (abfd, ".scommon");
-	  if (scomm == NULL
-	      || !bfd_set_section_flags (abfd, scomm, (SEC_ALLOC
-						       | SEC_IS_COMMON
-						       | SEC_LINKER_CREATED)))
+	  scomm = bfd_make_section_with_flags (abfd, ".scommon",
+					       (SEC_ALLOC
+						| SEC_IS_COMMON
+						| SEC_LINKER_CREATED));
+	  if (scomm == NULL)
 	    return FALSE;
 	}
 
@@ -4282,17 +4282,15 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	   | SEC_LINKER_CREATED);
   pltflags = flags;
 
-  s = bfd_make_section (abfd, ".got");
+  s = bfd_make_section_with_flags (abfd, ".got", flags);
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, flags)
       || !bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
 
   if (bed->want_got_plt)
     {
-      s = bfd_make_section (abfd, ".got.plt");
+      s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
-	  || !bfd_set_section_flags (abfd, s, flags)
 	  || !bfd_set_section_alignment (abfd, s, ptralign))
 	return FALSE;
     }
@@ -4337,18 +4335,18 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
       if (! frvfdpic_relocs_info (info))
 	return FALSE;
 
-      s = bfd_make_section (abfd, ".rel.got");
+      s = bfd_make_section_with_flags (abfd, ".rel.got",
+				       (flags | SEC_READONLY));
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, (flags | SEC_READONLY))
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
 
       frvfdpic_gotrel_section (info) = s;
 
       /* Machine-specific.  */
-      s = bfd_make_section (abfd, ".rofixup");
+      s = bfd_make_section_with_flags (abfd, ".rofixup",
+				       (flags | SEC_READONLY));
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, (flags | SEC_READONLY))
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
 
@@ -4395,9 +4393,8 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = bfd_make_section (abfd, ".plt");
+  s = bfd_make_section_with_flags (abfd, ".plt", pltflags);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, pltflags)
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
   /* FRV-specific: remember it.  */
@@ -4425,9 +4422,9 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* FRV-specific: we want rel relocations for the plt.  */
-  s = bfd_make_section (abfd, ".rel.plt");
+  s = bfd_make_section_with_flags (abfd, ".rel.plt",
+				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
   /* FRV-specific: remember it.  */
@@ -4473,9 +4470,9 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 image and use a R_*_COPY reloc to tell the dynamic linker to
 	 initialize them at run time.  The linker script puts the .dynbss
 	 section into the .bss section of the final image.  */
-      s = bfd_make_section (abfd, ".dynbss");
-      if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC | SEC_LINKER_CREATED))
+      s = bfd_make_section_with_flags (abfd, ".dynbss",
+				       SEC_ALLOC | SEC_LINKER_CREATED);
+      if (s == NULL)
 	return FALSE;
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
@@ -4491,11 +4488,11 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      copy relocs.  */
       if (! info->shared)
 	{
-	  s = bfd_make_section (abfd,
-				(bed->default_use_rela_p
-				 ? ".rela.bss" : ".rel.bss"));
+	  s = bfd_make_section_with_flags (abfd,
+					   (bed->default_use_rela_p
+					    ? ".rela.bss" : ".rel.bss"),
+					   flags | SEC_READONLY);
 	  if (s == NULL
-	      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	    return FALSE;
 	}

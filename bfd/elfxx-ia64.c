@@ -1436,11 +1436,11 @@ elfNN_ia64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 
       if (scomm == NULL)
 	{
-	  scomm = bfd_make_section (abfd, ".scommon");
-	  if (scomm == NULL
-	      || !bfd_set_section_flags (abfd, scomm, (SEC_ALLOC
-						       | SEC_IS_COMMON
-						       | SEC_LINKER_CREATED)))
+	  scomm = bfd_make_section_with_flags (abfd, ".scommon",
+					       (SEC_ALLOC
+						| SEC_IS_COMMON
+						| SEC_LINKER_CREATED));
+	  if (scomm == NULL)
 	    return FALSE;
 	}
 
@@ -1874,24 +1874,24 @@ elfNN_ia64_create_dynamic_sections (abfd, info)
   if (!get_pltoff (abfd, info, ia64_info))
     return FALSE;
 
-  s = bfd_make_section(abfd, ".rela.IA_64.pltoff");
+  s = bfd_make_section_with_flags (abfd, ".rela.IA_64.pltoff",
+				   (SEC_ALLOC | SEC_LOAD
+				    | SEC_HAS_CONTENTS
+				    | SEC_IN_MEMORY
+				    | SEC_LINKER_CREATED
+				    | SEC_READONLY));
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, (SEC_ALLOC | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | SEC_LINKER_CREATED
-					   | SEC_READONLY))
       || !bfd_set_section_alignment (abfd, s, LOG_SECTION_ALIGN))
     return FALSE;
   ia64_info->rel_pltoff_sec = s;
 
-  s = bfd_make_section(abfd, ".rela.got");
+  s = bfd_make_section_with_flags (abfd, ".rela.got",
+				   (SEC_ALLOC | SEC_LOAD
+				    | SEC_HAS_CONTENTS
+				    | SEC_IN_MEMORY
+				    | SEC_LINKER_CREATED
+				    | SEC_READONLY));
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, (SEC_ALLOC | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | SEC_LINKER_CREATED
-					   | SEC_READONLY))
       || !bfd_set_section_alignment (abfd, s, LOG_SECTION_ALIGN))
     return FALSE;
   ia64_info->rel_got_sec = s;
@@ -2038,15 +2038,14 @@ get_fptr (abfd, info, ia64_info)
       if (!dynobj)
 	ia64_info->root.dynobj = dynobj = abfd;
 
-      fptr = bfd_make_section (dynobj, ".opd");
+      fptr = bfd_make_section_with_flags (dynobj, ".opd",
+					  (SEC_ALLOC
+					   | SEC_LOAD
+					   | SEC_HAS_CONTENTS
+					   | SEC_IN_MEMORY
+					   | (info->pie ? 0 : SEC_READONLY)
+					   | SEC_LINKER_CREATED));
       if (!fptr
-	  || !bfd_set_section_flags (dynobj, fptr,
-				     (SEC_ALLOC
-				      | SEC_LOAD
-				      | SEC_HAS_CONTENTS
-				      | SEC_IN_MEMORY
-				      | (info->pie ? 0 : SEC_READONLY)
-				      | SEC_LINKER_CREATED))
 	  || !bfd_set_section_alignment (abfd, fptr, 4))
 	{
 	  BFD_ASSERT (0);
@@ -2058,14 +2057,13 @@ get_fptr (abfd, info, ia64_info)
       if (info->pie)
 	{
 	  asection *fptr_rel;
-	  fptr_rel = bfd_make_section(dynobj, ".rela.opd");
+	  fptr_rel = bfd_make_section_with_flags (dynobj, ".rela.opd",
+						  (SEC_ALLOC | SEC_LOAD
+						   | SEC_HAS_CONTENTS
+						   | SEC_IN_MEMORY
+						   | SEC_LINKER_CREATED
+						   | SEC_READONLY));
 	  if (fptr_rel == NULL
-	      || !bfd_set_section_flags (dynobj, fptr_rel,
-					 (SEC_ALLOC | SEC_LOAD
-					  | SEC_HAS_CONTENTS
-					  | SEC_IN_MEMORY
-					  | SEC_LINKER_CREATED
-					  | SEC_READONLY))
 	      || !bfd_set_section_alignment (abfd, fptr_rel,
 					     LOG_SECTION_ALIGN))
 	    {
@@ -2096,15 +2094,15 @@ get_pltoff (abfd, info, ia64_info)
       if (!dynobj)
 	ia64_info->root.dynobj = dynobj = abfd;
 
-      pltoff = bfd_make_section (dynobj, ELF_STRING_ia64_pltoff);
+      pltoff = bfd_make_section_with_flags (dynobj,
+					    ELF_STRING_ia64_pltoff,
+					    (SEC_ALLOC
+					     | SEC_LOAD
+					     | SEC_HAS_CONTENTS
+					     | SEC_IN_MEMORY
+					     | SEC_SMALL_DATA
+					     | SEC_LINKER_CREATED));
       if (!pltoff
-	  || !bfd_set_section_flags (dynobj, pltoff,
-				     (SEC_ALLOC
-				      | SEC_LOAD
-				      | SEC_HAS_CONTENTS
-				      | SEC_IN_MEMORY
-				      | SEC_SMALL_DATA
-				      | SEC_LINKER_CREATED))
 	  || !bfd_set_section_alignment (abfd, pltoff, 4))
 	{
 	  BFD_ASSERT (0);
@@ -2148,15 +2146,13 @@ get_reloc_section (abfd, ia64_info, sec, create)
   srel = bfd_get_section_by_name (dynobj, srel_name);
   if (srel == NULL && create)
     {
-      srel = bfd_make_section (dynobj, srel_name);
+      srel = bfd_make_section_with_flags (dynobj, srel_name,
+					  (SEC_ALLOC | SEC_LOAD
+					   | SEC_HAS_CONTENTS
+					   | SEC_IN_MEMORY
+					   | SEC_LINKER_CREATED
+					   | SEC_READONLY));
       if (srel == NULL
-	  || !bfd_set_section_flags (dynobj, srel,
-				     (SEC_ALLOC
-				      | SEC_LOAD
-				      | SEC_HAS_CONTENTS
-				      | SEC_IN_MEMORY
-				      | SEC_LINKER_CREATED
-				      | SEC_READONLY))
 	  || !bfd_set_section_alignment (dynobj, srel,
 					 LOG_SECTION_ALIGN))
 	return NULL;
@@ -4965,9 +4961,9 @@ elfNN_ia64_object_p (bfd *abfd)
 
 	  /* We need to create a fake group section for it and its
 	     unwind sections.  */
-	  group = bfd_make_section_anyway (abfd, name);
-	  if (group == NULL
-	      || ! bfd_set_section_flags (abfd, group, flags))
+	  group = bfd_make_section_anyway_with_flags (abfd, name,
+						      flags);
+	  if (group == NULL)
 	    return FALSE;
 
 	  /* Move the fake group section to the beginning.  */

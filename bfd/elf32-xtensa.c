@@ -1105,23 +1105,21 @@ elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
     return FALSE;
 
   /* Create ".rela.got".  */
-  s = bfd_make_section (dynobj, ".rela.got");
+  s = bfd_make_section_with_flags (dynobj, ".rela.got", flags);
   if (s == NULL
-      || ! bfd_set_section_flags (dynobj, s, flags)
       || ! bfd_set_section_alignment (dynobj, s, 2))
     return FALSE;
 
   /* Create ".got.loc" (literal tables for use by dynamic linker).  */
-  s = bfd_make_section (dynobj, ".got.loc");
+  s = bfd_make_section_with_flags (dynobj, ".got.loc", flags);
   if (s == NULL
-      || ! bfd_set_section_flags (dynobj, s, flags)
       || ! bfd_set_section_alignment (dynobj, s, 2))
     return FALSE;
 
   /* Create ".xt.lit.plt" (literal table for ".got.plt*").  */
-  s = bfd_make_section (dynobj, ".xt.lit.plt");
+  s = bfd_make_section_with_flags (dynobj, ".xt.lit.plt",
+				   noalloc_flags);
   if (s == NULL
-      || ! bfd_set_section_flags (dynobj, s, noalloc_flags)
       || ! bfd_set_section_alignment (dynobj, s, 2))
     return FALSE;
 
@@ -1151,17 +1149,16 @@ add_extra_plt_sections (bfd *dynobj, int count)
 
       sname = (char *) bfd_malloc (10);
       sprintf (sname, ".plt.%u", chunk);
-      s = bfd_make_section (dynobj, sname);
+      s = bfd_make_section_with_flags (dynobj, sname,
+				       flags | SEC_CODE);
       if (s == NULL
-	  || ! bfd_set_section_flags (dynobj, s, flags | SEC_CODE)
 	  || ! bfd_set_section_alignment (dynobj, s, 2))
 	return FALSE;
 
       sname = (char *) bfd_malloc (14);
       sprintf (sname, ".got.plt.%u", chunk);
-      s = bfd_make_section (dynobj, sname);
+      s = bfd_make_section_with_flags (dynobj, sname, flags);
       if (s == NULL
-	  || ! bfd_set_section_flags (dynobj, s, flags)
 	  || ! bfd_set_section_alignment (dynobj, s, 2))
 	return FALSE;
     }

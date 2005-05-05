@@ -576,9 +576,8 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = bfd_make_section (abfd, ".plt");
+  s = bfd_make_section_with_flags (abfd, ".plt", pltflags);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, pltflags)
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
 
@@ -601,17 +600,15 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
 	return FALSE;
     }
 
-  s = bfd_make_section (abfd, ".got");
+  s = bfd_make_section_with_flags (abfd, ".got", flags);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags)
       || ! bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
 
   if (bed->want_got_plt)
     {
-      s = bfd_make_section (abfd, ".got.plt");
+      s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags)
 	  || ! bfd_set_section_alignment (abfd, s, ptralign))
 	return FALSE;
     }
@@ -778,15 +775,15 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 	      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 	      if (srelgot == NULL)
 		{
-		  srelgot = bfd_make_section (dynobj, ".rela.got");
+		  srelgot = bfd_make_section_with_flags (dynobj,
+							 ".rela.got",
+							 (SEC_ALLOC
+							  | SEC_LOAD
+							  | SEC_HAS_CONTENTS
+							  | SEC_IN_MEMORY
+							  | SEC_LINKER_CREATED
+							  | SEC_READONLY));
 		  if (srelgot == NULL
-		      || ! bfd_set_section_flags (dynobj, srelgot,
-						  (SEC_ALLOC
-						   | SEC_LOAD
-						   | SEC_HAS_CONTENTS
-						   | SEC_IN_MEMORY
-						   | SEC_LINKER_CREATED
-						   | SEC_READONLY))
 		      || ! bfd_set_section_alignment (dynobj, srelgot, 2))
 		    return FALSE;
 		}
@@ -910,13 +907,14 @@ mn10300_elf_check_relocs (abfd, info, sec, relocs)
 		    {
 		      flagword flags;
 
-		      sreloc = bfd_make_section (dynobj, name);
 		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
 			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 		      if ((sec->flags & SEC_ALLOC) != 0)
 			flags |= SEC_ALLOC | SEC_LOAD;
+		      sreloc = bfd_make_section_with_flags (dynobj,
+							    name,
+							    flags);
 		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return FALSE;
 		    }
@@ -3925,10 +3923,11 @@ _bfd_mn10300_elf_create_dynamic_sections (abfd, info)
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
 
-  s = bfd_make_section (abfd,
-			bed->default_use_rela_p ? ".rela.plt" : ".rel.plt");
+  s = bfd_make_section_with_flags (abfd,
+				   (bed->default_use_rela_p
+				    ? ".rela.plt" : ".rel.plt"),
+				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
 
@@ -3953,9 +3952,9 @@ _bfd_mn10300_elf_create_dynamic_sections (abfd, info)
 	strcpy (relname, ".rela");
 	strcat (relname, secname);
 
-	s = bfd_make_section (abfd, relname);
+	s = bfd_make_section_with_flags (abfd, relname,
+					 flags | SEC_READONLY);
 	if (s == NULL
-	    || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	    || ! bfd_set_section_alignment (abfd, s, ptralign))
 	  return FALSE;
       }
@@ -3969,9 +3968,9 @@ _bfd_mn10300_elf_create_dynamic_sections (abfd, info)
 	 image and use a R_*_COPY reloc to tell the dynamic linker to
 	 initialize them at run time.  The linker script puts the .dynbss
 	 section into the .bss section of the final image.  */
-      s = bfd_make_section (abfd, ".dynbss");
-      if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
+      s = bfd_make_section_with_flags (abfd, ".dynbss",
+				       SEC_ALLOC | SEC_LINKER_CREATED);
+      if (s == NULL)
 	return FALSE;
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
@@ -3987,11 +3986,11 @@ _bfd_mn10300_elf_create_dynamic_sections (abfd, info)
 	 copy relocs.  */
       if (! info->shared)
 	{
-	  s = bfd_make_section (abfd,
-				(bed->default_use_rela_p
-				 ? ".rela.bss" : ".rel.bss"));
+	  s = bfd_make_section_with_flags (abfd,
+					   (bed->default_use_rela_p
+					    ? ".rela.bss" : ".rel.bss"),
+					   flags | SEC_READONLY);
 	  if (s == NULL
-	      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	      || ! bfd_set_section_alignment (abfd, s, ptralign))
 	    return FALSE;
 	}

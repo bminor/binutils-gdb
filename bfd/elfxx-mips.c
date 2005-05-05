@@ -1908,15 +1908,14 @@ mips_elf_rel_dyn_section (bfd *dynobj, bfd_boolean create_p)
   sreloc = bfd_get_section_by_name (dynobj, dname);
   if (sreloc == NULL && create_p)
     {
-      sreloc = bfd_make_section (dynobj, dname);
+      sreloc = bfd_make_section_with_flags (dynobj, dname,
+					    (SEC_ALLOC
+					     | SEC_LOAD
+					     | SEC_HAS_CONTENTS
+					     | SEC_IN_MEMORY
+					     | SEC_LINKER_CREATED
+					     | SEC_READONLY));
       if (sreloc == NULL
-	  || ! bfd_set_section_flags (dynobj, sreloc,
-				      (SEC_ALLOC
-				       | SEC_LOAD
-				       | SEC_HAS_CONTENTS
-				       | SEC_IN_MEMORY
-				       | SEC_LINKER_CREATED
-				       | SEC_READONLY))
 	  || ! bfd_set_section_alignment (dynobj, sreloc,
 					  MIPS_ELF_LOG_FILE_ALIGN (dynobj)))
 	return NULL;
@@ -3512,9 +3511,8 @@ mips_elf_create_compact_rel_section
       flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED
 	       | SEC_READONLY);
 
-      s = bfd_make_section (abfd, ".compact_rel");
+      s = bfd_make_section_with_flags (abfd, ".compact_rel", flags);
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags)
 	  || ! bfd_set_section_alignment (abfd, s,
 					  MIPS_ELF_LOG_FILE_ALIGN (abfd)))
 	return FALSE;
@@ -3555,9 +3553,8 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info,
 
   /* We have to use an alignment of 2**4 here because this is hardcoded
      in the function stub generation and in the linker script.  */
-  s = bfd_make_section (abfd, ".got");
+  s = bfd_make_section_with_flags (abfd, ".got", flags);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags)
       || ! bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
 
@@ -5588,9 +5585,10 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (bfd_get_section_by_name (abfd,
 			       MIPS_ELF_STUB_SECTION_NAME (abfd)) == NULL)
     {
-      s = bfd_make_section (abfd, MIPS_ELF_STUB_SECTION_NAME (abfd));
+      s = bfd_make_section_with_flags (abfd,
+				       MIPS_ELF_STUB_SECTION_NAME (abfd),
+				       flags | SEC_CODE);
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags | SEC_CODE)
 	  || ! bfd_set_section_alignment (abfd, s,
 					  MIPS_ELF_LOG_FILE_ALIGN (abfd)))
 	return FALSE;
@@ -5600,9 +5598,9 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       && !info->shared
       && bfd_get_section_by_name (abfd, ".rld_map") == NULL)
     {
-      s = bfd_make_section (abfd, ".rld_map");
+      s = bfd_make_section_with_flags (abfd, ".rld_map",
+				       flags &~ (flagword) SEC_READONLY);
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags &~ (flagword) SEC_READONLY)
 	  || ! bfd_set_section_alignment (abfd, s,
 					  MIPS_ELF_LOG_FILE_ALIGN (abfd)))
 	return FALSE;
@@ -9213,9 +9211,10 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		  flagword flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY
 				    | SEC_LINKER_CREATED | SEC_READONLY);
 
-		  rtproc_sec = bfd_make_section (abfd, ".rtproc");
+		  rtproc_sec = bfd_make_section_with_flags (abfd,
+							    ".rtproc",
+							    flags);
 		  if (rtproc_sec == NULL
-		      || ! bfd_set_section_flags (abfd, rtproc_sec, flags)
 		      || ! bfd_set_section_alignment (abfd, rtproc_sec, 4))
 		    return FALSE;
 		}

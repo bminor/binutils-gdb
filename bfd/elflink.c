@@ -59,17 +59,15 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
   flags = bed->dynamic_sec_flags;
 
-  s = bfd_make_section (abfd, ".got");
+  s = bfd_make_section_with_flags (abfd, ".got", flags);
   if (s == NULL
-      || !bfd_set_section_flags (abfd, s, flags)
       || !bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
 
   if (bed->want_got_plt)
     {
-      s = bfd_make_section (abfd, ".got.plt");
+      s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
-	  || !bfd_set_section_flags (abfd, s, flags)
 	  || !bfd_set_section_alignment (abfd, s, ptralign))
 	return FALSE;
     }
@@ -156,17 +154,17 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      shared library does not.  */
   if (info->executable)
     {
-      s = bfd_make_section (abfd, ".interp");
-      if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
+      s = bfd_make_section_with_flags (abfd, ".interp",
+				       flags | SEC_READONLY);
+      if (s == NULL)
 	return FALSE;
     }
 
   if (! info->traditional_format)
     {
-      s = bfd_make_section (abfd, ".eh_frame_hdr");
+      s = bfd_make_section_with_flags (abfd, ".eh_frame_hdr",
+				       flags | SEC_READONLY);
       if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
       elf_hash_table (info)->eh_info.hdr_sec = s;
@@ -174,38 +172,37 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* Create sections to hold version informations.  These are removed
      if they are not needed.  */
-  s = bfd_make_section (abfd, ".gnu.version_d");
+  s = bfd_make_section_with_flags (abfd, ".gnu.version_d",
+				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
 
-  s = bfd_make_section (abfd, ".gnu.version");
+  s = bfd_make_section_with_flags (abfd, ".gnu.version",
+				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, 1))
     return FALSE;
 
-  s = bfd_make_section (abfd, ".gnu.version_r");
+  s = bfd_make_section_with_flags (abfd, ".gnu.version_r",
+				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
 
-  s = bfd_make_section (abfd, ".dynsym");
+  s = bfd_make_section_with_flags (abfd, ".dynsym",
+				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
 
-  s = bfd_make_section (abfd, ".dynstr");
-  if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
+  s = bfd_make_section_with_flags (abfd, ".dynstr",
+				   flags | SEC_READONLY);
+  if (s == NULL)
     return FALSE;
 
-  s = bfd_make_section (abfd, ".dynamic");
+  s = bfd_make_section_with_flags (abfd, ".dynamic", flags);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags)
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
 
@@ -238,9 +235,9 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
-  s = bfd_make_section (abfd, ".hash");
+  s = bfd_make_section_with_flags (abfd, ".hash",
+				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
   elf_section_data (s)->this_hdr.sh_entsize = bed->s->sizeof_hash_entry;
@@ -280,9 +277,8 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = bfd_make_section (abfd, ".plt");
+  s = bfd_make_section_with_flags (abfd, ".plt", pltflags);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, pltflags)
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
 
@@ -306,10 +302,11 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  s = bfd_make_section (abfd,
-			bed->default_use_rela_p ? ".rela.plt" : ".rel.plt");
+  s = bfd_make_section_with_flags (abfd,
+				   (bed->default_use_rela_p
+				    ? ".rela.plt" : ".rel.plt"),
+				   flags | SEC_READONLY);
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
 
@@ -324,9 +321,10 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 image and use a R_*_COPY reloc to tell the dynamic linker to
 	 initialize them at run time.  The linker script puts the .dynbss
 	 section into the .bss section of the final image.  */
-      s = bfd_make_section (abfd, ".dynbss");
-      if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, SEC_ALLOC | SEC_LINKER_CREATED))
+      s = bfd_make_section_with_flags (abfd, ".dynbss",
+				       (SEC_ALLOC
+					| SEC_LINKER_CREATED));
+      if (s == NULL)
 	return FALSE;
 
       /* The .rel[a].bss section holds copy relocs.  This section is not
@@ -342,11 +340,11 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 copy relocs.  */
       if (! info->shared)
 	{
-	  s = bfd_make_section (abfd,
-				(bed->default_use_rela_p
-				 ? ".rela.bss" : ".rel.bss"));
+	  s = bfd_make_section_with_flags (abfd,
+					   (bed->default_use_rela_p
+					    ? ".rela.bss" : ".rel.bss"),
+					   flags | SEC_READONLY);
 	  if (s == NULL
-	      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	    return FALSE;
 	}
@@ -3626,12 +3624,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  if (tcomm == NULL)
 	    {
-	      tcomm = bfd_make_section (abfd, ".tcommon");
-	      if (tcomm == NULL
-		  || !bfd_set_section_flags (abfd, tcomm, (SEC_ALLOC
-							   | SEC_IS_COMMON
-							   | SEC_LINKER_CREATED
-							   | SEC_THREAD_LOCAL)))
+	      tcomm = bfd_make_section_with_flags (abfd, ".tcommon",
+						   (SEC_ALLOC
+						    | SEC_IS_COMMON
+						    | SEC_LINKER_CREATED
+						    | SEC_THREAD_LOCAL));
+	      if (tcomm == NULL)
 		goto error_free_vers;
 	    }
 	  sec = tcomm;

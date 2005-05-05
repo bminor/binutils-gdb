@@ -1890,19 +1890,17 @@ mmix_elf_check_common_relocs  (abfd, info, sec, relocs)
 	  if (allocated_gregs_section == NULL)
 	    {
 	      allocated_gregs_section
-		= bfd_make_section (bpo_greg_owner,
-				    MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
+		= bfd_make_section_with_flags (bpo_greg_owner,
+					       MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME,
+					       (SEC_HAS_CONTENTS
+						| SEC_IN_MEMORY
+						| SEC_LINKER_CREATED));
 	      /* Setting both SEC_ALLOC and SEC_LOAD means the section is
 		 treated like any other section, and we'd get errors for
 		 address overlap with the text section.  Let's set none of
 		 those flags, as that is what currently happens for usual
 		 GREG allocations, and that works.  */
 	      if (allocated_gregs_section == NULL
-		  || !bfd_set_section_flags (bpo_greg_owner,
-					     allocated_gregs_section,
-					     (SEC_HAS_CONTENTS
-					      | SEC_IN_MEMORY
-					      | SEC_LINKER_CREATED))
 		  || !bfd_set_section_alignment (bpo_greg_owner,
 						 allocated_gregs_section,
 						 3))

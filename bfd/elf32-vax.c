@@ -631,15 +631,15 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
 	      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 	      if (srelgot == NULL)
 		{
-		  srelgot = bfd_make_section (dynobj, ".rela.got");
+		  srelgot = bfd_make_section_with_flags (dynobj,
+							 ".rela.got",
+							 (SEC_ALLOC
+							  | SEC_LOAD
+							  | SEC_HAS_CONTENTS
+							  | SEC_IN_MEMORY
+							  | SEC_LINKER_CREATED
+							  | SEC_READONLY));
 		  if (srelgot == NULL
-		      || !bfd_set_section_flags (dynobj, srelgot,
-						 (SEC_ALLOC
-						  | SEC_LOAD
-						  | SEC_HAS_CONTENTS
-						  | SEC_IN_MEMORY
-						  | SEC_LINKER_CREATED
-						  | SEC_READONLY))
 		      || !bfd_set_section_alignment (dynobj, srelgot, 2))
 		    return FALSE;
 		}
@@ -760,15 +760,15 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
 		  sreloc = bfd_get_section_by_name (dynobj, name);
 		  if (sreloc == NULL)
 		    {
-		      sreloc = bfd_make_section (dynobj, name);
+		      sreloc = bfd_make_section_with_flags (dynobj,
+							    name,
+							    (SEC_ALLOC
+							     | SEC_LOAD
+							     | SEC_HAS_CONTENTS
+							     | SEC_IN_MEMORY
+							     | SEC_LINKER_CREATED
+							     | SEC_READONLY));
 		      if (sreloc == NULL
-			  || !bfd_set_section_flags (dynobj, sreloc,
-						     (SEC_ALLOC
-						      | SEC_LOAD
-						      | SEC_HAS_CONTENTS
-						      | SEC_IN_MEMORY
-						      | SEC_LINKER_CREATED
-						      | SEC_READONLY))
 			  || !bfd_set_section_alignment (dynobj, sreloc, 2))
 			return FALSE;
 		    }

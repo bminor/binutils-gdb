@@ -1,5 +1,87 @@
 2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* section.c (bfd_make_section_anyway_with_flags): New.
+	(bfd_make_section_anyway): Call bfd_make_section_anyway_with_flags,
+	(bfd_make_section_with_flags): New.
+	(bfd_make_section): Call bfd_make_section_with_flags.
+
+	* elf-m10300.c (_bfd_mn10300_elf_create_got_section): Call
+	bfd_make_section_with_flags/bfd_make_section_anyway_with_flags
+	instead of bfd_make_section/bfd_make_section and don't call
+	bfd_set_section_flags.
+	(mn10300_elf_check_relocs): Likewise.
+	(_bfd_mn10300_elf_create_dynamic_sections): Likewise.
+	* elf32-arm.c (create_got_section): Likewise.
+	(bfd_elf32_arm_add_glue_sections_to_bfd): Likewise.
+	(elf32_arm_check_relocs): Likewise.
+	* elf32-cris.c (cris_elf_check_relocs): Likewise.
+	* elf32-frv.c (elf32_frv_add_symbol_hook): Likewise.
+	(_frv_create_got_section): Likewise.
+	(elf32_frvfdpic_create_dynamic_sections): Likewise.
+	* elf32-hppa.c (elf32_hppa_create_dynamic_sections): Likewise.
+	(elf32_hppa_check_relocs): Likewise.
+	* elf32-i370.c (i370_elf_create_dynamic_sections): Likewise.
+	(i370_elf_check_relocs): Likewise.
+	* elf32-i386.c (create_got_section): Likewise.
+	(elf_i386_check_relocs): Likewise.
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Likewise.
+	(create_got_section): Likewise.
+	(m32r_elf_create_dynamic_sections): Likewise.
+	(m32r_elf_check_relocs): Likewise.
+	* elf32-m68k.c (elf_m68k_check_relocs): Likewise.
+	* elf32-ppc.c (ppc_elf_create_got): Likewise.
+	(ppc_elf_create_dynamic_sections): Likewise.
+	(ppc_elf_add_symbol_hook): Likewise.
+	(ppc_elf_check_relocs): Likewise.
+	* elf32-s390.c (create_got_section): Likewise.
+	(elf_s390_check_relocs): Likewise.
+	* elf32-sh.c (create_got_section): Likewise.
+	(sh_elf_create_dynamic_sections): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	* elf32-vax.c (elf_vax_check_relocs): Likewise.
+	* elf32-xstormy16.c (xstormy16_elf_check_relocs): Likewise.
+	* elf32-xtensa.c (elf_xtensa_create_dynamic_sections): Likewise.
+	(add_extra_plt_sections): Likewise.
+	* elf64-alpha.c (elf64_alpha_add_symbol_hook): Likewise.
+	(elf64_alpha_create_got_section): Likewise.
+	(elf64_alpha_create_dynamic_sections): Likewise.
+	(elf64_alpha_check_relocs): Likewise.
+	* elf64-hppa.c (get_reloc_section): Likewise.
+	(get_opd): Likewise.
+	(get_plt): Likewise.
+	(get_dlt): Likewise.
+	(get_stub): Likewise.
+	(elf64_hppa_create_dynamic_sectionso): Likewise.
+	* elf64-mmix.c (mmix_elf_check_common_relocs): Likewise.
+	* elf64-ppc.c (create_linkage_sections): Likewise.
+	(ppc64_elf_check_relocs): Likewise.
+	* elf64-s390.c (create_got_section): Likewise.
+	(elf_s390_check_relocs): Likewise.
+	* elf64-sh64.c (sh_elf64_check_relocs): Likewise.
+	(sh64_elf64_create_dynamic_sections): Likewise.
+	* elf64-x86-64.c (create_got_section): Likewise.
+	(elf64_x86_64_check_relocs): Likewise.
+	* elflink.c (_bfd_elf_create_got_section): Likewise.
+	(_bfd_elf_link_create_dynamic_sections): Likewise.
+	(elf_link_add_object_symbols): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_add_symbol_hook): Likewise.
+	(elfNN_ia64_create_dynamic_sections): Likewise.
+	(get_fptr): Likewise.
+	(get_pltoff): Likewise.
+	(get_reloc_section): Likewise.
+	(elfNN_ia64_object_p): Likewise.
+	* elfxx-mips.c (mips_elf_rel_dyn_section): Likewise.
+	(mips_elf_create_compact_rel_section): Likewise.
+	(mips_elf_create_got_section): Likewise.
+	(_bfd_mips_elf_create_dynamic_sections): Likewise.
+	* elfxx-sparc.c (create_got_section): Likewise.
+	(_bfd_sparc_elf_check_relocs): Likewise.
+
+	* elf.c (_bfd_elf_new_section_hook): Call _bfd_elf_get_sec_type_attr
+	on linker created sections.
+
+2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR 882
 	* elflink.c (_bfd_elf_link_assign_sym_version): Allow version
 	script on executable.

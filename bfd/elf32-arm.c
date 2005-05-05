@@ -1414,12 +1414,13 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   if (!htab->sgot || !htab->sgotplt)
     abort ();
 
-  htab->srelgot = bfd_make_section (dynobj, ".rel.got");
+  htab->srelgot = bfd_make_section_with_flags (dynobj, ".rel.got",
+					       (SEC_ALLOC | SEC_LOAD
+						| SEC_HAS_CONTENTS
+						| SEC_IN_MEMORY
+						| SEC_LINKER_CREATED
+						| SEC_READONLY));
   if (htab->srelgot == NULL
-      || ! bfd_set_section_flags (dynobj, htab->srelgot,
-				  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-				   | SEC_IN_MEMORY | SEC_LINKER_CREATED
-				   | SEC_READONLY))
       || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
     return FALSE;
   return TRUE;
@@ -1897,10 +1898,11 @@ bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
 	 of this section.  */
       flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
 
-      sec = bfd_make_section (abfd, ARM2THUMB_GLUE_SECTION_NAME);
+      sec = bfd_make_section_with_flags (abfd,
+					 ARM2THUMB_GLUE_SECTION_NAME,
+					 flags);
 
       if (sec == NULL
-	  || !bfd_set_section_flags (abfd, sec, flags)
 	  || !bfd_set_section_alignment (abfd, sec, 2))
 	return FALSE;
 
@@ -1916,10 +1918,11 @@ bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
       flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	| SEC_CODE | SEC_READONLY;
 
-      sec = bfd_make_section (abfd, THUMB2ARM_GLUE_SECTION_NAME);
+      sec = bfd_make_section_with_flags (abfd,
+					 THUMB2ARM_GLUE_SECTION_NAME,
+					 flags);
 
       if (sec == NULL
-	  || !bfd_set_section_flags (abfd, sec, flags)
 	  || !bfd_set_section_alignment (abfd, sec, 2))
 	return FALSE;
 
@@ -4690,7 +4693,6 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		      {
 		        flagword flags;
 
-		        sreloc = bfd_make_section (dynobj, name);
 		        flags = (SEC_HAS_CONTENTS | SEC_READONLY
 			         | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 		        if ((sec->flags & SEC_ALLOC) != 0
@@ -4698,8 +4700,10 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 			       relocations mapped.  */
 			    && !htab->symbian_p)
 			  flags |= SEC_ALLOC | SEC_LOAD;
+		        sreloc = bfd_make_section_with_flags (dynobj,
+							      name,
+							      flags);
 		        if (sreloc == NULL
-			    || ! bfd_set_section_flags (dynobj, sreloc, flags)
 			    || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			  return FALSE;
 		      }

@@ -1461,10 +1461,10 @@ m32r_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
 	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
 			    | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 
-	  s = bfd_make_section_anyway (abfd, ".sdata");
+	  s = bfd_make_section_anyway_with_flags (abfd, ".sdata",
+						  flags);
 	  if (s == NULL)
 	    return FALSE;
-	  bfd_set_section_flags (abfd, s, flags);
 	  bfd_set_section_alignment (abfd, s, 2);
 	}
 
@@ -1719,15 +1719,14 @@ create_got_section (dynobj, info)
   if (! htab->sgot || ! htab->sgotplt)
     abort ();
 
-  htab->srelgot = bfd_make_section (dynobj, ".rela.got");
+  htab->srelgot = bfd_make_section_with_flags (dynobj, ".rela.got",
+					       (SEC_ALLOC
+						| SEC_LOAD
+						| SEC_HAS_CONTENTS
+						| SEC_IN_MEMORY
+						| SEC_LINKER_CREATED
+						| SEC_READONLY));
   if (htab->srelgot == NULL
-      || ! bfd_set_section_flags (dynobj, htab->srelgot,
-                                  (SEC_ALLOC
-                                   | SEC_LOAD
-                                   | SEC_HAS_CONTENTS
-                                   | SEC_IN_MEMORY
-                                   | SEC_LINKER_CREATED
-                                   | SEC_READONLY))
       || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
     return FALSE;
 
@@ -1762,10 +1761,9 @@ m32r_elf_create_dynamic_sections (abfd, info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = bfd_make_section (abfd, ".plt");
+  s = bfd_make_section_with_flags (abfd, ".plt", pltflags);
   htab->splt = s;
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, pltflags)
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
 
@@ -1789,11 +1787,11 @@ m32r_elf_create_dynamic_sections (abfd, info)
         return FALSE;
     }
 
-  s = bfd_make_section (abfd,
-                        bed->default_use_rela_p ? ".rela.plt" : ".rel.plt");
+  s = bfd_make_section_with_flags (abfd,
+				   bed->default_use_rela_p ? ".rela.plt" : ".rel.plt",
+				   flags | SEC_READONLY);
   htab->srelplt = s;
   if (s == NULL
-      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
 
@@ -1819,9 +1817,9 @@ m32r_elf_create_dynamic_sections (abfd, info)
         strcat (relname, secname);
         if (bfd_get_section_by_name (abfd, secname))
           continue;
-        s = bfd_make_section (abfd, relname);
+        s = bfd_make_section_with_flags (abfd, relname,
+					 flags | SEC_READONLY);
         if (s == NULL
-            || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
             || ! bfd_set_section_alignment (abfd, s, ptralign))
           return FALSE;
       }
@@ -1835,10 +1833,10 @@ m32r_elf_create_dynamic_sections (abfd, info)
          image and use a R_*_COPY reloc to tell the dynamic linker to
          initialize them at run time.  The linker script puts the .dynbss
          section into the .bss section of the final image.  */
-      s = bfd_make_section (abfd, ".dynbss");
+      s = bfd_make_section_with_flags (abfd, ".dynbss",
+				       SEC_ALLOC | SEC_LINKER_CREATED);
       htab->sdynbss = s;
-      if (s == NULL
-          || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
+      if (s == NULL)
         return FALSE;
       /* The .rel[a].bss section holds copy relocs.  This section is not
          normally needed.  We need to create it here, though, so that the
@@ -1853,12 +1851,12 @@ m32r_elf_create_dynamic_sections (abfd, info)
          copy relocs.  */
       if (! info->shared)
         {
-          s = bfd_make_section (abfd,
-                                (bed->default_use_rela_p
-                                 ? ".rela.bss" : ".rel.bss"));
+          s = bfd_make_section_with_flags (abfd,
+					   (bed->default_use_rela_p
+					    ? ".rela.bss" : ".rel.bss"),
+					   flags | SEC_READONLY);
           htab->srelbss = s;
           if (s == NULL
-              || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
               || ! bfd_set_section_alignment (abfd, s, ptralign))
             return FALSE;
         }
@@ -4108,13 +4106,14 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
                     {
                       flagword flags;
 
-                      sreloc = bfd_make_section (dynobj, name);
                       flags = (SEC_HAS_CONTENTS | SEC_READONLY
                                | SEC_IN_MEMORY | SEC_LINKER_CREATED);
                       if ((sec->flags & SEC_ALLOC) != 0)
                         flags |= SEC_ALLOC | SEC_LOAD;
+                      sreloc = bfd_make_section_with_flags (dynobj,
+							    name,
+							    flags);
                       if (sreloc == NULL
-                          || ! bfd_set_section_flags (dynobj, sreloc, flags)
                           || ! bfd_set_section_alignment (dynobj, sreloc, 2))
                         return FALSE;
                     }

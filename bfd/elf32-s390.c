@@ -803,12 +803,13 @@ create_got_section (dynobj, info)
   if (!htab->sgot || !htab->sgotplt)
     abort ();
 
-  htab->srelgot = bfd_make_section (dynobj, ".rela.got");
+  htab->srelgot = bfd_make_section_with_flags (dynobj, ".rela.got",
+					       (SEC_ALLOC | SEC_LOAD
+						| SEC_HAS_CONTENTS
+						| SEC_IN_MEMORY
+						| SEC_LINKER_CREATED
+						| SEC_READONLY));
   if (htab->srelgot == NULL
-      || ! bfd_set_section_flags (dynobj, htab->srelgot,
-				  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-				   | SEC_IN_MEMORY | SEC_LINKER_CREATED
-				   | SEC_READONLY))
       || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
     return FALSE;
   return TRUE;
@@ -1281,13 +1282,14 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		    {
 		      flagword flags;
 
-		      sreloc = bfd_make_section (dynobj, name);
 		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
 			       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 		      if ((sec->flags & SEC_ALLOC) != 0)
 			flags |= SEC_ALLOC | SEC_LOAD;
+		      sreloc = bfd_make_section_with_flags (dynobj,
+							    name,
+							    flags);
 		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			return FALSE;
 		    }

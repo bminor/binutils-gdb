@@ -1004,15 +1004,17 @@ bfd_make_section_old_way (bfd *abfd, const char *name)
 
 /*
 FUNCTION
-	bfd_make_section_anyway
+	bfd_make_section_anyway_with_flags
 
 SYNOPSIS
-	asection *bfd_make_section_anyway (bfd *abfd, const char *name);
+	asection *bfd_make_section_anyway_with_flags
+	  (bfd *abfd, const char *name, flagword flags);
 
 DESCRIPTION
    Create a new empty section called @var{name} and attach it to the end of
    the chain of sections for @var{abfd}.  Create a new section even if there
-   is already a section with that name.
+   is already a section with that name.  Also set the attributes of the
+   new section to the value @var{flags}.
 
    Return <<NULL>> and set <<bfd_error>> on error; possible errors are:
    o <<bfd_error_invalid_operation>> - If output has already started for @var{abfd}.
@@ -1020,7 +1022,8 @@ DESCRIPTION
 */
 
 sec_ptr
-bfd_make_section_anyway (bfd *abfd, const char *name)
+bfd_make_section_anyway_with_flags (bfd *abfd, const char *name,
+				    flagword flags)
 {
   struct section_hash_entry *sh;
   asection *newsect;
@@ -1053,26 +1056,53 @@ bfd_make_section_anyway (bfd *abfd, const char *name)
       newsect = &new_sh->section;
     }
 
+  newsect->flags = flags;
   newsect->name = name;
   return bfd_section_init (abfd, newsect);
 }
 
 /*
 FUNCTION
-	bfd_make_section
+	bfd_make_section_anyway
 
 SYNOPSIS
-	asection *bfd_make_section (bfd *, const char *name);
+	asection *bfd_make_section_anyway (bfd *abfd, const char *name);
+
+DESCRIPTION
+   Create a new empty section called @var{name} and attach it to the end of
+   the chain of sections for @var{abfd}.  Create a new section even if there
+   is already a section with that name.
+
+   Return <<NULL>> and set <<bfd_error>> on error; possible errors are:
+   o <<bfd_error_invalid_operation>> - If output has already started for @var{abfd}.
+   o <<bfd_error_no_memory>> - If memory allocation fails.
+*/
+
+sec_ptr
+bfd_make_section_anyway (bfd *abfd, const char *name)
+{
+  return bfd_make_section_anyway_with_flags (abfd, name, 0);
+}
+
+/*
+FUNCTION
+	bfd_make_section_with_flags
+
+SYNOPSIS
+	asection *bfd_make_section_with_flags
+	  (bfd *, const char *name, flagword flags);
 
 DESCRIPTION
    Like <<bfd_make_section_anyway>>, but return <<NULL>> (without calling
    bfd_set_error ()) without changing the section chain if there is already a
-   section named @var{name}.  If there is an error, return <<NULL>> and set
+   section named @var{name}.  Also set the attributes of the new section to
+   the value @var{flags}.  If there is an error, return <<NULL>> and set
    <<bfd_error>>.
 */
 
 asection *
-bfd_make_section (bfd *abfd, const char *name)
+bfd_make_section_with_flags (bfd *abfd, const char *name,
+			     flagword flags)
 {
   struct section_hash_entry *sh;
   asection *newsect;
@@ -1101,7 +1131,28 @@ bfd_make_section (bfd *abfd, const char *name)
     }
 
   newsect->name = name;
+  newsect->flags = flags;
   return bfd_section_init (abfd, newsect);
+}
+
+/*
+FUNCTION
+	bfd_make_section
+
+SYNOPSIS
+	asection *bfd_make_section (bfd *, const char *name);
+
+DESCRIPTION
+   Like <<bfd_make_section_anyway>>, but return <<NULL>> (without calling
+   bfd_set_error ()) without changing the section chain if there is already a
+   section named @var{name}.  If there is an error, return <<NULL>> and set
+   <<bfd_error>>.
+*/
+
+asection *
+bfd_make_section (bfd *abfd, const char *name)
+{
+  return bfd_make_section_with_flags (abfd, name, 0);
 }
 
 /*

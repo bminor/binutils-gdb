@@ -3667,25 +3667,25 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
   /* Create .sfpr for code to save and restore fp regs.  */
   flags = (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
 	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-  htab->sfpr = bfd_make_section_anyway (dynobj, ".sfpr");
+  htab->sfpr = bfd_make_section_anyway_with_flags (dynobj, ".sfpr",
+						   flags);
   if (htab->sfpr == NULL
-      || ! bfd_set_section_flags (dynobj, htab->sfpr, flags)
       || ! bfd_set_section_alignment (dynobj, htab->sfpr, 2))
     return FALSE;
 
   /* Create .glink for lazy dynamic linking support.  */
-  htab->glink = bfd_make_section_anyway (dynobj, ".glink");
+  htab->glink = bfd_make_section_anyway_with_flags (dynobj, ".glink",
+						    flags);
   if (htab->glink == NULL
-      || ! bfd_set_section_flags (dynobj, htab->glink, flags)
       || ! bfd_set_section_alignment (dynobj, htab->glink, 2))
     return FALSE;
 
   /* Create .branch_lt for plt_branch stubs.  */
   flags = (SEC_ALLOC | SEC_LOAD
 	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-  htab->brlt = bfd_make_section_anyway (dynobj, ".branch_lt");
+  htab->brlt = bfd_make_section_anyway_with_flags (dynobj, ".branch_lt",
+						   flags);
   if (htab->brlt == NULL
-      || ! bfd_set_section_flags (dynobj, htab->brlt, flags)
       || ! bfd_set_section_alignment (dynobj, htab->brlt, 3))
     return FALSE;
 
@@ -3693,9 +3693,10 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
     {
       flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      htab->relbrlt = bfd_make_section_anyway (dynobj, ".rela.branch_lt");
+      htab->relbrlt = bfd_make_section_anyway_with_flags (dynobj,
+							  ".rela.branch_lt",
+							  flags);
       if (!htab->relbrlt
-	  || ! bfd_set_section_flags (dynobj, htab->relbrlt, flags)
 	  || ! bfd_set_section_alignment (dynobj, htab->relbrlt, 3))
 	return FALSE;
     }
@@ -3725,15 +3726,14 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
 
-  got = bfd_make_section (abfd, ".got");
+  got = bfd_make_section_with_flags (abfd, ".got", flags);
   if (!got
-      || !bfd_set_section_flags (abfd, got, flags)
       || !bfd_set_section_alignment (abfd, got, 3))
     return FALSE;
 
-  relgot = bfd_make_section (abfd, ".rela.got");
+  relgot = bfd_make_section_with_flags (abfd, ".rela.got",
+					flags | SEC_READONLY);
   if (!relgot
-      || ! bfd_set_section_flags (abfd, relgot, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, relgot, 3))
     return FALSE;
 
@@ -4686,12 +4686,13 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    {
 		      flagword flags;
 
-		      sreloc = bfd_make_section (dynobj, name);
 		      flags = (SEC_HAS_CONTENTS | SEC_READONLY
 			       | SEC_IN_MEMORY | SEC_LINKER_CREATED
 			       | SEC_ALLOC | SEC_LOAD);
+		      sreloc = bfd_make_section_with_flags (dynobj,
+							    name,
+							    flags);
 		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (dynobj, sreloc, flags)
 			  || ! bfd_set_section_alignment (dynobj, sreloc, 3))
 			return FALSE;
 		    }
