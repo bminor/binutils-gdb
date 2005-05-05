@@ -1,3 +1,14 @@
+2005-05-05  John Levon  <levon@movementarian.org>
+
+	* dwarf2.c (read_abbrevs): If bfd_realloc fails, free currently
+	allocated memory before returning.
+	(decode_line_info): Likewise.
+	(_bfd_dwarf2_cleanup_debug_info): New function:  Frees memory
+	allocated by functions in this file.
+	* elf-bfd.h (_bfd_dwarf2_cleanup_debug_info): Prototype.
+	* elf.c (bfd_elf_close_and_cleanup): Call
+	_bfd_dwarf2_cleanup_debug_info.
+
 2005-05-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* Makefile.am (INCLUDES): Don't -D_GNU_SOURCE here.

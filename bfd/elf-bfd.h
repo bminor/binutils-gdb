@@ -1728,6 +1728,10 @@ extern int bfd_elf_link_record_local_dynamic_symbol
 
 extern bfd_boolean _bfd_elf_close_and_cleanup
   (bfd *);
+
+extern void _bfd_dwarf2_cleanup_debug_info
+  (bfd *);
+
 extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
   (bfd *, arelent *, struct bfd_symbol *, void *,
    asection *, bfd *, char **);

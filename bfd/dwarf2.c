@@ -447,11 +447,28 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 	{
 	  if ((cur_abbrev->num_attrs % ATTR_ALLOC_CHUNK) == 0)
 	    {
+	      struct attr_abbrev *tmp;
+
 	      amt = cur_abbrev->num_attrs + ATTR_ALLOC_CHUNK;
 	      amt *= sizeof (struct attr_abbrev);
-	      cur_abbrev->attrs = bfd_realloc (cur_abbrev->attrs, amt);
-	      if (! cur_abbrev->attrs)
-		return 0;
+	      tmp = bfd_realloc (cur_abbrev->attrs, amt);
+	      if (tmp == NULL)
+	        {
+	          size_t i;
+
+	          for (i = 0; i < ABBREV_HASH_SIZE; i++)
+	            {
+	            struct abbrev_info *abbrev = abbrevs[i];
+
+	            while (abbrev)
+	              {
+	                free (abbrev->attrs);
+	                abbrev = abbrev->next;
+	              }
+	            }
+	          return NULL;
+	        }
+	      cur_abbrev->attrs = tmp;
 	    }
 
 	  cur_abbrev->attrs[cur_abbrev->num_attrs].name
@@ -963,11 +980,18 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 
       if ((table->num_dirs % DIR_ALLOC_CHUNK) == 0)
 	{
+	  char **tmp;
+
 	  amt = table->num_dirs + DIR_ALLOC_CHUNK;
 	  amt *= sizeof (char *);
-	  table->dirs = bfd_realloc (table->dirs, amt);
-	  if (! table->dirs)
-	    return 0;
+
+	  tmp = bfd_realloc (table->dirs, amt);
+	  if (tmp == NULL)
+	    {
+	      free (table->dirs);
+	      return NULL;
+	    }
+	  table->dirs = tmp;
 	}
 
       table->dirs[table->num_dirs++] = cur_dir;
@@ -982,11 +1006,19 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 
       if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
 	{
+	  struct fileinfo *tmp;
+
 	  amt = table->num_files + FILE_ALLOC_CHUNK;
 	  amt *= sizeof (struct fileinfo);
-	  table->files = bfd_realloc (table->files, amt);
-	  if (! table->files)
-	    return 0;
+
+	  tmp = bfd_realloc (table->files, amt);
+	  if (tmp == NULL)
+	    {
+	      free (table->files);
+	      free (table->dirs);
+	      return NULL;
+	    }
+	  table->files = tmp;
 	}
 
       table->files[table->num_files].name = cur_file;
@@ -1073,11 +1105,19 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		  line_ptr += bytes_read;
 		  if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
 		    {
+		      struct fileinfo *tmp;
+
 		      amt = table->num_files + FILE_ALLOC_CHUNK;
 		      amt *= sizeof (struct fileinfo);
-		      table->files = bfd_realloc (table->files, amt);
-		      if (! table->files)
-			return 0;
+		      tmp = bfd_realloc (table->files, amt);
+		      if (tmp == NULL)
+		        {
+			  free (table->files);
+			  free (table->dirs);
+			  free (filename);
+			  return NULL;
+		        }
+		      table->files = tmp;
 		    }
 		  table->files[table->num_files].name = cur_file;
 		  table->files[table->num_files].dir =
@@ -1094,7 +1134,10 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		default:
 		  (*_bfd_error_handler) (_("Dwarf Error: mangled line number section."));
 		  bfd_set_error (bfd_error_bad_value);
-		  return 0;
+		  free (filename);
+		  free (table->files);
+		  free (table->dirs);
+		  return NULL;
 		}
 	      break;
 	    case DW_LNS_copy:
@@ -2002,4 +2045,46 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     }
 
   return FALSE;
+}
+
+void
+_bfd_dwarf2_cleanup_debug_info (bfd *abfd)
+{
+  struct comp_unit *each;
+  struct dwarf2_debug *stash;
+
+  if (abfd == NULL || elf_tdata (abfd) == NULL)
+    return;
+
+  stash = elf_tdata (abfd)->dwarf2_find_line_info;
+
+  if (stash == NULL)
+    return;
+
+  for (each = stash->all_comp_units; each; each = each->next_unit)
+    {
+      struct abbrev_info **abbrevs = each->abbrevs;
+      size_t i;
+
+      for (i = 0; i < ABBREV_HASH_SIZE; i++)
+        {
+          struct abbrev_info *abbrev = abbrevs[i];
+
+          while (abbrev)
+            {
+              free (abbrev->attrs);
+              abbrev = abbrev->next;
+            }
+        }
+
+      if (each->line_table)
+        {
+          free (each->line_table->dirs);
+          free (each->line_table->files);
+        }
+    }
+
+  free (stash->dwarf_abbrev_buffer);
+  free (stash->dwarf_line_buffer);
+  free (stash->dwarf_ranges_buffer);
 }

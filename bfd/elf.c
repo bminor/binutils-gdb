@@ -6684,6 +6684,8 @@ _bfd_elf_close_and_cleanup (bfd *abfd)
 	_bfd_elf_strtab_free (elf_shstrtab (abfd));
     }
 
+  _bfd_dwarf2_cleanup_debug_info (abfd);
+
   return _bfd_generic_close_and_cleanup (abfd);
 }
 
