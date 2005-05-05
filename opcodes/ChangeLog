@@ -1,3 +1,9 @@
+2005-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add vi.
+	* configure: Regenerate.
+	* po/vi.po: New.
+
 2005-04-26  Jerome Guitton  <guitton@gnat.com>
 
 	* configure.in: Fix the check for basename declaration.
