@@ -1,3 +1,9 @@
+2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 882
+	* elflink.c (_bfd_elf_link_assign_sym_version): Allow version
+	script on executable.
+
 2005-05-05  John Levon  <levon@movementarian.org>
 
 	* dwarf2.c (read_abbrevs): If bfd_realloc fails, free currently

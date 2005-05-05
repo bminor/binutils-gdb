@@ -1778,7 +1778,6 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 		  d = (*t->match) (&t->locals, NULL, alc);
 		  if (d != NULL
 		      && h->dynindx != -1
-		      && info->shared
 		      && ! info->export_dynamic)
 		    (*bed->elf_backend_hide_symbol) (info, h, TRUE);
 		}
@@ -1905,7 +1904,6 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	{
 	  h->verinfo.vertree = local_ver;
 	  if (h->dynindx != -1
-	      && info->shared
 	      && ! info->export_dynamic)
 	    {
 	      (*bed->elf_backend_hide_symbol) (info, h, TRUE);
