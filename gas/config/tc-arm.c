@@ -22,8 +22,8 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
+   02110-1301, USA.  */
 
 #include <string.h>
 #define  NO_RELOC 0
@@ -12870,7 +12870,7 @@ struct arm_option_table arm_opts[] =
   {"mapcs-reentrant", N_("re-entrant code"), &pic_code, 1, NULL},
   {"matpcs", N_("code is ATPCS conformant"), &atpcs, 1, NULL},
   {"mbig-endian", N_("assemble for big-endian"), &target_big_endian, 1, NULL},
-  {"mlittle-endian", N_("assemble for little-endian"), &target_big_endian, 1,
+  {"mlittle-endian", N_("assemble for little-endian"), &target_big_endian, 0,
    NULL},
 
   /* These are recognized by the assembler, but have no affect on code.  */

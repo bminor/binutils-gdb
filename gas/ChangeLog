@@ -1,3 +1,8 @@
+2005-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (arm_opts): Make -mlittle-endian switch set
+	the target_big_endian variable to false.
+
 2005-05-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-ecoff.c (ecoff_frob_file_before_fix): Correct section
