@@ -20,8 +20,8 @@
    02111-1307, USA.  */
 
 #include "ansidecl.h"
-#include "libiberty.h"
 #include "sysdep.h"
+#include "libiberty.h"
 #include "ia64-asmtab.h"
 #include "ia64-asmtab.c"
 
