@@ -1,3 +1,11 @@
+2005-05-05  Paul Brook  <paul@codesourcery.com>
+
+	* lib/ld-lib.exp (regexp_diff): Pass test if last line is "#...".
+	* ld-elfweak/elfweak.exp: Run size2.d.
+	* ld-elfwaek/size2.d: New file.
+	* ld-elfwaek/size2a.s: New file.
+	* ld-elfwaek/size2b.s: New file.
+
 2005-04-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* ld-fastcall/fastcall.exp: Don't run on i*86-*-openbsd*.
