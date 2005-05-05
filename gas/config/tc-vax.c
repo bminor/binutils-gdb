@@ -1190,18 +1190,17 @@ md_assemble (instruction_string)
 			  p[0] = (operandP->vop_mode << 4) | 0xF;
 			  if ((is_absolute) && (expP->X_op != O_big))
 			    {
-			      /*
-			       * If nbytes > 4, then we are scrod. We
-			       * don't know if the high order bytes
-			       * are to be 0xFF or 0x00.  BSD4.2 & RMS
-			       * say use 0x00. OK --- but this
-			       * assembler needs ANOTHER rewrite to
-			       * cope properly with this bug.  */
-			      md_number_to_chars (p + 1, this_add_number, min (4, nbytes));
-			      if (nbytes > 4)
-				{
-				  memset (p + 5, '\0', nbytes - 4);
-				}
+			      /* If nbytes > 4, then we are scrod. We
+			         don't know if the high order bytes
+			         are to be 0xFF or 0x00.  BSD4.2 & RMS
+			         say use 0x00. OK --- but this
+			         assembler needs ANOTHER rewrite to
+			         cope properly with this bug.  */
+			      md_number_to_chars (p + 1, this_add_number,
+						  min (sizeof (valueT),
+						       (size_t) nbytes));
+			      if ((size_t) nbytes > sizeof (valueT))
+				memset (p + 5, '\0', nbytes - sizeof (valueT));
 			    }
 			  else
 			    {
