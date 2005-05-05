@@ -1,3 +1,7 @@
+2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in2.h: Regenerated.
+
 2005-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* config.bfd: Use bfd_elf32_i386_vxworks_vec for i?86-*-vxworks.

@@ -1554,7 +1554,13 @@ char *bfd_get_unique_section_name
 
 asection *bfd_make_section_old_way (bfd *abfd, const char *name);
 
+asection *bfd_make_section_anyway_with_flags
+   (bfd *abfd, const char *name, flagword flags);
+
 asection *bfd_make_section_anyway (bfd *abfd, const char *name);
+
+asection *bfd_make_section_with_flags
+   (bfd *, const char *name, flagword flags);
 
 asection *bfd_make_section (bfd *, const char *name);
 
