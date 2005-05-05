@@ -25,6 +25,8 @@
 #		.text section.
 #	DATA_START_SYMBOLS - symbols that appear at the start of the
 #		.data section.
+#	DATA_END_SYMBOLS - symbols that appear at the end of the
+#		writeable data sections.
 #	OTHER_GOT_SYMBOLS - symbols defined just before .got.
 #	OTHER_GOT_SECTIONS - sections just after .got.
 #	OTHER_SDATA_SECTIONS - sections just after .sdata.
@@ -45,6 +47,8 @@
 # 	combination of .fini sections.
 #	STACK_ADDR - start of a .stack section.
 #	OTHER_END_SYMBOLS - symbols to place right at the end of the script.
+#	ETEXT_NAME - name of a symbol for the end of the text section,
+#		normally etext.
 #	SEPARATE_GOTPLT - if set, .got.plt should be separate output section,
 #		so that .got can be in the RELRO area.  It should be set to
 #		the number of bytes in the beginning of .got.plt which can be
@@ -84,6 +88,7 @@ if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHI
 test -z "${ELFSIZE}" && ELFSIZE=32
 test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
 test "$LD_FLAG" = "N" && DATA_ADDR=.
+test -z "${ETEXT_NAME}" && ETEXT_NAME=etext
 test -n "$CREATE_SHLIB$CREATE_PIE" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESIZE=""
 test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
 test -n "$RELRO_NOW" && unset SEPARATE_GOTPLT
@@ -307,9 +312,9 @@ cat <<EOF
     KEEP (*(.fini))
     ${RELOCATING+${FINI_END}}
   } =${NOP-0}
-  ${RELOCATING+PROVIDE (__etext = .);}
-  ${RELOCATING+PROVIDE (_etext = .);}
-  ${RELOCATING+PROVIDE (etext = .);}
+  ${RELOCATING+PROVIDE (__${ETEXT_NAME} = .);}
+  ${RELOCATING+PROVIDE (_${ETEXT_NAME} = .);}
+  ${RELOCATING+PROVIDE (${ETEXT_NAME} = .);}
   ${WRITABLE_RODATA-${RODATA}}
   .rodata1      ${RELOCATING-0} : { *(.rodata1) }
   ${CREATE_SHLIB-${SDATA2}}
@@ -370,8 +375,7 @@ cat <<EOF
   ${OTHER_GOT_SECTIONS}
   ${SDATA}
   ${OTHER_SDATA_SECTIONS}
-  ${RELOCATING+_edata = .;}
-  ${RELOCATING+PROVIDE (edata = .);}
+  ${RELOCATING+${DATA_END_SYMBOLS-_edata = .; PROVIDE (edata = .);}}
   ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}

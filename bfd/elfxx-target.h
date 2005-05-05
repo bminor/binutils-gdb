@@ -416,7 +416,7 @@
 #define elf_backend_merge_symbol_attribute	NULL
 #endif
 #ifndef elf_backend_emit_relocs
-#define elf_backend_emit_relocs			NULL
+#define elf_backend_emit_relocs			_bfd_elf_link_output_relocs
 #endif
 #ifndef elf_backend_count_relocs
 #define elf_backend_count_relocs		NULL

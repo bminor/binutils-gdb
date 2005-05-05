@@ -1,3 +1,7 @@
+2005-05-05  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-i386.h (ELF_TARGET_FORMAT): Define for TE_VXWORKS.
+
 2005-05-05  Matt Thomas <matt@3am-software.com>
 
 	* config/tc-vax.c (md_assemble): Don't assume a valueT is 4

@@ -1,3 +1,12 @@
+2005-05-05  Paul Brook  <paul@codesourcery.com>
+
+	* Makefile.am: Add eelf_i386_vxworks.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Make i?86-*-vxworks use targ_emul=elf_i386_vxworks.
+	* emulparams/elf_i386_vxworks.sh: New file.
+	* emulparams/vxworks.sh: New file.
+	* scripttempl/elf.sc: Add DATA_END_SYMBOLS and ETEXT_NAME.
+
 2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_bound_symbols):

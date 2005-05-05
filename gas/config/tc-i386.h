@@ -61,7 +61,10 @@ extern unsigned long i386_mach (void);
 
 #ifdef TE_FreeBSD
 #define ELF_TARGET_FORMAT	"elf32-i386-freebsd"
+#elif defined (TE_VXWORKS)
+#define ELF_TARGET_FORMAT	"elf32-i386-vxworks"
 #endif
+
 #ifndef ELF_TARGET_FORMAT
 #define ELF_TARGET_FORMAT	"elf32-i386"
 #endif

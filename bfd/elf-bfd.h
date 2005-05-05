@@ -873,7 +873,8 @@ struct elf_backend_data
   /* Emit relocations.  Overrides default routine for emitting relocs,
      except during a relocatable link, or if all relocs are being emitted.  */
   bfd_boolean (*elf_backend_emit_relocs)
-    (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *);
+    (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
+     struct elf_link_hash_entry **);
 
   /* Count relocations.  Not called for relocatable links
      or if all relocs are being preserved in the output.  */
@@ -1606,7 +1607,8 @@ extern bfd_boolean _bfd_elf_link_size_reloc_section
   (bfd *, Elf_Internal_Shdr *, asection *);
 
 extern bfd_boolean _bfd_elf_link_output_relocs
-  (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *);
+  (bfd *, asection *, Elf_Internal_Shdr *, Elf_Internal_Rela *,
+   struct elf_link_hash_entry **);
 
 extern bfd_boolean _bfd_elf_fix_symbol_flags
   (struct elf_link_hash_entry *, struct elf_info_failed *);

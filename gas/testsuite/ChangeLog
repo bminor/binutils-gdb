@@ -1,3 +1,7 @@
+2005-05-05  Paul Brook  <paul@codesourcery.com>
+
+	* gas/i386/i386.exp: Don't run divide test on vxworks.
+
 2005-05-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* gas/sh/basic.exp: Replace linux-gnu with linux-* to allow for

@@ -271,6 +271,7 @@ BFD32_BACKENDS = \
 	elflink.lo \
 	elf-strtab.lo \
 	elf-eh-frame.lo \
+	elf-vxworks.lo \
 	epoc-pe-arm.lo \
 	epoc-pei-arm.lo \
 	hp300bsd.lo \
@@ -440,6 +441,7 @@ BFD32_BACKENDS_CFILES = \
 	elflink.c \
 	elf-strtab.c \
 	elf-eh-frame.c \
+	elf-vxworks.c \
 	epoc-pe-arm.c \
 	epoc-pei-arm.c \
 	hp300bsd.c \
@@ -1263,7 +1265,7 @@ elf32-i370.lo: elf32-i370.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
 elf32-i386.lo: elf32-i386.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/i386.h \
-  $(INCDIR)/elf/reloc-macros.h elf32-target.h
+  $(INCDIR)/elf/reloc-macros.h elf32-target.h elf-vxworks.h
 elf32-i860.lo: elf32-i860.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/i860.h \
@@ -1422,6 +1424,10 @@ elf-eh-frame.lo: elf-eh-frame.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/dwarf2.h
+elf-vxworks.lo: elf-vxworks.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/reloc-macros.h elf-vxworks.h
 epoc-pe-arm.lo: epoc-pe-arm.c pe-arm.c $(INCDIR)/filenames.h \
   coff-arm.c $(INCDIR)/hashtab.h $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \

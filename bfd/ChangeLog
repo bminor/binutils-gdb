@@ -1,3 +1,45 @@
+2005-05-05  Paul Brook  <paul@codesourcery.com>
+
+	* config.bfd: Use bfd_elf32_i386_vxworks_vec for i?86-*-vxworks.
+	* configure.in: Add bfd_elf32_i386_vxworks_vec. i386 targets need
+	elf-vxworks.lo.
+	* configure: Regenerate.
+	* Makefile.am (BFD32_BACKENDS): Add elf-vxworks.lo.
+	(BFD32_BACKENDS_CFILES): Add elf-vxworks.c.
+	(elf32-i386.lo): Depend on elf-vxworks.h.
+	(elf-vxworks.lo): New rule.
+	* Makefile.in: Regenerate.
+	* elf-bfd.h (elf_backend_data): Update type of
+	elf_backend_emit_relocs.
+	(_bfd_elf_link_output_relocs): Update prototype.
+	* elflink.c (_bfd_elf_link_output_relocs): Always use
+	bed->elf_backend_emit_relocs when outputting relocations.
+	* elfxx-target.h (elf_backend_emit_relocs): Default to
+	_bfd_elf_link_output_relocs.
+	* targets.c (bfd_elf32_i386_vxworks_vec): Declare.
+	(_bfd_target_vector): Add bfd_elf32_i386_vxworks_vec.
+	* elf32-i386.c: Add elf32-i386-vxworks target BFD.
+	(elf_i386_plt0_entry): Remove padding.
+	(elf_i386_pic_plt0_entry): Ditto.
+	(PLTRESOLVE_RELOCS_SHLIB, PLTRESOLVE_RELOCS): Define.
+	(PLT_NON_JUMP_SLOT_RELOCS): Define.
+	(elf_i386_link_hash_table): Add srelplt2, hgot, hplt, is_vxworks and
+	plt0_pad_byte fields.
+	(elf_i386_link_hash_table_create): Zero them.
+	(elf_i386_create_dynamic_sections): Create static relocation section.
+	(allocate_dynrelocs): Allocate space for static PLT relocations.
+	(elf_i386_size_dynamic_sections): Save shortcuts to PLT and GOT
+	symbols.  Give PLT symbols function type.  Don't strip PLT sections
+	if we have exported symbols from them. 
+	(elf_i386_finish_dynamic_symbol): Fill in VxWorks PLT static
+	relocation section.  Don't mark _GLOBAL_OFFSET_TABLE_ as absolute on
+	VxWorks.
+	(elf_i386_finish_dynamic_sections): Allow different pad bytes.
+	Add relocation for GOT location.  Fill in PLT static relocations.
+	(elf_i386_vxworks_link_hash_table_create): New function.
+	(elf_i386_vxworks_link_output_symbol_hook): New function.
+	* elf-vxworks.h: New file.
+
 2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* section.c (bfd_make_section_anyway_with_flags): New.

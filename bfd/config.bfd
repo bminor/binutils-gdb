@@ -606,7 +606,7 @@ case "${targ}" in
     targ_defvec=i386aout_vec
     ;;
   i[3-7]86-*-vxworks)
-    targ_defvec=bfd_elf32_i386_vec
+    targ_defvec=bfd_elf32_i386_vxworks_vec
     targ_underscore=yes
     ;;
   i[3-7]86-*-chaos)
