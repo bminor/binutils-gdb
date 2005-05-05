@@ -1,3 +1,10 @@
+2005-05-05  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure.in (ACX_HEADER_STRING): New.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* sysdep.h (STRING_WITH_STRINGS): Use.
+
 2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_close_and_cleanup): Only call
