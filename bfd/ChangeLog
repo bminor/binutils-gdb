@@ -1,5 +1,10 @@
 2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (_bfd_elf_close_and_cleanup): Only call
+	_bfd_dwarf2_cleanup_debug_info on bfd_object.
+
+2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elflink.c (_bfd_elf_provide_section_bound_symbols): Use
 	"__bss_start" instead of "_edata" as fallback.
 
@@ -145,7 +150,7 @@
 	(_bfd_dwarf2_cleanup_debug_info): New function:  Frees memory
 	allocated by functions in this file.
 	* elf-bfd.h (_bfd_dwarf2_cleanup_debug_info): Prototype.
-	* elf.c (bfd_elf_close_and_cleanup): Call
+	* elf.c (_bfd_elf_close_and_cleanup): Call
 	_bfd_dwarf2_cleanup_debug_info.
 
 2005-05-05  Hans-Peter Nilsson  <hp@axis.com>
