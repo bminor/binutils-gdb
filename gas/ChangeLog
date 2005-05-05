@@ -1,3 +1,7 @@
+2005-05-05  Steve Ellcey  <sje@cup.hp.com>
+
+	* config/tc-ia64.c (MIN): Undef.
+
 2005-05-05  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-i386.h (ELF_TARGET_FORMAT): Define for TE_VXWORKS.

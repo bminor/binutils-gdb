@@ -56,6 +56,9 @@
 #endif
 
 #define NELEMS(a)	((int) (sizeof (a)/sizeof ((a)[0])))
+
+/* Some systems define MIN in, e.g., param.h.  */
+#undef MIN
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 
 #define NUM_SLOTS	4
