@@ -70,6 +70,7 @@ bfd_default_target_size=32
 # host stuff:
 
 AC_PROG_CC
+AC_GNU_SOURCE
 
 ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw"
 CY_GNU_GETTEXT

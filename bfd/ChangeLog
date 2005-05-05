@@ -1,5 +1,12 @@
 2005-05-05  Hans-Peter Nilsson  <hp@axis.com>
 
+	* Makefile.am (INCLUDES): Don't -D_GNU_SOURCE here.
+	* configure.in: Call AC_GNU_SOURCE here, after AC_PROG_CC.
+	* configure, config.in, Makefile.in: Regenerate.
+	* sysdep.h (stpcpy): Revert last change.
+
+2005-05-05  Hans-Peter Nilsson  <hp@axis.com>
+
 	* sysdep.h (stpcpy): Wrap declaration in parentheses.
 
 2005-05-04  H.J. Lu  <hongjiu.lu@intel.com>
