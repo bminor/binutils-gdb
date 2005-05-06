@@ -1731,7 +1731,6 @@ copy_file (const char *input_filename, const char *output_filename,
   else if (bfd_check_format_matches (ibfd, bfd_object, &obj_matching))
     {
       bfd *obfd;
-      bfd_boolean delete;
     do_copy:
 
       /* bfd_get_target does not return the correct value until
@@ -1743,7 +1742,8 @@ copy_file (const char *input_filename, const char *output_filename,
       if (obfd == NULL)
 	RETURN_NONFATAL (output_filename);
 
-      delete = ! copy_object (ibfd, obfd);
+      if (! copy_object (ibfd, obfd))
+	status = 1;
 
       if (!bfd_close (obfd))
 	RETURN_NONFATAL (output_filename);
@@ -1751,11 +1751,6 @@ copy_file (const char *input_filename, const char *output_filename,
       if (!bfd_close (ibfd))
 	RETURN_NONFATAL (input_filename);
 
-      if (delete)
-	{
-	  unlink_if_ordinary (output_filename);
-	  status = 1;
-	}
     }
   else
     {
@@ -3054,6 +3049,8 @@ copy_main (int argc, char *argv[])
 
       if (status == 0 && preserve_dates)
 	set_times (output_filename, &statbuf);
+      else if (status != 0)
+	unlink_if_ordinary (output_filename);
     }
 
   if (change_warn)
