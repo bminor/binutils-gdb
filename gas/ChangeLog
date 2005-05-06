@@ -1,5 +1,10 @@
 2005-05-06  Jan Beulich  <jbeulich@novell.com>
 
+	* sb.h (sb_add_buffer): Reintroduce.
+	* sb.c (sb_add_buffer): Likewise.
+
+2005-05-06  Jan Beulich  <jbeulich@novell.com>
+
 	* macro.c (new_formal, del_formal): New.
 	(do_formals): Use new_formal. Check for and parse qualifier. Warn if
 	required argument has default value. Stop looking for more formal

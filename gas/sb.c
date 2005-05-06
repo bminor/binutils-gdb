@@ -165,6 +165,16 @@ sb_add_string (sb *ptr, const char *s)
   ptr->len += len;
 }
 
+/* add string at s of length len to sb at ptr */
+
+void
+sb_add_buffer (sb *ptr, const char *s, int len)
+{
+  sb_check (ptr, len);
+  memcpy (ptr->ptr + ptr->len, s, len);
+  ptr->len += len;
+}
+
 /* like sb_name, but don't include the null byte in the string.  */
 
 char *
