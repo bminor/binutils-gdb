@@ -477,6 +477,10 @@
 	* config.bfd: Add h8300*-*-rtemscoff.
 	Switch h8300*-*-rtems* to elf.
 
+2005-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* aclocal.m4, Makefile.in: Regnerated.
+
 2005-04-28  Paul Brook  <paul@codesourcery.com>
 
 	Merge changes only applied to Makefile.in.

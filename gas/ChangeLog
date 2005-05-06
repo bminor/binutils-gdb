@@ -165,6 +165,14 @@
 	* hash.c: Undo the last change.
 	* hash.h: Likewise.
 
+2005-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/Makefile.am (gasver.texi): Depend on bfd/configure instead
+	of Makefile.
+	(DISTCLEANFILES): Remove.
+	(MAINTAINERCLEANFILES): Add asconfig.texi.
+	* aclocal.m4, Makefile.in, doc/Makefile.in: Regenerated.
+
 2005-04-29  Ben Elliston  <bje@au.ibm.com>
 
 	* Makefile.am (GAS_CFILES): Remove bignum-copy.c.
