@@ -1,3 +1,25 @@
+2005-05-06  Nick Clifton  <nickc@redhat.com>
+
+	* Update the address and phone number of the FSF organization in
+	the GPL notices in the following files:
+	aclocal.m4, deffile.h, deffilep.y, fdl.texi, ld.h, ldcref.c,
+	ldctor.c, ldctor.h, ldemul.c, ldexp.c, ldexp.h, ldfile.c,
+	ldfile.h, 20ldgram.y, ldint.texinfo, ldlang.c, ldlang.h, ldlex.h,
+	ldlex.l, ldmain.c, ldmain.h, ldmisc.c, ldmisc.h, ldver.c, ldver.h,
+	ldwrite.c, ldwrite.h, lexsup.c, mri.c, mri.h, pe-dll.c, pe-dll.h,
+	sysdep.h, emultempl/aix.em, emultempl/alphaelf.em,
+	emultempl/armcoff.em, emultempl/armelf.em, emultempl/beos.em,
+	emultempl/crxelf.em, emultempl/elf32.em, emultempl/generic.em,
+	emultempl/gld960.em, emultempl/gld960c.em, emultempl/hppaelf.em,
+	emultempl/ia64elf.em, emultempl/irix.em,  emultempl/linux.em,
+	emultempl/lnk960.em, emultempl/m68hc1xelf.em,
+	emultempl/m68kcoff.em, emultempl/m68kelf.em,
+	emultempl/mipsecoff.em, emultempl/mmix-elfnmmo.em,
+	emultempl/mmixelf.em, emultempl/mmo.em, emultempl/needrelax.em,
+	emultempl/pe.em, emultempl/ppc32elf.em, emultempl/ppc64elf.em,
+	emultempl/sh64elf.em, emultempl/sunos.em, emultempl/ticoff.em,
+	emultempl/vanilla.em, emultempl/xtensaelf.em
+
 2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* scripttempl/elf.sc: Document the usage of __bss_start.
@@ -762,14 +784,6 @@
 	* scripttempl/maxqcoff.sc: New linker script for target maxq.
 	* NEWS: Mention the new target.
 
-2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
-
-	* testsuite/ld-scripts/weak.exp: Enable test on PE,
-	XFAIL non-i386 PE.
-	* testsuite/ld-undefined/weak-undef.exp: Enable test on PE,
-	XFAIL non-i386 PE.
-	* testsuite/lib/ld-lib.exp (is_pecoff_format): New.
-
 2004-11-04  Daniel Jacobowitz  <dan@debian.org>
 
 	* Makefile.am (ALL_EMULATIONS): Remove earmelf_oabi.o.
@@ -1475,25 +1489,6 @@
 
 	* ldlang.c (gc_section_callback): Move SEC_EXCLUDE twiddles..
 	(lang_gc_sections): .. to a LANG_FOR_EACH_INPUT_STATEMENT loop here.
-
-2004-05-28  Andrew Stubbs <andrew.stubbs@superh.com>
-
-	* testsuite/ld-sh/arch/arch.exp: New test script.
-	* testsuite/ld-sh/arch/arch_expected.txt: New file.
-	* testsuite/ld-sh/arch/sh.s: New file.
-	* testsuite/ld-sh/arch/sh2.s: New file.
-	* testsuite/ld-sh/arch/sh-dsp.s: New file.
-	* testsuite/ld-sh/arch/sh2e.s: New file.
-	* testsuite/ld-sh/arch/sh3-nommu.s: New file.
-	* testsuite/ld-sh/arch/sh3.s: New file.
-	* testsuite/ld-sh/arch/sh3-dsp.s: New file.
-	* testsuite/ld-sh/arch/sh3e.s: New file.
-	* testsuite/ld-sh/arch/sh4-nommu-nofpu.s: New file.
-	* testsuite/ld-sh/arch/sh4-nofpu.s: New file.
-	* testsuite/ld-sh/arch/sh4.s: New file.
-	* testsuite/ld-sh/arch/sh4a-nofpu.s: New file.
-	* testsuite/ld-sh/arch/sh4al-dsp.s: New file.
-	* testsuite/ld-sh/arch/sh4a.s: New file.
 
 2004-05-28  Alan Modra  <amodra@bigpond.net.au>
 
