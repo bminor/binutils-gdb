@@ -155,6 +155,7 @@ extern void s_float_space (int mult);
 extern void s_func (int);
 extern void s_globl (int arg);
 extern void s_if (int arg);
+extern void s_ifb (int arg);
 extern void s_ifc (int arg);
 extern void s_ifdef (int arg);
 extern void s_ifeqs (int arg);

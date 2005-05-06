@@ -29,4 +29,22 @@
 	.else
 	.long	9
 	.endif
+
+	.macro	m x, y
+	.ifb \x
+	.long	-1
+	.else
+	.long	\x
+	.endif
+	.ifnb \y
+	.long	\y
+	.else
+	.long	-1
+	.endif
+	.endm
+	m	,
+	m	, 10
+	m	11,
+	m	12, 13
+
 	.p2align 5,0

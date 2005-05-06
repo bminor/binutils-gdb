@@ -1,5 +1,10 @@
 2005-05-06  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/all/cond.s: Also test .ifb/.ifnb.
+	* gas/all/cond.d: Adjust.
+
+2005-05-06  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/macros/dot.s: Don't use pseudo-ops in first column.
 	* gas/macros/dot.l: Match broader range of possible outputs.
 	* gas/macros/purge.l: Likewise.

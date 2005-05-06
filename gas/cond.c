@@ -181,6 +181,40 @@ s_if (int arg)
   demand_empty_rest_of_line ();
 }
 
+/* Performs the .ifb (test_blank == 1) and
+   the .ifnb (test_blank == 0) pseudo op.  */
+
+void
+s_ifb (int test_blank)
+{
+  struct conditional_frame cframe;
+
+  initialize_cframe (&cframe);
+  
+  if (cframe.dead_tree)
+    cframe.ignoring = 1;
+  else
+    {
+      int is_eol;
+
+      SKIP_WHITESPACE ();
+      is_eol = is_end_of_line[(unsigned char) *input_line_pointer];
+      cframe.ignoring = (test_blank == !is_eol);
+    }
+
+  current_cframe = ((struct conditional_frame *)
+		    obstack_copy (&cond_obstack, &cframe,
+				  sizeof (cframe)));
+
+  if (LISTING_SKIP_COND ()
+      && cframe.ignoring
+      && (cframe.previous_cframe == NULL
+	  || ! cframe.previous_cframe->ignoring))
+    listing_list (2);
+
+  ignore_rest_of_line ();
+}
+
 /* Get a string for the MRI IFC or IFNC pseudo-ops.  */
 
 static char *

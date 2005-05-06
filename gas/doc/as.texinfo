@@ -4456,6 +4456,10 @@ Assembles the following section of code if the specified @var{symbol}
 has been defined.  Note a symbol which has been referenced but not yet defined
 is considered to be undefined.
 
+@cindex @code{ifb} directive
+@item .ifb @var{text}
+Assembles the following section of code if the operand is blank (empty).
+
 @cindex @code{ifc} directive
 @item .ifc @var{string1},@var{string2}
 Assembles the following section of code if the two strings are the same.  The
@@ -4489,6 +4493,11 @@ to zero.
 @cindex @code{iflt} directive
 @item .iflt @var{absolute expression}
 Assembles the following section of code if the argument is less than zero.
+
+@cindex @code{ifnb} directive
+@item .ifnb @var{text}
+Like @code{.ifb}, but the sense of the test is reversed: this assembles the
+following section of code if the operand is non-blank (non-empty).
 
 @cindex @code{ifnc} directive
 @item .ifnc @var{string1},@var{string2}.
