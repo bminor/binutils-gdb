@@ -2,7 +2,6 @@
 .*:[1-9][0-9]*: Warning: attempt to redefine pseudo-op .\.macro. ignored
 .*:27: Error: unknown pseudo-op: .\.xyz.
 .*:28: Error: .*
-(.* )?GAS .*
 #...
 [ 	]*[1-9][0-9]*[ 	]+m 4, 2
 [ 	]*[1-9][0-9]*[ 	]+> \.data
@@ -19,4 +18,5 @@
 [ 	]*[1-9][0-9]*[ 	]+
 [ 	]*[1-9][0-9]*[ 	]+\.purgem \.xyz, x\.y\.z
 [ 	]*[1-9][0-9]*[ 	]+\.xyz 0
-[ 	]*[1-9][0-9]*[ 	]+x\.y\.z 0
+[ 	]*[1-9][0-9]*[ 	]+(\?+[0 	]+)?x\.y\.z 0
+#pass

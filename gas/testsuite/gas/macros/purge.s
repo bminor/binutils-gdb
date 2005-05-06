@@ -29,12 +29,12 @@
   .irpc b,ABCDEFGHIJKLMNOPQRSTUVWXYZ
    .irpc c,ABCDEFGHIJKLMNOPQRSTUVWXYZ
     .irpc d,ABCDEFGHIJKLMNOPQRSTUVWXYZ
-     .macro \a\b\c\d arg1=0, arg2=0
+     .macro _\a\b\c\d arg1=0, arg2=0
       .if \arg1 + \arg2
-       .purgem \a\b\c\d
+       .purgem _\a\b\c\d
       .endif
      .endm
-	\a\b\c\d 1, 2
+	_\a\b\c\d 1, 2
     .endr
    .endr
   .endr
