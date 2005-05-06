@@ -1,3 +1,9 @@
+2005-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am: Remove stamp rules.  Depend on chew.c
+	instead of $(MKDOC).
+	* Makefile.in: Regnerated.
+
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
