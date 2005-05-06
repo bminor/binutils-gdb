@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 51 Franklin Street - Fifth Floor, Boston, 
+   the Free Software Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
 /* This file contains the code for generating runtime data structures
@@ -25,7 +25,7 @@
    matches.  The preconditions can specify that two operands are the
    same or an operand is a specific constant or register.  The expansion
    uses the bound variables from the pattern to specify that specific
-   operands from the pattern should be used in the result.  
+   operands from the pattern should be used in the result.
 
    The code determines whether the condition applies to a constant or
    a register depending on the type of the operand.  You may get
@@ -46,10 +46,10 @@
    OPTIONPRED   ::= OPTIONNAME ('+' OPTIONNAME)
    OPTIONNAME   ::= '"' id '"'
 
-   The replacement language 
+   The replacement language
    INSN_REPL      ::= INSN_LABEL_LIT ( ';' INSN_LABEL_LIT )*
-   INSN_LABEL_LIT ::= INSN_TEMPL 
-                      | 'LABEL' num 
+   INSN_LABEL_LIT ::= INSN_TEMPL
+                      | 'LABEL' num
                       | 'LITERAL' num ' ' VARIABLE
 
    The operands in a PRECOND must be constants or variables bound by
@@ -75,7 +75,7 @@
    {"beqz %as,%label", "bnez %as,%LABEL0;j %label;LABEL0"}
    would convert a branch to a negated branch to the following instruction
    with a jump to the original label.
-   
+
    An Xtensa-specific example that generates a literal:
    {"movi %at,%imm", "LITERAL0 %imm; l32r %at,%LITERAL0"}
    will convert a movi instruction to an l32r of a literal
@@ -263,9 +263,9 @@ static string_pattern_pair widen_spec_list[] =
   {"slli %ar,%as,0", "or %ar,%as,%as"},
 
   /* Widening with literals or const16.  */
-  {"movi %at,%imm ? IsaUseL32R ", 
+  {"movi %at,%imm ? IsaUseL32R ",
    "LITERAL0 %imm; l32r %at,%LITERAL0"},
-  {"movi %at,%imm ? IsaUseConst16", 
+  {"movi %at,%imm ? IsaUseConst16",
    "const16 %at,HI16U(%imm); const16 %at,LOW16U(%imm)"},
 
   {"addi %ar,%as,%imm", "addmi %ar,%as,%imm"},
@@ -1278,7 +1278,7 @@ clone_req_option_list (ReqOption *req_option)
   new_req_option = (ReqOption *) xmalloc (sizeof (ReqOption));
   new_req_option->or_option_terms = NULL;
   new_req_option->next = NULL;
-  new_req_option->or_option_terms = 
+  new_req_option->or_option_terms =
     clone_req_or_option_list (req_option->or_option_terms);
   new_req_option->next = clone_req_option_list (req_option->next);
   return new_req_option;
@@ -1325,7 +1325,7 @@ parse_option_cond (const char *s, ReqOption *option)
       req->next = NULL;
 
       /* Append to list.  */
-      for (r_p = &option->or_option_terms; (*r_p) != NULL; 
+      for (r_p = &option->or_option_terms; (*r_p) != NULL;
 	   r_p = &(*r_p)->next)
 	;
       (*r_p) = req;
@@ -1366,7 +1366,7 @@ parse_insn_pattern (const char *in, insn_pattern *insn)
       clear_split_rec (&optionrec);
       return FALSE;
     }
-  
+
   init_split_rec (&rec);
 
   split_string (&rec, optionrec.vec[0], '|', TRUE);
@@ -1409,7 +1409,7 @@ parse_insn_pattern (const char *in, insn_pattern *insn)
       ReqOption *req_option = (ReqOption *) xmalloc (sizeof (ReqOption));
       req_option->or_option_terms = NULL;
       req_option->next = NULL;
-      
+
       if (!parse_option_cond (optionrec.vec[i], req_option))
 	{
 	  clear_split_rec (&rec);
@@ -1477,7 +1477,7 @@ transition_applies (insn_pattern *initial_insn,
 	  || req_or_option->next != NULL)
 	continue;
 
-      if (strncmp (req_or_option->option_name, "IsaUse", 6) == 0) 
+      if (strncmp (req_or_option->option_name, "IsaUse", 6) == 0)
 	{
 	  bfd_boolean option_available = FALSE;
 	  char *option_name = req_or_option->option_name + 6;
@@ -1501,7 +1501,7 @@ transition_applies (insn_pattern *initial_insn,
 	}
       else if (strcmp (req_or_option->option_name, "realnop") == 0)
 	{
-	  bfd_boolean nop_available = 
+	  bfd_boolean nop_available =
 	    (xtensa_opcode_lookup (xtensa_default_isa, "nop")
 	     != XTENSA_UNDEFINED);
 	  if ((nop_available ^ req_or_option->is_true) != 0)
@@ -1697,7 +1697,7 @@ build_transition (insn_pattern *initial_insn,
 	      return NULL;
 	    }
 	  /* Check for the right number of ops.  */
-	  if (xtensa_opcode_num_operands (isa, bi->opcode) 
+	  if (xtensa_opcode_num_operands (isa, bi->opcode)
 	      != (int) operand_count)
 	    as_fatal (_("opcode '%s': replacement does not have %d ops"),
 		      opcode_name,

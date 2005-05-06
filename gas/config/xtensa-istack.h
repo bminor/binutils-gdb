@@ -43,8 +43,8 @@ typedef struct tinsn_struct
   enum itype_enum insn_type;
 
   xtensa_opcode opcode;	/* Literals have an invalid opcode.  */
-  bfd_boolean is_specific_opcode; 
-  bfd_boolean keep_wide; 
+  bfd_boolean is_specific_opcode;
+  bfd_boolean keep_wide;
   int ntok;
   expressionS tok[MAX_INSN_ARGS];
   struct dwarf2_line_info loc;
@@ -77,7 +77,7 @@ bfd_boolean istack_empty (IStack *);
 bfd_boolean istack_full (IStack *);
 TInsn *istack_top (IStack *);
 void istack_push (IStack *, TInsn *);
-TInsn *istack_push_space (IStack *); 
+TInsn *istack_push_space (IStack *);
 void istack_pop (IStack *);
 
 /* TInsn utilities.  */
