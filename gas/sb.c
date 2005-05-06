@@ -46,9 +46,7 @@
    sb_new (&foo);
    sb_grow... (&foo,...);
    use foo->ptr[*];
-   sb_kill (&foo);
-
-*/
+   sb_kill (&foo);  */
 
 static int dsize = 5;
 static void sb_check (sb *, int);
@@ -59,12 +57,12 @@ static int string_count[sb_max_power_two];
 /* Free list of sb structures.  */
 static sb_list_vector free_list;
 
-/* initializes an sb.  */
+/* Initializes an sb.  */
 
 static void
 sb_build (sb *ptr, int size)
 {
-  /* see if we can find one to allocate */
+  /* See if we can find one to allocate.  */
   sb_element *e;
 
   if (size > sb_max_power_two)
@@ -73,7 +71,7 @@ sb_build (sb *ptr, int size)
   e = free_list.size[size];
   if (!e)
     {
-      /* nothing there, allocate one and stick into the free list */
+      /* Nothing there, allocate one and stick into the free list.  */
       e = (sb_element *) xmalloc (sizeof (sb_element) + (1 << size));
       e->next = free_list.size[size];
       e->size = 1 << size;
@@ -81,11 +79,10 @@ sb_build (sb *ptr, int size)
       string_count[size]++;
     }
 
-  /* remove from free list */
-
+  /* Remove from free list.  */
   free_list.size[size] = e->next;
 
-  /* copy into callers world */
+  /* Copy into callers world.  */
   ptr->ptr = e->data;
   ptr->pot = size;
   ptr->len = 0;
@@ -98,17 +95,17 @@ sb_new (sb *ptr)
   sb_build (ptr, dsize);
 }
 
-/* deallocate the sb at ptr */
+/* Deallocate the sb at ptr.  */
 
 void
 sb_kill (sb *ptr)
 {
-  /* return item to free list */
+  /* Return item to free list.  */
   ptr->item->next = free_list.size[ptr->pot];
   free_list.size[ptr->pot] = ptr->item;
 }
 
-/* add the sb at s to the end of the sb at ptr */
+/* Add the sb at s to the end of the sb at ptr.  */
 
 void
 sb_add_sb (sb *ptr, sb *s)
@@ -118,7 +115,7 @@ sb_add_sb (sb *ptr, sb *s)
   ptr->len += s->len;
 }
 
-/* make sure that the sb at ptr has room for another len characters,
+/* Make sure that the sb at ptr has room for another len characters,
    and grow it if it doesn't.  */
 
 static void
@@ -128,6 +125,7 @@ sb_check (sb *ptr, int len)
     {
       sb tmp;
       int pot = ptr->pot;
+
       while (ptr->len + len >= 1 << pot)
 	pot++;
       sb_build (&tmp, pot);
@@ -137,7 +135,7 @@ sb_check (sb *ptr, int len)
     }
 }
 
-/* make the sb at ptr point back to the beginning.  */
+/* Make the sb at ptr point back to the beginning.  */
 
 void
 sb_reset (sb *ptr)
@@ -145,7 +143,7 @@ sb_reset (sb *ptr)
   ptr->len = 0;
 }
 
-/* add character c to the end of the sb at ptr.  */
+/* Add character c to the end of the sb at ptr.  */
 
 void
 sb_add_char (sb *ptr, int c)
@@ -154,7 +152,7 @@ sb_add_char (sb *ptr, int c)
   ptr->ptr[ptr->len++] = c;
 }
 
-/* add null terminated string s to the end of sb at ptr.  */
+/* Add null terminated string s to the end of sb at ptr.  */
 
 void
 sb_add_string (sb *ptr, const char *s)
@@ -165,7 +163,7 @@ sb_add_string (sb *ptr, const char *s)
   ptr->len += len;
 }
 
-/* add string at s of length len to sb at ptr */
+/* Add string at s of length len to sb at ptr */
 
 void
 sb_add_buffer (sb *ptr, const char *s, int len)
@@ -175,7 +173,7 @@ sb_add_buffer (sb *ptr, const char *s, int len)
   ptr->len += len;
 }
 
-/* like sb_name, but don't include the null byte in the string.  */
+/* Like sb_name, but don't include the null byte in the string.  */
 
 char *
 sb_terminate (sb *in)
@@ -185,8 +183,8 @@ sb_terminate (sb *in)
   return in->ptr;
 }
 
-/* start at the index idx into the string in sb at ptr and skip
-   whitespace. return the index of the first non whitespace character */
+/* Start at the index idx into the string in sb at ptr and skip
+   whitespace. return the index of the first non whitespace character.  */
 
 int
 sb_skip_white (int idx, sb *ptr)
@@ -198,7 +196,7 @@ sb_skip_white (int idx, sb *ptr)
   return idx;
 }
 
-/* start at the index idx into the sb at ptr. skips whitespace,
+/* Start at the index idx into the sb at ptr. skips whitespace,
    a comma and any following whitespace. returns the index of the
    next character.  */
 

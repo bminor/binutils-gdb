@@ -1,3 +1,8 @@
+2005-05-06  Nick Clifton  <nickc@redhat.com>
+
+	* sb.h: Fix formatting of comments.
+	* sb.c: Fix formatting of comments.
+
 2005-05-06  Jan Beulich  <jbeulich@novell.com>
 
 	* sb.h (sb_add_buffer): Reintroduce.
