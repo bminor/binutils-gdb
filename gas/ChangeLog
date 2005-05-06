@@ -109,21 +109,7 @@
 	config/te-netware.h, config/te-sparcaout.h, config/te-sun3.h,
 	config/te-tmips.h, config/te-vxworks.h, config/vax-inst.h,
 	config/xtensa-istack.h, config/xtensa-relax.c,
-	config/xtensa-relax.h, doc/fdl.texi,
-	testsuite/gas/all/itbl-test.c, testsuite/gas/all/test-example.c,
-	testsuite/gas/all/test-gen.c, testsuite/gas/arm/maverick.c,
-	testsuite/gas/cris/cris.exp, testsuite/gas/hppa/basic/basic.exp,
-	testsuite/gas/hppa/parse/parse.exp,
-	testsuite/gas/hppa/reloc/reloc.exp,
-	testsuite/gas/hppa/unsorted/unsorted.exp,
-	testsuite/gas/m88k/m88k.exp, testsuite/gas/mmix/mmix-err.exp,
-	testsuite/gas/mmix/mmix-list.exp, testsuite/gas/mmix/mmix.exp,
-	testsuite/gas/mn10200/basic.exp, testsuite/gas/mn10300/am33-2.c,
-	testsuite/gas/mn10300/basic.exp, testsuite/gas/pdp11/opcode.s,
-	testsuite/gas/ppc/aix.exp, testsuite/gas/sh/basic.exp,
-	testsuite/gas/sh/err.exp, testsuite/gas/sh/arch/arch.exp,
-	testsuite/gas/sh/sh64/sh64.exp, testsuite/gas/v850/basic.exp,
-	testsuite/lib/gas-defs.exp
+	config/xtensa-relax.h, doc/fdl.texi
 
 2005-05-05  Nick Clifton  <nickc@redhat.com>
 
@@ -692,7 +678,6 @@
 	* config/tc-arm.h (TC_SEGMENT_INFO_TYPE): Redefined as struct
 	arm_segment_info_type.
 	(arm_segment_info_type): New struct.
-	* testsuite/gas/arm/unwind.d: Update expected output.
 
 2005-03-28  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
@@ -1701,8 +1686,6 @@
 	BFD_RELOC_UNUSED same as previous meaning of BFD_RELOC_NONE.
 	(create_unwind_entry): Output dependency on the required personality
 	routines.
-	testsuite/gas/arm/unwind.d: Alter expected output to include
-	dependency on __aeabi_unwind_cpp_pr[01].
 
 2005-02-07  Nathan Sidwell  <nathan@codesourcery.com>
 
@@ -3705,23 +3688,6 @@
 	allow <arch>-up ISA variants.
 	(sh_elf_final_processing): Replace if-else chain with a call to
 	sh_find_elf_flags().
-	* testsuite/gas/sh/arch: New directory.
-	* testsuite/gas/sh/arch/arch.exp: New test script.
-	* testsuite/gas/sh/arch/arch_expected.txt: New file.
-	* testsuite/gas/sh/arch/sh.s: New file.
-	* testsuite/gas/sh/arch/sh2.s: New file.
-	* testsuite/gas/sh/arch/sh-dsp.s: New file.
-	* testsuite/gas/sh/arch/sh2e.s: New file.
-	* testsuite/gas/sh/arch/sh3-nommu.s: New file.
-	* testsuite/gas/sh/arch/sh3.s: New file.
-	* testsuite/gas/sh/arch/sh3-dsp.s: New file.
-	* testsuite/gas/sh/arch/sh3e.s: New file.
-	* testsuite/gas/sh/arch/sh4-nommu-nofpu.s: New file.
-	* testsuite/gas/sh/arch/sh4-nofpu.s: New file.
-	* testsuite/gas/sh/arch/sh4.s: New file.
-	* testsuite/gas/sh/arch/sh4a-nofpu.s: New file.
-	* testsuite/gas/sh/arch/sh4al-dsp.s: New file.
-	* testsuite/gas/sh/arch/sh4a.s: New file.
 
 2004-05-28  Peter Barada <peter@the-baradas.com>
 

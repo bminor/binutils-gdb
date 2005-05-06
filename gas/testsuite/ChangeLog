@@ -21,6 +21,20 @@
 
 	* gas/i386/i386.exp: Don't run divide test on vxworks.
 
+2005-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* Update the address and phone number of the FSF organization in
+	the GPL notices in the following files:
+	gas/all/itbl-test.c, gas/all/test-example.c, gas/all/test-gen.c,
+	gas/arm/maverick.c, gas/cris/cris.exp, gas/hppa/basic/basic.exp,
+	gas/hppa/parse/parse.exp, gas/hppa/reloc/reloc.exp,
+	gas/hppa/unsorted/unsorted.exp, gas/m88k/m88k.exp,
+	gas/mmix/mmix-err.exp, gas/mmix/mmix-list.exp, gas/mmix/mmix.exp,
+	gas/mn10200/basic.exp, gas/mn10300/am33-2.c,
+	gas/mn10300/basic.exp, gas/pdp11/opcode.s, gas/ppc/aix.exp,
+	gas/sh/basic.exp, gas/sh/err.exp, gas/sh/arch/arch.exp,
+	gas/sh/sh64/sh64.exp, gas/v850/basic.exp, lib/gas-defs.exp
+
 2005-05-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* gas/sh/basic.exp: Replace linux-gnu with linux-* to allow for
@@ -158,6 +172,10 @@
 
 	* gas/arm/tls.s, gas/arm/tls.d: New files.
 	* gas/arm/arm.exp: Run TLS test.
+
+2005-03-29  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/unwind.d: Update expected output.
 
 2005-03-28  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -341,7 +359,7 @@
 	* gas/arc/extensions.d: Likewise.
 	* gas/arc/warn.s: Warnings for readonly core registers accessed.
 	* gas/arc/warn.d: Likewise.
-	* testsuite/gas/arc/arc.exp: Run extensions testcase.
+	* gas/arc/arc.exp: Run extensions testcase.
 
 2005-03-03  Richard Sandiford  <rsandifo@redhat.com>
 
@@ -571,6 +589,11 @@
 
 	* gas/ia64/ia64.exp: Pass -munwind-check=error for unwind-err
 	and proc.
+
+2005-02-10  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/unwind.d: Alter expected output to include dependency on
+	__aeabi_unwind_cpp_pr[01].
 
 2005-02-09  Jan Beulich  <jbeulich@novell.com>
 
@@ -830,15 +853,15 @@
 
 2004-11-29  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
-	* testsuite/gas/m32r/rela-1.s: New test.
-	* testsuite/gas/m32r/rela-1.d: Expected disassembly.
-	* testsuite/gas/m32r/m32r.exp: Run the new test.
-	* testsuite/gas/m32r/relax-1.d: Update for fixed pcrel reloc
+	* gas/m32r/rela-1.s: New test.
+	* gas/m32r/rela-1.d: Expected disassembly.
+	* gas/m32r/m32r.exp: Run the new test.
+	* gas/m32r/relax-1.d: Update for fixed pcrel reloc
 	generation.
 
 2004-11-27  Richard Earnshaw  <rearnsha@arm.com>
 
-	* gas/testsuite/arm/thumbv6.d (setend): Remove stray tab at end
+	* gas/arm/thumbv6.d (setend): Remove stray tab at end
 	of dump pattern.
 
 2004-11-25  H.J. Lu  <hongjiu.lu@intel.com>
@@ -1388,6 +1411,26 @@
 	addressing with zero offset into mode 2 addressing.
 	* gas/m68k/mode5.d: New file: Expected disassmbly.
 	* gas/m68k/all.exp: Run new test.
+
+2004-05-28  Andrew Stubbs <andrew.stubbs@superh.com>
+
+	* gas/sh/arch: New directory.
+	* gas/sh/arch/arch.exp: New test script.
+	* gas/sh/arch/arch_expected.txt: New file.
+	* gas/sh/arch/sh.s: New file.
+	* gas/sh/arch/sh2.s: New file.
+	* gas/sh/arch/sh-dsp.s: New file.
+	* gas/sh/arch/sh2e.s: New file.
+	* gas/sh/arch/sh3-nommu.s: New file.
+	* gas/sh/arch/sh3.s: New file.
+	* gas/sh/arch/sh3-dsp.s: New file.
+	* gas/sh/arch/sh3e.s: New file.
+	* gas/sh/arch/sh4-nommu-nofpu.s: New file.
+	* gas/sh/arch/sh4-nofpu.s: New file.
+	* gas/sh/arch/sh4.s: New file.
+	* gas/sh/arch/sh4a-nofpu.s: New file.
+	* gas/sh/arch/sh4al-dsp.s: New file.
+	* gas/sh/arch/sh4a.s: New file.
 
 2004-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
