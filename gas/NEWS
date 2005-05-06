@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Macros with a variable number of arguments are now supported. See the
+  documentation for how this works.
+
 * Added --reduce-memory-overheads switch to reduce the size of the hash
   tables used, at the expense of longer assembly times, and
   --hash-size=<NUMBER> to set the size of the hash tables used by gas.

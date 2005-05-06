@@ -27,8 +27,8 @@ if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] } {
     run_dump_test irp
     run_dump_test rept
     run_dump_test repeat
+    run_dump_test vararg
 }
-
 
 gas_test_error "err.s" "" "macro infinite recursion"
 

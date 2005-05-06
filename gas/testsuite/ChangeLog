@@ -1,5 +1,12 @@
 2005-05-06  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/macros/badarg.s: Add check for bad qualifier specification.
+	* gas/macros/badarg.l: Adjust.
+	* gas/macros/vararg.[sd]: New.
+	* gas/macros/macros.exp: Run new test.
+
+2005-05-06  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/all/cond.s: Also test .ifb/.ifnb.
 	* gas/all/cond.d: Adjust.
 

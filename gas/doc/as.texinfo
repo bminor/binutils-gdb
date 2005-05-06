@@ -4866,7 +4866,10 @@ With that definition, @samp{SUM 0,5} is equivalent to this assembly input:
 @cindex @code{macro} directive
 Begin the definition of a macro called @var{macname}.  If your macro
 definition requires arguments, specify their names after the macro name,
-separated by commas or spaces.  You can supply a default value for any
+separated by commas or spaces.  You can qualify the macro argument to
+indicate whether all invocations must specify a non-blank value (through
+@samp{:@code{req}}), or whether it takes all of the remaining arguments
+(through @samp{:@code{vararg}}).  You can supply a default value for any
 macro argument by following the name with @samp{=@var{deflt}}.  You
 cannot define two macros with the same @var{macname} unless it has been
 subject to the @code{.purgem} directive (@xref{Purgem}.) between the two
@@ -4892,6 +4895,12 @@ After the definition is complete, you can call the macro either as
 ,@var{b}} (with @samp{\p1} evaluating as the default, in this case
 @samp{0}, and @samp{\p2} evaluating to @var{b}).
 @end table
+
+@item .macro m p1:req, p2=0, p3:vararg
+Begin the definition of a macro called @code{m}, with at least three
+arguments.  The first argument must always have a value specified, but
+not the second, which instead has a default value. The third formal
+will get assigned all remaining arguments specified at invocation time.
 
 When you call a macro, you can specify the argument values either by
 position, or by keyword.  For example, @samp{sum 9,17} is equivalent to

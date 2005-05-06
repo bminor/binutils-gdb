@@ -1,5 +1,26 @@
 2005-05-06  Jan Beulich  <jbeulich@novell.com>
 
+	* macro.c (new_formal, del_formal): New.
+	(do_formals): Use new_formal. Check for and parse qualifier. Warn if
+	required argument has default value. Stop looking for more formal
+	when there was a vararg one.
+	(macro_expand_body): Use new_formal and del_formal.
+	(macro_expand): Likewise. Initialize local variable err. Don't
+	return immediately when encountering an error. Warn when keyword
+	argument already had a value assigned. Eliminate duplicate clearing
+	of argument value. When current positional argument matches parameter
+	of vararg type, assign to it all the remaining arguments. Issue error
+	when required parameter does not have value.
+	(free_macro): Use del_formal.
+	(expand_irp): Initialize formal type. Free buffers associated with
+	formal prior to returning.
+	* macro.h (struct formal_struct): Add new field 'type' with new
+	enumeration type 'formal_type'.
+	* doc/as.texinfo: Document macro parameter qualifiers.
+	* NEWS: Mention new functionality.
+
+2005-05-06  Jan Beulich  <jbeulich@novell.com>
+
 	* cond.c (s_ifb): New.
 	* read.c (potable): Add s_ifb as handler for .ifb and .ifnb.
 	* read.h (s_ifb): Prototype.

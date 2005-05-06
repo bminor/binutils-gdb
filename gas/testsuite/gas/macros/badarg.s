@@ -32,3 +32,19 @@
 
 	m6
 	m7
+
+	.noaltmacro
+
+	.macro m8, arg :
+	.endm
+
+	.macro m9, arg : qual
+	.endm
+
+	.macro m10, arg : req = def
+	.endm
+
+	m10
+
+	.macro m11, arg1 : vararg, arg2
+	.endm

@@ -71,6 +71,8 @@ extern void *alloca ();
 static int get_token (int, sb *, sb *);
 static int getstring (int, sb *, sb *);
 static int get_any_string (int, sb *, sb *, int, int);
+static formal_entry *new_formal (void);
+static void del_formal (formal_entry *);
 static int do_formals (macro_entry *, int, sb *);
 static int get_apost_token (int, sb *, sb *, int);
 static int sub_actual (int, sb *, sb *, struct hash_control *, int, sb *, int);
@@ -465,6 +467,34 @@ get_any_string (int idx, sb *in, sb *out, int expand, int pretend_quoted)
   return idx;
 }
 
+/* Allocate a new formal.  */
+
+static formal_entry *
+new_formal (void)
+{
+  formal_entry *formal;
+
+  formal = xmalloc (sizeof (formal_entry));
+
+  sb_new (&formal->name);
+  sb_new (&formal->def);
+  sb_new (&formal->actual);
+  formal->next = NULL;
+  formal->type = FORMAL_OPTIONAL;
+  return formal;
+}
+
+/* Free a formal.  */
+
+static void
+del_formal (formal_entry *formal)
+{
+  sb_kill (&formal->actual);
+  sb_kill (&formal->def);
+  sb_kill (&formal->name);
+  free (formal);
+}
+
 /* Pick up the formal parameters of a macro definition.  */
 
 static int
@@ -476,14 +506,8 @@ do_formals (macro_entry *macro, int idx, sb *in)
   idx = sb_skip_white (idx, in);
   while (idx < in->len)
     {
-      formal_entry *formal;
+      formal_entry *formal = new_formal ();
       int cidx;
-
-      formal = (formal_entry *) xmalloc (sizeof (formal_entry));
-
-      sb_new (&formal->name);
-      sb_new (&formal->def);
-      sb_new (&formal->actual);
 
       idx = get_token (idx, in, &formal->name);
       if (formal->name.len == 0)
@@ -494,15 +518,57 @@ do_formals (macro_entry *macro, int idx, sb *in)
 	}
       idx = sb_skip_white (idx, in);
       /* This is a formal.  */
+      name = sb_terminate (&formal->name);
+      if (! macro_mri
+	  && idx < in->len
+	  && in->ptr[idx] == ':'
+	  && (! is_name_beginner (':')
+	      || idx + 1 >= in->len
+	      || ! is_part_of_name (in->ptr[idx + 1])))
+	{
+	  /* Got a qualifier.  */
+	  sb qual;
+
+	  sb_new (&qual);
+	  idx = get_token (sb_skip_white (idx + 1, in), in, &qual);
+	  sb_terminate (&qual);
+	  if (qual.len == 0)
+	    as_bad_where (macro->file,
+			  macro->line,
+			  _("Missing parameter qualifier for `%s' in macro `%s'"),
+			  name,
+			  macro->name);
+	  else if (strcmp (qual.ptr, "req") == 0)
+	    formal->type = FORMAL_REQUIRED;
+	  else if (strcmp (qual.ptr, "vararg") == 0)
+	    formal->type = FORMAL_VARARG;
+	  else
+	    as_bad_where (macro->file,
+			  macro->line,
+			  _("`%s' is not a valid parameter qualifier for `%s' in macro `%s'"),
+			  qual.ptr,
+			  name,
+			  macro->name);
+	  sb_kill (&qual);
+	  idx = sb_skip_white (idx, in);
+	}
       if (idx < in->len && in->ptr[idx] == '=')
 	{
 	  /* Got a default.  */
 	  idx = get_any_string (idx + 1, in, &formal->def, 1, 0);
 	  idx = sb_skip_white (idx, in);
+	  if (formal->type == FORMAL_REQUIRED)
+	    {
+	      sb_reset (&formal->def);
+	      as_warn_where (macro->file,
+			    macro->line,
+			    _("Pointless default value for required parameter `%s' in macro `%s'"),
+			    name,
+			    macro->name);
+	    }
 	}
 
       /* Add to macro's hash table.  */
-      name = sb_terminate (&formal->name);
       if (! hash_find (macro->formal_hash, name))
 	hash_jam (macro->formal_hash, name, formal);
       else
@@ -513,6 +579,10 @@ do_formals (macro_entry *macro, int idx, sb *in)
 		      macro->name);
 
       formal->index = macro->formal_count++;
+      *p = formal;
+      p = &formal->next;
+      if (formal->type == FORMAL_VARARG)
+	break;
       cidx = idx;
       idx = sb_skip_comma (idx, in);
       if (idx != cidx && idx >= in->len)
@@ -520,23 +590,14 @@ do_formals (macro_entry *macro, int idx, sb *in)
 	  idx = cidx;
 	  break;
 	}
-      *p = formal;
-      p = &formal->next;
-      *p = NULL;
     }
 
   if (macro_mri)
     {
-      formal_entry *formal;
+      formal_entry *formal = new_formal ();
 
       /* Add a special NARG formal, which macro_expand will set to the
          number of arguments.  */
-      formal = (formal_entry *) xmalloc (sizeof (formal_entry));
-
-      sb_new (&formal->name);
-      sb_new (&formal->def);
-      sb_new (&formal->actual);
-
       /* The same MRI assemblers which treat '@' characters also use
          the name $NARG.  At least until we find an exception.  */
       if (macro_strip_at)
@@ -557,7 +618,6 @@ do_formals (macro_entry *macro, int idx, sb *in)
 
       formal->index = NARG_INDEX;
       *p = formal;
-      formal->next = NULL;
     }
 
   return idx;
@@ -827,10 +887,8 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	      while (in->ptr[src] != '\n')
 		{
 		  const char *name;
-		  formal_entry *f;
+		  formal_entry *f = new_formal ();
 
-		  f = (formal_entry *) xmalloc (sizeof (formal_entry));
-		  sb_new (&f->name);
 		  src = get_token (src, in, &f->name);
 		  name = sb_terminate (&f->name);
 		  if (! hash_find (formal_hash, name))
@@ -838,8 +896,6 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 		      static int loccnt;
 		      char buf[20];
 
-		      sb_new (&f->def);
-		      sb_new (&f->actual);
 		      f->index = LOCAL_INDEX;
 		      f->next = loclist;
 		      loclist = f;
@@ -857,8 +913,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 				    macro->line + macro_line,
 				    _("`%s' was already used as parameter (or another local) name"),
 				    name);
-		      sb_kill (&f->name);
-		      free (f);
+		      del_formal (f);
 		    }
 
 		  src = sb_skip_comma (src, in);
@@ -935,10 +990,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
       /* Setting the value to NULL effectively deletes the entry.  We
          avoid calling hash_delete because it doesn't reclaim memory.  */
       hash_jam (formal_hash, sb_terminate (&loclist->name), NULL);
-      sb_kill (&loclist->name);
-      sb_kill (&loclist->def);
-      sb_kill (&loclist->actual);
-      free (loclist);
+      del_formal (loclist);
       loclist = f;
     }
 
@@ -957,7 +1009,7 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
   int is_positional = 0;
   int is_keyword = 0;
   int narg = 0;
-  const char *err;
+  const char *err = NULL;
 
   sb_new (&t);
 
@@ -981,12 +1033,8 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 		  && in->ptr[idx] != ' '
 		  && in->ptr[idx] != '\t')
 	    {
-	      formal_entry *n;
+	      formal_entry *n = new_formal ();
 
-	      n = (formal_entry *) xmalloc (sizeof (formal_entry));
-	      sb_new (&n->name);
-	      sb_new (&n->def);
-	      sb_new (&n->actual);
 	      n->index = QUAL_INDEX;
 
 	      n->next = m->formals;
@@ -1021,16 +1069,27 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	  sb_reset (&t);
 	  idx = get_token (idx, in, &t);
 	  if (in->ptr[idx] != '=')
-	    return _("confusion in formal parameters");
+	    {
+	      err = _("confusion in formal parameters");
+	      break;
+	    }
 
 	  /* Lookup the formal in the macro's list.  */
 	  ptr = (formal_entry *) hash_find (m->formal_hash, sb_terminate (&t));
 	  if (!ptr)
-	    return _("macro formal argument does not exist");
+	    as_bad (_("Parameter named `%s' does not exist for macro `%s'"),
+		    t.ptr,
+		    m->name);
 	  else
 	    {
 	      /* Insert this value into the right place.  */
-	      sb_reset (&ptr->actual);
+	      if (ptr->actual.len)
+		{
+		  as_warn (_("Value for parameter `%s' of macro `%s' was already specified"),
+			   ptr->name.ptr,
+			   m->name);
+		  sb_reset (&ptr->actual);
+		}
 	      idx = get_any_string (idx + 1, in, &ptr->actual, 0, 0);
 	      if (ptr->actual.len > 0)
 		++narg;
@@ -1041,7 +1100,10 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	  /* This is a positional arg.  */
 	  is_positional = 1;
 	  if (is_keyword)
-	    return _("can't mix positional and keyword arguments");
+	    {
+	      err = _("can't mix positional and keyword arguments");
+	      break;
+	    }
 
 	  if (!f)
 	    {
@@ -1049,13 +1111,12 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	      int c;
 
 	      if (!macro_mri)
-		return _("too many positional arguments");
+		{
+		  err = _("too many positional arguments");
+		  break;
+		}
 
-	      f = (formal_entry *) xmalloc (sizeof (formal_entry));
-	      sb_new (&f->name);
-	      sb_new (&f->def);
-	      sb_new (&f->actual);
-	      f->next = NULL;
+	      f = new_formal ();
 
 	      c = -1;
 	      for (pf = &m->formals; *pf != NULL; pf = &(*pf)->next)
@@ -1067,8 +1128,13 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	      f->index = c;
 	    }
 
-	  sb_reset (&f->actual);
-	  idx = get_any_string (idx, in, &f->actual, 1, 0);
+	  if (f->type != FORMAL_VARARG)
+	    idx = get_any_string (idx, in, &f->actual, 1, 0);
+	  else
+	    {
+	      sb_add_buffer (&f->actual, in->ptr + idx, in->len - idx);
+	      idx = in->len;
+	    }
 	  if (f->actual.len > 0)
 	    ++narg;
 	  do
@@ -1089,19 +1155,29 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	}
     }
 
-  if (macro_mri)
+  if (! err)
     {
-      char buffer[20];
+      for (ptr = m->formals; ptr; ptr = ptr->next)
+	{
+	  if (ptr->type == FORMAL_REQUIRED && ptr->actual.len == 0)
+	    as_bad (_("Missing value for required parameter `%s' of macro `%s'"),
+		    ptr->name.ptr,
+		    m->name);
+	}
 
-      sb_reset (&t);
-      sb_add_string (&t, macro_strip_at ? "$NARG" : "NARG");
-      ptr = (formal_entry *) hash_find (m->formal_hash, sb_terminate (&t));
-      sb_reset (&ptr->actual);
-      sprintf (buffer, "%d", narg);
-      sb_add_string (&ptr->actual, buffer);
+      if (macro_mri)
+	{
+	  char buffer[20];
+
+	  sb_reset (&t);
+	  sb_add_string (&t, macro_strip_at ? "$NARG" : "NARG");
+	  ptr = (formal_entry *) hash_find (m->formal_hash, sb_terminate (&t));
+	  sprintf (buffer, "%d", narg);
+	  sb_add_string (&ptr->actual, buffer);
+	}
+
+      err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash, m);
     }
-
-  err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash, m);
 
   /* Discard any unnamed formal arguments.  */
   if (macro_mri)
@@ -1115,11 +1191,8 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	    pf = &(*pf)->next;
 	  else
 	    {
-	      sb_kill (&(*pf)->name);
-	      sb_kill (&(*pf)->def);
-	      sb_kill (&(*pf)->actual);
 	      f = (*pf)->next;
-	      free (*pf);
+	      del_formal (*pf);
 	      *pf = f;
 	    }
 	}
@@ -1191,14 +1264,11 @@ free_macro(macro_entry *macro)
 
   for (formal = macro->formals; formal; )
     {
-      void *ptr;
+      formal_entry *f;
 
-      sb_kill (&formal->name);
-      sb_kill (&formal->def);
-      sb_kill (&formal->actual);
-      ptr = formal;
+      f = formal;
       formal = formal->next;
-      free (ptr);
+      del_formal (f);
     }
   hash_die (macro->formal_hash);
   sb_kill (&macro->sub);
@@ -1263,6 +1333,7 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
 
   f.index = 1;
   f.next = NULL;
+  f.type = FORMAL_OPTIONAL;
 
   sb_reset (out);
 
@@ -1308,6 +1379,9 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
     }
 
   hash_die (h);
+  sb_kill (&f.actual);
+  sb_kill (&f.def);
+  sb_kill (&f.name);
   sb_kill (&sub);
 
   return err;

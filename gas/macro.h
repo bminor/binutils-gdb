@@ -45,6 +45,12 @@ typedef struct formal_struct {
   sb def;			/* The default value.  */
   sb actual;			/* The actual argument (changed on each expansion).  */
   int index;			/* The index of the formal 0..formal_count - 1.  */
+  enum formal_type
+    {
+      FORMAL_OPTIONAL,
+      FORMAL_REQUIRED,
+      FORMAL_VARARG
+    } type;			/* The kind of the formal.  */
 } formal_entry;
 
 /* Other values found in the index field of a formal_entry.  */
