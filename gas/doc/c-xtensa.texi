@@ -618,7 +618,7 @@ can be used to load a pointer to the symbol @code{sym} into register
 the data in a literal pool.
 
 Literal pools for absolute mode @code{L32R} instructions
-(@pxref{Absolute Literals Directive}) are placed in a seperate
+(@pxref{Absolute Literals Directive}) are placed in a separate
 @code{.lit4} section.  By default literal pools for PC-relative mode
 @code{L32R} instructions are placed in a separate @code{.literal}
 section; however, when using the @samp{--text-@-section-@-literals}

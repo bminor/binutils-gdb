@@ -1,5 +1,9 @@
 2005-05-06  Bob Wilson  <bob.wilson@acm.org>
 
+	* doc/c-xtensa.texi (Literal Directive): Spelling correction.
+
+2005-05-06  Bob Wilson  <bob.wilson@acm.org>
+
 	* config/tc-xtensa.c: Remove excess whitespace.
 	* config/tc-xtensa.h: Likewise.
 	* config/xtensa-istack.h: Likewise.
