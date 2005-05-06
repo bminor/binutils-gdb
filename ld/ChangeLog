@@ -1,3 +1,8 @@
+2005-05-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_init_fini_syms):
+	Just check link_info.executable.
+
 2005-05-06  Nick Clifton  <nickc@redhat.com>
 
 	* Update the address and phone number of the FSF organization in
