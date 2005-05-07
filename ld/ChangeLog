@@ -1,5 +1,10 @@
 2005-05-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_init_fini_syms):
+	Put back !link_info.relocatable.
+
+2005-05-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR 878
 	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_init_fini_syms):
 	Just check link_info.executable.

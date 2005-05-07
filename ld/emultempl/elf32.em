@@ -1475,7 +1475,7 @@ gld${EMULATION_NAME}_provide_bound_symbols (const char *sec,
 static void
 gld${EMULATION_NAME}_provide_init_fini_syms (void)
 {
-  if (link_info.executable)
+  if (!link_info.relocatable && link_info.executable)
     {
       gld${EMULATION_NAME}_provide_bound_symbols (".preinit_array",
 						  "__preinit_array_start",
