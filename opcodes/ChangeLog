@@ -1,5 +1,9 @@
 2005-05-07  Nick Clifton  <nickc@redhat.com>
 
+	* po/nl.po: Updated translation.
+
+2005-05-07  Nick Clifton  <nickc@redhat.com>
+
 	* Update the address and phone number of the FSF organization in
 	the GPL notices in the following files:
 	a29k-dis.c, aclocal.m4, alpha-dis.c, alpha-opc.c, arc-dis.c,
