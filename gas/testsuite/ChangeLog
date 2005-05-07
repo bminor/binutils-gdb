@@ -1,3 +1,11 @@
+2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 843
+	* gas/i386/i386.exp: Add x86-64-branch.
+
+	* gas/i386/x86-64-branch.d: New.
+	* gas/i386/x86-64-branch.s: New.
+
 2005-05-06  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/macros/badarg.s: Add check for bad qualifier specification.

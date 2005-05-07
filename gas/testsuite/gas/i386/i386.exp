@@ -127,6 +127,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_list_test "x86-64-inval" "-al"
     run_list_test "x86-64-segment" "-al"
     run_list_test "x86-64-inval-seg" "-al"
+    run_dump_test "x86-64-branch"
 
     # For ELF targets verify that @unwind works.
     if { ([istarget "*-*-elf*"] || [istarget "*-*-linux*"]

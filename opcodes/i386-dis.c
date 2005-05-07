@@ -197,7 +197,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Eq OP_E, q_mode
 #define Edq OP_E, dq_mode
 #define Edqw OP_E, dqw_mode
-#define indirEv OP_indirE, v_mode
+#define indirEv OP_indirE, branch_v_mode
 #define indirEp OP_indirE, f_mode
 #define Ew OP_E, w_mode
 #define Ma OP_E, v_mode
@@ -323,6 +323,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define dqw_mode 12 /* registers like dq_mode, memory like w_mode.  */
 #define f_mode 13 /* 4- or 6-byte pointer operand */
 #define const_1_mode 14
+#define branch_v_mode 15 /* v_mode for branch.  */
 
 #define es_reg 100
 #define cs_reg 101
@@ -3155,6 +3156,18 @@ OP_E (int bytemode, int sizeflag)
 	  else
 	    oappend (names32[rm + add]);
 	  break;
+	case branch_v_mode:
+	  if (mode_64bit)
+	    oappend (names64[rm + add]);
+	  else
+	    {
+	      if ((sizeflag & DFLAG) || bytemode != branch_v_mode)
+		oappend (names32[rm + add]);
+	      else
+		oappend (names16[rm + add]);
+	      used_prefixes |= (prefixes & PREFIX_DATA);
+	    }
+	  break;
 	case v_mode:
 	case dq_mode:
 	case dqw_mode:
@@ -3256,6 +3269,7 @@ OP_E (int bytemode, int sizeflag)
 		case dqw_mode:
 		  oappend ("WORD PTR ");
 		  break;
+		case branch_v_mode:
 		case v_mode:
 		case dq_mode:
 		  USED_REX (REX_MODE64);
