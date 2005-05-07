@@ -1,3 +1,8 @@
+2005-05-04  Nick Clifton  <nickc@redhat.com>
+
+	* chew.c: Update the address and phone number of the FSF
+	organization in the GPL notice.
+
 2005-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (INCLUDES): Remove -D_GNU_SOURCE.
@@ -33,6 +38,11 @@
 	building chew.
 	* Makefile.in: Regenerate.
 
+2005-02-01  Ben Elliston  <bje@au.ibm.com>
+
+	* chew.c: Remove #if 0'd code throughout. Similarly, collapse #if
+	1'd code.
+	
 2004-12-20  Ian Lance Taylor  <ian@c2microsystems.com>
 
 	* Makefile.am: Use $(SHELL) whenever we run move-if-change.
