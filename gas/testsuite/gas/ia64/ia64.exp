@@ -71,6 +71,7 @@ if [istarget "ia64-*"] then {
 	run_dump_test "alias"
 	run_dump_test "xdata"
 	run_dump_test "group-1"
+	run_dump_test "group-2"
     }
 
     run_dump_test "bundling"

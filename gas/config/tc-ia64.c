@@ -3535,7 +3535,8 @@ start_unwind_section (const segT text_seg, int sec_index)
   sec_name [sec_name_len] = '\0';
 
   /* Handle COMDAT group.  */
-  if (suffix == text_name && (text_seg->flags & SEC_LINK_ONCE) != 0)
+  if ((text_seg->flags & SEC_LINK_ONCE) != 0
+      && (elf_section_flags (text_seg) & SHF_GROUP) != 0)
     {
       char *section;
       size_t len, group_name_len;

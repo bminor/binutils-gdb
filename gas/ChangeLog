@@ -1,3 +1,9 @@
+2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 940
+	* config/tc-ia64.c (start_unwind_section): Properly check
+	comdat group with SHF_GROUP.
+
 2005-05-06  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/c-xtensa.texi (Literal Directive): Spelling correction.

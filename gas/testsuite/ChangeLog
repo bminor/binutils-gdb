@@ -1,5 +1,13 @@
 2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR 940
+	* gas/ia64/group-2.d: New.
+	* gas/ia64/group-2.s: New.
+
+	* gas/ia64/ia64.exp: Add "group-2".
+
+2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR 843
 	* gas/i386/i386.exp: Add x86-64-branch.
 
