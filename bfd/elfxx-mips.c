@@ -9892,13 +9892,63 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
   return TRUE;
 }
 
-struct bfd_elf_special_section const _bfd_mips_elf_special_sections[]=
+static struct bfd_elf_special_section const
+  mips_special_sections_l[]=
+{
+  { ".lit4",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { ".lit8",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { NULL,      0,  0, 0,              0 }
+};
+
+static struct bfd_elf_special_section const
+  mips_special_sections_m[]=
+{
+  { ".mdebug", 7,  0, SHT_MIPS_DEBUG, 0 },
+  { NULL,      0,  0, 0,              0 }
+};
+
+static struct bfd_elf_special_section const
+  mips_special_sections_s[]=
 {
   { ".sdata",  6, -2, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
   { ".sbss",   5, -2, SHT_NOBITS,     SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".lit4",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".lit8",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+};
+
+static struct bfd_elf_special_section const
+  mips_special_sections_u[]=
+{
   { ".ucode",  6,  0, SHT_MIPS_UCODE, 0 },
-  { ".mdebug", 7,  0, SHT_MIPS_DEBUG, 0 },
   { NULL,      0,  0, 0,              0 }
+};
+
+struct bfd_elf_special_section const *
+  _bfd_mips_elf_special_sections[27] =
+{
+  NULL,				/* 'a' */
+  NULL,				/* 'b' */
+  NULL,				/* 'c' */
+  NULL,				/* 'd' */
+  NULL,				/* 'e' */
+  NULL,				/* 'f' */
+  NULL,				/* 'g' */
+  NULL,				/* 'h' */
+  NULL,				/* 'i' */
+  NULL,				/* 'j' */
+  NULL,				/* 'k' */
+  mips_special_sections_l,	/* 'l' */
+  mips_special_sections_m,	/* 'm' */
+  NULL,				/* 'n' */
+  NULL,				/* 'o' */
+  NULL,				/* 'p' */
+  NULL,				/* 'q' */
+  NULL,				/* 'r' */
+  mips_special_sections_s,	/* 'm' */
+  NULL,				/* 't' */
+  mips_special_sections_u,	/* 'u' */
+  NULL,				/* 'v' */
+  NULL,				/* 'w' */
+  NULL,				/* 'x' */
+  NULL,				/* 'y' */
+  NULL,				/* 'z' */
+  NULL				/* other */
 };

@@ -535,13 +535,64 @@ m68hc12_elf_set_mach_from_flags (bfd *abfd)
      Page0 accesses are faster on the M68HC12.
    - The .vectors is the section that represents the interrupt
      vectors.  */
-static struct bfd_elf_special_section const elf32_m68hc12_special_sections[]=
+static struct bfd_elf_special_section const
+  m68hc12_special_sections_e[] =
 {
   { ".eeprom",   7, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,        0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  m68hc12_special_sections_s[]=
+{
   { ".softregs", 9, 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { NULL,        0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  m68hc12_special_sections_p[]=
+{
   { ".page0",    6, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,        0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  m68hc12_special_sections_v[]=
+{
   { ".vectors",  8, 0, SHT_PROGBITS, SHF_ALLOC },
   { NULL,        0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const *
+  elf32_m68hc12_special_sections[27] =
+{
+  NULL,				/* 'a' */
+  NULL,				/* 'b' */
+  NULL,				/* 'c' */
+  NULL,				/* 'd' */
+  m68hc12_special_sections_e,	/* 'e' */
+  NULL,				/* 'f' */
+  NULL,				/* 'g' */
+  NULL,				/* 'h' */
+  NULL,				/* 'i' */
+  NULL,				/* 'j' */
+  NULL,				/* 'k' */
+  NULL,				/* 'l' */
+  NULL,				/* 'm' */
+  NULL,				/* 'n' */
+  NULL,				/* 'o' */
+  m68hc12_special_sections_p,	/* 'p' */
+  NULL,				/* 'q' */
+  NULL,				/* 'r' */
+  m68hc12_special_sections_s,	/* 's' */
+  NULL,				/* 't' */
+  NULL,				/* 'u' */
+  m68hc12_special_sections_v,	/* 'v' */
+  NULL,				/* 'w' */
+  NULL,				/* 'x' */
+  NULL,				/* 'y' */
+  NULL,				/* 'z' */
+  NULL				/* other */
 };
 
 #define ELF_ARCH		bfd_arch_m68hc12

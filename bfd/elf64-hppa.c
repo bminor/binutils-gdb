@@ -2671,11 +2671,50 @@ elf64_hppa_elf_get_symbol_type (elf_sym, type)
     return type;
 }
 
-static struct bfd_elf_special_section const elf64_hppa_special_sections[]=
+static struct bfd_elf_special_section const
+  hppa_special_sections_f[]=
 {
   { ".fini",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,        0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  hppa_special_sections_i[]=
+{
   { ".init",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { NULL,       0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const *
+  elf64_hppa_special_sections[27] =
+{
+  NULL,				/* 'a' */
+  NULL,				/* 'b' */
+  NULL,				/* 'c' */
+  NULL,				/* 'd' */
+  NULL,				/* 'e' */
+  hppa_special_sections_f,	/* 'f' */
+  NULL,				/* 'g' */
+  NULL,				/* 'h' */
+  hppa_special_sections_i,	/* 'i' */
+  NULL,				/* 'j' */
+  NULL,				/* 'k' */
+  NULL,				/* 'l' */
+  NULL,				/* 'm' */
+  NULL,				/* 'n' */
+  NULL,				/* 'o' */
+  NULL,				/* 'f' */
+  NULL,				/* 'q' */
+  NULL,				/* 'r' */
+  NULL,				/* 's' */
+  NULL,				/* 't' */
+  NULL,				/* 'u' */
+  NULL,				/* 'v' */
+  NULL,				/* 'w' */
+  NULL,				/* 'x' */
+  NULL,				/* 'y' */
+  NULL,				/* 'z' */
+  NULL				/* other */
 };
 
 /* The hash bucket size is the standard one, namely 4.  */

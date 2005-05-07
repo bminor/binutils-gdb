@@ -6538,8 +6538,8 @@ elf32_arm_symbian_link_hash_table_create (bfd *abfd)
   return ret;
 }     
 
-static struct bfd_elf_special_section const 
-  elf32_arm_symbian_special_sections[]=
+static struct bfd_elf_special_section const
+  symbian_special_sections_d[]=
 {
   /* In a BPABI executable, the dynamic linking sections do not go in
      the loadable read-only segment.  The post-linker may wish to
@@ -6548,15 +6548,91 @@ static struct bfd_elf_special_section const
   { ".dynamic",        8,  0, SHT_DYNAMIC,  0 },
   { ".dynstr",         7,  0, SHT_STRTAB,   0 },
   { ".dynsym",         7,  0, SHT_DYNSYM,   0 },
+  { NULL,              0,  0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  symbian_special_sections_g[]=
+{
+  /* In a BPABI executable, the dynamic linking sections do not go in
+     the loadable read-only segment.  The post-linker may wish to
+     refer to these sections, but they are not part of the final
+     program image.  */
   { ".got",            4,  0, SHT_PROGBITS, 0 },
+  { NULL,              0,  0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  symbian_special_sections_h[]=
+{
+  /* In a BPABI executable, the dynamic linking sections do not go in
+     the loadable read-only segment.  The post-linker may wish to
+     refer to these sections, but they are not part of the final
+     program image.  */
   { ".hash",           5,  0, SHT_HASH,     0 },
+  { NULL,              0,  0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  symbian_special_sections_i[]=
+{
   /* These sections do not need to be writable as the SymbianOS
      postlinker will arrange things so that no dynamic relocation is
      required.  */
   { ".init_array",    11,  0, SHT_INIT_ARRAY, SHF_ALLOC },
+  { NULL,              0,  0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  symbian_special_sections_f[]=
+{
+  /* These sections do not need to be writable as the SymbianOS
+     postlinker will arrange things so that no dynamic relocation is
+     required.  */
   { ".fini_array",    11,  0, SHT_FINI_ARRAY, SHF_ALLOC },
+  { NULL,              0,  0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  symbian_special_sections_p[]=
+{
+  /* These sections do not need to be writable as the SymbianOS
+     postlinker will arrange things so that no dynamic relocation is
+     required.  */
   { ".preinit_array", 14,  0, SHT_PREINIT_ARRAY, SHF_ALLOC },
   { NULL,              0,  0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const *
+  elf32_arm_symbian_special_sections[27]=
+{
+  NULL,				/* 'a' */
+  NULL,				/* 'b' */
+  NULL,				/* 'c' */
+  symbian_special_sections_d,	/* 'd' */
+  NULL,				/* 'e' */
+  symbian_special_sections_f,	/* 'f' */
+  symbian_special_sections_g,	/* 'g' */
+  symbian_special_sections_h,	/* 'h' */
+  symbian_special_sections_i,	/* 'i' */
+  NULL,				/* 'j' */
+  NULL,				/* 'k' */
+  NULL,				/* 'l' */
+  NULL,				/* 'm' */
+  NULL,				/* 'n' */
+  NULL,				/* 'o' */
+  symbian_special_sections_p,	/* 'p' */
+  NULL,				/* 'q' */
+  NULL,				/* 'r' */
+  NULL,				/* 's' */
+  NULL,				/* 't' */
+  NULL,				/* 'u' */
+  NULL,				/* 'v' */
+  NULL,				/* 'w' */
+  NULL,				/* 'x' */
+  NULL,				/* 'y' */
+  NULL,				/* 'z' */
+  NULL				/* other */
 };
 
 static void

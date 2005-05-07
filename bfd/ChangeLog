@@ -1,3 +1,27 @@
+2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Update special_sections to
+	array of pointer to bfd_elf_special_section.
+	* elf.c (special_sections): Likewise.
+	* elf32-arm.c (elf32_arm_symbian_special_sections): Likewise.
+	* elf32-m32r.c (m32r_elf_special_sections): Likewise.
+	* elf32-m68hc11.c (elf32_m68hc11_special_sections): Likewise.
+	* elf32-m68hc12.c (elf32_m68hc12_special_sections): Likewise.
+	* elf32-mcore.c (mcore_elf_special_sections): Likewise.
+	* elf32-ppc.c (ppc_elf_special_sections): Likewise.
+	* elf32-sh64.c (sh64_elf_special_sections): Likewise.
+	* elf32-v850.c (v850_elf_special_sections): Likewise.
+	* elf32-xtensa.c (elf_xtensa_special_sections): Likewise.
+	* elf64-alpha.c (elf64_alpha_special_sections): Likewise.
+	* elf64-hppa.c (elf64_hppa_special_sections): Likewise.
+	* elf64-ppc.c (ppc64_elf_special_sections): Likewise.
+	* elf64-sh64.c (sh64_elf64_special_sections): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_special_sections): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_special_sections): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_special_sections): Likewise.
+
+	* elf.c (get_special_section): Updated.
+
 2005-05-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_backend_data): Remove got_symbol_offset.

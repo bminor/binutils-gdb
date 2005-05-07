@@ -974,8 +974,9 @@ struct elf_backend_data
 
   const struct elf_size_info *s;
 
-  /* An array of target specific special section map.  */
-  const struct bfd_elf_special_section *special_sections;
+  /* An array of 27 target specific special section map arrays,
+     covering 'a' to 'z', plus other.  */
+  const struct bfd_elf_special_section **special_sections;
 
   /* The size in bytes of the header for the GOT.  This includes the
      so-called reserved entries on some systems.  */

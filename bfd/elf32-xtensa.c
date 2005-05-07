@@ -9479,12 +9479,56 @@ xtensa_callback_required_dependence (bfd *abfd,
 /* The default literal sections should always be marked as "code" (i.e.,
    SHF_EXECINSTR).  This is particularly important for the Linux kernel
    module loader so that the literals are not placed after the text.  */
-static struct bfd_elf_special_section const elf_xtensa_special_sections[]=
+static struct bfd_elf_special_section const
+  xtensa_special_sections_f[]=
 {
-  { ".literal",       8, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { ".init.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { ".fini.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { NULL,             0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  xtensa_special_sections_i[]=
+{
+  { ".init.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,             0, 0, 0,            0 }
+};
+static struct bfd_elf_special_section const
+  xtensa_special_sections_l[]=
+{
+  { ".literal",       8, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,             0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const *
+  elf_xtensa_special_sections[27] =
+{
+  NULL,				/* 'a' */
+  NULL,				/* 'b' */
+  NULL,				/* 'c' */
+  NULL,				/* 'd' */
+  NULL,				/* 'e' */
+  xtensa_special_sections_f,	/* 'f' */
+  NULL,				/* 'g' */
+  NULL,				/* 'h' */
+  xtensa_special_sections_i,	/* 'i' */
+  NULL,				/* 'j' */
+  NULL,				/* 'k' */
+  xtensa_special_sections_l,	/* 'l' */
+  NULL,				/* 'm' */
+  NULL,				/* 'n' */
+  NULL,				/* 'o' */
+  NULL,				/* 'p' */
+  NULL,				/* 'q' */
+  NULL,				/* 'r' */
+  NULL,				/* 's' */
+  NULL,				/* 't' */
+  NULL,				/* 'u' */
+  NULL,				/* 'v' */
+  NULL,				/* 'w' */
+  NULL,				/* 'x' */
+  NULL,				/* 'y' */
+  NULL,				/* 'z' */
+  NULL				/* other */
 };
 
 

@@ -1736,18 +1736,69 @@ ppc_elf_additional_program_headers (bfd *abfd)
    that the linker doesn't crater when trying to make more than
    2 sections.  */
 
-static struct bfd_elf_special_section const ppc_elf_special_sections[]=
+static struct bfd_elf_special_section const
+  ppc_special_sections_p[] =
 {
-  { ".tags",             5,  0, SHT_ORDERED,  SHF_ALLOC },
+  { ".plt",              4,  0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { NULL,                0,  0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  ppc_special_sections_s[] =
+{
   { ".sdata",            6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".sbss",             5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { ".sdata2",           7, -2, SHT_PROGBITS, SHF_ALLOC },
   { ".sbss2",            6, -2, SHT_PROGBITS, SHF_ALLOC },
+  { NULL,        0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  ppc_special_sections_t[] =
+{
+  { ".tags",             5,  0, SHT_ORDERED,  SHF_ALLOC },
+  { NULL,        0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const
+  ppc_special_sections_other[]=
+{
   { ".PPC.EMB.apuinfo", 16,  0, SHT_NOTE,     0 },
   { ".PPC.EMB.sdata0",  15,  0, SHT_PROGBITS, SHF_ALLOC },
   { ".PPC.EMB.sbss0",   14,  0, SHT_PROGBITS, SHF_ALLOC },
-  { ".plt",              4,  0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
-  { NULL,                0,  0, 0,            0 }
+  { NULL,        0, 0, 0,            0 }
+};
+
+static struct bfd_elf_special_section const *
+  ppc_elf_special_sections[27]=
+{
+  NULL,				/* 'a' */
+  NULL,				/* 'b' */
+  NULL,				/* 'c' */
+  NULL,				/* 'd' */
+  NULL,				/* 'e' */
+  NULL,				/* 'f' */
+  NULL,				/* 'g' */
+  NULL,				/* 'h' */
+  NULL,				/* 'i' */
+  NULL,				/* 'j' */
+  NULL,				/* 'k' */
+  NULL,				/* 'l' */
+  NULL,				/* 'm' */
+  NULL,				/* 'n' */
+  NULL,				/* 'o' */
+  ppc_special_sections_p,	/* 'p' */
+  NULL,				/* 'q' */
+  NULL,				/* 'r' */
+  ppc_special_sections_s,	/* 's' */
+  ppc_special_sections_t,	/* 's' */
+  NULL,				/* 'u' */
+  NULL,				/* 'v' */
+  NULL,				/* 'w' */
+  NULL,				/* 'x' */
+  NULL,				/* 'y' */
+  NULL,				/* 'z' */
+  ppc_special_sections_other,	/* other */
 };
 
 /* Very simple linked list structure for recording apuinfo values.  */
