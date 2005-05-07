@@ -112,7 +112,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE),		/* pcrel_offset */
 
   /* A 16 bit pc-relative relocation.  */
-  HOWTO (R_FRV_LABEL16,	        /* type */
+  HOWTO (R_FRV_LABEL16,		/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -124,10 +124,10 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 TRUE),		        /* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
 
   /* A 24-bit pc-relative relocation.  */
-  HOWTO (R_FRV_LABEL24,	/* type */
+  HOWTO (R_FRV_LABEL24,		/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 26,			/* bitsize */
@@ -139,9 +139,9 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0x7e03ffff,		/* src_mask */
 	 0x7e03ffff,		/* dst_mask */
-	 TRUE),		        /* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
 
-  HOWTO (R_FRV_LO16,	        /* type */
+  HOWTO (R_FRV_LO16,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -153,9 +153,9 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
-  HOWTO (R_FRV_HI16,	        /* type */
+  HOWTO (R_FRV_HI16,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -167,9 +167,9 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
-  HOWTO (R_FRV_GPREL12,	        /* type */
+  HOWTO (R_FRV_GPREL12,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
@@ -177,13 +177,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_FRV_GPREL12",       /* name */
+	 "R_FRV_GPREL12",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0xfff,		        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
-  HOWTO (R_FRV_GPRELU12,        /* type */
+  HOWTO (R_FRV_GPRELU12,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
@@ -191,13 +191,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_FRV_GPRELU12",      /* name */
+	 "R_FRV_GPRELU12",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0x3f03f,	        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0x3f03f,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
-  HOWTO (R_FRV_GPREL32,         /* type */
+  HOWTO (R_FRV_GPREL32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -207,11 +207,11 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GPREL32",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffffffff,            /* src_mask */
+	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
-  HOWTO (R_FRV_GPRELHI,	        /* type */
+  HOWTO (R_FRV_GPRELHI,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -221,11 +221,11 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GPRELHI",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,		        /* src_mask */
+	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
-  HOWTO (R_FRV_GPRELLO,	        /* type */
+  HOWTO (R_FRV_GPRELLO,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -235,13 +235,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GPRELLO",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,		        /* src_mask */
+	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 12-bit signed operand with the GOT offset for the address of
      the symbol.  */
-  HOWTO (R_FRV_GOT12,	        /* type */
+  HOWTO (R_FRV_GOT12,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
@@ -251,13 +251,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GOT12",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0xfff,		        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the address of the
      symbol.  */
-  HOWTO (R_FRV_GOTHI,	        /* type */
+  HOWTO (R_FRV_GOTHI,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -267,13 +267,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GOTHI",		/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffff,		        /* src_mask */
+	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the address of the
      symbol.  */
-  HOWTO (R_FRV_GOTLO,	        /* type */
+  HOWTO (R_FRV_GOTLO,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -285,7 +285,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The 32-bit address of the canonical descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC,	/* type */
@@ -314,9 +314,9 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_FUNCDESC_GOT12", /* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0xfff,		        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the address of the
      canonical descriptor of a function.  */
@@ -332,7 +332,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the address of the
      canonical descriptor of a function.  */
@@ -348,7 +348,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The 64-bit descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_VALUE,	/* type */
@@ -377,9 +377,9 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_FUNCDESC_GOTOFF12", /* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0xfff,		        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the address of the
      canonical descriptor of a function.  */
@@ -395,7 +395,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the address of the
      canonical descriptor of a function.  */
@@ -411,11 +411,11 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 12-bit signed operand with the GOT offset for the address of
      the symbol.  */
-  HOWTO (R_FRV_GOTOFF12,        /* type */
+  HOWTO (R_FRV_GOTOFF12,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
@@ -425,13 +425,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GOTOFF12",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0xfff,		        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the address of the
      symbol.  */
-  HOWTO (R_FRV_GOTOFFHI,        /* type */
+  HOWTO (R_FRV_GOTOFFHI,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -443,7 +443,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the address of the
      symbol.  */
@@ -459,7 +459,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 24-bit pc-relative relocation referencing the TLS PLT entry for
      a thread-local symbol.  If the symbol number is 0, it refers to
@@ -476,7 +476,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0x7e03ffff,		/* src_mask */
 	 0x7e03ffff,		/* dst_mask */
-	 TRUE),		        /* pcrel_offset */
+	 TRUE),			/* pcrel_offset */
 
   /* A 64-bit TLS descriptor for a symbol.  This relocation is only
      valid as a REL, dynamic relocation.  */
@@ -496,7 +496,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   /* A 12-bit signed operand with the GOT offset for the TLS
      descriptor of the symbol.  */
-  HOWTO (R_FRV_GOTTLSDESC12,    /* type */
+  HOWTO (R_FRV_GOTTLSDESC12,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
@@ -506,13 +506,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GOTTLSDESC12",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0xfff,		        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the TLS descriptor of the
      symbol.  */
-  HOWTO (R_FRV_GOTTLSDESCHI,    /* type */
+  HOWTO (R_FRV_GOTTLSDESCHI,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -524,7 +524,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the TLS descriptor of the
      symbol.  */
@@ -540,11 +540,11 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 12-bit signed operand with the offset from the module base
      address to the thread-local symbol address.  */
-  HOWTO (R_FRV_TLSMOFF12,        /* type */
+  HOWTO (R_FRV_TLSMOFF12,	 /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
@@ -554,13 +554,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_TLSMOFF12",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0xfff,		        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the offset from the module base address to
      the thread-local symbol address.  */
-  HOWTO (R_FRV_TLSMOFFHI,        /* type */
+  HOWTO (R_FRV_TLSMOFFHI,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -572,7 +572,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the offset from the module base address to
      the thread-local symbol address.  */
@@ -588,11 +588,11 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* A 12-bit signed operand with the GOT offset for the TLSOFF entry
      for a symbol.  */
-  HOWTO (R_FRV_GOTTLSOFF12,        /* type */
+  HOWTO (R_FRV_GOTTLSOFF12,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
@@ -602,13 +602,13 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FRV_GOTTLSOFF12",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,		        /* src_mask */
-	 0xfff,		        /* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* The upper 16 bits of the GOT offset for the TLSOFF entry for a
      symbol.  */
-  HOWTO (R_FRV_GOTTLSOFFHI,        /* type */
+  HOWTO (R_FRV_GOTTLSOFFHI,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
@@ -620,7 +620,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The lower 16 bits of the GOT offset for the TLSOFF entry for a
      symbol.  */
@@ -636,7 +636,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 
   /* The 32-bit offset from the thread pointer (not the module base
      address) to a thread-local symbol.  */
@@ -707,7 +707,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   /* A 32-bit offset from the module base address to
      the thread-local symbol address.  */
-  HOWTO (R_FRV_TLSMOFF,	/* type */
+  HOWTO (R_FRV_TLSMOFF,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -719,40 +719,40 @@ static reloc_howto_type elf32_frv_howto_table [] =
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),	        /* pcrel_offset */
+	 FALSE),		/* pcrel_offset */
 };
 
 /* GNU extension to record C++ vtable hierarchy.  */
 static reloc_howto_type elf32_frv_vtinherit_howto =
-  HOWTO (R_FRV_GNU_VTINHERIT,   /* type */
-         0,                     /* rightshift */
-         2,                     /* size (0 = byte, 1 = short, 2 = long) */
-         0,                     /* bitsize */
-         FALSE,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont, /* complain_on_overflow */
-         NULL,                  /* special_function */
-         "R_FRV_GNU_VTINHERIT", /* name */
-         FALSE,                 /* partial_inplace */
-         0,                     /* src_mask */
-         0,                     /* dst_mask */
-         FALSE);                /* pcrel_offset */
+  HOWTO (R_FRV_GNU_VTINHERIT,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 NULL,			/* special_function */
+	 "R_FRV_GNU_VTINHERIT", /* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE);		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable member usage.  */
 static reloc_howto_type elf32_frv_vtentry_howto =
-  HOWTO (R_FRV_GNU_VTENTRY,     /* type */
-         0,                     /* rightshift */
-         2,                     /* size (0 = byte, 1 = short, 2 = long) */
-         0,                     /* bitsize */
-         FALSE,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont, /* complain_on_overflow */
-         _bfd_elf_rel_vtable_reloc_fn,  /* special_function */
-         "R_FRV_GNU_VTENTRY",   /* name */
-         FALSE,                 /* partial_inplace */
-         0,                     /* src_mask */
-         0,                     /* dst_mask */
-         FALSE);                /* pcrel_offset */
+  HOWTO (R_FRV_GNU_VTENTRY,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_elf_rel_vtable_reloc_fn, /* special_function */
+	 "R_FRV_GNU_VTENTRY",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0,			/* dst_mask */
+	 FALSE);		/* pcrel_offset */
 
 /* The following 3 relocations are REL.  The only difference to the
    entries in the table above are that partial_inplace is TRUE.  */
@@ -1872,7 +1872,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 				   ->output_offset,
 				   R_FRV_TLSOFF, idx, ad, entry);
 	}
-	
+
       bfd_put_32 (output_bfd, ad,
 		  frvfdpic_got_section (info)->contents
 		  + frvfdpic_got_initial_offset (info)
@@ -2004,7 +2004,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
     {
       bfd_byte *plt_code = frvfdpic_plt_section (info)->contents
 	+ entry->tlsplt_entry;
-      
+
       if (info->executable
 	  && (entry->symndx != -1
 	      || FRVFDPIC_SYM_LOCAL (info, entry->d.h)))
@@ -2032,7 +2032,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	      else
 		idx = 0;
 	    }
-	  
+
 	  /* *ABS*+addend is special for TLS relocations, use only the
 	     addend for the TLS offset, and take the module id as
 	     0.  */
@@ -2044,7 +2044,7 @@ _frvfdpic_emit_got_relocs_plt_entries (struct frvfdpic_relocs_info *entry,
 	     TLS offset to the addend.  */
 	  else if (sec)
 	    ad += sec->output_section->vma - tls_biased_base (info);
-	  
+
 	  if ((bfd_signed_vma)ad >= -(1 << (16 - 1))
 	      && (bfd_signed_vma)ad < (1 << (16 - 1)))
 	    {
@@ -2974,7 +2974,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
   (LOCAL_EXEC_P ((info), (picrel)))
 #define RELAX_TLSDESC_INITIAL_EXEC_P(info, picrel) \
   (INITIAL_EXEC_P ((info), (picrel)))
- 
+
 #define RELAX_GOTTLSOFF_LOCAL_EXEC_P(info, picrel, value) \
   (LOCAL_EXEC_P ((info), (picrel)) \
    && TLSMOFF_IN_RANGE_FOR_SETLOS_P((value), (info)))
@@ -2991,7 +2991,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 		   name, input_bfd, input_section, rel->r_offset);
 		return FALSE;
 	      }
-	    
+
 	    if (RELAX_GETTLSOFF_LOCAL_EXEC_P (info, picrel,
 					      relocation + rel->r_addend))
 	      {
@@ -3128,7 +3128,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	      }
 
 	    break;
-	    
+
 	  case R_FRV_GOTTLSDESCLO:
 	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 
@@ -3176,7 +3176,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	      }
 
 	    break;
-	    
+
 	  case R_FRV_TLSDESC_RELAX:
 	    insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 
@@ -3506,12 +3506,12 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	    /*
 	      There's nothing to relax in these:
-	        R_FRV_TLSDESC_VALUE
-	        R_FRV_TLSOFF
-	        R_FRV_TLSMOFF12
-	        R_FRV_TLSMOFFHI
-	        R_FRV_TLSMOFFLO
-	        R_FRV_TLSMOFF
+		R_FRV_TLSDESC_VALUE
+		R_FRV_TLSOFF
+		R_FRV_TLSMOFF12
+		R_FRV_TLSMOFFHI
+		R_FRV_TLSMOFFLO
+		R_FRV_TLSMOFF
 	    */
 
 	  default:
@@ -3921,7 +3921,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	    ? _frvfdpic_osec_to_segment (output_bfd, sec->output_section)
 	    : tls_segment;
 	  break;
-	  
+
 	case R_FRV_TLSDESC_VALUE:
 	case R_FRV_TLSOFF:
 	  /* These shouldn't be present in input object files.  */
@@ -4304,8 +4304,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
       bh = NULL;
       if (!(_bfd_generic_link_add_one_symbol
 	    (info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
-	     bed->got_symbol_offset, (const char *) NULL, FALSE,
-	     bed->collect, &bh)))
+	     0, (const char *) NULL, FALSE, bed->collect, &bh)))
 	return FALSE;
       h = (struct elf_link_hash_entry *) bh;
       h->def_regular = 1;
@@ -4321,7 +4320,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size + bed->got_symbol_offset;
+  s->size += bed->got_header_size;
 
   /* This is the machine-specific part.  Create and initialize section
      data for the got.  */
@@ -4577,7 +4576,7 @@ _frvfdpic_count_tls_entries (struct frvfdpic_relocs_info *entry,
 			     bfd_boolean subtract)
 {
   const int l = subtract ? -1 : 1;
-  
+
   /* Allocate space for a GOT entry with the TLS offset of the
      symbol.  */
   if (entry->tlsoff12)
@@ -4761,7 +4760,7 @@ _frvfdpic_relax_tls_entries (struct frvfdpic_relocs_info *entry,
 	  _frvfdpic_count_tls_entries (entry, dinfo, TRUE);
 	  changed = TRUE;
 	}
-      
+
       entry->tlsplt =
 	entry->tlsoff12 = entry->tlsofflos = entry->tlsoffhilo = 0;
     }
@@ -5245,7 +5244,7 @@ _frvfdpic_assign_plt_entries (void **entryp, void *info_)
 	  else
 	    size = 16;
 	}
-      
+
       frvfdpic_plt_section (dinfo->g.info)->size += size;
     }
 
@@ -5833,7 +5832,7 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
 	      && (hend->type == bfd_link_hash_defined
 		  || hend->type == bfd_link_hash_defweak))
 	    {
-	      bfd_vma value = 
+	      bfd_vma value =
 		frvfdpic_gotfixup_section (info)->output_section->vma
 		+ frvfdpic_gotfixup_section (info)->output_offset
 		+ frvfdpic_gotfixup_section (info)->size
@@ -6276,7 +6275,7 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	case R_FRV_TLSDESC_VALUE:
 	  picrel->relocstlsd++;
 	  goto bad_reloc;
-	  
+
 	case R_FRV_GOTTLSDESC12:
 	  picrel->tlsdesc12 = 1;
 	  break;
@@ -6296,13 +6295,13 @@ elf32_frv_check_relocs (abfd, info, sec, relocs)
 	  picrel->tlsoff12 = 1;
 	  info->flags |= DF_STATIC_TLS;
 	  break;
-	  
+
 	case R_FRV_GOTTLSOFFHI:
 	case R_FRV_GOTTLSOFFLO:
 	  picrel->tlsoffhilo = 1;
 	  info->flags |= DF_STATIC_TLS;
 	  break;
-	  
+
 	case R_FRV_TLSOFF:
 	  picrel->relocstlsoff++;
 	  info->flags |= DF_STATIC_TLS;

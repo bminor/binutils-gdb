@@ -52,8 +52,8 @@ Program Headers:
 
 Relocation section '\.rela\.dyn' at offset 0x220 contains 2 entries:
  Offset +Info +Type +Sym\. Value +Symbol's Name \+ Addend
-01810380 +00000249 R_PPC_TPREL32 +00000000 +gd \+ 0
-01810384 +00000444 R_PPC_DTPMOD32 +00000000 +ld \+ 0
+01810370 +00000249 R_PPC_TPREL32 +00000000 +gd \+ 0
+01810374 +00000444 R_PPC_DTPMOD32 +00000000 +ld \+ 0
 
 Relocation section '\.rela\.plt' at offset 0x238 contains 1 entries:
  Offset +Info +Type +Sym\. Value +Symbol's Name \+ Addend
@@ -109,7 +109,7 @@ Symbol table '\.symtab' contains 40 entries:
 .*: 00000024 +0 TLS +GLOBAL DEFAULT +9 ld1
 .*: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
 .*: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
-.*: 01810374 +0 OBJECT +GLOBAL +HIDDEN +11 _GLOBAL_OFFSET_TABLE_
+.*: 01810380 +0 OBJECT +GLOBAL +HIDDEN +11 _GLOBAL_OFFSET_TABLE_
 .*: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
 .*: 0000001c +0 TLS +GLOBAL DEFAULT +9 gd0
 .*: 0000002c +0 TLS +GLOBAL DEFAULT +9 ie0

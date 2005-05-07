@@ -67,7 +67,6 @@ static bfd_vma opd_entry_value
 #define elf_backend_want_plt_sym 0
 #define elf_backend_plt_alignment 3
 #define elf_backend_plt_not_loaded 1
-#define elf_backend_got_symbol_offset 0
 #define elf_backend_got_header_size 8
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
@@ -2709,7 +2708,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
       long j;
       /* Trim duplicate syms, since we may have merged the normal and
 	 dynamic symbols.  Actually, we only care about syms that have
-	 different values, so trim any with the same value.  */ 
+	 different values, so trim any with the same value.  */
       for (i = 1, j = 1; i < symcount; ++i)
 	if (syms[i - 1]->value + syms[i - 1]->section->vma
 	    != syms[i]->value + syms[i]->section->vma)
@@ -4769,7 +4768,7 @@ opd_entry_value (asection *opd_sec,
 
       if (!bfd_get_section_contents (opd_bfd, opd_sec, &val, offset, 8))
 	return (bfd_vma) -1;
-      
+
       if (code_sec != NULL)
 	{
 	  asection *sec, *likely = NULL;

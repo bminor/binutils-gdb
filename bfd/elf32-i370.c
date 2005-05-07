@@ -699,7 +699,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	  if (s->size == 0)
 	    {
 	      /* Strip this section if we don't need it; see the
-                 comment below.  */
+		 comment below.  */
 	      strip = TRUE;
 	    }
 	  else
@@ -1022,20 +1022,16 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 	}
     }
 
-  /* Add a blrl instruction at _GLOBAL_OFFSET_TABLE_-4 so that a function can
-     easily find the address of the _GLOBAL_OFFSET_TABLE_.  */
-/* XXX this is clearly very wrong for the 370 arch */
   if (sgot)
     {
       unsigned char *contents = sgot->contents;
-      bfd_put_32 (output_bfd, (bfd_vma) 0x4e800021 /* blrl */, contents);
 
       if (sdyn == NULL)
-	bfd_put_32 (output_bfd, (bfd_vma) 0, contents+4);
+	bfd_put_32 (output_bfd, (bfd_vma) 0, contents);
       else
 	bfd_put_32 (output_bfd,
 		    sdyn->output_section->vma + sdyn->output_offset,
-		    contents+4);
+		    contents);
 
       elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
     }
@@ -1082,7 +1078,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 	}
 
       /* Set the sh_info field of the output .dynsym section to the
-         index of the first global symbol.  */
+	 index of the first global symbol.  */
       elf_section_data (sdynsym->output_section)->this_hdr.sh_info =
 	maxdindx + 1;
     }
@@ -1215,8 +1211,8 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      || r_type == R_I370_RELATIVE))
 		{
 		  /* In these cases, we don't need the relocation
-                     value.  We check specially because in some
-                     obscure cases sec->output_section will be NULL.  */
+		     value.  We check specially because in some
+		     obscure cases sec->output_section will be NULL.  */
 		  relocation = 0;
 		}
 	      else
@@ -1259,7 +1255,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  continue;
 
 	/* Relocations that may need to be propagated if this is a shared
-           object.  */
+	   object.  */
 	case (int)R_I370_REL31:
 	  /* If these relocations are not to a named symbol, they can be
 	     handled right here, no need to bother the dynamic linker.  */
@@ -1269,7 +1265,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	/* fall through */
 
 	/* Relocations that always need to be propagated if this is a shared
-           object.  */
+	   object.  */
 	case (int)R_I370_ADDR31:
 	case (int)R_I370_ADDR16:
 	  if (info->shared
@@ -1286,8 +1282,8 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 #endif
 
 	      /* When generating a shared object, these relocations
-                 are copied into the output file to be resolved at run
-                 time.  */
+		 are copied into the output file to be resolved at run
+		 time.  */
 
 	      if (sreloc == NULL)
 		{
@@ -1323,7 +1319,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
 	      /* h->dynindx may be -1 if this symbol was marked to
-                 become local.  */
+		 become local.  */
 	      else if (h != NULL
 		       && ((! info->symbolic && h->dynindx != -1)
 			   || !h->def_regular))
@@ -1377,8 +1373,8 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
 	      /* This reloc will be computed at runtime, so there's no
-                 need to do anything now, unless this is a RELATIVE
-                 reloc in an unallocated section.  */
+		 need to do anything now, unless this is a RELATIVE
+		 reloc in an unallocated section.  */
 	      if (skip == -1
 		  || (input_section->flags & SEC_ALLOC) != 0
 		  || ELF32_R_TYPE (outrel.r_info) != R_I370_RELATIVE)
@@ -1487,7 +1483,6 @@ i370_elf_post_process_headers (abfd, link_info)
 #define elf_info_to_howto	i370_elf_info_to_howto
 
 #define elf_backend_plt_not_loaded 1
-#define elf_backend_got_symbol_offset 4
 #define elf_backend_rela_normal 1
 
 #define bfd_elf32_bfd_reloc_type_lookup		i370_elf_reloc_type_lookup

@@ -977,10 +977,6 @@ struct elf_backend_data
   /* An array of target specific special section map.  */
   const struct bfd_elf_special_section *special_sections;
 
-  /* offset of the _GLOBAL_OFFSET_TABLE_ symbol from the start of the
-     .got section */
-  bfd_vma got_symbol_offset;
-
   /* The size in bytes of the header for the GOT.  This includes the
      so-called reserved entries on some systems.  */
   bfd_vma got_header_size;

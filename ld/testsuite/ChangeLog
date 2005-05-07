@@ -1,12 +1,21 @@
+2005-05-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe32.d: Update for changed got layout.
+	* ld-powerpc/tlsexe32.g: Likewise.
+	* ld-powerpc/tlsexe32.r: Likewise.
+	* ld-powerpc/tlsso32.d: Likewise.
+	* ld-powerpc/tlsso32.g: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+
 2005-05-06  Nick Clifton  <nickc@redhat.com>
 
-	* Update the address and phone number of the FSF organization in
+	Update the address and phone number of the FSF organization in
 	the GPL notices in the following files:
-	config/default.exp, ld-alpha/alpha.exp,	ld-arm/arm-elf.exp,
+	* config/default.exp, ld-alpha/alpha.exp, ld-arm/arm-elf.exp,
 	ld-auto-import/auto-import.exp, ld-bootstrap/bootstrap.exp,
 	ld-cdtest/cdtest.exp, ld-checks/checks.exp, ld-cris/cris.exp,
 	ld-crx/crx.exp, ld-cygwin/exe-export.exp, ld-d10v/d10v.exp,
-	ld-discard/discard.exp, ld-elf/elf.exp,	ld-elf/exclude.exp,
+	ld-discard/discard.exp, ld-elf/elf.exp, ld-elf/exclude.exp,
 	ld-elf/frame.exp, ld-elf/sec64k.exp, ld-elfcomm/elfcomm.exp,
 	ld-elfvers/vers.exp, ld-elfvsb/elfvsb.exp, ld-elfweak/elfweak.exp,
 	ld-fastcall/fastcall.exp, ld-frv/fdpic.exp, ld-frv/tls.exp,

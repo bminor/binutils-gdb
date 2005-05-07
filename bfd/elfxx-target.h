@@ -72,9 +72,6 @@
 #define bfd_elfNN_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window
 
-#ifndef elf_backend_got_symbol_offset
-#define elf_backend_got_symbol_offset (bfd_vma) 0
-#endif
 #ifndef elf_backend_can_refcount
 #define elf_backend_can_refcount 0
 #endif
@@ -527,7 +524,7 @@ static const struct elf_backend_data elfNN_bed =
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
   ELF_MINPAGESIZE,		/* minpagesize */
-  ELF_DYNAMIC_SEC_FLAGS,        /* dynamic_sec_flags */
+  ELF_DYNAMIC_SEC_FLAGS,	/* dynamic_sec_flags */
   elf_info_to_howto,
   elf_info_to_howto_rel,
   elf_backend_sym_is_global,
@@ -592,7 +589,6 @@ static const struct elf_backend_data elfNN_bed =
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,
   elf_backend_special_sections,
-  elf_backend_got_symbol_offset,
   elf_backend_got_header_size,
   elf_backend_collect,
   elf_backend_type_change_ok,

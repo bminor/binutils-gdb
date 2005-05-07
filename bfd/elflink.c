@@ -81,7 +81,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
       bh = NULL;
       if (!(_bfd_generic_link_add_one_symbol
 	    (info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
-	     bed->got_symbol_offset, NULL, FALSE, bed->collect, &bh)))
+	     0, NULL, FALSE, bed->collect, &bh)))
 	return FALSE;
       h = (struct elf_link_hash_entry *) bh;
       h->def_regular = 1;
@@ -96,7 +96,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size + bed->got_symbol_offset;
+  s->size += bed->got_header_size;
 
   return TRUE;
 }
@@ -920,7 +920,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
       if (h->type == STT_TLS)
 	{
-	  ntbfd = abfd; 
+	  ntbfd = abfd;
 	  ntsec = sec;
 	  ntdef = newdef;
 	  tbfd = oldbfd;
@@ -3591,7 +3591,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  else if (sec->kept_section)
 	    {
 	      /* Symbols from discarded section are undefined, and have
-	         default visibility.  */
+		 default visibility.  */
 	      sec = bfd_und_section_ptr;
 	      isym->st_shndx = SHN_UNDEF;
 	      isym->st_other = STV_DEFAULT
@@ -7055,7 +7055,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			  bfd_set_error (bfd_error_bad_value);
 			  return FALSE;
 			}
-		      
+
 		      while (h->root.type == bfd_link_hash_indirect
 			     || h->root.type == bfd_link_hash_warning)
 			h = (struct elf_link_hash_entry *) h->root.u.i.link;
@@ -7663,7 +7663,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   struct bfd_link_order **sections;
   asection *s;
   bfd_vma offset;
-  
+
   seen_other = 0;
   seen_linkorder = 0;
   for (p = o->map_head.link_order; p != NULL; p = p->next)
@@ -7695,11 +7695,11 @@ elf_fixup_link_order (bfd *abfd, asection *o)
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
-  
+
   sections = (struct bfd_link_order **)
     xmalloc (seen_linkorder * sizeof (struct bfd_link_order *));
   seen_linkorder = 0;
-  
+
   for (p = o->map_head.link_order; p != NULL; p = p->next)
     {
       sections[seen_linkorder++] = p;
@@ -9065,7 +9065,7 @@ elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h,
 
   return TRUE;
 }
- 
+
 /* Mark sections containing global symbols.  This is called through
    elf_link_hash_traverse.  */
 
@@ -9086,7 +9086,7 @@ elf_mark_used_section (struct elf_link_hash_entry *h,
 
   return TRUE;
 }
- 
+
 /* Do mark and sweep of unused sections.  */
 
 bfd_boolean
@@ -9156,7 +9156,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      /* _bfd_elf_discard_section_eh_frame knows how to discard
 		 orphaned FDEs so don't mark sections referenced by the
-		 EH frame section.  */  
+		 EH frame section.  */
 	      if (strcmp (o->name, ".eh_frame") == 0)
 		o->gc_mark = 1;
 	      else if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
@@ -9753,7 +9753,7 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 	     which we are really going to use.  */
 	  sec->output_section = bfd_abs_section_ptr;
 	  sec->kept_section = l->sec;
-	  
+
 	  if (flags & SEC_GROUP)
 	    {
 	      asection *first = elf_next_in_group (sec);
@@ -9842,7 +9842,7 @@ _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
   h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE,
 			    FALSE);
   if (h != NULL && (h->root.type == bfd_link_hash_undefined
-	            || h->root.type == bfd_link_hash_undefweak))
+		    || h->root.type == bfd_link_hash_undefweak))
     bfd_elf_set_symbol (h, val);
 }
 

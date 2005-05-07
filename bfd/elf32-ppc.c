@@ -2131,6 +2131,11 @@ struct ppc_elf_link_hash_table
     bfd_vma offset;
   } tlsld_got;
 
+  /* Size of reserved GOT entries.  */
+  unsigned int got_header_size;
+  /* Non-zero if allocating the header left a gap.  */
+  unsigned int got_gap;
+
   /* Small local sym to section mapping cache.  */
   struct sym_sec_cache sym_sec;
 };
@@ -2220,12 +2225,9 @@ ppc_elf_create_got (bfd *abfd, struct bfd_link_info *info)
   if (!bfd_set_section_flags (abfd, s, flags))
     return FALSE;
 
-  htab->relgot = bfd_make_section_with_flags (abfd, ".rela.got",
-					      SEC_ALLOC | SEC_LOAD
-					      | SEC_HAS_CONTENTS
-					      | SEC_IN_MEMORY
-					      | SEC_LINKER_CREATED
-					      | SEC_READONLY);
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED | SEC_READONLY);
+  htab->relgot = bfd_make_section_with_flags (abfd, ".rela.got", flags);
   if (!htab->relgot
       || ! bfd_set_section_alignment (abfd, htab->relgot, 2))
     return FALSE;
@@ -2257,18 +2259,18 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	   | SEC_LINKER_CREATED);
 
   htab->dynbss = bfd_get_section_by_name (abfd, ".dynbss");
-  htab->dynsbss = s = bfd_make_section_with_flags (abfd, ".dynsbss",
-						   SEC_ALLOC
-						   | SEC_LINKER_CREATED);
+  s = bfd_make_section_with_flags (abfd, ".dynsbss",
+				   SEC_ALLOC | SEC_LINKER_CREATED);
+  htab->dynsbss = s;
   if (s == NULL)
     return FALSE;
 
   if (! info->shared)
     {
       htab->relbss = bfd_get_section_by_name (abfd, ".rela.bss");
-      htab->relsbss = s = bfd_make_section_with_flags (abfd,
-						       ".rela.sbss",
-						       flags | SEC_READONLY);
+      s = bfd_make_section_with_flags (abfd, ".rela.sbss",
+				       flags | SEC_READONLY);
+      htab->relsbss = s;
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
@@ -2279,7 +2281,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (s == NULL)
     abort ();
 
-  flags = SEC_ALLOC | SEC_CODE | SEC_IN_MEMORY | SEC_LINKER_CREATED;
+  flags = SEC_ALLOC | SEC_CODE | SEC_LINKER_CREATED;
   return bfd_set_section_flags (abfd, s, flags);
 }
 
@@ -2626,15 +2628,15 @@ ppc_elf_check_relocs (bfd *abfd,
       /* If a relocation refers to _GLOBAL_OFFSET_TABLE_, create the .got.
 	 This shows up in particular in an R_PPC_ADDR32 in the eabi
 	 startup code.  */
-      if (h && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+      if (h != NULL
+	  && htab->got == NULL
+	  && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	{
-	  if (htab->got == NULL)
-	    {
-	      if (htab->elf.dynobj == NULL)
-		htab->elf.dynobj = abfd;
-	      if (!ppc_elf_create_got (htab->elf.dynobj, info))
-		return FALSE;
-	    }
+	  if (htab->elf.dynobj == NULL)
+	    htab->elf.dynobj = abfd;
+	  if (!ppc_elf_create_got (htab->elf.dynobj, info))
+	    return FALSE;
+	  BFD_ASSERT (h == htab->elf.hgot);
 	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -2860,8 +2862,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_REL14_BRTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
 	case R_PPC_REL32:
-	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	  if (h == NULL || h == htab->elf.hgot)
 	    break;
 	  /* fall through */
 
@@ -3240,8 +3241,7 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	case R_PPC_REL14_BRTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
 	case R_PPC_REL32:
-	  if (h == NULL
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	  if (h == NULL || h == htab->elf.hgot)
 	    break;
 	  /* Fall thru */
 
@@ -3648,6 +3648,34 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Allocate NEED contiguous space in .got, and return the offset.
+   Handles allocation of the got header when crossing 32k.  */
+
+static bfd_vma
+allocate_got (struct ppc_elf_link_hash_table *htab, unsigned int need)
+{
+  bfd_vma where;
+  unsigned int max_before_header = 32764;
+
+  if (need <= htab->got_gap)
+    {
+      where = max_before_header - htab->got_gap;
+      htab->got_gap -= need;
+    }
+  else
+    {
+      if (htab->got->size + need > max_before_header
+	  && htab->got->size <= max_before_header)
+	{
+	  htab->got_gap = max_before_header - htab->got->size;
+	  htab->got->size = max_before_header + htab->got_header_size;
+	}
+      where = htab->got->size;
+      htab->got->size += need;
+    }
+  return where;
+}
+
 /* Allocate space in associated reloc sections for dynamic relocs.  */
 
 static bfd_boolean
@@ -3749,33 +3777,32 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       else
 	{
 	  bfd_boolean dyn;
-	  eh->elf.got.offset = htab->got->size;
+	  unsigned int need = 0;
 	  if ((eh->tls_mask & TLS_TLS) != 0)
 	    {
 	      if ((eh->tls_mask & TLS_LD) != 0)
-		htab->got->size += 8;
+		need += 8;
 	      if ((eh->tls_mask & TLS_GD) != 0)
-		htab->got->size += 8;
+		need += 8;
 	      if ((eh->tls_mask & (TLS_TPREL | TLS_TPRELGD)) != 0)
-		htab->got->size += 4;
+		need += 4;
 	      if ((eh->tls_mask & TLS_DTPREL) != 0)
-		htab->got->size += 4;
+		need += 4;
 	    }
 	  else
-	    htab->got->size += 4;
+	    need += 4;
+	  eh->elf.got.offset = allocate_got (htab, need);
 	  dyn = htab->elf.dynamic_sections_created;
 	  if ((info->shared
 	       || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, &eh->elf))
 	      && (ELF_ST_VISIBILITY (eh->elf.other) == STV_DEFAULT
 		  || eh->elf.root.type != bfd_link_hash_undefweak))
 	    {
-	      /* All the entries we allocated need relocs.  */
-	      htab->relgot->size
-		+= ((htab->got->size - eh->elf.got.offset) / 4
-		    * sizeof (Elf32_External_Rela));
-	      /* Except LD only needs one.  */
+	      /* All the entries we allocated need relocs.
+		 Except LD only needs one.  */
 	      if ((eh->tls_mask & TLS_LD) != 0)
-		htab->relgot->size -= sizeof (Elf32_External_Rela);
+		need -= 4;
+	      htab->relgot->size += need * (sizeof (Elf32_External_Rela) / 4);
 	    }
 	}
     }
@@ -3932,15 +3959,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
 
-  if (htab->tlsld_got.refcount > 0)
-    {
-      htab->tlsld_got.offset = htab->got->size;
-      htab->got->size += 8;
-      if (info->shared)
-	htab->relgot->size += sizeof (Elf32_External_Rela);
-    }
-  else
-    htab->tlsld_got.offset = (bfd_vma) -1;
+  htab->got_header_size = 16;
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
@@ -3951,7 +3970,6 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       char *lgot_masks;
       bfd_size_type locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
-      asection *srel;
 
       if (!is_ppc_elf_target (ibfd->xvec))
 	continue;
@@ -3993,8 +4011,6 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       locsymcount = symtab_hdr->sh_info;
       end_local_got = local_got + locsymcount;
       lgot_masks = (char *) end_local_got;
-      s = htab->got;
-      srel = htab->relgot;
       for (; local_got < end_local_got; ++local_got, ++lgot_masks)
 	if (*local_got > 0)
 	  {
@@ -4002,40 +4018,59 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      {
 		/* If just an LD reloc, we'll just use
 		   htab->tlsld_got.offset.  */
-		if (htab->tlsld_got.offset == (bfd_vma) -1)
-		  {
-		    htab->tlsld_got.offset = s->size;
-		    s->size += 8;
-		    if (info->shared)
-		      srel->size += sizeof (Elf32_External_Rela);
-		  }
+		htab->tlsld_got.refcount += 1;
 		*local_got = (bfd_vma) -1;
 	      }
 	    else
 	      {
-		*local_got = s->size;
+		unsigned int need = 0;
 		if ((*lgot_masks & TLS_TLS) != 0)
 		  {
 		    if ((*lgot_masks & TLS_GD) != 0)
-		      s->size += 8;
+		      need += 8;
 		    if ((*lgot_masks & (TLS_TPREL | TLS_TPRELGD)) != 0)
-		      s->size += 4;
+		      need += 4;
 		    if ((*lgot_masks & TLS_DTPREL) != 0)
-		      s->size += 4;
+		      need += 4;
 		  }
 		else
-		  s->size += 4;
+		  need += 4;
+		*local_got = allocate_got (htab, need);
 		if (info->shared)
-		  srel->size += ((s->size - *local_got) / 4
-				 * sizeof (Elf32_External_Rela));
+		  htab->relgot->size += (need
+					 * (sizeof (Elf32_External_Rela) / 4));
 	      }
 	  }
 	else
 	  *local_got = (bfd_vma) -1;
     }
 
+  if (htab->tlsld_got.refcount > 0)
+    {
+      htab->tlsld_got.offset = allocate_got (htab, 8);
+      if (info->shared)
+	htab->relgot->size += sizeof (Elf32_External_Rela);
+    }
+  else
+    htab->tlsld_got.offset = (bfd_vma) -1;
+
   /* Allocate space for global sym dynamic relocs.  */
   elf_link_hash_traverse (elf_hash_table (info), allocate_dynrelocs, info);
+
+  if (htab->got != NULL)
+    {
+      unsigned int g_o_t = 32768;
+
+      /* If we haven't allocated the header, do so now.  */
+      if (htab->got->size <= 32768)
+	{
+	  g_o_t = htab->got->size;
+	  htab->got->size += htab->got_header_size;
+	}
+      g_o_t += 4;
+
+      htab->elf.hgot->root.u.def.value = g_o_t;
+    }
 
   /* We've now determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
@@ -5273,7 +5308,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  }
 	      }
 
-	    relocation = htab->got->output_offset + off - 4;
+	    relocation = htab->got->output_offset + off;
+	    relocation -= htab->elf.hgot->root.u.def.value;
 
 	    /* Addends on got relocations don't make much sense.
 	       x+off@got is actually x@got+off, and since the got is
@@ -5347,7 +5383,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  /* If these relocations are not to a named symbol, they can be
 	     handled right here, no need to bother the dynamic linker.  */
 	  if (SYMBOL_REFERENCES_LOCAL (info, h)
-	      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	      || h == htab->elf.hgot)
 	    break;
 	  /* fall through */
 
@@ -5952,8 +5988,8 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 #endif
 
   /* Mark some specially defined symbols as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
+  if (h == htab->elf.hgot
+      || strcmp (h->root.root.string, "_DYNAMIC") == 0
       || strcmp (h->root.root.string, "_PROCEDURE_LINKAGE_TABLE_") == 0)
     sym->st_shndx = SHN_ABS;
 
@@ -6035,17 +6071,18 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
   /* Add a blrl instruction at _GLOBAL_OFFSET_TABLE_-4 so that a function can
      easily find the address of the _GLOBAL_OFFSET_TABLE_.  */
-  if (htab->got)
+  if (htab->got != NULL)
     {
-      unsigned char *contents = htab->got->contents;
-      bfd_put_32 (output_bfd, 0x4e800021 /* blrl */, contents);
+      unsigned char *p = htab->got->contents;
+      bfd_vma val;
 
-      if (sdyn == NULL)
-	bfd_put_32 (output_bfd, 0, contents + 4);
-      else
-	bfd_put_32 (output_bfd,
-		    sdyn->output_section->vma + sdyn->output_offset,
-		    contents + 4);
+      p += elf_hash_table (info)->hgot->root.u.def.value;
+      bfd_put_32 (output_bfd, 0x4e800021 /* blrl */, p - 4);
+
+      val = 0;
+      if (sdyn != NULL)
+	val = sdyn->output_section->vma + sdyn->output_offset;
+      bfd_put_32 (output_bfd, val, p);
 
       elf_section_data (htab->got->output_section)->this_hdr.sh_entsize = 4;
     }
@@ -6076,10 +6113,8 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #endif
 
 #define elf_backend_plt_not_loaded	1
-#define elf_backend_got_symbol_offset	4
 #define elf_backend_can_gc_sections	1
 #define elf_backend_can_refcount	1
-#define elf_backend_got_header_size	12
 #define elf_backend_rela_normal		1
 
 #define bfd_elf32_mkobject			ppc_elf_mkobject

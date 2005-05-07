@@ -1,3 +1,32 @@
+2005-05-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Remove got_symbol_offset.
+	* elfxx-target.h (elf_backend_got_symbol_offset): Delete.
+	* elflink.c (_bfd_elf_create_got_section): Use zero in place of
+	got_symbol_offset.
+	* elf-m10300.c (_bfd_mn10300_elf_create_got_section): Likewise.
+	* elf32-frv.c (_frv_create_got_section): Likewise.
+	* elf32-i370.c (i370_elf_finish_dynamic_sections): Delete ppc code.
+	(elf_backend_got_symbol_offset): Don't define.
+	* elf64-ppc.c (elf_backend_got_symbol_offset): Don't define.
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Add got_header_size
+	and got_gap.
+	(ppc_elf_create_got): Tidy.
+	(ppc_elf_create_dynamic_sections): Don't set SEC_IN_MEMORY for .plt.
+	(ppc_elf_check_relocs): Reduce string comparisons by using elf.hgot.
+	(ppc_elf_gc_sweep_hook): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(ppc_elf_finish_dynamic_symbol): Likewise.
+	(allocate_got): New function.
+	(allocate_dynrelocs): Use allocate_got.
+	(ppc_elf_size_dynamic_sections): Likewise.  Delay tlsld_got allocation
+	so that local got can refcount it.  Set got_header_size.
+	(ppc_elf_relocate_section): Use value of elf.hgot rather than hard-
+	coded 4.
+	(ppc_elf_finish_dynamic_sections): Likewise.
+	(elf_backend_got_symbol_offset): Don't define.
+	(elf_backend_got_header_size): Ditto.
+
 2005-05-05  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure.in (ACX_HEADER_STRING): New.

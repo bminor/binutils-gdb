@@ -55,14 +55,14 @@ Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 18 entries:
 0+46a +0+245 R_PPC_TPREL16 +0+10474 +\.tdata \+ 10488
 0+46e +0+248 R_PPC_TPREL16_HA +0+10474 +\.tdata \+ 1048c
 0+472 +0+246 R_PPC_TPREL16_LO +0+10474 +\.tdata \+ 1048c
-0+10540 +0+44 R_PPC_DTPMOD32 +0+
-0+10548 +0+44 R_PPC_DTPMOD32 +0+
-0+1054c +0+4e R_PPC_DTPREL32 +0+
-0+10550 +0+844 R_PPC_DTPMOD32 +0+ +gd \+ 0
-0+10554 +0+84e R_PPC_DTPREL32 +0+ +gd \+ 0
-0+10558 +0+1544 R_PPC_DTPMOD32 +0+1c +gd0 \+ 0
-0+1055c +0+154e R_PPC_DTPREL32 +0+1c +gd0 \+ 0
-0+10560 +0+1649 R_PPC_TPREL32 +0+2c +ie0 \+ 0
+0+10530 +0+44 R_PPC_DTPMOD32 +0+
+0+10534 +0+4e R_PPC_DTPREL32 +0+
+0+10538 +0+44 R_PPC_DTPMOD32 +0+
+0+10540 +0+844 R_PPC_DTPMOD32 +0+ +gd \+ 0
+0+10544 +0+84e R_PPC_DTPREL32 +0+ +gd \+ 0
+0+10548 +0+1544 R_PPC_DTPMOD32 +0+1c +gd0 \+ 0
+0+1054c +0+154e R_PPC_DTPREL32 +0+1c +gd0 \+ 0
+0+10550 +0+1649 R_PPC_TPREL32 +0+2c +ie0 \+ 0
 
 Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym\. Value +Symbol's Name \+ Addend
@@ -118,7 +118,7 @@ Symbol table '\.symtab' contains 39 entries:
  +[0-9]+: 0+10 +0 TLS +LOCAL +DEFAULT +7 ie4
  +[0-9]+: 0+14 +0 TLS +LOCAL +DEFAULT +7 le4
  +[0-9]+: 0+18 +0 TLS +LOCAL +DEFAULT +7 le5
- +[0-9]+: 0+10534 +0 OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
+ +[0-9]+: 0+10558 +0 OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: 0+10490 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND gd
  +[0-9]+: 0+30 +0 TLS +GLOBAL DEFAULT +8 le0
