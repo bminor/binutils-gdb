@@ -253,7 +253,8 @@ dis_2_short (insn, memaddr, info, order)
       while (op->name)
 	{
 	  if ((op->format & SHORT_OPCODE)
-	      && ((op->mask & ins[j]) == (unsigned long) op->opcode))
+	      && ((((unsigned int) op->mask) & ins[j])
+		  == (unsigned int) op->opcode))
 	    {
 	      (*info->fprintf_func) (info->stream, "%s\t", op->name);
 	      for (i = 0; op->operands[i]; i++)

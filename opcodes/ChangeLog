@@ -1,3 +1,7 @@
+2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* d10v-dis.c (dis_2_short): Support 64bit host.
+
 2005-05-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/nl.po: Updated translation.
