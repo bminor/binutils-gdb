@@ -146,7 +146,7 @@ static void
 amd64fbsd_supply_uthread (struct regcache *regcache,
 			  int regnum, CORE_ADDR addr)
 {
-  char buf[8];
+  gdb_byte buf[8];
   int i;
 
   gdb_assert (regnum >= -1);
@@ -166,7 +166,7 @@ static void
 amd64fbsd_collect_uthread (const struct regcache *regcache,
 			   int regnum, CORE_ADDR addr)
 {
-  char buf[8];
+  gdb_byte buf[8];
   int i;
 
   gdb_assert (regnum >= -1);

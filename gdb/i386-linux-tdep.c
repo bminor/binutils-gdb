@@ -1,6 +1,7 @@
 /* Target-dependent code for GNU/Linux i386.
 
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -106,7 +107,7 @@ i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 #define LINUX_SIGTRAMP_INSN2	0xcd	/* int */
 #define LINUX_SIGTRAMP_OFFSET2	6
 
-static const unsigned char linux_sigtramp_code[] =
+static const gdb_byte linux_sigtramp_code[] =
 {
   LINUX_SIGTRAMP_INSN0,					/* pop %eax */
   LINUX_SIGTRAMP_INSN1, 0x77, 0x00, 0x00, 0x00,		/* mov $0x77, %eax */
@@ -122,7 +123,7 @@ static CORE_ADDR
 i386_linux_sigtramp_start (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  unsigned char buf[LINUX_SIGTRAMP_LEN];
+  gdb_byte buf[LINUX_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
      one of the three instructions.  We optimize for finding the PC at
@@ -175,7 +176,7 @@ i386_linux_sigtramp_start (struct frame_info *next_frame)
 #define LINUX_RT_SIGTRAMP_INSN1		0xcd /* int */
 #define LINUX_RT_SIGTRAMP_OFFSET1	5
 
-static const unsigned char linux_rt_sigtramp_code[] =
+static const gdb_byte linux_rt_sigtramp_code[] =
 {
   LINUX_RT_SIGTRAMP_INSN0, 0xad, 0x00, 0x00, 0x00,	/* mov $0xad, %eax */
   LINUX_RT_SIGTRAMP_INSN1, 0x80				/* int $0x80 */
@@ -190,7 +191,7 @@ static CORE_ADDR
 i386_linux_rt_sigtramp_start (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  unsigned char buf[LINUX_RT_SIGTRAMP_LEN];
+  gdb_byte buf[LINUX_RT_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
      one of the two instructions.  We optimize for finding the PC at
@@ -276,7 +277,7 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
 {
   CORE_ADDR pc;
   CORE_ADDR sp;
-  char buf[4];
+  gdb_byte buf[4];
 
   frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);

@@ -72,7 +72,7 @@ static int amd64_linux_gregset_reg_offset[] =
 #define LINUX_SIGTRAMP_INSN1	0x0f	/* syscall */
 #define LINUX_SIGTRAMP_OFFSET1	7
 
-static const unsigned char linux_sigtramp_code[] =
+static const gdb_byte linux_sigtramp_code[] =
 {
   /* mov $__NR_rt_sigreturn, %rax */
   LINUX_SIGTRAMP_INSN0, 0xc7, 0xc0, 0x0f, 0x00, 0x00, 0x00,
@@ -89,7 +89,7 @@ static CORE_ADDR
 amd64_linux_sigtramp_start (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  unsigned char buf[LINUX_SIGTRAMP_LEN];
+  gdb_byte buf[LINUX_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
      one of the two instructions.  We optimize for finding the PC at
@@ -150,7 +150,7 @@ static CORE_ADDR
 amd64_linux_sigcontext_addr (struct frame_info *next_frame)
 {
   CORE_ADDR sp;
-  char buf[8];
+  gdb_byte buf[8];
 
   frame_unwind_register (next_frame, SP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 8);

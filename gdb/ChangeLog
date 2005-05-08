@@ -1,5 +1,16 @@
 2005-05-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-tdep.c (linux_sigtramp_code, linux_rt_sigtramp_code):
+	Change type to `static const gdb_byte'.
+	(i386_linux_sigtramp_start, i386_linux_rt_sigtramp_start) 
+	(i386_linux_sigcontext_addr): Use gdb_byte for buf.
+	* amd64-linux-tdep.c (linux_sigtramp_code): Change type to `static
+	const gdb_byte'.
+	(amd64_linux_sigtramp_start, amd64_linux_sigcontext_addr): Use
+	gdb_byte for buf.
+	* amd64fbsd-tdep.c (amd64fbsd_supply_uthread) 
+	(amd64fbsd_collect_uthread): Use gdb_byte for buf.
+
 	* config/ia64/nm-aix.h: Remove file.
 
 	* amd64-tdep.c (amd64_return_value): Use `gdb_byte *' in casts.
