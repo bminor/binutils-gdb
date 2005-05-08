@@ -60,14 +60,15 @@ i386obsd_sigtramp_p (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   CORE_ADDR start_pc = (pc & ~(i386obsd_page_size - 1));
-  const char sigreturn[] =
+  const gdb_byte sigreturn[] =
   {
     0xb8,
     0x67, 0x00, 0x00, 0x00,	/* movl $SYS_sigreturn, %eax */
     0xcd, 0x80			/* int $0x80 */
   };
   size_t buflen = sizeof sigreturn;
-  char *name, *buf;
+  gdb_byte *buf;
+  char *name;
 
   /* If the function has a valid symbol name, it isn't a
      trampoline.  */
@@ -218,7 +219,7 @@ i386obsd_supply_uthread (struct regcache *regcache,
 {
   CORE_ADDR sp_addr = addr + I386OBSD_UTHREAD_ESP_OFFSET;
   CORE_ADDR sp = 0;
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   gdb_assert (regnum >= -1);
@@ -261,7 +262,7 @@ i386obsd_collect_uthread (const struct regcache *regcache,
 {
   CORE_ADDR sp_addr = addr + I386OBSD_UTHREAD_ESP_OFFSET;
   CORE_ADDR sp = 0;
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   gdb_assert (regnum >= -1);

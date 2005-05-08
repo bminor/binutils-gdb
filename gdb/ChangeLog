@@ -1,5 +1,35 @@
 2005-05-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_breakpoint_from_pc): Change return type to
+	`const gdb_byte *'.  Use gdb_byte for break_insn.
+	(i386_follow_jump): Use gdb_byte for op.
+	(i386_analyze_struct_return): Use gdb_byte for proto1, proto2, buf
+	and op.
+	(i386_skip_probe): Use gdb_byte for buf and op.
+	(struct i386_insn): Use gdb_byte for insn and mask.
+	(i386_match_insn, i386_analyze_frame_setup)
+	(i386_analyze_register_saves): Use gdb_byte for op.
+	(i386_skip_prologue): Use gdb_byte for pic_pat and op;
+	(i386_unwind_pc, i386_frame_cache, i386_sigtramp_frame_cache)
+	(i386_unwind_dummy_id, i386_get_longjmp_target): Use gdb_byte for
+	buf.
+	(i386_extract_return_value, i386_store_return_value): Use
+	`bfd_byte *' instead of `void *' for valbuf argument.  Remove now
+	redundant cast.
+	(i386_pseudo_register_read, i386_pseudo_register_write): Use
+	gdb_byte for mmx_buf.
+	(i386_register_to_value, i386_value_to_register): Use `gdb_byte *'
+	instead of `char *' for buf.
+	(i386_supply_gregset, i386_collect_gregset): Use `gdb_byte *'
+	instead of `char *' for regs.
+	(i386_svr4_sigcontext_addr): Use gdb_byte for buf.
+	* i386obsd-tdep.c (i386obsd_sigtramp_p): Use gdb_byte for
+	sigreturn and `gdb_byte *' for buf.
+	(i386obsd_aout_supply_regset): Use `const gdb_byte *' in cast.
+	(i386obsd_supply_uthread, i386obsd_collect_uthread): Use gdb_byte
+	for buf.
+	* i386bsd-tdep.c (i386bsd_sigcontext_addr): Use gdb_byte for buf.
+
 	* defs.h (gdb_byte): New typedef.  Tweak comments.
 
 	* target.h (target_link): Remove prototype.

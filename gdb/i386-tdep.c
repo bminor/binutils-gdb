@@ -263,12 +263,12 @@ static const char *disassembly_flavor = att_flavor;
    and can be inserted anywhere.
 
    This function is 64-bit safe.  */
-   
-static const unsigned char *
+
+static const gdb_byte *
 i386_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 {
-  static unsigned char break_insn[] = { 0xcc };	/* int 3 */
-  
+  static gdb_byte break_insn[] = { 0xcc }; /* int 3 */
+
   *len = sizeof (break_insn);
   return break_insn;
 }
@@ -335,7 +335,7 @@ i386_alloc_frame_cache (void)
 static CORE_ADDR
 i386_follow_jump (CORE_ADDR pc)
 {
-  unsigned char op;
+  gdb_byte op;
   long delta = 0;
   int data16 = 0;
 
@@ -397,10 +397,10 @@ i386_analyze_struct_return (CORE_ADDR pc, CORE_ADDR current_pc,
      and the assembler doesn't try to optimize it, so the 'sib' form
      gets generated).  This sequence is used to get the address of the
      return buffer for a function that returns a structure.  */
-  static unsigned char proto1[3] = { 0x87, 0x04, 0x24 };
-  static unsigned char proto2[4] = { 0x87, 0x44, 0x24, 0x00 };
-  unsigned char buf[4];
-  unsigned char op;
+  static gdb_byte proto1[3] = { 0x87, 0x04, 0x24 };
+  static gdb_byte proto2[4] = { 0x87, 0x44, 0x24, 0x00 };
+  gdb_byte buf[4];
+  gdb_byte op;
 
   if (current_pc <= pc)
     return pc;
@@ -446,8 +446,8 @@ i386_skip_probe (CORE_ADDR pc)
         pushl %ebp
 
      etc.  */
-  unsigned char buf[8];
-  unsigned char op;
+  gdb_byte buf[8];
+  gdb_byte op;
 
   op = read_memory_unsigned_integer (pc, 1);
 
@@ -479,8 +479,8 @@ i386_skip_probe (CORE_ADDR pc)
 struct i386_insn
 {
   size_t len;
-  unsigned char insn[I386_MAX_INSN_LEN];
-  unsigned char mask[I386_MAX_INSN_LEN];
+  gdb_byte insn[I386_MAX_INSN_LEN];
+  gdb_byte mask[I386_MAX_INSN_LEN];
 };
 
 /* Search for the instruction at PC in the list SKIP_INSNS.  Return
@@ -491,7 +491,7 @@ static struct i386_insn *
 i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
 {
   struct i386_insn *insn;
-  unsigned char op;
+  gdb_byte op;
 
   op = read_memory_unsigned_integer (pc, 1);
 
@@ -584,7 +584,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR limit,
 			  struct i386_frame_cache *cache)
 {
   struct i386_insn *insn;
-  unsigned char op;
+  gdb_byte op;
   int skip = 0;
 
   if (limit <= pc)
@@ -708,7 +708,7 @@ i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
 			     struct i386_frame_cache *cache)
 {
   CORE_ADDR offset = 0;
-  unsigned char op;
+  gdb_byte op;
   int i;
 
   if (cache->locals > 0)
@@ -771,14 +771,14 @@ i386_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 static CORE_ADDR
 i386_skip_prologue (CORE_ADDR start_pc)
 {
-  static unsigned char pic_pat[6] =
+  static gdb_byte pic_pat[6] =
   {
     0xe8, 0, 0, 0, 0,		/* call 0x0 */
     0x5b,			/* popl %ebx */
   };
   struct i386_frame_cache cache;
   CORE_ADDR pc;
-  unsigned char op;
+  gdb_byte op;
   int i;
 
   cache.locals = -1;
@@ -849,7 +849,7 @@ i386_skip_prologue (CORE_ADDR start_pc)
 static CORE_ADDR
 i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  char buf[8];
+  gdb_byte buf[8];
 
   frame_unwind_register (next_frame, PC_REGNUM, buf);
   return extract_typed_address (buf, builtin_type_void_func_ptr);
@@ -862,7 +862,7 @@ static struct i386_frame_cache *
 i386_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct i386_frame_cache *cache;
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   if (*this_cache)
@@ -1052,7 +1052,7 @@ i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   struct i386_frame_cache *cache;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   CORE_ADDR addr;
-  char buf[4];
+  gdb_byte buf[4];
 
   if (*this_cache)
     return *this_cache;
@@ -1163,7 +1163,7 @@ static const struct frame_base i386_frame_base =
 static struct frame_id
 i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR fp;
 
   frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
@@ -1185,7 +1185,7 @@ i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static int
 i386_get_longjmp_target (CORE_ADDR *pc)
 {
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR sp, jb_addr;
   int jb_pc_offset = gdbarch_tdep (current_gdbarch)->jb_pc_offset;
   int len = TYPE_LENGTH (builtin_type_void_func_ptr);
@@ -1217,7 +1217,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct value **args, CORE_ADDR sp, int struct_return,
 		      CORE_ADDR struct_addr)
 {
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   /* Push arguments in reverse order.  */
@@ -1279,11 +1279,11 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 static void
 i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
-			   struct regcache *regcache, void *valbuf)
+			   struct regcache *regcache, gdb_byte *valbuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int len = TYPE_LENGTH (type);
-  char buf[I386_MAX_REGISTER_SIZE];
+  gdb_byte buf[I386_MAX_REGISTER_SIZE];
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
@@ -1316,7 +1316,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	  regcache_raw_read (regcache, LOW_RETURN_REGNUM, buf);
 	  memcpy (valbuf, buf, low_size);
 	  regcache_raw_read (regcache, HIGH_RETURN_REGNUM, buf);
-	  memcpy ((char *) valbuf + low_size, buf, len - low_size);
+	  memcpy (valbuf + low_size, buf, len - low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -1329,7 +1329,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 
 static void
 i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
-			 struct regcache *regcache, const void *valbuf)
+			 struct regcache *regcache, const gdb_byte *valbuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int len = TYPE_LENGTH (type);
@@ -1341,7 +1341,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       ULONGEST fstat;
-      char buf[I386_MAX_REGISTER_SIZE];
+      gdb_byte buf[I386_MAX_REGISTER_SIZE];
 
       if (tdep->st0_regnum < 0)
 	{
@@ -1384,7 +1384,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 	{
 	  regcache_raw_write (regcache, LOW_RETURN_REGNUM, valbuf);
 	  regcache_raw_write_part (regcache, HIGH_RETURN_REGNUM, 0,
-				   len - low_size, (char *) valbuf + low_size);
+				   len - low_size, valbuf + low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -1607,7 +1607,7 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
-      char mmx_buf[MAX_REGISTER_SIZE];
+      gdb_byte mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Extract (always little endian).  */
@@ -1624,7 +1624,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
-      char mmx_buf[MAX_REGISTER_SIZE];
+      gdb_byte mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Read ...  */
@@ -1706,7 +1706,7 @@ i386_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, void *to)
 {
   int len = TYPE_LENGTH (type);
-  char *buf = to;
+  gdb_byte *buf = to;
 
   /* FIXME: kettenis/20030609: What should we do if REGNUM isn't
      available in FRAME (i.e. if it wasn't saved)?  */
@@ -1741,7 +1741,7 @@ i386_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const void *from)
 {
   int len = TYPE_LENGTH (type);
-  const char *buf = from;
+  const gdb_byte *buf = from;
 
   if (i386_fp_regnum_p (regnum))
     {
@@ -1774,7 +1774,7 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
   const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
-  const char *regs = gregs;
+  const bfd_byte *regs = gregs;
   int i;
 
   gdb_assert (len == tdep->sizeof_gregset);
@@ -1798,7 +1798,7 @@ i386_collect_gregset (const struct regset *regset,
 		      int regnum, void *gregs, size_t len)
 {
   const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
-  char *regs = gregs;
+  bfd_byte *regs = gregs;
   int i;
 
   gdb_assert (len == tdep->sizeof_gregset);
@@ -1996,7 +1996,7 @@ i386_svr4_sigtramp_p (struct frame_info *next_frame)
 static CORE_ADDR
 i386_svr4_sigcontext_addr (struct frame_info *next_frame)
 {
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR sp;
 
   frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);

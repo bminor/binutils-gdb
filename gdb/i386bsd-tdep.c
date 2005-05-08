@@ -38,7 +38,7 @@
 static CORE_ADDR
 i386bsd_sigcontext_addr (struct frame_info *next_frame)
 {
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR sp;
 
   frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
