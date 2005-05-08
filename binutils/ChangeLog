@@ -1,3 +1,19 @@
+2005-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* Update the address and phone number of the FSF organization in
+	the GPL notices in the following files:
+	aclocal.m4, addr2line.c, ar.c, arlex.l, arparse.y, arsup.c,
+	arsup.h, binemul.c, binemul.h, bucomm.c, bucomm.h, budbg.h,
+	budemang.c, budemang.h, coffdump.c, coffgrok.c, coffgrok.h,
+	cxxfilt.c, debug.c, debug.h, deflex.l, defparse.y, dlltool.c,
+	dlltool.h, dllwrap.c, emul_aix.c, emul_vanilla.c, filemode.c,
+	ieee.c, nlmconv.c, nlmconv.h, nlmheader.y, nm.c, objcopy.c,
+	objdump.c, prdbg.c, rclex.l, rcparse.y, rdcoff.c, rddbg.c,
+	readelf.c, rename.c, resbin.c, rescoff.c, resrc.c, resres.c,
+	size.c, srconv.c, stabs.c, strings.c, sysdump.c, sysinfo.y,
+	syslex.l, unwind-ia64.c, unwind-ia64.h, version.c, windres.c,
+	windres.h, winduni.c, winduni.h wrstabs.c, doc/fdl.texi
+
 2005-05-06  Jan Beulich  <jbeulich@novell.com>
 
 	* objcopy.c (copy_file): Don't delete output upon error here.

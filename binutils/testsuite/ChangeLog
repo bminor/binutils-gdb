@@ -1,3 +1,15 @@
+2005-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* Update the address and phone number of the FSF organization in
+	the GPL notices in the following files:
+	binutils-all/ar.exp, binutils-all/dlltool.exp,
+	binutils-all/nm.exp, binutils-all/objcopy.exp,
+	binutils-all/objdump.exp, binutils-all/readelf.exp,
+	binutils-all/size.exp, binutils-all/hppa/objdump.exp,
+	binutils-all/m68k/objdump.exp, binutils-all/vax/objdump.exp,
+	binutils-all/windres/msupdate, binutils-all/windres/windres.exp,
+	config/default.exp, lib/utils-lib.exp
+
 2005-04-04  Jan-Benedict Glaw  <jbglaw@lug-owl.>
 
 	* binutils-all/vax/objdump.exp: Condense the two tests into one
