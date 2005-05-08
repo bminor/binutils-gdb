@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/amd64.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -47,7 +47,8 @@ amd64obsd_supply_regset (const struct regset *regset,
   gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FXSAVE);
 
   i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
-  amd64_supply_fxsave (regcache, regnum, (char *)regs + tdep->sizeof_gregset);
+  amd64_supply_fxsave (regcache, regnum,
+		       ((const gdb_byte *)regs) + tdep->sizeof_gregset);
 }
 
 static const struct regset *
@@ -84,14 +85,15 @@ amd64obsd_sigtramp_p (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   CORE_ADDR start_pc = (pc & ~(amd64obsd_page_size - 1));
-  const char sigreturn[] =
+  const gdb_byte sigreturn[] =
   {
     0x48, 0xc7, 0xc0,
     0x67, 0x00, 0x00, 0x00,	/* movq $SYS_sigreturn, %rax */
     0xcd, 0x80			/* int $0x80 */
   };
   size_t buflen = (sizeof sigreturn) + 1;
-  char *name, *buf;
+  gdb_byte *buf;
+  char *name;
 
   /* If the function has a valid symbol name, it isn't a
      trampoline.  */

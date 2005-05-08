@@ -503,10 +503,10 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *type,
 
       if (readbuf)
 	regcache_raw_read_part (regcache, regnum, offset, min (len, 8),
-				(char *) readbuf + i * 8);
+				((gdb_byte *)readbuf) + i * 8);
       if (writebuf)
 	regcache_raw_write_part (regcache, regnum, offset, min (len, 8),
-				 (const char *) writebuf + i * 8);
+				 ((const gdb_byte *)writebuf) + i * 8);
     }
 
   return RETURN_VALUE_REGISTER_CONVENTION;
@@ -581,8 +581,8 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
       else
 	{
 	  /* The argument will be passed in registers.  */
-	  const bfd_byte *valbuf = value_contents (args[i]);
-	  char buf[8];
+	  const gdb_byte *valbuf = value_contents (args[i]);
+	  gdb_byte buf[8];
 
 	  gdb_assert (len <= 16);
 
@@ -630,7 +630,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
   for (i = 0; i < num_stack_args; i++)
     {
       struct type *type = value_type (stack_args[i]);
-      const bfd_byte *valbuf = value_contents (stack_args[i]);
+      const gdb_byte *valbuf = value_contents (stack_args[i]);
       int len = TYPE_LENGTH (type);
 
       write_memory (sp + element * 8, valbuf, len);
@@ -651,7 +651,7 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       int nargs, struct value **args,	CORE_ADDR sp,
 		       int struct_return, CORE_ADDR struct_addr)
 {
-  char buf[8];
+  gdb_byte buf[8];
 
   /* Pass arguments.  */
   sp = amd64_push_arguments (regcache, nargs, args, sp, struct_return);
@@ -740,9 +740,9 @@ static CORE_ADDR
 amd64_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 			struct amd64_frame_cache *cache)
 {
-  static unsigned char proto[3] = { 0x48, 0x89, 0xe5 };
-  unsigned char buf[3];
-  unsigned char op;
+  static gdb_byte proto[3] = { 0x48, 0x89, 0xe5 }; /* movq %rsp, %rbp */
+  gdb_byte buf[3];
+  gdb_byte op;
 
   if (current_pc <= pc)
     return current_pc;
@@ -795,7 +795,7 @@ static struct amd64_frame_cache *
 amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct amd64_frame_cache *cache;
-  char buf[8];
+  gdb_byte buf[8];
   int i;
 
   if (*this_cache)
@@ -932,7 +932,7 @@ amd64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
   struct amd64_frame_cache *cache;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   CORE_ADDR addr;
-  char buf[8];
+  gdb_byte buf[8];
   int i;
 
   if (*this_cache)
@@ -1034,7 +1034,7 @@ static const struct frame_base amd64_frame_base =
 static struct frame_id
 amd64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR fp;
 
   frame_unwind_register (next_frame, AMD64_RBP_REGNUM, buf);
@@ -1202,7 +1202,7 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
 
   if (fxsave && gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
     {
-      const char *regs = fxsave;
+      const gdb_byte *regs = fxsave;
 
       if (regnum == -1 || regnum == I387_FISEG_REGNUM)
 	regcache_raw_supply (regcache, I387_FISEG_REGNUM, regs + 12);
@@ -1220,7 +1220,7 @@ void
 amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 		      void *fxsave)
 {
-  char *regs = fxsave;
+  gdb_byte *regs = fxsave;
 
   i387_collect_fxsave (regcache, regnum, fxsave);
 

@@ -1,5 +1,19 @@
 2005-05-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-tdep.c (amd64_return_value): Use `gdb_byte *' in casts.
+	(amd64_push_arguments): Use gdb_byte instead of bfd_byte.  Use
+	gdb_byte for buf.
+	(amd64_push_dummy_call): Use gdb_byte for buf.
+	(amd64_analyze_prologue): Use gdb_byte for proto, buf and op.
+	(amd64_frame_cache, amd64_sigtramp_frame_cache)
+	(amd64_unwind_dummy_id): Use gdb_byte for buf.
+	(amd64_supply_fxsave, amd64_collect_fxsave): Use `gdb_byte *' for
+	regs.
+	* amd64obsd-tdep.c (amd64obsd_supply_regset): Use `gdb_byte *' in
+	casts.
+	(amd64obsd_sigtramp_p): Use gdb_byte for sigreturn and `gdb_byte
+	*' for buf,
+
 	* i386-tdep.c (i386_breakpoint_from_pc): Change return type to
 	`const gdb_byte *'.  Use gdb_byte for break_insn.
 	(i386_follow_jump): Use gdb_byte for op.
