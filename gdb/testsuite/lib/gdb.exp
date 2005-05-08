@@ -51,6 +51,26 @@ if ![info exists gdb_prompt] then {
     set gdb_prompt "\[(\]gdb\[)\]"
 }
 
+# The variable fullname_syntax_POSIX is a regexp which matches a POSIX 
+# absolute path ie. /foo/ 
+set fullname_syntax_POSIX "/.*/"
+# The variable fullname_syntax_UNC is a regexp which matches a Windows 
+# UNC path ie. \\D\foo\ 
+set fullname_syntax_UNC {\\\\[^\\]+\\.+\\}
+# The variable fullname_syntax_DOS_CASE is a regexp which matches a 
+# particular DOS case that GDB most likely will output
+# ie. \foo\, but don't match \\.*\ 
+set fullname_syntax_DOS_CASE {\\[^\\].*\\}
+# The variable fullname_syntax_DOS is a regexp which matches a DOS path
+# ie. a:\foo\ && a:foo\ 
+set fullname_syntax_DOS {[a-zA-Z]:.*\\}
+# The variable fullname_syntax is a regexp which matches what GDB considers
+# an absolute path. It is currently debatable if the Windows style paths 
+# d:foo and \abc should be considered valid as an absolute path.
+# Also, the purpse of this regexp is not to recognize a well formed 
+# absolute path, but to say with certainty that a path is absolute.
+set fullname_syntax "($fullname_syntax_POSIX|$fullname_syntax_UNC|$fullname_syntax_DOS_CASE|$fullname_syntax_DOS)"
+
 # Needed for some tests under Cygwin.
 global EXEEXT
 global env

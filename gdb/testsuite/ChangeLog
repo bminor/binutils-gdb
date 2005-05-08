@@ -1,3 +1,15 @@
+2005-05-05  Bob Rossi  <bob_rossi@cox.net>
+
+	* lib/gdb.exp (fullname_syntax): Added global regex.
+	(fullname_syntax_POSIX): Ditto.
+	(fullname_syntax_UNC): Ditto.
+	(fullname_syntax_DOS_CASE): Ditto.
+	(fullname_syntax_DOS): Ditto.
+	* gdb.mi/mi-file.exp (test_file_list_exec_source_file): Added
+	fullname_syntax variable to scope and use it.
+	(test_file_list_exec_source_files): Ditto.
+	* gdb.mi/mi2-file.exp (test_file_list_exec_source_file): Ditto.
+
 2005-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.threads/linux-dp.exp: Check for *-*-linux-gnu*.
