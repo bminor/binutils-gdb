@@ -1,5 +1,7 @@
 2005-05-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/ia64/nm-aix.h: Remove file.
+
 	* amd64-tdep.c (amd64_return_value): Use `gdb_byte *' in casts.
 	(amd64_push_arguments): Use gdb_byte instead of bfd_byte.  Use
 	gdb_byte for buf.
