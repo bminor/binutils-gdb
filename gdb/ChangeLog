@@ -1,5 +1,7 @@
 2005-05-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* defs.h (gdb_byte): New typedef.  Tweak comments.
+
 	* target.h (target_link): Remove prototype.
 	* target.c (target_link): Remove function.
 	* symfile.c: Remove comment about rombug.

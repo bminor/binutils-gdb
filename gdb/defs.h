@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -63,15 +63,16 @@
 
 #include "libiberty.h"
 
-/* For BFD64 and bfd_vma.  */
+/* Rather than duplicate all the logic in BFD for figuring out what
+   types to use (which can be pretty complicated), symply define them
+   in terms of the corresponding type from BFD.  */
+
 #include "bfd.h"
 
-/* An address in the program being debugged.  Host byte order.  Rather
-   than duplicate all the logic in BFD which figures out what type
-   this is (long, long long, etc.) and whether it needs to be 64
-   bits (the host/target interactions are subtle), we just use
-   bfd_vma.  */
+/* A byte from the program being debugged.  */
+typedef bfd_byte gdb_byte;
 
+/* An address in the program being debugged.  Host byte order.  */
 typedef bfd_vma CORE_ADDR;
 
 /* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
