@@ -28,7 +28,7 @@
 	(i386_unwind_dummy_id, i386_get_longjmp_target): Use gdb_byte for
 	buf.
 	(i386_extract_return_value, i386_store_return_value): Use
-	`bfd_byte *' instead of `void *' for valbuf argument.  Remove now
+	`gdb_byte *' instead of `void *' for valbuf argument.  Remove now
 	redundant cast.
 	(i386_pseudo_register_read, i386_pseudo_register_write): Use
 	gdb_byte for mmx_buf.
