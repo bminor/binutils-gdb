@@ -1,3 +1,8 @@
+2005-05-08  Dave Korn   <dave.korn@artimi.com>
+
+	* coff-tic80.c:  Undefine _CONST after system headers to prevent
+	clash with tic80-specific definition in include/coff/tic80.h
+
 2005-05-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 939

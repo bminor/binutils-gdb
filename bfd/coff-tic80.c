@@ -28,6 +28,14 @@ Boston, MA 02110-1301, USA.  */
 #include "bfdlink.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#ifdef _CONST
+/* Newlib-based hosts define _CONST as a STDC-safe alias for const,
+  but to the tic80 toolchain it means something altogether different.
+  Since sysdep.h will have pulled in stdio.h and hence _ansi.h which
+  contains this definition, we must undef it before including the 
+  tic80-specific definition. */
+#undef _CONST
+#endif /* _CONST */
 #include "coff/tic80.h"
 #include "coff/internal.h"
 #include "libcoff.h"
