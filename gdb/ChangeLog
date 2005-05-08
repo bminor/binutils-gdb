@@ -1,3 +1,9 @@
+2005-05-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* target.h (target_link): Remove prototype.
+	* target.c (target_link): Remove function.
+	* symfile.c: Remove comment about rombug.
+
 2005-05-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/cygwin.mh (XM_FILE): Remove variable.

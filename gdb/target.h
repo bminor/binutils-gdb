@@ -904,8 +904,6 @@ extern void target_load (char *arg, int from_tty);
 
 extern int target_async_mask (int mask);
 
-extern void target_link (char *, CORE_ADDR *);
-
 /* Converts a process id to a string.  Usually, the string just contains
    `process xyz', but on some systems it may contain
    `process xyz thread abc'.  */

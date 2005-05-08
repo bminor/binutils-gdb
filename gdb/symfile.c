@@ -1165,10 +1165,6 @@ find_separate_debug_file (struct objfile *objfile)
    used in GDB (perhaps "set mapped on", "set readnow on" would be
    better), (3) the order of options matters, which is contrary to GNU
    conventions (because it is confusing and inconvenient).  */
-/* Note: ezannoni 2000-04-17. This function used to have support for
-   rombug (see remote-os9k.c). It consisted of a call to target_link()
-   (target.c) to get the address of the text segment from the target,
-   and pass that to symbol_file_add(). This is no longer supported. */
 
 void
 symbol_file_command (char *args, int from_tty)

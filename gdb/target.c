@@ -1496,19 +1496,6 @@ target_disconnect (char *args, int from_tty)
   (current_target.to_disconnect) (args, from_tty);
 }
 
-void
-target_link (char *modname, CORE_ADDR *t_reloc)
-{
-  if (DEPRECATED_STREQ (current_target.to_shortname, "rombug"))
-    {
-      (current_target.to_lookup_symbol) (modname, t_reloc);
-      if (*t_reloc == 0)
-	error (_("Unable to link to %s and get relocation in rombug"), modname);
-    }
-  else
-    *t_reloc = (CORE_ADDR) -1;
-}
-
 int
 target_async_mask (int mask)
 {
