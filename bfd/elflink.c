@@ -6379,7 +6379,9 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
     {
       (*_bfd_error_handler)
 	(_("%B: %s symbol `%s' in %B is referenced by DSO"),
-	 finfo->output_bfd, h->root.u.def.section->owner,
+	 finfo->output_bfd,
+	 h->root.u.def.section == bfd_abs_section_ptr
+	 ? finfo->output_bfd : h->root.u.def.section->owner,
 	 ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
 	 ? "internal"
 	 : ELF_ST_VISIBILITY (h->other) == STV_HIDDEN

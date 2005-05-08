@@ -1,3 +1,10 @@
+2005-05-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 939
+	* elflink.c (elf_link_output_extsym): Use output_bfd if
+	h->root.u.def.section is bfd_abs_section_ptr when reporting
+	error.
+
 2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_backend_data): Update special_sections to
