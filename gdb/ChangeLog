@@ -1,5 +1,14 @@
 2005-05-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* vaxbsd-nat.c (vaxbsd_supply_gregset, vaxbsd_collect_gregset):
+	Use `gdb_byte *' for regs.
+	* vax-tdep.c (vax_supply_gregset): Use `gdb_byte *' for regs;
+	(vax_store_arguments, vax_push_dummy_call, vax_return_value): Use
+	gdb_byte for buf.
+	(vax_breakpoint_from_pc): Change return type to `const gdb_byte
+	*'.  Use gdb_byte for break_insn.
+	(vax_skip_prologue): Use gdb_byte for op.
+
 	* i387-tdep.c: Remove outdated comments.
 
 	* defs.h: Unconditionally include <sys/types.h>.
