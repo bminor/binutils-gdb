@@ -1,3 +1,13 @@
+2005-05-09  Nick Clifton  <nickc@redhat.com>
+
+	* Update the address and phone number of the FSF organization in
+	the GPL notices in the following files:
+	aclocal.m4, basic_blocks.c, basic_blocks.h, bb_exit_func.c,
+	bbconv.pl, call_graph.c, call_graph.h, cg_print.c, cg_print.h,
+	corefile.c, corefile.h, gmon_io.c, gmon_io.h, gmon_out.h,
+	gprof.texi, hist.c, hist.h, search_list.c, search_list.h,
+	source.c, source.h, sym_ids.c, sym_ids.h, symtab.c, symtab.h
+
 2005-04-25  Ben Elliston  <bje@au.ibm.com>
 
 	* corefile.h (core_num_syms): Remove unused extern declaration.
