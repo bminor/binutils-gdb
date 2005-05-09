@@ -3513,3 +3513,18 @@ sh64_vtable_inherit (int ignore ATTRIBUTE_UNUSED)
   input_line_pointer = eol;
 }
 
+int
+sh64_fake_label (const char *name)
+{
+  size_t len;
+
+  if (strcmp (name, FAKE_LABEL_NAME) == 0)
+    return 1;
+
+  len = strlen (name);
+  if (len >= (sizeof (DATALABEL_SUFFIX) - 1))
+    return strcmp (&name [len - sizeof (DATALABEL_SUFFIX) + 1],
+		   DATALABEL_SUFFIX) == 0;
+
+  return 0;
+}

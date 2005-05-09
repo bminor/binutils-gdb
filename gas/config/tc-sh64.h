@@ -221,3 +221,6 @@ void shmedia_md_end (void);
    we have to say we only have minimum byte-size insns.  */
 #undef  DWARF2_LINE_MIN_INSN_LENGTH
 #define DWARF2_LINE_MIN_INSN_LENGTH 1
+
+#define TC_FAKE_LABEL(NAME) sh64_fake_label(NAME)
+extern int sh64_fake_label (const char *);

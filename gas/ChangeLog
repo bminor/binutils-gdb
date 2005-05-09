@@ -1,3 +1,16 @@
+2005-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 936
+	* config/tc-sh64.c (sh64_fake_label): New.
+
+	* config/tc-sh64.h (TC_FAKE_LABEL): New.
+
+	* doc/internals.texi (TC_FAKE_LABEL): Document.
+
+	* write.c (TC_FAKE_LABEL): New.
+	(adjust_reloc_syms): Use it.
+	(write_object_file): Likewise.
+
 2005-05-09  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (parse_insn): Disallow use of prefix separator

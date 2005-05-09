@@ -97,6 +97,10 @@
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from (FIX)
 #endif
 
+#ifndef TC_FAKE_LABEL
+#define TC_FAKE_LABEL(NAME) (strcmp ((NAME), FAKE_LABEL_NAME) == 0)
+#endif
+
 /* Used to control final evaluation of expressions.  */
 int finalize_syms = 0;
 
@@ -795,7 +799,7 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	      = symbol_get_value_expression (sym)->X_add_symbol;
 	    const char *name = S_GET_NAME (sym);
 	    if (!S_IS_COMMON (new_sym)
-		&& strcmp (name, FAKE_LABEL_NAME)
+		&& !TC_FAKE_LABEL (name)
 		&& (!S_IS_EXTERNAL (sym) || S_IS_LOCAL (sym)))
 	      as_bad (_("Local symbol `%s' can't be equated to undefined symbol `%s'"),
 		      name, S_GET_NAME (new_sym));
@@ -1928,7 +1932,7 @@ write_object_file (void)
 	    {
 	      const char *name = S_GET_NAME (symp);
 	      if (S_IS_COMMON (symp)
-		  && strcmp (name, FAKE_LABEL_NAME)
+		  && !TC_FAKE_LABEL (name)
 		  && (!S_IS_EXTERNAL (symp) || S_IS_LOCAL (symp)))
 		{
 		  expressionS *e = symbol_get_value_expression (symp);

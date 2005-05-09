@@ -1019,6 +1019,11 @@ default definition is to accept any name followed by a colon character.
 Same as TC_START_LABEL, but should be used instead of TC_START_LABEL when
 LABELS_WITHOUT_COLONS is defined.
 
+@item TC_FAKE_LABEL
+@cindex TC_FAKE_LABEL
+You may define this macro to control what GAS considers to be a fake
+label.  The default fake label is FAKE_LABEL_NAME.
+
 @item NO_PSEUDO_DOT
 @cindex NO_PSEUDO_DOT
 If you define this macro, GAS will not require pseudo-ops to start with a
