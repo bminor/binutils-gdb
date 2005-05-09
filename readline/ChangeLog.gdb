@@ -1,3 +1,35 @@
+2005-05-09  Mark Mitchell <mark@codesourcery.com>
+
+	* readline/aclocal.m4: Use AC_TRY_LINK to check for mbstate_t.
+	* readline/complete.c (pwd.h): Guard with HAVE_PWD_H.
+	(getpwent): Guard with HAVE_GETPWENT.
+	(rl_username_completion_function): Guard use of getpwent.
+	(endpwent): Likewise.
+	* readline/config.h.in (HAVE_FCNTL): New macro.
+	(HAVE_GETPWENT): Likewise.
+	(HAVE_GETPWNAM): Likewise.
+	(HAVE_GETPWUID): Likewise.
+	(HAVE_KILL): Likewise.
+	(HAVE_PWD_H): Likewise.
+	* readline/configure: Regenerated.
+	* readline/configure.in: Handle MinGW when cross compiling.  Check for
+	getpwnam, getpwent, getpwuid, kill, and pwd.h.
+	* readline/display.c (rl_clear_screen): Treat Windows like DOS.
+	(insert_some_chars): Likewise.
+	(delete_chars): Likewise.
+	* readline/shell.c (pwd.h): Guard with HAVE_PWD_H.
+	(getpwuid): Guard with HAVE_GETPWUID.
+	(sh_unset_nodelay_mode): Guard use of fnctl with HAVE_FNCTL_H.
+	* readline/signals.c (rl_signal_handler): Don't use SIGALRM or
+	SIGQUIT if not defined.  Use "raise" if "kill" is not available.
+	(rl_set_signals): Don't set handlers for SIGQUIT or SIGALRM if
+	they are not defined.
+	(rl_clear_signals): Likewise.
+	* readline/tilde.c (pwd.h): Guard with HAVE_PWD_H.
+	(getpwuid): Guard declaration with HAVE_GETPWUID.
+	(getpwnam): Guard declaration with HAVE_GETPWNAM.
+	(tilde_expand_word): Guard use of getpwnam with HAVE_GETPWNAM.
+
 2004-02-19  Andrew Cagney  <cagney@redhat.com>
 
 	* config.guess: Update from version 2003-06-12 to 2004-02-16.

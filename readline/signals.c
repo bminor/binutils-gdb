@@ -127,7 +127,11 @@ rl_signal_handler (sig)
 #if !defined (HAVE_BSD_SIGNALS) && !defined (HAVE_POSIX_SIGNALS)
   /* Since the signal will not be blocked while we are in the signal
      handler, ignore it until rl_clear_signals resets the catcher. */
-  if (sig == SIGINT || sig == SIGALRM)
+  if (sig == SIGINT 
+#ifdef SIGALRM
+      || sig == SIGALRM
+#endif
+                       )
     rl_set_sighandler (sig, SIG_IGN, &dummy_cxt);
 #endif /* !HAVE_BSD_SIGNALS && !HAVE_POSIX_SIGNALS */
 
@@ -142,9 +146,13 @@ rl_signal_handler (sig)
     case SIGTTOU:
     case SIGTTIN:
 #endif /* SIGTSTP */
+#ifdef SIGALRM
     case SIGALRM:
+#endif
     case SIGTERM:
+#ifdef SIGQUIT
     case SIGQUIT:
+#endif
       rl_cleanup_after_signal ();
 
 #if defined (HAVE_POSIX_SIGNALS)
@@ -160,7 +168,14 @@ rl_signal_handler (sig)
       signal (sig, SIG_ACK);
 #endif
 
+      /* If we have the POSIX kill function, use it; otherwise, fall
+	 back to the ISO C raise function.  (Windows is an example of
+	 a platform that has raise, but not kill.)  */
+#ifdef HAVE_KILL
       kill (getpid (), sig);
+#else
+      raise (sig);
+#endif
 
       /* Let the signal that we just sent through.  */
 #if defined (HAVE_POSIX_SIGNALS)
@@ -277,8 +292,11 @@ rl_set_signals ()
     {
       rl_maybe_set_sighandler (SIGINT, rl_signal_handler, &old_int);
       rl_maybe_set_sighandler (SIGTERM, rl_signal_handler, &old_term);
+#ifdef SIGQUIT
       rl_maybe_set_sighandler (SIGQUIT, rl_signal_handler, &old_quit);
+#endif
 
+#ifdef SIGALRM
       oh = rl_set_sighandler (SIGALRM, rl_signal_handler, &old_alrm);
       if (oh == (SigHandler *)SIG_IGN)
 	rl_sigaction (SIGALRM, &old_alrm, &dummy);
@@ -290,6 +308,7 @@ rl_set_signals ()
       if (oh != (SigHandler *)SIG_DFL && (old_alrm.sa_flags & SA_RESTART))
 	rl_sigaction (SIGALRM, &old_alrm, &dummy);
 #endif /* HAVE_POSIX_SIGNALS */
+#endif /* SIGALRM */
 
 #if defined (SIGTSTP)
       rl_maybe_set_sighandler (SIGTSTP, rl_signal_handler, &old_tstp);
@@ -328,8 +347,12 @@ rl_clear_signals ()
 
       rl_sigaction (SIGINT, &old_int, &dummy);
       rl_sigaction (SIGTERM, &old_term, &dummy);
+#ifdef SIGQUIT
       rl_sigaction (SIGQUIT, &old_quit, &dummy);
+#endif
+#ifdef SIGALRM
       rl_sigaction (SIGALRM, &old_alrm, &dummy);
+#endif
 
 #if defined (SIGTSTP)
       rl_sigaction (SIGTSTP, &old_tstp, &dummy);
