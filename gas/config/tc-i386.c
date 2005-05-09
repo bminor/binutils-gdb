@@ -2082,7 +2082,13 @@ optimize_disp ()
 	    disp &= (((offsetT) 2 << 31) - 1);
 	    disp = (disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
 	  }
-	if (flag_code == CODE_64BIT)
+	if (!disp && (i.types[op] & BaseIndex))
+	  {
+	    i.types[op] &= ~Disp;
+	    i.op[op].disps = 0;
+	    i.disp_operands--;
+	  }
+	else if (flag_code == CODE_64BIT)
 	  {
 	    if (fits_in_signed_long (disp))
 	      i.types[op] |= Disp32S;
