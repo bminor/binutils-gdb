@@ -1,5 +1,14 @@
 2005-05-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Add has_dotsym.
+	(ppc64_elf_add_symbol_hook): Set has_dotsym.
+	(ppc64_elf_check_directives): Only process syms when has_dotsym.
+	(func_desc_adjust): Hide fake function descriptors when function
+	code entry is defined.
+	(adjust_opd_syms): Adjust for deleted_section becoming union field.
+
+2005-05-09  Alan Modra  <amodra@bigpond.net.au>
+
 	* elfcode.h (elf_object_p): Add more sanity checks on elf header.
 
 2005-05-08  Dave Korn   <dave.korn@artimi.com>

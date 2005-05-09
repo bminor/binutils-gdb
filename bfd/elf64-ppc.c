@@ -2369,9 +2369,14 @@ struct ppc64_elf_obj_tdata
   asection *got;
   asection *relgot;
 
-  /* Used during garbage collection.  We attach global symbols defined
-     on removed .opd entries to this section so that the sym is removed.  */
-  asection *deleted_section;
+  union {
+    /* Used during garbage collection.  We attach global symbols defined
+       on removed .opd entries to this section so that the sym is removed.  */
+    asection *deleted_section;
+
+    /* Used when adding symbols.  */
+    bfd_boolean has_dotsym;
+  } u;
 
   /* TLS local dynamic got entry handling.  Suppose for multiple GOT
      sections means we potentially need one of these for each input bfd.  */
@@ -4042,10 +4047,10 @@ make_fdh (struct bfd_link_info *info,
    function type.  */
 
 static bfd_boolean
-ppc64_elf_add_symbol_hook (bfd *ibfd ATTRIBUTE_UNUSED,
+ppc64_elf_add_symbol_hook (bfd *ibfd,
 			   struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			   Elf_Internal_Sym *isym,
-			   const char **name ATTRIBUTE_UNUSED,
+			   const char **name,
 			   flagword *flags ATTRIBUTE_UNUSED,
 			   asection **sec,
 			   bfd_vma *value ATTRIBUTE_UNUSED)
@@ -4053,6 +4058,13 @@ ppc64_elf_add_symbol_hook (bfd *ibfd ATTRIBUTE_UNUSED,
   if (*sec != NULL
       && strcmp (bfd_get_section_name (ibfd, *sec), ".opd") == 0)
     isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
+
+  if ((*name)[0] == '.'
+      && ELF_ST_BIND (isym->st_info) == STB_GLOBAL
+      && ELF_ST_TYPE (isym->st_info) < STT_SECTION
+      && is_ppc64_elf_target (ibfd->xvec))
+    ppc64_elf_tdata (ibfd)->u.has_dotsym = 1;
+
   return TRUE;
 }
 
@@ -4166,11 +4178,17 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
 }
 
 static bfd_boolean
-ppc64_elf_check_directives (bfd *abfd ATTRIBUTE_UNUSED,
-			    struct bfd_link_info *info)
+ppc64_elf_check_directives (bfd *abfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
   struct add_symbol_adjust_data data;
+
+  if (!is_ppc64_elf_target (abfd->xvec))
+    return TRUE;
+
+  if (!ppc64_elf_tdata (abfd)->u.has_dotsym)
+    return TRUE;
+  ppc64_elf_tdata (abfd)->u.deleted_section = NULL;
 
   htab = ppc_hash_table (info);
   if (!is_ppc64_elf_target (htab->elf.root.creator))
@@ -5491,15 +5509,25 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
     }
 
   /* Fake function descriptors are made undefweak.  If the function
-     code symbol is strong undefined, make the fake sym the same.  */
+     code symbol is strong undefined, make the fake sym the same.
+     If the function code symbol is defined, then force the fake
+     descriptor local;  We can't support overriding of symbols in a
+     shared library on a fake descriptor.  */
 
   if (fdh != NULL
       && fdh->fake
-      && fdh->elf.root.type == bfd_link_hash_undefweak
-      && fh->elf.root.type == bfd_link_hash_undefined)
+      && fdh->elf.root.type == bfd_link_hash_undefweak)
     {
-      fdh->elf.root.type = bfd_link_hash_undefined;
-      bfd_link_add_undef (&htab->elf.root, &fdh->elf.root);
+      if (fh->elf.root.type == bfd_link_hash_undefined)
+	{
+	  fdh->elf.root.type = bfd_link_hash_undefined;
+	  bfd_link_add_undef (&htab->elf.root, &fdh->elf.root);
+	}
+      else if (fh->elf.root.type == bfd_link_hash_defined
+	       || fh->elf.root.type == bfd_link_hash_defweak)
+	{
+	  _bfd_elf_link_hash_hide_symbol (info, &fdh->elf, TRUE);
+	}
     }
 
   if (fdh != NULL
@@ -5976,13 +6004,13 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
       if (adjust == -1)
 	{
 	  /* This entry has been deleted.  */
-	  asection *dsec = ppc64_elf_tdata (sym_sec->owner)->deleted_section;
+	  asection *dsec = ppc64_elf_tdata (sym_sec->owner)->u.deleted_section;
 	  if (dsec == NULL)
 	    {
 	      for (dsec = sym_sec->owner->sections; dsec; dsec = dsec->next)
 		if (elf_discarded_section (dsec))
 		  {
-		    ppc64_elf_tdata (sym_sec->owner)->deleted_section = dsec;
+		    ppc64_elf_tdata (sym_sec->owner)->u.deleted_section = dsec;
 		    break;
 		  }
 	    }
