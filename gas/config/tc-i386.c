@@ -1606,8 +1606,9 @@ parse_insn (line, mnemonic)
 	}
       if (!is_space_char (*l)
 	  && *l != END_OF_INSN
-	  && *l != PREFIX_SEPARATOR
-	  && *l != ',')
+	  && (intel_syntax
+	      || (*l != PREFIX_SEPARATOR
+		  && *l != ',')))
 	{
 	  as_bad (_("invalid character %s in mnemonic"),
 		  output_invalid (*l));
@@ -1615,7 +1616,7 @@ parse_insn (line, mnemonic)
 	}
       if (token_start == l)
 	{
-	  if (*l == PREFIX_SEPARATOR)
+	  if (!intel_syntax && *l == PREFIX_SEPARATOR)
 	    as_bad (_("expecting prefix; got nothing"));
 	  else
 	    as_bad (_("expecting mnemonic; got nothing"));
