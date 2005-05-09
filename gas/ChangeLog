@@ -1,3 +1,8 @@
+2005-05-09  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (parse_insn): Consider all matching instructions
+	when checking for string instruction after string-only prefix.
+
 2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 940

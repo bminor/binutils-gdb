@@ -1765,12 +1765,24 @@ parse_insn (line, mnemonic)
     }
 
   /* Check for rep/repne without a string instruction.  */
-  if (expecting_string_instruction
-      && !(current_templates->start->opcode_modifier & IsString))
+  if (expecting_string_instruction)
     {
-      as_bad (_("expecting string instruction after `%s'"),
-	      expecting_string_instruction);
-      return NULL;
+      static templates override;
+
+      for (t = current_templates->start; t < current_templates->end; ++t)
+	if (t->opcode_modifier & IsString)
+	  break;
+      if (t >= current_templates->end)
+	{
+	  as_bad (_("expecting string instruction after `%s'"),
+	        expecting_string_instruction);
+	  return NULL;
+	}
+      for (override.start = t; t < current_templates->end; ++t)
+	if (!(t->opcode_modifier & IsString))
+	  break;
+      override.end = t;
+      current_templates = &override;
     }
 
   return l;
