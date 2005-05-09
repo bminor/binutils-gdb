@@ -160,7 +160,7 @@ f_printchar (int c, struct ui_file *stream)
    be replaced with a true F77 version. */
 
 static void
-f_printstr (struct ui_file *stream, const bfd_byte *string,
+f_printstr (struct ui_file *stream, const gdb_byte *string,
 	    unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;

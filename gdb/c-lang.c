@@ -86,7 +86,7 @@ c_printchar (int c, struct ui_file *stream)
    printing LENGTH characters, or if FORCE_ELLIPSES.  */
 
 void
-c_printstr (struct ui_file *stream, const bfd_byte *string,
+c_printstr (struct ui_file *stream, const gdb_byte *string,
 	    unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;

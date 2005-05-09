@@ -499,7 +499,7 @@ f:=:void:value_to_register:struct frame_info *frame, int regnum, struct type *ty
 #
 f:=:CORE_ADDR:pointer_to_address:struct type *type, const void *buf:type, buf::unsigned_pointer_to_address::0
 f:=:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
-M::CORE_ADDR:integer_to_address:struct type *type, const bfd_byte *buf:type, buf
+M::CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 #
 # NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS.
 F:=:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp
@@ -521,8 +521,8 @@ M::enum return_value_convention:return_value:struct type *valtype, struct regcac
 
 f:=:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf::legacy_extract_return_value::0
 f:=:void:store_return_value:struct type *type, struct regcache *regcache, const void *valbuf:type, regcache, valbuf::legacy_store_return_value::0
-f:=:void:deprecated_extract_return_value:struct type *type, bfd_byte *regbuf, bfd_byte *valbuf:type, regbuf, valbuf
-f:=:void:deprecated_store_return_value:struct type *type, bfd_byte *valbuf:type, valbuf
+f:=:void:deprecated_extract_return_value:struct type *type, gdb_byte *regbuf, gdb_byte *valbuf:type, regbuf, valbuf
+f:=:void:deprecated_store_return_value:struct type *type, gdb_byte *valbuf:type, valbuf
 f:=:int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type::generic_use_struct_convention::0
 
 # As of 2004-01-17 only the 32-bit SPARC ABI has been identified as an
@@ -549,10 +549,10 @@ F:=:CORE_ADDR:deprecated_extract_struct_value_address:struct regcache *regcache:
 #
 f:=:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 f:=:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
-f:=:const bfd_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
+f:=:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
 M::CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
-f:=:int:memory_insert_breakpoint:CORE_ADDR addr, bfd_byte *contents_cache:addr, contents_cache:0:default_memory_insert_breakpoint::0
-f:=:int:memory_remove_breakpoint:CORE_ADDR addr, bfd_byte *contents_cache:addr, contents_cache:0:default_memory_remove_breakpoint::0
+f:=:int:memory_insert_breakpoint:CORE_ADDR addr, gdb_byte *contents_cache:addr, contents_cache:0:default_memory_insert_breakpoint::0
+f:=:int:memory_remove_breakpoint:CORE_ADDR addr, gdb_byte *contents_cache:addr, contents_cache:0:default_memory_remove_breakpoint::0
 v:=:CORE_ADDR:decr_pc_after_break:::0:::0
 
 # A function can be addressed by either it's "pointer" (possibly a

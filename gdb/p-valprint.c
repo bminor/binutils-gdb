@@ -57,7 +57,7 @@
 
 
 int
-pascal_val_print (struct type *type, const bfd_byte *valaddr,
+pascal_val_print (struct type *type, const gdb_byte *valaddr,
 		  int embedded_offset, CORE_ADDR address,
 		  struct ui_file *stream, int format, int deref_ref,
 		  int recurse, enum val_prettyprint pretty)
@@ -590,13 +590,13 @@ static void pascal_object_print_static_field (struct value *,
 					      struct ui_file *, int, int,
 					      enum val_prettyprint);
 
-static void pascal_object_print_value (struct type *, const bfd_byte *,
+static void pascal_object_print_value (struct type *, const gdb_byte *,
 				       CORE_ADDR, struct ui_file *,
 				       int, int, enum val_prettyprint,
 				       struct type **);
 
 void
-pascal_object_print_class_method (const bfd_byte *valaddr, struct type *type,
+pascal_object_print_class_method (const gdb_byte *valaddr, struct type *type,
 				  struct ui_file *stream)
 {
   struct type *domain;
@@ -736,7 +736,7 @@ pascal_object_is_vtbl_member (struct type *type)
    should not print, or zero if called from top level.  */
 
 void
-pascal_object_print_value_fields (struct type *type, const bfd_byte *valaddr,
+pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 				  CORE_ADDR address, struct ui_file *stream,
 				  int format, int recurse,
 				  enum val_prettyprint pretty,
@@ -907,7 +907,7 @@ pascal_object_print_value_fields (struct type *type, const bfd_byte *valaddr,
    baseclasses.  */
 
 void
-pascal_object_print_value (struct type *type, const bfd_byte *valaddr,
+pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 			   CORE_ADDR address, struct ui_file *stream,
 			   int format, int recurse,
 			   enum val_prettyprint pretty,
@@ -933,7 +933,7 @@ pascal_object_print_value (struct type *type, const bfd_byte *valaddr,
       int boffset;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       char *basename = TYPE_NAME (baseclass);
-      const bfd_byte *base_valaddr;
+      const gdb_byte *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -971,7 +971,7 @@ pascal_object_print_value (struct type *type, const bfd_byte *valaddr,
       if (boffset != -1 && (boffset < 0 || boffset >= TYPE_LENGTH (type)))
 	{
 	  /* FIXME (alloc): not safe is baseclass is really really big. */
-	  bfd_byte *buf = alloca (TYPE_LENGTH (baseclass));
+	  gdb_byte *buf = alloca (TYPE_LENGTH (baseclass));
 	  base_valaddr = buf;
 	  if (target_read_memory (address + boffset, buf,
 				  TYPE_LENGTH (baseclass)) != 0)
@@ -1052,7 +1052,7 @@ pascal_object_print_static_field (struct value *val,
 }
 
 void
-pascal_object_print_class_member (const bfd_byte *valaddr, struct type *domain,
+pascal_object_print_class_member (const gdb_byte *valaddr, struct type *domain,
 				  struct ui_file *stream, char *prefix)
 {
 

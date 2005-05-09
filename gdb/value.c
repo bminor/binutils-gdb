@@ -165,7 +165,7 @@ struct value
      declared here.  */
   union
   {
-    bfd_byte contents[1];
+    gdb_byte contents[1];
     DOUBLEST force_doublest_align;
     LONGEST force_longest_align;
     CORE_ADDR force_core_addr_align;
@@ -306,13 +306,13 @@ set_value_bitsize (struct value *value, int bit)
   value->bitsize = bit;
 }
 
-bfd_byte *
+gdb_byte *
 value_contents_raw (struct value *value)
 {
   return value->aligner.contents + value->embedded_offset;
 }
 
-bfd_byte *
+gdb_byte *
 value_contents_all_raw (struct value *value)
 {
   return value->aligner.contents;
@@ -324,7 +324,7 @@ value_enclosing_type (struct value *value)
   return value->enclosing_type;
 }
 
-const bfd_byte *
+const gdb_byte *
 value_contents_all (struct value *value)
 {
   if (value->lazy)
@@ -344,13 +344,13 @@ set_value_lazy (struct value *value, int val)
   value->lazy = val;
 }
 
-const bfd_byte *
+const gdb_byte *
 value_contents (struct value *value)
 {
   return value_contents_writeable (value);
 }
 
-bfd_byte *
+gdb_byte *
 value_contents_writeable (struct value *value)
 {
   if (value->lazy)
@@ -768,7 +768,7 @@ void
 set_internalvar_component (struct internalvar *var, int offset, int bitpos,
 			   int bitsize, struct value *newval)
 {
-  bfd_byte *addr = value_contents_writeable (var->value) + offset;
+  gdb_byte *addr = value_contents_writeable (var->value) + offset;
 
   if (bitsize)
     modify_field (addr, value_as_long (newval),
@@ -996,7 +996,7 @@ value_as_address (struct value *val)
    to an INT (or some size).  After all, it is only an offset.  */
 
 LONGEST
-unpack_long (struct type *type, const bfd_byte *valaddr)
+unpack_long (struct type *type, const gdb_byte *valaddr)
 {
   enum type_code code = TYPE_CODE (type);
   int len = TYPE_LENGTH (type);
@@ -1045,7 +1045,7 @@ unpack_long (struct type *type, const bfd_byte *valaddr)
    format, result is in host format.  */
 
 DOUBLEST
-unpack_double (struct type *type, const bfd_byte *valaddr, int *invp)
+unpack_double (struct type *type, const gdb_byte *valaddr, int *invp)
 {
   enum type_code code;
   int len;
@@ -1109,7 +1109,7 @@ unpack_double (struct type *type, const bfd_byte *valaddr, int *invp)
    to an INT (or some size).  After all, it is only an offset.  */
 
 CORE_ADDR
-unpack_pointer (struct type *type, const bfd_byte *valaddr)
+unpack_pointer (struct type *type, const gdb_byte *valaddr)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
@@ -1359,7 +1359,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
    If the field is signed, we also do sign extension. */
 
 LONGEST
-unpack_field_as_long (struct type *type, const bfd_byte *valaddr, int fieldno)
+unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 {
   ULONGEST val;
   ULONGEST valmask;
@@ -1406,7 +1406,7 @@ unpack_field_as_long (struct type *type, const bfd_byte *valaddr, int fieldno)
    0 <= BITPOS, where lbits is the size of a LONGEST in bits.  */
 
 void
-modify_field (bfd_byte *addr, LONGEST fieldval, int bitpos, int bitsize)
+modify_field (gdb_byte *addr, LONGEST fieldval, int bitpos, int bitsize)
 {
   ULONGEST oword;
   ULONGEST mask = (ULONGEST) -1 >> (8 * sizeof (ULONGEST) - bitsize);

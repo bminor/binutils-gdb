@@ -50,7 +50,7 @@ struct value;
 extern int scm_value_print (struct value *, struct ui_file *,
 			    int, enum val_prettyprint);
 
-extern int scm_val_print (struct type *, const bfd_byte *, int, CORE_ADDR,
+extern int scm_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			  struct ui_file *, int, int, int,
 			  enum val_prettyprint);
 

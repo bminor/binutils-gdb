@@ -30,7 +30,7 @@ extern void f_error (char *);	/* Defined in f-exp.y */
 extern void f_print_type (struct type *, char *, struct ui_file *, int,
 			  int);
 
-extern int f_val_print (struct type *, const bfd_byte *, int, CORE_ADDR,
+extern int f_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			struct ui_file *, int, int, int,
 			enum val_prettyprint);
 

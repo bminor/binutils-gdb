@@ -86,7 +86,7 @@ CORE_ADDR read_memory_typed_address (CORE_ADDR addr, struct type *type);
    byteswapping, alignment, different sizes for host vs. target types,
    etc.  */
 
-extern void write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr, int len);
+extern void write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len);
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
 extern void write_memory_unsigned_integer (CORE_ADDR addr, int len,

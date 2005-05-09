@@ -42,7 +42,7 @@ extern struct type *java_float_type;
 extern struct type *java_double_type;
 extern struct type *java_void_type;
 
-extern int java_val_print (struct type *, const bfd_byte *, int, CORE_ADDR,
+extern int java_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			   struct ui_file *, int, int, int,
 			   enum val_prettyprint);
 

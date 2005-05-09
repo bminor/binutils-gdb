@@ -244,7 +244,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
    should not print, or zero if called from top level.  */
 
 static void
-java_print_value_fields (struct type *type, const bfd_byte *valaddr,
+java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 			 CORE_ADDR address, struct ui_file *stream,
 			 int format, int recurse, enum val_prettyprint pretty)
 {
@@ -265,7 +265,7 @@ java_print_value_fields (struct type *type, const bfd_byte *valaddr,
 	  int boffset;
 	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
 	  char *basename = TYPE_NAME (baseclass);
-	  const bfd_byte *base_valaddr;
+	  const gdb_byte *base_valaddr;
 
 	  if (BASETYPE_VIA_VIRTUAL (type, i))
 	    continue;
@@ -441,7 +441,7 @@ java_print_value_fields (struct type *type, const bfd_byte *valaddr,
    The PRETTY parameter controls prettyprinting.  */
 
 int
-java_val_print (struct type *type, const bfd_byte *valaddr,
+java_val_print (struct type *type, const gdb_byte *valaddr,
 		int embedded_offset, CORE_ADDR address,
 		struct ui_file *stream, int format, int deref_ref,
 		int recurse, enum val_prettyprint pretty)

@@ -168,7 +168,7 @@ extern void set_value_lazy (struct value *value, int val);
    get to the real subobject, if the value happens to represent
    something embedded in a larger run-time object.  */
 
-extern bfd_byte *value_contents_raw (struct value *);
+extern gdb_byte *value_contents_raw (struct value *);
 
 /* Actual contents of the value.  For use of this value; setting it
    uses the stuff above.  Not valid if lazy is nonzero.  Target
@@ -176,14 +176,14 @@ extern bfd_byte *value_contents_raw (struct value *);
    value.  Note that a value therefore extends beyond what is
    declared here.  */
 
-extern const bfd_byte *value_contents (struct value *);
-extern bfd_byte *value_contents_writeable (struct value *);
+extern const gdb_byte *value_contents (struct value *);
+extern gdb_byte *value_contents_writeable (struct value *);
 
 /* The ALL variants of the above two macros do not adjust the returned
    pointer by the embedded_offset value.  */
 
-extern bfd_byte *value_contents_all_raw (struct value *);
-extern const bfd_byte *value_contents_all (struct value *);
+extern gdb_byte *value_contents_all_raw (struct value *);
+extern const gdb_byte *value_contents_all (struct value *);
 
 extern int value_fetch_lazy (struct value *val);
 extern int value_contents_equal (struct value *val1, struct value *val2);
@@ -262,12 +262,12 @@ extern LONGEST value_as_long (struct value *val);
 extern DOUBLEST value_as_double (struct value *val);
 extern CORE_ADDR value_as_address (struct value *val);
 
-extern LONGEST unpack_long (struct type *type, const bfd_byte *valaddr);
-extern DOUBLEST unpack_double (struct type *type, const bfd_byte *valaddr,
+extern LONGEST unpack_long (struct type *type, const gdb_byte *valaddr);
+extern DOUBLEST unpack_double (struct type *type, const gdb_byte *valaddr,
 			       int *invp);
-extern CORE_ADDR unpack_pointer (struct type *type, const bfd_byte *valaddr);
+extern CORE_ADDR unpack_pointer (struct type *type, const gdb_byte *valaddr);
 extern LONGEST unpack_field_as_long (struct type *type,
-				     const bfd_byte *valaddr,
+				     const gdb_byte *valaddr,
 				     int fieldno);
 
 extern struct value *value_from_longest (struct type *type, LONGEST num);
@@ -379,7 +379,7 @@ extern struct value *register_value_being_returned (struct type *valtype,
 
 extern struct value *value_in (struct value *element, struct value *set);
 
-extern int value_bit_index (struct type *type, const bfd_byte *addr,
+extern int value_bit_index (struct type *type, const gdb_byte *addr,
 			    int index);
 
 extern int using_struct_return (struct type *value_type, int gcc_p);
@@ -452,20 +452,20 @@ extern void release_value (struct value *val);
 
 extern int record_latest_value (struct value *val);
 
-extern void modify_field (bfd_byte *addr, LONGEST fieldval, int bitpos,
+extern void modify_field (gdb_byte *addr, LONGEST fieldval, int bitpos,
 			  int bitsize);
 
 extern void type_print (struct type *type, char *varstring,
 			struct ui_file *stream, int show);
 
-extern bfd_byte *baseclass_addr (struct type *type, int index,
-				 bfd_byte *valaddr,
+extern gdb_byte *baseclass_addr (struct type *type, int index,
+				 gdb_byte *valaddr,
 				 struct value **valuep, int *errp);
 
 extern void print_longest (struct ui_file *stream, int format,
 			   int use_local, LONGEST val);
 
-extern void print_floating (const bfd_byte *valaddr, struct type *type,
+extern void print_floating (const gdb_byte *valaddr, struct type *type,
 			    struct ui_file *stream);
 
 extern int value_print (struct value *val, struct ui_file *stream, int format,
@@ -477,7 +477,7 @@ extern void value_print_array_elements (struct value *val,
 
 extern struct value *value_release_to_mark (struct value *mark);
 
-extern int val_print (struct type *type, const bfd_byte *valaddr,
+extern int val_print (struct type *type, const gdb_byte *valaddr,
 		      int embedded_offset, CORE_ADDR address,
 		      struct ui_file *stream, int format,
 		      int deref_ref, int recurse,
@@ -495,7 +495,7 @@ extern void print_variable_value (struct symbol *var,
 				  struct frame_info *frame,
 				  struct ui_file *stream);
 
-extern int check_field (struct value *, const bfd_byte *);
+extern int check_field (struct value *, const gdb_byte *);
 
 extern void typedef_print (struct type *type, struct symbol *news,
 			   struct ui_file *stream);
@@ -520,7 +520,7 @@ extern struct value *value_literal_complex (struct value *, struct value *,
 					    struct type *);
 
 extern void find_rt_vbase_offset (struct type *, struct type *,
-				  const bfd_byte *, int, int *, int *);
+				  const gdb_byte *, int, int *, int *);
 
 extern struct value *find_function_in_inferior (const char *);
 

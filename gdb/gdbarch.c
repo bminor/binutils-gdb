@@ -2729,7 +2729,7 @@ gdbarch_integer_to_address_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const bfd_byte *buf)
+gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->integer_to_address != NULL);
@@ -2829,7 +2829,7 @@ set_gdbarch_store_return_value (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, bfd_byte *regbuf, bfd_byte *valbuf)
+gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, gdb_byte *regbuf, gdb_byte *valbuf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->deprecated_extract_return_value != NULL);
@@ -2846,7 +2846,7 @@ set_gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, struct type *type, bfd_byte *valbuf)
+gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, struct type *type, gdb_byte *valbuf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->deprecated_store_return_value != NULL);
@@ -2937,7 +2937,7 @@ set_gdbarch_inner_than (struct gdbarch *gdbarch,
   gdbarch->inner_than = inner_than;
 }
 
-const bfd_byte *
+const gdb_byte *
 gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   gdb_assert (gdbarch != NULL);
@@ -2979,7 +2979,7 @@ set_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, bfd_byte *contents_cache)
+gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *contents_cache)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->memory_insert_breakpoint != NULL);
@@ -2996,7 +2996,7 @@ set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, bfd_byte *contents_cache)
+gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *contents_cache)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->memory_remove_breakpoint != NULL);

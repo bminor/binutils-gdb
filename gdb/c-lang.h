@@ -39,7 +39,7 @@ extern void c_error (char *);	/* Defined in c-exp.y */
 extern void c_print_type (struct type *, char *, struct ui_file *, int,
 			  int);
 
-extern int c_val_print (struct type *, const bfd_byte *, int, CORE_ADDR,
+extern int c_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			struct ui_file *, int, int, int,
 			enum val_prettyprint);
 
@@ -50,7 +50,7 @@ extern int c_value_print (struct value *, struct ui_file *, int,
 
 extern void c_printchar (int, struct ui_file *);
 
-extern void c_printstr (struct ui_file * stream, const bfd_byte *string,
+extern void c_printstr (struct ui_file * stream, const gdb_byte *string,
 			unsigned int length, int width,
 			int force_ellipses);
 
@@ -76,14 +76,14 @@ extern int vtblprint;		/* Controls printing of vtbl's */
 
 extern int static_field_print;
 
-extern void cp_print_class_member (const bfd_byte *, struct type *,
+extern void cp_print_class_member (const gdb_byte *, struct type *,
 				   struct ui_file *, char *);
 
-extern void cp_print_class_method (const bfd_byte *, struct type *,
+extern void cp_print_class_method (const gdb_byte *, struct type *,
 				   struct ui_file *);
 
 extern void cp_print_value_fields (struct type *, struct type *,
-				   const bfd_byte *, int, CORE_ADDR,
+				   const gdb_byte *, int, CORE_ADDR,
 				   struct ui_file *, int,
 				   int, enum val_prettyprint,
 				   struct type **, int);

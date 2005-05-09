@@ -749,8 +749,8 @@ extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_add
 
 extern int gdbarch_integer_to_address_p (struct gdbarch *gdbarch);
 
-typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct gdbarch *gdbarch, struct type *type, const bfd_byte *buf);
-extern CORE_ADDR gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const bfd_byte *buf);
+typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
+extern CORE_ADDR gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_integer_to_address_ftype *integer_to_address);
 
 /* NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS. */
@@ -818,8 +818,8 @@ extern void set_gdbarch_store_return_value (struct gdbarch *gdbarch, gdbarch_sto
 #define STORE_RETURN_VALUE(type, regcache, valbuf) (gdbarch_store_return_value (current_gdbarch, type, regcache, valbuf))
 #endif
 
-typedef void (gdbarch_deprecated_extract_return_value_ftype) (struct type *type, bfd_byte *regbuf, bfd_byte *valbuf);
-extern void gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, bfd_byte *regbuf, bfd_byte *valbuf);
+typedef void (gdbarch_deprecated_extract_return_value_ftype) (struct type *type, gdb_byte *regbuf, gdb_byte *valbuf);
+extern void gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, gdb_byte *regbuf, gdb_byte *valbuf);
 extern void set_gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value);
 #if !defined (GDB_TM_FILE) && defined (DEPRECATED_EXTRACT_RETURN_VALUE)
 #error "Non multi-arch definition of DEPRECATED_EXTRACT_RETURN_VALUE"
@@ -828,8 +828,8 @@ extern void set_gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch
 #define DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf) (gdbarch_deprecated_extract_return_value (current_gdbarch, type, regbuf, valbuf))
 #endif
 
-typedef void (gdbarch_deprecated_store_return_value_ftype) (struct type *type, bfd_byte *valbuf);
-extern void gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, struct type *type, bfd_byte *valbuf);
+typedef void (gdbarch_deprecated_store_return_value_ftype) (struct type *type, gdb_byte *valbuf);
+extern void gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, struct type *type, gdb_byte *valbuf);
 extern void set_gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, gdbarch_deprecated_store_return_value_ftype *deprecated_store_return_value);
 #if !defined (GDB_TM_FILE) && defined (DEPRECATED_STORE_RETURN_VALUE)
 #error "Non multi-arch definition of DEPRECATED_STORE_RETURN_VALUE"
@@ -911,8 +911,8 @@ extern void set_gdbarch_inner_than (struct gdbarch *gdbarch, gdbarch_inner_than_
 #define INNER_THAN(lhs, rhs) (gdbarch_inner_than (current_gdbarch, lhs, rhs))
 #endif
 
-typedef const bfd_byte * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, int *lenptr);
-extern const bfd_byte * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
+typedef const gdb_byte * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, int *lenptr);
+extern const gdb_byte * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
 extern void set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc);
 #if !defined (GDB_TM_FILE) && defined (BREAKPOINT_FROM_PC)
 #error "Non multi-arch definition of BREAKPOINT_FROM_PC"
@@ -927,8 +927,8 @@ typedef CORE_ADDR (gdbarch_adjust_breakpoint_address_ftype) (struct gdbarch *gdb
 extern CORE_ADDR gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr);
 extern void set_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address);
 
-typedef int (gdbarch_memory_insert_breakpoint_ftype) (CORE_ADDR addr, bfd_byte *contents_cache);
-extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, bfd_byte *contents_cache);
+typedef int (gdbarch_memory_insert_breakpoint_ftype) (CORE_ADDR addr, gdb_byte *contents_cache);
+extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *contents_cache);
 extern void set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint);
 #if !defined (GDB_TM_FILE) && defined (MEMORY_INSERT_BREAKPOINT)
 #error "Non multi-arch definition of MEMORY_INSERT_BREAKPOINT"
@@ -937,8 +937,8 @@ extern void set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, gdbar
 #define MEMORY_INSERT_BREAKPOINT(addr, contents_cache) (gdbarch_memory_insert_breakpoint (current_gdbarch, addr, contents_cache))
 #endif
 
-typedef int (gdbarch_memory_remove_breakpoint_ftype) (CORE_ADDR addr, bfd_byte *contents_cache);
-extern int gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, bfd_byte *contents_cache);
+typedef int (gdbarch_memory_remove_breakpoint_ftype) (CORE_ADDR addr, gdb_byte *contents_cache);
+extern int gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *contents_cache);
 extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint);
 #if !defined (GDB_TM_FILE) && defined (MEMORY_REMOVE_BREAKPOINT)
 #error "Non multi-arch definition of MEMORY_REMOVE_BREAKPOINT"

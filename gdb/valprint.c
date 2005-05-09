@@ -190,7 +190,7 @@ show_addressprint (struct ui_file *file, int from_tty,
 
 
 int
-val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
+val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	   CORE_ADDR address, struct ui_file *stream, int format,
 	   int deref_ref, int recurse, enum val_prettyprint pretty)
 {
@@ -285,7 +285,7 @@ value_print (struct value *val, struct ui_file *stream, int format,
    value.  STREAM is where to print the value.  */
 
 void
-val_print_type_code_int (struct type *type, const bfd_byte *valaddr,
+val_print_type_code_int (struct type *type, const gdb_byte *valaddr,
 			 struct ui_file *stream)
 {
   if (TYPE_LENGTH (type) > sizeof (LONGEST))
@@ -392,7 +392,7 @@ longest_to_int (LONGEST arg)
    TYPE_CODE_FLT), pointed to in GDB by VALADDR, on STREAM.  */
 
 void
-print_floating (const bfd_byte *valaddr, struct type *type,
+print_floating (const gdb_byte *valaddr, struct type *type,
 		struct ui_file *stream)
 {
   DOUBLEST doub;
@@ -453,13 +453,13 @@ print_floating (const bfd_byte *valaddr, struct type *type,
 }
 
 void
-print_binary_chars (struct ui_file *stream, const bfd_byte *valaddr,
+print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		    unsigned len)
 {
 
 #define BITS_IN_BYTES 8
 
-  const bfd_byte *p;
+  const gdb_byte *p;
   unsigned int i;
   int b;
 
@@ -513,10 +513,10 @@ print_binary_chars (struct ui_file *stream, const bfd_byte *valaddr,
  * Print it in octal on stream or format it in buf.
  */
 void
-print_octal_chars (struct ui_file *stream, const bfd_byte *valaddr,
+print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		   unsigned len)
 {
-  const bfd_byte *p;
+  const gdb_byte *p;
   unsigned char octa1, octa2, octa3, carry;
   int cycle;
 
@@ -661,7 +661,7 @@ print_octal_chars (struct ui_file *stream, const bfd_byte *valaddr,
  * Print it in decimal on stream or format it in buf.
  */
 void
-print_decimal_chars (struct ui_file *stream, const bfd_byte *valaddr,
+print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		     unsigned len)
 {
 #define TEN             10
@@ -678,7 +678,7 @@ print_decimal_chars (struct ui_file *stream, const bfd_byte *valaddr,
 #define LOW_NIBBLE(  x ) ( (x) & 0x00F)
 #define HIGH_NIBBLE( x ) (((x) & 0x0F0) >> 4)
 
-  const bfd_byte *p;
+  const gdb_byte *p;
   unsigned char *digits;
   int carry;
   int decimal_len;
@@ -796,10 +796,10 @@ print_decimal_chars (struct ui_file *stream, const bfd_byte *valaddr,
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */
 
 void
-print_hex_chars (struct ui_file *stream, const bfd_byte *valaddr,
+print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		 unsigned len)
 {
-  const bfd_byte *p;
+  const gdb_byte *p;
 
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
@@ -828,10 +828,10 @@ print_hex_chars (struct ui_file *stream, const bfd_byte *valaddr,
    Omit any leading zero chars.  */
 
 void
-print_char_chars (struct ui_file *stream, const bfd_byte *valaddr,
+print_char_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		  unsigned len)
 {
-  const bfd_byte *p;
+  const gdb_byte *p;
 
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
@@ -869,7 +869,7 @@ print_char_chars (struct ui_file *stream, const bfd_byte *valaddr,
  */
 
 void
-val_print_array_elements (struct type *type, const bfd_byte *valaddr,
+val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 			  CORE_ADDR address, struct ui_file *stream,
 			  int format, int deref_ref,
 			  int recurse, enum val_prettyprint pretty,

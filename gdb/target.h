@@ -335,8 +335,8 @@ struct target_ops
 				   struct target_ops *target);
 
     void (*to_files_info) (struct target_ops *);
-    int (*to_insert_breakpoint) (CORE_ADDR, bfd_byte *);
-    int (*to_remove_breakpoint) (CORE_ADDR, bfd_byte *);
+    int (*to_insert_breakpoint) (CORE_ADDR, gdb_byte *);
+    int (*to_remove_breakpoint) (CORE_ADDR, gdb_byte *);
     int (*to_can_use_hw_breakpoint) (int, int, int);
     int (*to_insert_hw_breakpoint) (CORE_ADDR, char *);
     int (*to_remove_hw_breakpoint) (CORE_ADDR, char *);
@@ -537,9 +537,9 @@ extern int do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
-extern int target_read_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len);
+extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
 
-extern int target_write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr,
+extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 				int len);
 
 extern int xfer_memory (CORE_ADDR, char *, int, int,
@@ -1135,13 +1135,13 @@ struct section_table *target_section_by_addr (struct target_ops *target,
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint (CORE_ADDR, bfd_byte *);
+extern int memory_remove_breakpoint (CORE_ADDR, gdb_byte *);
 
-extern int memory_insert_breakpoint (CORE_ADDR, bfd_byte *);
+extern int memory_insert_breakpoint (CORE_ADDR, gdb_byte *);
 
-extern int default_memory_remove_breakpoint (CORE_ADDR, bfd_byte *);
+extern int default_memory_remove_breakpoint (CORE_ADDR, gdb_byte *);
 
-extern int default_memory_insert_breakpoint (CORE_ADDR, bfd_byte *);
+extern int default_memory_insert_breakpoint (CORE_ADDR, gdb_byte *);
 
 
 /* From target.c */

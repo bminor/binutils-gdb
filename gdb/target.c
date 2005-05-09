@@ -114,9 +114,9 @@ static int deprecated_debug_xfer_memory (CORE_ADDR, char *, int, int,
 
 static void debug_to_files_info (struct target_ops *);
 
-static int debug_to_insert_breakpoint (CORE_ADDR, bfd_byte *);
+static int debug_to_insert_breakpoint (CORE_ADDR, gdb_byte *);
 
-static int debug_to_remove_breakpoint (CORE_ADDR, bfd_byte *);
+static int debug_to_remove_breakpoint (CORE_ADDR, gdb_byte *);
 
 static int debug_to_can_use_hw_breakpoint (int, int, int);
 
@@ -966,9 +966,9 @@ xfer_using_stratum (enum target_object object, const char *annex,
 	    return 0;
 	  offset += xfered;
 	  if (readbuf != NULL)
-	    readbuf = (bfd_byte *) readbuf + xfered;
+	    readbuf = (gdb_byte *) readbuf + xfered;
 	  if (writebuf != NULL)
-	    writebuf = (bfd_byte *) writebuf + xfered;
+	    writebuf = (gdb_byte *) writebuf + xfered;
 	  target = target_stack;
 	}
       else if (xfered < 0)
@@ -1001,7 +1001,7 @@ xfer_using_stratum (enum target_object object, const char *annex,
    deal with partial reads should call target_read_memory_partial. */
 
 int
-target_read_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len)
+target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   if (target_xfer_partial_p ())
     return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
@@ -1011,9 +1011,9 @@ target_read_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len)
 }
 
 int
-target_write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr, int len)
+target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 {
-  bfd_byte *bytes = alloca (len);
+  gdb_byte *bytes = alloca (len);
   memcpy (bytes, myaddr, len);
   if (target_xfer_partial_p ())
     return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
@@ -1378,7 +1378,7 @@ target_read (struct target_ops *ops,
   while (xfered < len)
     {
       LONGEST xfer = target_read_partial (ops, object, annex,
-					  (bfd_byte *) buf + xfered,
+					  (gdb_byte *) buf + xfered,
 					  offset + xfered, len - xfered);
       /* Call an observer, notifying them of the xfer progress?  */
       if (xfer <= 0)
@@ -1400,7 +1400,7 @@ target_write (struct target_ops *ops,
   while (xfered < len)
     {
       LONGEST xfer = target_write_partial (ops, object, annex,
-					   (bfd_byte *) buf + xfered,
+					   (gdb_byte *) buf + xfered,
 					   offset + xfered, len - xfered);
       /* Call an observer, notifying them of the xfer progress?  */
       if (xfer <= 0)
@@ -2055,7 +2055,7 @@ debug_to_files_info (struct target_ops *target)
 }
 
 static int
-debug_to_insert_breakpoint (CORE_ADDR addr, bfd_byte *save)
+debug_to_insert_breakpoint (CORE_ADDR addr, gdb_byte *save)
 {
   int retval;
 
@@ -2069,7 +2069,7 @@ debug_to_insert_breakpoint (CORE_ADDR addr, bfd_byte *save)
 }
 
 static int
-debug_to_remove_breakpoint (CORE_ADDR addr, bfd_byte *save)
+debug_to_remove_breakpoint (CORE_ADDR addr, gdb_byte *save)
 {
   int retval;
 

@@ -335,7 +335,7 @@ objc_printchar (int c, struct ui_file *stream)
    FORCE_ELLIPSES.  */
 
 static void
-objc_printstr (struct ui_file *stream, const bfd_byte *string, 
+objc_printstr (struct ui_file *stream, const gdb_byte *string, 
 	       unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;

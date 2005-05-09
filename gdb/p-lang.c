@@ -157,7 +157,7 @@ pascal_printchar (int c, struct ui_file *stream)
    had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
 
 void
-pascal_printstr (struct ui_file *stream, const bfd_byte *string,
+pascal_printstr (struct ui_file *stream, const gdb_byte *string,
 		 unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;

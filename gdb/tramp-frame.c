@@ -97,7 +97,7 @@ tramp_frame_start (const struct tramp_frame *tramp,
       int i;
       for (i = 0; 1; i++)
 	{
-	  bfd_byte buf[sizeof (tramp->insn[0])];
+	  gdb_byte buf[sizeof (tramp->insn[0])];
 	  ULONGEST insn;
 	  if (tramp->insn[i].bytes == TRAMP_SENTINEL_INSN)
 	    return func;

@@ -193,7 +193,7 @@ struct language_defn
 
     void (*la_printchar) (int ch, struct ui_file * stream);
 
-    void (*la_printstr) (struct ui_file * stream, const bfd_byte *string,
+    void (*la_printstr) (struct ui_file * stream, const gdb_byte *string,
 			 unsigned int length, int width,
 			 int force_ellipses);
 
@@ -208,7 +208,7 @@ struct language_defn
 
     /* Print a value using syntax appropriate for this language. */
 
-    int (*la_val_print) (struct type *, const bfd_byte *, int, CORE_ADDR,
+    int (*la_val_print) (struct type *, const gdb_byte *, int, CORE_ADDR,
 			 struct ui_file *, int, int, int,
 			 enum val_prettyprint);
 

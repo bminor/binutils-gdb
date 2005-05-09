@@ -50,26 +50,26 @@ extern int output_format;
 
 extern int stop_print_at_null;	/* Stop printing at null char? */
 
-extern void val_print_array_elements (struct type *, const bfd_byte *,
+extern void val_print_array_elements (struct type *, const gdb_byte *,
 				      CORE_ADDR, struct ui_file *, int,
 				      int, int, enum val_prettyprint,
 				      unsigned int);
 
-extern void val_print_type_code_int (struct type *, const bfd_byte *,
+extern void val_print_type_code_int (struct type *, const gdb_byte *,
 				     struct ui_file *);
 
-extern void print_binary_chars (struct ui_file *, const bfd_byte *,
+extern void print_binary_chars (struct ui_file *, const gdb_byte *,
 				unsigned int);
 
-extern void print_octal_chars (struct ui_file *, const bfd_byte *,
+extern void print_octal_chars (struct ui_file *, const gdb_byte *,
 			       unsigned int);
 
-extern void print_decimal_chars (struct ui_file *, const bfd_byte *,
+extern void print_decimal_chars (struct ui_file *, const gdb_byte *,
 				 unsigned int);
 
-extern void print_hex_chars (struct ui_file *, const bfd_byte *,
+extern void print_hex_chars (struct ui_file *, const gdb_byte *,
 			     unsigned int);
 
-extern void print_char_chars (struct ui_file *, const bfd_byte *,
+extern void print_char_chars (struct ui_file *, const gdb_byte *,
 			      unsigned int);
 #endif

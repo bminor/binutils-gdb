@@ -566,7 +566,7 @@ value_assign (struct value *toval, struct value *fromval)
 
     case lval_memory:
       {
-	const bfd_byte *dest_buffer;
+	const gdb_byte *dest_buffer;
 	CORE_ADDR changed_addr;
 	int changed_len;
         char buffer[sizeof (LONGEST)];
@@ -1364,7 +1364,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 
 void
 find_rt_vbase_offset (struct type *type, struct type *basetype,
-		      const bfd_byte *valaddr, int offset, int *boffset_p,
+		      const gdb_byte *valaddr, int offset, int *boffset_p,
 		      int *skip_p)
 {
   int boffset;			/* offset of virtual base */
@@ -1520,7 +1520,7 @@ search_struct_method (char *name, struct value **arg1p,
 	  else
 	    {
 	      struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-	      const bfd_byte *base_valaddr;
+	      const gdb_byte *base_valaddr;
 
 	      /* The virtual base class pointer might have been clobbered by the
 	         user program. Make sure that it still points to a valid memory
@@ -1528,7 +1528,7 @@ search_struct_method (char *name, struct value **arg1p,
 
 	      if (offset < 0 || offset >= TYPE_LENGTH (type))
 		{
-		  bfd_byte *tmp = alloca (TYPE_LENGTH (baseclass));
+		  gdb_byte *tmp = alloca (TYPE_LENGTH (baseclass));
 		  if (target_read_memory (VALUE_ADDRESS (*arg1p)
 					  + value_offset (*arg1p) + offset,
 					  tmp, TYPE_LENGTH (baseclass)) != 0)
@@ -2317,7 +2317,7 @@ check_field_in (struct type *type, const char *name)
    target structure/union is defined, otherwise, return 0.  */
 
 int
-check_field (struct value *arg1, const bfd_byte *name)
+check_field (struct value *arg1, const gdb_byte *name)
 {
   struct type *t;
 

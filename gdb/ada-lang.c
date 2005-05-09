@@ -163,7 +163,7 @@ static struct value *evaluate_subexp_type (struct expression *, int *);
 static int is_dynamic_field (struct type *, int);
 
 static struct type *to_fixed_variant_branch_type (struct type *,
-						  const bfd_byte *,
+						  const gdb_byte *,
                                                   CORE_ADDR, struct value *);
 
 static struct type *to_fixed_array_type (struct type *, struct value *, int);
@@ -415,7 +415,7 @@ is_suffix (const char *str, const char *suffix)
 
 struct value *
 value_from_contents_and_address (struct type *type,
-				 const bfd_byte *valaddr,
+				 const gdb_byte *valaddr,
                                  CORE_ADDR address)
 {
   struct value *v = allocate_value (type);
@@ -461,8 +461,8 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
     }
 }
 
-static const bfd_byte *
-cond_offset_host (const bfd_byte *valaddr, long offset)
+static const gdb_byte *
+cond_offset_host (const gdb_byte *valaddr, long offset)
 {
   if (valaddr == NULL)
     return NULL;
@@ -1783,7 +1783,7 @@ has_negatives (struct type *type)
    Assumes 0 <= BIT_OFFSET < HOST_CHAR_BIT.  */
 
 struct value *
-ada_value_primitive_packed_val (struct value *obj, const bfd_byte *valaddr,
+ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 				long offset, int bit_offset, int bit_size,
                                 struct type *type)
 {
@@ -1935,7 +1935,7 @@ ada_value_primitive_packed_val (struct value *obj, const bfd_byte *valaddr,
    TARGET, starting at bit offset TARG_OFFSET.  SOURCE and TARGET must
    not overlap.  */
 static void
-move_bits (bfd_byte *target, int targ_offset, const bfd_byte *source,
+move_bits (gdb_byte *target, int targ_offset, const gdb_byte *source,
 	   int src_offset, int n)
 {
   unsigned int accum, mask;
@@ -5000,7 +5000,7 @@ ada_value_tag (struct value *val)
 
 static struct value *
 value_tag_from_contents_and_address (struct type *type,
-				     const bfd_byte *valaddr,
+				     const gdb_byte *valaddr,
                                      CORE_ADDR address)
 {
   int tag_byte_offset, dummy1, dummy2;
@@ -5008,7 +5008,7 @@ value_tag_from_contents_and_address (struct type *type,
   if (find_struct_field ("_tag", type, 0, &tag_type, &tag_byte_offset,
                          &dummy1, &dummy2))
     {
-      const bfd_byte *valaddr1 = ((valaddr == NULL)
+      const gdb_byte *valaddr1 = ((valaddr == NULL)
 				  ? NULL
 				  : valaddr + tag_byte_offset);
       CORE_ADDR address1 = (address == 0) ? 0 : address + tag_byte_offset;
@@ -5706,7 +5706,7 @@ BadName:
 
 int
 ada_which_variant_applies (struct type *var_type, struct type *outer_type,
-                           const bfd_byte *outer_valaddr)
+                           const gdb_byte *outer_valaddr)
 {
   int others_clause;
   int i;
@@ -6057,7 +6057,7 @@ empty_record (struct objfile *objfile)
 
 struct type *
 ada_template_to_fixed_record_type_1 (struct type *type,
-				     const bfd_byte *valaddr,
+				     const gdb_byte *valaddr,
                                      CORE_ADDR address, struct value *dval0,
                                      int keep_dynamic_fields)
 {
@@ -6217,7 +6217,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
    of 1.  */
 
 static struct type *
-template_to_fixed_record_type (struct type *type, const bfd_byte *valaddr,
+template_to_fixed_record_type (struct type *type, const gdb_byte *valaddr,
                                CORE_ADDR address, struct value *dval0)
 {
   return ada_template_to_fixed_record_type_1 (type, valaddr,
@@ -6284,7 +6284,7 @@ template_to_static_fixed_type (struct type *type0)
    contains the necessary discriminant values.  */
 
 static struct type *
-to_record_with_fixed_variant_part (struct type *type, const bfd_byte *valaddr,
+to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
                                    CORE_ADDR address, struct value *dval0)
 {
   struct value *mark = value_mark ();
@@ -6362,7 +6362,7 @@ to_record_with_fixed_variant_part (struct type *type, const bfd_byte *valaddr,
    shortcut and suspect the compiler should be altered.  FIXME.  */
 
 static struct type *
-to_fixed_record_type (struct type *type0, const bfd_byte *valaddr,
+to_fixed_record_type (struct type *type0, const gdb_byte *valaddr,
                       CORE_ADDR address, struct value *dval)
 {
   struct type *templ_type;
@@ -6397,7 +6397,7 @@ to_fixed_record_type (struct type *type0, const bfd_byte *valaddr,
    indicated in the union's type name.  */
 
 static struct type *
-to_fixed_variant_branch_type (struct type *var_type0, const bfd_byte *valaddr,
+to_fixed_variant_branch_type (struct type *var_type0, const gdb_byte *valaddr,
                               CORE_ADDR address, struct value *dval)
 {
   int which;
@@ -6503,7 +6503,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
    ADDRESS or in VALADDR contains these discriminants.  */
 
 struct type *
-ada_to_fixed_type (struct type *type, const bfd_byte *valaddr,
+ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
                    CORE_ADDR address, struct value *dval)
 {
   type = ada_check_typedef (type);
@@ -6855,8 +6855,8 @@ ada_aligned_type (struct type *type)
 /* The address of the aligned value in an object at address VALADDR
    having type TYPE.  Assumes ada_is_aligner_type (TYPE).  */
 
-const bfd_byte *
-ada_aligned_value_addr (struct type *type, const bfd_byte *valaddr)
+const gdb_byte *
+ada_aligned_value_addr (struct type *type, const gdb_byte *valaddr)
 {
   if (ada_is_aligner_type (type))
     return ada_aligned_value_addr (TYPE_FIELD_TYPE (type, 0),

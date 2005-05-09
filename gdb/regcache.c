@@ -844,7 +844,7 @@ regcache_xfer_part (struct regcache *regcache, int regnum,
 		    regcache_read_ftype *read, regcache_write_ftype *write)
 {
   struct regcache_descr *descr = regcache->descr;
-  bfd_byte reg[MAX_REGISTER_SIZE];
+  gdb_byte reg[MAX_REGISTER_SIZE];
   gdb_assert (offset >= 0 && offset <= descr->sizeof_register[regnum]);
   gdb_assert (len >= 0 && offset + len <= descr->sizeof_register[regnum]);
   /* Something to do?  */

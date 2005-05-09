@@ -1082,7 +1082,7 @@ unk_lang_printchar (int c, struct ui_file *stream)
 }
 
 static void
-unk_lang_printstr (struct ui_file *stream, const bfd_byte *string,
+unk_lang_printstr (struct ui_file *stream, const gdb_byte *string,
 		   unsigned int length, int width, int force_ellipses)
 {
   error (_("internal error - unimplemented function unk_lang_printstr called."));
@@ -1102,7 +1102,7 @@ unk_lang_print_type (struct type *type, char *varstring, struct ui_file *stream,
 }
 
 static int
-unk_lang_val_print (struct type *type, const bfd_byte *valaddr,
+unk_lang_val_print (struct type *type, const gdb_byte *valaddr,
 		    int embedded_offset, CORE_ADDR address,
 		    struct ui_file *stream, int format,
 		    int deref_ref, int recurse, enum val_prettyprint pretty)

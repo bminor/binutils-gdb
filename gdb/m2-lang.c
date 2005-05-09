@@ -107,7 +107,7 @@ m2_printchar (int c, struct ui_file *stream)
    be replaced with a true Modula version. */
 
 static void
-m2_printstr (struct ui_file *stream, const bfd_byte *string,
+m2_printstr (struct ui_file *stream, const gdb_byte *string,
 	     unsigned int length, int width, int force_ellipses)
 {
   unsigned int i;

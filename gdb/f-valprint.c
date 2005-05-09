@@ -274,7 +274,7 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
 
 static void
 f77_print_array_1 (int nss, int ndimensions, struct type *type,
-		   const bfd_byte *valaddr, CORE_ADDR address,
+		   const gdb_byte *valaddr, CORE_ADDR address,
 		   struct ui_file *stream, int format,
 		   int deref_ref, int recurse, enum val_prettyprint pretty,
 		   int *elts)
@@ -319,7 +319,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
    stuff and then immediately call f77_print_array_1() */
 
 static void
-f77_print_array (struct type *type, const bfd_byte *valaddr,
+f77_print_array (struct type *type, const gdb_byte *valaddr,
 		 CORE_ADDR address, struct ui_file *stream,
 		 int format, int deref_ref, int recurse,
 		 enum val_prettyprint pretty)
@@ -358,7 +358,7 @@ f77_print_array (struct type *type, const bfd_byte *valaddr,
    The PRETTY parameter controls prettyprinting.  */
 
 int
-f_val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
+f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     CORE_ADDR address, struct ui_file *stream, int format,
 	     int deref_ref, int recurse, enum val_prettyprint pretty)
 {

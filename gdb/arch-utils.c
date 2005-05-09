@@ -44,7 +44,7 @@ legacy_extract_return_value (struct type *type, struct regcache *regcache,
 			     void *valbuf)
 {
   char *registers = deprecated_grub_regcache_for_registers (regcache);
-  bfd_byte *buf = valbuf;
+  gdb_byte *buf = valbuf;
   DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, buf); /* OK */
 }
 
@@ -54,7 +54,7 @@ void
 legacy_store_return_value (struct type *type, struct regcache *regcache,
 			   const void *buf)
 {
-  bfd_byte *b = alloca (TYPE_LENGTH (type));
+  gdb_byte *b = alloca (TYPE_LENGTH (type));
   gdb_assert (regcache == current_regcache);
   memcpy (b, buf, TYPE_LENGTH (type));
   DEPRECATED_STORE_RETURN_VALUE (type, b);

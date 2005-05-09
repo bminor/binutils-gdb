@@ -188,7 +188,7 @@ extern void ada_error (char *); /* Defined in ada-exp.y */
 extern void ada_print_type (struct type *, char *, struct ui_file *, int,
                             int);
 
-extern int ada_val_print (struct type *, const bfd_byte *, int, CORE_ADDR,
+extern int ada_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
                           struct ui_file *, int, int, int,
                           enum val_prettyprint);
 
@@ -198,14 +198,14 @@ extern int ada_value_print (struct value *, struct ui_file *, int,
                                 /* Defined in ada-lang.c */
 
 extern struct value *value_from_contents_and_address (struct type *,
-						      const bfd_byte *,
+						      const gdb_byte *,
                                                       CORE_ADDR);
 
 extern void ada_emit_char (int, struct ui_file *, int, int);
 
 extern void ada_printchar (int, struct ui_file *);
 
-extern void ada_printstr (struct ui_file *, const bfd_byte *,
+extern void ada_printstr (struct ui_file *, const gdb_byte *,
 			  unsigned int, int, int);
 
 extern void ada_convert_actuals (struct value *, int, struct value **,
@@ -279,7 +279,7 @@ extern int ada_is_ignored_field (struct type *, int);
 extern int ada_is_packed_array_type (struct type *);
 
 extern struct value *ada_value_primitive_packed_val (struct value *,
-						     const bfd_byte *,
+						     const gdb_byte *,
                                                      long, int, int,
                                                      struct type *);
 
@@ -319,8 +319,8 @@ extern int ada_is_aligner_type (struct type *);
 
 extern struct type *ada_aligned_type (struct type *);
 
-extern const bfd_byte *ada_aligned_value_addr (struct type *,
-					       const bfd_byte *);
+extern const gdb_byte *ada_aligned_value_addr (struct type *,
+					       const gdb_byte *);
 
 extern const char *ada_attribute_name (enum exp_opcode);
 
@@ -343,13 +343,13 @@ extern struct value *ada_vax_float_print_function (struct type *);
 extern struct type *ada_system_address_type (void);
 
 extern int ada_which_variant_applies (struct type *, struct type *,
-				      const bfd_byte *);
+				      const gdb_byte *);
 
-extern struct type *ada_to_fixed_type (struct type *, const bfd_byte *,
+extern struct type *ada_to_fixed_type (struct type *, const gdb_byte *,
 				       CORE_ADDR, struct value *);
 
 extern struct type *ada_template_to_fixed_record_type_1 (struct type *type,
-							 const bfd_byte *valaddr,
+							 const gdb_byte *valaddr,
 							 CORE_ADDR address,
 							 struct value *dval0,
 							 int keep_dynamic_fields);

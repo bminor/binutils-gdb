@@ -39,7 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct ada_val_print_args
 {
   struct type *type;
-  const bfd_byte *valaddr0;
+  const gdb_byte *valaddr0;
   int embedded_offset;
   CORE_ADDR address;
   struct ui_file *stream;
@@ -49,19 +49,19 @@ struct ada_val_print_args
   enum val_prettyprint pretty;
 };
 
-static void print_record (struct type *, const bfd_byte *, struct ui_file *,
+static void print_record (struct type *, const gdb_byte *, struct ui_file *,
 			  int, int, enum val_prettyprint);
 
-static int print_field_values (struct type *, const bfd_byte *,
+static int print_field_values (struct type *, const gdb_byte *,
 			       struct ui_file *, int, int,
 			       enum val_prettyprint, int, struct type *,
-			       const bfd_byte *);
+			       const gdb_byte *);
 
 static void adjust_type_signedness (struct type *);
 
 static int ada_val_print_stub (void *args0);
 
-static int ada_val_print_1 (struct type *, const bfd_byte *, int, CORE_ADDR,
+static int ada_val_print_1 (struct type *, const gdb_byte *, int, CORE_ADDR,
 			    struct ui_file *, int, int, int,
 			    enum val_prettyprint);
 
@@ -129,7 +129,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type)
     by ada_coerce_to_simple_array).  */
 
 static void
-val_print_packed_array_elements (struct type *type, const bfd_byte *valaddr,
+val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 				 int bitoffset, struct ui_file *stream,
 				 int format, int recurse,
 				 enum val_prettyprint pretty)
@@ -237,7 +237,7 @@ val_print_packed_array_elements (struct type *type, const bfd_byte *valaddr,
 }
 
 static struct type *
-printable_val_type (struct type *type, const bfd_byte *valaddr)
+printable_val_type (struct type *type, const gdb_byte *valaddr)
 {
   return ada_to_fixed_type (ada_aligned_type (type), valaddr, 0, NULL);
 }
@@ -269,7 +269,7 @@ ada_emit_char (int c, struct ui_file *stream, int quoter, int type_len)
    or 2) of a character.  */
 
 static int
-char_at (const bfd_byte *string, int i, int type_len)
+char_at (const gdb_byte *string, int i, int type_len)
 {
   if (type_len == 1)
     return string[i];
@@ -290,7 +290,7 @@ ui_memcpy (void *dest, const char *buffer, long len)
    a decimal point, and at least one digit before and after the
    point.  We use GNAT format for NaNs and infinities.  */
 static void
-ada_print_floating (const bfd_byte *valaddr, struct type *type,
+ada_print_floating (const gdb_byte *valaddr, struct type *type,
 		    struct ui_file *stream)
 {
   char buffer[64];
@@ -431,7 +431,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
  */
 
 static void
-printstr (struct ui_file *stream, const bfd_byte *string,
+printstr (struct ui_file *stream, const gdb_byte *string,
 	  unsigned int length, int force_ellipses, int type_len)
 {
   unsigned int i;
@@ -520,7 +520,7 @@ printstr (struct ui_file *stream, const bfd_byte *string,
 }
 
 void
-ada_printstr (struct ui_file *stream, const bfd_byte *string,
+ada_printstr (struct ui_file *stream, const gdb_byte *string,
 	      unsigned int length, int width, int force_ellipses)
 {
   printstr (stream, string, length, force_ellipses, width);
@@ -547,7 +547,7 @@ ada_printstr (struct ui_file *stream, const bfd_byte *string,
    arrays.)  */
 
 int
-ada_val_print (struct type *type, const bfd_byte *valaddr0,
+ada_val_print (struct type *type, const gdb_byte *valaddr0,
 	       int embedded_offset, CORE_ADDR address,
 	       struct ui_file *stream, int format, int deref_ref,
 	       int recurse, enum val_prettyprint pretty)
@@ -582,7 +582,7 @@ ada_val_print_stub (void *args0)
  * does not catch evaluation errors (leaving that to ada_val_print).  */
 
 static int
-ada_val_print_1 (struct type *type, const bfd_byte *valaddr0,
+ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 		 int embedded_offset, CORE_ADDR address,
 		 struct ui_file *stream, int format,
 		 int deref_ref, int recurse, enum val_prettyprint pretty)
@@ -592,7 +592,7 @@ ada_val_print_1 (struct type *type, const bfd_byte *valaddr0,
   struct type *elttype;
   unsigned int eltlen;
   LONGEST val;
-  const bfd_byte *valaddr = valaddr0 + embedded_offset;
+  const gdb_byte *valaddr = valaddr0 + embedded_offset;
 
   type = ada_check_typedef (type);
 
@@ -873,10 +873,10 @@ ada_val_print_1 (struct type *type, const bfd_byte *valaddr0,
 }
 
 static int
-print_variant_part (struct type *type, int field_num, const bfd_byte *valaddr,
+print_variant_part (struct type *type, int field_num, const gdb_byte *valaddr,
 		    struct ui_file *stream, int format, int recurse,
 		    enum val_prettyprint pretty, int comma_needed,
-		    struct type *outer_type, const bfd_byte *outer_valaddr)
+		    struct type *outer_type, const gdb_byte *outer_valaddr)
 {
   struct type *var_type = TYPE_FIELD_TYPE (type, field_num);
   int which = ada_which_variant_applies (var_type, outer_type, outer_valaddr);
@@ -896,7 +896,7 @@ int
 ada_value_print (struct value *val0, struct ui_file *stream, int format,
 		 enum val_prettyprint pretty)
 {
-  const bfd_byte *valaddr = value_contents (val0);
+  const gdb_byte *valaddr = value_contents (val0);
   CORE_ADDR address = VALUE_ADDRESS (val0) + value_offset (val0);
   struct type *type =
     ada_to_fixed_type (value_type (val0), valaddr, address, NULL);
@@ -952,7 +952,7 @@ ada_value_print (struct value *val0, struct ui_file *stream, int format,
 }
 
 static void
-print_record (struct type *type, const bfd_byte *valaddr,
+print_record (struct type *type, const gdb_byte *valaddr,
 	      struct ui_file *stream, int format, int recurse,
 	      enum val_prettyprint pretty)
 {
@@ -985,10 +985,10 @@ print_record (struct type *type, const bfd_byte *valaddr,
    Returns 1 if COMMA_NEEDED or any fields were printed.  */
 
 static int
-print_field_values (struct type *type, const bfd_byte *valaddr,
+print_field_values (struct type *type, const gdb_byte *valaddr,
 		    struct ui_file *stream, int format, int recurse,
 		    enum val_prettyprint pretty, int comma_needed,
-		    struct type *outer_type, const bfd_byte *outer_valaddr)
+		    struct type *outer_type, const gdb_byte *outer_valaddr)
 {
   int i, len;
 

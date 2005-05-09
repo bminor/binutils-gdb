@@ -1158,7 +1158,7 @@ int
 value_logical_not (struct value *arg1)
 {
   int len;
-  const bfd_byte *p;
+  const gdb_byte *p;
   struct type *type1;
 
   arg1 = coerce_number (arg1);
@@ -1187,8 +1187,8 @@ value_strcmp (struct value *arg1, struct value *arg2)
 {
   int len1 = TYPE_LENGTH (value_type (arg1));
   int len2 = TYPE_LENGTH (value_type (arg2));
-  const bfd_byte *s1 = value_contents (arg1);
-  const bfd_byte *s2 = value_contents (arg2);
+  const gdb_byte *s1 = value_contents (arg1);
+  const gdb_byte *s2 = value_contents (arg2);
   int i, len = len1 < len2 ? len1 : len2;
 
   for (i = 0; i < len; i++)
@@ -1216,8 +1216,8 @@ int
 value_equal (struct value *arg1, struct value *arg2)
 {
   int len;
-  const bfd_byte *p1;
-  const bfd_byte *p2;
+  const gdb_byte *p1;
+  const gdb_byte *p2;
   struct type *type1, *type2;
   enum type_code code1;
   enum type_code code2;
@@ -1399,7 +1399,7 @@ value_complement (struct value *arg1)
    Return -1 if out of range, -2 other error. */
 
 int
-value_bit_index (struct type *type, const bfd_byte *valaddr, int index)
+value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
 {
   LONGEST low_bound, high_bound;
   LONGEST word;

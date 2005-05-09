@@ -81,7 +81,7 @@ static void cp_print_static_field (struct type *, struct value *,
 				   struct ui_file *, int, int,
 				   enum val_prettyprint);
 
-static void cp_print_value (struct type *, struct type *, const bfd_byte *,
+static void cp_print_value (struct type *, struct type *, const gdb_byte *,
 			    int, CORE_ADDR, struct ui_file *, int, int,
 			    enum val_prettyprint, struct type **);
 
@@ -93,7 +93,7 @@ static void cp_print_hpacc_virtual_table_entries (struct type *, int *,
 
 
 void
-cp_print_class_method (const bfd_byte *valaddr,
+cp_print_class_method (const gdb_byte *valaddr,
 		       struct type *type,
 		       struct ui_file *stream)
 {
@@ -259,7 +259,7 @@ cp_is_vtbl_member (struct type *type)
 
 void
 cp_print_value_fields (struct type *type, struct type *real_type,
-		       const bfd_byte *valaddr, int offset, CORE_ADDR address,
+		       const gdb_byte *valaddr, int offset, CORE_ADDR address,
 		       struct ui_file *stream, int format, int recurse,
 		       enum val_prettyprint pretty,
 		       struct type **dont_print_vb,int dont_print_statmem)
@@ -520,7 +520,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
 static void
 cp_print_value (struct type *type, struct type *real_type,
-		const bfd_byte *valaddr, int offset, CORE_ADDR address,
+		const gdb_byte *valaddr, int offset, CORE_ADDR address,
 		struct ui_file *stream, int format, int recurse,
 		enum val_prettyprint pretty, struct type **dont_print_vb)
 {
@@ -547,7 +547,7 @@ cp_print_value (struct type *type, struct type *real_type,
       int skip;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
       char *basename = TYPE_NAME (baseclass);
-      const bfd_byte *base_valaddr;
+      const gdb_byte *base_valaddr;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
@@ -594,7 +594,7 @@ cp_print_value (struct type *type, struct type *real_type,
 		      || (boffset + offset) >= TYPE_LENGTH (type)))
 		{
 		  /* FIXME (alloca): unsafe if baseclass is really really large. */
-		  bfd_byte *buf = alloca (TYPE_LENGTH (baseclass));
+		  gdb_byte *buf = alloca (TYPE_LENGTH (baseclass));
 		  base_valaddr = buf;
 		  if (target_read_memory (address + boffset, buf,
 					  TYPE_LENGTH (baseclass)) != 0)
@@ -704,7 +704,7 @@ cp_print_static_field (struct type *type,
 }
 
 void
-cp_print_class_member (const bfd_byte *valaddr, struct type *domain,
+cp_print_class_member (const gdb_byte *valaddr, struct type *domain,
 		       struct ui_file *stream, char *prefix)
 {
 

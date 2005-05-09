@@ -29,7 +29,7 @@ extern void pascal_error (char *);	/* Defined in p-exp.y */
 /* Defined in p-typeprint.c */
 extern void pascal_print_type (struct type *, char *, struct ui_file *, int, int);
 
-extern int pascal_val_print (struct type *, const bfd_byte *, int,
+extern int pascal_val_print (struct type *, const gdb_byte *, int,
 			     CORE_ADDR, struct ui_file *, int, int,
 			     int, enum val_prettyprint);
 
@@ -45,7 +45,7 @@ extern int
 
 extern void pascal_printchar (int, struct ui_file *);
 
-extern void pascal_printstr (struct ui_file *, const bfd_byte *,
+extern void pascal_printstr (struct ui_file *, const gdb_byte *,
 			     unsigned int, int, int);
 
 extern struct type *pascal_create_fundamental_type (struct objfile *, int);
@@ -66,13 +66,13 @@ extern int vtblprint;		/* Controls printing of vtbl's */
 
 extern int static_field_print;
 
-extern void pascal_object_print_class_member (const bfd_byte *, struct type *,
+extern void pascal_object_print_class_member (const gdb_byte *, struct type *,
 					      struct ui_file *, char *);
 
-extern void pascal_object_print_class_method (const bfd_byte *, struct type *,
+extern void pascal_object_print_class_method (const gdb_byte *, struct type *,
 					      struct ui_file *);
 
-extern void pascal_object_print_value_fields (struct type *, const bfd_byte *,
+extern void pascal_object_print_value_fields (struct type *, const gdb_byte *,
 					      CORE_ADDR, struct ui_file *,
 					      int, int, enum val_prettyprint,
 					      struct type **, int);
