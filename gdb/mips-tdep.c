@@ -2091,11 +2091,21 @@ static const struct frame_unwind mips_stub_frame_unwind =
 static const struct frame_unwind *
 mips_stub_frame_sniffer (struct frame_info *next_frame)
 {
+  struct obj_section *s;
   CORE_ADDR pc = frame_pc_unwind (next_frame);
+
   if (in_plt_section (pc, NULL))
     return &mips_stub_frame_unwind;
-  else
-    return NULL;
+
+  /* Binutils for MIPS puts lazy resolution stubs into .MIPS.stubs.  */
+  s = find_pc_section (pc);
+
+  if (s != NULL
+      && strcmp (bfd_get_section_name (s->objfile->obfd, s->the_bfd_section),
+		 ".MIPS.stubs") == 0)
+    return &mips_stub_frame_unwind;
+
+  return NULL;
 }
 
 static CORE_ADDR
