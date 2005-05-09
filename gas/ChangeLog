@@ -1,5 +1,12 @@
 2005-05-09  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (tc_x86_regname_to_dw2regnum): Correct 64-bit mode
+	names to match ABI. Add more registers for 32-bit and 64-bit modes.
+	Make name array static and const. Adjust lookup to account for NULL
+	entries (standing for unused register numbers).
+
+2005-05-09  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.c (parse_insn): Consider all matching instructions
 	when checking for string instruction after string-only prefix.
 
