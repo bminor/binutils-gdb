@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 /* Problems and other issues to resolve.
 
    (1)	BFD expects there to be some fixed number of "sections" in
-        the object file.  I.E. there is a "section_count" variable in the
+	the object file.  I.E. there is a "section_count" variable in the
 	bfd structure which contains the number of sections.  However, ELF
 	supports multiple "views" of a file.  In particular, with current
 	implementations, executable files typically have two tables, a
@@ -612,8 +612,13 @@ elf_object_p (bfd *abfd)
 
   if (i_ehdrp->e_shoff != 0)
     {
+      bfd_signed_vma where = i_ehdrp->e_shoff;
+
+      if (where != (file_ptr) where)
+	goto got_wrong_format_error;
+
       /* Seek to the section header table in the file.  */
-      if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0)
+      if (bfd_seek (abfd, (file_ptr) where, SEEK_SET) != 0)
 	goto got_no_match;
 
       /* Read the first section header at index 0, and convert to internal
@@ -625,12 +630,49 @@ elf_object_p (bfd *abfd)
       /* If the section count is zero, the actual count is in the first
 	 section header.  */
       if (i_ehdrp->e_shnum == SHN_UNDEF)
-	i_ehdrp->e_shnum = i_shdr.sh_size;
+	{
+	  i_ehdrp->e_shnum = i_shdr.sh_size;
+	  if (i_ehdrp->e_shnum != i_shdr.sh_size)
+	    goto got_wrong_format_error;
+	}
 
       /* And similarly for the string table index.  */
       if (i_ehdrp->e_shstrndx == SHN_XINDEX)
-	i_ehdrp->e_shstrndx = i_shdr.sh_link;
+	{
+	  i_ehdrp->e_shstrndx = i_shdr.sh_link;
+	  if (i_ehdrp->e_shstrndx != i_shdr.sh_link)
+	    goto got_wrong_format_error;
+	}
+
+      /* Sanity check that we can read all of the section headers.
+	 It ought to be good enough to just read the last one.  */
+      if (i_ehdrp->e_shnum != 1)
+	{
+	  /* Check that we don't have a totally silly number of sections.  */
+	  if (i_ehdrp->e_shnum > (unsigned int) -1 / sizeof (x_shdr))
+	    goto got_wrong_format_error;
+
+	  where += (i_ehdrp->e_shnum - 1) * sizeof (x_shdr);
+	  if (where != (file_ptr) where)
+	    goto got_wrong_format_error;
+	  if ((bfd_size_type) where <= i_ehdrp->e_shoff)
+	    goto got_wrong_format_error;
+
+	  if (bfd_seek (abfd, (file_ptr) where, SEEK_SET) != 0)
+	    goto got_no_match;
+	  if (bfd_bread (&x_shdr, sizeof x_shdr, abfd) != sizeof (x_shdr))
+	    goto got_no_match;
+
+	  /* Back to where we were.  */
+	  where = i_ehdrp->e_shoff + sizeof (x_shdr);
+	  if (bfd_seek (abfd, (file_ptr) where, SEEK_SET) != 0)
+	    goto got_no_match;
+	}
     }
+
+  /* A further sanity check.  */
+  if (i_ehdrp->e_shstrndx >= i_ehdrp->e_shnum)
+    goto got_wrong_format_error;
 
   /* Allocate space for a copy of the section header table in
      internal form.  */
@@ -1042,7 +1084,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	     symcount);
 
 	  /* Slurp in the symbols without the version information,
-             since that is more helpful than just quitting.  */
+	     since that is more helpful than just quitting.  */
 	  verhdr = NULL;
 	}
 
@@ -1107,7 +1149,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	    sym->symbol.section = bfd_abs_section_ptr;
 
 	  /* If this is a relocatable file, then the symbol value is
-             already section relative.  */
+	     already section relative.  */
 	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
 	    sym->symbol.value -= sym->symbol.section->vma;
 

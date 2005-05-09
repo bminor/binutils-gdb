@@ -1,3 +1,7 @@
+2005-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfcode.h (elf_object_p): Add more sanity checks on elf header.
+
 2005-05-08  Dave Korn   <dave.korn@artimi.com>
 
 	* coff-tic80.c:  Undefine _CONST after system headers to prevent
