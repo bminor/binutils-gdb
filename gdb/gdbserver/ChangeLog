@@ -1,3 +1,9 @@
+2005-05-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-s390-low.c (s390_breakpoint, s390_breakpoint_len): Define.
+	(s390_get_pc, s390_set_pc, s390_breakpoint_at): New functions.
+	(the_low_target): Add new members.
+
 2005-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* proc-service.c (ps_lgetregs): Search all_processes instead of
