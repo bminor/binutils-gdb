@@ -2348,7 +2348,6 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
   char *file;
   unsigned int line;
   sb s;
-  sb label;
   const char *err;
   const char *name;
 
@@ -2358,11 +2357,17 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
     sb_add_char (&s, *input_line_pointer++);
 
-  sb_new (&label);
   if (line_label != NULL)
-    sb_add_string (&label, S_GET_NAME (line_label));
+    {
+      sb label;
 
-  err = define_macro (0, &s, &label, get_line_sb, file, line, &name);
+      sb_new (&label);
+      sb_add_string (&label, S_GET_NAME (line_label));
+      err = define_macro (0, &s, &label, get_line_sb, file, line, &name);
+      sb_kill (&label);
+    }
+  else
+    err = define_macro (0, &s, NULL, get_line_sb, file, line, &name);
   if (err != NULL)
     as_bad_where (file, line, err, name);
   else

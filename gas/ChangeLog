@@ -1,3 +1,8 @@
+2005-05-10  Jan Beulich  <jbeulich@novell.com>
+
+	* read.c (s_macro): Move local variable 'local' to smaller scope.
+	Call sb_kill on it when done.
+
 2005-05-09  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (optimize_disp): Discard displacement entirely when zero and
