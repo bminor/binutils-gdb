@@ -50,7 +50,6 @@ DIST_COMMON = $(srcdir)/../config.guess $(srcdir)/../config.sub README \
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/../config/accross.m4 \
 	$(top_srcdir)/../config/acx.m4 $(top_srcdir)/../bfd/bfd.m4 \
 	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../libtool.m4 \
 	$(top_srcdir)/../gettext.m4 $(top_srcdir)/configure.in

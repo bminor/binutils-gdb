@@ -93,10 +93,10 @@ AC_CACHE_VAL(bfd_cv_has_long_long,
 AC_MSG_RESULT($bfd_cv_has_long_long)
 if test $bfd_cv_has_long_long = yes; then
   BFD_HOST_LONG_LONG=1
-  AC_COMPILE_CHECK_SIZEOF(long long)
+  AC_CHECK_SIZEOF(long long)
 fi
 
-AC_COMPILE_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(long)
 if test "x${ac_cv_sizeof_long}" = "x8"; then
   host64=true
   BFD_HOST_64BIT_LONG=1
@@ -907,7 +907,7 @@ AC_SUBST(bfd_default_target_size)
 # upward compatible.
 AC_CHECK_FUNCS(ftello ftello64 fseeko fseeko64)
 if test x"$ac_cv_func_ftello" = xyes -a x"$ac_cv_func_fseeko" = xyes; then
-    AC_COMPILE_CHECK_SIZEOF(off_t)
+    AC_CHECK_SIZEOF(off_t)
 fi
 AC_MSG_CHECKING([file_ptr type])
 bfd_file_ptr="long"

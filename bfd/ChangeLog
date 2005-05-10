@@ -1,3 +1,9 @@
+2005-05-09  Kelley Cook  <kcook@gcc.gnu.org>
+
+	* configure.in: Replace AC_COMPILE_CHECK_SIZEOF with AC_CHECK_SIZEOF.
+	* acinclude.m4: Don't sinclude accross.m4.
+	* config.in, configure, Makefile.in, doc/Makefile.in: Regenerate.
+
 2005-05-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Add has_dotsym.
