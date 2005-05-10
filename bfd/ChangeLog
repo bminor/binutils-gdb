@@ -1,3 +1,24 @@
+2005-05-10  Alan Modra  <amodra@bigpond.net.au>
+
+	Apply from mainline.
+	2005-05-09  Alan Modra  <amodra@bigpond.net.au>
+	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Add has_dotsym.
+	(ppc64_elf_add_symbol_hook): Set has_dotsym.
+	(ppc64_elf_check_directives): Only process syms when has_dotsym.
+	(func_desc_adjust): Hide fake function descriptors when function
+	code entry is defined.
+	(adjust_opd_syms): Adjust for deleted_section becoming union field.
+
+	2005-04-05  Alan Modra  <amodra@bigpond.net.au>
+	* elf64-ppc.c (dec_dynrel_count): New function split out from
+	ppc64_elf_edit_toc, with additional code from ppc64_elf_edit_opd.
+	(ppc64_elf_edit_toc, ppc64_elf_edit_opd): Use it.
+	(ppc64_elf_tls_optimize): Likewise.
+
+	2005-04-01  Alan Modra  <amodra@bigpond.net.au>
+	* elf64-ppc.c (ppc64_elf_edit_toc): Account for dynamic relocs
+	that we no longer need.
+
 2005-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am: Clear RELEASE.
