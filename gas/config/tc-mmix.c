@@ -2900,8 +2900,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 void
 mmix_handle_mmixal (void)
 {
-  char *s0 = input_line_pointer;
-  char *s;
+  char *insn;
+  char *s = input_line_pointer;
   char *label = NULL;
   char c;
 
@@ -2911,44 +2911,20 @@ mmix_handle_mmixal (void)
   if (mmix_gnu_syntax)
     return;
 
-  /* If the first character is a '.', then it's a pseudodirective, not a
-     label.  Make GAS not handle label-without-colon on this line.  We
-     also don't do mmixal-specific stuff on this line.  */
-  if (input_line_pointer[0] == '.')
-    {
-      label_without_colon_this_line = 0;
-      return;
-    }
-
-  /* Don't handle empty lines here.  */
-  while (1)
-    {
-      if (*s0 == 0 || is_end_of_line[(unsigned int) *s0])
-	return;
-
-      if (! ISSPACE (*s0))
-	break;
-
-      s0++;
-    }
-
   /* If we're on a line with a label, check if it's a mmixal fb-label.
      Save an indicator and skip the label; it must be set only after all
      fb-labels of expressions are evaluated.  */
-  if (ISDIGIT (input_line_pointer[0])
-      && input_line_pointer[1] == 'H'
-      && ISSPACE (input_line_pointer[2]))
+  if (ISDIGIT (s[0]) && s[1] == 'H' && ISSPACE (s[2]))
     {
-      char *s;
-      current_fb_label = input_line_pointer[0] - '0';
+      current_fb_label = s[0] - '0';
 
       /* We have to skip the label, but also preserve the newlineness of
 	 the previous character, since the caller checks that.  It's a
 	 mess we blame on the caller.  */
-      input_line_pointer[1] = input_line_pointer[-1];
-      input_line_pointer += 2;
+      s[1] = s[-1];
+      s += 2;
+      input_line_pointer = s;
 
-      s = input_line_pointer;
       while (*s && ISSPACE (*s) && ! is_end_of_line[(unsigned int) *s])
 	s++;
 
@@ -2972,32 +2948,61 @@ mmix_handle_mmixal (void)
 			_("[0-9]H labels do not mix with dot-pseudos"));
 	  current_fb_label = -1;
 	}
+
+      /* Back off to the last space before the opcode so we don't handle
+	 the opcode as a label.  */
+      s--;
     }
   else
+    current_fb_label = -1;
+
+  if (*s == '.')
     {
-      current_fb_label = -1;
-      if (is_name_beginner (input_line_pointer[0]))
-	label = input_line_pointer;
+      /* If the first character is a '.', then it's a pseudodirective, not a
+	 label.  Make GAS not handle label-without-colon on this line.  We
+	 also don't do mmixal-specific stuff on this line.  */
+      label_without_colon_this_line = 0;
+      return;
     }
 
-  s0 = input_line_pointer;
-  /* Skip over label.  */
-  while (*s0 && is_part_of_name (*s0))
-    s0++;
+  if (*s == 0 || is_end_of_line[(unsigned int) *s])
+    /* We avoid handling empty lines here.  */
+    return;
+      
+  if (is_name_beginner (*s))
+    label = s;
 
-  /* Remove trailing ":" off labels, as they'd otherwise be considered
-     part of the name.  But don't do it for local labels.  */
-  if (s0 != input_line_pointer && s0[-1] == ':'
-      && (s0 - 2 != input_line_pointer
-	  || ! ISDIGIT (s0[-2])))
-    s0[-1] = ' ';
-  else if (label != NULL)
+  /* If there is a label, skip over it.  */
+  while (*s && is_part_of_name (*s))
+    s++;
+
+  /* Find the start of the instruction or pseudo following the label,
+     if there is one.  */
+  for (insn = s;
+       *insn && ISSPACE (*insn) && ! is_end_of_line[(unsigned int) *insn];
+       insn++)
+    /* Empty */
+    ;
+
+  /* Remove a trailing ":" off labels, as they'd otherwise be considered
+     part of the name.  But don't do this for local labels.  */
+  if (s != input_line_pointer && s[-1] == ':'
+      && (s - 2 != input_line_pointer
+	  || ! ISDIGIT (s[-2])))
+    s[-1] = ' ';
+  else if (label != NULL
+	   /* For a lone label on a line, we don't attach it to the next
+	      instruction or MMIXAL-pseudo (getting its alignment).  Thus
+	      is acts like a "normal" :-ended label.  Ditto if it's
+	      followed by a non-MMIXAL pseudo.  */
+	   && !is_end_of_line[(unsigned int) *insn]
+	   && *insn != '.')
     {
       /* For labels that don't end in ":", we save it so we can later give
 	 it the same alignment and address as the associated instruction.  */
 
       /* Make room for the label including the ending nul.  */
-      int len_0 = s0 - label + 1;
+      int len_0 = s - label + 1;
 
       /* Save this label on the MMIX symbol obstack.  Saving it on an
 	 obstack is needless for "IS"-pseudos, but it's harmless and we
@@ -3007,14 +3012,10 @@ mmix_handle_mmixal (void)
       pending_label[len_0 - 1] = 0;
     }
 
-  while (*s0 && ISSPACE (*s0) && ! is_end_of_line[(unsigned int) *s0])
-    s0++;
-
-  if (pending_label != NULL && is_end_of_line[(unsigned int) *s0])
-    /* Whoops, this was actually a lone label on a line.  Like :-ended
-       labels, we don't attach such labels to the next instruction or
-       pseudo.  */
-    pending_label = NULL;
+  /* If we have a non-MMIXAL pseudo, we have not business with the rest of
+     the line.  */
+  if (*insn == '.')
+    return;
 
   /* Find local labels of operands.  Look for "[0-9][FB]" where the
      characters before and after are not part of words.  Break if a single
@@ -3026,7 +3027,6 @@ mmix_handle_mmixal (void)
 
   /* First make sure we don't have any of the magic characters on the line
      appearing as input.  */
-  s = s0;
   while (*s)
     {
       c = *s++;
@@ -3037,7 +3037,7 @@ mmix_handle_mmixal (void)
     }
 
   /* Scan again, this time looking for ';' after operands.  */
-  s = s0;
+  s = insn;
 
   /* Skip the insn.  */
   while (*s
@@ -3103,7 +3103,7 @@ mmix_handle_mmixal (void)
 
   /* Make IS into an EQU by replacing it with "= ".  Only match upper-case
      though; let lower-case be a syntax error.  */
-  s = s0;
+  s = insn;
   if (s[0] == 'I' && s[1] == 'S' && ISSPACE (s[2]))
     {
       *s = '=';

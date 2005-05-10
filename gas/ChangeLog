@@ -1,3 +1,11 @@
+2005-05-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR binutils/886
+	* config/tc-mmix.c (mmix_handle_mmixal): Rearrange slightly.
+	Handle label-without-colon before ordinary dot-pseudo as an
+	ordinary label.  Don't leak memory for label-without-colon alone
+	on a line.  Don't mmixal-munge operands for dot-pseudos.
+
 2005-05-10  Jan Beulich  <jbeulich@novell.com>
 
 	* macro.c (get_any_string): Remove the two last parameters. Replace
