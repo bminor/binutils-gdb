@@ -1450,7 +1450,9 @@ reloc_overflow (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 	case bfd_link_hash_defweak:
 	  einfo (_(" relocation truncated to fit: %s against symbol `%T' defined in %A section in %B"),
 		 reloc_name, entry->root.string,
-		 entry->u.def.section, entry->u.def.section->owner);
+		 entry->u.def.section,
+		 entry->u.def.section == bfd_abs_section_ptr
+		 ? output_bfd : entry->u.def.section->owner);
 	  break;
 	default:
 	  abort ();

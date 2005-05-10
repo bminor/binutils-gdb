@@ -1,3 +1,8 @@
+2005-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldmain.c (reloc_overflow): Use output_bfd if the symbol
+	is defined in the ABS section.
+
 2005-05-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_provide_init_fini_syms):
