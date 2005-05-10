@@ -1454,6 +1454,8 @@ gld${EMULATION_NAME}_provide_bound_symbols (const char *sec,
 					    const char *end)
 {
   asection *s = bfd_get_section_by_name (output_bfd, sec);
+  if (s && bfd_section_removed_from_list (output_bfd, s))
+    s = NULL;
   _bfd_elf_provide_section_bound_symbols (&link_info, s, start, end);
 }
 
