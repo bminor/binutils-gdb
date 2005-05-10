@@ -94,16 +94,11 @@ test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
 test -n "$RELRO_NOW" && unset SEPARATE_GOTPLT
 DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
 DATA_SEGMENT_RELRO_END=""
-DATA_SEGMENT_RELRO_GOTPLT_END=""
 DATA_SEGMENT_END=""
 if test -n "${COMMONPAGESIZE}"; then
   DATA_SEGMENT_ALIGN="ALIGN (${SEGMENT_SIZE}) - ((${MAXPAGESIZE} - .) & (${MAXPAGESIZE} - 1)); . = DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
   DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
-  if test -n "${SEPARATE_GOTPLT}"; then
-    DATA_SEGMENT_RELRO_GOTPLT_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT}, .);"
-  else
-    DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (0, .);"
-  fi
+  DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT-0}, .);"
 fi
 INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
 PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
@@ -112,8 +107,7 @@ if test -z "$GOT"; then
     GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
   else
     GOT=".got          ${RELOCATING-0} : { *(.got) }"
-    GOTPLT="${RELOCATING+${DATA_SEGMENT_RELRO_GOTPLT_END}}
-  .got.plt      ${RELOCATING-0} : { *(.got.plt) }"
+    GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt) }"
   fi
 fi
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
@@ -351,8 +345,8 @@ cat <<EOF
   ${TEXT_DYNAMIC-${DYNAMIC}}
   ${NO_SMALL_DATA+${RELRO_NOW+${GOT}}}
   ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT+${GOT}}}}
-  ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT+${GOTPLT}}}}
   ${RELOCATING+${DATA_SEGMENT_RELRO_END}}
+  ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT+${GOTPLT}}}}
   ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT-${GOT}}}}
 
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
