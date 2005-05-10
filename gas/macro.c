@@ -70,7 +70,7 @@ extern void *alloca ();
 
 static int get_token (int, sb *, sb *);
 static int getstring (int, sb *, sb *);
-static int get_any_string (int, sb *, sb *, int, int);
+static int get_any_string (int, sb *, sb *);
 static formal_entry *new_formal (void);
 static void del_formal (formal_entry *);
 static int do_formals (macro_entry *, int, sb *);
@@ -304,8 +304,6 @@ get_token (int idx, sb *in, sb *name)
 static int
 getstring (int idx, sb *in, sb *acc)
 {
-  idx = sb_skip_white (idx, in);
-
   while (idx < in->len
 	 && (in->ptr[idx] == '"'
 	     || (in->ptr[idx] == '<' && (macro_alternate || macro_mri))
@@ -390,7 +388,7 @@ getstring (int idx, sb *in, sb *acc)
 */
 
 static int
-get_any_string (int idx, sb *in, sb *out, int expand, int pretend_quoted)
+get_any_string (int idx, sb *in, sb *out)
 {
   sb_reset (out);
   idx = sb_skip_white (idx, in);
@@ -402,9 +400,7 @@ get_any_string (int idx, sb *in, sb *out, int expand, int pretend_quoted)
 	  while (!ISSEP (in->ptr[idx]))
 	    sb_add_char (out, in->ptr[idx++]);
 	}
-      else if (in->ptr[idx] == '%'
-	       && macro_alternate
-	       && expand)
+      else if (in->ptr[idx] == '%' && macro_alternate)
 	{
 	  int val;
 	  char buf[20];
@@ -421,9 +417,7 @@ get_any_string (int idx, sb *in, sb *out, int expand, int pretend_quoted)
 	       || (in->ptr[idx] == '<' && (macro_alternate || macro_mri))
 	       || (macro_alternate && in->ptr[idx] == '\''))
 	{
-	  if (macro_alternate
-	      && ! macro_strip_at
-	      && expand)
+	  if (macro_alternate && ! macro_strip_at)
 	    {
 	      /* Keep the quotes.  */
 	      sb_add_char (out, '\"');
@@ -439,14 +433,11 @@ get_any_string (int idx, sb *in, sb *out, int expand, int pretend_quoted)
       else
 	{
 	  while (idx < in->len
-		 && (in->ptr[idx] == '"'
-		     || in->ptr[idx] == '\''
-		     || pretend_quoted
-		     || (in->ptr[idx] != ' '
-			 && in->ptr[idx] != '\t'
-			 && in->ptr[idx] != ','
-			 && (in->ptr[idx] != '<'
-			     || (! macro_alternate && ! macro_mri)))))
+		 && in->ptr[idx] != ' '
+		 && in->ptr[idx] != '\t'
+		 && in->ptr[idx] != ','
+		 && (in->ptr[idx] != '<'
+		     || (! macro_alternate && ! macro_mri)))
 	    {
 	      if (in->ptr[idx] == '"'
 		  || in->ptr[idx] == '\'')
@@ -555,7 +546,7 @@ do_formals (macro_entry *macro, int idx, sb *in)
       if (idx < in->len && in->ptr[idx] == '=')
 	{
 	  /* Got a default.  */
-	  idx = get_any_string (idx + 1, in, &formal->def, 1, 0);
+	  idx = get_any_string (idx + 1, in, &formal->def);
 	  idx = sb_skip_white (idx, in);
 	  if (formal->type == FORMAL_REQUIRED)
 	    {
@@ -1040,7 +1031,7 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	      n->next = m->formals;
 	      m->formals = n;
 
-	      idx = get_any_string (idx, in, &n->actual, 1, 0);
+	      idx = get_any_string (idx, in, &n->actual);
 	    }
 	}
     }
@@ -1090,7 +1081,7 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 			   m->name);
 		  sb_reset (&ptr->actual);
 		}
-	      idx = get_any_string (idx + 1, in, &ptr->actual, 0, 0);
+	      idx = get_any_string (idx + 1, in, &ptr->actual);
 	      if (ptr->actual.len > 0)
 		++narg;
 	    }
@@ -1129,7 +1120,7 @@ macro_expand (int idx, sb *in, macro_entry *m, sb *out)
 	    }
 
 	  if (f->type != FORMAL_VARARG)
-	    idx = get_any_string (idx, in, &f->actual, 1, 0);
+	    idx = get_any_string (idx, in, &f->actual);
 	  else
 	    {
 	      sb_add_buffer (&f->actual, in->ptr + idx, in->len - idx);
@@ -1350,7 +1341,7 @@ expand_irp (int irpc, int idx, sb *in, sb *out, int (*get_line) (sb *))
       while (idx < in->len)
 	{
 	  if (!irpc)
-	    idx = get_any_string (idx, in, &f.actual, 1, 0);
+	    idx = get_any_string (idx, in, &f.actual);
 	  else
 	    {
 	      if (in->ptr[idx] == '"')
