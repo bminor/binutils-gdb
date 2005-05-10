@@ -1,3 +1,7 @@
+2005-05-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/relax2.s: Drop ":" off label definitions.
+
 2005-05-09  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/tlsd.[sd]: Adjust to not assume zero displacement will
