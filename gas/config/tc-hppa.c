@@ -5951,6 +5951,12 @@ pa_block (z)
 
   temp_size = get_absolute_expression ();
 
+  if (temp_size > 0x3FFFFFFF)
+    {
+      as_bad (_("Argument to .BLOCK/.BLOCKZ must be between 0 and 0x3fffffff"));
+      temp_size = 0;
+    }
+
   /* Always fill with zeros, that's what the HP assembler does.  */
   temp_fill = 0;
 

@@ -91,7 +91,14 @@ frag_grow (unsigned int nchars)
       frag_wane (frag_now);
       frag_new (0);
       oldc = frchain_now->frch_obstack.chunk_size;
-      frchain_now->frch_obstack.chunk_size = 2 * nchars + SIZEOF_STRUCT_FRAG;
+      /* Try to allocate a bit more than needed right now.  But don't do
+         this if we would waste too much memory.  Especially necessary
+	 for extremely big (like 2GB initialized) frags.  */
+      if (nchars < 0x10000)
+	frchain_now->frch_obstack.chunk_size = 2 * nchars;
+      else
+        frchain_now->frch_obstack.chunk_size = nchars + 0x10000;
+      frchain_now->frch_obstack.chunk_size += SIZEOF_STRUCT_FRAG;
       if (frchain_now->frch_obstack.chunk_size > 0)
 	while ((n = obstack_room (&frchain_now->frch_obstack)) < nchars
 	       && (unsigned long) frchain_now->frch_obstack.chunk_size > nchars)

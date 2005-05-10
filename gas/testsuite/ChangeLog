@@ -1,3 +1,8 @@
+2005-05-10  Michael Matz  <matz@suse.de>
+
+	* gas/hppa/parse/block1.s: Use official limit (0x3fffffff) for
+	.block.
+
 2005-05-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix/relax2.s: Drop ":" off label definitions.

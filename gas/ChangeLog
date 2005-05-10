@@ -1,3 +1,9 @@
+2005-05-10  Michael Matz  <matz@suse.de>
+
+	* frags.c (frag_grow): Don't be too greedy in allocating memory.
+
+	* config/tc-hppa.c (pa_block): Check arguments to .block[z].
+
 2005-05-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR binutils/886
@@ -23,8 +29,8 @@
 
 2005-05-09  Jan Beulich  <jbeulich@novell.com>
 
-	* config/tc-i386.c (optimize_disp): Discard displacement entirely when zero and
-	not required by encoding constraints.
+	* config/tc-i386.c (optimize_disp): Discard displacement entirely
+	when zero and not required by encoding constraints.
 
 2005-05-09  H.J. Lu  <hongjiu.lu@intel.com>
 
