@@ -1,3 +1,11 @@
+2005-05-10  Nick Clifton  <nickc@redhat.com>
+
+	* Update the address and phone number of the FSF organization in
+	the GPL notices in the following files:
+	cris.cpu, frv.cpu, frv.opc, iq10.cpu, iq2000.opc, iq2000m.cpu,
+	m32r.cpu, m32r.opc, sh.cpu, sh.opc, sh64-compact.cpu,
+	sh64-media.cpu, simplify.inc
+
 2005-02-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* frv.opc (parse_A): Warning fix.
