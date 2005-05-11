@@ -101,7 +101,9 @@ if test -n "${COMMONPAGESIZE}"; then
   DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT-0}, .);"
 fi
 INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
-PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
+if test -z "$PLT"; then
+  PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
+fi
 if test -z "$GOT"; then
   if test -z "$SEPARATE_GOTPLT"; then
     GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
@@ -143,6 +145,16 @@ if test -z "${NO_SMALL_DATA}"; then
   .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
 else
   NO_SMALL_DATA=" "
+fi
+if test -z "${DATA_GOT}"; then
+  if test -n "${NO_SMALL_DATA}"; then
+    DATA_GOT=" "
+  fi
+fi
+if test -z "${SDATA_GOT}"; then
+  if test -z "${NO_SMALL_DATA}"; then
+    SDATA_GOT=" "
+  fi
 fi
 test -n "$SEPARATE_GOTPLT" && SEPARATE_GOTPLT=" "
 CTOR=".ctors        ${CONSTRUCTING-0} : 
@@ -343,11 +355,12 @@ cat <<EOF
   ${RELOCATING+${DATARELRO}}
   ${OTHER_RELRO_SECTIONS}
   ${TEXT_DYNAMIC-${DYNAMIC}}
-  ${NO_SMALL_DATA+${RELRO_NOW+${GOT}}}
-  ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT+${GOT}}}}
+  ${DATA_GOT+${RELRO_NOW+${GOT}}}
+  ${DATA_GOT+${RELRO_NOW+${GOTPLT}}}
+  ${DATA_GOT+${RELRO_NOW-${SEPARATE_GOTPLT+${GOT}}}}
   ${RELOCATING+${DATA_SEGMENT_RELRO_END}}
-  ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT+${GOTPLT}}}}
-  ${NO_SMALL_DATA+${RELRO_NOW-${SEPARATE_GOTPLT-${GOT}}}}
+  ${DATA_GOT+${RELRO_NOW-${SEPARATE_GOTPLT-${GOT}}}}
+  ${DATA_GOT+${RELRO_NOW-${GOTPLT}}}
 
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
@@ -364,9 +377,9 @@ cat <<EOF
   ${SMALL_DATA_CTOR+${RELOCATING+${CTOR}}}
   ${SMALL_DATA_DTOR+${RELOCATING+${DTOR}}}
   ${DATA_PLT+${PLT_BEFORE_GOT+${PLT}}}
-  ${RELOCATING+${OTHER_GOT_SYMBOLS}}
-  ${NO_SMALL_DATA-${GOT}}
-  ${OTHER_GOT_SECTIONS}
+  ${SDATA_GOT+${RELOCATING+${OTHER_GOT_SYMBOLS}}}
+  ${SDATA_GOT+${GOT}}
+  ${SDATA_GOT+${OTHER_GOT_SECTIONS}}
   ${SDATA}
   ${OTHER_SDATA_SECTIONS}
   ${RELOCATING+${DATA_END_SYMBOLS-_edata = .; PROVIDE (edata = .);}}

@@ -1,3 +1,23 @@
+2005-05-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldgram.y: Add SPECIAL token.
+	(sect_constraint): Handle SPECIAL.
+	* ldlang.c (lang_output_section_find_1): Don't match SPECIAL.
+	(map_input_to_output_sections): Likewise.
+	* ldlex.l (SPECIAL): Define.
+	* emulparams/elf32ppc.sh (DATA_GOT, SDATA_GOT, SEPARATE_GOTPLT,
+	GOT, PLT, GOTPLT): Define.
+	* emultempl/ppc32elf.em (old_plt, old_got): New static vars.
+	(ppc_after_open): New function.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_OLD_LPT and OPTION_OLD_GOT.
+	(PARSE_AND_LIST_LONGOPTS): Add "bss-plt" and "sdata-got".
+	(PARSE_AND_LIST_OPTIONS): Document them.
+	(PARSE_AND_LIST_ARGS_CASES): Handle them.
+	(LDEMUL_AFTER_OPEN): Define.
+	* scripttempl/elf.sc (PLT): Don't override existing define.
+	(DATA_GOT, SDATA_GOT): Define and use to enable alternate got
+	placement rather than using NO_SMALL_DATA.  Emit GOTPLT for RELRO_NOW.
+
 2005-05-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/elf.sc (DATA_SEGMENT_RELRO_GOTPLT_END): Delete.
@@ -164,7 +184,7 @@
 2005-04-07  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/m68kcoff.em: Include ldexp.h and ldlang.h so that
-	ldfile.h can use the lang_input_statement type. 
+	ldfile.h can use the lang_input_statement type.
 
 2005-04-06  Jakub Jelinek  <jakub@redhat.com>
 

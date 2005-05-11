@@ -991,7 +991,9 @@ lang_output_section_find_1 (const char *const name, int constraint)
     {
       if (strcmp (name, lookup->name) == 0
 	  && lookup->constraint != -1
-	  && (constraint == 0 || constraint == lookup->constraint))
+	  && (constraint == 0
+	      || (constraint == lookup->constraint
+		  && constraint != SPECIAL)))
 	return lookup;
     }
   return NULL;
@@ -2951,7 +2953,8 @@ map_input_to_output_sections
 	case lang_output_section_statement_enum:
 	  if (s->output_section_statement.constraint)
 	    {
-	      if (s->output_section_statement.constraint == -1)
+	      if (s->output_section_statement.constraint != ONLY_IF_RW
+		  && s->output_section_statement.constraint != ONLY_IF_RO)
 		break;
 	      s->output_section_statement.all_input_readonly = TRUE;
 	      check_input_sections (s->output_section_statement.children.head,

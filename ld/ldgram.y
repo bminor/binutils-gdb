@@ -151,7 +151,7 @@ static int error_index;
 %token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM CASE EXTERN START
 %token <name> VERS_TAG VERS_IDENTIFIER
 %token GLOBAL LOCAL VERSIONK INPUT_VERSION_SCRIPT
-%token KEEP ONLY_IF_RO ONLY_IF_RW
+%token KEEP ONLY_IF_RO ONLY_IF_RW SPECIAL
 %token EXCLUDE_FILE
 %type <versyms> vers_defns
 %type <versnode> vers_tag
@@ -899,6 +899,7 @@ opt_subalign:
 sect_constraint:
 		ONLY_IF_RO { $$ = ONLY_IF_RO; }
 	|	ONLY_IF_RW { $$ = ONLY_IF_RW; }
+	|	SPECIAL { $$ = SPECIAL; }
 	|	{ $$ = 0; }
 	;
 

@@ -32,6 +32,66 @@ extern const bfd_target bfd_elf32_powerpcle_vec;
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;
 
+/* Chooses the correct place for .plt and .got.  */
+static int old_plt = 0;
+static int old_got = 0;
+
+static void
+ppc_after_open (void)
+{
+  if (link_info.hash->creator == &bfd_elf32_powerpc_vec
+      || link_info.hash->creator == &bfd_elf32_powerpcle_vec)
+    {
+      int new_plt;
+      int keep_new;
+      unsigned int num_plt;
+      unsigned int num_got;
+      lang_output_section_statement_type *os;
+      lang_output_section_statement_type *plt_os[2];
+      lang_output_section_statement_type *got_os[2];
+
+      new_plt = ppc_elf_select_plt_layout (output_bfd, &link_info, old_plt);
+      if (new_plt < 0)
+	einfo ("%X%P: select_plt_layout problem %E\n");
+
+      num_got = 0;
+      num_plt = 0;
+      for (os = &lang_output_section_statement.head->output_section_statement;
+	   os != NULL;
+	   os = os->next)
+	{
+	  if (os->constraint == SPECIAL && strcmp (os->name, ".plt") == 0)
+	    {
+	      if (num_plt < 2)
+		plt_os[num_plt] = os;
+	      ++num_plt;
+	    }
+	  if (os->constraint == SPECIAL && strcmp (os->name, ".got") == 0)
+	    {
+	      if (num_got < 2)
+		got_os[num_got] = os;
+	      ++num_got;
+	    }
+	}
+
+      keep_new = new_plt == 1 ? 0 : -1;
+      if (num_plt == 2)
+	{
+	  plt_os[0]->constraint = keep_new;
+	  plt_os[1]->constraint = ~keep_new;
+	}
+      if (num_got == 2)
+	{
+	  if (old_got)
+	    keep_new = -1;
+	  got_os[0]->constraint = keep_new;
+	  got_os[1]->constraint = ~keep_new;
+	}
+    }
+
+  gld${EMULATION_NAME}_after_open ();
+}
+
 static void
 ppc_before_allocation (void)
 {
@@ -68,15 +128,21 @@ EOF
 #
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_TLS_OPT		301
+#define OPTION_OLD_PLT			302
+#define OPTION_OLD_GOT			303
 '
 
 PARSE_AND_LIST_LONGOPTS='
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
+  { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
+  { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },
 '
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
-  --no-tls-optimize     Don'\''t try to optimize TLS accesses.\n"
+  --no-tls-optimize     Don'\''t try to optimize TLS accesses.\n\
+  --bss-plt             Force old-style BSS PLT.\n\
+  --sdata-got           Force GOT location just before .sdata.\n"
 		   ));
 '
 
@@ -84,9 +150,18 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_NO_TLS_OPT:
       notlsopt = 1;
       break;
+
+    case OPTION_OLD_PLT:
+      old_plt = 1;
+      break;
+
+    case OPTION_OLD_GOT:
+      old_got = 1;
+      break;
 '
 
 # Put these extra ppc32elf routines in ld_${EMULATION_NAME}_emulation
 #
+LDEMUL_AFTER_OPEN=ppc_after_open
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation

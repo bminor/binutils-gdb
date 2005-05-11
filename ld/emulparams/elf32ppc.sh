@@ -12,7 +12,16 @@ MAXPAGESIZE=0x10000
 COMMONPAGESIZE=0x1000
 ARCH=powerpc:common
 MACHINE=
+# Yes, we want duplicate .got and .plt sections.  The linker chooses the
+# appropriate one magically in ppc_after_open
+DATA_GOT=
+SDATA_GOT=
+SEPARATE_GOTPLT=0
 BSS_PLT=
+GOT=".got          ${RELOCATING-0} : SPECIAL { *(.got) }"
+PLT=".plt          ${RELOCATING-0} : SPECIAL { *(.plt) }"
+GOTPLT="${PLT}"
+OTHER_TEXT_SECTIONS="*(.glink)"
 EXECUTABLE_SYMBOLS='PROVIDE (__stack = 0); PROVIDE (___stack = 0);'
 OTHER_BSS_END_SYMBOLS='__end = .;'
 OTHER_RELRO_SECTIONS="
