@@ -1413,6 +1413,17 @@ get_sparc64_dynamic_type (unsigned long type)
 }
 
 static const char *
+get_ppc_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_PPC_GLINK: return "PPC_GLINK";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_ppc64_dynamic_type (unsigned long type)
 {
   switch (type)
@@ -1551,6 +1562,9 @@ get_dynamic_type (unsigned long type)
 	      break;
 	    case EM_SPARCV9:
 	      result = get_sparc64_dynamic_type (type);
+	      break;
+	    case EM_PPC:
+	      result = get_ppc_dynamic_type (type);
 	      break;
 	    case EM_PPC64:
 	      result = get_ppc64_dynamic_type (type);
