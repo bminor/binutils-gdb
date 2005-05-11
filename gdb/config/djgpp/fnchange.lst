@@ -34,6 +34,8 @@
 @V@/bfd/elf32-sh64-com.c @V@/bfd/e32sh64-com.c
 @V@/bfd/elf64-alpha.c @V@/bfd/e64alphf.c
 @V@/bfd/elf64-sh64.c @V@/bfd/e64sh64.c
+@V@/config/inttypes-pri.m4 @V@/config/pri-inttypes.m4
+@V@/config/inttypes_h.m4 @V@/config/uintmax-inttypes.m4
 @V@/dejagnu/baseboards/mn10200-cygmon.exp @V@/dejagnu/baseboards/mn10200cygmon.exp
 @V@/dejagnu/baseboards/mn10200-sim.exp @V@/dejagnu/baseboards/mn10200sim.exp
 @V@/dejagnu/baseboards/mn10300-cygmon.exp @V@/dejagnu/baseboards/mn10300cygmon.exp
@@ -69,6 +71,7 @@
 @V@/gdb/ChangeLog-2001 @V@/gdb/ChangeLog.001
 @V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.002
 @V@/gdb/ChangeLog-2003 @V@/gdb/ChangeLog.003
+@V@/gdb/ChangeLog-2004 @V@/gdb/ChangeLog.004
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
 @V@/gdb/amd64fbsd-nat.c @V@/gdb/a64fb-nat.c
@@ -169,6 +172,8 @@
 @V@/gdb/ppcobsd-tdep.c @V@/gdb/ppcob-tdep.c
 @V@/gdb/regformats/reg-i386-linux.dat @V@/gdb/regformats/r-i386-lnx.dat
 @V@/gdb/regformats/reg-s390x.dat @V@/gdb/regformats/r-s390x.dat
+@V@/gdb/regformats/reg-cris.dat @V@/gdb/regformats/r-cris.dat
+@V@/gdb/regformats/reg-crisv32.dat @V@/gdb/regformats/r-crisv32.dat
 @V@/gdb/remote-e7000.c @V@/gdb/rmt-e7000.c
 @V@/gdb/remote-est.c @V@/gdb/rmt-est.c
 @V@/gdb/remote-mips.c @V@/gdb/emt-mips.c
@@ -206,6 +211,8 @@
 @V@/gdb/testsuite/gdb.base/coremaker2.c @V@/gdb/testsuite/gdb.base/core2maker.c
 @V@/gdb/testsuite/gdb.cp/m-static1.cc @V@/gdb/testsuite/gdb.cp/m-stat1.cc
 @V@/gdb/testsuite/gdb.cp/namespace1.cc @V@/gdb/testsuite/gdb.cp/namesp1.cc
+@V@/gdb/testsuite/gdb.dwarf2/dw2-intermix.exp @V@/gdb/testsuite/gdb.dwarf2/dw2-intmix.exp
+@V@/gdb/testsuite/gdb.dwarf2/dw2-intermix.S @V@/gdb/testsuite/gdb.dwarf2/dw2-intmix.S
 @V@/gdb/testsuite/gdb.gdbtk/ChangeLog @V@/gdb/testsuite/gdb.tk/ChangeLog
 @V@/gdb/testsuite/gdb.gdbtk/Makefile.in @V@/gdb/testsuite/gdb.tk/Makefile.in
 @V@/gdb/testsuite/gdb.gdbtk/browser.exp @V@/gdb/testsuite/gdb.tk/browser.exp
@@ -302,6 +309,8 @@
 @V@/readline/config.h.bot @V@/readline/config.h-bot
 @V@/readline/config.h.in @V@/readline/config.h-in
 @V@/sim/frv/profile-fr400.c @V@/sim/frv/fr400-profile.c
+@V@/sim/cris/semcrisv10f-switch.c @V@/sim/cris/scrisv10f.c
+@V@/sim/cris/semcrisv32f-switch.c @V@/sim/cris/scrisv32f.c
 @V@/sim/frv/profile-fr400.h @V@/sim/frv/fr400-profile.h
 @V@/sim/frv/profile-fr500.c @V@/sim/frv/fr500-profile.c
 @V@/sim/frv/profile-fr500.h @V@/sim/frv/fr500-profile.h
@@ -362,9 +371,9 @@
 @V@/sim/testsuite/sim/frv/interrupts/data_store_error-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-data_store_error.cgs
 @V@/sim/testsuite/sim/frv/interrupts/fp_exception-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-fp_exception.cgs
 @V@/sim/testsuite/sim/frv/interrupts/insn_access_error-fr550.cgs @V@/sim/testsuite/sim/frv/interrupts/fr550-insn_access_error.cgs
-@V@/sim/testsuite/sim/mips/hilo-hazard-1.s @V@/sim/testsuite/sim/mips/hilo-hz-1.s
-@V@/sim/testsuite/sim/mips/hilo-hazard-2.s @V@/sim/testsuite/sim/mips/hilo-hz-2.s
-@V@/sim/testsuite/sim/mips/hilo-hazard-3.s @V@/sim/testsuite/sim/mips/hilo-hz-3.s
+@V@/sim/testsuite/sim/mips/hilo-hazard-1.s @V@/sim/testsuite/sim/mips/hilo-hz1.s
+@V@/sim/testsuite/sim/mips/hilo-hazard-2.s @V@/sim/testsuite/sim/mips/hilo-hz2.s
+@V@/sim/testsuite/sim/mips/hilo-hazard-3.s @V@/sim/testsuite/sim/mips/hilo-hz3.s
 @V@/sim/testsuite/sim/sh64/compact/ldsl-mach.cgs @V@/sim/testsuite/sim/sh64/compact/mach-ldsl.cgs
 @V@/sim/testsuite/sim/sh64/compact/ldsl-macl.cgs @V@/sim/testsuite/sim/sh64/compact/macl-ldsl.cgs
 @V@/sim/testsuite/sim/sh64/compact/stsl-mach.cgs @V@/sim/testsuite/sim/sh64/compact/mach-stsl.cgs

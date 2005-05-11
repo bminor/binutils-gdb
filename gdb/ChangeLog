@@ -1,5 +1,9 @@
 2005-05-11  Eli Zaretskii  <eliz@gnu.org>
 
+	* config/djgpp/fnchange.lst: Add mappings for inttypes*.m4,
+	ChangeLog-2004, reg-cris*.dat, dw2-intermix.*, semcris*-switch.c.
+	Fix mappings for hilo-hazard-?.s.
+
 	* config/djgpp/README: Update GDB versions and my email address.
 
 2005-05-09  Andrew Cagney  <cagney@gnu.org>
