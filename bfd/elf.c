@@ -750,25 +750,45 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   if ((hdr->sh_flags & SHF_TLS) != 0)
     flags |= SEC_THREAD_LOCAL;
 
-  /* The debugging sections appear to be recognized only by name, not
-     any sort of flag.  */
-  {
-    static const char *debug_sec_names [] =
+  if ((flags & SEC_ALLOC) == 0)
     {
-      ".debug",
-      ".gnu.linkonce.wi.",
-      ".line",
-      ".stab"
-    };
-    int i;
-
-    for (i = ARRAY_SIZE (debug_sec_names); i--;)
-      if (strncmp (name, debug_sec_names[i], strlen (debug_sec_names[i])) == 0)
-	break;
-
-    if (i >= 0)
-      flags |= SEC_DEBUGGING;
-  }
+      /* The debugging sections appear to be recognized only by name,
+	 not any sort of flag.  Their SEC_ALLOC bits are cleared.  */
+      static const struct
+	{
+	  const char *name;
+	  int len;
+	} debug_sections [] =
+	{
+	  { "debug",		 5  },	/* 'd' */
+	  { NULL,		 0  },	/* 'e' */
+	  { NULL,		 0  },	/* 'f' */
+	  { "gnu.linkonce.wi.", 17 },	/* 'g' */
+	  { NULL,		 0  },	/* 'h' */
+	  { NULL,		 0  },	/* 'i' */
+	  { NULL,		 0  },	/* 'j' */
+	  { NULL,		 0  },	/* 'k' */
+	  { "line",		 4  },	/* 'l' */
+	  { NULL,		 0  },	/* 'm' */
+	  { NULL,		 0  },	/* 'n' */
+	  { NULL,		 0  },	/* 'o' */
+	  { NULL,		 0  },	/* 'p' */
+	  { NULL,		 0  },	/* 'q' */
+	  { NULL,		 0  },	/* 'r' */
+	  { "stab",		 4  }	/* 's' */
+	};
+      
+      if (name [0] == '.')
+	{
+	  int i = name [1] - 'd';
+	  if (i >= 0
+	      && i < (int) ARRAY_SIZE (debug_sections)
+	      && debug_sections [i].name != NULL
+	      && strncmp (&name [1], debug_sections [i].name,
+			  debug_sections [i].len) == 0)
+	    flags |= SEC_DEBUGGING;
+	}
+    }
 
   /* As a GNU extension, if the name begins with .gnu.linkonce, we
      only link a single copy of the section.  This is used to support

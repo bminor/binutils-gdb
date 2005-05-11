@@ -1,3 +1,8 @@
+2005-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Only check debug
+	section if SEC_ALLOC isn't set.
+
 2005-05-09  Kelley Cook  <kcook@gcc.gnu.org>
 
 	* configure.in: Replace AC_COMPILE_CHECK_SIZEOF with AC_CHECK_SIZEOF.
