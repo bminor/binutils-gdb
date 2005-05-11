@@ -1,3 +1,7 @@
+2005-05-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* ld-undefined/undefined.exp: xfail xtensa-*-*.
+
 2005-05-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe32.d: Update for changed got layout.
