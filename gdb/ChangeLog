@@ -1,3 +1,7 @@
+2005-05-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/README: Update GDB versions and my email address.
+
 2005-05-09  Andrew Cagney  <cagney@gnu.org>
 
 	Use gdb_byte in preference to bfd_byte.

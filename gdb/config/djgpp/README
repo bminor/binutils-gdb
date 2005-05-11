@@ -90,9 +90,9 @@ If the distribution comes as a .tar.bz2 archive, and your version of
 `djtar' doesn't support bzip2 decompression, you need to unpack it as
 follows:
 
- bnzip2 gdb-5.2.tar.bz2
- djtar -x -p -o gdb-5.2/djunpack.bat gdb-5.2.tar > djunpack.bat
- djunpack gdb-5.2.tar
+ bnzip2 gdb-6.4.tar.bz2
+ djtar -x -p -o gdb-6.4/djunpack.bat gdb-6.4.tar > djunpack.bat
+ djunpack gdb-6.4.tar
 
 
 3. How to build
@@ -134,7 +134,7 @@ It is also possible to build GDB in a directory that is different from
 the one where the sources were unpacked.  In that case, you have to
 pass the source directory as the first argument to the script:
 
-	sh ./gdb/config/djgpp/djconfig.sh d:/gnu/gdb-5.2
+	sh ./gdb/config/djgpp/djconfig.sh d:/gnu/gdb-6.4
 
 You MUST use forward slashes in the first argument.
 
@@ -186,4 +186,4 @@ directories are not run.
 
 
 Enjoy,
-                                    Eli Zaretskii <eliz@is.elta.co.il>
+                                    Eli Zaretskii <eliz@gnu.org>
