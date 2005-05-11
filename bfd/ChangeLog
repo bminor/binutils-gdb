@@ -1,3 +1,8 @@
+2005-05-11  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Fix signedness
+	warning.
+
 2005-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Only check debug

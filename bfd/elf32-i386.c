@@ -3443,7 +3443,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	  if (htab->is_vxworks && !info->shared)
 	    {
 	      int num_plts = (htab->splt->size / PLT_ENTRY_SIZE) - 1;
-	      char *p;
+	      unsigned char *p;
 
 	      p = htab->srelplt2->contents;
 	      if (info->shared)
