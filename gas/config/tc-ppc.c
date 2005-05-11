@@ -5707,8 +5707,6 @@ md_apply_fix3 (fixP, valP, seg)
 			      value, 8);
 	  break;
 
-	case BFD_RELOC_LO16:
-	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:
 	case BFD_RELOC_16_GOT_PCREL:
 	case BFD_RELOC_16_GOTOFF:
@@ -5754,19 +5752,45 @@ md_apply_fix3 (fixP, valP, seg)
 			      value, 2);
 	  break;
 
+	case BFD_RELOC_16:
+	  if (fixP->fx_pcrel)
+	    fixP->fx_r_type = BFD_RELOC_16_PCREL;
+	  /* fall through */
+
+	case BFD_RELOC_16_PCREL:
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			      value, 2);
+	  break;
+
+	case BFD_RELOC_LO16:
+	  if (fixP->fx_pcrel)
+	    fixP->fx_r_type = BFD_RELOC_LO16_PCREL;
+	  /* fall through */
+
+	case BFD_RELOC_LO16_PCREL:
+	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			      value, 2);
+	  break;
+
 	  /* This case happens when you write, for example,
 	     lis %r3,(L1-L2)@ha
 	     where L1 and L2 are defined later.  */
 	case BFD_RELOC_HI16:
 	  if (fixP->fx_pcrel)
-	    abort ();
+	    fixP->fx_r_type = BFD_RELOC_HI16_PCREL;
+	  /* fall through */
+
+	case BFD_RELOC_HI16_PCREL:
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HI (value), 2);
 	  break;
 
 	case BFD_RELOC_HI16_S:
 	  if (fixP->fx_pcrel)
-	    abort ();
+	    fixP->fx_r_type = BFD_RELOC_HI16_S_PCREL;
+	  /* fall through */
+
+	case BFD_RELOC_HI16_S_PCREL:
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HA (value), 2);
 	  break;

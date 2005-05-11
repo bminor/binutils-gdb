@@ -1,3 +1,8 @@
+2005-05-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_apply_fix3): Allow pcrel forms of BFD_RELOC_16,
+	BFD_RELOC_LO16, BFD_RELOC_HI16 and BFD_RELOC_HI16_S.
+
 2005-05-10  Michael Matz  <matz@suse.de>
 
 	* frags.c (frag_grow): Don't be too greedy in allocating memory.
@@ -521,7 +526,7 @@
 	so that the hash table size can be set before it is used.
 	* hash.c: Use an unsigned long type for the size of the hash
 	tables.
-	* hash.h (set_gas_hash_table_size): Update the prototype.	
+	* hash.h (set_gas_hash_table_size): Update the prototype.
 
 2005-04-14  Alan Modra  <amodra@bigpond.net.au>
 
@@ -894,7 +899,7 @@
 	* config/tc-w65.c: Convert to ISO-C90 and fix formatting.
 	* config/tc-w65.h: Convert to ISO-C90 and fix formatting.
 	* config/tc-xstormy16.c: Convert to ISO-C90 and fix formatting.
-	* config/tc-xstormy16.h: Convert to ISO-C90 and fix formatting.	
+	* config/tc-xstormy16.h: Convert to ISO-C90 and fix formatting.
 
 2005-03-23  Jim Blandy  <jimb@redhat.com>
 
