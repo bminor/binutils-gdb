@@ -2063,6 +2063,19 @@ ENUMDOC
   Low 16 bits.
 
 ENUM
+  BFD_RELOC_HI16_PCREL
+ENUMDOC
+  High 16 bits of 32-bit pc-relative value
+ENUM
+  BFD_RELOC_HI16_S_PCREL
+ENUMDOC
+  High 16 bits of 32-bit pc-relative value, adjusted
+ENUM
+  BFD_RELOC_LO16_PCREL
+ENUMDOC
+  Low 16 bits of pc-relative value
+
+ENUM
   BFD_RELOC_MIPS16_HI16
 ENUMDOC
   MIPS16 high 16 bits of 32-bit value.

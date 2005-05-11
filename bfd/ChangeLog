@@ -1,3 +1,38 @@
+2005-05-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c (BFD_RELOC_HI16_PCREL): Define.
+	(BFD_RELOC_HI16_S_PCREL, BFD_RELOC_LO16_PCREL): Define.
+	* elf32-ppc.c (GLINK_PLTRESOLVE, GLINK_ENTRY_SIZE): Define.
+	(CROR_151515, CROR_313131): Delete.
+	(ADDIS_11_11, ADDI_11_11, SUB_11_11_30, ADD_0_11_11, ADD_11_0_11,
+	LWZ_0_4_30, MTCTR_0, LWZ_12_8_30, BCTR, ADDIS_11_30,
+	LWZU_0_X_11): Define.
+	(ppc_elf_howto_raw): Add R_PPC_REL16, R_PPC_REL16_LO, R_PPC_REL16_HI
+	and R_PPC_REL16_HA entries.
+	(ppc_elf_reloc_type_lookup): Convert new bfd reloc types.
+	(ppc_elf_addr16_ha_reloc): Also handle R_PPC_REL16_HA.
+	(struct ppc_elf_link_hash_table): Add glink, glink_pltresolve,
+	new_plt, and old_plt.
+	(ppc_elf_create_dynamic_sections): Create .glink section.
+	(ppc_elf_check_relocs): Set new_plt and old_plt.
+	(ppc_elf_select_plt_layout): New function.
+	(ppc_elf_tls_setup): Set plt output section elf type and flags.
+	(allocate_got): Handle differences between old and new got layout.
+	(allocate_dynrelocs): Likewise for plt.
+	(ppc_elf_size_dynamic_sections): Likewise.  Allocate memory for
+	.glink.  Don't allocate memory for old bss .plt.  Emit DT_PPC_GLINK.
+	(ppc_elf_relax_section): Rename ppc_info to htab.  Handle .glink
+	destination of R_PPC_PLTREL24 relocs.
+	(ppc_elf_relocate_section): Handle new relocs and changed destination
+	of R_PPC_PLTREL24.
+	(ppc_elf_finish_dynamic_symbol): Init new style plt and handle
+	differences in layout.
+	(ppc_elf_finish_dynamic_sections): Set DT_PPC_GLINK value.  Don't
+	put a blrl in new got.  Write glink contents.
+	* elf32-ppc.h (ppc_elf_select_plt_layout): Declare.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2005-05-11  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-i386.c (elf_i386_finish_dynamic_sections): Fix signedness
@@ -145,7 +180,7 @@
 	(allocate_dynrelocs): Allocate space for static PLT relocations.
 	(elf_i386_size_dynamic_sections): Save shortcuts to PLT and GOT
 	symbols.  Give PLT symbols function type.  Don't strip PLT sections
-	if we have exported symbols from them. 
+	if we have exported symbols from them.
 	(elf_i386_finish_dynamic_symbol): Fill in VxWorks PLT static
 	relocation section.  Don't mark _GLOBAL_OFFSET_TABLE_ as absolute on
 	VxWorks.
@@ -833,7 +868,7 @@
 	* coffcode.h (STRING_SIZE_SIZE): Updated to match libcoff-in.h.
 
 2005-04-11  Nick Clifton  <nickc@redhat.com>
-	
+
 	* aout-target.h:  Convert to ISO C.
 	* aoutf1.h:  Convert to ISO C.
 	* aoutx.h:  Convert to ISO C.
@@ -917,7 +952,7 @@
 2005-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (bfd_elf_set_group_contents): Ignore linker created
-	group section. 
+	group section.
 	(assign_section_numbers): Accept link_info. Check SHT_GROUP
 	sections for relocatable files only. Remove the linker created
 	group sections.
@@ -1032,8 +1067,7 @@
 	* configure.in: Check for ffs decl and alphabetize.
 	* config.in: Regenerate.
 	* configure: Regenerate.
-	* sysdep.h [NEED_DECLARATION_FFS] (ffs): Prototype and 
-	alphabetize.
+	* sysdep.h [NEED_DECLARATION_FFS] (ffs): Prototype and alphabetize.
 
 2005-03-29  Fred Fish  <fnf@specifixinc.com>
 
