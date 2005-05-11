@@ -90,7 +90,7 @@ If the distribution comes as a .tar.bz2 archive, and your version of
 `djtar' doesn't support bzip2 decompression, you need to unpack it as
 follows:
 
- bnzip2 gdb-6.4.tar.bz2
+ bunzip2 gdb-6.4.tar.bz2
  djtar -x -p -o gdb-6.4/djunpack.bat gdb-6.4.tar > djunpack.bat
  djunpack gdb-6.4.tar
 
