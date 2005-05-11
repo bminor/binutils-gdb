@@ -847,6 +847,7 @@ in sequential order.  The order makes a difference when the
 @menu
 * File Options::                Choosing files
 * Mode Options::                Choosing modes
+* Startup::                     What @value{GDBN} does during startup
 @end menu
 
 @node File Options
@@ -1141,6 +1142,84 @@ This option causes @value{GDBN} to print its version number and
 no-warranty blurb, and exit.
 
 @end table
+
+@node Startup
+@subsection What @value{GDBN} does during startup
+@cindex @value{GDBN} startup
+
+Here's the description of what @value{GDBN} does during session startup:
+
+@enumerate
+@item
+Sets up the command interpreter as specified by the command line
+(@pxref{Mode Options, interpreter}).
+
+@item
+@cindex init file
+Reads the @dfn{init file} (if any) in your home directory@footnote{On
+DOS/Windows systems, the home directory is the one pointed to by the
+@code{HOME} environment variable.} and executes all the commands in
+that file.
+
+@item
+Processes command line options and operands.
+
+@item
+Reads and executes the commands from init file (if any) in the current
+working directory.  This is only done if (1) there's an init file in
+your home directory, and (2) if the current directory is different
+from your home directory.  Thus, you can have more than one init file,
+one generic in your home directory, and another, specific to the
+program you are debugging, in the directory where you invoke
+@value{GDBN}.
+
+@item
+Reads command files specified by the @samp{-x} option.  @xref{Command
+Files}, for more details about @value{GDBN} command files.
+
+@item
+Reads the command history recorded in the @dfn{history file}.
+@xref{History}, for more details about the command history and the
+files where @value{GDBN} records it.
+@end enumerate
+
+Init files use the same syntax as @dfn{command files} (@pxref{Command
+Files}) and are processed by @value{GDBN} in the same way.  The init
+file in your home directory can set options (such as @samp{set
+complaints}) that affect subsequent processing of command line options
+and operands.  Init files are not executed if you use the @samp{-nx}
+option (@pxref{Mode Options, ,Choosing modes}).
+
+@cindex init file name
+@cindex @file{.gdbinit}
+@cindex @file{gdb.ini}
+The @value{GDBN} init files are normally called @file{.gdbinit}@footnote{
+The DJGPP port of @value{GDBN} uses the name
+@file{gdb.ini} instead, due to the limitations of file names imposed
+by DOS filesystems.}.
+On some configurations of @value{GDBN}, the init file is known by a
+different name (these are typically environments where a specialized
+form of @value{GDBN} may need to coexist with other forms, hence a
+different name for the specialized version's init file).  These are the
+environments with special init file names:
+
+@cindex @file{.vxgdbinit}
+@itemize @bullet
+@item
+VxWorks (Wind River Systems real-time OS): @file{.vxgdbinit}
+
+@cindex @file{.os68gdbinit}
+@item
+OS68K (Enea Data Systems real-time OS): @file{.os68gdbinit}
+
+@cindex @file{.esgdbinit}
+@item
+ES-1800 (Ericsson Telecom AB M68000 emulator): @file{.esgdbinit}
+
+@item
+CISCO 68k: @file{.cisco-gdbinit}
+@end itemize
+
 
 @node Quitting GDB
 @section Quitting @value{GDBN}
@@ -14993,6 +15072,7 @@ Stop recording command history in a file.
 
 @cindex history size
 @kindex set history size
+@cindex @env{HISTSIZE}, environment variable
 @item set history size @var{size}
 Set the number of commands which @value{GDBN} keeps in its history list.
 This defaults to the value of the environment variable
@@ -15652,64 +15732,14 @@ get a warning from the @code{define} command.
 @section Command files
 
 @cindex command files
-A command file for @value{GDBN} is a file of lines that are @value{GDBN}
-commands.  Comments (lines starting with @kbd{#}) may also be included.
-An empty line in a command file does nothing; it does not mean to repeat
-the last command, as it would from the terminal.
+A command file for @value{GDBN} is a text file made of lines that are
+@value{GDBN} commands.  Comments (lines starting with @kbd{#}) may
+also be included.  An empty line in a command file does nothing; it
+does not mean to repeat the last command, as it would from the
+terminal.
 
-@cindex init file
-@cindex @file{.gdbinit}
-@cindex @file{gdb.ini}
-When you start @value{GDBN}, it automatically executes commands from its
-@dfn{init files}, normally called @file{.gdbinit}@footnote{The DJGPP
-port of @value{GDBN} uses the name @file{gdb.ini} instead, due to the
-limitations of file names imposed by DOS filesystems.}.
-During startup, @value{GDBN} does the following:
-
-@enumerate
-@item
-Reads the init file (if any) in your home directory@footnote{On
-DOS/Windows systems, the home directory is the one pointed to by the
-@code{HOME} environment variable.}.
-
-@item
-Processes command line options and operands.
-
-@item
-Reads the init file (if any) in the current working directory.
-
-@item
-Reads command files specified by the @samp{-x} option.
-@end enumerate
-
-The init file in your home directory can set options (such as @samp{set
-complaints}) that affect subsequent processing of command line options
-and operands.  Init files are not executed if you use the @samp{-nx}
-option (@pxref{Mode Options, ,Choosing modes}).
-
-@cindex init file name
-On some configurations of @value{GDBN}, the init file is known by a
-different name (these are typically environments where a specialized
-form of @value{GDBN} may need to coexist with other forms, hence a
-different name for the specialized version's init file).  These are the
-environments with special init file names:
-
-@cindex @file{.vxgdbinit}
-@itemize @bullet
-@item
-VxWorks (Wind River Systems real-time OS): @file{.vxgdbinit}
-
-@cindex @file{.os68gdbinit}
-@item
-OS68K (Enea Data Systems real-time OS): @file{.os68gdbinit}
-
-@cindex @file{.esgdbinit}
-@item
-ES-1800 (Ericsson Telecom AB M68000 emulator): @file{.esgdbinit}
-@end itemize
-
-You can also request the execution of a command file with the
-@code{source} command:
+You can request the execution of a command file with the @code{source}
+command:
 
 @table @code
 @kindex source
@@ -15729,7 +15759,7 @@ when called from command files.
 @value{GDBN} also accepts command input from standard input.  In this
 mode, normal output goes to standard output and error output goes to
 standard error.  Errors in a command file supplied on standard input do
-not terminate execution of the command file --- execution continues with
+not terminate execution of the command file---execution continues with
 the next command.
 
 @smallexample

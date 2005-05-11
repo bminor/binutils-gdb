@@ -1,3 +1,14 @@
+2005-05-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Command Files): Move the description of the startup
+	from here...
+	(Startup): ...to this new subsection of the Invocation chapter.
+	Rearrange the description of init files more logically and add a
+	cross-reference to "Command Files".  Document the special gdbinit
+	name for CISCO 68k.  Expand the description of what GDB does
+	during startup.
+	(History): Add index entry for HISTSIZE.
+
 2005-05-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.texinfo (Files): Remove documentation for auto-solib-limit.
