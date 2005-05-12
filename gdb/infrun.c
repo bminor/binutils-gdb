@@ -45,6 +45,8 @@
 #include "value.h"
 #include "observer.h"
 #include "language.h"
+#include "solib.h"
+
 #include "gdb_assert.h"
 
 /* Prototypes for local functions */
@@ -160,10 +162,6 @@ show_debug_infrun (struct ui_file *file, int from_tty,
    signalling an error, which will obscure the change in the
    inferior's state.  */
 
-#ifndef IN_SOLIB_DYNSYM_RESOLVE_CODE
-#define IN_SOLIB_DYNSYM_RESOLVE_CODE(pc) 0
-#endif
-
 /* This function returns TRUE if pc is the address of an instruction
    that lies within the dynamic linker (such as the event hook, or the
    dld itself).
@@ -253,7 +251,6 @@ static struct symbol *step_start_function;
 
 static int trap_expected;
 
-#ifdef SOLIB_ADD
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 static int stop_on_solib_events;
@@ -264,7 +261,6 @@ show_stop_on_solib_events (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Stopping for shared library events is %s.\n"),
 		    value);
 }
-#endif
 
 /* Nonzero means expecting a trace trap
    and should stop the inferior and return silently when it happens.  */
@@ -448,6 +444,8 @@ follow_exec (int pid, char *execd_pathname)
 #endif
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+#else
+  solib_create_inferior_hook ();
 #endif
 
   /* Reinsert all breakpoints.  (Those which were symbolic have
@@ -2132,7 +2130,6 @@ process_event_stop_test:
 
       case BPSTAT_WHAT_CHECK_SHLIBS:
       case BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK:
-#ifdef SOLIB_ADD
 	{
           if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_CHECK_SHLIBS\n");
@@ -2163,7 +2160,11 @@ process_event_stop_test:
 	     exec/process stratum, instead relying on the target stack
 	     to propagate relevant changes (stop, section table
 	     changed, ...) up to other layers.  */
+#ifdef SOLIB_ADD
 	  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
+#else
+	  solib_add (NULL, 0, &current_target, auto_solib_add);
+#endif
 	  target_terminal_inferior ();
 
 	  /* Try to reenable shared library breakpoints, additional
@@ -2222,7 +2223,6 @@ process_event_stop_test:
 	      break;
 	    }
 	}
-#endif
 	break;
 
       case BPSTAT_WHAT_LAST:
@@ -2311,7 +2311,12 @@ process_event_stop_test:
      until we exit the run time loader code and reach the callee's
      address.  */
   if (step_over_calls == STEP_OVER_UNDEBUGGABLE
-      && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc))
+#ifdef IN_SOLIB_DYNSYM_RESOLVE_CODE
+      && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc)
+#else
+      && in_solib_dynsym_resolve_code (stop_pc)
+#endif
+      )
     {
       CORE_ADDR pc_after_resolver =
 	gdbarch_skip_solib_resolver (current_gdbarch, stop_pc);
@@ -2395,7 +2400,13 @@ process_event_stop_test:
       if (real_stop_pc != 0)
 	ecs->stop_func_start = real_stop_pc;
 
-      if (IN_SOLIB_DYNSYM_RESOLVE_CODE (ecs->stop_func_start))
+      if (
+#ifdef IN_SOLIB_DYNSYM_RESOLVE_CODE
+	  IN_SOLIB_DYNSYM_RESOLVE_CODE (ecs->stop_func_start)
+#else
+	  in_solib_dynsym_resolve_code (ecs->stop_func_start)
+#endif
+)
 	{
 	  struct symtab_and_line sr_sal;
 	  init_sal (&sr_sal);
@@ -3919,7 +3930,6 @@ When non-zero, inferior specific debugging is enabled."),
   signal_stop[TARGET_SIGNAL_CANCEL] = 0;
   signal_print[TARGET_SIGNAL_CANCEL] = 0;
 
-#ifdef SOLIB_ADD
   add_setshow_zinteger_cmd ("stop-on-solib-events", class_support,
 			    &stop_on_solib_events, _("\
 Set stopping for shared library events."), _("\
@@ -3930,7 +3940,6 @@ to the user would be loading/unloading of a new library."),
 			    NULL,
 			    show_stop_on_solib_events,
 			    &setlist, &showlist);
-#endif
 
   add_setshow_enum_cmd ("follow-fork-mode", class_run,
 			follow_fork_mode_kind_names,

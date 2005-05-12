@@ -1,3 +1,54 @@
+2005-05-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib.h (CLEAR_SOLIB, SOLIB_ADD)
+	(SOLIB_CREATE_INFERIOR_HOOK, SOLIB_REMOVE_INFERIOR_HOOK)
+	(SOLIB_IN_DYNAMIC_LINKER, SOLIB_RESTART)
+	(DISABLE_UNSETTABLE_BREAK, PC_SOLIB)
+	(IN_SOLIB_DYNSYM_RESOLVE_CODE): Remove defines and orphaned
+	comments.
+	* breakpoint.c: Include "solib.h".
+	(insert_bp_location) [!DISABLE_UNSETTABLE_BREAK]: Call
+	solib_address.
+	(remove_solib_event_breakpoints, create_solib_event_breakpoint)
+	(disable_breakpoints_in_shlibs)
+	(disable_breakpoints_in_unloaded_shlib)
+	(re_enable_breakpoints_in_shlibs): Compile if SOLIB_ADD isn't
+	defined. If PC_SOLIB isn't defined, call solib_address.
+	(_initialize_breakpoint): Unconditionally install observer.
+	* corelow.c: Include "solib.h".
+	[SOLIB_ADD] (solib_add_stub): Remove prototype.
+	(core_close) [!CLEAR_SOLIB]: Call clear_solib.
+	(solib_add_stub) [!SOLIB_ADD] Call solib_add.
+	(core_open): Unconditionally call solib_add_stub.
+	* fork-child.c: Include "solib.h".
+	(fork_inferior) [!SOLIB_CREATE_INFERIOR_HOOK]: Call
+	solib_create_inferior_hook.
+	* infcmd.c: Include "solib.h".
+	(attach_command) [!SOLIB_ADD]: Call shlib_rescan.  Unconditionally
+	call re_enable_breakpoints_in_shlibs.
+	* infrun.c: Include "solib.h".
+	(SOLIB_IN_SYNSYM_RESOLVE_CODE): Don't define if not already
+	defined.
+	(stop_on_solib_events, show_stop_on_solib_events): Include
+	unconditionally.
+	(follow_exec) [!SOLIB_CREATE_INFERIOR_HOOK]: Call
+	solib_create_inferior_hook.
+	(handle_inferior_event) [!SOLIB_ADD]: Call shlib_add.
+	[!IN_SOLIB_DYNSYM_RESOLVE_CODE]: Call in_solib_dynsym_resolve_code.
+	(_initialize_infrun): Unconditionally add "stop_on_solib-events"
+	command.
+	* remote.c: Include "solib.h".
+	(remote_open_1): Unconditionally call no_shared_libraries.
+	[!SOLIB_CREATE_INFERIOR_HOOK] Call solib_create_inferior_hook.
+	* stack.c: Include "solib.h".
+	(print_frame) [!PC_SOLIB] Call shlib_for_pc.
+	* xcoffsolib.c (no_shared_libraries): Remove function.
+	* Makefile.in (SFILES): Add solib.c.
+	(ALLDEPFILES): Remove solib.c.
+	(COMMON_OBS): Add solib.o.
+	(breakpoint.o, corelow.o, fork-chiled.o, infcmd.o, infrun.o)
+	(remote.o, stack.o): Update dependencies.
+
 2005-05-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cp-names.y: Renamed to ...

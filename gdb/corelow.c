@@ -46,6 +46,7 @@
 #include "observer.h"
 #include "gdb_assert.h"
 #include "exceptions.h"
+#include "solib.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -72,10 +73,6 @@ static struct core_fns *core_vec = NULL;
 struct gdbarch *core_gdbarch = NULL;
 
 static void core_files_info (struct target_ops *);
-
-#ifdef SOLIB_ADD
-static int solib_add_stub (void *);
-#endif
 
 static struct core_fns *sniff_core_bfd (bfd *);
 
@@ -212,6 +209,8 @@ core_close (int quitting)
          comments in clear_solib in solib.c. */
 #ifdef CLEAR_SOLIB
       CLEAR_SOLIB ();
+#else
+      clear_solib ();
 #endif
 
       name = bfd_get_filename (core_bfd);
@@ -237,18 +236,20 @@ core_close_cleanup (void *ignore)
   core_close (0/*ignored*/);
 }
 
-#ifdef SOLIB_ADD
 /* Stub function for catch_errors around shared library hacking.  FROM_TTYP
    is really an int * which points to from_tty.  */
 
 static int
 solib_add_stub (void *from_ttyp)
 {
+#ifdef SOLIB_ADD
   SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target, auto_solib_add);
+#else
+  solib_add (NULL, *(int *)from_ttyp, &current_target, auto_solib_add);
+#endif
   re_enable_breakpoints_in_shlibs ();
   return 0;
 }
-#endif /* SOLIB_ADD */
 
 /* Look for sections whose names start with `.reg/' so that we can extract the
    list of threads in a core file.  */
@@ -396,10 +397,7 @@ core_open (char *filename, int from_tty)
       target_fetch_registers (-1);
 
       /* Add symbols and section mappings for any shared libraries.  */
-#ifdef SOLIB_ADD
-      catch_errors (solib_add_stub, &from_tty, (char *) 0,
-		    RETURN_MASK_ALL);
-#endif
+      catch_errors (solib_add_stub, &from_tty, (char *) 0, RETURN_MASK_ALL);
 
       /* Now, set up the frame cache, and print the top of stack.  */
       flush_cached_frames ();

@@ -46,6 +46,7 @@
 #include "exceptions.h"
 #include "reggroups.h"
 #include "regcache.h"
+#include "solib.h"
 
 /* Prototypes for exported functions. */
 
@@ -686,10 +687,13 @@ print_frame (struct frame_info *fi,
       annotate_frame_source_end ();
     }
 
-#ifdef PC_SOLIB
   if (!funname || (!sal.symtab || !sal.symtab->filename))
     {
+#ifdef PC_SOLIB
       char *lib = PC_SOLIB (get_frame_pc (fi));
+#else
+      char *lib = solib_address (get_frame_pc (fi));
+#endif
       if (lib)
 	{
 	  annotate_frame_where ();
@@ -698,7 +702,6 @@ print_frame (struct frame_info *fi,
 	  ui_out_field_string (uiout, "from", lib);
 	}
     }
-#endif /* PC_SOLIB */
 
   /* do_cleanups will call ui_out_tuple_end() for us.  */
   do_cleanups (list_chain);

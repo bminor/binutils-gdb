@@ -44,6 +44,7 @@
 #include "regcache.h"
 #include "reggroups.h"
 #include "block.h"
+#include "solib.h"
 #include <ctype.h>
 #include "gdb_assert.h"
 
@@ -1805,6 +1806,8 @@ attach_command (char *args, int from_tty)
   */
 #ifdef CLEAR_SOLIB
       CLEAR_SOLIB ();
+#else
+      clear_solib ();
 #endif
 
   target_attach (args, from_tty);
@@ -1864,8 +1867,10 @@ attach_command (char *args, int from_tty)
 #ifdef SOLIB_ADD
   /* Add shared library symbols from the newly attached process, if any.  */
   SOLIB_ADD ((char *) 0, from_tty, &current_target, auto_solib_add);
-  re_enable_breakpoints_in_shlibs ();
+#else
+  solib_add (NULL, from_tty, &current_target, auto_solib_add);
 #endif
+  re_enable_breakpoints_in_shlibs ();
 
   /* Take any necessary post-attaching actions for this platform.
    */

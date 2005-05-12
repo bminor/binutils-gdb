@@ -49,6 +49,7 @@
 #include "cli/cli-script.h"
 #include "gdb_assert.h"
 #include "block.h"
+#include "solib.h"
 #include "solist.h"
 #include "observer.h"
 #include "exceptions.h"
@@ -853,8 +854,13 @@ insert_bp_location (struct bp_location *bpt,
       if (val)
 	{
 	  /* Can't set the breakpoint.  */
+	  if (
 #if defined (DISABLE_UNSETTABLE_BREAK)
-	  if (DISABLE_UNSETTABLE_BREAK (bpt->address))
+	      DISABLE_UNSETTABLE_BREAK (bpt->address)
+#else
+	      solib_address (bpt->address)
+#endif
+	      )
 	    {
 	      /* See also: disable_breakpoints_in_shlibs. */
 	      val = 0;
@@ -872,7 +878,6 @@ insert_bp_location (struct bp_location *bpt,
 				  "breakpoint #%d\n", bpt->owner->number);
 	    }
 	  else
-#endif
 	    {
 #ifdef ONE_PROCESS_WRITETEXT
 	      *process_warning = 1;
@@ -4330,7 +4335,6 @@ resolve_pending_breakpoint (struct breakpoint *b)
   return rc;
 }
 
-#ifdef SOLIB_ADD
 void
 remove_solib_event_breakpoints (void)
 {
@@ -4362,12 +4366,14 @@ disable_breakpoints_in_shlibs (int silent)
   /* See also: insert_breakpoints, under DISABLE_UNSETTABLE_BREAK. */
   ALL_BREAKPOINTS (b)
   {
-#if defined (PC_SOLIB)
-    if (((b->type == bp_breakpoint) ||
-	 (b->type == bp_hardware_breakpoint)) &&
-	breakpoint_enabled (b) &&
-	!b->loc->duplicate &&
-	PC_SOLIB (b->loc->address))
+    if (((b->type == bp_breakpoint) || (b->type == bp_hardware_breakpoint))
+	&& breakpoint_enabled (b) && !b->loc->duplicate
+#ifdef PC_SOLIB
+	&& PC_SOLIB (b->loc->address)
+#else
+	&& solib_address (b->loc->address)
+#endif
+	)
       {
 	b->enable_state = bp_shlib_disabled;
 	if (!silent)
@@ -4381,7 +4387,6 @@ disable_breakpoints_in_shlibs (int silent)
 	    warning (_("breakpoint #%d "), b->number);
 	  }
       }
-#endif
   }
 }
 
@@ -4394,18 +4399,19 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
   struct breakpoint *b;
   int disabled_shlib_breaks = 0;
 
-#if defined (PC_SOLIB)
   /* See also: insert_breakpoints, under DISABLE_UNSETTABLE_BREAK.  */
   ALL_BREAKPOINTS (b)
   {
     if ((b->loc->loc_type == bp_loc_hardware_breakpoint
 	|| b->loc->loc_type == bp_loc_software_breakpoint)
-	&& breakpoint_enabled (b) 
-	&& !b->loc->duplicate)
+	&& breakpoint_enabled (b) && !b->loc->duplicate)
       {
+#ifdef PC_SOLIB
 	char *so_name = PC_SOLIB (b->loc->address);
-	if (so_name 
-	    && !strcmp (so_name, solib->so_name))
+#else
+	char *so_name = solib_address (b->loc->address);
+#endif
+	if (so_name && !strcmp (so_name, solib->so_name))
           {
 	    b->enable_state = bp_shlib_disabled;
 	    /* At this point, we cannot rely on remove_breakpoint
@@ -4422,7 +4428,6 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 	  }
       }
   }
-#endif
 }
 
 /* Try to reenable any breakpoints in shared libraries.  */
@@ -4437,9 +4442,13 @@ re_enable_breakpoints_in_shlibs (void)
       {
 	char buf[1], *lib;
 	
-	/* Do not reenable the breakpoint if the shared library
-	   is still not mapped in.  */
+	/* Do not reenable the breakpoint if the shared library is
+	   still not mapped in.  */
+#ifdef PC_SOLIB
 	lib = PC_SOLIB (b->loc->address);
+#else
+	lib = solib_address (b->loc->address);
+#endif
 	if (lib != NULL && target_read_memory (b->loc->address, buf, 1) == 0)
 	  b->enable_state = bp_enabled;
       }
@@ -4450,8 +4459,6 @@ re_enable_breakpoints_in_shlibs (void)
       }
   }
 }
-
-#endif
 
 static void
 solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
@@ -7632,9 +7639,7 @@ _initialize_breakpoint (void)
   static struct cmd_list_element *breakpoint_show_cmdlist;
   struct cmd_list_element *c;
 
-#ifdef SOLIB_ADD
   observer_attach_solib_unloaded (disable_breakpoints_in_unloaded_shlib);
-#endif
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful

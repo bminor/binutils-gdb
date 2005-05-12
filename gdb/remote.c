@@ -42,6 +42,7 @@
 #include "value.h"
 #include "gdb_assert.h"
 #include "observer.h"
+#include "solib.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -2258,10 +2259,8 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       wait_forever_enabled_p = 0;
     }
 
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
   /* First delete any symbols previously loaded from shared libraries.  */
   no_shared_libraries (NULL, 0);
-#endif
 
   /* Start the remote connection.  If error() or QUIT, discard this
      target (we'd otherwise be in an inconsistent state) and then
@@ -2300,7 +2299,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       putpkt ("!");
       getpkt (buf, (rs->remote_packet_size), 0);
     }
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
+
   /* FIXME: need a master target_open vector from which all
      remote_opens can be called, so that stuff like this can
      go there.  Failing that, the following code must be copied
@@ -2310,10 +2309,13 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   /* Set up to detect and load shared libraries.  */
   if (exec_bfd) 	/* No use without an exec file.  */
     {
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
       SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
+#else
+      solib_create_inferior_hook ();
+#endif
       remote_check_symbols (symfile_objfile);
     }
-#endif
 
   observer_notify_inferior_created (&current_target, from_tty);
 }

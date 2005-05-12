@@ -545,7 +545,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	regcache.c reggroups.c remote.c remote-fileio.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
-	serial.c ser-base.c ser-unix.c source.c \
+	serial.c ser-base.c ser-unix.c \
+	solib.c solib-null.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
 	symtab.c \
 	target.c thread.c top.c tracepoint.c \
@@ -938,7 +939,8 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
 	cp-namespace.o \
 	reggroups.o regset.o \
 	trad-frame.o \
-	tramp-frame.o
+	tramp-frame.o \
+	solib.o solib-null.o
 
 TSOBS = inflow.o
 
@@ -1438,7 +1440,7 @@ ALLDEPFILES = \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
-	solib.c solib-irix.c solib-svr4.c solib-sunos.c \
+	solib-irix.c solib-svr4.c solib-sunos.c \
 	sparc-linux-tdep.c sparc-nat.c sparc-sol2-nat.c sparc-sol2-tdep.c \
 	sparc-tdep.c sparc-sol2-nat.c sparc-sol2-tdep.c sparc64-linux-nat.c \
 	sparc64-linux-tdep.c sparc64-nat.c sparc64-sol2-tdep.c \
@@ -1774,8 +1776,8 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(command_h) $(inferior_h) $(gdbthread_h) $(target_h) $(language_h) \
 	$(gdb_string_h) $(demangle_h) $(annotate_h) $(symfile_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
-	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) $(solist_h) \
-	$(observer_h) $(exceptions_h) $(gdb_events_h)
+	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) $(solib_h) \
+	$(solist_h) $(observer_h) $(exceptions_h) $(gdb_events_h)
 bsd-kvm.o: bsd-kvm.c $(defs_h) $(cli_cmds_h) $(command_h) $(frame_h) \
 	$(regcache_h) $(target_h) $(value_h) $(gdbcore_h) $(gdb_assert_h) \
 	$(readline_h) $(bsd_kvm_h)
@@ -1823,7 +1825,7 @@ corelow.o: corelow.c $(defs_h) $(arch_utils_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(symtab_h) $(command_h) $(bfd_h) $(target_h) \
 	$(gdbcore_h) $(gdbthread_h) $(regcache_h) $(regset_h) $(symfile_h) \
 	$(exec_h) $(readline_h) $(observer_h) $(gdb_assert_h) \
-	$(exceptions_h)
+	$(exceptions_h) $(solib_h)
 core-regset.o: core-regset.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(gdb_string_h) $(gregset_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(command_h) $(gdbcmd_h) \
@@ -1940,7 +1942,7 @@ f-lang.o: f-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(valprint_h) $(value_h)
 fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(target_h) $(gdb_wait_h) $(gdb_vfork_h) $(gdbcore_h) \
-	$(terminal_h) $(gdbthread_h) $(command_h)
+	$(terminal_h) $(gdbthread_h) $(command_h) $(solib_h)
 frame-base.o: frame-base.c $(defs_h) $(frame_base_h) $(frame_h) \
 	$(gdb_obstack_h)
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
@@ -2110,7 +2112,7 @@ infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(symfile_h) $(gdbcore_h) $(target_h) $(language_h) $(symfile_h) \
 	$(objfiles_h) $(completer_h) $(ui_out_h) $(event_top_h) \
 	$(parser_defs_h) $(regcache_h) $(reggroups_h) $(block_h) \
-	$(gdb_assert_h)
+	$(solib_h) $(gdb_assert_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h)
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
@@ -2126,7 +2128,7 @@ infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(exceptions_h) $(breakpoint_h) $(gdb_wait_h) \
 	$(gdbcore_h) $(gdbcmd_h) $(cli_script_h) $(target_h) $(gdbthread_h) \
 	$(annotate_h) $(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) \
-	$(value_h) $(observer_h) $(language_h) $(gdb_assert_h)
+	$(value_h) $(observer_h) $(language_h) $(solib_h) $(gdb_assert_h)
 inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(observer_h) $(gdb_wait_h) \
 	$(inflow_h)
@@ -2412,7 +2414,7 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(symfile_h) $(exceptions_h) $(target_h) $(gdbcmd_h) $(objfiles_h) \
 	$(gdb_stabs_h) $(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) \
 	$(gdb_assert_h) $(event_loop_h) $(event_top_h) $(inf_loop_h) \
-	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(observer_h)
+	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(solib_h) $(observer_h)
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(exceptions_h) $(gdbcmd_h) $(serial_h) $(remote_utils_h) \
@@ -2627,7 +2629,7 @@ stack.o: stack.c $(defs_h) $(gdb_string_h) $(value_h) $(symtab_h) \
 	$(gdbcore_h) $(target_h) $(source_h) $(breakpoint_h) $(demangle_h) \
 	$(inferior_h) $(annotate_h) $(ui_out_h) $(block_h) $(stack_h) \
 	$(gdb_assert_h) $(dictionary_h) $(exceptions_h) $(reggroups_h) \
-	$(regcache_h)
+	$(regcache_h) $(solib_h)
 std-regs.o: std-regs.c $(defs_h) $(user_regs_h) $(frame_h) $(gdbtypes_h) \
 	$(value_h) $(gdb_string_h)
 stop-gdb.o: stop-gdb.c $(defs_h)
