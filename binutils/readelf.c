@@ -7166,8 +7166,8 @@ reset_state_machine (int is_stmt)
   state_machine_regs.last_file_entry = 0;
 }
 
-/* Handled an extend line op.  Returns true if this is the end
-   of sequence.  */
+/* Handled an extend line op.
+   Returns the number of bytes read.  */
 
 static int
 process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
@@ -9097,7 +9097,9 @@ display_debug_lines (Elf_Internal_Shdr *section,
       printf (_("  Line Base:                   %d\n"), info.li_line_base);
       printf (_("  Line Range:                  %d\n"), info.li_line_range);
       printf (_("  Opcode Base:                 %d\n"), info.li_opcode_base);
-      printf (_("  (Pointer size:               %u)\n"), pointer_size);
+      printf (_("  (Pointer size:               %u)%s\n"),
+	      pointer_size,
+	      warned_about_missing_comp_units ? " [assumed]" : "" );
 
       end_of_sequence = data + info.li_length + initial_length_size;
 
@@ -9188,8 +9190,14 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
+	      if (pointer_size == 0)
+		{
+		  warn (_("Extend line ops need a valid pointer size, guessing at 4"));
+		  pointer_size = 4;
+		}
+
 	      data += process_extended_line_op (data, info.li_default_is_stmt,
-						pointer_size);
+						  pointer_size);
 	      break;
 
 	    case DW_LNS_copy:

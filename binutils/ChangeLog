@@ -1,3 +1,9 @@
+2005-05-12  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (display_debug_lines): If pointer_size has not been
+	found then assume that it is 4 in order to prevent a seg fault
+	when process_extend_line_op attempts to read the line data.
+
 2005-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (get_ppc_dynamic_type): New function for DT_PPC_GLINK.
