@@ -1,3 +1,8 @@
+2005-05-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* observer.sh (texi) [DJGPP]: If the file name includes a colon,
+	convert it to the /dev/x/ form.
+
 2005-05-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib.h (CLEAR_SOLIB, SOLIB_ADD)
