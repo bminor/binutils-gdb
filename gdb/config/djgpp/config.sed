@@ -3,22 +3,31 @@ s|gdb\.c++|gdb.cxx|g
 /ac_rel_source/s|ln -s|cp -p|
 s|\.gdbinit|gdb.ini|g
 
-/^ac_given_INSTALL=/,/^CEOF/ {
-  /^s%@prefix@%/a\
+# Edit Makefiles.  This should go near the beginning of
+# the substitutions script, before the branch command that
+# skips any lines without @...@ in them.
+# Any commands that can match again after substitution must
+# do a conditional branch to next cycle (;t), or else Sed might hang.
+/(echo[ 	]*':t/a\
   s,\\([yp*]\\)\\.tab,\\1_tab,g\
-  /^	@rm -f/s,\\$@-\\[0-9\\]\\[0-9\\],& *.i[1-9] *.i[1-9][0-9],\
+  s,\\$@\\.tmp,\\$@_tmp,g\
+  s,\\$@\\.new,\\$@_new,g\
+  /^	@rm -f/s,\\$@-\\[0-9\\]\\[0-9\\],& *.i[1-9] *.i[1-9][0-9],;t\
   s,standards\\.info\\*,standard*.inf*,\
   s,configure\\.info\\*,configur*.inf*,\
   s,\\.info\\*,.inf* *.i[1-9] *.i[1-9][0-9],\
   s,\\.gdbinit,gdb.ini,g\
-  /TEXINPUTS=/s,:,';',g\
+  s,@PATH_SEPARATOR@,";",\
+  /TEXINPUTS=/s,:,";",g\
   /VPATH *=/s,\\([^A-z]\\):,\\1;,g\
-  /\\$\\$file-\\[0-9\\]/s,echo,& *.i[1-9] *.i[1-9][0-9],\
-  /\\$\\$file-\\[0-9\\]/s,rm -f \\$\\$file,& \\${PACKAGE}.i[1-9] \\${PACKAGE}.i[1-9][0-9],\
-  s,config\\.h\\.in,config.h-in,g\
-  s,po2tbl\\.sed\\.in,po2tblsed.in,g
+  /\\$\\$file-\\[0-9\\]/s,echo,& *.i[1-9] *.i[1-9][0-9],;t\
+  /\\$\\$file-\\[0-9\\]/s,rm -f \\$\\$file,& \\${PACKAGE}.i[1-9] \\${PACKAGE}.i[1-9][0-9],;t\
+  s,config\\.h\\.in,config.h-in,g;t t\
+  s,po2tbl\\.sed\\.in,po2tblsed.in,g;t t
 
-}
+# Prevent splitting of config.status substitutions, because that
+# might break multi-line sed commands.
+/ac_max_sed_lines=[0-9]/s,=.*$,=`sed -n "$=" $tmp/subs.sed`,
 
 /^ac_given_srcdir=/,/^CEOF/ {
   /^s%@TOPLEVEL_CONFIGURE_ARGUMENTS@%/a\

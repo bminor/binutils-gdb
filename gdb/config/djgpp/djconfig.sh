@@ -5,7 +5,7 @@
 # configuring other GNU programs for DJGPP.
 #
 #=====================================================================
-# Copyright 1997,1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+# Copyright 1997,1999,2000,2001,2002,2003,2005 Free Software Foundation, Inc.
 #
 # Originally written by Robert Hoehne, revised by Eli Zaretskii.
 #  This file is part of GDB.
@@ -174,7 +174,7 @@ fi
 echo "Running the configure script..."
 $srcdir/configure --srcdir="$srcdir" --prefix='${DJDIR}' \
   --disable-shared --disable-nls --verbose --enable-build-warnings=\
--Wimplicit,-Wcomment,-Wformat,-Wparentheses,-Wpointer-arith $*
+-Wimplicit,-Wcomment,-Wformat,-Wparentheses,-Wpointer-arith,-Wuninitialized $*
 
 if test -f ${srcdir}/install- ; then
   mv ${srcdir}/install- ${srcdir}/install-.sh
