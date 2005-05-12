@@ -2368,6 +2368,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	     for shared library since it may not be local when used
 	     as function address.  */
 	  if (info->shared
+	      && !info->executable
 	      && h
 	      && h->def_regular
 	      && h->type == STT_FUNC
