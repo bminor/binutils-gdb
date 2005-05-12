@@ -1,3 +1,15 @@
+2005-05-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (LWZU_0_X_11): Delete.
+	(B, LWZ_11_X_11, LWZ_11_X_30, MTCTR_11): Define.
+	(ppc_elf_select_plt_layout): Set .got flags too.  Formatting.
+	(ppc_elf_size_dynamic_sections): Allocate space for .glink branch
+	table.
+	(ppc_elf_finish_dynamic_symbol): Point .plt entries into the branch
+	table.
+	(ppc_elf_finish_dynamic_sections): Adjust DT_PPC_GLINK value.
+	Generate .glink branch table and updated stubs.
+
 2005-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* reloc.c (BFD_RELOC_HI16_PCREL): Define.

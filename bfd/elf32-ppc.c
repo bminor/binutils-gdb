@@ -67,6 +67,7 @@ static bfd_reloc_status_type ppc_elf_unhandled_reloc
 
 /* Some instructions.  */
 #define NOP		0x60000000
+#define B		0x48000000
 #define ADDIS_11_11	0x3d6b0000
 #define ADDI_11_11	0x396b0000
 #define SUB_11_11_30	0x7d7e5850
@@ -77,7 +78,9 @@ static bfd_reloc_status_type ppc_elf_unhandled_reloc
 #define LWZ_12_8_30	0x819e0008
 #define BCTR		0x4e800420
 #define ADDIS_11_30	0x3d7e0000
-#define LWZU_0_X_11	0x840b0000
+#define LWZ_11_X_11	0x816b0000
+#define LWZ_11_X_30	0x817e0000
+#define MTCTR_11	0x7d6903a6
 
 /* Offset of tp and dtp pointers from start of TLS block.  */
 #define TP_OFFSET	0x7000
@@ -3280,24 +3283,25 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (!htab->old_plt)
     {
-      /* The new PLT is a loaded section.  Fix its flags.  */
-      if (htab->plt != NULL)
-	{
-	  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
-			    | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			| SEC_IN_MEMORY | SEC_LINKER_CREATED);
 
-	  if (!bfd_set_section_flags (htab->elf.dynobj, htab->plt, flags))
-	    return -1;
-	}
+      /* The new PLT is a loaded section.  */
+      if (htab->plt != NULL
+	  && !bfd_set_section_flags (htab->elf.dynobj, htab->plt, flags))
+	return -1;
+
+      /* The new GOT is not executable.  */
+      if (htab->got != NULL
+	  && !bfd_set_section_flags (htab->elf.dynobj, htab->got, flags))
+	return -1;
     }
   else
     {
       /* Stop an unused .glink section from affecting .text alignment.  */
-      if (htab->glink != NULL)
-	{
-	  if (!bfd_set_section_alignment (htab->elf.dynobj, htab->glink, 0))
-	    return -1;
-	}
+      if (htab->glink != NULL
+	  && !bfd_set_section_alignment (htab->elf.dynobj, htab->glink, 0))
+	return -1;
     }
   return !htab->old_plt;
 }
@@ -4302,6 +4306,10 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->glink != NULL && htab->glink->size != 0)
     {
       htab->glink_pltresolve = htab->glink->size;
+      /* Space for the branch table.  */
+      htab->glink->size += htab->glink->size / (GLINK_ENTRY_SIZE / 4) - 4;
+      /* Pad out to align the start of PLTresolve.  */
+      htab->glink->size += -htab->glink->size & 15;
       htab->glink->size += GLINK_PLTRESOLVE;
     }
 
@@ -6197,6 +6205,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
       else
 	{
 	  bfd_vma val = (htab->glink_pltresolve
+			 + h->plt.offset
 			 + htab->glink->output_section->vma
 			 + htab->glink->output_offset);
 	  bfd_put_32 (output_bfd, val, htab->plt->contents + h->plt.offset);
@@ -6345,7 +6354,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	    case DT_PPC_GLINK:
 	      s = htab->glink;
-	      dyn.d_un.d_ptr = (htab->glink_pltresolve
+	      dyn.d_un.d_ptr = (s->size - GLINK_PLTRESOLVE
 				+ s->output_section->vma + s->output_offset);
 	      break;
 
@@ -6380,7 +6389,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
     {
       unsigned char *p;
       unsigned char *endp;
-      bfd_vma pltgot;
+      bfd_vma got, pltgot;
       unsigned int i;
       static const unsigned int plt_resolve[] =
 	{
@@ -6400,17 +6409,67 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
 
+      got = (htab->elf.hgot->root.u.def.value
+	     + htab->elf.hgot->root.u.def.section->output_section->vma
+	     + htab->elf.hgot->root.u.def.section->output_offset);
+
       pltgot = (htab->plt->output_section->vma
 		+ htab->plt->output_offset
-		- htab->elf.hgot->root.u.def.value
-		- htab->elf.hgot->root.u.def.section->output_section->vma
-		- htab->elf.hgot->root.u.def.section->output_offset);
+		- got);
 
+      /* Write the plt call stubs.  */
       p = htab->glink->contents;
-      p += htab->glink_pltresolve;
-      bfd_put_32 (output_bfd, ADDIS_11_11 + PPC_HA (-pltgot), p);
+      endp = p + htab->glink_pltresolve;
+      while (p < endp)
+	{
+	  if (pltgot < 0x8000)
+	    {
+	      bfd_put_32 (output_bfd, LWZ_11_X_30 + pltgot, p);
+	      p += 4;
+	      bfd_put_32 (output_bfd, MTCTR_11, p);
+	      p += 4;
+	      bfd_put_32 (output_bfd, BCTR, p);
+	      p += 4;
+	      bfd_put_32 (output_bfd, NOP, p);
+	      p += 4;
+	    }
+	  else
+	    {
+	      bfd_put_32 (output_bfd, ADDIS_11_30 + PPC_HA (pltgot), p);
+	      p += 4;
+	      bfd_put_32 (output_bfd, LWZ_11_X_11 + PPC_LO (pltgot), p);
+	      p += 4;
+	      bfd_put_32 (output_bfd, MTCTR_11, p);
+	      p += 4;
+	      bfd_put_32 (output_bfd, BCTR, p);
+	      p += 4;
+	    }
+	  pltgot += 4;
+	}
+
+      /* Now build the branch table, one for each plt entry (less one),
+	 and perhaps some padding.  */
+      endp = htab->glink->contents;
+      endp += htab->glink->size - GLINK_PLTRESOLVE;
+      while (p < endp - 8 * 4)
+	{
+	  bfd_put_32 (output_bfd, B + endp - p, p);
+	  p += 4;
+	}
+      while (p < endp)
+	{
+	  bfd_put_32 (output_bfd, NOP, p);
+	  p += 4;
+	}
+
+      got -= (htab->glink_pltresolve
+	      + htab->glink->output_section->vma
+	      + htab->glink->output_offset);
+
+      /* Last comes the PLTresolve stub.  */
+      bfd_put_32 (output_bfd, ADDIS_11_11 + PPC_HA (got), p);
       p += 4;
-      bfd_put_32 (output_bfd, ADDI_11_11 + PPC_LO (-pltgot), p);
+      bfd_put_32 (output_bfd, ADDI_11_11 + PPC_LO (got), p);
       p += 4;
 
       for (i = 0; i < ARRAY_SIZE (plt_resolve); i++)
@@ -6420,21 +6479,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
       if (ARRAY_SIZE (plt_resolve) + 2 != GLINK_PLTRESOLVE / 4)
 	abort ();
-
-      p = htab->glink->contents;
-      endp = p + htab->glink_pltresolve;
-      while (p < endp)
-	{
-	  bfd_put_32 (output_bfd, ADDIS_11_30 + PPC_HA (pltgot), p);
-	  p += 4;
-	  bfd_put_32 (output_bfd, LWZU_0_X_11 + PPC_LO (pltgot), p);
-	  p += 4;
-	  bfd_put_32 (output_bfd, MTCTR_0, p);
-	  p += 4;
-	  bfd_put_32 (output_bfd, BCTR, p);
-	  p += 4;
-	  pltgot += 4;
-	}
     }
 
   return TRUE;
