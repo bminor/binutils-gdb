@@ -8,18 +8,19 @@ fi
 
 lang=$1 ; shift
 texi=$1 ; shift
-o=$1 ; shift
-echo "Creating ${o}-tmp" 1>&2
-rm -f ${o}-tmp
+o=$1
+otmp="`echo $1 | sed -e 's,\.[^.]*$,,'`.tmp"; shift
+echo "Creating ${otmp}" 1>&2
+rm -f ${otmp}
 
 # Can use any of the following: cat cmp cp diff echo egrep expr false
 # grep install-info ln ls mkdir mv pwd rm rmdir sed sleep sort tar
 # test touch true
 
-cat <<EOF >>${o}-tmp
+cat <<EOF >>${otmp}
 /* GDB Notifications to Observers.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -46,7 +47,7 @@ EOF
 
 
 case $lang in
-    h) cat <<EOF >>${o}-tmp
+    h) cat <<EOF >>${otmp}
 #ifndef OBSERVER_H
 #define OBSERVER_H
 
@@ -87,7 +88,7 @@ sed -n '
 ' $texi | while read event formal actual
 do
   case $lang in
-      h) cat <<EOF >>${o}-tmp
+      h) cat <<EOF >>${otmp}
 
 /* ${event} notifications.  */
 
@@ -100,7 +101,7 @@ EOF
 	;;
 
       inc)
-      	cat <<EOF >>${o}-tmp
+      	cat <<EOF >>${otmp}
 
 /* ${event} notifications.  */
 
@@ -146,12 +147,12 @@ done
 
 
 case $lang in
-    h) cat <<EOF >>${o}-tmp
+    h) cat <<EOF >>${otmp}
 
 #endif /* OBSERVER_H */
 EOF
 esac
 
 
-echo Moving ${o}-tmp to ${o}
-mv ${o}-tmp ${o}
+echo Moving ${otmp} to ${o}
+mv ${otmp} ${o}

@@ -1,5 +1,9 @@
 2005-05-12  Eli Zaretskii  <eliz@gnu.org>
 
+	* observer.sh: Use observer.tmp instead of observer.inc-tmp which
+	on 8+3 filesystems overwrites observer.inc.  Update copyright year
+	of the resultant file.
+
 	* gnu-v3-abi.c (init_gnuv3_ops): Cast is_gnu_v3_mangled_dtor and
 	is_gnu_v3_mangled_ctor to avoid compiler warnings.
 
