@@ -1,5 +1,5 @@
 /* Native debugging support for Intel x86 running DJGPP.
-   Copyright 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1997, 1999, 2000, 2001, 2005 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of GDB.
@@ -34,6 +34,7 @@
 #include "value.h"
 #include "regcache.h"
 #include "gdb_string.h"
+#include "top.h"
 
 #include <stdio.h>		/* might be required for __DJGPP_MINOR__ */
 #include <stdlib.h>
@@ -894,6 +895,9 @@ init_go32_ops (void)
 
   /* We are always processing GCC-compiled programs.  */
   processing_gcc_compilation = 2;
+
+  /* Override the default name of the GDB init file.  */
+  strcpy (gdbinit, "gdb.ini");
 }
 
 unsigned short windows_major, windows_minor;

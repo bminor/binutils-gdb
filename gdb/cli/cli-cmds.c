@@ -50,10 +50,6 @@
 #include "tui/tui.h"		/* For tui_active et.al.   */
 #endif
 
-#ifndef GDBINIT_FILENAME
-#define GDBINIT_FILENAME        ".gdbinit"
-#endif
-
 /* Prototypes for local command functions */
 
 static void complete_command (char *, int);
@@ -1100,6 +1096,7 @@ void
 init_cli_cmds (void)
 {
   struct cmd_list_element *c;
+  char *source_help_text;
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
@@ -1164,10 +1161,12 @@ End with a line of just \"end\".\n\
 Use the \"document\" command to give documentation for the new command.\n\
 Commands defined in this way may have up to ten arguments."));
 
-  c = add_cmd ("source", class_support, source_command, _("\
+  source_help_text = xstrprintf (_("\
 Read commands from a file named FILE.\n\
-Note that the file \"" GDBINIT_FILENAME "\" is read automatically in this way\n\
-when gdb is started."), &cmdlist);
+Note that the file \"%s\" is read automatically in this way\n\
+when gdb is started."), gdbinit);
+  c = add_cmd ("source", class_support, source_command,
+	       source_help_text, &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_com ("quit", class_support, quit_command, _("Exit gdb."));

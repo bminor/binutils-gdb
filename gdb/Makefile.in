@@ -1993,7 +1993,7 @@ gnu-v3-abi.o: gnu-v3-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(cp_support_h) \
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) $(gdb_wait_h) $(gdbcore_h) \
 	$(command_h) $(gdbcmd_h) $(floatformat_h) $(buildsym_h) \
 	$(i387_tdep_h) $(i386_tdep_h) $(value_h) $(regcache_h) \
-	$(gdb_string_h)
+	$(gdb_string_h) $(top_h)
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(value_h) $(arch_utils_h) $(regcache_h) \
 	$(gdbcore_h) $(objfiles_h) $(gdb_assert_h) $(dis_asm_h) \
 	 $(dwarf2_frame_h) $(frame_base_h) $(frame_unwind_h)
