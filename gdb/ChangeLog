@@ -1,5 +1,9 @@
 2005-05-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* sol-thread.c: Include "solib.h".
+	(sol_thread_attach): Use solib_add instead of SOLIB_ADD.
+	* Makefile.in (sol-thread.o): Update dependencies.
+
 	* NEWS: Mention OpenBSD/mips64 as a new native configuration.
 
 2005-05-12  Eli Zaretskii  <eliz@gnu.org>

@@ -1,7 +1,7 @@
 /* Solaris threads debugging interface.
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,6 +64,7 @@
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "solib.h"
 #include "symfile.h"
 
 #include "gdb_string.h"
@@ -353,7 +354,7 @@ sol_thread_attach (char *args, int from_tty)
   procfs_ops.to_attach (args, from_tty);
 
   /* Must get symbols from shared libraries before libthread_db can run!  */
-  SOLIB_ADD ((char *) 0, from_tty, (struct target_ops *) 0, auto_solib_add);
+  solib_add (NULL, from_tty, (struct target_ops *) 0, auto_solib_add);
 
   if (sol_thread_active)
     {
