@@ -1,3 +1,22 @@
+2005-05-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (go32-nat.o): Add $(top_h) to prerequisites.
+
+	* go32-nat.c: Include top.h.  Update copyright years.
+	(init_go32_ops): Override the default value of gdbinit[] with
+	"gdb.ini".
+
+	* cli/cli-cmds.c: Don't define GDBINIT_FILENAME.
+	(init_cli_cmds): Use gdbinit[] instead of a compile-time literal
+	string GDBINIT_FILENAME.
+
+	* top.c (PATH_MAX): Define if not defined.
+	(gdbinit): Declare with a constant size PATH_MAX.
+
+	* config/i386/go32.mh (XM_FILE): Remove.
+
+	* config/i386/xm-go32.h: Remove file.
+
 2005-05-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* sol-thread.c: Include "solib.h".
