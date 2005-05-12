@@ -1,3 +1,14 @@
+2005-05-12  Nick Clifton  <nickc@redhat.com>
+
+	* Update the address and phone number of the FSF organization in
+	the GPL notices in the following files:
+	COPYING, Makefile.in, armcopro.c, armdefs.h, armemu.c,
+	armemu.h, armfpe.h, arminit.c, armopts.h, armos.c, armos.h,
+	armrdi.c, armsupp.c, armvirt.c, bag.c, bag.h, communicate.c,
+	communicate.h, dbg_conf.h, dbg_cp.h, dbg_hif.h, dbg_rdi.h,
+	gdbhost.c, gdbhost.h, iwmmxt.c, iwmmxt.h, kid.c, main.c,
+	maverick.c, parent.c, thumbemu.c, wrapper.c
+
 2005-04-20  Nick Clifton  <nickc@redhat.com>
 
 	* armemu.c (handle_v6_insn): New function - emulate a few of the
