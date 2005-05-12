@@ -3,6 +3,10 @@
 
 *** Changes since GDB 6.3
 
+* New native configurations
+
+OpenBSD/mips64			mips64-*-openbsd*
+
 * Deprecated commands removed
 
 The following commands, that were deprecated in 2000, have been
