@@ -1166,11 +1166,10 @@ Processes command line options and operands.
 
 @item
 Reads and executes the commands from init file (if any) in the current
-working directory.  This is only done if (1) there's an init file in
-your home directory, and (2) if the current directory is different
-from your home directory.  Thus, you can have more than one init file,
-one generic in your home directory, and another, specific to the
-program you are debugging, in the directory where you invoke
+working directory.  This is only done if the current directory is
+different from your home directory.  Thus, you can have more than one
+init file, one generic in your home directory, and another, specific
+to the program you are debugging, in the directory where you invoke
 @value{GDBN}.
 
 @item
@@ -1192,19 +1191,23 @@ option (@pxref{Mode Options, ,Choosing modes}).
 
 @cindex init file name
 @cindex @file{.gdbinit}
-@cindex @file{gdb.ini}
-The @value{GDBN} init files are normally called @file{.gdbinit}@footnote{
-The DJGPP port of @value{GDBN} uses the name
-@file{gdb.ini} instead, due to the limitations of file names imposed
-by DOS filesystems.}.
+The @value{GDBN} init files are normally called @file{.gdbinit}.
 On some configurations of @value{GDBN}, the init file is known by a
 different name (these are typically environments where a specialized
 form of @value{GDBN} may need to coexist with other forms, hence a
 different name for the specialized version's init file).  These are the
 environments with special init file names:
 
-@cindex @file{.vxgdbinit}
 @itemize @bullet
+@cindex @file{gdb.ini}
+@item
+The DJGPP port of @value{GDBN} uses the name @file{gdb.ini}, due to
+the limitations of file names imposed by DOS filesystems.  The Windows
+ports of @value{GDBN} use the standard name, but if they find a
+@file{gdb.ini} file, they warn you about that and suggest to rename
+the file to the standard name.
+
+@cindex @file{.vxgdbinit}
 @item
 VxWorks (Wind River Systems real-time OS): @file{.vxgdbinit}
 

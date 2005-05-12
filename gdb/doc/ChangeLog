@@ -1,3 +1,8 @@
+2005-05-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Startup): Fix last change.  Treat gdb.ini like we
+	do with other non-standard names of init files.
+
 2005-05-11  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Command Files): Move the description of the startup
