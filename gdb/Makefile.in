@@ -519,7 +519,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	charset.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
-	cp-names.y \
+	cp-name-parser.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
 	dwarfread.c dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
@@ -946,13 +946,13 @@ SUBDIRS = @subdirs@
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.c \
-	cp-names.c \
+	cp-name-parser.c \
 	objc-exp.c \
 	ada-exp.c \
 	jv-exp.c \
 	f-exp.c m2-exp.c p-exp.c
 YYOBJ = c-exp.o \
-	cp-names.o \
+	cp-name-parser.o \
 	objc-exp.o \
 	ada-exp.o \
 	jv-exp.o \
@@ -1084,12 +1084,14 @@ uninstall-tui:
 		      $(DESTDIR)$(man1dir)/$$transformed_name.1
 
 # The C++ name parser can be built standalone for testing.
-test-cp-names.o: cp-names.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
+test-cp-name-parser.o: cp-name-parser.c $(safe_ctype_h) $(libiberty_h) \
+  $(demangle_h)
 	$(CC) -c $(INTERNAL_CFLAGS) -DTEST_CPNAMES \
-		-o test-cp-names.o cp-names.c
+		-o test-cp-name-parser.o cp-name-parser.c
 
-test-cp-names$(EXEEXT): test-cp-names.o $(LIBIBERTY)
-	$(CC) -o test-cp-names$(EXEEXT) test-cp-names.o $(LIBIBERTY)
+test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
+	$(CC_LD) $(INTERNAL_LDFLAGS) -o test-cp-name-parser$(EXEEXT) \
+		test-cp-name-parser.o $(LIBIBERTY)
 
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
@@ -1245,7 +1247,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
-	rm -f test-cp-names$(EXEEXT)
+	rm -f test-cp-name-parser$(EXEEXT)
 
 .PHONY: clean-tui
 clean-tui:
@@ -1274,7 +1276,7 @@ local-maintainer-clean:
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	rm -f c-exp.c \
-		cp-names.c \
+		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
 	        objc-exp.c \
 		jv-exp.tab \
@@ -1826,7 +1828,7 @@ core-regset.o: core-regset.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(gdb_string_h) $(gregset_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(command_h) $(gdbcmd_h) \
 	$(ui_out_h) $(gdb_string_h)
-cp-names.o: cp-names.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
+cp-name-parser.o: cp-name-parser.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
 cp-namespace.o: cp-namespace.c $(defs_h) $(cp_support_h) $(gdb_obstack_h) \
 	$(symtab_h) $(symfile_h) $(gdb_assert_h) $(block_h) $(objfiles_h) \
 	$(gdbtypes_h) $(dictionary_h) $(command_h) $(frame_h)

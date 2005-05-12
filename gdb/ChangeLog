@@ -1,3 +1,14 @@
+2005-05-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cp-names.y: Renamed to ...
+	* cp-name-parser.y: ... this.
+	* Makefile.in (SFILES, YYFILES, YYOBJ): Rename cp-names.y to
+	cp-name-parser.y.
+	(test-cp-names.o): Renamed to test-cp-name-parser.o.
+	(test-cp-names): Renamed to test-cp-name-parser.
+	(clean, local-maintainer-clean): Update.
+	(cp-names.o): Renamed to cp-name-parser.o.
+
 2005-05-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* observer.sh: Use observer.tmp instead of observer.inc-tmp which
