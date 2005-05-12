@@ -9192,7 +9192,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	    case DW_LNS_extended_op:
 	      if (pointer_size == 0)
 		{
-		  warn (_("Extend line ops need a valid pointer size, guessing at 4"));
+		  warn (_("Extend line ops need a valid pointer size, guessing at 4\n"));
 		  pointer_size = 4;
 		}
 
