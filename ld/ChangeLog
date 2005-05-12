@@ -1,3 +1,8 @@
+2005-05-11  Bob Wilson  <bob.wilson@acm.org>
+
+	* scripttempl/elfxtensa.sc: Sync up with elf.sc.
+	* emulparams/elf32xtensa.sh (PLT, GOT): Define.
+
 2005-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldgram.y: Add SPECIAL token.
