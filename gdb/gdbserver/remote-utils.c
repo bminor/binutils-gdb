@@ -639,6 +639,28 @@ prepare_resume_reply (char *buf, char status, unsigned char signo)
   if (status == 'T')
     {
       const char **regp = gdbserver_expedite_regs;
+
+      if (the_target->stopped_by_watchpoint != NULL
+	  && (*the_target->stopped_by_watchpoint) ())
+	{
+	  CORE_ADDR addr;
+	  int i;
+
+	  strncpy (buf, "watch:", 6);
+	  buf += 6;
+
+	  addr = (*the_target->stopped_data_address) ();
+
+	  /* Convert each byte of the address into two hexadecimal chars.
+	     Note that we take sizeof (void *) instead of sizeof (addr);
+	     this is to avoid sending a 64-bit address to a 32-bit GDB.  */
+	  for (i = sizeof (void *) * 2; i > 0; i--)
+	    {
+	      *buf++ = tohex ((addr >> (i - 1) * 4) & 0xf);
+	    }
+	  *buf++ = ';';
+	}
+
       while (*regp)
 	{
 	  buf = outreg (find_regno (*regp), buf);

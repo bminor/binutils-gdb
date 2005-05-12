@@ -509,6 +509,66 @@ main (int argc, char *argv[])
 	      signal = mywait (&status, 1);
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
+	    case 'Z':
+	      {
+		char *lenptr;
+		char *dataptr;
+		CORE_ADDR addr = strtoul (&own_buf[3], &lenptr, 16);
+		int len = strtol (lenptr + 1, &dataptr, 16);
+		char type = own_buf[1];
+
+		if (the_target->insert_watchpoint == NULL
+		    || (type < '2' || type > '4'))
+		  {
+		    /* No watchpoint support or not a watchpoint command;
+		       unrecognized either way.  */
+		    own_buf[0] = '\0';
+		  }
+		else
+		  {
+		    int res;
+
+		    res = (*the_target->insert_watchpoint) (type, addr, len);
+		    if (res == 0)
+		      write_ok (own_buf);
+		    else if (res == 1)
+		      /* Unsupported.  */
+		      own_buf[0] = '\0';
+		    else
+		      write_enn (own_buf);
+		  }
+		break;
+	      }
+	    case 'z':
+	      {
+		char *lenptr;
+		char *dataptr;
+		CORE_ADDR addr = strtoul (&own_buf[3], &lenptr, 16);
+		int len = strtol (lenptr + 1, &dataptr, 16);
+		char type = own_buf[1];
+
+		if (the_target->remove_watchpoint == NULL
+		    || (type < '2' || type > '4'))
+		  {
+		    /* No watchpoint support or not a watchpoint command;
+		       unrecognized either way.  */
+		    own_buf[0] = '\0';
+		  }
+		else
+		  {
+		    int res;
+
+		    res = (*the_target->remove_watchpoint) (type, addr, len);
+		    if (res == 0)
+		      write_ok (own_buf);
+		    else if (res == 1)
+		      /* Unsupported.  */
+		      own_buf[0] = '\0';
+		    else
+		      write_enn (own_buf);
+		  }
+		break;
+	      }
 	    case 'k':
 	      fprintf (stderr, "Killing inferior\n");
 	      kill_inferior ();

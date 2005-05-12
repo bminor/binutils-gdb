@@ -133,6 +133,27 @@ struct target_ops
      Read LEN bytes at OFFSET into a buffer at MYADDR.  */
 
   int (*read_auxv) (CORE_ADDR offset, char *myaddr, unsigned int len);
+
+  /* Insert and remove a hardware watchpoint.
+     Returns 0 on success, -1 on failure and 1 on unsupported.  
+     The type is coded as follows:
+       2 = write watchpoint
+       3 = read watchpoint
+       4 = access watchpoint
+  */
+
+  int (*insert_watchpoint) (char type, CORE_ADDR addr, int len);
+  int (*remove_watchpoint) (char type, CORE_ADDR addr, int len);
+
+  /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
+
+  int (*stopped_by_watchpoint) (void);
+
+  /* Returns the address associated with the watchpoint that hit, if any;  
+     returns 0 otherwise.  */
+
+  CORE_ADDR (*stopped_data_address) (void);
+
 };
 
 extern struct target_ops *the_target;

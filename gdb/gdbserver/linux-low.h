@@ -57,6 +57,13 @@ struct linux_target_ops
 
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);
+
+  /* Watchpoint related functions.  See target.h for comments.  */
+  int (*insert_watchpoint) (char type, CORE_ADDR addr, int len);
+  int (*remove_watchpoint) (char type, CORE_ADDR addr, int len);
+  int (*stopped_by_watchpoint) (void);
+  CORE_ADDR (*stopped_data_address) (void);
+
 };
 
 extern struct linux_target_ops the_low_target;

@@ -1,3 +1,16 @@
+2005-05-12  Orjan Friberg  <orjanf@axis.com>
+
+	* target.h (struct target_ops): Add insert_watchpoint, 
+	remove_watchpoint, stopped_by_watchpoint, stopped_data_address function
+	pointers for hardware watchpoint support.
+	* linux-low.h (struct linux_target_ops): Ditto.
+	* linux-low.c (linux_insert_watchpoint, linux_remove_watchpoint)
+	(linux_stopped_by_watchpoint, linux_stopped_data_address): New.  Add
+	to linux_target_ops.
+	* remote-utils.c (prepare_resume_reply): Add watchpoint information to
+	reply packet.
+	* server.c (main): Recognize 'Z' and 'z' packets.
+
 2005-05-10  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-s390-low.c (s390_breakpoint, s390_breakpoint_len): Define.

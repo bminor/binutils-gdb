@@ -1467,7 +1467,47 @@ linux_read_auxv (CORE_ADDR offset, char *myaddr, unsigned int len)
   return n;
 }
 
-
+/* These watchpoint related wrapper functions simply pass on the function call
+   if the target has registered a corresponding function.  */
+
+static int
+linux_insert_watchpoint (char type, CORE_ADDR addr, int len)
+{
+  if (the_low_target.insert_watchpoint != NULL)
+    return the_low_target.insert_watchpoint (type, addr, len);
+  else
+    /* Unsupported (see target.h).  */
+    return 1;
+}
+
+static int
+linux_remove_watchpoint (char type, CORE_ADDR addr, int len)
+{
+  if (the_low_target.remove_watchpoint != NULL)
+    return the_low_target.remove_watchpoint (type, addr, len);
+  else
+    /* Unsupported (see target.h).  */
+    return 1;
+}
+
+static int
+linux_stopped_by_watchpoint (void)
+{
+  if (the_low_target.stopped_by_watchpoint != NULL)
+    return the_low_target.stopped_by_watchpoint ();
+  else
+    return 0;
+}
+
+static CORE_ADDR
+linux_stopped_data_address (void)
+{
+  if (the_low_target.stopped_data_address != NULL)
+    return the_low_target.stopped_data_address ();
+  else
+    return 0;
+}
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -1483,6 +1523,10 @@ static struct target_ops linux_target_ops = {
   linux_look_up_symbols,
   linux_send_signal,
   linux_read_auxv,
+  linux_insert_watchpoint,
+  linux_remove_watchpoint,
+  linux_stopped_by_watchpoint,
+  linux_stopped_data_address,
 };
 
 static void
