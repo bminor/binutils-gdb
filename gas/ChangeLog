@@ -1,3 +1,11 @@
+2005-05-13  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_insnbuf_set_operand): Clarify error
+	message.
+	(xtensa_mark_zcl_first_insns): Fix incorrect nesting of conditional
+	for handling RELAX_CHECK_ALIGN_NEXT_OPCODE.
+
 2005-05-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_apply_fix3): Allow pcrel forms of BFD_RELOC_16,

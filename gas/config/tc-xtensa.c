@@ -2707,12 +2707,16 @@ xtensa_insnbuf_set_operand (xtensa_insnbuf slotbuf,
       if (xtensa_operand_is_PCrelative (xtensa_default_isa, opcode, operand)
 	  == 1)
 	as_bad_where ((char *) file, line,
-		      _("operand %u is out of range for '%s'"), value,
-		      xtensa_opcode_name (xtensa_default_isa, opcode));
+		      _("operand %d of '%s' has out of range value '%u'"), 
+		      operand + 1,
+		      xtensa_opcode_name (xtensa_default_isa, opcode),
+		      value);
       else
 	as_bad_where ((char *) file, line,
-		      _("operand %u is invalid for '%s'"), value,
-		      xtensa_opcode_name (xtensa_default_isa, opcode));
+		      _("operand %d of '%s' has invalid value '%u'"),
+		      operand + 1,
+		      xtensa_opcode_name (xtensa_default_isa, opcode),
+		      value);
       return;
     }
 
@@ -7135,11 +7139,9 @@ xtensa_mark_zcl_first_insns (void)
 	      /* Of course, sometimes (mostly for toy test cases) a
 		 zero-cost loop instruction is the last in a section.  */
 	      if (targ_frag)
-		{
-		  targ_frag->tc_frag_data.is_first_loop_insn = TRUE;
-		  if (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)
-		    frag_wane (fragP);
-		}
+		targ_frag->tc_frag_data.is_first_loop_insn = TRUE;
+	      if (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)
+		frag_wane (fragP);
 	    }
 	}
     }
