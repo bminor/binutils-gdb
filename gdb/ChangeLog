@@ -1,5 +1,10 @@
 2005-05-13  Orjan Friberg  <orjanf@axis.com>
 
+	* cris-tdep.c (_initialize_cris_tdep): Improve help strings for
+	cris-version, cris-mode, and cris-dwarf2-cfi settings.
+
+2005-05-13  Orjan Friberg  <orjanf@axis.com>
+
 	* cris-tdep.c (usr_cmd_cris_version): Change type to int.
 	(cris_mode_normal, cris_mode_guru, cris_modes, usr_cmd_cris_mode): Add.
 	(struct gdbarch_tdep): Change type of cris_version to int.  Add

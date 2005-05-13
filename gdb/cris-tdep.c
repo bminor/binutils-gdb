@@ -3952,7 +3952,9 @@ _initialize_cris_tdep (void)
 			    &usr_cmd_cris_version, 
 			    _("Set the current CRIS version."),
 			    _("Show the current CRIS version."),
-			    _("Set if autodetection fails."),
+			    _("\
+Set to 10 for CRISv10 or 32 for CRISv32 if autodetection fails.\n\
+Defaults to 10. "),
 			    set_cris_version,
 			    NULL, /* FIXME: i18n: Current CRIS version is %s.  */
 			    &setlist, &showlist);
@@ -3961,7 +3963,9 @@ _initialize_cris_tdep (void)
 			cris_modes, &usr_cmd_cris_mode, 
 			_("Set the current CRIS mode."),
 			_("Show the current CRIS mode."),
-			_("Set if autodetection fails."),
+			_("\
+Set to CRIS_MODE_GURU when debugging in guru mode.\n\
+Makes GDB use the NRP register instead of the ERP register in certain cases."),
 			set_cris_mode,
 			NULL, /* FIXME: i18n: Current CRIS version is %s.  */
 			&setlist, &showlist);
@@ -3970,7 +3974,7 @@ _initialize_cris_tdep (void)
 			   &usr_cmd_cris_dwarf2_cfi,
 			   _("Set the usage of Dwarf-2 CFI for CRIS."),
 			   _("Show the usage of Dwarf-2 CFI for CRIS."),
-			   _("Set to \"off\" if using gcc-cris < R59."),
+			   _("Set this to \"off\" if using gcc-cris < R59."),
 			   set_cris_dwarf2_cfi,
 			   NULL, /* FIXME: i18n: Usage of Dwarf-2 CFI for CRIS is %d.  */
 			   &setlist, &showlist);
