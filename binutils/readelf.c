@@ -4514,7 +4514,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info *aux)
 	      (unsigned long) (tp->info.offset - aux->seg_base));
 
       head = aux->info + (tp->info.offset - aux->info_addr);
-      stamp = BYTE_GET ((unsigned char *) head);
+      stamp = byte_get ((unsigned char *) head, sizeof (stamp));
 
       printf ("  v%u, flags=0x%lx (%s%s), len=%lu bytes\n",
 	      (unsigned) UNW_VER (stamp),

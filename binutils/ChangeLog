@@ -1,3 +1,7 @@
+2005-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (dump_ia64_unwind): Get stamp with proper size.
+
 2005-05-12  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (display_debug_lines): If pointer_size has not been
