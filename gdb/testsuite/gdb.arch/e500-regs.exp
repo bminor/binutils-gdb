@@ -32,7 +32,7 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-if ![istarget "powerpc-*"] then {
+if ![istarget "powerpc-*eabispe"] then {
     verbose "Skipping e500 register tests."
     return
 }
@@ -85,9 +85,9 @@ gdb_expect {
 # b) the register read (below) also works.
 
 if {$endianness == "big"} {
-set vector_register ".uint64 = 0x100000001, dbl = 0x0, v2_float = .0x0, 0x0., v2_int32 = .0x1, 0x1., v4_int16 = .0x0, 0x1, 0x0, 0x1., v8_int8 = .0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x1.."
+set vector_register ".uint64 = 0x100000001, v2_float = .0x0, 0x0., v2_int32 = .0x1, 0x1., v4_int16 = .0x0, 0x1, 0x0, 0x1., v8_int8 = .0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x1.."
 } else {
-set vector_register ".uint64 = 0x100000001, dbl = 0x0, v2_float = .0x0, 0x0., v2_int32 = .0x1, 0x1., v4_int16 = .0x1, 0x0, 0x1, 0x0., v8_int8 = .0x1, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0.."
+set vector_register ".uint64 = 0x100000001, v2_float = .0x0, 0x0., v2_int32 = .0x1, 0x1., v4_int16 = .0x1, 0x0, 0x1, 0x0., v8_int8 = .0x1, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0.."
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
@@ -110,9 +110,9 @@ for {set i 0} {$i < 32} {incr i 1} {
 # the way gdb works.
 
 if {$endianness == "big"} {
-     set decimal_vector ".uint64 = 4294967297, dbl = 0, v2_float = .1.*e-45, 1.*e-45., v2_int32 = .1, 1., v4_int16 = .0, 1, 0, 1., v8_int8 = ..000.000.000.001.000.000.000.001.."
+     set decimal_vector ".uint64 = 4294967297, v2_float = .1.*e-45, 1.*e-45., v2_int32 = .1, 1., v4_int16 = .0, 1, 0, 1., v8_int8 = ..000.000.000.001.000.000.000.001.."
 } else {
-     set decimal_vector ".uint64 = 4294967297, dbl = 0, v2_float = .1.*e-45, 1.*e-45., v2_int32 = .1, 1., v4_int16 = .1, 0, 1, 0., v8_int8 = ..001.000.000.000.001.000.000.."
+     set decimal_vector ".uint64 = 4294967297, v2_float = .1.*e-45, 1.*e-45., v2_int32 = .1, 1., v4_int16 = .1, 0, 1, 0., v8_int8 = ..001.000.000.000.001.000.000.."
 }
 
 for {set i 0} {$i < 32} {incr i 1} {
