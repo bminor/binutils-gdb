@@ -1,3 +1,20 @@
+2005-05-13  Orjan Friberg  <orjanf@axis.com>
+
+	* cris-tdep.c (usr_cmd_cris_version): Change type to int.
+	(cris_mode_normal, cris_mode_guru, cris_modes, usr_cmd_cris_mode): Add.
+	(struct gdbarch_tdep): Change type of cris_version to int.  Add
+	cris_mode.
+	(cris_mode, set_cris_mode): New functions.
+	(crisv32_single_step_through_delay): Read from NRP register instead
+	of ERP register in guru mode.
+	(cris_breakpoint_from_pc): Rename break_insn to break8_insn.
+	Add break15_insn, returned in guru mode.
+	(_initialize_cris_tdep): Add call to add_setshow_enum_cmd for new 
+	cris-mode setting.
+	(cris_dump_tdep): Add dump of cris_mode.
+	(cris_gdbarch_init): Add cris_mode to search criteria for architecture.
+	Register the sigtramp frame sniffer only if not in guru mode.
+	
 2005-05-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (go32-nat.o): Add $(top_h) to prerequisites.

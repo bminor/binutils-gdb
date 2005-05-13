@@ -146,11 +146,23 @@ enum cris_regnums
 extern const struct cris_spec_reg cris_spec_regs[];
 
 /* CRIS version, set via the user command 'set cris-version'.  Affects
-   register names and sizes.*/
-static unsigned int usr_cmd_cris_version;
+   register names and sizes.  */
+static int usr_cmd_cris_version;
 
 /* Indicates whether to trust the above variable.  */
 static int usr_cmd_cris_version_valid = 0;
+
+static const char cris_mode_normal[] = "CRIS_MODE_NORMAL";
+static const char cris_mode_guru[] = "CRIS_MODE_GURU";
+static const char *cris_modes[] = {
+  cris_mode_normal,
+  cris_mode_guru,
+  0
+};
+
+/* CRIS mode, set via the user command 'set cris-mode'.  Affects
+   type of break instruction among other things.  */
+static const char *usr_cmd_cris_mode = cris_mode_normal;
 
 /* Whether to make use of Dwarf-2 CFI (default on).  */
 static int usr_cmd_cris_dwarf2_cfi = 1;
@@ -158,7 +170,8 @@ static int usr_cmd_cris_dwarf2_cfi = 1;
 /* CRIS architecture specific information.  */
 struct gdbarch_tdep
 {
-  unsigned int cris_version;
+  int cris_version;
+  const char *cris_mode;
   int cris_dwarf2_cfi;
 };
 
@@ -168,6 +181,12 @@ static int
 cris_version (void)
 {
   return (gdbarch_tdep (current_gdbarch)->cris_version);
+}
+
+static const char *
+cris_mode (void)
+{
+  return (gdbarch_tdep (current_gdbarch)->cris_mode);
 }
 
 /* Sigtramp identification code copied from i386-linux-tdep.c.  */
@@ -456,7 +475,15 @@ crisv32_single_step_through_delay (struct gdbarch *gdbarch,
   int ret = 0;
   char buf[4];
 
-  frame_unwind_register (this_frame, ERP_REGNUM, buf);
+  if (cris_mode () == cris_mode_guru)
+    {
+      frame_unwind_register (this_frame, NRP_REGNUM, buf);
+    }
+  else
+    {
+      frame_unwind_register (this_frame, ERP_REGNUM, buf);
+    }
+
   erp = extract_unsigned_integer (buf, 4);
 
   if (erp & 0x1)
@@ -686,6 +713,9 @@ static void cris_dump_tdep (struct gdbarch *, struct ui_file *);
 
 static void set_cris_version (char *ignore_args, int from_tty, 
 			      struct cmd_list_element *c);
+
+static void set_cris_mode (char *ignore_args, int from_tty, 
+			   struct cmd_list_element *c);
 
 static void set_cris_dwarf2_cfi (char *ignore_args, int from_tty, 
 				 struct cmd_list_element *c);
@@ -1394,10 +1424,14 @@ cris_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static const unsigned char *
 cris_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
-  static unsigned char break_insn[] = {0x38, 0xe9};
+  static unsigned char break8_insn[] = {0x38, 0xe9};
+  static unsigned char break15_insn[] = {0x3f, 0xe9};
   *lenptr = 2;
 
-  return break_insn;
+  if (cris_mode () == cris_mode_guru)
+    return break15_insn;
+  else
+    return break8_insn;
 }
 
 /* Returns 1 if spec_reg is applicable to the current gdbarch's CRIS version,
@@ -3922,6 +3956,15 @@ _initialize_cris_tdep (void)
 			    set_cris_version,
 			    NULL, /* FIXME: i18n: Current CRIS version is %s.  */
 			    &setlist, &showlist);
+
+  add_setshow_enum_cmd ("cris-mode", class_support, 
+			cris_modes, &usr_cmd_cris_mode, 
+			_("Set the current CRIS mode."),
+			_("Show the current CRIS mode."),
+			_("Set if autodetection fails."),
+			set_cris_mode,
+			NULL, /* FIXME: i18n: Current CRIS version is %s.  */
+			&setlist, &showlist);
   
   add_setshow_boolean_cmd ("cris-dwarf2-cfi", class_support,
 			   &usr_cmd_cris_dwarf2_cfi,
@@ -3945,6 +3988,8 @@ cris_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
     {
       fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_version = %i\n",
                           tdep->cris_version);
+      fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_mode = %s\n",
+                          tdep->cris_mode);
       fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_dwarf2_cfi = %i\n",
                           tdep->cris_dwarf2_cfi);
     }
@@ -3963,6 +4008,19 @@ set_cris_version (char *ignore_args, int from_tty,
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, 
 		    _("cris_gdbarch_update: failed to update architecture."));
+}
+
+static void
+set_cris_mode (char *ignore_args, int from_tty, 
+	       struct cmd_list_element *c)
+{
+  struct gdbarch_info info;
+
+  /* Update the current architecture, if needed.  */
+  gdbarch_info_init (&info);
+  if (!gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, 
+		    "cris_gdbarch_update: failed to update architecture.");
 }
 
 static void
@@ -4003,14 +4061,15 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Make the current settings visible to the user.  */
   usr_cmd_cris_version = cris_version;
   
-  /* Find a candidate among the list of pre-declared architectures.  Both
-     CRIS version and ABI must match.  */
+  /* Find a candidate among the list of pre-declared architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info); 
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       if ((gdbarch_tdep (arches->gdbarch)->cris_version 
 	   == usr_cmd_cris_version)
+	  && (gdbarch_tdep (arches->gdbarch)->cris_mode 
+	   == usr_cmd_cris_mode)
 	  && (gdbarch_tdep (arches->gdbarch)->cris_dwarf2_cfi 
 	      == usr_cmd_cris_dwarf2_cfi))
         return arches->gdbarch;
@@ -4021,6 +4080,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->cris_version = usr_cmd_cris_version;
+  tdep->cris_mode = usr_cmd_cris_mode;
   tdep->cris_dwarf2_cfi = usr_cmd_cris_dwarf2_cfi;
 
   /* INIT shall ensure that the INFO.BYTE_ORDER is non-zero.  */
@@ -4137,7 +4197,10 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
     }
 
-  frame_unwind_append_sniffer (gdbarch, cris_sigtramp_frame_sniffer);
+  if (tdep->cris_mode != cris_mode_guru)
+    {
+      frame_unwind_append_sniffer (gdbarch, cris_sigtramp_frame_sniffer);
+    }
 
   frame_unwind_append_sniffer (gdbarch, cris_frame_sniffer);
   frame_base_set_default (gdbarch, &cris_frame_base);
