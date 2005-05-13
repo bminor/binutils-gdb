@@ -1,3 +1,10 @@
+2005-05-13  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/call-ar-st.exp: Call 'untested' and return -1 instead of
+	calling gdb_suppress_entire_file.
+	* gdb.base/charset.exp: Same.
+	* gdb.base/call-rt-st.exp: Same.
+
 2005-05-05  Bob Rossi  <bob_rossi@cox.net>
 
 	* lib/gdb.exp (fullname_syntax): Added global regex.

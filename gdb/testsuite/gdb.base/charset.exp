@@ -32,7 +32,8 @@ set testfile "charset"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+    untested "couldn't compile ${srcdir}/${subdir}/${srcfile}"
+    return -1
 }
 
 # Start with a fresh gdb.
