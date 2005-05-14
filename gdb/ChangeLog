@@ -1,3 +1,17 @@
+2005-05-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64-tdep.c (amd64_return_value): Change type of readbuf and
+	writebuf arguments to `gdb_byte *'.  Remove now redundant casts.
+	* i386-tdep.c (i386_return_value): Change type of readbuf and
+	writebuf arguments to `gdb_byte *'.
+	(i386_pseudo_register_read, i386_pseudo_register_write): Change
+	type of last argument to `gdb_byte *'.
+	(i386_register_to_value, i386_value_to_register): Change type of
+	last argument to `gdb_byte *'.  Simplify function a bit.
+	* i387-tdep.h (i387_value_to_register, i387_register_to_value):
+	Change type of last argument to `gdb_byte *'.
+	* i387-tdep.c: Likewise.
+
 2005-05-13  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbarch.sh (pseudo_register_read, pseudo_register_write)

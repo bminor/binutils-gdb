@@ -292,7 +292,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 
 void
 i387_register_to_value (struct frame_info *frame, int regnum,
-			struct type *type, void *to)
+			struct type *type, gdb_byte *to)
 {
   char from[I386_MAX_REGISTER_SIZE];
 
@@ -317,7 +317,7 @@ i387_register_to_value (struct frame_info *frame, int regnum,
 
 void
 i387_value_to_register (struct frame_info *frame, int regnum,
-			struct type *type, const void *from)
+			struct type *type, const gdb_byte *from)
 {
   char to[I386_MAX_REGISTER_SIZE];
 

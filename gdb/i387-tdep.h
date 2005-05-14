@@ -60,13 +60,13 @@ extern void i387_print_float_info (struct gdbarch *gdbarch,
    return its contents in TO.  */
 
 extern void i387_register_to_value (struct frame_info *frame, int regnum,
-				    struct type *type, void *to);
+				    struct type *type, gdb_byte *to);
 
 /* Write the contents FROM of a value of type TYPE into register
    REGNUM in frame FRAME.  */
 
 extern void i387_value_to_register (struct frame_info *frame, int regnum,
-				    struct type *type, const void *from);
+				    struct type *type, const gdb_byte *from);
 
 
 /* Size of the memory area use by the 'fsave' and 'fxsave'

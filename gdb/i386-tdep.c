@@ -1438,8 +1438,8 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 
 static enum return_value_convention
 i386_return_value (struct gdbarch *gdbarch, struct type *type,
-		   struct regcache *regcache, void *readbuf,
-		   const void *writebuf)
+		   struct regcache *regcache, gdb_byte *readbuf,
+		   const gdb_byte *writebuf)
 {
   enum type_code code = TYPE_CODE (type);
 
@@ -1603,7 +1603,7 @@ i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
 
 static void
 i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			   int regnum, void *buf)
+			   int regnum, gdb_byte *buf)
 {
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
@@ -1620,7 +1620,7 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static void
 i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
-			    int regnum, const void *buf)
+			    int regnum, const gdb_byte *buf)
 {
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
@@ -1703,10 +1703,9 @@ i386_convert_register_p (int regnum, struct type *type)
 
 static void
 i386_register_to_value (struct frame_info *frame, int regnum,
-			struct type *type, void *to)
+			struct type *type, gdb_byte *to)
 {
   int len = TYPE_LENGTH (type);
-  gdb_byte *buf = to;
 
   /* FIXME: kettenis/20030609: What should we do if REGNUM isn't
      available in FRAME (i.e. if it wasn't saved)?  */
@@ -1726,10 +1725,10 @@ i386_register_to_value (struct frame_info *frame, int regnum,
       gdb_assert (regnum != -1);
       gdb_assert (register_size (current_gdbarch, regnum) == 4);
 
-      get_frame_register (frame, regnum, buf);
+      get_frame_register (frame, regnum, to);
       regnum = i386_next_regnum (regnum);
       len -= 4;
-      buf += 4;
+      to += 4;
     }
 }
 
@@ -1738,10 +1737,9 @@ i386_register_to_value (struct frame_info *frame, int regnum,
 
 static void
 i386_value_to_register (struct frame_info *frame, int regnum,
-			struct type *type, const void *from)
+			struct type *type, const gdb_byte *from)
 {
   int len = TYPE_LENGTH (type);
-  const gdb_byte *buf = from;
 
   if (i386_fp_regnum_p (regnum))
     {
@@ -1758,10 +1756,10 @@ i386_value_to_register (struct frame_info *frame, int regnum,
       gdb_assert (regnum != -1);
       gdb_assert (register_size (current_gdbarch, regnum) == 4);
 
-      put_frame_register (frame, regnum, buf);
+      put_frame_register (frame, regnum, from);
       regnum = i386_next_regnum (regnum);
       len -= 4;
-      buf += 4;
+      from += 4;
     }
 }
 

@@ -406,7 +406,7 @@ amd64_classify (struct type *type, enum amd64_reg_class class[2])
 static enum return_value_convention
 amd64_return_value (struct gdbarch *gdbarch, struct type *type,
 		    struct regcache *regcache,
-		    void *readbuf, const void *writebuf)
+		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum amd64_reg_class class[2];
   int len = TYPE_LENGTH (type);
@@ -503,10 +503,10 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *type,
 
       if (readbuf)
 	regcache_raw_read_part (regcache, regnum, offset, min (len, 8),
-				((gdb_byte *)readbuf) + i * 8);
+				readbuf + i * 8);
       if (writebuf)
 	regcache_raw_write_part (regcache, regnum, offset, min (len, 8),
-				 ((const gdb_byte *)writebuf) + i * 8);
+				 writebuf + i * 8);
     }
 
   return RETURN_VALUE_REGISTER_CONVENTION;
