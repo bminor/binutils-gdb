@@ -1772,7 +1772,7 @@ i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
   const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
-  const bfd_byte *regs = gregs;
+  const gdb_byte *regs = gregs;
   int i;
 
   gdb_assert (len == tdep->sizeof_gregset);
@@ -1796,7 +1796,7 @@ i386_collect_gregset (const struct regset *regset,
 		      int regnum, void *gregs, size_t len)
 {
   const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
-  bfd_byte *regs = gregs;
+  gdb_byte *regs = gregs;
   int i;
 
   gdb_assert (len == tdep->sizeof_gregset);

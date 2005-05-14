@@ -1,5 +1,8 @@
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_supply_gregset, i386_collect_gregset): Use
+	gdb_byte instead of bfd_byte.
+
 	* mips-tdep.c (mips_pseudo_register_read)
 	(mips_pseudo_register_write): Change type of last argument to
 	`gdb_byte *'.
