@@ -1,5 +1,11 @@
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* m88k-tdep.c (m88k_breakpoint_from_pc): Change return type to
+	`const gdb_byte *'.  Use gdb_byte for break_insn.
+	(m88k_return_value): Change type of readbuf and
+	writebuf arguments to `gdb_byte *'.  Use gdb_byte for buf.
+	(m88k_supply_gregset): Use `gdb_byte *' for regs.
+
 	* vax-tdep.c (vax_return_value): Change type of readbuf and
 	writebuf arguments to `gdb_byte *'.
 
