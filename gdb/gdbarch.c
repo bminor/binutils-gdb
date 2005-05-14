@@ -2016,7 +2016,7 @@ gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, void *buf)
+gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->pseudo_register_read != NULL);
@@ -2040,7 +2040,7 @@ gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const void *buf)
+gdbarch_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->pseudo_register_write != NULL);
@@ -2654,7 +2654,7 @@ set_gdbarch_convert_register_p (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, void *buf)
+gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->register_to_value != NULL);
@@ -2671,7 +2671,7 @@ set_gdbarch_register_to_value (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const void *buf)
+gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->value_to_register != NULL);
@@ -2688,7 +2688,7 @@ set_gdbarch_value_to_register (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const void *buf)
+gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->pointer_to_address != NULL);
@@ -2705,7 +2705,7 @@ set_gdbarch_pointer_to_address (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, void *buf, CORE_ADDR addr)
+gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->address_to_pointer != NULL);
@@ -2777,7 +2777,7 @@ gdbarch_return_value_p (struct gdbarch *gdbarch)
 }
 
 enum return_value_convention
-gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf)
+gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->return_value != NULL);
@@ -2795,7 +2795,7 @@ set_gdbarch_return_value (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, void *valbuf)
+gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, gdb_byte *valbuf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->extract_return_value != NULL);
@@ -2812,7 +2812,7 @@ set_gdbarch_extract_return_value (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, const void *valbuf)
+gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, const gdb_byte *valbuf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->store_return_value != NULL);

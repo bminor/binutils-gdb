@@ -1,3 +1,20 @@
+2005-05-13  Andrew Cagney  <cagney@gnu.org>
+
+	* gdbarch.sh (pseudo_register_read, pseudo_register_write)
+	(value_to_register, register_to_value, pointer_to_address)
+	(address_to_pointer, return_value, extract_return_value)
+	(store_return_value): Instead of a void pointer, use gdb_byte.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* inferior.h (unsigned_address_to_pointer)
+	(signed_pointer_to_address, address_to_signed_pointer)
+	(unsigned_pointer_to_address): Update.
+	* arch-utils.h (legacy_return_value): 
+	* arch-utils.c (legacy_extract_return_value)
+	(legacy_return_value): Update.
+	* findvar.c (unsigned_pointer_to_address) 
+	(signed_pointer_to_address, unsigned_address_to_pointer) 
+	(address_to_signed_pointer): Update.
+
 2005-05-13  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (_initialize_cris_tdep): Improve help strings for

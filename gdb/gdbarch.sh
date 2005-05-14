@@ -423,8 +423,8 @@ F:TARGET_READ_SP:CORE_ADDR:read_sp:void
 # serious shakedown.
 f:TARGET_VIRTUAL_FRAME_POINTER:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset:0:legacy_virtual_frame_pointer::0
 #
-M::void:pseudo_register_read:struct regcache *regcache, int cookednum, void *buf:regcache, cookednum, buf
-M::void:pseudo_register_write:struct regcache *regcache, int cookednum, const void *buf:regcache, cookednum, buf
+M::void:pseudo_register_read:struct regcache *regcache, int cookednum, gdb_byte *buf:regcache, cookednum, buf
+M::void:pseudo_register_write:struct regcache *regcache, int cookednum, const gdb_byte *buf:regcache, cookednum, buf
 #
 v:=:int:num_regs:::0:-1
 # This macro gives the number of pseudo-registers that live in the
@@ -494,11 +494,11 @@ F:=:int:get_longjmp_target:CORE_ADDR *pc:pc
 v:=:int:believe_pcc_promotion:::::::
 #
 f:=:int:convert_register_p:int regnum, struct type *type:regnum, type:0:generic_convert_register_p::0
-f:=:void:register_to_value:struct frame_info *frame, int regnum, struct type *type, void *buf:frame, regnum, type, buf:0
-f:=:void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const void *buf:frame, regnum, type, buf:0
+f:=:void:register_to_value:struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf:frame, regnum, type, buf:0
+f:=:void:value_to_register:struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf:frame, regnum, type, buf:0
 #
-f:=:CORE_ADDR:pointer_to_address:struct type *type, const void *buf:type, buf::unsigned_pointer_to_address::0
-f:=:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
+f:=:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf::unsigned_pointer_to_address::0
+f:=:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
 M::CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 #
 # NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS.
@@ -512,15 +512,15 @@ F:=:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp
 # the predicate with default hack to avoid calling STORE_RETURN_VALUE
 # (via legacy_return_value), when a small struct is involved.
 
-M::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf:valtype, regcache, readbuf, writebuf::legacy_return_value
+M::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:valtype, regcache, readbuf, writebuf::legacy_return_value
 
 # The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
 # DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and
 # DEPRECATED_USE_STRUCT_CONVENTION have all been folded into
 # RETURN_VALUE.
 
-f:=:void:extract_return_value:struct type *type, struct regcache *regcache, void *valbuf:type, regcache, valbuf::legacy_extract_return_value::0
-f:=:void:store_return_value:struct type *type, struct regcache *regcache, const void *valbuf:type, regcache, valbuf::legacy_store_return_value::0
+f:=:void:extract_return_value:struct type *type, struct regcache *regcache, gdb_byte *valbuf:type, regcache, valbuf::legacy_extract_return_value::0
+f:=:void:store_return_value:struct type *type, struct regcache *regcache, const gdb_byte *valbuf:type, regcache, valbuf::legacy_store_return_value::0
 f:=:void:deprecated_extract_return_value:struct type *type, gdb_byte *regbuf, gdb_byte *valbuf:type, regbuf, valbuf
 f:=:void:deprecated_store_return_value:struct type *type, gdb_byte *valbuf:type, valbuf
 f:=:int:deprecated_use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type::generic_use_struct_convention::0

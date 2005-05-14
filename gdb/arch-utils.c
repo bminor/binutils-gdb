@@ -41,7 +41,7 @@
    register cache.  */
 void
 legacy_extract_return_value (struct type *type, struct regcache *regcache,
-			     void *valbuf)
+			     gdb_byte *valbuf)
 {
   char *registers = deprecated_grub_regcache_for_registers (regcache);
   gdb_byte *buf = valbuf;
@@ -52,7 +52,7 @@ legacy_extract_return_value (struct type *type, struct regcache *regcache,
    Takes a local copy of the buffer to avoid const problems.  */
 void
 legacy_store_return_value (struct type *type, struct regcache *regcache,
-			   const void *buf)
+			   const gdb_byte *buf)
 {
   gdb_byte *b = alloca (TYPE_LENGTH (type));
   gdb_assert (regcache == current_regcache);
@@ -68,8 +68,8 @@ always_use_struct_convention (int gcc_p, struct type *value_type)
 
 enum return_value_convention
 legacy_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		     struct regcache *regcache, void *readbuf,
-		     const void *writebuf)
+		     struct regcache *regcache, gdb_byte *readbuf,
+		     const gdb_byte *writebuf)
 {
   /* NOTE: cagney/2004-06-13: The gcc_p parameter to
      USE_STRUCT_CONVENTION isn't used.  */

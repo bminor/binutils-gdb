@@ -322,14 +322,14 @@ extern void set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, gdbarch_
 
 extern int gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_pseudo_register_read_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, void *buf);
-extern void gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, void *buf);
+typedef void (gdbarch_pseudo_register_read_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
+extern void gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, gdb_byte *buf);
 extern void set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_ftype *pseudo_register_read);
 
 extern int gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_pseudo_register_write_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const void *buf);
-extern void gdbarch_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const void *buf);
+typedef void (gdbarch_pseudo_register_write_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const gdb_byte *buf);
+extern void gdbarch_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const gdb_byte *buf);
 extern void set_gdbarch_pseudo_register_write (struct gdbarch *gdbarch, gdbarch_pseudo_register_write_ftype *pseudo_register_write);
 
 extern int gdbarch_num_regs (struct gdbarch *gdbarch);
@@ -707,8 +707,8 @@ extern void set_gdbarch_convert_register_p (struct gdbarch *gdbarch, gdbarch_con
 #define CONVERT_REGISTER_P(regnum, type) (gdbarch_convert_register_p (current_gdbarch, regnum, type))
 #endif
 
-typedef void (gdbarch_register_to_value_ftype) (struct frame_info *frame, int regnum, struct type *type, void *buf);
-extern void gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, void *buf);
+typedef void (gdbarch_register_to_value_ftype) (struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf);
+extern void gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf);
 extern void set_gdbarch_register_to_value (struct gdbarch *gdbarch, gdbarch_register_to_value_ftype *register_to_value);
 #if !defined (GDB_TM_FILE) && defined (REGISTER_TO_VALUE)
 #error "Non multi-arch definition of REGISTER_TO_VALUE"
@@ -717,8 +717,8 @@ extern void set_gdbarch_register_to_value (struct gdbarch *gdbarch, gdbarch_regi
 #define REGISTER_TO_VALUE(frame, regnum, type, buf) (gdbarch_register_to_value (current_gdbarch, frame, regnum, type, buf))
 #endif
 
-typedef void (gdbarch_value_to_register_ftype) (struct frame_info *frame, int regnum, struct type *type, const void *buf);
-extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const void *buf);
+typedef void (gdbarch_value_to_register_ftype) (struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf);
+extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_value_to_register_ftype *value_to_register);
 #if !defined (GDB_TM_FILE) && defined (VALUE_TO_REGISTER)
 #error "Non multi-arch definition of VALUE_TO_REGISTER"
@@ -727,8 +727,8 @@ extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_valu
 #define VALUE_TO_REGISTER(frame, regnum, type, buf) (gdbarch_value_to_register (current_gdbarch, frame, regnum, type, buf))
 #endif
 
-typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, const void *buf);
-extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const void *buf);
+typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, const gdb_byte *buf);
+extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
 #if !defined (GDB_TM_FILE) && defined (POINTER_TO_ADDRESS)
 #error "Non multi-arch definition of POINTER_TO_ADDRESS"
@@ -737,8 +737,8 @@ extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_poi
 #define POINTER_TO_ADDRESS(type, buf) (gdbarch_pointer_to_address (current_gdbarch, type, buf))
 #endif
 
-typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, void *buf, CORE_ADDR addr);
-extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, void *buf, CORE_ADDR addr);
+typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, gdb_byte *buf, CORE_ADDR addr);
+extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, gdb_byte *buf, CORE_ADDR addr);
 extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_address_to_pointer_ftype *address_to_pointer);
 #if !defined (GDB_TM_FILE) && defined (ADDRESS_TO_POINTER)
 #error "Non multi-arch definition of ADDRESS_TO_POINTER"
@@ -789,8 +789,8 @@ extern void set_gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch,
 
 extern int gdbarch_return_value_p (struct gdbarch *gdbarch);
 
-typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf);
-extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf);
+typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
+extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
 
 /* The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
@@ -798,8 +798,8 @@ extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_va
    DEPRECATED_USE_STRUCT_CONVENTION have all been folded into
    RETURN_VALUE. */
 
-typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, void *valbuf);
-extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, void *valbuf);
+typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, gdb_byte *valbuf);
+extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, gdb_byte *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);
 #if !defined (GDB_TM_FILE) && defined (EXTRACT_RETURN_VALUE)
 #error "Non multi-arch definition of EXTRACT_RETURN_VALUE"
@@ -808,8 +808,8 @@ extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_e
 #define EXTRACT_RETURN_VALUE(type, regcache, valbuf) (gdbarch_extract_return_value (current_gdbarch, type, regcache, valbuf))
 #endif
 
-typedef void (gdbarch_store_return_value_ftype) (struct type *type, struct regcache *regcache, const void *valbuf);
-extern void gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, const void *valbuf);
+typedef void (gdbarch_store_return_value_ftype) (struct type *type, struct regcache *regcache, const gdb_byte *valbuf);
+extern void gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, const gdb_byte *valbuf);
 extern void set_gdbarch_store_return_value (struct gdbarch *gdbarch, gdbarch_store_return_value_ftype *store_return_value);
 #if !defined (GDB_TM_FILE) && defined (STORE_RETURN_VALUE)
 #error "Non multi-arch definition of STORE_RETURN_VALUE"

@@ -38,8 +38,8 @@ extern int gdbarch_debug;
 enum return_value_convention legacy_return_value (struct gdbarch *gdbarch,
 						  struct type *valtype,
 						  struct regcache *regcache,
-						  void *readbuf,
-						  const void *writebuf);
+						  gdb_byte *readbuf,
+						  const gdb_byte *writebuf);
 
 /* Implementation of extract return value that grubs around in the
    register cache.  */
