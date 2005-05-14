@@ -1,5 +1,8 @@
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* vax-tdep.c (vax_return_value): Change type of readbuf and
+	writebuf arguments to `gdb_byte *'.
+
 	* amd64-tdep.c (amd64_return_value): Change type of readbuf and
 	writebuf arguments to `gdb_byte *'.  Remove now redundant casts.
 	* i386-tdep.c (i386_return_value): Change type of readbuf and
