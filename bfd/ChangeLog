@@ -1,3 +1,8 @@
+2005-05-13  Fred Fish  <fnf@specifixinc.com>
+
+	* libbfd-in.h: Fix a comment typo, 'neaderst' -> 'nearest'
+	* libbfd.h: Rebuilt.
+
 2005-05-13  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_get_property_section_name): Add missing
