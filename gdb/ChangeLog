@@ -1,5 +1,35 @@
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* mips-tdep.c (mips_pseudo_register_read)
+	(mips_pseudo_register_write): Change type of last argument to
+	`gdb_byte *'.
+	(mips_register_to_value, mips_value_to_register): Change type of
+	last argument to `gdb_byte *'.  Remove casts that are no longer
+	needed.
+	(mips_fetch_instruction, fetch_mips_16): Use gdb_byte for buf.
+	(mips_eabi_push_dummy_call, mips_n32n64_push_dummy_call)
+	(mips_o32_push_dummy_call, mips_o32_return_value): Use `const
+	gdb_byte *' for val and gdb_byte for valbuf.  Remove casts that
+	are no longer needed.
+	(mips_eabi_return_value, mips_n32n64_return_value)
+	(mips_o32_return_value, mips_o64_return_value): Change type of
+	readbuf and writebuf arguments to `gdb_byte *'.
+	(mips_read_fp_register_single): Change type of last argument to
+	`gdb_byte *'.  Use `gdb_byte *' for raw_buffer.
+	(mips_read_fp_register_double): Change type of last argument to
+	`gdb_byte *'.
+	(mips_print_fp_register): Use `gdb_byte *' for raw_buffer.  Remove
+	casts that are no longer needed.
+	(mips_print_register, print_gp_register_row): Use gdb_byte for
+	raw_buffer.  Remove casts that are no longer needed.
+	(mips_single_step_through_delay): Use gdb_byte for buf.
+	(mips_breakpoint_from_pc): Change return type to `const gdb_byte
+	*'.  Use gdb_byte for mips16_big_breakpoint, big_breakpoint,
+	pmon_big_breakpoint, idt_big_breakpoint, mips16_little_breakpoint,
+	little_breakpoint, pmon_little_breakpoint and
+	idt_little_breakpoint.
+	(mips_integer_to_address): Use `gdb_byte *' for tmp.
+
 	* config/m68k/obsd.mt (DEPRECATED_TM_FILE): Remove.
 	* config/i386/obsd.mt (DEPRECATED_TM_FILE): Remove.
 	* config/i386/obsd64.mt (DEPRECATED_TM_FILE): Remove.

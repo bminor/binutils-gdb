@@ -1,8 +1,8 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
-   Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
    and by Per Bothner(bothner@cs.wisc.edu) at U.Wisconsin.
@@ -568,7 +568,7 @@ mips_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 static void
 mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			   int cookednum, void *buf)
+			   int cookednum, gdb_byte *buf)
 {
   int rawnum = cookednum % NUM_REGS;
   gdb_assert (cookednum >= NUM_REGS && cookednum < 2 * NUM_REGS);
@@ -590,7 +590,7 @@ mips_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 static void
 mips_pseudo_register_write (struct gdbarch *gdbarch,
 			    struct regcache *regcache, int cookednum,
-			    const void *buf)
+			    const gdb_byte *buf)
 {
   int rawnum = cookednum % NUM_REGS;
   gdb_assert (cookednum >= NUM_REGS && cookednum < 2 * NUM_REGS);
@@ -654,18 +654,18 @@ mips_convert_register_p (int regnum, struct type *type)
 
 static void
 mips_register_to_value (struct frame_info *frame, int regnum,
-			struct type *type, void *to)
+			struct type *type, gdb_byte *to)
 {
-  get_frame_register (frame, regnum + 0, (char *) to + 4);
-  get_frame_register (frame, regnum + 1, (char *) to + 0);
+  get_frame_register (frame, regnum + 0, to + 4);
+  get_frame_register (frame, regnum + 1, to + 0);
 }
 
 static void
 mips_value_to_register (struct frame_info *frame, int regnum,
-			struct type *type, const void *from)
+			struct type *type, const gdb_byte *from)
 {
-  put_frame_register (frame, regnum + 0, (const char *) from + 4);
-  put_frame_register (frame, regnum + 1, (const char *) from + 0);
+  put_frame_register (frame, regnum + 0, from + 4);
+  put_frame_register (frame, regnum + 1, from + 0);
 }
 
 /* Return the GDB type object for the "standard" data type of data in
@@ -847,7 +847,7 @@ mips_write_pc (CORE_ADDR pc, ptid_t ptid)
 static ULONGEST
 mips_fetch_instruction (CORE_ADDR addr)
 {
-  char buf[MIPS_INSN32_SIZE];
+  gdb_byte buf[MIPS_INSN32_SIZE];
   int instlen;
   int status;
 
@@ -1108,7 +1108,7 @@ extended_offset (unsigned int extension)
 static unsigned int
 fetch_mips_16 (CORE_ADDR pc)
 {
-  char buf[8];
+  gdb_byte buf[8];
   pc &= 0xfffffffe;		/* clear the low order bit */
   target_read_memory (pc, buf, 2);
   return extract_unsigned_integer (buf, 2);
@@ -2442,8 +2442,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      char *val;
-      char valbuf[MAX_REGISTER_SIZE];
+      const gdb_byte *val;
+      gdb_byte valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -2468,7 +2468,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    fprintf_unfiltered (gdb_stdlog, " push");
 	}
       else
-	val = (char *) value_contents (arg);
+	val = value_contents (arg);
 
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.  Round the FP register
@@ -2652,7 +2652,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 mips_eabi_return_value (struct gdbarch *gdbarch,
 			struct type *type, struct regcache *regcache,
-			void *readbuf, const void *writebuf)
+			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (TYPE_LENGTH (type) > 2 * mips_abi_regsize (gdbarch))
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -2725,7 +2725,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      char *val;
+      const gdb_byte *val;
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -2736,7 +2736,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			    "mips_n32n64_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
-      val = (char *) value_contents (arg);
+      val = value_contents (arg);
 
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
@@ -2902,7 +2902,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 mips_n32n64_return_value (struct gdbarch *gdbarch,
 			  struct type *type, struct regcache *regcache,
-			  void *readbuf, const void *writebuf)
+			  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
@@ -3065,7 +3065,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      char *val;
+      const gdb_byte *val;
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3076,7 +3076,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			    "mips_o32_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
-      val = (char *) value_contents (arg);
+      val = value_contents (arg);
 
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.  Round the FP register
@@ -3317,7 +3317,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
 		       struct regcache *regcache,
-		       void *readbuf, const void *writebuf)
+		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
@@ -3519,7 +3519,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      from first to last.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      char *val;
+      const gdb_byte *val;
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3530,7 +3530,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			    "mips_o64_push_dummy_call: %d len=%d type=%d",
 			    argnum + 1, len, (int) typecode);
 
-      val = (char *) value_contents (arg);
+      val = value_contents (arg);
 
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.  Round the FP register
@@ -3771,7 +3771,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 mips_o64_return_value (struct gdbarch *gdbarch,
 		       struct type *type, struct regcache *regcache,
-		       void *readbuf, const void *writebuf)
+		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   return RETURN_VALUE_STRUCT_CONVENTION;
 }
@@ -3829,10 +3829,10 @@ mips_double_register_type (void)
 
 static void
 mips_read_fp_register_single (struct frame_info *frame, int regno,
-			      char *rare_buffer)
+			      gdb_byte *rare_buffer)
 {
   int raw_size = register_size (current_gdbarch, regno);
-  char *raw_buffer = alloca (raw_size);
+  gdb_byte *raw_buffer = alloca (raw_size);
 
   if (!frame_register_read (frame, regno, raw_buffer))
     error (_("can't read register %d (%s)"), regno, REGISTER_NAME (regno));
@@ -3861,7 +3861,7 @@ mips_read_fp_register_single (struct frame_info *frame, int regno,
 
 static void
 mips_read_fp_register_double (struct frame_info *frame, int regno,
-			      char *rare_buffer)
+			      gdb_byte *rare_buffer)
 {
   int raw_size = register_size (current_gdbarch, regno);
 
@@ -3898,14 +3898,12 @@ static void
 mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 			int regnum)
 {				/* do values for FP (float) regs */
-  char *raw_buffer;
+  gdb_byte *raw_buffer;
   double doub, flt1;	/* doubles extracted from raw hex data */
   int inv1, inv2;
 
-  raw_buffer =
-    (char *) alloca (2 *
-		     register_size (current_gdbarch,
-				    mips_regnum (current_gdbarch)->fp0));
+  raw_buffer = alloca (2 * register_size (current_gdbarch,
+					  mips_regnum (current_gdbarch)->fp0));
 
   fprintf_filtered (file, "%s:", REGISTER_NAME (regnum));
   fprintf_filtered (file, "%*s", 4 - (int) strlen (REGISTER_NAME (regnum)),
@@ -3972,7 +3970,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
 		     int regnum, int all)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  char raw_buffer[MAX_REGISTER_SIZE];
+  gdb_byte raw_buffer[MAX_REGISTER_SIZE];
   int offset;
 
   if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
@@ -4033,7 +4031,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   /* do values for GP (int) regs */
-  char raw_buffer[MAX_REGISTER_SIZE];
+  gdb_byte raw_buffer[MAX_REGISTER_SIZE];
   int ncols = (mips_abi_regsize (gdbarch) == 8 ? 4 : 8);	/* display cols per row */
   int col, byte;
   int regnum;
@@ -4082,11 +4080,11 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	     register_size (current_gdbarch,
 			    regnum) - register_size (current_gdbarch, regnum);
 	     byte < register_size (current_gdbarch, regnum); byte++)
-	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
+	  fprintf_filtered (file, "%02x", raw_buffer[byte]);
       else
 	for (byte = register_size (current_gdbarch, regnum) - 1;
 	     byte >= 0; byte--)
-	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
+	  fprintf_filtered (file, "%02x", raw_buffer[byte]);
       fprintf_filtered (file, " ");
       col++;
     }
@@ -4152,7 +4150,7 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
 				struct frame_info *frame)
 {
   CORE_ADDR pc = get_frame_pc (frame);
-  char buf[MIPS_INSN32_SIZE];
+  gdb_byte buf[MIPS_INSN32_SIZE];
 
   /* There is no branch delay slot on MIPS16.  */
   if (mips_pc_is_mips16 (pc))
@@ -4388,14 +4386,14 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
    (if necessary) to point to the actual memory location where the
    breakpoint should be inserted.  */
 
-static const unsigned char *
+static const gdb_byte *
 mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       if (mips_pc_is_mips16 (*pcptr))
 	{
-	  static unsigned char mips16_big_breakpoint[] = { 0xe8, 0xa5 };
+	  static gdb_byte mips16_big_breakpoint[] = { 0xe8, 0xa5 };
 	  *pcptr = unmake_mips16_addr (*pcptr);
 	  *lenptr = sizeof (mips16_big_breakpoint);
 	  return mips16_big_breakpoint;
@@ -4405,9 +4403,9 @@ mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 	  /* The IDT board uses an unusual breakpoint value, and
 	     sometimes gets confused when it sees the usual MIPS
 	     breakpoint instruction.  */
-	  static unsigned char big_breakpoint[] = { 0, 0x5, 0, 0xd };
-	  static unsigned char pmon_big_breakpoint[] = { 0, 0, 0, 0xd };
-	  static unsigned char idt_big_breakpoint[] = { 0, 0, 0x0a, 0xd };
+	  static gdb_byte big_breakpoint[] = { 0, 0x5, 0, 0xd };
+	  static gdb_byte pmon_big_breakpoint[] = { 0, 0, 0, 0xd };
+	  static gdb_byte idt_big_breakpoint[] = { 0, 0, 0x0a, 0xd };
 
 	  *lenptr = sizeof (big_breakpoint);
 
@@ -4425,16 +4423,16 @@ mips_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     {
       if (mips_pc_is_mips16 (*pcptr))
 	{
-	  static unsigned char mips16_little_breakpoint[] = { 0xa5, 0xe8 };
+	  static gdb_byte mips16_little_breakpoint[] = { 0xa5, 0xe8 };
 	  *pcptr = unmake_mips16_addr (*pcptr);
 	  *lenptr = sizeof (mips16_little_breakpoint);
 	  return mips16_little_breakpoint;
 	}
       else
 	{
-	  static unsigned char little_breakpoint[] = { 0xd, 0, 0x5, 0 };
-	  static unsigned char pmon_little_breakpoint[] = { 0xd, 0, 0, 0 };
-	  static unsigned char idt_little_breakpoint[] = { 0xd, 0x0a, 0, 0 };
+	  static gdb_byte little_breakpoint[] = { 0xd, 0, 0x5, 0 };
+	  static gdb_byte pmon_little_breakpoint[] = { 0xd, 0, 0, 0 };
+	  static gdb_byte idt_little_breakpoint[] = { 0xd, 0x0a, 0, 0 };
 
 	  *lenptr = sizeof (little_breakpoint);
 
@@ -4615,7 +4613,7 @@ static CORE_ADDR
 mips_integer_to_address (struct gdbarch *gdbarch,
 			 struct type *type, const bfd_byte *buf)
 {
-  char *tmp = alloca (TYPE_LENGTH (builtin_type_void_data_ptr));
+  gdb_byte *tmp = alloca (TYPE_LENGTH (builtin_type_void_data_ptr));
   LONGEST val = unpack_long (type, buf);
   store_signed_integer (tmp, TYPE_LENGTH (builtin_type_void_data_ptr), val);
   return extract_signed_integer (tmp,
