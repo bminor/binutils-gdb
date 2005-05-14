@@ -1,3 +1,8 @@
+2005-05-13  Fred Fish  <fnf@specifixinc.com>
+
+	* readelf.c: Fix a couple of obvious comment typos,
+	'debug_str' -> 'debug_ranges' and proecess' -> 'process'.
+
 2005-05-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (dump_ia64_unwind): Get stamp with proper size.

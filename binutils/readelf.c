@@ -7320,7 +7320,7 @@ load_debug_range (FILE *file)
   if (debug_range_contents != NULL)
     return;
 
-  /* Locate the .debug_str section.  */
+  /* Locate the .debug_ranges section.  */
   sec = find_section (".debug_ranges");
   if (sec == NULL)
     return;
@@ -8910,7 +8910,7 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
     }
  
   /* Set num_debug_info_entries here so that it can be used to check if
-     we need to proecess .debug_loc and .debug_ranges sections.  */
+     we need to process .debug_loc and .debug_ranges sections.  */
   if ((do_loc || do_debug_loc || do_debug_ranges)
       && num_debug_info_entries == 0)
     num_debug_info_entries = num_units;
