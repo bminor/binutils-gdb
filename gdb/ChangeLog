@@ -1,5 +1,27 @@
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* m68k-tdep.c (m68k_local_breakpoint_from_pc): Change return type
+	to `const gdb_byte *'.  Use gdb_byte for break_insn.
+	(m68k_register_to_value): Change type of last argument to
+	`gdb_byte *'.  Use gdb_byte for from.
+	(m68k_value_to_register): Change type of last argument to
+	`gdb_byte *'.  Use gdb_byte for to.
+	(m68k_extract_return_value): Change type of last argument to
+	`gdb_byte *'.  Use gdb_byte for buf.  Remove unnecessary cast.
+	(m68k_svr4_extract_return_value): Change type of last argument to
+	`gdb_byte *'.  Use gdb_byte for buf.
+	(m68k_store_return_value): Change type of last argument to
+	`gdb_byte *'.  Remove unnecessary cast.
+	(m68k_svr4_store_return_value): Change type of last argument to
+	`gdb_byte *'.  Use gdb_byte for buf.
+	(m68k_return_value, m68k_svr4_return_value): Change type of
+	readbuf and writebuf arguments to `gdb_byte *'.
+	(m68k_push_dummy_call, m68k_unwind_pc, m68k_frame_cache) 
+	(m68k_unwind_dummy_id): Use gdb_byte for buf.
+	(m68k_get_longjmp_target): Use `gdb_byte *' for buf.
+	* m68kbsd-tdep.c (m68kbsd_supply_fpregset) 
+	(m68kbsd_supply_gregset): Use `gdb_byte *' for regs.
+
 	* m88k-tdep.c (m88k_breakpoint_from_pc): Change return type to
 	`const gdb_byte *'.  Use gdb_byte for break_insn.
 	(m88k_return_value): Change type of readbuf and

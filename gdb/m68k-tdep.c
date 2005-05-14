@@ -65,10 +65,10 @@
 #define BPT_VECTOR 0xf
 #endif
 
-static const unsigned char *
+static const gdb_byte *
 m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
-  static unsigned char break_insn[] = {0x4e, (0x40 | BPT_VECTOR)};
+  static gdb_byte break_insn[] = {0x4e, (0x40 | BPT_VECTOR)};
   *lenptr = sizeof (break_insn);
   return break_insn;
 }
@@ -144,9 +144,9 @@ m68k_convert_register_p (int regnum, struct type *type)
 
 static void
 m68k_register_to_value (struct frame_info *frame, int regnum,
-			struct type *type, void *to)
+			struct type *type, gdb_byte *to)
 {
-  char from[M68K_MAX_REGISTER_SIZE];
+  gdb_byte from[M68K_MAX_REGISTER_SIZE];
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -167,9 +167,9 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
 
 static void
 m68k_value_to_register (struct frame_info *frame, int regnum,
-			struct type *type, const void *from)
+			struct type *type, const gdb_byte *from)
 {
-  char to[M68K_MAX_REGISTER_SIZE];
+  gdb_byte to[M68K_MAX_REGISTER_SIZE];
 
   /* We only support floating-point values.  */
   if (TYPE_CODE (type) != TYPE_CODE_FLT)
@@ -220,10 +220,10 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
 
 static void
 m68k_extract_return_value (struct type *type, struct regcache *regcache,
-			   void *valbuf)
+			   gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  char buf[M68K_MAX_REGISTER_SIZE];
+  gdb_byte buf[M68K_MAX_REGISTER_SIZE];
 
   if (len <= 4)
     {
@@ -234,8 +234,7 @@ m68k_extract_return_value (struct type *type, struct regcache *regcache,
     {
       regcache_raw_read (regcache, M68K_D0_REGNUM, buf);
       memcpy (valbuf, buf + (8 - len), len - 4);
-      regcache_raw_read (regcache, M68K_D1_REGNUM,
-			 (char *) valbuf + (len - 4));
+      regcache_raw_read (regcache, M68K_D1_REGNUM, valbuf + (len - 4));
     }
   else
     internal_error (__FILE__, __LINE__,
@@ -244,10 +243,10 @@ m68k_extract_return_value (struct type *type, struct regcache *regcache,
 
 static void
 m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
-				void *valbuf)
+				gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  char buf[M68K_MAX_REGISTER_SIZE];
+  gdb_byte buf[M68K_MAX_REGISTER_SIZE];
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
@@ -264,7 +263,7 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
 
 static void
 m68k_store_return_value (struct type *type, struct regcache *regcache,
-			 const void *valbuf)
+			 const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
 
@@ -274,8 +273,7 @@ m68k_store_return_value (struct type *type, struct regcache *regcache,
     {
       regcache_raw_write_part (regcache, M68K_D0_REGNUM, 8 - len,
 			       len - 4, valbuf);
-      regcache_raw_write (regcache, M68K_D1_REGNUM,
-			  (char *) valbuf + (len - 4));
+      regcache_raw_write (regcache, M68K_D1_REGNUM, valbuf + (len - 4));
     }
   else
     internal_error (__FILE__, __LINE__,
@@ -284,13 +282,13 @@ m68k_store_return_value (struct type *type, struct regcache *regcache,
 
 static void
 m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
-			      const void *valbuf)
+			      const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      char buf[M68K_MAX_REGISTER_SIZE];
+      gdb_byte buf[M68K_MAX_REGISTER_SIZE];
       convert_typed_floating (valbuf, type, buf, builtin_type_m68881_ext);
       regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
     }
@@ -330,8 +328,8 @@ m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 
 static enum return_value_convention
 m68k_return_value (struct gdbarch *gdbarch, struct type *type,
-		   struct regcache *regcache, void *readbuf,
-		   const void *writebuf)
+		   struct regcache *regcache, gdb_byte *readbuf,
+		   const gdb_byte *writebuf)
 {
   enum type_code code = TYPE_CODE (type);
 
@@ -353,8 +351,8 @@ m68k_return_value (struct gdbarch *gdbarch, struct type *type,
 
 static enum return_value_convention
 m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *type,
-			struct regcache *regcache, void *readbuf,
-			const void *writebuf)
+			struct regcache *regcache, gdb_byte *readbuf,
+			const gdb_byte *writebuf)
 {
   enum type_code code = TYPE_CODE (type);
 
@@ -411,7 +409,7 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      CORE_ADDR struct_addr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   /* Push arguments in reverse order.  */
@@ -740,7 +738,7 @@ m68k_skip_prologue (CORE_ADDR start_pc)
 static CORE_ADDR
 m68k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  char buf[8];
+  gdb_byte buf[8];
 
   frame_unwind_register (next_frame, PC_REGNUM, buf);
   return extract_typed_address (buf, builtin_type_void_func_ptr);
@@ -752,7 +750,7 @@ static struct m68k_frame_cache *
 m68k_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct m68k_frame_cache *cache;
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   if (*this_cache)
@@ -902,7 +900,7 @@ static const struct frame_base m68k_frame_base =
 static struct frame_id
 m68k_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR fp;
 
   frame_unwind_register (next_frame, M68K_FP_REGNUM, buf);
@@ -1054,7 +1052,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 static int
 m68k_get_longjmp_target (CORE_ADDR *pc)
 {
-  char *buf;
+  gdb_byte *buf;
   CORE_ADDR sp, jb_addr;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
