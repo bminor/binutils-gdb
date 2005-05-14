@@ -1,5 +1,12 @@
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/m68k/obsd.mt (DEPRECATED_TM_FILE): Remove.
+	* config/i386/obsd.mt (DEPRECATED_TM_FILE): Remove.
+	* config/i386/obsd64.mt (DEPRECATED_TM_FILE): Remove.
+	* config/pa/obsd.mt (DEPRECATED_TM_FILE): Remove.
+	* config/sparc/obsd.mt (DEPRECATED_TM_FILE): Remove.
+	* config/sparc/obsd64.mt (DEPRECATED_TM_FILE): Remove.
+
 	* sparc-tdep.c (sparc_fetch_instruction, sparc_fetch_wcookie): Use
 	gdb_byte for buf.
 	(sparc32_pseudo_register_read, sparc32_pseudo_register_write):
