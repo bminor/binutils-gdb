@@ -9338,9 +9338,9 @@ xtensa_get_property_section_name (asection *sec, const char *base_name)
       char *linkonce_kind = 0;
 
       if (strcmp (base_name, XTENSA_INSN_SEC_NAME) == 0) 
-	linkonce_kind = "x";
+	linkonce_kind = "x.";
       else if (strcmp (base_name, XTENSA_LIT_SEC_NAME) == 0) 
-	linkonce_kind = "p";
+	linkonce_kind = "p.";
       else if (strcmp (base_name, XTENSA_PROP_SEC_NAME) == 0)
 	linkonce_kind = "prop.";
       else
