@@ -93,7 +93,7 @@ struct regset;
 unsigned long
 sparc_fetch_instruction (CORE_ADDR pc)
 {
-  unsigned char buf[4];
+  gdb_byte buf[4];
   unsigned long insn;
   int i;
 
@@ -154,7 +154,7 @@ ULONGEST
 sparc_fetch_wcookie (void)
 {
   struct target_ops *ops = &current_target;
-  char buf[8];
+  gdb_byte buf[8];
   int len;
 
   len = target_read_partial (ops, TARGET_OBJECT_WCOOKIE, NULL, buf, 0, 8);
@@ -318,25 +318,25 @@ sparc32_register_type (struct gdbarch *gdbarch, int regnum)
 static void
 sparc32_pseudo_register_read (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
-			      int regnum, void *buf)
+			      int regnum, gdb_byte *buf)
 {
   gdb_assert (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM);
 
   regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);
   regcache_raw_read (regcache, regnum, buf);
-  regcache_raw_read (regcache, regnum + 1, ((char *)buf) + 4);
+  regcache_raw_read (regcache, regnum + 1, buf + 4);
 }
 
 static void
 sparc32_pseudo_register_write (struct gdbarch *gdbarch,
 			       struct regcache *regcache,
-			       int regnum, const void *buf)
+			       int regnum, const gdb_byte *buf)
 {
   gdb_assert (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM);
 
   regnum = SPARC_F0_REGNUM + 2 * (regnum - SPARC32_D0_REGNUM);
   regcache_raw_write (regcache, regnum, buf);
-  regcache_raw_write (regcache, regnum + 1, ((const char *)buf) + 4);
+  regcache_raw_write (regcache, regnum + 1, buf + 4);
 }
 
 
@@ -352,7 +352,7 @@ sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
   if (using_struct_return (value_type, using_gcc))
     {
-      char buf[4];
+      gdb_byte buf[4];
 
       /* This is an UNIMP instruction.  */
       store_unsigned_integer (buf, 4, TYPE_LENGTH (value_type) & 0x1fff);
@@ -447,7 +447,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 
   if (struct_return)
     {
-      char buf[4];
+      gdb_byte buf[4];
 
       store_unsigned_integer (buf, 4, struct_addr);
       write_memory (sp, buf, 4);
@@ -490,10 +490,10 @@ sparc32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    *LEN and optionally adjust *PC to point to the correct memory
    location for inserting the breakpoint.  */
    
-static const unsigned char *
+static const gdb_byte *
 sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 {
-  static unsigned char break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
+  static gdb_byte break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
 
   *len = sizeof (break_insn);
   return break_insn;
@@ -873,10 +873,10 @@ sparc_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
 static void
 sparc32_extract_return_value (struct type *type, struct regcache *regcache,
-			      void *valbuf)
+			      gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  char buf[8];
+  gdb_byte buf[8];
 
   gdb_assert (!sparc_structure_or_union_p (type));
   gdb_assert (!(sparc_floating_p (type) && len == 16));
@@ -915,10 +915,10 @@ sparc32_extract_return_value (struct type *type, struct regcache *regcache,
 
 static void
 sparc32_store_return_value (struct type *type, struct regcache *regcache,
-			    const void *valbuf)
+			    const gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  char buf[8];
+  gdb_byte buf[8];
 
   gdb_assert (!sparc_structure_or_union_p (type));
   gdb_assert (!(sparc_floating_p (type) && len == 16));
@@ -953,8 +953,8 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
 
 static enum return_value_convention
 sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
-		      struct regcache *regcache, void *readbuf,
-		      const void *writebuf)
+		      struct regcache *regcache, gdb_byte *readbuf,
+		      const gdb_byte *writebuf)
 {
   if (sparc_structure_or_union_p (type)
       || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
@@ -1082,7 +1082,7 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   static CORE_ADDR npc, nnpc;
-  static char npc_save[4], nnpc_save[4];
+  static gdb_byte npc_save[4], nnpc_save[4];
 
   if (insert_breakpoints_p)
     {
@@ -1259,7 +1259,7 @@ void
 sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
 {
   int offset = 0;
-  char buf[8];
+  gdb_byte buf[8];
   int i;
 
   if (sp & 1)
@@ -1327,7 +1327,7 @@ sparc_collect_rwindow (const struct regcache *regcache,
 		       CORE_ADDR sp, int regnum)
 {
   int offset = 0;
-  char buf[8];
+  gdb_byte buf[8];
   int i;
 
   if (sp & 1)
@@ -1393,7 +1393,7 @@ sparc32_supply_gregset (const struct sparc_gregset *gregset,
 			struct regcache *regcache,
 			int regnum, const void *gregs)
 {
-  const char *regs = gregs;
+  const gdb_byte *regs = gregs;
   int i;
 
   if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
@@ -1457,7 +1457,7 @@ sparc32_collect_gregset (const struct sparc_gregset *gregset,
 			 const struct regcache *regcache,
 			 int regnum, void *gregs)
 {
-  char *regs = gregs;
+  gdb_byte *regs = gregs;
   int i;
 
   if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
@@ -1511,7 +1511,7 @@ void
 sparc32_supply_fpregset (struct regcache *regcache,
 			 int regnum, const void *fpregs)
 {
-  const char *regs = fpregs;
+  const gdb_byte *regs = fpregs;
   int i;
 
   for (i = 0; i < 32; i++)
@@ -1528,7 +1528,7 @@ void
 sparc32_collect_fpregset (const struct regcache *regcache,
 			  int regnum, void *fpregs)
 {
-  char *regs = fpregs;
+  gdb_byte *regs = fpregs;
   int i;
 
   for (i = 0; i < 32; i++)

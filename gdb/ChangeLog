@@ -1,5 +1,40 @@
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc_fetch_instruction, sparc_fetch_wcookie): Use
+	gdb_byte for buf.
+	(sparc32_pseudo_register_read, sparc32_pseudo_register_write):
+	Change type of last argument to `gdb_byte *'.  Remove casts that
+	are no longer needed.
+	(sparc32_push_dummy_code, sparc32_store_arguments): Use gdb_byte
+	for buf.
+	(sparc_breakpoint_from_pc): Change return type to `const gdb_byte
+	*'.  Use gdb_byte for break_insn.
+	(sparc32_extract_return_value, sparc32_store_return_value): Change
+	type of last argument to `gdb_byte *'.  Use gdb_byte for buf.
+	(sparc32_return_value): Change type of readbuf and writebuf
+	arguments to `gdb_byte *'.
+	(sparc_software_single_step): Use gdb_byte for npc_save and
+	nnpc_save.
+	(sparc_supply_rwindow, sparc_collect_rwindow): Use gdb_byte for
+	buf.
+	(sparc32_supply_gregset, sparc32_collect_gregset)
+	(sparc32_supply_fpregset, sparc32_collect_fpregset): Use `gdb_byte
+	*' for regs.
+	* sparc64-tdep.c (sparc64_pseudo_register_read)
+	(sparc64_pseudo_register_write): Change type of last argument to
+	`gdb_byte *'.  Remove casts that are no longer needed.
+	(sparc64_store_floating_fields, sparc64_extract_floating_fields):
+	Change type of valbuf argument to `gfd_byte *'.
+	(sparc64_store_arguments): Use `gdb_byte *' for valbuf.  use
+	gdb_byte for buf.
+	(sparc64_extract_return_value, sparc64_store_return_value): Change
+	type of last argument to `gdb_byte *'.  Use gdb_byte for buf.
+	(sparc64_return_value): Change type of readbuf and writebuf
+	arguments to `gdb_byte *'.
+	(sparc64_supply_gregset, sparc64_collect_gregset)
+	(sparc64_supply_fpregset, sparc64_collect_fpregset): Use `gdb_byte
+	*' for regs.
+
 	* m68k-tdep.c (m68k_local_breakpoint_from_pc): Change return type
 	to `const gdb_byte *'.  Use gdb_byte for break_insn.
 	(m68k_register_to_value): Change type of last argument to
