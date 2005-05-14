@@ -1,3 +1,9 @@
+2005-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Set DT_PPC_GOT,
+	not DT_PPC_GLINK.
+	(ppc_elf_finish_dynamic_sections): Likewise.
+
 2005-05-13  Fred Fish  <fnf@specifixinc.com>
 
 	* libbfd-in.h: Fix a comment typo, 'neaderst' -> 'nearest'

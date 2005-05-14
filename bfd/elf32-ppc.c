@@ -4406,7 +4406,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (htab->glink != NULL && htab->glink->size != 0)
 	{
-	  if (!add_dynamic_entry (DT_PPC_GLINK, 0))
+	  if (!add_dynamic_entry (DT_PPC_GOT, 0))
 	    return FALSE;
 	}
 
@@ -6313,6 +6313,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 {
   asection *sdyn;
   struct ppc_elf_link_hash_table *htab;
+  bfd_vma got;
 
 #ifdef DEBUG
   fprintf (stderr, "ppc_elf_finish_dynamic_sections called\n");
@@ -6320,6 +6321,12 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
   htab = ppc_elf_hash_table (info);
   sdyn = bfd_get_section_by_name (htab->elf.dynobj, ".dynamic");
+
+  got = 0;
+  if (htab->elf.hgot != NULL)
+    got = (htab->elf.hgot->root.u.def.value
+	   + htab->elf.hgot->root.u.def.section->output_section->vma
+	   + htab->elf.hgot->root.u.def.section->output_offset);
 
   if (htab->elf.dynamic_sections_created)
     {
@@ -6352,10 +6359,8 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
-	    case DT_PPC_GLINK:
-	      s = htab->glink;
-	      dyn.d_un.d_ptr = (s->size - GLINK_PLTRESOLVE
-				+ s->output_section->vma + s->output_offset);
+	    case DT_PPC_GOT:
+	      dyn.d_un.d_ptr = got;
 	      break;
 
 	    default:
@@ -6389,7 +6394,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
     {
       unsigned char *p;
       unsigned char *endp;
-      bfd_vma got, pltgot;
+      bfd_vma pltgot;
       unsigned int i;
       static const unsigned int plt_resolve[] =
 	{
@@ -6408,10 +6413,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define PPC_LO(v) ((v) & 0xffff)
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
-
-      got = (htab->elf.hgot->root.u.def.value
-	     + htab->elf.hgot->root.u.def.section->output_section->vma
-	     + htab->elf.hgot->root.u.def.section->output_offset);
 
       pltgot = (htab->plt->output_section->vma
 		+ htab->plt->output_offset

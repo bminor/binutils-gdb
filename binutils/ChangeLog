@@ -1,3 +1,8 @@
+2005-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (get_ppc_dynamic_type): Display DT_PPC_GOT, not
+	DT_PPC_GLINK.
+
 2005-05-13  Fred Fish  <fnf@specifixinc.com>
 
 	* readelf.c: Fix a couple of obvious comment typos,

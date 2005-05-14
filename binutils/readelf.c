@@ -1417,7 +1417,7 @@ get_ppc_dynamic_type (unsigned long type)
 {
   switch (type)
     {
-    case DT_PPC_GLINK: return "PPC_GLINK";
+    case DT_PPC_GOT: return "PPC_GOT";
     default:
       return NULL;
     }
