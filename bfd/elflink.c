@@ -5377,7 +5377,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    {
 	      bfd_size_type indx;
 
-	      name = basename (output_bfd->filename);
+	      name = lbasename (output_bfd->filename);
 	      def.vd_hash = bfd_elf_hash (name);
 	      indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
 					  name, FALSE);
@@ -5600,7 +5600,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 		indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
 					    elf_dt_name (t->vn_bfd) != NULL
 					    ? elf_dt_name (t->vn_bfd)
-					    : basename (t->vn_bfd->filename),
+					    : lbasename (t->vn_bfd->filename),
 					    FALSE);
 		if (indx == (bfd_size_type) -1)
 		  return FALSE;
