@@ -195,7 +195,7 @@ xstormy16-*-*)          gdb_target=xstormy16 ;;
 
 vax-*-netbsd* | vax-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
-vax-*-openbsd*)		gdb_target=nbsd ;;
+vax-*-openbsd*)		gdb_target=obsd ;;
 vax-*-*)		gdb_target=vax ;;
 
 x86_64-*-linux*)	gdb_target=linux64

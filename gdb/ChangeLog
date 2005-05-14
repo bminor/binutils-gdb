@@ -1,5 +1,8 @@
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.tgt (vax-*-openbsd*): Set gdb_target to obsd.
+	* config/vax/obsd.mt (TDEPFILES): New file.
+
 	* i386-tdep.c (i386_supply_gregset, i386_collect_gregset): Use
 	gdb_byte instead of bfd_byte.
 
