@@ -377,7 +377,7 @@ child_follow_fork (int follow_child)
 	      int status;
 
 	      ptrace (PTRACE_CONT, parent_pid, 0, 0);
-	      waitpid (parent_pid, &status, __WALL);
+	      my_waitpid (parent_pid, &status, __WALL);
 	      if ((status >> 16) != PTRACE_EVENT_VFORK_DONE)
 		warning (_("Unexpected waitpid result %06x when waiting for "
 			 "vfork-done"), status);
@@ -494,10 +494,8 @@ linux_handle_extended_wait (int pid, int status,
 	{
 	  /* The new child has a pending SIGSTOP.  We can't affect it until it
 	     hits the SIGSTOP, but we're already attached.  */
-	  do {
-	    ret = waitpid (new_pid, &status,
-			   (event == PTRACE_EVENT_CLONE) ? __WCLONE : 0);
-	  } while (ret == -1 && errno == EINTR);
+	  ret = my_waitpid (new_pid, &status,
+			    (event == PTRACE_EVENT_CLONE) ? __WCLONE : 0);
 	  if (ret == -1)
 	    perror_with_name (_("waiting for new child"));
 	  else if (ret != new_pid)
@@ -868,11 +866,11 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
 			    "LLAL: PTRACE_ATTACH %s, 0, 0 (OK)\n",
 			    target_pid_to_str (ptid));
 
-      pid = waitpid (GET_LWP (ptid), &status, 0);
+      pid = my_waitpid (GET_LWP (ptid), &status, 0);
       if (pid == -1 && errno == ECHILD)
 	{
 	  /* Try again with __WCLONE to check cloned processes.  */
-	  pid = waitpid (GET_LWP (ptid), &status, __WCLONE);
+	  pid = my_waitpid (GET_LWP (ptid), &status, __WCLONE);
 	  lp->cloned = 1;
 	}
 
@@ -920,13 +918,13 @@ linux_nat_attach (char *args, int from_tty)
   /* Make sure the initial process is stopped.  The user-level threads
      layer might want to poke around in the inferior, and that won't
      work if things haven't stabilized yet.  */
-  pid = waitpid (GET_PID (inferior_ptid), &status, 0);
+  pid = my_waitpid (GET_PID (inferior_ptid), &status, 0);
   if (pid == -1 && errno == ECHILD)
     {
       warning (_("%s is a cloned process"), target_pid_to_str (inferior_ptid));
 
       /* Try again with __WCLONE to check cloned processes.  */
-      pid = waitpid (GET_PID (inferior_ptid), &status, __WCLONE);
+      pid = my_waitpid (GET_PID (inferior_ptid), &status, __WCLONE);
       lp->cloned = 1;
     }
 
@@ -1191,10 +1189,10 @@ wait_lwp (struct lwp_info *lp)
   gdb_assert (!lp->stopped);
   gdb_assert (lp->status == 0);
 
-  pid = waitpid (GET_LWP (lp->ptid), &status, 0);
+  pid = my_waitpid (GET_LWP (lp->ptid), &status, 0);
   if (pid == -1 && errno == ECHILD)
     {
-      pid = waitpid (GET_LWP (lp->ptid), &status, __WCLONE);
+      pid = my_waitpid (GET_LWP (lp->ptid), &status, __WCLONE);
       if (pid == -1 && errno == ECHILD)
 	{
 	  /* The thread has previously exited.  We need to delete it
@@ -1706,10 +1704,10 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 				   attached process.  */
       set_sigio_trap ();
 
-      pid = waitpid (GET_PID (ptid), &status, 0);
+      pid = my_waitpid (GET_PID (ptid), &status, 0);
       if (pid == -1 && errno == ECHILD)
 	/* Try again with __WCLONE to check cloned processes.  */
-	pid = waitpid (GET_PID (ptid), &status, __WCLONE);
+	pid = my_waitpid (GET_PID (ptid), &status, __WCLONE);
 
       if (debug_linux_nat)
 	{
@@ -1920,7 +1918,7 @@ retry:
     {
       pid_t lwpid;
 
-      lwpid = waitpid (pid, &status, options);
+      lwpid = my_waitpid (pid, &status, options);
       if (lwpid > 0)
 	{
 	  gdb_assert (pid == -1 || lwpid == pid);
@@ -2264,7 +2262,7 @@ kill_wait_callback (struct lwp_info *lp, void *data)
     {
       do
 	{
-	  pid = waitpid (GET_LWP (lp->ptid), NULL, __WCLONE);
+	  pid = my_waitpid (GET_LWP (lp->ptid), NULL, __WCLONE);
 	  if (pid != (pid_t) -1 && debug_linux_nat)
 	    {
 	      fprintf_unfiltered (gdb_stdlog,
@@ -2279,7 +2277,7 @@ kill_wait_callback (struct lwp_info *lp, void *data)
 
   do
     {
-      pid = waitpid (GET_LWP (lp->ptid), NULL, 0);
+      pid = my_waitpid (GET_LWP (lp->ptid), NULL, 0);
       if (pid != (pid_t) -1 && debug_linux_nat)
 	{
 	  fprintf_unfiltered (gdb_stdlog,
@@ -3095,7 +3093,7 @@ Specify any of the following keywords for detailed info:\n\
 
   action.sa_handler = sigchld_handler;
   sigemptyset (&action.sa_mask);
-  action.sa_flags = 0;
+  action.sa_flags = SA_RESTART;
   sigaction (SIGCHLD, &action, NULL);
 
   /* Make sure we don't block SIGCHLD during a sigsuspend.  */
@@ -3168,7 +3166,7 @@ lin_thread_get_thread_signals (sigset_t *set)
 
   action.sa_handler = sigchld_handler;
   sigemptyset (&action.sa_mask);
-  action.sa_flags = 0;
+  action.sa_flags = SA_RESTART;
   sigaction (cancel, &action, NULL);
 
   /* We block the "cancel" signal throughout this code ...  */
