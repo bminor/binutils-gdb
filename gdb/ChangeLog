@@ -1,5 +1,9 @@
 2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (.y.c): Update ylwrap invocation.
+
+2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-nat.c (child_follow_fork, linux_handle_extended_wait)
 	(lin_lwp_attach_lwp, linux_nat_attach, wait_lwp, child_wait)
 	(linux_nat_wait, kill_wait_callback): Use my_waitpid.

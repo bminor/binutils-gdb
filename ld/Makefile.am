@@ -103,6 +103,9 @@ info_TEXINFOS = ld.texinfo
 noinst_TEXINFOS = ldint.texinfo
 man_MANS = ld.1
 
+AM_MAKEINFOFLAGS = -I $(BFDDIR)/doc
+TEXI2DVI = texi2dvi -I $(BFDDIR)/doc
+
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) -I$(top_srcdir)/../intl -I../intl $(HDEFINES) $(CFLAGS) -DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
@@ -1630,17 +1633,12 @@ configdoc.texi:	${DOCVER}-doc.texi
 	  || ln ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
 	  || cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
 
-ldver.texi: Makefile
+ldver.texi: $(srcdir)/../bfd/configure
 	rm -f $@
-	echo '@set VERSION $(VERSION)' > $@
+	eval `grep '^ *VERSION=' $<`; echo "@set VERSION $$VERSION" > $@
 
-ld.info: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
-	@rm -f $@ $@-[0-9] $@-[0-9][0-9]
-	$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc $(srcdir)/ld.texinfo
-
+$(srcdir)/ld.info: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
-	TEXINPUTS=$(top_srcdir)/../texinfo:$$TEXINPUTS \
-	  MAKEINFO="$(MAKEINFO) -I $(srcdir) -I $(BFDDIR)/doc" $(TEXI2DVI) -I $(BFDDIR)/doc $(srcdir)/ld.texinfo
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
@@ -1654,10 +1652,12 @@ ld.1: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 	        (rm -f $@.T$$$$ && exit 1)
 	rm -f ld.pod
 
-MAINTAINERCLEANFILES = ldver.texi
+MAINTAINERCLEANFILES = ldver.texi configdoc.texi
 
-# We want to reconfigure if configure.host or configure.tgt changes.
-CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.host $(srcdir)/configure.tgt
+# We want to reconfigure if configure.host or configure.tgt changes.  We
+# extract version from bfd/configure.in, so we must depend on that also.
+CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.host $(srcdir)/configure.tgt \
+	$(srcdir)/../bfd/configure.in
 
 MOSTLYCLEANFILES = $(STAGESTUFF) ld1$(EXEEXT) ld2$(EXEEXT) ld3$(EXEEXT) \
 	ldemul-list.h crtbegin.o crtend.o ld.log ld.sum
@@ -1690,7 +1690,7 @@ install-data-local:
 
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
-install: install-info
+install-data-local: install-info
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
@@ -1700,8 +1700,6 @@ diststuff: info $(EXTRA_DIST)
 DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
 distclean-local:
 	rm -rf ldscripts
-
-Makefile: $(BFDDIR)/configure.in
 
 # Targets to rebuild dependencies in this Makefile.
 # Have to get rid of DEP1 here so that "$?" later includes all of $(CFILES).

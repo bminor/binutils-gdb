@@ -1,3 +1,17 @@
+2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* acinclude.m4: Remove obsolete code.
+	* configure.in: Update AC_PREREQ.
+	* doc/Makefile.am (binutils_TEXINFOS): Define.
+	(config.texi): Depend on distributed files instead of built
+	files.
+	(binutils.dvi, binutils.info): Remove unnecessary rules.
+	(DISTCLEANFILES): Remove.
+	(install-data-local): Renamed from install.
+	(info-local): Renamed from info.
+	* Makefile.in, aclocal.m4, config.in, configure,
+	doc/Makefile.in: Regenerated.
+
 2005-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (get_ppc_dynamic_type): Display DT_PPC_GOT, not

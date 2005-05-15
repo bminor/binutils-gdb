@@ -1,3 +1,9 @@
+2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am (m68k-parse.c, itbl-parse.c): Update ylwrap
+	invocation.
+	* Makefile.in: Regenerated.
+
 2005-05-13  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 

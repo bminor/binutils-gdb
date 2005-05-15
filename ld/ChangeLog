@@ -1,3 +1,18 @@
+2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am (AM_MAKEINFOFLAGS): Define.
+	(TEXI2DVI): Define.
+	(ldver.texi): Depend on distributed files instead of built files.
+	(ld.info): Include $(srcdir) in the rule target.  Remove actions.
+	(ld.dvi): Remove actions.
+	(MAINTAINERCLEANFILES): Add configdoc.texi.
+	(CONFIG_STATUS_DEPENDENCIES): Add bfd/configure.in.
+	(install-data-local): Renamed from install.
+	(Makefile): Remove explicit dependency.
+	* acinclude.m4: Remove obsolete code.
+	* configure.in: Update AC_PREREQ.  Remove extra $CONFIG_SHELL.
+	* Makefile.in, aclocal.m4, config.in, configure: Regenerated.
+
 2005-05-11  Bob Wilson  <bob.wilson@acm.org>
 
 	* scripttempl/elfxtensa.sc: Sync up with elf.sc.

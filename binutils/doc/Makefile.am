@@ -31,17 +31,13 @@ man_MANS = \
 	$(DEMANGLER_NAME).1
 
 info_TEXINFOS = binutils.texi
-
-config.texi: Makefile
-	rm -f config.texi
-	echo '@set VERSION $(VERSION)' > config.texi
-	echo "@set UPDATED `date "+%B %Y"`" >> config.texi
-
+binutils_TEXINFOS = config.texi
 binutils_TEXI = $(srcdir)/binutils.texi
 
-binutils.dvi:  $(binutils_TEXI) config.texi
-
-binutils.info: $(binutils_TEXI) config.texi
+config.texi: $(srcdir)/../../bfd/configure $(binutils_TEXI)
+	rm -f config.texi
+	eval `grep '^ *VERSION=' $<`; echo "@set VERSION $$VERSION" > $@
+	echo "@set UPDATED `date "+%B %Y"`" >> config.texi
 
 # Man page generation from texinfo
 addr2line.1:	$(binutils_TEXI)
@@ -143,7 +139,6 @@ cxxfilt.man:	$(binutils_TEXI)
 	rm -f $(DEMANGLER_NAME).pod
 
 MAINTAINERCLEANFILES = config.texi
-DISTCLEANFILES       = config.texi
 MOSTLYCLEANFILES     = $(DEMANGLER_NAME).1
 
 $(DEMANGLER_NAME).1: cxxfilt.man Makefile
@@ -158,9 +153,9 @@ $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
-install: install-info
+install-data-local: install-info
 
 # Maintenance
 
 # We need it for the taz target in ../../Makefile.in.
-info: $(MANS)
+info-local: $(MANS)
