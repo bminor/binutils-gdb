@@ -1,5 +1,7 @@
 2005-05-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* sol-thread.c (ignore): Change last argument to `gdb_byte.'
+
 	* config/i386/fbsd.mt (DEPRECATED_TM_FILE): Remove.
 	* config/i386/fbsd64.mt (DEPRECATED_TM_FILE): Remove.
 	* config/i386/nbsd.mt (DEPRECATED_TM_FILE): Remove.

@@ -1523,7 +1523,7 @@ sol_make_note_section (bfd *obfd, int *note_size)
 }
 
 static int
-ignore (CORE_ADDR addr, char *contents)
+ignore (CORE_ADDR addr, gdb_byte *contents)
 {
   return 0;
 }
