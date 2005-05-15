@@ -61,7 +61,7 @@ esac
 # We are about to set IFS=:, so DOS-style file names with a drive
 # letter and a colon will be in trouble.
 
-if test -n $DJGPP
+if test -n "$DJGPP"
 then
      texi=`echo $texi | sed -e 's,^\([a-zA-Z]\):/,/dev/\1/,'`
 fi

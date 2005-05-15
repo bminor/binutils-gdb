@@ -1,3 +1,7 @@
+2005-05-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* observer.sh: Quote $DJGPP.
+
 2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (.y.c): Update ylwrap invocation.
