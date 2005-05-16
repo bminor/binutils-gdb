@@ -1,5 +1,11 @@
 2005-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* s390-tdep.c (s390_return_value): Remove unnecessary casts.
+	(s390_breakpoint_from_pc): Change type of return value and
+	'breakpoint' to const gdb_byte *.
+
+2005-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* s390-tdep.c (s390_pseudo_register_read, s390_pseudo_register_write):
 	Change type of 'buf' argument to gdb_byte *.
 	(s390x_pseudo_register_read, s390x_pseudo_register_write): Likewise.

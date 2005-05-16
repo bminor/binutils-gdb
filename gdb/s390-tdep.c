@@ -2726,8 +2726,7 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
 	  else if (length == 2*word_size)
 	    {
 	      regcache_cooked_write (regcache, S390_R2_REGNUM, in);
-	      regcache_cooked_write (regcache, S390_R3_REGNUM,
-				     (const char *)in + word_size);
+	      regcache_cooked_write (regcache, S390_R3_REGNUM, in + word_size);
 	    }
 	  else
 	    internal_error (__FILE__, __LINE__, _("invalid return type"));
@@ -2759,8 +2758,7 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
 	  else if (length == 2*word_size)
 	    {
 	      regcache_cooked_read (regcache, S390_R2_REGNUM, out);
-	      regcache_cooked_read (regcache, S390_R3_REGNUM,
-				    (char *)out + word_size);
+	      regcache_cooked_read (regcache, S390_R3_REGNUM, out + word_size);
 	    }
 	  else
 	    internal_error (__FILE__, __LINE__, _("invalid return type"));
@@ -2778,10 +2776,10 @@ s390_return_value (struct gdbarch *gdbarch, struct type *type,
 
 /* Breakpoints.  */
 
-static const unsigned char *
+static const gdb_byte *
 s390_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
-  static unsigned char breakpoint[] = { 0x0, 0x1 };
+  static const gdb_byte breakpoint[] = { 0x0, 0x1 };
 
   *lenptr = sizeof (breakpoint);
   return breakpoint;
