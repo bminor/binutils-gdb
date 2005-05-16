@@ -1,3 +1,14 @@
+2005-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_pseudo_register_read, s390_pseudo_register_write):
+	Change type of 'buf' argument to gdb_byte *.
+	(s390x_pseudo_register_read, s390x_pseudo_register_write): Likewise.
+	(s390_register_to_value): Change type of 'out' to gdb_byte *, change
+	type of 'in' to gdb_byte [].
+	(s390_value_to_register): Change type of 'in' to gdb_byte *, change
+	type of 'out' to gdb_byte [].
+	(s390_return_value): Change type of 'out' and 'in' to gdb_byte *.
+
 2005-05-16  Andrew Cagney  <cagney@gnu.org>
 
 	* target.h (target_read_partial, target_write_partial)

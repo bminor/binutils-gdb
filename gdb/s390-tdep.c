@@ -210,7 +210,7 @@ s390_dwarf_reg_to_regnum (int reg)
 
 static void
 s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			   int regnum, void *buf)
+			   int regnum, gdb_byte *buf)
 {
   ULONGEST val;
 
@@ -233,7 +233,7 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static void
 s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
-			    int regnum, const void *buf)
+			    int regnum, const gdb_byte *buf)
 {
   ULONGEST val, psw;
 
@@ -260,7 +260,7 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static void
 s390x_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			    int regnum, void *buf)
+			    int regnum, gdb_byte *buf)
 {
   ULONGEST val;
 
@@ -282,7 +282,7 @@ s390x_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static void
 s390x_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
-			     int regnum, const void *buf)
+			     int regnum, const gdb_byte *buf)
 {
   ULONGEST val, psw;
 
@@ -316,9 +316,9 @@ s390_convert_register_p (int regno, struct type *type)
 
 static void
 s390_register_to_value (struct frame_info *frame, int regnum,
-                        struct type *valtype, void *out)
+                        struct type *valtype, gdb_byte *out)
 {
-  char in[8];
+  gdb_byte in[8];
   int len = TYPE_LENGTH (valtype);
   gdb_assert (len < 8);
 
@@ -328,9 +328,9 @@ s390_register_to_value (struct frame_info *frame, int regnum,
 
 static void
 s390_value_to_register (struct frame_info *frame, int regnum,
-                        struct type *valtype, const void *in)
+                        struct type *valtype, const gdb_byte *in)
 {
-  char out[8];
+  gdb_byte out[8];
   int len = TYPE_LENGTH (valtype);
   gdb_assert (len < 8);
 
@@ -2694,7 +2694,8 @@ s390_return_value_convention (struct gdbarch *gdbarch, struct type *type)
 
 static enum return_value_convention
 s390_return_value (struct gdbarch *gdbarch, struct type *type, 
-		   struct regcache *regcache, void *out, const void *in)
+		   struct regcache *regcache, gdb_byte *out,
+		   const gdb_byte *in)
 {
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   int length = TYPE_LENGTH (type);
