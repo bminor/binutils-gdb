@@ -46,10 +46,10 @@ struct dis_line_entry
 
 /* Like target_read_memory, but slightly different parameters.  */
 static int
-dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr, unsigned int len,
+dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr, unsigned int len,
 		     struct disassemble_info *info)
 {
-  return target_read_memory (memaddr, (char *) myaddr, len);
+  return target_read_memory (memaddr, myaddr, len);
 }
 
 /* Like memory_error with slightly different parameters.  */

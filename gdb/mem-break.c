@@ -58,7 +58,7 @@ default_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 
   /* Write the breakpoint.  */
   if (val == 0)
-    val = target_write_memory (addr, (char *) bp, bplen);
+    val = target_write_memory (addr, bp, bplen);
 
   return val;
 }

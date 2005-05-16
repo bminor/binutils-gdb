@@ -455,9 +455,8 @@ map_vmap (bfd *abfd, bfd *arch)
    we just tail-call it with more arguments to select between them.  */
 
 int
-xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-	     struct mem_attrib *attrib,
-	     struct target_ops *target)
+xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
+	     struct mem_attrib *attrib, struct target_ops *target)
 {
   int res;
   struct section_table *p;

@@ -532,8 +532,8 @@ dcache_free (DCACHE *dcache)
    This routine is indended to be called by remote_xfer_ functions. */
 
 int
-dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, char *myaddr, int len,
-		    int should_write)
+dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, gdb_byte *myaddr,
+		    int len, int should_write)
 {
   int i;
   int (*xfunc) (DCACHE *dcache, CORE_ADDR addr, char *ptr);

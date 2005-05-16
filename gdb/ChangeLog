@@ -1,3 +1,20 @@
+2005-05-16  Andrew Cagney  <cagney@gnu.org>
+
+	* target.h (target_read_partial, target_write_partial)
+	(do_xfer_memory, xfer_memory, target_read, target_write)
+	(get_target_memory): For buffers, change "void*" to gdb_byte.
+	(struct target_ops): Ditto for to_xfer_partial and
+	deprecated_xfer_memory.
+	* dcache.h (dcache_xfer_memory): Ditto.
+	* target.c (default_xfer_partial, target_read_partial) 
+	(target_write_partial, target_read, target_write) 
+	(do_xfer_memory, update_current_target, get_target_memory): Update.
+	(target_read_string): Change buf to a gdb_byte.
+	* dcache.c (dcache_xfer_memory): Update.
+	* exec.c (xfer_memory): Make buffer type to gdb_byte.
+	* mem-break.c (default_memory_insert_breakpoint): Remove cast.
+	* disasm.c (dis_asm_read_memory): Remove cast, use gdb_byte.
+
 2005-05-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* sol-thread.c (ignore): Change last argument to `gdb_byte.'

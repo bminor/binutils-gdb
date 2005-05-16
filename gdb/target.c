@@ -71,8 +71,8 @@ static void nosupport_runtime (void);
 
 static LONGEST default_xfer_partial (struct target_ops *ops,
 				     enum target_object object,
-				     const char *annex, void *readbuf,
-				     const void *writebuf,
+				     const char *annex, gdb_byte *readbuf,
+				     const gdb_byte *writebuf,
 				     ULONGEST offset, LONGEST len);
 
 /* Transfer LEN bytes between target address MEMADDR and GDB address
@@ -81,7 +81,7 @@ static LONGEST default_xfer_partial (struct target_ops *ops,
    partial transfers, try either target_read_memory_partial or
    target_write_memory_partial).  */
 
-static int target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+static int target_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			       int write);
 
 static void init_dummy_target (void);
@@ -505,7 +505,7 @@ update_current_target (void)
 	    (void (*) (void)) 
 	    noprocess);
   de_fault (deprecated_xfer_memory, 
-	    (int (*) (CORE_ADDR, char *, int, int, struct mem_attrib *, struct target_ops *)) 
+	    (int (*) (CORE_ADDR, gdb_byte *, int, int, struct mem_attrib *, struct target_ops *)) 
 	    nomemory);
   de_fault (to_files_info, 
 	    (void (*) (struct target_ops *)) 
@@ -771,7 +771,7 @@ int
 target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
 {
   int tlen, origlen, offset, i;
-  char buf[4];
+  gdb_byte buf[4];
   int errcode = 0;
   char *buffer;
   int buffer_allocated;
@@ -790,7 +790,7 @@ target_read_string (CORE_ADDR memaddr, char **string, int len, int *errnop)
       tlen = MIN (len, 4 - (memaddr & 3));
       offset = memaddr & 3;
 
-      errcode = target_read_memory (memaddr & ~3, buf, 4);
+      errcode = target_read_memory (memaddr & ~3, buf, sizeof buf);
       if (errcode != 0)
 	{
 	  /* The transfer request might have crossed the boundary to an
@@ -1053,7 +1053,7 @@ Mode for reading from readonly sections is %s.\n"),
    Result is -1 on error, or the number of bytes transfered.  */
 
 int
-do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+do_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		struct mem_attrib *attrib)
 {
   int res;
@@ -1114,7 +1114,7 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
    Result is 0 or errno value.  */
 
 static int
-target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
+target_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write)
 {
   int res;
   int reg_len;
@@ -1151,7 +1151,7 @@ target_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write)
 	{
 	  if (region->attrib.cache)
 	    res = dcache_xfer_memory (target_dcache, memaddr, myaddr,
-				     reg_len, write);
+				      reg_len, write);
 	  else
 	    res = do_xfer_memory (memaddr, myaddr, reg_len, write,
 				 &region->attrib);
@@ -1305,8 +1305,8 @@ target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 
 static LONGEST
 default_xfer_partial (struct target_ops *ops, enum target_object object,
-		      const char *annex, void *readbuf, 
-		      const void *writebuf, ULONGEST offset, LONGEST len)
+		      const char *annex, gdb_byte *readbuf, 
+		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   if (object == TARGET_OBJECT_MEMORY
       && ops->deprecated_xfer_memory != NULL)
@@ -1352,7 +1352,7 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
 LONGEST
 target_read_partial (struct target_ops *ops,
 		     enum target_object object,
-		     const char *annex, void *buf,
+		     const char *annex, gdb_byte *buf,
 		     ULONGEST offset, LONGEST len)
 {
   return target_xfer_partial (ops, object, annex, buf, NULL, offset, len);
@@ -1361,7 +1361,7 @@ target_read_partial (struct target_ops *ops,
 LONGEST
 target_write_partial (struct target_ops *ops,
 		      enum target_object object,
-		      const char *annex, const void *buf,
+		      const char *annex, const gdb_byte *buf,
 		      ULONGEST offset, LONGEST len)
 {
   return target_xfer_partial (ops, object, annex, NULL, buf, offset, len);
@@ -1371,7 +1371,7 @@ target_write_partial (struct target_ops *ops,
 LONGEST
 target_read (struct target_ops *ops,
 	     enum target_object object,
-	     const char *annex, void *buf,
+	     const char *annex, gdb_byte *buf,
 	     ULONGEST offset, LONGEST len)
 {
   LONGEST xfered = 0;
@@ -1393,7 +1393,7 @@ target_read (struct target_ops *ops,
 LONGEST
 target_write (struct target_ops *ops,
 	      enum target_object object,
-	      const char *annex, const void *buf,
+	      const char *annex, const gdb_byte *buf,
 	      ULONGEST offset, LONGEST len)
 {
   LONGEST xfered = 0;
@@ -1415,7 +1415,7 @@ target_write (struct target_ops *ops,
 /* Memory transfer methods.  */
 
 void
-get_target_memory (struct target_ops *ops, CORE_ADDR addr, void *buf,
+get_target_memory (struct target_ops *ops, CORE_ADDR addr, gdb_byte *buf,
 		   LONGEST len)
 {
   if (target_read (ops, TARGET_OBJECT_MEMORY, NULL, buf, addr, len)

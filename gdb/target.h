@@ -236,23 +236,23 @@ enum target_object
 
 extern LONGEST target_read_partial (struct target_ops *ops,
 				    enum target_object object,
-				    const char *annex, void *buf,
+				    const char *annex, gdb_byte *buf,
 				    ULONGEST offset, LONGEST len);
 
 extern LONGEST target_write_partial (struct target_ops *ops,
 				     enum target_object object,
-				     const char *annex, const void *buf,
+				     const char *annex, const gdb_byte *buf,
 				     ULONGEST offset, LONGEST len);
 
 /* Wrappers to perform the full transfer.  */
 extern LONGEST target_read (struct target_ops *ops,
 			    enum target_object object,
-			    const char *annex, void *buf,
+			    const char *annex, gdb_byte *buf,
 			    ULONGEST offset, LONGEST len);
 
 extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,
-			     const char *annex, const void *buf,
+			     const char *annex, const gdb_byte *buf,
 			     ULONGEST offset, LONGEST len);
 
 /* Wrappers to target read/write that perform memory transfers.  They
@@ -263,7 +263,7 @@ extern LONGEST target_write (struct target_ops *ops,
    which in turn lifted it from read_memory.  */
 
 extern void get_target_memory (struct target_ops *ops, CORE_ADDR addr,
-			       void *buf, LONGEST len);
+			       gdb_byte *buf, LONGEST len);
 extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
 					    CORE_ADDR addr, int len);
 
@@ -329,7 +329,7 @@ struct target_ops
        NOTE: cagney/2004-10-01: This has been entirely superseeded by
        to_xfer_partial and inferior inheritance.  */
 
-    int (*deprecated_xfer_memory) (CORE_ADDR memaddr, char *myaddr,
+    int (*deprecated_xfer_memory) (CORE_ADDR memaddr, gdb_byte *myaddr,
 				   int len, int write,
 				   struct mem_attrib *attrib,
 				   struct target_ops *target);
@@ -419,7 +419,7 @@ struct target_ops
        only one, of readbuf or writebuf must be non-NULL.  */
     LONGEST (*to_xfer_partial) (struct target_ops *ops,
 				enum target_object object, const char *annex,
-				void *readbuf, const void *writebuf,
+				gdb_byte *readbuf, const gdb_byte *writebuf,
 				ULONGEST offset, LONGEST len);
 
     int to_magic;
@@ -532,8 +532,8 @@ extern void target_disconnect (char *, int);
 
 extern DCACHE *target_dcache;
 
-extern int do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-			   struct mem_attrib *attrib);
+extern int do_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
+			   int write, struct mem_attrib *attrib);
 
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
@@ -542,7 +542,7 @@ extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
 extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 				int len);
 
-extern int xfer_memory (CORE_ADDR, char *, int, int,
+extern int xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			struct mem_attrib *, struct target_ops *);
 
 extern int child_xfer_memory (CORE_ADDR, char *, int, int,
