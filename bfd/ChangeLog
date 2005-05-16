@@ -1,3 +1,9 @@
+2005-05-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 834
+	* elfxx-ia64.c (elfNN_ia64_relax_br): New.
+	(elfNN_ia64_relax_section): Use it.
+
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* elflink.c (bfd_elf_size_dynamic_sections): Use lbasename instead
