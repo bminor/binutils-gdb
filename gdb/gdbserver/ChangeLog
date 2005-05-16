@@ -1,3 +1,9 @@
+2005-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-low.c (fetch_register): Ensure buffer size is a multiple
+	of sizeof (PTRACE_XFER_TYPE).
+	(usr_store_inferior_registers): Likewise.  Zero out excess bytes.
+
 2005-05-12  Orjan Friberg  <orjanf@axis.com>
 
 	* target.h (struct target_ops): Add insert_watchpoint, 

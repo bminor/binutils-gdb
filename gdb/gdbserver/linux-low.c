@@ -1095,7 +1095,7 @@ static void
 fetch_register (int regno)
 {
   CORE_ADDR regaddr;
-  register int i;
+  int i, size;
   char *buf;
 
   if (regno >= the_low_target.num_regs)
@@ -1106,8 +1106,10 @@ fetch_register (int regno)
   regaddr = register_addr (regno);
   if (regaddr == -1)
     return;
-  buf = alloca (register_size (regno));
-  for (i = 0; i < register_size (regno); i += sizeof (PTRACE_XFER_TYPE))
+  size = (register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+         & - sizeof (PTRACE_XFER_TYPE);
+  buf = alloca (size);
+  for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
       *(PTRACE_XFER_TYPE *) (buf + i) =
@@ -1147,7 +1149,7 @@ static void
 usr_store_inferior_registers (int regno)
 {
   CORE_ADDR regaddr;
-  int i;
+  int i, size;
   char *buf;
 
   if (regno >= 0)
@@ -1162,9 +1164,12 @@ usr_store_inferior_registers (int regno)
       if (regaddr == -1)
 	return;
       errno = 0;
-      buf = alloca (register_size (regno));
+      size = (register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+	     & - sizeof (PTRACE_XFER_TYPE);
+      buf = alloca (size);
+      memset (buf, 0, size);
       collect_register (regno, buf);
-      for (i = 0; i < register_size (regno); i += sizeof (PTRACE_XFER_TYPE))
+      for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
 	  ptrace (PTRACE_POKEUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
