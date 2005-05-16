@@ -72,11 +72,6 @@ static void build_remote_gdbarch_data (void);
 
 static void remote_files_info (struct target_ops *ignore);
 
-static int remote_xfer_memory (CORE_ADDR memaddr, char *myaddr,
-			       int len, int should_write,
-			       struct mem_attrib *attrib,
-			       struct target_ops *target);
-
 static void remote_prepare_to_store (void);
 
 static void remote_fetch_registers (int regno);
@@ -3871,7 +3866,7 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
    read; 0 for error.  TARGET is unused.  */
 
 static int
-remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
+remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, int mem_len,
 		    int should_write, struct mem_attrib *attrib,
 		    struct target_ops *target)
 {
@@ -4954,8 +4949,8 @@ the loaded file\n"));
 
 static LONGEST
 remote_xfer_partial (struct target_ops *ops, enum target_object object,
-		     const char *annex, void *readbuf, const void *writebuf,
-		     ULONGEST offset, LONGEST len)
+		     const char *annex, gdb_byte *readbuf,
+		     const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   struct remote_state *rs = get_remote_state ();
   int i;

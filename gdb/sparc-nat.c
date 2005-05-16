@@ -1,6 +1,6 @@
 /* Native-dependent code for SPARC.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -255,8 +255,8 @@ store_inferior_registers (int regnum)
 
 LONGEST
 sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
-		    const char *annex, void *readbuf, const void *writebuf,
-		    ULONGEST offset, LONGEST len)
+		    const char *annex, gdb_byte *readbuf,
+		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   unsigned long wcookie = 0;
   char *buf = (char *)&wcookie;
@@ -307,13 +307,13 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
 }
 
 LONGEST (*inf_ptrace_xfer_partial) (struct target_ops *, enum target_object,
-				    const char *, void *, const void *,
+				    const char *, gdb_byte *, const gdb_byte *,
 				    ULONGEST, LONGEST);
 
 static LONGEST
 sparc_xfer_partial (struct target_ops *ops, enum target_object object,
-		    const char *annex, void *readbuf, const void *writebuf,
-		    ULONGEST offset, LONGEST len)
+		    const char *annex, gdb_byte *readbuf,
+		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   if (object == TARGET_OBJECT_WCOOKIE)
     return sparc_xfer_wcookie (ops, object, annex, readbuf, writebuf, 

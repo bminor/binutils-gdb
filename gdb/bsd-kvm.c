@@ -1,6 +1,6 @@
 /* BSD Kernel Data Access Library (libkvm) interface.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -103,17 +103,33 @@ bsd_kvm_close (int quitting)
     }
 }
 
-static int
-bsd_kvm_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
-		    int write, struct mem_attrib *attrib,
-		    struct target_ops *ops)
+static LONGEST
+bsd_kvm_xfer_memory (CORE_ADDR addr, ULONGEST len,
+		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (write)
-    return kvm_write (core_kd, memaddr, myaddr, len);
-  else
-    return kvm_read (core_kd, memaddr, myaddr, len);
+  ssize_t nbytes = len;
 
-  return -1;
+  if (readbuf)
+    nbytes = kvm_read (core_kd, addr, readbuf, nbytes);
+  if (writebuf && nbytes > 0)
+    nbytes = kvm_write (core_kd, addr, writebuf, nbytes);
+  return nbytes;
+}
+
+static LONGEST
+bsd_kvm_xfer_partial (struct target_ops *ops, enum target_object object,
+		      const char *annex, gdb_byte *readbuf,
+		      const gdb_byte *writebuf,
+		      ULONGEST offset, LONGEST len)
+{
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      return bsd_kvm_xfer_memory (offset, len, readbuf, writebuf);
+
+    default:
+      return -1;
+    }
 }
 
 /* Fetch process control block at address PADDR.  */
@@ -287,7 +303,7 @@ Optionally specify the filename of a core dump.");
   bsd_kvm_ops.to_open = bsd_kvm_open;
   bsd_kvm_ops.to_close = bsd_kvm_close;
   bsd_kvm_ops.to_fetch_registers = bsd_kvm_fetch_registers;
-  bsd_kvm_ops.deprecated_xfer_memory = bsd_kvm_xfer_memory;
+  bsd_kvm_ops.to_xfer_partial = bsd_kvm_xfer_partial;
   bsd_kvm_ops.to_stratum = process_stratum;
   bsd_kvm_ops.to_has_memory = 1;
   bsd_kvm_ops.to_has_stack = 1;

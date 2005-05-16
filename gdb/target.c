@@ -108,10 +108,6 @@ static void debug_to_store_registers (int);
 
 static void debug_to_prepare_to_store (void);
 
-static int deprecated_debug_xfer_memory (CORE_ADDR, char *, int, int,
-					 struct mem_attrib *,
-					 struct target_ops *);
-
 static void debug_to_files_info (struct target_ops *);
 
 static int debug_to_insert_breakpoint (CORE_ADDR, gdb_byte *);
@@ -2006,7 +2002,7 @@ debug_to_prepare_to_store (void)
 }
 
 static int
-deprecated_debug_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
 			      int write, struct mem_attrib *attrib,
 			      struct target_ops *target)
 {

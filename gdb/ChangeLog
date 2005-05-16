@@ -1,5 +1,28 @@
 2005-05-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* corelow.c (core_xfer_partial): Change type of readbuf and
+	writebuf to `gdb_byte *'.
+	* sparc-nat.c (sparc_xfer_wcookie, sparc_xfer_partial): Change
+	type of readbuf and writebuf to `gdb_byte *'.
+	* bsd-uthread.c (bsd_uthread_xfer_partial): Change type of readbuf
+	and writebuf to `gdb_byte *'.
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Change type of readbuf
+	and writebuf to `gdb_byte *'.
+	* bsd-kvm.c (bsd_kvm_xfer_memory): Replace.
+	(bsd_kvm_xfer_partial): New function.
+	(bsd_kvm_add_target): Set to_xfer_partial instead of
+	to_xfer_memory.
+	* bfd-target.c (target_bfd_xfer_partial): Change type of readbuf
+	and writebuf to `gdb_byte *'.
+	* target.c (deprecated_debug_xfer_memory): Remove prototype.
+	(deprecated_debug_xfer_memory): Change type of second argument to
+	`gdb_byte *'.
+	* remote.c (remote_xfer_memory): Remove prototype.
+	(remote_xfer_memory): Change type of second argument to `gdb_byte
+	*'.
+	(remote_xfer_partial): Change type of readbuf and writebuf to
+	`gdb_byte *'.
+
 	* config/sparc/fbsd.mt (TDEPFILES): Add solib.o and solib-svr4.o.
 	* config/sparc/fbsd.mh (NATDEPFILES): Remove solib.o, solib-svr4.o
 	and solib-legacy.o.

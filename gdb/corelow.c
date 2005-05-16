@@ -1,8 +1,8 @@
 /* Core dump and executable file functions below target vector, for GDB.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2003, 2004 Free Software Foundation,
-   Inc.
+   1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -532,8 +532,8 @@ core_files_info (struct target_ops *t)
 
 static LONGEST
 core_xfer_partial (struct target_ops *ops, enum target_object object,
-		   const char *annex, void *readbuf,
-		   const void *writebuf, ULONGEST offset, LONGEST len)
+		   const char *annex, gdb_byte *readbuf,
+		   const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   switch (object)
     {

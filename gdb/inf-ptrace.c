@@ -400,8 +400,9 @@ inf_ptrace_stop (void)
 
 static LONGEST
 inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
-			 const char *annex, void *readbuf,
-			 const void *writebuf, ULONGEST offset, LONGEST len)
+			 const char *annex, gdb_byte *readbuf,
+			 const gdb_byte *writebuf,
+			 ULONGEST offset, LONGEST len)
 {
   switch (object)
     {
