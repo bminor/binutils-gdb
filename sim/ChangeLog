@@ -1,3 +1,8 @@
+2005-05-17  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.ac: Add igen to v850 build.
+	* configure: Regenerate.
+
 2005-04-29  Paul Brook  <paul@codesourcery.com>
 
 	* common/callback.c (PIPE_BUF): Provide default definition.

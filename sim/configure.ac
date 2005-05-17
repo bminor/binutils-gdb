@@ -116,6 +116,7 @@ if test "${enable_sim}" != no; then
        v850*-*-* )
            AC_CONFIG_SUBDIRS(v850)
 	   common=yes
+	   igen=yes
 	   ;;
    esac
    if test "$testsuite" = yes; then

@@ -3528,6 +3528,7 @@ subdirs="$subdirs ppc"
 subdirs="$subdirs v850"
 
 	   common=yes
+	   igen=yes
 	   ;;
    esac
    if test "$testsuite" = yes; then
