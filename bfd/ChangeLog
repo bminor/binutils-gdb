@@ -1,3 +1,12 @@
+2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf.c (_bfd_elf_write_object_contents): Check for non-NULL
+	elf_shstrtab.
+	* format.c (bfd_check_format_matches): Set output_has_begun
+	for both_direction.
+	* section.c (bfd_set_section_contents): Use bfd_write_p.  Remove
+	special case for both_direction.
+
 2005-05-17  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (group_signature): Check for a group section which is

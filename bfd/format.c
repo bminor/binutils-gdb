@@ -173,6 +173,14 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	  if (matching)
 	    free (matching_vector);
 
+	  /* If the file was opened for update, then `output_has_begun'
+	     some time ago when the file was created.  Do not recompute
+	     sections sizes or alignments in _bfd_set_section_contents.
+	     We can not set this flag until after checking the format,
+	     because it will interfere with creation of BFD sections.  */
+	  if (abfd->direction == both_direction)
+	    abfd->output_has_begun = TRUE;
+
 	  return TRUE;			/* File position has moved, BTW.  */
 	}
 
@@ -318,6 +326,14 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
       if (matching)
 	free (matching_vector);
+
+      /* If the file was opened for update, then `output_has_begun'
+	 some time ago when the file was created.  Do not recompute
+	 sections sizes or alignments in _bfd_set_section_contents.
+	 We can not set this flag until after checking the format,
+	 because it will interfere with creation of BFD sections.  */
+      if (abfd->direction == both_direction)
+	abfd->output_has_begun = TRUE;
 
       return TRUE;			/* File position has moved, BTW.  */
     }

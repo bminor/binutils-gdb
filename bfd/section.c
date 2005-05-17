@@ -1346,22 +1346,10 @@ bfd_set_section_contents (bfd *abfd,
       return FALSE;
     }
 
-  switch (abfd->direction)
+  if (!bfd_write_p (abfd))
     {
-    case read_direction:
-    case no_direction:
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
-
-    case write_direction:
-      break;
-
-    case both_direction:
-      /* File is opened for update. `output_has_begun' some time ago when
-	   the file was created.  Do not recompute sections sizes or alignments
-	   in _bfd_set_section_content.  */
-      abfd->output_has_begun = TRUE;
-      break;
     }
 
   /* Record a copy of the data in memory if desired.  */
