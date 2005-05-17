@@ -1,3 +1,41 @@
+2005-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 797
+	* ldexp.c (exp_fold_tree_1): Renamed from exp_fold_tree and
+	take take a bfd_boolean, mark_used. Ignore assert failure if
+	mark_used is TRUE.
+	(exp_fold_tree) Call exp_fold_tree_1 with mark_used == FALSE.
+	(exp_fold_tree_no_dot): Updated to take a bfd_boolean,
+	mark_used and pass down.
+	(fold_unary): Likewise.
+	(fold_binary): Likewise.
+	(fold_trinary): Likewise.
+	(exp_binop): Add FALSE to call to exp_fold_tree_no_dot.
+	(exp_trinop): Likewise.
+	(exp_unop): Likewise.
+	(exp_nameop): Likewise.
+	(exp_get_vma): Likewise.
+	(exp_get_fill): Likewise.
+	(exp_get_abs_int): Likewise.
+	(fold_name): Likewise. Set SEC_KEEP in output section flags.
+	(exp_mark_used_section): New.
+
+	* ldexp.h (exp_mark_used_section): New.
+
+	* ldlang.c (lang_output_section_statement_lookup_1): Set the
+	ignored field to FALSE.
+	(lang_mark_used_section_1): New.
+	(lang_mark_used_section): Call lang_mark_used_section_1.
+	(strip_excluded_output_sections): Call lang_mark_used_section
+	and check for unused sections.
+	(lang_size_sections_1): Skip an output section if it should
+	be ignored.
+	(lang_do_assignments_1): Likewise.
+	(lang_process): Don't call lang_mark_used_section here.
+
+	* ldlang.h (lang_output_section_statement_type): Change
+	all_input_readonly to bitfield. Add ignored.
+
 2005-05-17  Lennert Buytenhek  <buytenh@wantstofly.org>
 	    Peter S. Mazinger" <ps.m@gmx.net>
 

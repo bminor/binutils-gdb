@@ -147,7 +147,8 @@ typedef struct lang_output_section_statement_struct
   int subsection_alignment;	/* Alignment of components.  */
   int section_alignment;	/* Alignment of start of section.  */
   int constraint;
-  bfd_boolean all_input_readonly;
+  unsigned int all_input_readonly : 1;
+  unsigned int ignored : 1; 
 
   union etree_union *load_base;
 

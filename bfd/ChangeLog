@@ -1,3 +1,10 @@
+2005-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 797
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Also remove
+	empty sdynbss section.
+	* elf64-x86-64.c (elf64_x86_64_size_dynamic_sections): Likewise.
+
 2005-05-17  Tavis Ormandy <taviso@gentoo.org>
 
 	* elf.c (bfd_section_from_shdr): Add sanity check when parsing

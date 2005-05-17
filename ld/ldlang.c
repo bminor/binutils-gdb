@@ -1024,6 +1024,7 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
       lookup->bfd_section = NULL;
       lookup->processed = 0;
       lookup->constraint = constraint;
+      lookup->ignored = FALSE;
       lookup->sectype = normal_section;
       lookup->addr_tree = NULL;
       lang_list_init (&lookup->children);
@@ -3042,6 +3043,90 @@ map_input_to_output_sections
     }
 }
 
+/* Worker function for lang_mark_used_section.  Recursiveness goes
+   here.  */
+
+static void
+lang_mark_used_section_1
+  (lang_statement_union_type *s,
+   lang_output_section_statement_type *output_section_statement)
+{
+  for (; s != NULL; s = s->header.next)
+    {
+      switch (s->header.type)
+	{
+	case lang_constructors_statement_enum:
+	  break;
+
+	case lang_output_section_statement_enum:
+	  {
+	    lang_output_section_statement_type *os;
+
+	    os = &(s->output_section_statement);
+	    if (os->bfd_section != NULL)
+	      lang_mark_used_section_1 (os->children.head, os);
+	  }
+	  break;
+	case lang_wild_statement_enum:
+	  lang_mark_used_section_1 (s->wild_statement.children.head,
+				    output_section_statement);
+
+	  break;
+
+	case lang_object_symbols_statement_enum:
+	case lang_output_statement_enum:
+	case lang_target_statement_enum:
+	  break;
+	case lang_data_statement_enum:
+	  exp_mark_used_section (s->data_statement.exp,
+				 abs_output_section);
+	  break;
+
+	case lang_reloc_statement_enum:
+	  break;
+
+	case lang_input_section_enum:
+	  break;
+
+	case lang_input_statement_enum:
+	  break;
+	case lang_fill_statement_enum:
+	  break;
+	case lang_assignment_statement_enum:
+	  exp_mark_used_section (s->assignment_statement.exp,
+				 output_section_statement);
+	  break;
+	case lang_padding_statement_enum:
+	  break;
+
+	case lang_group_statement_enum:
+	  lang_mark_used_section_1 (s->group_statement.children.head,
+				    output_section_statement);
+	  break;
+
+	default:
+	  FAIL ();
+	  break;
+	case lang_address_statement_enum:
+	  break;
+	}
+    }
+}
+
+static void
+lang_mark_used_section (void)
+{
+  unsigned int gc_sections = link_info.gc_sections;
+
+  /* Callers of exp_fold_tree need to increment this.  */
+  lang_statement_iteration++;
+  lang_mark_used_section_1 (statement_list.head, abs_output_section);
+
+  link_info.gc_sections = 0;
+  bfd_gc_sections (output_bfd, &link_info);
+  link_info.gc_sections = gc_sections;
+}
+
 /* An output section might have been removed after its statement was
    added.  For example, ldemul_before_allocation can remove dynamic
    sections if they turn out to be not needed.  Clean them up here.  */
@@ -3051,32 +3136,54 @@ strip_excluded_output_sections (void)
 {
   lang_output_section_statement_type *os;
 
+  lang_mark_used_section ();
+
   for (os = &lang_output_section_statement.head->output_section_statement;
        os != NULL;
        os = os->next)
     {
-      asection *s;
+      asection *output_section;
+      bfd_boolean exclude;
 
       if (os->constraint == -1)
 	continue;
 
-      if (os->bfd_section == NULL || os->bfd_section->map_head.s == NULL)
+      output_section = os->bfd_section;
+      if (output_section == NULL)
 	continue;
 
-      for (s = os->bfd_section->map_head.s; s != NULL; s = s->map_head.s)
-	if ((s->flags & SEC_EXCLUDE) == 0)
-	  break;
-
-      os->bfd_section->map_head.link_order = NULL;
-      os->bfd_section->map_tail.link_order = NULL;
-
-      if (s == NULL)
+      exclude = FALSE;
+      if (output_section->map_head.s != NULL)
 	{
-	  s = os->bfd_section;
-	  os->bfd_section = NULL;
-	  if (!bfd_section_removed_from_list (output_bfd, s))
+	  asection *s;
+
+	  for (s = output_section->map_head.s; s != NULL;
+	       s = s->map_head.s)
+	    if ((s->flags & SEC_EXCLUDE) == 0)
+	      break;
+
+	  output_section->map_head.link_order = NULL;
+	  output_section->map_tail.link_order = NULL;
+
+	  if (s == NULL)
+	    exclude = TRUE;
+	}
+
+      if (exclude
+	  || (output_section->linker_has_input == 0
+	      && ((output_section->flags
+		   & (SEC_KEEP | SEC_HAS_CONTENTS)) == 0)))
+	{
+	  if (exclude)
+	    os->bfd_section = NULL;
+	  else
+	    /* We don't set bfd_section to NULL since bfd_section of the
+	     * removed output section statement may still be used.  */
+	    os->ignored = TRUE;
+	  if (!bfd_section_removed_from_list (output_bfd,
+					      output_section))
 	    {
-	      bfd_section_list_remove (output_bfd, s);
+	      bfd_section_list_remove (output_bfd, output_section);
 	      output_bfd->section_count--;
 	    }
 	}
@@ -3936,8 +4043,8 @@ lang_size_sections_1
 	    lang_output_section_statement_type *os;
 
 	    os = &s->output_section_statement;
-	    if (os->bfd_section == NULL)
-	      /* This section was never actually created.  */
+	    if (os->bfd_section == NULL || os->ignored)
+	      /* This section was removed or never actually created.  */
 	      break;
 
 	    /* If this is a COFF shared library section, use the size and
@@ -4432,7 +4539,7 @@ lang_do_assignments_1
 	    lang_output_section_statement_type *os;
 
 	    os = &(s->output_section_statement);
-	    if (os->bfd_section != NULL)
+	    if (os->bfd_section != NULL && !os->ignored)
 	      {
 		dot = os->bfd_section->vma;
 		lang_do_assignments_1 (os->children.head, os, os->fill, dot);
@@ -4446,7 +4553,7 @@ lang_do_assignments_1
 	      {
 		/* If nothing has been placed into the output section then
 		   it won't have a bfd_section.  */
-		if (os->bfd_section)
+		if (os->bfd_section && !os->ignored)
 		  {
 		    os->bfd_section->lma
 		      = exp_get_abs_int (os->load_base, 0, "load base",
@@ -5240,16 +5347,6 @@ lang_gc_sections (void)
     bfd_gc_sections (output_bfd, &link_info);
 }
 
-static void
-lang_mark_used_section (void)
-{
-  unsigned int gc_sections = link_info.gc_sections;
-
-  link_info.gc_sections = 0;
-  bfd_gc_sections (output_bfd, &link_info);
-  link_info.gc_sections = gc_sections;
-}
-
 void
 lang_process (void)
 {
@@ -5408,7 +5505,6 @@ lang_process (void)
     lang_check_section_addresses ();
 
   /* Final stuffs.  */
-  lang_mark_used_section ();
   ldemul_finish ();
   lang_finish ();
 }

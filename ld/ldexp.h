@@ -156,5 +156,7 @@ fill_type *exp_get_fill
   (etree_type *, fill_type *, char *, lang_phase_type);
 bfd_vma exp_get_abs_int
   (etree_type *, int, char *, lang_phase_type);
+void exp_mark_used_section
+  (etree_type *, struct lang_output_section_statement_struct *);
 
 #endif

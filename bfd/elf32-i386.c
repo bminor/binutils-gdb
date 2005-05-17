@@ -1914,7 +1914,8 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (s == htab->splt
 	  || s == htab->sgot
-	  || s == htab->sgotplt)
+	  || s == htab->sgotplt
+	  || s == htab->sdynbss)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
