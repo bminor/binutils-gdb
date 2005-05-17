@@ -83,6 +83,7 @@ int linenumber;
 ";".* 		{ }
 " "		{ }
 "\t"		{ }
+"\r"		{ }
 "\n"	 	{ linenumber ++ ;}
 "=" 		{ return '=';}
 "." 		{ return '.';}

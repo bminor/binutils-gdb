@@ -1,3 +1,7 @@
+2005-05-15  Yitzchak Scott-Thoennes  <sthoenna@efn.org>
+
+        * deflex.l: Ignore CRs
+
 2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* acinclude.m4: Remove obsolete code.
