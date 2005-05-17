@@ -1,3 +1,9 @@
+2005-05-17  Lennert Buytenhek  <buytenh@wantstofly.org>
+	    Peter S. Mazinger" <ps.m@gmx.net>
+
+	* emulparams/armelf_linux.sh (GENERATE_PIE_SCRIPT): Define as "yes". 
+	* emulparams/hppalinux.sh (GENERATE_PIE_SCRIPT): Define as "yes". 
+
 2005-05-17  Julian Brown <julian@codesourcery.com>
 
 	* ldlang.c (print_assignment): Do not rely upon a valid result
