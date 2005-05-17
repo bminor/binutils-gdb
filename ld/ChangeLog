@@ -1,3 +1,13 @@
+2005-05-17  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (Scan_for_self_assignment): Check an assignment tree to
+	see if the same value is being used on the rhs as on the lhs.
+	(print_assignment): Call scan_for_self_assignment and if it
+	returns true, do no display the result of the computation but
+	instead just the final value of the symbol on the lhs.
+	* ld.texinfo: Document this behaviour and provide an example of
+	when it will happen.
+
 2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (AM_MAKEINFOFLAGS): Define.
