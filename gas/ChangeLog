@@ -1,3 +1,13 @@
+2005-05-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850,h (TC_FIX_TYPE): Define.
+	(TC_INIT_FIX_TYPE): Define.
+	* config/tc-v850.c (md_assemble): When creating a fix record the
+	operand in the tc_fix_data field.
+	(md_apply_fix3): When applying a resolved fix use the operand's
+	insertion procedure to store the value, if the operand has been
+	recorded.
+
 2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.am (m68k-parse.c, itbl-parse.c): Update ylwrap

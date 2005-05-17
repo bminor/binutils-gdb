@@ -906,6 +906,7 @@ resolve_symbol_value (symbolS *symp)
       offsetT left, right;
       segT seg_left, seg_right;
       operatorT op;
+      int move_seg_ok;
 
       symp->sy_resolving = 1;
 
@@ -1091,18 +1092,15 @@ resolve_symbol_value (symbolS *symp)
 		}
 	    }
 
+	  move_seg_ok = 1;
 	  /* Equality and non-equality tests are permitted on anything.
 	     Subtraction, and other comparison operators are permitted if
 	     both operands are in the same section.  Otherwise, both
 	     operands must be absolute.  We already handled the case of
 	     addition or subtraction of a constant above.  This will
 	     probably need to be changed for an object file format which
-	     supports arbitrary expressions, such as IEEE-695.
-
-	     Don't emit messages unless we're finalizing the symbol value,
-	     otherwise we may get the same message multiple times.  */
-	  if (finalize_syms
-	      && !(seg_left == absolute_section
+	     supports arbitrary expressions, such as IEEE-695.  */
+	  if (!(seg_left == absolute_section
 		   && seg_right == absolute_section)
 	      && !(op == O_eq || op == O_ne)
 	      && !((op == O_subtract
@@ -1110,9 +1108,21 @@ resolve_symbol_value (symbolS *symp)
 		   && seg_left == seg_right
 		   && (seg_left != undefined_section
 		       || add_symbol == op_symbol)))
-	    report_op_error (symp, add_symbol, op_symbol);
+	    {
+	      /* Don't emit messages unless we're finalizing the symbol value,
+		 otherwise we may get the same message multiple times.  */
+	      if (finalize_syms)
+		report_op_error (symp, add_symbol, op_symbol);
+	      /* However do not move the symbol into the absolute section
+		 if it cannot currently be resolved - this would confuse
+		 other parts of the assembler into believing that the
+		 expression had been evaluated to zero.  */
+	      else
+		move_seg_ok = 0;
+	    }
 
-	  if (final_seg == expr_section || final_seg == undefined_section)
+	  if (move_seg_ok
+	      && (final_seg == expr_section || final_seg == undefined_section))
 	    final_seg = absolute_section;
 
 	  /* Check for division by zero.  */

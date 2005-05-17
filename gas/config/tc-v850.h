@@ -78,3 +78,8 @@ extern void v850_handle_align (fragS *);
 extern long v850_pcrel_from_section (struct fix *, asection *);
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 2
+
+/* We need to record the operand involved when a pseudo-reloc is
+   processed so that the resulting value can be inserted correctly.  */
+#define TC_FIX_TYPE             void *
+#define TC_INIT_FIX_DATA(fixP)  (fixP)->tc_fix_data = NULL

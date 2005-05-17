@@ -2125,6 +2125,8 @@ md_assemble (char *str)
 			      reloc_howto->pc_relative,
 			      reloc);
 
+	  fixP->tc_fix_data = (void *) operand;
+
 	  switch (reloc)
 	    {
 	    case BFD_RELOC_LO16:
@@ -2319,16 +2321,42 @@ md_apply_fix3 (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       /* We still have to insert the value into memory!  */
       where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
-      if (fixP->fx_r_type == BFD_RELOC_V850_LO16_SPLIT_OFFSET)
-	bfd_putl32 (((value << 16) & 0xfffe0000)
-		    | ((value << 5) & 0x20)
-		    | (bfd_getl32 (where) & ~0xfffe0020), where);
-      else if (fixP->fx_size == 1)
-	*where = value & 0xff;
-      else if (fixP->fx_size == 2)
-	bfd_putl16 (value & 0xffff, (unsigned char *) where);
-      else if (fixP->fx_size == 4)
-	bfd_putl32 (value, (unsigned char *) where);
+      if (fixP->tc_fix_data != NULL)
+	{
+	  struct v850_operand * operand = (struct v850_operand *) fixP->tc_fix_data;
+	  unsigned long insn;
+
+	  /* The variable "where" currently points at the exact point inside
+	     the insn where we need to insert the value.  But we need to
+	     extract the entire insn so we probably need to move "where"
+	     back a few bytes.  */
+	  if (fixP->fx_size == 2)
+	    where -= 2;
+	  else if (fixP->fx_size == 1)
+	    where -= 3;
+
+	  insn = bfd_getl32 ((unsigned char *) where);
+
+	  /* Use the operand's insertion procedure, if present, in order to
+	     make sure that the value is correctly stored in the insn.  */
+	  insn = v850_insert_operand (insn, operand, (offsetT) value,
+				      fixP->fx_file, fixP->fx_line, NULL);
+
+	  bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+	}
+      else
+	{
+	  if (fixP->fx_r_type == BFD_RELOC_V850_LO16_SPLIT_OFFSET)
+	    bfd_putl32 (((value << 16) & 0xfffe0000)
+			| ((value << 5) & 0x20)
+			| (bfd_getl32 (where) & ~0xfffe0020), where);
+	  else if (fixP->fx_size == 1)
+	    *where = value & 0xff;
+	  else if (fixP->fx_size == 2)
+	    bfd_putl16 (value & 0xffff, (unsigned char *) where);
+	  else if (fixP->fx_size == 4)
+	    bfd_putl32 (value, (unsigned char *) where);
+	}
     }
 }
 

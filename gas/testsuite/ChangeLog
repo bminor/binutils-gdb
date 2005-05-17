@@ -1,3 +1,10 @@
+2005-05-17  Nick Clifton  <nickc@redhat.com>
+
+	* gas/v850/split-lo16.s: Add test for a lo() pseudo reloc
+	corrupting an ld.w instruction.
+	* gas/v850/split-lo16.d: Add expected, correct (ie not corrupt)
+	output.
+
 2005-05-10  Michael Matz  <matz@suse.de>
 
 	* gas/hppa/parse/block1.s: Use official limit (0x3fffffff) for
