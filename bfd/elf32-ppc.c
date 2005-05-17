@@ -81,6 +81,12 @@ static bfd_reloc_status_type ppc_elf_unhandled_reloc
 #define LWZ_11_X_11	0x816b0000
 #define LWZ_11_X_30	0x817e0000
 #define MTCTR_11	0x7d6903a6
+#define LIS_11		0x3d600000
+#define LIS_12		0x3d800000
+#define LWZU_0_X_12	0x840c0000
+#define LWZ_0_X_12	0x800c0000
+#define LWZ_12_4_12	0x818c0004
+#define LWZ_12_X_12	0x818c0000
 
 /* Offset of tp and dtp pointers from start of TLS block.  */
 #define TP_OFFSET	0x7000
@@ -6394,59 +6400,78 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
     {
       unsigned char *p;
       unsigned char *endp;
-      bfd_vma pltgot;
+      bfd_vma pltgot, res0;
       unsigned int i;
       static const unsigned int plt_resolve[] =
 	{
-	  SUB_11_11_30,
-	  ADD_0_11_11,
-	  ADD_11_0_11,
 	  LWZ_0_4_30,
+	  SUB_11_11_30,
 	  MTCTR_0,
+	  ADD_0_11_11,
 	  LWZ_12_8_30,
+	  ADD_11_0_11,
 	  BCTR,
 	  NOP,
 	  NOP,
 	  NOP
 	};
 
+      if (ARRAY_SIZE (plt_resolve) + 2 != GLINK_PLTRESOLVE / 4)
+	abort ();
+
 #define PPC_LO(v) ((v) & 0xffff)
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
 
-      pltgot = (htab->plt->output_section->vma
-		+ htab->plt->output_offset
-		- got);
+      pltgot = htab->plt->output_section->vma + htab->plt->output_offset;
 
       /* Write the plt call stubs.  */
       p = htab->glink->contents;
       endp = p + htab->glink_pltresolve;
-      while (p < endp)
+      if (info->shared || info->pie)
 	{
-	  if (pltgot < 0x8000)
+	  pltgot -= got;
+
+	  while (p < endp)
 	    {
-	      bfd_put_32 (output_bfd, LWZ_11_X_30 + pltgot, p);
-	      p += 4;
-	      bfd_put_32 (output_bfd, MTCTR_11, p);
-	      p += 4;
-	      bfd_put_32 (output_bfd, BCTR, p);
-	      p += 4;
-	      bfd_put_32 (output_bfd, NOP, p);
-	      p += 4;
+	      if (pltgot < 0x8000)
+		{
+		  bfd_put_32 (output_bfd, LWZ_11_X_30 + pltgot, p);
+		  p += 4;
+		  bfd_put_32 (output_bfd, MTCTR_11, p);
+		  p += 4;
+		  bfd_put_32 (output_bfd, BCTR, p);
+		  p += 4;
+		  bfd_put_32 (output_bfd, NOP, p);
+		  p += 4;
+		}
+	      else
+		{
+		  bfd_put_32 (output_bfd, ADDIS_11_30 + PPC_HA (pltgot), p);
+		  p += 4;
+		  bfd_put_32 (output_bfd, LWZ_11_X_11 + PPC_LO (pltgot), p);
+		  p += 4;
+		  bfd_put_32 (output_bfd, MTCTR_11, p);
+		  p += 4;
+		  bfd_put_32 (output_bfd, BCTR, p);
+		  p += 4;
+		}
+	      pltgot += 4;
 	    }
-	  else
-	    {
-	      bfd_put_32 (output_bfd, ADDIS_11_30 + PPC_HA (pltgot), p);
-	      p += 4;
-	      bfd_put_32 (output_bfd, LWZ_11_X_11 + PPC_LO (pltgot), p);
-	      p += 4;
-	      bfd_put_32 (output_bfd, MTCTR_11, p);
-	      p += 4;
-	      bfd_put_32 (output_bfd, BCTR, p);
-	      p += 4;
-	    }
-	  pltgot += 4;
 	}
+      else
+	while (p < endp)
+	  {
+	    bfd_put_32 (output_bfd, LIS_11 + PPC_HA (pltgot), p);
+	    p += 4;
+	    bfd_put_32 (output_bfd, LWZ_11_X_11 + PPC_LO (pltgot), p);
+	    p += 4;
+	    bfd_put_32 (output_bfd, MTCTR_11, p);
+	    p += 4;
+	    bfd_put_32 (output_bfd, BCTR, p);
+	    p += 4;
+	    pltgot += 4;
+	  }
 
       /* Now build the branch table, one for each plt entry (less one),
 	 and perhaps some padding.  */
@@ -6463,23 +6488,53 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	  p += 4;
 	}
 
-      got -= (htab->glink_pltresolve
+      res0 = (htab->glink_pltresolve
 	      + htab->glink->output_section->vma
 	      + htab->glink->output_offset);
 
       /* Last comes the PLTresolve stub.  */
-      bfd_put_32 (output_bfd, ADDIS_11_11 + PPC_HA (got), p);
-      p += 4;
-      bfd_put_32 (output_bfd, ADDI_11_11 + PPC_LO (got), p);
-      p += 4;
-
-      for (i = 0; i < ARRAY_SIZE (plt_resolve); i++)
+      if (info->shared || info->pie)
 	{
-	  bfd_put_32 (output_bfd, plt_resolve[i], p);
+	  bfd_put_32 (output_bfd, ADDIS_11_11 + PPC_HA (got - res0), p);
 	  p += 4;
+	  bfd_put_32 (output_bfd, ADDI_11_11 + PPC_LO (got - res0), p);
+	  p += 4;
+
+	  for (i = 0; i < ARRAY_SIZE (plt_resolve); i++)
+	    {
+	      bfd_put_32 (output_bfd, plt_resolve[i], p);
+	      p += 4;
+	    }
 	}
-      if (ARRAY_SIZE (plt_resolve) + 2 != GLINK_PLTRESOLVE / 4)
-	abort ();
+      else
+	{
+	  bfd_put_32 (output_bfd, LIS_12 + PPC_HA (got + 4), p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADDIS_11_11 + PPC_HA (-res0), p);
+	  p += 4;
+	  if (PPC_HA (got + 4) != PPC_HA (got + 8))
+	    bfd_put_32 (output_bfd, LWZU_0_X_12 + PPC_LO (got + 4), p);
+	  else
+	    bfd_put_32 (output_bfd, LWZ_0_X_12 + PPC_LO (got + 4), p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADDI_11_11 + PPC_LO (-res0), p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, MTCTR_0, p);
+	  p += 4;
+	  bfd_put_32 (output_bfd, ADD_0_11_11, p);
+	  p += 4;
+	  if (PPC_HA (got + 4) != PPC_HA (got + 8))
+	    bfd_put_32 (output_bfd, LWZ_12_4_12, p);
+	  else
+	    bfd_put_32 (output_bfd, LWZ_12_X_12 + PPC_LO (got + 8), p);
+	  p += 4;
+
+	  for (i = 5; i < ARRAY_SIZE (plt_resolve); i++)
+	    {
+	      bfd_put_32 (output_bfd, plt_resolve[i], p);
+	      p += 4;
+	    }
+	}
     }
 
   return TRUE;

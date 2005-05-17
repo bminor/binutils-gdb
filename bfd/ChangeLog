@@ -1,3 +1,10 @@
+2005-05-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (LIS_11. LIS_12): Define.
+	(LWZU_0_X_12, LWZ_0_X_12, LWZ_12_4_12, LWZ_12_X_12): Define.
+	(ppc_elf_finish_dynamic_sections): Provide non-pic plt call stub
+	for --data-plt when building non-pie executables.
+
 2005-05-17  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-v850.c (v850_elf_relocate_section): Move code to test for
