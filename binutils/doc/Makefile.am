@@ -36,7 +36,8 @@ binutils_TEXI = $(srcdir)/binutils.texi
 
 config.texi: $(srcdir)/../../bfd/configure $(binutils_TEXI)
 	rm -f config.texi
-	eval `grep '^ *VERSION=' $<`; echo "@set VERSION $$VERSION" > $@
+	eval `grep '^ *VERSION=' $(srcdir)/../../bfd/configure`; \
+	  echo "@set VERSION $$VERSION" > $@
 	echo "@set UPDATED `date "+%B %Y"`" >> config.texi
 
 # Man page generation from texinfo

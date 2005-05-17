@@ -1,3 +1,8 @@
+2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/Makefile.am (config.texi): Don't use $<.
+	* doc/Makefile.in: Regenerated.
+
 2005-05-15  Yitzchak Scott-Thoennes  <sthoenna@efn.org>
 
         * deflex.l: Ignore CRs

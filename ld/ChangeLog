@@ -1,5 +1,10 @@
 2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.am (ldver.texi): Don't use $<.
+	* Makefile.in: Regenerated.
+
+2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.am (AM_MAKEINFOFLAGS, TEXI2DVI): Explicitly include
 	$(srcdir) before $(BFDDIR)/doc.
 	* Makefile.in: Regenerated.
