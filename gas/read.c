@@ -221,6 +221,7 @@ static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
 static int get_line_sb (sb *);
 static void generate_file_debug (void);
+static char *_find_end_of_line (char *, int, int);
 
 void
 read_begin (void)
@@ -519,9 +520,11 @@ pobegin (void)
 #define HANDLE_CONDITIONAL_ASSEMBLY()					\
   if (ignore_input ())							\
     {									\
-      while (!is_end_of_line[(unsigned char) *input_line_pointer++])	\
-	if (input_line_pointer == buffer_limit)				\
-	  break;							\
+      char *eol = find_end_of_line (input_line_pointer, flag_m68k_mri);	\
+      input_line_pointer = (input_line_pointer <= buffer_limit		\
+			    && eol >= buffer_limit)			\
+			   ? buffer_limit				\
+			   : eol + 1;					\
       continue;								\
     }
 
@@ -719,9 +722,7 @@ read_a_source_file (char *name)
 		  int len;
 
 		  /* Find the end of the current expanded macro line.  */
-		  for (s = input_line_pointer - 1; *s; ++s)
-		    if (is_end_of_line[(unsigned char) *s])
-		      break;
+		  s = find_end_of_line (input_line_pointer - 1, flag_m68k_mri);
 
 		  if (s != last_eol)
 		    {
@@ -911,34 +912,10 @@ read_a_source_file (char *name)
 		    }
 		  else
 		    {
-		      int inquote = 0;
-#ifdef QUOTES_IN_INSN
-		      int inescape = 0;
-#endif
-
 		      /* WARNING: c has char, which may be end-of-line.  */
 		      /* Also: input_line_pointer->`\0` where c was.  */
 		      *input_line_pointer = c;
-		      while (!is_end_of_line[(unsigned char) *input_line_pointer]
-			     || inquote
-#ifdef TC_EOL_IN_INSN
-			     || TC_EOL_IN_INSN (input_line_pointer)
-#endif
-			     )
-			{
-			  if (flag_m68k_mri && *input_line_pointer == '\'')
-			    inquote = !inquote;
-#ifdef QUOTES_IN_INSN
-			  if (inescape)
-			    inescape = 0;
-			  else if (*input_line_pointer == '"')
-			    inquote = !inquote;
-			  else if (*input_line_pointer == '\\')
-			    inescape = 1;
-#endif
-			  input_line_pointer++;
-			}
-
+		      input_line_pointer = _find_end_of_line (input_line_pointer, flag_m68k_mri, 1);
 		      c = *input_line_pointer;
 		      *input_line_pointer = '\0';
 
@@ -1459,7 +1436,7 @@ s_comm_internal (int param,
   if (name == p)
     {
       as_bad (_("expected symbol name"));
-      discard_rest_of_line ();
+      ignore_rest_of_line ();
       goto out;
     }
 
@@ -1785,7 +1762,7 @@ s_errwarn (int err)
 	{
 	  as_bad (_("%s argument must be a string"),
 		  err ? ".error" : ".warning");
-	  discard_rest_of_line ();
+	  ignore_rest_of_line ();
 	  return;
 	}
 
@@ -1966,7 +1943,7 @@ s_globl (int ignore ATTRIBUTE_UNUSED)
 void
 s_irp (int irpc)
 {
-  char *file;
+  char *file, *eol;
   unsigned int line;
   sb s;
   const char *err;
@@ -1975,8 +1952,9 @@ s_irp (int irpc)
   as_where (&file, &line);
 
   sb_new (&s);
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
-    sb_add_char (&s, *input_line_pointer++);
+  eol = find_end_of_line (input_line_pointer, 0);
+  sb_add_buffer (&s, input_line_pointer, eol - input_line_pointer);
+  input_line_pointer = eol;
 
   sb_new (&out);
 
@@ -2224,7 +2202,7 @@ s_lsym (int ignore ATTRIBUTE_UNUSED)
   if (name == p)
     {
       as_bad (_("expected symbol name"));
-      discard_rest_of_line ();
+      ignore_rest_of_line ();
       return;
     }
 
@@ -2286,8 +2264,7 @@ s_lsym (int ignore ATTRIBUTE_UNUSED)
 static int
 get_line_sb (sb *line)
 {
-  char quote1, quote2, inquote;
-  unsigned char c;
+  char *eol;
 
   if (input_line_pointer[-1] == '\n')
     bump_line_counters ();
@@ -2299,45 +2276,16 @@ get_line_sb (sb *line)
 	return 0;
     }
 
-  /* If app.c sets any other characters to LEX_IS_STRINGQUOTE, this
-     code needs to be changed.  */
-  if (!flag_m68k_mri)
-    quote1 = '"';
-  else
-    quote1 = '\0';
-
-  quote2 = '\0';
-  if (flag_m68k_mri)
-    quote2 = '\'';
-#ifdef LEX_IS_STRINGQUOTE
-  quote2 = '\'';
-#endif
-
-  inquote = '\0';
-
-  while ((c = * input_line_pointer ++) != 0
-	 && (!is_end_of_line[c]
-	     || (inquote != '\0' && c != '\n')))
-    {
-      if (inquote == c)
-	inquote = '\0';
-      else if (inquote == '\0')
-	{
-	  if (c == quote1)
-	    inquote = quote1;
-	  else if (c == quote2)
-	    inquote = quote2;
-	}
-
-      sb_add_char (line, c);
-    }
+  eol = find_end_of_line (input_line_pointer, flag_m68k_mri);
+  sb_add_buffer (line, input_line_pointer, eol - input_line_pointer);
+  input_line_pointer = eol;
 
   /* Don't skip multiple end-of-line characters, because that breaks support
      for the IA-64 stop bit (;;) which looks like two consecutive end-of-line
      characters but isn't.  Instead just skip one end of line character and
      return the character skipped so that the caller can re-insert it if
      necessary.   */
-  return c;
+  return *input_line_pointer++;
 }
 
 /* Define a macro.  This is an interface to macro.c.  */
@@ -2345,7 +2293,7 @@ get_line_sb (sb *line)
 void
 s_macro (int ignore ATTRIBUTE_UNUSED)
 {
-  char *file;
+  char *file, *eol;
   unsigned int line;
   sb s;
   const char *err;
@@ -2354,8 +2302,9 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
   as_where (&file, &line);
 
   sb_new (&s);
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
-    sb_add_char (&s, *input_line_pointer++);
+  eol = find_end_of_line (input_line_pointer, 0);
+  sb_add_buffer (&s, input_line_pointer, eol - input_line_pointer);
+  input_line_pointer = eol;
 
   if (line_label != NULL)
     {
@@ -2877,7 +2826,7 @@ s_set (int equiv)
   if (name == end_name)
     {
       as_bad (_("expected symbol name"));
-      discard_rest_of_line ();
+      ignore_rest_of_line ();
       return;
     }
 
@@ -3211,19 +3160,6 @@ demand_empty_rest_of_line (void)
 
 void
 ignore_rest_of_line (void)
-{
-  while (input_line_pointer < buffer_limit
-	 && !is_end_of_line[(unsigned char) *input_line_pointer])
-    input_line_pointer++;
-
-  input_line_pointer++;
-
-  /* Return pointing just after end-of-line.  */
-  know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
-}
-
-void
-discard_rest_of_line (void)
 {
   while (input_line_pointer < buffer_limit
 	 && !is_end_of_line[(unsigned char) *input_line_pointer])
@@ -5298,11 +5234,7 @@ do_s_func (int end_p, const char *default_prefix)
 void
 s_ignore (int arg ATTRIBUTE_UNUSED)
 {
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
-    {
-      ++input_line_pointer;
-    }
-  ++input_line_pointer;
+  ignore_rest_of_line ();
 }
 
 void
@@ -5339,4 +5271,52 @@ input_scrub_insert_file (char *path)
 {
   input_scrub_include_file (path, input_line_pointer);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+}
+
+/* Find the end of a line, considering quotation and escaping of quotes.  */
+
+#if !defined(TC_SINGLE_QUOTE_STRINGS) && defined(SINGLE_QUOTE_STRINGS)
+# define TC_SINGLE_QUOTE_STRINGS 1
+#endif
+
+static char *
+_find_end_of_line (char *s, int mri_string, int insn ATTRIBUTE_UNUSED)
+{
+  char inquote = '\0';
+  int inescape = 0;
+
+  while (!is_end_of_line[(unsigned char) *s]
+	 || (inquote && !ISCNTRL (*s))
+	 || (inquote == '\'' && flag_mri)
+#ifdef TC_EOL_IN_INSN
+	 || (insn && TC_EOL_IN_INSN (s))
+#endif
+	)
+    {
+      if (mri_string && *s == '\'')
+	inquote ^= *s;
+      else if (inescape)
+	inescape = 0;
+      else if (*s == '\\')
+	inescape = 1;
+      else if (!inquote
+	       ? *s == '"'
+#ifdef TC_SINGLE_QUOTE_STRINGS
+		 || (TC_SINGLE_QUOTE_STRINGS && *s == '\'')
+#endif
+	       : *s == inquote)
+	inquote ^= *s;
+      ++s;
+    }
+  if (inquote)
+    as_warn (_("missing closing `%c'"), inquote);
+  if (inescape)
+    as_warn (_("stray `\\'"));
+  return s;
+}
+
+char *
+find_end_of_line (char *s, int mri_string)
+{
+  return _find_end_of_line (s, mri_string, 0);
 }

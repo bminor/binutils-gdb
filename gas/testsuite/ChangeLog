@@ -1,3 +1,7 @@
+2005-05-17  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/mmix/err-byte1.s: Adjust expected error text on line 10.
+
 2005-05-17  Nick Clifton  <nickc@redhat.com>
 
 	* gas/v850/split-lo16.s: Add test for a lo() pseudo reloc

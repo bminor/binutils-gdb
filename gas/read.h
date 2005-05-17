@@ -56,6 +56,7 @@ extern char lex_type[];
 extern char is_end_of_line[];
 
 extern int is_it_end_of_statement (void);
+extern char *find_end_of_line (char *, int);
 
 extern int target_big_endian;
 
@@ -113,7 +114,7 @@ extern void emit_expr (expressionS *exp, unsigned int nbytes);
 extern void equals (char *sym_name, int reassign);
 extern void float_cons (int float_type);
 extern void ignore_rest_of_line (void);
-extern void discard_rest_of_line (void);
+#define discard_rest_of_line ignore_rest_of_line
 extern int output_leb128 (char *, valueT, int sign);
 extern void pseudo_set (symbolS * symbolP);
 extern void read_a_source_file (char *name);

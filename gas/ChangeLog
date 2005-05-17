@@ -1,3 +1,21 @@
+2005-05-17  Jan Beulich  <jbeulich@novell.com>
+
+	* read.c (_find_end_of_line): New.
+	(find_end_of_line): New.
+	(HANDLE_CONDITIONAL_ASSEMBLY): Use it.
+	(read_a_source_file): Use it.
+	(s_globl): Use it.
+	(s_macro): Use it.
+	(get_line_sb): Use it.
+	(s_errwarn): Replace discard_rest_of_line by ignore_rest_of_line.
+	(s_comm_internal): Likewise.
+	(s_lsym): Likewise.
+	(s_macro): Likewise.
+	(s_ignore): Use ignore_rest_of_line.
+	* read.h (find_end_of_line): Prototype.
+	(discard_rest_of_line): Remove prototype. #define to
+	ignore_rest_of_line.
+
 2005-05-17  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850,h (TC_FIX_TYPE): Define.
