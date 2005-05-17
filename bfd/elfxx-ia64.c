@@ -795,9 +795,12 @@ elfNN_ia64_relax_br (bfd_byte *contents, bfd_vma off)
 
   if (template == 0x16)
     {
-      /* For BBB, we need to put nop.m in slot 0 and keep the original
-	 predicate.  */
-      t0 &= PREDICATE_BITS << 5;
+      /* For BBB, we need to put nop.m in slot 0.  We keep the original
+	 predicate only if slot 0 isn't br.  */
+      if (br_slot == 0)
+	t0 = 0LL;
+      else
+	t0 &= PREDICATE_BITS << 5;
       t0 |= 0x1LL << (X4_SHIFT + 5);
     }
   else
