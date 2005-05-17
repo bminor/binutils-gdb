@@ -451,8 +451,23 @@ group_signature (bfd *abfd, Elf_Internal_Shdr *ghdr)
   unsigned char esym[sizeof (Elf64_External_Sym)];
   Elf_External_Sym_Shndx eshndx;
   Elf_Internal_Sym isym;
+  unsigned int i;
 
-  /* First we need to ensure the symbol table is available.  */
+  if (ghdr == NULL)
+    return NULL;
+
+  /* If this section is linked to by other sections then it is a symbol or
+     string section which is masquerading as a group.  This is a bad thing,
+     and if we carry on to the call to bfd_section_from_shdr below we will
+     enter an infinite loop.  So check now and break out if we detect this
+     case.  See:    
+     http://sources.redhat.com/ml/binutils/2005-05/msg00421.html
+     for a report of a case that tirggers this code.  */
+  for (i = elf_numsections (abfd); i--;)
+    if (elf_elfsections (abfd) [elf_elfsections (abfd) [i]->sh_link] == ghdr)
+      return NULL;
+
+  /* Next we need to ensure the symbol table is available.  */
   if (! bfd_section_from_shdr (abfd, ghdr->sh_link))
     return NULL;
 
