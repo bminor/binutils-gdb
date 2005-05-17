@@ -12513,7 +12513,7 @@ struct arm_option_table arm_opts[] =
   {"mapcs-reentrant", N_("re-entrant code"), &pic_code, 1, NULL},
   {"matpcs", N_("code is ATPCS conformant"), &atpcs, 1, NULL},
   {"mbig-endian", N_("assemble for big-endian"), &target_big_endian, 1, NULL},
-  {"mlittle-endian", N_("assemble for little-endian"), &target_big_endian, 1,
+  {"mlittle-endian", N_("assemble for little-endian"), &target_big_endian, 0,
    NULL},
 
   /* These are recognized by the assembler, but have no affect on code.  */

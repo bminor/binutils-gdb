@@ -1,5 +1,12 @@
 2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	Backport from mainline:
+	2005-05-05  Nick Clifton  <nickc@redhat.com>
+	* config/tc-arm.c (arm_opts): Make -mlittle-endian switch set
+	the target_big_endian variable to false.
+
+2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* doc/Makefile.am (gasver.texi): Don't use $<.
 	* doc/Makefile.in: Regenerated.
 
