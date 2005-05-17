@@ -3219,7 +3219,10 @@ print_assignment (lang_assignment_statement_type *assignment,
 
       if (computation_is_valid)
 	{
-	  value = result.value + result.section->bfd_section->vma;
+	  value = result.value;
+
+	  if (result.section)
+	    value += result.section->bfd_section->vma;
 
 	  minfo ("0x%V", value);
 	  if (is_dot)
@@ -3233,7 +3236,10 @@ print_assignment (lang_assignment_statement_type *assignment,
 				    FALSE, FALSE, TRUE);
 	  if (h)
 	    {
-	      value = h->u.def.value + result.section->bfd_section->vma;
+	      value = h->u.def.value;
+
+	      if (result.section)
+	      value += result.section->bfd_section->vma;
 
 	      minfo ("[0x%V]", value);
 	    }

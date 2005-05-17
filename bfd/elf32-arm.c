@@ -2692,7 +2692,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		     the section symbol as it is convenient.  (We
 		     cannot use the symbol given by "h" directly as it
 		     will not appear in the dynamic symbol table.)  */
-		  symbol = elf_section_data (sym_sec->output_section)->dynindx;
+		  if (sym_sec)
+		    symbol = elf_section_data (sym_sec->output_section)->dynindx;
+		  else
+		    symbol = elf_section_data (input_section->output_section)->dynindx;
 		  BFD_ASSERT (symbol != 0);
 		}
 	      else

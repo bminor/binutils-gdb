@@ -7,6 +7,11 @@
 
 2005-05-17  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-arm.c (elf32_arm_final_link_relocate): Gracefully handle
+	the situation where a symbols's section is not known but a section
+	relative R_ARM_RELATIVE reloc has to be generated for the Symbian
+	OS.
+
 	* elf32-v850.c (v850_elf_relocate_section): Move code to test for
 	the presence of a symbol table to just before the symbol table is
 	actually used.
