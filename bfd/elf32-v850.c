@@ -1649,15 +1649,6 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
-  if (sym_hashes == NULL)
-    {
-      info->callbacks->warning
-	(info, "no hash table available",
-	 NULL, input_bfd, input_section, (bfd_vma) 0);
-
-      return FALSE;
-    }
-
   /* Reset the list of remembered HI16S relocs to empty.  */
   free_hi16s     = previous_hi16s;
   previous_hi16s = NULL;
@@ -1697,6 +1688,18 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  bfd_boolean unresolved_reloc, warned;
+
+	  /* Note - this check is delayed until now as it is possible and valid
+	     to have a file without any symbols but with relocs that can be
+	     processed.  */
+	  if (sym_hashes == NULL)
+	    {
+	      info->callbacks->warning
+		(info, "no hash table available",
+		 NULL, input_bfd, input_section, (bfd_vma) 0);
+
+	      return FALSE;
+	    }
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,

@@ -1,3 +1,9 @@
+2005-05-17  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-v850.c (v850_elf_relocate_section): Move code to test for
+	the presence of a symbol table to just before the symbol table is
+	actually used.
+
 2005-05-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 834
