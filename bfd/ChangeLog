@@ -1,3 +1,8 @@
+2005-05-17  Tavis Ormandy <taviso@gentoo.org>
+
+	* elf.c (bfd_section_from_shdr): Add sanity check when parsing
+	dynamic sections.
+
 2005-05-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (LIS_11. LIS_12): Define.

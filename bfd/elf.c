@@ -1768,6 +1768,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     case SHT_DYNAMIC:	/* Dynamic linking information.  */
       if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	return FALSE;
+      if (hdr->sh_link > elf_numsections (abfd)
+	  || elf_elfsections (abfd)[hdr->sh_link] == NULL)
+	return FALSE;
       if (elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_STRTAB)
 	{
 	  Elf_Internal_Shdr *dynsymhdr;
