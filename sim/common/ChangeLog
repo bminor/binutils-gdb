@@ -1,3 +1,7 @@
+2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Make-common.in (install-common, installdirs): Honor $DESTDIR.
+
 2005-04-20  Manoj Iyer  <manjo@austin.ibm.com>
 
 	* sim-types.h: Changed unsigned32 and unsigned64 to signed32
