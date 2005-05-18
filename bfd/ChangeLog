@@ -1,3 +1,8 @@
+2005-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (group_signature): Undo the last change. Check if the
+	symbol table section is correct.
+
 2005-05-17  Zack Weinberg  <zack@codesourcery.com>
 
 	* elf32-arm.c: Wherever possible, use official reloc names
