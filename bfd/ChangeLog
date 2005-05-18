@@ -1,3 +1,10 @@
+2005-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Gracefully handle
+	the situation where a symbol's section is not known but a section
+	relative R_ARM_RELATIVE reloc has to be generated for the Symbian
+	OS.
+
 2005-03-30  Julian Brown  <julian@codesourcery.com>
 
 	* bfd-in.h (bfd_is_arm_mapping_symbol_name): Add prototype.
