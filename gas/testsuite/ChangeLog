@@ -1,3 +1,7 @@
+2005-05-18  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/all/altmacro.s: Parenthesize operand of %.
+
 2005-05-17  Zack Weinberg  <zack@codesourcery.com>
 
 	* gas/arm/arm.exp: Convert all existing "gas_test" tests to

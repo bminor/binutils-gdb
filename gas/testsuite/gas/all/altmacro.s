@@ -7,7 +7,7 @@ l2:	.byte	v2
 .endm
 
 .macro	m2 v1, v2
-	m1 %v1, %(v2-v1)
+	m1 %(v1), %(v2-v1)
 .endm
 
 .macro	m3 str
