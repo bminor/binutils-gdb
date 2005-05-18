@@ -2321,8 +2321,10 @@ md_apply_fix3 (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       /* We still have to insert the value into memory!  */
       where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
-      if (fixP->tc_fix_data != NULL)
+      if (fixP->tc_fix_data != NULL
+	  && ((struct v850_operand *) fixP->tc_fix_data)->insert != NULL)
 	{
+	  const char * message = NULL;
 	  struct v850_operand * operand = (struct v850_operand *) fixP->tc_fix_data;
 	  unsigned long insn;
 
@@ -2339,8 +2341,8 @@ md_apply_fix3 (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 
 	  /* Use the operand's insertion procedure, if present, in order to
 	     make sure that the value is correctly stored in the insn.  */
-	  insn = v850_insert_operand (insn, operand, (offsetT) value,
-				      fixP->fx_file, fixP->fx_line, NULL);
+	  insn = operand->insert (insn, (offsetT) value, message);
+	  /* Ignore message even if it is set.  */
 
 	  bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
 	}

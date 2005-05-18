@@ -1,3 +1,9 @@
+2005-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850.c (md_apply_fix3): Only use the insertion routine
+	if one exists.  Ignore any error messages it may produce, just
+	allow it to perform the insertion.
+
 2005-05-17  Zack Weinberg  <zack@codesourcery.com>
 
 	* hash.c (hash_lookup): Add len parameter.  All callers changed.
