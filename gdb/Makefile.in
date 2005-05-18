@@ -1448,6 +1448,7 @@ ALLDEPFILES = \
 	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
 	symm-tdep.c symm-nat.c \
+	v850-tdep.c \
 	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	win32-nat.c \
 	xcoffread.c xcoffsolib.c \
@@ -2697,6 +2698,10 @@ utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(gdb_curses_h) $(readline_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)
+v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(frame_base_h) $(trad_frame_h) \
+	$(frame_unwind_h) $(dwarf2_frame_h) $(gdbtypes_h) $(inferior_h) \
+	$(gdb_string_h) $(gdb_assert_h) $(gdbcore_h) $(arch_utils_h) \
+	$(regcache_h) $(dis_asm_h) $(osabi_h)
 valarith.o: valarith.c $(defs_h) $(value_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(target_h) $(language_h) $(gdb_string_h) \
 	$(doublest_h) $(infcall_h)

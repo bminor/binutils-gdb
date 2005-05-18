@@ -1,3 +1,55 @@
+2005-05-17  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Undelete v850.
+	* Makefile.in: Re-add v850-tdep.o dependencies.
+	* configure.tgt: Re-add v850.
+	* v850-tdep.c: Reorder code slightly.  Add register number enumerator.
+	(struct v850_frame_cache): New structure.
+	(v850_processor_type_table): Remove. Move functionality into
+	v850_register_name, v850e_register_name and v850_gdbarch_init.
+	(v850_register_name): New function.
+	(v850e_register_name): New function.
+	(struct prologue_info): Remove definition.
+	(v850_register_type): New function.
+	(v850_type_is_scalar): New function.
+	(v850_use_struct_convention): Align to gcc behaviour.
+	(v850_handle_prepare): Renamed from handle_prepare. Change third
+	parameter to struct v850_frame_cache *.
+	(v850_handle_pushm): Renamed from handle_pushm. Change third parameter
+	to struct v850_frame_cache *.
+	(v850_is_save_register): New function to evaluate if a register is
+	caller-save.
+	(v850_analyze_prologue): Replace v850_scan_prologue.  Change to support
+	new frame code.
+	(v850_init_extra_frame_info): Remove.
+	(v850_frame_chain): Remove.
+	(v850_find_callers_reg): Remove.
+	(v850_skip_prologue): Make static.
+	(v850_pop_frame): Remove.
+	(v850_frame_align): New function.
+	(v850_push_dummy_call): Replace v850_push_arguments.
+	(v850_push_return_address): Remove.
+	(v850_extract_return_value): New function.
+	(v850_store_return_value): New function.
+	(v850_return_value): New function.
+	(v850_frame_saved_pc): Remove.
+	(v850_breakpoint_from_pc): New function.
+	(v850_alloc_frame_cache): New function.
+	(v850_fix_call_dummy): Remove.
+	(v850_frame_cache): New function.
+	(v850_target_architecture_hook): Remove.
+	(v850_frame_prev_register): New function.
+	(v850_frame_this_id): New function.
+	(v850_frame_unwind): New structure.
+	(v850_frame_sniffer): New function.
+	(v850_unwind_sp): New function.
+	(v850_unwind_pc): New function.
+	(v850_unwind_dummy_id): New function.
+	(v850_frame_base_address): New function.
+	(v850_frame_base): New structure.
+	(v850_gdbarch_init): New function.
+	* config/v850/v850.mt: Undelete.  Drop TM_FILE.
+
 2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Dennis Brueni  <dennis@slickedit.com>
 

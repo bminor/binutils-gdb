@@ -116,7 +116,7 @@ the native maintainer when resolving ABI issues.
 	sparc		--target=sparc-elf broken
 			(bfd/elfxx-sparc:512 bfd_elf64_swap_reloca_out undef)
 
-	v850		Deleted
+	v850		--target=v850-elf ,-Werror
 
 	vax		--target=vax-netbsd broken
 			(opcodes/vax-dis.c:224 longjmp clober)
