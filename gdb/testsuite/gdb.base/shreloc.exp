@@ -1,4 +1,4 @@
-# Copyright (C) 2003 Free Software Foundation, Inc.
+# Copyright (C) 2003, 2005 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,9 +14,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
 
 # Tests for shared object file relocation. If two shared objects have
 # the same load address (actually, overlapping load spaces), one of
@@ -40,31 +37,49 @@ set prms_id 0
 set bug_id 0
 
 set workdir ${objdir}/${subdir}
+set testfile "shreloc"
+set libfile1 "shreloc1"
+set libfile2 "shreloc2"
+set srcfile $srcdir/$subdir/$testfile.c
+set lib1src $srcdir/$subdir/$libfile1.c
+set lib2src $srcdir/$subdir/$libfile2.c
+set binfile $objdir/$subdir/$testfile
+set lib1_sl $objdir/$subdir/$libfile1.sl
+set lib2_sl $objdir/$subdir/$libfile2.sl
 
-foreach module [list "shreloc" "shreloc1" "shreloc2"] {
-    if {[gdb_compile "${srcdir}/${subdir}/${module}.c" "${workdir}/${module}.o" object {debug}] != ""} {
-	untested "Couldn't compile ${module}.c"
-	return -1
-    }
-}
-
-set additional_flags "additional_flags=-shared"
-
-if {([istarget "*pc-cygwin"] || [istarget "*pc-mingw32"]) } {
-    set additional_flags "${additional_flags} -Wl,--image-base,0x04000000"
-}
-
-foreach module [list "shreloc1" "shreloc2"] {
-    if {[gdb_compile "${workdir}/${module}.o" "${workdir}/${module}.dll" executable [list debug $additional_flags]] != ""} {
-	untested "Couldn't link ${module}.dll"
-	return -1
-    }
-}
-
-if {[gdb_compile [list "${workdir}/shreloc.o" "${workdir}/shreloc1.dll" "${workdir}/shreloc2.dll"] "${workdir}/shreloc" executable debug] != ""} {
-    untested "Couldn't link shreloc executable"
+if [get_compiler_info ${binfile}] {
     return -1
 }
+
+set lib_opts "debug"
+set exec_opts [list debug shlib=$lib1_sl shlib=$lib2_sl]
+
+if {([istarget "*pc-cygwin"] || [istarget "*pc-mingw32"]) } {
+    lappend lib_opts "additional_flags=-Wl,--image-base,0x04000000"
+}
+
+if [test_compiler_info "xlc-*"] {
+
+    # IBM's xlc compiler does not add static variables to the ELF symbol 
+    # table by default.  We need this option to make the variables show 
+    # up in "maint print msymbols". 
+
+    lappend lib_opts "additional_flags=-qstatsym"
+
+}
+
+if { [gdb_compile_shlib $lib1src $lib1_sl $lib_opts] != ""} {
+    untested "Could not build $lib1_sl."
+    return -1
+} elseif { [gdb_compile_shlib $lib2src $lib2_sl $lib_opts] != ""} {
+    untested "Could not build $lib1_s2."
+    return -1
+} elseif { [gdb_compile $srcfile $binfile executable $exec_opts] != ""} {
+    untested "Could not build $binfile."
+    return -1
+}
+
+# Start with a fresh gdb.
 
 gdb_exit
 gdb_start

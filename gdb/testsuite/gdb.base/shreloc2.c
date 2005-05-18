@@ -6,5 +6,5 @@
 
 static int static_var_2;
 
-ATTRIBUTES void fn_2 (int unused) { }
+ATTRIBUTES void fn_2 (int referenced) { static_var_2 = referenced; }
 ATTRIBUTES int extern_var_2 = 0;

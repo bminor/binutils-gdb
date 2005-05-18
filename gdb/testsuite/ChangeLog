@@ -1,3 +1,11 @@
+2005-05-17  Paul Gilliam  <pgilliam@us.ibm.com>
+	    Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* gdb.base/shreloc.exp: Use gdb_compile_shlib.  Add support for
+	IBM's xlc compiler.
+	* gdb.base/shreloc1.c (fn_1): Reference variable static_var_1.
+	* gdb.base/shreloc2.c (fn_2): Reference variable static_var_2.
+
 2005-05-13  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/call-ar-st.exp: Call 'untested' and return -1 instead of
