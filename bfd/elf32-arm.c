@@ -2355,10 +2355,8 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	  /* These are the only relocation types we care about.  */
 	  if (   r_type != R_ARM_PC24
 	      && r_type != R_ARM_PLT32
-#ifndef OLD_ARM_ABI
 	      && r_type != R_ARM_CALL
 	      && r_type != R_ARM_JUMP24
-#endif
 	      && r_type != R_ARM_THM_CALL)
 	    continue;
 
@@ -2402,10 +2400,8 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	    {
 	    case R_ARM_PC24:
 	    case R_ARM_PLT32:
-#ifndef OLD_ARM_ABI
 	    case R_ARM_CALL:
 	    case R_ARM_JUMP24:
-#endif
 	      /* This one is a call from arm code.  We need to look up
 	         the target of the call.  If it is a thumb target, we
 	         insert glue.  */
@@ -2452,7 +2448,6 @@ error_return:
 #endif
 
 
-#ifndef OLD_ARM_ABI
 /* Set target relocation values needed during linking.  */
 
 void
@@ -2481,7 +2476,6 @@ bfd_elf32_arm_set_target_relocs (struct bfd_link_info *link_info,
   globals->fix_v4bx = fix_v4bx;
   globals->use_blx |= use_blx;
 }
-#endif
 
 /* The thumb form of a long branch is a bit finicky, because the offset
    encoding is split over two fields, each in it's own instruction. They
@@ -2752,8 +2746,6 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
   return TRUE;
 }
 
-
-#ifndef OLD_ARM_ABI
 /* Some relocations map to different relocations depending on the
    target.  Return the real relocation.  */
 static int
@@ -2775,8 +2767,6 @@ arm_real_reloc_type (struct elf32_arm_link_hash_table * globals,
       return r_type;
     }
 }
-#endif /* OLD_ARM_ABI */
-
 
 /* Return the base VMA address which should be subtracted from real addresses
    when resolving @dtpoff relocation.
@@ -2840,13 +2830,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
   globals = elf32_arm_hash_table (info);
 
-#ifndef OLD_ARM_ABI
   /* Some relocation type map to different relocations depending on the
      target.  We pick the right one here.  */
   r_type = arm_real_reloc_type (globals, r_type);
   if (r_type != howto->type)
     howto = elf32_arm_howto_from_type (r_type);
-#endif /* OLD_ARM_ABI */
 
   /* If the start address has been set, then set the EF_ARM_HASENTRY
      flag.  Setting this more than once is redundant, but the cost is
@@ -2898,12 +2886,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_PC24:
     case R_ARM_ABS32:
     case R_ARM_REL32:
-#ifndef OLD_ARM_ABI
     case R_ARM_CALL:
     case R_ARM_JUMP24:
     case R_ARM_XPC25:
     case R_ARM_PREL31:
-#endif
     case R_ARM_PLT32:
       /* r_symndx will be zero only for relocs against symbols
 	 from removed linkonce sections, or sections discarded by
@@ -2945,11 +2931,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	      || h->root.type != bfd_link_hash_undefweak)
 	  && r_type != R_ARM_PC24
-#ifndef OLD_ARM_ABI
 	  && r_type != R_ARM_CALL
 	  && r_type != R_ARM_JUMP24
 	  && r_type != R_ARM_PREL31
-#endif
 	  && r_type != R_ARM_PLT32)
 	{
 	  Elf_Internal_Rela outrel;
@@ -3047,14 +3031,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	}
       else switch (r_type)
 	{
-#ifndef OLD_ARM_ABI
 	case R_ARM_XPC25:	  /* Arm BLX instruction.  */
 	case R_ARM_CALL:
 	case R_ARM_JUMP24:
-#endif
 	case R_ARM_PC24:	  /* Arm B/BL instruction */
 	case R_ARM_PLT32:
-#ifndef OLD_ARM_ABI
 	  if (r_type == R_ARM_XPC25)
 	    {
 	      /* Check for Arm calling Arm function.  */
@@ -3067,7 +3048,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		   h ? h->root.root.string : "(local)");
 	    }
 	  else
-#endif
 	    {
 	      /* Check for Arm calling Thumb function.  */
 	      if (sym_flags == STT_ARM_TFUNC)
@@ -3123,14 +3103,12 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		return bfd_reloc_overflow;
 	    }
 
-#ifndef OLD_ARM_ABI
 	  /* If necessary set the H bit in the BLX instruction.  */
 	  if (r_type == R_ARM_XPC25 && ((value & 2) == 2))
 	    value = (signed_addend & howto->dst_mask)
 	      | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask))
 	      | (1 << 24);
 	  else
-#endif
 	    value = (signed_addend & howto->dst_mask)
 	      | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
 	  break;
@@ -3147,7 +3125,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  value += addend;
 	  break;
 
-#ifndef OLD_ARM_ABI
 	case R_ARM_PREL31:
 	  value -= (input_section->output_section->vma
 		    + input_section->output_offset + rel->r_offset);
@@ -3163,7 +3140,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  if (sym_flags == STT_ARM_TFUNC)
 	    value |= 1;
 	  break;
-#endif
 	}
 
       bfd_put_32 (input_bfd, value, hit_data);
@@ -3218,9 +3194,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       bfd_put_16 (input_bfd, value, hit_data);
       return bfd_reloc_ok;
 
-#ifndef OLD_ARM_ABI
     case R_ARM_THM_XPC22:
-#endif
     case R_ARM_THM_CALL:
       /* Thumb BL (branch long instruction).  */
       {
@@ -3244,7 +3218,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    addend = (upper << 12) | (lower << 1);
 	    signed_addend = addend;
 	  }
-#ifndef OLD_ARM_ABI
+
 	if (r_type == R_ARM_THM_XPC22)
 	  {
 	    /* Check for Thumb to Thumb call.  */
@@ -3257,7 +3231,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		 h ? h->root.root.string : "(local)");
 	  }
 	else
-#endif
 	  {
 	    /* If it is not a call to Thumb, assume call to Arm.
 	       If it is a call relative to a section name, then it is not a
@@ -3317,7 +3290,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
 	  overflow = TRUE;
 
-#ifndef OLD_ARM_ABI
 	if ((r_type == R_ARM_THM_XPC22
 	     && ((lower_insn & 0x1800) == 0x0800))
 	    || thumb_plt_call)
@@ -3326,7 +3298,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	     which specifies that bit 1 of the target address will come from bit
 	     1 of the base address.  */
 	  relocation = (relocation + 2) & ~ 3;
-#endif
+
 	/* Put RELOCATION back into the insn.  */
 	upper_insn = (upper_insn & ~(bfd_vma) 0x7ff) | ((relocation >> 12) & 0x7ff);
 	lower_insn = (lower_insn & ~(bfd_vma) 0x7ff) | ((relocation >> 1) & 0x7ff);
@@ -3538,7 +3510,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	return bfd_reloc_ok;
       }
 
-#ifndef OLD_ARM_ABI
     case R_ARM_ALU_PCREL7_0:
     case R_ARM_ALU_PCREL15_8:
     case R_ARM_ALU_PCREL23_15:
@@ -3564,7 +3535,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_put_32 (input_bfd, value, hit_data);
       }
       return bfd_reloc_ok;
-#endif
 
     case R_ARM_GNU_VTINHERIT:
     case R_ARM_GNU_VTENTRY:
@@ -3608,9 +3578,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 				       (bfd_vma) 0);
 
     case R_ARM_GOT32:
-#ifndef OLD_ARM_ABI
     case R_ARM_GOT_PREL:
-#endif
       /* Relocation is to the entry for this symbol in the
          global offset table.  */
       if (sgot == NULL)
@@ -4007,10 +3975,8 @@ arm_add_to_rel (bfd *              abfd,
 
 	case R_ARM_PC24:
 	case R_ARM_PLT32:
-#ifndef OLD_ARM_ABI
 	case R_ARM_CALL:
 	case R_ARM_JUMP24:
-#endif
 	  addend <<= howto->size;
 	  addend += increment;
 
@@ -4820,15 +4786,11 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
-#ifndef OLD_ARM_ABI
       r_type = arm_real_reloc_type (globals, r_type);
-#endif
       switch (r_type)
 	{
 	case R_ARM_GOT32:
-#ifndef OLD_ARM_ABI
 	case R_ARM_GOT_PREL:
-#endif
 	case R_ARM_TLS_GD32:
 	case R_ARM_TLS_IE32:
 	  if (h != NULL)
@@ -4851,11 +4813,9 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 	case R_ARM_REL32:
 	case R_ARM_PC24:
 	case R_ARM_PLT32:
-#ifndef OLD_ARM_ABI
 	case R_ARM_CALL:
 	case R_ARM_JUMP24:
 	case R_ARM_PREL31:
-#endif
 	case R_ARM_THM_CALL:
 	  /* Should the interworking branches be here also?  */
 
@@ -4952,9 +4912,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
-#ifndef OLD_ARM_ABI
       r_type = arm_real_reloc_type (htab, r_type);
-#endif
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
@@ -4973,9 +4931,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
       switch (r_type)
         {
 	  case R_ARM_GOT32:
-#ifndef OLD_ARM_ABI
 	  case R_ARM_GOT_PREL:
-#endif
 	  case R_ARM_TLS_GD32:
 	  case R_ARM_TLS_IE32:
 	    /* This symbol requires a global offset table entry.  */
@@ -5055,11 +5011,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_REL32:
 	  case R_ARM_PC24:
 	  case R_ARM_PLT32:
-#ifndef OLD_ARM_ABI
 	  case R_ARM_CALL:
 	  case R_ARM_JUMP24:
 	  case R_ARM_PREL31:
-#endif
 	  case R_ARM_THM_CALL:
 	    /* Should the interworking branches be listed here?  */
 	    if (h != NULL)
@@ -5078,11 +5032,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   sure yet, because something later might force the
 		   symbol local.  */
 		if (r_type == R_ARM_PC24
-#ifndef OLD_ARM_ABI
 		    || r_type == R_ARM_CALL
 		    || r_type == R_ARM_JUMP24
 		    || r_type == R_ARM_PREL31
-#endif
 		    || r_type == R_ARM_PLT32
 		    || r_type == R_ARM_THM_CALL)
 		  h->needs_plt = 1;

@@ -1,3 +1,8 @@
+2005-05-18  Zack Weinberg  <zack@codesourcery.com>
+
+	* elf32-arm.c: Make all #ifndef OLD_ARM_ABI blocks
+	unconditional.
+
 2005-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (group_signature): Undo the last change. Check if the
