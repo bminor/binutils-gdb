@@ -1,5 +1,6 @@
 2005-05-18  Julian Brown <julian@codesourcery.com>
 
+	Backport from mainline:
 	* ldlang.c (print_assignment): Do not rely upon a valid result
 	having a section associated with it.
 
