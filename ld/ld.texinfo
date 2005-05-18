@@ -675,12 +675,40 @@ information about the link, including the following:
 
 @itemize @bullet
 @item
-Where object files and symbols are mapped into memory.
+Where object files are mapped into memory.
 @item
 How common symbols are allocated.
 @item
 All archive members included in the link, with a mention of the symbol
 which caused the archive member to be brought in.
+@item
+The values assigned to symbols.
+
+Note - symbols whose values are computed by an expression which
+involves a reference to a previous value of the same symbol may not
+have correct result displayed in the link map.  This is because the
+linker discards intermediate results and only retains the final value
+of an expression.  Under such circumstances the linker will display
+the final value enclosed by square brackets.  Thus for example a
+linker script containing:
+
+@smallexample
+   foo = 1
+   foo = foo * 4
+   foo = foo + 8
+@end smallexample
+
+will produce the following output in the link map if the @option{-M}
+option is used:
+
+@smallexample
+   0x00000001                foo = 0x1
+   [0x0000000c]                foo = (foo * 0x4)
+   [0x0000000c]                foo = (foo + 0x8)
+@end smallexample
+
+See @ref{Expressions} for more information about expressions in linker
+scripts.
 @end itemize
 
 @kindex -n
