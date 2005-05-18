@@ -33,6 +33,7 @@
 #endif
 #include "libiberty.h"
 #include "sb.h"
+#include "as.h"
 
 /* These routines are about manipulating strings.
 
@@ -113,6 +114,38 @@ sb_add_sb (sb *ptr, sb *s)
   sb_check (ptr, s->len);
   memcpy (ptr->ptr + ptr->len, s->ptr, s->len);
   ptr->len += s->len;
+}
+
+/* Helper for sb_scrub_and_add_sb.  */
+
+static sb *sb_to_scrub;
+static char *scrub_position;
+static int
+scrub_from_sb (char *buf, int buflen)
+{
+  int copy;
+  copy = sb_to_scrub->len - (scrub_position - sb_to_scrub->ptr);
+  if (copy > buflen)
+    copy = buflen;
+  memcpy (buf, scrub_position, copy);
+  scrub_position += copy;
+  return copy;
+}
+
+/* Run the sb at s through do_scrub_chars and add the result to the sb
+   at ptr.  */
+
+void
+sb_scrub_and_add_sb (sb *ptr, sb *s)
+{
+  sb_to_scrub = s;
+  scrub_position = s->ptr;
+  
+  sb_check (ptr, s->len);
+  ptr->len += do_scrub_chars (scrub_from_sb, ptr->ptr + ptr->len, s->len);
+
+  sb_to_scrub = 0;
+  scrub_position = 0;
 }
 
 /* Make sure that the sb at ptr has room for another len characters,

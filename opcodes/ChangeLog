@@ -1,3 +1,16 @@
+2005-05-17  Zack Weinberg  <zack@codesourcery.com>
+
+	* arm-dis.c (thumb_opcodes): Add disassembly for V6T2 16-bit
+	instructions.  Adjust disassembly of some opcodes to match
+	unified syntax.
+	(thumb32_opcodes): New table.
+	(print_insn_thumb): Rename print_insn_thumb16; don't handle
+	two-halfword branches here.
+	(print_insn_thumb32): New function.
+	(print_insn): Choose among print_insn_arm, print_insn_thumb16,
+	and print_insn_thumb32.  Be consistent about order of
+	halfwords when printing 32-bit instructions.
+
 2005-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 843
@@ -124,11 +137,11 @@
 
 2005-03-21  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 	    Nick Clifton  <nickc@redhat.com>
-	    
+
 	* vax-dis.c: (entry_addr): New varible:  An array of user supplied
 	function entry mask addresses.
 	(entry_addr_occupied_slots): New variable: The number of occupied
-	elements in entry_addr. 
+	elements in entry_addr.
 	(entry_addr_total_slots): New variable: The total number of
 	elements in entry_addr.
 	(parse_disassembler_options): New function.  Fills in the entry_addr

@@ -63,6 +63,11 @@ extern PTR hash_replace (struct hash_control *, const char *key,
 
 extern PTR hash_find (struct hash_control *, const char *key);
 
+/* As hash_find, but KEY is of length LEN and is not guaranteed to be
+   NUL-terminated.  */
+
+extern PTR hash_find_n (struct hash_control *, const char *key, size_t len);
+
 /* Delete an entry from a hash table.  This returns the value stored
    for that entry, or NULL if there is no such entry.  */
 

@@ -1,3 +1,36 @@
+2005-05-17  Zack Weinberg  <zack@codesourcery.com>
+
+	* gas/arm/arm.exp: Convert all existing "gas_test" tests to
+	"run_dump_test" tests.  Run more tests unconditionally.  Run new tests.
+	* gas/arm/arch4t.s, gas/arm/arch6zk.s, gas/arm/arm3.s, gas/arm/arm6.s
+	* gas/arm/arm7dm.s, gas/arm/bignum1.s, gas/arm/float.s
+	* gas/arm/immed.s, gas/arm/iwmmxt.s, gas/arm/offset.s, gas/arm/thumb.s:
+	Adjust to work as a dump test.
+	* gas/arm/arch4t.d, gas/arm/arch6zk.d, gas/arm/arm3.d, gas/arm/arm6.d
+	* gas/arm/arm7dm.d, gas/arm/bignum1.d, gas/arm/float.d
+	* gas/arm/immed.d, gas/arm/iwmmxt.d, gas/arm/offset.d, gas/arm/thumb.d:
+	New files.
+
+	* gas/arm/armv1-bad.l, gas/arm/armv1-bad.s: Remove tests for
+	diagnostics that don't happen in the first pass anymore.
+
+	* gas/arm/iwmmxt-bad.l, gas/arm/r15-bad.l, gas/arm/req.l
+	* gas/arm/vfp-bad.l:
+	Update expected diagnostics.
+	* gas/arm/pic.d: Update expected reloc name.
+	* gas/arm/thumbv6.d: CPY no longer appears in disassembly.
+	* gas/arm/r15-bad.s: Avoid two-argument mul.
+	* gas/arm/req.s: Adjust comments.
+	* gas/arm/maverick.d, gas/arm/maverick.s: Avoid inappropriate
+	use of PC.
+
+	* gas/arm/macro-1.d, gas/arm/macro1.s
+	* gas/arm/t16-bad.l, gas/arm/t16-bad.s
+	* gas/arm/tcompat.d, gas/arm/tcompat.s
+	* gas/arm/tcompat2.d, gas/arm/tcompat2.s
+	* gas/arm/thumb32.d, gas/arm/thumb32.s
+	New test pair.
+
 2005-05-17  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/mmix/err-byte1.s: Adjust expected error text on line 10.

@@ -1,3 +1,18 @@
+2005-05-17  Zack Weinberg  <zack@codesourcery.com>
+
+	* hash.c (hash_lookup): Add len parameter.  All callers changed.
+	(hash_find_n): New interface.
+	* hash.h: Prototype hash_find_n.
+	* sb.c: Include as.h.
+	(scrub_from_sb, sb_to_scrub, scrub_position): New statics.
+	(sb_scrub_and_add_sb): New interface.
+	* sb.h: Prototype sb_scrub_and_add_sb.
+	* input-scrub.c (input_scrub_include_sb): Use sb_scrub_and_add_sb.
+
+	* config/tc-arm.h (TC_FORCE_RELOCATION_LOCAL): Remove
+	reference to BFD_RELOC_ARM_GOT12 which is never generated.
+	* config/tc-arm.c: Rewrite, adding Thumb-2 support.
+
 2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/Makefile.am (gasver.texi): Don't use $<.

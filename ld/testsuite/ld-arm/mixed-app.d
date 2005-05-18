@@ -49,7 +49,7 @@ Disassembly of section .text:
 
 .* <app_tfunc>:
  .*:	b500      	push	{lr}
- .*:	(ffc.f7ff|f7ffffc.) 	bl	.* <_start-0x..>
+ .*:	f7ff ffc. 	bl	.* <_start-0x..>
  .*:	bd00      	pop	{pc}
  .*:	4770      	bx	lr
  .*:	46c0      	nop			\(mov r8, r8\)

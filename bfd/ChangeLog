@@ -1,3 +1,32 @@
+2005-05-17  Zack Weinberg  <zack@codesourcery.com>
+
+	* elf32-arm.c: Wherever possible, use official reloc names
+	from AAELF.
+	(elf32_arm_howto_table, elf32_arm_tls_gd32_howto)
+	(elf32_arm_tls_ldo32_howto, elf32_arm_tls_ldm32_howto)
+	(elf32_arm_tls_le32_howto, elf32_arm_tls_ie32_howto)
+	(elf32_arm_vtinherit_howto, elf32_arm_vtentry_howto)
+	(elf32_arm_pc11_howto, elf32_arm_thm_pc9_howto, elf32_arm_got_prel)
+	(elf32_arm_r_howto): Replace with elf32_arm_howto_table_1,
+	elf32_arm_howto_table_2, and elf32_arm_howto_table_3.
+	Add many new relocations from AAELF.
+	(elf32_arm_howto_from_type): Update to match.
+	(elf32_arm_reloc_map): Add entries for R_ARM_THM_JUMP24,
+	R_ARM_THM_JUMP11, R_ARM_THM_JUMP19, R_ARM_THM_JUMP8,
+	R_ARM_THM_JUMP6, R_ARM_GNU_VTINHERIT, and R_ARM_GNU_VTENTRY.
+	(elf32_arm_reloc_type_lookup): Use elf32_arm_howto_from_type.
+	(elf32_arm_final_link_relocate): Add support for
+	R_ARM_THM_JUMP24, R_ARM_THM_JUMP19, R_ARM_THM_JUMP6.  Remove
+	case entries redundant with default.
+
+	* reloc.c: Reorganize ARM relocations.  Add Thumb
+	assembler-internal relocations BFD_RELOC_ARM_T32_OFFSET_U8,
+	BFD_RELOC_ARM_T32_OFFSET_IMM, BFD_RELOC_ARM_T32_IMMEDIATE.
+	Add visible relocations BFD_RELOC_THUMB_PCREL_BRANCH7,
+	BFD_RELOC_THUMB_BRANCH20, BFD_RELOC_THUMB_BRANCH25.
+	Delete unused relocations BFD_RELOC_ARM_GOT12, BFD_RELOC_ARM_COPY.
+	* bfd-in2.h, libbfd.h: Regenerate.
+
 2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf.c (_bfd_elf_write_object_contents): Check for non-NULL
