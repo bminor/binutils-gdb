@@ -1,4 +1,5 @@
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+# Free Software Foundation, Inc.
 #
 # This Program Is Free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -48,7 +49,7 @@ mi_gdb_test "200-break-insert $line_dct_close_brace" \
 mi_run_cmd
 # The running part has been checked already by mi_run_cmd
 gdb_expect {
-    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"$line_dct_close_brace\"\}\r\n$mi_gdb_prompt$" {
+    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_dct_close_brace\"\}\r\n$mi_gdb_prompt$" {
 	pass "run to do_children_tests"
     }
     -re ".*$mi_gdb_prompt$" {fail "run to do_children_tests (2)"}
@@ -332,7 +333,7 @@ mi_gdb_test "200-break-insert do_special_tests" \
 
 send_gdb "-exec-continue\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_special_tests\",args=\\\[\\\],file=\".*var-cmd.c\",line=\"$line_dst_a_1\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_special_tests\",args=\\\[\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_dst_a_1\"\}\r\n$mi_gdb_prompt$" {
 	pass "continue to do_special_tests"
     }
     timeout {
@@ -592,10 +593,10 @@ mi_gdb_test "200-break-insert incr_a" \
 	"break-insert operation"
 send_gdb "-exec-continue\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"3\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"incr_a\",args=\\\[\{name=\"a\",value=\"2\.*\"\}\\\],file=\".*var-cmd.c\",line=\"$line_incr_a_b_a\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"3\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"incr_a\",args=\\\[\{name=\"a\",value=\"2\.*\"\}\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_incr_a_b_a\"\}\r\n$mi_gdb_prompt$" {
 	pass "continue to incr_a"
     }
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"3\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"incr_a\",args=\\\[\{name=\"a\",value=\"\.*\"\}\\\],file=\".*var-cmd.c\",line=\"([expr $line_incr_a_b_a - 2]|[expr $line_incr_a_b_a - 1]|$line_incr_a_b_a)\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"3\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"incr_a\",args=\\\[\{name=\"a\",value=\"\.*\"\}\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"([expr $line_incr_a_b_a - 2]|[expr $line_incr_a_b_a - 1]|$line_incr_a_b_a)\"\}\r\n$mi_gdb_prompt$" {
 	fail "continue to incr_a (compiler debug info incorrect)"
     }
     -re "\\^running\r\n${mi_gdb_prompt}.*\r\n$mi_gdb_prompt$" {

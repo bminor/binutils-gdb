@@ -1,4 +1,4 @@
-# Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+# Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ mi_gdb_test "-interpreter-exec console \"list\"" \
 
 # # NOTE: cagney/2003-02-03: Not yet.
 # mi_gdb_test "-exec-continue" \
-#    {.*\*stopped,reason="breakpoint-hit",.*func="callee4".*file=".*basics.c",line="8"\}} \
+#    {.*\*stopped,reason="breakpoint-hit",.*func="callee4".*file=".*basics.c",fullname="${fullname_syntax}${srcfile}",line="8"\}} \
 #    "-interpreter-exec console \"continue to callee4\""
 send_gdb "999-exec-continue\n"
 gdb_expect {
@@ -161,11 +161,11 @@ mi_gdb_test "600-break-insert -t basics.c:$line_main_hello" \
 	"-break-insert -t basics.c:\$line_main_hello"
 
 # mi_gdb_test "-exec-continue" \
-#   {.*\*stopped.*,file=".*basics.c",line="$line_main_hello"\}} \
+#   {.*\*stopped.*,file=".*basics.c",fullname="${fullname_syntax}${srcfile}",line="$line_main_hello"\}} \
 #   "-exec-continue to line \$line_main_hello"
 send_gdb "700-exec-continue\n"
 gdb_expect {
-    -re "700\\^running\[\r\n\]+$mi_gdb_prompt.*\\*stopped.*,file=.*basics.c.,line=.$line_main_hello.*$mi_gdb_prompt$" {
+    -re "700\\^running\[\r\n\]+$mi_gdb_prompt.*\\*stopped.*,file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=.$line_main_hello.*$mi_gdb_prompt$" {
 	pass "-exec-continue to line \$line_main_hello"
     }
     timeout {
@@ -175,11 +175,11 @@ gdb_expect {
 
 # NOTE: cagney/2003-02-03: Not yet.
 # mi_gdb_test "-exec-next" \
-#   {.*\*stopped,reason="end-stepping-range",.*,file=".*basics.c",line="$line_main_return"\}} \
+#   {.*\*stopped,reason="end-stepping-range",.*,file=".*basics.c",fullname="${fullname_syntax}${srcfile}",line="$line_main_return"\}} \
 #   "-exec-next to line \$line_main_return"
 send_gdb "800-exec-next\n"
 gdb_expect {
-    -re "800\\^running\[\r\n\]+$mi_gdb_prompt.*\\*stopped,reason=.end-stepping-range.*,file=.*basics.c.,line=.$line_main_return.*$mi_gdb_prompt$" {
+    -re "800\\^running\[\r\n\]+$mi_gdb_prompt.*\\*stopped,reason=.end-stepping-range.*,file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=.$line_main_return.*$mi_gdb_prompt$" {
 	pass "-exec-next to line \$line_main_return"
     }
     timeout {

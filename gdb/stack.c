@@ -680,6 +680,12 @@ print_frame (struct frame_info *fi,
       ui_out_text (uiout, " at ");
       annotate_frame_source_file ();
       ui_out_field_string (uiout, "file", sal.symtab->filename);
+      if (ui_out_is_mi_like_p (uiout))
+	{
+	  const char *fullname = symtab_to_fullname (sal.symtab);
+	  if (fullname != NULL)
+	    ui_out_field_string (uiout, "fullname", fullname);
+	}
       annotate_frame_source_file_end ();
       ui_out_text (uiout, ":");
       annotate_frame_source_line ();

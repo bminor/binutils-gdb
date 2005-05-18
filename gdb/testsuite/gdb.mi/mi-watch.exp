@@ -1,4 +1,5 @@
-# Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2001, 2002, 2004, 2005
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -123,7 +124,7 @@ proc test_rwatch_creation_and_listing {} {
 
 proc test_watchpoint_triggering {} {
     global mi_gdb_prompt
-    global hex
+    global hex fullname_syntax srcfile
 
     set line_callee4_return_0     [gdb_get_line_number "return 0;"]
     set line_callee3_head         [gdb_get_line_number "callee3 ("]
@@ -139,7 +140,7 @@ proc test_watchpoint_triggering {} {
     gdb_expect {
       -re "222\\^running\r\n$mi_gdb_prompt" {
         gdb_expect {
-	    -re "222\\*stopped,reason=\"watchpoint-trigger\",wpt=\{number=\"2\",exp=\"C\"\},value=\{old=\".*\",new=\"3\"\},thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"$line_callee4_return_0\"\}\r\n$mi_gdb_prompt$" {
+	    -re "222\\*stopped,reason=\"watchpoint-trigger\",wpt=\{number=\"2\",exp=\"C\"\},value=\{old=\".*\",new=\"3\"\},thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_callee4_return_0\"\}\r\n$mi_gdb_prompt$" {
             pass "watchpoint trigger"
           }
           -re ".*$mi_gdb_prompt$" {fail "watchpoint trigger (2)"}
@@ -154,7 +155,7 @@ proc test_watchpoint_triggering {} {
     gdb_expect {
       -re "223\\^running\r\n$mi_gdb_prompt" {
         gdb_expect {
-	    -re "\[\r\n\]*223\\*stopped,reason=\"watchpoint-scope\",wpnum=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee3\",args=\\\[.*\\\],file=\".*basics.c\",line=\"$line_callee3_close_brace\"\}\r\n$mi_gdb_prompt$" {
+	    -re "\[\r\n\]*223\\*stopped,reason=\"watchpoint-scope\",wpnum=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee3\",args=\\\[.*\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_callee3_close_brace\"\}\r\n$mi_gdb_prompt$" {
             pass "wp out of scope"
           }
           -re ".*$mi_gdb_prompt$" {fail "wp out of scope (2)"}

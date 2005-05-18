@@ -1,3 +1,14 @@
+2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Dennis Brueni  <dennis@slickedit.com>
+
+	* gdb.mi/mi-cli.exp, gdb.mi/mi-return.exp, gdb.mi/mi-stack.exp,
+	gdb.mi/mi-stepi.exp, gdb.mi/mi-syn-frame.exp, gdb.mi/mi-until.exp,
+	gdb.mi/mi-var-display.exp, gdb.mi/mi-watch.exp, gdb.mi/mi2-cli.exp,
+	gdb.mi/mi2-return.exp, gdb.mi/mi2-stack.exp,
+	gdb.mi/mi2-syn-frame.exp, gdb.mi/mi2-until.exp,
+	gdb.mi/mi2-var-display.exp: Expect fullname field in stack frames.
+	* lib/mi-support.exp (mi_runto, mi_execute_to_helper): Likewise.
+
 2005-05-17  Paul Gilliam  <pgilliam@us.ibm.com>
 	    Wu Zhou  <woodzltc@cn.ibm.com>
 

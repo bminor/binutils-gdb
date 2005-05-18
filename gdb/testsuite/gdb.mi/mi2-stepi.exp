@@ -1,4 +1,5 @@
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -45,7 +46,7 @@ mi_gdb_load ${binfile}
 
 proc test_stepi_nexti {} {
     global mi_gdb_prompt
-    global hex
+    global hex fullname_syntax srcfile
 
     set line_main_head  [gdb_get_line_number "main ("]
     set line_main_body  [expr $line_main_head + 2]
@@ -53,8 +54,8 @@ proc test_stepi_nexti {} {
 
     send_gdb "111-exec-step-instruction\n"
     gdb_expect {
-	-re "111\\^running\r\n${mi_gdb_prompt}111\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
-	    set line $expect_out(1,string)
+	-re "111\\^running\r\n${mi_gdb_prompt}111\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
+	    set line $expect_out(2,string)
 	    if { $line >= $line_main_body && $line <= $line_main_hello } {
 		pass "step-instruction at main"
 	    } else {
@@ -67,8 +68,8 @@ proc test_stepi_nexti {} {
     }
     send_gdb "222-exec-next-instruction\n"
     gdb_expect {
-	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
-	    set line $expect_out(1,string)
+	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
+	    set line $expect_out(2,string)
 	    if { $line >= $line_main_body && $line <= $line_main_hello } {
 		pass "next-instruction at main"
 	    } else {
@@ -81,8 +82,8 @@ proc test_stepi_nexti {} {
     }
     send_gdb "333-exec-next-instruction\n"
     gdb_expect {
-	-re "333\\^running\r\n${mi_gdb_prompt}333\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
-	    set line $expect_out(1,string)
+	-re "333\\^running\r\n${mi_gdb_prompt}333\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
+	    set line $expect_out(2,string)
 	    if { $line >= $line_main_body && $line <= $line_main_hello } {
 		pass "next-instruction at main"
 	    } else {
