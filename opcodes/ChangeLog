@@ -1,3 +1,7 @@
+2005-05-19  Kelley Cook  <kcook@gcc.gnu.org>
+
+	* Makefile.in:  Regenerate.
+
 2005-05-17  Zack Weinberg  <zack@codesourcery.com>
 
 	* arm-dis.c (thumb_opcodes): Add disassembly for V6T2 16-bit
