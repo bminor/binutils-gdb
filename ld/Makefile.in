@@ -2475,6 +2475,7 @@ install-data-local:
 # cygnus option.
 install-data-local: install-info
 diststuff: info $(EXTRA_DIST)
+all: info ld.1
 distclean-local:
 	rm -rf ldscripts
 

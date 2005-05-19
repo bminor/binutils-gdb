@@ -1,3 +1,8 @@
+2005-05-19  Zack Weinberg  <zack@codesourcery.com>
+
+	* Makefile.am: Have 'all' depend on 'info'.
+	* Makefile.in: Regenerate.
+
 2005-05-19  Ben Elliston  <bje@au.ibm.com>
 
 	* readelf.c (read_and_display_attr_value): Handle a DW_AT_encoding
@@ -10,7 +15,7 @@
 
 2005-05-15  Yitzchak Scott-Thoennes  <sthoenna@efn.org>
 
-        * deflex.l: Ignore CRs
+	* deflex.l: Ignore CRs
 
 2005-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 

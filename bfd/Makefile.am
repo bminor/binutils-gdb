@@ -647,7 +647,7 @@ po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
 	  | LC_COLLATE= sort > tmp.bld \
 	  && mv tmp.bld $(srcdir)/po/BLD-POTFILES.in
 
-diststuff: info
+all diststuff: info
 
 # Various kinds of .o files to put in libbfd.a:
 # BFD_BACKENDS	Routines the configured targets need.

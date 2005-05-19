@@ -297,6 +297,7 @@ EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 	syslex.c deflex.c defparse.h defparse.c rclex.c rcparse.h rcparse.c
 
 diststuff: $(EXTRA_DIST) info
+all: info
 
 DISTCLEANFILES = sysinfo sysroff.c sysroff.h \
 	site.exp site.bak

@@ -475,6 +475,7 @@ stamp-mk.com: vmsconf.sh Makefile
 
 EXTRA_DIST = make-gas.com m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
 diststuff: $(EXTRA_DIST) info
+all: info
 
 DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-desc.h
 

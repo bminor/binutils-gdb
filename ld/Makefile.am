@@ -1697,6 +1697,7 @@ install-data-local: install-info
 # target is run by the taz target in ../Makefile.in.
 EXTRA_DIST = ldgram.c ldgram.h ldlex.c $(man_MANS)
 diststuff: info $(EXTRA_DIST)
+all: info ld.1
 
 DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
 distclean-local:

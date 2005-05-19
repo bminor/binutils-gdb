@@ -1,3 +1,8 @@
+2005-05-19  Zack Weinberg  <zack@codesourcery.com>
+
+	* Makefile.am: Have 'all' depend on 'info'.
+	* Makefile.in: Regenerate.
+
 2005-05-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_force_relocation): Add BFD_RELOC_24_PLT_PCREL.

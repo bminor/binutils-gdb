@@ -1251,7 +1251,7 @@ po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
 	  | LC_COLLATE= sort > tmp.bld \
 	  && mv tmp.bld $(srcdir)/po/BLD-POTFILES.in
 
-diststuff: info
+all diststuff: info
 
 stamp-ofiles: Makefile
 	rm -f tofiles

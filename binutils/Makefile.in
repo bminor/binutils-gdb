@@ -1050,6 +1050,7 @@ nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 	$(COMPILE) -c -DLD_NAME="\"$${ldname}\"" @NLMCONV_DEFS@ $(srcdir)/nlmconv.c
 
 diststuff: $(EXTRA_DIST) info
+all: info
 
 Makefile: $(BFDDIR)/configure.in
 

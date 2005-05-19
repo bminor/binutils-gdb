@@ -1,3 +1,8 @@
+2005-05-19  Zack Weinberg  <zack@codesourcery.com>
+
+	* Makefile.am: Have 'all' depend on 'info'.
+	* Makefile.in: Regenerate.
+
 2005-05-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_link_hash_table): Delete init_refcount and

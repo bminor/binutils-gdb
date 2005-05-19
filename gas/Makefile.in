@@ -2941,6 +2941,7 @@ stamp-mk.com: vmsconf.sh Makefile
 	$(SHELL) $(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
 	touch stamp-mk.com
 diststuff: $(EXTRA_DIST) info
+all: info
 
 $(OBJS): @ALL_OBJ_DEPS@
 
