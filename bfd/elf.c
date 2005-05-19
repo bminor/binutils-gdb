@@ -4151,22 +4151,20 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	{
 	  bfd_size_type align;
 	  bfd_vma adjust;
+	  unsigned int align_power = 0;
 
-	  if ((abfd->flags & D_PAGED) != 0)
-	    align = bed->maxpagesize;
-	  else
+	  for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	    {
-	      unsigned int align_power = 0;
-	      for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
-		{
-		  unsigned int secalign;
+	      unsigned int secalign;
 
-		  secalign = bfd_get_section_alignment (abfd, *secpp);
-		  if (secalign > align_power)
-		    align_power = secalign;
-		}
-	      align = (bfd_size_type) 1 << align_power;
+	      secalign = bfd_get_section_alignment (abfd, *secpp);
+	      if (secalign > align_power)
+		align_power = secalign;
 	    }
+	  align = (bfd_size_type) 1 << align_power;
+
+	  if ((abfd->flags & D_PAGED) != 0 && bed->maxpagesize > align)
+	    align = bed->maxpagesize;
 
 	  adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
 	  off += adjust;
@@ -4352,7 +4350,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 		  /* The section VMA must equal the file position
 		     modulo the page size.  */
 		  bfd_size_type page = align;
-		  if ((abfd->flags & D_PAGED) != 0)
+		  if ((abfd->flags & D_PAGED) != 0 && bed->maxpagesize > page)
 		    page = bed->maxpagesize;
 		  adjust = vma_page_aligned_bias (sec->vma,
 						  p->p_vaddr + p->p_memsz,

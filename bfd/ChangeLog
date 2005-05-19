@@ -1,3 +1,9 @@
+2005-05-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_segments): Use maximum of
+	maxpagesize and section alignment when adjusting initial
+	segment offset and section offsets.
+
 2005-05-18  Zack Weinberg  <zack@codesourcery.com>
 
 	* elf32-arm.c: Make all #ifndef OLD_ARM_ABI blocks
