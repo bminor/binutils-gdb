@@ -2362,8 +2362,8 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
 
   if (h->root.type == bfd_link_hash_warning)
     {
-      h->plt = elf_hash_table (eif->info)->init_offset;
-      h->got = elf_hash_table (eif->info)->init_offset;
+      h->got = elf_hash_table (eif->info)->init_got_offset;
+      h->plt = elf_hash_table (eif->info)->init_plt_offset;
 
       /* When warning symbols are created, they **replace** the "real"
 	 entry in the hash table, thus we never get to see the real
@@ -2392,7 +2392,7 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
 	  || (!h->ref_regular
 	      && (h->u.weakdef == NULL || h->u.weakdef->dynindx == -1))))
     {
-      h->plt = elf_hash_table (eif->info)->init_offset;
+      h->plt = elf_hash_table (eif->info)->init_plt_offset;
       return TRUE;
     }
 
@@ -4986,7 +4986,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* Any syms created from now on start with -1 in
      got.refcount/offset and plt.refcount/offset.  */
-  elf_hash_table (info)->init_refcount = elf_hash_table (info)->init_offset;
+  elf_hash_table (info)->init_got_refcount
+    = elf_hash_table (info)->init_got_offset;
+  elf_hash_table (info)->init_plt_refcount
+    = elf_hash_table (info)->init_plt_offset;
 
   /* The backend may have to create some sections regardless of whether
      we're dynamic or not.  */

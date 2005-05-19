@@ -1678,7 +1678,7 @@ elf32_hppa_hide_symbol (struct bfd_link_info *info,
   if (! ((struct elf32_hppa_link_hash_entry *) h)->plabel)
     {
       h->needs_plt = 0;
-      h->plt = elf_hash_table (info)->init_refcount;
+      h->plt = elf_hash_table (info)->init_plt_refcount;
     }
 }
 

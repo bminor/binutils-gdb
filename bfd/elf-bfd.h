@@ -349,13 +349,15 @@ struct elf_link_hash_table
 
   /* The value to use when initialising got.refcount/offset and
      plt.refcount/offset in an elf_link_hash_entry.  Set to zero when
-     the values are refcounts.  Set to init_offset in
-     size_dynamic_sections when the values may be offsets.  */
-  union gotplt_union init_refcount;
+     the values are refcounts.  Set to init_got_offset/init_plt_offset
+     in size_dynamic_sections when the values may be offsets.  */
+  union gotplt_union init_got_refcount;
+  union gotplt_union init_plt_refcount;
 
   /* The value to use for got.refcount/offset and plt.refcount/offset
      when the values may be offsets.  Normally (bfd_vma) -1.  */
-  union gotplt_union init_offset;
+  union gotplt_union init_got_offset;
+  union gotplt_union init_plt_offset;
 
   /* The number of symbols found in the link which must be put into
      the .dynsym section.  */

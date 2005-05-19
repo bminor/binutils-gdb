@@ -1,5 +1,40 @@
 2005-05-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (struct elf_link_hash_table): Delete init_refcount and
+	init_offset.  Add init_got_refcount, init_plt_refcount,
+	init_got_offset and init_plt_offset.
+	* elf.c (_bfd_elf_link_hash_newfunc): Adjust for above change.
+	(_bfd_elf_link_hash_hide_symbol): Likewise.
+	(_bfd_elf_link_hash_table_init): Likewise.
+	* elf32-hppa.c (elf32_hppa_hide_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_link_hash_table_create): Likewise.
+	* elflink.c (_bfd_elf_adjust_dynamic_symbol): Likewise.
+	(bfd_elf_size_dynamic_sections): Likewise.
+	* elf32-ppc.c (GLINK_PLTRESOLVE): Now 16 insns.
+	(LWZU_0_X_12, LWZ_0_4_30, LWZ_0_X_12, LWZ_11_X_11, LWZ_11_X_30,
+	LWZ_12_4_12, LWZ_12_8_30, LWZ_12_X_12, SUB_11_11_30): Delete.
+	(ADDIS_12_12, BCL_20_31, LWZU_0_12, LWZ_0_12, LWZ_11_11, LWZ_11_30,
+	LWZ_12_12, MFLR_0, MFLR_12, MTLR_0, SUB_11_11_12): Define.
+	(struct plt_entry): New.
+	(ppc_elf_link_hash_table_create): Set new init_plt fields.
+	(ppc_elf_copy_indirect_symbol): Handle merge of plt plist.  Don't
+	use _bfd_elf_link_hash_copy_indirect.
+	(update_plt_info, find_plt_ent): New functions.
+	(ppc_elf_check_relocs): Handle R_PPC_PLTREL24 with non-zero addend
+	and adjust for use of plt list rather than refcount.
+	(ppc_elf_gc_sweep_hook): Likewise.
+	(ppc_elf_tls_optimize): Likewise.
+	(ppc_elf_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc_elf_relax_section): Likewise.
+	(ppc_elf_relocate_section): Likewise.  Adjust R_PPC_PLTREL24 addends
+	when performing a relocatable link.
+	(ppc_elf_finish_dynamic_symbol): Likewise.  Write .glink stubs here..
+	(ppc_elf_finish_dynamic_sections): ..rather than here.  Use new
+	pic resolver stub.
+
+2005-05-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (assign_file_positions_for_segments): Use maximum of
 	maxpagesize and section alignment when adjusting initial
 	segment offset and section offsets.

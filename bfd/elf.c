@@ -1414,7 +1414,8 @@ _bfd_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       /* Set local fields.  */
       ret->indx = -1;
       ret->dynindx = -1;
-      ret->got = ret->plt = htab->init_refcount;
+      ret->got = htab->init_got_refcount;
+      ret->plt = htab->init_plt_refcount;
       memset (&ret->size, 0, (sizeof (struct elf_link_hash_entry)
 			      - offsetof (struct elf_link_hash_entry, size)));
       /* Assume that we have been called by a non-ELF symbol reader.
@@ -1487,7 +1488,7 @@ _bfd_elf_link_hash_hide_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *h,
 				bfd_boolean force_local)
 {
-  h->plt = elf_hash_table (info)->init_offset;
+  h->plt = elf_hash_table (info)->init_plt_offset;
   h->needs_plt = 0;
   if (force_local)
     {
@@ -1512,14 +1513,14 @@ _bfd_elf_link_hash_table_init
 				      const char *))
 {
   bfd_boolean ret;
+  int can_refcount = get_elf_backend_data (abfd)->can_refcount;
 
   table->dynamic_sections_created = FALSE;
   table->dynobj = NULL;
-  /* Make sure can_refcount is extended to the width and signedness of
-     init_refcount before we subtract one from it.  */
-  table->init_refcount.refcount = get_elf_backend_data (abfd)->can_refcount;
-  table->init_refcount.refcount -= 1;
-  table->init_offset.offset = -(bfd_vma) 1;
+  table->init_got_refcount.refcount = can_refcount - 1;
+  table->init_plt_refcount.refcount = can_refcount - 1;
+  table->init_got_offset.offset = -(bfd_vma) 1;
+  table->init_plt_offset.offset = -(bfd_vma) 1;
   /* The first dynamic symbol is a dummy.  */
   table->dynsymcount = 1;
   table->dynstr = NULL;

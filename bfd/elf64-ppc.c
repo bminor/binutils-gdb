@@ -3520,10 +3520,14 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
      only care about glist, but when compiled on a 32-bit host the
      bfd_vma fields are larger.  Setting the bfd_vma to zero makes
      debugger inspection of these fields look nicer.  */
-  htab->elf.init_refcount.refcount = 0;
-  htab->elf.init_refcount.glist = NULL;
-  htab->elf.init_offset.offset = 0;
-  htab->elf.init_offset.glist = NULL;
+  htab->elf.init_got_refcount.refcount = 0;
+  htab->elf.init_got_refcount.glist = NULL;
+  htab->elf.init_plt_refcount.refcount = 0;
+  htab->elf.init_plt_refcount.glist = NULL;
+  htab->elf.init_got_offset.offset = 0;
+  htab->elf.init_got_offset.glist = NULL;
+  htab->elf.init_plt_offset.offset = 0;
+  htab->elf.init_plt_offset.glist = NULL;
 
   return &htab->elf.root;
 }
