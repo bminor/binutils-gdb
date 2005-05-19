@@ -73,6 +73,9 @@ Generate code for processors with AltiVec instructions.
 @item -mpower4
 Generate code for Power4 architecture.
 
+@item -mpower5
+Generate code for Power5 architecture.
+
 @item -mcom
 Generate code Power/PowerPC common instructions.
 

@@ -906,6 +906,12 @@ parse_cpu (const char *arg)
       ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
 		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4);
     }
+  else if (strcmp (arg, "power5") == 0)
+    {
+      ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4
+		 | PPC_OPCODE_POWER5);
+    }
   /* -mcom means assemble for the common intersection between Power
      and PowerPC.  At present, we just allow the union, rather
      than the intersection.  */
@@ -1100,6 +1106,7 @@ PowerPC options:\n\
 -mbooke64		generate code for 64-bit PowerPC BookE\n\
 -mbooke, mbooke32	generate code for 32-bit PowerPC BookE\n\
 -mpower4		generate code for Power4 architecture\n\
+-mpower5		generate code for Power5 architecture\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n"));
   fprintf (stream, _("\
@@ -1255,7 +1262,10 @@ ppc_setup_opcodes (void)
 	      || (ppc_cpu & PPC_OPCODE_BOOKE) == 0)
 	  && ((op->flags & (PPC_OPCODE_POWER4 | PPC_OPCODE_NOPOWER4)) == 0
 	      || ((op->flags & PPC_OPCODE_POWER4)
-		  == (ppc_cpu & PPC_OPCODE_POWER4))))
+		  == (ppc_cpu & PPC_OPCODE_POWER4)))
+	  && ((op->flags & PPC_OPCODE_POWER5) == 0
+	      || ((op->flags & PPC_OPCODE_POWER5)
+		  == (ppc_cpu & PPC_OPCODE_POWER5))))
 	{
 	  const char *retval;
 

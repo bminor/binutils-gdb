@@ -1,3 +1,10 @@
+2005-05-19  Anton Blanchard  <anton@samba.org>
+
+	* config/tc-ppc.c (parse_cpu): Handle "-mpower5".
+	(md_show_usage): Document it.
+	(ppc_setup_opcodes): Insert POWER5 mnemonics.
+	* doc/c-ppc.texi (PowerPC-Opts): Document "-mpower5".
+
 2005-05-19  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (dot_endp): Don't use global symbol for unwind
