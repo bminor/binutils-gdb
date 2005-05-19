@@ -1,3 +1,10 @@
+2005-05-19  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/reloc-uw.s: New.
+	* gas/ia64/reloc-uw.d: New.
+	* gas/ia64/reloc-uw-ilp32.d: New.
+	* gas/ia64/ia64.exp: Run new test.
+
 2005-04-13  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/ldstla-32.s: Exclude offsets that are now meant to fail

@@ -4420,7 +4420,13 @@ dot_endp (dummy)
       e.X_op = O_pseudo_fixup;
       e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
       e.X_add_number = 0;
-      e.X_add_symbol = unwind.proc_start;
+      if (!S_IS_LOCAL (unwind.proc_start)
+	  && S_IS_DEFINED (unwind.proc_start))
+	e.X_add_symbol = symbol_temp_new (S_GET_SEGMENT (unwind.proc_start),
+					  S_GET_VALUE (unwind.proc_start),
+					  symbol_get_frag (unwind.proc_start));
+      else
+	e.X_add_symbol = unwind.proc_start;
       ia64_cons_fix_new (frag_now, where, bytes_per_address, &e);
 
       e.X_op = O_pseudo_fixup;

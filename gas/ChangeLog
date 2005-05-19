@@ -1,3 +1,8 @@
+2005-05-19  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (dot_endp): Don't use global symbol for unwind
+	relocations in unwind section.
+
 2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Backport from mainline:
