@@ -1,3 +1,7 @@
+2005-05-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_force_relocation): Add BFD_RELOC_24_PLT_PCREL.
+
 2005-05-19  Anton Blanchard  <anton@samba.org>
 
 	* config/tc-ppc.c (parse_cpu): Handle "-mpower5".
