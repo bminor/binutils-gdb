@@ -49,7 +49,7 @@ you lose
 #endif
 
 LONGEST
-extract_signed_integer (const void *addr, int len)
+extract_signed_integer (const gdb_byte *addr, int len)
 {
   LONGEST retval;
   const unsigned char *p;
@@ -83,7 +83,7 @@ That operation is not available on integers of more than %d bytes."),
 }
 
 ULONGEST
-extract_unsigned_integer (const void *addr, int len)
+extract_unsigned_integer (const gdb_byte *addr, int len)
 {
   ULONGEST retval;
   const unsigned char *p;
@@ -117,16 +117,18 @@ That operation is not available on integers of more than %d bytes."),
    function returns 1 and sets *PVAL.  Otherwise it returns 0.  */
 
 int
-extract_long_unsigned_integer (const void *addr, int orig_len, LONGEST *pval)
+extract_long_unsigned_integer (const gdb_byte *addr, int orig_len,
+			       LONGEST *pval)
 {
-  char *p, *first_addr;
+  const gdb_byte *p;
+  const gdb_byte *first_addr;
   int len;
 
   len = orig_len;
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
-      for (p = (char *) addr;
-	   len > (int) sizeof (LONGEST) && p < (char *) addr + orig_len;
+      for (p = addr;
+	   len > (int) sizeof (LONGEST) && p < addr + orig_len;
 	   p++)
 	{
 	  if (*p == 0)
@@ -138,9 +140,9 @@ extract_long_unsigned_integer (const void *addr, int orig_len, LONGEST *pval)
     }
   else
     {
-      first_addr = (char *) addr;
-      for (p = (char *) addr + orig_len - 1;
-	   len > (int) sizeof (LONGEST) && p >= (char *) addr;
+      first_addr = addr;
+      for (p = addr + orig_len - 1;
+	   len > (int) sizeof (LONGEST) && p >= addr;
 	   p--)
 	{
 	  if (*p == 0)
@@ -164,7 +166,7 @@ extract_long_unsigned_integer (const void *addr, int orig_len, LONGEST *pval)
 /* Treat the bytes at BUF as a pointer of type TYPE, and return the
    address it represents.  */
 CORE_ADDR
-extract_typed_address (const void *buf, struct type *type)
+extract_typed_address (const gdb_byte *buf, struct type *type)
 {
   if (TYPE_CODE (type) != TYPE_CODE_PTR
       && TYPE_CODE (type) != TYPE_CODE_REF)
@@ -177,11 +179,11 @@ extract_typed_address (const void *buf, struct type *type)
 
 
 void
-store_signed_integer (void *addr, int len, LONGEST val)
+store_signed_integer (gdb_byte *addr, int len, LONGEST val)
 {
-  unsigned char *p;
-  unsigned char *startaddr = (unsigned char *) addr;
-  unsigned char *endaddr = startaddr + len;
+  gdb_byte *p;
+  gdb_byte *startaddr = addr;
+  gdb_byte *endaddr = startaddr + len;
 
   /* Start at the least significant end of the integer, and work towards
      the most significant.  */
@@ -204,7 +206,7 @@ store_signed_integer (void *addr, int len, LONGEST val)
 }
 
 void
-store_unsigned_integer (void *addr, int len, ULONGEST val)
+store_unsigned_integer (gdb_byte *addr, int len, ULONGEST val)
 {
   unsigned char *p;
   unsigned char *startaddr = (unsigned char *) addr;
@@ -233,7 +235,7 @@ store_unsigned_integer (void *addr, int len, ULONGEST val)
 /* Store the address ADDR as a pointer of type TYPE at BUF, in target
    form.  */
 void
-store_typed_address (void *buf, struct type *type, CORE_ADDR addr)
+store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 {
   if (TYPE_CODE (type) != TYPE_CODE_PTR
       && TYPE_CODE (type) != TYPE_CODE_REF)

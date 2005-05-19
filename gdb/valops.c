@@ -933,54 +933,6 @@ value_ind (struct value *arg1)
   return 0;			/* For lint -- never reached */
 }
 
-/* Pushing small parts of stack frames.  */
-
-/* Push one word (the size of object that a register holds).  */
-
-CORE_ADDR
-push_word (CORE_ADDR sp, ULONGEST word)
-{
-  int len = DEPRECATED_REGISTER_SIZE;
-  char buffer[MAX_REGISTER_SIZE];
-
-  store_unsigned_integer (buffer, len, word);
-  if (INNER_THAN (1, 2))
-    {
-      /* stack grows downward */
-      sp -= len;
-      write_memory (sp, buffer, len);
-    }
-  else
-    {
-      /* stack grows upward */
-      write_memory (sp, buffer, len);
-      sp += len;
-    }
-
-  return sp;
-}
-
-/* Push LEN bytes with data at BUFFER.  */
-
-CORE_ADDR
-push_bytes (CORE_ADDR sp, char *buffer, int len)
-{
-  if (INNER_THAN (1, 2))
-    {
-      /* stack grows downward */
-      sp -= len;
-      write_memory (sp, buffer, len);
-    }
-  else
-    {
-      /* stack grows upward */
-      write_memory (sp, buffer, len);
-      sp += len;
-    }
-
-  return sp;
-}
-
 /* Create a value for an array by allocating space in the inferior, copying
    the data into that space, and then setting up an array value.
 

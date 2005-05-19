@@ -1,5 +1,15 @@
 2005-05-19  Andrew Cagney  <cagney@gnu.org>
 
+	* defs.h (extract_signed_integer, extract_unsigned_integer)
+	(extract_long_unsigned_integer, extract_typed_address)
+	(store_signed_integer, store_unsigned_integer)
+	(store_typed_address): Use gdb_byte for byte buffer parameters.
+	(push_bytes, push_word): Delete declaration.
+	* valops.c (push_bytes, push_word): Delete function.
+	* findvar.c (extract_signed_integer, extract_unsigned_integer) 
+	(extract_typed_address, store_signed_integer) 
+	(store_unsigned_integer): Update.
+	
 	* regcache.h (regcache_raw_read, regcache_raw_write)
 	(regcache_raw_read_part, regcache_raw_write_part)
 	(regcache_cooked_read_part, regcache_cooked_write_part)
