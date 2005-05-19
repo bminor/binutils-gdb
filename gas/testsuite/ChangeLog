@@ -1,3 +1,10 @@
+2005-05-19  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/reloc-uw.s: New.
+	* gas/ia64/reloc-uw.d: New.
+	* gas/ia64/reloc-uw-ilp32.d: New.
+	* gas/ia64/ia64.exp: Run new test.
+
 2005-05-18  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/all/altmacro.s: Parenthesize operand of %.

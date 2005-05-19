@@ -65,11 +65,13 @@ if [istarget "ia64-*"] then {
 	run_dump_test "unwind-ilp32"
 	run_dump_test "alias-ilp32"
 	run_dump_test "xdata-ilp32"
+	run_dump_test "reloc-uw-ilp32"
     } else {
 	run_dump_test "secname"
 	run_dump_test "unwind"
 	run_dump_test "alias"
 	run_dump_test "xdata"
+	run_dump_test "reloc-uw"
 	run_dump_test "group-1"
 	run_dump_test "group-2"
     }

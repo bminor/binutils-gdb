@@ -1,3 +1,8 @@
+2005-05-19  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (dot_endp): Don't use global symbol for unwind
+	relocations in unwind section.
+
 2005-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c (md_apply_fix3): Only use the insertion routine
