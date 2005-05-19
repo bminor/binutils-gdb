@@ -88,7 +88,6 @@ static gdbarch_register_name_ftype ia64_register_name;
 static gdbarch_register_type_ftype ia64_register_type;
 static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
-static gdbarch_extract_return_value_ftype ia64_extract_return_value;
 static struct type *is_float_or_hfa_type (struct type *t);
 static CORE_ADDR ia64_find_global_pointer (CORE_ADDR faddr);
 
@@ -2694,7 +2693,8 @@ ia64_use_struct_convention (int gcc_p, struct type *type)
 }
 
 void
-ia64_extract_return_value (struct type *type, struct regcache *regcache, void *valbuf)
+ia64_extract_return_value (struct type *type, struct regcache *regcache,
+			   gdb_byte *valbuf)
 {
   struct type *float_elt_type;
 

@@ -491,7 +491,7 @@ get_frame_func (struct frame_info *fi)
 }
 
 static int
-do_frame_register_read (void *src, int regnum, void *buf)
+do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 {
   frame_register_read (src, regnum, buf);
   return 1;

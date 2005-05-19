@@ -39,9 +39,9 @@ extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
 
-void regcache_raw_read (struct regcache *regcache, int rawnum, void *buf);
+void regcache_raw_read (struct regcache *regcache, int rawnum, gdb_byte *buf);
 void regcache_raw_write (struct regcache *regcache, int rawnum,
-			 const void *buf);
+			 const gdb_byte *buf);
 extern void regcache_raw_read_signed (struct regcache *regcache,
 				      int regnum, LONGEST *val);
 extern void regcache_raw_read_unsigned (struct regcache *regcache,
@@ -55,16 +55,17 @@ extern void regcache_raw_write_unsigned (struct regcache *regcache,
    write style operations.  */
 
 void regcache_raw_read_part (struct regcache *regcache, int regnum,
-			     int offset, int len, void *buf);
+			     int offset, int len, gdb_byte *buf);
 void regcache_raw_write_part (struct regcache *regcache, int regnum,
-			      int offset, int len, const void *buf);
+			      int offset, int len, const gdb_byte *buf);
 
 int regcache_valid_p (struct regcache *regcache, int regnum);
 
 /* Transfer a cooked register [0..NUM_REGS+NUM_PSEUDO_REGS).  */
-void regcache_cooked_read (struct regcache *regcache, int rawnum, void *buf);
+void regcache_cooked_read (struct regcache *regcache, int rawnum,
+			   gdb_byte *buf);
 void regcache_cooked_write (struct regcache *regcache, int rawnum,
-			    const void *buf);
+			    const gdb_byte *buf);
 
 /* NOTE: cagney/2002-08-13: At present GDB has no reliable mechanism
    for indicating when a ``cooked'' register was constructed from
@@ -88,18 +89,18 @@ extern void regcache_cooked_write_unsigned (struct regcache *regcache,
    write style operations.  */
 
 void regcache_cooked_read_part (struct regcache *regcache, int regnum,
-				int offset, int len, void *buf);
+				int offset, int len, gdb_byte *buf);
 void regcache_cooked_write_part (struct regcache *regcache, int regnum,
-				 int offset, int len, const void *buf);
+				 int offset, int len, const gdb_byte *buf);
 
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a
    target_fetch_registers() or target_store_registers().  */
 
 extern void regcache_raw_supply (struct regcache *regcache,
-				 int regnum, const void *buf);
+				 int regnum, const gdb_byte *buf);
 extern void regcache_raw_collect (const struct regcache *regcache,
-				  int regnum, void *buf);
+				  int regnum, gdb_byte *buf);
 
 
 /* The register's ``offset''.
@@ -136,14 +137,15 @@ extern int register_size (struct gdbarch *gdbarch, int regnum);
    restore_reggroup respectively.  COOKED_READ returns zero iff the
    register's value can't be returned.  */
 
-typedef int (regcache_cooked_read_ftype) (void *src, int regnum, void *buf);
+typedef int (regcache_cooked_read_ftype) (void *src, int regnum,
+					  gdb_byte *buf);
 
 extern void regcache_save (struct regcache *dst,
 			   regcache_cooked_read_ftype *cooked_read,
-			   void *src);
+			   void *cooked_read_context);
 extern void regcache_restore (struct regcache *dst,
 			      regcache_cooked_read_ftype *cooked_read,
-			      void *src);
+			      void *cooked_read_context);
 
 /* Copy/duplicate the contents of a register cache.  By default, the
    operation is pass-through.  Writes to DST and reads from SRC will
@@ -173,12 +175,12 @@ extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache 
    method, there should already be a non-deprecated variant that is
    parameterized with FRAME or REGCACHE.  */
 
-extern char *deprecated_grub_regcache_for_registers (struct regcache *);
-extern void deprecated_read_register_gen (int regnum, char *myaddr);
-extern void deprecated_write_register_gen (int regnum, char *myaddr);
-extern void deprecated_read_register_bytes (int regbyte, char *myaddr,
+extern gdb_byte *deprecated_grub_regcache_for_registers (struct regcache *);
+extern void deprecated_read_register_gen (int regnum, gdb_byte *myaddr);
+extern void deprecated_write_register_gen (int regnum, gdb_byte *myaddr);
+extern void deprecated_read_register_bytes (int regbyte, gdb_byte *myaddr,
 					    int len);
-extern void deprecated_write_register_bytes (int regbyte, char *myaddr,
+extern void deprecated_write_register_bytes (int regbyte, gdb_byte *myaddr,
 					     int len);
 
 /* NOTE: cagney/2002-11-05: This function has been superseeded by

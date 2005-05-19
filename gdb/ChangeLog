@@ -1,3 +1,29 @@
+2005-05-19  Andrew Cagney  <cagney@gnu.org>
+
+	* regcache.h (regcache_raw_read, regcache_raw_write)
+	(regcache_raw_read_part, regcache_raw_write_part)
+	(regcache_cooked_read_part, regcache_cooked_write_part)
+	(regcache_cooked_read, regcache_cooked_write)
+	(regcache_raw_supply, regcache_raw_collect)
+	(regcache_cooked_read_ftype, regcache_save, regcache_restore)
+	(deprecated_read_register_gen, deprecated_write_register_gen)
+	(deprecated_read_register_bytes, deprecated_write_register_bytes)
+	(deprecated_grub_regcache_for_registers): Use gdb_byte for byte
+	buffer parameters.
+	* ia64-tdep.c (ia64_extract_return_value): Update.
+	* frame.c (do_frame_register_read): Update.
+	* regcache.c (deprecated_grub_regcache_for_registers) 
+	(struct regcache, regcache_save, regcache_restore, regcache_cpy) 
+	(do_cooked_read, regcache_xmalloc, register_buffer) 
+	(deprecated_read_register_bytes, regcache_raw_read) 
+	(regcache_raw_read_signed, regcache_raw_read_unsigned) 
+	(deprecated_read_register_gen, regcache_cooked_read) 
+	(regcache_cooked_read_signed, regcache_cooked_read_unsigned) 
+	(deprecated_write_register_gen, regcache_cooked_write) 
+	(deprecated_write_register_bytes, regcache_raw_read_part) 
+	(regcache_raw_write_part, regcache_cooked_read_part) 
+	(regcache_cooked_write_part, read_register, regcache_raw_supply): 
+
 2005-05-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* MAINTAINERS: Undelete v850.
