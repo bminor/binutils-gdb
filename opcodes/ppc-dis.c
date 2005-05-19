@@ -72,6 +72,10 @@ powerpc_dialect (struct disassemble_info *info)
     dialect |= PPC_OPCODE_POWER4;
 
   if (info->disassembler_options
+      && strstr (info->disassembler_options, "power5") != NULL)
+    dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5;
+
+  if (info->disassembler_options
       && strstr (info->disassembler_options, "any") != NULL)
     dialect |= PPC_OPCODE_ANY;
 
@@ -302,6 +306,7 @@ the -M switch:\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
   fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");
+  fprintf (stream, "  power5                   Disassemble the Power5 instructions\n");
   fprintf (stream, "  32                       Do not disassemble 64-bit instructions\n");
   fprintf (stream, "  64                       Allow disassembly of 64-bit instructions\n");
 }

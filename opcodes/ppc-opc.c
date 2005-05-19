@@ -304,9 +304,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define L FXM4 + 1
   { 1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
-  /* The LEV field in a POWER SC form instruction.  */
-#define LEV L + 1
+  /* The LEV field in a POWER SVC form instruction.  */
+#define SVC_LEV L + 1
   { 7, 5, NULL, NULL, 0 },
+
+  /* The LEV field in an SC form instruction.  */
+#define LEV SVC_LEV + 1
+  { 7, 5, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
   /* The LI field in an I form instruction.  The lower two bits are
      forced to zero.  */
@@ -1818,6 +1822,7 @@ extract_tbr (unsigned long insn,
 #define PPCCOM	PPC_OPCODE_PPC | PPC_OPCODE_COMMON
 #define NOPOWER4 PPC_OPCODE_NOPOWER4 | PPCCOM
 #define POWER4	PPC_OPCODE_POWER4
+#define POWER5	PPC_OPCODE_POWER5
 #define PPC32   PPC_OPCODE_32 | PPC_OPCODE_PPC
 #define PPC64   PPC_OPCODE_64 | PPC_OPCODE_PPC
 #define PPC403	PPC_OPCODE_403
@@ -2749,9 +2754,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "bcla+",   B(16,1,1),	B_MASK,		PPCCOM,		{ BOE, BI, BDPA } },
 { "bcla",    B(16,1,1),	B_MASK,		COM,		{ BO, BI, BDA } },
 
-{ "sc",      SC(17,1,0), 0xffffffff,	PPC,		{ 0 } },
-{ "svc",     SC(17,0,0), SC_MASK,	POWER,		{ LEV, FL1, FL2 } },
-{ "svcl",    SC(17,0,1), SC_MASK,	POWER,		{ LEV, FL1, FL2 } },
+{ "sc",      SC(17,1,0), SC_MASK,	PPC,		{ LEV } },
+{ "svc",     SC(17,0,0), SC_MASK,	POWER,		{ SVC_LEV, FL1, FL2 } },
+{ "svcl",    SC(17,0,1), SC_MASK,	POWER,		{ SVC_LEV, FL1, FL2 } },
 { "svca",    SC(17,1,0), SC_MASK,	PWRCOM,		{ SV } },
 { "svcla",   SC(17,1,1), SC_MASK,	POWER,		{ SV } },
 
@@ -3007,6 +3012,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "crnand",  XL(19,225), XL_MASK,	COM,		{ BT, BA, BB } },
 
 { "crand",   XL(19,257), XL_MASK,	COM,		{ BT, BA, BB } },
+
+{ "hrfid",   XL(19,274), 0xffffffff,	POWER5,		{ 0 } },
 
 { "crset",   XL(19,289), XL_MASK,	PPCCOM,		{ BT, BAT, BBA } },
 { "creqv",   XL(19,289), XL_MASK,	COM,		{ BT, BA, BB } },
@@ -3434,6 +3441,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "clf",     X(31,118), XTO_MASK,	POWER,		{ RA, RB } },
 
 { "lbzux",   X(31,119),	X_MASK,		COM,		{ RT, RAL, RB } },
+
+{ "popcntb", X(31,122), XRB_MASK,	POWER5,		{ RA, RS } },
 
 { "not",     XRC(31,124,0), X_MASK,	COM,		{ RA, RS, RBS } },
 { "nor",     XRC(31,124,0), X_MASK,	COM,		{ RA, RS, RB } },
@@ -4512,6 +4521,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "fmuls",   A(59,25,0), AFRB_MASK,	PPC,		{ FRT, FRA, FRC } },
 { "fmuls.",  A(59,25,1), AFRB_MASK,	PPC,		{ FRT, FRA, FRC } },
 
+{ "fsqrtes",  A(59,26,0), AFRAFRC_MASK,	POWER5,		{ FRT, FRB } },
+{ "fsqrtes.", A(59,26,1), AFRAFRC_MASK,	POWER5,		{ FRT, FRB } },
+
 { "fmsubs",  A(59,28,0), A_MASK,	PPC,		{ FRT,FRA,FRC,FRB } },
 { "fmsubs.", A(59,28,1), A_MASK,	PPC,		{ FRT,FRA,FRC,FRB } },
 
@@ -4582,6 +4594,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "fsel",    A(63,23,0), A_MASK,	PPC,		{ FRT,FRA,FRC,FRB } },
 { "fsel.",   A(63,23,1), A_MASK,	PPC,		{ FRT,FRA,FRC,FRB } },
+
+{ "fre",     A(63,24,0), AFRAFRC_MASK,	POWER5,		{ FRT, FRB } },
+{ "fre.",    A(63,24,1), AFRAFRC_MASK,	POWER5,		{ FRT, FRB } },
 
 { "fmul",    A(63,25,0), AFRB_MASK,	PPCCOM,		{ FRT, FRA, FRC } },
 { "fm",      A(63,25,0), AFRB_MASK,	PWRCOM,		{ FRT, FRA, FRC } },

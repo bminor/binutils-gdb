@@ -1,3 +1,13 @@
+2005-05-19  Anton Blanchard  <anton@samba.org>
+
+	* ppc-dis.c (powerpc_dialect): Handle "-Mpower5".
+	(print_ppc_disassembler_options): Document it.
+	* ppc-opc.c (SVC_LEV): Define.
+	(LEV): Allow optional operand.
+	(POWER5): Define.
+	(powerpc_opcodes): Extend "sc".  Adjust "svc" and "svcl".  Add
+	"hrfid", "popcntb", "fsqrtes", "fsqrtes.", "fre" and "fre.".
+
 2005-05-19  Kelley Cook  <kcook@gcc.gnu.org>
 
 	* Makefile.in:  Regenerate.
