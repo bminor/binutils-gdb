@@ -1,5 +1,10 @@
 2005-05-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Don't eliminate
+	copy relocations for VxWorks.
+
+2005-05-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* bfd/elf32-ppc.c (struct ppc_elf_link_hash_entry): Add new field
 	has_sda_refs.
 	(ppc_elf_copy_indirect_symbol): Copy has_sda_refs.

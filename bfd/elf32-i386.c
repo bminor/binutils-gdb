@@ -1431,7 +1431,13 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
       return TRUE;
     }
 
-  if (ELIMINATE_COPY_RELOCS)
+  htab = elf_i386_hash_table (info);
+
+  /* If there aren't any dynamic relocs in read-only sections, then
+     we can keep the dynamic relocs and avoid the copy reloc.  This
+     doesn't work on VxWorks, where we can not have dynamic relocations
+     (other than copy and jump slot relocations) in an executable.  */
+  if (ELIMINATE_COPY_RELOCS && !htab->is_vxworks)
     {
       struct elf_i386_link_hash_entry * eh;
       struct elf_i386_dyn_relocs *p;
@@ -1444,8 +1450,6 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
 	    break;
 	}
 
-      /* If we didn't find any dynamic relocs in read-only sections, then
-	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
       if (p == NULL)
 	{
 	  h->non_got_ref = 0;
@@ -1462,8 +1466,6 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
      determine the address it must put in the global offset table, so
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
-
-  htab = elf_i386_hash_table (info);
 
   /* We must generate a R_386_COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
