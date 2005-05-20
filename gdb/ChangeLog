@@ -1,3 +1,9 @@
+2005-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* alpha-tdep.c (fp_register_zero_p): New function.
+	(fp_register_sign_bit): New function.
+	(alpha_next_pc): Add support for floating-point control instructions.
+
 2005-05-19  Andrew Cagney  <cagney@gnu.org>
 
 	* defs.h (extract_signed_integer, extract_unsigned_integer)

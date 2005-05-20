@@ -1335,6 +1335,30 @@ alpha_fill_fp_regs (int regno, void *f0_f30, void *fpcr)
 }
 
 
+
+/* Return nonzero if the G_floating register value in REG is equal to
+   zero for FP control instructions.  */
+   
+static int
+fp_register_zero_p (LONGEST reg)
+{
+  /* Check that all bits except the sign bit are zero.  */
+  const LONGEST zero_mask = ((LONGEST) 1 << 63) ^ -1;
+
+  return ((reg & zero_mask) == 0);
+}
+
+/* Return the value of the sign bit for the G_floating register
+   value held in REG.  */
+
+static int
+fp_register_sign_bit (LONGEST reg)
+{
+  const LONGEST sign_mask = (LONGEST) 1 << 63;
+
+  return ((reg & sign_mask) != 0);
+}
+
 /* alpha_software_single_step() is called just before we want to resume
    the inferior, if we want to single-step it but there is no hardware
    or kernel single-step support (NetBSD on Alpha, for example).  We find
@@ -1350,6 +1374,7 @@ alpha_next_pc (CORE_ADDR pc)
   unsigned int op;
   int offset;
   LONGEST rav;
+  char reg[8];
 
   insn = alpha_read_insn (pc);
 
@@ -1379,7 +1404,9 @@ alpha_next_pc (CORE_ADDR pc)
 	}
 
       /* Need to determine if branch is taken; read RA.  */
-      rav = (LONGEST) read_register ((insn >> 21) & 0x1f);
+      regcache_cooked_read (current_regcache, (insn >> 21) & 0x1f, reg);
+      rav = extract_signed_integer (reg, 8);
+
       switch (op)
 	{
 	case 0x38:		/* BLBC */
@@ -1415,7 +1442,32 @@ alpha_next_pc (CORE_ADDR pc)
 	    goto branch_taken;
 	  break;
 
-	/* ??? Missing floating-point branches.  */
+        /* Floating point branches.  */
+        
+        case 0x31:              /* FBEQ */
+          if (fp_register_zero_p (rav))
+            goto branch_taken;
+          break;
+        case 0x36:              /* FBGE */
+          if (fp_register_sign_bit (rav) == 0 || fp_register_zero_p (rav))
+            goto branch_taken;
+          break;
+        case 0x37:              /* FBGT */
+          if (fp_register_sign_bit (rav) == 0 && ! fp_register_zero_p (rav))
+            goto branch_taken;
+          break;
+        case 0x33:              /* FBLE */
+          if (fp_register_sign_bit (rav) == 1 || fp_register_zero_p (rav))
+            goto branch_taken;
+          break;
+        case 0x32:              /* FBLT */
+          if (fp_register_sign_bit (rav) == 1 && ! fp_register_zero_p (rav))
+            goto branch_taken;
+          break;
+        case 0x35:              /* FBNE */
+          if (! fp_register_zero_p (rav))
+            goto branch_taken;
+          break;
 	}
     }
 
