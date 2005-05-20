@@ -6793,7 +6793,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 
   xtensa_insnbuf_to_chars (isa, vinsn->insnbuf, (unsigned char *) f, 0);
 
-  xtensa_dwarf2_emit_insn (insn_size - extra_space, &best_loc);
+  xtensa_dwarf2_emit_insn (insn_size + extra_space, &best_loc);
 
   for (slot = 0; slot < vinsn->num_slots; slot++)
     {

@@ -1,3 +1,8 @@
+2005-05-20  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xg_assemble_vliw_tokens): Change subtraction
+	to addition in argument to xtensa_dwarf2_emit_insn.
+
 2005-05-19  Zack Weinberg  <zack@codesourcery.com>
 
 	* Makefile.am: Have 'all' depend on 'info'.
