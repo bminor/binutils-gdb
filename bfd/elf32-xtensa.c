@@ -1855,6 +1855,9 @@ bfd_elf_xtensa_reloc (bfd *abfd,
   asection *reloc_target_output_section;
   bfd_boolean is_weak_undef;
 
+  if (!xtensa_default_isa)
+    xtensa_default_isa = xtensa_isa_init (0, 0);
+
   /* ELF relocs are against symbols.  If we are producing relocatable
      output, and the reloc is against an external symbol, the resulting
      reloc will also be against the same symbol.  In such a case, we

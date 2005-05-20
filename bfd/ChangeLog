@@ -1,3 +1,8 @@
+2005-05-20  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (bfd_elf_xtensa_reloc): Make sure that
+	xtensa_default_isa is initialized.
+
 2005-05-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (allocate_dynrelocs): Correct plt offset assigned
