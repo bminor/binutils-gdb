@@ -15191,18 +15191,18 @@ Show the current pagination mode.
 You can always enter numbers in octal, decimal, or hexadecimal in
 @value{GDBN} by the usual conventions: octal numbers begin with
 @samp{0}, decimal numbers end with @samp{.}, and hexadecimal numbers
-begin with @samp{0x}.  Numbers that begin with none of these are, by
-default, entered in base 10; likewise, the default display for
-numbers---when no particular format is specified---is base 10.  You can
-change the default base for both input and output with the @code{set
-radix} command.
+begin with @samp{0x}.  Numbers that neither begin with @samp{0} or
+@samp{0x}, nor end with a @samp{.} are, by default, entered in base
+10; likewise, the default display for numbers---when no particular
+format is specified---is base 10.  You can change the default base for
+both input and output with the commands described below.
 
 @table @code
 @kindex set input-radix
 @item set input-radix @var{base}
 Set the default base for numeric input.  Supported choices
 for @var{base} are decimal 8, 10, or 16.  @var{base} must itself be
-specified either unambiguously or using the current default radix; for
+specified either unambiguously or using the current input radix; for
 example, any of
 
 @smallexample
@@ -15213,13 +15213,17 @@ set input-radix 0xa
 
 @noindent
 sets the input base to decimal.  On the other hand, @samp{set input-radix 10}
-leaves the input radix unchanged, no matter what it was.
+leaves the input radix unchanged, no matter what it was, since
+@samp{10}, being without any leading or trailing signs of its base, is
+interpreted in the current radix.  Thus, if the current radix is 16,
+@samp{10} is interpreted in hex, i.e.@: as 16 decimal, which doesn't
+change the radix.
 
 @kindex set output-radix
 @item set output-radix @var{base}
 Set the default base for numeric display.  Supported choices
 for @var{base} are decimal 8, 10, or 16.  @var{base} must itself be
-specified either unambiguously or using the current default radix.
+specified either unambiguously or using the current input radix.
 
 @kindex show input-radix
 @item show input-radix
