@@ -1,3 +1,11 @@
+2005-05-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (allocate_dynrelocs): Correct plt offset assigned
+	for second and subsequent list entries.  Only allocate multiple
+	glink stubs when shared or pie.
+	(ppc_elf_finish_dynamic_symbol): Break out early when only one
+	glink stub is needed.
+
 2005-05-19  Zack Weinberg  <zack@codesourcery.com>
 
 	* Makefile.am: Have 'all' depend on 'info'.

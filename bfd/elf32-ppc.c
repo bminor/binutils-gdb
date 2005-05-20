@@ -4058,6 +4058,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       struct plt_entry *ent;
       bfd_boolean doneone = FALSE;
+      bfd_vma plt_offset = 0, glink_offset = 0;
+
       for (ent = h->plt.plist; ent != NULL; ent = ent->next)
 	if (ent->plt.refcount > 0)
 	  {
@@ -4076,56 +4078,67 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 		if (!htab->old_plt)
 		  {
-		    ent->plt.offset = s->size;
 		    if (!doneone)
-		      s->size += 4;
+		      {
+			plt_offset = s->size;
+			s->size += 4;
+		      }
+		    ent->plt.offset = plt_offset;
 
 		    s = htab->glink;
-		    if (!info->shared
+		    if (!doneone || info->shared || info->pie)
+		      {
+			glink_offset = s->size;
+			s->size += GLINK_ENTRY_SIZE;
+		      }
+		    if (!doneone
+			&& !info->shared
 			&& !h->def_regular)
 		      {
 			h->root.u.def.section = s;
-			h->root.u.def.value = s->size;
+			h->root.u.def.value = glink_offset;
 		      }
-		    ent->glink_offset = s->size;
-		    s->size += GLINK_ENTRY_SIZE;
+		    ent->glink_offset = glink_offset;
 		  }
 		else
 		  {
-		    /* If this is the first .plt entry, make room for the
-		       special first entry.  */
-		    if (s->size == 0)
-		      s->size += PLT_INITIAL_ENTRY_SIZE;
-
-		    /* The PowerPC PLT is actually composed of two parts, the
-		       first part is 2 words (for a load and a jump), and then
-		       there is a remaining word available at the end.  */
-		    ent->plt.offset = (PLT_INITIAL_ENTRY_SIZE
-				       + (PLT_SLOT_SIZE
-					  * ((s->size - PLT_INITIAL_ENTRY_SIZE)
-					     / PLT_ENTRY_SIZE)));
-
-		    /* If this symbol is not defined in a regular file, and we
-		       are not generating a shared library, then set the symbol
-		       to this location in the .plt.  This is required to make
-		       function pointers compare as equal between the normal
-		       executable and the shared library.  */
-		    if (! info->shared
-			&& !h->def_regular)
-		      {
-			h->root.u.def.section = s;
-			h->root.u.def.value = ent->plt.offset;
-		      }
-
-		    /* Make room for this entry.  After the 8192nd entry, room
-		       for two entries is allocated.  */
 		    if (!doneone)
 		      {
+			/* If this is the first .plt entry, make room
+			   for the special first entry.  */
+			if (s->size == 0)
+			  s->size += PLT_INITIAL_ENTRY_SIZE;
+
+			/* The PowerPC PLT is actually composed of two
+			   parts, the first part is 2 words (for a load
+			   and a jump), and then there is a remaining
+			   word available at the end.  */
+			plt_offset = (PLT_INITIAL_ENTRY_SIZE
+				      + (PLT_SLOT_SIZE
+					 * ((s->size - PLT_INITIAL_ENTRY_SIZE)
+					    / PLT_ENTRY_SIZE)));
+
+			/* If this symbol is not defined in a regular
+			   file, and we are not generating a shared
+			   library, then set the symbol to this location
+			   in the .plt.  This is required to make
+			   function pointers compare as equal between
+			   the normal executable and the shared library.  */
+			if (! info->shared
+			    && !h->def_regular)
+			  {
+			    h->root.u.def.section = s;
+			    h->root.u.def.value = plt_offset;
+			  }
+
+			/* Make room for this entry.  After the 8192nd
+			   entry, room for two entries is allocated.  */
 			s->size += PLT_ENTRY_SIZE;
 			if ((s->size - PLT_INITIAL_ENTRY_SIZE) / PLT_ENTRY_SIZE
 			    > PLT_NUM_SINGLE_ENTRIES)
 			  s->size += PLT_ENTRY_SIZE;
 		      }
+		    ent->plt.offset = plt_offset;
 		  }
 
 		/* We also need to make an entry in the .rela.plt section.  */
@@ -6508,6 +6521,9 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		p += 4;
 		bfd_put_32 (output_bfd, BCTR, p);
 		p += 4;
+
+		/* We only need one non-PIC glink stub.  */
+		break;
 	      }
 	  }
 	else
