@@ -1,3 +1,7 @@
+2005-05-20  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.ac: Add snprintf and vsnprintf to AC_CHECK_DECLS.
+
 2005-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* alpha-tdep.c (fp_register_zero_p): New function.
@@ -40,6 +44,7 @@
 	(regcache_raw_write_part, regcache_cooked_read_part) 
 	(regcache_cooked_write_part, read_register, regcache_raw_supply): 
 
+>>>>>>> 1.7166
 2005-05-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* MAINTAINERS: Undelete v850.
@@ -187,6 +192,7 @@
 	(_initialize_linux_nat, lin_thread_get_thread_signals): Use
 	SA_RESTART.
 
+>>>>>>> 1.7163
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.tgt (vax-*-openbsd*): Set gdb_target to obsd.

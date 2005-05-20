@@ -418,7 +418,7 @@ AC_CHECK_HEADERS(ctype.h time.h)
 
 AC_CHECK_DECLS([free, malloc, realloc])
 AC_CHECK_DECLS([strerror, strstr])
-AC_CHECK_DECLS(getopt)
+AC_CHECK_DECLS([getopt, snprintf, vsnprintf])
 
 # ----------------------- #
 # Checks for structures.  #
