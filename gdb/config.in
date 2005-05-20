@@ -226,6 +226,10 @@
    don't. */
 #undef HAVE_DECL_REALLOC
 
+/* Define to 1 if you have the declaration of `snprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SNPRINTF
+
 /* Define to 1 if you have the declaration of `strerror', and to 0 if you
    don't. */
 #undef HAVE_DECL_STRERROR
@@ -233,6 +237,10 @@
 /* Define to 1 if you have the declaration of `strstr', and to 0 if you don't.
    */
 #undef HAVE_DECL_STRSTR
+
+/* Define to 1 if you have the declaration of `vsnprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_VSNPRINTF
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -662,6 +670,11 @@
 /* Define to 1 if the regex included in libiberty should be used. */
 #undef USE_INCLUDED_REGEX
 
+/* Define if we should use the Windows API, instead of the POSIX API. On
+   Windows, we use the Windows API when building for MinGW, but the POSIX API
+   when building for Cygwin. */
+#undef USE_WIN32API
+
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
@@ -670,7 +683,7 @@
 #endif
 
 /* 
-   [Define], [to], [1], [to], [avoid], [a], [clash], [between], [<widec.h>], [and], [<wchar.h>], [on], [Solaris], [2.[789]], [when], [using], [GCC.], []
+   Define to 1 to avoid a clash between <widec.h> and <wchar.h> on Solaris [2.[789]], when using GCC.
    */
 #undef _MSE_INT_H
 
