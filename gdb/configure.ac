@@ -396,8 +396,8 @@ case $host_os in
   solaris2.[[789]])
     if test "$GCC" = yes; then
       AC_DEFINE(_MSE_INT_H, 1,
-        [[Define to 1 to avoid a clash between <widec.h> and <wchar.h> on
-   Solaris 2.[789] when using GCC. ]])
+        [Define to 1 to avoid a clash between <widec.h> and <wchar.h> on
+   Solaris 2.[789] when using GCC. ])
     fi ;;
 esac
 AC_CHECK_HEADERS(curses.h cursesX.h ncurses.h ncurses/ncurses.h)

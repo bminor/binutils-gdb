@@ -1,6 +1,8 @@
 2005-05-20  Eli Zaretskii  <eliz@gnu.org>
 
-	* configure.ac: Add snprintf and vsnprintf to AC_CHECK_DECLS.
+	* configure.ac: Add snprintf and vsnprintf to AC_CHECK_DECLS.  Fix
+	bad description of _MSE_INT_H that caused each word in config.in
+	to be enclosed in [].
 	* configure, config.in: Regenerate.
 
 2005-05-20  Joel Brobecker  <brobecker@adacore.com>
