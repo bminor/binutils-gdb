@@ -1,6 +1,7 @@
 2005-05-20  Eli Zaretskii  <eliz@gnu.org>
 
 	* configure.ac: Add snprintf and vsnprintf to AC_CHECK_DECLS.
+	* configure, config.in: Regenerate.
 
 2005-05-20  Joel Brobecker  <brobecker@adacore.com>
 
