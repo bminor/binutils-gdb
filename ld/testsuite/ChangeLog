@@ -1,3 +1,9 @@
+2005-05-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-powerpc/sdalib.s, ld-powerpc/sdadyn.s, ld-powerpc/sdadyn.d: New
+	files.
+	* ld-powerpc/powerpc.exp: Run the new test.
+
 2005-05-20  Bob Wilson  <bob.wilson@acm.org>
 
 	* ld-undefined/undefined.exp: Revert xfail for xtensa-*-*.

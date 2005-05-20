@@ -1,3 +1,14 @@
+2005-05-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* bfd/elf32-ppc.c (struct ppc_elf_link_hash_entry): Add new field
+	has_sda_refs.
+	(ppc_elf_copy_indirect_symbol): Copy has_sda_refs.
+	(ppc_elf_check_relocs): Set has_sda_refs.
+	(ppc_elf_adjust_dynamic_symbol): Check has_sda_refs before eliminating
+	copy relocations.  Use has_sda_refs to place variables in .sbss.
+	(ppc_elf_finish_dynamic_symbol): Use has_sda_refs to place variables in
+	.sbss.
+
 2005-05-20  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (bfd_elf_xtensa_reloc): Make sure that

@@ -2269,6 +2269,10 @@ struct ppc_elf_link_hash_entry
 #define TLS_TLS		16	/* Any TLS reloc.  */
 #define TLS_TPRELGD	32	/* TPREL reloc resulting from GD->IE. */
   char tls_mask;
+
+  /* Nonzero if we have seen a small data relocation referring to this
+     symbol.  */
+  unsigned char has_sda_refs;
 };
 
 #define ppc_elf_hash_entry(ent) ((struct ppc_elf_link_hash_entry *) (ent))
@@ -2520,6 +2524,7 @@ ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed ATTRIBUTE_UNUSE
     }
 
   edir->tls_mask |= eind->tls_mask;
+  edir->has_sda_refs |= eind->has_sda_refs;
 
   /* If called to transfer flags for a weakdef during processing
      of elf_adjust_dynamic_symbol, don't copy non_got_ref.
@@ -3025,6 +3030,12 @@ ppc_elf_check_relocs (bfd *abfd,
 	    {
 	      bad_shared_reloc (abfd, r_type);
 	      return FALSE;
+	    }
+	  if (h != NULL)
+	    {
+	      ppc_elf_hash_entry (h)->has_sda_refs = TRUE;
+	      /* We may need a copy reloc.  */
+	      h->non_got_ref = TRUE;
 	    }
 	  break;
 
@@ -3923,7 +3934,11 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (!h->non_got_ref)
     return TRUE;
 
-  if (ELIMINATE_COPY_RELOCS)
+   /* If we didn't find any dynamic relocs in read-only sections, then we'll
+      be keeping the dynamic relocs and avoiding the copy reloc.  We can't
+      do this if there are any small data relocations.  */
+  if (ELIMINATE_COPY_RELOCS
+      && !ppc_elf_hash_entry (h)->has_sda_refs)
     {
       struct ppc_elf_dyn_relocs *p;
       for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
@@ -3933,8 +3948,6 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	    break;
 	}
 
-      /* If we didn't find any dynamic relocs in read-only sections, then
-	 we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
       if (p == NULL)
 	{
 	  h->non_got_ref = 0;
@@ -3952,11 +3965,10 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.
 
-     Of course, if the symbol is sufficiently small, we must instead
-     allocate it in .sbss.  FIXME: It would be better to do this if and
-     only if there were actually SDAREL relocs for that symbol.  */
+     Of course, if the symbol is referenced using SDAREL relocs, we
+     must instead allocate it in .sbss.  */
 
-  if (h->size <= elf_gp_size (htab->elf.dynobj))
+  if (ppc_elf_hash_entry (h)->has_sda_refs)
     s = htab->dynsbss;
   else
     s = htab->dynbss;
@@ -3970,7 +3982,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       asection *srel;
 
-      if (h->size <= elf_gp_size (htab->elf.dynobj))
+      if (ppc_elf_hash_entry (h)->has_sda_refs)
 	srel = htab->relsbss;
       else
 	srel = htab->relbss;
@@ -6544,7 +6556,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       BFD_ASSERT (h->dynindx != -1);
 
-      if (h->size <= elf_gp_size (htab->elf.dynobj))
+      if (ppc_elf_hash_entry (h)->has_sda_refs)
 	s = htab->relsbss;
       else
 	s = htab->relbss;

@@ -69,6 +69,10 @@ set ppcelftests {
      {{readelf -WSsrl tlsso32.r} {objdump -dr tlsso32.d}
       {objdump -sj.got tlsso32.g} {objdump -sj.tdata tlsso32.t}}
       "tls32.so"}
+    {"Shared library with global symbol" "-shared -melf32ppc" "" {sdalib.s}
+     {} "sdalib.so"}
+    {"Dynamic application with SDA" "-melf32ppc tmpdir/sdalib.so" "" {sdadyn.s}
+     {{objdump -R sdadyn.d}} "sdadyn"}
 }
 
 set ppc64elftests {
