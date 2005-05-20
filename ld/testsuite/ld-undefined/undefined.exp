@@ -128,7 +128,5 @@ setup_xfail "sh64-*-*"
 # of 9. On 64 bit s/390 this works because of the new brasl instruction that
 # doesn't need a literal pool entry.
 setup_xfail s390-*-*
-# Xtensa also uses a literal pool and has the same problem as s/390.
-setup_xfail xtensa-*-*
 
 checkund $ml $testline
