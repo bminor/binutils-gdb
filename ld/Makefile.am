@@ -1699,6 +1699,8 @@ EXTRA_DIST = ldgram.c ldgram.h ldlex.c $(man_MANS)
 diststuff: info $(EXTRA_DIST)
 all: info ld.1
 
+ld.1: info
+
 DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
 distclean-local:
 	rm -rf ldscripts
