@@ -1644,7 +1644,9 @@ ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-ld.1: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
+# It depends on "info" instead of "configdoc.texi ldver.texi" to
+# support parallel build.
+ld.1: $(srcdir)/ld.texinfo info
 	touch $@
 	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texinfo > ld.pod
 	-($(POD2MAN) ld.pod | \
@@ -1698,8 +1700,6 @@ install-data-local: install-info
 EXTRA_DIST = ldgram.c ldgram.h ldlex.c $(man_MANS)
 diststuff: info $(EXTRA_DIST)
 all: info ld.1
-
-ld.1: info
 
 DISTCLEANFILES = tdirs site.exp site.bak stringify.sed
 distclean-local:
