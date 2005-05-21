@@ -1,5 +1,11 @@
 2005-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am (ld.1): Revert the last 2 changes.
+	(info-recursive): Depend on ld.1.
+	* Makefile.in: Regenerated.
+
+2005-05-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (ld.1): Depend on "info" instead of
 	"configdoc.texi ldver.texi".
 	* Makefile.in: Regenerated.
