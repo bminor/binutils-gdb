@@ -1,5 +1,8 @@
 2005-05-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* arm-tdep.c (arm_extract_return_value, arm_store_return_value):
+	Change type of last argument to `gdb_byte *'.
+
 	* configure.host: Add arm*-*-openbsd*.
 	* configure.tgt: Add arm*-*-openbsd*.
 

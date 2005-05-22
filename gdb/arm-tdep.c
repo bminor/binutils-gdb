@@ -2013,12 +2013,9 @@ arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
    format, into VALBUF.  */
 
 static void
-arm_extract_return_value (struct type *type,
-			  struct regcache *regs,
-			  void *dst)
+arm_extract_return_value (struct type *type, struct regcache *regs,
+			  gdb_byte *valbuf)
 {
-  bfd_byte *valbuf = dst;
-
   if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
       switch (gdbarch_tdep (current_gdbarch)->fp_model)
@@ -2210,10 +2207,8 @@ arm_use_struct_convention (int gcc_p, struct type *type)
 
 static void
 arm_store_return_value (struct type *type, struct regcache *regs,
-			const void *src)
+			const gdb_byte *valbuf)
 {
-  const bfd_byte *valbuf = src;
-
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       char buf[MAX_REGISTER_SIZE];
