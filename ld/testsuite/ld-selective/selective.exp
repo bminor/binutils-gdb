@@ -24,8 +24,8 @@ if ![is_elf_format] {
     return
 }
 
-# IA64 does not support selective linking
-if {[istarget "ia64-*-*"]} {
+# Alpha and IA64 do not support selective linking
+if {[istarget "alpha*-*-*"] || [istarget "ia64-*-*"]} {
     return
 }
 
@@ -84,7 +84,7 @@ foreach testitem $seltests {
     foreach xfail_target $xfails {
 	setup_xfail $xfail_target
     }
-    setup_xfail "alpha*-*" "arc*-*" "d30v*-*" "dlx*-*" "i370*-*" "i860*-*"
+    setup_xfail "arc*-*" "d30v*-*" "dlx*-*" "i370*-*" "i860*-*"
     setup_xfail "i960*-*" "mn10200-*" "or32-*" "pj-*"
 
     # It's either C or C++ at the moment.

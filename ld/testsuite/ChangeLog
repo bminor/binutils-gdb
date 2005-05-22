@@ -1,3 +1,10 @@
+2005-05-22  Richard Henderson  <rth@redhat.com>
+
+	* ld-elfweak/dsow.dsym: Adjust for non-zero ST_OTHER.
+	* ld-elfweak/weak.dsym: Likewise.
+
+	* ld-selective/selective.exp: Don't test alpha.
+
 2005-05-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-powerpc/sdalib.s, ld-powerpc/sdadyn.s, ld-powerpc/sdadyn.d: New
