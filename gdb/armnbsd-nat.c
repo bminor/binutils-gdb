@@ -21,20 +21,19 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdbcore.h"
+#include "inferior.h"
+#include "regcache.h"
+#include "target.h"
 
-#ifndef FETCH_INFERIOR_REGISTERS
-#error Not FETCH_INFERIOR_REGISTERS 
-#endif /* !FETCH_INFERIOR_REGISTERS */
-
-#include "arm-tdep.h"
-
+#include "gdb_string.h"
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 #include <machine/frame.h>
-#include "inferior.h"
-#include "regcache.h"
-#include "gdbcore.h"
+
+#include "arm-tdep.h"
+#include "inf-ptrace.h"
 
 extern int arm_apcs_32;
 
@@ -194,8 +193,8 @@ fetch_fp_regs (void)
   supply_fparegset (&inferior_fp_registers);
 }
 
-void
-fetch_inferior_registers (int regno)
+static void
+armnbsd_fetch_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -391,8 +390,8 @@ store_fp_regs (void)
     warning (_("unable to store floating-point registers"));
 }
 
-void
-store_inferior_registers (int regno)
+static void
+armnbsd_store_registers (int regno)
 {
   if (regno >= 0)
     {
@@ -486,6 +485,13 @@ static struct core_fns arm_netbsd_elfcore_fns =
 void
 _initialize_arm_netbsd_nat (void)
 {
+  struct target_ops *t;
+
+  t = inf_ptrace_target ();
+  t->to_fetch_registers = armnbsd_fetch_registers;
+  t->to_store_registers = armnbsd_store_registers;
+  add_target (t);
+
   deprecated_add_core_fns (&arm_netbsd_core_fns);
   deprecated_add_core_fns (&arm_netbsd_elfcore_fns);
 }

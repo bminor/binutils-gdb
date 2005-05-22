@@ -1,5 +1,21 @@
 2005-05-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* armnbsd-nat.c: Include "gdb_string.h" and "inf_ptrace.h".
+	Reorder includes.  Don't require FETCH_INFERIOR_REGISTERS to be
+	defined.
+	(armnbsd_fetch_registers): Rename from armnbsd_fetch_registers.
+	Make static.
+	(armnbsd_store_registers): Rename from armnbsd_store_registers.
+	Make static.
+	(_initialize_arm_netbsd_nat): Construct and add target vector.
+	* Makefile.in (armnbsd-nat.o): Update dependencies.
+	* config/arm/nbsdaout.mh (NATDEPFILES): Remove infptrace.o and
+	intarg.o, add inf-ptrace.o.
+	(NAT_FILE): Set to solib.h.
+	* config/arm/nbsdelf.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o, add inf-ptrace.o.
+	(NAT_FILE): Remove.
+
 	* arm-tdep.c (arm_extract_return_value, arm_store_return_value):
 	Change type of last argument to `gdb_byte *'.
 
