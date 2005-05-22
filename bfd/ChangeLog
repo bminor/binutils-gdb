@@ -1,3 +1,8 @@
+2005-05-22  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relax_section): Only operate
+	on SEC_CODE sections.
+
 2005-05-22  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* som.c (try_prev_fixup): Changed type of subspace_reloc_sizep to

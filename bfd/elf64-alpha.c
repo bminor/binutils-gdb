@@ -1969,7 +1969,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   *again = FALSE;
 
   if (link_info->relocatable
-      || (sec->flags & SEC_RELOC) == 0
+      || (sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
       || sec->reloc_count == 0)
     return TRUE;
 
