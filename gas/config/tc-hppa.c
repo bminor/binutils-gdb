@@ -1641,21 +1641,9 @@ pa_ip (str)
 
       the_insn.reloc = R_HPPA_NONE;
 
-      /* If this instruction is specific to a particular architecture,
-	 then set a new architecture.  */
-      /* But do not automatically promote to pa2.0.  The automatic promotion
-	 crud is for compatibility with HP's old assemblers only.  */
-      if (insn->arch < 20
+      if (insn->arch >= 20
 	  && bfd_get_mach (stdoutput) < insn->arch)
-	{
-	  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
-	    as_warn (_("could not update architecture and machine"));
-	}
-      else if (bfd_get_mach (stdoutput) < insn->arch)
-	{
-	  match = FALSE;
-	  goto failed;
-	}
+	goto failed;
 
       /* Build the opcode, checking as we go to make
          sure that the operands match.  */
@@ -3960,6 +3948,16 @@ pa_ip (str)
 	      abort ();
 	    }
 	  break;
+	}
+
+      /* If this instruction is specific to a particular architecture,
+	 then set a new architecture.  This automatic promotion crud is
+	 for compatibility with HP's old assemblers only.  */
+      if (match == TRUE
+	  && bfd_get_mach (stdoutput) < insn->arch)
+	{
+	  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
+	    as_warn (_("could not update architecture and machine"));
 	}
 
  failed:

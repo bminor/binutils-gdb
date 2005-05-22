@@ -1,3 +1,8 @@
+2005-05-21  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* config/tc-hppa.c (pa_ip): Promote architecture from PA 1.0 to 1.1
+	only if an instruction match is found.
+
 2005-05-20  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xg_assemble_vliw_tokens): Change subtraction
