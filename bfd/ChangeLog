@@ -1,3 +1,19 @@
+2005-05-22  Richard Henderson  <rth@redhat.com>
+
+        * elf64-alpha.c (elf64_alpha_relax_with_lituse): Relax jsr to
+        undefweak to use zero register.  Call elf64_alpha_relax_got_load
+        if not all uses removed.
+        (elf64_alpha_relax_got_load): Relax undefweak to lda zero.
+        (elf64_alpha_relax_section): Handle undefweak symbols.
+        (elf64_alpha_calc_dynrel_sizes): Don't add relocs for undefweak.
+        (elf64_alpha_size_rela_got_1): Likewise.
+        (elf64_alpha_relocate_section): Likewise.
+
+2005-05-22  Richard Henderson  <rth@redhat.com>
+
+        * elf64-alpha.c (elf64_alpha_relax_section): Only operate
+        on SEC_CODE sections.
+
 2005-05-13  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_get_property_section_name): Add missing

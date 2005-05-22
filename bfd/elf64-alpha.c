@@ -1302,9 +1302,7 @@ elf64_alpha_relax_with_lituse (info, symval, irel)
 	  /* Extract the displacement from the instruction, sign-extending
 	     it if necessary, then test whether it is within 16 or 32 bits
 	     displacement from GP.  */
-	  insn_disp = insn & 0x0000ffff;
-	  if (insn_disp & 0x8000)
-	    insn_disp |= ~0xffff;  /* Negative: sign-extend.  */
+	  insn_disp = ((insn & 0xffff) ^ 0x8000) - 0x8000;
 
 	  xdisp = disp + insn_disp;
 	  fits16 = (xdisp >= - (bfd_signed_vma) 0x8000 && xdisp < 0x8000);
@@ -1372,6 +1370,19 @@ elf64_alpha_relax_with_lituse (info, symval, irel)
 	  {
 	    bfd_vma optdest, org;
 	    bfd_signed_vma odisp;
+
+	    /* For undefined weak symbols, we're mostly interested in getting
+	       rid of the got entry whenever possible, so optimize this to a
+	       use of the zero register.  */
+	    if (info->h && info->h->root.root.type == bfd_link_hash_undefweak)
+	      {
+		insn |= 31 << 16;
+		bfd_put_32 (info->abfd, (bfd_vma) insn,
+			    info->contents + urel->r_offset);
+
+		info->changed_contents = TRUE;
+		break;
+	      }
 
 	    /* If not zero, place to jump without needing pv.  */
 	    optdest = elf64_alpha_relax_opt_call (info, symval);
@@ -1476,9 +1487,11 @@ elf64_alpha_relax_with_lituse (info, symval, irel)
 		      info->contents + irel->r_offset);
 	  info->changed_contents = TRUE;
 	}
-    }
 
-  return TRUE;
+      return TRUE;
+    }
+  else
+    return elf64_alpha_relax_got_load (info, symval, irel, R_ALPHA_LITERAL);
 }
 
 static bfd_vma
@@ -1585,7 +1598,25 @@ elf64_alpha_relax_got_load (info, symval, irel, r_type)
     return TRUE;
 
   if (r_type == R_ALPHA_LITERAL)
-    disp = symval - info->gp;
+    {
+      /* Look for nice constant addresses.  This includes the not-uncommon
+	 special case of 0 for undefweak symbols.  */
+      if ((info->h && info->h->root.root.type == bfd_link_hash_undefweak)
+	  || (!info->link_info->shared
+	      && (symval >= (bfd_vma)-0x8000 || symval < 0x8000)))
+	{
+	  disp = 0;
+	  insn = (OP_LDA << 26) | (insn & (31 << 21)) | (31 << 16);
+	  insn |= (symval & 0xffff);
+	  r_type = R_ALPHA_NONE;
+	}
+      else
+	{
+	  disp = symval - info->gp;
+	  insn = (OP_LDA << 26) | (insn & 0x03ff0000);
+	  r_type = R_ALPHA_GPREL16;
+	}
+    }
   else
     {
       bfd_vma dtp_base, tp_base;
@@ -1594,17 +1625,26 @@ elf64_alpha_relax_got_load (info, symval, irel, r_type)
       dtp_base = alpha_get_dtprel_base (info->link_info);
       tp_base = alpha_get_tprel_base (info->link_info);
       disp = symval - (r_type == R_ALPHA_GOTDTPREL ? dtp_base : tp_base);
+
+      insn = (OP_LDA << 26) | (insn & (31 << 21)) | (31 << 16);
+
+      switch (r_type)
+	{
+	case R_ALPHA_GOTDTPREL:
+	  r_type = R_ALPHA_DTPREL16;
+	  break;
+	case R_ALPHA_GOTTPREL:
+	  r_type = R_ALPHA_TPREL16;
+	  break;
+	default:
+	  BFD_ASSERT (0);
+	  return FALSE;
+	}
     }
 
   if (disp < -0x8000 || disp >= 0x8000)
     return TRUE;
 
-  /* Exchange LDQ for LDA.  In the case of the TLS relocs, we're loading
-     a constant, so force the base register to be $31.  */
-  if (r_type == R_ALPHA_LITERAL)
-    insn = (OP_LDA << 26) | (insn & 0x03ff0000);
-  else
-    insn = (OP_LDA << 26) | (insn & (31 << 21)) | (31 << 16);
   bfd_put_32 (info->abfd, (bfd_vma) insn, info->contents + irel->r_offset);
   info->changed_contents = TRUE;
 
@@ -1619,22 +1659,6 @@ elf64_alpha_relax_got_load (info, symval, irel, r_type)
     }
 
   /* Smash the existing GOT relocation for its 16-bit immediate pair.  */
-  switch (r_type)
-    {
-    case R_ALPHA_LITERAL:
-      r_type = R_ALPHA_GPREL16;
-      break;
-    case R_ALPHA_GOTDTPREL:
-      r_type = R_ALPHA_DTPREL16;
-      break;
-    case R_ALPHA_GOTTPREL:
-      r_type = R_ALPHA_TPREL16;
-      break;
-    default:
-      BFD_ASSERT (0);
-      return FALSE;
-    }
-
   irel->r_info = ELF64_R_INFO (ELF64_R_SYM (irel->r_info), r_type);
   info->changed_relocs = TRUE;
 
@@ -1971,7 +1995,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   *again = FALSE;
 
   if (link_info->relocatable
-      || (sec->flags & SEC_RELOC) == 0
+      || (sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
       || sec->reloc_count == 0)
     return TRUE;
 
@@ -2105,13 +2129,17 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
 
 	  /* If the symbol is undefined, we can't do anything with it.  */
-	  if (h->root.root.type == bfd_link_hash_undefweak
-	      || h->root.root.type == bfd_link_hash_undefined)
+	  if (h->root.root.type == bfd_link_hash_undefined)
 	    continue;
 
-	  /* If the symbol isn't defined in the current module, again
-	     we can't do anything.  */
-	  if (!h->root.def_regular)
+	  /* If the symbol isn't defined in the current module,
+	     again we can't do anything.  */
+	  if (h->root.root.type == bfd_link_hash_undefweak)
+	    {
+	      info.tsec = bfd_abs_section_ptr;
+	      symval = 0;
+	    }
+	  else if (!h->root.def_regular)
 	    {
 	      /* Except for TLSGD relocs, which can sometimes be
 		 relaxed to GOTTPREL relocs.  */
@@ -3861,8 +3889,13 @@ elf64_alpha_calc_dynrel_sizes (h, info)
   /* If the symbol is dynamic, we'll need all the relocations in their
      natural form.  If this is a shared object, and it has been forced
      local, we'll need the same number of RELATIVE relocations.  */
-
   dynamic = alpha_elf_dynamic_symbol_p (&h->root, info);
+
+  /* If the symbol is a hidden undefined weak, then we never have any
+     relocations.  Avoid the loop which may want to add RELATIVE relocs
+     based on info->shared.  */
+  if (h->root.root.type == bfd_link_hash_undefweak && !dynamic)
+    return TRUE;
 
   for (relent = h->reloc_entries; relent; relent = relent->next)
     {
@@ -3951,8 +3984,13 @@ elf64_alpha_size_rela_got_1 (h, info)
   /* If the symbol is dynamic, we'll need all the relocations in their
      natural form.  If this is a shared object, and it has been forced
      local, we'll need the same number of RELATIVE relocations.  */
-
   dynamic = alpha_elf_dynamic_symbol_p (&h->root, info);
+
+  /* If the symbol is a hidden undefined weak, then we never have any
+     relocations.  Avoid the loop which may want to add RELATIVE relocs
+     based on info->shared.  */
+  if (h->root.root.type == bfd_link_hash_undefweak && !dynamic)
+    return TRUE;
 
   entries = 0;
   for (gotent = h->got_entries; gotent ; gotent = gotent->next)
@@ -4446,7 +4484,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* If the symbol has been forced local, output a
 		 RELATIVE reloc, otherwise it will be handled in
 		 finish_dynamic_symbol.  */
-	      if (info->shared && !dynamic_symbol_p)
+	      if (info->shared && !dynamic_symbol_p && !undef_weak_ref)
 		elf64_alpha_emit_dynrel (output_bfd, info, sgot, srelgot,
 					 gotent->got_offset, 0,
 					 R_ALPHA_RELATIVE, value);
@@ -4618,7 +4656,8 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      }
 	    else if (info->shared
 		     && r_symndx != 0
-		     && (input_section->flags & SEC_ALLOC))
+		     && (input_section->flags & SEC_ALLOC)
+		     && !undef_weak_ref)
 	      {
 		if (r_type == R_ALPHA_REFLONG)
 		  {
@@ -4651,6 +4690,14 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
                  input_bfd, h->root.root.root.string);
               ret_val = FALSE;
             }
+	  else if ((info->shared || info->pie) && undef_weak_ref)
+            {
+              (*_bfd_error_handler)
+                (_("%B: pc-relative relocation against undefined weak symbol %s"),
+                 input_bfd, h->root.root.root.string);
+              ret_val = FALSE;
+            }
+
 
 	  /* ??? .eh_frame references to discarded sections will be smashed
 	     to relocations against SHN_UNDEF.  The .eh_frame format allows
