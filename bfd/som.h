@@ -214,7 +214,7 @@ struct som_section_data_struct
 {
   struct som_copyable_section_data_struct *copy_data;
   unsigned int reloc_size;
-  char *reloc_stream;
+  unsigned char *reloc_stream;
   struct space_dictionary_record *space_dict;
   struct som_subspace_dictionary_record *subspace_dict;
 };

@@ -1,3 +1,17 @@
+2005-05-22  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* som.c (try_prev_fixup): Changed type of subspace_reloc_sizep to
+	unsigned int *.
+	(som_write_space_strings): Change type of tmp_space and p to char *.
+	(som_write_symbol_strings): Likewise.  Also change type of comp to
+	char *comp[4].
+	(som_begin_writing): Change type of strings_size to unsigned int.
+	(som_finish_writing): Likewise.
+	(som_slurp_reloc_table): Change type of external_relocs to unsigned
+	char *.
+	* som.h (struct som_section_data_struct): Change type of reloc_stream
+	field to unsigned char *.
+
 2005-05-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Don't eliminate

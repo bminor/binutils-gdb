@@ -1054,7 +1054,7 @@ som_reloc_queue_find (unsigned char *p,
 
 static unsigned char *
 try_prev_fixup (bfd *abfd ATTRIBUTE_UNUSED,
-		int *subspace_reloc_sizep,
+		unsigned int *subspace_reloc_sizep,
 		unsigned char *p,
 		unsigned int size,
 		struct reloc_queue *queue)
@@ -2958,8 +2958,8 @@ som_write_space_strings (bfd *abfd,
   /* Chunk of memory that we can use as buffer space, then throw
      away.  */
   size_t tmp_space_size = SOM_TMP_BUFSIZE;
-  unsigned char *tmp_space = alloca (tmp_space_size);
-  unsigned char *p = tmp_space;
+  char *tmp_space = alloca (tmp_space_size);
+  char *p = tmp_space;
   unsigned int strings_size = 0;
   asection *section;
   bfd_size_type amt;
@@ -3063,11 +3063,11 @@ som_write_symbol_strings (bfd *abfd,
   /* Chunk of memory that we can use as buffer space, then throw
      away.  */
   size_t tmp_space_size = SOM_TMP_BUFSIZE;
-  unsigned char *tmp_space = alloca (tmp_space_size);
-  unsigned char *p = tmp_space;
+  char *tmp_space = alloca (tmp_space_size);
+  char *p = tmp_space;
 
   unsigned int strings_size = 0;
-  unsigned char *comp[4];
+  char *comp[4];
   bfd_size_type amt;
 
   /* This gets a bit gruesome because of the compilation unit.  The
@@ -3227,7 +3227,7 @@ static bfd_boolean
 som_begin_writing (bfd *abfd)
 {
   unsigned long current_offset = 0;
-  int strings_size = 0;
+  unsigned int strings_size = 0;
   unsigned long num_spaces, num_subspaces, i;
   asection *section;
   unsigned int total_subspaces = 0;
@@ -3576,12 +3576,12 @@ som_finish_writing (bfd *abfd)
 {
   int num_spaces = som_count_spaces (abfd);
   asymbol **syms = bfd_get_outsymbols (abfd);
-  int i, num_syms, strings_size;
+  int i, num_syms;
   int subspace_index = 0;
   file_ptr location;
   asection *section;
   unsigned long current_offset;
-  unsigned int total_reloc_size;
+  unsigned int strings_size, total_reloc_size;
   bfd_size_type amt;
 
   /* We must set up the version identifier here as objcopy/strip copy
@@ -4842,7 +4842,7 @@ som_slurp_reloc_table (bfd *abfd,
 		       asymbol **symbols,
 		       bfd_boolean just_count)
 {
-  char *external_relocs;
+  unsigned char *external_relocs;
   unsigned int fixup_stream_size;
   arelent *internal_relocs;
   unsigned int num_relocs;
