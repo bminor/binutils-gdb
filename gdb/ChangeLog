@@ -1,5 +1,7 @@
 2005-05-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* NEWS: Mention OpenBSD/arm as a new native configuration.
+
 	* armnbsd-nat.c: Include "gdb_string.h" and "inf_ptrace.h".
 	Reorder includes.  Don't require FETCH_INFERIOR_REGISTERS to be
 	defined.

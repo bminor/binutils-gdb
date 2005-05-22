@@ -5,6 +5,7 @@
 
 * New native configurations
 
+OpenBSD/arm			arm*-*-openbsd*
 OpenBSD/mips64			mips64-*-openbsd*
 
 * Deprecated commands removed
