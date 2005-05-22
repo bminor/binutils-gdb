@@ -2341,7 +2341,7 @@ md_apply_fix3 (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 
 	  /* Use the operand's insertion procedure, if present, in order to
 	     make sure that the value is correctly stored in the insn.  */
-	  insn = operand->insert (insn, (offsetT) value, message);
+	  insn = operand->insert (insn, (offsetT) value, & message);
 	  /* Ignore message even if it is set.  */
 
 	  bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
