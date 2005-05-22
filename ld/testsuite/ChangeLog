@@ -1,3 +1,10 @@
+2005-05-22  Richard Henderson  <rth@redhat.com>
+
+        * ld-elfweak/dsow.dsym: Adjust for non-zero ST_OTHER.
+        * ld-elfweak/weak.dsym: Likewise.
+
+        * ld-selective/selective.exp: Don't test alpha.
+
 2005-04-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/reloc.d: Update to suit removal of non-alloc relocs.
