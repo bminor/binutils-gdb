@@ -1524,7 +1524,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 {
   int i;
   const int numregs = NUM_REGS + NUM_PSEUDO_REGS;
-  char buffer[MAX_REGISTER_SIZE];
+  gdb_byte buffer[MAX_REGISTER_SIZE];
 
   for (i = 0; i < numregs; i++)
     {

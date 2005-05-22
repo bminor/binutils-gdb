@@ -386,7 +386,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 static int
 register_changed_p (int regnum)
 {
-  char raw_buffer[MAX_REGISTER_SIZE];
+  gdb_byte raw_buffer[MAX_REGISTER_SIZE];
 
   if (! frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     return -1;
@@ -497,7 +497,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 static int
 get_register (int regnum, int format)
 {
-  char buffer[MAX_REGISTER_SIZE];
+  gdb_byte buffer[MAX_REGISTER_SIZE];
   int optim;
   int realnum;
   CORE_ADDR addr;

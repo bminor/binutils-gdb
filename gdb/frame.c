@@ -539,7 +539,7 @@ frame_pop (struct frame_info *this_frame)
 void
 frame_register_unwind (struct frame_info *frame, int regnum,
 		       int *optimizedp, enum lval_type *lvalp,
-		       CORE_ADDR *addrp, int *realnump, void *bufferp)
+		       CORE_ADDR *addrp, int *realnump, gdb_byte *bufferp)
 {
   struct frame_unwind_cache *cache;
 
@@ -601,7 +601,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 void
 frame_register (struct frame_info *frame, int regnum,
 		int *optimizedp, enum lval_type *lvalp,
-		CORE_ADDR *addrp, int *realnump, void *bufferp)
+		CORE_ADDR *addrp, int *realnump, gdb_byte *bufferp)
 {
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
      that the value proper does not need to be fetched.  */
@@ -619,7 +619,7 @@ frame_register (struct frame_info *frame, int regnum,
 }
 
 void
-frame_unwind_register (struct frame_info *frame, int regnum, void *buf)
+frame_unwind_register (struct frame_info *frame, int regnum, gdb_byte *buf)
 {
   int optimized;
   CORE_ADDR addr;
@@ -631,7 +631,7 @@ frame_unwind_register (struct frame_info *frame, int regnum, void *buf)
 
 void
 get_frame_register (struct frame_info *frame,
-		    int regnum, void *buf)
+		    int regnum, gdb_byte *buf)
 {
   frame_unwind_register (frame->next, regnum, buf);
 }
@@ -639,7 +639,7 @@ get_frame_register (struct frame_info *frame,
 LONGEST
 frame_unwind_register_signed (struct frame_info *frame, int regnum)
 {
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   return extract_signed_integer (buf, register_size (get_frame_arch (frame),
 						     regnum));
@@ -654,7 +654,7 @@ get_frame_register_signed (struct frame_info *frame, int regnum)
 ULONGEST
 frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
 {
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   return extract_unsigned_integer (buf, register_size (get_frame_arch (frame),
 						       regnum));
@@ -670,7 +670,7 @@ void
 frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 				ULONGEST *val)
 {
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   (*val) = extract_unsigned_integer (buf,
 				     register_size (get_frame_arch (frame),
@@ -678,7 +678,8 @@ frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 }
 
 void
-put_frame_register (struct frame_info *frame, int regnum, const void *buf)
+put_frame_register (struct frame_info *frame, int regnum,
+		    const gdb_byte *buf)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int realnum;
@@ -694,7 +695,7 @@ put_frame_register (struct frame_info *frame, int regnum, const void *buf)
       {
 	/* FIXME: write_memory doesn't yet take constant buffers.
            Arrrg!  */
-	char tmp[MAX_REGISTER_SIZE];
+	gdb_byte tmp[MAX_REGISTER_SIZE];
 	memcpy (tmp, buf, register_size (gdbarch, regnum));
 	write_memory (addr, tmp, register_size (gdbarch, regnum));
 	break;
@@ -715,7 +716,8 @@ put_frame_register (struct frame_info *frame, int regnum, const void *buf)
    Returns 0 if the register value could not be found.  */
 
 int
-frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
+frame_register_read (struct frame_info *frame, int regnum,
+		     gdb_byte *myaddr)
 {
   int optimized;
   enum lval_type lval;
@@ -1481,8 +1483,8 @@ deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 /* Memory access methods.  */
 
 void
-get_frame_memory (struct frame_info *this_frame, CORE_ADDR addr, void *buf,
-		  int len)
+get_frame_memory (struct frame_info *this_frame, CORE_ADDR addr,
+		  gdb_byte *buf, int len)
 {
   read_memory (addr, buf, len);
 }
@@ -1503,7 +1505,7 @@ get_frame_memory_unsigned (struct frame_info *this_frame, CORE_ADDR addr,
 
 int
 safe_frame_unwind_memory (struct frame_info *this_frame,
-			  CORE_ADDR addr, void *buf, int len)
+			  CORE_ADDR addr, gdb_byte *buf, int len)
 {
   /* NOTE: deprecated_read_memory_nobpt returns zero on success!  */
   return !deprecated_read_memory_nobpt (addr, buf, len);

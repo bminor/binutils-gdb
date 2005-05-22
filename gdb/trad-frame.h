@@ -56,7 +56,7 @@ void trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
 			      struct frame_info *next_frame,
 			      int regnum, int *optimizedp,
 			      enum lval_type *lvalp, CORE_ADDR *addrp,
-			      int *realregp, void *bufferp);
+			      int *realregp, gdb_byte *bufferp);
 
 /* A traditional saved regs table, indexed by REGNUM, encoding where
    the value of REGNUM for the previous frame can be found in this
@@ -117,6 +117,6 @@ void trad_frame_get_prev_register (struct frame_info *next_frame,
 				   struct trad_frame_saved_reg this_saved_regs[],
 				   int regnum, int *optimizedp,
 				   enum lval_type *lvalp, CORE_ADDR *addrp,
-				   int *realregp, void *bufferp);
+				   int *realregp, gdb_byte *bufferp);
 
 #endif

@@ -262,7 +262,7 @@ value_of_register (int regnum, struct frame_info *frame)
   int optim;
   struct value *reg_val;
   int realnum;
-  char raw_buffer[MAX_REGISTER_SIZE];
+  gdb_byte raw_buffer[MAX_REGISTER_SIZE];
   enum lval_type lval;
 
   /* User registers lie completely outside of the range of normal
@@ -662,7 +662,7 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       int len = TYPE_LENGTH (type);
       int value_bytes_copied;
       int optimized = 0;
-      char *value_bytes = (char *) alloca (len + MAX_REGISTER_SIZE);
+      gdb_byte *value_bytes = alloca (len + MAX_REGISTER_SIZE);
 
       /* Copy all of the data out, whereever it may be.  */
       for (local_regnum = regnum, value_bytes_copied = 0;

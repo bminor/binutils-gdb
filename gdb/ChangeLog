@@ -1,3 +1,32 @@
+2005-05-22  Andrew Cagney  <cagney@gnu.org>
+
+	* frame.h (frame_register_unwind, frame_unwind_register)
+	(get_frame_register, frame_register, put_frame_register)
+	(get_frame_memory, safe_frame_unwind_memory)
+	(frame_register_read): Use gdb_byte for byte buffer parameters.
+	* trad-frame.h (trad_frame_get_register)
+	(frame_get_prev_register): Ditto.
+	* frame-unwind.h (frame_prev_register_ftype): Ditto.
+	* frame.c (frame_pop, frame_register, frame_unwind_register) 
+	(get_frame_register, frame_unwind_register_signed) 
+	(frame_unwind_register_unsigned, frame_unwind_unsigned_register) 
+	(frame_register_read, get_frame_memory): Update.
+	* trad-frame.c (trad_frame_get_prev_register): Update.
+	(trad_frame_get_register): Update.
+	* gdbcore.h (deprecated_read_memory_nobpt, read_memory): Ditto.
+	* breakpoint.c (deprecated_read_memory_nobpt): Update.
+	* corefile.c (read_memory): Update.
+	* tramp-frame.c (tramp_frame_prev_register): Update.
+	* valops.c (value_assign): Update.
+	* sentinel-frame.c (sentinel_frame_prev_register): Update.
+	* std-regs.c (value_of_builtin_frame_fp_reg)
+	(value_of_builtin_frame_pc_reg): Update.
+	* infcmd.c (default_print_registers_info): Update
+	* dummy-frame.c (dummy_frame_prev_register): Update.
+	* findvar.c (value_of_register, value_from_register): Update.
+	* tui/tui-regs.c (tui_register_format, tui_get_register): Update.
+	* mi/mi-main.c (register_changed_p, get_register): Update.
+
 2005-05-20  Eli Zaretskii  <eliz@gnu.org>
 
 	* configure.ac: Add snprintf and vsnprintf to AC_CHECK_DECLS.  Fix
@@ -47,7 +76,6 @@
 	(regcache_raw_write_part, regcache_cooked_read_part) 
 	(regcache_cooked_write_part, read_register, regcache_raw_supply): 
 
->>>>>>> 1.7166
 2005-05-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* MAINTAINERS: Undelete v850.
@@ -195,7 +223,6 @@
 	(_initialize_linux_nat, lin_thread_get_thread_signals): Use
 	SA_RESTART.
 
->>>>>>> 1.7163
 2005-05-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.tgt (vax-*-openbsd*): Set gdb_target to obsd.

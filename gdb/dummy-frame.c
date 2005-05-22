@@ -175,7 +175,7 @@ dummy_frame_prev_register (struct frame_info *next_frame,
 			   void **this_prologue_cache,
 			   int regnum, int *optimized,
 			   enum lval_type *lvalp, CORE_ADDR *addrp,
-			   int *realnum, void *bufferp)
+			   int *realnum, gdb_byte *bufferp)
 {
   /* The dummy-frame sniffer always fills in the cache.  */
   struct dummy_frame_cache *cache = (*this_prologue_cache);

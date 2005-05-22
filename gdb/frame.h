@@ -395,7 +395,7 @@ extern enum frame_type get_frame_type (struct frame_info *);
 extern void frame_register_unwind (struct frame_info *frame, int regnum,
 				   int *optimizedp, enum lval_type *lvalp,
 				   CORE_ADDR *addrp, int *realnump,
-				   void *valuep);
+				   gdb_byte *valuep);
 
 /* Fetch a register from this, or unwind a register from the next
    frame.  Note that the get_frame methods are wrappers to
@@ -403,9 +403,9 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
    fetch fails.  */
 
 extern void frame_unwind_register (struct frame_info *frame,
-				   int regnum, void *buf);
+				   int regnum, gdb_byte *buf);
 extern void get_frame_register (struct frame_info *frame,
-				int regnum, void *buf);
+				int regnum, gdb_byte *buf);
 
 extern LONGEST frame_unwind_register_signed (struct frame_info *frame,
 					     int regnum);
@@ -429,13 +429,13 @@ extern void frame_unwind_unsigned_register (struct frame_info *frame,
 extern void frame_register (struct frame_info *frame, int regnum,
 			    int *optimizedp, enum lval_type *lvalp,
 			    CORE_ADDR *addrp, int *realnump,
-			    void *valuep);
+			    gdb_byte *valuep);
 
 /* The reverse.  Store a register value relative to the specified
    frame.  Note: this call makes the frame's state undefined.  The
    register and frame caches must be flushed.  */
 extern void put_frame_register (struct frame_info *frame, int regnum,
-				const void *buf);
+				const gdb_byte *buf);
 
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
@@ -471,7 +471,7 @@ extern void frame_pop (struct frame_info *frame);
    adaptor frames this should be ok.  */
 
 extern void get_frame_memory (struct frame_info *this_frame, CORE_ADDR addr,
-			      void *buf, int len);
+			      gdb_byte *buf, int len);
 extern LONGEST get_frame_memory_signed (struct frame_info *this_frame,
 					CORE_ADDR memaddr, int len);
 extern ULONGEST get_frame_memory_unsigned (struct frame_info *this_frame,
@@ -480,7 +480,7 @@ extern ULONGEST get_frame_memory_unsigned (struct frame_info *this_frame,
 /* Same as above, but return non-zero when the entire memory read
    succeeds, zero otherwize.  */
 extern int safe_frame_unwind_memory (struct frame_info *this_frame,
-				     CORE_ADDR addr, void *buf, int len);
+				     CORE_ADDR addr, gdb_byte *buf, int len);
 
 /* Return this frame's architecture.  */
 
@@ -586,7 +586,7 @@ extern int deprecated_pc_in_call_dummy (CORE_ADDR pc);
    isn't available (it could have been fetched from memory).  */
 
 extern int frame_register_read (struct frame_info *frame, int regnum,
-				void *buf);
+				gdb_byte *buf);
 
 /* From stack.c.  */
 extern void args_info (char *, int);

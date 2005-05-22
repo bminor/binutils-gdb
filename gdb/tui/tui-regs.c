@@ -669,7 +669,7 @@ tui_register_format (struct gdbarch *gdbarch, struct frame_info *frame,
   cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
   if (TYPE_VECTOR (type) != 0 && 0)
     {
-      char buf[MAX_REGISTER_SIZE];
+      gdb_byte buf[MAX_REGISTER_SIZE];
       int len;
 
       len = register_size (current_gdbarch, regnum);
@@ -709,7 +709,7 @@ tui_get_register (struct gdbarch *gdbarch, struct frame_info *frame,
     *changedp = FALSE;
   if (target_has_registers)
     {
-      char buf[MAX_REGISTER_SIZE];
+      gdb_byte buf[MAX_REGISTER_SIZE];
 
       get_frame_register (frame, regnum, buf);
       /* NOTE: cagney/2003-03-13: This is bogus.  It is refering to

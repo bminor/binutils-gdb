@@ -76,7 +76,7 @@ tramp_frame_prev_register (struct frame_info *next_frame,
 			   int *optimizedp,
 			   enum lval_type * lvalp,
 			   CORE_ADDR *addrp,
-			   int *realnump, void *valuep)
+			   int *realnump, gdb_byte *valuep)
 {
   struct trad_frame_cache *trad_cache
     = tramp_frame_cache (next_frame, this_cache);

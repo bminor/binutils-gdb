@@ -233,7 +233,7 @@ memory_error (int status, CORE_ADDR memaddr)
 
 /* Same as target_read_memory, but report an error if can't read.  */
 void
-read_memory (CORE_ADDR memaddr, char *myaddr, int len)
+read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   int status;
   status = target_read_memory (memaddr, myaddr, len);

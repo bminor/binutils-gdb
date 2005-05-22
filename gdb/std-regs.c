@@ -56,7 +56,7 @@ static struct value *
 value_of_builtin_frame_reg (struct frame_info *frame)
 {
   struct value *val;
-  char *buf;
+  gdb_byte *buf;
   build_builtin_type_frame_reg ();
   val = allocate_value (builtin_type_frame_reg);
   VALUE_LVAL (val) = not_lval;
@@ -85,7 +85,7 @@ value_of_builtin_frame_fp_reg (struct frame_info *frame)
   else
     {
       struct value *val = allocate_value (builtin_type_void_data_ptr);
-      char *buf = value_contents_raw (val);
+      gdb_byte *buf = value_contents_raw (val);
       if (frame == NULL)
 	memset (buf, 0, TYPE_LENGTH (value_type (val)));
       else
@@ -103,7 +103,7 @@ value_of_builtin_frame_pc_reg (struct frame_info *frame)
   else
     {
       struct value *val = allocate_value (builtin_type_void_data_ptr);
-      char *buf = value_contents_raw (val);
+      gdb_byte *buf = value_contents_raw (val);
       if (frame == NULL)
 	memset (buf, 0, TYPE_LENGTH (value_type (val)));
       else

@@ -1069,7 +1069,7 @@ frame_info (char *addr_exp, int from_tty)
 			       &realnum, NULL);
 	if (!optimized && lval == not_lval)
 	  {
-	    char value[MAX_REGISTER_SIZE];
+	    gdb_byte value[MAX_REGISTER_SIZE];
 	    CORE_ADDR sp;
 	    frame_register_unwind (fi, SP_REGNUM, &optimized, &lval, &addr,
 				   &realnum, value);

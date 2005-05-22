@@ -116,7 +116,7 @@ typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
 					  int *optimized,
 					  enum lval_type * lvalp,
 					  CORE_ADDR *addrp,
-					  int *realnump, void *valuep);
+					  int *realnump, gdb_byte *valuep);
 
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
    use the NEXT frame, and its register unwind method, to return the PREV

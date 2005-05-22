@@ -569,7 +569,7 @@ value_assign (struct value *toval, struct value *fromval)
 	const gdb_byte *dest_buffer;
 	CORE_ADDR changed_addr;
 	int changed_len;
-        char buffer[sizeof (LONGEST)];
+        gdb_byte buffer[sizeof (LONGEST)];
 
 	if (value_bitsize (toval))
 	  {
@@ -631,7 +631,7 @@ value_assign (struct value *toval, struct value *fromval)
 	       modify it, and copy it back in.  */
 	    int amount_copied;
 	    int amount_to_copy;
-	    char *buffer;
+	    gdb_byte *buffer;
 	    int reg_offset;
 	    int byte_offset;
 	    int regno;
@@ -655,7 +655,7 @@ value_assign (struct value *toval, struct value *fromval)
 	      amount_to_copy = byte_offset + TYPE_LENGTH (type);
 	    
 	    /* And a bounce buffer.  Be slightly over generous.  */
-	    buffer = (char *) alloca (amount_to_copy + MAX_REGISTER_SIZE);
+	    buffer = alloca (amount_to_copy + MAX_REGISTER_SIZE);
 
 	    /* Copy it in.  */
 	    for (regno = reg_offset, amount_copied = 0;
