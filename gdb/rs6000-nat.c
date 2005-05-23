@@ -449,7 +449,7 @@ read_word (CORE_ADDR from, int *to, int arch64)
    us in the target stack anyway.  */
 
 int
-child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+child_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 		   int write, struct mem_attrib *attrib,
 		   struct target_ops *target)
 {

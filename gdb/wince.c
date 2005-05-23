@@ -1839,7 +1839,7 @@ child_mourn_inferior (void)
 
 /* Move memory from child to/from gdb.  */
 int
-child_xfer_memory (CORE_ADDR memaddr, char *our, 
+child_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, 
 		   int len, int write,
 		   struct mem_attrib *attrib,
 		   struct target_ops *target)

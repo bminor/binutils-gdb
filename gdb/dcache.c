@@ -124,7 +124,7 @@ struct dcache_block
   {
     struct dcache_block *p;	/* next in list */
     CORE_ADDR addr;		/* Address for which data is recorded.  */
-    char data[LINE_SIZE];	/* bytes at given address */
+    gdb_byte data[LINE_SIZE];	/* bytes at given address */
     unsigned char state[LINE_SIZE];	/* what state the data is in */
 
     /* whether anything in state is dirty - used to speed up the 
@@ -161,10 +161,6 @@ struct dcache_struct
     /* The cache itself. */
     struct dcache_block *the_cache;
   };
-
-static int dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr);
-
-static int dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr);
 
 static struct dcache_block *dcache_hit (DCACHE *dcache, CORE_ADDR addr);
 
@@ -250,7 +246,7 @@ static int
 dcache_write_line (DCACHE *dcache, struct dcache_block *db)
 {
   CORE_ADDR memaddr;
-  char *myaddr;
+  gdb_byte *myaddr;
   int len;
   int res;
   int reg_len;
@@ -331,7 +327,7 @@ static int
 dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 {
   CORE_ADDR memaddr;
-  char *myaddr;
+  gdb_byte *myaddr;
   int len;
   int res;
   int reg_len;
@@ -450,7 +446,7 @@ dcache_writeback (DCACHE *dcache)
    Returns 0 on error. */
 
 static int
-dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
+dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr)
 {
   struct dcache_block *db = dcache_hit (dcache, addr);
 
@@ -477,7 +473,7 @@ dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
  */
 
 static int
-dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, char *ptr)
+dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr)
 {
   struct dcache_block *db = dcache_hit (dcache, addr);
 
@@ -536,7 +532,7 @@ dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, gdb_byte *myaddr,
 		    int len, int should_write)
 {
   int i;
-  int (*xfunc) (DCACHE *dcache, CORE_ADDR addr, char *ptr);
+  int (*xfunc) (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr);
   xfunc = should_write ? dcache_poke_byte : dcache_peek_byte;
 
   for (i = 0; i < len; i++)

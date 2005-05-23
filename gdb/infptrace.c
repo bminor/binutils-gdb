@@ -332,7 +332,7 @@ store_inferior_registers (int regnum)
    us in the target stack anyway.  */
 
 int
-child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+child_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		   struct mem_attrib *attrib, struct target_ops *target)
 {
   int i;

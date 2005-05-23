@@ -1,5 +1,17 @@
 2005-05-23  Andrew Cagney  <cagney@gnu.org>
 
+	* target.h (child_xfer_memory): Use gdb_byte for byte buffer
+	parameters.
+	* inftarg.c (child_xfer_partial): Update.
+	* wince.c (child_xfer_memory): Update.
+	* win32-nat.c (child_xfer_memory): Update.
+	* rs6000-nat.c (child_xfer_memory): Update.
+	* infptrace.c (child_xfer_memory): Update.
+	* dcache.c (struct dcache_block): Use gdb_byte for the byte
+	buffers.
+	(dcache_read_line, dcache_xfer_memory, dcache_poke_byte) 
+	(dcache_peek_byte, dcache_write_line): Ditto.
+
 	* auxv.h (target_auxv_read, procfs_xfer_auxv)
 	(target_auxv_parse): Use gdb_byte for byte buffer parameters.
 	* auxv.c (target_auxv_read, procfs_xfer_auxv, target_auxv_parse) 

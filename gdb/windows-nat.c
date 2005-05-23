@@ -1931,7 +1931,7 @@ child_stop (void)
 }
 
 int
-child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
+child_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
 		   int write, struct mem_attrib *mem,
 		   struct target_ops *target)
 {
