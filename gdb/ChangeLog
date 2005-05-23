@@ -1,7 +1,6 @@
 2005-05-23  Orjan Friberg  <orjanf@axis.com>
 
-	* gdb.texinfo (CRIS): Update the cris-version and cris-dwarf2-cfi
-	documentation.  Add documentation for cris-mode.
+	* cris-tdep.c: Tweak values for cris-mode.
 
 2004-05-23  Joel Brobecker  <brobecker@adacore.com>
 
