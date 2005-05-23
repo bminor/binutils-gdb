@@ -14665,21 +14665,30 @@ following CRIS-specific commands:
 @table @code
 @item set cris-version @var{ver}
 @cindex CRIS version
-Set the current CRIS version to @var{ver}.  The CRIS version affects
-register names and sizes.  This command is useful in case
-autodetection of the CRIS version fails.
+Set the current CRIS version to @var{ver}, either @samp{10} or @samp{32}.
+The CRIS version affects register names and sizes.  This command is useful in
+case autodetection of the CRIS version fails.
 
 @item show cris-version
 Show the current CRIS version.
 
 @item set cris-dwarf2-cfi
 @cindex DWARF-2 CFI and CRIS
-Set the usage of DWARF-2 CFI for CRIS debugging.  The default is off
-if using @code{gcc-cris} whose version is below @code{R59}, otherwise
-on.
+Set the usage of DWARF-2 CFI for CRIS debugging.  The default is @samp{on}.
+Change to @samp{off} when using @code{gcc-cris} whose version is below 
+@code{R59}.
 
 @item show cris-dwarf2-cfi
 Show the current state of using DWARF-2 CFI.
+
+@item set cris-mode @var{mode}
+@cindex CRIS mode
+Set the current CRIS mode to @var{mode}.  It should only be changed when
+debugging in guru mode, in which case it should be set to 
+@samp{guru} (the default is @samp{normal}).
+
+@item show cris-mode
+Show the current CRIS mode.
 @end table
 
 @node Super-H
