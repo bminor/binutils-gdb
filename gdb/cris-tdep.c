@@ -152,8 +152,8 @@ static int usr_cmd_cris_version;
 /* Indicates whether to trust the above variable.  */
 static int usr_cmd_cris_version_valid = 0;
 
-static const char cris_mode_normal[] = "CRIS_MODE_NORMAL";
-static const char cris_mode_guru[] = "CRIS_MODE_GURU";
+static const char cris_mode_normal[] = "normal";
+static const char cris_mode_guru[] = "guru";
 static const char *cris_modes[] = {
   cris_mode_normal,
   cris_mode_guru,
