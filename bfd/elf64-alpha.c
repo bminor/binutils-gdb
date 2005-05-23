@@ -1993,7 +1993,8 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   *again = FALSE;
 
   if (link_info->relocatable
-      || (sec->flags & (SEC_CODE | SEC_RELOC)) != (SEC_CODE | SEC_RELOC)
+      || ((sec->flags & (SEC_CODE | SEC_RELOC | SEC_ALLOC))
+	  != (SEC_CODE | SEC_RELOC | SEC_ALLOC))
       || sec->reloc_count == 0)
     return TRUE;
 
@@ -2988,6 +2989,15 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
   if (info->relocatable)
     return TRUE;
 
+  /* Don't do anything special with non-loaded, non-alloced sections.
+     In particular, any relocs in such sections should not affect GOT
+     and PLT reference counting (ie. we don't allow them to create GOT
+     or PLT entries), there's no possibility or desire to optimize TLS
+     relocs, and there's not much point in propagating relocs to shared
+     libs that the dynamic linker won't relocate.  */
+  if ((sec->flags & SEC_ALLOC) == 0)
+    return TRUE;
+
   dynobj = elf_hash_table(info)->dynobj;
   if (dynobj == NULL)
     elf_hash_table(info)->dynobj = dynobj = abfd;
@@ -3073,7 +3083,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 
 	case R_ALPHA_REFLONG:
 	case R_ALPHA_REFQUAD:
-	  if ((info->shared && (sec->flags & SEC_ALLOC)) || maybe_dynamic)
+	  if (info->shared || maybe_dynamic)
 	    need = NEED_DYNREL;
 	  break;
 
@@ -3211,8 +3221,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 		  rent->srel = sreloc;
 		  rent->rtype = r_type;
 		  rent->count = 1;
-		  rent->reltext = ((sec->flags & (SEC_READONLY | SEC_ALLOC))
-				   == (SEC_READONLY | SEC_ALLOC));
+		  rent->reltext = (sec->flags & SEC_READONLY) != 0;
 
 		  rent->next = h->reloc_entries;
 		  h->reloc_entries = rent;
@@ -3225,8 +3234,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
 	      /* If this is a shared library, and the section is to be
 		 loaded into memory, we need a RELATIVE reloc.  */
 	      sreloc->size += sizeof (Elf64_External_Rela);
-	      if ((sec->flags & (SEC_READONLY | SEC_ALLOC))
-		  == (SEC_READONLY | SEC_ALLOC))
+	      if (sec->flags & SEC_READONLY)
 		info->flags |= DF_TEXTREL;
 	    }
 	}
@@ -4265,7 +4273,6 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
   bfd_vma gp, tp_base, dtp_base;
   struct alpha_elf_got_entry **local_got_entries;
   bfd_boolean ret_val;
-  const char *section_name;
 
   /* Handle relocatable links with a smaller loop.  */
   if (info->relocatable)
@@ -4285,11 +4292,17 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
   else
     srelgot = NULL;
 
-  section_name = (bfd_elf_string_from_elf_section
-		  (input_bfd, elf_elfheader(input_bfd)->e_shstrndx,
-		   elf_section_data(input_section)->rel_hdr.sh_name));
-  BFD_ASSERT(section_name != NULL);
-  srel = bfd_get_section_by_name (dynobj, section_name);
+  if (input_section->flags & SEC_ALLOC)
+    {
+      const char *section_name;
+      section_name = (bfd_elf_string_from_elf_section
+		      (input_bfd, elf_elfheader(input_bfd)->e_shstrndx,
+		       elf_section_data(input_section)->rel_hdr.sh_name));
+      BFD_ASSERT(section_name != NULL);
+      srel = bfd_get_section_by_name (dynobj, section_name);
+    }
+  else
+    srel = NULL;
 
   /* Find the gp value for this input bfd.  */
   gotobj = alpha_elf_tdata (input_bfd)->gotobj;
@@ -4673,9 +4686,10 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    else
 	      goto default_reloc;
 
-	    elf64_alpha_emit_dynrel (output_bfd, info, input_section,
-				     srel, rel->r_offset, dynindx,
-				     dyntype, dynaddend);
+	    if (input_section->flags & SEC_ALLOC)
+	      elf64_alpha_emit_dynrel (output_bfd, info, input_section,
+				       srel, rel->r_offset, dynindx,
+				       dyntype, dynaddend);
 	  }
 	  goto default_reloc;
 

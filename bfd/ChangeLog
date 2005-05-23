@@ -1,5 +1,13 @@
 2005-05-22  Richard Henderson  <rth@redhat.com>
 
+	* elf64-alpha.c (elf64_alpha_relax_section): Ignore non-allocated
+	sections.
+	(elf64_alpha_check_relocs): Likewise.
+	(elf64_alpha_relocate_section): Don't emit dynamic relocations to
+	non-allocated sections.
+
+2005-05-22  Richard Henderson  <rth@redhat.com>
+
 	* elf64-alpha.c (elf64_alpha_relax_with_lituse): Relax jsr to 
 	undefweak to use zero register.  Call elf64_alpha_relax_got_load
 	if not all uses removed.
