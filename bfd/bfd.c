@@ -1161,6 +1161,10 @@ DESCRIPTION
 .       BFD_SEND (abfd, _bfd_find_nearest_line, \
 .                 (abfd, sec, syms, off, file, func, line))
 .
+.#define bfd_find_inliner_info(abfd, file, func, line) \
+.       BFD_SEND (abfd, _bfd_find_inliner_info, \
+.                 (abfd, file, func, line))
+.
 .#define bfd_debug_info_start(abfd) \
 .       BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
 .

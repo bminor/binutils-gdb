@@ -904,6 +904,9 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #ifndef MY_find_nearest_line
 #define MY_find_nearest_line NAME (aout, find_nearest_line)
 #endif
+#ifndef MY_find_inliner_info
+#define MY_find_inliner_info _bfd_nosymbols_find_inliner_info
+#endif
 #ifndef MY_sizeof_headers
 #define MY_sizeof_headers NAME (aout, sizeof_headers)
 #endif

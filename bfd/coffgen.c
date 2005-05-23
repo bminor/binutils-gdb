@@ -2223,6 +2223,20 @@ coff_find_nearest_line (bfd *abfd,
   return TRUE;
 }
 
+bfd_boolean
+coff_find_inliner_info (bfd *abfd,
+			const char **filename_ptr,
+			const char **functionname_ptr,
+			unsigned int *line_ptr)
+{
+  bfd_boolean found;
+
+  found = _bfd_dwarf2_find_inliner_info (abfd, filename_ptr,
+					 functionname_ptr, line_ptr,
+					 &coff_data(abfd)->dwarf2_find_line_info);
+  return (found);
+}
+
 int
 coff_sizeof_headers (bfd *abfd, bfd_boolean reloc)
 {

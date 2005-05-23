@@ -6672,6 +6672,25 @@ _bfd_elf_find_nearest_line (bfd *abfd,
   return TRUE;
 }
 
+/* After a call to bfd_find_nearest_line, successive calls to
+   bfd_find_inliner_info can be used to get source information about
+   each level of function inlining that terminated at the address
+   passed to bfd_find_nearest_line.  Currently this is only supported
+   for DWARF2 with appropriate DWARF3 extensions. */
+
+bfd_boolean
+_bfd_elf_find_inliner_info (bfd *abfd,
+			    const char **filename_ptr,
+			    const char **functionname_ptr,
+			    unsigned int *line_ptr)
+{
+  bfd_boolean found;
+  found = _bfd_dwarf2_find_inliner_info (abfd, filename_ptr,
+					 functionname_ptr, line_ptr,
+					 & elf_tdata (abfd)->dwarf2_find_line_info);
+  return found;
+}
+
 int
 _bfd_elf_sizeof_headers (bfd *abfd, bfd_boolean reloc)
 {

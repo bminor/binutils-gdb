@@ -29,6 +29,7 @@
 #define nlm_bfd_is_target_special_symbol ((bfd_boolean (*) (bfd *, asymbol *)) bfd_false)
 #define nlm_get_lineno                          _bfd_nosymbols_get_lineno
 #define nlm_find_nearest_line                   _bfd_nosymbols_find_nearest_line
+#define nlm_find_inliner_info                   _bfd_nosymbols_find_inliner_info
 #define nlm_bfd_make_debug_symbol               _bfd_nosymbols_bfd_make_debug_symbol
 #define nlm_read_minisymbols                    _bfd_generic_read_minisymbols
 #define nlm_minisymbol_to_symbol                _bfd_generic_minisymbol_to_symbol

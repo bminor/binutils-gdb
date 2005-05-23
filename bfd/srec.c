@@ -1188,6 +1188,7 @@ srec_print_symbol (bfd *abfd,
 #define srec_bfd_is_local_label_name              bfd_generic_is_local_label_name
 #define srec_get_lineno                           _bfd_nosymbols_get_lineno
 #define srec_find_nearest_line                    _bfd_nosymbols_find_nearest_line
+#define srec_find_inliner_info                    _bfd_nosymbols_find_inliner_info
 #define srec_make_empty_symbol                    _bfd_generic_make_empty_symbol
 #define srec_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
 #define srec_read_minisymbols                     _bfd_generic_read_minisymbols

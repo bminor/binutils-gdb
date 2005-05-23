@@ -3664,6 +3664,15 @@ ieee_find_nearest_line (bfd *abfd ATTRIBUTE_UNUSED,
   return FALSE;
 }
 
+static bfd_boolean
+ieee_find_inliner_info (bfd *abfd ATTRIBUTE_UNUSED,
+			const char **filename_ptr ATTRIBUTE_UNUSED,
+			const char **functionname_ptr ATTRIBUTE_UNUSED,
+			unsigned int *line_ptr ATTRIBUTE_UNUSED)
+{
+  return FALSE;
+}
+
 static int
 ieee_generic_stat_arch_elt (bfd *abfd, struct stat *buf)
 {

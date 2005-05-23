@@ -590,6 +590,12 @@ extern bfd_boolean NAME (aout, final_link)
 extern bfd_boolean NAME (aout, bfd_free_cached_info)
   (bfd *);
 
+#define aout_32_find_inliner_info	_bfd_nosymbols_find_inliner_info
+#if 0	/* Are these needed? */
+#define aout_16_find_inliner_info	_bfd_nosymbols_find_inliner_info
+#define aout_64_find_inliner_info	_bfd_nosymbols_find_inliner_info
+#endif
+
 /* A.out uses the generic versions of these routines...  */
 
 #define	aout_16_get_section_contents	_bfd_generic_get_section_contents

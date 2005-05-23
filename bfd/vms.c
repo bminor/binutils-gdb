@@ -972,6 +972,19 @@ vms_find_nearest_line (bfd * abfd ATTRIBUTE_UNUSED,
   return FALSE;
 }
 
+static bfd_boolean
+vms_find_inliner_info (bfd * abfd ATTRIBUTE_UNUSED,
+		       const char **file ATTRIBUTE_UNUSED,
+		       const char **func ATTRIBUTE_UNUSED,
+		       unsigned int *line ATTRIBUTE_UNUSED)
+{
+#if VMS_DEBUG
+  vms_debug (1, "vms_find_inliner_info (%p, <ret>, <ret>, <ret>)\n",
+	     abfd);
+#endif
+  return FALSE;
+}
+
 /* Back-door to allow format-aware applications to create debug symbols
    while using BFD for everything else.  Currently used by the assembler
    when creating COFF files.  */

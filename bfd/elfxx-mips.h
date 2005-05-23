@@ -81,6 +81,8 @@ extern bfd_boolean _bfd_mips_elf_ignore_discarded_relocs
 extern bfd_boolean _bfd_mips_elf_find_nearest_line
   (bfd *, asection *, asymbol **, bfd_vma, const char **,
    const char **, unsigned int *);
+extern bfd_boolean _bfd_mips_elf_find_inliner_info
+  (bfd *, const char **, const char **, unsigned int *);
 extern bfd_boolean _bfd_mips_elf_set_section_contents
   (bfd *, asection *, const void *, file_ptr, bfd_size_type);
 extern bfd_byte *_bfd_elf_mips_get_relocated_section_contents

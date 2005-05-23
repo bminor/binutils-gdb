@@ -312,6 +312,9 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
   ((bfd_boolean (*) (bfd *, asection *, asymbol **, bfd_vma, const char **, \
 		     const char **, unsigned int *)) \
    bfd_false)
+#define _bfd_nosymbols_find_inliner_info \
+  ((bfd_boolean (*) (bfd *, const char **, const char **, unsigned int *)) \
+   bfd_false)
 #define _bfd_nosymbols_bfd_make_debug_symbol \
   ((asymbol *(*) (bfd *, void *, unsigned long)) bfd_nullvoidptr)
 #define _bfd_nosymbols_read_minisymbols \
@@ -425,6 +428,10 @@ extern bfd_boolean _bfd_dwarf2_find_nearest_line
   (bfd *, asection *, asymbol **, bfd_vma, const char **, const char **,
    unsigned int *, unsigned int, void **);
 
+/* Find inliner info after calling bfd_find_nearest_line. */
+extern bfd_boolean _bfd_dwarf2_find_inliner_info
+  (bfd *, const char **, const char **, unsigned int *, void **);
+  
 /* Create a new section entry.  */
 extern struct bfd_hash_entry *bfd_section_hash_newfunc
   (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);

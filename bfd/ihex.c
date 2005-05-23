@@ -920,6 +920,7 @@ ihex_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED, bfd_boolean exec ATTRIBUTE_UNUS
 #define ihex_bfd_is_local_label_name              _bfd_nosymbols_bfd_is_local_label_name
 #define ihex_get_lineno                           _bfd_nosymbols_get_lineno
 #define ihex_find_nearest_line                    _bfd_nosymbols_find_nearest_line
+#define ihex_find_inliner_info                    _bfd_nosymbols_find_inliner_info
 #define ihex_bfd_make_debug_symbol                _bfd_nosymbols_bfd_make_debug_symbol
 #define ihex_read_minisymbols                     _bfd_nosymbols_read_minisymbols
 #define ihex_minisymbol_to_symbol                 _bfd_nosymbols_minisymbol_to_symbol

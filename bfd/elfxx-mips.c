@@ -8625,6 +8625,20 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asection *section,
 				     filename_ptr, functionname_ptr,
 				     line_ptr);
 }
+
+bfd_boolean
+_bfd_mips_elf_find_inliner_info (bfd *abfd,
+				 const char **filename_ptr,
+				 const char **functionname_ptr,
+				 unsigned int *line_ptr)
+{
+  bfd_boolean found;
+  found = _bfd_dwarf2_find_inliner_info (abfd, filename_ptr,
+					 functionname_ptr, line_ptr,
+					 & elf_tdata (abfd)->dwarf2_find_line_info);
+  return found;
+}
+
 
 /* When are writing out the .options or .MIPS.options section,
    remember the bytes we are writing out, so that we can install the

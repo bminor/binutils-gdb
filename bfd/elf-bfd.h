@@ -1488,6 +1488,8 @@ extern bfd_boolean _bfd_elf_set_arch_mach
 extern bfd_boolean _bfd_elf_find_nearest_line
   (bfd *, asection *, asymbol **, bfd_vma, const char **, const char **,
    unsigned int *);
+extern bfd_boolean _bfd_elf_find_inliner_info
+  (bfd *, const char **, const char **, unsigned int *);
 #define _bfd_elf_read_minisymbols _bfd_generic_read_minisymbols
 #define _bfd_elf_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
 extern int _bfd_elf_sizeof_headers

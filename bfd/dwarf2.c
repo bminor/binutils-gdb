@@ -118,6 +118,12 @@ struct dwarf2_debug
 
   /* Length of the loaded .debug_ranges section. */
   unsigned long dwarf_ranges_size;
+
+  /* If the most recent call to bfd_find_nearest_line was given an
+     address in an inlined function, preserve a pointer into the
+     calling chain for subsequent calls to bfd_find_inliner_info to
+     use. */
+  struct funcinfo *inliner_chain;
 };
 
 struct arange
@@ -680,9 +686,19 @@ struct line_info_table
   struct line_info* lcl_head;   /* local head; used in 'add_line_info' */
 };
 
+/* Remember some information about each function.  If the function is
+   inlined (DW_TAG_inlined_subroutine) it may have two additional
+   attributes, DW_AT_call_file and DW_AT_call_line, which specify the
+   source code location where this function was inlined. */
+
 struct funcinfo
 {
-  struct funcinfo *prev_func;
+  struct funcinfo *prev_func;		/* Pointer to previous function in list of all functions */
+  struct funcinfo *caller_func;		/* Pointer to function one scope higher */
+  char *caller_file;			/* Source location file name where caller_func inlines this func */
+  int caller_line;			/* Source location line number where caller_func inlines this func */
+  int tag;
+  int nesting_level;
   char *name;
   struct arange arange;
 };
@@ -1340,7 +1356,7 @@ read_debug_ranges (struct comp_unit *unit)
    depending upon them being ordered in TABLE by increasing range. */
 
 static bfd_boolean
-lookup_address_in_function_table (struct funcinfo *table,
+lookup_address_in_function_table (struct comp_unit *unit,
 				  bfd_vma addr,
 				  struct funcinfo **function_ptr,
 				  const char **functionname_ptr)
@@ -1349,7 +1365,7 @@ lookup_address_in_function_table (struct funcinfo *table,
   struct funcinfo* best_fit = NULL;
   struct arange *arange;
 
-  for (each_func = table;
+  for (each_func = unit->function_table;
        each_func;
        each_func = each_func->prev_func)
     {
@@ -1368,8 +1384,28 @@ lookup_address_in_function_table (struct funcinfo *table,
 
   if (best_fit)
     {
+      struct funcinfo* curr_func = best_fit;
+
       *functionname_ptr = best_fit->name;
       *function_ptr = best_fit;
+
+      /* If we found a match and it is a function that was inlined,
+	 traverse the function list looking for the function at the
+	 next higher scope and save a pointer to it for future use.
+	 Note that because of the way the DWARF info is generated, and
+	 the way we build the function list, the first function at the
+	 next higher level is the one we want. */
+
+      for (each_func = best_fit -> prev_func;
+	   each_func && (curr_func->tag == DW_TAG_inlined_subroutine);
+	   each_func = each_func->prev_func)
+	{
+	  if (each_func->nesting_level < curr_func->nesting_level)
+	    {
+	      curr_func->caller_func = each_func;
+	      curr_func = each_func;
+	    }
+	}
       return TRUE;
     }
   else
@@ -1508,6 +1544,8 @@ scan_unit_for_functions (struct comp_unit *unit)
 	{
 	  bfd_size_type amt = sizeof (struct funcinfo);
 	  func = bfd_zalloc (abfd, amt);
+	  func->tag = abbrev->tag;
+	  func->nesting_level = nesting_level;
 	  func->prev_func = unit->function_table;
 	  unit->function_table = func;
 	}
@@ -1522,6 +1560,14 @@ scan_unit_for_functions (struct comp_unit *unit)
 	    {
 	      switch (attr.name)
 		{
+		case DW_AT_call_file:
+		  func->caller_file = concat_filename (unit->line_table, attr.u.val);
+		  break;
+
+		case DW_AT_call_line:
+		  func->caller_line = attr.u.val;
+		  break;
+
 		case DW_AT_abstract_origin:
 		  func->name = find_abstract_instance_name (unit, attr.u.val);
 		  break;
@@ -1796,8 +1842,10 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
     }
 
   function = NULL;
-  func_p = lookup_address_in_function_table (unit->function_table, addr,
+  func_p = lookup_address_in_function_table (unit, addr,
 					     &function, functionname_ptr);
+  if (func_p && (function->tag == DW_TAG_inlined_subroutine))
+    stash->inliner_chain = function;
   line_p = lookup_address_in_line_info_table (unit->line_table, addr,
 					      function, filename_ptr,
 					      linenumber_ptr);
@@ -1954,6 +2002,8 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
   if (! stash->info_ptr)
     return FALSE;
 
+  stash->inliner_chain = NULL;
+
   /* Check the previously read comp. units first.  */
   for (each = stash->all_comp_units; each; each = each->next_unit)
     if (comp_unit_contains_address (each, addr))
@@ -2045,6 +2095,32 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     }
 
   return FALSE;
+}
+
+bfd_boolean
+_bfd_dwarf2_find_inliner_info (bfd *abfd ATTRIBUTE_UNUSED,
+			       const char **filename_ptr,
+			       const char **functionname_ptr,
+			       unsigned int *linenumber_ptr,
+			       void **pinfo)
+{
+  struct dwarf2_debug *stash;
+
+  stash = *pinfo;
+  if (stash)
+    {
+      struct funcinfo *func = stash->inliner_chain;
+      if (func && func->caller_func)
+	{
+	  *filename_ptr = func->caller_file;
+	  *functionname_ptr = func->caller_func->name;
+	  *linenumber_ptr = func->caller_line;
+	  stash->inliner_chain = func->caller_func;
+	  return (TRUE);
+	}
+    }
+
+  return (FALSE);
 }
 
 void

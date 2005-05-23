@@ -3202,6 +3202,7 @@ mmo_canonicalize_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 /* FIXME: We can do better on this one, if we have a dwarf2 .debug_line
    section or if MMO line numbers are implemented.  */
 #define mmo_find_nearest_line _bfd_nosymbols_find_nearest_line
+#define mmo_find_inliner_info _bfd_nosymbols_find_inliner_info
 #define mmo_make_empty_symbol _bfd_generic_make_empty_symbol
 #define mmo_bfd_make_debug_symbol _bfd_nosymbols_bfd_make_debug_symbol
 #define mmo_read_minisymbols _bfd_generic_read_minisymbols

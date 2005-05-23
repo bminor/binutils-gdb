@@ -1,3 +1,85 @@
+2005-05-23  Fred Fish  <fnf@specifixinc.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add inliner_chain member.
+	(struct funcinfo): Add caller_func, caller_file, caller_line.
+	tag, and nesting_level members.
+	(lookup_address_in_function_table): Change first passed parameter
+	from "struct funcinfo *" to "struct comp_unit *".
+	(lookup_address_in_function_table): Dereference unit to find function
+	table.
+	(lookup_address_in_function_table): Traverse the function list to
+	create a chain of inlined functions back to the first non inlined
+	function.
+	(scan_unit_for_functions): Remember tag and nesting level.  Handle
+	DW_AT_call_file and DW_AT_call_line.
+	(comp_unit_find_nearest_line): Adjust lookup_address_in_function_table
+	call to pass unit pointer instead of function table pointer.  For
+	inlined functions, save pointer to the inliner chain.
+	(_bfd_dwarf2_find_nearest_line): Initialize inliner_chain to NULL.
+	(_bfd_dwarf2_find_inliner_info): New function that returns information
+	from the inliner chain after a call to bfd_find_nearest_line.
+
+	* bfd.c (bfd_find_inliner_info): Define using BFD_SEND.
+	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Add entry for
+	NAME##_find_inliner_info.
+	(bfd_target): Add _bfd_find_inliner_info.
+	* bfd-in2.h: Regenerate.
+
+	* libbfd-in.h (_bfd_nosymbols_find_inliner_info): Define as
+	macro that always returns bfd_false.
+	(_bfd_dwarf2_find_inliner_info): Declare.
+	* libbfd.h: Regenerate.
+	
+	* elf32-arm.c (elf32_arm_find_inliner_info): New function
+	that calls _bfd_dwarf2_find_inliner_info.
+	(bfd_elf32_find_inliner_info): Define to elf32_arm_find_inliner_info.
+
+	* elfxx-mips.c (_bfd_mips_elf_find_inliner_info): New function
+	that calls _bfd_dwarf2_find_inliner_info.
+	* elfxx-mips.h (_bfd_mips_elf_find_inliner_info): Declare.
+	* elfn32-mips.c (bfd_elf32_find_inliner_info): Define to
+	_bfd_mips_elf_find_inliner_info.
+	* elf64-mips.c (bfd_elf64_find_inliner_info): Ditto.
+	* elf32-mips.c (bfd_elf32_find_inliner_info): Ditto.
+
+	* elf.c (_bfd_elf_find_inliner_info): New function that calls
+	_bfd_dwarf2_find_inliner_info.
+	* elf-bfd.h (_bfd_elf_find_inliner_info): Declare.
+	* elfxx-target.h (bfd_elfNN_find_inliner_info): Define to
+	_bfd_elf_find_inliner_info.
+
+	* coffgen.c (coff_find_inliner_info): New function that
+	calls _bfd_dwarf2_find_inliner_info.
+	* libcoff-in.h (coff_find_inliner_info): Declare.
+	* libcoff.h: Regenerate.
+	* coff-rs6000.c (rs6000coff_vec): Add coff_find_inliner_info.
+	(pmac_xcoff_vec) Ditto.
+	* coff64-rs6000.c (rs6000coff64_vec): Ditto.
+	(aix5coff64_vec): Ditto.
+	
+	* aout-target.h (MY_find_inliner_info): Define as
+	_bfd_nosymbols_find_inliner_info.
+	* aout-tic30.c (MY_find_inliner_info): Ditto.
+	* binary.c (binary_find_inliner_info): Ditto.
+	* i386msdos.c (msdos_find_inliner_info): Ditto.
+	* ihex.c (ihex_find_inliner_info): Ditto.
+	* libaout.h (aout_32_find_inliner_info): Ditto.
+	* libecoff.h (_bfd_ecoff_find_inliner_info): Ditto.
+	* mach-o.c (bfd_mach_o_find_inliner_info): Ditto.
+	* mmo.c (mmo_find_inliner_info): Ditto.
+	* nlm-target.h (nlm_find_inliner_info): Ditto.
+	* pef.c (bfd_pef_find_inliner_info): Ditto.
+	* ppcboot.c (ppcboot_find_inliner_info): Ditto.
+	* srec.c (srec_find_inliner_info): Ditto.
+	* tekhex.c (tekhex_find_inliner_info): Ditto.
+	* versados.c (versados_find_inliner_info): Ditto.
+	* xsym.c (bfd_sym_find_inliner_info): Ditto.
+
+	* ieee.c (ieee_find_inliner_info): New function that always
+	returns FALSE.
+	* oasys.c (oasys_find_inliner_info): Ditto.
+	* vms.c (vms_find_inliner_info): Ditto.
+
 2005-05-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): For old gcc -fPIC code

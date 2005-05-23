@@ -48,6 +48,7 @@
 #define bfd_mach_o_bfd_is_local_label_name            _bfd_nosymbols_bfd_is_local_label_name
 #define bfd_mach_o_get_lineno                         _bfd_nosymbols_get_lineno
 #define bfd_mach_o_find_nearest_line                  _bfd_nosymbols_find_nearest_line
+#define bfd_mach_o_find_inliner_info                  _bfd_nosymbols_find_inliner_info
 #define bfd_mach_o_bfd_make_debug_symbol              _bfd_nosymbols_bfd_make_debug_symbol
 #define bfd_mach_o_read_minisymbols                   _bfd_generic_read_minisymbols
 #define bfd_mach_o_minisymbol_to_symbol               _bfd_generic_minisymbol_to_symbol
