@@ -35,14 +35,14 @@ struct target_ops;		/* Forward declaration.  */
    stored in *DATA.  Return the size in bytes of this data.
    If zero, there is no data and *DATA is null.
    if < 0, there was an error and *DATA is null.  */
-extern LONGEST target_auxv_read (struct target_ops *ops, char **data);
+extern LONGEST target_auxv_read (struct target_ops *ops, gdb_byte **data);
 
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
    Return 0 if *READPTR is already at the end of the buffer.
    Return -1 if there is insufficient buffer for a whole entry.
    Return 1 if an entry was read into *TYPEP and *VALP.  */
 extern int target_auxv_parse (struct target_ops *ops,
-			      char **readptr, char *endptr,
+			      gdb_byte **readptr, gdb_byte *endptr,
 			      CORE_ADDR *typep, CORE_ADDR *valp);
 
 /* Extract the auxiliary vector entry with a_type matching MATCH.
@@ -66,8 +66,8 @@ extern int fprint_target_auxv (struct ui_file *file, struct target_ops *ops);
 extern LONGEST procfs_xfer_auxv (struct target_ops *ops,
 				 int /* enum target_object */ object,
 				 const char *annex,
-				 void *readbuf,
-				 const void *writebuf,
+				 gdb_byte *readbuf,
+				 const gdb_byte *writebuf,
 				 ULONGEST offset,
 				 LONGEST len);
 

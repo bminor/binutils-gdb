@@ -45,8 +45,8 @@ LONGEST
 procfs_xfer_auxv (struct target_ops *ops,
 		  int /* enum target_object */ object,
 		  const char *annex,
-		  void *readbuf,
-		  const void *writebuf,
+		  gdb_byte *readbuf,
+		  const gdb_byte *writebuf,
 		  ULONGEST offset,
 		  LONGEST len)
 {
@@ -81,10 +81,10 @@ procfs_xfer_auxv (struct target_ops *ops,
    If zero, there is no data and *DATA is null.
    if < 0, there was an error and *DATA is null.  */
 LONGEST
-target_auxv_read (struct target_ops *ops, char **data)
+target_auxv_read (struct target_ops *ops, gdb_byte **data)
 {
   size_t auxv_alloc = 512, auxv_pos = 0;
-  char *auxv = xmalloc (auxv_alloc);
+  gdb_byte *auxv = xmalloc (auxv_alloc);
   int n;
 
   while (1)
@@ -118,11 +118,11 @@ target_auxv_read (struct target_ops *ops, char **data)
    Return -1 if there is insufficient buffer for a whole entry.
    Return 1 if an entry was read into *TYPEP and *VALP.  */
 int
-target_auxv_parse (struct target_ops *ops, char **readptr, char *endptr,
-		   CORE_ADDR *typep, CORE_ADDR *valp)
+target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
+		   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   const int sizeof_auxv_field = TYPE_LENGTH (builtin_type_void_data_ptr);
-  char *ptr = *readptr;
+  gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
     return 0;
@@ -147,9 +147,9 @@ int
 target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
 {
   CORE_ADDR type, val;
-  char *data;
+  gdb_byte *data;
   int n = target_auxv_read (ops, &data);
-  char *ptr = data;
+  gdb_byte *ptr = data;
   int ents = 0;
 
   if (n <= 0)
@@ -183,9 +183,9 @@ int
 fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 {
   CORE_ADDR type, val;
-  char *data;
+  gdb_byte *data;
   int len = target_auxv_read (ops, &data);
-  char *ptr = data;
+  gdb_byte *ptr = data;
   int ents = 0;
 
   if (len <= 0)
