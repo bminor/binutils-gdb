@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add "-i/--inlines" to addr2line to print enclosing scope information
+  for inlined function chains, back to first non-inlined function.
+
 * Add "-N/--full-section-name" to readelf to display full section name.
 
 * Add "-M entry:<addr>" switch to objdump to specify a function entry address

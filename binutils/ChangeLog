@@ -1,3 +1,14 @@
+2005-05-23  Fred Fish  <fnf@specifixinc.com>
+
+	* addr2line.c (unwind_inlines): New flag for 'i' option.
+	(usage): Document '-i' option.
+	(long_options): Recognize '--inlines'.
+	(translate_addresses): Loop, calling bfd_find_inliner_info as
+	necessary and printing multiple output lines.
+	(main): Handle 'i' option.
+	* doc/binutils.texi (addr2line): Document '-i' option.
+	* NEWS: Mention new addr2line '-i' option.
+
 2005-05-23  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (fetch_indirect_string): Display a warning message

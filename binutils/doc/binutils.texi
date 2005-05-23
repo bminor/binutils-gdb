@@ -2524,6 +2524,7 @@ addr2line [@option{-b} @var{bfdname}|@option{--target=}@var{bfdname}]
           [@option{-C}|@option{--demangle}[=@var{style}]]
           [@option{-e} @var{filename}|@option{--exe=}@var{filename}]
           [@option{-f}|@option{--functions}] [@option{-s}|@option{--basename}]
+          [@option{-i}|@option{--inlines}]
           [@option{-H}|@option{--help}] [@option{-V}|@option{--version}]
           [addr addr @dots{}]
 @c man end
@@ -2596,6 +2597,15 @@ Display function names as well as file and line number information.
 @item -s
 @itemx --basenames
 Display only the base of each file name.
+
+@item -i
+@itemx --inlines
+If the address belongs to a function that was inlined, the source
+information for all enclosing scopes back to the first non-inlined
+function will also be printed.  For example, if @code{main} inlines
+@code{callee1} which inlines @code{callee2}, and address is from
+@code{callee2}, the source information for @code{callee1} and @code{main}
+will also be printed.
 @end table
 
 @c man end
