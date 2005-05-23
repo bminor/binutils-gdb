@@ -7269,7 +7269,10 @@ fetch_indirect_string (unsigned long offset)
     return _("<no .debug_str section>");
 
   if (offset > debug_str_size)
-    return _("<offset is too big>");
+    {
+      warn (_("DW_FORM_strp offset too big: %x\n"), offset);
+      return _("<offset is too big>");
+    }
 
   return debug_str_contents + offset;
 }
@@ -8800,7 +8803,7 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 
       if (!do_loc)
 	{
-	  printf (_("  Compilation Unit @ %lx:\n"), cu_offset);
+	  printf (_("  Compilation Unit @ offset 0x%lx:\n"), cu_offset);
 	  printf (_("   Length:        %ld\n"), compunit.cu_length);
 	  printf (_("   Version:       %d\n"), compunit.cu_version);
 	  printf (_("   Abbrev Offset: %ld\n"), compunit.cu_abbrev_offset);
@@ -9088,7 +9091,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
       /* Get the pointer size from the comp unit associated
 	 with this block of line number information.  */
       pointer_size = get_pointer_size_and_offset_of_comp_unit
-	(comp_unit, ".debug_lines", NULL);
+	(comp_unit, ".debug_line", NULL);
       comp_unit ++;
 
       printf (_("  Length:                      %ld\n"), info.li_length);
@@ -9199,7 +9202,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
 		}
 
 	      data += process_extended_line_op (data, info.li_default_is_stmt,
-						  pointer_size);
+						pointer_size);
 	      break;
 
 	    case DW_LNS_copy:

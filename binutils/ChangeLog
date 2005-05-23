@@ -1,3 +1,13 @@
+2005-05-23  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (fetch_indirect_string): Display a warning message
+	when a corrupt DW_FORM_strp value is encountered.
+	
+	(process_debug_info): Mention that the compilation unit offset is
+	being displayed in hexadecimal.
+	
+	(display_debug_lines): Fix typo in name of .debug_line section.
+
 2005-05-19  Zack Weinberg  <zack@codesourcery.com>
 
 	* Makefile.am: Have 'all' depend on 'info'.
