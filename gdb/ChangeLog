@@ -1,3 +1,10 @@
+2004-05-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* mdebugread.c (record_minimal_symbol): New procedure.
+	(parse_partial_symbols): Use record_minimal_symbol to record
+	the new minimal symbols instead of prim_record_minimal_symbol
+	and prim_record_minimal_symbol_and_info.
+
 2005-05-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS: Mention OpenBSD/arm as a new native configuration.
