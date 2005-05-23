@@ -1,3 +1,8 @@
+2005-05-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): For old gcc -fPIC code
+	force old plt layout.
+
 2005-05-22  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_section): Ignore non-allocated

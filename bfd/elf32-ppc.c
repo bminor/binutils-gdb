@@ -3160,14 +3160,32 @@ ppc_elf_check_relocs (bfd *abfd,
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
 
-	  /* When creating a shared object, we must copy these
-	     relocs into the output file.  We create a reloc
-	     section in dynobj and make room for the reloc.  */
+	case R_PPC_REL32:
+	  if (h == NULL
+	      && got2 != NULL
+	      && (sec->flags & SEC_CODE) != 0
+	      && (info->shared || info->pie)
+	      && !htab->old_plt)
+	    {
+	      /* Old -fPIC gcc code has .long LCTOC1-LCFx just before
+		 the start of a function, which assembles to a REL32
+		 reference to .got2.  If we detect one of these, then
+		 force the old PLT layout because the linker cannot
+		 reliably deduce the GOT pointer value needed for
+		 PLT call stubs.  */
+	      asection *s;
+
+	      s = bfd_section_from_r_symndx (abfd, &htab->sym_sec, sec,
+					     r_symndx);
+	      if (s == got2)
+		htab->old_plt = 1;
+	    }
+	  /* fall through */
+
 	case R_PPC_REL24:
 	case R_PPC_REL14:
 	case R_PPC_REL14_BRTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
-	case R_PPC_REL32:
 	  if (h == NULL)
 	    break;
 	  if (h == htab->elf.hgot)
