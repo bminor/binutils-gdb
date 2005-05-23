@@ -2451,7 +2451,8 @@ read_mapping (FILE *mapfile,
   int ret = fscanf (mapfile, "%llx-%llx %s %llx %s %llx",
 		    addr, endaddr, permissions, offset, device, inode);
 
-  if (ret > 0 && ret != EOF && *inode != 0)
+  filename[0] = '\0';
+  if (ret > 0 && ret != EOF)
     {
       /* Eat everything up to EOL for the filename.  This will prevent
          weird filenames (such as one with embedded whitespace) from
@@ -2462,11 +2463,7 @@ read_mapping (FILE *mapfile,
          only.  */
       ret += fscanf (mapfile, "%[^\n]\n", filename);
     }
-  else
-    {
-      filename[0] = '\0';	/* no filename */
-      fscanf (mapfile, "\n");
-    }
+
   return (ret != 0 && ret != EOF);
 }
 

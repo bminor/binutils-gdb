@@ -1,3 +1,8 @@
+2005-05-23  Michael Snyder  <msnyder@redhat.com>
+	From Nora Pan <qpan@mvista.com>
+	* linux-nat.c (read_mapping): Don't stumble over entries in
+	mapping that have name but zero inode.
+
 2005-05-23  Andrew Cagney  <cagney@gnu.org>
 
 	* target.h (child_xfer_memory): Use gdb_byte for byte buffer
