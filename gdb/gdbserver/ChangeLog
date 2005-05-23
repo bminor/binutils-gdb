@@ -1,3 +1,15 @@
+2005-05-23  Orjan Friberg  <orjanf@axis.com>
+
+	* linux-cris-low.c: New file with support for CRIS.
+	* linux-crisv32-low.c: Ditto for CRISv32.
+	* Makefile.in (SFILES): Add linux-cris-low.c, linux-crisv32-low.c.
+	(clean): Add reg-cris.c and reg-crisv32.c.
+	Add linux-cris-low.o, linux-crisv32-low.o, reg-cris.o, reg-cris.c, 
+	reg-crisv32.o, and reg-crisv32.c to make rules.
+	* configure.srv: Add cris-*-linux* and crisv32-*-linux* to list of
+	recognized targets.
+
+
 2005-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-low.c (fetch_register): Ensure buffer size is a multiple

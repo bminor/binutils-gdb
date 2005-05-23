@@ -118,7 +118,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/mem-break.c $(srcdir)/proc-service.c $(srcdir)/regcache.c \
 	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
 	$(srcdir)/thread-db.c $(srcdir)/utils.c \
-	$(srcdir)/linux-arm-low.c $(srcdir)/linux-i386-low.c \
+	$(srcdir)/linux-arm-low.c $(srcdir)/linux-cris-low.c \
+	$(srcdir)/linux-crisv32-low.c $(srcdir)/linux-i386-low.c \
 	$(srcdir)/i387-fp.c \
 	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
 	$(srcdir)/linux-m32r-low.c \
@@ -201,6 +202,7 @@ clean:
 	rm -f gdbserver gdbreplay core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c reg-mips.c
 	rm -f reg-ppc.c reg-sh.c reg-x86-64.c reg-i386-linux.c
+	rm -f reg-cris.c reg-crisv32.c
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -262,6 +264,8 @@ linux-low.o: linux-low.c $(linux_low_h) $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< @USE_THREAD_DB@
 
 linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h)
+linux-cris-low.o: linux-cris-low.c $(linux_low_h) $(server_h)
+linux-crisv32-low.o: linux-crisv32-low.c $(linux_low_h) $(server_h)
 linux-i386-low.o: linux-i386-low.c $(linux_low_h) $(server_h)
 linux-ia64-low.o: linux-ia64-low.c $(linux_low_h) $(server_h)
 linux-m32r-low.o: linux-m32r-low.c $(linux_low_h) $(server_h)
@@ -274,6 +278,12 @@ linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h)
 reg-arm.o : reg-arm.c $(regdef_h)
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
+reg-cris.o : reg-cris.c $(regdef_h)
+reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-cris.dat reg-cris.c
+reg-crisv32.o : reg-crisv32.c $(regdef_h)
+reg-crisv32.c : $(srcdir)/../regformats/reg-crisv32.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-crisv32.dat reg-crisv32.c
 reg-i386.o : reg-i386.c $(regdef_h)
 reg-i386.c : $(srcdir)/../regformats/reg-i386.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-i386.dat reg-i386.c
