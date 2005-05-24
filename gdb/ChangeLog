@@ -1,3 +1,8 @@
+2005-05-24  Orjan Friberg  <orjanf@axis.com>
+
+	* config/djgpp/fnchange.lst: Add mappings for 
+	gdbserver/linux-cris-low.c and gdbserver/linux-crisv32-low.c.
+
 2005-05-23  Michael Snyder  <msnyder@redhat.com>
 	From Nora Pan <qpan@mvista.com>
 	* linux-nat.c (read_mapping): Don't stumble over entries in

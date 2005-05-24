@@ -108,6 +108,8 @@
 @V@/gdb/config/sparc/tm-sparclynx.h @V@/gdb/config/sparc/tm-splynx.h
 @V@/gdb/cp-names.c @V@/gdb/cpnames.c
 @V@/gdb/f-exp.tab.c @V@/gdb/f-exp_tab.c
+@V@/gdb/gdbserver/linux-cris-low.c @V@/gdb/gdbserver/lx-cris.c
+@V@/gdb/gdbserver/linux-crisv32-low.c @V@/gdb/gdbserver/lx-cris32.c
 @V@/gdb/gdbtk/ChangeLog-2001 @V@/gdb/gdbtk/ChangeLog.001
 @V@/gdb/gdbtk/ChangeLog-2002 @V@/gdb/gdbtk/ChangeLog.002
 @V@/gdb/gdbtk/ChangeLog-2003 @V@/gdb/gdbtk/ChangeLog.003
