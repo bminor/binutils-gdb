@@ -1945,7 +1945,7 @@ s390_frame_prev_register (struct frame_info *next_frame,
 			  void **this_prologue_cache,
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, void *bufferp)
+			  int *realnump, gdb_byte *bufferp)
 {
   struct s390_unwind_cache *info
     = s390_frame_unwind_cache (next_frame, this_prologue_cache);
@@ -2017,7 +2017,7 @@ s390_stub_frame_prev_register (struct frame_info *next_frame,
 			       void **this_prologue_cache,
 			       int regnum, int *optimizedp,
 			       enum lval_type *lvalp, CORE_ADDR *addrp,
-			       int *realnump, void *bufferp)
+			       int *realnump, gdb_byte *bufferp)
 {
   struct s390_stub_unwind_cache *info
     = s390_stub_frame_unwind_cache (next_frame, this_prologue_cache);
@@ -2160,7 +2160,7 @@ s390_sigtramp_frame_prev_register (struct frame_info *next_frame,
 				   void **this_prologue_cache,
 				   int regnum, int *optimizedp,
 				   enum lval_type *lvalp, CORE_ADDR *addrp,
-				   int *realnump, void *bufferp)
+				   int *realnump, gdb_byte *bufferp)
 {
   struct s390_sigtramp_unwind_cache *info
     = s390_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);

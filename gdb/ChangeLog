@@ -1,3 +1,10 @@
+2005-05-24  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_frame_prev_register): Change type of last
+	argument to 'gdb_byte *'.
+	(s390_stub_frame_prev_register): Likewise.
+	(s390_sigtramp_frame_prev_register): Likewise.
+
 2005-05-24  Kris Warkentin  <kewarken@qnx.com>
 
 	* config/i386/nto.mt: Remove remote-nto.o.
