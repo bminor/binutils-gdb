@@ -4187,8 +4187,8 @@ process_section_groups (FILE *file)
 
 	  if (do_section_groups)
 	    {
-	      printf ("\n%s group section `%s' [%s] contains %u sections:\n",
-		      get_group_flags (entry), name, group_name, size);
+	      printf ("\n%s group section [%5u] `%s' [%s] contains %u sections:\n",
+		      get_group_flags (entry), i, name, group_name, size);
 
 	      printf (_("   [Index]    Name\n"));
 	    }
@@ -4202,13 +4202,26 @@ process_section_groups (FILE *file)
 	      entry = byte_get (indices, 4);
 	      indices += 4;
 
+	      if (entry >= elf_header.e_shnum)
+		{
+		  error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
+			 entry, i, elf_header.e_shnum - 1);
+		  continue;
+		}
+	      else if (entry >= SHN_LORESERVE && entry <= SHN_HIRESERVE)
+		{
+		  error (_("invalid section [%5u] in group section [%5u]\n"),
+			 entry, i);
+		  continue;
+		}
+
 	      if (section_headers_groups [SECTION_HEADER_INDEX (entry)]
 		  != NULL)
 		{
 		  if (entry)
 		    {
-		      error (_("section [%5u] already in group section [%5u]\n"),
-			     entry,
+		      error (_("section [%5u] in group section [%5u] already in group section [%5u]\n"),
+			     entry, i,
 			     section_headers_groups [SECTION_HEADER_INDEX (entry)]->group_index);
 		      continue;
 		    }

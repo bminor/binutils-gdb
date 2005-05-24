@@ -1,3 +1,8 @@
+2005-05-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_section_groups): Report group section
+	index. Check if the section member index is valid.
+
 2005-05-23  Fred Fish  <fnf@specifixinc.com>
 
 	* addr2line.c (unwind_inlines): New flag for 'i' option.
