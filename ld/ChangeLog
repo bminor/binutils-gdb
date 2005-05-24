@@ -1,3 +1,8 @@
+2005-05-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc32elf.em (after_allocation): Don't call
+	ppc_elf_set_sdata_syms when relocatable.
+
 2005-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ld.1): Revert the last 2 changes.

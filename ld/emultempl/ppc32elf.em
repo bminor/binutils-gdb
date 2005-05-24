@@ -113,8 +113,9 @@ ppc_before_allocation (void)
 static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
-  if (link_info.hash->creator == &bfd_elf32_powerpc_vec
-      || link_info.hash->creator == &bfd_elf32_powerpcle_vec)
+  if ((link_info.hash->creator == &bfd_elf32_powerpc_vec
+       || link_info.hash->creator == &bfd_elf32_powerpcle_vec)
+      && !link_info.relocatable)
     {
       if (!ppc_elf_set_sdata_syms (output_bfd, &link_info))
 	einfo ("%X%P: cannot set sdata syms %E\n");
