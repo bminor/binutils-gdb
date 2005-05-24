@@ -1,3 +1,7 @@
+2005-05-24  Kris Warkentin  <kewarken@qnx.com>
+
+	* config/i386/nto.mt: Remove remote-nto.o.
+
 2005-05-24  Orjan Friberg  <orjanf@axis.com>
 
 	* config/djgpp/fnchange.lst: Add mappings for 
