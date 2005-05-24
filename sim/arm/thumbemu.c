@@ -31,20 +31,74 @@ existing ARM simulator.  */
 #include "armemu.h"
 #include "armos.h"
 
+/* Attempt to emulate an ARMv6 instruction.
+   Stores t_branch into PVALUE upon success or t_undefined otherwise.  */
+
+static void
+handle_v6_thumb_insn (ARMul_State * state,
+		      ARMword       tinstr,
+		      tdstate *     pvalid)
+{
+  ARMword Rd;
+  ARMword Rm;
+
+  if (! state->is_v6)
+    {
+      * pvalid = t_undefined;
+      return;
+    }
+
+  switch (tinstr & 0xFFC0)
+    {
+    case 0xb660: /* cpsie */
+    case 0xb670: /* cpsid */
+    case 0x4600: /* cpy */
+    case 0xba00: /* rev */
+    case 0xba40: /* rev16 */
+    case 0xbac0: /* revsh */
+    case 0xb650: /* setend */
+    default:  
+      printf ("Unhandled v6 thumb insn: %04x\n", tinstr);
+      * pvalid = t_undefined;
+      return;
+
+    case 0xb200: /* sxth */
+      Rm = state->Reg [(tinstr & 0x38) >> 3];
+      if (Rm & 0x8000)
+	state->Reg [(tinstr & 0x7)] = (Rm & 0xffff) | 0xffff0000;
+      else
+	state->Reg [(tinstr & 0x7)] = Rm & 0xffff;
+      break;
+    case 0xb240: /* sxtb */
+      Rm = state->Reg [(tinstr & 0x38) >> 3];
+      if (Rm & 0x80)
+	state->Reg [(tinstr & 0x7)] = (Rm & 0xff) | 0xffffff00;
+      else
+	state->Reg [(tinstr & 0x7)] = Rm & 0xff;
+      break;
+    case 0xb280: /* uxth */
+      Rm = state->Reg [(tinstr & 0x38) >> 3];
+      state->Reg [(tinstr & 0x7)] = Rm & 0xffff;
+      break;
+    case 0xb2c0: /* uxtb */
+      Rm = state->Reg [(tinstr & 0x38) >> 3];
+      state->Reg [(tinstr & 0x7)] = Rm & 0xff;
+      break;
+    }
+  /* Indicate that the instruction has been processed.  */
+  * pvalid = t_branch;
+}
+
 /* Decode a 16bit Thumb instruction.  The instruction is in the low
    16-bits of the tinstr field, with the following Thumb instruction
    held in the high 16-bits.  Passing in two Thumb instructions allows
    easier simulation of the special dual BL instruction.  */
 
-tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
-     ARMul_State *
-       state;
-     ARMword
-       pc;
-     ARMword
-       tinstr;
-     ARMword *
-       ainstr;
+tdstate
+ARMul_ThumbDecode (ARMul_State * state,
+		   ARMword       pc,
+		   ARMword       tinstr,
+		   ARMword *     ainstr)
 {
   tdstate valid = t_decoded;	/* default assumes a valid instruction */
   ARMword next_instr;
@@ -222,7 +276,7 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	    case 0x0:		/* UNDEFINED */
 	    case 0x4:		/* UNDEFINED */
 	    case 0x8:		/* UNDEFINED */
-	      valid = t_undefined;
+	      handle_v6_thumb_insn (state, tinstr, & valid);
 	      break;
 	    }
 	}
@@ -370,7 +424,7 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	  /* Drop through.  */
 	default:
 	  /* Everything else is an undefined instruction.  */
-	  valid = t_undefined;
+	  handle_v6_thumb_insn (state, tinstr, & valid);
 	  break;
 	}
       break;
@@ -460,8 +514,9 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	    }
 	  valid = t_branch;
 	}
-      else			/* UNDEFINED : cc=1110(AL) uses different format */
-	valid = t_undefined;
+      else
+	/* UNDEFINED : cc=1110(AL) uses different format.  */
+	handle_v6_thumb_insn (state, tinstr, & valid);
       break;
     case 28:			/* B */
       /* Format 18 */
@@ -476,7 +531,7 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	{
 	  if (tinstr & 1)
 	    {
-	      valid = t_undefined;
+	      handle_v6_thumb_insn (state, tinstr, & valid);
 	      break;
 	    }
 	  /* Drop through.  */
@@ -499,8 +554,10 @@ tdstate ARMul_ThumbDecode (state, pc, tinstr, ainstr)
 	    break;
 	  }
 	}
-      valid = t_undefined;
+
+      handle_v6_thumb_insn (state, tinstr, & valid);
       break;
+
     case 30:			/* BL instruction 1 */
       /* Format 19 */
       /* There is no single ARM instruction equivalent for this Thumb

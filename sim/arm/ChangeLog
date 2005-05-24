@@ -1,3 +1,9 @@
+2005-05-24  Nick Clifton  <nickc@redhat.com>
+
+	* thumbemu.c (handle_v6_thumb_insn): New function.
+	(ARMul_ThumbDecode): Call handle_v6_thumb_insn() when an undefined
+	instruction binary is encountered.
+
 2005-05-12  Nick Clifton  <nickc@redhat.com>
 
 	* Update the address and phone number of the FSF organization in
