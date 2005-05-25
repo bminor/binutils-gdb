@@ -29,6 +29,6 @@ Key to Flags:
   I \(info\), L \(link order\), G \(group\), x \(unknown\)
   O \(extra OS processing required\) o \(OS specific\), p \(processor specific\)
 
-COMDAT group section `\._foo' \[\._foo\] contains 1 sections:
+COMDAT group section \[    1\] `\._foo' \[\._foo\] contains 1 sections:
    \[Index\]    Name
    \[    5\]   \.text

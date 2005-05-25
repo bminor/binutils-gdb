@@ -1,3 +1,8 @@
+2005-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/group-1.d: Updated.
+	* gas/ia64/group-2.d: Likewise.
+
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/radix.s: New.

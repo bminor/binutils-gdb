@@ -36,7 +36,7 @@ Key to Flags:
   I \(info\), L \(link order\), G \(group\), x \(unknown\)
   O \(extra OS processing required\) o \(OS specific\), p \(processor specific\)
 
-COMDAT group section `\.group' \[foo\] contains 3 sections:
+COMDAT group section \[    1\] `\.group' \[foo\] contains 3 sections:
    \[Index\]    Name
    \[    5\]   \.gnu\.linkonce\.t\.foo
    \[    6\]   \.gnu\.linkonce\.ia64unwi\.foo
