@@ -1,3 +1,31 @@
+2005-05-24  Andrew Cagney  <cagney@gnu.org>
+
+	* rs6000-tdep.c (ppc_supply_reg, ppc_collect_reg): Use gdb_byte
+	for byte buffers.
+	(rs6000_fetch_pointer_argument): Use get_frame_register_unsigned.
+	(rs6000_software_single_step, sstep_breaks, skip_prologue) 
+	(rs6000_push_dummy_call, rs6000_push_dummy_call) 
+	(rs6000_push_dummy_call, rs6000_push_dummy_call) 
+	(rs6000_register_to_value, e500_pseudo_register_read) 
+	(rs6000_store_return_value, e500_pseudo_register_write) 
+	(rs6000_frame_prev_register, rs6000_extract_return_value): Ditto.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call)
+	(ppc_sysv_abi_push_dummy_call, do_ppc_sysv_return_value)
+	(do_ppc_sysv_return_value, ppc_sysv_abi_return_value)
+	(ppc_sysv_abi_broken_return_value)
+	(ppc64_sysv_abi_push_dummy_call, ppc64_sysv_abi_push_dummy_call)
+	(ppc64_sysv_abi_push_dummy_call, ppc64_sysv_abi_return_value)
+	(ppc64_sysv_abi_return_value, ppc64_sysv_abi_return_value): Ditto.
+	* ppc-linux-tdep.c (ppc_linux_in_sigtramp)
+	(ppc_linux_at_sigtramp_return_path)
+	(ppc_linux_skip_trampoline_code)
+	(ppc_linux_memory_remove_breakpoint, ppc_linux_return_value):
+	* rs6000-tdep.c (rs6000_value_to_register)
+	(rs6000_register_to_value): Ditto.
+	* ppc-tdep.h (ppc_sysv_abi_return_value)
+	(ppc64_sysv_abi_return_value, ppc_sysv_abi_broken_return_value)
+	(ppc_linux_memory_remove_breakpoint): Ditto.
+
 2005-05-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (s390_frame_prev_register): Change type of last

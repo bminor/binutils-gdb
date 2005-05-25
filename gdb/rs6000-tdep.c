@@ -112,12 +112,12 @@ struct reg
 /* Breakpoint shadows for the single step instructions will be kept here. */
 
 static struct sstep_breaks
-  {
-    /* Address, or 0 if this is not in use.  */
-    CORE_ADDR address;
-    /* Shadow contents.  */
-    char data[4];
-  }
+{
+  /* Address, or 0 if this is not in use.  */
+  CORE_ADDR address;
+  /* Shadow contents.  */
+  gdb_byte data[4];
+}
 stepBreaks[2];
 
 /* Hook for determining the TOC address when calling functions in the
@@ -319,7 +319,7 @@ rs6000_register_sim_regno (int reg)
 
 static void
 ppc_supply_reg (struct regcache *regcache, int regnum, 
-		const char *regs, size_t offset)
+		const gdb_byte *regs, size_t offset)
 {
   if (regnum != -1 && offset != -1)
     regcache_raw_supply (regcache, regnum, regs + offset);
@@ -327,7 +327,7 @@ ppc_supply_reg (struct regcache *regcache, int regnum,
 
 static void
 ppc_collect_reg (const struct regcache *regcache, int regnum,
-		 char *regs, size_t offset)
+		 gdb_byte *regs, size_t offset)
 {
   if (regnum != -1 && offset != -1)
     regcache_raw_collect (regcache, regnum, regs + offset);
@@ -520,9 +520,7 @@ static CORE_ADDR
 rs6000_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			       struct type *type)
 {
-  CORE_ADDR addr;
-  get_frame_register (frame, 3 + argi, &addr);
-  return addr;
+  return get_frame_register_unsigned (frame, 3 + argi);
 }
 
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
@@ -621,7 +619,7 @@ rs6000_software_single_step (enum target_signal signal,
 {
   CORE_ADDR dummy;
   int breakp_sz;
-  const char *breakp = rs6000_breakpoint_from_pc (&dummy, &breakp_sz);
+  const gdb_byte *breakp = rs6000_breakpoint_from_pc (&dummy, &breakp_sz);
   int ii, insn;
   CORE_ADDR loc;
   CORE_ADDR breaks[2];
@@ -831,7 +829,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
   CORE_ADDR orig_pc = pc;
   CORE_ADDR last_prologue_pc = pc;
   CORE_ADDR li_found_pc = 0;
-  char buf[4];
+  gdb_byte buf[4];
   unsigned long op;
   long offset = 0;
   long vr_saved_offset = 0;
@@ -1429,7 +1427,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int len = 0;
   int argno;			/* current argument number */
   int argbytes;			/* current argument byte */
-  char tmp_buffer[50];
+  gdb_byte tmp_buffer[50];
   int f_argno = 0;		/* current floating point argno */
   int wordsize = gdbarch_tdep (current_gdbarch)->wordsize;
   CORE_ADDR func_addr = find_function_addr (function, NULL);
@@ -1507,7 +1505,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* Argument takes more than one register.  */
 	  while (argbytes < len)
 	    {
-	      char word[MAX_REGISTER_SIZE];
+	      gdb_byte word[MAX_REGISTER_SIZE];
 	      memset (word, 0, reg_size);
 	      memcpy (word,
 		      ((char *) value_contents (arg)) + argbytes,
@@ -1528,7 +1526,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  /* Argument can fit in one register.  No problem.  */
 	  int adj = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? reg_size - len : 0;
-	  char word[MAX_REGISTER_SIZE];
+	  gdb_byte word[MAX_REGISTER_SIZE];
 
 	  memset (word, 0, reg_size);
 	  memcpy (word, value_contents (arg), len);
@@ -1589,7 +1587,7 @@ ran_out_of_registers_for_arguments:
       if (argbytes)
 	{
 	  write_memory (sp + 24 + (ii * 4),
-			((char *) value_contents (arg)) + argbytes,
+			value_contents (arg) + argbytes,
 			len - argbytes);
 	  ++argno;
 	  ii += ((len - argbytes + 3) & -4) / 4;
@@ -1617,9 +1615,7 @@ ran_out_of_registers_for_arguments:
 	      ++f_argno;
 	    }
 
-	  write_memory (sp + 24 + (ii * 4),
-                        (char *) value_contents (arg),
-                        len);
+	  write_memory (sp + 24 + (ii * 4), value_contents (arg), len);
 	  ii += ((len + 3) & -4) / 4;
 	}
     }
@@ -1665,8 +1661,8 @@ rs6000_use_struct_convention (int gcc_p, struct type *value_type)
 }
 
 static void
-rs6000_extract_return_value (struct type *valtype, bfd_byte *regbuf,
-			     bfd_byte *valbuf)
+rs6000_extract_return_value (struct type *valtype, gdb_byte *regbuf,
+			     gdb_byte *valbuf)
 {
   int offset = 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
@@ -1933,10 +1929,10 @@ static void
 rs6000_register_to_value (struct frame_info *frame,
                           int regnum,
                           struct type *type,
-                          void *to)
+                          gdb_byte *to)
 {
   const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + regnum;
-  char from[MAX_REGISTER_SIZE];
+  gdb_byte from[MAX_REGISTER_SIZE];
   
   gdb_assert (reg->fpr);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
@@ -1949,10 +1945,10 @@ static void
 rs6000_value_to_register (struct frame_info *frame,
                           int regnum,
                           struct type *type,
-                          const void *from)
+                          const gdb_byte *from)
 {
   const struct reg *reg = gdbarch_tdep (current_gdbarch)->regs + regnum;
-  char to[MAX_REGISTER_SIZE];
+  gdb_byte to[MAX_REGISTER_SIZE];
 
   gdb_assert (reg->fpr);
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
@@ -1986,14 +1982,14 @@ rs6000_value_to_register (struct frame_info *frame,
    co-variant type qualifiers, ...  */
 static void
 e500_move_ev_register (void (*move) (struct regcache *regcache,
-                                     int regnum, void *buf),
+                                     int regnum, gdb_byte *buf),
                        struct regcache *regcache, int ev_reg,
-                       void *buffer)
+                       gdb_byte *buffer)
 {
   struct gdbarch *arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch); 
   int reg_index;
-  char *byte_buffer = buffer;
+  gdb_byte *byte_buffer = buffer;
 
   gdb_assert (tdep->ppc_ev0_regnum <= ev_reg
               && ev_reg < tdep->ppc_ev0_regnum + ppc_num_gprs);
@@ -2014,7 +2010,7 @@ e500_move_ev_register (void (*move) (struct regcache *regcache,
 
 static void
 e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			   int reg_nr, void *buffer)
+			   int reg_nr, gdb_byte *buffer)
 {
   struct gdbarch *regcache_arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
@@ -2033,7 +2029,7 @@ e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static void
 e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
-			    int reg_nr, const void *buffer)
+			    int reg_nr, const gdb_byte *buffer)
 {
   struct gdbarch *regcache_arch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
@@ -2042,9 +2038,9 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
  
   if (tdep->ppc_ev0_regnum <= reg_nr
       && reg_nr < tdep->ppc_ev0_regnum + ppc_num_gprs)
-    e500_move_ev_register ((void (*) (struct regcache *, int, void *))
+    e500_move_ev_register ((void (*) (struct regcache *, int, gdb_byte *))
                            regcache_raw_write,
-                           regcache, reg_nr, (void *) buffer);
+                           regcache, reg_nr, (gdb_byte *) buffer);
   else
     internal_error (__FILE__, __LINE__,
                     _("e500_pseudo_register_read: "
@@ -2161,7 +2157,7 @@ rs6000_dwarf2_reg_to_regnum (int num)
 static void
 rs6000_store_return_value (struct type *type,
                            struct regcache *regcache,
-                           const void *valbuf)
+                           const gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -2201,7 +2197,7 @@ rs6000_store_return_value (struct type *type,
                                      register_size (gdbarch, regnum));
         regcache_cooked_write_part (regcache, regnum,
                                     0, bytes_to_write,
-                                    (char *) valbuf + bytes_written);
+                                    valbuf + bytes_written);
         regnum++;
         bytes_written += bytes_to_write;
       }
@@ -3001,7 +2997,7 @@ rs6000_frame_prev_register (struct frame_info *next_frame,
 				 void **this_cache,
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, void *valuep)
+				 int *realnump, gdb_byte *valuep)
 {
   struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
 							this_cache);

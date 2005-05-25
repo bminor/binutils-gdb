@@ -33,13 +33,13 @@ struct type;
 enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
 							struct type *valtype,
 							struct regcache *regcache,
-							void *readbuf,
-							const void *writebuf);
+							gdb_byte *readbuf,
+							const gdb_byte *writebuf);
 enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
 							       struct type *valtype,
 							       struct regcache *regcache,
-							       void *readbuf,
-							       const void *writebuf);
+							       gdb_byte *readbuf,
+							       const gdb_byte *writebuf);
 CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					struct value *function,
 					struct regcache *regcache,
@@ -56,7 +56,8 @@ CORE_ADDR ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					  CORE_ADDR struct_addr);
 CORE_ADDR ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
 						    CORE_ADDR bpaddr);
-int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
+int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr,
+					gdb_byte *contents_cache);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
 void ppc_linux_supply_gregset (struct regcache *regcache,
 			       int regnum, const void *gregs, size_t size,
@@ -68,8 +69,8 @@ void ppc_linux_supply_fpregset (const struct regset *regset,
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
 							  struct type *valtype,
 							  struct regcache *regcache,
-							  void *readbuf,
-							  const void *writebuf);
+							  gdb_byte *readbuf,
+							  const gdb_byte *writebuf);
 
 /* From rs6000-tdep.c... */
 int altivec_register_p (int regno);

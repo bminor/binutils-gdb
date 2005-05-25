@@ -157,7 +157,7 @@ ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
   CORE_ADDR lr;
   CORE_ADDR sp;
   CORE_ADDR tramp_sp;
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR handler;
 
   lr = read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
@@ -205,7 +205,7 @@ insn_is_sigreturn (unsigned long pcinsn)
 static int
 ppc_linux_at_sigtramp_return_path (CORE_ADDR pc)
 {
-  char buf[12];
+  gdb_byte buf[12];
   unsigned long pcinsn;
   if (target_read_memory (pc - 4, buf, sizeof (buf)) != 0)
     return 0;
@@ -224,7 +224,7 @@ ppc_linux_at_sigtramp_return_path (CORE_ADDR pc)
 static CORE_ADDR
 ppc_linux_skip_trampoline_code (CORE_ADDR pc)
 {
-  char buf[4];
+  gdb_byte buf[4];
   struct obj_section *sect;
   struct objfile *objfile;
   unsigned long insn;
@@ -317,7 +317,8 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
   /* Fetch the string; we don't know how long it is.  Is it possible
      that the following will fail because we're trying to fetch too
      much? */
-  if (target_read_memory (strtab + symidx, symname, sizeof (symname)) != 0)
+  if (target_read_memory (strtab + symidx, (gdb_byte *) symname,
+			  sizeof (symname)) != 0)
     return 0;
 
   /* This might not work right if we have multiple symbols with the
@@ -455,12 +456,13 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
    regard to removing breakpoints in some potentially self modifying
    code.  */
 int
-ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
+ppc_linux_memory_remove_breakpoint (CORE_ADDR addr,
+				    gdb_byte *contents_cache)
 {
   const unsigned char *bp;
   int val;
   int bplen;
-  char old_contents[BREAKPOINT_MAX];
+  gdb_byte old_contents[BREAKPOINT_MAX];
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   bp = BREAKPOINT_FROM_PC (&addr, &bplen);
@@ -485,8 +487,8 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 
 static enum return_value_convention
 ppc_linux_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			struct regcache *regcache, void *readbuf,
-			const void *writebuf)
+			struct regcache *regcache, gdb_byte *readbuf,
+			const gdb_byte *writebuf)
 {  
   if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
        || TYPE_CODE (valtype) == TYPE_CODE_UNION)

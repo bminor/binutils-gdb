@@ -114,7 +114,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    {
 		      /* Always store the floating point value using
 		         the register's floating-point format.  */
-		      char regval[MAX_REGISTER_SIZE];
+		      gdb_byte regval[MAX_REGISTER_SIZE];
 		      struct type *regtype
 			= register_type (gdbarch, tdep->ppc_fp0_regnum + freg);
 		      convert_typed_floating (val, type, regval, regtype);
@@ -242,7 +242,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* Reduce the parameter down to something that fits in a
 	         "word".  */
-	      char word[MAX_REGISTER_SIZE];
+	      gdb_byte word[MAX_REGISTER_SIZE];
 	      memset (word, 0, MAX_REGISTER_SIZE);
 	      if (len > tdep->wordsize
 		  || TYPE_CODE (type) == TYPE_CODE_STRUCT
@@ -340,7 +340,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	{
 	  /* Floats and doubles stored in "f1".  Convert the value to
 	     the required type.  */
-	  char regval[MAX_REGISTER_SIZE];
+	  gdb_byte regval[MAX_REGISTER_SIZE];
 	  struct type *regtype = register_type (gdbarch,
                                                 tdep->ppc_fp0_regnum + 1);
 	  regcache_cooked_read (regcache, tdep->ppc_fp0_regnum + 1, regval);
@@ -350,7 +350,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	{
 	  /* Floats and doubles stored in "f1".  Convert the value to
 	     the register's "double" type.  */
-	  char regval[MAX_REGISTER_SIZE];
+	  gdb_byte regval[MAX_REGISTER_SIZE];
 	  struct type *regtype = register_type (gdbarch, tdep->ppc_fp0_regnum);
 	  convert_typed_floating (writebuf, type, regval, regtype);
 	  regcache_cooked_write (regcache, tdep->ppc_fp0_regnum + 1, regval);
@@ -488,7 +488,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  /* This matches SVr4 PPC, it does not match GCC.  */
 	  /* The value is right-padded to 8 bytes and then loaded, as
 	     two "words", into r3/r4.  */
-	  char regvals[MAX_REGISTER_SIZE * 2];
+	  gdb_byte regvals[MAX_REGISTER_SIZE * 2];
 	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3,
 				regvals + 0 * tdep->wordsize);
 	  if (TYPE_LENGTH (type) > tdep->wordsize)
@@ -501,7 +501,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	  /* This matches SVr4 PPC, it does not match GCC.  */
 	  /* The value is padded out to 8 bytes and then loaded, as
 	     two "words" into r3/r4.  */
-	  char regvals[MAX_REGISTER_SIZE * 2];
+	  gdb_byte regvals[MAX_REGISTER_SIZE * 2];
 	  memset (regvals, 0, sizeof regvals);
 	  memcpy (regvals, writebuf, TYPE_LENGTH (type));
 	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3,
@@ -517,8 +517,8 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 
 enum return_value_convention
 ppc_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			   struct regcache *regcache, void *readbuf,
-			   const void *writebuf)
+			   struct regcache *regcache, gdb_byte *readbuf,
+			   const gdb_byte *writebuf)
 {
   return do_ppc_sysv_return_value (gdbarch, valtype, regcache, readbuf,
 				   writebuf, 0);
@@ -528,7 +528,7 @@ enum return_value_convention
 ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
 				  struct type *valtype,
 				  struct regcache *regcache,
-				  void *readbuf, const void *writebuf)
+				  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   return do_ppc_sysv_return_value (gdbarch, valtype, regcache, readbuf,
 				   writebuf, 1);
@@ -688,7 +688,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (ppc_floating_point_unit_p (current_gdbarch)
 		      && freg <= 13)
 		    {
-		      char regval[MAX_REGISTER_SIZE];
+		      gdb_byte regval[MAX_REGISTER_SIZE];
 		      struct type *regtype
                         = register_type (gdbarch, tdep->ppc_fp0_regnum);
 		      convert_typed_floating (val, type, regval, regtype);
@@ -707,7 +707,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		         This code interprets that to mean: store it,
 		         left aligned, in the general register.  */
-		      char regval[MAX_REGISTER_SIZE];
+		      gdb_byte regval[MAX_REGISTER_SIZE];
 		      memset (regval, 0, sizeof regval);
 		      memcpy (regval, val, TYPE_LENGTH (type));
 		      regcache_cooked_write (regcache,
@@ -782,7 +782,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		{
 		  if (write_pass && greg <= 10)
 		    {
-		      char regval[MAX_REGISTER_SIZE];
+		      gdb_byte regval[MAX_REGISTER_SIZE];
 		      int len = TYPE_LENGTH (type) - byte;
 		      if (len > tdep->wordsize)
 			len = tdep->wordsize;
@@ -880,8 +880,8 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    corresponding register return-value location.  */
 enum return_value_convention
 ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			     struct regcache *regcache, void *readbuf,
-			     const void *writebuf)
+			     struct regcache *regcache, gdb_byte *readbuf,
+			     const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -893,7 +893,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
   /* Floats and doubles in F1.  */
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT && TYPE_LENGTH (valtype) <= 8)
     {
-      char regval[MAX_REGISTER_SIZE];
+      gdb_byte regval[MAX_REGISTER_SIZE];
       struct type *regtype = register_type (gdbarch, tdep->ppc_fp0_regnum);
       if (writebuf != NULL)
 	{
@@ -984,7 +984,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	  int i;
 	  for (i = 0; i < 2; i++)
 	    {
-	      char regval[MAX_REGISTER_SIZE];
+	      gdb_byte regval[MAX_REGISTER_SIZE];
 	      struct type *regtype =
 		register_type (current_gdbarch, tdep->ppc_fp0_regnum);
 	      if (writebuf != NULL)
