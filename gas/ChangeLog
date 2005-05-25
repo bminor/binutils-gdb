@@ -1,5 +1,10 @@
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (dot_endp): Clear out all three pointers in unwind
+	section entry.
+
+2005-05-25  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (dot_radix): Rewrite.
 
 2005-05-25  Jan Beulich  <jbeulich@novell.com>

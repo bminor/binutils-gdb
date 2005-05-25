@@ -4386,7 +4386,6 @@ dot_endp (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e;
-  char *ptr;
   int bytes_per_address;
   long where;
   segT saved_seg;
@@ -4433,7 +4432,7 @@ dot_endp (dummy)
 
       /* Need space for 3 pointers for procedure start, procedure end,
 	 and unwind info.  */
-      ptr = frag_more (3 * md.pointer_size);
+      memset (frag_more (3 * md.pointer_size), 0, 3 * md.pointer_size);
       where = frag_now_fix () - (3 * md.pointer_size);
       bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;
 
@@ -4466,10 +4465,6 @@ dot_endp (dummy)
 	  ia64_cons_fix_new (frag_now, where + (bytes_per_address * 2),
 			     bytes_per_address, &e);
 	}
-      else
-	md_number_to_chars (ptr + (bytes_per_address * 2), 0,
-			    bytes_per_address);
-
     }
   subseg_set (saved_seg, saved_subseg);
 
