@@ -11248,6 +11248,7 @@ ia64_gen_real_reloc_type (sym, r_type)
 	case BFD_RELOC_IA64_DIR32LSB: width = 32; suffix = "LSB"; break;
 	case BFD_RELOC_IA64_DIR64MSB: width = 64; suffix = "MSB"; break;
 	case BFD_RELOC_IA64_DIR64LSB: width = 64; suffix = "LSB"; break;
+	case BFD_RELOC_UNUSED:        width = 13; break;
 	case BFD_RELOC_IA64_IMM14:    width = 14; break;
 	case BFD_RELOC_IA64_IMM22:    width = 22; break;
 	case BFD_RELOC_IA64_IMM64:    width = 64; suffix = "I"; break;

@@ -1,5 +1,10 @@
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (ia64_gen_real_reloc_type): Also handle
+	BFD_RELOC_UNUSED when determining the width of the reloc.
+
+2005-05-25  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (dot_endp): Clear out all three pointers in unwind
 	section entry.
 
