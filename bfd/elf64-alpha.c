@@ -3523,16 +3523,17 @@ elf64_alpha_merge_gots (a, b)
 	         || h->root.root.type == bfd_link_hash_warning)
 	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
 
-	  start = &h->got_entries;
-	  for (pbe = start, be = *start; be ; pbe = &be->next, be = be->next)
+	  pbe = start = &h->got_entries;
+	  while ((be = *pbe) != NULL)
 	    {
 	      if (be->use_count == 0)
 	        {
 		  *pbe = be->next;
-		  continue;
+		  memset (be, 0xa5, sizeof (*be));
+		  goto kill;
 	        }
 	      if (be->gotobj != b)
-	        continue;
+	        goto next;
 
 	      for (ae = *start; ae ; ae = ae->next)
 	        if (ae->gotobj == a
@@ -3542,12 +3543,15 @@ elf64_alpha_merge_gots (a, b)
 		    ae->flags |= be->flags;
 		    ae->use_count += be->use_count;
 		    *pbe = be->next;
-		    goto global_found;
+		    memset (be, 0xa5, sizeof (*be));
+		    goto kill;
 		  }
 	      be->gotobj = a;
 	      total += alpha_got_entry_size (be->reloc_type);
 
-	    global_found:;
+	    next:;
+	      pbe = &be->next;
+	    kill:;
 	    }
         }
 
@@ -3703,8 +3707,11 @@ elf64_alpha_size_got_sections (info)
       if (elf64_alpha_can_merge_gots (cur_got_obj, i))
 	{
 	  elf64_alpha_merge_gots (cur_got_obj, i);
+
+	  alpha_elf_tdata(i)->got->size = 0;
 	  i = alpha_elf_tdata(i)->got_link_next;
 	  alpha_elf_tdata(cur_got_obj)->got_link_next = i;
+	  
 	  something_changed = 1;
 	}
       else
