@@ -1,5 +1,9 @@
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (dot_radix): Rewrite.
+
+2005-05-25  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (struct unw_rec_list): Remove next_slot_number
 	and next_slot_frag.
 	(alloc_record): Remove references to next_slot_number and

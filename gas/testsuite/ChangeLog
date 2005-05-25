@@ -1,5 +1,11 @@
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/ia64/radix.s: New.
+	* gas/ia64/radix.l: New.
+	* gas/ia64/ia64.exp: Run new test.
+
+2005-05-25  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/intelok.d: Account for 32-bit displacements being shown
 	in hex.
 

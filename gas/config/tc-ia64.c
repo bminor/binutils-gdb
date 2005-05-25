@@ -3070,17 +3070,20 @@ static void
 dot_radix (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
-  int radix;
+  char *radix;
+  int ch;
 
   SKIP_WHITESPACE ();
-  radix = *input_line_pointer++;
 
-  if (radix != 'C' && !is_end_of_line[(unsigned char) radix])
-    {
-      as_bad ("Radix `%c' unsupported", *input_line_pointer);
-      ignore_rest_of_line ();
-      return;
-    }
+  if (is_it_end_of_statement ())
+    return;
+  radix = input_line_pointer;
+  ch = get_symbol_end ();
+  ia64_canonicalize_symbol_name (radix);
+  if (strcasecmp (radix, "C"))
+    as_bad ("Radix `%s' unsupported or invalid", radix);
+  *input_line_pointer = ch;
+  demand_empty_rest_of_line ();
 }
 
 /* Helper function for .loc directives.  If the assembler is not generating
