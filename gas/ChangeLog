@@ -1,3 +1,11 @@
+2005-05-25  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (struct unw_rec_list): Remove next_slot_number
+	and next_slot_frag.
+	(alloc_record): Remove references to next_slot_number and
+	next_slot_frag.
+	(emit_one_bundle): Likewise.
+
 2005-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c (md_apply_fix3): Pass the address of the

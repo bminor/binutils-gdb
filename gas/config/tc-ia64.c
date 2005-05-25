@@ -695,8 +695,6 @@ typedef struct unw_rec_list {
   unwind_record r;
   unsigned long slot_number;
   fragS *slot_frag;
-  unsigned long next_slot_number;
-  fragS *next_slot_frag;
   struct unw_rec_list *next;
 } unw_rec_list;
 
@@ -1750,8 +1748,6 @@ alloc_record (unw_record_type t)
   ptr->next = NULL;
   ptr->slot_number = SLOT_NUM_NOT_SET;
   ptr->r.type = t;
-  ptr->next_slot_number = 0;
-  ptr->next_slot_frag = 0;
   return ptr;
 }
 
@@ -6922,12 +6918,6 @@ emit_one_bundle ()
 
   number_to_chars_littleendian (f + 0, t0, 8);
   number_to_chars_littleendian (f + 8, t1, 8);
-
-  if (unwind.list)
-    {
-      unwind.list->next_slot_number = (unsigned long) f + 16;
-      unwind.list->next_slot_frag = frag_now;
-    }
 }
 
 int
