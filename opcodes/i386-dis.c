@@ -3337,22 +3337,23 @@ OP_E (int bytemode, int sizeflag)
 		  oappend (scratchbuf);
 		}
 	    }
-	  if (intel_syntax)
-	    if (mod != 0 || (base & 7) == 5)
-	      {
-		/* Don't print zero displacements.  */
-		if (disp != 0)
-		  {
-		    if ((bfd_signed_vma) disp > 0)
-		      {
-			*obufp++ = '+';
-			*obufp = '\0';
-		      }
+	  if (intel_syntax && disp)
+	    {
+	      if ((bfd_signed_vma) disp > 0)
+		{
+		  *obufp++ = '+';
+		  *obufp = '\0';
+		}
+	      else if (mod != 1)
+		{
+		  *obufp++ = '-';
+		  *obufp = '\0';
+		  disp = - (bfd_signed_vma) disp;
+		}
 
-		    print_operand_value (scratchbuf, 0, disp);
-		    oappend (scratchbuf);
-		  }
-	      }
+	      print_operand_value (scratchbuf, mod != 1, disp);
+	      oappend (scratchbuf);
+	    }
 
 	  *obufp++ = close_char;
 	  *obufp = '\0';
@@ -3410,9 +3411,40 @@ OP_E (int bytemode, int sizeflag)
 	{
 	  *obufp++ = open_char;
 	  *obufp = '\0';
-	  oappend (index16[rm + add]);
+	  oappend (index16[rm]);
+	  if (intel_syntax && disp)
+	    {
+	      if ((bfd_signed_vma) disp > 0)
+		{
+		  *obufp++ = '+';
+		  *obufp = '\0';
+		}
+	      else if (mod != 1)
+		{
+		  *obufp++ = '-';
+		  *obufp = '\0';
+		  disp = - (bfd_signed_vma) disp;
+		}
+
+	      print_operand_value (scratchbuf, mod != 1, disp);
+	      oappend (scratchbuf);
+	    }
+
 	  *obufp++ = close_char;
 	  *obufp = '\0';
+	}
+      else if (intel_syntax)
+	{
+	  if (prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS
+			  | PREFIX_ES | PREFIX_FS | PREFIX_GS))
+	    ;
+	  else
+	    {
+	      oappend (names_seg[ds_reg - es_reg]);
+	      oappend (":");
+	    }
+	  print_operand_value (scratchbuf, 1, disp & 0xffff);
+	  oappend (scratchbuf);
 	}
     }
 }

@@ -1,5 +1,12 @@
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
+	* i386-dis.c (OP_E): In Intel mode, display 32-bit displacements in
+	hex (but retain it being displayed as signed). Remove redundant
+	checks. Add handling of displacements for 16-bit addressing in Intel
+	mode.
+
+2005-05-25  Jan Beulich  <jbeulich@novell.com>
+
 	* i386-dis.c (prefix_name): Remove pointless mode_64bit check.
 	(OP_E): Remove redundant REX_EXTZ handling. Remove pointless
 	masking of 'rm' in 16-bit memory address handling.
