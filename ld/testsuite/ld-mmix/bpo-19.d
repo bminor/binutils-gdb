@@ -15,7 +15,6 @@ SYMBOL TABLE:
 0+ l    d  \*ABS\*	0+ (|\.shstrtab)
 0+ l    d  \*ABS\*	0+ (|\.symtab)
 0+ l    d  \*ABS\*	0+ (|\.strtab)
-0+37c l       \*ABS\*	0+ i
 0+ g       \.text	0+ _start
 #...
 

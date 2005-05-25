@@ -1,3 +1,8 @@
+2005-05-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-mmix/bpo-6.d: Updated.
+	* ld-mmix/bpo-19.d: Likewise.
+
 2005-05-22  Richard Henderson  <rth@redhat.com>
 
 	* ld-elfweak/dsow.dsym: Adjust for non-zero ST_OTHER.
