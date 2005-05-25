@@ -1,3 +1,9 @@
+2005-05-25  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (prefix_name): Remove pointless mode_64bit check.
+	(OP_E): Remove redundant REX_EXTZ handling. Remove pointless
+	masking of 'rm' in 16-bit memory address handling.
+
 2005-05-19  Anton Blanchard  <anton@samba.org>
 
 	* ppc-dis.c (powerpc_dialect): Handle "-Mpower5".

@@ -1895,7 +1895,7 @@ prefix_name (int pref, int sizeflag)
       if (mode_64bit)
 	return (sizeflag & AFLAG) ? "addr32" : "addr64";
       else
-	return ((sizeflag & AFLAG) && !mode_64bit) ? "addr16" : "addr32";
+	return (sizeflag & AFLAG) ? "addr16" : "addr32";
     case FWAIT_OPCODE:
       return "fwait";
     default:
@@ -3214,13 +3214,11 @@ OP_E (int bytemode, int sizeflag)
 	    scale = (*codep >> 6) & 3;
 	  base = *codep & 7;
 	  USED_REX (REX_EXTY);
-	  USED_REX (REX_EXTZ);
 	  if (rex & REX_EXTY)
 	    index += 8;
-	  if (rex & REX_EXTZ)
-	    base += 8;
 	  codep++;
 	}
+      base += add;
 
       switch (mod)
 	{
@@ -3316,9 +3314,6 @@ OP_E (int bytemode, int sizeflag)
 	  if (intel_syntax && riprel)
 	    oappend ("rip + ");
 	  *obufp = '\0';
-	  USED_REX (REX_EXTZ);
-	  if (!havesib && (rex & REX_EXTZ))
-	    base += 8;
 	  if (havebase)
 	    oappend (mode_64bit && (sizeflag & AFLAG)
 		     ? names64[base] : names32[base]);
@@ -3384,7 +3379,7 @@ OP_E (int bytemode, int sizeflag)
       switch (mod)
 	{
 	case 0:
-	  if ((rm & 7) == 6)
+	  if (rm == 6)
 	    {
 	      disp = get16 ();
 	      if ((disp & 0x8000) != 0)
@@ -3405,13 +3400,13 @@ OP_E (int bytemode, int sizeflag)
 	}
 
       if (!intel_syntax)
-	if (mod != 0 || (rm & 7) == 6)
+	if (mod != 0 || rm == 6)
 	  {
 	    print_operand_value (scratchbuf, 0, disp);
 	    oappend (scratchbuf);
 	  }
 
-      if (mod != 0 || (rm & 7) != 6)
+      if (mod != 0 || rm != 6)
 	{
 	  *obufp++ = open_char;
 	  *obufp = '\0';
