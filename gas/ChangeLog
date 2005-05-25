@@ -1,5 +1,10 @@
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (md_begin): Don't try to match slot 2 of an MLX
+	template.
+
+2005-05-25  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (ia64_gen_real_reloc_type): Also handle
 	BFD_RELOC_UNUSED when determining the width of the reloc.
 

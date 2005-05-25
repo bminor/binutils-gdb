@@ -7288,7 +7288,7 @@ md_begin ()
 		{
 		  if (match (t, j, 1))
 		    {
-		      if (match (t, k, 2))
+		      if ((t == 2 && j == IA64_TYPE_X) || match (t, k, 2))
 			goodness = 3 + 3 + 3;
 		      else
 			goodness = 3 + 3 + extra_goodness (t, 2);
@@ -7304,7 +7304,7 @@ md_begin ()
 		}
 	      else if (match (t, i, 1))
 		{
-		  if (match (t, j, 2))
+		  if ((t == 2 && i == IA64_TYPE_X) || match (t, j, 2))
 		    goodness = 3 + 3;
 		  else
 		    goodness = 3 + extra_goodness (t, 2);
