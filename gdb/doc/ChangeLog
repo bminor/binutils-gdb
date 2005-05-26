@@ -1,3 +1,8 @@
+2005-05-26  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.texinfo: Note that Elena Zannoni, Fernando Nasser, and
+	Andrew Cagney implemented the original GDB/MI.
+
 2005-05-23  Orjan Friberg  <orjanf@axis.com>
 
 	* gdb.texinfo (CRIS): Update the cris-version and cris-dwarf2-cfi

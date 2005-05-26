@@ -471,6 +471,9 @@ Romig-Koch, Rob Savoye, Jamie Smith, Mike Stump, Ian Taylor, Angela
 Thomas, Michael Tiemann, Tom Tromey, Ron Unrau, Jim Wilson, and David
 Zuhn have made contributions both large and small.
 
+Andrew Cagney, Fernando Nasser, and Elena Zannoni, while working for
+Cygnus Solutions, implemented the original @sc{gdb/mi} interface.
+
 Jim Blandy added support for preprocessor macros, while working for Red
 Hat.
 
