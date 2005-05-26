@@ -4987,6 +4987,13 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
 
 	  bfd_mips_elf_swap_options_in (abfd, (Elf_External_Options *) l,
 					&intopt);
+	  if (intopt.size < sizeof (Elf_External_Options))
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: Warning: bad `%s' option size %u smaller than its header"),
+		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
+	      break;
+	    }
 	  if (ABI_64_P (abfd) && intopt.kind == ODK_REGINFO)
 	    {
 	      bfd_byte buf[8];
@@ -5201,6 +5208,13 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 
 	  bfd_mips_elf_swap_options_in (abfd, (Elf_External_Options *) l,
 					&intopt);
+	  if (intopt.size < sizeof (Elf_External_Options))
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: Warning: bad `%s' option size %u smaller than its header"),
+		abfd, MIPS_ELF_OPTIONS_SECTION_NAME (abfd), intopt.size);
+	      break;
+	    }
 	  if (ABI_64_P (abfd) && intopt.kind == ODK_REGINFO)
 	    {
 	      Elf64_Internal_RegInfo intreg;
@@ -5239,8 +5253,10 @@ bfd_boolean
 _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
 {
   register const char *name;
+  unsigned int sh_type;
 
   name = bfd_get_section_name (abfd, sec);
+  sh_type = hdr->sh_type;
 
   if (strcmp (name, ".liblist") == 0)
     {
@@ -5341,6 +5357,12 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_flags |= SHF_ALLOC;
       hdr->sh_entsize = 8;
     }
+
+  /* In the unlikely event a special section is empty it has to lose its
+     special meaning.  This may happen e.g. when using `strip' with the
+     "--only-keep-debug" option.  */
+  if (sec->size > 0 && !(sec->flags & SEC_HAS_CONTENTS))
+    hdr->sh_type = sh_type;
 
   /* The generic elf_fake_sections will set up REL_HDR using the default
    kind of relocations.  We used to set up a second header for the
