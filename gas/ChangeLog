@@ -1,3 +1,8 @@
+2005-05-26  James E Wilson  <wilson@specifixinc.com>
+
+	* config/tc-ia64.c (extra_goodness): Update comment.
+	(md_begin): Add debugging code to print best_template table.
+
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (md_begin): Don't try to match slot 2 of an MLX

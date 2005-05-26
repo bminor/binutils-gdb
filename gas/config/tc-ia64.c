@@ -7141,8 +7141,9 @@ match (int templ, int type, int slot)
   return result;
 }
 
-/* Add a bit of extra goodness if a nop of type F or B would fit
-   in TEMPL at SLOT.  */
+/* For Itanium 1, add a bit of extra goodness if a nop of type F or B would fit
+   in TEMPL at SLOT.  For Itanium 2, add a bit of extra goodness if a nop of
+   type M or I would fit in TEMPL at SLOT.  */
 
 static inline int
 extra_goodness (int templ, int slot)
@@ -7319,6 +7320,21 @@ md_begin ()
 		}
 	    }
 	}
+
+#ifdef DEBUG_TEMPLATES
+  /* For debugging changes to the best_template calculations.  We don't care
+     about combinations with invalid instructions, so start the loops at 1.  */
+  for (i = 0; i < IA64_NUM_TYPES; ++i)
+    for (j = 0; j < IA64_NUM_TYPES; ++j)
+      for (k = 0; k < IA64_NUM_TYPES; ++k)
+	{
+	  char type_letter[IA64_NUM_TYPES] = { 'n', 'a', 'i', 'm', 'b', 'f',
+					       'x', 'd' };
+	  fprintf (stderr, "%c%c%c %s\n", type_letter[i], type_letter[j],
+		   type_letter[k],
+		   ia64_templ_desc[best_template[i][j][k]].name);
+	}
+#endif
 
   for (i = 0; i < NUM_SLOTS; ++i)
     md.slot[i].user_template = -1;
