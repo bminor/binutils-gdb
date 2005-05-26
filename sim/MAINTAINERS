@@ -14,7 +14,6 @@ frv		Dave Brolley <brolley@redhat.com>
 igen		(igen simulators)
 ppc		Andrew Cagney <ac131313@redhat.com>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
-mips		Chris Demetriou <cgd@broadcom.com>
 sh		(global maintainers)
 common		Ben Elliston <bje@gnu.org>
 common		Frank Ch. Eigler <fche@redhat.com>
@@ -23,4 +22,5 @@ common		Frank Ch. Eigler <fche@redhat.com>
 	Past sim maintainers:
 
 mips		Andrew Cagney <ac131313@redhat.com>
+mips		Chris Demetriou <cgd@netbsd.org>
 ppc		Geoff Keating <geoffk@geoffk.org>

@@ -1,3 +1,8 @@
+2005-05-26  Chris Demetriou  <cgd@netbsd.org>
+
+	* MAINTAINERS: Update my mail address, move myself to the
+	"Past maintainers" section.
+
 2005-05-17  Corinna Vinschen  <vinschen@redhat.com>
 
 	* configure.ac: Add igen to v850 build.
