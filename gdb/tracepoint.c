@@ -150,7 +150,7 @@ static void trace_mention (struct tracepoint *);
 
 struct collection_list;
 static void add_aexpr (struct collection_list *, struct agent_expr *);
-static unsigned char *mem2hex (unsigned char *, unsigned char *, int);
+static char *mem2hex (gdb_byte *, char *, int);
 static void add_register (struct collection_list *collection,
 			  unsigned int regno);
 static struct cleanup *make_cleanup_free_actions (struct tracepoint *t);
@@ -2645,10 +2645,10 @@ trace_dump_command (char *args, int from_tty)
 
 static const char hexchars[] = "0123456789abcdef";
 
-static unsigned char *
-mem2hex (unsigned char *mem, unsigned char *buf, int count)
+static char *
+mem2hex (gdb_byte *mem, char *buf, int count)
 {
-  unsigned char ch;
+  gdb_byte ch;
 
   while (count-- > 0)
     {

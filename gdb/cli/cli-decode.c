@@ -537,7 +537,7 @@ add_setshow_optional_filename_cmd (char *name, enum command_class class,
    value.  SET_DOC and SHOW_DOC are the documentation strings.  */
 void
 add_setshow_integer_cmd (char *name, enum command_class class,
-			  unsigned int *var,
+			 int *var,
 			  const char *set_doc, const char *show_doc,
 			  const char *help_doc,
 			  cmd_sfunc_ftype *set_func,

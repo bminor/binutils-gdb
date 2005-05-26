@@ -301,12 +301,8 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
       switch (c->var_type)
 	{
 	case var_string:
-	  {
-	    unsigned char *p;
-
-	    if (*(unsigned char **) c->var)
-	      fputstr_filtered (*(unsigned char **) c->var, '"', stb->stream);
-	  }
+	  if (((char *)c->var)[0] != '\0')
+	    fputstr_filtered ((char *)c->var, '"', stb->stream);
 	  break;
 	case var_string_noescape:
 	case var_optional_filename:

@@ -247,7 +247,7 @@ struct bp_location
      control of the target insert_breakpoint and remove_breakpoint routines.
      No other code should assume anything about the value(s) here.
      Valid only for bp_loc_software_breakpoint.  */
-  char shadow_contents[BREAKPOINT_MAX];
+  gdb_byte shadow_contents[BREAKPOINT_MAX];
 
   /* Address at which breakpoint was requested, either by the user or
      by GDB for internal breakpoints.  This will usually be the same

@@ -1,3 +1,24 @@
+2005-05-26  Andrew Cagney  <cagney@gnu.org>
+
+	* command.h (add_setshow_integer_cmd): Make VAR an integer.
+	* cli/cli-decode.c (add_setshow_integer_cmd): Update to match.
+	* valops.c (value_string): Add a cast.
+	* eval.c (evaluate_subexp_standard): Use gdb_byte for byte buffers.
+	* breakpoint.c (re_enable_breakpoints_in_shlibs): Use gdb_byte for
+	byte buffers.
+	* target.h (struct target_ops): For to_insert_hw_breakpoint and
+	to_remove_hw_breakpoint use gdb_byte for byte buffer parameters.
+	* breakpoint.h (struct bp_location): Make shadow_contents a
+	gdb_byte buffer.
+	* cli/cli-setshow.c (do_setshow_command): Fix cast.
+	* cli/cli-dump.c (restore_section_callback)
+	(restore_binary_file): Use gdb_byte for byte buffers.
+	* proc-service.c (ps_ptwrite, ps_ptread, ps_pdwrite): Fix casts.
+	(ps_xfer_memory): Use gdb_byte for byte buffers.
+	* tracepoint.c (mem2hex): Use gdb_byte for byte buffers, and char
+	for string buffers.
+	* ser-tcp.c (net_open): Make len a socklen_t.
+
 2005-05-24  Andrew Cagney  <cagney@gnu.org>
 
 	* rs6000-tdep.c (ppc_supply_reg, ppc_collect_reg): Use gdb_byte

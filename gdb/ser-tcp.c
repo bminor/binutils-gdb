@@ -187,7 +187,8 @@ net_open (struct serial *scb, const char *name)
 
   /* Got something.  Is it an error? */
   {
-    int res, err, len;
+    int res, err;
+    socklen_t len;
     len = sizeof(err);
     /* On Windows, the fourth parameter to getsockopt is a "char *";
        on UNIX systems it is generally "void *".  The cast to "void *"

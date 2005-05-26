@@ -463,7 +463,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
   bfd_size_type sec_offset = 0;
   bfd_size_type sec_load_count = size;
   struct cleanup *old_chain;
-  char *buf;
+  gdb_byte *buf;
   int ret;
 
   /* Ignore non-loadable sections, eg. from elf files. */
@@ -525,7 +525,7 @@ restore_binary_file (char *filename, struct callback_data *data)
 {
   FILE *file = fopen_with_cleanup (filename, FOPEN_RB);
   int status;
-  char *buf;
+  gdb_byte *buf;
   long len;
 
   /* Get the file size for reading.  */

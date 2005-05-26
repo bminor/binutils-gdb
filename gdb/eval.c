@@ -559,7 +559,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  && TYPE_CODE (type) == TYPE_CODE_SET)
 	{
 	  struct value *set = allocate_value (expect_type);
-	  char *valaddr = value_contents_raw (set);
+	  gdb_byte *valaddr = value_contents_raw (set);
 	  struct type *element_type = TYPE_INDEX_TYPE (type);
 	  struct type *check_type = element_type;
 	  LONGEST low_bound, high_bound;

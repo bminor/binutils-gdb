@@ -67,7 +67,7 @@ typedef size_t gdb_ps_size_t;
 
 static ps_err_e
 ps_xfer_memory (const struct ps_prochandle *ph, paddr_t addr,
-		char *buf, size_t len, int write)
+		gdb_byte *buf, size_t len, int write)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
   int ret;
@@ -201,7 +201,7 @@ ps_err_e
 ps_pdwrite (gdb_ps_prochandle_t ph, paddr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
-  return ps_xfer_memory (ph, addr, (char *) buf, size, 1);
+  return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);
 }
 
 /* Read SIZE bytes from the target process PH at address ADDR and copy
@@ -211,7 +211,7 @@ ps_err_e
 ps_ptread (gdb_ps_prochandle_t ph, paddr_t addr,
 	   gdb_ps_read_buf_t buf, gdb_ps_size_t size)
 {
-  return ps_xfer_memory (ph, addr, buf, size, 0);
+  return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 0);
 }
 
 /* Write SIZE bytes from BUF into the target process PH at address ADDR.  */
@@ -220,7 +220,7 @@ ps_err_e
 ps_ptwrite (gdb_ps_prochandle_t ph, paddr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
-  return ps_xfer_memory (ph, addr, (char *) buf, size, 1);
+  return ps_xfer_memory (ph, addr, (gdb_byte *) buf, size, 1);
 }
 
 /* Get the general registers of LWP LWPID within the target process PH

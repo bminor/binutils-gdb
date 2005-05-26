@@ -4441,7 +4441,8 @@ re_enable_breakpoints_in_shlibs (void)
   {
     if (b->enable_state == bp_shlib_disabled)
       {
-	char buf[1], *lib;
+	gdb_byte buf[1];
+	char *lib;
 	
 	/* Do not reenable the breakpoint if the shared library is
 	   still not mapped in.  */

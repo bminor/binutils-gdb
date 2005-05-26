@@ -1039,7 +1039,7 @@ value_string (char *ptr, int len)
      copy LEN bytes from PTR in gdb to that address in the inferior. */
 
   addr = allocate_space_in_inferior (len);
-  write_memory (addr, ptr, len);
+  write_memory (addr, (gdb_byte *) ptr, len);
 
   val = value_at_lazy (stringtype, addr);
   return (val);

@@ -305,7 +305,7 @@ extern void add_setshow_optional_filename_cmd (char *name,
 
 extern void add_setshow_integer_cmd (char *name,
 				     enum command_class class,
-				     unsigned int *var,
+				     int *var,
 				     const char *set_doc,
 				     const char *show_doc,
 				     const char *help_doc,

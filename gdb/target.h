@@ -338,8 +338,8 @@ struct target_ops
     int (*to_insert_breakpoint) (CORE_ADDR, gdb_byte *);
     int (*to_remove_breakpoint) (CORE_ADDR, gdb_byte *);
     int (*to_can_use_hw_breakpoint) (int, int, int);
-    int (*to_insert_hw_breakpoint) (CORE_ADDR, char *);
-    int (*to_remove_hw_breakpoint) (CORE_ADDR, char *);
+    int (*to_insert_hw_breakpoint) (CORE_ADDR, gdb_byte *);
+    int (*to_remove_hw_breakpoint) (CORE_ADDR, gdb_byte *);
     int (*to_remove_watchpoint) (CORE_ADDR, int, int);
     int (*to_insert_watchpoint) (CORE_ADDR, int, int);
     int (*to_stopped_by_watchpoint) (void);
