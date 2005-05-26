@@ -69,10 +69,6 @@ struct alpha_elf_link_hash_entry
 #define ALPHA_ELF_LINK_HASH_TLS_IE	0x40
 #define ALPHA_ELF_LINK_HASH_PLT_LOC	0x80
 
-  /* Used to undo the localization of a plt symbol.  */
-  asection *plt_old_section;
-  bfd_vma plt_old_value;
-
   /* Used to implement multiple .got subsections.  */
   struct alpha_elf_got_entry
   {
@@ -2017,20 +2013,6 @@ elf64_alpha_adjust_dynamic_symbol (struct bfd_link_info *info,
       h->plt.offset = s->size;
       s->size += PLT_ENTRY_SIZE;
 
-      /* If this symbol is not defined in a regular file, and we are not
-	 generating a shared library, then set the symbol to the location
-	 in the .plt.  This is required to make function pointers compare
-	 equal between the normal executable and the shared library.  */
-      if (! info->shared
-	  && h->root.type != bfd_link_hash_defweak)
-	{
-	  ah->plt_old_section = h->root.u.def.section;
-	  ah->plt_old_value = h->root.u.def.value;
-	  ah->flags |= ALPHA_ELF_LINK_HASH_PLT_LOC;
-	  h->root.u.def.section = s;
-	  h->root.u.def.value = h->plt.offset;
-	}
-
       /* We also need a JMP_SLOT entry in the .rela.plt section.  */
       s = bfd_get_section_by_name (dynobj, ".rela.plt");
       BFD_ASSERT (s != NULL);
@@ -2480,14 +2462,6 @@ elf64_alpha_size_plt_section_1 (struct alpha_elf_link_hash_entry *h, PTR data)
     {
       h->root.needs_plt = 0;
       h->root.plt.offset = -1;
-
-      /* Undo the definition frobbing begun in adjust_dynamic_symbol.  */
-      if (h->flags & ALPHA_ELF_LINK_HASH_PLT_LOC)
-	{
-	  h->root.root.u.def.section = h->plt_old_section;
-	  h->root.root.u.def.value = h->plt_old_value;
-	  h->flags &= ~ALPHA_ELF_LINK_HASH_PLT_LOC;
-	}
     }
 
   return TRUE;
