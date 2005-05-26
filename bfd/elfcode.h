@@ -632,7 +632,8 @@ elf_object_p (bfd *abfd)
       if (i_ehdrp->e_shnum == SHN_UNDEF)
 	{
 	  i_ehdrp->e_shnum = i_shdr.sh_size;
-	  if (i_ehdrp->e_shnum != i_shdr.sh_size)
+	  if (i_ehdrp->e_shnum != i_shdr.sh_size
+	      || i_ehdrp->e_shnum == 0)
 	    goto got_wrong_format_error;
 	}
 
@@ -649,7 +650,8 @@ elf_object_p (bfd *abfd)
       if (i_ehdrp->e_shnum != 1)
 	{
 	  /* Check that we don't have a totally silly number of sections.  */
-	  if (i_ehdrp->e_shnum > (unsigned int) -1 / sizeof (x_shdr))
+	  if (i_ehdrp->e_shnum > (unsigned int) -1 / sizeof (x_shdr)
+	      || i_ehdrp->e_shnum > (unsigned int) -1 / sizeof (i_shdr))
 	    goto got_wrong_format_error;
 
 	  where += (i_ehdrp->e_shnum - 1) * sizeof (x_shdr);
@@ -669,10 +671,6 @@ elf_object_p (bfd *abfd)
 	    goto got_no_match;
 	}
     }
-
-  /* A further sanity check.  */
-  if (i_ehdrp->e_shstrndx >= i_ehdrp->e_shnum)
-    goto got_wrong_format_error;
 
   /* Allocate space for a copy of the section header table in
      internal form.  */
@@ -715,6 +713,20 @@ elf_object_p (bfd *abfd)
 	    goto got_no_match;
 	  elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
 
+	  /* Sanity check sh_link and sh_info.  */
+	  if (i_shdrp[shindex].sh_link >= num_sec
+	      || (i_shdrp[shindex].sh_link >= SHN_LORESERVE
+		  && i_shdrp[shindex].sh_link <= SHN_HIRESERVE))
+	    goto got_wrong_format_error;
+
+	  if (((i_shdrp[shindex].sh_flags & SHF_INFO_LINK)
+	       || i_shdrp[shindex].sh_type == SHT_RELA
+	       || i_shdrp[shindex].sh_type == SHT_REL)
+	      && (i_shdrp[shindex].sh_info >= num_sec
+		  || (i_shdrp[shindex].sh_info >= SHN_LORESERVE
+		      && i_shdrp[shindex].sh_info <= SHN_HIRESERVE)))
+	    goto got_wrong_format_error;
+
 	  /* If the section is loaded, but not page aligned, clear
 	     D_PAGED.  */
 	  if (i_shdrp[shindex].sh_size != 0
@@ -726,6 +738,17 @@ elf_object_p (bfd *abfd)
 	    abfd->flags &= ~D_PAGED;
 	}
     }
+
+  /* A further sanity check.  */
+  if (i_ehdrp->e_shnum != 0)
+    {
+      if (i_ehdrp->e_shstrndx >= elf_numsections (abfd)
+	  || (i_ehdrp->e_shstrndx >= SHN_LORESERVE
+	      && i_ehdrp->e_shstrndx <= SHN_HIRESERVE))
+	goto got_wrong_format_error;
+    }
+  else if (i_ehdrp->e_shstrndx != 0)
+    goto got_wrong_format_error;
 
   /* Read in the program headers.  */
   if (i_ehdrp->e_phnum == 0)
