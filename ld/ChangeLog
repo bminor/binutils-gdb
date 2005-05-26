@@ -1,3 +1,7 @@
+2005-05-27  Andreas Schwab  <schwab@suse.de>
+
+	* configure.host (HOSTING_LIBS): Add libunwind.a if it exists.
+
 2005-05-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (after_allocation): Don't call

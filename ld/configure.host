@@ -10,7 +10,7 @@
 
 HDEFINES=
 HOSTING_CRT0=/lib/crt0.o
-HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ]; then libgcc=../gcc/libgcc.a; else libgcc=\`${CC} -print-libgcc-file-name\`; fi; if [ -f ../gcc/libgcc_eh.a ]; then libgcc="$libgcc ../gcc/libgcc_eh.a"; else libgcc_eh=\`${CC} -print-file-name=libgcc_eh.a\`; if [ x"$libgcc_eh" != xlibgcc_eh.a ]; then libgcc="$libgcc $libgcc_eh"; fi; fi; echo --start-group $libgcc -lc --end-group`'
+HOSTING_LIBS='`if [ -f ../gcc/libgcc.a ]; then libgcc=../gcc/libgcc.a; else libgcc=\`${CC} -print-libgcc-file-name\`; fi; if [ -f ../gcc/libgcc_eh.a ]; then libgcc="$libgcc ../gcc/libgcc_eh.a"; else libgcc_eh=\`${CC} -print-file-name=libgcc_eh.a\`; if [ x"$libgcc_eh" != xlibgcc_eh.a ]; then libgcc="$libgcc $libgcc_eh"; fi; fi; if [ -f ../gcc/libunwind.a ]; then libgcc="$libgcc ../gcc/libunwind.a"; else libunwind=\`${CC} -print-file-name=libunwind.a\`; if [ x"$libunwind" != xlibunwind.a ]; then libgcc="$libgcc $libunwind"; fi; fi; echo --start-group $libgcc -lc --end-group`'
 
 #
 #	Generic configurations:
