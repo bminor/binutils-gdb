@@ -1,3 +1,16 @@
+2005-05-26  David Ung  <davidu@mips.com>
+ 
+ 	* mips.igen (mips32r2, mips64r2): New ISA models.  Add new model
+	tags to all instructions which are applicable to the new ISAs.
+ 	(do_ror, do_dror, ROR, RORV, DROR, DROR32, DRORV): Add, moved from
+	vr.igen.
+ 	* mips3264r2.igen: New file for MIPS 32/64 revision 2 specific
+ 	instructions. 
+ 	* vr.igen (do_ror, do_dror, ROR, RORV, DROR, DROR32, DRORV): Move
+	to mips.igen.
+ 	* configure.ac (mipsisa32r2*-*-*, mipsisa64r2*-*-*): Add new targets.
+	* configure: Regenerate.
+ 
 2005-03-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure: Regenerate.

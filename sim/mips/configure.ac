@@ -145,10 +145,20 @@ case "${target}" in
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
 			;;
+  mipsisa32r2*-*-*)	sim_gen=IGEN
+		        sim_igen_machine="-M mips32r2"
+			sim_igen_filter="32,f"
+			sim_mach_default="mipsisa32r2"
+			;;
   mipsisa32*-*-*)	sim_gen=IGEN
 		        sim_igen_machine="-M mips32"
 			sim_igen_filter="32,f"
 			sim_mach_default="mipsisa32"
+			;;
+  mipsisa64r2*-*-*)	sim_gen=IGEN
+		        sim_igen_machine="-M mips64r2,mips3d"
+			sim_igen_filter="32,64,f"
+			sim_mach_default="mipsisa64r2"
 			;;
   mipsisa64sb1*-*-*)	sim_gen=IGEN
 		        sim_igen_machine="-M mips64,mips3d,sb1"

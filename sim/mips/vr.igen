@@ -100,35 +100,6 @@
     GPR[rd] = store_hi_p ? HI : LO;
 }
 
-// 32-bit rotate right of X by Y bits.
-:function:::unsigned64:do_ror:unsigned32 x,unsigned32 y
-*vr5400:
-*vr5500:
-{
-  unsigned64 result;
-
-  y &= 31;
-  TRACE_ALU_INPUT2 (x, y);
-  result = EXTEND32 (ROTR32 (x, y));
-  TRACE_ALU_RESULT (result);
-  return result;
-}
-
-// Likewise 64-bit
-:function:::unsigned64:do_dror:unsigned64 x,unsigned64 y
-*vr5400:
-*vr5500:
-{
-  unsigned64 result;
-
-  y &= 63;
-  TRACE_ALU_INPUT2 (x, y);
-  result = ROTR64 (x, y);
-  TRACE_ALU_RESULT (result);
-  return result;
-}
-
-
 // VR4100 instructions.
 
 000000,5.RS,5.RT,00000,00000,101000::32::MADD16
@@ -246,45 +217,6 @@
 		0 /* single */);
 }
 
-000000,00001,5.RT,5.RD,5.SHIFT,000010::32::ROR
-"ror r<RD>, r<RT>, <SHIFT>"
-*vr5400:
-*vr5500:
-{
-  GPR[RD] = do_ror (SD_, GPR[RT], SHIFT);
-}
-
-000000,5.RS,5.RT,5.RD,00001,000110::32::RORV
-"rorv r<RD>, r<RT>, r<RS>"
-*vr5400:
-*vr5500:
-{
-  GPR[RD] = do_ror (SD_, GPR[RT], GPR[RS]);
-}
-
-000000,00001,5.RT,5.RD,5.SHIFT,111010::64::DROR
-"dror r<RD>, r<RT>, <SHIFT>"
-*vr5400:
-*vr5500:
-{
-  GPR[RD] = do_dror (SD_, GPR[RT], SHIFT);
-}
-
-000000,00001,5.RT,5.RD,5.SHIFT,111110::64::DROR32
-"dror32 r<RD>, r<RT>, <SHIFT>"
-*vr5400:
-*vr5500:
-{
-  GPR[RD] = do_dror (SD_, GPR[RT], SHIFT + 32);
-}
-
-000000,5.RS,5.RT,5.RD,00001,010110::64::DRORV
-"drorv r<RD>, r<RT>, r<RS>"
-*vr5400:
-*vr5500:
-{
-  GPR[RD] = do_dror (SD_, GPR[RT], GPR[RS]);
-}
 
 010011,5.BASE,5.INDEX,5.0,5.FD,000101:COP1X:64::LUXC1
 "luxc1 f<FD>, r<INDEX>(r<BASE>)"
