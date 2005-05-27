@@ -6479,7 +6479,6 @@ emit_one_bundle ()
   struct ia64_opcode *idesc;
   int end_of_insn_group = 0, user_template = -1;
   int n, i, j, first, curr, last_slot;
-  unw_rec_list *ptr, *last_ptr, *end_ptr;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
   struct insn_fix *ifix;
@@ -6534,7 +6533,9 @@ emit_one_bundle ()
   for (i = 0; i < 3 && md.num_slots_in_use > 0; ++i)
     {
       /* If we have unwind records, we may need to update some now.  */
-      ptr = md.slot[curr].unwind_record;
+      unw_rec_list *ptr = md.slot[curr].unwind_record;
+      unw_rec_list *end_ptr = NULL;
+
       if (ptr)
 	{
 	  /* Find the last prologue/body record in the list for the current
@@ -6544,9 +6545,11 @@ emit_one_bundle ()
 	     issued.  This matters because there may have been nops emitted
 	     meanwhile.  Any non-prologue non-body record followed by a
 	     prologue/body record must also refer to the current point.  */
-	  last_ptr = NULL;
-	  end_ptr = md.slot[(curr + 1) % NUM_SLOTS].unwind_record;
-	  for (; ptr != end_ptr; ptr = ptr->next)
+	  unw_rec_list *last_ptr;
+
+	  for (j = 1; end_ptr == NULL && j < md.num_slots_in_use; ++j)
+	    end_ptr = md.slot[(curr + j) % NUM_SLOTS].unwind_record;
+	  for (last_ptr = NULL; ptr != end_ptr; ptr = ptr->next)
 	    if (ptr->r.type == prologue || ptr->r.type == prologue_gr
 		|| ptr->r.type == body)
 	      last_ptr = ptr;
@@ -6814,7 +6817,6 @@ emit_one_bundle ()
 	  /* Set slot numbers for all remaining unwind records belonging to the
 	     current insn.  There can not be any prologue/body unwind records
 	     here.  */
-	  end_ptr = md.slot[(curr + 1) % NUM_SLOTS].unwind_record;
 	  for (; ptr != end_ptr; ptr = ptr->next)
 	    {
 	      ptr->slot_number = (unsigned long) f + i;

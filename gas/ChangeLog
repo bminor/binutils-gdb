@@ -1,3 +1,9 @@
+2005-05-27  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Restrict scope of ptr, end_ptr,
+	and last_ptr. Check all in-use slots for first one with non-NULL
+	unwind_record. Don't reload end_ptr before second update round.
+
 2005-05-26  James E Wilson  <wilson@specifixinc.com>
 
 	* config/tc-ia64.c (extra_goodness): Update comment.
