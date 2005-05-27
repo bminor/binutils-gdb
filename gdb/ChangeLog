@@ -1,4 +1,4 @@
-2005-05-27  Orjan Friberg <orjanf@axis.com>
+2005-05-27  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (cris_sigtramp_start, cris_rt_sigtramp_start) 
 	(cris_frame_prev_register, cris_sigtramp_frame_prev_register)
