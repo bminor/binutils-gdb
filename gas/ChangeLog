@@ -1,3 +1,14 @@
+2005-05-26  Zack Weinberg  <zack@codesourcery.com>
+
+	* config/tc-arm.h (TC_FIX_TYPE): Change to int.
+	(TC_INIT_FIX_DATA): Initialize to 0, not NULL.
+	* config/tc-arm.c (fix_new_arm): Remove now-unnecessary cast.
+	(md_apply_fix3): Delete fix_is_thumb variable; refer to
+	fixP->tc_fix_data directly in the sole place it was used.
+	Explicitly truncate value, *valP, fixP->fx_addnumber, and
+	fixP->fx_offset to 32 bits, for consistent behavior between 32-
+	and 64-bit hosts.
+
 2005-05-27  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (struct proc_pending): New.

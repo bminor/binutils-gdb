@@ -96,8 +96,8 @@ struct fix;
    deliberately not been updated to mark assembler created stabs
    symbols as Thumb.  */
 
-#define TC_FIX_TYPE PTR
-#define TC_INIT_FIX_DATA(FIX) ((FIX)->tc_fix_data = NULL)
+#define TC_FIX_TYPE int
+#define TC_INIT_FIX_DATA(FIX) ((FIX)->tc_fix_data = 0)
 
 /* We need to keep some local information on symbols.  */
 

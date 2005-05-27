@@ -7297,7 +7297,7 @@ fix_new_arm (fragS *	   frag,
 
   /* Mark whether the fix is to a THUMB instruction, or an ARM
      instruction.  */
-  new_fix->tc_fix_data = (PTR) thumb_mode;
+  new_fix->tc_fix_data = thumb_mode;
 }
 
 static void
@@ -10077,9 +10077,6 @@ md_apply_fix3 (fixS *	fixP,
   unsigned long	 temp;
   int		 sign;
   char *	 buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  /* The double cast here prevents warnings about converting a pointer
-     to an integer of different size.  We know the value is 0, 1, or 2.	 */
-  int		 fix_is_thumb = (int) (size_t) fixP->tc_fix_data;
 
   assert (fixP->fx_r_type <= BFD_RELOC_UNUSED);
 
@@ -10098,8 +10095,20 @@ md_apply_fix3 (fixS *	fixP,
 	value += md_pcrel_from (fixP);
     }
 
-  /* Remember value for emit_reloc.  */
+  /* On a 64-bit host, silently truncate 'value' to 32 bits for
+     consistency with the behavior on 32-bit hosts.  Remember value
+     for emit_reloc.  */
+  value &= 0xffffffff;
+  value ^= 0x80000000;
+  value -= 0x80000000; 
+
+  *valP = value;
   fixP->fx_addnumber = value;
+
+  /* Same treatment for fixP->fx_offset.  */
+  fixP->fx_offset &= 0xffffffff;
+  fixP->fx_offset ^= 0x80000000;
+  fixP->fx_offset -= 0x80000000;
 
   switch (fixP->fx_r_type)
     {
@@ -10436,7 +10445,7 @@ md_apply_fix3 (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_SWI:
-      if (fix_is_thumb)
+      if (fixP->tc_fix_data != 0)
 	{
 	  if (((unsigned long) value) > 0xff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
