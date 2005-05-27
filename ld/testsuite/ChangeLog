@@ -1,3 +1,10 @@
+2005-05-27  Mark Mitchell  <mark@codesourcery.com>
+
+	* config/default.exp (CC): Use find_gcc.
+	(CFLAGS): Define, if no definition has been provided by the user.
+	(CXX): Likewise.
+	(CXXFLAGS): Likewise.
+	
 2005-05-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-mmix/bpo-6.d: Updated.
@@ -161,9 +168,6 @@
 	* config/default.exp: Do not load libpath.exp if it does not
 	exist.
 	(CC): Provide fallback definition.
-	(CFLAGS): Likewise.
-	(CXX): Likewise.
-	(CXXFLAGS): Likewise.
 	
 2005-03-24  Eric Christopher  <echristo@redhat.com>
 

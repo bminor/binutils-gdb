@@ -80,9 +80,18 @@ if {[file exists tmpdir/libpath.exp]} {
 
 # The "make check" target in the Makefile passes in
 # "CC=$(CC_FOR_TARGET)".  But, if the user invokes runtest directly
-# (as when testing an installed linker), CC may not be set.  
+# (as when testing an installed linker), these flags may not be set.  
 if {![info exists CC]} {
-    set CC [transform gcc]
+    set CC [find_gcc]
+}
+if {![info exists CFLAGS]} {
+    set CFLAGS "-g -O2"
+}
+if {![info exists CXX]} {
+    set CXX [find_g++]
+}
+if {![info exists CXXFLAGS]} {
+    set CXXFLAGS ""
 }
 
 # The mips64-*-linux-gnu compiler defaults to the N32 ABI after
