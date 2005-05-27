@@ -1,5 +1,18 @@
 2005-05-27  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (struct proc_pending): New.
+	(unwind): Replace proc_start with proc_pending.
+	(unwind_diagnostic): Check unwind.proc_pending.sym.
+	(dot_proc): Replace unwind.proc_start with unwind.proc_pending.sym.
+	Check if previous proc not closed. Record all entry points.
+	(dot_endp): Replace unwind.proc_start with unwind.proc_pending.sym.
+	Set symbol sizes for entry points recorded in dot_proc. Check
+	arguments for consistency with respective .proc's.
+	(md_assemble): Replace unwind.proc_start with
+	unwind.proc_pending.sym.
+
+2005-05-27  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (emit_one_bundle): Restrict scope of ptr, end_ptr,
 	and last_ptr. Check all in-use slots for first one with non-NULL
 	unwind_record. Don't reload end_ptr before second update round.

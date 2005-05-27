@@ -709,6 +709,12 @@ typedef struct label_prologue_count
   unsigned int prologue_count;
 } label_prologue_count;
 
+typedef struct proc_pending
+{
+  symbolS *sym;
+  struct proc_pending *next;
+} proc_pending;
+
 static struct
 {
   /* Maintain a list of unwind entries for the current function.  */
@@ -720,7 +726,7 @@ static struct
   unw_rec_list *current_entry;
 
   /* These are used to create the unwind table entry for this function.  */
-  symbolS *proc_start;
+  proc_pending proc_pending;
   symbolS *info;		/* pointer to unwind info */
   symbolS *personality_routine;
   segT saved_text_seg;
@@ -3131,7 +3137,7 @@ unwind_diagnostic (const char * region, const char *directive)
 static int
 in_procedure (const char *directive)
 {
-  if (unwind.proc_start
+  if (unwind.proc_pending.sym
       && (!unwind.saved_text_seg || strcmp (directive, "endp") == 0))
     return 1;
   return unwind_diagnostic ("procedure", directive);
@@ -4268,8 +4274,22 @@ dot_proc (dummy)
 {
   char *name, *p, c;
   symbolS *sym;
+  proc_pending *pending, *last_pending;
 
-  unwind.proc_start = 0;
+  if (unwind.proc_pending.sym)
+    {
+      (md.unwind_check == unwind_check_warning
+       ? as_warn
+       : as_bad) ("Missing .endp after previous .proc");
+      while (unwind.proc_pending.next)
+	{
+	  pending = unwind.proc_pending.next;
+	  unwind.proc_pending.next = pending->next;
+	  free (pending);
+	}
+    }
+  last_pending = NULL;
+
   /* Parse names of main and alternate entry points and mark them as
      function symbols:  */
   while (1)
@@ -4285,9 +4305,16 @@ dot_proc (dummy)
 	  sym = symbol_find_or_make (name);
 	  if (S_IS_DEFINED (sym))
 	    as_bad ("`%s' was already defined", name);
-	  else if (unwind.proc_start == 0)
+	  else if (!last_pending)
 	    {
-	      unwind.proc_start = sym;
+	      unwind.proc_pending.sym = sym;
+	      last_pending = &unwind.proc_pending;
+	    }
+	  else
+	    {
+	      pending = xmalloc (sizeof (*pending));
+	      pending->sym = sym;
+	      last_pending = last_pending->next = pending;
 	    }
 	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 	}
@@ -4297,8 +4324,12 @@ dot_proc (dummy)
 	break;
       ++input_line_pointer;
     }
-  if (unwind.proc_start == 0)
-    unwind.proc_start = expr_build_dot ();
+  if (!last_pending)
+    {
+      unwind.proc_pending.sym = expr_build_dot ();
+      last_pending = &unwind.proc_pending;
+    }
+  last_pending->next = NULL;
   demand_empty_rest_of_line ();
   ia64_do_align (16);
 
@@ -4390,8 +4421,7 @@ dot_endp (dummy)
   long where;
   segT saved_seg;
   subsegT saved_subseg;
-  char *name, *default_name, *p, c;
-  symbolS *sym;
+  proc_pending *pending;
   int unwind_check = md.unwind_check;
 
   md.unwind_check = unwind_check_error;
@@ -4440,13 +4470,13 @@ dot_endp (dummy)
       e.X_op = O_pseudo_fixup;
       e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
       e.X_add_number = 0;
-      if (!S_IS_LOCAL (unwind.proc_start)
-	  && S_IS_DEFINED (unwind.proc_start))
-	e.X_add_symbol = symbol_temp_new (S_GET_SEGMENT (unwind.proc_start),
-					  S_GET_VALUE (unwind.proc_start),
-					  symbol_get_frag (unwind.proc_start));
+      if (!S_IS_LOCAL (unwind.proc_pending.sym)
+	  && S_IS_DEFINED (unwind.proc_pending.sym))
+	e.X_add_symbol = symbol_temp_new (S_GET_SEGMENT (unwind.proc_pending.sym),
+					  S_GET_VALUE (unwind.proc_pending.sym),
+					  symbol_get_frag (unwind.proc_pending.sym));
       else
-	e.X_add_symbol = unwind.proc_start;
+	e.X_add_symbol = unwind.proc_pending.sym;
       ia64_cons_fix_new (frag_now, where, bytes_per_address, &e);
 
       e.X_op = O_pseudo_fixup;
@@ -4468,62 +4498,22 @@ dot_endp (dummy)
     }
   subseg_set (saved_seg, saved_subseg);
 
-  if (unwind.proc_start)
-    default_name = (char *) S_GET_NAME (unwind.proc_start);
-  else
-    default_name = NULL;
-
-  /* Parse names of main and alternate entry points and set symbol sizes.  */
-  while (1)
+  /* Set symbol sizes.  */
+  pending = &unwind.proc_pending;
+  if (S_GET_NAME (pending->sym))
     {
-      SKIP_WHITESPACE ();
-      name = input_line_pointer;
-      c = get_symbol_end ();
-      p = input_line_pointer;
-      if (!*name)
+      do
 	{
-	  if (md.unwind_check == unwind_check_warning)
+	  symbolS *sym = pending->sym;
+
+	  if (!S_IS_DEFINED (sym))
+	    as_bad ("`%s' was not defined within procedure", S_GET_NAME (sym));
+	  else if (S_GET_SIZE (sym) == 0
+		   && symbol_get_obj (sym)->size == NULL)
 	    {
-	      if (default_name)
-		{
-		  as_warn ("Empty argument of .endp. Use the default name `%s'",
-			   default_name);
-		  name = default_name;
-		}
-	      else
-		as_warn ("Empty argument of .endp");
-	    }
-	  else
-	    as_bad ("Empty argument of .endp");
-	}
-      if (*name)
-	{
-	  sym = symbol_find (name);
-	  if (!sym
-	      && md.unwind_check == unwind_check_warning
-	      && default_name
-	      && default_name != name)
-	    {
-	      /* We have a bad name. Try the default one if needed.  */
-	      as_warn ("`%s' was not defined within procedure. Use the default name `%s'",
-		       name, default_name);
-	      name = default_name;
-	      sym = symbol_find (name);
-	    }
-	  if (!sym || !S_IS_DEFINED (sym))
-	    as_bad ("`%s' was not defined within procedure", name);
-	  else if (unwind.proc_start
-	      && (symbol_get_bfdsym (sym)->flags & BSF_FUNCTION)
-	      && S_GET_SIZE (sym) == 0 && symbol_get_obj (sym)->size == NULL)
-	    {
-	      fragS *fr = symbol_get_frag (unwind.proc_start);
 	      fragS *frag = symbol_get_frag (sym);
 
-	      /* Check whether the function label is at or beyond last
-		 .proc directive.  */
-	      while (fr && fr != frag)
-		fr = fr->fr_next;
-	      if (fr)
+	      if (frag)
 		{
 		  if (frag == frag_now && SEG_NORMAL (now_seg))
 		    S_SET_SIZE (sym, frag_now_fix () - S_GET_VALUE (sym));
@@ -4540,6 +4530,36 @@ dot_endp (dummy)
 		    }
 		}
 	    }
+	} while ((pending = pending->next) != NULL);
+    }
+
+  /* Parse names of main and alternate entry points.  */
+  while (1)
+    {
+      char *name, *p, c;
+
+      SKIP_WHITESPACE ();
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      p = input_line_pointer;
+      if (!*name)
+	(md.unwind_check == unwind_check_warning
+	 ? as_warn
+	 : as_bad) ("Empty argument of .endp");
+      else
+	{
+	  symbolS *sym = symbol_find (name);
+
+	  for (pending = &unwind.proc_pending; pending; pending = pending->next)
+	    {
+	      if (sym == pending->sym)
+		{
+		  pending->sym = NULL;
+		  break;
+		}
+	    }
+	  if (!sym || !pending)
+	    as_warn ("`%s' was not specified with previous .proc", name);
 	}
       *p = c;
       SKIP_WHITESPACE ();
@@ -4548,7 +4568,21 @@ dot_endp (dummy)
       ++input_line_pointer;
     }
   demand_empty_rest_of_line ();
-  unwind.proc_start = unwind.info = 0;
+
+  /* Deliberately only checking for the main entry point here; the
+     language spec even says all arguments to .endp are ignored.  */
+  if (unwind.proc_pending.sym
+      && S_GET_NAME (unwind.proc_pending.sym)
+      && strcmp (S_GET_NAME (unwind.proc_pending.sym), FAKE_LABEL_NAME))
+    as_warn ("`%s' should be an operand to this .endp",
+	     S_GET_NAME (unwind.proc_pending.sym));
+  while (unwind.proc_pending.next)
+    {
+      pending = unwind.proc_pending.next;
+      unwind.proc_pending.next = pending->next;
+      free (pending);
+    }
+  unwind.proc_pending.sym = unwind.info = NULL;
 }
 
 static void
@@ -10784,7 +10818,7 @@ md_assemble (str)
       CURR_SLOT.unwind_record = unwind.current_entry;
       unwind.current_entry = NULL;
     }
-  if (unwind.proc_start && S_IS_DEFINED (unwind.proc_start))
+  if (unwind.proc_pending.sym && S_IS_DEFINED (unwind.proc_pending.sym))
     unwind.insn = 1;
 
   /* Check for dependency violations.  */
