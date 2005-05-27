@@ -1,3 +1,7 @@
+2005-05-26  Chris Demetriou  <cgd@netbsd.org>
+
+	* MAINTAINERS (Write After Approval): Remove myself.
+
 2005-05-27  Andrew Cagney  <cagney@gnu.org>
 
 	* jv-lang.c (get_java_utf8_name): Add cast.
