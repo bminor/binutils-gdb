@@ -1,3 +1,10 @@
+2005-05-27  Orjan Friberg <orjanf@axis.com>
+
+	* cris-tdep.c (cris_sigtramp_start, cris_rt_sigtramp_start) 
+	(cris_frame_prev_register, cris_sigtramp_frame_prev_register)
+	(cris_return_value): Use gdb_byte for byte buffers.
+	(struct cris_frame_unwind, struct cris_frame_base): Fix formatting.
+
 2005-05-26  Chris Demetriou  <cgd@netbsd.org>
 
 	* MAINTAINERS (Write After Approval): Remove myself.
