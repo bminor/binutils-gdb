@@ -1,3 +1,24 @@
+2005-05-27  Andrew Cagney  <cagney@gnu.org>
+
+	* jv-lang.c (get_java_utf8_name): Add cast.
+	(evaluate_subexp_java): Use gdb_byte for buffers.
+	* jv-valprint.c (java_value_print, java_value_print): Use gdb_byte
+	for buffers.
+	* scm-lang.c (scm_get_field, scm_unpack)
+	(scm_evaluate_string): Use gdb_byte for buffers.
+	(scm_lookup_name): Add cast.
+	* scm-valprint.c (scm_scmval_print, scm_scmval_print): Use
+	gdb_byte for buffers.
+	* tui/tui.h (tui_get_command_dimension): Make parameters unsigned.
+	* tui/tui.c (tui_get_command_dimension): Make parameters unsigned.
+	* value.h (check_field): Change "name" to a string.
+	* valops.c (check_field): Change "name" to a string.
+	* scm-lang.h (scm_parse): Use gdb_byte for buffers.
+	* source.c (get_current_source_symtab_and_line)
+	(set_current_source_symtab_and_line): Initialize all fields of sal
+	structures.
+	* cli/cli-cmds.c (list_command): Use gdb_byte for buffers.
+
 2005-05-26  Andrew Cagney  <cagney@gnu.org>
 
 	* command.h (add_setshow_integer_cmd): Make VAR an integer.

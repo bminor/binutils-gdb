@@ -495,7 +495,7 @@ extern void print_variable_value (struct symbol *var,
 				  struct frame_info *frame,
 				  struct ui_file *stream);
 
-extern int check_field (struct value *, const gdb_byte *);
+extern int check_field (struct value *, const char *);
 
 extern void typedef_print (struct type *type, struct symbol *news,
 			   struct ui_file *stream);

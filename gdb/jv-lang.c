@@ -216,7 +216,7 @@ get_java_utf8_name (struct obstack *obstack, struct value *name)
     + TYPE_LENGTH (value_type (temp));
   chrs = obstack_alloc (obstack, name_length + 1);
   chrs[name_length] = '\0';
-  read_memory (data_addr, chrs, name_length);
+  read_memory (data_addr, (gdb_byte *) chrs, name_length);
   return chrs;
 }
 
@@ -883,7 +883,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 	  CORE_ADDR address;
 	  long length, index;
 	  struct type *el_type;
-	  char buf4[4];
+	  gdb_byte buf4[4];
 
 	  struct value *clas = java_class_from_object (arg1);
 	  struct value *temp = clas;

@@ -69,4 +69,4 @@ extern struct type *builtin_type_scm;
 
 extern int scm_parse (void);
 
-extern LONGEST scm_unpack (struct type *, const char *, enum type_code);
+extern LONGEST scm_unpack (struct type *, const gdb_byte *, enum type_code);

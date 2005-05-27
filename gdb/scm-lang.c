@@ -73,7 +73,7 @@ is_scmvalue_type (struct type *type)
 LONGEST
 scm_get_field (LONGEST svalue, int index)
 {
-  char buffer[20];
+  gdb_byte buffer[20];
   read_memory (SCM2PTR (svalue) + index * TYPE_LENGTH (builtin_type_scm),
 	       buffer, TYPE_LENGTH (builtin_type_scm));
   return extract_signed_integer (buffer, TYPE_LENGTH (builtin_type_scm));
@@ -84,7 +84,7 @@ scm_get_field (LONGEST svalue, int index)
    or Boolean (CONTEXT == TYPE_CODE_BOOL).  */
 
 LONGEST
-scm_unpack (struct type *type, const char *valaddr, enum type_code context)
+scm_unpack (struct type *type, const gdb_byte *valaddr, enum type_code context)
 {
   if (is_scmvalue_type (type))
     {
@@ -157,7 +157,7 @@ scm_lookup_name (char *str)
   struct symbol *sym;
   args[0] = value_allocate_space_in_inferior (len);
   args[1] = value_from_longest (builtin_type_int, len);
-  write_memory (value_as_long (args[0]), str, len);
+  write_memory (value_as_long (args[0]), (gdb_byte *) str, len);
 
   if (in_eval_c ()
       && (sym = lookup_symbol ("env",
@@ -189,9 +189,9 @@ scm_evaluate_string (char *str, int len)
   struct value *func;
   struct value *addr = value_allocate_space_in_inferior (len + 1);
   LONGEST iaddr = value_as_long (addr);
-  write_memory (iaddr, str, len);
+  write_memory (iaddr, (gdb_byte *) str, len);
   /* FIXME - should find and pass env */
-  write_memory (iaddr + len, "", 1);
+  write_memory (iaddr + len, (gdb_byte *) "", 1);
   func = find_function_in_inferior ("scm_evstr");
   return call_function_by_hand (func, 1, &addr);
 }

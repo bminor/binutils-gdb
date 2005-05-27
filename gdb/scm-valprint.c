@@ -220,7 +220,7 @@ taloop:
 	    int i;
 	    int done = 0;
 	    int buf_size;
-	    char buffer[64];
+	    gdb_byte buffer[64];
 	    int truncate = print_max && len > (int) print_max;
 	    if (truncate)
 	      len = print_max;
@@ -248,8 +248,8 @@ taloop:
 	  {
 	    int len = SCM_LENGTH (svalue);
 
-	    char *str = (char *) alloca (len);
-	    read_memory (SCM_CDR (svalue), str, len + 1);
+	    char *str = alloca (len);
+	    read_memory (SCM_CDR (svalue), (gdb_byte *) str, len + 1);
 	    /* Should handle weird characters FIXME */
 	    str[len] = '\0';
 	    fputs_filtered (str, stream);

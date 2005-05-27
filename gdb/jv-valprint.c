@@ -72,7 +72,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT && name != NULL
       && (i = strlen (name), name[i - 1] == ']'))
     {
-      char buf4[4];
+      gdb_byte buf4[4];
       long length;
       unsigned int things_printed = 0;
       int reps;
@@ -93,7 +93,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 
 	  while (i < length && things_printed < print_max)
 	    {
-	      char *buf;
+	      gdb_byte *buf;
 
 	      buf = alloca (TARGET_PTR_BIT / HOST_CHAR_BIT);
 	      fputs_filtered (", ", stream);

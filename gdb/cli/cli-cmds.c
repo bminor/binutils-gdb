@@ -650,7 +650,9 @@ static void
 list_command (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals, sals_end;
-  struct symtab_and_line sal, sal_end, cursal;
+  struct symtab_and_line sal = { };
+  struct symtab_and_line sal_end = { };
+  struct symtab_and_line cursal = { };
   struct symbol *sym;
   char *arg1;
   int no_end = 1;

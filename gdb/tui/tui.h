@@ -59,7 +59,8 @@ enum tui_win_type
 extern CORE_ADDR tui_get_low_disassembly_address (CORE_ADDR, CORE_ADDR);
 extern void tui_show_assembly (CORE_ADDR addr);
 extern int tui_is_window_visible (enum tui_win_type type);
-extern int tui_get_command_dimension (int *width, int *height);
+extern int tui_get_command_dimension (unsigned int *width,
+				      unsigned int *height);
 
 /* Initialize readline and configure the keymap for the switching
    key shortcut.  */
