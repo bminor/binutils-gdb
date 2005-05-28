@@ -1,4 +1,12 @@
 2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Jonathan Larmour  <jifl@eCosCentric.com>
+
+	PR backtrace/1760
+	* frame.c (backtrace_limit): Change type to int.
+	(get_prev_frame): Update backtrace limit support.
+	(_initialize_frame): Use add_setshow_integer_cmd for backtrace_limit.
+
+2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.tgt (powerpc64-*-linux*): Enable gdbserver.
 	* regformats/reg-ppc64.dat: New file.

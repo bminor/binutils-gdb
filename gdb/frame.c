@@ -141,7 +141,7 @@ Whether backtraces should continue past the entry point of a program is %s.\n"),
 		    value);
 }
 
-static unsigned int backtrace_limit = UINT_MAX;
+static int backtrace_limit = INT_MAX;
 static void
 show_backtrace_limit (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -1258,9 +1258,16 @@ get_prev_frame (struct frame_info *this_frame)
       return NULL;
     }
 
-  if (this_frame->level > backtrace_limit)
+  /* If the user's backtrace limit has been exceeded, stop.  We must
+     add two to the current level; one of those accounts for backtrace_limit
+     being 1-based and the level being 0-based, and the other accounts for
+     the level of the new frame instead of the level of the current
+     frame.  */
+  if (this_frame->level + 2 > backtrace_limit)
     {
-      error (_("Backtrace limit of %d exceeded"), backtrace_limit);
+      frame_debug_got_null_frame (gdb_stdlog, this_frame,
+				  "backtrace limit exceeded");
+      return NULL;
     }
 
   /* If we're already inside the entry function for the main objfile,
@@ -1610,16 +1617,16 @@ the rest of the stack trace."),
 			   &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
-  add_setshow_uinteger_cmd ("limit", class_obscure,
-			    &backtrace_limit, _("\
+  add_setshow_integer_cmd ("limit", class_obscure,
+			   &backtrace_limit, _("\
 Set an upper bound on the number of backtrace levels."), _("\
 Show the upper bound on the number of backtrace levels."), _("\
 No more than the specified number of frames can be displayed or examined.\n\
 Zero is unlimited."),
-			    NULL,
-			    show_backtrace_limit,
-			    &set_backtrace_cmdlist,
-			    &show_backtrace_cmdlist);
+			   NULL,
+			   show_backtrace_limit,
+			   &set_backtrace_cmdlist,
+			   &show_backtrace_cmdlist);
 
   /* Debug this files internals. */
   add_setshow_zinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\
