@@ -1,5 +1,10 @@
 2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* cp-name-parser.y (parse_escape): Revert previous change.  Return
+	the input character by default.
+
+2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2-frame.c (dwarf2_frame_prev_register): Use gdb_byte.
 	* i386-linux-nat.c (fetch_register, store_register, supply_gregset)
 	(fill_gregset): Likewise.

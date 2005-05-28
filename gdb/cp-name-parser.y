@@ -1440,7 +1440,7 @@ c_parse_backslash (int host_char, int *target_char)
 static int
 parse_escape (const char **string_ptr)
 {
-  int target_char = 0;
+  int target_char;
   int c = *(*string_ptr)++;
   if (c_parse_backslash (c, &target_char))
     return target_char;
@@ -1498,7 +1498,7 @@ parse_escape (const char **string_ptr)
 	  return i;
 	}
       default:
-	return target_char;
+	return c;
       }
 }
 
