@@ -962,7 +962,7 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 }
 
 static int
-thread_db_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+thread_db_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		       struct mem_attrib *attrib, struct target_ops *target)
 {
   struct cleanup *old_chain = save_inferior_ptid ();

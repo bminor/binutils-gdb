@@ -183,7 +183,7 @@ fetch_register (int regno)
     error (_("Couldn't read register %s (#%d): %s."), REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));
 
-  regcache_raw_supply (current_regcache, regno, &val);
+  regcache_raw_supply (current_regcache, regno, (gdb_byte *) &val);
 }
 
 /* Store one register. */
@@ -204,7 +204,7 @@ store_register (int regno)
     tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
 
   errno = 0;
-  regcache_raw_collect (current_regcache, regno, &val);
+  regcache_raw_collect (current_regcache, regno, (gdb_byte *) &val);
   ptrace (PTRACE_POKEUSER, tid, register_addr (regno, 0), val);
   if (errno != 0)
     error (_("Couldn't write register %s (#%d): %s."), REGISTER_NAME (regno),
@@ -225,11 +225,11 @@ supply_gregset (elf_gregset_t *gregsetp)
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
-    regcache_raw_supply (current_regcache, i, regp + regmap[i]);
+    regcache_raw_supply (current_regcache, i, (gdb_byte *) (regp + regmap[i]));
 
   if (I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
     regcache_raw_supply (current_regcache, I386_LINUX_ORIG_EAX_REGNUM,
-			 regp + ORIG_EAX);
+			 (gdb_byte *) (regp + ORIG_EAX));
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -244,12 +244,12 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if (regno == -1 || regno == i)
-      regcache_raw_collect (current_regcache, i, regp + regmap[i]);
+      regcache_raw_collect (current_regcache, i, (gdb_byte *) (regp + regmap[i]));
 
   if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
       && I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
     regcache_raw_collect (current_regcache, I386_LINUX_ORIG_EAX_REGNUM,
-			  regp + ORIG_EAX);
+			  (gdb_byte *) (regp + ORIG_EAX));
 }
 
 #ifdef HAVE_PTRACE_GETREGS

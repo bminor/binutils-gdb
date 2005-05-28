@@ -2326,8 +2326,9 @@ linux_nat_mourn_inferior (void)
 }
 
 static int
-linux_nat_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-		     struct mem_attrib *attrib, struct target_ops *target)
+linux_nat_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
+		       int write, struct mem_attrib *attrib,
+		       struct target_ops *target)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
   int xfer;
@@ -2621,7 +2622,7 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
   char psargs[80] = { '\0' };
   char *note_data = NULL;
   ptid_t current_ptid = inferior_ptid;
-  char *auxv;
+  gdb_byte *auxv;
   int auxv_len;
 
   if (get_exec_file (0))

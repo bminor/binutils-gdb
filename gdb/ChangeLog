@@ -1,3 +1,18 @@
+2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2-frame.c (dwarf2_frame_prev_register): Use gdb_byte.
+	* i386-linux-nat.c (fetch_register, store_register, supply_gregset)
+	(fill_gregset): Likewise.
+	* i386-tdep.c (i386_frame_prev_register)
+	(i386_sigtramp_frame_prev_register): Likewise.
+	* linux-nat.c (linux_nat_xfer_memory, linux_nat_make_corefile_notes):
+	Likewise.
+	* linux-thread-db.c (thread_db_xfer_memory): Likewise.
+	* remote.c (remote_insert_hw_breakpoint, remote_remove_hw_breakpoint):
+	Likewise.
+	* target.c (debug_to_insert_hw_breakpoint)
+	(debug_to_remove_hw_breakpoint, update_current_target): Likewise.
+
 2005-05-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	* MAINTAINERS: Change cris-elf state to non-broken.

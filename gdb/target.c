@@ -116,9 +116,9 @@ static int debug_to_remove_breakpoint (CORE_ADDR, gdb_byte *);
 
 static int debug_to_can_use_hw_breakpoint (int, int, int);
 
-static int debug_to_insert_hw_breakpoint (CORE_ADDR, char *);
+static int debug_to_insert_hw_breakpoint (CORE_ADDR, gdb_byte *);
 
-static int debug_to_remove_hw_breakpoint (CORE_ADDR, char *);
+static int debug_to_remove_hw_breakpoint (CORE_ADDR, gdb_byte *);
 
 static int debug_to_insert_watchpoint (CORE_ADDR, int, int);
 
@@ -514,10 +514,10 @@ update_current_target (void)
 	    (int (*) (int, int, int))
 	    return_zero);
   de_fault (to_insert_hw_breakpoint,
-	    (int (*) (CORE_ADDR, char *))
+	    (int (*) (CORE_ADDR, gdb_byte *))
 	    return_minus_one);
   de_fault (to_remove_hw_breakpoint,
-	    (int (*) (CORE_ADDR, char *))
+	    (int (*) (CORE_ADDR, gdb_byte *))
 	    return_minus_one);
   de_fault (to_insert_watchpoint,
 	    (int (*) (CORE_ADDR, int, int))
@@ -2136,7 +2136,7 @@ debug_to_stopped_data_address (struct target_ops *target, CORE_ADDR *addr)
 }
 
 static int
-debug_to_insert_hw_breakpoint (CORE_ADDR addr, char *save)
+debug_to_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *save)
 {
   int retval;
 
@@ -2150,7 +2150,7 @@ debug_to_insert_hw_breakpoint (CORE_ADDR addr, char *save)
 }
 
 static int
-debug_to_remove_hw_breakpoint (CORE_ADDR addr, char *save)
+debug_to_remove_hw_breakpoint (CORE_ADDR addr, gdb_byte *save)
 {
   int retval;
 

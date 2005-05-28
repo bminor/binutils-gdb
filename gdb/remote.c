@@ -4728,7 +4728,7 @@ remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 
 
 static int
-remote_insert_hw_breakpoint (CORE_ADDR addr, char *shadow)
+remote_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 {
   int len = 0;
   struct remote_state *rs = get_remote_state ();
@@ -4770,7 +4770,7 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, char *shadow)
 
 
 static int
-remote_remove_hw_breakpoint (CORE_ADDR addr, char *shadow)
+remote_remove_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 {
   int len;
   struct remote_state *rs = get_remote_state ();
