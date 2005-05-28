@@ -1,5 +1,10 @@
 2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* cli/cli-setshow.c (do_setshow_command): Partially revert previous
+	change.  Cast to "char **" for var_string.
+
+2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* cp-name-parser.y (parse_escape): Revert previous change.  Return
 	the input character by default.
 
