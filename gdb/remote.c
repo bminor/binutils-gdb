@@ -1114,7 +1114,7 @@ struct gdb_ext_thread_info
     int active;			/* Has state interesting to GDB? 
 				   regs, stack.  */
     char display[256];		/* Brief state display, name, 
-				   blocked/syspended.  */
+				   blocked/suspended.  */
     char shortname[32];		/* To be used to name threads.  */
     char more_display[256];	/* Long info, statistics, queue depth, 
 				   whatever.  */
@@ -1489,7 +1489,7 @@ remote_unpack_thread_info_response (char *pkt, threadref *expectedref,
   int mask, length;
   unsigned int tag;
   threadref ref;
-  char *limit = pkt + (rs->remote_packet_size);	/* plausable parsing limit */
+  char *limit = pkt + (rs->remote_packet_size);	/* plausible parsing limit */
   int retval = 1;
 
   /* info->threadid = 0; FIXME: implement zero_threadref.  */

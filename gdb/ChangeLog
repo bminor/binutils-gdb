@@ -1,5 +1,11 @@
 2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	From Wu Zhou <woodzltc@cn.ibm.com>:
+	* remote.c (struct gdb_ext_thread_info): Fix a comment typo.
+	(remote_unpack_thread_info_response): Likewise.
+
+2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* cli/cli-setshow.c (do_setshow_command): Partially revert previous
 	change.  Cast to "char **" for var_string.
 
