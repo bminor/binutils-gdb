@@ -1,3 +1,10 @@
+2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (SFILES): Add linux-ppc64-low.c.
+	(linux-ppc64-low.o, reg-ppc64.c, reg-ppc64.o): New targets.
+	* configure.srv: Add powerpc64-*-linux*.
+	* linux-ppc64-low.c: New file.
+
 2005-05-23  Orjan Friberg  <orjanf@axis.com>
 
 	* linux-cris-low.c: New file with support for CRIS.
@@ -8,7 +15,6 @@
 	reg-crisv32.o, and reg-crisv32.c to make rules.
 	* configure.srv: Add cris-*-linux* and crisv32-*-linux* to list of
 	recognized targets.
-
 
 2005-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
