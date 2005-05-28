@@ -1,3 +1,9 @@
+2005-05-28  David Daney  <ddaney@avtrex.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections):  Move
+	calculation of DT_RELSZ to occur after all dynamic relocations
+	are created.
+
 2005-05-26  Mark Kettenis  <kettenis@gnu.org>
             Maciej W. Rozycki  <macro@linux-mips.org>
 

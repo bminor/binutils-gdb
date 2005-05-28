@@ -7696,18 +7696,6 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      dyn.d_un.d_ptr = s->vma;
 	      break;
 
-	    case DT_RELSZ:
-	      /* Reduce DT_RELSZ to account for any relocations we
-		 decided not to make.  This is for the n64 irix rld,
-		 which doesn't seem to apply any relocations if there
-		 are trailing null entries.  */
-	      s = mips_elf_rel_dyn_section (dynobj, FALSE);
-	      dyn.d_un.d_val = (s->reloc_count
-				* (ABI_64_P (output_bfd)
-				   ? sizeof (Elf64_Mips_External_Rel)
-				   : sizeof (Elf32_External_Rel)));
-	      break;
-
 	    default:
 	      swap_out_p = FALSE;
 	      break;
@@ -7766,6 +7754,55 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 		return FALSE;
 	      BFD_ASSERT (addend == 0);
 	    }
+	}
+    }
+
+  /* The generation of dynamic relocations for the non-primary gots
+     adds more dynamic relocations.  We cannot count them until
+     here.  */
+
+  if (elf_hash_table (info)->dynamic_sections_created)
+    {
+      bfd_byte *b;
+      bfd_boolean swap_out_p;
+
+      BFD_ASSERT (sdyn != NULL);
+
+      for (b = sdyn->contents;
+	   b < sdyn->contents + sdyn->size;
+	   b += MIPS_ELF_DYN_SIZE (dynobj))
+	{
+	  Elf_Internal_Dyn dyn;
+	  asection *s;
+
+	  /* Read in the current dynamic entry.  */
+	  (*get_elf_backend_data (dynobj)->s->swap_dyn_in) (dynobj, b, &dyn);
+
+	  /* Assume that we're going to modify it and write it out.  */
+	  swap_out_p = TRUE;
+
+	  switch (dyn.d_tag)
+	    {
+	    case DT_RELSZ:
+	      /* Reduce DT_RELSZ to account for any relocations we
+		 decided not to make.  This is for the n64 irix rld,
+		 which doesn't seem to apply any relocations if there
+		 are trailing null entries.  */
+	      s = mips_elf_rel_dyn_section (dynobj, FALSE);
+	      dyn.d_un.d_val = (s->reloc_count
+				* (ABI_64_P (output_bfd)
+				   ? sizeof (Elf64_Mips_External_Rel)
+				   : sizeof (Elf32_External_Rel)));
+	      break;
+
+	    default:
+	      swap_out_p = FALSE;
+	      break;
+	    }
+
+	  if (swap_out_p)
+	    (*get_elf_backend_data (dynobj)->s->swap_dyn_out)
+	      (dynobj, &dyn, b);
 	}
     }
 
