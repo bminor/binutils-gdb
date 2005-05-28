@@ -144,6 +144,8 @@ AC_CHECK_DECLS(malloc)
 AC_CHECK_DECLS(realloc)
 AC_CHECK_DECLS(stpcpy)
 AC_CHECK_DECLS(strstr)
+AC_CHECK_DECLS(snprintf)
+AC_CHECK_DECLS(vsnprintf)
 
 # If we are configured native, pick a core file support file.
 COREFILE=

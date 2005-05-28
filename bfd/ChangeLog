@@ -1,3 +1,8 @@
+2005-05-28  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.in: Add snprintf and vsnprintf to AC_CHECK_DECLS.
+	* config.in, configure: Regenerate.
+
 2005-05-26  Mark Kettenis  <kettenis@gnu.org>
             Maciej W. Rozycki  <macro@linux-mips.org>
 
@@ -10,7 +15,7 @@
 
 2005-05-26  Richard Henderson  <rth@redhat.com>
 
-	* elf64-alpha.c (struct alpha_elf_link_hash_entry): Remove 
+	* elf64-alpha.c (struct alpha_elf_link_hash_entry): Remove
 	plt_old_section, plt_old_value.
 	(elf64_alpha_adjust_dynamic_symbol): Don't set it.
 	(elf64_alpha_size_plt_section_1): Don't use it.
@@ -64,7 +69,7 @@
 	macro that always returns bfd_false.
 	(_bfd_dwarf2_find_inliner_info): Declare.
 	* libbfd.h: Regenerate.
-	
+
 	* elf32-arm.c (elf32_arm_find_inliner_info): New function
 	that calls _bfd_dwarf2_find_inliner_info.
 	(bfd_elf32_find_inliner_info): Define to elf32_arm_find_inliner_info.
@@ -91,7 +96,7 @@
 	(pmac_xcoff_vec) Ditto.
 	* coff64-rs6000.c (rs6000coff64_vec): Ditto.
 	(aix5coff64_vec): Ditto.
-	
+
 	* aout-target.h (MY_find_inliner_info): Define as
 	_bfd_nosymbols_find_inliner_info.
 	* aout-tic30.c (MY_find_inliner_info): Ditto.
@@ -130,7 +135,7 @@
 
 2005-05-22  Richard Henderson  <rth@redhat.com>
 
-	* elf64-alpha.c (elf64_alpha_relax_with_lituse): Relax jsr to 
+	* elf64-alpha.c (elf64_alpha_relax_with_lituse): Relax jsr to
 	undefweak to use zero register.  Call elf64_alpha_relax_got_load
 	if not all uses removed.
 	(elf64_alpha_relax_got_load): Relax undefweak to lda zero.
