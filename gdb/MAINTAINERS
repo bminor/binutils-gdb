@@ -67,8 +67,7 @@ the native maintainer when resolving ABI issues.
 	avr		--target=avr ,-Werror
 			Theodore A. Roth	troth@openavr.org
 
-	cris		--target=cris-elf broken
-			(sim/cris/modelv10.c:4181 crisv10f_engine_run_full?)
+	cris		--target=cris-elf ,-Werror
 
 	d10v		OBSOLETE
 

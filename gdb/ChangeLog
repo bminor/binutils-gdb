@@ -1,3 +1,8 @@
+2005-05-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	* MAINTAINERS: Change cris-elf state to non-broken.
+	* cp-name-parser.y (parse_escape): Initialize target_char to zero.
+
 2005-05-27  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (crisv32_scan_prologue): Add.
