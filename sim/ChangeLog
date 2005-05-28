@@ -1,3 +1,7 @@
+2005-05-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/Makefile.in (stamp-v32fmloop): Depend on stamp-v10fmloop.
+
 2005-05-26  Chris Demetriou  <cgd@netbsd.org>
 
 	* MAINTAINERS: Update my mail address, move myself to the
