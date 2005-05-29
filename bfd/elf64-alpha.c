@@ -48,6 +48,59 @@
 #include "ecoffswap.h"
 
 
+/* Instruction data for plt generation and relaxation.  */
+
+#define OP_LDA		0x08
+#define OP_LDAH		0x09
+#define OP_LDQ		0x29
+#define OP_BR		0x30
+#define OP_BSR		0x34
+
+#define INSN_LDA	(OP_LDA << 26)
+#define INSN_LDAH	(OP_LDAH << 26)
+#define INSN_LDQ	(OP_LDQ << 26)
+#define INSN_BR		(OP_BR << 26)
+
+#define INSN_ADDQ	0x40000400
+#define INSN_RDUNIQ	0x0000009e
+#define INSN_SUBQ	0x40000520
+#define INSN_S4SUBQ	0x40000560
+#define INSN_UNOP	0x2ffe0000
+
+#define INSN_JSR	0x68004000
+#define INSN_JMP	0x68000000
+#define INSN_JSR_MASK	0xfc00c000
+
+#define INSN_A(I,A)		(I | (A << 21))
+#define INSN_AB(I,A,B)		(I | (A << 21) | (B << 16))
+#define INSN_ABC(I,A,B,C)	(I | (A << 21) | (B << 16) | C)
+#define INSN_ABO(I,A,B,O)	(I | (A << 21) | (B << 16) | ((O) & 0xffff))
+#define INSN_AD(I,A,D)		(I | (A << 21) | (((D) >> 2) & 0x1fffff))
+
+/* PLT/GOT Stuff */
+
+/* Set by ld emulation.  Putting this into the link_info or hash structure
+   is simply working too hard.  */
+#ifdef USE_SECUREPLT
+bfd_boolean elf64_alpha_use_secureplt = TRUE;
+#else
+bfd_boolean elf64_alpha_use_secureplt = FALSE;
+#endif
+
+#define OLD_PLT_HEADER_SIZE	32
+#define OLD_PLT_ENTRY_SIZE	12
+#define NEW_PLT_HEADER_SIZE	36
+#define NEW_PLT_ENTRY_SIZE	4
+
+#define PLT_HEADER_SIZE \
+  (elf64_alpha_use_secureplt ? NEW_PLT_HEADER_SIZE : OLD_PLT_HEADER_SIZE)
+#define PLT_ENTRY_SIZE \
+  (elf64_alpha_use_secureplt ? NEW_PLT_ENTRY_SIZE : OLD_PLT_ENTRY_SIZE)
+
+#define MAX_GOT_SIZE		(64*1024)
+
+#define ELF_DYNAMIC_INTERPRETER "/usr/lib/ld.so"
+
 struct alpha_elf_link_hash_entry
 {
   struct elf_link_hash_entry root;
@@ -67,7 +120,6 @@ struct alpha_elf_link_hash_entry
 #define ALPHA_ELF_LINK_HASH_LU_TLSLDM	0x20
 #define ALPHA_ELF_LINK_HASH_LU_FUNC	0x38
 #define ALPHA_ELF_LINK_HASH_TLS_IE	0x40
-#define ALPHA_ELF_LINK_HASH_PLT_LOC	0x80
 
   /* Used to implement multiple .got subsections.  */
   struct alpha_elf_got_entry
@@ -82,6 +134,9 @@ struct alpha_elf_link_hash_entry
 
     /* The .got offset for this entry.  */
     int got_offset;
+
+    /* The .plt offset for this entry.  */
+    int plt_offset;
 
     /* How many references to this entry?  */
     int use_count;
@@ -1021,22 +1076,6 @@ elf64_alpha_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
    - align_power ((bfd_vma) 16,						\
 		  elf_hash_table (info)->tls_sec->alignment_power))
 
-/* PLT/GOT Stuff */
-#define PLT_HEADER_SIZE 32
-#define PLT_HEADER_WORD1	(bfd_vma) 0xc3600000	/* br   $27,.+4     */
-#define PLT_HEADER_WORD2	(bfd_vma) 0xa77b000c	/* ldq  $27,12($27) */
-#define PLT_HEADER_WORD3	(bfd_vma) 0x47ff041f	/* nop              */
-#define PLT_HEADER_WORD4	(bfd_vma) 0x6b7b0000	/* jmp  $27,($27)   */
-
-#define PLT_ENTRY_SIZE 12
-#define PLT_ENTRY_WORD1		0xc3800000	/* br   $28, plt0   */
-#define PLT_ENTRY_WORD2		0
-#define PLT_ENTRY_WORD3		0
-
-#define MAX_GOT_SIZE		(64*1024)
-
-#define ELF_DYNAMIC_INTERPRETER "/usr/lib/ld.so"
-
 /* Handle an Alpha specific section when reading an object file.  This
    is called when bfd_section_from_shdr finds a section with an unknown
    type.
@@ -1199,13 +1238,13 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   /* We need to create .plt, .rela.plt, .got, and .rela.got sections.  */
 
   s = bfd_make_section_with_flags (abfd, ".plt",
-				   (SEC_ALLOC | SEC_LOAD
+				   (SEC_ALLOC | SEC_LOAD | SEC_CODE
 				    | SEC_HAS_CONTENTS
 				    | SEC_IN_MEMORY
 				    | SEC_LINKER_CREATED
-				    | SEC_CODE));
-  if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, 3))
+				    | (elf64_alpha_use_secureplt
+				       ? SEC_READONLY : 0)));
+  if (s == NULL || ! bfd_set_section_alignment (abfd, s, 4))
     return FALSE;
 
   /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
@@ -1220,8 +1259,7 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   h->def_regular = 1;
   h->type = STT_OBJECT;
 
-  if (info->shared
-      && ! bfd_elf_link_record_dynamic_symbol (info, h))
+  if (info->shared && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
   s = bfd_make_section_with_flags (abfd, ".rela.plt",
@@ -1230,9 +1268,16 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 				    | SEC_IN_MEMORY
 				    | SEC_LINKER_CREATED
 				    | SEC_READONLY));
-  if (s == NULL
-      || ! bfd_set_section_alignment (abfd, s, 3))
+  if (s == NULL || ! bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
+
+  if (elf64_alpha_use_secureplt)
+    {
+      s = bfd_make_section_with_flags (abfd, ".got.plt",
+				       SEC_ALLOC | SEC_LINKER_CREATED);
+      if (s == NULL || ! bfd_set_section_alignment (abfd, s, 3))
+	return FALSE;
+    }
 
   /* We may or may not have created a .got section for this object, but
      we definitely havn't done the rest of the work.  */
@@ -1588,24 +1633,6 @@ elf64_alpha_output_extsym (struct alpha_elf_link_hash_entry *h, PTR data)
       else
 	h->esym.asym.value = 0;
     }
-  else if (h->root.needs_plt)
-    {
-      /* Set type and value for a symbol with a function stub.  */
-      h->esym.asym.st = stProc;
-      sec = bfd_get_section_by_name (einfo->abfd, ".plt");
-      if (sec == NULL)
-	h->esym.asym.value = 0;
-      else
-	{
-	  output_section = sec->output_section;
-	  if (output_section != NULL)
-	    h->esym.asym.value = (h->root.plt.offset
-				  + sec->output_offset
-				  + output_section->vma);
-	  else
-	    h->esym.asym.value = 0;
-	}
-    }
 
   if (! bfd_ecoff_debug_one_external (einfo->abfd, einfo->debug, einfo->swap,
 				      h->root.root.root.string,
@@ -1676,6 +1703,7 @@ get_got_entry (bfd *abfd, struct alpha_elf_link_hash_entry *h,
       gotent->gotobj = abfd;
       gotent->addend = r_addend;
       gotent->got_offset = -1;
+      gotent->plt_offset = -1;
       gotent->use_count = 1;
       gotent->reloc_type = r_type;
       gotent->reloc_done = 0;
@@ -1693,6 +1721,16 @@ get_got_entry (bfd *abfd, struct alpha_elf_link_hash_entry *h,
     gotent->use_count += 1;
 
   return gotent;
+}
+
+static bfd_boolean
+elf64_alpha_want_plt (struct alpha_elf_link_hash_entry *ah)
+{
+  return ((ah->root.type == STT_FUNC
+	  || ah->root.root.type == bfd_link_hash_undefweak
+	  || ah->root.root.type == bfd_link_hash_undefined)
+	  && (ah->flags & ALPHA_ELF_LINK_HASH_LU_FUNC) != 0
+	  && (ah->flags & ~ALPHA_ELF_LINK_HASH_LU_FUNC) == 0);
 }
 
 /* Handle dynamic relocations when doing an Alpha ELF link.  */
@@ -1874,12 +1912,13 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  h->flags = gotent_flags;
 
 		  /* Make a guess as to whether a .plt entry is needed.  */
-		  if ((gotent_flags & ALPHA_ELF_LINK_HASH_LU_FUNC)
-		      && !(gotent_flags & ~ALPHA_ELF_LINK_HASH_LU_FUNC))
-		    h->root.needs_plt = 1;
-		  else
-		    h->root.needs_plt = 0;
-	        }
+		  /* ??? It appears that we won't make it into
+		     adjust_dynamic_symbol for symbols that remain
+		     totally undefined.  Copying this check here means
+		     we can create a plt entry for them too.  */
+		  h->root.needs_plt
+		    = (maybe_dynamic && elf64_alpha_want_plt (h));
+		}
 	    }
 	}
 
@@ -1986,42 +2025,26 @@ elf64_alpha_adjust_dynamic_symbol (struct bfd_link_info *info,
   ah = (struct alpha_elf_link_hash_entry *)h;
 
   /* Now that we've seen all of the input symbols, finalize our decision
-     about whether this symbol should get a .plt entry.  */
-
-  if (alpha_elf_dynamic_symbol_p (h, info)
-      && ((h->type == STT_FUNC
-	   && !(ah->flags & ALPHA_ELF_LINK_HASH_LU_ADDR))
-	  || (h->type == STT_NOTYPE
-	      && (ah->flags & ALPHA_ELF_LINK_HASH_LU_FUNC)
-	      && !(ah->flags & ~ALPHA_ELF_LINK_HASH_LU_FUNC)))
-      /* Don't prevent otherwise valid programs from linking by attempting
-	 to create a new .got entry somewhere.  A Correct Solution would be
-	 to add a new .got section to a new object file and let it be merged
-	 somewhere later.  But for now don't bother.  */
-      && ah->got_entries)
+     about whether this symbol should get a .plt entry.  Irritatingly, it
+     is common for folk to leave undefined symbols in shared libraries,
+     and they still expect lazy binding; accept undefined symbols in lieu
+     of STT_FUNC.  */
+  if (alpha_elf_dynamic_symbol_p (h, info) && elf64_alpha_want_plt (ah))
     {
-      h->needs_plt = 1;
+      h->needs_plt = TRUE;
 
       s = bfd_get_section_by_name(dynobj, ".plt");
       if (!s && !elf64_alpha_create_dynamic_sections (dynobj, info))
 	return FALSE;
 
-      /* The first bit of the .plt is reserved.  */
-      if (s->size == 0)
-	s->size = PLT_HEADER_SIZE;
-
-      h->plt.offset = s->size;
-      s->size += PLT_ENTRY_SIZE;
-
-      /* We also need a JMP_SLOT entry in the .rela.plt section.  */
-      s = bfd_get_section_by_name (dynobj, ".rela.plt");
-      BFD_ASSERT (s != NULL);
-      s->size += sizeof (Elf64_External_Rela);
+      /* We need one plt entry per got subsection.  Delay allocation of
+	 the actual plt entries until size_plt_section, called from
+	 size_dynamic_sections or during relaxation.  */
 
       return TRUE;
     }
   else
-    h->needs_plt = 0;
+    h->needs_plt = FALSE;
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
@@ -2284,7 +2307,6 @@ static bfd_boolean
 elf64_alpha_calc_got_offsets_for_symbol (struct alpha_elf_link_hash_entry *h,
 					 PTR arg ATTRIBUTE_UNUSED)
 {
-  bfd_boolean result = TRUE;
   struct alpha_elf_got_entry *gotent;
 
   if (h->root.root.type == bfd_link_hash_warning)
@@ -2297,19 +2319,12 @@ elf64_alpha_calc_got_offsets_for_symbol (struct alpha_elf_link_hash_entry *h,
 	bfd_size_type *plge;
 
 	td = alpha_elf_tdata (gotent->gotobj);
-	if (td == NULL)
-	  {
-	    _bfd_error_handler (_("Symbol %s has no GOT subsection for offset 0x%x"),
-				h->root.root.root.string, gotent->got_offset);
-	    result = FALSE;
-	    continue;
-	  }
 	plge = &td->got->size;
 	gotent->got_offset = *plge;
 	*plge += alpha_got_entry_size (gotent->reloc_type);
       }
 
-  return result;
+  return TRUE;
 }
 
 static void
@@ -2438,31 +2453,27 @@ elf64_alpha_size_plt_section_1 (struct alpha_elf_link_hash_entry *h, PTR data)
 {
   asection *splt = (asection *) data;
   struct alpha_elf_got_entry *gotent;
+  bfd_boolean saw_one = FALSE;
 
   /* If we didn't need an entry before, we still don't.  */
   if (!h->root.needs_plt)
     return TRUE;
 
-  /* There must still be a LITERAL got entry for the function.  */
+  /* For each LITERAL got entry still in use, allocate a plt entry.  */
   for (gotent = h->got_entries; gotent ; gotent = gotent->next)
     if (gotent->reloc_type == R_ALPHA_LITERAL
 	&& gotent->use_count > 0)
-      break;
+      {
+	if (splt->size == 0)
+	  splt->size = PLT_HEADER_SIZE;
+	gotent->plt_offset = splt->size;
+	splt->size += PLT_ENTRY_SIZE;
+	saw_one = TRUE;
+      }
 
-  /* If there is, reset the PLT offset.  If not, there's no longer
-     a need for the PLT entry.  */
-  if (gotent)
-    {
-      if (splt->size == 0)
-	splt->size = PLT_HEADER_SIZE;
-      h->root.plt.offset = splt->size;
-      splt->size += PLT_ENTRY_SIZE;
-    }
-  else
-    {
-      h->root.needs_plt = 0;
-      h->root.plt.offset = -1;
-    }
+  /* If there weren't any, there's no longer a need for the PLT entry.  */
+  if (!saw_one)
+    h->root.needs_plt = FALSE;
 
   return TRUE;
 }
@@ -2473,12 +2484,12 @@ elf64_alpha_size_plt_section_1 (struct alpha_elf_link_hash_entry *h, PTR data)
 static bfd_boolean
 elf64_alpha_size_plt_section (struct bfd_link_info *info)
 {
-  asection *splt, *spltrel;
+  asection *splt, *spltrel, *sgotplt;
   unsigned long entries;
   bfd *dynobj;
 
   dynobj = elf_hash_table(info)->dynobj;
-  splt = bfd_get_section_by_name(dynobj, ".plt");
+  splt = bfd_get_section_by_name (dynobj, ".plt");
   if (splt == NULL)
     return TRUE;
 
@@ -2490,10 +2501,24 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
   /* Every plt entry requires a JMP_SLOT relocation.  */
   spltrel = bfd_get_section_by_name (dynobj, ".rela.plt");
   if (splt->size)
-    entries = (splt->size - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+    {
+      if (elf64_alpha_use_secureplt)
+	entries = (splt->size - NEW_PLT_HEADER_SIZE) / NEW_PLT_ENTRY_SIZE;
+      else
+	entries = (splt->size - OLD_PLT_HEADER_SIZE) / OLD_PLT_ENTRY_SIZE;
+    }
   else
     entries = 0;
   spltrel->size = entries * sizeof (Elf64_External_Rela);
+
+  /* When using the secureplt, we need two words somewhere in the data
+     segment for the dynamic linker to tell us where to go.  This is the
+     entire contents of the .got.plt section.  */
+  if (elf64_alpha_use_secureplt)
+    {
+      sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+      sgotplt->size = entries ? 16 : 0;
+    }
 
   return TRUE;
 }
@@ -2631,6 +2656,11 @@ elf64_alpha_size_rela_got_1 (struct alpha_elf_link_hash_entry *h,
   if (h->root.root.type == bfd_link_hash_warning)
     h = (struct alpha_elf_link_hash_entry *) h->root.root.u.i.link;
 
+  /* If we're using a plt for this symbol, then all of its relocations
+     for its got entries go into .rela.plt.  */
+  if (h->root.needs_plt)
+    return TRUE;
+
   /* If the symbol is dynamic, we'll need all the relocations in their
      natural form.  If this is a shared object, and it has been forced
      local, we'll need the same number of RELATIVE relocations.  */
@@ -2647,11 +2677,6 @@ elf64_alpha_size_rela_got_1 (struct alpha_elf_link_hash_entry *h,
     if (gotent->use_count > 0)
       entries += alpha_dynamic_entries_for_reloc (gotent->reloc_type,
 						  dynamic, info->shared);
-
-  /* If we are using a .plt entry, subtract one, as the first
-     reference uses a .rela.plt entry instead.  */
-  if (h->root.plt.offset != MINUS_ONE)
-    entries--;
 
   if (entries > 0)
     {
@@ -2748,6 +2773,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 				    elf64_alpha_calc_dynrel_sizes, info);
 
       elf64_alpha_size_rela_got_section (info);
+      elf64_alpha_size_plt_section (info);
     }
   /* else we're not dynamic and by definition we don't need such things.  */
 
@@ -2831,6 +2857,10 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
 	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return FALSE;
+
+	  if (elf64_alpha_use_secureplt
+	      && !add_dynamic_entry (DT_ALPHA_PLTRO, 1))
+	    return FALSE;
 	}
 
       if (!add_dynamic_entry (DT_RELA, 0)
@@ -2861,17 +2891,6 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
    subject, that I cannot find references to at the moment, that
    related to Alpha in particular.  They are by David Wall, then of
    DEC WRL.  */
-
-#define OP_LDA		0x08
-#define OP_LDAH		0x09
-#define INSN_JSR	0x68004000
-#define INSN_JSR_MASK	0xfc00c000
-#define OP_LDQ		0x29
-#define OP_BR		0x30
-#define OP_BSR		0x34
-#define INSN_UNOP	0x2ffe0000
-#define INSN_ADDQ	0x40000400
-#define INSN_RDUNIQ	0x0000009e
 
 struct alpha_relax_info
 {
@@ -4599,9 +4618,10 @@ elf64_alpha_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 				   struct elf_link_hash_entry *h,
 				   Elf_Internal_Sym *sym)
 {
+  struct alpha_elf_link_hash_entry *ah = (struct alpha_elf_link_hash_entry *)h;
   bfd *dynobj = elf_hash_table(info)->dynobj;
 
-  if (h->plt.offset != MINUS_ONE)
+  if (h->needs_plt)
     {
       /* Fill in the .plt entry for this symbol.  */
       asection *splt, *sgot, *srel;
@@ -4613,83 +4633,71 @@ elf64_alpha_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 
       BFD_ASSERT (h->dynindx != -1);
 
-      /* The first .got entry will be updated by the .plt with the
-	 address of the target function.  */
-      gotent = ((struct alpha_elf_link_hash_entry *) h)->got_entries;
-      BFD_ASSERT (gotent && gotent->addend == 0);
-
       splt = bfd_get_section_by_name (dynobj, ".plt");
       BFD_ASSERT (splt != NULL);
       srel = bfd_get_section_by_name (dynobj, ".rela.plt");
       BFD_ASSERT (srel != NULL);
-      sgot = alpha_elf_tdata (gotent->gotobj)->got;
-      BFD_ASSERT (sgot != NULL);
 
-      got_addr = (sgot->output_section->vma
-		  + sgot->output_offset
-		  + gotent->got_offset);
-      plt_addr = (splt->output_section->vma
-		  + splt->output_offset
-		  + h->plt.offset);
+      for (gotent = ah->got_entries; gotent ; gotent = gotent->next)
+	if (gotent->reloc_type == R_ALPHA_LITERAL
+	    && gotent->use_count > 0)
+	  {
+	    unsigned int insn;
+	    int disp;
 
-      plt_index = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+	    sgot = alpha_elf_tdata (gotent->gotobj)->got;
+	    BFD_ASSERT (sgot != NULL);
 
-      /* Fill in the entry in the procedure linkage table.  */
-      {
-	bfd_vma insn1, insn2, insn3;
+	    BFD_ASSERT (gotent->got_offset != -1);
+	    BFD_ASSERT (gotent->plt_offset != -1);
 
-	insn1 = PLT_ENTRY_WORD1 | ((-(h->plt.offset + 4) >> 2) & 0x1fffff);
-	insn2 = PLT_ENTRY_WORD2;
-	insn3 = PLT_ENTRY_WORD3;
+	    got_addr = (sgot->output_section->vma
+			+ sgot->output_offset
+			+ gotent->got_offset);
+	    plt_addr = (splt->output_section->vma
+			+ splt->output_offset
+			+ gotent->plt_offset);
 
-	bfd_put_32 (output_bfd, insn1, splt->contents + h->plt.offset);
-	bfd_put_32 (output_bfd, insn2, splt->contents + h->plt.offset + 4);
-	bfd_put_32 (output_bfd, insn3, splt->contents + h->plt.offset + 8);
-      }
+	    plt_index = (gotent->plt_offset-PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
 
-      /* Fill in the entry in the .rela.plt section.  */
-      outrel.r_offset = got_addr;
-      outrel.r_info = ELF64_R_INFO(h->dynindx, R_ALPHA_JMP_SLOT);
-      outrel.r_addend = 0;
+	    /* Fill in the entry in the procedure linkage table.  */
+	    if (elf64_alpha_use_secureplt)
+	      {
+		disp = (PLT_HEADER_SIZE - 4) - (gotent->plt_offset + 4);
+		insn = INSN_AD (INSN_BR, 31, disp);
+		bfd_put_32 (output_bfd, insn,
+			    splt->contents + gotent->plt_offset);
 
-      loc = srel->contents + plt_index * sizeof (Elf64_External_Rela);
-      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+		plt_index = ((gotent->plt_offset - NEW_PLT_HEADER_SIZE)
+			     / NEW_PLT_ENTRY_SIZE);
+	      }
+	    else
+	      {
+		disp = -(gotent->plt_offset + 4);
+		insn = INSN_AD (INSN_BR, 28, disp);
+		bfd_put_32 (output_bfd, insn,
+			    splt->contents + gotent->plt_offset);
+		bfd_put_32 (output_bfd, INSN_UNOP,
+			    splt->contents + gotent->plt_offset + 4);
+		bfd_put_32 (output_bfd, INSN_UNOP,
+			    splt->contents + gotent->plt_offset + 8);
 
-      if (!h->def_regular)
-	{
-	  /* Mark the symbol as undefined, rather than as defined in the
-	     .plt section.  Leave the value alone.  */
-	  sym->st_shndx = SHN_UNDEF;
-	}
+		plt_index = ((gotent->plt_offset - OLD_PLT_HEADER_SIZE)
+			     / OLD_PLT_ENTRY_SIZE);
+	      }
 
-      /* Fill in the entries in the .got.  */
-      bfd_put_64 (output_bfd, plt_addr, sgot->contents + gotent->got_offset);
+	    /* Fill in the entry in the .rela.plt section.  */
+	    outrel.r_offset = got_addr;
+	    outrel.r_info = ELF64_R_INFO(h->dynindx, R_ALPHA_JMP_SLOT);
+	    outrel.r_addend = 0;
 
-      /* Subsequent .got entries will continue to bounce through the .plt.  */
-      if (gotent->next)
-	{
-	  srel = bfd_get_section_by_name (dynobj, ".rela.got");
-	  BFD_ASSERT (! info->shared || srel != NULL);
+	    loc = srel->contents + plt_index * sizeof (Elf64_External_Rela);
+	    bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
 
-	  gotent = gotent->next;
-	  do
-	    {
-	      sgot = alpha_elf_tdata(gotent->gotobj)->got;
-	      BFD_ASSERT(sgot != NULL);
-	      BFD_ASSERT(gotent->addend == 0);
-
-	      bfd_put_64 (output_bfd, plt_addr,
-		          sgot->contents + gotent->got_offset);
-
-	      if (info->shared)
-		elf64_alpha_emit_dynrel (output_bfd, info, sgot, srel,
-					 gotent->got_offset, 0,
-					 R_ALPHA_RELATIVE, plt_addr);
-
-	      gotent = gotent->next;
-	    }
-          while (gotent != NULL);
-	}
+	    /* Fill in the entry in the .got.  */
+	    bfd_put_64 (output_bfd, plt_addr,
+			sgot->contents + gotent->got_offset);
+	  }
     }
   else if (alpha_elf_dynamic_symbol_p (h, info))
     {
@@ -4766,33 +4774,45 @@ elf64_alpha_finish_dynamic_sections (bfd *output_bfd,
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
-      asection *splt;
+      asection *splt, *sgotplt, *srelaplt;
       Elf64_External_Dyn *dyncon, *dynconend;
+      bfd_vma plt_vma, gotplt_vma;
 
       splt = bfd_get_section_by_name (dynobj, ".plt");
+      srelaplt = bfd_get_section_by_name (output_bfd, ".rela.plt");
       BFD_ASSERT (splt != NULL && sdyn != NULL);
+
+      plt_vma = splt->output_section->vma + splt->output_offset;
+
+      gotplt_vma = 0;
+      if (elf64_alpha_use_secureplt)
+	{
+	  sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+	  BFD_ASSERT (sgotplt != NULL);
+	  if (sgotplt->size > 0)
+	    gotplt_vma = sgotplt->output_section->vma + sgotplt->output_offset;
+	}
 
       dyncon = (Elf64_External_Dyn *) sdyn->contents;
       dynconend = (Elf64_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
-	  const char *name;
-	  asection *s;
 
 	  bfd_elf64_swap_dyn_in (dynobj, dyncon, &dyn);
 
 	  switch (dyn.d_tag)
 	    {
 	    case DT_PLTGOT:
-	      name = ".plt";
-	      goto get_vma;
+	      dyn.d_un.d_ptr
+		= elf64_alpha_use_secureplt ? gotplt_vma : plt_vma;
+	      break;
 	    case DT_PLTRELSZ:
-	      name = ".rela.plt";
-	      goto get_size;
+	      dyn.d_un.d_val = srelaplt ? srelaplt->size : 0;
+	      break;
 	    case DT_JMPREL:
-	      name = ".rela.plt";
-	      goto get_vma;
+	      dyn.d_un.d_ptr = srelaplt ? srelaplt->vma : 0;
+	      break;
 
 	    case DT_RELASZ:
 	      /* My interpretation of the TIS v1.1 ELF document indicates
@@ -4800,36 +4820,69 @@ elf64_alpha_finish_dynamic_sections (bfd *output_bfd,
 		 the rest of the BFD does.  It is, however, what the
 		 glibc ld.so wants.  Do this fixup here until we found
 		 out who is right.  */
-	      s = bfd_get_section_by_name (output_bfd, ".rela.plt");
-	      if (s)
-		dyn.d_un.d_val -= s->size;
-	      break;
-
-	    get_vma:
-	      s = bfd_get_section_by_name (output_bfd, name);
-	      dyn.d_un.d_ptr = (s ? s->vma : 0);
-	      break;
-
-	    get_size:
-	      s = bfd_get_section_by_name (output_bfd, name);
-	      dyn.d_un.d_val = s->size;
+	      if (srelaplt)
+		dyn.d_un.d_val -= srelaplt->size;
 	      break;
 	    }
 
 	  bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	}
 
-      /* Initialize the PLT0 entry.  */
+      /* Initialize the plt header.  */
       if (splt->size > 0)
 	{
-	  bfd_put_32 (output_bfd, PLT_HEADER_WORD1, splt->contents);
-	  bfd_put_32 (output_bfd, PLT_HEADER_WORD2, splt->contents + 4);
-	  bfd_put_32 (output_bfd, PLT_HEADER_WORD3, splt->contents + 8);
-	  bfd_put_32 (output_bfd, PLT_HEADER_WORD4, splt->contents + 12);
+	  unsigned int insn;
+	  int ofs;
 
-	  /* The next two words will be filled in by ld.so */
-	  bfd_put_64 (output_bfd, (bfd_vma) 0, splt->contents + 16);
-	  bfd_put_64 (output_bfd, (bfd_vma) 0, splt->contents + 24);
+	  if (elf64_alpha_use_secureplt)
+	    {
+	      ofs = gotplt_vma - (plt_vma + PLT_HEADER_SIZE);
+
+	      insn = INSN_ABC (INSN_SUBQ, 27, 28, 25);
+	      bfd_put_32 (output_bfd, insn, splt->contents);
+
+	      insn = INSN_ABO (INSN_LDAH, 28, 28, (ofs + 0x8000) >> 16);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 4);
+
+	      insn = INSN_ABC (INSN_S4SUBQ, 25, 25, 25);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 8);
+
+	      insn = INSN_ABO (INSN_LDA, 28, 28, ofs);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 12);
+
+	      insn = INSN_ABO (INSN_LDQ, 27, 28, 0);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 16);
+
+	      insn = INSN_ABC (INSN_ADDQ, 25, 25, 25);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 20);
+
+	      insn = INSN_ABO (INSN_LDQ, 28, 28, 8);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 24);
+
+	      insn = INSN_AB (INSN_JMP, 31, 27);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 28);
+
+	      insn = INSN_AD (INSN_BR, 28, -PLT_HEADER_SIZE);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 32);
+	    }
+	  else
+	    {
+	      insn = INSN_AD (INSN_BR, 27, 0);	/* br $27, .+4 */
+	      bfd_put_32 (output_bfd, insn, splt->contents);
+
+	      insn = INSN_ABO (INSN_LDQ, 27, 27, 12);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 4);
+
+	      insn = INSN_UNOP;
+	      bfd_put_32 (output_bfd, insn, splt->contents + 8);
+
+	      insn = INSN_AB (INSN_JMP, 27, 27);
+	      bfd_put_32 (output_bfd, insn, splt->contents + 12);
+
+	      /* The next two words will be filled in by ld.so.  */
+	      bfd_put_64 (output_bfd, 0, splt->contents + 16);
+	      bfd_put_64 (output_bfd, 0, splt->contents + 24);
+	    }
 
 	  elf_section_data (splt->output_section)->this_hdr.sh_entsize = 0;
 	}

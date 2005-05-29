@@ -51,6 +51,18 @@ AC_ARG_WITH(mmap,
   *)    AC_MSG_ERROR(bad value ${withval} for BFD with-mmap option) ;;
 esac],[want_mmap=false])dnl
 
+AC_ARG_ENABLE(secureplt,
+[  --enable-secureplt      Default to creating read-only plt entries],
+[case "${enableval}" in
+  yes)  use_secureplt=true  ;;
+  no)   use_secureplt=false ;;
+  *)    AC_MSG_ERROR(bad value ${enableval} for secureplt option) ;;
+esac],[use_secureplt=false])dnl
+if test $use_secureplt = true; then
+  AC_DEFINE(USE_SECUREPLT, 1,
+    [Define if we should default to creating read-only plt entries])
+fi
+
 AM_BINUTILS_WARNINGS
 
 AM_CONFIG_HEADER(config.h:config.in)

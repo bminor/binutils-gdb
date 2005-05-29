@@ -345,6 +345,9 @@
 /* Use mmap if it's available? */
 #undef USE_MMAP
 
+/* Define if we should default to creating read-only plt entries */
+#undef USE_SECUREPLT
+
 /* Version number of package */
 #undef VERSION
 

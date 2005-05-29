@@ -1,3 +1,38 @@
+2005-05-29  Richard Henderson  <rth@redhat.com>
+
+	* configure.in (--enable-secureplt): New.
+	* elf64-alpha.c (INSN_LDA, INSN_LDAH, INSN_LDQ, INSN_BR): New.
+	(INSN_SUBQ, INSN_S4SUBQ, INSN_JMP): New.
+	(INSN_A, INSN_AB, INSN_ABC, INSN_ABO, INSN_AD): New.
+	(elf64_alpha_use_secureplt): New.
+	(OLD_PLT_HEADER_SIZE, OLD_PLT_ENTRY_SIZE): New.
+	(NEW_PLT_HEADER_SIZE, NEW_PLT_ENTRY_SIZE): New.
+	(PLT_HEADER_SIZE, PLT_ENTRY_SIZE): Conditionalize on secureplt.
+	(ALPHA_ELF_LINK_HASH_PLT_LOC): Remove.
+	(struct alpha_elf_link_hash_entry): Add plt_offset.
+	(PLT_HEADER_WORD1, PLT_HEADER_WORD2, PLT_HEADER_WORD3): Remove.
+	(PLT_HEADER_WORD4, PLT_ENTRY_WORD1, PLT_ENTRY_WORD2): Remove.
+	(PLT_ENTRY_WORD3): Remove.
+	(elf64_alpha_create_dynamic_sections): If secureplt, set SEC_READONLY
+	on .plt and create .got.plt.
+	(elf64_alpha_output_extsym): Remove .plt frobbing for symbol values.
+	(get_got_entry): Initialize plt_offset.
+	(elf64_alpha_want_plt): New.
+	(elf64_alpha_check_relocs): Use it.
+	(elf64_alpha_adjust_dynamic_symbol): Likewise.  Don't allocate
+	plt entries here.
+	(elf64_alpha_calc_got_offsets_for_symbol): Don't report internal
+	error as user error.
+	(elf64_alpha_size_plt_section_1): Allocate one plt entry per
+	got subsection.
+	(elf64_alpha_size_plt_section): Size .got.plt section.
+	(elf64_alpha_size_rela_got_1): Don't allocate relocations if
+	plt entries used.
+	(elf64_alpha_size_dynamic_sections): Call elf64_alpha_size_plt_section.
+	Add PLTRO DYNAMIC entry.
+	(elf64_alpha_finish_dynamic_symbol): Generate secureplt format.
+	(elf64_alpha_finish_dynamic_sections): Likewise.
+
 2005-05-28  David Daney  <ddaney@avtrex.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections):  Move
@@ -10,7 +45,7 @@
 	* config.in, configure: Regenerate.
 
 2005-05-26  Mark Kettenis  <kettenis@gnu.org>
-            Maciej W. Rozycki  <macro@linux-mips.org>
+	    Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elfxx-mips.c (_bfd_mips_elf_section_processing): Warn and
 	stop processing of options if one of invalid size is
