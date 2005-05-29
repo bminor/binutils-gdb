@@ -1,3 +1,21 @@
+2005-05-29  Richard Henderson  <rth@redhat.com>
+
+	* emulparams/elf64alpha.sh (PLT): New.
+	(TEXT_PLT): New.
+	* emultempl/alphaelf.em (disable_relaxation): New.
+	(limit_32bit): Rename from elf64alpha_32bit; update all users.
+	(elf64_alpha_use_secureplt): Declare.
+	(bfd_elf64_alpha_vec, bfd_elf64_alpha_freebsd_vec): Declare.
+	(alpha_after_open): New.
+	(alpha_before_allocation): New.
+	(OPTION_NO_RELAX, OPTION_SECUREPLT, OPTION_NO_SECUREPLT): New.
+	(PARSE_AND_LIST_LONGOPTS): Include them.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Likewise.
+	(LDEMUL_AFTER_OPEN, LDEMUL_BEFORE_ALLOCATION): New.
+	* scripttempl/elf.sc (TEXT_PLT): New.
+	(PLT): Use it.
+
 2005-05-27  Andreas Schwab  <schwab@suse.de>
 
 	* configure.host (HOSTING_LIBS): Add libunwind.a if it exists.

@@ -104,6 +104,7 @@ INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
 if test -z "$PLT"; then
   PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
 fi
+test -n "${DATA_PLT-${BSS_PLT-text}}" && TEXT_PLT=yes
 if test -z "$GOT"; then
   if test -z "$SEPARATE_GOTPLT"; then
     GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) }"
@@ -302,7 +303,7 @@ cat <<EOF
     ${RELOCATING+${INIT_END}}
   } =${NOP-0}
 
-  ${DATA_PLT-${BSS_PLT-${PLT}}}
+  ${TEXT_PLT+${PLT}}
   .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
