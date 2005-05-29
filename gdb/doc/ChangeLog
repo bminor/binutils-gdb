@@ -1,3 +1,8 @@
+2005-05-28  Bob Rossi  <bob@brasko.net>
+
+	* gdb.texinfo (GDB/MI Out-of-band Records): Add bullet enumerating
+	the possible reasons why an exec async record would be returned to FE.
+
 2005-05-26  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.texinfo: Note that Elena Zannoni, Fernando Nasser, and

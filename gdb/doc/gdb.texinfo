@@ -16969,9 +16969,40 @@ consequence of @sc{gdb/mi} (e.g., a breakpoint modified) or a result of
 target activity (e.g., target stopped).
 
 The following is a preliminary list of possible out-of-band records.
+In particular, the @var{exec-async-output} records.
 
 @table @code
-@item "*" "stop"
+@item *stopped,reason="@var{reason}"
+@end table
+
+@var{reason} can be one of the following:
+
+@table @code
+@item breakpoint-hit
+A breakpoint was reached.
+@item watchpoint-trigger
+A watchpoint was triggered.
+@item read-watchpoint-trigger
+A read watchpoint was triggered.
+@item access-watchpoint-trigger 
+An access watchpoint was triggered.
+@item function-finished
+An -exec-finish or similar CLI command was accomplished.
+@item location-reached
+An -exec-until or similar CLI command was accomplished.
+@item watchpoint-scope
+A watchpoint has gone out of scope.
+@item end-stepping-range
+An -exec-next, -exec-next-instruction, -exec-step, -exec-step-instruction or 
+similar CLI command was accomplished.
+@item exited-signalled 
+The inferior exited because of a signal.
+@item exited 
+The inferior exited.
+@item exited-normally 
+The inferior exited normally.
+@item signal-received 
+A signal was received by the inferior.
 @end table
 
 

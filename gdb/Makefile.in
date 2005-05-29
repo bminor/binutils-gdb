@@ -171,14 +171,14 @@ SUBDIR_MI_OBS = \
 	mi-cmds.o mi-cmd-env.o mi-cmd-var.o mi-cmd-break.o mi-cmd-stack.o \
 	mi-cmd-file.o mi-cmd-disas.o mi-symbol-cmds.o \
 	mi-interp.o \
-	mi-main.o mi-parse.o mi-getopt.o
+	mi-main.o mi-parse.o mi-getopt.o mi-common.o
 SUBDIR_MI_SRCS = \
 	mi/mi-out.c mi/mi-console.c \
 	mi/mi-cmds.c mi/mi-cmd-env.c \
 	mi/mi-cmd-var.c mi/mi-cmd-break.c mi/mi-cmd-stack.c \
 	mi/mi-cmd-file.c mi/mi-cmd-disas.c mi/mi-symbol-cmds.c \
 	mi/mi-interp.c \
-	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c
+	mi/mi-main.c mi/mi-parse.c mi/mi-getopt.c mi/mi-common.c
 SUBDIR_MI_DEPS =
 SUBDIR_MI_LDFLAGS=
 SUBDIR_MI_CFLAGS= \
@@ -824,6 +824,7 @@ mi_getopt_h = $(srcdir)/mi/mi-getopt.h
 mi_main_h = $(srcdir)/mi/mi-main.h
 mi_out_h = $(srcdir)/mi/mi-out.h
 mi_parse_h = $(srcdir)/mi/mi-parse.h
+mi_common_h = $(srcdir)/mi/mi-common.h
 
 #
 # gdb/tui/ headers
@@ -1778,7 +1779,7 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(gdb_string_h) $(demangle_h) $(annotate_h) $(symfile_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
 	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) $(solib_h) \
-	$(solist_h) $(observer_h) $(exceptions_h) $(gdb_events_h)
+	$(solist_h) $(observer_h) $(exceptions_h) $(gdb_events_h) $(mi_common_h)
 bsd-kvm.o: bsd-kvm.c $(defs_h) $(cli_cmds_h) $(command_h) $(frame_h) \
 	$(regcache_h) $(target_h) $(value_h) $(gdbcore_h) $(gdb_assert_h) \
 	$(readline_h) $(bsd_kvm_h)
@@ -2129,7 +2130,8 @@ infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(exceptions_h) $(breakpoint_h) $(gdb_wait_h) \
 	$(gdbcore_h) $(gdbcmd_h) $(cli_script_h) $(target_h) $(gdbthread_h) \
 	$(annotate_h) $(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) \
-	$(value_h) $(observer_h) $(language_h) $(solib_h) $(gdb_assert_h)
+	$(value_h) $(observer_h) $(language_h) $(solib_h) $(gdb_assert_h) \
+	$(mi_common_h)
 inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(observer_h) $(gdb_wait_h) \
 	$(inflow_h)
@@ -3000,6 +3002,8 @@ mi-parse.o: $(srcdir)/mi/mi-parse.c $(defs_h) $(mi_cmds_h) $(mi_parse_h) \
 mi-symbol-cmds.o: $(srcdir)/mi/mi-symbol-cmds.c $(defs_h) $(mi_cmds_h) \
 	$(symtab_h) $(ui_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-symbol-cmds.c
+mi-common.o: $(srcdir)/mi/mi-common.c $(mi_common_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-common.c
 
 #
 # rdi-share sub-directory

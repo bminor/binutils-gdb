@@ -55,6 +55,7 @@
 #include "exceptions.h"
 
 #include "gdb-events.h"
+#include "mi/mi-common.h"
 
 /* Prototypes for local functions. */
 
@@ -2114,7 +2115,8 @@ print_it_typical (bpstat bs)
       annotate_breakpoint (bs->breakpoint_at->number);
       ui_out_text (uiout, "\nBreakpoint ");
       if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "reason", "breakpoint-hit");
+	ui_out_field_string (uiout, "reason", 
+			     async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
       ui_out_field_int (uiout, "bkptno", bs->breakpoint_at->number);
       ui_out_text (uiout, ", ");
       return PRINT_SRC_AND_LOC;
@@ -2249,7 +2251,9 @@ print_it_typical (bpstat bs)
 	{
 	  annotate_watchpoint (bs->breakpoint_at->number);
 	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string (uiout, "reason", "watchpoint-trigger");
+	    ui_out_field_string
+	      (uiout, "reason",
+	       async_reason_lookup (EXEC_ASYNC_WATCHPOINT_TRIGGER));
 	  mention (bs->breakpoint_at);
 	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
@@ -2269,7 +2273,9 @@ print_it_typical (bpstat bs)
 
     case bp_read_watchpoint:
       if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "reason", "read-watchpoint-trigger");
+	ui_out_field_string
+	  (uiout, "reason",
+	   async_reason_lookup (EXEC_ASYNC_READ_WATCHPOINT_TRIGGER));
       mention (bs->breakpoint_at);
       ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
@@ -2285,7 +2291,9 @@ print_it_typical (bpstat bs)
 	{
 	  annotate_watchpoint (bs->breakpoint_at->number);
 	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
+	    ui_out_field_string
+	      (uiout, "reason",
+	       async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
 	  mention (bs->breakpoint_at);
 	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
@@ -2299,7 +2307,9 @@ print_it_typical (bpstat bs)
 	{
 	  mention (bs->breakpoint_at);
 	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string (uiout, "reason", "access-watchpoint-trigger");
+	    ui_out_field_string
+	      (uiout, "reason",
+	       async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
 	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
@@ -2315,7 +2325,9 @@ print_it_typical (bpstat bs)
 
     case bp_finish:
       if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "reason", "function-finished");
+	ui_out_field_string
+	  (uiout, "reason",
+	   async_reason_lookup (EXEC_ASYNC_FUNCTION_FINISHED));
       return PRINT_UNKNOWN;
       break;
 
@@ -2545,7 +2557,8 @@ watchpoint_check (void *p)
 	 will be deleted already. So we have no choice but print the
 	 information here. */
       if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "reason", "watchpoint-scope");
+	ui_out_field_string
+	  (uiout, "reason", async_reason_lookup (EXEC_ASYNC_WATCHPOINT_SCOPE));
       ui_out_text (uiout, "\nWatchpoint ");
       ui_out_field_int (uiout, "wpnum", bs->breakpoint_at->number);
       ui_out_text (uiout, " deleted because the program has left the block in\n\

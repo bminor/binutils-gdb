@@ -1,3 +1,15 @@
+2005-05-28  Bob Rossi  <bob@brasko.net>
+	* Makefile.in (SUBDIR_MI_OBS, SUBDIR_MI_SRCS): Add mi-common.
+	(gdb/mi/ headers): Add mi_common_h.
+	(breakpoint.o, infrun.o): Add dependencies mi_common_h.
+	* breakpoint.c (include): Add include 'mi/mi-common.h'.
+	(print_it_typical): Use async_reason_lookup.
+	(watchpoint_check): Ditto.
+	* infrun.c (include): Add include 'mi/mi-common.h'.
+	(print_stop_reason): Use async_reason_lookup.
+	* mi/mi-common.h: New file.
+	* mi/mi-common.c: Ditto.
+
 2005-05-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* alpha-tdep.c (alpha_next_pc): Use correct register number

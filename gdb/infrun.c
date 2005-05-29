@@ -48,6 +48,7 @@
 #include "solib.h"
 
 #include "gdb_assert.h"
+#include "mi/mi-common.h"
 
 /* Prototypes for local functions */
 
@@ -2876,7 +2877,9 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
          operation for n > 1 */
       if (!step_multi || !stop_step)
 	if (ui_out_is_mi_like_p (uiout))
-	  ui_out_field_string (uiout, "reason", "end-stepping-range");
+	  ui_out_field_string
+	    (uiout, "reason",
+	     async_reason_lookup (EXEC_ASYNC_END_STEPPING_RANGE));
       break;
     case BREAKPOINT_HIT:
       /* We found a breakpoint. */
@@ -2886,7 +2889,9 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* The inferior was terminated by a signal. */
       annotate_signalled ();
       if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "reason", "exited-signalled");
+	ui_out_field_string
+	  (uiout, "reason",
+	   async_reason_lookup (EXEC_ASYNC_EXITED_SIGNALLED));
       ui_out_text (uiout, "\nProgram terminated with signal ");
       annotate_signal_name ();
       ui_out_field_string (uiout, "signal-name",
@@ -2906,7 +2911,8 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       if (stop_info)
 	{
 	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string (uiout, "reason", "exited");
+	    ui_out_field_string (uiout, "reason", 
+				 async_reason_lookup (EXEC_ASYNC_EXITED));
 	  ui_out_text (uiout, "\nProgram exited with code ");
 	  ui_out_field_fmt (uiout, "exit-code", "0%o",
 			    (unsigned int) stop_info);
@@ -2915,7 +2921,9 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       else
 	{
 	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string (uiout, "reason", "exited-normally");
+	    ui_out_field_string
+	      (uiout, "reason",
+	       async_reason_lookup (EXEC_ASYNC_EXITED_NORMALLY));
 	  ui_out_text (uiout, "\nProgram exited normally.\n");
 	}
       break;
@@ -2926,7 +2934,8 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       ui_out_text (uiout, "\nProgram received signal ");
       annotate_signal_name ();
       if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "reason", "signal-received");
+	ui_out_field_string
+	  (uiout, "reason", async_reason_lookup (EXEC_ASYNC_SIGNAL_RECEIVED));
       ui_out_field_string (uiout, "signal-name",
 			   target_signal_to_name (stop_info));
       annotate_signal_name_end ();
