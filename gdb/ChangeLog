@@ -1,3 +1,8 @@
+2005-05-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* alpha-tdep.c (alpha_next_pc): Use correct register number
+	for floating-point branch instructions.
+
 2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Jonathan Larmour  <jifl@eCosCentric.com>
 

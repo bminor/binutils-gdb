@@ -1372,6 +1372,7 @@ alpha_next_pc (CORE_ADDR pc)
 {
   unsigned int insn;
   unsigned int op;
+  int regno;
   int offset;
   LONGEST rav;
   char reg[8];
@@ -1404,7 +1405,19 @@ alpha_next_pc (CORE_ADDR pc)
 	}
 
       /* Need to determine if branch is taken; read RA.  */
-      regcache_cooked_read (current_regcache, (insn >> 21) & 0x1f, reg);
+      regno = (insn >> 21) & 0x1f;
+      switch (op)
+        {
+          case 0x31:              /* FBEQ */
+          case 0x36:              /* FBGE */
+          case 0x37:              /* FBGT */
+          case 0x33:              /* FBLE */
+          case 0x32:              /* FBLT */
+          case 0x35:              /* FBNE */
+            regno += FP0_REGNUM;
+	}
+      
+      regcache_cooked_read (current_regcache, regno, reg);
       rav = extract_signed_integer (reg, 8);
 
       switch (op)
