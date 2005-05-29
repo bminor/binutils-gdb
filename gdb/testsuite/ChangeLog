@@ -1,3 +1,8 @@
+2005-05-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.arch/alpha-step.c: New file.
+	* gdb.arch/alpha-step.exp: New testcase.
+
 2005-05-17  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Dennis Brueni  <dennis@slickedit.com>
 
