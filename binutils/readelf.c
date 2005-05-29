@@ -1471,6 +1471,17 @@ get_ia64_dynamic_type (unsigned long type)
 }
 
 static const char *
+get_alpha_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_ALPHA_PLTRO: return "ALPHA_PLTRO";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_dynamic_type (unsigned long type)
 {
   static char buff[64];
@@ -1571,6 +1582,9 @@ get_dynamic_type (unsigned long type)
 	      break;
 	    case EM_IA_64:
 	      result = get_ia64_dynamic_type (type);
+	      break;
+	    case EM_ALPHA:
+	      result = get_alpha_dynamic_type (type);
 	      break;
 	    default:
 	      result = NULL;
