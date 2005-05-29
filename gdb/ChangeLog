@@ -1,3 +1,8 @@
+2005-05-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/fnchange.lst: Add mappings for linux-ppc-low.c and
+	linux-ppc64-low.c.
+
 2005-05-28  Bob Rossi  <bob@brasko.net>
 	* Makefile.in (SUBDIR_MI_OBS, SUBDIR_MI_SRCS): Add mi-common.
 	(gdb/mi/ headers): Add mi_common_h.
