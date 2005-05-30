@@ -4098,7 +4098,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  /* If this is a tp-relative relocation against sym 0,
 	     this is hackery from relax_section.  Force the value to
-	     be the tls base.  */
+	     be the tls module base.  */
 	  if (r_symndx == 0
 	      && (r_type == R_ALPHA_TLSLDM
 		  || r_type == R_ALPHA_GOTTPREL
@@ -4106,7 +4106,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  || r_type == R_ALPHA_TPRELHI
 		  || r_type == R_ALPHA_TPRELLO
 		  || r_type == R_ALPHA_TPREL16))
-	    value = tp_base;
+	    value = dtp_base;
 
 	  if (local_got_entries)
 	    gotent = local_got_entries[r_symndx];

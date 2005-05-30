@@ -1,3 +1,8 @@
+2005-05-30  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Use dtp_base for
+	the zero index relocs produced by elf64_alpha_relax_tls_get_addr.
+
 2005-05-29  Richard Henderson  <rth@redhat.com>
 
 	* configure.in (--enable-secureplt): New.
