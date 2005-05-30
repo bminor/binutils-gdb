@@ -1,3 +1,28 @@
+2005-05-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport from mainline:
+	2005-05-29  Jakub Jelinek  <jakub@redhat.com>
+	* elfcode.h (elf_object_p): Fail if e_shoff != 0, e_shnum == 0 and
+	first shdr has sh_size == 0.  Fail if e_shnum is large to cause
+	arithmetic overflow when allocating the i_shdr array.
+	Sanity check sh_link and sh_info fields.  Fix e_shstrndx sanity check.
+
+	2005-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+	* elf.c (group_signature): Undo the last change. Check if the
+	symbol table section is correct.
+
+	2005-05-17  Nick Clifton  <nickc@redhat.com>
+	* elf.c (group_signature): Check for a group section which is
+	actually a (corrupt) symbol table section in disguise and prevent
+	an infinite loop from occurring.
+
+	2005-05-17  Tavis Ormandy <taviso@gentoo.org>
+	* elf.c (bfd_section_from_shdr): Add sanity check when parsing
+	dynamic sections.
+
+	2005-05-09  Alan Modra  <amodra@bigpond.net.au>
+	* elfcode.h (elf_object_p): Add more sanity checks on elf header.
+
 2005-05-28  David Daney  <ddaney@avtrex.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections):  Move

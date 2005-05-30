@@ -443,8 +443,11 @@ group_signature (bfd *abfd, Elf_Internal_Shdr *ghdr)
   Elf_External_Sym_Shndx eshndx;
   Elf_Internal_Sym isym;
 
-  /* First we need to ensure the symbol table is available.  */
-  if (! bfd_section_from_shdr (abfd, ghdr->sh_link))
+  /* First we need to ensure the symbol table is available.  Make sure
+     that it is a symbol table section.  */
+  hdr = elf_elfsections (abfd) [ghdr->sh_link];
+  if (hdr->sh_type != SHT_SYMTAB
+      || ! bfd_section_from_shdr (abfd, ghdr->sh_link))
     return NULL;
 
   /* Go read the symbol.  */
@@ -1732,6 +1735,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
     case SHT_DYNAMIC:	/* Dynamic linking information.  */
       if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+	return FALSE;
+      if (hdr->sh_link > elf_numsections (abfd)
+	  || elf_elfsections (abfd)[hdr->sh_link] == NULL)
 	return FALSE;
       if (elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_STRTAB)
 	{
