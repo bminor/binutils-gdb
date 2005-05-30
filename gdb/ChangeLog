@@ -1,5 +1,9 @@
 2005-05-30  Andrew Cagney  <cagney@gnu.org>
 
+	* MAINTAINERS (Can Commit Without Approval): New section,
+	previously burried under "Target Instruction Set Architectures".
+	Note that cagney "can commit" changes to powerpc-linux.
+	
 	* MAINTAINERS: Drop architecture and target vectors.
 
 2005-05-29  Eli Zaretskii  <eliz@gnu.org>

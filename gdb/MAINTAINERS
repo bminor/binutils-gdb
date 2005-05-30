@@ -48,6 +48,23 @@ fix, since such a change without discussion will result in
 instantaneous and loud complaints.
 
 
+		Can Commit Without Approval
+		       (alphabetic)
+
+The following developers CAN COMMIT changes (and hence approve
+patches) to specific sections of GDB:
+
+	Andrew Cagney (powerpc, powerpc-linux)
+	Hans-Peter Nilsson (cris)	
+	Jeff Johnston (ia64)
+	Joel Brobecker (mips)
+	Kei Sakamoto (m32r)
+	Kevin Buettner (powerpc)
+	Orjan Friberg (cris)
+	Randolph Chung (pa)
+	Ulrich Weigand (s390)
+
+
 Target Instruction Set Architectures:
 
 The *-tdep.c files.  ISA (Instruction Set Architecture) and OS-ABI
@@ -125,19 +142,6 @@ the native maintainer when resolving ABI issues.
 	xstormy16	--target=xstormy16-elf
 			Corinna Vinschen	vinschen@redhat.com
 
-The following developers CAN COMMIT changes (and hence approve
-patches) to specific architectures:
-
-	Andrew Cagney (powerpc)
-	Hans-Peter Nilsson (cris)	
-	Jeff Johnston (ia64)
-	Joel Brobecker (mips)
-	Kei Sakamoto (m32r)
-	Kevin Buettner (powerpc)
-	Orjan Friberg (cris)
-	Randolph Chung (pa)
-	Ulrich Weigand (s390)
-
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.
 
@@ -165,8 +169,7 @@ MS Windows (NT, '00, 9x, Me, XP) host & native
 			Chris Faylor		cgf@alum.bu.edu
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
-GNU/Linux PPC native	Andrew Cagney		cagney@gnu.org
-			Kevin Buettner		kevinb@redhat.com
+GNU/Linux PPC native	Kevin Buettner		kevinb@redhat.com
 GNU/Linux MIPS native & host
 			Daniel Jacobowitz	dan@debian.org
 GNU/Linux m68k		Andreas Schwab		schwab@suse.de
