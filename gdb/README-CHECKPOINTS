@@ -1,0 +1,101 @@
+This is an experimental, not-ready-for-primetime modification to gdb, 
+to allow it to save tracepoint/checkpoint data to a file for later use.
+There is an accompanying experimental RDA agent that can serve the data
+back to gdb for replay.
+
+Here is the (strictly pro tem) user interface as it stands:
+
+	set default-tracepoint-method (on/off)
+
+Tells gdb to use the default (fallback) method for tracepoints,
+in which tracepoint data is collected by gdb itself and written
+into a file.
+
+	open-checkpoint-file <filename>
+
+Open named file for tracepoint/checkpoint data.
+Overwrite, not append.
+
+	close-checkpoint-file
+
+Close the tracepoint/checkpoint file.
+
+	drop-checkpoint
+
+Write a checkpoint into the file right now.  There are several
+options for what a checkpoint may contain (see "checkpoint-method").
+
+	tracepoint-method <n>
+	checkpoint-method <n>
+
+Selects one of several experimental methods of saving 
+tracepoint/checkpoint data.
+
+	default-do-tracepoints
+
+If we happen to be sitting at a tracepoint, pretend it has
+just been hit (collect the data and write it to the file).
+
+
+
+HOW TO USE
+[evolving, subject to change]
+
+Open a file, drop some checkpoints/tracepoints into it, close the file.
+
+You can drop a checkpoint at any time by command "drop-checkpoint".
+Or, you can attach tracepoints to breakpoints (see below) and run
+a "tracepoint experiment", automatically generating numerous 
+trace-frame checkpoints.  The results are essentially identical.
+
+The contents of a tracepoint/checkpoint record may be:
+
+ * Method 1: just a small subset of the registers (pc, sp...).
+ * Method 2: All the registers.
+ * Method 3: All the registers, and a variable-size snapshot
+   of the stack.
+ * Method 4: All the registers, and an arbitrary number of chunks
+   of memory, as specified in a tracepoint "actions" list (see
+   "help actions", "help collect", etc.)
+
+This gives you a great deal of control over the content and
+granularity of a tracepoint/checkpoint file.  For instance, 
+you could do:
+
+	define sdrop
+	    step
+	    drop
+	end
+
+	define sidrop
+	    si
+	    drop
+	end
+
+and drop a checkpoint after every source statement, or
+every instruction.  A long sequence of single-instruction
+checkpoints could be used to simulate backward-stepping.
+
+
+SIMULATING TRACEPOINTS
+
+To do a tracepoint experiment:
+
+    1) Set tracepoints at selected locations.
+    2) Define the set of data to be collected at each tracepoint.
+   *3) Set a breakpoint at the same location for each tracepoint.
+    4) Open a tracepoint/checkpoint file.
+    5) "set default-tracepoint-method on".  In this mode, 
+    whenever a breakpoint occurs and there is a tracepoint
+    at the same location, the tracepoint "wins", overrides the
+    breakpoint, and causes gdb to collect tracepoint data and then
+    continue (effectively "ignoring" the breakpoint.
+    6) tstart
+    7) run/continue/step/next
+    8) Make sure you have a way to *end* the experiment
+    (eg. a breakpoint that is *not* matched by a tracepoint).
+    9) tstop
+    10) Close the file.
+
+Obviously under development and subject to change.
+
