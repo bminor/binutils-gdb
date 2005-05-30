@@ -99,8 +99,20 @@ extern void output_command (char *, int);
    $trace_line  : source line of trace frame currently being debugged.
    $trace_file  : source file of trace frame currently being debugged.
    $tracepoint  : tracepoint number of trace frame currently being debugged.
+
+   A number of the methods in this module assume "target remote", 
+   and some of them contain code that belongs in remote.c and 
+   ought to be accessed thru the target vector (so that non-remote
+   targets could implement them too).
+
+   Therefore this module defines a user-settable mode variable
+   "default-tracepoint-method", which will override the original
+   methods and cause a simple-minded fall-back method to be used, 
+   which should work on most if not all targets.
+
  */
 
+int default_trace_method;
 
 /* ======= Important global variables: ======= */
 
@@ -601,6 +613,22 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
     }
 }
 
+/* Utility: Look up a tracepoint in the list, by address.  
+   Returns the first match that's enabled.  */
+
+struct tracepoint *
+get_tracepoint_by_address (CORE_ADDR address)
+{
+  struct tracepoint *t;
+
+  ALL_TRACEPOINTS (t)
+    if (t->enabled_p)
+      if (t->address == address)
+	return t;
+
+  return NULL;
+}
+
 /* Utility: parse a tracepoint number and look it up in the list.
    If MULTI_P is true, there might be a range of tracepoints in ARG.
    if OPTIONAL_P is true, then if the argument is missing, the most
@@ -963,7 +991,8 @@ validate_actionline (char **line, struct tracepoint *t)
 	    {
 	      if ((0 == strncasecmp ("reg", p + 1, 3)) ||
 		  (0 == strncasecmp ("arg", p + 1, 3)) ||
-		  (0 == strncasecmp ("loc", p + 1, 3)))
+		  (0 == strncasecmp ("loc", p + 1, 3)) ||
+		  (0 == strncasecmp ("stack", p + 1, 5)))
 		{
 		  p = strchr (p, ',');
 		  continue;
@@ -1500,6 +1529,9 @@ free_actions_list (char **actions_list)
   xfree (actions_list);
 }
 
+static CORE_ADDR tracepoint_top_of_stack;
+static unsigned int tracepoint_size_of_stack = 256;
+
 /* Render all actions into gdb protocol.  */
 static void
 encode_actions (struct tracepoint *t, char ***tdp_actions,
@@ -1571,6 +1603,28 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 				     frame_reg,
 				     frame_offset,
 				     'L');
+		  action_exp = strchr (action_exp, ',');	/* more? */
+		}
+	      else if (0 == strncasecmp ("$stack", action_exp, 6))
+		{
+		  CORE_ADDR lo, hi;
+		  int stacklen;
+
+		  /* FIXME: frame pointer? stack_grows_down?  */
+		  lo = read_sp ();
+		  if (tracepoint_top_of_stack != 0)
+		    hi = tracepoint_top_of_stack;
+		  else
+		    hi = lo + tracepoint_size_of_stack;
+
+		  stacklen = hi - lo;
+
+		  if (tracepoint_top_of_stack != 0 &&
+		      stacklen > 10000)	/* Arbitrary sanity check.  */
+		    error ("Stack too big: sp = 0x%08lx, TOS = 0x%08lx, check TOS.",
+			   (unsigned long) lo, (unsigned long) hi);
+
+		  add_memrange (collect, -1, lo, stacklen);
 		  action_exp = strchr (action_exp, ',');	/* more? */
 		}
 	      else
@@ -1752,7 +1806,13 @@ trace_start_command (char *args, int from_tty)
 
   dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
-  if (target_is_remote ())
+  if (default_trace_method)
+    {
+      /* Default implementation.  */
+      if (from_tty && info_verbose)
+	printf_filtered ("Activating trace experiment, default method.\n");
+    }
+  else if (target_is_remote ())
     {
       putpkt ("QTinit");
       remote_get_noisy_reply (target_buf, sizeof (target_buf));
@@ -1830,34 +1890,47 @@ trace_start_command (char *args, int from_tty)
       remote_get_noisy_reply (target_buf, sizeof (target_buf));
       if (strcmp (target_buf, "OK"))
 	error (_("Bogus reply from target: %s"), target_buf);
-      set_traceframe_num (-1);	/* All old traceframes invalidated.  */
-      set_tracepoint_num (-1);
-      set_traceframe_context (-1);
-      trace_running_p = 1;
-      if (deprecated_trace_start_stop_hook)
-	deprecated_trace_start_stop_hook (1, from_tty);
-
     }
   else
-    error (_("Trace can only be run on remote targets."));
+    {
+      error (_("Target does not implement this command (tstart)."));
+    }
+
+  /* All methods.  */
+  set_traceframe_num (-1);	/* All old traceframes invalidated.  */
+  set_tracepoint_num (-1);
+  set_traceframe_context (-1);
+  trace_running_p = 1;
+  if (deprecated_trace_start_stop_hook)
+    deprecated_trace_start_stop_hook (1, from_tty);
 }
 
 /* tstop command */
 static void
 trace_stop_command (char *args, int from_tty)
 {
-  if (target_is_remote ())
+  if (default_trace_method)
+    {
+      /* Default implementation.  */
+      if (from_tty && info_verbose)
+	printf_filtered ("Deactivating trace experiment, default method.\n");
+    }
+  else if (target_is_remote ())
     {
       putpkt ("QTStop");
       remote_get_noisy_reply (target_buf, sizeof (target_buf));
       if (strcmp (target_buf, "OK"))
 	error (_("Bogus reply from target: %s"), target_buf);
-      trace_running_p = 0;
-      if (deprecated_trace_start_stop_hook)
-	deprecated_trace_start_stop_hook (0, from_tty);
     }
   else
-    error (_("Trace can only be run on remote targets."));
+    {
+      error (_("Target does not implement this command (tstop)."));
+    }
+
+  /* All methods.  */
+  trace_running_p = 0;
+  if (deprecated_trace_start_stop_hook)
+    deprecated_trace_start_stop_hook (0, from_tty);
 }
 
 unsigned long trace_running_p;
@@ -1866,7 +1939,11 @@ unsigned long trace_running_p;
 static void
 trace_status_command (char *args, int from_tty)
 {
-  if (target_is_remote ())
+  if (default_trace_method)
+    {
+      printf_filtered ("Trace is %s.\n", trace_running_p ? "on" : "off");
+    }
+  else if (target_is_remote ())
     {
       putpkt ("qTStatus");
       remote_get_noisy_reply (target_buf, sizeof (target_buf));
@@ -1879,7 +1956,9 @@ trace_status_command (char *args, int from_tty)
       trace_running_p = (target_buf[1] == '1');
     }
   else
-    error (_("Trace can only be run on remote targets."));
+    {
+      error (_("Target does not implement this command (tstatus)."));
+    }
 }
 
 /* Worker function for the various flavors of the tfind command.  */
@@ -2012,6 +2091,9 @@ static void
 trace_find_command (char *args, int from_tty)
 { /* this should only be called with a numeric argument */
   int frameno = -1;
+
+  if (default_trace_method)
+    error ("default trace find");
 
   if (target_is_remote ())
     {
@@ -2536,6 +2618,9 @@ trace_dump_command (char *args, int from_tty)
   int stepping_actions = 0;
   int stepping_frame = 0;
 
+  if (default_trace_method)
+    error ("default trace dump");
+
   if (!target_is_remote ())
     {
       error (_("Trace can only be run on remote targets."));
@@ -2669,12 +2754,481 @@ get_traceframe_number (void)
   return traceframe_number;
 }
 
+static FILE *checkpoint_file;
+static int tracepoint_method;
+
+static void
+emit_checkpoint_method1 (struct tracepoint *t)
+{
+  /* This extremely concise method emits only a few essential registers. 
+     Think of it as an execution trace.  */
+  if (checkpoint_file)
+    {
+      /* Method 1: Emit minimal subset of registers.  */
+      fputs ("T00", checkpoint_file);
+      /* FIXME: print 'em like addresses.  */
+      if (PC_REGNUM >= 0)
+	{
+	  fputs (int_string ((LONGEST) PC_REGNUM, 16, 0, 0, 0), 
+		 checkpoint_file);
+	  fputc (':', checkpoint_file);
+	  fputs (paddr (read_pc ()), checkpoint_file);
+	  fputc (';', checkpoint_file);
+	}
+      if (SP_REGNUM >= 0)
+	{
+	  fputs (int_string ((LONGEST) SP_REGNUM, 16, 0, 0, 0), 
+		 checkpoint_file);
+	  fputc (':', checkpoint_file);
+	  fputs (paddr (read_sp ()), checkpoint_file);
+	  fputc (';', checkpoint_file);
+	}
+      if (DEPRECATED_FP_REGNUM >= 0)
+	{
+	  fputs (int_string ((LONGEST) DEPRECATED_FP_REGNUM, 16, 0, 0, 0), 
+		 checkpoint_file);
+	  fputc (':', checkpoint_file);
+	  fputs (paddr ((CORE_ADDR) read_register (DEPRECATED_FP_REGNUM)), 
+		 checkpoint_file);
+	  fputc (';', checkpoint_file);
+	}
+      if (PS_REGNUM >= 0)
+	{
+	  fputs (int_string ((LONGEST) PS_REGNUM, 16, 0, 0, 0), 
+		 checkpoint_file);
+	  fputc (':', checkpoint_file);
+	  fputs (paddr ((CORE_ADDR) read_register (PS_REGNUM)), 
+		 checkpoint_file);
+	  fputc (';', checkpoint_file);
+	}
+#define I386_EBP_REGNUM 5	/* mumble, mutter... */
+
+#if defined (I386_EBP_REGNUM)
+      fputs (int_string ((LONGEST) I386_EBP_REGNUM, 16, 0, 0, 0), 
+	     checkpoint_file);
+      fputc (':', checkpoint_file);
+      fputs (paddr ((CORE_ADDR) read_register (I386_EBP_REGNUM)), 
+	     checkpoint_file);
+      fputc (';', checkpoint_file);
+#endif
+      fputc ('\n', checkpoint_file);
+    }
+}
+
+static void
+checkpoint_emit_id (int id, FILE *file)
+{
+  fprintf (file, "\nCHECKPOINT ID %d\n", id);
+}
+
+static void
+checkpoint_emit_sequential_id (FILE *file)
+{
+  static int cpnum;
+  checkpoint_emit_id (cpnum++, file);
+}
+
+static void
+checkpoint_emit_gregs (FILE *file)
+{
+  /* FIXME: assume the g packet includes regs 0 to NUM_REGS-1.  */
+  unsigned char binbuf[32];
+  char ascbuf[128];
+  int i;
+
+  for (i = 0; i < NUM_REGS; i++)
+    {
+      if (!register_cached (i))
+	target_fetch_registers (i);
+      regcache_raw_collect (current_regcache, i, binbuf);
+      *(mem2hex (binbuf, ascbuf, register_size (current_gdbarch, i))) = '\0';
+      fputs (ascbuf, file);
+    }
+  fputc ('\n', file);
+}
+
+static void
+checkpoint_emit_memrange (CORE_ADDR lo, CORE_ADDR hi, FILE *file)
+{
+  unsigned char *buf;
+  unsigned int i, len = hi - lo;
+
+  fprintf (file, "S3%02x%s", (len + 5) > 255 ? 255 : (len + 5), paddr (lo));
+
+  /* FIXME: cleanup.  */
+  buf = xmalloc (len);
+  target_read_memory (lo, buf, len);
+
+  /* FIXME: byte order?  */
+  for (i = 0; i < len; i++)
+    {
+      if ((i > 0) && ((i % 256) == 0))
+	fprintf (file, "xx\nS3%02x%s", 
+		 (len + 5 - i) > 255 ? 255 : (len + 5 - i), paddr (lo + i));
+      fprintf (file, "%02x", buf[i]);
+    }
+  xfree (buf);
+
+  /* We don't really care about the checksum.  */
+  fputs ("xx\n", file);
+}
+
+static void
+checkpoint_emit_stack (FILE *file)
+{
+  CORE_ADDR lo, hi;
+  int stacklen;
+
+  /* FIXME: frame pointer? stack_grows_down?  */
+  lo = read_sp ();
+  if (tracepoint_top_of_stack != 0)
+    hi = tracepoint_top_of_stack;
+  else
+    hi = lo + tracepoint_size_of_stack;
+
+  stacklen = hi - lo;
+
+  if (tracepoint_top_of_stack != 0 &&
+      stacklen > 10000)	/* Arbitrary sanity check.  */
+    error ("Stack too big: sp = 0x%08lx, TOS = 0x%08lx, check TOS.",
+	   (unsigned long) lo, (unsigned long) hi);
+
+  checkpoint_emit_memrange (lo, hi, file);
+}
+
+static void
+emit_checkpoint_method2 (struct tracepoint *t)
+{
+  /* This relatively concise method emits the standard "g packet"
+     register set.  It's still mostly an execution trace, but any
+     variables in registers will be captured too.  */
+
+  checkpoint_emit_sequential_id (checkpoint_file);
+  fputs ("REGISTERS\n", checkpoint_file);
+  checkpoint_emit_gregs (checkpoint_file);
+}
+
+static void
+emit_checkpoint_method3 (struct tracepoint *t)
+{
+  /* This medium-complexity method emits the standard "g packet"
+     register set, plus a configurable chunk of the machine stack.
+     User may either specify the size of the chunk (default 512),
+     or the top of the stack.  By this means, we hopefully capture
+     all local variables and arguments, and can do backtrace.  */
+
+  checkpoint_emit_sequential_id (checkpoint_file);
+  fputs ("REGISTERS\n", checkpoint_file);
+  checkpoint_emit_gregs (checkpoint_file);
+
+  /* And here's where memory goes.  */
+  fputs ("MEMORY\n", checkpoint_file);
+  checkpoint_emit_stack (checkpoint_file);
+}
+
+static void
+emit_checkpoint_method4 (struct tracepoint *t)
+{
+  /* This method will not immediately lend itself to the "drop"
+     command, because it wants to interpret the "actions" of the
+     actual tracepoint.  "Drop" doesn't have an actual tracepoint
+     associated with it (unles we give it an argument...  Hmmm!) */
+
+  char **tdp_actions, **stepping_actions;
+  int memory_flag = 0;
+  int i;
+
+  if (checkpoint_file)
+    {
+      encode_actions (t, &tdp_actions, &stepping_actions);
+      if (tdp_actions == NULL)
+	{
+	  /* Fixme -- no actions -- should just lay down a 
+	     "method 1" tracepoint, but rda doesn't know how
+	     to read those yet, so fall back to method2.  */
+	  emit_checkpoint_method2 (t);
+	  return;
+	}
+
+      checkpoint_emit_sequential_id (checkpoint_file);
+      for (i = 0; tdp_actions[i]; i++)
+	{
+	  CORE_ADDR offset, base;
+	  int regnum, len;
+	  char *ptr;
+
+	  if (tdp_actions[i][0] == 'R')
+	    {
+	      /* We want some regs.  Let's just take 'em all.  */
+	      fputs ("REGISTERS\n", checkpoint_file);
+	      checkpoint_emit_gregs (checkpoint_file);
+	    }
+	do_memrange:
+	  if (tdp_actions[i][0] == 'M')
+	    {
+	      /* A mem range.  */
+	      if (memory_flag == 0)
+		{
+		  fputs ("MEMORY\n", checkpoint_file);
+		  memory_flag++;
+		}
+	      if (strncmp (tdp_actions[i] + 1, "FFFF", 4) == 0)
+		{
+		  /* Absolute memory range.  */
+		  if ((ptr = strchr (tdp_actions[i], ',')) != NULL)
+		    {
+		      /* FIXME strtoull? */
+		      base = strtoul (++ptr, NULL, 16);
+		      if ((ptr = strchr (ptr, ',')) != NULL)
+			{
+			  len = strtoul (++ptr, NULL, 16);
+			  checkpoint_emit_memrange (base, base + len, 
+						    checkpoint_file);
+			}
+		    }
+		}
+	      else
+		{
+		  /* Register-based memory range.  */
+		  regnum = strtol (tdp_actions[i] + 1, NULL, 16);
+		  base = read_register (regnum);
+		  if ((ptr = strchr (tdp_actions[i], ',')) != NULL)
+		    {
+		      offset = strtoul (++ptr, NULL, 16);
+		      if ((ptr = strchr (ptr, ',')) != NULL)
+			{
+			  len = strtol (++ptr, NULL, 16);
+			  checkpoint_emit_memrange (base + offset, 
+						    base + offset + len,
+						    checkpoint_file);
+			}
+		    }
+		}
+	      if ((ptr = strchr (ptr, 'M')) != NULL)
+		{
+		  tdp_actions[i] = ptr;
+		  goto do_memrange;
+		}
+	    }
+	}
+    }
+}
+
+static void
+tracepoint_set_tos_command (char *args, int from_tty)
+{
+  if (args == NULL || *args == '\0')
+    error ("Argument required: address of TOS");
+
+  /* Fixme -- expression.  */
+  tracepoint_top_of_stack = parse_and_eval_address (args);
+}
+
+static void
+tracepoint_set_size_of_stack_command (char *args, int from_tty)
+{
+  if (args == NULL || *args == '\0')
+    error ("Argument required: size of desired stack memrange.");
+
+  /* Fixme -- expression.  */
+  tracepoint_size_of_stack = parse_and_eval_address (args);
+}
+
+static void
+default_do_tracepoints_command (char *args, int from_tty)
+{
+  CORE_ADDR stop_pc;
+  struct tracepoint *t;
+
+  if (checkpoint_file == NULL)
+    error ("You must open a checkpoint file first.  Type help open-checkpoint.");
+
+  if (tracepoint_chain == NULL)
+    error ("No tracepoints defined.");
+
+  if (!target_has_execution)
+    error ("Target not running.");
+
+  if (from_tty && info_verbose)
+    printf_filtered ("Do default tracepoint actions.\n");
+
+  /* OK, find a tracepoint that matches the current pc.
+     FIXME handle while-stepping.  */
+  stop_pc = read_pc ();
+  ALL_TRACEPOINTS (t)
+    if (t->address == stop_pc)
+      {
+	if (from_tty && info_verbose)
+	  printf_filtered ("Will collect data for tracepoint %d\n", t->number);
+	switch (tracepoint_method) 
+	  {
+	  case 1:	emit_checkpoint_method1 (t);	break;
+	  case 2:	emit_checkpoint_method2 (t);	break;
+	  case 3:	emit_checkpoint_method3 (t);	break;
+	  case 4:	emit_checkpoint_method4 (t);	break;
+	  default:	emit_checkpoint_method4 (t);	break;
+	  }
+      }
+}
+
+/* boolean tracepoint_event_p --
+
+   Decides whether to handle the current stop event as a 
+   tracepoint event.  If so, handles the event (collects 
+   the tracepoint data) and returns true.  GDB will not stop.
+
+   Otherwise the event must be handled by someone else,
+   eg. as a breakpoint event.  */
+
+int
+tracepoint_event_p ()
+{
+  struct tracepoint *t;
+
+  /* Can't be ours if default trace method is not on.  */
+  if (!default_trace_method)
+    return 0;
+
+  /* Can't be ours if a trace experiment is not running.  */
+  if (!trace_running_p)
+    return 0;
+
+  /* Can't be ours if we don't have an open tracepoint file.  */
+  if (checkpoint_file == NULL)
+    return 0;
+
+  /* Can't be ours if there's no (enabled) tracepoint here.  */
+  if ((t = get_tracepoint_by_address (read_pc ())) == NULL)
+    return 0;
+
+  /* OK, it's ours, let's handle it.  */
+  switch (tracepoint_method) 
+    {
+    case 1:	emit_checkpoint_method1 (t);	break;
+    case 2:	emit_checkpoint_method2 (t);	break;
+    case 3:	emit_checkpoint_method3 (t);	break;
+    case 4:	emit_checkpoint_method4 (t);	break;
+    default:	emit_checkpoint_method4 (t);	break;
+    }
+  /* Tell caller we've handled it.  */
+  return 1;
+}
+
+/* Open file for checkpoints (tracepoint frames).  */
+static void
+checkpoint_open (char *args, int from_tty)
+{
+  if (args == NULL || *args == '\0')
+    error ("Argument required: checkpoint file name.");
+
+  if ((checkpoint_file = fopen (args, "w")) == NULL)
+    error ("Could not open checkpoint file %s for output.", args);
+
+  fprintf (checkpoint_file, "CHECKPOINT FILE\n");
+  if (from_tty)
+    fprintf_filtered (gdb_stdout, "File '%s' open for checkpoints.\n",
+		      args);
+}
+
+/* Close file for checkpoints (tracepoint frames).  */
+static void
+checkpoint_close (char *unused, int from_tty)
+{
+  if (checkpoint_file == NULL)
+    error ("No checkpoint file is open.");
+
+  fclose (checkpoint_file);
+  if (from_tty)
+    fprintf_filtered (gdb_stdout, "Checkpoint file closed.\n");
+}
+
+/* "Drop" a checkpoint into the checkpoint file.  */
+static void
+checkpoint_command (char *args, int from_tty)
+{
+  if (checkpoint_file)
+    {
+      switch (tracepoint_method) 
+	{
+	case 1:		emit_checkpoint_method1 (NULL);	break;
+	case 2:		emit_checkpoint_method2 (NULL);	break;
+	case 3:		emit_checkpoint_method3 (NULL);	break;
+	case 4:
+	  if (args && *args)
+	    {
+	      struct tracepoint *t = get_tracepoint_by_number (&args, 0, 0);
+
+	      if (t)
+		{
+		  emit_checkpoint_method4 (t);
+		  break;
+		}
+	    }
+	  error ("Must specify a tracepoint ID for method 4.");
+	  break;
+	default:	emit_checkpoint_method3 (NULL);	break;
+	}
+    }
+  else
+    error ("You must open a checkpoint file.");
+}
+
 
 /* module initialization */
 void
 _initialize_tracepoint (void)
 {
   struct cmd_list_element *c;
+
+  add_setshow_boolean_cmd ("default-tracepoint-method", class_trace, 
+			   &default_trace_method, _("\
+Set whether gdb will use a brute-force tracepoint method."), _("\
+Show whether gdb will use a brute-force tracepoint method."), _("\
+When this is set, tracepoint data will actually be collected\n\
+by gdb, and not by the target.  Obviously this method is far\n\
+more intrusive and time consuming than the ideal."), 
+			   NULL, NULL, &setlist, &showlist);
+
+  add_setshow_integer_cmd ("tracepoint-method", class_trace, 
+			   &tracepoint_method, _("\
+Set the method for saving a tracepoint."), _("\
+Show the method for saving a tracepoint."), _("\
+Method 1, save only a minimal subset of registers.\n\
+Method 2, save all of the registers (but not pseudo-registers).\n\
+Method 3, save all registers and the machine stack\n\
+  (see tos and size-of-stack).\n\
+Method 4, use tracepoints to determine what to save.\n\
+Method 5 etc. TBD."), 
+			   NULL, NULL, &setlist, &showlist);
+
+  add_com ("default-do-tracepoints", class_trace, 
+	   default_do_tracepoints_command, "Collect tracepoint data.");
+
+  c = add_com ("open-checkpoint", class_trace, checkpoint_open, "\
+Open output file for checkpoints.\n\
+Argument is filename.");
+  set_cmd_completer (c, filename_completer);
+
+  c = add_com ("close-checkpoint", class_trace, checkpoint_close, "\
+Close checkpoint file.\n\
+No arguments, since only one checkpoint file may be open at a time.");
+  set_cmd_completer (c, noop_completer);
+
+  c = add_com ("drop-checkpoint", class_trace, checkpoint_command, "\
+Drop a checkpoint.\n\
+Best not ask what good it will do...");
+  set_cmd_completer (c, noop_completer);
+
+  c = add_com ("tos", class_trace, tracepoint_set_tos_command, "\
+Set TOS so that checkpoints can save the stack.");
+  set_cmd_completer (c, noop_completer);
+
+  c = add_com ("size-of-stack", class_trace, 
+	       tracepoint_set_size_of_stack_command, "\
+Set size of stack to be saved at a checkpoint.");
+  set_cmd_completer (c, noop_completer);
+
+  /* End checkpoint stuff.  */
 
   tracepoint_chain = 0;
   tracepoint_count = 0;

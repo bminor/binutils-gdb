@@ -1,3 +1,40 @@
+2005-05-30  Michael Snyder  <msnyder@redhat.com>
+
+	Add support for writing tracepoint/checkpoint data to a file.
+
+	* breakpoint.c (bpstat_stop_status): Add hook for interpreting
+	breakpoints as tracepoints, enabling gdb to handle them directly
+	by a "default" fallback method (writing data to a file).
+	
+	* tracepoint.c (default_tracepoint_method): New user-settable
+	mode variable -- tells gdb to use a "default" (fallback) method
+	for collecting tracepoint data.
+	(trace_start_command, trace_stop_command, trace_status_command):
+	Add "default" mode.
+
+	(tracepoint_event_p, default_do_tracepoints_command): New 
+	functions, entry points into default tracepoint collection method.
+
+	(checkpoint_open, checkpoint_close): Open / close checkpoint file.
+	(checkpoint_command): Drop a checkpoint into checkpoint file.
+
+	(emit_checkpoint_method1, emit_checkpoint_method2, 
+	emit_checkpoint_method3, emit_checkpoint_method4): Experimental
+	methods for writing checkpoint/tracepoint data to a file.
+
+	(checkpoint_emit_memrange, checkpoint_emit_gregs, 
+	checkpoint_emit_stack, checkpoint_emit_id, etc.): 
+	Support functions for writing checkpoint/tracepoint data.
+	
+	(get_tracepoint_by_address): New function.
+	(validate_actionline): Add "$stack" pseudo-object for collection.
+	(tracepoint_top_of_stack, tracepoint_size_of_stack): 
+	New user-settable variables.
+	(encode_actions): Interpret "$stack" pseudo-object, collect stack.
+
+	* tracepoint.h (default_trace_method, tracepoint_event_p):
+	Exported interface for default tracepoint method.
+
 2005-05-29  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/djgpp/fnchange.lst: Add mappings for linux-ppc-low.c and

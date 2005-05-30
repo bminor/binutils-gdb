@@ -26,6 +26,7 @@
 #include "symtab.h"
 #include "frame.h"
 #include "breakpoint.h"
+#include "tracepoint.h"	/* for default tracepoint method */
 #include "gdbtypes.h"
 #include "expression.h"
 #include "gdbcore.h"
@@ -2841,6 +2842,14 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	real_breakpoint = 1;
       }
 
+    /* tracepoint */
+    /* OK -- if we put the action here, it means we will
+       check for a tracepoint if a watchpoint has triggered, 
+       or if we have a breakpoint at the current PC.  By
+       checking now, we will NOT honor the breakpoint's 
+       condition if any.  We would do that later.  */
+
+
     if (frame_id_p (b->frame_id)
 	&& !frame_id_eq (b->frame_id, get_frame_id (get_current_frame ())))
       bs->stop = 0;
@@ -2880,20 +2889,37 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid, int stopped_by_watchpoint)
 	  }
 	else
 	  {
-	    /* We will stop here */
-	    if (b->disposition == disp_disable)
-	      b->enable_state = bp_disabled;
-	    if (b->silent)
-	      bs->print = 0;
-	    bs->commands = b->commands;
-	    if (bs->commands &&
-		(strcmp ("silent", bs->commands->line) == 0
-		 || (xdb_commands && strcmp ("Q", bs->commands->line) == 0)))
+	    /* tracepoint */
+	    /* If we put the check here, we can honor the breakpoint's
+	       condition and/or ignore-count and/or thread, if any.  */
+
+	    if (default_trace_method && tracepoint_event_p ())
 	      {
-		bs->commands = bs->commands->next;
+		/* This breakpoint has been handled as a tracepoint.
+		   Don't stop.  */
+		bs->stop = 0;
 		bs->print = 0;
+		/* hit_count -- should we consider this a hit?  */
 	      }
-	    bs->commands = copy_command_lines (bs->commands);
+	    else
+	      {
+		/* Not tracepoint -- back to your regularly scheduled
+		   breakpoint handling.  */
+		/* We will stop here */
+		if (b->disposition == disp_disable)
+		  b->enable_state = bp_disabled;
+		if (b->silent)
+		  bs->print = 0;
+		bs->commands = b->commands;
+		if (bs->commands &&
+		    (strcmp ("silent", bs->commands->line) == 0
+		     || (xdb_commands && strcmp ("Q", bs->commands->line) == 0)))
+		  {
+		    bs->commands = bs->commands->next;
+		    bs->print = 0;
+		  }
+		bs->commands = copy_command_lines (bs->commands);
+	      }
 	  }
       }
     /* Print nothing for this entry if we dont stop or if we dont print.  */

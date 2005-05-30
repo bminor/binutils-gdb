@@ -2062,7 +2062,7 @@ process_event_stop_test:
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTATE_WHAT_STOP_NOISY\n");
 	stop_print_frame = 1;
 
-	/* We are about to nuke the step_resume_breakpointt via the
+	/* We are about to nuke the step_resume_breakpoint via the
 	   cleanup chain, so no need to worry about it here.  */
 
 	stop_stepping (ecs);

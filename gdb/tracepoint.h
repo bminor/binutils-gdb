@@ -21,6 +21,14 @@
 #if !defined (TRACEPOINT_H)
 #define TRACEPOINT_H 1
 
+/* Exported interface: */
+
+extern int default_trace_method;
+extern int tracepoint_event_p (void);
+
+/* Most of what follows is not meant for export.
+   They're just forward declarations for internal use in tracepoint.c.  */
+
 /* The data structure for an action: */
 struct action_line
   {
