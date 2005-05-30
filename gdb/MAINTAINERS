@@ -185,10 +185,10 @@ Solaris/SPARC native & host (devolved)
 
 Core: Generic components used by all of GDB
 
-generic arch support	Andrew Cagney		cagney@redhat.com
+generic arch support	(Global Maintainers)
 			Any host/target maintainer can add to
-			gdbarch.{c,h,sh}.  Send tricky ones to cagney.
-target vector		Andrew Cagney		cagney@redhat.com
+			gdbarch.{c,h,sh}.
+target vector		(Global Maintainers)
 
 event loop		Elena Zannoni           ezannoni@redhat.com
                         For the part of top.c related to the event loop,

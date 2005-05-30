@@ -1,3 +1,7 @@
+2005-05-30  Andrew Cagney  <cagney@gnu.org>
+
+	* MAINTAINERS: Drop architecture and target vectors.
+
 2005-05-29  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/djgpp/fnchange.lst: Add mappings for linux-ppc-low.c and
