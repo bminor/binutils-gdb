@@ -1,3 +1,7 @@
+2005-05-31  Richard Henderson  <rth@redhat.com>
+
+	* readelf.c (dump_relocations): Special case R_ALPHA_LITUSE.
+
 2005-05-29  Richard Henderson  <rth@redhat.com>
 
 	* readelf.c (get_alpha_dynamic_type): New.

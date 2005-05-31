@@ -1243,7 +1243,31 @@ dump_relocations (FILE *file,
       else
 	printf (do_wide ? "%-22.22s" : "%-17.17s", rtype);
 
-      if (symtab_index)
+      if (elf_header.e_machine == EM_ALPHA
+	  && streq (rtype, "R_ALPHA_LITUSE")
+	  && is_rela)
+	{
+	  switch (rels[i].r_addend)
+	    {
+	    case LITUSE_ALPHA_ADDR:   rtype = "ADDR";   break;
+	    case LITUSE_ALPHA_BASE:   rtype = "BASE";   break;
+	    case LITUSE_ALPHA_BYTOFF: rtype = "BYTOFF"; break;
+	    case LITUSE_ALPHA_JSR:    rtype = "JSR";    break;
+	    case LITUSE_ALPHA_TLSGD:  rtype = "TLSGD";  break;
+	    case LITUSE_ALPHA_TLSLDM: rtype = "TLSLDM"; break;
+	    case LITUSE_ALPHA_JSRDIRECT: rtype = "JSRDIRECT"; break;
+	    default: rtype = NULL;
+	    }
+	  if (rtype)
+	    printf (" (%s)", rtype);
+	  else
+	    {
+	      putchar (' ');
+	      printf (_("<unknown addend: %lx>"),
+		      (unsigned long) rels[i].r_addend);
+	    }
+	}
+      else if (symtab_index)
 	{
 	  if (symtab == NULL || symtab_index >= nsyms)
 	    printf (" bad symbol index: %08lx", (unsigned long) symtab_index);
@@ -1309,8 +1333,7 @@ dump_relocations (FILE *file,
 	  print_vma (rels[i].r_addend, LONG_HEX);
 	}
 
-      if (elf_header.e_machine == EM_SPARCV9
-	  && streq (rtype, "R_SPARC_OLO10"))
+      if (elf_header.e_machine == EM_SPARCV9 && streq (rtype, "R_SPARC_OLO10"))
 	printf (" + %lx", (unsigned long) ELF64_R_TYPE_DATA (info));
 
       putchar ('\n');
