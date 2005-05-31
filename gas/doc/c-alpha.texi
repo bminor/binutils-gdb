@@ -203,6 +203,12 @@ Used with a register branch format instruction (e.g.@: @code{jsr}) to
 indicate that the literal is used for a call.  During relaxation, the
 code may be altered to use a direct branch (e.g.@: @code{bsr}).
 
+@item !lituse_jsrdirect!@var{N}
+Similar to @code{lituse_jsr}, but also that this call cannot be vectored
+through a PLT entry.  This is useful for functions with special calling
+conventions which do not allow the normal call-clobbered registers to be
+clobbered.
+
 @item !lituse_bytoff!@var{N}
 Used with a byte mask instruction (e.g.@: @code{extbl}) to indicate
 that only the low 3 bits of the address are relevant.  During relaxation,

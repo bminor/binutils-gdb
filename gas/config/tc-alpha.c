@@ -109,28 +109,29 @@ struct alpha_macro
 #define O_cpregister	O_md2	/* + a leading comma.  */
 
 /* The alpha_reloc_op table below depends on the ordering of these.  */
-#define O_literal	O_md3	/* !literal relocation.  */
-#define O_lituse_addr	O_md4	/* !lituse_addr relocation.  */
-#define O_lituse_base	O_md5	/* !lituse_base relocation.  */
-#define O_lituse_bytoff	O_md6	/* !lituse_bytoff relocation.  */
-#define O_lituse_jsr	O_md7	/* !lituse_jsr relocation.  */
-#define O_lituse_tlsgd	O_md8	/* !lituse_tlsgd relocation.  */
-#define O_lituse_tlsldm	O_md9	/* !lituse_tlsldm relocation.  */
-#define O_gpdisp	O_md10	/* !gpdisp relocation.  */
-#define O_gprelhigh	O_md11	/* !gprelhigh relocation.  */
-#define O_gprellow	O_md12	/* !gprellow relocation.  */
-#define O_gprel		O_md13	/* !gprel relocation.  */
-#define O_samegp	O_md14	/* !samegp relocation.  */
-#define O_tlsgd		O_md15	/* !tlsgd relocation.  */
-#define O_tlsldm	O_md16	/* !tlsldm relocation.  */
-#define O_gotdtprel	O_md17	/* !gotdtprel relocation.  */
-#define O_dtprelhi	O_md18	/* !dtprelhi relocation.  */
-#define O_dtprello	O_md19	/* !dtprello relocation.  */
-#define O_dtprel	O_md20	/* !dtprel relocation.  */
-#define O_gottprel	O_md21	/* !gottprel relocation.  */
-#define O_tprelhi	O_md22	/* !tprelhi relocation.  */
-#define O_tprello	O_md23	/* !tprello relocation.  */
-#define O_tprel		O_md24	/* !tprel relocation.  */
+#define O_literal	O_md3		/* !literal relocation.  */
+#define O_lituse_addr	O_md4		/* !lituse_addr relocation.  */
+#define O_lituse_base	O_md5		/* !lituse_base relocation.  */
+#define O_lituse_bytoff	O_md6		/* !lituse_bytoff relocation.  */
+#define O_lituse_jsr	O_md7		/* !lituse_jsr relocation.  */
+#define O_lituse_tlsgd	O_md8		/* !lituse_tlsgd relocation.  */
+#define O_lituse_tlsldm	O_md9		/* !lituse_tlsldm relocation.  */
+#define O_lituse_jsrdirect O_md10	/* !lituse_jsrdirect relocation.  */
+#define O_gpdisp	O_md11		/* !gpdisp relocation.  */
+#define O_gprelhigh	O_md12		/* !gprelhigh relocation.  */
+#define O_gprellow	O_md13		/* !gprellow relocation.  */
+#define O_gprel		O_md14		/* !gprel relocation.  */
+#define O_samegp	O_md15		/* !samegp relocation.  */
+#define O_tlsgd		O_md16		/* !tlsgd relocation.  */
+#define O_tlsldm	O_md17		/* !tlsldm relocation.  */
+#define O_gotdtprel	O_md18		/* !gotdtprel relocation.  */
+#define O_dtprelhi	O_md19		/* !dtprelhi relocation.  */
+#define O_dtprello	O_md20		/* !dtprello relocation.  */
+#define O_dtprel	O_md21		/* !dtprel relocation.  */
+#define O_gottprel	O_md22		/* !gottprel relocation.  */
+#define O_tprelhi	O_md23		/* !tprelhi relocation.  */
+#define O_tprello	O_md24		/* !tprello relocation.  */
+#define O_tprel		O_md25		/* !tprel relocation.  */
 
 #define DUMMY_RELOC_LITUSE_ADDR		(BFD_RELOC_UNUSED + 1)
 #define DUMMY_RELOC_LITUSE_BASE		(BFD_RELOC_UNUSED + 2)
@@ -138,6 +139,7 @@ struct alpha_macro
 #define DUMMY_RELOC_LITUSE_JSR		(BFD_RELOC_UNUSED + 4)
 #define DUMMY_RELOC_LITUSE_TLSGD	(BFD_RELOC_UNUSED + 5)
 #define DUMMY_RELOC_LITUSE_TLSLDM	(BFD_RELOC_UNUSED + 6)
+#define DUMMY_RELOC_LITUSE_JSRDIRECT	(BFD_RELOC_UNUSED + 7)
 
 #define USER_RELOC_P(R) ((R) >= O_literal && (R) <= O_tprel)
 
@@ -418,6 +420,7 @@ alpha_reloc_op[] =
   DEF (lituse_jsr, DUMMY_RELOC_LITUSE_JSR, 1, 1),
   DEF (lituse_tlsgd, DUMMY_RELOC_LITUSE_TLSGD, 1, 1),
   DEF (lituse_tlsldm, DUMMY_RELOC_LITUSE_TLSLDM, 1, 1),
+  DEF (lituse_jsrdirect, DUMMY_RELOC_LITUSE_JSRDIRECT, 1, 1),
   DEF (gpdisp, BFD_RELOC_ALPHA_GPDISP, 1, 1),
   DEF (gprelhigh, BFD_RELOC_ALPHA_GPREL_HI16, 0, 0),
   DEF (gprellow, BFD_RELOC_ALPHA_GPREL_LO16, 0, 0),
@@ -770,6 +773,7 @@ debug_exp (expressionS tok[], int ntok)
 	case O_lituse_jsr:		name = "O_lituse_jsr";		break;
 	case O_lituse_tlsgd:		name = "O_lituse_tlsgd";	break;
 	case O_lituse_tlsldm:		name = "O_lituse_tlsldm";	break;
+	case O_lituse_jsrdirect:	name = "O_lituse_jsrdirect";	break;
 	case O_gpdisp:			name = "O_gpdisp";		break;
 	case O_gprelhigh:		name = "O_gprelhigh";		break;
 	case O_gprellow:		name = "O_gprellow";		break;
@@ -1719,6 +1723,9 @@ emit_insn (struct alpha_insn *insn)
 	  goto do_lituse;
 	case DUMMY_RELOC_LITUSE_TLSLDM:
 	  fixP->fx_offset = LITUSE_ALPHA_TLSLDM;
+	  goto do_lituse;
+	case DUMMY_RELOC_LITUSE_JSRDIRECT:
+	  fixP->fx_offset = LITUSE_ALPHA_JSRDIRECT;
 	  goto do_lituse;
 	do_lituse:
 	  fixP->fx_addsy = section_symbol (now_seg);
