@@ -34,13 +34,6 @@
 #define ARM_ELF_ABI_VERSION		0
 #define ARM_ELF_OS_ABI_VERSION		ELFOSABI_ARM
 
-static reloc_howto_type * elf32_arm_reloc_type_lookup
-  PARAMS ((bfd * abfd, bfd_reloc_code_real_type code));
-static bfd_boolean elf32_arm_nabi_grok_prstatus
-  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
-static bfd_boolean elf32_arm_nabi_grok_psinfo
-  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
-
 /* Note: code such as elf32_arm_reloc_type_lookup expect to use e.g.
    R_ARM_PC24 as an index into this, and find the R_ARM_PC24 HOWTO
    in that slot.  */
@@ -1344,9 +1337,8 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
   };
 
 static reloc_howto_type *
-elf32_arm_reloc_type_lookup (abfd, code)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+elf32_arm_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			     bfd_reloc_code_real_type code)
 {
   unsigned int i;
   for (i = 0; i < NUM_ELEM (elf32_arm_reloc_map); i ++)
@@ -1358,9 +1350,7 @@ elf32_arm_reloc_type_lookup (abfd, code)
 
 /* Support for core dump NOTE sections */
 static bfd_boolean
-elf32_arm_nabi_grok_prstatus (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+elf32_arm_nabi_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
   size_t size;
@@ -1390,9 +1380,7 @@ elf32_arm_nabi_grok_prstatus (abfd, note)
 }
 
 static bfd_boolean
-elf32_arm_nabi_grok_psinfo (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+elf32_arm_nabi_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   switch (note->descsz)
     {

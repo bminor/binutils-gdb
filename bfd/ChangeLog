@@ -1,3 +1,9 @@
+2005-05-31  Zack Weinberg  <zack@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_reloc_type_lookup)
+	(elf32_arm_nabi_grok_prstatus, elf32_arm_nabi_grok_psinfo):
+	Use ISO C90 function declaration style.
+
 2005-05-31  James E Wilson  <wilson@specifixinc.com>
 
 	* elfcode.h (NAME(bfd_elf,bfd_from_remote_memory)): Check for program
