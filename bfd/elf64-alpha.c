@@ -112,14 +112,15 @@ struct alpha_elf_link_hash_entry
   int flags;
 
   /* Contexts in which a literal was referenced.  */
-#define ALPHA_ELF_LINK_HASH_LU_ADDR	0x01
-#define ALPHA_ELF_LINK_HASH_LU_MEM	0x02
-#define ALPHA_ELF_LINK_HASH_LU_BYTE	0x04
-#define ALPHA_ELF_LINK_HASH_LU_JSR	0x08
-#define ALPHA_ELF_LINK_HASH_LU_TLSGD	0x10
-#define ALPHA_ELF_LINK_HASH_LU_TLSLDM	0x20
-#define ALPHA_ELF_LINK_HASH_LU_FUNC	0x38
-#define ALPHA_ELF_LINK_HASH_TLS_IE	0x40
+#define ALPHA_ELF_LINK_HASH_LU_ADDR	 0x01
+#define ALPHA_ELF_LINK_HASH_LU_MEM	 0x02
+#define ALPHA_ELF_LINK_HASH_LU_BYTE	 0x04
+#define ALPHA_ELF_LINK_HASH_LU_JSR	 0x08
+#define ALPHA_ELF_LINK_HASH_LU_TLSGD	 0x10
+#define ALPHA_ELF_LINK_HASH_LU_TLSLDM	 0x20
+#define ALPHA_ELF_LINK_HASH_LU_JSRDIRECT 0x40
+#define ALPHA_ELF_LINK_HASH_LU_PLT	 0x38
+#define ALPHA_ELF_LINK_HASH_TLS_IE	 0x80
 
   /* Used to implement multiple .got subsections.  */
   struct alpha_elf_got_entry
@@ -1729,8 +1730,8 @@ elf64_alpha_want_plt (struct alpha_elf_link_hash_entry *ah)
   return ((ah->root.type == STT_FUNC
 	  || ah->root.root.type == bfd_link_hash_undefweak
 	  || ah->root.root.type == bfd_link_hash_undefined)
-	  && (ah->flags & ALPHA_ELF_LINK_HASH_LU_FUNC) != 0
-	  && (ah->flags & ~ALPHA_ELF_LINK_HASH_LU_FUNC) == 0);
+	  && (ah->flags & ALPHA_ELF_LINK_HASH_LU_PLT) != 0
+	  && (ah->flags & ~ALPHA_ELF_LINK_HASH_LU_PLT) == 0);
 }
 
 /* Handle dynamic relocations when doing an Alpha ELF link.  */
@@ -1826,7 +1827,7 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     This will be important when it comes to decide if we can
 	     create a .plt entry for a function symbol.  */
 	  while (++rel < relend && ELF64_R_TYPE (rel->r_info) == R_ALPHA_LITUSE)
-	    if (rel->r_addend >= 1 && rel->r_addend <= 5)
+	    if (rel->r_addend >= 1 && rel->r_addend <= 6)
 	      gotent_flags |= 1 << rel->r_addend;
 	  --rel;
 
@@ -3137,7 +3138,7 @@ elf64_alpha_relax_with_lituse (struct alpha_relax_info *info,
     {
       if (ELF64_R_TYPE (urel->r_info) != R_ALPHA_LITUSE)
 	break;
-      if (urel->r_addend <= 3)
+      if (urel->r_addend <= 6)
 	flags |= 1 << urel->r_addend;
     }
 
@@ -3232,6 +3233,7 @@ elf64_alpha_relax_with_lituse (struct alpha_relax_info *info,
 	case LITUSE_ALPHA_JSR:
 	case LITUSE_ALPHA_TLSGD:
 	case LITUSE_ALPHA_TLSLDM:
+	case LITUSE_ALPHA_JSRDIRECT:
 	  {
 	    bfd_vma optdest, org;
 	    bfd_signed_vma odisp;

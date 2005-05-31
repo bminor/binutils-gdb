@@ -1,3 +1,12 @@
+2005-05-31  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (ALPHA_ELF_LINK_HASH_LU_JSRDIRECT): New.
+	(ALPHA_ELF_LINK_HASH_TLS_IE): Renumber to 0x80.
+	(ALPHA_ELF_LINK_HASH_LU_PLT): Rename from ALPHA_ELF_LINK_HASH_LU_FUNC.
+	(elf64_alpha_want_plt): Update to match.
+	(elf64_alpha_check_relocs): Collect JSRDIRECT in gotent_flags.
+	(elf64_alpha_relax_with_lituse): Likewise.  Handle JSRDIRECT.
+
 2005-05-31  Zack Weinberg  <zack@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_reloc_type_lookup)
