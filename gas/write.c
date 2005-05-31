@@ -713,12 +713,8 @@ size_seg (bfd *abfd, asection *sec, PTR xxx ATTRIBUTE_UNUSED)
 
 #ifdef DEBUG2
 static void
-dump_section_relocs (abfd, sec, stream_)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     char *stream_;
+dump_section_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, FILE *stream)
 {
-  FILE *stream = (FILE *) stream_;
   segment_info_type *seginfo = seg_info (sec);
   fixS *fixp = seginfo->fix_root;
 
@@ -1060,7 +1056,7 @@ write_relocs (bfd *abfd, asection *sec, PTR xxx ATTRIBUTE_UNUSED)
 
 #ifdef DEBUG4
   {
-    int i, j, nsyms;
+    unsigned int i, j, nsyms;
     asymbol **sympp;
     sympp = bfd_get_outsymbols (stdoutput);
     nsyms = bfd_get_symcount (stdoutput);
@@ -1089,7 +1085,7 @@ write_relocs (bfd *abfd, asection *sec, PTR xxx ATTRIBUTE_UNUSED)
 
 #ifdef DEBUG3
   {
-    int i;
+    unsigned int i;
     arelent *r;
     asymbol *s;
     fprintf (stderr, "relocs for sec %s\n", sec->name);
@@ -1097,8 +1093,8 @@ write_relocs (bfd *abfd, asection *sec, PTR xxx ATTRIBUTE_UNUSED)
       {
 	r = relocs[i];
 	s = *r->sym_ptr_ptr;
-	fprintf (stderr, "  reloc %2d @%08x off %4x : sym %-10s addend %x\n",
-		 i, r, r->address, s->name, r->addend);
+	fprintf (stderr, "  reloc %2d @%p off %4lx : sym %-10s addend %lx\n",
+		 i, r, (unsigned long)r->address, s->name, (unsigned long)r->addend);
       }
   }
 #endif

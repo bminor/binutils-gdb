@@ -1,3 +1,9 @@
+2005-05-31  Christian Groessler  <chris@groessler.org>
+
+	* write.c (dump_section_relocs): Convert to ISO-C.
+	(write_relocs): Avoid signed/unsigned and fprintf argument
+	warnings in debug code.
+
 2005-05-26  Zack Weinberg  <zack@codesourcery.com>
 
 	* config/tc-arm.h (TC_FIX_TYPE): Change to int.
