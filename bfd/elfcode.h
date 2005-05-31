@@ -1656,7 +1656,10 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   for (i = 0; i < i_ehdr.e_phnum; ++i)
     {
       elf_swap_phdr_in (templ, &x_phdrs[i], &i_phdrs[i]);
-      if (i_phdrs[i].p_type == PT_LOAD)
+      /* IA-64 vDSO may have two mappings for one segment, where one mapping
+	 is executable only, and one is read only.  We must not use the
+	 executable one.  */
+      if (i_phdrs[i].p_type == PT_LOAD && (i_phdrs[i].p_flags & PF_R))
 	{
 	  bfd_vma segment_end;
 	  segment_end = (i_phdrs[i].p_offset + i_phdrs[i].p_filesz
@@ -1703,7 +1706,10 @@ NAME(_bfd_elf,bfd_from_remote_memory)
     }
 
   for (i = 0; i < i_ehdr.e_phnum; ++i)
-    if (i_phdrs[i].p_type == PT_LOAD)
+    /* IA-64 vDSO may have two mappings for one segment, where one mapping
+       is executable only, and one is read only.  We must not use the
+       executable one.  */
+    if (i_phdrs[i].p_type == PT_LOAD && (i_phdrs[i].p_flags & PF_R))
       {
 	bfd_vma start = i_phdrs[i].p_offset & -i_phdrs[i].p_align;
 	bfd_vma end = (i_phdrs[i].p_offset + i_phdrs[i].p_filesz

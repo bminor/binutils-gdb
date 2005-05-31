@@ -1,3 +1,8 @@
+2005-05-31  James E Wilson  <wilson@specifixinc.com>
+
+	* elfcode.h (NAME(bfd_elf,bfd_from_remote_memory)): Check for program
+	header PF_R flag on PT_LOAD segments.
+
 2005-05-30  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relocate_section): Use dtp_base for
