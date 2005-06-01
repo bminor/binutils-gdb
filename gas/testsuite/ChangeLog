@@ -1,3 +1,8 @@
+2005-06-01  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/ldstla-32-1.l: Update to handle leading zeroes.
+	* gas/mips/ldstla-32-mips3-1.l: Likewise.
+
 2005-05-27  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/proc.l: Adjust.

@@ -3558,7 +3558,7 @@ load_register (int reg, expressionS *ep, int dbl)
       char value[32];
 
       sprintf_vma (value, ep->X_add_number);
-      as_bad (_("Number (%s) larger than 32 bits"), value);
+      as_bad (_("Number (0x%s) larger than 32 bits"), value);
       macro_build (ep, "addiu", "t,r,j", reg, 0, BFD_RELOC_LO16);
       return;
     }
@@ -5805,7 +5805,7 @@ macro (struct mips_cl_insn *ip)
 	  char value [32];
 
 	  sprintf_vma (value, offset_expr.X_add_number);
-	  as_bad (_("Number (%s) larger than 32 bits"), value);
+	  as_bad (_("Number (0x%s) larger than 32 bits"), value);
 	}
 
       /* A constant expression in PIC code can be handled just as it
@@ -6399,7 +6399,7 @@ macro (struct mips_cl_insn *ip)
 	  char value [32];
 
 	  sprintf_vma (value, offset_expr.X_add_number);
-	  as_bad (_("Number (%s) larger than 32 bits"), value);
+	  as_bad (_("Number (0x%s) larger than 32 bits"), value);
 	}
 
       /* Even on a big endian machine $fn comes before $fn+1.  We have
