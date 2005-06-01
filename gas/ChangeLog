@@ -1,3 +1,10 @@
+2005-06-01  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (TxCE, TxC3, TxCM, TUE, TUF): Remove redundant
+	test for the presence of thumb version of the parsing functions
+	since they must always exist and the test generates a compile time
+	warning message.
+
 2005-05-31  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-alpha.c (O_lituse_jsrdirect): New.

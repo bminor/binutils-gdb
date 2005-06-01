@@ -7963,7 +7963,7 @@ static const struct asm_cond conds[] =
 /* The normal sort of mnemonic; has a Thumb variant; takes a conditional suffix.  */
 #define TxCE(mnem, op, top, nops, ops, ae, te) \
   { #mnem, OPS##nops ops, OT_csuffix, 0x##op, top, ARM_VARIANT, \
-    do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te }
 
 /* Two variants of the above - TCE for a numeric Thumb opcode, tCE for
    a T_MNEM_xyz enumerator.  */
@@ -7976,7 +7976,7 @@ static const struct asm_cond conds[] =
    infix after the third character.  */
 #define TxC3(mnem, op, top, nops, ops, ae, te) \
   { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, top, ARM_VARIANT, \
-    do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te }
 #define TC3(mnem, aop, top, nops, ops, ae, te) \
        TxC3(mnem, aop, 0x##top, nops, ops, ae, te)
 #define tC3(mnem, aop, top, nops, ops, ae, te) \
@@ -7986,7 +7986,7 @@ static const struct asm_cond conds[] =
    appear in the condition table.  */
 #define TxCM_(m1, m2, m3, op, top, nops, ops, ae, te)	\
   { #m1 #m2 #m3, OPS##nops ops, sizeof(#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof(#m1) - 1, \
-    0x##op, top, ARM_VARIANT, do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
+    0x##op, top, ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##te }
 
 #define TxCM(m1, m2, op, top, nops, ops, ae, te)	\
   TxCM_(m1,   , m2, op, top, nops, ops, ae, te),	\
@@ -8018,13 +8018,13 @@ static const struct asm_cond conds[] =
    field is still 0xE.  */
 #define TUE(mnem, op, top, nops, ops, ae, te)				\
   { #mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
-    do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te }
 
 /* Mnemonic that cannot be conditionalized, and bears 0xF in its ARM
    condition code field.  */
 #define TUF(mnem, op, top, nops, ops, ae, te)				\
   { #mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0x##top, ARM_VARIANT, \
-    do_##te ? THUMB_VARIANT : 0, do_##ae, do_##te }
+    THUMB_VARIANT, do_##ae, do_##te }
 
 /* ARM-only variants of all the above.  */
 #define CE(mnem,  op, nops, ops, ae) TCE(mnem,  op, 0, nops, ops, ae, 0)
