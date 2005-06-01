@@ -2905,7 +2905,6 @@ cannot set a hardware watchpoint, it sets a software watchpoint, which
 executes more slowly and reports the change in value at the next
 @emph{statement}, not the instruction, after the change occurs.
 
-@vindex can-use-hw-watchpoints
 @cindex use only software watchpoints
 You can force @value{GDBN} to use only software watchpoints with the
 @kbd{set can-use-hw-watchpoints 0} command.  With this variable set to
