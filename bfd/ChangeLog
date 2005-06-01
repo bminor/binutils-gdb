@@ -1,3 +1,8 @@
+2005-05-31  Jim Blandy  <jimb@redhat.com>
+
+	* Makefile.am: Regenerate dependencies with 'make dep-am'.
+	* Makefile.in: Regenerate.
+
 2005-05-31  Richard Henderson  <rth@redhat.com>
 
 	* elf64-alpha.c (ALPHA_ELF_LINK_HASH_LU_JSRDIRECT): New.
