@@ -1,3 +1,7 @@
+2005-06-01  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* emulparams/elf32btsmip.sh: Unset DATA_ADDR.
+
 2005-05-31  Zack Weinberg  <zack@codesourcery.com>
 
 	* ldlang.c (entry_symbol_default): New file-scope global.
