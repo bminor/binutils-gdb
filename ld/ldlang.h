@@ -474,6 +474,8 @@ extern void lang_section_start
   (const char *, union etree_union *, const segment_type *);
 extern void lang_add_entry
   (const char *, bfd_boolean);
+extern void lang_default_entry
+  (const char *);
 extern void lang_add_target
   (const char *);
 extern void lang_add_wild

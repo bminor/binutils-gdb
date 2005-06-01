@@ -91,6 +91,7 @@ lang_statement_list_type lang_output_section_statement;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain = { NULL, NULL };
 struct bfd_sym_chain entry_symbol = { NULL, NULL };
+static const char *entry_symbol_default = "start";
 const char *entry_section = ".text";
 bfd_boolean entry_from_cmdline;
 bfd_boolean lang_has_input_file = FALSE;
@@ -4743,9 +4744,9 @@ lang_finish (void)
 
   if (entry_symbol.name == NULL)
     {
-      /* No entry has been specified.  Look for start, but don't warn
-	 if we don't find it.  */
-      entry_symbol.name = "start";
+      /* No entry has been specified.  Look for the default entry, but
+	 don't warn if we don't find it.  */
+      entry_symbol.name = entry_symbol_default;
       warn = FALSE;
     }
 
@@ -5580,6 +5581,16 @@ lang_add_entry (const char *name, bfd_boolean cmdline)
       entry_symbol.name = name;
       entry_from_cmdline = cmdline;
     }
+}
+
+/* Set the default start symbol to NAME.  .em files should use this,
+   not lang_add_entry, to override the use of "start" if neither the
+   linker script nor the command line specifies an entry point.  NAME
+   must be permanently allocated.  */
+void
+lang_default_entry (const char *name)
+{
+  entry_symbol_default = name;
 }
 
 void

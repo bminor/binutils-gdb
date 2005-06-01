@@ -1,10 +1,17 @@
+2005-05-31  Zack Weinberg  <zack@codesourcery.com>
+
+	* ld-scripts/align.exp: Mark align1 XFAIL on PECOFF targets.
+	* ld-scripts/data.exp: Mark data UNSUPPORTED on a.out targets.
+	* ld-scripts/provide.exp, ld-scripts/size.exp: Mark all tests
+	UNSUPPORTED on a.out targets.  Tidy.
+
 2005-05-27  Mark Mitchell  <mark@codesourcery.com>
 
 	* config/default.exp (CC): Use find_gcc.
 	(CFLAGS): Define, if no definition has been provided by the user.
 	(CXX): Likewise.
 	(CXXFLAGS): Likewise.
-	
+
 2005-05-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-mmix/bpo-6.d: Updated.
@@ -130,7 +137,7 @@
 	ld-sparc/tlssunpic64.dd, ld-sparc/tlssunpic64.rd,
 	ld-sparc/tlssunpic64.sd, ld-sparc/tlssunpic64.td): Update now
 	that sparc64 ELF does support TLS.
-	
+
 2005-04-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/empty.d: New file.
@@ -168,7 +175,7 @@
 	* config/default.exp: Do not load libpath.exp if it does not
 	exist.
 	(CC): Provide fallback definition.
-	
+
 2005-03-24  Eric Christopher  <echristo@redhat.com>
 
 	* ld-mips-elf/rel32-n32.d: Revert changes.

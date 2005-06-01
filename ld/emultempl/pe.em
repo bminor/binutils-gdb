@@ -139,9 +139,9 @@ gld_${EMULATION_NAME}_before_parse (void)
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
 #if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
-  lang_add_entry ("WinMainCRTStartup", FALSE);
+  lang_default_entry ("WinMainCRTStartup");
 #else
-  lang_add_entry ("_WinMainCRTStartup", FALSE);
+  lang_default_entry ("_WinMainCRTStartup");
 #endif
 #endif
 #endif
@@ -457,7 +457,7 @@ set_pe_subsystem (void)
     {
       char *alc_entry;
 
-      /* lang_add_entry expects its argument to be permanently
+      /* lang_default_entry expects its argument to be permanently
 	 allocated, so we don't free this string.  */
       alc_entry = xmalloc (strlen (initial_symbol_char)
 			   + strlen (entry)
@@ -467,7 +467,7 @@ set_pe_subsystem (void)
       entry = alc_entry;
     }
 
-  lang_add_entry (entry, FALSE);
+  lang_default_entry (entry);
 
   return;
 }

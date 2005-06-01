@@ -1,3 +1,12 @@
+2005-05-31  Zack Weinberg  <zack@codesourcery.com>
+
+	* ldlang.c (entry_symbol_default): New file-scope global.
+	(lang_finish): Use it, not a hardwired "start".
+	(lang_default_entry): Set it.
+	* ldlang.h: Declare lang_default_entry.
+	* emultempl/beos.em, emultempl/pe.em: Use lang_default_entry,
+	not lang_add_entry, to override default entry point symbol.
+
 2005-05-29  Richard Henderson  <rth@redhat.com>
 
 	* emulparams/elf64alpha.sh (PLT): New.
