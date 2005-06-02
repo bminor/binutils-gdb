@@ -1,5 +1,5 @@
 # Expect script for ld-powerpc tests
-#   Copyright 2002, 2003 Free Software Foundation
+#   Copyright 2002, 2003, 2005 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -69,9 +69,9 @@ set ppcelftests {
      {{readelf -WSsrl tlsso32.r} {objdump -dr tlsso32.d}
       {objdump -sj.got tlsso32.g} {objdump -sj.tdata tlsso32.t}}
       "tls32.so"}
-    {"Shared library with global symbol" "-shared -melf32ppc" "" {sdalib.s}
+    {"Shared library with global symbol" "-shared -melf32ppc" "-a32" {sdalib.s}
      {} "sdalib.so"}
-    {"Dynamic application with SDA" "-melf32ppc tmpdir/sdalib.so" "" {sdadyn.s}
+    {"Dynamic application with SDA" "-melf32ppc tmpdir/sdalib.so" "-a32" {sdadyn.s}
      {{objdump -R sdadyn.d}} "sdadyn"}
 }
 

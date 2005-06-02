@@ -1,3 +1,7 @@
+2005-06-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/powerpc.exp (ppcelftests): Assemble sda test with -a32.
+
 2005-05-31  Zack Weinberg  <zack@codesourcery.com>
 
 	* ld-scripts/align.exp: Mark align1 XFAIL on PECOFF targets.
