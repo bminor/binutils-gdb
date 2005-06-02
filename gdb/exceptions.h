@@ -24,8 +24,7 @@
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
-struct ui_out;
-
+#include "ui-out.h"
 #include <setjmp.h>
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
