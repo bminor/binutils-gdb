@@ -3080,7 +3080,7 @@ lang_mark_used_section_1
 	  break;
 	case lang_data_statement_enum:
 	  exp_mark_used_section (s->data_statement.exp,
-				 abs_output_section);
+				 bfd_abs_section_ptr);
 	  break;
 
 	case lang_reloc_statement_enum:
@@ -3095,7 +3095,7 @@ lang_mark_used_section_1
 	  break;
 	case lang_assignment_statement_enum:
 	  exp_mark_used_section (s->assignment_statement.exp,
-				 output_section_statement);
+				 output_section_statement->bfd_section);
 	  break;
 	case lang_padding_statement_enum:
 	  break;
@@ -3319,8 +3319,8 @@ print_assignment (lang_assignment_statement_type *assignment,
       computation_is_valid = is_dot || (scan_for_self_assignment (dst, tree) == FALSE);
     }
 
-  result = exp_fold_tree (tree, output_section, lang_final_phase_enum,
-			  print_dot, &print_dot);
+  result = exp_fold_tree (tree, output_section->bfd_section,
+			  lang_final_phase_enum, print_dot, &print_dot);
   if (result.valid_p)
     {
       bfd_vma value;
@@ -3330,7 +3330,7 @@ print_assignment (lang_assignment_statement_type *assignment,
 	  value = result.value;
 
 	  if (result.section)
-	    value += result.section->bfd_section->vma;
+	    value += result.section->vma;
 
 	  minfo ("0x%V", value);
 	  if (is_dot)
@@ -3347,7 +3347,7 @@ print_assignment (lang_assignment_statement_type *assignment,
 	      value = h->u.def.value;
 
 	      if (result.section)
-	      value += result.section->bfd_section->vma;
+	      value += result.section->vma;
 
 	      minfo ("[0x%V]", value);
 	    }
@@ -4149,7 +4149,7 @@ lang_size_sections_1
 
 		    os->processed = -1;
 		    r = exp_fold_tree (os->addr_tree,
-				       abs_output_section,
+				       bfd_abs_section_ptr,
 				       lang_allocating_phase_enum,
 				       dot, &dot);
 		    os->processed = 0;
@@ -4159,7 +4159,7 @@ lang_size_sections_1
 			       " address expression for section %s\n"),
 			     os->name);
 
-		    dot = r.value + r.section->bfd_section->vma;
+		    dot = r.value + r.section->vma;
 		  }
 
 		/* The section starts here.
@@ -4199,7 +4199,7 @@ lang_size_sections_1
 	    os->processed = 1;
 
 	    if (os->update_dot_tree != 0)
-	      exp_fold_tree (os->update_dot_tree, abs_output_section,
+	      exp_fold_tree (os->update_dot_tree, bfd_abs_section_ptr,
 			     lang_allocating_phase_enum, dot, &dot);
 
 	    /* Update dot in the region ?
@@ -4258,7 +4258,7 @@ lang_size_sections_1
 
 	    /* We might refer to provided symbols in the expression, and
 	       need to mark them as needed.  */
-	    exp_fold_tree (s->data_statement.exp, abs_output_section,
+	    exp_fold_tree (s->data_statement.exp, bfd_abs_section_ptr,
 			   lang_allocating_phase_enum, dot, &dot);
 
 	    switch (s->data_statement.type)
@@ -4347,7 +4347,7 @@ lang_size_sections_1
 	    bfd_vma newdot = dot;
 
 	    exp_fold_tree (s->assignment_statement.exp,
-			   output_section_statement,
+			   output_section_statement->bfd_section,
 			   lang_allocating_phase_enum,
 			   dot,
 			   &newdot);
@@ -4580,12 +4580,12 @@ lang_do_assignments_1
 	    etree_value_type value;
 
 	    value = exp_fold_tree (s->data_statement.exp,
-				   abs_output_section,
+				   bfd_abs_section_ptr,
 				   lang_final_phase_enum, dot, &dot);
 	    if (!value.valid_p)
 	      einfo (_("%F%P: invalid data statement\n"));
 	    s->data_statement.value
-	      = value.value + value.section->bfd_section->vma;
+	      = value.value + value.section->vma;
 	  }
 	  {
 	    unsigned int size;
@@ -4618,7 +4618,7 @@ lang_do_assignments_1
 	    etree_value_type value;
 
 	    value = exp_fold_tree (s->reloc_statement.addend_exp,
-				   abs_output_section,
+				   bfd_abs_section_ptr,
 				   lang_final_phase_enum, dot, &dot);
 	    s->reloc_statement.addend_value = value.value;
 	    if (!value.valid_p)
@@ -4644,7 +4644,7 @@ lang_do_assignments_1
 	case lang_assignment_statement_enum:
 	  {
 	    exp_fold_tree (s->assignment_statement.exp,
-			   output_section_statement,
+			   output_section_statement->bfd_section,
 			   lang_final_phase_enum,
 			   dot,
 			   &dot);

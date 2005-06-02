@@ -1,3 +1,18 @@
+2005-06-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldexp.h (etree_value_type): Use "asection *" in place of
+	"struct lang_output_section_statement_struct *" for "section".
+	(exp_fold_tree): Likewise.
+	(exp_mark_used_section): Likewise.
+	* ldexp.c (new_rel, new_rel_from_section, fold_unary, fold_binary,
+	fold_trinary, fold_name, exp_fold_tree_1, exp_fold_tree,
+	exp_mark_used_section): Likewise for "current_section" param.
+	(make_abs, new_abs, exp_binop, exp_unop, exp_get_vma, exp_get_fill,
+	exp_get_abs_int): Adjust for above changes.
+	* ldlang.c (lang_mark_used_section_1, print_assignment,
+	lang_size_sections_1, lang_do_assignments_1): Likewise.
+	* ldexp.c (fold_name): Init entire result struct.
+
 2005-06-01  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* emulparams/elf32btsmip.sh: Unset DATA_ADDR.

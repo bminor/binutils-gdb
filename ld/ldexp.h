@@ -1,6 +1,6 @@
 /* ldexp.h -
    Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -26,7 +26,7 @@
 typedef struct {
   bfd_vma value;
   char *str;
-  struct lang_output_section_statement_struct *section;
+  asection *section;
   bfd_boolean valid_p;
 } etree_value_type;
 
@@ -130,8 +130,7 @@ etree_type *exp_relop
 etree_value_type invalid
   (void);
 etree_value_type exp_fold_tree
-  (etree_type *, struct lang_output_section_statement_struct *,
-   lang_phase_type, bfd_vma, bfd_vma *);
+  (etree_type *, asection *, lang_phase_type, bfd_vma, bfd_vma *);
 etree_type *exp_binop
   (int, etree_type *, etree_type *);
 etree_type *exp_trinop
@@ -157,6 +156,6 @@ fill_type *exp_get_fill
 bfd_vma exp_get_abs_int
   (etree_type *, int, char *, lang_phase_type);
 void exp_mark_used_section
-  (etree_type *, struct lang_output_section_statement_struct *);
+  (etree_type *, asection *);
 
 #endif
