@@ -1,3 +1,9 @@
+2005-06-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (add_symbol_adjust): Set sym visibility to most
+	restrictive of func code and func descr for undefined syms as well
+	as defined.
+
 2005-05-31  Jim Blandy  <jimb@redhat.com>
 
 	* Makefile.am: Regenerate dependencies with 'make dep-am'.
