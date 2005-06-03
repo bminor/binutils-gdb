@@ -26,42 +26,37 @@
 #include "elf-bfd.h"
 #include "elf/vax.h"
 
-static reloc_howto_type *reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void rtype_to_howto
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
-static struct bfd_hash_entry *elf_vax_link_hash_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-static struct bfd_link_hash_table *elf_vax_link_hash_table_create
-  PARAMS ((bfd *));
-static bfd_boolean elf_vax_check_relocs
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-static asection *elf_vax_gc_mark_hook
-  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
-static bfd_boolean elf_vax_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-static bfd_boolean elf_vax_adjust_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static bfd_boolean elf_vax_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean elf_vax_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
-static bfd_boolean elf_vax_finish_dynamic_symbol
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-	   Elf_Internal_Sym *));
-static bfd_boolean elf_vax_finish_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+static reloc_howto_type *reloc_type_lookup (bfd *, bfd_reloc_code_real_type);
+static void rtype_to_howto (bfd *, arelent *, Elf_Internal_Rela *);
+static struct bfd_hash_entry *elf_vax_link_hash_newfunc (struct bfd_hash_entry *,
+							 struct bfd_hash_table *,
+							 const char *);
+static struct bfd_link_hash_table *elf_vax_link_hash_table_create (bfd *);
+static bfd_boolean elf_vax_check_relocs (bfd *, struct bfd_link_info *,
+					 asection *, const Elf_Internal_Rela *);
+static asection *elf_vax_gc_mark_hook (asection *, struct bfd_link_info *,
+				       Elf_Internal_Rela *,
+				       struct elf_link_hash_entry *,
+				       Elf_Internal_Sym *);
+static bfd_boolean elf_vax_gc_sweep_hook (bfd *, struct bfd_link_info *,
+					  asection *,
+					  const Elf_Internal_Rela *);
+static bfd_boolean elf_vax_adjust_dynamic_symbol (struct bfd_link_info *,
+						  struct elf_link_hash_entry *);
+static bfd_boolean elf_vax_size_dynamic_sections (bfd *, struct bfd_link_info *);
+static bfd_boolean elf_vax_relocate_section (bfd *, struct bfd_link_info *,
+					     bfd *, asection *, bfd_byte *,
+					     Elf_Internal_Rela *,
+					     Elf_Internal_Sym *, asection **);
+static bfd_boolean elf_vax_finish_dynamic_symbol (bfd *, struct bfd_link_info *,
+						  struct elf_link_hash_entry *,
+						  Elf_Internal_Sym *);
+static bfd_boolean elf_vax_finish_dynamic_sections (bfd *,
+						    struct bfd_link_info *);
 
-static bfd_boolean elf32_vax_set_private_flags
-  PARAMS ((bfd *, flagword));
-static bfd_boolean elf32_vax_merge_private_bfd_data
-  PARAMS ((bfd *, bfd *));
-static bfd_boolean elf32_vax_print_private_bfd_data
-  PARAMS ((bfd *, PTR));
+static bfd_boolean elf32_vax_set_private_flags (bfd *, flagword);
+static bfd_boolean elf32_vax_merge_private_bfd_data (bfd *, bfd *);
+static bfd_boolean elf32_vax_print_private_bfd_data (bfd *, PTR);
 
 static reloc_howto_type howto_table[] = {
   HOWTO (R_VAX_NONE,		/* type */
@@ -290,10 +285,8 @@ static reloc_howto_type howto_table[] = {
 };
 
 static void
-rtype_to_howto (abfd, cache_ptr, dst)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *cache_ptr;
-     Elf_Internal_Rela *dst;
+rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
+		Elf_Internal_Rela *dst)
 {
   BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_VAX_max);
   cache_ptr->howto = &howto_table[ELF32_R_TYPE(dst->r_info)];
@@ -325,9 +318,7 @@ static const struct
 };
 
 static reloc_howto_type *
-reloc_type_lookup (abfd, code)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real_type code)
 {
   unsigned int i;
   for (i = 0; i < sizeof (reloc_map) / sizeof (reloc_map[0]); i++)
@@ -414,52 +405,50 @@ struct elf_vax_link_hash_table
 
 /* Declare this now that the above structures are defined.  */
 
-static bfd_boolean elf_vax_discard_copies
-  PARAMS ((struct elf_vax_link_hash_entry *, PTR));
+static bfd_boolean elf_vax_discard_copies (struct elf_vax_link_hash_entry *,
+					   PTR);
 
 /* Declare this now that the above structures are defined.  */
 
-static bfd_boolean elf_vax_instantiate_got_entries
-  PARAMS ((struct elf_link_hash_entry *, PTR));
+static bfd_boolean elf_vax_instantiate_got_entries (struct elf_link_hash_entry *,
+						    PTR);
 
 /* Traverse an VAX ELF linker hash table.  */
 
 #define elf_vax_link_hash_traverse(table, func, info)			\
   (elf_link_hash_traverse						\
    (&(table)->root,							\
-    (bfd_boolean (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func), \
+    (bfd_boolean (*) (struct elf_link_hash_entry *, PTR)) (func),	\
     (info)))
 
 /* Get the VAX ELF linker hash table from a link_info structure.  */
 
-#define elf_vax_hash_table(p) \
-  ((struct elf_vax_link_hash_table *) (p)->hash)
+#define elf_vax_hash_table(p) ((struct elf_vax_link_hash_table *) (p)->hash)
 
 /* Create an entry in an VAX ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-elf_vax_link_hash_newfunc (entry, table, string)
-     struct bfd_hash_entry *entry;
-     struct bfd_hash_table *table;
-     const char *string;
+elf_vax_link_hash_newfunc (struct bfd_hash_entry *entry,
+			   struct bfd_hash_table *table,
+			   const char *string)
 {
   struct elf_vax_link_hash_entry *ret =
     (struct elf_vax_link_hash_entry *) entry;
 
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
-  if (ret == (struct elf_vax_link_hash_entry *) NULL)
+  if (ret == NULL)
     ret = ((struct elf_vax_link_hash_entry *)
 	   bfd_hash_allocate (table,
 			      sizeof (struct elf_vax_link_hash_entry)));
-  if (ret == (struct elf_vax_link_hash_entry *) NULL)
+  if (ret == NULL)
     return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct elf_vax_link_hash_entry *)
 	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				     table, string));
-  if (ret != (struct elf_vax_link_hash_entry *) NULL)
+  if (ret != NULL)
     {
       ret->pcrel_relocs_copied = NULL;
     }
@@ -470,14 +459,13 @@ elf_vax_link_hash_newfunc (entry, table, string)
 /* Create an VAX ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
-elf_vax_link_hash_table_create (abfd)
-     bfd *abfd;
+elf_vax_link_hash_table_create (bfd *abfd)
 {
   struct elf_vax_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_vax_link_hash_table);
 
-  ret = (struct elf_vax_link_hash_table *) bfd_malloc (amt);
-  if (ret == (struct elf_vax_link_hash_table *) NULL)
+  ret = bfd_malloc (amt);
+  if (ret == NULL)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
@@ -492,9 +480,7 @@ elf_vax_link_hash_table_create (abfd)
 
 /* Keep vax-specific flags in the ELF header */
 static bfd_boolean
-elf32_vax_set_private_flags (abfd, flags)
-     bfd *abfd;
-     flagword flags;
+elf32_vax_set_private_flags (bfd *abfd, flagword flags)
 {
   elf_elfheader (abfd)->e_flags = flags;
   elf_flags_init (abfd) = TRUE;
@@ -504,9 +490,7 @@ elf32_vax_set_private_flags (abfd, flags)
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 static bfd_boolean
-elf32_vax_merge_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+elf32_vax_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   flagword out_flags;
   flagword in_flags;
@@ -529,9 +513,7 @@ elf32_vax_merge_private_bfd_data (ibfd, obfd)
 
 /* Display the flags field */
 static bfd_boolean
-elf32_vax_print_private_bfd_data (abfd, ptr)
-     bfd *abfd;
-     PTR ptr;
+elf32_vax_print_private_bfd_data (bfd *abfd, PTR ptr)
 {
   FILE *file = (FILE *) ptr;
 
@@ -563,11 +545,8 @@ elf32_vax_print_private_bfd_data (abfd, ptr)
    table.  */
 
 static bfd_boolean
-elf_vax_check_relocs (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
+		      const Elf_Internal_Rela *relocs)
 {
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
@@ -786,8 +765,8 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
 		 which means that h is really a pointer to an
 		 elf_vax_link_hash_entry.  */
 	      if ((ELF32_R_TYPE (rel->r_info) == R_VAX_PC8
- 		   || ELF32_R_TYPE (rel->r_info) == R_VAX_PC16
- 		   || ELF32_R_TYPE (rel->r_info) == R_VAX_PC32)
+		   || ELF32_R_TYPE (rel->r_info) == R_VAX_PC16
+		   || ELF32_R_TYPE (rel->r_info) == R_VAX_PC32)
 		  && info->symbolic)
 		{
 		  struct elf_vax_link_hash_entry *eh;
@@ -843,12 +822,11 @@ elf_vax_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-elf_vax_gc_mark_hook (sec, info, rel, h, sym)
-     asection *sec;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     Elf_Internal_Rela *rel;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+elf_vax_gc_mark_hook (asection *sec,
+		      struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		      Elf_Internal_Rela *rel,
+		      struct elf_link_hash_entry *h,
+		      Elf_Internal_Sym *sym)
 {
   if (h != NULL)
     {
@@ -882,11 +860,8 @@ elf_vax_gc_mark_hook (sec, info, rel, h, sym)
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
-elf_vax_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+elf_vax_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info, asection *sec,
+		       const Elf_Internal_Rela *relocs)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -1128,9 +1103,7 @@ elf_vax_adjust_dynamic_symbol (info, h)
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
-elf_vax_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
+elf_vax_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s;
@@ -1177,7 +1150,7 @@ elf_vax_size_dynamic_sections (output_bfd, info)
   if (info->shared && info->symbolic)
     elf_vax_link_hash_traverse (elf_vax_hash_table (info),
 				elf_vax_discard_copies,
-				(PTR) NULL);
+				NULL);
 
   /* If this is a -Bsymbolic shared link or a static link, we need to
      discard all the got entries we've recorded.  Otherwise, we need to
@@ -1334,9 +1307,8 @@ elf_vax_size_dynamic_sections (output_bfd, info)
    routine, but we won't fill them in in the relocate_section routine.  */
 
 static bfd_boolean
-elf_vax_discard_copies (h, ignore)
-     struct elf_vax_link_hash_entry *h;
-     PTR ignore ATTRIBUTE_UNUSED;
+elf_vax_discard_copies (struct elf_vax_link_hash_entry *h,
+			PTR ignore ATTRIBUTE_UNUSED)
 {
   struct elf_vax_pcrel_relocs_copied *s;
 
@@ -1361,9 +1333,7 @@ elf_vax_discard_copies (h, ignore)
    will be reserved for the symbol.  */
 
 static bfd_boolean
-elf_vax_instantiate_got_entries (h, infoptr)
-     struct elf_link_hash_entry *h;
-     PTR infoptr;
+elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, PTR infoptr)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) infoptr;
   bfd *dynobj;
@@ -1409,16 +1379,14 @@ elf_vax_instantiate_got_entries (h, infoptr)
 /* Relocate an VAX ELF section.  */
 
 static bfd_boolean
-elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     bfd *input_bfd;
-     asection *input_section;
-     bfd_byte *contents;
-     Elf_Internal_Rela *relocs;
-     Elf_Internal_Sym *local_syms;
-     asection **local_sections;
+elf_vax_relocate_section (bfd *output_bfd,
+			  struct bfd_link_info *info,
+			  bfd *input_bfd,
+			  asection *input_section,
+			  bfd_byte *contents,
+			  Elf_Internal_Rela *relocs,
+			  Elf_Internal_Sym *local_syms,
+			  asection **local_sections)
 {
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
@@ -1487,7 +1455,7 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
-	   
+
 	  if ((h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	      && ((r_type == R_VAX_PLT32
@@ -1842,11 +1810,9 @@ elf_vax_relocate_section (output_bfd, info, input_bfd, input_section,
    dynamic sections here.  */
 
 static bfd_boolean
-elf_vax_finish_dynamic_symbol (output_bfd, info, h, sym)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+elf_vax_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
+			       struct elf_link_hash_entry *h,
+			       Elf_Internal_Sym *sym)
 {
   bfd *dynobj;
 
@@ -1997,9 +1963,7 @@ elf_vax_finish_dynamic_symbol (output_bfd, info, h, sym)
 /* Finish up the dynamic sections.  */
 
 static bfd_boolean
-elf_vax_finish_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
+elf_vax_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *sgot;

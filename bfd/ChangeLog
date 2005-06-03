@@ -1,3 +1,31 @@
+2005-06-03  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* elf32-vax.c (rtype_to_howto): Remove PARAMS.
+	(reloc_type_lookup): Dito.
+	(elf_vax_discard_copies): Dito.
+	(elf_vax_instantiate_got_entries): Dito.
+	(elf_vax_link_hash_traverse): Dito.
+	(elf_vax_link_hash_newfunc): Dito.
+	(elf_vax_link_hash_table_create): Dito.
+	(elf32_vax_set_private_flags): Dito.
+	(elf32_vax_merge_private_bfd_data): Dito.
+	(elf32_vax_print_private_bfd_data): Dito.
+	(elf_vax_check_relocs): Dito.
+	(elf_vax_gc_mark_hook): Dito.
+	(elf_vax_gc_sweep_hook): Dito.
+	(elf_vax_size_dynamic_sections): Dito.
+	(elf_vax_discard_copies): Dito.
+	(elf_vax_instantiate_got_entries): Dito.
+	(elf_vax_relocate_section): Dito.
+	(elf_vax_finish_dynamic_symbol): Dito.
+	(elf_vax_finish_dynamic_sections): Dito.
+	(elf_vax_hash_table): Break-up of line isn't needed.
+	(elf_vax_check_relocs): Remove leading whitespace
+	(elf_vax_relocate_section): Remove redundant whitespace
+	(elf_vax_link_hash_newfunc): Don't cast NULL.
+	(elf_vax_link_hash_table_create): Dito.
+	* cpu-vax.c (bfd_vax_arch) Remove a trailing space.
+
 2005-06-03  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 568
