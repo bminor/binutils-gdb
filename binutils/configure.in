@@ -86,7 +86,7 @@ AC_PROG_CC
 AC_PROG_YACC
 AM_PROG_LEX
 
-ALL_LINGUAS="fr tr ja es sv da zh_CN ru ro rw"
+ALL_LINGUAS="fr tr ja es sv da zh_CN ru ro rw zh_TW"
 CY_GNU_GETTEXT
 
 AM_MAINTAINER_MODE
