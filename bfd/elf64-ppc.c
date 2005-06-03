@@ -4111,9 +4111,7 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
       else
 	fdh->elf.ref_regular = 1;
     }
-  else if (fdh != NULL
-	   && (fdh->elf.root.type == bfd_link_hash_defined
-	       || fdh->elf.root.type == bfd_link_hash_defweak))
+  else if (fdh != NULL)
     {
       unsigned entry_vis = ELF_ST_VISIBILITY (eh->elf.other) - 1;
       unsigned descr_vis = ELF_ST_VISIBILITY (fdh->elf.other) - 1;
@@ -4122,7 +4120,9 @@ add_symbol_adjust (struct elf_link_hash_entry *h, void *inf)
       else if (entry_vis > descr_vis)
 	eh->elf.other += descr_vis - entry_vis;
 
-      if (eh->elf.root.type == bfd_link_hash_undefined)
+      if ((fdh->elf.root.type == bfd_link_hash_defined
+	   || fdh->elf.root.type == bfd_link_hash_defweak)
+	  && eh->elf.root.type == bfd_link_hash_undefined)
 	{
 	  eh->elf.root.type = bfd_link_hash_undefweak;
 	  eh->was_undefined = 1;
