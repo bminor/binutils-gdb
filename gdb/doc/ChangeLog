@@ -1,3 +1,11 @@
+2005-06-03  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Registers): Add index entries for the standard
+	registers.
+	(Frames): Add cross-reference from frame pointer description to
+	the Registers node.
+	(Annotations Overview): Fix the reference to GDB name.
+
 2005-06-01  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Set Watchpoints): Remove @vindex entry for

@@ -4149,8 +4149,8 @@ Inside your program, stack frames are identified by their addresses.  A
 stack frame consists of many bytes, each of which has its own address; each
 kind of computer has a convention for choosing one byte whose
 address serves as the address of the frame.  Usually this address is kept
-in a register called the @dfn{frame pointer register} while execution is
-going on in that frame.
+in a register called the @dfn{frame pointer register}
+(@pxref{Registers, $fp}) while execution is going on in that frame.
 
 @cindex frame number
 @value{GDBN} assigns numbers to all existing stack frames, starting with
@@ -6128,6 +6128,11 @@ the selected stack frame.  @var{regname} may be any register name valid on
 the machine you are using, with or without the initial @samp{$}.
 @end table
 
+@cindex stack pointer register
+@cindex program counter register
+@cindex process status register
+@cindex frame pointer register
+@cindex standard registers
 @value{GDBN} has four ``standard'' register names that are available (in
 expressions) on most machines---whenever they do not conflict with an
 architecture's canonical mnemonics for registers.  The register names
@@ -20589,7 +20594,7 @@ Interface, annotate, GDB's Obsolete Annotations}).
 @table @code
 @kindex set annotate
 @item set annotate @var{level}
-The @value{GDB} command @code{set annotate} sets the level of
+The @value{GDBN} command @code{set annotate} sets the level of
 annotations to the specified @var{level}.
 
 @item show annotate
