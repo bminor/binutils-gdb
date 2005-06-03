@@ -160,7 +160,8 @@ static struct bfd_link_callbacks link_callbacks =
   reloc_overflow,
   reloc_dangerous,
   unattached_reloc,
-  notice
+  notice,
+  einfo
 };
 
 struct bfd_link_info link_info;
@@ -873,7 +874,7 @@ add_keepsyms_file (const char *filename)
    a link.  */
 
 static bfd_boolean
-add_archive_element (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+add_archive_element (struct bfd_link_info *info,
 		     bfd *abfd,
 		     const char *name)
 {
@@ -904,7 +905,7 @@ add_archive_element (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       bfd *from;
       int len;
 
-      h = bfd_link_hash_lookup (link_info.hash, name, FALSE, FALSE, TRUE);
+      h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, TRUE);
 
       if (h == NULL)
 	from = NULL;
@@ -1145,7 +1146,7 @@ constructor_callback (struct bfd_link_info *info,
   /* Ensure that BFD_RELOC_CTOR exists now, so that we can give a
      useful error message.  */
   if (bfd_reloc_type_lookup (output_bfd, BFD_RELOC_CTOR) == NULL
-      && (link_info.relocatable
+      && (info->relocatable
 	  || bfd_reloc_type_lookup (abfd, BFD_RELOC_CTOR) == NULL))
     einfo (_("%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n"));
 
@@ -1422,10 +1423,7 @@ reloc_overflow (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   if (overflow_cutoff_limit == -1)
     return TRUE;
 
-  if (abfd == NULL)
-    einfo (_("%P%X: generated"));
-  else
-    einfo ("%X%C:", abfd, section, address);
+  einfo ("%X%C:", abfd, section, address);
 
   if (overflow_cutoff_limit >= 0
       && overflow_cutoff_limit-- == 0)
@@ -1477,11 +1475,8 @@ reloc_dangerous (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		 asection *section,
 		 bfd_vma address)
 {
-  if (abfd == NULL)
-    einfo (_("%P%X: generated"));
-  else
-    einfo ("%X%C:", abfd, section, address);
-  einfo (_("dangerous relocation: %s\n"), message);
+  einfo (_("%X%C: dangerous relocation: %s\n"),
+	 abfd, section, address, message);
   return TRUE;
 }
 
@@ -1495,11 +1490,8 @@ unattached_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		  asection *section,
 		  bfd_vma address)
 {
-  if (abfd == NULL)
-    einfo (_("%P%X: generated"));
-  else
-    einfo ("%X%C:", abfd, section, address);
-  einfo (_(" reloc refers to symbol `%T' which is not being output\n"), name);
+  einfo (_("%X%C: reloc refers to symbol `%T' which is not being output\n"),
+	 abfd, section, address, name);
   return TRUE;
 }
 

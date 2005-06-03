@@ -92,6 +92,11 @@ simple_dummy_multiple_definition (struct bfd_link_info *link_info ATTRIBUTE_UNUS
   return TRUE;
 }
 
+static void
+simple_dummy_einfo (const char *fmt ATTRIBUTE_UNUSED, ...)
+{
+}
+
 struct saved_output_info
 {
   bfd_vma offset;
@@ -187,6 +192,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   callbacks.reloc_dangerous = simple_dummy_reloc_dangerous;
   callbacks.unattached_reloc = simple_dummy_unattached_reloc;
   callbacks.multiple_definition = simple_dummy_multiple_definition;
+  callbacks.einfo = simple_dummy_einfo;
 
   memset (&link_order, 0, sizeof (link_order));
   link_order.next = NULL;

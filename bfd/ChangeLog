@@ -1,5 +1,13 @@
 2005-06-03  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 568
+	* configure.in: Bump version
+	* configure: Regenerate.
+	* elflink.c (elf_link_input_bfd): Use einfo linker callback to print
+	discarded section sym refs and kill linker output.
+	* simple.c (simple_dummy_einfo): New function.
+	(bfd_simple_get_relocated_section_contents): Init callbacks.einfo.
+
 	* elf32-i386.c (elf_i386_relocate_section): Handle zero symndx
 	for all reloc types.
 

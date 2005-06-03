@@ -7087,14 +7087,10 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		    {
 		      BFD_ASSERT (r_symndx != 0);
 		      if (action & COMPLAIN)
-			{
-			  (*_bfd_error_handler)
-			    (_("`%s' referenced in section `%A' of %B: "
-			       "defined in discarded section `%A' of %B"),
-			     o, input_bfd, sec, sec->owner, sym_name);
-			  bfd_set_error (bfd_error_bad_value);
-			  return FALSE;
-			}
+			(*finfo->info->callbacks->einfo)
+			  (_("%X`%s' referenced in section `%A' of %B: "
+			     "defined in discarded section `%A' of %B"),
+			   sym_name, o, input_bfd, sec, sec->owner);
 
 		      /* Try to do the best we can to support buggy old
 			 versions of gcc.  If we've warned, or this is

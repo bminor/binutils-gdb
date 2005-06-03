@@ -190,7 +190,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		bfd *abfd = va_arg (arg, bfd *);
 
 		if (abfd == NULL)
-		  fprintf (fp, "<none>");
+		  fprintf (fp, "%s generated", program_name);
 		else if (abfd->my_archive)
 		  fprintf (fp, "%s(%s)", abfd->my_archive->filename,
 			   abfd->filename);
@@ -275,49 +275,62 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		section = va_arg (arg, asection *);
 		offset = va_arg (arg, bfd_vma);
 
-		entry = (lang_input_statement_type *) abfd->usrdata;
-		if (entry != (lang_input_statement_type *) NULL
-		    && entry->asymbols != (asymbol **) NULL)
-		  asymbols = entry->asymbols;
+		if (abfd == NULL)
+		  {
+		    entry = NULL;
+		    asymbols = NULL;
+		  }
 		else
 		  {
-		    long symsize;
-		    long symbol_count;
-
-		    symsize = bfd_get_symtab_upper_bound (abfd);
-		    if (symsize < 0)
-		      einfo (_("%B%F: could not read symbols\n"), abfd);
-		    asymbols = xmalloc (symsize);
-		    symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
-		    if (symbol_count < 0)
-		      einfo (_("%B%F: could not read symbols\n"), abfd);
-		    if (entry != (lang_input_statement_type *) NULL)
+		    entry = (lang_input_statement_type *) abfd->usrdata;
+		    if (entry != (lang_input_statement_type *) NULL
+			&& entry->asymbols != (asymbol **) NULL)
+		      asymbols = entry->asymbols;
+		    else
 		      {
-			entry->asymbols = asymbols;
-			entry->symbol_count = symbol_count;
+			long symsize;
+			long sym_count;
+
+			symsize = bfd_get_symtab_upper_bound (abfd);
+			if (symsize < 0)
+			  einfo (_("%B%F: could not read symbols\n"), abfd);
+			asymbols = xmalloc (symsize);
+			sym_count = bfd_canonicalize_symtab (abfd, asymbols);
+			if (sym_count < 0)
+			  einfo (_("%B%F: could not read symbols\n"), abfd);
+			if (entry != (lang_input_statement_type *) NULL)
+			  {
+			    entry->asymbols = asymbols;
+			    entry->symbol_count = sym_count;
+			  }
 		      }
 		  }
 
-		/* The GNU Coding Standard requires that error messages be of the form:
+		/* The GNU Coding Standard requires that error messages
+		   be of the form:
 		   
 		     source-file-name:lineno: message
 
-		   We do not always have a line number available so if we cannot find
-		   them we print out the section name and offset instread.  */
+		   We do not always have a line number available so if
+		   we cannot find them we print out the section name and
+		   offset instread.  */
 		discard_last = TRUE;
-		if (bfd_find_nearest_line (abfd, section, asymbols, offset,
-					   &filename, &functionname,
-					   &linenumber))
+		if (abfd != NULL
+		    && bfd_find_nearest_line (abfd, section, asymbols, offset,
+					      &filename, &functionname,
+					      &linenumber))
 		  {
 		    if (functionname != NULL && fmt[-1] == 'C')
 		      {
-			/* Detect the case where we are printing out a message
-			   for the same function as the last call to vinfo ("%C").
-			   In this situation do not print out the ABFD filename
-			   or the function name again.  Note - we do still print
-			   out the source filename, as this will allow programs
-			   that parse the linker's output (eg emacs) to correctly
-			   locate multiple errors in the same source file.  */
+			/* Detect the case where we are printing out a
+			   message for the same function as the last
+			   call to vinfo ("%C").  In this situation do
+			   not print out the ABFD filename or the
+			   function name again.  Note - we do still
+			   print out the source filename, as this will
+			   allow programs that parse the linker's output
+			   (eg emacs) to correctly locate multiple
+			   errors in the same source file.  */
 			if (last_bfd == NULL
 			    || last_file == NULL
 			    || last_function == NULL

@@ -1,3 +1,13 @@
+2005-06-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmain.c (link_callbacks): Add einfo.
+	(add_archive_element): Use passed info, not link_info.
+	(constructor_callback): Likewise.
+	(reloc_overflow): Don't handle null bfd specially.
+	(reloc_dangerous, unattached_reloc): Likewise.
+	* ldmisc.c (vfinfo <B>): Print "ld generated" for null bfd.
+	(vfinfo <C, D, G>): Handle null bfd.  Wrap comments.
+
 2005-06-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.h (etree_value_type): Use "asection *" in place of
