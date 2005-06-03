@@ -2951,6 +2951,9 @@ emit_checkpoint_method4 (struct tracepoint *t)
 	}
 
       checkpoint_emit_sequential_id (checkpoint_file);
+      fputs ("PC=", checkpoint_file);
+      fputs (paddr (read_pc ()), checkpoint_file);
+      fputc ('\n', checkpoint_file);
       for (i = 0; tdp_actions[i]; i++)
 	{
 	  CORE_ADDR offset, base;

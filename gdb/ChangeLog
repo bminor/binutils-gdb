@@ -1,5 +1,6 @@
 2005-05-12  Michael Snyder  <msnyder@redhat.com>
 
+	* tracepoint.c (emit_checkpoint_method4): Add PC to ckpt record.
 	* target.c (target_read_memory_trusted): New function.
 	Implements 'trust-readonly-section'.
 	(target_read_partial): Honor trust-readonly-section.
