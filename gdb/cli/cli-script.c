@@ -245,6 +245,7 @@ do_restore_user_call_depth (void * call_depth)
   (*depth) = 0;
 }
 
+static int from_tty;
 
 void
 execute_user_command (struct cmd_list_element *c, char *args)
@@ -271,6 +272,7 @@ execute_user_command (struct cmd_list_element *c, char *args)
      user-defined function.  */
   old_chain = make_cleanup (do_restore_instream_cleanup, instream);
   instream = (FILE *) 0;
+  from_tty = 0;
   while (cmdlines)
     {
       ret = execute_control_command (cmdlines);
@@ -304,13 +306,23 @@ execute_control_command (struct command_line *cmd)
 
   switch (cmd->control_type)
     {
+    case noisy_control:
+      from_tty = 1;
+      ret = simple_control;
+      break;
+
+    case quiet_control:
+      from_tty = 0;
+      ret = simple_control;
+      break;
+
     case simple_control:
       /* A simple command, execute it and return.  */
       new_line = insert_args (cmd->line);
       if (!new_line)
 	break;
       make_cleanup (free_current_contents, &new_line);
-      execute_command (new_line, 0);
+      execute_command (new_line, from_tty);
       ret = cmd->control_type;
       break;
 
@@ -739,6 +751,29 @@ read_next_line (struct command_line **command)
         first_arg++;
       *command = build_command_line (if_control, first_arg);
     }
+  /* Is this a request for noisy output (a la "from_tty")?  */
+  else if (p1 - p == 5 && !strncmp (p, "noisy", 5))
+    {
+      *command = (struct command_line *)
+	xmalloc (sizeof (struct command_line));
+      (*command)->next = NULL;
+      (*command)->line = NULL;
+      (*command)->control_type = noisy_control;
+      (*command)->body_count = 0;
+      (*command)->body_list = NULL;
+    }
+  /* Is this a request to stop noisy output (a la "from_tty")?  */
+  else if ((p1 - p == 5 && !strncmp (p, "quiet", 5)) ||
+	   (p1 - p == 6 && !strncmp (p, "silent", 6)))
+    {
+      *command = (struct command_line *)
+	xmalloc (sizeof (struct command_line));
+      (*command)->next = NULL;
+      (*command)->line = NULL;
+      (*command)->control_type = quiet_control;
+      (*command)->body_count = 0;
+      (*command)->body_list = NULL;
+    }
   else if (p1 - p == 10 && !strncmp (p, "loop_break", 10))
     {
       *command = (struct command_line *)
@@ -810,6 +845,16 @@ recurse_read_control_structure (struct command_line *current_cmd)
       /* Just skip blanks and comments.  */
       if (val == nop_command)
 	continue;
+      else if (val == noisy_command)
+	{
+	  ret = noisy_control;
+	  break;
+	}
+      else if (val == quiet_command)
+	{
+	  ret = quiet_control;
+	  break;
+	}
 
       if (val == end_command)
 	{
@@ -917,6 +962,16 @@ read_command_lines (char *prompt_arg, int from_tty)
       /* Ignore blank lines or comments.  */
       if (val == nop_command)
 	continue;
+      else if (val == noisy_command)
+	{
+	  ret = noisy_control;
+	  break;
+	}
+      else if (val == quiet_command)
+	{
+	  ret = quiet_control;
+	  break;
+	}
 
       if (val == end_command)
 	{

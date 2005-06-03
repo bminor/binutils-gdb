@@ -652,7 +652,9 @@ enum misc_command_type
     ok_command,
     end_command,
     else_command,
-    nop_command
+    nop_command,
+    quiet_command,
+    noisy_command
   };
 
 enum command_control_type
@@ -662,6 +664,8 @@ enum command_control_type
     continue_control,
     while_control,
     if_control,
+    noisy_control,
+    quiet_control,
     invalid_control
   };
 

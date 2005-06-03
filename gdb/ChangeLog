@@ -1,3 +1,12 @@
+2005-06-03  Michael Snyder  <msnyder@redhat.com>
+
+	* defs.h (noisy_command, quiet_command): New command types 
+	to be interpreted by cli-script.c.  Turn on and off 'from_tty'
+	output.
+	* cli/cli-script.c (noisy_command, quiet_command): Interpret
+	new pseudo-commands for user-defined scripts (which otherwise
+	will frequently produce no output).
+
 2005-05-30  Michael Snyder  <msnyder@redhat.com>
 
 	Add support for writing tracepoint/checkpoint data to a file.
