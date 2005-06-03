@@ -440,8 +440,8 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
 }
 
 static void
-dump_symtab (struct objfile *objfile, struct symtab *symtab,
-	     struct ui_file *outfile)
+dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
+	       struct ui_file *outfile)
 {
   int i;
   struct dict_iterator iter;
@@ -531,6 +531,22 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
     {
       fprintf_filtered (outfile, "\nBlockvector same as previous symtab\n\n");
     }
+}
+
+static void
+dump_symtab (struct objfile *objfile, struct symtab *symtab,
+	     struct ui_file *outfile)
+{
+  enum language saved_lang;
+
+  /* Set the current language to the language of the symtab we're dumping
+     because certain routines used during dump_symtab() use the current
+     language to print an image of the symbol.  We'll restore it later.  */
+  saved_lang = set_language (symtab->language);
+
+  dump_symtab_1 (objfile, symtab, outfile);
+
+  set_language (saved_lang);
 }
 
 void
