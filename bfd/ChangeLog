@@ -1,4 +1,15 @@
-2005-06-02  Alan Modra  <amodra@bigpond.net.au>
+2005-06-03  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 568
+	* elf32-i386.c (elf_i386_relocate_section): Handle zero symndx
+	for all reloc types.
+
+	Apply from mainline:
+	2005-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+	* elf32-i386.c (elf_i386_relocate_section): Allow R_386_GOTOFF
+	against protected function when building executable.
+
+2005-06-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (add_symbol_adjust): Set sym visibility to most
 	restrictive of func code and func descr for undefined syms as well
