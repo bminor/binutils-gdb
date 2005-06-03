@@ -1,3 +1,12 @@
+2005-05-12  Michael Snyder  <msnyder@redhat.com>
+
+	* target.c (target_read_memory_trusted): New function.
+	Implements 'trust-readonly-section'.
+	(target_read_partial): Honor trust-readonly-section.
+	(target_read_memory_partial): Ditto.
+	(target_read_memory): Ditto.
+	(do_xfer_memory): Ditto.
+
 2005-06-03  Michael Snyder  <msnyder@redhat.com>
 
 	* defs.h (noisy_command, quiet_command): New command types 

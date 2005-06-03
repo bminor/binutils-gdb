@@ -845,6 +845,40 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
   return NULL;
 }
 
+static int trust_readonly = 0;
+static void
+show_trust_readonly (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, 
+		    _("Mode for reading from readonly sections is %s.\n"),
+		    value);
+}
+
+/* If trust-readonly-sections, and if MEMADDR is within a
+   read-only section, read LEN bytes from the bfd at MEMADDR,
+   placing the results in GDB's memory at MYADDR.  Returns
+   the number of bytes read.  */
+
+static int
+target_read_memory_trusted (CORE_ADDR memaddr, char *myaddr, int len)
+{
+  struct section_table *secp;
+  /* User-settable option, 'trust-readonly-sections'.  If true,
+     then memory from any SEC_READONLY bfd section may be read
+     directly from the bfd file.  */
+  if (trust_readonly)
+    {
+      secp = target_section_by_addr (&current_target, memaddr);
+      if (secp != NULL
+	  && (bfd_get_section_flags (secp->bfd, secp->the_bfd_section)
+	      & SEC_READONLY))
+	return xfer_memory (memaddr, myaddr, len, 0, NULL, &current_target);
+    }
+
+  return 0;
+}
+
 /* Return non-zero when the target vector has supplied an xfer_partial
    method and it, rather than xfer_memory, should be used.  */
 static int
@@ -999,6 +1033,12 @@ xfer_using_stratum (enum target_object object, const char *annex,
 int
 target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
+  int ret;
+
+  /* Honor 'trust-readonly-sections' if set.  */
+  if ((ret = target_read_memory_trusted (memaddr, myaddr, len)) > 0)
+    return (ret != len);
+
   if (target_xfer_partial_p ())
     return xfer_using_stratum (TARGET_OBJECT_MEMORY, NULL,
 			       memaddr, len, myaddr, NULL);
@@ -1033,16 +1073,6 @@ target_stopped_data_address_p (struct target_ops *target)
 }
 #endif
 
-static int trust_readonly = 0;
-static void
-show_trust_readonly (struct ui_file *file, int from_tty,
-		     struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("\
-Mode for reading from readonly sections is %s.\n"),
-		    value);
-}
-
 /* Move memory to or from the targets.  The top target gets priority;
    if it cannot handle it, it is offered to the next one down, etc.
 
@@ -1060,22 +1090,14 @@ do_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
   if (len == 0)
     return 0;
 
+  /* Honor 'trust-readonly-sections' if set.  */
+  if (!write && 
+      (res = target_read_memory_trusted (memaddr, myaddr, len)) > 0)
+	return res;
+
   /* deprecated_xfer_memory is not guaranteed to set errno, even when
      it returns 0.  */
   errno = 0;
-
-  if (!write && trust_readonly)
-    {
-      struct section_table *secp;
-      /* User-settable option, "trust-readonly-sections".  If true,
-         then memory from any SEC_READONLY bfd section may be read
-         directly from the bfd file.  */
-      secp = target_section_by_addr (&current_target, memaddr);
-      if (secp != NULL
-	  && (bfd_get_section_flags (secp->bfd, secp->the_bfd_section)
-	      & SEC_READONLY))
-	return xfer_memory (memaddr, myaddr, len, 0, attrib, &current_target);
-    }
 
   /* The quick case is that the top target can handle the transfer.  */
   res = current_target.deprecated_xfer_memory
@@ -1244,10 +1266,14 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
 int
 target_read_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 {
+  int retval;
+
+  /* Honor 'trust-readonly-sections' if set.  */
+  if ((retval = target_read_memory_trusted (memaddr, buf, len)) > 0)
+    return retval;
+
   if (target_xfer_partial_p ())
     {
-      int retval;
-
       retval = target_xfer_partial (target_stack, TARGET_OBJECT_MEMORY,
 				    NULL, buf, NULL, memaddr, len);
 
@@ -1351,6 +1377,13 @@ target_read_partial (struct target_ops *ops,
 		     const char *annex, gdb_byte *buf,
 		     ULONGEST offset, LONGEST len)
 {
+  int ret;
+
+  /* Honor 'trust-readonly-sections' if set.  */
+  if (object == TARGET_OBJECT_MEMORY)
+    if ((ret = target_read_memory_trusted (offset, buf, len)) > 0)
+      return ret;
+
   return target_xfer_partial (ops, object, annex, buf, NULL, offset, len);
 }
 
