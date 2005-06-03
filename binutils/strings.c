@@ -447,7 +447,12 @@ get_char (FILE *stream, file_off *address, int *magiccount, char **magic)
 	{
 	  if (stream == NULL)
 	    return EOF;
-#ifdef HAVE_GETC_UNLOCKED
+
+	  /* Only use getc_unlocked if we found a declaration for it.
+	     Otherwise, libc is not thread safe by default, and we
+	     should not use it.  */
+
+#if defined(HAVE_GETC_UNLOCKED) && HAVE_DECL_GETC_UNLOCKED
 	  c = getc_unlocked (stream);
 #else
 	  c = getc (stream);

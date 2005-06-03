@@ -1,3 +1,11 @@
+2005-06-03  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure.in: Check for getc_unlocked prototype.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* strings.c (get_char): Only call getc_unlocked if we have seen a
+	prototype.
+
 2005-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add zh_TW
