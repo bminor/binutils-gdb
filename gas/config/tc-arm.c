@@ -8027,11 +8027,44 @@ static const struct asm_cond conds[] =
     THUMB_VARIANT, do_##ae, do_##te }
 
 /* ARM-only variants of all the above.  */
-#define CE(mnem,  op, nops, ops, ae) TCE(mnem,  op, 0, nops, ops, ae, 0)
-#define C3(mnem,  op, nops, ops, ae) TC3(mnem,  op, 0, nops, ops, ae, 0)
-#define CM(m1,m2, op, nops, ops, ae) TCM(m1,m2, op, 0, nops, ops, ae, 0)
-#define UE(mnem,  op, nops, ops, ae) TUE(mnem,  op, 0, nops, ops, ae, 0)
-#define UF(mnem,  op, nops, ops, ae) TUF(mnem,  op, 0, nops, ops, ae, 0)
+#define CE(mnem,  op, nops, ops, ae)	\
+  { #mnem, OPS##nops ops, OT_csuffix, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
+
+#define C3(mnem, op, nops, ops, ae)	\
+  { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
+
+#define xCM_(m1, m2, m3, op, nops, ops, ae)	\
+  { #m1 #m2 #m3, OPS##nops ops, \
+    sizeof(#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof(#m1) - 1, \
+    0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
+
+#define CM(m1, m2, op, nops, ops, ae)	\
+  xCM_(m1,   , m2, op, nops, ops, ae),	\
+  xCM_(m1, eq, m2, op, nops, ops, ae),	\
+  xCM_(m1, ne, m2, op, nops, ops, ae),	\
+  xCM_(m1, cs, m2, op, nops, ops, ae),	\
+  xCM_(m1, hs, m2, op, nops, ops, ae),	\
+  xCM_(m1, cc, m2, op, nops, ops, ae),	\
+  xCM_(m1, ul, m2, op, nops, ops, ae),	\
+  xCM_(m1, lo, m2, op, nops, ops, ae),	\
+  xCM_(m1, mi, m2, op, nops, ops, ae),	\
+  xCM_(m1, pl, m2, op, nops, ops, ae),	\
+  xCM_(m1, vs, m2, op, nops, ops, ae),	\
+  xCM_(m1, vc, m2, op, nops, ops, ae),	\
+  xCM_(m1, hi, m2, op, nops, ops, ae),	\
+  xCM_(m1, ls, m2, op, nops, ops, ae),	\
+  xCM_(m1, ge, m2, op, nops, ops, ae),	\
+  xCM_(m1, lt, m2, op, nops, ops, ae),	\
+  xCM_(m1, gt, m2, op, nops, ops, ae),	\
+  xCM_(m1, le, m2, op, nops, ops, ae),	\
+  xCM_(m1, al, m2, op, nops, ops, ae)
+
+#define UE(mnem, op, nops, ops, ae)	\
+  { #mnem, OPS##nops ops, OT_unconditional, 0x##op, 0, ARM_VARIANT, 0, do_##ae, NULL }
+
+#define UF(mnem, op, nops, ops, ae)	\
+  { #mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0, ARM_VARIANT, 0, do_##ae, NULL }
+
 #define do_0 0
 
 /* Thumb-only, unconditional.  */

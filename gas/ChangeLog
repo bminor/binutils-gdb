@@ -1,3 +1,8 @@
+2005-06-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (CE, C3, CM, UE, UF): Redefine without reference
+	to their Thumb-enabled equivalents.
+
 2005-06-01  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (load_register): Add leading "0x" to the
