@@ -25,6 +25,10 @@
 
 extern int default_trace_method;
 extern int tracepoint_event_p (void);
+extern int trace_default_start (char *, int);
+extern int trace_default_stop (char *, int);
+extern int trace_default_status (char *, int);
+extern unsigned long trace_running_p;
 
 /* Most of what follows is not meant for export.
    They're just forward declarations for internal use in tracepoint.c.  */
@@ -118,8 +122,6 @@ enum actionline_type
 /* The tracepoint chain of all tracepoints.  */
 
 extern struct tracepoint *tracepoint_chain;
-
-extern unsigned long trace_running_p;
 
 /* A hook used to notify the UI of tracepoint operations.  */
 

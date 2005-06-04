@@ -58,6 +58,8 @@
 
 #include "remote-fileio.h"
 
+#include "tracepoint.h"
+
 /* Prototypes for local functions.  */
 static void cleanup_sigint_signal_handler (void *dummy);
 static void initialize_sigint_signal_handler (void);
@@ -5366,6 +5368,41 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
   return 0;
 }
 
+static int
+remote_start_tracepoints (char *args, int from_tty)
+{
+  fprintf_unfiltered (gdb_stdout, "remote to_start_tracepoints\n");
+  return 0;
+}
+
+static int
+remote_stop_tracepoints (char *args, int from_tty)
+{
+  fprintf_unfiltered (gdb_stdout, "remote to_stop_tracepoints\n");
+  return 0;
+}
+
+static int
+remote_tracepoint_status (char *args, int from_tty)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *buf = alloca (rs->remote_packet_size);
+
+  if (from_tty && info_verbose)
+    fprintf_unfiltered (gdb_stdout, "remote to_tracepoint_status\n");
+  putpkt ("qTStatus");
+  /* FIXME: How about async?  See tracepoint.c, get_noisy_reply.  */
+  getpkt (buf, rs->remote_packet_size, 0);
+
+  if (buf[0] != 'T' ||
+      (buf[1] != '0' && buf[1] != '1'))
+    return 0;	/* Target does not support.  */
+
+  /* Exported for use by the GUI.  */
+  trace_running_p = (buf[1] == '1');
+  return 1;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -5413,6 +5450,9 @@ Specify the serial device it is connected to\n\
   remote_ops.to_has_registers = 1;
   remote_ops.to_has_execution = 1;
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
+  remote_ops.to_start_tracepoints = remote_start_tracepoints;
+  remote_ops.to_stop_tracepoints = remote_stop_tracepoints;
+  remote_ops.to_tracepoint_status = remote_tracepoint_status;
   remote_ops.to_magic = OPS_MAGIC;
 }
 
@@ -5542,6 +5582,9 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_is_async_p = remote_is_async_p;
   remote_async_ops.to_async = remote_async;
   remote_async_ops.to_async_mask_value = 1;
+  remote_async_ops.to_start_tracepoints = remote_start_tracepoints;
+  remote_async_ops.to_stop_tracepoints = remote_stop_tracepoints;
+  remote_async_ops.to_tracepoint_status = remote_tracepoint_status;
   remote_async_ops.to_magic = OPS_MAGIC;
 }
 

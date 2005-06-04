@@ -422,6 +422,13 @@ struct target_ops
 				gdb_byte *readbuf, const gdb_byte *writebuf,
 				ULONGEST offset, LONGEST len);
 
+    /* Tracepoint start.  */
+    int (*to_start_tracepoints) (char *, int);
+    /* Tracepoint stop.  */
+    int (*to_stop_tracepoints) (char *, int);
+    /* Tracepoint status.  */
+    int (*to_tracepoint_status) (char *, int);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1066,6 +1073,14 @@ extern int target_stopped_data_address_p (struct target_ops *);
 /* Horrible hack to get around existing macros :-(.  */
 #define target_stopped_data_address_p(CURRENT_TARGET) (1)
 #endif
+
+#define target_start_tracepoints(ARGS, FROM_TTY) \
+     (*current_target.to_start_tracepoints) (ARGS, FROM_TTY)
+#define target_stop_tracepoints(ARGS, FROM_TTY) \
+     (*current_target.to_stop_tracepoints) (ARGS, FROM_TTY)
+#define target_tracepoint_status(ARGS, FROM_TTY) \
+     (*current_target.to_tracepoint_status) (ARGS, FROM_TTY)
+
 
 /* This will only be defined by a target that supports catching vfork events,
    such as HP-UX.

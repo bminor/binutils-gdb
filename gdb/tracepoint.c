@@ -1787,6 +1787,9 @@ remote_set_transparent_ranges (void)
     }
 }
 
+unsigned long trace_running_p;
+static FILE *checkpoint_file;
+
 /* tstart command:
 
    Tell target to clear any previous trace experiment.
@@ -1794,9 +1797,44 @@ remote_set_transparent_ranges (void)
    to the target.  If no errors, 
    Tell target to start a new trace experiment.  */
 
+extern int
+trace_default_start (char *args, int from_tty)
+{
+  if (checkpoint_file == NULL)
+    error (_("\
+You must open a tracepoint file to use the default tracepoint\n\
+method.  This will enable gdb to save trace data into a file.\n\n\
+See 'help open-tracepoint-file'."));
+
+  if (from_tty && info_verbose)
+    fprintf_filtered (gdb_stdout, "default trace start\n");
+  set_traceframe_num (-1);	/* All old traceframes invalidated.  */
+  set_tracepoint_num (-1);
+  set_traceframe_context (-1);
+  trace_running_p = 1;
+  if (deprecated_trace_start_stop_hook)
+    deprecated_trace_start_stop_hook (1, from_tty);
+
+  return 1;	/* Handled.  */
+}
+
 static void
 trace_start_command (char *args, int from_tty)
 {
+#if 1
+  if (!target_start_tracepoints (args, from_tty))
+    {
+      if (!default_trace_method)
+	if (query (_("Target tracepoint support not active.  Use default method? ")))
+	  default_trace_method++;
+
+      if (default_trace_method)
+	trace_default_start (args, from_tty);
+      else if (from_tty)
+	fprintf_filtered (gdb_stdout, "Cancelled.\n");
+    }
+  return;
+#else
   struct tracepoint *t;
   char buf[2048];
   char **tdp_actions;
@@ -1903,12 +1941,47 @@ trace_start_command (char *args, int from_tty)
   trace_running_p = 1;
   if (deprecated_trace_start_stop_hook)
     deprecated_trace_start_stop_hook (1, from_tty);
+#endif
 }
 
-/* tstop command */
+/* tstop command:
+   Tell the target to stop collecting trace data.  */
+
+extern int
+trace_default_stop (char *args, int from_tty)
+{
+  if (checkpoint_file == NULL)
+    error (_("\
+You must open a tracepoint file to use the default tracepoint\n\
+method.  This will enable gdb to save trace data into a file.\n\n\
+See 'help open-tracepoint-file'."));
+
+  if (from_tty && info_verbose)
+    fprintf_filtered (gdb_stdout, "default trace stop\n");
+  trace_running_p = 0;
+  if (deprecated_trace_start_stop_hook)
+    deprecated_trace_start_stop_hook (0, from_tty);
+
+  return 1;	/* Handled.  */
+}
+
 static void
 trace_stop_command (char *args, int from_tty)
 {
+#if 1
+  if (!target_stop_tracepoints (args, from_tty))
+    {
+      if (!default_trace_method)
+	if (query (_("Target tracepoint support not active.  Use default method? ")))
+	  default_trace_method++;
+
+      if (default_trace_method)
+	trace_default_stop (args, from_tty);
+      else
+	fprintf_filtered (gdb_stdout, "Cancelled.\n");
+    }
+  return;
+#else
   if (default_trace_method)
     {
       /* Default implementation.  */
@@ -1931,14 +2004,47 @@ trace_stop_command (char *args, int from_tty)
   trace_running_p = 0;
   if (deprecated_trace_start_stop_hook)
     deprecated_trace_start_stop_hook (0, from_tty);
+#endif
 }
 
-unsigned long trace_running_p;
+/* tstatus command:
+   Report whether trace is running.   */
 
-/* tstatus command */
+extern int
+trace_default_status (char *args, int from_tty)
+{
+  if (checkpoint_file == NULL)
+    error (_("\
+You must open a tracepoint file to use the default tracepoint\n\
+method.  This will enable gdb to save trace data into a file.\n\n\
+See 'help open-tracepoint-file'."));
+
+  if (from_tty && info_verbose)
+    fprintf_filtered (gdb_stdout, "default trace status\n");
+
+  fprintf_filtered (gdb_stdout, "Trace is %s.\n",
+		    trace_running_p ? "on" : "off");
+
+  return 1;	/* Handled.  */
+}
+
 static void
 trace_status_command (char *args, int from_tty)
 {
+#if 1
+  if (!target_tracepoint_status (args, from_tty))
+    {
+      if (!default_trace_method)
+	if (query (_("Target tracepoint support not active.  Use default method? ")))
+	  default_trace_method++;
+
+      if (default_trace_method)
+	trace_default_status (args, from_tty);
+      else
+	fprintf_filtered (gdb_stdout, "Cancelled.\n");
+    }
+  return;
+#else
   if (default_trace_method)
     {
       printf_filtered ("Trace is %s.\n", trace_running_p ? "on" : "off");
@@ -1959,6 +2065,7 @@ trace_status_command (char *args, int from_tty)
     {
       error (_("Target does not implement this command (tstatus)."));
     }
+#endif
 }
 
 /* Worker function for the various flavors of the tfind command.  */
@@ -2754,7 +2861,6 @@ get_traceframe_number (void)
   return traceframe_number;
 }
 
-static FILE *checkpoint_file;
 static int tracepoint_method;
 
 static void
@@ -3122,14 +3228,14 @@ static void
 checkpoint_open (char *args, int from_tty)
 {
   if (args == NULL || *args == '\0')
-    error ("Argument required: checkpoint file name.");
+    error ("Argument required: filename for tracepoint/checkpoint data.");
 
   if ((checkpoint_file = fopen (args, "w")) == NULL)
     error ("Could not open checkpoint file %s for output.", args);
 
   fprintf (checkpoint_file, "CHECKPOINT FILE\n");
   if (from_tty)
-    fprintf_filtered (gdb_stdout, "File '%s' open for checkpoints.\n",
+    fprintf_filtered (gdb_stdout, "File '%s' open for trace/checkpoints.\n",
 		      args);
 }
 
@@ -3209,6 +3315,11 @@ Method 5 etc. TBD."),
 
   c = add_com ("open-checkpoint", class_trace, checkpoint_open, "\
 Open output file for checkpoints.\n\
+Argument is filename.");
+  set_cmd_completer (c, filename_completer);
+
+  c = add_com ("open-tracepoint", class_trace, checkpoint_open, "\
+Open output file for tracepoints.\n\
 Argument is filename.");
   set_cmd_completer (c, filename_completer);
 

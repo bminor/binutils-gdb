@@ -1,4 +1,11 @@
-2005-05-12  Michael Snyder  <msnyder@redhat.com>
+2005-06-03  Michael Snyder  <msnyder@redhat.com>
+
+	* tracepoint.c, remote.c, target.c, target.h, etc.: 
+	Begin moving tracepoint methods into the target vector,
+	and migrating some of the remote protocol stuff from
+	tracepoint.c into remote.c.
+
+2005-06-03  Michael Snyder  <msnyder@redhat.com>
 
 	* tracepoint.c (emit_checkpoint_method4): Add PC to ckpt record.
 	* target.c (target_read_memory_trusted): New function.

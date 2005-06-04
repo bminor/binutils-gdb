@@ -38,6 +38,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "gdbcore.h"
+#include "tracepoint.h"
 
 static void target_info (char *, int);
 
@@ -456,6 +457,10 @@ update_current_target (void)
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
+      INHERIT (to_start_tracepoints, t);
+      INHERIT (to_stop_tracepoints, t);
+      INHERIT (to_tracepoint_status, t);
+     
       INHERIT (to_magic, t);
     }
 #undef INHERIT
@@ -636,6 +641,16 @@ update_current_target (void)
   de_fault (to_async, 
 	    (void (*) (void (*) (enum inferior_event_type, void*), void*)) 
 	    tcomplain);
+  de_fault (to_start_tracepoints, 
+	    (int (*) (char *, int))
+	    return_zero);
+  de_fault (to_stop_tracepoints, 
+	    (int (*) (char *, int))
+	    return_zero);
+  de_fault (to_tracepoint_status, 
+	    (int (*) (char *, int))
+	    return_zero);
+
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed
@@ -1847,6 +1862,36 @@ static char * dummy_make_corefile_notes (bfd *ignore1, int *ignore2)
   return NULL;
 }
 
+/* Generic fallback method for tracepoints: start tracepoint experiment.  */
+static int
+default_start_tracepoints (char *args, int from_tty)
+{
+  if (info_verbose)
+    fprintf_unfiltered (gdb_stdout, "default to_start_tracepoints\n");
+
+  return trace_default_start (args, from_tty);
+}
+
+/* Generic fallback method for tracepoints: stop tracepoint experiment.  */
+static int
+default_stop_tracepoints (char *args, int from_tty)
+{
+  if (info_verbose)
+    fprintf_unfiltered (gdb_stdout, "default to_stop_tracepoints\n");
+
+  return trace_default_stop (args, from_tty);
+}
+
+/* Generic fallback method for tracepoints: tracepoint experiment status.  */
+static int
+default_tracepoint_status (char *args, int from_tty)
+{
+  if (info_verbose)
+    fprintf_unfiltered (gdb_stdout, "default to_tracepoint_status\n");
+
+  return trace_default_status (args, from_tty);
+}
+
 /* Set up the handful of non-empty slots needed by the dummy target
    vector.  */
 
@@ -1863,6 +1908,9 @@ init_dummy_target (void)
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;
   dummy_target.to_make_corefile_notes = dummy_make_corefile_notes;
   dummy_target.to_xfer_partial = default_xfer_partial;
+  dummy_target.to_start_tracepoints = default_start_tracepoints;
+  dummy_target.to_stop_tracepoints = default_stop_tracepoints;
+  dummy_target.to_tracepoint_status = default_tracepoint_status;
   dummy_target.to_magic = OPS_MAGIC;
 }
 
@@ -2530,6 +2578,36 @@ debug_to_pid_to_exec_file (int pid)
   return exec_file;
 }
 
+static int
+debug_to_start_tracepoints (char *args, int from_tty)
+{
+  int ret = debug_target.to_start_tracepoints (args, from_tty);
+
+  fprintf_unfiltered (gdb_stdout, 
+		      "target to_start_tracepoints returns %d\n", ret);
+  return ret;
+}
+
+static int
+debug_to_stop_tracepoints (char *args, int from_tty)
+{
+  int ret = debug_target.to_stop_tracepoints (args, from_tty);
+
+  fprintf_unfiltered (gdb_stdout, 
+		      "target to_stop_tracepoints returns %d\n", ret);
+  return ret;
+}
+
+static int
+debug_to_tracepoint_status (char *args, int from_tty)
+{
+  int ret = debug_target.to_tracepoint_status (args, from_tty);
+
+  fprintf_unfiltered (gdb_stdout, 
+		      "target to_tracepoint_status returns %d\n", ret);
+  return ret;
+}
+
 static void
 setup_target_debug (void)
 {
@@ -2589,6 +2667,10 @@ setup_target_debug (void)
   current_target.to_enable_exception_callback = debug_to_enable_exception_callback;
   current_target.to_get_current_exception_event = debug_to_get_current_exception_event;
   current_target.to_pid_to_exec_file = debug_to_pid_to_exec_file;
+
+  current_target.to_start_tracepoints = debug_to_start_tracepoints;
+  current_target.to_stop_tracepoints  = debug_to_stop_tracepoints;
+  current_target.to_tracepoint_status = debug_to_tracepoint_status;
 
 }
 
