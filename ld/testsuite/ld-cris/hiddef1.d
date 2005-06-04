@@ -14,7 +14,7 @@
 # and sections change, make sure that there's no .plt and that
 # dsofn is hidden (not exported as a dynamic symbol).
 
-There are 11 section headers, starting at offset 0x[0-9a-f]+:
+There are 12 section headers, starting at offset 0x[0-9a-f]+:
 #...
   \[[ 0-9]+\] \.got              PROGBITS        [0-9a-f]+ [0-9a-f]+ 0+10 04  WA  0   0  4
 #...
@@ -24,5 +24,5 @@ Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 1 entries:
 #...
 Symbol table '\.dynsym' contains 9 entries:
 #...
-Symbol table '\.symtab' contains 19 entries:
+Symbol table '\.symtab' contains 20 entries:
 #pass

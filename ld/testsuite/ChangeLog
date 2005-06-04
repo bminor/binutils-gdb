@@ -1,3 +1,9 @@
+2005-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-cris/hiddef1.d: Updated.
+	* ld-cris/libdso-10.d: Likewise.
+	* ld-cris/libdso-2.d: Likewise.
+
 2005-06-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/powerpc.exp (ppcelftests): Assemble sda test with -a32.
