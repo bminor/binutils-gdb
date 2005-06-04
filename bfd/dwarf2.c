@@ -141,7 +141,7 @@ struct comp_unit
   /* Chain the previously read compilation units.  */
   struct comp_unit *next_unit;
 
-  /* Keep the bdf convenient (for memory allocation).  */
+  /* Keep the bfd convenient (for memory allocation).  */
   bfd *abfd;
 
   /* The lowest and highest addresses contained in this compilation

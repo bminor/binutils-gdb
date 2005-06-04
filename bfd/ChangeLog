@@ -1,3 +1,7 @@
+2005-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf2.c (comp_unit): Fix a typo in comment.
+
 2005-06-03  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* elf32-vax.c (rtype_to_howto): Remove PARAMS.
