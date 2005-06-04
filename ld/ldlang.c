@@ -3065,7 +3065,12 @@ lang_mark_used_section_1
 
 	    os = &(s->output_section_statement);
 	    if (os->bfd_section != NULL)
-	      lang_mark_used_section_1 (os->children.head, os);
+	      {
+		lang_mark_used_section_1 (os->children.head, os);
+		if (os->load_base)
+		  exp_mark_used_section (os->load_base,
+					 bfd_abs_section_ptr);
+	      }
 	  }
 	  break;
 	case lang_wild_statement_enum:

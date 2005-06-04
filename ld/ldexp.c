@@ -1217,6 +1217,8 @@ align_n (bfd_vma value, bfd_vma align)
 void
 exp_mark_used_section (etree_type *tree, asection *current_section)
 {
+  bfd_vma dot = 0;
+
   switch (tree->type.node_class)
     {
     case etree_value:
@@ -1232,6 +1234,8 @@ exp_mark_used_section (etree_type *tree, asection *current_section)
       break;
 
     case etree_binary:
+      fold_binary (tree, current_section, lang_allocating_phase_enum,
+		   dot, &dot, TRUE);
       break;
 
     case etree_trinary:
@@ -1243,12 +1247,13 @@ exp_mark_used_section (etree_type *tree, asection *current_section)
       if (tree->assign.dst[0] != '.' || tree->assign.dst[1] != 0)
 	{
 	  etree_value_type result;
-	  bfd_vma dot = 0;
 
 	  result = exp_fold_tree_1 (tree->assign.src,
 				    current_section,
 				    lang_allocating_phase_enum,
 				    dot, &dot, TRUE);
+	  if (current_section != bfd_abs_section_ptr)
+	    current_section->flags |= SEC_KEEP;
 	  if (result.valid_p)
 	    {
 	      bfd_boolean create;

@@ -1,3 +1,12 @@
+2005-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 992
+	* ldexp.c (exp_mark_used_section): Set SEC_KEEP on current
+	section for etree_assign, etree_provide and etree_provided.
+	Call fold_binary on etree_binary.
+
+	* ldlang.c (lang_mark_used_section_1): Handle load base.
+
 2005-06-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldmain.c (link_callbacks): Add einfo.
