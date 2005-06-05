@@ -1247,24 +1247,33 @@ exp_mark_used_section (etree_type *tree, asection *current_section)
       if (tree->assign.dst[0] != '.' || tree->assign.dst[1] != 0)
 	{
 	  etree_value_type result;
+	  bfd_boolean create = tree->type.node_class == etree_assign;
+	  struct bfd_link_hash_entry *h;
 
 	  result = exp_fold_tree_1 (tree->assign.src,
 				    current_section,
 				    lang_allocating_phase_enum,
 				    dot, &dot, TRUE);
-	  if (current_section != bfd_abs_section_ptr)
+
+	  /* We mark the current section SEC_KEEP only if the symbol
+	     will be defined.  */
+	  if (!create)
+	    h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
+				      create, FALSE, TRUE);
+	  else
+	    h = NULL;
+
+	  if ((create || h)
+	      && current_section != bfd_abs_section_ptr)
 	    current_section->flags |= SEC_KEEP;
+
 	  if (result.valid_p)
 	    {
-	      bfd_boolean create;
-	      struct bfd_link_hash_entry *h;
 
-	      if (tree->type.node_class == etree_assign)
-		create = TRUE;
-	      else
-		create = FALSE;
-	      h = bfd_link_hash_lookup (link_info.hash, tree->assign.dst,
-					create, FALSE, TRUE);
+	      if (create)
+		h = bfd_link_hash_lookup (link_info.hash,
+					  tree->assign.dst, create,
+					  FALSE, TRUE);
 	      if (h == NULL)
 		{
 		  if (create)

@@ -35,7 +35,5 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, DATA
   5 \.got          0+c  0+21e0  0+21e0  0+1e0  2\*\*2
                   CONTENTS, ALLOC, LOAD, DATA
-  6 \.data         0+  0+21ec  0+21ec  0+1ec  2\*\*0
-                  CONTENTS, ALLOC, LOAD, DATA
-  7 \.bss          0+14  0+21ec  0+21ec  0+1ec  2\*\*0
+  6 \.bss          0+14  0+21ec  0+21ec  0+1ec  2\*\*0
                   ALLOC
