@@ -1,3 +1,11 @@
+2005-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-pcc.c (ppc64_elf_gc_mark_hook): For the local sym in .opd
+	case, include addend when indexing .opd section map.
+	(ppc64_elf_edit_opd): Add no_opd_opt param.  Do nothing besides
+	clear opd_adjust array if no_opd_opt set.  Tidy code.
+	* elf64-ppc.h (ppc64_elf_edit_opd): Update prototype.
+
 2005-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf2.c (comp_unit): Fix a typo in comment.

@@ -5064,7 +5064,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	  if (!rsec->gc_mark)
 	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
 
-	  rsec = opd_sym_section[sym->st_value / 8];
+	  rsec = opd_sym_section[(sym->st_value + rel->r_addend) / 8];
 	}
     }
 
@@ -6155,6 +6155,7 @@ dec_dynrel_count (bfd_vma r_info,
 
 bfd_boolean
 ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
+		    bfd_boolean no_opd_opt,
 		    bfd_boolean non_overlapping)
 {
   bfd *ibfd;
@@ -6184,10 +6185,13 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	{
 	  /* check_relocs hasn't been called.  Must be a ld -r link
 	     or --just-symbols object.   */
-	  opd_adjust = bfd_zalloc (obfd, amt);
+	  opd_adjust = bfd_alloc (obfd, amt);
 	  ppc64_elf_section_data (sec)->opd.adjust = opd_adjust;
 	}
       memset (opd_adjust, 0, amt);
+
+      if (no_opd_opt)
+	continue;
 
       if (sec->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
 	continue;
@@ -6358,18 +6362,16 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 
 	  elf_section_data (sec)->relocs = relstart;
 
-	  wptr = sec->contents;
-	  rptr = sec->contents;
 	  new_contents = sec->contents;
-
 	  if (add_aux_fields)
 	    {
 	      new_contents = bfd_malloc (sec->size + cnt_16b * 8);
 	      if (new_contents == NULL)
 		return FALSE;
 	      need_pad = FALSE;
-	      wptr = new_contents;
 	    }
+	  wptr = new_contents;
+	  rptr = sec->contents;
 
 	  write_rel = relstart;
 	  skip = FALSE;
