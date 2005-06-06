@@ -905,9 +905,10 @@ print_symbol (bfd *abfd, asymbol *sym, bfd_vma ssize, bfd *archive_bfd)
 	}
       else if (bfd_get_section (sym)->owner == abfd)
 	{
-	  if (bfd_find_nearest_line (abfd, bfd_get_section (sym), syms,
-				     sym->value, &filename, &functionname,
-				     &lineno)
+	  if ((bfd_find_line (abfd, syms, sym, &filename, &lineno)
+	       || bfd_find_nearest_line (abfd, bfd_get_section (sym),
+					 syms, sym->value, &filename,
+					 &functionname, &lineno))
 	      && filename != NULL
 	      && lineno != 0)
 	    printf ("\t%s:%u", filename, lineno);

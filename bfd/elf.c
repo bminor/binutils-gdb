@@ -6672,6 +6672,17 @@ _bfd_elf_find_nearest_line (bfd *abfd,
   return TRUE;
 }
 
+/* Find the line for a symbol.  */
+
+bfd_boolean
+_bfd_elf_find_line (bfd *abfd, asymbol **symbols, asymbol *symbol,
+		    const char **filename_ptr, unsigned int *line_ptr)
+{
+  return _bfd_dwarf2_find_line (abfd, symbols, symbol,
+				filename_ptr, line_ptr, 0,
+				&elf_tdata (abfd)->dwarf2_find_line_info);
+}
+
 /* After a call to bfd_find_nearest_line, successive calls to
    bfd_find_inliner_info can be used to get source information about
    each level of function inlining that terminated at the address

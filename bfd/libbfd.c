@@ -918,3 +918,13 @@ read_signed_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
   *bytes_read_ptr = num_read;
   return result;
 }
+
+bfd_boolean
+_bfd_generic_find_line (bfd *abfd ATTRIBUTE_UNUSED,
+		       asymbol **symbols ATTRIBUTE_UNUSED,
+		       asymbol *symbol ATTRIBUTE_UNUSED,
+		       const char **filename_ptr ATTRIBUTE_UNUSED,
+		       unsigned int *linenumber_ptr ATTRIBUTE_UNUSED)
+{
+  return FALSE;
+}

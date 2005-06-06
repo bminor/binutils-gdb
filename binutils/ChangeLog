@@ -1,3 +1,9 @@
+2005-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 990
+	* nm.c (print_symbol): Call bfd_find_line before
+	bfd_find_nearest_line.
+
 2005-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* NEWS: Mention new powerpc ld support.

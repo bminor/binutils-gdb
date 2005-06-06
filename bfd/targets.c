@@ -349,6 +349,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_is_target_special_symbol, \
 .  NAME##_get_lineno, \
 .  NAME##_find_nearest_line, \
+.  _bfd_generic_find_line, \
 .  NAME##_find_inliner_info, \
 .  NAME##_bfd_make_debug_symbol, \
 .  NAME##_read_minisymbols, \
@@ -371,6 +372,9 @@ BFD_JUMP_TABLE macros.
 .  bfd_boolean (*_bfd_find_nearest_line)
 .    (bfd *, struct bfd_section *, struct bfd_symbol **, bfd_vma,
 .     const char **, const char **, unsigned int *);
+.  bfd_boolean (*_bfd_find_line)
+.    (bfd *, struct bfd_symbol **, struct bfd_symbol *,
+.     const char **, unsigned int *);
 .  bfd_boolean (*_bfd_find_inliner_info)
 .    (bfd *, const char **, const char **, unsigned int *);
 . {* Back-door to allow format-aware applications to create debug symbols

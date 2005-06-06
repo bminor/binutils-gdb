@@ -1,5 +1,39 @@
 2005-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR 990
+	* bfd.c (bfd_find_line): New.
+
+	* dwarf2.c (comp_unit): Add variable_table.
+	(funcinfo): Add file, line, and sec.
+	(varinfo): New.
+	(lookup_symbol_in_function_table): New.
+	(lookup_symbol_in_variable_table): New.
+	(scan_unit_for_functions): Renamed to ...
+	(scan_unit_for_symbols): This. Handle DW_TAG_entry_point and
+	DW_TAG_variable.
+	(comp_unit_find_nearest_line): Updated.
+	(comp_unit_find_line): New.
+	(_bfd_dwarf2_find_line): New.
+
+	* elf-bfd.h (_bfd_elf_find_line): New.
+	(_bfd_generic_find_line): New. Defined.
+
+	* elf.c (_bfd_elf_find_line): New.
+
+	* libbfd-in.h (_bfd_dwarf2_find_line): New.
+	(_bfd_generic_find_line): New.
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+	* libbfd.c (_bfd_generic_find_line): New.
+
+	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Initialize _bfd_find_line
+	with _bfd_generic_find_line.
+	(bfd_target): Add _bfd_find_line.
+
+2005-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* dwarf2.c (decode_line_info): Properly set low_pc.
 
 2005-06-06  Alan Modra  <amodra@bigpond.net.au>
