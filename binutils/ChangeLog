@@ -1,3 +1,7 @@
+2005-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* NEWS: Mention new powerpc ld support.
+
 2005-06-03  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure.in: Check for getc_unlocked prototype.
@@ -41,10 +45,10 @@
 
 	* readelf.c (fetch_indirect_string): Display a warning message
 	when a corrupt DW_FORM_strp value is encountered.
-	
+
 	(process_debug_info): Mention that the compilation unit offset is
 	being displayed in hexadecimal.
-	
+
 	(display_debug_lines): Fix typo in name of .debug_line section.
 
 2005-05-19  Zack Weinberg  <zack@codesourcery.com>
