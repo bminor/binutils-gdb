@@ -1,3 +1,7 @@
+2005-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf2.c (decode_line_info): Properly set low_pc.
+
 2005-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-pcc.c (ppc64_elf_gc_mark_hook): For the local sym in .opd

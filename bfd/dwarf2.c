@@ -1070,6 +1070,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	 address, we must compare on every DW_LNS_copy, etc.  */
       bfd_vma low_pc  = 0;
       bfd_vma high_pc = 0;
+      bfd_boolean low_pc_set = FALSE;
 
       /* Decode the table.  */
       while (! end_sequence)
@@ -1087,8 +1088,11 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      /* Append row to matrix using current values.  */
 	      add_line_info (table, address, filename, line, column, 0);
 	      basic_block = 1;
-	      if (low_pc == 0 || address < low_pc)
-		low_pc = address;
+	      if (!low_pc_set || address < low_pc)
+		{
+		  low_pc_set = TRUE;
+		  low_pc = address;
+		}
 	      if (address > high_pc)
 		high_pc = address;
 	    }
@@ -1106,8 +1110,11 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		  end_sequence = 1;
 		  add_line_info (table, address, filename, line, column,
 				 end_sequence);
-		  if (low_pc == 0 || address < low_pc)
-		    low_pc = address;
+		  if (!low_pc_set || address < low_pc)
+		    {
+		      low_pc_set = TRUE;
+		      low_pc = address;
+		    }
 		  if (address > high_pc)
 		    high_pc = address;
 		  arange_add (unit->abfd, &unit->arange, low_pc, high_pc);
@@ -1159,8 +1166,11 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	    case DW_LNS_copy:
 	      add_line_info (table, address, filename, line, column, 0);
 	      basic_block = 0;
-	      if (low_pc == 0 || address < low_pc)
-		low_pc = address;
+	      if (!low_pc_set || address < low_pc)
+		{
+		  low_pc_set = TRUE;
+		  low_pc = address;
+		}
 	      if (address > high_pc)
 		high_pc = address;
 	      break;
