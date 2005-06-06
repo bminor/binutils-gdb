@@ -4,6 +4,8 @@
 	case, include addend when indexing .opd section map.
 	(ppc64_elf_edit_opd): Add no_opd_opt param.  Do nothing besides
 	clear opd_adjust array if no_opd_opt set.  Tidy code.
+	Ignore zero size .opd.  Check bfd_alloc return value.
+	(ppc_stub_name): Return immediately on bfd_malloc fail.
 	* elf64-ppc.h (ppc64_elf_edit_opd): Update prototype.
 
 2005-06-04  H.J. Lu  <hongjiu.lu@intel.com>
