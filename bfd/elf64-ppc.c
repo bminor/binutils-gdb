@@ -3533,26 +3533,26 @@ ppc_stub_name (const asection *input_section,
     {
       len = 8 + 1 + strlen (h->elf.root.root.string) + 1 + 8 + 1;
       stub_name = bfd_malloc (len);
-      if (stub_name != NULL)
-	{
-	  sprintf (stub_name, "%08x.%s+%x",
-		   input_section->id & 0xffffffff,
-		   h->elf.root.root.string,
-		   (int) rel->r_addend & 0xffffffff);
-	}
+      if (stub_name == NULL)
+	return stub_name;
+
+      sprintf (stub_name, "%08x.%s+%x",
+	       input_section->id & 0xffffffff,
+	       h->elf.root.root.string,
+	       (int) rel->r_addend & 0xffffffff);
     }
   else
     {
       len = 8 + 1 + 8 + 1 + 8 + 1 + 8 + 1;
       stub_name = bfd_malloc (len);
-      if (stub_name != NULL)
-	{
-	  sprintf (stub_name, "%08x.%x:%x+%x",
-		   input_section->id & 0xffffffff,
-		   sym_sec->id & 0xffffffff,
-		   (int) ELF64_R_SYM (rel->r_info) & 0xffffffff,
-		   (int) rel->r_addend & 0xffffffff);
-	}
+      if (stub_name == NULL)
+	return stub_name;
+
+      sprintf (stub_name, "%08x.%x:%x+%x",
+	       input_section->id & 0xffffffff,
+	       sym_sec->id & 0xffffffff,
+	       (int) ELF64_R_SYM (rel->r_info) & 0xffffffff,
+	       (int) rel->r_addend & 0xffffffff);
     }
   if (stub_name[len - 2] == '+' && stub_name[len - 1] == '0')
     stub_name[len - 2] = 0;
@@ -5015,7 +5015,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	  if (!rsec->gc_mark)
 	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
 
-	  rsec = opd_sym_section[sym->st_value / 8];
+	  rsec = opd_sym_section[(sym->st_value + rel->r_addend) / 8];
 	}
     }
 
@@ -6106,6 +6106,7 @@ dec_dynrel_count (bfd_vma r_info,
 
 bfd_boolean
 ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
+		    bfd_boolean no_opd_opt,
 		    bfd_boolean non_overlapping)
 {
   bfd *ibfd;
@@ -6126,7 +6127,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
       bfd_size_type cnt_16b = 0;
 
       sec = bfd_get_section_by_name (ibfd, ".opd");
-      if (sec == NULL)
+      if (sec == NULL || sec->size == 0)
 	continue;
 
       amt = sec->size * sizeof (long) / 8;
@@ -6135,10 +6136,15 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	{
 	  /* check_relocs hasn't been called.  Must be a ld -r link
 	     or --just-symbols object.   */
-	  opd_adjust = bfd_zalloc (obfd, amt);
+	  opd_adjust = bfd_alloc (obfd, amt);
+	  if (opd_adjust == NULL)
+	    return FALSE;
 	  ppc64_elf_section_data (sec)->opd.adjust = opd_adjust;
 	}
       memset (opd_adjust, 0, amt);
+
+      if (no_opd_opt)
+	continue;
 
       if (sec->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
 	continue;
@@ -6308,18 +6314,16 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 
 	  elf_section_data (sec)->relocs = relstart;
 
-	  wptr = sec->contents;
-	  rptr = sec->contents;
 	  new_contents = sec->contents;
-
 	  if (add_aux_fields)
 	    {
 	      new_contents = bfd_malloc (sec->size + cnt_16b * 8);
 	      if (new_contents == NULL)
 		return FALSE;
 	      need_pad = FALSE;
-	      wptr = new_contents;
 	    }
+	  wptr = new_contents;
+	  rptr = sec->contents;
 
 	  write_rel = relstart;
 	  skip = FALSE;

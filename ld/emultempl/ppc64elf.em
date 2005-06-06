@@ -102,8 +102,8 @@ ppc_before_allocation (void)
 {
   if (stub_file != NULL)
     {
-      if (!no_opd_opt
-	  && !ppc64_elf_edit_opd (output_bfd, &link_info, non_overlapping_opd))
+      if (!ppc64_elf_edit_opd (output_bfd, &link_info, no_opd_opt,
+			       non_overlapping_opd))
 	einfo ("%X%P: can not edit %s %E\n", "opd");
 
       if (ppc64_elf_tls_setup (output_bfd, &link_info) && !no_tls_opt)
