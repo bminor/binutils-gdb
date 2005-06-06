@@ -1,3 +1,12 @@
+2005-06-06  Manoj Iyer  <manjo@austin.ibm.com>
+
+	* solib-svr4.c: Change type of 'lm' to gdb_byte.
+	(elf_locate_base): Converted types of buf, bufend, pbuf, to gdb_byte.
+	(first_link_map_member): Converted type of r_map_buf to gdb_byte.
+	(open_symbol_file_object): Converted type of l_name_buf to gdb_byte.
+	(svr4_fetch_objfile_link_map): Converted type of l_name_buf to
+	gdb_byte.
+
 2005-06-04  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* MAINTAINERS: Update my email address.

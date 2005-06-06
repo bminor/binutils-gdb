@@ -57,7 +57,7 @@ struct lm_info
     /* Pointer to copy of link map from inferior.  The type is char *
        rather than void *, so that we may use byte offsets to find the
        various fields without the need for a cast.  */
-    char *lm;
+    gdb_byte *lm;
   };
 
 /* On SVR4 systems, a list of symbols in the dynamic linker where
@@ -292,8 +292,8 @@ elf_locate_base (void)
   struct bfd_section *dyninfo_sect;
   int dyninfo_sect_size;
   CORE_ADDR dyninfo_addr;
-  char *buf;
-  char *bufend;
+  gdb_byte *buf;
+  gdb_byte *bufend;
   int arch_size;
 
   /* Find the start address of the .dynamic section.  */
@@ -337,7 +337,7 @@ elf_locate_base (void)
 	    }
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
 	    {
-	      char *pbuf;
+	      gdb_byte *pbuf;
 	      int pbuf_size = TARGET_PTR_BIT / HOST_CHAR_BIT;
 
 	      pbuf = alloca (pbuf_size);
@@ -372,7 +372,7 @@ elf_locate_base (void)
 	    }
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
 	    {
-	      char *pbuf;
+	      gdb_byte *pbuf;
 	      int pbuf_size = TARGET_PTR_BIT / HOST_CHAR_BIT;
 
 	      pbuf = alloca (pbuf_size);
@@ -468,7 +468,7 @@ first_link_map_member (void)
 {
   CORE_ADDR lm = 0;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  char *r_map_buf = xmalloc (lmo->r_map_size);
+  gdb_byte *r_map_buf = xmalloc (lmo->r_map_size);
   struct cleanup *cleanups = make_cleanup (xfree, r_map_buf);
 
   read_memory (debug_base + lmo->r_map_offset, r_map_buf, lmo->r_map_size);
@@ -515,7 +515,7 @@ open_symbol_file_object (void *from_ttyp)
   int errcode;
   int from_tty = *(int *)from_ttyp;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  char *l_name_buf = xmalloc (lmo->l_name_size);
+  gdb_byte *l_name_buf = xmalloc (lmo->l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
 
   if (symfile_objfile)
@@ -690,7 +690,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
       struct lm_info objfile_lm_info;
       struct cleanup *old_chain;
       CORE_ADDR name_address;
-      char *l_name_buf = xmalloc (lmo->l_name_size);
+      gdb_byte *l_name_buf = xmalloc (lmo->l_name_size);
       old_chain = make_cleanup (xfree, l_name_buf);
 
       /* Set up the buffer to contain the portion of the link_map
