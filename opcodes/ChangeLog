@@ -1,3 +1,18 @@
+2005-06-07  Zack Weinberg  <zack@codesourcery.com>
+
+	* arm-dis.c: Split up the comments describing the format codes, so
+	that the ARM and 16-bit Thumb opcode tables each have comments
+	preceding them that describe all the codes, and only the codes,
+	valid in those tables.  (32-bit Thumb table is already like this.)
+	Reorder the lists in all three comments to match the order in
+	which the codes are implemented.
+	Remove all forward declarations of static functions.  Convert all
+	function definitions to ISO C format.
+	(print_insn_arm, print_insn_thumb16, print_insn_thumb32):
+	Return nothing.
+	(print_insn_thumb16): Remove unused case 'I'.
+	(print_insn): Update for changed calling convention of subroutines.
+
 2005-05-25  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (OP_E): In Intel mode, display 32-bit displacements in
