@@ -2339,7 +2339,7 @@ eelf32frvfd.c: $(srcdir)/emulparams/elf32frvfd.sh \
 	${GENSCRIPTS} elf32frvfd "$(tdir_frv)"
 eelf32ms1.c: $(srcdir)/emulparams/elf32ms1.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-        ${GENSCRIPTS} elf32ms1 "$(tdir_ms1)"
+	${GENSCRIPTS} elf32ms1 "$(tdir_ms1)"
 
 # The generated emulation files mostly have the same dependencies.
 $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \

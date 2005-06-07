@@ -1,3 +1,9 @@
+2005-06-07  Eric Christopher  <echristo@redhat.com>
+
+	* readelf.c (guess_is_rela): Support ms1.
+	(dump_relocations): Ditto.
+	(get_machine_name): Ditto.
+
 2005-06-07  Aldy Hernandez  <aldyh@redhat.com>
 	    Michael Snyder  <msnyder@redhat.com>
 	    Stan Cox  <scox@redhat.com>
