@@ -50,6 +50,7 @@ case ${cpu} in
   m683??)		cpu_type=m68k ;;
   m5200)		cpu_type=m68k ;;
   m8*)			cpu_type=m88k ;;
+  ms1)                  cpu_type=ms1 endian=big ;;
   maxq)			cpu_type=maxq ;;
   mips*el)		cpu_type=mips endian=little ;;
   mips*)		cpu_type=mips endian=big ;;

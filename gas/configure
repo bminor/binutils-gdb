@@ -4688,6 +4688,10 @@ _ACEOF
 	fi
 	;;
 
+      ms1)
+        using_cgen=yes
+	;;
+
       i386 | s390 | sparc)
 	if test $this_target = $target ; then
 

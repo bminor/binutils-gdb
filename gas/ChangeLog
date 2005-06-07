@@ -1,3 +1,13 @@
+2005-06-07  Aldy Hernandez  <aldyh@redhat.com>
+	    Michael Snyder  <msnyder@redhat.com>
+	    Stan Cox  <scox@redhat.com>
+
+	* configure.in: Add ms1 case.
+
+	* configure: Regenerate.
+
+	* configure.tgt: Add ms1 case.
+
 2005-06-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.h (resource_table): Change units to unsigned chars.
