@@ -495,6 +495,7 @@ readelf.o: readelf.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/elf/m32r.h $(INCDIR)/elf/m68k.h $(INCDIR)/elf/m68hc11.h \
   $(INCDIR)/elf/mcore.h $(INCDIR)/elf/mips.h $(INCDIR)/elf/mmix.h \
   $(INCDIR)/elf/mn10200.h $(INCDIR)/elf/mn10300.h $(INCDIR)/elf/msp430.h \
+  $(INCDIR)/elf/ms1.h \
   $(INCDIR)/elf/or32.h $(INCDIR)/elf/pj.h $(INCDIR)/elf/ppc.h \
   $(INCDIR)/elf/ppc64.h $(INCDIR)/elf/s390.h $(INCDIR)/elf/sh.h \
   $(INCDIR)/elf/sparc.h $(INCDIR)/elf/v850.h $(INCDIR)/elf/vax.h \

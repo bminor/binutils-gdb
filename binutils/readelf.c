@@ -94,6 +94,7 @@
 #include "elf/mmix.h"
 #include "elf/mn10200.h"
 #include "elf/mn10300.h"
+#include "elf/ms1.h"
 #include "elf/msp430.h"
 #include "elf/or32.h"
 #include "elf/pj.h"

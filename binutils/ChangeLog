@@ -1,3 +1,13 @@
+2005-06-07  Aldy Hernandez  <aldyh@redhat.com>
+	    Michael Snyder  <msnyder@redhat.com>
+	    Stan Cox  <scox@redhat.com>
+
+	* Makefile.am (readelf.o): Depend on ms1.h.
+
+	* Makefile.in: Regenerate.
+
+	* readelf.c: Include ms1.h.
+
 2005-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 990
