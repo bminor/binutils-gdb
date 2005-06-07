@@ -145,9 +145,9 @@ near:
 	.arm
 .localbar:
 	b	.localbar
-	b	.back
+	b	.wombat
 	bl	.localbar
-	bl	.back
+	bl	.wombat
 
 	bx	r0
 	swi	0x123456
@@ -159,33 +159,33 @@ morethumb:
 	adr	r0, forwardonly
 
 	b	.foo
-	b	.back
+	b	.wombat
 	bl	.foo
-	bl	.back
+	bl	.wombat
 
 	bx	r0
 
 	swi	0xff
 	.align	0
 forwardonly:
-	beq	.back
-	bne	.back
-	bcs	.back
-	bcc	.back
-	bmi	.back
-	bpl	.back
-	bvs	.back
-	bvc	.back
-	bhi	.back
-	bls	.back
-	bge	.back
-	bgt	.back
-	blt	.back
-	bgt	.back
-	ble	.back
-	bhi	.back
-	blo	.back
-	bul	.back
+	beq	.wombat
+	bne	.wombat
+	bcs	.wombat
+	bcc	.wombat
+	bmi	.wombat
+	bpl	.wombat
+	bvs	.wombat
+	bvc	.wombat
+	bhi	.wombat
+	bls	.wombat
+	bge	.wombat
+	bgt	.wombat
+	blt	.wombat
+	bgt	.wombat
+	ble	.wombat
+	bhi	.wombat
+	blo	.wombat
+	bul	.wombat
 
 .back:
 	bl	.local

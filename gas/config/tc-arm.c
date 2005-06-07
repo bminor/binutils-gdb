@@ -1414,11 +1414,9 @@ find_real_start (symbolS * symbolP)
   if (name == NULL)
     abort ();
 
-  /* The compiler may generate BL instructions to local labels because
-     it needs to perform a branch to a far away location. These labels
-     do not have a corresponding ".real_start_of" label.  To accomodate
-     hand-written assembly, we don't insist on a leading ".L", just a
-     leading dot.  */
+  /* Names that start with '.' are local labels, not function entry points.
+     The compiler may generate BL instructions to these labels because it
+     needs to perform a branch to a far away location.	*/
   if (name[0] == '.')
     return symbolP;
 
@@ -10515,8 +10513,7 @@ md_apply_fix (fixS *	fixP,
 #define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
 
 #ifdef OBJ_ELF
-      if (!fixP->fx_done)
-	value = fixP->fx_offset;
+      value = fixP->fx_offset;
 #endif
 
       /* We are going to store value (shifted right by two) in the
@@ -10586,8 +10583,7 @@ md_apply_fix (fixS *	fixP,
 	newval = md_chars_to_number (buf, INSN_SIZE);
 
 #ifdef OBJ_ELF
-	if (!fixP->fx_done)
-	  value = fixP->fx_offset;
+	value = fixP->fx_offset;
 #endif
 	hbit   = (value >> 1) & 1;
 	value  = (value >> 2) & 0x00ffffff;
@@ -10746,8 +10742,7 @@ md_apply_fix (fixS *	fixP,
 	if (diff & 0x400000)
 	  diff |= ~0x3fffff;
 #ifdef OBJ_ELF
-	if (!fixP->fx_done)
-	  value = fixP->fx_offset;
+	value = fixP->fx_offset;
 #endif
 	value += diff;
 
@@ -11356,6 +11351,13 @@ arm_force_relocation (struct fix * fixp)
 {
 #if defined (OBJ_COFF) && defined (TE_PE)
   if (fixp->fx_r_type == BFD_RELOC_RVA)
+    return 1;
+#endif
+#ifdef OBJ_ELF
+  if (fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
+      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
+      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX
+      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)
     return 1;
 #endif
 

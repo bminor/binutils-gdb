@@ -119,41 +119,68 @@ Disassembly of section \.text:
 0+0de <[^>]+> 2f68      	cmp	r7, #104
 0+0e0 <[^>]+> 46c0      	nop			\(mov r8, r8\)
 0+0e2 <[^>]+> 46c0      	nop			\(mov r8, r8\)
-0+0e4 <[^>]+> eafffffe 	b	0+0e4 <[^>]+>
-0+0e8 <[^>]+> ea000011 	b	0+134 <[^>]+>
-0+0ec <[^>]+> ebfffffc 	bl	0+0e4 <[^>]+>
-0+0f0 <[^>]+> eb00000f 	bl	0+134 <[^>]+>
+0+0e4 <[^>]+> ea000037 	b	0+0e4 <[^>]+>
+			e4: R_ARM_PC24	\.text
+0+0e8 <[^>]+> eafffffe 	b	0+000 <[^>]+>
+			e8: R_ARM_PC24	\.wombat
+0+0ec <[^>]+> eb000037 	bl	0+0e4 <[^>]+>
+			ec: R_ARM_PC24	\.text
+0+0f0 <[^>]+> ebfffffe 	bl	0+000 <[^>]+>
+			f0: R_ARM_PC24	\.wombat
 0+0f4 <[^>]+> e12fff10 	bx	r0
 0+0f8 <[^>]+> ef123456 	swi	0x00123456
 0+0fc <[^>]+> a004      	add	r0, pc, #16	\(adr r0,0+110 <[^>]+>\)
 0+0fe <[^>]+> e77f      	b.n	0+000 <[^>]+>
-0+100 <[^>]+> e018      	b.n	0+134 <[^>]+>
-0+102 <[^>]+> f7ff ff7d 	bl	0+000 <[^>]+>
-0+106 <[^>]+> f000 f815 	bl	0+134 <[^>]+>
+0+100 <[^>]+> e7fe      	b.n	0+000 <[^>]+>
+			100: R_ARM_THM_JUMP11	\.wombat
+0+102 <[^>]+> f7ff fffe 	bl	0+000 <[^>]+>
+			102: R_ARM_THM_CALL	\.text
+0+106 <[^>]+> f7ff fffe 	bl	0+000 <[^>]+>
+			106: R_ARM_THM_CALL	\.wombat
 0+10a <[^>]+> 4700      	bx	r0
 0+10c <[^>]+> dfff      	swi	255
 	\.\.\.
-0+110 <[^>]+> d010      	beq.n	0+134 <[^>]+>
-0+112 <[^>]+> d10f      	bne.n	0+134 <[^>]+>
-0+114 <[^>]+> d20e      	bcs.n	0+134 <[^>]+>
-0+116 <[^>]+> d30d      	bcc.n	0+134 <[^>]+>
-0+118 <[^>]+> d40c      	bmi.n	0+134 <[^>]+>
-0+11a <[^>]+> d50b      	bpl.n	0+134 <[^>]+>
-0+11c <[^>]+> d60a      	bvs.n	0+134 <[^>]+>
-0+11e <[^>]+> d709      	bvc.n	0+134 <[^>]+>
-0+120 <[^>]+> d808      	bhi.n	0+134 <[^>]+>
-0+122 <[^>]+> d907      	bls.n	0+134 <[^>]+>
-0+124 <[^>]+> da06      	bge.n	0+134 <[^>]+>
-0+126 <[^>]+> dc05      	bgt.n	0+134 <[^>]+>
-0+128 <[^>]+> db04      	blt.n	0+134 <[^>]+>
-0+12a <[^>]+> dc03      	bgt.n	0+134 <[^>]+>
-0+12c <[^>]+> dd02      	ble.n	0+134 <[^>]+>
-0+12e <[^>]+> d801      	bhi.n	0+134 <[^>]+>
-0+130 <[^>]+> d300      	bcc.n	0+134 <[^>]+>
-0+132 <[^>]+> d3ff      	bcc.n	0+134 <[^>]+>
-0+134 <[^>]+> f000 fc00 	bl	0+938 <[^>]+>
+0+110 <[^>]+> d0fe      	beq.n	0+000 <[^>]+>
+			110: R_ARM_THM_JUMP8	\.wombat
+0+112 <[^>]+> d1fe      	bne.n	0+000 <[^>]+>
+			112: R_ARM_THM_JUMP8	\.wombat
+0+114 <[^>]+> d2fe      	bcs.n	0+000 <[^>]+>
+			114: R_ARM_THM_JUMP8	\.wombat
+0+116 <[^>]+> d3fe      	bcc.n	0+000 <[^>]+>
+			116: R_ARM_THM_JUMP8	\.wombat
+0+118 <[^>]+> d4fe      	bmi.n	0+000 <[^>]+>
+			118: R_ARM_THM_JUMP8	\.wombat
+0+11a <[^>]+> d5fe      	bpl.n	0+000 <[^>]+>
+			11a: R_ARM_THM_JUMP8	\.wombat
+0+11c <[^>]+> d6fe      	bvs.n	0+000 <[^>]+>
+			11c: R_ARM_THM_JUMP8	\.wombat
+0+11e <[^>]+> d7fe      	bvc.n	0+000 <[^>]+>
+			11e: R_ARM_THM_JUMP8	\.wombat
+0+120 <[^>]+> d8fe      	bhi.n	0+000 <[^>]+>
+			120: R_ARM_THM_JUMP8	\.wombat
+0+122 <[^>]+> d9fe      	bls.n	0+000 <[^>]+>
+			122: R_ARM_THM_JUMP8	\.wombat
+0+124 <[^>]+> dafe      	bge.n	0+000 <[^>]+>
+			124: R_ARM_THM_JUMP8	\.wombat
+0+126 <[^>]+> dcfe      	bgt.n	0+000 <[^>]+>
+			126: R_ARM_THM_JUMP8	\.wombat
+0+128 <[^>]+> dbfe      	blt.n	0+000 <[^>]+>
+			128: R_ARM_THM_JUMP8	\.wombat
+0+12a <[^>]+> dcfe      	bgt.n	0+000 <[^>]+>
+			12a: R_ARM_THM_JUMP8	\.wombat
+0+12c <[^>]+> ddfe      	ble.n	0+000 <[^>]+>
+			12c: R_ARM_THM_JUMP8	\.wombat
+0+12e <[^>]+> d8fe      	bhi.n	0+000 <[^>]+>
+			12e: R_ARM_THM_JUMP8	\.wombat
+0+130 <[^>]+> d3fe      	bcc.n	0+000 <[^>]+>
+			130: R_ARM_THM_JUMP8	\.wombat
+0+132 <[^>]+> d3fe      	bcc.n	0+000 <[^>]+>
+			132: R_ARM_THM_JUMP8	\.wombat
+0+134 <[^>]+> f000 fc9a 	bl	0+938 <[^>]+>
+			134: R_ARM_THM_CALL	\.text
 	\.\.\.
-0+938 <[^>]+> f7ff fbfc 	bl	0+134 <[^>]+>
+0+938 <[^>]+> f000 f898 	bl	0+134 <[^>]+>
+			938: R_ARM_THM_CALL	\.text
 0+93c <[^>]+> 4801      	ldr	r0, \[pc, #4\]	\(0+944 <[^>]+>\)
 0+93e <[^>]+> 4801      	ldr	r0, \[pc, #4\]	\(0+944 <[^>]+>\)
 0+940 <[^>]+> 4801      	ldr	r0, \[pc, #4\]	\(0+948 <[^>]+>\)
