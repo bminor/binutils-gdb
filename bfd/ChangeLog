@@ -1,3 +1,33 @@
+2005-06-07  Aldy Hernandez  <aldyh@redhat.com>
+	    Michael Snyder  <msnyder@redhat.com>
+	    Stan Cox  <scox@redhat.com>
+
+	* Makefile.am (ALL_MACHINES): Add ms1 support.
+	(ALL_MACHINES_CFILES): Same.
+	(BFD32_BACKENDS): Same.
+	(BFD32_BACKENDS_CFILES): Same.
+
+	* Makefile.in: Regenerate.
+
+	* archures.c (bfd_architecture): Add ms1 entries.
+	Externalize bfd_ms1_arch.
+	(bfd_archures_list): Add bfd_ms1_arch.
+
+	* bfd-in2.h: Regenerate.
+
+	* cpu-ms1.c: New file.
+
+	* elf32-ms1.c: New file.
+
+	* targets.c: Define extern of bfd_elf32_ms1_vec.
+	Add bfd_elf32_ms1_vec to _bfd_target_vector.
+
+	* configure.in: Add bfd_elf32_ms1_vec case.
+
+	* configure: Regenerate.
+
+	* config.bfd: Add ms1-*-elf to table.
+
 2005-06-07  Zack Weinberg  <zack@codesourcery.com>
 
 	* coff-i386.c: Change md_apply_fix3 to md_apply_fix in comment.

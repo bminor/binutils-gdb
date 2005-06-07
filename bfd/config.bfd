@@ -920,6 +920,10 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
+  ms1-*-elf)
+    targ_defvec=bfd_elf32_ms1_vec
+    ;;
+
   msp430-*-*)
     targ_defvec=bfd_elf32_msp430_vec
     ;;

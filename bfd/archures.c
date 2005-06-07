@@ -316,6 +316,9 @@ DESCRIPTION
 . bfd_arch_iq2000,     {* Vitesse IQ2000.  *}
 .#define bfd_mach_iq2000        1
 .#define bfd_mach_iq10          2
+.  bfd_arch_ms1,
+.#define bfd_mach_ms1           1
+.#define bfd_mach_mrisc2        2
 .  bfd_arch_pj,
 .  bfd_arch_avr,       {* Atmel AVR microcontrollers.  *}
 .#define bfd_mach_avr1		1
@@ -453,6 +456,7 @@ extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
 extern const bfd_arch_info_type bfd_xtensa_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
+extern const bfd_arch_info_type bfd_ms1_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
   {
@@ -493,6 +497,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_mmix_arch,
     &bfd_mn10200_arch,
     &bfd_mn10300_arch,
+    &bfd_ms1_arch,
     &bfd_msp430_arch,
     &bfd_ns32k_arch,
     &bfd_openrisc_arch,
