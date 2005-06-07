@@ -128,6 +128,83 @@ SECTION
 
 /*
 FUNCTION
+	bfd_fopen
+
+SYNOPSIS
+	bfd *bfd_fopen (const char *filename, const char *target,
+                        const char *mode, int fd);
+
+DESCRIPTION
+	Open the file @var{filename} with the target @var{target}.
+	Return a pointer to the created BFD.  If @var{fd} is not -1,
+	then <<fdopen>> is used to open the file; otherwise, <<fopen>>
+	is used.  @var{mode} is passed directly to <<fopen>> or
+	<<fdopen>>. 
+
+	Calls <<bfd_find_target>>, so @var{target} is interpreted as by
+	that function.
+
+	If <<NULL>> is returned then an error has occured.   Possible errors
+	are <<bfd_error_no_memory>>, <<bfd_error_invalid_target>> or
+	<<system_call>> error.
+*/
+
+bfd *
+bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
+{
+  bfd *nbfd;
+  const bfd_target *target_vec;
+
+  bfd_set_error (bfd_error_system_call);
+
+  nbfd = _bfd_new_bfd ();
+  if (nbfd == NULL)
+    return NULL;
+
+  target_vec = bfd_find_target (target, nbfd);
+  if (target_vec == NULL)
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
+  
+#ifdef HAVE_FDOPEN
+  if (fd != -1)
+    nbfd->iostream = fdopen (fd, mode);
+  else
+#endif
+    nbfd->iostream = fopen (filename, mode);
+  if (nbfd->iostream == NULL)
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
+
+  /* OK, put everything where it belongs.  */
+  nbfd->filename = filename;
+
+  /* Figure out whether the user is opening the file for reading,
+     writing, or both, by looking at the MODE argument.  */
+  if ((mode[0] == 'r' || mode[0] == 'w' || mode[0] == 'a') 
+      && mode[1] == '+')
+    nbfd->direction = both_direction;
+  else if (mode[0] == 'r')
+    nbfd->direction = read_direction;
+  else
+    nbfd->direction = write_direction;
+
+  if (! bfd_cache_init (nbfd))
+    {
+      _bfd_delete_bfd (nbfd);
+      return NULL;
+    }
+  nbfd->opened_once = TRUE;
+
+  return nbfd;
+}
+
+/*
+FUNCTION
 	bfd_openr
 
 SYNOPSIS
@@ -148,32 +225,7 @@ DESCRIPTION
 bfd *
 bfd_openr (const char *filename, const char *target)
 {
-  bfd *nbfd;
-  const bfd_target *target_vec;
-
-  nbfd = _bfd_new_bfd ();
-  if (nbfd == NULL)
-    return NULL;
-
-  target_vec = bfd_find_target (target, nbfd);
-  if (target_vec == NULL)
-    {
-      _bfd_delete_bfd (nbfd);
-      return NULL;
-    }
-
-  nbfd->filename = filename;
-  nbfd->direction = read_direction;
-
-  if (bfd_open_file (nbfd) == NULL)
-    {
-      /* File didn't exist, or some such.  */
-      bfd_set_error (bfd_error_system_call);
-      _bfd_delete_bfd (nbfd);
-      return NULL;
-    }
-
-  return nbfd;
+  return bfd_fopen (filename, target, FOPEN_RB, -1);
 }
 
 /* Don't try to `optimize' this function:
@@ -212,72 +264,30 @@ DESCRIPTION
 bfd *
 bfd_fdopenr (const char *filename, const char *target, int fd)
 {
-  bfd *nbfd;
-  const bfd_target *target_vec;
+  const char *mode;
+#if defined(HAVE_FCNTL) && defined(F_GETFL)
   int fdflags;
+#endif
 
   bfd_set_error (bfd_error_system_call);
 #if ! defined(HAVE_FCNTL) || ! defined(F_GETFL)
-  fdflags = O_RDWR;			/* Assume full access.  */
+  mode = FOPEN_RUB; /* Assume full access.  */
 #else
   fdflags = fcntl (fd, F_GETFL, NULL);
-#endif
   if (fdflags == -1)
     return NULL;
 
-  nbfd = _bfd_new_bfd ();
-  if (nbfd == NULL)
-    return NULL;
-
-  target_vec = bfd_find_target (target, nbfd);
-  if (target_vec == NULL)
-    {
-      _bfd_delete_bfd (nbfd);
-      return NULL;
-    }
-
-#ifndef HAVE_FDOPEN
-  nbfd->iostream = fopen (filename, FOPEN_RB);
-#else
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug.  */
   switch (fdflags & (O_ACCMODE))
     {
-    case O_RDONLY: nbfd->iostream = fdopen (fd, FOPEN_RB);   break;
-    case O_WRONLY: nbfd->iostream = fdopen (fd, FOPEN_RUB);  break;
-    case O_RDWR:   nbfd->iostream = fdopen (fd, FOPEN_RUB);  break;
+    case O_RDONLY: mode = FOPEN_RB;
+    case O_WRONLY: mode = FOPEN_RUB;
+    case O_RDWR:   mode = FOPEN_RUB;
     default: abort ();
     }
 #endif
 
-  if (nbfd->iostream == NULL)
-    {
-      _bfd_delete_bfd (nbfd);
-      return NULL;
-    }
-
-  /* OK, put everything where it belongs.  */
-  nbfd->filename = filename;
-
-  /* As a special case we allow a FD open for read/write to
-     be written through, although doing so requires that we end
-     the previous clause with a preposition.  */
-  /* (O_ACCMODE) parens are to avoid Ultrix header file bug.  */
-  switch (fdflags & (O_ACCMODE))
-    {
-    case O_RDONLY: nbfd->direction = read_direction; break;
-    case O_WRONLY: nbfd->direction = write_direction; break;
-    case O_RDWR: nbfd->direction = both_direction; break;
-    default: abort ();
-    }
-
-  if (! bfd_cache_init (nbfd))
-    {
-      _bfd_delete_bfd (nbfd);
-      return NULL;
-    }
-  nbfd->opened_once = TRUE;
-
-  return nbfd;
+  return bfd_fopen (filename, target, mode, fd);
 }
 
 /*
