@@ -1,3 +1,8 @@
+2005-06-07  David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add cpu names m4k, 24k,
+	24kc, 24kf and 24kfx under MIPS32 release 2.
+
 2005-06-04  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (CE, C3, CM, UE, UF): Redefine without reference
