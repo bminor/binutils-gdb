@@ -1,3 +1,9 @@
+2005-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	(POTFILES): Remove GAS_CFILES.
+	* Makefile.in: Regenerate.
+
 2005-06-07  David Ung  <davidu@mips.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Add cpu names m4k, 24k,
