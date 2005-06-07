@@ -1,3 +1,10 @@
+2005-06-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.h (resource_table): Change units to unsigned chars.
+	* config/tc-xtensa.c (new_resource_table): Likewise.
+	(resize_resource_table): Likewise.
+	(release_resources): Fix assertion for unsigned values.
+
 2005-06-07  Zack Weinberg  <zack@codesourcery.com>
 
 	* cgen.c, cgen.h, tc.h, write.c, config/obj-coff.c

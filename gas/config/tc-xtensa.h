@@ -418,7 +418,7 @@ typedef struct
   opcode_num_units_func opcode_num_units;
   opcode_funcUnit_use_unit_func opcode_unit_use;
   opcode_funcUnit_use_stage_func opcode_unit_stage;
-  char **units;
+  unsigned char **units;
 } resource_table;
 
 resource_table *new_resource_table

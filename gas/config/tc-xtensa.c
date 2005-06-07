@@ -5788,9 +5788,9 @@ new_resource_table (void *data,
   rt->opcode_unit_use = ouuf;
   rt->opcode_unit_stage = ousf;
 
-  rt->units = (char **) xcalloc (cycles, sizeof (char *));
+  rt->units = (unsigned char **) xcalloc (cycles, sizeof (unsigned char *));
   for (i = 0; i < cycles; i++)
-    rt->units[i] = (char *) xcalloc (nu, sizeof (char));
+    rt->units[i] = (unsigned char *) xcalloc (nu, sizeof (unsigned char));
 
   return rt;
 }
@@ -5820,11 +5820,13 @@ resize_resource_table (resource_table *rt, int cycles)
   old_cycles = rt->allocated_cycles;
   rt->allocated_cycles = cycles;
 
-  rt->units = xrealloc (rt->units, sizeof (char *) * rt->allocated_cycles);
+  rt->units = xrealloc (rt->units,
+			rt->allocated_cycles * sizeof (unsigned char *));
   for (i = 0; i < old_cycles; i++)
-    rt->units[i] = xrealloc (rt->units[i], sizeof (char) * rt->num_units);
+    rt->units[i] = xrealloc (rt->units[i],
+			     rt->num_units * sizeof (unsigned char));
   for (i = old_cycles; i < cycles; i++)
-    rt->units[i] = xcalloc (rt->num_units, sizeof (char));
+    rt->units[i] = xcalloc (rt->num_units, sizeof (unsigned char));
 }
 
 
@@ -5876,8 +5878,8 @@ release_resources (resource_table *rt, xtensa_opcode opcode, int cycle)
     {
       xtensa_funcUnit unit = (rt->opcode_unit_use) (rt->data, opcode, i);
       int stage = (rt->opcode_unit_stage) (rt->data, opcode, i);
+      assert (rt->units[stage + cycle][unit] > 0);
       rt->units[stage + cycle][unit]--;
-      assert (rt->units[stage + cycle][unit] >= 0);
     }
 }
 
