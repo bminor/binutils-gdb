@@ -523,7 +523,7 @@ md_atof (int type, char *litP, int *sizeP)
    fixuping relocations of debug sections.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   valueT val = * valP;
   char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;

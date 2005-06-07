@@ -2742,7 +2742,7 @@ md_atof (type, litP, sizeP)
 }
 
 void 
-md_apply_fix3 (fixP, value, seg)
+md_apply_fix (fixP, value, seg)
      fixS *fixP;
      valueT *value;
      segT seg ATTRIBUTE_UNUSED;

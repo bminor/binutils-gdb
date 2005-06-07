@@ -2012,7 +2012,7 @@ md_fix_pcrel_adjust (fixS *fixP)
    They all get called from here.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;

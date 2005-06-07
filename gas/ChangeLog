@@ -1,3 +1,38 @@
+2005-06-07  Zack Weinberg  <zack@codesourcery.com>
+
+	* cgen.c, cgen.h, tc.h, write.c, config/obj-coff.c
+	* config/tc-a29k.c, config/tc-alpha.c, config/tc-alpha.h
+	* config/tc-arc.c, config/tc-arc.h, config/tc-arm.c
+	* config/tc-arm.h, config/tc-avr.c, config/tc-avr.h
+	* config/tc-cris.c, config/tc-crx.c, config/tc-d10v.c
+	* config/tc-d10v.h, config/tc-d30v.c, config/tc-d30v.h
+	* config/tc-dlx.c, config/tc-dlx.h, config/tc-fr30.h
+	* config/tc-frv.c, config/tc-frv.h, config/tc-h8300.c
+	* config/tc-h8500.c, config/tc-hppa.c, config/tc-hppa.h
+	* config/tc-i370.c, config/tc-i370.h, config/tc-i386.c
+	* config/tc-i386.h, config/tc-i860.c, config/tc-i860.h
+	* config/tc-i960.c, config/tc-i960.h, config/tc-ia64.c
+	* config/tc-ip2k.c, config/tc-ip2k.h, config/tc-iq2000.c
+	* config/tc-iq2000.h, config/tc-m32r.c, config/tc-m32r.h
+	* config/tc-m68hc11.c, config/tc-m68hc11.h, config/tc-m68k.c
+	* config/tc-m68k.h, config/tc-m88k.c, config/tc-maxq.c
+	* config/tc-mcore.c, config/tc-mcore.h, config/tc-mips.c
+	* config/tc-mips.h, config/tc-mmix.c, config/tc-mn10200.c
+	* config/tc-mn10300.c, config/tc-msp430.c, config/tc-ns32k.c
+	* config/tc-openrisc.h, config/tc-or32.c, config/tc-or32.h
+	* config/tc-pdp11.c, config/tc-pj.c, config/tc-pj.h
+	* config/tc-ppc.c, config/tc-ppc.h, config/tc-s390.c
+	* config/tc-s390.h, config/tc-sh64.c, config/tc-sh.c
+	* config/tc-sh.h, config/tc-sparc.c, config/tc-sparc.h
+	* config/tc-tahoe.c, config/tc-tic30.c, config/tc-tic4x.c
+	* config/tc-tic54x.c, config/tc-tic80.c, config/tc-v850.c
+	* config/tc-v850.h, config/tc-vax.c, config/tc-vax.h
+	* config/tc-w65.c, config/tc-xstormy16.c, config/tc-xstormy16.h
+	* config/tc-xtensa.c, config/tc-z8k.c:
+	Replace all instances of the string "_apply_fix3" with
+	"_apply_fix".
+	* po/POTFILES.in, po/gas.pot: Regenerate.
+
 2005-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

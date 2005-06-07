@@ -1414,9 +1414,11 @@ find_real_start (symbolS * symbolP)
   if (name == NULL)
     abort ();
 
-  /* Names that start with '.' are local labels, not function entry points.
-     The compiler may generate BL instructions to these labels because it
-     needs to perform a branch to a far away location.	*/
+  /* The compiler may generate BL instructions to local labels because
+     it needs to perform a branch to a far away location. These labels
+     do not have a corresponding ".real_start_of" label.  To accomodate
+     hand-written assembly, we don't insist on a leading ".L", just a
+     leading dot.  */
   if (name[0] == '.')
     return symbolP;
 
@@ -3071,7 +3073,7 @@ parse_shift (char **str, int i, enum parse_shift_mode mode)
 
    where <shift> is defined by parse_shift above, and <rotate> is a
    multiple of 2 between 0 and 30.  Validation of immediate operands
-   is deferred to md_apply_fix3.  */
+   is deferred to md_apply_fix.  */
 
 static int
 parse_shifter_operand (char **str, int i)
@@ -3122,7 +3124,7 @@ parse_shifter_operand (char **str, int i)
 	  return FAIL;
 	}
 
-      /* Convert to decoded value.  md_apply_fix3 will put it back.  */
+      /* Convert to decoded value.  md_apply_fix will put it back.  */
       inst.reloc.exp.X_add_number
 	= (((inst.reloc.exp.X_add_number << (32 - value))
 	    | (inst.reloc.exp.X_add_number >> value)) & 0xffffffff);
@@ -3977,7 +3979,7 @@ encode_arm_vfp_sp_reg (int reg, enum vfp_sp_reg_pos pos)
 }
 
 /* Encode a <shift> in an ARM-format instruction.  The immediate,
-   if any, is handled by md_apply_fix3.	 */
+   if any, is handled by md_apply_fix.	 */
 static void
 encode_arm_shift (int i)
 {
@@ -9963,7 +9965,7 @@ md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
   return 0;
 }
 
-/* Subroutine of md_apply_fix3.	 Check to see if an immediate can be
+/* Subroutine of md_apply_fix.	 Check to see if an immediate can be
    computed as two separate immediate values, added together.  We
    already know that this value cannot be computed by just one ARM
    instruction.	 */
@@ -10010,7 +10012,7 @@ validate_offset_imm (unsigned int val, int hwse)
   return val;
 }
 
-/* Subroutine of md_apply_fix3.	 Do those data_ops which can take a
+/* Subroutine of md_apply_fix.	 Do those data_ops which can take a
    negative immediate constant by altering the instruction.  A bit of
    a hack really.
 	MOV <-> MVN
@@ -10100,7 +10102,7 @@ negate_data_op (unsigned long * instruction,
 }
 
 void
-md_apply_fix3 (fixS *	fixP,
+md_apply_fix (fixS *	fixP,
 	       valueT * valP,
 	       segT	seg)
 {
@@ -10513,7 +10515,8 @@ md_apply_fix3 (fixS *	fixP,
 #define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
 
 #ifdef OBJ_ELF
-      value = fixP->fx_offset;
+      if (!fixP->fx_done)
+	value = fixP->fx_offset;
 #endif
 
       /* We are going to store value (shifted right by two) in the
@@ -10583,7 +10586,8 @@ md_apply_fix3 (fixS *	fixP,
 	newval = md_chars_to_number (buf, INSN_SIZE);
 
 #ifdef OBJ_ELF
-	value = fixP->fx_offset;
+	if (!fixP->fx_done)
+	  value = fixP->fx_offset;
 #endif
 	hbit   = (value >> 1) & 1;
 	value  = (value >> 2) & 0x00ffffff;
@@ -10742,7 +10746,8 @@ md_apply_fix3 (fixS *	fixP,
 	if (diff & 0x400000)
 	  diff |= ~0x3fffff;
 #ifdef OBJ_ELF
-	value = fixP->fx_offset;
+	if (!fixP->fx_done)
+	  value = fixP->fx_offset;
 #endif
 	value += diff;
 
@@ -11351,13 +11356,6 @@ arm_force_relocation (struct fix * fixp)
 {
 #if defined (OBJ_COFF) && defined (TE_PE)
   if (fixp->fx_r_type == BFD_RELOC_RVA)
-    return 1;
-#endif
-#ifdef OBJ_ELF
-  if (fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
-      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
-      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX
-      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)
     return 1;
 #endif
 

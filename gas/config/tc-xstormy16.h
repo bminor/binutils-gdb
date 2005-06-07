@@ -42,10 +42,10 @@
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
-#define md_apply_fix3 xstormy16_md_apply_fix3
+#define md_apply_fix xstormy16_md_apply_fix
 
 #define tc_fix_adjustable(FIX) xstormy16_fix_adjustable (FIX)
 extern bfd_boolean xstormy16_fix_adjustable (struct fix *);

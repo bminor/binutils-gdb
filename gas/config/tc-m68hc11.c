@@ -3228,7 +3228,7 @@ tc_m68hc11_fix_adjustable (fixS *fixP)
 }
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *where;
   long value = * valP;

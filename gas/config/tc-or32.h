@@ -55,7 +55,7 @@ extern int or32_unrecognized_line (int);
 #define EXTERN_FORCE_RELOC 0
 
 #ifdef OBJ_ELF
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 #endif
 

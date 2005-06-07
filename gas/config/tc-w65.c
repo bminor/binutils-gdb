@@ -879,7 +879,7 @@ md_section_align (segT seg, valueT size)
 }
 
 void
-md_apply_fix3 (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;

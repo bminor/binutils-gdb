@@ -96,7 +96,7 @@ void avr_cons_fix_new(fragS *frag,int where, int nbytes, expressionS *exp);
    visible symbols can be overridden.  */
 #define EXTERN_FORCE_RELOC 0
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* If you define this macro, it should return the offset between the

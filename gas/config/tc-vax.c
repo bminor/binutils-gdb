@@ -316,7 +316,7 @@ md_number_to_chars (con, value, nbytes)
    that they reference.  */
 
 void				/* Knows about order of bytes in address.  */
-md_apply_fix3 (fixP, valueP, seg)
+md_apply_fix (fixP, valueP, seg)
      fixS *fixP;
      valueT *valueP;
      segT seg ATTRIBUTE_UNUSED;

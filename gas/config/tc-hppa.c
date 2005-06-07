@@ -1175,7 +1175,7 @@ static struct default_space_dict pa_def_spaces[] =
       } \
   }
 
-/* Variant of CHECK_FIELD for use in md_apply_fix3 and other places where
+/* Variant of CHECK_FIELD for use in md_apply_fix and other places where
    the current file and line number are not valid.  */
 
 #define CHECK_FIELD_WHERE(FIELD, HIGH, LOW, FILENAME, LINE) \
@@ -4422,7 +4422,7 @@ md_undefined_symbol (name)
 /* Apply a fixup to an instruction.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
+md_apply_fix (fixP, valP, seg)
      fixS *fixP;
      valueT *valP;
      segT seg ATTRIBUTE_UNUSED;

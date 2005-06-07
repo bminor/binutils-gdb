@@ -5546,7 +5546,7 @@ xtensa_fix_adjustable (fixS *fixP)
 
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   char *const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
   valueT val;

@@ -3904,7 +3904,7 @@ md_show_usage (FILE *stream)
    enough info to complete immediately) to the data in a frag.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   /* This assignment truncates upper bits if valueT is 64 bits (as with
      --enable-64-bit-bfd), which is fine here, though we cast to avoid

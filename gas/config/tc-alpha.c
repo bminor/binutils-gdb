@@ -5204,7 +5204,7 @@ md_pcrel_from (fixS *fixP)
    GPDISP.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT * valP, segT seg)
+md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 {
   char * const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
   valueT value = * valP;

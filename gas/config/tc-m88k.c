@@ -1018,7 +1018,7 @@ tc_coff_fix2rtype (fixS *fixp)
    file itself.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = * (long *) valP;
   char *buf;

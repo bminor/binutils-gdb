@@ -52,7 +52,7 @@ arelent *tc_gen_reloc (asection *, struct fix *);
    visible symbols can be overridden.  */
 #define EXTERN_FORCE_RELOC 0
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define tc_fix_adjustable(FIX) 					\

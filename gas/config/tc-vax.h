@@ -60,7 +60,7 @@ extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
 #ifdef BFD_ASSEMBLER
-/* Values passed to md_apply_fix3 don't include symbol values.  */
+/* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define tc_fix_adjustable(FIX)					\

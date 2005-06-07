@@ -1130,7 +1130,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 void
-md_apply_fix3 (fixS *fixP,
+md_apply_fix (fixS *fixP,
 	       valueT *valP,
 	       segT seg ATTRIBUTE_UNUSED)
 {

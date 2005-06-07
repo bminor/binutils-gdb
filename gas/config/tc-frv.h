@@ -44,7 +44,7 @@ extern bfd_boolean frv_md_fdpic_enabled (void);
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 extern void frv_tomcat_workaround PARAMS ((void));

@@ -1468,7 +1468,7 @@ frv_force_relocation (fix)
 /* Apply a fixup that could be resolved within the assembler.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
+md_apply_fix (fixP, valP, seg)
      fixS *   fixP;
      valueT * valP;
      segT     seg;
@@ -1542,7 +1542,7 @@ md_apply_fix3 (fixP, valP, seg)
 	break;
       }
 
-  gas_cgen_md_apply_fix3 (fixP, valP, seg);
+  gas_cgen_md_apply_fix (fixP, valP, seg);
   return;
 }
 

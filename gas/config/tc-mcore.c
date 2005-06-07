@@ -1984,7 +1984,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
    Also sets up addends for 'rela' type relocations.  */
 
 void
-md_apply_fix3 (fixS *   fixP,
+md_apply_fix (fixS *   fixP,
 	       valueT * valP,
 	       segT     segment ATTRIBUTE_UNUSED)
 {

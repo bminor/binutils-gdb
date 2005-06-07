@@ -1269,7 +1269,7 @@ md_pcrel_from (fixS *fixP)
    that, we determine the correct reloc code and put it back in the fixup.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT * valP, segT seg)
+md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 {
   valueT value = * valP;
 
@@ -1884,7 +1884,7 @@ md_assemble (char *str)
 		 operands residing in the insn, but instead just use the
 		 operand index.  This lets us easily handle fixups for any
 		 operand type, although that is admittedly not a very exciting
-		 feature.  We pick a BFD reloc type in md_apply_fix3.
+		 feature.  We pick a BFD reloc type in md_apply_fix.
 
 		 Limm values (4 byte immediate "constants") must be treated
 		 normally because they're not part of the actual insn word

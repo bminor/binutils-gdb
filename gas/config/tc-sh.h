@@ -212,7 +212,7 @@ extern void sh_elf_final_processing (void);
 #define tc_fix_adjustable(FIX) sh_fix_adjustable(FIX)
 extern bfd_boolean sh_fix_adjustable (struct fix *);
 
-/* Values passed to md_apply_fix3 don't include symbol values.  */
+/* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* This expression evaluates to true if the relocation is for a local object

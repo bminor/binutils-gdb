@@ -1056,7 +1056,7 @@ md_dlx_fix_adjustable (fixS *fixP)
 }
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = *valP;
   char *place = fixP->fx_where + fixP->fx_frag->fr_literal;

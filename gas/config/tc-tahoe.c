@@ -457,7 +457,7 @@ md_number_to_chars (char con[],		/* Return 'nbytes' of chars here.  */
 }
 
 void
-md_apply_fix3 (fixS *fixP ATTRIBUTE_UNUSED,
+md_apply_fix (fixS *fixP ATTRIBUTE_UNUSED,
 	       valueT * valP ATTRIBUTE_UNUSED,
 	       segT seg ATTRIBUTE_UNUSED)
 {

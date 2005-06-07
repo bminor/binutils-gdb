@@ -71,10 +71,10 @@ extern void m32r_handle_align (fragS *);
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2 + 4)
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
-#define md_apply_fix3 gas_cgen_md_apply_fix3
+#define md_apply_fix gas_cgen_md_apply_fix
 
 #define tc_fix_adjustable(FIX) m32r_fix_adjustable (FIX)
 bfd_boolean m32r_fix_adjustable (struct fix *);

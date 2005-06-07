@@ -127,8 +127,9 @@ struct fix;
 
 #define OPTIONAL_REGISTER_PREFIX '%'
 
-#define LOCAL_LABEL(name) (name[0] == '.' && (name[1] == 'L'))
-#define LOCAL_LABELS_FB   1
+#define LOCAL_LABEL(name)  (name[0] == '.' && name[1] == 'L')
+#define LOCAL_LABELS_FB    1
+#define LOCAL_LABEL_PREFIX '.'
 
 /* This expression evaluates to true if the relocation is for a local
    object for which we still want to do the relocation at runtime.
@@ -168,7 +169,6 @@ struct fix;
 # define md_elf_section_change_hook()	arm_elf_change_section ()
 # define md_elf_section_type(str, len)	arm_elf_section_type (str, len)
 # define GLOBAL_OFFSET_TABLE_NAME	"_GLOBAL_OFFSET_TABLE_"
-# define LOCAL_LABEL_PREFIX 		'.'
 # define TC_SEGMENT_INFO_TYPE 		struct arm_segment_info_type
 
 enum mstate
@@ -206,7 +206,7 @@ struct arm_segment_info_type
 
 # define EXTERN_FORCE_RELOC 			1
 # define tc_fix_adjustable(FIX) 		arm_fix_adjustable (FIX)
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 # define MD_APPLY_SYM_VALUE(FIX) 		0
 # define TC_VALIDATE_FIX(FIX, SEGTYPE, LABEL)	arm_validate_fix (FIX)
 

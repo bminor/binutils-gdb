@@ -62,7 +62,7 @@ void d30v_frob_label (symbolS *);
 void d30v_cons_align (int);
 #define md_cons_align(nbytes)	     d30v_cons_align (nbytes)
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* No shared lib support, so we don't need to ensure externally

@@ -93,7 +93,7 @@ extern long m68hc11_relax_frag (segT, fragS*, long);
 
 #define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs */
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* No shared lib support, so we don't need to ensure externally

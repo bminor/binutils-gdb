@@ -1449,7 +1449,7 @@ md_gather_operands (str, insn, opcode)
      BFD_RELOC_UNUSED plus the operand index.  This lets us easily
      handle fixups for any operand type, although that is admittedly
      not a very exciting feature.  We pick a BFD reloc type in
-     md_apply_fix3.  */
+     md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
 
@@ -1957,7 +1957,7 @@ tc_s390_force_relocation (fixp)
    fixup.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
+md_apply_fix (fixP, valP, seg)
      fixS *fixP;
      valueT *valP;
      segT seg ATTRIBUTE_UNUSED;

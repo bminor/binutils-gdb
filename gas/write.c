@@ -2522,7 +2522,7 @@ relax_segment (struct frag *segment_frag_root, segT segment)
    Go through all the fixS's in a segment and see which ones can be
    handled now.  (These consist of fixS where we have since discovered
    the value of a symbol, or the address of the frag involved.)
-   For each one, call md_apply_fix3 to put the fix into the frag data.
+   For each one, call md_apply_fix to put the fix into the frag data.
 
    Result is a count of how many relocation structs will be needed to
    handle the remaining fixS's that we couldn't completely handle here.
@@ -2703,7 +2703,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	}
 
       if (!fixP->fx_done)
-	md_apply_fix3 (fixP, &add_number, this_segment);
+	md_apply_fix (fixP, &add_number, this_segment);
 
       if (!fixP->fx_done)
 	{

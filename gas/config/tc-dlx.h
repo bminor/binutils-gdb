@@ -74,7 +74,7 @@ extern bfd_boolean md_dlx_fix_adjustable  (struct fix *);
 
 #define tc_fix_adjustable(FIX) md_dlx_fix_adjustable (FIX)
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define NEED_FX_R_TYPE

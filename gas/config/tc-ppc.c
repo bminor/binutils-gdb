@@ -2651,7 +2651,7 @@ md_assemble (str)
      BFD_RELOC_UNUSED plus the operand index.  This lets us easily
      handle fixups for any operand type, although that is admittedly
      not a very exciting feature.  We pick a BFD reloc type in
-     md_apply_fix3.  */
+     md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
       const struct powerpc_operand *operand;
@@ -5510,7 +5510,7 @@ ppc_fix_adjustable (fix)
    fixup.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
+md_apply_fix (fixP, valP, seg)
      fixS *fixP;
      valueT * valP;
      segT seg ATTRIBUTE_UNUSED;

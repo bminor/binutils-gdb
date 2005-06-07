@@ -583,13 +583,13 @@ maxq_number_to_chars (char *buf, valueT val, int n)
 
 /* GAS will call this for each fixup. It's main objective is to store the
    correct value in the object file. 'fixup_segment' performs the generic
-   overflow check on the 'valueT *val' argument after md_apply_fix3 returns.
+   overflow check on the 'valueT *val' argument after md_apply_fix returns.
    If the overflow check is relevant for the target machine, then
-   'md_apply_fix3' should modify 'valueT *val', typically to the value stored 
+   'md_apply_fix' should modify 'valueT *val', typically to the value stored 
    in the object file (not to be done in MAXQ).  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valT, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valT, segT seg ATTRIBUTE_UNUSED)
 {
   char *p = fixP->fx_frag->fr_literal + fixP->fx_where;
   char *frag_to_fix_at =

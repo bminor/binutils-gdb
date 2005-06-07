@@ -2365,7 +2365,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
       if (fragP->tc_frag_data == NULL)
 	{
 	  /* We must initialize data that's supposed to be "fixed up" to
-	     avoid emitting garbage, because md_apply_fix3 won't do
+	     avoid emitting garbage, because md_apply_fix won't do
 	     anything for undefined symbols.  */
 	  md_number_to_chars (var_partp, 0, 8);
 	  tmpfixP
@@ -2413,7 +2413,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
    Note that this function isn't called when linkrelax != 0.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT segment)
+md_apply_fix (fixS *fixP, valueT *valP, segT segment)
 {
   char *buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */
@@ -2652,7 +2652,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 
       if (addsy == NULL || bfd_is_abs_section (addsec))
 	{
-	  /* Resolve this reloc now, as md_apply_fix3 would have done (not
+	  /* Resolve this reloc now, as md_apply_fix would have done (not
 	     called if -linkrelax).  There is no point in keeping a reloc
 	     to an absolute symbol.  No reloc that is subject to
 	     relaxation must be to an absolute symbol; difference
@@ -2852,9 +2852,9 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 	}
       /* FALLTHROUGH.  */
 
-      /* The others are supposed to be handled by md_apply_fix3.
+      /* The others are supposed to be handled by md_apply_fix.
 	 FIXME: ... which isn't called when -linkrelax.  Move over
-	 md_apply_fix3 code here for everything reasonable.  */
+	 md_apply_fix code here for everything reasonable.  */
     badop:
     default:
       as_bad_where
@@ -3267,10 +3267,10 @@ mmix_force_relocation (fixS *fixP)
   if (linkrelax)
     return 1;
 
-  /* All our pcrel relocations are must-keep.  Note that md_apply_fix3 is
+  /* All our pcrel relocations are must-keep.  Note that md_apply_fix is
      called *after* this, and will handle getting rid of the presumed
      reloc; a relocation isn't *forced* other than to be handled by
-     md_apply_fix3 (or tc_gen_reloc if linkrelax).  */
+     md_apply_fix (or tc_gen_reloc if linkrelax).  */
   if (fixP->fx_pcrel)
     return 1;
 

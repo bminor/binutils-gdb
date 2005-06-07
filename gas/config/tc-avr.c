@@ -863,7 +863,7 @@ md_pcrel_from_section (fixp, sec)
    value in the object file.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
+md_apply_fix (fixP, valP, seg)
      fixS *fixP;
      valueT * valP;
      segT seg;

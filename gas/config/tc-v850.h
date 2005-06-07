@@ -44,7 +44,7 @@ extern bfd_boolean v850_fix_adjustable (struct fix *);
 extern int v850_force_relocation (struct fix *);
 
 #ifdef OBJ_ELF
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 #endif
 

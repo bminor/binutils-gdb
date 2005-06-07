@@ -43,7 +43,7 @@
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-#define md_apply_fix3 gas_cgen_md_apply_fix3
+#define md_apply_fix gas_cgen_md_apply_fix
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
@@ -59,7 +59,7 @@
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) iq2000_force_relocation (fix)
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define tc_gen_reloc gas_cgen_tc_gen_reloc

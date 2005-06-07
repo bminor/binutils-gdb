@@ -738,7 +738,7 @@ md_begin (void)
       op++;
     }
 
-  /* This is both a simplification (we don't have to write md_apply_fix3)
+  /* This is both a simplification (we don't have to write md_apply_fix)
      and support for future optimizations (branch shortening and similar
      stuff in the linker.  */
   linkrelax = 1;
@@ -847,7 +847,7 @@ md_pcrel_from (fixS *fixp)
 }
 
 void
-md_apply_fix3 (fixS * fixP, valueT * valP ATTRIBUTE_UNUSED, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS * fixP, valueT * valP ATTRIBUTE_UNUSED, segT seg ATTRIBUTE_UNUSED)
 {
   /* We shouldn't ever get here because linkrelax is nonzero.  */
   abort ();

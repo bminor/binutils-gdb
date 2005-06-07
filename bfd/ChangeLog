@@ -1,3 +1,7 @@
+2005-06-07  Zack Weinberg  <zack@codesourcery.com>
+
+	* coff-i386.c: Change md_apply_fix3 to md_apply_fix in comment.
+
 2005-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Init _bfd_find_line.

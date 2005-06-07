@@ -2087,7 +2087,7 @@ md_assemble (char *str)
      BFD_RELOC_UNUSED plus the operand index.  This lets us easily
      handle fixups for any operand type, although that is admittedly
      not a very exciting feature.  We pick a BFD reloc type in
-     md_apply_fix3.  */
+     md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
       const struct v850_operand *operand;
@@ -2240,7 +2240,7 @@ v850_pcrel_from_section (fixS *fixp, segT section)
 }
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 {
   valueT value = * valueP;
   char *where;

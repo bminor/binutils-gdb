@@ -902,7 +902,7 @@ md_number_to_chars (char *buf, valueT val, int n)
 
 #ifdef BFD_ASSEMBLER
 void
-md_apply_fix3 (fixS * fixP, valueT * val, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS * fixP, valueT * val, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   long t_val;
@@ -998,7 +998,7 @@ md_apply_fix3 (fixS * fixP, valueT * val, segT seg ATTRIBUTE_UNUSED)
 }
 #else
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   long val = *valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;

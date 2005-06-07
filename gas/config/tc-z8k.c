@@ -1410,7 +1410,7 @@ md_section_align (segT seg, valueT size)
    has been eliminated, set fix->fx_done. If fix->fx_addsy is non-NULL,
    we will have to generate a reloc entry.  */
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 {
   long val = * (long *) valP;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
@@ -1517,7 +1517,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
       break;
 
     default:
-      printf(_("md_apply_fix3: unknown r_type 0x%x\n"), fixP->fx_r_type);
+      printf(_("md_apply_fix: unknown r_type 0x%x\n"), fixP->fx_r_type);
       abort ();
     }
 

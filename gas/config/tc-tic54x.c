@@ -5481,7 +5481,7 @@ tic54x_cons_fix_new (frag, where, octets, exp)
    If fixp->fx_addsy is non-NULL, we'll have to generate a reloc entry.   */
 
 void
-md_apply_fix3 (fixP, valP, seg)
+md_apply_fix (fixP, valP, seg)
      fixS *fixP;
      valueT * valP;
      segT seg ATTRIBUTE_UNUSED;

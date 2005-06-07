@@ -3415,7 +3415,7 @@ sh_frob_file (void)
 }
 
 /* Called after relaxing.  Set the correct sizes of the fragments, and
-   create relocs so that md_apply_fix3 will fill in the correct values.  */
+   create relocs so that md_apply_fix will fill in the correct values.  */
 
 void
 #ifdef BFD_ASSEMBLER
@@ -3794,7 +3794,7 @@ sh_elf_final_processing (void)
 /* Apply a fixup to the object file.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   int lowbyte = target_big_endian ? 1 : 0;
@@ -4090,7 +4090,7 @@ md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
     default:
 #ifdef HAVE_SH64
-      shmedia_md_apply_fix3 (fixP, valP);
+      shmedia_md_apply_fix (fixP, valP);
       return;
 #else
       abort ();
@@ -4349,7 +4349,7 @@ sh_coff_reloc_mangle (segment_info_type *seg, fixS *fix,
     {
       /* We can't store the offset in the object file, since this
 	 reloc does not take up any space, so we store it in r_offset.
-	 The fx_addnumber field was set in md_apply_fix3.  */
+	 The fx_addnumber field was set in md_apply_fix.  */
       intr->r_offset = fix->fx_addnumber;
     }
   else if (fix->fx_r_type == BFD_RELOC_SH_COUNT)

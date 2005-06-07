@@ -65,7 +65,7 @@ extern void arc_cons_fix_new (struct frag *, int, int, struct expressionS *);
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 4
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* No shared lib support, so we don't need to ensure externally

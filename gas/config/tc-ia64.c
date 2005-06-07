@@ -5995,7 +5995,7 @@ operand_match (idesc, index, e)
 	case O_symbol:
 	  fix = CURR_SLOT.fixup + CURR_SLOT.num_fixups;
 	  /* There are no external relocs for TAG13/TAG13b fields, so we
-	     create a dummy reloc.  This will not live past md_apply_fix3.  */
+	     create a dummy reloc.  This will not live past md_apply_fix.  */
 	  fix->code = BFD_RELOC_UNUSED;
 	  fix->code = ia64_gen_real_reloc_type (e->X_op_symbol, fix->code);
 	  fix->opnd = idesc->operands[index];
@@ -11055,7 +11055,7 @@ ia64_cons_fix_new (f, where, nbytes, exp)
   fix = fix_new_exp (f, where, nbytes, exp, 0, code);
   /* We need to store the byte order in effect in case we're going
      to fix an 8 or 16 bit relocation (for which there no real
-     relocs available).  See md_apply_fix3().  */
+     relocs available).  See md_apply_fix().  */
   fix->tc_fix_data.bigendian = target_big_endian;
 }
 
@@ -11402,7 +11402,7 @@ fix_insn (fix, odesc, value)
    (if possible).  */
 
 void
-md_apply_fix3 (fix, valP, seg)
+md_apply_fix (fix, valP, seg)
      fixS *fix;
      valueT *valP;
      segT seg ATTRIBUTE_UNUSED;

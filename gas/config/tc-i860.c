@@ -1338,7 +1338,7 @@ obtain_reloc_for_imm16 (fixS *fix, long *val)
    we will have to generate a reloc entry.  */
 
 void
-md_apply_fix3 (fixS *fix, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fix, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf;
   long val = *valP;

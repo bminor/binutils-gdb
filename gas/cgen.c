@@ -225,7 +225,7 @@ gas_cgen_swap_fixups (i)
    At this point we do not use a bfd_reloc_code_real_type for
    operands residing in the insn, but instead just use the
    operand index.  This lets us easily handle fixups for any
-   operand type.  We pick a BFD reloc type in md_apply_fix3.  */
+   operand type.  We pick a BFD reloc type in md_apply_fix.  */
 
 fixS *
 gas_cgen_record_fixup (frag, where, insn, length, operand, opinfo, symbol, offset)
@@ -264,7 +264,7 @@ gas_cgen_record_fixup (frag, where, insn, length, operand, opinfo, symbol, offse
    At this point we do not use a bfd_reloc_code_real_type for
    operands residing in the insn, but instead just use the
    operand index.  This lets us easily handle fixups for any
-   operand type.  We pick a BFD reloc type in md_apply_fix3.  */
+   operand type.  We pick a BFD reloc type in md_apply_fix.  */
 
 fixS *
 gas_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
@@ -580,7 +580,7 @@ gas_cgen_finish_insn (insn, buf, length, relax_p, result)
    should handle them all.  */
 
 void
-gas_cgen_md_apply_fix3 (fixP, valP, seg)
+gas_cgen_md_apply_fix (fixP, valP, seg)
      fixS *   fixP;
      valueT * valP;
      segT     seg ATTRIBUTE_UNUSED;

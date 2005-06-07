@@ -1995,7 +1995,7 @@ m32r_cgen_record_fixup_exp (fragS *frag,
 #define FX_OPINFO_R_TYPE(f) ((f)->fx_cgen.opinfo)
 
 /* Sort any unmatched HI16 relocs so that they immediately precede
-   the corresponding LO16 reloc.  This is called before md_apply_fix3 and
+   the corresponding LO16 reloc.  This is called before md_apply_fix and
    tc_gen_reloc.  */
 
 void

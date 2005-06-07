@@ -431,7 +431,7 @@ ip2k_force_relocation (fixS * fix)
 }
 
 void
-ip2k_apply_fix3 (fixS *fixP, valueT *valueP, segT seg)
+ip2k_apply_fix (fixS *fixP, valueT *valueP, segT seg)
 {
   if (fixP->fx_r_type == BFD_RELOC_IP2K_TEXT
       && ! fixP->fx_addsy
@@ -445,7 +445,7 @@ ip2k_apply_fix3 (fixS *fixP, valueT *valueP, segT seg)
       /* Must be careful when we are fixing up an FR.  We could be
 	 fixing up an offset to (SP) or (DP) in which case we don't
 	 want to step on the top 2 bits of the FR operand.  The
-	 gas_cgen_md_apply_fix3 doesn't know any better and overwrites
+	 gas_cgen_md_apply_fix doesn't know any better and overwrites
 	 the entire operand.  We counter this by adding the bits
 	 to the new value.  */
       char *where = fixP->fx_frag->fr_literal + fixP->fx_where;
@@ -459,7 +459,7 @@ ip2k_apply_fix3 (fixS *fixP, valueT *valueP, segT seg)
       *valueP += (insn_value & 0x180);
     }
 
-  gas_cgen_md_apply_fix3 (fixP, valueP, seg);
+  gas_cgen_md_apply_fix (fixP, valueP, seg);
 }
 
 int

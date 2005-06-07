@@ -54,7 +54,7 @@ extern int target_big_endian;
 /* foo-. gets turned into PC relative relocs.  */
 #define DIFF_EXPR_OK
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* We don't need to handle .word strangely.  */

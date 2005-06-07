@@ -4793,7 +4793,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
    we are handling.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
+md_apply_fix (fixP, valP, seg)
      /* The fix we're to put in.  */
      fixS *fixP;
      /* Pointer to the value of the bits.  */

@@ -60,7 +60,7 @@ extern valueT alpha_gp_value;
 #define tc_fix_adjustable(FIX)		alpha_fix_adjustable (FIX)
 #define RELOC_REQUIRES_SYMBOL
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define md_convert_frag(b,s,f)		as_fatal ("alpha convert_frag\n")

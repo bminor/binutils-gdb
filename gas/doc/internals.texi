@@ -512,7 +512,7 @@ A number which is added into the fixup.
 
 @item fx_addnumber
 Some CPU backends use this field to convey information between
-@code{md_apply_fix3} and @code{tc_gen_reloc}.  The machine independent code does
+@code{md_apply_fix} and @code{tc_gen_reloc}.  The machine independent code does
 not use it.
 
 @item fx_next
@@ -1250,7 +1250,7 @@ given section will be processed when the @var{linkrelax} variable is
 set.  The macro is given the N_TYPE bits for the section in its
 @var{segT} argument.  If the macro evaluates to a non-zero value
 then the fixups will be converted into relocs, otherwise they will
-be passed to @var{md_apply_fix3} as normal.
+be passed to @var{md_apply_fix} as normal.
 
 @item md_convert_frag
 @cindex md_convert_frag
@@ -1277,11 +1277,11 @@ It may be used to change the fixup in @code{struct fix *@var{fixP}} before
 the generic code sees it, or to fully process the fixup.  In the latter case,
 a @code{goto @var{skip}} will bypass the generic code.
 
-@item md_apply_fix3 (@var{fixP}, @var{valP}, @var{seg})
-@cindex md_apply_fix3
+@item md_apply_fix (@var{fixP}, @var{valP}, @var{seg})
+@cindex md_apply_fix
 GAS will call this for each fixup that passes the @code{TC_VALIDATE_FIX} test
 when @var{linkrelax} is not set.  It should store the correct value in the
-object file.  @code{struct fix *@var{fixP}} is the fixup @code{md_apply_fix3}
+object file.  @code{struct fix *@var{fixP}} is the fixup @code{md_apply_fix}
 is operating on.  @code{valueT *@var{valP}} is the value to store into the
 object files, or at least is the generic code's best guess.  Specifically,
 *@var{valP} is the value of the fixup symbol, perhaps modified by
@@ -1289,8 +1289,8 @@ object files, or at least is the generic code's best guess.  Specifically,
 less @code{MD_PCREL_FROM_SECTION} for pc-relative fixups.
 @code{segT @var{seg}} is the section the fix is in.
 @code{fixup_segment} performs a generic overflow check on *@var{valP} after
-@code{md_apply_fix3} returns.  If the overflow check is relevant for the target
-machine, then @code{md_apply_fix3} should modify *@var{valP}, typically to the
+@code{md_apply_fix} returns.  If the overflow check is relevant for the target
+machine, then @code{md_apply_fix} should modify *@var{valP}, typically to the
 value stored in the object file.
 
 @item TC_FORCE_RELOCATION (@var{fix})
@@ -1318,7 +1318,7 @@ returns non-zero, will emit relocs.
 This macro controls resolution of fixup expressions involving the
 difference of two symbols in the same section.  If this macro returns zero,
 the subtrahend will be resolved and @code{fx_subsy} set to @code{NULL} for
-@code{md_apply_fix3}.  If undefined, the default of
+@code{md_apply_fix}.  If undefined, the default of
 @w{@code{! SEG_NORMAL (@var{seg}) || TC_FORCE_RELOCATION (@var{fix})}} will
 be used.
 
@@ -1341,7 +1341,7 @@ This macro is evaluated for any fixup with a @code{fx_subsy} that
 @item MD_APPLY_SYM_VALUE (@var{fix})
 @cindex MD_APPLY_SYM_VALUE
 This macro controls whether the symbol value becomes part of the value passed
-to @code{md_apply_fix3}.  If the macro is undefined, or returns non-zero, the
+to @code{md_apply_fix}.  If the macro is undefined, or returns non-zero, the
 symbol value will be included.  For ELF, a suitable definition might simply be
 @code{0}, because ELF relocations don't include the symbol value in the addend.
 

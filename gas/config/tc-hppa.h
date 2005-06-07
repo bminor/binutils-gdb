@@ -134,7 +134,7 @@ int hppa_fix_adjustable PARAMS((struct fix *));
    normally appear safe to handle it completely within GAS.  */
 #define TC_FORCE_RELOCATION(FIX) hppa_force_relocation (FIX)
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #ifdef OBJ_SOM

@@ -433,11 +433,11 @@ xstormy16_fix_adjustable (fixS * fixP)
   return TRUE;
 }
 
-/* This is a copy of gas_cgen_md_apply_fix3, with some enhancements to
+/* This is a copy of gas_cgen_md_apply_fix, with some enhancements to
    do various things that would not be valid for all ports.  */
 
 void
-xstormy16_md_apply_fix3 (fixS *   fixP,
+xstormy16_md_apply_fix (fixS *   fixP,
 			 valueT * valueP,
 			 segT     seg ATTRIBUTE_UNUSED)
 {

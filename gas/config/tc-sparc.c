@@ -2486,12 +2486,12 @@ sparc_ip (str, pinsn)
 		      goto error;
 		    }
 
-		  /* Constants that won't fit are checked in md_apply_fix3
+		  /* Constants that won't fit are checked in md_apply_fix
 		     and bfd_install_relocation.
 		     ??? It would be preferable to install the constants
 		     into the insn here and save having to create a fixS
 		     for each one.  There already exists code to handle
-		     all the various cases (e.g. in md_apply_fix3 and
+		     all the various cases (e.g. in md_apply_fix and
 		     bfd_install_relocation) so duplicating all that code
 		     here isn't right.  */
 		}
@@ -2879,7 +2879,7 @@ output_insn (insn, the_insn)
 				 the_insn->pcrel,
 				 the_insn->reloc);
       /* Turn off overflow checking in fixup_segment.  We'll do our
-	 own overflow checking in md_apply_fix3.  This is necessary because
+	 own overflow checking in md_apply_fix.  This is necessary because
 	 the insn size is 4 and fixup_segment will signal an overflow for
 	 large 8 byte quantities.  */
       fixP->fx_no_overflow = 1;
@@ -2998,7 +2998,7 @@ md_number_to_chars (buf, val, n)
    hold.  */
 
 void
-md_apply_fix3 (fixP, valP, segment)
+md_apply_fix (fixP, valP, segment)
      fixS *fixP;
      valueT *valP;
      segT segment ATTRIBUTE_UNUSED;

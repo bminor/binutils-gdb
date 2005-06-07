@@ -34,7 +34,7 @@ short  tc_coff_fix2rtype (fixS *);
 void   md_assemble (char *);
 void   md_begin (void);
 void   md_number_to_chars (char *, valueT, int);
-void   md_apply_fix3 (fixS *, valueT *, segT);
+void   md_apply_fix (fixS *, valueT *, segT);
 
 #ifndef WORKING_DOT_WORD
 extern int md_short_jump_size;

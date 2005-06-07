@@ -39,7 +39,7 @@
    symbol" or local symbol.  */
 #define DATALABEL_SUFFIX " DL"
 
-/* See shmedia_md_apply_fix3 and shmedia_md_pcrel_from_section for usage.  */
+/* See shmedia_md_apply_fix and shmedia_md_pcrel_from_section for usage.  */
 #define SHMEDIA_MD_PCREL_FROM_FIX(FIXP) \
  ((FIXP)->fx_size + (FIXP)->fx_where + (FIXP)->fx_frag->fr_address - 4)
 
@@ -136,7 +136,7 @@ static const unsigned char shmedia_little_nop_pattern[4] =
 static void shmedia_md_begin (void);
 static int shmedia_parse_reg (char *, int *, int *, shmedia_arg_type);
 static void shmedia_md_assemble (char *);
-static void shmedia_md_apply_fix3 (fixS *, valueT *);
+static void shmedia_md_apply_fix (fixS *, valueT *);
 static int shmedia_md_estimate_size_before_relax (fragS *, segT);
 static int shmedia_init_reloc (arelent *, fixS *);
 static char *shmedia_get_operands (shmedia_opcode_info *, char *,
@@ -577,10 +577,10 @@ shmedia_init_reloc (arelent *rel, fixS *fixP)
   return 0;
 }
 
-/* Hook called from md_apply_fix3 in tc-sh.c.  */
+/* Hook called from md_apply_fix in tc-sh.c.  */
 
 static void
-shmedia_md_apply_fix3 (fixS *fixP, valueT *valp)
+shmedia_md_apply_fix (fixS *fixP, valueT *valp)
 {
   offsetT val = *valp;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
@@ -602,7 +602,7 @@ shmedia_md_apply_fix3 (fixS *fixP, valueT *valp)
 	  /* Because write.c calls MD_PCREL_FROM_SECTION twice, we need to
 	     undo one of the adjustments, if the relocation is not
 	     actually for a symbol within the same segment (which we
-	     cannot check, because we're not called from md_apply_fix3, so
+	     cannot check, because we're not called from md_apply_fix, so
 	     we have to keep the reloc).  FIXME: This is a bug in
 	     write.c:fixup_segment affecting most targets that change
 	     ordinary relocs to pcrel relocs in md_apply_fix.  */
@@ -2736,7 +2736,7 @@ shmedia_build_Mytes (shmedia_opcode_info *opcode,
 			insn_loc);
 	    else
 	      /* This reloc-type is just temporary, so we can distinguish
-		 PTA from PT.  It is changed in shmedia_md_apply_fix3 to
+		 PTA from PT.  It is changed in shmedia_md_apply_fix to
 		 BFD_RELOC_SH_PT_16.  */
 	      insn |= shmedia_immediate_op (insn_loc, opjp, 1,
 					    opjp->reloctype == BFD_RELOC_NONE

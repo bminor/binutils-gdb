@@ -47,10 +47,10 @@
 #define LITERAL_PREFIXPERCENT_BIN
 #define DOUBLESLASH_LINE_COMMENTS
 
-/* Values passed to md_apply_fix3 don't include the symbol value.  */
+/* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
-#define md_apply_fix3 ip2k_apply_fix3
+#define md_apply_fix ip2k_apply_fix
 
 #define TC_HANDLES_FX_DONE
 

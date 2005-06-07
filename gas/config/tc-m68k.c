@@ -4605,7 +4605,7 @@ md_number_to_chars (char *buf, valueT val, int n)
 }
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   offsetT val = *valP;
   addressT upper_limit;

@@ -175,7 +175,7 @@ extern int tc_m68k_fix_adjustable PARAMS ((struct fix *));
 #define EXTERN_FORCE_RELOC \
   ((strcmp (TARGET_OS, "elf") != 0) && (strcmp (TARGET_OS, "uclinux") != 0))
 
-/* Values passed to md_apply_fix3 don't include symbol values.  */
+/* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define elf_tc_final_processing m68k_elf_final_processing

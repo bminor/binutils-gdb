@@ -410,7 +410,7 @@ PJ options:\n\
 /* Apply a fixup to the object file.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   long val = *valP;

@@ -1924,7 +1924,7 @@ d30v_cons_align (int size)
 }
 
 void
-md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *where;
   unsigned long insn, insn2;

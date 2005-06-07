@@ -2446,7 +2446,7 @@ md_pcrel_from (fixS *fixP)
 }
 
 void
-md_apply_fix3 (fixS *fixP,
+md_apply_fix (fixS *fixP,
 	       valueT *valP,
 	       segT seg ATTRIBUTE_UNUSED)
 {

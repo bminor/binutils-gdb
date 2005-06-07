@@ -2232,7 +2232,7 @@ md_assemble (char *str)
      BFD_RELOC_UNUSED plus the operand index.  This lets us easily
      handle fixups for any operand type, although that is admittedly
      not a very exciting feature.  We pick a BFD reloc type in
-     md_apply_fix3.  */
+     md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
       const struct i370_operand *operand;
@@ -2476,14 +2476,14 @@ md_pcrel_from_section (fixS *fixp, segT sec ATTRIBUTE_UNUSED)
    going on here.  */
 
 void
-md_apply_fix3 (fixS *fixP, valueT * valP, segT seg)
+md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 {
   valueT value = * valP;
 
   if (fixP->fx_addsy != NULL)
     {
 #ifdef DEBUG
-      printf ("\nmd_apply_fix3: symbol %s at 0x%x (%s:%d) val=0x%x addend=0x%x\n",
+      printf ("\nmd_apply_fix: symbol %s at 0x%x (%s:%d) val=0x%x addend=0x%x\n",
 	      S_GET_NAME (fixP->fx_addsy),
 	      fixP->fx_frag->fr_address + fixP->fx_where,
 	      fixP->fx_file, fixP->fx_line,
@@ -2508,7 +2508,7 @@ md_apply_fix3 (fixS *fixP, valueT * valP, segT seg)
       operand = &i370_operands[opindex];
 
 #ifdef DEBUG
-      printf ("\nmd_apply_fix3: fixup operand %s at 0x%x in %s:%d addend=0x%x\n",
+      printf ("\nmd_apply_fix: fixup operand %s at 0x%x in %s:%d addend=0x%x\n",
 	      operand->name,
 	      fixP->fx_frag->fr_address + fixP->fx_where,
 	      fixP->fx_file, fixP->fx_line,
@@ -2568,7 +2568,7 @@ md_apply_fix3 (fixS *fixP, valueT * valP, segT seg)
       i370_elf_validate_fix (fixP, seg);
 #endif
 #ifdef DEBUG
-      printf ("md_apply_fix3: reloc case %d in segment  %s %s:%d\n",
+      printf ("md_apply_fix: reloc case %d in segment  %s %s:%d\n",
 	      fixP->fx_r_type, segment_name (seg), fixP->fx_file, fixP->fx_line);
       printf ("\tcurrent fixup value is 0x%x \n", value);
 #endif

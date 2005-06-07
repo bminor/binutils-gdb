@@ -1818,7 +1818,7 @@ md_pcrel_from_section (fixS * fixp, segT sec)
    value in the object file.  */
 
 void
-md_apply_fix3 (fixS * fixp, valueT * valuep, segT seg)
+md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 {
   unsigned char * where;
   unsigned long insn;
