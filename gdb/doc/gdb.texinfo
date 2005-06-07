@@ -477,6 +477,13 @@ Cygnus Solutions, implemented the original @sc{gdb/mi} interface.
 Jim Blandy added support for preprocessor macros, while working for Red
 Hat.
 
+Andrew Cagney designed @value{GDBN}'s architecture vector.  Many
+people including Andrew Cagney, Stephane Carrez, Randolph Chung, Nick
+Duffek, Richard Henderson, Mark Kettenis, Grace Sainsbury, Kei
+Sakamoto, Yoshinori Sato, Michael Snyder, Andreas Schwab, Jason
+Thorpe, Corinna Vinschen, Ulrich Weigand, and Elena Zannoni, helped
+with the migration of old architectures to this new framework.
+
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
 
