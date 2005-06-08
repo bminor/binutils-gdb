@@ -429,7 +429,7 @@ rl_getc (stream)
 	 from the console.  (Otherwise, no characters are available
 	 until the user hits the return key.)  */
       if (isatty (fileno (stream)))
-	  return getche ();
+	return getch ();
 #endif
       result = read (fileno (stream), &c, sizeof (unsigned char));
 

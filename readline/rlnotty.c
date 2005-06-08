@@ -48,7 +48,7 @@ tputs (string, nlines, outfun)
      int (*outfun) ();
 {
   while (*string)
-    outfun (*string);
+    outfun (*string++);
 }
 
 int
@@ -67,6 +67,7 @@ void
 rl_prep_terminal (meta_flag)
      int meta_flag;
 {
+  readline_echoing_p = 1;
   return;
 }
 
