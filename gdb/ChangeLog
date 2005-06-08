@@ -1,3 +1,7 @@
+2005-06-08  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* expression.h (enum exp_opcode): Fix a comment typo.
+
 2005-06-06  Manoj Iyer  <manjo@austin.ibm.com>
 
 	* solib-svr4.c (struct lm_info): Change type of 'lm' to gdb_byte.
