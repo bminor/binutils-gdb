@@ -2655,7 +2655,7 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
   /* If the two addresses are in different frags, then we need to add in
      the remaining size of this frag, and then the entire size of intermediate
      frags.  */
-  while (slot_frag != first_frag)
+  while (first_frag != NULL && slot_frag != first_frag)
     {
       unsigned long start_addr = (unsigned long) &first_frag->fr_literal;
 
