@@ -1,3 +1,24 @@
+2005-06-08  Zack Weinberg  <zack@codesourcery.com>
+
+	* arm-opc.h: Delete; fold contents into ...
+	* arm-dis.c: ... here.  Move includes of internal COFF headers
+	next to includes of internal ELF headers.
+	(streq, WORD_ADDRESS, BDISP, BDISP23): Delete, unused.
+	(struct arm_opcode): Rename struct opcode32.  Make 'assembler' const.
+	(struct thumb_opcode): Rename struct opcode16.  Make 'assembler' const.
+	(arm_conditional, arm_fp_const, arm_shift, arm_regname, regnames)
+	(iwmmxt_wwnames, iwmmxt_wwssnames):
+	Make const.
+	(regnames): Remove iWMMXt coprocessor register sets.
+	(iwmmxt_regnames, iwmmxt_cregnames): New statics.
+	(get_arm_regnames): Adjust fourth argument to match above changes.
+	(set_iwmmxt_regnames): Delete.
+	(print_insn_arm): Constify 'c'.  Use ISO syntax for function
+	pointer calls.  Expand sole use of BDISP.  Use iwmmxt_regnames
+	and iwmmxt_cregnames, not set_iwmmxt_regnames.
+	(print_insn_thumb16, print_insn_thumb32): Constify 'c'.  Use
+	ISO syntax for function pointer calls.
+
 2005-06-07  Zack Weinberg  <zack@codesourcery.com>
 
 	* arm-dis.c: Split up the comments describing the format codes, so

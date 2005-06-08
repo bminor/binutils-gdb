@@ -24,21 +24,17 @@
 
 #include "dis-asm.h"
 #include "opcode/arm.h"
-#include "arm-opc.h"
-#include "coff/internal.h"
-#include "libcoff.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 
 /* FIXME: This shouldn't be done here.  */
+#include "coff/internal.h"
+#include "libcoff.h"
 #include "elf-bfd.h"
 #include "elf/internal.h"
 #include "elf/arm.h"
 
-#ifndef streq
-#define streq(a,b)	(strcmp ((a), (b)) == 0)
-#endif
-
+/* FIXME: Belongs in global header.  */
 #ifndef strneq
 #define strneq(a,b,n)	(strncmp ((a), (b), (n)) == 0)
 #endif
@@ -47,7 +43,19 @@
 #define NUM_ELEM(a)     (sizeof (a) / sizeof (a)[0])
 #endif
 
-#define WORD_ADDRESS(pc) ((pc) & ~0x3)
+struct opcode32
+{
+  unsigned long arch;		/* Architecture defining this insn.  */
+  unsigned long value, mask;	/* Recognise insn if (op&mask)==value.  */
+  const char *assembler;	/* How to disassemble this insn.  */
+};
+
+struct opcode16
+{
+  unsigned long arch;		/* Architecture defining this insn.  */
+  unsigned short value, mask;	/* Recognise insn if (op&mask)==value.  */
+  const char *assembler;	/* How to disassemble this insn.  */
+};
 
 /* Opcode tables: ARM, 16-bit Thumb, 32-bit Thumb.  All three are partially
    ordered: they must be searched linearly from the top to obtain a correct
@@ -101,7 +109,7 @@
    %E			print the LSB and WIDTH fields of a BFI or BFC instruction.
    %V                   print the 16-bit immediate field of a MOVT or MOVW instruction.  */
 
-static const struct arm_opcode arm_opcodes[] =
+static const struct opcode32 arm_opcodes[] =
 {
   /* ARM instructions.  */
   {ARM_EXT_V1, 0xe1a00000, 0xffffffff, "nop\t\t\t(mov r0,r0)"},
@@ -644,7 +652,7 @@ static const struct arm_opcode arm_opcodes[] =
    %<bitnum>'c		print specified char iff bit is one
    %<bitnum>?ab		print a if bit is one else print b.  */
 
-static const struct thumb_opcode thumb_opcodes[] =
+static const struct opcode16 thumb_opcodes[] =
 {
   /* Thumb instructions.  */
 
@@ -812,7 +820,7 @@ static const struct thumb_opcode thumb_opcodes[] =
    is guaranteed never to catch a special-case bit pattern with a more
    general mask, which is important, because this instruction encoding
    makes heavy use of special-case bit patterns.  */
-static const struct arm_opcode thumb32_opcodes[] =
+static const struct opcode32 thumb32_opcodes[] =
 {
   /* Instructions defined in the basic V6T2 set.  */
   {ARM_EXT_V6T2, 0xf3af8000, 0xffffffff, "nop.w"},
@@ -1018,20 +1026,25 @@ static const struct arm_opcode thumb32_opcodes[] =
   {0, 0, 0, 0}
 };
    
-
-static char * arm_conditional[] =
+static const char *const arm_conditional[] =
 {"eq", "ne", "cs", "cc", "mi", "pl", "vs", "vc",
  "hi", "ls", "ge", "lt", "gt", "le", "", "<und>"};
 
+static const char *const arm_fp_const[] =
+{"0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0"};
+
+static const char *const arm_shift[] =
+{"lsl", "lsr", "asr", "ror"};
+
 typedef struct
 {
-  const char * name;
-  const char * description;
-  const char * reg_names[16];
+  const char *name;
+  const char *description;
+  const char *reg_names[16];
 }
 arm_regname;
 
-static arm_regname regnames[] =
+static const arm_regname regnames[] =
 {
   { "raw" , "Select raw register names",
     { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"}},
@@ -1045,20 +1058,26 @@ static arm_regname regnames[] =
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "v4", "v5", "v6", "v7",  "v8",  "IP",  "SP",  "LR",  "PC" }},
   { "special-atpcs", "Select special register names used in the ATPCS",
     { "a1", "a2", "a3", "a4", "v1", "v2", "v3", "WR", "v5", "SB", "SL",  "FP",  "IP",  "SP",  "LR",  "PC" }},
-  { "iwmmxt_regnames", "Select register names used on the Intel Wireless MMX technology coprocessor",
-    { "wr0", "wr1", "wr2", "wr3", "wr4", "wr5", "wr6", "wr7", "wr8", "wr9", "wr10", "wr11", "wr12", "wr13", "wr14", "wr15"}},
-  { "iwmmxt_Cregnames", "Select control register names used on the Intel Wireless MMX technology coprocessor",
-    {"wcid", "wcon", "wcssf", "wcasf", "reserved", "reserved", "reserved", "reserved", "wcgr0", "wcgr1", "wcgr2", "wcgr3", "reserved", "reserved", "reserved", "reserved"}}
 };
 
-static char * iwmmxt_wwnames[] =
+static const char *const iwmmxt_wwnames[] =
 {"b", "h", "w", "d"};
 
-static char * iwmmxt_wwssnames[] =
+static const char *const iwmmxt_wwssnames[] =
 {"b", "bus", "b", "bss",
  "h", "hus", "h", "hss",
  "w", "wus", "w", "wss",
  "d", "dus", "d", "dss"
+};
+
+static const char *const iwmmxt_regnames[] =
+{ "wr0", "wr1", "wr2", "wr3", "wr4", "wr5", "wr6", "wr7",
+  "wr8", "wr9", "wr10", "wr11", "wr12", "wr13", "wr14", "wr15"
+};
+
+static const char *const iwmmxt_cregnames[] =
+{ "wcid", "wcon", "wcssf", "wcasf", "reserved", "reserved", "reserved", "reserved",
+  "wcgr0", "wcgr1", "wcgr2", "wcgr3", "reserved", "reserved", "reserved", "reserved"
 };
 
 /* Default to GCC register name set.  */
@@ -1069,11 +1088,6 @@ static unsigned int regname_selected = 1;
 
 static bfd_boolean force_thumb = FALSE;
 
-static char * arm_fp_const[] =
-{"0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0"};
-
-static char * arm_shift[] =
-{"lsl", "lsr", "asr", "ror"};
 
 /* Functions.  */
 int
@@ -1092,7 +1106,7 @@ set_arm_regname_option (int option)
 
 int
 get_arm_regnames (int option, const char **setname, const char **setdescription,
-		  const char ***register_names)
+		  const char *const **register_names)
 {
   *setname = regnames[option].name;
   *setdescription = regnames[option].description;
@@ -1131,33 +1145,14 @@ arm_decode_shift (long given, fprintf_ftype func, void *stream)
     }
 }
 
-static int
-set_iwmmxt_regnames (void)
-{
-  const char * setname;
-  const char * setdesc;
-  const char ** regnames;
-  int iwmmxt_regnames = 0;
-  int num_regnames = get_arm_regname_num_options ();
-
-  get_arm_regnames (iwmmxt_regnames, &setname,
-		    &setdesc, &regnames);
-  while ((strcmp ("iwmmxt_regnames", setname))
-	 && (iwmmxt_regnames < num_regnames))
-    get_arm_regnames (++iwmmxt_regnames, &setname, &setdesc, &regnames);
-
-  return iwmmxt_regnames;
-}
-
 /* Print one ARM instruction from PC on INFO->STREAM.  */
 
 static void
 print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 {
-  const struct arm_opcode *insn;
+  const struct opcode32 *insn;
   void *stream = info->stream;
-  fprintf_ftype func   = info->fprintf_func;
-  static int iwmmxt_regnames = 0;
+  fprintf_ftype func = info->fprintf_func;
 
   for (insn = arm_opcodes; insn->assembler; insn++)
     {
@@ -1174,7 +1169,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 	      || (insn->mask & 0xF0000000) == 0xF0000000
 	      || (insn->mask == 0 && insn->value == 0)))
 	{
-	  char * c;
+	  const char *c;
 
 	  for (c = insn->assembler; *c; c++)
 	    {
@@ -1281,9 +1276,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			    offset = -offset;
 
 			  func (stream, "[pc, #%d]\t; ", offset);
-
-			  (*info->print_address_func)
-			    (offset + pc + 8, info);
+			  info->print_address_func (offset + pc + 8, info);
 			}
 		      else
 			{
@@ -1340,8 +1333,10 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		      break;
 
 		    case 'b':
-		      (*info->print_address_func)
-			(BDISP (given) * 4 + pc + 8, info);
+		      {
+			int disp = (((given & 0xffffff) ^ 0x800000) - 0x800000);
+			info->print_address_func (disp*4 + pc + 8, info);
+		      }
 		      break;
 
 		    case 'c':
@@ -1663,34 +1658,18 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			      case 'g':
 				{
 				  long reg;
-				  int current_regnames;
-
-				  if (! iwmmxt_regnames)
-				    iwmmxt_regnames = set_iwmmxt_regnames ();
-				  current_regnames = set_arm_regname_option
-				    (iwmmxt_regnames);
-
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
-				  func (stream, "%s", arm_regnames[reg]);
-				  set_arm_regname_option (current_regnames);
+				  func (stream, "%s", iwmmxt_regnames[reg]);
 				}
 				break;
 
 			      case 'G':
 				{
 				  long reg;
-				  int current_regnames;
-
-				  if (! iwmmxt_regnames)
-				    iwmmxt_regnames = set_iwmmxt_regnames ();
-				  current_regnames = set_arm_regname_option
-				    (iwmmxt_regnames + 1);
-
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
-				  func (stream, "%s", arm_regnames[reg]);
-				  set_arm_regname_option (current_regnames);
+				  func (stream, "%s", iwmmxt_cregnames[reg]);
 				}
 				break;
 
@@ -1901,14 +1880,14 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 static void
 print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 {
-  const struct thumb_opcode *insn;
+  const struct opcode16 *insn;
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
 
   for (insn = thumb_opcodes; insn->assembler; insn++)
     if ((given & insn->mask) == insn->value)
       {
-	char * c = insn->assembler;
+	const char *c = insn->assembler;
 	for (; *c; c++)
 	  {
 	    int domaskpc = 0;
@@ -2070,8 +2049,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 
 			  case 'B':
 			    reg = ((reg ^ (1 << bitend)) - (1 << bitend));
-			    (*info->print_address_func)
-			      (reg * 2 + pc + 4, info);
+			    info->print_address_func (reg * 2 + pc + 4, info);
 			    break;
 
 			  case 'c':
@@ -2127,14 +2105,14 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 static void
 print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 {
-  const struct arm_opcode *insn;
+  const struct opcode32 *insn;
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
 
   for (insn = thumb32_opcodes; insn->assembler; insn++)
     if ((given & insn->mask) == insn->value)
       {
-	char * c = insn->assembler;
+	const char *c = insn->assembler;
 	for (; *c; c++)
 	  {
 	    if (*c != '%')
