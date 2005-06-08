@@ -280,9 +280,9 @@ bfd_fdopenr (const char *filename, const char *target, int fd)
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug.  */
   switch (fdflags & (O_ACCMODE))
     {
-    case O_RDONLY: mode = FOPEN_RB;
-    case O_WRONLY: mode = FOPEN_RUB;
-    case O_RDWR:   mode = FOPEN_RUB;
+    case O_RDONLY: mode = FOPEN_RB; break;
+    case O_WRONLY: mode = FOPEN_RUB; break;
+    case O_RDWR:   mode = FOPEN_RUB; break;
     default: abort ();
     }
 #endif
