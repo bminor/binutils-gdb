@@ -1,4 +1,9 @@
+2005-06-08  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* config/tc-m32r.c (use_parallel): Change default value from 1 to 0.
+
 2004-08-18  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
 	* config/tc-mips.c (append_insn): Handle delay slots in branch likely
 	correctly.
 
