@@ -1,5 +1,9 @@
 2005-06-07  Mark Mitchell  <mark@codesourcery.com>
 
+	* opncls.c (bfd_fdopenr): Add missing break statements.
+
+2005-06-07  Mark Mitchell  <mark@codesourcery.com>
+
 	* opncls.c (bfd_fopen): New API.
 	(bfd_openr): Use it.
 	(bfd_fdopenr): Likewise.
