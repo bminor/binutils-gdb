@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 void ppc64_elf_init_stub_bfd
   (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_edit_opd
-  (bfd *, struct bfd_link_info *, bfd_boolean);
+  (bfd *, struct bfd_link_info *, bfd_boolean, bfd_boolean);
 asection *ppc64_elf_tls_setup
   (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_tls_optimize
