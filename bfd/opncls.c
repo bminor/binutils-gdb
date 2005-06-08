@@ -155,8 +155,6 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
   bfd *nbfd;
   const bfd_target *target_vec;
 
-  bfd_set_error (bfd_error_system_call);
-
   nbfd = _bfd_new_bfd ();
   if (nbfd == NULL)
     return NULL;
@@ -176,6 +174,7 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
     nbfd->iostream = fopen (filename, mode);
   if (nbfd->iostream == NULL)
     {
+      bfd_set_error (bfd_error_system_call);
       _bfd_delete_bfd (nbfd);
       return NULL;
     }

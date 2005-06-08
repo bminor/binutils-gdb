@@ -1,3 +1,7 @@
+2005-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* opncls.c (bfd_fopen): Don't set bfd_error unconditionally.
+
 2005-06-07  Mark Mitchell  <mark@codesourcery.com>
 
 	* opncls.c (bfd_fdopenr): Add missing break statements.
