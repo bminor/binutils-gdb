@@ -268,13 +268,15 @@ bfd_fdopenr (const char *filename, const char *target, int fd)
   int fdflags;
 #endif
 
-  bfd_set_error (bfd_error_system_call);
 #if ! defined(HAVE_FCNTL) || ! defined(F_GETFL)
   mode = FOPEN_RUB; /* Assume full access.  */
 #else
   fdflags = fcntl (fd, F_GETFL, NULL);
   if (fdflags == -1)
-    return NULL;
+    {
+      bfd_set_error (bfd_error_system_call);
+      return NULL;
+    }
 
   /* (O_ACCMODE) parens are to avoid Ultrix header file bug.  */
   switch (fdflags & (O_ACCMODE))
