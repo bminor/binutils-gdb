@@ -25,6 +25,7 @@
 
 struct frame_info;
 struct frame_id;
+struct gdbarch;
 
 #ifndef LIBUNWIND_FRAME_H
 #define LIBUNWIND_FRAME_H 1
@@ -37,9 +38,11 @@ struct libunwind_descr
   int (*uw2gdb) (int);
   int (*is_fpreg) (int);
   void *accessors;
+  void *special_accessors;
 };
 
 const struct frame_unwind *libunwind_frame_sniffer (struct frame_info *next_frame);
+const struct frame_unwind *libunwind_sigtramp_frame_sniffer (struct frame_info *next_frame);
 
 void libunwind_frame_set_descr (struct gdbarch *arch, struct libunwind_descr *descr);
 
@@ -58,6 +61,8 @@ int libunwind_search_unwind_table (void *as, long ip, void *di,
 
 unw_word_t libunwind_find_dyn_list (unw_addr_space_t, unw_dyn_info_t *,
 				    void *);
+
+int libunwind_get_reg_special (struct gdbarch *gdbarch, int regnum, void *buf);
 
 #endif /* libunwind-frame.h */
 

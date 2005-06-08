@@ -1,3 +1,43 @@
+2005-06-08  Jeff Johnston  <jjohnstn@redhat.com>
+	    David Mosberger <davidm@hpl.hp.com>
+
+	* ia64-tdep.c (KERNEL_START): New macro.
+	(ia64_pseudo_register_read): Fix code to use libunwind to properly
+	get the rse registers.
+	(ia64_frame_this_id): Mark outermost frame with null frame id.
+	(ia64_sigtramp_frame_prev_register): Fix up debug output.
+	(ia64_access_rse_reg): New accessor function.
+	(ia64_access_mem): Add special logic for accessing the
+	kernel's unwind table.
+	(getunwind_table): Fix for corefiles.
+	(get_kernel_table): Fix to handle vDSO.
+	(ia64_libunwind_frame_this_id): Check for null frame id and
+	don't unwind past pc value of 0.  Fix debugging output.
+	(ia64_libunwind_sigtramp_frame_this_id): New function.
+	(ia64_libunwind_sigtramp_frame_prev_register): Ditto.
+	(ia64_libunwind_sigtramp_frame_sniffer): Ditto.
+	(ia64_libunwind_sigtramp_frame_unwind): New unwinder.
+	(ia64_unw_rse_accessors): New libunwind accessors.
+	(ia64_libunwind_descr): Add ia64_unw_rse_accessors.
+	(ia64_gdbarch_init)[HAVE_LIBUNWIND_IA64_H]: Use 
+	ia64_libunwind_sigtramp_frame_sniffer instead of 
+	ia64_sigtramp_frame_sniffer.
+	* libunwind-frame.c (libunwind_frame_set_descr): Add
+	special register accessors.
+	(libunwind_frame_cache): Add special logic to check for
+	0 pc value.  Check for a signal trampoline frame.
+	(libunwind_frame_this_id): Check if libunwind_frame_cache
+	returns NULL.
+	(libunwind_frame_prev_register): Check for NULL cache.
+	(libunwind_frame_base_address): Ditto.
+	(libunwind_sigtramp_frame_sniffer): New function.
+	(libunwind_get_reg_special): Ditto.
+	(libunwind_load): Add unw_is_signal_frame support.
+	* libunwind-frame.h (struct libunwind_descr): Add special_accessors
+	field.
+	(libunwind_sigtramp_frame_sniffer): New prototype.
+	(libunwind_get_reg_special): Ditto.
+	
 2005-06-08  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* expression.h (enum exp_opcode): Fix a comment typo.

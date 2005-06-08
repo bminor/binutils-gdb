@@ -49,6 +49,7 @@ static struct gdbarch_data *libunwind_descr_handle;
 static int (*unw_get_reg_p) (unw_cursor_t *, unw_regnum_t, unw_word_t *);
 static int (*unw_get_fpreg_p) (unw_cursor_t *, unw_regnum_t, unw_fpreg_t *);
 static int (*unw_get_saveloc_p) (unw_cursor_t *, unw_regnum_t, unw_save_loc_t *);
+static int (*unw_is_signal_frame_p) (unw_cursor_t *);
 static int (*unw_step_p) (unw_cursor_t *);
 static int (*unw_init_remote_p) (unw_cursor_t *, unw_addr_space_t, void *);
 static unw_addr_space_t (*unw_create_addr_space_p) (unw_accessors_t *, int);
@@ -78,6 +79,7 @@ struct libunwind_frame_cache
 static char *get_reg_name = STRINGIFY(UNW_OBJ(get_reg));
 static char *get_fpreg_name = STRINGIFY(UNW_OBJ(get_fpreg));
 static char *get_saveloc_name = STRINGIFY(UNW_OBJ(get_save_loc));
+static char *is_signal_frame_name = STRINGIFY(UNW_OBJ(is_signal_frame));
 static char *step_name = STRINGIFY(UNW_OBJ(step));
 static char *init_remote_name = STRINGIFY(UNW_OBJ(init_remote));
 static char *create_addr_space_name = STRINGIFY(UNW_OBJ(create_addr_space));
@@ -119,6 +121,7 @@ libunwind_frame_set_descr (struct gdbarch *gdbarch, struct libunwind_descr *desc
   arch_descr->uw2gdb = descr->uw2gdb;
   arch_descr->is_fpreg = descr->is_fpreg;
   arch_descr->accessors = descr->accessors;
+  arch_descr->special_accessors = descr->special_accessors;
 }
 
 static struct libunwind_frame_cache *
@@ -139,6 +142,10 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = FRAME_OBSTACK_ZALLOC (struct libunwind_frame_cache);
 
   cache->func_addr = frame_func_unwind (next_frame);
+  if (cache->func_addr == 0
+      && frame_relative_level (next_frame) > 0
+      && get_frame_type (next_frame) != SIGTRAMP_FRAME)
+    return NULL;
 
   /* Get a libunwind cursor to the previous frame.  We do this by initializing
      a cursor.  Libunwind treats a new cursor as the top of stack and will get
@@ -156,7 +163,8 @@ libunwind_frame_cache (struct frame_info *next_frame, void **this_cache)
 				 : __LITTLE_ENDIAN);
 
   unw_init_remote_p (&cache->cursor, as, next_frame);
-  unw_step_p (&cache->cursor);
+  if (unw_step_p (&cache->cursor) < 0)
+    return NULL;
 
   /* To get base address, get sp from previous frame.  */
   uw_sp_regnum = descr->gdb2uw (SP_REGNUM);
@@ -208,8 +216,14 @@ libunwind_frame_sniffer (struct frame_info *next_frame)
 
   ret = unw_init_remote_p (&cursor, as, next_frame);
 
-  if (ret >= 0)
-    ret = unw_step_p (&cursor);
+  if (ret < 0)
+    return NULL;
+
+ 
+  /* Check to see if we have libunwind info by checking if we are in a 
+     signal frame.  If it doesn't return an error, we have libunwind info
+     and can use libunwind.  */
+  ret = unw_is_signal_frame_p (&cursor);
 
   if (ret < 0)
     return NULL;
@@ -224,7 +238,10 @@ libunwind_frame_this_id (struct frame_info *next_frame, void **this_cache,
   struct libunwind_frame_cache *cache =
     libunwind_frame_cache (next_frame, this_cache);
 
-  (*this_id) = frame_id_build (cache->base, cache->func_addr);
+  if (cache != NULL)
+    (*this_id) = frame_id_build (cache->base, cache->func_addr);
+  else
+    (*this_id) = null_frame_id;
 }
 
 void
@@ -245,6 +262,9 @@ libunwind_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   unw_regnum_t uw_regnum;
   struct libunwind_descr *descr;
 
+  if (cache == NULL)
+    return;
+  
   /* Convert from gdb register number to libunwind register number.  */
   descr = libunwind_descr (get_frame_arch (next_frame));
   uw_regnum = descr->gdb2uw (regnum);
@@ -312,6 +332,8 @@ libunwind_frame_base_address (struct frame_info *next_frame, void **this_cache)
   struct libunwind_frame_cache *cache =
     libunwind_frame_cache (next_frame, this_cache);
 
+  if (cache == NULL)
+    return (CORE_ADDR)NULL;
   return cache->base;
 }
 
@@ -325,6 +347,95 @@ libunwind_search_unwind_table (void *as, long ip, void *di,
 				    di, pi, need_unwind_info, args);
 }
 
+/* Verify if we are in a sigtramp frame and we can use libunwind to unwind.  */
+const struct frame_unwind *
+libunwind_sigtramp_frame_sniffer (struct frame_info *next_frame)
+{
+  unw_cursor_t cursor;
+  unw_accessors_t *acc;
+  unw_addr_space_t as;
+  struct libunwind_descr *descr;
+  int i, ret;
+
+  /* To test for libunwind unwind support, initialize a cursor to the
+     current frame and try to back up.  We use this same method when
+     setting up the frame cache (see libunwind_frame_cache()).  If
+     libunwind returns success for this operation, it means that it
+     has found sufficient libunwind unwinding information to do
+     so.  */
+
+  descr = libunwind_descr (get_frame_arch (next_frame));
+  acc = descr->accessors;
+  as =  unw_create_addr_space_p (acc,
+				 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+				 ? __BIG_ENDIAN
+				 : __LITTLE_ENDIAN);
+
+  ret = unw_init_remote_p (&cursor, as, next_frame);
+
+  if (ret < 0)
+    return NULL;
+
+  /* Check to see if we are in a signal frame.  */
+  ret = unw_is_signal_frame_p (&cursor);
+  if (ret > 0)
+    return &libunwind_frame_unwind;
+
+  return NULL;
+}
+
+/* The following routine is for accessing special registers of the top frame.
+   A special set of accessors must be given that work without frame info.
+   This is used by ia64 to access the rse registers r32-r127.  While they
+   are usually located at BOF, this is not always true and only the libunwind
+   info can decipher where they actually are.  */
+int
+libunwind_get_reg_special (struct gdbarch *gdbarch, int regnum, void *buf)
+{
+  unw_cursor_t cursor;
+  unw_accessors_t *acc;
+  unw_addr_space_t as;
+  struct libunwind_descr *descr;
+  int ret;
+  unw_regnum_t uw_regnum;
+  unw_word_t intval;
+  unw_fpreg_t fpval;
+  void *ptr;
+
+
+  descr = libunwind_descr (gdbarch);
+  acc = descr->special_accessors;
+  as =  unw_create_addr_space_p (acc,
+				 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
+				 ? __BIG_ENDIAN
+				 : __LITTLE_ENDIAN);
+
+  ret = unw_init_remote_p (&cursor, as, NULL);
+  if (ret < 0)
+    return -1;
+
+  uw_regnum = descr->gdb2uw (regnum);
+
+  if (descr->is_fpreg (uw_regnum))
+    {
+      ret = unw_get_fpreg_p (&cursor, uw_regnum, &fpval);
+      ptr = &fpval;
+    }
+  else
+    {
+      ret = unw_get_reg_p (&cursor, uw_regnum, &intval);
+      ptr = &intval;
+    }
+
+  if (ret < 0)
+    return -1;
+
+  if (buf)
+    memcpy (buf, ptr, register_size (current_gdbarch, regnum));
+
+  return 0;
+}
+  
 static int
 libunwind_load (void)
 {
@@ -346,6 +457,10 @@ libunwind_load (void)
 
   unw_get_saveloc_p = dlsym (handle, get_saveloc_name);
   if (unw_get_saveloc_p == NULL)
+    return 0;
+
+  unw_is_signal_frame_p = dlsym (handle, is_signal_frame_name);
+  if (unw_is_signal_frame_p == NULL)
     return 0;
 
   unw_step_p = dlsym (handle, step_name);
