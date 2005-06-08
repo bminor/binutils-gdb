@@ -2655,7 +2655,7 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
   /* If the two addresses are in different frags, then we need to add in
      the remaining size of this frag, and then the entire size of intermediate
      frags.  */
-  while (first_frag != NULL && slot_frag != first_frag)
+  while (slot_frag != first_frag)
     {
       unsigned long start_addr = (unsigned long) &first_frag->fr_literal;
 
@@ -2708,6 +2708,26 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
       /* Move to the beginning of the next frag.  */
       first_frag = first_frag->fr_next;
       first_addr = (unsigned long) &first_frag->fr_literal;
+
+      /* This can happen if there is section switching in the middle of a
+	 function, causing the frag chain for the function to be broken.  */
+      if (first_frag == NULL)
+	{
+	  /* We get six warnings for one problem, because of the loop in
+	     fixup_unw_records, and because fixup_unw_records is called 3
+	     times: once before creating the variant frag, once to estimate
+	     its size, and once to relax it.  This is unreasonable, so we use
+	     a static var to make sure we only emit the warning once.  */
+	  static int warned = 0;
+
+	  if (!warned)
+	    {
+	      as_warn ("Corrupted unwind info due to unsupported section switching");
+	      warned = 1;
+	    }
+
+	  return index;
+	}
     }
 
   /* Add in the used part of the last frag.  */

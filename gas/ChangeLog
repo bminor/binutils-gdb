@@ -1,3 +1,9 @@
+2005-06-08  James E Wilson  <wilson@specifixinc.com>
+
+	PR 994
+	* config/tc-ia64.c (slot_index): Revert last change.  If first_frag
+	is NULL, then emit a warning, and return the current index.
+
 2005-06-08  Tomas Hurka  <tom@hukatronic.cz>
 
 	PR991
