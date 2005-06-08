@@ -1,3 +1,7 @@
+2005-06-08  Aldy Hernandez  <aldyh@redhat.com>
+
+	* emulparams/elf32ms1.sh: New.
+
 2005-06-07  Eric Christopher  <echristo@redhat.com>
 
 	* Makefile.am (eelf32ms1.c): Use tab.
