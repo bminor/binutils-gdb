@@ -1,3 +1,9 @@
+2005-06-09  Jakub Jelinek  <jakub@redhat.com>
+
+	* objdump.c (disassemble_bytes): Don't crash if q->howto == NULL.
+	If q->howto->name == NULL, print q->howto->type as number instead.
+	(dump_reloc_set): Likewise.
+
 2005-06-07  Eric Christopher  <echristo@redhat.com>
 
 	* readelf.c (guess_is_rela): Support ms1.

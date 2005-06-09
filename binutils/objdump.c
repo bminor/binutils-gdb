@@ -1570,7 +1570,12 @@ disassemble_bytes (struct disassemble_info * info,
 	      objdump_print_value (section->vma - rel_offset + q->address,
 				   info, TRUE);
 
-	      printf (": %s\t", q->howto->name);
+	      if (q->howto == NULL)
+		printf (": *unknown*\t");
+	      else if (q->howto->name)
+		printf (": %s\t", q->howto->name);
+	      else
+		printf (": %d\t", q->howto->type);
 
 	      if (q->sym_ptr_ptr == NULL || *q->sym_ptr_ptr == NULL)
 		printf ("*unknown*");
@@ -2465,23 +2470,20 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 	  section_name = NULL;
 	}
 
+      bfd_printf_vma (abfd, q->address);
+      if (q->howto == NULL)
+	printf (" *unknown*         ");
+      else if (q->howto->name)
+	printf (" %-16s  ", q->howto->name);
+      else
+	printf (" %-16d  ", q->howto->type);
       if (sym_name)
-	{
-	  bfd_printf_vma (abfd, q->address);
-	  if (q->howto->name)
-	    printf (" %-16s  ", q->howto->name);
-	  else
-	    printf (" %-16d  ", q->howto->type);
-	  objdump_print_symname (abfd, NULL, *q->sym_ptr_ptr);
-	}
+	objdump_print_symname (abfd, NULL, *q->sym_ptr_ptr);
       else
 	{
 	  if (section_name == NULL)
 	    section_name = "*unknown*";
-	  bfd_printf_vma (abfd, q->address);
-	  printf (" %-16s  [%s]",
-		  q->howto->name,
-		  section_name);
+	  printf ("[%s]", section_name);
 	}
 
       if (q->addend)
