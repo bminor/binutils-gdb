@@ -9067,27 +9067,6 @@ elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h,
   return TRUE;
 }
 
-/* Mark sections containing global symbols.  This is called through
-   elf_link_hash_traverse.  */
-
-static bfd_boolean
-elf_mark_used_section (struct elf_link_hash_entry *h,
-		       void *data ATTRIBUTE_UNUSED)
-{
-  if (h->root.type == bfd_link_hash_warning)
-    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-  if (h->root.type == bfd_link_hash_defined
-      || h->root.type == bfd_link_hash_defweak)
-    {
-      asection *s = h->root.u.def.section;
-      if (s != NULL && s->output_section != NULL)
-	s->output_section->flags |= SEC_KEEP;
-    }
-
-  return TRUE;
-}
-
 /* Do mark and sweep of unused sections.  */
 
 bfd_boolean
@@ -9100,15 +9079,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
      struct elf_link_hash_entry *h, Elf_Internal_Sym *);
 
   if (!info->gc_sections)
-    {
-      /* If we are called when info->gc_sections is 0, we will mark
-	 all sections containing global symbols for non-relocatable
-	 link.  */
-      if (!info->relocatable)
-	elf_link_hash_traverse (elf_hash_table (info),
-				elf_mark_used_section, NULL);
-      return TRUE;
-    }
+    return bfd_generic_gc_sections (abfd, info);
 
   if (!get_elf_backend_data (abfd)->can_gc_sections
       || info->relocatable

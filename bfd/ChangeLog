@@ -1,3 +1,10 @@
+2005-06-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_mark_used_section): Delete.
+	(bfd_elf_gc_sections): Call bfd_generic_gc_sections.
+	* reloc.c (bfd_mark_used_section): New function.
+	(bfd_generic_gc_sections): Call bfd_mark_used_section.
+
 2005-06-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* opncls.c (bfd_fopen): Don't set bfd_error unconditionally.
