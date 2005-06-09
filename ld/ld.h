@@ -238,12 +238,6 @@ typedef struct {
 
 extern ld_config_type config;
 
-typedef enum {
-  lang_first_phase_enum,
-  lang_allocating_phase_enum,
-  lang_final_phase_enum
-} lang_phase_type;
-
 extern FILE * saved_script_handle;
 extern bfd_boolean force_make_executable;
 

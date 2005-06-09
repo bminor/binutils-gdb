@@ -1497,15 +1497,13 @@ gld${EMULATION_NAME}_layout_sections_again (void)
   lang_reset_memory_regions ();
 
   /* Resize the sections.  */
-  lang_size_sections (stat_ptr->head, abs_output_section,
-		      &stat_ptr->head, 0, (bfd_vma) 0, NULL, TRUE);
+  lang_size_sections (NULL, TRUE);
 
   /* Redo special stuff.  */
   ldemul_after_allocation ();
 
   /* Do the assignments again.  */
-  lang_do_assignments (stat_ptr->head, abs_output_section,
-		       (fill_type *) 0, (bfd_vma) 0);
+  lang_do_assignments ();
 }
 
 static void

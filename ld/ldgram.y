@@ -600,10 +600,7 @@ length:
 fill_exp:
 	mustbe_exp
 		{
-		  $$ = exp_get_fill ($1,
-				     0,
-				     "fill value",
-				     lang_first_phase_enum);
+		  $$ = exp_get_fill ($1, 0, "fill value");
 		}
 	;
 
@@ -681,18 +678,16 @@ memory_spec: 	NAME
 
 origin_spec:
 	ORIGIN '=' mustbe_exp
-		{ region->current =
-		 region->origin =
-		 exp_get_vma($3, 0L,"origin", lang_first_phase_enum);
-}
+		{
+		  region->origin = exp_get_vma ($3, 0, "origin");
+		  region->current = region->origin;
+		}
 	;
 
 length_spec:
              LENGTH '=' mustbe_exp
-               { region->length = exp_get_vma($3,
-					       ~((bfd_vma)0),
-					       "length",
-					       lang_first_phase_enum);
+		{
+		  region->length = exp_get_vma ($3, -1, "length");
 		}
 	;
 

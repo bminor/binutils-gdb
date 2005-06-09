@@ -110,14 +110,14 @@ ppc_before_allocation (void)
 	{
 	  /* Size the sections.  This is premature, but we want to know the
 	     TLS segment layout so that certain optimizations can be done.  */
-	  lang_size_sections (stat_ptr->head, abs_output_section,
-			      &stat_ptr->head, 0, 0, NULL, TRUE);
+	  expld.phase = lang_mark_phase_enum;
+	  expld.dataseg.phase = exp_dataseg_none;
+	  one_lang_size_sections_pass (NULL, TRUE);
 
 	  if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
 	    einfo ("%X%P: TLS problem %E\n");
 
 	  /* We must not cache anything from the preliminary sizing.  */
-	  elf_tdata (output_bfd)->program_header_size = 0;
 	  lang_reset_memory_regions ();
 	}
 

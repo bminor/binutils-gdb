@@ -1,3 +1,90 @@
+2005-06-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.h (lang_phase_type): Move to..
+	* ldexp.h: ..here.  Add lang_mark_phase_enum.
+	(node_type): Remove etree_undef and etree_unspec.
+	(exp_data_seg): Delete.
+	(struct ldexp_control, expld): New.
+	(invalid, exp_mark_used_section): Delete.
+	(exp_fold_tree, exp_get_vma, exp_get_value_int, exp_get_fill,
+	exp_get_abs_int): Update prototypes.
+	* ldexp.c (assigning_to_dot): Delete.
+	(expld): Define.
+	(make_abs): Operate directly on expld.result.  Update all callers.
+	(new_abs): Likewise.  Return void.
+	(new_rel_from_abs): Rename from new_rel_from_section.
+	(new_rel, new_rel_from_abs): Operate on expld.result and return void.
+	Update all callers.
+	(fold_unary): Operate on expld.result and return void.  Remove
+	"current_section", "allocation_done", "dot", "dotp" and "mark_used"
+	params.  Update all callers.
+	(fold_binary, fold_trinary, fold_name, exp_fold_tree_1): Likewise.
+	(fold_unary <ALIGN_K>): Ensure alignment is absolute.
+	(fold_unary <ABSOLUTE>): Use make_abs.
+	(fold_unary <DATA_SEGMENT_END>): Evaluate mark_phase as for
+	allocating_phase.
+	(fold_binary <DATA_SEGMENT_ALIGN, DATA_SEGMENT_RELRO_END, >): Ditto.
+	(fold_binary <'%','/'>): Don't error if marking.
+	(fold_name <SIZEOF_HEADERS>): Don't call bfd_sizeof_headers when
+	marking.
+	(fold_name <NAME>): Remove FIXME; -R is handled correctly.  Don't
+	error when marking.
+	(fold_name <ADDR, LOADADDR, SIZEOF>): Don't set SEC_KEEP.
+	(exp_fold_tree_1): Don't error when marking.
+	(exp_fold_tree_1 <etree_rel>): Evaluate in all phases except first.
+	(exp_fold_tree_1 <etree_assign to dot>): Don't check for NULL
+	current section, instead check for NULL dotp.
+	(exp_fold_tree_1 <etree_provide>): Don't evaluate the assignment
+	source unless the symbol is referenced and undefined.
+	(exp_fold_tree): Remove "allocation_done" and "dot" params.  Save
+	params to expld.
+	(exp_fold_tree_no_dot): Remove "current_section", "allocation_done
+	and "mark_used" params.  Save params to expld.  Update all callers.
+	(exp_assop): Do without temp var.
+	(exp_print_tree <etree_undef>): Delete code.
+	(exp_get_vma): Remove "allocation_done" param.  Correct error return.
+	(exp_get_fill, exp_get_abs_int): Likewise.
+	(exp_get_value_int): Remove "allocation_done" param.
+	(exp_mark_used_section): Delete.
+	* ldgram.y (fill_exp): Update exp_get_fill call.
+	(origin_spec, length_spec): Update exp_get_vma call.
+	* ldlang.c (lang_init): Don't bother clearing lang_statement_iteration.
+	(lang_mark_used_section_1, lang_mark_used_section): Delete.
+	(strip_excluded_output_sections): Call one_lang_size_sections_pass in
+	marking mode.  Merge old lang_mark_used_section code.  Correct handling
+	of output sections with excluded input sections and data statements.
+	Don't drop non-zero sized sections.  Don't zap os->bfd_section.
+	Do set SEC_EXCLUDE when appropriate.
+	(print_output_section_statement): Update for changed ldexp.c
+	interface.
+	(print_assignment, lang_size_sections_1): Likewise.
+	(lang_do_assignments_1, lang_enter_output_section_statement): Likewise.
+	(lang_new_phdr, lang_record_phdrs): Likewise.
+	(lang_size_sections): Likewise.
+	(insert_pad): Use following statement if it is a pad, rather than
+	creating a new one.
+	(lang_size_sections_1 <lang_output_section_statement_enum>): Do
+	process ignored output section to set vma and lma, but don't
+	update dot for these sections.  Don't error if marking.
+	(lang_size_sections_1 <lang_assignment_statement_enum>): Don't
+	update dot for ignored sections.
+	(lang_size_sections_1 <lang_data_statement_enum>): Don't mark absolute
+	section with SEC_ALLOC.
+	(one_lang_size_sections_pass): New function.
+	(lang_size_sections): Remove first five params.  Set expld.phase on
+	entry and exit.   Use one_lang_size_sections_pass.
+	(lang_do_assignments): Remove all params.  Update all callers.
+	(lang_reset_memory_regions): Clear os->processed for all output
+	section statements.
+	* ldlang.h (lang_do_assignments): Update prototype.
+	(lang_size_sections): Likewise.
+	(one_lang_size_sections_pass): Declare.
+	* pe-dll.c (pe_dll_fill_sections, pe_exe_fill_sections): Update
+	lang_size_sections and lang_do_assignments calls.
+	* emultempl/elf32.em (layout_sections_again): Likewise.
+	* emultempl/ppc64elf.em (ppc_before_allocation): Use
+	one_lang_size_sections_pass.
+
 2005-06-08  Aldy Hernandez  <aldyh@redhat.com>
 
 	* emulparams/elf32ms1.sh: New.

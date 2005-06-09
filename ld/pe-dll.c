@@ -2636,14 +2636,13 @@ pe_dll_fill_sections (bfd *abfd, struct bfd_link_info *info)
       bfd_set_section_size (filler_bfd, reloc_s, reloc_sz);
 
       /* Resize the sections.  */
-      lang_size_sections (stat_ptr->head, abs_output_section,
-			  &stat_ptr->head, 0, 0, NULL, TRUE);
+      lang_size_sections (NULL, TRUE);
 
       /* Redo special stuff.  */
       ldemul_after_allocation ();
 
       /* Do the assignments again.  */
-      lang_do_assignments (stat_ptr->head, abs_output_section, NULL, 0);
+      lang_do_assignments ();
     }
 
   fill_edata (abfd, info);
@@ -2667,14 +2666,13 @@ pe_exe_fill_sections (bfd *abfd, struct bfd_link_info *info)
       bfd_set_section_size (filler_bfd, reloc_s, reloc_sz);
 
       /* Resize the sections.  */
-      lang_size_sections (stat_ptr->head, abs_output_section,
-			  &stat_ptr->head, 0, 0, NULL, TRUE);
+      lang_size_sections (NULL, TRUE);
 
       /* Redo special stuff.  */
       ldemul_after_allocation ();
 
       /* Do the assignments again.  */
-      lang_do_assignments (stat_ptr->head, abs_output_section, NULL, 0);
+      lang_do_assignments ();
     }
   reloc_s->contents = reloc_d;
 }

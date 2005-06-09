@@ -509,8 +509,7 @@ extern void lang_for_each_file
 extern void lang_reset_memory_regions
   (void);
 extern void lang_do_assignments
-  (lang_statement_union_type *, lang_output_section_statement_type *,
-   fill_type *, bfd_vma);
+  (void);
 
 #define LANG_FOR_EACH_INPUT_STATEMENT(statement)			\
   lang_input_statement_type *statement;					\
@@ -556,10 +555,10 @@ extern void strip_excluded_output_sections
   (void);
 extern void dprint_statement
   (lang_statement_union_type *, int);
-extern bfd_vma lang_size_sections
-  (lang_statement_union_type *, lang_output_section_statement_type *,
-   lang_statement_union_type **, fill_type *, bfd_vma, bfd_boolean *,
-   bfd_boolean);
+extern void lang_size_sections
+  (bfd_boolean *, bfd_boolean);
+extern void one_lang_size_sections_pass
+  (bfd_boolean *, bfd_boolean);
 extern void lang_enter_group
   (void);
 extern void lang_leave_group

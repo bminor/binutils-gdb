@@ -40,8 +40,6 @@ typedef struct {
     etree_assign,
     etree_provide,
     etree_provided,
-    etree_undef,
-    etree_unspec,
     etree_value,
     etree_assert,
     etree_rel
@@ -91,17 +89,44 @@ typedef union etree_union {
   } assert_s;
 } etree_type;
 
-extern struct exp_data_seg {
-  enum {
-    exp_dataseg_none,
-    exp_dataseg_align_seen,
-    exp_dataseg_relro_seen,
-    exp_dataseg_end_seen,
-    exp_dataseg_relro_adjust,
-    exp_dataseg_adjust
-  } phase;
-  bfd_vma base, min_base, relro_end, end, pagesize, maxpagesize;
-} exp_data_seg;
+typedef enum {
+  lang_first_phase_enum,
+  lang_mark_phase_enum,
+  lang_allocating_phase_enum,
+  lang_final_phase_enum
+} lang_phase_type;
+
+struct ldexp_control {
+  /* Modify expression evaluation depending on this.  */
+  lang_phase_type phase;
+
+  /* Principally used for diagnostics.  */
+  bfd_boolean assigning_to_dot;
+
+  /* Working results.  */
+  etree_value_type result;
+  bfd_vma dot;
+
+  /* Current dot and section passed to ldexp folder.  */
+  bfd_vma *dotp;
+  asection *section;
+
+  /* State machine and results for DATASEG.  */
+  struct {
+    enum {
+      exp_dataseg_none,
+      exp_dataseg_align_seen,
+      exp_dataseg_relro_seen,
+      exp_dataseg_end_seen,
+      exp_dataseg_relro_adjust,
+      exp_dataseg_adjust
+    } phase;
+
+    bfd_vma base, min_base, relro_end, end, pagesize, maxpagesize;
+  } dataseg;
+};
+
+extern struct ldexp_control expld;
 
 /* A maps from a segment name to a base address.  */
 typedef struct segment_struct {
@@ -127,10 +152,8 @@ etree_type *exp_bigintop
   (bfd_vma, char *);
 etree_type *exp_relop
   (asection *, bfd_vma);
-etree_value_type invalid
-  (void);
-etree_value_type exp_fold_tree
-  (etree_type *, asection *, lang_phase_type, bfd_vma, bfd_vma *);
+void exp_fold_tree
+  (etree_type *, asection *, bfd_vma *);
 etree_type *exp_binop
   (int, etree_type *, etree_type *);
 etree_type *exp_trinop
@@ -148,14 +171,12 @@ etree_type *exp_assert
 void exp_print_tree
   (etree_type *);
 bfd_vma exp_get_vma
-  (etree_type *, bfd_vma, char *, lang_phase_type);
+  (etree_type *, bfd_vma, char *);
 int exp_get_value_int
-  (etree_type *, int, char *, lang_phase_type);
+  (etree_type *, int, char *);
 fill_type *exp_get_fill
-  (etree_type *, fill_type *, char *, lang_phase_type);
+  (etree_type *, fill_type *, char *);
 bfd_vma exp_get_abs_int
-  (etree_type *, int, char *, lang_phase_type);
-void exp_mark_used_section
-  (etree_type *, asection *);
+  (etree_type *, int, char *);
 
 #endif
