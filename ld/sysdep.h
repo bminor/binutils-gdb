@@ -77,19 +77,19 @@ extern char *strrchr ();
 #include "fopen-same.h"
 #endif
 
-#ifdef NEED_DECLARATION_STRSTR
+#if !HAVE_DECL_STRSTR
 extern char *strstr ();
 #endif
 
-#ifdef NEED_DECLARATION_FREE
+#if !HAVE_DECL_FREE
 extern void free ();
 #endif
 
-#ifdef NEED_DECLARATION_GETENV
+#if !HAVE_DECL_GETENV
 extern char *getenv ();
 #endif
 
-#ifdef NEED_DECLARATION_ENVIRON
+#if !HAVE_DECL_ENVIRON
 extern char **environ;
 #endif
 

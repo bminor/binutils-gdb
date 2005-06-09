@@ -1,3 +1,12 @@
+2005-06-09  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure.in (AM_BINUTILS_WARNINGS): Add.
+	(BFD_NEED_DECLARATION) Replace with AC_CHECK_DECLS.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* sysdep.h (NEED_DECLARATION_*): Replace with HAVE_DECL_*
+	* ldmain.c: Ditto.
+
 2005-06-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_unary <ALIGN_K>): Revert last change.
@@ -89,6 +98,7 @@
 	* emultempl/ppc64elf.em (ppc_before_allocation): Use
 	one_lang_size_sections_pass.
 
+>>>>>>> 1.1366
 2005-06-08  Aldy Hernandez  <aldyh@redhat.com>
 
 	* emulparams/elf32ms1.sh: New.

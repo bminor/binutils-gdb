@@ -50,7 +50,7 @@
 #include <string.h>
 
 #ifdef HAVE_SBRK
-#ifdef NEED_DECLARATION_SBRK
+#if !HAVE_DECL_SBRK
 extern void *sbrk ();
 #endif
 #endif
