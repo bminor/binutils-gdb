@@ -531,7 +531,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   /* FIXME: There is no gas syntax to specify the debug section flag.  */
   if (strncmp (sec_name, DOT_DEBUG, sizeof (DOT_DEBUG) - 1) == 0
       || strncmp (sec_name, GNU_LINKONCE_WI, sizeof (GNU_LINKONCE_WI) - 1) == 0)
-    sec_flags = SEC_READONLY | SEC_DEBUGGING;
+    sec_flags = SEC_DEBUGGING;
 
   /* skip LOAD */
   /* READONLY later */
@@ -545,10 +545,6 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   /* skip ROM */
   /* skip constRUCTOR */
   /* skip CONTENTS */
-#ifdef STYP_NOLOAD
-  if ((sec_flags & (SEC_NEVER_LOAD | SEC_COFF_SHARED_LIBRARY)) != 0)
-    styp_flags |= STYP_NOLOAD;
-#endif
   if ((sec_flags & SEC_IS_COMMON) != 0)
     styp_flags |= IMAGE_SCN_LNK_COMDAT;
   if ((sec_flags & SEC_DEBUGGING) != 0)
@@ -564,17 +560,19 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   /* skip LINK_DUPLICATES */
   /* skip LINKER_CREATED */
 
-  /* For now, the read/write bits are mapped onto SEC_READONLY, even
-     though the semantics don't quite match.  The bits from the input
-     are retained in pei_section_data(abfd, section)->pe_flags.  */
-
-  styp_flags |= IMAGE_SCN_MEM_READ;       /* Always readable.  */
-  if ((sec_flags & SEC_READONLY) == 0)
-    styp_flags |= IMAGE_SCN_MEM_WRITE;    /* Invert READONLY for write.  */
-  if (sec_flags & SEC_CODE)
-    styp_flags |= IMAGE_SCN_MEM_EXECUTE;  /* CODE->EXECUTE.  */
-  if (sec_flags & SEC_COFF_SHARED)
-    styp_flags |= IMAGE_SCN_MEM_SHARED;   /* Shared remains meaningful.  */
+  if (sec_flags & SEC_ALLOC)
+    {
+      /* For now, the read/write bits are mapped onto SEC_READONLY, even
+	 though the semantics don't quite match.  The bits from the input
+	 are retained in pei_section_data(abfd, section)->pe_flags.  */
+      styp_flags |= IMAGE_SCN_MEM_READ;       /* Always readable.  */
+      if ((sec_flags & SEC_READONLY) == 0)
+	styp_flags |= IMAGE_SCN_MEM_WRITE;    /* Invert READONLY for write.  */
+      if (sec_flags & SEC_CODE)
+	styp_flags |= IMAGE_SCN_MEM_EXECUTE;  /* CODE->EXECUTE.  */
+      if (sec_flags & SEC_COFF_SHARED)
+	styp_flags |= IMAGE_SCN_MEM_SHARED;   /* Shared remains meaningful.  */
+    }
 
   return styp_flags;
 }
