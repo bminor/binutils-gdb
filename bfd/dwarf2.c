@@ -1326,6 +1326,11 @@ lookup_address_in_line_info_table (struct line_info_table *table,
 		  *linenumber_ptr = each_line->line;
 		}
 	    }
+	  else
+	    {
+	      *filename_ptr = each_line->filename;
+	      *linenumber_ptr = each_line->line;
+	    }
 	}
 
       if (addr_match && !each_line->end_sequence)

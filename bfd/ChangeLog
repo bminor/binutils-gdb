@@ -1,3 +1,9 @@
+2005-06-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 1000
+	* dwarf2.c (lookup_address_in_line_info_table): Restore code
+	handling NULL function info, removed with 2005-04-03 change.
+
 2005-06-08  Mark Mitchell  <mark@codesourcery.com>
 
 	* opncls.c (bfd_fopen): Mark returned BFD as cacheable if FD == -1.
