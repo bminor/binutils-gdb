@@ -1,5 +1,9 @@
 2005-06-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldexp.c (fold_unary <ALIGN_K>): Revert last change.
+
+2005-06-09  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld.h (lang_phase_type): Move to..
 	* ldexp.h: ..here.  Add lang_mark_phase_enum.
 	(node_type): Remove etree_undef and etree_unspec.

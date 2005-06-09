@@ -207,10 +207,7 @@ fold_unary (etree_type *tree)
 	{
 	case ALIGN_K:
 	  if (expld.phase != lang_first_phase_enum)
-	    {
-	      make_abs ();
-	      new_rel_from_abs (align_n (expld.dot, expld.result.value));
-	    }
+	    new_rel_from_abs (align_n (expld.dot, expld.result.value));
 	  else
 	    expld.result.valid_p = FALSE;
 	  break;
