@@ -560,7 +560,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   /* skip LINK_DUPLICATES */
   /* skip LINKER_CREATED */
 
-  if (sec_flags & SEC_ALLOC)
+  if (sec_flags & (SEC_ALLOC | SEC_LOAD))
     {
       /* For now, the read/write bits are mapped onto SEC_READONLY, even
 	 though the semantics don't quite match.  The bits from the input

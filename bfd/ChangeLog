@@ -1,5 +1,10 @@
 2005-06-09  Christopher Faylor  <cgf@timesys.com>
 
+	* coffcode.h (sec_to_styp_flags): Set appropriate section flags when
+	either SEC_ALLOC OR SEC_LOAD.
+
+2005-06-09  Christopher Faylor  <cgf@timesys.com>
+
 	* coffcode.h (sec_to_styp_flags): Remove read/write flags from noload
 	section header.  Do not add STYP_NOLOAD since it does not appear to be
 	a valid PE flag.
