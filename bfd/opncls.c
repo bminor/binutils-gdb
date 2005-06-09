@@ -144,6 +144,8 @@ DESCRIPTION
 	Calls <<bfd_find_target>>, so @var{target} is interpreted as by
 	that function.
 
+	The new BFD is marked as cacheable iff @var{fd} is -1.
+
 	If <<NULL>> is returned then an error has occured.   Possible errors
 	are <<bfd_error_no_memory>>, <<bfd_error_invalid_target>> or
 	<<system_call>> error.
@@ -198,6 +200,12 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
       return NULL;
     }
   nbfd->opened_once = TRUE;
+  /* If we opened the file by name, mark it cacheable; we can close it
+     and reopen it later.  However, if a file descriptor was provided,
+     then it may have been opened with special flags that make it
+     unsafe to close and reopen the file.  */
+  if (fd == -1)
+    bfd_set_cacheable (nbfd, TRUE);
 
   return nbfd;
 }

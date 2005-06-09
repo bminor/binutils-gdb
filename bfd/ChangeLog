@@ -1,3 +1,7 @@
+2005-06-08  Mark Mitchell  <mark@codesourcery.com>
+
+	* opncls.c (bfd_fopen): Mark returned BFD as cacheable if FD == -1.
+
 2005-06-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_mark_used_section): Delete.
