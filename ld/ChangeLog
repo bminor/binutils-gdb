@@ -103,7 +103,6 @@
 	* emultempl/ppc64elf.em (ppc_before_allocation): Use
 	one_lang_size_sections_pass.
 
->>>>>>> 1.1366
 2005-06-08  Aldy Hernandez  <aldyh@redhat.com>
 
 	* emulparams/elf32ms1.sh: New.
