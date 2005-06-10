@@ -1,3 +1,9 @@
+2005-06-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2.c (decode_line_info): Revert last change.  Instead set
+	initial low_pc to -1 to avoid need to test whether loc_pc has
+	been set.
+
 2005-06-09  Christopher Faylor  <cgf@timesys.com>
 
 	* coffcode.h (sec_to_styp_flags): Set appropriate section flags when
