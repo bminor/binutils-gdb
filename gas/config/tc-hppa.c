@@ -1,6 +1,6 @@
 /* tc-hppa.c -- Assemble for the PA
    Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -5937,10 +5937,7 @@ static void
 pa_block (z)
      int z ATTRIBUTE_UNUSED;
 {
-  char *p;
-  long int temp_fill;
   unsigned int temp_size;
-  unsigned int i;
 
 #ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
@@ -5954,21 +5951,11 @@ pa_block (z)
       as_bad (_("Argument to .BLOCK/.BLOCKZ must be between 0 and 0x3fffffff"));
       temp_size = 0;
     }
-
-  /* Always fill with zeros, that's what the HP assembler does.  */
-  temp_fill = 0;
-
-  p = frag_var (rs_fill, (int) temp_size, (int) temp_size,
-		(relax_substateT) 0, (symbolS *) 0, (offsetT) 1, NULL);
-  memset (p, 0, temp_size);
-
-  /* Convert 2 bytes at a time.  */
-
-  for (i = 0; i < temp_size; i += 2)
+  else
     {
-      md_number_to_chars (p + i,
-			  (valueT) temp_fill,
-			  (int) ((temp_size - i) > 2 ? 2 : (temp_size - i)));
+      /* Always fill with zeros, that's what the HP assembler does.  */
+      char *p = frag_var (rs_fill, 1, 1, 0, NULL, temp_size, NULL);
+      *p = 0;
     }
 
   pa_undefine_label ();

@@ -1,3 +1,8 @@
+2005-06-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-hppa.c (pa_block): Allocate just one byte for the
+	fill pattern.
+
 2005-06-08  James E Wilson  <wilson@specifixinc.com>
 
 	PR 994
@@ -6,7 +11,7 @@
 
 2005-06-08  Tomas Hurka  <tom@hukatronic.cz>
 
-	PR991
+	PR 991
 	* config/tc-m68k.c (m68k_ip): Test for insn compatiblity using a
 	temporary copy of the operands array so that changes can be safely
 	backed out if the insn does not match.
