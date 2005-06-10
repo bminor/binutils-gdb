@@ -398,7 +398,7 @@ cat <<EOF
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
       .bss section disappears because there are no input sections.  */
-   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
+   ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }
   ${OTHER_BSS_SECTIONS}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}

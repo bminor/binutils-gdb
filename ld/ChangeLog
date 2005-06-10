@@ -1,3 +1,8 @@
+2005-06-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempt/elf.sc (.bss): Align tail in a way that allows
+	empty section pruning.
+
 2005-06-09  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure.in (AM_BINUTILS_WARNINGS): Add.
