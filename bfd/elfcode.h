@@ -875,6 +875,12 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
   if (sec->reloc_count == 0)
     return;
 
+  /* If we have opened an existing file for update, reloc_count may be
+     set even though we are not linking.  In that case we have nothing
+     to do.  */
+  if (sec->orelocation == NULL)
+    return;
+
   rela_hdr = &elf_section_data (sec)->rel_hdr;
 
   rela_hdr->sh_size = rela_hdr->sh_entsize * sec->reloc_count;
