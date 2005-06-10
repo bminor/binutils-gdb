@@ -11,7 +11,7 @@ Program Header:
     LOAD off    0x0+ vaddr 0x0+ paddr 0x0+ align 2\*\*13
          filesz 0x0+188 memsz 0x0+188 flags r-x
     LOAD off    0x0+188 vaddr 0x0+2188 paddr 0x0+2188 align 2\*\*13
-         filesz 0x0+64 memsz 0x0+78 flags rw-
+         filesz 0x0+64 memsz 0x0+64 flags rw-
  DYNAMIC off    0x0+188 vaddr 0x0+2188 paddr 0x0+2188 align 2\*\*2
          filesz 0x0+58 memsz 0x0+58 flags rw-
 Dynamic Section:
@@ -35,5 +35,3 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, DATA
   5 \.got          0+c  0+21e0  0+21e0  0+1e0  2\*\*2
                   CONTENTS, ALLOC, LOAD, DATA
-  6 \.bss          0+14  0+21ec  0+21ec  0+1ec  2\*\*0
-                  ALLOC

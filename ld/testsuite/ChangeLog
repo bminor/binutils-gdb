@@ -1,5 +1,11 @@
 2005-06-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-cris/libdso-10.d: Adjust for elf.sc .bss change.
+	* ld-cris/libdso-2.d: Likewise.
+	* ld-mmix/loc6.d: Likewise.
+
+2005-06-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-scripts/empty-aligned.t: Adjust alignment expressions so
 	that no .text? section is kept.  Also check setting vma and
 	lma.
