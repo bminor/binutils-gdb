@@ -1,3 +1,15 @@
+2005-06-09  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c (ia64_pseudo_register_read): Use gdb_byte and
+	protect libunwind references with HAVE_LIBUNWIND_IA64_H flag.
+	* (ia64_pseudo_register_write): Use gdb_byte to remove warning.
+	* (ia64_register_to_value, ia64_value_to_register): Ditto.
+	* (ia64_frame_prev_register): Ditto.
+	* (ia64_libunwind_frame_prev_register): Ditto.
+	* (ia64_sigtramp_frame_prev_register): Ditto.
+	* (ia64_libunwind_sigtramp_frame_prev_register): Ditto.
+	* (ia64_store_return_value): Ditto.
+ 
 2005-06-08  Jeff Johnston  <jjohnstn@redhat.com>
 	    David Mosberger <davidm@hpl.hp.com>
 

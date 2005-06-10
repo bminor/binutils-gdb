@@ -673,14 +673,16 @@ rse_address_add(CORE_ADDR addr, int nslots)
 
 static void
 ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-                           int regnum, void *buf)
+                           int regnum, gdb_byte *buf)
 {
   if (regnum >= V32_REGNUM && regnum <= V127_REGNUM)
     {
+#ifdef HAVE_LIBUNWIND_IA64_H
       /* First try and use the libunwind special reg accessor, otherwise fallback to
 	 standard logic.  */
       if (!libunwind_is_initialized ()
 	  || libunwind_get_reg_special (gdbarch, regnum, buf) != 0)
+#endif
 	{
 	  /* The fallback position is to assume that r32-r127 are found sequentially
 	     in memory starting at $bof.  This isn't always true, but without libunwind,
@@ -791,7 +793,7 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static void
 ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
-			    int regnum, const void *buf)
+			    int regnum, const gdb_byte *buf)
 {
   if (regnum >= V32_REGNUM && regnum <= V127_REGNUM)
     {
@@ -912,7 +914,7 @@ ia64_convert_register_p (int regno, struct type *type)
 
 static void
 ia64_register_to_value (struct frame_info *frame, int regnum,
-                         struct type *valtype, void *out)
+                         struct type *valtype, gdb_byte *out)
 {
   char in[MAX_REGISTER_SIZE];
   frame_register_read (frame, regnum, in);
@@ -921,7 +923,7 @@ ia64_register_to_value (struct frame_info *frame, int regnum,
 
 static void
 ia64_value_to_register (struct frame_info *frame, int regnum,
-                         struct type *valtype, const void *in)
+                         struct type *valtype, const gdb_byte *in)
 {
   char out[MAX_REGISTER_SIZE];
   convert_typed_floating (in, valtype, out, builtin_type_ia64_ext);
@@ -1576,7 +1578,7 @@ static void
 ia64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, void *valuep)
+			  int *realnump, gdb_byte *valuep)
 {
   struct ia64_frame_cache *cache =
     ia64_frame_cache (next_frame, this_cache);
@@ -1976,7 +1978,7 @@ ia64_sigtramp_frame_prev_register (struct frame_info *next_frame,
 				   void **this_cache,
 				   int regnum, int *optimizedp,
 				   enum lval_type *lvalp, CORE_ADDR *addrp,
-				   int *realnump, void *valuep)
+				   int *realnump, gdb_byte *valuep)
 {
   char dummy_valp[MAX_REGISTER_SIZE];
   char buf[MAX_REGISTER_SIZE];
@@ -2747,7 +2749,7 @@ ia64_libunwind_frame_prev_register (struct frame_info *next_frame,
 				    void **this_cache,
 				    int regnum, int *optimizedp,
 				    enum lval_type *lvalp, CORE_ADDR *addrp,
-				    int *realnump, void *valuep)
+				    int *realnump, gdb_byte *valuep)
 {
   int reg = regnum;
 
@@ -2885,7 +2887,7 @@ ia64_libunwind_sigtramp_frame_prev_register (struct frame_info *next_frame,
 					     void **this_cache,
 					     int regnum, int *optimizedp,
 					     enum lval_type *lvalp, CORE_ADDR *addrp,
-					     int *realnump, void *valuep)
+					     int *realnump, gdb_byte *valuep)
 
 {
   CORE_ADDR prev_ip, addr;
@@ -3497,7 +3499,8 @@ ia64_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static void
-ia64_store_return_value (struct type *type, struct regcache *regcache, const void *valbuf)
+ia64_store_return_value (struct type *type, struct regcache *regcache, 
+			const gdb_byte *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
