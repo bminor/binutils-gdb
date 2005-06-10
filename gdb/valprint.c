@@ -434,7 +434,7 @@ print_floating (const gdb_byte *valaddr, struct type *type,
      assumptions about the host and target floating point format.  */
 
   /* NOTE: cagney/2002-02-03: Since the TYPE of what was passed in may
-     not necessarially be a TYPE_CODE_FLT, the below ignores that and
+     not necessarily be a TYPE_CODE_FLT, the below ignores that and
      instead uses the type's length to determine the precision of the
      floating-point value being printed.  */
 

@@ -1,3 +1,7 @@
+2005-06-10  Ben Elliston  <bje@au.ibm.com>
+
+	* valprint.c (print_floating): Fix comment typo.
+
 2005-06-09  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* ia64-tdep.c (ia64_pseudo_register_read): Use gdb_byte and
