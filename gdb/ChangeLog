@@ -1,3 +1,9 @@
+2005-06-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_register_type): Return
+	builtin_type_void_func_ptr for %eip and builtin_type_void_data_ptr
+	for %ebp and %esp.
+
 2005-06-10  Ben Elliston  <bje@au.ibm.com>
 
 	* valprint.c (print_floating): Fix comment typo.

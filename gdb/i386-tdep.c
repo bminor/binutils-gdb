@@ -1560,9 +1560,11 @@ i386_build_sse_type (void)
 static struct type *
 i386_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum == I386_EIP_REGNUM
-      || regnum == I386_EBP_REGNUM || regnum == I386_ESP_REGNUM)
-    return lookup_pointer_type (builtin_type_void);
+  if (regnum == I386_EIP_REGNUM)
+    return builtin_type_void_func_ptr;
+
+  if (regnum == I386_EBP_REGNUM || regnum == I386_ESP_REGNUM)
+    return builtin_type_void_data_ptr;
 
   if (i386_fp_regnum_p (regnum))
     return builtin_type_i387_ext;
