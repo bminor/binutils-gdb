@@ -1795,6 +1795,7 @@ created. By default, the new dynamic tags are not created. Note that
 those options are only available for ELF systems.
 
 @kindex --hash-size=@var{number}
+@item --hash-size=@var{number}
 Set the default size of the linker's hash tables to a prime number
 close to @var{number}.  Increasing this value can reduce the length of
 time it takes the linker to perform its tasks, at the expense of
