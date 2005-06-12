@@ -205,7 +205,7 @@ sparc64nbsd_sigcontext_frame_prev_register (struct frame_info *next_frame,
 					    int regnum, int *optimizedp,
 					    enum lval_type *lvalp,
 					    CORE_ADDR *addrp,
-					    int *realnump, void *valuep)
+					    int *realnump, gdb_byte *valuep)
 {
   struct sparc_frame_cache *cache =
     sparc64nbsd_sigcontext_frame_cache (next_frame, this_cache);

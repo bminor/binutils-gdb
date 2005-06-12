@@ -1,5 +1,21 @@
 2005-06-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc32_frame_prev_register): Change type of last
+	argument to `gdb_byte *'.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_frame_prev_register):
+	Likewise.
+	* sparcobsd-tdep.c (sparc32obsd_frame_prev_register): Likewise.
+	* sparc-sol2-tdep.c (sparc32_sol2_sigtramp_frame_prev_register):
+	Likewise.
+	* sparc64-tdep.c (sparc64_frame_prev_register): Likewise.
+	* sparc64fbsd-tdep.c (sparc64fbsd_sigtramp_frame_prev_register):
+	Likewise.
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_frame_prev_register):
+	Likewise.
+	* sparc64obsd-tdep.c (sparc64obsd_frame_prev_register): Likewise.
+	* sparc64-sol2-tdep.c (sparc64_sol2_sigtramp_frame_unwind):
+	Likewise.
+
 	* amd64-tdep.c (amd64_frame_prev_register)
 	(amd64_sigtramp_frame_prev_register): Change type of last argument
 	to `gdb_byte *'.

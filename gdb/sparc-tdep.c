@@ -741,7 +741,7 @@ static void
 sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			     int regnum, int *optimizedp,
 			     enum lval_type *lvalp, CORE_ADDR *addrp,
-			     int *realnump, void *valuep)
+			     int *realnump, gdb_byte *valuep)
 {
   struct sparc_frame_cache *cache =
     sparc32_frame_cache (next_frame, this_cache);
