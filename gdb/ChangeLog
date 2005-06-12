@@ -1,5 +1,9 @@
 2005-06-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* arm-tdep.c (arm_prologue_prev_register)
+	(arm_sigtramp_prev_register): Change type of last argument to
+	`gdb_byte *'.
+
 	* m88k-tdep.c (m88k_frame_prev_register): Change type of last
 	argument to `gdb_byte *'.
 

@@ -953,7 +953,7 @@ arm_prologue_prev_register (struct frame_info *next_frame,
 			    enum lval_type *lvalp,
 			    CORE_ADDR *addrp,
 			    int *realnump,
-			    void *valuep)
+			    gdb_byte *valuep)
 {
   struct arm_prologue_cache *cache;
 
@@ -1113,7 +1113,7 @@ arm_sigtramp_prev_register (struct frame_info *next_frame,
 			    enum lval_type *lvalp,
 			    CORE_ADDR *addrp,
 			    int *realnump,
-			    void *valuep)
+			    gdb_byte *valuep)
 {
   struct arm_prologue_cache *cache;
 
