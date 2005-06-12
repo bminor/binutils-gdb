@@ -54,6 +54,9 @@ info_TEXINFOS = bfd.texinfo
 
 MKDOC = chew$(EXEEXT_FOR_BUILD)
 
+INCLUDES = -I.. -I$(srcdir)/.. -I$(srcdir)/../../include \
+	-I$(srcdir)/../../intl -I../../intl
+
 $(MKDOC): $(srcdir)/chew.c
 	$(CC_FOR_BUILD) -o chew.$$$$ $(srcdir)/chew.c \
 	  $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(H_CFLAGS) \
@@ -61,7 +64,7 @@ $(MKDOC): $(srcdir)/chew.c
 	$(SHELL) $(srcdir)/../../move-if-change chew.$$$$ $(MKDOC)
 
 chew.o: chew.c
-	$(CC_FOR_BUILD) -c -I.. -I$(srcdir)/.. -I$(srcdir)/../../include -I$(srcdir)/../../intl -I../../intl $(H_CFLAGS) $(CFLAGS_FOR_BUILD) $(srcdir)/chew.c
+	$(CC_FOR_BUILD) -c $(INCLUDES) $(H_CFLAGS) $(CFLAGS_FOR_BUILD) $(srcdir)/chew.c
 
 protos: libbfd.h libcoff.h bfd.h
 

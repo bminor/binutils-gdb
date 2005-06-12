@@ -261,6 +261,9 @@ SRCIPROT = $(srcdir)/../cache.c $(srcdir)/../libbfd.c \
 TEXIDIR = $(srcdir)/../../texinfo/fsf
 info_TEXINFOS = bfd.texinfo
 MKDOC = chew$(EXEEXT_FOR_BUILD)
+INCLUDES = -I.. -I$(srcdir)/.. -I$(srcdir)/../../include \
+	-I$(srcdir)/../../intl -I../../intl
+
 LIBBFD_H_DEP = \
 	$(srcdir)/../libbfd-in.h	\
 	$(srcdir)/../init.c		\
@@ -589,7 +592,7 @@ $(MKDOC): $(srcdir)/chew.c
 	$(SHELL) $(srcdir)/../../move-if-change chew.$$$$ $(MKDOC)
 
 chew.o: chew.c
-	$(CC_FOR_BUILD) -c -I.. -I$(srcdir)/.. -I$(srcdir)/../../include -I$(srcdir)/../../intl -I../../intl $(H_CFLAGS) $(CFLAGS_FOR_BUILD) $(srcdir)/chew.c
+	$(CC_FOR_BUILD) -c $(INCLUDES) $(H_CFLAGS) $(CFLAGS_FOR_BUILD) $(srcdir)/chew.c
 
 protos: libbfd.h libcoff.h bfd.h
 
