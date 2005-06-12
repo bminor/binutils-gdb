@@ -212,7 +212,7 @@ alpha_convert_register_p (int regno, struct type *type)
 
 static void
 alpha_register_to_value (struct frame_info *frame, int regnum,
-			 struct type *valtype, void *out)
+			 struct type *valtype, gdb_byte *out)
 {
   char in[MAX_REGISTER_SIZE];
   frame_register_read (frame, regnum, in);
@@ -231,7 +231,7 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
 
 static void
 alpha_value_to_register (struct frame_info *frame, int regnum,
-			 struct type *valtype, const void *in)
+			 struct type *valtype, const gdb_byte *in)
 {
   char out[MAX_REGISTER_SIZE];
   switch (TYPE_LENGTH (valtype))
@@ -439,7 +439,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 static void
 alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
-			    void *valbuf)
+			    gdb_byte *valbuf)
 {
   int length = TYPE_LENGTH (valtype);
   char raw_buffer[ALPHA_REGISTER_SIZE];
@@ -517,7 +517,7 @@ alpha_extract_struct_value_address (struct regcache *regcache)
 
 static void
 alpha_store_return_value (struct type *valtype, struct regcache *regcache,
-			  const void *valbuf)
+			  const gdb_byte *valbuf)
 {
   int length = TYPE_LENGTH (valtype);
   char raw_buffer[ALPHA_REGISTER_SIZE];
@@ -821,7 +821,7 @@ alpha_sigtramp_frame_prev_register (struct frame_info *next_frame,
 				    void **this_prologue_cache,
 				    int regnum, int *optimizedp,
 				    enum lval_type *lvalp, CORE_ADDR *addrp,
-				    int *realnump, void *bufferp)
+				    int *realnump, gdb_byte *bufferp)
 {
   struct alpha_sigtramp_unwind_cache *info
     = alpha_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
@@ -1163,7 +1163,7 @@ alpha_heuristic_frame_prev_register (struct frame_info *next_frame,
 				     void **this_prologue_cache,
 				     int regnum, int *optimizedp,
 				     enum lval_type *lvalp, CORE_ADDR *addrp,
-				     int *realnump, void *bufferp)
+				     int *realnump, gdb_byte *bufferp)
 {
   struct alpha_heuristic_unwind_cache *info
     = alpha_heuristic_frame_unwind_cache (next_frame, this_prologue_cache, 0);

@@ -256,7 +256,7 @@ alpha_mdebug_frame_prev_register (struct frame_info *next_frame,
 				  void **this_prologue_cache,
 				  int regnum, int *optimizedp,
 				  enum lval_type *lvalp, CORE_ADDR *addrp,
-				  int *realnump, void *bufferp)
+				  int *realnump, gdb_byte *bufferp)
 {
   struct alpha_mdebug_unwind_cache *info
     = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
