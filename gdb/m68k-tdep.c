@@ -825,7 +825,7 @@ static void
 m68k_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, void *valuep)
+			  int *realnump, gdb_byte *valuep)
 {
   struct m68k_frame_cache *cache = m68k_frame_cache (next_frame, this_cache);
 
