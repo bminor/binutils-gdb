@@ -128,7 +128,7 @@
 .\" ========================================================================
 .\"
 .IX Title "LD 1"
-.TH LD 1 "2005-05-02" "binutils-2.16" "GNU Development Tools"
+.TH LD 1 "2005-06-12" "binutils-2.16.1" "GNU Development Tools"
 .SH "NAME"
 ld \- Using LD, the GNU linker
 .SH "SYNOPSIS"
@@ -1561,7 +1561,8 @@ systems may not understand them. If you specify
 If you specify \fB\-\-disable\-new\-dtags\fR, no new dynamic tags will be
 created. By default, the new dynamic tags are not created. Note that
 those options are only available for \s-1ELF\s0 systems.
-.Sp
+.IP "\fB\-\-hash\-size=\fR\fInumber\fR" 4
+.IX Item "--hash-size=number"
 Set the default size of the linker's hash tables to a prime number
 close to \fInumber\fR.  Increasing this value can reduce the length of
 time it takes the linker to perform its tasks, at the expense of
