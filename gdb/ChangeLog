@@ -1,5 +1,8 @@
 2005-06-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* m88k-tdep.c (m88k_frame_prev_register): Change type of last
+	argument to `gdb_byte *'.
+
 	* vax-tdep.c (vax_frame_prev_register): Change type of last
 	argument to `gdb_byte *'.
 
