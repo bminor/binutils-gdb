@@ -1,3 +1,9 @@
+2005-06-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64-tdep.c (amd64_frame_prev_register)
+	(amd64_sigtramp_frame_prev_register): Change type of last argument
+	to `gdb_byte *'.
+
 2005-06-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_register_type): Return
