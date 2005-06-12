@@ -1,3 +1,11 @@
+2005-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Backport from mainline:
+	2005-06-01  Maciej W. Rozycki  <macro@linux-mips.org>
+	* config/tc-mips.c (load_register): Add leading "0x" to the
+	output of sprintf_vma().
+	(macro): Likewise.
+
 2005-06-08  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
 	* config/tc-m32r.c (use_parallel): Change default value from 1 to 0.
