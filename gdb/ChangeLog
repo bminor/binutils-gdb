@@ -1,5 +1,17 @@
 2005-06-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.c (hppa_frame_prev_register)
+	(hppa_fallback_frame_prev_register)
+	(hppa_stub_frame_prev_register): Change type of last argument to
+	`gdb_byte *'.
+	(hppa_fetch_pointer_argument): Tweak comment.  Use
+	get_frame_register_unsigned instead of get_frame_register.
+	(hppa32_return_value, hppa64_return_value): Change type of readbuf
+	and writebuf arguments to `gdb_byte *'.  Remove unecessary casts
+	and local variables.
+	(hppa_pseudo_register_read): Change type of last argument to
+	`gdb_byte *'.
+
 	* m68k-tdep.c (m68k_frame_prev_register): Change type of last
 	argument to `gdb_byte *'.
 

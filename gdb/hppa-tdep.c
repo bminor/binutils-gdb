@@ -1035,7 +1035,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 hppa32_return_value (struct gdbarch *gdbarch,
 		     struct type *type, struct regcache *regcache,
-		     void *readbuf, const void *writebuf)
+		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (TYPE_LENGTH (type) <= 2 * 4)
     {
@@ -1061,9 +1061,9 @@ hppa32_return_value (struct gdbarch *gdbarch,
       for (b = part; b < TYPE_LENGTH (type); b += 4)
 	{
 	  if (readbuf != NULL)
-	    regcache_cooked_read (regcache, reg, (char *) readbuf + b);
+	    regcache_cooked_read (regcache, reg, readbuf + b);
 	  if (writebuf != NULL)
-	    regcache_cooked_write (regcache, reg, (const char *) writebuf + b);
+	    regcache_cooked_write (regcache, reg, writebuf + b);
 	  reg++;
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -1075,7 +1075,7 @@ hppa32_return_value (struct gdbarch *gdbarch,
 static enum return_value_convention
 hppa64_return_value (struct gdbarch *gdbarch,
 		     struct type *type, struct regcache *regcache,
-		     void *readbuf, const void *writebuf)
+		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   int len = TYPE_LENGTH (type);
   int regnum, offset;
@@ -1139,12 +1139,11 @@ hppa64_return_value (struct gdbarch *gdbarch,
 
   if (readbuf)
     {
-      char *buf = readbuf;
       while (len > 0)
 	{
 	  regcache_cooked_read_part (regcache, regnum, offset,
-				     min (len, 8), buf);
-	  buf += min (len, 8);
+				     min (len, 8), readbuf);
+	  readbuf += min (len, 8);
 	  len -= min (len, 8);
 	  regnum++;
 	}
@@ -1152,12 +1151,11 @@ hppa64_return_value (struct gdbarch *gdbarch,
 
   if (writebuf)
     {
-      const char *buf = writebuf;
       while (len > 0)
 	{
 	  regcache_cooked_write_part (regcache, regnum, offset,
-				      min (len, 8), buf);
-	  buf += min (len, 8);
+				      min (len, 8), writebuf);
+	  writebuf += min (len, 8);
 	  len -= min (len, 8);
 	  regnum++;
 	}
@@ -2109,7 +2107,7 @@ hppa_frame_prev_register (struct frame_info *next_frame,
 			  void **this_cache,
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, void *valuep)
+			  int *realnump, gdb_byte *valuep)
 {
   struct hppa_frame_cache *info = hppa_frame_cache (next_frame, this_cache);
   hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
@@ -2232,7 +2230,7 @@ hppa_fallback_frame_prev_register (struct frame_info *next_frame,
 			  void **this_cache,
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, void *valuep)
+			  int *realnump, gdb_byte *valuep)
 {
   struct hppa_frame_cache *info = 
     hppa_fallback_frame_cache (next_frame, this_cache);
@@ -2317,7 +2315,7 @@ hppa_stub_frame_prev_register (struct frame_info *next_frame,
 			       void **this_prologue_cache,
 			       int regnum, int *optimizedp,
 			       enum lval_type *lvalp, CORE_ADDR *addrp,
-			       int *realnump, void *valuep)
+			       int *realnump, gdb_byte *valuep)
 {
   struct hppa_stub_unwind_cache *info
     = hppa_stub_frame_unwind_cache (next_frame, this_prologue_cache);
@@ -2587,26 +2585,25 @@ hppa_smash_text_address (CORE_ADDR addr)
   return (addr &= ~0x3);
 }
 
-/* Get the ith function argument for the current function.  */
+/* Get the ARGIth function argument for the current function.  */
+
 static CORE_ADDR
 hppa_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			     struct type *type)
 {
-  CORE_ADDR addr;
-  get_frame_register (frame, HPPA_R0_REGNUM + 26 - argi, &addr);
-  return addr;
+  return get_frame_register_unsigned (frame, HPPA_R0_REGNUM + 26 - argi);
 }
 
 static void
 hppa_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			   int regnum, void *buf)
+			   int regnum, gdb_byte *buf)
 {
     ULONGEST tmp;
 
     regcache_raw_read_unsigned (regcache, regnum, &tmp);
     if (regnum == HPPA_PCOQ_HEAD_REGNUM || regnum == HPPA_PCOQ_TAIL_REGNUM)
       tmp &= ~0x3;
-    store_unsigned_integer (buf, sizeof(tmp), tmp);
+    store_unsigned_integer (buf, sizeof tmp, tmp);
 }
 
 static CORE_ADDR
