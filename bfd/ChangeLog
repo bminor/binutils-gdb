@@ -1,3 +1,9 @@
+2005-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.am: Set RELEASE.
+	* configure.in: Bump version to 2.16.1.
+	* Makefile.in, configure: Regenerated.
+
 2005-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-pcc.c (ppc64_elf_gc_mark_hook): For the local sym in .opd
