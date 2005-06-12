@@ -1,5 +1,8 @@
 2005-06-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* vax-tdep.c (vax_frame_prev_register): Change type of last
+	argument to `gdb_byte *'.
+
 	* sparc-tdep.c (sparc32_frame_prev_register): Change type of last
 	argument to `gdb_byte *'.
 	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_frame_prev_register):
