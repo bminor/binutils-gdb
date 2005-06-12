@@ -1,5 +1,8 @@
 2005-06-12  Mark Kettenis  <kettenis@gnu.org>
 
+	* arm-tdep.c (set_disassembly_style, _initialize_arm_tdep):
+	Consitify regnames.
+
 	* alpha-tdep.c (alpha_sigtramp_frame_prev_register)
 	(alpha_heuristic_frame_prev_register): Change type of last
 	argument to `gdb_byte *'.
