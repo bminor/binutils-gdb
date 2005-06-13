@@ -1,3 +1,12 @@
+2005-06-13  Mark Mitchell  <mark@codesourcery.com>
+
+	* corelow.c (core_open): Use bfd_fopen, not bfd_fdopenr.
+	* exec.c (exec_file_attach): Likewise.
+	* solib-frv.c (enable_break2): Likewise.
+	* solib-svr4.c (enable_break): Likewise.
+	* solib.c (solib_map_sections): Likewise.
+	* symfile.c (symfile_bfd_open): Likewise.
+
 2005-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (symfile.o): Add $(exec_h).

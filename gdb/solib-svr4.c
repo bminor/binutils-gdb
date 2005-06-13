@@ -883,7 +883,7 @@ enable_break (void)
 
       tmp_fd  = solib_open (buf, &tmp_pathname);
       if (tmp_fd >= 0)
-	tmp_bfd = bfd_fdopenr (tmp_pathname, gnutarget, tmp_fd);
+	tmp_bfd = bfd_fopen (tmp_pathname, gnutarget, FOPEN_RB, tmp_fd);
 
       if (tmp_bfd == NULL)
 	goto bkpt_at_symbol;
