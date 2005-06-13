@@ -1,5 +1,5 @@
 /* GNU/Linux/MIPS specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -131,7 +131,7 @@ mips_breakpoint_at (CORE_ADDR where)
 {
   unsigned long insn;
 
-  (*the_target->read_memory) (where, (char *) &insn, 4);
+  (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
   if (insn == mips_breakpoint)
     return 1;
 
@@ -147,7 +147,7 @@ struct linux_target_ops the_low_target = {
   mips_cannot_store_register,
   mips_get_pc,
   mips_set_pc,
-  (const char *) &mips_breakpoint,
+  (const unsigned char *) &mips_breakpoint,
   mips_breakpoint_len,
   mips_reinsert_addr,
   0,

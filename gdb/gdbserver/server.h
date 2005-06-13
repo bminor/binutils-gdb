@@ -136,8 +136,8 @@ void enable_async_io (void);
 void disable_async_io (void);
 void unblock_async_io (void);
 void block_async_io (void);
-void convert_ascii_to_int (char *from, char *to, int n);
-void convert_int_to_ascii (char *from, char *to, int n);
+void convert_ascii_to_int (char *from, unsigned char *to, int n);
+void convert_int_to_ascii (unsigned char *from, char *to, int n);
 void new_thread_notify (int id);
 void dead_thread_notify (int id);
 void prepare_resume_reply (char *buf, char status, unsigned char sig);
@@ -145,7 +145,7 @@ void prepare_resume_reply (char *buf, char status, unsigned char sig);
 void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr);
 void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,
-		      unsigned int *len_ptr, char *to);
+		      unsigned int *len_ptr, unsigned char *to);
 
 int unhexify (char *bin, const char *hex, int count);
 int hexify (char *hex, const char *bin, int count);

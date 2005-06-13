@@ -1,5 +1,5 @@
 /* Memory breakpoint operations for the remote server for GDB.
-   Copyright 2002
+   Copyright 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
@@ -23,7 +23,7 @@
 
 #include "server.h"
 
-const char *breakpoint_data;
+const unsigned char *breakpoint_data;
 int breakpoint_len;
 
 #define MAX_BREAKPOINT_LEN 8
@@ -203,14 +203,14 @@ check_breakpoints (CORE_ADDR stop_pc)
 }
 
 void
-set_breakpoint_data (const char *bp_data, int bp_len)
+set_breakpoint_data (const unsigned char *bp_data, int bp_len)
 {
   breakpoint_data = bp_data;
   breakpoint_len = bp_len;
 }
 
 void
-check_mem_read (CORE_ADDR mem_addr, char *buf, int mem_len)
+check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
   struct breakpoint *bp = breakpoints;
   CORE_ADDR mem_end = mem_addr + mem_len;
@@ -243,7 +243,7 @@ check_mem_read (CORE_ADDR mem_addr, char *buf, int mem_len)
 }
 
 void
-check_mem_write (CORE_ADDR mem_addr, char *buf, int mem_len)
+check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
 {
   struct breakpoint *bp = breakpoints;
   CORE_ADDR mem_end = mem_addr + mem_len;

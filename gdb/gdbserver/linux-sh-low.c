@@ -1,5 +1,5 @@
 /* GNU/Linux/SH specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -81,7 +81,7 @@ sh_breakpoint_at (CORE_ADDR where)
 {
   unsigned short insn;
 
-  (*the_target->read_memory) (where, (char *) &insn, 2);
+  (*the_target->read_memory) (where, (unsigned char *) &insn, 2);
   if (insn == sh_breakpoint)
     return 1;
 
@@ -97,7 +97,7 @@ struct linux_target_ops the_low_target = {
   sh_cannot_store_register,
   sh_get_pc,
   sh_set_pc,
-  (const char *) &sh_breakpoint,
+  (const unsigned char *) &sh_breakpoint,
   sh_breakpoint_len,
   NULL,
   0,

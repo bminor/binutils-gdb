@@ -1337,7 +1337,7 @@ linux_store_registers (int regno)
    to debugger memory starting at MYADDR.  */
 
 static int
-linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
+linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -1371,7 +1371,7 @@ linux_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
    returns the value of errno.  */
 
 static int
-linux_write_memory (CORE_ADDR memaddr, const char *myaddr, int len)
+linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
@@ -1450,7 +1450,7 @@ linux_send_signal (int signum)
    to debugger memory starting at MYADDR.  */
 
 static int
-linux_read_auxv (CORE_ADDR offset, char *myaddr, unsigned int len)
+linux_read_auxv (CORE_ADDR offset, unsigned char *myaddr, unsigned int len)
 {
   char filename[PATH_MAX];
   int fd, n;

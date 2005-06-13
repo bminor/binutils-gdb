@@ -1,5 +1,5 @@
 /* i387-specific utility functions, for the remote server for GDB.
-   Copyright 2000, 2001, 2002
+   Copyright 2000, 2001, 2002, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -43,7 +43,7 @@ struct i387_fsave {
   unsigned int foseg;
 
   /* Space for eight 80-bit FP values.  */
-  char st_space[80];
+  unsigned char st_space[80];
 };
 
 struct i387_fxsave {
@@ -63,10 +63,10 @@ struct i387_fxsave {
   unsigned int _pad1;
 
   /* Space for eight 80-bit FP values in 128-bit spaces.  */
-  char st_space[128];
+  unsigned char st_space[128];
 
   /* Space for eight 128-bit XMM values, or 16 on x86-64.  */
-  char xmm_space[256];
+  unsigned char xmm_space[256];
 };
 
 void

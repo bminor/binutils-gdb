@@ -106,7 +106,7 @@ struct target_ops
   
      Returns 0 on success and errno on failure.  */
 
-  int (*read_memory) (CORE_ADDR memaddr, char *myaddr, int len);
+  int (*read_memory) (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
   /* Write memory to the inferior process.  This should generally be
      called through write_inferior_memory, which handles breakpoint shadowing.
@@ -115,7 +115,8 @@ struct target_ops
 
      Returns 0 on success and errno on failure.  */
 
-  int (*write_memory) (CORE_ADDR memaddr, const char *myaddr, int len);
+  int (*write_memory) (CORE_ADDR memaddr, const unsigned char *myaddr,
+		       int len);
 
   /* Query GDB for the values of any symbols we're interested in.
      This function is called whenever we receive a "qSymbols::"
@@ -132,7 +133,8 @@ struct target_ops
 
      Read LEN bytes at OFFSET into a buffer at MYADDR.  */
 
-  int (*read_auxv) (CORE_ADDR offset, char *myaddr, unsigned int len);
+  int (*read_auxv) (CORE_ADDR offset, unsigned char *myaddr,
+		    unsigned int len);
 
   /* Insert and remove a hardware watchpoint.
      Returns 0 on success, -1 on failure and 1 on unsupported.  
@@ -183,9 +185,10 @@ void set_target_ops (struct target_ops *);
 
 unsigned char mywait (char *statusp, int connected_wait);
 
-int read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
+int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
-int write_inferior_memory (CORE_ADDR memaddr, const char *myaddr, int len);
+int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+			   int len);
 
 void set_desired_inferior (int id);
 

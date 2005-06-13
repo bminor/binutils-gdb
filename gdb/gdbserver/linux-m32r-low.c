@@ -74,7 +74,8 @@ m32r_breakpoint_at (CORE_ADDR where)
 {
   unsigned short insn;
 
-  (*the_target->read_memory) (where, (char *) &insn, m32r_breakpoint_len);
+  (*the_target->read_memory) (where, (unsigned char *) &insn,
+			      m32r_breakpoint_len);
   if (insn == m32r_breakpoint)
     return 1;
 
@@ -90,7 +91,7 @@ struct linux_target_ops the_low_target = {
   m32r_cannot_store_register,
   m32r_get_pc,
   m32r_set_pc,
-  (const char *) &m32r_breakpoint,
+  (const unsigned char *) &m32r_breakpoint,
   m32r_breakpoint_len,
   NULL,
   0,

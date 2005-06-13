@@ -40,10 +40,16 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 
 BFD_NEED_DECLARATION(strerror)
 
+AC_CHECK_TYPE(socklen_t,
+	      [AC_DEFINE(HAVE_SOCKLEN_T, 1, [Define if you have socklen_t.])],
+	      [], [#include <sys/socket.h>])
+
 . ${srcdir}/configure.srv
 
 if test "${srv_linux_usrregs}" = "yes"; then
-  AC_DEFINE(HAVE_LINUX_USRREGS)
+  AC_DEFINE(HAVE_LINUX_USRREGS, 1,
+	    [Define if the target supports PTRACE_PEEKUSR for register ]
+	    [access.])
 fi
 
 if test "${srv_linux_regsets}" = "yes"; then
@@ -55,7 +61,9 @@ if test "${srv_linux_regsets}" = "yes"; then
 		  [gdbsrv_cv_have_ptrace_getregs=no])])
   AC_MSG_RESULT($gdbsrv_cv_have_ptrace_getregs)
   if test "${gdbsrv_cv_have_ptrace_getregs}" = "yes"; then
-    AC_DEFINE(HAVE_LINUX_REGSETS)
+    AC_DEFINE(HAVE_LINUX_REGSETS, 1,
+	      [Define if the target supports PTRACE_GETREGS for register ]
+	      [access.])
   fi
 
   AC_MSG_CHECKING(for PTRACE_GETFPXREGS)
@@ -66,7 +74,9 @@ if test "${srv_linux_regsets}" = "yes"; then
 		  [gdbsrv_cv_have_ptrace_getfpxregs=no])])
   AC_MSG_RESULT($gdbsrv_cv_have_ptrace_getfpxregs)
   if test "${gdbsrv_cv_have_ptrace_getfpxregs}" = "yes"; then
-    AC_DEFINE(HAVE_PTRACE_GETFPXREGS)
+    AC_DEFINE(HAVE_PTRACE_GETFPXREGS, 1,
+	      [Define if the target supports PTRACE_GETFPXREGS for extended ]
+	      [register access.])
   fi
 fi
 
@@ -98,7 +108,8 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
        gdb_cv_prfpregset_t_broken=yes)])
     AC_MSG_RESULT($gdb_cv_prfpregset_t_broken)
     if test $gdb_cv_prfpregset_t_broken = yes; then
-      AC_DEFINE(PRFPREGSET_T_BROKEN)
+      AC_DEFINE(PRFPREGSET_T_BROKEN, 1,
+		[Define if the prfpregset_t type is broken.])
     fi
   fi
 

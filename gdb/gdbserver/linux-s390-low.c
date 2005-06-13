@@ -76,7 +76,7 @@ s390_cannot_store_register (int regno)
 }
 
 
-static const char s390_breakpoint[] = { 0, 1 };
+static const unsigned char s390_breakpoint[] = { 0, 1 };
 #define s390_breakpoint_len 2
 
 static CORE_ADDR

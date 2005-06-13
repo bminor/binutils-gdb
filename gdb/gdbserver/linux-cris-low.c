@@ -85,7 +85,8 @@ cris_breakpoint_at (CORE_ADDR where)
 {
   unsigned short insn;
 
-  (*the_target->read_memory) (where, (char *) &insn, cris_breakpoint_len);
+  (*the_target->read_memory) (where, (unsigned char *) &insn,
+			      cris_breakpoint_len);
   if (insn == cris_breakpoint)
     return 1;
 
@@ -112,7 +113,7 @@ struct linux_target_ops the_low_target = {
   cris_cannot_store_register,
   cris_get_pc,
   cris_set_pc,
-  (const char *) &cris_breakpoint,
+  (const unsigned char *) &cris_breakpoint,
   cris_breakpoint_len,
   cris_reinsert_addr,
   0,

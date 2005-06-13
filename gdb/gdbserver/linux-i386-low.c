@@ -1,5 +1,5 @@
 /* GNU/Linux/i386 specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2004
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -160,7 +160,7 @@ struct regset_info target_regsets[] = {
 
 #endif /* HAVE_LINUX_REGSETS */
 
-static const char i386_breakpoint[] = { 0xCC };
+static const unsigned char i386_breakpoint[] = { 0xCC };
 #define i386_breakpoint_len 1
 
 extern int debug_threads;

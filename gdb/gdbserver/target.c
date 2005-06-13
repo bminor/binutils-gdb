@@ -1,5 +1,5 @@
 /* Target operations for the remote server for GDB.
-   Copyright 2002, 2004
+   Copyright 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
@@ -58,7 +58,7 @@ set_desired_inferior (int use_general)
 }
 
 int
-read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
+read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int res;
   res = (*the_target->read_memory) (memaddr, myaddr, len);
@@ -67,12 +67,13 @@ read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 }
 
 int
-write_inferior_memory (CORE_ADDR memaddr, const char *myaddr, int len)
+write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+		       int len)
 {
   /* Lacking cleanups, there is some potential for a memory leak if the
      write fails and we go through error().  Make sure that no more than
      one buffer is ever pending by making BUFFER static.  */
-  static char *buffer = 0;
+  static unsigned char *buffer = 0;
   int res;
 
   if (buffer != NULL)

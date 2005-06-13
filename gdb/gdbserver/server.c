@@ -126,7 +126,7 @@ handle_query (char *own_buf)
   if (the_target->read_auxv != NULL
       && strncmp ("qPart:auxv:read::", own_buf, 17) == 0)
     {
-      char data[(PBUFSIZ - 1) / 2];
+      unsigned char data[(PBUFSIZ - 1) / 2];
       CORE_ADDR ofs;
       unsigned int len;
       int n;
@@ -313,7 +313,8 @@ gdbserver_usage (void)
 int
 main (int argc, char *argv[])
 {
-  char ch, status, *own_buf, mem_buf[2000];
+  char ch, status, *own_buf;
+  unsigned char mem_buf[2000];
   int i = 0;
   int signal;
   unsigned int len;

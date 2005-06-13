@@ -1,5 +1,5 @@
 /* GNU/Linux/m68k specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -120,7 +120,7 @@ struct regset_info target_regsets[] = {
 
 #endif /* HAVE_LINUX_REGSETS */
 
-static const char m68k_breakpoint[] = { 0x4E, 0x4F };
+static const unsigned char m68k_breakpoint[] = { 0x4E, 0x4F };
 #define m68k_breakpoint_len 2
 
 static CORE_ADDR

@@ -1,5 +1,5 @@
 /* GNU/Linux/ARM specific low level interface, for the remote server for GDB.
-   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -75,7 +75,7 @@ arm_breakpoint_at (CORE_ADDR where)
 {
   unsigned long insn;
 
-  (*the_target->read_memory) (where, (char *) &insn, 4);
+  (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
   if (insn == arm_breakpoint)
     return 1;
 
@@ -102,7 +102,7 @@ struct linux_target_ops the_low_target = {
   arm_cannot_store_register,
   arm_get_pc,
   arm_set_pc,
-  (const char *) &arm_breakpoint,
+  (const unsigned char *) &arm_breakpoint,
   arm_breakpoint_len,
   arm_reinsert_addr,
   0,

@@ -37,6 +37,10 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
+
 /* A cache entry for a successfully looked-up symbol.  */
 struct sym_cache
 {
@@ -122,7 +126,7 @@ remote_open (char *name)
       char *port_str;
       int port;
       struct sockaddr_in sockaddr;
-      int tmp;
+      socklen_t tmp;
       int tmp_desc;
 
       port_str = strchr (name, ':');
@@ -544,10 +548,10 @@ write_enn (char *buf)
 }
 
 void
-convert_int_to_ascii (char *from, char *to, int n)
+convert_int_to_ascii (unsigned char *from, char *to, int n)
 {
   int nib;
-  char ch;
+  int ch;
   while (n--)
     {
       ch = *from++;
@@ -561,7 +565,7 @@ convert_int_to_ascii (char *from, char *to, int n)
 
 
 void
-convert_ascii_to_int (char *from, char *to, int n)
+convert_ascii_to_int (char *from, unsigned char *to, int n)
 {
   int nib1, nib2;
   while (n--)
@@ -722,7 +726,7 @@ decode_m_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr)
 
 void
 decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
-		 char *to)
+		 unsigned char *to)
 {
   int i = 0;
   char ch;

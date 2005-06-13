@@ -1,5 +1,5 @@
 /* Memory breakpoint interfaces for the remote server for GDB.
-   Copyright 2002
+   Copyright 2002, 2005
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
@@ -55,17 +55,17 @@ int check_breakpoints (CORE_ADDR stop_pc);
    to MEM_ADDR + MEM_LEN.  Update the data already read from the target
    (in BUF) if necessary.  */
 
-void check_mem_read (CORE_ADDR mem_addr, char *buf, int mem_len);
+void check_mem_read (CORE_ADDR mem_addr, unsigned char *buf, int mem_len);
 
 /* See if any breakpoints shadow the target memory area from MEM_ADDR
    to MEM_ADDR + MEM_LEN.  Update the data to be written to the target
    (in BUF) if necessary, as well as the original data for any breakpoints.  */
 
-void check_mem_write (CORE_ADDR mem_addr, char *buf, int mem_len);
+void check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len);
 
 /* Set the byte pattern to insert for memory breakpoints.  This function
    must be called before any breakpoints are set.  */
 
-void set_breakpoint_data (const char *bp_data, int bp_len);
+void set_breakpoint_data (const unsigned char *bp_data, int bp_len);
 
 #endif /* MEM_BREAK_H */

@@ -50,7 +50,7 @@ struct linux_target_ops
   int (*cannot_store_register) (int);
   CORE_ADDR (*get_pc) (void);
   void (*set_pc) (CORE_ADDR newpc);
-  const char *breakpoint;
+  const unsigned char *breakpoint;
   int breakpoint_len;
   CORE_ADDR (*breakpoint_reinsert_addr) (void);
 

@@ -1,3 +1,43 @@
+2005-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* acconfig.h: Remove.
+	* configure.ac: Add a test for socklen_t.  Use three-argument
+	AC_DEFINE throughout.
+	* config.in: Regenerated using autoheader 2.59.
+	* configure: Regenerated.
+
+	* gdbreplay.c (socklen_t): Provide a default.
+	(remote_open): Use socklen_t.
+	* remote-utils.c (socklen_t): Provide a default.
+	(remote_open): Use socklen_t.
+	(convert_int_to_ascii, convert_ascii_to_int, decode_M_packet): Use
+	unsigned char.
+
+	* i387-fp.c (struct i387_fsave, struct i387_fxsave): Use unsigned
+	char for buffers.
+	* linux-low.c (linux_read_memory, linux_write_memory)
+	(linux_read_auxv): Likewise.
+	* mem-break.c (breakpoint_data, set_breakpoint_data, check_mem_read)
+	(check_mem_write): Likewise.
+	* mem-break.h (set_breakpoint_data, check_mem_read, check_mem_write):
+	Likewise.
+	* regcache.c (struct inferior_rgcache_data, registers_to_string)
+	(registers_from_string, register_data): Likewise.
+	* server.c (handle_query, main): Likewise.
+	* server.h (convert_ascii_to_int, convert_int_to_ascii)
+	(decode_M_packet): Likewise.
+	* target.c (read_inferior_memory, write_inferior_memory): Likewise.
+	* target.h (struct target_ops): Update read_memory, write_memory,
+	and read_auxv.
+	(read_inferior_memory, write_inferior_memory): Update.
+	* linux-low.h (struct linux_target_ops): Change type of breakpoint
+	to unsigned char *.
+	* linux-arm-low.c, linux-cris-low.c, linux-crisv32-low.c,
+	linux-i386-low.c, linux-m32r-low.c, linux-m68k-low.c,
+	linux-mips-low.c, linux-ppc-low.c, linux-ppc64-low.c,
+	linux-s390-low.c, linux-sh-low.c: Update for changes in
+	read_inferior_memory and the_low_target->breakpoint.
+
 2005-05-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (SFILES): Add linux-ppc64-low.c.
