@@ -36,4 +36,7 @@ extern struct target_ops exec_ops;
 extern int build_section_table (struct bfd *, struct section_table **,
 				struct section_table **);
 
+/* Set the loaded address of a section.  */
+extern void exec_set_section_address (const char *, int, CORE_ADDR);
+
 #endif

@@ -1,3 +1,13 @@
+2005-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (symfile.o): Add $(exec_h).
+	* exec.h (exec_set_section_address): Add prototype.
+	* exec.c (exec_set_section_address): New function.
+	* symfile.c: Include "exec.h".
+	(struct place_section_arg, place_section): New.
+	(default_symfile_offsets): Call place_section for each
+	section of a relocatable file.
+
 2005-06-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* hppa-tdep.c (hppa_pc_requires_run_before_use): Really test all

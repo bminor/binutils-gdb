@@ -1,4 +1,4 @@
-# Copyright 2002, 2003 Free Software Foundation, Inc.
+# Copyright 2002, 2003, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -131,4 +131,16 @@ if { "${function_foo_addr}" == "${new_function_foo_addr}" } {
   pass "function foo has a different address"
 }
 
-return 0
+# Now try loading the object as an exec-file; we should be able to print
+# the values of variables after we do this.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+# Check the values of the variables.
+gdb_test "print static_foo" "\\\$$decimal = 1"
+gdb_test "print static_bar" "\\\$$decimal = 2"
+gdb_test "print global_foo" "\\\$$decimal = 3"
+gdb_test "print global_bar" "\\\$$decimal = 4"

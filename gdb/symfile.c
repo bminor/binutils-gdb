@@ -49,6 +49,7 @@
 #include "gdb_assert.h"
 #include "block.h"
 #include "observer.h"
+#include "exec.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -456,6 +457,84 @@ init_objfile_sect_indices (struct objfile *objfile)
     }
 }
 
+/* The arguments to place_section.  */
+
+struct place_section_arg
+{
+  struct section_offsets *offsets;
+  CORE_ADDR lowest;
+};
+
+/* Find a unique offset to use for loadable section SECT if
+   the user did not provide an offset.  */
+
+void
+place_section (bfd *abfd, asection *sect, void *obj)
+{
+  struct place_section_arg *arg = obj;
+  CORE_ADDR *offsets = arg->offsets->offsets, start_addr;
+  int done;
+
+  /* We are only interested in loadable sections.  */
+  if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
+    return;
+
+  /* If the user specified an offset, honor it.  */
+  if (offsets[sect->index] != 0)
+    return;
+
+  /* Otherwise, let's try to find a place for the section.  */
+  do {
+    asection *cur_sec;
+    ULONGEST align = 1 << bfd_get_section_alignment (abfd, sect);
+
+    start_addr = (arg->lowest + align - 1) & -align;
+    done = 1;
+
+    for (cur_sec = abfd->sections; cur_sec != NULL; cur_sec = cur_sec->next)
+      {
+	int indx = cur_sec->index;
+	CORE_ADDR cur_offset;
+
+	/* We don't need to compare against ourself.  */
+	if (cur_sec == sect)
+	  continue;
+
+	/* We can only conflict with loadable sections.  */
+	if ((bfd_get_section_flags (abfd, cur_sec) & SEC_LOAD) == 0)
+	  continue;
+
+	/* We do not expect this to happen; just ignore sections in a
+	   relocatable file with an assigned VMA.  */
+	if (bfd_section_vma (abfd, cur_sec) != 0)
+	  continue;
+
+	/* If the section offset is 0, either the section has not been placed
+	   yet, or it was the lowest section placed (in which case LOWEST
+	   will be past its end).  */
+	if (offsets[indx] == 0)
+	  continue;
+
+	/* If this section would overlap us, then we must move up.  */
+	if (start_addr + bfd_get_section_size (sect) > offsets[indx]
+	    && start_addr < offsets[indx] + bfd_get_section_size (cur_sec))
+	  {
+	    start_addr = offsets[indx] + bfd_get_section_size (cur_sec);
+	    start_addr = (start_addr + align - 1) & -align;
+	    done = 0;
+	    continue;
+	  }
+
+	/* Otherwise, we appear to be OK.  So far.  */
+      }
+    }
+  while (!done);
+
+  offsets[sect->index] = start_addr;
+  arg->lowest = start_addr + bfd_get_section_size (sect);
+
+  exec_set_section_address (bfd_get_filename (abfd), sect->index, start_addr);
+}
 
 /* Parse the user's idea of an offset for dynamic linking, into our idea
    of how to represent it for fast symbol reading.  This is the default
@@ -490,6 +569,19 @@ default_symfile_offsets (struct objfile *objfile,
       /* The section_offsets in the objfile are here filled in using
          the BFD index. */
       (objfile->section_offsets)->offsets[osp->sectindex] = osp->addr;
+    }
+
+  /* For relocatable files, all loadable sections will start at zero.
+     The zero is meaningless, so try to pick arbitrary addresses such
+     that no loadable sections overlap.  This algorithm is quadratic,
+     but the number of sections in a single object file is generally
+     small.  */
+  if ((bfd_get_file_flags (objfile->obfd) & (EXEC_P | DYNAMIC)) == 0)
+    {
+      struct place_section_arg arg;
+      arg.offsets = objfile->section_offsets;
+      arg.lowest = 0;
+      bfd_map_over_sections (objfile->obfd, place_section, &arg);
     }
 
   /* Remember the bfd indexes for the .text, .data, .bss and
