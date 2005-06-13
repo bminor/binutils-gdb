@@ -1,3 +1,10 @@
+2005-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-main.c (register_changed_p, get_register): Use
+	get_selected_frame.
+	(mi_execute_command): Call mi_out_rewind after an error.
+
 2005-06-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-tdep.c (hppa_frame_prev_register)

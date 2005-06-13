@@ -388,7 +388,7 @@ register_changed_p (int regnum)
 {
   gdb_byte raw_buffer[MAX_REGISTER_SIZE];
 
-  if (! frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
+  if (! frame_register_read (get_selected_frame (NULL), regnum, raw_buffer))
     return -1;
 
   if (memcmp (&old_regs[DEPRECATED_REGISTER_BYTE (regnum)], raw_buffer,
@@ -509,7 +509,7 @@ get_register (int regnum, int format)
   if (format == 'N')
     format = 0;
 
-  frame_register (deprecated_selected_frame, regnum, &optim, &lval, &addr,
+  frame_register (get_selected_frame (NULL), regnum, &optim, &lval, &addr,
 		  &realnum, buffer);
 
   if (optim)
@@ -1174,11 +1174,12 @@ mi_execute_command (char *cmd, int from_tty)
       if (result.reason < 0)
 	{
 	  /* The command execution failed and error() was called
-	     somewhere */
+	     somewhere.  */
 	  fputs_unfiltered (command->token, raw_stdout);
 	  fputs_unfiltered ("^error,msg=\"", raw_stdout);
 	  fputstr_unfiltered (result.message, '"', raw_stdout);
 	  fputs_unfiltered ("\"\n", raw_stdout);
+	  mi_out_rewind (uiout);
 	}
       mi_parse_free (command);
     }
