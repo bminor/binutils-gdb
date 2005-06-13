@@ -1,3 +1,8 @@
+2005-06-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* hppa-tdep.c (hppa_pc_requires_run_before_use): Really test all
+	bits of top byte in address.
+
 2005-06-13  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* eval.c (evaluate_subexp_standard): Add code to check the target

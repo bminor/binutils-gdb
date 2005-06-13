@@ -2527,7 +2527,7 @@ hppa_pc_requires_run_before_use (CORE_ADDR pc)
      minimal symbols, I'm resorting to the gross hack of checking the
      top byte of the address for all 1's.  Sigh.  */
 
-  return (!target_has_stack && (pc & 0xFF000000));
+  return (!target_has_stack && (pc & 0xFF000000) == 0xFF000000);
 }
 
 /* Return the GDB type object for the "standard" data type of data in
