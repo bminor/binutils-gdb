@@ -433,12 +433,6 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 
   format = (int) argv[0][0];
 
-  if (!target_has_registers)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_list_register_values: No registers.");
-      return MI_CMD_ERROR;
-    }
-
   list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-values");
 
   if (argc == 1)		/* No args, beside the format: do all the regs */
