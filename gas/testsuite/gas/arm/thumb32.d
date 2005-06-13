@@ -295,14 +295,10 @@ Disassembly of section .text:
 0+3cc <[^>]+> f340 800c 	ble\.w	0+3e8 <[^>]+>
 0+3d0 <[^>]+> f7ff bfae 	b\.w	0+330 <[^>]+>
 0+3d4 <[^>]+> f000 b808 	b\.w	0+3e8 <[^>]+>
-0+3d8 <[^>]+> f000 f996 	bl	0+330 <[^>]+>
-			3d8: R_ARM_THM_CALL	\.text
-0+3dc <[^>]+> f000 f9f2 	bl	0+3e8 <[^>]+>
-			3dc: R_ARM_THM_CALL	\.text
-0+3e0 <[^>]+> f000 e996 	blx	0+330 <[^>]+>
-			3e0: R_ARM_THM_XPC22	\.text
-0+3e4 <[^>]+> f000 e9f2 	blx	0+3e8 <[^>]+>
-			3e4: R_ARM_THM_XPC22	\.text
+0+3d8 <[^>]+> f7ff ffaa 	bl	0+330 <[^>]+>
+0+3dc <[^>]+> f000 f804 	bl	0+3e8 <[^>]+>
+0+3e0 <[^>]+> f7ff efa6 	blx	0+330 <[^>]+>
+0+3e4 <[^>]+> f000 e800 	blx	0+3e8 <[^>]+>
 0+3e8 <[^>]+> 4748      	bx	r9
 0+3ea <[^>]+> 4780      	blx	r0
 0+3ec <[^>]+> 47c8      	blx	r9

@@ -1,3 +1,13 @@
+2005-06-13  Zack Weinberg  <zack@codesourcery.com>
+
+	* config/tc-arm.c (find_real_start): Check S_IS_LOCAL on
+	symbolP as well as for names with a leading dot.  Use ACONCAT.
+	(md_apply_fix): For branch relocations, only replace value
+	with fixP->fx_offset (under #ifdef OBJ_ELF) when !fixP->fx_done.
+	(arm_force_relocation): Remove #ifdef OBJ_ELF case.
+	* config/tc-arm.h (LOCAL_LABEL): Remove unnecessary parentheses.
+	(LOCAL_LABEL_PREFIX): Don't define.
+
 2005-06-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-hppa.c (pa_block): Allocate just one byte for the

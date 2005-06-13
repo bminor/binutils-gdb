@@ -1414,15 +1414,15 @@ find_real_start (symbolS * symbolP)
   if (name == NULL)
     abort ();
 
-  /* Names that start with '.' are local labels, not function entry points.
-     The compiler may generate BL instructions to these labels because it
-     needs to perform a branch to a far away location.	*/
-  if (name[0] == '.')
+  /* The compiler may generate BL instructions to local labels because
+     it needs to perform a branch to a far away location. These labels
+     do not have a corresponding ".real_start_of" label.  We check
+     both for S_IS_LOCAL and for a leading dot, to give a way to bypass
+     the ".real_start_of" convention for nonlocal branches.  */
+  if (S_IS_LOCAL (symbolP) || name[0] == '.')
     return symbolP;
 
-  real_start = malloc (strlen (name) + strlen (STUB_NAME) + 1);
-  sprintf (real_start, "%s%s", STUB_NAME, name);
-
+  real_start = ACONCAT ((STUB_NAME, name, NULL));
   new_target = symbol_find (real_start);
 
   if (new_target == NULL)
@@ -1430,8 +1430,6 @@ find_real_start (symbolS * symbolP)
       as_warn ("Failed to find real start of function: %s\n", name);
       new_target = symbolP;
     }
-
-  free (real_start);
 
   return new_target;
 }
@@ -10513,7 +10511,8 @@ md_apply_fix (fixS *	fixP,
 #define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
 
 #ifdef OBJ_ELF
-      value = fixP->fx_offset;
+      if (!fixP->fx_done)
+	value = fixP->fx_offset;
 #endif
 
       /* We are going to store value (shifted right by two) in the
@@ -10583,7 +10582,8 @@ md_apply_fix (fixS *	fixP,
 	newval = md_chars_to_number (buf, INSN_SIZE);
 
 #ifdef OBJ_ELF
-	value = fixP->fx_offset;
+	if (!fixP->fx_done)
+	  value = fixP->fx_offset;
 #endif
 	hbit   = (value >> 1) & 1;
 	value  = (value >> 2) & 0x00ffffff;
@@ -10742,7 +10742,8 @@ md_apply_fix (fixS *	fixP,
 	if (diff & 0x400000)
 	  diff |= ~0x3fffff;
 #ifdef OBJ_ELF
-	value = fixP->fx_offset;
+	if (!fixP->fx_done)
+	  value = fixP->fx_offset;
 #endif
 	value += diff;
 
@@ -11351,13 +11352,6 @@ arm_force_relocation (struct fix * fixp)
 {
 #if defined (OBJ_COFF) && defined (TE_PE)
   if (fixp->fx_r_type == BFD_RELOC_RVA)
-    return 1;
-#endif
-#ifdef OBJ_ELF
-  if (fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
-      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
-      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX
-      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)
     return 1;
 #endif
 

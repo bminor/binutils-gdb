@@ -1,3 +1,8 @@
+2005-06-13  Zack Weinberg  <zack@codesourcery.com>
+
+	* gas/arm/thumb.s: Only branch to labels defined in this file.
+	* gas/arm/thumb.d, gas/arm/thumb32.d: Adjust expected output.
+
 2005-06-01  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* gas/mips/ldstla-32-1.l: Update to handle leading zeroes.
