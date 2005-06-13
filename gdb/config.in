@@ -435,6 +435,9 @@
 /* Define to 1 if you have the `socketpair' function. */
 #undef HAVE_SOCKETPAIR
 
+/* Define to 1 if the system has the type `socklen_t'. */
+#undef HAVE_SOCKLEN_T
+
 /* Define to 1 if you have the <stddef.h> header file. */
 #undef HAVE_STDDEF_H
 

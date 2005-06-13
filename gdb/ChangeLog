@@ -1,3 +1,10 @@
+2005-06-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* ser-tcp.c: Tewak comment.
+	[!HAVE_SOCKLEN_T]: Typedef socklen_t.
+	* configure.ac: Add check for socklen_t.
+	* configure, config.in: Regenerate.
+
 2005-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/i386/linux64.mt (TDEPFILES): Add symfile-mem.o.

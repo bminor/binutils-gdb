@@ -1,5 +1,6 @@
-/* Serial interface for raw TCP connections on Un*x like systems
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001
+/* Serial interface for raw TCP connections on Un*x like systems.
+
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -50,6 +51,10 @@
 
 #include <signal.h>
 #include "gdb_string.h"
+
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
 
 static int net_open (struct serial *scb, const char *name);
 static void net_close (struct serial *scb);

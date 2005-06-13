@@ -432,6 +432,10 @@ AC_CHECK_MEMBERS([struct stat.st_blksize])
 # ------------------ #
 
 AC_TYPE_SIGNAL
+AC_CHECK_TYPES(socklen_t, [], [],
+[#include <sys/types.h>
+#include <sys/socket.h>
+])
 
 # ------------------------------------- #
 # Checks for compiler characteristics.  #
