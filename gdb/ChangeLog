@@ -1,5 +1,8 @@
 2005-06-13  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.ac: Use AC_CHECK_TYPES to check for uintptr_t.
+	* configure, config.in: Regenerate.
+
 	* ser-tcp.c: Tewak comment.
 	[!HAVE_SOCKLEN_T]: Typedef socklen_t.
 	* configure.ac: Add check for socklen_t.

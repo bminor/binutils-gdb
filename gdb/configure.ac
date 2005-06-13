@@ -436,6 +436,7 @@ AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
 #include <sys/socket.h>
 ])
+AC_CHECK_TYPES(uintptr_t, [], [], [#include <stdint.h>])
 
 # ------------------------------------- #
 # Checks for compiler characteristics.  #
@@ -666,18 +667,6 @@ AC_CACHE_VAL(gdb_cv_have_pt_getxmmregs,
 AC_MSG_RESULT($gdb_cv_have_pt_getxmmregs)
 if test $gdb_cv_have_pt_getxmmregs = yes; then
   AC_DEFINE(HAVE_PT_GETXMMREGS)
-fi
-
-# See if stdint.h provides the uintptr_t type.
-# Autoconf 2.5X has an improved AC_CHECK_TYPE which will simplify this.
-AC_CACHE_CHECK([for uintptr_t in stdint.h], gdb_cv_have_uintptr_t,
-  [AC_TRY_COMPILE(
-    [#include <stdint.h>],
-    [uintptr_t foo = 0;],
-    gdb_cv_have_uintptr_t=yes,
-    gdb_cv_have_uintptr_t=no)])
-if test $gdb_cv_have_uintptr_t = yes; then
-  AC_DEFINE(HAVE_UINTPTR_T, 1, [Define if <stdint.h> provides the uintptr_t type.])
 fi
 
 # If we are configured native on GNU/Linux, work around problems with

@@ -566,7 +566,7 @@
 /* Define to 1 if you have the `ttrace' function. */
 #undef HAVE_TTRACE
 
-/* Define if <stdint.h> provides the uintptr_t type. */
+/* Define to 1 if the system has the type `uintptr_t'. */
 #undef HAVE_UINTPTR_T
 
 /* Define to 1 if you have the <unistd.h> header file. */
