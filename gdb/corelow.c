@@ -315,7 +315,9 @@ core_open (char *filename, int from_tty)
   if (scratch_chan < 0)
     perror_with_name (filename);
 
-  temp_bfd = bfd_fdopenr (filename, gnutarget, scratch_chan);
+  temp_bfd = bfd_fopen (filename, gnutarget, 
+			write_files ? FOPEN_RUB : FOPEN_RB,
+			scratch_chan);
   if (temp_bfd == NULL)
     perror_with_name (filename);
 

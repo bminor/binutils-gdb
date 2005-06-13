@@ -214,7 +214,9 @@ exec_file_attach (char *filename, int from_tty)
 #endif
       if (scratch_chan < 0)
 	perror_with_name (filename);
-      exec_bfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
+      exec_bfd = bfd_fopen (scratch_pathname, gnutarget,
+			    write_files ? FOPEN_RUB : FOPEN_RB,
+			    scratch_chan);
 
       if (!exec_bfd)
 	error (_("\"%s\": could not open as an executable file: %s"),

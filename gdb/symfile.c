@@ -1284,7 +1284,7 @@ symfile_bfd_open (char *name)
   name = absolute_name;		/* Keep 2nd malloc'd copy in bfd */
   /* It'll be freed in free_objfile(). */
 
-  sym_bfd = bfd_fdopenr (name, gnutarget, desc);
+  sym_bfd = bfd_fopen (name, gnutarget, FOPEN_RB, desc);
   if (!sym_bfd)
     {
       close (desc);

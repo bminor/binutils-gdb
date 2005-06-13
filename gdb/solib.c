@@ -253,7 +253,7 @@ solib_map_sections (void *arg)
     }
 
   /* Leave scratch_pathname allocated.  abfd->name will point to it.  */
-  abfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
+  abfd = bfd_fopen (scratch_pathname, gnutarget, FOPEN_RB, scratch_chan);
   if (!abfd)
     {
       close (scratch_chan);
