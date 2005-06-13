@@ -1246,6 +1246,24 @@ evaluate_subexp_standard (struct type *expect_type,
       type = check_typedef (value_type (arg1));
       code = TYPE_CODE (type);
 
+      if (code == TYPE_CODE_PTR)
+	{
+	  /* Fortran always passes variable to subroutines as pointer.
+	     So we need to look into its target type to see if it is
+	     array, string or function.  If it is, we need to switch
+	     to the target value the original one points to.  */ 
+	  struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
+
+	  if (TYPE_CODE (target_type) == TYPE_CODE_ARRAY
+	      || TYPE_CODE (target_type) == TYPE_CODE_STRING
+	      || TYPE_CODE (target_type) == TYPE_CODE_FUNC)
+	    {
+	      arg1 = value_ind (arg1);
+	      type = check_typedef (value_type (arg1));
+	      code = TYPE_CODE (type);
+	    }
+	} 
+
       switch (code)
 	{
 	case TYPE_CODE_ARRAY:

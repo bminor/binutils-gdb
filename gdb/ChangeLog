@@ -1,3 +1,10 @@
+2005-06-13  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* eval.c (evaluate_subexp_standard): Add code to check the target
+	type of a TYPE_CODE_PTR value when we encounter a f77 undetermined
+	arglist.  If it is array, string or function, work on the target
+	value instead.
+
 2005-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Nick Roberts  <nickrob@snap.net.nz>
 
