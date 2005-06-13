@@ -1,4 +1,4 @@
-# Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2004
+# Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2004, 2005
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -118,6 +118,10 @@ proc extract_heap { dir } {
 set next_heap [extract_heap next]
 set prev_heap [extract_heap prev]
 
+# Save the total allocated size within GDB so that we can check
+# the core size later.
+gdb_test "set \$bytes_allocated = bytes_allocated" "" "save heap size"
+
 # Now create a core dump
 
 # Rename the core file to "TESTFILE.corefile" rather than just "core",
@@ -171,10 +175,14 @@ if { $file == "" } {
 
 if {[catch {file size $corefile} core_size] == 0} {
     set core_ok 0
-    gdb_test_multiple "print bytes_allocated < $core_size" "check core size" {
+    gdb_test_multiple "print \$bytes_allocated < $core_size" "check core size" {
 	-re " = 1\r\n$gdb_prompt $" {
 	    pass "check core size"
 	    set core_ok 1
+	}
+	-re " = 0\r\n$gdb_prompt $" {
+	    pass "check core size"
+	    set core_ok 0
 	}
     }
 } { 

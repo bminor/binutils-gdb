@@ -1,5 +1,10 @@
 2005-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/bigcore.exp: Correct checks for systems which can
+	not dump a large core file.
+
+2005-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/relocate.c: Add a copyright notice.
 	(dummy): Remove.
 	* gdb.base/relocate.exp: Test printing the values of variables
