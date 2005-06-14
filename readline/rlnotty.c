@@ -51,6 +51,15 @@ tputs (string, nlines, outfun)
     outfun (*string++);
 }
 
+char *
+tgoto (cap, col, row)
+     const char *cap;
+     int col;
+     int row;
+{
+  return NULL;
+}
+     
 int
 _rl_disable_tty_signals ()
 {
