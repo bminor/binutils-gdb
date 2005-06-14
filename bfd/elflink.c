@@ -1188,8 +1188,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
   /* Handle the special case of an old common symbol merging with a
      new symbol which looks like a common symbol in a shared object.
      We change *PSEC and *PVALUE to make the new symbol look like a
-     common symbol, and let _bfd_generic_link_add_one_symbol will do
-     the right thing.  */
+     common symbol, and let _bfd_generic_link_add_one_symbol do the
+     right thing.  */
 
   if (newdyncommon
       && h->root.type == bfd_link_hash_common)

@@ -1,3 +1,7 @@
+2005-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Fix a typo in comment.
+
 2005-06-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf.c (bfd_section_from_shdr): Fail if name is NULL.
