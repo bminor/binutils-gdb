@@ -1752,6 +1752,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
   name = bfd_elf_string_from_elf_section (abfd,
 					  elf_elfheader (abfd)->e_shstrndx,
 					  hdr->sh_name);
+  if (name == NULL)
+    return FALSE;
 
   switch (hdr->sh_type)
     {
@@ -1922,6 +1924,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	      Elf_Internal_Shdr *hdr2 = elf_elfsections (abfd)[i];
 	      if (hdr2->sh_link == shindex)
 		{
+		  /* Prevent endless recursion on broken objects.  */
+		  if (i == shindex)
+		    return FALSE;
 		  if (! bfd_section_from_shdr (abfd, i))
 		    return FALSE;
 		  if (elf_onesymtab (abfd) == i)
@@ -1999,6 +2004,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name,
 						  shindex);
 
+        /* Prevent endless recursion on broken objects.  */
+        if (elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_REL
+            || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_RELA)
+          return FALSE;
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return FALSE;
 	target_sect = bfd_section_from_elf_index (abfd, hdr->sh_info);

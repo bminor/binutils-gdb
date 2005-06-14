@@ -821,8 +821,14 @@ do_slurp_coff_armap (bfd *abfd)
   /* The coff armap must be read sequentially.  So we construct a
      bsd-style one in core all at once, for simplicity.  */
 
+  if (nsymz > ~ (bfd_size_type) 0 / sizeof (carsym))
+    return FALSE;
+
   carsym_size = (nsymz * sizeof (carsym));
   ptrsize = (4 * nsymz);
+
+  if (carsym_size + stringsize + 1 <= carsym_size)
+    return FALSE;
 
   ardata->symdefs = bfd_zalloc (abfd, carsym_size + stringsize + 1);
   if (ardata->symdefs == NULL)
