@@ -1,3 +1,8 @@
+2005-06-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.ac: Simplify and improve check for socklen_t.
+	* configure, config.in: Regenerate.
+
 2005-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* acconfig.h: Remove.

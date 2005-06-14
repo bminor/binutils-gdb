@@ -40,10 +40,10 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 
 BFD_NEED_DECLARATION(strerror)
 
-AC_CHECK_TYPE(socklen_t,
-	      [AC_DEFINE(HAVE_SOCKLEN_T, 1, [Define if you have socklen_t.])],
-	      [], [#include <sys/socket.h>])
-
+AC_CHECK_TYPES(socklen_t, [], [],
+[#include <sys/types.h>
+#include <sys/socket.h>
+])
 . ${srcdir}/configure.srv
 
 if test "${srv_linux_usrregs}" = "yes"; then
