@@ -8,7 +8,7 @@
 	* configure.ac: Use AC_CHECK_TYPES to check for uintptr_t.
 	* configure, config.in: Regenerate.
 
-	* ser-tcp.c: Tewak comment.
+	* ser-tcp.c: Tweak comment.
 	[!HAVE_SOCKLEN_T]: Typedef socklen_t.
 	* configure.ac: Add check for socklen_t.
 	* configure, config.in: Regenerate.
