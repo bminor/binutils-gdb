@@ -147,7 +147,14 @@ void *alloca ();
 # define N_(String) (String)
 #endif
 
+/* Used by ar.c and objcopy.c.  */
+#define BUFSIZE 8192
+
 /* bucomm.c */
+
+/* Return the filename in a static buffer.  */
+const char *bfd_get_archive_filename (bfd *);
+
 void bfd_nonfatal (const char *);
 
 void bfd_fatal (const char *) ATTRIBUTE_NORETURN;

@@ -31,6 +31,7 @@
 
 #include <sys/stat.h>
 #include <time.h>		/* ctime, maybe time_t */
+#include <assert.h>
 
 #ifndef HAVE_TIME_T_IN_TIME_H
 #ifndef HAVE_TIME_T_IN_TYPES_H
@@ -474,4 +475,39 @@ get_file_size (const char * file_name)
     return statbuf.st_size;
 
   return 0;
+}
+
+/* Return the filename in a static buffer.  */
+
+const char *
+bfd_get_archive_filename (bfd *abfd)
+{
+  static size_t curr = 0;
+  static char *buf;
+  size_t needed;
+
+  assert (abfd != NULL);
+  
+  if (!abfd->my_archive)
+    return bfd_get_filename (abfd);
+
+  needed = (strlen (bfd_get_filename (abfd->my_archive))
+	    + strlen (bfd_get_filename (abfd)) + 3);
+  if (needed > curr)
+    {
+      if (curr)
+	free (buf);
+      curr = needed + (needed >> 1);
+      buf = bfd_malloc (curr);
+      /* If we can't malloc, fail safe by returning just the file name.
+	 This function is only used when building error messages.  */
+      if (!buf)
+	{
+	  curr = 0;
+	  return bfd_get_filename (abfd);
+	}
+    }
+  sprintf (buf, "%s(%s)", bfd_get_filename (abfd->my_archive),
+	   bfd_get_filename (abfd));
+  return buf;
 }

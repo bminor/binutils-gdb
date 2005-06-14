@@ -1120,6 +1120,74 @@ add_redefine_syms_file (const char *filename)
   free (buf);
 }
 
+/* Copy unkown object file IBFD onto OBFD.
+   Returns TRUE upon success, FALSE otherwise.  */
+
+static bfd_boolean
+copy_unknown_object (bfd *ibfd, bfd *obfd)
+{
+  char *cbuf;
+  int tocopy;
+  long ncopied;
+  long size;
+  struct stat buf;
+
+  if (bfd_stat_arch_elt (ibfd, &buf) != 0)
+    {
+      bfd_nonfatal (bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
+  size = buf.st_size;
+  if (size < 0)
+    {
+      non_fatal (_("stat returns negative size for `%s'"),
+		 bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
+  if (bfd_seek (ibfd, (file_ptr) 0, SEEK_SET) != 0)
+    {
+      bfd_nonfatal (bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
+  if (verbose)
+    printf (_("copy from `%s' [unknown] to `%s' [unknown]\n"),
+	    bfd_get_archive_filename (ibfd), bfd_get_filename (obfd));
+
+  cbuf = xmalloc (BUFSIZE);
+  ncopied = 0;
+  while (ncopied < size)
+    {
+      tocopy = size - ncopied;
+      if (tocopy > BUFSIZE)
+	tocopy = BUFSIZE;
+
+      if (bfd_bread (cbuf, (bfd_size_type) tocopy, ibfd)
+	  != (bfd_size_type) tocopy)
+	{
+	  bfd_nonfatal (bfd_get_archive_filename (ibfd));
+	  free (cbuf);
+	  return FALSE;
+	}
+
+      if (bfd_bwrite (cbuf, (bfd_size_type) tocopy, obfd)
+	  != (bfd_size_type) tocopy)
+	{
+	  bfd_nonfatal (bfd_get_filename (obfd));
+	  free (cbuf);
+	  return FALSE;
+	}
+
+      ncopied += tocopy;
+    }
+
+  chmod (bfd_get_filename (obfd), buf.st_mode);
+  free (cbuf);
+  return TRUE;
+}
+
 /* Copy object file IBFD onto OBFD.
    Returns TRUE upon success, FALSE otherwise.  */
 
@@ -1149,8 +1217,8 @@ copy_object (bfd *ibfd, bfd *obfd)
     }
 
   if (verbose)
-    printf (_("copy from %s(%s) to %s(%s)\n"),
-	    bfd_get_filename (ibfd), bfd_get_target (ibfd),
+    printf (_("copy from `%s' [%s] to `%s' [%s]\n"),
+	    bfd_get_archive_filename (ibfd), bfd_get_target (ibfd),
 	    bfd_get_filename (obfd), bfd_get_target (obfd));
 
   if (set_start_set)
@@ -1173,7 +1241,7 @@ copy_object (bfd *ibfd, bfd *obfd)
       if (!bfd_set_start_address (obfd, start)
 	  || !bfd_set_file_flags (obfd, flags))
 	{
-	  bfd_nonfatal (bfd_get_filename (ibfd));
+	  bfd_nonfatal (bfd_get_archive_filename (ibfd));
 	  return FALSE;
 	}
     }
@@ -1186,20 +1254,18 @@ copy_object (bfd *ibfd, bfd *obfd)
 	  || bfd_get_arch (ibfd) != bfd_get_arch (obfd)))
     {
       if (bfd_get_arch (ibfd) == bfd_arch_unknown)
-	fatal (_("Unable to recognise the format of the input file %s"),
-	       bfd_get_filename (ibfd));
+	non_fatal (_("Unable to recognise the format of the input file `%s'"),
+		   bfd_get_archive_filename (ibfd));
       else
-	{
-	  non_fatal (_("Warning: Output file cannot represent architecture %s"),
-		     bfd_printable_arch_mach (bfd_get_arch (ibfd),
-					      bfd_get_mach (ibfd)));
-	  return FALSE;
-	}
+	non_fatal (_("Warning: Output file cannot represent architecture `%s'"),
+		   bfd_printable_arch_mach (bfd_get_arch (ibfd),
+					    bfd_get_mach (ibfd)));
+      return FALSE;
     }
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
     {
-      bfd_nonfatal (bfd_get_filename (ibfd));
+      bfd_nonfatal (bfd_get_archive_filename (ibfd));
       return FALSE;
     }
 
@@ -1385,7 +1451,7 @@ copy_object (bfd *ibfd, bfd *obfd)
   symsize = bfd_get_symtab_upper_bound (ibfd);
   if (symsize < 0)
     {
-      bfd_nonfatal (bfd_get_filename (ibfd));
+      bfd_nonfatal (bfd_get_archive_filename (ibfd));
       return FALSE;
     }
 
@@ -1634,13 +1700,35 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
 	RETURN_NONFATAL (output_name);
 
       if (bfd_check_format (this_element, bfd_object))
-	delete = ! copy_object (this_element, output_bfd);
-
-      if (!bfd_close (output_bfd))
 	{
-	  bfd_nonfatal (bfd_get_filename (output_bfd));
-	  /* Error in new object file. Don't change archive.  */
-	  status = 1;
+	  delete = ! copy_object (this_element, output_bfd);
+
+	  if (! delete
+	      || bfd_get_arch (this_element) != bfd_arch_unknown)
+	    {
+	      if (!bfd_close (output_bfd))
+		{
+		  bfd_nonfatal (bfd_get_filename (output_bfd));
+		  /* Error in new object file. Don't change archive.  */
+		  status = 1;
+		}
+	    }
+	  else
+	    goto copy_unknown_element;
+	}
+      else
+	{
+	  non_fatal (_("Unable to recognise the format of the input file `%s'"),
+		     bfd_get_archive_filename (this_element));
+
+copy_unknown_element:
+	  delete = !copy_unknown_object (this_element, output_bfd);
+	  if (!bfd_close_all_done (output_bfd))
+	    {
+	      bfd_nonfatal (bfd_get_filename (output_bfd));
+	      /* Error in new object file. Don't change archive.  */
+	      status = 1;
+	    }
 	}
 
       if (delete)

@@ -1,3 +1,19 @@
+2005-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 995
+	* ar.c (BUFSIZE): Moved to ...
+	* bucomm.h (BUFSIZE): Here.
+
+	* bucomm.c: Include <assert.h>.
+	(bfd_get_archive_filename): New.
+	* bucomm.h (bfd_get_archive_filename): New.
+
+	* objcopy.c (copy_unknown_object): New.
+	(copy_object): Use bfd_get_archive_filename when reporting input
+	error. Don't call fatal on unknown arch.
+	(copy_archive): Call copy_unknown_object on unknown format or
+	arch.
+
 2005-06-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (cmalloc, xcmalloc, xcrealloc): New functions.
