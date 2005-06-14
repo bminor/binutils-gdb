@@ -1,3 +1,53 @@
+2005-06-14  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (cmalloc, xcmalloc, xcrealloc): New functions.
+	(get_data): Add nmemb argument.  Return NULL if nmemb * size
+	overflows.  If var == NULL, allocate one extra byte and
+	clear it.
+	(slurp_rela_relocs, slurp_rel_relocs, get_32bit_program_headers,
+	get_64bit_program_headers, get_program_headers,
+	get_32bit_section_headers, get_64bit_section_headers,
+	get_32bit_elf_symbols, get_64bit_elf_symbols, process_section_headers,
+	process_section_groups, process_relocs, slurp_ia64_unwind_table,
+	ia64_process_unwind, slurp_hppa_unwind_table, hppa_process_unwind,
+	get_32bit_dynamic_section, get_64bit_dynamic_section,
+	process_dynamic_section, process_version_sections, get_dynamic_data,
+	process_symbol_table, dump_section, load_debug_str, load_debug_loc,
+	load_debug_range, read_and_display_attr_value, process_debug_info,
+	get_debug_info, frame_need_space, display_debug_frames,
+	display_debug_section, process_mips_specific, process_gnu_liblist,
+	process_corefile_note_segment): Adjust get_data callers.  Use
+	cmalloc, xcmalloc and xcrealloc instead of {m,xm,xre}alloc where
+	passed size is a product of 2 numbers.
+
+	* readelf.c (print_mode): Fix comment typo.
+	(slurp_rela_relocs, slurp_rel_relocs): Fix memory leaks.
+	(dump_relocations): Fix a thinko in check for invalid st_name.
+	(process_program_headers): Don't crash if string_table is NULL.
+	(process_section_headers): Don't crash if e_shstrndx is invalid.
+	Ensure string_table_length is 0 if string_table == NULL.
+	Don't return just because string_table is NULL.
+	(process_section_groups): Don't crash if symtab's sh_link or
+	symbol's st_name is invalid.  Fix a memory leak.  Fix check for
+	invalid section number entry.
+	(process_relocs): Don't crash if relocation or symbol section's
+	sh_link is invalid.
+	(slurp_ia64_unwind_table, slurp_hppa_unwind_table): Don't crash if
+	relocation section's sh_info is invalid.
+	(ia64_process_unwind, hppa_process_unwind): Don't crash if symbol
+	table's sh_link is invalid.
+	(process_version_sections): Don't crash on version or symbol
+	section's sh_link is invalid.  Don't crash if symbol's st_shndx
+	is invalid.
+	(process_symbol_table): Don't crash if string table is corrupt
+	or symbol's st_name, st_shndx, vna_name or vda_name is invalid.
+	(debug_apply_rela_addends): Don't crash if relocation section's
+	sh_info or sh_link is invalid.
+	(display_debug_loc): Warn for unterminated .debug_loc section
+	or start offsets not within .debug_loc section boundaries.
+	(process_gnu_liblist): Don't crash if liblist section's sh_link
+	or entry's l_name is invalid.
+
 2005-06-09  Jakub Jelinek  <jakub@redhat.com>
 
 	* objdump.c (disassemble_bytes): Don't crash if q->howto == NULL.
