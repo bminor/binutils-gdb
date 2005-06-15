@@ -1,6 +1,6 @@
 /* Native-dependent code for PA-RISC HP-UX.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -134,8 +134,8 @@ hppa_hpux_fetch_register (int regnum)
      `struct save_state', even for 64-bit code.  */
   if (regnum == HPPA_FLAGS_REGNUM && size == 8)
     {
-      ULONGEST flags = extract_unsigned_integer (buf, 4);
-      store_unsigned_integer (buf, 8, flags);
+      ULONGEST flags = extract_unsigned_integer ((gdb_byte *)buf, 4);
+      store_unsigned_integer ((gdb_byte *)buf, 8, flags);
     }
 
   regcache_raw_supply (current_regcache, regnum, buf);
@@ -176,8 +176,8 @@ hppa_hpux_store_register (int regnum)
      `struct save_state', even for 64-bit code.  */
   if (regnum == HPPA_FLAGS_REGNUM && size == 8)
     {
-      ULONGEST flags = extract_unsigned_integer (buf, 8);
-      store_unsigned_integer (buf, 4, flags);
+      ULONGEST flags = extract_unsigned_integer ((gdb_byte *)buf, 8);
+      store_unsigned_integer ((gdb_byte *)buf, 4, flags);
       size = 4;
     }
 

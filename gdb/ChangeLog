@@ -1,3 +1,9 @@
+2005-06-15  Mark Kettenis  <kettenis@jive.nl>
+
+	* hppa-hpux-nat.c (hppa_hpux_fetch_register)
+	(hppa_hpux_store_register): Add casts in extract_unsigned_integer
+	and store_usigned_integer calls.
+
 2005-06-14  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-main.c (mi_cmd_data_list_register_values): Remove test for
