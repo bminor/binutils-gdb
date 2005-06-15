@@ -3217,6 +3217,7 @@ static struct bfd_elf_special_section const *
 #define ELF_ARCH				bfd_arch_v850
 #define ELF_MACHINE_CODE			EM_V850
 #define ELF_MACHINE_ALT1			EM_CYGNUS_V850
+#define ELF_MACHINE_ALT2			EM_V800 /* This is the value used by the GreenHills toolchain.  */
 #define ELF_MAXPAGESIZE				0x1000
 
 #define elf_info_to_howto			v850_elf_info_to_howto_rela

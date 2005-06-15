@@ -1,3 +1,8 @@
+2005-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-v850.c (ELF_MACHINE_ALT2): Define so that binaries
+	produced by the GreenHills toolchain can be assimilated.
+
 2005-06-14  Steve Ellcey  <sje@cup.hp.com>
 
 	* som.c (som_find_inliner_info): New.
