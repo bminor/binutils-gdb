@@ -51,6 +51,7 @@
 #define ARCH_mmix
 #define ARCH_mn10200
 #define ARCH_mn10300
+#define ARCH_ms1
 #define ARCH_msp430
 #define ARCH_ns32k
 #define ARCH_openrisc
@@ -231,6 +232,11 @@ disassembler (abfd)
 #ifdef ARCH_maxq
     case bfd_arch_maxq:
       disassemble = print_insn_maxq_little;
+      break;
+#endif
+#ifdef ARCH_ms1
+    case bfd_arch_ms1:
+      disassemble = print_insn_ms1;
       break;
 #endif
 #ifdef ARCH_msp430

@@ -1,3 +1,19 @@
+2005-06-15  Dave Brolley  <brolley@redhat.com>
+
+	Contribute Morpho ms1 on behalf of Red Hat
+	* ms1-asm.c, ms1-desc.c, ms1-dis.c, ms1-ibld.c, ms1-opc.c, 
+	ms1-opc.h: New files, Morpho ms1 target.
+
+	2004-05-14  Stan Cox  <scox@redhat.com>
+
+	* disassemble.c (ARCH_ms1): Define.
+	(disassembler): Handle bfd_arch_ms1
+
+	2004-05-13  Michael Snyder  <msnyder@redhat.com>
+
+	* Makefile.am, Makefile.in: Add ms1 target.
+	* configure.in: Ditto.
+
 2005-06-08  Zack Weinberg  <zack@codesourcery.com>
 
 	* arm-opc.h: Delete; fold contents into ...

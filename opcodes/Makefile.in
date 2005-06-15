@@ -255,6 +255,7 @@ HFILES = \
 	iq2000-desc.h iq2000-opc.h \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
+	ms1-desc.h ms1-opc.h \
 	openrisc-desc.h openrisc-opc.h \
 	sh-opc.h \
 	sh64-opc.h \
@@ -349,6 +350,11 @@ CFILES = \
 	m10300-opc.c \
 	mmix-dis.c \
 	mmix-opc.c \
+	ms1-asm.c \
+	ms1-desc.c \
+	ms1-dis.c \
+	ms1-ibld.c \
+	ms1-opc.c \
 	ns32k-dis.c \
 	openrisc-asm.c \
 	openrisc-desc.c \
@@ -463,6 +469,11 @@ ALL_MACHINES = \
 	mips16-opc.lo \
 	mmix-dis.lo \
 	mmix-opc.lo \
+	ms1-asm.lo \
+	ms1-desc.lo \
+	ms1-dis.lo \
+	ms1-ibld.lo \
+	ms1-opc.lo \
 	msp430-dis.lo \
 	ns32k-dis.lo \
 	openrisc-asm.lo \
@@ -527,7 +538,7 @@ noinst_LIBRARIES = libopcodes.a
 POTFILES = $(HFILES) $(CFILES)
 CLEANFILES = \
 	stamp-ip2k stamp-m32r stamp-fr30 stamp-frv stamp-openrisc \
-	stamp-iq2000 stamp-xstormy16 \
+	stamp-iq2000 stamp-ms1 stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 CGENDIR = @cgendir@
@@ -541,7 +552,7 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = fr30 frv ip2k m32r openrisc xstormy16
+CGEN_CPUS = fr30 frv ip2k m32r ms1 openrisc xstormy16
 @CGEN_MAINT_FALSE@IP2K_DEPS = 
 @CGEN_MAINT_TRUE@IP2K_DEPS = stamp-ip2k
 @CGEN_MAINT_FALSE@M32R_DEPS = 
@@ -550,6 +561,8 @@ CGEN_CPUS = fr30 frv ip2k m32r openrisc xstormy16
 @CGEN_MAINT_TRUE@FR30_DEPS = stamp-fr30
 @CGEN_MAINT_FALSE@FRV_DEPS = 
 @CGEN_MAINT_TRUE@FRV_DEPS = stamp-frv
+@CGEN_MAINT_FALSE@MS1_DEPS = 
+@CGEN_MAINT_TRUE@MS1_DEPS = stamp-ms1
 @CGEN_MAINT_FALSE@OPENRISC_DEPS = 
 @CGEN_MAINT_TRUE@OPENRISC_DEPS = stamp-openrisc
 @CGEN_MAINT_FALSE@IQ2000_DEPS = 
@@ -953,11 +966,15 @@ stamp-fr30: $(CGENDEPS) $(CPUDIR)/fr30.cpu $(CPUDIR)/fr30.opc
 
 $(srcdir)/frv-desc.h $(srcdir)/frv-desc.c $(srcdir)/frv-opc.h $(srcdir)/frv-opc.c $(srcdir)/frv-ibld.c $(srcdir)/frv-asm.c $(srcdir)/frv-dis.c: $(FRV_DEPS)
 	@true
-# .cpu and .opc files for frv are kept in a different directory, but cgen has no switch to specify that location, so
-# copy those file to the regular place.
 stamp-frv: $(CGENDEPS) $(srcdir)/../cpu/frv.cpu $(srcdir)/../cpu/frv.opc
 	$(MAKE) run-cgen arch=frv prefix=frv options= \
 		archfile=$(srcdir)/../cpu/frv.cpu opcfile=$(srcdir)/../cpu/frv.opc extrafiles=
+
+$(srcdir)/ms1-desc.h $(srcdir)/ms1-desc.c $(srcdir)/ms1-opc.h $(srcdir)/ms1-opc.c $(srcdir)/ms1-ibld.c $(srcdir)/ms1-asm.c $(srcdir)/ms1-dis.c: $(MS1_DEPS)
+	@true
+stamp-ms1: $(CGENDEPS) $(srcdir)/../cpu/ms1.cpu $(srcdir)/../cpu/ms1.opc
+	$(MAKE) run-cgen arch=ms1 prefix=ms1 options= \
+		archfile=$(srcdir)/../cpu/ms1.cpu opcfile=$(srcdir)/../cpu/ms1.opc extrafiles=
 
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true
@@ -1276,6 +1293,25 @@ mmix-dis.lo: mmix-dis.c $(INCDIR)/opcode/mmix.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
   opintl.h
 mmix-opc.lo: mmix-opc.c $(INCDIR)/opcode/mmix.h $(INCDIR)/symcat.h
+ms1-asm.lo: ms1-asm.c sysdep.h config.h \
+  $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h \
+  $(INCDIR)/opcode/cgen.h ms1-opc.h opintl.h $(INCDIR)/xregex.h \
+  $(INCDIR)/xregex2.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+ms1-desc.lo: ms1-desc.c sysdep.h config.h \
+  $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h \
+  $(INCDIR)/opcode/cgen.h ms1-opc.h opintl.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/xregex.h $(INCDIR)/xregex2.h
+ms1-dis.lo: ms1-dis.c sysdep.h config.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
+  $(INCDIR)/libiberty.h ms1-desc.h $(INCDIR)/opcode/cgen.h \
+  ms1-opc.h opintl.h
+ms1-ibld.lo: ms1-ibld.c sysdep.h config.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
+  ms1-desc.h $(INCDIR)/opcode/cgen.h ms1-opc.h \
+  opintl.h $(INCDIR)/safe-ctype.h
+ms1-opc.lo: ms1-opc.c sysdep.h config.h \
+  $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h \
+  $(INCDIR)/opcode/cgen.h ms1-opc.h $(INCDIR)/libiberty.h
 ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(INCDIR)/opcode/ns32k.h opintl.h
