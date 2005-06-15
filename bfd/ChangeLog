@@ -1,3 +1,7 @@
+2005-06-14  Steve Ellcey  <sje@cup.hp.com>
+
+	* som.c (som_find_inliner_info): New.
+
 2005-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Fix a typo in comment.
