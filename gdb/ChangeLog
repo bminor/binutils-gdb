@@ -1,4 +1,4 @@
-2005-06-15  Mark Kettenis  <kettenis@jive.nl>
+2005-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-nat.c (hppa_hpux_fetch_register)
 	(hppa_hpux_store_register): Add casts in extract_unsigned_integer
