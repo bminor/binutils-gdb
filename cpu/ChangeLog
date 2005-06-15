@@ -1,3 +1,9 @@
+2005-06-15  Dave Brolley  <brolley@redhat.com>
+
+	Contributed by Red Hat.
+	* ms1.cpu: New file.  Written by Nick Clifton, Stan Cox.
+	* ms1.opc: New file.  Written by Stan Cox.
+
 2005-05-10  Nick Clifton  <nickc@redhat.com>
 
 	* Update the address and phone number of the FSF organization in
