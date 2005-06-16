@@ -23,7 +23,7 @@
 # This file is sourced from elf32.em, and defines extra arm-elf
 # specific routines.
 #
-test -z $TARGET2_TYPE && TARGET2_TYPE="rel"
+test -z "$TARGET2_TYPE" && TARGET2_TYPE="rel"
 cat >>e${EMULATION_NAME}.c <<EOF
 
 static char *thumb_entry_symbol = NULL;
