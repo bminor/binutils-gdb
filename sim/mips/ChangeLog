@@ -1,3 +1,14 @@
+2005-06-16  David Ung  <davidu@mips.com>
+            Nigel Stephens  <nigel@mips.com>
+
+        * mips.igen: New mips16e model and include m16e.igen.
+        (check_u64): Add mips16e tag.
+        * m16e.igen: New file for MIPS16e instructions.
+        * configure.ac (mipsisa32*-*-*, mipsisa32r2*-*-*, mipsisa64*-*-*,
+        mipsisa64r2*-*-*): Change sim_gen to M16, add mips16 and mips16e
+        models.
+        * configure: Regenerate.
+
 2005-05-26  David Ung  <davidu@mips.com>
  
  	* mips.igen (mips32r2, mips64r2): New ISA models.  Add new model

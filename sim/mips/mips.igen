@@ -68,6 +68,7 @@
 //  Instructions for the ASEs are in separate .igen files.
 //  ASEs add instructions on to a base ISA.
 :model:::mips16:mips16:			// m16.igen (and m16.dc)
+:model:::mips16e:mips16e:		// m16e.igen
 :model:::mips3d:mips3d:			// mips3d.igen
 :model:::mdmx:mdmx:			// mdmx.igen
 
@@ -491,6 +492,7 @@
 }
 
 :function:::void:check_u64:instruction_word insn
+*mips16e:
 *mips64:
 *mips64r2:
 {
@@ -5689,6 +5691,7 @@
 
 :include:::mips3264r2.igen
 :include:::m16.igen
+:include:::m16e.igen
 :include:::mdmx.igen
 :include:::mips3d.igen
 :include:::sb1.igen
