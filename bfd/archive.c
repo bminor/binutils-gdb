@@ -129,6 +129,7 @@ DESCRIPTION
 
 #include "bfd.h"
 #include "sysdep.h"
+#include "libiberty.h"
 #include "libbfd.h"
 #include "aout/ar.h"
 #include "aout/ranlib.h"
