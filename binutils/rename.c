@@ -37,6 +37,7 @@
 #define O_BINARY 0
 #endif
 
+#if ! defined (_WIN32) || defined (__CYGWIN32__)
 static int simple_copy (const char *, const char *);
 
 /* The number of bytes to copy at once.  */
@@ -88,6 +89,7 @@ simple_copy (const char *from, const char *to)
     }
   return 0;
 }
+#endif /* __CYGWIN32__ or not _WIN32 */
 
 /* Set the times of the file DESTINATION to be the same as those in
    STATBUF.  */
@@ -140,7 +142,7 @@ set_times (const char *destination, const struct stat *statbuf)
    Return 0 if ok, -1 if error.  */
 
 int
-smart_rename (const char *from, const char *to, int preserve_dates)
+smart_rename (const char *from, const char *to, int preserve_dates ATTRIBUTE_UNUSED)
 {
   bfd_boolean exists;
   struct stat s;

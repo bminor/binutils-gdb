@@ -1,3 +1,12 @@
+2005-06-16  Nick Clifton  <nickc@redhat.com>
+
+	* rename.c (simple_copy): Only define if it is going to be used.
+	(smart_rename): Mark the preserve_dates parameter as possibly
+	being unused.
+
+	* resres.c (write_res_data): Prevent a potential compile time
+	warning by casting the return value from fwrite.
+
 2005-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 995

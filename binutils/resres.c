@@ -408,7 +408,7 @@ write_res_data (data, size, count)
      size_t size;
      int count;
 {
-  if (fwrite (data, size, count, fres) != (size_t) count)
+  if ((size_t) fwrite (data, size, count, fres) != (size_t) count)
     fatal ("%s: could not write to file", filename);
 }
 
