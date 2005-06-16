@@ -221,6 +221,13 @@ const struct mips_opcode mips16_opcodes[] =
 {"sw",	    "x,V(S)",	0xd000, 0xf800, RD_x|RD_SP,	0,	0 },
 {"sw",	    "R,V(S)",	0x6200, 0xff00, RD_31|RD_SP,	0,	0 },
 {"xor",	    "x,y",	0xe80e, 0xf81f, WR_x|RD_x|RD_y, 0,	0 },
+  /* MIPS16e additions */
+{"seb",	    "x",	0xe891, 0xf8ff, WR_x|RD_x,	0,      0 },
+{"seh",	    "x",	0xe8b1, 0xf8ff, WR_x|RD_x,	0,      0 },
+{"sew",	    "x",	0xe8d1, 0xf8ff, WR_x|RD_x,	0,      I3 },
+{"zeb",	    "x",	0xe811, 0xf8ff, WR_x|RD_x,	0,      0 },
+{"zeh",	    "x",	0xe831, 0xf8ff, WR_x|RD_x,	0,      0 },
+{"zew",	    "x",	0xe851, 0xf8ff, WR_x|RD_x,	0,      I3 },
 };
 
 const int bfd_mips16_num_opcodes =

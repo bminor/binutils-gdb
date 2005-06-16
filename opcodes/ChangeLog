@@ -1,3 +1,8 @@
+2005-06-16  David Ung  <davidu@mips.com>
+
+        * mips16-opc.c (mips16_opcodes): Add the following MIPS16e
+        instructions to the table; seb/seh/sew/zeb/zeh/zew.
+
 2005-06-15  Dave Brolley  <brolley@redhat.com>
 
 	Contribute Morpho ms1 on behalf of Red Hat
