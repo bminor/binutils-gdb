@@ -1,3 +1,7 @@
+2005-06-16  David Ung  <davidu@mips.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2005-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-nat.c (hppa_hpux_fetch_register)
