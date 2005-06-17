@@ -103,6 +103,15 @@ static reloc_howto_type x86_64_elf_howto_table[] =
   HOWTO(R_X86_64_TPOFF32, 0, 2, 32, FALSE, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_TPOFF32", FALSE, 0xffffffff,
 	0xffffffff, FALSE),
+  HOWTO(R_X86_64_PC64, 0, 4, 64, TRUE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_PC64", FALSE, MINUS_ONE, MINUS_ONE,
+	TRUE),
+  HOWTO(R_X86_64_GOTOFF64, 0, 4, 64, FALSE, 0, complain_overflow_bitfield,
+	bfd_elf_generic_reloc, "R_X86_64_GOTOFF64",
+	FALSE, MINUS_ONE, MINUS_ONE, FALSE),
+  HOWTO(R_X86_64_GOTPC32, 0, 2, 32, TRUE, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_GOTPC32",
+	FALSE, 0xffffffff, 0xffffffff, TRUE),
 
 /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_X86_64_GNU_VTINHERIT, 0, 4, 0, FALSE, 0, complain_overflow_dont,
@@ -147,6 +156,9 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
   { BFD_RELOC_X86_64_DTPOFF32,	R_X86_64_DTPOFF32, },
   { BFD_RELOC_X86_64_GOTTPOFF,	R_X86_64_GOTTPOFF, },
   { BFD_RELOC_X86_64_TPOFF32,	R_X86_64_TPOFF32, },
+  { BFD_RELOC_64_PCREL,		R_X86_64_PC64, },
+  { BFD_RELOC_X86_64_GOTOFF64,	R_X86_64_GOTOFF64, },
+  { BFD_RELOC_X86_64_GOTPC32,	R_X86_64_GOTPC32, },
   { BFD_RELOC_VTABLE_INHERIT,	R_X86_64_GNU_VTINHERIT, },
   { BFD_RELOC_VTABLE_ENTRY,	R_X86_64_GNU_VTENTRY, },
 };
@@ -179,13 +191,13 @@ elf64_x86_64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   r_type = ELF64_R_TYPE (dst->r_info);
   if (r_type < (unsigned int) R_X86_64_GNU_VTINHERIT)
     {
-      BFD_ASSERT (r_type <= (unsigned int) R_X86_64_TPOFF32);
+      BFD_ASSERT (r_type <= (unsigned int) R_X86_64_GOTPC32);
       i = r_type;
     }
   else
     {
       BFD_ASSERT (r_type < (unsigned int) R_X86_64_max);
-      i = r_type - ((unsigned int) R_X86_64_GNU_VTINHERIT - R_X86_64_TPOFF32 - 1);
+      i = r_type - ((unsigned int) R_X86_64_GNU_VTINHERIT - R_X86_64_GOTPC32 - 1);
     }
   cache_ptr->howto = &x86_64_elf_howto_table[i];
   BFD_ASSERT (r_type == cache_ptr->howto->type);
@@ -749,7 +761,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	  }
 	  /* Fall through */
 
-	  //case R_X86_64_GOTPCREL:
+	case R_X86_64_GOTOFF64:
+	case R_X86_64_GOTPC32:
 	create_got:
 	  if (htab->sgot == NULL)
 	    {
@@ -802,6 +815,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
+	case R_X86_64_PC64:
 	case R_X86_64_64:
 	  if (h != NULL && !info->shared)
 	    {
@@ -816,7 +830,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      /* We may need a .plt entry if the function this reloc
 		 refers to is in a shared lib.  */
 	      h->plt.refcount += 1;
-	      if (r_type != R_X86_64_PC32)
+	      if (r_type != R_X86_64_PC32 && r_type != R_X86_64_PC64)
 		h->pointer_equality_needed = 1;
 	    }
 
@@ -845,7 +859,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	       && (sec->flags & SEC_ALLOC) != 0
 	       && (((r_type != R_X86_64_PC8)
 		    && (r_type != R_X86_64_PC16)
-		    && (r_type != R_X86_64_PC32))
+		    && (r_type != R_X86_64_PC32)
+		    && (r_type != R_X86_64_PC64))
 		   || (h != NULL
 		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
@@ -948,7 +963,8 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	      p->count += 1;
 	      if (r_type == R_X86_64_PC8
 		  || r_type == R_X86_64_PC16
-		  || r_type == R_X86_64_PC32)
+		  || r_type == R_X86_64_PC32
+		  || r_type == R_X86_64_PC64)
 		p->pc_count += 1;
 	    }
 	  break;
@@ -1093,6 +1109,7 @@ elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
+	case R_X86_64_PC64:
 	  if (info->shared)
 	    break;
 	  /* Fall thru */
@@ -1941,6 +1958,42 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  break;
 
+	case R_X86_64_GOTOFF64:
+	  /* Relocation is relative to the start of the global offset
+	     table.  */
+
+	  /* Check to make sure it isn't a protected function symbol
+	     for shared library since it may not be local when used
+	     as function address.  */
+	  if (info->shared
+	      && h
+	      && h->def_regular
+	      && h->type == STT_FUNC
+	      && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+	    {
+	      (*_bfd_error_handler)
+		(_("%B: relocation R_X86_64_GOTOFF64 against protected function `%s' can not be used when making a shared object"),
+		 input_bfd, h->root.root.string);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+
+	  /* Note that sgot is not involved in this
+	     calculation.  We always want the start of .got.plt.  If we
+	     defined _GLOBAL_OFFSET_TABLE_ in a different way, as is
+	     permitted by the ABI, we might have to change this
+	     calculation.  */
+	  relocation -= htab->sgotplt->output_section->vma
+			+ htab->sgotplt->output_offset;
+	  break;
+
+	case R_X86_64_GOTPC32:
+	  /* Use global offset table as symbol value.  */
+	  relocation = htab->sgotplt->output_section->vma
+		       + htab->sgotplt->output_offset;
+	  unresolved_reloc = FALSE;
+	  break;
+
 	case R_X86_64_PLT32:
 	  /* Relocation is to the entry for this symbol in the
 	     procedure linkage table.  */
@@ -1999,6 +2052,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32:
+	case R_X86_64_PC64:
 	case R_X86_64_64:
 	  /* FIXME: The ABI says the linker should make sure the value is
 	     the same when it's zeroextended to 64 bit.	 */
@@ -2016,7 +2070,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && ((r_type != R_X86_64_PC8
 		    && r_type != R_X86_64_PC16
-		    && r_type != R_X86_64_PC32)
+		    && r_type != R_X86_64_PC32
+		    && r_type != R_X86_64_PC64)
 		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
@@ -2060,6 +2115,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		       && (r_type == R_X86_64_PC8
 			   || r_type == R_X86_64_PC16
 			   || r_type == R_X86_64_PC32
+			   || r_type == R_X86_64_PC64
 			   || !info->shared
 			   || !info->symbolic
 			   || !h->def_regular))

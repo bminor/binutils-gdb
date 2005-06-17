@@ -1222,6 +1222,7 @@ reloc (size, pcrel, sign, other)
 	case 1: return BFD_RELOC_8_PCREL;
 	case 2: return BFD_RELOC_16_PCREL;
 	case 4: return BFD_RELOC_32_PCREL;
+	case 8: return BFD_RELOC_64_PCREL;
 	}
       as_bad (_("can not do %d byte pc-relative relocation"), size);
     }
@@ -1292,8 +1293,11 @@ tc_i386_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_X86_64_TLSGD
       || fixP->fx_r_type == BFD_RELOC_X86_64_TLSLD
       || fixP->fx_r_type == BFD_RELOC_X86_64_DTPOFF32
+      || fixP->fx_r_type == BFD_RELOC_X86_64_DTPOFF64
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOTTPOFF
       || fixP->fx_r_type == BFD_RELOC_X86_64_TPOFF32
+      || fixP->fx_r_type == BFD_RELOC_X86_64_TPOFF64
+      || fixP->fx_r_type == BFD_RELOC_X86_64_GOTOFF64
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
@@ -3502,14 +3506,16 @@ output_disp (insn_start_frag, insn_start_off)
 
 	      p = frag_more (size);
 	      reloc_type = reloc (size, pcrel, sign, i.reloc[n]);
-	      if (reloc_type == BFD_RELOC_32
-		  && GOT_symbol
+	      if (GOT_symbol
 		  && GOT_symbol == i.op[n].disps->X_add_symbol
-		  && (i.op[n].disps->X_op == O_symbol
-		      || (i.op[n].disps->X_op == O_add
-			  && ((symbol_get_value_expression
-			       (i.op[n].disps->X_op_symbol)->X_op)
-			      == O_subtract))))
+		  && (((reloc_type == BFD_RELOC_32
+			|| reloc_type == BFD_RELOC_X86_64_32S)
+		       && (i.op[n].disps->X_op == O_symbol
+			   || (i.op[n].disps->X_op == O_add
+			       && ((symbol_get_value_expression
+				    (i.op[n].disps->X_op_symbol)->X_op)
+				   == O_subtract))))
+		      || reloc_type == BFD_RELOC_32_PCREL))
 		{
 		  offsetT add;
 
@@ -3526,10 +3532,10 @@ output_disp (insn_start_frag, insn_start_off)
 		      add += p - frag_now->fr_literal;
 		    }
 
-		  /* We don't support dynamic linking on x86-64 yet.  */
-		  if (flag_code == CODE_64BIT)
-		    abort ();
-		  reloc_type = BFD_RELOC_386_GOTPC;
+		  if (flag_code != CODE_64BIT)
+		    reloc_type = BFD_RELOC_386_GOTPC;
+		  else
+		    reloc_type = BFD_RELOC_X86_64_GOTPC32;
 		  i.op[n].disps->X_add_number += add;
 		}
 	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
@@ -3638,7 +3644,8 @@ output_imm (insn_start_frag, insn_start_off)
 	       * since the expression is not pcrel, I felt it would be
 	       * confusing to do it this way.  */
 
-	      if (reloc_type == BFD_RELOC_32
+	      if ((reloc_type == BFD_RELOC_32
+		   || reloc_type == BFD_RELOC_X86_64_32S)
 		  && GOT_symbol
 		  && GOT_symbol == i.op[n].imms->X_add_symbol
 		  && (i.op[n].imms->X_op == O_symbol
@@ -3662,10 +3669,10 @@ output_imm (insn_start_frag, insn_start_off)
 		      add += p - frag_now->fr_literal;
 		    }
 
-		  /* We don't support dynamic linking on x86-64 yet.  */
-		  if (flag_code == CODE_64BIT)
-		    abort ();
-		  reloc_type = BFD_RELOC_386_GOTPC;
+		  if (flag_code != CODE_64BIT)
+		    reloc_type = BFD_RELOC_386_GOTPC;
+		  else
+		    reloc_type = BFD_RELOC_X86_64_GOTPC32;
 		  i.op[n].imms->X_add_number += add;
 		}
 	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
@@ -3698,7 +3705,7 @@ lex_got (reloc, adjust)
     const enum bfd_reloc_code_real rel[NUM_FLAG_CODE];
   } gotrel[] = {
     { "PLT",      { BFD_RELOC_386_PLT32,      0, BFD_RELOC_X86_64_PLT32    } },
-    { "GOTOFF",   { BFD_RELOC_386_GOTOFF,     0, 0                         } },
+    { "GOTOFF",   { BFD_RELOC_386_GOTOFF,     0, BFD_RELOC_X86_64_GOTOFF64 } },
     { "GOTPCREL", { 0,                        0, BFD_RELOC_X86_64_GOTPCREL } },
     { "TLSGD",    { BFD_RELOC_386_TLS_GD,     0, BFD_RELOC_X86_64_TLSGD    } },
     { "TLSLDM",   { BFD_RELOC_386_TLS_LDM,    0, 0                         } },
@@ -3792,7 +3799,7 @@ x86_cons (exp, size)
      expressionS *exp;
      int size;
 {
-  if (size == 4)
+  if (size == 4 || (flag_code == CODE_64BIT && size == 8))
     {
       /* Handle @GOTOFF and the like in an expression.  */
       char *save;
@@ -4104,7 +4111,8 @@ i386_displacement (disp_start, disp_end)
      the symbol table.  We will ultimately change the relocation
      to be relative to the beginning of the section.  */
   if (i.reloc[this_operand] == BFD_RELOC_386_GOTOFF
-      || i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
+      || i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL
+      || i.reloc[this_operand] == BFD_RELOC_X86_64_GOTOFF64)
     {
       if (exp->X_op != O_symbol)
 	{
@@ -4122,6 +4130,8 @@ i386_displacement (disp_start, disp_end)
       exp->X_op_symbol = GOT_symbol;
       if (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
 	i.reloc[this_operand] = BFD_RELOC_32_PCREL;
+      else if (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTOFF64)
+	i.reloc[this_operand] = BFD_RELOC_64;
       else
 	i.reloc[this_operand] = BFD_RELOC_32;
     }
@@ -4812,6 +4822,9 @@ md_apply_fix (fixP, valP, seg)
 	default:
 	  break;
 
+	case BFD_RELOC_64:
+	  fixP->fx_r_type = BFD_RELOC_64_PCREL;
+	  break;
 	case BFD_RELOC_32:
 	case BFD_RELOC_X86_64_32S:
 	  fixP->fx_r_type = BFD_RELOC_32_PCREL;
@@ -4827,6 +4840,7 @@ md_apply_fix (fixP, valP, seg)
 
   if (fixP->fx_addsy != NULL
       && (fixP->fx_r_type == BFD_RELOC_32_PCREL
+	  || fixP->fx_r_type == BFD_RELOC_64_PCREL
 	  || fixP->fx_r_type == BFD_RELOC_16_PCREL
 	  || fixP->fx_r_type == BFD_RELOC_8_PCREL)
       && !use_rela_relocations)
@@ -4901,7 +4915,9 @@ md_apply_fix (fixP, valP, seg)
       case BFD_RELOC_386_TLS_LDO_32:
       case BFD_RELOC_386_TLS_LE_32:
       case BFD_RELOC_X86_64_DTPOFF32:
+      case BFD_RELOC_X86_64_DTPOFF64:
       case BFD_RELOC_X86_64_TPOFF32:
+      case BFD_RELOC_X86_64_TPOFF64:
 	S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	break;
 
@@ -5339,7 +5355,6 @@ i386_validate_fix (fixp)
 {
   if (fixp->fx_subsy && fixp->fx_subsy == GOT_symbol)
     {
-      /* GOTOFF relocation are nonsense in 64bit mode.  */
       if (fixp->fx_r_type == BFD_RELOC_32_PCREL)
 	{
 	  if (flag_code != CODE_64BIT)
@@ -5348,9 +5363,10 @@ i386_validate_fix (fixp)
 	}
       else
 	{
-	  if (flag_code == CODE_64BIT)
-	    abort ();
-	  fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
+	  if (flag_code != CODE_64BIT)
+	    fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
+	  else
+	    fixp->fx_r_type = BFD_RELOC_X86_64_GOTOFF64;
 	}
       fixp->fx_subsy = 0;
     }
@@ -5384,8 +5400,12 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_X86_64_TLSGD:
     case BFD_RELOC_X86_64_TLSLD:
     case BFD_RELOC_X86_64_DTPOFF32:
+    case BFD_RELOC_X86_64_DTPOFF64:
     case BFD_RELOC_X86_64_GOTTPOFF:
     case BFD_RELOC_X86_64_TPOFF32:
+    case BFD_RELOC_X86_64_TPOFF64:
+    case BFD_RELOC_X86_64_GOTOFF64:
+    case BFD_RELOC_X86_64_GOTPC32:
     case BFD_RELOC_RVA:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
@@ -5415,6 +5435,9 @@ tc_gen_reloc (section, fixp)
 	    case 1: code = BFD_RELOC_8_PCREL;  break;
 	    case 2: code = BFD_RELOC_16_PCREL; break;
 	    case 4: code = BFD_RELOC_32_PCREL; break;
+#ifdef BFD64
+	    case 8: code = BFD_RELOC_64_PCREL; break;
+#endif
 	    }
 	}
       else
@@ -5438,14 +5461,14 @@ tc_gen_reloc (section, fixp)
       break;
     }
 
-  if (code == BFD_RELOC_32
+  if ((code == BFD_RELOC_32 || code == BFD_RELOC_32_PCREL)
       && GOT_symbol
       && fixp->fx_addsy == GOT_symbol)
     {
-      /* We don't support GOTPC on 64bit targets.  */
-      if (flag_code == CODE_64BIT)
-	abort ();
-      code = BFD_RELOC_386_GOTPC;
+      if (flag_code != CODE_64BIT)
+	code = BFD_RELOC_386_GOTPC;
+      else
+	code = BFD_RELOC_X86_64_GOTPC32;
     }
 
   rel = (arelent *) xmalloc (sizeof (arelent));

@@ -1,3 +1,18 @@
+2005-06-17  Jan Beulich  <jbeulich@novell.com>
+
+	* bfd-in2.h (elf_x86_64_reloc_type): Add BFD_RELOC_X86_64_GOTOFF64
+	and BFD_RELOC_X86_64_GOTPC32.
+	* libbfd.h (bfd_reloc_code_real_names): Likewise.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Add entries for
+	R_X86_64_PC64, R_X86_64_GOTOFF64, and R_X86_64_GOTPC32.
+	(x86_64_reloc_map): Add entries for R_X86_64_PC64, R_X86_64_GOTOFF64,
+	and R_X86_64_GOTPC32.
+	(elf64_x86_64_info_to_howto): Adjust bounding relocation type.
+	(elf64_x86_64_check_relocs): Also handle R_X86_64_PC64,
+	R_X86_64_GOTOFF64, and R_X86_64_GOTPC32.
+	(elf64_x86_64_relocate_section): Likewise.
+	(elf64_x86_64_gc_sweep_hook): Also handle R_X86_64_PC64.
+
 2005-06-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* archive.c: Include "libiberty.h".
