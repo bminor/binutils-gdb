@@ -1,3 +1,12 @@
+2005-06-17  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (CHECK_ENTSIZE_VALUES, CHECK_ENTSIZE): Define.
+	(process_section_headers): Use it.
+	(process_relocs): Don't crash if symsec is not SHT_SYMTAB
+	or SHT_DYNSYM.
+	(process_version_sections): Use sizeof (Elf_External_Versym)
+	instead of sh_entsize.
+
 2005-06-16  Nick Clifton  <nickc@redhat.com>
 
 	* rename.c (simple_copy): Only define if it is going to be used.

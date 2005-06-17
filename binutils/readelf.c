@@ -3871,6 +3871,22 @@ process_section_headers (FILE *file)
       break;
     }
 
+#define CHECK_ENTSIZE_VALUES(section, i, size32, size64) \
+  do									    \
+    {									    \
+      size_t expected_entsize						    \
+	= is_32bit_elf ? size32 : size64;				    \
+      if (section->sh_entsize != expected_entsize)			    \
+	error (_("Section %d has invalid sh_entsize %lx (expected %lx)\n"), \
+	       i, (unsigned long int) section->sh_entsize,		    \
+	       (unsigned long int) expected_entsize);			    \
+      section->sh_entsize = expected_entsize;				    \
+    }									    \
+  while (0)
+#define CHECK_ENTSIZE(section, i, type) \
+  CHECK_ENTSIZE_VALUES (section, i, sizeof (Elf32_External_##type),	    \
+			sizeof (Elf64_External_##type))
+
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
        i++, section++)
@@ -3885,6 +3901,7 @@ process_section_headers (FILE *file)
 	      continue;
 	    }
 
+	  CHECK_ENTSIZE (section, i, Sym);
 	  num_dynamic_syms = section->sh_size / section->sh_entsize;
 	  dynamic_symbols = GET_ELF_SYMBOLS (file, section);
 	}
@@ -3910,6 +3927,14 @@ process_section_headers (FILE *file)
 	    }
 	  symtab_shndx_hdr = section;
 	}
+      else if (section->sh_type == SHT_SYMTAB)
+	CHECK_ENTSIZE (section, i, Sym);
+      else if (section->sh_type == SHT_GROUP)
+	CHECK_ENTSIZE_VALUES (section, i, GRP_ENTRY_SIZE, GRP_ENTRY_SIZE);
+      else if (section->sh_type == SHT_REL)
+	CHECK_ENTSIZE (section, i, Rel);
+      else if (section->sh_type == SHT_RELA)
+	CHECK_ENTSIZE (section, i, Rela);
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
 		|| do_debug_lines || do_debug_pubnames || do_debug_aranges
 		|| do_debug_frames || do_debug_macinfo || do_debug_str
@@ -4488,6 +4513,10 @@ process_relocs (FILE *file)
 		  char *strtab = NULL;
 
 		  symsec = SECTION_HEADER (section->sh_link);
+		  if (symsec->sh_type != SHT_SYMTAB
+		      && symsec->sh_type != SHT_DYNSYM)
+                    continue;
+
 		  nsyms = symsec->sh_size / symsec->sh_entsize;
 		  symtab = GET_ELF_SYMBOLS (file, symsec);
 
@@ -6358,7 +6387,7 @@ process_version_sections (FILE *file)
 	      break;
 
 	    link_section = SECTION_HEADER (section->sh_link);
-	    total = section->sh_size / section->sh_entsize;
+	    total = section->sh_size / sizeof (Elf_External_Versym);
 
 	    if (SECTION_HEADER_INDEX (link_section->sh_link)
 		>= elf_header.e_shnum)
