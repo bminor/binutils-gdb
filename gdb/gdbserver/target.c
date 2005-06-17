@@ -42,7 +42,8 @@ set_desired_inferior (int use_general)
       /* If we are continuing any (all) thread(s), use step_thread
 	 to decide which thread to step and/or send the specified
 	 signal to.  */
-      if (step_thread > 0 && (cont_thread == 0 || cont_thread == -1))
+      if ((step_thread != 0 && step_thread != -1)
+	  && (cont_thread == 0 || cont_thread == -1))
 	found = (struct thread_info *) find_inferior_id (&all_threads,
 							 step_thread);
 

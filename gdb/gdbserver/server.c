@@ -281,7 +281,7 @@ myresume (int step, int sig)
   struct thread_resume resume_info[2];
   int n = 0;
 
-  if (step || sig || cont_thread > 0)
+  if (step || sig || (cont_thread != 0 && cont_thread != -1))
     {
       resume_info[0].thread
 	= ((struct inferior_list_entry *) current_inferior)->id;
@@ -293,7 +293,7 @@ myresume (int step, int sig)
   resume_info[n].thread = -1;
   resume_info[n].step = 0;
   resume_info[n].sig = 0;
-  resume_info[n].leave_stopped = (cont_thread > 0);
+  resume_info[n].leave_stopped = (cont_thread != 0 && cont_thread != -1);
 
   (*the_target->resume) (resume_info);
 }

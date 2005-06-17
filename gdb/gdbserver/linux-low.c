@@ -667,7 +667,7 @@ retry:
      then we need to make sure we restart the other threads.  We could
      pick a thread at random or restart all; restarting all is less
      arbitrary.  */
-  if (cont_thread > 0)
+  if (cont_thread != 0 && cont_thread != -1)
     {
       child = (struct thread_info *) find_inferior_id (&all_threads,
 						       cont_thread);
@@ -1435,7 +1435,7 @@ linux_send_signal (int signum)
 {
   extern unsigned long signal_pid;
 
-  if (cont_thread > 0)
+  if (cont_thread != 0 && cont_thread != -1)
     {
       struct process_info *process;
 

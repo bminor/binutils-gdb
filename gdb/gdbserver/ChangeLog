@@ -1,3 +1,10 @@
+2005-06-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (linux_wait, linux_send_signal): Don't test
+	an unsigned long variable for > 0 if it could be MAX_ULONG.
+	* server.c (myresume): Likewise.
+	* target.c (set_desired_inferior): Likewise.
+
 2005-06-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.ac: Simplify and improve check for socklen_t.
