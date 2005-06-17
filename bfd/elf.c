@@ -1948,7 +1948,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	Elf_Internal_Shdr *hdr2;
 	unsigned int num_sec = elf_numsections (abfd);
 
-	if (hdr->sh_entsize != (hdr->sh_type == SHT_REL
+	if (hdr->sh_entsize
+	    != (bfd_size_type) (hdr->sh_type == SHT_REL
 				? bed->s->sizeof_rel : bed->s->sizeof_rela))
 	  return FALSE;
 

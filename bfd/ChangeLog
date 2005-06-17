@@ -1,5 +1,7 @@
 2005-06-17  Jakub Jelinek  <jakub@redhat.com>
 
+	* elf.c (bfd_section_from_shdr): Kill bogus warning.
+
 	* elf.c (bfd_section_from_shdr): Fail if sh_entsize is bogus for
 	symbol, relocation, group or versym sections.
 
