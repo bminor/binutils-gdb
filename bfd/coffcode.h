@@ -4830,7 +4830,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   amt = (bfd_size_type) asect->reloc_count * sizeof (arelent);
   reloc_cache = bfd_alloc (abfd, amt);
 
-  if (reloc_cache == NULL)
+  if (reloc_cache == NULL || native_relocs == NULL)
     return FALSE;
 
   for (idx = 0; idx < asect->reloc_count; idx++)

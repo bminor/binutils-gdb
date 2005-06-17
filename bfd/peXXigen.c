@@ -1103,7 +1103,7 @@ pe_print_idata (bfd * abfd, void * vfile)
       bfd_vma toc_address;
       bfd_vma start_address;
       bfd_byte *data;
-      int offset;
+      bfd_vma offset;
 
       if (!bfd_malloc_and_get_section (abfd, rel_section, &data))
 	{
@@ -1113,6 +1113,13 @@ pe_print_idata (bfd * abfd, void * vfile)
 	}
 
       offset = abfd->start_address - rel_section->vma;
+
+      if (offset >= rel_section->size || offset + 8 > rel_section->size)
+        {
+          if (data != NULL)
+            free (data);
+          return FALSE;
+        }
 
       start_address = bfd_get_32 (abfd, data + offset);
       loadable_toc_address = bfd_get_32 (abfd, data + offset + 4);
@@ -1181,6 +1188,9 @@ pe_print_idata (bfd * abfd, void * vfile)
 
       if (hint_addr == 0 && first_thunk == 0)
 	break;
+
+      if (dll_name - adj >= section->size)
+        break;
 
       dll = (char *) data + dll_name - adj;
       fprintf (file, _("\n\tDLL Name: %s\n"), dll);

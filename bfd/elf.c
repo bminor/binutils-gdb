@@ -1811,7 +1811,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (elf_onesymtab (abfd) == shindex)
 	return TRUE;
 
-      BFD_ASSERT (hdr->sh_entsize == bed->s->sizeof_sym);
+      if (hdr->sh_entsize != bed->s->sizeof_sym)
+	return FALSE;
       BFD_ASSERT (elf_onesymtab (abfd) == 0);
       elf_onesymtab (abfd) = shindex;
       elf_tdata (abfd)->symtab_hdr = *hdr;
@@ -1862,7 +1863,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (elf_dynsymtab (abfd) == shindex)
 	return TRUE;
 
-      BFD_ASSERT (hdr->sh_entsize == bed->s->sizeof_sym);
+      if (hdr->sh_entsize != bed->s->sizeof_sym)
+	return FALSE;
       BFD_ASSERT (elf_dynsymtab (abfd) == 0);
       elf_dynsymtab (abfd) = shindex;
       elf_tdata (abfd)->dynsymtab_hdr = *hdr;
@@ -1946,6 +1948,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	Elf_Internal_Shdr *hdr2;
 	unsigned int num_sec = elf_numsections (abfd);
 
+	if (hdr->sh_entsize != (hdr->sh_type == SHT_REL
+				? bed->s->sizeof_rel : bed->s->sizeof_rela))
+	  return FALSE;
+
 	/* Check for a bogus link to avoid crashing.  */
 	if ((hdr->sh_link >= SHN_LORESERVE && hdr->sh_link <= SHN_HIRESERVE)
 	    || hdr->sh_link >= num_sec)
@@ -2004,10 +2010,10 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name,
 						  shindex);
 
-        /* Prevent endless recursion on broken objects.  */
-        if (elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_REL
-            || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_RELA)
-          return FALSE;
+	/* Prevent endless recursion on broken objects.  */
+	if (elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_REL
+	    || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_RELA)
+	  return FALSE;
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return FALSE;
 	target_sect = bfd_section_from_elf_index (abfd, hdr->sh_info);
@@ -2047,6 +2053,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       break;
 
     case SHT_GNU_versym:
+      if (hdr->sh_entsize != sizeof (Elf_External_Versym))
+	return FALSE;
       elf_dynversym (abfd) = shindex;
       elf_tdata (abfd)->dynversym_hdr = *hdr;
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
@@ -2065,6 +2073,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       /* We need a BFD section for objcopy and relocatable linking,
 	 and it's handy to have the signature available as the section
 	 name.  */
+      if (hdr->sh_entsize != GRP_ENTRY_SIZE)
+	return FALSE;
       name = group_signature (abfd, hdr);
       if (name == NULL)
 	return FALSE;

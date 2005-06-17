@@ -1,3 +1,13 @@
+2005-06-17  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (bfd_section_from_shdr): Fail if sh_entsize is bogus for
+	symbol, relocation, group or versym sections.
+
+	* coffcode.h (coff_slurp_reloc_table): Don't crash if native_relocs
+	is NULL.
+	* peXXigen.c (pe_print_idata): Don't crash if dll_name or start_address
+	doesn't point into the section.
+
 2005-06-17  Jan Beulich  <jbeulich@novell.com>
 
 	* bfd-in2.h (elf_x86_64_reloc_type): Add BFD_RELOC_X86_64_GOTOFF64
