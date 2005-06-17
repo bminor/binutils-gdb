@@ -1056,9 +1056,9 @@ set_thread (int th, int gen)
       buf[3] = '\0';
     }
   else if (th < 0)
-    sprintf (&buf[2], "-%x", -th);
+    xsnprintf (&buf[2], rs->remote_packet_size - 2, "-%x", -th);
   else
-    sprintf (&buf[2], "%x", th);
+    xsnprintf (&buf[2], rs->remote_packet_size - 2, "%x", th);
   putpkt (buf);
   getpkt (buf, (rs->remote_packet_size), 0);
   if (gen)
@@ -1076,9 +1076,9 @@ remote_thread_alive (ptid_t ptid)
   char buf[16];
 
   if (tid < 0)
-    sprintf (buf, "T-%08x", -tid);
+    xsnprintf (buf, sizeof (buf), "T-%08x", -tid);
   else
-    sprintf (buf, "T%08x", tid);
+    xsnprintf (buf, sizeof (buf), "T%08x", tid);
   putpkt (buf);
   getpkt (buf, sizeof (buf), 0);
   return (buf[0] == 'O' && buf[1] == 'K');
@@ -1869,7 +1869,8 @@ remote_threads_extra_info (struct thread_info *tp)
 
   if (use_threadextra_query)
     {
-      sprintf (bufp, "qThreadExtraInfo,%x", PIDGET (tp->ptid));
+      xsnprintf (bufp, rs->remote_packet_size, "qThreadExtraInfo,%x", 
+		 PIDGET (tp->ptid));
       putpkt (bufp);
       getpkt (bufp, (rs->remote_packet_size), 0);
       if (bufp[0] != 0)
@@ -1890,12 +1891,14 @@ remote_threads_extra_info (struct thread_info *tp)
     if (threadinfo.active)
       {
 	if (*threadinfo.shortname)
-	  n += sprintf(&display_buf[0], " Name: %s,", threadinfo.shortname);
+	  n += xsnprintf (&display_buf[0], sizeof (display_buf) - n, 
+			  " Name: %s,", threadinfo.shortname);
 	if (*threadinfo.display)
-	  n += sprintf(&display_buf[n], " State: %s,", threadinfo.display);
+	  n += xsnprintf (&display_buf[n], sizeof (display_buf) - n, 
+			  " State: %s,", threadinfo.display);
 	if (*threadinfo.more_display)
-	  n += sprintf(&display_buf[n], " Priority: %s",
-		       threadinfo.more_display);
+	  n += xsnprintf (&display_buf[n], sizeof (display_buf) - n, 
+			  " Priority: %s", threadinfo.more_display);
 
 	if (n > 0)
 	  {
@@ -1920,8 +1923,7 @@ extended_remote_restart (void)
 
   /* Send the restart command; for reasons I don't understand the
      remote side really expects a number after the "R".  */
-  buf[0] = 'R';
-  sprintf (&buf[1], "%x", 0);
+  xsnprintf (&buf, rs->remote_packet_size, "R%x", 0);
   putpkt (buf);
 
   /* Now query for status so this looks just like we restarted
@@ -2138,11 +2140,11 @@ remote_check_symbols (struct objfile *objfile)
       msg[end] = '\0';
       sym = lookup_minimal_symbol (msg, NULL, NULL);
       if (sym == NULL)
-	sprintf (msg, "qSymbol::%s", &reply[8]);
+	xsnprintf (msg, rs->remote_packet_size, "qSymbol::%s", &reply[8]);
       else
-	sprintf (msg, "qSymbol:%s:%s",
-		 paddr_nz (SYMBOL_VALUE_ADDRESS (sym)),
-		 &reply[8]);
+	xsnprintf (msg, rs->remote_packet_size, "qSymbol:%s:%s",
+		   paddr_nz (SYMBOL_VALUE_ADDRESS (sym)),
+		   &reply[8]);
       putpkt (msg);
       getpkt (reply, (rs->remote_packet_size), 0);
     }
@@ -3435,7 +3437,7 @@ store_register_using_P (int regnum)
   char regp[MAX_REGISTER_SIZE];
   char *p;
 
-  sprintf (buf, "P%s=", phex_nz (reg->pnum, 0));
+  xsnprintf (buf, rs->remote_packet_size, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
   regcache_raw_collect (current_regcache, reg->regnum, regp);
   bin2hex (regp, p, register_size (current_gdbarch, reg->regnum));
@@ -4908,7 +4910,8 @@ compare_sections_command (char *args, int from_tty)
       matched = 1;		/* do this section */
       lma = s->lma;
       /* FIXME: assumes lma can fit into long.  */
-      sprintf (buf, "qCRC:%lx,%lx", (long) lma, (long) size);
+      xsnprintf (buf, rs->remote_packet_size, "qCRC:%lx,%lx", 
+		 (long) lma, (long) size);
       putpkt (buf);
 
       /* Be clever; compute the host_crc before waiting for target
