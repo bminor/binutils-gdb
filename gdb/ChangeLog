@@ -1,3 +1,11 @@
+2005-06-17  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* remote.c (set_thread, remote_thread_alive): Replace sprintf
+	call with xsnprintf.
+	(remote_threads_extra_info, extended_remote_restart)
+	(remote_check_symbols, store_register_using_P)
+	(compare_sections_command): Ditto.
+
 2005-06-16  David Ung  <davidu@mips.com>
 
 	* MAINTAINERS (Write After Approval): Add self.
