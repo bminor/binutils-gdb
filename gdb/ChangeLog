@@ -1,3 +1,9 @@
+2005-06-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* regcache.c (regcache_raw_supply, regcache_raw_collect): Change
+	type of last argument back to `void *'.
+	* regcache.h (regcache_raw_supply, regcache_raw_collect): Likewise.
+
 2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmds.c (mi_cmds): Remove entry for -stack-info-frame.

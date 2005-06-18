@@ -98,9 +98,9 @@ void regcache_cooked_write_part (struct regcache *regcache, int regnum,
    target_fetch_registers() or target_store_registers().  */
 
 extern void regcache_raw_supply (struct regcache *regcache,
-				 int regnum, const gdb_byte *buf);
+				 int regnum, const void *buf);
 extern void regcache_raw_collect (const struct regcache *regcache,
-				  int regnum, gdb_byte *buf);
+				  int regnum, void *buf);
 
 
 /* The register's ``offset''.

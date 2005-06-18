@@ -1002,8 +1002,7 @@ write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid)
 /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
 
 void
-regcache_raw_supply (struct regcache *regcache, int regnum,
-		     const gdb_byte *buf)
+regcache_raw_supply (struct regcache *regcache, int regnum, const void *buf)
 {
   void *regbuf;
   size_t size;
@@ -1036,8 +1035,7 @@ regcache_raw_supply (struct regcache *regcache, int regnum,
 /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
 
 void
-regcache_raw_collect (const struct regcache *regcache, int regnum,
-		      gdb_byte *buf)
+regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
 {
   const void *regbuf;
   size_t size;
