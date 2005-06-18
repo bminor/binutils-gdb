@@ -1,3 +1,9 @@
+2005-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* reloc.c: Add BFD_RELOC_X86_64_GOTOFF64 and
+	BFD_RELOC_X86_64_GOTPC32.
+	* bfd-in2.h: Regenerated.
+
 2005-06-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf.c (bfd_section_from_shdr): Kill bogus warning.
