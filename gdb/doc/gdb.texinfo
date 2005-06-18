@@ -10651,6 +10651,17 @@ descriptions of the file options @samp{-mapped} and @samp{-readnow}
 and with the commands @code{file}, @code{symbol-file}, or
 @code{add-symbol-file}, described below), for more information.
 
+@cindex unlinked object files
+@cindex patching object files
+You can load unlinked object @file{.o} files into @value{GDBN} using
+the @code{file} command.  You will not be able to ``run'' an object
+file, but you can disassemble functions and inspect variables.  Also,
+if the underlying BFD functionality supports it, you could use
+@kbd{gdb -write} to patch object files using this technique.  Note
+that @value{GDBN} can neither interpret nor modify relocations in this
+case, so branches and some initialized variables will appear to go to
+the wrong place.  But this feature is still handy from time to time.
+
 @item file
 @code{file} with no argument makes @value{GDBN} discard any information it
 has on both executable file and the symbol table.

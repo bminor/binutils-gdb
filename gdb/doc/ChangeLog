@@ -6,6 +6,8 @@
 	(Output Formats): More detailed description of the `c' format.
 	(Memory): List explicitly all the formats supported by `x'.
 	(Threads): Add an @cindex entry for "thread apply".
+	(Files): Document the possibility of loading unlinked object
+	files.
 
 2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
 
