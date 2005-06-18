@@ -2386,6 +2386,7 @@ As with the @samp{[New @dots{}]} message, the form of the text after
 threads.
 
 @kindex thread apply
+@cindex apply command to several threads
 @item thread apply [@var{threadno}] [@var{all}]  @var{args}
 The @code{thread apply} command allows you to apply a command to one or
 more threads.  Specify the numbers of the threads that you want affected

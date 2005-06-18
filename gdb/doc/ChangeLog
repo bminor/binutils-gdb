@@ -5,6 +5,7 @@
 	(Files): Add an xref to the above description.
 	(Output Formats): More detailed description of the `c' format.
 	(Memory): List explicitly all the formats supported by `x'.
+	(Threads): Add an @cindex entry for "thread apply".
 
 2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
 
