@@ -1,7 +1,7 @@
 2005-06-17  Wu Zhou  <woodzltc@cn.ibm.com>
 
-	* gdb.fortran/array_element.f: New file.
-	* gdb.fortran/array_element.exp: New testcase.
+	* gdb.fortran/array-element.f: New file.
+	* gdb.fortran/array-element.exp: New testcase.
 
 2005-06-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
