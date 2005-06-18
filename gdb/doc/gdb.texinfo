@@ -5309,7 +5309,10 @@ The command @code{info symbol 0x54320} yields similar results.
 @xref{Symbols, info symbol}.
 
 @item c
-Regard as an integer and print it as a character constant.
+Regard as an integer and print it as a character constant.  This
+prints both the numerical value and its character representation.  The
+character representation is replaced with the octal escape @samp{\nnn}
+for characters outside the 7-bit @sc{ascii} range.
 
 @item f
 Regard the bits of the value as a floating point number and print
@@ -5359,10 +5362,12 @@ how much memory (counting by units @var{u}) to display.
 @c 4.1.2.
 
 @item @var{f}, the display format
-The display format is one of the formats used by @code{print},
-@samp{s} (null-terminated string), or @samp{i} (machine instruction).
-The default is @samp{x} (hexadecimal) initially.
-The default changes each time you use either @code{x} or @code{print}.
+The display format is one of the formats used by @code{print}
+(@samp{x}, @samp{d}, @samp{u}, @samp{o}, @samp{t}, @samp{a}, @samp{c},
+@samp{f}), and in addition @samp{s} (for null-terminated strings) and
+@samp{i} (for machine instructions).  The default is @samp{x}
+(hexadecimal) initially.  The default changes each time you use either
+@code{x} or @code{print}.
 
 @item @var{u}, the unit size
 The unit size is any of

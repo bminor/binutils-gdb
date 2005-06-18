@@ -3,6 +3,8 @@
 	* gdb.texinfo (Server): Clarify that `file' should be used before
 	connecting to the server.
 	(Files): Add an xref to the above description.
+	(Output Formats): More detailed description of the `c' format.
+	(Memory): List explicitly all the formats supported by `x'.
 
 2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
 
