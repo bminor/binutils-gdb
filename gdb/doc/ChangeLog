@@ -9,6 +9,8 @@
 	(Files): Document the possibility of loading unlinked object
 	files.  Add more indexing for solib-absolute-prefix and
 	--with-sysroot.
+	(Machine Code): Document possible problems with locations in
+	shared libraries.
 
 2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
 

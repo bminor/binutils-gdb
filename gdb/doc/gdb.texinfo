@@ -4922,6 +4922,12 @@ End of assembler dump.
 Some architectures have more than one commonly-used set of instruction
 mnemonics or other syntax.
 
+For programs that were dynamically linked and use shared libraries,
+instructions that call functions or branch to locations in the shared
+libraries might show a seemingly bogus location---it's actually a
+location of the relocation table.  On some architectures, @value{GDBN}
+might be able to resolve these to actual function names.
+
 @table @code
 @kindex set disassembly-flavor
 @cindex Intel disassembly flavor
