@@ -47,9 +47,6 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
   struct cleanup *cleanup_stack;
   struct frame_info *fi;
 
-  if (!target_has_stack)
-    error (_("mi_cmd_stack_list_frames: No stack."));
-
   if (argc > 2 || argc == 1)
     error (_("mi_cmd_stack_list_frames: Usage: [FRAME_LOW FRAME_HIGH]"));
 
@@ -103,9 +100,6 @@ mi_cmd_stack_info_depth (char *command, char **argv, int argc)
   int frame_high;
   int i;
   struct frame_info *fi;
-
-  if (!target_has_stack)
-    error (_("mi_cmd_stack_info_depth: No stack."));
 
   if (argc > 1)
     error (_("mi_cmd_stack_info_depth: Usage: [MAX_DEPTH]"));
@@ -329,16 +323,9 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 enum mi_cmd_result
 mi_cmd_stack_select_frame (char *command, char **argv, int argc)
 {
-  if (!target_has_stack)
-    error (_("mi_cmd_stack_select_frame: No stack."));
+  if (argc == 0 || argc > 1)
+    error (_("mi_cmd_stack_select_frame: Usage: FRAME_SPEC"));
 
-  if (argc > 1)
-    error (_("mi_cmd_stack_select_frame: Usage: [FRAME_SPEC]"));
-
-  /* with no args, don't change frame */
-  if (argc == 0)
-    select_frame_command (0, 1 /* not used */ );
-  else
-    select_frame_command (argv[0], 1 /* not used */ );
+  select_frame_command (argv[0], 1 /* not used */ );
   return MI_CMD_DONE;
 }
