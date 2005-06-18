@@ -1,5 +1,9 @@
 2005-06-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.c (hppa_fallback_frame_cache): Don't error out if we
+	can't find the bounds of the current function.  Wrap some long
+	lines in the process.
+
 	* regcache.c (regcache_raw_supply, regcache_raw_collect): Change
 	type of last argument back to `void *'.
 	* regcache.h (regcache_raw_supply, regcache_raw_collect): Likewise.

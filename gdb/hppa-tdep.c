@@ -2144,72 +2144,65 @@ static struct hppa_frame_cache *
 hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct hppa_frame_cache *cache;
-  unsigned int frame_size;
-  int found_rp;
-  CORE_ADDR pc, start_pc, end_pc, cur_pc;
+  unsigned int frame_size = 0;
+  int found_rp = 0;
+  CORE_ADDR start_pc;
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ hppa_fallback_frame_cache (frame=%d)-> ",
-      frame_relative_level(next_frame));
+    fprintf_unfiltered (gdb_stdlog,
+			"{ hppa_fallback_frame_cache (frame=%d) -> ",
+			frame_relative_level (next_frame));
 
   cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  pc = frame_func_unwind (next_frame);
-  cur_pc = frame_pc_unwind (next_frame);
-  frame_size = 0;
-  found_rp = 0;
-
-  find_pc_partial_function (pc, NULL, &start_pc, &end_pc);
-
-  if (start_pc == 0 || end_pc == 0)
+  start_pc = frame_func_unwind (next_frame);
+  if (start_pc)
     {
-      error (_("Cannot find bounds of current function (@0x%s), unwinding will "
-	     "fail."), paddr_nz (pc));
-      return cache;
-    }
+      CORE_ADDR cur_pc = frame_pc_unwind (next_frame);
+      CORE_ADDR pc;
 
-  if (end_pc > cur_pc)
-    end_pc = cur_pc;
+      for (pc = start_pc; pc < cur_pc; pc += 4)
+	{
+	  unsigned int insn;
 
-  for (pc = start_pc; pc < end_pc; pc += 4)
-    {
-      unsigned int insn;
+	  insn = read_memory_unsigned_integer (pc, 4);
+	  frame_size += prologue_inst_adjust_sp (insn);
 
-      insn = read_memory_unsigned_integer (pc, 4);
-
-      frame_size += prologue_inst_adjust_sp (insn);
-
-      /* There are limited ways to store the return pointer into the
-	 stack.  */
-      if (insn == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
-	 {
-	   cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
-	   found_rp = 1;
-	 }
-      else if (insn == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
-	 {
-	   cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
-	   found_rp = 1;
-	 }
+	  /* There are limited ways to store the return pointer into the
+	     stack.  */
+	  if (insn == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
+	    {
+	      cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
+	      found_rp = 1;
+	    }
+	  else if (insn == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
+	    {
+	      cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
+	      found_rp = 1;
+	    }
+	}
     }
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, " frame_size = %d, found_rp = %d }\n",
-      frame_size, found_rp);
+    fprintf_unfiltered (gdb_stdlog, " frame_size=%d, found_rp=%d }\n",
+			frame_size, found_rp);
 
-  cache->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM) - frame_size;
+  cache->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+  cache->base -= frame_size;
   trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
 
   if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
     {
       cache->saved_regs[HPPA_RP_REGNUM].addr += cache->base;
-      cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[HPPA_RP_REGNUM];
+      cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = 
+	cache->saved_regs[HPPA_RP_REGNUM];
     }
   else
     {
-      ULONGEST rp = frame_unwind_register_unsigned (next_frame, HPPA_RP_REGNUM);
+      ULONGEST rp;
+      rp = frame_unwind_register_unsigned (next_frame, HPPA_RP_REGNUM);
       trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, rp);
     }
 
