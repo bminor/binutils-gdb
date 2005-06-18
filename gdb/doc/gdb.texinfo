@@ -4300,7 +4300,11 @@ you are interested in, or recompile without optimizations.
 @cindex startup code, and backtrace
 Most programs have a standard user entry point---a place where system
 libraries and startup code transition into user code.  For C this is
-@code{main}.  When @value{GDBN} finds the entry function in a backtrace
+@code{main}@footnote{
+Note that embedded programs (the so-called ``free-standing''
+environment) are not required to have a @code{main} function as the
+entry point.  They could even have multiple entry points.}.
+When @value{GDBN} finds the entry function in a backtrace
 it will terminate the backtrace, to avoid tracing into highly
 system-specific (and generally uninteresting) code.
 

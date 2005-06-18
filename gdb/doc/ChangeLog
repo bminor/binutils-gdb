@@ -11,6 +11,8 @@
 	--with-sysroot.
 	(Machine Code): Document possible problems with locations in
 	shared libraries.
+	(Backtrace): Document that free-standing environments do not need
+	to have a `main' function.
 
 2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
 
