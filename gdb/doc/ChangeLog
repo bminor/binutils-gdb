@@ -1,3 +1,9 @@
+2005-06-18  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Server): Clarify that `file' should be used before
+	connecting to the server.
+	(Files): Add an xref to the above description.
+
 2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (GDB/MI Stack Manipulation): Remove reference to

@@ -10618,9 +10618,10 @@ way to do this is at start-up time, using the arguments to
 Out of @value{GDBN}}).
 
 Occasionally it is necessary to change to a different file during a
-@value{GDBN} session.  Or you may run @value{GDBN} and forget to specify
-a file you want to use.  In these situations the @value{GDBN} commands
-to specify new files are useful.
+@value{GDBN} session.  Or you may run @value{GDBN} and forget to
+specify a file you want to use.  Or you are debugging a remote target
+via @code{gdbserver} (@pxref{Server, file}).  In these situations the
+@value{GDBN} commands to specify new files are useful.
 
 @table @code
 @cindex executable file
@@ -11941,8 +11942,12 @@ For TCP connections, you must start up @code{gdbserver} prior to using
 the @code{target remote} command.  Otherwise you may get an error whose
 text depends on the host system, but which usually looks something like
 @samp{Connection refused}.  You don't need to use the @code{load}
-command in @value{GDBN} when using gdbserver, since the program is
-already on the target.
+command in @value{GDBN} when using @code{gdbserver}, since the program is
+already on the target.  However, if you want to load the symbols (as
+you normally would), do that with the @code{file} command, and issue
+it @emph{before} connecting to the server; otherwise, you will get an
+error message saying @code{"Program is already running"}, since the
+program is considered running after the connection.
 
 @end table
 
