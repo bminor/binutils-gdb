@@ -1,3 +1,12 @@
+2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmds.c (mi_cmds): Remove entry for -stack-info-frame.
+
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames)
+	(mi_cmd_stack_info_depth): Don't test for stack.
+	(mi_cmd_stack_select_frame): Make the argument mandatory.
+	Don't test for stack.
+
 2005-06-17  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* remote.c (set_thread, remote_thread_alive): Replace sprintf
