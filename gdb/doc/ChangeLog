@@ -7,7 +7,8 @@
 	(Memory): List explicitly all the formats supported by `x'.
 	(Threads): Add an @cindex entry for "thread apply".
 	(Files): Document the possibility of loading unlinked object
-	files.
+	files.  Add more indexing for solib-absolute-prefix and
+	--with-sysroot.
 
 2005-06-18  Nick Roberts  <nickrob@snap.net.nz>
 

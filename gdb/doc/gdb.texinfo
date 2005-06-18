@@ -11062,12 +11062,14 @@ host system; they need to be the same as the target libraries, although the
 copies on the target can be stripped as long as the copies on the host are
 not.
 
-You need to tell @value{GDBN} where the target libraries are, so that it can
-load the correct copies---otherwise, it may try to load the host's libraries.
-@value{GDBN} has two variables to specify the search directories for target
-libraries.
+@cindex where to look for shared libraries
+For remote debugging, you need to tell @value{GDBN} where the target
+libraries are, so that it can load the correct copies---otherwise, it
+may try to load the host's libraries.  @value{GDBN} has two variables
+to specify the search directories for target libraries.
 
 @table @code
+@cindex prefix for shared library file names
 @kindex set solib-absolute-prefix
 @item set solib-absolute-prefix @var{path}
 If this variable is set, @var{path} will be used as a prefix for any
@@ -11077,6 +11079,8 @@ paths to the shared library in the target program's memory.  If you use
 out in the same way that they are on the target, with e.g.@: a
 @file{/usr/lib} hierarchy under @var{path}.
 
+@cindex default value of @samp{solib-absolute-prefix}
+@cindex @samp{--with-sysroot}
 You can set the default value of @samp{solib-absolute-prefix} by using the
 configure-time @samp{--with-sysroot} option.
 
