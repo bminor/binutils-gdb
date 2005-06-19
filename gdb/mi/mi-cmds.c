@@ -107,6 +107,7 @@ struct mi_cmd mi_cmds[] =
   { "signal-list-handle-actions", { NULL, 0 }, NULL, NULL },
   { "signal-list-signal-types", { NULL, 0 }, NULL, NULL },
   { "stack-info-depth", { NULL, 0 }, 0, mi_cmd_stack_info_depth},
+  { "stack-info-frame", { NULL, 0 }, 0, mi_cmd_stack_info_frame},
   { "stack-list-arguments", { NULL, 0 }, 0, mi_cmd_stack_list_args},
   { "stack-list-exception-handlers", { NULL, 0 }, NULL, NULL },
   { "stack-list-frames", { NULL, 0 }, 0, mi_cmd_stack_list_frames},
