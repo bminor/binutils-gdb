@@ -1,7 +1,7 @@
 /* Generic remote debugging interface for simulators.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2004 Free Software Foundation, Inc.
+   2002, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
    Steve Chamberlain (sac@cygnus.com).
@@ -92,11 +92,6 @@ static void gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal);
 static ptid_t gdbsim_wait (ptid_t ptid, struct target_waitstatus *status);
 
 static void gdbsim_prepare_to_store (void);
-
-static int gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, 
-					int len, int write,
-					struct mem_attrib *attrib,
-					struct target_ops *target);
 
 static void gdbsim_files_info (struct target_ops *target);
 
@@ -742,7 +737,7 @@ gdbsim_prepare_to_store (void)
    Returns the number of bytes transferred. */
 
 static int
-gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			     int write, struct mem_attrib *attrib,
 			     struct target_ops *target)
 {

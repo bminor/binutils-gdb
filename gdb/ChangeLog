@@ -1,3 +1,8 @@
+2005-06-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* remote-sim.c (gdbsim_xfer_inferior_memory): Remove prototype.
+	Change type of second argument to`gdb_byte *'.
+
 2005-06-19  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-cmd-stack.c (mi_cmd_stack_info_frame): New function.
