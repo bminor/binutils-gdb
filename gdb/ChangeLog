@@ -1,3 +1,8 @@
+2005-06-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-tdep.c (hppa_pointer_to_address_hack): Remove function.
+	(unwind_command): Use %lx to print pointer.
+
 2005-06-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* remote-sim.c (gdbsim_xfer_inferior_memory): Remove prototype.
