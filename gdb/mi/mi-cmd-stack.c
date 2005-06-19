@@ -329,3 +329,13 @@ mi_cmd_stack_select_frame (char *command, char **argv, int argc)
   select_frame_command (argv[0], 1 /* not used */ );
   return MI_CMD_DONE;
 }
+
+enum mi_cmd_result
+mi_cmd_stack_info_frame (char *command, char **argv, int argc)
+{
+  if (argc > 0)
+    error (_("mi_cmd_stack_info_frame: No arguments required"));
+  
+  print_frame_info (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 0);
+  return MI_CMD_DONE;
+}
