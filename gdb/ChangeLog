@@ -1,3 +1,12 @@
+2005-06-19  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-cmd-stack.c (mi_cmd_stack_info_frame): New function.
+
+	* mi/mi-cmds.c (mi_cmds): Replace entry for -stack-info-frame.
+	Make it use mi_cmd_stack_info_frame
+
+	* mi/mi-cmds.h (mi_cmd_stack_info_frame): New declaration.
+
 2005-06-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-tdep.c (hppa_fallback_frame_cache): Don't error out if we
