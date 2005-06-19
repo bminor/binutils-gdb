@@ -19223,6 +19223,34 @@ Signal handling commands are not implemented.
 @node GDB/MI Stack Manipulation
 @section @sc{gdb/mi} Stack Manipulation Commands
 
+
+@subheading The @code{-stack-info-frame} Command
+@findex -stack-info-frame
+
+@subsubheading Synopsis
+
+@smallexample
+ -stack-info-frame
+@end smallexample
+
+Get info on the selected frame.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info frame} or @samp{frame}
+(without arguments).
+
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-stack-info-frame
+^done,frame=@{level="1",addr="0x0001076c",func="callee3",
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="17"@}
+(@value{GDBP})
+@end smallexample
+
 @subheading The @code{-stack-info-depth} Command
 @findex -stack-info-depth
 
