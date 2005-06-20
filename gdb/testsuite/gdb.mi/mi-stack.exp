@@ -55,6 +55,7 @@ proc test_stack_frame_listing {} {
     # -stack-list-frames
     # -stack-list-frames 1 1
     # -stack-list-frames 1 3
+    # -stack-info-frame
 
     mi_gdb_test "231-stack-list-frames" \
 	    "231\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_callee4_body\"\},frame=\{level=\"1\",addr=\"$hex\",func=\"callee3\",.*\},frame=\{level=\"2\",addr=\"$hex\",func=\"callee2\",.*\},frame=\{level=\"3\",addr=\"$hex\",func=\"callee1\",.*\},frame=\{level=\"4\",addr=\"$hex\",func=\"main\",.*\}\\\]" \
@@ -69,6 +70,10 @@ proc test_stack_frame_listing {} {
     mi_gdb_test "234-stack-list-frames 1" \
 	    "234\\^error,msg=\"mi_cmd_stack_list_frames: Usage.*FRAME_LOW FRAME_HIGH.*\"" \
 	    "stack frame listing wrong"
+
+    mi_gdb_test "235-stack-info-frame" \
+            "235\\^done,frame=\{level=\"0\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_callee4_body\"\}" \
+	       "selected frame listing"
 }
 
 proc test_stack_args_listing {} {
@@ -187,16 +192,9 @@ gdb_expect {
 	    "232\\^done,locals=\\\[\\\]" \
                 "stack locals listing for new frame"
 
-# this should be a no-op
-
-    mi_gdb_test "232-stack-select-frame" \
-	    "232\\^done" \
-                "stack select same frame"
-
     mi_gdb_test "232-stack-list-locals 1" \
 	    "232\\^done,locals=\\\[\\\]" \
                 "stack locals for same frame (level 1)"
-
 }
 
 mi_runto callee4
