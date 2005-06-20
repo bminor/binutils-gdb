@@ -1,6 +1,12 @@
 2005-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR 1025:
+	PR 1022
+	* elf32-hppa.c (elf32_hppa_check_relocs): Handle indirect
+	symbol.
+
+2005-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 1025
 	* elf32-i386.c (elf_i386_check_relocs): Handle indirect symbol.
 	* elf64-x86-64.c (elf64_x86_64_check_relocs): Likewise.
 

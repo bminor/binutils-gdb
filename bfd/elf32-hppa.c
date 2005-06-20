@@ -1085,8 +1085,13 @@ elf32_hppa_check_relocs (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	h = NULL;
       else
-	h = ((struct elf32_hppa_link_hash_entry *)
+	{
+	  h = ((struct elf32_hppa_link_hash_entry *)
 	     sym_hashes[r_symndx - symtab_hdr->sh_info]);
+	  while (h->elf.root.type == bfd_link_hash_indirect
+		 || h->elf.root.type == bfd_link_hash_warning)
+	    h = (struct elf32_hppa_link_hash_entry *) h->elf.root.u.i.link;
+	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
 
