@@ -6201,14 +6201,14 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-#ifdef INCLUDE_SHMEDIA
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    {
+#ifdef INCLUDE_SHMEDIA
 	      seen_stt_datalabel |= h->type == STT_DATALABEL;
+#endif
 	      h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	    }
-#endif
 	}
 
       r_type = sh_elf_optimized_tls_reloc (info, r_type, h == NULL);

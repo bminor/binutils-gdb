@@ -2909,7 +2909,12 @@ ppc_elf_check_relocs (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	h = NULL;
       else
-	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
       /* If a relocation refers to _GLOBAL_OFFSET_TABLE_, create the .got.
 	 This shows up in particular in an R_PPC_ADDR32 in the eabi

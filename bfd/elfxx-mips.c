@@ -5850,6 +5850,10 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  h = ((struct mips_elf_link_hash_entry *)
 	       sym_hashes[r_symndx - extsymoff]);
 
+	  while (h->root.root.type == bfd_link_hash_indirect
+		 || h->root.root.type == bfd_link_hash_warning)
+	    h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
+
 	  /* H is the symbol this stub is for.  */
 
 	  h->fn_stub = sec;
