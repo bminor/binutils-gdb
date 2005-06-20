@@ -150,5 +150,25 @@ mov eax, [rax+symbol]
 #RIP relative
 mov eax, [rip+symbol]
 
+foo:
+.att_syntax
+#absolute 64bit addressing
+mov 0x8877665544332211,%al
+mov 0x8877665544332211,%ax
+mov 0x8877665544332211,%eax
+mov 0x8877665544332211,%rax
+mov %al,0x8877665544332211
+mov %ax,0x8877665544332211
+mov %eax,0x8877665544332211
+mov %rax,0x8877665544332211
+movb 0x8877665544332211,%al
+movw 0x8877665544332211,%ax
+movl 0x8877665544332211,%eax
+movq 0x8877665544332211,%rax
+movb %al,0x8877665544332211
+movw %ax,0x8877665544332211
+movl %eax,0x8877665544332211
+movq %rax,0x8877665544332211
+
 # Get a good alignment.
  .p2align	4,0

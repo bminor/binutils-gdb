@@ -1,3 +1,12 @@
+2005-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 1013
+	* config/tc-i386.c (md_assemble): Don't call optimize_disp on
+	movabs.
+	(optimize_disp): Optimize only if possible. Don't use 64bit
+	displacement on non-constants and do same on constants if
+	possible.
+
 2005-06-17  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (reloc): Also handle BFD_RELOC_64_PCREL.
