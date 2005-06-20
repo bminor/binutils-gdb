@@ -1,3 +1,9 @@
+2005-06-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 1025:
+	* elf32-i386.c (elf_i386_check_relocs): Handle indirect symbol.
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Likewise.
+
 2005-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* reloc.c: Add BFD_RELOC_X86_64_GOTOFF64 and
