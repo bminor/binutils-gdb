@@ -1,3 +1,10 @@
+2005-06-20  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi-stack.exp (test_stack_locals_listing): Remove test for
+	-stack-select-frame without arguments.
+	(test_stack_frame_listing): Add test for newly implemented command
+	-stack-info-frame.
+	
 2005-06-17  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* gdb.fortran/array-element.f: New file.
