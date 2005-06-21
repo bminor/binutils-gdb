@@ -1,3 +1,7 @@
+2005-06-21  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2005-06-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppabsd-tdep.c: Include "symtab.h", "objfiles.h", "target.h",
