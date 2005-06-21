@@ -1,3 +1,35 @@
+2005-06-21  Carlos O'Donell <carlos@systemhalted.org>
+
+	* bfd/elf32-hppa.c (hppa_elf_hash_entry): Define.
+	(hppa_stub_hash_entry): Define.
+	(stub_hash_newfunc): Rename variables.
+	(hppa_link_hash_newfunc): Likewise.
+	(elf32_hppa_link_hash_table_free): Likewise.
+	(hppa_stub_name): Likewise.
+	(hppa_get_stub_entry): Likewise.
+	(hppa_add_stub): Likewise.
+	(hppa_type_of_stub): Likewise.
+	(hppa_build_one_stub): Likewise.
+	(hppa_size_one_stub): Likewise.
+	(elf32_hppa_create_dynamic_sections): Likewise.
+	(elf32_hppa_copy_indirect_symbol): Likewise.
+	(elf32_hppa_check_relocs): Likewise.
+	(elf32_hppa_gc_mark_hook): Likewise.
+	(elf32_hppa_gc_sweep_hook): Likewise.
+	(elf32_hppa_grok_psinfo): Likewise.
+	(elf32_hppa_hide_symbol): Likewise.
+	(elf32_hppa_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(clobber_millicode_symbols): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(elf32_hppa_size_dynamic_sections): Likewise.
+	(get_local_syms): Likewise.
+	(elf32_hppa_size_stubs): Likewise.
+	(hppa_record_segment_addr): Likewise.
+	(final_link_relocate): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+	(elf32_hppa_finish_dynamic_symbol): Likewise.
+
 2005-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 1025
