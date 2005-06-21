@@ -1,3 +1,8 @@
+2005-06-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ttrace.c (inf_ttrace_xfer_partial): Change type of readbuf
+	and writebuf arguments to `gdb_byte *'.
+
 2005-06-21  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.
