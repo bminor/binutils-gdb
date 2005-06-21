@@ -1,4 +1,20 @@
-			GDB Maintainers
+		GDB Maintainers
+
+	     GDB Steering Committee
+
+The members of the GDB Steering Committee are the FSF-appointed
+maintainers of the GDB project.
+
+	Jim Blandy (Red Hat)
+	Andrew Cagney (Red Hat)
+	Robert Dewar (AdaCore, NYU)
+	Klee Dienes (Apple)
+	Paul Hilfinger (UC Berkeley)
+	Dan Jacobowitz (CodeSourcery)
+	Stan Shebs (Apple)
+	Richard Stallman (FSF)
+	Ian Lance Taylor (C2)
+	Todd Whitesel
 
 
 			Global Maintainers
