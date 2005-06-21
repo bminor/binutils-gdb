@@ -1,3 +1,13 @@
+2005-06-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppabsd-tdep.c: Include "symtab.h", "objfiles.h", "target.h",
+	"value.h" and "elf/common.h".
+	(hppabsd_supply_gregset): Use `gdb_byte *' for byte buffer.
+	(hppabsd_find_global_pointer): New function.
+	(hppabsd_init_abi): Set TDEP->find_global_pointer to
+	hppabsd_find_global_pointer.
+	* Makefile.in (hppabsd-tdep.o): Update dependencies.
+
 2005-06-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-tdep.c (hppa_pointer_to_address_hack): Remove function.

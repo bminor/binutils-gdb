@@ -1,6 +1,6 @@
 /* Target-dependent code for HP PA-RISC BSD's.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,12 +21,18 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "symtab.h"
+#include "objfiles.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
+#include "target.h"
+#include "value.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
+
+#include "elf/common.h"
 
 #include "hppa-tdep.h"
 #include "solib-svr4.h"
@@ -44,7 +50,7 @@ static void
 hppabsd_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
-  const char *regs = gregs;
+  const gdb_byte *regs = gregs;
   size_t offset;
   int i;
 
@@ -86,6 +92,78 @@ hppabsd_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 
+CORE_ADDR
+hppabsd_find_global_pointer (struct value *function)
+{
+  CORE_ADDR faddr = value_as_address (function);
+  struct obj_section *faddr_sec;
+  gdb_byte buf[4];
+
+  /* Is this a plabel? If so, dereference it to get the Global Pointer
+     value.  */
+  if (faddr & 2)
+    {
+      if (target_read_memory ((faddr & ~3) + 4, buf, sizeof buf) == 0)
+	return extract_unsigned_integer (buf, sizeof buf);
+    }
+
+  /* If the address is in the .plt section, then the real function
+     hasn't yet been fixed up by the linker so we cannot determine the
+     Global Pointer for that function.  */
+  if (in_plt_section (faddr, NULL))
+    return 0;
+
+  faddr_sec = find_pc_section (faddr);
+  if (faddr_sec != NULL)
+    {
+      struct obj_section *sec;
+
+      ALL_OBJFILE_OSECTIONS (faddr_sec->objfile, sec)
+	{
+	  if (strcmp (sec->the_bfd_section->name, ".dynamic") == 0)
+	    break;
+	}
+
+      if (sec < faddr_sec->objfile->sections_end)
+	{
+	  CORE_ADDR addr = sec->addr;
+
+	  while (addr < sec->endaddr)
+	    {
+	      gdb_byte buf[4];
+	      LONGEST tag;
+
+	      if (target_read_memory (addr, buf, sizeof buf) != 0)
+		break;
+
+	      tag = extract_signed_integer (buf, sizeof buf);
+	      if (tag == DT_PLTGOT)
+		{
+		  CORE_ADDR pltgot;
+
+		  if (target_read_memory (addr + 4, buf, sizeof buf) != 0)
+		    break;
+
+		  /* The OpenBSD ld.so doesn't relocate DT_PLTGOT, so
+		     we have to do it ourselves.  */
+		  pltgot = extract_unsigned_integer (buf, sizeof buf);
+		  pltgot += ANOFFSET (sec->objfile->section_offsets,
+				      SECT_OFF_TEXT (sec->objfile));
+		  return pltgot;
+		}
+
+	      if (tag == DT_NULL)
+		break;
+
+	      addr += 8;
+	    }
+	}
+    }
+
+  return 0;
+}
+
+
 static void
 hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -96,6 +174,7 @@ hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, hppabsd_regset_from_core_section);
 
   /* OpenBSD and NetBSD use ELF.  */
+  tdep->find_global_pointer = hppabsd_find_global_pointer;
   tdep->is_elf = 1;
 
   /* OpenBSD and NetBSD uses SVR4-style shared libraries.  */
