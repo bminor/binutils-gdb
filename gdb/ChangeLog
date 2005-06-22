@@ -1,3 +1,8 @@
+2005-06-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* remote.c (extended_remote_restart): Pass buffer in call to
+	xsnprintf instead of a pointer to the buffer.
+
 2005-06-21  Andrew Cagney  <cagney@gnu.org>
 
 	* MAINTAINERS: List GDB's Steering Committee as responsible for

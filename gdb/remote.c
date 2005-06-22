@@ -1923,7 +1923,7 @@ extended_remote_restart (void)
 
   /* Send the restart command; for reasons I don't understand the
      remote side really expects a number after the "R".  */
-  xsnprintf (&buf, rs->remote_packet_size, "R%x", 0);
+  xsnprintf (buf, rs->remote_packet_size, "R%x", 0);
   putpkt (buf);
 
   /* Now query for status so this looks just like we restarted
