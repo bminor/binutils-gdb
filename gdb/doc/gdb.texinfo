@@ -1188,7 +1188,7 @@ Files}, for more details about @value{GDBN} command files.
 
 @item
 Reads the command history recorded in the @dfn{history file}.
-@xref{History}, for more details about the command history and the
+@xref{Command History}, for more details about the command history and the
 files where @value{GDBN} records it.
 @end enumerate
 
@@ -15023,7 +15023,7 @@ described here.
 @menu
 * Prompt::                      Prompt
 * Editing::                     Command editing
-* History::                     Command history
+* Command History::             Command history
 * Screen Size::                 Screen size
 * Numbers::                     Numbers
 * ABI::                         Configuring the current ABI
@@ -15091,7 +15091,7 @@ Show whether command line editing is enabled.
 interface.  Users unfamiliar with @sc{gnu} Emacs or @code{vi} are
 encouraged to read that chapter.
 
-@node History
+@node Command History
 @section Command history
 @cindex command history
 
@@ -15103,6 +15103,17 @@ history facility.
 @value{GDBN} uses the @sc{gnu} History library, a part of the Readline
 package, to provide the history facility.  @xref{Using History
 Interactively}, for the detailed description of the History library.
+
+To issue a command to @value{GDBN} without affecting certain aspects of
+the state which is seen by users, prefix it with @samp{server }.  This
+means that this command will not affect the command history, nor will it
+affect @value{GDBN}'s notion of which command to repeat if @key{RET} is
+pressed on a line by itself.
+
+@cindex @code{server}, command prefix
+The server prefix does not affect the recording of values into the value
+history; to print a value without recording it into the value history,
+use the @code{output} command instead of the @code{print} command.
 
 Here is the description of @value{GDBN} commands related to command
 history.
@@ -20604,7 +20615,6 @@ This is Edition @value{EDITION}, @value{DATE}.
 
 @menu
 * Annotations Overview::  What annotations are; the general syntax.
-* Server Prefix::       Issuing a command without affecting user state.
 * Prompting::           Annotations marking @value{GDBN}'s need for input.
 * Errors::              Annotations for error messages.
 * Invalidation::        Some annotations describe things now invalid.
@@ -20682,20 +20692,6 @@ Here @samp{quit} is input to @value{GDBN}; the rest is output from
 @value{GDBN}.  The three lines beginning @samp{^Z^Z} (where @samp{^Z}
 denotes a @samp{control-z} character) are annotations; the rest is
 output from @value{GDBN}.
-
-@node Server Prefix
-@section The Server Prefix
-@cindex server prefix for annotations
-
-To issue a command to @value{GDBN} without affecting certain aspects of
-the state which is seen by users, prefix it with @samp{server }.  This
-means that this command will not affect the command history, nor will it
-affect @value{GDBN}'s notion of which command to repeat if @key{RET} is
-pressed on a line by itself.
-
-The server prefix does not affect the recording of values into the value
-history; to print a value without recording it into the value history,
-use the @code{output} command instead of the @code{print} command.
 
 @node Prompting
 @section Annotation for @value{GDBN} Input
