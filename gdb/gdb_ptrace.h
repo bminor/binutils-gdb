@@ -92,8 +92,8 @@
 
 /* Not all systems support attaching and detaching.   */
 
-#ifndef PT_ATTCH
-# ifdef PTRACE_DETACH
+#ifndef PT_ATTACH
+# ifdef PTRACE_ATTACH
 #  define PT_ATTACH PTRACE_ATTACH
 # endif
 #endif

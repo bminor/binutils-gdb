@@ -1,3 +1,8 @@
+2005-06-23  Andreas Schwab  <schwab@suse.de>
+
+	* gdb_ptrace.h: Fix typos when checking for PT_ATTACH.  Reported
+	by Chad Harrington <harrington.chad@gmail.com>.
+
 2005-06-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* remote.c (extended_remote_restart): Pass buffer in call to
