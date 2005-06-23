@@ -1,6 +1,6 @@
 /* Opcode table for m680[012346]0/m6888[12]/m68851/mcf5200.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2003, 2004
+   2000, 2001, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB, GAS, and the GNU binutils.
@@ -94,11 +94,11 @@ const struct m68k_opcode m68k_opcodes[] =
 {"andl", 6,	one(0001200),	one(0177700), "#lDs", mcfisa_a },
 {"andl", 2,	one(0140200),	one(0170700), ";lDd", m68000up | mcfisa_a },
 {"andl", 2,	one(0140600),	one(0170700), "Dd~l", m68000up | mcfisa_a },
-{"and", 4,		one(0001100),	one(0177700), "#w$w", m68000up },
-{"and", 4,		one(0001074),	one(0177777), "#bCs", m68000up },
-{"and", 4,		one(0001174),	one(0177777), "#wSs", m68000up },
-{"and", 2,		one(0140100),	one(0170700), ";wDd", m68000up },
-{"and", 2,		one(0140500),	one(0170700), "Dd~w", m68000up },
+{"and", 4,	one(0001100),	one(0177700), "#w$w", m68000up },
+{"and", 4,	one(0001074),	one(0177777), "#bCs", m68000up },
+{"and", 4,	one(0001174),	one(0177777), "#wSs", m68000up },
+{"and", 2,	one(0140100),	one(0170700), ";wDd", m68000up },
+{"and", 2,	one(0140500),	one(0170700), "Dd~w", m68000up },
 
 {"aslb", 2,	one(0160400),	one(0170770), "QdDs", m68000up },
 {"aslb", 2,	one(0160440),	one(0170770), "DdDs", m68000up },

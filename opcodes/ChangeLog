@@ -1,3 +1,8 @@
+2005-06-23  Ben Elliston  <bje@gnu.org>
+
+	* m68k-dis.c: Use ISC C90.
+	* m68k-opc.c: Formatting fixes.
+
 2005-06-16  David Ung  <davidu@mips.com>
 
         * mips16-opc.c (mips16_opcodes): Add the following MIPS16e

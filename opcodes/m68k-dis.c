@@ -1,6 +1,6 @@
 /* Print Motorola 68k instructions.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is free software; you can redistribute it and/or modify
@@ -27,25 +27,13 @@
 
 /* Local function prototypes */
 
-static int
-fetch_data PARAMS ((struct disassemble_info *, bfd_byte *));
-
-static void
-dummy_print_address PARAMS ((bfd_vma, struct disassemble_info *));
-
-static int
-fetch_arg PARAMS ((unsigned char *, int, int, disassemble_info *));
-
-static void
-print_base PARAMS ((int, bfd_vma, disassemble_info *));
-
-static unsigned char *
-print_indexed PARAMS ((int, unsigned char *, bfd_vma, disassemble_info *));
-
-static int
-print_insn_arg PARAMS ((const char *, unsigned char *, unsigned char *,
-			bfd_vma, disassemble_info *));
-
+static int fetch_data (struct disassemble_info *, bfd_byte *);
+static void dummy_print_address (bfd_vma, struct disassemble_info *);
+static int fetch_arg (unsigned char *, int, int, disassemble_info *);
+static void print_base (int, bfd_vma, disassemble_info *);
+static unsigned char * print_indexed (int, unsigned char *, bfd_vma, disassemble_info *);
+static int print_insn_arg (const char *, unsigned char *, unsigned char *,
+			   bfd_vma, disassemble_info *);
 static bfd_boolean m68k_valid_ea (char code, int val);
 
 const char * const fpcr_names[] =
@@ -140,9 +128,7 @@ struct private {
    ? 1 : fetch_data ((info), (addr)))
 
 static int
-fetch_data (info, addr)
-     struct disassemble_info *info;
-     bfd_byte *addr;
+fetch_data (struct disassemble_info *info, bfd_byte *addr)
 {
   int status;
   struct private *priv = (struct private *)info->private_data;
@@ -168,8 +154,7 @@ static int
 dummy_printer (FILE *file ATTRIBUTE_UNUSED,
 	       const char *format ATTRIBUTE_UNUSED, ...)
 #else
-dummy_printer (file)
-     FILE *file ATTRIBUTE_UNUSED;
+dummy_printer (FILE *file ATTRIBUTE_UNUSED)
 #endif
 {
   return 0;
@@ -327,9 +312,7 @@ match_insn_m68k (bfd_vma memaddr, disassemble_info * info,
    on INFO->STREAM.  Returns length of the instruction, in bytes.  */
 
 int
-print_insn_m68k (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+print_insn_m68k (bfd_vma memaddr, disassemble_info *info)
 {
   int i;
   const char *d;
@@ -498,13 +481,12 @@ print_insn_m68k (memaddr, info)
    return -1 if an invalid operand was found, or -2 if
    an opcode tabe error was found.  */
 
+/* ADDR is the pc for this arg to be relative to.  */
+
 static int
-print_insn_arg (d, buffer, p0, addr, info)
-     const char *d;
-     unsigned char *buffer;
-     unsigned char *p0;
-     bfd_vma addr;		/* PC for this arg to be relative to.  */
-     disassemble_info *info;
+print_insn_arg (const char *d, unsigned char *buffer,
+		unsigned char *p0, bfd_vma addr,
+		disassemble_info *info)
 {
   int val = 0;
   int place = d[1];
@@ -1230,11 +1212,8 @@ m68k_valid_ea (char code, int val)
    BUFFER contains the instruction.  */
 
 static int
-fetch_arg (buffer, code, bits, info)
-     unsigned char *buffer;
-     int code;
-     int bits;
-     disassemble_info *info;
+fetch_arg (unsigned char *buffer, int code, int bits,
+	   disassemble_info *info)
 {
   int val = 0;
 
@@ -1409,11 +1388,8 @@ fetch_arg (buffer, code, bits, info)
    ADDR is the nominal core address of that extension word.  */
 
 static unsigned char *
-print_indexed (basereg, p, addr, info)
-     int basereg;
-     unsigned char *p;
-     bfd_vma addr;
-     disassemble_info *info;
+print_indexed (int basereg, unsigned char *p,
+	       bfd_vma addr, disassemble_info *info)
 {
   int word;
   static char *const scales[] = { "", ":2", ":4", ":8" };
@@ -1511,10 +1487,7 @@ print_indexed (basereg, p, addr, info)
    REGNO = -1 for pc, -2 for none (suppressed).  */
 
 static void
-print_base (regno, disp, info)
-     int regno;
-     bfd_vma disp;
-     disassemble_info *info;
+print_base (int regno, bfd_vma disp, disassemble_info *info)
 {
   if (regno == -1)
     {
