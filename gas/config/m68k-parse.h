@@ -1,6 +1,6 @@
 /* m68k-parse.h -- header file for m68k assembler
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -339,7 +339,7 @@ struct m68k_op
 
 /* The parsing function.  */
 
-extern int m68k_ip_op PARAMS ((char *, struct m68k_op *));
+extern int m68k_ip_op (char *, struct m68k_op *);
 
 /* Whether register prefixes are optional.  */
 extern int flag_reg_prefix_optional;

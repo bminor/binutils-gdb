@@ -73,7 +73,7 @@ struct fix;
 
 #define TC_COFF_FIX2RTYPE(FIX) tc_coff_fix2rtype(FIX)
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
-extern int tc_coff_sizemachdep PARAMS ((struct frag *));
+extern int tc_coff_sizemachdep (struct frag *);
 #ifdef TE_SUN3
 /* This variable contains the value to write out at the beginning of
    the a.out file.  The 2<<16 means that this is a 68020 file instead
@@ -132,19 +132,19 @@ extern const char *m68k_comment_chars;
 #endif
 #endif
 
-extern void m68k_mri_mode_change PARAMS ((int));
+extern void m68k_mri_mode_change (int);
 #define MRI_MODE_CHANGE(i) m68k_mri_mode_change (i)
 
-extern int m68k_conditional_pseudoop PARAMS ((pseudo_typeS *));
+extern int m68k_conditional_pseudoop (pseudo_typeS *);
 #define tc_conditional_pseudoop(pop) m68k_conditional_pseudoop (pop)
 
-extern void m68k_frob_label PARAMS ((symbolS *));
+extern void m68k_frob_label (symbolS *);
 #define tc_frob_label(sym) m68k_frob_label (sym)
 
-extern void m68k_flush_pending_output PARAMS ((void));
+extern void m68k_flush_pending_output (void);
 #define md_flush_pending_output() m68k_flush_pending_output ()
 
-extern void m68k_frob_symbol PARAMS ((symbolS *));
+extern void m68k_frob_symbol (symbolS *);
 
 #ifdef BFD_ASSEMBLER
 
@@ -167,7 +167,7 @@ while (0)
 
 #ifdef OBJ_ELF
 #define tc_fix_adjustable(X) tc_m68k_fix_adjustable(X)
-extern int tc_m68k_fix_adjustable PARAMS ((struct fix *));
+extern int tc_m68k_fix_adjustable (struct fix *);
 
 /* Target *-*-elf implies an embedded target.  No shared libs.
    *-*-uclinux also requires special casing to prevent GAS from
@@ -179,7 +179,7 @@ extern int tc_m68k_fix_adjustable PARAMS ((struct fix *));
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define elf_tc_final_processing m68k_elf_final_processing
-extern void m68k_elf_final_processing PARAMS ((void));
+extern void m68k_elf_final_processing (void);
 #endif
 
 #else /* ! BFD_ASSEMBLER */
@@ -198,10 +198,10 @@ extern void m68k_elf_final_processing PARAMS ((void));
 
 #define DIFF_EXPR_OK
 
-extern void m68k_init_after_args PARAMS ((void));
+extern void m68k_init_after_args (void);
 #define tc_init_after_args m68k_init_after_args
 
-extern int m68k_parse_long_option PARAMS ((char *));
+extern int m68k_parse_long_option (char *);
 #define md_parse_long_option m68k_parse_long_option
 
 #define md_operand(x)

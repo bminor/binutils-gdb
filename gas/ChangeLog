@@ -1,3 +1,9 @@
+2005-06-23  Ben Elliston  <bje@gnu.org>
+
+	* config/m68k-parse.h: Use ISO C90.
+	* config/m68k-parse.y: Likewise.
+	* config/tc-m68k.h: Likewise.
+
 2005-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 1013

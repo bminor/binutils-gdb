@@ -1,5 +1,5 @@
 /* m68k.y -- bison grammar for m68k operand parsing
-   Copyright 1995, 1996, 1997, 1998, 2001, 2003, 2004
+   Copyright 1995, 1996, 1997, 1998, 2001, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Ken Raeburn and Ian Lance Taylor, Cygnus Support
 
@@ -83,9 +83,9 @@
 
 /* Internal functions.  */
 
-static enum m68k_register m68k_reg_parse PARAMS ((char **));
-static int yylex PARAMS ((void));
-static void yyerror PARAMS ((const char *));
+static enum m68k_register m68k_reg_parse (char **);
+static int yylex (void);
+static void yyerror (const char *);
 
 /* The parser sets fields pointed to by this global variable.  */
 static struct m68k_op *op;
