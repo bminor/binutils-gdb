@@ -289,7 +289,7 @@ struct i386_frame_cache
 {
   /* Base address.  */
   CORE_ADDR base;
-  CORE_ADDR sp_offset;
+  LONGEST sp_offset;
   CORE_ADDR pc;
 
   /* Saved registers.  */

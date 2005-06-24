@@ -1,3 +1,7 @@
+2005-06-24  Corinna Vinschen  <vinschen@redhat.com>
+
+	* i386-tdep.c (struct i386_frame_cache): Define sp_offset as LONGEST.
+
 2005-06-23  Andreas Schwab  <schwab@suse.de>
 
 	* gdb_ptrace.h: Fix typos when checking for PT_ATTACH.  Reported
