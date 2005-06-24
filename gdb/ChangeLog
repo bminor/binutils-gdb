@@ -5,6 +5,8 @@
 	(ppcobsd_supply_pcb): New function.
 	(_initialize_ppcobsd_nat): Enable libkvm interface.
 	* Makefile.in (ppcobsd-nat.o): Update dependencies.
+	* config/powerpc/obsd.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
 
 2005-06-24  Corinna Vinschen  <vinschen@redhat.com>
 
