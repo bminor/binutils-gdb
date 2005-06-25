@@ -312,8 +312,8 @@ msymbol_is_special (struct minimal_symbol *msym)
 
 static void
 mips_xfer_register (struct regcache *regcache, int reg_num, int length,
-		    enum bfd_endian endian, bfd_byte * in,
-		    const bfd_byte * out, int buf_offset)
+		    enum bfd_endian endian, gdb_byte *in,
+		    const gdb_byte *out, int buf_offset)
 {
   int reg_offset = 0;
   gdb_assert (reg_num >= NUM_REGS);
@@ -3386,7 +3386,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      bfd_byte reg[MAX_REGISTER_SIZE];
+      gdb_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = mips_regnum (current_gdbarch)->fp0;
@@ -4611,7 +4611,7 @@ mips_register_sim_regno (int regnum)
 
 static CORE_ADDR
 mips_integer_to_address (struct gdbarch *gdbarch,
-			 struct type *type, const bfd_byte *buf)
+			 struct type *type, const gdb_byte *buf)
 {
   gdb_byte *tmp = alloca (TYPE_LENGTH (builtin_type_void_data_ptr));
   LONGEST val = unpack_long (type, buf);

@@ -1,3 +1,8 @@
+2005-06-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips-tdep.c (mips_xfer_register, mips_o32_return_value) 
+	(mips_integer_to_address): Use gdb_byte instead of bfd_byte.
+
 2005-06-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* ppcobsd-nat.c: Include "gdbcore.h", <sys/signal.h>,
