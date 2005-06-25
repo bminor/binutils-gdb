@@ -661,8 +661,8 @@ sol_thread_prepare_to_store (void)
    Returns the number of bytes transferred.  */
 
 static int
-sol_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
-			struct mem_attrib *attrib,
+sol_thread_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
+			int dowrite, struct mem_attrib *attrib,
 			struct target_ops *target)
 {
   int retval;
@@ -698,8 +698,9 @@ sol_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
 
 static LONGEST
 sol_thread_xfer_partial (struct target_ops *ops, enum target_object object,
-			  const char *annex, void *readbuf,
-			  const void *writebuf, ULONGEST offset, LONGEST len)
+			  const char *annex, gdb_byte *readbuf,
+			  const gdb_byte *writebuf,
+			 ULONGEST offset, LONGEST len)
 {
   int retval;
   struct cleanup *old_chain;

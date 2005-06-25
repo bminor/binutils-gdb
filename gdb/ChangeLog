@@ -1,5 +1,10 @@
 2005-06-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* sol-thread.c (sol_thread_xfer_memory): Change type of second
+	argument to `gdb_byte *'.
+	(sol_thread_xfer_partial): Change type of readbuf and writebuf
+	arguments to `gdb_byte *'.
+
 	* mips-tdep.c (mips_xfer_register, mips_o32_return_value) 
 	(mips_integer_to_address): Use gdb_byte instead of bfd_byte.
 
