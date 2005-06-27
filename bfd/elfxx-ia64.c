@@ -5219,7 +5219,7 @@ static void
 elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 				      asymbol *asym)
 {
-  elf_symbol_type *elfsym = (elf_symbol_type *) asym;;
+  elf_symbol_type *elfsym = (elf_symbol_type *) asym;
 
   switch (elfsym->internal_elf_sym.st_shndx)
     {
