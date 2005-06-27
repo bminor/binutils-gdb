@@ -1,3 +1,7 @@
+2005-06-27  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* gdbtypes.c (get_discrete_bounds): Fix a comment typo.
+
 2005-06-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* sol-thread.c (sol_thread_xfer_memory): Change type of second

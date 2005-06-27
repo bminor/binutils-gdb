@@ -684,7 +684,7 @@ create_range_type (struct type *result_type, struct type *index_type,
 }
 
 /* Set *LOWP and *HIGHP to the lower and upper bounds of discrete type TYPE.
-   Return 1 of type is a range type, 0 if it is discrete (and bounds
+   Return 1 if type is a range type, 0 if it is discrete (and bounds
    will fit in LONGEST), or -1 otherwise. */
 
 int
