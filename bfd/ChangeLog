@@ -1,3 +1,35 @@
+2005-06-27  Carlos O'Donell <carlos@systemhalted.org>
+
+	* bfd/elf32-hppa.c (struct elf32_hppa_stub_hash_entry): 
+	Use bh_root, and hh.
+	(struct elf32_hppa_link_hash_entry): Use eh, and hsh_cache.
+	(struct elf32_hppa_dyn_reloc_entry): Use hdh_next.
+	(struct elf32_hppa_link_hash_table): Use etab and bstab.
+	(stub_hash_newfunc): Use hh.
+	(hppa_link_hash_newfunc): Use hsh_cache.
+	(elf32_hppa_link_hash_table_create): Use etab, and bstab.
+	(elf32_hppa_link_hash_table_free): Use bstab.
+	(hppa_stub_name): Use eh.
+	(hppa_get_stub_entry): Use hh, hsh_entry, and hsh_cache.
+	(hppa_add_stub): Use bstab.
+	(hppa_type_of_stub): Use eh.
+	(hppa_build_one_stub): Use hh and bh_root.
+	(elf32_hppa_copy_indirect_symbol): Use hdh_next.
+	(elf32_hppa_check_relocs): Use eh, etab, and hdh_next.
+	(elf32_hppa_gc_sweep_hook): Use hdh_next.
+	(elf32_hppa_adjust_dynamic_symbol): Use hdh_next, and etab.
+	(allocate_plt_static): Use etab.
+	(allocate_dynrelocs): Use etab, and hdh_next.
+	(readonly_dynrelocs): Use hdh_next.
+	(elf32_hppa_size_dynamic_sections): Use etab, and hdh_next.
+	(get_local_syms): Use eh, bstab, and hh.
+	(elf32_hppa_size_stubs): Use eh, bstab, and hh.
+	(elf32_hppa_set_gp): Use etab.
+	(elf32_hppa_build_stubs): Use bstab.
+	(final_link_relocate): Use eh, bh_root.
+	(elf32_hppa_relocate_section): Use elf, etab.
+	(elf32_hppa_finish_dynamic_sections): Use etab.
+
 2005-06-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_hpux_backend_symbol_processing): Remove
