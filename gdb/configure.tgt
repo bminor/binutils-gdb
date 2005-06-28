@@ -11,6 +11,7 @@
 case "${target_cpu}" in
 
 alpha*)			gdb_target_cpu=alpha ;;
+am33_2.0*)              gdb_target_cpu=mn10300 ;;
 arm*)			gdb_target_cpu=arm ;;
 avr*)			gdb_target_cpu=avr ;;
 hppa*)			gdb_target_cpu=pa ;;
@@ -46,6 +47,9 @@ alpha*-*-netbsd* | alpha*-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 alpha*-*-openbsd*)	gdb_target=nbsd ;;
 alpha*-*-*)		gdb_target=alpha ;;
+
+# mn10300 / am33 liunux
+am33_2.0*-*-linux*)	gdb_target=linux ;;
 
 arm*-wince-pe)		gdb_target=wince ;;
 arm*-*-linux*)		gdb_target=linux

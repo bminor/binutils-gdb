@@ -1,3 +1,9 @@
+2005-06-27  Michael Snyder  <msnyder@redhat.com>
+
+	* config/mn10300/linux.mt: New file.
+	* configure.tgt: Add rule for am33 / mn10300-linux.
+	* mn10300-tdep.c, mn10300-tdep.h: Bump copyright year.
+
 2005-06-27  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* gdbtypes.c (get_discrete_bounds): Fix a comment typo.
