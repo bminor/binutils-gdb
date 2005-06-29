@@ -1,3 +1,9 @@
+2005-06-30  Ben Elliston  <bje@gnu.org>
+
+	* Makefile.am (EXPECT): Set to expect.
+	(RUNTEST): Likewise, set to runtest.
+	* Makefile.in: Regenerate.
+
 2005-06-16  Alexander Klimov  <alserkli@inbox.ru>
 
 	* emultempl/armelf.em: Add quotes to avoid a null test

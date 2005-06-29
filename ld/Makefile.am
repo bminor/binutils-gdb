@@ -57,14 +57,8 @@ HOSTING_LIBS = @HOSTING_LIBS@
 HOSTING_EMU = -m $(EMUL)
 
 # Setup the testing framework, if you have one
-EXPECT = `if [ -f $$r/../expect/expect ] ; \
-	then echo $$r/../expect/expect ; \
-	else echo expect ; fi`
-
-RUNTEST = `if [ -f $${srcroot}/../dejagnu/runtest ] ; \
-	then echo $${srcroot}/../dejagnu/runtest ; \
-	else echo runtest ; fi`
-
+EXPECT = expect
+RUNTEST = runtest
 RUNTESTFLAGS =
 
 CC_FOR_TARGET = ` \

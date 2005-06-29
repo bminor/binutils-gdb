@@ -1,3 +1,9 @@
+2005-06-30  Ben Elliston  <bje@gnu.org>
+
+	* Makefile.am (EXPECT): Set to expect.
+	(RUNTEST): Likewise, set to runtest.
+	* Makefile.in: Regenerate.
+
 2005-06-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (CHECK_ENTSIZE_VALUES, CHECK_ENTSIZE): Define.

@@ -436,14 +436,8 @@ BFDLIB = ../bfd/libbfd.la
 OPCODES = ../opcodes/libopcodes.la
 LIBIBERTY = ../libiberty/libiberty.a
 POTFILES = $(CFILES) $(DEBUG_SRCS) $(HFILES)
-EXPECT = `if [ -f $$r/../expect/expect ] ; then \
-          echo $$r/../expect/expect ; \
-          else echo expect ; fi`
-
-RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
-           echo ${srcdir}/../dejagnu/runtest ; \
-           else echo runtest ;  fi`
-
+EXPECT = expect
+RUNTEST = runtest
 CC_FOR_TARGET = ` \
   if [ -f $$r/../gcc/xgcc ] ; then \
     if [ -f $$r/../newlib/Makefile ] ; then \

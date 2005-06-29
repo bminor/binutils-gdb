@@ -119,12 +119,8 @@ po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
-EXPECT = `if [ -f $$r/../expect/expect ] ; then \
-          echo $$r/../expect/expect ; \
-          else echo expect ; fi`
-RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
-           echo ${srcdir}/../dejagnu/runtest ; \
-           else echo runtest ;  fi`
+EXPECT = expect
+RUNTEST = runtest
 
 CC_FOR_TARGET = ` \
   if [ -f $$r/../gcc/xgcc ] ; then \

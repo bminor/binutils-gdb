@@ -527,13 +527,8 @@ $(OBJS): $(INCDIR)/bin-bugs.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
 	as.h asintl.h bignum.h bit_fix.h config.h emul.h expr.h flonum.h \
 	frags.h hash.h listing.h obj.h read.h symbols.h tc.h write.h
 
-EXPECT = `if [ -f $${rootme}/../expect/expect ] ; then \
-          echo $${rootme}/../expect/expect ; \
-          else echo expect ; fi`
-
-RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
-		echo $${srcdir}/../dejagnu/runtest ; else echo runtest; \
-	   fi`
+EXPECT = expect
+RUNTEST = runtest
 RUNTESTFLAGS=
 
 check-DEJAGNU: site.exp

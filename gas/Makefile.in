@@ -723,14 +723,8 @@ as_new_LDADD = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 	$(extra_objects) $(GASLIBS) $(INTLDEPS)
 
-EXPECT = `if [ -f $${rootme}/../expect/expect ] ; then \
-          echo $${rootme}/../expect/expect ; \
-          else echo expect ; fi`
-
-RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
-		echo $${srcdir}/../dejagnu/runtest ; else echo runtest; \
-	   fi`
-
+EXPECT = expect
+RUNTEST = runtest
 RUNTESTFLAGS = 
 
 # The m68k operand parser.
