@@ -19,6 +19,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <signal.h>
 #include <sys/time.h>
@@ -73,6 +74,7 @@ handler (int sig)
     }
 } /* handler */
 
+int
 main ()
 {
   int i;

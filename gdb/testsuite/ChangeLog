@@ -1,3 +1,10 @@
+2005-06-29  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/sigrepeat.c: Include <stdlib.h> and add return type for
+	main to avoid warnings.
+
+	* gdb.base/sigrepeat.exp: Fix reference to undefined variable.
+
 2005-06-20  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.mi/mi-stack.exp (test_stack_locals_listing): Remove test for
