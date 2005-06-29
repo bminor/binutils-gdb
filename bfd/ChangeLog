@@ -1,3 +1,8 @@
+2005-06-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_gc_sweep): Do not refcount on sections that have
+	not been processed by check_relocs.
+
 2005-06-29  Paul Brook  <paul@codesourcery.com>
 
 	* bfd-in.h (_bfd_elf_provide_symbol): Update prototype.

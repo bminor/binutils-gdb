@@ -8902,7 +8902,9 @@ elf_gc_sweep (struct bfd_link_info *info, gc_sweep_hook_fn gc_sweep_hook)
 	  /* But we also have to update some of the relocation
 	     info we collected before.  */
 	  if (gc_sweep_hook
-	      && (o->flags & SEC_RELOC) && o->reloc_count > 0)
+	      && (o->flags & SEC_RELOC) != 0
+	      && o->reloc_count > 0
+	      && !bfd_is_abs_section (o->output_section))
 	    {
 	      Elf_Internal_Rela *internal_relocs;
 	      bfd_boolean r;
