@@ -354,8 +354,9 @@ CODE_FRAGMENT
 .     output sections that have an input section.  *}
 .  unsigned int linker_has_input : 1;
 .
-.  {* A mark flag used by some linker backends for garbage collection.  *}
+.  {* Mark flags used by some linker backends for garbage collection.  *}
 .  unsigned int gc_mark : 1;
+.  unsigned int gc_mark_from_eh : 1;
 .
 .  {* The following flags are used by the ELF linker. *}
 .
@@ -661,18 +662,18 @@ static const asymbol global_syms[] =
 
 #define STD_SECTION(SEC, FLAGS, SYM, NAME, IDX)				\
   const asymbol * const SYM = (asymbol *) &global_syms[IDX]; 		\
-  asection SEC = 							\
+  asection SEC =							\
     /* name, id,  index, next, prev, flags, user_set_vma,            */	\
     { NAME,  IDX, 0,     NULL, NULL, FLAGS, 0,				\
 									\
-    /* linker_mark, linker_has_input, gc_mark, segment_mark,         */	\
+    /* linker_mark, linker_has_input, gc_mark, gc_mark_from_eh,      */	\
        0,           0,                1,       0,			\
 									\
-    /* sec_info_type, use_rela_p, has_tls_reloc, has_gp_reloc,       */ \
-       0,	      0,	  0,		 0,			\
+    /* segment_mark, sec_info_type, use_rela_p, has_tls_reloc,       */	\
+       0,            0,             0,          0,			\
 									\
-    /* need_finalize_relax, reloc_done,                              */ \
-       0,		    0,						\
+    /* has_gp_reloc, need_finalize_relax, reloc_done,                */	\
+       0,            0,                   0,				\
 									\
     /* vma, lma, size, rawsize                                       */	\
        0,   0,   0,    0,						\
@@ -686,8 +687,8 @@ static const asymbol global_syms[] =
     /* line_filepos, userdata, contents, lineno, lineno_count,       */	\
        0,            NULL,     NULL,     NULL,   0,			\
 									\
-    /* entsize, kept_section, moving_line_filepos,	           */	\
-       0,       NULL,	      0,					\
+    /* entsize, kept_section, moving_line_filepos,                   */	\
+       0,       NULL,         0,					\
 									\
     /* target_index, used_by_bfd, constructor_chain, owner,          */	\
        0,            NULL,        NULL,              NULL,		\

@@ -54,12 +54,12 @@ static asection bfd_debug_section =
 {
   /* name,      id,  index, next, prev, flags, user_set_vma,       */
      "*DEBUG*", 0,   0,     NULL, NULL, 0,     0,
-  /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
-     0,           0,                0,       0,
-  /* sec_info_type, use_rela_p, has_tls_reloc, has_gp_reloc,       */
-     0,		    0,		0,	       0,
-  /* need_finalize_relax, reloc_done,                              */
-     0,			  0,
+  /* linker_mark, linker_has_input, gc_mark, gc_mark_from_eh,      */
+     0,           0,                1,       0,
+  /* segment_mark, sec_info_type, use_rela_p, has_tls_reloc,       */
+     0,            0,             0,          0,
+  /* has_gp_reloc, need_finalize_relax, reloc_done,                */
+     0,            0,                   0,
   /* vma, lma, size, rawsize,                                      */
      0,   0,   0,    0,
   /* output_offset, output_section, alignment_power,               */
@@ -68,7 +68,7 @@ static asection bfd_debug_section =
      NULL,       NULL,        0,           0,       0,
   /* line_filepos, userdata, contents, lineno, lineno_count,       */
      0,            NULL,     NULL,     NULL,   0,
-  /* entsize, kept_section, moving_line_filepos,	           */
+  /* entsize, kept_section, moving_line_filepos,                   */
      0,       NULL,         0,
   /* target_index, used_by_bfd, constructor_chain, owner,          */
      0,            NULL,        NULL,              NULL,

@@ -1,5 +1,17 @@
 2005-06-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (_bfd_elf_gc_mark): Mark sections referenced by
+	.eh_frame specially..
+	(bfd_elf_gc_sections): ..rather than totally ignoring .eh_frame.
+	Don't recheck sections we have already marked.
+	(elf_gc_sweep): Keep non-code sections referenced from .eh_frame.
+	* section.c (struct bfd_section): Add gc_mark_from_eh.
+	(STD_SECTION): Adjust.
+	* ecoff.c (bfd_debug_section): Adjust.
+	* bfd-in2.h: Regenerate.
+
+2005-06-29  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (elf_gc_sweep): Do not refcount on sections that have
 	not been processed by check_relocs.
 
