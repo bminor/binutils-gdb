@@ -5108,24 +5108,38 @@ ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
       if (s == NULL)
 	s = bfd_get_section_by_name (obfd, lsect->bss_name);
 
-      val = 0;
-      if (s != NULL)
-	val = s->vma + 32768;
-      lsect->sym_val = val;
+      if (s)
+	{
+	  /* VxWorks executables are relocatable, so the sdata base symbols
+	     must be section-relative.  If the section is zero sized leave
+	     them as absolute symbols to avoid creationg an unused
+	     output section.  */
+	  val = 32768;
+	  lsect->sym_val = val + s->vma;
+	  if (s->size == 0)
+	    {
+	      val += s->vma;
+	      s = NULL;
+	    }
+	}
+      else
+	{
+	  val = 0;
+	  lsect->sym_val = 0;
+	}
 
-      _bfd_elf_provide_symbol (info, lsect->sym_name, val);
+      _bfd_elf_provide_symbol (info, lsect->sym_name, val, s);
     }
 
   s = bfd_get_section_by_name (obfd, ".sbss");
-  val = 0;
+  _bfd_elf_provide_symbol (info, "__sbss_start", 0, NULL);
+  _bfd_elf_provide_symbol (info, "___sbss_start", 0, NULL);
   if (s != NULL)
-    val = s->vma;
-  _bfd_elf_provide_symbol (info, "__sbss_start", val);
-  _bfd_elf_provide_symbol (info, "___sbss_start", val);
-  if (s != NULL)
-    val += s->size;
-  _bfd_elf_provide_symbol (info, "__sbss_end", val);
-  _bfd_elf_provide_symbol (info, "___sbss_end", val);
+    val = s->size;
+  else
+    val = 0;
+  _bfd_elf_provide_symbol (info, "__sbss_end", val, s);
+  _bfd_elf_provide_symbol (info, "___sbss_end", val, s);
   return TRUE;
 }
 

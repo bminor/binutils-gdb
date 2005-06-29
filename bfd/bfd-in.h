@@ -698,7 +698,7 @@ extern struct bfd_section *_bfd_elf_tls_setup
   (bfd *, struct bfd_link_info *);
 
 extern void _bfd_elf_provide_symbol
-  (struct bfd_link_info *, const char *, bfd_vma);
+  (struct bfd_link_info *, const char *, bfd_vma, struct bfd_section *);
 
 extern void _bfd_elf_provide_section_bound_symbols
   (struct bfd_link_info *, struct bfd_section *sec, const char *, const char *);

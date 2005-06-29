@@ -1,3 +1,13 @@
+2005-06-29  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in.h (_bfd_elf_provide_symbol): Update prototype.
+	* bfd-in2.h: Regenerate.
+	* elf32-ppc.c (ppc_elf_set_sdata_syms): Make sdata symbols section
+	relative.
+	* elflink.c (bfd_elf_set_symbol): Add section argument.
+	(_bfd_elf_provide_symbol): Ditto.
+	(_bfd_elf_provide_section_bound_symbols): Pass NULL section argument.
+
 2005-06-27  Carlos O'Donell <carlos@systemhalted.org>
 
 	* bfd/elf32-hppa.c (struct elf32_hppa_stub_hash_entry): 

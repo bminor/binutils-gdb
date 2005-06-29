@@ -9792,10 +9792,11 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 }
 
 static void
-bfd_elf_set_symbol (struct elf_link_hash_entry *h, bfd_vma val)
+bfd_elf_set_symbol (struct elf_link_hash_entry *h, bfd_vma val,
+		    struct bfd_section *s)
 {
   h->root.type = bfd_link_hash_defined;
-  h->root.u.def.section = bfd_abs_section_ptr;
+  h->root.u.def.section = s ? s : bfd_abs_section_ptr;
   h->root.u.def.value = val;
   h->def_regular = 1;
   h->type = STT_OBJECT;
@@ -9803,11 +9804,12 @@ bfd_elf_set_symbol (struct elf_link_hash_entry *h, bfd_vma val)
   h->forced_local = 1;
 }
 
-/* Set NAME to VAL if the symbol exists and is undefined.  */
+/* Set NAME to VAL if the symbol exists and is undefined.  If val is NULL
+   it is an absolute symbol, otherwise it is relative to that section.  */
 
 void
 _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
-			 bfd_vma val)
+			 bfd_vma val, struct bfd_section *s)
 {
   struct elf_link_hash_entry *h;
 
@@ -9815,7 +9817,7 @@ _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
 			    FALSE);
   if (h != NULL && (h->root.type == bfd_link_hash_undefined
 		    || h->root.type == bfd_link_hash_undefweak))
-    bfd_elf_set_symbol (h, val);
+    bfd_elf_set_symbol (h, val, s);
 }
 
 /* Set START and END to boundaries of SEC if they exist and are
@@ -9868,8 +9870,8 @@ _bfd_elf_provide_section_bound_symbols (struct bfd_link_info *info,
     }
 
   if (do_start)
-    bfd_elf_set_symbol (hs, start_val);
+    bfd_elf_set_symbol (hs, start_val, NULL);
 
   if (do_end)
-    bfd_elf_set_symbol (he, end_val);
+    bfd_elf_set_symbol (he, end_val, NULL);
 }
