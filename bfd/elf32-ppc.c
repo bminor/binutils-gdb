@@ -3945,6 +3945,24 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* This is a reference to a symbol defined by a dynamic object which
      is not a function.  */
 
+  /* First, a fudge for old shared libs that export some symbols they
+     should not.  */
+  if (!h->def_regular
+      && (strcmp (h->root.root.string, "_SDA_BASE_") == 0
+	  || strcmp (h->root.root.string, "_SDA2_BASE_") == 0))
+    {
+      /* These symbols will be defined later, as if they were defined in
+	 a linker script.  We don't want to use a definition in a shared
+	 object.  */
+      const struct elf_backend_data *bed;
+
+      bed = get_elf_backend_data (htab->elf.dynobj);
+      (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+      h->root.type = bfd_link_hash_undefined;
+      h->root.u.undef.abfd = htab->elf.dynobj;
+      return TRUE;
+    }
+
   /* If we are creating a shared library, we must presume that the
      only references to the symbol are via the global offset table.
      For such cases we need not do anything here; the relocations will

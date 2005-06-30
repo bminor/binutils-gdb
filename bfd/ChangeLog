@@ -1,3 +1,11 @@
+2005-06-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Ignore dynamic
+	_SDA_BASE_ and _SDA2_BASE_ symbols.
+	* elflink.c (_bfd_elf_provide_symbol): Correct comment.  Define
+	sym if not def_regular.
+	(_bfd_elf_provide_section_bound_symbols): Similarly.
+
 2005-06-30  Ben Elliston  <bje@gnu.org>
 
 	* config.bfd: Mark as obsolete:

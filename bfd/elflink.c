@@ -9836,8 +9836,9 @@ bfd_elf_set_symbol (struct elf_link_hash_entry *h, bfd_vma val,
   h->forced_local = 1;
 }
 
-/* Set NAME to VAL if the symbol exists and is undefined.  If val is NULL
-   it is an absolute symbol, otherwise it is relative to that section.  */
+/* Set NAME to VAL if the symbol exists and is not defined in a regular
+   object file.  If S is NULL it is an absolute symbol, otherwise it is
+   relative to that section.  */
 
 void
 _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
@@ -9847,13 +9848,12 @@ _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
 
   h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE,
 			    FALSE);
-  if (h != NULL && (h->root.type == bfd_link_hash_undefined
-		    || h->root.type == bfd_link_hash_undefweak))
+  if (h != NULL && !h->def_regular)
     bfd_elf_set_symbol (h, val, s);
 }
 
-/* Set START and END to boundaries of SEC if they exist and are
-   undefined.  */
+/* Set START and END to boundaries of SEC if they exist and are not
+   defined in regular object files.  */
 
 void
 _bfd_elf_provide_section_bound_symbols (struct bfd_link_info *info,
@@ -9868,15 +9868,11 @@ _bfd_elf_provide_section_bound_symbols (struct bfd_link_info *info,
   /* Check if we need them or not first.  */
   hs = elf_link_hash_lookup (elf_hash_table (info), start, FALSE,
 			     FALSE, FALSE);
-  do_start = (hs != NULL
-	      && (hs->root.type == bfd_link_hash_undefined
-		  || hs->root.type == bfd_link_hash_undefweak));
+  do_start = hs != NULL && !hs->def_regular;
 
   he = elf_link_hash_lookup (elf_hash_table (info), end, FALSE,
 			     FALSE, FALSE);
-  do_end = (he != NULL
-	    && (he->root.type == bfd_link_hash_undefined
-		|| he->root.type == bfd_link_hash_undefweak));
+  do_end = he != NULL && !he->def_regular;
 
   if (!do_start && !do_end)
     return;
