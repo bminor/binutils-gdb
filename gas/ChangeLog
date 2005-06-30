@@ -1,5 +1,10 @@
 2005-06-30  Ben Elliston  <bje@gnu.org>
 
+	* Makefile.am (check-DEJAGNU): Don't search for expect.
+	* Makefile.in: Regenerate.
+
+2005-06-30  Ben Elliston  <bje@gnu.org>
+
 	* Makefile.am (EXPECT): Set to expect.
 	(RUNTEST): Likewise, set to runtest.
 	* Makefile.in: Regenerate.
