@@ -3,6 +3,7 @@
 	* config/tc-arm.c (T_OPCODE_BRANCH, encode_arm_addr_mode_2)
 	(encode_arm_addr_mode_3, encode_arm_cp_address, do_blx, do_t_blx)
 	(do_t_branch, insns [b, bl]): Don't encode pipeline offset.
+	(do_branch): Always set inst.reloc.pc_rel.
 	(s_arm_elf_cons): Disallow use of (plt) suffix.
 	(do_adrl): Adjust X_add_number unconditionally.
 	(md_pcrel_from): Rename md_pcrel_from_section, add second segT
