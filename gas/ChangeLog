@@ -1,3 +1,21 @@
+2005-06-30  Zack Weinberg  <zack@codesourcery.com>
+
+	* config/tc-arm.c (T_OPCODE_BRANCH, encode_arm_addr_mode_2)
+	(encode_arm_addr_mode_3, encode_arm_cp_address, do_blx, do_t_blx)
+	(do_t_branch, insns [b, bl]): Don't encode pipeline offset.
+	(s_arm_elf_cons): Disallow use of (plt) suffix.
+	(do_adrl): Adjust X_add_number unconditionally.
+	(md_pcrel_from): Rename md_pcrel_from_section, add second segT
+	argument.  Handle all adjustment for pipeline offset here.
+	(md_apply_fix): No need to undo work of md_pcrel_from.  No
+	need to extract pre-encoded pipeline adjustments from various
+	branch instructions.  Generally, assume instructions are already
+	all-bits-zero in the field being fixed up.  Remove all OBJ_ELF
+	special cases.  Handle BFD_RELOC_ARM_PLT32 like
+	BFD_RELOC_ARM_PCREL_BRANCH.
+	(tc_gen_reloc): Remove OBJ_ELF special case.
+	* config/tc-arm.c: Define MD_PCREL_FROM_SECTION.
+
 2005-06-30  Ben Elliston  <bje@gnu.org>
 
 	* Makefile.am (check-DEJAGNU): Don't search for expect.

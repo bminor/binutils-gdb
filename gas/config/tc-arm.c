@@ -485,7 +485,7 @@ struct asm_opcode
 #define T_OPCODE_PUSH	0xb400
 #define T_OPCODE_POP	0xbc00
 
-#define T_OPCODE_BRANCH 0xe7fe
+#define T_OPCODE_BRANCH 0xe000
 
 #define THUMB_SIZE	2	/* Size of thumb instruction.  */
 #define THUMB_PP_PC_LR 0x0100
@@ -1970,8 +1970,15 @@ s_arm_elf_cons (int nbytes)
 	      reloc_howto_type *howto = bfd_reloc_type_lookup (stdoutput, reloc);
 	      int size = bfd_get_reloc_size (howto);
 
+	      if (reloc == BFD_RELOC_ARM_PLT32)
+		{
+		  as_bad (_("(plt) is only valid on branch targets"));
+		  reloc = BFD_RELOC_UNUSED;
+		  size = 0;
+		}
+
 	      if (size > nbytes)
-		as_bad ("%s relocations do not fit in %d bytes",
+		as_bad (_("%s relocations do not fit in %d bytes"),
 			howto->name, nbytes);
 	      else
 		{
@@ -4075,8 +4082,6 @@ encode_arm_addr_mode_2 (int i, bfd_boolean is_t)
     {
       if (inst.reloc.type == BFD_RELOC_UNUSED)
 	inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM;
-      if (inst.reloc.pc_rel)
-	inst.reloc.exp.X_add_number -= 8;  /* pipeline offset */
     }
 }
 
@@ -4107,8 +4112,6 @@ encode_arm_addr_mode_3 (int i, bfd_boolean is_t)
       inst.instruction |= HWOFFSET_IMM;
       if (inst.reloc.type == BFD_RELOC_UNUSED)
 	inst.reloc.type = BFD_RELOC_ARM_OFFSET_IMM8;
-      if (inst.reloc.pc_rel)
-	inst.reloc.exp.X_add_number -= 8;  /* pipeline offset */
     }
 }
 
@@ -4161,8 +4164,6 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
     inst.reloc.type = reloc_override;
   else
     inst.reloc.type = BFD_RELOC_ARM_CP_OFF_IMM;
-  if (inst.reloc.pc_rel)
-    inst.reloc.exp.X_add_number -= 8;
   return SUCCESS;
 }
 
@@ -4329,10 +4330,8 @@ do_adr (void)
   /* Frag hacking will turn this into a sub instruction if the offset turns
      out to be negative.  */
   inst.reloc.type = BFD_RELOC_ARM_IMMEDIATE;
-#ifndef TE_WINCE
-  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust.  */
-#endif
   inst.reloc.pc_rel = 1;
+  inst.reloc.exp.X_add_number -= 8;
 }
 
 /* This is a pseudo-op of the form "adrl rd, label" to be converted
@@ -4348,11 +4347,9 @@ do_adrl (void)
   /* Frag hacking will turn this into a sub instruction if the offset turns
      out to be negative.  */
   inst.reloc.type	       = BFD_RELOC_ARM_ADRL_IMMEDIATE;
-#ifndef TE_WINCE
-  inst.reloc.exp.X_add_number -= 8; /* PC relative adjust  */
-#endif
   inst.reloc.pc_rel	       = 1;
   inst.size		       = INSN_SIZE * 2;
+  inst.reloc.exp.X_add_number -= 8;
 }
 
 static void
@@ -4432,13 +4429,12 @@ encode_branch (int default_reloc)
       constraint (inst.operands[0].imm != BFD_RELOC_ARM_PLT32,
 		  _("the only suffix valid here is '(plt)'"));
       inst.reloc.type	= BFD_RELOC_ARM_PLT32;
-      inst.reloc.pc_rel = 0;
     }
   else
     {
       inst.reloc.type = default_reloc;
-      inst.reloc.pc_rel = 1;
     }
+  inst.reloc.pc_rel = 1;
 }
 
 static void
@@ -4472,7 +4468,7 @@ do_blx (void)
       /* Arg is an address; this instruction cannot be executed
 	 conditionally, and the opcode must be adjusted.  */
       constraint (inst.cond != COND_ALWAYS, BAD_COND);
-      inst.instruction = 0xfafffffe;
+      inst.instruction = 0xfa000000;
       encode_branch (BFD_RELOC_ARM_PCREL_BLX);
     }
 }
@@ -6128,7 +6124,7 @@ do_t_blx (void)
   else
     {
       /* No register.  This must be BLX(1).  */
-      inst.instruction = 0xf7ffeffe;
+      inst.instruction = 0xf000e800;
       inst.reloc.type	= BFD_RELOC_THUMB_PCREL_BLX;
       inst.reloc.pc_rel = 1;
     }
@@ -6141,13 +6137,13 @@ do_t_branch (void)
     {
       if (inst.cond == COND_ALWAYS)
 	{
-	  inst.instruction = 0xf7ffbffe;
+	  inst.instruction = 0xf000b000;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH25;
 	}
       else
 	{
 	  assert (inst.cond != 0xF);
-	  inst.instruction = (inst.cond << 22) | 0xf43faffe;
+	  inst.instruction = (inst.cond << 22) | 0xf0008000;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH20;
 	}
     }
@@ -6157,7 +6153,7 @@ do_t_branch (void)
 	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH12;
       else
 	{
-	  inst.instruction = 0xd0fe | (inst.cond << 8);
+	  inst.instruction = 0xd000 | (inst.cond << 8);
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH9;
 	}
     }
@@ -8123,19 +8119,13 @@ static const struct asm_opcode insns[] =
  tC3(ldmfd,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
 
  TCE(swi,	f000000, df00,     1, (EXPi),        swi, t_swi),
-#ifdef TE_WINCE
-  /* XXX This is the wrong place to do this.  Think multi-arch.	 */
- TCE(b,		a000000, e7fe,	     1, (EXPr),	    branch, t_branch),
- TCE(bl,	b000000, f7fffffe,   1, (EXPr),	    branch, t_branch23),
-#else
- TCE(b,		afffffe, e7fe,	     1, (EXPr),	    branch, t_branch),
- TCE(bl,	bfffffe, f7fffffe,   1, (EXPr),	    branch, t_branch23),
-#endif
+ TCE(b,		a000000, e000,	   1, (EXPr),	     branch, t_branch),
+ TCE(bl,	b000000, f000f800, 1, (EXPr),	     branch, t_branch23),
 
   /* Pseudo ops.  */
- TCE(adr,	28f0000, 000f,	   2, (RR, EXP),    adr,  t_adr),
-  C3(adrl,	28f0000,           2, (RR, EXP),    adrl),
- tCE(nop,	1a00000, nop,	   1, (oI255c),	    nop,  t_nop),
+ TCE(adr,	28f0000, 000f,	   2, (RR, EXP),     adr,  t_adr),
+  C3(adrl,	28f0000,           2, (RR, EXP),     adrl),
+ tCE(nop,	1a00000, nop,	   1, (oI255c),	     nop,  t_nop),
 
   /* Thumb-compatibility pseudo ops.  */
  tCE(lsl,	1a00000, lsl,	   3, (RR, oRR, SH), shift, t_shift),
@@ -8143,7 +8133,7 @@ static const struct asm_opcode insns[] =
  tCE(lsr,	1a00020, lsr,	   3, (RR, oRR, SH), shift, t_shift),
  tC3(lsrs,	1b00020, lsrs,	   3, (RR, oRR, SH), shift, t_shift),
  tCE(asr,	1a00040, asr,	   3, (RR, oRR, SH), shift, t_shift),
- tC3(asrs,     1b00040, asrs,     3, (RR, oRR, SH), shift, t_shift),
+ tC3(asrs,      1b00040, asrs,     3, (RR, oRR, SH), shift, t_shift),
  tCE(ror,	1a00060, ror,	   3, (RR, oRR, SH), shift, t_shift),
  tC3(rors,	1b00060, rors,	   3, (RR, oRR, SH), shift, t_shift),
  tCE(neg,	2600000, neg,	   2, (RR, RR),      rd_rn, t_neg),
@@ -8153,7 +8143,7 @@ static const struct asm_opcode insns[] =
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT ARM_EXT_V6
- TCE(cpy,       1a00000, 4600,     2, (RR, RR),          rd_rm, t_cpy),
+ TCE(cpy,       1a00000, 4600,     2, (RR, RR),      rd_rm, t_cpy),
 
  /* V1 instructions with no Thumb analogue prior to V6T2.  */
 #undef THUMB_VARIANT
@@ -8170,7 +8160,7 @@ static const struct asm_opcode insns[] =
  TC3(strbt,	4600000, f8200e00, 2, (RR, ADDR),    ldstt, t_ldstt),
 
  TC3(stmdb,	9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
- TC3(stmfd,    9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(stmfd,     9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
 
  TC3(ldmdb,	9100000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
  TC3(ldmea,	9100000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
@@ -9898,41 +9888,75 @@ tc_arm_frame_initial_instructions (void)
 
 /* MD interface: Symbol and relocation handling.  */
 
-/* The knowledge of the PC's pipeline offset is built into the insns
-   themselves.	*/
+/* Return the address within the segment that a PC-relative fixup is
+   relative to.  For ARM, PC-relative fixups applied to instructions
+   are generally relative to the location of the fixup plus 8 bytes.
+   Thumb branches are offset by 4, and Thumb loads relative to PC
+   require special handling.  */
 
 long
-md_pcrel_from (fixS * fixP)
+md_pcrel_from_section (fixS * fixP, segT seg)
 {
-  if (fixP->fx_addsy
-      && S_GET_SEGMENT (fixP->fx_addsy) == undefined_section
-      && fixP->fx_subsy == NULL)
-    return 0;
+  offsetT base = fixP->fx_where + fixP->fx_frag->fr_address;
 
-  /* PC relative addressing on the Thumb is slightly odd as the bottom
-     two bits of the PC are forced to zero for the calculation.  This
-     happens *after* application of the pipeline offset.  However,
-     Thumb adrl already adjusts for this, so we need not do it again.  */
+  /* If this is pc-relative and we are going to emit a relocation
+     then we just want to put out any pipeline compensation that the linker
+     will need.  Otherwise we want to use the calculated base.  */
+  if (fixP->fx_pcrel 
+      && ((fixP->fx_addsy && S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	  || arm_force_relocation (fixP)))
+    base = 0;
+
   switch (fixP->fx_r_type)
     {
+      /* PC relative addressing on the Thumb is slightly odd as the
+	 bottom two bits of the PC are forced to zero for the
+	 calculation.  This happens *after* application of the
+	 pipeline offset.  However, Thumb adrl already adjusts for
+	 this, so we need not do it again.  */
     case BFD_RELOC_ARM_THUMB_ADD:
-      return (fixP->fx_where + fixP->fx_frag->fr_address) & ~3;
+      return base & ~3;
 
     case BFD_RELOC_ARM_THUMB_OFFSET:
     case BFD_RELOC_ARM_T32_OFFSET_IMM:
-      return (fixP->fx_where + fixP->fx_frag->fr_address + 4) & ~3;
+      return (base + 4) & ~3;
 
-    default:
-      break;
-    }
+      /* Thumb branches are simply offset by +4.  */
+    case BFD_RELOC_THUMB_PCREL_BRANCH7:
+    case BFD_RELOC_THUMB_PCREL_BRANCH9:
+    case BFD_RELOC_THUMB_PCREL_BRANCH12:
+    case BFD_RELOC_THUMB_PCREL_BRANCH20:
+    case BFD_RELOC_THUMB_PCREL_BRANCH23:
+    case BFD_RELOC_THUMB_PCREL_BRANCH25:
+    case BFD_RELOC_THUMB_PCREL_BLX:
+      return base + 4;
 
+      /* ARM mode branches are offset by +8.  However, the Windows CE
+	 loader expects the relocation not to take this into account.  */
+    case BFD_RELOC_ARM_PCREL_BRANCH:
+    case BFD_RELOC_ARM_PCREL_BLX:
+    case BFD_RELOC_ARM_PLT32:
 #ifdef TE_WINCE
-  /* The pattern was adjusted to accommodate CE's off-by-one fixups,
-     so we un-adjust here to compensate for the accommodation.	*/
-  return fixP->fx_where + fixP->fx_frag->fr_address + 8;
+      return base;
 #else
-  return fixP->fx_where + fixP->fx_frag->fr_address;
+      return base + 8;
 #endif
+
+      /* ARM mode loads relative to PC are also offset by +8.  Unlike
+	 branches, the Windows CE loader *does* expect the relocation
+	 to take this into account.  */
+    case BFD_RELOC_ARM_OFFSET_IMM:
+    case BFD_RELOC_ARM_OFFSET_IMM8:
+    case BFD_RELOC_ARM_HWLITERAL:
+    case BFD_RELOC_ARM_LITERAL:
+    case BFD_RELOC_ARM_CP_OFF_IMM:
+      return base + 8;
+
+
+      /* Other PC-relative relocations are un-offset.  */
+    default:
+      return base;
+    }
 }
 
 /* Under ELF we need to default _GLOBAL_OFFSET_TABLE.
@@ -10115,17 +10139,6 @@ md_apply_fix (fixS *	fixP,
   if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
     fixP->fx_done = 1;
 
-  /* If this symbol is in a different section then we need to leave it for
-     the linker to deal with.  Unfortunately, md_pcrel_from can't tell,
-     so we have to undo its effects here.  */
-  if (fixP->fx_pcrel)
-    {
-      if (fixP->fx_addsy != NULL
-	  && S_IS_DEFINED (fixP->fx_addsy)
-	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
-	value += md_pcrel_from (fixP);
-    }
-
   /* On a 64-bit host, silently truncate 'value' to 32 bits for
      consistency with the behavior on 32-bit hosts.  Remember value
      for emit_reloc.  */
@@ -10286,7 +10299,6 @@ md_apply_fix (fixS *	fixP,
       value /= 4;
 
       newval = md_chars_to_number (buf+2, THUMB_SIZE);
-      newval &= 0xff00;
       newval |= value;
       md_number_to_chars (buf+2, newval, THUMB_SIZE);
       break;
@@ -10457,7 +10469,6 @@ md_apply_fix (fixS *	fixP,
 	  break;
 	}
 
-      newval &= 0xfbff8f00;
       newval |= (newimm & 0x800) << 15;
       newval |= (newimm & 0x700) << 4;
       newval |= (newimm & 0x0ff);
@@ -10470,7 +10481,7 @@ md_apply_fix (fixS *	fixP,
       if (((unsigned long) value) > 0xffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid smi expression"));
-      newval = md_chars_to_number (buf, INSN_SIZE) & 0xfff000f0;
+      newval = md_chars_to_number (buf, INSN_SIZE);
       newval |= (value & 0xf) | ((value & 0xfff0) << 4);
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
@@ -10481,7 +10492,7 @@ md_apply_fix (fixS *	fixP,
 	  if (((unsigned long) value) > 0xff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid swi expression"));
-	  newval = md_chars_to_number (buf, THUMB_SIZE) & 0xff00;
+	  newval = md_chars_to_number (buf, THUMB_SIZE);
 	  newval |= value;
 	  md_number_to_chars (buf, newval, THUMB_SIZE);
 	}
@@ -10490,7 +10501,7 @@ md_apply_fix (fixS *	fixP,
 	  if (((unsigned long) value) > 0x00ffffff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid swi expression"));
-	  newval = md_chars_to_number (buf, INSN_SIZE) & 0xff000000;
+	  newval = md_chars_to_number (buf, INSN_SIZE);
 	  newval |= value;
 	  md_number_to_chars (buf, newval, INSN_SIZE);
 	}
@@ -10505,358 +10516,180 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_PCREL_BRANCH:
-      newval = md_chars_to_number (buf, INSN_SIZE);
-
-      /* Sign-extend a 24-bit number.  */
-#define SEXT24(x)	((((x) & 0xffffff) ^ (~ 0x7fffff)) + 0x800000)
-
 #ifdef OBJ_ELF
-      if (!fixP->fx_done)
-	value = fixP->fx_offset;
+    case BFD_RELOC_ARM_PLT32:
 #endif
 
       /* We are going to store value (shifted right by two) in the
-	 instruction, in a 24 bit, signed field  Thus we need to check
-	 that none of the top 8 bits of the shifted value (top 7 bits of
-	 the unshifted, unsigned value) are set, or that they are all set.  */
-      if ((value & ~ ((offsetT) 0x1ffffff)) != 0
-	  && ((value & ~ ((offsetT) 0x1ffffff)) != ~ ((offsetT) 0x1ffffff)))
-	{
-#ifdef OBJ_ELF
-	  /* Normally we would be stuck at this point, since we cannot store
-	     the absolute address that is the destination of the branch in the
-	     24 bits of the branch instruction.	 If however, we happen to know
-	     that the destination of the branch is in the same section as the
-	     branch instruction itself, then we can compute the relocation for
-	     ourselves and not have to bother the linker with it.
-
-	     FIXME: The test for OBJ_ELF is only here because I have not
-	     worked out how to do this for OBJ_COFF.  */
-	  if (fixP->fx_addsy != NULL
-	      && S_IS_DEFINED (fixP->fx_addsy)
-	      && S_GET_SEGMENT (fixP->fx_addsy) == seg)
-	    {
-	      /* Get pc relative value to go into the branch.  */
-	      value = * valP;
-
-	      /* Permit a backward branch provided that enough bits
-		 are set.  Allow a forwards branch, provided that
-		 enough bits are clear.	 */
-	      if (   (value & ~ ((offsetT) 0x1ffffff)) == ~ ((offsetT) 0x1ffffff)
-		  || (value & ~ ((offsetT) 0x1ffffff)) == 0)
-		fixP->fx_done = 1;
-	    }
-
-	  if (! fixP->fx_done)
-#endif
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("GAS can't handle same-section branch dest >= 0x04000000"));
-	}
-
-      value >>= 2;
-      value += SEXT24 (newval);
-
-      if (    (value & ~ ((offsetT) 0xffffff)) != 0
-	  && ((value & ~ ((offsetT) 0xffffff)) != ~ ((offsetT) 0xffffff)))
+	 instruction, in a 24 bit, signed field.  Bits 0 and 1 must be
+	 clear, and bits 26 through 32 either all clear or all set. */
+      if (value & 0x00000003)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("out of range branch"));
+		      _("misaligned branch destination"));
+      if ((value & (offsetT)0xfe000000) != (offsetT)0
+	  && (value & (offsetT)0xfe000000) != (offsetT)0xfe000000)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
 
-      if (seg->use_rela_p && !fixP->fx_done)
+      if (fixP->fx_done || !seg->use_rela_p)
 	{
-	  /* Must unshift the value before storing it in the addend.  */
-	  value <<= 2;
-#ifdef OBJ_ELF
-	  fixP->fx_offset = value;
-#endif
-	  fixP->fx_addnumber = value;
-	  newval = newval & 0xff000000;
+	  newval = md_chars_to_number (buf, INSN_SIZE);
+	  newval |= (value >> 2) & 0x00ffffff;
+	  md_number_to_chars (buf, newval, INSN_SIZE);
 	}
-      else
-	  newval = (value & 0x00ffffff) | (newval & 0xff000000);
-      md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
     case BFD_RELOC_ARM_PCREL_BLX:
-      {
-	offsetT hbit;
-	newval = md_chars_to_number (buf, INSN_SIZE);
+      /* BLX allows bit 1 to be set in the branch destination, since
+	 it targets a Thumb instruction which is only required to be
+	 aligned modulo 2.  Other constraints are as for B/BL.  */
+      if (value & 0x00000001)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("misaligned BLX destination"));
+      if ((value & (offsetT)0xfe000000) != (offsetT)0
+	  && (value & (offsetT)0xfe000000) != (offsetT)0xfe000000)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
 
-#ifdef OBJ_ELF
-	if (!fixP->fx_done)
-	  value = fixP->fx_offset;
-#endif
-	hbit   = (value >> 1) & 1;
-	value  = (value >> 2) & 0x00ffffff;
-	value  = (value + (newval & 0x00ffffff)) & 0x00ffffff;
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  offsetT hbit;
+	  hbit   = (value >> 1) & 1;
+	  value  = (value >> 2) & 0x00ffffff;
 
-	if (seg->use_rela_p && !fixP->fx_done)
-	  {
-	    /* Must sign-extend and unshift the value before storing
-	       it in the addend.  */
-	    value = SEXT24 (value);
-	    value = (value << 2) | hbit;
-#ifdef OBJ_ELF
-	    fixP->fx_offset = value;
-#endif
-	    fixP->fx_addnumber = value;
-	    newval = newval & 0xfe000000;
-	  }
-	else
-	  newval = value | (newval & 0xfe000000) | (hbit << 24);
-	md_number_to_chars (buf, newval, INSN_SIZE);
-      }
+	  newval = md_chars_to_number (buf, INSN_SIZE);
+	  newval |= value | hbit << 24;
+	  md_number_to_chars (buf, newval, INSN_SIZE);
+	}
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH7: /* CZB */
-      newval = md_chars_to_number (buf, THUMB_SIZE);
-      {
-	addressT diff = ((newval & 0x00f8) >> 2) | (newval & 0x0200) >> 3;
-	/* This one does not have the offset encoded in the pattern.  */
-	value = value + diff - 4;
-	/* CZB can only branch forward.  */
-	if (value & ~0x7e)
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("branch out of range"));
+      /* CZB can only branch forward.  */
+      if (value & ~0x7e)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
 
-	newval &= 0xfd07;
-	if (seg->use_rela_p && !fixP->fx_done)
-	  {
-#ifdef OBJ_ELF
-	    fixP->fx_offset = value;
-#endif
-	    fixP->fx_addnumber = value;
-	  }
-	else
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  newval = md_chars_to_number (buf, THUMB_SIZE);
 	  newval |= ((value & 0x2e) << 2) | ((value & 0x40) << 3);
-      }
-      md_number_to_chars (buf, newval, THUMB_SIZE);
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	}
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH9: /* Conditional branch.	*/
-      newval = md_chars_to_number (buf, THUMB_SIZE);
-      {
-	addressT diff = (newval & 0xff) << 1;
-	if (diff & 0x100)
-	  diff |= ~0xff;
+      if ((value & ~0xff) && ((value & ~0xff) != ~0xff))
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
 
-	value += diff;
-	if ((value & ~0xff) && ((value & ~0xff) != ~0xff))
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("branch out of range"));
-	if (seg->use_rela_p && !fixP->fx_done)
-	  {
-#ifdef OBJ_ELF
-	    fixP->fx_offset = value;
-#endif
-	    fixP->fx_addnumber = value;
-	    newval = newval & 0xff00;
-	  }
-	else
-	  newval = (newval & 0xff00) | ((value & 0x1ff) >> 1);
-      }
-      md_number_to_chars (buf, newval, THUMB_SIZE);
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  newval = md_chars_to_number (buf, THUMB_SIZE);
+	  newval |= (value & 0x1ff) >> 1;
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	}
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH12: /* Unconditional branch.  */
-      newval = md_chars_to_number (buf, THUMB_SIZE);
-      {
-	addressT diff = (newval & 0x7ff) << 1;
-	if (diff & 0x800)
-	  diff |= ~0x7ff;
+      if ((value & ~0x7ff) && ((value & ~0x7ff) != ~0x7ff))
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
 
-	value += diff;
-	if ((value & ~0x7ff) && ((value & ~0x7ff) != ~0x7ff))
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("branch out of range"));
-	if (seg->use_rela_p && !fixP->fx_done)
-	  {
-#ifdef OBJ_ELF
-	    fixP->fx_offset = value;
-#endif
-	    fixP->fx_addnumber = value;
-	    newval = newval & 0xf800;
-	  }
-	else
-	  newval = (newval & 0xf800) | ((value & 0xfff) >> 1);
-      }
-      md_number_to_chars (buf, newval, THUMB_SIZE);
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  newval = md_chars_to_number (buf, THUMB_SIZE);
+	  newval |= (value & 0xfff) >> 1;
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	}
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH20:
-      {
-	offsetT newval2;
-	addressT diff, S, J1, J2, lo, hi;
+      if ((value & ~0x1fffff) && ((value & ~0x1fffff) != ~0x1fffff))
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("conditional branch out of range"));
 
-	newval	= md_chars_to_number (buf, THUMB_SIZE);
-	newval2 = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  offsetT newval2;
+	  addressT S, J1, J2, lo, hi;
 
-	S  = !(newval & 0x0400);  /* flipped - 0=negative */
-	hi = (newval  & 0x003f);
-	J1 = (newval2 & 0x2000) >> 13;
-	J2 = (newval2 & 0x0800) >> 11;
-	lo = (newval2 & 0x07ff);
+	  S  = (value & 0x00100000) >> 20;
+	  J2 = (value & 0x00080000) >> 19;
+	  J1 = (value & 0x00040000) >> 18;
+	  hi = (value & 0x0003f000) >> 12;
+	  lo = (value & 0x00000ffe) >> 1;
 
-	diff = ((S << 20) | (J2 << 19) | (J1 << 18) | (hi << 12) | (lo << 1));
-	diff -= (1 << 20);  /* sign extend */
-	value += diff;
-
-	if ((value & ~0x1fffff) && ((value & ~0x1fffff) != ~0x1fffff))
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("conditional branch out of range"));
-
-	newval  = newval  & 0xfbc0;
-	newval2 = newval2 & 0xd000;
-	if (seg->use_rela_p && !fixP->fx_done)
-	  {
-#ifdef OBJ_ELF
-	    fixP->fx_offset = value;
-#endif
-	    fixP->fx_addnumber = value;
-	  }
-	else
-	  {
-	    S  = (value & 0x00100000) >> 20;
-	    J2 = (value & 0x00080000) >> 19;
-	    J1 = (value & 0x00040000) >> 18;
-	    hi = (value & 0x0003f000) >> 12;
-	    lo = (value & 0x00000ffe) >> 1;
-
-	    newval  = newval  | (S << 10) | hi;
-	    newval2 = newval2 | (J1 << 13) | (J2 << 11) | lo;
-	  }
-
-	md_number_to_chars (buf, newval, THUMB_SIZE);
-	md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
-      }
+	  newval   = md_chars_to_number (buf, THUMB_SIZE);
+	  newval2  = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+	  newval  |= (S << 10) | hi;
+	  newval2 |= (J1 << 13) | (J2 << 11) | lo;
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	  md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
+	}
       break;
 
     case BFD_RELOC_THUMB_PCREL_BLX:
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
-      {
-	offsetT newval2;
-	addressT diff;
+      if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
 
-	newval	= md_chars_to_number (buf, THUMB_SIZE);
-	newval2 = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
-	diff = ((newval & 0x7ff) << 12) | ((newval2 & 0x7ff) << 1);
-	if (diff & 0x400000)
-	  diff |= ~0x3fffff;
-#ifdef OBJ_ELF
-	if (!fixP->fx_done)
-	  value = fixP->fx_offset;
-#endif
-	value += diff;
+      if (fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
+	/* For a BLX instruction, make sure that the relocation is rounded up
+	   to a word boundary.  This follows the semantics of the instruction
+	   which specifies that bit 1 of the target address will come from bit
+	   1 of the base address.  */
+	value = (value + 1) & ~ 1;
 
-	if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("branch with link out of range"));
-
-	if (fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
-	  /* For a BLX instruction, make sure that the relocation is rounded up
-	     to a word boundary.  This follows the semantics of the instruction
-	     which specifies that bit 1 of the target address will come from bit
-	     1 of the base address.  */
-	  value = (value + 1) & ~ 1;
-
-	if (seg->use_rela_p && !fixP->fx_done)
-	  {
-#ifdef OBJ_ELF
-	    fixP->fx_offset = value;
-#endif
-	    fixP->fx_addnumber = value;
-	    newval = newval & 0xf800;
-	    newval2 = newval2 & 0xf800;
-	  }
-	else
-	  {
-	    newval  = (newval  & 0xf800) | ((value & 0x7fffff) >> 12);
-	    newval2 = (newval2 & 0xf800) | ((value & 0xfff) >> 1);
-	  }
-	md_number_to_chars (buf, newval, THUMB_SIZE);
-	md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
-      }
-      break;
-
-    case BFD_RELOC_8:
-      if (seg->use_rela_p && !fixP->fx_done)
-	break;
-      if (fixP->fx_done || fixP->fx_pcrel)
-	md_number_to_chars (buf, value, 1);
-#ifdef OBJ_ELF
-      else
+      if (fixP->fx_done || !seg->use_rela_p)
 	{
-	  value = fixP->fx_offset;
-	  md_number_to_chars (buf, value, 1);
+	  offsetT newval2;
+
+	  newval   = md_chars_to_number (buf, THUMB_SIZE);
+	  newval2  = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+	  newval  |= (value & 0x7fffff) >> 12;
+	  newval2 |= (value & 0xfff) >> 1;
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	  md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
 	}
-#endif
       break;
 
     case BFD_RELOC_THUMB_PCREL_BRANCH25:
-      {
-	offsetT newval2;
-	addressT diff, S, I1, I2, lo, hi;
+      if ((value & ~0x1ffffff) && ((value & ~0x1ffffff) != ~0x1ffffff))
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("branch out of range"));
 
-	newval	= md_chars_to_number (buf, THUMB_SIZE);
-	newval2 = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  offsetT newval2;
+	  addressT S, I1, I2, lo, hi;
 
-	S  = (newval  & 0x0400) >> 10;
-	hi = (newval  & 0x03ff);
-	I1 = (newval2 & 0x2000) >> 13;
-	I2 = (newval2 & 0x0800) >> 11;
-	lo = (newval2 & 0x07ff);
+	  S  = (value & 0x01000000) >> 24;
+	  I1 = (value & 0x00800000) >> 23;
+	  I2 = (value & 0x00400000) >> 22;
+	  hi = (value & 0x003ff000) >> 12;
+	  lo = (value & 0x00000ffe) >> 1;
 
-	I1 = !(I1 ^ S);
-	I2 = !(I2 ^ S);
-	S  = !S;
+	  I1 = !(I1 ^ S);
+	  I2 = !(I2 ^ S);
 
-	diff = ((S << 24) | (I1 << 23) | (I2 << 22) | (hi << 12) | (lo << 1));
-	diff -= (1 << 24);  /* sign extend */
-	value += diff;
+	  newval   = md_chars_to_number (buf, THUMB_SIZE);
+	  newval2  = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+	  newval  |= (S << 10) | hi;
+	  newval2 |= (I1 << 13) | (I2 << 11) | lo;
+	  md_number_to_chars (buf, newval, THUMB_SIZE);
+	  md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
+	}
+      break;
 
-	if ((value & ~0x1ffffff) && ((value & ~0x1ffffff) != ~0x1ffffff))
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("branch out of range"));
-
-	newval  = newval  & 0xf800;
-	newval2 = newval2 & 0xd000;
-	if (seg->use_rela_p && !fixP->fx_done)
-	  {
-#ifdef OBJ_ELF
-	    fixP->fx_offset = value;
-#endif
-	    fixP->fx_addnumber = value;
-	  }
-	else
-	  {
-	    S  = (value & 0x01000000) >> 24;
-	    I1 = (value & 0x00800000) >> 23;
-	    I2 = (value & 0x00400000) >> 22;
-	    hi = (value & 0x003ff000) >> 12;
-	    lo = (value & 0x00000ffe) >> 1;
-
-	    I1 = !(I1 ^ S);
-	    I2 = !(I2 ^ S);
-
-	    newval  = newval  | (S << 10) | hi;
-	    newval2 = newval2 | (I1 << 13) | (I2 << 11) | lo;
-	  }
-	md_number_to_chars (buf, newval, THUMB_SIZE);
-	md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
-      }
+    case BFD_RELOC_8:
+      if (fixP->fx_done || !seg->use_rela_p)
+	md_number_to_chars (buf, value, 1);
       break;
 
     case BFD_RELOC_16:
-      if (seg->use_rela_p && !fixP->fx_done)
-	break;
-      if (fixP->fx_done || fixP->fx_pcrel)
+      if (fixP->fx_done || !seg->use_rela_p)
 	md_number_to_chars (buf, value, 2);
-#ifdef OBJ_ELF
-      else
-	{
-	  value = fixP->fx_offset;
-	  md_number_to_chars (buf, value, 2);
-	}
-#endif
       break;
 
 #ifdef OBJ_ELF
@@ -10871,9 +10704,8 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_GOT32:
     case BFD_RELOC_ARM_GOTOFF:
     case BFD_RELOC_ARM_TARGET2:
-      if (seg->use_rela_p && !fixP->fx_done)
-	break;
-      md_number_to_chars (buf, 0, 4);
+      if (fixP->fx_done || !seg->use_rela_p)
+	md_number_to_chars (buf, 0, 4);
       break;
 #endif
 
@@ -10883,22 +10715,13 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_ROSEGREL32:
     case BFD_RELOC_ARM_SBREL32:
     case BFD_RELOC_32_PCREL:
-      if (seg->use_rela_p && !fixP->fx_done)
-	break;
-      if (fixP->fx_done || fixP->fx_pcrel)
+      if (fixP->fx_done || !seg->use_rela_p)
 	md_number_to_chars (buf, value, 4);
-#ifdef OBJ_ELF
-      else
-	{
-	  value = fixP->fx_offset;
-	  md_number_to_chars (buf, value, 4);
-	}
-#endif
       break;
 
 #ifdef OBJ_ELF
     case BFD_RELOC_ARM_PREL31:
-      if (fixP->fx_done || fixP->fx_pcrel)
+      if (fixP->fx_done || !seg->use_rela_p)
 	{
 	  newval = md_chars_to_number (buf, 4) & 0x80000000;
 	  if ((value ^ (value >> 1)) & 0x40000000)
@@ -10909,10 +10732,6 @@ md_apply_fix (fixS *	fixP,
 	  newval |= value & 0x7fffffff;
 	  md_number_to_chars (buf, newval, 4);
 	}
-      break;
-
-    case BFD_RELOC_ARM_PLT32:
-      /* It appears the instruction is fully prepared at this point.  */
       break;
 #endif
 
@@ -11135,15 +10954,9 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
-  /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
-#ifndef OBJ_ELF
-  if (fixp->fx_pcrel == 0)
-    reloc->addend = fixp->fx_offset;
-  else
-    reloc->addend = fixp->fx_offset = reloc->address;
-#else  /* OBJ_ELF */
+  if (fixp->fx_pcrel)
+    fixp->fx_offset = reloc->address;
   reloc->addend = fixp->fx_offset;
-#endif
 
   switch (fixp->fx_r_type)
     {

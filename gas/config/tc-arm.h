@@ -211,6 +211,9 @@ struct arm_segment_info_type
 
 #endif
 
+#define MD_PCREL_FROM_SECTION(F,S) md_pcrel_from_section(F,S)
+
+extern long md_pcrel_from_section (struct fix *, segT);
 extern void arm_frag_align_code (int, int);
 extern void arm_validate_fix (struct fix *);
 extern const char * elf32_arm_target_format (void);

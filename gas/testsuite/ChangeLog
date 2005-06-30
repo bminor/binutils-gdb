@@ -1,3 +1,10 @@
+2005-06-30  Zack Weinberg  <zack@codesourcery.com>
+
+	* gas/arm/arm.exp: Don't special case ldconst, arm7t, or copro
+	for *-wince-*.
+	* gas/arm/wince_arm7t.d, gas/arm/wince_copro.d
+	* gas/arm/wince_ldconst.d: Delete.
+
 2005-06-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 1013

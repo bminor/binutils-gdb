@@ -18,16 +18,13 @@ if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
 
     if {[istarget *-wince-*]} then {
 	run_dump_test "wince_inst"
-	run_dump_test "wince_ldconst"
-	run_dump_test "wince_arm7t"
-	run_dump_test "wince_copro"
     } else {
 	run_dump_test "inst"
-	run_dump_test "ldconst"
-	run_dump_test "arm7t"
-	run_dump_test "copro"
     }
 
+    run_dump_test "ldconst"
+    run_dump_test "arm7t"
+    run_dump_test "copro"
     run_dump_test "arm3"
     run_dump_test "arm6"
     run_dump_test "arm7dm"
