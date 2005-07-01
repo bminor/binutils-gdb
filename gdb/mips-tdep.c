@@ -1659,7 +1659,7 @@ mips_insn16_frame_prev_register (struct frame_info *next_frame,
 				 void **this_cache,
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, void *valuep)
+				 int *realnump, gdb_byte *valuep)
 {
   struct mips_frame_cache *info = mips_insn16_frame_cache (next_frame,
 							   this_cache);
@@ -1979,7 +1979,7 @@ mips_insn32_frame_prev_register (struct frame_info *next_frame,
 				 void **this_cache,
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, void *valuep)
+				 int *realnump, gdb_byte *valuep)
 {
   struct mips_frame_cache *info = mips_insn32_frame_cache (next_frame,
 							   this_cache);
@@ -2073,7 +2073,7 @@ mips_stub_frame_prev_register (struct frame_info *next_frame,
 				 void **this_cache,
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, void *valuep)
+				 int *realnump, gdb_byte *valuep)
 {
   struct trad_frame_cache *this_trad_cache
     = mips_stub_frame_cache (next_frame, this_cache);

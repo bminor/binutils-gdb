@@ -1,3 +1,9 @@
+2005-07-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* mips-tdep.c (mips_insn16_frame_prev_register)
+	(mips_insn32_frame_prev_register, mips_stub_frame_prev_register):
+	Change type of last argument to `gdb_byte *'.
+
 2005-07-01  Steve Ellcey  <sje@cup.hp.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.
