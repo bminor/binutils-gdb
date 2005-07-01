@@ -1,3 +1,12 @@
+2005-07-01  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure.in (AM_BINUTILS_WARNINGS): Add.
+	(BFD_NEED_DECLARATION): Replace with AC_CHECK_DECLS.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* objdump.c (NEED_DECLARATION_*): Replace with !HAVE_DECL_*.
+	* bucomm.h: (NEED_DECLARATION_*): Ditto.
+
 2005-06-30  Ben Elliston  <bje@gnu.org>
 
 	* Makefile.am (check-DEJAGNU): Don't search for expect.

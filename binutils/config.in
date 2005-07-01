@@ -27,12 +27,32 @@
 /* Define to 1 if you have the `dcgettext' function. */
 #undef HAVE_DCGETTEXT
 
+/* Define to 1 if you have the declaration of `environ', and to 0 if you
+   don't. */
+#undef HAVE_DECL_ENVIRON
+
+/* Define to 1 if you have the declaration of `fprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_FPRINTF
+
 /* Define to 1 if you have the declaration of `getc_unlocked', and to 0 if you
    don't. */
 #undef HAVE_DECL_GETC_UNLOCKED
 
+/* Define to 1 if you have the declaration of `getenv', and to 0 if you don't.
+   */
+#undef HAVE_DECL_GETENV
+
 /* Is the prototype for getopt in <unistd.h> in the expected format? */
 #undef HAVE_DECL_GETOPT
+
+/* Define to 1 if you have the declaration of `sbrk', and to 0 if you don't.
+   */
+#undef HAVE_DECL_SBRK
+
+/* Define to 1 if you have the declaration of `strstr', and to 0 if you don't.
+   */
+#undef HAVE_DECL_STRSTR
 
 /* Does the platform use an executable suffix? */
 #undef HAVE_EXECUTABLE_SUFFIX
@@ -165,21 +185,6 @@
 
 /* Define to 1 if you have the `__argz_stringify' function. */
 #undef HAVE___ARGZ_STRINGIFY
-
-/* Define if environ is not declared in system header files. */
-#undef NEED_DECLARATION_ENVIRON
-
-/* Define if fprintf is not declared in system header files. */
-#undef NEED_DECLARATION_FPRINTF
-
-/* Define if getenv is not declared in system header files. */
-#undef NEED_DECLARATION_GETENV
-
-/* Define if sbrk is not declared in system header files. */
-#undef NEED_DECLARATION_SBRK
-
-/* Define if strstr is not declared in system header files. */
-#undef NEED_DECLARATION_STRSTR
 
 /* Name of package */
 #undef PACKAGE

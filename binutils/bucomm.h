@@ -72,21 +72,21 @@ extern char *strrchr ();
 #endif
 #endif
 
-#ifdef NEED_DECLARATION_STRSTR
+#if !HAVE_DECL_STRSTR
 extern char *strstr ();
 #endif
 
 #ifdef HAVE_SBRK
-#ifdef NEED_DECLARATION_SBRK
+#if !HAVE_DECL_SBRK
 extern char *sbrk ();
 #endif
 #endif
 
-#ifdef NEED_DECLARATION_GETENV
+#if !HAVE_DECL_GETENV
 extern char *getenv ();
 #endif
 
-#ifdef NEED_DECLARATION_ENVIRON
+#if !HAVE_DECL_ENVIRON
 extern char **environ;
 #endif
 

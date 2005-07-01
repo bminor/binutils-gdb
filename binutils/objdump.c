@@ -65,7 +65,7 @@
 #define	BYTES_IN_WORD	32
 #include "aout/aout64.h"
 
-#ifdef NEED_DECLARATION_FPRINTF
+#if !HAVE_DECL_FPRINTF
 /* This is needed by init_disassemble_info().  */
 extern int fprintf (FILE *, const char *, ...);
 #endif
