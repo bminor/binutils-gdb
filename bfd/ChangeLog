@@ -1,3 +1,13 @@
+2005-07-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-alpha.c (elf64_alpha_create_got_section): Always create
+	a new .got section.
+	(elf64_alpha_create_dynamic_sections): Always make new sections
+	by using bfd_make_section_anyway_with_flags.  Check that .got not
+	already created.
+	(elf64_alpha_check_relocs): Delete "got_created".  Use tdata->gotobj
+	instead.
+
 2005-06-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Ignore dynamic
