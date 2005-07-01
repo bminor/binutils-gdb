@@ -1,3 +1,11 @@
+2005-07-01  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure.ac (BFD_NEED_DECLARATION): Replace with AC_CHECK_DECLS.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* server.h (NEED_DECLARATION_STRERROR):
+	Replace with !HAVE_DECL_STRERROR.
+
 2005-06-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (linux_wait, linux_send_signal): Don't test

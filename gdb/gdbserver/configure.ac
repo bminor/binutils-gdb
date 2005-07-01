@@ -38,7 +38,7 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h thread_db.h linux/elf.h dnl
 		 stdlib.h unistd.h)
 
-BFD_NEED_DECLARATION(strerror)
+AC_CHECK_DECLS(strerror)
 
 AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>

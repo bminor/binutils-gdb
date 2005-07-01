@@ -34,7 +34,7 @@
 #include <string.h>
 #endif
 
-#ifdef NEED_DECLARATION_STRERROR
+#if !HAVE_DECL_STRERROR
 #ifndef strerror
 extern char *strerror (int);	/* X3.159-1989  4.11.6.2 */
 #endif

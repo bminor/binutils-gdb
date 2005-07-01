@@ -3081,9 +3081,9 @@ fi
 done
 
 
-echo "$as_me:$LINENO: checking whether strerror must be declared" >&5
-echo $ECHO_N "checking whether strerror must be declared... $ECHO_C" >&6
-if test "${bfd_cv_decl_needed_strerror+set}" = set; then
+echo "$as_me:$LINENO: checking whether strerror is declared" >&5
+echo $ECHO_N "checking whether strerror is declared... $ECHO_C" >&6
+if test "${ac_cv_have_decl_strerror+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -3092,25 +3092,14 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+$ac_includes_default
 int
 main ()
 {
-char *(*pfn) = (char *(*)) strerror
+#ifndef strerror
+  char *p = (char *) strerror;
+#endif
+
   ;
   return 0;
 }
@@ -3137,25 +3126,32 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  bfd_cv_decl_needed_strerror=no
+  ac_cv_have_decl_strerror=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-bfd_cv_decl_needed_strerror=yes
+ac_cv_have_decl_strerror=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $ac_cv_have_decl_strerror" >&5
+echo "${ECHO_T}$ac_cv_have_decl_strerror" >&6
+if test $ac_cv_have_decl_strerror = yes; then
 
-echo "$as_me:$LINENO: result: $bfd_cv_decl_needed_strerror" >&5
-echo "${ECHO_T}$bfd_cv_decl_needed_strerror" >&6
-if test $bfd_cv_decl_needed_strerror = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define NEED_DECLARATION_STRERROR 1
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRERROR 1
 _ACEOF
 
+
+else
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRERROR 0
+_ACEOF
+
+
 fi
+
 
 
 echo "$as_me:$LINENO: checking for socklen_t" >&5
