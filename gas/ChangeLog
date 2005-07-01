@@ -1,3 +1,61 @@
+2005-07-01  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (line_separator_chars): Add '{' and '}'.
+	(output_spill_psprel, output_spill_psprel_p): Combine.
+	(output_spill_sprel, output_spill_sprel_p): Combine.
+	(output_spill_reg, output_spill_regp_p): Combine.
+	(process_one_record): Handle psp_psprel.
+	(parse_predicate_and_operand): New.
+	(convert_expr_to_ab_reg): Two new parameters. Return void. Always
+	initialize output values. Emit diagnostic case here.
+	(convert_expr_to_xy_reg): Likewise. Don't allow r0, f0, and f1.
+	(add_unwind_entry): New second parameter. Allow first parameter to
+	be NULL. Parse optional tag, emit warning about further support for
+	it otherwise being missing. Check end-of-line when requested.
+	(dot_fframe): Clear operand when wrong. Allow tag.
+	(dot_vframe): Likewise.
+	(dot_vframesp): Likewise. Rename parameter, issue warning when psp
+	relative.
+	(dot_vframepsp): Remove.
+	(dot_altrp): Clear operand when wrong. Allow tag.
+	(dot_save): Likewise. Let default case also go through
+	add_unwind_entry.
+	(dot_savemem): Likewise.
+	(dot_restore): Don't return when wrong operand. Allow tag.
+	(dot_spillreg, dot_spillreg_p): Combine. Simplify by using
+	parse_predicate_and_operand and the new arguments to
+	convert_expr_to_ab_reg and convert_expr_to_xy_reg. Don't return
+	when wrong operand. Allow tag.
+	(dot_restorereg, dot_restorereg_p): Likewise.
+	(dot_spillmem, dot_spillmem_p): Likewise.
+	(dot_saveg): Clear operand when wrong. Perform tighter operand
+	checks. Allow tag.
+	(dot_savef): Likewise.
+	(dot_saveb): Likewise.
+	(dot_savegf): Likewise.
+	(dot_spill): Remove end-of-line check. 	Combine. Simplify by using
+	parse_predicate_and_operand and the new arguments to
+	convert_expr_to_ab_reg and convert_expr_to_xy_reg. Don't return
+	when wrong operand. Allow tag.
+	(popcount): New.
+	(dot_label_state): Don't return when wrong operand.
+	(dot_copy_state): Likewise.
+	(dot_unwabi): Likewise. Check if in prologue.
+	(dot_body): Don't call demand_empty_rest_of_line.
+	(dot_prologue): Type of mask and grsave is unsigned. Perform tighter
+	operand checks.
+	(md_pseudo_table): Also use dot_restorereg for .restorereg.p. Also
+	use dot_spillreg for .spillreg.p. Also use dot_spillmem for
+	.spillpsp.p and .spillsp.p. Also use dot_vframesp for .vframepsp.
+	(parse_operand): New second parameter. Don't deal with '}' here
+	anymore. Don't advance past end-of-line.
+	(parse_operands): Pass second argument to parse_operand.
+	(ia64_start_line): Prevent out-of-bounds access through
+	input_line_pointer. Deal with '}' here.
+	(ia64_unrecognized_line): Don't deal with '}' here.
+	(dot_alias): Use ignore_rest_of_line not its deprecated alias
+	discard_rest_of_line.
+
 2005-06-30  Zack Weinberg  <zack@codesourcery.com>
 
 	* config/tc-arm.c (T_OPCODE_BRANCH, encode_arm_addr_mode_2)

@@ -25,6 +25,7 @@ start:
 .copy_state 1
 .fframe 0
 .vframe r0
+.vframesp 0
 .spill 0
 .restore sp
 .save rp, r0

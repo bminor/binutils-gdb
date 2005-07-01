@@ -1,3 +1,13 @@
+2005-07-01  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/group-2.s: Use register as second operand of .prologue.
+	* gas/ia64/unwind-err.s: Add check for .vframesp.
+	* gas/ia64/unwind-err.l: Adjust.
+	* gas/ia64/strange.[sd]: New.
+	* gas/ia64/unwind-bad.[sl]: New.
+	* gas/ia64/unwind-ok.[sd]: New.
+	* gas/ia64/ia64.exp: Run new tests.
+
 2005-06-30  Zack Weinberg  <zack@codesourcery.com>
 
 	* gas/arm/arm.exp: Don't special case ldconst, arm7t, or copro
