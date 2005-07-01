@@ -1,3 +1,7 @@
+2005-07-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf.sc (.gcc_except_table): Don't KEEP.
+
 2005-06-30  Ben Elliston  <bje@gnu.org>
 
 	* Makefile.am (check-DEJAGNU): Don't search for expect.
