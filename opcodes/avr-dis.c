@@ -1,21 +1,21 @@
 /* Disassemble AVR instructions.
-   Copyright 1999, 2000, 2002, 2004 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Denis Chertykov <denisc@overta.ru>
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include <assert.h>
 #include "sysdep.h"
@@ -28,7 +28,7 @@ struct avr_opcodes_s
   char *name;
   char *constraints;
   char *opcode;
-  int insn_size;		/* in words */
+  int insn_size;		/* In words.  */
   int isa;
   unsigned int bin_opcode;
 };
@@ -42,9 +42,6 @@ const struct avr_opcodes_s avr_opcodes[] =
   {NULL, NULL, NULL, 0, 0, 0}
 };
 
-static int avr_operand (unsigned int, unsigned int, unsigned int, int,
-                        char *, char *, int, int *, bfd_vma *);
-
 static int
 avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constraint,
              char *buf, char *comment, int regs, int *sym, bfd_vma *sym_addr)
@@ -57,9 +54,9 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
       /* Any register operand.  */
     case 'r':
       if (regs)
-	insn = (insn & 0xf) | ((insn & 0x0200) >> 5); /* source register */
+	insn = (insn & 0xf) | ((insn & 0x0200) >> 5); /* Source register.  */
       else
-	insn = (insn & 0x01f0) >> 4; /* destination register */
+	insn = (insn & 0x01f0) >> 4; /* Destination register.  */
       
       sprintf (buf, "r%d", insn);
       break;
@@ -201,6 +198,7 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
     case 'P':
       {
 	unsigned int x;
+
 	x = (insn & 0xf);
 	x |= (insn >> 5) & 0x30;
 	sprintf (buf, "0x%02x", x);
@@ -231,29 +229,24 @@ avr_operand (unsigned int insn, unsigned int insn2, unsigned int pc, int constra
     return ok;
 }
 
-static unsigned short avrdis_opcode PARAMS ((bfd_vma, disassemble_info *));
-
 static unsigned short
-avrdis_opcode (addr, info)
-     bfd_vma addr;
-     disassemble_info *info;
+avrdis_opcode (bfd_vma addr, disassemble_info *info)
 {
   bfd_byte buffer[2];
   int status;
-  status = info->read_memory_func(addr, buffer, 2, info);
-  if (status != 0)
-    {
-      info->memory_error_func(status, addr, info);
-      return -1;
-    }
-  return bfd_getl16 (buffer);
+
+  status = info->read_memory_func (addr, buffer, 2, info);
+
+  if (status == 0)
+    return bfd_getl16 (buffer);
+
+  info->memory_error_func (status, addr, info);
+  return -1;
 }
 
 
 int
-print_insn_avr(addr, info)
-     bfd_vma addr;
-     disassemble_info *info;
+print_insn_avr (bfd_vma addr, disassemble_info *info)
 {
   unsigned int insn, insn2;
   const struct avr_opcodes_s *opcode;
@@ -274,8 +267,7 @@ print_insn_avr(addr, info)
 
       nopcodes = sizeof (avr_opcodes) / sizeof (struct avr_opcodes_s);
       
-      avr_bin_masks = (unsigned int *)
-	xmalloc (nopcodes * sizeof (unsigned int));
+      avr_bin_masks = xmalloc (nopcodes * sizeof (unsigned int));
 
       for (opcode = avr_opcodes, maskptr = avr_bin_masks;
 	   opcode->name;
@@ -305,10 +297,8 @@ print_insn_avr(addr, info)
   for (opcode = avr_opcodes, maskptr = avr_bin_masks;
        opcode->name;
        opcode++, maskptr++)
-    {
-      if ((insn & *maskptr) == opcode->bin_opcode)
-	break;
-    }
+    if ((insn & *maskptr) == opcode->bin_opcode)
+      break;
   
   /* Special case: disassemble `ldd r,b+0' as `ld r,b', and
      `std b+0,r' as `st b,r' (next entry in the table).  */

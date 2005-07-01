@@ -157,7 +157,7 @@ cgen_keyword_search_init (CGEN_KEYWORD *kt, const char *spec)
 {
   CGEN_KEYWORD_SEARCH search;
 
-  /* FIXME: Need to specify format of PARAMS.  */
+  /* FIXME: Need to specify format of params.  */
   if (spec != NULL)
     abort ();
 

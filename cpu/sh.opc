@@ -1,6 +1,6 @@
 /* SHmedia opcode support.  -*- C -*-
 
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2005 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc; developed under contract from Hitachi
    Semiconductor (America) Inc.
@@ -19,9 +19,9 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
-*/
 /* This file is an addendum to sh-media.cpu.  Heavy use of C code isn't
    appropriate in .cpu files, so it resides here.  This especially applies
    to assembly/disassembly where parsing/printing can be quite involved.
@@ -35,8 +35,7 @@
    <arch>-opc.c additions use: "-- opc.c"
    <arch>-asm.c additions use: "-- asm.c"
    <arch>-dis.c additions use: "-- dis.c"
-   <arch>-ibd.h additions use: "-- ibd.h"
-*/
+   <arch>-ibd.h additions use: "-- ibd.h"  */
 
 /* -- opc.h */
 
@@ -51,27 +50,26 @@
 /* -- asm.c */
 
 static const char *
-parse_fsd (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     long *valuep;
+parse_fsd (CGEN_CPU_DESC cd,
+	   const char ** strp,
+	   int opindex,
+	   long * valuep)
 {
-  abort();
+  abort ();
 }
 
 /* -- dis.c */
 
 static void
-print_likely (cd, dis_info, value, attrs, pc, length)
-     CGEN_CPU_DESC cd;
-     PTR dis_info;
-     long value;
-     unsigned int attrs;
-     bfd_vma pc;
-     int length;
+print_likely (CGEN_CPU_DESC cd,
+	      void * dis_info,
+	      long value,
+	      unsigned int attrs,
+	      bfd_vma pc,
+	      int length)
 {
   disassemble_info *info = (disassemble_info *) dis_info;
+
   (*info->fprintf_func) (info->stream, (value) ? "/l" : "/u");
 }
 

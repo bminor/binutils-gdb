@@ -1,3 +1,10 @@
+2005-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* frv.opc: Update to ISO C90 function declaration style.
+	* iq2000.opc: Likewise.
+	* m32r.opc: Likewise.
+	* sh.opc: Likewise.
+
 2005-06-15  Dave Brolley  <brolley@redhat.com>
 
 	Contributed by Red Hat.

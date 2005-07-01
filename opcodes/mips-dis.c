@@ -4,21 +4,22 @@
    Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
-This file is part of GDB, GAS, and the GNU binutils.
+   This file is part of GDB, GAS, and the GNU binutils.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #include "sysdep.h"
 #include "dis-asm.h"
@@ -40,96 +41,88 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 /* Mips instructions are at maximum this many bytes long.  */
 #define INSNLEN 4
 
-static void set_default_mips_dis_options
-  PARAMS ((struct disassemble_info *));
-static void parse_mips_dis_option
-  PARAMS ((const char *, unsigned int));
-static void parse_mips_dis_options
-  PARAMS ((const char *));
-static int _print_insn_mips
-  PARAMS ((bfd_vma, struct disassemble_info *, enum bfd_endian));
-static int print_insn_mips
-  PARAMS ((bfd_vma, unsigned long int, struct disassemble_info *));
-static void print_insn_args
-  PARAMS ((const char *, unsigned long, bfd_vma, struct disassemble_info *));
-static int print_insn_mips16
-  PARAMS ((bfd_vma, struct disassemble_info *));
-static int is_newabi
-  PARAMS ((Elf_Internal_Ehdr *));
-static void print_mips16_insn_arg
-  PARAMS ((int, const struct mips_opcode *, int, bfd_boolean, int, bfd_vma,
-	   struct disassemble_info *));
 
 /* FIXME: These should be shared with gdb somehow.  */
 
-struct mips_cp0sel_name {
-	unsigned int cp0reg;
-	unsigned int sel;
-	const char * const name;
+struct mips_cp0sel_name
+{
+  unsigned int cp0reg;
+  unsigned int sel;
+  const char * const name;
 };
 
 /* The mips16 register names.  */
-static const char * const mips16_reg_names[] = {
+static const char * const mips16_reg_names[] =
+{
   "s0", "s1", "v0", "v1", "a0", "a1", "a2", "a3"
 };
 
-static const char * const mips_gpr_names_numeric[32] = {
+static const char * const mips_gpr_names_numeric[32] =
+{
   "$0",   "$1",   "$2",   "$3",   "$4",   "$5",   "$6",   "$7",
   "$8",   "$9",   "$10",  "$11",  "$12",  "$13",  "$14",  "$15",
   "$16",  "$17",  "$18",  "$19",  "$20",  "$21",  "$22",  "$23",
   "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
 };
 
-static const char * const mips_gpr_names_oldabi[32] = {
+static const char * const mips_gpr_names_oldabi[32] =
+{
   "zero", "at",   "v0",   "v1",   "a0",   "a1",   "a2",   "a3",
   "t0",   "t1",   "t2",   "t3",   "t4",   "t5",   "t6",   "t7",
   "s0",   "s1",   "s2",   "s3",   "s4",   "s5",   "s6",   "s7",
   "t8",   "t9",   "k0",   "k1",   "gp",   "sp",   "s8",   "ra"
 };
 
-static const char * const mips_gpr_names_newabi[32] = {
+static const char * const mips_gpr_names_newabi[32] =
+{
   "zero", "at",   "v0",   "v1",   "a0",   "a1",   "a2",   "a3",
   "a4",   "a5",   "a6",   "a7",   "t0",   "t1",   "t2",   "t3",
   "s0",   "s1",   "s2",   "s3",   "s4",   "s5",   "s6",   "s7",
   "t8",   "t9",   "k0",   "k1",   "gp",   "sp",   "s8",   "ra"
 };
 
-static const char * const mips_fpr_names_numeric[32] = {
+static const char * const mips_fpr_names_numeric[32] =
+{
   "$f0",  "$f1",  "$f2",  "$f3",  "$f4",  "$f5",  "$f6",  "$f7",
   "$f8",  "$f9",  "$f10", "$f11", "$f12", "$f13", "$f14", "$f15",
   "$f16", "$f17", "$f18", "$f19", "$f20", "$f21", "$f22", "$f23",
   "$f24", "$f25", "$f26", "$f27", "$f28", "$f29", "$f30", "$f31"
 };
 
-static const char * const mips_fpr_names_32[32] = {
+static const char * const mips_fpr_names_32[32] =
+{
   "fv0",  "fv0f", "fv1",  "fv1f", "ft0",  "ft0f", "ft1",  "ft1f",
   "ft2",  "ft2f", "ft3",  "ft3f", "fa0",  "fa0f", "fa1",  "fa1f",
   "ft4",  "ft4f", "ft5",  "ft5f", "fs0",  "fs0f", "fs1",  "fs1f",
   "fs2",  "fs2f", "fs3",  "fs3f", "fs4",  "fs4f", "fs5",  "fs5f"
 };
 
-static const char * const mips_fpr_names_n32[32] = {
+static const char * const mips_fpr_names_n32[32] =
+{
   "fv0",  "ft14", "fv1",  "ft15", "ft0",  "ft1",  "ft2",  "ft3",
   "ft4",  "ft5",  "ft6",  "ft7",  "fa0",  "fa1",  "fa2",  "fa3",
   "fa4",  "fa5",  "fa6",  "fa7",  "fs0",  "ft8",  "fs1",  "ft9",
   "fs2",  "ft10", "fs3",  "ft11", "fs4",  "ft12", "fs5",  "ft13"
 };
 
-static const char * const mips_fpr_names_64[32] = {
+static const char * const mips_fpr_names_64[32] =
+{
   "fv0",  "ft12", "fv1",  "ft13", "ft0",  "ft1",  "ft2",  "ft3",
   "ft4",  "ft5",  "ft6",  "ft7",  "fa0",  "fa1",  "fa2",  "fa3",
   "fa4",  "fa5",  "fa6",  "fa7",  "ft8",  "ft9",  "ft10", "ft11",
   "fs0",  "fs1",  "fs2",  "fs3",  "fs4",  "fs5",  "fs6",  "fs7"
 };
 
-static const char * const mips_cp0_names_numeric[32] = {
+static const char * const mips_cp0_names_numeric[32] =
+{
   "$0",   "$1",   "$2",   "$3",   "$4",   "$5",   "$6",   "$7",
   "$8",   "$9",   "$10",  "$11",  "$12",  "$13",  "$14",  "$15",
   "$16",  "$17",  "$18",  "$19",  "$20",  "$21",  "$22",  "$23",
   "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
 };
 
-static const char * const mips_cp0_names_mips3264[32] = {
+static const char * const mips_cp0_names_mips3264[32] =
+{
   "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
   "c0_context",   "c0_pagemask",  "c0_wired",     "$7",
   "c0_badvaddr",  "c0_count",     "c0_entryhi",   "c0_compare",
@@ -140,7 +133,8 @@ static const char * const mips_cp0_names_mips3264[32] = {
   "c0_taglo",     "c0_taghi",     "c0_errorepc",  "c0_desave",
 };
 
-static const struct mips_cp0sel_name mips_cp0sel_names_mips3264[] = {
+static const struct mips_cp0sel_name mips_cp0sel_names_mips3264[] =
+{
   { 16, 1, "c0_config1"		},
   { 16, 2, "c0_config2"		},
   { 16, 3, "c0_config3"		},
@@ -172,7 +166,8 @@ static const struct mips_cp0sel_name mips_cp0sel_names_mips3264[] = {
   { 29, 1, "c0_datahi"		}
 };
 
-static const char * const mips_cp0_names_mips3264r2[32] = {
+static const char * const mips_cp0_names_mips3264r2[32] =
+{
   "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
   "c0_context",   "c0_pagemask",  "c0_wired",     "c0_hwrena",
   "c0_badvaddr",  "c0_count",     "c0_entryhi",   "c0_compare",
@@ -183,7 +178,8 @@ static const char * const mips_cp0_names_mips3264r2[32] = {
   "c0_taglo",     "c0_taghi",     "c0_errorepc",  "c0_desave",
 };
 
-static const struct mips_cp0sel_name mips_cp0sel_names_mips3264r2[] = {
+static const struct mips_cp0sel_name mips_cp0sel_names_mips3264r2[] =
+{
   {  4, 1, "c0_contextconfig"	},
   {  5, 1, "c0_pagegrain"	},
   { 12, 1, "c0_intctl"		},
@@ -238,7 +234,8 @@ static const struct mips_cp0sel_name mips_cp0sel_names_mips3264r2[] = {
 };
 
 /* SB-1: MIPS64 (mips_cp0_names_mips3264) with minor mods.  */
-static const char * const mips_cp0_names_sb1[32] = {
+static const char * const mips_cp0_names_sb1[32] =
+{
   "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
   "c0_context",   "c0_pagemask",  "c0_wired",     "$7",
   "c0_badvaddr",  "c0_count",     "c0_entryhi",   "c0_compare",
@@ -249,7 +246,8 @@ static const char * const mips_cp0_names_sb1[32] = {
   "c0_taglo_i",   "c0_taghi_i",   "c0_errorepc",  "c0_desave",
 };
 
-static const struct mips_cp0sel_name mips_cp0sel_names_sb1[] = {
+static const struct mips_cp0sel_name mips_cp0sel_names_sb1[] =
+{
   { 16, 1, "c0_config1"		},
   { 18, 1, "c0_watchlo,1"	},
   { 19, 1, "c0_watchhi,1"	},
@@ -273,14 +271,16 @@ static const struct mips_cp0sel_name mips_cp0sel_names_sb1[] = {
   { 29, 3, "c0_datahi_d"	},
 };
 
-static const char * const mips_hwr_names_numeric[32] = {
+static const char * const mips_hwr_names_numeric[32] =
+{
   "$0",   "$1",   "$2",   "$3",   "$4",   "$5",   "$6",   "$7",
   "$8",   "$9",   "$10",  "$11",  "$12",  "$13",  "$14",  "$15",
   "$16",  "$17",  "$18",  "$19",  "$20",  "$21",  "$22",  "$23",
   "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
 };
 
-static const char * const mips_hwr_names_mips3264r2[32] = {
+static const char * const mips_hwr_names_mips3264r2[32] =
+{
   "hwr_cpunum",   "hwr_synci_step", "hwr_cc",     "hwr_ccres",
   "$4",          "$5",            "$6",           "$7",
   "$8",   "$9",   "$10",  "$11",  "$12",  "$13",  "$14",  "$15",
@@ -288,20 +288,23 @@ static const char * const mips_hwr_names_mips3264r2[32] = {
   "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
 };
 
-struct mips_abi_choice {
-  const char *name;
+struct mips_abi_choice
+{
+  const char * name;
   const char * const *gpr_names;
   const char * const *fpr_names;
 };
 
-struct mips_abi_choice mips_abi_choices[] = {
+struct mips_abi_choice mips_abi_choices[] =
+{
   { "numeric", mips_gpr_names_numeric, mips_fpr_names_numeric },
   { "32", mips_gpr_names_oldabi, mips_fpr_names_32 },
   { "n32", mips_gpr_names_newabi, mips_fpr_names_n32 },
   { "64", mips_gpr_names_newabi, mips_fpr_names_64 },
 };
 
-struct mips_arch_choice {
+struct mips_arch_choice
+{
   const char *name;
   int bfd_mach_valid;
   unsigned long bfd_mach;
@@ -313,7 +316,8 @@ struct mips_arch_choice {
   const char * const *hwr_names;
 };
 
-const struct mips_arch_choice mips_arch_choices[] = {
+const struct mips_arch_choice mips_arch_choices[] =
+{
   { "numeric",	0, 0, 0, 0,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
 
@@ -415,55 +419,38 @@ static int mips_cp0sel_names_len;
 static const char * const *mips_hwr_names;
 
 /* Other options */
-static int no_aliases;	/* If set disassemble as most general inst. */
-
-static const struct mips_abi_choice *choose_abi_by_name
-  PARAMS ((const char *, unsigned int));
-static const struct mips_arch_choice *choose_arch_by_name
-  PARAMS ((const char *, unsigned int));
-static const struct mips_arch_choice *choose_arch_by_number
-  PARAMS ((unsigned long));
-static const struct mips_cp0sel_name *lookup_mips_cp0sel_name
-  PARAMS ((const struct mips_cp0sel_name *, unsigned int, unsigned int,
-	   unsigned int));
+static int no_aliases;	/* If set disassemble as most general inst.  */
 
 static const struct mips_abi_choice *
-choose_abi_by_name (name, namelen)
-     const char *name;
-     unsigned int namelen;
+choose_abi_by_name (const char *name, unsigned int namelen)
 {
   const struct mips_abi_choice *c;
   unsigned int i;
 
   for (i = 0, c = NULL; i < ARRAY_SIZE (mips_abi_choices) && c == NULL; i++)
-    {
-      if (strncmp (mips_abi_choices[i].name, name, namelen) == 0
-	  && strlen (mips_abi_choices[i].name) == namelen)
-	c = &mips_abi_choices[i];
-    }
+    if (strncmp (mips_abi_choices[i].name, name, namelen) == 0
+	&& strlen (mips_abi_choices[i].name) == namelen)
+      c = &mips_abi_choices[i];
+
   return c;
 }
 
 static const struct mips_arch_choice *
-choose_arch_by_name (name, namelen)
-     const char *name;
-     unsigned int namelen;
+choose_arch_by_name (const char *name, unsigned int namelen)
 {
   const struct mips_arch_choice *c = NULL;
   unsigned int i;
 
   for (i = 0, c = NULL; i < ARRAY_SIZE (mips_arch_choices) && c == NULL; i++)
-    {
-      if (strncmp (mips_arch_choices[i].name, name, namelen) == 0
-	  && strlen (mips_arch_choices[i].name) == namelen)
-	c = &mips_arch_choices[i];
-    }
+    if (strncmp (mips_arch_choices[i].name, name, namelen) == 0
+	&& strlen (mips_arch_choices[i].name) == namelen)
+      c = &mips_arch_choices[i];
+
   return c;
 }
 
 static const struct mips_arch_choice *
-choose_arch_by_number (mach)
-     unsigned long mach;
+choose_arch_by_number (unsigned long mach)
 {
   static unsigned long hint_bfd_mach;
   static const struct mips_arch_choice *hint_arch_choice;
@@ -490,9 +477,24 @@ choose_arch_by_number (mach)
   return c;
 }
 
-void
-set_default_mips_dis_options (info)
-     struct disassemble_info *info;
+/* Check if the object uses NewABI conventions.  */
+
+static int
+is_newabi (Elf_Internal_Ehdr *header)
+{
+  /* There are no old-style ABIs which use 64-bit ELF.  */
+  if (header->e_ident[EI_CLASS] == ELFCLASS64)
+    return 1;
+
+  /* If a 32-bit ELF file, n32 is a new-style ABI.  */
+  if ((header->e_flags & EF_MIPS_ABI2) != 0)
+    return 1;
+
+  return 0;
+}
+
+static void
+set_default_mips_dis_options (struct disassemble_info *info)
 {
   const struct mips_arch_choice *chosen_arch;
 
@@ -538,10 +540,8 @@ set_default_mips_dis_options (info)
 #endif
 }
 
-void
-parse_mips_dis_option (option, len)
-     const char *option;
-     unsigned int len;
+static void
+parse_mips_dis_option (const char *option, unsigned int len)
 {
   unsigned int i, optionlen, vallen;
   const char *val;
@@ -557,10 +557,9 @@ parse_mips_dis_option (option, len)
   
   /* Look for the = that delimits the end of the option name.  */
   for (i = 0; i < len; i++)
-    {
-      if (option[i] == '=')
-	break;
-    }
+    if (option[i] == '=')
+      break;
+
   if (i == 0)		/* Invalid option: no name before '='.  */
     return;
   if (i == len)		/* Invalid option: no '='.  */
@@ -572,8 +571,8 @@ parse_mips_dis_option (option, len)
   val = option + (optionlen + 1);
   vallen = len - (optionlen + 1);
 
-  if (strncmp("gpr-names", option, optionlen) == 0
-      && strlen("gpr-names") == optionlen)
+  if (strncmp ("gpr-names", option, optionlen) == 0
+      && strlen ("gpr-names") == optionlen)
     {
       chosen_abi = choose_abi_by_name (val, vallen);
       if (chosen_abi != NULL)
@@ -581,8 +580,8 @@ parse_mips_dis_option (option, len)
       return;
     }
 
-  if (strncmp("fpr-names", option, optionlen) == 0
-      && strlen("fpr-names") == optionlen)
+  if (strncmp ("fpr-names", option, optionlen) == 0
+      && strlen ("fpr-names") == optionlen)
     {
       chosen_abi = choose_abi_by_name (val, vallen);
       if (chosen_abi != NULL)
@@ -590,8 +589,8 @@ parse_mips_dis_option (option, len)
       return;
     }
 
-  if (strncmp("cp0-names", option, optionlen) == 0
-      && strlen("cp0-names") == optionlen)
+  if (strncmp ("cp0-names", option, optionlen) == 0
+      && strlen ("cp0-names") == optionlen)
     {
       chosen_arch = choose_arch_by_name (val, vallen);
       if (chosen_arch != NULL)
@@ -603,8 +602,8 @@ parse_mips_dis_option (option, len)
       return;
     }
 
-  if (strncmp("hwr-names", option, optionlen) == 0
-      && strlen("hwr-names") == optionlen)
+  if (strncmp ("hwr-names", option, optionlen) == 0
+      && strlen ("hwr-names") == optionlen)
     {
       chosen_arch = choose_arch_by_name (val, vallen);
       if (chosen_arch != NULL)
@@ -612,8 +611,8 @@ parse_mips_dis_option (option, len)
       return;
     }
 
-  if (strncmp("reg-names", option, optionlen) == 0
-      && strlen("reg-names") == optionlen)
+  if (strncmp ("reg-names", option, optionlen) == 0
+      && strlen ("reg-names") == optionlen)
     {
       /* We check both ABI and ARCH here unconditionally, so
 	 that "numeric" will do the desirable thing: select
@@ -639,9 +638,8 @@ parse_mips_dis_option (option, len)
   /* Invalid option.  */
 }
 
-void
-parse_mips_dis_options (options)
-     const char *options;
+static void
+parse_mips_dis_options (const char *options)
 {
   const char *option_end;
 
@@ -671,9 +669,10 @@ parse_mips_dis_options (options)
 }
 
 static const struct mips_cp0sel_name *
-lookup_mips_cp0sel_name(names, len, cp0reg, sel)
-	const struct mips_cp0sel_name *names;
-	unsigned int len, cp0reg, sel;
+lookup_mips_cp0sel_name (const struct mips_cp0sel_name *names,
+			 unsigned int len,
+			 unsigned int cp0reg,
+			 unsigned int sel)
 {
   unsigned int i;
 
@@ -686,11 +685,10 @@ lookup_mips_cp0sel_name(names, len, cp0reg, sel)
 /* Print insn arguments for 32/64-bit code.  */
 
 static void
-print_insn_args (d, l, pc, info)
-     const char *d;
-     register unsigned long int l;
-     bfd_vma pc;
-     struct disassemble_info *info;
+print_insn_args (const char *d,
+		 register unsigned long int l,
+		 bfd_vma pc,
+		 struct disassemble_info *info)
 {
   int op, delta;
   unsigned int lsb, msb, msbd;
@@ -992,9 +990,11 @@ print_insn_args (d, l, pc, info)
 	case 'Q':
 	  {
 	    unsigned int vsel = (l >> OP_SH_VSEL) & OP_MASK_VSEL;
+
 	    if ((vsel & 0x10) == 0)
 	      {
 		int fmt;
+
 		vsel &= 0x0f;
 		for (fmt = 0; fmt < 3; fmt++, vsel >>= 1)
 		  if ((vsel & 1) == 0)
@@ -1041,35 +1041,17 @@ print_insn_args (d, l, pc, info)
     }
 }
 
-/* Check if the object uses NewABI conventions.  */
-
-static int
-is_newabi (header)
-     Elf_Internal_Ehdr *header;
-{
-  /* There are no old-style ABIs which use 64-bit ELF.  */
-  if (header->e_ident[EI_CLASS] == ELFCLASS64)
-    return 1;
-
-  /* If a 32-bit ELF file, n32 is a new-style ABI.  */
-  if ((header->e_flags & EF_MIPS_ABI2) != 0)
-    return 1;
-
-  return 0;
-}
-
 /* Print the mips instruction at address MEMADDR in debugged memory,
    on using INFO.  Returns length of the instruction, in bytes, which is
    always INSNLEN.  BIGENDIAN must be 1 if this is big-endian code, 0 if
    this is little-endian code.  */
 
 static int
-print_insn_mips (memaddr, word, info)
-     bfd_vma memaddr;
-     unsigned long int word;
-     struct disassemble_info *info;
+print_insn_mips (bfd_vma memaddr,
+		 unsigned long int word,
+		 struct disassemble_info *info)
 {
-  register const struct mips_opcode *op;
+  const struct mips_opcode *op;
   static bfd_boolean init = 0;
   static const struct mips_opcode *mips_hash[OP_MASK_OP + 1];
 
@@ -1114,7 +1096,7 @@ print_insn_mips (memaddr, word, info)
 	      && !(no_aliases && (op->pinfo2 & INSN2_ALIAS))
 	      && (word & op->mask) == op->match)
 	    {
-	      register const char *d;
+	      const char *d;
 
 	      /* We always allow to disassemble the jalx instruction.  */
 	      if (! OPCODE_IS_MEMBER (op, mips_isa, mips_processor)
@@ -1163,244 +1145,16 @@ print_insn_mips (memaddr, word, info)
   return INSNLEN;
 }
 
-/* In an environment where we do not know the symbol type of the
-   instruction we are forced to assume that the low order bit of the
-   instructions' address may mark it as a mips16 instruction.  If we
-   are single stepping, or the pc is within the disassembled function,
-   this works.  Otherwise, we need a clue.  Sometimes.  */
-
-static int
-_print_insn_mips (memaddr, info, endianness)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
-     enum bfd_endian endianness;
-{
-  bfd_byte buffer[INSNLEN];
-  int status;
-
-  set_default_mips_dis_options (info);
-  parse_mips_dis_options (info->disassembler_options);
-
-#if 1
-  /* FIXME: If odd address, this is CLEARLY a mips 16 instruction.  */
-  /* Only a few tools will work this way.  */
-  if (memaddr & 0x01)
-    return print_insn_mips16 (memaddr, info);
-#endif
-
-#if SYMTAB_AVAILABLE
-  if (info->mach == bfd_mach_mips16
-      || (info->flavour == bfd_target_elf_flavour
-	  && info->symbols != NULL
-	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
-	      == STO_MIPS16)))
-    return print_insn_mips16 (memaddr, info);
-#endif
-
-  status = (*info->read_memory_func) (memaddr, buffer, INSNLEN, info);
-  if (status == 0)
-    {
-      unsigned long insn;
-
-      if (endianness == BFD_ENDIAN_BIG)
-	insn = (unsigned long) bfd_getb32 (buffer);
-      else
-	insn = (unsigned long) bfd_getl32 (buffer);
-
-      return print_insn_mips (memaddr, insn, info);
-    }
-  else
-    {
-      (*info->memory_error_func) (status, memaddr, info);
-      return -1;
-    }
-}
-
-int
-print_insn_big_mips (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
-{
-  return _print_insn_mips (memaddr, info, BFD_ENDIAN_BIG);
-}
-
-int
-print_insn_little_mips (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
-{
-  return _print_insn_mips (memaddr, info, BFD_ENDIAN_LITTLE);
-}
-
-/* Disassemble mips16 instructions.  */
-
-static int
-print_insn_mips16 (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
-{
-  int status;
-  bfd_byte buffer[2];
-  int length;
-  int insn;
-  bfd_boolean use_extend;
-  int extend = 0;
-  const struct mips_opcode *op, *opend;
-
-  info->bytes_per_chunk = 2;
-  info->display_endian = info->endian;
-  info->insn_info_valid = 1;
-  info->branch_delay_insns = 0;
-  info->data_size = 0;
-  info->insn_type = dis_nonbranch;
-  info->target = 0;
-  info->target2 = 0;
-
-  status = (*info->read_memory_func) (memaddr, buffer, 2, info);
-  if (status != 0)
-    {
-      (*info->memory_error_func) (status, memaddr, info);
-      return -1;
-    }
-
-  length = 2;
-
-  if (info->endian == BFD_ENDIAN_BIG)
-    insn = bfd_getb16 (buffer);
-  else
-    insn = bfd_getl16 (buffer);
-
-  /* Handle the extend opcode specially.  */
-  use_extend = FALSE;
-  if ((insn & 0xf800) == 0xf000)
-    {
-      use_extend = TRUE;
-      extend = insn & 0x7ff;
-
-      memaddr += 2;
-
-      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
-      if (status != 0)
-	{
-	  (*info->fprintf_func) (info->stream, "extend 0x%x",
-				 (unsigned int) extend);
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-
-      if (info->endian == BFD_ENDIAN_BIG)
-	insn = bfd_getb16 (buffer);
-      else
-	insn = bfd_getl16 (buffer);
-
-      /* Check for an extend opcode followed by an extend opcode.  */
-      if ((insn & 0xf800) == 0xf000)
-	{
-	  (*info->fprintf_func) (info->stream, "extend 0x%x",
-				 (unsigned int) extend);
-	  info->insn_type = dis_noninsn;
-	  return length;
-	}
-
-      length += 2;
-    }
-
-  /* FIXME: Should probably use a hash table on the major opcode here.  */
-
-  opend = mips16_opcodes + bfd_mips16_num_opcodes;
-  for (op = mips16_opcodes; op < opend; op++)
-    {
-      if (op->pinfo != INSN_MACRO
-	  && !(no_aliases && (op->pinfo2 & INSN2_ALIAS))
-	  && (insn & op->mask) == op->match)
-	{
-	  const char *s;
-
-	  if (strchr (op->args, 'a') != NULL)
-	    {
-	      if (use_extend)
-		{
-		  (*info->fprintf_func) (info->stream, "extend 0x%x",
-					 (unsigned int) extend);
-		  info->insn_type = dis_noninsn;
-		  return length - 2;
-		}
-
-	      use_extend = FALSE;
-
-	      memaddr += 2;
-
-	      status = (*info->read_memory_func) (memaddr, buffer, 2,
-						  info);
-	      if (status == 0)
-		{
-		  use_extend = TRUE;
-		  if (info->endian == BFD_ENDIAN_BIG)
-		    extend = bfd_getb16 (buffer);
-		  else
-		    extend = bfd_getl16 (buffer);
-		  length += 2;
-		}
-	    }
-
-	  (*info->fprintf_func) (info->stream, "%s", op->name);
-	  if (op->args[0] != '\0')
-	    (*info->fprintf_func) (info->stream, "\t");
-
-	  for (s = op->args; *s != '\0'; s++)
-	    {
-	      if (*s == ','
-		  && s[1] == 'w'
-		  && (((insn >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX)
-		      == ((insn >> MIPS16OP_SH_RY) & MIPS16OP_MASK_RY)))
-		{
-		  /* Skip the register and the comma.  */
-		  ++s;
-		  continue;
-		}
-	      if (*s == ','
-		  && s[1] == 'v'
-		  && (((insn >> MIPS16OP_SH_RZ) & MIPS16OP_MASK_RZ)
-		      == ((insn >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX)))
-		{
-		  /* Skip the register and the comma.  */
-		  ++s;
-		  continue;
-		}
-	      print_mips16_insn_arg (*s, op, insn, use_extend, extend, memaddr,
-				     info);
-	    }
-
-	  if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
-	    {
-	      info->branch_delay_insns = 1;
-	      if (info->insn_type != dis_jsr)
-		info->insn_type = dis_branch;
-	    }
-
-	  return length;
-	}
-    }
-
-  if (use_extend)
-    (*info->fprintf_func) (info->stream, "0x%x", extend | 0xf000);
-  (*info->fprintf_func) (info->stream, "0x%x", insn);
-  info->insn_type = dis_noninsn;
-
-  return length;
-}
-
 /* Disassemble an operand for a mips16 instruction.  */
 
 static void
-print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
-     char type;
-     const struct mips_opcode *op;
-     int l;
-     bfd_boolean use_extend;
-     int extend;
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_mips16_insn_arg (char type,
+		       const struct mips_opcode *op,
+		       int l,
+		       bfd_boolean use_extend,
+		       int extend,
+		       bfd_vma memaddr,
+		       struct disassemble_info *info)
 {
   switch (type)
     {
@@ -1796,9 +1550,228 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
     }
 }
 
+/* Disassemble mips16 instructions.  */
+
+static int
+print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
+{
+  int status;
+  bfd_byte buffer[2];
+  int length;
+  int insn;
+  bfd_boolean use_extend;
+  int extend = 0;
+  const struct mips_opcode *op, *opend;
+
+  info->bytes_per_chunk = 2;
+  info->display_endian = info->endian;
+  info->insn_info_valid = 1;
+  info->branch_delay_insns = 0;
+  info->data_size = 0;
+  info->insn_type = dis_nonbranch;
+  info->target = 0;
+  info->target2 = 0;
+
+  status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+  if (status != 0)
+    {
+      (*info->memory_error_func) (status, memaddr, info);
+      return -1;
+    }
+
+  length = 2;
+
+  if (info->endian == BFD_ENDIAN_BIG)
+    insn = bfd_getb16 (buffer);
+  else
+    insn = bfd_getl16 (buffer);
+
+  /* Handle the extend opcode specially.  */
+  use_extend = FALSE;
+  if ((insn & 0xf800) == 0xf000)
+    {
+      use_extend = TRUE;
+      extend = insn & 0x7ff;
+
+      memaddr += 2;
+
+      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+      if (status != 0)
+	{
+	  (*info->fprintf_func) (info->stream, "extend 0x%x",
+				 (unsigned int) extend);
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+
+      if (info->endian == BFD_ENDIAN_BIG)
+	insn = bfd_getb16 (buffer);
+      else
+	insn = bfd_getl16 (buffer);
+
+      /* Check for an extend opcode followed by an extend opcode.  */
+      if ((insn & 0xf800) == 0xf000)
+	{
+	  (*info->fprintf_func) (info->stream, "extend 0x%x",
+				 (unsigned int) extend);
+	  info->insn_type = dis_noninsn;
+	  return length;
+	}
+
+      length += 2;
+    }
+
+  /* FIXME: Should probably use a hash table on the major opcode here.  */
+
+  opend = mips16_opcodes + bfd_mips16_num_opcodes;
+  for (op = mips16_opcodes; op < opend; op++)
+    {
+      if (op->pinfo != INSN_MACRO
+	  && !(no_aliases && (op->pinfo2 & INSN2_ALIAS))
+	  && (insn & op->mask) == op->match)
+	{
+	  const char *s;
+
+	  if (strchr (op->args, 'a') != NULL)
+	    {
+	      if (use_extend)
+		{
+		  (*info->fprintf_func) (info->stream, "extend 0x%x",
+					 (unsigned int) extend);
+		  info->insn_type = dis_noninsn;
+		  return length - 2;
+		}
+
+	      use_extend = FALSE;
+
+	      memaddr += 2;
+
+	      status = (*info->read_memory_func) (memaddr, buffer, 2,
+						  info);
+	      if (status == 0)
+		{
+		  use_extend = TRUE;
+		  if (info->endian == BFD_ENDIAN_BIG)
+		    extend = bfd_getb16 (buffer);
+		  else
+		    extend = bfd_getl16 (buffer);
+		  length += 2;
+		}
+	    }
+
+	  (*info->fprintf_func) (info->stream, "%s", op->name);
+	  if (op->args[0] != '\0')
+	    (*info->fprintf_func) (info->stream, "\t");
+
+	  for (s = op->args; *s != '\0'; s++)
+	    {
+	      if (*s == ','
+		  && s[1] == 'w'
+		  && (((insn >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX)
+		      == ((insn >> MIPS16OP_SH_RY) & MIPS16OP_MASK_RY)))
+		{
+		  /* Skip the register and the comma.  */
+		  ++s;
+		  continue;
+		}
+	      if (*s == ','
+		  && s[1] == 'v'
+		  && (((insn >> MIPS16OP_SH_RZ) & MIPS16OP_MASK_RZ)
+		      == ((insn >> MIPS16OP_SH_RX) & MIPS16OP_MASK_RX)))
+		{
+		  /* Skip the register and the comma.  */
+		  ++s;
+		  continue;
+		}
+	      print_mips16_insn_arg (*s, op, insn, use_extend, extend, memaddr,
+				     info);
+	    }
+
+	  if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
+	    {
+	      info->branch_delay_insns = 1;
+	      if (info->insn_type != dis_jsr)
+		info->insn_type = dis_branch;
+	    }
+
+	  return length;
+	}
+    }
+
+  if (use_extend)
+    (*info->fprintf_func) (info->stream, "0x%x", extend | 0xf000);
+  (*info->fprintf_func) (info->stream, "0x%x", insn);
+  info->insn_type = dis_noninsn;
+
+  return length;
+}
+
+/* In an environment where we do not know the symbol type of the
+   instruction we are forced to assume that the low order bit of the
+   instructions' address may mark it as a mips16 instruction.  If we
+   are single stepping, or the pc is within the disassembled function,
+   this works.  Otherwise, we need a clue.  Sometimes.  */
+
+static int
+_print_insn_mips (bfd_vma memaddr,
+		  struct disassemble_info *info,
+		  enum bfd_endian endianness)
+{
+  bfd_byte buffer[INSNLEN];
+  int status;
+
+  set_default_mips_dis_options (info);
+  parse_mips_dis_options (info->disassembler_options);
+
+#if 1
+  /* FIXME: If odd address, this is CLEARLY a mips 16 instruction.  */
+  /* Only a few tools will work this way.  */
+  if (memaddr & 0x01)
+    return print_insn_mips16 (memaddr, info);
+#endif
+
+#if SYMTAB_AVAILABLE
+  if (info->mach == bfd_mach_mips16
+      || (info->flavour == bfd_target_elf_flavour
+	  && info->symbols != NULL
+	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
+	      == STO_MIPS16)))
+    return print_insn_mips16 (memaddr, info);
+#endif
+
+  status = (*info->read_memory_func) (memaddr, buffer, INSNLEN, info);
+  if (status == 0)
+    {
+      unsigned long insn;
+
+      if (endianness == BFD_ENDIAN_BIG)
+	insn = (unsigned long) bfd_getb32 (buffer);
+      else
+	insn = (unsigned long) bfd_getl32 (buffer);
+
+      return print_insn_mips (memaddr, insn, info);
+    }
+  else
+    {
+      (*info->memory_error_func) (status, memaddr, info);
+      return -1;
+    }
+}
+
+int
+print_insn_big_mips (bfd_vma memaddr, struct disassemble_info *info)
+{
+  return _print_insn_mips (memaddr, info, BFD_ENDIAN_BIG);
+}
+
+int
+print_insn_little_mips (bfd_vma memaddr, struct disassemble_info *info)
+{
+  return _print_insn_mips (memaddr, info, BFD_ENDIAN_LITTLE);
+}
+
 void
-print_mips_disassembler_options (stream)
-     FILE *stream;
+print_mips_disassembler_options (FILE *stream)
 {
   unsigned int i;
 

@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    instructions have same mnemonics but different functionality. */
 #define CGEN_VALIDATE_INSN_SUPPORTED
 
-extern int iq2000_cgen_insn_supported (CGEN_CPU_DESC cd, const CGEN_INSN *insn);
+extern int iq2000_cgen_insn_supported (CGEN_CPU_DESC, const CGEN_INSN *);
 
 /* -- asm.c */
 /* Enum declaration for iq2000 instruction types.  */

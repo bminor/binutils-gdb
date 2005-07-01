@@ -3,46 +3,34 @@
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
-This file is part of GDB.
+   This file is part of GDB and GNU Binutils.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #include "sysdep.h"
 #include "dis-asm.h"
 #include "opcode/a29k.h"
 
-static void print_general PARAMS ((int, struct disassemble_info *));
-static void print_special PARAMS ((unsigned int, struct disassemble_info *));
-static int is_delayed_branch PARAMS ((int));
-static void find_bytes_little
-  PARAMS ((char *, unsigned char *, unsigned char *, unsigned char *,
-	   unsigned char *));
-static void find_bytes_big
-  PARAMS ((char *, unsigned char *, unsigned char *, unsigned char *,
-	   unsigned char *));
-static int print_insn PARAMS ((bfd_vma, struct disassemble_info *));
-
-
 /* Print a symbolic representation of a general-purpose
    register number NUM on STREAM.
    NUM is a number as found in the instruction, not as found in
    debugging symbols; it must be in the range 0-255.  */
+
 static void
-print_general (num, info)
-     int num;
-     struct disassemble_info *info;
+print_general (int num, struct disassemble_info *info)
 {
   if (num < 128)
     (*info->fprintf_func) (info->stream, "gr%d", num);
@@ -55,29 +43,31 @@ print_general (num, info)
    The mnemonics used by the AMD assembler are not quite the same
    as the ones in the User's Manual.  We use the ones that the
    assembler uses.  */
+
 static void
-print_special (num, info)
-     unsigned int num;
-     struct disassemble_info *info;
+print_special (unsigned int num, struct disassemble_info *info)
 {
   /* Register names of registers 0-SPEC0_NUM-1.  */
-  static char *spec0_names[] = {
-    "vab", "ops", "cps", "cfg", "cha", "chd", "chc", "rbp", "tmc", "tmr",
-    "pc0", "pc1", "pc2", "mmu", "lru", "rsn", "rma0", "rmc0", "rma1", "rmc1",
-    "spc0", "spc1", "spc2", "iba0", "ibc0", "iba1", "ibc1", "dba", "dbc",
-    "cir", "cdr"
+  static char *spec0_names[] =
+    {
+      "vab", "ops", "cps", "cfg", "cha", "chd", "chc", "rbp", "tmc", "tmr",
+      "pc0", "pc1", "pc2", "mmu", "lru", "rsn", "rma0", "rmc0", "rma1", "rmc1",
+      "spc0", "spc1", "spc2", "iba0", "ibc0", "iba1", "ibc1", "dba", "dbc",
+      "cir", "cdr"
     };
 #define SPEC0_NUM ((sizeof spec0_names) / (sizeof spec0_names[0]))
 
   /* Register names of registers 128-128+SPEC128_NUM-1.  */
-  static char *spec128_names[] = {
-    "ipc", "ipa", "ipb", "q", "alu", "bp", "fc", "cr"
+  static char *spec128_names[] =
+    {
+      "ipc", "ipa", "ipb", "q", "alu", "bp", "fc", "cr"
     };
 #define SPEC128_NUM ((sizeof spec128_names) / (sizeof spec128_names[0]))
 
   /* Register names of registers 160-160+SPEC160_NUM-1.  */
-  static char *spec160_names[] = {
-    "fpe", "inte", "fps", "sr163", "exop"
+  static char *spec160_names[] =
+    {
+      "fpe", "inte", "fps", "sr163", "exop"
     };
 #define SPEC160_NUM ((sizeof spec160_names) / (sizeof spec160_names[0]))
 
@@ -92,9 +82,9 @@ print_special (num, info)
 }
 
 /* Is an instruction with OPCODE a delayed branch?  */
+
 static int
-is_delayed_branch (opcode)
-     int opcode;
+is_delayed_branch (int opcode)
 {
   return (opcode == 0xa8 || opcode == 0xa9 || opcode == 0xa0 || opcode == 0xa1
 	  || opcode == 0xa4 || opcode == 0xa5
@@ -105,13 +95,13 @@ is_delayed_branch (opcode)
 }
 
 /* Now find the four bytes of INSN and put them in *INSN{0,8,16,24}.  */
+
 static void
-find_bytes_big (insn, insn0, insn8, insn16, insn24)
-     char *insn;
-     unsigned char *insn0;
-     unsigned char *insn8;
-     unsigned char *insn16;
-     unsigned char *insn24;
+find_bytes_big (char *insn,
+		unsigned char *insn0,
+		unsigned char *insn8,
+		unsigned char *insn16,
+		unsigned char *insn24)
 {
   *insn24 = insn[0];
   *insn16 = insn[1];
@@ -120,12 +110,11 @@ find_bytes_big (insn, insn0, insn8, insn16, insn24)
 }
 
 static void
-find_bytes_little (insn, insn0, insn8, insn16, insn24)
-     char *insn;
-     unsigned char *insn0;
-     unsigned char *insn8;
-     unsigned char *insn16;
-     unsigned char *insn24;
+find_bytes_little (char *insn,
+		   unsigned char *insn0,
+		   unsigned char *insn8,
+		   unsigned char *insn16,
+		   unsigned char *insn24)
 {
   *insn24 = insn[3];
   *insn16 = insn[2];
@@ -134,16 +123,14 @@ find_bytes_little (insn, insn0, insn8, insn16, insn24)
 }
 
 typedef void (*find_byte_func_type)
-     PARAMS ((char *, unsigned char *, unsigned char *,
-	      unsigned char *, unsigned char *));
+     (char *, unsigned char *, unsigned char *,
+      unsigned char *, unsigned char *);
 
 /* Print one instruction from MEMADDR on INFO->STREAM.
    Return the size of the instruction (always 4 on a29k).  */
 
 static int
-print_insn (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn (bfd_vma memaddr, struct disassemble_info *info)
 {
   /* The raw instruction.  */
   char insn[4];
@@ -169,11 +156,15 @@ print_insn (memaddr, info)
 
   printf ("%02x%02x%02x%02x ", insn24, insn16, insn8, insn0);
 
-  /* Handle the nop (aseq 0x40,gr1,gr1) specially */
-  if ((insn24==0x70) && (insn16==0x40) && (insn8==0x01) && (insn0==0x01)) {
-    (*info->fprintf_func) (info->stream,"nop");
-    return 4;
-  }
+  /* Handle the nop (aseq 0x40,gr1,gr1) specially.  */
+  if (   (insn24 == 0x70)
+      && (insn16 == 0x40)
+      && (insn8 == 0x01)
+      && (insn0 == 0x01))
+    {
+      (*info->fprintf_func) (info->stream,"nop");
+      return 4;
+    }
 
   /* The opcode is always in insn24.  */
   for (opcode = &a29k_opcodes[0];
@@ -206,18 +197,19 @@ print_insn (memaddr, info)
 		  break;
 
 		case 'x':
-		  (*info->fprintf_func) (info->stream, "0x%x", (insn16 << 8) + insn0);
+		  (*info->fprintf_func) (info->stream, "0x%x",
+					 (insn16 << 8) + insn0);
 		  break;
 
 		case 'h':
 		  /* This used to be %x for binutils.  */
 		  (*info->fprintf_func) (info->stream, "0x%x",
-				    (insn16 << 24) + (insn0 << 16));
+					 (insn16 << 24) + (insn0 << 16));
 		  break;
 
 		case 'X':
 		  (*info->fprintf_func) (info->stream, "%d",
-				    ((insn16 << 8) + insn0) | 0xffff0000);
+					 ((insn16 << 8) + insn0) | 0xffff0000);
 		  break;
 
 		case 'P':
@@ -274,7 +266,8 @@ print_insn (memaddr, info)
 		  break;
 
 		case 'F':
-		  (*info->fprintf_func) (info->stream, "%d", (insn16 >> 2) & 15);
+		  (*info->fprintf_func) (info->stream, "%d",
+					 (insn16 >> 2) & 15);
 		  break;
 
 		case 'C':
@@ -308,14 +301,14 @@ print_insn (memaddr, info)
 		     call _printf
 		     consth _foo
 		     */
-		  (*find_byte_func) (prev_insn, &prev_insn0, &prev_insn8,
-				     &prev_insn16, &prev_insn24);
+		  (*find_byte_func) (prev_insn, & prev_insn0, & prev_insn8,
+				     & prev_insn16, & prev_insn24);
 		  if (is_delayed_branch (prev_insn24))
 		    {
 		      errcode = (*info->read_memory_func)
-			(memaddr - 8, (bfd_byte *) &prev_insn[0], 4, info);
-		      (*find_byte_func) (prev_insn, &prev_insn0, &prev_insn8,
-					 &prev_insn16, &prev_insn24);
+			(memaddr - 8, (bfd_byte *) & prev_insn[0], 4, info);
+		      (*find_byte_func) (prev_insn, & prev_insn0, & prev_insn8,
+					 & prev_insn16, & prev_insn24);
 		    }
 		}
 
@@ -347,20 +340,18 @@ print_insn (memaddr, info)
 }
 
 /* Disassemble an big-endian a29k instruction.  */
+
 int
-print_insn_big_a29k (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_big_a29k (bfd_vma memaddr, struct disassemble_info *info)
 {
   info->private_data = (PTR) find_bytes_big;
   return print_insn (memaddr, info);
 }
 
 /* Disassemble a little-endian a29k instruction.  */
+
 int
-print_insn_little_a29k (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_little_a29k (bfd_vma memaddr, struct disassemble_info *info)
 {
   info->private_data = (PTR) find_bytes_little;
   return print_insn (memaddr, info);

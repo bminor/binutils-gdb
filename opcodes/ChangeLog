@@ -1,3 +1,62 @@
+2005-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* a29k-dis.c: Update to ISO C90 style function declarations and
+	fix formatting.
+	* alpha-opc.c: Likewise.
+	* arc-dis.c: Likewise.
+	* arc-opc.c: Likewise.
+	* avr-dis.c: Likewise.
+	* cgen-asm.in: Likewise.
+	* cgen-dis.in: Likewise.
+	* cgen-ibld.in: Likewise.
+	* cgen-opc.c: Likewise.
+	* cris-dis.c: Likewise.
+	* d10v-dis.c: Likewise.
+	* d30v-dis.c: Likewise.
+	* d30v-opc.c: Likewise.
+	* dis-buf.c: Likewise.
+	* dlx-dis.c: Likewise.
+	* h8300-dis.c: Likewise.
+	* h8500-dis.c: Likewise.
+	* hppa-dis.c: Likewise.
+	* i370-dis.c: Likewise.
+	* i370-opc.c: Likewise.
+	* m10200-dis.c: Likewise.
+	* m10300-dis.c: Likewise.
+	* m68k-dis.c: Likewise.
+	* m88k-dis.c: Likewise.
+	* mips-dis.c: Likewise.
+	* mmix-dis.c: Likewise.
+	* msp430-dis.c: Likewise.
+	* ns32k-dis.c: Likewise.
+	* or32-dis.c: Likewise.
+	* or32-opc.c: Likewise.
+	* pdp11-dis.c: Likewise.
+	* pj-dis.c: Likewise.
+	* s390-dis.c: Likewise.
+	* sh-dis.c: Likewise.
+	* sh64-dis.c: Likewise.
+	* sparc-dis.c: Likewise.
+	* sparc-opc.c: Likewise.
+	* sysdep.h: Likewise.
+	* tic30-dis.c: Likewise.
+	* tic4x-dis.c: Likewise.
+	* tic80-dis.c: Likewise.
+	* v850-dis.c: Likewise.
+	* v850-opc.c: Likewise.
+	* vax-dis.c: Likewise.
+	* w65-dis.c: Likewise.
+	* z8kgen.c: Likewise.
+	
+	* fr30-*: Regenerate.
+	* frv-*: Regenerate.
+	* ip2k-*: Regenerate.
+	* iq2000-*: Regenerate.
+	* m32r-*: Regenerate.
+	* ms1-*: Regenerate.
+	* openrisc-*: Regenerate.
+	* xstormy16-*: Regenerate.
+
 2005-06-23  Ben Elliston  <bje@gnu.org>
 
 	* m68k-dis.c: Use ISC C90.

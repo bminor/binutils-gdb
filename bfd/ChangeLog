@@ -1,3 +1,25 @@
+2005-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* cpu-d10v.c: Update to ISO C90 style function declarations and
+	fix formatting.
+	* cpu-d30v.c: Likewsie.
+	* cpu-i370.c: Likewsie.
+	* cpu-xstormy16.c: Likewsie.
+	* elf32-arc.c: Likewsie.
+	* elf32-d10v.c: Likewsie.
+	* elf32-d30v.c: Likewsie.
+	* elf32-dlx.c: Likewsie.
+	* elf32-i370.c: Likewsie.
+	* elf32-i960.c: Likewsie.
+	* elf32-ip2k.c: Likewsie.
+	* elf32-m32r.c: Likewsie.
+	* elf32-mcore.c: Likewsie.
+	* elf32-openrisc.c: Likewsie.
+	* elf32-or32.c: Likewsie.
+	* elf32-pj.c: Likewsie.
+	* elf32-v850.c: Likewsie.
+	* elf32-xstormy16.c: Likewsie.
+
 2005-07-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-alpha.c (elf64_alpha_create_got_section): Always create

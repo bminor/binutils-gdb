@@ -1,27 +1,27 @@
 /* Disassembler interface for targets using CGEN. -*- C -*-
    CGEN: Cpu tools GENerator
 
-THIS FILE IS MACHINE GENERATED WITH CGEN.
-- the resultant file is machine generated, cgen-dis.in isn't
+   THIS FILE IS MACHINE GENERATED WITH CGEN.
+   - the resultant file is machine generated, cgen-dis.in isn't
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2005
-Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2005
+   Free Software Foundation, Inc.
 
-This file is part of the GNU Binutils and GDB, the GNU debugger.
+   This file is part of the GNU Binutils and GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 /* ??? Eventually more and more of this stuff can go to cpu-independent files.
    Keep that in mind.  */
@@ -56,12 +56,11 @@ static int read_insn
   (CGEN_CPU_DESC, bfd_vma, disassemble_info *, bfd_byte *, int, CGEN_EXTRACT_INFO *,
    unsigned long *);
 
-/* -- disassembler routines inserted here */
+/* -- disassembler routines inserted here.  */
 
 
 void iq2000_cgen_print_operand
-  PARAMS ((CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *,
-           void const *, bfd_vma, int));
+  (CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *, void const *, bfd_vma, int);
 
 /* Main entry point for printing operands.
    XINFO is a `void *' and not a `disassemble_info *' to not put a requirement
@@ -79,16 +78,15 @@ void iq2000_cgen_print_operand
    the handlers.  */
 
 void
-iq2000_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
-     CGEN_CPU_DESC cd;
-     int opindex;
-     PTR xinfo;
-     CGEN_FIELDS *fields;
-     void const *attrs ATTRIBUTE_UNUSED;
-     bfd_vma pc;
-     int length;
+iq2000_cgen_print_operand (CGEN_CPU_DESC cd,
+			   int opindex,
+			   void * xinfo,
+			   CGEN_FIELDS *fields,
+			   void const *attrs ATTRIBUTE_UNUSED,
+			   bfd_vma pc,
+			   int length)
 {
- disassemble_info *info = (disassemble_info *) xinfo;
+  disassemble_info *info = (disassemble_info *) xinfo;
 
   switch (opindex)
     {
@@ -201,8 +199,7 @@ cgen_print_fn * const iq2000_cgen_print_handlers[] =
 
 
 void
-iq2000_cgen_init_dis (cd)
-     CGEN_CPU_DESC cd;
+iq2000_cgen_init_dis (CGEN_CPU_DESC cd)
 {
   iq2000_cgen_init_opcode_table (cd);
   iq2000_cgen_init_ibld_table (cd);
@@ -254,7 +251,7 @@ print_address (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 
   /* Print the operand as directed by the attributes.  */
   if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_SEM_ONLY))
-    ; /* nothing to do */
+    ; /* Nothing to do.  */
   else if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_PCREL_ADDR))
     (*info->print_address_func) (value, info);
   else if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_ABS_ADDR))
@@ -336,6 +333,7 @@ read_insn (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	   unsigned long *insn_value)
 {
   int status = (*info->read_memory_func) (pc, buf, buflen, info);
+
   if (status != 0)
     {
       (*info->memory_error_func) (status, pc, info);
@@ -440,13 +438,13 @@ print_insn (CGEN_CPU_DESC cd,
 	    length = CGEN_EXTRACT_FN (cd, insn)
 	      (cd, insn, &ex_info, insn_value_cropped, &fields, pc);
 
-	  /* length < 0 -> error */
+	  /* Length < 0 -> error.  */
 	  if (length < 0)
 	    return length;
 	  if (length > 0)
 	    {
 	      CGEN_PRINT_FN (cd, insn) (cd, info, insn, &fields, pc, length);
-	      /* length is in bits, result is in bytes */
+	      /* Length is in bits, result is in bytes.  */
 	      return length / 8;
 	    }
 	}
@@ -496,7 +494,8 @@ default_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
    Print one instruction from PC on INFO->STREAM.
    Return the size of the instruction (in bytes).  */
 
-typedef struct cpu_desc_list {
+typedef struct cpu_desc_list
+{
   struct cpu_desc_list *next;
   int isa;
   int mach;
@@ -581,7 +580,7 @@ print_insn_iq2000 (bfd_vma pc, disassemble_info *info)
       if (!cd)
 	abort ();
 
-      /* save this away for future reference */
+      /* Save this away for future reference.  */
       cl = xmalloc (sizeof (struct cpu_desc_list));
       cl->cd = cd;
       cl->isa = isa;

@@ -36,14 +36,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Override disassembly hashing - there are variable bits in the top
    byte of these instructions.  */
 #define CGEN_DIS_HASH_SIZE 8
-#define CGEN_DIS_HASH(buf,value) (((* (unsigned char*) (buf)) >> 5) % CGEN_DIS_HASH_SIZE)
+#define CGEN_DIS_HASH(buf, value) \
+  (((* (unsigned char*) (buf)) >> 5) % CGEN_DIS_HASH_SIZE)
 
 #define CGEN_ASM_HASH_SIZE 127
-#define CGEN_ASM_HASH(insn) ip2k_asm_hash(insn)
+#define CGEN_ASM_HASH(insn) ip2k_asm_hash (insn)
 
-extern unsigned int ip2k_asm_hash PARAMS ((const char *insn));
-extern int ip2k_cgen_insn_supported
-  PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *));
+extern unsigned int ip2k_asm_hash (const char *);
+extern int ip2k_cgen_insn_supported (CGEN_CPU_DESC, const CGEN_INSN *);
 
 /* -- opc.c */
 /* Enum declaration for ip2k instruction types.  */

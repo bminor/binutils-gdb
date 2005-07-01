@@ -28,9 +28,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* -- opc.h */
 
 /* ??? This can be improved upon.  */
-#undef CGEN_DIS_HASH_SIZE
+#undef  CGEN_DIS_HASH_SIZE
 #define CGEN_DIS_HASH_SIZE 16
-#undef CGEN_DIS_HASH
+#undef  CGEN_DIS_HASH
 #define CGEN_DIS_HASH(buffer, value) (((unsigned char *) (buffer))[0] >> 4)
 
 /* -- */

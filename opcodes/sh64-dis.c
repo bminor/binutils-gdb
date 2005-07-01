@@ -1,5 +1,5 @@
 /* Disassemble SH64 instructions.
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include "sysdep.h"
 #include "sh64-opc.h"
 #include "libiberty.h"
-
 /* We need to refer to the ELF header structure.  */
 #include "elf-bfd.h"
 #include "elf/sh.h"
@@ -54,18 +53,11 @@ struct sh64_disassemble_info
    Note that some archs have this as a field in the opcode table.  */
 static unsigned long *shmedia_opcode_mask_table;
 
-static void initialize_shmedia_opcode_mask_table PARAMS ((void));
-static int print_insn_shmedia PARAMS ((bfd_vma, disassemble_info *));
-static const char *creg_name PARAMS ((int));
-static bfd_boolean init_sh64_disasm_info PARAMS ((struct disassemble_info *));
-static enum sh64_elf_cr_type sh64_get_contents_type_disasm
-  PARAMS ((bfd_vma, struct disassemble_info *));
-
 /* Initialize the SH64 opcode mask table for each instruction in SHmedia
    mode.  */
 
 static void
-initialize_shmedia_opcode_mask_table ()
+initialize_shmedia_opcode_mask_table (void)
 {
   int n_opc;
   int n;
@@ -163,19 +155,16 @@ initialize_shmedia_opcode_mask_table ()
 
 /* Get a predefined control-register-name, or return NULL.  */
 
-const char *
-creg_name (cregno)
-     int cregno;
+static const char *
+creg_name (int cregno)
 {
   const shmedia_creg_info *cregp;
 
   /* If control register usage is common enough, change this to search a
      hash-table.  */
   for (cregp = shmedia_creg_table; cregp->name != NULL; cregp++)
-    {
-      if (cregp->cregno == cregno)
-	return cregp->name;
-    }
+    if (cregp->cregno == cregno)
+      return cregp->name;
 
   return NULL;
 }
@@ -183,13 +172,10 @@ creg_name (cregno)
 /* Main function to disassemble SHmedia instructions.  */
 
 static int
-print_insn_shmedia (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_shmedia (bfd_vma memaddr, struct disassemble_info *info)
 {
   fprintf_ftype fprintf_fn = info->fprintf_func;
   void *stream = info->stream;
-
   unsigned char insn[4];
   unsigned long instruction;
   int status;
@@ -289,6 +275,7 @@ print_insn_shmedia (memaddr, info)
 	case A_CREG_J:
 	  {
 	    const char *name;
+
 	    r = temp & 0x3f;
 
 	    name = creg_name (r);
@@ -457,9 +444,7 @@ print_insn_shmedia (memaddr, info)
    no section is available.  */
 
 static enum sh64_elf_cr_type
-sh64_get_contents_type_disasm (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+sh64_get_contents_type_disasm (bfd_vma memaddr, struct disassemble_info *info)
 {
   struct sh64_disassemble_info *sh64_infop = info->private_data;
 
@@ -513,8 +498,7 @@ sh64_get_contents_type_disasm (memaddr, info)
 /* Initialize static and dynamic disassembly state.  */
 
 static bfd_boolean
-init_sh64_disasm_info (info)
-     struct disassemble_info *info;
+init_sh64_disasm_info (struct disassemble_info *info)
 {
   struct sh64_disassemble_info *sh64_infop
     = calloc (sizeof (*sh64_infop), 1);
@@ -538,9 +522,7 @@ init_sh64_disasm_info (info)
    use any of the functions further below.  */
 
 int
-print_insn_sh64x_media (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_sh64x_media (bfd_vma memaddr, struct disassemble_info *info)
 {
   if (info->private_data == NULL && ! init_sh64_disasm_info (info))
     return -1;
@@ -556,9 +538,7 @@ print_insn_sh64x_media (memaddr, info)
    If we see an SHcompact instruction, return -2.  */
 
 int
-print_insn_sh64 (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_sh64 (bfd_vma memaddr, struct disassemble_info *info)
 {
   enum bfd_endian endian = info->endian;
   enum sh64_elf_cr_type cr_type;

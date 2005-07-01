@@ -1,5 +1,6 @@
 /* Disassemble h8500 instructions.
-   Copyright 1993, 1998, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+   Copyright 1993, 1998, 2000, 2001, 2002, 2004, 2005
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,7 +14,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #include <stdio.h>
 
@@ -29,8 +31,6 @@
 #define MAXLEN 8
 
 #include <setjmp.h>
-
-static int fetch_data PARAMS ((struct disassemble_info *, bfd_byte *));
 
 struct private
 {
@@ -49,9 +49,7 @@ struct private
    ? 1 : fetch_data ((info), (addr)))
 
 static int
-fetch_data (info, addr)
-     struct disassemble_info *info;
-     bfd_byte *addr;
+fetch_data (struct disassemble_info *info, bfd_byte *addr)
 {
   int status;
   struct private *priv = (struct private *) info->private_data;
@@ -74,14 +72,11 @@ fetch_data (info, addr)
 static char *crname[] = { "sr", "ccr", "*", "br", "ep", "dp", "*", "tp" };
 
 int
-print_insn_h8500 (addr, info)
-     bfd_vma addr;
-     disassemble_info *info;
+print_insn_h8500 (bfd_vma addr, disassemble_info *info)
 {
   const h8500_opcode_info *opcode;
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
-
   struct private priv;
   bfd_byte *buffer = priv.the_buffer;
 
@@ -91,21 +86,6 @@ print_insn_h8500 (addr, info)
   if (setjmp (priv.bailout) != 0)
     /* Error return.  */
     return -1;
-
-  if (0)
-    {
-      static int one;
-
-      if (!one)
-	{
-	  one = 1;
-	  for (opcode = h8500_table; opcode->name; opcode++)
-	    {
-	      if ((opcode->bytes[0].contents & 0x8) == 0)
-		printf ("%s\n", opcode->name);
-	    }
-	}
-    }
 
   /* Run down the table to find the one which matches.  */
   for (opcode = h8500_table; opcode->name; opcode++)
@@ -127,9 +107,8 @@ print_insn_h8500 (addr, info)
 	  FETCH_DATA (info, buffer + byte + 1);
 	  if ((buffer[byte] & opcode->bytes[byte].mask)
 	      != (opcode->bytes[byte].contents))
-	    {
-	      goto next;
-	    }
+	    goto next;
+
 	  else
 	    {
 	      /* Extract any info parts.  */
@@ -299,6 +278,7 @@ print_insn_h8500 (addr, info)
 	      {
 		int i;
 		int nc = 0;
+
 		func (stream, "(");
 		for (i = 0; i < 8; i++)
 		  {

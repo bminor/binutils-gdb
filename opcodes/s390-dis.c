@@ -1,5 +1,5 @@
 /* s390-dis.c -- Disassemble S390 instructions
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of GDB, GAS and the GNU binutils.
@@ -29,15 +29,10 @@ static int init_flag = 0;
 static int opc_index[256];
 static int current_arch_mask = 0;
 
-static void init_disasm PARAMS ((struct disassemble_info *));
-static unsigned int s390_extract_operand
-  PARAMS ((unsigned char *, const struct s390_operand *));
-
 /* Set up index table for first opcode byte.  */
 
 static void
-init_disasm (info)
-     struct disassemble_info *info;
+init_disasm (struct disassemble_info *info)
 {
   const struct s390_opcode *opcode;
   const struct s390_opcode *opcode_end;
@@ -68,9 +63,7 @@ init_disasm (info)
 /* Extracts an operand value from an instruction.  */
 
 static inline unsigned int
-s390_extract_operand (insn, operand)
-     unsigned char *insn;
-     const struct s390_operand *operand;
+s390_extract_operand (unsigned char *insn, const struct s390_operand *operand)
 {
   unsigned int val;
   int bits;
@@ -102,7 +95,7 @@ s390_extract_operand (insn, operand)
   if (operand->flags & S390_OPERAND_PCREL)
     val <<= 1;
 
-  /* Length x in an instructions has real length x+1.  */
+  /* Length x in an instructions has real length x + 1.  */
   if (operand->flags & S390_OPERAND_LENGTH)
     val++;
   return val;
@@ -111,9 +104,7 @@ s390_extract_operand (insn, operand)
 /* Print a S390 instruction.  */
 
 int
-print_insn_s390 (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_s390 (bfd_vma memaddr, struct disassemble_info *info)
 {
   bfd_byte buffer[6];
   const struct s390_opcode *opcode;

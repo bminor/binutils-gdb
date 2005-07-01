@@ -15,21 +15,14 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #include <setjmp.h>
 #include <string.h>
 #include "sysdep.h"
 #include "opcode/vax.h"
 #include "dis-asm.h"
-
-/* Local function prototypes */
-static int fetch_data PARAMS ((struct disassemble_info *, bfd_byte *));
-static int print_insn_arg
-  PARAMS ((const char *, unsigned char *, bfd_vma, disassemble_info *));
-static int print_insn_mode
-  PARAMS ((const char *, int, unsigned char *, bfd_vma, disassemble_info *));
-
 
 static char *reg_names[] =
 {
@@ -53,11 +46,7 @@ static char *entry_mask_bit[] =
 };
 
 /* Sign-extend an (unsigned char). */
-#if __STDC__ == 1
 #define COERCE_SIGNED_CHAR(ch) ((signed char)(ch))
-#else
-#define COERCE_SIGNED_CHAR(ch) ((int)(((ch) ^ 0x80) & 0xFF) - 128)
-#endif
 
 /* Get a 1 byte signed integer.  */
 #define NEXTBYTE(p)  \
@@ -96,9 +85,7 @@ struct private
    ? 1 : fetch_data ((info), (addr)))
 
 static int
-fetch_data (info, addr)
-     struct disassemble_info *info;
-     bfd_byte *addr;
+fetch_data (struct disassemble_info *info, bfd_byte *addr)
 {
   int status;
   struct private *priv = (struct private *) info->private_data;
@@ -208,13 +195,165 @@ is_function_entry (struct disassemble_info *info, bfd_vma addr)
   return FALSE;
 }
 
+static int
+print_insn_mode (const char *d,
+		 int size,
+		 unsigned char *p0,
+		 bfd_vma addr,	/* PC for this arg to be relative to.  */
+		 disassemble_info *info)
+{
+  unsigned char *p = p0;
+  unsigned char mode, reg;
+
+  /* Fetch and interpret mode byte.  */
+  mode = (unsigned char) NEXTBYTE (p);
+  reg = mode & 0xF;
+  switch (mode & 0xF0)
+    {
+    case 0x00:
+    case 0x10:
+    case 0x20:
+    case 0x30: /* Literal mode			$number.  */
+      if (d[1] == 'd' || d[1] == 'f' || d[1] == 'g' || d[1] == 'h')
+	(*info->fprintf_func) (info->stream, "$0x%x [%c-float]", mode, d[1]);
+      else
+        (*info->fprintf_func) (info->stream, "$0x%x", mode);
+      break;
+    case 0x40: /* Index:			base-addr[Rn] */
+      p += print_insn_mode (d, size, p0 + 1, addr + 1, info);
+      (*info->fprintf_func) (info->stream, "[%s]", reg_names[reg]);
+      break;
+    case 0x50: /* Register:			Rn */
+      (*info->fprintf_func) (info->stream, "%s", reg_names[reg]);
+      break;
+    case 0x60: /* Register deferred:		(Rn) */
+      (*info->fprintf_func) (info->stream, "(%s)", reg_names[reg]);
+      break;
+    case 0x70: /* Autodecrement:		-(Rn) */
+      (*info->fprintf_func) (info->stream, "-(%s)", reg_names[reg]);
+      break;
+    case 0x80: /* Autoincrement:		(Rn)+ */
+      if (reg == 0xF)
+	{	/* Immediate?  */
+	  int i;
+
+	  FETCH_DATA (info, p + size);
+	  (*info->fprintf_func) (info->stream, "$0x");
+	  if (d[1] == 'd' || d[1] == 'f' || d[1] == 'g' || d[1] == 'h')
+	    {
+	      int float_word;
+
+	      float_word = p[0] | (p[1] << 8);
+	      if ((d[1] == 'd' || d[1] == 'f')
+		  && (float_word & 0xff80) == 0x8000)
+		{
+		  (*info->fprintf_func) (info->stream, "[invalid %c-float]",
+					 d[1]);
+		}
+	      else
+		{
+	          for (i = 0; i < size; i++)
+		    (*info->fprintf_func) (info->stream, "%02x",
+		                           p[size - i - 1]);
+	          (*info->fprintf_func) (info->stream, " [%c-float]", d[1]);
+		}
+	    }
+	  else
+	    {
+	      for (i = 0; i < size; i++)
+	        (*info->fprintf_func) (info->stream, "%02x", p[size - i - 1]);
+	    }
+	  p += size;
+	}
+      else
+	(*info->fprintf_func) (info->stream, "(%s)+", reg_names[reg]);
+      break;
+    case 0x90: /* Autoincrement deferred:	@(Rn)+ */
+      if (reg == 0xF)
+	(*info->fprintf_func) (info->stream, "*0x%x", NEXTLONG (p));
+      else
+	(*info->fprintf_func) (info->stream, "@(%s)+", reg_names[reg]);
+      break;
+    case 0xB0: /* Displacement byte deferred:	*displ(Rn).  */
+      (*info->fprintf_func) (info->stream, "*");
+    case 0xA0: /* Displacement byte:		displ(Rn).  */
+      if (reg == 0xF)
+	(*info->print_address_func) (addr + 2 + NEXTBYTE (p), info);
+      else
+	(*info->fprintf_func) (info->stream, "0x%x(%s)", NEXTBYTE (p),
+			       reg_names[reg]);
+      break;
+    case 0xD0: /* Displacement word deferred:	*displ(Rn).  */
+      (*info->fprintf_func) (info->stream, "*");
+    case 0xC0: /* Displacement word:		displ(Rn).  */
+      if (reg == 0xF)
+	(*info->print_address_func) (addr + 3 + NEXTWORD (p), info);
+      else
+	(*info->fprintf_func) (info->stream, "0x%x(%s)", NEXTWORD (p),
+			       reg_names[reg]);
+      break;
+    case 0xF0: /* Displacement long deferred:	*displ(Rn).  */
+      (*info->fprintf_func) (info->stream, "*");
+    case 0xE0: /* Displacement long:		displ(Rn).  */
+      if (reg == 0xF)
+	(*info->print_address_func) (addr + 5 + NEXTLONG (p), info);
+      else
+	(*info->fprintf_func) (info->stream, "0x%x(%s)", NEXTLONG (p),
+			       reg_names[reg]);
+      break;
+    }
+
+  return p - p0;
+}
+
+/* Returns number of bytes "eaten" by the operand, or return -1 if an
+   invalid operand was found, or -2 if an opcode tabel error was
+   found. */
+
+static int
+print_insn_arg (const char *d,
+		unsigned char *p0,
+		bfd_vma addr,	/* PC for this arg to be relative to.  */
+		disassemble_info *info)
+{
+  int arg_len;
+
+  /* Check validity of addressing length.  */
+  switch (d[1])
+    {
+    case 'b' : arg_len = 1;	break;
+    case 'd' : arg_len = 8;	break;
+    case 'f' : arg_len = 4;	break;
+    case 'g' : arg_len = 8;	break;
+    case 'h' : arg_len = 16;	break;
+    case 'l' : arg_len = 4;	break;
+    case 'o' : arg_len = 16;	break;
+    case 'w' : arg_len = 2;	break;
+    case 'q' : arg_len = 8;	break;
+    default  : abort ();
+    }
+
+  /* Branches have no mode byte.  */
+  if (d[0] == 'b')
+    {
+      unsigned char *p = p0;
+
+      if (arg_len == 1)
+	(*info->print_address_func) (addr + 1 + NEXTBYTE (p), info);
+      else
+	(*info->print_address_func) (addr + 2 + NEXTWORD (p), info);
+
+      return p - p0;
+    }
+
+  return print_insn_mode (d, arg_len, p0, addr, info);
+}
+
 /* Print the vax instruction at address MEMADDR in debugged memory,
    on INFO->STREAM.  Returns length of the instruction, in bytes.  */
 
 int
-print_insn_vax (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+print_insn_vax (bfd_vma memaddr, disassemble_info *info)
 {
   static bfd_boolean parsed_disassembler_options = FALSE;
   const struct vot *votp;
@@ -223,7 +362,7 @@ print_insn_vax (memaddr, info)
   struct private priv;
   bfd_byte *buffer = priv.the_buffer;
 
-  info->private_data = (PTR) &priv;
+  info->private_data = & priv;
   priv.max_fetched = priv.the_buffer;
   priv.insn_start = memaddr;
 
@@ -237,10 +376,8 @@ print_insn_vax (memaddr, info)
     }
 
   if (setjmp (priv.bailout) != 0)
-    {
-      /* Error return.  */
-      return -1;
-    }
+    /* Error return.  */
+    return -1;
 
   argp = NULL;
   /* Check if the info buffer has more than one byte left since
@@ -275,7 +412,7 @@ print_insn_vax (memaddr, info)
 
   for (votp = &votstrs[0]; votp->name[0]; votp++)
     {
-      register vax_opcodeT opcode = votp->detail.code;
+      vax_opcodeT opcode = votp->detail.code;
 
       /* 2 byte codes match 2 buffer pos. */
       if ((bfd_byte) opcode == buffer[0]
@@ -315,158 +452,3 @@ print_insn_vax (memaddr, info)
   return arg - buffer;
 }
 
-/* Returns number of bytes "eaten" by the operand, or return -1 if an
-   invalid operand was found, or -2 if an opcode tabel error was
-   found. */
-
-static int
-print_insn_arg (d, p0, addr, info)
-     const char *d;
-     unsigned char *p0;
-     bfd_vma addr;		/* PC for this arg to be relative to */
-     disassemble_info *info;
-{
-  int arg_len;
-
-  /* check validity of addressing length */
-  switch (d[1])
-    {
-    case 'b' : arg_len = 1;	break;
-    case 'd' : arg_len = 8;	break;
-    case 'f' : arg_len = 4;	break;
-    case 'g' : arg_len = 8;	break;
-    case 'h' : arg_len = 16;	break;
-    case 'l' : arg_len = 4;	break;
-    case 'o' : arg_len = 16;	break;
-    case 'w' : arg_len = 2;	break;
-    case 'q' : arg_len = 8;	break;
-    default  : abort();
-    }
-
-  /* branches have no mode byte */
-  if (d[0] == 'b')
-    {
-      unsigned char *p = p0;
-
-      if (arg_len == 1)
-	(*info->print_address_func) (addr + 1 + NEXTBYTE (p), info);
-      else
-	(*info->print_address_func) (addr + 2 + NEXTWORD (p), info);
-
-      return p - p0;
-    }
-
-  return print_insn_mode (d, arg_len, p0, addr, info);
-}
-
-static int
-print_insn_mode (d, size, p0, addr, info)
-     const char *d;
-     int size;
-     unsigned char *p0;
-     bfd_vma addr;		/* PC for this arg to be relative to */
-     disassemble_info *info;
-{
-  unsigned char *p = p0;
-  unsigned char mode, reg;
-
-  /* fetch and interpret mode byte */
-  mode = (unsigned char) NEXTBYTE (p);
-  reg = mode & 0xF;
-  switch (mode & 0xF0)
-    {
-    case 0x00:
-    case 0x10:
-    case 0x20:
-    case 0x30: /* literal mode			$number */
-      if (d[1] == 'd' || d[1] == 'f' || d[1] == 'g' || d[1] == 'h')
-	(*info->fprintf_func) (info->stream, "$0x%x [%c-float]", mode, d[1]);
-      else
-        (*info->fprintf_func) (info->stream, "$0x%x", mode);
-      break;
-    case 0x40: /* index:			base-addr[Rn] */
-      p += print_insn_mode (d, size, p0 + 1, addr + 1, info);
-      (*info->fprintf_func) (info->stream, "[%s]", reg_names[reg]);
-      break;
-    case 0x50: /* register:			Rn */
-      (*info->fprintf_func) (info->stream, "%s", reg_names[reg]);
-      break;
-    case 0x60: /* register deferred:		(Rn) */
-      (*info->fprintf_func) (info->stream, "(%s)", reg_names[reg]);
-      break;
-    case 0x70: /* autodecrement:		-(Rn) */
-      (*info->fprintf_func) (info->stream, "-(%s)", reg_names[reg]);
-      break;
-    case 0x80: /* autoincrement:		(Rn)+ */
-      if (reg == 0xF)
-	{	/* immediate? */
-	  int i;
-
-	  FETCH_DATA (info, p + size);
-	  (*info->fprintf_func) (info->stream, "$0x");
-	  if (d[1] == 'd' || d[1] == 'f' || d[1] == 'g' || d[1] == 'h')
-	    {
-	      int float_word;
-
-	      float_word = p[0] | (p[1] << 8);
-	      if ((d[1] == 'd' || d[1] == 'f')
-		  && (float_word & 0xff80) == 0x8000)
-		{
-		  (*info->fprintf_func) (info->stream, "[invalid %c-float]",
-					 d[1]);
-		}
-	      else
-		{
-	          for (i = 0; i < size; i++)
-		    (*info->fprintf_func) (info->stream, "%02x",
-		                           p[size - i - 1]);
-	          (*info->fprintf_func) (info->stream, " [%c-float]", d[1]);
-		}
-	    }
-	  else
-	    {
-	      for (i = 0; i < size; i++)
-	        (*info->fprintf_func) (info->stream, "%02x", p[size - i - 1]);
-	    }
-	  p += size;
-	}
-      else
-	(*info->fprintf_func) (info->stream, "(%s)+", reg_names[reg]);
-      break;
-    case 0x90: /* autoincrement deferred:	@(Rn)+ */
-      if (reg == 0xF)
-	(*info->fprintf_func) (info->stream, "*0x%x", NEXTLONG (p));
-      else
-	(*info->fprintf_func) (info->stream, "@(%s)+", reg_names[reg]);
-      break;
-    case 0xB0: /* displacement byte deferred:	*displ(Rn) */
-      (*info->fprintf_func) (info->stream, "*");
-    case 0xA0: /* displacement byte:		displ(Rn) */
-      if (reg == 0xF)
-	(*info->print_address_func) (addr + 2 + NEXTBYTE (p), info);
-      else
-	(*info->fprintf_func) (info->stream, "0x%x(%s)", NEXTBYTE (p),
-			       reg_names[reg]);
-      break;
-    case 0xD0: /* displacement word deferred:	*displ(Rn) */
-      (*info->fprintf_func) (info->stream, "*");
-    case 0xC0: /* displacement word:		displ(Rn) */
-      if (reg == 0xF)
-	(*info->print_address_func) (addr + 3 + NEXTWORD (p), info);
-      else
-	(*info->fprintf_func) (info->stream, "0x%x(%s)", NEXTWORD (p),
-			       reg_names[reg]);
-      break;
-    case 0xF0: /* displacement long deferred:	*displ(Rn) */
-      (*info->fprintf_func) (info->stream, "*");
-    case 0xE0: /* displacement long:		displ(Rn) */
-      if (reg == 0xF)
-	(*info->print_address_func) (addr + 5 + NEXTLONG (p), info);
-      else
-	(*info->fprintf_func) (info->stream, "0x%x(%s)", NEXTLONG (p),
-			       reg_names[reg]);
-      break;
-    }
-
-  return p - p0;
-}

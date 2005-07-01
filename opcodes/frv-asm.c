@@ -1,26 +1,27 @@
 /* Assembler interface for targets using CGEN. -*- C -*-
    CGEN: Cpu tools GENerator
 
-THIS FILE IS MACHINE GENERATED WITH CGEN.
-- the resultant file is machine generated, cgen-asm.in isn't
+   THIS FILE IS MACHINE GENERATED WITH CGEN.
+   - the resultant file is machine generated, cgen-asm.in isn't
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2005
+   Free Software Foundation, Inc.
 
-This file is part of the GNU Binutils and GDB, the GNU debugger.
+   This file is part of the GNU Binutils and GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 /* ??? Eventually more and more of this stuff can go to cpu-independent files.
    Keep that in mind.  */
@@ -48,31 +49,6 @@ static const char * parse_insn_normal
 /* -- assembler routines inserted here.  */
 
 /* -- asm.c */
-static const char * parse_ulo16
-  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static const char * parse_uslo16
-  PARAMS ((CGEN_CPU_DESC, const char **, int, signed long *));
-static const char * parse_uhi16
-  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static long parse_register_number
-  PARAMS ((const char **));
-static const char * parse_spr
-  PARAMS ((CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *));
-static const char * parse_d12
-  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
-static const char * parse_s12
-  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
-static const char * parse_u12
-  PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
-static const char * parse_even_register
-  PARAMS ((CGEN_CPU_DESC, const char **, CGEN_KEYWORD *, long *));
-static const char * parse_A0
-  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static const char * parse_A1
-  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
-static const char * parse_A
-  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *, unsigned long));
-
 inline static const char *
 parse_symbolic_address (CGEN_CPU_DESC cd,
 			const char **strp,
@@ -214,11 +190,10 @@ parse_ld_annotation (CGEN_CPU_DESC cd,
 }
 
 static const char *
-parse_ulo16 (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     unsigned long *valuep;
+parse_ulo16 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     unsigned long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -230,7 +205,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	{
 	  *strp += 4;
 	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_LO16,
-				       &result_type, &value);
+				       & result_type, & value);
 	  if (**strp != ')')
 	    return "missing `)'";
 	  ++*strp;
@@ -245,7 +220,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  *strp += 9;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GPRELLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -257,7 +232,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  *strp += 7;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -269,7 +244,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  *strp += 15;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOTLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -281,7 +256,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  *strp += 10;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTOFFLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -293,7 +268,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  *strp += 18;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -305,7 +280,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  *strp += 14;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSDESCLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -317,7 +292,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  *strp += 11;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_TLSMOFFLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -329,7 +304,7 @@ parse_ulo16 (cd, strp, opindex, valuep)
 	  *strp += 13;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSOFFLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -341,11 +316,10 @@ parse_ulo16 (cd, strp, opindex, valuep)
 }
 
 static const char *
-parse_uslo16 (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     signed long *valuep;
+parse_uslo16 (CGEN_CPU_DESC cd,
+	      const char **strp,
+	      int opindex,
+	      signed long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -357,7 +331,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	{
 	  *strp += 4;
 	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_LO16,
-				       &result_type, &value);
+				       & result_type, & value);
 	  if (**strp != ')')
 	    return "missing `)'";
 	  ++*strp;
@@ -372,7 +346,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  *strp += 9;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GPRELLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -384,7 +358,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  *strp += 7;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -396,7 +370,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  *strp += 15;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOTLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -408,7 +382,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  *strp += 10;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTOFFLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -420,7 +394,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  *strp += 18;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOTOFFLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -432,7 +406,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  *strp += 14;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSDESCLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -444,7 +418,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  *strp += 11;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_TLSMOFFLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -456,7 +430,7 @@ parse_uslo16 (cd, strp, opindex, valuep)
 	  *strp += 13;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSOFFLO,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -468,11 +442,10 @@ parse_uslo16 (cd, strp, opindex, valuep)
 }
 
 static const char *
-parse_uhi16 (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     unsigned long *valuep;
+parse_uhi16 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     unsigned long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -484,7 +457,7 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	{
 	  *strp += 4;
 	  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_FRV_HI16,
-				       &result_type, &value);
+				       & result_type, & value);
 	  if (**strp != ')')
 	    return "missing `)'";
 	  ++*strp;
@@ -506,7 +479,7 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	  *strp += 9;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GPRELHI,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -518,7 +491,7 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	  *strp += 7;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTHI,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -530,7 +503,7 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	  *strp += 15;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOTHI,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -542,7 +515,7 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	  *strp += 10;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTOFFHI,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -554,7 +527,7 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	  *strp += 18;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOTOFFHI,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -578,7 +551,7 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	  *strp += 11;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_TLSMOFFHI,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -590,7 +563,7 @@ parse_uhi16 (cd, strp, opindex, valuep)
 	  *strp += 13;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSOFFHI,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -602,10 +575,10 @@ parse_uhi16 (cd, strp, opindex, valuep)
 }
 
 static long
-parse_register_number (strp)
-     const char **strp;
+parse_register_number (const char **strp)
 {
   int regno;
+
   if (**strp < '0' || **strp > '9')
     return -1; /* error */
 
@@ -617,11 +590,10 @@ parse_register_number (strp)
 }
 
 static const char *
-parse_spr (cd, strp, table, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     CGEN_KEYWORD * table;
-     long *valuep;
+parse_spr (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   CGEN_KEYWORD * table,
+	   long *valuep)
 {
   const char *save_strp;
   long regno;
@@ -632,10 +604,10 @@ parse_spr (cd, strp, table, valuep)
       *strp += 4;
       regno = parse_register_number (strp);
       if (**strp != ']')
-        return "missing `]'";
+        return _("missing `]'");
       ++*strp;
       if (! spr_valid (regno))
-	return "Special purpose register number is out of range";
+	return _("Special purpose register number is out of range");
       *valuep = regno;
       return NULL;
     }
@@ -645,7 +617,7 @@ parse_spr (cd, strp, table, valuep)
   if (regno != -1)
     {
       if (! spr_valid (regno))
-	return "Special purpose register number is out of range";
+	return _("Special purpose register number is out of range");
       *valuep = regno;
       return NULL;
     }
@@ -655,11 +627,10 @@ parse_spr (cd, strp, table, valuep)
 }
 
 static const char *
-parse_d12 (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     long *valuep;
+parse_d12 (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -673,7 +644,7 @@ parse_d12 (cd, strp, opindex, valuep)
           *strp += 9;
           errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GPREL12,
-					   &result_type, &value);
+					   & result_type, & value);
           if (**strp != ')')
             return "missing `)'";
           ++*strp;
@@ -685,7 +656,7 @@ parse_d12 (cd, strp, opindex, valuep)
 	  *strp += 7;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOT12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -697,7 +668,7 @@ parse_d12 (cd, strp, opindex, valuep)
 	  *strp += 15;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOT12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -709,7 +680,7 @@ parse_d12 (cd, strp, opindex, valuep)
 	  *strp += 10;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTOFF12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -721,7 +692,7 @@ parse_d12 (cd, strp, opindex, valuep)
 	  *strp += 18;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -733,7 +704,7 @@ parse_d12 (cd, strp, opindex, valuep)
 	  *strp += 14;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSDESC12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -745,7 +716,7 @@ parse_d12 (cd, strp, opindex, valuep)
 	  *strp += 11;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_TLSMOFF12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -757,7 +728,7 @@ parse_d12 (cd, strp, opindex, valuep)
 	  *strp += 13;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSOFF12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -769,11 +740,10 @@ parse_d12 (cd, strp, opindex, valuep)
 }
 
 static const char *
-parse_s12 (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     long *valuep;
+parse_s12 (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -787,7 +757,7 @@ parse_s12 (cd, strp, opindex, valuep)
 	  *strp += 9;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GPREL12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing `)'";
 	  ++*strp;
@@ -799,7 +769,7 @@ parse_s12 (cd, strp, opindex, valuep)
 	  *strp += 7;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOT12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -811,7 +781,7 @@ parse_s12 (cd, strp, opindex, valuep)
 	  *strp += 15;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOT12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -823,7 +793,7 @@ parse_s12 (cd, strp, opindex, valuep)
 	  *strp += 10;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTOFF12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -835,7 +805,7 @@ parse_s12 (cd, strp, opindex, valuep)
 	  *strp += 18;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_FUNCDESC_GOTOFF12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -847,7 +817,7 @@ parse_s12 (cd, strp, opindex, valuep)
 	  *strp += 14;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSDESC12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -859,7 +829,7 @@ parse_s12 (cd, strp, opindex, valuep)
 	  *strp += 11;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_TLSMOFF12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -871,7 +841,7 @@ parse_s12 (cd, strp, opindex, valuep)
 	  *strp += 13;
 	  errmsg = parse_symbolic_address (cd, strp, opindex,
 					   BFD_RELOC_FRV_GOTTLSOFF12,
-					   &result_type, &value);
+					   & result_type, & value);
 	  if (**strp != ')')
 	    return "missing ')'";
 	  ++*strp;
@@ -886,11 +856,10 @@ parse_s12 (cd, strp, opindex, valuep)
 }
 
 static const char *
-parse_u12 (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     long *valuep;
+parse_u12 (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   long *valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
@@ -903,7 +872,7 @@ parse_u12 (cd, strp, opindex, valuep)
       *strp += 9;
       errmsg = parse_symbolic_address (cd, strp, opindex,
 				       BFD_RELOC_FRV_GPRELU12,
-				       &result_type, &value);
+				       & result_type, & value);
       if (**strp != ')')
         return "missing `)'";
       ++*strp;
@@ -919,12 +888,11 @@ parse_u12 (cd, strp, opindex, valuep)
 }
 
 static const char *
-parse_A (cd, strp, opindex, valuep, A)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     unsigned long *valuep;
-     unsigned long A;
+parse_A (CGEN_CPU_DESC cd,
+	 const char **strp,
+	 int opindex,
+	 unsigned long *valuep,
+	 unsigned long A)
 {
   const char *errmsg;
  
@@ -936,37 +904,34 @@ parse_A (cd, strp, opindex, valuep, A)
     return errmsg;
 
   if (*valuep != A)
-    return "Value of A operand must be 0 or 1";
+    return _("Value of A operand must be 0 or 1");
 
   return NULL;
 }
 
 static const char *
-parse_A0 (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     unsigned long *valuep;
+parse_A0 (CGEN_CPU_DESC cd,
+	  const char **strp,
+	  int opindex,
+	  unsigned long *valuep)
 {
   return parse_A (cd, strp, opindex, valuep, 0);
 }
 
 static const char *
-parse_A1 (cd, strp, opindex, valuep)
-     CGEN_CPU_DESC cd;
-     const char **strp;
-     int opindex;
-     unsigned long *valuep;
+parse_A1 (CGEN_CPU_DESC cd,
+	  const char **strp,
+	  int opindex,
+	  unsigned long *valuep)
 {
   return parse_A (cd, strp, opindex, valuep, 1);
 }
 
 static const char *
-parse_even_register (cd, strP, tableP, valueP)
-     CGEN_CPU_DESC  cd;
-     const char **  strP;
-     CGEN_KEYWORD * tableP;
-     long *         valueP;
+parse_even_register (CGEN_CPU_DESC  cd,
+		     const char **  strP,
+		     CGEN_KEYWORD * tableP,
+		     long *         valueP)
 {
   const char * errmsg;
   const char * saved_star_strP = * strP;
@@ -1003,7 +968,7 @@ parse_call_label (CGEN_CPU_DESC cd,
 					   BFD_RELOC_FRV_GETTLSOFF,
 					   resultp, &value);
 	  if (**strp != ')')
-	    return "missing `)'";
+	    return _("missing `)'");
 	  ++*strp;
 	  *valuep = value;
 	  return errmsg;
@@ -1016,7 +981,7 @@ parse_call_label (CGEN_CPU_DESC cd,
 /* -- */
 
 const char * frv_cgen_parse_operand
-  PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
+  (CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *);
 
 /* Main entry point for operand parsing.
 
@@ -1032,11 +997,10 @@ const char * frv_cgen_parse_operand
    the handlers.  */
 
 const char *
-frv_cgen_parse_operand (cd, opindex, strp, fields)
-     CGEN_CPU_DESC cd;
-     int opindex;
-     const char ** strp;
-     CGEN_FIELDS * fields;
+frv_cgen_parse_operand (CGEN_CPU_DESC cd,
+			   int opindex,
+			   const char ** strp,
+			   CGEN_FIELDS * fields)
 {
   const char * errmsg = NULL;
   /* Used by scalar operands that still need to be parsed.  */
@@ -1308,8 +1272,7 @@ cgen_parse_fn * const frv_cgen_parse_handlers[] =
 };
 
 void
-frv_cgen_init_asm (cd)
-     CGEN_CPU_DESC cd;
+frv_cgen_init_asm (CGEN_CPU_DESC cd)
 {
   frv_cgen_init_opcode_table (cd);
   frv_cgen_init_ibld_table (cd);
@@ -1692,30 +1655,3 @@ frv_cgen_assemble_insn (CGEN_CPU_DESC cd,
     return NULL;
   }
 }
-
-#if 0 /* This calls back to GAS which we can't do without care.  */
-
-/* Record each member of OPVALS in the assembler's symbol table.
-   This lets GAS parse registers for us.
-   ??? Interesting idea but not currently used.  */
-
-/* Record each member of OPVALS in the assembler's symbol table.
-   FIXME: Not currently used.  */
-
-void
-frv_cgen_asm_hash_keywords (CGEN_CPU_DESC cd, CGEN_KEYWORD *opvals)
-{
-  CGEN_KEYWORD_SEARCH search = cgen_keyword_search_init (opvals, NULL);
-  const CGEN_KEYWORD_ENTRY * ke;
-
-  while ((ke = cgen_keyword_search_next (& search)) != NULL)
-    {
-#if 0 /* Unnecessary, should be done in the search routine.  */
-      if (! frv_cgen_opval_supported (ke))
-	continue;
-#endif
-      cgen_asm_record_register (cd, ke->name, ke->value);
-    }
-}
-
-#endif /* 0 */

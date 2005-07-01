@@ -1,5 +1,5 @@
 /* Disassemble SH instructions.
-   Copyright 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2003, 2004
+   Copyright 1993, 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
@@ -14,7 +14,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #include <stdio.h>
 #include "sysdep.h"
@@ -28,18 +29,12 @@
 #define INCLUDE_SHMEDIA
 #endif
 
-static void print_movxy
-  PARAMS ((const sh_opcode_info *, int, int, fprintf_ftype, void *));
-static void print_insn_ddt PARAMS ((int, struct disassemble_info *));
-static void print_dsp_reg PARAMS ((int, fprintf_ftype, void *));
-static void print_insn_ppi PARAMS ((int, struct disassemble_info *));
-
 static void
-print_movxy (op, rn, rm, fprintf_fn, stream)
-     const sh_opcode_info *op;
-     int rn, rm;
-     fprintf_ftype fprintf_fn;
-     void *stream;
+print_movxy (const sh_opcode_info *op,
+	     int rn,
+	     int rm,
+	     fprintf_ftype fprintf_fn,
+	     void *stream)
 {
   int n;
 
@@ -113,9 +108,7 @@ print_movxy (op, rn, rm, fprintf_fn, stream)
    Return nonzero if a field b of a parallel processing insns follows.  */
 
 static void
-print_insn_ddt (insn, info)
-     int insn;
-     struct disassemble_info *info;
+print_insn_ddt (int insn, struct disassemble_info *info)
 {
   fprintf_ftype fprintf_fn = info->fprintf_func;
   void *stream = info->stream;
@@ -202,10 +195,7 @@ print_insn_ddt (insn, info)
 }
 
 static void
-print_dsp_reg (rm, fprintf_fn, stream)
-     int rm;
-     fprintf_ftype fprintf_fn;
-     void *stream;
+print_dsp_reg (int rm, fprintf_ftype fprintf_fn, void *stream)
 {
   switch (rm)
     {
@@ -246,9 +236,7 @@ print_dsp_reg (rm, fprintf_fn, stream)
 }
 
 static void
-print_insn_ppi (field_b, info)
-     int field_b;
-     struct disassemble_info *info;
+print_insn_ppi (int field_b, struct disassemble_info *info)
 {
   static char *sx_tab[] = { "x0", "x1", "a0", "a1" };
   static char *sy_tab[] = { "y0", "y1", "m0", "m1" };
@@ -275,23 +263,20 @@ print_insn_ppi (field_b, info)
       static char *sg_tab[] = { "m0", "m1", "a0", "a1" };
 
       if (field_b & 0x2000)
-	{
-	  fprintf_fn (stream, "p%s %s,%s,%s\t",
-		      (field_b & 0x1000) ? "add" : "sub",
-		      sx_tab[(field_b >> 6) & 3],
-		      sy_tab[(field_b >> 4) & 3],
-		      du_tab[(field_b >> 0) & 3]);
-	}
+	fprintf_fn (stream, "p%s %s,%s,%s\t",
+		    (field_b & 0x1000) ? "add" : "sub",
+		    sx_tab[(field_b >> 6) & 3],
+		    sy_tab[(field_b >> 4) & 3],
+		    du_tab[(field_b >> 0) & 3]);
+
       else if ((field_b & 0xf0) == 0x10
 	       && info->mach != bfd_mach_sh_dsp
 	       && info->mach != bfd_mach_sh3_dsp)
-	{
-	  fprintf_fn (stream, "pclr %s \t", du_tab[(field_b >> 0) & 3]);
-	}
+	fprintf_fn (stream, "pclr %s \t", du_tab[(field_b >> 0) & 3]);
+
       else if ((field_b & 0xf3) != 0)
-	{
-	  fprintf_fn (stream, ".word 0x%x\t", field_b);
-	}
+	fprintf_fn (stream, ".word 0x%x\t", field_b);
+
       fprintf_fn (stream, "pmuls%c%s,%s,%s",
 		  field_b & 0x2000 ? ' ' : '\t',
 		  se_tab[(field_b >> 10) & 3],
@@ -392,10 +377,9 @@ print_insn_ppi (field_b, info)
 
 /* FIXME mvs: movx insns print as ".word 0x%03x", insn & 0xfff
    (ie. the upper nibble is missing).  */
+
 int
-print_insn_sh (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_sh (bfd_vma memaddr, struct disassemble_info *info)
 {
   fprintf_ftype fprintf_fn = info->fprintf_func;
   void *stream = info->stream;
@@ -648,7 +632,7 @@ print_insn_sh (memaddr, info)
 	    case REG_N_D:
 	      if ((nibs[n] & 1) != 0)
 		goto fail;
-	      /* fall through */
+	      /* Fall through.  */
 	    case REG_N:
 	      rn = nibs[n];
 	      break;

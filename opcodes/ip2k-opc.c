@@ -34,16 +34,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "safe-ctype.h"
 
-/* A better hash function for instruction mnemonics. */
+/* A better hash function for instruction mnemonics.  */
 unsigned int
-ip2k_asm_hash (insn)
-     const char* insn;
+ip2k_asm_hash (const char* insn)
 {
   unsigned int hash;
   const char* m = insn;
 
-  for (hash = 0; *m && !ISSPACE(*m); m++)
-    hash = (hash * 23) ^ (0x1F & TOLOWER(*m));
+  for (hash = 0; *m && ! ISSPACE (*m); m++)
+    hash = (hash * 23) ^ (0x1F & TOLOWER (*m));
 
   /* printf ("%s %d\n", insn, (hash % CGEN_ASM_HASH_SIZE)); */
 
@@ -51,11 +50,10 @@ ip2k_asm_hash (insn)
 }
 
 
-/* Special check to ensure that instruction exists for given machine. */
+/* Special check to ensure that instruction exists for given machine.  */
+
 int
-ip2k_cgen_insn_supported (cd, insn)
-     CGEN_CPU_DESC cd;
-     const CGEN_INSN *insn;
+ip2k_cgen_insn_supported (CGEN_CPU_DESC cd, const CGEN_INSN *insn)
 {
   int machs = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH);
 
@@ -63,7 +61,7 @@ ip2k_cgen_insn_supported (cd, insn)
   if (machs == 0)
     return 1;
   
-  return ((machs & cd->machs) != 0);
+  return (machs & cd->machs) != 0;
 }
 
 
@@ -71,10 +69,10 @@ ip2k_cgen_insn_supported (cd, insn)
 /* The hash functions are recorded here to help keep assembler code out of
    the disassembler and vice versa.  */
 
-static int asm_hash_insn_p PARAMS ((const CGEN_INSN *));
-static unsigned int asm_hash_insn PARAMS ((const char *));
-static int dis_hash_insn_p PARAMS ((const CGEN_INSN *));
-static unsigned int dis_hash_insn PARAMS ((const char *, CGEN_INSN_INT));
+static int asm_hash_insn_p        (const CGEN_INSN *);
+static unsigned int asm_hash_insn (const char *);
+static int dis_hash_insn_p        (const CGEN_INSN *);
+static unsigned int dis_hash_insn (const char *, CGEN_INSN_INT);
 
 /* Instruction formats.  */
 
@@ -873,14 +871,10 @@ dis_hash_insn (buf, value)
   return CGEN_DIS_HASH (buf, value);
 }
 
-static void set_fields_bitsize PARAMS ((CGEN_FIELDS *, int));
-
 /* Set the recorded length of the insn in the CGEN_FIELDS struct.  */
 
 static void
-set_fields_bitsize (fields, size)
-     CGEN_FIELDS *fields;
-     int size;
+set_fields_bitsize (CGEN_FIELDS *fields, int size)
 {
   CGEN_FIELDS_BITSIZE (fields) = size;
 }
@@ -889,15 +883,15 @@ set_fields_bitsize (fields, size)
    This plugs the opcode entries and macro instructions into the cpu table.  */
 
 void
-ip2k_cgen_init_opcode_table (cd)
-     CGEN_CPU_DESC cd;
+ip2k_cgen_init_opcode_table (CGEN_CPU_DESC cd)
 {
   int i;
   int num_macros = (sizeof (ip2k_cgen_macro_insn_table) /
 		    sizeof (ip2k_cgen_macro_insn_table[0]));
   const CGEN_IBASE *ib = & ip2k_cgen_macro_insn_table[0];
   const CGEN_OPCODE *oc = & ip2k_cgen_macro_insn_opcode_table[0];
-  CGEN_INSN *insns = (CGEN_INSN *) xmalloc (num_macros * sizeof (CGEN_INSN));
+  CGEN_INSN *insns = xmalloc (num_macros * sizeof (CGEN_INSN));
+
   memset (insns, 0, num_macros * sizeof (CGEN_INSN));
   for (i = 0; i < num_macros; ++i)
     {

@@ -1,21 +1,21 @@
 /* Disassemble MN10300 instructions.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2005
    Free Software Foundation, Inc.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
-
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
 
 #include <stdio.h>
 
@@ -24,202 +24,17 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #include "dis-asm.h"
 #include "opintl.h"
 
-static void disassemble PARAMS ((bfd_vma, struct disassemble_info *,
-				 unsigned long insn, unsigned int));
-
 #define HAVE_AM33_2 (info->mach == AM33_2)
-#define HAVE_AM33 (info->mach == AM33 || HAVE_AM33_2)
-#define HAVE_AM30 (info->mach == AM30)
-
-int
-print_insn_mn10300 (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
-{
-  int status;
-  bfd_byte buffer[4];
-  unsigned long insn;
-  unsigned int consume;
-
-  /* First figure out how big the opcode is.  */
-  status = (*info->read_memory_func) (memaddr, buffer, 1, info);
-  if (status != 0)
-    {
-      (*info->memory_error_func) (status, memaddr, info);
-      return -1;
-    }
-  insn = *(unsigned char *) buffer;
-
-  /* These are one byte insns.  */
-  if ((insn & 0xf3) == 0x00
-      || (insn & 0xf0) == 0x10
-      || (insn & 0xfc) == 0x3c
-      || (insn & 0xf3) == 0x41
-      || (insn & 0xf3) == 0x40
-      || (insn & 0xfc) == 0x50
-      || (insn & 0xfc) == 0x54
-      || (insn & 0xf0) == 0x60
-      || (insn & 0xf0) == 0x70
-      || ((insn & 0xf0) == 0x80
-	  && (insn & 0x0c) >> 2 != (insn & 0x03))
-      || ((insn & 0xf0) == 0x90
-	  && (insn & 0x0c) >> 2 != (insn & 0x03))
-      || ((insn & 0xf0) == 0xa0
-	  && (insn & 0x0c) >> 2 != (insn & 0x03))
-      || ((insn & 0xf0) == 0xb0
-	  && (insn & 0x0c) >> 2 != (insn & 0x03))
-      || (insn & 0xff) == 0xcb
-      || (insn & 0xfc) == 0xd0
-      || (insn & 0xfc) == 0xd4
-      || (insn & 0xfc) == 0xd8
-      || (insn & 0xf0) == 0xe0
-      || (insn & 0xff) == 0xff)
-    {
-      consume = 1;
-    }
-
-  /* These are two byte insns.  */
-  else if ((insn & 0xf0) == 0x80
-	   || (insn & 0xf0) == 0x90
-	   || (insn & 0xf0) == 0xa0
-	   || (insn & 0xf0) == 0xb0
-	   || (insn & 0xfc) == 0x20
-	   || (insn & 0xfc) == 0x28
-	   || (insn & 0xf3) == 0x43
-	   || (insn & 0xf3) == 0x42
-	   || (insn & 0xfc) == 0x58
-	   || (insn & 0xfc) == 0x5c
-	   || ((insn & 0xf0) == 0xc0
-	       && (insn & 0xff) != 0xcb
-	       && (insn & 0xff) != 0xcc
-	       && (insn & 0xff) != 0xcd)
-	   || (insn & 0xff) == 0xf0
-	   || (insn & 0xff) == 0xf1
-	   || (insn & 0xff) == 0xf2
-	   || (insn & 0xff) == 0xf3
-	   || (insn & 0xff) == 0xf4
-	   || (insn & 0xff) == 0xf5
-	   || (insn & 0xff) == 0xf6)
-    {
-      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-      insn = bfd_getb16 (buffer);
-      consume = 2;
-    }
-
-  /* These are three byte insns.  */
-  else if ((insn & 0xff) == 0xf8
-	   || (insn & 0xff) == 0xcc
-	   || (insn & 0xff) == 0xf9
-	   || (insn & 0xf3) == 0x01
-	   || (insn & 0xf3) == 0x02
-	   || (insn & 0xf3) == 0x03
-	   || (insn & 0xfc) == 0x24
-	   || (insn & 0xfc) == 0x2c
-	   || (insn & 0xfc) == 0x30
-	   || (insn & 0xfc) == 0x34
-	   || (insn & 0xfc) == 0x38
-	   || (insn & 0xff) == 0xde
-	   || (insn & 0xff) == 0xdf
-	   || (insn & 0xff) == 0xf9
-	   || (insn & 0xff) == 0xcc)
-    {
-      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-      insn = bfd_getb16 (buffer);
-      insn <<= 8;
-      status = (*info->read_memory_func) (memaddr + 2, buffer, 1, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-      insn |= *(unsigned char *) buffer;
-      consume = 3;
-    }
-
-  /* These are four byte insns.  */
-  else if ((insn & 0xff) == 0xfa
-	   || (insn & 0xff) == 0xf7
-	   || (insn & 0xff) == 0xfb)
-    {
-      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-      insn = bfd_getb32 (buffer);
-      consume = 4;
-    }
-
-  /* These are five byte insns.  */
-  else if ((insn & 0xff) == 0xcd
-	   || (insn & 0xff) == 0xdc)
-    {
-      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-      insn = bfd_getb32 (buffer);
-      consume = 5;
-    }
-
-  /* These are six byte insns.  */
-  else if ((insn & 0xff) == 0xfd
-	   || (insn & 0xff) == 0xfc)
-    {
-      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-
-      insn = bfd_getb32 (buffer);
-      consume = 6;
-    }
-
-  /* Else its a seven byte insns (in theory).  */
-  else
-    {
-      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, memaddr, info);
-	  return -1;
-	}
-
-      insn = bfd_getb32 (buffer);
-      consume = 7;
-      /* Handle the 5-byte extended instruction codes.  */
-      if ((insn & 0xfff80000) == 0xfe800000)
-	consume = 5;
-    }
-
-  disassemble (memaddr, info, insn, consume);
-
-  return consume;
-}
+#define HAVE_AM33   (info->mach == AM33 || HAVE_AM33_2)
+#define HAVE_AM30   (info->mach == AM30)
 
 static void
-disassemble (memaddr, info, insn, size)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
-     unsigned long insn;
-     unsigned int size;
+disassemble (bfd_vma memaddr,
+	     struct disassemble_info *info,
+	     unsigned long insn,
+	     unsigned int size)
 {
-  struct mn10300_opcode *op = (struct mn10300_opcode *)mn10300_opcodes;
+  struct mn10300_opcode *op = (struct mn10300_opcode *) mn10300_opcodes;
   const struct mn10300_operand *operand;
   bfd_byte buffer[4];
   unsigned long extension = 0;
@@ -282,21 +97,18 @@ disassemble (memaddr, info, insn, size)
 	    extra_shift = 0;
 
 	  if (size == 1 || size == 2)
-	    {
-	      extension = 0;
-	    }
+	    extension = 0;
+
 	  else if (size == 3
 		   && (op->format == FMT_D1
 		       || op->opcode == 0xdf0000
 		       || op->opcode == 0xde0000))
-	    {
-	      extension = 0;
-	    }
+	    extension = 0;
+
 	  else if (size == 3
 		   && op->format == FMT_D6)
-	    {
-	      extension = 0;
-	    }
+	    extension = 0;
+
 	  else if (size == 3)
 	    {
 	      insn &= 0xff0000;
@@ -314,15 +126,13 @@ disassemble (memaddr, info, insn, size)
 		   && (op->opcode == 0xfaf80000
 		       || op->opcode == 0xfaf00000
 		       || op->opcode == 0xfaf40000))
-	    {
-	      extension = 0;
-	    }
+	    extension = 0;
+
 	  else if (size == 4
 		   && (op->format == FMT_D7
 		       || op->format == FMT_D10))
-	    {
-	      extension = 0;
-	    }
+	    extension = 0;
+
 	  else if (size == 4)
 	    {
 	      insn &= 0xffff0000;
@@ -339,6 +149,7 @@ disassemble (memaddr, info, insn, size)
 	  else if (size == 5 && op->opcode == 0xdc000000)
 	    {
 	      unsigned long temp = 0;
+
 	      status = (*info->read_memory_func) (memaddr + 1, buffer, 4, info);
 	      if (status != 0)
 		{
@@ -373,6 +184,7 @@ disassemble (memaddr, info, insn, size)
 	  else if (size == 5)
 	    {
 	      unsigned long temp = 0;
+
 	      status = (*info->read_memory_func) (memaddr + 1, buffer, 2, info);
 	      if (status != 0)
 		{
@@ -414,6 +226,7 @@ disassemble (memaddr, info, insn, size)
 	  else if (size == 6)
 	    {
 	      unsigned long temp = 0;
+
 	      status = (*info->read_memory_func) (memaddr + 2, buffer, 4, info);
 	      if (status != 0)
 		{
@@ -442,6 +255,7 @@ disassemble (memaddr, info, insn, size)
 	  else if (size == 7 && op->opcode == 0xdd000000)
 	    {
 	      unsigned long temp = 0;
+
 	      status = (*info->read_memory_func) (memaddr + 1, buffer, 4, info);
 	      if (status != 0)
 		{
@@ -465,6 +279,7 @@ disassemble (memaddr, info, insn, size)
 	  else if (size == 7)
 	    {
 	      unsigned long temp = 0;
+
 	      status = (*info->read_memory_func) (memaddr + 2, buffer, 4, info);
 	      if (status != 0)
 		{
@@ -506,6 +321,7 @@ disassemble (memaddr, info, insn, size)
 	      if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
 		{
 		  unsigned long temp;
+
 		  value = insn & ((1 << operand->bits) - 1);
 		  value <<= (32 - operand->bits);
 		  temp = extension >> operand->shift;
@@ -517,6 +333,7 @@ disassemble (memaddr, info, insn, size)
 	      else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
 		{
 		  unsigned long temp;
+
 		  value = insn & ((1 << operand->bits) - 1);
 		  value <<= (24 - operand->bits);
 		  temp = extension >> operand->shift;
@@ -572,15 +389,12 @@ disassemble (memaddr, info, insn, size)
 			   | ((insn >> shl_low) & mask_low));
 		}
 	      else if ((operand->flags & MN10300_OPERAND_EXTENDED) != 0)
-		{
-		  value = ((extension >> (operand->shift))
-			   & ((1 << operand->bits) - 1));
-		}
+		value = ((extension >> (operand->shift))
+			 & ((1 << operand->bits) - 1));
+
 	      else
-		{
-		  value = ((insn >> (operand->shift))
-			   & ((1 << operand->bits) - 1));
-		}
+		value = ((insn >> (operand->shift))
+			 & ((1 << operand->bits) - 1));
 
 	      if ((operand->flags & MN10300_OPERAND_SIGNED) != 0
 		  /* These are properly extended by the code above.  */
@@ -762,8 +576,185 @@ disassemble (memaddr, info, insn, size)
     }
 
   if (!match)
+    /* xgettext:c-format */
+    (*info->fprintf_func) (info->stream, _("unknown\t0x%04x"), insn);
+}
+
+int
+print_insn_mn10300 (bfd_vma memaddr, struct disassemble_info *info)
+{
+  int status;
+  bfd_byte buffer[4];
+  unsigned long insn;
+  unsigned int consume;
+
+  /* First figure out how big the opcode is.  */
+  status = (*info->read_memory_func) (memaddr, buffer, 1, info);
+  if (status != 0)
     {
-      /* xgettext:c-format */
-      (*info->fprintf_func) (info->stream, _("unknown\t0x%04x"), insn);
+      (*info->memory_error_func) (status, memaddr, info);
+      return -1;
     }
+  insn = *(unsigned char *) buffer;
+
+  /* These are one byte insns.  */
+  if ((insn & 0xf3) == 0x00
+      || (insn & 0xf0) == 0x10
+      || (insn & 0xfc) == 0x3c
+      || (insn & 0xf3) == 0x41
+      || (insn & 0xf3) == 0x40
+      || (insn & 0xfc) == 0x50
+      || (insn & 0xfc) == 0x54
+      || (insn & 0xf0) == 0x60
+      || (insn & 0xf0) == 0x70
+      || ((insn & 0xf0) == 0x80
+	  && (insn & 0x0c) >> 2 != (insn & 0x03))
+      || ((insn & 0xf0) == 0x90
+	  && (insn & 0x0c) >> 2 != (insn & 0x03))
+      || ((insn & 0xf0) == 0xa0
+	  && (insn & 0x0c) >> 2 != (insn & 0x03))
+      || ((insn & 0xf0) == 0xb0
+	  && (insn & 0x0c) >> 2 != (insn & 0x03))
+      || (insn & 0xff) == 0xcb
+      || (insn & 0xfc) == 0xd0
+      || (insn & 0xfc) == 0xd4
+      || (insn & 0xfc) == 0xd8
+      || (insn & 0xf0) == 0xe0
+      || (insn & 0xff) == 0xff)
+    {
+      consume = 1;
+    }
+
+  /* These are two byte insns.  */
+  else if ((insn & 0xf0) == 0x80
+	   || (insn & 0xf0) == 0x90
+	   || (insn & 0xf0) == 0xa0
+	   || (insn & 0xf0) == 0xb0
+	   || (insn & 0xfc) == 0x20
+	   || (insn & 0xfc) == 0x28
+	   || (insn & 0xf3) == 0x43
+	   || (insn & 0xf3) == 0x42
+	   || (insn & 0xfc) == 0x58
+	   || (insn & 0xfc) == 0x5c
+	   || ((insn & 0xf0) == 0xc0
+	       && (insn & 0xff) != 0xcb
+	       && (insn & 0xff) != 0xcc
+	       && (insn & 0xff) != 0xcd)
+	   || (insn & 0xff) == 0xf0
+	   || (insn & 0xff) == 0xf1
+	   || (insn & 0xff) == 0xf2
+	   || (insn & 0xff) == 0xf3
+	   || (insn & 0xff) == 0xf4
+	   || (insn & 0xff) == 0xf5
+	   || (insn & 0xff) == 0xf6)
+    {
+      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+      insn = bfd_getb16 (buffer);
+      consume = 2;
+    }
+
+  /* These are three byte insns.  */
+  else if ((insn & 0xff) == 0xf8
+	   || (insn & 0xff) == 0xcc
+	   || (insn & 0xff) == 0xf9
+	   || (insn & 0xf3) == 0x01
+	   || (insn & 0xf3) == 0x02
+	   || (insn & 0xf3) == 0x03
+	   || (insn & 0xfc) == 0x24
+	   || (insn & 0xfc) == 0x2c
+	   || (insn & 0xfc) == 0x30
+	   || (insn & 0xfc) == 0x34
+	   || (insn & 0xfc) == 0x38
+	   || (insn & 0xff) == 0xde
+	   || (insn & 0xff) == 0xdf
+	   || (insn & 0xff) == 0xf9
+	   || (insn & 0xff) == 0xcc)
+    {
+      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+      insn = bfd_getb16 (buffer);
+      insn <<= 8;
+      status = (*info->read_memory_func) (memaddr + 2, buffer, 1, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+      insn |= *(unsigned char *) buffer;
+      consume = 3;
+    }
+
+  /* These are four byte insns.  */
+  else if ((insn & 0xff) == 0xfa
+	   || (insn & 0xff) == 0xf7
+	   || (insn & 0xff) == 0xfb)
+    {
+      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+      insn = bfd_getb32 (buffer);
+      consume = 4;
+    }
+
+  /* These are five byte insns.  */
+  else if ((insn & 0xff) == 0xcd
+	   || (insn & 0xff) == 0xdc)
+    {
+      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+      insn = bfd_getb32 (buffer);
+      consume = 5;
+    }
+
+  /* These are six byte insns.  */
+  else if ((insn & 0xff) == 0xfd
+	   || (insn & 0xff) == 0xfc)
+    {
+      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+
+      insn = bfd_getb32 (buffer);
+      consume = 6;
+    }
+
+  /* Else its a seven byte insns (in theory).  */
+  else
+    {
+      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, memaddr, info);
+	  return -1;
+	}
+
+      insn = bfd_getb32 (buffer);
+      consume = 7;
+      /* Handle the 5-byte extended instruction codes.  */
+      if ((insn & 0xfff80000) == 0xfe800000)
+	consume = 5;
+    }
+
+  disassemble (memaddr, info, insn, consume);
+
+  return consume;
 }

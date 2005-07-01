@@ -1,25 +1,26 @@
 /* Instruction building/extraction support for @arch@. -*- C -*-
 
-THIS FILE IS MACHINE GENERATED WITH CGEN: Cpu tools GENerator.
-- the resultant file is machine generated, cgen-ibld.in isn't
+   THIS FILE IS MACHINE GENERATED WITH CGEN: Cpu tools GENerator.
+   - the resultant file is machine generated, cgen-ibld.in isn't
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2005
+   Free Software Foundation, Inc.
 
-This file is part of the GNU Binutils and GDB, the GNU debugger.
+   This file is part of the GNU Binutils and GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 /* ??? Eventually more and more of this stuff can go to cpu-independent files.
    Keep that in mind.  */
@@ -35,9 +36,9 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "opintl.h"
 #include "safe-ctype.h"
 
-#undef min
+#undef  min
 #define min(a,b) ((a) < (b) ? (a) : (b))
-#undef max
+#undef  max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
 /* Used by the ifield rtx function.  */
@@ -135,12 +136,6 @@ insert_normal (CGEN_CPU_DESC cd,
   /* If LENGTH is zero, this operand doesn't contribute to the value.  */
   if (length == 0)
     return NULL;
-
-#if 0
-  if (CGEN_INT_INSN_P
-      && word_offset != 0)
-    abort ();
-#endif
 
   if (word_length > 32)
     abort ();
@@ -286,7 +281,7 @@ insert_insn_normal (CGEN_CPU_DESC cd,
 
 #if CGEN_INT_INSN_P
 /* Cover function to store an insn value into an integral insn.  Must go here
- because it needs <prefix>-desc.h for CGEN_INT_INSN_P.  */
+   because it needs <prefix>-desc.h for CGEN_INT_INSN_P.  */
 
 static void
 put_insn_int_value (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -304,6 +299,7 @@ put_insn_int_value (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       int shift = insn_length - length;
       /* Written this way to avoid undefined behaviour.  */
       CGEN_INSN_INT mask = (((1L << (length - 1)) - 1) << 1) | 1;
+
       *buf = (*buf & ~(mask << shift)) | ((value & mask) << shift);
     }
 }
@@ -374,9 +370,7 @@ extract_1 (CGEN_CPU_DESC cd,
 {
   unsigned long x;
   int shift;
-#if 0
-  int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
-#endif
+
   x = cgen_get_insn_value (cd, bufp, word_length);
 
   if (CGEN_INSN_LSB0_P)
@@ -438,12 +432,6 @@ extract_normal (CGEN_CPU_DESC cd,
       *valuep = 0;
       return 1;
     }
-
-#if 0
-  if (CGEN_INT_INSN_P
-      && word_offset != 0)
-    abort ();
-#endif
 
   if (word_length > 32)
     abort ();
@@ -539,4 +527,4 @@ extract_insn_normal (CGEN_CPU_DESC cd,
   return CGEN_INSN_BITSIZE (insn);
 }
 
-/* machine generated code added here */
+/* Machine generated code added here.  */
