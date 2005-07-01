@@ -1,3 +1,8 @@
+2005-07-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* solib-svr4.c: Include "solib.h".
+	* Makefile.in (solib-svr4.o): Update dependencies.
+
 2005-06-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* eval.c (evaluate_struct_tuple): Use strcmp instead of
