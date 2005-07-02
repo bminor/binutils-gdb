@@ -1,3 +1,8 @@
+2005-07-02  Nathan J. Williams  <nathanw@wasabisystems.com>
+
+	* gdb.texinfo (Packets): Change description of 'D' packet to note
+	that GDB does wait for a response.
+
 2005-06-22  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (History) Rename "Command History".

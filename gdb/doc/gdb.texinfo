@@ -22058,8 +22058,10 @@ before @value{GDBN} disconnects via the @code{detach} command.
 
 Reply:
 @table @samp
-@item @emph{no response}
-@value{GDBN} does not check for any response after sending this packet.
+@item OK
+for success
+@item E@var{NN}
+for an error
 @end table
 
 @item @code{e} --- reserved
