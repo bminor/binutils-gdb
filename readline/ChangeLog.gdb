@@ -1,3 +1,9 @@
+2005-07-03  Mark Kettenis <kettenis@gnu.org>
+
+	From Martin Simmons:
+	* configure.in: Check for getpwnam instead of getpwname.
+	* configure: Regenerate.
+
 2005-05-09  Mark Mitchell <mark@codesourcery.com>
 
 	* aclocal.m4: Use AC_TRY_LINK to check for mbstate_t.

@@ -120,7 +120,7 @@ AC_HEADER_DIRENT
 
 AC_CHECK_FUNCS(fcntl kill lstat memmove putenv select setenv setlocale \
 	       strcasecmp strpbrk tcgetattr vsnprintf isascii isxdigit \
-               getpwname getpwent getpwuid)
+               getpwnam getpwent getpwuid)
 
 AC_FUNC_STRCOLL
 

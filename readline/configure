@@ -4139,7 +4139,7 @@ fi
 
 for ac_func in fcntl kill lstat memmove putenv select setenv setlocale \
 	       strcasecmp strpbrk tcgetattr vsnprintf isascii isxdigit \
-               getpwname getpwent getpwuid
+               getpwnam getpwent getpwuid
 do
 as_ac_var=`echo "ac_cv_func_$ac_func" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $ac_func" >&5
