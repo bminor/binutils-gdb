@@ -1,3 +1,9 @@
+2005-07-03  Richard Henderson  <rth@redhat.com>
+
+	* amd64-tdep.c (amd64_sse_type): New.	
+	(amd64_register_info): Use it for xmm registers.  Constify.
+	(amd64_register_type): Initialize amd64_sse_type as needed.
+
 2005-07-03  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure.ac: Add arguments to AC_DEFINE calls.

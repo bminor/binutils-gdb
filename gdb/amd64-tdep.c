@@ -55,7 +55,9 @@ struct amd64_register_info
   struct type **type;
 };
 
-static struct amd64_register_info amd64_register_info[] =
+static struct type *amd64_sse_type;
+
+static struct amd64_register_info const amd64_register_info[] =
 {
   { "rax", &builtin_type_int64 },
   { "rbx", &builtin_type_int64 },
@@ -103,22 +105,22 @@ static struct amd64_register_info amd64_register_info[] =
   { "fop", &builtin_type_int32 },
 
   /* %xmm0 is register number 40.  */
-  { "xmm0", &builtin_type_v4sf },
-  { "xmm1", &builtin_type_v4sf },
-  { "xmm2", &builtin_type_v4sf },
-  { "xmm3", &builtin_type_v4sf },
-  { "xmm4", &builtin_type_v4sf },
-  { "xmm5", &builtin_type_v4sf },
-  { "xmm6", &builtin_type_v4sf },
-  { "xmm7", &builtin_type_v4sf },
-  { "xmm8", &builtin_type_v4sf },
-  { "xmm9", &builtin_type_v4sf },
-  { "xmm10", &builtin_type_v4sf },
-  { "xmm11", &builtin_type_v4sf },
-  { "xmm12", &builtin_type_v4sf },
-  { "xmm13", &builtin_type_v4sf },
-  { "xmm14", &builtin_type_v4sf },
-  { "xmm15", &builtin_type_v4sf },
+  { "xmm0", &amd64_sse_type },
+  { "xmm1", &amd64_sse_type },
+  { "xmm2", &amd64_sse_type },
+  { "xmm3", &amd64_sse_type },
+  { "xmm4", &amd64_sse_type },
+  { "xmm5", &amd64_sse_type },
+  { "xmm6", &amd64_sse_type },
+  { "xmm7", &amd64_sse_type },
+  { "xmm8", &amd64_sse_type },
+  { "xmm9", &amd64_sse_type },
+  { "xmm10", &amd64_sse_type },
+  { "xmm11", &amd64_sse_type },
+  { "xmm12", &amd64_sse_type },
+  { "xmm13", &amd64_sse_type },
+  { "xmm14", &amd64_sse_type },
+  { "xmm15", &amd64_sse_type },
   { "mxcsr", &builtin_type_int32 }
 };
 
@@ -143,9 +145,33 @@ amd64_register_name (int regnum)
 static struct type *
 amd64_register_type (struct gdbarch *gdbarch, int regnum)
 {
+  struct type *t;
+
   gdb_assert (regnum >= 0 && regnum < AMD64_NUM_REGS);
 
-  return *amd64_register_info[regnum].type;
+  /* ??? Unfortunately, amd64_init_abi is called too early, and so we
+     cannot create the amd64_sse_type early enough to avoid any check
+     at this point.  */
+  t = *amd64_register_info[regnum].type;
+  if (t != NULL)
+    return t;
+
+  gdb_assert (amd64_sse_type == NULL);
+
+  t = init_composite_type ("__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
+  append_composite_type_field (t, "v4_float", builtin_type_v4_float);
+  append_composite_type_field (t, "v2_double", builtin_type_v2_double);
+  append_composite_type_field (t, "v16_int8", builtin_type_v16_int8);
+  append_composite_type_field (t, "v8_int16", builtin_type_v8_int16);
+  append_composite_type_field (t, "v4_int32", builtin_type_v4_int32);
+  append_composite_type_field (t, "v2_int64", builtin_type_v2_int64);
+  append_composite_type_field (t, "uint128", builtin_type_int128);
+
+  TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+  TYPE_NAME (t) = "builtin_type_vec128i";
+      
+  amd64_sse_type = t;
+  return t;
 }
 
 /* DWARF Register Number Mapping as defined in the System V psABI,
