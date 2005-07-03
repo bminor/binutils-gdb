@@ -920,15 +920,6 @@ size_t iconv();
   AC_SUBST(LIBICONV)
 ])
 
-# AC_GNU_SOURCE
-# -------------
-# FIXME: Remove thise once we start using Autoconf 2.5x (x>=4).
-AC_DEFUN([AC_GNU_SOURCE],
-[AC_BEFORE([$0], [AC_TRY_COMPILE])dnl
-AC_BEFORE([$0], [AC_TRY_RUN])dnl
-AC_DEFINE([_GNU_SOURCE])
-])
-
 dnl written by Guido Draheim <guidod@gmx.de>, original by Alexandre Oliva 
 dnl Version 1.3 (2001/03/02)
 dnl source http://www.gnu.org/software/ac-archive/Miscellaneous/ac_define_dir.html
