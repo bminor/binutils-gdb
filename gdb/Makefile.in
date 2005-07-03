@@ -389,10 +389,7 @@ LINTFLAGS= $(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
 	$(INTL_CFLAGS)
 
-RUNTEST = `if [ -f $${rootsrc}/../dejagnu/runtest ] ; then \
-		echo $${rootsrc}/../dejagnu/runtest ; else echo runtest; \
-	   fi`
-
+RUNTEST = runtest
 RUNTESTFLAGS=
 
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX

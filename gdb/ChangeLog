@@ -1,3 +1,7 @@
+2005-07-04  Ben Elliston  <bje@gnu.org>
+
+	* Makefile.in (RUNTEST): Set to runtest.
+
 2005-07-03  Richard Henderson  <rth@redhat.com>
 
 	* amd64-tdep.c (amd64_sse_type): New.	
