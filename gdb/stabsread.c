@@ -1,8 +1,8 @@
 /* Support routines for decoding "stabs" debugging information format.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
-   Software Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2527,7 +2527,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	    }
 	  else if (has_destructor && new_fnlist->fn_fieldlist.name[0] != '~')
 	    {
-	      new_fnlist->fn_fieldlist.name = concat ("~", main_fn_name, NULL);
+	      new_fnlist->fn_fieldlist.name =
+		concat ("~", main_fn_name, (char *)NULL);
 	      xfree (main_fn_name);
 	    }
 	  else if (!has_stub)

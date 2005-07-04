@@ -300,7 +300,7 @@ core_open (char *filename, int from_tty)
   filename = tilde_expand (filename);
   if (filename[0] != '/')
     {
-      temp = concat (current_directory, "/", filename, NULL);
+      temp = concat (current_directory, "/", filename, (char *)NULL);
       xfree (filename);
       filename = temp;
     }

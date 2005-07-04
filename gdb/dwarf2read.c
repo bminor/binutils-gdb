@@ -1,7 +1,7 @@
 /* DWARF 2 debugging format support for GDB.
 
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004
+   2004, 2005
    Free Software Foundation, Inc.
 
    Adapted by Gary Funck (gary@intrepid.com), Intrepid Technology,
@@ -6632,15 +6632,15 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 
             if (!IS_ABSOLUTE_PATH (include_name) && dir_name != NULL)
               {
-                include_name =
-                  concat (dir_name, SLASH_STRING, include_name, NULL);
+                include_name = concat (dir_name, SLASH_STRING,
+				       include_name, (char *)NULL);
                 make_cleanup (xfree, include_name);
               }
 
             if (!IS_ABSOLUTE_PATH (pst_filename) && pst->dirname != NULL)
               {
-                pst_filename =
-                  concat (pst->dirname, SLASH_STRING, pst_filename, NULL);
+                pst_filename = concat (pst->dirname, SLASH_STRING,
+				       pst_filename, (char *)NULL);
                 make_cleanup (xfree, pst_filename);
               }
 
@@ -6679,7 +6679,7 @@ dwarf2_start_subfile (char *filename, char *dirname)
   if (!IS_ABSOLUTE_PATH (filename) && dirname != NULL)
     {
       struct subfile *subfile;
-      char *fullname = concat (dirname, "/", filename, NULL);
+      char *fullname = concat (dirname, "/", filename, (char *)NULL);
 
       for (subfile = subfiles; subfile; subfile = subfile->next)
 	{

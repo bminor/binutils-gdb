@@ -1,6 +1,6 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
@@ -1399,7 +1399,7 @@ patch_type (struct type *type, struct type *real_type)
     {
       if (TYPE_NAME (target))
 	xfree (TYPE_NAME (target));
-      TYPE_NAME (target) = concat (TYPE_NAME (real_target), NULL);
+      TYPE_NAME (target) = concat (TYPE_NAME (real_target), (char *)NULL);
     }
 }
 
@@ -1636,7 +1636,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		}
 	      else
 		TYPE_NAME (SYMBOL_TYPE (sym)) =
-		  concat (DEPRECATED_SYMBOL_NAME (sym), NULL);
+		  concat (DEPRECATED_SYMBOL_NAME (sym), (char *)NULL);
 	    }
 
 	  /* Keep track of any type which points to empty structured type,
@@ -1671,7 +1671,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		&& *DEPRECATED_SYMBOL_NAME (sym) != '~'
 		&& *DEPRECATED_SYMBOL_NAME (sym) != '.')
 	      TYPE_TAG_NAME (SYMBOL_TYPE (sym)) =
-		concat (DEPRECATED_SYMBOL_NAME (sym), NULL);
+		concat (DEPRECATED_SYMBOL_NAME (sym), (char *)NULL);
 
 	  add_symbol_to_list (sym, &file_symbols);
 	  break;

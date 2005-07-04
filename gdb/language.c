@@ -412,7 +412,7 @@ set_lang_str (void)
   if (language_mode == language_mode_auto)
     prefix = "auto; currently ";
 
-  language = concat (prefix, current_language->la_name, NULL);
+  language = concat (prefix, current_language->la_name, (char *)NULL);
 }
 
 static void
@@ -440,7 +440,7 @@ set_type_str (void)
       error (_("Unrecognized type check setting."));
     }
 
-  type = concat (prefix, tmp, NULL);
+  type = concat (prefix, tmp, (char *)NULL);
 }
 
 static void
@@ -468,7 +468,7 @@ set_range_str (void)
 
   if (range)
     xfree (range);
-  range = concat (pref, tmp, NULL);
+  range = concat (pref, tmp, (char *)NULL);
 }
 
 static void
@@ -492,7 +492,7 @@ set_case_str (void)
    }
 
    xfree (case_sensitive);
-   case_sensitive = concat (prefix, tmp, NULL);
+   case_sensitive = concat (prefix, tmp, (char *)NULL);
 }
 
 /* Print out the current language settings: language, range and

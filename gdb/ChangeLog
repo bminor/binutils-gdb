@@ -1,5 +1,19 @@
 2005-07-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* bsd-kvm.c (bsd_kvm_open): Properly cast sentinel in concat call.
+	* coffread.c (patch_type, process_coff_symbol): Likewise.
+	* corelow.c (core_open): Likewise. 
+	* dwarf2read.c (dwarf_decode_lines, dwarf2_start_subfile): 
+	* language.c (set_lang_str, set_type_str, set_range_str) 
+	(set_case_str): Likewise.
+	* source.c (add_path, openp): Likewise.
+	* stabsread.c: Likewise.
+	* top.c (init_history): Likewise.
+	* utils.c (xfullpath): Likewise.
+	* value.c (lookup_internalvar): Likewise.
+	* cli/cli-cmds.c (cd_command): Likewise.
+	* cli/cli-dump.c (add_dump_command): Likewise.
+
 	* i387-tdep.c (print_i387_value, print_i387_ext, i387_tag): Change
 	type of first argument to `const gdb_byte *'.
 	(i387_print_float_info, i387_register_to_value)

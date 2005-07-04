@@ -438,7 +438,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
       && c->doc[3] == 't' 
       && c->doc[4] == 'e'
       && c->doc[5] == ' ')
-    c->doc = concat ("Append ", c->doc + 6, NULL);
+    c->doc = concat ("Append ", c->doc + 6, (char *)NULL);
 }
 
 /* Opaque data for restore_section_callback. */

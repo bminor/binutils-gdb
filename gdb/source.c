@@ -1,6 +1,6 @@
 /* List lines of source files for GDB, the GNU debugger.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -487,10 +487,10 @@ add_path (char *dirname, char **which_path, int parse_separators)
 	name = tilde_expand (name);
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
       else if (IS_ABSOLUTE_PATH (name) && p == name + 2) /* "d:" => "d:." */
-	name = concat (name, ".", NULL);
+	name = concat (name, ".", (char *)NULL);
 #endif
       else if (!IS_ABSOLUTE_PATH (name) && name[0] != '$')
-	name = concat (current_directory, SLASH_STRING, name, NULL);
+	name = concat (current_directory, SLASH_STRING, name, (char *)NULL);
       else
 	name = savestring (name, p - name);
       make_cleanup (xfree, name);
@@ -563,15 +563,16 @@ add_path (char *dirname, char **which_path, int parse_separators)
 
 		c = old[prefix];
 		old[prefix] = '\0';
-		temp = concat (old, tinybuf, name, NULL);
+		temp = concat (old, tinybuf, name, (char *)NULL);
 		old[prefix] = c;
-		*which_path = concat (temp, "", &old[prefix], NULL);
+		*which_path = concat (temp, "", &old[prefix], (char *)NULL);
 		prefix = strlen (temp);
 		xfree (temp);
 	      }
 	    else
 	      {
-		*which_path = concat (name, (old[0] ? tinybuf : old), old, NULL);
+		*which_path = concat (name, (old[0] ? tinybuf : old),
+				      old, (char *)NULL);
 		prefix = strlen (name);
 	      }
 	    xfree (old);
@@ -771,7 +772,7 @@ done:
 	  char *f = concat (current_directory,
 			    IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
 			    ? "" : SLASH_STRING,
-			    filename, NULL);
+			    filename, (char *)NULL);
 	  *filename_opened = xfullpath (f);
 	  xfree (f);
 	}

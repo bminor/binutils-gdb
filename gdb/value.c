@@ -743,7 +743,7 @@ lookup_internalvar (char *name)
       return var;
 
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
-  var->name = concat (name, NULL);
+  var->name = concat (name, (char *)NULL);
   var->value = allocate_value (builtin_type_void);
   release_value (var->value);
   var->next = internalvars;
