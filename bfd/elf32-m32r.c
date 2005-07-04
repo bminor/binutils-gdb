@@ -4013,45 +4013,30 @@ m32r_elf_check_relocs (bfd *abfd,
   return TRUE;
 }
 
-static struct bfd_elf_special_section const
-  m32r_elf_special_sections_s[] =
+static struct bfd_elf_special_section const m32r_elf_special_sections[] =
 {
-  { ".sdata",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".sbss",    5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { NULL,              0,  0, 0,            0 }
+  { ".sdata",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,       0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *
-  m32r_elf_special_sections[27] =
+static const struct bfd_elf_special_section *
+m32r_elf_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  NULL,				/* 'c' */
-  NULL,				/* 'd' */
-  NULL,				/* 'e' */
-  NULL,				/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  NULL,				/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  NULL,				/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  NULL,				/* 'p' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  m32r_elf_special_sections_s,	/* 's' */
-  NULL,				/* 't' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  NULL				/* other */
-};
+  const struct bfd_elf_special_section const *ssect;
+
+  /* See if this is one of the special sections.  */
+  if (sec->name == NULL)
+    return NULL;
+
+  ssect = _bfd_elf_get_special_section (sec->name,
+					m32r_elf_special_sections,
+					sec->use_rela_p);
+  if (ssect != NULL)
+    return ssect;
+
+  return _bfd_elf_get_sec_type_attr (abfd, sec);
+}
 
 static bfd_boolean
 m32r_elf_fake_sections (bfd *abfd,
@@ -4156,7 +4141,7 @@ m32r_elf_reloc_type_class (const Elf_Internal_Rela *rela)
 #define bfd_elf32_bfd_merge_private_bfd_data 	m32r_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		m32r_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	m32r_elf_print_private_bfd_data
-#define elf_backend_special_sections		m32r_elf_special_sections
+#define elf_backend_get_sec_type_attr		m32r_elf_get_sec_type_attr
 
 #include "elf32-target.h"
 

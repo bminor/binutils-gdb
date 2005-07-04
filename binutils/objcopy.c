@@ -1290,7 +1290,15 @@ copy_object (bfd *ibfd, bfd *obfd)
 	{
 	  flagword flags;
 
-	  padd->section = bfd_make_section (obfd, padd->name);
+	  pset = find_section_list (padd->name, FALSE);
+	  if (pset != NULL)
+	    pset->used = TRUE;
+
+	  flags = SEC_HAS_CONTENTS | SEC_READONLY | SEC_DATA;
+	  if (pset != NULL && pset->set_flags)
+	    flags = pset->flags | SEC_HAS_CONTENTS;
+
+	  padd->section = bfd_make_section_with_flags (obfd, padd->name, flags);
 	  if (padd->section == NULL)
 	    {
 	      non_fatal (_("can't create section `%s': %s"),
@@ -1299,21 +1307,6 @@ copy_object (bfd *ibfd, bfd *obfd)
 	    }
 
 	  if (! bfd_set_section_size (obfd, padd->section, padd->size))
-	    {
-	      bfd_nonfatal (bfd_get_filename (obfd));
-	      return FALSE;
-	    }
-
-	  pset = find_section_list (padd->name, FALSE);
-	  if (pset != NULL)
-	    pset->used = TRUE;
-
-	  if (pset != NULL && pset->set_flags)
-	    flags = pset->flags | SEC_HAS_CONTENTS;
-	  else
-	    flags = SEC_HAS_CONTENTS | SEC_READONLY | SEC_DATA;
-
-	  if (! bfd_set_section_flags (obfd, padd->section, flags))
 	    {
 	      bfd_nonfatal (bfd_get_filename (obfd));
 	      return FALSE;
@@ -2001,13 +1994,24 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       name = n;
     }
 
-  osection = bfd_make_section_anyway (obfd, name);
+  if (p != NULL && p->set_flags)
+    flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
+  else if (strip_symbols == STRIP_NONDEBUG && (flags & SEC_ALLOC) != 0)
+    flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
+
+  osection = bfd_make_section_anyway_with_flags (obfd, name, flags);
 
   if (osection == NULL)
     {
       err = _("making");
       goto loser;
     }
+
+  if (strip_symbols == STRIP_NONDEBUG
+      && obfd->xvec->flavour == bfd_target_elf_flavour
+      && (flags & SEC_ALLOC) != 0
+      && (p == NULL || !p->set_flags))
+    elf_section_type (osection) = SHT_NOBITS;
 
   size = bfd_section_size (ibfd, isection);
   if (copy_byte >= 0)
@@ -2054,21 +2058,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 				  bfd_section_alignment (ibfd, isection)))
     {
       err = _("alignment");
-      goto loser;
-    }
-
-  if (p != NULL && p->set_flags)
-    flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
-  else if (strip_symbols == STRIP_NONDEBUG && (flags & SEC_ALLOC) != 0)
-    {
-      flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD);
-      if (obfd->xvec->flavour == bfd_target_elf_flavour)
-	elf_section_type (osection) = SHT_NOBITS;
-    }
-
-  if (!bfd_set_section_flags (obfd, osection, flags))
-    {
-      err = _("flags");
       goto loser;
     }
 
@@ -2353,28 +2342,22 @@ write_debugging_info (bfd *obfd, void *dhandle,
       bfd_byte *syms, *strings;
       bfd_size_type symsize, stringsize;
       asection *stabsec, *stabstrsec;
+      flagword flags;
 
       if (! write_stabs_in_sections_debugging_info (obfd, dhandle, &syms,
 						    &symsize, &strings,
 						    &stringsize))
 	return FALSE;
 
-      stabsec = bfd_make_section (obfd, ".stab");
-      stabstrsec = bfd_make_section (obfd, ".stabstr");
+      flags = SEC_HAS_CONTENTS | SEC_READONLY | SEC_DEBUGGING;
+      stabsec = bfd_make_section_with_flags (obfd, ".stab", flags);
+      stabstrsec = bfd_make_section_with_flags (obfd, ".stabstr", flags);
       if (stabsec == NULL
 	  || stabstrsec == NULL
 	  || ! bfd_set_section_size (obfd, stabsec, symsize)
 	  || ! bfd_set_section_size (obfd, stabstrsec, stringsize)
 	  || ! bfd_set_section_alignment (obfd, stabsec, 2)
-	  || ! bfd_set_section_alignment (obfd, stabstrsec, 0)
-	  || ! bfd_set_section_flags (obfd, stabsec,
-				   (SEC_HAS_CONTENTS
-				    | SEC_READONLY
-				    | SEC_DEBUGGING))
-	  || ! bfd_set_section_flags (obfd, stabstrsec,
-				      (SEC_HAS_CONTENTS
-				       | SEC_READONLY
-				       | SEC_DEBUGGING)))
+	  || ! bfd_set_section_alignment (obfd, stabstrsec, 0))
 	{
 	  non_fatal (_("%s: can't create debugging section: %s"),
 		     bfd_get_filename (obfd),

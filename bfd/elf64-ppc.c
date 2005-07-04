@@ -100,7 +100,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class
 #define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
 #define elf_backend_link_output_symbol_hook   ppc64_elf_output_symbol_hook
-#define elf_backend_special_sections	      ppc64_elf_special_sections
+#define elf_backend_get_sec_type_attr	      ppc64_elf_get_sec_type_attr
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -2508,61 +2508,34 @@ ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 /* Add extra PPC sections.  */
 
-static struct bfd_elf_special_section const
-  ppc64_special_sections_p[]=
+static struct bfd_elf_special_section const ppc64_elf_special_sections[]=
 {
   { ".plt",     4,  0, SHT_NOBITS,   0 },
-  { NULL,        0, 0, 0,            0 }
-};
-
-static struct bfd_elf_special_section const
-  ppc64_special_sections_s[]=
-{
-  { ".sdata",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".sbss",    5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { NULL,        0, 0, 0,            0 }
-};
-
-static struct bfd_elf_special_section const
-  ppc64_special_sections_t[]=
-{
+  { ".sdata",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".toc",     4,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".toc1",    5,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".tocbss",  7,  0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { NULL,       0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *
-  ppc64_elf_special_sections[27]=
+static const struct bfd_elf_special_section *
+ppc64_elf_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  NULL,				/* 'c' */
-  NULL,				/* 'd' */
-  NULL,				/* 'e' */
-  NULL,				/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  NULL,				/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  NULL,				/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  ppc64_special_sections_p,	/* 'p' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  ppc64_special_sections_s,	/* 's' */
-  ppc64_special_sections_t,	/* 't' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  NULL				/* other */
-};
+  const struct bfd_elf_special_section const *ssect;
+
+  /* See if this is one of the special sections.  */
+  if (sec->name == NULL)
+    return NULL;
+
+  ssect = _bfd_elf_get_special_section (sec->name,
+					ppc64_elf_special_sections,
+					sec->use_rela_p);
+  if (ssect != NULL)
+    return ssect;
+
+  return _bfd_elf_get_sec_type_attr (abfd, sec);
+}
 
 struct _ppc64_elf_section_data
 {

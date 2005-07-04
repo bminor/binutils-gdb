@@ -633,10 +633,15 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_section_from_shdr)
     (bfd *, Elf_Internal_Shdr *, const char *, int);
 
-  /* A function to convert machine dependent section header flags to
+  /* A function to convert machine dependent ELF section header flags to
      BFD internal section header flags.  */
   bfd_boolean (*elf_backend_section_flags)
     (flagword *, const Elf_Internal_Shdr *);
+
+  /* A function that returns a struct containing ELF section flags and
+     type for the given BFD section.   */
+  const struct bfd_elf_special_section * (*get_sec_type_attr)
+    (bfd *, asection *);
 
   /* A function to handle unusual program segment types when creating BFD
      sections from ELF program segments.  */
@@ -975,10 +980,6 @@ struct elf_backend_data
   int elf_machine_alt2;
 
   const struct elf_size_info *s;
-
-  /* An array of 27 target specific special section map arrays,
-     covering 'a' to 'z', plus other.  */
-  const struct bfd_elf_special_section **special_sections;
 
   /* The size in bytes of the header for the GOT.  This includes the
      so-called reserved entries on some systems.  */
@@ -1501,8 +1502,10 @@ extern bfd_boolean _bfd_elf_new_section_hook
   (bfd *, asection *);
 extern bfd_boolean _bfd_elf_init_reloc_shdr
   (bfd *, Elf_Internal_Shdr *, asection *, bfd_boolean);
+extern const struct bfd_elf_special_section *_bfd_elf_get_special_section
+  (const char *, const struct bfd_elf_special_section *, unsigned int);
 extern const struct bfd_elf_special_section *_bfd_elf_get_sec_type_attr
-  (bfd *, const char *);
+  (bfd *, asection *);
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void _bfd_elf_no_info_to_howto

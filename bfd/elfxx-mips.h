@@ -127,9 +127,10 @@ extern bfd_boolean _bfd_mips_relax_section
   (bfd *, asection *, struct bfd_link_info *, bfd_boolean *);
 extern bfd_vma _bfd_mips_elf_sign_extend
   (bfd_vma, int);
+extern const struct bfd_elf_special_section *_bfd_mips_elf_get_sec_type_attr
+  (bfd *, asection *);
 
-extern struct bfd_elf_special_section const *_bfd_mips_elf_special_sections[];
 #define elf_backend_name_local_section_symbols \
   _bfd_mips_elf_name_local_section_symbols
-#define elf_backend_special_sections _bfd_mips_elf_special_sections
+#define elf_backend_get_sec_type_attr _bfd_mips_elf_get_sec_type_attr
 #define elf_backend_eh_frame_address_size _bfd_mips_elf_eh_frame_address_size

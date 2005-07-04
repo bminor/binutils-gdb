@@ -535,65 +535,32 @@ m68hc12_elf_set_mach_from_flags (bfd *abfd)
      Page0 accesses are faster on the M68HC12.
    - The .vectors is the section that represents the interrupt
      vectors.  */
-static struct bfd_elf_special_section const
-  m68hc12_special_sections_e[] =
+static struct bfd_elf_special_section const elf32_m68hc12_special_sections[] =
 {
   { ".eeprom",   7, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { NULL,        0, 0, 0,            0 }
-};
-
-static struct bfd_elf_special_section const
-  m68hc12_special_sections_s[]=
-{
-  { ".softregs", 9, 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { NULL,        0, 0, 0,            0 }
-};
-
-static struct bfd_elf_special_section const
-  m68hc12_special_sections_p[]=
-{
   { ".page0",    6, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { NULL,        0, 0, 0,            0 }
-};
-
-static struct bfd_elf_special_section const
-  m68hc12_special_sections_v[]=
-{
+  { ".softregs", 9, 0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { ".vectors",  8, 0, SHT_PROGBITS, SHF_ALLOC },
   { NULL,        0, 0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *
-  elf32_m68hc12_special_sections[27] =
+static const struct bfd_elf_special_section *
+elf32_m68hc12_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  NULL,				/* 'c' */
-  NULL,				/* 'd' */
-  m68hc12_special_sections_e,	/* 'e' */
-  NULL,				/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  NULL,				/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  NULL,				/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  m68hc12_special_sections_p,	/* 'p' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  m68hc12_special_sections_s,	/* 's' */
-  NULL,				/* 't' */
-  NULL,				/* 'u' */
-  m68hc12_special_sections_v,	/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  NULL				/* other */
-};
+  const struct bfd_elf_special_section const *ssect;
+
+  /* See if this is one of the special sections.  */
+  if (sec->name == NULL)
+    return NULL;
+
+  ssect = _bfd_elf_get_special_section (sec->name,
+					elf32_m68hc12_special_sections,
+					sec->use_rela_p);
+  if (ssect != NULL)
+    return ssect;
+
+  return _bfd_elf_get_sec_type_attr (abfd, sec);
+}
 
 #define ELF_ARCH		bfd_arch_m68hc12
 #define ELF_MACHINE_CODE	EM_68HC12
@@ -611,7 +578,7 @@ static struct bfd_elf_special_section const *
 #define elf_backend_object_p		m68hc12_elf_set_mach_from_flags
 #define elf_backend_final_write_processing	0
 #define elf_backend_can_gc_sections		1
-#define elf_backend_special_sections elf32_m68hc12_special_sections
+#define elf_backend_get_sec_type_attr elf32_m68hc12_get_sec_type_attr
 #define elf_backend_post_process_headers     elf32_m68hc11_post_process_headers
 #define elf_backend_add_symbol_hook  elf32_m68hc11_add_symbol_hook
 

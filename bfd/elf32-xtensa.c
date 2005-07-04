@@ -9482,57 +9482,31 @@ xtensa_callback_required_dependence (bfd *abfd,
 /* The default literal sections should always be marked as "code" (i.e.,
    SHF_EXECINSTR).  This is particularly important for the Linux kernel
    module loader so that the literals are not placed after the text.  */
-static struct bfd_elf_special_section const
-  xtensa_special_sections_f[]=
+static struct bfd_elf_special_section const elf_xtensa_special_sections[] =
 {
   { ".fini.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { NULL,             0, 0, 0,            0 }
-};
-
-static struct bfd_elf_special_section const
-  xtensa_special_sections_i[]=
-{
   { ".init.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { NULL,             0, 0, 0,            0 }
-};
-static struct bfd_elf_special_section const
-  xtensa_special_sections_l[]=
-{
   { ".literal",       8, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { NULL,             0, 0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *
-  elf_xtensa_special_sections[27] =
+static const struct bfd_elf_special_section *
+elf_xtensa_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  NULL,				/* 'c' */
-  NULL,				/* 'd' */
-  NULL,				/* 'e' */
-  xtensa_special_sections_f,	/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  xtensa_special_sections_i,	/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  xtensa_special_sections_l,	/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  NULL,				/* 'p' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  NULL,				/* 's' */
-  NULL,				/* 't' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  NULL				/* other */
-};
+  const struct bfd_elf_special_section const *ssect;
+
+  /* See if this is one of the special sections.  */
+  if (sec->name == NULL)
+    return NULL;
+
+  ssect = _bfd_elf_get_special_section (sec->name,
+					elf_xtensa_special_sections,
+					sec->use_rela_p);
+  if (ssect != NULL)
+    return ssect;
+
+  return _bfd_elf_get_sec_type_attr (abfd, sec);
+}
 
 
 #ifndef ELF_ARCH
@@ -9592,6 +9566,6 @@ static struct bfd_elf_special_section const *
 #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section
 #define elf_backend_size_dynamic_sections    elf_xtensa_size_dynamic_sections
-#define elf_backend_special_sections	     elf_xtensa_special_sections
+#define elf_backend_get_sec_type_attr	     elf_xtensa_get_sec_type_attr
 
 #include "elf32-target.h"

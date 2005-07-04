@@ -1,3 +1,46 @@
+2005-07-04  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 1004
+	* elf-bfd.h (struct elf_backend_data): Add get_sec_type_attr.  Delete
+	special_sections.
+	(_bfd_elf_get_special_section): Declare.
+	(bfd_elf_special_section): Update prototype.
+	* elf.c (special_sections): Remove unused outer entries.
+	(get_special_section): Delete.
+	(_bfd_elf_get_special_section): New function.
+	(_bfd_elf_get_sec_type_attr): Replace "name" arg with "sec".  Update
+	special_sections indexing.
+	(_bfd_elf_new_section_hook): Call backend get_sec_type_attr.
+	* elf32-arm.c (symbian_special_sections_d): Delete.
+	(symbian_special_sections_g, symbian_special_sections_h): Delete.
+	(symbian_special_sections_i, symbian_special_sections_f): Delete.
+	(symbian_special_sections_p): Delete.
+	(elf32_arm_symbian_special_sections): Merge above to here.
+	(elf32_arm_symbian_get_sec_type_attr): New function.
+	(elf_backend_special_sections): Don't define.
+	(elf_backend_get_sec_type_attr): Define.
+	* elf32-m32r.c: Similarly to elf32-arm.c.
+	* elf32-m68hc11.c: Likewise.
+	* elf32-m68hc12.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	(bfd_elf_special_section ppc_alt_plt): New.  Use it if .plt loadable.
+	* elfxx-mips.h (_bfd_mips_elf_get_sec_type_attr): Declare.
+	(_bfd_mips_elf_special_sections, elf_backend_special_sections): Delete.
+	(elf_backend_get_sec_type_attr): Define.
+	* elfxx-target.h (elf_backend_get_sec_type_attr): Define.
+	(elf_backend_special_sections): Don't define.
+	(elfNN_bed): Update.
+
 2005-07-01  Nick Clifton  <nickc@redhat.com>
 
 	* cpu-d10v.c: Update to ISO C90 style function declarations and

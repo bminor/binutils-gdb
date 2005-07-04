@@ -2671,51 +2671,30 @@ elf64_hppa_elf_get_symbol_type (elf_sym, type)
     return type;
 }
 
-static struct bfd_elf_special_section const
-  hppa_special_sections_f[]=
+static struct bfd_elf_special_section const elf64_hppa_special_sections[] =
 {
   { ".fini",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { NULL,        0, 0, 0,            0 }
-};
-
-static struct bfd_elf_special_section const
-  hppa_special_sections_i[]=
-{
   { ".init",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { NULL,       0, 0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *
-  elf64_hppa_special_sections[27] =
+static const struct bfd_elf_special_section *
+elf64_hppa_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  NULL,				/* 'c' */
-  NULL,				/* 'd' */
-  NULL,				/* 'e' */
-  hppa_special_sections_f,	/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  hppa_special_sections_i,	/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  NULL,				/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  NULL,				/* 'f' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  NULL,				/* 's' */
-  NULL,				/* 't' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  NULL				/* other */
-};
+  const struct bfd_elf_special_section const *ssect;
+
+  /* See if this is one of the special sections.  */
+  if (sec->name == NULL)
+    return NULL;
+
+  ssect = _bfd_elf_get_special_section (sec->name,
+					elf64_hppa_special_sections,
+					sec->use_rela_p);
+  if (ssect != NULL)
+    return ssect;
+
+  return _bfd_elf_get_sec_type_attr (abfd, sec);
+}
 
 /* The hash bucket size is the standard one, namely 4.  */
 
@@ -2813,7 +2792,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_get_symbol_type	elf64_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	elf64_hppa_reloc_type_class
 #define elf_backend_rela_normal		1
-#define elf_backend_special_sections	elf64_hppa_special_sections
+#define elf_backend_get_sec_type_attr	elf64_hppa_get_sec_type_attr
 
 #include "elf64-target.h"
 
@@ -2822,7 +2801,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
 
-#undef elf_backend_special_sections
+#undef elf_backend_get_sec_type_attr
 
 #define INCLUDED_TARGET_FILE 1
 #include "elf64-target.h"

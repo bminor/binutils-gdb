@@ -331,6 +331,9 @@
 #ifndef elf_backend_section_flags
 #define elf_backend_section_flags	0
 #endif
+#ifndef elf_backend_get_sec_type_attr
+#define elf_backend_get_sec_type_attr	_bfd_elf_get_sec_type_attr
+#endif
 #ifndef elf_backend_section_from_phdr
 #define elf_backend_section_from_phdr	_bfd_elf_make_section_from_phdr
 #endif
@@ -506,10 +509,6 @@
 #define elf_backend_size_info _bfd_elfNN_size_info
 #endif
 
-#ifndef elf_backend_special_sections
-#define elf_backend_special_sections NULL
-#endif
-
 #ifndef elf_backend_sign_extend_vma
 #define elf_backend_sign_extend_vma 0
 #endif
@@ -540,6 +539,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_section_processing,
   elf_backend_section_from_shdr,
   elf_backend_section_flags,
+  elf_backend_get_sec_type_attr,
   elf_backend_section_from_phdr,
   elf_backend_fake_sections,
   elf_backend_section_from_bfd_section,
@@ -591,7 +591,6 @@ static const struct elf_backend_data elfNN_bed =
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,
-  elf_backend_special_sections,
   elf_backend_got_header_size,
   elf_backend_collect,
   elf_backend_type_change_ok,

@@ -1828,70 +1828,44 @@ ppc_elf_additional_program_headers (bfd *abfd)
    that the linker doesn't crater when trying to make more than
    2 sections.  */
 
-static struct bfd_elf_special_section const
-  ppc_special_sections_p[] =
+static struct bfd_elf_special_section const ppc_elf_special_sections[] =
 {
   { ".plt",              4,  0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
+  { ".sbss",             5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { ".sbss2",            6, -2, SHT_PROGBITS, SHF_ALLOC },
+  { ".sdata",            6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".sdata2",           7, -2, SHT_PROGBITS, SHF_ALLOC },
+  { ".tags",             5,  0, SHT_ORDERED,  SHF_ALLOC },
+  { ".PPC.EMB.apuinfo", 16,  0, SHT_NOTE,     0 },
+  { ".PPC.EMB.sbss0",   14,  0, SHT_PROGBITS, SHF_ALLOC },
+  { ".PPC.EMB.sdata0",  15,  0, SHT_PROGBITS, SHF_ALLOC },
   { NULL,                0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const
-  ppc_special_sections_s[] =
-{
-  { ".sdata",            6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { ".sbss",             5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
-  { ".sdata2",           7, -2, SHT_PROGBITS, SHF_ALLOC },
-  { ".sbss2",            6, -2, SHT_PROGBITS, SHF_ALLOC },
-  { NULL,        0, 0, 0,            0 }
-};
+/* This is what we want for new plt/got.  */
+static struct bfd_elf_special_section ppc_alt_plt =
+  { ".plt",              4,  0, SHT_PROGBITS, SHF_ALLOC };
 
-static struct bfd_elf_special_section const
-  ppc_special_sections_t[] =
+static const struct bfd_elf_special_section *
+ppc_elf_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
-  { ".tags",             5,  0, SHT_ORDERED,  SHF_ALLOC },
-  { NULL,        0, 0, 0,            0 }
-};
+  const struct bfd_elf_special_section const *ssect;
 
-static struct bfd_elf_special_section const
-  ppc_special_sections_other[]=
-{
-  { ".PPC.EMB.apuinfo", 16,  0, SHT_NOTE,     0 },
-  { ".PPC.EMB.sdata0",  15,  0, SHT_PROGBITS, SHF_ALLOC },
-  { ".PPC.EMB.sbss0",   14,  0, SHT_PROGBITS, SHF_ALLOC },
-  { NULL,        0, 0, 0,            0 }
-};
+  /* See if this is one of the special sections.  */
+  if (sec->name == NULL)
+    return NULL;
 
-static struct bfd_elf_special_section const *
-  ppc_elf_special_sections[27]=
-{
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  NULL,				/* 'c' */
-  NULL,				/* 'd' */
-  NULL,				/* 'e' */
-  NULL,				/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  NULL,				/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  NULL,				/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  ppc_special_sections_p,	/* 'p' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  ppc_special_sections_s,	/* 's' */
-  ppc_special_sections_t,	/* 's' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  ppc_special_sections_other,	/* other */
-};
+  ssect = _bfd_elf_get_special_section (sec->name, ppc_elf_special_sections,
+					sec->use_rela_p);
+  if (ssect != NULL)
+    {
+      if (ssect == ppc_elf_special_sections && (sec->flags & SEC_LOAD) != 0)
+	ssect = &ppc_alt_plt;
+      return ssect;
+    }
+
+  return _bfd_elf_get_sec_type_attr (abfd, sec);
+}
 
 /* Very simple linked list structure for recording apuinfo values.  */
 typedef struct apuinfo_list
@@ -6978,7 +6952,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_begin_write_processing	ppc_elf_begin_write_processing
 #define elf_backend_final_write_processing	ppc_elf_final_write_processing
 #define elf_backend_write_section		ppc_elf_write_section
-#define elf_backend_special_sections		ppc_elf_special_sections
+#define elf_backend_get_sec_type_attr		ppc_elf_get_sec_type_attr
 #define elf_backend_plt_sym_val			ppc_elf_plt_sym_val
 
 #include "elf32-target.h"

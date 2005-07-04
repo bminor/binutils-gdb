@@ -5162,45 +5162,30 @@ elf64_alpha_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
-static struct bfd_elf_special_section const
-  alpha_special_sections_s[]=
+static struct bfd_elf_special_section const elf64_alpha_special_sections[] =
 {
-  { ".sdata", 6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
   { ".sbss",  5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { ".sdata", 6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
   { NULL,     0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *
-  elf64_alpha_special_sections[27] =
+static const struct bfd_elf_special_section *
+elf64_alpha_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  NULL,				/* 'c' */
-  NULL,				/* 'd' */
-  NULL,				/* 'e' */
-  NULL,				/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  NULL,				/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  NULL,				/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  NULL,				/* 'p' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  alpha_special_sections_s,	/* 's' */
-  NULL,				/* 't' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  NULL				/* other */
-};
+  const struct bfd_elf_special_section const *ssect;
+
+  /* See if this is one of the special sections.  */
+  if (sec->name == NULL)
+    return NULL;
+
+  ssect = _bfd_elf_get_special_section (sec->name,
+					elf64_alpha_special_sections,
+					sec->use_rela_p);
+  if (ssect != NULL)
+    return ssect;
+
+  return _bfd_elf_get_sec_type_attr (abfd, sec);
+}
 
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  Copied
@@ -5340,8 +5325,8 @@ static const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_size_info \
   alpha_elf_size_info
 
-#define elf_backend_special_sections \
-  elf64_alpha_special_sections
+#define elf_backend_get_sec_type_attr \
+  elf64_alpha_get_sec_type_attr
 
 /* A few constants that determine how the .plt section is set up.  */
 #define elf_backend_want_got_plt 0

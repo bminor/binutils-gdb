@@ -2270,9 +2270,8 @@ static struct bfd_elf_special_section const special_sections_t[] =
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *special_sections [27] =
+static struct bfd_elf_special_section const *special_sections[] =
 {
-  NULL,				/* 'a' */
   special_sections_b,		/* 'b' */
   special_sections_c,		/* 'b' */
   special_sections_d,		/* 'd' */
@@ -2292,51 +2291,29 @@ static struct bfd_elf_special_section const *special_sections [27] =
   special_sections_r,		/* 'r' */
   special_sections_s,		/* 's' */
   special_sections_t,		/* 't' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  NULL				/* other */
 };
 
-static const struct bfd_elf_special_section *
-get_special_section (const char *name,
-		     const struct bfd_elf_special_section **special_sections_p,
-		     unsigned int rela)
+const struct bfd_elf_special_section *
+_bfd_elf_get_special_section (const char *name,
+			      const struct bfd_elf_special_section *spec,
+			      unsigned int rela)
 {
   int i;
   int len;
-  const struct bfd_elf_special_section *special_sections;
 
-  if (name [0] == '.')
-    {
-      i = name [1] - 'a';
-      if (i < 0 || i > 25)
-	i = 26;
-    }
-  else
-    i = 26;
+  len = strlen (name);
 
-  special_sections = special_sections_p [i];
-
-  if (!special_sections)
-    return special_sections;
-
-  len= strlen (name);
-
-  for (i = 0; special_sections[i].prefix != NULL; i++)
+  for (i = 0; spec[i].prefix != NULL; i++)
     {
       int suffix_len;
-      int prefix_len = special_sections[i].prefix_length;
+      int prefix_len = spec[i].prefix_length;
 
       if (len < prefix_len)
 	continue;
-      if (memcmp (name, special_sections[i].prefix, prefix_len) != 0)
+      if (memcmp (name, spec[i].prefix, prefix_len) != 0)
 	continue;
 
-      suffix_len = special_sections[i].suffix_length;
+      suffix_len = spec[i].suffix_length;
       if (suffix_len <= 0)
 	{
 	  if (name[prefix_len] != 0)
@@ -2345,7 +2322,7 @@ get_special_section (const char *name,
 		continue;
 	      if (name[prefix_len] != '.'
 		  && (suffix_len == -2
-		      || (rela && special_sections[i].type == SHT_REL)))
+		      || (rela && spec[i].type == SHT_REL)))
 		continue;
 	    }
 	}
@@ -2354,41 +2331,46 @@ get_special_section (const char *name,
 	  if (len < prefix_len + suffix_len)
 	    continue;
 	  if (memcmp (name + len - suffix_len,
-		      special_sections[i].prefix + prefix_len,
+		      spec[i].prefix + prefix_len,
 		      suffix_len) != 0)
 	    continue;
 	}
-      return &special_sections[i];
+      return &spec[i];
     }
 
   return NULL;
 }
 
 const struct bfd_elf_special_section *
-_bfd_elf_get_sec_type_attr (bfd *abfd, const char *name)
+_bfd_elf_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  const struct bfd_elf_special_section *ssect = NULL;
+  int i;
+  const struct bfd_elf_special_section *spec;
 
   /* See if this is one of the special sections.  */
-  if (name)
-    {
-      unsigned int rela = bed->default_use_rela_p;
+  if (sec->name == NULL)
+    return NULL;
 
-      if (bed->special_sections)
-	ssect = get_special_section (name, bed->special_sections, rela);
+  if (sec->name[0] != '.')
+    return NULL;
 
-      if (! ssect)
-	ssect = get_special_section (name, special_sections, rela);
-    }
+  i = sec->name[1] - 'b';
+  if (i < 0 || i > 't' - 'b')
+    return NULL;
 
-  return ssect;
+  spec = special_sections[i];
+
+  if (spec == NULL)
+    return NULL;
+
+  return _bfd_elf_get_special_section (sec->name, spec, sec->use_rela_p);
 }
 
 bfd_boolean
 _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
 {
   struct bfd_elf_section_data *sdata;
+  const struct elf_backend_data *bed;
   const struct bfd_elf_special_section *ssect;
 
   sdata = (struct bfd_elf_section_data *) sec->used_by_bfd;
@@ -2400,22 +2382,23 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
       sec->used_by_bfd = sdata;
     }
 
+  /* Indicate whether or not this section should use RELA relocations.  */
+  bed = get_elf_backend_data (abfd);
+  sec->use_rela_p = bed->default_use_rela_p;
+
   /* When we read a file, we don't need section type and flags unless
      it is a linker created section.  They will be overridden in
      _bfd_elf_make_section_from_shdr anyway.  */
   if (abfd->direction != read_direction
       || (sec->flags & SEC_LINKER_CREATED) != 0)
     {
-      ssect = _bfd_elf_get_sec_type_attr (abfd, sec->name);
+      ssect = (*bed->get_sec_type_attr) (abfd, sec);
       if (ssect != NULL)
 	{
 	  elf_section_type (sec) = ssect->type;
 	  elf_section_flags (sec) = ssect->attr;
 	}
     }
-
-  /* Indicate whether or not this section should use RELA relocations.  */
-  sec->use_rela_p = get_elf_backend_data (abfd)->default_use_rela_p;
 
   return TRUE;
 }

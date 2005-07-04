@@ -520,6 +520,7 @@ obj_elf_change_section (const char *name,
   asection *old_sec;
   segT sec;
   flagword flags;
+  const struct elf_backend_data *bed;
   const struct bfd_elf_special_section *ssect;
 
 #ifdef md_flush_pending_output
@@ -551,7 +552,8 @@ obj_elf_change_section (const char *name,
   else
     sec = subseg_force_new (name, 0);
 
-  ssect = _bfd_elf_get_sec_type_attr (stdoutput, name);
+  bed = get_elf_backend_data (stdoutput);
+  ssect = (*bed->get_sec_type_attr) (stdoutput, sec);
 
   if (ssect != NULL)
     {

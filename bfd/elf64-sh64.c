@@ -4068,44 +4068,29 @@ sh64_elf64_merge_symbol_attribute (struct elf_link_hash_entry *h,
   return;
 }
 
-static struct bfd_elf_special_section const
-  sh64_special_sections_c[] =
+static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
 {
   { ".cranges", 8, 0, SHT_PROGBITS, 0 },
-  { NULL,        0, 0, 0,            0 }
+  { NULL,       0, 0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *
-  sh64_elf64_special_sections[27]=
+static const struct bfd_elf_special_section *
+sh64_elf64_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  sh64_special_sections_c,	/* 'c' */
-  NULL,				/* 'd' */
-  NULL,				/* 'e' */
-  NULL,				/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  NULL,				/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  NULL,				/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  NULL,				/* 'p' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  NULL,				/* 's' */
-  NULL,				/* 't' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  NULL				/* other */
-};
+  const struct bfd_elf_special_section const *ssect;
+
+  /* See if this is one of the special sections.  */
+  if (sec->name == NULL)
+    return NULL;
+
+  ssect = _bfd_elf_get_special_section (sec->name,
+					sh64_elf64_special_sections,
+					sec->use_rela_p);
+  if (ssect != NULL)
+    return ssect;
+
+  return _bfd_elf_get_sec_type_attr (abfd, sec);
+}
 
 #define TARGET_BIG_SYM		bfd_elf64_sh64_vec
 #define TARGET_BIG_NAME		"elf64-sh64"
@@ -4165,7 +4150,7 @@ static struct bfd_elf_special_section const *
 					sh64_elf64_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
 					sh64_elf64_finish_dynamic_sections
-#define elf_backend_special_sections	sh64_elf64_special_sections
+#define elf_backend_get_sec_type_attr	sh64_elf64_get_sec_type_attr
 
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
