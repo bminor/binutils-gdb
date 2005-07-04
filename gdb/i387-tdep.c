@@ -1,7 +1,7 @@
 /* Intel 387 floating point stuff.
 
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,7 +39,7 @@
 /* Print the floating point number specified by RAW.  */
 
 static void
-print_i387_value (char *raw, struct ui_file *file)
+print_i387_value (const gdb_byte *raw, struct ui_file *file)
 {
   DOUBLEST value;
 
@@ -63,7 +63,7 @@ print_i387_value (char *raw, struct ui_file *file)
 /* Print the classification for the register contents RAW.  */
 
 static void
-print_i387_ext (unsigned char *raw, struct ui_file *file)
+print_i387_ext (const gdb_byte *raw, struct ui_file *file)
 {
   int sign;
   int integer;
@@ -203,7 +203,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		       struct frame_info *frame, const char *args)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
-  char buf[4];
+  gdb_byte buf[4];
   ULONGEST fctrl;
   ULONGEST fstat;
   ULONGEST ftag;
@@ -234,7 +234,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 
   for (fpreg = 7; fpreg >= 0; fpreg--)
     {
-      unsigned char raw[I386_MAX_REGISTER_SIZE];
+      gdb_byte raw[I386_MAX_REGISTER_SIZE];
       int tag = (ftag >> (fpreg * 2)) & 3;
       int i;
 
@@ -294,7 +294,7 @@ void
 i387_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, gdb_byte *to)
 {
-  char from[I386_MAX_REGISTER_SIZE];
+  gdb_byte from[I386_MAX_REGISTER_SIZE];
 
   gdb_assert (i386_fp_regnum_p (regnum));
 
@@ -319,7 +319,7 @@ void
 i387_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const gdb_byte *from)
 {
-  char to[I386_MAX_REGISTER_SIZE];
+  gdb_byte to[I386_MAX_REGISTER_SIZE];
 
   gdb_assert (i386_fp_regnum_p (regnum));
 
@@ -376,7 +376,7 @@ void
 i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
-  const char *regs = fsave;
+  const gdb_byte *regs = fsave;
   int i;
 
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
@@ -401,7 +401,7 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 	if (i >= I387_FCTRL_REGNUM
 	    && i != I387_FIOFF_REGNUM && i != I387_FOOFF_REGNUM)
 	  {
-	    unsigned char val[4];
+	    gdb_byte val[4];
 
 	    memcpy (val, FSAVE_ADDR (regs, i), 2);
 	    val[2] = val[3] = 0;
@@ -419,7 +419,7 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
       regcache_raw_supply (regcache, i, NULL);
   if (regnum == -1 || regnum == I387_MXCSR_REGNUM)
     {
-      char buf[4];
+      gdb_byte buf[4];
 
       store_unsigned_integer (buf, 4, 0x1f80);
       regcache_raw_supply (regcache, I387_MXCSR_REGNUM, buf);
@@ -438,7 +438,7 @@ void
 i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  char *regs = fsave;
+  gdb_byte *regs = fsave;
   int i;
 
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
@@ -455,7 +455,7 @@ i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 	if (i >= I387_FCTRL_REGNUM
 	    && i != I387_FIOFF_REGNUM && i != I387_FOOFF_REGNUM)
 	  {
-	    unsigned char buf[4];
+	    gdb_byte buf[4];
 
 	    regcache_raw_collect (regcache, i, buf);
 
@@ -536,7 +536,7 @@ static int fxsave_offset[] =
 
 #define FXSAVE_MXCSR_ADDR(fxsave) (fxsave + 24)
 
-static int i387_tag (const unsigned char *raw);
+static int i387_tag (const gdb_byte *raw);
 
 
 /* Fill register REGNUM in REGCACHE with the appropriate
@@ -547,7 +547,7 @@ void
 i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
-  const char *regs = fxsave;
+  const gdb_byte *regs = fxsave;
   int i;
 
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
@@ -573,7 +573,7 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 	if (i >= I387_FCTRL_REGNUM && i < I387_XMM0_REGNUM
 	    && i != I387_FIOFF_REGNUM && i != I387_FOOFF_REGNUM)
 	  {
-	    unsigned char val[4];
+	    gdb_byte val[4];
 
 	    memcpy (val, FXSAVE_ADDR (regs, i), 2);
 	    val[2] = val[3] = 0;
@@ -637,7 +637,7 @@ void
 i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  char *regs = fxsave;
+  gdb_byte *regs = fxsave;
   int i;
 
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
@@ -657,7 +657,7 @@ i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 	if (i >= I387_FCTRL_REGNUM && i < I387_XMM0_REGNUM
 	    && i != I387_FIOFF_REGNUM && i != I387_FOOFF_REGNUM)
 	  {
-	    unsigned char buf[4];
+	    gdb_byte buf[4];
 
 	    regcache_raw_collect (regcache, i, buf);
 
@@ -716,7 +716,7 @@ i387_fill_fxsave (void *fxsave, int regnum)
    *RAW.  */
 
 static int
-i387_tag (const unsigned char *raw)
+i387_tag (const gdb_byte *raw)
 {
   int integer;
   unsigned int exponent;

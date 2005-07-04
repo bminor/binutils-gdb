@@ -1,3 +1,12 @@
+2005-07-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c (print_i387_value, print_i387_ext, i387_tag): Change
+	type of first argument to `const gdb_byte *'.
+	(i387_print_float_info, i387_register_to_value)
+	(i387_value_to_register, i387_supply_fsave, i387_collect_fsave)
+	(i387_supply_fxsave, i387_collect_fxsave): Use gdb_byte for byte
+	buffers.
+
 2005-07-04  Ben Elliston  <bje@gnu.org>
 
 	* Makefile.in (RUNTEST): Set to runtest.
