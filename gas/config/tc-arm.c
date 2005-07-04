@@ -226,17 +226,17 @@ struct arm_it
   struct
   {
     unsigned reg;
-    unsigned imm;
-    unsigned present	: 1;  /* operand present */
-    unsigned isreg	: 1;  /* operand was a register */
-    unsigned immisreg	: 1;  /* .imm field is a second register */
-    unsigned hasreloc	: 1;  /* operand has relocation suffix */
-    unsigned writeback	: 1;  /* operand has trailing ! */
-    unsigned preind	: 1;  /* preindexed address */
-    unsigned postind	: 1;  /* postindexed address */
-    unsigned negative	: 1;  /* index register was negated */
-    unsigned shifted	: 1;  /* shift applied to operation */
-    unsigned shift_kind : 3;  /* shift operation (enum shift_kind) */
+    signed int imm;
+    unsigned present	: 1;  /* Operand present.  */
+    unsigned isreg	: 1;  /* Operand was a register.  */
+    unsigned immisreg	: 1;  /* .imm field is a second register.  */
+    unsigned hasreloc	: 1;  /* Operand has relocation suffix.  */
+    unsigned writeback	: 1;  /* Operand has trailing !  */
+    unsigned preind	: 1;  /* Preindexed address.  */
+    unsigned postind	: 1;  /* Postindexed address.  */
+    unsigned negative	: 1;  /* Index register was negated.  */
+    unsigned shifted	: 1;  /* Shift applied to operation.  */
+    unsigned shift_kind : 3;  /* Shift operation (enum shift_kind).  */
   } operands[6];
 };
 
@@ -1035,7 +1035,7 @@ parse_reg_list (char ** strp)
    register.  Double precision registers are matched if DP is nonzero.	*/
 
 static int
-parse_vfp_reg_list (char **str, int *pbase, int dp)
+parse_vfp_reg_list (char **str, unsigned int *pbase, int dp)
 {
   int base_reg;
   int new_base;
@@ -2335,7 +2335,7 @@ static void
 s_arm_unwind_save_vfp (void)
 {
   int count;
-  int reg;
+  unsigned int reg;
   valueT op;
 
   count = parse_vfp_reg_list (&input_line_pointer, &reg, 1);
@@ -3246,7 +3246,7 @@ parse_address (char **str, int i)
 	{
 	  /* [Rn], {expr} - unindexed, with option */
 	  if (parse_immediate (&p, &inst.operands[i].imm,
-				       0, 255, TRUE) == FAIL)
+			       0, 255, TRUE) == FAIL)
 	    return FAIL;
 
 	  if (skip_past_char (&p, '}') == FAIL)
@@ -3574,7 +3574,7 @@ enum operand_parse_code
    structure.  Returns SUCCESS or FAIL depending on whether the
    specified grammar matched.  */
 static int
-parse_operands (char *str, const char *pattern)
+parse_operands (char *str, const unsigned char *pattern)
 {
   unsigned const char *upat = pattern;
   char *backtrack_pos = 0;
@@ -4645,8 +4645,8 @@ do_ldrd (void)
       /* For an index-register load, the index register must not overlap the
 	 destination (even if not write-back).	*/
       else if (inst.operands[2].immisreg
-	       && (inst.operands[2].imm == inst.operands[0].reg
-		   || inst.operands[2].imm == inst.operands[1].reg))
+	       && ((unsigned) inst.operands[2].imm == inst.operands[0].reg
+		   || (unsigned) inst.operands[2].imm == inst.operands[1].reg))
 	as_warn (_("index register overlaps destination register"));
     }
 

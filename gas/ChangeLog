@@ -1,3 +1,16 @@
+2005-07-04  Khem Raj  <kraj@mvista.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* tc-arm.c (struct arm_it): Make operands.imm signed to match its
+	use an immediate value.
+	(parse_vfp_reg_list): Make the 2nd parameter an unsigned pointer
+	since the register field of the operands structure is unsigned.
+	(s_arm_unwind_save_vfp): Make "reg" unsigned.
+	(parse_operands): Make the 2ns parameter an unsigned pointer to
+	match its use.
+	(do_ldrd): When using the imm field of the operands structure as a
+	second register field, treat it as unsigned.
+
 2005-07-04  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 1004
