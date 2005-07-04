@@ -1,3 +1,8 @@
+2005-07-04  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* elf32-m32r.c (m32r_elf_size_dynamic_sections): Use
+	info->executable instead of !info->shared where appropriate.
+
 2005-07-04  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 1042

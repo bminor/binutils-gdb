@@ -1,3 +1,7 @@
+2005-07-04  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* emulparams/m32relf_linux.sh (GENERATE_PIE_SCRIPT): Set to yes.
+
 2005-07-04  Aurelien Jarno  <aurel32@debian.org>
 
 	* emultempl/elf32.em: Enable use of ld.so.conf for *-*-k*bsd-*.
