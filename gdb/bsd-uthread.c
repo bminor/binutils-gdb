@@ -343,7 +343,7 @@ bsd_uthread_wait (ptid_t ptid, struct target_waitstatus *status)
 				    builtin_type_void_data_ptr);
   if (addr != 0)
     {
-      char buf[4];
+      gdb_byte buf[4];
 
       /* FIXME: For executables linked statically with the threads
          library, we end up here before the program has actually been

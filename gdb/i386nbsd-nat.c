@@ -1,6 +1,6 @@
 /* Native-dependent code for NetBSD/i386.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -60,7 +60,7 @@ i386nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   if (pcb->pcb_esp == 0)
     return 0;
 
-  read_memory (pcb->pcb_esp, (char *) &sf, sizeof sf);
+  read_memory (pcb->pcb_esp, (gdb_byte *)&sf, sizeof sf);
   pcb->pcb_esp += sizeof (struct switchframe);
   regcache_raw_supply (regcache, I386_EDI_REGNUM, &sf.sf_edi);
   regcache_raw_supply (regcache, I386_ESI_REGNUM, &sf.sf_esi);

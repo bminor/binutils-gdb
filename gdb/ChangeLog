@@ -1,5 +1,9 @@
 2005-07-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386nbsd-nat.c (i386nbsd_supply_pcb): Cast to 'gdb_byte *' in
+	read_memory call.
+	* bsd-uthread.c (bsd_uthread_wait): Use gdb_byte for byte buffer.
+
 	* bsd-kvm.c (bsd_kvm_open): Properly cast sentinel in concat call.
 	* coffread.c (patch_type, process_coff_symbol): Likewise.
 	* corelow.c (core_open): Likewise. 
