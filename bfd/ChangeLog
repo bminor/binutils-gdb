@@ -1,5 +1,11 @@
 2005-07-04  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 1042
+	* elf.c (assign_file_positions_for_segments): Remove excluded
+	sections from the segment map.
+
+2005-07-04  Alan Modra  <amodra@bigpond.net.au>
+
 	PR 1004
 	* elf-bfd.h (struct elf_backend_data): Add get_sec_type_attr.  Delete
 	special_sections.

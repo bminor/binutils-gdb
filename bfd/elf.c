@@ -4044,7 +4044,8 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
     {
       /* The placement algorithm assumes that non allocated sections are
 	 not in PT_LOAD segments.  We ensure this here by removing such
-	 sections from the segment map.  */
+	 sections from the segment map.  We also remove excluded
+	 sections.  */
       for (m = elf_tdata (abfd)->segment_map;
 	   m != NULL;
 	   m = m->next)
@@ -4052,13 +4053,12 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 	  unsigned int new_count;
 	  unsigned int i;
 
-	  if (m->p_type != PT_LOAD)
-	    continue;
-
 	  new_count = 0;
 	  for (i = 0; i < m->count; i ++)
 	    {
-	      if ((m->sections[i]->flags & SEC_ALLOC) != 0)
+	      if ((m->sections[i]->flags & SEC_EXCLUDE) == 0
+		  && ((m->sections[i]->flags & SEC_ALLOC) != 0
+		      || m->p_type != PT_LOAD))
 		{
 		  if (i != new_count)
 		    m->sections[new_count] = m->sections[i];
