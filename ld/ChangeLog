@@ -1,3 +1,8 @@
+2005-07-04  Mike Frysinger <vapier@gentoo.org>
+
+	* emulparams/hppalinux.sh (GENERATE_PIE_SCRIPT): Fix typo in
+	name.
+
 2005-07-04  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* emulparams/m32relf_linux.sh (GENERATE_PIE_SCRIPT): Set to yes.
