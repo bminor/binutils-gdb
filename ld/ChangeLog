@@ -1,3 +1,7 @@
+2005-07-04  Aurelien Jarno  <aurel32@debian.org>
+
+	* emultempl/elf32.em: Enable use of ld.so.conf for *-*-k*bsd-*.
+
 2005-07-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/elf.sc (.gcc_except_table): Don't KEEP.
