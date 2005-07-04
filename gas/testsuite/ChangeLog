@@ -1,3 +1,31 @@
+2005-07-04  Zack Weinberg  <zack@codesourcery.com>
+
+	* lib/gas-defs.exp (run_dump_tests): New proc.
+	(run_dump_test): Add support for new options: target, not-target,
+	skip, not-skip, error-output.  Document stderr.  Tidy a
+	little.
+	(slurp_options): If a line doesn't match the option regexp, but
+	does begin with #, ignore it; don't stop parsing options.
+	* gas/arm/arm.exp: Remove most code.  Use run_dump_tests.
+
+	* gas/arm/archv6t2-bad.d, gas/arm/armv1.d, gas/arm/iwmmxt-bad.d
+	* gas/arm/r15-bad.d, gas/arm/req.d, gas/arm/t16-bad.d
+	* gas/arm/undefined.d, gas/arm/undefined_coff.d, gas/arm/vfp-bad.d:
+	New files.
+	* gas/arm/bignum1.d, gas/arm/mapping.d, gas/arm/pic.d:
+	Only run on ELF targets.
+	* gas/arm/tls.d, gas/arm/unwind.d: Only run on ELF targets.
+	Skip on VxWorks.
+	* gas/arm/tls_vxworks.d, gas/arm/unwind_vxworks.d: New files.
+	* gas/arm/thumb.d, gas/arm/thumb32.d: Don't run on aout or pe.
+	* gas/arm/le-fpconst.d: Only run on *-*-pe.
+	* gas/arm/inst.d: Skip on WinCE.
+	* gas/arm/wince_inst.d: Skip unless WinCE.
+	* gas/arm/el_segundo.d: Mark up for actual use; adjust
+	expectations.
+	* gas/arm/el_segundo.s: Remove irrelevant junk.  Add padding
+	for a.out's sake.
+
 2005-07-01  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/group-2.s: Use register as second operand of .prologue.

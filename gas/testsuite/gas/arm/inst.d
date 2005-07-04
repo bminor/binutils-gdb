@@ -1,6 +1,8 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: ARM basic instructions
 #as: -mcpu=arm7m -EL
+# WinCE has its own version of this test.
+#skip: *-wince-*
 
 # Test the standard ARM instructions:
 

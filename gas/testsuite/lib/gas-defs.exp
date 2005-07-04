@@ -233,6 +233,24 @@ proc is_elf_format {} {
     return 1
 }
 
+# run_dump_tests TESTCASES EXTRA_OPTIONS
+# Wrapper for run_dump_test, which is suitable for invoking as
+#   run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
+# EXTRA_OPTIONS are passed down to run_dump_test.  Honors runtest_file_p.
+# Body cribbed from dg-runtest.
+
+proc run_dump_tests { testcases {extra_options {}} } {
+    global runtests
+
+    foreach testcase $testcases {
+        # If testing specific files and this isn't one of them, skip it.
+        if ![runtest_file_p $runtests $testcase] {
+            continue
+        }
+        run_dump_test [file rootname [file tail $testcase]] $extra_options
+    }
+}
+
 
 # run_dump_test FILE (optional:) EXTRA_OPTIONS
 #
@@ -255,8 +273,10 @@ proc is_elf_format {} {
 # OPTION is the name of some option, like "name" or "objdump", and
 # VALUE is OPTION's value.  The valid options are described below.
 # Whitespace is ignored everywhere, except within VALUE.  The option
-# list ends with the first line that doesn't match the above syntax
-# (hmm, not great for error detection).
+# list ends with the first line that doesn't match the above syntax.
+# However, a line within the options that begins with a #, but doesn't
+# have a recognizable option name followed by a colon, is considered a
+# comment and entirely ignored.
 #
 # The optional EXTRA_OPTIONS argument to `run_dump_test' is a list of
 # two-element lists.  The first element of each is an option name, and
@@ -292,6 +312,27 @@ proc is_elf_format {} {
 #	Assemble the file SOURCE.s.  If omitted, this defaults to FILE.s.
 #       This is useful if several .d files want to share a .s file.
 #
+#   target: GLOBS...
+#       Run this test only on a specified list of targets.  More precisely,
+#       each glob in the space-separated list is passed to "istarget"; if
+#       it evaluates true for any of them, the test will be run, otherwise
+#       it will be marked unsupported.
+#
+#   not-target: GLOBS...
+#       Do not run this test on a specified list of targets.  Again,
+#       the each glob in the space-separated list is passed to
+#       "istarget", and the test is run if it evaluates *false* for
+#       *all* of them.  Otherwise it will be marked unsupported.
+#
+#   skip: GLOBS...
+#   not-skip: GLOBS...
+#       These are exactly the same as "not-target" and "target",
+#       respectively, except that they do nothing at all if the check
+#       fails.  They should only be used in groups, to construct a single
+#       test which is run on all targets but with variant options or
+#       expected output on some targets.  (For example, see
+#       gas/arm/inst.d and gas/arm/wince_inst.d.)
+#
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
 #	to pass.  The PROG, objdump, nm and objcopy options have no
@@ -300,6 +341,16 @@ proc is_elf_format {} {
 #   warning: REGEX
 #	Expect a gas warning matching REGEX.  It is an error to issue
 #	both "error" and "warning".
+#
+#   stderr: FILE
+#       FILE contains regexp lines to be matched against the diagnostic
+#       output of the assembler.  This does not preclude the use of
+#       PROG, nm, objdump, or objcopy.
+#
+#   error-output: FILE
+#       Means the same as 'stderr', but also indicates that the assembler
+#       is expected to exit unsuccessfully (therefore PROG, objdump, nm,
+#       and objcopy have no meaning and should not be supplied).
 #
 # Each option may occur at most once.
 #
@@ -337,7 +388,12 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(source) {}
     set opts(stderr) {}
     set opts(error) {}
+    set opts(error-output) {}
     set opts(warning) {}
+    set opts(target) {}
+    set opts(not-target) {}
+    set opts(skip) {}
+    set opts(not-skip) {}
 
     foreach i $opt_array {
 	set opt_name [lindex $i 0]
@@ -371,16 +427,30 @@ proc run_dump_test { name {extra_options {}} } {
 	append opts($opt_name) $opt_val
     }
 
+    if { $opts(name) == "" } {
+	set testname "$subdir/$name"
+    } else {
+	set testname $opts(name)
+    }
+    verbose "Testing $testname"
+
     if { (($opts(warning) != "") && ($opts(error) != "")) \
-	 || (($opts(warning) != "") && ($opts(stderr) != "")) } {
-	perror "$testname: bad mix of stderr, error and warning test-directives"
+	 || (($opts(warning) != "") && ($opts(stderr) != "")) \
+	 || (($opts(error-output) != "") && ($opts(stderr) != "")) \
+	 || (($opts(error-output) != "") && ($opts(error) != "")) \
+	 || (($opts(error-output) != "") && ($opts(warning) != "")) } {
+	perror "$testname: bad mix of stderr, error-output, error, and warning test-directives"
+	unresolved $testname
 	return
+    }
+    if { $opts(error-output) != "" } then {
+	set opts(stderr) $opts(error-output)
     }
 
     set program ""
     # It's meaningless to require an output-testing method when we
     # expect an error.
-    if { $opts(error) == "" } {
+    if { $opts(error) == "" && $opts(error-output) == "" } {
 	if {$opts(PROG) != ""} {
 	    switch -- $opts(PROG) {
 		objdump	{ set program objdump }
@@ -389,7 +459,7 @@ proc run_dump_test { name {extra_options {}} } {
 		readelf	{ set program readelf }
 		default	{
 		    perror "unrecognized program option $opts(PROG) in $file.d"
-		    unresolved $subdir/$name
+		    unresolved $testname
 		    return }
 	    }
 	} else {
@@ -398,7 +468,7 @@ proc run_dump_test { name {extra_options {}} } {
 		if {$opts($p) != ""} {
 		    if {$program != ""} {
 			perror "ambiguous dump program in $file.d"
-			unresolved $subdir/$name
+			unresolved $testname
 			return
 		    } else {
 			set program $p
@@ -408,16 +478,61 @@ proc run_dump_test { name {extra_options {}} } {
 	}
 	if { $program == "" && $opts(warning) == "" } {
 	    perror "dump program unspecified in $file.d"
-	    unresolved $subdir/$name
+	    unresolved $testname
 	    return
 	}
     }
 
-    if { $opts(name) == "" } {
-	set testname "$subdir/$name"
-    } else {
-	set testname $opts(name)
+    # Handle skipping the test on specified targets.
+    # You can have both skip/not-skip and target/not-target, but you can't
+    # have both skip and not-skip, or target and not-target, in the same file.
+    if { $opts(skip) != "" } then {
+	if { $opts(not-skip) != "" } then {
+	    perror "$testname: mixing skip and not-skip directives is invalid"
+	    unresolved $testname
+	    return
+	}
+	foreach glob $opts(skip) {
+	    if {[istarget $glob]} { return }
+	}
     }
+    if { $opts(not-skip) != "" } then {
+	set skip 1
+	foreach glob $opts(not-skip) {
+	    if {[istarget $glob]} { 
+		set skip 0
+		break
+	    }
+	}
+	if {$skip} { return }
+    }
+    if { $opts(target) != "" } then {
+	if { $opts(not-target) != "" } then {
+	    perror "$testname: mixing target and not-target directives is invalid"
+	    unresolved $testname
+	    return
+	}
+	set skip 1
+	foreach glob $opts(target) {
+	    if {[istarget $glob]} { 
+		set skip 0
+		break
+	    }
+	}
+	if {$skip} { 
+	    unsupported $testname
+	    return 
+	}
+    }
+    if { $opts(not-target) != "" } then {
+	foreach glob $opts(not-target) {
+	    if {[istarget $glob]} {
+		unsupported $testname
+		return 
+	    }
+	}
+    }
+
 
     if { $opts(source) == "" } {
 	set sourcefile ${file}.s
@@ -449,10 +564,9 @@ proc run_dump_test { name {extra_options {}} } {
 	set exitstat "succeeded"
 	if { $cmdret != 0 } { set exitstat "failed" }
 
+	send_log "$comp_output\n"
+	verbose "$comp_output" 3
 	if { $opts(stderr) == "" }  then {
-	    send_log "$comp_output\n"
-	    verbose "$comp_output" 3
-
 	    if { [regexp $expmsg $comp_output] \
 		    && (($cmdret == 0) == ($opts(warning) != "")) } {
 		# We have the expected output from gas.
@@ -478,7 +592,6 @@ proc run_dump_test { name {extra_options {}} } {
 		return
 	    }
 	    set stderrfile $srcdir/$subdir/$opts(stderr)
-	    send_log "wrote pruned stderr to dump.stderr\n"
 	    verbose "wrote pruned stderr to dump.stderr" 3
 	    if { [regexp_diff "dump.stderr" "$stderrfile"] } then {
 		if { $opts(error) != "" } {
@@ -490,6 +603,9 @@ proc run_dump_test { name {extra_options {}} } {
 		}
 		fail $testname
 		verbose "pruned stderr is [file_contents "dump.stderr"]" 2
+		return
+	    } elseif { $opts(error-output) != "" } then {
+		pass $testname
 		return
 	    }
 	}
@@ -557,15 +673,15 @@ proc slurp_options { file } {
     set ws  {[ 	]*}
     set nws {[^ 	]*}
     # whitespace is ignored anywhere except within the options list;
-    # option names are alphabetic only
-    set pat "^#${ws}(\[a-zA-Z\]*)$ws:${ws}(.*)$ws\$"
+    # option names are alphabetic plus dash
+    set pat "^#${ws}(\[a-zA-Z-\]*)$ws:${ws}(.*)$ws\$"
     while { [gets $f line] != -1 } {
 	set line [string trim $line]
 	# Whitespace here is space-tab.
 	if [regexp $pat $line xxx opt_name opt_val] {
 	    # match!
 	    lappend opt_array [list $opt_name $opt_val]
-	} else {
+	} elseif {![regexp "^#" $line ]} {
 	    break
 	}
     }
