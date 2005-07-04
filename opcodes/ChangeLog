@@ -1,3 +1,7 @@
+2005-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* tic30-dis.c (cnvt_tmsfloat_ieee): Use HUGE_VALF if defined.
+
 2005-07-01  Nick Clifton  <nickc@redhat.com>
 
 	* a29k-dis.c: Update to ISO C90 style function declarations and

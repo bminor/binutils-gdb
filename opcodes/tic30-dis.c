@@ -302,10 +302,17 @@ cnvt_tmsfloat_ieee (unsigned long tmsfloat, int size, float *ieeefloat)
     {
       if (mant == 0)
 	*ieeefloat = ERANGE;
+#ifdef HUGE_VALF
+      if (sign == 0)
+	*ieeefloat = HUGE_VALF;
+      else
+	*ieeefloat = -HUGE_VALF;
+#else
       if (sign == 0)
 	*ieeefloat = 1.0 / 0.0;
       else
 	*ieeefloat = -1.0 / 0.0;
+#endif
       return 1;
     }
   exp >>= 1;
