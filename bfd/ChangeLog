@@ -1,5 +1,20 @@
 2005-07-05  Jakub Jelinek  <jakub@redhat.com>
 
+	* libbfd-in.h (struct artdata): Add extended_names_size field.
+	* libbfd.h: Rebuilt.
+	* coff-rs600.c (_bfd_xcoff_archive_p): Don't clear fields in freshly
+	allocated object by bfd_zalloc.
+	* coff64-rs6000.c (xcoff64_archive_p): Likewise.
+	* ecoff.c (_bfd_ecoff_archive_p): Likewise.
+	* archive.c (_bfd_generic_mkarchive, bfd_generic_archive_p): Likewise.
+	(get_extended_arelt_filename): Fail if index is bigger or equal to
+	extended_names_size.
+	(_bfd_generic_read_ar_hdr_mag): Don't set bfd_error_malformed_archive,
+	get_extended_arelt_filename already did that.
+	(_bfd_slurp_extended_name_table): Initialize extended_names_size field.
+	Allocate one extra byte and clear it, in case extended names table
+	is not terminated.
+
 	* libbfd-in.h (bfd_malloc2, bfd_realloc2, bfd_zmalloc2, bfd_alloc2,
 	bfd_zalloc2): New prototypes.
 	* bfd-in.h (HALF_BFD_SIZE_TYPE): Define.

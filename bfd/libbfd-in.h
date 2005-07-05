@@ -64,6 +64,7 @@ struct artdata {
   carsym *symdefs;		/* the symdef entries */
   symindex symdef_count;	/* how many there are */
   char *extended_names;		/* clever intel extension */
+  bfd_size_type extended_names_size; /* Size of extended names */
   /* when more compilers are standard C, this can be a time_t */
   long  armap_timestamp;	/* Timestamp value written into armap.
 				   This is used for BSD archives to check

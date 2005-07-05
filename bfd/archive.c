@@ -182,11 +182,13 @@ _bfd_generic_mkarchive (bfd *abfd)
   if (bfd_ardata (abfd) == NULL)
     return FALSE;
 
-  bfd_ardata (abfd)->cache = NULL;
-  bfd_ardata (abfd)->archive_head = NULL;
-  bfd_ardata (abfd)->symdefs = NULL;
-  bfd_ardata (abfd)->extended_names = NULL;
-  bfd_ardata (abfd)->tdata = NULL;
+  /* Already cleared by bfd_zalloc above.
+     bfd_ardata (abfd)->cache = NULL;
+     bfd_ardata (abfd)->archive_head = NULL;
+     bfd_ardata (abfd)->symdefs = NULL;
+     bfd_ardata (abfd)->extended_names = NULL;
+     bfd_ardata (abfd)->extended_names_size = 0;
+     bfd_ardata (abfd)->tdata = NULL;  */
 
   return TRUE;
 }
@@ -335,7 +337,7 @@ get_extended_arelt_filename (bfd *arch, const char *name)
   errno = 0;
   /* Skip first char, which is '/' in SVR4 or ' ' in some other variants.  */
   index = strtol (name + 1, NULL, 10);
-  if (errno != 0)
+  if (errno != 0 || index >= bfd_ardata (arch)->extended_names_size)
     {
       bfd_set_error (bfd_error_malformed_archive);
       return NULL;
@@ -405,10 +407,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
     {
       filename = get_extended_arelt_filename (abfd, hdr.ar_name);
       if (filename == NULL)
-	{
-	  bfd_set_error (bfd_error_malformed_archive);
-	  return NULL;
-	}
+	return NULL;
     }
   /* BSD4.4-style long filename.
      Only implemented for reading, so far!  */
@@ -629,11 +628,13 @@ bfd_generic_archive_p (bfd *abfd)
     }
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
-  bfd_ardata (abfd)->cache = NULL;
-  bfd_ardata (abfd)->archive_head = NULL;
-  bfd_ardata (abfd)->symdefs = NULL;
-  bfd_ardata (abfd)->extended_names = NULL;
-  bfd_ardata (abfd)->tdata = NULL;
+  /* Cleared by bfd_zalloc above.
+     bfd_ardata (abfd)->cache = NULL;
+     bfd_ardata (abfd)->archive_head = NULL;
+     bfd_ardata (abfd)->symdefs = NULL;
+     bfd_ardata (abfd)->extended_names = NULL;
+     bfd_ardata (abfd)->extended_names_size = 0;
+     bfd_ardata (abfd)->tdata = NULL;  */
 
   if (!BFD_SEND (abfd, _bfd_slurp_armap, (abfd))
       || !BFD_SEND (abfd, _bfd_slurp_extended_name_table, (abfd)))
@@ -1067,6 +1068,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	  strncmp (nextname, "//              ", 16) != 0)
 	{
 	  bfd_ardata (abfd)->extended_names = NULL;
+	  bfd_ardata (abfd)->extended_names_size = 0;
 	  return TRUE;
 	}
 
@@ -1075,7 +1077,11 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	return FALSE;
 
       amt = namedata->parsed_size;
-      bfd_ardata (abfd)->extended_names = bfd_zalloc (abfd, amt);
+      if (amt + 1 == 0)
+        goto byebye;
+
+      bfd_ardata (abfd)->extended_names_size = amt;
+      bfd_ardata (abfd)->extended_names = bfd_zalloc (abfd, amt + 1);
       if (bfd_ardata (abfd)->extended_names == NULL)
 	{
 	byebye:
@@ -1098,15 +1104,17 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	 trailing '/'.  DOS/NT created archive often have \ in them
 	 We'll fix all problems here..  */
       {
-	char *temp = bfd_ardata (abfd)->extended_names;
+        char *ext_names = bfd_ardata (abfd)->extended_names;
+	char *temp = ext_names;
 	char *limit = temp + namedata->parsed_size;
 	for (; temp < limit; ++temp)
 	  {
 	    if (*temp == '\012')
-	      temp[temp[-1] == '/' ? -1 : 0] = '\0';
+	      temp[temp > ext_names && temp[-1] == '/' ? -1 : 0] = '\0';
 	    if (*temp == '\\')
 	      *temp = '/';
 	  }
+	*limit = '\0';
       }
 
       /* Pad to an even boundary if you have to.  */
