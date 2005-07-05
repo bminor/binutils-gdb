@@ -1,3 +1,34 @@
+2005-07-05  Aldy Hernandez  <aldyh@redhat.com>
+
+	* gas/ms1: New directory.
+	* gas/ms1/allinsn.d: New.
+	* gas/ms1/allinsn.s: New.
+	* gas/ms1/badinsn.s: New.
+	* gas/ms1/badinsn1.s: New.
+	* gas/ms1/badoffsethigh.s: New.
+	* gas/ms1/badoffsetlow.s: New.
+	* gas/ms1/badorder.s: New.
+	* gas/ms1/badreg.s: New.
+	* gas/ms1/badsignedimmhigh.s: New.
+	* gas/ms1/badsignedimmlow.s: New.
+	* gas/ms1/badsyntax.s: New.
+	* gas/ms1/badsyntax1.s: New.
+	* gas/ms1/badunsignedimmhigh.s: New.
+	* gas/ms1/badunsignedimmlow.s: New.
+	* gas/ms1/errors.exp: New.
+	* gas/ms1/ldst.s: New.
+	* gas/ms1/misc.d: New.
+	* gas/ms1/misc.s: New.
+	* gas/ms1/ms1-16-003.d: New.
+	* gas/ms1/ms1-16-003.s: New.
+	* gas/ms1/ms1.exp: New.
+	* gas/ms1/msys.d: New.
+	* gas/ms1/msys.s: New.
+	* gas/ms1/relocs.d: New.
+	* gas/ms1/relocs.exp: New.
+	* testsuite/gas/ms1/relocs1.s: New.
+	* testsuite/gas/ms1/relocs2.s: New.
+
 2005-07-05  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/svme.d: New.

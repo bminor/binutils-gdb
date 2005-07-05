@@ -1,0 +1,10 @@
+# MRISC1 assembler testsuite.
+
+if { [istarget mrisc1*-*-*] || [istarget ms1-*-*]} then {
+    #
+    run_dump_test "allinsn"
+    run_dump_test "misc"
+    run_dump_test "msys"
+    run_dump_test "ms1-16-003"
+    #
+}
