@@ -1257,7 +1257,7 @@ m68hc11_elf_relax_delete_bytes (bfd *abfd, asection *sec,
      are located in .page0.
    - The .vectors is the section that represents the interrupt
      vectors.  */
-static struct bfd_elf_special_section const elf32_m68hc11_special_sections[] =
+static const struct bfd_elf_special_section elf32_m68hc11_special_sections[] =
 {
   { ".eeprom",   7, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".page0",    6, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
@@ -1269,7 +1269,7 @@ static struct bfd_elf_special_section const elf32_m68hc11_special_sections[] =
 static const struct bfd_elf_special_section *
 elf32_m68hc11_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)

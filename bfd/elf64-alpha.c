@@ -5162,7 +5162,7 @@ elf64_alpha_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
-static struct bfd_elf_special_section const elf64_alpha_special_sections[] =
+static const struct bfd_elf_special_section elf64_alpha_special_sections[] =
 {
   { ".sbss",  5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
   { ".sdata", 6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
@@ -5172,7 +5172,7 @@ static struct bfd_elf_special_section const elf64_alpha_special_sections[] =
 static const struct bfd_elf_special_section *
 elf64_alpha_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)

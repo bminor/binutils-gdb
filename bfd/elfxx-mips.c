@@ -9969,7 +9969,7 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
   return TRUE;
 }
 
-struct bfd_elf_special_section const _bfd_mips_elf_special_sections[] =
+const struct bfd_elf_special_section _bfd_mips_elf_special_sections[] =
 {
   { ".lit4",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
   { ".lit8",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
@@ -9983,7 +9983,7 @@ struct bfd_elf_special_section const _bfd_mips_elf_special_sections[] =
 const struct bfd_elf_special_section *
 _bfd_mips_elf_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)

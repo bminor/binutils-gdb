@@ -1828,7 +1828,7 @@ ppc_elf_additional_program_headers (bfd *abfd)
    that the linker doesn't crater when trying to make more than
    2 sections.  */
 
-static struct bfd_elf_special_section const ppc_elf_special_sections[] =
+static const struct bfd_elf_special_section ppc_elf_special_sections[] =
 {
   { ".plt",              4,  0, SHT_NOBITS,   SHF_ALLOC + SHF_EXECINSTR },
   { ".sbss",             5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
@@ -1849,7 +1849,7 @@ static struct bfd_elf_special_section ppc_alt_plt =
 static const struct bfd_elf_special_section *
 ppc_elf_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)

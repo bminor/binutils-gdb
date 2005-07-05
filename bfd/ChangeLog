@@ -1,3 +1,25 @@
+2005-07-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (special_sections): Move const qualifier.
+	(special_sections_b..special_sections_t): Likewise.
+	* elf32-arm.c (elf32_arm_symbian_get_sec_type_attr): Remove duplicate
+	const.
+	(elf32_arm_symbian_special_sections): Move const qualifier.
+	* elf32-m32r.c: Similarly.
+	* elf32-m68hc11.c: Similarly.
+	* elf32-m68hc12.c: Similarly.
+	* elf32-mcore.c: Similarly.
+	* elf32-ppc.c: Similarly.
+	* elf32-sh64.c: Similarly.
+	* elf32-v850.c: Similarly.
+	* elf32-xtensa.c: Similarly.
+	* elf64-alpha.c: Similarly.
+	* elf64-hppa.c: Similarly.
+	* elf64-ppc.c: Similarly.
+	* elf64-sh64.c: Similarly.
+	* elfxx-ia64.c: Similarly.
+	* elfxx-mips.c: Similarly.
+
 2005-07-04  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* elf32-m32r.c (m32r_elf_size_dynamic_sections): Use

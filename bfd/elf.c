@@ -2164,19 +2164,19 @@ bfd_section_from_elf_index (bfd *abfd, unsigned int index)
   return elf_elfsections (abfd)[index]->bfd_section;
 }
 
-static struct bfd_elf_special_section const special_sections_b[] =
+static const struct bfd_elf_special_section special_sections_b[] =
 {
   { ".bss",            4, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_c[] =
+static const struct bfd_elf_special_section special_sections_c[] =
 {
   { ".comment",        8,  0, SHT_PROGBITS, 0 },
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_d[] =
+static const struct bfd_elf_special_section special_sections_d[] =
 {
   { ".data",           5, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".data1",          6,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
@@ -2191,14 +2191,14 @@ static struct bfd_elf_special_section const special_sections_d[] =
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_f[] =
+static const struct bfd_elf_special_section special_sections_f[] =
 {
   { ".fini",           5,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { ".fini_array",    11,  0, SHT_FINI_ARRAY, SHF_ALLOC + SHF_WRITE },
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_g[] =
+static const struct bfd_elf_special_section special_sections_g[] =
 {
   { ".gnu.linkonce.b",15, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { ".got",            4,  0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
@@ -2210,13 +2210,13 @@ static struct bfd_elf_special_section const special_sections_g[] =
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_h[] =
+static const struct bfd_elf_special_section special_sections_h[] =
 {
   { ".hash",           5,  0, SHT_HASH,     SHF_ALLOC },
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_i[] =
+static const struct bfd_elf_special_section special_sections_i[] =
 {
   { ".init",           5,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { ".init_array",    11,  0, SHT_INIT_ARRAY, SHF_ALLOC + SHF_WRITE },
@@ -2224,27 +2224,27 @@ static struct bfd_elf_special_section const special_sections_i[] =
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_l[] =
+static const struct bfd_elf_special_section special_sections_l[] =
 {
   { ".line",           5,  0, SHT_PROGBITS, 0 },
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_n[] =
+static const struct bfd_elf_special_section special_sections_n[] =
 {
   { ".note.GNU-stack",15,  0, SHT_PROGBITS, 0 },
   { ".note",           5, -1, SHT_NOTE,     0 },
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_p[] =
+static const struct bfd_elf_special_section special_sections_p[] =
 {
   { ".preinit_array", 14,  0, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
   { ".plt",            4,  0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_r[] =
+static const struct bfd_elf_special_section special_sections_r[] =
 {
   { ".rodata",         7, -2, SHT_PROGBITS, SHF_ALLOC },
   { ".rodata1",        8,  0, SHT_PROGBITS, SHF_ALLOC },
@@ -2253,7 +2253,7 @@ static struct bfd_elf_special_section const special_sections_r[] =
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_s[] =
+static const struct bfd_elf_special_section special_sections_s[] =
 {
   { ".shstrtab",       9,  0, SHT_STRTAB,   0 },
   { ".strtab",         7,  0, SHT_STRTAB,   0 },
@@ -2262,7 +2262,7 @@ static struct bfd_elf_special_section const special_sections_s[] =
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const special_sections_t[] =
+static const struct bfd_elf_special_section special_sections_t[] =
 {
   { ".text",           5, -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { ".tbss",           5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_TLS },
@@ -2270,7 +2270,7 @@ static struct bfd_elf_special_section const special_sections_t[] =
   { NULL,              0,  0, 0,            0 }
 };
 
-static struct bfd_elf_special_section const *special_sections[] =
+static const struct bfd_elf_special_section *special_sections[] =
 {
   special_sections_b,		/* 'b' */
   special_sections_c,		/* 'b' */

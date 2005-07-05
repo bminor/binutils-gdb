@@ -4068,7 +4068,7 @@ sh64_elf64_merge_symbol_attribute (struct elf_link_hash_entry *h,
   return;
 }
 
-static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
+static const struct bfd_elf_special_section sh64_elf64_special_sections[]=
 {
   { ".cranges", 8, 0, SHT_PROGBITS, 0 },
   { NULL,       0, 0, 0,            0 }
@@ -4077,7 +4077,7 @@ static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
 static const struct bfd_elf_special_section *
 sh64_elf64_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)

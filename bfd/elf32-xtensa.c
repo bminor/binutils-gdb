@@ -9482,7 +9482,7 @@ xtensa_callback_required_dependence (bfd *abfd,
 /* The default literal sections should always be marked as "code" (i.e.,
    SHF_EXECINSTR).  This is particularly important for the Linux kernel
    module loader so that the literals are not placed after the text.  */
-static struct bfd_elf_special_section const elf_xtensa_special_sections[] =
+static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 {
   { ".fini.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { ".init.literal", 13, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
@@ -9493,7 +9493,7 @@ static struct bfd_elf_special_section const elf_xtensa_special_sections[] =
 static const struct bfd_elf_special_section *
 elf_xtensa_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)

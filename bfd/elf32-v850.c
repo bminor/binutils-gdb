@@ -3024,7 +3024,7 @@ v850_elf_relax_section (bfd *abfd,
   goto finish;
 }
 
-static struct bfd_elf_special_section const v850_elf_special_sections[] =
+static const struct bfd_elf_special_section v850_elf_special_sections[] =
 {
   { ".call_table_data", 16,  0, SHT_PROGBITS,     (SHF_ALLOC
                                                    + SHF_WRITE) },
@@ -3058,7 +3058,7 @@ static struct bfd_elf_special_section const v850_elf_special_sections[] =
 static const struct bfd_elf_special_section *
 v850_elf_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)

@@ -2671,7 +2671,7 @@ elf64_hppa_elf_get_symbol_type (elf_sym, type)
     return type;
 }
 
-static struct bfd_elf_special_section const elf64_hppa_special_sections[] =
+static const struct bfd_elf_special_section elf64_hppa_special_sections[] =
 {
   { ".fini",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { ".init",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
@@ -2681,7 +2681,7 @@ static struct bfd_elf_special_section const elf64_hppa_special_sections[] =
 static const struct bfd_elf_special_section *
 elf64_hppa_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)

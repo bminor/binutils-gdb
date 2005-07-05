@@ -5050,7 +5050,7 @@ elfNN_ia64_reloc_type_class (rela)
     }
 }
 
-static struct bfd_elf_special_section const elfNN_ia64_special_sections[] =
+static const struct bfd_elf_special_section elfNN_ia64_special_sections[] =
 {
   { ".sbss",  5, -1, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
   { ".sdata", 6, -1, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
@@ -5060,7 +5060,7 @@ static struct bfd_elf_special_section const elfNN_ia64_special_sections[] =
 static const struct bfd_elf_special_section *
 elfNN_ia64_get_sec_type_attr (bfd *abfd, asection *sec)
 {
-  const struct bfd_elf_special_section const *ssect;
+  const struct bfd_elf_special_section *ssect;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)
