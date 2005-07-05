@@ -397,7 +397,12 @@ _bfd_sparc_elf_info_to_howto_ptr (unsigned int r_type)
       return &sparc_rev32_howto;
 
     default:
-      BFD_ASSERT (r_type < (unsigned int) R_SPARC_max_std);
+      if (r_type >= (unsigned int) R_SPARC_max_std)
+	{
+	  (*_bfd_error_handler) (_("invalid relocation type %d"),
+				 (int) r_type);
+	  r_type = R_SPARC_NONE;
+	}
       return &_bfd_sparc_elf_howto_table[r_type];
     }
 }

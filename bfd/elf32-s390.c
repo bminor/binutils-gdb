@@ -351,7 +351,8 @@ elf_s390_info_to_howto (abfd, cache_ptr, dst)
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
 {
-  switch (ELF32_R_TYPE(dst->r_info))
+  unsigned int r_type = ELF32_R_TYPE(dst->r_info);
+  switch (r_type)
     {
     case R_390_GNU_VTINHERIT:
       cache_ptr->howto = &elf32_s390_vtinherit_howto;
@@ -362,8 +363,13 @@ elf_s390_info_to_howto (abfd, cache_ptr, dst)
       break;
 
     default:
-      BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_390_max);
-      cache_ptr->howto = &elf_howto_table[ELF32_R_TYPE(dst->r_info)];
+      if (r_type >= sizeof (elf_howto_table) / sizeof (elf_howto_table[0]))
+	{
+	  (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
+				 abfd, (int) r_type);
+	  r_type = R_390_NONE;
+	}
+      cache_ptr->howto = &elf_howto_table[r_type];
     }
 }
 

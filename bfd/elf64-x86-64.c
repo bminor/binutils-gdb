@@ -189,16 +189,19 @@ elf64_x86_64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   unsigned r_type, i;
 
   r_type = ELF64_R_TYPE (dst->r_info);
-  if (r_type < (unsigned int) R_X86_64_GNU_VTINHERIT)
+  if (r_type < (unsigned int) R_X86_64_GNU_VTINHERIT
+      || r_type >= (unsigned int) R_X86_64_max)
     {
-      BFD_ASSERT (r_type <= (unsigned int) R_X86_64_GOTPC32);
+      if (r_type > (unsigned int) R_X86_64_GOTPC32)
+	{
+	  (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
+				 abfd, (int) r_type);
+	  r_type = R_X86_64_NONE;
+	}
       i = r_type;
     }
   else
-    {
-      BFD_ASSERT (r_type < (unsigned int) R_X86_64_max);
-      i = r_type - ((unsigned int) R_X86_64_GNU_VTINHERIT - R_X86_64_GOTPC32 - 1);
-    }
+    i = r_type - ((unsigned int) R_X86_64_GNU_VTINHERIT - R_X86_64_GOTPC32 - 1);
   cache_ptr->howto = &x86_64_elf_howto_table[i];
   BFD_ASSERT (r_type == cache_ptr->howto->type);
 }

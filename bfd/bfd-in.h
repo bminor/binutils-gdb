@@ -136,6 +136,9 @@ typedef unsigned long bfd_size_type;
 
 #endif /* not BFD64  */
 
+#define HALF_BFD_SIZE_TYPE \
+  (((bfd_size_type) 1) << (8 * sizeof (bfd_size_type) / 2))
+
 #ifndef BFD_HOST_64_BIT
 /* Fall back on a 32 bit type.  The idea is to make these types always
    available for function return types, but in the case that

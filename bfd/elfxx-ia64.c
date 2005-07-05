@@ -487,7 +487,8 @@ lookup_howto (rtype)
 	elf_code_to_howto_index[ia64_howto_table[i].type] = i;
     }
 
-  BFD_ASSERT (rtype <= R_IA64_MAX_RELOC_CODE);
+  if (rtype > R_IA64_MAX_RELOC_CODE)
+    return 0;
   i = elf_code_to_howto_index[rtype];
   if (i >= NELEMS (ia64_howto_table))
     return 0;

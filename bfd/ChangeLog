@@ -1,5 +1,30 @@
 2005-07-05  Jakub Jelinek  <jakub@redhat.com>
 
+	* libbfd-in.h (bfd_malloc2, bfd_realloc2, bfd_zmalloc2, bfd_alloc2,
+	bfd_zalloc2): New prototypes.
+	* bfd-in.h (HALF_BFD_SIZE_TYPE): Define.
+	* libbfd.c (bfd_malloc2, bfd_realloc2, bfd_zmalloc2): New functions.
+	* opncls.c (bfd_alloc2, bfd_zalloc2): New functions.
+	* elf.c (bfd_elf_get_elf_syms, setup_group, assign_section_numbers,
+	elf_map_symbols, map_sections_to_segments,
+	assign_file_positions_for_segments, copy_private_bfd_data,
+	swap_out_syms, _bfd_elf_slurp_version_tables): Use bfd_*alloc2
+	where appropriate.
+	* bfd-in2.h: Rebuilt.
+	* libbfd.h: Rebuilt.
+
+	* elf.c (_bfd_elf_print_private_bfd_data): Don't crash on bogus
+	verdef or verneed section.
+	(_bfd_elf_slurp_version_tables): Handle corrupt verdef and/or
+	verneed sections gracefully.
+	* elfxx-sparc.c (_bfd_sparc_elf_info_to_howto_ptr): Don't crash on
+	bogus relocation values.
+	* elf64-ppc.c (ppc64_elf_info_to_howto): Likewise.
+	* elf64-s390.c (elf_s390_info_to_howto): Likewise.
+	* elf32-s390.c (elf_s390_info_to_howto): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_info_to_howto): Likewise.
+	* elfxx-ia64.c (lookup_howto): Likewise.
+
 	* elf.c (bfd_elf_get_str_section): Allocate an extra byte after
 	the end of strtab and clear it.
 	(elf_read): Remove.

@@ -156,12 +156,76 @@ bfd_malloc (bfd_size_type size)
   return ptr;
 }
 
+/* Allocate memory using malloc, nmemb * size with overflow checking.  */
+
+void *
+bfd_malloc2 (bfd_size_type nmemb, bfd_size_type size)
+{
+  void *ptr;
+
+  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
+      && size != 0
+      && nmemb > ~(bfd_size_type) 0 / size)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  size *= nmemb;
+
+  if (size != (size_t) size)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  ptr = malloc ((size_t) size);
+  if (ptr == NULL && (size_t) size != 0)
+    bfd_set_error (bfd_error_no_memory);
+
+  return ptr;
+}
+
 /* Reallocate memory using realloc.  */
 
 void *
 bfd_realloc (void *ptr, bfd_size_type size)
 {
   void *ret;
+
+  if (size != (size_t) size)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  if (ptr == NULL)
+    ret = malloc ((size_t) size);
+  else
+    ret = realloc (ptr, (size_t) size);
+
+  if (ret == NULL && (size_t) size != 0)
+    bfd_set_error (bfd_error_no_memory);
+
+  return ret;
+}
+
+/* Reallocate memory using realloc, nmemb * size with overflow checking.  */
+
+void *
+bfd_realloc2 (void *ptr, bfd_size_type nmemb, bfd_size_type size)
+{
+  void *ret;
+
+  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
+      && size != 0
+      && nmemb > ~(bfd_size_type) 0 / size)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  size *= nmemb;
 
   if (size != (size_t) size)
     {
@@ -205,6 +269,44 @@ bfd_zmalloc (bfd_size_type size)
 
   return ptr;
 }
+
+/* Allocate memory using malloc (nmemb * size) with overflow checking
+   and clear it.  */
+
+void *
+bfd_zmalloc2 (bfd_size_type nmemb, bfd_size_type size)
+{
+  void *ptr;
+
+  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
+      && size != 0
+      && nmemb > ~(bfd_size_type) 0 / size)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  size *= nmemb;
+
+  if (size != (size_t) size)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  ptr = malloc ((size_t) size);
+
+  if ((size_t) size != 0)
+    {
+      if (ptr == NULL)
+	bfd_set_error (bfd_error_no_memory);
+      else
+	memset (ptr, 0, (size_t) size);
+    }
+
+  return ptr;
+}
+
 /*
 INTERNAL_FUNCTION
 	bfd_write_bigendian_4byte_int

@@ -93,6 +93,12 @@ extern void *bfd_realloc
   (void *, bfd_size_type);
 extern void *bfd_zmalloc
   (bfd_size_type);
+extern void *bfd_malloc2
+  (bfd_size_type, bfd_size_type);
+extern void *bfd_realloc2
+  (void *, bfd_size_type, bfd_size_type);
+extern void *bfd_zmalloc2
+  (bfd_size_type, bfd_size_type);
 
 extern void _bfd_default_error_handler (const char *s, ...);
 extern bfd_error_handler_type _bfd_error_handler;
@@ -103,6 +109,10 @@ extern void *bfd_alloc
   (bfd *, bfd_size_type);
 extern void *bfd_zalloc
   (bfd *, bfd_size_type);
+extern void *bfd_alloc2
+  (bfd *, bfd_size_type, bfd_size_type);
+extern void *bfd_zalloc2
+  (bfd *, bfd_size_type, bfd_size_type);
 extern void bfd_release
   (bfd *, void *);
 
