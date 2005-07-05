@@ -1,3 +1,8 @@
+2005-07-05  Peter S. Mazinger <ps.m@gmx.net>
+
+	* elf32-arm.c (elf32_arm_size_dynamic_sections): Fix a typo and
+	touchup logic like i386/ppc.
+
 2005-07-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (special_sections): Move const qualifier.

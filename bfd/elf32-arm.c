@@ -5932,7 +5932,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (!info->shared)
+     if (info->executable)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -5965,10 +5965,9 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	{
 	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return FALSE;
-	  info->flags |= DF_TEXTREL;
 	}
     }
-#undef add_synamic_entry
+#undef add_dynamic_entry
 
   return TRUE;
 }
