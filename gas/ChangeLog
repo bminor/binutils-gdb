@@ -1,3 +1,7 @@
+2005-07-05  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-ppc.c (ppc_target_format): Add VxWorks.
+
 2005-07-05  Aldy Hernandez  <aldyh@redhat.com>
 
 	* config/tc-ms1.c: New.

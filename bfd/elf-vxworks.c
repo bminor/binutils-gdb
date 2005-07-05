@@ -142,6 +142,8 @@ elf_vxworks_final_write_processing (bfd *abfd,
 
   sec = bfd_get_section_by_name (abfd, ".rel.plt.unloaded");
   if (!sec)
+    sec = bfd_get_section_by_name (abfd, ".rela.plt.unloaded");
+  if (!sec)
     return;
   d = elf_section_data (sec);
   d->this_hdr.sh_link = elf_tdata (abfd)->symtab_section;

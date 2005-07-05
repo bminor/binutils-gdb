@@ -1,3 +1,37 @@
+2005-05-07  Paul Brook  <paul@codesourcery.com>
+
+	* config.bfd: Add separate case for ppc-vxworks.
+	* configure: Regenerate.
+	* configure.in: Include elf-vxworks.lo on ppc targets.
+	* elf-vxworks.c (elf_vxworks_final_write_processing): Handle
+	.rela.plt.unloaded.
+	* elf32-ppc.c: Add VxWorks target vec.	Include elf-vxworks.h.
+	(PLT_ENTRY_SIZE, PLT_INITIAL_ENTRY_SIZE, PLT_SLOT_SIZE): Remove.
+	(VXWORKS_PLT_ENTRY_SIZE, ppc_elf_vxworks_plt_entry,
+	ppc_elf_vxworks_pic_plt_entry, VXWORKS_PLT_INITIAL_ENTRY_SIZE,
+	ppc_elf_vxworks_plt0_entry, ppc_elf_vxworks_pic_plt0_entry,
+	VXWORKS_PLT_NON_JMP_SLOT_RELOCS, VXWORKS_PLTRESOLVE_RELOCS,
+	VXWORKS_PLTRESOLVE_RELOCS_SHLIB): New.
+	(ppc_elf_link_hash_table): Add srelplt2, sgotplt, hgot, hplt,
+	is_vxworks, plt_entry_size, plt_slot_size, plt_initial_entry_size.
+	(ppc_elf_link_hash_table_create): Initialize hadtab plt fields.
+	(ppc_elf_create_got): Create .got.plt for VxWorks.
+	(ppc_elf_create_dynamic_sections): Create unloaded plt relocation
+	section for VxWorks.
+	(ppc_elf_select_plt_layout): Handle VxWorks plt format.
+	(allocate_got): VxWorks does not need a got header.
+	(allocate_dynrelocs): Handle VxWorks plt format.
+	(ppc_elf_size_dynamic_sections): Save _G_O_T_ and _P_L_T_ symbols for
+	VxWorks.  Handle VxWorks plt/got.
+	(ppc_elf_finish_dynamic_sections): Fill in VxWorks plt.
+	(ppc_elf_vxworks_special_sections): New.
+	(ppc_elf_vxworks_link_hash_table_create,
+	ppc_elf_vxworks_add_symbol_hook,
+	elf_i386_vxworks_link_output_symbol_hook,
+	ppc_elf_vxworks_final_write_processing): New functions.
+	* targets.c (bfd_elf32_powerpc_vxworks_vec): Declare.
+	(_bfd_target_vector): Use it.
+
 2005-07-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* libbfd-in.h (struct artdata): Add extended_names_size field.

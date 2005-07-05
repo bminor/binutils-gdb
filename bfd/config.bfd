@@ -1022,7 +1022,7 @@ case "${targ}" in
 #endif
   powerpc-*-*bsd* | powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
   powerpc-*-solaris2* | powerpc-*-linux-* | powerpc-*-rtems* | \
-  powerpc-*-chorus* | powerpc-*-vxworks* | powerpc-*-windiss*)
+  powerpc-*-chorus*)
     targ_defvec=bfd_elf32_powerpc_vec
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec ppcboot_vec"
     targ64_selvecs="bfd_elf64_powerpc_vec bfd_elf64_powerpcle_vec"
@@ -1052,6 +1052,11 @@ case "${targ}" in
   powerpc-*-nto*)
     targ_defvec=bfd_elf32_powerpc_vec
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec ppcboot_vec"
+    ;;
+  powerpc-*-vxworks* | powerpc-*-windiss*)
+    targ_defvec=bfd_elf32_powerpc_vxworks_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec bfd_elf32_powerpcle_vec ppcboot_vec"
+    targ64_selvecs="bfd_elf64_powerpc_vec bfd_elf64_powerpcle_vec"
     ;;
   powerpcle-*-nto*)
     targ_defvec=bfd_elf32_powerpcle_vec

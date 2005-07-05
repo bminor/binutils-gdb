@@ -1,5 +1,5 @@
 # If you change this file, please also look at files which source this one:
-# elf32lppc.sh elf32ppclinux.sh elf32ppcsim.sh
+# elf32lppc.sh elf32ppclinux.sh elf32ppcsim.sh elf32ppcvxworks.sh
 
 TEMPLATE_NAME=elf32
 EXTRA_EM_FILE=ppc32elf

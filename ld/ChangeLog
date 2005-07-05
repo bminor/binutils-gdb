@@ -1,3 +1,16 @@
+2005-05-07  Paul Brook  <paul@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32ppcvxworks.o.
+	(eelf32ppcvxworks.o): Add dependencies.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add entry for powerpc-vxworks.
+	* emulparams/elf32-ppc.c: Mention elf32ppcvxworks.sh in comment.
+	* emulparams/elf32ppcvxworks.sh: New file.
+	* emultempl/ppc32elf.em (bfd_elf32_powerpc_vxworks_vec): Declare.
+	(is_ppc_elf32_vec): New function.
+	(ppc_after_open, ppc_before_allocation,
+	gld${EMULATION_NAME}_after_allocation): Use it.
+
 2005-07-05  Peter S. Mazinger" <ps.m@gmx.net>
 
 	* emulparams/elf32bmip.sh (GENERATE_PIE_SCRIPT): Define as "yes".

@@ -28,6 +28,15 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 extern const bfd_target bfd_elf32_powerpc_vec;
 extern const bfd_target bfd_elf32_powerpcle_vec;
+extern const bfd_target bfd_elf32_powerpc_vxworks_vec;
+
+static inline int
+is_ppc_elf32_vec(const bfd_target * vec)
+{
+  return (vec == &bfd_elf32_powerpc_vec
+	  || vec == &bfd_elf32_powerpc_vxworks_vec
+	  || vec == &bfd_elf32_powerpcle_vec);
+}
 
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;
@@ -39,8 +48,7 @@ static int old_got = 0;
 static void
 ppc_after_open (void)
 {
-  if (link_info.hash->creator == &bfd_elf32_powerpc_vec
-      || link_info.hash->creator == &bfd_elf32_powerpcle_vec)
+  if (is_ppc_elf32_vec (link_info.hash->creator))
     {
       int new_plt;
       int keep_new;
@@ -95,8 +103,7 @@ ppc_after_open (void)
 static void
 ppc_before_allocation (void)
 {
-  if (link_info.hash->creator == &bfd_elf32_powerpc_vec
-      || link_info.hash->creator == &bfd_elf32_powerpcle_vec)
+  if (is_ppc_elf32_vec (link_info.hash->creator))
     {
       if (ppc_elf_tls_setup (output_bfd, &link_info) && !notlsopt)
 	{
@@ -113,9 +120,7 @@ ppc_before_allocation (void)
 static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
-  if ((link_info.hash->creator == &bfd_elf32_powerpc_vec
-       || link_info.hash->creator == &bfd_elf32_powerpcle_vec)
-      && !link_info.relocatable)
+  if (is_ppc_elf32_vec (link_info.hash->creator))
     {
       if (!ppc_elf_set_sdata_syms (output_bfd, &link_info))
 	einfo ("%X%P: cannot set sdata syms %E\n");

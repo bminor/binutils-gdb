@@ -1,3 +1,9 @@
+2005-05-07  Paul Brook  <paul@codesourcery.com>
+
+	* gas/ppc/altivec.d: Match all powerpc target vecs.
+	* gas/ppc/booke.d: Ditto.
+	* gas/ppc/e500.d: Ditto.
+
 2005-07-05  Aldy Hernandez  <aldyh@redhat.com>
 
 	* gas/ms1: New directory.

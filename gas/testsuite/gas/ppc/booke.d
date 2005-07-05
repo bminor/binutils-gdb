@@ -2,7 +2,7 @@
 #objdump: -dr -Mbooke
 #name: BookE tests
 
-.*: +file format elf(32)?(64)?-powerpc
+.*: +file format elf(32)?(64)?-powerpc.*
 
 Disassembly of section \.text:
 
