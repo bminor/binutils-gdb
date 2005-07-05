@@ -1,3 +1,9 @@
+2005-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: New Vietnamese translation.
+	* configure.in (ALL_LINGUAS): Add vi.
+	* configure: Regenerate.
+
 2005-07-05  Peter S. Mazinger <ps.m@gmx.net>
 
 	* elf32-arm.c (elf32_arm_size_dynamic_sections): Fix a typo and
