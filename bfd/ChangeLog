@@ -1,8 +1,15 @@
+2005-07-05  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_vxworks_special_sections): Remove.
+	(ppc_elf_vxworks_get_sec_type_attr): New function.
+	(elf_backend_special_sections): Remove vxwords definition.
+	(elf_backend_get_sec_type_attr): Define for vxworks.
+
 2005-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* elf64-ppc.c (ppc64_elf_info_to_howto): Fix typo.
 
-2005-05-07  Paul Brook  <paul@codesourcery.com>
+2005-07-05  Paul Brook  <paul@codesourcery.com>
 
 	* config.bfd: Add separate case for ppc-vxworks.
 	* configure: Regenerate.

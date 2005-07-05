@@ -7388,39 +7388,18 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME		"elf32-powerpc-vxworks"
 
-/* This is the same as ppc_elf_special_sections except it does not include
-   the entry for .plt.  */
-static struct bfd_elf_special_section const *
-  ppc_elf_vxworks_special_sections[27]=
+/* VxWorks uses the elf default section flags for .plt.  */
+static const struct bfd_elf_special_section *
+ppc_elf_vxworks_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
-  NULL,				/* 'a' */
-  NULL,				/* 'b' */
-  NULL,				/* 'c' */
-  NULL,				/* 'd' */
-  NULL,				/* 'e' */
-  NULL,				/* 'f' */
-  NULL,				/* 'g' */
-  NULL,				/* 'h' */
-  NULL,				/* 'i' */
-  NULL,				/* 'j' */
-  NULL,				/* 'k' */
-  NULL,				/* 'l' */
-  NULL,				/* 'm' */
-  NULL,				/* 'n' */
-  NULL,				/* 'o' */
-  NULL,				/* 'p' */
-  NULL,				/* 'q' */
-  NULL,				/* 'r' */
-  ppc_special_sections_s,	/* 's' */
-  ppc_special_sections_t,	/* 's' */
-  NULL,				/* 'u' */
-  NULL,				/* 'v' */
-  NULL,				/* 'w' */
-  NULL,				/* 'x' */
-  NULL,				/* 'y' */
-  NULL,				/* 'z' */
-  ppc_special_sections_other,	/* other */
-};
+  if (sec->name == NULL)
+    return NULL;
+
+  if (strcmp (sec->name, ".plt") == 0)
+    return _bfd_elf_get_sec_type_attr (abfd, sec);
+
+  return ppc_elf_get_sec_type_attr (abfd, sec);
+}
 
 /* Like ppc_elf_link_hash_table_create, but overrides
    appropriately for VxWorks.  */
@@ -7501,9 +7480,6 @@ ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #undef bfd_elf32_bfd_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_create \
   ppc_elf_vxworks_link_hash_table_create
-#undef elf_backend_special_sections
-#define elf_backend_special_sections \
-  ppc_elf_vxworks_special_sections
 #undef elf_backend_add_symbol_hook
 #define elf_backend_add_symbol_hook \
   ppc_elf_vxworks_add_symbol_hook
@@ -7513,6 +7489,9 @@ ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #undef elf_backend_final_write_processing
 #define elf_backend_final_write_processing \
   ppc_elf_vxworks_final_write_processing
+#undef elf_backend_get_sec_type_attr
+#define elf_backend_get_sec_type_attr \
+  ppc_elf_vxworks_get_sec_type_attr
 #undef elf_backend_emit_relocs
 #define elf_backend_emit_relocs \
   elf_vxworks_emit_relocs
