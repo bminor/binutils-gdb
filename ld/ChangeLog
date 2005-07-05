@@ -1,3 +1,8 @@
+2005-07-05  Peter S. Mazinger" <ps.m@gmx.net>
+
+	* emulparams/elf32bmip.sh (GENERATE_PIE_SCRIPT): Define as "yes".
+	* emulparams/elf32bmipn32-defs.sh (GENERATE_PIE_SCRIPT): Define as "yes".
+
 2005-07-04  Mike Frysinger <vapier@gentoo.org>
 
 	* emulparams/hppalinux.sh (GENERATE_PIE_SCRIPT): Fix typo in
