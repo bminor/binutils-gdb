@@ -1,3 +1,9 @@
+2005-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-pdp11.c (md_apply_fix): Cast first argument to
+	md_chars_to_numbers to an unsigned pointer in order to avoid a
+	compile time warning.
+
 2005-07-05  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-ppc.c (ppc_target_format): Add VxWorks.

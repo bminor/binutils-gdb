@@ -1,3 +1,13 @@
+2005-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* iq2000.opc (parse_lo16, parse_mlo16): Make value parameter
+	unsigned in order to avoid compile time warnings about sign
+	conflicts.
+
+	* ms1.opc (parse_*): Likewise.
+	(parse_imm16): Use a "void *" as it is passed both signed and
+	unsigned arguments.
+
 2005-07-01  Nick Clifton  <nickc@redhat.com>
 
 	* frv.opc: Update to ISO C90 function declaration style.

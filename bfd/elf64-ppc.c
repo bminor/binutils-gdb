@@ -2121,8 +2121,8 @@ ppc64_elf_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
 	       / sizeof (ppc64_elf_howto_table[0])))
     {
       (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
-			     abfd, (int) r_type);
-      r_type = R_PPC64_NONE;
+			     abfd, (int) type);
+      type = R_PPC64_NONE;
     }
   cache_ptr->howto = ppc64_elf_howto_table[type];
 }

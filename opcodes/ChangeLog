@@ -1,3 +1,8 @@
+2005-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* iq2000-asm.c: Regenerate.
+	* ms1-asm.c: Regenerate.
+
 2005-07-05  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (SVME_Fixup): New.

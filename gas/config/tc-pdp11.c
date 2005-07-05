@@ -243,7 +243,7 @@ md_apply_fix (fixS *fixP,
 
   buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   size = fixP->fx_size;
-  code = md_chars_to_number (buf, size);
+  code = md_chars_to_number ((unsigned char *) buf, size);
 
   switch (fixP->fx_r_type)
     {

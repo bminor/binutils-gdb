@@ -255,7 +255,7 @@ static const char *
 parse_lo16 (CGEN_CPU_DESC cd,
 	    const char **strp,
 	    int opindex,
-	    long *valuep)
+	    unsigned long *valuep)
 {
   if (strncasecmp (*strp, "%lo(", 4) == 0)
     {
@@ -287,7 +287,7 @@ static const char *
 parse_mlo16 (CGEN_CPU_DESC cd,
 	     const char **strp,
 	     int opindex,
-	     long *valuep)
+	     unsigned long *valuep)
 {
   if (strncasecmp (*strp, "%lo(", 4) == 0)
     {

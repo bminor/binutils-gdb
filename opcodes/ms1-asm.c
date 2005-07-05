@@ -49,16 +49,6 @@ static const char * parse_insn_normal
 /* -- assembler routines inserted here.  */
 
 /* -- asm.c */
-static int signed_out_of_bounds (long);
-static const char * parse_imm16 (CGEN_CPU_DESC, const char **, int, long *);
-static const char * parse_dup   (CGEN_CPU_DESC, const char **, int, long *);
-static const char * parse_ball  (CGEN_CPU_DESC, const char **, int, long *);
-static const char * parse_xmode (CGEN_CPU_DESC, const char **, int, long *);
-static const char * parse_rc    (CGEN_CPU_DESC, const char **, int, long *);
-static const char * parse_cbrb  (CGEN_CPU_DESC, const char **, int, long *);
-static const char * parse_rbbc  (CGEN_CPU_DESC, const char **, int, long *);
-static const char * parse_type  (CGEN_CPU_DESC, const char **, int, long *);
-
 /* Range checking for signed numbers.  Returns 0 if acceptable
    and 1 if the value is out of bounds for a signed quantity.  */
 
@@ -74,8 +64,9 @@ static const char *
 parse_imm16 (CGEN_CPU_DESC cd,
 	     const char **strp,
 	     int opindex,
-	     long *valuep)
+	     void *arg)
 {
+  signed long * valuep = (signed long *) arg;
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
   bfd_reloc_code_real_type code = BFD_RELOC_NONE;
@@ -178,9 +169,9 @@ parse_imm16 (CGEN_CPU_DESC cd,
       else  
 	{
           /* MS1_OPERAND_IMM16Z.  Parse as an unsigned integer.  */
-          errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+          errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, (unsigned long *) valuep);
 
-	  if (opindex == (CGEN_OPERAND_TYPE)MS1_OPERAND_IMM16
+	  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16
 	      && *valuep >= 0x8000
 	      && *valuep <= 0xffff)
 	    *valuep -= 0x10000;
@@ -195,7 +186,7 @@ static const char *
 parse_dup (CGEN_CPU_DESC cd,
 	   const char **strp,
 	   int opindex,
-	   long *valuep)
+	   unsigned long *valuep)
 {
   const char *errmsg = NULL;
 
@@ -220,7 +211,7 @@ static const char *
 parse_ball (CGEN_CPU_DESC cd,
 	    const char **strp,
 	    int opindex,
-	    long *valuep)
+	    unsigned long *valuep)
 {
   const char *errmsg = NULL;
 
@@ -244,7 +235,7 @@ static const char *
 parse_xmode (CGEN_CPU_DESC cd,
 	     const char **strp,
 	     int opindex,
-	     long *valuep)
+	     unsigned long *valuep)
 {
   const char *errmsg = NULL;
 
@@ -268,7 +259,7 @@ static const char *
 parse_rc (CGEN_CPU_DESC cd,
 	  const char **strp,
 	  int opindex,
-	  long *valuep)
+	  unsigned long *valuep)
 {
   const char *errmsg = NULL;
 
@@ -292,7 +283,7 @@ static const char *
 parse_cbrb (CGEN_CPU_DESC cd,
 	    const char **strp,
 	    int opindex,
-	    long *valuep)
+	    unsigned long *valuep)
 {
   const char *errmsg = NULL;
 
@@ -316,7 +307,7 @@ static const char *
 parse_rbbc (CGEN_CPU_DESC cd,
 	    const char **strp,
 	    int opindex,
-	    long *valuep)
+	    unsigned long *valuep)
 {
   const char *errmsg = NULL;
 
@@ -350,7 +341,7 @@ static const char *
 parse_type (CGEN_CPU_DESC cd,
 	    const char **strp,
 	    int opindex,
-	    long *valuep)
+	    unsigned long *valuep)
 {
   const char *errmsg = NULL;
 

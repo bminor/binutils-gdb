@@ -1,3 +1,7 @@
+2005-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* elf64-ppc.c (ppc64_elf_info_to_howto): Fix typo.
+
 2005-05-07  Paul Brook  <paul@codesourcery.com>
 
 	* config.bfd: Add separate case for ppc-vxworks.
