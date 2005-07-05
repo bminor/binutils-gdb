@@ -1,3 +1,9 @@
+2005-07-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (bfd_elf_get_str_section): Allocate an extra byte after
+	the end of strtab and clear it.
+	(elf_read): Remove.
+
 2005-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: New Vietnamese translation.

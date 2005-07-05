@@ -206,28 +206,6 @@ bfd_elf_hash (const char *namearg)
   return h & 0xffffffff;
 }
 
-/* Read a specified number of bytes at a specified offset in an ELF
-   file, into a newly allocated buffer, and return a pointer to the
-   buffer.  */
-
-static bfd_byte *
-elf_read (bfd *abfd, file_ptr offset, bfd_size_type size)
-{
-  bfd_byte *buf;
-
-  if ((buf = bfd_alloc (abfd, size)) == NULL)
-    return NULL;
-  if (bfd_seek (abfd, offset, SEEK_SET) != 0)
-    return NULL;
-  if (bfd_bread (buf, size, abfd) != size)
-    {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_file_truncated);
-      return NULL;
-    }
-  return buf;
-}
-
 bfd_boolean
 bfd_elf_mkobject (bfd *abfd)
 {
@@ -267,7 +245,21 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
       /* No cached one, attempt to read, and cache what we read.  */
       offset = i_shdrp[shindex]->sh_offset;
       shstrtabsize = i_shdrp[shindex]->sh_size;
-      shstrtab = elf_read (abfd, offset, shstrtabsize);
+
+      /* Allocate and clear an extra byte at the end, to prevent crashes
+	 in case the string table is not terminated.  */
+      if (shstrtabsize + 1 == 0
+	  || (shstrtab = bfd_alloc (abfd, shstrtabsize + 1)) == NULL
+	  || bfd_seek (abfd, offset, SEEK_SET) != 0)
+	shstrtab = NULL;
+      else if (bfd_bread (shstrtab, shstrtabsize, abfd) != shstrtabsize)
+	{
+	  if (bfd_get_error () != bfd_error_system_call)
+	    bfd_set_error (bfd_error_file_truncated);
+	  shstrtab = NULL;
+	}
+      else
+	shstrtab[shstrtabsize] = '\0';
       i_shdrp[shindex]->contents = shstrtab;
     }
   return (char *) shstrtab;
