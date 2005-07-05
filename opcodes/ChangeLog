@@ -1,3 +1,10 @@
+2005-07-05  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (SVME_Fixup): New.
+	(grps): Use it for the lidt entry.
+	(PNI_Fixup): Call OP_M rather than OP_E.
+	(INVLPG_Fixup): Likewise.
+
 2005-07-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* tic30-dis.c (cnvt_tmsfloat_ieee): Use HUGE_VALF if defined.

@@ -429,12 +429,15 @@ static const arch_entry cpu_arch[] = {
   {"k6_2",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuK6|CpuMMX|Cpu3dnow },
   {"athlon",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA },
   {"sledgehammer",Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2 },
+  {"opteron",	Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuK6|CpuAthlon|CpuSledgehammer|CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA|CpuSSE|CpuSSE2 },
   {".mmx",	CpuMMX },
   {".sse",	CpuMMX|CpuMMX2|CpuSSE },
   {".sse2",	CpuMMX|CpuMMX2|CpuSSE|CpuSSE2 },
   {".3dnow",	CpuMMX|Cpu3dnow },
   {".3dnowa",	CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA },
   {".padlock",	CpuPadLock },
+  {".pacifica",	CpuSVME },
+  {".svme",	CpuSVME },
   {NULL, 0 }
 };
 
@@ -1403,6 +1406,7 @@ md_assemble (line)
      have two immediate operands.  */
   if (intel_syntax && i.operands > 1
       && (strcmp (mnemonic, "bound") != 0)
+      && (strcmp (mnemonic, "invlpga") != 0)
       && !((i.types[0] & Imm) && (i.types[1] & Imm)))
     swap_operands ();
 
@@ -2846,8 +2850,10 @@ process_operands ()
       default_seg = &ds;
     }
 
-  if (i.tm.base_opcode == 0x8d /* lea */ && i.seg[0] && !quiet_warnings)
-    as_warn (_("segment override on `lea' is ineffectual"));
+  if ((i.tm.base_opcode == 0x8d /* lea */
+       || (i.tm.cpu_flags & CpuSVME))
+      && i.seg[0] && !quiet_warnings)
+    as_warn (_("segment override on `%s' is ineffectual"), i.tm.name);
 
   /* If a segment was explicitly specified, and the specified segment
      is not the default, use an opcode prefix to select it.  If we
@@ -4194,7 +4200,30 @@ i386_index_check (operand_string)
  tryprefix:
 #endif
   ok = 1;
-   if (flag_code == CODE_64BIT)
+  if ((current_templates->start->cpu_flags & CpuSVME)
+      && current_templates->end[-1].operand_types[0] == AnyMem)
+    {
+      /* Memory operands of SVME insns are special in that they only allow
+	 rAX as their memory address and ignore any segment override.  */
+      unsigned RegXX;
+
+      /* SKINIT is even more restrictive: it always requires EAX.  */
+      if (strcmp (current_templates->start->name, "skinit") == 0)
+	RegXX = Reg32;
+      else if (flag_code == CODE_64BIT)
+	RegXX = i.prefix[ADDR_PREFIX] == 0 ? Reg64 : Reg32;
+      else
+	RegXX = (flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0)
+		? Reg16
+		: Reg32;
+      if (!i.base_reg
+	  || !(i.base_reg->reg_type & Acc)
+	  || !(i.base_reg->reg_type & RegXX)
+	  || i.index_reg
+	  || (i.types[0] & Disp))
+	ok = 0;
+    }
+  else if (flag_code == CODE_64BIT)
      {
        unsigned RegXX = (i.prefix[ADDR_PREFIX] == 0 ? Reg64 : Reg32);
 

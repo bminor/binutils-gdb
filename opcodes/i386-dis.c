@@ -95,6 +95,7 @@ static void OP_3DNowSuffix (int, int);
 static void OP_SIMD_Suffix (int, int);
 static void SIMD_Fixup (int, int);
 static void PNI_Fixup (int, int);
+static void SVME_Fixup (int, int);
 static void INVLPG_Fixup (int, int);
 static void BadOp (void);
 static void SEG_Fixup (int, int);
@@ -1374,7 +1375,7 @@ static const struct dis386 grps[][8] = {
     { "sgdtIQ",	 M, XX, XX },
     { "sidtIQ", PNI_Fixup, 0, XX, XX },
     { "lgdt{Q|Q||}",	 M, XX, XX },
-    { "lidt{Q|Q||}",	 M, XX, XX },
+    { "lidt{Q|Q||}",	 SVME_Fixup, 0, XX, XX },
     { "smswQ",	Ev, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "lmsw",	Ew, XX, XX },
@@ -4445,7 +4446,77 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
       codep++;
     }
   else
-    OP_E (0, sizeflag);
+    OP_M (0, sizeflag);
+}
+
+static void
+SVME_Fixup (int bytemode, int sizeflag)
+{
+  const char *alt;
+  char *p;
+
+  switch (*codep)
+    {
+    case 0xd8:
+      alt = "vmrun";
+      break;
+    case 0xd9:
+      alt = "vmmcall";
+      break;
+    case 0xda:
+      alt = "vmload";
+      break;
+    case 0xdb:
+      alt = "vmsave";
+      break;
+    case 0xdc:
+      alt = "stgi";
+      break;
+    case 0xdd:
+      alt = "clgi";
+      break;
+    case 0xde:
+      alt = "skinit";
+      break;
+    case 0xdf:
+      alt = "invlpga";
+      break;
+    default:
+      OP_M (bytemode, sizeflag);
+      return;
+    }
+  /* Override "lidt".  */
+  p = obuf + strlen (obuf) - 4;
+  /* We might have a suffix.  */
+  if (*p == 'i')
+    --p;
+  strcpy (p, alt);
+  if (!(prefixes & PREFIX_ADDR))
+    {
+      ++codep;
+      return;
+    }
+  used_prefixes |= PREFIX_ADDR;
+  switch (*codep++)
+    {
+    case 0xdf:
+      strcpy (op2out, names32[1]);
+      two_source_ops = 1;
+	  /* Fall through.  */
+    case 0xd8:
+    case 0xda:
+    case 0xdb:
+      *obufp++ = open_char;
+      if (mode_64bit || (sizeflag & AFLAG))
+        alt = names32[0];
+      else
+        alt = names16[0];
+      strcpy (obufp, alt);
+      obufp += strlen (alt);
+      *obufp++ = close_char;
+      *obufp = '\0';
+      break;
+    }
 }
 
 static void
@@ -4462,7 +4533,7 @@ INVLPG_Fixup (int bytemode, int sizeflag)
       alt = "rdtscp";
       break;
     default:
-      OP_E (bytemode, sizeflag);
+      OP_M (bytemode, sizeflag);
       return;
     }
   /* Override "invlpg".  */

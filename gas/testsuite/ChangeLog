@@ -1,3 +1,10 @@
+2005-07-05  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/svme.d: New.
+	* gas/i386/svme.s: New.
+	* gas/i386/svme64.d: New.
+	* gas/i386/i386.exp: Run new tests.
+
 2005-07-04  Zack Weinberg  <zack@codesourcery.com>
 
 	* lib/gas-defs.exp (run_dump_tests): New proc.
