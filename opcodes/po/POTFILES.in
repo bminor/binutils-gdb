@@ -5,7 +5,6 @@ arc-dis.c
 arc-ext.c
 arc-opc.c
 arm-dis.c
-arm-opc.h
 avr-dis.c
 cgen-asm.c
 cgen-dis.c
@@ -96,6 +95,13 @@ mips-dis.c
 mips-opc.c
 mmix-dis.c
 mmix-opc.c
+ms1-asm.c
+ms1-desc.c
+ms1-desc.h
+ms1-dis.c
+ms1-ibld.c
+ms1-opc.c
+ms1-opc.h
 ns32k-dis.c
 openrisc-asm.c
 openrisc-desc.c

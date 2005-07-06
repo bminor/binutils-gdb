@@ -424,9 +424,10 @@ stamp-ip2k: $(CGENDEPS) $(CPUDIR)/ip2k.cpu $(CPUDIR)/ip2k.opc
 
 $(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
 	@true
-stamp-m32r: $(CGENDEPS) $(CPUDIR)/m32r.cpu $(CPUDIR)/m32r.opc
+stamp-m32r: $(CGENDEPS) $(srcdir)/../cpu/m32r.cpu $(srcdir)/../cpu/m32r.opc
 	$(MAKE) run-cgen arch=m32r prefix=m32r options=opinst \
-		archfile=$(CPUDIR)/m32r.cpu opcfile=$(CPUDIR)/m32r.opc extrafiles=opinst
+		archfile=$(srcdir)/../cpu/m32r.cpu \
+		opcfile=$(srcdir)/../cpu/m32r.opc extrafiles=opinst
 
 $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-opc.c $(srcdir)/fr30-ibld.c $(srcdir)/fr30-asm.c $(srcdir)/fr30-dis.c: $(FR30_DEPS)
 	@true
@@ -442,9 +443,10 @@ stamp-frv: $(CGENDEPS) $(srcdir)/../cpu/frv.cpu $(srcdir)/../cpu/frv.opc
 
 $(srcdir)/ms1-desc.h $(srcdir)/ms1-desc.c $(srcdir)/ms1-opc.h $(srcdir)/ms1-opc.c $(srcdir)/ms1-ibld.c $(srcdir)/ms1-asm.c $(srcdir)/ms1-dis.c: $(MS1_DEPS)
 	@true
-stamp-ms1: $(CGENDEPS) $(CPUDIR)/ms1.cpu $(CPUDIR)/ms1.opc
+stamp-ms1: $(CGENDEPS) $(srcdir)/../cpu/ms1.cpu $(srcdir)/../cpu/ms1.opc
 	$(MAKE) run-cgen arch=ms1 prefix=ms1 options= \
-		archfile=$(CPUDIR)/ms1.cpu opcfile=$(CPUDIR)/ms1.opc extrafiles=
+		archfile=$(srcdir)/../cpu/ms1.cpu \
+		opcfile=$(srcdir)/../cpu/ms1.opc extrafiles=
 
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true
@@ -454,10 +456,12 @@ stamp-openrisc: $(CGENDEPS) $(CPUDIR)/openrisc.cpu $(CPUDIR)/openrisc.opc
 
 $(srcdir)/iq2000-desc.h $(srcdir)/iq2000-desc.c $(srcdir)/iq2000-opc.h $(srcdir)/iq2000-opc.c $(srcdir)/iq2000-ibld.c $(srcdir)/iq2000-asm.c $(srcdir)/iq2000-dis.c: $(IQ2000_DEPS)
 	@true
-stamp-iq2000: $(CGENDEPS) $(CPUDIR)/iq2000.cpu $(CPUDIR)/iq2000.opc \
-	$(CPUDIR)/iq2000m.cpu $(CPUDIR)/iq10.cpu
+stamp-iq2000: $(CGENDEPS) $(srcdir)/../cpu/iq2000.cpu \
+		$(srcdir)/../cpu/iq2000.opc $(srcdir)/../cpu/iq2000m.cpu \
+		$(srcdir)/../cpu/iq10.cpu
 	$(MAKE) run-cgen arch=iq2000 prefix=iq2000 options= \
-		archfile=$(CPUDIR)/iq2000.cpu opcfile=$(CPUDIR)/iq2000.opc extrafiles=
+		archfile=$(srcdir)/../cpu/iq2000.cpu \
+		opcfile=$(srcdir)/../cpu/iq2000.opc extrafiles=
 
 $(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
 	@true

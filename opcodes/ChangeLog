@@ -1,3 +1,12 @@
+2005-07-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (stamp-m32r): Fix path to cpu files.
+	(stamp-m32r, stamp-iq2000): Likewise.
+	* Makefile.in: Regenerate.
+	* m32r-asm.c: Regenerate.
+	* po/POTFILES.in: Remove arm-opc.h.  Add ms1-asm.c, ms1-desc.c,
+	ms1-desc.h, ms1-dis.c, ms1-ibld.c, ms1-opc.c, ms1-opc.h.
+
 2005-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* iq2000-asm.c: Regenerate.

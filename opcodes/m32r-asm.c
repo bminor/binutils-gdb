@@ -49,7 +49,6 @@ static const char * parse_insn_normal
 /* -- assembler routines inserted here.  */
 
 /* -- asm.c */
-
 static const char * MISSING_CLOSING_PARENTHESIS = N_("missing `)'");
 
 /* Handle '#' prefixes (i.e. skip over them).  */
@@ -120,7 +119,10 @@ parse_hi16 (CGEN_CPU_DESC cd,
    handles the case where low() isn't present.  */
 
 static const char *
-parse_slo16 (CGEN_CPU_DESC cd, const char ** strp, int opindex, long * valuep)
+parse_slo16 (CGEN_CPU_DESC cd,
+	     const char ** strp,
+	     int opindex,
+	     long * valuep)
 {
   const char *errmsg;
   enum cgen_parse_operand_result result_type;
