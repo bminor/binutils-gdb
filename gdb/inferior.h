@@ -103,9 +103,10 @@ extern void set_sigio_trap (void);
 
 extern void clear_sigio_trap (void);
 
-/* File name for default use for standard in/out in the inferior.  */
+/* Set/get file name for default use for standard in/out in the inferior.  */
 
-extern char *inferior_io_terminal;
+extern void set_inferior_io_terminal (const char *terminal_name);
+extern const char *get_inferior_io_terminal (void);
 
 /* Collected pid, tid, etc. of the debugged inferior.  When there's
    no inferior, PIDGET (inferior_ptid) will be 0. */
@@ -264,7 +265,7 @@ extern char *construct_inferior_arguments (struct gdbarch *, int, char **);
 
 /* From inflow.c */
 
-extern void new_tty_prefork (char *);
+extern void new_tty_prefork (const char *);
 
 extern int gdb_has_a_terminal (void);
 

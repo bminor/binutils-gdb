@@ -138,6 +138,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   char **save_our_env;
   int shell = 0;
   static char **argv;
+  const char *inferior_io_terminal = get_inferior_io_terminal ();
 
   /* If no exec file handed to us, get it from the exec-file command
      -- with a good, common error message if none is specified.  */

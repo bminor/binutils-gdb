@@ -1,3 +1,9 @@
+2005-07-06  Bob Rossi  <bob@brasko.net>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Add -inferior-tty-set
+	and -inferior-tty-show.
+	(Input/Output): Document "set/show inferior-tty" and tty alias.
+
 2005-07-02  Nathan J. Williams  <nathanw@wasabisystems.com>
 
 	* gdb.texinfo (Packets): Change description of 'D' packet to note

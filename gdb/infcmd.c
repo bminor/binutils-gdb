@@ -136,7 +136,7 @@ static char **inferior_argv;
 
 /* File name for default use for standard in/out in the inferior.  */
 
-char *inferior_io_terminal;
+static char *inferior_io_terminal;
 
 /* Pid of our debugged inferior, or 0 if no inferior now.
    Since various parts of infrun.c test this to see whether there is a program
@@ -202,6 +202,24 @@ int step_multi;
 struct gdb_environ *inferior_environ;
 
 /* Accessor routines. */
+
+void 
+set_inferior_io_terminal (const char *terminal_name)
+{
+  if (inferior_io_terminal)
+    xfree (inferior_io_terminal);
+
+  if (!terminal_name)
+    inferior_io_terminal = NULL;
+  else
+    inferior_io_terminal = savestring (terminal_name, strlen (terminal_name));
+}
+
+const char *
+get_inferior_io_terminal (void)
+{
+  return inferior_io_terminal;
+}
 
 char *
 get_inferior_args (void)
@@ -376,7 +394,7 @@ tty_command (char *file, int from_tty)
   if (file == 0)
     error_no_arg (_("terminal name for running target process"));
 
-  inferior_io_terminal = savestring (file, strlen (file));
+  set_inferior_io_terminal (file);
 }
 
 /* Kill the inferior if already running.  This function is designed
@@ -1988,11 +2006,15 @@ unset_command (char *args, int from_tty)
 void
 _initialize_infcmd (void)
 {
-  struct cmd_list_element *c;
+  struct cmd_list_element *c = NULL;
 
-  c = add_com ("tty", class_run, tty_command,
-	       _("Set terminal for future runs of program being debugged."));
-  set_cmd_completer (c, filename_completer);
+  /* add the filename of the terminal connected to inferior I/O */
+  add_setshow_filename_cmd ("inferior-tty", class_run,
+			    &inferior_io_terminal, _("\
+Set terminal for future runs of program being debugged."), _("\
+Show terminal for future runs of program being debugged."), _("\
+Usage: set inferior-tty /dev/pts/1"), NULL, NULL, &setlist, &showlist);
+  add_com_alias ("tty", "set inferior-tty", class_alias, 0);
 
   add_setshow_optional_filename_cmd ("args", class_run,
 				     &inferior_args, _("\

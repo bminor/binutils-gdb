@@ -1,4 +1,4 @@
-# Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -236,12 +236,42 @@ proc test_path_specification {} {
 
 } 
 
+proc test_setshow_inferior_tty {} {
+    global mi_gdb_prompt
+
+    # Test that the commands,
+    #   -inferior-tty-set
+    #   -inferior-tty-show
+    # are setting/getting the same data in GDB.
+
+    mi_gdb_test "301-inferior-tty-show" \
+		"301\\\^done" \
+		"initial tty is empty"
+
+    mi_gdb_test "302-inferior-tty-set /dev/pts/1" \
+		"302\\\^done" \
+		"set tty to /dev/pts/1"
+
+    mi_gdb_test "303-inferior-tty-show" \
+		"303\\\^done,inferior_tty_terminal=\"/dev/pts/1\"" \
+		"tty was set correctly"
+
+    mi_gdb_test "304-inferior-tty-set" \
+		"304\\\^done" \
+		"set tty to the empty string"
+
+    mi_gdb_test "305-inferior-tty-show" \
+		"305\\\^done" \
+		"final tty is empty"
+}
+
 if [test_mi_interpreter_selection] {
   test_exec_and_symbol_mi_operatons
   test_breakpoints_deletion
   test_dir_specification
   test_cwd_specification
   test_path_specification
+  test_setshow_inferior_tty
 }
 
 mi_gdb_exit

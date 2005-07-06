@@ -91,6 +91,8 @@ struct mi_cmd mi_cmds[] =
   { "gdb-show", { "show", 1 }, NULL, NULL },
   { "gdb-source", { NULL, 0 }, NULL, NULL },
   { "gdb-version", { "show version", 0 }, 0 },
+  { "inferior-tty-set", { NULL, 0 }, NULL, mi_cmd_inferior_tty_set},
+  { "inferior-tty-show", { NULL, 0 }, NULL, mi_cmd_inferior_tty_show},
   { "interpreter-exec", { NULL, 0 }, 0, mi_cmd_interpreter_exec},
   { "kod-info", { NULL, 0 }, NULL, NULL },
   { "kod-list", { NULL, 0 }, NULL, NULL },

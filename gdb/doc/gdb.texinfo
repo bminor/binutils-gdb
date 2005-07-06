@@ -2095,7 +2095,24 @@ terminal.
 
 When you use the @code{tty} command or redirect input in the @code{run}
 command, only the input @emph{for your program} is affected.  The input
-for @value{GDBN} still comes from your terminal.
+for @value{GDBN} still comes from your terminal.  @code{tty} is an alias
+for @code{set inferior-tty}.
+
+@cindex inferior tty
+@cindex set inferior controlling terminal
+You can use the @code{show inferior-tty} command to tell @value{GDBN} to
+display the name of the terminal that will be used for future runs of your
+program.
+
+@table @code
+@item set inferior-tty /dev/ttyb
+@kindex set inferior-tty
+Set the tty for the program being debugged to /dev/ttyb.
+
+@item show inferior-tty
+@kindex show inferior-tty
+Show the current tty for the program being debugged.
+@end table
 
 @node Attach
 @section Debugging an already-running process
@@ -19178,6 +19195,57 @@ The corresponding @value{GDBN} command is @samp{interpreter-exec}.
 &"During symbol reading, bad structure-type format.\n"
 ~"Breakpoint 1 at 0x8074fc6: file ../../src/gdb/main.c, line 743.\n"
 ^done
+(@value{GDBP})
+@end smallexample
+
+@subheading The @code{-inferior-tty-set} Command
+@findex -inferior-tty-set
+
+@subheading Synopsis
+
+@smallexample
+-inferior-tty-set /dev/pts/1
+@end smallexample
+
+Set terminal for future runs of the program being debugged.
+
+@subheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{set inferior-tty /dev/pts/1}.
+
+@subheading Example
+
+@smallexample
+(@value{GDBP})
+-inferior-tty-set /dev/pts/1
+^done
+(@value{GDBP})
+@end smallexample
+
+@subheading The @code{-inferior-tty-show} Command
+@findex -inferior-tty-show
+
+@subheading Synopsis
+
+@smallexample
+-inferior-tty-show
+@end smallexample
+
+Show terminal for future runs of program being debugged.
+
+@subheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{show inferior-tty /dev/pts/1}.
+
+@subheading Example
+
+@smallexample
+(@value{GDBP})
+-inferior-tty-set /dev/pts/1
+^done
+(@value{GDBP})
+-inferior-tty-show
+^done,inferior_tty_terminal="/dev/pts/1"
 (@value{GDBP})
 @end smallexample
 

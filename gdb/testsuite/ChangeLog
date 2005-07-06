@@ -1,3 +1,9 @@
+2005-07-06  Bob Rossi  <bob@brasko.net>
+
+	* gdb.mi/mi-basics.exp (test_setshow_inferior_tty): Test MI tty
+	command.
+	(Copyright): Update copyright.
+
 2005-07-06  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* gdb.fortran/exprs.exp (test_arithmetic_expressions): Add five

@@ -1,3 +1,28 @@
+2005-07-06  Bob Rossi  <bob@brasko.net>
+
+	* fork-child.c (fork-inferior): Use accessor function for
+	inferior_io_terminal.
+	* infcmd.c (inferior_io_terminal): Make static.
+	(set_inferior_io_terminal): New function.
+	(get_inferior_io_terminal): Ditto.
+	(tty_command): Use accessor function.
+	(_initialize_infcmd): Add inferior_tty setshow variable.
+	(_initialize_infcmd): Remove tty command.
+	(_initialize_infcmd): Add a tty command that is an alias.
+	* inferior.h (set_inferior_io_terminal): New prototype.
+	(get_inferior_io_terminal): Ditto.
+	(new_tty_prefork): Add const qualifier to parameter.
+	* inflow.c (inferior_thisrun_terminal): Add const qualifier.
+	(new_tty_prefork): Add const qualifier to parameter.
+	* nto-procfs (procfs_create_inferior): Use accessor function.
+	(procfs_create_inferior): Add const qualifier to locals.
+	* win32-nat.c (child_create_inferior): Ditto.
+	* mi/mi-cmd-env.c (mi_cmd_inferior_tty_set): New function.
+	(mi_cmd_inferior_tty_set): Ditto.
+	* mi/mi-cmds.c (mi_cmds): Add inferior-tty-set and inferior-tty-show
+	* mi/mi-cmds.h (mi_cmd_inferior_tty_set): Add prototype.
+	(mi_cmd_inferior_tty_show): Ditto.
+
 2005-07-06  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* tui/tui-win.c (parse_scrolling_args): Fix SEGV error with invalid

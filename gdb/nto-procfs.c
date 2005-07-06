@@ -981,9 +981,10 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
   pid_t pid;
   int flags, errn;
   char **argv, *args;
-  char *in = "", *out = "", *err = "";
+  const char *in = "", *out = "", *err = "";
   int fd, fds[3];
   sigset_t set;
+  const char *inferior_io_terminal = get_inferior_io_terminal ();
 
   argv = xmalloc (((strlen (allargs) + 1) / (unsigned) 2 + 2) *
 		  sizeof (*argv));

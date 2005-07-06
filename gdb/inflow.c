@@ -94,7 +94,7 @@ static void (*sigquit_ours) ();
 /* The name of the tty (from the `tty' command) that we gave to the inferior
    when it was last started.  */
 
-static char *inferior_thisrun_terminal;
+static const char *inferior_thisrun_terminal;
 
 /* Nonzero if our terminal settings are in effect.  Zero if the
    inferior's settings are in effect.  Ignored if !gdb_has_a_terminal
@@ -509,7 +509,7 @@ child_terminal_info (char *args, int from_tty)
    the terminal specified in the NEW_TTY_PREFORK call.  */
 
 void
-new_tty_prefork (char *ttyname)
+new_tty_prefork (const char *ttyname)
 {
   /* Save the name for later, for determining whether we and the child
      are sharing a tty.  */

@@ -1735,6 +1735,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
   const char *sh;
   int tty;
   int ostdin, ostdout, ostderr;
+  const char *inferior_io_terminal = get_inferior_io_terminal ();
 
   if (!exec_file)
     error (_("No executable specified, use `target exec'."));

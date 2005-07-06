@@ -244,6 +244,30 @@ mi_cmd_env_dir (char *command, char **argv, int argc)
   return MI_CMD_DONE;
 }
 
+/* Set the inferior terminal device name.  */
+enum mi_cmd_result
+mi_cmd_inferior_tty_set (char *command, char **argv, int argc)
+{
+  set_inferior_io_terminal (argv[0]);
+
+  return MI_CMD_DONE;
+}
+
+/* Print the inferior terminal device name  */
+enum mi_cmd_result
+mi_cmd_inferior_tty_show (char *command, char **argv, int argc)
+{
+  const char *inferior_io_terminal = get_inferior_io_terminal ();
+  
+  if ( !mi_valid_noargs ("mi_cmd_inferior_tty_show", argc, argv))
+    error (_("mi_cmd_inferior_tty_show: Usage: No args"));
+
+  if (inferior_io_terminal)
+    ui_out_field_string (uiout, "inferior_tty_terminal", inferior_io_terminal);
+
+  return MI_CMD_DONE;
+}
+
 void 
 _initialize_mi_cmd_env (void)
 {
