@@ -1,3 +1,11 @@
+2005-07-06  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* f-exp.y (yyparse): Add code to support exponentiation expression.
+	(yylex): Add code to scan exponentiation operator.
+	* eval.c (evaluate_subexp_standard): Add support for BINOP_EXP.
+	* valarith.c (value_binop): Reset errno to 0 before calling pow
+	to do exponentiation operation.
+
 2005-07-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386nbsd-nat.c (i386nbsd_supply_pcb): Cast to 'gdb_byte *' in

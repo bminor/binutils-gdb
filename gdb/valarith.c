@@ -791,11 +791,12 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  v = v1 / v2;
 	  break;
 
-        case BINOP_EXP:
-          v = pow (v1, v2);
-          if (errno)
-            error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
-          break;
+	case BINOP_EXP:
+	  errno = 0;
+	  v = pow (v1, v2);
+	  if (errno)
+	    error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
+	  break;
 
 	default:
 	  error (_("Integer-only operation on floating point number."));
@@ -929,11 +930,12 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      v = v1 / v2;
 	      break;
 
-            case BINOP_EXP:
-              v = pow (v1, v2);
-              if (errno)
-                error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
-              break;
+	    case BINOP_EXP:
+	      errno = 0;
+	      v = pow (v1, v2);
+	      if (errno)
+		error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
+	      break;
 
 	    case BINOP_REM:
 	      v = v1 % v2;
@@ -1050,10 +1052,11 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 		error (_("Division by zero"));
               break;
 
-            case BINOP_EXP:
-              v = pow (v1, v2);
-              if (errno)
-                error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
+	    case BINOP_EXP:
+	      errno = 0;
+	      v = pow (v1, v2);
+	      if (errno)
+		error (_("Cannot perform exponentiation: %s"), safe_strerror (errno));
 	      break;
 
 	    case BINOP_REM:

@@ -1,6 +1,6 @@
 /* YACC parser for Fortran expressions, for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1993, 1994, 1995, 1996, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1993, 1994, 1995, 1996, 2000, 2001,
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -217,6 +217,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %left '@'
 %left '+' '-'
 %left '*' '/' '%'
+%right STARSTAR
 %right UNARY 
 %right '('
 
@@ -313,6 +314,10 @@ exp	:	'(' type ')' exp  %prec UNARY
 
 exp	:	exp '@' exp
 			{ write_exp_elt_opcode (BINOP_REPEAT); }
+	;
+
+exp	:	exp STARSTAR exp
+			{ write_exp_elt_opcode (BINOP_EXP); }
 	;
 
 exp	:	exp '*' exp
@@ -941,7 +946,7 @@ yylex ()
 	}
     }
   
-  /* See if it is a special .foo. operator */
+  /* See if it is a special .foo. operator.  */
   
   for (i = 0; dot_ops[i].operator != NULL; i++)
     if (strncmp (tokstart, dot_ops[i].operator, strlen (dot_ops[i].operator)) == 0)
@@ -951,6 +956,15 @@ yylex ()
 	return dot_ops[i].token;
       }
   
+  /* See if it is an exponentiation operator.  */
+
+  if (strncmp (tokstart, "**", 2) == 0)
+    {
+      lexptr += 2;
+      yylval.opcode = BINOP_EXP;
+      return STARSTAR;
+    }
+
   switch (c = *tokstart)
     {
     case 0:

@@ -1510,6 +1510,7 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	return value_sub (arg1, arg2);
 
+    case BINOP_EXP:
     case BINOP_MUL:
     case BINOP_DIV:
     case BINOP_REM:
