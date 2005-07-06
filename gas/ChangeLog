@@ -1,3 +1,7 @@
+2005-07-06  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (nop): Use zero for L-unit pseudo-nop.
+
 2005-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-pdp11.c (md_apply_fix): Cast first argument to

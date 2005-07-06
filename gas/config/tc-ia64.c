@@ -593,7 +593,7 @@ static const bfd_vma nop[IA64_NUM_UNITS] =
     0x0008000000LL,	/* M-unit nop */
     0x4000000000LL,	/* B-unit nop */
     0x0008000000LL,	/* F-unit nop */
-    0x0008000000LL,	/* L-"unit" nop */
+    0x0000000000LL,	/* L-"unit" nop immediate */
     0x0008000000LL,	/* X-unit nop */
   };
 
