@@ -95,6 +95,7 @@ cpu-maxq.c
 cpu-mcore.c
 cpu-mips.c
 cpu-mmix.c
+cpu-ms1.c
 cpu-msp430.c
 cpu-ns32k.c
 cpu-openrisc.c
@@ -156,6 +157,7 @@ elf32-m68k.c
 elf32-m88k.c
 elf32-mcore.c
 elf32-mips.c
+elf32-ms1.c
 elf32-msp430.c
 elf32-openrisc.c
 elf32-or32.c
@@ -194,7 +196,9 @@ elf-m10200.c
 elf-m10300.c
 elfn32-mips.c
 elf-strtab.c
+elf-vxworks.c
 elfxx-mips.c
+elfxx-sparc.c
 epoc-pe-arm.c
 epoc-pei-arm.c
 format.c

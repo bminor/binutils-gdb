@@ -1,3 +1,8 @@
+2005-07-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/SRC-POTFILES.in: Add cpu-ms1.c, elf32-ms1.c, elf-vxworks.c,
+	elfxx-sparc.c.
+
 2005-07-05  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-ppc.c (ppc_elf_vxworks_special_sections): Remove.
