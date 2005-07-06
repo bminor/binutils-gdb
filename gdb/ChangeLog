@@ -1,5 +1,10 @@
 2005-07-06  Wu Zhou  <woodzltc@cn.ibm.com>
 
+	* tui/tui-win.c (parse_scrolling_args): Fix SEGV error with invalid
+	scroll command.
+
+2005-07-06  Wu Zhou  <woodzltc@cn.ibm.com>
+
 	* f-exp.y (yyparse): Add code to support exponentiation expression.
 	(yylex): Add code to scan exponentiation operator.
 	* eval.c (evaluate_subexp_standard): Add support for BINOP_EXP.

@@ -1543,7 +1543,7 @@ parse_scrolling_args (char *arg, struct tui_win_info * * win_to_scroll,
 
 	  if (*win_to_scroll == (struct tui_win_info *) NULL ||
 	      !(*win_to_scroll)->generic.is_visible)
-	    warning (_("Invalid window specified. \n\
+	    error (_("Invalid window specified. \n\
 The window name specified must be valid and visible.\n"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
 	    *win_to_scroll = (struct tui_win_info *) (tui_source_windows ())->list[0];
