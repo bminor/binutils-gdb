@@ -719,6 +719,7 @@ struct varinfo
   int line;
   int tag;
   char *name;
+  bfd_vma addr;
   /* Where the symbol is defined */
   asection *sec;
   /* Is this a stack variable? */
@@ -1495,6 +1496,7 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 static bfd_boolean
 lookup_symbol_in_variable_table (struct comp_unit *unit,
 				 asymbol *sym,
+				 bfd_vma addr,
 				 const char **filename_ptr,
 				 unsigned int *linenumber_ptr)
 {
@@ -1504,6 +1506,9 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 
   for (each = unit->variable_table; each; each = each->prev_var)
     if (each->stack == 0
+	&& each->file != NULL
+	&& each->name != NULL
+	&& each->addr == addr
 	&& (!each->sec || each->sec == sec)
 	&& strcmp (name, each->name) == 0)
       break;
@@ -1749,21 +1754,23 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		  break;
 
 		case DW_AT_location:
-		  if (var->stack)
+		  switch (attr.form)
 		    {
-		      switch (attr.form)
+		    case DW_FORM_block:
+		    case DW_FORM_block1:
+		    case DW_FORM_block2:
+		    case DW_FORM_block4:
+		      if (*attr.u.blk->data == DW_OP_addr)
 			{
-			case DW_FORM_block:
-			case DW_FORM_block1:
-			case DW_FORM_block2:
-			case DW_FORM_block4:
-			  if (*attr.u.blk->data == DW_OP_addr)
-			    var->stack = 0;
-			  break;
-
-			default:
-			  break;
+			  var->stack = 0;
+			  var->addr = bfd_get ((attr.u.blk->size - 1) * 8,
+					       unit->abfd,
+					       attr.u.blk->data + 1);
 			}
+		      break;
+		    
+		    default:
+		      break;
 		    }
 		  break;
 
@@ -2073,7 +2080,8 @@ comp_unit_find_line (struct comp_unit *unit,
 					    filename_ptr,
 					    linenumber_ptr);
   else
-    return lookup_symbol_in_variable_table (unit, sym, filename_ptr,
+    return lookup_symbol_in_variable_table (unit, sym, addr,
+					    filename_ptr,
 					    linenumber_ptr);
 }
 
