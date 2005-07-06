@@ -1173,10 +1173,10 @@
 
 
 (if (keep-mach? (iq2000))
-(include "iq2000m.cpu"))
+(include "../../cpu/iq2000m.cpu"))
 
 (if (keep-mach? (iq10))
-(include "iq10.cpu"))
+(include "../../cpu/iq10.cpu"))
 
 
 
