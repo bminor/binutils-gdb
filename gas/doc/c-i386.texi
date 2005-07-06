@@ -701,7 +701,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{i486} @tab @samp{i586} @tab @samp{i686} @tab @samp{pentium}
 @item @samp{pentiumpro} @tab @samp{pentiumii} @tab @samp{pentiumiii} @tab @samp{pentium4}
 @item @samp{k6} @tab @samp{athlon} @samp{sledgehammer}
-@item @samp{.mmx} @samp{.sse} @samp{.sse2} @samp{.3dnow}
+@item @samp{.mmx} @samp{.sse} @samp{.sse2} @samp{.sse3} @samp{.3dnow}
 @end multitable
 
 Apart from the warning, there are only two other effects on

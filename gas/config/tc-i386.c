@@ -433,6 +433,7 @@ static const arch_entry cpu_arch[] = {
   {".mmx",	CpuMMX },
   {".sse",	CpuMMX|CpuMMX2|CpuSSE },
   {".sse2",	CpuMMX|CpuMMX2|CpuSSE|CpuSSE2 },
+  {".sse3",	CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuSSE3 },
   {".3dnow",	CpuMMX|Cpu3dnow },
   {".3dnowa",	CpuMMX|CpuMMX2|Cpu3dnow|Cpu3dnowA },
   {".padlock",	CpuPadLock },

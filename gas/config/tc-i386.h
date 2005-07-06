@@ -182,7 +182,8 @@ typedef struct
 #define CpuSSE2	       0x4000	/* Streaming SIMD extensions 2 required */
 #define Cpu3dnow       0x8000	/* 3dnow! support required */
 #define Cpu3dnowA     0x10000	/* 3dnow!Extensions support required */
-#define CpuPNI	      0x20000	/* Prescott New Instructions required */
+#define CpuSSE3	      0x20000	/* Streaming SIMD extensions 3 required */
+#define CpuPNI	      CpuSSE3	/* Prescott New Instructions required */
 #define CpuPadLock    0x40000	/* VIA PadLock required */
 #define CpuSVME	      0x80000	/* AMD Secure Virtual Machine Ext-s required */
 
