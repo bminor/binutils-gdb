@@ -1,3 +1,8 @@
+2005-07-06  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* gdb.fortran/exprs.exp (test_arithmetic_expressions): Add five
+	tests to evaluate exponentiation expression.
+
 2005-06-29  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.base/sigrepeat.c: Include <stdlib.h> and add return type for

@@ -1,4 +1,4 @@
-# Copyright (C) 1994, 1997 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1997, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -249,6 +249,14 @@ proc test_arithmetic_expressions {} {
     gdb_test "p 6.0 / 3.0"	" = 2"	"real divided by real"
 
     # Test modulo with various operands
+
+    # Test exponentiation with various operands
+    
+    gdb_test "p 2 ** 3" " = 8" "int powered by int"
+    gdb_test "p 2 ** 2 ** 3" " = 256" "combined exponentiation expression"
+    gdb_test "p (2 ** 2) ** 3" " = 64" "combined exponentiation expression in specified order"
+    gdb_test "p 4 ** 0.5" " = 2" "int powered by real"
+    gdb_test "p 4.0 ** 0.5" " = 2" "real powered by real"
 
 }
 
