@@ -2633,6 +2633,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 	  reloc_ptr_ptr = current->orelocation;
 	  reloc_end = reloc_ptr_ptr + current->reloc_count;
 	  out_ptr = (char *) reloc_buff;
+
 	  for (;
 	       reloc_ptr_ptr < reloc_end;
 	       reloc_ptr_ptr++, out_ptr += external_reloc_size)
@@ -2645,6 +2646,11 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 
 	      reloc = *reloc_ptr_ptr;
 	      sym = *reloc->sym_ptr_ptr;
+
+	      /* If the howto field has not been initialised then skip this reloc.
+		 This assumes that an error message has been issued elsewhere.  */
+	      if (reloc->howto == NULL)
+		continue;
 
 	      in.r_vaddr = (reloc->address
 			    + bfd_get_section_vma (abfd, current));

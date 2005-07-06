@@ -1,3 +1,12 @@
+2005-07-06  Nick Clifton  <nickc@redhat.com>
+
+	* coff-alpha.c (alpha_adjust_reloc_in): Issue an informative error
+	message if an unknown reloc is encountered.
+	(alpha_relocate_section): Likewise.
+
+	* ecoff.c (_bfd_ecoff_write_object_contents): Cope with a reloc
+	with a missing howto field.
+
 2005-07-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/SRC-POTFILES.in: Add cpu-ms1.c, elf32-ms1.c, elf-vxworks.c,

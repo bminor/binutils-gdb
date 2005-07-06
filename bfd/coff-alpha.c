@@ -632,7 +632,15 @@ alpha_adjust_reloc_in (abfd, intern, rptr)
      arelent *rptr;
 {
   if (intern->r_type > ALPHA_R_GPVALUE)
-    abort ();
+    {
+      (*_bfd_error_handler)
+	(_("%B: unknown/unsupported relocation type %d"),
+	 abfd, intern->r_type);
+      bfd_set_error (bfd_error_bad_value);
+      rptr->addend = 0;
+      rptr->howto  = NULL;
+      return;
+    }
 
   switch (intern->r_type)
     {
@@ -1521,8 +1529,26 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 
       switch (r_type)
 	{
+	case ALPHA_R_GPRELHIGH:
+	  (*_bfd_error_handler)
+	    (_("%B: unsupported relocation: ALPHA_R_GPRELHIGH"),
+	     input_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  continue;
+	  
+	case ALPHA_R_GPRELLOW:
+	  (*_bfd_error_handler)
+	    (_("%B: unsupported relocation: ALPHA_R_GPRELLOW"),
+	     input_bfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  continue;
+	  
 	default:
-	  abort ();
+	  (*_bfd_error_handler)
+	    (_("%B: unknown relocation type %d"),
+	     input_bfd, (int) r_type);
+	  bfd_set_error (bfd_error_bad_value);
+	  continue;
 
 	case ALPHA_R_IGNORE:
 	  /* This reloc appears after a GPDISP reloc.  On earlier
