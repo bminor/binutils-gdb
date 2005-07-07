@@ -1,3 +1,7 @@
+2005-07-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-modules.c: Update tables with Xtensa MMU features.
+
 2005-07-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* elf32-xtensa.c (vsprint_msg): Add format attribute.  Fix

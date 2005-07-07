@@ -29,6 +29,7 @@ static xtensa_sysreg_internal sysregs[] = {
   { "LBEG", 0, 0 },
   { "LEND", 1, 0 },
   { "LCOUNT", 2, 0 },
+  { "PTEVADDR", 83, 0 },
   { "DDR", 104, 0 },
   { "176", 176, 0 },
   { "208", 208, 0 },
@@ -70,10 +71,13 @@ static xtensa_sysreg_internal sysregs[] = {
   { "IBREAKA1", 129, 0 },
   { "IBREAKENABLE", 96, 0 },
   { "ICOUNTLEVEL", 237, 0 },
-  { "DEBUGCAUSE", 233, 0 }
+  { "DEBUGCAUSE", 233, 0 },
+  { "RASID", 90, 0 },
+  { "ITLBCFG", 91, 0 },
+  { "DTLBCFG", 92, 0 }
 };
 
-#define NUM_SYSREGS 45
+#define NUM_SYSREGS 49
 #define MAX_SPECIAL_REG 245
 #define MAX_USER_REG 0
 
@@ -96,13 +100,14 @@ static xtensa_state_internal states[] = {
   { "EXCSAVE2", 32, 0 },
   { "EXCSAVE3", 32, 0 },
   { "EXCSAVE4", 32, 0 },
-  { "EPS2", 13, 0 },
-  { "EPS3", 13, 0 },
-  { "EPS4", 13, 0 },
+  { "EPS2", 15, 0 },
+  { "EPS3", 15, 0 },
+  { "EPS4", 15, 0 },
   { "EXCCAUSE", 6, 0 },
   { "PSINTLEVEL", 4, 0 },
   { "PSUM", 1, 0 },
   { "PSWOE", 1, 0 },
+  { "PSRING", 2, 0 },
   { "PSEXCM", 1, 0 },
   { "DEPC", 32, 0 },
   { "EXCVADDR", 32, 0 },
@@ -131,10 +136,16 @@ static xtensa_state_internal states[] = {
   { "DBNUM", 4, 0 },
   { "CCOMPARE0", 32, 0 },
   { "CCOMPARE1", 32, 0 },
-  { "CCOMPARE2", 32, 0 }
+  { "CCOMPARE2", 32, 0 },
+  { "ASID3", 8, 0 },
+  { "ASID2", 8, 0 },
+  { "ASID1", 8, 0 },
+  { "INSTPGSZID4", 2, 0 },
+  { "DATAPGSZID4", 2, 0 },
+  { "PTBASE", 10, 0 }
 };
 
-#define NUM_STATES 51
+#define NUM_STATES 58
 
 /* Macros for xtensa_state numbers (for use in iclasses because the
    state numbers are not available when the iclass table is generated).  */
@@ -161,35 +172,42 @@ static xtensa_state_internal states[] = {
 #define STATE_PSINTLEVEL 19
 #define STATE_PSUM 20
 #define STATE_PSWOE 21
-#define STATE_PSEXCM 22
-#define STATE_DEPC 23
-#define STATE_EXCVADDR 24
-#define STATE_WindowBase 25
-#define STATE_WindowStart 26
-#define STATE_PSCALLINC 27
-#define STATE_PSOWB 28
-#define STATE_LBEG 29
-#define STATE_LEND 30
-#define STATE_SAR 31
-#define STATE_LITBADDR 32
-#define STATE_LITBEN 33
-#define STATE_MISC0 34
-#define STATE_MISC1 35
-#define STATE_InOCDMode 36
-#define STATE_INTENABLE 37
-#define STATE_DBREAKA0 38
-#define STATE_DBREAKC0 39
-#define STATE_DBREAKA1 40
-#define STATE_DBREAKC1 41
-#define STATE_IBREAKA0 42
-#define STATE_IBREAKA1 43
-#define STATE_IBREAKENABLE 44
-#define STATE_ICOUNTLEVEL 45
-#define STATE_DEBUGCAUSE 46
-#define STATE_DBNUM 47
-#define STATE_CCOMPARE0 48
-#define STATE_CCOMPARE1 49
-#define STATE_CCOMPARE2 50
+#define STATE_PSRING 22
+#define STATE_PSEXCM 23
+#define STATE_DEPC 24
+#define STATE_EXCVADDR 25
+#define STATE_WindowBase 26
+#define STATE_WindowStart 27
+#define STATE_PSCALLINC 28
+#define STATE_PSOWB 29
+#define STATE_LBEG 30
+#define STATE_LEND 31
+#define STATE_SAR 32
+#define STATE_LITBADDR 33
+#define STATE_LITBEN 34
+#define STATE_MISC0 35
+#define STATE_MISC1 36
+#define STATE_InOCDMode 37
+#define STATE_INTENABLE 38
+#define STATE_DBREAKA0 39
+#define STATE_DBREAKC0 40
+#define STATE_DBREAKA1 41
+#define STATE_DBREAKC1 42
+#define STATE_IBREAKA0 43
+#define STATE_IBREAKA1 44
+#define STATE_IBREAKENABLE 45
+#define STATE_ICOUNTLEVEL 46
+#define STATE_DEBUGCAUSE 47
+#define STATE_DBNUM 48
+#define STATE_CCOMPARE0 49
+#define STATE_CCOMPARE1 50
+#define STATE_CCOMPARE2 51
+#define STATE_ASID3 52
+#define STATE_ASID2 53
+#define STATE_ASID1 54
+#define STATE_INSTPGSZID4 55
+#define STATE_DATAPGSZID4 56
+#define STATE_PTBASE 57
 
 
 /* Field definitions.  */
@@ -2244,11 +2262,14 @@ static xtensa_operand_internal operands[] = {
 /* Iclass table.  */
 
 static xtensa_arg_internal Iclass_xt_iclass_rfe_stateArgs[] = {
-  { { STATE_PSEXCM }, 'o' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_PSEXCM }, 'm' },
   { { STATE_EPC1 }, 'i' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rfde_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DEPC }, 'i' }
 };
 
@@ -2335,6 +2356,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rotw_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rotw_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_WindowBase }, 'm' }
 };
 
@@ -2351,7 +2374,8 @@ static xtensa_arg_internal Iclass_xt_iclass_retw_stateArgs[] = {
 
 static xtensa_arg_internal Iclass_xt_iclass_rfwou_stateArgs[] = {
   { { STATE_EPC1 }, 'i' },
-  { { STATE_PSEXCM }, 'o' },
+  { { STATE_PSEXCM }, 'm' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_WindowBase }, 'm' },
   { { STATE_WindowStart }, 'm' },
   { { STATE_PSOWB }, 'i' }
@@ -2363,10 +2387,20 @@ static xtensa_arg_internal Iclass_xt_iclass_l32e_args[] = {
   { { 12 /* immrx4 */ }, 'i' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_l32e_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_s32e_args[] = {
   { { 6 /* art */ }, 'i' },
   { { 4 /* ars */ }, 'i' },
   { { 12 /* immrx4 */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_s32e_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_windowbase_args[] = {
@@ -2374,6 +2408,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_windowbase_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_windowbase_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_WindowBase }, 'i' }
 };
 
@@ -2382,6 +2418,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_windowbase_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_windowbase_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_WindowBase }, 'o' }
 };
 
@@ -2390,6 +2428,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_windowbase_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_windowbase_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_WindowBase }, 'm' }
 };
 
@@ -2398,6 +2438,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_windowstart_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_windowstart_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_WindowStart }, 'i' }
 };
 
@@ -2406,6 +2448,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_windowstart_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_windowstart_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_WindowStart }, 'o' }
 };
 
@@ -2414,6 +2458,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_windowstart_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_windowstart_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_WindowStart }, 'm' }
 };
 
@@ -2707,6 +2753,7 @@ static xtensa_arg_internal Iclass_xt_iclass_rsil_stateArgs[] = {
   { { STATE_PSWOE }, 'i' },
   { { STATE_PSCALLINC }, 'i' },
   { { STATE_PSOWB }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_PSUM }, 'i' },
   { { STATE_PSEXCM }, 'i' },
   { { STATE_PSINTLEVEL }, 'm' }
@@ -2842,8 +2889,18 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_176_args[] = {
   { { 6 /* art */ }, 'o' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_rsr_176_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_rsr_208_args[] = {
   { { 6 /* art */ }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_208_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ps_args[] = {
@@ -2854,6 +2911,7 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ps_stateArgs[] = {
   { { STATE_PSWOE }, 'i' },
   { { STATE_PSCALLINC }, 'i' },
   { { STATE_PSOWB }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_PSUM }, 'i' },
   { { STATE_PSEXCM }, 'i' },
   { { STATE_PSINTLEVEL }, 'i' }
@@ -2867,8 +2925,9 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ps_stateArgs[] = {
   { { STATE_PSWOE }, 'o' },
   { { STATE_PSCALLINC }, 'o' },
   { { STATE_PSOWB }, 'o' },
+  { { STATE_PSRING }, 'm' },
   { { STATE_PSUM }, 'o' },
-  { { STATE_PSEXCM }, 'o' },
+  { { STATE_PSEXCM }, 'm' },
   { { STATE_PSINTLEVEL }, 'o' }
 };
 
@@ -2880,6 +2939,7 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ps_stateArgs[] = {
   { { STATE_PSWOE }, 'm' },
   { { STATE_PSCALLINC }, 'm' },
   { { STATE_PSOWB }, 'm' },
+  { { STATE_PSRING }, 'm' },
   { { STATE_PSUM }, 'm' },
   { { STATE_PSEXCM }, 'm' },
   { { STATE_PSINTLEVEL }, 'm' }
@@ -2890,6 +2950,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_epc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_epc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC1 }, 'i' }
 };
 
@@ -2898,6 +2960,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_epc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_epc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC1 }, 'o' }
 };
 
@@ -2906,6 +2970,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_epc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_epc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC1 }, 'm' }
 };
 
@@ -2914,6 +2980,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_excsave1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_excsave1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE1 }, 'i' }
 };
 
@@ -2922,6 +2990,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_excsave1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_excsave1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE1 }, 'o' }
 };
 
@@ -2930,6 +3000,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_excsave1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_excsave1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE1 }, 'm' }
 };
 
@@ -2938,6 +3010,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_epc2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_epc2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC2 }, 'i' }
 };
 
@@ -2946,6 +3020,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_epc2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_epc2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC2 }, 'o' }
 };
 
@@ -2954,6 +3030,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_epc2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_epc2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC2 }, 'm' }
 };
 
@@ -2962,6 +3040,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_excsave2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_excsave2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE2 }, 'i' }
 };
 
@@ -2970,6 +3050,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_excsave2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_excsave2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE2 }, 'o' }
 };
 
@@ -2978,6 +3060,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_excsave2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_excsave2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE2 }, 'm' }
 };
 
@@ -2986,6 +3070,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_epc3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_epc3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC3 }, 'i' }
 };
 
@@ -2994,6 +3080,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_epc3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_epc3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC3 }, 'o' }
 };
 
@@ -3002,6 +3090,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_epc3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_epc3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC3 }, 'm' }
 };
 
@@ -3010,6 +3100,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_excsave3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_excsave3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE3 }, 'i' }
 };
 
@@ -3018,6 +3110,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_excsave3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_excsave3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE3 }, 'o' }
 };
 
@@ -3026,6 +3120,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_excsave3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_excsave3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE3 }, 'm' }
 };
 
@@ -3034,6 +3130,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_epc4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_epc4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC4 }, 'i' }
 };
 
@@ -3042,6 +3140,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_epc4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_epc4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC4 }, 'o' }
 };
 
@@ -3050,6 +3150,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_epc4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_epc4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPC4 }, 'm' }
 };
 
@@ -3058,6 +3160,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_excsave4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_excsave4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE4 }, 'i' }
 };
 
@@ -3066,6 +3170,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_excsave4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_excsave4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE4 }, 'o' }
 };
 
@@ -3074,6 +3180,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_excsave4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_excsave4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCSAVE4 }, 'm' }
 };
 
@@ -3082,6 +3190,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_eps2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_eps2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS2 }, 'i' }
 };
 
@@ -3090,6 +3200,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_eps2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_eps2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS2 }, 'o' }
 };
 
@@ -3098,6 +3210,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_eps2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_eps2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS2 }, 'm' }
 };
 
@@ -3106,6 +3220,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_eps3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_eps3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS3 }, 'i' }
 };
 
@@ -3114,6 +3230,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_eps3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_eps3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS3 }, 'o' }
 };
 
@@ -3122,6 +3240,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_eps3_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_eps3_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS3 }, 'm' }
 };
 
@@ -3130,6 +3250,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_eps4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_eps4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS4 }, 'i' }
 };
 
@@ -3138,6 +3260,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_eps4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_eps4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS4 }, 'o' }
 };
 
@@ -3146,6 +3270,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_eps4_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_eps4_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EPS4 }, 'm' }
 };
 
@@ -3154,6 +3280,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_excvaddr_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_excvaddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCVADDR }, 'i' }
 };
 
@@ -3162,6 +3290,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_excvaddr_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_excvaddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCVADDR }, 'o' }
 };
 
@@ -3170,6 +3300,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_excvaddr_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_excvaddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCVADDR }, 'm' }
 };
 
@@ -3178,6 +3310,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_depc_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_depc_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DEPC }, 'i' }
 };
 
@@ -3186,6 +3320,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_depc_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_depc_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DEPC }, 'o' }
 };
 
@@ -3194,6 +3330,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_depc_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_depc_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DEPC }, 'm' }
 };
 
@@ -3202,6 +3340,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_exccause_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_exccause_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCCAUSE }, 'i' },
   { { STATE_XTSYNC }, 'i' }
 };
@@ -3211,6 +3351,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_exccause_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_exccause_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCCAUSE }, 'o' }
 };
 
@@ -3219,6 +3361,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_exccause_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_exccause_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_EXCCAUSE }, 'm' }
 };
 
@@ -3227,6 +3371,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_misc0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_misc0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_MISC0 }, 'i' }
 };
 
@@ -3235,6 +3381,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_misc0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_misc0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_MISC0 }, 'o' }
 };
 
@@ -3243,6 +3391,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_misc0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_misc0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_MISC0 }, 'm' }
 };
 
@@ -3251,6 +3401,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_misc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_misc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_MISC1 }, 'i' }
 };
 
@@ -3259,6 +3411,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_misc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_misc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_MISC1 }, 'o' }
 };
 
@@ -3267,11 +3421,18 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_misc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_misc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_MISC1 }, 'm' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_prid_args[] = {
   { { 6 /* art */ }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_prid_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rfi_args[] = {
@@ -3282,8 +3443,9 @@ static xtensa_arg_internal Iclass_xt_iclass_rfi_stateArgs[] = {
   { { STATE_PSWOE }, 'o' },
   { { STATE_PSCALLINC }, 'o' },
   { { STATE_PSOWB }, 'o' },
+  { { STATE_PSRING }, 'm' },
   { { STATE_PSUM }, 'o' },
-  { { STATE_PSEXCM }, 'o' },
+  { { STATE_PSEXCM }, 'm' },
   { { STATE_PSINTLEVEL }, 'o' },
   { { STATE_EPC1 }, 'i' },
   { { STATE_EPC2 }, 'i' },
@@ -3300,6 +3462,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wait_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wait_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_PSINTLEVEL }, 'o' }
 };
 
@@ -3308,6 +3472,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_interrupt_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_interrupt_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_INTERRUPT }, 'i' }
 };
 
@@ -3316,6 +3482,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_intset_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_intset_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' },
   { { STATE_INTERRUPT }, 'm' }
 };
@@ -3325,6 +3493,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_intclear_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_intclear_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' },
   { { STATE_INTERRUPT }, 'm' }
 };
@@ -3334,6 +3504,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_intenable_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_intenable_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_INTENABLE }, 'i' }
 };
 
@@ -3342,6 +3514,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_intenable_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_intenable_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_INTENABLE }, 'o' }
 };
 
@@ -3350,6 +3524,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_intenable_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_intenable_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_INTENABLE }, 'm' }
 };
 
@@ -3377,6 +3553,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_dbreaka0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_dbreaka0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKA0 }, 'i' }
 };
 
@@ -3385,6 +3563,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_dbreaka0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_dbreaka0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKA0 }, 'o' },
   { { STATE_XTSYNC }, 'o' }
 };
@@ -3394,6 +3574,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_dbreaka0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_dbreaka0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKA0 }, 'm' },
   { { STATE_XTSYNC }, 'o' }
 };
@@ -3403,6 +3585,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_dbreakc0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_dbreakc0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKC0 }, 'i' }
 };
 
@@ -3411,6 +3595,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_dbreakc0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_dbreakc0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKC0 }, 'o' },
   { { STATE_XTSYNC }, 'o' }
 };
@@ -3420,6 +3606,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_dbreakc0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_dbreakc0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKC0 }, 'm' },
   { { STATE_XTSYNC }, 'o' }
 };
@@ -3429,6 +3617,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_dbreaka1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_dbreaka1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKA1 }, 'i' }
 };
 
@@ -3437,6 +3627,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_dbreaka1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_dbreaka1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKA1 }, 'o' },
   { { STATE_XTSYNC }, 'o' }
 };
@@ -3446,6 +3638,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_dbreaka1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_dbreaka1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKA1 }, 'm' },
   { { STATE_XTSYNC }, 'o' }
 };
@@ -3455,6 +3649,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_dbreakc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_dbreakc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKC1 }, 'i' }
 };
 
@@ -3463,6 +3659,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_dbreakc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_dbreakc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKC1 }, 'o' },
   { { STATE_XTSYNC }, 'o' }
 };
@@ -3472,6 +3670,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_dbreakc1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_dbreakc1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DBREAKC1 }, 'm' },
   { { STATE_XTSYNC }, 'o' }
 };
@@ -3481,6 +3681,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ibreaka0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ibreaka0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKA0 }, 'i' }
 };
 
@@ -3489,6 +3691,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ibreaka0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_ibreaka0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKA0 }, 'o' }
 };
 
@@ -3497,6 +3701,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ibreaka0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_ibreaka0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKA0 }, 'm' }
 };
 
@@ -3505,6 +3711,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ibreaka1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ibreaka1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKA1 }, 'i' }
 };
 
@@ -3513,6 +3721,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ibreaka1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_ibreaka1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKA1 }, 'o' }
 };
 
@@ -3521,6 +3731,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ibreaka1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_ibreaka1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKA1 }, 'm' }
 };
 
@@ -3529,6 +3741,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ibreakenable_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ibreakenable_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKENABLE }, 'i' }
 };
 
@@ -3537,6 +3751,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ibreakenable_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_ibreakenable_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKENABLE }, 'o' }
 };
 
@@ -3545,6 +3761,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ibreakenable_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_ibreakenable_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_IBREAKENABLE }, 'm' }
 };
 
@@ -3553,6 +3771,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_debugcause_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_debugcause_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DEBUGCAUSE }, 'i' },
   { { STATE_DBNUM }, 'i' }
 };
@@ -3562,6 +3782,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_debugcause_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_debugcause_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DEBUGCAUSE }, 'o' },
   { { STATE_DBNUM }, 'o' }
 };
@@ -3571,6 +3793,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_debugcause_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_debugcause_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DEBUGCAUSE }, 'm' },
   { { STATE_DBNUM }, 'm' }
 };
@@ -3580,6 +3804,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_icount_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_icount_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_ICOUNT }, 'i' }
 };
 
@@ -3588,6 +3814,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_icount_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_icount_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' },
   { { STATE_ICOUNT }, 'o' }
 };
@@ -3597,6 +3825,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_icount_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_icount_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' },
   { { STATE_ICOUNT }, 'm' }
 };
@@ -3606,6 +3836,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_icountlevel_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_icountlevel_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_ICOUNTLEVEL }, 'i' }
 };
 
@@ -3614,6 +3846,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_icountlevel_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_icountlevel_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_ICOUNTLEVEL }, 'o' }
 };
 
@@ -3622,6 +3856,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_icountlevel_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_icountlevel_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_ICOUNTLEVEL }, 'm' }
 };
 
@@ -3630,6 +3866,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ddr_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_DDR }, 'i' }
 };
 
@@ -3638,6 +3876,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ddr_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_ddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' },
   { { STATE_DDR }, 'o' }
 };
@@ -3647,6 +3887,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ddr_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_ddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' },
   { { STATE_DDR }, 'm' }
 };
@@ -3657,6 +3899,7 @@ static xtensa_arg_internal Iclass_xt_iclass_rfdo_stateArgs[] = {
   { { STATE_PSWOE }, 'o' },
   { { STATE_PSCALLINC }, 'o' },
   { { STATE_PSOWB }, 'o' },
+  { { STATE_PSRING }, 'o' },
   { { STATE_PSUM }, 'o' },
   { { STATE_PSEXCM }, 'o' },
   { { STATE_PSINTLEVEL }, 'o' },
@@ -3672,6 +3915,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ccount_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ccount_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOUNT }, 'i' }
 };
 
@@ -3680,6 +3925,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ccount_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_ccount_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' },
   { { STATE_CCOUNT }, 'o' }
 };
@@ -3689,6 +3936,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ccount_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_ccount_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' },
   { { STATE_CCOUNT }, 'm' }
 };
@@ -3698,6 +3947,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ccompare0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ccompare0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE0 }, 'i' }
 };
 
@@ -3706,6 +3957,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ccompare0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_ccompare0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE0 }, 'o' },
   { { STATE_INTERRUPT }, 'm' }
 };
@@ -3715,6 +3968,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ccompare0_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_ccompare0_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE0 }, 'm' },
   { { STATE_INTERRUPT }, 'm' }
 };
@@ -3724,6 +3979,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ccompare1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ccompare1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE1 }, 'i' }
 };
 
@@ -3732,6 +3989,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ccompare1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_ccompare1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE1 }, 'o' },
   { { STATE_INTERRUPT }, 'm' }
 };
@@ -3741,6 +4000,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ccompare1_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_ccompare1_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE1 }, 'm' },
   { { STATE_INTERRUPT }, 'm' }
 };
@@ -3750,6 +4011,8 @@ static xtensa_arg_internal Iclass_xt_iclass_rsr_ccompare2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_rsr_ccompare2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE2 }, 'i' }
 };
 
@@ -3758,6 +4021,8 @@ static xtensa_arg_internal Iclass_xt_iclass_wsr_ccompare2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wsr_ccompare2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE2 }, 'o' },
   { { STATE_INTERRUPT }, 'm' }
 };
@@ -3767,6 +4032,8 @@ static xtensa_arg_internal Iclass_xt_iclass_xsr_ccompare2_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_xsr_ccompare2_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_CCOMPARE2 }, 'm' },
   { { STATE_INTERRUPT }, 'm' }
 };
@@ -3781,14 +4048,29 @@ static xtensa_arg_internal Iclass_xt_iclass_icache_inv_args[] = {
   { { 21 /* uimm8x4 */ }, 'i' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_icache_inv_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_licx_args[] = {
   { { 6 /* art */ }, 'o' },
   { { 4 /* ars */ }, 'i' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_licx_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_sicx_args[] = {
   { { 6 /* art */ }, 'i' },
   { { 4 /* ars */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_sicx_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_dcache_args[] = {
@@ -3801,9 +4083,19 @@ static xtensa_arg_internal Iclass_xt_iclass_dcache_ind_args[] = {
   { { 22 /* uimm4x16 */ }, 'i' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_dcache_ind_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_dcache_inv_args[] = {
   { { 4 /* ars */ }, 'i' },
   { { 21 /* uimm8x4 */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_dcache_inv_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_dpf_args[] = {
@@ -3816,9 +4108,155 @@ static xtensa_arg_internal Iclass_xt_iclass_sdct_args[] = {
   { { 4 /* ars */ }, 'i' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_sdct_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_ldct_args[] = {
   { { 6 /* art */ }, 'o' },
   { { 4 /* ars */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_ldct_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_wsr_ptevaddr_args[] = {
+  { { 6 /* art */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_wsr_ptevaddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_PTBASE }, 'o' },
+  { { STATE_XTSYNC }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_ptevaddr_args[] = {
+  { { 6 /* art */ }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_ptevaddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_PTBASE }, 'i' },
+  { { STATE_EXCVADDR }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_xsr_ptevaddr_args[] = {
+  { { 6 /* art */ }, 'm' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_xsr_ptevaddr_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_PTBASE }, 'm' },
+  { { STATE_EXCVADDR }, 'i' },
+  { { STATE_XTSYNC }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_rasid_args[] = {
+  { { 6 /* art */ }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_rasid_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_ASID3 }, 'i' },
+  { { STATE_ASID2 }, 'i' },
+  { { STATE_ASID1 }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_wsr_rasid_args[] = {
+  { { 6 /* art */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_wsr_rasid_stateArgs[] = {
+  { { STATE_XTSYNC }, 'o' },
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_ASID3 }, 'o' },
+  { { STATE_ASID2 }, 'o' },
+  { { STATE_ASID1 }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_xsr_rasid_args[] = {
+  { { 6 /* art */ }, 'm' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_xsr_rasid_stateArgs[] = {
+  { { STATE_XTSYNC }, 'o' },
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_ASID3 }, 'm' },
+  { { STATE_ASID2 }, 'm' },
+  { { STATE_ASID1 }, 'm' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_itlbcfg_args[] = {
+  { { 6 /* art */ }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_itlbcfg_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_INSTPGSZID4 }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_wsr_itlbcfg_args[] = {
+  { { 6 /* art */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_wsr_itlbcfg_stateArgs[] = {
+  { { STATE_XTSYNC }, 'o' },
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_INSTPGSZID4 }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_xsr_itlbcfg_args[] = {
+  { { 6 /* art */ }, 'm' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_xsr_itlbcfg_stateArgs[] = {
+  { { STATE_XTSYNC }, 'o' },
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_INSTPGSZID4 }, 'm' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_dtlbcfg_args[] = {
+  { { 6 /* art */ }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_rsr_dtlbcfg_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_DATAPGSZID4 }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_wsr_dtlbcfg_args[] = {
+  { { 6 /* art */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_wsr_dtlbcfg_stateArgs[] = {
+  { { STATE_XTSYNC }, 'o' },
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_DATAPGSZID4 }, 'o' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_xsr_dtlbcfg_args[] = {
+  { { 6 /* art */ }, 'm' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_xsr_dtlbcfg_stateArgs[] = {
+  { { STATE_XTSYNC }, 'o' },
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
+  { { STATE_DATAPGSZID4 }, 'm' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_idtlb_args[] = {
@@ -3826,6 +4264,8 @@ static xtensa_arg_internal Iclass_xt_iclass_idtlb_args[] = {
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_idtlb_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' }
 };
 
@@ -3834,12 +4274,19 @@ static xtensa_arg_internal Iclass_xt_iclass_rdtlb_args[] = {
   { { 4 /* ars */ }, 'i' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_rdtlb_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_wdtlb_args[] = {
   { { 6 /* art */ }, 'i' },
   { { 4 /* ars */ }, 'i' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_wdtlb_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' },
   { { STATE_XTSYNC }, 'o' }
 };
 
@@ -3847,14 +4294,42 @@ static xtensa_arg_internal Iclass_xt_iclass_iitlb_args[] = {
   { { 4 /* ars */ }, 'i' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_iitlb_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_ritlb_args[] = {
   { { 6 /* art */ }, 'o' },
   { { 4 /* ars */ }, 'i' }
 };
 
+static xtensa_arg_internal Iclass_xt_iclass_ritlb_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
 static xtensa_arg_internal Iclass_xt_iclass_witlb_args[] = {
   { { 6 /* art */ }, 'i' },
   { { 4 /* ars */ }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_witlb_stateArgs[] = {
+  { { STATE_PSEXCM }, 'i' },
+  { { STATE_PSRING }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_ldpte_stateArgs[] = {
+  { { STATE_PTBASE }, 'i' },
+  { { STATE_EXCVADDR }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_hwwitlba_stateArgs[] = {
+  { { STATE_EXCVADDR }, 'i' }
+};
+
+static xtensa_arg_internal Iclass_xt_iclass_hwwdtlba_stateArgs[] = {
+  { { STATE_EXCVADDR }, 'i' }
 };
 
 static xtensa_arg_internal Iclass_xt_iclass_nsa_args[] = {
@@ -3866,9 +4341,9 @@ static xtensa_iclass_internal iclasses[] = {
   { 0, 0 /* xt_iclass_excw */,
     0, 0, 0, 0 },
   { 0, 0 /* xt_iclass_rfe */,
-    2, Iclass_xt_iclass_rfe_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rfe_stateArgs, 0, 0 },
   { 0, 0 /* xt_iclass_rfde */,
-    1, Iclass_xt_iclass_rfde_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rfde_stateArgs, 0, 0 },
   { 0, 0 /* xt_iclass_syscall */,
     0, 0, 0, 0 },
   { 0, 0 /* xt_iclass_simcall */,
@@ -3890,27 +4365,27 @@ static xtensa_iclass_internal iclasses[] = {
   { 2, Iclass_xt_iclass_movsp_args,
     2, Iclass_xt_iclass_movsp_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rotw_args,
-    1, Iclass_xt_iclass_rotw_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rotw_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_retw_args,
     4, Iclass_xt_iclass_retw_stateArgs, 0, 0 },
   { 0, 0 /* xt_iclass_rfwou */,
-    5, Iclass_xt_iclass_rfwou_stateArgs, 0, 0 },
+    6, Iclass_xt_iclass_rfwou_stateArgs, 0, 0 },
   { 3, Iclass_xt_iclass_l32e_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_l32e_stateArgs, 0, 0 },
   { 3, Iclass_xt_iclass_s32e_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_s32e_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_windowbase_args,
-    1, Iclass_xt_iclass_rsr_windowbase_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_windowbase_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_windowbase_args,
-    1, Iclass_xt_iclass_wsr_windowbase_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_windowbase_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_windowbase_args,
-    1, Iclass_xt_iclass_xsr_windowbase_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_windowbase_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_windowstart_args,
-    1, Iclass_xt_iclass_rsr_windowstart_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_windowstart_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_windowstart_args,
-    1, Iclass_xt_iclass_wsr_windowstart_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_windowstart_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_windowstart_args,
-    1, Iclass_xt_iclass_xsr_windowstart_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_windowstart_stateArgs, 0, 0 },
   { 3, Iclass_xt_iclass_add_n_args,
     0, 0, 0, 0 },
   { 3, Iclass_xt_iclass_addi_n_args,
@@ -4016,7 +4491,7 @@ static xtensa_iclass_internal iclasses[] = {
   { 0, 0 /* xt_iclass_sync */,
     1, Iclass_xt_iclass_sync_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_rsil_args,
-    6, Iclass_xt_iclass_rsil_stateArgs, 0, 0 },
+    7, Iclass_xt_iclass_rsil_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_lend_args,
     1, Iclass_xt_iclass_rsr_lend_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_lend_args,
@@ -4048,259 +4523,289 @@ static xtensa_iclass_internal iclasses[] = {
   { 1, Iclass_xt_iclass_xsr_litbase_args,
     2, Iclass_xt_iclass_xsr_litbase_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_176_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_rsr_176_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_208_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_rsr_208_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ps_args,
-    6, Iclass_xt_iclass_rsr_ps_stateArgs, 0, 0 },
+    7, Iclass_xt_iclass_rsr_ps_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ps_args,
-    6, Iclass_xt_iclass_wsr_ps_stateArgs, 0, 0 },
+    7, Iclass_xt_iclass_wsr_ps_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ps_args,
-    6, Iclass_xt_iclass_xsr_ps_stateArgs, 0, 0 },
+    7, Iclass_xt_iclass_xsr_ps_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_epc1_args,
-    1, Iclass_xt_iclass_rsr_epc1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_epc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_epc1_args,
-    1, Iclass_xt_iclass_wsr_epc1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_epc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_epc1_args,
-    1, Iclass_xt_iclass_xsr_epc1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_epc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_excsave1_args,
-    1, Iclass_xt_iclass_rsr_excsave1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_excsave1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_excsave1_args,
-    1, Iclass_xt_iclass_wsr_excsave1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_excsave1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_excsave1_args,
-    1, Iclass_xt_iclass_xsr_excsave1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_excsave1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_epc2_args,
-    1, Iclass_xt_iclass_rsr_epc2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_epc2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_epc2_args,
-    1, Iclass_xt_iclass_wsr_epc2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_epc2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_epc2_args,
-    1, Iclass_xt_iclass_xsr_epc2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_epc2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_excsave2_args,
-    1, Iclass_xt_iclass_rsr_excsave2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_excsave2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_excsave2_args,
-    1, Iclass_xt_iclass_wsr_excsave2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_excsave2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_excsave2_args,
-    1, Iclass_xt_iclass_xsr_excsave2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_excsave2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_epc3_args,
-    1, Iclass_xt_iclass_rsr_epc3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_epc3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_epc3_args,
-    1, Iclass_xt_iclass_wsr_epc3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_epc3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_epc3_args,
-    1, Iclass_xt_iclass_xsr_epc3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_epc3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_excsave3_args,
-    1, Iclass_xt_iclass_rsr_excsave3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_excsave3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_excsave3_args,
-    1, Iclass_xt_iclass_wsr_excsave3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_excsave3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_excsave3_args,
-    1, Iclass_xt_iclass_xsr_excsave3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_excsave3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_epc4_args,
-    1, Iclass_xt_iclass_rsr_epc4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_epc4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_epc4_args,
-    1, Iclass_xt_iclass_wsr_epc4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_epc4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_epc4_args,
-    1, Iclass_xt_iclass_xsr_epc4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_epc4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_excsave4_args,
-    1, Iclass_xt_iclass_rsr_excsave4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_excsave4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_excsave4_args,
-    1, Iclass_xt_iclass_wsr_excsave4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_excsave4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_excsave4_args,
-    1, Iclass_xt_iclass_xsr_excsave4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_excsave4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_eps2_args,
-    1, Iclass_xt_iclass_rsr_eps2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_eps2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_eps2_args,
-    1, Iclass_xt_iclass_wsr_eps2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_eps2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_eps2_args,
-    1, Iclass_xt_iclass_xsr_eps2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_eps2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_eps3_args,
-    1, Iclass_xt_iclass_rsr_eps3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_eps3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_eps3_args,
-    1, Iclass_xt_iclass_wsr_eps3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_eps3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_eps3_args,
-    1, Iclass_xt_iclass_xsr_eps3_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_eps3_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_eps4_args,
-    1, Iclass_xt_iclass_rsr_eps4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_eps4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_eps4_args,
-    1, Iclass_xt_iclass_wsr_eps4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_eps4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_eps4_args,
-    1, Iclass_xt_iclass_xsr_eps4_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_eps4_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_excvaddr_args,
-    1, Iclass_xt_iclass_rsr_excvaddr_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_excvaddr_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_excvaddr_args,
-    1, Iclass_xt_iclass_wsr_excvaddr_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_excvaddr_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_excvaddr_args,
-    1, Iclass_xt_iclass_xsr_excvaddr_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_excvaddr_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_depc_args,
-    1, Iclass_xt_iclass_rsr_depc_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_depc_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_depc_args,
-    1, Iclass_xt_iclass_wsr_depc_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_depc_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_depc_args,
-    1, Iclass_xt_iclass_xsr_depc_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_depc_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_exccause_args,
-    2, Iclass_xt_iclass_rsr_exccause_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_rsr_exccause_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_exccause_args,
-    1, Iclass_xt_iclass_wsr_exccause_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_exccause_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_exccause_args,
-    1, Iclass_xt_iclass_xsr_exccause_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_exccause_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_misc0_args,
-    1, Iclass_xt_iclass_rsr_misc0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_misc0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_misc0_args,
-    1, Iclass_xt_iclass_wsr_misc0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_misc0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_misc0_args,
-    1, Iclass_xt_iclass_xsr_misc0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_misc0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_misc1_args,
-    1, Iclass_xt_iclass_rsr_misc1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_misc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_misc1_args,
-    1, Iclass_xt_iclass_wsr_misc1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_misc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_misc1_args,
-    1, Iclass_xt_iclass_xsr_misc1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_misc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_prid_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_rsr_prid_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rfi_args,
-    14, Iclass_xt_iclass_rfi_stateArgs, 0, 0 },
+    15, Iclass_xt_iclass_rfi_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wait_args,
-    1, Iclass_xt_iclass_wait_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wait_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_interrupt_args,
-    1, Iclass_xt_iclass_rsr_interrupt_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_interrupt_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_intset_args,
-    2, Iclass_xt_iclass_wsr_intset_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_intset_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_intclear_args,
-    2, Iclass_xt_iclass_wsr_intclear_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_intclear_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_intenable_args,
-    1, Iclass_xt_iclass_rsr_intenable_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_intenable_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_intenable_args,
-    1, Iclass_xt_iclass_wsr_intenable_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_intenable_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_intenable_args,
-    1, Iclass_xt_iclass_xsr_intenable_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_intenable_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_break_args,
     2, Iclass_xt_iclass_break_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_break_n_args,
     2, Iclass_xt_iclass_break_n_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_dbreaka0_args,
-    1, Iclass_xt_iclass_rsr_dbreaka0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_dbreaka0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_dbreaka0_args,
-    2, Iclass_xt_iclass_wsr_dbreaka0_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_dbreaka0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_dbreaka0_args,
-    2, Iclass_xt_iclass_xsr_dbreaka0_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_dbreaka0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_dbreakc0_args,
-    1, Iclass_xt_iclass_rsr_dbreakc0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_dbreakc0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_dbreakc0_args,
-    2, Iclass_xt_iclass_wsr_dbreakc0_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_dbreakc0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_dbreakc0_args,
-    2, Iclass_xt_iclass_xsr_dbreakc0_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_dbreakc0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_dbreaka1_args,
-    1, Iclass_xt_iclass_rsr_dbreaka1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_dbreaka1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_dbreaka1_args,
-    2, Iclass_xt_iclass_wsr_dbreaka1_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_dbreaka1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_dbreaka1_args,
-    2, Iclass_xt_iclass_xsr_dbreaka1_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_dbreaka1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_dbreakc1_args,
-    1, Iclass_xt_iclass_rsr_dbreakc1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_dbreakc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_dbreakc1_args,
-    2, Iclass_xt_iclass_wsr_dbreakc1_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_dbreakc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_dbreakc1_args,
-    2, Iclass_xt_iclass_xsr_dbreakc1_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_dbreakc1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ibreaka0_args,
-    1, Iclass_xt_iclass_rsr_ibreaka0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_ibreaka0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ibreaka0_args,
-    1, Iclass_xt_iclass_wsr_ibreaka0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_ibreaka0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ibreaka0_args,
-    1, Iclass_xt_iclass_xsr_ibreaka0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_ibreaka0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ibreaka1_args,
-    1, Iclass_xt_iclass_rsr_ibreaka1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_ibreaka1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ibreaka1_args,
-    1, Iclass_xt_iclass_wsr_ibreaka1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_ibreaka1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ibreaka1_args,
-    1, Iclass_xt_iclass_xsr_ibreaka1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_ibreaka1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ibreakenable_args,
-    1, Iclass_xt_iclass_rsr_ibreakenable_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_ibreakenable_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ibreakenable_args,
-    1, Iclass_xt_iclass_wsr_ibreakenable_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_ibreakenable_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ibreakenable_args,
-    1, Iclass_xt_iclass_xsr_ibreakenable_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_ibreakenable_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_debugcause_args,
-    2, Iclass_xt_iclass_rsr_debugcause_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_rsr_debugcause_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_debugcause_args,
-    2, Iclass_xt_iclass_wsr_debugcause_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_debugcause_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_debugcause_args,
-    2, Iclass_xt_iclass_xsr_debugcause_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_debugcause_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_icount_args,
-    1, Iclass_xt_iclass_rsr_icount_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_icount_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_icount_args,
-    2, Iclass_xt_iclass_wsr_icount_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_icount_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_icount_args,
-    2, Iclass_xt_iclass_xsr_icount_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_icount_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_icountlevel_args,
-    1, Iclass_xt_iclass_rsr_icountlevel_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_icountlevel_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_icountlevel_args,
-    1, Iclass_xt_iclass_wsr_icountlevel_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wsr_icountlevel_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_icountlevel_args,
-    1, Iclass_xt_iclass_xsr_icountlevel_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_xsr_icountlevel_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ddr_args,
-    1, Iclass_xt_iclass_rsr_ddr_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_ddr_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ddr_args,
-    2, Iclass_xt_iclass_wsr_ddr_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_ddr_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ddr_args,
-    2, Iclass_xt_iclass_xsr_ddr_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_ddr_stateArgs, 0, 0 },
   { 0, 0 /* xt_iclass_rfdo */,
-    9, Iclass_xt_iclass_rfdo_stateArgs, 0, 0 },
+    10, Iclass_xt_iclass_rfdo_stateArgs, 0, 0 },
   { 0, 0 /* xt_iclass_rfdd */,
     1, Iclass_xt_iclass_rfdd_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ccount_args,
-    1, Iclass_xt_iclass_rsr_ccount_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_ccount_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ccount_args,
-    2, Iclass_xt_iclass_wsr_ccount_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_ccount_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ccount_args,
-    2, Iclass_xt_iclass_xsr_ccount_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_ccount_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ccompare0_args,
-    1, Iclass_xt_iclass_rsr_ccompare0_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_ccompare0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ccompare0_args,
-    2, Iclass_xt_iclass_wsr_ccompare0_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_ccompare0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ccompare0_args,
-    2, Iclass_xt_iclass_xsr_ccompare0_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_ccompare0_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ccompare1_args,
-    1, Iclass_xt_iclass_rsr_ccompare1_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_ccompare1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ccompare1_args,
-    2, Iclass_xt_iclass_wsr_ccompare1_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_ccompare1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ccompare1_args,
-    2, Iclass_xt_iclass_xsr_ccompare1_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_ccompare1_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_rsr_ccompare2_args,
-    1, Iclass_xt_iclass_rsr_ccompare2_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_rsr_ccompare2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_wsr_ccompare2_args,
-    2, Iclass_xt_iclass_wsr_ccompare2_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_wsr_ccompare2_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_xsr_ccompare2_args,
-    2, Iclass_xt_iclass_xsr_ccompare2_stateArgs, 0, 0 },
+    4, Iclass_xt_iclass_xsr_ccompare2_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_icache_args,
     0, 0, 0, 0 },
   { 2, Iclass_xt_iclass_icache_inv_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_icache_inv_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_licx_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_licx_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_sicx_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_sicx_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_dcache_args,
     0, 0, 0, 0 },
   { 2, Iclass_xt_iclass_dcache_ind_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_dcache_ind_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_dcache_inv_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_dcache_inv_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_dpf_args,
     0, 0, 0, 0 },
   { 2, Iclass_xt_iclass_sdct_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_sdct_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_ldct_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_ldct_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_wsr_ptevaddr_args,
+    4, Iclass_xt_iclass_wsr_ptevaddr_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_rsr_ptevaddr_args,
+    4, Iclass_xt_iclass_rsr_ptevaddr_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_xsr_ptevaddr_args,
+    5, Iclass_xt_iclass_xsr_ptevaddr_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_rsr_rasid_args,
+    5, Iclass_xt_iclass_rsr_rasid_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_wsr_rasid_args,
+    6, Iclass_xt_iclass_wsr_rasid_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_xsr_rasid_args,
+    6, Iclass_xt_iclass_xsr_rasid_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_rsr_itlbcfg_args,
+    3, Iclass_xt_iclass_rsr_itlbcfg_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_wsr_itlbcfg_args,
+    4, Iclass_xt_iclass_wsr_itlbcfg_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_xsr_itlbcfg_args,
+    4, Iclass_xt_iclass_xsr_itlbcfg_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_rsr_dtlbcfg_args,
+    3, Iclass_xt_iclass_rsr_dtlbcfg_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_wsr_dtlbcfg_args,
+    4, Iclass_xt_iclass_wsr_dtlbcfg_stateArgs, 0, 0 },
+  { 1, Iclass_xt_iclass_xsr_dtlbcfg_args,
+    4, Iclass_xt_iclass_xsr_dtlbcfg_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_idtlb_args,
-    1, Iclass_xt_iclass_idtlb_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_idtlb_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_rdtlb_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_rdtlb_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_wdtlb_args,
-    1, Iclass_xt_iclass_wdtlb_stateArgs, 0, 0 },
+    3, Iclass_xt_iclass_wdtlb_stateArgs, 0, 0 },
   { 1, Iclass_xt_iclass_iitlb_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_iitlb_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_ritlb_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_ritlb_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_witlb_args,
-    0, 0, 0, 0 },
+    2, Iclass_xt_iclass_witlb_stateArgs, 0, 0 },
+  { 0, 0 /* xt_iclass_ldpte */,
+    2, Iclass_xt_iclass_ldpte_stateArgs, 0, 0 },
+  { 0, 0 /* xt_iclass_hwwitlba */,
+    1, Iclass_xt_iclass_hwwitlba_stateArgs, 0, 0 },
+  { 0, 0 /* xt_iclass_hwwdtlba */,
+    1, Iclass_xt_iclass_hwwdtlba_stateArgs, 0, 0 },
   { 2, Iclass_xt_iclass_nsa_args,
     0, 0, 0, 0 }
 };
@@ -5893,6 +6398,78 @@ Opcode_ldct_Slot_inst_encode (xtensa_insnbuf slotbuf)
 }
 
 static void
+Opcode_wsr_ptevaddr_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5331;
+}
+
+static void
+Opcode_rsr_ptevaddr_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5330;
+}
+
+static void
+Opcode_xsr_ptevaddr_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5316;
+}
+
+static void
+Opcode_rsr_rasid_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5a30;
+}
+
+static void
+Opcode_wsr_rasid_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5a31;
+}
+
+static void
+Opcode_xsr_rasid_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5a16;
+}
+
+static void
+Opcode_rsr_itlbcfg_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5b30;
+}
+
+static void
+Opcode_wsr_itlbcfg_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5b31;
+}
+
+static void
+Opcode_xsr_itlbcfg_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5b16;
+}
+
+static void
+Opcode_rsr_dtlbcfg_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5c30;
+}
+
+static void
+Opcode_wsr_dtlbcfg_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5c31;
+}
+
+static void
+Opcode_xsr_dtlbcfg_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x5c16;
+}
+
+static void
 Opcode_idtlb_Slot_inst_encode (xtensa_insnbuf slotbuf)
 {
   slotbuf[0] = 0xc05;
@@ -5950,6 +6527,24 @@ static void
 Opcode_witlb_Slot_inst_encode (xtensa_insnbuf slotbuf)
 {
   slotbuf[0] = 0x605;
+}
+
+static void
+Opcode_ldpte_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0xf1f;
+}
+
+static void
+Opcode_hwwitlba_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x105;
+}
+
+static void
+Opcode_hwwdtlba_Slot_inst_encode (xtensa_insnbuf slotbuf)
+{
+  slotbuf[0] = 0x905;
 }
 
 static void
@@ -7020,6 +7615,54 @@ xtensa_opcode_encode_fn Opcode_ldct_encode_fns[] = {
   Opcode_ldct_Slot_inst_encode, 0, 0
 };
 
+xtensa_opcode_encode_fn Opcode_wsr_ptevaddr_encode_fns[] = {
+  Opcode_wsr_ptevaddr_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_rsr_ptevaddr_encode_fns[] = {
+  Opcode_rsr_ptevaddr_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_xsr_ptevaddr_encode_fns[] = {
+  Opcode_xsr_ptevaddr_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_rsr_rasid_encode_fns[] = {
+  Opcode_rsr_rasid_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_wsr_rasid_encode_fns[] = {
+  Opcode_wsr_rasid_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_xsr_rasid_encode_fns[] = {
+  Opcode_xsr_rasid_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_rsr_itlbcfg_encode_fns[] = {
+  Opcode_rsr_itlbcfg_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_wsr_itlbcfg_encode_fns[] = {
+  Opcode_wsr_itlbcfg_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_xsr_itlbcfg_encode_fns[] = {
+  Opcode_xsr_itlbcfg_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_rsr_dtlbcfg_encode_fns[] = {
+  Opcode_rsr_dtlbcfg_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_wsr_dtlbcfg_encode_fns[] = {
+  Opcode_wsr_dtlbcfg_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_xsr_dtlbcfg_encode_fns[] = {
+  Opcode_xsr_dtlbcfg_Slot_inst_encode, 0, 0
+};
+
 xtensa_opcode_encode_fn Opcode_idtlb_encode_fns[] = {
   Opcode_idtlb_Slot_inst_encode, 0, 0
 };
@@ -7058,6 +7701,18 @@ xtensa_opcode_encode_fn Opcode_ritlb1_encode_fns[] = {
 
 xtensa_opcode_encode_fn Opcode_witlb_encode_fns[] = {
   Opcode_witlb_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_ldpte_encode_fns[] = {
+  Opcode_ldpte_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_hwwitlba_encode_fns[] = {
+  Opcode_hwwitlba_Slot_inst_encode, 0, 0
+};
+
+xtensa_opcode_encode_fn Opcode_hwwdtlba_encode_fns[] = {
+  Opcode_hwwdtlba_Slot_inst_encode, 0, 0
 };
 
 xtensa_opcode_encode_fn Opcode_nsa_encode_fns[] = {
@@ -7864,40 +8519,85 @@ static xtensa_opcode_internal opcodes[] = {
   { "ldct", 212 /* xt_iclass_ldct */,
     0,
     Opcode_ldct_encode_fns, 0, 0 },
-  { "idtlb", 213 /* xt_iclass_idtlb */,
+  { "wsr.ptevaddr", 213 /* xt_iclass_wsr.ptevaddr */,
+    0,
+    Opcode_wsr_ptevaddr_encode_fns, 0, 0 },
+  { "rsr.ptevaddr", 214 /* xt_iclass_rsr.ptevaddr */,
+    0,
+    Opcode_rsr_ptevaddr_encode_fns, 0, 0 },
+  { "xsr.ptevaddr", 215 /* xt_iclass_xsr.ptevaddr */,
+    0,
+    Opcode_xsr_ptevaddr_encode_fns, 0, 0 },
+  { "rsr.rasid", 216 /* xt_iclass_rsr.rasid */,
+    0,
+    Opcode_rsr_rasid_encode_fns, 0, 0 },
+  { "wsr.rasid", 217 /* xt_iclass_wsr.rasid */,
+    0,
+    Opcode_wsr_rasid_encode_fns, 0, 0 },
+  { "xsr.rasid", 218 /* xt_iclass_xsr.rasid */,
+    0,
+    Opcode_xsr_rasid_encode_fns, 0, 0 },
+  { "rsr.itlbcfg", 219 /* xt_iclass_rsr.itlbcfg */,
+    0,
+    Opcode_rsr_itlbcfg_encode_fns, 0, 0 },
+  { "wsr.itlbcfg", 220 /* xt_iclass_wsr.itlbcfg */,
+    0,
+    Opcode_wsr_itlbcfg_encode_fns, 0, 0 },
+  { "xsr.itlbcfg", 221 /* xt_iclass_xsr.itlbcfg */,
+    0,
+    Opcode_xsr_itlbcfg_encode_fns, 0, 0 },
+  { "rsr.dtlbcfg", 222 /* xt_iclass_rsr.dtlbcfg */,
+    0,
+    Opcode_rsr_dtlbcfg_encode_fns, 0, 0 },
+  { "wsr.dtlbcfg", 223 /* xt_iclass_wsr.dtlbcfg */,
+    0,
+    Opcode_wsr_dtlbcfg_encode_fns, 0, 0 },
+  { "xsr.dtlbcfg", 224 /* xt_iclass_xsr.dtlbcfg */,
+    0,
+    Opcode_xsr_dtlbcfg_encode_fns, 0, 0 },
+  { "idtlb", 225 /* xt_iclass_idtlb */,
     0,
     Opcode_idtlb_encode_fns, 0, 0 },
-  { "pdtlb", 214 /* xt_iclass_rdtlb */,
+  { "pdtlb", 226 /* xt_iclass_rdtlb */,
     0,
     Opcode_pdtlb_encode_fns, 0, 0 },
-  { "rdtlb0", 214 /* xt_iclass_rdtlb */,
+  { "rdtlb0", 226 /* xt_iclass_rdtlb */,
     0,
     Opcode_rdtlb0_encode_fns, 0, 0 },
-  { "rdtlb1", 214 /* xt_iclass_rdtlb */,
+  { "rdtlb1", 226 /* xt_iclass_rdtlb */,
     0,
     Opcode_rdtlb1_encode_fns, 0, 0 },
-  { "wdtlb", 215 /* xt_iclass_wdtlb */,
+  { "wdtlb", 227 /* xt_iclass_wdtlb */,
     0,
     Opcode_wdtlb_encode_fns, 0, 0 },
-  { "iitlb", 216 /* xt_iclass_iitlb */,
+  { "iitlb", 228 /* xt_iclass_iitlb */,
     0,
     Opcode_iitlb_encode_fns, 0, 0 },
-  { "pitlb", 217 /* xt_iclass_ritlb */,
+  { "pitlb", 229 /* xt_iclass_ritlb */,
     0,
     Opcode_pitlb_encode_fns, 0, 0 },
-  { "ritlb0", 217 /* xt_iclass_ritlb */,
+  { "ritlb0", 229 /* xt_iclass_ritlb */,
     0,
     Opcode_ritlb0_encode_fns, 0, 0 },
-  { "ritlb1", 217 /* xt_iclass_ritlb */,
+  { "ritlb1", 229 /* xt_iclass_ritlb */,
     0,
     Opcode_ritlb1_encode_fns, 0, 0 },
-  { "witlb", 218 /* xt_iclass_witlb */,
+  { "witlb", 230 /* xt_iclass_witlb */,
     0,
     Opcode_witlb_encode_fns, 0, 0 },
-  { "nsa", 219 /* xt_iclass_nsa */,
+  { "ldpte", 231 /* xt_iclass_ldpte */,
+    0,
+    Opcode_ldpte_encode_fns, 0, 0 },
+  { "hwwitlba", 232 /* xt_iclass_hwwitlba */,
+    XTENSA_OPCODE_IS_BRANCH,
+    Opcode_hwwitlba_encode_fns, 0, 0 },
+  { "hwwdtlba", 233 /* xt_iclass_hwwdtlba */,
+    0,
+    Opcode_hwwdtlba_encode_fns, 0, 0 },
+  { "nsa", 234 /* xt_iclass_nsa */,
     0,
     Opcode_nsa_encode_fns, 0, 0 },
-  { "nsau", 219 /* xt_iclass_nsa */,
+  { "nsau", 234 /* xt_iclass_nsa */,
     0,
     Opcode_nsau_encode_fns, 0, 0 }
 };
@@ -7923,7 +8623,10 @@ Slot_inst_decode (const xtensa_insnbuf insn)
 		  switch (Field_m_Slot_inst_get (insn))
 		    {
 		    case 0:
-		      return 77; /* ill */
+		      if (Field_s_Slot_inst_get (insn) == 0 &&
+			  Field_n_Slot_inst_get (insn) == 0)
+			return 77; /* ill */
+		      break;
 		    case 2:
 		      switch (Field_n_Slot_inst_get (insn))
 			{
@@ -8053,34 +8756,42 @@ Slot_inst_decode (const xtensa_insnbuf insn)
 		    return 13; /* rotw */
 		  break;
 		case 14:
-		  return 274; /* nsa */
+		  return 289; /* nsa */
 		case 15:
-		  return 275; /* nsau */
+		  return 290; /* nsau */
 		}
 	      break;
 	    case 5:
 	      switch (Field_r_Slot_inst_get (insn))
 		{
+		case 1:
+		  return 287; /* hwwitlba */
 		case 3:
-		  return 271; /* ritlb0 */
+		  return 283; /* ritlb0 */
 		case 4:
-		  return 269; /* iitlb */
+		  if (Field_t_Slot_inst_get (insn) == 0)
+		    return 281; /* iitlb */
+		  break;
 		case 5:
-		  return 270; /* pitlb */
+		  return 282; /* pitlb */
 		case 6:
-		  return 273; /* witlb */
+		  return 285; /* witlb */
 		case 7:
-		  return 272; /* ritlb1 */
+		  return 284; /* ritlb1 */
+		case 9:
+		  return 288; /* hwwdtlba */
 		case 11:
-		  return 266; /* rdtlb0 */
+		  return 278; /* rdtlb0 */
 		case 12:
-		  return 264; /* idtlb */
+		  if (Field_t_Slot_inst_get (insn) == 0)
+		    return 276; /* idtlb */
+		  break;
 		case 13:
-		  return 265; /* pdtlb */
+		  return 277; /* pdtlb */
 		case 14:
-		  return 268; /* wdtlb */
+		  return 280; /* wdtlb */
 		case 15:
-		  return 267; /* rdtlb1 */
+		  return 279; /* rdtlb1 */
 		}
 	      break;
 	    case 6:
@@ -8138,6 +8849,14 @@ Slot_inst_decode (const xtensa_insnbuf insn)
 		  return 22; /* xsr.windowbase */
 		case 73:
 		  return 25; /* xsr.windowstart */
+		case 83:
+		  return 266; /* xsr.ptevaddr */
+		case 90:
+		  return 269; /* xsr.rasid */
+		case 91:
+		  return 272; /* xsr.itlbcfg */
+		case 92:
+		  return 275; /* xsr.dtlbcfg */
 		case 96:
 		  return 218; /* xsr.ibreakenable */
 		case 104:
@@ -8236,11 +8955,15 @@ Slot_inst_decode (const xtensa_insnbuf insn)
 		case 9:
 		  return 262; /* sdct */
 		case 14:
-		  if (Field_t_Slot_inst_get (insn) == 0)
+		  if (Field_t_Slot_inst_get (insn) == 0 &&
+		      Field_s_Slot_inst_get (insn) == 0)
 		    return 231; /* rfdo */
-		  if (Field_t_Slot_inst_get (insn) == 1)
+		  if (Field_t_Slot_inst_get (insn) == 1 &&
+		      Field_s_Slot_inst_get (insn) == 0)
 		    return 232; /* rfdd */
 		  break;
+		case 15:
+		  return 286; /* ldpte */
 		}
 	      break;
 	    }
@@ -8265,6 +8988,14 @@ Slot_inst_decode (const xtensa_insnbuf insn)
 		  return 20; /* rsr.windowbase */
 		case 73:
 		  return 23; /* rsr.windowstart */
+		case 83:
+		  return 265; /* rsr.ptevaddr */
+		case 90:
+		  return 267; /* rsr.rasid */
+		case 91:
+		  return 270; /* rsr.itlbcfg */
+		case 92:
+		  return 273; /* rsr.dtlbcfg */
 		case 96:
 		  return 216; /* rsr.ibreakenable */
 		case 104:
@@ -8358,6 +9089,14 @@ Slot_inst_decode (const xtensa_insnbuf insn)
 		  return 21; /* wsr.windowbase */
 		case 73:
 		  return 24; /* wsr.windowstart */
+		case 83:
+		  return 264; /* wsr.ptevaddr */
+		case 90:
+		  return 268; /* wsr.rasid */
+		case 91:
+		  return 271; /* wsr.itlbcfg */
+		case 92:
+		  return 274; /* wsr.dtlbcfg */
 		case 96:
 		  return 217; /* wsr.ibreakenable */
 		case 104:
@@ -8664,7 +9403,9 @@ Slot_inst16b_decode (const xtensa_insnbuf insn)
 		return 34; /* nop.n */
 	      break;
 	    case 6:
-	      return 30; /* ill.n */
+	      if (Field_s_Slot_inst16b_get (insn) == 0)
+		return 30; /* ill.n */
+	      break;
 	    }
 	  break;
 	}
@@ -9090,8 +9831,8 @@ xtensa_isa_internal xtensa_modules = {
   3, slots,
   39 /* num_fields */,
   70, operands,
-  220, iclasses,
-  276, opcodes, 0,
+  235, iclasses,
+  291, opcodes, 0,
   1, regfiles,
   NUM_STATES, states, 0,
   NUM_SYSREGS, sysregs, 0,
