@@ -1,3 +1,7 @@
+2005-07-07  Ben Elliston  <bje@gnu.org>
+
+	* config.bfd: Mark m68*-*-rtemscoff as obsolete.
+
 2005-07-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf2.c (varinfo): Add addr.

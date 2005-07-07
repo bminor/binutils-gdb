@@ -34,6 +34,7 @@ case $targ in
  m68*-apple-aux* | \
  m68*-apollo-* | \
  m68*-bull-sysv* | \
+ m68*-*-rtemscoff* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
