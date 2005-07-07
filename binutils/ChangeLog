@@ -1,3 +1,11 @@
+2005-07-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* bucomm.h (report): Add format attribute.
+	* dlltool.c (inform): Likewise.
+	* dllwrap.c (display, inform, warn): Likewise.
+	* objdump.c (objdump_sprintf): Likewise.
+	* readelf.c (error, warn): Likewise.  Fix format bugs.
+
 2005-07-05  Dmitry V. Levin  <ldv@altlinux.org>
 	    Nick Clifton  <nickc@redhat.com>
 

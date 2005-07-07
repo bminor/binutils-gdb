@@ -77,7 +77,7 @@ print_register_list (void * dis_info,
 
   if (value & mask)
     {
-      (*info->fprintf_func) (info->stream, "r%i", index + offset);
+      (*info->fprintf_func) (info->stream, "r%li", index + offset);
       comma = ",";
     }
     
@@ -90,7 +90,7 @@ print_register_list (void * dis_info,
 
       if (value & mask)
 	{
-	  (*info->fprintf_func) (info->stream, "%sr%i", comma, index + offset);
+	  (*info->fprintf_func) (info->stream, "%sr%li", comma, index + offset);
 	  comma = ",";
 	}
     }

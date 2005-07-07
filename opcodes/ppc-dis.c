@@ -249,7 +249,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	  else
 	    {
 	      if (operand->bits == 3)
-		(*info->fprintf_func) (info->stream, "cr%d", value);
+		(*info->fprintf_func) (info->stream, "cr%ld", value);
 	      else
 		{
 		  static const char *cbnames[4] = { "lt", "gt", "eq", "so" };

@@ -708,7 +708,7 @@ static void fill_ordinals (export_type **);
 static int alphafunc (const void *, const void *);
 static void mangle_defs (void);
 static void usage (FILE *, int);
-static void inform (const char *, ...);
+static void inform (const char *, ...) ATTRIBUTE_PRINTF_1;
 static void set_dll_name_from_def (const char *);
 
 static char *

@@ -108,14 +108,14 @@ disassemble (bfd_vma memaddr,
 		{
 		  value = ((insn >> (operand->shift + extra_shift))
 			   & ((1 << operand->bits) - 1));
-		  (*info->fprintf_func) (info->stream, "d%d", value);
+		  (*info->fprintf_func) (info->stream, "d%ld", value);
 		}
 
 	      else if ((operand->flags & MN10200_OPERAND_AREG) != 0)
 		{
 		  value = ((insn >> (operand->shift + extra_shift))
 			   & ((1 << operand->bits) - 1));
-		  (*info->fprintf_func) (info->stream, "a%d", value);
+		  (*info->fprintf_func) (info->stream, "a%ld", value);
 		}
 
 	      else if ((operand->flags & MN10200_OPERAND_PSW) != 0)
@@ -323,7 +323,7 @@ print_insn_mn10200 (bfd_vma memaddr, struct disassemble_info *info)
     }
   else
     {
-      (*info->fprintf_func) (info->stream, _("unknown\t0x%02x"), insn);
+      (*info->fprintf_func) (info->stream, _("unknown\t0x%02lx"), insn);
       return 1;
     }
 

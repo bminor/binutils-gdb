@@ -620,8 +620,8 @@ struct vms_private_data_struct
 #define SECTION_NAME_TEMPLATE "__SEC__%d"
 					 
 #if VMS_DEBUG				 
-extern void _bfd_vms_debug (int, char *, ..);
-extern void _bfd_hexdump   (int, unsignedchar *, int, int);
+extern void _bfd_vms_debug (int, char *, ...) ATTRIBUTE_PRINTF_2;
+extern void _bfd_hexdump   (int, unsigned char *, int, int);
 					 
 #define vms_debug _bfd_vms_debug	 
 #endif					 

@@ -182,7 +182,7 @@ dis_long (unsigned long insn,
     }
 
   if (!match)
-    (*info->fprintf_func) (info->stream, ".long\t0x%08x", insn);
+    (*info->fprintf_func) (info->stream, ".long\t0x%08lx", insn);
 
   if (need_paren)
     (*info->fprintf_func) (info->stream, ")");
@@ -255,7 +255,7 @@ dis_2_short (unsigned long insn,
     }
 
   if (num_match == 0)
-    (*info->fprintf_func) (info->stream, ".long\t0x%08x", insn);
+    (*info->fprintf_func) (info->stream, ".long\t0x%08lx", insn);
 
   if (need_paren)
     (*info->fprintf_func) (info->stream, ")");

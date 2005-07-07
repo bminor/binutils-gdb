@@ -449,7 +449,7 @@ disassemble (bfd_vma memaddr,
 		  value = ((insn >> (operand->shift + extra_shift))
 			   & ((1 << operand->bits) - 1));
 		  if (value == 0)
-		    (*info->fprintf_func) (info->stream, "sp", value);
+		    (*info->fprintf_func) (info->stream, "sp");
 		  else
 		    (*info->fprintf_func) (info->stream, "xr%d", (int) value);
 		}
@@ -577,7 +577,7 @@ disassemble (bfd_vma memaddr,
 
   if (!match)
     /* xgettext:c-format */
-    (*info->fprintf_func) (info->stream, _("unknown\t0x%04x"), insn);
+    (*info->fprintf_func) (info->stream, _("unknown\t0x%04lx"), insn);
 }
 
 int

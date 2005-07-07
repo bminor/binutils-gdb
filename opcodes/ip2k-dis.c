@@ -89,7 +89,7 @@ print_fr (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       if (offsetvalue == 0)
 	(*info->fprintf_func) (info->stream, "%s","(DP)");
       else
-	(*info->fprintf_func) (info->stream, "$%x%s",offsetvalue, "(DP)");
+	(*info->fprintf_func) (info->stream, "$%lx%s",offsetvalue, "(DP)");
       return;
     }
 
@@ -99,7 +99,7 @@ print_fr (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       if (offsetvalue == 0)
 	(*info->fprintf_func) (info->stream, "%s", "(SP)");
       else
-	(*info->fprintf_func) (info->stream, "$%x%s", offsetvalue,"(SP)");
+	(*info->fprintf_func) (info->stream, "$%lx%s", offsetvalue,"(SP)");
       return;
     }
 
@@ -110,7 +110,7 @@ print_fr (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     (*info->fprintf_func) (info->stream, "%s", ke->name);
   else
     /* Print as an address literal.  */
-    (*info->fprintf_func) (info->stream, "$%02x", value);
+    (*info->fprintf_func) (info->stream, "$%02lx", value);
 }
 
 static void
@@ -123,7 +123,7 @@ print_dollarhex (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
-  (*info->fprintf_func) (info->stream, "$%x", value);
+  (*info->fprintf_func) (info->stream, "$%lx", value);
 }
 
 static void
@@ -136,7 +136,7 @@ print_dollarhex8 (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
-  (*info->fprintf_func) (info->stream, "$%02x", value);
+  (*info->fprintf_func) (info->stream, "$%02lx", value);
 }
 
 static void
@@ -153,7 +153,7 @@ print_dollarhex_addr16h (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
      by 8 bits so that disassembled code will reassemble properly.  */
   value = ((value << 8) & 0xFF00);
 
-  (*info->fprintf_func) (info->stream, "$%04x", value);
+  (*info->fprintf_func) (info->stream, "$%04lx", value);
 }
 
 static void
@@ -166,7 +166,7 @@ print_dollarhex_addr16l (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
-  (*info->fprintf_func) (info->stream, "$%04x", value);
+  (*info->fprintf_func) (info->stream, "$%04lx", value);
 }
 
 static void
@@ -181,7 +181,7 @@ print_dollarhex_p (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 
   value = ((value << 14) & 0x1C000);
   ;value = (value  & 0x1FFFF);
-  (*info->fprintf_func) (info->stream, "$%05x", value);
+  (*info->fprintf_func) (info->stream, "$%05lx", value);
 }
 
 static void
@@ -195,7 +195,7 @@ print_dollarhex_cj (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   disassemble_info *info = (disassemble_info *) dis_info;
 
   value = ((value << 1) & 0x1FFFF);
-  (*info->fprintf_func) (info->stream, "$%05x", value);
+  (*info->fprintf_func) (info->stream, "$%05lx", value);
 }
 
 static void
@@ -208,7 +208,7 @@ print_decimal (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 {
   disassemble_info *info = (disassemble_info *) dis_info;
 
-  (*info->fprintf_func) (info->stream, "%d", value);
+  (*info->fprintf_func) (info->stream, "%ld", value);
 }
 
 

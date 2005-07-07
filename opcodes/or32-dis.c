@@ -300,7 +300,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info *info)
 
   /* This used to be %8x for binutils.  */
   (*info->fprintf_func)
-    (info->stream, ".word 0x%08x", insn);
+    (info->stream, ".word 0x%08lx", insn);
   return 4;
 }
 

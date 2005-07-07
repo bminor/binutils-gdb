@@ -547,7 +547,7 @@ print_arg (argument *a, bfd_vma memaddr, struct disassemble_info *info)
 		    func (stream, "%s", string);
 		  }
 		else
-		  func (stream, "$0x%x", a->constant);
+		  func (stream, "$0x%lx", a->constant);
 	    }
 	  else
             {
@@ -556,11 +556,11 @@ print_arg (argument *a, bfd_vma memaddr, struct disassemble_info *info)
             }
         }
       else
-	func (stream, "$0x%x", a->constant);
+	func (stream, "$0x%lx", a->constant);
       break;
 
     case arg_idxr:
-      func (stream, "0x%x(%s,%s,%d)", a->constant, getregname (a->r),
+      func (stream, "0x%lx(%s,%s,%d)", a->constant, getregname (a->r),
 	    getregname (a->i_r), powerof2 (a->scale));
       break;
 
@@ -569,7 +569,7 @@ print_arg (argument *a, bfd_vma memaddr, struct disassemble_info *info)
       break;
 
     case arg_cr:
-      func (stream, "0x%x(%s)", a->constant, getregname (a->r));
+      func (stream, "0x%lx(%s)", a->constant, getregname (a->r));
 
       if (IS_INSN_TYPE (LD_STOR_INS_INC))
 	func (stream, "+");

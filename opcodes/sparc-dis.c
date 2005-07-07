@@ -693,7 +693,7 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		    break;
 
 		  case '3':
-		    (info->fprintf_func) (stream, "%d", X_IMM (insn, 3));
+		    (info->fprintf_func) (stream, "%ld", X_IMM (insn, 3));
 		    break;
 
 		  case 'K':
@@ -806,16 +806,16 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		      if (name)
 			(*info->fprintf_func) (stream, "%s", name);
 		      else
-			(*info->fprintf_func) (stream, "%d", X_RD (insn));
+			(*info->fprintf_func) (stream, "%ld", X_RD (insn));
 		      break;
 		    }
 
 		  case 'M':
-		    (*info->fprintf_func) (stream, "%%asr%d", X_RS1 (insn));
+		    (*info->fprintf_func) (stream, "%%asr%ld", X_RS1 (insn));
 		    break;
 
 		  case 'm':
-		    (*info->fprintf_func) (stream, "%%asr%d", X_RD (insn));
+		    (*info->fprintf_func) (stream, "%%asr%ld", X_RD (insn));
 		    break;
 
 		  case 'L':
@@ -840,7 +840,7 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		      if (name)
 			(*info->fprintf_func) (stream, "%s", name);
 		      else
-			(*info->fprintf_func) (stream, "(%d)", X_ASI (insn));
+			(*info->fprintf_func) (stream, "(%ld)", X_ASI (insn));
 		      break;
 		    }
 
@@ -873,7 +873,7 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		    break;
 
 		  case 'x':
-		    (*info->fprintf_func) (stream, "%d",
+		    (*info->fprintf_func) (stream, "%ld",
 					   ((X_LDST_I (insn) << 8)
 					    + X_ASI (insn)));
 		    break;

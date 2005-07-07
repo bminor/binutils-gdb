@@ -344,7 +344,7 @@ print_insn_d30v (bfd_vma memaddr, struct disassemble_info *info)
     {
       info->bytes_per_line = 8;
       if (!(result = lookup_opcode (&insn, in1, 0)))
-	(*info->fprintf_func) (info->stream, ".long\t0x%x", in1);
+	(*info->fprintf_func) (info->stream, ".long\t0x%lx", in1);
       else
 	print_insn (info, memaddr, (long long) in1, &insn, 0, result);
       return 4;
@@ -356,7 +356,7 @@ print_insn_d30v (bfd_vma memaddr, struct disassemble_info *info)
       /* LONG instruction.  */
       if (!(result = lookup_opcode (&insn, in1, 1)))
 	{
-	  (*info->fprintf_func) (info->stream, ".long\t0x%x,0x%x", in1, in2);
+	  (*info->fprintf_func) (info->stream, ".long\t0x%lx,0x%lx", in1, in2);
 	  return 8;
 	}
       num = (long long) in1 << 32 | in2;
@@ -366,7 +366,7 @@ print_insn_d30v (bfd_vma memaddr, struct disassemble_info *info)
     {
       num = in1;
       if (!(result = lookup_opcode (&insn, in1, 0)))
-	(*info->fprintf_func) (info->stream, ".long\t0x%x", in1);
+	(*info->fprintf_func) (info->stream, ".long\t0x%lx", in1);
       else
 	print_insn (info, memaddr, num, &insn, 0, result);
 
@@ -387,7 +387,7 @@ print_insn_d30v (bfd_vma memaddr, struct disassemble_info *info)
       insn.form = NULL;
       num = in2;
       if (!(result = lookup_opcode (&insn, in2, 0)))
-	(*info->fprintf_func) (info->stream, ".long\t0x%x", in2);
+	(*info->fprintf_func) (info->stream, ".long\t0x%lx", in2);
       else
 	print_insn (info, memaddr, num, &insn, 0, result);
     }

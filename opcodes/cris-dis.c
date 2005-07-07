@@ -1448,7 +1448,7 @@ print_insn_cris_generic (bfd_vma memaddr,
 	  advance += 2;
 
 	  /* If to print data as offsets, then shortcut here.  */
-	  (*info->fprintf_func) (info->stream, "case %d%s: -> ",
+	  (*info->fprintf_func) (info->stream, "case %ld%s: -> ",
 				 case_offset + no_of_case_offsets
 				 - case_offset_counter,
 				 case_offset_counter == 1 ? "/default" :
@@ -1520,7 +1520,7 @@ print_insn_cris_generic (bfd_vma memaddr,
 
 	  if (matchedp == NULL)
 	    {
-	      (*info->fprintf_func) (info->stream, "??0x%lx", insn);
+	      (*info->fprintf_func) (info->stream, "??0x%x", insn);
 	      advance += 2;
 
 	      info->insn_type = dis_noninsn;

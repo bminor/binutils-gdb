@@ -86,7 +86,7 @@ const pseudo_typeS md_pseudo_table[] =
   {0, 0, 0}
 };
 
-static int
+static int ATTRIBUTE_PRINTF_1
 debug (const char *string, ...)
 {
   if (flag_debug)
@@ -439,9 +439,9 @@ tic30_operand (char *token)
 
 	  debug ("Expression type: %d\n",
 		 current_op->direct.direct_expr.X_op);
-	  debug ("Expression addnum: %d\n",
-		 current_op->direct.direct_expr.X_add_number);
-	  debug ("Segment: %d\n", retval);
+	  debug ("Expression addnum: %ld\n",
+		 (long) current_op->direct.direct_expr.X_add_number);
+	  debug ("Segment: %p\n", retval);
 
 	  input_line_pointer = save_input_line_pointer;
 
@@ -609,9 +609,9 @@ tic30_operand (char *token)
 	      retval = expression (&current_op->immediate.imm_expr);
 	      debug ("Expression type: %d\n",
 		     current_op->immediate.imm_expr.X_op);
-	      debug ("Expression addnum: %d\n",
-		     current_op->immediate.imm_expr.X_add_number);
-	      debug ("Segment: %d\n", retval);
+	      debug ("Expression addnum: %ld\n",
+		     (long) current_op->immediate.imm_expr.X_add_number);
+	      debug ("Segment: %p\n", retval);
 	      input_line_pointer = save_input_line_pointer;
 
 	      if (current_op->immediate.imm_expr.X_op == O_constant)
@@ -1140,7 +1140,7 @@ md_apply_fix (fixS *fixP,
   debug ("Values in fixP\n");
   debug ("fx_size = %d\n", fixP->fx_size);
   debug ("fx_pcrel = %d\n", fixP->fx_pcrel);
-  debug ("fx_where = %d\n", fixP->fx_where);
+  debug ("fx_where = %ld\n", fixP->fx_where);
   debug ("fx_offset = %d\n", (int) fixP->fx_offset);
   {
     char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
@@ -1182,11 +1182,11 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 valueT
 md_section_align (segT segment, valueT size)
 {
-  debug ("In md_section_align() segment = %d and size = %d\n",
-	 segment, size);
+  debug ("In md_section_align() segment = %p and size = %lu\n",
+	 segment, (unsigned long) size);
   size = (size + 3) / 4;
   size *= 4;
-  debug ("New size value = %d\n", size);
+  debug ("New size value = %lu\n", (unsigned long) size);
   return size;
 }
 
@@ -1196,7 +1196,7 @@ md_pcrel_from (fixS *fixP)
   int offset;
 
   debug ("In md_pcrel_from()\n");
-  debug ("fx_where = %d\n", fixP->fx_where);
+  debug ("fx_where = %ld\n", fixP->fx_where);
   debug ("fx_size = %d\n", fixP->fx_size);
   /* Find the opcode that represents the current instruction in the
      fr_literal storage area, and check bit 21.  Bit 21 contains whether the

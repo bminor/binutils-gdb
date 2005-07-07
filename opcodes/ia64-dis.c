@@ -109,7 +109,7 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
   if (slotnum == 0)
     (*info->fprintf_func) (info->stream, "[%s] ", tname);
   else
-    (*info->fprintf_func) (info->stream, "      ", tname);
+    (*info->fprintf_func) (info->stream, "      ");
 
   unit = ia64_templ_desc[template].exec_unit[slotnum];
 
@@ -237,11 +237,11 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
 	    if (str)
 	      (*info->fprintf_func) (info->stream, "%s", str);
 	    else if (odesc->flags & IA64_OPND_FLAG_DECIMAL_SIGNED)
-	      (*info->fprintf_func) (info->stream, "%lld", value);
+	      (*info->fprintf_func) (info->stream, "%lld", (long long) value);
 	    else if (odesc->flags & IA64_OPND_FLAG_DECIMAL_UNSIGNED)
-	      (*info->fprintf_func) (info->stream, "%llu", value);
+	      (*info->fprintf_func) (info->stream, "%llu", (long long) value);
 	    else
-	      (*info->fprintf_func) (info->stream, "0x%llx", value);
+	      (*info->fprintf_func) (info->stream, "0x%llx", (long long) value);
 	    break;
 
 	  case IA64_OPND_CLASS_REL:
@@ -268,6 +268,6 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
   return retval;
 
  decoding_failed:
-  (*info->fprintf_func) (info->stream, "      data8 %#011llx", insn);
+  (*info->fprintf_func) (info->stream, "      data8 %#011llx", (long long) insn);
   goto failed;
 }

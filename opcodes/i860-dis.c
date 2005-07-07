@@ -73,7 +73,7 @@ print_br_address (disassemble_info *info, bfd_vma memaddr, long val)
 
   long adj = (long)memaddr + 4 + (val << 2);
 
-  (*info->fprintf_func) (info->stream, "0x%08x", adj);
+  (*info->fprintf_func) (info->stream, "0x%08lx", adj);
 	    
   /* Attempt to obtain a symbol for the target address.  */
 	

@@ -222,12 +222,12 @@ tic4x_print_immed (struct disassemble_info *info,
     {
     case IMMED_SINT:
     case IMMED_INT:
-      (*info->fprintf_func) (info->stream, "%d", (long) arg);
+      (*info->fprintf_func) (info->stream, "%ld", (long) arg);
       break;
 
     case IMMED_SUINT:
     case IMMED_UINT:
-      (*info->fprintf_func) (info->stream, "%u", arg);
+      (*info->fprintf_func) (info->stream, "%lu", arg);
       break;
 
     case IMMED_SFLOAT:
@@ -724,7 +724,7 @@ tic4x_disassemble (unsigned long pc,
            && tic4x_print_op (NULL, instruction, p, pc))
         tic4x_print_op (info, instruction, p, pc);
       else
-        (*info->fprintf_func) (info->stream, "%08x", instruction);
+        (*info->fprintf_func) (info->stream, "%08lx", instruction);
     }
   else
     {
@@ -736,7 +736,7 @@ tic4x_disassemble (unsigned long pc,
             break;
           }
       if (i == TIC4X_SPESOP_SIZE)
-        (*info->fprintf_func) (info->stream, "%08x", instruction);
+        (*info->fprintf_func) (info->stream, "%08lx", instruction);
     }
 
   /* Return size of insn in words.  */

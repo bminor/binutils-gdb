@@ -187,7 +187,7 @@ disassemble (bfd_vma memaddr,
 		  info->fprintf_func (info->stream, "ep");
 		  break;
 		default:
-		  info->fprintf_func (info->stream, "%d", value);
+		  info->fprintf_func (info->stream, "%ld", value);
 		  break;
 		case V850_OPERAND_DISP:
 		  {
@@ -314,7 +314,7 @@ disassemble (bfd_vma memaddr,
 		      if ((insn & 0x001fffc0) == 0x00130780)
 			value <<= 16;
 
-		      info->fprintf_func (info->stream, "0x%x", value);
+		      info->fprintf_func (info->stream, "0x%lx", value);
 		    }
 		  else
 		    info->memory_error_func (status, memaddr + bytes_read,
@@ -355,9 +355,9 @@ disassemble (bfd_vma memaddr,
   if (!match)
     {
       if (short_op)
-	info->fprintf_func (info->stream, ".short\t0x%04x", insn);
+	info->fprintf_func (info->stream, ".short\t0x%04lx", insn);
       else
-	info->fprintf_func (info->stream, ".long\t0x%08x", insn);
+	info->fprintf_func (info->stream, ".long\t0x%08lx", insn);
     }
 
   return bytes_read;

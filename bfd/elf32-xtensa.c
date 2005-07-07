@@ -1775,7 +1775,7 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
 }
 
 
-static char *
+static char * ATTRIBUTE_PRINTF(2,4)
 vsprint_msg (const char *origmsg, const char *fmt, int arglen, ...)
 {
   /* To reduce the size of the memory leak,
@@ -2355,7 +2355,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	      else
 		error_message = vsprint_msg (error_message, ": (%s+0x%x)",
 					     strlen (name) + 22,
-					     name, rel->r_addend);
+					     name, (int)rel->r_addend);
 	    }
 
 	  if (!((*info->callbacks->reloc_dangerous)

@@ -796,7 +796,7 @@ print_insn_args (const char *d,
 
 	case 'i':
 	case 'u':
-	  (*info->fprintf_func) (info->stream, "0x%x",
+	  (*info->fprintf_func) (info->stream, "0x%lx",
 				 (l >> OP_SH_IMMEDIATE) & OP_MASK_IMMEDIATE);
 	  break;
 
@@ -870,32 +870,33 @@ print_insn_args (const char *d,
 	  break;
 
 	case '<':
-	  (*info->fprintf_func) (info->stream, "0x%x",
+	  (*info->fprintf_func) (info->stream, "0x%lx",
 				 (l >> OP_SH_SHAMT) & OP_MASK_SHAMT);
 	  break;
 
 	case 'c':
-	  (*info->fprintf_func) (info->stream, "0x%x",
+	  (*info->fprintf_func) (info->stream, "0x%lx",
 				 (l >> OP_SH_CODE) & OP_MASK_CODE);
 	  break;
 
 	case 'q':
-	  (*info->fprintf_func) (info->stream, "0x%x",
+	  (*info->fprintf_func) (info->stream, "0x%lx",
 				 (l >> OP_SH_CODE2) & OP_MASK_CODE2);
 	  break;
 
 	case 'C':
-	  (*info->fprintf_func) (info->stream, "0x%x",
+	  (*info->fprintf_func) (info->stream, "0x%lx",
 				 (l >> OP_SH_COPZ) & OP_MASK_COPZ);
 	  break;
 
 	case 'B':
-	  (*info->fprintf_func) (info->stream, "0x%x",
+	  (*info->fprintf_func) (info->stream, "0x%lx",
+
 				 (l >> OP_SH_CODE20) & OP_MASK_CODE20);
 	  break;
 
 	case 'J':
-	  (*info->fprintf_func) (info->stream, "0x%x",
+	  (*info->fprintf_func) (info->stream, "0x%lx",
 				 (l >> OP_SH_CODE19) & OP_MASK_CODE19);
 	  break;
 
@@ -929,7 +930,7 @@ print_insn_args (const char *d,
 	     'T' format.  Therefore, until we gain understanding of
 	     cp2 register names, we can simply print the register
 	     numbers.  */
-	  (*info->fprintf_func) (info->stream, "$%d",
+	  (*info->fprintf_func) (info->stream, "$%ld",
 				 (l >> OP_SH_RT) & OP_MASK_RT);
 	  break;
 
@@ -943,7 +944,7 @@ print_insn_args (const char *d,
 	    (*info->fprintf_func) (info->stream, "%s",
 				   mips_cp0_names[(l >> OP_SH_RD) & OP_MASK_RD]);
 	  else
-	    (*info->fprintf_func) (info->stream, "$%d",
+	    (*info->fprintf_func) (info->stream, "$%ld",
 				   (l >> OP_SH_RD) & OP_MASK_RD);
 	  break;
 
@@ -953,37 +954,37 @@ print_insn_args (const char *d,
 	  break;
 
 	case 'N':
-	  (*info->fprintf_func) (info->stream, "$fcc%d",
+	  (*info->fprintf_func) (info->stream, "$fcc%ld",
 				 (l >> OP_SH_BCC) & OP_MASK_BCC);
 	  break;
 
 	case 'M':
-	  (*info->fprintf_func) (info->stream, "$fcc%d",
+	  (*info->fprintf_func) (info->stream, "$fcc%ld",
 				 (l >> OP_SH_CCC) & OP_MASK_CCC);
 	  break;
 
 	case 'P':
-	  (*info->fprintf_func) (info->stream, "%d",
+	  (*info->fprintf_func) (info->stream, "%ld",
 				 (l >> OP_SH_PERFREG) & OP_MASK_PERFREG);
 	  break;
 
 	case 'e':
-	  (*info->fprintf_func) (info->stream, "%d",
+	  (*info->fprintf_func) (info->stream, "%ld",
 				 (l >> OP_SH_VECBYTE) & OP_MASK_VECBYTE);
 	  break;
 
 	case '%':
-	  (*info->fprintf_func) (info->stream, "%d",
+	  (*info->fprintf_func) (info->stream, "%ld",
 				 (l >> OP_SH_VECALIGN) & OP_MASK_VECALIGN);
 	  break;
 
 	case 'H':
-	  (*info->fprintf_func) (info->stream, "%d",
+	  (*info->fprintf_func) (info->stream, "%ld",
 				 (l >> OP_SH_SEL) & OP_MASK_SEL);
 	  break;
 
 	case 'O':
-	  (*info->fprintf_func) (info->stream, "%d",
+	  (*info->fprintf_func) (info->stream, "%ld",
 				 (l >> OP_SH_ALN) & OP_MASK_ALN);
 	  break;
 
@@ -999,35 +1000,35 @@ print_insn_args (const char *d,
 		for (fmt = 0; fmt < 3; fmt++, vsel >>= 1)
 		  if ((vsel & 1) == 0)
 		    break;
-		(*info->fprintf_func) (info->stream, "$v%d[%d]",
+		(*info->fprintf_func) (info->stream, "$v%ld[%d]",
 				       (l >> OP_SH_FT) & OP_MASK_FT,
 				       vsel >> 1);
 	      }
 	    else if ((vsel & 0x08) == 0)
 	      {
-		(*info->fprintf_func) (info->stream, "$v%d",
+		(*info->fprintf_func) (info->stream, "$v%ld",
 				       (l >> OP_SH_FT) & OP_MASK_FT);
 	      }
 	    else
 	      {
-		(*info->fprintf_func) (info->stream, "0x%x",
+		(*info->fprintf_func) (info->stream, "0x%lx",
 				       (l >> OP_SH_FT) & OP_MASK_FT);
 	      }
 	  }
 	  break;
 
 	case 'X':
-	  (*info->fprintf_func) (info->stream, "$v%d",
+	  (*info->fprintf_func) (info->stream, "$v%ld",
 				 (l >> OP_SH_FD) & OP_MASK_FD);
 	  break;
 
 	case 'Y':
-	  (*info->fprintf_func) (info->stream, "$v%d",
+	  (*info->fprintf_func) (info->stream, "$v%ld",
 				 (l >> OP_SH_FS) & OP_MASK_FS);
 	  break;
 
 	case 'Z':
-	  (*info->fprintf_func) (info->stream, "$v%d",
+	  (*info->fprintf_func) (info->stream, "$v%ld",
 				 (l >> OP_SH_FT) & OP_MASK_FT);
 	  break;
 
@@ -1141,7 +1142,7 @@ print_insn_mips (bfd_vma memaddr,
 
   /* Handle undefined instructions.  */
   info->insn_type = dis_noninsn;
-  (*info->fprintf_func) (info->stream, "0x%x", word);
+  (*info->fprintf_func) (info->stream, "0x%lx", word);
   return INSNLEN;
 }
 

@@ -1,3 +1,14 @@
+2005-07-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* arc-dis.c, arm-dis.c, cris-dis.c, crx-dis.c, d10v-dis.c,
+	d30v-dis.c, fr30-dis.c, h8300-dis.c, h8500-dis.c, i860-dis.c,
+	ia64-dis.c, ip2k-dis.c, m10200-dis.c, m10300-dis.c,
+	m88k-dis.c, mcore-dis.c, mips-dis.c, ms1-dis.c, or32-dis.c,
+	ppc-dis.c, sh64-dis.c, sparc-dis.c, tic4x-dis.c, tic80-dis.c,
+	v850-dis.c: Fix format bugs.
+	* ia64-gen.c (fail, warn): Add format attribute.
+	* or32-opc.c (debug): Likewise.
+
 2005-07-07  Khem Raj  <kraj@mvista.com>
 
 	* arm-dis.c (opcode32 arm_opcodes): Fix ARM VFP fadds instruction

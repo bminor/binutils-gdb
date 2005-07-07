@@ -239,8 +239,8 @@ static int dlistlen = 0;
 static int dlisttotlen = 0;
 
 
-static void fail (const char *, ...);
-static void warn (const char *, ...);
+static void fail (const char *, ...) ATTRIBUTE_PRINTF_1;
+static void warn (const char *, ...) ATTRIBUTE_PRINTF_1;
 static struct rdep * insert_resource (const char *, enum ia64_dependency_mode);
 static int  deplist_equals (struct deplist *, struct deplist *);
 static short insert_deplist (int, unsigned short *);

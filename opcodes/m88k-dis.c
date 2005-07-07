@@ -676,7 +676,7 @@ printop (struct disassemble_info *info,
 
     default:
       /* xgettext:c-format */
-      (*info->fprintf_func) (info->stream, _("# <dis error: %08x>"), inst);
+      (*info->fprintf_func) (info->stream, _("# <dis error: %08lx>"), inst);
     }
 }
 
@@ -729,7 +729,7 @@ m88kdis (bfd_vma pc,
     ;
 
   if (entry_ptr == NULL)
-    (*info->fprintf_func) (info->stream, "word\t%08x", instruction);
+    (*info->fprintf_func) (info->stream, "word\t%08lx", instruction);
   else
     {
       (*info->fprintf_func) (info->stream, "%s", entry_ptr->instr->mnemonic);

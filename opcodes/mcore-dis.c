@@ -198,7 +198,7 @@ print_insn_mcore (memaddr, info)
 	    if (inst & 0x400)
 	      val |= 0xFFFFFC00;
 
-	    fprintf (stream, "\t0x%x", memaddr + 2 + (val << 1));
+	    fprintf (stream, "\t0x%lx", (long)(memaddr + 2 + (val << 1)));
 
 	    if (strcmp (op->name, "bsr") == 0)
 	      {
@@ -218,8 +218,8 @@ print_insn_mcore (memaddr, info)
 	  {
 	    long val;
 	    val = (inst & 0x000F);
-	    fprintf (stream, "\t%s, 0x%x",
-		     grname[(inst >> 4) & 0xF], memaddr - (val << 1));
+	    fprintf (stream, "\t%s, 0x%lx",
+		     grname[(inst >> 4) & 0xF], (long)(memaddr - (val << 1)));
 	  }
 	  break;
 
@@ -244,11 +244,11 @@ print_insn_mcore (memaddr, info)
 		| (ibytes[2] << 8) | (ibytes[3]);
 
 	    /* Removed [] around literal value to match ABI syntax 12/95.  */
-	    fprintf (stream, "\t%s, 0x%X", grname[(inst >> 8) & 0xF], val);
+	    fprintf (stream, "\t%s, 0x%lX", grname[(inst >> 8) & 0xF], val);
 
 	    if (val == 0)
-	      fprintf (stream, "\t// from address pool at 0x%x",
-		       (memaddr + 2 + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
+	      fprintf (stream, "\t// from address pool at 0x%lx",
+		       (long)(memaddr + 2 + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
 	  }
 	  break;
 
@@ -273,7 +273,7 @@ print_insn_mcore (memaddr, info)
 		| (ibytes[2] << 8) | (ibytes[3]);
 
 	    /* Removed [] around literal value to match ABI syntax 12/95.  */
-	    fprintf (stream, "\t0x%X", val);
+	    fprintf (stream, "\t0x%lX", val);
 	    /* For jmpi/jsri, we'll try to get a symbol for the target.  */
 	    if (info->print_address_func && val != 0)
 	      {
@@ -282,8 +282,8 @@ print_insn_mcore (memaddr, info)
 	      }
 	    else
 	      {
-		fprintf (stream, "\t// from address pool at 0x%x",
-			 (memaddr + 2 + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
+		fprintf (stream, "\t// from address pool at 0x%lx",
+			 (long)(memaddr + 2 + ((inst & 0xFF) << 2)) & 0xFFFFFFFC);
 	      }
 	  }
 	  break;

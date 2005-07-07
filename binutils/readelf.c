@@ -264,7 +264,7 @@ static void (*byte_put) (unsigned char *, bfd_vma, int);
 #define streq(a,b)	(strcmp ((a), (b)) == 0)
 #define strneq(a,b,n)	(strncmp ((a), (b), (n)) == 0)
 
-static void
+static void ATTRIBUTE_PRINTF_1
 error (const char *message, ...)
 {
   va_list args;
@@ -275,7 +275,7 @@ error (const char *message, ...)
   va_end (args);
 }
 
-static void
+static void ATTRIBUTE_PRINTF_1
 warn (const char *message, ...)
 {
   va_list args;
@@ -327,7 +327,7 @@ get_data (void *var, FILE *file, long offset, size_t size, size_t nmemb,
 
   if (fseek (file, archive_file_offset + offset, SEEK_SET))
     {
-      error (_("Unable to seek to 0x%x for %s\n"),
+      error (_("Unable to seek to 0x%lx for %s\n"),
 	     archive_file_offset + offset, reason);
       return NULL;
     }
@@ -342,8 +342,8 @@ get_data (void *var, FILE *file, long offset, size_t size, size_t nmemb,
 
       if (mvar == NULL)
 	{
-	  error (_("Out of memory allocating 0x%x bytes for %s\n"),
-		 size * nmemb, reason);
+	  error (_("Out of memory allocating 0x%lx bytes for %s\n"),
+		 (unsigned long)(size * nmemb), reason);
 	  return NULL;
 	}
 
@@ -352,7 +352,8 @@ get_data (void *var, FILE *file, long offset, size_t size, size_t nmemb,
 
   if (fread (mvar, size, nmemb, file) != nmemb)
     {
-      error (_("Unable to read in 0x%x bytes of %s\n"), size * nmemb, reason);
+      error (_("Unable to read in 0x%lx bytes of %s\n"),
+	     (unsigned long)(size * nmemb), reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -7453,7 +7454,7 @@ fetch_indirect_string (unsigned long offset)
 
   if (offset > debug_str_size)
     {
-      warn (_("DW_FORM_strp offset too big: %x\n"), offset);
+      warn (_("DW_FORM_strp offset too big: %lx\n"), offset);
       return _("<offset is too big>");
     }
 
@@ -8464,7 +8465,7 @@ read_and_display_attr_value (unsigned long attribute,
       break;
 
     default:
-      warn (_("Unrecognized form: %d\n"), form);
+      warn (_("Unrecognized form: %lu\n"), form);
       break;
     }
 
@@ -9799,10 +9800,10 @@ display_debug_loc (Elf_Internal_Shdr *section,
 	    {
 	      if (start < next)
 		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_loc section.\n"),
-		      start - section_begin, next - section_begin);
+		      (long)(start - section_begin), (long)(next - section_begin));
 	      else if (start > next)
 		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_loc section.\n"),
-		      start - section_begin, next - section_begin);
+		      (long)(start - section_begin), (long)(next - section_begin));
 	    }
 	  start = next;
 
@@ -10152,10 +10153,10 @@ display_debug_ranges (Elf_Internal_Shdr *section,
 	    {
 	      if (start < next)
 		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_ranges section.\n"),
-		      start - section_begin, next - section_begin);
+		      (long)(start - section_begin), (long)(next - section_begin));
 	      else if (start > next)
 		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_ranges section.\n"),
-		      start - section_begin, next - section_begin);
+		      (long)(start - section_begin), (long)(next - section_begin));
 	    }
 	  start = next;
 
@@ -10528,7 +10529,7 @@ display_debug_frames (Elf_Internal_Shdr *section,
 
 	  if (!cie)
 	    {
-	      warn ("Invalid CIE pointer %08lx in FDE at %08lx\n",
+	      warn ("Invalid CIE pointer %08lx in FDE at %p\n",
 		    cie_id, saved_start);
 	      start = block_end;
 	      fc->ncols = 0;
@@ -11814,9 +11815,9 @@ process_corefile_note_segment (FILE *file, bfd_vma offset, bfd_vma length)
 
       if (((char *) next) > (((char *) pnotes) + length))
 	{
-	  warn (_("corrupt note found at offset %x into core notes\n"),
-		((char *) external) - ((char *) pnotes));
-	  warn (_(" type: %x, namesize: %08lx, descsize: %08lx\n"),
+	  warn (_("corrupt note found at offset %lx into core notes\n"),
+		(long)((char *)external - (char *)pnotes));
+	  warn (_(" type: %lx, namesize: %08lx, descsize: %08lx\n"),
 		inote.type, inote.namesz, inote.descsz);
 	  break;
 	}
@@ -12295,7 +12296,7 @@ process_archive (char *file_name, FILE *file)
 	  off = strtoul (arhdr.ar_name + 1, NULL, 10);
 	  if (off >= longnames_size)
 	    {
-	      error (_("%s: invalid archive string table offset %lu\n"), off);
+	      error (_("%s: invalid archive string table offset %lu\n"), file_name, off);
 	      ret = 1;
 	      break;
 	    }
@@ -12311,7 +12312,7 @@ process_archive (char *file_name, FILE *file)
 
       if (nameend == NULL)
 	{
-	  error (_("%s: bad archive file name\n"));
+	  error (_("%s: bad archive file name\n"), file_name);
 	  ret = 1;
 	  break;
 	}

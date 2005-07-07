@@ -87,7 +87,7 @@ print_operand_bitnum (struct disassemble_info *info, long value)
   if (tmp != NULL)
     (*info->fprintf_func) (info->stream, "%s", tmp);
   else
-    (*info->fprintf_func) (info->stream, "%ld", bitnum);
+    (*info->fprintf_func) (info->stream, "%d", bitnum);
 }
 
 /* Print the operand as directed by the flags.  */

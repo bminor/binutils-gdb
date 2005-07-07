@@ -1,3 +1,10 @@
+2005-07-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* elf32-xtensa.c (vsprint_msg): Add format attribute.  Fix
+	format bugs.
+	* vms.h (_bfd_vms_debug): Add format attribute.
+	(_bfd_vms_debug, _bfd_hexdump): Fix typos.
+
 2005-07-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 975

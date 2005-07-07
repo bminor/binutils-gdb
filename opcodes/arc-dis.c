@@ -1202,7 +1202,7 @@ decodeInstr (bfd_vma            address, /* Address of this instruction.  */
   bytes = dsmOneArcInst (address, (void *)& s);
 
   /* Display the disassembly instruction.  */
-  (*func) (stream, "%08x ", s.words[0]);
+  (*func) (stream, "%08lx ", s.words[0]);
   (*func) (stream, "    ");
   (*func) (stream, "%-10s ", s.instrBuffer);
 

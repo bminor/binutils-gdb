@@ -224,7 +224,7 @@ print_insn_shmedia (bfd_vma memaddr, struct disassemble_info *info)
   /* FIXME: We should also check register number constraints.  */
   if (op->name == NULL)
     {
-      fprintf_fn (stream, ".long 0x%08x", instruction);
+      fprintf_fn (stream, ".long 0x%08lx", instruction);
       return 4;
     }
 
@@ -312,7 +312,7 @@ print_insn_shmedia (bfd_vma memaddr, struct disassemble_info *info)
 	  imm = temp & 0x3f;
 	  if (imm & (unsigned long) 0x20)
 	    imm |= ~(unsigned long) 0x3f;
-	  fprintf_fn (stream, "%d", imm);
+	  fprintf_fn (stream, "%ld", imm);
 	  break;
 
 	  /* A signed 6-bit number, multiplied by 32 when used.  */
@@ -320,7 +320,7 @@ print_insn_shmedia (bfd_vma memaddr, struct disassemble_info *info)
 	  imm = temp & 0x3f;
 	  if (imm & (unsigned long) 0x20)
 	    imm |= ~(unsigned long) 0x3f;
-	  fprintf_fn (stream, "%d", imm * 32);
+	  fprintf_fn (stream, "%ld", imm * 32);
 	  break;
 
 	  /* A signed 10-bit number, multiplied by 8 when used.  */
@@ -345,7 +345,7 @@ print_insn_shmedia (bfd_vma memaddr, struct disassemble_info *info)
 	  if (imm & (unsigned long) 0x200)
 	    imm |= ~(unsigned long) 0x3ff;
 	  imm <<= by_number;
-	  fprintf_fn (stream, "%d", imm);
+	  fprintf_fn (stream, "%ld", imm);
 	  break;
 
 	  /* A signed 16-bit number.  */
@@ -353,7 +353,7 @@ print_insn_shmedia (bfd_vma memaddr, struct disassemble_info *info)
 	  imm = temp & 0xffff;
 	  if (imm & (unsigned long) 0x8000)
 	    imm |= ~((unsigned long) 0xffff);
-	  fprintf_fn (stream, "%d", imm);
+	  fprintf_fn (stream, "%ld", imm);
 	  break;
 
 	  /* A PC-relative signed 16-bit number, multiplied by 4 when
@@ -370,19 +370,19 @@ print_insn_shmedia (bfd_vma memaddr, struct disassemble_info *info)
 	  /* An unsigned 5-bit number.  */
 	case A_IMMU5:
 	  imm = temp & 0x1f;
-	  fprintf_fn (stream, "%d", imm);
+	  fprintf_fn (stream, "%ld", imm);
 	  break;
 
 	  /* An unsigned 6-bit number.  */
 	case A_IMMU6:
 	  imm = temp & 0x3f;
-	  fprintf_fn (stream, "%d", imm);
+	  fprintf_fn (stream, "%ld", imm);
 	  break;
 
 	  /* An unsigned 16-bit number.  */
 	case A_IMMU16:
 	  imm = temp & 0xffff;
-	  fprintf_fn (stream, "%d", imm);
+	  fprintf_fn (stream, "%ld", imm);
 	  break;
 
 	default:

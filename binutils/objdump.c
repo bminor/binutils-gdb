@@ -1189,7 +1189,7 @@ typedef struct
 
 /* sprintf to a "stream".  */
 
-static int
+static int ATTRIBUTE_PRINTF_2
 objdump_sprintf (SFILE *f, const char *format, ...)
 {
   size_t n;

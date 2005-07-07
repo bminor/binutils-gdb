@@ -1578,7 +1578,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
 
-				  func (stream, "%d", reg);
+				  func (stream, "%ld", reg);
 				}
 				break;
 			      case 'W':
@@ -1588,7 +1588,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
 				  
-				  func (stream, "%d", reg + 1);
+				  func (stream, "%ld", reg + 1);
 				}
 				break;
 			      case 'x':
@@ -1598,7 +1598,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
 
-				  func (stream, "0x%08x", reg);
+				  func (stream, "0x%08lx", reg);
 
 				  /* Some SWI instructions have special
 				     meanings.  */
@@ -1615,7 +1615,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
 
-				  func (stream, "%01x", reg & 0xf);
+				  func (stream, "%01lx", reg & 0xf);
 				}
 				break;
 			      case 'f':
@@ -1629,7 +1629,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 				    func (stream, "#%s",
 					  arm_fp_const[reg & 7]);
 				  else
-				    func (stream, "f%d", reg);
+				    func (stream, "f%ld", reg);
 				}
 				break;
 
@@ -1991,7 +1991,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 		  long imm = (given & 0x07c0) >> 6;
 		  if (imm == 0)
 		    imm = 32;
-		  func (stream, "#%d", imm);
+		  func (stream, "#%ld", imm);
 		}
 		break;
 
@@ -2024,15 +2024,15 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 			    break;
 
 			  case 'd':
-			    func (stream, "%d", reg);
+			    func (stream, "%ld", reg);
 			    break;
 
 			  case 'H':
-			    func (stream, "%d", reg << 1);
+			    func (stream, "%ld", reg << 1);
 			    break;
 
 			  case 'W':
-			    func (stream, "%d", reg << 2);
+			    func (stream, "%ld", reg << 2);
 			    break;
 
 			  case 'a':
@@ -2044,7 +2044,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 			    break;
 
 			  case 'x':
-			    func (stream, "0x%04x", reg);
+			    func (stream, "0x%04lx", reg);
 			    break;
 
 			  case 'B':

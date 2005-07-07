@@ -279,17 +279,17 @@ print_one_arg (disassemble_info *info,
       if ((x & SIZE) == L_16 ||
 	  (x & SIZE) == L_16U)
 	{
-	  outfn (stream, ".%s%d (0x%x)",
+	  outfn (stream, ".%s%d (0x%lx)",
 		   (short) cst > 0 ? "+" : "",
 		   (short) cst, 
-		   addr + (short) cst + len);
+		   (long)(addr + (short) cst + len));
 	}
       else
 	{
-	  outfn (stream, ".%s%d (0x%x)",
+	  outfn (stream, ".%s%d (0x%lx)",
 		   (char) cst > 0 ? "+" : "",
 		   (char) cst, 
-		   addr + (char) cst + len);
+		   (long)(addr + (char) cst + len));
 	}
     }
   else if ((x & MODE) == DISP)

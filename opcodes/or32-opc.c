@@ -334,7 +334,7 @@ const struct or32_opcode or32_opcodes[] =
 /* Define dummy, if debug is not defined.  */
 
 #if !defined HAS_DEBUG
-static void
+static void ATTRIBUTE_PRINTF_2
 debug (int level ATTRIBUTE_UNUSED, const char *format ATTRIBUTE_UNUSED, ...)
 {
 }
@@ -502,7 +502,7 @@ cover_insn (unsigned long * cur, int pass, unsigned int mask)
 	last_match = i;
       }
   
-  debug (8, "%08X %08X\n", mask, cur_mask);
+  debug (8, "%08X %08lX\n", mask, cur_mask);
 
   if (ninstr == 0)
     return 0;
@@ -510,8 +510,8 @@ cover_insn (unsigned long * cur, int pass, unsigned int mask)
   if (ninstr == 1)
     {
       /* Leaf holds instruction index.  */
-      debug (8, "%i>I%i %s\n",
-	     cur - automata, last_match, or32_opcodes[last_match].name);
+      debug (8, "%li>I%i %s\n",
+	     (long)(cur - automata), last_match, or32_opcodes[last_match].name);
 
       *cur = LEAF_FLAG | last_match;
       cur++;
@@ -528,7 +528,7 @@ cover_insn (unsigned long * cur, int pass, unsigned int mask)
 	    {
 	      unsigned long m = (1UL << ((unsigned long) len)) - 1;
 
-	      debug (9, " (%i(%08X & %08X>>%i = %08X, %08X)",
+	      debug (9, " (%i(%08lX & %08lX>>%i = %08lX, %08lX)",
 		     len,m, cur_mask, i, (cur_mask >> (unsigned)i),
 		     (cur_mask >> (unsigned) i) & m);
 
@@ -557,8 +557,8 @@ cover_insn (unsigned long * cur, int pass, unsigned int mask)
 	  exit (1);
 	}
 
-      debug (8, "%i> #### %i << %i (%i) ####\n",
-	     cur - automata, best_len, best_first, ninstr);
+      debug (8, "%li> #### %i << %i (%i) ####\n",
+	     (long)(cur - automata), best_len, best_first, ninstr);
 
       *cur = best_first;
       cur++;
@@ -582,17 +582,17 @@ cover_insn (unsigned long * cur, int pass, unsigned int mask)
 		&& ((ti[j].insn_mask >> best_first) & cur_mask) == cur_mask)
 	      ti[j].in_pass = curpass;
 
-	  debug (9, "%08X %08X %i\n", mask, cur_mask, best_first);
+	  debug (9, "%08X %08lX %i\n", mask, cur_mask, best_first);
 	  c = cover_insn (cur, curpass, mask & (~(cur_mask << best_first)));
 	  if (c)
 	    {
-	      debug (8, "%i> #%X -> %u\n", next - automata, i, cur - automata);
+	      debug (8, "%li> #%X -> %lu\n", (long)(next - automata), i, (long)(cur - automata));
 	      *next = cur - automata;
 	      cur = c;	 
 	    }
 	  else 
 	    {
-	      debug (8, "%i> N/A\n", next - automata);
+	      debug (8, "%li> N/A\n", (long)(next - automata));
 	      *next = 0;
 	    }
 	  next++;
@@ -635,7 +635,7 @@ parse_params (const struct or32_opcode * opcode,
     {
       cur->type = OPTYPE_REG | OPTYPE_OP | OPTYPE_LAST;
       cur->data = 0;
-      debug (9, "#%08X %08X\n", cur->type, cur->data);
+      debug (9, "#%08lX %08lX\n", cur->type, cur->data);
       cur++;
       return cur;
   }
@@ -652,7 +652,7 @@ parse_params (const struct or32_opcode * opcode,
 	  unsigned long arg;
 
 	  arg = insn_extract (*args, opcode->encoding);
-	  debug (9, "%s : %08X ------\n", opcode->name, arg);
+	  debug (9, "%s : %08lX ------\n", opcode->name, arg);
 	  if (letter_signed (*args))
 	    {
 	      type |= OPTYPE_SIG;
@@ -678,7 +678,7 @@ parse_params (const struct or32_opcode * opcode,
 	      cur->type = type | shr;
 	      cur->data = mask;
 	      arg &= ~(((1 << mask) - 1) << shr);
-	      debug (6, "|%08X %08X\n", cur->type, cur->data);
+	      debug (6, "|%08lX %08lX\n", cur->type, cur->data);
 	      cur++;
 	    }
 	  args++;
@@ -689,7 +689,7 @@ parse_params (const struct or32_opcode * opcode,
 	     Later we will treat them as one operand.  */
 	  cur--;
 	  cur->type = type | cur->type | OPTYPE_DIS | OPTYPE_OP;
-	  debug (9, ">%08X %08X\n", cur->type, cur->data);
+	  debug (9, ">%08lX %08lX\n", cur->type, cur->data);
 	  cur++;
 	  type = 0;
 	  i++;
@@ -699,7 +699,7 @@ parse_params (const struct or32_opcode * opcode,
 	{
 	  cur--;
 	  cur->type = type | cur->type | OPTYPE_OP;
-	  debug (9, ">%08X %08X\n", cur->type, cur->data);
+	  debug (9, ">%08lX %08lX\n", cur->type, cur->data);
 	  cur++;
 	  type = 0;
 	  i++;
@@ -709,7 +709,7 @@ parse_params (const struct or32_opcode * opcode,
 	{
 	  cur->type = type;
 	  cur->data = 0;
-	  debug (9, ">%08X %08X\n", cur->type, cur->data);
+	  debug (9, ">%08lX %08lX\n", cur->type, cur->data);
 	  cur++;
 	  type = 0;
 	  i++;
@@ -726,7 +726,7 @@ parse_params (const struct or32_opcode * opcode,
 
   cur--;
   cur->type = type | cur->type | OPTYPE_OP | OPTYPE_LAST;
-  debug (9, "#%08X %08X\n", cur->type, cur->data);
+  debug (9, "#%08lX %08lX\n", cur->type, cur->data);
   cur++;
 
   return cur;
@@ -814,7 +814,7 @@ insn_decode (unsigned int insn)
     {
       unsigned int first = *a;
 
-      debug (9, "%i ", a - automata);
+      debug (9, "%li ", (long)(a - automata));
 
       a++;
       i = (insn >> first) & *a;
@@ -822,7 +822,7 @@ insn_decode (unsigned int insn)
       if (!*(a + i))
 	{
 	  /* Invalid instruction found?  */
-	  debug (9, "XXX\n", i);
+	  debug (9, "XXX\n");
 	  return -1;
 	}
       a = automata + *(a + i);

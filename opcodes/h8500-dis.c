@@ -229,7 +229,7 @@ print_insn_h8500 (bfd_vma addr, disassemble_info *info)
 	      func (stream, "@(0x%x:8 (%d), r%d)", disp & 0xff, disp, rd);
 	      break;
 	    case FPIND_D8:
-	      func (stream, "@(0x%x:8 (%d), fp)", disp & 0xff, disp, rn);
+	      func (stream, "@(0x%x:8 (%d), fp)", disp & 0xff, disp);
 	      break;
 	    case CRB:
 	    case CRW:
@@ -298,11 +298,11 @@ print_insn_h8500 (bfd_vma addr, disassemble_info *info)
 	      break;
 	    case PCREL16:
 	      func (stream, "0x%0x:16",
-		    (pcrel + addr + opcode->length) & 0xffff);
+		    (int)(pcrel + addr + opcode->length) & 0xffff);
 	      break;
 	    case PCREL8:
 	      func (stream, "#0x%0x:8",
-		    ((char) pcrel + addr + opcode->length) & 0xffff);
+		    (int)((char) pcrel + addr + opcode->length) & 0xffff);
 	      break;
 	    case QIM:
 	      func (stream, "#%d:q", qim);
