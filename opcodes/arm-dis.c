@@ -460,7 +460,7 @@ static const struct opcode32 arm_opcodes[] =
   {FPU_VFP_EXT_V1, 0x0eb00bc0, 0x0fff0ff0, "fabsd%c\t%1z, %0z"},
   {FPU_VFP_EXT_V1xD, 0x0eb00ac0, 0x0fbf0fd0, "fabss%c\t%1y, %0y"},
   {FPU_VFP_EXT_V1, 0x0e300b00, 0x0ff00ff0, "faddd%c\t%1z, %2z, %0z"},
-  {FPU_VFP_EXT_V1xD, 0x0e300a00, 0x0fb00f50, "fadds%c\t%1y, %2y, %1y"},
+  {FPU_VFP_EXT_V1xD, 0x0e300a00, 0x0fb00f50, "fadds%c\t%1y, %2y, %0y"},
   {FPU_VFP_EXT_V1, 0x0eb40b40, 0x0fff0f70, "fcmp%7'ed%c\t%1z, %0z"},
   {FPU_VFP_EXT_V1xD, 0x0eb40a40, 0x0fbf0f50, "fcmp%7'es%c\t%1y, %0y"},
   {FPU_VFP_EXT_V1, 0x0eb50b40, 0x0fff0f70, "fcmp%7'ezd%c\t%1z"},

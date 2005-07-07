@@ -1,3 +1,8 @@
+2005-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/vfp1xD.d: Adjust expected fadds disassemblies now that
+	the dissassembler has been fixed.
+
 2005-05-07  Paul Brook  <paul@codesourcery.com>
 
 	* gas/ppc/altivec.d: Match all powerpc target vecs.

@@ -1,3 +1,8 @@
+2005-07-07  Khem Raj  <kraj@mvista.com>
+
+	* arm-dis.c (opcode32 arm_opcodes): Fix ARM VFP fadds instruction
+	disassembly pattern.
+
 2005-07-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (stamp-m32r): Fix path to cpu files.
