@@ -2572,8 +2572,10 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
   if (ELF_COMMON_DEF_P (h))
     /* Do nothing.  */;
   /* If we don't have a definition in a regular file, then we can't
-     resolve locally.  The sym is either undefined or dynamic.  */
-  else if (!h->def_regular)
+     resolve locally unless it has non-default visibility .  The sym
+     is either undefined or dynamic.  */
+  else if (!h->def_regular
+	   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
     return FALSE;
 
   /* Forced local symbols resolve locally.  */

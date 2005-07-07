@@ -1,3 +1,9 @@
+2005-07-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 975
+	* elflink.c (_bfd_elf_symbol_refs_local_p): Only undefined
+	symbol with default visibility is local.
+
 2005-07-07  Ben Elliston  <bje@gnu.org>
 
 	* config.bfd: Mark m68*-*-rtemscoff as obsolete.
