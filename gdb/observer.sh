@@ -9,7 +9,11 @@ fi
 lang=$1 ; shift
 texi=$1 ; shift
 o=$1
-otmp="`echo $1 | sed -e 's,\.[^.]*$,,'`.tmp"; shift
+case $lang in
+  h) tmp=htmp ;;
+  inc) tmp=itmp ;;
+esac
+otmp="`echo $1 | sed -e 's,\.[^.]*$,,'`.$tmp"; shift
 echo "Creating ${otmp}" 1>&2
 rm -f ${otmp}
 

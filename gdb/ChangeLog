@@ -1,3 +1,8 @@
+2005-07-07  Andreas Schwab  <schwab@suse.de>
+
+	* observer.sh: Use different temporary file name depending on mode
+	of operation to avoid clash during parallel build.
+
 2005-07-06  Bob Rossi  <bob@brasko.net>
 
 	* fork-child.c (fork-inferior): Use accessor function for
