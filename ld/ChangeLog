@@ -1,4 +1,4 @@
-2005-05-07  Paul Brook  <paul@codesourcery.com>
+2005-07-05  Paul Brook  <paul@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32ppcvxworks.o.
 	(eelf32ppcvxworks.o): Add dependencies.
