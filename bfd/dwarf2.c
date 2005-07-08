@@ -347,16 +347,35 @@ read_indirect_string (struct comp_unit* unit,
 static bfd_uint64_t
 read_address (struct comp_unit *unit, bfd_byte *buf)
 {
-  switch (unit->addr_size)
+  int signed_vma = get_elf_backend_data (unit->abfd)->sign_extend_vma;
+
+  if (signed_vma)
     {
-    case 8:
-      return bfd_get_64 (unit->abfd, buf);
-    case 4:
-      return bfd_get_32 (unit->abfd, buf);
-    case 2:
-      return bfd_get_16 (unit->abfd, buf);
-    default:
-      abort ();
+      switch (unit->addr_size)
+	{
+	case 8:
+	  return bfd_get_signed_64 (unit->abfd, buf);
+	case 4:
+	  return bfd_get_signed_32 (unit->abfd, buf);
+	case 2:
+	  return bfd_get_signed_16 (unit->abfd, buf);
+	default:
+	  abort ();
+	}
+    }
+  else
+    {
+      switch (unit->addr_size)
+	{
+	case 8:
+	  return bfd_get_64 (unit->abfd, buf);
+	case 4:
+	  return bfd_get_32 (unit->abfd, buf);
+	case 2:
+	  return bfd_get_16 (unit->abfd, buf);
+	default:
+	  abort ();
+	}
     }
 }
 

@@ -1,3 +1,8 @@
+2005-07-08  Paul Koning  <pkoning@equallogic.com>
+
+	* dwarf2.c (read_address): Check sign_extend_vma to handle targets
+	where addresses are sign extended.
+
 2005-07-08  Ralf Corsepius <ralf.corsepius@rtems.org>
 
 	* config.bfd: Mark i960-*-rtems*, or32-*-rtems* as obsolete.
