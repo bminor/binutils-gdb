@@ -1002,11 +1002,7 @@ sys_halt()
 
 #include "ansidecl.h"
 
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #include "libiberty.h"
 #include "bfd.h"

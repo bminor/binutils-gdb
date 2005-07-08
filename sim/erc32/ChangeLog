@@ -1,3 +1,7 @@
+2005-07-08  Ben Elliston  <bje@au.ibm.com>
+
+	* func.c: Remove ANSI_PROTOTYPES conditional code.
+
 2005-03-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure: Regenerate.
