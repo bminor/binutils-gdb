@@ -38,12 +38,7 @@
 
 #include <time.h>
 #include <sys/stat.h>
-
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>

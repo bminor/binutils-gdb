@@ -1,3 +1,10 @@
+2005-07-08  Ben Elliston  <bje@au.ibm.com>
+
+	* bucomm.h: Include <stdarg.h> unconditionally, not only when
+	ANSI_PROTOTYPES is defined.  Remove #ifdef logic.
+	* dlltool.c: Likewise.
+	* dllwrap.c: Likewise.
+
 2005-07-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* bucomm.h (report): Add format attribute.

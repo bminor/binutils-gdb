@@ -28,11 +28,7 @@
 #include "config.h"
 #include "bin-bugs.h"
 
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #ifdef USE_BINARY_FOPEN
 #include "fopen-bin.h"

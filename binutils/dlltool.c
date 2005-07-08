@@ -254,13 +254,7 @@
 
 #include <time.h>
 #include <sys/stat.h>
-
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-
 #include <assert.h>
 
 #ifdef DLLTOOL_ARM
