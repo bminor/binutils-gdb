@@ -23,7 +23,7 @@ Section Headers:
   \[11\] .tdata +PROGBITS +60+1[0-9a-f]+ 0+1[0-9a-f]+ 0+60 00 WAT +0 +0 +4
   \[12\] .tbss +NOBITS +60+1[0-9a-f]+ 0+1[0-9a-f]+ 0+40 00 WAT +0 +0 +1
   \[13\] .dynamic +DYNAMIC +60+1[0-9a-f]+ 0+1[0-9a-f]+ 0+150 10 +WA +4 +0 +8
-  \[14\] .got +PROGBITS +60+2000 0+2000 0+48 00 WAp +0 +0 +8
+  \[14\] .got +PROGBITS +60+1318 0+1318 0+48 00 WAp +0 +0 +8
   \[15\] .IA_64.pltoff +.*
   \[16\] .shstrtab +.*
   \[17\] .symtab +.*
@@ -48,13 +48,13 @@ Program Headers:
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 3 entries:
  +Offset +Info +Type +Symbol's Value  Symbol's Name \+ Addend
-60+2018  0+200000097 R_IA64_TPREL64LSB +0+ sG2 \+ 0
-60+2020  0+5000000a7 R_IA64_DTPMOD64LSB +0+ sG1 \+ 0
-60+2028  0+5000000b7 R_IA64_DTPREL64LSB +0+ sG1 \+ 0
+60+1330  0+200000097 R_IA64_TPREL64LSB +0+ sG2 \+ 0
+60+1338  0+5000000a7 R_IA64_DTPMOD64LSB +0+ sG1 \+ 0
+60+1340  0+5000000b7 R_IA64_DTPREL64LSB +0+ sG1 \+ 0
 
 Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value  Symbol's Name \+ Addend
-60+2050  0+300000081 R_IA64_IPLTLSB +0+ __tls_get_addr \+ 0
+60+1360  0+300000081 R_IA64_IPLTLSB +0+ __tls_get_addr \+ 0
 
 Symbol table '.dynsym' contains 8 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name

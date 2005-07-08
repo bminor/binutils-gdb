@@ -60,23 +60,21 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 14 entries:
 0+1013a8  0+12 R_X86_64_TPOFF64 +0+70
 0+1013b8  0+10 R_X86_64_DTPMOD64 +0+
 0+1013c8  0+12 R_X86_64_TPOFF64 +0+44
-0+101388  0+a00000012 R_X86_64_TPOFF64 +0+10 sg5 \+ 0
-0+101390  0+c00000010 R_X86_64_DTPMOD64 +0+ sg1 \+ 0
-0+101398  0+c00000011 R_X86_64_DTPOFF64 +0+ sg1 \+ 0
-0+1013b0  0+f00000012 R_X86_64_TPOFF64 +0+4 sg2 \+ 0
+0+101388  0+800000012 R_X86_64_TPOFF64 +0+10 sg5 \+ 0
+0+101390  0+a00000010 R_X86_64_DTPMOD64 +0+ sg1 \+ 0
+0+101398  0+a00000011 R_X86_64_DTPOFF64 +0+ sg1 \+ 0
+0+1013b0  0+d00000012 R_X86_64_TPOFF64 +0+4 sg2 \+ 0
 
 Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value  Symbol's Name \+ Addend
-0+[0-9a-f]+  0+b00000007 R_X86_64_JUMP_SLOT +0+ __tls_get_addr \+ 0
+0+[0-9a-f]+  0+900000007 R_X86_64_JUMP_SLOT +0+ __tls_get_addr \+ 0
 
-Symbol table '.dynsym' contains 20 entries:
+Symbol table '.dynsym' contains 18 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +8 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +9 *
- +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
- +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +8 sg8
  +[0-9]+: 0+101210 +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +8 sg3

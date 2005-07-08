@@ -22,7 +22,7 @@ Section Headers:
   \[10\] .tdata +PROGBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+60 00 WAT +0 +0 +4
   \[11\] .tbss +NOBITS +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+20 00 WAT +0 +0 +1
   \[12\] .dynamic +DYNAMIC +0+11[0-9a-f]+ 0+1[0-9a-f]+ 0+140 10 +WA +3 +0 +8
-  \[13\] .got +PROGBITS +0+12000 0+2000 0+50 00 WAp +0 +0 +8
+  \[13\] .got +PROGBITS +0+112d8 0+12d8 0+50 00 WAp +0 +0 +8
   \[14\] .IA_64.pltoff +.*
   \[15\] .shstrtab +.*
   \[16\] .symtab +.*
@@ -45,18 +45,18 @@ Program Headers:
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 6 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-0+12018 +0+f000000a7 R_IA64_DTPMOD64LSB +0+ sg1 \+ 0
-0+12020 +0+f000000b7 R_IA64_DTPREL64LSB +0+ sg1 \+ 0
-0+12028 +0+1200000097 R_IA64_TPREL64LSB +0+4 sg2 \+ 0
-0+12030 +0+a7 R_IA64_DTPMOD64LSB +0+
-0+12038 +0+97 R_IA64_TPREL64LSB +0+44
-0+12048 +0+97 R_IA64_TPREL64LSB +0+24
+0+112f0 +0+d000000a7 R_IA64_DTPMOD64LSB +0+ sg1 \+ 0
+0+112f8 +0+d000000b7 R_IA64_DTPREL64LSB +0+ sg1 \+ 0
+0+11300 +0+1000000097 R_IA64_TPREL64LSB +0+4 sg2 \+ 0
+0+11308 +0+a7 R_IA64_DTPMOD64LSB +0+
+0+11310 +0+97 R_IA64_TPREL64LSB +0+44
+0+11320 +0+97 R_IA64_TPREL64LSB +0+24
 
 Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-0+[0-9a-f]+ +0+e00000081 R_IA64_IPLTLSB +0+ __tls_get_addr \+ 0
+0+[0-9a-f]+ +0+c00000081 R_IA64_IPLTLSB +0+ __tls_get_addr \+ 0
 
-Symbol table '.dynsym' contains 23 entries:
+Symbol table '.dynsym' contains 21 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +7 *
@@ -64,9 +64,7 @@ Symbol table '.dynsym' contains 23 entries:
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +9 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +10 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +11 *
- +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +14 *
- +[0-9]+: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +10 sg8
  +[0-9]+: 0+11[0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +10 sg3
@@ -124,7 +122,7 @@ Symbol table '.symtab' contains 57 entries:
  +[0-9]+: 0+74 +0 TLS +LOCAL +HIDDEN +11 sH6
  +[0-9]+: 0+7c +0 TLS +LOCAL +HIDDEN +11 sH8
  +[0-9]+: 0+40 +0 TLS +LOCAL +HIDDEN +10 sh1
- +[0-9]+: 0+12000 +0 OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
+ +[0-9]+: 0+112d8 +0 OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
  +[0-9]+: 0+44 +0 TLS +LOCAL +HIDDEN +10 sh2
  +[0-9]+: 0+54 +0 TLS +LOCAL +HIDDEN +10 sh6
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +10 sg8
