@@ -114,6 +114,13 @@ extern int md_cris_force_relocation (struct fix *);
   && (! IS_CRIS_PIC_RELOC ((FIX)->fx_r_type)		\
       || (FIX)->fx_r_type == BFD_RELOC_CRIS_32_GOTREL))
 
+/* FIXME: This *should* be a redundant definition, as the
+   TC_FORCE_RELOCATION* definitions already told about the cases where
+   we *don't* want the symbol value calculated.  Here we seem to answer
+   the "are you sure" question.  It certainly has very little to do with
+   whether the symbol value is passed to md_apply_fix.  */
+#define MD_APPLY_SYM_VALUE(FIX) 0
+
 /* When we have fixups against constant expressions, we get a GAS-specific
    section symbol at no extra charge for obscure reasons in
    adjust_reloc_syms.  Since ELF outputs section symbols, it gladly

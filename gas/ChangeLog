@@ -1,3 +1,8 @@
+2005-07-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR gas/1049
+	* config/tc-cris.h (MD_APPLY_SYM_VALUE): Define.
+
 2005-07-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* config/tc-tic30.c (debug): Add format attribute.  Fix format
