@@ -5058,24 +5058,6 @@ static const struct bfd_elf_special_section elfNN_ia64_special_sections[] =
   { NULL,        0, 0, 0,            0 }
 };
 
-static const struct bfd_elf_special_section *
-elfNN_ia64_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					elfNN_ia64_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
-
 static bfd_boolean
 elfNN_ia64_object_p (bfd *abfd)
 {
@@ -5297,7 +5279,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_hide_symbol		elfNN_ia64_hash_hide_symbol
 #define elf_backend_reloc_type_class	elfNN_ia64_reloc_type_class
 #define elf_backend_rela_normal		1
-#define elf_backend_get_sec_type_attr	elfNN_ia64_get_sec_type_attr
+#define elf_backend_special_sections	elfNN_ia64_special_sections
 
 /* FIXME: PR 290: The Intel C compiler generates SHT_IA_64_UNWIND with
    SHF_LINK_ORDER. But it doesn't set theh sh_link or sh_info fields.

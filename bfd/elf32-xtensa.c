@@ -9489,25 +9489,6 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
   { ".literal",       8, 0, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
   { NULL,             0, 0, 0,            0 }
 };
-
-static const struct bfd_elf_special_section *
-elf_xtensa_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					elf_xtensa_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
-
 
 #ifndef ELF_ARCH
 #define TARGET_LITTLE_SYM		bfd_elf32_xtensa_le_vec
@@ -9566,6 +9547,6 @@ elf_xtensa_get_sec_type_attr (bfd *abfd, asection *sec)
 #define elf_backend_reloc_type_class	     elf_xtensa_reloc_type_class
 #define elf_backend_relocate_section	     elf_xtensa_relocate_section
 #define elf_backend_size_dynamic_sections    elf_xtensa_size_dynamic_sections
-#define elf_backend_get_sec_type_attr	     elf_xtensa_get_sec_type_attr
+#define elf_backend_special_sections	     elf_xtensa_special_sections
 
 #include "elf32-target.h"

@@ -1265,24 +1265,6 @@ static const struct bfd_elf_special_section elf32_m68hc11_special_sections[] =
   { ".vectors",  8, 0, SHT_PROGBITS, SHF_ALLOC },
   { NULL,        0, 0, 0,            0 }
 };
-
-static const struct bfd_elf_special_section *
-elf32_m68hc11_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					elf32_m68hc11_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
 
 #define ELF_ARCH		bfd_arch_m68hc11
 #define ELF_MACHINE_CODE	EM_68HC11
@@ -1302,7 +1284,7 @@ elf32_m68hc11_get_sec_type_attr (bfd *abfd, asection *sec)
 #define elf_backend_object_p	0
 #define elf_backend_final_write_processing	0
 #define elf_backend_can_gc_sections		1
-#define elf_backend_get_sec_type_attr elf32_m68hc11_get_sec_type_attr
+#define elf_backend_special_sections  elf32_m68hc11_special_sections
 
 #define bfd_elf32_bfd_link_hash_table_create \
                                 m68hc11_elf_bfd_link_hash_table_create

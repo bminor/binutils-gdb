@@ -6962,24 +6962,6 @@ elf32_arm_symbian_special_sections[] =
   { NULL,              0,  0, 0,            0 }
 };
 
-static const struct bfd_elf_special_section *
-elf32_arm_symbian_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					elf32_arm_symbian_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
-
 static void
 elf32_arm_symbian_begin_write_processing (bfd *abfd, 
 					  struct bfd_link_info *link_info
@@ -7032,8 +7014,8 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
 #define bfd_elf32_bfd_link_hash_table_create \
   elf32_arm_symbian_link_hash_table_create
 
-#undef elf_backend_get_sec_type_attr
-#define elf_backend_get_sec_type_attr elf32_arm_symbian_get_sec_type_attr
+#undef elf_backend_special_sections
+#define elf_backend_special_sections elf32_arm_symbian_special_sections
 
 #undef elf_backend_begin_write_processing
 #define elf_backend_begin_write_processing \

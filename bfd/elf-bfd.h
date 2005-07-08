@@ -981,6 +981,9 @@ struct elf_backend_data
 
   const struct elf_size_info *s;
 
+  /* An array of target specific special sections.  */
+  const struct bfd_elf_special_section *special_sections;
+
   /* The size in bytes of the header for the GOT.  This includes the
      so-called reserved entries on some systems.  */
   bfd_vma got_header_size;

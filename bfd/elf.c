@@ -2339,14 +2339,26 @@ _bfd_elf_get_special_section (const char *name,
 }
 
 const struct bfd_elf_special_section *
-_bfd_elf_get_sec_type_attr (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
+_bfd_elf_get_sec_type_attr (bfd *abfd, asection *sec)
 {
   int i;
   const struct bfd_elf_special_section *spec;
+  const struct elf_backend_data *bed;
 
   /* See if this is one of the special sections.  */
   if (sec->name == NULL)
     return NULL;
+
+  bed = get_elf_backend_data (abfd);
+  spec = bed->special_sections;
+  if (spec)
+    {
+      spec = _bfd_elf_get_special_section (sec->name,
+					   bed->special_sections,
+					   sec->use_rela_p);
+      if (spec != NULL)
+	return spec;
+    }
 
   if (sec->name[0] != '.')
     return NULL;

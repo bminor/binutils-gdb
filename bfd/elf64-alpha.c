@@ -5169,24 +5169,6 @@ static const struct bfd_elf_special_section elf64_alpha_special_sections[] =
   { NULL,     0,  0, 0,            0 }
 };
 
-static const struct bfd_elf_special_section *
-elf64_alpha_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					elf64_alpha_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
-
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  Copied
    from elf32-mips.c.  */
@@ -5325,8 +5307,8 @@ static const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_size_info \
   alpha_elf_size_info
 
-#define elf_backend_get_sec_type_attr \
-  elf64_alpha_get_sec_type_attr
+#define elf_backend_special_sections \
+  elf64_alpha_special_sections
 
 /* A few constants that determine how the .plt section is set up.  */
 #define elf_backend_want_got_plt 0

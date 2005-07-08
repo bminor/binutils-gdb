@@ -4020,24 +4020,6 @@ static const struct bfd_elf_special_section m32r_elf_special_sections[] =
   { NULL,       0,  0, 0,            0 }
 };
 
-static const struct bfd_elf_special_section *
-m32r_elf_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					m32r_elf_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
-
 static bfd_boolean
 m32r_elf_fake_sections (bfd *abfd,
 			Elf_Internal_Shdr *hdr ATTRIBUTE_UNUSED,
@@ -4141,7 +4123,7 @@ m32r_elf_reloc_type_class (const Elf_Internal_Rela *rela)
 #define bfd_elf32_bfd_merge_private_bfd_data 	m32r_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		m32r_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	m32r_elf_print_private_bfd_data
-#define elf_backend_get_sec_type_attr		m32r_elf_get_sec_type_attr
+#define elf_backend_special_sections		m32r_elf_special_sections
 
 #include "elf32-target.h"
 

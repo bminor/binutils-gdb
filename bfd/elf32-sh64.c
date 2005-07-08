@@ -89,7 +89,7 @@ static void sh64_find_section_for_address
 #define elf_backend_merge_symbol_attribute	sh64_elf_merge_symbol_attribute
 #define elf_backend_final_write_processing 	sh64_elf_final_write_processing
 #define elf_backend_section_from_shdr		sh64_backend_section_from_shdr
-#define elf_backend_get_sec_type_attr		sh64_elf_get_sec_type_attr
+#define elf_backend_special_sections		sh64_elf_special_sections
 #define elf_backend_section_flags		sh64_elf_section_flags
 
 #define bfd_elf32_new_section_hook		sh64_elf_new_section_hook
@@ -759,24 +759,6 @@ static const struct bfd_elf_special_section sh64_elf_special_sections[] =
   { ".cranges", 8, 0, SHT_PROGBITS, 0 },
   { NULL,       0, 0, 0,            0 }
 };
-
-static const struct bfd_elf_special_section *
-sh64_elf_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					sh64_elf_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
 
 #undef	TARGET_BIG_SYM
 #define	TARGET_BIG_SYM		bfd_elf32_sh64_vec

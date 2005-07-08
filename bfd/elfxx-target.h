@@ -509,6 +509,10 @@
 #define elf_backend_size_info _bfd_elfNN_size_info
 #endif
 
+#ifndef elf_backend_special_sections
+#define elf_backend_special_sections NULL
+#endif
+
 #ifndef elf_backend_sign_extend_vma
 #define elf_backend_sign_extend_vma 0
 #endif
@@ -591,6 +595,7 @@ static const struct elf_backend_data elfNN_bed =
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,
   &elf_backend_size_info,
+  elf_backend_special_sections,
   elf_backend_got_header_size,
   elf_backend_collect,
   elf_backend_type_change_ok,

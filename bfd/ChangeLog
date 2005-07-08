@@ -1,3 +1,30 @@
+2005-07-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Add special_sections.
+
+	* elf.c (_bfd_elf_get_sec_type_attr): Check special_sections
+	first.
+
+	* elf32-arm.c (elf_backend_get_sec_type_attr): Removed.
+	(elf_backend_special_sections): New. Defined.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc11.c: Likewise.
+	* elf32-m68hc12.c: Likewise.
+	* elf32-mcore.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-mips.h: Likewise.
+
+	* elfxx-target.h (elf_backend_special_sections): New.
+	(elfNN_bed): Initialize special_sections.
+
 2005-07-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* xtensa-modules.c: Update tables with Xtensa MMU features.

@@ -3054,24 +3054,6 @@ static const struct bfd_elf_special_section v850_elf_special_sections[] =
                                                    + SHF_V850_R0REL) },
   { NULL,        0, 0, 0,            0 }
 };
-
-static const struct bfd_elf_special_section *
-v850_elf_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					v850_elf_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
 
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_vec
 #define TARGET_LITTLE_NAME			"elf32-v850"
@@ -3096,7 +3078,7 @@ v850_elf_get_sec_type_attr (bfd *abfd, asection *sec)
 #define elf_backend_fake_sections		v850_elf_fake_sections
 #define elf_backend_gc_mark_hook                v850_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook               v850_elf_gc_sweep_hook
-#define elf_backend_get_sec_type_attr		v850_elf_get_sec_type_attr
+#define elf_backend_special_sections		v850_elf_special_sections
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_rela_normal 1

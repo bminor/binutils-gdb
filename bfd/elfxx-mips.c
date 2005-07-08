@@ -9979,21 +9979,3 @@ const struct bfd_elf_special_section _bfd_mips_elf_special_sections[] =
   { ".ucode",  6,  0, SHT_MIPS_UCODE, 0 },
   { NULL,      0,  0, 0,              0 }
 };
-
-const struct bfd_elf_special_section *
-_bfd_mips_elf_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					_bfd_mips_elf_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}

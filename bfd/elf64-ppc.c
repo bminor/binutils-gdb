@@ -100,7 +100,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class
 #define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
 #define elf_backend_link_output_symbol_hook   ppc64_elf_output_symbol_hook
-#define elf_backend_get_sec_type_attr	      ppc64_elf_get_sec_type_attr
+#define elf_backend_special_sections	      ppc64_elf_special_sections
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -2523,24 +2523,6 @@ static const struct bfd_elf_special_section ppc64_elf_special_sections[]=
   { ".tocbss",  7,  0, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { NULL,       0,  0, 0,            0 }
 };
-
-static const struct bfd_elf_special_section *
-ppc64_elf_get_sec_type_attr (bfd *abfd, asection *sec)
-{
-  const struct bfd_elf_special_section *ssect;
-
-  /* See if this is one of the special sections.  */
-  if (sec->name == NULL)
-    return NULL;
-
-  ssect = _bfd_elf_get_special_section (sec->name,
-					ppc64_elf_special_sections,
-					sec->use_rela_p);
-  if (ssect != NULL)
-    return ssect;
-
-  return _bfd_elf_get_sec_type_attr (abfd, sec);
-}
 
 struct _ppc64_elf_section_data
 {
