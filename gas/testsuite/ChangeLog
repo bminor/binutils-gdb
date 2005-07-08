@@ -1,3 +1,10 @@
+2005-07-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR gas/1049
+	* gas/cris/rd-pic-2.d, gas/cris/rd-pic-2.s: New test.
+	* gas/cris/rd-abs32-1.d: Tweak for not emitting reloc-related
+	garbage for global symbols.
+
 2005-07-07  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/vfp1xD.d: Adjust expected fadds disassemblies now that

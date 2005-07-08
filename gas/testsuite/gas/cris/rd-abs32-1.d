@@ -16,9 +16,9 @@ Disassembly of section \.text:
    2:	0f05                	nop 
    4:	3f0d 0200 0000      	jump 2 <locsym2>
 			6: R_CRIS_32	\.text\+0x2
-   a:	3f0d 0200 0000      	jump 2 <locsym2>
+   a:	3f0d 0000 0000      	jump 0 <locsym2-0x2>
 			c: R_CRIS_32	locsym2
-  10:	3f0d 7400 0000      	jump 74 <locsym3>
+  10:	3f0d 0000 0000      	jump 0 <locsym2-0x2>
 			12: R_CRIS_32	locsym3
   16:	3f0d 7400 0000      	jump 74 <locsym3>
 			18: R_CRIS_32	\.text\+0x74
@@ -26,9 +26,9 @@ Disassembly of section \.text:
 			1e: R_CRIS_32	extsym
   22:	3fbd 0200 0000      	jsr 2 <locsym2>
 			24: R_CRIS_32	\.text\+0x2
-  28:	3fbd 0200 0000      	jsr 2 <locsym2>
+  28:	3fbd 0000 0000      	jsr 0 <locsym2-0x2>
 			2a: R_CRIS_32	locsym2
-  2e:	3fbd 7400 0000      	jsr 74 <locsym3>
+  2e:	3fbd 0000 0000      	jsr 0 <locsym2-0x2>
 			30: R_CRIS_32	locsym3
   34:	3fbd 7400 0000      	jsr 74 <locsym3>
 			36: R_CRIS_32	\.text\+0x74
@@ -38,11 +38,11 @@ Disassembly of section \.text:
 			42: R_CRIS_32	\.text\+0x2
   46:	0000                	bcc \.\+2
   48:	0000                	bcc \.\+2
-  4a:	3f3d 0200 0000      	jsrc 2 <locsym2>
+  4a:	3f3d 0000 0000      	jsrc 0 <locsym2-0x2>
 			4c: R_CRIS_32	locsym2
   50:	0000                	bcc \.\+2
   52:	0000                	bcc \.\+2
-  54:	3f3d 7400 0000      	jsrc 74 <locsym3>
+  54:	3f3d 0000 0000      	jsrc 0 <locsym2-0x2>
 			56: R_CRIS_32	locsym3
   5a:	0000                	bcc \.\+2
   5c:	0000                	bcc \.\+2
