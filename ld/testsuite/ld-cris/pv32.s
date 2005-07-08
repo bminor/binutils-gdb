@@ -14,6 +14,8 @@ pfn:
 .Lfe1:
 	.size	pfn,.Lfe1-pfn
 
+	.global	expobj
+	.size	expobj,4
 	.global dsofn
 	.type	dsofn,@function
 dsofn:

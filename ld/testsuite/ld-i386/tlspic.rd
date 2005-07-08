@@ -50,45 +50,43 @@ Program Headers:
 
 Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 26 entries:
  Offset +Info +Type +Sym.Value +Sym. Name
-[0-9a-f]+ +0+23 R_386_TLS_DTPMOD3
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+23 R_386_TLS_DTPMOD3
-[0-9a-f]+ +0+23 R_386_TLS_DTPMOD3
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+0e R_386_TLS_TPOFF *
-[0-9a-f]+ +0+23 R_386_TLS_DTPMOD3
-[0-9a-f]+ +0+25 R_386_TLS_TPOFF32
-[0-9a-f]+ +0+80e R_386_TLS_TPOFF   0+8   sg3
-[0-9a-f]+ +0+925 R_386_TLS_TPOFF32 0+c   sg4
-[0-9a-f]+ +0+90e R_386_TLS_TPOFF   0+c   sg4
-[0-9a-f]+ +0+a0e R_386_TLS_TPOFF   0+10   sg5
-[0-9a-f]+ +0+b23 R_386_TLS_DTPMOD3 0+   sg1
-[0-9a-f]+ +0+b24 R_386_TLS_DTPOFF3 0+   sg1
-[0-9a-f]+ +0+e25 R_386_TLS_TPOFF32 0+4   sg2
+[0-9a-f ]+R_386_TLS_DTPMOD3
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_DTPMOD3
+[0-9a-f ]+R_386_TLS_DTPMOD3
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_TPOFF *
+[0-9a-f ]+R_386_TLS_DTPMOD3
+[0-9a-f ]+R_386_TLS_TPOFF32
+[0-9a-f ]+R_386_TLS_TPOFF   0+8   sg3
+[0-9a-f ]+R_386_TLS_TPOFF32 0+c   sg4
+[0-9a-f ]+R_386_TLS_TPOFF   0+c   sg4
+[0-9a-f ]+R_386_TLS_TPOFF   0+10   sg5
+[0-9a-f ]+R_386_TLS_DTPMOD3 0+   sg1
+[0-9a-f ]+R_386_TLS_DTPOFF3 0+   sg1
+[0-9a-f ]+R_386_TLS_TPOFF32 0+4   sg2
 
 Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
- Offset     Info    Type            Sym.Value  Sym. Name
-[0-9a-f]+  0+1307 R_386_JUMP_SLOT   0+   ___tls_get_addr
+ Offset +Info +Type +Sym.Value +Sym. Name
+[0-9a-f ]+R_386_JUMP_SLOT   0+   ___tls_get_addr
 
-Symbol table '.dynsym' contains 20 entries:
- +Num: + Value  Size Type + Bind +Vis +Ndx Name
+Symbol table '.dynsym' contains 18 entries:
+ +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +8 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +9 *
- +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
- +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +8 sg8
  +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +8 sg3

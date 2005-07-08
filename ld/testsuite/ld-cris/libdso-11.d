@@ -8,20 +8,20 @@
 
 DYNAMIC SYMBOL TABLE:
 #...
-0+1e4 g    DF \.text	0+8 dsofn3
+0+1bc g    DF \.text	0+8 dsofn3
 #...
-0+1e0 g    DF \.text	0+ dsofn
+0+1b8 g    DF \.text	0+ dsofn
 #...
 Contents of section \.rela\.plt:
- 01a0 70220000 0b090000 00000000           .*
+ 0178 48220000 0b070000 00000000           .*
 Contents of section \.plt:
- 01ac 84e20401 7e7a3f7a 04f26ffa bf09b005  .*
- 01bc 00000000 00000000 00006f0d 0c000000  .*
- 01cc 6ffabf09 b0053f7e 00000000 bf0ed4ff  .*
- 01dc ffffb005                             .*
+ 0184 84e20401 7e7a3f7a 04f26ffa bf09b005  .*
+ 0194 00000000 00000000 00006f0d 0c000000  .*
+ 01a4 6ffabf09 b0053f7e 00000000 bf0ed4ff  .*
+ 01b4 ffffb005                             .*
 Contents of section \.text:
- 01e0 b0050000 bfbee2ff ffffb005           .*
+ 01b8 b0050000 bfbee2ff ffffb005           .*
 Contents of section \.dynamic:
 #...
 Contents of section \.got:
- 2264 ec210000 00000000 00000000 d2010000  .*
+ 223c c4210000 00000000 00000000 aa010000  .*

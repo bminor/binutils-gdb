@@ -1,3 +1,43 @@
+2005-07-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-cris/pv32.s: Give expobj a size.
+	* ld-cris/pv32-1.d: Update.
+	* ld-alpha/tlsbin.dd: Update for empty section removal change.
+	* ld-alpha/tlsbin.sd: Likewise.
+	* ld-alpha/tlsbin.td: Likewise.
+	* ld-alpha/tlsbinr.dd: Likewise.
+	* ld-alpha/tlsbinr.rd: Likewise.
+	* ld-alpha/tlspic.dd: Likewise.
+	* ld-alpha/tlspic.rd: Likewise.
+	* ld-alpha/tlspic.sd: Likewise.
+	* ld-alpha/tlspic.td: Likewise.
+	* ld-arm/tls-lib.d: Likewise.
+	* ld-arm/tls-lib.r: Likewise.
+	* ld-cris/gotplt2.d: Likewise.
+	* ld-cris/gotplt3.d: Likewise.
+	* ld-cris/hiddef1.d: Likewise.
+	* ld-cris/libdso-10.d: Likewise.
+	* ld-cris/libdso-11.d: Likewise.
+	* ld-cris/libdso-12.d: Likewise.
+	* ld-cris/libdso-14.d: Likewise.
+	* ld-cris/libdso-2.d: Likewise.
+	* ld-i386/tlsnopic.dd: Likewise.
+	* ld-i386/tlsnopic.rd: Likewise.
+	* ld-i386/tlsnopic.sd: Likewise.
+	* ld-i386/tlspic.rd: Likewise.
+	* ld-mmix/bpo-10.d: Likewise.
+	* ld-mmix/bpo-22.d: Likewise.
+	* ld-mmix/sec-7m.d: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.g: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlsso32.d: Likewise.
+	* ld-powerpc/tlsso32.g: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+	* ld-powerpc/tlstocso.g: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+
 2005-06-23  Andreas Schwab  <schwab@suse.de>
 
 	* ld-elfweak/size_foo.c (foo): Fix warning about implicit return

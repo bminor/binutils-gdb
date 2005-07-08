@@ -37,7 +37,7 @@ Program Headers:
  +LOAD +0x0+ 0x0+ 0x0+ 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x10000
  +LOAD +0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ RWE 0x10000
  +DYNAMIC +0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ 0x[0-9a-f]+ RW +0x8
- +TLS +0x0+2000 0x0+12000 0x0+12000 0x0+60 0x0+80 R +0x4
+ +TLS +0x0+10e0 0x0+110e0 0x0+110e0 0x0+60 0x0+80 R +0x4
 #...
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 7 entries:
@@ -61,8 +61,6 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* [0-9a-f]+     0 SECTION LOCAL  DEFAULT    7 
 .* [0-9a-f]+     0 SECTION LOCAL  DEFAULT    8 
 .* [0-9a-f]+     0 SECTION LOCAL  DEFAULT    9 
-.* [0-9a-f]+     0 NOTYPE  LOCAL  DEFAULT  UND 
-.* [0-9a-f]+     0 NOTYPE  LOCAL  DEFAULT  UND 
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg8
 .* [0-9a-f]+     0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg3
