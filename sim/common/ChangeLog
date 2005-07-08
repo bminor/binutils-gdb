@@ -1,3 +1,9 @@
+2005-07-08  Ian Lance Taylor  <ian@airs.com>
+
+	* sim-fpu.c (pack_fpu): If SIM_QUIET_NAN_NEGATED is defined, use a
+	different fraction for a quiet NaN.
+	(unpack_fpu): Likewise.
+
 2005-07-08  Ben Elliston  <bje@au.ibm.com>
 
 	* callback.c: Remove ANSI_PROTOTYPES conditional code.
