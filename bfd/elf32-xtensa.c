@@ -21,11 +21,7 @@
 #include "bfd.h"
 #include "sysdep.h"
 
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <strings.h>
 
 #include "bfdlink.h"
