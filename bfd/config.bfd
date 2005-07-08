@@ -35,6 +35,8 @@ case $targ in
  m68*-apollo-* | \
  m68*-bull-sysv* | \
  m68*-*-rtemscoff* | \
+ i960-*-rtems* | \
+ or32-*-rtems* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -51,6 +53,13 @@ case $targ in
  vax-*-vms* | \
  arm-*-oabi | \
  thumb-*-oabi | \
+ a29k-*rtems* | \
+ hppa*-*-rtems* | \
+ *-go32-rtems* | \
+ i[3-7]86*-*-rtemscoff* | \
+ mips*el-*-rtems* | \
+ powerpcle-*-rtems* | \
+ sparc*-*-rtemsaout* | \
  null)
     echo "*** Configuration $targ is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
@@ -297,7 +306,7 @@ case "${targ}" in
     ;;
 
   a29k-*-ebmon* | a29k-*-udi* | a29k-*-coff* | a29k-*-sym1* | \
-  a29k-*-vxworks* | a29k-*-sysv* | a29k-*rtems*)
+  a29k-*-vxworks* | a29k-*-sysv*)
     targ_defvec=a29kcoff_big_vec
     targ_selvecs=sunos_big_vec
     targ_underscore=yes
@@ -413,7 +422,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_hppa_nbsd_vec
     targ_selvecs="bfd_elf32_hppa_vec bfd_elf32_hppa_linux_vec"
     ;;
-  hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-rtems* | hppa*-*-openbsd*)
+  hppa*-*-*elf* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-openbsd*)
     targ_defvec=bfd_elf32_hppa_vec
     targ_selvecs=bfd_elf32_hppa_linux_vec
     ;;
@@ -466,17 +475,13 @@ case "${targ}" in
   i[3-7]86-*-chorus*)
     targ_defvec=bfd_elf32_i386_vec
     ;;
-  *-*-msdosdjgpp* | *-*-go32* | *-go32-rtems* )
+  *-*-msdosdjgpp* | *-*-go32* )
     targ_defvec=go32coff_vec
     targ_selvecs="go32stubbedcoff_vec i386aout_vec"
     ;;
   i[3-7]86-*-sysv* | i[3-7]86-*-isc* | i[3-7]86-*-sco* | i[3-7]86-*-coff | \
   i[3-7]86-*-aix*)
     targ_defvec=i386coff_vec
-    ;;
-  i[3-7]86*-*-rtemscoff*)
-    targ_defvec=i386coff_vec
-    targ_selvecs="bfd_elf32_i386_vec i386aout_vec"
     ;;
   i[3-7]86-*-rtemself* | i[3-7]86-*-rtems*)
     targ_defvec=bfd_elf32_i386_vec
@@ -863,7 +868,7 @@ case "${targ}" in
     targ_defvec=ecoff_big_vec
     targ_selvecs=ecoff_little_vec
     ;;
-  mips*el-*-elf* | mips*el-*-rtems* | mips*el-*-vxworks* | mips*-*-chorus*)
+  mips*el-*-elf* | mips*el-*-vxworks* | mips*-*-chorus*)
     targ_defvec=bfd_elf32_littlemips_vec
     targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
@@ -945,12 +950,12 @@ case "${targ}" in
     targ_defvec=bfd_elf32_openrisc_vec
     ;;
 
-  or32-*-coff)
+  or32-*-coff | or32-*-rtems* )
     targ_defvec=or32coff_big_vec
     targ_underscore=yes
     ;;
 
-  or32-*-elf | or32-*-rtems*)
+  or32-*-elf)
     targ_defvec=bfd_elf32_or32_big_vec
     ;;
 
@@ -1064,8 +1069,7 @@ case "${targ}" in
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec ppcboot_vec"
     ;;
   powerpcle-*-elf* | powerpcle-*-sysv4* | powerpcle-*-eabi* | \
-  powerpcle-*-solaris2* | powerpcle-*-linux-* | powerpcle-*-vxworks* |\
-  powerpcle-*-rtems*)
+  powerpcle-*-solaris2* | powerpcle-*-linux-* | powerpcle-*-vxworks*)
     targ_defvec=bfd_elf32_powerpcle_vec
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec ppcboot_vec"
     targ64_selvecs="bfd_elf64_powerpc_vec bfd_elf64_powerpcle_vec"
@@ -1293,11 +1297,6 @@ case "${targ}" in
 #endif /* BFD64 */
   sparc*-*-coff*)
     targ_defvec=sparccoff_vec
-    ;;
-  sparc*-*-rtemsaout*)
-    targ_defvec=sunos_big_vec
-    targ_selvecs="bfd_elf32_sparc_vec sparccoff_vec"
-    targ_underscore=yes
     ;;
   sparc*-*-rtems* | sparc*-*-rtemself*)
     targ_defvec=bfd_elf32_sparc_vec

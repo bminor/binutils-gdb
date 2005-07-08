@@ -1,3 +1,10 @@
+2005-07-08  Ralf Corsepius <ralf.corsepius@rtems.org>
+
+	* config.bfd: Mark i960-*-rtems*, or32-*-rtems* as obsolete.
+	Mark a29k-*rtems*, hppa*-*-rtems*, *-go32-rtems*, 
+	i[3-7]86*-*-rtemscoff*, mips*el-*-rtems*, powerpcle-*-rtems*,
+	sparc*-*-rtemsaout* as removed
+
 2005-07-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-hppa.h (elf_hppa_final_link): Use gp val of zero when none
