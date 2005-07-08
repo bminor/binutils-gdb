@@ -305,7 +305,6 @@ hppaelf_finish (void)
 	}
     }
 
-  gld${EMULATION_NAME}_strip_empty_sections ();
   gld${EMULATION_NAME}_provide_init_fini_syms ();
 }
 

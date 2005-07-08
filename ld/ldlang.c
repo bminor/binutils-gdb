@@ -1960,11 +1960,8 @@ wild_sort (lang_wild_statement_type *wild,
 	 looking at the sections for this file.  */
 
       if (sec != NULL && sec->spec.sorted != none)
-	{
-	  if (compare_section (sec->spec.sorted, section,
-			       ls->section) < 0)
-	    break;
-	}
+	if (compare_section (sec->spec.sorted, section, ls->section) < 0)
+	  break;
     }
 
   return l;
@@ -3086,39 +3083,40 @@ strip_excluded_output_sections (void)
       if (output_section == NULL)
 	continue;
 
-      exclude = TRUE;
-      if (output_section->map_head.s != NULL)
+      exclude = (output_section->rawsize == 0
+		 && (output_section->flags & SEC_KEEP) == 0
+		 && !bfd_section_removed_from_list (output_bfd,
+						    output_section));
+
+      /* Some sections have not yet been sized, notably .gnu.version,
+	 .dynsym, .dynstr and .hash.  These all have SEC_LINKER_CREATED
+	 input sections, so don't drop output sections that have such
+	 input sections unless they are also marked SEC_EXCLUDE.  */
+      if (exclude && output_section->map_head.s != NULL)
 	{
 	  asection *s;
 
-	  for (s = output_section->map_head.s; s != NULL;
-	       s = s->map_head.s)
-	    if ((s->flags & SEC_EXCLUDE) == 0)
+	  for (s = output_section->map_head.s; s != NULL; s = s->map_head.s)
+	    if ((s->flags & SEC_LINKER_CREATED) != 0
+		&& (s->flags & SEC_EXCLUDE) == 0)
 	      {
 		exclude = FALSE;
 		break;
 	      }
-
-	  output_section->map_head.link_order = NULL;
-	  output_section->map_tail.link_order = NULL;
 	}
 
-      if (exclude
-	  && (output_section->flags & SEC_KEEP) == 0
-	  && output_section->rawsize == 0
-	  && !bfd_is_abs_section (output_section))
+      /* TODO: Don't just junk map_head.s, turn them into link_orders.  */
+      output_section->map_head.link_order = NULL;
+      output_section->map_tail.link_order = NULL;
+
+      if (exclude)
 	{
 	  /* We don't set bfd_section to NULL since bfd_section of the
 	     removed output section statement may still be used.  */
 	  os->ignored = TRUE;
 	  output_section->flags |= SEC_EXCLUDE;
-
-	  if (!bfd_section_removed_from_list (output_bfd,
-					      output_section))
-	    {
-	      bfd_section_list_remove (output_bfd, output_section);
-	      output_bfd->section_count--;
-	    }
+	  bfd_section_list_remove (output_bfd, output_section);
+	  output_bfd->section_count--;
 	}
     }
 

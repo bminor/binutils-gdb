@@ -1,3 +1,12 @@
+2005-07-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (wild_sort): Formatting.
+	(strip_excluded_output_sections): Strip zero size sections here.
+	* emultempl/elf32.em (gld*_strip_empty_sections): Delete.
+	(gld*_finish): Don't call the above.
+	* emultempl/hppaelf.em (hppaelf_finish): Likewise.
+	* emultempl/ppc64elf.em (ppc_finish): Likewise.
+
 2005-07-05  Paul Brook  <paul@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32ppcvxworks.o.

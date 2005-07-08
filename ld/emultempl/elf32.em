@@ -61,7 +61,6 @@ static void gld${EMULATION_NAME}_before_allocation (void);
 static bfd_boolean gld${EMULATION_NAME}_place_orphan
   (lang_input_statement_type *file, asection *s);
 static void gld${EMULATION_NAME}_layout_sections_again (void);
-static void gld${EMULATION_NAME}_strip_empty_sections (void);
 static void gld${EMULATION_NAME}_provide_init_fini_syms (void);
 static void gld${EMULATION_NAME}_finish (void) ATTRIBUTE_UNUSED;
 
@@ -1507,40 +1506,11 @@ gld${EMULATION_NAME}_layout_sections_again (void)
 }
 
 static void
-gld${EMULATION_NAME}_strip_empty_sections (void)
-{
-  if (!link_info.relocatable)
-    {
-      lang_output_section_statement_type *os;
-
-      for (os = &lang_output_section_statement.head->output_section_statement;
-	   os != NULL;
-	   os = os->next)
-	{
-	  asection *s;
-
-	  if (os == abs_output_section || os->constraint == -1)
-	    continue;
-	  s = os->bfd_section;
-	  if (s != NULL
-	      && s->size == 0
-	      && (s->flags & SEC_KEEP) == 0
-	      && !bfd_section_removed_from_list (output_bfd, s))
-	    {
-	      bfd_section_list_remove (output_bfd, s);
-	      output_bfd->section_count--;
-	    }
-	}
-    }
-}
-
-static void
 gld${EMULATION_NAME}_finish (void)
 {
   if (bfd_elf_discard_info (output_bfd, &link_info))
     gld${EMULATION_NAME}_layout_sections_again ();
 
-  gld${EMULATION_NAME}_strip_empty_sections ();
   gld${EMULATION_NAME}_provide_init_fini_syms ();
 }
 EOF
