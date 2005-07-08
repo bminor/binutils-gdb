@@ -28,11 +28,7 @@
 #include "as.h"
 #include "safe-ctype.h"
 #include "opcode/tic30.h"
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 /* Put here all non-digit non-letter characters that may occur in an
    operand.  */

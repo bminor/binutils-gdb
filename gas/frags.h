@@ -22,9 +22,7 @@
 #ifndef FRAGS_H
 #define FRAGS_H
 
-#ifdef ANSI_PROTOTYPES
 struct obstack;
-#endif
 
 /* A code fragment (frag) is some known number of chars, followed by some
    unknown number of chars. Typically the unknown number of chars is an

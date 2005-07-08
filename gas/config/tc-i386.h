@@ -27,9 +27,7 @@
 #error So, do you know what you are doing?
 #endif
 
-#ifdef ANSI_PROTOTYPES
 struct fix;
-#endif
 
 #define TARGET_BYTES_BIG_ENDIAN	0
 

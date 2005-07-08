@@ -23,9 +23,7 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 1
 
-#if ANSI_PROTOTYPES
 struct internal_reloc;
-#endif
 
 #define WORKING_DOT_WORD
 

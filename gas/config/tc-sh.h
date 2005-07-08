@@ -23,7 +23,6 @@
 
 #define TARGET_ARCH bfd_arch_sh
 
-#if ANSI_PROTOTYPES
 /* The type fixS is defined (to struct fix) in write.h, but write.h uses
    definitions from this file.  To avoid problems with including write.h
    after the "right" definitions, don't; just forward-declare struct fix
@@ -31,7 +30,6 @@
 struct fix;
 struct segment_info_struct;
 struct internal_reloc;
-#endif
 
 /* Whether -relax was used.  */
 extern int sh_relax;

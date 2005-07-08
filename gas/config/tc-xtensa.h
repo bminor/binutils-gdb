@@ -21,9 +21,7 @@
 #ifndef TC_XTENSA
 #define TC_XTENSA 1
 
-#ifdef ANSI_PROTOTYPES
 struct fix;
-#endif
 
 #ifndef BFD_ASSEMBLER
 #error Xtensa support requires BFD_ASSEMBLER

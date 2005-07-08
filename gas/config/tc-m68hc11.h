@@ -22,9 +22,7 @@
 #define TC_M68HC11
 #define TC_M68HC12
 
-#ifdef ANSI_PROTOTYPES
 struct fix;
-#endif
 
 /* Define TC_M68K so that we can use the MRI mode.  */
 #define TC_M68K

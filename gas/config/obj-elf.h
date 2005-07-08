@@ -241,9 +241,7 @@ extern void elf_pop_insert (void);
 
 #ifndef OBJ_MAYBE_ELF
 #define obj_ecoff_set_ext elf_ecoff_set_ext
-#ifdef ANSI_PROTOTYPES
 struct ecoff_extr;
-#endif
 extern void elf_ecoff_set_ext (symbolS *, struct ecoff_extr *);
 #endif
 

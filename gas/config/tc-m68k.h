@@ -22,9 +22,7 @@
 
 #define TC_M68K 1
 
-#ifdef ANSI_PROTOTYPES
 struct fix;
-#endif
 
 #define TARGET_BYTES_BIG_ENDIAN 1
 

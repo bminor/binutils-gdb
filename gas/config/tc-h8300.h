@@ -37,10 +37,8 @@
 #define FAKE_LABEL_NAME ".L0\001"
 #endif
 
-#if ANSI_PROTOTYPES
 struct fix;
 struct internal_reloc;
-#endif
 
 #define WORKING_DOT_WORD
 

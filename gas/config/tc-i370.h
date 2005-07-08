@@ -22,9 +22,7 @@
 
 #define TC_I370
 
-#ifdef ANSI_PROTOTYPES
 struct fix;
-#endif
 
 /* Set the endianness we are using.  Default to big endian.  */
 #ifndef TARGET_BYTES_BIG_ENDIAN

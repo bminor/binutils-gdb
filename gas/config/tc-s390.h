@@ -21,9 +21,7 @@
 
 #define TC_S390
 
-#ifdef ANSI_PROTOTYPES
 struct fix;
-#endif
 
 #ifndef BFD_ASSEMBLER
  #error S390 support requires BFD_ASSEMBLER

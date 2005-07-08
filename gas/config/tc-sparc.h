@@ -22,9 +22,7 @@
 #ifndef TC_SPARC
 #define TC_SPARC 1
 
-#ifdef ANSI_PROTOTYPES
 struct frag;
-#endif
 
 /* This is used to set the default value for `target_big_endian'.  */
 #define TARGET_BYTES_BIG_ENDIAN 1
