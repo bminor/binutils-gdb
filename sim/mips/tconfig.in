@@ -31,3 +31,6 @@ MODULE_INSTALL_FN dv_sockser_install;
 /* Define this if the target cpu is bi-endian
    and the simulator supports it.  */
 #define SIM_HAVE_BIENDIAN
+
+/* MIPS uses an unusual format for floating point quiet NaNs.  */
+#define SIM_QUIET_NAN_NEGATED
