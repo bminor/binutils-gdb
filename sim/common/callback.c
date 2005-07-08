@@ -26,11 +26,7 @@
 #include "cconfig.h"
 #endif
 #include "ansidecl.h"
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -755,23 +751,10 @@ os_init (p)
 
 /* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 os_printf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
-#else
-os_printf_filtered (p, va_alist)
-     host_callback *p;
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  char *format;
-
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   vfprintf (stdout, format, args);
   va_end (args);
@@ -779,51 +762,24 @@ os_printf_filtered (p, va_alist)
 
 /* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 os_vprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_list args)
-#else
-os_vprintf_filtered (p, format, args)
-     host_callback *p;
-     const char *format;
-     va_list args;
-#endif
 {
   vprintf (format, args);
 }
 
 /* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 os_evprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_list args)
-#else
-os_evprintf_filtered (p, format, args)
-     host_callback *p;
-     const char *format;
-     va_list args;
-#endif
 {
   vfprintf (stderr, format, args);
 }
 
 /* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 os_error (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
-#else
-os_error (p, va_alist)
-     host_callback *p;
-     va_dcl
-#endif
 {
   va_list args;
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  char *format;
-
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
 
   vfprintf (stderr, format, args);
   fprintf (stderr, "\n");

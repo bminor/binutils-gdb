@@ -29,11 +29,7 @@
 #endif
 #include "ansidecl.h"
 #include "libiberty.h"
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

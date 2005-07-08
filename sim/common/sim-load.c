@@ -24,11 +24,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #include "ansidecl.h"
 #include <stdio.h> /* for NULL */
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -176,17 +172,11 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
 static void
 xprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 {
-#ifndef ANSI_PROTOTYPES
   host_callback *callback;
   char *fmt;
-#endif
   va_list ap;
 
   VA_START (ap, fmt);
-#ifndef ANSI_PROTOTYPES
-  callback = va_arg (ap, host_callback *);
-  fmt = va_arg (ap, char *);
-#endif
 
   (*callback->vprintf_filtered) (callback, fmt, ap);
 
@@ -196,17 +186,11 @@ xprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 static void
 eprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 {
-#ifndef ANSI_PROTOTYPES
   host_callback *callback;
   char *fmt;
-#endif
   va_list ap;
 
   VA_START (ap, fmt);
-#ifndef ANSI_PROTOTYPES
-  callback = va_arg (ap, host_callback *);
-  fmt = va_arg (ap, char *);
-#endif
 
   (*callback->evprintf_filtered) (callback, fmt, ap);
 

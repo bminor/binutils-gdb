@@ -1,3 +1,9 @@
+2005-07-08  Ben Elliston  <bje@au.ibm.com>
+
+	* callback.c: Remove ANSI_PROTOTYPES conditional code.
+	* sim-load.c: Likewise.
+	* syscall.c: Likewise.
+
 2005-05-24  Corinna Vinschen  <vinschen@redhat.com>
 
 	* Make-common.in (LIBDEPS): Correctly use INTLDEPS for dependency
