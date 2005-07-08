@@ -1405,7 +1405,6 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
-      bfd_boolean strip;
 
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
@@ -1414,37 +1413,23 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_get_section_name (dynobj, s);
 
-      strip = FALSE;
-
       if (strncmp (name, ".rela", 5) == 0)
 	{
-	  if (strcmp (name, ".rela.plt") == 0)
-	    relplt = TRUE;
-	  else if (strcmp (name, ".rela.got") == 0)
-	    relgot = TRUE;
-
-	  /* We use the reloc_count field as a counter if we need
-	     to copy relocs into the output file.  */
-	  s->reloc_count = 0;
-	}
-      else if (strncmp (name, ".plt.", 5) == 0
-	       || strncmp (name, ".got.plt.", 9) == 0)
-	{
-	  if (s->size == 0)
+	  if (s->size != 0)
 	    {
-	      /* If we don't need this section, strip it from the output
-		 file.  We must create the ".plt*" and ".got.plt*"
-		 sections in create_dynamic_sections and/or check_relocs
-		 based on a conservative estimate of the PLT relocation
-		 count, because the sections must be created before the
-		 linker maps input sections to output sections.  The
-		 linker does that before size_dynamic_sections, where we
-		 compute the exact size of the PLT, so there may be more
-		 of these sections than are actually needed.  */
-	      strip = TRUE;
+	      if (strcmp (name, ".rela.plt") == 0)
+		relplt = TRUE;
+	      else if (strcmp (name, ".rela.got") == 0)
+		relgot = TRUE;
+
+	      /* We use the reloc_count field as a counter if we need
+		 to copy relocs into the output file.  */
+	      s->reloc_count = 0;
 	    }
 	}
-      else if (strcmp (name, ".got") != 0
+      else if (strncmp (name, ".plt.", 5) != 0
+	       && strncmp (name, ".got.plt.", 9) != 0
+	       && strcmp (name, ".got") != 0
 	       && strcmp (name, ".plt") != 0
 	       && strcmp (name, ".got.plt") != 0
 	       && strcmp (name, ".xt.lit.plt") != 0
@@ -1454,13 +1439,24 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  continue;
 	}
 
-      if (strip)
-	s->flags |= SEC_EXCLUDE;
-      else
+      if (s->size == 0)
+	{
+	  /* If we don't need this section, strip it from the output
+	     file.  We must create the ".plt*" and ".got.plt*"
+	     sections in create_dynamic_sections and/or check_relocs
+	     based on a conservative estimate of the PLT relocation
+	     count, because the sections must be created before the
+	     linker maps input sections to output sections.  The
+	     linker does that before size_dynamic_sections, where we
+	     compute the exact size of the PLT, so there may be more
+	     of these sections than are actually needed.  */
+	  s->flags |= SEC_EXCLUDE;
+	}
+      else if ((s->flags & SEC_HAS_CONTENTS) != 0)
 	{
 	  /* Allocate memory for the section contents.  */
 	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
-	  if (s->contents == NULL && s->size != 0)
+	  if (s->contents == NULL)
 	    return FALSE;
 	}
     }

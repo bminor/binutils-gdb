@@ -2274,7 +2274,8 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      sec->size = (sec->size + sizeof (plt_stub) + mask) & ~mask;
 	    }
 	}
-      else if (sec == htab->sgot)
+      else if (sec == htab->sgot
+	       || sec == htab->sdynbss)
 	;
       else if (strncmp (bfd_get_section_name (dynobj, sec), ".rela", 5) == 0)
 	{
@@ -2311,10 +2312,13 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  continue;
 	}
 
+      if ((sec->flags & SEC_HAS_CONTENTS) == 0)
+	continue;
+
       /* Allocate memory for the section contents.  Zero it, because
 	 we may not fill in all the reloc sections.  */
       sec->contents = bfd_zalloc (dynobj, sec->size);
-      if (sec->contents == NULL && sec->size != 0)
+      if (sec->contents == NULL)
 	return FALSE;
     }
 

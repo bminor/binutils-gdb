@@ -2767,7 +2767,6 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
-      bfd_boolean strip;
 
       if (!(s->flags & SEC_LINKER_CREATED))
 	continue;
@@ -2776,23 +2775,11 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_get_section_name (dynobj, s);
 
-      /* If we don't need this section, strip it from the output file.
-	 This is to handle .rela.bss and .rela.plt.  We must create it
-	 in create_dynamic_sections, because it must be created before
-	 the linker maps input sections to output sections.  The
-	 linker does that before adjust_dynamic_symbol is called, and
-	 it is that function which decides whether anything needs to
-	 go into these sections.  */
-
-      strip = FALSE;
-
       if (strncmp (name, ".rela", 5) == 0)
 	{
-	  strip = (s->size == 0);
-
-	  if (!strip)
+	  if (s->size != 0)
 	    {
-	      if (strcmp(name, ".rela.plt") == 0)
+	      if (strcmp (name, ".rela.plt") == 0)
 		relplt = TRUE;
 
 	      /* We use the reloc_count field as a counter if we need
@@ -2800,19 +2787,30 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (strcmp (name, ".plt") != 0)
+      else if (strncmp (name, ".got", 4) != 0
+	       && strcmp (name, ".plt") != 0
+	       && strcmp (name, ".dynbss") != 0)
 	{
 	  /* It's not one of our dynamic sections, so don't allocate space.  */
 	  continue;
 	}
 
-      if (strip)
-	s->flags |= SEC_EXCLUDE;
-      else
+      if (s->size == 0)
+	{
+	  /* If we don't need this section, strip it from the output file.
+	     This is to handle .rela.bss and .rela.plt.  We must create it
+	     in create_dynamic_sections, because it must be created before
+	     the linker maps input sections to output sections.  The
+	     linker does that before adjust_dynamic_symbol is called, and
+	     it is that function which decides whether anything needs to
+	     go into these sections.  */
+	  s->flags |= SEC_EXCLUDE;
+	}
+      else if ((s->flags & SEC_HAS_CONTENTS) != 0)
 	{
 	  /* Allocate memory for the section contents.  */
 	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
-	  if (s->contents == NULL && s->size != 0)
+	  if (s->contents == NULL)
 	    return FALSE;
 	}
     }

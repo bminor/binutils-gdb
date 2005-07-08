@@ -2152,55 +2152,54 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
      memory for them.  */
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
-      const char *name;
-      bfd_boolean strip = FALSE;
-
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
-      /* It's OK to base decisions on the section name, because none
-	 of the dynobj section names depend upon the input files.  */
-      name = bfd_get_section_name (dynobj, s);
-
-      if (strncmp (name, ".rela", 5) == 0)
+      if (s == htab->splt
+	  || s == htab->sgot
+	  || s == htab->sdynbss)
 	{
-	  if (s->size == 0)
-	    {
-	      /* If we don't need this section, strip it from the
-		 output file.  This is to handle .rela.bss and
-		 .rel.plt.  We must create it in
-		 create_dynamic_sections, because it must be created
-		 before the linker maps input sections to output
-		 sections.  The linker does that before
-		 adjust_dynamic_symbol is called, and it is that
-		 function which decides whether anything needs to go
-		 into these sections.  */
-	      strip = TRUE;
-	    }
-	  else
+	  /* Strip this section if we don't need it; see the
+	     comment below.  */
+	}
+      else if (strncmp (s->name, ".rela", 5) == 0)
+	{
+	  if (s->size != 0)
 	    {
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (s != htab->splt && s != htab->sgot)
+      else
 	{
-	  /* It's not one of our sections, so don't allocate space.  */
+	  /* It's not one of our sections.  */
 	  continue;
 	}
 
-      if (strip)
+      if (s->size == 0)
 	{
+	  /* If we don't need this section, strip it from the
+	     output file.  This is mostly to handle .rela.bss and
+	     .rela.plt.  We must create both sections in
+	     create_dynamic_sections, because they must be created
+	     before the linker maps input sections to output
+	     sections.  The linker does that before
+	     adjust_dynamic_symbol is called, and it is that
+	     function which decides whether anything needs to go
+	     into these sections.  */
 	  s->flags |= SEC_EXCLUDE;
 	  continue;
 	}
+
+      if ((s->flags & SEC_HAS_CONTENTS) == 0)
+	continue;
 
       /* Allocate memory for the section contents.  Zero the memory
 	 for the benefit of .rela.plt, which has 4 unused entries
 	 at the beginning, and we don't want garbage.  */
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
-      if (s->contents == NULL && s->size != 0)
+      if (s->contents == NULL)
 	return FALSE;
     }
 

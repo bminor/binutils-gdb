@@ -1259,9 +1259,9 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (!sec || (sec->flags & SEC_EXCLUDE))
 		sec = bfd_get_section_by_name (abfd, ".data");
 	      if (!sec || (sec->flags & SEC_EXCLUDE))
-		return FALSE;
-
-	      gp_val = sec->output_offset + sec->output_section->vma;
+		gp_val = 0;
+	      else
+		gp_val = sec->output_offset + sec->output_section->vma;
 	    }
 	}
 

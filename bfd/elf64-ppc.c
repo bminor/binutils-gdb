@@ -3195,7 +3195,7 @@ struct ppc_branch_hash_entry {
   /* Base hash table entry structure.  */
   struct bfd_hash_entry root;
 
-  /* Offset within .branch_lt.  */
+  /* Offset within branch lookup table.  */
   unsigned int offset;
 
   /* Generation marker.  */
@@ -3693,26 +3693,50 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
       || ! bfd_set_section_alignment (dynobj, htab->glink, 2))
     return FALSE;
 
-  /* Create .branch_lt for plt_branch stubs.  */
-  flags = (SEC_ALLOC | SEC_LOAD
-	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-  htab->brlt = bfd_make_section_anyway_with_flags (dynobj, ".branch_lt",
-						   flags);
+  /* Create branch lookup table for plt_branch stubs.  */
+  if (info->shared)
+    {
+      flags = (SEC_ALLOC | SEC_LOAD
+	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+      htab->brlt
+	= bfd_make_section_anyway_with_flags (dynobj, ".data.rel.ro.brlt",
+					      flags);
+    }
+  else
+    {
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+      htab->brlt
+	= bfd_make_section_anyway_with_flags (dynobj, ".rodata.brlt", flags);
+    }
+
   if (htab->brlt == NULL
       || ! bfd_set_section_alignment (dynobj, htab->brlt, 3))
     return FALSE;
 
-  if (info->shared || info->emitrelocations)
+  if (info->shared)
     {
       flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-      htab->relbrlt = bfd_make_section_anyway_with_flags (dynobj,
-							  ".rela.branch_lt",
-							  flags);
-      if (!htab->relbrlt
-	  || ! bfd_set_section_alignment (dynobj, htab->relbrlt, 3))
-	return FALSE;
+      htab->relbrlt
+	= bfd_make_section_anyway_with_flags (dynobj, ".rela.data.rel.ro.brlt",
+					      flags);
     }
+  else if (info->emitrelocations)
+    {
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+      htab->relbrlt
+	= bfd_make_section_anyway_with_flags (dynobj, ".rela.rodata.brlt",
+					      flags);
+    }
+  else
+    return TRUE;
+
+  if (!htab->relbrlt
+      || ! bfd_set_section_alignment (dynobj, htab->relbrlt, 3))
+    return FALSE;
+
   return TRUE;
 }
 
@@ -3739,13 +3763,13 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
 
-  got = bfd_make_section_with_flags (abfd, ".got", flags);
+  got = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (!got
       || !bfd_set_section_alignment (abfd, got, 3))
     return FALSE;
 
-  relgot = bfd_make_section_with_flags (abfd, ".rela.got",
-					flags | SEC_READONLY);
+  relgot = bfd_make_section_anyway_with_flags (abfd, ".rela.got",
+					       flags | SEC_READONLY);
   if (!relgot
       || ! bfd_set_section_alignment (abfd, relgot, 3))
     return FALSE;
@@ -7696,26 +7720,15 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	continue;
       else if (s == htab->got
 	       || s == htab->plt
-	       || s == htab->glink)
+	       || s == htab->glink
+	       || s == htab->dynbss)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
       else if (strncmp (bfd_get_section_name (dynobj, s), ".rela", 5) == 0)
 	{
-	  if (s->size == 0)
-	    {
-	      /* If we don't need this section, strip it from the
-		 output file.  This is mostly to handle .rela.bss and
-		 .rela.plt.  We must create both sections in
-		 create_dynamic_sections, because they must be created
-		 before the linker maps input sections to output
-		 sections.  The linker does that before
-		 adjust_dynamic_symbol is called, and it is that
-		 function which decides whether anything needs to go
-		 into these sections.  */
-	    }
-	  else
+	  if (s->size != 0)
 	    {
 	      if (s != htab->relplt)
 		relocs = TRUE;
@@ -7733,12 +7746,20 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (s->size == 0)
 	{
+	  /* If we don't need this section, strip it from the
+	     output file.  This is mostly to handle .rela.bss and
+	     .rela.plt.  We must create both sections in
+	     create_dynamic_sections, because they must be created
+	     before the linker maps input sections to output
+	     sections.  The linker does that before
+	     adjust_dynamic_symbol is called, and it is that
+	     function which decides whether anything needs to go
+	     into these sections.  */
 	  s->flags |= SEC_EXCLUDE;
 	  continue;
 	}
 
-      /* .plt is in the bss section.  We don't initialise it.  */
-      if (s == htab->plt)
+      if ((s->flags & SEC_HAS_CONTENTS) == 0)
 	continue;
 
       /* Allocate memory for the section contents.  We use bfd_zalloc
@@ -9120,7 +9141,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
       (*htab->layout_sections_again) ();
     }
 
-  /* It would be nice to strip .branch_lt from the output if the
+  /* It would be nice to strip htab->brlt from the output if the
      section is empty, but it's too late.  If we strip sections here,
      the dynamic symbol table is corrupted since the section symbol
      for the stripped section isn't written.  */

@@ -6668,7 +6668,6 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
-      bfd_boolean strip;
 
       /* It's OK to base decisions on the section name, because none
 	 of the dynobj section names depend upon the input files.  */
@@ -6677,24 +6676,9 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
-      strip = FALSE;
-
       if (strncmp (name, ".rel", 4) == 0)
 	{
-	  if (s->size == 0)
-	    {
-	      /* We only strip the section if the output section name
-                 has the same name.  Otherwise, there might be several
-                 input sections for this output section.  FIXME: This
-                 code is probably not needed these days anyhow, since
-                 the linker now does not create empty output sections.  */
-	      if (s->output_section != NULL
-		  && strcmp (name,
-			     bfd_get_section_name (s->output_section->owner,
-						   s->output_section)) == 0)
-		strip = TRUE;
-	    }
-	  else
+	  if (s->size != 0)
 	    {
 	      const char *outname;
 	      asection *target;
@@ -6818,15 +6802,18 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	  continue;
 	}
 
-      if (strip)
+      if (s->size == 0)
 	{
 	  s->flags |= SEC_EXCLUDE;
 	  continue;
 	}
 
+      if ((s->flags & SEC_HAS_CONTENTS) == 0)
+	continue;
+
       /* Allocate memory for the section contents.  */
       s->contents = bfd_zalloc (dynobj, s->size);
-      if (s->contents == NULL && s->size != 0)
+      if (s->contents == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
 	  return FALSE;

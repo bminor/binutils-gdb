@@ -2264,7 +2264,8 @@ m32r_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (s == htab->splt
           || s == htab->sgot
-          || s == htab->sgotplt)
+          || s == htab->sgotplt
+	  || s == htab->sdynbss)
         {
           /* Strip this section if we don't need it; see the
              comment below.  */
@@ -2296,6 +2297,9 @@ m32r_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
           s->flags |= SEC_EXCLUDE;
           continue;
         }
+
+      if ((s->flags & SEC_HAS_CONTENTS) == 0)
+	continue;
 
       /* Allocate memory for the section contents.  We use bfd_zalloc
          here in case unused entries are not reclaimed before the

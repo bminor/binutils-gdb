@@ -1,3 +1,45 @@
+2005-07-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-hppa.h (elf_hppa_final_link): Use gp val of zero when none
+	of the usual sections are found.
+	* elf-m10300.c (_bfd_mn10300_elf_size_dynamic_sections): Tidy.
+	Strip .dynbss if it is zero size.
+	* elf32-arm.c (elf32_arm_size_dynamic_sections): Likewise.
+	* elf32-cris.c (elf_cris_size_dynamic_sections): Likewise.
+	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Likewise.
+	* elf32-i370.c (i370_elf_size_dynamic_sections): Likewise, and
+	.dynsbss.
+	(i370_elf_finish_dynamic_sections): Don't attempt to write .got
+	when it is zero size.
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Correct handling
+	of .dynbss and zero size sections.
+	* elf32-m32r.c (m32r_elf_size_dynamic_sections): Strip .dynbss if
+	it is zero size.
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Tidy.  Strip
+	.dynbss if zero size.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Likewise, .dynsbss
+	too.
+	* elf32-s390.c (elf_s390_size_dynamic_sections): Likewise.
+	* elf32-sh.c (sh_elf_size_dynamic_sections): Likewise.
+	* elf32-vax.c (elf_vax_size_dynamic_sections): Likewise.
+	* elf32-xtensa.c (elf_xtensa_size_dynamic_sections): Tidy.  Strip
+	.plt.* and .got.plt.* if zero size.
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Tidy.  Strip
+	.got* and .dynbss if zero size.
+	* elf64-hppa.c (elf64_hppa_size_dynamic_sections): Tidy.  Strip
+	* elf64-ppc.c (create_linkage_sections): Create branch lookup table
+	in .data.rel.ro.brlt or .rodata.brlt, and similarly for associated
+	reloc section.
+	(create_got_section): Always create new .got and .rela.got sections.
+	(ppc64_elf_size_dynamic_sections): Tidy.  Strip .dynbss if zero size.
+	* elf64-s390.c (elf_s390_size_dynamic_sections): Likewise.
+	* elf64-sh64.c (sh64_elf64_size_dynamic_sections): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_size_dynamic_sections): Handle
+	dynamic bss sections correctly.
+	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Tidy.
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Tidy.  Strip
+	.dynbss if zero size.
+
 2005-07-08  Ben Elliston  <bje@au.ibm.com>
 
 	* elf32-xtensa.c: Include <stdarg.h> unconditionally, not only
@@ -326,7 +368,7 @@
 
 2005-06-27  Carlos O'Donell <carlos@systemhalted.org>
 
-	* bfd/elf32-hppa.c (struct elf32_hppa_stub_hash_entry): 
+	* bfd/elf32-hppa.c (struct elf32_hppa_stub_hash_entry):
 	Use bh_root, and hh.
 	(struct elf32_hppa_link_hash_entry): Use eh, and hsh_cache.
 	(struct elf32_hppa_dyn_reloc_entry): Use hdh_next.
