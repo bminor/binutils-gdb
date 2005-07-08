@@ -1744,19 +1744,13 @@ INLINE_SIM_FPU (int)
 sim_fpu_abs (sim_fpu *f,
 	     const sim_fpu *r)
 {
+  *f = *r;
+  f->sign = 0;
   if (sim_fpu_is_snan (r))
     {
-      *f = *r;
       f->class = sim_fpu_class_qnan;
       return sim_fpu_status_invalid_snan;
     }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
-  *f = *r;
-  f->sign = 0;
   return 0;
 }
 

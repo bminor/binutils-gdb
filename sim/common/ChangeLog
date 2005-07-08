@@ -1,5 +1,7 @@
 2005-07-08  Ian Lance Taylor  <ian@airs.com>
 
+	* sim-fpu.c (sim_fpu_abs): Always clear the sign bit.
+
 	* sim-fpu.c (pack_fpu): If SIM_QUIET_NAN_NEGATED is defined, use a
 	different fraction for a quiet NaN.
 	(unpack_fpu): Likewise.
