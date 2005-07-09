@@ -1,3 +1,9 @@
+2005-07-09  Ben Elliston  <bje@au.ibm.com>
+
+	* memcpy.c: Remove ANSI_PROTOTYPES conditional code.
+	* memmove.c: Likewise.
+	* objalloc.c: Likewise.
+
 2005-07-07  Kelley Cook  <kcook@gcc.gnu.org>
 
 	* config.table: Delete file.  Move former contents into ...
