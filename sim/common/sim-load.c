@@ -172,8 +172,6 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
 static void
 xprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 {
-  host_callback *callback;
-  char *fmt;
   va_list ap;
 
   VA_START (ap, fmt);
@@ -186,8 +184,6 @@ xprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 static void
 eprintf VPARAMS ((host_callback *callback, const char *fmt, ...))
 {
-  host_callback *callback;
-  char *fmt;
   va_list ap;
 
   VA_START (ap, fmt);

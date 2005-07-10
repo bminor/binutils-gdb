@@ -1,3 +1,8 @@
+2005-07-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* sim-load.c (xprintf, eprintf): Remove fallout from ANSI_PROTOTYPES
+	change.
+
 2005-07-08  Ian Lance Taylor  <ian@airs.com>
 
 	* sim-fpu.c (sim_fpu_abs): Always clear the sign bit.
