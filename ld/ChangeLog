@@ -1,3 +1,9 @@
+2005-07-09  Christopher Faylor  <cgf@timesys.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse): Enable runtime
+	relocation by default.
+	(compute_dll_image_base): Avoid linking into cygwin dll address space.
+
 2005-07-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (wild_sort): Formatting.

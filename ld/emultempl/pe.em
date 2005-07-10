@@ -135,7 +135,7 @@ gld_${EMULATION_NAME}_before_parse (void)
   config.dynamic_link = TRUE;
   config.has_shared = 1;
   link_info.pei386_auto_import = -1;
-  link_info.pei386_runtime_pseudo_reloc = FALSE;
+  link_info.pei386_runtime_pseudo_reloc = -1;
 
 #if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
 #if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
@@ -667,7 +667,7 @@ static unsigned long
 compute_dll_image_base (const char *ofile)
 {
   unsigned long hash = strhash (ofile);
-  return 0x60000000 | ((hash << 16) & 0x0FFC0000);
+  return 0x61300000 + ((hash << 16) & 0x0FFC0000);
 }
 #endif
 
