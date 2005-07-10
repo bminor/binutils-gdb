@@ -1,3 +1,8 @@
+2005-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (optimize_disp): Optimize signed 32bit
+	displacements.
+
 2005-07-08  Ben Elliston  <bje@au.ibm.com>
 
 	* frags.h: Remove ANSI_PROTOTYPES conditional code.

@@ -2108,7 +2108,10 @@ optimize_disp ()
 	    else if (flag_code == CODE_64BIT)
 	      {
 		if (fits_in_signed_long (disp))
-		  i.types[op] |= Disp32S;
+		  {
+		    i.types[op] &= ~Disp64;
+		    i.types[op] |= Disp32S;
+		  }
 		if (fits_in_unsigned_long (disp))
 		  i.types[op] |= Disp32;
 	      }

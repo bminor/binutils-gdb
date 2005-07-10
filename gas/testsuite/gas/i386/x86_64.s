@@ -170,5 +170,23 @@ movw %ax,0x8877665544332211
 movl %eax,0x8877665544332211
 movq %rax,0x8877665544332211
 
+#absolute signed 32bit addressing
+mov 0xffffffffff332211,%al
+mov 0xffffffffff332211,%ax
+mov 0xffffffffff332211,%eax
+mov 0xffffffffff332211,%rax
+mov %al,0xffffffffff332211
+mov %ax,0xffffffffff332211
+mov %eax,0xffffffffff332211
+mov %rax,0xffffffffff332211
+movb 0xffffffffff332211,%al
+movw 0xffffffffff332211,%ax
+movl 0xffffffffff332211,%eax
+movq 0xffffffffff332211,%rax
+movb %al,0xffffffffff332211
+movw %ax,0xffffffffff332211
+movl %eax,0xffffffffff332211
+movq %rax,0xffffffffff332211
+
 # Get a good alignment.
  .p2align	4,0

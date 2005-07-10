@@ -140,4 +140,20 @@ Disassembly of section .text:
  27e:	66 a3 11 22 33 44 55 66 77 88 	mov[ 	]+%ax,0x8877665544332211
  288:	a3 11 22 33 44 55 66 77 88 	mov[ 	]+%eax,0x8877665544332211
  291:	48 a3 11 22 33 44 55 66 77 88 	mov[ 	]+%rax,0x8877665544332211
+ 29b:	8a 04 25 11 22 33 ff 	mov[ 	]+0xffffffffff332211,%al
+ 2a2:	66 8b 04 25 11 22 33 ff 	mov[ 	]+0xffffffffff332211,%ax
+ 2aa:	8b 04 25 11 22 33 ff 	mov[ 	]+0xffffffffff332211,%eax
+ 2b1:	48 8b 04 25 11 22 33 ff 	mov[ 	]+0xffffffffff332211,%rax
+ 2b9:	88 04 25 11 22 33 ff 	mov[ 	]+%al,0xffffffffff332211
+ 2c0:	66 89 04 25 11 22 33 ff 	mov[ 	]+%ax,0xffffffffff332211
+ 2c8:	89 04 25 11 22 33 ff 	mov[ 	]+%eax,0xffffffffff332211
+ 2cf:	48 89 04 25 11 22 33 ff 	mov[ 	]+%rax,0xffffffffff332211
+ 2d7:	8a 04 25 11 22 33 ff 	mov[ 	]+0xffffffffff332211,%al
+ 2de:	66 8b 04 25 11 22 33 ff 	mov[ 	]+0xffffffffff332211,%ax
+ 2e6:	8b 04 25 11 22 33 ff 	mov[ 	]+0xffffffffff332211,%eax
+ 2ed:	48 8b 04 25 11 22 33 ff 	mov[ 	]+0xffffffffff332211,%rax
+ 2f5:	88 04 25 11 22 33 ff 	mov[ 	]+%al,0xffffffffff332211
+ 2fc:	66 89 04 25 11 22 33 ff 	mov[ 	]+%ax,0xffffffffff332211
+ 304:	89 04 25 11 22 33 ff 	mov[ 	]+%eax,0xffffffffff332211
+ 30b:	48 89 04 25 11 22 33 ff 	mov[ 	]+%rax,0xffffffffff332211
 #pass

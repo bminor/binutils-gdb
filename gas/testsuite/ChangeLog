@@ -1,3 +1,9 @@
+2005-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386/x86_64.s: Add absolute siged 32bit addressing tests for
+	mov.
+	* i386/x86_64.d: Updated.
+
 2005-07-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR gas/1049
@@ -103,7 +109,7 @@
 
 	PR 1013
 	* i386/x86_64.s: Add absolute 64bit addressing tests for mov.
-	* i386/x86_64.s: Updated.
+	* i386/x86_64.d: Updated.
 
 2005-06-17  Jan Beulich  <jbeulich@novell.com>
 
