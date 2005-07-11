@@ -1,3 +1,8 @@
+2005-07-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_symbol_refs_local_p): Revert the last
+	change.
+
 2005-07-08  Paul Koning  <pkoning@equallogic.com>
 
 	* dwarf2.c (read_address): Check sign_extend_vma to handle targets
