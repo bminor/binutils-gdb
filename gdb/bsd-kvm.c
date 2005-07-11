@@ -34,6 +34,7 @@
 #ifdef HAVE_NLIST_H
 #include <nlist.h>
 #endif
+#include <paths.h>
 #include "readline/readline.h"
 #include <sys/param.h>
 #include <sys/proc.h>
@@ -41,18 +42,21 @@
 
 #include "bsd-kvm.h"
 
+/* Kernel memory device file.  */
+static const char *bsd_kvm_corefile;
+
 /* Kernel memory interface descriptor.  */
-kvm_t *core_kd;
+static kvm_t *core_kd;
 
 /* Address of process control block.  */
-struct pcb *bsd_kvm_paddr;
+static struct pcb *bsd_kvm_paddr;
 
 /* Pointer to architecture-specific function that reconstructs the
    register state from PCB and supplies it to REGCACHE.  */
-int (*bsd_kvm_supply_pcb)(struct regcache *regcache, struct pcb *pcb);
+static int (*bsd_kvm_supply_pcb)(struct regcache *regcache, struct pcb *pcb);
 
 /* Target ops for libkvm interface.  */
-struct target_ops bsd_kvm_ops;
+static struct target_ops bsd_kvm_ops;
 
 static void
 bsd_kvm_open (char *filename, int from_tty)
@@ -81,6 +85,7 @@ bsd_kvm_open (char *filename, int from_tty)
   if (temp_kd == NULL)
     error (("%s"), errbuf);
 
+  bsd_kvm_corefile = filename;
   unpush_target (&bsd_kvm_ops);
   core_kd = temp_kd;
   push_target (&bsd_kvm_ops);
@@ -130,6 +135,16 @@ bsd_kvm_xfer_partial (struct target_ops *ops, enum target_object object,
     default:
       return -1;
     }
+}
+
+static void
+bsd_kvm_files_info (struct target_ops *ops)
+{
+  if (bsd_kvm_corefile && strcmp (bsd_kvm_corefile, _PATH_MEM) != 0)
+    printf_filtered (_("\tUsing the kernel crash dump %s.\n"),
+		     bsd_kvm_corefile);
+  else
+    printf_filtered (_("\tUsing the currently running kernel.\n"));
 }
 
 /* Fetch process control block at address PADDR.  */
@@ -304,6 +319,7 @@ Optionally specify the filename of a core dump.");
   bsd_kvm_ops.to_close = bsd_kvm_close;
   bsd_kvm_ops.to_fetch_registers = bsd_kvm_fetch_registers;
   bsd_kvm_ops.to_xfer_partial = bsd_kvm_xfer_partial;
+  bsd_kvm_ops.to_files_info = bsd_kvm_files_info;
   bsd_kvm_ops.to_stratum = process_stratum;
   bsd_kvm_ops.to_has_memory = 1;
   bsd_kvm_ops.to_has_stack = 1;

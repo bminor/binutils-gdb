@@ -1,3 +1,13 @@
+2005-07-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* bsd-kvm.c: Include <paths.h>.
+	(bsd_kvm_corefile): New variable.
+	(core_kd, bsd_kvm_paddr, bsd_kvm_supply_pcb, bsd_kvm_ops): Make
+	static.
+	(bsd_kvm_open): Set bsd_kvm_corefile.
+	(bsd_kvm_files_info): New function.
+	(bsd_kvm_add_target): Set to_files_info.
+
 2005-07-07  Andreas Schwab  <schwab@suse.de>
 
 	* observer.sh: Use different temporary file name depending on mode
