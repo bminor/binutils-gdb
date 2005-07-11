@@ -1,3 +1,8 @@
+2005-07-10  Ralf Corsepius <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Remove a29k-*-rtems*, hppa*-*-rtems*,i386-go32-rtems*,
+	i386-*-rtemscoff*, sparc-*-rtemsaout*.
+
 2005-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (optimize_disp): Optimize signed 32bit

@@ -93,7 +93,6 @@ case ${generic_target} in
   a29k-amd-udi)				fmt=coff ;;
   a29k-amd-ebmon)			fmt=coff ;;
   a29k-nyu-sym1)			fmt=coff ;;
-  a29k-*-rtems*)			fmt=coff ;;
   a29k-*-vxworks*)			fmt=coff ;;
 
   alpha-*-*vms*)			fmt=evax ;;
@@ -151,7 +150,6 @@ case ${generic_target} in
   hppa-*-netbsd*)			fmt=elf em=nbsd ;;
   hppa-*-openbsd*)			fmt=elf em=hppa ;;
   hppa-*-osf*)				fmt=som em=hppa ;;
-  hppa-*-rtems*)			fmt=elf em=hppa ;;
   hppa-*-hpux11*)
     case ${cpu} in
       hppa*64*)				fmt=elf em=hppa64 ;;
@@ -210,10 +208,8 @@ case ${generic_target} in
   i386-*-sco3.2*)			fmt=coff ;;
   i386-*-vsta)				fmt=aout ;;
   i386-*-msdosdjgpp* \
-  | i386-*-go32* \
-  | i386-go32-rtems*)			fmt=coff em=go32 ;;
+  | i386-*-go32*)			fmt=coff em=go32 ;;
   i386-*-rtemself*)			fmt=elf ;;
-  i386-*-rtemscoff*)			fmt=coff ;;
   i386-*-rtems*)			fmt=elf ;;
   i386-*-gnu*)				fmt=elf ;;
   i386-*-mach*)				fmt=aout em=mach ;;
@@ -363,7 +359,6 @@ case ${generic_target} in
   shle*-*-kaos*)			fmt=elf ;;
   sh64-*-elf*)				fmt=elf ;;
 
-  sparc-*-rtemsaout*)			fmt=aout ;;
   sparc-*-rtemself*)			fmt=elf ;;
   sparc-*-rtems*)			fmt=elf ;;
   sparc-*-sunos4*)			fmt=aout em=sun3 ;;
