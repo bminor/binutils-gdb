@@ -98,7 +98,6 @@ sparcv9-*-solaris2* | sparc64-*-solaris2*)
 			;;
 sparc*-*-solaris2*)	targ_emul=elf32_sparc ;;
 sparc*-wrs-vxworks*)	targ_emul=sparcaout ;;
-sparc*-*-rtemsaout*)    targ_emul=sparcaout ;;
 sparc*-*-rtemself*)     targ_emul=elf32_sparc ;;
 sparc*-*-rtems*)        targ_emul=elf32_sparc ;;
 i860-*-coff)		targ_emul=coff_i860 ;;
@@ -135,7 +134,6 @@ maxq-*-coff)            targ_emul=maxqcoff;;
 i370-*-elf* | i370-*-linux-*) targ_emul=elf32i370 ;;
 i[3-7]86-*-nto-qnx*)	targ_emul=i386nto ;;
 i[3-7]86-*-vsta)	targ_emul=vsta ;;
-i[3-7]86-go32-rtems*)	targ_emul=i386go32 ;;
 i[3-7]86-*-go32)	targ_emul=i386go32 ;;
 i[3-7]86-*-msdosdjgpp*) targ_emul=i386go32 ;;
 i[3-7]86-*-aix*)	targ_emul=i386coff ;;
@@ -143,7 +141,6 @@ i[3-7]86-*-sco*)	targ_emul=i386coff ;;
 i[3-7]86-*-isc*)	targ_emul=i386coff ;;
 i[3-7]86-*-lynxos*)	targ_emul=i386lynx ;;
 i[3-7]86-*-coff)	targ_emul=i386coff ;;
-i[3-7]86-*-rtemscoff*)	targ_emul=i386coff ;;
 i[3-7]86-*-rtemself*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-rtems*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-aros*)	targ_emul=elf_i386 ;;
@@ -400,7 +397,6 @@ hppa*-*-*elf*)		targ_emul=hppaelf ;;
 hppa*-*-lites*)		targ_emul=hppaelf ;;
 hppa*-*-netbsd*)	targ_emul=hppanbsd ;;
 hppa*-*-openbsd*)	targ_emul=hppaobsd ;;
-hppa*-*-rtems*)		targ_emul=hppaelf ;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
 vax-*-netbsdelf*)	targ_emul=elf32vax
 			targ_extra_emuls=vaxnbsd ;;
@@ -435,7 +431,6 @@ mips*vr5000el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr5000-*-elf*)	targ_emul=elf32b4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
-mips*el-*-rtems*)	targ_emul=elf32elmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
 mips*el-*-vxworks*)	targ_emul=elf32elmip ;;
 mips*-*-vxworks*)	targ_emul=elf32ebmip
@@ -540,7 +535,6 @@ powerpc-*-vxworks*)
 	;;
 powerpc-*-nto*)         targ_emul=elf32ppcnto ;;
 powerpcle-*-nto*)       targ_emul=elf32lppcnto ;;
-powerpcle-*-rtems*)	targ_emul=elf32leppc ;;
 powerpc-*-rtems*)	targ_emul=elf32ppc ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;

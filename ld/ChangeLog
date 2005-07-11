@@ -1,3 +1,9 @@
+2005-07-10  Ralf Corsepius <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Remove sparc*-*-rtemsaout*, i[3-7]86-go32-rtems*,
+	i[3-7]86-*-rtemscoff*, hppa*-*-rtems*, mips*el-*-rtems*,
+	powerpcle-*-rtems*.
+
 2005-07-09  Christopher Faylor  <cgf@timesys.com>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse): Enable runtime
