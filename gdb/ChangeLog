@@ -1,4 +1,4 @@
-2005-07-12  Mark Kettenis  <kettenis@openbsd.localdomain>
+2005-07-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2expr.h: Tweak comment.
 	(struct dwarf_expr_context): Use `gdb_byte *' in read_mem and
