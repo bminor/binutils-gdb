@@ -1,3 +1,8 @@
+2005-07-12  Bob Rossi  <bob@brasko.net>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Fix -inferior-tty-show
+	corresponding GDB command comment.
+
 2005-07-06  Bob Rossi  <bob@brasko.net>
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Add -inferior-tty-set

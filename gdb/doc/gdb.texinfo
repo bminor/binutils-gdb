@@ -19235,7 +19235,7 @@ Show terminal for future runs of program being debugged.
 
 @subheading @value{GDBN} Command
 
-The corresponding @value{GDBN} command is @samp{show inferior-tty /dev/pts/1}.
+The corresponding @value{GDBN} command is @samp{show inferior-tty}.
 
 @subheading Example
 
