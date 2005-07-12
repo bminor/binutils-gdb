@@ -1,3 +1,8 @@
+2005-07-12  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/relax1-n.d, gas/mmix/relax1-rn.d: Avoid "# FIXME: "
+	first on a line, adjusting for testsuite framework change.
+
 2005-07-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386/x86_64.s: Add absolute siged 32bit addressing tests for
