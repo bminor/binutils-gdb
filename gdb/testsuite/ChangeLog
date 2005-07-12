@@ -1,3 +1,7 @@
+2005-07-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-sse.exp: Compile with -msse when using GCC.
+
 2005-07-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.mi/mi2-stack.exp (test_stack_locals_listing): Remove test for
