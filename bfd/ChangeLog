@@ -1,5 +1,10 @@
 2005-07-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_relocate_section): Don't use a plt stub
+	when !can_plt_call.
+
+2005-07-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-xtensa.c (bfd_elf_xtensa_reloc): Warning fix.
 
 2005-07-12  Alan Modra  <amodra@bigpond.net.au>

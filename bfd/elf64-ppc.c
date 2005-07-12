@@ -9998,6 +9998,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      br = bfd_get_32 (input_bfd, contents + rel->r_offset);
 		      if ((br & 1) == 0)
 			can_plt_call = TRUE;
+		      else
+			stub_entry = NULL;
 		    }
 		  else if (h != NULL
 			   && strcmp (h->elf.root.root.string,
