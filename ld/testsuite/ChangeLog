@@ -1,3 +1,7 @@
+2005-07-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/sdalib.s (lib_var): Size it.
+
 2005-07-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ia64/tlsbin.rd: Update for empty section removal change.
