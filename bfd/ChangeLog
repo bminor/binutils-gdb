@@ -1,5 +1,9 @@
 2005-07-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-xtensa.c (bfd_elf_xtensa_reloc): Warning fix.
+
+2005-07-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_set_sdata_syms): Correct __sbss_start value.
 
 2005-07-11  H.J. Lu  <hongjiu.lu@intel.com>

@@ -1930,7 +1930,8 @@ bfd_elf_xtensa_reloc (bfd *abfd,
 	*error_message = "";
       *error_message = vsprint_msg (*error_message, ": (%s + 0x%lx)",
 				    strlen (symbol->name) + 17,
-				    symbol->name, reloc_entry->addend);
+				    symbol->name,
+				    (unsigned long) reloc_entry->addend);
     }
 
   return flag;
