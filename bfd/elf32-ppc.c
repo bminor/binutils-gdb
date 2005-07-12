@@ -5307,12 +5307,11 @@ ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
     }
 
   s = bfd_get_section_by_name (obfd, ".sbss");
-  _bfd_elf_provide_symbol (info, "__sbss_start", 0, NULL);
-  _bfd_elf_provide_symbol (info, "___sbss_start", 0, NULL);
+  val = 0;
+  _bfd_elf_provide_symbol (info, "__sbss_start", val, s);
+  _bfd_elf_provide_symbol (info, "___sbss_start", val, s);
   if (s != NULL)
     val = s->size;
-  else
-    val = 0;
   _bfd_elf_provide_symbol (info, "__sbss_end", val, s);
   _bfd_elf_provide_symbol (info, "___sbss_end", val, s);
   return TRUE;
