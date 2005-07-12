@@ -1528,7 +1528,7 @@ print_object_command (char *args, int from_tty)
   struct value *object, *function, *description;
   CORE_ADDR string_addr, object_addr;
   int i = 0;
-  char c = -1;
+  gdb_byte c = 0;
 
   if (!args || !*args)
     error (
@@ -1560,7 +1560,7 @@ print_object_command (char *args, int from_tty)
     error (_("object returns null description"));
 
   read_memory (string_addr + i++, &c, 1);
-  if (c != '\0')
+  if (c != 0)
     do
       { /* Read and print characters up to EOS.  */
 	QUIT;

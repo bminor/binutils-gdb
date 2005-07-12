@@ -1,7 +1,7 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
-   Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -43,7 +43,7 @@ void
 legacy_extract_return_value (struct type *type, struct regcache *regcache,
 			     gdb_byte *valbuf)
 {
-  char *registers = deprecated_grub_regcache_for_registers (regcache);
+  gdb_byte *registers = deprecated_grub_regcache_for_registers (regcache);
   gdb_byte *buf = valbuf;
   DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, buf); /* OK */
 }

@@ -1,3 +1,9 @@
+2005-07-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* objc-lang.c (print_object_command): Use gdb_byte for c.
+	* arch-utils.c (legacy_extract_return_value): Use 'gdb_byte *' for
+	registers.
+
 2005-07-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* bsd-kvm.c: Include <paths.h>.
