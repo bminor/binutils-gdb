@@ -60,11 +60,11 @@ struct dwarf2_cie
   ULONGEST return_address_register;
 
   /* Instruction sequence to initialize a register set.  */
-  unsigned char *initial_instructions;
-  unsigned char *end;
+  gdb_byte *initial_instructions;
+  gdb_byte *end;
 
   /* Encoding of addresses.  */
-  unsigned char encoding;
+  gdb_byte encoding;
 
   /* True if a 'z' augmentation existed.  */
   unsigned char saw_z_augmentation;
@@ -86,8 +86,8 @@ struct dwarf2_fde
   CORE_ADDR address_range;
 
   /* Instruction sequence.  */
-  unsigned char *instructions;
-  unsigned char *end;
+  gdb_byte *instructions;
+  gdb_byte *end;
 
   struct dwarf2_fde *next;
 };
@@ -112,7 +112,7 @@ struct dwarf2_frame_state
 
   LONGEST cfa_offset;
   ULONGEST cfa_reg;
-  unsigned char *cfa_exp;
+  gdb_byte *cfa_exp;
   enum {
     CFA_UNSET,
     CFA_REG_OFFSET,
@@ -208,23 +208,23 @@ read_reg (void *baton, int reg)
   struct frame_info *next_frame = (struct frame_info *) baton;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   int regnum;
-  char *buf;
+  gdb_byte *buf;
 
   regnum = DWARF2_REG_TO_REGNUM (reg);
 
-  buf = (char *) alloca (register_size (gdbarch, regnum));
+  buf = alloca (register_size (gdbarch, regnum));
   frame_unwind_register (next_frame, regnum, buf);
   return extract_typed_address (buf, builtin_type_void_data_ptr);
 }
 
 static void
-read_mem (void *baton, char *buf, CORE_ADDR addr, size_t len)
+read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
 {
   read_memory (addr, buf, len);
 }
 
 static void
-no_get_frame_base (void *baton, unsigned char **start, size_t *length)
+no_get_frame_base (void *baton, gdb_byte **start, size_t *length)
 {
   internal_error (__FILE__, __LINE__,
 		  _("Support for DW_OP_fbreg is unimplemented"));
@@ -238,7 +238,7 @@ no_get_tls_address (void *baton, CORE_ADDR offset)
 }
 
 static CORE_ADDR
-execute_stack_op (unsigned char *exp, ULONGEST len,
+execute_stack_op (gdb_byte *exp, ULONGEST len,
 		  struct frame_info *next_frame, CORE_ADDR initial)
 {
   struct dwarf_expr_context *ctx;
@@ -265,7 +265,7 @@ execute_stack_op (unsigned char *exp, ULONGEST len,
 
 
 static void
-execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
+execute_cfa_program (gdb_byte *insn_ptr, gdb_byte *insn_end,
 		     struct frame_info *next_frame,
 		     struct dwarf2_frame_state *fs)
 {
@@ -274,7 +274,7 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 
   while (insn_ptr < insn_end && fs->pc <= pc)
     {
-      unsigned char insn = *insn_ptr++;
+      gdb_byte insn = *insn_ptr++;
       ULONGEST utmp, reg;
       LONGEST offset;
 
@@ -399,7 +399,8 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 	      break;
 
 	    case DW_CFA_def_cfa_offset:
-	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &fs->cfa_offset);
+	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
+	      fs->cfa_offset = utmp;
 	      /* cfa_how deliberately not set.  */
 	      break;
 
@@ -1020,7 +1021,7 @@ struct comp_unit
   struct dwarf2_cie *cie;
 
   /* Pointer to the .debug_frame section loaded into memory.  */
-  char *dwarf_frame_buffer;
+  gdb_byte *dwarf_frame_buffer;
 
   /* Length of the loaded .debug_frame section.  */
   unsigned long dwarf_frame_size;
@@ -1038,30 +1039,30 @@ struct comp_unit
 const struct objfile_data *dwarf2_frame_objfile_data;
 
 static unsigned int
-read_1_byte (bfd *bfd, char *buf)
+read_1_byte (bfd *abfd, gdb_byte *buf)
 {
-  return bfd_get_8 (abfd, (bfd_byte *) buf);
+  return bfd_get_8 (abfd, buf);
 }
 
 static unsigned int
-read_4_bytes (bfd *abfd, char *buf)
+read_4_bytes (bfd *abfd, gdb_byte *buf)
 {
-  return bfd_get_32 (abfd, (bfd_byte *) buf);
+  return bfd_get_32 (abfd, buf);
 }
 
 static ULONGEST
-read_8_bytes (bfd *abfd, char *buf)
+read_8_bytes (bfd *abfd, gdb_byte *buf)
 {
-  return bfd_get_64 (abfd, (bfd_byte *) buf);
+  return bfd_get_64 (abfd, buf);
 }
 
 static ULONGEST
-read_unsigned_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
+read_unsigned_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
 {
   ULONGEST result;
   unsigned int num_read;
   int shift;
-  unsigned char byte;
+  gdb_byte byte;
 
   result = 0;
   shift = 0;
@@ -1083,12 +1084,12 @@ read_unsigned_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
 }
 
 static LONGEST
-read_signed_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
+read_signed_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
 {
   LONGEST result;
   int shift;
   unsigned int num_read;
-  unsigned char byte;
+  gdb_byte byte;
 
   result = 0;
   shift = 0;
@@ -1113,14 +1114,14 @@ read_signed_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
 }
 
 static ULONGEST
-read_initial_length (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
+read_initial_length (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
 {
   LONGEST result;
 
-  result = bfd_get_32 (abfd, (bfd_byte *) buf);
+  result = bfd_get_32 (abfd, buf);
   if (result == 0xffffffff)
     {
-      result = bfd_get_64 (abfd, (bfd_byte *) buf + 4);
+      result = bfd_get_64 (abfd, buf + 4);
       *bytes_read_ptr = 12;
     }
   else
@@ -1146,7 +1147,7 @@ read_initial_length (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
    position in the FDE, ...).  Bit 7, indicates that the address
    should be dereferenced.  */
 
-static unsigned char
+static gdb_byte
 encoding_for_size (unsigned int size)
 {
   switch (size)
@@ -1163,7 +1164,7 @@ encoding_for_size (unsigned int size)
 }
 
 static unsigned int
-size_of_encoded_value (unsigned char encoding)
+size_of_encoded_value (gdb_byte encoding)
 {
   if (encoding == DW_EH_PE_omit)
     return 0;
@@ -1184,8 +1185,8 @@ size_of_encoded_value (unsigned char encoding)
 }
 
 static CORE_ADDR
-read_encoded_value (struct comp_unit *unit, unsigned char encoding,
-		    unsigned char *buf, unsigned int *bytes_read_ptr)
+read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
+		    gdb_byte *buf, unsigned int *bytes_read_ptr)
 {
   int ptr_len = size_of_encoded_value (DW_EH_PE_absptr);
   ptrdiff_t offset;
@@ -1206,7 +1207,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       break;
     case DW_EH_PE_pcrel:
       base = bfd_get_section_vma (unit->bfd, unit->dwarf_frame_section);
-      base += ((char *) buf - unit->dwarf_frame_buffer);
+      base += (buf - unit->dwarf_frame_buffer);
       break;
     case DW_EH_PE_datarel:
       base = unit->dbase;
@@ -1224,7 +1225,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       break;
     case DW_EH_PE_aligned:
       base = 0;
-      offset = (char *) buf - unit->dwarf_frame_buffer;
+      offset = buf - unit->dwarf_frame_buffer;
       if ((offset % ptr_len) != 0)
 	{
 	  *bytes_read_ptr = ptr_len - (offset % ptr_len);
@@ -1243,7 +1244,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
     case DW_EH_PE_uleb128:
       {
 	ULONGEST value;
-	unsigned char *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
+	gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
 	*bytes_read_ptr += read_uleb128 (buf, end_buf, &value) - buf;
 	return base + value;
       }
@@ -1259,7 +1260,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
     case DW_EH_PE_sleb128:
       {
 	LONGEST value;
-	char *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
+	gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
 	*bytes_read_ptr += read_sleb128 (buf, end_buf, &value) - buf;
 	return base + value;
       }
@@ -1353,21 +1354,20 @@ add_fde (struct comp_unit *unit, struct dwarf2_fde *fde)
 #define DW64_CIE_ID ~0
 #endif
 
-static char *decode_frame_entry (struct comp_unit *unit, char *start,
-				 int eh_frame_p);
+static gdb_byte *decode_frame_entry (struct comp_unit *unit, gdb_byte *start,
+				     int eh_frame_p);
 
 /* Decode the next CIE or FDE.  Return NULL if invalid input, otherwise
    the next byte to be processed.  */
-static char *
-decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
+static gdb_byte *
+decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 {
-  char *buf;
+  gdb_byte *buf, *end;
   LONGEST length;
   unsigned int bytes_read;
   int dwarf64_p;
   ULONGEST cie_id;
   ULONGEST cie_pointer;
-  char *end;
 
   buf = start;
   length = read_initial_length (unit->abfd, buf, &bytes_read);
@@ -1434,8 +1434,8 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
       buf += 1;
 
       /* Interpret the interesting bits of the augmentation.  */
-      augmentation = buf;
-      buf = augmentation + strlen (augmentation) + 1;
+      augmentation = (char *) buf;
+      buf += (strlen (augmentation) + 1);
 
       /* The GCC 2.x "eh" augmentation has a pointer immediately
          following the augmentation string, so it must be handled
@@ -1499,7 +1499,7 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 	  else if (*augmentation == 'P')
 	    {
 	      /* Skip.  Avoid indirection since we throw away the result.  */
-	      unsigned char encoding = (*buf++) & ~DW_EH_PE_indirect;
+	      gdb_byte encoding = (*buf++) & ~DW_EH_PE_indirect;
 	      read_encoded_value (unit, encoding, buf, &bytes_read);
 	      buf += bytes_read;
 	      augmentation++;
@@ -1587,11 +1587,11 @@ decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 }
 
 /* Read a CIE or FDE in BUF and decode it.  */
-static char *
-decode_frame_entry (struct comp_unit *unit, char *start, int eh_frame_p)
+static gdb_byte *
+decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 {
   enum { NONE, ALIGN4, ALIGN8, FAIL } workaround = NONE;
-  char *ret;
+  gdb_byte *ret;
   const char *msg;
   ptrdiff_t start_offset;
 
@@ -1693,7 +1693,7 @@ void
 dwarf2_build_frame_info (struct objfile *objfile)
 {
   struct comp_unit unit;
-  char *frame_ptr;
+  gdb_byte *frame_ptr;
 
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
   unit.abfd = objfile->obfd;

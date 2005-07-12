@@ -1,3 +1,69 @@
+2005-07-12  Mark Kettenis  <kettenis@openbsd.localdomain>
+
+	* dwarf2expr.h: Tweak comment.
+	(struct dwarf_expr_context): Use `gdb_byte *' in read_mem and
+	get_frame_base function pointers.
+	(read_uleb128, read_sleb128): Change return type and types of
+	first two arguments to `gdb_byte *'.
+	(dwarf2_read_address): Change types of first two arguments to
+	`gdb_byte *'.
+	* dwarf2expr.c: Tweak comment.
+	(dwarf_expr_eval): Change type of second argument to `gdb_byte *'.
+	(read_uleb128, read_sleb128): Change return type and types of
+	first two arguments to `gdb_byte *'.
+	(dwarf2_read_address): Change types of first two arguments to
+	`gdb_byte *'.
+	(execute_stack_op): Change types of last two arguments to
+	`gdb_byte *'.  Use `gdb_byte *' for byte buffers.
+	* dwarf2loc.h: Tweak comment.
+	(struct dwarf2_locexpr_baton, struct dwarf2_loclist_baton): Use
+	`gdb_byte *' for byte buffers.
+	* dwarf2loc.c (find_location_expression): Change return type to
+	`gdb_byte *'.  Use `gdb_byte *' for byte buffers.  Change length
+	to `unsigned int'.
+	(dwarf_expr_read_reg): Use `gdb_byte *' for byte buffer.  Remove
+	bogus cast.
+	(dwarf_expr_read_mem): Change type of second argument to
+	`gdb_byte *'.
+	(dwarf_expr_frame_base): Change type of second argument to
+	`gdb_byte **'.
+	(dwarf2_evaluate_loc_desc): Change type of third argument to
+	`gdb_byte *'.
+	(needs_frame_read_mem): Change type of second argument to
+	`gdb_byte *'.
+	(needs_frame_frame_base): Change type of second argument
+	`gdb_byte **'.  Use gdb_byte for lit0.
+	(dwarf2_tracepoint_var_ref): Change type of fourth argument to
+	`gdb_byte *'.  Use `gdb_byte *' for byte buffer.
+	(loclist_read_variable, loclist_tracepoint_var_ref): Use `gdb_byte
+	*' for byte buffer.
+	* dwarf2-frame.c (struct dwarf2_cie, struct dwarf2_fde)
+	(struct dwarf2_frame_state): Use gdb_byte instead of `unsigned
+	char'.
+	(read_reg): Use `gdb_byte *' for byte buffers.  Remove redundant
+	cast.
+	(read_mem): Change second argument to `gdb_byte *'.
+	(no_get_frame_base): Change second argument to `gdb_byte **'.
+	(execute_stack_op): Change first argument to `gdb_byte *'.
+	(execute_cfa_program): Change first two arguments to `gdb_byte *'.
+	Use gdb_byte instead of `unsigned int'.  Use temprorary variable
+	to store result of read_uleb128.
+	(struct comp_unit): Use `gdb_byte *' for byte buffers.
+	(read_1_byte, read_4_bytes, read_8_bytes): Change last argument to
+	`gdb_byte *'.
+	(read_unsigned_leb128, read_signed_leb128): Change second argument
+	to `gdb_byte *'.  Use gdb_byte instead of `unsigned char'.
+	(read_initial_length): Change second argument to `gdb_byte *'.
+	Remove redundant casts.
+	(read_encoded_value): Use gdb_byte instead of `unsigned char'.
+	Remove bogus casts.
+	(decode_frame_entry_1): Change return type and second argument to
+	`gdb_byte *'.  Use `gdb_byte *' for byte buffers.  Use gdb_byte
+	instead of `unsigned char'.
+	(decode_frame_entry): Change return type and second argument to
+	`gdb_byte *'.  Use `gdb_byte *' for byte buffers.
+	(dwarf2_build_frame_info): Use `gdb_byte *' for byte buffers.
+
 2005-07-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* objc-lang.c (print_object_command): Use gdb_byte for c.

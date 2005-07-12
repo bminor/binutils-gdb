@@ -1,5 +1,6 @@
-/* Dwarf2 location expression support for GDB.
-   Copyright 2003 Free Software Foundation, Inc.
+/* DWARF 2 location expression support for GDB.
+
+   Copyright 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,7 +36,7 @@ struct symbol_ops;
 struct dwarf2_locexpr_baton
 {
   /* Pointer to the start of the location expression.  */
-  unsigned char *data;
+  gdb_byte *data;
 
   /* Length of the location expression.  */
   unsigned short size;
@@ -51,7 +52,7 @@ struct dwarf2_loclist_baton
   CORE_ADDR base_address;
 
   /* Pointer to the start of the location list.  */
-  unsigned char *data;
+  gdb_byte *data;
 
   /* Length of the location list.  */
   unsigned short size;
@@ -67,4 +68,4 @@ struct dwarf2_loclist_baton
 extern const struct symbol_ops dwarf2_locexpr_funcs;
 extern const struct symbol_ops dwarf2_loclist_funcs;
 
-#endif
+#endif /* dwarf2loc.h */

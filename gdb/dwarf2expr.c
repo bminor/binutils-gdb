@@ -1,5 +1,7 @@
-/* Dwarf2 Expression Evaluator
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+/* DWARF 2 Expression Evaluator.
+
+   Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+
    Contributed by Daniel Berlin (dan@dberlin.org)
 
    This file is part of GDB.
@@ -30,7 +32,7 @@
 /* Local prototypes.  */
 
 static void execute_stack_op (struct dwarf_expr_context *,
-			      unsigned char *, unsigned char *);
+			      gdb_byte *, gdb_byte *);
 
 /* Create a new context for the expression evaluator.  */
 
@@ -130,8 +132,7 @@ add_piece (struct dwarf_expr_context *ctx,
    CTX.  */
 
 void
-dwarf_expr_eval (struct dwarf_expr_context *ctx, unsigned char *addr,
-		 size_t len)
+dwarf_expr_eval (struct dwarf_expr_context *ctx, gdb_byte *addr, size_t len)
 {
   execute_stack_op (ctx, addr, addr + len);
 }
@@ -140,12 +141,12 @@ dwarf_expr_eval (struct dwarf_expr_context *ctx, unsigned char *addr,
    by R, and return the new value of BUF.  Verify that it doesn't extend
    past BUF_END.  */
 
-unsigned char *
-read_uleb128 (unsigned char *buf, unsigned char *buf_end, ULONGEST * r)
+gdb_byte *
+read_uleb128 (gdb_byte *buf, gdb_byte *buf_end, ULONGEST * r)
 {
   unsigned shift = 0;
   ULONGEST result = 0;
-  unsigned char byte;
+  gdb_byte byte;
 
   while (1)
     {
@@ -166,12 +167,12 @@ read_uleb128 (unsigned char *buf, unsigned char *buf_end, ULONGEST * r)
    by R, and return the new value of BUF.  Verify that it doesn't extend
    past BUF_END.  */
 
-unsigned char *
-read_sleb128 (unsigned char *buf, unsigned char *buf_end, LONGEST * r)
+gdb_byte *
+read_sleb128 (gdb_byte *buf, gdb_byte *buf_end, LONGEST * r)
 {
   unsigned shift = 0;
   LONGEST result = 0;
-  unsigned char byte;
+  gdb_byte byte;
 
   while (1)
     {
@@ -196,7 +197,7 @@ read_sleb128 (unsigned char *buf, unsigned char *buf_end, LONGEST * r)
    number of bytes read from BUF.  */
 
 CORE_ADDR
-dwarf2_read_address (unsigned char *buf, unsigned char *buf_end, int *bytes_read)
+dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int *bytes_read)
 {
   CORE_ADDR result;
 
@@ -252,8 +253,8 @@ signed_address_type (void)
    evaluate the expression between OP_PTR and OP_END.  */
 
 static void
-execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
-		  unsigned char *op_end)
+execute_stack_op (struct dwarf_expr_context *ctx,
+		  gdb_byte *op_ptr, gdb_byte *op_end)
 {
   ctx->in_reg = 0;
 
@@ -449,7 +450,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	  break;
 	case DW_OP_fbreg:
 	  {
-	    unsigned char *datastart;
+	    gdb_byte *datastart;
 	    size_t datalen;
 	    unsigned int before_stack_len;
 
@@ -519,7 +520,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	    {
 	    case DW_OP_deref:
 	      {
-		char *buf = alloca (TARGET_ADDR_BIT / TARGET_CHAR_BIT);
+		gdb_byte *buf = alloca (TARGET_ADDR_BIT / TARGET_CHAR_BIT);
 		int bytes_read;
 
 		(ctx->read_mem) (ctx->baton, buf, result,
@@ -533,7 +534,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 
 	    case DW_OP_deref_size:
 	      {
-		char *buf = alloca (TARGET_ADDR_BIT / TARGET_CHAR_BIT);
+		gdb_byte *buf = alloca (TARGET_ADDR_BIT / TARGET_CHAR_BIT);
 		int bytes_read;
 
 		(ctx->read_mem) (ctx->baton, buf, result, *op_ptr++);

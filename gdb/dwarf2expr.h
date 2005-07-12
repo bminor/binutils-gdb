@@ -1,6 +1,9 @@
-/* Dwarf2 Expression Evaluator
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
-   Contributed by Daniel Berlin (dan@dberlin.org)
+/* DWARF 2 Expression Evaluator.
+
+   Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+
+   Contributed by Daniel Berlin <dan@dberlin.org>.
+
    This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify
@@ -40,14 +43,12 @@ struct dwarf_expr_context
   CORE_ADDR (*read_reg) (void *baton, int regnum);
 
   /* Read LENGTH bytes at ADDR into BUF.  */
-  void (*read_mem) (void *baton, char *buf, CORE_ADDR addr,
-		    size_t length);
+  void (*read_mem) (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t length);
 
   /* Return the location expression for the frame base attribute, in
      START and LENGTH.  The result must be live until the current
      expression evaluation is complete.  */
-  void (*get_frame_base) (void *baton, unsigned char **start,
-			 size_t *length);
+  void (*get_frame_base) (void *baton, gdb_byte **start, size_t *length);
 
   /* Return the thread-local storage address for
      DW_OP_GNU_push_tls_address.  */
@@ -129,11 +130,9 @@ void dwarf_expr_eval (struct dwarf_expr_context *ctx, unsigned char *addr,
 CORE_ADDR dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n);
 
 
-unsigned char *read_uleb128 (unsigned char *buf, unsigned char *buf_end,
-			     ULONGEST * r);
-unsigned char *read_sleb128 (unsigned char *buf, unsigned char *buf_end,
-			     LONGEST * r);
-CORE_ADDR dwarf2_read_address (unsigned char *buf, unsigned char *buf_end,
+gdb_byte *read_uleb128 (gdb_byte *buf, gdb_byte *buf_end, ULONGEST * r);
+gdb_byte *read_sleb128 (gdb_byte *buf, gdb_byte *buf_end, LONGEST * r);
+CORE_ADDR dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end,
 			       int *bytes_read);
 
-#endif
+#endif /* dwarf2expr.h */

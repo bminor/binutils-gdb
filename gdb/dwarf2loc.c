@@ -52,13 +52,14 @@
    For now, only return the first matching location expression; there
    can be more than one in the list.  */
 
-static char *
+static gdb_byte *
 find_location_expression (struct dwarf2_loclist_baton *baton,
 			  size_t *locexpr_length, CORE_ADDR pc)
 {
   CORE_ADDR low, high;
-  char *loc_ptr, *buf_end;
-  unsigned int addr_size = TARGET_ADDR_BIT / TARGET_CHAR_BIT, length;
+  gdb_byte *loc_ptr, *buf_end;
+  int length;
+  unsigned int addr_size = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
   CORE_ADDR base_offset = ANOFFSET (baton->objfile->section_offsets,
@@ -122,12 +123,12 @@ dwarf_expr_read_reg (void *baton, int dwarf_regnum)
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
   CORE_ADDR result, save_addr;
   enum lval_type lval_type;
-  char *buf;
+  gdb_byte *buf;
   int optimized, regnum, realnum, regsize;
 
   regnum = DWARF2_REG_TO_REGNUM (dwarf_regnum);
   regsize = register_size (current_gdbarch, regnum);
-  buf = (char *) alloca (regsize);
+  buf = alloca (regsize);
 
   frame_register (debaton->frame, regnum, &optimized, &lval_type, &save_addr,
 		  &realnum, buf);
@@ -141,7 +142,7 @@ dwarf_expr_read_reg (void *baton, int dwarf_regnum)
 /* Read memory at ADDR (length LEN) into BUF.  */
 
 static void
-dwarf_expr_read_mem (void *baton, char *buf, CORE_ADDR addr, size_t len)
+dwarf_expr_read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
 {
   read_memory (addr, buf, len);
 }
@@ -150,7 +151,7 @@ dwarf_expr_read_mem (void *baton, char *buf, CORE_ADDR addr, size_t len)
    describing the frame base.  Return a pointer to it in START and
    its length in LENGTH.  */
 static void
-dwarf_expr_frame_base (void *baton, unsigned char **start, size_t * length)
+dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
 {
   /* FIXME: cagney/2003-03-26: This code should be using
      get_frame_base_address(), and then implement a dwarf2 specific
@@ -273,7 +274,7 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
    of FRAME.  */
 static struct value *
 dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
-			  unsigned char *data, unsigned short size,
+			  gdb_byte *data, unsigned short size,
 			  struct objfile *objfile)
 {
   struct gdbarch *arch = get_frame_arch (frame);
@@ -350,16 +351,16 @@ needs_frame_read_reg (void *baton, int regnum)
 
 /* Reads from memory do not require a frame.  */
 static void
-needs_frame_read_mem (void *baton, char *buf, CORE_ADDR addr, size_t len)
+needs_frame_read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
 {
   memset (buf, 0, len);
 }
 
 /* Frame-relative accesses do require a frame.  */
 static void
-needs_frame_frame_base (void *baton, unsigned char **start, size_t * length)
+needs_frame_frame_base (void *baton, gdb_byte **start, size_t * length)
 {
-  static char lit0 = DW_OP_lit0;
+  static gdb_byte lit0 = DW_OP_lit0;
   struct needs_frame_baton *nf_baton = baton;
 
   *start = &lit0;
@@ -381,7 +382,7 @@ needs_frame_tls_address (void *baton, CORE_ADDR offset)
    requires a frame to evaluate.  */
 
 static int
-dwarf2_loc_desc_needs_frame (unsigned char *data, unsigned short size)
+dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size)
 {
   struct needs_frame_baton baton;
   struct dwarf_expr_context *ctx;
@@ -417,8 +418,8 @@ dwarf2_loc_desc_needs_frame (unsigned char *data, unsigned short size)
 }
 
 static void
-dwarf2_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
-			   struct axs_value * value, unsigned char *data,
+dwarf2_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
+			   struct axs_value *value, gdb_byte *data,
 			   int size)
 {
   if (size == 0)
@@ -445,7 +446,7 @@ dwarf2_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 	 as above.  */
       int frame_reg;
       LONGEST frame_offset;
-      unsigned char *buf_end;
+      gdb_byte *buf_end;
 
       buf_end = read_sleb128 (data + 1, data + size, &frame_offset);
       if (buf_end != data + size)
@@ -575,7 +576,7 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   struct value *val;
-  unsigned char *data;
+  gdb_byte *data;
   size_t size;
 
   data = find_location_expression (dlbaton, &size,
@@ -622,7 +623,7 @@ loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
 			    struct axs_value * value)
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
-  unsigned char *data;
+  gdb_byte *data;
   size_t size;
 
   data = find_location_expression (dlbaton, &size, ax->scope);
