@@ -1,3 +1,10 @@
+2005-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (fetch_register, usr_store_inferior_registers): Handle
+	left-padded registers.
+	* linux-low.h (struct linux_target_ops): Add left_pad_xfer.
+	* linux-ppc64-low.c (the_low_target): Set left_pad_xfer.
+
 2005-07-01  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure.ac (BFD_NEED_DECLARATION): Replace with AC_CHECK_DECLS.

@@ -64,6 +64,9 @@ struct linux_target_ops
   int (*stopped_by_watchpoint) (void);
   CORE_ADDR (*stopped_data_address) (void);
 
+  /* Whether to left-pad registers for PEEKUSR/POKEUSR if they are smaller
+     than an xfer unit.  */
+  int left_pad_xfer;
 };
 
 extern struct linux_target_ops the_low_target;
