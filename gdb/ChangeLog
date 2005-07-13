@@ -1,3 +1,7 @@
+2005-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Set 64-bit link map offsets.
+
 2005-07-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2expr.h: Tweak comment.

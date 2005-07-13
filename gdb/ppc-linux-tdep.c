@@ -1,7 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   1997, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1107,6 +1107,10 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_convert_from_func_ptr_addr
         (gdbarch, ppc64_linux_convert_from_func_ptr_addr);
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
+
+      /* Shared library handling.  */
+      set_solib_svr4_fetch_link_map_offsets
+        (gdbarch, svr4_lp64_fetch_link_map_offsets);
 
       /* Trampolines.  */
       tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sigaction_tramp_frame);
