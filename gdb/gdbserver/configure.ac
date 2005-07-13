@@ -53,6 +53,9 @@ if test "${srv_linux_usrregs}" = "yes"; then
 fi
 
 if test "${srv_linux_regsets}" = "yes"; then
+  AC_DEFINE(HAVE_LINUX_REGSETS, 1,
+	    [Define if the target supports register sets.])
+
   AC_MSG_CHECKING(for PTRACE_GETREGS)
   AC_CACHE_VAL(gdbsrv_cv_have_ptrace_getregs,
   [AC_TRY_COMPILE([#include <sys/ptrace.h>],
@@ -61,7 +64,7 @@ if test "${srv_linux_regsets}" = "yes"; then
 		  [gdbsrv_cv_have_ptrace_getregs=no])])
   AC_MSG_RESULT($gdbsrv_cv_have_ptrace_getregs)
   if test "${gdbsrv_cv_have_ptrace_getregs}" = "yes"; then
-    AC_DEFINE(HAVE_LINUX_REGSETS, 1,
+    AC_DEFINE(HAVE_PTRACE_GETREGS, 1,
 	      [Define if the target supports PTRACE_GETREGS for register ]
 	      [access.])
   fi

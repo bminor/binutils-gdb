@@ -65,7 +65,7 @@ m68k_cannot_fetch_register (int regno)
   return (regno >= m68k_num_regs);
 }
 
-#ifdef HAVE_LINUX_REGSETS
+#ifdef HAVE_PTRACE_GETREGS
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 
@@ -107,18 +107,19 @@ m68k_store_fpregset (const void *buf)
 			 + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
 }
 
+#endif /* HAVE_PTRACE_GETREGS */
 
 struct regset_info target_regsets[] = {
+#ifdef HAVE_PTRACE_GETREGS
   { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
     GENERAL_REGS,
     m68k_fill_gregset, m68k_store_gregset },
   { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (elf_fpregset_t),
     FP_REGS,
     m68k_fill_fpregset, m68k_store_fpregset },
+#endif /* HAVE_PTRACE_GETREGS */
   { 0, 0, -1, -1, NULL, NULL }
 };
-
-#endif /* HAVE_LINUX_REGSETS */
 
 static const unsigned char m68k_breakpoint[] = { 0x4E, 0x4F };
 #define m68k_breakpoint_len 2

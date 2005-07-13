@@ -1,5 +1,19 @@
 2005-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* configure.ac: Define HAVE_LINUX_REGSETS even if PTRACE_GETREGS
+	is not available.  Define HAVE_PTRACE_GETREGS if it is.
+	* config.in, configure: Regenerated.
+	* configure.srv: Set srv_linux_regsets for PowerPC and PowerPC64.
+	* linux-i386-low.c, linux-m68k-low.c: Update to use
+	HAVE_PTRACE_GETREGS.
+	* linux-low.c (regsets_fetch_inferior_registers)
+	(regsets_store_inferior_registers): Only return 0 if we processed
+	GENERAL_REGS.
+	* linux-ppc-low.c (ppc_fill_gregset, target_regsets): New.
+	* linux-ppc64-low.c (ppc_fill_gregset, target_regsets): New.
+
+2005-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* inferiors.c (struct thread_info): Add gdb_id.
 	(add_thread): Add gdb_id argument.
 	(thread_id_to_gdb_id, thread_to_gdb_id, gdb_id_to_thread_id): New.

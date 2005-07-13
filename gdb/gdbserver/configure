@@ -3233,6 +3233,12 @@ _ACEOF
 fi
 
 if test "${srv_linux_regsets}" = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LINUX_REGSETS 1
+_ACEOF
+
+
   echo "$as_me:$LINENO: checking for PTRACE_GETREGS" >&5
 echo $ECHO_N "checking for PTRACE_GETREGS... $ECHO_C" >&6
   if test "${gdbsrv_cv_have_ptrace_getregs+set}" = set; then
@@ -3290,7 +3296,7 @@ echo "${ECHO_T}$gdbsrv_cv_have_ptrace_getregs" >&6
   if test "${gdbsrv_cv_have_ptrace_getregs}" = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_LINUX_REGSETS 1
+#define HAVE_PTRACE_GETREGS 1
 _ACEOF
 
   fi

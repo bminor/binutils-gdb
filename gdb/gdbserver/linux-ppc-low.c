@@ -101,6 +101,25 @@ ppc_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
+/* Provide only a fill function for the general register set.  ps_lgetregs
+   will use this for NPTL support.  */
+
+static void ppc_fill_gregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < 32; i++)
+    collect_register (i, (char *) buf + ppc_regmap[i]);
+
+  for (i = 64; i < 70; i++)
+    collect_register (i, (char *) buf + ppc_regmap[i]);
+}
+
+struct regset_info target_regsets[] = {
+  { 0, 0, 0, GENERAL_REGS, ppc_fill_gregset, NULL },
+  { 0, 0, -1, -1, NULL, NULL }
+};
+
 struct linux_target_ops the_low_target = {
   ppc_num_regs,
   ppc_regmap,

@@ -13,7 +13,7 @@
 /* Define to 1 if you have the <linux/elf.h> header file. */
 #undef HAVE_LINUX_ELF_H
 
-/* Define if the target supports PTRACE_GETREGS for register access. */
+/* Define if the target supports register sets. */
 #undef HAVE_LINUX_REGSETS
 
 /* Define if the target supports PTRACE_PEEKUSR for register access. */
@@ -40,6 +40,9 @@
 /* Define if the target supports PTRACE_GETFPXREGS for extended register
    access. */
 #undef HAVE_PTRACE_GETFPXREGS
+
+/* Define if the target supports PTRACE_GETREGS for register access. */
+#undef HAVE_PTRACE_GETREGS
 
 /* Define to 1 if you have the <sgtty.h> header file. */
 #undef HAVE_SGTTY_H

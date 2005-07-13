@@ -1213,6 +1213,7 @@ static int
 regsets_fetch_inferior_registers ()
 {
   struct regset_info *regset;
+  int saw_general_regs = 0;
 
   regset = target_regsets;
 
@@ -1254,16 +1255,22 @@ regsets_fetch_inferior_registers ()
 	      perror (s);
 	    }
 	}
+      else if (regset->type == GENERAL_REGS)
+	saw_general_regs = 1;
       regset->store_function (buf);
       regset ++;
     }
-  return 0;
+  if (saw_general_regs)
+    return 0;
+  else
+    return 1;
 }
 
 static int
 regsets_store_inferior_registers ()
 {
   struct regset_info *regset;
+  int saw_general_regs = 0;
 
   regset = target_regsets;
 
@@ -1303,9 +1310,15 @@ regsets_store_inferior_registers ()
 	      perror ("Warning: ptrace(regsets_store_inferior_registers)");
 	    }
 	}
+      else if (regset->type == GENERAL_REGS)
+	saw_general_regs = 1;
       regset ++;
       free (buf);
     }
+  if (saw_general_regs)
+    return 0;
+  else
+    return 1;
   return 0;
 }
 

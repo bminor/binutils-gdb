@@ -92,7 +92,7 @@ i386_cannot_fetch_register (int regno)
 }
 
 
-#ifdef HAVE_LINUX_REGSETS
+#ifdef HAVE_PTRACE_GETREGS
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 
@@ -142,23 +142,24 @@ i386_store_fpxregset (const void *buf)
   i387_fxsave_to_cache (buf);
 }
 
+#endif /* HAVE_PTRACE_GETREGS */
 
 struct regset_info target_regsets[] = {
+#ifdef HAVE_PTRACE_GETREGS
   { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
     GENERAL_REGS,
     i386_fill_gregset, i386_store_gregset },
-#ifdef HAVE_PTRACE_GETFPXREGS
+# ifdef HAVE_PTRACE_GETFPXREGS
   { PTRACE_GETFPXREGS, PTRACE_SETFPXREGS, sizeof (elf_fpxregset_t),
     EXTENDED_REGS,
     i386_fill_fpxregset, i386_store_fpxregset },
-#endif
+# endif
   { PTRACE_GETFPREGS, PTRACE_SETFPREGS, sizeof (elf_fpregset_t),
     FP_REGS,
     i386_fill_fpregset, i386_store_fpregset },
+#endif /* HAVE_PTRACE_GETREGS */
   { 0, 0, -1, -1, NULL, NULL }
 };
-
-#endif /* HAVE_LINUX_REGSETS */
 
 static const unsigned char i386_breakpoint[] = { 0xCC };
 #define i386_breakpoint_len 1
