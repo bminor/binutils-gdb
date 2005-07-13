@@ -1,5 +1,19 @@
 2005-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* inferiors.c (struct thread_info): Add gdb_id.
+	(add_thread): Add gdb_id argument.
+	(thread_id_to_gdb_id, thread_to_gdb_id, gdb_id_to_thread_id): New.
+	* linux-low.c (linux_create_inferior, linux_attach_lwp): Update
+	calls to add_thread.
+	* remote-utils.c (prepare_resume_reply: Use thread_to_gdb_id.
+	* server.c (handle_query): Use thread_to_gdb_id.
+	(handle_v_cont, main): Use gdb_id_to_thread_id.
+	* server.h (add_thread): Update prototype.
+	(thread_id_to_gdb_id, thread_to_gdb_id, gdb_id_to_thread_id): New
+	prototypes.
+
+2005-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-low.c (fetch_register, usr_store_inferior_registers): Handle
 	left-padded registers.
 	* linux-low.h (struct linux_target_ops): Add left_pad_xfer.

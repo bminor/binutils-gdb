@@ -97,7 +97,10 @@ extern struct thread_info *current_inferior;
 void remove_inferior (struct inferior_list *list,
 		      struct inferior_list_entry *entry);
 void remove_thread (struct thread_info *thread);
-void add_thread (unsigned long thread_id, void *target_data);
+void add_thread (unsigned long thread_id, void *target_data, unsigned int);
+unsigned int thread_id_to_gdb_id (unsigned long);
+unsigned int thread_to_gdb_id (struct thread_info *);
+unsigned long gdb_id_to_thread_id (unsigned int);
 void clear_inferiors (void);
 struct inferior_list_entry *find_inferior
      (struct inferior_list *,

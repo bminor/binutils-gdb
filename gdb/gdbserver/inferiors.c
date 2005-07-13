@@ -30,6 +30,7 @@ struct thread_info
   struct inferior_list_entry entry;
   void *target_data;
   void *regcache_data;
+  unsigned int gdb_id;
 };
 
 struct inferior_list all_threads;
@@ -102,7 +103,7 @@ remove_inferior (struct inferior_list *list,
 }
 
 void
-add_thread (unsigned long thread_id, void *target_data)
+add_thread (unsigned long thread_id, void *target_data, unsigned int gdb_id)
 {
   struct thread_info *new_thread
     = (struct thread_info *) malloc (sizeof (*new_thread));
@@ -118,6 +119,45 @@ add_thread (unsigned long thread_id, void *target_data)
 
   new_thread->target_data = target_data;
   set_inferior_regcache_data (new_thread, new_register_cache ());
+  new_thread->gdb_id = gdb_id;
+}
+
+unsigned int
+thread_id_to_gdb_id (unsigned long thread_id)
+{
+  struct inferior_list_entry *inf = all_threads.head;
+
+  while (inf != NULL)
+    {
+      struct thread_info *thread = get_thread (inf);
+      if (inf->id == thread_id)
+	return thread->gdb_id;
+      inf = inf->next;
+    }
+
+  return 0;
+}
+
+unsigned int
+thread_to_gdb_id (struct thread_info *thread)
+{
+  return thread->gdb_id;
+}
+
+unsigned long
+gdb_id_to_thread_id (unsigned int gdb_id)
+{
+  struct inferior_list_entry *inf = all_threads.head;
+
+  while (inf != NULL)
+    {
+      struct thread_info *thread = get_thread (inf);
+      if (thread->gdb_id == gdb_id)
+	return inf->id;
+      inf = inf->next;
+    }
+
+  return 0;
 }
 
 static void

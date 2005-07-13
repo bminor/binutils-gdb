@@ -103,7 +103,7 @@ handle_query (char *own_buf)
   if (strcmp ("qfThreadInfo", own_buf) == 0)
     {
       thread_ptr = all_threads.head;
-      sprintf (own_buf, "m%lx", thread_ptr->id);
+      sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
       thread_ptr = thread_ptr->next;
       return;
     }
@@ -112,7 +112,7 @@ handle_query (char *own_buf)
     {
       if (thread_ptr != NULL)
 	{
-	  sprintf (own_buf, "m%lx", thread_ptr->id);
+	  sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
 	  thread_ptr = thread_ptr->next;
 	  return;
 	}
@@ -218,11 +218,19 @@ handle_v_cont (char *own_buf, char *status, int *signal)
 	}
       else if (p[0] == ':')
 	{
-	  resume_info[i].thread = strtoul (p + 1, &q, 16);
+	  unsigned int gdb_id = strtoul (p + 1, &q, 16);
+	  unsigned long thread_id;
+
 	  if (p == q)
 	    goto err;
 	  p = q;
 	  if (p[0] != ';' && p[0] != 0)
+	    goto err;
+
+	  thread_id = gdb_id_to_thread_id (gdb_id);
+	  if (thread_id)
+	    resume_info[i].thread = thread_id;
+	  else
 	    goto err;
 
 	  i++;
@@ -431,26 +439,35 @@ main (int argc, char *argv[])
 	      prepare_resume_reply (own_buf, status, signal);
 	      break;
 	    case 'H':
-	      switch (own_buf[1])
+	      if (own_buf[1] == 'c' || own_buf[1] == 'g' || own_buf[1] == 's')
 		{
-		case 'g':
-		  general_thread = strtoul (&own_buf[2], NULL, 16);
+		  unsigned long gdb_id, thread_id;
+
+		  gdb_id = strtoul (&own_buf[2], NULL, 16);
+		  thread_id = gdb_id_to_thread_id (gdb_id);
+		  if (thread_id == 0)
+		    {
+		      write_enn (own_buf);
+		      break;
+		    }
+
+		  if (own_buf[1] == 'g')
+		    {
+		      general_thread = thread_id;
+		      set_desired_inferior (1);
+		    }
+		  else if (own_buf[1] == 'c')
+		    cont_thread = thread_id;
+		  else if (own_buf[1] == 's')
+		    step_thread = thread_id;
+
 		  write_ok (own_buf);
-		  set_desired_inferior (1);
-		  break;
-		case 'c':
-		  cont_thread = strtoul (&own_buf[2], NULL, 16);
-		  write_ok (own_buf);
-		  break;
-		case 's':
-		  step_thread = strtoul (&own_buf[2], NULL, 16);
-		  write_ok (own_buf);
-		  break;
-		default:
+		}
+	      else
+		{
 		  /* Silently ignore it so that gdb can extend the protocol
 		     without compatibility headaches.  */
 		  own_buf[0] = '\0';
-		  break;
 		}
 	      break;
 	    case 'g':
@@ -592,10 +609,22 @@ main (int argc, char *argv[])
 		  break;
 		}
 	    case 'T':
-	      if (mythread_alive (strtoul (&own_buf[1], NULL, 16)))
-		write_ok (own_buf);
-	      else
-		write_enn (own_buf);
+	      {
+		unsigned long gdb_id, thread_id;
+
+		gdb_id = strtoul (&own_buf[1], NULL, 16);
+		thread_id = gdb_id_to_thread_id (gdb_id);
+		if (thread_id == 0)
+		  {
+		    write_enn (own_buf);
+		    break;
+		  }
+
+		if (mythread_alive (thread_id))
+		  write_ok (own_buf);
+		else
+		  write_enn (own_buf);
+	      }
 	      break;
 	    case 'R':
 	      /* Restarting the inferior is only supported in the

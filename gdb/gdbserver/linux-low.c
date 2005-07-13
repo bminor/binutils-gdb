@@ -160,7 +160,7 @@ linux_create_inferior (char *program, char **allargs)
     }
 
   new_process = add_process (pid);
-  add_thread (pid, new_process);
+  add_thread (pid, new_process, pid);
 
   return pid;
 }
@@ -185,7 +185,7 @@ linux_attach_lwp (unsigned long pid, unsigned long tid)
     }
 
   new_process = (struct process_info *) add_process (pid);
-  add_thread (tid, new_process);
+  add_thread (tid, new_process, pid);
 
   /* The next time we wait for this LWP we'll see a SIGSTOP as PTRACE_ATTACH
      brings it to a halt.  We should ignore that SIGSTOP and resume the process
