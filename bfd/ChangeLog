@@ -1,3 +1,7 @@
+2005-07-13  Steve Ellcey  <sje@cup.hp.com>
+
+	* bfd.m4 (BFD_NEED_DECLARATION): Remove.
+
 2005-07-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Don't use a plt stub
