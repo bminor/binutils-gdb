@@ -481,10 +481,16 @@ alpha_ecoff_bad_format_hook (abfd, filehdr)
 {
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
 
-  if (ALPHA_ECOFF_BADMAG (*internal_f))
-    return FALSE;
+  if (! ALPHA_ECOFF_BADMAG (*internal_f))
+    return TRUE;
 
-  return TRUE;
+  if (ALPHA_ECOFF_COMPRESSEDMAG (*internal_f))
+    (*_bfd_error_handler)
+      (_("%B: Cannot handle compressed Alpha binaries.\n"
+	 "   Use compiler flags, or objZ, to generate uncompressed binaries."),
+       abfd);
+
+  return FALSE;
 }
 
 /* This is a hook called by coff_real_object_p to create any backend
@@ -603,8 +609,11 @@ alpha_ecoff_swap_reloc_out (abfd, intern, dst)
       size = intern->r_size;
     }
 
+  /* XXX FIXME:  The maximum symndx value used to be 14 but this
+     fails with object files prodiced by DEC's C++ compiler.
+     Where does the value 14 (or 15) come from anyway ?  */
   BFD_ASSERT (intern->r_extern
-	      || (intern->r_symndx >= 0 && intern->r_symndx <= 14));
+	      || (intern->r_symndx >= 0 && intern->r_symndx <= 15));
 
   H_PUT_64 (abfd, intern->r_vaddr, ext->r_vaddr);
   H_PUT_32 (abfd, symndx, ext->r_symndx);

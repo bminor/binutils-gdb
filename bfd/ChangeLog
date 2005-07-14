@@ -1,3 +1,12 @@
+2005-07-14  Daniel Marques  <marques@cs.cornell.edu>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* coff-alpha.c (alpha_ecoff_bad_format_hook): Detect compressed
+	Alpha binaries and issue a helpful error message.
+	(alpha_ecoff_swap_reloc_out): Increase maximum allowed internal
+	symbol index to 15 to allow for binaries produced by DEC
+	compilers.	
+
 2005-07-13  Steve Ellcey  <sje@cup.hp.com>
 
 	* bfd.m4 (BFD_NEED_DECLARATION): Remove.
