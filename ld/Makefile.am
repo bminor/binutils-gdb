@@ -171,6 +171,7 @@ ALL_EMULATIONS = \
 	eelf32lppc.o \
 	eelf32lppcnto.o \
 	eelf32lppcsim.o \
+	eelf32m32c.o \
 	eelf32mcore.o \
 	eelf32mipswindiss.o \
 	eelf32ms1.o \
@@ -368,7 +369,7 @@ ALL_EMULATIONS = \
 	evsta.o \
 	ew65.o \
 	ez8001.o \
-	  eelf32frvfd.o \
+	eelf32frvfd.o \
 	ez8002.o
 
 ALL_64_EMULATIONS = \
@@ -1531,6 +1532,9 @@ eelf32frvfd.c: $(srcdir)/emulparams/elf32frvfd.sh \
   $(srcdir)/emulparams/elf32frv.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32frvfd "$(tdir_frv)"
+eelf32m32c.c: $(srcdir)/emulparams/elf32m32c.sh \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32m32c "$(tdir_m32c)"
 eelf32ms1.c: $(srcdir)/emulparams/elf32ms1.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ms1 "$(tdir_ms1)"

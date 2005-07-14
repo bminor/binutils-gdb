@@ -1833,6 +1833,9 @@ enum bfd_architecture
 #define bfd_mach_arc_6         6
 #define bfd_mach_arc_7         7
 #define bfd_mach_arc_8         8
+ bfd_arch_m32c,     /* Renesas M16C/M32C.  */
+#define bfd_mach_m16c        0x75
+#define bfd_mach_m32c        0x78
   bfd_arch_m32r,      /* Renesas M32R (formerly Mitsubishi M32R/D) */
 #define bfd_mach_m32r          1 /* For backwards compatibility.  */
 #define bfd_mach_m32rx         'x'

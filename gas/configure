@@ -4661,6 +4661,9 @@ _ACEOF
 	using_cgen=yes
 	;;
 
+      m32c)
+	using_cgen=yes
+	;;
       frv)
 	using_cgen=yes
 	;;

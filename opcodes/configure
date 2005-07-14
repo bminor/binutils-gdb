@@ -8771,6 +8771,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_xtensa_arch)	ta="$ta xtensa-dis.lo" ;;
 	bfd_z8k_arch)		ta="$ta z8k-dis.lo" ;;
 	bfd_frv_arch)           ta="$ta frv-asm.lo frv-desc.lo frv-dis.lo frv-ibld.lo frv-opc.lo" using_cgen=yes ;;
+	bfd_m32c_arch)		ta="$ta m32c-asm.lo m32c-desc.lo m32c-dis.lo m32c-ibld.lo m32c-opc.lo" using_cgen=yes ;;
 
 	"")			;;
 	*)		{ { echo "$as_me:$LINENO: error: *** unknown target architecture $arch" >&5

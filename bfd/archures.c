@@ -286,6 +286,9 @@ DESCRIPTION
 .#define bfd_mach_arc_6         6
 .#define bfd_mach_arc_7         7
 .#define bfd_mach_arc_8         8
+. bfd_arch_m32c,     {* Renesas M16C/M32C.  *}
+.#define bfd_mach_m16c        0x75
+.#define bfd_mach_m32c        0x78
 .  bfd_arch_m32r,      {* Renesas M32R (formerly Mitsubishi M32R/D) *}
 .#define bfd_mach_m32r		1 {* For backwards compatibility.  *}
 .#define bfd_mach_m32rx		'x'
@@ -422,6 +425,7 @@ extern const bfd_arch_info_type bfd_i960_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
 extern const bfd_arch_info_type bfd_ip2k_arch;
 extern const bfd_arch_info_type bfd_iq2000_arch;
+extern const bfd_arch_info_type bfd_m32c_arch;
 extern const bfd_arch_info_type bfd_m32r_arch;
 extern const bfd_arch_info_type bfd_m68hc11_arch;
 extern const bfd_arch_info_type bfd_m68hc12_arch;
@@ -519,6 +523,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_xstormy16_arch,
     &bfd_xtensa_arch,
     &bfd_z8k_arch,
+    &bfd_m32c_arch,
 #endif
   0
 };

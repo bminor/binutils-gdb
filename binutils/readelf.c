@@ -86,6 +86,7 @@
 #include "elf/i960.h"
 #include "elf/ia64.h"
 #include "elf/ip2k.h"
+#include "elf/m32c.h"
 #include "elf/m32r.h"
 #include "elf/m68k.h"
 #include "elf/m68hc11.h"
@@ -767,6 +768,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_XTENSA:
     case EM_XTENSA_OLD:
     case EM_M32R:
+    case EM_M32C:
     case EM_MS1:
       return TRUE;
 
@@ -1274,6 +1276,10 @@ dump_relocations (FILE *file,
 	case EM_XTENSA_OLD:
 	case EM_XTENSA:
 	  rtype = elf_xtensa_reloc_type (type);
+	  break;
+
+	case EM_M32C:
+	  rtype = elf_m32c_reloc_type (type);
 	  break;
 
 	case EM_MS1:
@@ -1818,6 +1824,7 @@ get_machine_name (unsigned e_machine)
     case EM_IQ2000:       	return "Vitesse IQ2000";
     case EM_XTENSA_OLD:
     case EM_XTENSA:		return "Tensilica Xtensa Processor";
+    case EM_M32C:	        return "Renesas M32c";
     case EM_MS1:                return "Morpho Techologies MS1 processor";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_machine);

@@ -62,6 +62,7 @@ CPU_TYPES = \
 	i860 \
 	i960 \
 	ip2k \
+	m32c \
 	m32r \
 	m68hc11 \
 	m68k \
@@ -259,6 +260,7 @@ TARGET_CPU_CFILES = \
 	config/tc-i860.c \
 	config/tc-i960.c \
 	config/tc-ip2k.c \
+	config/tc-m32c.c \
 	config/tc-m32r.c \
 	config/tc-m68hc11.c \
 	config/tc-m68k.c \
@@ -312,6 +314,7 @@ TARGET_CPU_HFILES = \
 	config/tc-i860.h \
 	config/tc-i960.h \
 	config/tc-ip2k.h \
+	config/tc-m32c.h \
 	config/tc-m32r.h \
 	config/tc-m68hc11.h \
 	config/tc-m68k.h \

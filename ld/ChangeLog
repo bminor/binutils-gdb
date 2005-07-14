@@ -1,3 +1,12 @@
+2005-07-14  Jim Blandy  <jimb@redhat.com>
+
+	Add support for the Renesas M32C and M16C.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32m32c.o.
+	(eelf32m32c.c): New target.
+	* Makefile.in: Regenerated.
+	* configure.tgt: Add case for m32c-*-elf.
+	* emulparams/elf32m32c.sh: New file.
+
 2005-07-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (strip_excluded_output_sections): Don't call

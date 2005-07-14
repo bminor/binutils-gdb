@@ -326,6 +326,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @emph{Target IP2K options:}
    [@b{-mip2022}|@b{-mip2022ext}]
 @end ifset
+@ifset M32C
+
+@emph{Target M32C options:}
+   [@b{-m32c}|@b{-m16c}]
+@end ifset
 @ifset M32R
 
 @emph{Target M32R options:}
@@ -708,6 +713,21 @@ Specifies that the extended IP2022 instructions are allowed.
 @item -mip2022
 Restores the default behaviour, which restricts the permitted instructions to
 just the basic IP2022 ones.
+
+@end table
+@end ifset
+
+@ifset M32C
+The following options are available when @value{AS} is configured for the
+Renesas M32C and M16C processors.
+
+@table @gcctabopt
+
+@item -m32c
+Assemble M32C instructions.
+
+@item -m16c
+Assemble M16C instructions (the default).
 
 @end table
 @end ifset
@@ -2108,6 +2128,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset IP2K
 @samp{#} on the ip2k;
+@end ifset
+@ifset M32C
+@samp{#} on the m32c;
 @end ifset
 @ifset M32R
 @samp{#} on the m32r;
@@ -6113,6 +6136,9 @@ subject, see the hardware manufacturer's manual.
 @ifset IP2K
 * IP2K-Dependent::              IP2K Dependent Features
 @end ifset
+@ifset M32C
+* M32C-Dependent::              M32C Dependent Features
+@end ifset
 @ifset M32R
 * M32R-Dependent::              M32R Dependent Features
 @end ifset
@@ -6259,6 +6285,10 @@ family.
 
 @ifset IP2K
 @include c-ip2k.texi
+@end ifset
+
+@ifset M32C
+@include c-m32c.texi
 @end ifset
 
 @ifset M32R

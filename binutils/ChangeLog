@@ -1,3 +1,11 @@
+2005-07-14  Jim Blandy  <jimb@redhat.com>
+
+	* readelf.c: #include "elf/m32c.h"
+	(guess_is_rela, dump_relocations, get_machine_name): Add cases for
+	EM_M32C.
+	* Makefile.am (readelf.o): Update dependencies.
+	* Makefile.in: Regenerated.
+
 2005-07-08  Ben Elliston  <bje@au.ibm.com>
 
 	* bucomm.h: Include <stdarg.h> unconditionally, not only when

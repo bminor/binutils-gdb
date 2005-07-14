@@ -17,6 +17,7 @@ targ_extra_ofiles=
 
 case "${targ}" in
 am33_2.0-*-linux*)	targ_emul=elf32am33lin ;;
+m32c-*-elf)		targ_emul=elf32m32c ;;
 arm-epoc-pe)		targ_emul=arm_epoc_pe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arm-*-wince)		targ_emul=armpe ;

@@ -74,6 +74,8 @@ config/tc-ia64.c
 config/tc-ia64.h
 config/tc-ip2k.c
 config/tc-ip2k.h
+config/tc-m32c.c
+config/tc-m32c.h
 config/tc-m32r.c
 config/tc-m32r.h
 config/tc-m68hc11.c

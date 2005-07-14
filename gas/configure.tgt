@@ -30,6 +30,7 @@ eval `echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/cpu=\1 vendor=\2 os=\3/'`
 # endian and arch.
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${cpu} in
+  m32c)			cpu_type=m32c endian=big ;;
   am33_2.0)		cpu_type=mn10300 endian=little ;;
   alpha*)		cpu_type=alpha ;;
   arm*be|arm*b)		cpu_type=arm endian=big ;;
@@ -89,6 +90,7 @@ esac
 generic_target=${cpu_type}-$vendor-$os
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${generic_target} in
+  m32c-*-elf)         			fmt=elf ;;
   a29k-*-coff)				fmt=coff ;;
   a29k-amd-udi)				fmt=coff ;;
   a29k-amd-ebmon)			fmt=coff ;;

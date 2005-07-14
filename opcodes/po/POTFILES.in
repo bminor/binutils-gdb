@@ -9,6 +9,8 @@ avr-dis.c
 cgen-asm.c
 cgen-dis.c
 cgen-opc.c
+cgen-ops.h
+cgen-types.h
 cris-dis.c
 cris-opc.c
 crx-dis.c
@@ -74,6 +76,13 @@ m10200-dis.c
 m10200-opc.c
 m10300-dis.c
 m10300-opc.c
+m32c-asm.c
+m32c-desc.c
+m32c-desc.h
+m32c-dis.c
+m32c-ibld.c
+m32c-opc.c
+m32c-opc.h
 m32r-asm.c
 m32r-desc.c
 m32r-desc.h

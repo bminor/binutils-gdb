@@ -86,6 +86,7 @@ cpu-ip2k.c
 cpu-iq2000.c
 cpu-m10200.c
 cpu-m10300.c
+cpu-m32c.c
 cpu-m32r.c
 cpu-m68hc11.c
 cpu-m68hc12.c
@@ -149,6 +150,7 @@ elf32-i860.c
 elf32-i960.c
 elf32-ip2k.c
 elf32-iq2000.c
+elf32-m32c.c
 elf32-m32r.c
 elf32-m68hc11.c
 elf32-m68hc12.c

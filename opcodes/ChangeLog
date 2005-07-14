@@ -1,3 +1,33 @@
+2005-07-14  Jim Blandy  <jimb@redhat.com>
+
+	Add support for the Renesas M32C and M16C.
+	* m32c-asm.c, m32c-desc.c, m32c-dis.c, m32c-ibld.c, m32c-opc.c: New.
+	* m32c-desc.h, m32c-opc.h: New.
+	* Makefile.am (HFILES): List m32c-desc.h and m32c-opc.h.
+	(CFILES): List m32c-asm.c, m32c-desc.c, m32c-dis.c, m32c-ibld.c,
+	m32c-opc.c.
+	(ALL_MACHINES): List m32c-asm.lo, m32c-desc.lo, m32c-dis.lo,
+	m32c-ibld.lo, m32c-opc.lo.
+	(CLEANFILES): List stamp-m32c.
+	(M32C_DEPS): List stamp-m32c, if CGEN_MAINT.
+	(CGEN_CPUS): Add m32c.
+	(m32c-asm.c, m32c-desc.c, m32c-dis.c, m32c-ibld.c, m32c-opc.c)
+	(m32c-desc.h, m32c-opc.h): Depend on M32C_DEPS.
+	(m32c_opc_h): New variable.
+	(stamp-m32c, m32c-asm.lo, m32c-desc.lo, m32c-dis.lo, m32c-ibld.lo)
+	(m32c-opc.lo): New rules.
+	* Makefile.in: Regenerated.
+	* configure.in: Add case for bfd_m32c_arch.
+	* configure: Regenerated.
+	* disassemble.c (ARCH_m32c): New.
+	[ARCH_m32c]: #include "m32c-desc.h".
+	(disassembler) [ARCH_m32c]: Add case for bfd_arch_m32c.
+	(disassemble_init_for_target) [ARCH_m32c]: Same.
+
+	* cgen-ops.h, cgen-types.h: New files.
+	* Makefile.am (HFILES): List them.
+	* Makefile.in: Regenerated.
+	
 2005-07-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* arc-dis.c, arm-dis.c, cris-dis.c, crx-dis.c, d10v-dis.c,

@@ -560,6 +560,7 @@ do
     # This list is alphabetized to make it easy to compare
     # with the two vector lists in targets.c.  For the same reason,
     # use one entry per line, even though this leads to long lines.
+    bfd_elf32_m32c_vec)         tb="$tb elf32-m32c.lo elf32.lo $elf" ;;
     a29kcoff_big_vec)		tb="$tb coff-a29k.lo cofflink.lo" ;;
     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
     aix5coff64_vec)		tb="$tb coff64-rs6000.lo xcofflink.lo aix5ppc-core.lo"; target_size=64 ;;

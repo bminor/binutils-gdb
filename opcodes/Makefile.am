@@ -25,6 +25,7 @@ LIBIBERTY = ../libiberty/libiberty.a
 
 # Header files.
 HFILES = \
+	cgen-ops.h cgen-types.h \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
 	h8500-opc.h \
@@ -32,6 +33,7 @@ HFILES = \
 	ia64-opc.h \
 	ip2k-desc.h ip2k-opc.h \
 	iq2000-desc.h iq2000-opc.h \
+	m32c-desc.h m32c-opc.h \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
 	ms1-desc.h ms1-opc.h \
@@ -106,6 +108,11 @@ CFILES = \
 	iq2000-dis.c \
 	iq2000-ibld.c \
 	iq2000-opc.c \
+	m32c-asm.c \
+	m32c-desc.c \
+	m32c-dis.c \
+	m32c-ibld.c \
+	m32c-opc.c \
 	m32r-asm.c \
 	m32r-desc.c \
 	m32r-dis.c \
@@ -225,6 +232,11 @@ ALL_MACHINES = \
 	iq2000-dis.lo \
 	iq2000-ibld.lo \
 	iq2000-opc.lo \
+	m32c-asm.lo \
+	m32c-desc.lo \
+	m32c-dis.lo \
+	m32c-ibld.lo \
+	m32c-opc.lo \
 	m32r-asm.lo \
 	m32r-desc.lo \
 	m32r-dis.lo \
@@ -361,8 +373,8 @@ uninstall_libopcodes:
 	rm -f $(DESTDIR)$(bfdincludedir)/dis-asm.h
 
 CLEANFILES = \
-	stamp-ip2k stamp-m32r stamp-fr30 stamp-frv stamp-openrisc \
-	stamp-iq2000 stamp-ms1 stamp-xstormy16 \
+	stamp-ip2k stamp-m32c stamp-m32r stamp-fr30 stamp-frv \
+	stamp-openrisc stamp-iq2000 stamp-ms1 stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
@@ -378,10 +390,11 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = fr30 frv ip2k m32r ms1 openrisc xstormy16
+CGEN_CPUS = fr30 frv ip2k m32c m32r ms1 openrisc xstormy16
 
 if CGEN_MAINT
 IP2K_DEPS = stamp-ip2k
+M32C_DEPS = stamp-m32c
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
 FRV_DEPS = stamp-frv
@@ -391,6 +404,7 @@ IQ2000_DEPS = stamp-iq2000
 XSTORMY16_DEPS = stamp-xstormy16
 else
 IP2K_DEPS =
+M32C_DEPS =
 M32R_DEPS =
 FR30_DEPS =
 FRV_DEPS =
@@ -421,6 +435,30 @@ $(srcdir)/ip2k-desc.h $(srcdir)/ip2k-desc.c $(srcdir)/ip2k-opc.h $(srcdir)/ip2k-
 stamp-ip2k: $(CGENDEPS) $(CPUDIR)/ip2k.cpu $(CPUDIR)/ip2k.opc
 	$(MAKE) run-cgen arch=ip2k prefix=ip2k options= \
 		archfile=$(CPUDIR)/ip2k.cpu opcfile=$(CPUDIR)/ip2k.opc extrafiles=
+
+$(srcdir)/m32c-desc.h $(srcdir)/m32c-desc.c $(srcdir)/m32c-opc.h $(srcdir)/m32c-opc.c $(srcdir)/m32c-ibld.c $(srcdir)/m32c-asm.c $(srcdir)/m32c-dis.c: $(M32C_DEPS)
+#	@true
+stamp-m32c: $(CGENDEPS) $(CPUDIR)/m32c.cpu $(CPUDIR)/m32c.opc
+	$(MAKE) run-cgen arch=m32c prefix=m32c options= \
+		archfile=$(CPUDIR)/m32c.cpu opcfile=$(CPUDIR)/m32c.opc extrafiles=
+m32c_opc_h = m32c-opc.h cgen-types.h cgen-ops.h
+m32c-asm.lo: m32c-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h m32c-desc.h \
+  $(INCDIR)/opcode/cgen.h $(m32c_opc_h) opintl.h
+m32c-desc.lo: m32c-desc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h m32c-desc.h \
+  $(INCDIR)/opcode/cgen.h $(m32c_opc_h) opintl.h
+m32c-dis.lo: m32c-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h m32c-desc.h $(INCDIR)/opcode/cgen.h \
+  $(m32c_opc_h) opintl.h
+m32c-ibld.lo: m32c-ibld.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h m32c-desc.h $(INCDIR)/opcode/cgen.h \
+  $(m32c_opc_h) opintl.h
+m32c-opc.lo: m32c-opc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h m32c-desc.h \
+  $(INCDIR)/opcode/cgen.h $(m32c_opc_h)
 
 $(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
 	@true

@@ -1,3 +1,20 @@
+2005-07-14  Jim Blandy  <jimb@redhat.com>
+
+	Add support for the Renesas M32C.
+	* Makefile.am (CPU_TYPES): List m32c.
+	(TARGET_CPU_CFILES): List config/tc-m32c.c.
+	(TARGET_CPU_HFILES): List config/tc-m32c.h.
+	* configure.in: Add case for m32c.
+	* configure.tgt: Add cases for m32c and m32c-*-elf.
+	* configure: Regenerated.
+	* config/tc-m32c.c, config/tc-m32c.h: New files.
+	* doc/Makefile.am (CPU_DOCS): Add c-m32c.texi.
+	* doc/Makefile.in: Regenerated.
+	* doc/all.texi: Set M32C.
+	* doc/as.texinfo: Add text for the M32C-specific options and line
+	comment characters, and refer to c-m32c.texi.
+	* doc/c-m32c.texi: New file.
+	
 2005-07-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 1069

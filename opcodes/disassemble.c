@@ -75,9 +75,13 @@
 #define ARCH_z8k
 #define ARCH_frv
 #define ARCH_iq2000
+#define ARCH_m32c
 #define INCLUDE_SHMEDIA
 #endif
 
+#ifdef ARCH_m32c
+#include "m32c-desc.h"
+#endif
 
 disassembler_ftype
 disassembler (abfd)
@@ -394,6 +398,11 @@ disassembler (abfd)
       disassemble = print_insn_iq2000;
       break;
 #endif
+#ifdef ARCH_m32c
+    case bfd_arch_m32c:
+      disassemble = print_insn_m32c;
+      break;
+#endif
     default:
       return 0;
     }
@@ -438,6 +447,15 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_tic4x
     case bfd_arch_tic4x:
       info->skip_zeroes = 32;
+#endif
+#ifdef ARCH_m32c
+    case bfd_arch_m32c:
+      info->endian = BFD_ENDIAN_BIG;
+      if (info->mach == bfd_mach_m16c)
+	info->insn_sets = ISA_M16C;
+      else
+	info->insn_sets = ISA_M32C;
+      break;
 #endif
     default:
       break;

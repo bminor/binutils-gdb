@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-06-06 14:11-0700\n"
+"POT-Creation-Date: 2005-07-14 17:39-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -431,7 +431,7 @@ msgstr ""
 #. * We have a GROSS internal error.
 #. * This should never happen.
 #.
-#: atof-generic.c:419 config/tc-m68k.c:3170
+#: atof-generic.c:419 config/tc-m68k.c:3185
 msgid "failed sanity check"
 msgstr ""
 
@@ -641,12 +641,12 @@ msgstr ""
 msgid "unsupported section attribute '%c'"
 msgstr ""
 
-#: config/obj-coff.c:1524 config/obj-coff.c:4281 config/tc-ppc.c:4605
+#: config/obj-coff.c:1524 config/obj-coff.c:4281 config/tc-ppc.c:4609
 #, c-format
 msgid "unknown section attribute '%c'"
 msgstr ""
 
-#: config/obj-coff.c:1554 config/tc-ppc.c:4623 config/tc-tic54x.c:4287
+#: config/obj-coff.c:1554 config/tc-ppc.c:4627 config/tc-tic54x.c:4287
 #: read.c:2551
 #, c-format
 msgid "error setting flags for \"%s\": %s"
@@ -736,144 +736,144 @@ msgstr ""
 msgid "bad .common segment %s"
 msgstr ""
 
-#: config/obj-elf.c:577
+#: config/obj-elf.c:579
 #, c-format
 msgid "setting incorrect section type for %s"
 msgstr ""
 
-#: config/obj-elf.c:582
+#: config/obj-elf.c:584
 #, c-format
 msgid "ignoring incorrect section type for %s"
 msgstr ""
 
-#: config/obj-elf.c:619
+#: config/obj-elf.c:621
 #, c-format
 msgid "setting incorrect section attributes for %s"
 msgstr ""
 
-#: config/obj-elf.c:671
+#: config/obj-elf.c:673
 #, c-format
 msgid "ignoring changed section type for %s"
 msgstr ""
 
-#: config/obj-elf.c:683
+#: config/obj-elf.c:685
 #, c-format
 msgid "ignoring changed section attributes for %s"
 msgstr ""
 
-#: config/obj-elf.c:685
+#: config/obj-elf.c:687
 #, c-format
 msgid "ignoring changed section entity size for %s"
 msgstr ""
 
-#: config/obj-elf.c:738
+#: config/obj-elf.c:740
 msgid "unrecognized .section attribute: want a,w,x,M,S,G,T"
 msgstr ""
 
-#: config/obj-elf.c:775
+#: config/obj-elf.c:777
 msgid "unrecognized section attribute"
 msgstr ""
 
-#: config/obj-elf.c:803 read.c:2534
+#: config/obj-elf.c:805 read.c:2534
 msgid "unrecognized section type"
 msgstr ""
 
-#: config/obj-elf.c:833
+#: config/obj-elf.c:835
 msgid "missing name"
 msgstr ""
 
-#: config/obj-elf.c:944
+#: config/obj-elf.c:946
 msgid "invalid merge entity size"
 msgstr ""
 
-#: config/obj-elf.c:951
+#: config/obj-elf.c:953
 msgid "entity size for SHF_MERGE not specified"
 msgstr ""
 
-#: config/obj-elf.c:971
+#: config/obj-elf.c:973
 msgid "group name for SHF_GROUP not specified"
 msgstr ""
 
-#: config/obj-elf.c:984
+#: config/obj-elf.c:986
 msgid "character following name is not '#'"
 msgstr ""
 
-#: config/obj-elf.c:1099
+#: config/obj-elf.c:1101
 msgid ".previous without corresponding .section; ignored"
 msgstr ""
 
-#: config/obj-elf.c:1125
+#: config/obj-elf.c:1127
 msgid ".popsection without corresponding .pushsection; ignored"
 msgstr ""
 
-#: config/obj-elf.c:1177
+#: config/obj-elf.c:1179
 msgid "expected comma after name in .symver"
 msgstr ""
 
-#: config/obj-elf.c:1201
+#: config/obj-elf.c:1203
 #, c-format
 msgid "missing version name in `%s' for symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1212
+#: config/obj-elf.c:1214
 #, c-format
 msgid "multiple versions [`%s'|`%s'] for symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1442
+#: config/obj-elf.c:1444
 msgid "expected quoted string"
 msgstr ""
 
-#: config/obj-elf.c:1462
+#: config/obj-elf.c:1464
 #, c-format
 msgid "expected comma after name `%s' in .size directive"
 msgstr ""
 
-#: config/obj-elf.c:1471
+#: config/obj-elf.c:1473
 msgid "missing expression in .size directive"
 msgstr ""
 
-#: config/obj-elf.c:1558
+#: config/obj-elf.c:1560
 #, c-format
 msgid "unrecognized symbol type \"%s\""
 msgstr ""
 
-#: config/obj-elf.c:1726
+#: config/obj-elf.c:1728
 msgid ".size expression too complicated to fix up"
 msgstr ""
 
-#: config/obj-elf.c:1758
+#: config/obj-elf.c:1760
 #, c-format
 msgid ""
 "invalid attempt to declare external version name as default in symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1819 ecoff.c:3598
+#: config/obj-elf.c:1821 ecoff.c:3598
 #, c-format
 msgid "symbol `%s' can not be both weak and common"
 msgstr ""
 
-#: config/obj-elf.c:1926
+#: config/obj-elf.c:1928
 #, c-format
 msgid "assuming all members of group `%s' are COMDAT"
 msgstr ""
 
-#: config/obj-elf.c:1948
+#: config/obj-elf.c:1950
 #, c-format
 msgid "can't create group: %s"
 msgstr ""
 
-#: config/obj-elf.c:2057
+#: config/obj-elf.c:2059
 #, c-format
 msgid "failed to set up debugging information: %s"
 msgstr ""
 
-#: config/obj-elf.c:2077
+#: config/obj-elf.c:2079
 #, c-format
 msgid "can't start writing .mdebug section: %s"
 msgstr ""
 
-#: config/obj-elf.c:2085
+#: config/obj-elf.c:2087
 #, c-format
 msgid "could not write .mdebug section: %s"
 msgstr ""
@@ -924,14 +924,14 @@ msgstr ""
 #: config/tc-d30v.c:490 config/tc-h8300.c:470 config/tc-h8500.c:271
 #: config/tc-mcore.c:667 config/tc-mmix.c:489 config/tc-mn10200.c:1078
 #: config/tc-mn10300.c:1820 config/tc-msp430.c:407 config/tc-or32.c:324
-#: config/tc-or32.c:376 config/tc-ppc.c:2377 config/tc-s390.c:1218
+#: config/tc-or32.c:376 config/tc-ppc.c:2381 config/tc-s390.c:1218
 #: config/tc-sh64.c:2213 config/tc-sh.c:1240 config/tc-tic80.c:261
 #: config/tc-v850.c:1952 config/tc-w65.c:206 config/tc-z8k.c:331
 msgid "missing operand"
 msgstr ""
 
 #: config/tc-a29k.c:357 config/tc-cris.c:1493 config/tc-cris.c:1501
-#: config/tc-crx.c:2028 config/tc-dlx.c:685 config/tc-hppa.c:1617
+#: config/tc-crx.c:2029 config/tc-dlx.c:685 config/tc-hppa.c:1617
 #: config/tc-i860.c:492 config/tc-i860.c:509 config/tc-i860.c:989
 #: config/tc-sparc.c:1420 config/tc-sparc.c:1428
 #, c-format
@@ -954,7 +954,7 @@ msgid "Immediate value of %ld is too large"
 msgstr ""
 
 #: config/tc-a29k.c:474 config/tc-i860.c:395 config/tc-i860.c:940
-#: config/tc-m68k.c:3495 config/tc-m68k.c:3527 config/tc-sparc.c:2660
+#: config/tc-m68k.c:3510 config/tc-m68k.c:3542 config/tc-sparc.c:2660
 msgid "failed sanity check."
 msgstr ""
 
@@ -1141,14 +1141,14 @@ msgid "sequence number in use for !tlsgd!%ld"
 msgstr ""
 
 #: config/tc-alpha.c:1823 config/tc-arc.c:294 config/tc-mn10200.c:889
-#: config/tc-mn10300.c:2601 config/tc-ppc.c:1471 config/tc-s390.c:612
+#: config/tc-mn10300.c:2601 config/tc-ppc.c:1475 config/tc-s390.c:612
 #: config/tc-v850.c:1573
 msgid "operand"
 msgstr ""
 
 #: config/tc-alpha.c:1926 config/tc-alpha.c:1950 config/tc-d10v.c:585
 #: config/tc-d30v.c:573 config/tc-mn10200.c:1133 config/tc-mn10300.c:1893
-#: config/tc-ppc.c:2343 config/tc-ppc.c:2560 config/tc-ppc.c:2572
+#: config/tc-ppc.c:2347 config/tc-ppc.c:2564 config/tc-ppc.c:2576
 #: config/tc-s390.c:1228 config/tc-s390.c:1328 config/tc-s390.c:1424
 #: config/tc-v850.c:1747 config/tc-v850.c:1770 config/tc-v850.c:1973
 msgid "too many fixups"
@@ -1166,7 +1166,7 @@ msgstr ""
 msgid "can not resolve expression"
 msgstr ""
 
-#: config/tc-alpha.c:3275 config/tc-ppc.c:1776 config/tc-ppc.c:4368
+#: config/tc-alpha.c:3275 config/tc-ppc.c:1780 config/tc-ppc.c:4372
 #, c-format
 msgid ".COMMon length (%ld.) <0! Ignored."
 msgstr ""
@@ -1175,7 +1175,7 @@ msgstr ""
 msgid "Ignoring attempt to re-define symbol"
 msgstr ""
 
-#: config/tc-alpha.c:3313 config/tc-alpha.c:3322 config/tc-ppc.c:4405
+#: config/tc-alpha.c:3313 config/tc-alpha.c:3322 config/tc-ppc.c:4409
 #: config/tc-sparc.c:3854
 #, c-format
 msgid "Length of .comm \"%s\" is already %ld. Not changed to %ld."
@@ -1370,7 +1370,7 @@ msgstr ""
 
 #: config/tc-alpha.c:5067 config/tc-h8300.c:2092 config/tc-h8500.c:1115
 #: config/tc-hppa.c:4032 config/tc-i860.c:1059 config/tc-m68hc11.c:558
-#: config/tc-m68k.c:4586 config/tc-m88k.c:916 config/tc-ns32k.c:1955
+#: config/tc-m68k.c:4604 config/tc-m88k.c:916 config/tc-ns32k.c:1955
 #: config/tc-or32.c:877 config/tc-sparc.c:2947 config/tc-z8k.c:1328
 msgid "Bad call to MD_ATOF()"
 msgstr ""
@@ -1437,7 +1437,7 @@ msgstr ""
 msgid "frame reg expected, using $%d."
 msgstr ""
 
-#: config/tc-arc.c:1077 config/tc-arm.c:9363 config/tc-ip2k.c:249
+#: config/tc-arc.c:1077 config/tc-arm.c:9351 config/tc-ip2k.c:249
 msgid "md_estimate_size_before_relax\n"
 msgstr ""
 
@@ -1446,13 +1446,13 @@ msgid "md_convert_frag\n"
 msgstr ""
 
 #. We can't actually support subtracting a symbol.
-#: config/tc-arc.c:1288 config/tc-arm.c:1011 config/tc-arm.c:5598
-#: config/tc-arm.c:5649 config/tc-arm.c:6313 config/tc-arm.c:6867
-#: config/tc-arm.c:6893 config/tc-arm.c:7120 config/tc-arm.c:7137
-#: config/tc-arm.c:7243 config/tc-avr.c:891 config/tc-cris.c:3928
+#: config/tc-arc.c:1288 config/tc-arm.c:1011 config/tc-arm.c:5592
+#: config/tc-arm.c:5643 config/tc-arm.c:6307 config/tc-arm.c:6861
+#: config/tc-arm.c:6887 config/tc-arm.c:7114 config/tc-arm.c:7131
+#: config/tc-arm.c:7237 config/tc-avr.c:891 config/tc-cris.c:3928
 #: config/tc-d10v.c:1539 config/tc-d30v.c:1938 config/tc-mips.c:3758
 #: config/tc-mips.c:4866 config/tc-mips.c:5798 config/tc-mips.c:6392
-#: config/tc-msp430.c:1871 config/tc-ppc.c:5553 config/tc-v850.c:2274
+#: config/tc-msp430.c:1871 config/tc-ppc.c:5557 config/tc-v850.c:2274
 #: config/tc-xstormy16.c:484
 msgid "expression too complex"
 msgstr ""
@@ -1561,7 +1561,7 @@ msgstr ""
 msgid "bad segment"
 msgstr ""
 
-#: config/tc-arm.c:683 config/tc-arm.c:3121 config/tc-i960.c:1310
+#: config/tc-arm.c:683 config/tc-arm.c:3126 config/tc-i960.c:1310
 msgid "invalid constant"
 msgstr ""
 
@@ -1599,7 +1599,7 @@ msgstr ""
 msgid "invalid register list"
 msgstr ""
 
-#: config/tc-arm.c:1087 config/tc-arm.c:2387 config/tc-arm.c:2520
+#: config/tc-arm.c:1087 config/tc-arm.c:2392 config/tc-arm.c:2525
 msgid "register list not in ascending order"
 msgstr ""
 
@@ -1644,314 +1644,324 @@ msgstr ""
 msgid "ignoring attempt to undefine built-in register '%s'"
 msgstr ""
 
-#: config/tc-arm.c:1448
+#: config/tc-arm.c:1446
 msgid "selected processor does not support THUMB opcodes"
 msgstr ""
 
-#: config/tc-arm.c:1462
+#: config/tc-arm.c:1460
 msgid "selected processor does not support ARM opcodes"
 msgstr ""
 
-#: config/tc-arm.c:1475
+#: config/tc-arm.c:1473
 #, c-format
 msgid "invalid instruction size selected (%d)"
 msgstr ""
 
-#: config/tc-arm.c:1507
+#: config/tc-arm.c:1505
 #, c-format
 msgid "invalid operand to .code directive (%d) (expecting 16 or 32)"
 msgstr ""
 
-#: config/tc-arm.c:1563
+#: config/tc-arm.c:1561
 #, c-format
 msgid "expected comma after name \"%s\""
 msgstr ""
 
-#: config/tc-arm.c:1613 config/tc-m32r.c:589
+#: config/tc-arm.c:1611 config/tc-m32r.c:589
 #, c-format
 msgid "symbol `%s' already defined"
 msgstr ""
 
-#: config/tc-arm.c:1647
+#: config/tc-arm.c:1645
 #, c-format
 msgid "unrecognized syntax mode \"%s\""
 msgstr ""
 
-#: config/tc-arm.c:1667
+#: config/tc-arm.c:1665
 #, c-format
 msgid "alignment too large: %d assumed"
 msgstr ""
 
-#: config/tc-arm.c:1670
+#: config/tc-arm.c:1668
 msgid "alignment negative. 0 assumed."
 msgstr ""
 
-#: config/tc-arm.c:1808
+#: config/tc-arm.c:1806
 msgid "literal pool overflow"
 msgstr ""
 
-#: config/tc-arm.c:1964 config/tc-arm.c:3729
+#: config/tc-arm.c:1962 config/tc-arm.c:3734
 msgid "unrecognized relocation suffix"
 msgstr ""
 
-#: config/tc-arm.c:2024
+#: config/tc-arm.c:1975
+msgid "(plt) is only valid on branch targets"
+msgstr ""
+
+#: config/tc-arm.c:1981 config/tc-s390.c:1126 config/tc-s390.c:1707
+#: config/tc-xtensa.c:1626
+#, c-format
+msgid "%s relocations do not fit in %d bytes"
+msgstr ""
+
+#: config/tc-arm.c:2029
 msgid "expected 0 or 1"
 msgstr ""
 
-#: config/tc-arm.c:2028
+#: config/tc-arm.c:2033
 msgid "missing comma"
 msgstr ""
 
-#: config/tc-arm.c:2083
+#: config/tc-arm.c:2088
 msgid "dupicate .handlerdata directive"
 msgstr ""
 
-#: config/tc-arm.c:2154
+#: config/tc-arm.c:2159
 msgid "personality routine specified for cantunwind frame"
 msgstr ""
 
-#: config/tc-arm.c:2168
+#: config/tc-arm.c:2173
 msgid "duplicate .personalityindex directive"
 msgstr ""
 
-#: config/tc-arm.c:2175
+#: config/tc-arm.c:2180
 msgid "bad personality routine number"
 msgstr ""
 
-#: config/tc-arm.c:2194
+#: config/tc-arm.c:2199
 msgid "duplicate .personality directive"
 msgstr ""
 
-#: config/tc-arm.c:2217 config/tc-arm.c:2339
+#: config/tc-arm.c:2222 config/tc-arm.c:2344
 msgid "expected register list"
 msgstr ""
 
-#: config/tc-arm.c:2295
+#: config/tc-arm.c:2300
 msgid "expected , <constant>"
 msgstr ""
 
-#: config/tc-arm.c:2304
+#: config/tc-arm.c:2309
 msgid "number of registers must be in the range [1:4]"
 msgstr ""
 
-#: config/tc-arm.c:2401 config/tc-arm.c:2534
+#: config/tc-arm.c:2406 config/tc-arm.c:2539
 msgid "bad register range"
 msgstr ""
 
-#: config/tc-arm.c:2587
+#: config/tc-arm.c:2592
 msgid "register expected"
 msgstr ""
 
-#: config/tc-arm.c:2597
+#: config/tc-arm.c:2602
 msgid "FPA .unwind_save does not take a register list"
 msgstr ""
 
-#: config/tc-arm.c:2610
+#: config/tc-arm.c:2615
 msgid ".unwind_save does not support this kind of register"
 msgstr ""
 
-#: config/tc-arm.c:2635
+#: config/tc-arm.c:2640
 msgid "SP and PC not permitted in .unwind_movsp directive"
 msgstr ""
 
-#: config/tc-arm.c:2640
+#: config/tc-arm.c:2645
 msgid "unexpected .unwind_movsp directive"
 msgstr ""
 
-#: config/tc-arm.c:2664
+#: config/tc-arm.c:2669
 msgid "stack increment must be multiple of 4"
 msgstr ""
 
-#: config/tc-arm.c:2693
+#: config/tc-arm.c:2698
 msgid "expected <reg>, <reg>"
 msgstr ""
 
-#: config/tc-arm.c:2711
+#: config/tc-arm.c:2716
 msgid "register must be either sp or set by a previousunwind_movsp directive"
 msgstr ""
 
-#: config/tc-arm.c:2747
+#: config/tc-arm.c:2752
 msgid "expected <offset>, <opcode>"
 msgstr ""
 
-#: config/tc-arm.c:2759
+#: config/tc-arm.c:2764
 msgid "unwind opcode too long"
 msgstr ""
 
-#: config/tc-arm.c:2764
+#: config/tc-arm.c:2769
 msgid "invalid unwind opcode"
 msgstr ""
 
-#: config/tc-arm.c:2848
+#: config/tc-arm.c:2853
 msgid "constant expression required"
 msgstr ""
 
-#: config/tc-arm.c:2854 config/tc-arm.c:6176 config/tc-arm.c:11041
-#: config/tc-arm.c:11066 config/tc-arm.c:11074 config/tc-z8k.c:1125
+#: config/tc-arm.c:2859 config/tc-arm.c:6170 config/tc-arm.c:10861
+#: config/tc-arm.c:10886 config/tc-arm.c:10894 config/tc-z8k.c:1125
 #: config/tc-z8k.c:1137
 msgid "immediate value out of range"
 msgstr ""
 
-#: config/tc-arm.c:2949
+#: config/tc-arm.c:2954
 msgid "invalid FPA immediate expression"
 msgstr ""
 
-#: config/tc-arm.c:2999 config/tc-arm.c:3007
+#: config/tc-arm.c:3004 config/tc-arm.c:3012
 msgid "shift expression expected"
 msgstr ""
 
-#: config/tc-arm.c:3021
+#: config/tc-arm.c:3026
 msgid "'LSL' or 'ASR' required"
 msgstr ""
 
-#: config/tc-arm.c:3029
+#: config/tc-arm.c:3034
 msgid "'LSL' required"
 msgstr ""
 
-#: config/tc-arm.c:3037
+#: config/tc-arm.c:3042
 msgid "'ASR' required"
 msgstr ""
 
-#: config/tc-arm.c:3109 config/tc-arm.c:4190 config/tc-v850.c:1844
+#: config/tc-arm.c:3114 config/tc-arm.c:4189 config/tc-v850.c:1844
 #: config/tc-v850.c:1865
 msgid "constant expression expected"
 msgstr ""
 
-#: config/tc-arm.c:3116
+#: config/tc-arm.c:3121
 msgid "invalid rotation"
 msgstr ""
 
-#: config/tc-arm.c:3231
+#: config/tc-arm.c:3236
 msgid "']' expected"
 msgstr ""
 
-#: config/tc-arm.c:3249
+#: config/tc-arm.c:3254
 msgid "'}' expected at end of 'option' field"
 msgstr ""
 
-#: config/tc-arm.c:3254
+#: config/tc-arm.c:3259
 msgid "cannot combine index with option"
 msgstr ""
 
-#: config/tc-arm.c:3267
+#: config/tc-arm.c:3272
 msgid "cannot combine pre- and post-indexing"
 msgstr ""
 
-#: config/tc-arm.c:3363
+#: config/tc-arm.c:3368
 msgid "flag for {c}psr instruction expected"
 msgstr ""
 
-#: config/tc-arm.c:3388
+#: config/tc-arm.c:3393
 msgid "unrecognized CPS flag"
 msgstr ""
 
-#: config/tc-arm.c:3395
+#: config/tc-arm.c:3400
 msgid "missing CPS flags"
 msgstr ""
 
-#: config/tc-arm.c:3418 config/tc-arm.c:3424
+#: config/tc-arm.c:3423 config/tc-arm.c:3429
 msgid "valid endian specifiers are be or le"
 msgstr ""
 
-#: config/tc-arm.c:3446
+#: config/tc-arm.c:3451
 msgid "missing rotation field after comma"
 msgstr ""
 
-#: config/tc-arm.c:3461
+#: config/tc-arm.c:3466
 msgid "rotation can only be 0, 8, 16, or 24"
 msgstr ""
 
-#: config/tc-arm.c:3481
+#: config/tc-arm.c:3486
 msgid "condition required"
 msgstr ""
 
-#: config/tc-arm.c:3770
+#: config/tc-arm.c:3775
 msgid "iWMMXt data or control register expected"
 msgstr ""
 
-#: config/tc-arm.c:3888
+#: config/tc-arm.c:3893
 msgid "garbage following instruction"
 msgstr ""
 
-#: config/tc-arm.c:4022
+#: config/tc-arm.c:4027
 msgid "instruction does not accept preindexed addressing"
 msgstr ""
 
 #. unindexed - only for coprocessor
-#: config/tc-arm.c:4038 config/tc-arm.c:5691
+#: config/tc-arm.c:4043 config/tc-arm.c:5685
 msgid "instruction does not accept unindexed addressing"
 msgstr ""
 
-#: config/tc-arm.c:4046
+#: config/tc-arm.c:4051
 msgid "destination register same as write-back base"
 msgstr ""
 
-#: config/tc-arm.c:4047
+#: config/tc-arm.c:4052
 msgid "source register same as write-back base"
 msgstr ""
 
-#: config/tc-arm.c:4095
+#: config/tc-arm.c:4098
 msgid "instruction does not accept scaled register index"
 msgstr ""
 
-#: config/tc-arm.c:4136
+#: config/tc-arm.c:4137
 msgid "instruction does not support unindexed addressing"
 msgstr ""
 
-#: config/tc-arm.c:4151
+#: config/tc-arm.c:4152
 msgid "pc may not be used with write-back"
 msgstr ""
 
-#: config/tc-arm.c:4156
+#: config/tc-arm.c:4157
 msgid "instruction does not support writeback"
 msgstr ""
 
-#: config/tc-arm.c:4185
+#: config/tc-arm.c:4184
 msgid "invalid pseudo operation"
 msgstr ""
 
-#: config/tc-arm.c:4231
+#: config/tc-arm.c:4230
 msgid "literal pool insertion failed"
 msgstr ""
 
-#: config/tc-arm.c:4374 config/tc-arm.c:4393 config/tc-arm.c:4406
-#: config/tc-arm.c:6072 config/tc-arm.c:6092 config/tc-arm.c:6106
+#: config/tc-arm.c:4369 config/tc-arm.c:4388 config/tc-arm.c:4401
+#: config/tc-arm.c:6066 config/tc-arm.c:6086 config/tc-arm.c:6100
 msgid "bit-field extends past end of register"
 msgstr ""
 
-#: config/tc-arm.c:4435
+#: config/tc-arm.c:4430
 msgid "the only suffix valid here is '(plt)'"
 msgstr ""
 
-#: config/tc-arm.c:4468
+#: config/tc-arm.c:4462
 msgid "use of r15 in blx in ARM mode is not really useful"
 msgstr ""
 
-#: config/tc-arm.c:4486
+#: config/tc-arm.c:4480
 msgid "use of r15 in bx in ARM mode is not really useful"
 msgstr ""
 
-#: config/tc-arm.c:4498 config/tc-arm.c:6212
+#: config/tc-arm.c:4492 config/tc-arm.c:6206
 msgid "use of r15 in bxj is not really useful"
 msgstr ""
 
-#: config/tc-arm.c:4602 config/tc-arm.c:4611
+#: config/tc-arm.c:4596 config/tc-arm.c:4605
 msgid "writeback of base register is UNPREDICTABLE"
 msgstr ""
 
-#: config/tc-arm.c:4605
+#: config/tc-arm.c:4599
 msgid "writeback of base register when in register list is UNPREDICTABLE"
 msgstr ""
 
-#: config/tc-arm.c:4615
+#: config/tc-arm.c:4609
 msgid "if writeback register is in list, it must be the lowest reg in the list"
 msgstr ""
 
-#: config/tc-arm.c:4630
+#: config/tc-arm.c:4624
 msgid "first destination register must be even"
 msgstr ""
 
-#: config/tc-arm.c:4633 config/tc-arm.c:4690
+#: config/tc-arm.c:4627 config/tc-arm.c:4684
 msgid "can only load two consecutive registers"
 msgstr ""
 
@@ -1959,820 +1969,817 @@ msgstr ""
 #. have been called in the first place.
 #. If op 2 were present and equal to PC, this function wouldn't
 #. have been called in the first place.
-#: config/tc-arm.c:4634 config/tc-arm.c:4693 config/tc-arm.c:5140
-#: config/tc-arm.c:6539
+#: config/tc-arm.c:4628 config/tc-arm.c:4687 config/tc-arm.c:5134
+#: config/tc-arm.c:6533
 msgid "r14 not allowed here"
 msgstr ""
 
-#: config/tc-arm.c:4635
+#: config/tc-arm.c:4629
 msgid "'[' expected"
 msgstr ""
 
-#: config/tc-arm.c:4648
+#: config/tc-arm.c:4642
 msgid "base register written back, and overlaps second destination register"
 msgstr ""
 
-#: config/tc-arm.c:4656
+#: config/tc-arm.c:4650
 msgid "index register overlaps destination register"
 msgstr ""
 
-#: config/tc-arm.c:4670 config/tc-arm.c:5113 config/tc-arm.c:6405
-#: config/tc-arm.c:7165
+#: config/tc-arm.c:4664 config/tc-arm.c:5107 config/tc-arm.c:6399
+#: config/tc-arm.c:7159
 msgid "instruction does not accept this addressing mode"
 msgstr ""
 
-#: config/tc-arm.c:4676 config/tc-arm.c:5122
+#: config/tc-arm.c:4670 config/tc-arm.c:5116
 msgid "offset must be zero in ARM encoding"
 msgstr ""
 
-#: config/tc-arm.c:4687 config/tc-arm.c:5134
+#: config/tc-arm.c:4681 config/tc-arm.c:5128
 msgid "even register required"
 msgstr ""
 
-#: config/tc-arm.c:4718 config/tc-arm.c:4749
+#: config/tc-arm.c:4712 config/tc-arm.c:4743
 msgid "this instruction requires a post-indexed address"
 msgstr ""
 
-#: config/tc-arm.c:4776
+#: config/tc-arm.c:4770
 msgid "rd and rm should be different in mla"
 msgstr ""
 
-#: config/tc-arm.c:4808 config/tc-arm.c:6741
+#: config/tc-arm.c:4802 config/tc-arm.c:6735
 msgid "'CPSR' or 'SPSR' expected"
 msgstr ""
 
-#: config/tc-arm.c:4841
+#: config/tc-arm.c:4835
 msgid "rd and rm should be different in mul"
 msgstr ""
 
-#: config/tc-arm.c:4862
+#: config/tc-arm.c:4856
 msgid "rdhi, rdlo and rm must all be different"
 msgstr ""
 
-#: config/tc-arm.c:4924
+#: config/tc-arm.c:4918
 msgid "'[' expected after PLD mnemonic"
 msgstr ""
 
-#: config/tc-arm.c:4926
+#: config/tc-arm.c:4920
 msgid "post-indexed expression used in preload instruction"
 msgstr ""
 
-#: config/tc-arm.c:4928
+#: config/tc-arm.c:4922
 msgid "writeback used in preload instruction"
 msgstr ""
 
-#: config/tc-arm.c:4930
+#: config/tc-arm.c:4924
 msgid "unindexed addressing used in preload instruction"
 msgstr ""
 
-#: config/tc-arm.c:5029 config/tc-arm.c:7076
+#: config/tc-arm.c:5023 config/tc-arm.c:7070
 msgid "source1 and dest must be same register"
 msgstr ""
 
-#: config/tc-arm.c:5079 config/tc-arm.c:6798
+#: config/tc-arm.c:5073 config/tc-arm.c:6792
 msgid "rdhi and rdlo must be different"
 msgstr ""
 
-#: config/tc-arm.c:5137
+#: config/tc-arm.c:5131
 msgid "can only store two consecutive registers"
 msgstr ""
 
-#: config/tc-arm.c:5232 config/tc-arm.c:5249
+#: config/tc-arm.c:5226 config/tc-arm.c:5243
 msgid "only two consecutive VFP SP registers allowed here"
 msgstr ""
 
-#: config/tc-arm.c:5277 config/tc-arm.c:5292
+#: config/tc-arm.c:5271 config/tc-arm.c:5286
 msgid "this addressing mode requires base-register writeback"
 msgstr ""
 
-#: config/tc-arm.c:5370
+#: config/tc-arm.c:5364
 msgid "this instruction does not support indexing"
 msgstr ""
 
-#: config/tc-arm.c:5393
+#: config/tc-arm.c:5387
 msgid "only r15 allowed here"
 msgstr ""
 
-#: config/tc-arm.c:5603 config/tc-arm.c:10418
+#: config/tc-arm.c:5597 config/tc-arm.c:10428
 msgid "shift expression is too large"
 msgstr ""
 
-#: config/tc-arm.c:5629
+#: config/tc-arm.c:5623
 msgid "Thumb does not support the ldr =N pseudo-operation"
 msgstr ""
 
-#: config/tc-arm.c:5634
+#: config/tc-arm.c:5628
 msgid "cannot use register index with PC-relative addressing"
 msgstr ""
 
-#: config/tc-arm.c:5635
+#: config/tc-arm.c:5629
 msgid "cannot use register index with this instruction"
 msgstr ""
 
-#: config/tc-arm.c:5637
+#: config/tc-arm.c:5631
 msgid "Thumb does not support negative register indexing"
 msgstr ""
 
-#: config/tc-arm.c:5639
+#: config/tc-arm.c:5633
 msgid "Thumb does not support register post-indexing"
 msgstr ""
 
-#: config/tc-arm.c:5641
+#: config/tc-arm.c:5635
 msgid "Thumb does not support register indexing with writeback"
 msgstr ""
 
-#: config/tc-arm.c:5643
+#: config/tc-arm.c:5637
 msgid "Thumb supports only LSL in shifted register indexing"
 msgstr ""
 
-#: config/tc-arm.c:5651
+#: config/tc-arm.c:5645
 msgid "shift out of range"
 msgstr ""
 
-#: config/tc-arm.c:5659
+#: config/tc-arm.c:5653
 msgid "cannot use writeback with PC-relative addressing"
 msgstr ""
 
-#: config/tc-arm.c:5661
+#: config/tc-arm.c:5655
 msgid "cannot use writeback with this instruction"
 msgstr ""
 
-#: config/tc-arm.c:5681
+#: config/tc-arm.c:5675
 msgid "cannot use post-indexing with PC-relative addressing"
 msgstr ""
 
-#: config/tc-arm.c:5682
+#: config/tc-arm.c:5676
 msgid "cannot use post-indexing with this instruction"
 msgstr ""
 
-#: config/tc-arm.c:5849 config/tc-arm.c:5958 config/tc-arm.c:6038
-#: config/tc-arm.c:6712
+#: config/tc-arm.c:5843 config/tc-arm.c:5952 config/tc-arm.c:6032
+#: config/tc-arm.c:6706
 msgid "shift must be constant"
 msgstr ""
 
-#: config/tc-arm.c:5876 config/tc-arm.c:5973 config/tc-arm.c:6053
-#: config/tc-arm.c:6725
+#: config/tc-arm.c:5870 config/tc-arm.c:5967 config/tc-arm.c:6047
+#: config/tc-arm.c:6719
 msgid "unshifted register required"
 msgstr ""
 
-#: config/tc-arm.c:5891 config/tc-arm.c:6064 config/tc-arm.c:6785
+#: config/tc-arm.c:5885 config/tc-arm.c:6058 config/tc-arm.c:6779
 msgid "dest must overlap one source register"
 msgstr ""
 
-#: config/tc-arm.c:5976
+#: config/tc-arm.c:5970
 msgid "dest and source1 must be the same register"
 msgstr ""
 
-#: config/tc-arm.c:6241
+#: config/tc-arm.c:6235
 msgid "Thumb does not support the 2-argument form of this instruction"
 msgstr ""
 
-#: config/tc-arm.c:6315
+#: config/tc-arm.c:6309
 msgid "Thumb load/store multiple does not support {reglist}^"
 msgstr ""
 
-#: config/tc-arm.c:6332 config/tc-arm.c:6348 config/tc-arm.c:6379
+#: config/tc-arm.c:6326 config/tc-arm.c:6342 config/tc-arm.c:6373
 #, c-format
 msgid "value stored for r%d is UNPREDICTABLE"
 msgstr ""
 
-#: config/tc-arm.c:6342 config/tc-arm.c:6909
+#: config/tc-arm.c:6336 config/tc-arm.c:6903
 msgid "SP should not be in register list"
 msgstr ""
 
-#: config/tc-arm.c:6346 config/tc-arm.c:6913
+#: config/tc-arm.c:6340 config/tc-arm.c:6907
 msgid "PC should not be in register list"
 msgstr ""
 
-#: config/tc-arm.c:6355 config/tc-arm.c:6919
+#: config/tc-arm.c:6349 config/tc-arm.c:6913
 msgid "LR and PC should not both be in register list"
 msgstr ""
 
-#: config/tc-arm.c:6358
+#: config/tc-arm.c:6352
 msgid "base register should not be in register list when written back"
 msgstr ""
 
-#: config/tc-arm.c:6376 config/tc-arm.c:6386
+#: config/tc-arm.c:6370 config/tc-arm.c:6380
 msgid "this instruction will write back the base register"
 msgstr ""
 
-#: config/tc-arm.c:6389
+#: config/tc-arm.c:6383
 msgid "this instruction will not write back the base register"
 msgstr ""
 
-#: config/tc-arm.c:6418
+#: config/tc-arm.c:6412
 msgid "r14 not allowed as first register when second register is omitted"
 msgstr ""
 
-#: config/tc-arm.c:6462 config/tc-arm.c:6475 config/tc-arm.c:6511
+#: config/tc-arm.c:6456 config/tc-arm.c:6469 config/tc-arm.c:6505
 msgid "Thumb does not support this addressing mode"
 msgstr ""
 
-#: config/tc-arm.c:6479
+#: config/tc-arm.c:6473
 msgid "byte or halfword not valid for base register"
 msgstr ""
 
-#: config/tc-arm.c:6482
+#: config/tc-arm.c:6476
 msgid "r15 based store not allowed"
 msgstr ""
 
-#: config/tc-arm.c:6484
+#: config/tc-arm.c:6478
 msgid "invalid base register for register offset"
 msgstr ""
 
-#: config/tc-arm.c:6661
+#: config/tc-arm.c:6655
 msgid "only lo regs allowed with immediate"
 msgstr ""
 
-#: config/tc-arm.c:6750
+#: config/tc-arm.c:6744
 msgid "Thumb encoding does not support an immediate here"
 msgstr ""
 
-#: config/tc-arm.c:6820
+#: config/tc-arm.c:6814
 msgid "Thumb does not support NOP with hints"
 msgstr ""
 
-#: config/tc-arm.c:6891
+#: config/tc-arm.c:6885
 msgid "push/pop do not support {reglist}^"
 msgstr ""
 
-#: config/tc-arm.c:6926
+#: config/tc-arm.c:6920
 msgid "invalid register list to push/pop instruction"
 msgstr ""
 
-#: config/tc-arm.c:7097
+#: config/tc-arm.c:7091
 msgid "ror #imm not supported"
 msgstr ""
 
-#: config/tc-arm.c:7222
+#: config/tc-arm.c:7216
 msgid "Thumb encoding does not support rotation"
 msgstr ""
 
-#: config/tc-arm.c:7465 config/tc-arm.c:7532
+#: config/tc-arm.c:7459 config/tc-arm.c:7526
 msgid "conditional infixes are deprecated in unified syntax"
 msgstr ""
 
-#: config/tc-arm.c:7564
+#: config/tc-arm.c:7558
 #, c-format
 msgid "bad instruction `%s'"
 msgstr ""
 
-#: config/tc-arm.c:7574 config/tc-arm.c:7606
+#: config/tc-arm.c:7568 config/tc-arm.c:7600
 #, c-format
 msgid "selected processor does not support `%s'"
 msgstr ""
 
-#: config/tc-arm.c:7580
+#: config/tc-arm.c:7574
 msgid "Thumb does not support conditional execution"
 msgstr ""
 
-#: config/tc-arm.c:7596
+#: config/tc-arm.c:7590
 #, c-format
 msgid "cannot honor width suffix -- `%s'"
 msgstr ""
 
-#: config/tc-arm.c:7611
+#: config/tc-arm.c:7605
 #, c-format
 msgid "width suffixes are invalid in ARM mode -- `%s'"
 msgstr ""
 
-#: config/tc-arm.c:9454
+#: config/tc-arm.c:9442
 msgid "alignments greater than 32 bytes not supported in .text sections."
 msgstr ""
 
-#: config/tc-arm.c:9748
+#: config/tc-arm.c:9736
 msgid "handerdata in cantunwind frame"
 msgstr ""
 
-#: config/tc-arm.c:9765
+#: config/tc-arm.c:9753
 msgid "too many unwind opcodes for personality routine 0"
 msgstr ""
 
-#: config/tc-arm.c:9797
+#: config/tc-arm.c:9785
 msgid "too many unwind opcodes"
 msgstr ""
 
-#: config/tc-arm.c:10163 config/tc-arm.c:10442
+#: config/tc-arm.c:10174 config/tc-arm.c:10452
 #, c-format
 msgid "undefined symbol %s used as an immediate value"
 msgstr ""
 
-#: config/tc-arm.c:10177 config/tc-arm.c:10457
+#: config/tc-arm.c:10188 config/tc-arm.c:10467
 #, c-format
 msgid "invalid constant (%lx) after fixup"
 msgstr ""
 
-#: config/tc-arm.c:10214
+#: config/tc-arm.c:10225
 #, c-format
 msgid "unable to compute ADRL instructions for PC offset of 0x%lx"
 msgstr ""
 
-#: config/tc-arm.c:10246 config/tc-arm.c:10271
+#: config/tc-arm.c:10257 config/tc-arm.c:10282
 msgid "invalid literal constant: pool needs to be closer"
 msgstr ""
 
-#: config/tc-arm.c:10249 config/tc-arm.c:10287
+#: config/tc-arm.c:10260 config/tc-arm.c:10298
 #, c-format
 msgid "bad immediate value for offset (%ld)"
 msgstr ""
 
-#: config/tc-arm.c:10273
+#: config/tc-arm.c:10284
 #, c-format
 msgid "bad immediate value for half-word offset (%ld)"
 msgstr ""
 
-#: config/tc-arm.c:10329
+#: config/tc-arm.c:10339
 msgid "offset not a multiple of 4"
 msgstr ""
 
-#: config/tc-arm.c:10336 config/tc-arm.c:10351 config/tc-arm.c:10366
-#: config/tc-arm.c:10377 config/tc-arm.c:10400 config/tc-pj.c:499
+#: config/tc-arm.c:10346 config/tc-arm.c:10361 config/tc-arm.c:10376
+#: config/tc-arm.c:10387 config/tc-arm.c:10410 config/tc-pj.c:499
 #: config/tc-sh.c:4111
 msgid "offset out of range"
 msgstr ""
 
-#: config/tc-arm.c:10474
+#: config/tc-arm.c:10483
 msgid "invalid smi expression"
 msgstr ""
 
-#: config/tc-arm.c:10485 config/tc-arm.c:10494
+#: config/tc-arm.c:10494 config/tc-arm.c:10503
 msgid "invalid swi expression"
 msgstr ""
 
-#: config/tc-arm.c:10504
+#: config/tc-arm.c:10513
 msgid "invalid expression in load/store multiple"
 msgstr ""
 
-#: config/tc-arm.c:10554
-msgid "GAS can't handle same-section branch dest >= 0x04000000"
+#: config/tc-arm.c:10528
+msgid "misaligned branch destination"
 msgstr ""
 
-#: config/tc-arm.c:10563
-msgid "out of range branch"
-msgstr ""
-
-#: config/tc-arm.c:10619 config/tc-arm.c:10645 config/tc-arm.c:10670
-#: config/tc-arm.c:10817
+#: config/tc-arm.c:10532 config/tc-arm.c:10552 config/tc-arm.c:10570
+#: config/tc-arm.c:10583 config/tc-arm.c:10596 config/tc-arm.c:10635
+#: config/tc-arm.c:10660
 msgid "branch out of range"
 msgstr ""
 
-#: config/tc-arm.c:10705
+#: config/tc-arm.c:10548
+msgid "misaligned BLX destination"
+msgstr ""
+
+#: config/tc-arm.c:10609
 msgid "conditional branch out of range"
 msgstr ""
 
-#: config/tc-arm.c:10751
-msgid "branch with link out of range"
-msgstr ""
-
-#: config/tc-arm.c:10906
+#: config/tc-arm.c:10730
 msgid "rel31 relocation overflow"
 msgstr ""
 
-#: config/tc-arm.c:10921 config/tc-arm.c:10936
+#: config/tc-arm.c:10741 config/tc-arm.c:10756
 msgid "co-processor offset out of range"
 msgstr ""
 
-#: config/tc-arm.c:10952
+#: config/tc-arm.c:10772
 #, c-format
 msgid "invalid offset, target not word aligned (0x%08lX)"
 msgstr ""
 
-#: config/tc-arm.c:10958 config/tc-arm.c:10967 config/tc-arm.c:10975
-#: config/tc-arm.c:10983 config/tc-arm.c:10991
+#: config/tc-arm.c:10778 config/tc-arm.c:10787 config/tc-arm.c:10795
+#: config/tc-arm.c:10803 config/tc-arm.c:10811
 #, c-format
 msgid "invalid offset, value too big (0x%08lX)"
 msgstr ""
 
-#: config/tc-arm.c:11032
+#: config/tc-arm.c:10852
 msgid "invalid Hi register with immediate"
 msgstr ""
 
-#: config/tc-arm.c:11048
+#: config/tc-arm.c:10868
 msgid "invalid immediate for stack address calculation"
 msgstr ""
 
-#: config/tc-arm.c:11056
+#: config/tc-arm.c:10876
 #, c-format
 msgid "invalid immediate for address calculation (value = 0x%08lX)"
 msgstr ""
 
-#: config/tc-arm.c:11086
+#: config/tc-arm.c:10906
 #, c-format
 msgid "invalid immediate: %ld is too large"
 msgstr ""
 
-#: config/tc-arm.c:11098
+#: config/tc-arm.c:10918
 #, c-format
 msgid "invalid shift value: %ld"
 msgstr ""
 
-#: config/tc-arm.c:11117
+#: config/tc-arm.c:10937
 #, c-format
 msgid "bad relocation fixup type (%d)"
 msgstr ""
 
-#: config/tc-arm.c:11191
+#: config/tc-arm.c:11005
 msgid "literal referenced across section boundary"
 msgstr ""
 
-#: config/tc-arm.c:11221
+#: config/tc-arm.c:11035
 msgid "internal relocation (type: IMMEDIATE) not fixed up"
 msgstr ""
 
-#: config/tc-arm.c:11226
+#: config/tc-arm.c:11040
 msgid "ADRL used for a symbol not defined in the same file"
 msgstr ""
 
-#: config/tc-arm.c:11235
+#: config/tc-arm.c:11049
 #, c-format
 msgid "undefined local label `%s'"
 msgstr ""
 
-#: config/tc-arm.c:11241
+#: config/tc-arm.c:11055
 msgid "internal_relocation (type: OFFSET_IMM) not fixed up"
 msgstr ""
 
-#: config/tc-arm.c:11261 config/tc-cris.c:3869 config/tc-mcore.c:1997
+#: config/tc-arm.c:11075 config/tc-cris.c:3869 config/tc-mcore.c:1997
 #: config/tc-mmix.c:2888 config/tc-ns32k.c:2304
 msgid "<unknown>"
 msgstr ""
 
-#: config/tc-arm.c:11264 config/tc-arm.c:11285
+#: config/tc-arm.c:11078 config/tc-arm.c:11099
 #, c-format
 msgid "cannot represent %s relocation in this object file format"
 msgstr ""
 
-#: config/tc-arm.c:11505
+#: config/tc-arm.c:11312
 #, c-format
 msgid "%s: unexpected function type: %d"
 msgstr ""
 
-#: config/tc-arm.c:11582
+#: config/tc-arm.c:11389
 msgid "virtual memory exhausted"
 msgstr ""
 
-#: config/tc-arm.c:11608
+#: config/tc-arm.c:11415
 msgid "use of old and new-style options to set CPU type"
 msgstr ""
 
-#: config/tc-arm.c:11618
+#: config/tc-arm.c:11425
 msgid "use of old and new-style options to set FPU type"
 msgstr ""
 
-#: config/tc-arm.c:11680
+#: config/tc-arm.c:11487
 msgid "hard-float conflicts with specified fpu"
 msgstr ""
 
-#: config/tc-arm.c:11872
+#: config/tc-arm.c:11679
 msgid "generate PIC code"
 msgstr ""
 
-#: config/tc-arm.c:11873
+#: config/tc-arm.c:11680
 msgid "assemble Thumb code"
 msgstr ""
 
-#: config/tc-arm.c:11874
+#: config/tc-arm.c:11681
 msgid "support ARM/Thumb interworking"
 msgstr ""
 
-#: config/tc-arm.c:11876
+#: config/tc-arm.c:11683
 msgid "code uses 32-bit program counter"
 msgstr ""
 
-#: config/tc-arm.c:11877
+#: config/tc-arm.c:11684
 msgid "code uses 26-bit program counter"
 msgstr ""
 
-#: config/tc-arm.c:11878
+#: config/tc-arm.c:11685
 msgid "floating point args are in fp regs"
 msgstr ""
 
-#: config/tc-arm.c:11880
+#: config/tc-arm.c:11687
 msgid "re-entrant code"
 msgstr ""
 
-#: config/tc-arm.c:11881
+#: config/tc-arm.c:11688
 msgid "code is ATPCS conformant"
 msgstr ""
 
-#: config/tc-arm.c:11882
+#: config/tc-arm.c:11689
 msgid "assemble for big-endian"
 msgstr ""
 
-#: config/tc-arm.c:11883
+#: config/tc-arm.c:11690
 msgid "assemble for little-endian"
 msgstr ""
 
 #. These are recognized by the assembler, but have no affect on code.
-#: config/tc-arm.c:11887
+#: config/tc-arm.c:11694
 msgid "use frame pointer"
 msgstr ""
 
-#: config/tc-arm.c:11888
+#: config/tc-arm.c:11695
 msgid "use stack size checking"
 msgstr ""
 
 #. DON'T add any new processors to this list -- we want the whole list
 #. to go away...  Add them to the processors table instead.
-#: config/tc-arm.c:11892 config/tc-arm.c:11893
+#: config/tc-arm.c:11699 config/tc-arm.c:11700
 msgid "use -mcpu=arm1"
 msgstr ""
 
-#: config/tc-arm.c:11894 config/tc-arm.c:11895
+#: config/tc-arm.c:11701 config/tc-arm.c:11702
 msgid "use -mcpu=arm2"
 msgstr ""
 
-#: config/tc-arm.c:11896 config/tc-arm.c:11897
+#: config/tc-arm.c:11703 config/tc-arm.c:11704
 msgid "use -mcpu=arm250"
 msgstr ""
 
-#: config/tc-arm.c:11898 config/tc-arm.c:11899
+#: config/tc-arm.c:11705 config/tc-arm.c:11706
 msgid "use -mcpu=arm3"
 msgstr ""
 
-#: config/tc-arm.c:11900 config/tc-arm.c:11901
+#: config/tc-arm.c:11707 config/tc-arm.c:11708
 msgid "use -mcpu=arm6"
 msgstr ""
 
-#: config/tc-arm.c:11902 config/tc-arm.c:11903
+#: config/tc-arm.c:11709 config/tc-arm.c:11710
 msgid "use -mcpu=arm600"
 msgstr ""
 
-#: config/tc-arm.c:11904 config/tc-arm.c:11905
+#: config/tc-arm.c:11711 config/tc-arm.c:11712
 msgid "use -mcpu=arm610"
 msgstr ""
 
-#: config/tc-arm.c:11906 config/tc-arm.c:11907
+#: config/tc-arm.c:11713 config/tc-arm.c:11714
 msgid "use -mcpu=arm620"
 msgstr ""
 
-#: config/tc-arm.c:11908 config/tc-arm.c:11909
+#: config/tc-arm.c:11715 config/tc-arm.c:11716
 msgid "use -mcpu=arm7"
 msgstr ""
 
-#: config/tc-arm.c:11910 config/tc-arm.c:11911
+#: config/tc-arm.c:11717 config/tc-arm.c:11718
 msgid "use -mcpu=arm70"
 msgstr ""
 
-#: config/tc-arm.c:11912 config/tc-arm.c:11913
+#: config/tc-arm.c:11719 config/tc-arm.c:11720
 msgid "use -mcpu=arm700"
 msgstr ""
 
-#: config/tc-arm.c:11914 config/tc-arm.c:11915
+#: config/tc-arm.c:11721 config/tc-arm.c:11722
 msgid "use -mcpu=arm700i"
 msgstr ""
 
-#: config/tc-arm.c:11916 config/tc-arm.c:11917
+#: config/tc-arm.c:11723 config/tc-arm.c:11724
 msgid "use -mcpu=arm710"
 msgstr ""
 
-#: config/tc-arm.c:11918 config/tc-arm.c:11919
+#: config/tc-arm.c:11725 config/tc-arm.c:11726
 msgid "use -mcpu=arm710c"
 msgstr ""
 
-#: config/tc-arm.c:11920 config/tc-arm.c:11921
+#: config/tc-arm.c:11727 config/tc-arm.c:11728
 msgid "use -mcpu=arm720"
 msgstr ""
 
-#: config/tc-arm.c:11922 config/tc-arm.c:11923
+#: config/tc-arm.c:11729 config/tc-arm.c:11730
 msgid "use -mcpu=arm7d"
 msgstr ""
 
-#: config/tc-arm.c:11924 config/tc-arm.c:11925
+#: config/tc-arm.c:11731 config/tc-arm.c:11732
 msgid "use -mcpu=arm7di"
 msgstr ""
 
-#: config/tc-arm.c:11926 config/tc-arm.c:11927
+#: config/tc-arm.c:11733 config/tc-arm.c:11734
 msgid "use -mcpu=arm7m"
 msgstr ""
 
-#: config/tc-arm.c:11928 config/tc-arm.c:11929
+#: config/tc-arm.c:11735 config/tc-arm.c:11736
 msgid "use -mcpu=arm7dm"
 msgstr ""
 
-#: config/tc-arm.c:11930 config/tc-arm.c:11931
+#: config/tc-arm.c:11737 config/tc-arm.c:11738
 msgid "use -mcpu=arm7dmi"
 msgstr ""
 
-#: config/tc-arm.c:11932 config/tc-arm.c:11933
+#: config/tc-arm.c:11739 config/tc-arm.c:11740
 msgid "use -mcpu=arm7100"
 msgstr ""
 
-#: config/tc-arm.c:11934 config/tc-arm.c:11935
+#: config/tc-arm.c:11741 config/tc-arm.c:11742
 msgid "use -mcpu=arm7500"
 msgstr ""
 
-#: config/tc-arm.c:11936 config/tc-arm.c:11937
+#: config/tc-arm.c:11743 config/tc-arm.c:11744
 msgid "use -mcpu=arm7500fe"
 msgstr ""
 
-#: config/tc-arm.c:11938 config/tc-arm.c:11939 config/tc-arm.c:11940
-#: config/tc-arm.c:11941
+#: config/tc-arm.c:11745 config/tc-arm.c:11746 config/tc-arm.c:11747
+#: config/tc-arm.c:11748
 msgid "use -mcpu=arm7tdmi"
 msgstr ""
 
-#: config/tc-arm.c:11942 config/tc-arm.c:11943
+#: config/tc-arm.c:11749 config/tc-arm.c:11750
 msgid "use -mcpu=arm710t"
 msgstr ""
 
-#: config/tc-arm.c:11944 config/tc-arm.c:11945
+#: config/tc-arm.c:11751 config/tc-arm.c:11752
 msgid "use -mcpu=arm720t"
 msgstr ""
 
-#: config/tc-arm.c:11946 config/tc-arm.c:11947
+#: config/tc-arm.c:11753 config/tc-arm.c:11754
 msgid "use -mcpu=arm740t"
 msgstr ""
 
-#: config/tc-arm.c:11948 config/tc-arm.c:11949
+#: config/tc-arm.c:11755 config/tc-arm.c:11756
 msgid "use -mcpu=arm8"
 msgstr ""
 
-#: config/tc-arm.c:11950 config/tc-arm.c:11951
+#: config/tc-arm.c:11757 config/tc-arm.c:11758
 msgid "use -mcpu=arm810"
 msgstr ""
 
-#: config/tc-arm.c:11952 config/tc-arm.c:11953
+#: config/tc-arm.c:11759 config/tc-arm.c:11760
 msgid "use -mcpu=arm9"
 msgstr ""
 
-#: config/tc-arm.c:11954 config/tc-arm.c:11955
+#: config/tc-arm.c:11761 config/tc-arm.c:11762
 msgid "use -mcpu=arm9tdmi"
 msgstr ""
 
-#: config/tc-arm.c:11956 config/tc-arm.c:11957
+#: config/tc-arm.c:11763 config/tc-arm.c:11764
 msgid "use -mcpu=arm920"
 msgstr ""
 
-#: config/tc-arm.c:11958 config/tc-arm.c:11959
+#: config/tc-arm.c:11765 config/tc-arm.c:11766
 msgid "use -mcpu=arm940"
 msgstr ""
 
-#: config/tc-arm.c:11960
+#: config/tc-arm.c:11767
 msgid "use -mcpu=strongarm"
 msgstr ""
 
-#: config/tc-arm.c:11962
+#: config/tc-arm.c:11769
 msgid "use -mcpu=strongarm110"
 msgstr ""
 
-#: config/tc-arm.c:11964
+#: config/tc-arm.c:11771
 msgid "use -mcpu=strongarm1100"
 msgstr ""
 
-#: config/tc-arm.c:11966
+#: config/tc-arm.c:11773
 msgid "use -mcpu=strongarm1110"
 msgstr ""
 
-#: config/tc-arm.c:11967
+#: config/tc-arm.c:11774
 msgid "use -mcpu=xscale"
 msgstr ""
 
-#: config/tc-arm.c:11968
+#: config/tc-arm.c:11775
 msgid "use -mcpu=iwmmxt"
 msgstr ""
 
-#: config/tc-arm.c:11969
+#: config/tc-arm.c:11776
 msgid "use -mcpu=all"
 msgstr ""
 
 #. Architecture variants -- don't add any more to this list either.
-#: config/tc-arm.c:11972 config/tc-arm.c:11973
+#: config/tc-arm.c:11779 config/tc-arm.c:11780
 msgid "use -march=armv2"
 msgstr ""
 
-#: config/tc-arm.c:11974 config/tc-arm.c:11975
+#: config/tc-arm.c:11781 config/tc-arm.c:11782
 msgid "use -march=armv2a"
 msgstr ""
 
-#: config/tc-arm.c:11976 config/tc-arm.c:11977
+#: config/tc-arm.c:11783 config/tc-arm.c:11784
 msgid "use -march=armv3"
 msgstr ""
 
-#: config/tc-arm.c:11978 config/tc-arm.c:11979
+#: config/tc-arm.c:11785 config/tc-arm.c:11786
 msgid "use -march=armv3m"
 msgstr ""
 
-#: config/tc-arm.c:11980 config/tc-arm.c:11981
+#: config/tc-arm.c:11787 config/tc-arm.c:11788
 msgid "use -march=armv4"
 msgstr ""
 
-#: config/tc-arm.c:11982 config/tc-arm.c:11983
+#: config/tc-arm.c:11789 config/tc-arm.c:11790
 msgid "use -march=armv4t"
 msgstr ""
 
-#: config/tc-arm.c:11984 config/tc-arm.c:11985
+#: config/tc-arm.c:11791 config/tc-arm.c:11792
 msgid "use -march=armv5"
 msgstr ""
 
-#: config/tc-arm.c:11986 config/tc-arm.c:11987
+#: config/tc-arm.c:11793 config/tc-arm.c:11794
 msgid "use -march=armv5t"
 msgstr ""
 
-#: config/tc-arm.c:11988 config/tc-arm.c:11989
+#: config/tc-arm.c:11795 config/tc-arm.c:11796
 msgid "use -march=armv5te"
 msgstr ""
 
 #. Floating point variants -- don't add any more to this list either.
-#: config/tc-arm.c:11992
+#: config/tc-arm.c:11799
 msgid "use -mfpu=fpe"
 msgstr ""
 
-#: config/tc-arm.c:11993
+#: config/tc-arm.c:11800
 msgid "use -mfpu=fpa10"
 msgstr ""
 
-#: config/tc-arm.c:11994
+#: config/tc-arm.c:11801
 msgid "use -mfpu=fpa11"
 msgstr ""
 
-#: config/tc-arm.c:11996
+#: config/tc-arm.c:11803
 msgid "use either -mfpu=softfpa or -mfpu=softvfp"
 msgstr ""
 
-#: config/tc-arm.c:12215
+#: config/tc-arm.c:12022
 msgid "invalid architectural extension"
 msgstr ""
 
-#: config/tc-arm.c:12229
+#: config/tc-arm.c:12036
 msgid "missing architectural extension"
 msgstr ""
 
-#: config/tc-arm.c:12242
+#: config/tc-arm.c:12049
 #, c-format
 msgid "unknown architectural extnsion `%s'"
 msgstr ""
 
-#: config/tc-arm.c:12266
+#: config/tc-arm.c:12073
 #, c-format
 msgid "missing cpu name `%s'"
 msgstr ""
 
-#: config/tc-arm.c:12282
+#: config/tc-arm.c:12089
 #, c-format
 msgid "unknown cpu `%s'"
 msgstr ""
 
-#: config/tc-arm.c:12300
+#: config/tc-arm.c:12107
 #, c-format
 msgid "missing architecture name `%s'"
 msgstr ""
 
-#: config/tc-arm.c:12317
+#: config/tc-arm.c:12124
 #, c-format
 msgid "unknown architecture `%s'\n"
 msgstr ""
 
-#: config/tc-arm.c:12333
+#: config/tc-arm.c:12140
 #, c-format
 msgid "unknown floating point format `%s'\n"
 msgstr ""
 
-#: config/tc-arm.c:12349
+#: config/tc-arm.c:12156
 #, c-format
 msgid "unknown floating point abi `%s'\n"
 msgstr ""
 
-#: config/tc-arm.c:12365
+#: config/tc-arm.c:12172
 #, c-format
 msgid "unknown EABI `%s'\n"
 msgstr ""
 
-#: config/tc-arm.c:12372
+#: config/tc-arm.c:12179
 msgid "<cpu name>\t  assemble for CPU <cpu name>"
 msgstr ""
 
-#: config/tc-arm.c:12374
+#: config/tc-arm.c:12181
 msgid "<arch name>\t  assemble for architecture <arch name>"
 msgstr ""
 
-#: config/tc-arm.c:12376
+#: config/tc-arm.c:12183
 msgid "<fpu name>\t  assemble for FPU architecture <fpu name>"
 msgstr ""
 
-#: config/tc-arm.c:12378
+#: config/tc-arm.c:12185
 msgid "<abi>\t  assemble for floating point ABI <abi>"
 msgstr ""
 
-#: config/tc-arm.c:12381
+#: config/tc-arm.c:12188
 msgid "<ver>\t  assemble for eabi version <ver>"
 msgstr ""
 
-#: config/tc-arm.c:12422 config/tc-arm.c:12444
+#: config/tc-arm.c:12229 config/tc-arm.c:12251
 #, c-format
 msgid "option `-%c%s' is deprecated: %s"
 msgstr ""
 
-#: config/tc-arm.c:12465
+#: config/tc-arm.c:12272
 #, c-format
 msgid " ARM-specific assembler options:\n"
 msgstr ""
 
-#: config/tc-arm.c:12476
+#: config/tc-arm.c:12283
 #, c-format
 msgid "  -EB                     assemble code for a big-endian cpu\n"
 msgstr ""
 
-#: config/tc-arm.c:12481
+#: config/tc-arm.c:12288
 #, c-format
 msgid "  -EL                     assemble code for a little-endian cpu\n"
 msgstr ""
@@ -2820,10 +2827,10 @@ msgstr ""
 msgid "redefinition of mcu type `%s' to `%s'"
 msgstr ""
 
-#: config/tc-avr.c:402 config/tc-crx.c:490 config/tc-d10v.c:278
+#: config/tc-avr.c:402 config/tc-crx.c:491 config/tc-d10v.c:278
 #: config/tc-d30v.c:312 config/tc-mips.c:9925 config/tc-mmix.c:2264
 #: config/tc-mn10200.c:342 config/tc-msp430.c:805 config/tc-pj.c:342
-#: config/tc-ppc.c:5202 config/tc-sh.c:2972 config/tc-v850.c:1199
+#: config/tc-ppc.c:5206 config/tc-sh.c:2972 config/tc-v850.c:1199
 msgid "bad call to md_atof"
 msgstr ""
 
@@ -2928,7 +2935,7 @@ msgstr ""
 
 #: config/tc-avr.c:1115 config/tc-d10v.c:1494 config/tc-d30v.c:1804
 #: config/tc-mn10200.c:814 config/tc-mn10300.c:2308 config/tc-msp430.c:1986
-#: config/tc-or32.c:1505 config/tc-ppc.c:6048 config/tc-v850.c:2190
+#: config/tc-or32.c:1505 config/tc-ppc.c:6052 config/tc-v850.c:2190
 #, c-format
 msgid "reloc %d not supported by object file format"
 msgstr ""
@@ -3015,17 +3022,17 @@ msgid ""
 "common_v10_v32"
 msgstr ""
 
-#: config/tc-cris.c:1148 config/tc-crx.c:581 config/tc-crx.c:608
-#: config/tc-crx.c:626
+#: config/tc-cris.c:1148 config/tc-crx.c:582 config/tc-crx.c:609
+#: config/tc-crx.c:627
 msgid "Virtual memory exhausted"
 msgstr ""
 
-#: config/tc-cris.c:1182 config/tc-crx.c:591
+#: config/tc-cris.c:1182 config/tc-crx.c:592
 #, c-format
 msgid "Can't hash `%s': %s\n"
 msgstr ""
 
-#: config/tc-cris.c:1183 config/tc-crx.c:592
+#: config/tc-cris.c:1183 config/tc-crx.c:593
 msgid "(unknown reason)"
 msgstr ""
 
@@ -3273,180 +3280,180 @@ msgstr ""
 msgid ".arch <arch> requires a matching --march=... option"
 msgstr ""
 
-#: config/tc-crx.c:343 config/tc-mn10200.c:801 write.c:2654
+#: config/tc-crx.c:344 config/tc-mn10200.c:801 write.c:2654
 #, c-format
 msgid "can't resolve `%s' {%s section} - `%s' {%s section}"
 msgstr ""
 
-#: config/tc-crx.c:359
+#: config/tc-crx.c:360
 #, c-format
 msgid "internal error: reloc %d (`%s') not supported by object file format"
 msgstr ""
 
-#: config/tc-crx.c:618 config/tc-crx.c:636 config/tc-i386.c:938
-#: config/tc-i386.c:961 config/tc-m68k.c:4203
+#: config/tc-crx.c:619 config/tc-crx.c:637 config/tc-i386.c:942
+#: config/tc-i386.c:965 config/tc-m68k.c:4221
 #, c-format
 msgid "Internal Error:  Can't hash %s: %s"
 msgstr ""
 
 #. Missing or bad expr becomes absolute 0.
-#: config/tc-crx.c:664 config/tc-i386.c:4132
+#: config/tc-crx.c:665 config/tc-i386.c:4164
 #, c-format
 msgid "missing or invalid displacement expression `%s' taken as 0"
 msgstr ""
 
-#: config/tc-crx.c:802 config/tc-crx.c:822 config/tc-crx.c:837
+#: config/tc-crx.c:803 config/tc-crx.c:823 config/tc-crx.c:838
 #, c-format
 msgid "Illegal register `%s' in Instruction `%s'"
 msgstr ""
 
-#: config/tc-crx.c:865
+#: config/tc-crx.c:866
 #, c-format
 msgid "Illegal Scale - `%d'"
 msgstr ""
 
-#: config/tc-crx.c:981
+#: config/tc-crx.c:982
 #, c-format
 msgid "Illegal operands (whitespace): `%s'"
 msgstr ""
 
-#: config/tc-crx.c:993 config/tc-crx.c:1000 config/tc-crx.c:1017
-#: config/tc-crx.c:1803
+#: config/tc-crx.c:994 config/tc-crx.c:1001 config/tc-crx.c:1018
+#: config/tc-crx.c:1804
 #, c-format
 msgid "Missing matching brackets : `%s'"
 msgstr ""
 
-#: config/tc-crx.c:1043
+#: config/tc-crx.c:1044
 #, c-format
 msgid "Unknown exception: `%s'"
 msgstr ""
 
-#: config/tc-crx.c:1139
+#: config/tc-crx.c:1140
 #, c-format
 msgid "Illegal `cinv' parameter: `%c'"
 msgstr ""
 
-#: config/tc-crx.c:1172
+#: config/tc-crx.c:1173
 #, c-format
 msgid "Unknown register: `%d'"
 msgstr ""
 
 #. Issue a error message when register is illegal.
-#: config/tc-crx.c:1180
+#: config/tc-crx.c:1181
 #, c-format
 msgid "Illegal register (`%s') in Instruction: `%s'"
 msgstr ""
 
-#: config/tc-crx.c:1309
+#: config/tc-crx.c:1310
 #, c-format
 msgid "Illegal Co-processor register in Instruction `%s' "
 msgstr ""
 
-#: config/tc-crx.c:1316
+#: config/tc-crx.c:1317
 #, c-format
 msgid "Illegal Co-processor special register in Instruction `%s' "
 msgstr ""
 
-#: config/tc-crx.c:1615
+#: config/tc-crx.c:1616
 msgid "Incorrect number of operands"
 msgstr ""
 
-#: config/tc-crx.c:1617
+#: config/tc-crx.c:1618
 #, c-format
 msgid "Illegal type of operand (arg %d)"
 msgstr ""
 
-#: config/tc-crx.c:1623
+#: config/tc-crx.c:1624
 #, c-format
 msgid "Operand out of range (arg %d)"
 msgstr ""
 
-#: config/tc-crx.c:1626
+#: config/tc-crx.c:1627
 #, c-format
 msgid "Operand has odd displacement (arg %d)"
 msgstr ""
 
-#: config/tc-crx.c:1629
+#: config/tc-crx.c:1630
 #, c-format
 msgid "Invalid DISPU4 operand value (arg %d)"
 msgstr ""
 
-#: config/tc-crx.c:1632
+#: config/tc-crx.c:1633
 #, c-format
 msgid "Invalid CST4 operand value (arg %d)"
 msgstr ""
 
-#: config/tc-crx.c:1635
+#: config/tc-crx.c:1636
 #, c-format
 msgid "Operand value is not within upper 64 KB (arg %d)"
 msgstr ""
 
-#: config/tc-crx.c:1639 config/tc-crx.c:1670
+#: config/tc-crx.c:1640 config/tc-crx.c:1671
 #, c-format
 msgid "Illegal operand (arg %d)"
 msgstr ""
 
-#: config/tc-crx.c:1701 config/tc-crx.c:1718
+#: config/tc-crx.c:1702 config/tc-crx.c:1719
 #, c-format
 msgid "Same src/dest register is used (`r%d'), result is undefined"
 msgstr ""
 
-#: config/tc-crx.c:1710
+#: config/tc-crx.c:1711
 #, c-format
 msgid "`%s' has undefined result"
 msgstr ""
 
-#: config/tc-crx.c:1772
+#: config/tc-crx.c:1773
 msgid "Invalid Register in Register List"
 msgstr ""
 
-#: config/tc-crx.c:1826
+#: config/tc-crx.c:1827
 #, c-format
 msgid "Illegal register `%s' in cop-register list"
 msgstr ""
 
-#: config/tc-crx.c:1834
+#: config/tc-crx.c:1835
 #, c-format
 msgid "Illegal register `%s' in cop-special-register list"
 msgstr ""
 
-#: config/tc-crx.c:1853
+#: config/tc-crx.c:1854
 #, c-format
 msgid "Illegal register `%s' in user register list"
 msgstr ""
 
-#: config/tc-crx.c:1872
+#: config/tc-crx.c:1873
 #, c-format
 msgid "Illegal register `%s' in register list"
 msgstr ""
 
-#: config/tc-crx.c:1878
+#: config/tc-crx.c:1879
 #, c-format
 msgid "Maximum %d bits may be set in `mask16' operand"
 msgstr ""
 
-#: config/tc-crx.c:1887
+#: config/tc-crx.c:1888
 #, c-format
 msgid "rest of line ignored; first ignored character is `%c'"
 msgstr ""
 
-#: config/tc-crx.c:1895
+#: config/tc-crx.c:1896
 #, c-format
 msgid "Illegal `mask16' operand, operation is undefined - `%s'"
 msgstr ""
 
 #. HI can't be specified without LO (and vise-versa).
-#: config/tc-crx.c:1901
+#: config/tc-crx.c:1902
 msgid "HI/LO registers should be specified together"
 msgstr ""
 
-#: config/tc-crx.c:1907
+#: config/tc-crx.c:1908
 msgid "HI/LO registers should be specified without additional registers"
 msgstr ""
 
 #. Give an error if a frag containing code is not aligned to a 2-byte
 #. boundary.
-#: config/tc-crx.c:1992 config/tc-crx.h:78
+#: config/tc-crx.c:1993 config/tc-crx.h:78
 msgid "instruction address is not a multiple of 2"
 msgstr ""
 
@@ -3462,7 +3469,7 @@ msgid ""
 msgstr ""
 
 #: config/tc-d10v.c:496 config/tc-d30v.c:488 config/tc-mn10200.c:1075
-#: config/tc-mn10300.c:1817 config/tc-ppc.c:2375 config/tc-s390.c:1216
+#: config/tc-mn10300.c:1817 config/tc-ppc.c:2379 config/tc-s390.c:1216
 #: config/tc-tic80.c:259 config/tc-v850.c:1949
 msgid "illegal operand"
 msgstr ""
@@ -3554,7 +3561,7 @@ msgstr ""
 msgid "bad opcode or operands"
 msgstr ""
 
-#: config/tc-d10v.c:1296 config/tc-m68k.c:4689
+#: config/tc-d10v.c:1296 config/tc-m68k.c:4707
 msgid "value out of range"
 msgstr ""
 
@@ -3792,8 +3799,8 @@ msgid "Instruction %s not allowed in a delay slot."
 msgstr ""
 
 #: config/tc-fr30.c:358 config/tc-frv.c:1600 config/tc-i960.c:1764
-#: config/tc-ip2k.c:371 config/tc-m32r.c:2143 config/tc-openrisc.c:376
-#: config/tc-xstormy16.c:631
+#: config/tc-ip2k.c:371 config/tc-m32c.c:869 config/tc-m32r.c:2143
+#: config/tc-openrisc.c:376 config/tc-xstormy16.c:631
 msgid "Bad call to md_atof()"
 msgstr ""
 
@@ -3931,8 +3938,8 @@ msgstr ""
 
 #: config/tc-h8300.c:82 config/tc-h8300.c:93 config/tc-h8300.c:105
 #: config/tc-h8300.c:117 config/tc-h8300.c:129 config/tc-h8300.c:142
-#: config/tc-h8300.c:213 config/tc-hppa.c:1441 config/tc-hppa.c:6930
-#: config/tc-hppa.c:6936 config/tc-hppa.c:6942 config/tc-hppa.c:6948
+#: config/tc-h8300.c:213 config/tc-hppa.c:1441 config/tc-hppa.c:6917
+#: config/tc-hppa.c:6923 config/tc-hppa.c:6929 config/tc-hppa.c:6935
 #: config/tc-mn10300.c:1223 config/tc-mn10300.c:1228 config/tc-mn10300.c:2726
 msgid "could not set architecture and machine"
 msgstr ""
@@ -4203,11 +4210,11 @@ msgstr ""
 msgid "internal error: losing opcode: `%s' \"%s\"\n"
 msgstr ""
 
-#: config/tc-hppa.c:1542 config/tc-hppa.c:7069 config/tc-hppa.c:7126
+#: config/tc-hppa.c:1542 config/tc-hppa.c:7056 config/tc-hppa.c:7113
 msgid "Missing function name for .PROC (corrupted label chain)"
 msgstr ""
 
-#: config/tc-hppa.c:1545 config/tc-hppa.c:7129
+#: config/tc-hppa.c:1545 config/tc-hppa.c:7116
 msgid "Missing function name for .PROC"
 msgstr ""
 
@@ -4381,384 +4388,384 @@ msgstr ""
 msgid "Invalid Nullification: (%c)"
 msgstr ""
 
-#: config/tc-hppa.c:5954
+#: config/tc-hppa.c:5951
 msgid "Argument to .BLOCK/.BLOCKZ must be between 0 and 0x3fffffff"
 msgstr ""
 
-#: config/tc-hppa.c:6080
+#: config/tc-hppa.c:6067
 #, c-format
 msgid "Invalid .CALL argument: %s"
 msgstr ""
 
-#: config/tc-hppa.c:6202
+#: config/tc-hppa.c:6189
 msgid ".callinfo is not within a procedure definition"
 msgstr ""
 
-#: config/tc-hppa.c:6222
+#: config/tc-hppa.c:6209
 #, c-format
 msgid "FRAME parameter must be a multiple of 8: %d\n"
 msgstr ""
 
-#: config/tc-hppa.c:6241
+#: config/tc-hppa.c:6228
 msgid "Value for ENTRY_GR must be in the range 3..18\n"
 msgstr ""
 
-#: config/tc-hppa.c:6253
+#: config/tc-hppa.c:6240
 msgid "Value for ENTRY_FR must be in the range 12..21\n"
 msgstr ""
 
-#: config/tc-hppa.c:6263
+#: config/tc-hppa.c:6250
 msgid "Value for ENTRY_SR must be 3\n"
 msgstr ""
 
-#: config/tc-hppa.c:6319
+#: config/tc-hppa.c:6306
 #, c-format
 msgid "Invalid .CALLINFO argument: %s"
 msgstr ""
 
-#: config/tc-hppa.c:6431
+#: config/tc-hppa.c:6418
 msgid "The .ENTER pseudo-op is not supported"
 msgstr ""
 
-#: config/tc-hppa.c:6447
+#: config/tc-hppa.c:6434
 msgid "Misplaced .entry. Ignored."
 msgstr ""
 
-#: config/tc-hppa.c:6451
+#: config/tc-hppa.c:6438
 msgid "Missing .callinfo."
 msgstr ""
 
-#: config/tc-hppa.c:6517
+#: config/tc-hppa.c:6504
 msgid ".REG expression must be a register"
 msgstr ""
 
-#: config/tc-hppa.c:6533
+#: config/tc-hppa.c:6520
 msgid "bad or irreducible absolute expression; zero assumed"
 msgstr ""
 
-#: config/tc-hppa.c:6544
+#: config/tc-hppa.c:6531
 msgid ".REG must use a label"
 msgstr ""
 
-#: config/tc-hppa.c:6546
+#: config/tc-hppa.c:6533
 msgid ".EQU must use a label"
 msgstr ""
 
-#: config/tc-hppa.c:6599
+#: config/tc-hppa.c:6586
 msgid ".EXIT must appear within a procedure"
 msgstr ""
 
-#: config/tc-hppa.c:6603
+#: config/tc-hppa.c:6590
 msgid "Missing .callinfo"
 msgstr ""
 
-#: config/tc-hppa.c:6607
+#: config/tc-hppa.c:6594
 msgid "No .ENTRY for this .EXIT"
 msgstr ""
 
-#: config/tc-hppa.c:6634
+#: config/tc-hppa.c:6621
 #, c-format
 msgid "Cannot define export symbol: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:6692
+#: config/tc-hppa.c:6679
 #, c-format
 msgid "Using ENTRY rather than CODE in export directive for %s"
 msgstr ""
 
-#: config/tc-hppa.c:6809
+#: config/tc-hppa.c:6796
 #, c-format
 msgid "Undefined .EXPORT/.IMPORT argument (ignored): %s"
 msgstr ""
 
-#: config/tc-hppa.c:6891
+#: config/tc-hppa.c:6878
 msgid "Missing label name on .LABEL"
 msgstr ""
 
-#: config/tc-hppa.c:6896
+#: config/tc-hppa.c:6883
 msgid "extra .LABEL arguments ignored."
 msgstr ""
 
-#: config/tc-hppa.c:6913
+#: config/tc-hppa.c:6900
 msgid "The .LEAVE pseudo-op is not supported"
 msgstr ""
 
-#: config/tc-hppa.c:6952
+#: config/tc-hppa.c:6939
 msgid "Unrecognized .LEVEL argument\n"
 msgstr ""
 
-#: config/tc-hppa.c:6988
+#: config/tc-hppa.c:6975
 #, c-format
 msgid "Cannot define static symbol: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:7023
+#: config/tc-hppa.c:7010
 msgid "Nested procedures"
 msgstr ""
 
-#: config/tc-hppa.c:7033
+#: config/tc-hppa.c:7020
 msgid "Cannot allocate unwind descriptor\n"
 msgstr ""
 
-#: config/tc-hppa.c:7133
+#: config/tc-hppa.c:7120
 msgid "misplaced .procend"
 msgstr ""
 
-#: config/tc-hppa.c:7136
+#: config/tc-hppa.c:7123
 msgid "Missing .callinfo for this procedure"
 msgstr ""
 
-#: config/tc-hppa.c:7139
+#: config/tc-hppa.c:7126
 msgid "Missing .EXIT for a .ENTRY"
 msgstr ""
 
-#: config/tc-hppa.c:7177
+#: config/tc-hppa.c:7164
 msgid "Not in a space.\n"
 msgstr ""
 
-#: config/tc-hppa.c:7180
+#: config/tc-hppa.c:7167
 msgid "Not in a subspace.\n"
 msgstr ""
 
-#: config/tc-hppa.c:7271
+#: config/tc-hppa.c:7258
 msgid "Invalid .SPACE argument"
 msgstr ""
 
-#: config/tc-hppa.c:7318
+#: config/tc-hppa.c:7305
 msgid "Can't change spaces within a procedure definition. Ignored"
 msgstr ""
 
-#: config/tc-hppa.c:7447
+#: config/tc-hppa.c:7434
 #, c-format
 msgid "Undefined space: '%s' Assuming space number = 0."
 msgstr ""
 
-#: config/tc-hppa.c:7471
+#: config/tc-hppa.c:7458
 msgid "Must be in a space before changing or declaring subspaces.\n"
 msgstr ""
 
-#: config/tc-hppa.c:7475
+#: config/tc-hppa.c:7462
 msgid "Can't change subspaces within a procedure definition. Ignored"
 msgstr ""
 
-#: config/tc-hppa.c:7511
+#: config/tc-hppa.c:7498
 msgid "Parameters of an existing subspace can't be modified"
 msgstr ""
 
-#: config/tc-hppa.c:7563
+#: config/tc-hppa.c:7550
 msgid "Alignment must be a power of 2"
 msgstr ""
 
-#: config/tc-hppa.c:7610
+#: config/tc-hppa.c:7597
 msgid "FIRST not supported as a .SUBSPACE argument"
 msgstr ""
 
-#: config/tc-hppa.c:7612
+#: config/tc-hppa.c:7599
 msgid "Invalid .SUBSPACE argument"
 msgstr ""
 
-#: config/tc-hppa.c:7801
+#: config/tc-hppa.c:7788
 #, c-format
 msgid "Internal error: Unable to find containing space for %s."
 msgstr ""
 
-#: config/tc-hppa.c:7841
+#: config/tc-hppa.c:7828
 #, c-format
 msgid "Out of memory: could not allocate new space chain entry: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:7930
+#: config/tc-hppa.c:7917
 #, c-format
 msgid "Out of memory: could not allocate new subspace chain entry: %s\n"
 msgstr ""
 
-#: config/tc-hppa.c:8666
+#: config/tc-hppa.c:8653
 #, c-format
 msgid "Symbol '%s' could not be created."
 msgstr ""
 
-#: config/tc-hppa.c:8670
+#: config/tc-hppa.c:8657
 msgid "No memory for symbol name."
 msgstr ""
 
-#: config/tc-i386.c:706
+#: config/tc-i386.c:710
 #, c-format
 msgid "%s shortened to %s"
 msgstr ""
 
-#: config/tc-i386.c:762
+#: config/tc-i386.c:766
 msgid "same type of prefix used twice"
 msgstr ""
 
-#: config/tc-i386.c:780
+#: config/tc-i386.c:784
 msgid "64bit mode not supported on this CPU."
 msgstr ""
 
-#: config/tc-i386.c:784
+#: config/tc-i386.c:788
 msgid "32bit mode not supported on this CPU."
 msgstr ""
 
-#: config/tc-i386.c:817
+#: config/tc-i386.c:821
 msgid "bad argument to syntax directive."
 msgstr ""
 
-#: config/tc-i386.c:869
+#: config/tc-i386.c:873
 #, c-format
 msgid "no such architecture: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:874
+#: config/tc-i386.c:878
 msgid "missing cpu architecture"
 msgstr ""
 
-#: config/tc-i386.c:888
+#: config/tc-i386.c:892
 #, c-format
 msgid "no such architecture modifier: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:904 config/tc-i386.c:5191
+#: config/tc-i386.c:908 config/tc-i386.c:5252
 msgid "Unknown architecture"
 msgstr ""
 
-#: config/tc-i386.c:1219
+#: config/tc-i386.c:1223
 msgid "There are no unsigned pc-relative relocations"
 msgstr ""
 
-#: config/tc-i386.c:1226 config/tc-i386.c:5411
+#: config/tc-i386.c:1231 config/tc-i386.c:5476
 #, c-format
 msgid "can not do %d byte pc-relative relocation"
 msgstr ""
 
-#: config/tc-i386.c:1243
+#: config/tc-i386.c:1248
 #, c-format
 msgid "can not do %s %d byte relocation"
 msgstr ""
 
-#: config/tc-i386.c:1439 config/tc-i386.c:2436
+#: config/tc-i386.c:1452 config/tc-i386.c:2460
 #, c-format
 msgid "ambiguous operand size for `%s'"
 msgstr ""
 
-#: config/tc-i386.c:1487
+#: config/tc-i386.c:1500
 #, c-format
 msgid "can't use register '%%%s' as operand %d in '%s'."
 msgstr ""
 
 #. UnixWare fsub no args is alias for fsubp, fadd -> faddp, etc.
-#: config/tc-i386.c:1516
+#: config/tc-i386.c:1529
 #, c-format
 msgid "translating to `%sp'"
 msgstr ""
 
-#: config/tc-i386.c:1561
+#: config/tc-i386.c:1574
 #, c-format
 msgid "can't encode register '%%%s' in an instruction requiring REX prefix."
 msgstr ""
 
-#: config/tc-i386.c:1602 config/tc-i386.c:1701
+#: config/tc-i386.c:1615 config/tc-i386.c:1714
 #, c-format
 msgid "no such instruction: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:1613 config/tc-i386.c:1733
+#: config/tc-i386.c:1626 config/tc-i386.c:1746
 #, c-format
 msgid "invalid character %s in mnemonic"
 msgstr ""
 
-#: config/tc-i386.c:1620
+#: config/tc-i386.c:1633
 msgid "expecting prefix; got nothing"
 msgstr ""
 
-#: config/tc-i386.c:1622
+#: config/tc-i386.c:1635
 msgid "expecting mnemonic; got nothing"
 msgstr ""
 
-#: config/tc-i386.c:1641
+#: config/tc-i386.c:1654
 #, c-format
 msgid "redundant %s prefix"
 msgstr ""
 
-#: config/tc-i386.c:1751
+#: config/tc-i386.c:1764
 #, c-format
 msgid "`%s' is not supported in 64-bit mode"
 msgstr ""
 
-#: config/tc-i386.c:1752
+#: config/tc-i386.c:1765
 #, c-format
 msgid "`%s' is only supported in 64-bit mode"
 msgstr ""
 
-#: config/tc-i386.c:1758
+#: config/tc-i386.c:1771
 #, c-format
 msgid "`%s' is not supported on `%s%s'"
 msgstr ""
 
-#: config/tc-i386.c:1765
+#: config/tc-i386.c:1778
 msgid "use .code16 to ensure correct addressing mode"
 msgstr ""
 
-#: config/tc-i386.c:1778
+#: config/tc-i386.c:1791
 #, c-format
 msgid "expecting string instruction after `%s'"
 msgstr ""
 
-#: config/tc-i386.c:1812
+#: config/tc-i386.c:1825
 #, c-format
 msgid "invalid character %s before operand %d"
 msgstr ""
 
-#: config/tc-i386.c:1826
+#: config/tc-i386.c:1839
 #, c-format
 msgid "unbalanced parenthesis in operand %d."
 msgstr ""
 
-#: config/tc-i386.c:1829
+#: config/tc-i386.c:1842
 #, c-format
 msgid "unbalanced brackets in operand %d."
 msgstr ""
 
-#: config/tc-i386.c:1838
+#: config/tc-i386.c:1851
 #, c-format
 msgid "invalid character %s in operand %d"
 msgstr ""
 
-#: config/tc-i386.c:1865
+#: config/tc-i386.c:1878
 #, c-format
 msgid "spurious operands; (%d operands/instruction max)"
 msgstr ""
 
-#: config/tc-i386.c:1888
+#: config/tc-i386.c:1901
 msgid "expecting operand after ','; got nothing"
 msgstr ""
 
-#: config/tc-i386.c:1893
+#: config/tc-i386.c:1906
 msgid "expecting operand before ','; got nothing"
 msgstr ""
 
 #. We found no match.
-#: config/tc-i386.c:2245
+#: config/tc-i386.c:2269
 #, c-format
 msgid "suffix or operands invalid for `%s'"
 msgstr ""
 
-#: config/tc-i386.c:2256
+#: config/tc-i386.c:2280
 #, c-format
 msgid "indirect %s without `*'"
 msgstr ""
 
 #. Warn them that a data or address size prefix doesn't
 #. affect assembly of the next line of code.
-#: config/tc-i386.c:2264
+#: config/tc-i386.c:2288
 #, c-format
 msgid "stand-alone `%s' prefix"
 msgstr ""
 
-#: config/tc-i386.c:2293 config/tc-i386.c:2308
+#: config/tc-i386.c:2317 config/tc-i386.c:2332
 #, c-format
 msgid "`%s' operand %d must use `%%es' segment"
 msgstr ""
 
-#: config/tc-i386.c:2418
+#: config/tc-i386.c:2442
 msgid ""
 "no instruction mnemonic suffix given and no register operands; can't size "
 "instruction"
@@ -4766,181 +4773,181 @@ msgstr ""
 
 #. Prohibit these changes in the 64bit mode, since the
 #. lowering is more complicated.
-#: config/tc-i386.c:2519 config/tc-i386.c:2578 config/tc-i386.c:2595
-#: config/tc-i386.c:2627 config/tc-i386.c:2660
+#: config/tc-i386.c:2543 config/tc-i386.c:2602 config/tc-i386.c:2619
+#: config/tc-i386.c:2651 config/tc-i386.c:2684
 #, c-format
 msgid "Incorrect register `%%%s' used with `%c' suffix"
 msgstr ""
 
-#: config/tc-i386.c:2527 config/tc-i386.c:2585 config/tc-i386.c:2667
+#: config/tc-i386.c:2551 config/tc-i386.c:2609 config/tc-i386.c:2691
 #, c-format
 msgid "using `%%%s' instead of `%%%s' due to `%c' suffix"
 msgstr ""
 
-#: config/tc-i386.c:2542 config/tc-i386.c:2563 config/tc-i386.c:2614
-#: config/tc-i386.c:2645
+#: config/tc-i386.c:2566 config/tc-i386.c:2587 config/tc-i386.c:2638
+#: config/tc-i386.c:2669
 #, c-format
 msgid "`%%%s' not allowed with `%s%c'"
 msgstr ""
 
-#: config/tc-i386.c:2708
+#: config/tc-i386.c:2732
 msgid "no instruction mnemonic suffix given; can't determine immediate size"
 msgstr ""
 
-#: config/tc-i386.c:2741
+#: config/tc-i386.c:2765
 #, c-format
 msgid ""
 "no instruction mnemonic suffix given; can't determine immediate size %x %c"
 msgstr ""
 
 #. Reversed arguments on faddp, fsubp, etc.
-#: config/tc-i386.c:2790
+#: config/tc-i386.c:2814
 #, c-format
 msgid "translating to `%s %%%s,%%%s'"
 msgstr ""
 
 #. Extraneous `l' suffix on fp insn.
-#: config/tc-i386.c:2797
+#: config/tc-i386.c:2821
 #, c-format
 msgid "translating to `%s %%%s'"
 msgstr ""
 
-#: config/tc-i386.c:2815
+#: config/tc-i386.c:2839
 #, c-format
 msgid "you can't `pop %%cs'"
 msgstr ""
 
-#. lea
-#: config/tc-i386.c:2834
-msgid "segment override on `lea' is ineffectual"
+#: config/tc-i386.c:2860
+#, c-format
+msgid "segment override on `%s' is ineffectual"
 msgstr ""
 
-#: config/tc-i386.c:3143 config/tc-i386.c:3237 config/tc-i386.c:3282
+#: config/tc-i386.c:3169 config/tc-i386.c:3263 config/tc-i386.c:3308
 msgid "skipping prefixes on this instruction"
 msgstr ""
 
-#: config/tc-i386.c:3302
+#: config/tc-i386.c:3328
 msgid "16-bit jump out of range"
 msgstr ""
 
-#: config/tc-i386.c:3311
+#: config/tc-i386.c:3337
 #, c-format
 msgid "can't handle non absolute segment in `%s'"
 msgstr ""
 
-#: config/tc-i386.c:3764
+#: config/tc-i386.c:3793
 #, c-format
 msgid "@%s reloc is not supported in %s bit mode"
 msgstr ""
 
-#: config/tc-i386.c:3882
+#: config/tc-i386.c:3911
 msgid "only 1 or 2 immediate operands are allowed"
 msgstr ""
 
-#: config/tc-i386.c:3905 config/tc-i386.c:4092
+#: config/tc-i386.c:3934 config/tc-i386.c:4121
 #, c-format
 msgid "junk `%s' after expression"
 msgstr ""
 
 #. Missing or bad expr becomes absolute 0.
-#: config/tc-i386.c:3916
+#: config/tc-i386.c:3945
 #, c-format
 msgid "missing or invalid immediate expression `%s' taken as 0"
 msgstr ""
 
-#: config/tc-i386.c:3941 config/tc-i386.c:4150
+#: config/tc-i386.c:3970 config/tc-i386.c:4182
 #, c-format
 msgid "unimplemented segment %s in operand"
 msgstr ""
 
-#: config/tc-i386.c:3987
+#: config/tc-i386.c:4016
 #, c-format
 msgid "expecting scale factor of 1, 2, 4, or 8: got `%s'"
 msgstr ""
 
-#: config/tc-i386.c:3996
+#: config/tc-i386.c:4025
 #, c-format
 msgid "scale factor of %d without an index register"
 msgstr ""
 
-#: config/tc-i386.c:4111
+#: config/tc-i386.c:4141
 #, c-format
 msgid "bad expression used with @%s"
 msgstr ""
 
-#: config/tc-i386.c:4234
+#: config/tc-i386.c:4289
 #, c-format
 msgid "`%s' is not a valid base/index expression"
 msgstr ""
 
-#: config/tc-i386.c:4238
+#: config/tc-i386.c:4293
 #, c-format
 msgid "`%s' is not a valid %s bit base/index expression"
 msgstr ""
 
-#: config/tc-i386.c:4312
+#: config/tc-i386.c:4367
 #, c-format
 msgid "bad memory operand `%s'"
 msgstr ""
 
-#: config/tc-i386.c:4327
+#: config/tc-i386.c:4382
 #, c-format
 msgid "junk `%s' after register"
 msgstr ""
 
-#: config/tc-i386.c:4336 config/tc-i386.c:4451 config/tc-i386.c:4489
+#: config/tc-i386.c:4391 config/tc-i386.c:4506 config/tc-i386.c:4544
 #, c-format
 msgid "bad register name `%s'"
 msgstr ""
 
-#: config/tc-i386.c:4344
+#: config/tc-i386.c:4399
 msgid "immediate operand illegal with absolute jump"
 msgstr ""
 
-#: config/tc-i386.c:4366
+#: config/tc-i386.c:4421
 #, c-format
 msgid "too many memory references for `%s'"
 msgstr ""
 
-#: config/tc-i386.c:4444
+#: config/tc-i386.c:4499
 #, c-format
 msgid "expecting `,' or `)' after index register in `%s'"
 msgstr ""
 
-#: config/tc-i386.c:4468
+#: config/tc-i386.c:4523
 #, c-format
 msgid "expecting `)' after scale factor in `%s'"
 msgstr ""
 
-#: config/tc-i386.c:4475
+#: config/tc-i386.c:4530
 #, c-format
 msgid "expecting index register or scale factor after `,'; got '%c'"
 msgstr ""
 
-#: config/tc-i386.c:4482
+#: config/tc-i386.c:4537
 #, c-format
 msgid "expecting `,' or `)' after base register in `%s'"
 msgstr ""
 
 #. It's not a memory operand; argh!
-#: config/tc-i386.c:4523
+#: config/tc-i386.c:4578
 #, c-format
 msgid "invalid char %s beginning operand %d `%s'"
 msgstr ""
 
-#: config/tc-i386.c:4698
+#: config/tc-i386.c:4753
 msgid "long jump required"
 msgstr ""
 
-#: config/tc-i386.c:4976
+#: config/tc-i386.c:5037
 msgid "Bad call to md_atof ()"
 msgstr ""
 
-#: config/tc-i386.c:5143
+#: config/tc-i386.c:5204
 msgid "No compiled in support for x86_64"
 msgstr ""
 
-#: config/tc-i386.c:5164
+#: config/tc-i386.c:5225
 #, c-format
 msgid ""
 "  -Q                      ignored\n"
@@ -4951,106 +4958,106 @@ msgid ""
 "  -s                      ignored\n"
 msgstr ""
 
-#: config/tc-i386.c:5172
+#: config/tc-i386.c:5233
 #, c-format
 msgid ""
 "  -n                      Do not optimize code alignment\n"
 "  -q                      quieten some warnings\n"
 msgstr ""
 
-#: config/tc-i386.c:5272 config/tc-s390.c:1826
+#: config/tc-i386.c:5333 config/tc-s390.c:1826
 msgid "GOT already in symbol table"
 msgstr ""
 
-#: config/tc-i386.c:5426
+#: config/tc-i386.c:5494
 #, c-format
 msgid "can not do %d byte relocation"
 msgstr ""
 
-#: config/tc-i386.c:5495 config/tc-s390.c:2272
+#: config/tc-i386.c:5563 config/tc-s390.c:2272
 #, c-format
 msgid "cannot represent relocation type %s"
 msgstr ""
 
-#: config/tc-i386.c:5750
+#: config/tc-i386.c:5818
 #, c-format
 msgid "invalid operand for '%s' ('%s' unexpected)"
 msgstr ""
 
-#: config/tc-i386.c:5762
+#: config/tc-i386.c:5830
 #, c-format
 msgid "too many memory references for '%s'"
 msgstr ""
 
 #. See the comments in intel_bracket_expr.
-#: config/tc-i386.c:5773
+#: config/tc-i386.c:5841
 #, c-format
 msgid "Treating `%s' as memory reference"
 msgstr ""
 
-#: config/tc-i386.c:6085
+#: config/tc-i386.c:6153
 #, c-format
 msgid "Unknown operand modifier `%s'"
 msgstr ""
 
-#: config/tc-i386.c:6095
+#: config/tc-i386.c:6163
 msgid "Conflicting operand modifiers"
 msgstr ""
 
-#: config/tc-i386.c:6144
+#: config/tc-i386.c:6212
 msgid "Invalid operand to `OFFSET'"
 msgstr ""
 
-#: config/tc-i386.c:6212
+#: config/tc-i386.c:6280
 #, c-format
 msgid "`[%.*s]' taken to mean just `%.*s'"
 msgstr ""
 
-#: config/tc-i386.c:6309
+#: config/tc-i386.c:6377
 #, c-format
 msgid "`%s' is not a valid segment register"
 msgstr ""
 
-#: config/tc-i386.c:6313
+#: config/tc-i386.c:6381
 msgid "Extra segment override ignored"
 msgstr ""
 
-#: config/tc-i386.c:6347 config/tc-i386.c:6516
+#: config/tc-i386.c:6415 config/tc-i386.c:6584
 msgid "Register scaling only allowed in memory operands"
 msgstr ""
 
-#: config/tc-i386.c:6369 config/tc-i386.c:6493
+#: config/tc-i386.c:6437 config/tc-i386.c:6561
 #, c-format
 msgid "Syntax error: Expecting a constant, got `%s'"
 msgstr ""
 
-#: config/tc-i386.c:6397
+#: config/tc-i386.c:6465
 msgid "Too many register references in memory operand"
 msgstr ""
 
-#: config/tc-i386.c:6408
+#: config/tc-i386.c:6476
 msgid "Using register names in OFFSET expressions is deprecated"
 msgstr ""
 
-#: config/tc-i386.c:6421
+#: config/tc-i386.c:6489
 msgid "Invalid use of register"
 msgstr ""
 
-#: config/tc-i386.c:6566
+#: config/tc-i386.c:6634
 #, c-format
 msgid "Unrecognized token '%s'"
 msgstr ""
 
-#: config/tc-i386.c:6583
+#: config/tc-i386.c:6651
 #, c-format
 msgid "Unexpected token `%s'"
 msgstr ""
 
-#: config/tc-i386.c:6745
+#: config/tc-i386.c:6813
 msgid "`:' expected"
 msgstr ""
 
-#: config/tc-i386.c:6770
+#: config/tc-i386.c:6838
 #, c-format
 msgid "Unrecognized token `%s'"
 msgstr ""
@@ -5227,7 +5234,7 @@ msgstr ""
 msgid "architecture of opcode conflicts with that of earlier instruction(s)"
 msgstr ""
 
-#: config/tc-i960.c:1433 config/tc-xtensa.c:11298
+#: config/tc-i960.c:1433 config/tc-xtensa.c:11300
 msgid "too many operands"
 msgstr ""
 
@@ -5332,99 +5339,99 @@ msgstr ""
 msgid "option --link-relax is only supported in b.out format"
 msgstr ""
 
-#: config/tc-ia64.c:1011
+#: config/tc-ia64.c:1005
 msgid "Bad .section directive: want a,o,s,w,x,M,S,G,T in string"
 msgstr ""
 
-#: config/tc-ia64.c:1148
+#: config/tc-ia64.c:1142
 msgid "Unwind directive not followed by an instruction."
 msgstr ""
 
-#: config/tc-ia64.c:4962
+#: config/tc-ia64.c:4934
 msgid "Register name expected"
 msgstr ""
 
-#: config/tc-ia64.c:4967 config/tc-ia64.c:5283
+#: config/tc-ia64.c:4939 config/tc-ia64.c:5255
 msgid "Comma expected"
 msgstr ""
 
-#: config/tc-ia64.c:4975
+#: config/tc-ia64.c:4947
 msgid "Register value annotation ignored"
 msgstr ""
 
-#: config/tc-ia64.c:5016
+#: config/tc-ia64.c:4988
 msgid "Directive invalid within a bundle"
 msgstr ""
 
-#: config/tc-ia64.c:5109
+#: config/tc-ia64.c:5081
 msgid "Missing predicate relation type"
 msgstr ""
 
-#: config/tc-ia64.c:5115
+#: config/tc-ia64.c:5087
 msgid "Unrecognized predicate relation type"
 msgstr ""
 
-#: config/tc-ia64.c:5162
+#: config/tc-ia64.c:5134
 msgid "Bad register range"
 msgstr ""
 
-#: config/tc-ia64.c:5171
+#: config/tc-ia64.c:5143
 msgid "Predicate register expected"
 msgstr ""
 
-#: config/tc-ia64.c:5176
+#: config/tc-ia64.c:5148
 msgid "Duplicate predicate register ignored"
 msgstr ""
 
-#: config/tc-ia64.c:5194
+#: config/tc-ia64.c:5166
 msgid "Predicate source and target required"
 msgstr ""
 
-#: config/tc-ia64.c:5196 config/tc-ia64.c:5208
+#: config/tc-ia64.c:5168 config/tc-ia64.c:5180
 msgid "Use of p0 is not valid in this context"
 msgstr ""
 
-#: config/tc-ia64.c:5203
+#: config/tc-ia64.c:5175
 msgid "At least two PR arguments expected"
 msgstr ""
 
-#: config/tc-ia64.c:5217
+#: config/tc-ia64.c:5189
 msgid "At least one PR argument expected"
 msgstr ""
 
-#: config/tc-ia64.c:5253
+#: config/tc-ia64.c:5225
 #, c-format
 msgid "Inserting \"%s\" into entry hint table failed: %s"
 msgstr ""
 
 #. FIXME -- need 62-bit relocation type
-#: config/tc-ia64.c:5729
+#: config/tc-ia64.c:5701
 msgid "62-bit relocation not yet implemented"
 msgstr ""
 
 #. XXX technically, this is wrong: we should not be issuing warning
 #. messages until we're sure this instruction pattern is going to
 #. be used!
-#: config/tc-ia64.c:5802
+#: config/tc-ia64.c:5774
 msgid "lower 16 bits of mask ignored"
 msgstr ""
 
-#: config/tc-ia64.c:6421
+#: config/tc-ia64.c:6385
 msgid "Value truncated to 62 bits"
 msgstr ""
 
 #. Give an error if a frag containing code is not aligned to a 16 byte
 #. boundary.
-#: config/tc-ia64.c:6558 config/tc-ia64.h:171
+#: config/tc-ia64.c:6522 config/tc-ia64.h:171
 msgid "instruction address is not a multiple of 16"
 msgstr ""
 
-#: config/tc-ia64.c:7094
+#: config/tc-ia64.c:7058
 #, c-format
 msgid "Unrecognized option '-x%s'"
 msgstr ""
 
-#: config/tc-ia64.c:7122
+#: config/tc-ia64.c:7086
 msgid ""
 "IA-64 options:\n"
 "  --mconstant-gp\t  mark output file as using the constant-GP model\n"
@@ -5450,79 +5457,79 @@ msgid ""
 "\t\t\t  dependency violation checking\n"
 msgstr ""
 
-#: config/tc-ia64.c:7152
+#: config/tc-ia64.c:7116
 msgid "--gstabs is not supported for ia64"
 msgstr ""
 
-#: config/tc-ia64.c:7496 config/tc-mips.c:1383
+#: config/tc-ia64.c:7460 config/tc-mips.c:1383
 msgid "Could not set architecture and machine"
 msgstr ""
 
-#: config/tc-ia64.c:7613
+#: config/tc-ia64.c:7586
 msgid "Explicit stops are ignored in auto mode"
 msgstr ""
 
-#: config/tc-ia64.c:7665
+#: config/tc-ia64.c:7608
 msgid "Found '{' after explicit switch to automatic mode"
 msgstr ""
 
-#: config/tc-ia64.c:8235
+#: config/tc-ia64.c:8197
 #, c-format
 msgid "Unhandled dependency %s for %s (%s), note %d"
 msgstr ""
 
-#: config/tc-ia64.c:9510
+#: config/tc-ia64.c:9472
 #, c-format
 msgid "Unrecognized dependency specifier %d\n"
 msgstr ""
 
-#: config/tc-ia64.c:10404
+#: config/tc-ia64.c:10366
 msgid "Only the first path encountering the conflict is reported"
 msgstr ""
 
-#: config/tc-ia64.c:10407
+#: config/tc-ia64.c:10369
 msgid "This is the location of the conflicting usage"
 msgstr ""
 
-#: config/tc-ia64.c:11614
+#: config/tc-ia64.c:11576
 msgid "Can't add stop bit to mark end of instruction group"
 msgstr ""
 
-#: config/tc-ia64.c:11714 read.c:1438 read.c:2204 read.c:2828
+#: config/tc-ia64.c:11676 read.c:1438 read.c:2204 read.c:2828
 msgid "expected symbol name"
 msgstr ""
 
-#: config/tc-ia64.c:11724 read.c:2214 read.c:2838 stabs.c:470
+#: config/tc-ia64.c:11686 read.c:2214 read.c:2838 stabs.c:470
 #, c-format
 msgid "expected comma after \"%s\""
 msgstr ""
 
-#: config/tc-ia64.c:11766
+#: config/tc-ia64.c:11728
 #, c-format
 msgid "`%s' is already the alias of %s `%s'"
 msgstr ""
 
-#: config/tc-ia64.c:11776
+#: config/tc-ia64.c:11738
 #, c-format
 msgid "%s `%s' already has an alias `%s'"
 msgstr ""
 
-#: config/tc-ia64.c:11787
+#: config/tc-ia64.c:11749
 #, c-format
 msgid "inserting \"%s\" into %s alias hash table failed: %s"
 msgstr ""
 
-#: config/tc-ia64.c:11795
+#: config/tc-ia64.c:11757
 #, c-format
 msgid "inserting \"%s\" into %s name hash table failed: %s"
 msgstr ""
 
-#: config/tc-ia64.c:11814
+#: config/tc-ia64.c:11776
 #, c-format
 msgid "symbol `%s' aliased to `%s' is not used"
 msgstr ""
 
-#: config/tc-ia64.c:11836
+#: config/tc-ia64.c:11798
 #, c-format
 msgid "section `%s' aliased to `%s' is not used"
 msgstr ""
@@ -5544,6 +5551,11 @@ msgstr ""
 
 #: config/tc-ip2k.c:274
 msgid "md_pcrel_from\n"
+msgstr ""
+
+#: config/tc-m32c.c:128
+#, c-format
+msgid " M32C specific command line options:\n"
 msgstr ""
 
 #. Pretend that we do not recognise this option.
@@ -5762,7 +5774,7 @@ msgid ""
 "is this intentional ?"
 msgstr ""
 
-#: config/tc-m32r.c:1493 config/tc-ppc.c:1768 config/tc-ppc.c:4360
+#: config/tc-m32r.c:1493 config/tc-ppc.c:1772 config/tc-ppc.c:4364
 msgid "Expected comma after symbol-name: rest of line ignored."
 msgstr ""
 
@@ -5771,16 +5783,16 @@ msgstr ""
 msgid ".SCOMMon length (%ld.) <0! Ignored."
 msgstr ""
 
-#: config/tc-m32r.c:1517 config/tc-ppc.c:1790 config/tc-ppc.c:2947
-#: config/tc-ppc.c:4384
+#: config/tc-m32r.c:1517 config/tc-ppc.c:1794 config/tc-ppc.c:2951
+#: config/tc-ppc.c:4388
 msgid "ignoring bad alignment"
 msgstr ""
 
-#: config/tc-m32r.c:1529 config/tc-ppc.c:1827 config/tc-v850.c:323
+#: config/tc-m32r.c:1529 config/tc-ppc.c:1831 config/tc-v850.c:323
 msgid "Common alignment not a power of 2"
 msgstr ""
 
-#: config/tc-m32r.c:1544 config/tc-ppc.c:1801 config/tc-ppc.c:4396
+#: config/tc-m32r.c:1544 config/tc-ppc.c:1805 config/tc-ppc.c:4400
 #, c-format
 msgid "Ignoring attempt to re-define symbol `%s'."
 msgstr ""
@@ -6156,11 +6168,11 @@ msgstr ""
 msgid ", or aliases"
 msgstr ""
 
-#: config/tc-m68k.c:758 config/tc-m68k.c:4775 config/tc-m68k.c:5166
+#: config/tc-m68k.c:758 config/tc-m68k.c:4793 config/tc-m68k.c:5184
 msgid "Tried to convert PC relative branch to absolute jump"
 msgstr ""
 
-#: config/tc-m68k.c:765 config/tc-m68k.c:4765
+#: config/tc-m68k.c:765 config/tc-m68k.c:4783
 msgid "Tried to convert PC relative BSR to absolute JSR"
 msgstr ""
 
@@ -6198,348 +6210,348 @@ msgstr ""
 msgid "Cannot make %s relocation PC relative"
 msgstr ""
 
-#: config/tc-m68k.c:1112 config/tc-tahoe.c:1398 config/tc-vax.c:1952
+#: config/tc-m68k.c:1113 config/tc-tahoe.c:1398 config/tc-vax.c:1952
 msgid "No operator"
 msgstr ""
 
-#: config/tc-m68k.c:1142 config/tc-tahoe.c:1415 config/tc-vax.c:1969
+#: config/tc-m68k.c:1143 config/tc-tahoe.c:1415 config/tc-vax.c:1969
 msgid "Unknown operator"
 msgstr ""
 
-#: config/tc-m68k.c:1992
+#: config/tc-m68k.c:2007
 msgid "invalid instruction for this architecture; needs "
 msgstr ""
 
-#: config/tc-m68k.c:1998
+#: config/tc-m68k.c:2013
 msgid "ColdFire ISA_A"
 msgstr ""
 
-#: config/tc-m68k.c:2006
+#: config/tc-m68k.c:2021
 msgid "ColdFire hardware divide"
 msgstr ""
 
-#: config/tc-m68k.c:2014
+#: config/tc-m68k.c:2029
 msgid "ColdFire ISA_A+"
 msgstr ""
 
-#: config/tc-m68k.c:2022
+#: config/tc-m68k.c:2037
 msgid "ColdFire ISA_B"
 msgstr ""
 
-#: config/tc-m68k.c:2030
+#: config/tc-m68k.c:2045
 msgid "ColdFire fpu"
 msgstr ""
 
-#: config/tc-m68k.c:2037
+#: config/tc-m68k.c:2052
 msgid "fpu (68040, 68060 or 68881/68882)"
 msgstr ""
 
-#: config/tc-m68k.c:2040
+#: config/tc-m68k.c:2055
 msgid "mmu (68030 or 68851)"
 msgstr ""
 
-#: config/tc-m68k.c:2043
+#: config/tc-m68k.c:2058
 msgid "68020 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2046
+#: config/tc-m68k.c:2061
 msgid "68000 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2049
+#: config/tc-m68k.c:2064
 msgid "68010 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2077
+#: config/tc-m68k.c:2092
 msgid "operands mismatch"
 msgstr ""
 
-#: config/tc-m68k.c:2138 config/tc-m68k.c:2144 config/tc-m68k.c:2150
+#: config/tc-m68k.c:2153 config/tc-m68k.c:2159 config/tc-m68k.c:2165
 #: config/tc-mmix.c:2488 config/tc-mmix.c:2512
 msgid "operand out of range"
 msgstr ""
 
-#: config/tc-m68k.c:2207
+#: config/tc-m68k.c:2222
 #, c-format
 msgid "Bignum too big for %c format; truncated"
 msgstr ""
 
-#: config/tc-m68k.c:2288
+#: config/tc-m68k.c:2303
 msgid "displacement too large for this architecture; needs 68020 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2399
+#: config/tc-m68k.c:2414
 msgid ""
 "scale factor invalid on this architecture; needs cpu32 or 68020 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2404
+#: config/tc-m68k.c:2419
 msgid "invalid index size for coldfire"
 msgstr ""
 
-#: config/tc-m68k.c:2457
+#: config/tc-m68k.c:2472
 msgid "Forcing byte displacement"
 msgstr ""
 
-#: config/tc-m68k.c:2459
+#: config/tc-m68k.c:2474
 msgid "byte displacement out of range"
 msgstr ""
 
-#: config/tc-m68k.c:2507 config/tc-m68k.c:2545
+#: config/tc-m68k.c:2522 config/tc-m68k.c:2560
 msgid "invalid operand mode for this architecture; needs 68020 or higher"
 msgstr ""
 
-#: config/tc-m68k.c:2531 config/tc-m68k.c:2565
+#: config/tc-m68k.c:2546 config/tc-m68k.c:2580
 msgid ":b not permitted; defaulting to :w"
 msgstr ""
 
-#: config/tc-m68k.c:2642
+#: config/tc-m68k.c:2657
 msgid "unsupported byte value; use a different suffix"
 msgstr ""
 
-#: config/tc-m68k.c:2657
+#: config/tc-m68k.c:2672
 msgid "unknown/incorrect operand"
 msgstr ""
 
-#: config/tc-m68k.c:2700 config/tc-m68k.c:2708 config/tc-m68k.c:2715
-#: config/tc-m68k.c:2722
+#: config/tc-m68k.c:2715 config/tc-m68k.c:2723 config/tc-m68k.c:2730
+#: config/tc-m68k.c:2737
 msgid "out of range"
 msgstr ""
 
-#: config/tc-m68k.c:2768
+#: config/tc-m68k.c:2783
 msgid "Can't use long branches on 68000/68010/5200"
 msgstr ""
 
-#: config/tc-m68k.c:2885
+#: config/tc-m68k.c:2900
 msgid "Expression out of range, using 0"
 msgstr ""
 
-#: config/tc-m68k.c:3066 config/tc-m68k.c:3082
+#: config/tc-m68k.c:3081 config/tc-m68k.c:3097
 msgid "Floating point register in register list"
 msgstr ""
 
-#: config/tc-m68k.c:3072
+#: config/tc-m68k.c:3087
 msgid "Wrong register in floating-point reglist"
 msgstr ""
 
-#: config/tc-m68k.c:3088
+#: config/tc-m68k.c:3103
 msgid "incorrect register in reglist"
 msgstr ""
 
-#: config/tc-m68k.c:3094
+#: config/tc-m68k.c:3109
 msgid "wrong register in floating-point reglist"
 msgstr ""
 
 #. ERROR.
-#: config/tc-m68k.c:3557
+#: config/tc-m68k.c:3572
 msgid "Extra )"
 msgstr ""
 
 #. ERROR.
-#: config/tc-m68k.c:3568
+#: config/tc-m68k.c:3583
 msgid "Missing )"
 msgstr ""
 
-#: config/tc-m68k.c:3585
+#: config/tc-m68k.c:3600
 msgid "Missing operand"
 msgstr ""
 
-#: config/tc-m68k.c:3947
+#: config/tc-m68k.c:3962
 #, c-format
 msgid "%s -- statement `%s' ignored"
 msgstr ""
 
-#: config/tc-m68k.c:3996
+#: config/tc-m68k.c:4011
 #, c-format
 msgid "Don't know how to figure width of %c in md_assemble()"
 msgstr ""
 
-#: config/tc-m68k.c:4162
+#: config/tc-m68k.c:4180
 #, c-format
 msgid "Internal Error:  Can't allocate m68k_sorted_opcodes of size %d"
 msgstr ""
 
-#: config/tc-m68k.c:4213 config/tc-m68k.c:4252
+#: config/tc-m68k.c:4231 config/tc-m68k.c:4270
 #, c-format
 msgid "Internal Error: Can't find %s in hash table"
 msgstr ""
 
-#: config/tc-m68k.c:4216 config/tc-m68k.c:4255
+#: config/tc-m68k.c:4234 config/tc-m68k.c:4273
 #, c-format
 msgid "Internal Error: Can't hash %s: %s"
 msgstr ""
 
-#: config/tc-m68k.c:4336
+#: config/tc-m68k.c:4354
 msgid "architecture not yet selected: defaulting to 68020"
 msgstr ""
 
-#: config/tc-m68k.c:4396
+#: config/tc-m68k.c:4414
 #, c-format
 msgid "unrecognized default cpu `%s' ???"
 msgstr ""
 
-#: config/tc-m68k.c:4407
+#: config/tc-m68k.c:4425
 msgid "68040 and 68851 specified; mmu instructions may assemble incorrectly"
 msgstr ""
 
-#: config/tc-m68k.c:4424
+#: config/tc-m68k.c:4442
 msgid "options for 68881 and no-68881 both given"
 msgstr ""
 
-#: config/tc-m68k.c:4427
+#: config/tc-m68k.c:4445
 msgid "options for 68851 and no-68851 both given"
 msgstr ""
 
-#: config/tc-m68k.c:4496
+#: config/tc-m68k.c:4514
 #, c-format
 msgid "text label `%s' aligned to odd boundary"
 msgstr ""
 
-#: config/tc-m68k.c:4705
+#: config/tc-m68k.c:4723
 msgid "invalid byte branch offset"
 msgstr ""
 
-#: config/tc-m68k.c:4741
+#: config/tc-m68k.c:4759
 msgid "short branch with zero offset: use :w"
 msgstr ""
 
-#: config/tc-m68k.c:4791 config/tc-m68k.c:4850 config/tc-m68k.c:4914
+#: config/tc-m68k.c:4809 config/tc-m68k.c:4868 config/tc-m68k.c:4932
 msgid "Tried to convert PC relative conditional branch to absolute jump"
 msgstr ""
 
-#: config/tc-m68k.c:4831
+#: config/tc-m68k.c:4849
 msgid "Tried to convert DBcc to absolute jump"
 msgstr ""
 
-#: config/tc-m68k.c:5210 config/tc-m68k.c:5221 config/tc-m68k.c:5261
+#: config/tc-m68k.c:5228 config/tc-m68k.c:5239 config/tc-m68k.c:5279
 msgid "expression out of range: defaulting to 1"
 msgstr ""
 
-#: config/tc-m68k.c:5253
+#: config/tc-m68k.c:5271
 msgid "expression out of range: defaulting to 0"
 msgstr ""
 
-#: config/tc-m68k.c:5294 config/tc-m68k.c:5306
+#: config/tc-m68k.c:5312 config/tc-m68k.c:5324
 #, c-format
 msgid "Can't deal with expression; defaulting to %ld"
 msgstr ""
 
-#: config/tc-m68k.c:5320
+#: config/tc-m68k.c:5338
 msgid "expression doesn't fit in BYTE"
 msgstr ""
 
-#: config/tc-m68k.c:5324
+#: config/tc-m68k.c:5342
 msgid "expression doesn't fit in WORD"
 msgstr ""
 
-#: config/tc-m68k.c:5411
+#: config/tc-m68k.c:5429
 #, c-format
 msgid "%s: unrecognized processor name"
 msgstr ""
 
-#: config/tc-m68k.c:5475
+#: config/tc-m68k.c:5493
 msgid "bad coprocessor id"
 msgstr ""
 
-#: config/tc-m68k.c:5481
+#: config/tc-m68k.c:5499
 msgid "unrecognized fopt option"
 msgstr ""
 
-#: config/tc-m68k.c:5614
+#: config/tc-m68k.c:5632
 #, c-format
 msgid "option `%s' may not be negated"
 msgstr ""
 
-#: config/tc-m68k.c:5625
+#: config/tc-m68k.c:5643
 #, c-format
 msgid "option `%s' not recognized"
 msgstr ""
 
-#: config/tc-m68k.c:5654
+#: config/tc-m68k.c:5672
 msgid "bad format of OPT NEST=depth"
 msgstr ""
 
-#: config/tc-m68k.c:5710
+#: config/tc-m68k.c:5728
 msgid "missing label"
 msgstr ""
 
-#: config/tc-m68k.c:5734 config/tc-m68k.c:5763
+#: config/tc-m68k.c:5752 config/tc-m68k.c:5781
 msgid "bad register list"
 msgstr ""
 
-#: config/tc-m68k.c:5736
+#: config/tc-m68k.c:5754
 #, c-format
 msgid "bad register list: %s"
 msgstr ""
 
-#: config/tc-m68k.c:5834
+#: config/tc-m68k.c:5852
 msgid "restore without save"
 msgstr ""
 
-#: config/tc-m68k.c:5988 config/tc-m68k.c:6358
+#: config/tc-m68k.c:6006 config/tc-m68k.c:6376
 msgid "syntax error in structured control directive"
 msgstr ""
 
-#: config/tc-m68k.c:6033
+#: config/tc-m68k.c:6051
 msgid "missing condition code in structured control directive"
 msgstr ""
 
-#: config/tc-m68k.c:6104
+#: config/tc-m68k.c:6122
 #, c-format
 msgid ""
 "Condition <%c%c> in structured control directive can not be encoded correctly"
 msgstr ""
 
-#: config/tc-m68k.c:6400
+#: config/tc-m68k.c:6418
 msgid "missing then"
 msgstr ""
 
-#: config/tc-m68k.c:6481
+#: config/tc-m68k.c:6499
 msgid "else without matching if"
 msgstr ""
 
-#: config/tc-m68k.c:6514
+#: config/tc-m68k.c:6532
 msgid "endi without matching if"
 msgstr ""
 
-#: config/tc-m68k.c:6554
+#: config/tc-m68k.c:6572
 msgid "break outside of structured loop"
 msgstr ""
 
-#: config/tc-m68k.c:6592
+#: config/tc-m68k.c:6610
 msgid "next outside of structured loop"
 msgstr ""
 
-#: config/tc-m68k.c:6643
+#: config/tc-m68k.c:6661
 msgid "missing ="
 msgstr ""
 
-#: config/tc-m68k.c:6681
+#: config/tc-m68k.c:6699
 msgid "missing to or downto"
 msgstr ""
 
-#: config/tc-m68k.c:6717 config/tc-m68k.c:6751 config/tc-m68k.c:6965
+#: config/tc-m68k.c:6735 config/tc-m68k.c:6769 config/tc-m68k.c:6983
 msgid "missing do"
 msgstr ""
 
-#: config/tc-m68k.c:6852
+#: config/tc-m68k.c:6870
 msgid "endf without for"
 msgstr ""
 
-#: config/tc-m68k.c:6906
+#: config/tc-m68k.c:6924
 msgid "until without repeat"
 msgstr ""
 
-#: config/tc-m68k.c:7000
+#: config/tc-m68k.c:7018
 msgid "endw without while"
 msgstr ""
 
-#: config/tc-m68k.c:7162
+#: config/tc-m68k.c:7180
 #, c-format
 msgid "unrecognized architecture specification `%s'"
 msgstr ""
 
-#: config/tc-m68k.c:7255
+#: config/tc-m68k.c:7273
 #, c-format
 msgid ""
 "680X0 options:\n"
@@ -6554,7 +6566,7 @@ msgid ""
 "\t\t\t[default yes for 68020, 68030, and cpu32]\n"
 msgstr ""
 
-#: config/tc-m68k.c:7267
+#: config/tc-m68k.c:7285
 #, c-format
 msgid ""
 "-m68851 | -mno-68851\n"
@@ -6568,7 +6580,7 @@ msgid ""
 "--bitwise-or\t\tdo not treat `|' as a comment character\n"
 msgstr ""
 
-#: config/tc-m68k.c:7277
+#: config/tc-m68k.c:7295
 #, c-format
 msgid ""
 "--base-size-default-16\tbase reg without size is 16 bits\n"
@@ -6577,12 +6589,12 @@ msgid ""
 "--disp-size-default-32\tdisplacement with unknown size is 32 bits (default)\n"
 msgstr ""
 
-#: config/tc-m68k.c:7312
+#: config/tc-m68k.c:7330
 #, c-format
 msgid "Error %s in %s\n"
 msgstr ""
 
-#: config/tc-m68k.c:7316
+#: config/tc-m68k.c:7334
 #, c-format
 msgid "Opcode(%d.%s): "
 msgstr ""
@@ -7439,7 +7451,7 @@ msgstr ""
 msgid "Bad .mask/.fmask directive"
 msgstr ""
 
-#: config/tc-mips.c:13952
+#: config/tc-mips.c:13959
 #, c-format
 msgid ""
 "MIPS options:\n"
@@ -7450,7 +7462,7 @@ msgid ""
 "\t\t\timplicitly with the gp register [default 8]\n"
 msgstr ""
 
-#: config/tc-mips.c:13959
+#: config/tc-mips.c:13966
 #, c-format
 msgid ""
 "-mips1\t\t\tgenerate MIPS ISA I instructions\n"
@@ -7465,7 +7477,7 @@ msgid ""
 "-march=CPU/-mtune=CPU\tgenerate code/schedule for CPU, where CPU is one of:\n"
 msgstr ""
 
-#: config/tc-mips.c:13978
+#: config/tc-mips.c:13985
 #, c-format
 msgid ""
 "-mCPU\t\t\tequivalent to -march=CPU -mtune=CPU. Deprecated.\n"
@@ -7473,14 +7485,14 @@ msgid ""
 "\t\t\tFor -mCPU and -no-mCPU, CPU must be one of:\n"
 msgstr ""
 
-#: config/tc-mips.c:13991
+#: config/tc-mips.c:13998
 #, c-format
 msgid ""
 "-mips16\t\t\tgenerate mips16 instructions\n"
 "-no-mips16\t\tdo not generate mips16 instructions\n"
 msgstr ""
 
-#: config/tc-mips.c:13994
+#: config/tc-mips.c:14001
 #, c-format
 msgid ""
 "-mfix-vr4120\t\twork around certain VR4120 errata\n"
@@ -7496,7 +7508,7 @@ msgid ""
 "--break, --no-trap\tbreak exception on div by 0 and mult overflow\n"
 msgstr ""
 
-#: config/tc-mips.c:14007
+#: config/tc-mips.c:14014
 #, c-format
 msgid ""
 "-KPIC, -call_shared\tgenerate SVR4 position independent code\n"
@@ -7508,7 +7520,7 @@ msgid ""
 "-mabi=ABI\t\tcreate ABI conformant object file for:\n"
 msgstr ""
 
-#: config/tc-mips.c:14026
+#: config/tc-mips.c:14033
 #, c-format
 msgid ""
 "-32\t\t\tcreate o32 ABI object file (default)\n"
@@ -7775,13 +7787,13 @@ msgid ""
 "none yet\n"
 msgstr ""
 
-#: config/tc-mn10200.c:931 config/tc-mn10300.c:1392 config/tc-ppc.c:2130
+#: config/tc-mn10200.c:931 config/tc-mn10300.c:1392 config/tc-ppc.c:2134
 #: config/tc-s390.c:1522 config/tc-v850.c:1621
 #, c-format
 msgid "Unrecognized opcode: `%s'"
 msgstr ""
 
-#: config/tc-mn10200.c:1174 config/tc-mn10300.c:1965 config/tc-ppc.c:2609
+#: config/tc-mn10200.c:1174 config/tc-mn10300.c:1965 config/tc-ppc.c:2613
 #: config/tc-s390.c:1437 config/tc-v850.c:2026
 #, c-format
 msgid "junk at end of line: `%s'"
@@ -8343,237 +8355,237 @@ msgstr ""
 msgid "Neither Power nor PowerPC opcodes were selected."
 msgstr ""
 
-#: config/tc-ppc.c:1280 config/tc-s390.c:517
+#: config/tc-ppc.c:1284 config/tc-s390.c:517
 #, c-format
 msgid "Internal assembler error for instruction %s"
 msgstr ""
 
-#: config/tc-ppc.c:1304
+#: config/tc-ppc.c:1308
 #, c-format
 msgid "Internal assembler error for macro %s"
 msgstr ""
 
-#: config/tc-ppc.c:1635
+#: config/tc-ppc.c:1639
 msgid "identifier+constant@got means identifier@got+constant"
 msgstr ""
 
-#: config/tc-ppc.c:1702
+#: config/tc-ppc.c:1706
 #, c-format
 msgid "%s relocations do not fit in %d bytes\n"
 msgstr ""
 
-#: config/tc-ppc.c:1809
+#: config/tc-ppc.c:1813
 #, c-format
 msgid "Length of .lcomm \"%s\" is already %ld. Not changed to %ld."
 msgstr ""
 
-#: config/tc-ppc.c:1891
+#: config/tc-ppc.c:1895
 msgid "Relocation cannot be done when using -mrelocatable"
 msgstr ""
 
-#: config/tc-ppc.c:1940
+#: config/tc-ppc.c:1944
 msgid "TOC section size exceeds 64k"
 msgstr ""
 
-#: config/tc-ppc.c:2022
+#: config/tc-ppc.c:2026
 #, c-format
 msgid "syntax error: invalid toc specifier `%s'"
 msgstr ""
 
-#: config/tc-ppc.c:2036
+#: config/tc-ppc.c:2040
 #, c-format
 msgid "syntax error: expected `]', found  `%c'"
 msgstr ""
 
-#: config/tc-ppc.c:2315
+#: config/tc-ppc.c:2319
 msgid "[tocv] symbol is not a toc symbol"
 msgstr ""
 
-#: config/tc-ppc.c:2326
+#: config/tc-ppc.c:2330
 msgid "Unimplemented toc32 expression modifier"
 msgstr ""
 
-#: config/tc-ppc.c:2331
+#: config/tc-ppc.c:2335
 msgid "Unimplemented toc64 expression modifier"
 msgstr ""
 
-#: config/tc-ppc.c:2335
+#: config/tc-ppc.c:2339
 #, c-format
 msgid "Unexpected return value [%d] from parse_toc_entry!\n"
 msgstr ""
 
-#: config/tc-ppc.c:2553
+#: config/tc-ppc.c:2557
 msgid "unsupported relocation for DS offset field"
 msgstr ""
 
-#: config/tc-ppc.c:2597
+#: config/tc-ppc.c:2601
 #, c-format
 msgid "syntax error; found `%c' but expected `%c'"
 msgstr ""
 
-#: config/tc-ppc.c:2640 config/tc-ppc.h:117
+#: config/tc-ppc.c:2644 config/tc-ppc.h:115
 msgid "instruction address is not a multiple of 4"
 msgstr ""
 
-#: config/tc-ppc.c:2751
+#: config/tc-ppc.c:2755
 msgid "wrong number of operands"
 msgstr ""
 
-#: config/tc-ppc.c:2807
+#: config/tc-ppc.c:2811
 msgid "Bad .section directive: want a,e,w,x,M,S,G,T in string"
 msgstr ""
 
-#: config/tc-ppc.c:2922
+#: config/tc-ppc.c:2926
 msgid "missing size"
 msgstr ""
 
-#: config/tc-ppc.c:2931
+#: config/tc-ppc.c:2935
 msgid "negative size"
 msgstr ""
 
-#: config/tc-ppc.c:2968
+#: config/tc-ppc.c:2972
 msgid "missing real symbol name"
 msgstr ""
 
-#: config/tc-ppc.c:2989
+#: config/tc-ppc.c:2993
 msgid "attempt to redefine symbol"
 msgstr ""
 
-#: config/tc-ppc.c:3236
+#: config/tc-ppc.c:3240
 msgid "The XCOFF file format does not support arbitrary sections"
 msgstr ""
 
-#: config/tc-ppc.c:3313
+#: config/tc-ppc.c:3317
 msgid "missing rename string"
 msgstr ""
 
-#: config/tc-ppc.c:3344 config/tc-ppc.c:3899 read.c:3042
+#: config/tc-ppc.c:3348 config/tc-ppc.c:3903 read.c:3042
 msgid "missing value"
 msgstr ""
 
-#: config/tc-ppc.c:3362
+#: config/tc-ppc.c:3366
 msgid "illegal .stabx expression; zero assumed"
 msgstr ""
 
-#: config/tc-ppc.c:3394
+#: config/tc-ppc.c:3398
 msgid "missing class"
 msgstr ""
 
-#: config/tc-ppc.c:3403
+#: config/tc-ppc.c:3407
 msgid "missing type"
 msgstr ""
 
-#: config/tc-ppc.c:3484
+#: config/tc-ppc.c:3488
 msgid "missing symbol name"
 msgstr ""
 
-#: config/tc-ppc.c:3678
+#: config/tc-ppc.c:3682
 msgid "nested .bs blocks"
 msgstr ""
 
-#: config/tc-ppc.c:3711
+#: config/tc-ppc.c:3715
 msgid ".es without preceding .bs"
 msgstr ""
 
-#: config/tc-ppc.c:3891
+#: config/tc-ppc.c:3895
 msgid "non-constant byte count"
 msgstr ""
 
-#: config/tc-ppc.c:3939
+#: config/tc-ppc.c:3943
 msgid ".tc not in .toc section"
 msgstr ""
 
-#: config/tc-ppc.c:3958
+#: config/tc-ppc.c:3962
 msgid ".tc with no label"
 msgstr ""
 
-#: config/tc-ppc.c:4050
+#: config/tc-ppc.c:4054
 msgid ".machine stack overflow"
 msgstr ""
 
-#: config/tc-ppc.c:4057
+#: config/tc-ppc.c:4061
 msgid ".machine stack underflow"
 msgstr ""
 
-#: config/tc-ppc.c:4064
+#: config/tc-ppc.c:4068
 #, c-format
 msgid "invalid machine `%s'"
 msgstr ""
 
-#: config/tc-ppc.c:4118
+#: config/tc-ppc.c:4122
 msgid "No previous section to return to. Directive ignored."
 msgstr ""
 
 #. Section Contents
 #. unknown
-#: config/tc-ppc.c:4535
+#: config/tc-ppc.c:4539
 msgid "Unsupported section attribute -- 'a'"
 msgstr ""
 
-#: config/tc-ppc.c:4724
+#: config/tc-ppc.c:4728
 msgid "bad symbol suffix"
 msgstr ""
 
-#: config/tc-ppc.c:4817
+#: config/tc-ppc.c:4821
 msgid "Unrecognized symbol suffix"
 msgstr ""
 
-#: config/tc-ppc.c:4903
+#: config/tc-ppc.c:4907
 msgid "two .function pseudo-ops with no intervening .ef"
 msgstr ""
 
-#: config/tc-ppc.c:4916
+#: config/tc-ppc.c:4920
 msgid ".ef with no preceding .function"
 msgstr ""
 
-#: config/tc-ppc.c:5044
+#: config/tc-ppc.c:5048
 #, c-format
 msgid "warning: symbol %s has no csect"
 msgstr ""
 
-#: config/tc-ppc.c:5348
+#: config/tc-ppc.c:5352
 msgid "symbol in .toc does not match any .tc"
 msgstr ""
 
-#: config/tc-ppc.c:5677 config/tc-s390.c:2057 config/tc-v850.c:2314
+#: config/tc-ppc.c:5681 config/tc-s390.c:2057 config/tc-v850.c:2314
 #: config/tc-xstormy16.c:538
 msgid "unresolved expression that must be resolved"
 msgstr ""
 
-#: config/tc-ppc.c:5680
+#: config/tc-ppc.c:5684
 #, c-format
 msgid "unsupported relocation against %s"
 msgstr ""
 
-#: config/tc-ppc.c:5753
+#: config/tc-ppc.c:5757
 #, c-format
 msgid "cannot emit PC relative %s relocation against %s"
 msgstr ""
 
-#: config/tc-ppc.c:5758
+#: config/tc-ppc.c:5762
 #, c-format
 msgid "cannot emit PC relative %s relocation"
 msgstr ""
 
-#: config/tc-ppc.c:5940
+#: config/tc-ppc.c:5944
 #, c-format
 msgid "Unable to handle reference to symbol %s"
 msgstr ""
 
-#: config/tc-ppc.c:5943
+#: config/tc-ppc.c:5947
 msgid "Unable to resolve expression"
 msgstr ""
 
-#: config/tc-ppc.c:5970
+#: config/tc-ppc.c:5974
 msgid "must branch to an address a multiple of 4"
 msgstr ""
 
-#: config/tc-ppc.c:5974
+#: config/tc-ppc.c:5978
 #, c-format
 msgid "@local or @plt branch destination is too far away, %ld bytes"
 msgstr ""
 
-#: config/tc-ppc.c:6005
+#: config/tc-ppc.c:6009
 #, c-format
 msgid "Gas failure, reloc value %d\n"
 msgstr ""
@@ -8616,11 +8628,6 @@ msgstr ""
 
 #: config/tc-s390.c:988
 msgid "Big number is too big"
-msgstr ""
-
-#: config/tc-s390.c:1126 config/tc-s390.c:1707 config/tc-xtensa.c:1626
-#, c-format
-msgid "%s relocations do not fit in %d bytes"
 msgstr ""
 
 #: config/tc-s390.c:1136
@@ -9518,11 +9525,11 @@ msgstr ""
 msgid "Illegal operands: garbage after %%r_%s%d()"
 msgstr ""
 
-#: config/tc-sparc.h:48
+#: config/tc-sparc.h:46
 msgid "sparc convert_frag\n"
 msgstr ""
 
-#: config/tc-sparc.h:50
+#: config/tc-sparc.h:48
 msgid "estimate_size_before_relax called"
 msgstr ""
 
@@ -11031,250 +11038,250 @@ msgstr ""
 msgid "unhandled local relocation fix %s"
 msgstr ""
 
-#: config/tc-xtensa.c:5977
+#: config/tc-xtensa.c:5979
 msgid "couldn't find a valid instruction format"
-msgstr ""
-
-#: config/tc-xtensa.c:5978
-#, c-format
-msgid "    ops were: "
 msgstr ""
 
 #: config/tc-xtensa.c:5980
 #, c-format
+msgid "    ops were: "
+msgstr ""
+
+#: config/tc-xtensa.c:5982
+#, c-format
 msgid " %s;"
 msgstr ""
 
-#: config/tc-xtensa.c:5983
+#: config/tc-xtensa.c:5985
 #, c-format
 msgid "\n"
 msgstr ""
 
-#: config/tc-xtensa.c:5991
+#: config/tc-xtensa.c:5993
 #, c-format
 msgid "format '%s' allows %d slots, but there are %d opcodes"
 msgstr ""
 
-#: config/tc-xtensa.c:6002 config/tc-xtensa.c:6100
+#: config/tc-xtensa.c:6004 config/tc-xtensa.c:6102
 msgid "illegal resource usage in bundle"
 msgstr ""
 
-#: config/tc-xtensa.c:6187
+#: config/tc-xtensa.c:6189
 #, c-format
 msgid "opcodes '%s' (slot %d) and '%s' (slot %d) write the same register"
 msgstr ""
 
-#: config/tc-xtensa.c:6192
+#: config/tc-xtensa.c:6194
 #, c-format
 msgid "opcodes '%s' (slot %d) and '%s' (slot %d) write the same state"
 msgstr ""
 
-#: config/tc-xtensa.c:6197
+#: config/tc-xtensa.c:6199
 #, c-format
 msgid "opcodes '%s' (slot %d) and '%s' (slot %d) write the same queue"
 msgstr ""
 
-#: config/tc-xtensa.c:6202
+#: config/tc-xtensa.c:6204
 #, c-format
 msgid ""
 "opcodes '%s' (slot %d) and '%s' (slot %d) both have volatile queue accesses"
 msgstr ""
 
-#: config/tc-xtensa.c:6218
+#: config/tc-xtensa.c:6220
 msgid "multiple branches or jumps in the same bundle"
 msgstr ""
 
-#: config/tc-xtensa.c:6672
+#: config/tc-xtensa.c:6674
 msgid "cannot assemble into a literal fragment"
 msgstr ""
 
-#: config/tc-xtensa.c:6674
+#: config/tc-xtensa.c:6676
 msgid "..."
 msgstr ""
 
-#: config/tc-xtensa.c:7178
+#: config/tc-xtensa.c:7180
 msgid ""
 "instruction sequence (write a0, branch, retw) may trigger hardware errata"
 msgstr ""
 
-#: config/tc-xtensa.c:7288
+#: config/tc-xtensa.c:7290
 msgid "branching or jumping to a loop end may trigger hardware errata"
 msgstr ""
 
-#: config/tc-xtensa.c:7387
+#: config/tc-xtensa.c:7389
 msgid "loop end too close to another loop end may trigger hardware errata"
 msgstr ""
 
-#: config/tc-xtensa.c:7396
+#: config/tc-xtensa.c:7398
 #, c-format
 msgid "fr_var %lu < length %d"
 msgstr ""
 
-#: config/tc-xtensa.c:7567
+#: config/tc-xtensa.c:7569
 msgid ""
 "loop containing less than three instructions may trigger hardware errata"
 msgstr ""
 
-#: config/tc-xtensa.c:7639
+#: config/tc-xtensa.c:7641
 msgid "undecodable instruction in instruction frag"
 msgstr ""
 
-#: config/tc-xtensa.c:7748
+#: config/tc-xtensa.c:7750
 msgid "invalid empty loop"
 msgstr ""
 
-#: config/tc-xtensa.c:7753
+#: config/tc-xtensa.c:7755
 msgid "loop target does not follow loop instruction in section"
 msgstr ""
 
-#: config/tc-xtensa.c:8290
+#: config/tc-xtensa.c:8292
 msgid "bad relaxation state"
 msgstr ""
 
-#: config/tc-xtensa.c:8348
+#: config/tc-xtensa.c:8350
 #, c-format
 msgid "fr_var (%ld) < length (%d)"
 msgstr ""
 
-#: config/tc-xtensa.c:8849
+#: config/tc-xtensa.c:8851
 msgid "internal error: relaxation failed"
 msgstr ""
 
-#: config/tc-xtensa.c:8855
+#: config/tc-xtensa.c:8857
 msgid "internal error: relaxation requires too many steps"
 msgstr ""
 
-#: config/tc-xtensa.c:9030
+#: config/tc-xtensa.c:9032
 msgid "invalid relaxation fragment result"
 msgstr ""
 
-#: config/tc-xtensa.c:9110
+#: config/tc-xtensa.c:9112
 msgid "unable to widen instruction"
 msgstr ""
 
-#: config/tc-xtensa.c:9253
+#: config/tc-xtensa.c:9255
 msgid "multiple literals in expansion"
 msgstr ""
 
-#: config/tc-xtensa.c:9257
+#: config/tc-xtensa.c:9259
 msgid "no registered fragment for literal"
 msgstr ""
 
-#: config/tc-xtensa.c:9259
+#: config/tc-xtensa.c:9261
 msgid "number of literal tokens != 1"
 msgstr ""
 
-#: config/tc-xtensa.c:9403 config/tc-xtensa.c:9409
+#: config/tc-xtensa.c:9405 config/tc-xtensa.c:9411
 #, c-format
 msgid "unresolved loop target symbol: %s"
 msgstr ""
 
-#: config/tc-xtensa.c:9515
+#: config/tc-xtensa.c:9517
 #, c-format
 msgid "invalid expression evaluation type %d"
 msgstr ""
 
-#: config/tc-xtensa.c:9537
+#: config/tc-xtensa.c:9539
 msgid "loop too long for LOOP instruction"
 msgstr ""
 
-#: config/tc-xtensa.c:9808
+#: config/tc-xtensa.c:9810
 #, c-format
 msgid "fixes not all moved from %s"
 msgstr ""
 
-#: config/tc-xtensa.c:9950
+#: config/tc-xtensa.c:9952
 msgid ""
 "literal pool location required for text-section-literals; specify with ."
 "literal_position"
 msgstr ""
 
-#: config/tc-xtensa.c:10459
+#: config/tc-xtensa.c:10461
 #, c-format
 msgid "could not create section %s"
 msgstr ""
 
-#: config/tc-xtensa.c:10461
+#: config/tc-xtensa.c:10463
 #, c-format
 msgid "invalid flag combination on section %s"
 msgstr ""
 
-#: config/tc-xtensa.c:10847
+#: config/tc-xtensa.c:10849
 msgid "too many operands in instruction"
 msgstr ""
 
-#: config/tc-xtensa.c:11081
+#: config/tc-xtensa.c:11083
 #, c-format
 msgid "invalid symbolic operand %d on '%s'"
 msgstr ""
 
-#: config/tc-xtensa.c:11150 config/tc-xtensa.c:11224
+#: config/tc-xtensa.c:11152 config/tc-xtensa.c:11226
 msgid "operand number mismatch"
 msgstr ""
 
-#: config/tc-xtensa.c:11153
+#: config/tc-xtensa.c:11155
 msgid "cannot encode opcode"
 msgstr ""
 
-#: config/tc-xtensa.c:11228
+#: config/tc-xtensa.c:11230
 #, c-format
 msgid "cannot encode opcode \"%s\" in the given format \"%s\""
 msgstr ""
 
-#: config/tc-xtensa.c:11253
+#: config/tc-xtensa.c:11255
 #, c-format
 msgid "xtensa-isa failure: %s"
 msgstr ""
 
-#: config/tc-xtensa.c:11286
+#: config/tc-xtensa.c:11288
 msgid "invalid opcode"
 msgstr ""
 
-#: config/tc-xtensa.c:11292
+#: config/tc-xtensa.c:11294
 msgid "too few operands"
 msgstr ""
 
-#: config/tc-xtensa.c:11419 config/tc-xtensa.c:11427
+#: config/tc-xtensa.c:11421 config/tc-xtensa.c:11429
 msgid "out of memory"
 msgstr ""
 
-#: config/tc-xtensa.c:11539
+#: config/tc-xtensa.c:11541
 msgid "instruction with constant operands does not fit"
 msgstr ""
 
-#: config/tc-xtensa.c:11548 config/tc-xtensa.c:11569
+#: config/tc-xtensa.c:11550 config/tc-xtensa.c:11571
 #, c-format
 msgid "invalid operand %d on '%s'"
 msgstr ""
 
-#: config/tc-xtensa.c:11560
+#: config/tc-xtensa.c:11562
 msgid "invalid subtract operand"
 msgstr ""
 
-#: config/tc-xtensa.c:11574
+#: config/tc-xtensa.c:11576
 #, c-format
 msgid "invalid expression for operand %d on '%s'"
 msgstr ""
 
-#: config/tc-xtensa.c:11604
+#: config/tc-xtensa.c:11606
 msgid "cannot decode instruction format"
 msgstr ""
 
-#: config/tc-xtensa.c:11763
+#: config/tc-xtensa.c:11765
 msgid "ignoring extra '-rename-section' delimiter ':'"
 msgstr ""
 
-#: config/tc-xtensa.c:11768
+#: config/tc-xtensa.c:11770
 #, c-format
 msgid "ignoring invalid '-rename-section' specification: '%s'"
 msgstr ""
 
-#: config/tc-xtensa.c:11779
+#: config/tc-xtensa.c:11781
 #, c-format
 msgid "section %s renamed multiple times"
 msgstr ""
 
-#: config/tc-xtensa.c:11781
+#: config/tc-xtensa.c:11783
 #, c-format
 msgid "multiple sections remapped to output section %s"
 msgstr ""
