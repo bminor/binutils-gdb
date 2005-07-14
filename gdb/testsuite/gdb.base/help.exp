@@ -562,7 +562,7 @@ gdb_test "help target" "Connect to a target machine or process\.\[\r\n\]+The fir
 # test help tbreak
 gdb_test "help tbreak" "Set a temporary breakpoint.*" "help tbreak"
 # test help tty
-gdb_test "help tty" "Set terminal for future runs of program being debugged\." "help tty"
+gdb_test "help tty" "Set terminal for future runs of program being debugged\.\[\r\n\]+Usage: set inferior-tty /dev/pts/1" "help tty"
 # test help until "u" abbreviation
 gdb_test "help u" "Execute until the program reaches a source line greater than the current\[\r\n\]+or a specified location \\(same args as break command\\) within the current frame\." "help until \"u\" abbreviation"
 # test help until

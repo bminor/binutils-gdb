@@ -1,3 +1,8 @@
+2005-07-14  Bob Rossi  <bob@brasko.net>
+  
+	* gdb.base/default.exp (tty): Changed output of command.
+	* gdb.base/help.exp (help tty): Ditto.
+
 2005-07-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/i386-sse.exp: Compile with -msse when using GCC.

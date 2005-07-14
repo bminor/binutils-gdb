@@ -754,7 +754,7 @@ gdb_test "target" "Argument required .target name.*" "target"
 #test tbreak
 gdb_test "tbreak" "No default breakpoint address now." "tbreak"
 #test tty
-gdb_test "tty" "Argument required .terminal name for running target process.*" "tty"
+gdb_test "tty" "Argument required .filename to set it to\..*" "tty"
 #test until "u" abbreviation
 gdb_test "u" "The program is not running." "until \"u\" abbreviation"
 #test until
