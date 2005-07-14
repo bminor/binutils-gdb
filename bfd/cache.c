@@ -177,7 +177,7 @@ DESCRIPTION
 	determine when it can avoid a function call.
 */
 
-bfd *bfd_last_cache;
+bfd *bfd_last_cache = NULL;
 
 /*
   INTERNAL_FUNCTION

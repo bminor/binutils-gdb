@@ -1,3 +1,7 @@
+2005-07-14  Paul Woegerer <paul.woegerer@nsc.com>
+
+	* cache.c (bfd_last_cache): Initialise to NULL.
+
 2005-07-14  Daniel Marques  <marques@cs.cornell.edu>
 	    Nick Clifton  <nickc@redhat.com>
 
