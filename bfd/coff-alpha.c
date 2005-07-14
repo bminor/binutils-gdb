@@ -610,7 +610,7 @@ alpha_ecoff_swap_reloc_out (abfd, intern, dst)
     }
 
   /* XXX FIXME:  The maximum symndx value used to be 14 but this
-     fails with object files prodiced by DEC's C++ compiler.
+     fails with object files produced by DEC's C++ compiler.
      Where does the value 14 (or 15) come from anyway ?  */
   BFD_ASSERT (intern->r_extern
 	      || (intern->r_symndx >= 0 && intern->r_symndx <= 15));
