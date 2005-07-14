@@ -711,10 +711,14 @@ extern void _bfd_elf_provide_symbol
   (struct bfd_link_info *, const char *, bfd_vma, struct bfd_section *);
 
 extern void _bfd_elf_provide_section_bound_symbols
-  (struct bfd_link_info *, struct bfd_section *sec, const char *, const char *);
+  (struct bfd_link_info *, struct bfd_section *, const char *, const char *);
+
+extern void _bfd_elf_fix_excluded_sec_syms
+  (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
+   char **);
 
 /* SunOS shared library support routines for the linker.  */
 
@@ -723,7 +727,8 @@ extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
 extern bfd_boolean bfd_sunos_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *);
 extern bfd_boolean bfd_sunos_size_dynamic_sections
-  (bfd *, struct bfd_link_info *, struct bfd_section **, struct bfd_section **, struct bfd_section **);
+  (bfd *, struct bfd_link_info *, struct bfd_section **,
+   struct bfd_section **, struct bfd_section **);
 
 /* Linux shared library support routines for the linker.  */
 

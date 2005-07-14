@@ -3049,7 +3049,6 @@ void
 strip_excluded_output_sections (void)
 {
   lang_output_section_statement_type *os;
-  unsigned int gc_sections;
 
   /* Run lang_size_sections (if not already done) to ensure that all
      symbols defined in the linker script are put in the bfd hash
@@ -3061,13 +3060,6 @@ strip_excluded_output_sections (void)
       one_lang_size_sections_pass (NULL, FALSE);
       lang_reset_memory_regions ();
     }
-
-  /* Now call into bfd_gc_sections to mark all sections defining global
-     symbols with SEC_KEEP.  */
-  gc_sections = link_info.gc_sections;
-  link_info.gc_sections = 0;
-  bfd_gc_sections (output_bfd, &link_info);
-  link_info.gc_sections = gc_sections;
 
   for (os = &lang_output_section_statement.head->output_section_statement;
        os != NULL;

@@ -1,3 +1,14 @@
+2005-07-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (strip_excluded_output_sections): Don't call
+	bfd_gc_sections.
+	* emultempl/elf32.em (gld*_provide_bound_symbols): Move.
+	(gld*_provide_init_fini_syms): Move.
+	(gld*_before_allocation): Call the above from here..
+	(gld*_finish): ..not here.  Call _bfd_elf_fix_excluded_sec_syms.
+	* emultempl/hppaelf.em (hppaelf_finish): Likewise.
+	* emultempl/ppc64elf.em (ppc_finish): Likewise.
+
 2005-07-10  Ralf Corsepius <ralf.corsepius@rtems.org>
 
 	* configure.tgt: Remove sparc*-*-rtemsaout*, i[3-7]86-go32-rtems*,

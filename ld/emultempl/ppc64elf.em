@@ -379,7 +379,7 @@ ppc_finish (void)
     }
 
   ppc64_elf_restore_symbols (&link_info);
-  gld${EMULATION_NAME}_provide_init_fini_syms ();
+  _bfd_elf_fix_excluded_sec_syms (output_bfd, &link_info);
 }
 
 

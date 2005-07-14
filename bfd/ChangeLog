@@ -1,3 +1,19 @@
+2005-07-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (_bfd_elf_fix_excluded_sec_syms): Declare.
+	(_bfd_elf_provide_section_bound_symbols): Remove param name.
+	Formatting.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (bfd_elf_gc_sections): Don't call generic function.
+	(_bfd_elf_provide_symbol): Formatting.
+	(_bfd_elf_provide_section_bound_symbols): Remove all hacks, just
+	create section relative syms.
+	(fix_syms, _bfd_elf_fix_excluded_sec_syms): New functions.
+	* elf32-ppc.c (ppc_elf_set_sdata_syms): Use
+	_bfd_elf_provide_section_bound_symbols.
+	* reloc.c (bfd_mark_used_section): Delete.
+	(bfd_generic_gc_sections): Don't call the above.
+
 2005-07-14  Paul Woegerer <paul.woegerer@nsc.com>
 
 	PR 1063
@@ -10,7 +26,7 @@
 	Alpha binaries and issue a helpful error message.
 	(alpha_ecoff_swap_reloc_out): Increase maximum allowed internal
 	symbol index to 15 to allow for binaries produced by DEC
-	compilers.	
+	compilers.
 
 2005-07-13  Steve Ellcey  <sje@cup.hp.com>
 
@@ -42,7 +58,7 @@
 2005-07-08  Ralf Corsepius <ralf.corsepius@rtems.org>
 
 	* config.bfd: Mark i960-*-rtems*, or32-*-rtems* as obsolete.
-	Mark a29k-*rtems*, hppa*-*-rtems*, *-go32-rtems*, 
+	Mark a29k-*rtems*, hppa*-*-rtems*, *-go32-rtems*,
 	i[3-7]86*-*-rtemscoff*, mips*el-*-rtems*, powerpcle-*-rtems*,
 	sparc*-*-rtemsaout* as removed
 

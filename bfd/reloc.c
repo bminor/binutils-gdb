@@ -4520,27 +4520,6 @@ bfd_generic_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-/* Mark sections containing global symbols.  This is called through
-   bfd_link_hash_traverse.  */
-
-static bfd_boolean
-bfd_mark_used_section (struct bfd_link_hash_entry *h,
-		       void *data ATTRIBUTE_UNUSED)
-{
-  if (h->type == bfd_link_hash_warning)
-    h = h->u.i.link;
-
-  if (h->type == bfd_link_hash_defined
-      || h->type == bfd_link_hash_defweak)
-    {
-      asection *s = h->u.def.section;
-      if (s != NULL && s->output_section != NULL)
-	s->output_section->flags |= SEC_KEEP;
-    }
-
-  return TRUE;
-}
-
 /*
 INTERNAL_FUNCTION
 	bfd_generic_gc_sections
@@ -4551,18 +4530,13 @@ SYNOPSIS
 
 DESCRIPTION
 	Provides default handling for relaxing for back ends which
-	don't do section gc -- i.e., does nothing besides the special
-	case for marking sections having global symbols.
+	don't do section gc -- i.e., does nothing.
 */
 
 bfd_boolean
 bfd_generic_gc_sections (bfd *abfd ATTRIBUTE_UNUSED,
-			 struct bfd_link_info *info)
+			 struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  /* If called when info->gc_sections is 0, then mark all sections
-     containing global symbols with SEC_KEEP.  */
-  if (!info->gc_sections && !info->relocatable)
-    bfd_link_hash_traverse (info->hash, bfd_mark_used_section, NULL);
   return TRUE;
 }
 

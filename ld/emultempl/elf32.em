@@ -61,7 +61,6 @@ static void gld${EMULATION_NAME}_before_allocation (void);
 static bfd_boolean gld${EMULATION_NAME}_place_orphan
   (lang_input_statement_type *file, asection *s);
 static void gld${EMULATION_NAME}_layout_sections_again (void);
-static void gld${EMULATION_NAME}_provide_init_fini_syms (void);
 static void gld${EMULATION_NAME}_finish (void) ATTRIBUTE_UNUSED;
 
 EOF
@@ -1040,6 +1039,47 @@ if test x"$LDEMUL_BEFORE_ALLOCATION" != xgld"$EMULATION_NAME"_before_allocation;
   fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
+static void
+gld${EMULATION_NAME}_provide_bound_symbols (const char *sec,
+					    const char *start,
+					    const char *end)
+{
+  asection *s = bfd_get_section_by_name (output_bfd, sec);
+  _bfd_elf_provide_section_bound_symbols (&link_info, s, start, end);
+}
+
+/* If not building a shared library, provide
+
+   __preinit_array_start
+   __preinit_array_end
+   __init_array_start
+   __init_array_end
+   __fini_array_start
+   __fini_array_end
+
+   They are set here rather than via PROVIDE in the linker
+   script, because using PROVIDE inside an output section
+   statement results in unnecessary output sections.  Using
+   PROVIDE outside an output section statement runs the risk of
+   section alignment affecting where the section starts.  */
+
+static void
+gld${EMULATION_NAME}_provide_init_fini_syms (void)
+{
+  if (!link_info.relocatable && link_info.executable)
+    {
+      gld${EMULATION_NAME}_provide_bound_symbols (".preinit_array",
+						  "__preinit_array_start",
+						  "__preinit_array_end");
+      gld${EMULATION_NAME}_provide_bound_symbols (".init_array",
+						  "__init_array_start",
+						  "__init_array_end");
+      gld${EMULATION_NAME}_provide_bound_symbols (".fini_array",
+						  "__fini_array_start",
+						  "__fini_array_end");
+    }
+}
+
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
 
@@ -1056,6 +1096,8 @@ gld${EMULATION_NAME}_before_allocation (void)
      the ELF backend know about them in case the variables are
      referred to by dynamic objects.  */
   lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
+
+  gld${EMULATION_NAME}_provide_init_fini_syms ();
 
   /* Let the ELF backend work out the sizes of any sections required
      by dynamic linking.  */
@@ -1448,49 +1490,6 @@ if test x"$LDEMUL_FINISH" != xgld"$EMULATION_NAME"_finish; then
 cat >>e${EMULATION_NAME}.c <<EOF
 
 static void
-gld${EMULATION_NAME}_provide_bound_symbols (const char *sec,
-					    const char *start,
-					    const char *end)
-{
-  asection *s = bfd_get_section_by_name (output_bfd, sec);
-  if (s && bfd_section_removed_from_list (output_bfd, s))
-    s = NULL;
-  _bfd_elf_provide_section_bound_symbols (&link_info, s, start, end);
-}
-
-/* If not building a shared library, provide
-
-   __preinit_array_start
-   __preinit_array_end
-   __init_array_start
-   __init_array_end
-   __fini_array_start
-   __fini_array_end
-
-   They are set here rather than via PROVIDE in the linker
-   script, because using PROVIDE inside an output section
-   statement results in unnecessary output sections.  Using
-   PROVIDE outside an output section statement runs the risk of
-   section alignment affecting where the section starts.  */
-
-static void
-gld${EMULATION_NAME}_provide_init_fini_syms (void)
-{
-  if (!link_info.relocatable && link_info.executable)
-    {
-      gld${EMULATION_NAME}_provide_bound_symbols (".preinit_array",
-						  "__preinit_array_start",
-						  "__preinit_array_end");
-      gld${EMULATION_NAME}_provide_bound_symbols (".init_array",
-						  "__init_array_start",
-						  "__init_array_end");
-      gld${EMULATION_NAME}_provide_bound_symbols (".fini_array",
-						  "__fini_array_start",
-						  "__fini_array_end");
-    }
-}
-
-static void
 gld${EMULATION_NAME}_layout_sections_again (void)
 {
   lang_reset_memory_regions ();
@@ -1511,7 +1510,7 @@ gld${EMULATION_NAME}_finish (void)
   if (bfd_elf_discard_info (output_bfd, &link_info))
     gld${EMULATION_NAME}_layout_sections_again ();
 
-  gld${EMULATION_NAME}_provide_init_fini_syms ();
+  _bfd_elf_fix_excluded_sec_syms (output_bfd, &link_info);
 }
 EOF
 fi

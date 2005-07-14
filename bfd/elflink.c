@@ -9119,9 +9119,6 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
     (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
      struct elf_link_hash_entry *h, Elf_Internal_Sym *);
 
-  if (!info->gc_sections)
-    return bfd_generic_gc_sections (abfd, info);
-
   if (!get_elf_backend_data (abfd)->can_gc_sections
       || info->relocatable
       || info->emitrelocations
@@ -9846,8 +9843,7 @@ _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
 {
   struct elf_link_hash_entry *h;
 
-  h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE,
-			    FALSE);
+  h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
   if (h != NULL && !h->def_regular)
     bfd_elf_set_symbol (h, val, s);
 }
@@ -9861,45 +9857,41 @@ _bfd_elf_provide_section_bound_symbols (struct bfd_link_info *info,
 					const char *start,
 					const char *end)
 {
-  struct elf_link_hash_entry *hs, *he;
-  bfd_vma start_val, end_val;
-  bfd_boolean do_start, do_end;
-
-  /* Check if we need them or not first.  */
-  hs = elf_link_hash_lookup (elf_hash_table (info), start, FALSE,
-			     FALSE, FALSE);
-  do_start = hs != NULL && !hs->def_regular;
-
-  he = elf_link_hash_lookup (elf_hash_table (info), end, FALSE,
-			     FALSE, FALSE);
-  do_end = he != NULL && !he->def_regular;
-
-  if (!do_start && !do_end)
-    return;
-
+  bfd_vma val = 0;
+  _bfd_elf_provide_symbol (info, start, val, sec);
   if (sec != NULL)
+    val = sec->size;
+  _bfd_elf_provide_symbol (info, end, val, sec);
+}
+
+/* Convert symbols in excluded output sections to absolute.  */
+
+static bfd_boolean
+fix_syms (struct bfd_link_hash_entry *h, void *data)
+{
+  bfd *obfd = (bfd *) data;
+
+  if (h->type == bfd_link_hash_warning)
+    h = h->u.i.link;
+
+  if (h->type == bfd_link_hash_defined
+      || h->type == bfd_link_hash_defweak)
     {
-      start_val = sec->vma;
-      end_val = start_val + sec->size;
-    }
-  else
-    {
-      /* We have to choose those values very carefully.  Some targets,
-	 like alpha, may have relocation overflow with 0. "__bss_start"
-	 should be defined in all cases.  */
-      struct elf_link_hash_entry *h
-	= elf_link_hash_lookup (elf_hash_table (info), "__bss_start",
-				FALSE, FALSE, FALSE);
-      if (h != NULL && h->root.type == bfd_link_hash_defined)
-	start_val = h->root.u.def.value;
-      else
-	start_val = 0;
-      end_val = start_val;
+      asection *s = h->u.def.section;
+      if (s != NULL
+	  && s == s->output_section
+	  && bfd_section_removed_from_list (obfd, s))
+	{
+	  h->u.def.value += s->vma;
+	  h->u.def.section = bfd_abs_section_ptr;
+	}
     }
 
-  if (do_start)
-    bfd_elf_set_symbol (hs, start_val, NULL);
+  return TRUE;
+}
 
-  if (do_end)
-    bfd_elf_set_symbol (he, end_val, NULL);
+void
+_bfd_elf_fix_excluded_sec_syms (bfd *obfd, struct bfd_link_info *info)
+{
+  bfd_link_hash_traverse (info->hash, fix_syms, obfd);
 }
