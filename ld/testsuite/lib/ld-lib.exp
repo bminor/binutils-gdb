@@ -1281,6 +1281,7 @@ proc run_ld_link_exec_tests { ldtests } {
     global env
     global CC
     global CFLAGS
+    global errcnt
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -1291,7 +1292,6 @@ proc run_ld_link_exec_tests { ldtests } {
 	set expfile [lindex $testitem 5]
 	set cflags [lindex $testitem 6]
 	set objfiles {}
-	set is_unresolved 0
 	set failed 0
 
 #	verbose -log "Testname is $testname"
@@ -1306,17 +1306,10 @@ proc run_ld_link_exec_tests { ldtests } {
 	    set objfile "tmpdir/[file rootname $src_file].o"
 	    lappend objfiles $objfile
 
-	    if ![ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile] {
-		set is_unresolved 1
-		break
-	    }
-	}
-
-	# Catch assembler errors.
-	if { $is_unresolved != 0 } {
-	    unresolved $testname
-	    continue
-	}
+	# We ignore warnings since some compilers may generate
+	# incorrect section attributes and the assembler will warn
+	# them.
+	ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
 
 	if ![ld_link $ld $binfile "-L$srcdir/$subdir $ld_options $objfiles"] {
 	    set failed 1
@@ -1345,15 +1338,10 @@ proc run_ld_link_exec_tests { ldtests } {
 
 	    if { $failed != 0 } {
 		fail $testname
-	    } else { if { $is_unresolved == 0 } {
+	    } else {
+		set errcnt 0
 		pass $testname
 	    } }
-	}
-
-	# Catch action errors.
-	if { $is_unresolved != 0 } {
-	    unresolved $testname
-	    continue
 	}
     }
 }

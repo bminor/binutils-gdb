@@ -1,5 +1,10 @@
 2005-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Ignore assembler
+	warnings.
+
+2005-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* lib/ld-lib.exp (run_ld_link_exec_tests): Update comments.
 
 2005-07-14  H.J. Lu  <hongjiu.lu@intel.com>
