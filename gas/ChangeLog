@@ -1,3 +1,9 @@
+2005-07-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 1069
+	* config/tc-crx.c (reset_vars): Use strncpy to prevent overflowing
+	the ins_parse buffer.
+
 2005-07-10  Ralf Corsepius <ralf.corsepius@rtems.org>
 
 	* configure.tgt: Remove a29k-*-rtems*, hppa*-*-rtems*,i386-go32-rtems*,

@@ -268,7 +268,8 @@ reset_vars (char *op)
   memset (& output_opcode, '\0', sizeof (output_opcode));
 
   /* Save a copy of the original OP (used in error messages).  */
-  strcpy (ins_parse, op);
+  strncpy (ins_parse, op, sizeof ins_parse - 1);
+  ins_parse [sizeof ins_parse - 1] = 0;
 }
 
 /* This macro decides whether a particular reloc is an entry in a
