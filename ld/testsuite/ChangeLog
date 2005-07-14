@@ -1,3 +1,17 @@
+2005-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/elf.exp (array_tests): New.
+	Call run_ld_link_exec_tests with array_tests.
+
+	* ld-elf/fini.c: New file.
+	* ld-elf/fini.out: Likewise.
+	* ld-elf/init.c: Likewise.
+	* ld-elf/init.out: Likewise.
+	* ld-elf/preinit.c: Likewise.
+	* ld-elf/preinit.out: Likewise.
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): New.
+
 2005-07-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/sdalib.s (lib_var): Size it.

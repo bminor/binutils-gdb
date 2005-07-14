@@ -1262,3 +1262,98 @@ if ![string length [info proc prune_warnings]] {
 	return $text
     }
 }
+
+# List contains test-items with 3 items followed by 2 lists, one item and
+# one optional item:
+# 0:name
+# 1:ld options
+# 2:assembler options
+# 3:filenames of assembler files
+# 4:name of output file
+# 5:expected output
+# 6:compiler flags (optional)
+
+proc run_ld_link_exec_tests { ldtests } {
+    global ld
+    global as
+    global srcdir
+    global subdir
+    global env
+    global CC
+    global CFLAGS
+
+    foreach testitem $ldtests {
+	set testname [lindex $testitem 0]
+	set ld_options [lindex $testitem 1]
+	set as_options [lindex $testitem 2]
+	set src_files  [lindex $testitem 3]
+	set binfile tmpdir/[lindex $testitem 4]
+	set expfile [lindex $testitem 5]
+	set cflags [lindex $testitem 6]
+	set objfiles {}
+	set is_unresolved 0
+	set failed 0
+
+#	verbose -log "Testname is $testname"
+#	verbose -log "ld_options is $ld_options"
+#	verbose -log "as_options is $as_options"
+#	verbose -log "src_files is $src_files"
+#	verbose -log "actions is $actions"
+#	verbose -log "binfile is $binfile"
+
+	# Assemble each file in the test.
+	foreach src_file $src_files {
+	    set objfile "tmpdir/[file rootname $src_file].o"
+	    lappend objfiles $objfile
+
+	    if ![ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile] {
+		set is_unresolved 1
+		break
+	    }
+	}
+
+	# Catch assembler errors.
+	if { $is_unresolved != 0 } {
+	    unresolved $testname
+	    continue
+	}
+
+	if ![ld_link $ld $binfile "-L$srcdir/$subdir $ld_options $objfiles"] {
+	    set failed 1
+	} else {
+	    set failed 0
+	    send_log "Running: $binfile > $binfile.out\n"
+	    verbose "Running: $binfile > $binfile.out"
+	    catch "exec $binfile > $binfile.out" exec_output
+	    
+	    if ![string match "" $exec_output] then {
+		send_log "$exec_output\n"
+		verbose "$exec_output" 1
+		set failed 1
+	    } else {
+		send_log "diff $binfile.out $srcdir/$subdir/$expfile\n"
+		verbose "diff $binfile.out $srcdir/$subdir/$expfile"
+		catch "exec diff $binfile.out $srcdir/$subdir/$expfile" exec_output
+		set exec_output [prune_warnings $exec_output]
+
+		if ![string match "" $exec_output] then {
+		    send_log "$exec_output\n"
+		    verbose "$exec_output" 1
+		    set failed 1
+		}
+	    }
+
+	    if { $failed != 0 } {
+		fail $testname
+	    } else { if { $is_unresolved == 0 } {
+		pass $testname
+	    } }
+	}
+
+	# Catch action errors.
+	if { $is_unresolved != 0 } {
+	    unresolved $testname
+	    continue
+	}
+    }
+}
