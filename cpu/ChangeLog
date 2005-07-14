@@ -1,3 +1,7 @@
+2005-07-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ms1.opc (print_dollarhex): Correct format string.
+
 2005-07-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* iq2000.cpu: Include from binutils cpu dir.
@@ -326,7 +330,7 @@
 	media-expand-halfword-to-double-semantics, mexpdhd, cmexpdhd,
 	cmhtob): Use new operands.
 	* frv.opc (CGEN_VERBOSE_ASSEMBLER_ERRORS): Define.
-        (parse_even_register): New function.
+	(parse_even_register): New function.
 
 2003-06-03  Nick Clifton  <nickc@redhat.com>
 
