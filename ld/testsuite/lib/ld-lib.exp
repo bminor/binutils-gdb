@@ -1263,8 +1263,8 @@ if ![string length [info proc prune_warnings]] {
     }
 }
 
-# List contains test-items with 3 items followed by 2 lists, one item and
-# one optional item:
+# List contains test-items with 3 items followed by 1 lists, 2 items
+# and one optional item:
 # 0:name
 # 1:ld options
 # 2:assembler options
