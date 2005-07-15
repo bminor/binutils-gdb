@@ -1,3 +1,27 @@
+2005-07-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldemul.c (ldemul_do_assignments): New function.
+	(do_assignments_default): New function.
+	* ldemul.h (ldemul_do_assignments): Declare.
+	(do_assignments_default): Declare.
+	(struct ld_emulation_xfer_struct): Add do_assignments.
+	* ldlang.c (lang_do_assignments) Call ldemul_do_assignments.
+	* emultempl/aix.em (ld_*_emulation): Init do_assignments field.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+	* emultempl/elf32.em: Likewise, to call gld*_provide_init_fini_syms.
+	(gld*_find_exp_assignment): Adjust bfd_elf_record_link_assignment call.
+
 2005-07-14  Jim Blandy  <jimb@redhat.com>
 
 	Add support for the Renesas M32C and M16C.

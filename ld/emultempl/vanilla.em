@@ -65,6 +65,7 @@ struct ld_emulation_xfer_struct ld_vanilla_emulation =
   vanilla_set_output_arch,
   ldemul_default_target,
   before_allocation_default,
+  do_assignments_default,
   vanilla_get_script,
   "vanilla",
   "a.out-sunos-big",

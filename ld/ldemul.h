@@ -1,6 +1,6 @@
 /* ld-emul.h - Linker emulation header file
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001,
-   2002, 2003, 2004
+   2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -34,6 +34,8 @@ extern void ldemul_after_open
 extern void ldemul_after_allocation
   (void);
 extern void ldemul_before_allocation
+  (void);
+extern void ldemul_do_assignments
   (void);
 extern void ldemul_set_output_arch
   (void);
@@ -77,6 +79,8 @@ extern void after_allocation_default
   (void);
 extern void before_allocation_default
   (void);
+extern void do_assignments_default
+  (void);
 extern void set_output_arch_default
   (void);
 extern void syslib_default
@@ -116,6 +120,9 @@ typedef struct ld_emulation_xfer_struct {
 
   /* Run before allocating output sections.  */
   void   (*before_allocation) (void);
+
+  /* Run to set special symbols at the same time as link script syms.  */
+  void   (*do_assignments) (void);
 
   /* Return the appropriate linker script.  */
   char * (*get_script) (int *isfile);

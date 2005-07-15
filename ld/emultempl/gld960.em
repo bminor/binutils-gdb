@@ -134,6 +134,7 @@ struct ld_emulation_xfer_struct ld_gld960_emulation =
   gld960_set_output_arch,
   gld960_choose_target,
   before_allocation_default,
+  do_assignments_default,
   gld960_get_script,
   "960",
   "",

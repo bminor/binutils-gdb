@@ -1340,6 +1340,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   gld${EMULATION_NAME}_set_output_arch,
   gld${EMULATION_NAME}_choose_target,
   gld${EMULATION_NAME}_before_allocation,
+  do_assignments_default,
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",

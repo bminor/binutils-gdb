@@ -4585,6 +4585,7 @@ lang_do_assignments (void)
 {
   lang_statement_iteration++;
   lang_do_assignments_1 (statement_list.head, abs_output_section, NULL, 0);
+  ldemul_do_assignments ();
 }
 
 /* Fix any .startof. or .sizeof. symbols.  When the assemblers see the

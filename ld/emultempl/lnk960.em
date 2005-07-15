@@ -269,6 +269,7 @@ struct ld_emulation_xfer_struct ld_lnk960_emulation =
   lnk960_set_output_arch,
   lnk960_choose_target,
   before_allocation_default,
+  do_assignments_default,
   lnk960_get_script,
   "lnk960",
   "",
