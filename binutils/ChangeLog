@@ -1,3 +1,7 @@
+2005-07-15  Eric Christopher  <echristo@redhat.com>
+
+	* MAINTAINERS: Change affiliation.
+
 2005-07-14  Jim Blandy  <jimb@redhat.com>
 
 	* readelf.c: #include "elf/m32c.h"
