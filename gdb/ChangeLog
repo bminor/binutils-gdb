@@ -1,3 +1,9 @@
+2005-07-16  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el:  Update for changes in Emacs 22.0.50.  Bring more
+	features over from gdb-ui.el.  Use "-var-update --all-values" for
+	faster re-display of watch expressions.
+
 2005-07-15  Mark Kettenis  <kettenis@gnu.org>
 	    Marcel Moolenaar  <marcel@xcllnt.net>
 
