@@ -1,5 +1,9 @@
 2005-07-15  Ben Elliston  <bje@au.ibm.com>
 
+	* hw_htab.c (bfd_get_section_lma): Remove macro; use BFD's.
+
+2005-07-15  Ben Elliston  <bje@au.ibm.com>
+
 	* hw_init.c: Comment out tokens after #endif directive.
 	* hw_register.c: Likewise.
 	* hw_trace.c: Likewise.

@@ -393,7 +393,6 @@ htab_sum_binary(bfd *abfd,
   htab_binary_sizes *sizes = (htab_binary_sizes*)data;
   unsigned_word size = bfd_get_section_size (sec);
   unsigned_word vma = bfd_get_section_vma (abfd, sec);
-#define bfd_get_section_lma(abfd, sec) ((sec)->lma + 0)
   unsigned_word ra = bfd_get_section_lma (abfd, sec);
 
   /* skip the section if no memory to allocate */
