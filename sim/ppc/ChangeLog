@@ -1,3 +1,10 @@
+2005-07-15  Ben Elliston  <bje@au.ibm.com>
+
+	* hw_init.c: Comment out tokens after #endif directive.
+	* hw_register.c: Likewise.
+	* hw_trace.c: Likewise.
+	* hw_vm.c: Likewise.
+
 2005-04-20  Manoj Iyer  <manjo@austin.ibm.com>
 
 	* psim.c: Added libiberty.h header file.
