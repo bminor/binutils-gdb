@@ -1075,7 +1075,7 @@ normal, level 1 is for use when @value{GDBN} is run as a subprocess of
 @sc{gnu} Emacs, level 3 is the maximum annotation suitable for programs
 that control @value{GDBN}, and level 2 has been deprecated.
 
-The annotation mechanism has largely been superseeded by @sc{gdb/mi}
+The annotation mechanism has largely been superseded by @sc{gdb/mi}
 (@pxref{GDB/MI}).
 
 @item --args
@@ -17111,18 +17111,13 @@ For each command in the block, the following is described:
  -command @var{args}@dots{}
 @end smallexample
 
-@subsubheading @value{GDBN} Command
-
-The corresponding @value{GDBN} CLI command.
-
 @subsubheading Result
 
-@subsubheading Out-of-band
+@subsubheading @value{GDBN} Command
 
-@subsubheading Notes
+The corresponding @value{GDBN} CLI command(s), if any.
 
 @subsubheading Example
-
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Breakpoint Table Commands
@@ -19559,14 +19554,14 @@ Show a single frame:
  -stack-list-locals @var{print-values}
 @end smallexample
 
-Display the local variable names for the current frame.  With an
-argument of 0 or @code{--no-values}, prints only the names of the variables.
-With argument of 1 or @code{--all-values}, prints also their values.  With
-argument of 2 or @code{--simple-values}, prints the name, type and value for
-simple data types and the name and type for arrays, structures and
-unions.  In this last case, the idea is that the user can see the
-value of simple data types immediately and he can create variable
-objects for other data types if he wishes to explore their values in
+Display the local variable names for the selected frame.  If
+@var{print-values} is 0 or @code{--no-values}, print only the names of
+the variables; if it is 1 or @code{--all-values}, print also their
+values; and if it is 2 or @code{--simple-values}, print the name,
+type and value for simple data types and the name and type for arrays,
+structures and unions.  In this last case, a frontend can immediately
+display the value of simple data types and create variable objects for
+other data types when the the user wishes to explore their values in
 more detail.
 
 @subsubheading @value{GDBN} Command
@@ -19599,7 +19594,7 @@ more detail.
  -stack-select-frame @var{framenum}
 @end smallexample
 
-Change the current frame.  Select a different frame @var{framenum} on
+Change the selected frame.  Select a different frame @var{framenum} on
 the stack.
 
 @subsubheading @value{GDBN} Command
@@ -20531,23 +20526,27 @@ Returns the number of children of a variable object @var{name}:
 @smallexample
  -var-list-children [@var{print-values}] @var{name}
 @end smallexample
+@anchor{-var-list-children} 
 
-Returns a list of the children of the specified variable object.  With
-just the variable object name as an argument or with an optional
-preceding argument of 0 or @code{--no-values}, prints only the names of the
-variables.  With an optional preceding argument of 1 or @code{--all-values},
-also prints their values.
+Return a list of the children of the specified variable object and
+create variable objects for them, if they do not already exist.  With
+a single argument or if @var{print-values} has a value for of 0 or
+@code{--no-values}, print only the names of the variables; if
+@var{print-values} is 1 or @code{--all-values}, also print their
+values; and if it is 2 or @code{--simple-values} print the name and
+value for simple data types and just the name for arrays, structures
+and unions.
 
 @subsubheading Example
 
 @smallexample
 (@value{GDBP})
  -var-list-children n
- numchild=@var{n},children=[@{name=@var{name},
+ ^done,numchild=@var{n},children=[@{name=@var{name},
  numchild=@var{n},type=@var{type}@},@r{(repeats N times)}]
 (@value{GDBP})
  -var-list-children --all-values n
- numchild=@var{n},children=[@{name=@var{name},
+ ^done,numchild=@var{n},children=[@{name=@var{name},
  numchild=@var{n},value=@var{value},type=@var{type}@},@r{(repeats N times)}]
 @end smallexample
 
@@ -20658,13 +20657,28 @@ subsequent @code{-var-update} list.
 @subsubheading Synopsis
 
 @smallexample
- -var-update @{@var{name} | "*"@}
+ -var-update [@var{print-values}] @{@var{name} | "*"@}
 @end smallexample
 
 Update the value of the variable object @var{name} by evaluating its
 expression after fetching all the new values from memory or registers.
-A @samp{*} causes all existing variable objects to be updated.
+A @samp{*} causes all existing variable objects to be updated.  The
+option @var{print-values} determines whether names and values, or just
+names are printed in the manner described for
+@code{@pxref{-var-list-children}}.
 
+@subsubheading Example
+
+@smallexample
+(@value{GDBP})
+-var-assign var1 3
+^done,value="3"
+(@value{GDBP})
+-var-update --all-values var1
+^done,changelist=[@{name="var1",value="3",in_scope="true",
+type_changed="false"@}]
+(@value{GDBP})
+@end smallexample
 
 @node Annotations
 @chapter @value{GDBN} Annotations
