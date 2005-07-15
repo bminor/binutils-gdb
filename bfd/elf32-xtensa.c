@@ -36,7 +36,7 @@
 /* Local helper functions.  */
 
 static bfd_boolean add_extra_plt_sections (bfd *, int);
-static char *build_encoding_error_message (xtensa_opcode, bfd_vma);
+static char *vsprint_msg (const char *, const char *, int, ...) ATTRIBUTE_PRINTF(2,4);
 static bfd_reloc_status_type bfd_elf_xtensa_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_boolean do_fix_for_relocatable_link
@@ -1742,7 +1742,30 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
       || xtensa_operand_set_field (isa, opcode, opnd, fmt, slot,
 				   sbuff, newval))
     {
-      *error_message = build_encoding_error_message (opcode, relocation);
+      const char *opname = xtensa_opcode_name (isa, opcode);
+      const char *msg;
+
+      msg = "cannot encode";
+      if (is_direct_call_opcode (opcode))
+	{
+	  if ((relocation & 0x3) != 0)
+	    msg = "misaligned call target";
+	  else
+	    msg = "call target out of range";
+	}
+      else if (opcode == get_l32r_opcode ())
+	{
+	  if ((relocation & 0x3) != 0)
+	    msg = "misaligned literal target";
+	  else if (is_alt_relocation (howto->type))
+	    msg = "literal target out of range (too many literals)";
+	  else if (self_address > relocation)
+	    msg = "literal target out of range (try using text-section-literals)";
+	  else
+	    msg = "literal placed after use";
+	}
+
+      *error_message = vsprint_msg (opname, ": %s", strlen (msg) + 2, msg);
       return bfd_reloc_dangerous;
     }
 
@@ -1767,7 +1790,7 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
 }
 
 
-static char * ATTRIBUTE_PRINTF(2,4)
+static char *
 vsprint_msg (const char *origmsg, const char *fmt, int arglen, ...)
 {
   /* To reduce the size of the memory leak,
@@ -1794,32 +1817,6 @@ vsprint_msg (const char *origmsg, const char *fmt, int arglen, ...)
   vsprintf (message + orig_len, fmt, ap);
   VA_CLOSE (ap);
   return message;
-}
-
-
-static char *
-build_encoding_error_message (xtensa_opcode opcode, bfd_vma target_address)
-{
-  const char *opname = xtensa_opcode_name (xtensa_default_isa, opcode);
-  const char *msg;
-
-  msg = "cannot encode";
-  if (is_direct_call_opcode (opcode))
-    {
-      if ((target_address & 0x3) != 0)
-	msg = "misaligned call target";
-      else
-	msg = "call target out of range";
-    }
-  else if (opcode == get_l32r_opcode ())
-    {
-      if ((target_address & 0x3) != 0)
-	msg = "misaligned literal target";
-      else
-	msg = "literal target out of range";
-    }
-
-  return vsprint_msg (opname, ": %s", strlen (msg) + 2, msg);
 }
 
 

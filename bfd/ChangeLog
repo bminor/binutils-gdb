@@ -1,3 +1,10 @@
+2005-07-15  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (vsprint_msg): Add prototype.
+	(build_encoding_error_message): Delete.  Code moved into....
+	(elf_xtensa_do_reloc): ....here, and changed to give better
+	error messages for out of range literals.
+
 2005-07-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (bfd_elf_record_link_assignment): Remove output_bfd param.
