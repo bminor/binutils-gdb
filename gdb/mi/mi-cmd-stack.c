@@ -1,5 +1,5 @@
 /* MI Command Set - stack commands.
-   Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -136,16 +136,18 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
    frame = get_selected_frame (NULL);
 
    if (strcmp (argv[0], "0") == 0
-       || strcmp (argv[0], "--no-values") == 0)
+       || strcmp (argv[0], mi_no_values) == 0)
      print_values = PRINT_NO_VALUES;
    else if (strcmp (argv[0], "1") == 0
-	    || strcmp (argv[0], "--all-values") == 0)
+	    || strcmp (argv[0], mi_all_values) == 0)
      print_values = PRINT_ALL_VALUES;
    else if (strcmp (argv[0], "2") == 0
-	    || strcmp (argv[0], "--simple-values") == 0)
+	    || strcmp (argv[0], mi_simple_values) == 0)
      print_values = PRINT_SIMPLE_VALUES;
    else
-     error (_("Unknown value for PRINT_VALUES: must be: 0 or \"--no-values\", 1 or \"--all-values\", 2 or \"--simple-values\""));
+     error (_("Unknown value for PRINT_VALUES: must be: \
+0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
+	    mi_no_values, mi_all_values, mi_simple_values);
   list_args_or_locals (1, print_values, frame);
   return MI_CMD_DONE;
 }

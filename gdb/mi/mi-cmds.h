@@ -1,6 +1,6 @@
 /* MI Command Set for GDB, the GNU debugger.
 
-   Copyright 2000, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -49,6 +49,10 @@ enum print_values {
    PRINT_ALL_VALUES,
    PRINT_SIMPLE_VALUES
 };
+
+extern const char mi_no_values[];
+extern const char mi_simple_values[];
+extern const char mi_all_values[];
 
 typedef enum mi_cmd_result (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
 

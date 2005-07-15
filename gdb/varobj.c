@@ -1,6 +1,7 @@
 /* Implementation of the GDB variable objects API.
 
-   Copyright 1999, 2000, 2001, 2005 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -758,6 +759,14 @@ varobj_get_type (struct varobj *var)
   thetype = ui_file_xstrdup (stb, &length);
   do_cleanups (old_chain);
   return thetype;
+}
+
+/* Obtain the type of an object variable.  */
+
+struct type *
+varobj_get_gdb_type (struct varobj *var)
+{
+  return var->type;
 }
 
 enum varobj_languages

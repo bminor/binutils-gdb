@@ -1,3 +1,22 @@
+2005-07-15  Nick Roberts  <nickrob@snap.net.nz>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mi/mi-cmds.h (mi_no_values, mi_simple_values, mi_all_values): New
+	declarations.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): Use string
+	constants instead of literals for MI command options.
+	* mi/mi-cmd-var.c (mi_no_values, mi_simple_values, mi_all_values):
+	New variables.
+	(mi_parse_values_option, mi_print_value_p): New functions.
+	(mi_cmd_var_list_children): Use mi_parse_values_option and
+	mi_print_value_p.
+	(mi_cmd_var_update): Support a PRINT_VALUES option.  Update calls
+	to varobj_update_one.
+	(varobj_update_one): Take a print_values argument.  Call
+	mi_print_value_p.
+	* varobj.c (varobj_get_gdb_type): New function.
+	* varobj.h (varobj_get_gdb_type): New prototype.
+
 2005-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ppc-linux-tdep.c (ppc_linux_init_abi): Set 64-bit link map offsets.

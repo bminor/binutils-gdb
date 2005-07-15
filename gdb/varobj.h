@@ -1,5 +1,5 @@
 /* GDB variable objects API.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2005 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -84,6 +84,8 @@ extern int varobj_list_children (struct varobj *var,
 				 struct varobj ***childlist);
 
 extern char *varobj_get_type (struct varobj *var);
+
+extern struct type *varobj_get_gdb_type (struct varobj *var);
 
 extern enum varobj_languages varobj_get_language (struct varobj *var);
 

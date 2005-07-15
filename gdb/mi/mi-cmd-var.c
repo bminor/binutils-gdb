@@ -1,6 +1,6 @@
 /* MI Command Set - varobj commands.
 
-   Copyright 2000, 2002, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -30,9 +30,14 @@
 #include <ctype.h>
 #include "gdb_string.h"
 
+const char mi_no_values[] = "--no-values";
+const char mi_simple_values[] = "--simple-values";
+const char mi_all_values[] = "--all-values";
+
 extern int varobjdebug;		/* defined in varobj.c */
 
-static int varobj_update_one (struct varobj *var);
+static int varobj_update_one (struct varobj *var,
+			      enum print_values print_values);
 
 /* VAROBJ operations */
 
@@ -247,6 +252,49 @@ mi_cmd_var_info_num_children (char *command, char **argv, int argc)
   return MI_CMD_DONE;
 }
 
+/* Parse a string argument into a print_values value.  */
+
+static enum print_values
+mi_parse_values_option (const char *arg)
+{
+  if (strcmp (arg, "0") == 0
+      || strcmp (arg, mi_no_values) == 0)
+    return PRINT_NO_VALUES;
+  else if (strcmp (arg, "1") == 0
+	   || strcmp (arg, mi_all_values) == 0)
+    return PRINT_ALL_VALUES;
+  else if (strcmp (arg, "2") == 0
+	   || strcmp (arg, mi_simple_values) == 0)
+    return PRINT_SIMPLE_VALUES;
+  else
+    error (_("Unknown value for PRINT_VALUES\n\
+Must be: 0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
+	   mi_no_values, mi_simple_values, mi_all_values);
+}
+
+/* Return 1 if given the argument PRINT_VALUES we should display
+   a value of type TYPE.  */
+
+static int
+mi_print_value_p (struct type *type, enum print_values print_values)
+{
+  if (type != NULL)
+    type = check_typedef (type);
+
+  if (print_values == PRINT_NO_VALUES)
+    return 0;
+
+  if (print_values == PRINT_ALL_VALUES)
+    return 1;
+
+  /* For PRINT_SIMPLE_VALUES, only print the value if it has a type
+     and that type is not a compound type.  */
+
+  return (TYPE_CODE (type) != TYPE_CODE_ARRAY
+	  && TYPE_CODE (type) != TYPE_CODE_STRUCT
+	  && TYPE_CODE (type) != TYPE_CODE_UNION);
+}
+
 enum mi_cmd_result
 mi_cmd_var_list_children (char *command, char **argv, int argc)
 {
@@ -262,23 +310,19 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
     error (_("mi_cmd_var_list_children: Usage: [PRINT_VALUES] NAME"));
 
   /* Get varobj handle, if a valid var obj name was specified */
-  if (argc == 1) var = varobj_get_handle (argv[0]);
-  else var = varobj_get_handle (argv[1]);
+  if (argc == 1)
+    var = varobj_get_handle (argv[0]);
+  else
+    var = varobj_get_handle (argv[1]);
   if (var == NULL)
     error (_("Variable object not found"));
 
   numchild = varobj_list_children (var, &childlist);
   ui_out_field_int (uiout, "numchild", numchild);
   if (argc == 2)
-    if (strcmp (argv[0], "0") == 0
-	|| strcmp (argv[0], "--no-values") == 0)
-      print_values = PRINT_NO_VALUES;
-    else if (strcmp (argv[0], "1") == 0
-	     || strcmp (argv[0], "--all-values") == 0)
-      print_values = PRINT_ALL_VALUES;
-    else
-     error (_("Unknown value for PRINT_VALUES: must be: 0 or \"--no-values\", 1 or \"--all-values\""));
-  else print_values = PRINT_NO_VALUES;
+    print_values = mi_parse_values_option (argv[0]);
+  else
+    print_values = PRINT_NO_VALUES;
 
   if (numchild <= 0)
     return MI_CMD_DONE;
@@ -295,12 +339,12 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
       ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
       ui_out_field_string (uiout, "exp", varobj_get_expression (*cc));
       ui_out_field_int (uiout, "numchild", varobj_get_num_children (*cc));
-      if (print_values)
+      if (mi_print_value_p (varobj_get_gdb_type (*cc), print_values))
 	ui_out_field_string (uiout, "value", varobj_get_value (*cc));
       type = varobj_get_type (*cc);
       /* C++ pseudo-variables (public, private, protected) do not have a type */
       if (type)
-	ui_out_field_string (uiout, "type", varobj_get_type (*cc));
+	ui_out_field_string (uiout, "type", type);
       do_cleanups (cleanup_child);
       cc++;
     }
@@ -426,11 +470,20 @@ mi_cmd_var_update (char *command, char **argv, int argc)
   struct cleanup *cleanup;
   char *name;
   int nv;
+  enum print_values print_values;
 
-  if (argc != 1)
-    error (_("mi_cmd_var_update: Usage: NAME."));
+  if (argc != 1 && argc != 2)
+    error (_("mi_cmd_var_update: Usage: [PRINT_VALUES] NAME."));
 
-  name = argv[0];
+  if (argc == 1)
+    name = argv[0];
+  else
+    name = (argv[1]);
+
+  if (argc == 2)
+    print_values = mi_parse_values_option (argv[0]);
+  else
+    print_values = PRINT_NO_VALUES;
 
   /* Check if the parameter is a "*" which means that we want
      to update all variables */
@@ -450,7 +503,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
       cr = rootlist;
       while (*cr != NULL)
 	{
-	  varobj_update_one (*cr);
+	  varobj_update_one (*cr, print_values);
 	  cr++;
 	}
       xfree (rootlist);
@@ -467,7 +520,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
         cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, "changelist");
       else
         cleanup = make_cleanup_ui_out_list_begin_end (uiout, "changelist");
-      varobj_update_one (var);
+      varobj_update_one (var, print_values);
       do_cleanups (cleanup);
     }
     return MI_CMD_DONE;
@@ -478,7 +531,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
    scope), and 1 if it succeeds. */
 
 static int
-varobj_update_one (struct varobj *var)
+varobj_update_one (struct varobj *var, enum print_values print_values)
 {
   struct varobj **changelist;
   struct varobj **cc;
@@ -524,6 +577,8 @@ varobj_update_one (struct varobj *var)
 	  if (mi_version (uiout) > 1)
 	    cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
+	  if (mi_print_value_p (varobj_get_gdb_type (*cc), print_values))
+	    ui_out_field_string (uiout, "value", varobj_get_value (*cc));
 	  ui_out_field_string (uiout, "in_scope", "true");
 	  ui_out_field_string (uiout, "type_changed", "false");
 	  if (mi_version (uiout) > 1)
