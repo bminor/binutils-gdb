@@ -1,3 +1,7 @@
+2005-07-15  Jim Blandy  <jimb@redhat.com>
+
+	* m32c.cpu, m32c.opc: Fix copyright.
+
 2005-07-14  Jim Blandy  <jimb@redhat.com>
 
 	* m32c.cpu, m32c.opc: Machine description for the Renesas M32C.
