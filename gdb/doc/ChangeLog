@@ -1,3 +1,12 @@
+2005-07-15  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Describe print-values
+	option for -var-list-children and -var-update.
+	(GDB/MI Stack Manipulation): Simplify description of
+	print-values option for -stack-list-locals.
+	(GDB/MI Command Description Format): Clarify.
+	(Mode Options): Spelling of superseded.
+
 2005-07-12  Bob Rossi  <bob@brasko.net>
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Fix -inferior-tty-show
