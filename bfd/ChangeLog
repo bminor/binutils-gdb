@@ -1,3 +1,11 @@
+2005-07-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (bfd_elf_record_link_assignment): Remove output_bfd param.
+	(_bfd_elf_provide_symbol): Allow redefinition of weak syms and those
+	defined in output sections.  Call bfd_elf_record_link_assignment.
+	* bfd-in.h (bfd_elf_record_link_assignment): Update prototype.
+	* bfd-in2.h: Regenerate.
+
 2005-07-14  Jim Blandy  <jimb@redhat.com>
 
 	Add support for m32c-*-elf (Renesas m32c and m16c).

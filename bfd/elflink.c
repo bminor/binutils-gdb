@@ -433,8 +433,7 @@ bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
    this in case some dynamic object refers to this symbol.  */
 
 bfd_boolean
-bfd_elf_record_link_assignment (bfd *output_bfd ATTRIBUTE_UNUSED,
-				struct bfd_link_info *info,
+bfd_elf_record_link_assignment (struct bfd_link_info *info,
 				const char *name,
 				bfd_boolean provide)
 {
@@ -9843,8 +9842,13 @@ _bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
 {
   struct elf_link_hash_entry *h;
 
+  bfd_elf_record_link_assignment (info, name, TRUE);
+
   h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
-  if (h != NULL && !h->def_regular)
+  if (h != NULL
+      && !(h->root.type == bfd_link_hash_defined
+	   && h->root.u.def.section != NULL
+	   && h->root.u.def.section != h->root.u.def.section->output_section))
     bfd_elf_set_symbol (h, val, s);
 }
 
