@@ -1,3 +1,8 @@
+2007-07-15  H.J. Lu <hongjiu.lu@intel.com>
+
+	* gas/config/tc-i386.h (CpuVMX): New.
+	(CpuUnknownFlags): Add CpuVMX.
+
 2005-07-14  Jim Blandy  <jimb@redhat.com>
 
 	Add support for the Renesas M32C.

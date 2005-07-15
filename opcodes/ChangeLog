@@ -1,3 +1,15 @@
+2007-07-15  H.J. Lu <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_VMX): New. Handle Intel VMX Instructions.
+	(VMX_Fixup): New. Fix up Intel VMX Instructions.
+	(Em): New.
+	(Gm): New.
+	(VM): New.
+	(dis386_twobyte): Updated entries 0x78 and 0x79.
+	(twobyte_has_modrm): Likewise.
+	(grps): Use OP_VMX in the "sgdtIQ" entry. Updated GRP9.
+	(OP_G): Handle m_mode.
+
 2005-07-14  Jim Blandy  <jimb@redhat.com>
 
 	Add support for the Renesas M32C and M16C.

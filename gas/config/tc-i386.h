@@ -184,6 +184,7 @@ typedef struct
 #define CpuPNI	      CpuSSE3	/* Prescott New Instructions required */
 #define CpuPadLock    0x40000	/* VIA PadLock required */
 #define CpuSVME	      0x80000	/* AMD Secure Virtual Machine Ext-s required */
+#define CpuVMX	     0x100000	/* VMX Instructions required */
 
   /* These flags are set by gas depending on the flag_code.  */
 #define Cpu64	     0x4000000   /* 64bit support required  */
@@ -191,7 +192,7 @@ typedef struct
 
   /* The default value for unknown CPUs - enable all features to avoid problems.  */
 #define CpuUnknownFlags (Cpu086|Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686 \
-	|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI \
+	|CpuP4|CpuSledgehammer|CpuMMX|CpuMMX2|CpuSSE|CpuSSE2|CpuPNI|CpuVMX \
 	|Cpu3dnow|Cpu3dnowA|CpuK6|CpuAthlon|CpuPadLock|CpuSVME)
 
   /* the bits in opcode_modifier are used to generate the final opcode from

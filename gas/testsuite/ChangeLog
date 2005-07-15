@@ -1,3 +1,12 @@
+2007-07-15  H.J. Lu <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Add vmx and x86-64-vmx.
+
+	* gas/i386/vmx.d: New file.
+	* gas/i386/vmx.s: Likewise.
+	* gas/i386/x86-64-vmx.d: Likewise.
+	* gas/i386/x86-64-vmx.s: Likewise.
+
 2005-07-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 1063

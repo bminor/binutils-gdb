@@ -88,6 +88,7 @@ static void OP_EX (int, int);
 static void OP_MS (int, int);
 static void OP_XS (int, int);
 static void OP_M (int, int);
+static void OP_VMX (int, int);
 static void OP_0fae (int, int);
 static void OP_0f07 (int, int);
 static void NOP_Fixup (int, int);
@@ -99,6 +100,7 @@ static void SVME_Fixup (int, int);
 static void INVLPG_Fixup (int, int);
 static void BadOp (void);
 static void SEG_Fixup (int, int);
+static void VMX_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -200,6 +202,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Edqw OP_E, dqw_mode
 #define indirEv OP_indirE, branch_v_mode
 #define indirEp OP_indirE, f_mode
+#define Em OP_E, m_mode
 #define Ew OP_E, w_mode
 #define Ma OP_E, v_mode
 #define M OP_M, 0		/* lea, lgdt, etc. */
@@ -208,6 +211,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Gv OP_G, v_mode
 #define Gd OP_G, d_mode
 #define Gdq OP_G, dq_mode
+#define Gm OP_G, m_mode
 #define Gw OP_G, w_mode
 #define Rd OP_Rd, d_mode
 #define Rm OP_Rd, m_mode
@@ -299,6 +303,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EX OP_EX, v_mode
 #define MS OP_MS, v_mode
 #define XS OP_XS, v_mode
+#define VM OP_VMX, q_mode
 #define OPSUF OP_3DNowSuffix, 0
 #define OPSIMD OP_SIMD_Suffix, 0
 
@@ -915,8 +920,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "pcmpeqd",		MX, EM, XX },
   { "emms",		XX, XX, XX },
   /* 78 */
-  { "(bad)",		XX, XX, XX },
-  { "(bad)",		XX, XX, XX },
+  { "vmread",		Em, Gm, XX },
+  { "vmwrite",		Gm, Em, XX },
   { "(bad)",		XX, XX, XX },
   { "(bad)",		XX, XX, XX },
   { PREGRP28 },
@@ -1102,7 +1107,7 @@ static const unsigned char twobyte_has_modrm[256] = {
   /* 40 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 4f */
   /* 50 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 5f */
   /* 60 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 6f */
-  /* 70 */ 1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1, /* 7f */
+  /* 70 */ 1,1,1,1,1,1,1,0,1,1,0,0,1,1,1,1, /* 7f */
   /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
   /* 90 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 9f */
   /* a0 */ 0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1, /* af */
@@ -1372,7 +1377,7 @@ static const struct dis386 grps[][8] = {
   },
   /* GRP7 */
   {
-    { "sgdtIQ",	 M, XX, XX },
+    { "sgdtIQ", VMX_Fixup, 0, XX, XX },
     { "sidtIQ", PNI_Fixup, 0, XX, XX },
     { "lgdt{Q|Q||}",	 M, XX, XX },
     { "lidt{Q|Q||}",	 SVME_Fixup, 0, XX, XX },
@@ -1400,8 +1405,8 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
     { "(bad)",	XX, XX, XX },
-    { "(bad)",	XX, XX, XX },
-    { "(bad)",	XX, XX, XX },
+    { "",	VM, XX, XX },		/* See OP_VMX.  */
+    { "vmptrst", Eq, XX, XX },
   },
   /* GRP10 */
   {
@@ -3487,6 +3492,12 @@ OP_G (int bytemode, int sizeflag)
 	oappend (names16[reg + add]);
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
+    case m_mode:
+      if (mode_64bit)
+	oappend (names64[reg + add]);
+      else
+	oappend (names32[reg + add]);
+      break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);
       break;
@@ -4596,4 +4607,51 @@ SEG_Fixup (int extrachar, int sizeflag)
     }
 
   OP_E (extrachar, sizeflag);
+}
+
+static void
+VMX_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
+{
+  if (mod == 3 && reg == 0 && rm >=1 && rm <= 4)
+    {
+      /* Override "sgdt".  */
+      char *p = obuf + strlen (obuf) - 4;
+
+      /* We might have a suffix.  */
+      if (*p == 'i')
+	--p;
+
+      switch (rm)
+	{
+	case 1:
+	  strcpy (p, "vmcall");
+	  break;
+	case 2:
+	  strcpy (p, "vmlaunch");
+	  break;
+	case 3:
+	  strcpy (p, "vmresume");
+	  break;
+	case 4:
+	  strcpy (p, "vmxoff");
+	  break;
+	}
+
+      codep++;
+    }
+  else
+    OP_E (0, sizeflag);
+}
+
+static void
+OP_VMX (int bytemode, int sizeflag)
+{
+  used_prefixes |= (prefixes & (PREFIX_DATA | PREFIX_REPZ));
+  if (prefixes & PREFIX_DATA)
+    strcpy (obuf, "vmclear");
+  else if (prefixes & PREFIX_REPZ)
+    strcpy (obuf, "vmxon");
+  else
+    strcpy (obuf, "vmptrld");
+  OP_E (bytemode, sizeflag);
 }
