@@ -1,3 +1,14 @@
+2005-07-15  Mark Kettenis  <kettenis@gnu.org>
+	    Marcel Moolenaar  <marcel@xcllnt.net>
+
+	* sparc64fbsd-nat.c: Include "regcache.h", <sys/types.h>,
+	<machine/pcb.h> and "bsd-kvm.h".
+	(sparc64fbsd_kvm_supply_pcb): New function.
+	(_initialize_sparc64fbsd_nat): Enable libkvm interface.
+	* config/sparc/fbsd.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
+	* Makefile.in (sparc64fbsd-nat.o): Update dependencies.
+
 2005-07-15  Nick Roberts  <nickrob@snap.net.nz>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

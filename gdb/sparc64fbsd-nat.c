@@ -20,11 +20,47 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "regcache.h"
 #include "target.h"
 
 #include "fbsd-nat.h"
 #include "sparc64-tdep.h"
 #include "sparc-nat.h"
+
+
+/* Support for debugging kernel virtual memory images.  */
+
+#include <sys/types.h>
+#include <machine/pcb.h>
+
+#include "bsd-kvm.h"
+
+static int
+sparc64fbsd_kvm_supply_pcb (struct regcache *regcache, struct pcb *pcb)
+{
+  /* The following is true for FreeBSD 5.4:
+
+     The pcb contains %sp and %pc.  Since the register windows are
+     explicitly flushed, we can find the `local' and `in' registers on
+     the stack.  */
+
+  /* The stack pointer shouldn't be zero.  */
+  if (pcb->pcb_sp == 0)
+    return 0;
+
+  regcache_raw_supply (regcache, SPARC_SP_REGNUM, &pcb->pcb_sp);
+  regcache_raw_supply (regcache, SPARC64_PC_REGNUM, &pcb->pcb_pc);
+
+  /* Synthesize %npc.  */
+  pcb->pcb_pc += 4;
+  regcache_raw_supply (regcache, SPARC64_NPC_REGNUM, &pcb->pcb_pc);
+
+  /* Read `local' and `in' registers from the stack.  */
+  sparc_supply_rwindow (regcache, pcb->pcb_sp, -1);
+
+  return 1;
+}
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_sparc64fbsd_nat (void);
@@ -42,4 +78,7 @@ _initialize_sparc64fbsd_nat (void)
   add_target (t);
 
   sparc_gregset = &sparc64fbsd_gregset;
+
+  /* Support debugging kernel virtual memory images.  */
+  bsd_kvm_add_target (sparc64fbsd_kvm_supply_pcb);
 }
