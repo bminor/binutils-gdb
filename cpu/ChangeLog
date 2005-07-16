@@ -1,3 +1,8 @@
+2005-07-16  Jim Blandy  <jimb@redhat.com>
+
+	* m32c.opc (m32c_cgen_insn_supported): Use int, not CGEN_BITSET,
+	to represent isa sets.
+
 2005-07-15  Jim Blandy  <jimb@redhat.com>
 
 	* m32c.cpu, m32c.opc: Fix copyright.
