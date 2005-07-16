@@ -4143,7 +4143,7 @@ Tue Dec 13 08:04:15 1994  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro_build): Accept BFD_RELOC_PCREL* without
 	requiring that the X_op_symbol be in the text_section.
-	(macro): Change the test for a legel expression difference to
+	(macro): Change the test for a legal expression difference to
 	correspond to changes in pseudo_set in read.c.
 
 Fri Dec  9 21:04:17 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
