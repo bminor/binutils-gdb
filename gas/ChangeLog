@@ -1,3 +1,8 @@
+2005-07-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2007-07-15  H.J. Lu <hongjiu.lu@intel.com>
 
 	* gas/config/tc-i386.h (CpuVMX): New.

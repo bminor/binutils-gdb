@@ -1,3 +1,10 @@
+2005-07-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	(stamp-m32c): Fix cpu dependencies.
+	* Makefile.in: Regenerate.
+	* ip2k-dis.c: Regenerate.
+
 2007-07-15  H.J. Lu <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_VMX): New. Handle Intel VMX Instructions.

@@ -438,9 +438,10 @@ stamp-ip2k: $(CGENDEPS) $(CPUDIR)/ip2k.cpu $(CPUDIR)/ip2k.opc
 
 $(srcdir)/m32c-desc.h $(srcdir)/m32c-desc.c $(srcdir)/m32c-opc.h $(srcdir)/m32c-opc.c $(srcdir)/m32c-ibld.c $(srcdir)/m32c-asm.c $(srcdir)/m32c-dis.c: $(M32C_DEPS)
 #	@true
-stamp-m32c: $(CGENDEPS) $(CPUDIR)/m32c.cpu $(CPUDIR)/m32c.opc
+stamp-m32c: $(CGENDEPS) $(srcdir)/../cpu/m32c.cpu $(srcdir)/../cpu/m32c.opc
 	$(MAKE) run-cgen arch=m32c prefix=m32c options= \
-		archfile=$(CPUDIR)/m32c.cpu opcfile=$(CPUDIR)/m32c.opc extrafiles=
+		archfile=$(srcdir)/../cpu/m32c.cpu \
+		opcfile=$(srcdir)/../cpu/m32c.opc extrafiles=
 m32c_opc_h = m32c-opc.h cgen-types.h cgen-ops.h
 m32c-asm.lo: m32c-asm.c sysdep.h config.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h m32c-desc.h \
@@ -586,7 +587,8 @@ arc-dis.lo: arc-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h \
   $(INCDIR)/elf/reloc-macros.h opintl.h arc-dis.h arc-ext.h
 arc-opc.lo: arc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/arc.h
+  $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/arc.h \
+  opintl.h
 arc-ext.lo: arc-ext.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h arc-ext.h $(INCDIR)/libiberty.h
 arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
@@ -745,6 +747,27 @@ iq2000-ibld.lo: iq2000-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 iq2000-opc.lo: iq2000-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h iq2000-desc.h $(INCDIR)/opcode/cgen.h \
   iq2000-opc.h $(INCDIR)/libiberty.h
+m32c-asm.lo: m32c-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h m32c-desc.h $(INCDIR)/opcode/cgen.h \
+  m32c-opc.h cgen-types.h cgen-ops.h opintl.h $(INCDIR)/xregex.h \
+  $(INCDIR)/xregex2.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+m32c-desc.lo: m32c-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h m32c-desc.h $(INCDIR)/opcode/cgen.h \
+  m32c-opc.h cgen-types.h cgen-ops.h opintl.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/xregex.h $(INCDIR)/xregex2.h
+m32c-dis.lo: m32c-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  m32c-desc.h $(INCDIR)/opcode/cgen.h m32c-opc.h cgen-types.h \
+  cgen-ops.h opintl.h $(INCDIR)/elf/m32c.h $(INCDIR)/elf/reloc-macros.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h
+m32c-ibld.lo: m32c-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h m32c-desc.h \
+  $(INCDIR)/opcode/cgen.h m32c-opc.h cgen-types.h cgen-ops.h \
+  opintl.h $(INCDIR)/safe-ctype.h
+m32c-opc.lo: m32c-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h m32c-desc.h $(INCDIR)/opcode/cgen.h \
+  m32c-opc.h cgen-types.h cgen-ops.h $(INCDIR)/libiberty.h
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \
@@ -805,25 +828,23 @@ mmix-dis.lo: mmix-dis.c $(INCDIR)/opcode/mmix.h $(INCDIR)/dis-asm.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
   opintl.h
 mmix-opc.lo: mmix-opc.c $(INCDIR)/opcode/mmix.h $(INCDIR)/symcat.h
-ms1-asm.lo: ms1-asm.c sysdep.h config.h \
-  $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h \
-  $(INCDIR)/opcode/cgen.h ms1-opc.h opintl.h $(INCDIR)/xregex.h \
-  $(INCDIR)/xregex2.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
-ms1-desc.lo: ms1-desc.c sysdep.h config.h \
-  $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h \
-  $(INCDIR)/opcode/cgen.h ms1-opc.h opintl.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/xregex.h $(INCDIR)/xregex2.h
-ms1-dis.lo: ms1-dis.c sysdep.h config.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
-  $(INCDIR)/libiberty.h ms1-desc.h $(INCDIR)/opcode/cgen.h \
-  ms1-opc.h opintl.h
-ms1-ibld.lo: ms1-ibld.c sysdep.h config.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
-  ms1-desc.h $(INCDIR)/opcode/cgen.h ms1-opc.h \
-  opintl.h $(INCDIR)/safe-ctype.h
-ms1-opc.lo: ms1-opc.c sysdep.h config.h \
-  $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h \
-  $(INCDIR)/opcode/cgen.h ms1-opc.h $(INCDIR)/libiberty.h
+ms1-asm.lo: ms1-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h $(INCDIR)/opcode/cgen.h \
+  ms1-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+ms1-desc.lo: ms1-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h $(INCDIR)/opcode/cgen.h \
+  ms1-opc.h opintl.h $(INCDIR)/libiberty.h $(INCDIR)/xregex.h \
+  $(INCDIR)/xregex2.h
+ms1-dis.lo: ms1-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  ms1-desc.h $(INCDIR)/opcode/cgen.h ms1-opc.h opintl.h
+ms1-ibld.lo: ms1-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h \
+  $(INCDIR)/opcode/cgen.h ms1-opc.h opintl.h $(INCDIR)/safe-ctype.h
+ms1-opc.lo: ms1-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h ms1-desc.h $(INCDIR)/opcode/cgen.h \
+  ms1-opc.h $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
 ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/dis-asm.h \
   $(INCDIR)/opcode/ns32k.h opintl.h

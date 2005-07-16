@@ -1088,10 +1088,12 @@ emipsbsd.c: $(srcdir)/emulparams/mipsbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mipsbsd.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsbsd
 emipsidt.c: $(srcdir)/emulparams/mipsidt.sh \
-  $(srcdir)/emultempl/mipsecoff.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/mipsecoff.em $(srcdir)/emultempl/generic.em \
+  $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsidt "$(tdir_mipsidt)"
 emipsidtl.c: $(srcdir)/emulparams/mipsidtl.sh \
-  $(srcdir)/emultempl/mipsecoff.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/mipsecoff.em $(srcdir)/emultempl/generic.em \
+  $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipsidtl "$(tdir_mipsidtl)"
 emipslit.c:  $(srcdir)/emulparams/mipslit.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
@@ -1763,8 +1765,8 @@ ldctor.o: ldctor.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldexp.h ldlang.h ldmisc.h ldgram.h ldmain.h ldctor.h
 ldemul.o: ldemul.c config.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h $(INCDIR)/fopen-same.h \
-  ld.h $(INCDIR)/bin-bugs.h ldmisc.h ldexp.h ldlang.h \
-  ldfile.h ldemul.h ldmain.h ldemul-list.h
+  $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmisc.h \
+  ldexp.h ldlang.h ldfile.h ldemul.h ldmain.h ldemul-list.h
 ldexp.o: ldexp.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \

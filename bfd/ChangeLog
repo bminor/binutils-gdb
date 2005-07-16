@@ -1,3 +1,8 @@
+2005-07-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2005-07-15  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (vsprint_msg): Add prototype.

@@ -89,7 +89,7 @@ print_fr (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       if (offsetvalue == 0)
 	(*info->fprintf_func) (info->stream, "%s","(DP)");
       else
-	(*info->fprintf_func) (info->stream, "$%lx%s",offsetvalue, "(DP)");
+	(*info->fprintf_func) (info->stream, "$%lx%s", offsetvalue, "(DP)");
       return;
     }
 

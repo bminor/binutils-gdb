@@ -1,3 +1,9 @@
+2005-07-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	(emipsidt.c, emipsidtl.c): Depend on generic.em.
+	* Makefile.in: Regenerate.
+
 2005-07-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldemul.c (ldemul_do_assignments): New function.
