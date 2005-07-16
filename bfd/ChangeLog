@@ -1,5 +1,11 @@
 2005-07-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_set_sdata_syms): Return void.  Remove hack
+	for zero size sections.  Don't set .sbss syms here.
+	* elf32-ppc.h (ppc_elf_set_sdata_syms): Adjust prototype.
+
+2005-07-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 

@@ -5261,7 +5261,7 @@ ppc_elf_relax_section (bfd *abfd,
    statement runs the risk of section alignment affecting where the
    section starts.  */
 
-bfd_boolean
+void
 ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
 {
   struct ppc_elf_link_hash_table *htab;
@@ -5286,16 +5286,9 @@ ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
       if (s)
 	{
 	  /* VxWorks executables are relocatable, so the sdata base symbols
-	     must be section-relative.  If the section is zero sized leave
-	     them as absolute symbols to avoid creationg an unused
-	     output section.  */
+	     must be section-relative.  */
 	  val = 32768;
 	  lsect->sym_val = val + s->vma;
-	  if (s->size == 0)
-	    {
-	      val += s->vma;
-	      s = NULL;
-	    }
 	}
       else
 	{
@@ -5305,13 +5298,6 @@ ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
 
       _bfd_elf_provide_symbol (info, lsect->sym_name, val, s);
     }
-
-  s = bfd_get_section_by_name (obfd, ".sbss");
-  _bfd_elf_provide_section_bound_symbols (info, s,
-					  "__sbss_start", "__sbss_end");
-  _bfd_elf_provide_section_bound_symbols (info, s,
-					  "___sbss_start", "___sbss_end");
-  return TRUE;
 }
 
 /* Fill in the address for a pointer generated in a linker section.  */

@@ -118,13 +118,20 @@ ppc_before_allocation (void)
 }
 
 static void
-gld${EMULATION_NAME}_after_allocation (void)
+ppc_do_assignments (void)
 {
+  asection *s;
+
   if (is_ppc_elf32_vec (link_info.hash->creator))
-    {
-      if (!ppc_elf_set_sdata_syms (output_bfd, &link_info))
-	einfo ("%X%P: cannot set sdata syms %E\n");
-    }
+    ppc_elf_set_sdata_syms (output_bfd, &link_info);
+
+  s = bfd_get_section_by_name (output_bfd, ".sbss");
+  _bfd_elf_provide_section_bound_symbols (&link_info, s,
+					  "__sbss_start", "__sbss_end");
+  _bfd_elf_provide_section_bound_symbols (&link_info, s,
+					  "___sbss_start", "___sbss_end");
+
+  gld${EMULATION_NAME}_provide_init_fini_syms ();
 }
 
 EOF
@@ -170,4 +177,4 @@ PARSE_AND_LIST_ARGS_CASES='
 #
 LDEMUL_AFTER_OPEN=ppc_after_open
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
-LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
+LDEMUL_DO_ASSIGNMENTS=ppc_do_assignments

@@ -57,6 +57,7 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
+static void gld${EMULATION_NAME}_provide_init_fini_syms (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static bfd_boolean gld${EMULATION_NAME}_place_orphan
   (lang_input_statement_type *file, asection *s);
@@ -1097,7 +1098,7 @@ gld${EMULATION_NAME}_before_allocation (void)
      referred to by dynamic objects.  */
   lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
 
-  gld${EMULATION_NAME}_provide_init_fini_syms ();
+  ldemul_do_assignments ();
 
   /* Let the ELF backend work out the sizes of any sections required
      by dynamic linking.  */

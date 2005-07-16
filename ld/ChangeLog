@@ -1,5 +1,15 @@
 2005-07-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/elf32.em (gld*_provide_init_fini_syms): Prototype.
+	(gld*_before_allocation): Call ldemul_do_assignments rather than
+	gld*_provide_init_fini_syms directly.
+	* emultempl/ppc32elf.em (gld*_after_allocation): Delete.
+	(ppc_do_assignments): New function.
+	(LDEMUL_AFTER_ALLOCATION): Don't define.
+	(LDEMUL_DO_ASSIGNMENTS): Define.
+
+2005-07-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	(emipsidt.c, emipsidtl.c): Depend on generic.em.
 	* Makefile.in: Regenerate.
