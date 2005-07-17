@@ -618,7 +618,7 @@ print_insn_hppa (bfd_vma memaddr, disassemble_info *info)
 			 read_write_names[GET_FIELD (insn, 25, 25)]);
 		      break;
 		    case 'W':
-		      (*info->fprintf_func) (info->stream, ",w");
+		      (*info->fprintf_func) (info->stream, ",w ");
 		      break;
 		    case 'r':
 		      if (GET_FIELD (insn, 23, 26) == 5)

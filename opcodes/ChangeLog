@@ -1,3 +1,8 @@
+2005-07-16  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* hppa-dis.c (print_insn_hppa): Add space after 'w' in wide-mode
+	mfctl disassembly.
+
 2005-07-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
