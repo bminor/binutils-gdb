@@ -1577,10 +1577,12 @@ pa_ip (str)
   char *s, c, *argstart, *name, *save_s;
   const char *args;
   int match = FALSE;
+  int need_promotion = FALSE;
   int comma = 0;
   int cmpltr, nullif, flag, cond, num;
   unsigned long opcode;
   struct pa_opcode *insn;
+  struct pa_opcode *promoted_insn = NULL;
 
 #ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
@@ -3956,8 +3958,17 @@ pa_ip (str)
       if (match == TRUE
 	  && bfd_get_mach (stdoutput) < insn->arch)
 	{
-	  if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
-	    as_warn (_("could not update architecture and machine"));
+	  if (need_promotion)
+	    {
+	      if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
+		as_warn (_("could not update architecture and machine"));
+	    }
+	  else
+	    {
+	      match = FALSE;
+	      if (!promoted_insn)
+		promoted_insn = insn;
+	    }
 	}
 
  failed:
@@ -3973,6 +3984,13 @@ pa_ip (str)
 	    }
 	  else
 	    {
+	      if (promoted_insn)
+		{
+		  insn = promoted_insn;
+		  need_promotion = TRUE;
+		  s = argstart;
+		  continue;
+		}
 	      as_bad (_("Invalid operands %s"), error_message);
 	      return;
 	    }
