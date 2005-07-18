@@ -81,7 +81,7 @@ main ()
   /* Set up the altstack.  */
   {
     static char stack[SIGSTKSZ * NR_LEVELS];
-    struct sigaltstack alt;
+    stack_t alt;
     memset (&alt, 0, sizeof (alt));
     alt.ss_sp = stack;
     alt.ss_size = SIGSTKSZ;
