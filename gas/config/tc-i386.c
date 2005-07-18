@@ -1204,23 +1204,51 @@ pt (t)
 
 #endif /* DEBUG386 */
 
-static bfd_reloc_code_real_type reloc
-  PARAMS ((int, int, int, bfd_reloc_code_real_type));
-
 static bfd_reloc_code_real_type
-reloc (size, pcrel, sign, other)
-     int size;
-     int pcrel;
-     int sign;
-     bfd_reloc_code_real_type other;
+reloc (unsigned int size,
+     int pcrel,
+     int sign,
+     bfd_reloc_code_real_type other)
 {
   if (other != NO_RELOC)
-    return other;
+    {
+      reloc_howto_type *reloc;
+
+      if (size == 8)
+	switch (other)
+	  {
+	    case BFD_RELOC_X86_64_TPOFF32:
+	      other = BFD_RELOC_X86_64_TPOFF64;
+	      break;
+	    case BFD_RELOC_X86_64_DTPOFF32:
+	      other = BFD_RELOC_X86_64_DTPOFF64;
+	      break;
+	    default:
+	      break;
+	  }
+      reloc = bfd_reloc_type_lookup (stdoutput, other);
+      if (!reloc)
+	as_bad (_("unknown relocation (%u)"), other);
+      else if (size != bfd_get_reloc_size (reloc))
+	as_bad (_("%u-byte relocation cannot be applied to %u-byte field"),
+		bfd_get_reloc_size (reloc),
+		size);
+      else if (pcrel && !reloc->pc_relative)
+	as_bad (_("non-pc-relative relocation for pc-relative field"));
+      else if ((reloc->complain_on_overflow == complain_overflow_signed
+		&& !sign)
+	       || (reloc->complain_on_overflow == complain_overflow_unsigned
+		&& sign > 0))
+	as_bad (_("relocated field and relocation type differ in signedness"));
+      else
+	return other;
+      return NO_RELOC;
+    }
 
   if (pcrel)
     {
       if (!sign)
-	as_bad (_("There are no unsigned pc-relative relocations"));
+	as_bad (_("there are no unsigned pc-relative relocations"));
       switch (size)
 	{
 	case 1: return BFD_RELOC_8_PCREL;
@@ -1228,11 +1256,11 @@ reloc (size, pcrel, sign, other)
 	case 4: return BFD_RELOC_32_PCREL;
 	case 8: return BFD_RELOC_64_PCREL;
 	}
-      as_bad (_("can not do %d byte pc-relative relocation"), size);
+      as_bad (_("cannot do %u byte pc-relative relocation"), size);
     }
   else
     {
-      if (sign)
+      if (sign > 0)
 	switch (size)
 	  {
 	  case 4: return BFD_RELOC_X86_64_32S;
@@ -1245,8 +1273,8 @@ reloc (size, pcrel, sign, other)
 	  case 4: return BFD_RELOC_32;
 	  case 8: return BFD_RELOC_64;
 	  }
-      as_bad (_("can not do %s %d byte relocation"),
-	      sign ? "signed" : "unsigned", size);
+      as_bad (_("cannot do %s %u byte relocation"),
+	      sign > 0 ? "signed" : "unsigned", size);
     }
 
   abort ();
@@ -2059,16 +2087,16 @@ optimize_imm ()
 	    switch (guess_suffix)
 	      {
 	      case QWORD_MNEM_SUFFIX:
-		i.types[op] = Imm64 | Imm32S;
+		i.types[op] &= Imm64 | Imm32S;
 		break;
 	      case LONG_MNEM_SUFFIX:
-		i.types[op] = Imm32;
+		i.types[op] &= Imm32;
 		break;
 	      case WORD_MNEM_SUFFIX:
-		i.types[op] = Imm16;
+		i.types[op] &= Imm16;
 		break;
 	      case BYTE_MNEM_SUFFIX:
-		i.types[op] = Imm8 | Imm8S;
+		i.types[op] &= Imm8 | Imm8S;
 		break;
 	      }
 	    break;
@@ -3714,8 +3742,6 @@ output_imm (insn_start_frag, insn_start_off)
 }
 
 #ifndef LEX_AT
-static char *lex_got PARAMS ((enum bfd_reloc_code_real *, int *));
-
 /* Parse operands of the form
    <symbol>@GOTOFF+<nnn>
    and similar .plt or .got references.
@@ -3726,28 +3752,29 @@ static char *lex_got PARAMS ((enum bfd_reloc_code_real *, int *));
    is non-null set it to the length of the string we removed from the
    input line.  Otherwise return NULL.  */
 static char *
-lex_got (reloc, adjust)
-     enum bfd_reloc_code_real *reloc;
-     int *adjust;
+lex_got (enum bfd_reloc_code_real *reloc,
+     int *adjust,
+     unsigned int *types)
 {
   static const char * const mode_name[NUM_FLAG_CODE] = { "32", "16", "64" };
   static const struct {
     const char *str;
     const enum bfd_reloc_code_real rel[NUM_FLAG_CODE];
+    const unsigned int types64;
   } gotrel[] = {
-    { "PLT",      { BFD_RELOC_386_PLT32,      0, BFD_RELOC_X86_64_PLT32    } },
-    { "GOTOFF",   { BFD_RELOC_386_GOTOFF,     0, BFD_RELOC_X86_64_GOTOFF64 } },
-    { "GOTPCREL", { 0,                        0, BFD_RELOC_X86_64_GOTPCREL } },
-    { "TLSGD",    { BFD_RELOC_386_TLS_GD,     0, BFD_RELOC_X86_64_TLSGD    } },
-    { "TLSLDM",   { BFD_RELOC_386_TLS_LDM,    0, 0                         } },
-    { "TLSLD",    { 0,                        0, BFD_RELOC_X86_64_TLSLD    } },
-    { "GOTTPOFF", { BFD_RELOC_386_TLS_IE_32,  0, BFD_RELOC_X86_64_GOTTPOFF } },
-    { "TPOFF",    { BFD_RELOC_386_TLS_LE_32,  0, BFD_RELOC_X86_64_TPOFF32  } },
-    { "NTPOFF",   { BFD_RELOC_386_TLS_LE,     0, 0                         } },
-    { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32, 0, BFD_RELOC_X86_64_DTPOFF32 } },
-    { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,  0, 0                         } },
-    { "INDNTPOFF",{ BFD_RELOC_386_TLS_IE,     0, 0                         } },
-    { "GOT",      { BFD_RELOC_386_GOT32,      0, BFD_RELOC_X86_64_GOT32    } }
+    { "PLT",      { BFD_RELOC_386_PLT32,      0, BFD_RELOC_X86_64_PLT32    }, Imm32|Imm32S|Disp32 },
+    { "GOTOFF",   { BFD_RELOC_386_GOTOFF,     0, BFD_RELOC_X86_64_GOTOFF64 }, Imm64|Disp64 },
+    { "GOTPCREL", { 0,                        0, BFD_RELOC_X86_64_GOTPCREL }, Imm32|Imm32S|Disp32 },
+    { "TLSGD",    { BFD_RELOC_386_TLS_GD,     0, BFD_RELOC_X86_64_TLSGD    }, Imm32|Imm32S|Disp32 },
+    { "TLSLDM",   { BFD_RELOC_386_TLS_LDM,    0, 0                         }, 0 },
+    { "TLSLD",    { 0,                        0, BFD_RELOC_X86_64_TLSLD    }, Imm32|Imm32S|Disp32 },
+    { "GOTTPOFF", { BFD_RELOC_386_TLS_IE_32,  0, BFD_RELOC_X86_64_GOTTPOFF }, Imm32|Imm32S|Disp32 },
+    { "TPOFF",    { BFD_RELOC_386_TLS_LE_32,  0, BFD_RELOC_X86_64_TPOFF32  }, Imm32|Imm32S|Imm64|Disp32|Disp64 },
+    { "NTPOFF",   { BFD_RELOC_386_TLS_LE,     0, 0                         }, 0 },
+    { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32, 0, BFD_RELOC_X86_64_DTPOFF32 }, Imm32|Imm32S|Imm64|Disp32|Disp64 },
+    { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,  0, 0                         }, 0 },
+    { "INDNTPOFF",{ BFD_RELOC_386_TLS_IE,     0, 0                         }, 0 },
+    { "GOT",      { BFD_RELOC_386_GOT32,      0, BFD_RELOC_X86_64_GOT32    }, Imm32|Imm32S|Disp32 }
   };
   char *cp;
   unsigned int j;
@@ -3771,6 +3798,14 @@ lex_got (reloc, adjust)
 	      *reloc = gotrel[j].rel[(unsigned int) flag_code];
 	      if (adjust)
 		*adjust = len;
+
+	      if (types)
+		{
+		  if (flag_code != CODE_64BIT)
+		    *types = Imm32|Disp32;
+		  else
+		    *types = gotrel[j].types64;
+		}
 
 	      if (GOT_symbol == NULL)
 		GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
@@ -3820,7 +3855,7 @@ x86_cons_fix_new (frag, off, len, exp)
      unsigned int len;
      expressionS *exp;
 {
-  enum bfd_reloc_code_real r = reloc (len, 0, 0, got_reloc);
+  enum bfd_reloc_code_real r = reloc (len, 0, -1, got_reloc);
   got_reloc = NO_RELOC;
   fix_new_exp (frag, off, len, exp, 0, r);
 }
@@ -3838,7 +3873,7 @@ x86_cons (exp, size)
       int adjust;
 
       save = input_line_pointer;
-      gotfree_input_line = lex_got (&got_reloc, &adjust);
+      gotfree_input_line = lex_got (&got_reloc, &adjust, NULL);
       if (gotfree_input_line)
 	input_line_pointer = gotfree_input_line;
 
@@ -3869,7 +3904,7 @@ x86_pe_cons_fix_new (frag, off, len, exp)
      unsigned int len;
      expressionS *exp;
 {
-  enum bfd_reloc_code_real r = reloc (len, 0, 0, NO_RELOC);
+  enum bfd_reloc_code_real r = reloc (len, 0, -1, NO_RELOC);
 
   if (exp->X_op == O_secrel)
     {
@@ -3914,6 +3949,7 @@ i386_immediate (imm_start)
 #endif
   segT exp_seg = 0;
   expressionS *exp;
+  unsigned int types = ~0U;
 
   if (i.imm_operands == MAX_IMMEDIATE_OPERANDS)
     {
@@ -3931,7 +3967,7 @@ i386_immediate (imm_start)
   input_line_pointer = imm_start;
 
 #ifndef LEX_AT
-  gotfree_input_line = lex_got (&i.reloc[this_operand], NULL);
+  gotfree_input_line = lex_got (&i.reloc[this_operand], NULL, &types);
   if (gotfree_input_line)
     input_line_pointer = gotfree_input_line;
 #endif
@@ -3986,6 +4022,7 @@ i386_immediate (imm_start)
 	 determined later, depending on destination register,
 	 suffix, or the default for the section.  */
       i.types[this_operand] |= Imm8 | Imm16 | Imm32 | Imm32S | Imm64;
+      i.types[this_operand] &= types;
     }
 
   return 1;
@@ -4056,11 +4093,12 @@ i386_displacement (disp_start, disp_end)
   char *gotfree_input_line;
 #endif
   int bigdisp = Disp32;
+  unsigned int types = Disp;
 
   if (flag_code == CODE_64BIT)
     {
       if (i.prefix[ADDR_PREFIX] == 0)
-	bigdisp = Disp64;
+	bigdisp = Disp64 | Disp32S | Disp32;
     }
   else if ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0))
     bigdisp = Disp16;
@@ -4118,7 +4156,7 @@ i386_displacement (disp_start, disp_end)
     }
 #endif
 #ifndef LEX_AT
-  gotfree_input_line = lex_got (&i.reloc[this_operand], NULL);
+  gotfree_input_line = lex_got (&i.reloc[this_operand], NULL, &types);
   if (gotfree_input_line)
     input_line_pointer = gotfree_input_line;
 #endif
@@ -4192,8 +4230,10 @@ i386_displacement (disp_start, disp_end)
       return 0;
     }
 #endif
-  else if (flag_code == CODE_64BIT)
-    i.types[this_operand] |= Disp32S | Disp32;
+
+  if (!(i.types[this_operand] & ~Disp))
+    i.types[this_operand] &= types;
+
   return 1;
 }
 

@@ -1,5 +1,27 @@
 2005-07-18  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (reloc): Convert to ISO C90. Change first
+	parameter to unsigned. Parameter sign now is tristate - zero/
+	positive mean unsigned/signed, negative means signedness doesn't
+	matter. Check field size,
+	signedness, and pcrel-ness are in agreement between relocated field
+	and relocation type. Adjust diagnostics.
+	(optimize_imm): And type mask of operand instead of overwriting it.
+	(lex_got): Convert to ISO C90. Add third parameter. Add new field to
+	local structure and initialize gotrel accordingly. Pass caller as
+	mask of types that the operator can match.
+	(x86_cons_fix_new): Let reloc know that signedness of relocation
+	doesn't matter.
+	(x86_pe_cons_fix_new): Likewise.
+	(x86_cons): Pass additional argument to lex_got.
+	(i386_immediate): New local variable 'types'. Pass its address as
+	additional argument to lex_got. Mask out operand types not supported
+	befoe returning.
+	(i386_displacement): Likewise. Set bigdisp to all types supported in
+	64-bit mode, combining the previously split initialization.
+
+2005-07-18  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.c (parse_insn): Reject prefix if unavailable in
 	current mode.
 
