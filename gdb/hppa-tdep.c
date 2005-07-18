@@ -1,8 +1,8 @@
-/* Target-dependent code for the HP PA architecture, for GDB.
+/* Target-dependent code for the HP PA-RISC architecture.
 
    Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
-   Foundation, Inc.
+   1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -1166,16 +1166,13 @@ hppa64_return_value (struct gdbarch *gdbarch,
 
 
 static CORE_ADDR
-hppa32_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
-				   CORE_ADDR addr,
+hppa32_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
 				   struct target_ops *targ)
 {
   if (addr & 2)
     {
-      CORE_ADDR plabel;
-
-      plabel = addr & ~3;
-      target_read_memory(plabel, (char *)&addr, 4);
+      CORE_ADDR plabel = addr & ~3;
+      return read_memory_typed_address (plabel, builtin_type_void_func_ptr);
     }
 
   return addr;
@@ -2599,7 +2596,7 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
 			         struct trad_frame_saved_reg saved_regs[],
 				 int regnum, int *optimizedp,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, void *valuep)
+				 int *realnump, gdb_byte *valuep)
 {
   struct gdbarch *arch = get_frame_arch (next_frame);
 

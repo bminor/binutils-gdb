@@ -1,5 +1,6 @@
-/* Common target dependent code for GDB on HPPA systems.
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+/* Target-dependent code for the HP PA-RISC architecture.
+
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -226,12 +227,12 @@ int hppa_low_sign_extend (unsigned int, unsigned int);
 int hppa_sign_extend (unsigned int, unsigned int);
 CORE_ADDR hppa_symbol_address(const char *sym);
 
-void
-hppa_frame_prev_register_helper (struct frame_info *next_frame,
-			         struct trad_frame_saved_reg *saved_regs,
-				 int regnum, int *optimizedp,
-				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, void *valuep);
+extern void
+  hppa_frame_prev_register_helper (struct frame_info *next_frame,
+				   struct trad_frame_saved_reg *saved_regs,
+				   int regnum, int *optimizedp,
+				   enum lval_type *lvalp, CORE_ADDR *addrp,
+				   int *realnump, gdb_byte *valuep);
 
 extern CORE_ADDR hppa_read_pc (ptid_t ptid);
 extern void hppa_write_pc (CORE_ADDR pc, ptid_t ptid);

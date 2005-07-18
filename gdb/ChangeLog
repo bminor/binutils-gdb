@@ -1,4 +1,14 @@
 2005-07-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-tdep.h (hppa_frame_prev_register_helper): Change types of
+	last argument to `gdb_byte *'.
+	* hppa-tdep.c (hppa32_convert_from_func_ptr_addr): Rewrite.
+	(hppa_frame_prev_register_helper): Change types of last argument
+	to `gdb_byte *'.
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_prev_register):
+	Change types of last argument to `gdb_byte *'.
+	
+2005-07-18  Mark Kettenis  <kettenis@gnu.org>
 	    Jason Molenda  <jmolenda@apple.com>
 
 	* i386-tdep.c (i386_match_insn): Match complete instruction
