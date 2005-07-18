@@ -1,3 +1,8 @@
+2005-07-18  Ben Elliston  <bje@au.ibm.com>
+
+	* readelf.c (read_and_display_attr_value): Handle a DW_AT_encoding
+	value of DW_ATE_decimal_float instead of DW_ATE_GNU_decimal_float.
+
 2005-07-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
