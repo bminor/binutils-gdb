@@ -1427,6 +1427,15 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 	  && tdep->struct_return == pcc_struct_return))
     return 0;
 
+  /* Structures consisting of a single `float', `double' or 'long
+     double' member are returned in %st(0).  */
+  if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
+    {
+      type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+	return (len == 4 || len == 8 || len == 12);
+    }
+
   return (len == 1 || len == 2 || len == 4 || len == 8);
 }
 
@@ -1469,11 +1478,12 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
     }
 
   /* This special case is for structures consisting of a single
-     `float' or `double' member.  These structures are returned in
-     %st(0).  For these structures, we call ourselves recursively,
-     changing TYPE into the type of the first member of the structure.
-     Since that should work for all structures that have only one
-     member, we don't bother to check the member's type here.  */
+     `float', `double' or 'long double' member.  These structures are
+     returned in %st(0).  For these structures, we call ourselves
+     recursively, changing TYPE into the type of the first member of
+     the structure.  Since that should work for all structures that
+     have only one member, we don't bother to check the member's type
+     here.  */
   if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
     {
       type = check_typedef (TYPE_FIELD_TYPE (type, 0));

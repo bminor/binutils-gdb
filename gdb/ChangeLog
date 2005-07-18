@@ -1,3 +1,9 @@
+2005-07-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_reg_struct_return_p): Handle structures with a
+	single 'long double' member correctly.
+	(i386_return_value): Tweak comment.
+
 2005-07-16  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el:  Update for changes in Emacs 22.0.50.  Bring more
