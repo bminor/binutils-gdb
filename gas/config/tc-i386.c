@@ -1644,6 +1644,15 @@ parse_insn (line, mnemonic)
 	  && current_templates
 	  && (current_templates->start->opcode_modifier & IsPrefix))
 	{
+	  if (current_templates->start->cpu_flags
+	      & (flag_code != CODE_64BIT ? Cpu64 : CpuNo64))
+	    {
+	      as_bad ((flag_code != CODE_64BIT
+		       ? _("`%s' is only supported in 64-bit mode")
+		       : _("`%s' is not supported in 64-bit mode")),
+		      current_templates->start->name);
+	      return NULL;
+	    }
 	  /* If we are in 16-bit mode, do not allow addr16 or data16.
 	     Similarly, in 32-bit mode, do not allow addr32 or data32.  */
 	  if ((current_templates->start->opcode_modifier & (Size16 | Size32))
