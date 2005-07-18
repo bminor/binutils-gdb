@@ -1,3 +1,10 @@
+2005-07-18  Jan Beulich  <jbeulich@novell.com>
+
+	* ld-i386/abs.s, ld-i386/zero.s, ld-i386/abs.d, ld-x86-64/abs.d,
+	ld-i386/pcrel16.s, ld-i386/pcrel16.d, ld-x86-64/pcrel16.d,
+	ld-i386/pcrel8.s, ld-i386/pcrel8.d, ld-x86-64/pcrel8.d: New.
+	* ld-i386/i386.exp, ld-x86-64/x86-64.exp: Run new tests.
+
 2005-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* lib/ld-lib.exp (run_ld_link_exec_tests): Ignore assembler

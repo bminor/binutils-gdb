@@ -1,3 +1,10 @@
+2005-07-18  Jan Beulich  <jbeulich@novell.com>
+
+	* elf32-i386.c (elf_howto_table): Adjust overflow complaint handler
+	for R_386_PC16.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Adjust overflow complaint
+	handler for R_X86_64_PC16, R_X86_64_8, and R_X86_64_DTPOFF.
+
 2005-07-16  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
 	PR ld/1021
