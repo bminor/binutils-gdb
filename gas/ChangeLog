@@ -1,5 +1,18 @@
 2005-07-18  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (md_begin): Use IS_ELF.
+	(tc_i386_fix_adjustable): Likewise.
+	(md_estimate_size_before_relax): Likewise.
+	(md_apply_fix): Likewise.
+	(i386_target_format): Likewise.
+	(lex_got): Define to NULL when not ELF or when LEX_AT. Check IS_ELF.
+	(i386_immediate): Remove #ifdef LEX_AT.
+	(i386_displacement): Likewise.
+	* config/tc-i386.h (x86_cons): Prototype only when ELF and when not
+	LEX_AT.
+
+2005-07-18  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.c (reloc): Convert to ISO C90. Change first
 	parameter to unsigned. Parameter sign now is tristate - zero/
 	positive mean unsigned/signed, negative means signedness doesn't

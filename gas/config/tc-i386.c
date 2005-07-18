@@ -1021,7 +1021,7 @@ md_begin ()
   }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+  if (IS_ELF)
     {
       record_alignment (text_section, 2);
       record_alignment (data_section, 2);
@@ -1291,7 +1291,7 @@ tc_i386_fix_adjustable (fixP)
      fixS *fixP ATTRIBUTE_UNUSED;
 {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+  if (!IS_ELF)
     return 1;
 
   /* Don't adjust pc-relative references to merge sections in 64-bit
@@ -3741,7 +3741,9 @@ output_imm (insn_start_frag, insn_start_off)
     }
 }
 
-#ifndef LEX_AT
+#if (!defined (OBJ_ELF) && !defined (OBJ_MAYBE_ELF)) || defined (LEX_AT)
+# define lex_got(reloc, adjust, types) NULL
+#else
 /* Parse operands of the form
    <symbol>@GOTOFF+<nnn>
    and similar .plt or .got references.
@@ -3778,6 +3780,9 @@ lex_got (enum bfd_reloc_code_real *reloc,
   };
   char *cp;
   unsigned int j;
+
+  if (!IS_ELF)
+    return NULL;
 
   for (cp = input_line_pointer; *cp != '@'; cp++)
     if (is_end_of_line[(unsigned char) *cp])
@@ -3944,9 +3949,7 @@ i386_immediate (imm_start)
      char *imm_start;
 {
   char *save_input_line_pointer;
-#ifndef LEX_AT
   char *gotfree_input_line;
-#endif
   segT exp_seg = 0;
   expressionS *exp;
   unsigned int types = ~0U;
@@ -3966,11 +3969,9 @@ i386_immediate (imm_start)
   save_input_line_pointer = input_line_pointer;
   input_line_pointer = imm_start;
 
-#ifndef LEX_AT
   gotfree_input_line = lex_got (&i.reloc[this_operand], NULL, &types);
   if (gotfree_input_line)
     input_line_pointer = gotfree_input_line;
-#endif
 
   exp_seg = expression (exp);
 
@@ -3979,10 +3980,8 @@ i386_immediate (imm_start)
     as_bad (_("junk `%s' after expression"), input_line_pointer);
 
   input_line_pointer = save_input_line_pointer;
-#ifndef LEX_AT
   if (gotfree_input_line)
     free (gotfree_input_line);
-#endif
 
   if (exp->X_op == O_absent || exp->X_op == O_big)
     {
@@ -4089,9 +4088,7 @@ i386_displacement (disp_start, disp_end)
   expressionS *exp;
   segT exp_seg = 0;
   char *save_input_line_pointer;
-#ifndef LEX_AT
   char *gotfree_input_line;
-#endif
   int bigdisp = Disp32;
   unsigned int types = Disp;
 
@@ -4155,11 +4152,9 @@ i386_displacement (disp_start, disp_end)
       *displacement_string_end = '0';
     }
 #endif
-#ifndef LEX_AT
   gotfree_input_line = lex_got (&i.reloc[this_operand], NULL, &types);
   if (gotfree_input_line)
     input_line_pointer = gotfree_input_line;
-#endif
 
   exp_seg = expression (exp);
 
@@ -4171,10 +4166,8 @@ i386_displacement (disp_start, disp_end)
 #endif
   RESTORE_END_STRING (disp_end);
   input_line_pointer = save_input_line_pointer;
-#ifndef LEX_AT
   if (gotfree_input_line)
     free (gotfree_input_line);
-#endif
 
   /* We do this to make sure that the section symbol is in
      the symbol table.  We will ultimately change the relocation
@@ -4657,7 +4650,7 @@ md_estimate_size_before_relax (fragP, segment)
      shared library.  */
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      || (OUTPUT_FLAVOR == bfd_target_elf_flavour
+      || (IS_ELF
 	  && (S_IS_EXTERNAL (fragP->fr_symbol)
 	      || S_IS_WEAK (fragP->fr_symbol)))
 #endif
@@ -4944,7 +4937,7 @@ md_apply_fix (fixP, valP, seg)
 	 subtract the current location (for partial_inplace, PC relative
 	 relocations); see more below.  */
 #ifndef OBJ_AOUT
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour
+      if (IS_ELF
 #ifdef TE_PE
 	  || OUTPUT_FLAVOR == bfd_target_coff_flavour
 #endif
@@ -4952,7 +4945,7 @@ md_apply_fix (fixP, valP, seg)
 	value += fixP->fx_where + fixP->fx_frag->fr_address;
 #endif
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+      if (IS_ELF)
 	{
 	  segT sym_seg = S_GET_SEGMENT (fixP->fx_addsy);
 
@@ -4984,8 +4977,7 @@ md_apply_fix (fixP, valP, seg)
   /* Fix a few things - the dynamic linker expects certain values here,
      and we must not disappoint it.  */
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-      && fixP->fx_addsy)
+  if (IS_ELF && fixP->fx_addsy)
     switch (fixP->fx_r_type)
       {
       case BFD_RELOC_386_PLT32:
@@ -5328,8 +5320,7 @@ i386_target_format ()
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
 void i386_elf_emit_arch_note ()
 {
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour
-      && cpu_arch_name != NULL)
+  if (IS_ELF && cpu_arch_name != NULL)
     {
       char *p;
       asection *seg = now_seg;

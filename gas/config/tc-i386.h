@@ -391,7 +391,7 @@ arch_entry;
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
 #endif
 
-#ifndef LEX_AT
+#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
 extern void x86_cons PARAMS ((expressionS *, int));
 
