@@ -499,7 +499,8 @@ i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
     {
       if ((op & insn->mask[0]) == insn->insn[0])
 	{
-	  unsigned char buf[I386_MAX_INSN_LEN - 1];
+	  gdb_byte buf[I386_MAX_INSN_LEN - 1];
+	  int insn_matched = 1;
 	  size_t i;
 
 	  gdb_assert (insn->len > 1);
@@ -509,10 +510,11 @@ i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
 	  for (i = 1; i < insn->len; i++)
 	    {
 	      if ((buf[i - 1] & insn->mask[i]) != insn->insn[i])
-		break;
-
-	      return insn;
+		insn_matched = 0;
 	    }
+
+	  if (insn_matched)
+	    return insn;
 	}
     }
 

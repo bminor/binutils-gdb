@@ -1,4 +1,10 @@
 2005-07-18  Mark Kettenis  <kettenis@gnu.org>
+	    Jason Molenda  <jmolenda@apple.com>
+
+	* i386-tdep.c (i386_match_insn): Match complete instruction
+	pattern.
+
+2005-07-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_reg_struct_return_p): Handle structures with a
 	single 'long double' member correctly.
