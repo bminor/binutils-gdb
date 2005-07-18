@@ -53,10 +53,10 @@ m32c_asm_hash (const char *mnem)
 /* The hash functions are recorded here to help keep assembler code out of
    the disassembler and vice versa.  */
 
-static int asm_hash_insn_p PARAMS ((const CGEN_INSN *));
-static unsigned int asm_hash_insn PARAMS ((const char *));
-static int dis_hash_insn_p PARAMS ((const CGEN_INSN *));
-static unsigned int dis_hash_insn PARAMS ((const char *, CGEN_INSN_INT));
+static int asm_hash_insn_p        (const CGEN_INSN *);
+static unsigned int asm_hash_insn (const char *);
+static int dis_hash_insn_p        (const CGEN_INSN *);
+static unsigned int dis_hash_insn (const char *, CGEN_INSN_INT);
 
 /* Instruction formats.  */
 
@@ -7638,7 +7638,7 @@ static const CGEN_IFMT ifmt_mov16_w_S_imm_a0 ATTRIBUTE_UNUSED = {
 };
 
 static const CGEN_IFMT ifmt_mov32_l_a0 ATTRIBUTE_UNUSED = {
-  32, 32, 0xff000000, { { F (F_0_4) }, { F (F_DSP_16_U24) }, { F (F_4_4) }, { 0 } }
+  32, 32, 0xff000000, { { F (F_0_4) }, { F (F_4_4) }, { F (F_DSP_8_U24) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_popc16_imm16 ATTRIBUTE_UNUSED = {
@@ -40026,84 +40026,6 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (Z), ' ', '#', '0', ',', OP (DSP_8_U16), 0 } },
     & ifmt_mov16_b_Z_imm8_dst3_dst16_3_S_8_16_absolute_QI, { 0xb70000 }
   },
-/* mov.b${S} #${Imm-8-QI},r0l */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', 'r', '0', 'l', 0 } },
-    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_R0l_direct_QI, { 0xc400 }
-  },
-/* mov.b${S} #${Imm-8-QI},r0h */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', 'r', '0', 'h', 0 } },
-    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_R0h_direct_QI, { 0xc300 }
-  },
-/* mov.b${S} #${Imm-8-QI},${Dsp-16-u8}[sb] */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', OP (DSP_16_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_16_8_SB_relative_QI, { 0xc50000 }
-  },
-/* mov.b${S} #${Imm-8-QI},${Dsp-16-s8}[fb] */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', OP (DSP_16_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_16_8_FB_relative_QI, { 0xc60000 }
-  },
-/* mov.b${S} #${Imm-8-QI},${Dsp-16-u16} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', OP (DSP_16_U16), 0 } },
-    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_16_16_absolute_QI, { 0xc7000000 }
-  },
-/* mov.w${S} #${Imm-16-HI},${Dsp-8-u8}[sb] */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_16_HI), ',', OP (DSP_8_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_tst32_w_imm_S_2_S_8_dst32_2_S_8_SB_relative_HI, { 0x25000000 }
-  },
-/* mov.w${S} #${Imm-16-HI},${Dsp-8-s8}[fb] */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_16_HI), ',', OP (DSP_8_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_tst32_w_imm_S_2_S_8_dst32_2_S_8_FB_relative_HI, { 0x35000000 }
-  },
-/* mov.w${S} #${Imm-24-HI},${Dsp-8-u16} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_24_HI), ',', OP (DSP_8_U16), 0 } },
-    & ifmt_tst32_w_imm_S_2_S_16_dst32_2_S_16_absolute_HI, { 0x15000000 }
-  },
-/* mov.w${S} #${Imm-8-HI},r0 */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_8_HI), ',', 'r', '0', 0 } },
-    & ifmt_tst32_w_imm_S_2_S_basic_dst32_2_S_R0_direct_HI, { 0x50000 }
-  },
-/* mov.b${S} #${Imm-16-QI},${Dsp-8-u8}[sb] */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_16_QI), ',', OP (DSP_8_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_tst32_b_imm_S_2_S_8_dst32_2_S_8_SB_relative_QI, { 0x240000 }
-  },
-/* mov.b${S} #${Imm-16-QI},${Dsp-8-s8}[fb] */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_16_QI), ',', OP (DSP_8_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_tst32_b_imm_S_2_S_8_dst32_2_S_8_FB_relative_QI, { 0x340000 }
-  },
-/* mov.b${S} #${Imm-24-QI},${Dsp-8-u16} */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_24_QI), ',', OP (DSP_8_U16), 0 } },
-    & ifmt_tst32_b_imm_S_2_S_16_dst32_2_S_16_absolute_QI, { 0x14000000 }
-  },
-/* mov.b${S} #${Imm-8-QI},r0l */
-  {
-    { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', 'r', '0', 'l', 0 } },
-    & ifmt_tst32_b_imm_S_2_S_basic_dst32_2_S_R0l_direct_QI, { 0x400 }
-  },
 /* mov.w${Q} #${Imm-12-s4},$Dst32RnUnprefixedHI */
   {
     { 0, 0, 0, 0 },
@@ -40355,6 +40277,84 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), 0 } },
     & ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_QI, { 0xd80f0000 }
+  },
+/* mov.b${S} #${Imm-8-QI},r0l */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', 'r', '0', 'l', 0 } },
+    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_R0l_direct_QI, { 0xc400 }
+  },
+/* mov.b${S} #${Imm-8-QI},r0h */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', 'r', '0', 'h', 0 } },
+    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_R0h_direct_QI, { 0xc300 }
+  },
+/* mov.b${S} #${Imm-8-QI},${Dsp-16-u8}[sb] */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', OP (DSP_16_U8), '[', 's', 'b', ']', 0 } },
+    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_16_8_SB_relative_QI, { 0xc50000 }
+  },
+/* mov.b${S} #${Imm-8-QI},${Dsp-16-s8}[fb] */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', OP (DSP_16_S8), '[', 'f', 'b', ']', 0 } },
+    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_16_8_FB_relative_QI, { 0xc60000 }
+  },
+/* mov.b${S} #${Imm-8-QI},${Dsp-16-u16} */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', OP (DSP_16_U16), 0 } },
+    & ifmt_stz16_b_S_imm8_dst3_dst16_3_S_16_16_absolute_QI, { 0xc7000000 }
+  },
+/* mov.w${S} #${Imm-16-HI},${Dsp-8-u8}[sb] */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_16_HI), ',', OP (DSP_8_U8), '[', 's', 'b', ']', 0 } },
+    & ifmt_tst32_w_imm_S_2_S_8_dst32_2_S_8_SB_relative_HI, { 0x25000000 }
+  },
+/* mov.w${S} #${Imm-16-HI},${Dsp-8-s8}[fb] */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_16_HI), ',', OP (DSP_8_S8), '[', 'f', 'b', ']', 0 } },
+    & ifmt_tst32_w_imm_S_2_S_8_dst32_2_S_8_FB_relative_HI, { 0x35000000 }
+  },
+/* mov.w${S} #${Imm-24-HI},${Dsp-8-u16} */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_24_HI), ',', OP (DSP_8_U16), 0 } },
+    & ifmt_tst32_w_imm_S_2_S_16_dst32_2_S_16_absolute_HI, { 0x15000000 }
+  },
+/* mov.w${S} #${Imm-8-HI},r0 */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_8_HI), ',', 'r', '0', 0 } },
+    & ifmt_tst32_w_imm_S_2_S_basic_dst32_2_S_R0_direct_HI, { 0x50000 }
+  },
+/* mov.b${S} #${Imm-16-QI},${Dsp-8-u8}[sb] */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_16_QI), ',', OP (DSP_8_U8), '[', 's', 'b', ']', 0 } },
+    & ifmt_tst32_b_imm_S_2_S_8_dst32_2_S_8_SB_relative_QI, { 0x240000 }
+  },
+/* mov.b${S} #${Imm-16-QI},${Dsp-8-s8}[fb] */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_16_QI), ',', OP (DSP_8_S8), '[', 'f', 'b', ']', 0 } },
+    & ifmt_tst32_b_imm_S_2_S_8_dst32_2_S_8_FB_relative_QI, { 0x340000 }
+  },
+/* mov.b${S} #${Imm-24-QI},${Dsp-8-u16} */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_24_QI), ',', OP (DSP_8_U16), 0 } },
+    & ifmt_tst32_b_imm_S_2_S_16_dst32_2_S_16_absolute_QI, { 0x14000000 }
+  },
+/* mov.b${S} #${Imm-8-QI},r0l */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, OP (S), ' ', '#', OP (IMM_8_QI), ',', 'r', '0', 'l', 0 } },
+    & ifmt_tst32_b_imm_S_2_S_basic_dst32_2_S_R0l_direct_QI, { 0x400 }
   },
 /* mov.l${G} #${Imm-16-SI},$Dst32RnUnprefixedSI */
   {
@@ -78816,16 +78816,16 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (S), ' ', '#', OP (IMM_8_HI), ',', 'a', '1', 0 } },
     & ifmt_mov16_w_S_imm_a0, { 0x9d0000 }
   },
-/* mov.l$S #${Dsp-16-u24},a0 */
+/* mov.l$S #${Dsp-8-u24},a0 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (DSP_16_U24), ',', 'a', '0', 0 } },
+    { { MNEM, OP (S), ' ', '#', OP (DSP_8_U24), ',', 'a', '0', 0 } },
     & ifmt_mov32_l_a0, { 0xbc000000 }
   },
-/* mov.l$S #${Dsp-16-u24},a1 */
+/* mov.l$S #${Dsp-8-u24},a1 */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (S), ' ', '#', OP (DSP_16_U24), ',', 'a', '1', 0 } },
+    { { MNEM, OP (S), ' ', '#', OP (DSP_8_U24), ',', 'a', '1', 0 } },
     & ifmt_mov32_l_a0, { 0xbd000000 }
   },
 /* mov.b$S r0l,a1 */
@@ -79353,14 +79353,10 @@ dis_hash_insn (buf, value)
   return CGEN_DIS_HASH (buf, value);
 }
 
-static void set_fields_bitsize PARAMS ((CGEN_FIELDS *, int));
-
 /* Set the recorded length of the insn in the CGEN_FIELDS struct.  */
 
 static void
-set_fields_bitsize (fields, size)
-     CGEN_FIELDS *fields;
-     int size;
+set_fields_bitsize (CGEN_FIELDS *fields, int size)
 {
   CGEN_FIELDS_BITSIZE (fields) = size;
 }
@@ -79369,15 +79365,15 @@ set_fields_bitsize (fields, size)
    This plugs the opcode entries and macro instructions into the cpu table.  */
 
 void
-m32c_cgen_init_opcode_table (cd)
-     CGEN_CPU_DESC cd;
+m32c_cgen_init_opcode_table (CGEN_CPU_DESC cd)
 {
   int i;
   int num_macros = (sizeof (m32c_cgen_macro_insn_table) /
 		    sizeof (m32c_cgen_macro_insn_table[0]));
   const CGEN_IBASE *ib = & m32c_cgen_macro_insn_table[0];
   const CGEN_OPCODE *oc = & m32c_cgen_macro_insn_opcode_table[0];
-  CGEN_INSN *insns = (CGEN_INSN *) xmalloc (num_macros * sizeof (CGEN_INSN));
+  CGEN_INSN *insns = xmalloc (num_macros * sizeof (CGEN_INSN));
+
   memset (insns, 0, num_macros * sizeof (CGEN_INSN));
   for (i = 0; i < num_macros; ++i)
     {

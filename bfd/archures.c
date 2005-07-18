@@ -438,6 +438,7 @@ extern const bfd_arch_info_type bfd_mmix_arch;
 extern const bfd_arch_info_type bfd_mn10200_arch;
 extern const bfd_arch_info_type bfd_mn10300_arch;
 extern const bfd_arch_info_type bfd_msp430_arch;
+extern const bfd_arch_info_type bfd_ms1_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_openrisc_arch;
 extern const bfd_arch_info_type bfd_or32_arch;
@@ -460,7 +461,6 @@ extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
 extern const bfd_arch_info_type bfd_xtensa_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
-extern const bfd_arch_info_type bfd_ms1_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
   {
@@ -490,6 +490,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_ia64_arch,
     &bfd_ip2k_arch,
     &bfd_iq2000_arch,
+    &bfd_m32c_arch,
     &bfd_m32r_arch,
     &bfd_m68hc11_arch,
     &bfd_m68hc12_arch,
@@ -523,7 +524,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_xstormy16_arch,
     &bfd_xtensa_arch,
     &bfd_z8k_arch,
-    &bfd_m32c_arch,
 #endif
   0
 };

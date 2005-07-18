@@ -195,6 +195,7 @@
 (dnf f-16-1 "opcode"                      (all-isas)  16 1)
 (dnf f-16-2 "opcode"                      (all-isas)  16 2)
 (dnf f-16-4 "opcode"                      (all-isas)  16 4)
+(dnf f-16-8 "opcode"                      (all-isas)  16 8)
 (dnf f-18-1 "opcode"                      (all-isas)  18 1)
 (dnf f-18-2 "opcode"                      (all-isas)  18 2)
 (dnf f-18-3 "opcode"                      (all-isas)  18 3)
@@ -204,6 +205,8 @@
 (dnf f-20-4 "opcode"                      (all-isas)  20 4)
 (dnf f-21-3 "opcode"                      (all-isas)  21 3)
 (dnf f-24-2 "opcode"                      (all-isas)  24 2)
+(dnf f-24-8 "opcode"                      (all-isas)  24 8)
+(dnf f-32-16 "opcode"                     (all-isas)  32 16)
 
 ;-------------------------------------------------------------
 ; Registers
@@ -554,6 +557,14 @@
 		     (and UHI (srl UHI value 8) #x00ff)
 		     (and UHI (sll UHI value 8) #xff00))) ; extract
 )
+(df  f-dsp-8-u24 "24 bit unsigned" (all-isas) 8 24 UINT
+     ((value pc) (or SI
+		     (or (srl value 16) (and value #xff00))
+		     (sll (and value #xff) 16)))
+     ((value pc) (or SI
+		     (or (srl value 16) (and value #xff00))
+		     (sll (and value #xff) 16)))
+ )
 
 (dnmf f-dsp-16-u24 "24 bit unsigned" (all-isas) UINT
       (f-dsp-16-u16 f-dsp-32-u8)
@@ -876,15 +887,16 @@
 ; Labels
 ;-------------------------------------------------------------
 
-(df  f-lab-5-3 "3 bit pc relative signed offset" (PCREL-ADDR all-isas) 5 3 INT
+(df  f-lab-5-3 "3 bit pc relative unsigned offset" (PCREL-ADDR all-isas) 5 3 UINT
      ((value pc) (sub SI value (add SI pc 2))) ; insert
      ((value pc) (add SI value (add SI pc 2))) ; extract
 )
 (dnmf f-lab32-jmp-s "unsigned 3 bit pc relative offset" (PCREL-ADDR all-isas) UINT
       (f-2-2 f-7-1)
-      (sequence () ; insert
-		(set (ifield f-7-1) (and (sub (ifield f-lab32-jmp-s) pc) #x1))
-		(set (ifield f-2-2) (srl (sub (ifield f-lab32-jmp-s) pc) 1))
+      (sequence ((SI val)) ; insert
+		(set val (sub (sub (ifield f-lab32-jmp-s) pc) 2))
+		(set (ifield f-7-1) (and val #x1))
+		(set (ifield f-2-2) (srl val 1))
 		)
       (sequence () ; extract
 		(set (ifield f-lab32-jmp-s) (add pc (add (or (sll (ifield f-2-2) 1)
@@ -1744,6 +1756,10 @@
   h-sint DFLT f-dsp-8-s8
   ((parse "signed8")) () ()
 )
+(define-full-operand Dsp-8-u24 "unsigned 24 bit displacement at offset 8 bits" (all-isas)
+  h-uint DFLT f-dsp-8-u24
+  ((parse "unsigned24")) () ()
+)
 (define-full-operand Dsp-10-u6 "unsigned 6 bit displacement at offset 10 bits" (all-isas)
   h-uint DFLT f-dsp-10-u6
   ((parse "unsigned6")) () ()
@@ -1825,7 +1841,7 @@
   ((parse "unsigned8")) () ()
 )
 (define-full-operand Dsp-40-s8 "signed 8 bit displacement at offset 40 bits" (all-isas)
-  h-uint DFLT f-dsp-40-s8
+  h-sint DFLT f-dsp-40-s8
   ((parse "signed8")) () ()
 )
 (define-full-operand Dsp-40-u16 "unsigned 16 bit displacement at offset 40 bits" (all-isas)
@@ -1833,7 +1849,7 @@
   ((parse "unsigned16")) () ()
 )
 (define-full-operand Dsp-40-s16 "signed 16 bit displacement at offset 40 bits" (all-isas)
-  h-uint DFLT f-dsp-40-s16
+  h-sint DFLT f-dsp-40-s16
   ((parse "signed16")) () ()
 )
 (define-full-operand Dsp-40-u24 "unsigned 24 bit displacement at offset 40 bits" (all-isas)
@@ -1845,7 +1861,7 @@
   ((parse "unsigned8")) () ()
 )
 (define-full-operand Dsp-48-s8 "signed 8 bit displacement at offset 48 bits" (all-isas)
-  h-uint DFLT f-dsp-48-s8
+  h-sint DFLT f-dsp-48-s8
   ((parse "signed8")) () ()
 )
 (define-full-operand Dsp-48-u16 "unsigned 16 bit displacement at offset 48 bits" (all-isas)
@@ -1853,7 +1869,7 @@
   ((parse "unsigned16")) () ()
 )
 (define-full-operand Dsp-48-s16 "signed 16 bit displacement at offset 48 bits" (all-isas)
-  h-uint DFLT f-dsp-48-s16
+  h-sint DFLT f-dsp-48-s16
   ((parse "signed16")) () ()
 )
 (define-full-operand Dsp-48-u24 "unsigned 24 bit displacement at offset 48 bits" (all-isas)
@@ -1886,7 +1902,7 @@
   () () ()
 )
 (define-full-operand Imm-13-u3 "signed 3 bit immediate at offset 13 bits" (all-isas)
-  h-uint DFLT f-imm-13-u3
+  h-sint DFLT f-imm-13-u3
   ((parse "signed4")) () ()
 )
 (define-full-operand Imm-20-s4 "signed 4 bit immediate at offset 20 bits" (all-isas)
@@ -1994,7 +2010,7 @@
   ((parse "unsigned_bitbase8") (print "unsigned_bitbase")) () ()
 )
 (define-full-operand BitBase16-16-s8 "signed bit,base:8 at offset 16for m16c" (m16c-isa)
-  h-uint DFLT f-dsp-16-s8
+  h-sint DFLT f-dsp-16-s8
   ((parse "signed_bitbase8") (print "signed_bitbase")) () ()
 )
 (define-full-operand BitBase16-16-u16 "unsigned bit,base:16 at offset 16 for m16c" (m16c-isa)
@@ -2002,7 +2018,7 @@
   ((parse "unsigned_bitbase16") (print "unsigned_bitbase")) () ()
 )
 (define-full-operand BitBase16-8-u11-S "signed bit,base:11 at offset 16 for m16c" (m16c-isa)
-  h-sint DFLT f-bitbase16-u11-S
+  h-uint DFLT f-bitbase16-u11-S
   ((parse "unsigned_bitbase11") (print "unsigned_bitbase")) () ()
 )
 
@@ -2050,12 +2066,18 @@
 ; Labels
 ;-------------------------------------------------------------
 
-(dnop Lab-5-3     "3 bit label"  (all-isas) h-iaddr f-lab-5-3)
-(dnop Lab32-jmp-s "3 bit label"  (all-isas) h-iaddr f-lab32-jmp-s)
-(dnop Lab-8-8     "8 bit label"  (all-isas) h-iaddr f-lab-8-8)
-(dnop Lab-8-16    "16 bit label" (all-isas) h-iaddr f-lab-8-16)
+(define-full-operand Lab-5-3 "3 bit label" (all-isas RELAX)
+  h-iaddr DFLT f-lab-5-3
+  ((parse "lab_5_3")) () () )
+
+(define-full-operand Lab32-jmp-s "3 bit label" (all-isas RELAX)
+  h-iaddr DFLT f-lab32-jmp-s
+  ((parse "lab_5_3")) () () )
+
+(dnop Lab-8-8     "8 bit label"  (all-isas RELAX) h-iaddr f-lab-8-8)
+(dnop Lab-8-16    "16 bit label" (all-isas RELAX) h-iaddr f-lab-8-16)
 (dnop Lab-8-24    "24 bit label" (all-isas) h-iaddr f-lab-8-24)
-(dnop Lab-16-8    "8 bit label"  (all-isas) h-iaddr f-lab-16-8)
+(dnop Lab-16-8    "8 bit label"  (all-isas RELAX) h-iaddr f-lab-16-8)
 (dnop Lab-24-8    "8 bit label"  (all-isas) h-iaddr f-lab-24-8)
 (dnop Lab-32-8    "8 bit label"  (all-isas) h-iaddr f-lab-32-8)
 (dnop Lab-40-8    "8 bit label"  (all-isas) h-iaddr f-lab-40-8)
@@ -7957,7 +7979,7 @@
 
 (dni jcnd16-5
      "jCnd label"
-     ((machine 16))
+     (RELAXABLE (machine 16))
      "j$cond16j5 ${Lab-8-8}"
      (+ (f-0-4 #x6) (f-4-1 1) cond16j5 Lab-8-8)
      (jcnd16-sem cond16j5 Lab-8-8)
@@ -7966,7 +7988,7 @@
 
 (dni jcnd16
      "jCnd label"
-     ((machine 16))
+     (RELAXABLE (machine 16))
      "j$cond16j ${Lab-16-8}"
      (+ (f-0-4 #x7) (f-4-4 #xD) (f-8-4 #xC) cond16j Lab-16-8)
      (jcnd16-sem cond16j Lab-16-8)
@@ -7975,7 +7997,7 @@
 
 (dni jcnd32
      "jCnd label"
-     ((machine 32))
+     (RELAXABLE (machine 32))
      "j$cond32j ${Lab-8-8}"
      (+ (f-0-1 1) (f-4-3 5) cond32j Lab-8-8)
      (jcnd32-sem cond32j Lab-8-8)
@@ -7987,19 +8009,19 @@
 ;-------------------------------------------------------------
 
 ; jmp.s label3 (m16 #1)
-(dni jmp16.s "jmp.s Lab-5-3" ((machine 16))
+(dni jmp16.s "jmp.s Lab-5-3" (RELAXABLE (machine 16))
      ("jmp.s ${Lab-5-3}")
      (+ (f-0-4 6) (f-4-1 0) Lab-5-3)
      (sequence () (set pc Lab-5-3))
      ())
 ; jmp.b label8 (m16 #2)
-(dni jmp16.b "jmp.b Lab-8-8" ((machine 16))
+(dni jmp16.b "jmp.b Lab-8-8" (RELAXABLE (machine 16))
      ("jmp.b ${Lab-8-8}")
      (+ (f-0-4 #xF) (f-4-4 #xE) Lab-8-8)
      (sequence () (set pc Lab-8-8))
      ())
 ; jmp.w label16 (m16 #3)
-(dni jmp16.w "jmp.w Lab-8-16" ((machine 16))
+(dni jmp16.w "jmp.w Lab-8-16" (RELAXABLE (machine 16))
      ("jmp.w ${Lab-8-16}")
      (+ (f-0-4 #xF) (f-4-4 4) Lab-8-16)
      (sequence () (set pc Lab-8-16))
@@ -8032,20 +8054,20 @@
 ; jmp.s label3 (m32 #1)
 (dni jmp32.s
      "jmp.s label"
-     ((machine 32))
+     (RELAXABLE (machine 32))
      "jmp.s ${Lab32-jmp-s}"
      (+ (f-0-2 1) (f-4-3 5) Lab32-jmp-s)
      (set pc Lab32-jmp-s)
      ()
 )
 ; jmp.b label8 (m32 #2)
-(dni jmp32.b "jmp.b Lab-8-8" ((machine 32))
+(dni jmp32.b "jmp.b Lab-8-8" (RELAXABLE (machine 32))
      ("jmp.b ${Lab-8-8}")
      (+ (f-0-4 #xB) (f-4-4 #xB) Lab-8-8)
      (set pc Lab-8-8)
      ())
 ; jmp.w label16 (m32 #3)
-(dni jmp32.w "jmp.w Lab-8-16" ((machine 32))
+(dni jmp32.w "jmp.w Lab-8-16" (RELAXABLE (machine 32))
      ("jmp.w ${Lab-8-16}")
      (+ (f-0-4 #xC) (f-4-4 #xE) Lab-8-16)
      (set pc Lab-8-16)
@@ -8089,7 +8111,7 @@
 )
 
 ; jsr.w label16 (m16 #1)
-(dni jsr16.w "jsr.w Lab-8-16" ((machine 16))
+(dni jsr16.w "jsr.w Lab-8-16" (RELAXABLE (machine 16))
      ("jsr.w ${Lab-8-16}")
      (+ (f-0-4 #xF) (f-4-4 5) Lab-8-16)
      (jsr16-sem 3 Lab-8-16)
@@ -8145,7 +8167,7 @@
      (jsr32-sem 6 dst32-16-24-Unprefixed-SI)
      ())
 ; jsr.w label16 (m32 #1)
-(dni jsr32.w "jsr.w label" ((machine 32))
+(dni jsr32.w "jsr.w label" (RELAXABLE (machine 32))
      ("jsr.w ${Lab-8-16}")
      (+ (f-0-4 #xC) (f-4-4 #xF) Lab-8-16)
      (jsr32-sem 3 Lab-8-16)
@@ -8531,11 +8553,6 @@
 (binary-arith-imm-dst mov G (f-0-4 7) (f-4-3 2) (f-8-4 #xC) #x9 #x2 #xF mov-sem)
 ; mov.L:G #imm32,dst (m32 #2)
 (binary-arith32-imm-dst-defn SI SI .l 0 mov G #xB #x3 #x1 mov-sem)
-; mov.size:Q #imm4,dst (m16 #2 m32 #3)
-(binary-arith16-imm4-dst-defn QI .b 0 0 mov (f-0-4 #xD) (f-4-3 4) mov-sem)
-(binary-arith16-imm4-dst-defn QI .w 0 1 mov (f-0-4 #xD) (f-4-3 4) mov-sem)
-(binary-arith32-imm4-dst-defn QI .b 1 0 mov #x7 #x2 mov-sem)
-(binary-arith32-imm4-dst-defn HI .w 1 1 mov #x7 #x2 mov-sem)
 ; mov.BW:S #imm,dst2 (m32 #4)
 (binary-arith32-s-imm-dst QI .b 0 mov #x0 #x2 mov-sem)
 (binary-arith32-s-imm-dst HI .w 1 mov #x0 #x2 mov-sem)
@@ -8558,8 +8575,14 @@
 )
 (mov32-wl-s-defn HI w #x9 Imm-8-HI a0 #xC)
 (mov32-wl-s-defn HI w #x9 Imm-8-HI a1 #xD)
-(mov32-wl-s-defn SI l #xB Dsp-16-u24 a0 #xC)
-(mov32-wl-s-defn SI l #xB Dsp-16-u24 a1 #xD)
+(mov32-wl-s-defn SI l #xB Dsp-8-u24 a0 #xC)
+(mov32-wl-s-defn SI l #xB Dsp-8-u24 a1 #xD)
+
+; mov.size:Q #imm4,dst (m16 #2 m32 #3)
+(binary-arith16-imm4-dst-defn QI .b 0 0 mov (f-0-4 #xD) (f-4-3 4) mov-sem)
+(binary-arith16-imm4-dst-defn QI .w 0 1 mov (f-0-4 #xD) (f-4-3 4) mov-sem)
+(binary-arith32-imm4-dst-defn QI .b 1 0 mov #x7 #x2 mov-sem)
+(binary-arith32-imm4-dst-defn HI .w 1 1 mov #x7 #x2 mov-sem)
 
 ; mov.BW:Z #0,dst (m16 #5 m32 #6)
 (dni mov16.b-Z-imm8-dst3

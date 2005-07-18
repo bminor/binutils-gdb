@@ -3035,6 +3035,25 @@ of the container.  */
 /* DLX relocs  */
   BFD_RELOC_DLX_JMP26,
 
+/* Renesas M16C/M32C Relocations.  */
+  BFD_RELOC_M16C_8_PCREL8,
+  BFD_RELOC_M16C_16_PCREL8,
+  BFD_RELOC_M16C_8_PCREL16,
+  BFD_RELOC_M16C_8_ELABEL24,
+  BFD_RELOC_M16C_8_ABS16,
+  BFD_RELOC_M16C_16_ABS16,
+  BFD_RELOC_M16C_16_ABS24,
+  BFD_RELOC_M16C_16_ABS32,
+  BFD_RELOC_M16C_24_ABS16,
+  BFD_RELOC_M16C_24_ABS24,
+  BFD_RELOC_M16C_24_ABS32,
+  BFD_RELOC_M16C_32_ABS16,
+  BFD_RELOC_M16C_32_ABS24,
+  BFD_RELOC_M16C_32_ABS32,
+  BFD_RELOC_M16C_40_ABS16,
+  BFD_RELOC_M16C_40_ABS24,
+  BFD_RELOC_M16C_40_ABS32,
+
 /* Renesas M32R (formerly Mitsubishi M32R) relocs.
 This is a 24 bit absolute address.  */
   BFD_RELOC_M32R_24,
@@ -3801,6 +3820,21 @@ This is the 5 bits of a value.  */
   BFD_RELOC_VAX_GLOB_DAT,
   BFD_RELOC_VAX_JMP_SLOT,
   BFD_RELOC_VAX_RELATIVE,
+
+/* Morpho MS1 - 16 bit immediate relocation.  */
+  BFD_RELOC_MS1_PC16,
+
+/* Morpho MS1 - Hi 16 bits of an address.  */
+  BFD_RELOC_MS1_HI16,
+
+/* Morpho MS1 - Low 16 bits of an address.  */
+  BFD_RELOC_MS1_LO16,
+
+/* Morpho MS1 - Used to tell the linker which vtable entries are used.  */
+  BFD_RELOC_MS1_GNU_VTINHERIT,
+
+/* Morpho MS1 - Used to tell the linker which vtable entries are used.  */
+  BFD_RELOC_MS1_GNU_VTENTRY,
 
 /* msp430 specific relocation codes  */
   BFD_RELOC_MSP430_10_PCREL,

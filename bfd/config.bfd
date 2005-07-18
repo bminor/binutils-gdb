@@ -177,9 +177,6 @@ case "${targ}" in
     ;;
 #endif /* BFD64 */
 
-  m32c-*-elf)
-    targ_defvec=bfd_elf32_m32c_vec
-    ;;
   am33_2.0-*-linux*)
     targ_defvec=bfd_elf32_am33lin_vec
     ;;
@@ -663,6 +660,10 @@ case "${targ}" in
 
   iq2000-*-elf)
     targ_defvec=bfd_elf32_iq2000_vec
+    ;;
+
+  m32c-*-elf)
+    targ_defvec=bfd_elf32_m32c_vec
     ;;
 
   m32r*le-*-linux*)

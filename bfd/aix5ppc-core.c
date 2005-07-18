@@ -2,7 +2,7 @@
    Copyright 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Written by Tom Rix
-   Contributed by Redhat.
+   Contributed by Red Hat Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -28,14 +28,10 @@
 #include "sysdep.h"
 #include "libbfd.h"
 
-const bfd_target *xcoff64_core_p
-  PARAMS ((bfd *));
-bfd_boolean xcoff64_core_file_matches_executable_p
-  PARAMS ((bfd *, bfd *));
-char *xcoff64_core_file_failing_command
-  PARAMS ((bfd *));
-int xcoff64_core_file_failing_signal
-  PARAMS ((bfd *));
+const bfd_target *xcoff64_core_p (bfd *);
+bfd_boolean xcoff64_core_file_matches_executable_p (bfd *, bfd *);
+char *xcoff64_core_file_failing_command (bfd *);
+int xcoff64_core_file_failing_signal (bfd *);
 
 /* Aix 5.1 system include file.  */
 
@@ -50,8 +46,7 @@ int xcoff64_core_file_failing_signal
   ((bfd_signed_vma)(v) < 0 || (bfd_signed_vma)(v) > (bfd_signed_vma)(s).st_size)
 
 const bfd_target *
-xcoff64_core_p (abfd)
-     bfd *abfd;
+xcoff64_core_p (bfd *abfd)
 {
   struct core_dumpxx core, *new_core_hdr;
   struct stat statbuf;
@@ -111,8 +106,7 @@ xcoff64_core_p (abfd)
       return return_value;
     }
 
-  new_core_hdr = (struct core_dumpxx *)
-    bfd_zalloc (abfd, sizeof (struct core_dumpxx));
+  new_core_hdr = bfd_zalloc (abfd, sizeof (struct core_dumpxx));
   if (NULL == new_core_hdr)
     return return_value;
 
@@ -232,9 +226,7 @@ xcoff64_core_p (abfd)
 /* Return `TRUE' if given core is from the given executable.  */
 
 bfd_boolean
-xcoff64_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd;
-     bfd *exec_bfd;
+xcoff64_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
 {
   struct core_dumpxx core;
   char *path, *s;
@@ -298,8 +290,7 @@ xcoff64_core_file_matches_executable_p (core_bfd, exec_bfd)
 }
 
 char *
-xcoff64_core_file_failing_command (abfd)
-     bfd *abfd;
+xcoff64_core_file_failing_command (bfd *abfd)
 {
   struct core_dumpxx *c = core_hdr (abfd);
   char *return_value = 0;
@@ -311,8 +302,7 @@ xcoff64_core_file_failing_command (abfd)
 }
 
 int
-xcoff64_core_file_failing_signal (abfd)
-     bfd *abfd;
+xcoff64_core_file_failing_signal (bfd *abfd)
 {
   struct core_dumpxx *c = core_hdr (abfd);
   int return_value = 0;
@@ -325,41 +315,33 @@ xcoff64_core_file_failing_signal (abfd)
 
 #else /* AIX_5_CORE */
 
-const bfd_target *xcoff64_core_p
-  PARAMS ((bfd *));
-bfd_boolean xcoff64_core_file_matches_executable_p
-  PARAMS ((bfd *, bfd *));
-char *xcoff64_core_file_failing_command
-  PARAMS ((bfd *));
-int xcoff64_core_file_failing_signal
-  PARAMS ((bfd *));
+const bfd_target *xcoff64_core_p  (bfd *);
+bfd_boolean xcoff64_core_file_matches_executable_p (bfd *, bfd *);
+char *xcoff64_core_file_failing_command (bfd *);
+int xcoff64_core_file_failing_signal (bfd *);
 
 const bfd_target *
-xcoff64_core_p (abfd)
-     bfd *abfd ATTRIBUTE_UNUSED;
+xcoff64_core_p (bfd *abfd ATTRIBUTE_UNUSED)
 {
   bfd_set_error (bfd_error_wrong_format);
   return 0;
 }
 
 bfd_boolean
-xcoff64_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd ATTRIBUTE_UNUSED;
-     bfd *exec_bfd ATTRIBUTE_UNUSED;
+xcoff64_core_file_matches_executable_p (bfd *core_bfd ATTRIBUTE_UNUSED,
+					bfd *exec_bfd ATTRIBUTE_UNUSED)
 {
   return FALSE;
 }
 
 char *
-xcoff64_core_file_failing_command (abfd)
-     bfd *abfd ATTRIBUTE_UNUSED;
+xcoff64_core_file_failing_command (bfd *abfd ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 int
-xcoff64_core_file_failing_signal (abfd)
-     bfd *abfd ATTRIBUTE_UNUSED;
+xcoff64_core_file_failing_signal (bfd *abfd ATTRIBUTE_UNUSED)
 {
   return 0;
 }

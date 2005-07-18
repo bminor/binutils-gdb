@@ -1,26 +1,27 @@
 /* Assembler interface for targets using CGEN. -*- C -*-
    CGEN: Cpu tools GENerator
 
-THIS FILE IS MACHINE GENERATED WITH CGEN.
-- the resultant file is machine generated, cgen-asm.in isn't
+   THIS FILE IS MACHINE GENERATED WITH CGEN.
+   - the resultant file is machine generated, cgen-asm.in isn't
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2005
+   Free Software Foundation, Inc.
 
-This file is part of the GNU Binutils and GDB, the GNU debugger.
+   This file is part of the GNU Binutils and GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 /* ??? Eventually more and more of this stuff can go to cpu-independent files.
    Keep that in mind.  */
@@ -48,7 +49,7 @@ static const char * parse_insn_normal
 /* -- assembler routines inserted here.  */
 
 /* -- asm.c */
-#include <ctype.h>
+#include "safe-ctype.h"
 
 #define MACH_M32C 5		/* Must match md_begin.  */
 
@@ -76,25 +77,40 @@ m32c_cgen_isa_register (const char **strp)
    return 0;
 }
 
+#define PARSE_UNSIGNED							\
+  do									\
+    {									\
+      /* Don't successfully parse literals beginning with '['.  */	\
+      if (**strp == '[')						\
+	return "Invalid literal"; /* Anything -- will not be seen.  */	\
+									\
+      errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);\
+      if (errmsg)							\
+	return errmsg;							\
+    }									\
+  while (0)
+
+#define PARSE_SIGNED							\
+  do									\
+    {									\
+      /* Don't successfully parse literals beginning with '['.  */	\
+      if (**strp == '[')						\
+	return "Invalid literal"; /* Anything -- will not be seen.  */	\
+									\
+      errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);  \
+      if (errmsg)							\
+	return errmsg;							\
+    }									\
+  while (0)
+
 static const char *
 parse_unsigned6 (CGEN_CPU_DESC cd, const char **strp,
 		 int opindex, unsigned long *valuep)
 {
   const char *errmsg = 0;
   unsigned long value;
-  long have_zero = 0;
 
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
-
-  if (strncmp (*strp, "0x0", 3) == 0 
-      || (**strp == '0' && *(*strp + 1) != 'x'))
-    have_zero = 1;
-
-  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
-  if (errmsg)
-    return errmsg;
+  PARSE_UNSIGNED;
 
   if (value > 0x3f)
     return _("imm:6 immediate is out of range");
@@ -111,17 +127,11 @@ parse_unsigned8 (CGEN_CPU_DESC cd, const char **strp,
   unsigned long value;
   long have_zero = 0;
 
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
-
   if (strncmp (*strp, "0x0", 3) == 0 
       || (**strp == '0' && *(*strp + 1) != 'x'))
     have_zero = 1;
 
-  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
-  if (errmsg)
-    return errmsg;
+  PARSE_UNSIGNED;
 
   if (value > 0xff)
     return _("dsp:8 immediate is out of range");
@@ -141,18 +151,12 @@ parse_signed4 (CGEN_CPU_DESC cd, const char **strp,
   const char *errmsg = 0;
   signed long value;
   long have_zero = 0;
-  
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
 
   if (strncmp (*strp, "0x0", 3) == 0 
       || (**strp == '0' && *(*strp + 1) != 'x'))
     have_zero = 1;
 
-  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
-  if (errmsg)
-    return errmsg;
+  PARSE_SIGNED;
 
   if (value < -8 || value > 7)
     return _("Immediate is out of range -8 to 7");
@@ -172,13 +176,7 @@ parse_signed8 (CGEN_CPU_DESC cd, const char **strp,
   const char *errmsg = 0;
   signed long value;
   
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
-
-  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
-  if (errmsg)
-    return errmsg;
+  PARSE_SIGNED;
 
   if (value <= 255 && value > 127)
     value -= 0x100;
@@ -198,13 +196,13 @@ parse_unsigned16 (CGEN_CPU_DESC cd, const char **strp,
   unsigned long value;
   long have_zero = 0;
  
-  /* Don't successfully parse literals beginning with '[' */
+  /* Don't successfully parse literals beginning with '['.  */
   if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
+    return "Invalid literal"; /* Anything -- will not be seen.  */
 
-  /* Don't successfully parse register names */
+  /* Don't successfully parse register names.  */
   if (m32c_cgen_isa_register (strp))
-    return "Invalid literal"; /* anything -- will not be seen */
+    return "Invalid literal"; /* Anything -- will not be seen.  */
 
   if (strncmp (*strp, "0x0", 3) == 0 
       || (**strp == '0' && *(*strp + 1) != 'x'))
@@ -234,14 +232,8 @@ parse_signed16 (CGEN_CPU_DESC cd, const char **strp,
 {
   const char *errmsg = 0;
   signed long value;
-  
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
 
-  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
-  if (errmsg)
-    return errmsg;
+  PARSE_SIGNED;
 
   if (value <= 65535 && value > 32767)
     value -= 0x10000;
@@ -260,13 +252,13 @@ parse_unsigned20 (CGEN_CPU_DESC cd, const char **strp,
   const char *errmsg = 0;
   unsigned long value;
   
-  /* Don't successfully parse literals beginning with '[' */
+  /* Don't successfully parse literals beginning with '['.  */
   if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
+    return "Invalid literal"; /* Anything -- will not be seen.  */
 
-  /* Don't successfully parse register names */
+  /* Don't successfully parse register names.  */
   if (m32c_cgen_isa_register (strp))
-    return "Invalid literal"; /* anything -- will not be seen */
+    return "Invalid literal"; /* Anything -- will not be seen.  */
 
   errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
   if (errmsg)
@@ -286,13 +278,13 @@ parse_unsigned24 (CGEN_CPU_DESC cd, const char **strp,
   const char *errmsg = 0;
   unsigned long value;
   
-  /* Don't successfully parse literals beginning with '[' */
+  /* Don't successfully parse literals beginning with '['.  */
   if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
+    return "Invalid literal"; /* Anything -- will not be seen.  */
 
-  /* Don't successfully parse register names */
+  /* Don't successfully parse register names.  */
   if (m32c_cgen_isa_register (strp))
-    return "Invalid literal"; /* anything -- will not be seen */
+    return "Invalid literal"; /* Anything -- will not be seen.  */
 
   errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
   if (errmsg)
@@ -307,21 +299,11 @@ parse_unsigned24 (CGEN_CPU_DESC cd, const char **strp,
 
 static const char *
 parse_signed32 (CGEN_CPU_DESC cd, const char **strp,
-		 int opindex, signed long *valuep)
+		int opindex, signed long *valuep)
 {
   const char *errmsg = 0;
   signed long value;
   
-#if 0
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
-
-  /* Don't successfully parse register names */
-  if (m32c_cgen_isa_register (strp))
-    return "Invalid literal"; /* anything -- will not be seen */
-#endif
-
   errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
   if (errmsg)
     return errmsg;
@@ -336,18 +318,8 @@ parse_imm1_S (CGEN_CPU_DESC cd, const char **strp,
 {
   const char *errmsg = 0;
   signed long value;
-  
-#if 0
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
 
-  /* Don't successfully parse register names */
-  if (m32c_cgen_isa_register (strp))
-    return "Invalid literal"; /* anything -- will not be seen */
-#endif
-
-  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
   if (errmsg)
     return errmsg;
 
@@ -365,17 +337,7 @@ parse_imm3_S (CGEN_CPU_DESC cd, const char **strp,
   const char *errmsg = 0;
   signed long value;
   
-#if 0
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
-
-  /* Don't successfully parse register names */
-  if (m32c_cgen_isa_register (strp))
-    return "Invalid literal"; /* anything -- will not be seen */
-#endif
-
-  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
   if (errmsg)
     return errmsg;
 
@@ -387,17 +349,47 @@ parse_imm3_S (CGEN_CPU_DESC cd, const char **strp,
 }
 
 static const char *
+parse_lab_5_3 (CGEN_CPU_DESC cd,
+	       const char **strp,
+	       int opindex ATTRIBUTE_UNUSED,
+	       int opinfo,
+	       enum cgen_parse_operand_result *type_addr,
+	       unsigned long *valuep)
+{
+  const char *errmsg = 0;
+  unsigned long value;
+  enum cgen_parse_operand_result op_res;
+
+  errmsg = cgen_parse_address (cd, strp, M32C_OPERAND_LAB_5_3,
+			       opinfo, & op_res, & value);
+
+  if (type_addr)
+    *type_addr = op_res;
+
+  if (op_res == CGEN_PARSE_OPERAND_ADDRESS)
+    {
+      /* This is a hack; the field cannot handle near-zero signed
+	 offsets that CGEN wants to put in to indicate an "empty"
+	 operand at first.  */
+      *valuep = 2;
+      return 0;
+    }
+  if (errmsg)
+    return errmsg;
+
+  if (value < 2 || value > 9)
+    return _("immediate is out of range 2-9");
+
+  *valuep = value;
+  return 0;
+}
+
+static const char *
 parse_Bitno16R (CGEN_CPU_DESC cd, const char **strp,
 		int opindex, unsigned long *valuep)
 {
   const char *errmsg = 0;
   unsigned long value;
-
-#if 0
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
-#endif
 
   errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
   if (errmsg)
@@ -421,12 +413,6 @@ parse_unsigned_bitbase (CGEN_CPU_DESC cd, const char **strp,
   const char *newp = *strp;
   unsigned long long bitbase;
 
-#if 0
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
-#endif
-
   errmsg = cgen_parse_unsigned_integer (cd, & newp, opindex, & bit);
   if (errmsg)
     return errmsg;
@@ -439,7 +425,7 @@ parse_unsigned_bitbase (CGEN_CPU_DESC cd, const char **strp,
   if (errmsg)
     return errmsg;
 
-  bitbase = (unsigned long long)bit + ((unsigned long long)base * 8);
+  bitbase = (unsigned long long) bit + ((unsigned long long) base * 8);
 
   if (bitbase >= (1ull << bits))
     return _("bit,base is out of range");
@@ -460,12 +446,6 @@ parse_signed_bitbase (CGEN_CPU_DESC cd, const char **strp,
   const char *newp = *strp;
   long long bitbase;
   long long limit;
-
-#if 0
-  /* Don't successfully parse literals beginning with '[' */
-  if (**strp == '[')
-    return "Invalid literal"; /* anything -- will not be seen */
-#endif
 
   errmsg = cgen_parse_unsigned_integer (cd, & newp, opindex, & bit);
   if (errmsg)
@@ -547,21 +527,22 @@ parse_signed_bitbase19 (CGEN_CPU_DESC cd, const char **strp,
 }
 
 /* Parse the suffix as :<char> or as nothing followed by a whitespace.  */
+
 static const char *
 parse_suffix (const char **strp, char suffix)
 {
   const char *newp = *strp;
   
-  if (**strp == ':' && tolower (*(*strp + 1)) == suffix)
+  if (**strp == ':' && TOLOWER (*(*strp + 1)) == suffix)
     newp = *strp + 2;
 
-  if (isspace (*newp))
+  if (ISSPACE (*newp))
     {
       *strp = newp;
       return 0;
     }
 	
-  return "Invalid suffix"; /* anything -- will not be seen */
+  return "Invalid suffix"; /* Anything -- will not be seen.  */
 }
 
 static const char *
@@ -593,6 +574,7 @@ parse_Z (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, const char **strp,
 }
 
 /* Parse an empty suffix. Fail if the next char is ':'.  */
+
 static const char *
 parse_X (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, const char **strp,
 	 int opindex ATTRIBUTE_UNUSED, signed long *valuep ATTRIBUTE_UNUSED)
@@ -611,16 +593,16 @@ parse_r0l_r0h (CGEN_CPU_DESC cd, const char **strp,
   signed long junk;
   const char *newp = *strp;
 
-  /* Parse r0[hl] */
+  /* Parse r0[hl].  */
   errmsg = cgen_parse_keyword (cd, & newp, & m32c_cgen_opval_h_r0l_r0h, & value);
   if (errmsg)
     return errmsg;
 
   if (*newp != ',')
-    return "not a valid r0l/r0h pair";
+    return _("not a valid r0l/r0h pair");
   ++newp;
 
-  /* Parse the second register in the pair */
+  /* Parse the second register in the pair.  */
   if (value == 0) /* r0l */
     errmsg = cgen_parse_keyword (cd, & newp, & m32c_cgen_opval_h_r0h, & junk);
   else
@@ -633,7 +615,8 @@ parse_r0l_r0h (CGEN_CPU_DESC cd, const char **strp,
   return 0;
 }
 
-/* Accept .b or .w in any case */
+/* Accept .b or .w in any case.  */
+
 static const char *
 parse_size (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, const char **strp,
 	    int opindex ATTRIBUTE_UNUSED, signed long *valuep ATTRIBUTE_UNUSED)
@@ -643,196 +626,14 @@ parse_size (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, const char **strp,
 	  || *(*strp + 1) == 'w' || *(*strp + 1) == 'W'))
     {
       *strp += 2;
-      return 0;
+      return NULL;
     }
-  return "Invalid size specifier";
+
+  return _("Invalid size specifier");
 }
 
-/* static const char * parse_abs (CGEN_CPU_DESC, const char **, int, */
-/* 			       unsigned long *, unsigned long); */
-/* static const char * parse_abs16 (CGEN_CPU_DESC, const char **, int, */
-/* 				 int ATTRIBUTE_UNUSED, */
-/* 				 enum cgen_parse_operand_result * ATTRIBUTE_UNUSED, */
-/* 				 unsigned long * ); */
-/* static const char * parse_abs24 (CGEN_CPU_DESC, const char **, int, */
-/* 				 int ATTRIBUTE_UNUSED, */
-/* 				 enum cgen_parse_operand_result  * ATTRIBUTE_UNUSED, */
-/* 				 unsigned long *); */
+/* Special check to ensure that instruction exists for given machine.  */
 
-/* /\* Parse absolute  *\/ */
-
-/* static const char * */
-/* parse_abs16 (CGEN_CPU_DESC cd, const char **strp, int opindex, */
-/* 	     int reloc ATTRIBUTE_UNUSED, */
-/* 	     enum cgen_parse_operand_result *type_addr ATTRIBUTE_UNUSED, */
-/* 	     unsigned long *valuep) */
-/* { */
-/*   return parse_abs (cd, strp, opindex, valuep, 16); */
-/* } */
-
-/* static const char * */
-/* parse_abs24 (CGEN_CPU_DESC cd, const char **strp, int opindex, */
-/* 	     int reloc ATTRIBUTE_UNUSED, */
-/* 	     enum cgen_parse_operand_result *type_addr ATTRIBUTE_UNUSED, */
-/* 	     unsigned long *valuep) */
-/* { */
-/*   return parse_abs (cd, strp, opindex, valuep, 24); */
-/* } */
-
-/* static const char * */
-/* parse_abs (CGEN_CPU_DESC cd, const char **strp, int opindex, */
-/* 	   unsigned long *valuep, */
-/* 	   unsigned long length) */
-/* { */
-/*   const char *errmsg = 0; */
-/*   const char *op; */
-/*   int has_register = 0; */
-    
-/*   for (op = *strp; *op != '\0'; op++) */
-/*     { */
-/*       if (*op == '[') */
-/* 	{ */
-/* 	  has_register = 1; */
-/* 	  break; */
-/* 	} */
-/*       else if (*op == ',') */
-/* 	break; */
-/*     } */
-  
-/*   if (has_register || m32c_cgen_isa_register (strp)) */
-/*     errmsg = _("immediate value cannot be register"); */
-/*   else */
-/*     { */
-/*       enum cgen_parse_operand_result result_type; */
-/*       bfd_vma value; */
-/*       const char *errmsg; */
- 
-/*       errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_HI16, */
-/*                                    &result_type, &value); */
-/*       *valuep = value; */
-/*     } */
-/*   return errmsg; */
-/* } */
-/* /\* Handle signed/unsigned literal.  *\/ */
-
-/* static const char * */
-/* parse_imm8 (cd, strp, opindex, valuep) */
-/*      CGEN_CPU_DESC cd; */
-/*      const char **strp; */
-/*      int opindex; */
-/*      unsigned long *valuep; */
-/* { */
-/*   const char *errmsg = 0; */
-/*   long value; */
-/*   long have_zero = 0; */
-  
-/*   if (strncmp (*strp, "0x0", 3) == 0  */
-/*       || (**strp == '0' && *(*strp + 1) != 'x')) */
-/*     have_zero = 1; */
-/*   errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value); */
-/*   *valuep = value; */
-/*   /\* If this field may require a relocation then use larger dsp16.  *\/ */
-/*   if (! have_zero && value == 0) */
-/*     errmsg = _("immediate value may not fit in dsp8 field"); */
-    
-/*   return errmsg; */
-/* } */
-
-/* static const char * */
-/* parse_imm16 (cd, strp, opindex, valuep) */
-/*      CGEN_CPU_DESC cd; */
-/*      const char **strp; */
-/*      int opindex; */
-/*      unsigned long *valuep; */
-/* { */
-/*   const char *errmsg; */
-/*   long value; */
- 
-/*   errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value); */
-/*   *valuep = value; */
-/*   return errmsg; */
-/* } */
-
-/* static const char * */
-/* parse_imm24 (cd, strp, opindex, valuep) */
-/*      CGEN_CPU_DESC cd; */
-/*      const char **strp; */
-/*      int opindex; */
-/*      unsigned long *valuep; */
-/* { */
-/*   const char *errmsg; */
-/*   long value; */
- 
-/*   errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value); */
-/*   *valuep = value; */
-/*   return errmsg; */
-/* } */
-
-/* static const char * */
-/* parse_imm32 (cd, strp, opindex, valuep) */
-/*      CGEN_CPU_DESC cd; */
-/*      const char **strp; */
-/*      int opindex; */
-/*      unsigned long *valuep; */
-/* { */
-/*   const char *errmsg; */
-/*   long value; */
- 
-/*   errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value); */
-/*   *valuep = value; */
-/*   return errmsg; */
-/* } */
-
-/* /\* Handle bitfields.  *\/ */
-
-/* static const char * */
-/* parse_boff8 (cd, strp, opindex, valuep) */
-/*      CGEN_CPU_DESC cd; */
-/*      const char **strp; */
-/*      int opindex; */
-/*      unsigned long *valuep; */
-/* { */
-/*   const char *errmsg; */
-/*   long bit_value, value; */
- 
-/*   errmsg = cgen_parse_signed_integer (cd, strp, opindex, & bit_value); */
-/*   if (errmsg == 0) */
-/*     { */
-/*       *strp = *strp + 1; */
-/*       errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value); */
-/*     } */
-/*   value = value * 8 + bit_value; */
-/*   *valuep = value; */
-/*   if (value > 0x100) */
-/*     errmsg = _("Operand out of range. Must be between 0 and 255."); */
-/*   return errmsg; */
-/* } */
-
-/* static const char * */
-/* parse_boff16 (cd, strp, opindex, valuep) */
-/*      CGEN_CPU_DESC cd; */
-/*      const char **strp; */
-/*      int opindex; */
-/*      unsigned long *valuep; */
-/* { */
-/*   const char *errmsg; */
-/*   long bit_value, value; */
- 
-/*   errmsg = cgen_parse_signed_integer (cd, strp, opindex, & bit_value); */
-/*   if (errmsg == 0) */
-/*     { */
-/*       *strp = *strp + 1; */
-/*       errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value); */
-/*     } */
-/*   value = value * 8 + bit_value; */
-/*   *valuep = value; */
-/*   if (value > 0x1000) */
-/*     errmsg = _("Operand out of range. Must be between 0 and 65535."); */
-/*   return errmsg; */
-/* } */
-
-
-/* Special check to ensure that instruction exists for given machine */
 int
 m32c_cgen_insn_supported (CGEN_CPU_DESC cd,
 			  const CGEN_INSN *insn)
@@ -840,7 +641,7 @@ m32c_cgen_insn_supported (CGEN_CPU_DESC cd,
   int machs = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH);
   int isas = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_ISA);
 
-  /* If attributes are absent, assume no restriction. */
+  /* If attributes are absent, assume no restriction.  */
   if (machs == 0)
     machs = ~0;
 
@@ -855,8 +656,7 @@ parse_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	      const char **strp,
 	      int opindex ATTRIBUTE_UNUSED,
 	      unsigned long *valuep,
-	      int push
-	      )
+	      int push)
 {
   const char *errmsg = 0;
   int regno = 0;
@@ -912,23 +712,23 @@ parse_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   return errmsg;
 }
 
-#define POP 0
+#define POP  0
 #define PUSH 1
 
 static const char *
 parse_pop_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
-		     const char **strp,
-		     int opindex ATTRIBUTE_UNUSED,
-		     unsigned long *valuep)
+		  const char **strp,
+		  int opindex ATTRIBUTE_UNUSED,
+		  unsigned long *valuep)
 {
   return parse_regset (cd, strp, opindex, valuep, POP);
 }
 
 static const char *
 parse_push_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
-		     const char **strp,
-		     int opindex ATTRIBUTE_UNUSED,
-		     unsigned long *valuep)
+		   const char **strp,
+		   int opindex ATTRIBUTE_UNUSED,
+		   unsigned long *valuep)
 {
   return parse_regset (cd, strp, opindex, valuep, PUSH);
 }
@@ -936,7 +736,7 @@ parse_push_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 /* -- dis.c */
 
 const char * m32c_cgen_parse_operand
-  PARAMS ((CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *));
+  (CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *);
 
 /* Main entry point for operand parsing.
 
@@ -952,11 +752,10 @@ const char * m32c_cgen_parse_operand
    the handlers.  */
 
 const char *
-m32c_cgen_parse_operand (cd, opindex, strp, fields)
-     CGEN_CPU_DESC cd;
-     int opindex;
-     const char ** strp;
-     CGEN_FIELDS * fields;
+m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
+			   int opindex,
+			   const char ** strp,
+			   CGEN_FIELDS * fields)
 {
   const char * errmsg = NULL;
   /* Used by scalar operands that still need to be parsed.  */
@@ -992,7 +791,7 @@ m32c_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = cgen_parse_keyword (cd, strp, & m32c_cgen_opval_h_gr_QI, & fields->f_dst32_rn_unprefixed_QI);
       break;
     case M32C_OPERAND_BITBASE16_16_S8 :
-      errmsg = parse_signed_bitbase8 (cd, strp, M32C_OPERAND_BITBASE16_16_S8, (unsigned long *) (& fields->f_dsp_16_s8));
+      errmsg = parse_signed_bitbase8 (cd, strp, M32C_OPERAND_BITBASE16_16_S8, (long *) (& fields->f_dsp_16_s8));
       break;
     case M32C_OPERAND_BITBASE16_16_U16 :
       errmsg = parse_unsigned_bitbase16 (cd, strp, M32C_OPERAND_BITBASE16_16_U16, (unsigned long *) (& fields->f_dsp_16_u16));
@@ -1001,7 +800,7 @@ m32c_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = parse_unsigned_bitbase8 (cd, strp, M32C_OPERAND_BITBASE16_16_U8, (unsigned long *) (& fields->f_dsp_16_u8));
       break;
     case M32C_OPERAND_BITBASE16_8_U11_S :
-      errmsg = parse_unsigned_bitbase11 (cd, strp, M32C_OPERAND_BITBASE16_8_U11_S, (long *) (& fields->f_bitbase16_u11_S));
+      errmsg = parse_unsigned_bitbase11 (cd, strp, M32C_OPERAND_BITBASE16_8_U11_S, (unsigned long *) (& fields->f_bitbase16_u11_S));
       break;
     case M32C_OPERAND_BITBASE32_16_S11_UNPREFIXED :
       errmsg = parse_signed_bitbase11 (cd, strp, M32C_OPERAND_BITBASE32_16_S11_UNPREFIXED, (long *) (& fields->f_bitbase32_16_s11_unprefixed));
@@ -1100,10 +899,10 @@ m32c_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = parse_unsigned8 (cd, strp, M32C_OPERAND_DSP_32_U8, (unsigned long *) (& fields->f_dsp_32_u8));
       break;
     case M32C_OPERAND_DSP_40_S16 :
-      errmsg = parse_signed16 (cd, strp, M32C_OPERAND_DSP_40_S16, (unsigned long *) (& fields->f_dsp_40_s16));
+      errmsg = parse_signed16 (cd, strp, M32C_OPERAND_DSP_40_S16, (long *) (& fields->f_dsp_40_s16));
       break;
     case M32C_OPERAND_DSP_40_S8 :
-      errmsg = parse_signed8 (cd, strp, M32C_OPERAND_DSP_40_S8, (unsigned long *) (& fields->f_dsp_40_s8));
+      errmsg = parse_signed8 (cd, strp, M32C_OPERAND_DSP_40_S8, (long *) (& fields->f_dsp_40_s8));
       break;
     case M32C_OPERAND_DSP_40_U16 :
       errmsg = parse_unsigned16 (cd, strp, M32C_OPERAND_DSP_40_U16, (unsigned long *) (& fields->f_dsp_40_u16));
@@ -1115,10 +914,10 @@ m32c_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = parse_unsigned8 (cd, strp, M32C_OPERAND_DSP_40_U8, (unsigned long *) (& fields->f_dsp_40_u8));
       break;
     case M32C_OPERAND_DSP_48_S16 :
-      errmsg = parse_signed16 (cd, strp, M32C_OPERAND_DSP_48_S16, (unsigned long *) (& fields->f_dsp_48_s16));
+      errmsg = parse_signed16 (cd, strp, M32C_OPERAND_DSP_48_S16, (long *) (& fields->f_dsp_48_s16));
       break;
     case M32C_OPERAND_DSP_48_S8 :
-      errmsg = parse_signed8 (cd, strp, M32C_OPERAND_DSP_48_S8, (unsigned long *) (& fields->f_dsp_48_s8));
+      errmsg = parse_signed8 (cd, strp, M32C_OPERAND_DSP_48_S8, (long *) (& fields->f_dsp_48_s8));
       break;
     case M32C_OPERAND_DSP_48_U16 :
       errmsg = parse_unsigned16 (cd, strp, M32C_OPERAND_DSP_48_U16, (unsigned long *) (& fields->f_dsp_48_u16));
@@ -1134,6 +933,9 @@ m32c_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case M32C_OPERAND_DSP_8_U16 :
       errmsg = parse_unsigned16 (cd, strp, M32C_OPERAND_DSP_8_U16, (unsigned long *) (& fields->f_dsp_8_u16));
+      break;
+    case M32C_OPERAND_DSP_8_U24 :
+      errmsg = parse_unsigned24 (cd, strp, M32C_OPERAND_DSP_8_U24, (unsigned long *) (& fields->f_dsp_8_u24));
       break;
     case M32C_OPERAND_DSP_8_U6 :
       errmsg = parse_unsigned6 (cd, strp, M32C_OPERAND_DSP_8_U6, (unsigned long *) (& fields->f_dsp_8_u6));
@@ -1238,7 +1040,7 @@ m32c_cgen_parse_operand (cd, opindex, strp, fields)
       errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_12_S4, (long *) (& fields->f_imm_12_s4));
       break;
     case M32C_OPERAND_IMM_13_U3 :
-      errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_13_U3, (unsigned long *) (& fields->f_imm_13_u3));
+      errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_13_U3, (long *) (& fields->f_imm_13_u3));
       break;
     case M32C_OPERAND_IMM_16_HI :
       errmsg = parse_signed16 (cd, strp, M32C_OPERAND_IMM_16_HI, (long *) (& fields->f_dsp_16_s16));
@@ -1352,7 +1154,7 @@ m32c_cgen_parse_operand (cd, opindex, strp, fields)
     case M32C_OPERAND_LAB_5_3 :
       {
         bfd_vma value = 0;
-        errmsg = cgen_parse_address (cd, strp, M32C_OPERAND_LAB_5_3, 0, NULL,  & value);
+        errmsg = parse_lab_5_3 (cd, strp, M32C_OPERAND_LAB_5_3, 0, NULL,  & value);
         fields->f_lab_5_3 = value;
       }
       break;
@@ -1380,7 +1182,7 @@ m32c_cgen_parse_operand (cd, opindex, strp, fields)
     case M32C_OPERAND_LAB32_JMP_S :
       {
         bfd_vma value = 0;
-        errmsg = cgen_parse_address (cd, strp, M32C_OPERAND_LAB32_JMP_S, 0, NULL,  & value);
+        errmsg = parse_lab_5_3 (cd, strp, M32C_OPERAND_LAB32_JMP_S, 0, NULL,  & value);
         fields->f_lab32_jmp_s = value;
       }
       break;
@@ -1574,8 +1376,7 @@ cgen_parse_fn * const m32c_cgen_parse_handlers[] =
 };
 
 void
-m32c_cgen_init_asm (cd)
-     CGEN_CPU_DESC cd;
+m32c_cgen_init_asm (CGEN_CPU_DESC cd)
 {
   m32c_cgen_init_opcode_table (cd);
   m32c_cgen_init_ibld_table (cd);
@@ -1958,30 +1759,3 @@ m32c_cgen_assemble_insn (CGEN_CPU_DESC cd,
     return NULL;
   }
 }
-
-#if 0 /* This calls back to GAS which we can't do without care.  */
-
-/* Record each member of OPVALS in the assembler's symbol table.
-   This lets GAS parse registers for us.
-   ??? Interesting idea but not currently used.  */
-
-/* Record each member of OPVALS in the assembler's symbol table.
-   FIXME: Not currently used.  */
-
-void
-m32c_cgen_asm_hash_keywords (CGEN_CPU_DESC cd, CGEN_KEYWORD *opvals)
-{
-  CGEN_KEYWORD_SEARCH search = cgen_keyword_search_init (opvals, NULL);
-  const CGEN_KEYWORD_ENTRY * ke;
-
-  while ((ke = cgen_keyword_search_next (& search)) != NULL)
-    {
-#if 0 /* Unnecessary, should be done in the search routine.  */
-      if (! m32c_cgen_opval_supported (ke))
-	continue;
-#endif
-      cgen_asm_record_register (cd, ke->name, ke->value);
-    }
-}
-
-#endif /* 0 */

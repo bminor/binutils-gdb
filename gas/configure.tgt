@@ -30,9 +30,8 @@ eval `echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/cpu=\1 vendor=\2 os=\3/'`
 # endian and arch.
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${cpu} in
-  m32c)			cpu_type=m32c endian=big ;;
-  am33_2.0)		cpu_type=mn10300 endian=little ;;
   alpha*)		cpu_type=alpha ;;
+  am33_2.0)		cpu_type=mn10300 endian=little ;;
   arm*be|arm*b)		cpu_type=arm endian=big ;;
   arm*)			cpu_type=arm endian=little ;;
   c4x*)			cpu_type=tic4x ;;
@@ -43,18 +42,19 @@ case ${cpu} in
   ia64)			cpu_type=ia64 ;;
   ip2k)			cpu_type=ip2k endian=big ;; 
   iq2000)		cpu_type=iq2000 endian=big ;; 
+  m32c)			cpu_type=m32c endian=big ;;
   m32r)			cpu_type=m32r endian=big ;;
   m32rle)		cpu_type=m32r endian=little ;;
-  m6811|m6812|m68hc12)	cpu_type=m68hc11 ;;
-  m680[012346]0)	cpu_type=m68k ;;
-  m68008)		cpu_type=m68k ;;
-  m683??)		cpu_type=m68k ;;
   m5200)		cpu_type=m68k ;;
+  m68008)		cpu_type=m68k ;;
+  m680[012346]0)	cpu_type=m68k ;;
+  m6811|m6812|m68hc12)	cpu_type=m68hc11 ;;
+  m683??)		cpu_type=m68k ;;
   m8*)			cpu_type=m88k ;;
-  ms1)                  cpu_type=ms1 endian=big ;;
   maxq)			cpu_type=maxq ;;
   mips*el)		cpu_type=mips endian=little ;;
   mips*)		cpu_type=mips endian=big ;;
+  ms1)                  cpu_type=ms1 endian=big ;;
   or32*)		cpu_type=or32 endian=big ;;
   pjl*)			cpu_type=pj endian=little ;;
   pj*)			cpu_type=pj endian=big ;;
@@ -63,16 +63,16 @@ case ${cpu} in
   rs6000*)		cpu_type=ppc ;;
   s390x*)		cpu_type=s390 arch=s390x ;;
   s390*)		cpu_type=s390 arch=s390 ;;
-  sh5*)			cpu_type=sh64 endian=big ;;
   sh5le*)		cpu_type=sh64 endian=little ;;
-  sh64*)            	cpu_type=sh64 endian=big ;;
+  sh5*)			cpu_type=sh64 endian=big ;;
   sh64le*)		cpu_type=sh64 endian=little ;;
+  sh64*)            	cpu_type=sh64 endian=big ;;
   sh*le)		cpu_type=sh endian=little ;;
   sh*)			cpu_type=sh endian=big ;;
-  sparclite*)		cpu_type=sparc arch=sparclite ;;
-  sparclet*)		cpu_type=sparc arch=sparclet ;;
   sparc64*)		cpu_type=sparc arch=v9-64 ;;
   sparc86x*)		cpu_type=sparc arch=sparc86x  ;;
+  sparclet*)		cpu_type=sparc arch=sparclet ;;
+  sparclite*)		cpu_type=sparc arch=sparclite ;;
   sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
   strongarm*be)		cpu_type=arm endian=big ;;
   strongarm*b)		cpu_type=arm endian=big ;;
@@ -90,7 +90,6 @@ esac
 generic_target=${cpu_type}-$vendor-$os
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${generic_target} in
-  m32c-*-elf)         			fmt=elf ;;
   a29k-*-coff)				fmt=coff ;;
   a29k-amd-udi)				fmt=coff ;;
   a29k-amd-ebmon)			fmt=coff ;;
@@ -246,6 +245,8 @@ case ${generic_target} in
 
   iq2000-*-elf)         		fmt=elf ;;
 
+  m32c-*-elf)         			fmt=elf ;;
+
   m32r-*-elf*)				fmt=elf ;;
   m32r-*-linux*)			fmt=elf em=linux;;
 
@@ -307,6 +308,8 @@ case ${generic_target} in
   # cpu_type for am33_2.0 is set to mn10300
   mn10300-*-linux*)			fmt=elf em=linux ;;
   mn10300-*-*)				fmt=elf ;;
+
+  ms1-*-elf)				fmt=elf bfd_gas=yes ;;
 
   msp430-*-*)				fmt=elf ;;
 

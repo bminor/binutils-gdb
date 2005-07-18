@@ -30,6 +30,8 @@
 #define ARCH_d10v
 #define ARCH_d30v
 #define ARCH_dlx
+#define ARCH_fr30
+#define ARCH_frv
 #define ARCH_h8300
 #define ARCH_h8500
 #define ARCH_hppa
@@ -37,13 +39,14 @@
 #define ARCH_i386
 #define ARCH_i860
 #define ARCH_i960
-#define ARCH_ip2k
 #define ARCH_ia64
-#define ARCH_fr30
+#define ARCH_ip2k
+#define ARCH_iq2000
+#define ARCH_m32c
 #define ARCH_m32r
-#define ARCH_m68k
 #define ARCH_m68hc11
 #define ARCH_m68hc12
+#define ARCH_m68k
 #define ARCH_m88k
 #define ARCH_maxq
 #define ARCH_mcore
@@ -73,9 +76,6 @@
 #define ARCH_xstormy16
 #define ARCH_xtensa
 #define ARCH_z8k
-#define ARCH_frv
-#define ARCH_iq2000
-#define ARCH_m32c
 #define INCLUDE_SHMEDIA
 #endif
 

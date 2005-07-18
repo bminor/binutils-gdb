@@ -824,6 +824,7 @@ const CGEN_IFLD m32c_cgen_ifld_table[] =
   { M32C_F_16_1, "f-16-1", 0, 32, 16, 1, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_16_2, "f-16-2", 0, 32, 16, 2, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_16_4, "f-16-4", 0, 32, 16, 4, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+  { M32C_F_16_8, "f-16-8", 0, 32, 16, 8, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_18_1, "f-18-1", 0, 32, 18, 1, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_18_2, "f-18-2", 0, 32, 18, 2, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_18_3, "f-18-3", 0, 32, 18, 3, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
@@ -833,6 +834,8 @@ const CGEN_IFLD m32c_cgen_ifld_table[] =
   { M32C_F_20_4, "f-20-4", 0, 32, 20, 4, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_21_3, "f-21-3", 0, 32, 21, 3, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_24_2, "f-24-2", 0, 32, 24, 2, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+  { M32C_F_24_8, "f-24-8", 0, 32, 24, 8, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+  { M32C_F_32_16, "f-32-16", 32, 32, 0, 16, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_SRC16_RN, "f-src16-rn", 0, 32, 10, 2, { 0, { (1<<MACH_M16C), (1<<ISA_M16C) } }  },
   { M32C_F_SRC16_AN, "f-src16-an", 0, 32, 11, 1, { 0, { (1<<MACH_M16C), (1<<ISA_M16C) } }  },
   { M32C_F_SRC32_AN_UNPREFIXED, "f-src32-an-unprefixed", 0, 32, 11, 1, { 0, { (1<<MACH_M32C), (1<<ISA_M32C) } }  },
@@ -895,6 +898,7 @@ const CGEN_IFLD m32c_cgen_ifld_table[] =
   { M32C_F_DSP_48_U16, "f-dsp-48-u16", 32, 32, 16, 16, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_DSP_48_S16, "f-dsp-48-s16", 32, 32, 16, 16, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_DSP_64_U16, "f-dsp-64-u16", 64, 32, 0, 16, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+  { M32C_F_DSP_8_U24, "f-dsp-8-u24", 0, 32, 8, 24, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_DSP_16_U24, "f-dsp-16-u24", 0, 0, 0, 0,{ 0|A(VIRTUAL), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_DSP_24_U24, "f-dsp-24-u24", 0, 0, 0, 0,{ 0|A(VIRTUAL), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
   { M32C_F_DSP_32_U24, "f-dsp-32-u24", 32, 32, 0, 24, { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
@@ -1466,6 +1470,10 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
   { "Dsp-8-s8", M32C_OPERAND_DSP_8_S8, HW_H_SINT, 8, 8,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_8_S8] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+/* Dsp-8-u24: unsigned 24 bit displacement at offset 8 bits */
+  { "Dsp-8-u24", M32C_OPERAND_DSP_8_U24, HW_H_UINT, 8, 24,
+    { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_8_U24] } }, 
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-10-u6: unsigned 6 bit displacement at offset 10 bits */
   { "Dsp-10-u6", M32C_OPERAND_DSP_10_U6, HW_H_UINT, 10, 6,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_10_U6] } }, 
@@ -1547,7 +1555,7 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_40_U8] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-40-s8: signed 8 bit displacement at offset 40 bits */
-  { "Dsp-40-s8", M32C_OPERAND_DSP_40_S8, HW_H_UINT, 8, 8,
+  { "Dsp-40-s8", M32C_OPERAND_DSP_40_S8, HW_H_SINT, 8, 8,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_40_S8] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-40-u16: unsigned 16 bit displacement at offset 40 bits */
@@ -1555,7 +1563,7 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_40_U16] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-40-s16: signed 16 bit displacement at offset 40 bits */
-  { "Dsp-40-s16", M32C_OPERAND_DSP_40_S16, HW_H_UINT, 8, 16,
+  { "Dsp-40-s16", M32C_OPERAND_DSP_40_S16, HW_H_SINT, 8, 16,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_40_S16] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-40-u24: unsigned 24 bit displacement at offset 40 bits */
@@ -1567,7 +1575,7 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_48_U8] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-48-s8: signed 8 bit displacement at offset 48 bits */
-  { "Dsp-48-s8", M32C_OPERAND_DSP_48_S8, HW_H_UINT, 16, 8,
+  { "Dsp-48-s8", M32C_OPERAND_DSP_48_S8, HW_H_SINT, 16, 8,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_48_S8] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-48-u16: unsigned 16 bit displacement at offset 48 bits */
@@ -1575,7 +1583,7 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_48_U16] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-48-s16: signed 16 bit displacement at offset 48 bits */
-  { "Dsp-48-s16", M32C_OPERAND_DSP_48_S16, HW_H_UINT, 16, 16,
+  { "Dsp-48-s16", M32C_OPERAND_DSP_48_S16, HW_H_SINT, 16, 16,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_48_S16] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Dsp-48-u24: unsigned 24 bit displacement at offset 48 bits */
@@ -1607,7 +1615,7 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_IMM_12_S4] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Imm-13-u3: signed 3 bit immediate at offset 13 bits */
-  { "Imm-13-u3", M32C_OPERAND_IMM_13_U3, HW_H_UINT, 13, 3,
+  { "Imm-13-u3", M32C_OPERAND_IMM_13_U3, HW_H_SINT, 13, 3,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_IMM_13_U3] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Imm-20-s4: signed 4 bit immediate at offset 20 bits */
@@ -1715,7 +1723,7 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_16_U8] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }  },
 /* BitBase16-16-s8: signed bit,base:8 at offset 16for m16c */
-  { "BitBase16-16-s8", M32C_OPERAND_BITBASE16_16_S8, HW_H_UINT, 16, 8,
+  { "BitBase16-16-s8", M32C_OPERAND_BITBASE16_16_S8, HW_H_SINT, 16, 8,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_16_S8] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }  },
 /* BitBase16-16-u16: unsigned bit,base:16 at offset 16 for m16c */
@@ -1723,7 +1731,7 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_DSP_16_U16] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }  },
 /* BitBase16-8-u11-S: signed bit,base:11 at offset 16 for m16c */
-  { "BitBase16-8-u11-S", M32C_OPERAND_BITBASE16_8_U11_S, HW_H_SINT, 5, 11,
+  { "BitBase16-8-u11-S", M32C_OPERAND_BITBASE16_8_U11_S, HW_H_UINT, 5, 11,
     { 2, { (const PTR) &M32C_F_BITBASE16_U11_S_MULTI_IFIELD[0] } }, 
     { 0|A(VIRTUAL), { (1<<MACH_BASE), (1<<ISA_M16C) } }  },
 /* BitBase32-16-u11-Unprefixed: unsigned bit,base:11 at offset 16 for m32c */
@@ -1769,19 +1777,19 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
 /* Lab-5-3: 3 bit label */
   { "Lab-5-3", M32C_OPERAND_LAB_5_3, HW_H_IADDR, 5, 3,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_LAB_5_3] } }, 
-    { 0|A(PCREL_ADDR), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+    { 0|A(RELAX)|A(PCREL_ADDR), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Lab32-jmp-s: 3 bit label */
   { "Lab32-jmp-s", M32C_OPERAND_LAB32_JMP_S, HW_H_IADDR, 2, 3,
     { 2, { (const PTR) &M32C_F_LAB32_JMP_S_MULTI_IFIELD[0] } }, 
-    { 0|A(PCREL_ADDR)|A(VIRTUAL), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+    { 0|A(RELAX)|A(PCREL_ADDR)|A(VIRTUAL), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Lab-8-8: 8 bit label */
   { "Lab-8-8", M32C_OPERAND_LAB_8_8, HW_H_IADDR, 8, 8,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_LAB_8_8] } }, 
-    { 0|A(PCREL_ADDR), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+    { 0|A(RELAX)|A(PCREL_ADDR), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Lab-8-16: 16 bit label */
   { "Lab-8-16", M32C_OPERAND_LAB_8_16, HW_H_IADDR, 8, 16,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_LAB_8_16] } }, 
-    { 0|A(SIGN_OPT)|A(PCREL_ADDR), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+    { 0|A(RELAX)|A(SIGN_OPT)|A(PCREL_ADDR), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Lab-8-24: 24 bit label */
   { "Lab-8-24", M32C_OPERAND_LAB_8_24, HW_H_IADDR, 8, 24,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_LAB_8_24] } }, 
@@ -1789,7 +1797,7 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
 /* Lab-16-8: 8 bit label */
   { "Lab-16-8", M32C_OPERAND_LAB_16_8, HW_H_IADDR, 16, 8,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_LAB_16_8] } }, 
-    { 0|A(PCREL_ADDR), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+    { 0|A(RELAX)|A(PCREL_ADDR), { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Lab-24-8: 8 bit label */
   { "Lab-24-8", M32C_OPERAND_LAB_24_8, HW_H_IADDR, 24, 8,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_LAB_24_8] } }, 
@@ -29584,71 +29592,6 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_MOV16_B_Z_IMM8_DST3_DST16_3_S_8_16_ABSOLUTE_QI, "mov16.b-Z-imm8-dst3-dst16-3-S-8-16-absolute-QI", "mov.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* mov.b${S} #${Imm-8-QI},r0l */
-  {
-    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_R0L_DIRECT_QI, "mov16.b.S-imm8-dst3-dst16-3-S-R0l-direct-QI", "mov.b", 16,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
-  },
-/* mov.b${S} #${Imm-8-QI},r0h */
-  {
-    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_R0H_DIRECT_QI, "mov16.b.S-imm8-dst3-dst16-3-S-R0h-direct-QI", "mov.b", 16,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
-  },
-/* mov.b${S} #${Imm-8-QI},${Dsp-16-u8}[sb] */
-  {
-    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_16_8_SB_RELATIVE_QI, "mov16.b.S-imm8-dst3-dst16-3-S-16-8-SB-relative-QI", "mov.b", 24,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
-  },
-/* mov.b${S} #${Imm-8-QI},${Dsp-16-s8}[fb] */
-  {
-    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_16_8_FB_RELATIVE_QI, "mov16.b.S-imm8-dst3-dst16-3-S-16-8-FB-relative-QI", "mov.b", 24,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
-  },
-/* mov.b${S} #${Imm-8-QI},${Dsp-16-u16} */
-  {
-    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_16_16_ABSOLUTE_QI, "mov16.b.S-imm8-dst3-dst16-3-S-16-16-absolute-QI", "mov.b", 32,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
-  },
-/* mov.w${S} #${Imm-16-HI},${Dsp-8-u8}[sb] */
-  {
-    M32C_INSN_MOV32_W_IMM_S_2_S_8_DST32_2_S_8_SB_RELATIVE_HI, "mov32.w-imm-S-2-S-8-dst32-2-S-8-SB-relative-HI", "mov.w", 32,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
-  },
-/* mov.w${S} #${Imm-16-HI},${Dsp-8-s8}[fb] */
-  {
-    M32C_INSN_MOV32_W_IMM_S_2_S_8_DST32_2_S_8_FB_RELATIVE_HI, "mov32.w-imm-S-2-S-8-dst32-2-S-8-FB-relative-HI", "mov.w", 32,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
-  },
-/* mov.w${S} #${Imm-24-HI},${Dsp-8-u16} */
-  {
-    M32C_INSN_MOV32_W_IMM_S_2_S_16_DST32_2_S_16_ABSOLUTE_HI, "mov32.w-imm-S-2-S-16-dst32-2-S-16-absolute-HI", "mov.w", 40,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
-  },
-/* mov.w${S} #${Imm-8-HI},r0 */
-  {
-    M32C_INSN_MOV32_W_IMM_S_2_S_BASIC_DST32_2_S_R0_DIRECT_HI, "mov32.w-imm-S-2-S-basic-dst32-2-S-R0-direct-HI", "mov.w", 24,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
-  },
-/* mov.b${S} #${Imm-16-QI},${Dsp-8-u8}[sb] */
-  {
-    M32C_INSN_MOV32_B_IMM_S_2_S_8_DST32_2_S_8_SB_RELATIVE_QI, "mov32.b-imm-S-2-S-8-dst32-2-S-8-SB-relative-QI", "mov.b", 24,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
-  },
-/* mov.b${S} #${Imm-16-QI},${Dsp-8-s8}[fb] */
-  {
-    M32C_INSN_MOV32_B_IMM_S_2_S_8_DST32_2_S_8_FB_RELATIVE_QI, "mov32.b-imm-S-2-S-8-dst32-2-S-8-FB-relative-QI", "mov.b", 24,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
-  },
-/* mov.b${S} #${Imm-24-QI},${Dsp-8-u16} */
-  {
-    M32C_INSN_MOV32_B_IMM_S_2_S_16_DST32_2_S_16_ABSOLUTE_QI, "mov32.b-imm-S-2-S-16-dst32-2-S-16-absolute-QI", "mov.b", 32,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
-  },
-/* mov.b${S} #${Imm-8-QI},r0l */
-  {
-    M32C_INSN_MOV32_B_IMM_S_2_S_BASIC_DST32_2_S_R0L_DIRECT_QI, "mov32.b-imm-S-2-S-basic-dst32-2-S-R0l-direct-QI", "mov.b", 16,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
-  },
 /* mov.w${Q} #${Imm-12-s4},$Dst32RnUnprefixedHI */
   {
     M32C_INSN_MOV32_W_IMM4_Q_16_UNPREFIXED_DST32_RN_DIRECT_UNPREFIXED_HI, "mov32.w-imm4-Q-16-Unprefixed-dst32-Rn-direct-Unprefixed-HI", "mov.w", 16,
@@ -29858,6 +29801,71 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
   {
     M32C_INSN_MOV16_B_IMM4_Q_16_DST16_16_16_ABSOLUTE_QI, "mov16.b-imm4-Q-16-dst16-16-16-absolute-QI", "mov.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* mov.b${S} #${Imm-8-QI},r0l */
+  {
+    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_R0L_DIRECT_QI, "mov16.b.S-imm8-dst3-dst16-3-S-R0l-direct-QI", "mov.b", 16,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* mov.b${S} #${Imm-8-QI},r0h */
+  {
+    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_R0H_DIRECT_QI, "mov16.b.S-imm8-dst3-dst16-3-S-R0h-direct-QI", "mov.b", 16,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* mov.b${S} #${Imm-8-QI},${Dsp-16-u8}[sb] */
+  {
+    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_16_8_SB_RELATIVE_QI, "mov16.b.S-imm8-dst3-dst16-3-S-16-8-SB-relative-QI", "mov.b", 24,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* mov.b${S} #${Imm-8-QI},${Dsp-16-s8}[fb] */
+  {
+    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_16_8_FB_RELATIVE_QI, "mov16.b.S-imm8-dst3-dst16-3-S-16-8-FB-relative-QI", "mov.b", 24,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* mov.b${S} #${Imm-8-QI},${Dsp-16-u16} */
+  {
+    M32C_INSN_MOV16_B_S_IMM8_DST3_DST16_3_S_16_16_ABSOLUTE_QI, "mov16.b.S-imm8-dst3-dst16-3-S-16-16-absolute-QI", "mov.b", 32,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* mov.w${S} #${Imm-16-HI},${Dsp-8-u8}[sb] */
+  {
+    M32C_INSN_MOV32_W_IMM_S_2_S_8_DST32_2_S_8_SB_RELATIVE_HI, "mov32.w-imm-S-2-S-8-dst32-2-S-8-SB-relative-HI", "mov.w", 32,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
+  },
+/* mov.w${S} #${Imm-16-HI},${Dsp-8-s8}[fb] */
+  {
+    M32C_INSN_MOV32_W_IMM_S_2_S_8_DST32_2_S_8_FB_RELATIVE_HI, "mov32.w-imm-S-2-S-8-dst32-2-S-8-FB-relative-HI", "mov.w", 32,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
+  },
+/* mov.w${S} #${Imm-24-HI},${Dsp-8-u16} */
+  {
+    M32C_INSN_MOV32_W_IMM_S_2_S_16_DST32_2_S_16_ABSOLUTE_HI, "mov32.w-imm-S-2-S-16-dst32-2-S-16-absolute-HI", "mov.w", 40,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
+  },
+/* mov.w${S} #${Imm-8-HI},r0 */
+  {
+    M32C_INSN_MOV32_W_IMM_S_2_S_BASIC_DST32_2_S_R0_DIRECT_HI, "mov32.w-imm-S-2-S-basic-dst32-2-S-R0-direct-HI", "mov.w", 24,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
+  },
+/* mov.b${S} #${Imm-16-QI},${Dsp-8-u8}[sb] */
+  {
+    M32C_INSN_MOV32_B_IMM_S_2_S_8_DST32_2_S_8_SB_RELATIVE_QI, "mov32.b-imm-S-2-S-8-dst32-2-S-8-SB-relative-QI", "mov.b", 24,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
+  },
+/* mov.b${S} #${Imm-16-QI},${Dsp-8-s8}[fb] */
+  {
+    M32C_INSN_MOV32_B_IMM_S_2_S_8_DST32_2_S_8_FB_RELATIVE_QI, "mov32.b-imm-S-2-S-8-dst32-2-S-8-FB-relative-QI", "mov.b", 24,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
+  },
+/* mov.b${S} #${Imm-24-QI},${Dsp-8-u16} */
+  {
+    M32C_INSN_MOV32_B_IMM_S_2_S_16_DST32_2_S_16_ABSOLUTE_QI, "mov32.b-imm-S-2-S-16-dst32-2-S-16-absolute-QI", "mov.b", 32,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
+  },
+/* mov.b${S} #${Imm-8-QI},r0l */
+  {
+    M32C_INSN_MOV32_B_IMM_S_2_S_BASIC_DST32_2_S_R0L_DIRECT_QI, "mov32.b-imm-S-2-S-basic-dst32-2-S-R0l-direct-QI", "mov.b", 16,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
 /* mov.l${G} #${Imm-16-SI},$Dst32RnUnprefixedSI */
   {
@@ -61737,32 +61745,32 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
 /* j$cond16j5 ${Lab-8-8} */
   {
     M32C_INSN_JCND16_5, "jcnd16-5", "j", 16,
-    { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
 /* j$cond16j ${Lab-16-8} */
   {
     M32C_INSN_JCND16, "jcnd16", "j", 24,
-    { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
 /* j$cond32j ${Lab-8-8} */
   {
     M32C_INSN_JCND32, "jcnd32", "j", 16,
-    { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
+    { 0|A(RELAXABLE)|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
 /* jmp.s ${Lab-5-3} */
   {
     M32C_INSN_JMP16_S, "jmp16.s", "jmp.s", 8,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
 /* jmp.b ${Lab-8-8} */
   {
     M32C_INSN_JMP16_B, "jmp16.b", "jmp.b", 16,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
 /* jmp.w ${Lab-8-16} */
   {
     M32C_INSN_JMP16_W, "jmp16.w", "jmp.w", 24,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
 /* jmp.a ${Lab-8-24} */
   {
@@ -61777,17 +61785,17 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
 /* jmp.s ${Lab32-jmp-s} */
   {
     M32C_INSN_JMP32_S, "jmp32.s", "jmp.s", 8,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
+    { 0|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
 /* jmp.b ${Lab-8-8} */
   {
     M32C_INSN_JMP32_B, "jmp32.b", "jmp.b", 16,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
+    { 0|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
 /* jmp.w ${Lab-8-16} */
   {
     M32C_INSN_JMP32_W, "jmp32.w", "jmp.w", 24,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
+    { 0|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
 /* jmp.a ${Lab-8-24} */
   {
@@ -61802,7 +61810,7 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
 /* jsr.w ${Lab-8-16} */
   {
     M32C_INSN_JSR16_W, "jsr16.w", "jsr.w", 24,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
 /* jsr.a ${Lab-8-24} */
   {
@@ -61812,7 +61820,7 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
 /* jsr.w ${Lab-8-16} */
   {
     M32C_INSN_JSR32_W, "jsr32.w", "jsr.w", 24,
-    { 0|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
+    { 0|A(RELAXABLE)|A(UNCOND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
 /* jsr.a ${Lab-8-24} */
   {
@@ -61909,12 +61917,12 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_MOV32_W_A1, "mov32-w-a1", "mov.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* mov.l$S #${Dsp-16-u24},a0 */
+/* mov.l$S #${Dsp-8-u24},a0 */
   {
     M32C_INSN_MOV32_L_A0, "mov32-l-a0", "mov.l", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* mov.l$S #${Dsp-16-u24},a1 */
+/* mov.l$S #${Dsp-8-u24},a1 */
   {
     M32C_INSN_MOV32_L_A1, "mov32-l-a1", "mov.l", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
@@ -62265,27 +62273,23 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
 #undef A
 
 /* Initialize anything needed to be done once, before any cpu_open call.  */
-static void init_tables PARAMS ((void));
 
 static void
-init_tables ()
+init_tables (void)
 {
 }
 
-static const CGEN_MACH * lookup_mach_via_bfd_name
-  PARAMS ((const CGEN_MACH *, const char *));
-static void build_hw_table  PARAMS ((CGEN_CPU_TABLE *));
-static void build_ifield_table  PARAMS ((CGEN_CPU_TABLE *));
-static void build_operand_table PARAMS ((CGEN_CPU_TABLE *));
-static void build_insn_table    PARAMS ((CGEN_CPU_TABLE *));
-static void m32c_cgen_rebuild_tables PARAMS ((CGEN_CPU_TABLE *));
+static const CGEN_MACH * lookup_mach_via_bfd_name (const CGEN_MACH *, const char *);
+static void build_hw_table      (CGEN_CPU_TABLE *);
+static void build_ifield_table  (CGEN_CPU_TABLE *);
+static void build_operand_table (CGEN_CPU_TABLE *);
+static void build_insn_table    (CGEN_CPU_TABLE *);
+static void m32c_cgen_rebuild_tables (CGEN_CPU_TABLE *);
 
 /* Subroutine of m32c_cgen_cpu_open to look up a mach via its bfd name.  */
 
 static const CGEN_MACH *
-lookup_mach_via_bfd_name (table, name)
-     const CGEN_MACH *table;
-     const char *name;
+lookup_mach_via_bfd_name (const CGEN_MACH *table, const char *name)
 {
   while (table->name)
     {
@@ -62299,8 +62303,7 @@ lookup_mach_via_bfd_name (table, name)
 /* Subroutine of m32c_cgen_cpu_open to build the hardware table.  */
 
 static void
-build_hw_table (cd)
-     CGEN_CPU_TABLE *cd;
+build_hw_table (CGEN_CPU_TABLE *cd)
 {
   int i;
   int machs = cd->machs;
@@ -62326,8 +62329,7 @@ build_hw_table (cd)
 /* Subroutine of m32c_cgen_cpu_open to build the hardware table.  */
 
 static void
-build_ifield_table (cd)
-     CGEN_CPU_TABLE *cd;
+build_ifield_table (CGEN_CPU_TABLE *cd)
 {
   cd->ifld_table = & m32c_cgen_ifld_table[0];
 }
@@ -62335,8 +62337,7 @@ build_ifield_table (cd)
 /* Subroutine of m32c_cgen_cpu_open to build the hardware table.  */
 
 static void
-build_operand_table (cd)
-     CGEN_CPU_TABLE *cd;
+build_operand_table (CGEN_CPU_TABLE *cd)
 {
   int i;
   int machs = cd->machs;
@@ -62344,8 +62345,7 @@ build_operand_table (cd)
   /* MAX_OPERANDS is only an upper bound on the number of selected entries.
      However each entry is indexed by it's enum so there can be holes in
      the table.  */
-  const CGEN_OPERAND **selected =
-    (const CGEN_OPERAND **) xmalloc (MAX_OPERANDS * sizeof (CGEN_OPERAND *));
+  const CGEN_OPERAND **selected = xmalloc (MAX_OPERANDS * sizeof (* selected));
 
   cd->operand_table.init_entries = init;
   cd->operand_table.entry_size = sizeof (CGEN_OPERAND);
@@ -62368,12 +62368,11 @@ build_operand_table (cd)
    operand elements to be in the table [which they mightn't be].  */
 
 static void
-build_insn_table (cd)
-     CGEN_CPU_TABLE *cd;
+build_insn_table (CGEN_CPU_TABLE *cd)
 {
   int i;
   const CGEN_IBASE *ib = & m32c_cgen_insn_table[0];
-  CGEN_INSN *insns = (CGEN_INSN *) xmalloc (MAX_INSNS * sizeof (CGEN_INSN));
+  CGEN_INSN *insns = xmalloc (MAX_INSNS * sizeof (CGEN_INSN));
 
   memset (insns, 0, MAX_INSNS * sizeof (CGEN_INSN));
   for (i = 0; i < MAX_INSNS; ++i)
@@ -62386,8 +62385,7 @@ build_insn_table (cd)
 /* Subroutine of m32c_cgen_cpu_open to rebuild the tables.  */
 
 static void
-m32c_cgen_rebuild_tables (cd)
-     CGEN_CPU_TABLE *cd;
+m32c_cgen_rebuild_tables (CGEN_CPU_TABLE *cd)
 {
   int i;
   unsigned int isas = cd->isas;
@@ -62399,7 +62397,7 @@ m32c_cgen_rebuild_tables (cd)
 #define UNSET (CGEN_SIZE_UNKNOWN + 1)
   cd->default_insn_bitsize = UNSET;
   cd->base_insn_bitsize = UNSET;
-  cd->min_insn_bitsize = 65535; /* some ridiculously big number */
+  cd->min_insn_bitsize = 65535; /* Some ridiculously big number.  */
   cd->max_insn_bitsize = 0;
   for (i = 0; i < MAX_ISAS; ++i)
     if (((1 << i) & isas) != 0)
@@ -62411,7 +62409,7 @@ m32c_cgen_rebuild_tables (cd)
 	if (cd->default_insn_bitsize == UNSET)
 	  cd->default_insn_bitsize = isa->default_insn_bitsize;
 	else if (isa->default_insn_bitsize == cd->default_insn_bitsize)
-	  ; /* this is ok */
+	  ; /* This is ok.  */
 	else
 	  cd->default_insn_bitsize = CGEN_SIZE_UNKNOWN;
 
@@ -62420,7 +62418,7 @@ m32c_cgen_rebuild_tables (cd)
 	if (cd->base_insn_bitsize == UNSET)
 	  cd->base_insn_bitsize = isa->base_insn_bitsize;
 	else if (isa->base_insn_bitsize == cd->base_insn_bitsize)
-	  ; /* this is ok */
+	  ; /* This is ok.  */
 	else
 	  cd->base_insn_bitsize = CGEN_SIZE_UNKNOWN;
 
@@ -62532,12 +62530,12 @@ m32c_cgen_cpu_open (enum cgen_cpu_open_arg arg_type, ...)
     }
   va_end (ap);
 
-  /* mach unspecified means "all" */
+  /* Mach unspecified means "all".  */
   if (machs == 0)
     machs = (1 << MAX_MACHS) - 1;
-  /* base mach is always selected */
+  /* Base mach is always selected.  */
   machs |= 1;
-  /* isa unspecified means "all" */
+  /* ISA unspecified means "all".  */
   if (isas == 0)
     isas = (1 << MAX_ISAS) - 1;
   if (endian == CGEN_ENDIAN_UNKNOWN)
@@ -62570,9 +62568,7 @@ m32c_cgen_cpu_open (enum cgen_cpu_open_arg arg_type, ...)
    MACH_NAME is the bfd name of the mach.  */
 
 CGEN_CPU_DESC
-m32c_cgen_cpu_open_1 (mach_name, endian)
-     const char *mach_name;
-     enum cgen_endian endian;
+m32c_cgen_cpu_open_1 (const char *mach_name, enum cgen_endian endian)
 {
   return m32c_cgen_cpu_open (CGEN_CPU_OPEN_BFDMACH, mach_name,
 			       CGEN_CPU_OPEN_ENDIAN, endian,
@@ -62585,8 +62581,7 @@ m32c_cgen_cpu_open_1 (mach_name, endian)
    place as some simulator ports use this but they don't use libopcodes.  */
 
 void
-m32c_cgen_cpu_close (cd)
-     CGEN_CPU_DESC cd;
+m32c_cgen_cpu_close (CGEN_CPU_DESC cd)
 {
   unsigned int i;
   const CGEN_INSN *insns;
@@ -62595,23 +62590,17 @@ m32c_cgen_cpu_close (cd)
     {
       insns = cd->macro_insn_table.init_entries;
       for (i = 0; i < cd->macro_insn_table.num_init_entries; ++i, ++insns)
-	{
-	  if (CGEN_INSN_RX ((insns)))
-	    regfree (CGEN_INSN_RX (insns));
-	}
+	if (CGEN_INSN_RX ((insns)))
+	  regfree (CGEN_INSN_RX (insns));
     }
 
   if (cd->insn_table.init_entries)
     {
       insns = cd->insn_table.init_entries;
       for (i = 0; i < cd->insn_table.num_init_entries; ++i, ++insns)
-	{
-	  if (CGEN_INSN_RX (insns))
-	    regfree (CGEN_INSN_RX (insns));
-	}
-    }
-
-  
+	if (CGEN_INSN_RX (insns))
+	  regfree (CGEN_INSN_RX (insns));
+    }  
 
   if (cd->macro_insn_table.init_entries)
     free ((CGEN_INSN *) cd->macro_insn_table.init_entries);

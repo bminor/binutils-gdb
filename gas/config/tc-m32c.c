@@ -156,7 +156,7 @@ md_begin (void)
   gas_cgen_cpu_desc = m32c_cgen_cpu_open (CGEN_CPU_OPEN_MACHS, cpu_mach,
 					  CGEN_CPU_OPEN_ENDIAN,
 					  CGEN_ENDIAN_BIG,
-					  CGEN_CPU_OPEN_ISAS, & m32c_isa,
+					  CGEN_CPU_OPEN_ISAS, m32c_isa,
 					  CGEN_CPU_OPEN_END);
 
   m32c_cgen_init_asm (gas_cgen_cpu_desc);
@@ -757,6 +757,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
     { M32C_OPERAND_DSP_24_U24, BFD_RELOC_24, 3 },
     { M32C_OPERAND_DSP_32_U24, BFD_RELOC_24, 4 },
     { M32C_OPERAND_DSP_40_U24, BFD_RELOC_24, 5 },
+    { M32C_OPERAND_DSP_8_U24,  BFD_RELOC_24, 1 },
 
     /* Absolute relocs for 32-bit fields.  */
     { M32C_OPERAND_IMM_16_SI,  BFD_RELOC_32, 2 },
@@ -782,7 +783,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
 
   fprintf
     (stderr,
-     "Error: tc-m32c.c:md_cgen_lookup_reloc Unimplemented relocation %d\n",
+     "Error: tc-m32c.c:md_cgen_lookup_reloc Unimplemented relocation for operand %d\n",
      operand->type);
 
   return BFD_RELOC_NONE;
@@ -1014,4 +1015,3 @@ m32c_is_colon_insn (char *start ATTRIBUTE_UNUSED)
 
   return 0;
 }
-
