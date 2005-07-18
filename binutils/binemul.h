@@ -1,6 +1,6 @@
 /* Binutils emulation layer.
    Copyright 2002, 2003 Free Software Foundation, Inc.
-   Written by Tom Rix, Redhat.
+   Written by Tom Rix, Red Hat Inc.
 
    This file is part of GNU Binutils.
 
@@ -40,7 +40,7 @@ extern bfd_boolean ar_emul_default_parse_arg (char *);
   fprintf (fp, _(" emulation options: \n"))
 
 #define AR_EMUL_ELEMENT_CHECK(abfd, file_name) \
-  do { if ((abfd) == (bfd *) NULL) bfd_fatal (file_name); } while (0)
+  do { if ((abfd) == NULL) bfd_fatal (file_name); } while (0)
 
 #define AR_EMUL_APPEND_PRINT_VERBOSE(verbose, file_name) \
   do { if (verbose) printf ("a - %s\n", file_name); } while (0)
