@@ -1,5 +1,9 @@
 2005-07-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* target.c (normal_pid_to_str): Use xsnprintf instead of snprintf.
+	* bsd-uthread.c (bsd_uthread_pid_to_str): Likewise.
+	* inf-ttrace.c (inf_ttrace_pid_to_str): Likewise.
+
 	* hppa-tdep.h (hppa_frame_prev_register_helper): Change types of
 	last argument to `gdb_byte *'.
 	* hppa-tdep.c (hppa32_convert_from_func_ptr_addr): Rewrite.

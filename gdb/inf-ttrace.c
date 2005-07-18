@@ -909,11 +909,9 @@ inf_ttrace_pid_to_str (ptid_t ptid)
       pid_t pid = ptid_get_pid (ptid);
       lwpid_t lwpid = ptid_get_lwp (ptid);
       static char buf[128];
-      int size;
 
-      size = snprintf (buf, sizeof buf, "process %ld, lwp %ld",
-		       (long)pid, (long)lwpid);
-      gdb_assert (size < sizeof buf);
+      xsnprintf (buf, sizeof buf, "process %ld, lwp %ld",
+		 (long)pid, (long)lwpid);
       return buf;
     }
 

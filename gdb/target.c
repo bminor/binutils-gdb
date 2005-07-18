@@ -1793,10 +1793,8 @@ char *
 normal_pid_to_str (ptid_t ptid)
 {
   static char buf[32];
-  int size;
 
-  size = snprintf (buf, sizeof buf, "process %d", ptid_get_pid (ptid));
-  gdb_assert (size < sizeof buf);
+  xsnprintf (buf, sizeof buf, "process %d", ptid_get_pid (ptid));
   return buf;
 }
 

@@ -469,11 +469,9 @@ bsd_uthread_pid_to_str (ptid_t ptid)
   if (ptid_get_tid (ptid) != 0)
     {
       static char buf[64];
-      int size;
 
-      size = snprintf (buf, sizeof buf, "process %d, thread 0x%lx",
-		       ptid_get_pid (ptid), ptid_get_tid (ptid));
-      gdb_assert (size < sizeof buf);
+      xsnprintf (buf, sizeof buf, "process %d, thread 0x%lx",
+		 ptid_get_pid (ptid), ptid_get_tid (ptid));
       return buf;
     }
 
