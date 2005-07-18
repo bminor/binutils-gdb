@@ -118,6 +118,7 @@ proc advancei { i } {
             # trampolines.  We can't set a breakpoint there, and we
             # don't gracefully fall back to single-stepping.
             setup_kfail "i?86-*-linux*" gdb/1736
+	    setup_kfail "*-*-openbsd*" gdb/1736
             fail "$test (could not set breakpoint)"
 	    return
         }

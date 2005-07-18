@@ -1,5 +1,9 @@
 2005-07-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb.base/sigaltstack.exp (finish_test): KFAIL gdb/1736 on
+	*-*-openbsd*.
+	* gdb.base/sigstep.exp (advancei): KFAIL gdb/1736 on *-*-openbsd*.
+
 	* gdb.base/sigaltstack.c (main): Use stack_t instead of `struct
 	sigaltsatck'.
 
