@@ -1,3 +1,8 @@
+2005-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PNI_Fixup): Update comment.
+	(VMX_Fixup): Properly handle the suffix check.
+
 2005-07-16  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* hppa-dis.c (print_insn_hppa): Add space after 'w' in wide-mode

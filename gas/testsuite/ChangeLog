@@ -1,3 +1,10 @@
+2005-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Add suffix.
+
+	* gas/i386/suffix.d: New file.
+	* gas/i386/suffix.s: Likewise.
+
 2005-07-18  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* gas/hppa/basic/fp_comp.s: Add level 1.1 directive.

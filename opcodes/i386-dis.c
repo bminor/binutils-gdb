@@ -4419,7 +4419,7 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
       /* Override "sidt".  */
       char *p = obuf + strlen (obuf) - 4;
 
-      /* We might have a suffix.  */
+      /* We might have a suffix when disassembling with -Msuffix.  */
       if (*p == 'i')
 	--p;
 
@@ -4617,8 +4617,8 @@ VMX_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
       /* Override "sgdt".  */
       char *p = obuf + strlen (obuf) - 4;
 
-      /* We might have a suffix.  */
-      if (*p == 'i')
+      /* We might have a suffix when disassembling with -Msuffix.  */
+      if (*p == 'g')
 	--p;
 
       switch (rm)
