@@ -3066,6 +3066,8 @@ pa_ip (str)
 
 	    /* Handle 14 bit immediate, shifted left three times.  */
 	    case '#':
+	      if (bfd_get_mach (stdoutput) != pa20)
+		break;
 	      the_insn.field_selector = pa_chk_field_selector (&s);
 	      get_expression (s);
 	      s = expr_end;
