@@ -1,3 +1,8 @@
+2005-07-18  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* gas/hppa/basic/fp_comp.s: Add level 1.1 directive.
+	* gas/hppa/basic/special.s, gas/hppa/basic/system.s: Likewise.
+
 2005-07-18  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/reloc32.[sdl]: New.
