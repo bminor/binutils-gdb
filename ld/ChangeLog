@@ -1,3 +1,8 @@
+2005-07-19  Paul Brook  <paul@codesourcery.com>
+
+	* configure.host (HOSTING_CRT0): Parse output of gcc --help --verbose
+	to determine dynamic linker name.
+
 2005-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* configure.tgt: Restore alpha ordering to list of arches.
