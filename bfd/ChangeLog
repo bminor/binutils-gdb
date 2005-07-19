@@ -1,3 +1,17 @@
+2005-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* reloc.c: Add M32C and MS1 relocs.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2005-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Move m32c entry to correct location.
+        * archures.c: Likewise.
+        * configure.in: Likewise.
+        * configure: Regenerate.
+        * targets.c: Move ms1 vector to correct location.
+
 2005-07-18  Jan Beulich  <jbeulich@novell.com>
 
 	* elf32-i386.c (elf_howto_table): Adjust overflow complaint handler

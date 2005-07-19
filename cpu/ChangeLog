@@ -1,3 +1,27 @@
+2005-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* m32c.cpu (f-16-8, f-24-8, f-32-16, f-dsp-8-u24): New opcode
+	components.
+	(f-lab32-jmp-s): Fix insertion sequence.
+	(Dsp-8-u24, Lab-5-3, Lab32-jmp-s): New operands.
+	(Dsp-40-s8): Make parameter be signed.
+	(Dsp-40-s16): Likewise.
+	(Dsp-48-s8): Likewise.
+	(Dsp-48-s16): Likewise.
+	(Imm-13-u3): Likewise. (Despite its name!)
+	(BitBase16-16-s8): Make the parameter be unsigned.
+	(BitBase16-8-u11-S): Likewise.
+	(Lab-8-8, Lab-8-16, Lab-16-8, jcnd16-5, jcnd16, jcnd32, jmp16.s,
+	jmp16.b, jmp16.w, jmp32.s, jmp32.b, jmp32.w, jsp16.w, jsr32.w): Allow
+	relaxation.
+
+	* m32c.opc: Fix formatting.
+	Use safe-ctype.h instead of ctype.h
+	Move duplicated code sequences into a macro.
+	Fix compile time warnings about signedness mismatches.
+	Remove dead code.
+	(parse_lab_5_3): New parser function.
+	
 2005-07-16  Jim Blandy  <jimb@redhat.com>
 
 	* m32c.opc (m32c_cgen_insn_supported): Use int, not CGEN_BITSET,

@@ -1,3 +1,19 @@
+2005-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Restore alpha ordering to list of arches.
+	* configure: Regenerate.
+	* disassemble.c: Restore alpha ordering to list of arches.
+
+2005-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* m32c-asm.c: Regenerate.
+	* m32c-desc.c: Regenerate.
+	* m32c-desc.h: Regenerate.
+	* m32c-dis.c: Regenerate.
+	* m32c-ibld.h: Regenerate.
+	* m32c-opc.c: Regenerate.
+	* m32c-opc.h: Regenerate.
+
 2005-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (PNI_Fixup): Update comment.

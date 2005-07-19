@@ -1,3 +1,7 @@
+2005-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Restore alpha ordering to list of arches.
+
 2005-07-18  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* tc-hppa.c (pa_ip): Reject match for '#' immediate if not pa20.
