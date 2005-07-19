@@ -1,3 +1,8 @@
+2005-07-19  Ben Elliston  <bje@au.ibm.com>
+
+	* readelf.c (read_and_display_attr_value): Remove comment adjacent
+	to DW_ATE_decimal_float about it being a GNU extension.
+
 2005-07-18  Ben Elliston  <bje@au.ibm.com>
 
 	* readelf.c (read_and_display_attr_value): Handle a DW_AT_encoding

@@ -8615,7 +8615,6 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_ATE_unsigned_char:	printf ("(unsigned char)"); break;
 	  /* DWARF 2.1 value.  */
 	case DW_ATE_imaginary_float:	printf ("(imaginary float)"); break;
-	  /* GNU extension.  */
 	case DW_ATE_decimal_float:	printf ("(decimal float)"); break;
 	default:
 	  if (uvalue >= DW_ATE_lo_user
