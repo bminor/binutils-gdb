@@ -1,3 +1,7 @@
+2005-07-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldmain.c (main): Reindent.
+
 2005-07-19  Paul Brook  <paul@codesourcery.com>
 
 	* configure.host (HOSTING_CRT0): Parse output of gcc --help --verbose
