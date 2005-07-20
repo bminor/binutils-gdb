@@ -6,6 +6,8 @@ TEXT_START_ADDR=0x2000
 ARCH=m32c
 ENTRY=_start
 EMBEDDED=yes
+TEMPLATE_NAME=elf32
+EXTRA_EM_FILE=needrelax
 ELFSIZE=32
 MAXPAGESIZE=256
 # This is like setting STACK_ADDR to 0x0073FFFF0, except that the setting can

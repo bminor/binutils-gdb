@@ -1,3 +1,8 @@
+2005-07-20  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32m32c.sh (TEMPLATE_NAME): New.
+	(EXTRA_EM_FILE): New.
+
 2005-07-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldmain.c (main): Reindent.
