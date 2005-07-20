@@ -1,3 +1,8 @@
+2005-07-20  DJ Delorie  <dj@redhat.com>
+
+	* disassemble.c (disassemble_init_for_target): M32C ISAs are
+	enums, so convert them to bit masks, which attributes are.
+
 2005-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Restore alpha ordering to list of arches.

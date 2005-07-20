@@ -452,9 +452,9 @@ disassemble_init_for_target (struct disassemble_info * info)
     case bfd_arch_m32c:
       info->endian = BFD_ENDIAN_BIG;
       if (info->mach == bfd_mach_m16c)
-	info->insn_sets = ISA_M16C;
+	info->insn_sets = 1 << ISA_M16C;
       else
-	info->insn_sets = ISA_M32C;
+	info->insn_sets = 1 << ISA_M32C;
       break;
 #endif
     default:
