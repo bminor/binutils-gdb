@@ -1,3 +1,13 @@
+2005-07-20  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* gas/m32r/rel32.exp: New file. 
+	* gas/m32r/rel32.s: New file. 
+	* gas/m32r/rel32.d: New file. 
+	* gas/m32r/rel32-pic.s: New file. 
+	* gas/m32r/rel32-pic.d: New file. 
+	* gas/m32r/rel32-err.s: New file. 
+	* gas/m32r/error.exp: Added rel32-err. 
+
 2005-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Add suffix.

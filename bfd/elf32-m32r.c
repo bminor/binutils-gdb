@@ -877,7 +877,21 @@ static reloc_howto_type m32r_elf_howto_table[] =
          0,                     /* dst_mask */
          FALSE),                /* pcrel_offset */
 
-  EMPTY_HOWTO (45),
+  /* A 32 bit PC relative relocation.  */
+  HOWTO (R_M32R_REL32,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,/* special_function */
+	 "R_M32R_REL32",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 TRUE),			/* pcrel_offset */
+
   EMPTY_HOWTO (46),
   EMPTY_HOWTO (47),
 
@@ -1193,6 +1207,7 @@ static const struct m32r_reloc_map m32r_reloc_map[] =
   { BFD_RELOC_M32R_SDA16, R_M32R_SDA16_RELA },
   { BFD_RELOC_VTABLE_INHERIT, R_M32R_RELA_GNU_VTINHERIT },
   { BFD_RELOC_VTABLE_ENTRY, R_M32R_RELA_GNU_VTENTRY },
+  { BFD_RELOC_32_PCREL, R_M32R_REL32 },
 
   { BFD_RELOC_M32R_GOT24, R_M32R_GOT24 },
   { BFD_RELOC_M32R_26_PLTREL, R_M32R_26_PLTREL },
@@ -2611,6 +2626,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                               || r_type == R_M32R_HI16_SLO_RELA
                               || r_type == R_M32R_LO16_RELA)
 			          && !h->forced_local)
+                              || r_type == R_M32R_REL32
                               || r_type == R_M32R_10_PCREL_RELA
                               || r_type == R_M32R_18_PCREL_RELA
                               || r_type == R_M32R_26_PCREL_RELA)
@@ -2854,6 +2870,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
             case R_M32R_16_RELA:
             case R_M32R_24_RELA:
             case R_M32R_32_RELA:
+            case R_M32R_REL32:
             case R_M32R_18_PCREL_RELA:
             case R_M32R_26_PCREL_RELA:
             case R_M32R_HI16_ULO_RELA:
@@ -2862,7 +2879,8 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                   && r_symndx != 0
                   && (input_section->flags & SEC_ALLOC) != 0
                   && ((r_type != R_M32R_18_PCREL_RELA
-                       && r_type != R_M32R_26_PCREL_RELA)
+                       && r_type != R_M32R_26_PCREL_RELA
+                       && r_type != R_M32R_REL32)
                       || (h != NULL
                           && h->dynindx != -1
                           && (! info->symbolic
@@ -2912,7 +2930,8 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                   if (skip)
                     memset (&outrel, 0, sizeof outrel);
                   else if (r_type == R_M32R_18_PCREL_RELA
-                           || r_type == R_M32R_26_PCREL_RELA)
+                           || r_type == R_M32R_26_PCREL_RELA
+                           || r_type == R_M32R_REL32)
                     {
                       BFD_ASSERT (h != NULL && h->dynindx != -1);
                       outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
@@ -3683,6 +3702,7 @@ m32r_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 	case R_M32R_16_RELA:
 	case R_M32R_24_RELA:
 	case R_M32R_32_RELA:
+	case R_M32R_REL32:
 	case R_M32R_HI16_ULO_RELA:
 	case R_M32R_HI16_SLO_RELA:
 	case R_M32R_LO16_RELA:
@@ -3704,7 +3724,8 @@ m32r_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 		if (p->sec == sec)
 		  {
 		    if (ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
-			|| ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA)
+			|| ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
+			|| ELF32_R_TYPE (rel->r_info) == R_M32R_REL32)
 		      p->pc_count -= 1;
 		    p->count -= 1;
 		    if (p->count == 0)
@@ -3864,6 +3885,7 @@ m32r_elf_check_relocs (bfd *abfd,
         case R_M32R_16_RELA:
         case R_M32R_24_RELA:
         case R_M32R_32_RELA:
+        case R_M32R_REL32:
         case R_M32R_HI16_ULO_RELA:
         case R_M32R_HI16_SLO_RELA:
         case R_M32R_LO16_RELA:
@@ -3899,7 +3921,8 @@ m32r_elf_check_relocs (bfd *abfd,
           if ((info->shared
                && (sec->flags & SEC_ALLOC) != 0
 	       && ((r_type != R_M32R_26_PCREL_RELA
-                    && r_type != R_M32R_18_PCREL_RELA)
+                    && r_type != R_M32R_18_PCREL_RELA
+                    && r_type != R_M32R_REL32)
 	           || (h != NULL
 		       && (! info->symbolic
 		           || h->root.type == bfd_link_hash_defweak

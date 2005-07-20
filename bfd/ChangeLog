@@ -1,3 +1,11 @@
+2005-07-20  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* elf32-m32r.c (m32r_elf_howto_table): Support R_M32R_REL32.
+	(m32r_reloc_map): Likewise.
+	(m32r_elf_relocate_section): Likewise.
+	(m32r_elf_gc_sweep_hook): Likewise.
+	(m32r_elf_check_relocs): Likewise.
+
 2005-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* reloc.c: Add M32C and MS1 relocs.

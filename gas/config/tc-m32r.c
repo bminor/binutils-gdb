@@ -2258,6 +2258,17 @@ tc_gen_reloc (asection * section, fixS * fixP)
   reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
+
+  if (fixP->fx_pcrel)
+    {
+      if (fixP->fx_r_type == BFD_RELOC_32)
+        fixP->fx_r_type = BFD_RELOC_32_PCREL;
+      else if (fixP->fx_r_type == BFD_RELOC_16)
+	{
+          fixP->fx_r_type = BFD_RELOC_16_PCREL;
+          bfd_set_error (bfd_error_bad_value);
+	}
+    }
  
   code = fixP->fx_r_type;
   if (pic_code)
@@ -2327,7 +2338,8 @@ printf(" => %s\n",reloc->howto->name);
  
   /* Use fx_offset for these cases.  */
   if (   fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT)
+      || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixP->fx_r_type == BFD_RELOC_32_PCREL)
     reloc->addend  = fixP->fx_offset;
   else if ((!pic_code
             && code != BFD_RELOC_M32R_26_PLTREL)
