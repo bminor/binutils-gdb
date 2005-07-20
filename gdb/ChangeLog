@@ -1,3 +1,17 @@
+2005-07-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ttrace.c (inf_ttrace_vfork_ppid): New variable.
+	(inf_ttrace_follow_fork): New function.
+	(inf_ttrace_him, inf_ttrace_attach): Ask for TTEVT_FORK and
+	TTEVT_VFORK events.  Replace TTEO_NOSTRCHLD option with
+	TTEO_PROC_INHERIT.
+	(inf_ttrace_create_inferior, inf_ttrace_attach): Add checks for
+	inf_ttrace_vfork_ppid.
+	(inf_ttrace_kill_inferior, inf_ttrace_detach): Detach from waiting
+	parent if appropriate.
+	(inf_ttrace_wait): Handle TTEVT_FORK and TTEVT_VFORK.
+	(inf_ttrace_target): Set to_follow_fork.
+
 2005-07-20  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* remote.c (remote_pid_to_str): Use xsnprintf instead of snprintf.

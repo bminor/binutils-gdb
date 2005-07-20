@@ -397,6 +397,132 @@ inf_ttrace_stopped_by_watchpoint (void)
 }
 
 
+/* When tracking a vfork(2), we cannot detach from the parent until
+   after the child has called exec(3) or has exited.  If we are still
+   attached to the parent, this variable will be set to the process ID
+   of the parent.  Otherwise it will be set to zero.  */
+static pid_t inf_ttrace_vfork_ppid = -1;
+
+static int
+inf_ttrace_follow_fork (int follow_child)
+{
+  pid_t pid, fpid;
+  lwpid_t lwpid, flwpid;
+  ttstate_t tts;
+
+  /* FIXME: kettenis/20050720: This stuff should really be passed as
+     an argument by our caller.  */
+  {
+    ptid_t ptid;
+    struct target_waitstatus status;
+
+    get_last_target_status (&ptid, &status);
+    gdb_assert (status.kind == TARGET_WAITKIND_FORKED
+		|| status.kind == TARGET_WAITKIND_VFORKED);
+
+    pid = ptid_get_pid (ptid);
+    lwpid = ptid_get_lwp (ptid);
+  }
+
+  /* Get all important details that core GDB doesn't (and shouldn't)
+     know about.  */
+  if (ttrace (TT_LWP_GET_STATE, pid, lwpid,
+	      (uintptr_t)&tts, sizeof tts, 0) == -1)
+    perror_with_name (("ttrace"));
+
+  gdb_assert (tts.tts_event == TTEVT_FORK || tts.tts_event == TTEVT_VFORK);
+
+  if (tts.tts_u.tts_fork.tts_isparent)
+    {
+      pid = tts.tts_pid;
+      lwpid = tts.tts_lwpid;
+      fpid = tts.tts_u.tts_fork.tts_fpid;
+      flwpid = tts.tts_u.tts_fork.tts_flwpid;
+    }
+  else
+    {
+      pid = tts.tts_u.tts_fork.tts_fpid;
+      lwpid = tts.tts_u.tts_fork.tts_flwpid;
+      fpid = tts.tts_pid;
+      flwpid = tts.tts_lwpid;
+    }
+
+  if (follow_child)
+    {
+      inferior_ptid = ptid_build (fpid, flwpid, 0);
+      detach_breakpoints (pid);
+
+      target_terminal_ours ();
+      fprintf_unfiltered (gdb_stdlog, _("\
+Attaching after fork to child process %ld.\n"), (long)fpid);
+    }
+  else
+    {
+      inferior_ptid = ptid_build (pid, lwpid, 0);
+      detach_breakpoints (fpid);
+
+      target_terminal_ours ();
+      fprintf_unfiltered (gdb_stdlog, _("\
+Detaching after fork from child process %ld.\n"), (long)fpid);
+    }
+
+  if (tts.tts_event == TTEVT_VFORK)
+    {
+      gdb_assert (!tts.tts_u.tts_fork.tts_isparent);
+
+      if (follow_child)
+	{
+	  /* We can't detach from the parent yet.  */
+	  inf_ttrace_vfork_ppid = pid;
+
+	  reattach_breakpoints (fpid);
+	}
+      else
+	{
+	  if (ttrace (TT_PROC_DETACH, fpid, 0, 0, 0, 0) == -1)
+	    perror_with_name (("ttrace"));
+
+	  /* Wait till we get the TTEVT_VFORK event in the parent.
+	     This indicates that the child has called exec(3) or has
+	     exited and that the parent is ready to be traced again.  */
+	  if (ttrace_wait (pid, lwpid, TTRACE_WAITOK, &tts, sizeof tts) == -1)
+	    perror_with_name (("ttrace_wait"));
+	  gdb_assert (tts.tts_event == TTEVT_VFORK);
+	  gdb_assert (tts.tts_u.tts_fork.tts_isparent);
+
+	  reattach_breakpoints (pid);
+	}
+    }
+  else
+    {
+      gdb_assert (tts.tts_u.tts_fork.tts_isparent);
+
+      if (follow_child)
+	{
+	  if (ttrace (TT_PROC_DETACH, pid, 0, 0, 0, 0) == -1)
+	    perror_with_name (("ttrace"));
+	}
+      else
+	{
+	  if (ttrace (TT_PROC_DETACH, fpid, 0, 0, 0, 0) == -1)
+	    perror_with_name (("ttrace"));
+	}
+    }
+
+  if (follow_child)
+    {
+      /* The child will start out single-threaded.  */
+      inf_ttrace_num_lwps = 0;
+      inf_ttrace_num_lwps_in_syscall = 0;
+
+      /* Reset breakpoints in the child as appropriate.  */
+      follow_inferior_reset_breakpoints ();
+    }
+
+  return 0;
+}
+
+
 /* File descriptors for pipes used as semaphores during initial
    startup of an inferior.  */
 static int inf_ttrace_pfd1[2];
@@ -463,12 +589,12 @@ inf_ttrace_him (int pid)
 
   /* Set the initial event mask.  */
   memset (&tte, 0, sizeof (tte));
-  tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT;
+  tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT | TTEVT_FORK | TTEVT_VFORK;
   tte.tte_events |= TTEVT_LWP_CREATE | TTEVT_LWP_EXIT | TTEVT_LWP_TERMINATE;
 #ifdef TTEVT_BPT_SSTEP
   tte.tte_events |= TTEVT_BPT_SSTEP;
 #endif
-  tte.tte_opts = TTEO_NOSTRCCHLD;
+  tte.tte_opts |= TTEO_PROC_INHERIT;
   if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
     perror_with_name (("ttrace"));
@@ -506,6 +632,7 @@ inf_ttrace_create_inferior (char *exec_file, char *allargs, char **env,
   gdb_assert (inf_ttrace_num_lwps_in_syscall == 0);
   gdb_assert (inf_ttrace_page_dict.count == 0);
   gdb_assert (inf_ttrace_reenable_page_protections == 0);
+  gdb_assert (inf_ttrace_vfork_ppid == -1);
 
   fork_inferior (exec_file, allargs, env, inf_ttrace_me, inf_ttrace_him,
 		 inf_ttrace_prepare, NULL);
@@ -528,6 +655,14 @@ inf_ttrace_kill_inferior (void)
   if (ttrace (TT_PROC_EXIT, pid, 0, 0, 0, 0) == -1)
     perror_with_name (("ttrace"));
   /* ??? Is it necessary to call ttrace_wait() here?  */
+
+  if (inf_ttrace_vfork_ppid != -1)
+    {
+      if (ttrace (TT_PROC_DETACH, inf_ttrace_vfork_ppid, 0, 0, 0, 0) == -1)
+	perror_with_name (("ttrace"));
+      inf_ttrace_vfork_ppid = -1;
+    }
+
   target_mourn_inferior ();
 }
 
@@ -594,6 +729,7 @@ inf_ttrace_attach (char *args, int from_tty)
 
   gdb_assert (inf_ttrace_num_lwps == 0);
   gdb_assert (inf_ttrace_num_lwps_in_syscall == 0);
+  gdb_assert (inf_ttrace_vfork_ppid == -1);
 
   if (ttrace (TT_PROC_ATTACH, pid, 0, TT_KILL_ON_EXIT, TT_VERSION, 0) == -1)
     perror_with_name (("ttrace"));
@@ -601,12 +737,12 @@ inf_ttrace_attach (char *args, int from_tty)
 
   /* Set the initial event mask.  */
   memset (&tte, 0, sizeof (tte));
-  tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT;
+  tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT | TTEVT_FORK | TTEVT_VFORK;
   tte.tte_events |= TTEVT_LWP_CREATE | TTEVT_LWP_EXIT | TTEVT_LWP_TERMINATE;
 #ifdef TTEVT_BPT_SSTEP
   tte.tte_events |= TTEVT_BPT_SSTEP;
 #endif
-  tte.tte_opts = TTEO_NOSTRCCHLD;
+  tte.tte_opts |= TTEO_PROC_INHERIT;
   if (ttrace (TT_PROC_SET_EVENT_MASK, pid, 0,
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
     perror_with_name (("ttrace"));
@@ -641,6 +777,13 @@ inf_ttrace_detach (char *args, int from_tty)
      can pass a signal number here.  Does this really work?  */
   if (ttrace (TT_PROC_DETACH, pid, 0, 0, sig, 0) == -1)
     perror_with_name (("ttrace"));
+
+  if (inf_ttrace_vfork_ppid != -1)
+    {
+      if (ttrace (TT_PROC_DETACH, inf_ttrace_vfork_ppid, 0, 0, 0, 0) == -1)
+	perror_with_name (("ttrace"));
+      inf_ttrace_vfork_ppid = -1;
+    }
 
   inf_ttrace_num_lwps = 0;
   inf_ttrace_num_lwps_in_syscall = 0;
@@ -699,9 +842,9 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 
   if (pid == -1)
-    pid = 0;
+    pid = lwpid = 0;
 
-  gdb_assert (lwpid == 0 || pid != 0);
+  gdb_assert (pid != 0 || lwpid == 0);
 
   do
     {
@@ -710,6 +853,20 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
       if (ttrace_wait (pid, lwpid, TTRACE_WAITOK, &tts, sizeof tts) == -1)
 	perror_with_name (("ttrace_wait"));
+
+      if (tts.tts_event == TTEVT_VFORK && tts.tts_u.tts_fork.tts_isparent)
+	{
+	  if (inf_ttrace_vfork_ppid != -1)
+	    {
+	      gdb_assert (inf_ttrace_vfork_ppid == tts.tts_pid);
+
+	      if (ttrace (TT_PROC_DETACH, tts.tts_pid, 0, 0, 0, 0) == -1)
+		perror_with_name (("ttrace"));
+	      inf_ttrace_vfork_ppid = -1;
+	    }
+
+	  tts.tts_event = TTEVT_NONE;
+	}
 
       clear_sigio_trap ();
       clear_sigint_trap ();
@@ -745,6 +902,35 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     case TTEVT_EXIT:
       store_waitstatus (ourstatus, tts.tts_u.tts_exit.tts_exitcode);
       inf_ttrace_num_lwps = 0;
+      break;
+
+    case TTEVT_FORK:
+      ourstatus->kind = TARGET_WAITKIND_FORKED;
+      ourstatus->value.related_pid = tts.tts_u.tts_fork.tts_fpid;
+
+      /* Make sure the other end of the fork is stopped too.  */
+      if (ttrace_wait (tts.tts_u.tts_fork.tts_fpid,
+		       tts.tts_u.tts_fork.tts_flwpid,
+		       TTRACE_WAITOK, &tts, sizeof tts) == -1)
+	perror_with_name (("ttrace_wait"));
+
+      gdb_assert (tts.tts_event == TTEVT_FORK);
+      if (tts.tts_u.tts_fork.tts_isparent)
+	{
+	  ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
+	  ourstatus->value.related_pid = tts.tts_u.tts_fork.tts_fpid;
+	}
+      break;
+
+    case TTEVT_VFORK:
+      gdb_assert (!tts.tts_u.tts_fork.tts_isparent);
+
+      ourstatus->kind = TARGET_WAITKIND_VFORKED;
+      ourstatus->value.related_pid = tts.tts_u.tts_fork.tts_fpid;
+
+      /* HACK: To avoid touching the parent during the vfork, switch
+	 away from it.  */
+      inferior_ptid = ptid;
       break;
 
     case TTEVT_LWP_CREATE:
@@ -935,6 +1121,7 @@ inf_ttrace_target (void)
   t->to_files_info = inf_ttrace_files_info;
   t->to_thread_alive = inf_ttrace_thread_alive;
   t->to_pid_to_str = inf_ttrace_pid_to_str;
+  t->to_follow_fork = inf_ttrace_follow_fork;
   t->to_can_use_hw_breakpoint = inf_ttrace_can_use_hw_breakpoint;
   t->to_region_size_ok_for_hw_watchpoint =
     inf_ttrace_region_size_ok_for_hw_watchpoint;
