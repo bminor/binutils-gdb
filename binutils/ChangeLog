@@ -1,3 +1,7 @@
+2005-07-21  Eric Christopher  <echristo@apple.com>
+
+	* MAINTAINERS: Change affiliation.
+
 2005-07-19  Ben Elliston  <bje@au.ibm.com>
 
 	* readelf.c (read_and_display_attr_value): Remove comment adjacent
