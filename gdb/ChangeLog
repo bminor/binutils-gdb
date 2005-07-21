@@ -1,3 +1,7 @@
+2005-07-21  Eric Christopher  <echristo@apple.com>
+
+	* MAINTAINERS (Misc): Update affiliation.
+
 2005-07-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ttrace.c (inf_ttrace_wait): Properly report TTEVT_EXEC
@@ -35,7 +39,7 @@
 	to `gdb_byte *'.
 	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_prev_register):
 	Change types of last argument to `gdb_byte *'.
-	
+
 2005-07-18  Mark Kettenis  <kettenis@gnu.org>
 	    Jason Molenda  <jmolenda@apple.com>
 
@@ -221,9 +225,9 @@
 
 	* bsd-kvm.c (bsd_kvm_open): Properly cast sentinel in concat call.
 	* coffread.c (patch_type, process_coff_symbol): Likewise.
-	* corelow.c (core_open): Likewise. 
-	* dwarf2read.c (dwarf_decode_lines, dwarf2_start_subfile): 
-	* language.c (set_lang_str, set_type_str, set_range_str) 
+	* corelow.c (core_open): Likewise.
+	* dwarf2read.c (dwarf_decode_lines, dwarf2_start_subfile):
+	* language.c (set_lang_str, set_type_str, set_range_str)
 	(set_case_str): Likewise.
 	* source.c (add_path, openp): Likewise.
 	* stabsread.c: Likewise.
@@ -246,7 +250,7 @@
 
 2005-07-03  Richard Henderson  <rth@redhat.com>
 
-	* amd64-tdep.c (amd64_sse_type): New.	
+	* amd64-tdep.c (amd64_sse_type): New.
 	(amd64_register_info): Use it for xmm registers.  Constify.
 	(amd64_register_type): Initialize amd64_sse_type as needed.
 
@@ -295,7 +299,7 @@
 	(sol_thread_xfer_partial): Change type of readbuf and writebuf
 	arguments to `gdb_byte *'.
 
-	* mips-tdep.c (mips_xfer_register, mips_o32_return_value) 
+	* mips-tdep.c (mips_xfer_register, mips_o32_return_value)
 	(mips_integer_to_address): Use gdb_byte instead of bfd_byte.
 
 2005-06-24  Mark Kettenis  <kettenis@gnu.org>
@@ -486,7 +490,7 @@
 	* alpha-tdep.c (alpha_sigtramp_frame_prev_register)
 	(alpha_heuristic_frame_prev_register): Change type of last
 	argument to `gdb_byte *'.
-	(alpha_register_to_value, alpha_value_to_register) 
+	(alpha_register_to_value, alpha_value_to_register)
 	(alpha_extract_return_value, alpha_store_return_value): Likewise.
 	* alpha-mdebug-tdep.c (alpha_mdebug_frame_prev_register): Likewise.
 
@@ -563,8 +567,8 @@
 	(ia64_libunwind_sigtramp_frame_unwind): New unwinder.
 	(ia64_unw_rse_accessors): New libunwind accessors.
 	(ia64_libunwind_descr): Add ia64_unw_rse_accessors.
-	(ia64_gdbarch_init)[HAVE_LIBUNWIND_IA64_H]: Use 
-	ia64_libunwind_sigtramp_frame_sniffer instead of 
+	(ia64_gdbarch_init)[HAVE_LIBUNWIND_IA64_H]: Use
+	ia64_libunwind_sigtramp_frame_sniffer instead of
 	ia64_sigtramp_frame_sniffer.
 	* libunwind-frame.c (libunwind_frame_set_descr): Add
 	special register accessors.
@@ -581,7 +585,7 @@
 	field.
 	(libunwind_sigtramp_frame_sniffer): New prototype.
 	(libunwind_get_reg_special): Ditto.
-	
+
 2005-06-08  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* expression.h (enum exp_opcode): Fix a comment typo.
@@ -615,7 +619,7 @@
 	* MAINTAINERS (Can Commit Without Approval): New section,
 	previously burried under "Target Instruction Set Architectures".
 	Note that cagney "can commit" changes to powerpc-linux.
-	
+
 	* MAINTAINERS: Drop architecture and target vectors.
 
 2005-05-29  Eli Zaretskii  <eliz@gnu.org>
@@ -692,12 +696,12 @@
 2005-05-27  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (crisv32_scan_prologue): Add.
-	(cris_frame_unwind_cache, cris_skip_prologue): Call 
+	(cris_frame_unwind_cache, cris_skip_prologue): Call
 	crisv32_scan_prologue when debugging CRISv32.
 
 2005-05-27  Orjan Friberg  <orjanf@axis.com>
 
-	* cris-tdep.c (cris_sigtramp_start, cris_rt_sigtramp_start) 
+	* cris-tdep.c (cris_sigtramp_start, cris_rt_sigtramp_start)
 	(cris_frame_prev_register, cris_sigtramp_frame_prev_register)
 	(cris_return_value): Use gdb_byte for byte buffers.
 	(struct cris_frame_unwind, struct cris_frame_base): Fix formatting.
@@ -753,11 +757,11 @@
 	* rs6000-tdep.c (ppc_supply_reg, ppc_collect_reg): Use gdb_byte
 	for byte buffers.
 	(rs6000_fetch_pointer_argument): Use get_frame_register_unsigned.
-	(rs6000_software_single_step, sstep_breaks, skip_prologue) 
-	(rs6000_push_dummy_call, rs6000_push_dummy_call) 
-	(rs6000_push_dummy_call, rs6000_push_dummy_call) 
-	(rs6000_register_to_value, e500_pseudo_register_read) 
-	(rs6000_store_return_value, e500_pseudo_register_write) 
+	(rs6000_software_single_step, sstep_breaks, skip_prologue)
+	(rs6000_push_dummy_call, rs6000_push_dummy_call)
+	(rs6000_push_dummy_call, rs6000_push_dummy_call)
+	(rs6000_register_to_value, e500_pseudo_register_read)
+	(rs6000_store_return_value, e500_pseudo_register_write)
 	(rs6000_frame_prev_register, rs6000_extract_return_value): Ditto.
 	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call)
 	(ppc_sysv_abi_push_dummy_call, do_ppc_sysv_return_value)
@@ -789,7 +793,7 @@
 
 2005-05-24  Orjan Friberg  <orjanf@axis.com>
 
-	* config/djgpp/fnchange.lst: Add mappings for 
+	* config/djgpp/fnchange.lst: Add mappings for
 	gdbserver/linux-cris-low.c and gdbserver/linux-crisv32-low.c.
 
 2005-05-23  Michael Snyder  <msnyder@redhat.com>
@@ -808,12 +812,12 @@
 	* infptrace.c (child_xfer_memory): Update.
 	* dcache.c (struct dcache_block): Use gdb_byte for the byte
 	buffers.
-	(dcache_read_line, dcache_xfer_memory, dcache_poke_byte) 
+	(dcache_read_line, dcache_xfer_memory, dcache_poke_byte)
 	(dcache_peek_byte, dcache_write_line): Ditto.
 
 	* auxv.h (target_auxv_read, procfs_xfer_auxv)
 	(target_auxv_parse): Use gdb_byte for byte buffer parameters.
-	* auxv.c (target_auxv_read, procfs_xfer_auxv, target_auxv_parse) 
+	* auxv.c (target_auxv_read, procfs_xfer_auxv, target_auxv_parse)
 	(target_auxv_search, fprint_target_auxv): Update.
 
 2005-05-23  Orjan Friberg  <orjanf@axis.com>
@@ -862,9 +866,9 @@
 	* trad-frame.h (trad_frame_get_register)
 	(frame_get_prev_register): Ditto.
 	* frame-unwind.h (frame_prev_register_ftype): Ditto.
-	* frame.c (frame_pop, frame_register, frame_unwind_register) 
-	(get_frame_register, frame_unwind_register_signed) 
-	(frame_unwind_register_unsigned, frame_unwind_unsigned_register) 
+	* frame.c (frame_pop, frame_register, frame_unwind_register)
+	(get_frame_register, frame_unwind_register_signed)
+	(frame_unwind_register_unsigned, frame_unwind_unsigned_register)
 	(frame_register_read, get_frame_memory): Update.
 	* trad-frame.c (trad_frame_get_prev_register): Update.
 	(trad_frame_get_register): Update.
@@ -903,10 +907,10 @@
 	(store_typed_address): Use gdb_byte for byte buffer parameters.
 	(push_bytes, push_word): Delete declaration.
 	* valops.c (push_bytes, push_word): Delete function.
-	* findvar.c (extract_signed_integer, extract_unsigned_integer) 
-	(extract_typed_address, store_signed_integer) 
+	* findvar.c (extract_signed_integer, extract_unsigned_integer)
+	(extract_typed_address, store_signed_integer)
 	(store_unsigned_integer): Update.
-	
+
 	* regcache.h (regcache_raw_read, regcache_raw_write)
 	(regcache_raw_read_part, regcache_raw_write_part)
 	(regcache_cooked_read_part, regcache_cooked_write_part)
@@ -919,17 +923,17 @@
 	buffer parameters.
 	* ia64-tdep.c (ia64_extract_return_value): Update.
 	* frame.c (do_frame_register_read): Update.
-	* regcache.c (deprecated_grub_regcache_for_registers) 
-	(struct regcache, regcache_save, regcache_restore, regcache_cpy) 
-	(do_cooked_read, regcache_xmalloc, register_buffer) 
-	(deprecated_read_register_bytes, regcache_raw_read) 
-	(regcache_raw_read_signed, regcache_raw_read_unsigned) 
-	(deprecated_read_register_gen, regcache_cooked_read) 
-	(regcache_cooked_read_signed, regcache_cooked_read_unsigned) 
-	(deprecated_write_register_gen, regcache_cooked_write) 
-	(deprecated_write_register_bytes, regcache_raw_read_part) 
-	(regcache_raw_write_part, regcache_cooked_read_part) 
-	(regcache_cooked_write_part, read_register, regcache_raw_supply): 
+	* regcache.c (deprecated_grub_regcache_for_registers)
+	(struct regcache, regcache_save, regcache_restore, regcache_cpy)
+	(do_cooked_read, regcache_xmalloc, register_buffer)
+	(deprecated_read_register_bytes, regcache_raw_read)
+	(regcache_raw_read_signed, regcache_raw_read_unsigned)
+	(deprecated_read_register_gen, regcache_cooked_read)
+	(regcache_cooked_read_signed, regcache_cooked_read_unsigned)
+	(deprecated_write_register_gen, regcache_cooked_write)
+	(deprecated_write_register_bytes, regcache_raw_read_part)
+	(regcache_raw_write_part, regcache_cooked_read_part)
+	(regcache_cooked_write_part, read_register, regcache_raw_supply):
 
 2005-05-17  Corinna Vinschen  <vinschen@redhat.com>
 
@@ -1044,8 +1048,8 @@
 	(struct target_ops): Ditto for to_xfer_partial and
 	deprecated_xfer_memory.
 	* dcache.h (dcache_xfer_memory): Ditto.
-	* target.c (default_xfer_partial, target_read_partial) 
-	(target_write_partial, target_read, target_write) 
+	* target.c (default_xfer_partial, target_read_partial)
+	(target_write_partial, target_read, target_write)
 	(do_xfer_memory, update_current_target, get_target_memory): Update.
 	(target_read_string): Change buf to a gdb_byte.
 	* dcache.c (dcache_xfer_memory): Update.
@@ -1174,10 +1178,10 @@
 	`gdb_byte *'.  Use gdb_byte for buf.
 	(m68k_return_value, m68k_svr4_return_value): Change type of
 	readbuf and writebuf arguments to `gdb_byte *'.
-	(m68k_push_dummy_call, m68k_unwind_pc, m68k_frame_cache) 
+	(m68k_push_dummy_call, m68k_unwind_pc, m68k_frame_cache)
 	(m68k_unwind_dummy_id): Use gdb_byte for buf.
 	(m68k_get_longjmp_target): Use `gdb_byte *' for buf.
-	* m68kbsd-tdep.c (m68kbsd_supply_fpregset) 
+	* m68kbsd-tdep.c (m68kbsd_supply_fpregset)
 	(m68kbsd_supply_gregset): Use `gdb_byte *' for regs.
 
 	* m88k-tdep.c (m88k_breakpoint_from_pc): Change return type to
@@ -1211,11 +1215,11 @@
 	* inferior.h (unsigned_address_to_pointer)
 	(signed_pointer_to_address, address_to_signed_pointer)
 	(unsigned_pointer_to_address): Update.
-	* arch-utils.h (legacy_return_value): 
+	* arch-utils.h (legacy_return_value):
 	* arch-utils.c (legacy_extract_return_value)
 	(legacy_return_value): Update.
-	* findvar.c (unsigned_pointer_to_address) 
-	(signed_pointer_to_address, unsigned_address_to_pointer) 
+	* findvar.c (unsigned_pointer_to_address)
+	(signed_pointer_to_address, unsigned_address_to_pointer)
 	(address_to_signed_pointer): Update.
 
 2005-05-13  Orjan Friberg  <orjanf@axis.com>
@@ -1234,12 +1238,12 @@
 	of ERP register in guru mode.
 	(cris_breakpoint_from_pc): Rename break_insn to break8_insn.
 	Add break15_insn, returned in guru mode.
-	(_initialize_cris_tdep): Add call to add_setshow_enum_cmd for new 
+	(_initialize_cris_tdep): Add call to add_setshow_enum_cmd for new
 	cris-mode setting.
 	(cris_dump_tdep): Add dump of cris_mode.
 	(cris_gdbarch_init): Add cris_mode to search criteria for architecture.
 	Register the sigtramp frame sniffer only if not in guru mode.
-	
+
 2005-05-13  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (go32-nat.o): Add $(top_h) to prerequisites.
@@ -1395,13 +1399,13 @@
 
 	* i386-linux-tdep.c (linux_sigtramp_code, linux_rt_sigtramp_code):
 	Change type to `static const gdb_byte'.
-	(i386_linux_sigtramp_start, i386_linux_rt_sigtramp_start) 
+	(i386_linux_sigtramp_start, i386_linux_rt_sigtramp_start)
 	(i386_linux_sigcontext_addr): Use gdb_byte for buf.
 	* amd64-linux-tdep.c (linux_sigtramp_code): Change type to `static
 	const gdb_byte'.
 	(amd64_linux_sigtramp_start, amd64_linux_sigcontext_addr): Use
 	gdb_byte for buf.
-	* amd64fbsd-tdep.c (amd64fbsd_supply_uthread) 
+	* amd64fbsd-tdep.c (amd64fbsd_supply_uthread)
 	(amd64fbsd_collect_uthread): Use gdb_byte for buf.
 
 	* config/ia64/nm-aix.h: Remove file.
@@ -1494,7 +1498,7 @@
 	(memory_insert_breakpoint, memory_remove_breakpoint): Change type
 	of buffer to a bfd_byte pointer.
 	* gdbarch.h, gdbarch.c: Re-generate.
-	* mem-break.c (memory_insert_breakpoint) 
+	* mem-break.c (memory_insert_breakpoint)
 	(memory_remove_breakpoint, default_memory_insert_breakpoint)
 	(default_memory_remove_breakpoint): Update.
 	* target.h (memory_insert_breakpoint)
@@ -1502,23 +1506,23 @@
 	(default_memory_remove_breakpoint): Update declarations.
 	(struct target_ops): Update to_insert_breakpoint and
 	to_remove_breakpoint.
-	* target.c (debug_to_remove_breakpoint) 
+	* target.c (debug_to_remove_breakpoint)
 	(debug_to_insert_breakpoint): Update.
-	* remote-m32r-sdi.c (m32r_remove_breakpoint) 
+	* remote-m32r-sdi.c (m32r_remove_breakpoint)
 	(m32r_insert_breakpoint): Update.
-	* m32r-tdep.c (m32r_memory_insert_breakpoint) 
+	* m32r-tdep.c (m32r_memory_insert_breakpoint)
 	(m32r_memory_remove_breakpoint): Update.
-	* remote-e7000.c (e7000_insert_breakpoint) 
+	* remote-e7000.c (e7000_insert_breakpoint)
 	(e7000_remove_breakpoint): Update.
-	* remote-rdi.c (arm_rdi_insert_breakpoint) 
+	* remote-rdi.c (arm_rdi_insert_breakpoint)
 	(arm_rdi_remove_breakpoint): Update.
-	* remote-sim.c (gdbsim_insert_breakpoint) 
+	* remote-sim.c (gdbsim_insert_breakpoint)
 	(gdbsim_remove_breakpoint): Update.
 	* exec.c (ignore): Update.
 	* rs6000-tdep.c (rs6000_extract_return_value): Update.
-	* ia64-tdep.c (ia64_memory_insert_breakpoint) 
+	* ia64-tdep.c (ia64_memory_insert_breakpoint)
 	(ia64_memory_remove_breakpoint): Update.
-	* remote-rdp.c (remote_rdp_insert_breakpoint) 
+	* remote-rdp.c (remote_rdp_insert_breakpoint)
 	(remote_rdp_remove_breakpoint): Update.
 
 2005-05-01  Mark Kettenis  <kettenis@gnu.org>
@@ -1533,9 +1537,9 @@
 
 2005-04-29  Mark Kettenis  <kettenis@gnu.org>
 
-	* solist.h (TARGET_SO_FREE_SO, TARGET_SO_CLEAR_SOLIB) 
-	(TARGET_SO_SOLIB_CREATE_INFERIOR_HOOK) 
-	(TARGET_SO_SPECIAL_SYMBOL_HANDLING, TARGET_SO_CURRENT_SOS) 
+	* solist.h (TARGET_SO_FREE_SO, TARGET_SO_CLEAR_SOLIB)
+	(TARGET_SO_SOLIB_CREATE_INFERIOR_HOOK)
+	(TARGET_SO_SPECIAL_SYMBOL_HANDLING, TARGET_SO_CURRENT_SOS)
 	(TARGET_SO_OPEN_SYMBOL_FILE_OBJECT): Remove defines.
 	* solib.c (solib_data): New variable.
 	(solib_init, solib_ops): New functions.
@@ -1618,7 +1622,7 @@
 2005-04-28  Andrew Cagney  <cagney@gnu.org>
 
 	* valops.c (check_field): Make buffer a bfd_byte.
-	* value.c (unpack_long, unpack_double, unpack_pointer) 
+	* value.c (unpack_long, unpack_double, unpack_pointer)
 	(unpack_field_as_long, modify_field): Ditto.
 	* value.h: Update declarations.
 
@@ -1709,7 +1713,7 @@
 	(gdb_select): New function.
 	(gdb_wait_for_event): Use it.
 	* Makefile.in (event-loop.o): Depend on $(gdb_assert_h).
-	
+
 2005-04-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-tdep.c: Include "dwarf2-frame.h".
@@ -2078,8 +2082,8 @@
 
 	* dummy-frame.c (dummy_frame_sniffer): Optimization: don't bother
 	computing this_id if there are no dummy frames on the stack.
-	
-	* mn10300-tdep.c (mn10300_frame_unwind_cache): Use 
+
+	* mn10300-tdep.c (mn10300_frame_unwind_cache): Use
 	find_partial_func instead of unwind_pc to identify frame.
 	(mn10300_push_dummy_call): Handle struct args, struct_return.
 
@@ -2087,7 +2091,7 @@
 	before setting it.
 	* mn10300-tdep.c (mn10300_skip_prologue): Use analyze_prologue
 	instead of skip_prologue_using_sal.
-	
+
 2005-03-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-frv.c (struct lm_info): Add new field ``lm_addr''.
@@ -2334,7 +2338,7 @@
 	(ser_unix_async): Likewise.
 	(ser_unix_wait_for): Make it static.
 	* configure: Regenerated.
-	
+
 2005-03-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.h: Update copyrigh year.
@@ -2365,7 +2369,7 @@
 	* configure: Regenerated.
 	* config.in: Likewise.
 	* remote-fileio.c (remote_fileio_to_fio_stat): Check
-	HAVE_STRUCT_STAT_ST_BLKSIZE. 
+	HAVE_STRUCT_STAT_ST_BLKSIZE.
 
 2005-03-21  Christopher Faylor  <cgf@timesys.com>
 
@@ -2459,10 +2463,10 @@
 
 2005-03-15  Mark Mitchell  <mark@codesourcery.com>
 
-	* utils.c (internal_vproblem): Guard call to fork with 
+	* utils.c (internal_vproblem): Guard call to fork with
 	HAVE_WORKING_FORK.
 	* cli/cli-cmds.c (shell_escape): Guard call to vfork with
-	HAVE_WORKING_VFORK and HAVE_WORKING_FORK. 
+	HAVE_WORKING_VFORK and HAVE_WORKING_FORK.
 
 	* remote-fileo.c (remote_fileio_mode_to_host): Accomodate lack of
 	S_IRGRP and related macros.
@@ -2492,7 +2496,7 @@
 
 2005-03-11  Michael Snyder  <msnyder@redhat.com>
 
-	* mn10300-tdep.c (mn10300_dummy_unwind_dummy_id): Replace 
+	* mn10300-tdep.c (mn10300_dummy_unwind_dummy_id): Replace
 	stub fn with real implementatin mn10300_unwind_dummy_id.
 	(mn10300_push_dummy_call): Implement.  Bare bones version,
 	does not handle structs or floats.
@@ -2544,7 +2548,7 @@
 
 2005-03-09  David Lecomber  <david@lecomber.net>
 
-	* proc-api.c (_initialize_proc_api): Fix invalid multi-line 
+	* proc-api.c (_initialize_proc_api): Fix invalid multi-line
 	i18n text.
 
 2005-03-09  Mark Kettenis  <kettenis@gnu.org>
@@ -2764,10 +2768,10 @@
 	common_val_print.
 
 2005-02-25 Mark Kettenis  <kettenis@gnu.org>
-	
+
 	Committed by Elena Zannoni <ezannoni@redhat.com>
 
-	* dwarf2read.c (dwarf2_build_psymtabs_hard): Adjust 
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Adjust
 	info_ptr before building psymtabs for included files.
 	(create_all_comp_units): Initailize initial length size of
 	compilation header to zero.
@@ -2775,71 +2779,71 @@
 	sections are encountered within the same compilation header.
 	(dwarf_decode_line_header): Pass compilation header in call to
 	read_initial_length.
-	
+
 2005-02-24  Andrew Cagney  <cagney@gnu.org>
 
 	Add show_VARIABLE functions, update add_setshow call.
 	* varobj.c (_initialize_varobj, show_varobjdebug): Add and update.
-	* valprint.c (_initialize_valprint, show_print_max) 
-	(show_stop_print_at_null, show_repeat_count_threshold) 
-	(show_prettyprint_structs, show_unionprint) 
-	(show_prettyprint_arrays, show_addressprint, show_input_radix) 
+	* valprint.c (_initialize_valprint, show_print_max)
+	(show_stop_print_at_null, show_repeat_count_threshold)
+	(show_prettyprint_structs, show_unionprint)
+	(show_prettyprint_arrays, show_addressprint, show_input_radix)
 	(show_output_radix): Ditto.
 	* valops.c (_initialize_valops, show_overload_resolution): Ditto.
-	* utils.c (initialize_utils, show_chars_per_line) 
-	(show_lines_per_page, show_demangle, show_pagination_enabled) 
+	* utils.c (initialize_utils, show_chars_per_line)
+	(show_lines_per_page, show_demangle, show_pagination_enabled)
 	(show_sevenbit_strings, show_asm_demangle): Ditto
-	* tui/tui-win.c (_initialize_tui_win, show_tui_border_kind) 
+	* tui/tui-win.c (_initialize_tui_win, show_tui_border_kind)
 	(show_tui_border_mode, show_tui_active_border_mode): Ditto.
-	* top.c (init_main, show_new_async_prompt) 
-	(show_async_command_editing_p, show_write_history_p) 
-	(show_history_size, show_history_filename, show_caution) 
+	* top.c (init_main, show_new_async_prompt)
+	(show_async_command_editing_p, show_write_history_p)
+	(show_history_size, show_history_filename, show_caution)
 	(show_annotation_level, init_main): Ditto.
 	* target.c (initialize_targets, show_targetdebug)
 	(show_trust_readonly): Ditto.
-	* symfile.c (_initialize_symfile, show_symbol_reloading) 
-	(show_ext_args, show_download_write_size) 
+	* symfile.c (_initialize_symfile, show_symbol_reloading)
+	(show_ext_args, show_download_write_size)
 	(show_debug_file_directory): Ditto.
 	* source.c (_initialize_source, show_lines_to_list): Ditto.
-	* solib.c (_initialize_solib, show_auto_solib_add) 
+	* solib.c (_initialize_solib, show_auto_solib_add)
 	(show_solib_search_path): Ditto.
-	* p-valprint.c (_initialize_pascal_valprint) 
+	* p-valprint.c (_initialize_pascal_valprint)
 	(show_pascal_static_field_print): Ditto.
-	* printcmd.c (_initialize_printcmd, show_max_symbolic_offset) 
+	* printcmd.c (_initialize_printcmd, show_max_symbolic_offset)
 	(show_print_symbol_filename): Add and update.
 	* parse.c (_initialize_parse, show_expressiondebug): Dito.
 	* observer.c (_initialize_observer, show_observer_debug): Dito.
-	* maint.c (_initialize_maint_cmds, show_watchdog) 
+	* maint.c (_initialize_maint_cmds, show_watchdog)
 	(show_maintenance_profile_p): Dito.
 	* linux-nat.c (_initialize_linux_nat, show_debug_linux_nat): Dito.
-	* infrun.c (_initialize_infrun, show_debug_infrun) 
-	(show_stop_on_solib_events, show_follow_fork_mode_string) 
+	* infrun.c (_initialize_infrun, show_debug_infrun)
+	(show_stop_on_solib_events, show_follow_fork_mode_string)
 	(show_scheduler_mode, show_step_stop_if_no_debug): Ditto.
-	* infcall.c (_initialize_infcall, show_coerce_float_to_double_p) 
+	* infcall.c (_initialize_infcall, show_coerce_float_to_double_p)
 	(show_unwind_on_signal_p): Ditto.
-	* gdbtypes.c (build_gdbtypes, show_opaque_type_resolution) 
+	* gdbtypes.c (build_gdbtypes, show_opaque_type_resolution)
 	(_initialize_gdbtypes, show_overload_debug): Ditto.
 	* gdb-events.c, gdb-events.sh (_initialize_gdb_events)
 	(show_gdb_events_debug): Ditto.
 	* gdbarch.c, gdbarch.sh (show_gdbarch_debug)
 	(_initialize_gdbarch): Ditto.
-	* frame.c (_initialize_frame, show_backtrace_past_main) 
-	(show_backtrace_past_entry, show_backtrace_limit) 
+	* frame.c (_initialize_frame, show_backtrace_past_main)
+	(show_backtrace_past_entry, show_backtrace_limit)
 	(show_frame_debug): Ditto.
 	* exec.c (_initialize_exec, show_write_files): Ditto.
-	* dwarf2read.c (_initialize_dwarf2_read) 
+	* dwarf2read.c (_initialize_dwarf2_read)
 	(show_dwarf2_max_cache_age): Ditto.
 	* demangle.c (_initialize_demangler)
 	(show_demangling_style_names): Ditto.
 	* dcache.c (_initialize_dcache, show_dcache_enabled_p): Ditto.
-	* cp-valprint.c (show_static_field_print) 
+	* cp-valprint.c (show_static_field_print)
 	(_initialize_cp_valprint, show_vtblprint, show_objectprint): Ditto.
 	* corefile.c (_initialize_core, show_gnutarget_string): Ditto.
-	* cli/cli-logging.c (_initialize_cli_logging) 
-	(show_logging_overwrite, show_logging_redirect) 
+	* cli/cli-logging.c (_initialize_cli_logging)
+	(show_logging_overwrite, show_logging_redirect)
 	(show_logging_filename): Ditto.
-	* cli/cli-cmds.c (show_info_verbose, show_history_expansion_p) 
-	(init_cli_cmds, show_baud_rate, show_remote_debug) 
+	* cli/cli-cmds.c (show_info_verbose, show_history_expansion_p)
+	(init_cli_cmds, show_baud_rate, show_remote_debug)
 	(show_remote_timeout, show_max_user_call_depth): Ditto.
 	* charset.c (show_host_charset_name, show_target_charset_name)
 	(initialize_charset): Ditto.
@@ -2859,7 +2863,7 @@
 
 	* configure.ac: Only enaable insight when itcl is present.
 	* configure: Re-generate.
-	
+
 2005-02-21  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	Committed by Andrew Cagney.
@@ -2895,7 +2899,7 @@
 	add_setshow_optional_filename_cmd.
 	* solib.c, symfile.c: Update.
 	* cli/cli-setshow.c: Do not tidle expand the file.
-	
+
 	Add more uses of add_setshow_string_cmd, add_setshow_integer_cmd,
 	and add_setshow_string_noescape_cmd.
 	* cli/cli-setshow.c (deprecated_show_value_hack): Do not print a
@@ -2908,13 +2912,13 @@
 	Use add_setshow_enum_cmd through out.
 	* arch-utils.c, charset.c, demangle.c, i386-tdep.c: Update.
 	* infrun.c, mips-tdep.c, osabi.c, serial.c, tui/tui-win.c: Update.
-	
+
 	* mi/mi-main.c (captured_mi_execute_command): Use
 	mi_cmd_interpreter_exec.
 
 	* cli/cli-decode.c (add_setshow_optional_filename_cmd): New
 	function.
-	* cli/cli-setshow.c (deprecated_show_value_hack) 
+	* cli/cli-setshow.c (deprecated_show_value_hack)
 	(do_setshow_command): Handle var_optional_filename.
 	* command.h (enum var_types): Add var_optional_filename.
 	(add_setshow_optional_filename_cmd): Declare.
@@ -2941,7 +2945,7 @@
 	* cli/cli-decode.c (add_setshow_integer_cmd): New function.
 	* command.h (add_setshow_integer_cmd): Declare.
 	* cli/cli-cmds.c: Update.
-	
+
 	Use add_setshow_uinteger_cmd through out.
 	* printcmd.c, source.c, utils.c, valprint.c: Update.
 
@@ -2953,7 +2957,7 @@
 	* serial.c, solib-frv.c, somsolib.c, target.c, top.c: Update.
 	* varobj.c, cli/cli-cmds.c: Update.
 	* gdbarch.c, gdb-events.c: Regenerate.
-	
+
 	Use add_setshow_boolean_command through out.  Delete #ifdef 0'ed
 	code adding set/show boolean commands.
 	* cp-valprint.c, dcache.c, exec.c, gdbtypes.c, infrun.c: Update.
@@ -2995,7 +2999,7 @@
 	* hppa-tdep.c, infcall.c, m32r-rom.c, maint.c: Update.
 	* mips-tdep.c, nto-tdep.c, observer.c, remote-rdi.c: Update
 	* remote.c, target.c, cli/cli-logging.c: Update.
-	
+
 2005-02-16  Andrew Cagney  <cagney@gnu.org>
 
 	Merge setshow print and show parameters.
@@ -3010,9 +3014,9 @@
 	fprint_setshow with show_value_func.
 	* cli/cli-decode.c (add_setshow_cmd_full): Update show_func
 	parameter.  Set show_value_func.  Do not set cmd_sfunc.
-	(add_setshow_enum_cmd, add_setshow_auto_boolean_cmd) 
-	(add_setshow_boolean_cmd, add_setshow_filename_cmd) 
-	(add_setshow_string_cmd, add_setshow_uinteger_cmd) 
+	(add_setshow_enum_cmd, add_setshow_auto_boolean_cmd)
+	(add_setshow_boolean_cmd, add_setshow_filename_cmd)
+	(add_setshow_string_cmd, add_setshow_uinteger_cmd)
 	(add_setshow_zinteger_cmd): Update.
 	* complaints.c (complaints_show_value): Replace
 	fprint_setshow_complaints.
@@ -3022,19 +3026,19 @@
 	* cli/cli-setshow.c (do_setshow_command): Call show_value_func
 	instead of fprint_setshow.  Use deprecated_show_value_hack.
 	(deprecated_show_value_hack): New function.
-	* remote.c (add_packet_config_cmd, show_remote_cmd): 
-	(show_remote_protocol_P_packet_cmd) 
-	(show_remote_protocol_P_packet_cmd) 
-	(show_remote_protocol_Z_access_wp_packet_cmd) 
-	(show_remote_protocol_Z_hardware_bp_packet_cmd) 
+	* remote.c (add_packet_config_cmd, show_remote_cmd):
+	(show_remote_protocol_P_packet_cmd)
+	(show_remote_protocol_P_packet_cmd)
+	(show_remote_protocol_Z_access_wp_packet_cmd)
+	(show_remote_protocol_Z_hardware_bp_packet_cmd)
 	(show_remote_protocol_Z_packet_cmd)
-	(show_remote_protocol_Z_read_wp_packet_cmd) 
-	(show_remote_protocol_Z_software_bp_packet_cmd) 
-	(show_remote_protocol_Z_write_wp_packet_cmd) 
-	(show_remote_protocol_binary_download_cmd) 
-	(show_remote_protocol_p_packet_cmd) 
-	(show_remote_protocol_qPart_auxv_packet_cmd) 
-	(show_remote_protocol_qSymbol_packet_cmd) 
+	(show_remote_protocol_Z_read_wp_packet_cmd)
+	(show_remote_protocol_Z_software_bp_packet_cmd)
+	(show_remote_protocol_Z_write_wp_packet_cmd)
+	(show_remote_protocol_binary_download_cmd)
+	(show_remote_protocol_p_packet_cmd)
+	(show_remote_protocol_qPart_auxv_packet_cmd)
+	(show_remote_protocol_qSymbol_packet_cmd)
 	(show_remote_protocol_vcont_packet_cmd): Update.
 
 2005-02-16  Mark Kettenis  <kettenis@gnu.org>
@@ -3057,12 +3061,12 @@
 2005-02-16  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* remote-e7000.c: unuse TM_FILE defined macro.
-	(e7000_fetch_registers)	
+	(e7000_fetch_registers)
 	(e7000_store_registers)
 	(e7000_wait): delete NUM_REALREGS.
 	* remote-hms.c: move TM_FILE macro.
 	(CCR_REGNO): move define from tm-h8300.h.
-	
+
 2005-02-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64-linux-tdep.c: Update copyright year.
@@ -3200,7 +3204,7 @@
 	* tui/tui-file.c, tui/tui-interp.c: Update.
 
 2005-02-10  Andrew Cagney  <cagney@gnu.org>
-	
+
 	Mark up all error and warning messages.
 	* ada-lang.c, amd64-tdep.c, arch-utils.c, breakpoint.c: Update.
 	* bsd-kvm.c, bsd-uthread.c, coff-solib.h, coffread.c: Update.
@@ -3252,7 +3256,7 @@
 	* mi/mi-cmd-stack.c, mi/mi-cmd-var.c, mi/mi-getopt.c: Update.
 	* mi/mi-symbol-cmds.c, tui/tui-layout.c, tui/tui-stack.c: Update.
 	* tui/tui-win.c: Update.
-	
+
 2005-02-10  Ian Lance Taylor  <ian@airs.com>
 
 	* MAINTAINERS: Update my e-mail address.
@@ -3351,16 +3355,16 @@
 
 2005-02-08  Andrew Cagney  <cagney@gnu.org>
 
-	* value.h (METHOD_PTR_IS_VIRTUAL, METHOD_PTR_FROM_VOFFSET) 
+	* value.h (METHOD_PTR_IS_VIRTUAL, METHOD_PTR_FROM_VOFFSET)
 	(METHOD_PTR_TO_VOFFSET): Move from here ...
-	* cp-support.h (METHOD_PTR_IS_VIRTUAL, METHOD_PTR_FROM_VOFFSET) 
+	* cp-support.h (METHOD_PTR_IS_VIRTUAL, METHOD_PTR_FROM_VOFFSET)
 	(METHOD_PTR_TO_VOFFSET): ... to here.
 	* cp-valprint.c, p-valprint.c, eval.c: Include "cp-support.h".
 	* Makefile.in: Update dependencies.
-	
+
 	* exceptions.c: Do not include <setjmp.h>.
 	(SIGJMP_BUF, SIGSETJMP, SIGLONGJMP): Delete macros.
-	(catch_exception, catch_exceptions_with_msg, catch_errors) 
+	(catch_exception, catch_exceptions_with_msg, catch_errors)
 	(catch_command_errors): Use TRY_CATCH.
 	(struct catcher): Use EXCEPTIONS_SIGJMP_BUF.
 	(exceptions_state_mc_init): Rename catcher_init.
@@ -3368,7 +3372,7 @@
 	(exceptions_state_mc_action_iter)
 	(exceptions_state_mc_action_iter_1): New functions.
 	* exceptions.h: Include <setjmp.h>.
-	(EXCEPTIONS_SIGJMP_BUF, EXCEPTIONS_SIGSETJMP) 
+	(EXCEPTIONS_SIGJMP_BUF, EXCEPTIONS_SIGSETJMP)
 	(EXCEPTIONS_SIGLONGJMP): Define.
 	(exceptions_state_mc_init, exceptions_state_mc_action_iter)
 	(exceptions_state_mc_action_iter_1): Declare.
@@ -3417,14 +3421,14 @@
 	* ax-gdb.c, tracepoint.c: Update.
 
 	* value.h (deprecated_value_lval_hack)
-	(deprecated_value_address_hack) 
-	(deprecated_value_internalvar_hack) 
+	(deprecated_value_address_hack)
+	(deprecated_value_internalvar_hack)
 	(deprecated_value_regnum_hack): Declare.
-	(VALUE_LVAL, VALUE_ADDRESS, VALUE_INTERNALVAR) 
+	(VALUE_LVAL, VALUE_ADDRESS, VALUE_INTERNALVAR)
 	(VALUE_FRAME_ID, VALUE_REGNUM): Use.
 	* value.c (deprecated_value_lval_hack)
-	(deprecated_value_address_hack) 
-	(deprecated_value_internalvar_hack) 
+	(deprecated_value_address_hack)
+	(deprecated_value_internalvar_hack)
 	(deprecated_value_regnum_hack): Define.
 
 	* value.h (VALUE_POINTED_TO_OFFSET): Delete.
@@ -3538,9 +3542,9 @@
 	* valprint.h (val_print_array_elements): Update.
 	* ada-lang.h (ada_val_print, ada_aligned_value_addr)
 	(ada_value_primitive_packed_val, ada_which_variant_applies): Update.
-	* ada-valprint.c (ada_val_print, struct ada_val_print_args) 
-	(ada_val_print_1, ada_print_floating, printable_val_type) 
-	(print_record, val_print_packed_array_elements) 
+	* ada-valprint.c (ada_val_print, struct ada_val_print_args)
+	(ada_val_print_1, ada_print_floating, printable_val_type)
+	(print_record, val_print_packed_array_elements)
 	(print_field_values, print_variant_part): Update.
 	* c-lang.h (c_val_print, cp_print_value_fields): Update.
 	* c-valprint.c (c_val_print): Update.
@@ -3554,8 +3558,8 @@
 	* m2-valprint.c (m2_val_print): Update.
 	* p-lang.h (pascal_val_print): Update.
 	(pascal_object_print_value_fields): Update.
-	* p-valprint.c (pascal_val_print) 
-	(pascal_object_print_value_fields, pascal_object_print_value) 
+	* p-valprint.c (pascal_val_print)
+	(pascal_object_print_value_fields, pascal_object_print_value)
 	(pascal_object_print_value): Update.
 	* scm-lang.h (scm_val_print): Update.
 	* scm-valprint.c (scm_val_print): Update.
@@ -3565,7 +3569,7 @@
 	(pascal_object_print_class_method): Make buffer a const bfd_byte.
 	* p-valprint.c (pascal_object_print_class_method)
 	(pascal_object_print_class_method): Ditto.
-	
+
 	* language.h (struct language_defn): Make la_printstr's buffer
 	parameter a const bfd_byte.
 	* p-lang.h (pascal_printstr): Update function to match.
@@ -3653,7 +3657,7 @@
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* mips-tdep.c (mips_integer_to_address): Update.
 	* value.c (value_as_address): Update.
-	
+
 	* cli/cli-dump.h (fopen_with_cleanup): Make "filename" const.
 	* cli/cli-dump.c (dump_binary_file, dump_bfd_file): Make string
 	parameters const, change buf to a const bfd_byte.
@@ -3698,13 +3702,13 @@
 	(find_cris_op): Filter out CRISv32 instructions.  Tweaked comment and
 	warning when unable to find step target.
 	(CRISV10_ELF_NGREG, CRISV32_ELF_NGREG, crisv32_elf_gregset_t): Define.
-	(supply_gregset): Add struct gdbarch_tdep.  Set pseudo-PC register for 
+	(supply_gregset): Add struct gdbarch_tdep.  Set pseudo-PC register for
 	CRISv32.
 	(fetch_core_registers): Update for CRISv32.
 	(cris_gdbarch_init): Set pc_regnum, register_type, num_regs,
 	register_name, cannot_store_register, cannot_fetch_register,
 	have_nonsteppable_watchpoint, single_step_through_delay for CRISv32.
-	
+
 2005-01-26  Nick Roberts  <nickrob@snap.net.nz>
 
 	* interps.c (interpreter_exec_cmd): Use condition,
@@ -3813,7 +3817,7 @@
 	* exceptions.c: Include "serial.h"
 	(print_flush): Mimic flush code found in utils.c:quit.
 	* Makefile.in: Update dependencies.
-	
+
 2005-01-19  Jim Blandy  <jimb@redhat.com>
 
 	* configure.tgt: Set build_rdi_share to "yes" on those targets
@@ -3872,17 +3876,17 @@
 	(child_insert_fork_catchpoint, child_insert_vfork_catchpoint)
 	(child_insert_exec_catchpoint): Change return type to void.
 	* target.c (update_current_target): Update.
-	(debug_to_insert_fork_catchpoint) 
-	(debug_to_insert_vfork_catchpoint) 
+	(debug_to_insert_fork_catchpoint)
+	(debug_to_insert_vfork_catchpoint)
 	(debug_to_insert_exec_catchpoint): Update.
-	* inf-child.c (inf_child_insert_fork_catchpoint) 
-	(inf_child_insert_vfork_catchpoint) 
+	* inf-child.c (inf_child_insert_fork_catchpoint)
+	(inf_child_insert_vfork_catchpoint)
 	(inf_child_insert_exec_catchpoint): Update.
 	* breakpoint.c (insert_catchpoint): Update, do not throw an error.
-	* linux-nat.c (child_insert_fork_catchpoint) 
+	* linux-nat.c (child_insert_fork_catchpoint)
 	(child_insert_vfork_catchpoint)
 	(child_insert_exec_catchpoint): Update.
-	* inftarg.c (child_insert_fork_catchpoint) 
+	* inftarg.c (child_insert_fork_catchpoint)
 	(child_insert_vfork_catchpoint,)
 	(child_insert_exec_catchpoint): Update.
 
@@ -3939,7 +3943,7 @@
 	* exceptions.c (throw_it): Free the old message after creating the
 	new.
 	* Makefile.in: Update dependencies.
-	
+
 2005-01-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64fbsd-tdep.c: Update copyright year.
@@ -4038,7 +4042,7 @@
 	* thread.c (gdb_list_thread_ids, gdb_thread_select): Update.
 	* breakpoint.c (gdb_breakpoint_query, gdb_breakpoint): Update.
 	* remote-fileio.c (remote_fileio_request): Update.
-	
+
 	* exceptions.h (exception_fprintf): Declare.
 	(exception_print): Drop pre_print parameter.
 	* mi/mi-main.c (mi_execute_command): Update exception_print call.
@@ -4055,7 +4059,7 @@
 	* exceptions.c (exception_fprintf): New function.
 	(print_exception): New function.
 	(exception_print): Use print_exception.
-	
+
 	* utils.c (error_output_message): Delete function.
 	* defs.h (error_output_message): Delete declaration.
 
@@ -4071,7 +4075,7 @@
 	(throw_vsilent): Delete declaration.
 	* utils.c (error_silent): Delete function.
 	* defs.h (error_silent): Delete declaration.
-	
+
 	* mi/mi-main.c (mi_execute_command): Print the exception.
 	* cli/cli-interp.c (safe_execute_command): Print the exception.
 	* exceptions.h (exception_print): Declare.
@@ -4207,7 +4211,7 @@
 	* mi/mi-interp.c: Include "exceptions.h".
 	(mi_cmd_interpreter_exec, mi_interpreter_exec): Update to return
 	'struct exception".
-	* cli/cli-interp.c (cli_interpreter_exec, safe_execute_command) 
+	* cli/cli-interp.c (cli_interpreter_exec, safe_execute_command)
 	(do_captured_execute_command): Update to use catch_exception.
 	* interps.h: Include "exceptions.h".
 	(interp_exec_ftype, interp_exec): Return "struct exception".
@@ -4303,7 +4307,7 @@
 	* ada-valprint.c, ada-lang.c: Ditto.
 	* Makefile.in (HFILES_NO_SRCDIR, COMMON_OBS): Add exceptions.h and
 	exceptions.o.  Update all dependencies.
-	
+
 2005-01-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-fbsd.h: Update copyright year.
@@ -4382,7 +4386,7 @@
 	* configure.in: Replace configdirs with multiple references to
 	AC_CONFIG_SUBDIRS.
 	* configure: Re-generate.
-	
+
 2005-01-05  Andreas Schwab  <schwab@suse.de>
 
 	* ia64-tdep.c: Include "osabi.h".
@@ -4412,7 +4416,7 @@
 
 2005-01-05  Kevin Buettner  <kevinb@redhat.com>
 
-	* ia64-tdep.c (ia64_gdbarch_init): Eliminate dependency on 
+	* ia64-tdep.c (ia64_gdbarch_init): Eliminate dependency on
 	functions in ia64-aix-tdep.c.
 	* ia64-tdep.h (ia64_aix_sigcontext_register_address): Remove
 	function defined in ia64-aix-tdep.c.
