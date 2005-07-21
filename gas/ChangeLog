@@ -1,3 +1,7 @@
+2005-07-20  Tavis Ormandy <taviso@gentoo.org>
+
+	* messages.c: Use vsnprintf instead of vsprintf.
+
 2005-07-20  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* config/tc-m32r.c (tc_gen_reloc): Check BFD_RELOC_32_PCREL and

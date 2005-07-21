@@ -233,7 +233,7 @@ as_warn (const char *format, ...)
   if (!flag_no_warnings)
     {
       va_start (args, format);
-      vsprintf (buffer, format, args);
+      vsnprintf (buffer, sizeof (buffer), format, args);
       va_end (args);
       as_warn_internal ((char *) NULL, 0, buffer);
     }
@@ -250,7 +250,7 @@ as_warn (format, va_alist)
   if (!flag_no_warnings)
     {
       va_start (args);
-      vsprintf (buffer, format, args);
+      vsnprintf (buffer, sizeof (buffer), format, args);
       va_end (args);
       as_warn_internal ((char *) NULL, 0, buffer);
     }
@@ -271,7 +271,7 @@ as_warn_where (char *file, unsigned int line, const char *format, ...)
   if (!flag_no_warnings)
     {
       va_start (args, format);
-      vsprintf (buffer, format, args);
+      vsnprintf (buffer, sizeof (buffer), format, args);
       va_end (args);
       as_warn_internal (file, line, buffer);
     }
@@ -290,7 +290,7 @@ as_warn_where (file, line, format, va_alist)
   if (!flag_no_warnings)
     {
       va_start (args);
-      vsprintf (buffer, format, args);
+      vsnprintf (buffer, sizeof (buffer), format, args);
       va_end (args);
       as_warn_internal (file, line, buffer);
     }
@@ -332,7 +332,7 @@ as_bad (const char *format, ...)
   char buffer[2000];
 
   va_start (args, format);
-  vsprintf (buffer, format, args);
+  vsnprintf (buffer, sizeof (buffer), format, args);
   va_end (args);
 
   as_bad_internal ((char *) NULL, 0, buffer);
@@ -348,7 +348,7 @@ as_bad (format, va_alist)
   char buffer[2000];
 
   va_start (args);
-  vsprintf (buffer, format, args);
+  vsnprintf (buffer, sizeof (buffer), format, args);
   va_end (args);
 
   as_bad_internal ((char *) NULL, 0, buffer);
@@ -367,7 +367,7 @@ as_bad_where (char *file, unsigned int line, const char *format, ...)
   char buffer[2000];
 
   va_start (args, format);
-  vsprintf (buffer, format, args);
+  vsnprintf (buffer, sizeof (buffer), format, args);
   va_end (args);
 
   as_bad_internal (file, line, buffer);
@@ -385,7 +385,7 @@ as_bad_where (file, line, format, va_alist)
   char buffer[2000];
 
   va_start (args);
-  vsprintf (buffer, format, args);
+  vsnprintf (buffer, sizeof (buffer), format, args);
   va_end (args);
 
   as_bad_internal (file, line, buffer);
