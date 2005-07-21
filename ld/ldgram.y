@@ -48,7 +48,6 @@
 static enum section_type sectype;
 static lang_memory_region_type *region;
 
-static bfd_boolean ldgram_want_filename = TRUE;
 FILE *saved_script_handle = NULL;
 bfd_boolean force_make_executable = FALSE;
 
