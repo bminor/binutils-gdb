@@ -750,10 +750,6 @@ case "${targ}" in
     # targ_selvecs=m68kmach3_vec
     # targ_cflags=-DSTAT_FOR_EXEC
     ;;
-  m68*-*-lynxos*)
-    targ_defvec=m68klynx_coff_vec
-    targ_selvecs=m68klynx_aout_vec
-    ;;
   m68*-hp*-netbsd*)
     targ_defvec=m68k4knetbsd_vec
     targ_selvecs="m68knetbsd_vec hp300bsd_vec sunos_big_vec"

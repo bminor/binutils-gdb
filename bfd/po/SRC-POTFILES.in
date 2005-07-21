@@ -23,7 +23,6 @@ binary.c
 bout.c
 cache.c
 cf-i386lynx.c
-cf-m68klynx.c
 cf-sparclynx.c
 cisco-core.c
 coff64-rs6000.c
@@ -240,7 +239,6 @@ linker.c
 lynx-core.c
 m68k4knetbsd.c
 m68klinux.c
-m68klynx.c
 m68knetbsd.c
 m88kmach3.c
 m88kopenbsd.c

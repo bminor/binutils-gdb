@@ -1,3 +1,20 @@
+2005-07-21  Ben Elliston  <bje@gnu.org>
+
+	* Makefile.am (BFD32_BACKENDS): Remove cf-m68klynx.lo.
+	(BFD32_BACKENDS): Likewise, remove m68klynx.lo.
+	(BFD32_BACKENDS_CFILES): Remove cf-m68klynx.c, m68klynx.c.
+	(cf-m68klynx.lo, m68klynx.lo): Remove targets.
+	* Makefile.in: Regenerate.
+	* cf-m68klynx.c: Remove.
+	* m68klynx.c: Likewise.
+	* configure.in (m68klynx_aout_vec): Remove vector.
+	(m68klynx_coff_vec): Likewise.
+	* configure: Regenerate.
+	* targets.c (m68klynx_aout_vec): Remove extern.
+	(m68klynx_coff_vec): Likewise.
+	(_bfd_target_vector): Remove m68klynx_{aout,coff}_vec.
+	* po/SRC-POTFILES.in: Remove cf-m68klynx.c, m68klynx.c.
+
 2005-07-20  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* elf32-m32r.c (m32r_elf_howto_table): Support R_M32R_REL32.

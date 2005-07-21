@@ -51,9 +51,6 @@ struct fix;
 #undef OBJ_COFF_OMIT_OPTIONAL_HEADER
 #endif
 
-#ifdef TE_LYNX
-#define TARGET_FORMAT		"coff-m68k-lynx"
-#endif
 #ifdef TE_AUX
 #define TARGET_FORMAT		"coff-m68k-aux"
 #endif

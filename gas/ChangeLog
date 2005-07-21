@@ -1,3 +1,7 @@
+2005-07-21  Ben Elliston  <bje@gnu.org>
+
+	* config/tc-m68k.h: Remove TE_LYNX conditional code.
+
 2005-07-21  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (encode_thumb32_addr_mode): Don't set

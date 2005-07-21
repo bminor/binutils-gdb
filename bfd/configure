@@ -13121,8 +13121,6 @@ do
     m68kcoff_vec)		tb="$tb coff-m68k.lo cofflink.lo" ;;
     m68kcoffun_vec)		tb="$tb coff-u68k.lo coff-m68k.lo cofflink.lo" ;;
     m68klinux_vec)		tb="$tb m68klinux.lo aout32.lo" ;;
-    m68klynx_aout_vec)		tb="$tb m68klynx.lo lynx-core.lo aout32.lo" ;;
-    m68klynx_coff_vec)		tb="$tb cf-m68klynx.lo coff-m68k.lo cofflink.lo lynx-core.lo" ;;
     m68knetbsd_vec)		tb="$tb m68knetbsd.lo aout32.lo" ;;
     m68ksysvcoff_vec)		tb="$tb coff-svm68k.lo cofflink.lo" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.lo" ;;

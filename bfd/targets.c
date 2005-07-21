@@ -698,8 +698,6 @@ extern const bfd_target m68kaux_coff_vec;
 extern const bfd_target m68kcoff_vec;
 extern const bfd_target m68kcoffun_vec;
 extern const bfd_target m68klinux_vec;
-extern const bfd_target m68klynx_aout_vec;
-extern const bfd_target m68klynx_coff_vec;
 extern const bfd_target m68knetbsd_vec;
 extern const bfd_target m68ksysvcoff_vec;
 extern const bfd_target m88kbcs_vec;
@@ -1035,8 +1033,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 	   which kind of a.out file it is.  */
 	&m68klinux_vec,
 #endif
-	&m68klynx_aout_vec,
-	&m68klynx_coff_vec,
 	&m68knetbsd_vec,
 	&m68ksysvcoff_vec,
 	&m88kbcs_vec,

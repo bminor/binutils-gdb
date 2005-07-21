@@ -187,7 +187,6 @@ BFD32_BACKENDS = \
 	armnetbsd.lo \
 	bout.lo \
 	cf-i386lynx.lo \
-	cf-m68klynx.lo \
 	cf-sparclynx.lo \
 	coff-a29k.lo \
 	coff-apollo.lo \
@@ -296,7 +295,6 @@ BFD32_BACKENDS = \
 	ieee.lo \
 	m68k4knetbsd.lo \
 	m68klinux.lo \
-	m68klynx.lo \
 	m68knetbsd.lo \
 	m88kmach3.lo \
 	m88kopenbsd.lo \
@@ -359,7 +357,6 @@ BFD32_BACKENDS_CFILES = \
 	armnetbsd.c \
 	bout.c \
 	cf-i386lynx.c \
-	cf-m68klynx.c \
 	cf-sparclynx.c \
 	coff-a29k.c \
 	coff-apollo.c \
@@ -468,7 +465,6 @@ BFD32_BACKENDS_CFILES = \
 	ieee.c \
 	m68k4knetbsd.c \
 	m68klinux.c \
-	m68klynx.c \
 	m68knetbsd.c \
 	m88kmach3.c \
 	m88kopenbsd.c \
@@ -1074,10 +1070,6 @@ cf-i386lynx.lo: cf-i386lynx.c $(INCDIR)/filenames.h \
   coff-i386.c $(INCDIR)/hashtab.h $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
-cf-m68klynx.lo: cf-m68klynx.c coff-m68k.c $(INCDIR)/filenames.h \
-  $(INCDIR)/hashtab.h $(INCDIR)/coff/m68k.h $(INCDIR)/coff/external.h \
-  $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
-  coffcode.h coffswap.h
 cf-sparclynx.lo: cf-sparclynx.c coff-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/sparc.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
@@ -1512,10 +1504,6 @@ m68k4knetbsd.lo: m68k4knetbsd.c netbsd.h $(INCDIR)/filenames.h \
 m68klinux.lo: m68klinux.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h $(INCDIR)/bfdlink.h aout-target.h
-m68klynx.lo: m68klynx.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
-  libaout.h $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h \
-  aout-target.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
-  $(INCDIR)/aout/ar.h
 m68knetbsd.lo: m68knetbsd.c netbsd.h $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h libaout.h $(INCDIR)/bfdlink.h aout-target.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
