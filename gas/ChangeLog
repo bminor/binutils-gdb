@@ -1,3 +1,8 @@
+2005-07-21  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (encode_thumb32_addr_mode): Don't set
+	inst.reloc.pc_rel.
+
 2005-07-20  Tavis Ormandy <taviso@gentoo.org>
 
 	* messages.c: Use vsnprintf instead of vsprintf.

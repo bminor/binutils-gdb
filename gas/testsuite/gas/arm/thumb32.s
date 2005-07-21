@@ -733,3 +733,15 @@ xta:
 	uxtab	r1, r2, r3
 	uxtab16	r1, r2, r3
 	uxtah	r1, r2, r3
+
+	.macro	ldpcimm op
+	\op	r1, [pc, #0x2aa]
+	\op	r1, [pc, #0x155]
+	\op	r1, [pc, #-0x2aa]
+	\op	r1, [pc, #-0x155]
+	.endm
+	ldpcimm	ldrb
+	ldpcimm	ldrsb
+	ldpcimm	ldrh
+	ldpcimm	ldrsh
+	ldpcimm	ldr

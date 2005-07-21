@@ -5667,7 +5667,6 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
 	    inst.instruction |= 0x00000100;
 	}
       inst.reloc.type = BFD_RELOC_ARM_T32_OFFSET_IMM;
-      inst.reloc.pc_rel = is_pc;
     }
   else if (inst.operands[i].postind)
     {

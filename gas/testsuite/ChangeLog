@@ -1,3 +1,8 @@
+2005-07-21  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.s: Add tests for [pc, #imm] addressing modes.
+	* gas/arm/thumb32.d: Ditto.
+
 2005-07-20  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* gas/m32r/rel32.exp: New file. 
