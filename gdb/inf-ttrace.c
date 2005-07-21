@@ -758,8 +758,8 @@ inf_ttrace_attach (char *args, int from_tty)
 static void
 inf_ttrace_detach (char *args, int from_tty)
 {
-  int sig = 0;
   pid_t pid = ptid_get_pid (inferior_ptid);
+  int sig = 0;
 
   if (from_tty)
     {
@@ -894,9 +894,14 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 #endif
 
     case TTEVT_EXEC:
-      /* Make it look like a breakpoint.  */
-      ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      ourstatus->kind = TARGET_WAITKIND_EXECD;
+      ourstatus->value.execd_pathname =
+	xmalloc (tts.tts_u.tts_exec.tts_pathlen + 1);
+      if (ttrace (TT_PROC_GET_PATHNAME, tts.tts_pid, 0,
+		  (uintptr_t)ourstatus->value.execd_pathname,
+		  tts.tts_u.tts_exec.tts_pathlen, 0) == -1)
+	perror_with_name (("ttrace"));
+      ourstatus->value.execd_pathname[tts.tts_u.tts_exec.tts_pathlen] = 0;
       break;
 
     case TTEVT_EXIT:
