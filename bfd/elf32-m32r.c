@@ -4011,6 +4011,7 @@ m32r_elf_check_relocs (bfd *abfd,
 
               p->count += 1;
               if (ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
+		  || ELF32_R_TYPE (rel->r_info) == R_M32R_REL32
                   || ELF32_R_TYPE (rel->r_info) == R_M32R_18_PCREL_RELA)
                 p->pc_count += 1;
             }
