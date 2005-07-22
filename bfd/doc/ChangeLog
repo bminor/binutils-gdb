@@ -1,3 +1,7 @@
+2005-07-22  DJ Delorie  <dj@redhat.com>
+
+	* chew.c: Include stdlib.h.
+
 2005-07-22  Kazu Hirata  <kazu@codesourcery.com>
 
 	* chew.c: Don't include sysdep.h.
