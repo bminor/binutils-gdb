@@ -83,7 +83,6 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
    Foo.  */
 
 #include "ansidecl.h"
-#include "sysdep.h"
 #include <assert.h>
 #include <stdio.h>
 #include <ctype.h>
