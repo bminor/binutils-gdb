@@ -140,7 +140,6 @@ i[3-7]86-*-sco*)	targ_emul=i386coff ;;
 i[3-7]86-*-isc*)	targ_emul=i386coff ;;
 i[3-7]86-*-lynxos*)	targ_emul=i386lynx ;;
 i[3-7]86-*-coff)	targ_emul=i386coff ;;
-i[3-7]86-*-rtemself*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-rtems*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-aros*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-bsd)		targ_emul=i386bsd ;;
@@ -532,7 +531,6 @@ sparcv9-*-solaris2* | sparc64-*-solaris2*)
 			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'` ;;
 sparc*-*-solaris2*)	targ_emul=elf32_sparc ;;
 sparc*-wrs-vxworks*)	targ_emul=sparcaout ;;
-sparc*-*-rtemself*)     targ_emul=elf32_sparc ;;
 sparc*-*-rtems*)        targ_emul=elf32_sparc
 			;;
 tic30-*-*aout*)		targ_emul=tic30aout ;;

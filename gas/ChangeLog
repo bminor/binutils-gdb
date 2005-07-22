@@ -1,3 +1,8 @@
+2005-07-21  Ralf Corsepius  <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Remove i386-*-rtemself*.
+	Remove sparc-*-rtemself*.
+
 2005-07-21  Ben Elliston  <bje@gnu.org>
 
 	* config/tc-m68k.h: Remove TE_LYNX conditional code.

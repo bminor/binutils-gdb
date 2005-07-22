@@ -210,7 +210,6 @@ case ${generic_target} in
   i386-*-vsta)				fmt=aout ;;
   i386-*-msdosdjgpp* \
   | i386-*-go32*)			fmt=coff em=go32 ;;
-  i386-*-rtemself*)			fmt=elf ;;
   i386-*-rtems*)			fmt=elf ;;
   i386-*-gnu*)				fmt=elf ;;
   i386-*-mach*)				fmt=aout em=mach ;;
@@ -364,7 +363,6 @@ case ${generic_target} in
   shle*-*-kaos*)			fmt=elf ;;
   sh64-*-elf*)				fmt=elf ;;
 
-  sparc-*-rtemself*)			fmt=elf ;;
   sparc-*-rtems*)			fmt=elf ;;
   sparc-*-sunos4*)			fmt=aout em=sun3 ;;
   sparc-*-aout | sparc*-*-vxworks*)	fmt=aout em=sparcaout ;;

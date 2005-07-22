@@ -1,3 +1,8 @@
+2005-07-21  Ralf Corsepius  <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Remove i[3-7]86-*-rtemself*.
+	Remove sparc-*-rtemself*.
+
 2005-07-21  Ben Elliston  <bje@gnu.org>
 
 	* ldgram.y (ldgram_want_filename): Remove unused static.

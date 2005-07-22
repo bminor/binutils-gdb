@@ -483,7 +483,7 @@ case "${targ}" in
   i[3-7]86-*-aix*)
     targ_defvec=i386coff_vec
     ;;
-  i[3-7]86-*-rtemself* | i[3-7]86-*-rtems*)
+  i[3-7]86-*-rtems*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs="i386coff_vec i386aout_vec"
     ;;
@@ -1298,11 +1298,11 @@ case "${targ}" in
   sparc*-*-coff*)
     targ_defvec=sparccoff_vec
     ;;
-  sparc*-*-rtems* | sparc*-*-rtemself*)
+  sparc*-*-rtems*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs="sunos_big_vec sparccoff_vec"
     ;;
-  sparc*-*-* | sparc*-*-rtems*)
+  sparc*-*-*)
     targ_defvec=sunos_big_vec
     targ_underscore=yes
     ;;
