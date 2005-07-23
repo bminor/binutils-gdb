@@ -1,3 +1,8 @@
+2005-07-23  Olaf Hering <olh@suse.de>
+
+	* elflink.c (elf_link_input_bfd): Add '\n' for linker einfo
+	callback.
+
 2005-07-21  Ralf Corsepius  <ralf.corsepius@rtems.org>
 
 	* config.bfd: Remove i[3-7]86-*-rtemself*.

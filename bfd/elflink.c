@@ -7089,7 +7089,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		      if (action & COMPLAIN)
 			(*finfo->info->callbacks->einfo)
 			  (_("%X`%s' referenced in section `%A' of %B: "
-			     "defined in discarded section `%A' of %B"),
+			     "defined in discarded section `%A' of %B\n"),
 			   sym_name, o, input_bfd, sec, sec->owner);
 
 		      /* Try to do the best we can to support buggy old
