@@ -1,3 +1,7 @@
+2005-07-24  Mark Mitchell  <mark@codesourcery.com>
+
+	* ser-tcp.c (close): Define as a function-like macro on MinGW.
+
 2005-07-21  Eric Christopher  <echristo@apple.com>
 
 	* MAINTAINERS (Misc): Update affiliation.

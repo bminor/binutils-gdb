@@ -39,7 +39,7 @@
 #ifdef USE_WIN32API
 #include <winsock2.h>
 #define ETIMEDOUT WSAETIMEDOUT
-#define close closesocket
+#define close(fd) closesocket (fd)
 #define ioctl ioctlsocket
 #else
 #include <netinet/in.h>
