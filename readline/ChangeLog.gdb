@@ -3,7 +3,7 @@
 	* input.c (rl_getc): Use getch to read console input on
 	Windows.
 	* readline.c (bind_arrow_keys_internal): Translate
-	Windows keysequences into POSIX key sequences.
+	Windows keysequences into ANSI key sequences.
 	* rldefs.h (NO_TTY_DRIVER): Define on MinGW.
 	* rltty.c: Conditionalize on NO_TTY_DRIVER throughout.
 	
