@@ -1,6 +1,6 @@
 /* Portable <sys/ptrace.h>
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,6 +40,10 @@
 
 /* No need to include <unistd.h> since it's already included by
    "defs.h".  */
+
+#ifndef PT_TRACE_ME
+# define PT_TRACE_ME	0
+#endif
 
 #ifndef PT_READ_I
 # define PT_READ_I	1	/* Read word in child's I space.  */

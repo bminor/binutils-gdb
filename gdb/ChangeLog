@@ -1,5 +1,34 @@
 2005-07-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb_ptrace.h (PT_TRACE_ME): Define to zero if not already
+	defined.
+	* inf-ptrace.c: Tweak comments.
+	(inf_ptrace_me): Use PT_TRACE_ME instead of hardcoded zero.
+	(inf_ptrace_mourn_inferior): Call waitpid.
+	(inf_ptrace_attach): Use pid_t, Remove unnecessary cast.
+	(inf_ptrace_detach): Use pid_t.  Use ptid_get_pid instead of
+	PIDGET.
+	(inf_ptrace_kill): Rename from inf_ptrace_kill_inferior.  Use
+	pid_t.  Use ptid_get_pid instead of PIDGET.
+	(inf_ptrace_kill): Call waitpid instead of wait.
+	(inf_ptrace_resume): Use pid_t.  Use ptid_get_pid instead of
+	PIDGET.
+	(inf_ptrace_wait): Use waitpid instead wait.  Use pid_t.  Don't
+	call target_has_exited or target_thread_alive.  Properly ignore
+	terminated detached child processes.
+	(inf_ptrace_has_exited): Remove function.
+	(inf_ptrace_xfer_partial): Use pid_t.  Use ptid_get_pid instead of
+	PIDGET.  Use gdb_byte instead of `unsigned char'.
+	(inf_ptrace_thread_alive): Use ptid_get_pid instead of PIDGET.
+	(inf_ptrace_pid_to_str): Remove function.
+	(inf_ptrace_target): Use inf_ptrace_kill instead of
+	inf_ptrace_kill_inferior.  Use normal_pid_to_str instead of
+	inf_ptrace_pid_to_str.  Don't set to_has_exited.
+	(inf_ptrace_fetch_register, inf_ptrace_store_register): Reformat
+	long lines.
+
+2005-07-25  Mark Kettenis  <kettenis@gnu.org>
+
 	* inf-ptrace.c: Reorder functions.
 	(inf_ptrace_open, inf_ptrace_reported_exec_events_per_call)
 	(inf_ptrace_can_run, inf_ptrace_post_attach): Removed.
