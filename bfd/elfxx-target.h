@@ -521,6 +521,22 @@
 #define elf_backend_link_order_error_handler _bfd_default_error_handler
 #endif
 
+#ifndef elf_backend_common_definition
+#define elf_backend_common_definition _bfd_elf_common_definition
+#endif
+
+#ifndef elf_backend_common_section_index
+#define elf_backend_common_section_index _bfd_elf_common_section_index
+#endif
+
+#ifndef elf_backend_common_section
+#define elf_backend_common_section _bfd_elf_common_section
+#endif
+
+#ifndef elf_backend_merge_symbol
+#define elf_backend_merge_symbol NULL
+#endif
+
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
 #ifndef INCLUDED_TARGET_FILE
@@ -590,6 +606,10 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_ecoff_debug_swap,
   elf_backend_bfd_from_remote_memory,
   elf_backend_plt_sym_val,
+  elf_backend_common_definition,
+  elf_backend_common_section_index,
+  elf_backend_common_section,
+  elf_backend_merge_symbol,
   elf_backend_link_order_error_handler,
   elf_backend_relplt_name,
   ELF_MACHINE_ALT1,

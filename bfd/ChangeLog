@@ -1,3 +1,35 @@
+2005-07-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_backend_data): Add common_definition,
+	common_section_index, common_section, and merge_symbol.
+	(_bfd_elf_common_definition): New.
+	(_bfd_elf_common_section_index): New.
+	(_bfd_elf_common_section): New.
+
+	* elf.c (elf_fake_sections): Don't clear sh_flags.
+
+	* elflink.c (_bfd_elf_merge_symbol): Call backend merge_symbol
+	if it is available.
+	(is_global_data_symbol_definition): Call backend
+	common_definition instead of checking SHN_COMMON.
+	(elf_link_add_object_symbols): Likewise.
+	(elf_link_output_extsym): Call backend common_section_index
+	for common section index.
+	(_bfd_elf_common_definition): New.
+	(_bfd_elf_common_section_index): New.
+	(_bfd_elf_common_section): New.
+
+	* elfxx-target.h (elf_backend_common_definition): New.
+	(elf_backend_common_section_index): New.
+	(elf_backend_common_section): New.
+	(elf_backend_merge_symbol): New.
+	(elfNN_bed): Initialize common_definition, common_section_index,
+	common_section, and merge_symbol.
+
+	* section.c (BFD_FAKE_SECTION): New.
+	(STD_SECTION): Use it.
+	* bfd-in2.h: Regenerated.
+
 2005-07-23  Olaf Hering <olh@suse.de>
 
 	* elflink.c (elf_link_input_bfd): Add '\n' for linker einfo

@@ -2618,7 +2618,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
       return;
     }
 
-  this_hdr->sh_flags = 0;
+  /* Don't clear sh_flags. Assembler may set additional bits.  */
 
   if ((asect->flags & SEC_ALLOC) != 0
       || asect->user_set_vma)

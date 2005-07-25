@@ -780,6 +780,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
   bfd_boolean newweak, oldweak;
+  const struct elf_backend_data *bed;
 
   *skip = FALSE;
   *override = FALSE;
@@ -1121,6 +1122,19 @@ _bfd_elf_merge_symbol (bfd *abfd,
   else
     olddyncommon = FALSE;
 
+  /* We now know everything about the old and new symbols.  We ask the
+     backend to check if we can merge them.  */
+  bed = get_elf_backend_data (abfd);
+  if (bed->merge_symbol
+      && !bed->merge_symbol (info, sym_hash, h, sym, psec, pvalue,
+			     pold_alignment, skip, override,
+			     type_change_ok, size_change_ok,
+			     &newdyn, &newdef, &newdyncommon, &newweak,
+			     abfd, &sec,
+			     &olddyn, &olddef, &olddyncommon, &oldweak,
+			     oldbfd, &oldsec))
+    return FALSE;
+
   /* If both the old and the new symbols look like common symbols in a
      dynamic object, set the size of the symbol to the larger of the
      two.  */
@@ -1197,7 +1211,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       newdef = FALSE;
       newdyncommon = FALSE;
       *pvalue = sym->st_size;
-      *psec = sec = bfd_com_section_ptr;
+      *psec = sec = bed->common_section (oldsec);
       *size_change_ok = TRUE;
     }
 
@@ -2641,6 +2655,8 @@ static bfd_boolean
 is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
 				  Elf_Internal_Sym *sym)
 {
+  const struct elf_backend_data *bed;
+
   /* Local symbols do not count, but target specific ones might.  */
   if (ELF_ST_BIND (sym->st_info) != STB_GLOBAL
       && ELF_ST_BIND (sym->st_info) < STB_LOOS)
@@ -2656,7 +2672,8 @@ is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
 
   /* If the symbol is defined in the common section, then
      it is a common definition and so does not count.  */
-  if (sym->st_shndx == SHN_COMMON)
+  bed = get_elf_backend_data (abfd);
+  if (bed->common_definition (sym))
     return FALSE;
 
   /* If the symbol is in a target specific section then we
@@ -3548,6 +3565,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       bfd_boolean type_change_ok;
       bfd_boolean new_weakdef;
       bfd_boolean override;
+      bfd_boolean common;
       unsigned int old_alignment;
       bfd *old_bfd;
 
@@ -3557,6 +3575,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       sec = NULL;
       value = isym->st_value;
       *sym_hash = NULL;
+      common = bed->common_definition (isym);
 
       bind = ELF_ST_BIND (isym->st_info);
       if (bind == STB_LOCAL)
@@ -3569,8 +3588,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
       else if (bind == STB_GLOBAL)
 	{
-	  if (isym->st_shndx != SHN_UNDEF
-	      && isym->st_shndx != SHN_COMMON)
+	  if (isym->st_shndx != SHN_UNDEF && !common)
 	    flags = BSF_GLOBAL;
 	}
       else if (bind == STB_WEAK)
@@ -3861,13 +3879,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
 
       /* Set the alignment of a common symbol.  */
-      if ((isym->st_shndx == SHN_COMMON
-	   || bfd_is_com_section (sec))
+      if ((common || bfd_is_com_section (sec))
 	  && h->root.type == bfd_link_hash_common)
 	{
 	  unsigned int align;
 
-	  if (isym->st_shndx == SHN_COMMON)
+	  if (common)
 	    align = bfd_log2 (isym->st_value);
 	  else
 	    {
@@ -3893,7 +3910,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	     definition or a common symbol is ignored due to the old
 	     normal definition. We need to make sure the maximum
 	     alignment is maintained.  */
-	  if ((old_alignment || isym->st_shndx == SHN_COMMON)
+	  if ((old_alignment || common)
 	      && h->root.type != bfd_link_hash_common)
 	    {
 	      unsigned int common_align;
@@ -6498,7 +6515,7 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 
     case bfd_link_hash_common:
       input_sec = h->root.u.c.p->section;
-      sym.st_shndx = SHN_COMMON;
+      sym.st_shndx = bed->common_section_index (input_sec);
       sym.st_value = 1 << h->root.u.c.p->alignment_power;
       break;
 
@@ -9899,4 +9916,22 @@ void
 _bfd_elf_fix_excluded_sec_syms (bfd *obfd, struct bfd_link_info *info)
 {
   bfd_link_hash_traverse (info->hash, fix_syms, obfd);
+}
+
+bfd_boolean
+_bfd_elf_common_definition (Elf_Internal_Sym *sym)
+{
+  return sym->st_shndx == SHN_COMMON;
+}
+
+unsigned int
+_bfd_elf_common_section_index (asection *sec ATTRIBUTE_UNUSED)
+{
+  return SHN_COMMON;
+}
+
+asection *
+_bfd_elf_common_section (asection *sec ATTRIBUTE_UNUSED)
+{
+  return bfd_com_section_ptr;
 }

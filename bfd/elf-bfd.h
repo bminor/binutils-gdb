@@ -969,6 +969,30 @@ struct elf_backend_data
      see elf.c.  */
   bfd_vma (*plt_sym_val) (bfd_vma, const asection *, const arelent *);
 
+  /* Is symbol defined in common section?  */
+  bfd_boolean (*common_definition) (Elf_Internal_Sym *);
+
+  /* Return a common section index for section.  */
+  unsigned int (*common_section_index) (asection *);
+
+  /* Return a common section for section.  */
+  asection *(*common_section) (asection *);
+
+  /* Return TRUE if we can merge 2 definitions.  */
+  bfd_boolean (*merge_symbol) (struct bfd_link_info *,
+			       struct elf_link_hash_entry **,
+			       struct elf_link_hash_entry *,
+			       Elf_Internal_Sym *, asection **,
+			       bfd_vma *, unsigned int *,
+			       bfd_boolean *, bfd_boolean *,
+			       bfd_boolean *, bfd_boolean *,
+			       bfd_boolean *, bfd_boolean *,
+			       bfd_boolean *, bfd_boolean *,
+			       bfd *, asection **,
+			       bfd_boolean *, bfd_boolean *,
+			       bfd_boolean *, bfd_boolean *,
+			       bfd *, asection **);
+
   /* Used to handle bad SHF_LINK_ORDER input.  */
   bfd_error_handler_type link_order_error_handler;
 
@@ -1740,6 +1764,15 @@ extern int bfd_elf_link_record_local_dynamic_symbol
 
 extern bfd_boolean _bfd_elf_close_and_cleanup
   (bfd *);
+
+extern bfd_boolean _bfd_elf_common_definition
+  (Elf_Internal_Sym *);
+
+extern unsigned int _bfd_elf_common_section_index
+  (asection *);
+
+extern asection *_bfd_elf_common_section
+  (asection *);
 
 extern void _bfd_dwarf2_cleanup_debug_info
   (bfd *);
