@@ -1,3 +1,12 @@
+2005-07-25  Mark Mitchell <mark@codesourcery.com>
+
+	* input.c (rl_getc): Use getch to read console input on
+	Windows.
+	* readline.c (bind_arrow_keys_internal): Translate
+	Windows keysequences into POSIX key sequences.
+	* rldefs.h (NO_TTY_DRIVER): Define on MinGW.
+	* rltty.c: Conditionalize on NO_TTY_DRIVER throughout.
+	
 2005-07-03  Mark Kettenis <kettenis@gnu.org>
 
 	From Martin Simmons:

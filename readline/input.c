@@ -424,6 +424,13 @@ rl_getc (stream)
 
   while (1)
     {
+#ifdef __MINGW32__
+      /* On Windows, use a special routine to read a single  character
+	 from the console.  (Otherwise, no characters are available
+	 until the user hits the return key.)  */
+      if (isatty (fileno (stream)))
+	return getch ();
+#endif
       result = read (fileno (stream), &c, sizeof (unsigned char));
 
       if (result == sizeof (unsigned char))

@@ -868,6 +868,22 @@ bind_arrow_keys_internal (map)
    _rl_bind_if_unbound ("\033[0D", rl_get_next_history);
 #endif
 
+#ifdef __MINGW32__
+   /* Under Windows, when an extend key (like an arrow key) is
+      pressed, getch() will return 340 (octal) followed by a code for
+      the extended key.  We use macros to transform those into the
+      normal ANSI terminal sequences for these keys.  */
+
+   /* Up arrow.  */
+   rl_macro_bind ("\340H", "\033[A", map);
+   /* Left arrow.  */
+   rl_macro_bind ("\340K", "\033[D", map);
+   /* Right arrow.  */
+   rl_macro_bind ("\340M", "\033[C", map);
+   /* Down arrow.  */
+   rl_macro_bind ("\340P", "\033[B", map);
+#endif
+
   _rl_bind_if_unbound ("\033[A", rl_get_previous_history);
   _rl_bind_if_unbound ("\033[B", rl_get_next_history);
   _rl_bind_if_unbound ("\033[C", rl_forward_char);

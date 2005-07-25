@@ -32,7 +32,9 @@
 
 #include "rlstdc.h"
 
-#if defined (_POSIX_VERSION) && !defined (TERMIOS_MISSING)
+#if defined (__MINGW32__)
+#  define NO_TTY_DRIVER
+#elif defined (_POSIX_VERSION) && !defined (TERMIOS_MISSING)
 #  define TERMIOS_TTY_DRIVER
 #else
 #  if defined (HAVE_TERMIO_H)
