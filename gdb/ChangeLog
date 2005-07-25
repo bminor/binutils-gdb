@@ -1,3 +1,14 @@
+2005-07-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c: Reorder functions.
+	(inf_ptrace_open, inf_ptrace_reported_exec_events_per_call)
+	(inf_ptrace_can_run, inf_ptrace_post_attach): Removed.
+	(inf_ptrace_target): Don't set to_open,
+	to_reported_exec_events_per_call, to_can_run, to_post_attach,
+	to_stratum, to_has_all_memory, to_has_memory, to_has_stack,
+	to_has_registers, to_has_execution, to_magic.  Reorder remaining
+	initializations.
+
 2005-07-25  Mark Mitchell  <mark@codesourcery.com>
 
 	* configure.ac: On MinGW, do not require a termcap library, and

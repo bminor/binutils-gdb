@@ -39,6 +39,158 @@
 
 /* HACK: Save the ptrace ops returned by inf_ptrace_target.  */
 static struct target_ops *ptrace_ops_hack;
+
+
+/* Stub function which causes the inferior that runs it, to be ptrace-able
+   by its parent process.  */
+
+static void
+inf_ptrace_me (void)
+{
+  /* "Trace me, Dr. Memory!"  */
+  ptrace (0, 0, (PTRACE_TYPE_ARG3) 0, 0);
+}
+
+/* Stub function which causes the GDB that runs it, to start ptrace-ing
+   the child process.  */
+
+static void
+inf_ptrace_him (int pid)
+{
+  push_target (ptrace_ops_hack);
+
+  /* On some targets, there must be some explicit synchronization
+     between the parent and child processes after the debugger
+     forks, and before the child execs the debuggee program.  This
+     call basically gives permission for the child to exec.  */
+
+  target_acknowledge_created_inferior (pid);
+
+  /* START_INFERIOR_TRAPS_EXPECTED is defined in inferior.h, and will
+     be 1 or 2 depending on whether we're starting without or with a
+     shell.  */
+  startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
+
+  /* On some targets, there must be some explicit actions taken after
+     the inferior has been started up.  */
+  target_post_startup_inferior (pid_to_ptid (pid));
+}
+
+/* Start an inferior Unix child process and sets inferior_ptid to its
+   pid.  EXEC_FILE is the file to run.  ALLARGS is a string containing
+   the arguments to the program.  ENV is the environment vector to
+   pass.  Errors reported with error().  */
+
+static void
+inf_ptrace_create_inferior (char *exec_file, char *allargs, char **env,
+			    int from_tty)
+{
+  fork_inferior (exec_file, allargs, env, inf_ptrace_me, inf_ptrace_him,
+		 NULL, NULL);
+  /* We are at the first instruction we care about.  */
+  observer_notify_inferior_created (&current_target, from_tty);
+  /* Pedal to the metal...  */
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
+}
+
+static void
+inf_ptrace_mourn_inferior (void)
+{
+  unpush_target (ptrace_ops_hack);
+  generic_mourn_inferior ();
+}
+
+/* Attach to process PID, then initialize for debugging it.  */
+
+static void
+inf_ptrace_attach (char *args, int from_tty)
+{
+  char *exec_file;
+  int pid;
+  char *dummy;
+
+  if (!args)
+    error_no_arg (_("process-id to attach"));
+
+  dummy = args;
+  pid = strtol (args, &dummy, 0);
+  /* Some targets don't set errno on errors, grrr!  */
+  if (pid == 0 && args == dummy)
+    error (_("Illegal process-id: %s."), args);
+
+  if (pid == getpid ())		/* Trying to masturbate?  */
+    error (_("I refuse to debug myself!"));
+
+  if (from_tty)
+    {
+      exec_file = (char *) get_exec_file (0);
+
+      if (exec_file)
+	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
+			   target_pid_to_str (pid_to_ptid (pid)));
+      else
+	printf_unfiltered (_("Attaching to %s\n"),
+			   target_pid_to_str (pid_to_ptid (pid)));
+
+      gdb_flush (gdb_stdout);
+    }
+
+#ifdef PT_ATTACH
+  errno = 0;
+  ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
+  if (errno != 0)
+    perror_with_name (("ptrace"));
+  attach_flag = 1;
+#else
+  error (_("This system does not support attaching to a process"));
+#endif
+
+  inferior_ptid = pid_to_ptid (pid);
+  push_target (ptrace_ops_hack);
+
+  /* Do this first, before anything has had a chance to query the
+     inferior's symbol table or similar.  */
+  observer_notify_inferior_created (&current_target, from_tty);
+}
+
+/* Take a program previously attached to and detaches it.  The program
+   resumes execution and will no longer stop on signals, etc.  We'd
+   better not have left any breakpoints in the program or it'll die
+   when it hits one.  For this to work, it may be necessary for the
+   process to have been previously attached.  It *might* work if the
+   program was started via the normal ptrace (PTRACE_TRACEME).  */
+
+static void
+inf_ptrace_detach (char *args, int from_tty)
+{
+  int sig = 0;
+  int pid = PIDGET (inferior_ptid);
+
+  if (from_tty)
+    {
+      char *exec_file = get_exec_file (0);
+      if (exec_file == 0)
+	exec_file = "";
+      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
+			 target_pid_to_str (pid_to_ptid (pid)));
+      gdb_flush (gdb_stdout);
+    }
+  if (args)
+    sig = atoi (args);
+
+#ifdef PT_DETACH
+  errno = 0;
+  ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3) 1, sig);
+  if (errno != 0)
+    perror_with_name (("ptrace"));
+  attach_flag = 0;
+#else
+  error (_("This system does not support detaching from a process"));
+#endif
+
+  inferior_ptid = null_ptid;
+  unpush_target (ptrace_ops_hack);
+}
 
 static void
 inf_ptrace_kill_inferior (void)
@@ -61,6 +213,18 @@ inf_ptrace_kill_inferior (void)
   ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
   wait (&status);
   target_mourn_inferior ();
+}
+
+/* Send a SIGINT to the process group.  This acts just like the user
+   typed a ^C on the controlling terminal.
+
+   FIXME: This may not be correct for all systems.  Some may want to
+   use killpg() instead of kill (-pgrp).  */
+
+static void
+inf_ptrace_stop (void)
+{
+  kill (-inferior_process_group, SIGINT);
 }
 
 /* Resume execution of the inferior process.  If STEP is nonzero,
@@ -162,194 +326,6 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   return pid_to_ptid (pid);
 }
 
-/* Check to see if the given thread is alive.
-
-   FIXME: Is kill() ever the right way to do this?  I doubt it, but
-   for now we're going to try and be compatable with the old thread
-   code.  */
-
-static int
-inf_ptrace_thread_alive (ptid_t ptid)
-{
-  pid_t pid = PIDGET (ptid);
-
-  return (kill (pid, 0) != -1);
-}
-
-/* Attach to process PID, then initialize for debugging it.  */
-
-static void
-inf_ptrace_attach (char *args, int from_tty)
-{
-  char *exec_file;
-  int pid;
-  char *dummy;
-
-  if (!args)
-    error_no_arg (_("process-id to attach"));
-
-  dummy = args;
-  pid = strtol (args, &dummy, 0);
-  /* Some targets don't set errno on errors, grrr!  */
-  if (pid == 0 && args == dummy)
-    error (_("Illegal process-id: %s."), args);
-
-  if (pid == getpid ())		/* Trying to masturbate?  */
-    error (_("I refuse to debug myself!"));
-
-  if (from_tty)
-    {
-      exec_file = (char *) get_exec_file (0);
-
-      if (exec_file)
-	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (pid_to_ptid (pid)));
-      else
-	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (pid_to_ptid (pid)));
-
-      gdb_flush (gdb_stdout);
-    }
-
-#ifdef PT_ATTACH
-  errno = 0;
-  ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
-  if (errno != 0)
-    perror_with_name (("ptrace"));
-  attach_flag = 1;
-#else
-  error (_("This system does not support attaching to a process"));
-#endif
-
-  inferior_ptid = pid_to_ptid (pid);
-  push_target (ptrace_ops_hack);
-
-  /* Do this first, before anything has had a chance to query the
-     inferior's symbol table or similar.  */
-  observer_notify_inferior_created (&current_target, from_tty);
-}
-
-static void
-inf_ptrace_post_attach (int pid)
-{
-  /* This version of Unix doesn't require a meaningful "post attach"
-     operation by a debugger.  */
-}
-
-/* Take a program previously attached to and detaches it.  The program
-   resumes execution and will no longer stop on signals, etc.  We'd
-   better not have left any breakpoints in the program or it'll die
-   when it hits one.  For this to work, it may be necessary for the
-   process to have been previously attached.  It *might* work if the
-   program was started via the normal ptrace (PTRACE_TRACEME).  */
-
-static void
-inf_ptrace_detach (char *args, int from_tty)
-{
-  int sig = 0;
-  int pid = PIDGET (inferior_ptid);
-
-  if (from_tty)
-    {
-      char *exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-			 target_pid_to_str (pid_to_ptid (pid)));
-      gdb_flush (gdb_stdout);
-    }
-  if (args)
-    sig = atoi (args);
-
-#ifdef PT_DETACH
-  errno = 0;
-  ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3) 1, sig);
-  if (errno != 0)
-    perror_with_name (("ptrace"));
-  attach_flag = 0;
-#else
-  error (_("This system does not support detaching from a process"));
-#endif
-
-  inferior_ptid = null_ptid;
-  unpush_target (ptrace_ops_hack);
-}
-
-/* Print status information about what we're accessing.  */
-
-static void
-inf_ptrace_files_info (struct target_ops *ignore)
-{
-  printf_unfiltered (_("\tUsing the running image of %s %s.\n"),
-		     attach_flag ? "attached" : "child",
-		     target_pid_to_str (inferior_ptid));
-}
-
-static void
-inf_ptrace_open (char *arg, int from_tty)
-{
-  error (_("Use the \"run\" command to start a Unix child process."));
-}
-
-/* Stub function which causes the inferior that runs it, to be ptrace-able
-   by its parent process.  */
-
-static void
-inf_ptrace_me (void)
-{
-  /* "Trace me, Dr. Memory!"  */
-  ptrace (0, 0, (PTRACE_TYPE_ARG3) 0, 0);
-}
-
-/* Stub function which causes the GDB that runs it, to start ptrace-ing
-   the child process.  */
-
-static void
-inf_ptrace_him (int pid)
-{
-  push_target (ptrace_ops_hack);
-
-  /* On some targets, there must be some explicit synchronization
-     between the parent and child processes after the debugger
-     forks, and before the child execs the debuggee program.  This
-     call basically gives permission for the child to exec.  */
-
-  target_acknowledge_created_inferior (pid);
-
-  /* START_INFERIOR_TRAPS_EXPECTED is defined in inferior.h, and will
-     be 1 or 2 depending on whether we're starting without or with a
-     shell.  */
-  startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
-
-  /* On some targets, there must be some explicit actions taken after
-     the inferior has been started up.  */
-  target_post_startup_inferior (pid_to_ptid (pid));
-}
-
-/* Start an inferior Unix child process and sets inferior_ptid to its
-   pid.  EXEC_FILE is the file to run.  ALLARGS is a string containing
-   the arguments to the program.  ENV is the environment vector to
-   pass.  Errors reported with error().  */
-
-static void
-inf_ptrace_create_inferior (char *exec_file, char *allargs, char **env,
-			    int from_tty)
-{
-  fork_inferior (exec_file, allargs, env, inf_ptrace_me, inf_ptrace_him,
-		 NULL, NULL);
-  /* We are at the first instruction we care about.  */
-  observer_notify_inferior_created (&current_target, from_tty);
-  /* Pedal to the metal...  */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
-}
-
-static int
-inf_ptrace_reported_exec_events_per_exec_call (void)
-{
-  /* Typically, we get a single SIGTRAP per exec.  */
-  return 1;
-}
-
 static int
 inf_ptrace_has_exited (int pid, int wait_status, int *exit_status)
 {
@@ -368,31 +344,6 @@ inf_ptrace_has_exited (int pid, int wait_status, int *exit_status)
   /* ??? Do we really need to consult the event state, too?
      Assume the wait_state alone suffices.  */
   return 0;
-}
-
-static void
-inf_ptrace_mourn_inferior (void)
-{
-  unpush_target (ptrace_ops_hack);
-  generic_mourn_inferior ();
-}
-
-static int
-inf_ptrace_can_run (void)
-{
-  return 1;
-}
-
-/* Send a SIGINT to the process group.  This acts just like the user
-   typed a ^C on the controlling terminal.
-
-   FIXME: This may not be correct for all systems.  Some may want to
-   use killpg() instead of kill (-pgrp).  */
-
-static void
-inf_ptrace_stop (void)
-{
-  kill (-inferior_process_group, SIGINT);
 }
 
 /* Perform a partial transfer to/from the specified object.  For
@@ -516,6 +467,30 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
     }
 }
 
+/* Check to see if the given thread is alive.
+
+   FIXME: Is kill() ever the right way to do this?  I doubt it, but
+   for now we're going to try and be compatable with the old thread
+   code.  */
+
+static int
+inf_ptrace_thread_alive (ptid_t ptid)
+{
+  pid_t pid = PIDGET (ptid);
+
+  return (kill (pid, 0) != -1);
+}
+
+/* Print status information about what we're accessing.  */
+
+static void
+inf_ptrace_files_info (struct target_ops *ignore)
+{
+  printf_unfiltered (_("\tUsing the running image of %s %s.\n"),
+		     attach_flag ? "attached" : "child",
+		     target_pid_to_str (inferior_ptid));
+}
+
 static char *
 inf_ptrace_pid_to_str (ptid_t ptid)
 {
@@ -530,33 +505,22 @@ inf_ptrace_target (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_open = inf_ptrace_open;
   t->to_attach = inf_ptrace_attach;
-  t->to_post_attach = inf_ptrace_post_attach;
   t->to_detach = inf_ptrace_detach;
   t->to_resume = inf_ptrace_resume;
   t->to_wait = inf_ptrace_wait;
-  t->to_xfer_partial = inf_ptrace_xfer_partial;
   t->to_files_info = inf_ptrace_files_info;
   t->to_kill = inf_ptrace_kill_inferior;
   t->to_create_inferior = inf_ptrace_create_inferior;
-  t->to_reported_exec_events_per_exec_call =
-    inf_ptrace_reported_exec_events_per_exec_call;
-  t->to_has_exited = inf_ptrace_has_exited;
   t->to_mourn_inferior = inf_ptrace_mourn_inferior;
-  t->to_can_run = inf_ptrace_can_run;
   t->to_thread_alive = inf_ptrace_thread_alive;
   t->to_pid_to_str = inf_ptrace_pid_to_str;
   t->to_stop = inf_ptrace_stop;
-  t->to_stratum = process_stratum;
-  t->to_has_all_memory = 1;
-  t->to_has_memory = 1;
-  t->to_has_stack = 1;
-  t->to_has_registers = 1;
-  t->to_has_execution = 1;
-  t->to_magic = OPS_MAGIC;
-  ptrace_ops_hack = t;
+  t->to_xfer_partial = inf_ptrace_xfer_partial;
 
+  t->to_has_exited = inf_ptrace_has_exited;
+
+  ptrace_ops_hack = t;
   return t;
 }
 
