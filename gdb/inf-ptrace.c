@@ -41,6 +41,59 @@
 static struct target_ops *ptrace_ops_hack;
 
 
+#ifdef PT_GET_PROCESS_STATE
+
+static int
+inf_ptrace_follow_fork (int follow_child)
+{
+  pid_t pid, fpid;
+  ptrace_state_t pe;
+
+  /* FIXME: kettenis/20050720: This stuff should really be passed as
+     an argument by our caller.  */
+  {
+    ptid_t ptid;
+    struct target_waitstatus status;
+
+    get_last_target_status (&ptid, &status);
+    gdb_assert (status.kind == TARGET_WAITKIND_FORKED);
+
+    pid = ptid_get_pid (ptid);
+  }
+
+  if (ptrace (PT_GET_PROCESS_STATE, pid,
+	       (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+    perror_with_name (("ptrace"));
+
+  gdb_assert (pe.pe_report_event == PTRACE_FORK);
+  fpid = pe.pe_other_pid;
+
+  if (follow_child)
+    {
+      inferior_ptid = pid_to_ptid (fpid);
+      detach_breakpoints (pid);
+
+      /* Reset breakpoints in the child as appropriate.  */
+      follow_inferior_reset_breakpoints ();
+
+      if (ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
+	perror_with_name (("ptrace"));
+    }
+  else
+    {
+      inferior_ptid = pid_to_ptid (pid);
+      detach_breakpoints (fpid);
+
+      if (ptrace (PT_DETACH, fpid, (PTRACE_TYPE_ARG3)1, 0) == -1)
+	perror_with_name (("ptrace"));
+    }
+
+  return 0;
+}
+
+#endif /* PT_GET_PROCESS_STATE */
+
+
 /* Prepare to be traced.  */
 
 static void
@@ -55,6 +108,19 @@ inf_ptrace_me (void)
 static void
 inf_ptrace_him (int pid)
 {
+#ifdef PT_GET_PROCESS_STATE
+  {
+    ptrace_event_t pe;
+
+    /* Set the initial event mask.  */
+    memset (&pe, 0, sizeof pe);
+    pe.pe_set_event |= PTRACE_FORK;
+    if (ptrace (PT_SET_EVENT_MASK, pid,
+		(PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+      perror_with_name (("ptrace"));
+  }
+#endif
+
   push_target (ptrace_ops_hack);
 
   /* On some targets, there must be some explicit synchronization
@@ -154,6 +220,19 @@ inf_ptrace_attach (char *args, int from_tty)
   attach_flag = 1;
 #else
   error (_("This system does not support attaching to a process"));
+#endif
+
+#ifdef PT_GET_PROCESS_STATE
+  {
+    ptrace_event_t pe;
+
+    /* Set the initial event mask.  */
+    memset (&pe, 0, sizeof pe);
+    pe.pe_set_event |= PTRACE_FORK;
+    if (ptrace (PT_SET_EVENT_MASK, pid,
+		(PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+      perror_with_name (("ptrace"));
+  }
 #endif
 
   inferior_ptid = pid_to_ptid (pid);
@@ -309,6 +388,44 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	pid = -1;
     }
   while (pid == -1);
+
+#ifdef PT_GET_PROCESS_STATE
+  if (WIFSTOPPED (status))
+    {
+      ptrace_state_t pe;
+      pid_t fpid;
+
+      if (ptrace (PT_GET_PROCESS_STATE, pid,
+		  (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+	perror_with_name (("ptrace"));
+
+      switch (pe.pe_report_event)
+	{
+	case PTRACE_FORK:
+	  ourstatus->kind = TARGET_WAITKIND_FORKED;
+	  ourstatus->value.related_pid = pe.pe_other_pid;
+
+	  /* Make sure the other end of the fork is stopped too.  */
+	  fpid = waitpid (pe.pe_other_pid, &status, 0);
+	  if (fpid == -1)
+	    perror_with_name (("waitpid"));
+
+	  if (ptrace (PT_GET_PROCESS_STATE, fpid,
+		      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+	    perror_with_name (("ptrace"));
+
+	  gdb_assert (pe.pe_report_event == PTRACE_FORK);
+	  gdb_assert (pe.pe_other_pid == pid);
+	  if (fpid == ptid_get_pid (inferior_ptid))
+	    {
+	      ourstatus->value.related_pid = pe.pe_other_pid;
+	      return pid_to_ptid (fpid);
+	    }
+
+	  return pid_to_ptid (pid);
+	}
+    }
+#endif
 
   store_waitstatus (ourstatus, status);
   return pid_to_ptid (pid);
@@ -471,6 +588,9 @@ inf_ptrace_target (void)
   t->to_files_info = inf_ptrace_files_info;
   t->to_kill = inf_ptrace_kill;
   t->to_create_inferior = inf_ptrace_create_inferior;
+#ifdef PT_GET_PROCESS_STATE
+  t->to_follow_fork = inf_ptrace_follow_fork;
+#endif
   t->to_mourn_inferior = inf_ptrace_mourn_inferior;
   t->to_thread_alive = inf_ptrace_thread_alive;
   t->to_pid_to_str = normal_pid_to_str;

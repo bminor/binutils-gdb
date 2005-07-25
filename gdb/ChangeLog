@@ -1,5 +1,15 @@
 2005-07-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* inf-ptrace.c [PT_GET_PROCESS_STATE] (inf_ptrace_follow_fork):
+	New function.
+	(inf_ptrace_him, inf_ptrace_attach) [PT_GET_PROCESS_STATE]: Set
+	PTRACE_FORK event flag.
+	(inf_ptrace_wait) [PT_GET_PROCESS_STATE]: Handle PTRACE_FORK
+	event.
+	(inf_ptrace_target) [PT_GET_PROCESS_STATE]: Set to_follow_fork.
+
+2005-07-25  Mark Kettenis  <kettenis@gnu.org>
+
 	* gdb_ptrace.h (PT_TRACE_ME): Define to zero if not already
 	defined.
 	* inf-ptrace.c: Tweak comments.
