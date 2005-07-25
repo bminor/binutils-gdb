@@ -244,5 +244,8 @@ extern void elf_pop_insert (void);
 struct ecoff_extr;
 extern void elf_ecoff_set_ext (symbolS *, struct ecoff_extr *);
 #endif
+extern asection *elf_com_section_ptr;
+extern symbolS * elf_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP,
+				   addressT size);
 
 #endif /* _OBJ_ELF_H */

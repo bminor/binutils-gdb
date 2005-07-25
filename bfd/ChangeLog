@@ -1,3 +1,27 @@
+2005-07-25  Jan Hubicka  <jh@suse.cz>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_large_com_section): New.
+	* elf.c (_bfd_elf_large_com_section): New. Defined.
+
+	* elf64-x86-64.c (elf64_x86_64_add_symbol_hook): New.
+	(elf64_x86_64_elf_section_from_bfd_section): New.
+	(elf64_x86_64_symbol_processing): New.
+	(elf64_x86_64_common_definition): New.
+	(elf64_x86_64_common_section_index): New.
+	(elf64_x86_64_common_section): New.
+	(elf64_x86_64_merge_symbol): New.
+	(elf64_x86_64_additional_program_headers): New.
+	(elf64_x86_64_special_sections): New.
+	(elf_backend_section_from_bfd_section): New. Defined.
+	(elf_backend_add_symbol_hook): Likewise.
+	(elf_backend_common_section_index): Likewise.
+	(elf_backend_common_section): Likewise.
+	(elf_backend_common_definition): Likewise.
+	(elf_backend_merge_symbol): Likewise.
+	(elf_backend_special_sections): Likewise.
+	(elf_backend_additional_program_headers): Likewise.
+
 2005-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_backend_data): Add common_definition,

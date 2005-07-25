@@ -53,6 +53,10 @@
 #include "elf/i370.h"
 #endif
 
+#ifdef TC_I386
+#include "elf/x86-64.h"
+#endif
+
 static void obj_elf_line (int);
 static void obj_elf_size (int);
 static void obj_elf_type (int);
@@ -174,6 +178,8 @@ static const pseudo_typeS ecoff_debug_pseudo_table[] =
 
 /* This is called when the assembler starts.  */
 
+asection *elf_com_section_ptr;
+
 void
 elf_begin (void)
 {
@@ -186,6 +192,7 @@ elf_begin (void)
   symbol_table_insert (section_symbol (s));
   s = bfd_get_section_by_name (stdoutput, BSS_SECTION_NAME);
   symbol_table_insert (section_symbol (s));
+  elf_com_section_ptr = bfd_com_section_ptr;
 }
 
 void
@@ -270,7 +277,7 @@ elf_file_symbol (const char *s, int appfile)
 /* Called from read.c:s_comm after we've parsed .comm symbol, size.
    Parse a possible alignment value.  */
 
-static symbolS *
+symbolS *
 elf_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP, addressT size)
 {
   addressT align = 0;
@@ -334,7 +341,7 @@ elf_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP, addressT size)
       S_SET_VALUE (symbolP, size);
       S_SET_ALIGN (symbolP, align);
       S_SET_EXTERNAL (symbolP);
-      S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
+      S_SET_SEGMENT (symbolP, elf_com_section_ptr);
     }
 
   symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
@@ -569,7 +576,16 @@ obj_elf_change_section (const char *name,
 		 .section .init_array,"aw",@progbits
 
 		 for __attribute__ ((section (".init_array"))).
+		 "@progbits" is incorrect.  Also for x86-64 large bss
+		 sections, gcc, as of 2005-07-06, will emit
+
+		 .section .lbss,"aw",@progbits
+
 		 "@progbits" is incorrect.  */
+#ifdef TC_I386
+	      && (bed->s->arch_size != 64
+		  || !(ssect->attr & SHF_X86_64_LARGE))
+#endif
 	      && ssect->type != SHT_INIT_ARRAY
 	      && ssect->type != SHT_FINI_ARRAY
 	      && ssect->type != SHT_PREINIT_ARRAY)

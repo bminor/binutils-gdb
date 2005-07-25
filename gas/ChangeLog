@@ -1,3 +1,27 @@
+2005-07-25  Jan Hubicka  <jh@suse.cz>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c: Include "elf/x86-64.h" if TC_I386 is
+	defined.
+	(elf_com_section_ptr): New.
+	(elf_begin): Set elf_com_section_ptr to bfd_com_section_ptr.
+	(elf_common_parse): Make it global. Use elf_com_section_ptr
+	instead of bfd_com_section_ptr.
+	(obj_elf_change_section): Handle x86-64 large bss sections.
+
+	* config/obj-elf.h (elf_com_section_ptr): New.
+	(elf_common_parse): New.
+
+	* config/tc-i386.c (handle_large_common): New.
+	(md_pseudo_table): Add "largecomm".
+	(x86_64_section_letter): New.
+	(x86_64_section_word): New.
+
+	* config/tc-i386.h (x86_64_section_word): New.
+	(x86_64_section_letter): New.
+	(md_elf_section_letter): New. Defined.
+	(md_elf_section_word): Likewise.
+
 2005-07-21  Ralf Corsepius  <ralf.corsepius@rtems.org>
 
 	* configure.tgt: Remove i386-*-rtemself*.

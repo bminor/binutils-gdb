@@ -2906,6 +2906,181 @@ elf64_x86_64_section_from_shdr (bfd *abfd,
   return TRUE;
 }
 
+/* Hook called by the linker routine which adds symbols from an object
+   file.  We use it to put SHN_X86_64_LCOMMON items in .lbss, instead
+   of .bss.  */
+
+static bfd_boolean
+elf64_x86_64_add_symbol_hook (bfd *abfd,
+			      struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			      Elf_Internal_Sym *sym,
+			      const char **namep ATTRIBUTE_UNUSED,
+			      flagword *flagsp ATTRIBUTE_UNUSED,
+			      asection **secp, bfd_vma *valp)
+{
+  asection *lcomm;
+
+  switch (sym->st_shndx)
+    {
+    case SHN_X86_64_LCOMMON:
+      lcomm = bfd_get_section_by_name (abfd, "LARGE_COMMON");
+      if (lcomm == NULL)
+	{
+	  lcomm = bfd_make_section_with_flags (abfd,
+					       "LARGE_COMMON",
+					       (SEC_ALLOC
+						| SEC_IS_COMMON
+						| SEC_LINKER_CREATED));
+	  if (lcomm == NULL)
+	    return FALSE;
+	  elf_section_flags (lcomm) |= SHF_X86_64_LARGE;
+	}
+      *secp = lcomm;
+      *valp = sym->st_size;
+      break;
+    }
+  return TRUE;
+}
+
+
+/* Given a BFD section, try to locate the corresponding ELF section
+   index.  */
+
+static bfd_boolean
+elf64_x86_64_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
+					   asection *sec, int *index)
+{
+  if (sec == &_bfd_elf_large_com_section)
+    {
+      *index = SHN_X86_64_LCOMMON;
+      return TRUE;
+    }
+  return FALSE;
+}
+
+/* Process a symbol.  */
+
+static void
+elf64_x86_64_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
+				asymbol *asym)
+{
+  elf_symbol_type *elfsym = (elf_symbol_type *) asym;
+
+  switch (elfsym->internal_elf_sym.st_shndx)
+    {
+    case SHN_X86_64_LCOMMON:
+      asym->section = &_bfd_elf_large_com_section;
+      asym->value = elfsym->internal_elf_sym.st_size;
+      /* Common symbol doesn't set BSF_GLOBAL.  */
+      asym->flags &= ~BSF_GLOBAL;
+      break;
+    }
+}
+
+static bfd_boolean
+elf64_x86_64_common_definition (Elf_Internal_Sym *sym)
+{
+  return (sym->st_shndx == SHN_COMMON
+	  || sym->st_shndx == SHN_X86_64_LCOMMON);
+}
+
+static unsigned int
+elf64_x86_64_common_section_index (asection *sec)
+{
+  if ((elf_section_flags (sec) & SHF_X86_64_LARGE) == 0)
+    return SHN_COMMON;
+  else
+    return SHN_X86_64_LCOMMON;
+}
+
+static asection *
+elf64_x86_64_common_section (asection *sec)
+{
+  if ((elf_section_flags (sec) & SHF_X86_64_LARGE) == 0)
+    return bfd_com_section_ptr;
+  else
+    return &_bfd_elf_large_com_section;
+}
+
+static bfd_boolean
+elf64_x86_64_merge_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			   struct elf_link_hash_entry **sym_hash ATTRIBUTE_UNUSED,
+			   struct elf_link_hash_entry *h,
+			   Elf_Internal_Sym *sym,
+			   asection **psec ATTRIBUTE_UNUSED,
+			   bfd_vma *pvalue ATTRIBUTE_UNUSED,
+			   unsigned int *pold_alignment ATTRIBUTE_UNUSED,
+			   bfd_boolean *skip ATTRIBUTE_UNUSED,
+			   bfd_boolean *override ATTRIBUTE_UNUSED,
+			   bfd_boolean *type_change_ok ATTRIBUTE_UNUSED,
+			   bfd_boolean *size_change_ok ATTRIBUTE_UNUSED,
+			   bfd_boolean *newdef ATTRIBUTE_UNUSED,
+			   bfd_boolean *newdyn,
+			   bfd_boolean *newdyncommon ATTRIBUTE_UNUSED,
+			   bfd_boolean *newweak ATTRIBUTE_UNUSED,
+			   bfd *abfd ATTRIBUTE_UNUSED,
+			   asection **sec,
+			   bfd_boolean *olddef ATTRIBUTE_UNUSED,
+			   bfd_boolean *olddyn,
+			   bfd_boolean *olddyncommon ATTRIBUTE_UNUSED,
+			   bfd_boolean *oldweak ATTRIBUTE_UNUSED,
+			   bfd *oldbfd ATTRIBUTE_UNUSED,
+			   asection **oldsec)
+{
+  /* A normal common symbol and a large common symbol result in a
+     normal common symbol.  If we see the normal symbol first, we
+     do nothing since the first one will be used.  If we see the
+     large common symbol first, we need to change the large common
+     symbol to the normal common symbol.  */
+  if (!*olddyn
+      && h->root.type == bfd_link_hash_common
+      && !*newdyn
+      && bfd_is_com_section (*sec)
+      && *oldsec != *sec
+      && sym->st_shndx == SHN_COMMON
+      && (elf_section_flags (*oldsec) & SHF_X86_64_LARGE) != 0)
+    {
+      h->root.u.c.p->section = bfd_make_section_old_way (abfd,
+							 "COMMON");
+      h->root.u.c.p->section->flags = SEC_ALLOC;
+    }
+
+  return TRUE;
+}
+
+static int
+elf64_x86_64_additional_program_headers (bfd *abfd)
+{
+  asection *s;
+  int count = 0; 
+
+  /* Check to see if we need a large readonly segment.  */
+  s = bfd_get_section_by_name (abfd, ".lrodata");
+  if (s && (s->flags & SEC_LOAD))
+    count++;
+
+  /* Check to see if we need a large data segment.  Since .lbss sections
+     is placed right after the .bss section, there should be no need for
+     a large data segment just because of .lbss.  */
+  s = bfd_get_section_by_name (abfd, ".ldata");
+  if (s && (s->flags & SEC_LOAD))
+    count++;
+
+  return count;
+}
+
+static const struct bfd_elf_special_section 
+  elf64_x86_64_special_sections[]=
+{
+  { ".gnu.linkonce.lb",	16, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
+  { ".gnu.linkonce.lr",	16, -2, SHT_PROGBITS, SHF_ALLOC + SHF_X86_64_LARGE},
+  { ".gnu.linkonce.lt",	16, -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR + SHF_X86_64_LARGE},
+  { ".lbss",	5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
+  { ".ldata",	6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_X86_64_LARGE},
+  { ".lrodata",	8, -2, SHT_PROGBITS, SHF_ALLOC + SHF_X86_64_LARGE},
+  { NULL,	0,  0, 0,            0 }
+};
+
 #define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
 #define TARGET_LITTLE_NAME		    "elf64-x86-64"
 #define ELF_ARCH			    bfd_arch_i386
@@ -2945,5 +3120,24 @@ elf64_x86_64_section_from_shdr (bfd *abfd,
 
 #define elf_backend_section_from_shdr \
 	elf64_x86_64_section_from_shdr
+
+#define elf_backend_section_from_bfd_section \
+  elf64_x86_64_elf_section_from_bfd_section
+#define elf_backend_add_symbol_hook \
+  elf64_x86_64_add_symbol_hook
+#define elf_backend_symbol_processing \
+  elf64_x86_64_symbol_processing
+#define elf_backend_common_section_index \
+  elf64_x86_64_common_section_index
+#define elf_backend_common_section \
+  elf64_x86_64_common_section
+#define elf_backend_common_definition \
+  elf64_x86_64_common_definition
+#define elf_backend_merge_symbol \
+  elf64_x86_64_merge_symbol
+#define elf_backend_special_sections \
+  elf64_x86_64_special_sections
+#define elf_backend_additional_program_headers \
+  elf64_x86_64_additional_program_headers
 
 #include "elf64-target.h"

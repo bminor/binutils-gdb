@@ -1,3 +1,10 @@
+2005-07-25  Jan Hubicka  <jh@suse.cz>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf_x86_64.sh (LARGE_SECTIONS): New.
+
+	* scripttempl/elf.sc: Updated for large section support.
+
 2005-07-21  Ralf Corsepius  <ralf.corsepius@rtems.org>
 
 	* configure.tgt: Remove i[3-7]86-*-rtemself*.

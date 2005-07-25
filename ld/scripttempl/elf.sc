@@ -78,6 +78,9 @@
 #  .debug_info	.gnu.linkonce.wi.foo
 #  .tdata	.gnu.linkonce.td.foo
 #  .tbss	.gnu.linkonce.tb.foo
+#  .lrodata	.gnu.linkonce.lr.foo
+#  .ldata	.gnu.linkonce.l.foo
+#  .lbss	.gnu.linkonce.lb.foo
 #
 #  Each of these can also have corresponding .rel.* and .rela.* sections.
 
@@ -156,6 +159,31 @@ if test -z "${SDATA_GOT}"; then
   if test -z "${NO_SMALL_DATA}"; then
     SDATA_GOT=" "
   fi
+fi
+if test -n "${LARGE_SECTIONS}"; then
+  LBSS="
+  .lbss ${RELOCATING-0} :
+  {
+   *(.dynlbss)
+   *(.lbss${RELOCATING+ .lbss.* .gnu.linkonce.lb.*})
+   *(LARGE_COMMON)
+  }"
+  LARGE_SECTIONS="
+  .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  {
+   *(.lrodata${RELOCATING+ .lrodata.* .gnu.linkonce.lr.*})
+  }
+  .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  {
+   *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
+   ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
+  }"
+  REL_LDATA=".rel.ldata    ${RELOCATING-0} : { *(.rel.ldata${RELOCATING+ .rel.ldata.* .rel.gnu.linkonce.l.*}) }
+  .rela.ldata   ${RELOCATING-0} : { *(.rela.ldata${RELOCATING+ .rela.ldata.* .rela.gnu.linkonce.l.*}) }"
+  REL_LBSS=".rel.lbss     ${RELOCATING-0} : { *(.rel.lbss${RELOCATING+ .rel.lbss.* .rel.gnu.linkonce.lb.*}) }
+  .rela.lbss    ${RELOCATING-0} : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }"
+  REL_LRODATA=".rel.lrodata       ${RELOCATING-0} : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
+  .rela.lrodata       ${RELOCATING-0} : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
 fi
 test -n "$SEPARATE_GOTPLT" && SEPARATE_GOTPLT=" "
 CTOR=".ctors        ${CONSTRUCTING-0} : 
@@ -274,6 +302,9 @@ eval $COMBRELOCCAT <<EOF
   ${REL_SBSS2}
   .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
   .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
+  ${REL_LDATA}
+  ${REL_LBSS}
+  ${REL_LRODATA}
 EOF
 if [ -n "$COMBRELOC" ]; then
 cat <<EOF
@@ -397,13 +428,17 @@ cat <<EOF
    *(COMMON)
    /* Align here to ensure that the .bss section occupies space up to
       _end.  Align after .bss to ensure correct alignment even if the
-      .bss section disappears because there are no input sections.  */
+      .bss section disappears because there are no input sections.
+      FIXME: Why do we need it? When there is no .bss section, we don't
+      pad the .data section.  */
    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }
+  ${LBSS}
   ${OTHER_BSS_SECTIONS}
+  ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
+  ${LARGE_SECTIONS}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+_end = .;}
-  ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
   ${RELOCATING+${DATA_SEGMENT_END}}
 

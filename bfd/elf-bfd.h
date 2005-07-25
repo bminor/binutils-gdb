@@ -1834,6 +1834,9 @@ extern bfd *_bfd_elf64_bfd_from_remote_memory
   (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, int));
 
+/* Large common section.  */
+extern asection _bfd_elf_large_com_section;
+
 /* SH ELF specific routine.  */
 
 extern bfd_boolean _sh_elf_set_mach_from_flags

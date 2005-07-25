@@ -1355,6 +1355,9 @@ dump_relocations (FILE *file,
 			sec_name = "ABS";
 		      else if (psym->st_shndx == SHN_COMMON)
 			sec_name = "COMMON";
+		      else if (elf_header.e_machine == EM_X86_64
+			       && psym->st_shndx == SHN_X86_64_LCOMMON)
+			sec_name = "LARGE_COMMON";
 		      else if (elf_header.e_machine == EM_IA_64
 			       && elf_header.e_ident[EI_OSABI] == ELFOSABI_HPUX
 			       && psym->st_shndx == SHN_IA_64_ANSI_COMMON)
@@ -3789,7 +3792,10 @@ get_elf_section_flags (bfd_vma sh_flags)
 	case SHF_TLS:		   *p = 'T'; break;
 
 	default:
-	  if (flag & SHF_MASKOS)
+	  if (elf_header.e_machine == EM_X86_64
+	      && flag == SHF_X86_64_LARGE)
+	    *p = 'l';
+	  else if (flag & SHF_MASKOS)
 	    {
 	      *p = 'o';
 	      sh_flags &= ~ SHF_MASKOS;
@@ -6698,6 +6704,9 @@ get_symbol_index_type (unsigned int type)
 	  && elf_header.e_machine == EM_IA_64
 	  && elf_header.e_ident[EI_OSABI] == ELFOSABI_HPUX)
 	return "ANSI_COM";
+      else if (elf_header.e_machine == EM_X86_64
+	       && type == SHN_X86_64_LCOMMON)
+	return "LARGE_COM";
       else if (type >= SHN_LOPROC && type <= SHN_HIPROC)
 	sprintf (buff, "PRC[0x%04x]", type);
       else if (type >= SHN_LOOS && type <= SHN_HIOS)

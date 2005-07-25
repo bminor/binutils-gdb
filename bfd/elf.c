@@ -8456,3 +8456,9 @@ done:
 
   return result;
 }
+
+/* It is only used by x86-64 so far.  */
+asection _bfd_elf_large_com_section
+  = BFD_FAKE_SECTION (_bfd_elf_large_com_section,
+		      SEC_IS_COMMON, NULL, NULL, "LARGE_COMMON",
+		      0);

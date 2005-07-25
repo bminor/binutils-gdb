@@ -305,6 +305,7 @@ static int allow_naked_reg = 0;
    leave, push, and pop instructions so that gcc has the same stack
    frame as in 32 bit mode.  */
 static char stackop_size = '\0';
+static void handle_large_common (int small ATTRIBUTE_UNUSED);
 
 /* Non-zero to optimize code alignment.  */
 int optimize_align_code = 1;
@@ -467,6 +468,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"att_syntax", set_intel_syntax, 0},
   {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
   {"loc", dwarf2_directive_loc, 0},
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  {"largecomm", handle_large_common, 0},
+#endif
 #ifdef TE_PE
   {"secrel32", pe_directive_secrel, 0},
 #endif
@@ -6990,3 +6994,71 @@ tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
   emit_expr (&expr, size);
 }
 #endif
+
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+/* For ELF on x86-64, add support for SHF_X86_64_LARGE.  */
+
+int
+x86_64_section_letter (int letter, char **ptr_msg)
+{
+  if (flag_code == CODE_64BIT)
+    {
+      if (letter == 'l')
+	return SHF_X86_64_LARGE;
+
+      *ptr_msg = _("Bad .section directive: want a,l,w,x,M,S,G,T in string");
+     }
+  else
+   *ptr_msg = _("Bad .section directive: want a,w,x,M,S,G,T in string");
+  return -1;
+}
+
+int
+x86_64_section_word (char *str, size_t len)
+{
+  if (len == 5 && flag_code == CODE_64BIT && strncmp (str, "large", 5) == 0)
+    return SHF_X86_64_LARGE;
+
+  return -1;
+}
+
+static void
+handle_large_common (int small ATTRIBUTE_UNUSED)
+{
+  if (flag_code != CODE_64BIT)
+    {
+      s_comm_internal (0, elf_common_parse);
+      as_warn (_(".largecomm supported only in 64bit mode, producing .comm"));
+    }
+  else
+    {
+      static segT lbss_section;
+      asection *saved_com_section_ptr = elf_com_section_ptr;
+      asection *saved_bss_section = bss_section;
+
+      if (lbss_section == NULL)
+	{
+	  flagword applicable;
+	  segT seg = now_seg;
+	  subsegT subseg = now_subseg;
+
+	  /* The .lbss section is for local .largecomm symbols.  */
+	  lbss_section = subseg_new (".lbss", 0);
+	  applicable = bfd_applicable_section_flags (stdoutput);
+	  bfd_set_section_flags (stdoutput, lbss_section,
+				 applicable & SEC_ALLOC);
+	  seg_info (lbss_section)->bss = 1;
+
+	  subseg_set (seg, subseg);
+	}
+
+      elf_com_section_ptr = &_bfd_elf_large_com_section;
+      bss_section = lbss_section;
+
+      s_comm_internal (0, elf_common_parse);
+
+      elf_com_section_ptr = saved_com_section_ptr;
+      bss_section = saved_bss_section;
+    }
+}
+#endif /* OBJ_ELF || OBJ_MAYBE_ELF */

@@ -501,6 +501,12 @@ extern void tc_x86_frame_initial_instructions PARAMS ((void));
 #define md_elf_section_type(str,len) i386_elf_section_type (str, len)
 extern int i386_elf_section_type PARAMS ((const char *, size_t len));
 
+/* Support for SHF_X86_64_LARGE */
+extern int x86_64_section_word PARAMS ((char *, size_t));
+extern int x86_64_section_letter PARAMS ((int letter, char **ptr_msg));
+#define md_elf_section_letter(LETTER, PTR_MSG)	x86_64_section_letter (LETTER, PTR_MSG)
+#define md_elf_section_word(STR, LEN)		x86_64_section_word (STR, LEN)
+
 #ifdef TE_PE
 
 #define O_secrel O_md1
