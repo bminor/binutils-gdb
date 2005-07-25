@@ -332,6 +332,10 @@ case $host_os in
   go32* | *djgpp*)
     ac_cv_search_tgetent="none required"
     ;;
+  *mingw32*)	 
+    ac_cv_search_tgetent="none required"
+    CONFIG_OBS="$CONFIG_OBS win32-termcap.o"
+    ;;
 esac
 
 # These are the libraries checked by Readline.
