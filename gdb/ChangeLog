@@ -1,3 +1,10 @@
+2005-07-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386obsd-tdep.c (i386obsd_sigreturn_offset): New variable.
+	(i386obsd_sigtramp_p): Deal with an arbitrary number of possible
+	offsets.
+	(i386obsd_aout_supply_regset): Avoid bogus cast.
+
 2005-07-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c [PT_GET_PROCESS_STATE] (inf_ptrace_follow_fork):

@@ -45,12 +45,24 @@
 /* Since OpenBSD 3.2, the sigtramp routine is mapped at a random page
    in virtual memory.  The randomness makes it somewhat tricky to
    detect it, but fortunately we can rely on the fact that the start
-   of the sigtramp routine is page-aligned.  By the way, the mapping
-   is read-only, so you cannot place a breakpoint in the signal
-   trampoline.  */
+   of the sigtramp routine is page-aligned.  We recognize the
+   trampoline by looking for the code that invokes the sigreturn
+   system call.  The offset where we can find that code varies from
+   release to release.
+
+   By the way, the mapping mentioned above is read-only, so you cannot
+   place a breakpoint in the signal trampoline.  */
 
 /* Default page size.  */
 static const int i386obsd_page_size = 4096;
+
+/* Offset for sigreturn(2).  */
+static const int i386obsd_sigreturn_offset[] = {
+  0x0a,				/* OpenBSD 3.2 */
+  0x14,				/* OpenBSD 3.6 */
+  0x3a,				/* OpenBSD 3.8 */
+  -1
+};
 
 /* Return whether the frame preceding NEXT_FRAME corresponds to an
    OpenBSD sigtramp routine.  */
@@ -60,6 +72,7 @@ i386obsd_sigtramp_p (struct frame_info *next_frame)
 {
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   CORE_ADDR start_pc = (pc & ~(i386obsd_page_size - 1));
+  /* The call sequence invoking sigreturn(2).  */
   const gdb_byte sigreturn[] =
   {
     0xb8,
@@ -67,6 +80,7 @@ i386obsd_sigtramp_p (struct frame_info *next_frame)
     0xcd, 0x80			/* int $0x80 */
   };
   size_t buflen = sizeof sigreturn;
+  const int *offset;
   gdb_byte *buf;
   char *name;
 
@@ -84,21 +98,18 @@ i386obsd_sigtramp_p (struct frame_info *next_frame)
   /* Allocate buffer.  */
   buf = alloca (buflen);
 
-  /* If we can't read the instructions at START_PC, return zero.  */
-  if (!safe_frame_unwind_memory (next_frame, start_pc + 0x0a, buf, buflen))
-    return 0;
+  /* Loop over all offsets.  */
+  for (offset = i386obsd_sigreturn_offset; *offset != -1; offset++)
+    {
+      /* If we can't read the instructions, return zero.  */
+      if (!safe_frame_unwind_memory (next_frame, start_pc + *offset,
+				     buf, buflen))
+	return 0;
 
-  /* Check for sigreturn(2).  */
-  if (memcmp (buf, sigreturn, buflen) == 0)
-    return 1;
-
-  /* If we can't read the instructions at START_PC, return zero.  */
-  if (!safe_frame_unwind_memory (next_frame, start_pc + 0x14, buf, buflen))
-    return 0;
-
-  /* Check for sigreturn(2) (again).  */
-  if (memcmp (buf, sigreturn, buflen) == 0)
-    return 1;
+      /* Check for sigreturn(2).  */
+      if (memcmp (buf, sigreturn, buflen) == 0)
+	return 1;
+    }
 
   return 0;
 }
@@ -133,11 +144,12 @@ i386obsd_aout_supply_regset (const struct regset *regset,
 			     const void *regs, size_t len)
 {
   const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
+  const gdb_byte *gregs = regs;
 
   gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE);
 
   i386_supply_gregset (regset, regcache, regnum, regs, tdep->sizeof_gregset);
-  i387_supply_fsave (regcache, regnum, (char *) regs + tdep->sizeof_gregset);
+  i387_supply_fsave (regcache, regnum, gregs + tdep->sizeof_gregset);
 }
 
 static const struct regset *
