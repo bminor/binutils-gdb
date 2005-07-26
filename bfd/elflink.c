@@ -8912,41 +8912,6 @@ elf_gc_sweep (struct bfd_link_info *info, gc_sweep_hook_fn gc_sweep_hook)
 	  if (o->gc_mark)
 	    continue;
 
-	  /* Keep .gcc_except_table.* if the associated .text.* is
-	     marked.  This isn't very nice, but the proper solution,
-	     splitting .eh_frame up and using comdat doesn't pan out 
-	     easily due to needing special relocs to handle the
-	     difference of two symbols in separate sections.
-	     Don't keep code sections referenced by .eh_frame.  */
-	  if (o->gc_mark_from_eh && (o->flags & SEC_CODE) == 0)
-	    {
-	      if (strncmp (o->name, ".gcc_except_table.", 18) == 0)
-		{
-		  unsigned long len;
-		  char *fn_name;
-		  asection *fn_text;
-
-		  len = strlen (o->name + 18) + 1;
-		  fn_name = bfd_malloc (len + 6);
-		  if (fn_name == NULL)
-		    return FALSE;
-		  memcpy (fn_name, ".text.", 6);
-		  memcpy (fn_name + 6, o->name + 18, len);
-		  fn_text = bfd_get_section_by_name (sub, fn_name);
-		  free (fn_name);
-		  if (fn_text != NULL && fn_text->gc_mark)
-		    o->gc_mark = 1;
-		}
-
-	      /* If not using specially named exception table section,
-		 then keep whatever we are using.  */
-	      else
-		o->gc_mark = 1;
-
-	      if (o->gc_mark)
-		continue;
-	    }
-
 	  /* Skip sweeping sections already excluded.  */
 	  if (o->flags & SEC_EXCLUDE)
 	    continue;
@@ -9181,6 +9146,48 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 	if ((o->flags & SEC_KEEP) != 0 && !o->gc_mark)
 	  if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
 	    return FALSE;
+    }
+
+  /* ... again for sections marked from eh_frame.  */
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+    {
+      asection *o;
+
+      if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+	continue;
+
+      /* Keep .gcc_except_table.* if the associated .text.* is
+	 marked.  This isn't very nice, but the proper solution,
+	 splitting .eh_frame up and using comdat doesn't pan out 
+	 easily due to needing special relocs to handle the
+	 difference of two symbols in separate sections.
+	 Don't keep code sections referenced by .eh_frame.  */
+      for (o = sub->sections; o != NULL; o = o->next)
+	if (!o->gc_mark && o->gc_mark_from_eh && (o->flags & SEC_CODE) == 0)
+	  {
+	    if (strncmp (o->name, ".gcc_except_table.", 18) == 0)
+	      {
+		unsigned long len;
+		char *fn_name;
+		asection *fn_text;
+
+		len = strlen (o->name + 18) + 1;
+		fn_name = bfd_malloc (len + 6);
+		if (fn_name == NULL)
+		  return FALSE;
+		memcpy (fn_name, ".text.", 6);
+		memcpy (fn_name + 6, o->name + 18, len);
+		fn_text = bfd_get_section_by_name (sub, fn_name);
+		free (fn_name);
+		if (fn_text == NULL || !fn_text->gc_mark)
+		  continue;
+	      }
+
+	    /* If not using specially named exception table section,
+	       then keep whatever we are using.  */
+	    if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
+	      return FALSE;
+	  }
     }
 
   /* ... and mark SEC_EXCLUDE for those that go.  */

@@ -1,3 +1,8 @@
+2005-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_gc_sweep): Move gcc_except_table code..
+	(bfd_elf_gc_sections): ..to here.
+
 2005-07-25  DJ Delorie  <dj@redhat.com>
 
 	* reloc.c: Remove unused M32C relocs, add BFD_RELOC_M32C_HI8.
@@ -114,10 +119,10 @@
 2005-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd: Move m32c entry to correct location.
-        * archures.c: Likewise.
-        * configure.in: Likewise.
-        * configure: Regenerate.
-        * targets.c: Move ms1 vector to correct location.
+	* archures.c: Likewise.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+	* targets.c: Move ms1 vector to correct location.
 
 2005-07-18  Jan Beulich  <jbeulich@novell.com>
 
