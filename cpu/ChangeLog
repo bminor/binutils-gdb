@@ -1,3 +1,11 @@
+2005-07-25  DJ Delorie  <dj@redhat.com>
+
+	* m32c.opc (parse_unsigned8): Add %dsp8().
+	(parse_signed8): Add %hi8().
+	(parse_unsigned16): Add %dsp16().
+	(parse_signed16): Add %lo16() and %hi16().
+	(parse_lab_5_3): Make valuep a bfd_vma *.
+
 2005-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* m32c.cpu (f-16-8, f-24-8, f-32-16, f-dsp-8-u24): New opcode

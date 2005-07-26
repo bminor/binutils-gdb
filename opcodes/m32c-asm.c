@@ -127,6 +127,28 @@ parse_unsigned8 (CGEN_CPU_DESC cd, const char **strp,
   unsigned long value;
   long have_zero = 0;
 
+  if (strncasecmp (*strp, "%dsp8(", 6) == 0)
+    {
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+      const char *errmsg;
+
+      *strp += 6;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_8,
+				   & result_type, & value);
+      if (**strp != ')')
+	return _("missing `)'");
+      (*strp) ++;
+
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	{
+	  return _("%dsp8() takes a symbolic address, not a number");
+	}
+      *valuep = value;
+      return errmsg;
+    }
+
   if (strncmp (*strp, "0x0", 3) == 0 
       || (**strp == '0' && *(*strp + 1) != 'x'))
     have_zero = 1;
@@ -175,7 +197,29 @@ parse_signed8 (CGEN_CPU_DESC cd, const char **strp,
 {
   const char *errmsg = 0;
   signed long value;
-  
+
+  if (strncasecmp (*strp, "%hi8(", 5) == 0)
+    {
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+      const char *errmsg;
+
+      *strp += 5;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_M32C_HI8,
+				   & result_type, & value);
+      if (**strp != ')')
+	return _("missing `)'");
+      (*strp) ++;
+
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	{
+	  value >>= 16;
+	}
+      *valuep = value;
+      return errmsg;
+    }
+
   PARSE_SIGNED;
 
   if (value <= 255 && value > 127)
@@ -195,7 +239,29 @@ parse_unsigned16 (CGEN_CPU_DESC cd, const char **strp,
   const char *errmsg = 0;
   unsigned long value;
   long have_zero = 0;
- 
+
+  if (strncasecmp (*strp, "%dsp16(", 7) == 0)
+    {
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+      const char *errmsg;
+
+      *strp += 7;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_16,
+				   & result_type, & value);
+      if (**strp != ')')
+	return _("missing `)'");
+      (*strp) ++;
+
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	{
+	  return _("%dsp16() takes a symbolic address, not a number");
+	}
+      *valuep = value;
+      return errmsg;
+    }
+
   /* Don't successfully parse literals beginning with '['.  */
   if (**strp == '[')
     return "Invalid literal"; /* Anything -- will not be seen.  */
@@ -232,6 +298,50 @@ parse_signed16 (CGEN_CPU_DESC cd, const char **strp,
 {
   const char *errmsg = 0;
   signed long value;
+
+  if (strncasecmp (*strp, "%lo16(", 6) == 0)
+    {
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+      const char *errmsg;
+
+      *strp += 6;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_LO16,
+				   & result_type, & value);
+      if (**strp != ')')
+	return _("missing `)'");
+      (*strp) ++;
+
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	{
+	  value &= 0xffff;
+	}
+      *valuep = value;
+      return errmsg;
+    }
+
+  if (strncasecmp (*strp, "%hi16(", 6) == 0)
+    {
+      enum cgen_parse_operand_result result_type;
+      bfd_vma value;
+      const char *errmsg;
+
+      *strp += 6;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_HI16,
+				   & result_type, & value);
+      if (**strp != ')')
+	return _("missing `)'");
+      (*strp) ++;
+
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	{
+	  value >>= 16;
+	}
+      *valuep = value;
+      return errmsg;
+    }
 
   PARSE_SIGNED;
 
@@ -354,10 +464,10 @@ parse_lab_5_3 (CGEN_CPU_DESC cd,
 	       int opindex ATTRIBUTE_UNUSED,
 	       int opinfo,
 	       enum cgen_parse_operand_result *type_addr,
-	       unsigned long *valuep)
+	       bfd_vma *valuep)
 {
   const char *errmsg = 0;
-  unsigned long value;
+  bfd_vma value;
   enum cgen_parse_operand_result op_res;
 
   errmsg = cgen_parse_address (cd, strp, M32C_OPERAND_LAB_5_3,

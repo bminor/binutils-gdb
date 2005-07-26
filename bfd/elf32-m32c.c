@@ -132,6 +132,62 @@ static reloc_howto_type m32c_elf_howto_table [] =
 	 0,     		/* src_mask */
 	 0,             	/* dst_mask */
 	 TRUE), 		/* pcrel_offset */
+
+  HOWTO (R_M32C_8,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M32C_8",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,     		/* src_mask */
+	 0x000000ff,		/* dst_mask */
+	 FALSE), 		/* pcrel_offset */
+
+  HOWTO (R_M32C_LO16,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M32C_LO16",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,     		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE), 		/* pcrel_offset */
+
+  HOWTO (R_M32C_HI8,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M32C_HI8",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,     		/* src_mask */
+	 0x000000ff,		/* dst_mask */
+	 FALSE), 		/* pcrel_offset */
+
+  HOWTO (R_M32C_HI16,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M32C_HI16",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0,     		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE), 		/* pcrel_offset */
 };
 
 /* Map BFD reloc types to M32C ELF reloc types.  */
@@ -149,7 +205,11 @@ static const struct m32c_reloc_map m32c_reloc_map [] =
   { BFD_RELOC_24,               R_M32C_24 },
   { BFD_RELOC_32,		R_M32C_32 },
   { BFD_RELOC_8_PCREL,          R_M32C_8_PCREL },
-  { BFD_RELOC_16_PCREL,         R_M32C_16_PCREL }
+  { BFD_RELOC_16_PCREL,         R_M32C_16_PCREL },
+  { BFD_RELOC_8,		R_M32C_8 },
+  { BFD_RELOC_LO16,		R_M32C_LO16 },
+  { BFD_RELOC_HI16,		R_M32C_HI16 },
+  { BFD_RELOC_M32C_HI8,		R_M32C_HI8 }
 };
 
 static reloc_howto_type *
@@ -371,6 +431,11 @@ m32c_elf_relocate_section
 			      + (*plt_offset & -2));
 	      }
 	  }
+	  break;
+
+	case R_M32C_HI8:
+	case R_M32C_HI16:
+	  relocation >>= 16;
 	  break;
 	}
 

@@ -1,3 +1,14 @@
+2005-07-25  DJ Delorie  <dj@redhat.com>
+
+	* reloc.c: Remove unused M32C relocs, add BFD_RELOC_M32C_HI8.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+	* elf32-m32c.c (m32c_elf_howto_table): Add R_M32C_8, R_M32C_LO16,
+	R_M32C_HI8, R_M32C_HI16.
+	(m32c_reloc_map): Likewise.
+	(m32c_elf_relocate_section): Add R_M32C_HI8 and R_M32C_HI16.
+
 2005-07-25  Jan Hubicka  <jh@suse.cz>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

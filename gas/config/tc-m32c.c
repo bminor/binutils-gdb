@@ -738,6 +738,27 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
     int offset;
   } op_reloc_table[] = {
 
+    /* Absolute relocs for 8-bit fields.  */
+    { M32C_OPERAND_IMM_8_QI,   BFD_RELOC_8, 1 },
+    { M32C_OPERAND_IMM_16_QI,  BFD_RELOC_8, 2 },
+    { M32C_OPERAND_IMM_24_QI,  BFD_RELOC_8, 3 },
+    { M32C_OPERAND_IMM_32_QI,  BFD_RELOC_8, 4 },
+    { M32C_OPERAND_IMM_40_QI,  BFD_RELOC_8, 5 },
+    { M32C_OPERAND_IMM_48_QI,  BFD_RELOC_8, 6 },
+    { M32C_OPERAND_IMM_56_QI,  BFD_RELOC_8, 7 },
+    { M32C_OPERAND_DSP_8_S8,   BFD_RELOC_8, 1 },
+    { M32C_OPERAND_DSP_16_S8,  BFD_RELOC_8, 2 },
+    { M32C_OPERAND_DSP_24_S8,  BFD_RELOC_8, 3 },
+    { M32C_OPERAND_DSP_32_S8,  BFD_RELOC_8, 4 },
+    { M32C_OPERAND_DSP_40_S8,  BFD_RELOC_8, 5 },
+    { M32C_OPERAND_DSP_48_S8,  BFD_RELOC_8, 6 },
+    { M32C_OPERAND_DSP_8_U8,   BFD_RELOC_8, 1 },
+    { M32C_OPERAND_DSP_16_U8,  BFD_RELOC_8, 2 },
+    { M32C_OPERAND_DSP_24_U8,  BFD_RELOC_8, 3 },
+    { M32C_OPERAND_DSP_32_U8,  BFD_RELOC_8, 4 },
+    { M32C_OPERAND_DSP_40_U8,  BFD_RELOC_8, 5 },
+    { M32C_OPERAND_DSP_48_U8,  BFD_RELOC_8, 6 },
+
     /* Absolute relocs for 16-bit fields.  */
     { M32C_OPERAND_IMM_16_HI,  BFD_RELOC_16, 2 },
     { M32C_OPERAND_IMM_24_HI,  BFD_RELOC_16, 3 },
@@ -777,6 +798,11 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
         {
           fixP->fx_where += or->offset;
           fixP->fx_size -= or->offset;
+
+	  if (fixP->fx_cgen.opinfo
+	      && fixP->fx_cgen.opinfo != BFD_RELOC_NONE)
+	    return fixP->fx_cgen.opinfo;
+
           return or->reloc;
         }
     }

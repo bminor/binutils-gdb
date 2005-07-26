@@ -1,3 +1,8 @@
+2005-07-25  DJ Delorie  <dj@redhat.com>
+
+	* m32c-asm.c Regenerate.
+	* m32c-dis.c Regenerate.
+
 2005-07-20  DJ Delorie  <dj@redhat.com>
 
 	* disassemble.c (disassemble_init_for_target): M32C ISAs are
