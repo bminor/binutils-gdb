@@ -2087,22 +2087,36 @@ optimize_imm ()
 
 	    /* Symbols and expressions.  */
 	  default:
-	    /* Convert symbolic operand to proper sizes for matching.  */
-	    switch (guess_suffix)
-	      {
-	      case QWORD_MNEM_SUFFIX:
-		i.types[op] &= Imm64 | Imm32S;
-		break;
-	      case LONG_MNEM_SUFFIX:
-		i.types[op] &= Imm32;
-		break;
-	      case WORD_MNEM_SUFFIX:
-		i.types[op] &= Imm16;
-		break;
-	      case BYTE_MNEM_SUFFIX:
-		i.types[op] &= Imm8 | Imm8S;
-		break;
-	      }
+	    /* Convert symbolic operand to proper sizes for matching, but don't
+	       prevent matching a set of insns that only supports sizes other
+	       than those matching the insn suffix.  */
+	    {
+	      unsigned int mask, allowed = 0;
+	      const template *t;
+
+	      for (t = current_templates->start; t < current_templates->end; ++t)
+	        allowed |= t->operand_types[op];
+	      switch (guess_suffix)
+		{
+		case QWORD_MNEM_SUFFIX:
+		  mask = Imm64 | Imm32S;
+		  break;
+		case LONG_MNEM_SUFFIX:
+		  mask = Imm32;
+		  break;
+		case WORD_MNEM_SUFFIX:
+		  mask = Imm16;
+		  break;
+		case BYTE_MNEM_SUFFIX:
+		  mask = Imm8;
+		  break;
+		default:
+		  mask = 0;
+		  break;
+		}
+		if (mask & allowed)
+		  i.types[op] &= mask;
+	    }
 	    break;
 	  }
       }

@@ -62,6 +62,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "sib"
     run_dump_test "vmx"
     run_dump_test "suffix"
+    run_dump_test "immed32"
 
     if {![istarget "*-*-aix*"]
 	&& (![is_elf_format] || [istarget "*-*-linux*"]
@@ -135,6 +136,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-branch"
     run_dump_test "svme64"
     run_dump_test "x86-64-vmx"
+    run_dump_test "immed64"
 
     # For ELF targets verify that @unwind works.
     if { ([istarget "*-*-elf*"] || [istarget "*-*-linux*"]

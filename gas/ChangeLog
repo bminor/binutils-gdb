@@ -1,3 +1,9 @@
+2005-07-26  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (optimize_imm): Calculate candidate immediates
+	mask from guessed suffix, but mask out other immediate types only
+	if at least on candidate is valid for the insn.
+
 2005-07-25  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.c (md_cgen_lookup_reloc): Add 8 bit operands.

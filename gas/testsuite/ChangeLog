@@ -1,3 +1,9 @@
+2005-07-26  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/immed32.[sd]: New.
+	* gas/i386/immed64.[sd]: New.
+	* gas/i386/i386.exp: Run new tests.
+
 2005-07-21  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb32.s: Add tests for [pc, #imm] addressing modes.
