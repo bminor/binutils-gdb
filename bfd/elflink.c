@@ -1216,7 +1216,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
     }
 
   /* Skip weak definitions of symbols that are already defined.  */
-  if (newdef && olddef && newweak && !oldweak)
+  if (newdef && olddef && newweak)
     *skip = TRUE;
 
   /* If the old symbol is from a dynamic object, and the new symbol is

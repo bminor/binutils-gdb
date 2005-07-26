@@ -1,3 +1,8 @@
+2005-07-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_merge_symbol): Skip weak redefinition
+	regardless of strength of previous definition.
+
 2005-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_gc_mark_dynamic_ref_symbol): Handle -shared.
