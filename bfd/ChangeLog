@@ -1,5 +1,11 @@
 2005-07-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (elf_gc_mark_dynamic_ref_symbol): Handle -shared.
+	(bfd_elf_gc_sections): Allow -gc-sections when -shared.
+	* elf32-ppc.c (ppc_elf_gc_sweep_hook): Correct for -shared.
+
+2005-07-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (elf_gc_sweep): Move gcc_except_table code..
 	(bfd_elf_gc_sections): ..to here.
 

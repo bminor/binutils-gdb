@@ -3728,8 +3728,12 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_UADDR32:
 	case R_PPC_UADDR16:
+	  if (info->shared)
+	    break;
+
 	case R_PPC_PLT32:
 	case R_PPC_PLTREL24:
+	case R_PPC_PLTREL32:
 	case R_PPC_PLT16_LO:
 	case R_PPC_PLT16_HI:
 	case R_PPC_PLT16_HA:

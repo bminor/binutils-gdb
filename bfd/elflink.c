@@ -9072,19 +9072,25 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
   return TRUE;
 }
 
-/* Mark sections containing dynamically referenced symbols.  This is called
-   through elf_link_hash_traverse.  */
+/* Mark sections containing dynamically referenced symbols.  When
+   building shared libraries, we must assume that any visible symbol is
+   referenced.  */
 
 static bfd_boolean
-elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h,
-				void *okp ATTRIBUTE_UNUSED)
+elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 {
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
-      && h->ref_dynamic)
+      && (h->ref_dynamic
+	  || (info->shared
+	      && h->def_regular
+	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
+	      && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN)))
     h->root.u.def.section->flags |= SEC_KEEP;
 
   return TRUE;
@@ -9104,7 +9110,6 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   if (!get_elf_backend_data (abfd)->can_gc_sections
       || info->relocatable
       || info->emitrelocations
-      || info->shared
       || !is_elf_hash_table (info->hash))
     {
       (*_bfd_error_handler)(_("Warning: gc-sections option ignored"));
@@ -9129,9 +9134,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   if (elf_hash_table (info)->dynamic_sections_created)
     elf_link_hash_traverse (elf_hash_table (info),
 			    elf_gc_mark_dynamic_ref_symbol,
-			    &ok);
-  if (!ok)
-    return FALSE;
+			    info);
 
   /* Grovel through relocs to find out who stays ...  */
   gc_mark_hook = get_elf_backend_data (abfd)->gc_mark_hook;
