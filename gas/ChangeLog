@@ -1,3 +1,68 @@
+2005-07-27  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.h (unw_r_record): Change type of fr_mem to unsigned
+	int.
+	(unw_p_record): Remove unused/redundant fields imask and rmask.
+	Combine spoff and pspoff into a union. Combine gr and br into a
+	union. Change type of grmask and brmask to unsigned char. Change type
+	of frmask to unsigned int.
+	(unw_x_record): Combine spoff, pspoff, and treg into a union.
+	* config/tc-ia64.c (unwind): New field 'pending_saves'.
+	(check_pending_save): New.
+	(alloc_record): Clear out entire record.
+	(output_psp_gr): Use renamed structure fields.
+	(output_psp_sprel): Likewise.
+	(output_rp_gr): Likewise.
+	(output_rp_br): Likewise.
+	(output_rp_psprel): Likewise.
+	(output_rp_sprel): Likewise.
+	(output_pfs_gr): Likewise.
+	(output_pfs_psprel): Likewise.
+	(output_pfs_sprel): Likewise.
+	(output_preds_gr): Likewise.
+	(output_preds_psprel): Likewise.
+	(output_preds_sprel): Likewise.
+	(output_spill_base): Likewise.
+	(output_unat_gr): Likewise.
+	(output_unat_psprel): Likewise.
+	(output_unat_sprel): Likewise.
+	(output_lc_gr): Likewise.
+	(output_lc_psprel): Likewise.
+	(output_lc_sprel): Likewise.
+	(output_fpsr_gr): Likewise.
+	(output_fpsr_psprel): Likewise.
+	(output_fpsr_sprel): Likewise.
+	(output_priunat_gr): Likewise.
+	(output_priunat_psprel): Likewise.
+	(output_priunat_sprel): Likewise.
+	(output_bsp_gr): Likewise.
+	(output_bsp_psprel): Likewise.
+	(output_bsp_sprel): Likewise.
+	(output_bspstore_gr): Likewise.
+	(output_bspstore_psprel): Likewise.
+	(output_bspstore_sprel): Likewise.
+	(output_rnat_gr): Likewise.
+	(output_rnat_psprel): Likewise.
+	(output_rnat_sprel): Likewise.
+	(output_spill_psprel): Likewise.
+	(output_spill_sprel): Likewise.
+	(output_spill_reg): Likewise.
+	(output_fr_mem): Likewise. Allocate one unwind record per set mask
+	bit.
+	(output_frgr_mem): Likewise.
+	(output_gr_mem): Likewise.
+	(output_br_mem): Likewise.
+	(output_gr_gr): Likewise.
+	(output_br_gr): Likewise.
+	(fixup_unw_records): Likewise.
+	(process_one_record): Use renamed structure fields. For gr_gr and
+	br_gr, collect mask from chain of records before output.
+	(in_prologue): Simplify and eliminate early returns. Call
+	check_pending_save.
+	(in_body): Simplify and eliminate early returns.
+	(dot_body): Call check_pending_save.
+	(md_assemble): Update comment. Deal with pending saves.
+
 2005-07-26  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (optimize_imm): Calculate candidate immediates

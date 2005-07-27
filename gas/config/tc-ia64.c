@@ -742,6 +742,9 @@ static struct
   unsigned int prologue_count;	/* number of .prologues seen so far */
   /* Prologue counts at previous .label_state directives.  */
   struct label_prologue_count * saved_prologue_counts;
+
+  /* List of split up .save-s.  */
+  unw_p_record *pending_saves;
 } unwind;
 
 /* The input value is a negated offset from psp, and specifies an address
@@ -1738,6 +1741,55 @@ output_X4_format (f, qp, ab, reg, x, y, treg, t)
   (*f) (count, bytes, NULL);
 }
 
+/* This function checks whether there are any outstanding .save-s and
+   discards them if so.  */
+
+static void
+check_pending_save (void)
+{
+  if (unwind.pending_saves)
+    {
+      unw_rec_list *cur, *prev;
+
+      as_warn ("Previous .save incomplete");
+      for (cur = unwind.list, prev = NULL; cur; )
+	if (&cur->r.record.p == unwind.pending_saves)
+	  {
+	    if (prev)
+	      prev->next = cur->next;
+	    else
+	      unwind.list = cur->next;
+	    if (cur == unwind.tail)
+	      unwind.tail = prev;
+	    if (cur == unwind.current_entry)
+	      unwind.current_entry = cur->next;
+	    /* Don't free the first discarded record, it's being used as
+	       terminator for (currently) br_gr and gr_gr processing, and
+	       also prevents leaving a dangling pointer to it in its
+	       predecessor.  */
+	    cur->r.record.p.grmask = 0;
+	    cur->r.record.p.brmask = 0;
+	    cur->r.record.p.frmask = 0;
+	    prev = cur->r.record.p.next;
+	    cur->r.record.p.next = NULL;
+	    cur = prev;
+	    break;
+	  }
+	else
+	  {
+	    prev = cur;
+	    cur = cur->next;
+	  }
+      while (cur)
+	{
+	  prev = cur;
+	  cur = cur->r.record.p.next;
+	  free (prev);
+	}
+      unwind.pending_saves = NULL;
+    }
+}
+
 /* This function allocates a record list structure, and initializes fields.  */
 
 static unw_rec_list *
@@ -1745,7 +1797,7 @@ alloc_record (unw_record_type t)
 {
   unw_rec_list *ptr;
   ptr = xmalloc (sizeof (*ptr));
-  ptr->next = NULL;
+  memset (ptr, 0, sizeof (*ptr));
   ptr->slot_number = SLOT_NUM_NOT_SET;
   ptr->r.type = t;
   return ptr;
@@ -1809,7 +1861,7 @@ output_psp_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (psp_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -1818,7 +1870,7 @@ output_psp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (psp_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -1834,7 +1886,7 @@ output_rp_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (rp_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -1843,7 +1895,7 @@ output_rp_br (br)
      unsigned int br;
 {
   unw_rec_list *ptr = alloc_record (rp_br);
-  ptr->r.record.p.br = br;
+  ptr->r.record.p.r.br = br;
   return ptr;
 }
 
@@ -1852,7 +1904,7 @@ output_rp_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rp_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -1861,7 +1913,7 @@ output_rp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rp_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -1877,7 +1929,7 @@ output_pfs_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (pfs_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -1886,7 +1938,7 @@ output_pfs_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (pfs_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -1895,7 +1947,7 @@ output_pfs_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (pfs_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -1911,7 +1963,7 @@ output_preds_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (preds_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -1920,7 +1972,7 @@ output_preds_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (preds_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -1929,7 +1981,7 @@ output_preds_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (preds_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -1938,8 +1990,24 @@ output_fr_mem (mask)
      unsigned int mask;
 {
   unw_rec_list *ptr = alloc_record (fr_mem);
-  ptr->r.record.p.rmask = mask;
-  return ptr;
+  unw_rec_list *cur = ptr;
+
+  ptr->r.record.p.frmask = mask;
+  unwind.pending_saves = &ptr->r.record.p;
+  for (;;)
+    {
+      unw_rec_list *prev = cur;
+
+      /* Clear least significant set bit.  */
+      mask &= ~(mask & (~mask + 1));
+      if (!mask)
+	return ptr;
+      cur = alloc_record (fr_mem);
+      cur->r.record.p.frmask = mask;
+      /* Retain only least significant bit.  */
+      prev->r.record.p.frmask ^= mask;
+      prev->r.record.p.next = cur;
+    }
 }
 
 static unw_rec_list *
@@ -1948,9 +2016,39 @@ output_frgr_mem (gr_mask, fr_mask)
      unsigned int fr_mask;
 {
   unw_rec_list *ptr = alloc_record (frgr_mem);
-  ptr->r.record.p.grmask = gr_mask;
-  ptr->r.record.p.frmask = fr_mask;
-  return ptr;
+  unw_rec_list *cur = ptr;
+
+  unwind.pending_saves = &cur->r.record.p;
+  cur->r.record.p.frmask = fr_mask;
+  while (fr_mask)
+    {
+      unw_rec_list *prev = cur;
+
+      /* Clear least significant set bit.  */
+      fr_mask &= ~(fr_mask & (~fr_mask + 1));
+      if (!gr_mask && !fr_mask)
+	return ptr;
+      cur = alloc_record (frgr_mem);
+      cur->r.record.p.frmask = fr_mask;
+      /* Retain only least significant bit.  */
+      prev->r.record.p.frmask ^= fr_mask;
+      prev->r.record.p.next = cur;
+    }
+  cur->r.record.p.grmask = gr_mask;
+  for (;;)
+    {
+      unw_rec_list *prev = cur;
+
+      /* Clear least significant set bit.  */
+      gr_mask &= ~(gr_mask & (~gr_mask + 1));
+      if (!gr_mask)
+	return ptr;
+      cur = alloc_record (frgr_mem);
+      cur->r.record.p.grmask = gr_mask;
+      /* Retain only least significant bit.  */
+      prev->r.record.p.grmask ^= gr_mask;
+      prev->r.record.p.next = cur;
+    }
 }
 
 static unw_rec_list *
@@ -1959,9 +2057,27 @@ output_gr_gr (mask, reg)
      unsigned int reg;
 {
   unw_rec_list *ptr = alloc_record (gr_gr);
+  unw_rec_list *cur = ptr;
+
   ptr->r.record.p.grmask = mask;
-  ptr->r.record.p.gr = reg;
-  return ptr;
+  ptr->r.record.p.r.gr = reg;
+  unwind.pending_saves = &ptr->r.record.p;
+  for (;;)
+    {
+      unw_rec_list *prev = cur;
+
+      /* Clear least significant set bit.  */
+      mask &= ~(mask & (~mask + 1));
+      if (!mask)
+	return ptr;
+      cur = alloc_record (gr_gr);
+      cur->r.record.p.grmask = mask;
+      /* Indicate this record shouldn't be output.  */
+      cur->r.record.p.r.gr = REG_NUM;
+      /* Retain only least significant bit.  */
+      prev->r.record.p.grmask ^= mask;
+      prev->r.record.p.next = cur;
+    }
 }
 
 static unw_rec_list *
@@ -1969,27 +2085,77 @@ output_gr_mem (mask)
      unsigned int mask;
 {
   unw_rec_list *ptr = alloc_record (gr_mem);
-  ptr->r.record.p.rmask = mask;
-  return ptr;
+  unw_rec_list *cur = ptr;
+
+  ptr->r.record.p.grmask = mask;
+  unwind.pending_saves = &ptr->r.record.p;
+  for (;;)
+    {
+      unw_rec_list *prev = cur;
+
+      /* Clear least significant set bit.  */
+      mask &= ~(mask & (~mask + 1));
+      if (!mask)
+	return ptr;
+      cur = alloc_record (gr_mem);
+      cur->r.record.p.grmask = mask;
+      /* Retain only least significant bit.  */
+      prev->r.record.p.grmask ^= mask;
+      prev->r.record.p.next = cur;
+    }
 }
 
 static unw_rec_list *
 output_br_mem (unsigned int mask)
 {
   unw_rec_list *ptr = alloc_record (br_mem);
+  unw_rec_list *cur = ptr;
+
   ptr->r.record.p.brmask = mask;
-  return ptr;
+  unwind.pending_saves = &ptr->r.record.p;
+  for (;;)
+    {
+      unw_rec_list *prev = cur;
+
+      /* Clear least significant set bit.  */
+      mask &= ~(mask & (~mask + 1));
+      if (!mask)
+	return ptr;
+      cur = alloc_record (br_mem);
+      cur->r.record.p.brmask = mask;
+      /* Retain only least significant bit.  */
+      prev->r.record.p.brmask ^= mask;
+      prev->r.record.p.next = cur;
+    }
 }
 
 static unw_rec_list *
-output_br_gr (save_mask, reg)
-     unsigned int save_mask;
+output_br_gr (mask, reg)
+     unsigned int mask;
      unsigned int reg;
 {
   unw_rec_list *ptr = alloc_record (br_gr);
-  ptr->r.record.p.brmask = save_mask;
-  ptr->r.record.p.gr = reg;
-  return ptr;
+  unw_rec_list *cur = ptr;
+
+  ptr->r.record.p.brmask = mask;
+  ptr->r.record.p.r.gr = reg;
+  unwind.pending_saves = &ptr->r.record.p;
+  for (;;)
+    {
+      unw_rec_list *prev = cur;
+
+      /* Clear least significant set bit.  */
+      mask &= ~(mask & (~mask + 1));
+      if (!mask)
+	return ptr;
+      cur = alloc_record (br_gr);
+      cur->r.record.p.brmask = mask;
+      /* Indicate this record shouldn't be output.  */
+      cur->r.record.p.r.gr = REG_NUM;
+      /* Retain only least significant bit.  */
+      prev->r.record.p.brmask ^= mask;
+      prev->r.record.p.next = cur;
+    }
 }
 
 static unw_rec_list *
@@ -1997,7 +2163,7 @@ output_spill_base (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (spill_base);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2013,7 +2179,7 @@ output_unat_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (unat_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -2022,7 +2188,7 @@ output_unat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (unat_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2031,7 +2197,7 @@ output_unat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (unat_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -2047,7 +2213,7 @@ output_lc_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (lc_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -2056,7 +2222,7 @@ output_lc_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (lc_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2065,7 +2231,7 @@ output_lc_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (lc_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -2081,7 +2247,7 @@ output_fpsr_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (fpsr_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -2090,7 +2256,7 @@ output_fpsr_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (fpsr_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2099,7 +2265,7 @@ output_fpsr_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (fpsr_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -2122,7 +2288,7 @@ output_priunat_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (priunat_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -2131,7 +2297,7 @@ output_priunat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (priunat_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2140,7 +2306,7 @@ output_priunat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (priunat_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -2156,7 +2322,7 @@ output_bsp_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (bsp_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -2165,7 +2331,7 @@ output_bsp_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bsp_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2174,7 +2340,7 @@ output_bsp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bsp_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -2190,7 +2356,7 @@ output_bspstore_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (bspstore_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -2199,7 +2365,7 @@ output_bspstore_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bspstore_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2208,7 +2374,7 @@ output_bspstore_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bspstore_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -2224,7 +2390,7 @@ output_rnat_gr (gr)
      unsigned int gr;
 {
   unw_rec_list *ptr = alloc_record (rnat_gr);
-  ptr->r.record.p.gr = gr;
+  ptr->r.record.p.r.gr = gr;
   return ptr;
 }
 
@@ -2233,7 +2399,7 @@ output_rnat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rnat_psprel);
-  ptr->r.record.p.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.p.off.psp = ENCODED_PSP_OFFSET (offset);
   return ptr;
 }
 
@@ -2242,7 +2408,7 @@ output_rnat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rnat_sprel);
-  ptr->r.record.p.spoff = offset / 4;
+  ptr->r.record.p.off.sp = offset / 4;
   return ptr;
 }
 
@@ -2291,7 +2457,7 @@ output_spill_psprel (ab, reg, offset, predicate)
   unw_rec_list *ptr = alloc_record (predicate ? spill_psprel_p : spill_psprel);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.pspoff = ENCODED_PSP_OFFSET (offset);
+  ptr->r.record.x.where.pspoff = ENCODED_PSP_OFFSET (offset);
   ptr->r.record.x.qp = predicate;
   return ptr;
 }
@@ -2306,7 +2472,7 @@ output_spill_sprel (ab, reg, offset, predicate)
   unw_rec_list *ptr = alloc_record (predicate ? spill_sprel_p : spill_sprel);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.spoff = offset / 4;
+  ptr->r.record.x.where.spoff = offset / 4;
   ptr->r.record.x.qp = predicate;
   return ptr;
 }
@@ -2322,7 +2488,7 @@ output_spill_reg (ab, reg, targ_reg, xy, predicate)
   unw_rec_list *ptr = alloc_record (predicate ? spill_reg_p : spill_reg);
   ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.treg = targ_reg;
+  ptr->r.record.x.where.reg = targ_reg;
   ptr->r.record.x.xy = xy;
   ptr->r.record.x.qp = predicate;
   return ptr;
@@ -2336,7 +2502,7 @@ process_one_record (ptr, f)
      unw_rec_list *ptr;
      vbyte_func f;
 {
-  unsigned long fr_mask, gr_mask;
+  unsigned int fr_mask, gr_mask;
 
   switch (ptr->r.type)
     {
@@ -2402,13 +2568,13 @@ process_one_record (ptr, f)
     case bsp_gr:
     case bspstore_gr:
     case rnat_gr:
-      output_P3_format (f, ptr->r.type, ptr->r.record.p.gr);
+      output_P3_format (f, ptr->r.type, ptr->r.record.p.r.gr);
       break;
     case rp_br:
-      output_P3_format (f, rp_br, ptr->r.record.p.br);
+      output_P3_format (f, rp_br, ptr->r.record.p.r.br);
       break;
     case psp_sprel:
-      output_P7_format (f, psp_sprel, ptr->r.record.p.spoff, 0);
+      output_P7_format (f, psp_sprel, ptr->r.record.p.off.sp, 0);
       break;
     case rp_when:
     case pfs_when:
@@ -2425,7 +2591,7 @@ process_one_record (ptr, f)
     case lc_psprel:
     case fpsr_psprel:
     case spill_base:
-      output_P7_format (f, ptr->r.type, ptr->r.record.p.pspoff, 0);
+      output_P7_format (f, ptr->r.type, ptr->r.record.p.off.psp, 0);
       break;
     case rp_sprel:
     case pfs_sprel:
@@ -2437,13 +2603,29 @@ process_one_record (ptr, f)
     case bsp_sprel:
     case bspstore_sprel:
     case rnat_sprel:
-      output_P8_format (f, ptr->r.type, ptr->r.record.p.spoff);
+      output_P8_format (f, ptr->r.type, ptr->r.record.p.off.sp);
       break;
     case gr_gr:
-      output_P9_format (f, ptr->r.record.p.grmask, ptr->r.record.p.gr);
+      if (ptr->r.record.p.r.gr < REG_NUM)
+	{
+	  const unw_rec_list *cur = ptr;
+
+	  gr_mask = cur->r.record.p.grmask;
+	  while ((cur = cur->r.record.p.next) != NULL)
+	    gr_mask |= cur->r.record.p.grmask;
+	  output_P9_format (f, gr_mask, ptr->r.record.p.r.gr);
+	}
       break;
     case br_gr:
-      output_P2_format (f, ptr->r.record.p.brmask, ptr->r.record.p.gr);
+      if (ptr->r.record.p.r.gr < REG_NUM)
+	{
+	  const unw_rec_list *cur = ptr;
+
+	  gr_mask = cur->r.record.p.brmask;
+	  while ((cur = cur->r.record.p.next) != NULL)
+	    gr_mask |= cur->r.record.p.brmask;
+	  output_P2_format (f, gr_mask, ptr->r.record.p.r.gr);
+	}
       break;
     case spill_mask:
       as_bad ("spill_mask record unimplemented.");
@@ -2459,7 +2641,7 @@ process_one_record (ptr, f)
     case bsp_psprel:
     case bspstore_psprel:
     case rnat_psprel:
-      output_P8_format (f, ptr->r.type, ptr->r.record.p.pspoff);
+      output_P8_format (f, ptr->r.type, ptr->r.record.p.off.psp);
       break;
     case unwabi:
       output_P10_format (f, ptr->r.record.p.abi, ptr->r.record.p.context);
@@ -2474,32 +2656,32 @@ process_one_record (ptr, f)
     case spill_psprel:
       output_X1_format (f, ptr->r.type, ptr->r.record.x.ab,
 			ptr->r.record.x.reg, ptr->r.record.x.t,
-			ptr->r.record.x.pspoff);
+			ptr->r.record.x.where.pspoff);
       break;
     case spill_sprel:
       output_X1_format (f, ptr->r.type, ptr->r.record.x.ab,
 			ptr->r.record.x.reg, ptr->r.record.x.t,
-			ptr->r.record.x.spoff);
+			ptr->r.record.x.where.spoff);
       break;
     case spill_reg:
       output_X2_format (f, ptr->r.record.x.ab, ptr->r.record.x.reg,
 			ptr->r.record.x.xy >> 1, ptr->r.record.x.xy,
-			ptr->r.record.x.treg, ptr->r.record.x.t);
+			ptr->r.record.x.where.reg, ptr->r.record.x.t);
       break;
     case spill_psprel_p:
       output_X3_format (f, ptr->r.type, ptr->r.record.x.qp,
 			ptr->r.record.x.ab, ptr->r.record.x.reg,
-			ptr->r.record.x.t, ptr->r.record.x.pspoff);
+			ptr->r.record.x.t, ptr->r.record.x.where.pspoff);
       break;
     case spill_sprel_p:
       output_X3_format (f, ptr->r.type, ptr->r.record.x.qp,
 			ptr->r.record.x.ab, ptr->r.record.x.reg,
-			ptr->r.record.x.t, ptr->r.record.x.spoff);
+			ptr->r.record.x.t, ptr->r.record.x.where.spoff);
       break;
     case spill_reg_p:
       output_X4_format (f, ptr->r.record.x.qp, ptr->r.record.x.ab,
 			ptr->r.record.x.reg, ptr->r.record.x.xy >> 1,
-			ptr->r.record.x.xy, ptr->r.record.x.treg,
+			ptr->r.record.x.xy, ptr->r.record.x.where.reg,
 			ptr->r.record.x.t);
       break;
     default:
@@ -2835,8 +3017,8 @@ fixup_unw_records (list, before_relax)
 	      as_bad ("fr_mem record before region record!");
 	      return;
 	    }
-	  region->r.record.r.mask.fr_mem |= ptr->r.record.p.rmask;
-	  set_imask (region, ptr->r.record.p.rmask, t, 1);
+	  region->r.record.r.mask.fr_mem |= ptr->r.record.p.frmask;
+	  set_imask (region, ptr->r.record.p.frmask, t, 1);
 	  break;
 	case gr_mem:
 	  if (!region)
@@ -2844,8 +3026,8 @@ fixup_unw_records (list, before_relax)
 	      as_bad ("gr_mem record before region record!");
 	      return;
 	    }
-	  region->r.record.r.mask.gr_mem |= ptr->r.record.p.rmask;
-	  set_imask (region, ptr->r.record.p.rmask, t, 2);
+	  region->r.record.r.mask.gr_mem |= ptr->r.record.p.grmask;
+	  set_imask (region, ptr->r.record.p.grmask, t, 2);
 	  break;
 	case br_mem:
 	  if (!region)
@@ -3174,18 +3356,11 @@ static int
 in_prologue (const char *directive)
 {
   int in = in_procedure (directive);
-  if (in)
-    {
-      /* We are in a procedure. Check if we are in a prologue.  */
-      if (unwind.prologue)
-	return 1;
-      /* We only want to issue one message.  */
-      if (in == 1)
-	return unwind_diagnostic ("prologue", directive);
-      else
-	return -1;
-    }
-  return 0;
+
+  if (in > 0 && !unwind.prologue)
+    in = unwind_diagnostic ("prologue", directive);
+  check_pending_save ();
+  return in;
 }
 
 /* Return 1 if a directive is in a body, -1 if a directive isn't in
@@ -3197,18 +3372,10 @@ static int
 in_body (const char *directive)
 {
   int in = in_procedure (directive);
-  if (in)
-    {
-      /* We are in a procedure. Check if we are in a body.  */
-      if (unwind.body)
-	return 1;
-      /* We only want to issue one message.  */
-      if (in == 1)
-	return unwind_diagnostic ("body region", directive);
-      else
-	return -1;
-    }
-  return 0;
+
+  if (in > 0 && !unwind.body)
+    in = unwind_diagnostic ("body region", directive);
+  return in;
 }
 
 static void
@@ -4306,6 +4473,7 @@ dot_body (dummy)
     return;
   if (!unwind.prologue && !unwind.body && unwind.insn)
     as_warn ("Initial .body should precede any instructions");
+  check_pending_save ();
 
   unwind.prologue = 0;
   unwind.prologue_mask = 0;
@@ -10774,11 +10942,23 @@ md_assemble (str)
   as_where (&CURR_SLOT.src_file, &CURR_SLOT.src_line);
   dwarf2_where (&CURR_SLOT.debug_line);
 
-  /* Add unwind entry, if there is one.  */
+  /* Add unwind entries, if there are any.  */
   if (unwind.current_entry)
     {
       CURR_SLOT.unwind_record = unwind.current_entry;
       unwind.current_entry = NULL;
+    }
+  if (unwind.pending_saves)
+    {
+      if (unwind.pending_saves->next)
+	{
+	  /* Attach the next pending save to the next slot so that its
+	     slot number will get set correctly.  */
+	  add_unwind_entry (unwind.pending_saves->next, NOT_A_CHAR);
+	  unwind.pending_saves = &unwind.pending_saves->next->r.record.p;
+	}
+      else
+	unwind.pending_saves = NULL;
     }
   if (unwind.proc_pending.sym && S_IS_DEFINED (unwind.proc_pending.sym))
     unwind.insn = 1;

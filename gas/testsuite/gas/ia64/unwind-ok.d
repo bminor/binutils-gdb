@@ -13,7 +13,7 @@ Unwind section '\.IA_64\.unwind' at offset 0x[[:xdigit:]]+ contains 8 entries:
 [[:space:]]*P7:spill_base\(pspoff=0x10-0x10\)
 [[:space:]]*P3:rp_br\(reg=b7\)
 [[:space:]]*P10:unwabi\(abi=@svr4,context=0x00\)
-[[:space:]]*R1:body\(rlen=[[:digit:]]+\)
+[[:space:]]*R1:body\(rlen=25\)
 [[:space:]]*X2:spill_reg\(t=0,reg=r4,treg=r2\)
 [[:space:]]*X4:spill_reg_p\(qp=p1,t=1,reg=r7,treg=r31\)
 [[:space:]]*X1:spill_sprel\(reg=b1,t=2,spoff=0x8\)
@@ -41,7 +41,7 @@ Unwind section '\.IA_64\.unwind' at offset 0x[[:xdigit:]]+ contains 8 entries:
 [[:space:]]*v[[:digit:]]+, flags=0x0( \(\))?, len=[[:digit:]]+ bytes
 [[:space:]]*R2:prologue_gr\(mask=\[rp,psp,pr\],grsave=r8,rlen=14\)
 [[:space:]]*P5:frgr_mem\(grmask=\[r4,r7\],frmask=\[f2,f31\]\)
-[[:space:]]*P4:spill_mask\(imask=\[b-b,bb-,---,---,--\]\)
+[[:space:]]*P4:spill_mask\(imask=\[frb,bfr,---,---,--\]\)
 [[:space:]]*P7:spill_base\(pspoff=0x10-0x10\)
 [[:space:]]*P2:br_gr\(brmask=\[b1,b5\],gr=r32\)
 [[:space:]]*X2:spill_reg\(t=6,reg=f31,treg=f31\)

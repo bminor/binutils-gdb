@@ -1,3 +1,8 @@
+2005-07-27  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/unwind-bad.l: Uncomment patterns matching new warnings.
+	* gas/ia64/unwind-ok.d: Correct expectations.
+
 2005-07-26  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/immed32.[sd]: New.

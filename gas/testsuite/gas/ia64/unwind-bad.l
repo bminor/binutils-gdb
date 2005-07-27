@@ -2,17 +2,17 @@
 .*:8: Error: First operand to \.save\.g must be a positive 4-bit constant
 .*:10: Error: First operand to \.save\.g must be a positive 4-bit constant
 .*:12: Error: First operand to \.save\.g must be a positive 4-bit constant
-#FIXME .*:16: Error: Previous spill incomplete
+.*:16: Warning: Previous .save incomplete
 #FIXME .*:18: Error: Register r4 was already saved
 .*:20: Error: Operand to \.save\.f must be a positive 20-bit constant
 .*:22: Error: Operand to \.save\.f must be a positive 20-bit constant
 .*:24: Error: Operand to \.save\.f must be a positive 20-bit constant
-#FIXME .*:28: Error: Previous spill incomplete
+.*:28: Warning: Previous .save incomplete
 #FIXME .*:30: Error: Register f2 was already saved
 .*:32: Error: First operand to \.save\.b must be a positive 5-bit constant
 .*:34: Error: First operand to \.save\.b must be a positive 5-bit constant
 .*:36: Error: First operand to \.save\.b must be a positive 5-bit constant
-#FIXME .*:40: Error: Previous spill incomplete
+.*:40: Warning: Previous .save incomplete
 #FIXME .*:42: Error: Register b1 was already saved
 .*:44: Error: Operand 2 to \.spillreg must be a writable register
 .*:46: Error: Operand 1 to \.spillreg must be a preserved register
@@ -32,7 +32,7 @@
 .*:82: Error: Second operand to \.save\.gf must be a non-negative 20-bit constant
 .*:84: Error: First operand to \.save\.gf must be a non-negative 4-bit constant
 .*:86: Error: Second operand to \.save\.gf must be a non-negative 20-bit constant
-#FIXME .*:90: Error: Previous spill incomplete
+.*:90: Warning: Previous .save incomplete
 #FIXME .*:92: Error: Register r4 was already saved
 #FIXME .*:94: Error: Register f2 was already saved
 .*:98: Error: Epilogue count of 2 exceeds number of nested prologues \(1\)

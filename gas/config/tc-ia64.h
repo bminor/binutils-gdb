@@ -241,7 +241,7 @@ typedef struct unw_r_record
   struct
   {
     unsigned char *i;
-    unsigned long fr_mem;
+    unsigned int fr_mem;
     unsigned char gr_mem;
     unsigned char br_mem;
   } mask;
@@ -249,17 +249,22 @@ typedef struct unw_r_record
 
 typedef struct unw_p_record
 {
-  void *imask;
+  struct unw_rec_list *next;
   unsigned long t;
   unsigned long size;
-  unsigned long spoff;
-  unsigned long br;
-  unsigned long pspoff;
-  unsigned short gr;
-  unsigned short rmask;
-  unsigned short grmask;
-  unsigned long frmask;
-  unsigned short brmask;
+  union
+  {
+    unsigned long sp;
+    unsigned long psp;
+  } off;
+  union
+  {
+    unsigned short gr;
+    unsigned short br;
+  } r;
+  unsigned char grmask;
+  unsigned char brmask;
+  unsigned int frmask;
   unsigned char abi;
   unsigned char context;
 } unw_p_record;
@@ -274,10 +279,13 @@ typedef struct unw_b_record
 typedef struct unw_x_record
 {
   unsigned long t;
-  unsigned long spoff;
-  unsigned long pspoff;
+  union
+  {
+    unsigned long spoff;
+    unsigned long pspoff;
+    unsigned int reg;
+  } where;
   unsigned short reg;
-  unsigned short treg;
   unsigned short qp;
   unsigned short ab;	/* Value of the AB field..  */
   unsigned short xy;	/* Value of the XY field..  */
