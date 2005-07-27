@@ -9911,10 +9911,11 @@ fix_syms (struct bfd_link_hash_entry *h, void *data)
     {
       asection *s = h->u.def.section;
       if (s != NULL
-	  && s == s->output_section
-	  && bfd_section_removed_from_list (obfd, s))
+	  && s->output_section != NULL
+	  && (s->output_section->flags & SEC_EXCLUDE) != 0
+	  && bfd_section_removed_from_list (obfd, s->output_section))
 	{
-	  h->u.def.value += s->vma;
+	  h->u.def.value += s->output_offset + s->output_section->vma;
 	  h->u.def.section = bfd_abs_section_ptr;
 	}
     }

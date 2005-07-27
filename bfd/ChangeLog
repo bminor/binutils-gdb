@@ -1,3 +1,7 @@
+2005-07-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (fix_syms): Handle symbols defined in input sections.
+
 2005-07-27  Jan Beulich  <jbeulich@novell.com>
 
 	* elf64-x86-64.c (R_X86_64_standard, R_X86_64_vt_offset): New.
