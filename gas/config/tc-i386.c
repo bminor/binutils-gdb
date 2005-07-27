@@ -111,6 +111,9 @@ static void output_disp PARAMS ((fragS *insn_start_frag,
 #ifndef I386COFF
 static void s_bss PARAMS ((int));
 #endif
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+static void handle_large_common (int small ATTRIBUTE_UNUSED);
+#endif
 
 static const char *default_arch = DEFAULT_ARCH;
 
@@ -305,7 +308,6 @@ static int allow_naked_reg = 0;
    leave, push, and pop instructions so that gcc has the same stack
    frame as in 32 bit mode.  */
 static char stackop_size = '\0';
-static void handle_large_common (int small ATTRIBUTE_UNUSED);
 
 /* Non-zero to optimize code alignment.  */
 int optimize_align_code = 1;

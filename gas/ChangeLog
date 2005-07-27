@@ -1,3 +1,7 @@
+2007-07-27  H.J. Lu <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (handle_large_common): Declare only for ELF.
+
 2005-07-27  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.h (unw_r_record): Change type of fr_mem to unsigned
