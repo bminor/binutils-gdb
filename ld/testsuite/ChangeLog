@@ -1,3 +1,9 @@
+2005-07-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elfweak/size2a.s: Extend test to check size for two weaks.
+	* ld-elfweak/size2b.s: Likewise.
+	* ld-elfweak/size2.d: Update.
+
 2005-07-18  Jan Beulich  <jbeulich@novell.com>
 
 	* ld-i386/abs.s, ld-i386/zero.s, ld-i386/abs.d, ld-x86-64/abs.d,
