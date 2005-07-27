@@ -1,4 +1,4 @@
-/* Copyright 1999, 2004 Free Software Foundation, Inc.
+/* Copyright 1999, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -51,7 +51,7 @@ typedef struct _struct_decl {
   char *char_ptr;
   long  long_int;
   int  **int_ptr_ptr;
-  long  long_array[10];
+  long  long_array[12];
 
   void (*func_ptr) (void);
   struct _struct_decl (*func_ptr_struct) (int, char *, long);
@@ -227,6 +227,8 @@ do_children_tests (void)
   struct_declarations.long_array[9] = 1234;
 
   weird->func_ptr = nothing;
+  struct_declarations.long_array[10] = 3456;
+  struct_declarations.long_array[11] = 5678;
 
   /* Struct/pointer/array tests */
   a0 = '0';

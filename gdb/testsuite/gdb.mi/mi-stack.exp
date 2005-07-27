@@ -152,19 +152,19 @@ proc test_stack_locals_listing {} {
 
     # Obtain lists for locals for the stack frames
     # Tests:
-    # -stack-list-locals 0
-    # -stack-list-locals 1
-    # -stack-list-locals 2
+    # -stack-list-locals 0 (--no-values)
+    # -stack-list-locals 1 (--all-values)
+    # -stack-list-locals 2 (--simple-values)
     # -stack-list-arguments 
 
     mi_gdb_test "232-stack-list-locals 0" \
-	    "232\\^done,locals=\\\[name=\"A\",name=\"B\",name=\"C\"\\\]" \
-                "stack locals listing 0"
+  "232\\^done,locals=\\\[name=\"A\",name=\"B\",name=\"C\",name=\"D\"\\\]" \
+                "stack locals listing of names"
 
 set line_callee4_return_0 [gdb_get_line_number "return 0;"]
 
-# step until A, B, C, have some reasonable values.
-send_gdb "-exec-next 3\n"
+# step until A, B, C, D have some reasonable values.
+send_gdb "-exec-next 4\n"
 gdb_expect {
     -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_callee4_return_0\"\}\r\n$mi_gdb_prompt$" {
 	pass "next's in callee4"
@@ -173,12 +173,12 @@ gdb_expect {
 }
 
     mi_gdb_test "232-stack-list-locals 1" \
-	    "232\\^done,locals=\\\[\{name=\"A\",value=\"1\"\},\{name=\"B\",value=\"2\"\},\{name=\"C\",value=\"3\"\}\\\]" \
-                "stack locals listing 1"
+    "232\\^done,locals=\\\[\{name=\"A\",value=\"1\"\},\{name=\"B\",value=\"2\"\},\{name=\"C\",value=\"3\"\},\{name=\"D\",value=\"\\{0, 1, 2\\}\"\}\\\]" \
+                "stack locals listing of names and values"
 
     mi_gdb_test "232-stack-list-locals 2" \
-	    "232\\^done,locals=\\\[\{name=\"A\",type=\"int\",value=\"1\"\},\{name=\"B\",type=\"int\",value=\"2\"\},\{name=\"C\",type=\"int\",value=\"3\"\}\\\]" \
-                "stack locals listing 2"
+	    "232\\^done,locals=\\\[\{name=\"A\",type=\"int\",value=\"1\"\},\{name=\"B\",type=\"int\",value=\"2\"\},\{name=\"C\",type=\"int\",value=\"3\"\},\{name=\"D\",type=\"int \\\[3\\\]\"\}\\\]" \
+  "stack locals listing, simple types: names and values, complex type: names and types"
 
     mi_gdb_test "234-stack-list-locals" \
 	    "234\\^error,msg=\"mi_cmd_stack_list_locals: Usage.*PRINT_VALUES.*\"" \
