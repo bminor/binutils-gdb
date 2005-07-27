@@ -1,3 +1,19 @@
+2005-07-27  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/var-cmd.c: Give long_array in _struct_decl 12 elements.
+	(do_children_tests): Assign values to the extra elements.
+
+	* gdb.mi/mi-var-child.exp: Adapt tests for extra elements and use
+	them for tests for "-var-update --no-values" and
+	"-var-update --all-values".  
+	Add test for "-var-list-children --simple-values".
+
+	* gdb.mi/basics.c (callee4): Add integer array D[3]...
+
+	* gdb.mi/mi-stack.exp (test_stack_locals_listing): ...to test
+	"-stack-list-locals --simple-values"  Improve doc strings and
+	comments.
+
 2005-07-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/sigaltstack.exp (finish_test): KFAIL gdb/1736 on
