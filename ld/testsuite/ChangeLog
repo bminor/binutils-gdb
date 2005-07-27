@@ -1,3 +1,9 @@
+2005-07-28  Ben Elliston  <bje@gnu.org>
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Add new parameter
+	${targets_to_xfail} that is applied for each test item.
+	* ld-elf/elf.exp: Pass *-*-netbsdelf* as an xfailed target.
+
 2005-07-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elfweak/size2a.s: Extend test to check size for two weaks.

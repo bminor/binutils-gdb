@@ -43,4 +43,5 @@ set array_tests {
     {"static fini array" "-static" "" {fini.c} "fini" "fini.out"}
 }
 
-run_ld_link_exec_tests $array_tests
+# NetBSD ELF systems do not currently support the .*_array sections.
+run_ld_link_exec_tests [list "*-*-netbsdelf*"] $array_tests

@@ -1263,17 +1263,18 @@ if ![string length [info proc prune_warnings]] {
     }
 }
 
-# List contains test-items with 3 items followed by 1 lists, 2 items
+# targets_to_xfail is a list of target triplets to be xfailed.
+# ldtests contains test-items with 3 items followed by 1 lists, 2 items
 # and one optional item:
-# 0:name
-# 1:ld options
-# 2:assembler options
-# 3:filenames of assembler files
-# 4:name of output file
-# 5:expected output
-# 6:compiler flags (optional)
+#   0:name
+#   1:ld options
+#   2:assembler options
+#   3:filenames of assembler files
+#   4:name of output file
+#   5:expected output
+#   6:compiler flags (optional)
 
-proc run_ld_link_exec_tests { ldtests } {
+proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
     global ld
     global as
     global srcdir
@@ -1284,6 +1285,9 @@ proc run_ld_link_exec_tests { ldtests } {
     global errcnt
 
     foreach testitem $ldtests {
+	foreach target $targets_to_xfail {
+	    setup_xfail $target
+	}
 	set testname [lindex $testitem 0]
 	set ld_options [lindex $testitem 1]
 	set as_options [lindex $testitem 2]
