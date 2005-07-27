@@ -113,6 +113,13 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_X86_64_GOTPC32",
 	FALSE, 0xffffffff, 0xffffffff, TRUE),
 
+  /* We have a gap in the reloc numbers here.
+     R_X86_64_standard counts the number up to this point, and
+     R_X86_64_vt_offset is the value to subtract from a reloc type of
+     R_X86_64_GNU_VT* to form an index into this table.  */
+#define R_X86_64_standard (R_X86_64_GOTPC32 + 1)
+#define R_X86_64_vt_offset (R_X86_64_GNU_VTINHERIT - R_X86_64_standard)
+
 /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_X86_64_GNU_VTINHERIT, 0, 4, 0, FALSE, 0, complain_overflow_dont,
 	 NULL, "R_X86_64_GNU_VTINHERIT", FALSE, 0, 0, FALSE),
@@ -192,7 +199,7 @@ elf64_x86_64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   if (r_type < (unsigned int) R_X86_64_GNU_VTINHERIT
       || r_type >= (unsigned int) R_X86_64_max)
     {
-      if (r_type > (unsigned int) R_X86_64_GOTPC32)
+      if (r_type >= (unsigned int) R_X86_64_standard)
 	{
 	  (*_bfd_error_handler) (_("%B: invalid relocation type %d"),
 				 abfd, (int) r_type);
@@ -201,7 +208,7 @@ elf64_x86_64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
       i = r_type;
     }
   else
-    i = r_type - ((unsigned int) R_X86_64_GNU_VTINHERIT - R_X86_64_GOTPC32 - 1);
+    i = r_type - (unsigned int) R_X86_64_vt_offset;
   cache_ptr->howto = &x86_64_elf_howto_table[i];
   BFD_ASSERT (r_type == cache_ptr->howto->type);
 }
