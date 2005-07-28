@@ -1010,6 +1010,7 @@ static lang_output_section_statement_type *
 lang_output_section_statement_lookup_1 (const char *const name, int constraint)
 {
   lang_output_section_statement_type *lookup;
+  lang_output_section_statement_type **nextp;
 
   lookup = lang_output_section_find_1 (name, constraint);
   if (lookup == NULL)
@@ -1038,9 +1039,13 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
       lookup->update_dot_tree = NULL;
       lookup->phdrs = NULL;
 
+      /* GCC's strict aliasing rules prevent us from just casting the
+	 address, so we store the pointer in a variable and cast that
+	 instead.  */
+      nextp = &lookup->next;
       lang_statement_append (&lang_output_section_statement,
 			     (lang_statement_union_type *) lookup,
-			     (lang_statement_union_type **) &lookup->next);
+			     (lang_statement_union_type **) nextp);
     }
   return lookup;
 }

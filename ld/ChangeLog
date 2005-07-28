@@ -1,3 +1,9 @@
+2005-07-28  DJ Delorie  <dj@redhat.com>
+
+	* ldlang.c (lang_output_section_statement_lookup_1): Don't cast a
+	unary & address operator, as that breaks GCC's strict aliasing
+	rules.
+
 2005-07-25  Jan Hubicka  <jh@suse.cz>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
