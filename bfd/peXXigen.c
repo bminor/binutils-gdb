@@ -1346,6 +1346,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 	return TRUE;
 
       addr = section->vma;
+      dataoff = 0;
       datasize = section->size;
       if (datasize == 0)
 	return TRUE;
@@ -1355,12 +1356,8 @@ pe_print_edata (bfd * abfd, void * vfile)
       addr += extra->ImageBase;
 
       for (section = abfd->sections; section != NULL; section = section->next)
-	{
-	  datasize = section->size;
-
-	  if (addr >= section->vma && addr < section->vma + datasize)
-	    break;
-	}
+	if (addr >= section->vma && addr < section->vma + section->size)
+	  break;
 
       if (section == NULL)
 	{
@@ -1368,13 +1365,20 @@ pe_print_edata (bfd * abfd, void * vfile)
 		   _("\nThere is an export table, but the section containing it could not be found\n"));
 	  return TRUE;
 	}
+
+      dataoff = addr - section->vma;
+      datasize = extra->DataDirectory[0].Size;
+      if (datasize > section->size - dataoff)
+	{
+	  fprintf (file,
+		   _("\nThere is an export table in %s, but it does not fit into that section\n"),
+		   section->name);
+	  return TRUE;
+	}
     }
 
   fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
 	   section->name, (unsigned long) addr);
-
-  dataoff = addr - section->vma;
-  datasize -= dataoff;
 
   data = bfd_malloc (datasize);
   if (data == NULL)

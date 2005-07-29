@@ -1,3 +1,10 @@
+2005-07-29  Pavel Kankovsky  <peak@argo.troja.mff.cuni.cz>
+
+	* peXXigen.c (pe_print_edata): Compute the size of the export
+	table from the size field in the DataDictionary and not the size
+	of the section.  Some linkers embed the export table inside a
+	larger section.
+
 2005-07-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct elf_backend_data): Add action_discarded.
