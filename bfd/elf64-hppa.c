@@ -2745,6 +2745,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_reloc_type_class	elf64_hppa_reloc_type_class
 #define elf_backend_rela_normal		1
 #define elf_backend_special_sections	elf64_hppa_special_sections
+#define elf_backend_action_discarded	elf_hppa_action_discarded
 
 #include "elf64-target.h"
 

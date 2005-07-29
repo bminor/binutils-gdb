@@ -5303,6 +5303,21 @@ ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
       _bfd_elf_provide_symbol (info, lsect->sym_name, val, s);
     }
 }
+
+/* What to do when ld finds relocations against symbols defined in
+   discarded sections.  */
+
+static unsigned int
+ppc_elf_action_discarded (asection *sec)
+{
+  if (strcmp (".fixup", sec->name) == 0)
+    return 0;
+
+  if (strcmp (".got2", sec->name) == 0)
+    return 0;
+
+  return _bfd_elf_default_action_discarded (sec);
+}
 
 /* Fill in the address for a pointer generated in a linker section.  */
 
@@ -7360,6 +7375,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_write_section		ppc_elf_write_section
 #define elf_backend_get_sec_type_attr		ppc_elf_get_sec_type_attr
 #define elf_backend_plt_sym_val			ppc_elf_plt_sym_val
+#define elf_backend_action_discarded		ppc_elf_action_discarded
 
 #include "elf32-target.h"
 

@@ -4251,6 +4251,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_post_process_headers     elf32_hppa_post_process_headers
 #define elf_backend_get_symbol_type	     elf32_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	     elf32_hppa_reloc_type_class
+#define elf_backend_action_discarded	     elf_hppa_action_discarded
 
 #define elf_backend_can_gc_sections	     1
 #define elf_backend_can_refcount	     1

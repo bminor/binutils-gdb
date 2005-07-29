@@ -546,6 +546,12 @@ struct bfd_elf_special_section
   int attr;
 };
 
+enum action_discarded
+  {
+    COMPLAIN = 1,
+    PRETEND = 2
+  };
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -916,6 +922,11 @@ struct elf_backend_data
   /* This function, if defined, signals that the function above has removed
      the discarded relocations for this section.  */
   bfd_boolean (*elf_backend_ignore_discarded_relocs)
+    (asection *);
+
+  /* What to do when ld finds relocations against symbols defined in
+     discarded sections.  */
+  unsigned int (*action_discarded)
     (asection *);
 
   /* This function returns the width of FDE pointers in bytes, or 0 if

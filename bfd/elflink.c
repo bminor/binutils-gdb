@@ -6690,12 +6690,6 @@ elf_section_ignore_discarded_relocs (asection *sec)
   return FALSE;
 }
 
-enum action_discarded
-  {
-    COMPLAIN = 1,
-    PRETEND = 2
-  };
-
 /* Return a mask saying how ld should treat relocations in SEC against
    symbols defined in discarded sections.  If this function returns
    COMPLAIN set, ld will issue a warning message.  If this function
@@ -6705,8 +6699,8 @@ enum action_discarded
    zero the reloc (at least that is the intent, but some cooperation by
    the target dependent code is needed, particularly for REL targets).  */
 
-static unsigned int
-elf_action_discarded (asection *sec)
+unsigned int
+_bfd_elf_default_action_discarded (asection *sec)
 {
   if (sec->flags & SEC_DEBUGGING)
     return PRETEND;
@@ -6715,12 +6709,6 @@ elf_action_discarded (asection *sec)
     return 0;
 
   if (strcmp (".gcc_except_table", sec->name) == 0)
-    return 0;
-
-  if (strcmp (".PARISC.unwind", sec->name) == 0)
-    return 0;
-
-  if (strcmp (".fixup", sec->name) == 0)
     return 0;
 
   return COMPLAIN | PRETEND;
@@ -7042,7 +7030,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	  if (!elf_section_ignore_discarded_relocs (o))
 	    {
 	      Elf_Internal_Rela *rel, *relend;
-	      unsigned int action = elf_action_discarded (o);
+	      unsigned int action = (*bed->action_discarded) (o);
 
 	      rel = internal_relocs;
 	      relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;

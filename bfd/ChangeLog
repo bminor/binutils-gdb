@@ -1,3 +1,21 @@
+2005-07-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Add action_discarded.
+	(enum action_discarded): Move from..
+	* elflink.c (enum action_discarded): ..here.
+	(_bfd_elf_default_action_discarded): Rename from elf_action_discarded.
+	Remove target specific section checks.
+	(elf_link_input_bfd): Adjust.
+	* elfxx-target.h (elf_backend_action_discarded): Define.
+	(elfNN_bed): Init new field.
+	* bfd-in.h (_bfd_elf_default_action_discarded): Declare.
+	* bfd-in2.h: Regenerate.
+	* elf-hppa.h (elf_hppa_action_discarded): New function.
+	* elf32-hppa.c (elf_backend_action_discarded): Define.
+	* elf64-hppa.c (elf_backend_action_discarded): Define.
+	* elf32-ppc.c (ppc_elf_action_discarded): New function.
+	(elf_backend_action_discarded): Define.
+
 2005-07-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (fix_syms): Handle symbols defined in input sections.

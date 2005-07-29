@@ -1,5 +1,5 @@
 /* Common code for PA ELF implementations.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -1055,6 +1055,18 @@ static bfd_boolean elf_hppa_sort_unwind (bfd *abfd)
     }
 
   return TRUE;
+}
+
+/* What to do when ld finds relocations against symbols defined in
+   discarded sections.  */
+
+static unsigned int
+elf_hppa_action_discarded (asection *sec)
+{
+  if (strcmp (".PARISC.unwind", sec->name) == 0)
+    return 0;
+
+  return _bfd_elf_default_action_discarded (sec);
 }
 
 #if ARCH_SIZE == 64
