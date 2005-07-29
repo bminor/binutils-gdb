@@ -3491,6 +3491,55 @@ parse_cond (char **str)
   return c->value;
 }
 
+/* Parse the operands of a table branch instruction.  Similar to a memory
+   operand.  */
+static int
+parse_tb (char **str)
+{
+  char * p = *str;
+  int reg;
+
+  if (skip_past_char (&p, '[') == FAIL)
+    return FAIL;
+
+  if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
+    {
+      inst.error = _(reg_expected_msgs[REG_TYPE_RN]);
+      return FAIL;
+    }
+  inst.operands[0].reg = reg;
+
+  if (skip_past_comma (&p) == FAIL)
+    return FAIL;
+  
+  if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
+    {
+      inst.error = _(reg_expected_msgs[REG_TYPE_RN]);
+      return FAIL;
+    }
+  inst.operands[0].imm = reg;
+
+  if (skip_past_comma (&p) == SUCCESS)
+    {
+      if (parse_shift (&p, 0, SHIFT_LSL_IMMEDIATE) == FAIL)
+	return FAIL;
+      if (inst.reloc.exp.X_add_number != 1)
+	{
+	  inst.error = _("invalid shift");
+	  return FAIL;
+	}
+      inst.operands[0].shifted = 1;
+    }
+
+  if (skip_past_char (&p, ']') == FAIL)
+    {
+      inst.error = _("']' expected");
+      return FAIL;
+    }
+  *str = p;
+  return SUCCESS;
+}
+
 /* Matcher codes for parse_operands.  */
 enum operand_parse_code
 {
@@ -3546,6 +3595,7 @@ enum operand_parse_code
   OP_ENDI,	/* Endianness specifier */
   OP_PSR,	/* CPSR/SPSR mask for msr */
   OP_COND,	/* conditional code */
+  OP_TB,	/* Table branch.  */
 
   OP_RRnpc_I0,	/* ARM register or literal 0 */
   OP_RR_EXr,	/* ARM register or expression with opt. reloc suff. */
@@ -3786,6 +3836,10 @@ parse_operands (char *str, const unsigned char *pattern)
 	case OP_oROR:	 val = parse_ror (&str);		break;
 	case OP_PSR:	 val = parse_psr (&str);		break;
 	case OP_COND:	 val = parse_cond (&str);		break;
+
+	case OP_TB:
+	  po_misc_or_fail (parse_tb (&str));
+	  break;
 
 	  /* Register lists */
 	case OP_REGLST:
@@ -5774,6 +5828,20 @@ static const unsigned int thumb_op32[] = { T16_32_TAB };
 
 /* Thumb instruction encoders, in alphabetical order.  */
 
+/* ADDW or SUBW.  */
+static void
+do_t_add_sub_w (void)
+{
+  int Rd, Rn;
+
+  Rd = inst.operands[0].reg;
+  Rn = inst.operands[1].reg;
+
+  constraint (Rd == 15, _("PC not allowed as destination"));
+  inst.instruction |= (Rn << 16) | (Rd << 8);
+  inst.reloc.type = BFD_RELOC_ARM_T32_IMM12;
+}
+
 /* Parse an add or subtract instruction.  We get here with inst.instruction
    equalling any of THUMB_OPCODE_add, adds, sub, or subs.  */
 
@@ -7224,6 +7292,21 @@ do_t_swi (void)
 }
 
 static void
+do_t_tb (void)
+{
+  int half;
+
+  half = (inst.instruction & 0x10) != 0;
+  constraint (inst.operands[0].imm == 15,
+	      _("PC is not a valid index register"));
+  constraint (!half && inst.operands[0].shifted,
+	      _("instruction does not allow shifted index"));
+  constraint (half && !inst.operands[0].shifted,
+	      _("instruction requires shifted index"));
+  inst.instruction |= (inst.operands[0].reg << 16) | inst.operands[0].imm;
+}
+
+static void
 do_t_usat (void)
 {
   inst.instruction |= inst.operands[0].reg << 8;
@@ -8463,6 +8546,15 @@ static const struct asm_opcode insns[] =
  TUE(itete,     0, bf05, 1, (COND),    it, t_it),
  TUE(ittee,     0, bf09, 1, (COND),    it, t_it),
  TUE(iteee,     0, bf01, 1, (COND),    it, t_it),
+
+ /* Thumb2 only instructions.  */
+#undef ARM_VARIANT
+#define ARM_VARIANT 0
+
+ TCE(addw,	0, f2000000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
+ TCE(subw,	0, f2a00000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
+ TCE(tbb,       0, e8d0f000, 1, (TB), 0, t_tb),
+ TCE(tbh,       0, e8d0f010, 1, (TB), 0, t_tb),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT FPU_FPA_EXT_V1  /* Core FPA instruction set (V1).  */
@@ -10439,6 +10531,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_T32_IMMEDIATE:
+    case BFD_RELOC_ARM_T32_IMM12:
       /* We claim that this fixup has been processed here,
 	 even if in fact we generate an error because we do
 	 not have a reloc for it, so tc_gen_reloc will reject it.  */
@@ -10457,7 +10550,15 @@ md_apply_fix (fixS *	fixP,
       newval <<= 16;
       newval |= md_chars_to_number (buf+2, THUMB_SIZE);
 
-      newimm = encode_thumb32_immediate (value);
+      if (fixP->fx_r_type == BFD_RELOC_ARM_T32_IMM12)
+	{
+	  if (value > 0xfff)
+	    newimm = (unsigned int) FAIL;
+	  else
+	    newimm = value;
+	}
+      else
+	newimm = encode_thumb32_immediate (value);
 
       /* FUTURE: Implement analogue of negate_data_op for T32.  */
       if (newimm == (unsigned int)FAIL)

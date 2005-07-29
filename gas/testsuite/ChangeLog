@@ -1,3 +1,8 @@
+2005-07-29  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.s: Add tests for addw, subw, tbb and tbh.
+	* gas/arm/thumb32.d: Ditto.
+
 2005-07-27  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/unwind-bad.l: Uncomment patterns matching new warnings.

@@ -1,3 +1,12 @@
+2005-07-29  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (parse_tb): New function.
+	(enum operand_parse_code): Add OP_TB.
+	(parse_operands): Handle OP_TB.
+	(do_t_add_sub_w, do_t_tb): New functions.
+	(insns): Add entries for addw, subw, tbb and tbh.
+	(md_apply_fix): Handle BFD_RELOC_ARM_T32_IMM12.
+
 2005-07-29  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
 	* config/tc-m32r.c (m32r_check_fixup): Fixed X_op check.

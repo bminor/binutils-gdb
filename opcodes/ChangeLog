@@ -1,3 +1,8 @@
+2005-07-29  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (thumb32_opc): Fix addressing mode for tbh.
+	(print_insn_thumb32): Fix decoding of thumb2 'I' operands.
+
 2005-07-25  DJ Delorie  <dj@redhat.com>
 
 	* m32c-asm.c Regenerate.

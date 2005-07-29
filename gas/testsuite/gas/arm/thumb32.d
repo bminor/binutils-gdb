@@ -1011,3 +1011,11 @@ Disassembly of section .text:
 0+cf4 <[^>]+> f8df 1155 	ldr\.w	r1, \[pc, #341\]	; 0+e4d <[^>]+>
 0+cf8 <[^>]+> f85f 12aa 	ldr\.w	r1, \[pc, #-682\]	; 0+a52 <[^>]+>
 0+cfc <[^>]+> f85f 1155 	ldr\.w	r1, \[pc, #-341\]	; 0+bab <[^>]+>
+0+d00 <[^>]+> f200 0900 	addw	r9, r0, #0	; 0x0
+0+d04 <[^>]+> f60f 76ff 	addw	r6, pc, #4095	; 0xfff
+0+d08 <[^>]+> f6a9 2685 	subw	r6, r9, #2693	; 0xa85
+0+d0c <[^>]+> f2a9 567a 	subw	r6, r9, #1402	; 0x57a
+0+d10 <[^>]+> e8df f006 	tbb	\[pc, r6\]
+0+d14 <[^>]+> e8d0 f009 	tbb	\[r0, r9\]
+0+d18 <[^>]+> e8df f017 	tbh	\[pc, r7, lsl #1\]
+0+d1c <[^>]+> e8d0 f018 	tbh	\[r0, r8, lsl #1\]

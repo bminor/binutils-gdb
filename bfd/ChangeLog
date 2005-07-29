@@ -1,3 +1,9 @@
+2005-07-29  Paul Brook  <paul@codesourcery.com>
+
+	* reloc.c (BFD_RELOC_ARM_T32_IMM12): Add.
+	* bfd-in2.h: Regeenrate.
+	* libbfd.h: Regenerate.
+
 2005-07-29  Pavel Kankovsky  <peak@argo.troja.mff.cuni.cz>
 
 	* peXXigen.c (pe_print_edata): Compute the size of the export

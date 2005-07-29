@@ -745,3 +745,11 @@ xta:
 	ldpcimm	ldrh
 	ldpcimm	ldrsh
 	ldpcimm	ldr
+	addw r9, r0, #0
+	addw r6, pc, #0xfff
+	subw r6, r9, #0xa85
+	subw r6, r9, #0x57a
+	tbb [pc, r6]
+	tbb [r0, r9]
+	tbh [pc, r7, lsl #1]
+	tbh [r0, r8, lsl #1]
