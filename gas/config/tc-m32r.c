@@ -479,7 +479,7 @@ m32r_check_fixup (expressionS *main_exp, bfd_reloc_code_real_type *r_type_p)
         return 0;
     }
 
-  if (exp->X_op == O_PIC_reloc || exp->X_md != BFD_RELOC_UNUSED)
+  if (exp->X_op == O_PIC_reloc)
     {
       *r_type_p = exp->X_md;
       if (exp == main_exp)
