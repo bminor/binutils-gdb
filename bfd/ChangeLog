@@ -1,3 +1,8 @@
+2005-07-29  David Daney  <ddaney@avtrex.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_add_symbol_hook):  Ignore _gp_disp
+	if it is in the *ABS* section.
+
 2005-07-29  Paul Brook  <paul@codesourcery.com>
 
 	* reloc.c: Add BFD_RELOC_ARM_T32_ADD_PC12.

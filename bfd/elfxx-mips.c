@@ -5414,6 +5414,20 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
       return TRUE;
     }
 
+  /* Shared objects may have a dynamic symbol '_gp_disp' defined as
+     a SECTION *ABS*.  This causes ld to think it can resolve _gp_disp
+     by setting a DT_NEEDED for the shared object.  Since _gp_disp is
+     a magic symbol resolved by the linker, we ignore this bogus definition
+     of _gp_disp.  New ABI objects do not suffer from this problem so this
+     is not done for them. */
+  if (!NEWABI_P(abfd)
+      && (sym->st_shndx == SHN_ABS)
+      && (strcmp (*namep, "_gp_disp") == 0))
+    {
+      *namep = NULL;
+      return TRUE;
+    }
+
   switch (sym->st_shndx)
     {
     case SHN_COMMON:
