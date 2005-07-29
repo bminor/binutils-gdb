@@ -5748,6 +5748,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(adcs,  4140, eb500000),			\
   X(add,   1c00, eb000000),			\
   X(adds,  1c00, eb100000),			\
+  X(adr,   000f, f20f0000),			\
   X(and,   4000, ea000000),			\
   X(ands,  4000, ea100000),			\
   X(asr,   1000, fa40f000),			\
@@ -5781,8 +5782,8 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(negs,  4240, f1d00000), /* rsbs #0 */	\
   X(orr,   4300, ea400000),			\
   X(orrs,  4300, ea500000),			\
-  X(pop,   bc00, e8ad0000), /* ldmia sp!,... */	\
-  X(push,  b400, e8bd0000), /* stmia sp!,... */	\
+  X(pop,   bc00, e8bd0000), /* ldmia sp!,... */	\
+  X(push,  b400, e92d0000), /* stmdb sp!,... */	\
   X(rev,   ba00, fa90f080),			\
   X(rev16, ba40, fa90f090),			\
   X(revsh, bac0, fa90f0b0),			\
@@ -5963,11 +5964,24 @@ do_t_add_sub (void)
 static void
 do_t_adr (void)
 {
-  inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
-  inst.reloc.exp.X_add_number -= 4; /* PC relative adjust.  */
-  inst.reloc.pc_rel = 1;
+  if (unified_syntax && inst.size_req != 2)
+    {
+      /* Always generate a 32-bit opcode;
+	 section relaxation will shrink it later if possible.  */
+      inst.instruction = THUMB_OP32 (inst.instruction);
+      inst.instruction |= inst.operands[0].reg << 8;
+      inst.reloc.type = BFD_RELOC_ARM_T32_ADD_PC12;
+      inst.reloc.pc_rel = 1;
+    }
+  else
+    {
+      inst.instruction = THUMB_OP16 (inst.instruction);
+      inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
+      inst.reloc.exp.X_add_number -= 4; /* PC relative adjust.  */
+      inst.reloc.pc_rel = 1;
 
-  inst.instruction |= inst.operands[0].reg << 4;
+      inst.instruction |= inst.operands[0].reg << 4;
+    }
 }
 
 /* Arithmetic instructions for which there is just one 16-bit
@@ -6948,39 +6962,52 @@ do_t_pld (void)
 static void
 do_t_push_pop (void)
 {
+  unsigned mask;
+  
   constraint (inst.operands[0].writeback,
 	      _("push/pop do not support {reglist}^"));
   constraint (inst.reloc.type != BFD_RELOC_UNUSED,
 	      _("expression too complex"));
 
-  if ((inst.operands[0].imm & ~0xff) == 0)
+  mask = inst.operands[0].imm;
+  if ((mask & ~0xff) == 0)
     inst.instruction = THUMB_OP16 (inst.instruction);
   else if ((inst.instruction == T_MNEM_push
-	    && (inst.operands[0].imm & ~0xff) == 1 << REG_LR)
+	    && (mask & ~0xff) == 1 << REG_LR)
 	   || (inst.instruction == T_MNEM_pop
-	       && (inst.operands[0].imm & ~0xff) == 1 << REG_PC))
+	       && (mask & ~0xff) == 1 << REG_PC))
     {
       inst.instruction = THUMB_OP16 (inst.instruction);
       inst.instruction |= THUMB_PP_PC_LR;
-      inst.operands[0].imm &= 0xff;
+      mask &= 0xff;
     }
   else if (unified_syntax)
     {
-      if (inst.operands[1].imm & (1 << 13))
-	as_warn (_("SP should not be in register list"));
+      if (mask & (1 << 13))
+	inst.error =  _("SP not allowed in register list");
       if (inst.instruction == T_MNEM_push)
 	{
-	  if (inst.operands[1].imm & (1 << 15))
-	    as_warn (_("PC should not be in register list"));
+	  if (mask & (1 << 15))
+	    inst.error = _("PC not allowed in register list");
 	}
       else
 	{
-	  if (inst.operands[1].imm & (1 << 14)
-	      && inst.operands[1].imm & (1 << 15))
-	    as_warn (_("LR and PC should not both be in register list"));
+	  if (mask & (1 << 14)
+	      && mask & (1 << 15))
+	    inst.error = _("LR and PC should not both be in register list");
 	}
-
-      inst.instruction = THUMB_OP32 (inst.instruction);
+      if ((mask & (mask - 1)) == 0)
+	{
+	  /* Single register push/pop implemented as str/ldr.  */
+	  if (inst.instruction == T_MNEM_push)
+	    inst.instruction = 0xf84d0d04; /* str reg, [sp, #-4]! */
+	  else
+	    inst.instruction = 0xf85d0b04; /* ldr reg, [sp], #4 */
+	  mask = ffs(mask) - 1;
+	  mask <<= 12;
+	}
+      else
+	inst.instruction = THUMB_OP32 (inst.instruction);
     }
   else
     {
@@ -6988,7 +7015,7 @@ do_t_push_pop (void)
       return;
     }
 
-  inst.instruction |= inst.operands[0].imm;
+  inst.instruction |= mask;
 }
 
 static void
@@ -8205,7 +8232,7 @@ static const struct asm_opcode insns[] =
  TCE(bl,	b000000, f000f800, 1, (EXPr),	     branch, t_branch23),
 
   /* Pseudo ops.  */
- TCE(adr,	28f0000, 000f,	   2, (RR, EXP),     adr,  t_adr),
+ tCE(adr,	28f0000, adr,	   2, (RR, EXP),     adr,  t_adr),
   C3(adrl,	28f0000,           2, (RR, EXP),     adrl),
  tCE(nop,	1a00000, nop,	   1, (oI255c),	     nop,  t_nop),
 
@@ -10010,6 +10037,7 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 
     case BFD_RELOC_ARM_THUMB_OFFSET:
     case BFD_RELOC_ARM_T32_OFFSET_IMM:
+    case BFD_RELOC_ARM_T32_ADD_PC12:
       return (base + 4) & ~3;
 
       /* Thumb branches are simply offset by +4.  */
@@ -10532,6 +10560,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_T32_IMMEDIATE:
     case BFD_RELOC_ARM_T32_IMM12:
+    case BFD_RELOC_ARM_T32_ADD_PC12:
       /* We claim that this fixup has been processed here,
 	 even if in fact we generate an error because we do
 	 not have a reloc for it, so tc_gen_reloc will reject it.  */
@@ -10550,17 +10579,23 @@ md_apply_fix (fixS *	fixP,
       newval <<= 16;
       newval |= md_chars_to_number (buf+2, THUMB_SIZE);
 
-      if (fixP->fx_r_type == BFD_RELOC_ARM_T32_IMM12)
+      /* FUTURE: Implement analogue of negate_data_op for T32.  */
+      if (fixP->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE)
+	newimm = encode_thumb32_immediate (value);
+      else
 	{
+	  /* 12 bit immediate for addw/subw.  */
+	  if (value < 0)
+	    {
+	      value = -value;
+	      newval ^= 0x00a00000;
+	    }
 	  if (value > 0xfff)
 	    newimm = (unsigned int) FAIL;
 	  else
 	    newimm = value;
 	}
-      else
-	newimm = encode_thumb32_immediate (value);
 
-      /* FUTURE: Implement analogue of negate_data_op for T32.  */
       if (newimm == (unsigned int)FAIL)
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,

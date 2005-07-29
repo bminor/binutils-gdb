@@ -1,5 +1,16 @@
 2005-07-29  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (T16_32_TAB): Add "addr". Fix encoding of push and
+	pop.
+	(do_t_addr): Implement 32-bit variant.
+	(do_t_push_pop): Make some errors warnings.  Handle single register
+	32-bit case.
+	(insns): Use tCE for adr.
+	(md_pcrel_from_section): Handle BFD_RELOC_ARM_T32_ADD_PC12.
+	(md_apply_fix): Ditto.
+
+2005-07-29  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (parse_tb): New function.
 	(enum operand_parse_code): Add OP_TB.
 	(parse_operands): Handle OP_TB.

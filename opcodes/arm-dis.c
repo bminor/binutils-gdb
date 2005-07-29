@@ -2253,22 +2253,22 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      offset = -i8;
 		      break;
 
-		    case 0xB:  /* 8-bit + preindex with wb */
+		    case 0xF:  /* 8-bit + preindex with wb */
 		      offset = i8;
 		      writeback = TRUE;
 		      break;
 
-		    case 0x9:  /* 8-bit - preindex with wb */
+		    case 0xD:  /* 8-bit - preindex with wb */
 		      offset = -i8;
 		      writeback = TRUE;
 		      break;
 
-		    case 0xF:  /* 8-bit + postindex */
+		    case 0xB:  /* 8-bit + postindex */
 		      offset = i8;
 		      postind = TRUE;
 		      break;
 
-		    case 0xD:  /* 8-bit - postindex */
+		    case 0x9:  /* 8-bit - postindex */
 		      offset = -i8;
 		      postind = TRUE;
 		      break;

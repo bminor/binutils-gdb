@@ -1,5 +1,9 @@
 2005-07-29  Paul Brook  <paul@codesourcery.com>
 
+	* arm-dis.c: Fix disassebly of thumb2 writeback addressing modes.
+
+2005-07-29  Paul Brook  <paul@codesourcery.com>
+
 	* arm-dis.c (thumb32_opc): Fix addressing mode for tbh.
 	(print_insn_thumb32): Fix decoding of thumb2 'I' operands.
 

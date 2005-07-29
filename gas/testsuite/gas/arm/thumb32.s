@@ -753,3 +753,6 @@ xta:
 	tbb [r0, r9]
 	tbh [pc, r7, lsl #1]
 	tbh [r0, r8, lsl #1]
+
+	push	{r8}
+	pop	{r8}

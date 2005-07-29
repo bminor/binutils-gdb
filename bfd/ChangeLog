@@ -1,5 +1,11 @@
 2005-07-29  Paul Brook  <paul@codesourcery.com>
 
+	* reloc.c: Add BFD_RELOC_ARM_T32_ADD_PC12.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2005-07-29  Paul Brook  <paul@codesourcery.com>
+
 	* reloc.c (BFD_RELOC_ARM_T32_IMM12): Add.
 	* bfd-in2.h: Regeenrate.
 	* libbfd.h: Regenerate.

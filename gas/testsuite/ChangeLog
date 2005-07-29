@@ -1,5 +1,11 @@
 2005-07-29  Paul Brook  <paul@codesourcery.com>
 
+	* gas/arm/thumb32.d: Fix expected output for writeback addressing
+	modes.  Add single high reg push/pop test.
+	* gas/asm/thumb32.s: Add single high reg push/pop test.
+
+2005-07-29  Paul Brook  <paul@codesourcery.com>
+
 	* gas/arm/thumb32.s: Add tests for addw, subw, tbb and tbh.
 	* gas/arm/thumb32.d: Ditto.
 
