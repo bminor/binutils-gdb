@@ -1,4 +1,4 @@
-/* Copyright 1999, 2000, 2004
+/* Copyright 1999, 2000, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -30,6 +30,7 @@ int callee4 (void)
   int A=1;
   int B=2;
   int C;
+  int D[3] = {0, 1, 2};
 
   C = A + B;
   return 0;

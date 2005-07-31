@@ -28,7 +28,7 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile "var-cmd"
+set testfile "mi-var-child"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
@@ -553,7 +553,7 @@ mi_gdb_test "-var-info-num-children struct_declarations.int_ptr_ptr.*int_ptr_ptr
 
 # Step to "struct_declarations.integer = 123;"
 set line_dct_123 [gdb_get_line_number "struct_declarations.integer = 123;"]
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
       $line_dct_123 "step to line \$line_dct_123"
 
 # Test: c_variable-4.81
@@ -752,7 +752,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars. None changed"
 
 # Step over "struct_declarations.integer = 123;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_123 + 1] "step \$line_dct_123 + 1"
 
 # Test: c_variable-5.2
@@ -765,7 +765,7 @@ mi_gdb_test "-var-update *" \
 #    weird->char_ptr = "hello";
 #    bar = 2121;
 #    foo = &bar;
-mi_execute_to "exec-step 3" "end-stepping-range" do_children_tests {} {.*var-cmd.c} \
+mi_execute_to "exec-step 3" "end-stepping-range" do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_123 + 4] {} "step \$line_dct_123 + 4"
 
 # Test: c_variable-5.3
@@ -775,7 +775,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars struct_declarations.char_ptr"
 
 # Step over "struct_declarations.int_ptr_ptr = &foo;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_123 + 5] "step \$line_dct_123 + 5"
 
 # Test: c_variable-5.4
@@ -785,7 +785,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars int_ptr_ptr and children changed"
 
 # Step over "weird->long_array[0] = 1234;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_123 + 6] "step \$line_dct_123 + 6"
 
 # Test: c_variable-5.5
@@ -795,7 +795,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars struct_declarations.long_array.0 changed"
 
 # Step over "struct_declarations.long_array[1] = 2345;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_123 + 7] "step \$line_dct_123 + 7"
 
 # Test: c_variable-5.6
@@ -805,7 +805,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars struct_declarations.long_array.1 changed"
 
 # Step over "weird->long_array[2] = 3456;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_123 + 8] "step \$line_dct_123 + 8"
 
 # Test: c_variable-5.7
@@ -824,7 +824,7 @@ mi_gdb_test "-var-update *" \
 #    struct_declarations.long_array[9] = 1234;
 
 set line_dct_nothing [gdb_get_line_number "weird->func_ptr = nothing;"]
-mi_execute_to "exec-step 7" "end-stepping-range" do_children_tests {} {.*var-cmd.c} \
+mi_execute_to "exec-step 7" "end-stepping-range" do_children_tests {} ".*${srcfile}" \
     $line_dct_nothing {} "step \$line_dct_nothing"
 
 # Test: c_variable-5.8
@@ -835,7 +835,7 @@ mi_gdb_test "-var-update *" \
 
 
 # Step over "weird->func_ptr = nothing";
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_nothing + 1] "step \$line_dct_nothing + 1"
 
 # Test: c_variable-5.9
@@ -845,7 +845,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars struct_declarations.func_ptr changed"
 
 # Step over "struct_declarations.long_array[10] = 3456";
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_nothing + 2] "step \$line_dct_nothing + 2"
 
 mi_gdb_test "-var-update --no-values *" \
@@ -854,7 +854,7 @@ mi_gdb_test "-var-update --no-values *" \
 
 # Step over "struct_declarations.long_array[11] = 5678";
 set line_dct_a0_0 [gdb_get_line_number "a0 = '0';"]
-mi_step_to  do_children_tests {} {.*var-cmd.c} \
+mi_step_to  do_children_tests {} ".*${srcfile}" \
     $line_dct_a0_0 "step \$line_dct_a0_0"
 
 mi_gdb_test "-var-update --all-values *" \
@@ -883,7 +883,7 @@ mi_gdb_test "-var-delete weird->int_ptr_ptr" \
 #   psnp = &snp0;
 
 set line_dct_snp0 [gdb_get_line_number "psnp = &snp0;"]
-mi_execute_to "exec-step 43" "end-stepping-range" do_children_tests {} {.*var-cmd.c} \
+mi_execute_to "exec-step 43" "end-stepping-range" do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_snp0 + 1] {} "step \$line_dct_snp0 + 1"
 
 # Test: c_variable-5.10
@@ -1154,7 +1154,7 @@ mi_gdb_test "-var-list-children psnp->ptrs.0.next.next.ptrs" \
 	"get children of psnp->ptrs.0.next.next.ptrs"
 
 #  Step over "snp0.char_ptr = &b3;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_snp0 + 2] "step \$line_dct_snp0 + 2"
 
 # Test: c_variable-5.47
@@ -1164,7 +1164,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars psnp->char_ptr (and 0.char_ptr) changed"
 
 #  Step over "snp1.char_ptr = &c3;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_snp0 + 3] "step \$line_dct_snp0 + 3"
 
 # Test: c_variable-5.48
@@ -1175,7 +1175,7 @@ mi_gdb_test "-var-update *" \
 
 
 #  Step over "snp2.char_ptr = &a3;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_snp0 + 4] "step \$line_dct_snp0 + 4"
 
 # Test: c_variable-5.49
@@ -1186,7 +1186,7 @@ mi_gdb_test "-var-update *" \
 
 
 #  Step over "snp0.long_ptr = &y3;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_snp0 + 5] "step \$line_dct_snp0 + 5"
 
 # Test: c_variable-5.50
@@ -1197,7 +1197,7 @@ mi_gdb_test "-var-update *" \
 
 
 #  Step over "snp1.long_ptr = &x3;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_snp0 + 6] "step \$line_dct_snp0 + 6"
 
 # Test: c_variable-5.51
@@ -1214,7 +1214,7 @@ clear_xfail *-*-*
 #
 
 #  Step over "snp2.long_ptr = &z3;"
-mi_step_to do_children_tests {} {.*var-cmd.c} \
+mi_step_to do_children_tests {} ".*${srcfile}" \
     [expr $line_dct_snp0 + 7] "step \$line_dct_snp0 + 7"
 
 # Test: c_variable-5.52

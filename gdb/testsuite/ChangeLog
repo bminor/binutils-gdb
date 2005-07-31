@@ -1,3 +1,12 @@
+2005-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.mi/basics.c, gdb.mi/var-cmd.c: Revert last change.
+	* gdb.mi/mi-stack.c: New file, based on gdb.mi/basics.c.
+	* gdb.mi/mi-var-child.c: New file, based on gdb.mi/var-cmd.c.
+	* gdb.mi/mi-stack.exp: Update to use mi-stack.c as a source file.
+	* gdb.mi/mi-var-child.exp: Update to use mi-var-child.c as a source
+	file.
+
 2005-07-27  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.mi/var-cmd.c: Give long_array in _struct_decl 12 elements.
