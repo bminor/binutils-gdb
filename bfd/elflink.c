@@ -8943,6 +8943,12 @@ elf_gc_sweep (struct bfd_link_info *info, gc_sweep_hook_fn gc_sweep_hook)
 
     elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol, &i);
 
+    /* There is an unused NULL entry at the head of the table which
+       we must account for in our count.  Unless there weren't any
+       symbols, which means we'll have no table at all.  */
+    if (i != 0)
+      ++i;
+
     elf_hash_table (info)->dynsymcount = i;
   }
 

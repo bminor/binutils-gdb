@@ -1,3 +1,7 @@
+2005-07-30  David Daney  <ddaney@avtrex.com>
+
+	* elflink.c (elf_gc_sweep):  Set dynsymcount to correct value.
+
 2005-07-29  David Daney  <ddaney@avtrex.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_add_symbol_hook):  Ignore _gp_disp
