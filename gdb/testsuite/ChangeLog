@@ -1,5 +1,12 @@
 2005-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.mi/mi-var-child.c (do_children_tests): Initialize
+	struct_declarations.
+	* gdb.mi/mi-var-child.exp: Step over the initialization of
+	struct_declarations.
+
+2005-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.mi/basics.c, gdb.mi/var-cmd.c: Revert last change.
 	* gdb.mi/mi-stack.c: New file, based on gdb.mi/basics.c.
 	* gdb.mi/mi-var-child.c: New file, based on gdb.mi/var-cmd.c.

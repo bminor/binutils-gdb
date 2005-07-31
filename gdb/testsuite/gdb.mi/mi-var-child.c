@@ -208,6 +208,7 @@ do_children_tests (void)
   int bar;
 
   struct _struct_decl struct_declarations;
+  memset (&struct_declarations, 0, sizeof (struct_declarations));
   weird = &struct_declarations;
 
   struct_declarations.integer = 123;
