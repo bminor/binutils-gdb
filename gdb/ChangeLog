@@ -1,3 +1,27 @@
+2005-07-31  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* cli-out.c (cli_field_fmt, cli_message, out_field_fmt): Add
+	ATTR_FORMAT or ATTRIBUTE_FPTR_PRINTF.
+	* complaints.c (vcomplaint): Likewise.
+	* defs.h (xvasprintf, xstrvprintf, verror, vfatal)
+	(internal_verror, internal_vwarning, vwarning)
+	(deprecated_query_hook, deprecated_warning_hook)
+	(deprecated_readline_begin_hook): Likewise.
+	* disasm.c (fprintf_disasm): Likewise.
+	* exceptions.c (throw_it): Likewise.
+	* exceptions.h (throw_verror, throw_vfatal): Likewise.
+	* mi/mi-interp.c (mi_interp_query_hook): Likewise.
+	* mi/mi-out.c (mi_field_fmt, mi_message): Likewise.
+	* tui/tui-hooks.c (tui_query_hook): Likewise.
+	* tui/tui-out.c (tui_field_fmt, tui_message, out_field_fmt):
+	Likewise.
+	* ui-out.c (default_field_fmt, default_message, uo_field_fmt)
+	(uo_message): Likewise.
+	* ui-out.h (ui_out_field_fmt, ui_out_message, field_fmt_ftype)
+	(message_ftype): Likewise.
+	* utils.c (vfprintf_maybe_filtered, internal_vproblem)
+	(defaulted_query, printchar): Likewise.
+	
 2005-07-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-tdep.c (i386obsd_sigreturn_offset): New variable.

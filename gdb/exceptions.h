@@ -160,9 +160,10 @@ extern void exception_fprintf (struct ui_file *file, struct gdb_exception e,
    Wombat.  */
 
 extern NORETURN void throw_exception (struct gdb_exception exception) ATTR_NORETURN;
-extern NORETURN void throw_verror (enum errors, const char *fmt,
-				   va_list ap) ATTR_NORETURN;
-extern NORETURN void throw_vfatal (const char *fmt, va_list ap) ATTR_NORETURN;
+extern NORETURN void throw_verror (enum errors, const char *fmt, va_list ap)
+     ATTR_NORETURN ATTR_FORMAT (printf, 2, 0);
+extern NORETURN void throw_vfatal (const char *fmt, va_list ap)
+     ATTR_NORETURN ATTR_FORMAT (printf, 1, 0);
 extern NORETURN void throw_error (enum errors error, const char *fmt,
 				  ...) ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
 

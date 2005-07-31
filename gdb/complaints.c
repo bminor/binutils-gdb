@@ -1,7 +1,7 @@
 /* Support for complaint handling during symbol reading in GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1995, 1998, 1999, 2000, 2002,
-   2004 Free Software Foundation, Inc.
+   2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -166,7 +166,7 @@ static unsigned int stop_whining = 0;
 /* Print a complaint, and link the complaint block into a chain for
    later handling.  */
 
-static void
+static void ATTR_FORMAT (printf, 4, 0)
 vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
 	    va_list args)
 {

@@ -1,6 +1,7 @@
 /* Disassemble support for GDB.
 
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -313,7 +314,7 @@ do_assembly_only (struct ui_out *uiout, struct disassemble_info * di,
 /* Initialize the disassemble info struct ready for the specified
    stream.  */
 
-static int
+static int ATTR_FORMAT (printf, 2, 3)
 fprintf_disasm (void *stream, const char *format, ...)
 {
   va_list args;

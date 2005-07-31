@@ -1,6 +1,6 @@
 /* MI Command Set - output generating routines.
 
-   Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -56,11 +56,12 @@ static void mi_field_string (struct ui_out *uiout, int fldno, int width,
 static void mi_field_fmt (struct ui_out *uiout, int fldno,
 			  int width, enum ui_align align,
 			  const char *fldname, const char *format,
-			  va_list args);
+			  va_list args) ATTR_FORMAT (printf, 6, 0);
 static void mi_spaces (struct ui_out *uiout, int numspaces);
 static void mi_text (struct ui_out *uiout, const char *string);
 static void mi_message (struct ui_out *uiout, int verbosity,
-			const char *format, va_list args);
+			const char *format, va_list args)
+     ATTR_FORMAT (printf, 3, 0);
 static void mi_wrap_hint (struct ui_out *uiout, char *identstring);
 static void mi_flush (struct ui_out *uiout);
 

@@ -1,7 +1,7 @@
 /* Output generating routines for GDB CLI.
 
-   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005
+   Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -60,11 +60,12 @@ static void tui_field_string (struct ui_out *uiout, int fldno, int width,
 static void tui_field_fmt (struct ui_out *uiout, int fldno,
 			   int width, enum ui_align align,
 			   const char *fldname, const char *format,
-			   va_list args);
+			   va_list args) ATTR_FORMAT (printf, 6, 0);
 static void tui_spaces (struct ui_out *uiout, int numspaces);
 static void tui_text (struct ui_out *uiout, const char *string);
 static void tui_message (struct ui_out *uiout, int verbosity,
-			 const char *format, va_list args);
+			 const char *format, va_list args)
+     ATTR_FORMAT (printf, 3, 0);
 static void tui_wrap_hint (struct ui_out *uiout, char *identstring);
 static void tui_flush (struct ui_out *uiout);
 
@@ -102,7 +103,7 @@ static void field_separator (void);
 
 static void out_field_fmt (struct ui_out *uiout, int fldno,
 			   const char *fldname,
-			   const char *format,...);
+			   const char *format,...) ATTR_FORMAT (printf, 4, 5);
 
 /* local variables */
 

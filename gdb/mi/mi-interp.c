@@ -1,6 +1,6 @@
 /* MI Interpreter Definitions and Commands for GDB, the GNU debugger.
 
-   Copyright 2002, 2003, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -55,7 +55,8 @@ static void mi_command_loop (int mi_version);
 /* These are hooks that we put in place while doing interpreter_exec
    so we can report interesting things that happened "behind the mi's
    back" in this command */
-static int mi_interp_query_hook (const char *ctlstr, va_list ap);
+static int mi_interp_query_hook (const char *ctlstr, va_list ap)
+     ATTR_FORMAT (printf, 1, 0);
 
 static void mi3_command_loop (void);
 static void mi2_command_loop (void);

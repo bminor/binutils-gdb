@@ -1,3 +1,7 @@
+2005-07-31  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* server.h (error, fatal, warning): Add ATTR_FORMAT.
+
 2005-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.ac: Define HAVE_LINUX_REGSETS even if PTRACE_GETREGS

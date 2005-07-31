@@ -163,9 +163,9 @@ int target_signal_to_host (enum target_signal oursig);
 /* Functions from utils.c */
 
 void perror_with_name (char *string);
-void error (const char *string,...) ATTR_NORETURN;
-void fatal (const char *string,...) ATTR_NORETURN;
-void warning (const char *string,...);
+void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
+void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
+void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
 
 /* Functions from the register cache definition.  */
 

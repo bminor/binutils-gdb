@@ -872,12 +872,14 @@ extern void *xzalloc (size_t);
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
 extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
-extern void xvasprintf (char **ret, const char *format, va_list ap);
+extern void xvasprintf (char **ret, const char *format, va_list ap)
+     ATTR_FORMAT (printf, 2, 0);
 
 /* Like asprintf and vasprintf, but return the string, throw an error
    if no memory.  */
 extern char *xstrprintf (const char *format, ...) ATTR_FORMAT (printf, 1, 2);
-extern char *xstrvprintf (const char *format, va_list ap);
+extern char *xstrvprintf (const char *format, va_list ap)
+     ATTR_FORMAT (printf, 1, 0);
 
 /* Like snprintf, but throw an error if the output buffer is too small.  */
 extern int xsnprintf (char *str, size_t size, const char *format, ...)
@@ -897,24 +899,28 @@ extern char *quit_pre_print;
 
 extern char *warning_pre_print;
 
-extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
+extern NORETURN void verror (const char *fmt, va_list ap)
+     ATTR_NORETURN ATTR_FORMAT (printf, 1, 0);
 
 extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
-extern NORETURN void vfatal (const char *fmt, va_list ap) ATTR_NORETURN;
+extern NORETURN void vfatal (const char *fmt, va_list ap)
+     ATTR_NORETURN ATTR_FORMAT (printf, 1, 0);
 
 extern NORETURN void fatal (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 
 extern NORETURN void internal_verror (const char *file, int line,
-				      const char *, va_list ap) ATTR_NORETURN;
+				      const char *, va_list ap)
+     ATTR_NORETURN ATTR_FORMAT (printf, 3, 0);
 
 extern NORETURN void internal_error (const char *file, int line,
 				     const char *, ...) ATTR_NORETURN ATTR_FORMAT (printf, 3, 4);
 
 extern void internal_vwarning (const char *file, int line,
-			       const char *, va_list ap);
+			       const char *, va_list ap)
+     ATTR_FORMAT (printf, 3, 0);
 
 extern void internal_warning (const char *file, int line,
 			      const char *, ...) ATTR_FORMAT (printf, 3, 4);
@@ -923,7 +929,7 @@ extern NORETURN void nomem (long) ATTR_NORETURN;
 
 extern void warning (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
-extern void vwarning (const char *, va_list args);
+extern void vwarning (const char *, va_list args) ATTR_FORMAT (printf, 1, 0);
 
 /* List of known OS ABIs.  If you change this, make sure to update the
    table in osabi.c.  */
@@ -1092,15 +1098,18 @@ extern void (*deprecated_print_frame_info_listing_hook) (struct symtab * s,
 							 int line, int stopline,
 							 int noerror);
 extern struct frame_info *parse_frame_specification (char *frame_exp);
-extern int (*deprecated_query_hook) (const char *, va_list);
-extern void (*deprecated_warning_hook) (const char *, va_list);
+extern int (*deprecated_query_hook) (const char *, va_list)
+     ATTRIBUTE_FPTR_PRINTF(1,0);
+extern void (*deprecated_warning_hook) (const char *, va_list)
+     ATTRIBUTE_FPTR_PRINTF(1,0);
 extern void (*deprecated_flush_hook) (struct ui_file * stream);
 extern void (*deprecated_create_breakpoint_hook) (struct breakpoint * b);
 extern void (*deprecated_delete_breakpoint_hook) (struct breakpoint * bpt);
 extern void (*deprecated_modify_breakpoint_hook) (struct breakpoint * bpt);
 extern void (*deprecated_interactive_hook) (void);
 extern void (*deprecated_registers_changed_hook) (void);
-extern void (*deprecated_readline_begin_hook) (char *,...);
+extern void (*deprecated_readline_begin_hook) (char *, ...)
+     ATTRIBUTE_FPTR_PRINTF_1;
 extern char *(*deprecated_readline_hook) (char *);
 extern void (*deprecated_readline_end_hook) (void);
 extern void (*deprecated_register_changed_hook) (int regno);
