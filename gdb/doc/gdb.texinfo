@@ -4399,9 +4399,6 @@ pointer and a program counter.
 
 On the 29k architecture, it needs three addresses: a register stack
 pointer, a program counter, and a memory stack pointer.
-@c note to future updaters: this is conditioned on a flag
-@c SETUP_ARBITRARY_FRAME in the tm-*.h files.  The above is up to date
-@c as of 27 Jan 1994.
 
 @kindex up
 @item up @var{n}
