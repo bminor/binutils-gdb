@@ -2485,18 +2485,21 @@ process_event_stop_test:
 	}
     }
 
+  ecs->sal = find_pc_line (stop_pc, 0);
+
   /* NOTE: tausq/2004-05-24: This if block used to be done before all
      the trampoline processing logic, however, there are some trampolines 
      that have no names, so we should do trampoline handling first.  */
   if (step_over_calls == STEP_OVER_UNDEBUGGABLE
-      && ecs->stop_func_name == NULL)
+      && ecs->stop_func_name == NULL
+      && ecs->sal.line == 0)
     {
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into undebuggable function\n");
 
       /* The inferior just stepped into, or returned to, an
-         undebuggable function (where there is no symbol, not even a
-         minimal symbol, corresponding to the address where the
+         undebuggable function (where there is no debugging information
+         and no line number corresponding to the address where the
          inferior stopped).  Since we want to skip this kind of code,
          we keep going until the inferior returns from this
          function.  */
@@ -2531,8 +2534,6 @@ process_event_stop_test:
       stop_stepping (ecs);
       return;
     }
-
-  ecs->sal = find_pc_line (stop_pc, 0);
 
   if (ecs->sal.line == 0)
     {

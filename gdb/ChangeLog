@@ -1,3 +1,9 @@
+2005-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Suggested by Vladimir Prus <ghost@cs.msu.su>:
+	* infrun.c (handle_inferior_event): Check for line information in
+	undebuggable functions.
+
 2005-07-31  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* cli-out.c (cli_field_fmt, cli_message, out_field_fmt): Add
