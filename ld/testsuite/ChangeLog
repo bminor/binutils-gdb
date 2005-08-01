@@ -1,3 +1,7 @@
+2005-08-01  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips/mips-elf-flags.exp: Add more good_combination tests.
+
 2005-07-28  Ben Elliston  <bje@gnu.org>
 
 	* lib/ld-lib.exp (run_ld_link_exec_tests): Add new parameter

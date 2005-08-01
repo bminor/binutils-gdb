@@ -9661,11 +9661,26 @@ mips_mach_extends_p (unsigned long base, unsigned long extension)
 {
   size_t i;
 
-  for (i = 0; extension != base && i < ARRAY_SIZE (mips_mach_extensions); i++)
-    if (extension == mips_mach_extensions[i].extension)
-      extension = mips_mach_extensions[i].base;
+  if (extension == base)
+    return TRUE;
 
-  return extension == base;
+  if (base == bfd_mach_mipsisa32
+      && mips_mach_extends_p (bfd_mach_mipsisa64, extension))
+    return TRUE;
+
+  if (base == bfd_mach_mipsisa32r2
+      && mips_mach_extends_p (bfd_mach_mipsisa64r2, extension))
+    return TRUE;
+
+  for (i = 0; i < ARRAY_SIZE (mips_mach_extensions); i++)
+    if (extension == mips_mach_extensions[i].extension)
+      {
+	extension = mips_mach_extensions[i].base;
+	if (extension == base)
+	  return TRUE;
+      }
+
+  return FALSE;
 }
 
 

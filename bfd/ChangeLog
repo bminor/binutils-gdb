@@ -1,3 +1,8 @@
+2005-08-01  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-mips.c (mips_mach_extends_p): Treat MIPS64 as an extension
+	of MIPS32 and MIPS64r2 as an extension of MIPS32r2.
+
 2005-07-30  David Daney  <ddaney@avtrex.com>
 
 	* elflink.c (elf_gc_sweep):  Set dynsymcount to correct value.

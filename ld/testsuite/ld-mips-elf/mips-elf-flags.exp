@@ -158,3 +158,6 @@ good_combination { "-mips3 -32" "-mips64r2 -32" "-mips64 -32" } { mips64r2 }
 
 good_combination { "-march=vr4120 -mabi=32" "-mips3 -mabi=32" } { 4120 o32 }
 good_combination { "-march=sb1 -mgp32 -32" "-march=4000 -mgp32 -32" } { sb1 o32 }
+good_combination { "-mips32 -mabi=32" "-march=sb1 -mabi=32" } { sb1 o32 }
+good_combination { "-mips64r2 -mabi=32" "-mips32 -mabi=32" } { mips64r2 o32 }
+good_combination { "-mips5 -mabi=o64" "-mips64r2 -mabi=o64" } { mips64r2 o64 }
