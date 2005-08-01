@@ -1105,8 +1105,8 @@ read_signed_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
     }
   while (byte & 0x80);
 
-  if ((shift < 32) && (byte & 0x40))
-    result |= -(1 << shift);
+  if (shift < 8 * sizeof (result) && (byte & 0x40))
+    result |= -(((LONGEST)1) << shift);
 
   *bytes_read_ptr = num_read;
 

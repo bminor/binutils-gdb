@@ -1,3 +1,9 @@
+2005-08-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2-frame.c (read_signed_leb128): Handle values that do not
+	fit in 32 bits.
+	* dwarf2read.c (read_signed_leb128): Likewise.
+
 2005-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	From Josef Ezra <jezra@emc.com>:

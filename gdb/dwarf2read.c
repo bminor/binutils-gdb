@@ -6032,12 +6032,11 @@ static long
 read_signed_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
 {
   long result;
-  int i, shift, size, num_read;
+  int i, shift, num_read;
   unsigned char byte;
 
   result = 0;
   shift = 0;
-  size = 32;
   num_read = 0;
   i = 0;
   while (1)
@@ -6052,10 +6051,8 @@ read_signed_leb128 (bfd *abfd, char *buf, unsigned int *bytes_read_ptr)
 	  break;
 	}
     }
-  if ((shift < size) && (byte & 0x40))
-    {
-      result |= -(1 << shift);
-    }
+  if ((shift < 8 * sizeof (result)) && (byte & 0x40))
+    result |= -(((long)1) << shift);
   *bytes_read_ptr = num_read;
   return result;
 }
