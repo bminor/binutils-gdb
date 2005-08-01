@@ -1443,7 +1443,7 @@ stringify_collection_list (struct collection_list *list, char *string)
 	       (long) (list->list[i].end - list->list[i].start));
 
       count += strlen (end);
-      end += count;
+      end = temp_buf + count;
     }
 
   for (i = 0; i < list->next_aexpr_elt; i++)

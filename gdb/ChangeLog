@@ -1,5 +1,11 @@
 2005-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	From Josef Ezra <jezra@emc.com>:
+	* tracepoint.c (stringify_collection_list): Correct pointer
+	arithmetic.
+
+2005-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	Suggested by Vladimir Prus <ghost@cs.msu.su>:
 	* infrun.c (handle_inferior_event): Check for line information in
 	undebuggable functions.
