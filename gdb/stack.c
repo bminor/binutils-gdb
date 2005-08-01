@@ -817,22 +817,6 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
       struct frame_id id = frame_id_build_wild (addrs[0]);
       struct frame_info *fid;
 
-      /* If SETUP_ARBITRARY_FRAME is defined, then frame
-	 specifications take at least 2 addresses.  It is important to
-	 detect this case here so that "frame 100" does not give a
-	 confusing error message like "frame specification requires
-	 two addresses".  This of course does not solve the "frame
-	 100" problem for machines on which a frame specification can
-	 be made with one address.  To solve that, we need a new
-	 syntax for a specifying a frame by address.  I think the
-	 cleanest syntax is $frame(0x45) ($frame(0x23,0x45) for two
-	 args, etc.), but people might think that is too much typing,
-	 so I guess *0x23,0x45 would be a possible alternative (commas
-	 really should be used instead of spaces to delimit; using
-	 spaces normally works in an expression).  */
-#ifdef SETUP_ARBITRARY_FRAME
-      error (_("No frame %s"), paddr_d (addrs[0]));
-#endif
       /* If (s)he specifies the frame with an address, he deserves
 	 what (s)he gets.  Still, give the highest one that matches.
 	 (NOTE: cagney/2004-10-29: Why highest, or outer-most, I don't
