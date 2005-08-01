@@ -699,7 +699,6 @@ static int nfunc (const void *, const void *);
 static void remove_null_names (export_type **);
 static void process_duplicates (export_type **);
 static void fill_ordinals (export_type **);
-static int alphafunc (const void *, const void *);
 static void mangle_defs (void);
 static void usage (FILE *, int);
 static void inform (const char *, ...) ATTRIBUTE_PRINTF_1;
@@ -2828,8 +2827,16 @@ nfunc (const void *a, const void *b)
 {
   export_type *ap = *(export_type **) a;
   export_type *bp = *(export_type **) b;
+  const char *an = ap->name;
+  const char *bn = bp->name;
 
-  return (strcmp (ap->name, bp->name));
+  if (killat)
+    {
+      an = (an[0] == '@') ? an + 1 : an;
+      bn = (bn[0] == '@') ? bn + 1 : bn;
+    }
+
+  return (strcmp (an, bn));
 }
 
 static void
@@ -2973,15 +2980,6 @@ fill_ordinals (export_type **d_export_vec)
     }
 }
 
-static int
-alphafunc (const void *av, const void *bv)
-{
-  const export_type **a = (const export_type **) av;
-  const export_type **b = (const export_type **) bv;
-
-  return strcmp ((*a)->name, (*b)->name);
-}
-
 static void
 mangle_defs (void)
 {
@@ -3017,7 +3015,7 @@ mangle_defs (void)
 
   d_exports_lexically[i] = 0;
 
-  qsort (d_exports_lexically, i, sizeof (export_type *), alphafunc);
+  qsort (d_exports_lexically, i, sizeof (export_type *), nfunc);
 
   /* Fill exp entries with their hint values.  */
   for (i = 0; i < d_nfuncs; i++)
