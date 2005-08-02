@@ -1,3 +1,15 @@
+2005-08-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Suggested by Shaun Jackman <sjackman@gmail.com>:
+	* defs.h (print_transfer_performance): Update prototype.
+	* m32r-rom.c (m32r_load, m32r_upload_command): Use gettimeofday
+	for print_transfer_performance.
+	* remote-m32r-sdi.c (m32r_load): Likewise.
+	* symfile.c (generic_load): Likewise.
+	(report_transfer_performance): Create a dummy struct timeval.
+	(print_transfer_performance): Use a more accurate measure
+	of performance.
+
 2005-08-01  Fred Fish  <fnf@specifix.com>
 
 	* stack.c (parse_frame_specification_1): Remove use of obsolete

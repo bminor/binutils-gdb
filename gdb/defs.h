@@ -552,10 +552,12 @@ extern void symbol_file_command (char *, int);
 extern void generic_load (char *name, int from_tty);
 
 /* Summarise a download */
+struct timeval;
 extern void print_transfer_performance (struct ui_file *stream,
 					unsigned long data_count,
 					unsigned long write_count,
-					unsigned long time_count);
+					const struct timeval *start_time,
+					const struct timeval *end_time);
 
 /* From top.c */
 

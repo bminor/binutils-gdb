@@ -1213,7 +1213,7 @@ m32r_load (char *args, int from_tty)
   char *filename;
   int quiet;
   int nostart;
-  time_t start_time, end_time;	/* Start and end times of download */
+  struct timeval start_time, end_time;
   unsigned long data_count;	/* Number of bytes transferred to memory */
   int ret;
   static RETSIGTYPE (*prev_sigint) ();
@@ -1263,7 +1263,7 @@ m32r_load (char *args, int from_tty)
     error (_("\"%s\" is not an object file: %s"), filename,
 	   bfd_errmsg (bfd_get_error ()));
 
-  start_time = time (NULL);
+  gettimeofday (&start_time, NULL);
   data_count = 0;
 
   interrupted = 0;
@@ -1349,7 +1349,7 @@ m32r_load (char *args, int from_tty)
   interrupted = 0;
   signal (SIGINT, prev_sigint);
 
-  end_time = time (NULL);
+  gettimeofday (&end_time, NULL);
 
   /* Make the PC point at the start address */
   if (exec_bfd)
@@ -1373,8 +1373,8 @@ m32r_load (char *args, int from_tty)
 	printf_unfiltered ("[Starting %s at 0x%lx]\n", filename, entry);
     }
 
-  print_transfer_performance (gdb_stdout, data_count, 0,
-			      end_time - start_time);
+  print_transfer_performance (gdb_stdout, data_count, 0, &start_time,
+			      &end_time);
 
   do_cleanups (old_chain);
 }

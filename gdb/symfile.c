@@ -1,7 +1,7 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -57,6 +57,7 @@
 #include "gdb_stat.h"
 #include <ctype.h>
 #include <time.h>
+#include <sys/time.h>
 
 #ifndef O_BINARY
 #define O_BINARY 0
@@ -1600,7 +1601,7 @@ generic_load (char *args, int from_tty)
 {
   asection *s;
   bfd *loadfile_bfd;
-  time_t start_time, end_time;	/* Start and end times of download */
+  struct timeval start_time, end_time;
   char *filename;
   struct cleanup *old_cleanups;
   char *offptr;
@@ -1652,11 +1653,11 @@ generic_load (char *args, int from_tty)
   bfd_map_over_sections (loadfile_bfd, add_section_size_callback,
 			 (void *) &cbdata.total_size);
 
-  start_time = time (NULL);
+  gettimeofday (&start_time, NULL);
 
   bfd_map_over_sections (loadfile_bfd, load_section_callback, &cbdata);
 
-  end_time = time (NULL);
+  gettimeofday (&end_time, NULL);
 
   entry = bfd_get_start_address (loadfile_bfd);
   ui_out_text (uiout, "Start address ");
@@ -1675,7 +1676,7 @@ generic_load (char *args, int from_tty)
      others don't (or didn't - perhaps they have all been deleted).  */
 
   print_transfer_performance (gdb_stdout, cbdata.data_count,
-			      cbdata.write_count, end_time - start_time);
+			      cbdata.write_count, &start_time, &end_time);
 
   do_cleanups (old_cleanups);
 }
@@ -1690,21 +1691,35 @@ void
 report_transfer_performance (unsigned long data_count, time_t start_time,
 			     time_t end_time)
 {
-  print_transfer_performance (gdb_stdout, data_count,
-			      end_time - start_time, 0);
+  struct timeval start, end;
+
+  start.tv_sec = start_time;
+  start.tv_usec = 0;
+  end.tv_sec = end_time;
+  end.tv_usec = 0;
+
+  print_transfer_performance (gdb_stdout, data_count, 0, &start, &end);
 }
 
 void
 print_transfer_performance (struct ui_file *stream,
 			    unsigned long data_count,
 			    unsigned long write_count,
-			    unsigned long time_count)
+			    const struct timeval *start_time,
+			    const struct timeval *end_time)
 {
+  unsigned long time_count;
+
+  /* Compute the elapsed time in milliseconds, as a tradeoff between
+     accuracy and overflow.  */
+  time_count = (end_time->tv_sec - start_time->tv_sec) * 1000;
+  time_count += (end_time->tv_usec - start_time->tv_usec) / 1000;
+
   ui_out_text (uiout, "Transfer rate: ");
   if (time_count > 0)
     {
       ui_out_field_fmt (uiout, "transfer-rate", "%lu",
-			(data_count * 8) / time_count);
+			1000 * (data_count * 8) / time_count);
       ui_out_text (uiout, " bits/sec");
     }
   else

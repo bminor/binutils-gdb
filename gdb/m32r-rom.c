@@ -1,8 +1,8 @@
 /* Remote debugging interface to m32r and mon2000 ROM monitors for GDB, 
    the GNU debugger.
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2004 Free Software
-   Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2004, 2005
+   Free Software Foundation, Inc.
 
    Adapted by Michael Snyder of Cygnus Support.
 
@@ -35,6 +35,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "symfile.h"		/* for generic load */
+#include <sys/time.h>
 #include <time.h>		/* for time_t */
 #include "gdb_string.h"
 #include "objfiles.h"		/* for ALL_OBJFILES etc. */
@@ -119,7 +120,7 @@ m32r_load (char *filename, int from_tty)
   bfd *abfd;
   asection *s;
   unsigned int i, data_count = 0;
-  time_t start_time, end_time;	/* for timing of download */
+  struct timeval start_time, end_time;
 
   if (filename == NULL || filename[0] == 0)
     filename = get_exec_file (1);
@@ -129,7 +130,7 @@ m32r_load (char *filename, int from_tty)
     error (_("Unable to open file %s."), filename);
   if (bfd_check_format (abfd, bfd_object) == 0)
     error (_("File is not an object file."));
-  start_time = time (NULL);
+  gettimeofday (&start_time, NULL);
 #if 0
   for (s = abfd->sections; s; s = s->next)
     if (s->flags & SEC_LOAD)
@@ -163,10 +164,10 @@ m32r_load (char *filename, int from_tty)
       return;
     }
 #endif
-  end_time = time (NULL);
+  gettimeofday (&end_time, NULL);
   printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
-  print_transfer_performance (gdb_stdout, data_count, 0,
-			      end_time - start_time);
+  print_transfer_performance (gdb_stdout, data_count, 0, &start_time,
+			      &end_time);
 
   /* Finally, make the PC point at the start address */
   if (exec_bfd)
@@ -405,7 +406,7 @@ m32r_upload_command (char *args, int from_tty)
 {
   bfd *abfd;
   asection *s;
-  time_t start_time, end_time;	/* for timing of download */
+  struct timeval start_time, end_time;
   int resp_len, data_count = 0;
   char buf[1024];
   struct hostent *hostent;
@@ -467,7 +468,7 @@ m32r_upload_command (char *args, int from_tty)
 	  ("Need to know default download path (use 'set download-path')");
     }
 
-  start_time = time (NULL);
+  gettimeofday (&start_time, NULL);
   monitor_printf ("uhip %s\r", server_addr);
   resp_len = monitor_expect_prompt (buf, sizeof (buf));	/* parse result? */
   monitor_printf ("ulip %s\r", board_addr);
@@ -491,7 +492,7 @@ m32r_upload_command (char *args, int from_tty)
   else
     printf_filtered (" -- Ethernet load complete.\n");
 
-  end_time = time (NULL);
+  gettimeofday (&end_time, NULL);
   abfd = bfd_openr (args, 0);
   if (abfd != NULL)
     {				/* Download is done -- print section statistics */
@@ -517,8 +518,8 @@ m32r_upload_command (char *args, int from_tty)
       /* Finally, make the PC point at the start address */
       write_pc (bfd_get_start_address (abfd));
       printf_filtered ("Start address 0x%lx\n", bfd_get_start_address (abfd));
-      print_transfer_performance (gdb_stdout, data_count, 0,
-				  end_time - start_time);
+      print_transfer_performance (gdb_stdout, data_count, 0, &start_time,
+				  &end_time);
     }
   inferior_ptid = null_ptid;	/* No process now */
 
