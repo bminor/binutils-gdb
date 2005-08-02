@@ -6014,6 +6014,13 @@ md_apply_fix (fixP, valP, seg)
 
 #ifdef OBJ_ELF
   fixP->fx_addnumber = value;
+
+  /* PowerPC uses RELA relocs, ie. the reloc addend is stored separately
+     from the section contents.  If we are going to be emitting a reloc
+     then the section contents are immaterial, so don't warn if they
+     happen to overflow.  Leave such warnings to ld.  */
+  if (!fixP->fx_done)
+    fixP->fx_no_overflow = 1;
 #else
   if (fixP->fx_r_type != BFD_RELOC_PPC_TOC16)
     fixP->fx_addnumber = 0;

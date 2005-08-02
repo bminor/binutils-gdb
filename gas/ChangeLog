@@ -1,3 +1,8 @@
+2005-08-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_apply_fix <ELF>): Don't warn on overflow
+	if emitting a reloc.
+
 2005-07-29  Thiemo Seufer  <ths@networkno.de>
 
 	* config/tc-mips.c (s_mips_globl): Allow multiple symbols per .globl.
