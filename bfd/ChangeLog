@@ -1,3 +1,19 @@
+2005-08-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 1147
+	* elf32-arm.c (struct _arm_elf_section_data): Turn into a typedef
+	and make the mapcount field unsigned.
+	(struct section_list): New: Used to keep track of which sections
+	have an _arm_elf_section_data structure.
+	(record_section_with_arm_elf_section_data): New function.
+	(get_arm_elf_section_data): New function.
+	(unrecord_section_with_arm_elf_section_data): New function.
+	(elf32_arm_output_symbol_hook): Use get_arm_elf_section_data.
+	(elf32_arm_new_section_hook): Call
+	record_section_with_arm_elf_section_data.
+	(elf32_arm_write_section): Use get_arm_elf_section_data and
+	unrecord_section_with_arm_elf_section_data.
+
 2005-08-01  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_mach_extends_p): Treat MIPS64 as an extension

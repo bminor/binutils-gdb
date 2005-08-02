@@ -1515,15 +1515,16 @@ typedef struct elf32_elf_section_map
 }
 elf32_arm_section_map;
 
-struct _arm_elf_section_data
+typedef struct _arm_elf_section_data
 {
   struct bfd_elf_section_data elf;
-  int mapcount;
+  unsigned int mapcount;
   elf32_arm_section_map *map;
-};
+}
+_arm_elf_section_data;
 
 #define elf32_arm_section_data(sec) \
-  ((struct _arm_elf_section_data *) elf_section_data (sec))
+  ((_arm_elf_section_data *) elf_section_data (sec))
 
 /* The size of the thread control block.  */
 #define TCB_SIZE	8
@@ -4400,7 +4401,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 
   /* Check to see if the input BFD actually contains any sections.  If
      not, its flags may not have been initialised either, but it
-     cannot actually cause any incompatibility.  Do not short-circuit
+     cannot actually cause any incompatiblity.  Do not short-circuit
      dynamic objects; their section list may be emptied by
     elf_link_add_object_symbols.
 
@@ -6511,6 +6512,71 @@ elf32_arm_section_from_shdr (bfd *abfd,
   return TRUE;
 }
 
+/* A structure used to record a list of sections, independently
+   of the next and prev fields in the asection structure.  */
+typedef struct section_list
+{
+  asection * sec;
+  struct section_list * next;
+  struct section_list * prev;
+}
+section_list;
+
+/* Unfortunately we need to keep a list of sections for which
+   an _arm_elf_section_data structure has been allocated.  This
+   is because it is possible for functions like elf32_arm_write_section
+   to be called on a section which has had an elf_data_structure
+   allocated for it (and so the used_by_bfd field is valid) but
+   for which the ARM extended version of this structure - the
+   _arm_elf_section_data structure - has not been allocated.  */
+static section_list * sections_with_arm_elf_section_data = NULL;
+
+static void
+record_section_with_arm_elf_section_data (bfd * abfd, asection * sec)
+{
+  struct section_list * entry;
+
+  entry = bfd_alloc (abfd, sizeof (* entry));
+  if (entry == NULL)
+    return;
+  entry->sec = sec;
+  entry->next = sections_with_arm_elf_section_data;
+  entry->prev = NULL;
+  if (entry->next != NULL)
+    entry->next->prev = entry;
+  sections_with_arm_elf_section_data = entry;
+}
+
+static _arm_elf_section_data *
+get_arm_elf_section_data (asection * sec)
+{
+  struct section_list * entry;
+
+  for (entry = sections_with_arm_elf_section_data; entry; entry = entry->next)
+    if (entry->sec == sec)
+      return elf32_arm_section_data (sec);
+  return NULL;
+}
+
+static void
+unrecord_section_with_arm_elf_section_data (asection * sec)
+{
+  struct section_list * entry;
+
+  for (entry = sections_with_arm_elf_section_data; entry; entry = entry->next)
+    if (entry->sec == sec)
+      {
+	if (entry->prev != NULL)
+	  entry->prev->next = entry->next;
+	if (entry->next != NULL)
+	  entry->next->prev = entry->prev;
+	if (entry == sections_with_arm_elf_section_data)
+	  sections_with_arm_elf_section_data = entry->next;
+	free (entry);
+	break;
+      }
+}
+
 /* Called for each symbol.  Builds a section map based on mapping symbols.
    Does not alter any of the symbols.  */
 
@@ -6523,6 +6589,8 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
 {
   int mapcount;
   elf32_arm_section_map *map;
+  elf32_arm_section_map *newmap;
+  _arm_elf_section_data *arm_data;
   struct elf32_arm_link_hash_table *globals;
 
   /* Only do this on final link.  */
@@ -6538,31 +6606,43 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
   if (! bfd_is_arm_mapping_symbol_name (name))
     return TRUE;
 
-  mapcount = ++(elf32_arm_section_data (input_sec)->mapcount);
-  map = elf32_arm_section_data (input_sec)->map;
+  /* If this section has not been allocated an _arm_elf_section_data
+     structure then we cannot record anything.  */
+  arm_data = get_arm_elf_section_data (input_sec);
+  if (arm_data == NULL)
+    return TRUE;
+
+  mapcount = arm_data->mapcount + 1;
+  map = arm_data->map;
   /* TODO: This may be inefficient, but we probably don't usually have many
      mapping symbols per section.  */
-  map = bfd_realloc (map, mapcount * sizeof (elf32_arm_section_map));
-  elf32_arm_section_data (input_sec)->map = map;
+  newmap = bfd_realloc (map, mapcount * sizeof (* map));
+  if (newmap != NULL)
+    {
+      arm_data->map = newmap;
+      arm_data->mapcount = mapcount;
 
-  map[mapcount - 1].vma = elfsym->st_value;
-  map[mapcount - 1].type = name[1];
+      map[mapcount - 1].vma = elfsym->st_value;
+      map[mapcount - 1].type = name[1];
+    }
+
   return TRUE;
 }
-
 
 /* Allocate target specific section data.  */
 
 static bfd_boolean
 elf32_arm_new_section_hook (bfd *abfd, asection *sec)
 {
-  struct _arm_elf_section_data *sdata;
+  _arm_elf_section_data *sdata;
   bfd_size_type amt = sizeof (*sdata);
 
   sdata = bfd_zalloc (abfd, amt);
   if (sdata == NULL)
     return FALSE;
   sec->used_by_bfd = sdata;
+
+  record_section_with_arm_elf_section_data (abfd, sec);
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }
@@ -6586,6 +6666,7 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 			 bfd_byte *contents)
 {
   int mapcount;
+  _arm_elf_section_data *arm_data;
   elf32_arm_section_map *map;
   bfd_vma ptr;
   bfd_vma end;
@@ -6593,14 +6674,19 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
   bfd_byte tmp;
   int i;
 
-  mapcount = elf32_arm_section_data (sec)->mapcount;
-  map = elf32_arm_section_data (sec)->map;
+  /* If this section has not been allocated an _arm_elf_section_data
+     structure then we cannot record anything.  */
+  arm_data = get_arm_elf_section_data (sec);
+  if (arm_data == NULL)
+    return FALSE;
+
+  mapcount = arm_data->mapcount;
+  map = arm_data->map;
 
   if (mapcount == 0)
     return FALSE;
 
-  qsort (map, mapcount, sizeof (elf32_arm_section_map),
-	 elf32_arm_compare_mapping);
+  qsort (map, mapcount, sizeof (* map), elf32_arm_compare_mapping);
 
   offset = sec->output_section->vma + sec->output_offset;
   ptr = map[0].vma - offset;
@@ -6644,7 +6730,12 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 	}
       ptr = end;
     }
+
   free (map);
+  arm_data->mapcount = 0;
+  arm_data->map = NULL;
+  unrecord_section_with_arm_elf_section_data (sec);
+
   return FALSE;
 }
 
