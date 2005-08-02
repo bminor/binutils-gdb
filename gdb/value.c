@@ -355,7 +355,7 @@ value_contents_writeable (struct value *value)
 {
   if (value->lazy)
     value_fetch_lazy (value);
-  return value->aligner.contents;
+  return value_contents_raw (value);
 }
 
 /* Return non-zero if VAL1 and VAL2 have the same contents.  Note that

@@ -1,5 +1,9 @@
 2005-08-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* value.c (value_contents_writeable): Use value_contents_raw.
+
+2005-08-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	Suggested by Shaun Jackman <sjackman@gmail.com>:
 	* defs.h (print_transfer_performance): Update prototype.
 	* m32r-rom.c (m32r_load, m32r_upload_command): Use gettimeofday
