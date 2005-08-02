@@ -1,5 +1,10 @@
 2005-08-03  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Remove hgot.  Use
+	elf.hgot throughout file.
+
+2005-08-03  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Correct value of
 	_GLOBAL_OFFSET_TABLE_ for > 32k GOT.
 

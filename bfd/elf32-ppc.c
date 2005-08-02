@@ -2363,7 +2363,7 @@ struct ppc_elf_link_hash_table
   asection *sgotplt;
 
   /* Short-cuts to frequently used symbols on VxWorks targets.  */
-  struct elf_link_hash_entry *hgot, *hplt;
+  struct elf_link_hash_entry *hplt;
 
   /* True if the target system is VxWorks.  */
   int is_vxworks;
@@ -4650,15 +4650,13 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (htab->is_vxworks)
     {
-      /* Save the GOT and PLT symbols in the hash table for easy access.
-	 Mark them as having relocations; they might not, but we won't
-	 know for sure until we build the GOT in finish_dynamic_symbol.  */
+      /* Save the PLT symbol in the hash table for easy access.
+	 Mark GOT and PLT syms as having relocations; they might not,
+	 but we won't know for sure until we build the GOT in
+	 finish_dynamic_symbol.  */
 
-      htab->hgot = elf_link_hash_lookup (elf_hash_table (info),
-					 "_GLOBAL_OFFSET_TABLE_",
-					 FALSE, FALSE, FALSE);
-      if (htab->hgot)
-	htab->hgot->indx = -2;
+      if (htab->elf.hgot)
+	htab->elf.hgot->indx = -2;
       htab->hplt = elf_link_hash_lookup (elf_hash_table (info),
 					 "_PROCEDURE_LINKAGE_TABLE_",
 					 FALSE, FALSE, FALSE);
@@ -6680,10 +6678,11 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		  }
 		else
 		  {
-		    bfd_vma got_loc = (got_offset
-			+ htab->hgot->root.u.def.value
-			+ htab->hgot->root.u.def.section->output_offset
-			+ htab->hgot->root.u.def.section->output_section->vma);
+		    bfd_vma got_loc
+		      = (got_offset
+			 + htab->elf.hgot->root.u.def.value
+			 + htab->elf.hgot->root.u.def.section->output_offset
+			 + htab->elf.hgot->root.u.def.section->output_section->vma);
 		    bfd_vma got_loc_hi = (got_loc >> 16)
 					 + ((got_loc & 0x8000) >> 15);
 
@@ -6744,7 +6743,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		    rela.r_offset = (htab->plt->output_section->vma
 				     + htab->plt->output_offset
 				     + ent->plt.offset + 2);
-		    rela.r_info = ELF32_R_INFO (htab->hgot->indx,
+		    rela.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
 						R_PPC_ADDR16_HA);
 		    rela.r_addend = got_offset;
 		    bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
@@ -6754,7 +6753,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		    rela.r_offset = (htab->plt->output_section->vma
 				     + htab->plt->output_offset
 				     + ent->plt.offset + 6);
-		    rela.r_info = ELF32_R_INFO (htab->hgot->indx,
+		    rela.r_info = ELF32_R_INFO (htab->elf.hgot->indx,
 						R_PPC_ADDR16_LO);
 		    rela.r_addend = got_offset;
 		    bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
@@ -7045,7 +7044,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       unsigned char *p = htab->got->contents;
       bfd_vma val;
 
-      p += elf_hash_table (info)->hgot->root.u.def.value;
+      p += htab->elf.hgot->root.u.def.value;
       if (htab->old_plt && !htab->is_vxworks)
 	bfd_put_32 (output_bfd, 0x4e800021 /* blrl */, p - 4);
 
@@ -7068,9 +7067,9 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       if (!info->shared)
 	{
 	  bfd_vma got_value =
-	    (htab->hgot->root.u.def.section->output_section->vma
-	     + htab->hgot->root.u.def.section->output_offset
-	     + htab->hgot->root.u.def.value);
+	    (htab->elf.hgot->root.u.def.section->output_section->vma
+	     + htab->elf.hgot->root.u.def.section->output_offset
+	     + htab->elf.hgot->root.u.def.value);
 	  bfd_vma got_hi = (got_value >> 16) + ((got_value & 0x8000) >> 15);
 
 	  bfd_put_32 (output_bfd, plt_entry[0] | (got_hi & 0xffff),
@@ -7101,7 +7100,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	  rela.r_offset = (htab->plt->output_section->vma
 			   + htab->plt->output_offset
 			   + 2);
-	  rela.r_info = ELF32_R_INFO (htab->hgot->indx, R_PPC_ADDR16_HA);
+	  rela.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_PPC_ADDR16_HA);
 	  rela.r_addend = 0;
 	  bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 	  loc += sizeof (Elf32_External_Rela);
@@ -7110,7 +7109,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	  rela.r_offset = (htab->plt->output_section->vma
 			   + htab->plt->output_offset
 			   + 6);
-	  rela.r_info = ELF32_R_INFO (htab->hgot->indx, R_PPC_ADDR16_LO);
+	  rela.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_PPC_ADDR16_LO);
 	  rela.r_addend = 0;
 	  bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 	  loc += sizeof (Elf32_External_Rela);
@@ -7123,12 +7122,12 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      Elf_Internal_Rela rel;
 
 	      bfd_elf32_swap_reloc_in (output_bfd, loc, &rel);
-	      rel.r_info = ELF32_R_INFO (htab->hgot->indx, R_PPC_ADDR16_HA);
+	      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_PPC_ADDR16_HA);
 	      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
 	      loc += sizeof (Elf32_External_Rela);
 
 	      bfd_elf32_swap_reloc_in (output_bfd, loc, &rel);
-	      rel.r_info = ELF32_R_INFO (htab->hgot->indx, R_PPC_ADDR16_LO);
+	      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_PPC_ADDR16_LO);
 	      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
 	      loc += sizeof (Elf32_External_Rela);
 
