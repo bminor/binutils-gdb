@@ -172,6 +172,7 @@ struct elfNN_ia64_allocate_data
 {
   struct bfd_link_info *info;
   bfd_size_type ofs;
+  bfd_boolean only_got;
 };
 
 #define elfNN_ia64_hash_table(p) \
@@ -1337,7 +1338,17 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_local_got, &data);
       ia64_info->got_sec->size = data.ofs;
 
-      /* ??? Resize .rela.got too.  */
+      if (ia64_info->root.dynamic_sections_created)
+	{
+	  /* Resize .rela.got.  */
+	  ia64_info->rel_got_sec->size = 0;
+	  if (link_info->shared
+	      && ia64_info->self_dtpmod_offset != (bfd_vma) -1)
+	    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
+	  data.only_got = TRUE;
+	  elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_dynrel_entries,
+				       &data);
+	}
     }
 
   if (!link_info->need_relax_finalize)
@@ -2895,6 +2906,52 @@ allocate_dynrel_entries (dyn_i, data)
 		   && ELF_ST_VISIBILITY (dyn_i->h->other)
 		   && dyn_i->h->root.type == bfd_link_hash_undefweak);
 
+  /* Take care of the GOT and PLT relocations.  */
+
+  if ((!resolved_zero
+       && (dynamic_symbol || shared)
+       && (dyn_i->want_got || dyn_i->want_gotx))
+      || (dyn_i->want_ltoff_fptr
+	  && dyn_i->h
+	  && dyn_i->h->dynindx != -1))
+    {
+      if (!dyn_i->want_ltoff_fptr
+	  || !x->info->pie
+	  || dyn_i->h == NULL
+	  || dyn_i->h->root.type != bfd_link_hash_undefweak)
+	ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
+    }
+  if ((dynamic_symbol || shared) && dyn_i->want_tprel)
+    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
+  if (dynamic_symbol && dyn_i->want_dtpmod)
+    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
+  if (dynamic_symbol && dyn_i->want_dtprel)
+    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
+
+  if (x->only_got)
+    return TRUE;
+
+  if (ia64_info->rel_fptr_sec && dyn_i->want_fptr)
+    {
+      if (dyn_i->h == NULL || dyn_i->h->root.type != bfd_link_hash_undefweak)
+	ia64_info->rel_fptr_sec->size += sizeof (ElfNN_External_Rela);
+    }
+
+  if (!resolved_zero && dyn_i->want_pltoff)
+    {
+      bfd_size_type t = 0;
+
+      /* Dynamic symbols get one IPLT relocation.  Local symbols in
+	 shared libraries get two REL relocations.  Local symbols in
+	 main applications get nothing.  */
+      if (dynamic_symbol)
+	t = sizeof (ElfNN_External_Rela);
+      else if (shared)
+	t = 2 * sizeof (ElfNN_External_Rela);
+
+      ia64_info->rel_pltoff_sec->size += t;
+    }
+
   /* Take care of the normal data relocations.  */
 
   for (rent = dyn_i->reloc_entries; rent; rent = rent->next)
@@ -2941,48 +2998,6 @@ allocate_dynrel_entries (dyn_i, data)
       if (rent->reltext)
 	ia64_info->reltext = 1;
       rent->srel->size += sizeof (ElfNN_External_Rela) * count;
-    }
-
-  /* Take care of the GOT and PLT relocations.  */
-
-  if ((!resolved_zero
-       && (dynamic_symbol || shared)
-       && (dyn_i->want_got || dyn_i->want_gotx))
-      || (dyn_i->want_ltoff_fptr
-	  && dyn_i->h
-	  && dyn_i->h->dynindx != -1))
-    {
-      if (!dyn_i->want_ltoff_fptr
-	  || !x->info->pie
-	  || dyn_i->h == NULL
-	  || dyn_i->h->root.type != bfd_link_hash_undefweak)
-	ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
-    }
-  if ((dynamic_symbol || shared) && dyn_i->want_tprel)
-    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
-  if (dynamic_symbol && dyn_i->want_dtpmod)
-    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
-  if (dynamic_symbol && dyn_i->want_dtprel)
-    ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
-  if (ia64_info->rel_fptr_sec && dyn_i->want_fptr)
-    {
-      if (dyn_i->h == NULL || dyn_i->h->root.type != bfd_link_hash_undefweak)
-	ia64_info->rel_fptr_sec->size += sizeof (ElfNN_External_Rela);
-    }
-
-  if (!resolved_zero && dyn_i->want_pltoff)
-    {
-      bfd_size_type t = 0;
-
-      /* Dynamic symbols get one IPLT relocation.  Local symbols in
-	 shared libraries get two REL relocations.  Local symbols in
-	 main applications get nothing.  */
-      if (dynamic_symbol)
-	t = sizeof (ElfNN_External_Rela);
-      else if (shared)
-	t = 2 * sizeof (ElfNN_External_Rela);
-
-      ia64_info->rel_pltoff_sec->size += t;
     }
 
   return TRUE;
@@ -3116,6 +3131,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 
       if (info->shared && ia64_info->self_dtpmod_offset != (bfd_vma) -1)
 	ia64_info->rel_got_sec->size += sizeof (ElfNN_External_Rela);
+      data.only_got = FALSE;
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_dynrel_entries, &data);
     }
 

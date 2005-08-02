@@ -1,3 +1,13 @@
+2005-08-02  Andreas Schwab  <schwab@suse.de>
+
+	* elfxx-ia64.c (struct elfNN_ia64_allocate_data): Add only_got.
+	(elfNN_ia64_relax_section): Reallocate .rela.got when .got has
+	changed.
+	(allocate_dynrel_entries): Look only at GOT relocations when
+	only_got is true.
+	(elfNN_ia64_size_dynamic_sections): Set only_got to false before
+	calling allocate_dynrel_entries.
+
 2005-08-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 1147
