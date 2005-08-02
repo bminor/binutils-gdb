@@ -1,3 +1,7 @@
+2005-08-02  J"orn Rennecke <joern.rennecke@st.com>
+
+	* interp.c (strswaplen): Add one for '\0' delimiter.
+
 2005-06-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gencode.c (tab): Avoid lvalue casts.  Suggested by

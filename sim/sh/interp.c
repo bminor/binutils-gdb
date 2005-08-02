@@ -959,6 +959,10 @@ ptr (x)
   return (char *) (x + saved_state.asregs.memory);
 }
 
+/* STR points to a zero-terminated string in target byte order.  Return
+   the number of bytes that need to be converted to host byte order in order
+   to use this string as a zero-terminated string on the host.
+   (Not counting the rounding up needed to operate on entire words.)  */
 static int
 strswaplen (str)
      int str;
@@ -971,7 +975,7 @@ strswaplen (str)
     return 0;
   end = str;
   for (end = str; memory[end ^ endian]; end++) ;
-  return end - str;
+  return end - str + 1;
 }
 
 static void
