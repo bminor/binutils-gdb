@@ -1,3 +1,8 @@
+2005-08-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Correct value of
+	_GLOBAL_OFFSET_TABLE_ for > 32k GOT.
+
 2005-08-02  Andreas Schwab  <schwab@suse.de>
 
 	* elfxx-ia64.c (struct elfNN_ia64_allocate_data): Add only_got.

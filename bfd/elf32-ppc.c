@@ -4676,14 +4676,17 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     {
       unsigned int g_o_t = 32768;
 
-      /* If we haven't allocated the header, do so now.  */
+      /* If we haven't allocated the header, do so now.  When we get here,
+	 for old plt/got the got size will be 0 to 32764 (not allocated),
+	 or 32780 to 65536 (header allocated).  For new plt/got, the
+	 corresponding ranges are 0 to 32768 and 32780 to 65536.  */
       if (htab->got->size <= 32768)
 	{
 	  g_o_t = htab->got->size;
+	  if (htab->old_plt)
+	    g_o_t += 4;
 	  htab->got->size += htab->got_header_size;
 	}
-      if (htab->old_plt && !htab->is_vxworks)
-	g_o_t += 4;
 
       htab->elf.hgot->root.u.def.value = g_o_t;
     }
