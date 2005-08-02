@@ -1,3 +1,9 @@
+2005-08-02   Bob Rossi  <bob@brasko.net>
+  
+	* gdb.mi/mi-syn-frame.exp, gdb.mi/mi2-syn-frame.exp: Add MESSAGE
+	parameter to mi_gdb_test.
+	* lib/mi-support.exp (mi_gdb_test): Make MESSAGE parameter necessary.
+
 2005-07-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.mi/mi-var-child.c (do_children_tests): Initialize

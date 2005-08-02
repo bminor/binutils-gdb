@@ -517,10 +517,9 @@ proc mi_gdb_load { arg } {
 #   this is the null string no command is sent.
 # PATTERN is the pattern to match for a PASS, and must NOT include
 #   the \r\n sequence immediately before the gdb prompt.
-# MESSAGE is an optional message to be printed.  If this is
-#   omitted, then the pass/fail messages use the command string as the
-#   message.  (If this is the empty string, then sometimes we don't
-#   call pass or fail at all; I don't understand this at all.)
+# MESSAGE is the message to be printed.  (If this is the empty string, 
+#   then sometimes we don't call pass or fail at all; I don't 
+#   understand this at all.)
 #
 # Returns:
 #    1 if the test failed,
@@ -533,13 +532,9 @@ proc mi_gdb_test { args } {
     global GDB expect_out
     upvar timeout timeout
 
-    if [llength $args]>2 then {
-	set message [lindex $args 2]
-    } else {
-	set message [lindex $args 0]
-    }
     set command [lindex $args 0]
     set pattern [lindex $args 1]
+    set message [lindex $args 2]
 
     if [llength $args]==5 {
 	set question_string [lindex $args 3];
