@@ -1,3 +1,11 @@
+2005-08-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_howto_table): Undo the overflow change for
+	R_386_PC16 made on 2005-07-18.
+
+	* elf64-x86-64.c (x86_64_elf_howto_table): Undo the overflow
+	change for R_X86_64_PC16 made on 2005-07-18.
+
 2005-08-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (struct ppc_elf_link_hash_table): Remove hgot.  Use

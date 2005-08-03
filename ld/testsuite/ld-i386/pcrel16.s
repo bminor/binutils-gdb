@@ -1,11 +1,9 @@
- .text
- .code16
- .global _start, fwd
+	.code16
+	.text
+	.globl _start
 _start:
-	jpo	fwd
- .rept 2500
-	testl $0x12345678, %ss:0x76543210(,%eax,4)
- .endr
-fwd:
-	leave
-	ret
+	.org 0x420
+	int $0x42
+	lret $2
+	.org 0xf065
+	jmp _start+((0x42) << 4)

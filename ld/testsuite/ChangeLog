@@ -1,3 +1,9 @@
+2005-08-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/pcrel16.d: Updated.
+	* ld-i386/pcrel16.s: Likewise.
+	* ld-x86-64/pcrel16.d: Likewise.
+
 2005-08-01  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips/mips-elf-flags.exp: Add more good_combination tests.
