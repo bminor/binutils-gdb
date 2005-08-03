@@ -1,3 +1,8 @@
+2005-08-02  Khem Raj  <kraj@mvista.com>
+
+	* config/tc-arm.c (do_iwmmxt_wldstd): Correct the offset range for
+	WLDRD/WSTRD instruction.
+
 2005-08-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_apply_fix <ELF>): Don't warn on overflow

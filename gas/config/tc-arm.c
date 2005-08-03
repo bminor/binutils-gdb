@@ -5516,7 +5516,7 @@ static void
 do_iwmmxt_wldstd (void)
 {
   inst.instruction |= inst.operands[0].reg << 12;
-  encode_arm_cp_address (1, TRUE, FALSE, BFD_RELOC_ARM_CP_OFF_IMM_S2);
+  encode_arm_cp_address (1, TRUE, FALSE, 0);
 }
 
 static void
