@@ -34,8 +34,8 @@ OTHER_BSS_SECTIONS="
   .hbss         ${RELOCATING-0} : { *(.hbss) }
   .tbss         ${RELOCATING-0} : { *(.tbss) }
 "
-#OTHER_BSS_END_SYMBOLS='PROVIDE (__TLS_SIZE = SIZEOF (.tbss));'
-OTHER_BSS_END_SYMBOLS='
+#OTHER_END_SYMBOLS='PROVIDE (__TLS_SIZE = SIZEOF (.tbss));'
+OTHER_END_SYMBOLS='
   PROVIDE (__TLS_SIZE = 0);
   PROVIDE (__TLS_INIT_SIZE = 0);
   PROVIDE (__TLS_INIT_START = 0);

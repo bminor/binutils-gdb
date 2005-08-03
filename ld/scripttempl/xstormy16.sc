@@ -148,7 +148,7 @@ SECTIONS
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+_end = .;}
   ${RELOCATING+__stack = .;}
-  ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
+  ${RELOCATING+${OTHER_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
 
   /* Read-only sections in ROM.  */

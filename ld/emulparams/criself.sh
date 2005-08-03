@@ -42,7 +42,7 @@ OTHER_SDATA_SECTIONS="${RELOCATING+PROVIDE (__Edata = .);}"
 # address, we can't get to it with OTHER_BSS_SYMBOLS, neither can we
 # use ADDR(.bss) there.  Instead, we use the symbol support for the
 # end symbol.
-OTHER_BSS_END_SYMBOLS='
+OTHER_END_SYMBOLS='
  PROVIDE (__Ebss = .);
  PROVIDE (__end = .);
  __Sbss = ADDR (.bss);

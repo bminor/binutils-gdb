@@ -1,3 +1,26 @@
+2005-08-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (exp_init_os): Handle etree_provide.
+	* emulparams/armelf.sh (OTHER_END_SYMBOLS): Rename from..
+	(OTHER_BSS_END_SYMBOLS): ..this.
+	* emulparams/armelf_linux.sh: Likewise.
+	* emulparams/armnto.sh: Likewise.
+	* emulparams/criself.sh: Likewise.
+	* emulparams/crislinux.sh: Likewise.
+	* emulparams/elf32frv.sh: Likewise.
+	* emulparams/elf32mcore.sh: Likewise.
+	* emulparams/elf32ppc.sh: Likewise.
+	* emulparams/elf32ppclinux.sh: Likewise.
+	* emulparams/hppa64linux.sh: Likewise.
+	* scripttempl/armbpabi.sc: Substitute $OTHER_END_SYMBOLS, not
+	$OTHER_BSS_END_SYMBOLS.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+	* scripttempl/elf.sc: Likewise.  Delete __bss_start comment.
+	* scripttempl/elfxtensa.sc: Likewise.
+
 2005-07-29  Nick Clifton  <nickc@redhat.com>
 
 	* ldmain.c (main): Allow -shared and -static to be used together.

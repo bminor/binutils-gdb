@@ -1616,6 +1616,7 @@ exp_init_os (etree_type *exp)
   switch (exp->type.node_class)
     {
     case etree_assign:
+    case etree_provide:
       exp_init_os (exp->assign.src);
       break;
 

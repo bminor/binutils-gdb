@@ -23,7 +23,7 @@ PLT=".plt          ${RELOCATING-0} : SPECIAL { *(.plt) }"
 GOTPLT="${PLT}"
 OTHER_TEXT_SECTIONS="*(.glink)"
 EXECUTABLE_SYMBOLS='PROVIDE (__stack = 0); PROVIDE (___stack = 0);'
-OTHER_BSS_END_SYMBOLS='__end = .;'
+OTHER_END_SYMBOLS="__end = .;"
 OTHER_RELRO_SECTIONS="
   .fixup        ${RELOCATING-0} : { *(.fixup) }
   .got1         ${RELOCATING-0} : { *(.got1) }

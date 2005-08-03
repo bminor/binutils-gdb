@@ -301,7 +301,7 @@ cat <<EOF
   ${OTHER_BSS_SECTIONS}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+_end = .;}
-  ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
+  ${RELOCATING+${OTHER_END_SYMBOLS}}
   ${RELOCATING+PROVIDE (end = .);}
 
   /* Stabs debugging sections.  */
