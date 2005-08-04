@@ -1,5 +1,10 @@
 2005-08-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am (eelf32m32c.c): Fix dependencies.
+	* Makefile.in: Regenerate.
+
+2005-08-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldemul.c (ldemul_finish): Call ld_emulation->finish unconditionally.
 	(finish_default): New function.
 	* ldemul.h (finish_default): Declare.
