@@ -3014,7 +3014,7 @@ elf64_x86_64_merge_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			   struct elf_link_hash_entry **sym_hash ATTRIBUTE_UNUSED,
 			   struct elf_link_hash_entry *h,
 			   Elf_Internal_Sym *sym,
-			   asection **psec ATTRIBUTE_UNUSED,
+			   asection **psec,
 			   bfd_vma *pvalue ATTRIBUTE_UNUSED,
 			   unsigned int *pold_alignment ATTRIBUTE_UNUSED,
 			   bfd_boolean *skip ATTRIBUTE_UNUSED,
@@ -3031,25 +3031,28 @@ elf64_x86_64_merge_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			   bfd_boolean *olddyn,
 			   bfd_boolean *olddyncommon ATTRIBUTE_UNUSED,
 			   bfd_boolean *oldweak ATTRIBUTE_UNUSED,
-			   bfd *oldbfd ATTRIBUTE_UNUSED,
+			   bfd *oldbfd,
 			   asection **oldsec)
 {
   /* A normal common symbol and a large common symbol result in a
-     normal common symbol.  If we see the normal symbol first, we
-     do nothing since the first one will be used.  If we see the
-     large common symbol first, we need to change the large common
-     symbol to the normal common symbol.  */
+     normal common symbol.  We turn the large common symbol into a
+     normal one.  */
   if (!*olddyn
       && h->root.type == bfd_link_hash_common
       && !*newdyn
       && bfd_is_com_section (*sec)
-      && *oldsec != *sec
-      && sym->st_shndx == SHN_COMMON
-      && (elf_section_flags (*oldsec) & SHF_X86_64_LARGE) != 0)
+      && *oldsec != *sec)
     {
-      h->root.u.c.p->section = bfd_make_section_old_way (abfd,
-							 "COMMON");
-      h->root.u.c.p->section->flags = SEC_ALLOC;
+      if (sym->st_shndx == SHN_COMMON
+	  && (elf_section_flags (*oldsec) & SHF_X86_64_LARGE) != 0)
+	{
+	  h->root.u.c.p->section
+	    = bfd_make_section_old_way (oldbfd, "COMMON");
+	  h->root.u.c.p->section->flags = SEC_ALLOC;
+	}
+      else if (sym->st_shndx == SHN_X86_64_LCOMMON
+	       && (elf_section_flags (*oldsec) & SHF_X86_64_LARGE) == 0)
+	*psec = *sec = bfd_com_section_ptr; 
     }
 
   return TRUE;
