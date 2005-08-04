@@ -1,5 +1,35 @@
 2005-08-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldemul.c (ldemul_do_assignments, do_assignments_default): Delete.
+	* ldemul.h (ldemul_do_assignments, do_assignments_default): Delete.
+	(struct ld_emulation_xfer_struct): Remove do_assignments field.
+	* ldlang.c (lang_do_assignments): Don't call ldemul_do_assignments.
+	* emulparams/elf32ppc.sh (SDATA_START_SYMBOLS): New.
+	(SDATA2_START_SYMBOLS, SBSS_START_SYMBOLS, SBSS_END_SYMBOLS): New.
+	* emultempl/aix.em (ld_*_emulation): Delete do_assignments init.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	(gld*_provide_bound_symbols): Delete.
+	(gld*_provide_init_fini_syms): Delete.
+	(gld*_before_allocation): Don't call ldemul_do_assignments.
+	* emultempl/ppc32elf.em (ppc_do_assignments): Delete.
+	(LDEMUL_DO_ASSIGNMENTS): Delete.
+	* scripttempl/elf.sc: Provide init/fini syms.  Add SBSS_START_SYMBOLS,
+	SBSS_END_SYMBOLS, SDATA2_START_SYMBOLS.
+
+2005-08-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am (eelf32m32c.c): Fix dependencies.
 	* Makefile.in: Regenerate.
 

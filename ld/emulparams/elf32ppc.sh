@@ -23,6 +23,17 @@ PLT=".plt          ${RELOCATING-0} : SPECIAL { *(.plt) }"
 GOTPLT="${PLT}"
 OTHER_TEXT_SECTIONS="*(.glink)"
 EXECUTABLE_SYMBOLS='PROVIDE (__stack = 0); PROVIDE (___stack = 0);'
+if test -z "${CREATE_SHLIB}"; then
+  SDATA_START_SYMBOLS="PROVIDE (_SDA_BASE_ = 32768);"
+  SDATA2_START_SYMBOLS="PROVIDE (_SDA2_BASE_ = 32768);"
+  SBSS_START_SYMBOLS="PROVIDE (__sbss_start = .); PROVIDE (___sbss_start = .);"
+  SBSS_END_SYMBOLS="PROVIDE (__sbss_end = .); PROVIDE (___sbss_end = .);"
+else
+  unset SDATA_START_SYMBOLS
+  unset SDATA2_START_SYMBOLS
+  unset SBSS_START_SYMBOLS
+  unset SBSS_END_SYMBOLS
+fi
 OTHER_END_SYMBOLS="__end = .;"
 OTHER_RELRO_SECTIONS="
   .fixup        ${RELOCATING-0} : { *(.fixup) }

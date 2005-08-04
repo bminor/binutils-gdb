@@ -123,10 +123,12 @@ STACKNOTE="/DISCARD/ : { *(.note.GNU-stack) }"
 if test -z "${NO_SMALL_DATA}"; then
   SBSS=".sbss         ${RELOCATING-0} :
   {
+    ${RELOCATING+${SBSS_START_SYMBOLS}}
     ${CREATE_SHLIB+*(.sbss2 .sbss2.* .gnu.linkonce.sb2.*)}
     *(.dynsbss)
     *(.sbss${RELOCATING+ .sbss.* .gnu.linkonce.sb.*})
     *(.scommon)
+    ${RELOCATING+${SBSS_END_SYMBOLS}}
   }"
   SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
   SDATA="/* We want the small data sections together, so single-instruction offsets
@@ -138,7 +140,11 @@ if test -z "${NO_SMALL_DATA}"; then
     ${CREATE_SHLIB+*(.sdata2 .sdata2.* .gnu.linkonce.s2.*)}
     *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
   }"
-  SDATA2=".sdata2       ${RELOCATING-0} : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
+  SDATA2=".sdata2       ${RELOCATING-0} :
+  {
+    ${RELOCATING+${SDATA2_START_SYMBOLS}}
+    *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*})
+  }"
   REL_SDATA=".rel.sdata    ${RELOCATING-0} : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
   .rela.sdata   ${RELOCATING-0} : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
   REL_SBSS=".rel.sbss     ${RELOCATING-0} : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
@@ -376,10 +382,24 @@ cat <<EOF
   .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
   .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
 
-  .preinit_array   ${RELOCATING-0} : { KEEP (*(.preinit_array)) }
-  .init_array   ${RELOCATING-0} : { KEEP (*(.init_array)) }
-  .fini_array   ${RELOCATING-0} : { KEEP (*(.fini_array)) }
-
+  .preinit_array   ${RELOCATING-0} :
+  {
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_start = .);}}
+    KEEP (*(.preinit_array))
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_end = .);}}
+  }
+  .init_array   ${RELOCATING-0} :
+  {
+     ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .);}}
+     KEEP (*(.init_array))
+     ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
+  }
+  .fini_array   ${RELOCATING-0} :
+  {
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
+    KEEP (*(.fini_array))
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
+  }
   ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}
   ${SMALL_DATA_DTOR-${RELOCATING+${DTOR}}}
   .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }

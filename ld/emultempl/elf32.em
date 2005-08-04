@@ -57,7 +57,6 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
-static void gld${EMULATION_NAME}_provide_init_fini_syms (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static bfd_boolean gld${EMULATION_NAME}_place_orphan
   (lang_input_statement_type *file, asection *s);
@@ -1040,47 +1039,6 @@ if test x"$LDEMUL_BEFORE_ALLOCATION" != xgld"$EMULATION_NAME"_before_allocation;
   fi
 cat >>e${EMULATION_NAME}.c <<EOF
 
-static void
-gld${EMULATION_NAME}_provide_bound_symbols (const char *sec,
-					    const char *start,
-					    const char *end)
-{
-  asection *s = bfd_get_section_by_name (output_bfd, sec);
-  _bfd_elf_provide_section_bound_symbols (&link_info, s, start, end);
-}
-
-/* If not building a shared library, provide
-
-   __preinit_array_start
-   __preinit_array_end
-   __init_array_start
-   __init_array_end
-   __fini_array_start
-   __fini_array_end
-
-   They are set here rather than via PROVIDE in the linker
-   script, because using PROVIDE inside an output section
-   statement results in unnecessary output sections.  Using
-   PROVIDE outside an output section statement runs the risk of
-   section alignment affecting where the section starts.  */
-
-static void
-gld${EMULATION_NAME}_provide_init_fini_syms (void)
-{
-  if (!link_info.relocatable && link_info.executable)
-    {
-      gld${EMULATION_NAME}_provide_bound_symbols (".preinit_array",
-						  "__preinit_array_start",
-						  "__preinit_array_end");
-      gld${EMULATION_NAME}_provide_bound_symbols (".init_array",
-						  "__init_array_start",
-						  "__init_array_end");
-      gld${EMULATION_NAME}_provide_bound_symbols (".fini_array",
-						  "__fini_array_start",
-						  "__fini_array_end");
-    }
-}
-
 /* This is called after the sections have been attached to output
    sections, but before any sizes or addresses have been set.  */
 
@@ -1097,8 +1055,6 @@ gld${EMULATION_NAME}_before_allocation (void)
      the ELF backend know about them in case the variables are
      referred to by dynamic objects.  */
   lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
-
-  ldemul_do_assignments ();
 
   /* Let the ELF backend work out the sizes of any sections required
      by dynamic linking.  */
@@ -1881,7 +1837,6 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
   ${LDEMUL_BEFORE_ALLOCATION-gld${EMULATION_NAME}_before_allocation},
-  ${LDEMUL_DO_ASSIGNMENTS-gld${EMULATION_NAME}_provide_init_fini_syms},
   ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",

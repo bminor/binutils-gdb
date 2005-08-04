@@ -1668,8 +1668,8 @@ typedef struct elf_linker_section
   const char *bss_name;
   /* Associated symbol name.  */
   const char *sym_name;
-  /* Value of symbol.  */
-  bfd_vma sym_val;
+  /* Associated symbol.  */
+  struct elf_link_hash_entry *sym;
 } elf_linker_section_t;
 
 /* Linked list of allocated pointer entries.  This hangs off of the
@@ -2734,6 +2734,20 @@ ppc_elf_add_symbol_hook (bfd *abfd,
   return TRUE;
 }
 
+static bfd_boolean
+create_sdata_sym (struct ppc_elf_link_hash_table *htab,
+		  elf_linker_section_t *lsect)
+{
+  lsect->sym = elf_link_hash_lookup (&htab->elf, lsect->sym_name,
+				     TRUE, FALSE, TRUE);
+  if (lsect->sym == NULL)
+    return FALSE;
+  if (lsect->sym->root.type == bfd_link_hash_new)
+    lsect->sym->non_elf = 0;
+  lsect->sym->ref_regular = 1;
+  return TRUE;
+}
+
 /* Create a special linker section.  */
 
 static bfd_boolean
@@ -2760,7 +2774,7 @@ ppc_elf_create_linker_section (bfd *abfd,
     return FALSE;
   lsect->section = s;
 
-  return TRUE;
+  return create_sdata_sym (htab, lsect);
 }
 
 /* Find a linker generated pointer with a given addend and type.  */
@@ -3090,6 +3104,11 @@ ppc_elf_check_relocs (bfd *abfd,
 	  if (!elf_create_pointer_linker_section (abfd, &htab->sdata[0],
 						  h, rel))
 	    return FALSE;
+	  if (h != NULL)
+	    {
+	      ppc_elf_hash_entry (h)->has_sda_refs = TRUE;
+	      h->non_got_ref = TRUE;
+	    }
 	  break;
 
 	  /* Indirect .sdata2 relocation.  */
@@ -3106,12 +3125,65 @@ ppc_elf_check_relocs (bfd *abfd,
 	  if (!elf_create_pointer_linker_section (abfd, &htab->sdata[1],
 						  h, rel))
 	    return FALSE;
+	  if (h != NULL)
+	    {
+	      ppc_elf_hash_entry (h)->has_sda_refs = TRUE;
+	      h->non_got_ref = TRUE;
+	    }
 	  break;
 
 	case R_PPC_SDAREL16:
+	  if (info->shared)
+	    {
+	      bad_shared_reloc (abfd, r_type);
+	      return FALSE;
+	    }
+	  if (htab->sdata[0].sym == NULL
+	      && !create_sdata_sym (htab, &htab->sdata[0]))
+	    return FALSE;
+	  if (h != NULL)
+	    {
+	      ppc_elf_hash_entry (h)->has_sda_refs = TRUE;
+	      h->non_got_ref = TRUE;
+	    }
+	  break;
+
 	case R_PPC_EMB_SDA2REL:
+	  if (info->shared)
+	    {
+	      bad_shared_reloc (abfd, r_type);
+	      return FALSE;
+	    }
+	  if (htab->sdata[1].sym == NULL
+	      && !create_sdata_sym (htab, &htab->sdata[1]))
+	    return FALSE;
+	  if (h != NULL)
+	    {
+	      ppc_elf_hash_entry (h)->has_sda_refs = TRUE;
+	      h->non_got_ref = TRUE;
+	    }
+	  break;
+
 	case R_PPC_EMB_SDA21:
 	case R_PPC_EMB_RELSDA:
+	  if (info->shared)
+	    {
+	      bad_shared_reloc (abfd, r_type);
+	      return FALSE;
+	    }
+	  if (htab->sdata[0].sym == NULL
+	      && !create_sdata_sym (htab, &htab->sdata[0]))
+	    return FALSE;
+	  if (htab->sdata[1].sym == NULL
+	      && !create_sdata_sym (htab, &htab->sdata[1]))
+	    return FALSE;
+	  if (h != NULL)
+	    {
+	      ppc_elf_hash_entry (h)->has_sda_refs = TRUE;
+	      h->non_got_ref = TRUE;
+	    }
+	  break;
+
 	case R_PPC_EMB_NADDR32:
 	case R_PPC_EMB_NADDR16:
 	case R_PPC_EMB_NADDR16_LO:
@@ -3123,11 +3195,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	      return FALSE;
 	    }
 	  if (h != NULL)
-	    {
-	      ppc_elf_hash_entry (h)->has_sda_refs = TRUE;
-	      /* We may need a copy reloc.  */
-	      h->non_got_ref = TRUE;
-	    }
+	    h->non_got_ref = TRUE;
 	  break;
 
 	case R_PPC_PLT32:
@@ -4045,24 +4113,6 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* This is a reference to a symbol defined by a dynamic object which
      is not a function.  */
-
-  /* First, a fudge for old shared libs that export some symbols they
-     should not.  */
-  if (!h->def_regular
-      && (strcmp (h->root.root.string, "_SDA_BASE_") == 0
-	  || strcmp (h->root.root.string, "_SDA2_BASE_") == 0))
-    {
-      /* These symbols will be defined later, as if they were defined in
-	 a linker script.  We don't want to use a definition in a shared
-	 object.  */
-      const struct elf_backend_data *bed;
-
-      bed = get_elf_backend_data (htab->elf.dynobj);
-      (*bed->elf_backend_hide_symbol) (info, h, TRUE);
-      h->root.type = bfd_link_hash_undefined;
-      h->root.u.undef.abfd = htab->elf.dynobj;
-      return TRUE;
-    }
 
   /* If we are creating a shared library, we must presume that the
      only references to the symbol are via the global offset table.
@@ -5259,52 +5309,6 @@ ppc_elf_relax_section (bfd *abfd,
   return FALSE;
 }
 
-/* Set _SDA_BASE_, _SDA2_BASE, and sbss start and end syms.  They are
-   set here rather than via PROVIDE in the default linker script,
-   because using PROVIDE inside an output section statement results in
-   unnecessary output sections.  Using PROVIDE outside an output section
-   statement runs the risk of section alignment affecting where the
-   section starts.  */
-
-void
-ppc_elf_set_sdata_syms (bfd *obfd, struct bfd_link_info *info)
-{
-  struct ppc_elf_link_hash_table *htab;
-  unsigned i;
-  asection *s;
-  bfd_vma val;
-
-  htab = ppc_elf_hash_table (info);
-
-  for (i = 0; i < 2; i++)
-    {
-      elf_linker_section_t *lsect = &htab->sdata[i];
-
-      s = lsect->section;
-      if (s != NULL)
-	s = s->output_section;
-      if (s == NULL)
-	s = bfd_get_section_by_name (obfd, lsect->name);
-      if (s == NULL)
-	s = bfd_get_section_by_name (obfd, lsect->bss_name);
-
-      if (s)
-	{
-	  /* VxWorks executables are relocatable, so the sdata base symbols
-	     must be section-relative.  */
-	  val = 32768;
-	  lsect->sym_val = val + s->vma;
-	}
-      else
-	{
-	  val = 0;
-	  lsect->sym_val = 0;
-	}
-
-      _bfd_elf_provide_symbol (info, lsect->sym_name, val, s);
-    }
-}
-
 /* What to do when ld finds relocations against symbols defined in
    discarded sections.  */
 
@@ -6348,6 +6352,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_SDAREL16:
 	  {
 	    const char *name;
+	    struct elf_link_hash_entry *sh;
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
@@ -6364,7 +6369,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		   howto->name,
 		   name);
 	      }
-	    addend -= htab->sdata[0].sym_val;
+	    sh = htab->sdata[0].sym;
+	    addend -= (sh->root.u.def.value
+		       + sh->root.u.def.section->output_offset
+		       + sh->root.u.def.section->output_section->vma);
 	  }
 	  break;
 
@@ -6372,6 +6380,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_EMB_SDA2REL:
 	  {
 	    const char *name;
+	    struct elf_link_hash_entry *sh;
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
@@ -6390,7 +6399,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		ret = FALSE;
 		continue;
 	      }
-	    addend -= htab->sdata[1].sym_val;
+	    sh = htab->sdata[1].sym;
+	    addend -= (sh->root.u.def.value
+		       + sh->root.u.def.section->output_offset
+		       + sh->root.u.def.section->output_section->vma);
 	  }
 	  break;
 
@@ -6400,6 +6412,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  {
 	    const char *name;
 	    int reg;
+	    struct elf_link_hash_entry *sh;
 
 	    BFD_ASSERT (sec != NULL);
 	    name = bfd_get_section_name (abfd, sec->output_section);
@@ -6409,14 +6422,20 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		     && (name[5] == 0 || name[5] == '.'))))
 	      {
 		reg = 13;
-		addend -= htab->sdata[0].sym_val;
+		sh = htab->sdata[0].sym;
+		addend -= (sh->root.u.def.value
+			   + sh->root.u.def.section->output_offset
+			   + sh->root.u.def.section->output_section->vma);
 	      }
 
 	    else if (strncmp (name, ".sdata2", 7) == 0
 		     || strncmp (name, ".sbss2", 6) == 0)
 	      {
 		reg = 2;
-		addend -= htab->sdata[1].sym_val;
+		sh = htab->sdata[1].sym;
+		addend -= (sh->root.u.def.value
+			   + sh->root.u.def.section->output_offset
+			   + sh->root.u.def.section->output_section->vma);
 	      }
 
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0

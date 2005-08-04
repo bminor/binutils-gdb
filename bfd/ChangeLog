@@ -1,5 +1,25 @@
 2005-08-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (struct elf_linker_section): Replace sym_val field
+	with sym.
+	(ppc_elf_relocate_section): Adjust for above.
+	(create_sdata_sym): New function.
+	(ppc_elf_create_linker_section): Call it.
+	(ppc_elf_check_relocs): Correct has_sda_refs and non_got_refs.
+	Create sdata syms for all SDA relocs.
+	(ppc_elf_adjust_dynamic_symbol): Don't special case _SDA_BASE_
+	and _SDA2_BASE_.
+	(ppc_elf_set_sdata_syms): Delete.
+	* elflink.c (bfd_elf_size_dynamic_sections): Don't create DT_INIT
+	and DT_FINI tags unless associated section has input.
+	(bfd_elf_set_symbol, _bfd_elf_provide_symbol): Delete.
+	(_bfd_elf_provide_section_bound_symbols): Delete.
+	* bfd-in.h (_bfd_elf_provide_symbol): Delete.
+	(_bfd_elf_provide_section_bound_symbols): Delete.
+	* bfd-in2.h: Regenerate.
+
+2005-08-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (fix_syms, _bfd_elf_fix_excluded_sec_syms): Move to..
 	* linker.c (fix_syms, _bfd_fix_excluded_sec_syms): ..here.
 	* bfd-in.h (_bfd_fix_excluded_sec_syms): Rename.

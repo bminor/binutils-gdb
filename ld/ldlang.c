@@ -3056,9 +3056,7 @@ strip_excluded_output_sections (void)
 {
   lang_output_section_statement_type *os;
 
-  /* Run lang_size_sections (if not already done) to ensure that all
-     symbols defined in the linker script are put in the bfd hash
-     table.  */
+  /* Run lang_size_sections (if not already done).  */
   if (expld.phase != lang_mark_phase_enum)
     {
       expld.phase = lang_mark_phase_enum;
@@ -4591,7 +4589,6 @@ lang_do_assignments (void)
 {
   lang_statement_iteration++;
   lang_do_assignments_1 (statement_list.head, abs_output_section, NULL, 0);
-  ldemul_do_assignments ();
 }
 
 /* Fix any .startof. or .sizeof. symbols.  When the assemblers see the

@@ -80,12 +80,6 @@ ldemul_before_allocation (void)
 }
 
 void
-ldemul_do_assignments (void)
-{
-  ld_emulation->do_assignments ();
-}
-
-void
 ldemul_set_output_arch (void)
 {
   ld_emulation->set_output_arch ();
@@ -219,11 +213,6 @@ before_allocation_default (void)
 {
   if (!link_info.relocatable)
     strip_excluded_output_sections ();
-}
-
-void
-do_assignments_default (void)
-{
 }
 
 void

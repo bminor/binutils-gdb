@@ -222,7 +222,6 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   set_output_arch_default,
   ldemul_default_target,
   before_allocation_default,
-  do_assignments_default,
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",

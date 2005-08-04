@@ -702,12 +702,6 @@ extern int bfd_get_sign_extend_vma
 extern struct bfd_section *_bfd_elf_tls_setup
   (bfd *, struct bfd_link_info *);
 
-extern void _bfd_elf_provide_symbol
-  (struct bfd_link_info *, const char *, bfd_vma, struct bfd_section *);
-
-extern void _bfd_elf_provide_section_bound_symbols
-  (struct bfd_link_info *, struct bfd_section *, const char *, const char *);
-
 extern void _bfd_fix_excluded_sec_syms
   (bfd *, struct bfd_link_info *);
 

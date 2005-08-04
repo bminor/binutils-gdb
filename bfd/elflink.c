@@ -5032,6 +5032,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       asection *dynstr;
       struct bfd_elf_version_tree *t;
       struct bfd_elf_version_expr *d;
+      asection *s;
       bfd_boolean all_defined;
 
       *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
@@ -5235,7 +5236,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    return FALSE;
 	}
 
-      if (bfd_get_section_by_name (output_bfd, ".preinit_array") != NULL)
+      s = bfd_get_section_by_name (output_bfd, ".preinit_array");
+      if (s != NULL && s->linker_has_input)
 	{
 	  /* DT_PREINIT_ARRAY is not allowed in shared library.  */
 	  if (! info->executable)
@@ -5263,13 +5265,15 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      || !_bfd_elf_add_dynamic_entry (info, DT_PREINIT_ARRAYSZ, 0))
 	    return FALSE;
 	}
-      if (bfd_get_section_by_name (output_bfd, ".init_array") != NULL)
+      s = bfd_get_section_by_name (output_bfd, ".init_array");
+      if (s != NULL && s->linker_has_input)
 	{
 	  if (!_bfd_elf_add_dynamic_entry (info, DT_INIT_ARRAY, 0)
 	      || !_bfd_elf_add_dynamic_entry (info, DT_INIT_ARRAYSZ, 0))
 	    return FALSE;
 	}
-      if (bfd_get_section_by_name (output_bfd, ".fini_array") != NULL)
+      s = bfd_get_section_by_name (output_bfd, ".fini_array");
+      if (s != NULL && s->linker_has_input)
 	{
 	  if (!_bfd_elf_add_dynamic_entry (info, DT_FINI_ARRAY, 0)
 	      || !_bfd_elf_add_dynamic_entry (info, DT_FINI_ARRAYSZ, 0))
@@ -9839,55 +9843,6 @@ _bfd_elf_section_already_linked (bfd *abfd, struct bfd_section * sec)
 
   /* This is the first section with this name.  Record it.  */
   bfd_section_already_linked_table_insert (already_linked_list, sec);
-}
-
-static void
-bfd_elf_set_symbol (struct elf_link_hash_entry *h, bfd_vma val,
-		    struct bfd_section *s)
-{
-  h->root.type = bfd_link_hash_defined;
-  h->root.u.def.section = s ? s : bfd_abs_section_ptr;
-  h->root.u.def.value = val;
-  h->def_regular = 1;
-  h->type = STT_OBJECT;
-  h->other = STV_HIDDEN | (h->other & ~ ELF_ST_VISIBILITY (-1));
-  h->forced_local = 1;
-}
-
-/* Set NAME to VAL if the symbol exists and is not defined in a regular
-   object file.  If S is NULL it is an absolute symbol, otherwise it is
-   relative to that section.  */
-
-void
-_bfd_elf_provide_symbol (struct bfd_link_info *info, const char *name,
-			 bfd_vma val, struct bfd_section *s)
-{
-  struct elf_link_hash_entry *h;
-
-  bfd_elf_record_link_assignment (info, name, TRUE);
-
-  h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
-  if (h != NULL
-      && !(h->root.type == bfd_link_hash_defined
-	   && h->root.u.def.section != NULL
-	   && h->root.u.def.section != h->root.u.def.section->output_section))
-    bfd_elf_set_symbol (h, val, s);
-}
-
-/* Set START and END to boundaries of SEC if they exist and are not
-   defined in regular object files.  */
-
-void
-_bfd_elf_provide_section_bound_symbols (struct bfd_link_info *info,
-					asection *sec,
-					const char *start,
-					const char *end)
-{
-  bfd_vma val = 0;
-  _bfd_elf_provide_symbol (info, start, val, sec);
-  if (sec != NULL)
-    val = sec->size;
-  _bfd_elf_provide_symbol (info, end, val, sec);
 }
 
 bfd_boolean
