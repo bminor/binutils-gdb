@@ -708,7 +708,7 @@ extern void _bfd_elf_provide_symbol
 extern void _bfd_elf_provide_section_bound_symbols
   (struct bfd_link_info *, struct bfd_section *, const char *, const char *);
 
-extern void _bfd_elf_fix_excluded_sec_syms
+extern void _bfd_fix_excluded_sec_syms
   (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs

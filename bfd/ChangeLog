@@ -1,3 +1,10 @@
+2005-08-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (fix_syms, _bfd_elf_fix_excluded_sec_syms): Move to..
+	* linker.c (fix_syms, _bfd_fix_excluded_sec_syms): ..here.
+	* bfd-in.h (_bfd_fix_excluded_sec_syms): Rename.
+	* bfd-in2.h: Regenerate.
+
 2005-08-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Resize .rela.got

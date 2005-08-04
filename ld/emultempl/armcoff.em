@@ -126,8 +126,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   /* We have seen it all. Allocate it, and carry on */
   bfd_arm_allocate_interworking_sections (& link_info);
 
-  if (!link_info.relocatable)
-    strip_excluded_output_sections ();
+  before_allocation_default ();
 }
 
 static void
@@ -194,6 +193,8 @@ gld${EMULATION_NAME}_finish (void)
     }
   else
     einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);
+
+  finish_default ();
 }
 
 static char *

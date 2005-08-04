@@ -94,8 +94,7 @@ ldemul_set_output_arch (void)
 void
 ldemul_finish (void)
 {
-  if (ld_emulation->finish)
-    ld_emulation->finish ();
+  ld_emulation->finish ();
 }
 
 void
@@ -225,6 +224,13 @@ before_allocation_default (void)
 void
 do_assignments_default (void)
 {
+}
+
+void
+finish_default (void)
+{
+  if (!link_info.relocatable)
+    _bfd_fix_excluded_sec_syms (output_bfd, &link_info);
 }
 
 void

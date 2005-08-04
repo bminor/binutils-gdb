@@ -379,7 +379,7 @@ ppc_finish (void)
     }
 
   ppc64_elf_restore_symbols (&link_info);
-  _bfd_elf_fix_excluded_sec_syms (output_bfd, &link_info);
+  finish_default ();
 }
 
 

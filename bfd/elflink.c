@@ -9890,39 +9890,6 @@ _bfd_elf_provide_section_bound_symbols (struct bfd_link_info *info,
   _bfd_elf_provide_symbol (info, end, val, sec);
 }
 
-/* Convert symbols in excluded output sections to absolute.  */
-
-static bfd_boolean
-fix_syms (struct bfd_link_hash_entry *h, void *data)
-{
-  bfd *obfd = (bfd *) data;
-
-  if (h->type == bfd_link_hash_warning)
-    h = h->u.i.link;
-
-  if (h->type == bfd_link_hash_defined
-      || h->type == bfd_link_hash_defweak)
-    {
-      asection *s = h->u.def.section;
-      if (s != NULL
-	  && s->output_section != NULL
-	  && (s->output_section->flags & SEC_EXCLUDE) != 0
-	  && bfd_section_removed_from_list (obfd, s->output_section))
-	{
-	  h->u.def.value += s->output_offset + s->output_section->vma;
-	  h->u.def.section = bfd_abs_section_ptr;
-	}
-    }
-
-  return TRUE;
-}
-
-void
-_bfd_elf_fix_excluded_sec_syms (bfd *obfd, struct bfd_link_info *info)
-{
-  bfd_link_hash_traverse (info->hash, fix_syms, obfd);
-}
-
 bfd_boolean
 _bfd_elf_common_definition (Elf_Internal_Sym *sym)
 {

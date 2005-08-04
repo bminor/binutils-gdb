@@ -788,8 +788,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 	}
     }
 
-  if (!link_info.relocatable)
-    strip_excluded_output_sections ();
+  before_allocation_default ();
 }
 
 static char *
@@ -1344,7 +1343,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  0,				/* finish */
+  finish_default,
   gld${EMULATION_NAME}_create_output_section_statements,
   0,				/* open_dynamic_archive */
   0,				/* place_orphan */

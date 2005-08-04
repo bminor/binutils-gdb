@@ -305,7 +305,7 @@ hppaelf_finish (void)
 	}
     }
 
-  _bfd_elf_fix_excluded_sec_syms (output_bfd, &link_info);
+  finish_default ();
 }
 
 

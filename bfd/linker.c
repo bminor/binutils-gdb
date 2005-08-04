@@ -3071,3 +3071,36 @@ _bfd_generic_section_already_linked (bfd *abfd, asection *sec)
   /* This is the first section with this name.  Record it.  */
   bfd_section_already_linked_table_insert (already_linked_list, sec);
 }
+
+/* Convert symbols in excluded output sections to absolute.  */
+
+static bfd_boolean
+fix_syms (struct bfd_link_hash_entry *h, void *data)
+{
+  bfd *obfd = (bfd *) data;
+
+  if (h->type == bfd_link_hash_warning)
+    h = h->u.i.link;
+
+  if (h->type == bfd_link_hash_defined
+      || h->type == bfd_link_hash_defweak)
+    {
+      asection *s = h->u.def.section;
+      if (s != NULL
+	  && s->output_section != NULL
+	  && (s->output_section->flags & SEC_EXCLUDE) != 0
+	  && bfd_section_removed_from_list (obfd, s->output_section))
+	{
+	  h->u.def.value += s->output_offset + s->output_section->vma;
+	  h->u.def.section = bfd_abs_section_ptr;
+	}
+    }
+
+  return TRUE;
+}
+
+void
+_bfd_fix_excluded_sec_syms (bfd *obfd, struct bfd_link_info *info)
+{
+  bfd_link_hash_traverse (info->hash, fix_syms, obfd);
+}

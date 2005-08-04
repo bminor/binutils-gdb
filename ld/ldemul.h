@@ -81,6 +81,8 @@ extern void before_allocation_default
   (void);
 extern void do_assignments_default
   (void);
+extern void finish_default
+  (void);
 extern void set_output_arch_default
   (void);
 extern void syslib_default

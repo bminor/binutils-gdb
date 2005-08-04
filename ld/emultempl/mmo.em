@@ -112,6 +112,7 @@ static void
 mmo_finish (void)
 {
   bfd_map_over_sections (output_bfd, mmo_wipe_sec_reloc_flag, NULL);
+  finish_default ();
 }
 
 /* To get on-demand global register allocation right, we need to parse the

@@ -1169,8 +1169,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
       }
   }
 
-  if (!link_info.relocatable)
-    strip_excluded_output_sections ();
+  before_allocation_default ();
 
   if (!bfd_elf_size_dynsym_hash_dynstr (output_bfd, &link_info))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
@@ -1511,7 +1510,7 @@ gld${EMULATION_NAME}_finish (void)
   if (bfd_elf_discard_info (output_bfd, &link_info))
     gld${EMULATION_NAME}_layout_sections_again ();
 
-  _bfd_elf_fix_excluded_sec_syms (output_bfd, &link_info);
+  finish_default ();
 }
 EOF
 fi

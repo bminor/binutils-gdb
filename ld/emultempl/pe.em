@@ -1288,8 +1288,7 @@ gld_${EMULATION_NAME}_before_allocation (void)
   bfd_arm_pe_allocate_interworking_sections (& link_info);
 #endif /* TARGET_IS_armpe */
 
-  if (!link_info.relocatable)
-    strip_excluded_output_sections ();
+  before_allocation_default ();
 }
 
 #ifdef DLL_SUPPORT
@@ -1463,6 +1462,8 @@ gld_${EMULATION_NAME}_finish (void)
 	einfo (_("%P: warning: connot find thumb start symbol %s\n"), thumb_entry_symbol);
     }
 #endif /* defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe) */
+
+  finish_default ();
 
 #ifdef DLL_SUPPORT
   if (link_info.shared

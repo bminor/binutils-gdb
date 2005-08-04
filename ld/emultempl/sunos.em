@@ -809,9 +809,9 @@ gld${EMULATION_NAME}_before_allocation (void)
 	hdyn->u.def.section = sdyn;
       else
 	hdyn->u.def.section = bfd_abs_section_ptr;
-
-      strip_excluded_output_sections ();
     }
+
+  before_allocation_default ();
 }
 
 /* This is called by the before_allocation routine via
@@ -1017,7 +1017,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL,	/* finish */
+  finish_default,
   gld${EMULATION_NAME}_create_output_section_statements,
   NULL,	/* open dynamic archive */
   NULL,	/* place orphan */

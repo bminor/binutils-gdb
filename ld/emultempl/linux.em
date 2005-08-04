@@ -122,7 +122,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   if (! bfd_${EMULATION_NAME}_size_dynamic_sections (output_bfd, &link_info))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
-  strip_excluded_output_sections ();
+  before_allocation_default ();
 }
 
 static char *
@@ -193,7 +193,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL,	/* finish */
+  finish_default,
   gld${EMULATION_NAME}_create_output_section_statements,
   gld${EMULATION_NAME}_open_dynamic_archive,
   NULL,	/* place orphan */

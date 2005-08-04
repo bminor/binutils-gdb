@@ -138,7 +138,7 @@ struct ld_emulation_xfer_struct ld_gld960_emulation =
   gld960_get_script,
   "960",
   "",
-  NULL,	/* finish */
+  finish_default,
   NULL,	/* create output section statements */
   NULL,	/* open dynamic archive */
   NULL,	/* place orphan */

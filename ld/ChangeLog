@@ -1,3 +1,28 @@
+2005-08-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldemul.c (ldemul_finish): Call ld_emulation->finish unconditionally.
+	(finish_default): New function.
+	* ldemul.h (finish_default): Declare.
+	* emultempl/aix.em (gld*_before_allocation): Call
+	before_allocation_default rather than strip_excluded_output_sections.
+	(ld_*_emulation): Init finish field to finish_default.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+
 2005-08-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (exp_init_os): Handle etree_provide.

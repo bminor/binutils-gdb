@@ -69,7 +69,7 @@ struct ld_emulation_xfer_struct ld_vanilla_emulation =
   vanilla_get_script,
   "vanilla",
   "a.out-sunos-big",
-  NULL,	/* finish */
+  finish_default,
   NULL,	/* create output section statements */
   NULL,	/* open dynamic archive */
   NULL,	/* place orphan */

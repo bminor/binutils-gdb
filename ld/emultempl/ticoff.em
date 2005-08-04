@@ -166,7 +166,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  NULL, /* finish */
+  finish_default,
   NULL, /* create output section statements */
   NULL, /* open dynamic archive */
   NULL, /* place orphan */
