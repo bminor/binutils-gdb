@@ -1533,6 +1533,17 @@ get_parisc_dynamic_type (unsigned long type)
     case DT_HP_GST_SIZE:	return "HP_GST_SIZE";
     case DT_HP_GST_VERSION:	return "HP_GST_VERSION";
     case DT_HP_GST_HASHVAL:	return "HP_GST_HASHVAL";
+    case DT_HP_EPLTREL:		return "HP_GST_EPLTREL";
+    case DT_HP_EPLTRELSZ:	return "HP_GST_EPLTRELSZ";
+    case DT_HP_FILTERED:	return "HP_FILTERED";
+    case DT_HP_FILTER_TLS:	return "HP_FILTER_TLS";
+    case DT_HP_COMPAT_FILTERED:	return "HP_COMPAT_FILTERED";
+    case DT_HP_LAZYLOAD:	return "HP_LAZYLOAD";
+    case DT_HP_BIND_NOW_COUNT:	return "HP_BIND_NOW_COUNT";
+    case DT_PLT:		return "PLT";
+    case DT_PLT_SIZE:		return "PLT_SIZE";
+    case DT_DLT:		return "DLT";
+    case DT_DLT_SIZE:		return "DLT_SIZE";
     default:
       return NULL;
     }
@@ -1675,7 +1686,9 @@ get_dynamic_type (unsigned long type)
 
 	  snprintf (buff, sizeof (buff), _("Processor Specific: %lx"), type);
 	}
-      else if ((type >= DT_LOOS) && (type <= DT_HIOS))
+      else if (((type >= DT_LOOS) && (type <= DT_HIOS))
+	       || (elf_header.e_machine == EM_PARISC
+		   && (type >= OLD_DT_LOOS) && (type <= OLD_DT_HIOS)))
 	{
 	  const char *result;
 
@@ -2392,6 +2405,10 @@ get_parisc_segment_type (unsigned long type)
     case PT_HP_CORE_MMF:	return "HP_CORE_MMF";
     case PT_HP_PARALLEL:	return "HP_PARALLEL";
     case PT_HP_FASTBIND:	return "HP_FASTBIND";
+    case PT_HP_OPT_ANNOT:	return "HP_OPT_ANNOT";
+    case PT_HP_HSL_ANNOT:	return "HP_HSL_ANNOT";
+    case PT_HP_STACK:		return "HP_STACK";
+    case PT_HP_CORE_UTSNAME:	return "HP_CORE_UTSNAME";
     case PT_PARISC_ARCHEXT:	return "PARISC_ARCHEXT";
     case PT_PARISC_UNWIND:	return "PARISC_UNWIND";
     default:
@@ -2557,6 +2574,9 @@ get_parisc_section_type_name (unsigned int sh_type)
     case SHT_PARISC_EXT:	return "PARISC_EXT";
     case SHT_PARISC_UNWIND:	return "PARISC_UNWIND";
     case SHT_PARISC_DOC:	return "PARISC_DOC";
+    case SHT_PARISC_ANNOT:	return "PARISC_ANNOT";
+    case SHT_PARISC_SYMEXTN:	return "PARISC_SYMEXTN";
+    case SHT_PARISC_STUBS:	return "PARISC_STUBS";
     default:
       break;
     }
@@ -5430,7 +5450,13 @@ dynamic_section_parisc_val (Elf_Internal_Dyn *entry)
 	  { DT_HP_BIND_RESTRICTED, "HP_BIND_RESTRICTED" },
 	  { DT_HP_BIND_SYMBOLIC, "HP_BIND_SYMBOLIC" },
 	  { DT_HP_RPATH_FIRST, "HP_RPATH_FIRST" },
-	  { DT_HP_BIND_DEPTH_FIRST, "HP_BIND_DEPTH_FIRST" }
+	  { DT_HP_BIND_DEPTH_FIRST, "HP_BIND_DEPTH_FIRST" },
+	  { DT_HP_GST, "HP_GST" },
+	  { DT_HP_SHLIB_FIXED, "HP_SHLIB_FIXED" },
+	  { DT_HP_MERGE_SHLIB_SEG, "HP_MERGE_SHLIB_SEG" },
+	  { DT_HP_NODELETE, "HP_NODELETE" },
+	  { DT_HP_GROUP, "HP_GROUP" },
+	  { DT_HP_PROTECT_LINKAGE_TABLE, "HP_PROTECT_LINKAGE_TABLE" }
 	};
 	int first = 1;
 	size_t cnt;

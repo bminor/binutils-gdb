@@ -1,3 +1,12 @@
+2005-08-04  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* readelf.c (get_parisc_dynamic_type): Add new dynamic types.
+	(get_dynamic_type): Use old values for DT_LOOS and DT_HIOS when
+	e_machine is EM_PARISC.
+	(get_parisc_segment_type): Add new segment types.
+	(get_parisc_section_type_name): Add new section names.
+	(dynamic_section_parisc_val): Add new table entries.
+
 2005-08-01  Filip Navara  <navaraf@reactos.com>
 
 	* dlltool.c (alphafunc): Remove and replace usage with nfunc.
