@@ -1,5 +1,10 @@
 2005-08-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Resize .rela.got
+	only if it isn't NULL.
+
+2005-08-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_howto_table): Undo the overflow change for
 	R_386_PC16 made on 2005-07-18.
 

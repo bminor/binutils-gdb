@@ -1338,7 +1338,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_local_got, &data);
       ia64_info->got_sec->size = data.ofs;
 
-      if (ia64_info->root.dynamic_sections_created)
+      if (ia64_info->root.dynamic_sections_created
+	  && ia64_info->rel_got_sec != NULL)
 	{
 	  /* Resize .rela.got.  */
 	  ia64_info->rel_got_sec->size = 0;
