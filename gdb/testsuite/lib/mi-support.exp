@@ -28,6 +28,9 @@ if ![info exists mi_gdb_prompt] then {
     set mi_gdb_prompt "\[(\]gdb\[)\] \r\n"
 }
 
+global mi_inferior_spawn_id
+global mi_inferior_tty_name
+
 set MIFLAGS "-i=mi"
 
 #
@@ -81,13 +84,17 @@ proc mi_uncatched_gdb_exit {} {
 }
 
 #
-# start gdb -- start gdb running, default procedure
+# mi_gdb_start [INFERIOR_PTY] -- start gdb running, default procedure
+#
+# INFERIOR_PTY should be set to separate-inferior-tty to have the inferior work 
+# with it's own PTY. If set to same-inferior-tty, the inferior shares GDB's PTY. 
+# The default value is same-inferior-tty.
 #
 # When running over NFS, particularly if running many simultaneous
 # tests on different hosts all using the same server, things can
 # get really slow.  Give gdb at least 3 minutes to start up.
 #
-proc mi_gdb_start { } {
+proc mi_gdb_start { args } {
     global verbose
     global GDB
     global GDBFLAGS
@@ -98,6 +105,13 @@ proc mi_gdb_start { } {
     global MIFLAGS
 
     gdb_stop_suppressing_tests;
+    set inferior_pty no-tty
+
+    if { [llength $args] == 1} {
+	set inferior_pty [lindex $args 0]
+    }
+
+    set separate_inferior_pty [string match $inferior_pty separate-inferior-tty]
 
     # Start SID.
     if { [info procs sid_start] != "" } {
@@ -117,6 +131,16 @@ proc mi_gdb_start { } {
 	    exit 1
 	}
     }
+
+    # Create the new PTY for the inferior process.
+    if { $separate_inferior_pty } {
+	spawn -pty
+	global mi_inferior_spawn_id
+	global mi_inferior_tty_name
+	set mi_inferior_spawn_id $spawn_id
+	set mi_inferior_tty_name $spawn_out(slave,name)
+    }
+
     set res [remote_spawn host "$GDB -nw $GDBFLAGS $MIFLAGS [host_info gdb_opts]"];
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
@@ -188,6 +212,19 @@ proc mi_gdb_start { } {
 	timeout {
 	    warning "Couldn't set the width to 0."
 	}
+    }
+    # If allowing the inferior to have its own PTY then assign the inferior
+    # its own terminal device here.
+    if { $separate_inferior_pty } {
+	send_gdb "102-inferior-tty-set $mi_inferior_tty_name\n"
+	gdb_expect 10 {
+	    -re ".*102\\\^done\r\n$mi_gdb_prompt$" {
+		verbose "redirect inferior output to new terminal device."
+	    }
+	    timeout {
+	    	warning "Couldn't redirect inferior output." 2
+	    }
+    	}
     }
 
     return 0;
@@ -511,7 +548,8 @@ proc mi_gdb_load { arg } {
     return 0
 }
 
-# mi_gdb_test COMMAND PATTERN MESSAGE -- send a command to gdb; test the result.
+# mi_gdb_test COMMAND PATTERN MESSAGE [IPATTERN] -- send a command to gdb; 
+#   test the result.
 #
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
 #   this is the null string no command is sent.
@@ -520,6 +558,9 @@ proc mi_gdb_load { arg } {
 # MESSAGE is the message to be printed.  (If this is the empty string, 
 #   then sometimes we don't call pass or fail at all; I don't 
 #   understand this at all.)
+# IPATTERN is the pattern to match for the inferior's output.  This parameter
+#   is optional.  If present, it will produce a PASS if the match is 
+#   successful, and a FAIL if unsuccessful.
 #
 # Returns:
 #    1 if the test failed,
@@ -535,6 +576,10 @@ proc mi_gdb_test { args } {
     set command [lindex $args 0]
     set pattern [lindex $args 1]
     set message [lindex $args 2]
+
+    if [llength $args]==4 {
+	set ipattern [lindex $args 3]
+    }
 
     if [llength $args]==5 {
 	set question_string [lindex $args 3];
@@ -686,6 +731,23 @@ proc mi_gdb_test { args } {
 	    set result 1
 	}
     }
+
+    # If the GDB output matched, compare the inferior output.
+    if { $result == 0 } {
+	if [ info exists ipattern ] {
+	    global mi_inferior_spawn_id
+	    expect {
+		-i $mi_inferior_spawn_id -re "$ipattern" {
+		    pass "inferior_output:$message"
+		}
+		timeout {
+		    fail "inferior output timeout"
+		    set result 1
+		}
+	    }
+        }
+    }
+
     return $result
 }
 

@@ -36,7 +36,7 @@ load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
 gdb_exit
-if [mi_gdb_start] {
+if [mi_gdb_start separate-inferior-tty] {
     continue
 }
 
@@ -54,37 +54,10 @@ mi_gdb_load ${binfile}
 mi_run_to_main
 
 # Next over the hello() call which will produce lots of output
-send_gdb "47-exec-next\n"
-gdb_expect {
-    -re "47\\^running\r\n$mi_gdb_prompt" {
-	pass "Started step over hello"
-    }
-    timeout {
-	fail "Started step over hello (timeout)"
-    }
-}
-
-if { ![target_info exists gdb,noinferiorio]}  {
-    gdb_expect {
-	-re "@\"H\"\r\n.*@\"e\"\r\n.*@\"l\"\r\n.*@\"l\"\r\n.*@\"o\"\r\n.*@\" \"\r\n.*@\"\\\\\\\\\"\r\n.*@\"\\\\\"\"\r\n.*@\"!\"\r\n.*@\"\\\\r\"\r\n.*@\"\\\\n\"\r\n" {
-	    pass "Hello message"
-	}
-	-re "Hello" {
-
-	    # Probably a native system where GDB doesn't have direct #
-	    # control over the inferior console.  # For this to work,
-	    # GDB would need to run the inferior process # under a PTY
-	    # and then use the even-loops ability to wait on #
-	    # multiple event sources to channel the output back
-	    # through the # MI.
-
-	    kfail "gdb/623" "Hello message"
-	}
-	timeout {
-	    fail "Hello message (timeout)"
-	}
-    }
-}
+mi_gdb_test "47-exec-next" \
+	    "47\\^running" \
+	    "Testing console output" \
+	    "Hello \\\\\"!\[\r\n\]+"
     
 gdb_expect {
     -re "47\\*stopped.*$mi_gdb_prompt$" {

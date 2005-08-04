@@ -33,7 +33,7 @@ load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
 gdb_exit
-if [mi_gdb_start] {
+if [mi_gdb_start separate-inferior-tty] {
     continue
 }
 
@@ -238,6 +238,7 @@ proc test_path_specification {} {
 
 proc test_setshow_inferior_tty {} {
     global mi_gdb_prompt
+    global mi_inferior_tty_name
 
     # Test that the commands,
     #   -inferior-tty-set
@@ -245,8 +246,8 @@ proc test_setshow_inferior_tty {} {
     # are setting/getting the same data in GDB.
 
     mi_gdb_test "301-inferior-tty-show" \
-		"301\\\^done" \
-		"initial tty is empty"
+		"301\\\^done,inferior_tty_terminal=\"$mi_inferior_tty_name\"" \
+		"initial tty is mi_inferior_tty_name"
 
     mi_gdb_test "302-inferior-tty-set /dev/pts/1" \
 		"302\\\^done" \
@@ -262,7 +263,15 @@ proc test_setshow_inferior_tty {} {
 
     mi_gdb_test "305-inferior-tty-show" \
 		"305\\\^done" \
-		"final tty is empty"
+		"make sure tty is empty"
+
+    mi_gdb_test "306-inferior-tty-set $mi_inferior_tty_name" \
+		"306\\\^done" \
+		"set tty to mi_inferior_tty_name (the way it was)"
+
+    mi_gdb_test "307-inferior-tty-show" \
+		"307\\\^done,inferior_tty_terminal=\"$mi_inferior_tty_name\"" \
+		"verify tty is correct"
 }
 
 if [test_mi_interpreter_selection] {
