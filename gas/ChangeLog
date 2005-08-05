@@ -1,5 +1,13 @@
 2005-08-05  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (current_it_mask, current_cc): New variables.
+	(do_t_add_sub): Use correct encodings inside IT block.
+	(do_t_arit3c): Ditto.
+	(do_t_it): Simplify logic.  Set current_it_mask and current_cc.
+	(md_assemble): Verify conditional suffixes agains IT blocks.
+
+2005-08-05  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (encode_thumb32_immediate): Only accept shifted
 	constants.
 	(encode_thumb32_shifted_operand): Prohibit register shifts.

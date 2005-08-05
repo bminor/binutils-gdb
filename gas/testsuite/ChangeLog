@@ -1,5 +1,11 @@
 2005-08-05  Paul Brook  <paul@codesourcery.com>
 
+	* gas/arm/thumb32.s: Use correct conditional suffixes inside IT
+	blocks.
+	* gas/arm/thumb2_it.d, gas/arm/thumb2_it.s: New test.
+
+2005-08-05  Paul Brook  <paul@codesourcery.com>
+
 	* gas/arm/thumb32.d: Update ldm/stm dests.
 	* gas/arm/thumb32.s: Ditto.
 

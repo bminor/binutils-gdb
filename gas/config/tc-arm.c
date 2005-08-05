@@ -535,6 +535,11 @@ typedef struct literal_pool
 
 /* Pointer to a linked list of literal pools.  */
 literal_pool * list_of_pools = NULL;
+
+/* State variables for IT block handling.  */
+static bfd_boolean current_it_mask = 0;
+static int current_cc;
+
 
 /* Pure syntax.	 */
 
@@ -5863,6 +5868,8 @@ do_t_add_sub (void)
     {
       if (!inst.operands[2].isreg)
 	{
+	  /* ??? Convert large immediates to addw/subw.  */
+	  /* ??? 16-bit adds with small immediates.  */
 	  /* For an immediate, we always generate a 32-bit opcode;
 	     section relaxation will shrink it later if possible.  */
 	  inst.instruction = THUMB_OP32 (inst.instruction);
@@ -5877,11 +5884,20 @@ do_t_add_sub (void)
 	  /* See if we can do this with a 16-bit instruction.  */
 	  if (!inst.operands[2].shifted && inst.size_req != 4)
 	    {
-	      if (Rd <= 7 && Rn <= 7 && Rn <= 7
-		  && (inst.instruction == T_MNEM_adds
-		      || inst.instruction == T_MNEM_subs))
+	      bfd_boolean narrow;
+
+	      if (inst.instruction == T_MNEM_adds
+		  || inst.instruction == T_MNEM_subs)
+		narrow = (current_it_mask == 0);
+	      else
+		narrow = (current_it_mask != 0);
+	      if (Rd > 7 || Rs > 7 || Rn > 7)
+		narrow = FALSE;
+
+	      if (narrow)
 		{
-		  inst.instruction = (inst.instruction == T_MNEM_adds
+		  inst.instruction = ((inst.instruction == T_MNEM_adds
+				       || inst.instruction == T_MNEM_add)
 				      ? T_OPCODE_ADD_R3
 				      : T_OPCODE_SUB_R3);
 		  inst.instruction |= Rd | (Rs << 3) | (Rn << 6);
@@ -6018,10 +6034,22 @@ do_t_arit3 (void)
 	}
       else
 	{
+	  bfd_boolean narrow;
+
 	  /* See if we can do this with a 16-bit instruction.  */
-	  if (THUMB_SETS_FLAGS (inst.instruction)
-	      && !inst.operands[2].shifted
-	      && inst.size_req != 4
+	  if (THUMB_SETS_FLAGS (inst.instruction))
+	    narrow = current_it_mask == 0;
+	  else
+	    narrow = current_it_mask != 0;
+
+	  if (Rd > 7 || Rn > 7 || Rs > 7)
+	    narrow = FALSE;
+	  if (inst.operands[2].shifted)
+	    narrow = FALSE;
+	  if (inst.size_req == 4)
+	    narrow = FALSE;
+
+	  if (narrow
 	      && Rd == Rs)
 	    {
 	      inst.instruction = THUMB_OP16 (inst.instruction);
@@ -6089,10 +6117,22 @@ do_t_arit3c (void)
 	}
       else
 	{
+	  bfd_boolean narrow;
+
 	  /* See if we can do this with a 16-bit instruction.  */
-	  if (THUMB_SETS_FLAGS (inst.instruction)
-	      && !inst.operands[2].shifted
-	      && inst.size_req != 4)
+	  if (THUMB_SETS_FLAGS (inst.instruction))
+	    narrow = current_it_mask == 0;
+	  else
+	    narrow = current_it_mask != 0;
+
+	  if (Rd > 7 || Rn > 7 || Rs > 7)
+	    narrow = FALSE;
+	  if (inst.operands[2].shifted)
+	    narrow = FALSE;
+	  if (inst.size_req == 4)
+	    narrow = FALSE;
+
+	  if (narrow)
 	    {
 	      if (Rd == Rs)
 		{
@@ -6363,21 +6403,26 @@ static void
 do_t_it (void)
 {
   unsigned int cond = inst.operands[0].imm;
+
+  current_it_mask = (inst.instruction & 0xf) | 0x10;
+  current_cc = cond;
+
+  /* If the condition is a negative condition, invert the mask.  */
   if ((cond & 0x1) == 0x0)
     {
       unsigned int mask = inst.instruction & 0x000f;
-      inst.instruction &= 0xfff0;
 
       if ((mask & 0x7) == 0)
 	/* no conversion needed */;
       else if ((mask & 0x3) == 0)
-	mask = (~(mask & 0x8) & 0x8) | 0x4;
-      else if ((mask & 1) == 0)
-	mask = (~(mask & 0xC) & 0xC) | 0x2;
+	mask ^= 0x8;
+      else if ((mask & 0x1) == 0)
+	mask ^= 0xC;
       else
-	mask = (~(mask & 0xE) & 0xE) | 0x1;
+	mask ^= 0xE;
 
-      inst.instruction |= (mask & 0xF);
+      inst.instruction &= 0xfff0;
+      inst.instruction |= mask;
     }
 
   inst.instruction |= cond << 4;
@@ -7687,11 +7732,34 @@ md_assemble (char *str)
 	  return;
 	}
 
+      /* Check conditional suffixes.  */
+      if (current_it_mask)
+	{
+	  int cond;
+	  cond = current_cc ^ ((current_it_mask >> 4) & 1) ^ 1;
+	  if (cond != inst.cond)
+	    {
+	      as_bad (_("incorrect condition in IT block"));
+	      return;
+	    }
+	  current_it_mask <<= 1;
+	  current_it_mask &= 0x1f;
+	}
+      else if (inst.cond != COND_ALWAYS && opcode->tencode != do_t_branch)
+	{
+	  as_bad (_("thumb conditional instrunction not in IT block"));
+	  return;
+	}
+
       mapping_state (MAP_THUMB);
       inst.instruction = opcode->tvalue;
 
       if (!parse_operands (p, opcode->operands))
 	opcode->tencode ();
+
+      /* Clear current_it_mask at the end of an IT block.  */
+      if (current_it_mask == 0x10)
+	current_it_mask = 0;
 
       if (!inst.error)
 	{

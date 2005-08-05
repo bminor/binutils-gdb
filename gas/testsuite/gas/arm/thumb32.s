@@ -275,62 +275,76 @@ nop_hint:
 	nop {129}
 
 it:
-	.macro	itx opc cond n
-	\opc	\cond
-	.rept	\n
-	nop
-	.endr
+	.macro nop1 cond ncond a
+	.ifc \a,t
+	nop\cond
+	.else
+	nop\ncond
+	.endif
+	.endm
+	.macro it0 cond m=
+	it\m \cond
+	nop\cond
+	.endm
+	.macro it1 cond ncond a m=
+	it0 \cond \a\m
+	nop1 \cond \ncond \a
+	.endm
+	.macro it2 cond ncond a b m=
+	it1 \cond \ncond \a \b\m
+	nop1 \cond \ncond \b
+	.endm
+	.macro it3 cond ncond a b c
+	it2 \cond \ncond \a \b \c
+	nop1 \cond \ncond \c
 	.endm
 
-	itx	it eq 1
-	itx	it ne 1
-	itx	it cs 1
-	itx	it hs 1
-	itx	it cc 1
-	itx	it ul 1
-	itx	it lo 1
-	itx	it mi 1
-	itx	it pl 1
-	itx	it vs 1
-	itx	it vc 1
-	itx	it hi 1
-	itx	it ge 1
-	itx	it lt 1
-	itx	it gt 1
-	itx	it le 1
-	itx	it al 1
+	it0	eq
+	it0	ne
+	it0	cs
+	it0	hs
+	it0	cc
+	it0	ul
+	it0	lo
+	it0	mi
+	it0	pl
+	it0	vs
+	it0	vc
+	it0	hi
+	it0	ge
+	it0	lt
+	it0	gt
+	it0	le
+	it0	al
+	it1 eq ne t
+	it1 eq ne e
+	it2 eq ne t t
+	it2 eq ne e t
+	it2 eq ne t e
+	it2 eq ne e e
+	it3 eq ne t t t
+	it3 eq ne e t t
+	it3 eq ne t e t
+	it3 eq ne t t e
+	it3 eq ne t e e
+	it3 eq ne e t e
+	it3 eq ne e e t
+	it3 eq ne e e e
 
-	itx	itt eq 2
-	itx	ite eq 2
-	itx	ittt eq 3
-	itx	itet eq 3
-	itx	itte eq 3
-	itx	itee eq 3
-	itx	itttt eq 4
-	itx	itett eq 4
-	itx	ittet eq 4
-	itx	ittte eq 4
-	itx	ittee eq 4
-	itx	itete eq 4
-	itx	iteet eq 4
-	itx	iteee eq 4
-	
-	itx	itt ne 2
-	itx	ite ne 2
-	itx	ittt ne 3
-	itx	itet ne 3
-	itx	itte ne 3
-	itx	itee ne 3
-	itx	itttt ne 4
-	itx	itett ne 4
-	itx	ittet ne 4
-	itx	ittte ne 4
-	itx	ittee ne 4
-	itx	itete ne 4
-	itx	iteet ne 4
-	itx	iteee ne 4
-
-	.purgem itx
+	it1 ne eq t
+	it1 ne eq e
+	it2 ne eq t t
+	it2 ne eq e t
+	it2 ne eq t e
+	it2 ne eq e e
+	it3 ne eq t t t
+	it3 ne eq e t t
+	it3 ne eq t e t
+	it3 ne eq t t e
+	it3 ne eq t e e
+	it3 ne eq e t e
+	it3 ne eq e e t
+	it3 ne eq e e e
 
 ldst:
 	.macro	ls op
