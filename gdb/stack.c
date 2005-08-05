@@ -60,6 +60,8 @@ void _initialize_stack (void);
 
 /* Prototypes for local functions. */
 
+static struct frame_info *parse_frame_specification (char *frame_exp);
+
 static void down_command (char *, int);
 
 static void down_silently_base (char *);
@@ -844,7 +846,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
     error (_("Too many args in frame specification"));
 }
 
-struct frame_info *
+static struct frame_info *
 parse_frame_specification (char *frame_exp)
 {
   return parse_frame_specification_1 (frame_exp, NULL, NULL);
@@ -932,15 +934,13 @@ frame_info (char *addr_exp, int from_tty)
     {
       printf_filtered (_("Stack level %d, frame at "),
 		       frame_relative_level (fi));
-      deprecated_print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
-      printf_filtered (":\n");
     }
   else
     {
       printf_filtered (_("Stack frame at "));
-      deprecated_print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
-      printf_filtered (":\n");
     }
+  deprecated_print_address_numeric (get_frame_base (fi), 1, gdb_stdout);
+  printf_filtered (":\n");
   printf_filtered (" %s = ", pc_regname);
   deprecated_print_address_numeric (get_frame_pc (fi), 1, gdb_stdout);
 

@@ -1,3 +1,10 @@
+2005-08-02  Fred Fish  <fnf@specifix.com>
+
+	* defs.h (parse_frame_specification): Remove prototype.
+	* stack.c (parse_frame_specification): Add prototype and
+	make function static.
+	(frame_info): Move common code outside if..then..else.
+
 2005-08-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* value.c (value_contents_writeable): Use value_contents_raw.

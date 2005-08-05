@@ -1099,7 +1099,6 @@ extern void (*deprecated_show_load_progress) (const char *section,
 extern void (*deprecated_print_frame_info_listing_hook) (struct symtab * s,
 							 int line, int stopline,
 							 int noerror);
-extern struct frame_info *parse_frame_specification (char *frame_exp);
 extern int (*deprecated_query_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);
 extern void (*deprecated_warning_hook) (const char *, va_list)
