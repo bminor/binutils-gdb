@@ -4486,6 +4486,10 @@ void bfd_preserve_restore (bfd *, struct bfd_preserve *);
 
 void bfd_preserve_finish (bfd *, struct bfd_preserve *);
 
+void bfd_hide_symbol
+   (bfd *, struct bfd_link_info *,
+    struct bfd_link_hash_entry *, bfd_boolean);
+
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent
    (bfd *abfd, symindex previous, carsym **sym);

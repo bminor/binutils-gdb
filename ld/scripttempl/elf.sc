@@ -379,21 +379,21 @@ cat <<EOF
 
   .preinit_array   ${RELOCATING-0} :
   {
-    ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_start = .);}}
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__preinit_array_start = .);}}
     KEEP (*(.preinit_array))
-    ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_end = .);}}
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__preinit_array_end = .);}}
   }
   .init_array   ${RELOCATING-0} :
   {
-     ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .);}}
+     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__init_array_start = .);}}
      KEEP (*(.init_array))
-     ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
+     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__init_array_end = .);}}
   }
   .fini_array   ${RELOCATING-0} :
   {
-    ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__fini_array_start = .);}}
     KEEP (*(.fini_array))
-    ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__fini_array_end = .);}}
   }
   ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}
   ${SMALL_DATA_DTOR-${RELOCATING+${DTOR}}}

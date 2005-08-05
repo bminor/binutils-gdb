@@ -1,3 +1,18 @@
+2005-08-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Document PROVIDE_HIDDEN.
+
+	* ldexp.c (exp_fold_tree_1): Hide a provided symbol if asked.
+	(exp_provide): Add and set hidden.
+
+	* ldexp.h (etree_type): Add hidden to assign.
+
+	* ldgram.y (PROVIDE_HIDDEN): New.
+	* ldlex.l (PROVIDE_HIDDEN): Likewise.
+
+	* scripttempl/elf.sc: Use PROVIDE_HIDDEN on array bound
+	symbols.
+
 2005-08-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf_x86_64.sh: Revert last change.

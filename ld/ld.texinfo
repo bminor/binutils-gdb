@@ -2779,6 +2779,7 @@ the symbol and place it into the symbol table with a global scope.
 @menu
 * Simple Assignments::		Simple Assignments
 * PROVIDE::			PROVIDE
+* PROVIDE_HIDDEN::		PROVIDE_HIDDEN
 * Source Code Reference::	How to use a linker script defined symbol in source code
 @end menu
 
@@ -2871,6 +2872,12 @@ the other hand, the program defines @samp{etext} (with no leading
 underscore), the linker will silently use the definition in the program.
 If the program references @samp{etext} but does not define it, the
 linker will use the definition in the linker script.
+
+@node PROVIDE_HIDDEN
+@subsection PROVIDE_HIDDEN
+@cindex PROVIDE_HIDDEN
+Similar to @code{PROVIDE}.  For ELF targeted ports, the symbol will be
+hidden and won't be exported.
 
 @node Source Code Reference
 @subsection Source Code Reference

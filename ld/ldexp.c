@@ -740,6 +740,8 @@ exp_fold_tree_1 (etree_type *tree)
 		     defined by some object.  */
 		  break;
 		}
+	      if (tree->assign.hidden)
+		bfd_hide_symbol (output_bfd, &link_info, h, TRUE);
 	    }
 
 	  exp_fold_tree_1 (tree->assign.src);
@@ -884,7 +886,7 @@ exp_assop (int code, const char *dst, etree_type *src)
 /* Handle PROVIDE.  */
 
 etree_type *
-exp_provide (const char *dst, etree_type *src)
+exp_provide (const char *dst, etree_type *src, bfd_boolean hidden)
 {
   etree_type *n;
 
@@ -893,6 +895,7 @@ exp_provide (const char *dst, etree_type *src)
   n->assign.type.node_class = etree_provide;
   n->assign.src = src;
   n->assign.dst = dst;
+  n->assign.hidden = hidden;
   return n;
 }
 

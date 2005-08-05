@@ -142,7 +142,7 @@ static int error_index;
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
-%token ALIGNMOD AT SUBALIGN PROVIDE AS_NEEDED
+%token ALIGNMOD AT SUBALIGN PROVIDE PROVIDE_HIDDEN AS_NEEDED
 %type <token> assign_op atype attributes_opt sect_constraint
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD ASSERT_K
@@ -648,7 +648,11 @@ assignment:
 		}
 	|	PROVIDE '(' NAME '=' mustbe_exp ')'
 		{
-		  lang_add_assignment (exp_provide ($3, $5));
+		  lang_add_assignment (exp_provide ($3, $5, FALSE));
+		}
+	|	PROVIDE_HIDDEN '(' NAME '=' mustbe_exp ')'
+		{
+		  lang_add_assignment (exp_provide ($3, $5, TRUE));
 		}
 	;
 

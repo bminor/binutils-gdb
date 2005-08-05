@@ -1508,3 +1508,29 @@ bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
      objalloc.  */
   bfd_hash_table_free (&preserve->section_htab);
 }
+
+/*
+FUNCTION
+	bfd_hide_symbol
+
+SYNOPSIS
+	void bfd_hide_symbol (bfd *,
+			      struct bfd_link_info *,
+			      struct bfd_link_hash_entry *,
+			      bfd_boolean);
+
+DESCRIPTION
+	This function hides a symbol so that it won't be exported. 
+
+*/
+
+void
+bfd_hide_symbol (bfd *abfd,
+		 struct bfd_link_info *link_info,
+		 struct bfd_link_hash_entry *h,
+		 bfd_boolean force_local)
+{
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    (get_elf_backend_data (abfd)->elf_backend_hide_symbol)
+      (link_info, (struct elf_link_hash_entry *) h, force_local);
+}
