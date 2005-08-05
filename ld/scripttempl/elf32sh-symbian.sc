@@ -8,7 +8,6 @@
 #	OTHER_TEXT_SECTIONS - these get put in .text when relocating
 #	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
 #		(e.g., .PARISC.global)
-#	OTHER_BSS_SECTIONS - other than .bss .sbss ...
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
@@ -34,7 +33,7 @@
 #	FINI_START, FINI_END - statements just before and just after
 # 	combination of .fini sections.
 #	STACK_ADDR - start of a .stack section.
-#	OTHER_END_SYMBOLS - symbols to place right at the end of the script.
+#	OTHER_SYMBOLS - symbols to place right at the end of the script.
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
@@ -257,10 +256,10 @@ SECTIONS
       .bss section disappears because there are no input sections.  */
    ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   } :data
-  ${OTHER_BSS_SECTIONS}
+  ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-  ${RELOCATING+_end = .;}
   ${RELOCATING+${OTHER_END_SYMBOLS}}
+  ${RELOCATING+_end = .;}
   ${RELOCATING+PROVIDE (end = .);}
   ${RELOCATING+${DATA_SEGMENT_END}}
 
@@ -371,7 +370,7 @@ cat <<EOF
 
   ${STACK_ADDR+${STACK}}
   ${OTHER_SECTIONS}
-  ${RELOCATING+${OTHER_END_SYMBOLS}}
+  ${RELOCATING+${OTHER_SYMBOLS}}
   ${RELOCATING+${STACKNOTE}}
 }
 EOF

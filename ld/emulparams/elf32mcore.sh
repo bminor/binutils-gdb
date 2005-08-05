@@ -22,7 +22,7 @@ EMBEDDED=yes
 NOP=0x0e0e0e0e
 
 OTHER_BSS_SYMBOLS="__bss_start__ = . ;"
-OTHER_END_SYMBOLS="__bss_end__ = . ;"
+OTHER_BSS_END_SYMBOLS="__bss_end__ = . ;"
 
 # This sets the stack to the top of the simulator memory (2^19 bytes).
 STACK_ADDR=0x80000

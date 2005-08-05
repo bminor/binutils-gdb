@@ -1,3 +1,40 @@
+2005-08-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/armelf.sh (OTHER_BSS_END_SYMBOLS): Split out from
+	OTHER_END_SYMBOLS.
+	* emulparams/armelf_linux.sh: Likewise.
+	* emulparams/armnto.sh: Likewise.
+	* emulparams/criself.sh: Likewise.
+	* emulparams/elf32mcore.sh: Likewise.
+	* emulparams/criself.sh (OTHER_SYMBOLS): Define.
+	* emulparams/crislinux.sh (OTHER_SYMBOLS): Define.
+	(OTHER_END_SYMBOLS): Don't define.
+	* emulparams/elf32fr30.sh: Likewise.
+	* emulparams/elf64mmix.sh: Likewise.
+	* emulparams/hppa64linux.sh: Likewise.
+	* emulparams/m32relf.sh: Likewise.
+	* emulparams/vxworks.sh: Likewise.
+	* scripttempl/armbpabi.sc (OTHER_BSS_SECTIONS): Delete.
+	(OTHER_BSS_END_SYMBOLS): Add.
+	(OTHER_END_SYMBOLS): Move before current end sym definitions.
+	(OTHER_SYMBOLS): Replace OTHER_END_SYMBOLS near end of script.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+
+	* scripttempl/elf.sc (LBSS, LARGE_SECTIONS): Delete.
+	(REL_LDATA, REL_LBSS, REL_LRODATA): Delete.
+	(REL_LARGE, LARGE_SECTIONS): Add.
+	* emulparams/elf_x86_64.sh (LARGE_SECTIONS): Define as script text.
+	(REL_LARGE): Define.
+	* emulparams/hppa64linux.sh (OTHER_BSS_SECTIONS): Don't define.
+	(LARGE_SECTIONS): Define.
+	* emulparams/hppa64linux.sh (OTHER_BSS_SECTIONS): Don't define.
+	(LARGE_SECTIONS): Define.
+
 2005-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldemul.c (ldemul_do_assignments, do_assignments_default): Delete.

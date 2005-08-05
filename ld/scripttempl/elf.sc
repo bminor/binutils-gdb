@@ -14,7 +14,6 @@
 #		(e.g., .PARISC.global)
 #	OTHER_RELRO_SECTIONS - other than .data.rel.ro ...
 #		(e.g. PPC32 .fixup, .got[12])
-#	OTHER_BSS_SECTIONS - other than .bss .sbss ...
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
@@ -46,7 +45,7 @@
 #	FINI_START, FINI_END - statements just before and just after
 # 	combination of .fini sections.
 #	STACK_ADDR - start of a .stack section.
-#	OTHER_END_SYMBOLS - symbols to place right at the end of the script.
+#	OTHER_SYMBOLS - symbols to place right at the end of the script.
 #	ETEXT_NAME - name of a symbol for the end of the text section,
 #		normally etext.
 #	SEPARATE_GOTPLT - if set, .got.plt should be separate output section,
@@ -166,31 +165,6 @@ if test -z "${SDATA_GOT}"; then
     SDATA_GOT=" "
   fi
 fi
-if test -n "${LARGE_SECTIONS}"; then
-  LBSS="
-  .lbss ${RELOCATING-0} :
-  {
-   *(.dynlbss)
-   *(.lbss${RELOCATING+ .lbss.* .gnu.linkonce.lb.*})
-   *(LARGE_COMMON)
-  }"
-  LARGE_SECTIONS="
-  .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
-  {
-   *(.lrodata${RELOCATING+ .lrodata.* .gnu.linkonce.lr.*})
-  }
-  .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
-  {
-   *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
-   ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
-  }"
-  REL_LDATA=".rel.ldata    ${RELOCATING-0} : { *(.rel.ldata${RELOCATING+ .rel.ldata.* .rel.gnu.linkonce.l.*}) }
-  .rela.ldata   ${RELOCATING-0} : { *(.rela.ldata${RELOCATING+ .rela.ldata.* .rela.gnu.linkonce.l.*}) }"
-  REL_LBSS=".rel.lbss     ${RELOCATING-0} : { *(.rel.lbss${RELOCATING+ .rel.lbss.* .rel.gnu.linkonce.lb.*}) }
-  .rela.lbss    ${RELOCATING-0} : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }"
-  REL_LRODATA=".rel.lrodata       ${RELOCATING-0} : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
-  .rela.lrodata       ${RELOCATING-0} : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
-fi
 test -n "$SEPARATE_GOTPLT" && SEPARATE_GOTPLT=" "
 CTOR=".ctors        ${CONSTRUCTING-0} : 
   {
@@ -308,9 +282,7 @@ eval $COMBRELOCCAT <<EOF
   ${REL_SBSS2}
   .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
   .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
-  ${REL_LDATA}
-  ${REL_LBSS}
-  ${REL_LRODATA}
+  ${REL_LARGE}
 EOF
 if [ -n "$COMBRELOC" ]; then
 cat <<EOF
@@ -451,8 +423,8 @@ cat <<EOF
       pad the .data section.  */
    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }
-  ${LBSS}
-  ${OTHER_BSS_SECTIONS}
+  ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
+  ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${LARGE_SECTIONS}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+${OTHER_END_SYMBOLS}}
@@ -503,7 +475,7 @@ cat <<EOF
 
   ${STACK_ADDR+${STACK}}
   ${OTHER_SECTIONS}
-  ${RELOCATING+${OTHER_END_SYMBOLS}}
+  ${RELOCATING+${OTHER_SYMBOLS}}
   ${RELOCATING+${STACKNOTE}}
 }
 EOF

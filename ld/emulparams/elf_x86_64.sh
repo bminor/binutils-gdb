@@ -12,8 +12,31 @@ TEMPLATE_NAME=elf32
 GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes
 NO_SMALL_DATA=yes
-LARGE_SECTIONS=yes
 SEPARATE_GOTPLT=24
+
+LARGE_SECTIONS="
+  .lbss ${RELOCATING-0} :
+  {
+    *(.dynlbss)
+    *(.lbss${RELOCATING+ .lbss.* .gnu.linkonce.lb.*})
+    *(LARGE_COMMON)
+  }
+  .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  {
+    *(.lrodata${RELOCATING+ .lrodata.* .gnu.linkonce.lr.*})
+  }
+  .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  {
+    *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
+    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
+  }"
+REL_LARGE="
+  .rel.ldata    ${RELOCATING-0} : { *(.rel.ldata${RELOCATING+ .rel.ldata.* .rel.gnu.linkonce.l.*}) }
+  .rela.ldata   ${RELOCATING-0} : { *(.rela.ldata${RELOCATING+ .rela.ldata.* .rela.gnu.linkonce.l.*}) }
+  .rel.lbss     ${RELOCATING-0} : { *(.rel.lbss${RELOCATING+ .rel.lbss.* .rel.gnu.linkonce.lb.*}) }
+  .rela.lbss    ${RELOCATING-0} : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }
+  .rel.lrodata  ${RELOCATING-0} : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
+  .rela.lrodata ${RELOCATING-0} : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
 
 if [ "x${host}" = "x${target}" ]; then
   case " $EMULATION_LIBPATH " in

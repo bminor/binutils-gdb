@@ -21,5 +21,5 @@ FINI_END='KEEP (*(.fini$99));
           PROVIDE (_etext = .);'
 
 ETEXT_NAME=etext_unrelocated
-OTHER_END_SYMBOLS="PROVIDE (_ehdr = ${TEXT_START_ADDR});"
+OTHER_SYMBOLS="PROVIDE (_ehdr = ${TEXT_START_ADDR});"
 DATA_END_SYMBOLS=".edata : { PROVIDE (_edata = .); }"
