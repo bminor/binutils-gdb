@@ -634,8 +634,8 @@ Disassembly of section .text:
 0+79a <[^>]+> e889 0007 	stmia\.w	r9, \{r0, r1, r2\}
 0+79e <[^>]+> e880 0580 	stmia\.w	r0, \{r7, r8, sl\}
 0+7a2 <[^>]+> e8a0 0580 	stmia\.w	r0!, \{r7, r8, sl\}
-0+7a6 <[^>]+> e900 0580 	stmdb	r0, \{r7, r8, sl\}
-0+7aa <[^>]+> e910 0580 	ldmdb	r0, \{r7, r8, sl\}
+0+7a6 <[^>]+> e910 0580 	ldmdb	r0, \{r7, r8, sl\}
+0+7aa <[^>]+> e900 0580 	stmdb	r0, \{r7, r8, sl\}
 0+7ae <[^>]+> fb00 0000 	mla	r0, r0, r0, r0
 0+7b2 <[^>]+> fb00 0010 	mls	r0, r0, r0, r0
 0+7b6 <[^>]+> fb00 0900 	mla	r9, r0, r0, r0
@@ -1021,3 +1021,5 @@ Disassembly of section .text:
 0+d1c <[^>]+> e8d0 f018 	tbh	\[r0, r8, lsl #1\]
 0+d20 <[^>]+> f84d 8d04 	str.w	r8, \[sp, #-4\]!
 0+d24 <[^>]+> f85d 8b04 	ldr.w	r8, \[sp\], #4
+0+d28 <[^>]+> e930 0580 	ldmdb	r0!, \{r7, r8, sl\}
+0+d2c <[^>]+> e920 0580 	stmdb	r0!, \{r7, r8, sl\}

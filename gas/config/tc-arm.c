@@ -3989,14 +3989,14 @@ encode_thumb32_immediate (unsigned int val)
 {
   unsigned int a, i;
 
-  if (val <= 255)
+  if (val <= 0xff)
     return val;
 
-  for (i = 0; i < 32; i++)
+  for (i = 1; i <= 24; i++)
     {
-      a = rotate_left (val, i);
-      if (a >= 128 && a <= 255)
-	return (a & 0x7f) | (i << 7);
+      a = val >> i;
+      if ((val & ~(0xff << i)) == 0)
+	return ((val >> i) & 0x7f) | ((32 - i) << 7);
     }
 
   a = val & 0xff;
@@ -5637,6 +5637,8 @@ encode_thumb32_shifted_operand (int i)
   unsigned int value = inst.reloc.exp.X_add_number;
   unsigned int shift = inst.operands[i].shift_kind;
 
+  constraint (inst.operands[i].immisreg,
+	      _("shift by register not allowed in thumb mode"));
   inst.instruction |= inst.operands[i].reg;
   if (shift == SHIFT_RRX)
     inst.instruction |= SHIFT_ROR << 4;
@@ -5695,9 +5697,10 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
 	{
 	  constraint (inst.reloc.exp.X_op != O_constant,
 		      _("expression too complex"));
-	  constraint (inst.reloc.exp.X_add_number < 0 || inst.reloc.exp.X_add_number > 3,
+	  constraint (inst.reloc.exp.X_add_number < 0
+		      || inst.reloc.exp.X_add_number > 3,
 		      _("shift out of range"));
-	  inst.instruction |= inst.reloc.exp.X_op << 4;
+	  inst.instruction |= inst.reloc.exp.X_add_number << 4;
 	}
       inst.reloc.type = BFD_RELOC_UNUSED;
     }
@@ -8268,11 +8271,11 @@ static const struct asm_opcode insns[] =
  TC3(strt,	4200000, f8400e00, 2, (RR, ADDR),    ldstt, t_ldstt),
  TC3(strbt,	4600000, f8200e00, 2, (RR, ADDR),    ldstt, t_ldstt),
 
- TC3(stmdb,	9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
- TC3(stmfd,     9000000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(stmdb,	9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(stmfd,     9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
 
- TC3(ldmdb,	9100000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
- TC3(ldmea,	9100000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(ldmdb,	9100000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3(ldmea,	9100000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
 
  /* V1 instructions with no Thumb analogue at all.  */
   CE(rsc,	0e00000,	   3, (RR, oRR, SH), arit),

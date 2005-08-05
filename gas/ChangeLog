@@ -1,3 +1,11 @@
+2005-08-05  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (encode_thumb32_immediate): Only accept shifted
+	constants.
+	(encode_thumb32_shifted_operand): Prohibit register shifts.
+	(encode_thumb32_addr_mode): Fix typo.
+	(insns): Correct thumb2 ldm and stm opcodes.
+
 2005-08-02  Khem Raj  <kraj@mvista.com>
 
 	* config/tc-arm.c (do_iwmmxt_wldstd): Correct the offset range for

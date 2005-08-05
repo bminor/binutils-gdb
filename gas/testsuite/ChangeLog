@@ -1,3 +1,8 @@
+2005-08-05  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.d: Update ldm/stm dests.
+	* gas/arm/thumb32.s: Ditto.
+
 2005-08-03  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/iwmmxt-bad2.s: New file: Check for error messages about

@@ -756,3 +756,6 @@ xta:
 
 	push	{r8}
 	pop	{r8}
+
+	ldmdb	r0!, {r7,r8,r10}
+	stmdb	r0!, {r7,r8,r10}
