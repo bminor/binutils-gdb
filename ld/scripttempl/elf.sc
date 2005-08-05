@@ -166,6 +166,29 @@ if test -z "${SDATA_GOT}"; then
   fi
 fi
 test -n "$SEPARATE_GOTPLT" && SEPARATE_GOTPLT=" "
+test "${LARGE_SECTIONS}" = "yes" && REL_LARGE="
+  .rel.ldata    ${RELOCATING-0} : { *(.rel.ldata${RELOCATING+ .rel.ldata.* .rel.gnu.linkonce.l.*}) }
+  .rela.ldata   ${RELOCATING-0} : { *(.rela.ldata${RELOCATING+ .rela.ldata.* .rela.gnu.linkonce.l.*}) }
+  .rel.lbss     ${RELOCATING-0} : { *(.rel.lbss${RELOCATING+ .rel.lbss.* .rel.gnu.linkonce.lb.*}) }
+  .rela.lbss    ${RELOCATING-0} : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }
+  .rel.lrodata  ${RELOCATING-0} : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
+  .rela.lrodata ${RELOCATING-0} : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
+test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
+  .lbss ${RELOCATING-0} :
+  {
+    *(.dynlbss)
+    *(.lbss${RELOCATING+ .lbss.* .gnu.linkonce.lb.*})
+    *(LARGE_COMMON)
+  }
+  .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  {
+    *(.lrodata${RELOCATING+ .lrodata.* .gnu.linkonce.lr.*})
+  }
+  .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  {
+    *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
+    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
+  }"
 CTOR=".ctors        ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+${CTOR_START}}

@@ -1,5 +1,10 @@
 2005-08-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* emulparams/elf_x86_64.sh: Revert last change.
+	* scripttempl/elf.sc (REL_LARGE, LARGE_SECTIONS): Define here.
+
+2005-08-05  Alan Modra  <amodra@bigpond.net.au>
+
 	* emulparams/armelf.sh (OTHER_BSS_END_SYMBOLS): Split out from
 	OTHER_END_SYMBOLS.
 	* emulparams/armelf_linux.sh: Likewise.
