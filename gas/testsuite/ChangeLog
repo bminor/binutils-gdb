@@ -1,3 +1,7 @@
+2005-08-05  John Davind Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* gas/hppa/reloc/reloc.exp (do_function_reloc_bug): Add "L%" to regexp.
+
 2005-08-05  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb32.s: Use correct conditional suffixes inside IT

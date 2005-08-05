@@ -545,7 +545,7 @@ proc do_function_reloc_bug {} {
 	# Make sure we didn't put anything in the instruction itself!
 	while 1 {
 	    expect {
-	        -re "^0+cc\[^\n\]*ldil 0,r20\[^\n\]*\n" 
+	        -re "^0+cc\[^\n\]*ldil L%0,r20\[^\n\]*\n" 
 		    { set x [expr $x+1] }
 	        -re "^0+d0\[^\n\]*ldo 0\[\(\]+r20\[\)\]+,r19\[^\n\]*\n" 
 		    { set x [expr $x+1] }
