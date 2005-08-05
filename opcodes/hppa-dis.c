@@ -912,6 +912,7 @@ print_insn_hppa (bfd_vma memaddr, disassemble_info *info)
 		  fput_const (extract_14 (insn), info);
 		  break;
 		case 'k':
+		  fputs_filtered ("L%", info);
 		  fput_const (extract_21 (insn), info);
 		  break;
 		case '<':

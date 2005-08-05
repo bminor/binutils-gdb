@@ -1,3 +1,7 @@
+2005-08-05  John David Anglin  <dave.anglin@nrc-crnc.gc.ca>
+
+	* hppa-dis.c (print_insn_hppa): Prefix 21-bit values with "L%".
+
 2005-07-29  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c: Fix disassebly of thumb2 writeback addressing modes.
