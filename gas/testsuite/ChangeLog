@@ -1,4 +1,4 @@
-2005-08-05  John Davind Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+2005-08-05  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* gas/hppa/reloc/reloc.exp (do_function_reloc_bug): Add "L%" to regexp.
 
