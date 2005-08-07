@@ -1606,7 +1606,7 @@ read_rangelist (struct comp_unit *unit, struct arange *arange, bfd_uint64_t offs
       bfd_vma low_pc;
       bfd_vma high_pc;
 
-      if (unit->offset_size == 4)
+      if (unit->addr_size == 4)
 	{
 	  low_pc = read_4_bytes (unit->abfd, ranges_ptr);
 	  ranges_ptr += 4;

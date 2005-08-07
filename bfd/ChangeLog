@@ -1,3 +1,8 @@
+2005-08-05  Fred Fish  <fnf@specifix.com>
+
+	* dwarf2.c (read_rangelist): Use addr_size instead of offset_size
+	to determine how many bytes to read from each rangelist entry.
+
 2005-08-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd.c (bfd_hide_symbol): New.
