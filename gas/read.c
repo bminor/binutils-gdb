@@ -1698,9 +1698,17 @@ s_app_line (int ignore ATTRIBUTE_UNUSED)
 
   /* The given number is that of the next line.  */
   l = get_absolute_expression () - 1;
-  if (l < 0)
+
+  if (l < -1)
     /* Some of the back ends can't deal with non-positive line numbers.
-       Besides, it's silly.  */
+       Besides, it's silly.  GCC however will generate a line number of
+       zero when it is pre-processing builtins for assembler-with-cpp files:
+
+          # 0 "<built-in>"
+
+       We do not want to barf on this, especially since such files are used
+       in the GCC and GDB testsuites.  So we check for negative line numbers
+       rather than non-positive line numbers.  */
     as_warn (_("line numbers must be positive; line number %d rejected"),
 	     l + 1);
   else

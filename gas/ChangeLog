@@ -1,3 +1,8 @@
+2005-08-07  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (s_app_line): Accept a line number of 0 for compatibility
+	with gcc's output for assembler-with-cpp files.
+
 2005-08-05  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (current_it_mask, current_cc): New variables.
