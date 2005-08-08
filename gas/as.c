@@ -433,6 +433,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_EXECSTACK,
       OPTION_NOEXECSTACK,
       OPTION_ALTERNATE,
+      OPTION_AL,
       OPTION_HASH_TABLE_SIZE,
       OPTION_REDUCE_MEMORY_OVERHEADS,
       OPTION_WARN_FATAL
@@ -451,6 +452,8 @@ parse_args (int * pargc, char *** pargv)
        necessary because -a=<FILE> is a valid switch but getopt would
        normally reject it since --alternate does not take an argument.  */
     ,{"a", optional_argument, NULL, 'a'}
+    /* Handle -al=<FILE>.  */
+    ,{"al", optional_argument, NULL, OPTION_AL}
     ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
     ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
     ,{"emulation", required_argument, NULL, OPTION_EMULATION}
@@ -784,6 +787,12 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 #endif
 	case 'Z':
 	  flag_always_generate_output = 1;
+	  break;
+
+ 	case OPTION_AL:
+	  listing |= LISTING_LISTING;
+	  if (optarg)
+	    listing_filename = xstrdup (optarg);
 	  break;
 
  	case OPTION_ALTERNATE:

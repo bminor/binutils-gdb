@@ -1,3 +1,8 @@
+2005-08-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/1118
+	* as.c (parse_args): Handle -al=<FILE>.
+
 2005-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (s_app_line): Accept a line number of 0 for compatibility
