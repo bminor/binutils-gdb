@@ -7,7 +7,7 @@ Symbol table for image:
    ..  ..: ........     0  NOTYPE GLOBAL DEFAULT ABS _bss_end__
    ..  ..: ........     0  OBJECT GLOBAL DEFAULT ABS _DYNAMIC
    ..  ..: ........     0  NOTYPE GLOBAL DEFAULT ABS __bss_end__
-   ..  ..: ........     0  NOTYPE GLOBAL DEFAULT  13 _stack
+   ..  ..: ........     0  NOTYPE GLOBAL DEFAULT ABS _stack
    ..  ..: ........     4  OBJECT GLOBAL DEFAULT  12 data_obj
    ..  ..: ........     0  NOTYPE GLOBAL DEFAULT ABS __bss_start__
    ..  ..: ........     0  NOTYPE GLOBAL DEFAULT ABS __bss_start
