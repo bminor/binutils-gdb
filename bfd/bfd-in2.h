@@ -1936,6 +1936,7 @@ enum bfd_architecture
 #define bfd_mach_msp14          14
 #define bfd_mach_msp15          15
 #define bfd_mach_msp16          16  
+#define bfd_mach_msp21          21
 #define bfd_mach_msp31          31
 #define bfd_mach_msp32          32
 #define bfd_mach_msp33          33
@@ -4486,9 +4487,10 @@ void bfd_preserve_restore (bfd *, struct bfd_preserve *);
 
 void bfd_preserve_finish (bfd *, struct bfd_preserve *);
 
-void bfd_hide_symbol
-   (bfd *, struct bfd_link_info *,
-    struct bfd_link_hash_entry *, bfd_boolean);
+void bfd_hide_symbol (bfd *,
+    struct bfd_link_info *,
+    struct bfd_link_hash_entry *,
+    bfd_boolean);
 
 /* Extracted from archive.c.  */
 symindex bfd_get_next_mapent

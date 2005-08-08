@@ -352,6 +352,7 @@ DESCRIPTION
 .#define bfd_mach_msp14          14
 .#define bfd_mach_msp15          15
 .#define bfd_mach_msp16          16  
+.#define bfd_mach_msp21          21
 .#define bfd_mach_msp31          31
 .#define bfd_mach_msp32          32
 .#define bfd_mach_msp33          33

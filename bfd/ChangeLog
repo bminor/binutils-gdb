@@ -1,3 +1,10 @@
+2005-08-08  Eric Dönges <Eric.Doenges@betty-tv.com>
+
+	* archures.c (bfd_mach_msp21): New MSP430 machine number.
+	* bfd-in2.h: Regenerate.
+	* cpu-msp430.c (arch_info_struct): Add support for msp430x21xx
+	variants.
+
 2005-08-07  Nick Clifton  <nickc@redhat.com>
 	    Paul Brook  <paul@codesourcery.com>
 

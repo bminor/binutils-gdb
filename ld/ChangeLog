@@ -1,3 +1,13 @@
+2005-08-08  Eric Dönges <Eric.Doenges@betty-tv.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add msp430x21xx	variants.
+	Add rules to build these emulations.
+	* Makefile.in: Regenerate.
+	* configure.tgt (msp430): Add the new variants to the
+	targ_extra_emuls list.
+	* emulparams/msp430all.sh: Add entries for the msp430x21xx
+	variants.
+
 2005-08-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Document PROVIDE_HIDDEN.

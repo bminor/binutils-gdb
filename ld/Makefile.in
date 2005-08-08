@@ -513,6 +513,10 @@ ALL_EMULATIONS = \
 	emsp430x1610.o \
 	emsp430x1611.o \
 	emsp430x1612.o \
+	emsp430x2101.o \
+	emsp430x2111.o \
+	emsp430x2121.o \
+	emsp430x2131.o \
 	emsp430x311.o \
 	emsp430x312.o \
 	emsp430x313.o \
@@ -2023,6 +2027,22 @@ emsp430x1612.c: $(srcdir)/emulparams/msp430all.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32msp430.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} msp430x1612 "$(tdir_msp430x1612)" msp430all
+emsp430x2101.c: $(srcdir)/emulparams/msp430all.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32msp430.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} msp430x2101 "$(tdir_msp430x2101)" msp430all
+emsp430x2111.c: $(srcdir)/emulparams/msp430all.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32msp430.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} msp430x2111 "$(tdir_msp430x2111)" msp430all
+emsp430x2121.c: $(srcdir)/emulparams/msp430all.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32msp430.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} msp430x2121 "$(tdir_msp430x2121)" msp430all
+emsp430x2131.c: $(srcdir)/emulparams/msp430all.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32msp430.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} msp430x2131 "$(tdir_msp430x2131)" msp430all
 emsp430x311.c: $(srcdir)/emulparams/msp430all.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32msp430_3.sc \
   ${GEN_DEPENDS}

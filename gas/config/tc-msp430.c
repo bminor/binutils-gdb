@@ -205,6 +205,7 @@ struct mcu_type_s
 #define MSP430_ISA_14   14
 #define MSP430_ISA_15   15
 #define MSP430_ISA_16   16
+#define MSP430_ISA_21   21
 #define MSP430_ISA_31   31
 #define MSP430_ISA_32   32
 #define MSP430_ISA_33   33
@@ -251,6 +252,11 @@ static struct mcu_type_s mcu_types[] =
   {"msp430x1611", MSP430_ISA_16, bfd_mach_msp16},
   {"msp430x1612", MSP430_ISA_16, bfd_mach_msp16},
 
+  {"msp430x2101", MSP430_ISA_21, bfd_mach_msp21},
+  {"msp430x2111", MSP430_ISA_21, bfd_mach_msp21},
+  {"msp430x2121", MSP430_ISA_21, bfd_mach_msp21},
+  {"msp430x2131", MSP430_ISA_21, bfd_mach_msp21},
+  
   {"msp430x311",  MSP430_ISA_31, bfd_mach_msp31},
   {"msp430x312",  MSP430_ISA_31, bfd_mach_msp31},
   {"msp430x313",  MSP430_ISA_31, bfd_mach_msp31},
