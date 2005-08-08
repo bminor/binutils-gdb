@@ -1,3 +1,10 @@
+2005-08-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 1070
+	* macro.c (getstring): Treat round parentheses in the same way as
+	angle brackets.
+	(get_any_string): Likewise.
+
 2005-08-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/1118

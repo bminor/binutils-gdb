@@ -306,14 +306,19 @@ getstring (int idx, sb *in, sb *acc)
 {
   while (idx < in->len
 	 && (in->ptr[idx] == '"'
+	     || in->ptr[idx] == '('
 	     || (in->ptr[idx] == '<' && (macro_alternate || macro_mri))
 	     || (in->ptr[idx] == '\'' && macro_alternate)))
     {
-      if (in->ptr[idx] == '<')
+      if (in->ptr[idx] == '<'
+	  || in->ptr[idx] == '(')
 	{
 	  int nest = 0;
+	  char start_char = in->ptr[idx];
+	  char end_char = in->ptr[idx] == '<' ? '>' : ')';
+
 	  idx++;
-	  while ((in->ptr[idx] != '>' || nest)
+	  while ((in->ptr[idx] != end_char || nest)
 		 && idx < in->len)
 	    {
 	      if (in->ptr[idx] == '!')
@@ -323,9 +328,9 @@ getstring (int idx, sb *in, sb *acc)
 		}
 	      else
 		{
-		  if (in->ptr[idx] == '>')
+		  if (in->ptr[idx] == end_char)
 		    nest--;
-		  if (in->ptr[idx] == '<')
+		  if (in->ptr[idx] == start_char)
 		    nest++;
 		  sb_add_char (acc, in->ptr[idx++]);
 		}
@@ -382,10 +387,10 @@ getstring (int idx, sb *in, sb *acc)
 /* Fetch string from the input stream,
    rules:
     'Bxyx<whitespace>  	-> return 'Bxyza
-    %<char>		-> return string of decimal value of x
-    "<string>"		-> return string
-    xyx<whitespace>     -> return xyz
-*/
+    %<expr>		-> return string of decimal value of <expr>
+    "string"		-> return string
+    (string)		-> return string
+    xyx<whitespace>     -> return xyz.  */
 
 static int
 get_any_string (int idx, sb *in, sb *out)
@@ -404,6 +409,7 @@ get_any_string (int idx, sb *in, sb *out)
 	{
 	  int val;
 	  char buf[20];
+
 	  /* Turns the next expression into a string.  */
 	  /* xgettext: no-c-format */
 	  idx = (*macro_expr) (_("% operator needs absolute expression"),
@@ -414,6 +420,7 @@ get_any_string (int idx, sb *in, sb *out)
 	  sb_add_string (out, buf);
 	}
       else if (in->ptr[idx] == '"'
+	       || in->ptr[idx] == '('
 	       || (in->ptr[idx] == '<' && (macro_alternate || macro_mri))
 	       || (macro_alternate && in->ptr[idx] == '\''))
 	{
@@ -443,6 +450,7 @@ get_any_string (int idx, sb *in, sb *out)
 		  || in->ptr[idx] == '\'')
 		{
 		  char tchar = in->ptr[idx];
+
 		  sb_add_char (out, in->ptr[idx++]);
 		  while (idx < in->len
 			 && in->ptr[idx] != tchar)
