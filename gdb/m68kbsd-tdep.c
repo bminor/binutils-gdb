@@ -21,9 +21,12 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "frame.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -126,6 +129,61 @@ m68kbsd_regset_from_core_section (struct gdbarch *gdbarch,
 
   return NULL;
 }
+
+
+/* Signal trampolines.  */
+
+static void
+m68kobsd_sigtramp_cache_init (const struct tramp_frame *self,
+			      struct frame_info *next_frame,
+			      struct trad_frame_cache *this_cache,
+			      CORE_ADDR func)
+{
+  CORE_ADDR addr, base, pc;
+  int regnum;
+
+  base = frame_unwind_register_unsigned (next_frame, M68K_SP_REGNUM);
+
+  /* The 'addql #4,%sp' instruction at offset 8 adjusts the stack
+     pointer.  Adjust the frame base accordingly.  */
+  pc = frame_unwind_register_unsigned (next_frame, M68K_PC_REGNUM);
+  if ((pc - func) > 8)
+    base -= 4;
+
+  /* Get frame pointer, stack pointer, program counter and processor
+     state from `struct sigcontext'.  */
+  addr = get_frame_memory_unsigned (next_frame, base + 8, 4);
+  trad_frame_set_reg_addr (this_cache, M68K_FP_REGNUM, addr + 8);
+  trad_frame_set_reg_addr (this_cache, M68K_SP_REGNUM, addr + 12);
+  trad_frame_set_reg_addr (this_cache, M68K_PC_REGNUM, addr + 20);
+  trad_frame_set_reg_addr (this_cache, M68K_PS_REGNUM, addr + 24);
+
+  /* The sc_ap member of `struct sigcontext' points to additional
+     hardware state.  Here we find the missing registers.  */
+  addr = get_frame_memory_unsigned (next_frame, addr + 16, 4) + 4;
+  for (regnum = M68K_D0_REGNUM; regnum < M68K_FP_REGNUM; regnum++, addr += 4)
+    trad_frame_set_reg_addr (this_cache, regnum, addr);
+
+  /* Construct the frame ID using the function start.  */
+  trad_frame_set_id (this_cache, frame_id_build (base, func));
+}
+
+static const struct tramp_frame m68kobsd_sigtramp = {
+  SIGTRAMP_FRAME,
+  2,
+  {
+    { 0x206f, -1 }, { 0x000c, -1},	/* moveal %sp@(12),%a0 */
+    { 0x4e90, -1 },			/* jsr %a0@ */
+    { 0x588f, -1 },			/* addql #4,%sp */
+    { 0x4e41, -1 },			/* trap #1 */
+    { 0x2f40, -1 }, { 0x0004, -1 },	/* moveal %d0,%sp@(4) */
+    { 0x7001, -1 },			/* moveq #SYS_exit,%d0 */
+    { 0x4e40, -1 },			/* trap #0 */
+    { TRAMP_SENTINEL_INSN, -1 }
+  },
+  m68kobsd_sigtramp_cache_init
+};
+
 
 static void
 m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -149,6 +207,8 @@ m68kbsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   m68kbsd_init_abi (info, gdbarch);
 
   tdep->struct_return = reg_struct_return;
+
+  tramp_frame_prepend_unwinder (gdbarch, &m68kobsd_sigtramp);
 }
 
 /* NetBSD ELF.  */

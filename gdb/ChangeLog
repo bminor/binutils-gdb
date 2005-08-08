@@ -1,3 +1,12 @@
+2005-08-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* tramp-frame.h (struct tramp_frame): Allow for 16 instructions
+	instead of 8.
+	* m68kbsd-tdep.c: Include "frame.h", "trad-frame.h" and
+	"tramp-frame.h".
+	(m68kobsd_sigtramp_cache_init): New function.
+	(m68kbsd_aout_init_abi): Prepend m68kobsd_sigtramp unwinder.
+
 2005-08-02  Fred Fish  <fnf@specifix.com>
 
 	* defs.h (parse_frame_specification): Remove prototype.
