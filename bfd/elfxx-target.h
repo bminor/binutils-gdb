@@ -26,7 +26,9 @@
    There are two such structures here:  one for big-endian machines and
    one for little-endian machines.   */
 
+#ifndef bfd_elfNN_close_and_cleanup
 #define	bfd_elfNN_close_and_cleanup _bfd_elf_close_and_cleanup
+#endif
 #define bfd_elfNN_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
 #ifndef bfd_elfNN_get_section_contents
 #define bfd_elfNN_get_section_contents _bfd_generic_get_section_contents

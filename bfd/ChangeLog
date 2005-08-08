@@ -1,3 +1,20 @@
+2005-08-07  Nick Clifton  <nickc@redhat.com>
+	    Paul Brook  <paul@codesourcery.com>
+
+	PR 1147
+	* elf32-arm.c (bfd_elf32_close_and_cleanup): Define.
+	(elf32_arm_close_and_cleanup): New function - walk over the
+	sections in the bfd that is being closed removing them from the
+	list of recorded sections.
+	(unrecord_section_via_map_over_sections): New helper function.
+	(record_section_with_arm_elf_section_data): Call bfd_malloc
+	instead of bfd_alloc.  Remove unneeded abfd parameter.
+	(elf32_arm_new_section_hook): Do not pass bfd to
+	record_section_with_arm_elf_section_data.
+
+	* elfxx-target.h (bfd_elfNN_close_and_cleanup): Only define if not
+	already defined by the target.
+
 2005-08-05  Fred Fish  <fnf@specifix.com>
 
 	* dwarf2.c (read_rangelist): Use addr_size instead of offset_size

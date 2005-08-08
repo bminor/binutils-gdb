@@ -6532,11 +6532,11 @@ section_list;
 static section_list * sections_with_arm_elf_section_data = NULL;
 
 static void
-record_section_with_arm_elf_section_data (bfd * abfd, asection * sec)
+record_section_with_arm_elf_section_data (asection * sec)
 {
   struct section_list * entry;
 
-  entry = bfd_alloc (abfd, sizeof (* entry));
+  entry = bfd_malloc (sizeof (* entry));
   if (entry == NULL)
     return;
   entry->sec = sec;
@@ -6642,7 +6642,7 @@ elf32_arm_new_section_hook (bfd *abfd, asection *sec)
     return FALSE;
   sec->used_by_bfd = sdata;
 
-  record_section_with_arm_elf_section_data (abfd, sec);
+  record_section_with_arm_elf_section_data (sec);
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }
@@ -6737,6 +6737,22 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
   unrecord_section_with_arm_elf_section_data (sec);
 
   return FALSE;
+}
+
+static void
+unrecord_section_via_map_over_sections (bfd * abfd ATTRIBUTE_UNUSED,
+					asection * sec,
+					void * ignore ATTRIBUTE_UNUSED)
+{
+  unrecord_section_with_arm_elf_section_data (sec);
+}
+
+static bfd_boolean
+elf32_arm_close_and_cleanup (bfd * abfd)
+{
+  bfd_map_over_sections (abfd, unrecord_section_via_map_over_sections, NULL);
+
+  return _bfd_elf_close_and_cleanup (abfd);
 }
 
 /* Display STT_ARM_TFUNC symbols as functions.  */
@@ -6897,6 +6913,7 @@ const struct elf_size_info elf32_arm_size_info = {
 #define bfd_elf32_find_inliner_info	        elf32_arm_find_inliner_info
 #define bfd_elf32_new_section_hook		elf32_arm_new_section_hook
 #define bfd_elf32_bfd_is_target_special_symbol	elf32_arm_is_target_special_symbol
+#define bfd_elf32_close_and_cleanup             elf32_arm_close_and_cleanup
 
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook
