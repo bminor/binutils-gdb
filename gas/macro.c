@@ -310,12 +310,11 @@ getstring (int idx, sb *in, sb *acc)
 	     || (in->ptr[idx] == '<' && (macro_alternate || macro_mri))
 	     || (in->ptr[idx] == '\'' && macro_alternate)))
     {
-      if (in->ptr[idx] == '<'
-	  || in->ptr[idx] == '(')
+      if (in->ptr[idx] == '<')
 	{
 	  int nest = 0;
-	  char start_char = in->ptr[idx];
-	  char end_char = in->ptr[idx] == '<' ? '>' : ')';
+	  char start_char = '>';
+	  char end_char = '>';
 
 	  idx++;
 	  while ((in->ptr[idx] != end_char || nest)
@@ -336,6 +335,28 @@ getstring (int idx, sb *in, sb *acc)
 		}
 	    }
 	  idx++;
+	}
+      else if (in->ptr[idx] == '(')
+	{
+	  int nest = 0;
+	  char c;
+
+	  do
+	    {
+	      c = in->ptr[idx];
+
+	      if (c == '!')
+		c = in->ptr[++idx];
+	      else if (c == ')')
+		nest--;
+	      else if (c == '(')
+		nest++;
+
+	      sb_add_char (acc, c);
+	      idx++;
+	    }
+	  while ((c != ')' || nest)
+		 && idx < in->len);
 	}
       else if (in->ptr[idx] == '"' || in->ptr[idx] == '\'')
 	{
@@ -389,7 +410,7 @@ getstring (int idx, sb *in, sb *acc)
     'Bxyx<whitespace>  	-> return 'Bxyza
     %<expr>		-> return string of decimal value of <expr>
     "string"		-> return string
-    (string)		-> return string
+    (string)		-> return (string-including-whitespaces)
     xyx<whitespace>     -> return xyz.  */
 
 static int
