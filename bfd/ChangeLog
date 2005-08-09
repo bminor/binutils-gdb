@@ -1,3 +1,10 @@
+2005-08-09  Rodney Brown  <rbrown@bravurasolutions.com.au>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* aix5ppc-core.c (xcoff64_core_p): Constify return_value
+	variable.  Also, do not use core_hdr macro as it evaluates to a
+	cast of an lvalue which is no longer supported by GCC 4.0.
+
 2005-08-08  Eric Dönges <Eric.Doenges@betty-tv.com>
 
 	* archures.c (bfd_mach_msp21): New MSP430 machine number.

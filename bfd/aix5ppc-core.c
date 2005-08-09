@@ -1,5 +1,5 @@
 /* IBM RS/6000 "XCOFF" back-end for BFD.
-   Copyright 2001, 2002, 2003, 2004
+   Copyright 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Tom Rix
    Contributed by Red Hat Inc.
@@ -55,7 +55,7 @@ xcoff64_core_p (bfd *abfd)
   bfd_vma ld_offset;
   bfd_size_type i;
   struct vm_infox vminfo;
-  bfd_target *return_value = NULL;
+  const bfd_target *return_value = NULL;
 
   /* Get the header.  */
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
@@ -111,7 +111,10 @@ xcoff64_core_p (bfd *abfd)
     return return_value;
 
   memcpy (new_core_hdr, &core, sizeof (struct core_dumpxx));
-  core_hdr(abfd) = (char *)new_core_hdr;
+  /* The core_hdr() macro is no longer used here because it would
+     expand to code relying on gcc's cast-as-lvalue extension,
+     which was removed in gcc 4.0.  */
+  abfd->tdata.any = new_core_hdr;
 
   /* .stack section.  */
   sec = bfd_make_section_anyway (abfd, ".stack");
