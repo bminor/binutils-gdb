@@ -493,7 +493,7 @@ proc mi_gdb_load { arg } {
 	# For SID, things get complex
 	send_target_sid
 	gdb_expect 60 {
-	    -re "\\^done,.*$mi_gdb_prompt$" {
+	    -re "\\^done.*$mi_gdb_prompt$" {
 	    }
 	    timeout {
 		perror "Unable to connect to SID target"

@@ -1,3 +1,7 @@
+2005-08-09  Corinna Vinschen  <vinschen@redhat.com>
+
+	* lib/mi-support.exp (mi_gdb_load): Fix typo.
+
 2005-08-02  Bob Rossi  <bob@brasko.net>
 
 	* gdb.mi/mi-basics.exp: Tell mi_gdb_start to use a PTY for inferior.
