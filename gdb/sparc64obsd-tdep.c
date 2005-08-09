@@ -68,19 +68,27 @@ sparc64obsd_supply_gregset (const struct regset *regset,
 
 /* Signal trampolines.  */
 
-/* The OpenBSD kernel maps the signal trampoline at some random
-   location in user space, which means that the traditional BSD way of
-   detecting it won't work.
+/* Since OpenBSD 3.2, the sigtramp routine is mapped at a random page
+   in virtual memory.  The randomness makes it somewhat tricky to
+   detect it, but fortunately we can rely on the fact that the start
+   of the sigtramp routine is page-aligned.  We recognize the
+   trampoline by looking for the code that invokes the sigreturn
+   system call.  The offset where we can find that code varies from
+   release to release.
 
-   The signal trampoline will be mapped at an address that is page
-   aligned.  We recognize the signal trampoline by the looking for the
-   sigreturn system call.  The offset where we can find the code that
-   makes this system call varies from release to release.  For OpenBSD
-   3.6 and later releases we can find the code at offset 0xec.  For
-   OpenBSD 3.5 and earlier releases, we find it at offset 0xe8.  */
+   By the way, the mapping mentioned above is read-only, so you cannot
+   place a breakpoint in the signal trampoline.  */
 
+/* Default page size.  */
 static const int sparc64obsd_page_size = 8192;
-static const int sparc64obsd_sigreturn_offset[] = { 0xec, 0xe8, -1 };
+
+/* Offset for sigreturn(2).  */
+static const int sparc64obsd_sigreturn_offset[] = {
+  0xf0,				/* OpenBSD 3.8 */
+  0xec,				/* OpenBSD 3.6 */
+  0xe8,				/* OpenBSD 3.2 */
+  -1
+};
 
 static int
 sparc64obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)

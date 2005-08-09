@@ -1,3 +1,9 @@
+2005-08-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64obsd-tdep.c: Tweak comments.
+	(sparc64obsd_sigreturn_offset): Add offset for new OpenBSD 3.8
+	signal trampoline.
+
 2005-08-09  Andrew Cagney  <cagney@gnu.org>
 
 	* linux-nat.h (linux_proc_xfer_memory): Change type of "myaddr" a
