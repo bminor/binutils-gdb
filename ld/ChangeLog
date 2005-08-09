@@ -1,4 +1,8 @@
-2005-08-08  Eric Dönges <Eric.Doenges@betty-tv.com>
+2005-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* emulparams/hppa64linux.sh (LARGE_SECTIONS): Remove .tbss.
+
+2005-08-08  Eric Doenges <Eric.Doenges@betty-tv.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add msp430x21xx	variants.
 	Add rules to build these emulations.

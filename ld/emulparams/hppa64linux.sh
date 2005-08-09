@@ -27,13 +27,9 @@ OTHER_READWRITE_SECTIONS="
   .plt          ${RELOCATING-0} : { *(.plt) }
   .dlt          ${RELOCATING-0} : { *(.dlt) }"
 
-# The PA64 ELF port has two additional bss sections. huge bss and thread bss.
-# Make sure they end up in the appropriate location.  We also have to set
-# __TLS_SIZE to the size of the thread bss section.
-LARGE_SECTIONS="
-  .hbss         ${RELOCATING-0} : { *(.hbss) }
-  .tbss         ${RELOCATING-0} : { *(.tbss) }
-"
+# The PA64 ELF port has an additional huge bss section.
+LARGE_SECTIONS=".hbss         ${RELOCATING-0} : { *(.hbss) }"
+
 #OTHER_SYMBOLS='PROVIDE (__TLS_SIZE = SIZEOF (.tbss));'
 OTHER_SYMBOLS='
   PROVIDE (__TLS_SIZE = 0);
