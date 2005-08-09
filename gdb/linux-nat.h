@@ -68,7 +68,7 @@ struct lwp_info
 struct mem_attrib;
 struct target_ops;
 
-extern int linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len,
+extern int linux_proc_xfer_memory (CORE_ADDR addr, gdb_byte *myaddr, int len,
 				   int write, struct mem_attrib *attrib,
 				   struct target_ops *target);
 

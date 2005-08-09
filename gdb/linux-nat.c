@@ -2946,7 +2946,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 }
 
 int
-linux_proc_xfer_memory (CORE_ADDR addr, char *myaddr, int len, int write,
+linux_proc_xfer_memory (CORE_ADDR addr, gdb_byte *myaddr, int len, int write,
 			struct mem_attrib *attrib, struct target_ops *target)
 {
   int fd, ret;
@@ -3128,7 +3128,7 @@ get_signo (const char *name)
   if (ms == NULL)
     return 0;
 
-  if (target_read_memory (SYMBOL_VALUE_ADDRESS (ms), (char *) &signo,
+  if (target_read_memory (SYMBOL_VALUE_ADDRESS (ms), (gdb_byte *) &signo,
 			  sizeof (signo)) != 0)
     return 0;
 

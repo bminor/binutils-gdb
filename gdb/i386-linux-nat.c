@@ -770,7 +770,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
   if (step)
     {
       CORE_ADDR pc = read_pc_pid (pid_to_ptid (pid));
-      unsigned char buf[LINUX_SYSCALL_LEN];
+      gdb_byte buf[LINUX_SYSCALL_LEN];
 
       request = PTRACE_SINGLESTEP;
 
@@ -783,7 +783,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
          that's about to be restored, and set the trace flag there.  */
 
       /* First check if PC is at a system call.  */
-      if (deprecated_read_memory_nobpt (pc, (char *) buf, LINUX_SYSCALL_LEN) == 0
+      if (deprecated_read_memory_nobpt (pc, buf, LINUX_SYSCALL_LEN) == 0
 	  && memcmp (buf, linux_syscall, LINUX_SYSCALL_LEN) == 0)
 	{
 	  int syscall = read_register_pid (LINUX_SYSCALL_REGNUM,
@@ -802,9 +802,9 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 	      /* Set the trace flag in the context that's about to be
                  restored.  */
 	      addr += LINUX_SIGCONTEXT_EFLAGS_OFFSET;
-	      read_memory (addr, (char *) &eflags, 4);
+	      read_memory (addr, (gdb_byte *) &eflags, 4);
 	      eflags |= 0x0100;
-	      write_memory (addr, (char *) &eflags, 4);
+	      write_memory (addr, (gdb_byte *) &eflags, 4);
 	    }
 	}
     }

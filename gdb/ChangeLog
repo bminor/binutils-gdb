@@ -1,3 +1,13 @@
+2005-08-09  Andrew Cagney  <cagney@gnu.org>
+
+	* linux-nat.h (linux_proc_xfer_memory): Change type of "myaddr" a
+	"gdb_byte" pointer.
+	* linux-nat.c (linux_proc_xfer_memory): Update.
+	(get_signo): Cast signo to a "gdb_byte" pointer.
+	* i386-linux-nat.c (child_resume): Make "buf" a gdb_byte, delete
+	redundant casts.
+	(child_resume): Cast eflags to a "gdb_byte" pointer.
+
 2005-08-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* tramp-frame.h (struct tramp_frame): Allow for 16 instructions
