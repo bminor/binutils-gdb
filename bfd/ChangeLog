@@ -1,3 +1,8 @@
+2005-08-10  James E. Wilson  <wilson@specifix.com>
+
+	* dwarf2.c (scan_unit_for_symbols, case DT_AT_location): Verify that
+	DW_OP_addr is only opcode in location before using it.
+
 2005-08-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_final_link): Reset gp.
