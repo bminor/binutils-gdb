@@ -1,3 +1,7 @@
+2005-08-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_final_link): Reset gp.
+
 2005-08-09  Rodney Brown  <rbrown@bravurasolutions.com.au>
 	    Nick Clifton  <nickc@redhat.com>
 

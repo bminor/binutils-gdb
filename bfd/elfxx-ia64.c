@@ -3981,15 +3981,15 @@ elfNN_ia64_final_link (abfd, info)
   /* Make sure we've got ourselves a nice fat __gp value.  */
   if (!info->relocatable)
     {
-      bfd_vma gp_val = _bfd_get_gp_value (abfd);
+      bfd_vma gp_val;
       struct elf_link_hash_entry *gp;
 
-      if (gp_val == 0)
-	{
-	  if (! elfNN_ia64_choose_gp (abfd, info))
-	    return FALSE;
-	  gp_val = _bfd_get_gp_value (abfd);
-	}
+      /* We assume after gp is set, section size will only decrease. We
+	 need to adjust gp for it.  */
+      _bfd_set_gp_value (abfd, 0);
+      if (! elfNN_ia64_choose_gp (abfd, info))
+	return FALSE;
+      gp_val = _bfd_get_gp_value (abfd);
 
       gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
 			         FALSE, FALSE);
