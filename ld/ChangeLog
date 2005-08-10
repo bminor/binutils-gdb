@@ -1,3 +1,8 @@
+2005-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* pe-dll.c (pe_exe_fill_sections): Call lang_reset_memory_regions
+	before lang_size_sections.
+
 2005-08-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/hppa64linux.sh (LARGE_SECTIONS): Remove .tbss.

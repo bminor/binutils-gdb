@@ -2636,6 +2636,7 @@ pe_dll_fill_sections (bfd *abfd, struct bfd_link_info *info)
       bfd_set_section_size (filler_bfd, reloc_s, reloc_sz);
 
       /* Resize the sections.  */
+      lang_reset_memory_regions ();
       lang_size_sections (NULL, TRUE);
 
       /* Redo special stuff.  */
@@ -2666,6 +2667,7 @@ pe_exe_fill_sections (bfd *abfd, struct bfd_link_info *info)
       bfd_set_section_size (filler_bfd, reloc_s, reloc_sz);
 
       /* Resize the sections.  */
+      lang_reset_memory_regions ();
       lang_size_sections (NULL, TRUE);
 
       /* Redo special stuff.  */
