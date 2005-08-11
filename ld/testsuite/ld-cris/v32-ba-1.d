@@ -14,5 +14,5 @@ Disassembly of section \.text:
 
 0+8 <b>:
    8:	4312                	moveq 3,r1
-   a:	bf0e f6ff ffff      	ba 0 <(a|___init__start)>
+   a:	bf0e f6ff ffff      	ba 0 <[^>]*>
   10:	4db2                	moveq 13,r11

@@ -1,3 +1,7 @@
+2005-08-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/v32-ba-1.d: Regexpize to adjust for symbol change.
+
 2005-08-08  Richard Earnshaw  <richard.earnshaw@arm.com>
 
 	* ld-arm/mixed-app.sym: Expact _stack to be in the ABS section.
