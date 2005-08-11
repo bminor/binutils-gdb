@@ -147,7 +147,7 @@ static int do_syms;
 static int do_reloc;
 static int do_sections;
 static int do_section_groups;
-static int do_full_section_name;
+static int do_section_details;
 static int do_segments;
 static int do_unwind;
 static int do_using_dynamic;
@@ -2716,6 +2716,7 @@ static struct option options[] =
   {"sections",	       no_argument, 0, 'S'},
   {"section-headers",  no_argument, 0, 'S'},
   {"section-groups",   no_argument, 0, 'g'},
+  {"section-details",  no_argument, 0, 't'},
   {"full-section-name",no_argument, 0, 'N'},
   {"symbols",	       no_argument, 0, 's'},
   {"syms",	       no_argument, 0, 's'},
@@ -2751,8 +2752,7 @@ usage (void)
   -S --section-headers   Display the sections' header\n\
      --sections          An alias for --section-headers\n\
   -g --section-groups    Display the section groups\n\
-  -N --full-section-name\n\
-                         Display the full section name\n\
+  -t --section-details   Display the section details\n\
   -e --headers           Equivalent to: -h -l -S\n\
   -s --syms              Display the symbol table\n\
       --symbols          An alias for --syms\n\
@@ -2825,7 +2825,7 @@ parse_args (int argc, char **argv)
     usage ();
 
   while ((c = getopt_long
-	  (argc, argv, "ersuahnldSDAINgw::x:i:vVWH", options, NULL)) != EOF)
+	  (argc, argv, "ersuahnldSDAINtgw::x:i:vVWH", options, NULL)) != EOF)
     {
       char *cp;
       int section;
@@ -2856,8 +2856,10 @@ parse_args (int argc, char **argv)
 	case 'g':
 	  do_section_groups++;
 	  break;
+	case 't':
 	case 'N':
-	  do_full_section_name++;
+	  do_sections++;
+	  do_section_details++;
 	  break;
 	case 'e':
 	  do_header++;
@@ -3788,8 +3790,33 @@ get_64bit_elf_symbols (FILE *file, Elf_Internal_Shdr *section)
 static const char *
 get_elf_section_flags (bfd_vma sh_flags)
 {
-  static char buff[33];
+  static char buff[1024];
   char *p = buff;
+  int index, size = sizeof (buff) - (8 + 4 + 1);
+  const struct
+    {
+      const char *str;
+      int len;
+    }
+  flags [] =
+    {
+	{ "WRITE", 5 },
+	{ "ALLOC", 5 },
+	{ "EXEC", 4 },
+	{ "MERGE", 5 },
+	{ "STRINGS", 7 },
+	{ "INFO LINK", 9 },
+	{ "LINK ORDER", 10 },
+	{ "OS NONCONF", 10 },
+	{ "GROUP", 5 },
+	{ "TLS", 3 }
+    };
+
+  if (do_section_details)
+    {
+      sprintf (buff, "[%8.8lx]: ", (unsigned long) sh_flags);
+      p += 8 + 4;
+    }
 
   while (sh_flags)
     {
@@ -3798,38 +3825,94 @@ get_elf_section_flags (bfd_vma sh_flags)
       flag = sh_flags & - sh_flags;
       sh_flags &= ~ flag;
 
-      switch (flag)
+      if (do_section_details)
 	{
-	case SHF_WRITE:		   *p = 'W'; break;
-	case SHF_ALLOC:		   *p = 'A'; break;
-	case SHF_EXECINSTR:	   *p = 'X'; break;
-	case SHF_MERGE:		   *p = 'M'; break;
-	case SHF_STRINGS:	   *p = 'S'; break;
-	case SHF_INFO_LINK:	   *p = 'I'; break;
-	case SHF_LINK_ORDER:	   *p = 'L'; break;
-	case SHF_OS_NONCONFORMING: *p = 'O'; break;
-	case SHF_GROUP:		   *p = 'G'; break;
-	case SHF_TLS:		   *p = 'T'; break;
+	  switch (flag)
+	    {
+	    case SHF_WRITE:		index = 0; break;
+	    case SHF_ALLOC:		index = 1; break;
+	    case SHF_EXECINSTR:		index = 2; break;
+	    case SHF_MERGE:		index = 3; break;
+	    case SHF_STRINGS:		index = 4; break;
+	    case SHF_INFO_LINK:		index = 5; break;
+	    case SHF_LINK_ORDER:	index = 6; break;
+	    case SHF_OS_NONCONFORMING:	index = 7; break;
+	    case SHF_GROUP:		index = 8; break;
+	    case SHF_TLS:		index = 9; break;
 
-	default:
-	  if (elf_header.e_machine == EM_X86_64
-	      && flag == SHF_X86_64_LARGE)
-	    *p = 'l';
+	    default:
+	      index = -1;
+	      break;
+	    }
+
+	  if (p != buff + 8 + 4)
+	    {
+	      if (size < 10 + 2)
+		abort ();
+	      size -= 2;
+	      *p++ = ',';
+	      *p++ = ' ';
+	    }
+
+	  if (index != -1)
+	    {
+	      size -= flags [index].len;
+	      p = stpcpy (p, flags [index].str);
+	    }
 	  else if (flag & SHF_MASKOS)
 	    {
-	      *p = 'o';
-	      sh_flags &= ~ SHF_MASKOS;
+	      size -= 5 + 8;
+	      sprintf (p, "OS (%8.8lx)", (unsigned long) flag);
+	      p += 5 + 8;
 	    }
 	  else if (flag & SHF_MASKPROC)
 	    {
-	      *p = 'p';
-	      sh_flags &= ~ SHF_MASKPROC;
+	      size -= 7 + 8;
+	      sprintf (p, "PROC (%8.8lx)", (unsigned long) flag);
+	      p += 7 + 8;
 	    }
 	  else
-	    *p = 'x';
-	  break;
+	    {
+	      size -= 10 + 8;
+	      sprintf (p, "UNKNOWN (%8.8lx)", (unsigned long) flag);
+	      p += 10 + 8;
+	    }
 	}
-      p++;
+      else
+	{
+	  switch (flag)
+	    {
+	    case SHF_WRITE:		*p = 'W'; break;
+	    case SHF_ALLOC:		*p = 'A'; break;
+	    case SHF_EXECINSTR:		*p = 'X'; break;
+	    case SHF_MERGE:		*p = 'M'; break;
+	    case SHF_STRINGS:		*p = 'S'; break;
+	    case SHF_INFO_LINK:		*p = 'I'; break;
+	    case SHF_LINK_ORDER:	*p = 'L'; break;
+	    case SHF_OS_NONCONFORMING:	*p = 'O'; break;
+	    case SHF_GROUP:		*p = 'G'; break;
+	    case SHF_TLS:		*p = 'T'; break;
+
+	    default:
+	      if (elf_header.e_machine == EM_X86_64
+		  && flag == SHF_X86_64_LARGE)
+		*p = 'l';
+	      else if (flag & SHF_MASKOS)
+		{
+		  *p = 'o';
+		  sh_flags &= ~ SHF_MASKOS;
+		}
+	      else if (flag & SHF_MASKPROC)
+		{
+		  *p = 'p';
+		  sh_flags &= ~ SHF_MASKPROC;
+		}
+	      else
+		*p = 'x';
+	      break;
+	    }
+	  p++;
+	}
     }
 
   *p = '\0';
@@ -4009,10 +4092,10 @@ process_section_headers (FILE *file)
 
   if (is_32bit_elf)
     {
-      if (do_full_section_name)
+      if (do_section_details)
 	{
 	  printf (_("  [Nr] Name\n"));
-	  printf (_("       Type            Addr     Off    Size   ES Flg Lk Inf Al\n"));
+	  printf (_("       Type            Addr     Off    Size   ES   Lk Inf Al\n"));
 	}
       else
 	printf
@@ -4020,10 +4103,10 @@ process_section_headers (FILE *file)
     }
   else if (do_wide)
     {
-      if (do_full_section_name)
+      if (do_section_details)
 	{
 	  printf (_("  [Nr] Name\n"));
-	  printf (_("       Type            Address          Off    Size   ES Flg Lk Inf Al\n"));
+	  printf (_("       Type            Address          Off    Size   ES   Lk Inf Al\n"));
 	}
       else
 	printf
@@ -4031,11 +4114,11 @@ process_section_headers (FILE *file)
     }
   else
     {
-      if (do_full_section_name)
+      if (do_section_details)
 	{
 	  printf (_("  [Nr] Name\n"));
-	  printf (_("       Flags             Type             Address           Offset\n"));
-	  printf (_("       Size              EntSize          Link     Info     Align\n"));
+	  printf (_("       Type              Address          Offset            Link\n"));
+	  printf (_("       Size              EntSize          Info              Align\n"));
 	}
       else
 	{
@@ -4044,11 +4127,14 @@ process_section_headers (FILE *file)
 	}
     }
 
+  if (do_section_details)
+    printf (_("       Flags\n"));
+
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum;
        i++, section++)
     {
-      if (do_full_section_name)
+      if (do_section_details)
 	{
 	  printf ("  [%2u] %s\n",
 		  SECTION_HEADER_NUM (i),
@@ -4072,7 +4158,10 @@ process_section_headers (FILE *file)
 		   (unsigned long) section->sh_size,
 		   (unsigned long) section->sh_entsize);
 
-	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
+	  if (do_section_details)
+	    fputs ("  ", stdout);
+	  else
+	    printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
 	  printf ("%2ld %3lu %2ld\n",
 		  (unsigned long) section->sh_link,
@@ -4107,7 +4196,10 @@ process_section_headers (FILE *file)
 	      print_vma (section->sh_entsize, LONG_HEX);
 	    }
 
-	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
+	  if (do_section_details)
+	    fputs ("  ", stdout);
+	  else
+	    printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
 	  printf ("%2ld %3lu ",
 		  (unsigned long) section->sh_link,
@@ -4121,27 +4213,24 @@ process_section_headers (FILE *file)
 	      putchar ('\n');
 	    }
 	}
-      else if (do_full_section_name)
+      else if (do_section_details)
 	{
-	  printf ("       %-15.15s   %-15.15s ",
-		  get_elf_section_flags (section->sh_flags),
+	  printf ("       %-15.15s  ",
 		  get_section_type_name (section->sh_type));
-	  putchar (' ');
 	  print_vma (section->sh_addr, LONG_HEX);
 	  if ((long) section->sh_offset == section->sh_offset)
-	    printf ("  %8.8lx", (unsigned long) section->sh_offset);
+	    printf ("  %16.16lx", (unsigned long) section->sh_offset);
 	  else
 	    {
 	      printf ("  ");
 	      print_vma (section->sh_offset, LONG_HEX);
 	    }
-	  printf ("\n       ");
+	  printf ("  %ld\n       ", (unsigned long) section->sh_link);
 	  print_vma (section->sh_size, LONG_HEX);
-	  printf ("  ");
+	  putchar (' ');
 	  print_vma (section->sh_entsize, LONG_HEX);
 
-	  printf ("   %2ld      %3lu        %ld\n",
-		  (unsigned long) section->sh_link,
+	  printf ("  %-16lu  %ld\n",
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
 	}
@@ -4168,9 +4257,13 @@ process_section_headers (FILE *file)
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
 	}
+
+      if (do_section_details)
+	printf ("       %s\n", get_elf_section_flags (section->sh_flags));
     }
 
-  printf (_("Key to Flags:\n\
+  if (!do_section_details)
+    printf (_("Key to Flags:\n\
   W (write), A (alloc), X (execute), M (merge), S (strings)\n\
   I (info), L (link order), G (group), x (unknown)\n\
   O (extra OS processing required) o (OS specific), p (processor specific)\n"));

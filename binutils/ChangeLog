@@ -1,3 +1,20 @@
+2005-08-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention "-t/--section-details" and
+	"-N/--full-section-name".
+
+	* doc/binutils.texi: Document "-t/--section-details". Remove
+	"-N/--full-section-name".
+
+	* readelf.c (do_full_section_name): Renamed to ...
+	(do_section_details): This.
+	(option): Rename "-N/--full-section-name" to
+	"-t/--section-details".
+	(usage): Likewise.
+	(parse_args): Likewise.
+	(get_elf_section_flags): Support do_section_details.
+	(process_section_headers): Updated for do_section_details.
+
 2005-08-04  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* readelf.c (get_parisc_dynamic_type): Add new dynamic types.

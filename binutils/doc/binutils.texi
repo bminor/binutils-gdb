@@ -3254,7 +3254,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-l}|@option{--program-headers}|@option{--segments}]
         [@option{-S}|@option{--section-headers}|@option{--sections}]
         [@option{-g}|@option{--section-groups}]
-        [@option{-N}|@option{--full-section-name}]
+        [@option{-t}|@option{--section-details}]
         [@option{-e}|@option{--headers}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
         [@option{-n}|@option{--notes}]
@@ -3331,10 +3331,10 @@ has any.
 Displays the information contained in the file's section groups, if it
 has any.
 
-@item -N
-@itemx --full-section-name
-@cindex ELF section name information
-Displays the full section name for @option{-S}.
+@item -t
+@itemx --section-details
+@cindex ELF section information
+Displays the detailed section information. Implies @option{-S}.
 
 @item -s
 @itemx --symbols
