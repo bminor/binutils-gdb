@@ -1,3 +1,8 @@
+2005-08-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* subsegs.c (subseg_change): Move declaration of seginfo to before
+	first statement.
+
 2005-08-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* README-vms: Delete.

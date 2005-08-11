@@ -75,9 +75,9 @@ subsegs_begin (void)
 void
 subseg_change (register segT seg, register int subseg)
 {
+  segment_info_type *seginfo;
   now_seg = seg;
   now_subseg = subseg;
-  segment_info_type *seginfo;
 
   if (now_seg == absolute_section)
     return;
