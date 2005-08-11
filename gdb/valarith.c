@@ -883,7 +883,14 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
          Use the signedness of the operand with the greater length.
          If both operands are of equal length, use unsigned operation
          if one of the operands is unsigned.  */
-      if (promoted_len1 > promoted_len2)
+      if (op == BINOP_RSH || op == BINOP_LSH)
+	{
+	  /* In case of the shift operators the type of the result only
+	     depends on the type of the left operand.  */
+	  unsigned_operation = is_unsigned1;
+	  result_len = promoted_len1;
+	}
+      else if (promoted_len1 > promoted_len2)
 	{
 	  unsigned_operation = is_unsigned1;
 	  result_len = promoted_len1;

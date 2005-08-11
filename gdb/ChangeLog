@@ -1,3 +1,9 @@
+2005-08-11  Andreas Schwab  <schwab@suse.de>
+
+	PR exp/1978
+	* valarith.c (value_binop): Fix result type for the shift
+	operators.
+
 2005-08-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64obsd-tdep.c: Tweak comments.
