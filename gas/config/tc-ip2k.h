@@ -20,11 +20,6 @@
 
 #define TC_IP2K
 
-#ifndef BFD_ASSEMBLER
-/* Leading space so will compile with cc.  */
- #error IP2K support requires BFD_ASSEMBLER
-#endif
-
 #define LISTING_HEADER "IP2xxx GAS "
 
 /* The target BFD architecture.  */

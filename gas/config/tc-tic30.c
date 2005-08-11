@@ -38,8 +38,6 @@ static char *ordinal_names[] =
   "first", "second", "third", "fourth", "fifth"
 };
 
-const int md_reloc_size = 0;
-
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "*";
 const char line_separator_chars[] = "";

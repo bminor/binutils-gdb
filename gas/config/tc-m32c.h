@@ -1,5 +1,5 @@
 /* tc-m32c.h -- Header file for tc-m32c.c.
-   Copyright (C) 2004 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -19,10 +19,6 @@
    Boston, MA 02111-1307, USA. */
 
 #define TC_M32C
-
-#ifndef BFD_ASSEMBLER
-#error M32C support requires BFD_ASSEMBLER
-#endif
 
 #define LISTING_HEADER "M16C/M32C GAS "
 

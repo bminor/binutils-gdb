@@ -1,5 +1,5 @@
 /* tc-iq2000.h -- Header file for tc-iq2000.c.
-   Copyright (C) 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -19,11 +19,6 @@
    Boston, MA 02110-1301, USA. */
 
 #define TC_IQ2000
-
-#ifndef BFD_ASSEMBLER
-/* Leading space so will compile with cc.  */
- #error IQ2000 support requires BFD_ASSEMBLER
-#endif
 
 #define LISTING_HEADER "IQ2000 GAS "
 

@@ -1085,12 +1085,11 @@ md_apply_fix (fixP, valP, seg)
     }
 }
 
-/* A `BFD_ASSEMBLER' GAS will call this to generate a reloc.  GAS
-   will pass the resulting reloc to `bfd_install_relocation'.  This
-   currently works poorly, as `bfd_install_relocation' often does the
-   wrong thing, and instances of `tc_gen_reloc' have been written to
-   work around the problems, which in turns makes it difficult to fix
-   `bfd_install_relocation'.  */
+/* GAS will call this to generate a reloc, passing the resulting reloc
+   to `bfd_install_relocation'.  This currently works poorly, as
+   `bfd_install_relocation' often does the wrong thing, and instances of
+   `tc_gen_reloc' have been written to work around the problems, which
+   in turns makes it difficult to fix `bfd_install_relocation'.  */
 
 /* If while processing a fixup, a reloc really needs to be created
    then it is done here.  */

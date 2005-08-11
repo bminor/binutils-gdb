@@ -1,6 +1,6 @@
 /* tc-i386.h -- Header file for tc-i386.c
    Copyright 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004
+   2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -22,10 +22,6 @@
 
 #ifndef TC_I386
 #define TC_I386 1
-
-#ifndef BFD_ASSEMBLER
-#error So, do you know what you are doing?
-#endif
 
 struct fix;
 

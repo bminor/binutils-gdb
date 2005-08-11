@@ -2,7 +2,7 @@
    format backends.
 
    Copyright 1987, 1990, 1991, 1992, 1993, 1995, 1996, 1997, 1999, 2000,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -29,13 +29,6 @@ void obj_emit_symbols (char **where, symbolS * symbols);
 #ifndef obj_read_begin_hook
 void obj_read_begin_hook (void);
 #endif
-#ifndef BFD_ASSEMBLER
-void obj_crawl_symbol_chain (object_headers * headers);
-void obj_header_append (char **where, object_headers * headers);
-#ifndef obj_pre_write_hook
-void obj_pre_write_hook (object_headers * headers);
-#endif
-#endif
 
 #ifndef obj_symbol_new_hook
 void obj_symbol_new_hook (symbolS * symbolP);
@@ -45,7 +38,6 @@ void obj_symbol_to_chars (char **where, symbolS * symbolP);
 
 extern const pseudo_typeS obj_pseudo_table[];
 
-#ifdef BFD_ASSEMBLER
 struct format_ops {
   int flavor;
   unsigned dfl_leading_underscore : 1;
@@ -88,7 +80,6 @@ extern const struct format_ops aout_format_ops;
 
 #ifndef this_format
 COMMON const struct format_ops *this_format;
-#endif
 #endif
 
 /* end of obj.h */

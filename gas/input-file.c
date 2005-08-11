@@ -143,9 +143,7 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
 
   if (f_in == NULL)
     {
-#ifdef BFD_ASSEMBLER
       bfd_set_error (bfd_error_system_call);
-#endif
       as_perror (_("Can't open %s for reading"), file_name);
       return;
     }
@@ -154,9 +152,7 @@ input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
 
   if (ferror (f_in))
     {
-#ifdef BFD_ASSEMBLER
       bfd_set_error (bfd_error_system_call);
-#endif
       as_perror (_("Can't open %s for reading"), file_name);
 
       fclose (f_in);
@@ -219,9 +215,7 @@ input_file_get (char *buf, int buflen)
   size = fread (buf, sizeof (char), buflen, f_in);
   if (size < 0)
     {
-#ifdef BFD_ASSEMBLER
       bfd_set_error (bfd_error_system_call);
-#endif
       as_perror (_("Can't read from %s"), file_name);
       size = 0;
     }
@@ -248,9 +242,7 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
     size = fread (where, sizeof (char), BUFFER_SIZE, f_in);
   if (size < 0)
     {
-#ifdef BFD_ASSEMBLER
       bfd_set_error (bfd_error_system_call);
-#endif
       as_perror (_("Can't read from %s"), file_name);
       size = 0;
     }
@@ -260,9 +252,7 @@ input_file_give_next_buffer (char *where /* Where to place 1st character of new 
     {
       if (fclose (f_in))
 	{
-#ifdef BFD_ASSEMBLER
 	  bfd_set_error (bfd_error_system_call);
-#endif
 	  as_perror (_("Can't close %s"), file_name);
 	}
       f_in = (FILE *) 0;

@@ -11,7 +11,6 @@
 #   cpu_type	canonical gas cpu type; identifies the config/tc-* files
 #   fmt		output format; identifies the config/obj-* files
 #   em		emulation; identifies the config/te-* files
-#   bfd_gas	set to "yes" if BFD_ASSEMBLER is required
 
 # Optional output shell variables; these are not always set:
 #   arch	the default architecture; sets DEFAULT_ARCH on some systems 
@@ -50,7 +49,6 @@ case ${cpu} in
   m680[012346]0)	cpu_type=m68k ;;
   m6811|m6812|m68hc12)	cpu_type=m68hc11 ;;
   m683??)		cpu_type=m68k ;;
-  m8*)			cpu_type=m88k ;;
   maxq)			cpu_type=maxq ;;
   mips*el)		cpu_type=mips endian=little ;;
   mips*)		cpu_type=mips endian=big ;;
@@ -90,12 +88,6 @@ esac
 generic_target=${cpu_type}-$vendor-$os
 # Note: This table is alpha-sorted, please try to keep it that way.
 case ${generic_target} in
-  a29k-*-coff)				fmt=coff ;;
-  a29k-amd-udi)				fmt=coff ;;
-  a29k-amd-ebmon)			fmt=coff ;;
-  a29k-nyu-sym1)			fmt=coff ;;
-  a29k-*-vxworks*)			fmt=coff ;;
-
   alpha-*-*vms*)			fmt=evax ;;
   alpha-*-osf*)				fmt=ecoff ;;
   alpha-*-linuxecoff*)			fmt=ecoff ;;
@@ -161,11 +153,7 @@ case ${generic_target} in
   hppa-*-bsd*)				fmt=som em=hppa ;;
   hppa-*-hiux*)				fmt=som em=hppa ;;
 
-  h8300-*-rtemscoff*)			fmt=coff ;;
-  h8300-*-coff)				fmt=coff ;;
   h8300-*-elf | h8300-*-rtems*)		fmt=elf ;;
-  h8500-*-rtems*)			fmt=coff ;;
-  h8500-*-coff)				fmt=coff ;;
 
   i370-*-elf* | i370-*-linux*)		fmt=elf ;;
 
@@ -225,13 +213,6 @@ case ${generic_target} in
 
   i860-*-*)				fmt=elf endian=little ;;
 
-  i960-*-bout)				fmt=bout ;;
-  i960-*-coff)				fmt=coff em=ic960 ;;
-  i960-*-rtems*)			fmt=coff em=ic960 ;;
-  i960-*-nindy*)			fmt=bout ;;
-  i960-*-vxworks5.0)			fmt=bout ;;
-  i960-*-vxworks5.*)			fmt=coff em=ic960 ;;
-  i960-*-vxworks*)			fmt=bout ;;
   i960-*-elf*)				fmt=elf ;;
 
   ia64-*-elf*)				fmt=elf ;;
@@ -252,30 +233,16 @@ case ${generic_target} in
   m68hc11-*-* | m6811-*-*)		fmt=elf ;;
   m68hc12-*-* | m6812-*-*)		fmt=elf ;;
 
-  m68k-*-vxworks*)			fmt=aout em=sun3 ;;
-  m68k-ericsson-ose)			fmt=aout em=sun3 ;;
-  m68k-*-sunos*)			fmt=aout em=sun3 ;;
-  m68k-motorola-sysv*)			fmt=coff em=delta ;;
-  m68k-bull-sysv3*)			fmt=coff em=dpx2 ;;
-  m68k-apollo-*)			fmt=coff em=apollo ;;
   m68k-*-elf*)				fmt=elf ;;
   m68k-*-sysv4*)			fmt=elf em=svr4 ;;
-  m68k-*-sysv*)				fmt=coff ;;
-  m68k-*-coff | m68k-*-rtemscoff*)	fmt=coff ;;
   m68k-*-rtems*)			fmt=elf ;;
-  m68k-*-hpux*)				fmt=hp300 em=hp300 ;;
-  m68k-*-linux*aout*)			fmt=aout em=linux ;;
   m68k-*-linux-*)			fmt=elf em=linux ;;
   m68k-*-uclinux*)			fmt=elf ;;
   m68k-*-gnu*)				fmt=elf ;;
   m68k-*-netbsdelf*)			fmt=elf em=nbsd ;;
   m68k-*-netbsd*)			fmt=aout em=nbsd bfd_gas=yes ;;
   m68k-*-openbsd*)			fmt=aout em=nbsd bfd_gas=yes ;;
-  m68k-apple-aux*)			fmt=coff em=aux ;;
   m68k-*-psos*)				fmt=elf em=psos;;
-
-  m88k-motorola-sysv3*)			fmt=coff em=delt88 ;;
-  m88k-*-coff*)				fmt=coff ;;
 
   maxq-*-coff)      			fmt=coff bfd_gas=yes ;;
 
@@ -320,7 +287,6 @@ case ${generic_target} in
   openrisc-*-*)				fmt=elf ;;
 
   or32-*-rtems*)			fmt=elf ;;
-  or32-*-coff)				fmt=coff ;;
   or32-*-elf)				fmt=elf ;;
 
   pj*)					fmt=elf ;;
@@ -391,18 +357,13 @@ case ${generic_target} in
   tic30-*-*coff*)			fmt=coff bfd_gas=yes ;;
   tic4x-*-* | c4x-*-*)			fmt=coff bfd_gas=yes ;;
   tic54x-*-* | c54x*-*-*)		fmt=coff bfd_gas=yes need_libm=yes;;
-  tic80-*-*)				fmt=coff ;;
 
   v850-*-*)				fmt=elf ;;
   v850e-*-*)				fmt=elf ;;
   v850ea-*-*)				fmt=elf ;;
 
   vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
-  vax-*-netbsd*)			fmt=aout em=nbsd ;;
-  vax-*-bsd* | vax-*-ultrix*)		fmt=aout ;;
   vax-*-linux-*)			fmt=elf em=linux ;;
-
-  w65-*-*)				fmt=coff ;;
 
   xscale-*-coff)			fmt=coff ;;
   xscale-*-elf)				fmt=elf ;;
@@ -415,7 +376,6 @@ case ${generic_target} in
 
   *-*-aout | *-*-scout)			fmt=aout ;;
   *-*-freebsd* | *-*-kfreebsd*-gnu)	fmt=elf em=freebsd ;;
-  *-*-nindy*)				fmt=bout ;;
   *-*-bsd*)				fmt=aout em=sun3 ;;
   *-*-generic)				fmt=generic ;;
   *-*-xray | *-*-hms)			fmt=coff ;;
@@ -436,3 +396,8 @@ case ${fmt} in
     bfd_gas=yes
     ;;
 esac
+
+if test $bfd_gas != yes; then
+  echo This target is no longer supported in gas
+  exit 1
+fi

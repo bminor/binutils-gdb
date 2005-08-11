@@ -175,9 +175,6 @@ static int meabi_flags = EF_ARM_EABI_UNKNOWN;
 symbolS * GOT_symbol;
 #endif
 
-/* Size of relocation record.  */
-const int md_reloc_size = 8;
-
 /* 0: assemble for ARM,
    1: assemble for Thumb,
    2: assemble for Thumb even though target CPU does not support thumb

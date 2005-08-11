@@ -36,7 +36,6 @@ const char line_separator_chars[] = ";";
 extern int machine;
 extern int coff_flags;
 int segmented_mode;
-const int md_reloc_size;
 
 /* This is non-zero if target was set from the command line.  */
 static int z8k_target_from_cmdline;
@@ -1260,24 +1259,12 @@ md_assemble (char *str)
     }
 }
 
-void
-tc_crawl_symbol_chain (object_headers *headers ATTRIBUTE_UNUSED)
-{
-  printf (_("call to tc_crawl_symbol_chain \n"));
-}
-
 /* We have no need to default values of symbols.  */
 
 symbolS *
 md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
-}
-
-void
-tc_headers_hook (object_headers *headers ATTRIBUTE_UNUSED)
-{
-  printf (_("call to tc_headers_hook \n"));
 }
 
 /* Various routines to kill one day.  */

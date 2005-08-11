@@ -26,7 +26,6 @@
 #define TC_PCREL_ADJUST(F) md_pcrel_adjust(F)
 extern int md_pcrel_adjust (fragS *);
 
-#ifdef BFD_ASSEMBLER
 #define NO_RELOC BFD_RELOC_NONE
 
 #define TARGET_ARCH		bfd_arch_ns32k
@@ -34,17 +33,10 @@ extern int md_pcrel_adjust (fragS *);
 #ifndef TARGET_FORMAT		/* Maybe defined in te-*.h.  */
 #define TARGET_FORMAT		"a.out-pc532-mach"
 #endif
-#else
-#define NO_RELOC 0
-#endif
 
 #define LOCAL_LABELS_FB 1
 
 #include "bit_fix.h"
-
-#define tc_aout_pre_write_hook(x)	{;}	/* not used */
-#define tc_crawl_symbol_chain(a)	{;}	/* not used */
-#define tc_headers_hook(a)		{;}	/* not used */
 
 #ifdef SEQUENT_COMPATABILITY
 #define DEF_MODEC 20

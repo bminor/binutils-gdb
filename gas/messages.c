@@ -1,6 +1,6 @@
 /* messages.c - error reporter -
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001,
-   2003, 2004
+   2003, 2004, 2005
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -150,16 +150,10 @@ as_perror (const char *gripe,		/* Unpunctuated error theme.  */
   as_show_where ();
   fprintf (stderr, gripe, filename);
   errno = saved_errno;
-#ifdef BFD_ASSEMBLER
   errtxt = bfd_errmsg (bfd_get_error ());
-#else
-  errtxt = xstrerror (errno);
-#endif
   fprintf (stderr, ": %s\n", errtxt);
   errno = 0;
-#ifdef BFD_ASSEMBLER
   bfd_set_error (bfd_error_no_error);
-#endif
 }
 
 /* Send to stderr a string as a warning, and locate warning
@@ -477,13 +471,11 @@ sprint_value (char *buf, valueT val)
       sprintf (buf, "%ld", (long) val);
       return;
     }
-#ifdef BFD_ASSEMBLER
   if (sizeof (val) <= sizeof (bfd_vma))
     {
       sprintf_vma (buf, val);
       return;
     }
-#endif
   abort ();
 }
 
@@ -504,14 +496,12 @@ as_internal_value_out_of_range (char *    prefix,
   if (prefix == NULL)
     prefix = "";
 
-#ifdef BFD_ASSEMBLER
   if (   val < HEX_MAX_THRESHOLD
       && min < HEX_MAX_THRESHOLD
       && max < HEX_MAX_THRESHOLD
       && val > HEX_MIN_THRESHOLD
       && min > HEX_MIN_THRESHOLD
       && max > HEX_MIN_THRESHOLD)
-#endif
     {
       /* xgettext:c-format  */
       err = _("%s out of range (%d is not between %d and %d)");
@@ -523,7 +513,6 @@ as_internal_value_out_of_range (char *    prefix,
 	as_warn_where (file, line, err,
 		       prefix, (int) val, (int) min, (int) max);
     }
-#ifdef BFD_ASSEMBLER
   else
     {
       char val_buf [sizeof (val) * 3 + 2];
@@ -545,7 +534,6 @@ as_internal_value_out_of_range (char *    prefix,
       else
 	as_warn_where (file, line, err, prefix, val_buf, min_buf, max_buf);
     }
-#endif
 }
 
 void

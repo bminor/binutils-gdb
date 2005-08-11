@@ -43,10 +43,7 @@
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 #include "hash.h"
-
-#ifdef BFD_ASSEMBLER
 #include "bfdver.h"
-#endif
 
 #ifdef HAVE_ITBL_CPU
 #include "itbl-ops.h"
@@ -112,13 +109,11 @@ int debug_memory = 0;
 /* Enable verbose mode.  */
 int verbose = 0;
 
-#ifdef BFD_ASSEMBLER
 segT reg_section;
 segT expr_section;
 segT text_section;
 segT data_section;
 segT bss_section;
-#endif
 
 /* Name of listing file.  */
 static char *listing_filename = NULL;
@@ -225,13 +220,8 @@ print_version_id (void)
     return;
   printed = 1;
 
-#ifdef BFD_ASSEMBLER
-  fprintf (stderr, _("GNU assembler version %s (%s) using BFD version %s"),
+  fprintf (stderr, _("GNU assembler version %s (%s) using BFD version %s\n"),
 	   VERSION, TARGET_ALIAS, BFD_VERSION_STRING);
-#else
-  fprintf (stderr, _("GNU assembler version %s (%s)"), VERSION, TARGET_ALIAS);
-#endif
-  fprintf (stderr, "\n");
 }
 
 static void
@@ -276,7 +266,7 @@ Options:\n\
                           emulate output (default %s)\n"), def_em);
   }
 #endif
-#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
   fprintf (stream, _("\
   --execstack             require executable stack for this object\n"));
   fprintf (stream, _("\
@@ -457,7 +447,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
     ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
     ,{"emulation", required_argument, NULL, OPTION_EMULATION}
-#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
     ,{"execstack", no_argument, NULL, OPTION_EXECSTACK}
     ,{"noexecstack", no_argument, NULL, OPTION_NOEXECSTACK}
 #endif
@@ -598,11 +588,7 @@ parse_args (int * pargc, char *** pargv)
 
 	case OPTION_VERSION:
 	  /* This output is intended to follow the GNU standards document.  */
-#ifdef BFD_ASSEMBLER
 	  printf (_("GNU assembler %s\n"), BFD_VERSION_STRING);
-#else
-	  printf (_("GNU assembler %s\n"), VERSION);
-#endif
 	  printf (_("Copyright 2005 Free Software Foundation, Inc.\n"));
 	  printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
@@ -643,11 +629,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	    if (*s == '\0')
 	      as_fatal (_("bad defsym; format is --defsym name=value"));
 	    *s++ = '\0';
-#ifdef BFD_ASSEMBLER
 	    i = bfd_scan_vma (s, (const char **) NULL, 0);
-#else
-	    i = strtol (s, (char **) NULL, 0);
-#endif
 	    n = xmalloc (sizeof *n);
 	    n->next = defsyms;
 	    n->name = optarg;
@@ -774,7 +756,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  flag_fatal_warnings = 1;
 	  break;
 
-#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 	case OPTION_EXECSTACK:
 	  flag_execstack = 1;
 	  flag_noexecstack = 0;
@@ -983,44 +965,10 @@ static void
 perform_an_assembly_pass (int argc, char ** argv)
 {
   int saw_a_file = 0;
-#ifdef BFD_ASSEMBLER
   flagword applicable;
-#endif
 
   need_pass_2 = 0;
 
-#ifndef BFD_ASSEMBLER
-#ifdef MANY_SEGMENTS
-  {
-    unsigned int i;
-    for (i = SEG_E0; i < SEG_UNKNOWN; i++)
-      segment_info[i].fix_root = 0;
-  }
-  /* Create the three fixed ones.  */
-  {
-    segT seg;
-
-#ifdef TE_APOLLO
-    seg = subseg_new (".wtext", 0);
-#else
-    seg = subseg_new (".text", 0);
-#endif
-    assert (seg == SEG_E0);
-    seg = subseg_new (".data", 0);
-    assert (seg == SEG_E1);
-    seg = subseg_new (".bss", 0);
-    assert (seg == SEG_E2);
-#ifdef TE_APOLLO
-    create_target_segments ();
-#endif
-  }
-
-#else /* not MANY_SEGMENTS.  */
-  text_fix_root = NULL;
-  data_fix_root = NULL;
-  bss_fix_root = NULL;
-#endif /* not MANY_SEGMENTS.  */
-#else /* BFD_ASSEMBLER.  */
   /* Create the standard sections, and those the assembler uses
      internally.  */
   text_section = subseg_new (TEXT_SECTION_NAME, 0);
@@ -1042,12 +990,10 @@ perform_an_assembly_pass (int argc, char ** argv)
   reg_section = subseg_new ("*GAS `reg' section*", 0);
   expr_section = subseg_new ("*GAS `expr' section*", 0);
 
-#endif /* BFD_ASSEMBLER.  */
-
   subseg_set (text_section, 0);
 
   /* This may add symbol table entries, which requires having an open BFD,
-     and sections already created, in BFD_ASSEMBLER mode.  */
+     and sections already created.  */
   md_begin ();
 
 #ifdef USING_CGEN
@@ -1113,10 +1059,8 @@ main (int argc, char ** argv)
   out_file_name = OBJ_DEFAULT_OUTPUT_FILE_NAME;
 
   hex_init ();
-#ifdef BFD_ASSEMBLER
   bfd_init ();
   bfd_set_error_program_name (myname);
-#endif
 
 #ifdef USE_EMULATIONS
   select_emulation_mode (argc, argv);
@@ -1140,21 +1084,13 @@ main (int argc, char ** argv)
 #ifdef TC_I960
   macro_strip_at = flag_mri;
 #endif
-#ifdef TC_A29K
-  /* For compatibility with the AMD 29K family macro assembler
-     specification.  */
-  flag_macro_alternate = 1;
-  macro_strip_at = 1;
-#endif
 
   macro_init (flag_macro_alternate, flag_mri, macro_strip_at, macro_expr);
 
   PROGRESS (1);
 
-#ifdef BFD_ASSEMBLER
   output_file_create (out_file_name);
   assert (stdoutput != 0);
-#endif
 
 #ifdef tc_init_after_args
   tc_init_after_args ();
@@ -1189,7 +1125,7 @@ main (int argc, char ** argv)
   md_end ();
 #endif
 
-#if defined BFD_ASSEMBLER && (defined OBJ_ELF || defined OBJ_MAYBE_ELF)
+#if defined OBJ_ELF || defined OBJ_MAYBE_ELF
   if ((flag_execstack || flag_noexecstack)
       && OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
@@ -1216,13 +1152,11 @@ main (int argc, char ** argv)
   else
     keep_it = 0;
 
-#if defined (BFD_ASSEMBLER) || !defined (BFD)
   /* This used to be done at the start of write_object_file in
      write.c, but that caused problems when doing listings when
      keep_it was zero.  This could probably be moved above md_end, but
      I didn't want to risk the change.  */
   subsegs_finish ();
-#endif
 
   if (keep_it)
     write_object_file ();
@@ -1232,10 +1166,7 @@ main (int argc, char ** argv)
 #endif
 
 #ifndef OBJ_VMS /* Does its own file handling.  */
-#ifndef BFD_ASSEMBLER
-  if (keep_it)
-#endif
-    output_file_close (out_file_name);
+  output_file_close (out_file_name);
 #endif
 
   if (flag_fatal_warnings && had_warnings () > 0 && had_errors () == 0)

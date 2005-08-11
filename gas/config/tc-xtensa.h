@@ -1,5 +1,5 @@
 /* tc-xtensa.h -- Header file for tc-xtensa.c.
-   Copyright (C) 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -22,10 +22,6 @@
 #define TC_XTENSA 1
 
 struct fix;
-
-#ifndef BFD_ASSEMBLER
-#error Xtensa support requires BFD_ASSEMBLER
-#endif
 
 #ifndef OBJ_ELF
 #error Xtensa support requires ELF object format

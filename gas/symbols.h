@@ -19,18 +19,6 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#ifdef BFD_ASSEMBLER
-/* The BFD code wants to walk the list in both directions.  */
-#undef  SYMBOLS_NEED_BACKPOINTERS
-#define SYMBOLS_NEED_BACKPOINTERS
-#endif
-
-#ifndef BFD_ASSEMBLER
-/* The non-BFD code expects to be able to manipulate the symbol fields
-   directly.  */
-#include "struc-symbol.h"
-#endif
-
 extern struct obstack notes;	/* eg FixS live here.  */
 
 extern struct obstack cond_obstack;	/* this is where we track .ifdef/.endif
@@ -87,7 +75,6 @@ extern void copy_symbol_attributes (symbolS *, symbolS *);
 extern valueT S_GET_VALUE (symbolS *);
 extern void S_SET_VALUE (symbolS *, valueT);
 
-#ifdef BFD_ASSEMBLER
 extern int S_IS_FUNCTION (symbolS *);
 extern int S_IS_EXTERNAL (symbolS *);
 extern int S_IS_WEAK (symbolS *);
@@ -105,7 +92,6 @@ extern void S_SET_NAME (symbolS *, const char *);
 extern void S_CLEAR_EXTERNAL (symbolS *);
 extern void S_SET_WEAK (symbolS *);
 extern void S_SET_THREAD_LOCAL (symbolS *);
-#endif
 
 #ifndef WORKING_DOT_WORD
 struct broken_word
@@ -150,16 +136,12 @@ extern const short seg_N_TYPE[];/* subseg.c */
 
 void symbol_clear_list_pointers (symbolS * symbolP);
 
-#ifdef SYMBOLS_NEED_BACKPOINTERS
-
 void symbol_insert (symbolS * addme, symbolS * target,
 		    symbolS ** rootP, symbolS ** lastP);
 void symbol_remove (symbolS * symbolP, symbolS ** rootP,
 		    symbolS ** lastP);
 
 extern symbolS *symbol_previous (symbolS *);
-
-#endif /* SYMBOLS_NEED_BACKPOINTERS */
 
 void verify_symbol_chain (symbolS * rootP, symbolS * lastP);
 
@@ -192,11 +174,8 @@ extern int symbol_section_p (symbolS *);
 extern int symbol_equated_p (symbolS *);
 extern int symbol_equated_reloc_p (symbolS *);
 extern int symbol_constant_p (symbolS *);
-
-#ifdef BFD_ASSEMBLER
 extern asymbol *symbol_get_bfdsym (symbolS *);
 extern void symbol_set_bfdsym (symbolS *, asymbol *);
-#endif
 
 #ifdef OBJ_SYMFIELD_TYPE
 OBJ_SYMFIELD_TYPE *symbol_get_obj (symbolS *);

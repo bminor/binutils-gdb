@@ -1,5 +1,5 @@
 /* tc-mn10300.c -- Assembler code for the Matsushita 10300
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -2468,11 +2468,10 @@ md_apply_fix (fixP, valP, seg)
     abort ();
 
   /* The value we are passed in *valuep includes the symbol values.
-     Since we are using BFD_ASSEMBLER, if we are doing this relocation
-     the code in write.c is going to call bfd_install_relocation, which
-     is also going to use the symbol value.  That means that if the
-     reloc is fully resolved we want to use *valuep since
-     bfd_install_relocation is not being used.
+     If we are doing this relocation the code in write.c is going to
+     call bfd_install_relocation, which is also going to use the symbol
+     value.  That means that if the reloc is fully resolved we want to
+     use *valuep since bfd_install_relocation is not being used.
 
      However, if the reloc is not fully resolved we do not want to use
      *valuep, and must use fx_offset instead.  However, if the reloc

@@ -29,10 +29,6 @@ struct fix;
 #define TARGET_BYTES_BIG_ENDIAN 1
 #endif
 
-#ifndef BFD_ASSEMBLER
- #error PowerPC support requires BFD_ASSEMBLER
-#endif
-
 /* If OBJ_COFF is defined, and TE_PE is not defined, we are assembling
    XCOFF for AIX or PowerMac.  If TE_PE is defined, we are assembling
    COFF for Windows NT.  */

@@ -70,8 +70,6 @@ const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
    changed in read.c .  Ideally it shouldn't have to know about it at all,
    but nothing is ideal around here.  */
 
-const int md_reloc_size = 8;	/* Size of relocation record.  */
-
 /* Are we trying to generate PIC code?  If so, absolute references
    ought to be made into linkage table references or pc-relative
    references.  Not implemented.  For ELF there are other means
@@ -740,63 +738,6 @@ find_cf_chip (int architecture)
   return buf;
 }
 
-#if defined (M68KCOFF) && !defined (BFD_ASSEMBLER)
-
-#ifdef NO_PCREL_RELOCS
-
-int
-make_pcrel_absolute (fixS *fixP, long *add_number)
-{
-  register unsigned char *opcode = fixP->fx_frag->fr_opcode;
-
-  /* Rewrite the PC relative instructions to absolute address ones.
-     these are rumored to be faster, and the apollo linker refuses
-     to deal with the PC relative relocations.  */
-  if (opcode[0] == 0x60 && opcode[1] == 0xff) /* BRA -> JMP.  */
-    {
-      if (flag_keep_pcrel)
-    	as_fatal (_("Tried to convert PC relative branch to absolute jump"));
-      opcode[0] = 0x4e;
-      opcode[1] = 0xf9;
-    }
-  else if (opcode[0] == 0x61 && opcode[1] == 0xff) /* BSR -> JSR.  */
-    {
-      if (flag_keep_pcrel)
-    	as_fatal (_("Tried to convert PC relative BSR to absolute JSR"));
-      opcode[0] = 0x4e;
-      opcode[1] = 0xb9;
-    }
-  else
-    as_fatal (_("Unknown PC relative instruction"));
-  *add_number -= 4;
-  return 0;
-}
-
-#endif /* NO_PCREL_RELOCS */
-
-short
-tc_coff_fix2rtype (fixS *fixP)
-{
-  if (fixP->fx_tcbit && fixP->fx_size == 4)
-    return R_RELLONG_NEG;
-#ifdef NO_PCREL_RELOCS
-  know (fixP->fx_pcrel == 0);
-  return (fixP->fx_size == 1 ? R_RELBYTE
-	  : fixP->fx_size == 2 ? R_DIR16
-	  : R_DIR32);
-#else
-  return (fixP->fx_pcrel
-	  ? (fixP->fx_size == 1 ? R_PCRBYTE
-	     : fixP->fx_size == 2 ? R_PCRWORD
-	     : R_PCRLONG)
-	  : (fixP->fx_size == 1 ? R_RELBYTE
-	     : fixP->fx_size == 2 ? R_RELWORD
-	     : R_RELLONG));
-#endif
-}
-
-#endif
-
 #ifdef OBJ_ELF
 
 /* Return zero if the reference to SYMBOL from within the same segment may
@@ -956,8 +897,6 @@ tc_m68k_fix_adjustable (fixS *fixP)
 
 #endif /* OBJ_ELF */
 
-#ifdef BFD_ASSEMBLER
-
 arelent *
 tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
@@ -1067,8 +1006,6 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   return reloc;
 }
-
-#endif /* BFD_ASSEMBLER */
 
 /* Handle of the OPCODE hash table.  NULL means any use before
    m68k_ip_begin() will crash.  */
@@ -2273,12 +2210,8 @@ m68k_ip (char *instring)
 		  && m68k_abspcadd)
 		{
 		  opP->disp.exp.X_op = O_symbol;
-#ifndef BFD_ASSEMBLER
-		  opP->disp.exp.X_add_symbol = &abs_symbol;
-#else
 		  opP->disp.exp.X_add_symbol =
 		    section_symbol (absolute_section);
-#endif
 		}
 
 	      /* Force into index mode.  Hope this works.  */
@@ -3894,11 +3827,6 @@ init_regtable (void)
 
 static int no_68851, no_68881;
 
-#ifdef OBJ_AOUT
-/* a.out machine type.  Default to 68020.  */
-int m68k_aout_machtype = 2;
-#endif
-
 void
 md_assemble (char *str)
 {
@@ -4444,18 +4372,6 @@ m68k_init_after_args (void)
   if (no_68851 && (current_architecture & m68851))
     as_bad (_("options for 68851 and no-68851 both given"));
 
-#ifdef OBJ_AOUT
-  /* Work out the magic number.  This isn't very general.  */
-  if (current_architecture & m68000)
-    m68k_aout_machtype = 0;
-  else if (current_architecture & m68010)
-    m68k_aout_machtype = 1;
-  else if (current_architecture & m68020)
-    m68k_aout_machtype = 2;
-  else
-    m68k_aout_machtype = 2;
-#endif
-
   /* Note which set of "movec" control registers is available.  */
   select_control_regs ();
 
@@ -4654,11 +4570,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     }
 #endif
 
-#ifdef BFD_ASSEMBLER
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return;
-#endif
 
   switch (fixP->fx_size)
     {
@@ -4712,10 +4626,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
      in write.c may have clobbered fx_pcrel, so we need to examine the
      reloc type.  */
   if ((fixP->fx_pcrel
-#ifdef BFD_ASSEMBLER
-       || fixP->fx_r_type == BFD_RELOC_8_PCREL
-#endif
-       )
+       || fixP->fx_r_type == BFD_RELOC_8_PCREL)
       && fixP->fx_size == 1
       && (fixP->fx_addsy == NULL
 	  || S_IS_DEFINED (fixP->fx_addsy))
@@ -4943,18 +4854,6 @@ md_convert_frag_1 (fragS *fragP)
     }
 }
 
-#ifndef BFD_ASSEMBLER
-
-void
-md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED,
-		 segT sec ATTRIBUTE_UNUSED,
-		 fragS *fragP)
-{
-  md_convert_frag_1 (fragP);
-}
-
-#else
-
 void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 		 segT sec ATTRIBUTE_UNUSED,
@@ -4962,7 +4861,6 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 {
   md_convert_frag_1 (fragP);
 }
-#endif
 
 /* Force truly undefined symbols to their maximum size, and generally set up
    the frag list to be relaxed
@@ -5119,38 +5017,6 @@ md_ri_to_chars (char *the_bytes, struct reloc_info_generic *ri)
 		  | ((ri->r_extern << 4) & 0x10));
 }
 
-#endif
-
-#ifndef BFD_ASSEMBLER
-void
-tc_aout_fix_to_chars (char *where, fixS *fixP,
-		      relax_addressT segment_address_in_file)
-{
-  /*
-   * In: length of relocation (or of address) in chars: 1, 2 or 4.
-   * Out: GNU LD relocation length code: 0, 1, or 2.
-   */
-
-  static const unsigned char nbytes_r_length[] = {42, 0, 1, 42, 2};
-  long r_symbolnum;
-
-  know (fixP->fx_addsy != NULL);
-
-  md_number_to_chars (where,
-		      (fixP->fx_frag->fr_address
-		       + fixP->fx_where - segment_address_in_file), 4);
-
-  r_symbolnum = (S_IS_DEFINED (fixP->fx_addsy)
-		 ? S_GET_TYPE (fixP->fx_addsy)
-		 : fixP->fx_addsy->sy_number);
-
-  where[4] = (r_symbolnum >> 16) & 0x0ff;
-  where[5] = (r_symbolnum >> 8) & 0x0ff;
-  where[6] = r_symbolnum & 0x0ff;
-  where[7] = (((fixP->fx_pcrel << 7) & 0x80)
-	      | ((nbytes_r_length[fixP->fx_size] << 5) & 0x60)
-	      | ((!S_IS_DEFINED (fixP->fx_addsy) << 4) & 0x10));
-}
 #endif
 
 #endif /* OBJ_AOUT or OBJ_BOUT */
@@ -7408,7 +7274,6 @@ valueT
 md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 {
 #ifdef OBJ_AOUT
-#ifdef BFD_ASSEMBLER
   /* For a.out, force the section size to be aligned.  If we don't do
      this, BFD will align it for us, but it will not write out the
      final bytes of the section.  This may be a bug in BFD, but it is
@@ -7418,7 +7283,6 @@ md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 
   align = bfd_get_section_alignment (stdoutput, segment);
   size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
-#endif
 #endif
 
   return size;
@@ -7440,34 +7304,6 @@ md_pcrel_from (fixS *fixP)
     adjust = -1;
   return fixP->fx_where + fixP->fx_frag->fr_address - adjust;
 }
-
-#ifndef BFD_ASSEMBLER
-#ifdef OBJ_COFF
-
-void
-tc_coff_symbol_emit_hook (symbolS *ignore ATTRIBUTE_UNUSED)
-{
-}
-
-int
-tc_coff_sizemachdep (fragS *frag)
-{
-  switch (frag->fr_subtype & 0x3)
-    {
-    case BYTE:
-      return 1;
-    case SHORT:
-      return 2;
-    case LONG:
-      return 4;
-    default:
-      abort ();
-      return 0;
-    }
-}
-
-#endif
-#endif
 
 #ifdef OBJ_ELF
 void

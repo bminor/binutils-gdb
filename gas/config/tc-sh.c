@@ -124,8 +124,6 @@ const pseudo_typeS md_pseudo_table[] =
   {0, 0, 0}
 };
 
-/*int md_reloc_size; */
-
 int sh_relax;		/* set if -relax seen */
 
 /* Whether -small was seen.  */
@@ -2871,9 +2869,7 @@ md_assemble (char *str)
 	}
     }
 
-#ifdef BFD_ASSEMBLER
   dwarf2_emit_insn (size);
-#endif
 }
 
 /* This routine is called each time a label definition is seen.  It
@@ -2921,24 +2917,6 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
-
-#ifdef OBJ_COFF
-#ifndef BFD_ASSEMBLER
-
-void
-tc_crawl_symbol_chain (object_headers *headers ATTRIBUTE_UNUSED)
-{
-  printf (_("call to tc_crawl_symbol_chain \n"));
-}
-
-void
-tc_headers_hook (object_headers *headers ATTRIBUTE_UNUSED)
-{
-  printf (_("call to tc_headers_hook \n"));
-}
-
-#endif
-#endif
 
 /* Various routines to kill one day.  */
 /* Equal to MAX_PRECISION in atof-ieee.c.  */
@@ -3245,8 +3223,7 @@ struct sh_count_relocs
 };
 
 /* Count the number of fixups in a section which refer to a particular
-   symbol.  When using BFD_ASSEMBLER, this is called via
-   bfd_map_over_sections.  */
+   symbol.  This is called via bfd_map_over_sections.  */
 
 static void
 sh_count_relocs (bfd *abfd ATTRIBUTE_UNUSED, segT sec, void *data)
@@ -3271,8 +3248,8 @@ sh_count_relocs (bfd *abfd ATTRIBUTE_UNUSED, segT sec, void *data)
     }
 }
 
-/* Handle the count relocs for a particular section.  When using
-   BFD_ASSEMBLER, this is called via bfd_map_over_sections.  */
+/* Handle the count relocs for a particular section.
+   This is called via bfd_map_over_sections.  */
 
 static void
 sh_frob_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec,
@@ -3302,9 +3279,6 @@ sh_frob_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec,
 	  || fix->fx_subsy != NULL
 	  || fix->fx_addnumber != 0
 	  || S_GET_SEGMENT (sym) != sec
-#if ! defined (BFD_ASSEMBLER) && defined (OBJ_COFF)
-	  || S_GET_STORAGE_CLASS (sym) == C_EXT
-#endif
 	  || S_IS_EXTERNAL (sym))
 	{
 	  as_warn_where (fix->fx_file, fix->fx_line,
@@ -3344,9 +3318,6 @@ sh_frob_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec,
 	  || fscan->fx_subsy != NULL
 	  || fscan->fx_addnumber != 0
 	  || S_GET_SEGMENT (sym) != sec
-#if ! defined (BFD_ASSEMBLER) && defined (OBJ_COFF)
-	  || S_GET_STORAGE_CLASS (sym) == C_EXT
-#endif
 	  || S_IS_EXTERNAL (sym))
 	{
 	  as_warn_where (fix->fx_file, fix->fx_line,
@@ -3358,16 +3329,7 @@ sh_frob_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec,
 	 counting the number of times we find a reference to sym.  */
       info.sym = sym;
       info.count = 0;
-#ifdef BFD_ASSEMBLER
       bfd_map_over_sections (stdoutput, sh_count_relocs, &info);
-#else
-      {
-	int iscan;
-
-	for (iscan = SEG_E0; iscan < SEG_UNKNOWN; iscan++)
-	  sh_count_relocs ((bfd *) NULL, iscan, &info);
-      }
-#endif
 
       if (info.count < 1)
 	abort ();
@@ -3402,28 +3364,14 @@ sh_frob_file (void)
   if (! sh_relax)
     return;
 
-#ifdef BFD_ASSEMBLER
   bfd_map_over_sections (stdoutput, sh_frob_section, NULL);
-#else
-  {
-    int iseg;
-
-    for (iseg = SEG_E0; iseg < SEG_UNKNOWN; iseg++)
-      sh_frob_section ((bfd *) NULL, iseg, NULL);
-  }
-#endif
 }
 
 /* Called after relaxing.  Set the correct sizes of the fragments, and
    create relocs so that md_apply_fix will fill in the correct values.  */
 
 void
-#ifdef BFD_ASSEMBLER
 md_convert_frag (bfd *headers ATTRIBUTE_UNUSED, segT seg, fragS *fragP)
-#else
-md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED, segT seg,
-		 fragS *fragP)
-#endif
 {
   int donerelax = 0;
 
@@ -3496,12 +3444,7 @@ md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED, segT seg,
 
 	/* Build a relocation to six / four bytes farther on.  */
 	subseg_change (seg, 0);
-	fix_new (fragP, fragP->fr_fix, 2,
-#ifdef BFD_ASSEMBLER
-		 section_symbol (seg),
-#else
-		 seg_info (seg)->dot,
-#endif
+	fix_new (fragP, fragP->fr_fix, 2, section_symbol (seg),
 		 fragP->fr_address + fragP->fr_fix + (delay ? 4 : 6),
 		 1, BFD_RELOC_SH_PCDISP8BY2);
 
@@ -3568,17 +3511,12 @@ md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED, segT seg,
 valueT
 md_section_align (segT seg ATTRIBUTE_UNUSED, valueT size)
 {
-#ifdef BFD_ASSEMBLER
 #ifdef OBJ_ELF
   return size;
 #else /* ! OBJ_ELF */
   return ((size + (1 << bfd_get_section_alignment (stdoutput, seg)) - 1)
 	  & (-1 << bfd_get_section_alignment (stdoutput, seg)));
 #endif /* ! OBJ_ELF */
-#else /* ! BFD_ASSEMBLER */
-  return ((size + (1 << section_alignment[(int) seg]) - 1)
-	  & (-1 << section_alignment[(int) seg]));
-#endif /* ! BFD_ASSEMBLER */
 }
 
 /* This static variable is set by s_uacons to tell sh_cons_align that
@@ -3803,7 +3741,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   long max, min;
   int shift;
 
-#ifdef BFD_ASSEMBLER
   /* A difference between two symbols, the second of which is in the
      current section, is transformed in a PC-relative relocation to
      the other symbol.  We have to adjust the relocation type here.  */
@@ -3849,24 +3786,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       && fixP->fx_addsy != NULL
       && S_IS_WEAK (fixP->fx_addsy))
     val -= S_GET_VALUE  (fixP->fx_addsy);
-#endif
 
-#ifdef BFD_ASSEMBLER
   if (SWITCH_TABLE (fixP))
     val -= S_GET_VALUE  (fixP->fx_subsy);
-#else
-  if (fixP->fx_r_type == 0)
-    {
-      if (fixP->fx_size == 2)
-	fixP->fx_r_type = BFD_RELOC_16;
-      else if (fixP->fx_size == 4)
-	fixP->fx_r_type = BFD_RELOC_32;
-      else if (fixP->fx_size == 1)
-	fixP->fx_r_type = BFD_RELOC_8;
-      else
-	abort ();
-    }
-#endif
 
   max = min = 0;
   shift = 0;
@@ -4207,8 +4129,7 @@ md_number_to_chars (char *ptr, valueT use, int nbytes)
     number_to_chars_bigendian (ptr, use, nbytes);
 }
 
-/* This version is used in obj-coff.c when not using BFD_ASSEMBLER.
-   eg for the sh-hms target.  */
+/* This version is used in obj-coff.c eg. for the sh-hms target.  */
 
 long
 md_pcrel_from (fixS *fixP)
@@ -4233,167 +4154,6 @@ md_pcrel_from_section (fixS *fixP, segT sec)
 
   return md_pcrel_from (fixP);
 }
-
-#ifdef OBJ_COFF
-
-int
-tc_coff_sizemachdep (fragS *frag)
-{
-  return md_relax_table[frag->fr_subtype].rlx_length;
-}
-
-#endif /* OBJ_COFF */
-
-#ifndef BFD_ASSEMBLER
-#ifdef OBJ_COFF
-
-/* Map BFD relocs to SH COFF relocs.  */
-
-struct reloc_map
-{
-  bfd_reloc_code_real_type bfd_reloc;
-  int sh_reloc;
-};
-
-static const struct reloc_map coff_reloc_map[] =
-{
-  { BFD_RELOC_32, R_SH_IMM32 },
-  { BFD_RELOC_16, R_SH_IMM16 },
-  { BFD_RELOC_8, R_SH_IMM8 },
-  { BFD_RELOC_SH_PCDISP8BY2, R_SH_PCDISP8BY2 },
-  { BFD_RELOC_SH_PCDISP12BY2, R_SH_PCDISP },
-  { BFD_RELOC_SH_IMM4, R_SH_IMM4 },
-  { BFD_RELOC_SH_IMM4BY2, R_SH_IMM4BY2 },
-  { BFD_RELOC_SH_IMM4BY4, R_SH_IMM4BY4 },
-  { BFD_RELOC_SH_IMM8, R_SH_IMM8 },
-  { BFD_RELOC_SH_IMM8BY2, R_SH_IMM8BY2 },
-  { BFD_RELOC_SH_IMM8BY4, R_SH_IMM8BY4 },
-  { BFD_RELOC_SH_PCRELIMM8BY2, R_SH_PCRELIMM8BY2 },
-  { BFD_RELOC_SH_PCRELIMM8BY4, R_SH_PCRELIMM8BY4 },
-  { BFD_RELOC_8_PCREL, R_SH_SWITCH8 },
-  { BFD_RELOC_SH_SWITCH16, R_SH_SWITCH16 },
-  { BFD_RELOC_SH_SWITCH32, R_SH_SWITCH32 },
-  { BFD_RELOC_SH_USES, R_SH_USES },
-  { BFD_RELOC_SH_COUNT, R_SH_COUNT },
-  { BFD_RELOC_SH_ALIGN, R_SH_ALIGN },
-  { BFD_RELOC_SH_CODE, R_SH_CODE },
-  { BFD_RELOC_SH_DATA, R_SH_DATA },
-  { BFD_RELOC_SH_LABEL, R_SH_LABEL },
-  { BFD_RELOC_UNUSED, 0 }
-};
-
-/* Adjust a reloc for the SH.  This is similar to the generic code,
-   but does some minor tweaking.  */
-
-void
-sh_coff_reloc_mangle (segment_info_type *seg, fixS *fix,
-		      struct internal_reloc *intr, unsigned int paddr)
-{
-  symbolS *symbol_ptr = fix->fx_addsy;
-  symbolS *dot;
-
-  intr->r_vaddr = paddr + fix->fx_frag->fr_address + fix->fx_where;
-
-  if (! SWITCH_TABLE (fix))
-    {
-      const struct reloc_map *rm;
-
-      for (rm = coff_reloc_map; rm->bfd_reloc != BFD_RELOC_UNUSED; rm++)
-	if (rm->bfd_reloc == (bfd_reloc_code_real_type) fix->fx_r_type)
-	  break;
-      if (rm->bfd_reloc == BFD_RELOC_UNUSED)
-	as_bad_where (fix->fx_file, fix->fx_line,
-		      _("Can not represent %s relocation in this object file format"),
-		      bfd_get_reloc_code_name (fix->fx_r_type));
-      intr->r_type = rm->sh_reloc;
-      intr->r_offset = 0;
-    }
-  else
-    {
-      know (sh_relax);
-
-      if (fix->fx_r_type == BFD_RELOC_16)
-	intr->r_type = R_SH_SWITCH16;
-      else if (fix->fx_r_type == BFD_RELOC_8)
-	intr->r_type = R_SH_SWITCH8;
-      else if (fix->fx_r_type == BFD_RELOC_32)
-	intr->r_type = R_SH_SWITCH32;
-      else
-	abort ();
-
-      /* For a switch reloc, we set r_offset to the difference between
-         the reloc address and the subtrahend.  When the linker is
-         doing relaxing, it can use the determine the starting and
-         ending points of the switch difference expression.  */
-      intr->r_offset = intr->r_vaddr - S_GET_VALUE (fix->fx_subsy);
-    }
-
-  /* PC relative relocs are always against the current section.  */
-  if (symbol_ptr == NULL)
-    {
-      switch (fix->fx_r_type)
-	{
-	case BFD_RELOC_SH_PCRELIMM8BY2:
-	case BFD_RELOC_SH_PCRELIMM8BY4:
-	case BFD_RELOC_SH_PCDISP8BY2:
-	case BFD_RELOC_SH_PCDISP12BY2:
-	case BFD_RELOC_SH_USES:
-	  symbol_ptr = seg->dot;
-	  break;
-	default:
-	  break;
-	}
-    }
-
-  if (fix->fx_r_type == BFD_RELOC_SH_USES)
-    {
-      /* We can't store the offset in the object file, since this
-	 reloc does not take up any space, so we store it in r_offset.
-	 The fx_addnumber field was set in md_apply_fix.  */
-      intr->r_offset = fix->fx_addnumber;
-    }
-  else if (fix->fx_r_type == BFD_RELOC_SH_COUNT)
-    {
-      /* We can't store the count in the object file, since this reloc
-         does not take up any space, so we store it in r_offset.  The
-         fx_offset field was set when the fixup was created in
-         sh_coff_frob_file.  */
-      intr->r_offset = fix->fx_offset;
-      /* This reloc is always absolute.  */
-      symbol_ptr = NULL;
-    }
-  else if (fix->fx_r_type == BFD_RELOC_SH_ALIGN)
-    {
-      /* Store the alignment in the r_offset field.  */
-      intr->r_offset = fix->fx_offset;
-      /* This reloc is always absolute.  */
-      symbol_ptr = NULL;
-    }
-  else if (fix->fx_r_type == BFD_RELOC_SH_CODE
-	   || fix->fx_r_type == BFD_RELOC_SH_DATA
-	   || fix->fx_r_type == BFD_RELOC_SH_LABEL)
-    {
-      /* These relocs are always absolute.  */
-      symbol_ptr = NULL;
-    }
-
-  /* Turn the segment of the symbol into an offset.  */
-  if (symbol_ptr != NULL)
-    {
-      dot = segment_info[S_GET_SEGMENT (symbol_ptr)].dot;
-      if (dot != NULL)
-	intr->r_symndx = dot->sy_number;
-      else
-	intr->r_symndx = symbol_ptr->sy_number;
-    }
-  else
-    intr->r_symndx = -1;
-}
-
-#endif /* OBJ_COFF */
-#endif /* ! BFD_ASSEMBLER */
-
-#ifdef BFD_ASSEMBLER
 
 /* Create a reloc.  */
 
@@ -4610,4 +4370,3 @@ sh_regname_to_dw2regnum (const char *regname)
   return regnum;
 }
 #endif /* OBJ_ELF */
-#endif /* BFD_ASSEMBLER */

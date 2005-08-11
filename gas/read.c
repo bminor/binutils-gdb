@@ -72,7 +72,6 @@ die horribly;
 #endif
 
 #ifndef LEX_AT
-/* The m88k unfortunately uses @ as a label beginner.  */
 #define LEX_AT 0
 #endif
 
@@ -98,7 +97,6 @@ die horribly;
 #endif
 
 #ifndef LEX_DOLLAR
-/* The a29k assembler does not permits labels to start with $.  */
 #define LEX_DOLLAR 3
 #endif
 
@@ -246,7 +244,6 @@ read_begin (void)
 }
 
 #ifndef TC_ADDRESS_BYTES
-#ifdef BFD_ASSEMBLER
 #define TC_ADDRESS_BYTES address_bytes
 
 static inline int
@@ -260,7 +257,6 @@ address_bytes (void)
   n += 1;
   return n;
 }
-#endif
 #endif
 
 /* Set up pseudo-op tables.  */
@@ -823,8 +819,8 @@ read_a_source_file (char *name)
 #endif
 		  if (NO_PSEUDO_DOT || flag_m68k_mri)
 		    {
-		      /* The MRI assembler and the m88k use pseudo-ops
-			 without a period.  */
+		      /* The MRI assembler uses pseudo-ops without
+			 a period.  */
 		      pop = (pseudo_typeS *) hash_find (po_hash, s);
 		      if (pop != NULL && pop->poc_handler == NULL)
 			pop = NULL;
@@ -1265,11 +1261,7 @@ do_align (int n, char *fill, int len, int max)
    fill pattern.  BYTES_P is non-zero if the alignment value should be
    interpreted as the byte boundary, rather than the power of 2.  */
 
-#ifdef BFD_ASSEMBLER
 #define ALIGN_LIMIT (stdoutput->arch_info->bits_per_address - 1)
-#else
-#define ALIGN_LIMIT 15
-#endif
 
 static void
 s_align (int arg, int bytes_p)
@@ -1449,9 +1441,7 @@ s_comm_internal (int param,
 
   temp = get_absolute_expr (&exp);
   size = temp;
-#ifdef BFD_ASSEMBLER
   size &= ((offsetT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
-#endif
   if (exp.X_op == O_absent)
     {
       as_bad (_("missing size expression"));
@@ -2015,7 +2005,6 @@ s_linkonce (int ignore ATTRIBUTE_UNUSED)
 #ifdef obj_handle_link_once
   obj_handle_link_once (type);
 #else /* ! defined (obj_handle_link_once) */
-#ifdef BFD_ASSEMBLER
   {
     flagword flags;
 
@@ -2045,9 +2034,6 @@ s_linkonce (int ignore ATTRIBUTE_UNUSED)
       as_bad (_("bfd_set_section_flags: %s"),
 	      bfd_errmsg (bfd_get_error ()));
   }
-#else /* ! defined (BFD_ASSEMBLER) */
-  as_warn (_(".linkonce is not supported for this object file format"));
-#endif /* ! defined (BFD_ASSEMBLER) */
 #endif /* ! defined (obj_handle_link_once) */
 
   demand_empty_rest_of_line ();
@@ -2070,11 +2056,9 @@ bss_alloc (symbolS *symbolP, addressT size, int align)
 	{
 	  bss_seg = subseg_new (".sbss", 1);
 	  seg_info (bss_seg)->bss = 1;
-#ifdef BFD_ASSEMBLER
 	  if (!bfd_set_section_flags (stdoutput, bss_seg, SEC_ALLOC))
 	    as_warn (_("error setting flags for \".sbss\": %s"),
 		     bfd_errmsg (bfd_get_error ()));
-#endif
 	}
     }
 #endif
@@ -2487,8 +2471,7 @@ s_org (int ignore ATTRIBUTE_UNUSED)
    called by the obj-format routine which handles section changing
    when in MRI mode.  It will create a new section, and return it.  It
    will set *TYPE to the section type: one of 'C' (code), 'D' (data),
-   'M' (mixed), or 'R' (romable).  If BFD_ASSEMBLER is defined, the
-   flags will be set in the section.  */
+   'M' (mixed), or 'R' (romable).  The flags will be set in the section.  */
 
 void
 s_mri_sect (char *type ATTRIBUTE_UNUSED)
@@ -2542,7 +2525,6 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 	as_bad (_("unrecognized section type"));
       ++input_line_pointer;
 
-#ifdef BFD_ASSEMBLER
       {
 	flagword flags;
 
@@ -2561,7 +2543,6 @@ s_mri_sect (char *type ATTRIBUTE_UNUSED)
 		       bfd_errmsg (bfd_get_error ()));
 	  }
       }
-#endif
     }
 
   /* Ignore the HP type.  */
@@ -3201,9 +3182,6 @@ pseudo_set (symbolS *symbolP)
 {
   expressionS exp;
   segT seg;
-#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
-  int ext;
-#endif /* OBJ_AOUT or OBJ_BOUT */
 
   know (symbolP);		/* NULL pointer is logic error.  */
 
@@ -3235,9 +3213,6 @@ pseudo_set (symbolS *symbolP)
       as_bad ("attempt to set value of section symbol");
       return;
     }
-#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
-  ext = S_IS_EXTERNAL (symbolP);
-#endif /* OBJ_AOUT or OBJ_BOUT */
 
   switch (exp.X_op)
     {
@@ -3294,13 +3269,6 @@ pseudo_set (symbolS *symbolP)
       set_zero_frag (symbolP);
       break;
     }
-
-#if (defined (OBJ_AOUT) || defined (OBJ_BOUT)) && ! defined (BFD_ASSEMBLER)
-  if (ext)
-    S_SET_EXTERNAL (symbolP);
-  else
-    S_CLEAR_EXTERNAL (symbolP);
-#endif /* OBJ_AOUT or OBJ_BOUT */
 }
 
 /*			cons()
@@ -3720,16 +3688,8 @@ emit_expr (expressionS *exp, unsigned int nbytes)
     {
       memset (p, 0, nbytes);
 
-      /* Now we need to generate a fixS to record the symbol value.
-	 This is easy for BFD.  For other targets it can be more
-	 complex.  For very complex cases (currently, the HPPA and
-	 NS32K), you can define TC_CONS_FIX_NEW to do whatever you
-	 want.  For simpler cases, you can define TC_CONS_RELOC to be
-	 the name of the reloc code that should be stored in the fixS.
-	 If neither is defined, the code uses NO_RELOC if it is
-	 defined, and otherwise uses 0.  */
+      /* Now we need to generate a fixS to record the symbol value.  */
 
-#ifdef BFD_ASSEMBLER
 #ifdef TC_CONS_FIX_NEW
       TC_CONS_FIX_NEW (frag_now, p - frag_now->fr_literal, nbytes, exp);
 #else
@@ -3759,24 +3719,6 @@ emit_expr (expressionS *exp, unsigned int nbytes)
 		     0, r);
       }
 #endif
-#else
-#ifdef TC_CONS_FIX_NEW
-      TC_CONS_FIX_NEW (frag_now, p - frag_now->fr_literal, nbytes, exp);
-#else
-      /* Figure out which reloc number to use.  Use TC_CONS_RELOC if
-	 it is defined, otherwise use NO_RELOC if it is defined,
-	 otherwise use 0.  */
-#ifndef TC_CONS_RELOC
-#ifdef NO_RELOC
-#define TC_CONS_RELOC NO_RELOC
-#else
-#define TC_CONS_RELOC 0
-#endif
-#endif
-      fix_new_exp (frag_now, p - frag_now->fr_literal, (int) nbytes, exp, 0,
-		   TC_CONS_RELOC);
-#endif /* TC_CONS_FIX_NEW */
-#endif /* BFD_ASSEMBLER */
     }
 }
 
@@ -5207,10 +5149,7 @@ do_s_func (int end_p, const char *default_prefix)
 	    asprintf (&label, "%s%s", default_prefix, name);
 	  else
 	    {
-	      char leading_char = 0;
-#ifdef BFD_ASSEMBLER
-	      leading_char = bfd_get_symbol_leading_char (stdoutput);
-#endif
+	      char leading_char = bfd_get_symbol_leading_char (stdoutput);
 	      /* Missing entry point, use function's name with the leading
 		 char prepended.  */
 	      if (leading_char)

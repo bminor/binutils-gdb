@@ -61,33 +61,10 @@ struct fix;
 #ifndef COFF_MAGIC
 #define COFF_MAGIC MC68MAGIC
 #endif
-#define BFD_ARCH bfd_arch_m68k /* for non-BFD_ASSEMBLER */
-#define TARGET_ARCH bfd_arch_m68k /* BFD_ASSEMBLER */
-#define COFF_FLAGS F_AR32W
-#define TC_COUNT_RELOC(x) ((x)->fx_addsy||(x)->fx_subsy)
-
-#define TC_COFF_FIX2RTYPE(FIX) tc_coff_fix2rtype(FIX)
-#define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
-extern int tc_coff_sizemachdep (struct frag *);
-#ifdef TE_SUN3
-/* This variable contains the value to write out at the beginning of
-   the a.out file.  The 2<<16 means that this is a 68020 file instead
-   of an old-style 68000 file */
-
-#define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE (2<<16|OMAGIC);	/* Magic byte for file header */
-#endif /* TE_SUN3 */
-
-#ifndef AOUT_MACHTYPE
-#define AOUT_MACHTYPE m68k_aout_machtype
-extern int m68k_aout_machtype;
-#endif
+#define TARGET_ARCH bfd_arch_m68k
 
 #define tc_comment_chars m68k_comment_chars
 extern const char *m68k_comment_chars;
-
-#define tc_crawl_symbol_chain(a)	{;}	/* not used */
-#define tc_headers_hook(a)		{;}	/* not used */
-#define tc_aout_pre_write_hook(x)	{;}	/* not used */
 
 #define LISTING_WORD_SIZE 2	/* A word is 2 bytes */
 #define LISTING_LHS_WIDTH 2	/* One word on the first line */
@@ -101,10 +78,6 @@ extern const char *m68k_comment_chars;
 
 #if !defined (REGISTER_PREFIX_OPTIONAL)
 #if defined (M68KCOFF) || defined (OBJ_ELF)
-#ifndef BFD_ASSEMBLER
-#define LOCAL_LABEL(name) (name[0] == '.' \
-			   && (name[1] == 'L' || name[1] == '.'))
-#endif /* ! BFD_ASSEMBLER */
 #define REGISTER_PREFIX_OPTIONAL 0
 #else /* ! (COFF || ELF) */
 #define REGISTER_PREFIX_OPTIONAL 1
@@ -120,11 +93,6 @@ extern const char *m68k_comment_chars;
 #define tc_canonicalize_symbol_name(s) ((*(s) == '~' ? *(s) = '.' : '.'), s)
 /* On the Delta, dots are not required before pseudo-ops.  */
 #define NO_PSEUDO_DOT 1
-#ifndef BFD_ASSEMBLER
-#undef LOCAL_LABEL
-#define LOCAL_LABEL(name) \
-  (name[0] == '.' || (name[0] == 'L' && name[1] == '%'))
-#endif
 #endif
 
 extern void m68k_mri_mode_change (int);
@@ -140,8 +108,6 @@ extern void m68k_flush_pending_output (void);
 #define md_flush_pending_output() m68k_flush_pending_output ()
 
 extern void m68k_frob_symbol (symbolS *);
-
-#ifdef BFD_ASSEMBLER
 
 #define tc_frob_symbol(sym,punt)				\
 do								\
@@ -176,20 +142,6 @@ extern int tc_m68k_fix_adjustable (struct fix *);
 #define elf_tc_final_processing m68k_elf_final_processing
 extern void m68k_elf_final_processing (void);
 #endif
-
-#else /* ! BFD_ASSEMBLER */
-
-#define tc_frob_coff_symbol(sym) m68k_frob_symbol (sym)
-
-#define NO_RELOC          0
-#define RELAX_RELOC_ABS8  0
-#define RELAX_RELOC_ABS16 0
-#define RELAX_RELOC_ABS32 0
-#define RELAX_RELOC_PC8   0
-#define RELAX_RELOC_PC16  0
-#define RELAX_RELOC_PC32  0
-
-#endif /* ! BFD_ASSEMBLER */
 
 #define DIFF_EXPR_OK
 

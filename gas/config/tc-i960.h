@@ -52,21 +52,12 @@
  */
 
 /* tailor gas */
-#define SYMBOLS_NEED_BACKPOINTERS
 #define LOCAL_LABELS_FB 1
 #define BITFIELD_CONS_EXPRESSIONS
 
 /* tailor the coff format */
-#define BFD_ARCH				bfd_arch_i960
-#define COFF_FLAGS				F_AR32WR
 #define COFF_MAGIC				I960ROMAGIC
-#define OBJ_COFF_SECTION_HEADER_HAS_ALIGNMENT
 #define OBJ_COFF_MAX_AUXENTRIES			(2)
-#define TC_COUNT_RELOC(FIX)			(!(FIX)->fx_done)
-#define TC_COFF_FIX2RTYPE(FIX)			tc_coff_fix2rtype (FIX)
-#define TC_COFF_SIZEMACHDEP(FRAGP)		tc_coff_sizemachdep (FRAGP)
-#define TC_COFF_SET_MACHINE(HDRS)		tc_headers_hook (HDRS)
-extern int tc_coff_sizemachdep PARAMS ((struct frag *));
 
 /* MEANING OF 'n_other' in the symbol record.
  *
@@ -188,7 +179,6 @@ extern struct symbol *tc_get_bal_of_call PARAMS ((symbolS *));
 
 extern void i960_handle_align PARAMS ((struct frag *));
 #define HANDLE_ALIGN(FRAG)	i960_handle_align (FRAG)
-#define NEED_FX_R_TYPE
 #define NO_RELOC -1
 
 #define md_operand(x)

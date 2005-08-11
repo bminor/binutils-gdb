@@ -24,10 +24,6 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 
-#ifndef BFD_ASSEMBLER
- #error D10V support requires BFD_ASSEMBLER
-#endif
-
 /* The target BFD architecture.  */
 #define TARGET_ARCH bfd_arch_d10v
 

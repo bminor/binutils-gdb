@@ -1,5 +1,5 @@
-/* as.c - GAS literal pool management.
-   Copyright 1994, 2000 Free Software Foundation, Inc.
+/* literal.c - GAS literal pool management.
+   Copyright 1994, 2000, 2005 Free Software Foundation, Inc.
    Written by Ken Raeburn (raeburn@cygnus.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -39,7 +39,7 @@
 #include "as.h"
 #include "subsegs.h"
 
-#if defined (BFD_ASSEMBLER) && defined (NEED_LITERAL_POOL)
+#ifdef NEED_LITERAL_POOL
 
 valueT
 add_to_literal_pool (sym, addend, sec, size)
@@ -92,4 +92,4 @@ add_to_literal_pool (sym, addend, sec, size)
   seginfo->literal_pool_size += size;
   return offset;
 }
-#endif /* BFD_ASSEMBLER */
+#endif

@@ -47,10 +47,8 @@ struct frchain			/* control building of a frag chain */
   struct frchain *frch_next;	/* next in chain of struct frchain-s */
   segT frch_seg;		/* SEG_TEXT or SEG_DATA.  */
   subsegT frch_subseg;		/* subsegment number of this chain */
-#ifdef BFD_ASSEMBLER
   fixS *fix_root;		/* Root of fixups for this subsegment.  */
   fixS *fix_tail;		/* Last fixup for this subsegment.  */
-#endif
   struct obstack frch_obstack;	/* for objects in this frag chain */
   fragS *frch_frag_now;		/* frag_now for this subsegment */
 };
@@ -77,30 +75,22 @@ typedef struct segment_info_struct {
 
   int user_stuff;
 
-  /* Fixups for this segment.  If BFD_ASSEMBLER, this is only valid
-     after the frchains are run together.  */
+  /* Fixups for this segment.  This is only valid after the frchains
+     are run together.  */
   fixS *fix_root;
   fixS *fix_tail;
-
-#if defined (MANY_SEGMENTS) && !defined (BFD_ASSEMBLER)
-  struct internal_scnhdr scnhdr;
-  enum linkonce_type linkonce;
-  const char *name;
-#endif
 
   symbolS *dot;
 
   struct lineno_list *lineno_list_head;
   struct lineno_list *lineno_list_tail;
 
-#ifdef BFD_ASSEMBLER
   /* Which BFD section does this gas segment correspond to?  */
   asection *bfd_section;
 
   /* NULL, or pointer to the gas symbol that is the section symbol for
      this section.  sym->bsym and bfd_section->symbol should be the same.  */
   symbolS *sym;
-#endif
 
   union {
     /* Current size of section holding stabs strings.  */
@@ -119,30 +109,7 @@ typedef struct segment_info_struct {
 #endif
 } segment_info_type;
 
-#ifdef BFD_ASSEMBLER
-
 extern segment_info_type *seg_info (segT);
 extern symbolS *section_symbol (segT);
-
-#else /* ! BFD_ASSEMBLER */
-
-#ifdef MANY_SEGMENTS
-
-extern segment_info_type segment_info[];
-
-#define seg_info(SEC)	(&segment_info[SEC])
-
-#else
-
-/* Sentinel for frchain crawling.  Points to the 1st data-segment
-   frchain.  (Which is pointed to by the last text-segment frchain.) */
-extern frchainS *data0_frchainP;
-extern frchainS *bss0_frchainP;
-
-#define seg_info(S)	(abort (), (segment_info_type *) 0)
-
-#endif
-
-#endif /* ! BFD_ASSEMBLER */
 
 extern void subsegs_print_statistics (FILE *);

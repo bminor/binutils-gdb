@@ -1,5 +1,5 @@
 /* tc-mn10300.h -- Header file for tc-mn10300.c.
-   Copyright 1996, 1997, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -22,10 +22,6 @@
 #define TC_MN10300
 
 #define TARGET_BYTES_BIG_ENDIAN 0
-
-#ifndef BFD_ASSEMBLER
- #error MN10300 support requires BFD_ASSEMBLER
-#endif
 
 #define DIFF_EXPR_OK
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"

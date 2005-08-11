@@ -25,10 +25,7 @@
 #include "as.h"
 #include "subsegs.h"
 #include "bfd.h"
-
-#ifdef BFD_ASSEMBLER
 #include "dwarf2dbg.h"
-#endif
 
 #define DEFINE_TABLE
 #define h8_opcodes ops
@@ -77,10 +74,8 @@ h8300hmode (int arg ATTRIBUTE_UNUSED)
 {
   Hmode = 1;
   Smode = 0;
-#ifdef BFD_ASSEMBLER
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300h))
     as_warn (_("could not set architecture and machine"));
-#endif
 }
 
 static void
@@ -88,10 +83,8 @@ h8300smode (int arg ATTRIBUTE_UNUSED)
 {
   Smode = 1;
   Hmode = 1;
-#ifdef BFD_ASSEMBLER
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300s))
     as_warn (_("could not set architecture and machine"));
-#endif
 }
 
 static void
@@ -100,10 +93,8 @@ h8300hnmode (int arg ATTRIBUTE_UNUSED)
   Hmode = 1;
   Smode = 0;
   Nmode = 1;
-#ifdef BFD_ASSEMBLER
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300hn))
     as_warn (_("could not set architecture and machine"));
-#endif
 }
 
 static void
@@ -112,10 +103,8 @@ h8300snmode (int arg ATTRIBUTE_UNUSED)
   Smode = 1;
   Hmode = 1;
   Nmode = 1;
-#ifdef BFD_ASSEMBLER
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300sn))
     as_warn (_("could not set architecture and machine"));
-#endif
 }
 
 static void
@@ -124,10 +113,8 @@ h8300sxmode (int arg ATTRIBUTE_UNUSED)
   Smode = 1;
   Hmode = 1;
   SXmode = 1;
-#ifdef BFD_ASSEMBLER
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300sx))
     as_warn (_("could not set architecture and machine"));
-#endif
 }
 
 static void
@@ -137,10 +124,8 @@ h8300sxnmode (int arg ATTRIBUTE_UNUSED)
   Hmode = 1;
   SXmode = 1;
   Nmode = 1;
-#ifdef BFD_ASSEMBLER
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300sxn))
     as_warn (_("could not set architecture and machine"));
-#endif
 }
 
 static void
@@ -184,8 +169,6 @@ const pseudo_typeS md_pseudo_table[] =
   {0, 0, 0}
 };
 
-const int md_reloc_size;
-
 const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant
@@ -208,10 +191,8 @@ md_begin (void)
   char prev_buffer[100];
   int idx = 0;
 
-#ifdef BFD_ASSEMBLER
   if (!bfd_set_arch_mach (stdoutput, bfd_arch_h8300, bfd_mach_h8300))
     as_warn (_("could not set architecture and machine"));
-#endif
 
   opcode_hash_control = hash_new ();
   prev_buffer[0] = 0;
@@ -2017,32 +1998,14 @@ md_assemble (char *str)
 
   build_bytes (instruction, operand);
 
-#ifdef BFD_ASSEMBLER
   dwarf2_emit_insn (instruction->length);
-#endif
 }
-
-#ifndef BFD_ASSEMBLER
-void
-tc_crawl_symbol_chain (object_headers *headers ATTRIBUTE_UNUSED)
-{
-  printf (_("call to tc_crawl_symbol_chain \n"));
-}
-#endif
 
 symbolS *
 md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
-
-#ifndef BFD_ASSEMBLER
-void
-tc_headers_hook (object_headers *headers ATTRIBUTE_UNUSED)
-{
-  printf (_("call to tc_headers_hook \n"));
-}
-#endif
 
 /* Various routines to kill one day */
 /* Equal to MAX_PRECISION in atof-ieee.c */
@@ -2132,12 +2095,7 @@ tc_aout_fix_to_chars (void)
 }
 
 void
-md_convert_frag (
-#ifdef BFD_ASSEMBLER
-		 bfd *headers ATTRIBUTE_UNUSED,
-#else
-		 object_headers *headers ATTRIBUTE_UNUSED,
-#endif
+md_convert_frag (bfd *headers ATTRIBUTE_UNUSED,
 		 segT seg ATTRIBUTE_UNUSED,
 		 fragS *fragP ATTRIBUTE_UNUSED)
 {
@@ -2145,22 +2103,12 @@ md_convert_frag (
   abort ();
 }
 
-#ifdef BFD_ASSEMBLER
 valueT
 md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
   return ((size + (1 << align) - 1) & (-1 << align));
 }
-#else
-valueT
-md_section_align (segT seg, valueT size)
-{
-  return ((size + (1 << section_alignment[(int) seg]) - 1)
-	  & (-1 << section_alignment[(int) seg]));
-}
-#endif
-
 
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
@@ -2212,66 +2160,6 @@ md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
   abort ();
 }
 
-#ifndef BFD_ASSEMBLER
-void
-tc_reloc_mangle (fixS *fix_ptr, struct internal_reloc *intr, bfd_vma base)
-{
-  symbolS *symbol_ptr;
-
-  symbol_ptr = fix_ptr->fx_addsy;
-
-  /* If this relocation is attached to a symbol then it's ok
-     to output it.  */
-  if (fix_ptr->fx_r_type == TC_CONS_RELOC)
-    {
-      /* cons likes to create reloc32's whatever the size of the reloc..
-       */
-      switch (fix_ptr->fx_size)
-	{
-	case 4:
-	  intr->r_type = R_RELLONG;
-	  break;
-	case 2:
-	  intr->r_type = R_RELWORD;
-	  break;
-	case 1:
-	  intr->r_type = R_RELBYTE;
-	  break;
-	default:
-	  abort ();
-	}
-    }
-  else
-    {
-      intr->r_type = fix_ptr->fx_r_type;
-    }
-
-  intr->r_vaddr = fix_ptr->fx_frag->fr_address + fix_ptr->fx_where + base;
-  intr->r_offset = fix_ptr->fx_offset;
-
-  if (symbol_ptr)
-    {
-      if (symbol_ptr->sy_number != -1)
-	intr->r_symndx = symbol_ptr->sy_number;
-      else
-	{
-	  symbolS *segsym;
-
-	  /* This case arises when a reference is made to `.'.  */
-	  segsym = seg_info (S_GET_SEGMENT (symbol_ptr))->dot;
-	  if (segsym == NULL)
-	    intr->r_symndx = -1;
-	  else
-	    {
-	      intr->r_symndx = segsym->sy_number;
-	      intr->r_offset += S_GET_VALUE (symbol_ptr);
-	    }
-	}
-    }
-  else
-    intr->r_symndx = -1;
-}
-#else /* BFD_ASSEMBLER */
 arelent *
 tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
@@ -2313,4 +2201,3 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   return rel;
 }
-#endif

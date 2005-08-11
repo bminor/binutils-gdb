@@ -31,10 +31,8 @@
 
 #define TARGET_FORMAT "elf32-crx"
 #define TARGET_ARCH   bfd_arch_crx
-#define BFD_ARCH      bfd_arch_crx
 
 #define WORKING_DOT_WORD
-#define NEED_FX_R_TYPE
 #define LOCAL_LABEL_PREFIX '.'
 
 #define md_undefined_symbol(s)	0

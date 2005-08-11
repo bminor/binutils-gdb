@@ -856,7 +856,6 @@ Optional Features:
   --enable-static=PKGS  build static libraries default=yes
   --enable-fast-install=PKGS  optimize for fast installation default=yes
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --enable-bfd-assembler  use BFD back end for writing object files
     targets            alternative target configurations besides the primary
   --enable-commonbfdlib   build shared BFD/opcodes/libiberty library
   --enable-werror    treat compile warnings as errors
@@ -3812,7 +3811,7 @@ test x"$pic_mode" = xno && libtool_flags="$libtool_flags --prefer-non-pic"
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3815 "configure"' > conftest.$ac_ext
+  echo '#line 3814 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4053,18 +4052,7 @@ exec 5>>./config.log
 
 
 
-user_bfd_gas=
-# Check whether --enable-bfd-assembler or --disable-bfd-assembler was given.
-if test "${enable_bfd_assembler+set}" = set; then
-  enableval="$enable_bfd_assembler"
-  case "${enableval}" in
-  yes) need_bfd=yes user_bfd_gas=yes ;;
-  no)  user_bfd_gas=no ;;
-  *)   { { echo "$as_me:$LINENO: error: bad value ${enableval} given for bfd-assembler option" >&5
-echo "$as_me: error: bad value ${enableval} given for bfd-assembler option" >&2;}
-   { (exit 1); exit 1; }; } ;;
-esac
-fi; # Check whether --enable-targets or --disable-targets was given.
+# Check whether --enable-targets or --disable-targets was given.
 if test "${enable_targets+set}" = set; then
   enableval="$enable_targets"
   case "${enableval}" in
@@ -4648,10 +4636,6 @@ _ACEOF
 	*opcodes*) shared_opcodes=true ;;
 	*) shared_opcodes=false ;;
 	esac
-	if test "${shared_opcodes}" = "true"; then
-	  # A shared libopcodes must be linked against libbfd.
-	  need_bfd=yes
-	fi
 	;;
     esac
 
@@ -4730,17 +4714,8 @@ _ACEOF
 # See if we really can support this configuration with the emulation code.
 
     if test $this_target = $target ; then
-      primary_bfd_gas=$bfd_gas
       obj_format=$fmt
       te_file=$em
-
-      if test $bfd_gas = no ; then
-	# Can't support other configurations this way.
-	break
-      fi
-    elif test $bfd_gas = no ; then
-      # Can't support this configuration.
-      break
     fi
 
 # From target name and format, produce a list of supported emulations.
@@ -4841,28 +4816,6 @@ echo "$as_me: error: GAS does not have support for object file format ${obj_form
    { (exit 1); exit 1; }; }
 fi
 
-case ${user_bfd_gas}-${primary_bfd_gas} in
-  yes-yes | no-no)
-    # We didn't override user's choice.
-    ;;
-  no-yes)
-    { echo "$as_me:$LINENO: WARNING: Use of BFD is required for ${target}; overriding config options." >&5
-echo "$as_me: WARNING: Use of BFD is required for ${target}; overriding config options." >&2;}
-    ;;
-  no-preferred)
-    primary_bfd_gas=no
-    ;;
-  *-preferred)
-    primary_bfd_gas=yes
-    ;;
-  yes-*)
-    primary_bfd_gas=yes
-    ;;
-  -*)
-    # User specified nothing.
-    ;;
-esac
-
 # Some COFF configurations want these random other flags set.
 case ${obj_format} in
   coff)
@@ -4887,8 +4840,8 @@ _ACEOF
 esac
 
 # Getting this done right is going to be a bitch.  Each configuration specified
-# with --enable-targets=... should be checked for environment, format, cpu, and
-# bfd_gas setting.
+# with --enable-targets=... should be checked for environment, format, cpu
+# setting.
 #
 # For each configuration, the necessary object file support code must be linked
 # in.  This might be only one, it might be up to four.  The necessary emulation
@@ -4991,11 +4944,6 @@ cat >>confdefs.h <<\_ACEOF
 #define OBJ_MAYBE_GENERIC 1
 _ACEOF
  ;;
-      hp300)
-cat >>confdefs.h <<\_ACEOF
-#define OBJ_MAYBE_HP300 1
-_ACEOF
-   ;;
       ieee)
 cat >>confdefs.h <<\_ACEOF
 #define OBJ_MAYBE_IEEE 1
@@ -5038,16 +4986,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in
-  yes-*-coff)	need_bfd=yes ;;
-  no-*-coff)	need_bfd=yes
-
-cat >>confdefs.h <<\_ACEOF
-#define MANY_SEGMENTS 1
-_ACEOF
- ;;
-esac
-
 reject_dev_configs=yes
 
 case ${reject_dev_configs}-${dev} in
@@ -5064,15 +5002,6 @@ esac
 
 
 
-case "${primary_bfd_gas}" in
-  yes)
-cat >>confdefs.h <<\_ACEOF
-#define BFD_ASSEMBLER 1
-_ACEOF
-
-	need_bfd=yes ;;
-esac
-
 # do we need the opcodes library?
 case "${need_opcodes}" in
 yes)
@@ -5080,13 +5009,9 @@ yes)
   ;;
 esac
 
-case "${need_bfd}" in
-yes)
-  BFDLIB=../bfd/libbfd.la
-  BFDVER_H=../bfd/bfdver.h
-  ALL_OBJ_DEPS="$ALL_OBJ_DEPS"' ../bfd/bfd.h $(INCDIR)/symcat.h'
-  ;;
-esac
+BFDLIB=../bfd/libbfd.la
+BFDVER_H=../bfd/bfdver.h
+ALL_OBJ_DEPS="$ALL_OBJ_DEPS"' ../bfd/bfd.h $(INCDIR)/symcat.h'
 
 
 

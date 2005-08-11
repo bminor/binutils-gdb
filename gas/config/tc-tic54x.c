@@ -5549,17 +5549,6 @@ md_pcrel_from (fixP)
   return 0;
 }
 
-#if defined OBJ_COFF
-
-short
-tc_coff_fix2rtype (fixP)
-     fixS *fixP;
-{
-  return (fixP->fx_r_type);
-}
-
-#endif /* OBJ_COFF */
-
 /* Mostly little-endian, but longwords (4 octets) get MS word stored
    first.  */
 

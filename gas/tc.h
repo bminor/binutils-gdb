@@ -25,12 +25,9 @@
 
 extern const pseudo_typeS md_pseudo_table[];
 
-extern const int md_reloc_size;	/* Size of a relocation record.  */
-
 char * md_atof (int, char *, int *);
 int    md_parse_option (int, char *);
 void   md_show_usage (FILE *);
-short  tc_coff_fix2rtype (fixS *);
 void   md_assemble (char *);
 void   md_begin (void);
 void   md_number_to_chars (char *, valueT, int);
@@ -69,30 +66,11 @@ valueT  md_section_align (segT, valueT);
 symbolS *md_undefined_symbol (char *);
 #endif
 
-#ifdef BFD_ASSEMBLER
-
 #ifndef md_convert_frag
 void    md_convert_frag (bfd *, segT, fragS *);
-#endif
-#ifndef tc_headers_hook
-void    tc_headers_hook (segT *, fixS *);
 #endif
 #ifndef RELOC_EXPANSION_POSSIBLE
 extern arelent *tc_gen_reloc (asection *, fixS *);
 #else
 extern arelent **tc_gen_reloc (asection *, fixS *);
 #endif
-
-#else /* not BFD_ASSEMBLER */
-
-#ifndef md_convert_frag
-void    md_convert_frag (object_headers *, segT, fragS *);
-#endif
-#ifndef tc_crawl_symbol_chain
-void    tc_crawl_symbol_chain (object_headers *);
-#endif
-#ifndef tc_headers_hook
-void    tc_headers_hook (object_headers *);
-#endif
-
-#endif /* BFD_ASSEMBLER */

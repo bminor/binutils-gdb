@@ -20,14 +20,12 @@
 @c Object formats of interest
 @c ==========================
 @set AOUT
-@set BOUT
 @set COFF
 @set ELF
 @set SOM
 
 @c CPUs of interest
 @c ================
-@set A29K
 @set ALPHA
 @set ARC
 @set ARM
@@ -35,7 +33,6 @@
 @set D10V
 @set D30V
 @set H8/300
-@set H8/500
 @set HPPA
 @set I370
 @set I80386
@@ -47,7 +44,6 @@
 @set M32R
 @set M68HC11
 @set M680X0
-@set M880X0
 @set MCORE
 @set MIPS
 @set MMIX
@@ -60,7 +56,6 @@
 @set TIC54X
 @set V850
 @set VAX
-@set VXWORKS
 @set XTENSA
 @set Z8000
 

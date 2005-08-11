@@ -1,3 +1,143 @@
+2005-08-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* README-vms: Delete.
+	* config-gas.com: Delete.
+	* makefile.vms: Delete.
+	* vmsconf.sh: Delete.
+	* config/atof-tahoe.c: Delete.
+	* config/m88k-opcode.h: Delete.
+	* config/obj-bout.c: Delete.
+	* config/obj-bout.h: Delete.
+	* config/obj-hp300.c: Delete.
+	* config/obj-hp300.h: Delete.
+	* config/tc-a29k.c: Delete.
+	* config/tc-a29k.h: Delete.
+	* config/tc-h8500.c: Delete.
+	* config/tc-h8500.h: Delete.
+	* config/tc-m88k.c: Delete.
+	* config/tc-m88k.h: Delete.
+	* config/tc-tahoe.c: Delete.
+	* config/tc-tahoe.h: Delete.
+	* config/tc-tic80.c: Delete.
+	* config/tc-tic80.h: Delete.
+	* config/tc-w65.c: Delete.
+	* config/tc-w65.h: Delete.
+	* config/te-aux.h: Delete.
+	* config/te-delt88.h: Delete.
+	* config/te-delta.h: Delete.
+	* config/te-dpx2.h: Delete.
+	* config/te-hp300.h: Delete.
+	* config/te-ic960.h: Delete.
+	* config/vms-a-conf.h: Delete.
+	* doc/c-a29k.texi: Delete.
+	* doc/c-h8500.texi: Delete.
+	* doc/c-m88k.texi: Delete.
+	* README: Remove obsolete examples, and list of supported targets.
+	* Makefile.am: Remove a29k, h8500, m88k, tahoe, tic80, w65,
+	bout and hp300 support.
+	(DEP_FLAGS): Don't define BFD_ASSEMBLER.
+	* configure.in: Remove --enable-bfd-assembler, need_bfd,
+	primary_bfd_gas.
+	* configure.tgt: Remove a29k, h8300-coff, h8500-*, i960 non-elf,
+	m68k non bfd, m88k, or32-coff, tic80-*, vax non-bfd, w65k-*, *-nindy.
+	* as.c: Remove all non-BFD_ASSEMBLER code, support for above targets.
+	* as.h: Likewise.
+	* dw2gencfi.c: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* ehopt.c: Likewise.
+	* input-file.c: Likewise.
+	* listing.c: Likewise.
+	* literal.c: Likewise.
+	* messages.c: Likewise.
+	* obj.h: Likewise.
+	* output-file.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+	* struc-symbol.h: Likewise.
+	* subsegs.c: Likewise.
+	* subsegs.h: Likewise.
+	* symbols.c: Likewise.
+	* symbols.h: Likewise.
+	* tc.h: Likewise.
+	* write.c: Likewise.
+	* write.h: Likewise.
+	* config/aout_gnu.h: Likewise.
+	* config/obj-aout.c: Likewise.
+	* config/obj-aout.h: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-coff.h: Likewise.
+	* config/obj-evax.h: Likewise.
+	* config/obj-ieee.h: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-arm.h: Likewise.
+	* config/tc-avr.c: Likewise.
+	* config/tc-avr.h: Likewise.
+	* config/tc-crx.h: Likewise.
+	* config/tc-d10v.h: Likewise.
+	* config/tc-d30v.h: Likewise.
+	* config/tc-dlx.h: Likewise.
+	* config/tc-fr30.h: Likewise.
+	* config/tc-frv.h: Likewise.
+	* config/tc-h8300.c: Likewise.
+	* config/tc-h8300.h: Likewise.
+	* config/tc-hppa.h: Likewise.
+	* config/tc-i370.h: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-i386.h: Likewise.
+	* config/tc-i860.h: Likewise.
+	* config/tc-i960.c: Likewise.
+	* config/tc-i960.h: Likewise.
+	* config/tc-ip2k.h: Likewise.
+	* config/tc-iq2000.h: Likewise.
+	* config/tc-m32c.h: Likewise.
+	* config/tc-m32r.h: Likewise.
+	* config/tc-m68hc11.h: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-m68k.h: Likewise.
+	* config/tc-maxq.c: Likewise.
+	* config/tc-maxq.h: Likewise.
+	* config/tc-mcore.c: Likewise.
+	* config/tc-mcore.h: Likewise.
+	* config/tc-mn10200.h: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-mn10300.h: Likewise.
+	* config/tc-ms1.h: Likewise.
+	* config/tc-msp430.c: Likewise.
+	* config/tc-msp430.h: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-ns32k.h: Likewise.
+	* config/tc-openrisc.h: Likewise.
+	* config/tc-or32.c: Likewise.
+	* config/tc-or32.h: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-ppc.h: Likewise.
+	* config/tc-s390.h: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh.h: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic30.h: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic4x.h: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-tic54x.h: Likewise.
+	* config/tc-v850.h: Likewise.
+	* config/tc-vax.c: Likewise.
+	* config/tc-vax.h: Likewise.
+	* config/tc-xstormy16.h: Likewise.
+	* config/tc-xtensa.h: Likewise.
+	* config/tc-z8k.c: Likewise.
+	* config/tc-z8k.h: Likewise.
+	* config/vms-a-conf.h
+	* doc/Makefile.am: Likewise.
+	* doc/all.texi: Likewise.
+	* doc/as.texinfo: Likewise.
+	* doc/Makefile.in: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2005-08-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 1070

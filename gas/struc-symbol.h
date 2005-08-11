@@ -1,5 +1,5 @@
 /* struct_symbol.h - Internal symbol structure
-   Copyright 1987, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001
+   Copyright 1987, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -22,43 +22,21 @@
 #ifndef __struc_symbol_h__
 #define __struc_symbol_h__
 
-#ifdef BFD_ASSEMBLER
-/* The BFD code wants to walk the list in both directions.  */
-#undef  SYMBOLS_NEED_BACKPOINTERS
-#define SYMBOLS_NEED_BACKPOINTERS
-#endif
-
 /* The information we keep for a symbol.  Note that the symbol table
    holds pointers both to this and to local_symbol structures.  See
    below.  */
 
 struct symbol
 {
-#ifdef BFD_ASSEMBLER
   /* BFD symbol */
   asymbol *bsym;
-#else
-  /* The (4-origin) position of sy_name in the symbol table of the object
-     file.  This will be 0 for (nameless) .stabd symbols.
-
-     Not used until write_object_file() time.  */
-  unsigned long sy_name_offset;
-
-  /* What we write in .o file (if permitted).  */
-  obj_symbol_type sy_symbol;
-
-  /* The 24 bit symbol number.  Symbol numbers start at 0 and are unsigned.  */
-  long sy_number;
-#endif
 
   /* The value of the symbol.  */
   expressionS sy_value;
 
   /* Forwards and (optionally) backwards chain pointers.  */
   struct symbol *sy_next;
-#ifdef SYMBOLS_NEED_BACKPOINTERS
   struct symbol *sy_previous;
-#endif /* SYMBOLS_NEED_BACKPOINTERS */
 
   /* Pointer to the frag this symbol is attached to, if any.
      Otherwise, NULL.  */
@@ -100,8 +78,6 @@ struct symbol
   TARGET_SYMBOL_FIELDS
 #endif
 };
-
-#ifdef BFD_ASSEMBLER
 
 /* A pointer in the symbol may point to either a complete symbol
    (struct symbol above) or to a local symbol (struct local_symbol
@@ -153,7 +129,5 @@ struct local_symbol
 #define local_symbol_set_frag(l, f) ((l)->u.lsy_frag = (f))
 #define local_symbol_get_real_symbol(l) ((l)->u.lsy_sym)
 #define local_symbol_set_real_symbol(l, s) ((l)->u.lsy_sym = (s))
-
-#endif /* BFD_ASSEMBLER */
 
 #endif /* __struc_symbol_h__ */

@@ -1,6 +1,6 @@
 /* write.h
    Copyright 1987, 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+   2002, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -27,16 +27,6 @@
 #define EXEC_MACHINE_TYPE HP9000S200_ID
 #endif
 #endif /* TC_I960 */
-
-#ifndef BFD_ASSEMBLER
-
-#ifndef LOCAL_LABEL
-#define LOCAL_LABEL(name) (name [0] == 'L' )
-#endif
-
-#define S_LOCAL_NAME(s) (LOCAL_LABEL (S_GET_NAME (s)))
-
-#endif /* ! BFD_ASSEMBLER */
 
 /* This is the name of a fake symbol which will never appear in the
    assembler output.  S_IS_LOCAL detects it because of the \001.  */
@@ -120,15 +110,7 @@ struct fix
      processing.  */
   bit_fixS *fx_bit_fixP;
 
-#ifdef BFD_ASSEMBLER
   bfd_reloc_code_real_type fx_r_type;
-#else
-#ifdef NEED_FX_R_TYPE
-  /* Hack for machines where the type of reloc can't be
-     worked out by looking at how big it is.  */
-  int fx_r_type;
-#endif
-#endif
 
   /* This field is sort of misnamed.  It appears to be a sort of random
      scratch field, for use by the back ends.  The main gas code doesn't
@@ -165,20 +147,6 @@ typedef struct fix fixS;
 extern int finalize_syms;
 extern symbolS *abs_section_sym;
 extern addressT dot_value;
-
-#ifndef BFD_ASSEMBLER
-extern char *next_object_file_charP;
-
-#ifndef MANY_SEGMENTS
-COMMON fixS *text_fix_root, *text_fix_tail;	/* Chains fixSs.  */
-COMMON fixS *data_fix_root, *data_fix_tail;	/* Chains fixSs.  */
-COMMON fixS *bss_fix_root, *bss_fix_tail;	/* Chains fixSs.  */
-extern struct frag *text_last_frag;		/* Last frag in segment.  */
-extern struct frag *data_last_frag;		/* Last frag in segment.  */
-#endif
-COMMON fixS **seg_fix_rootP, **seg_fix_tailP;	/* -> one of above.  */
-#endif
-
 extern long string_byte_count;
 extern int section_alignment[];
 
@@ -189,26 +157,14 @@ extern void subsegs_finish (void);
 extern void write_object_file (void);
 extern long relax_frag (segT, fragS *, long);
 extern int relax_segment (struct frag * seg_frag_root, segT seg_type);
-
 extern void number_to_chars_littleendian (char *, valueT, int);
 extern void number_to_chars_bigendian (char *, valueT, int);
-
-#ifdef BFD_ASSEMBLER
 extern fixS *fix_new
   (fragS * frag, int where, int size, symbolS * add_symbol,
    offsetT offset, int pcrel, bfd_reloc_code_real_type r_type);
 extern fixS *fix_new_exp
   (fragS * frag, int where, int size, expressionS *exp, int pcrel,
    bfd_reloc_code_real_type r_type);
-#else
-extern fixS *fix_new
-  (fragS * frag, int where, int size, symbolS * add_symbol,
-   offsetT offset, int pcrel, int r_type);
-extern fixS *fix_new_exp
-  (fragS * frag, int where, int size, expressionS *exp, int pcrel,
-   int r_type);
-#endif
-
 extern void write_print_statistics (FILE *);
 
 #endif /* __write_h__ */

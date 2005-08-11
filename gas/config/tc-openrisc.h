@@ -20,11 +20,6 @@
 
 #define TC_OPENRISC
 
-#ifndef BFD_ASSEMBLER
-/* leading space so will compile with cc */
-#  error OPENRISC support requires BFD_ASSEMBLER
-#endif
-
 #define LISTING_HEADER "OpenRISC GAS "
 
 /* The target BFD architecture.  */

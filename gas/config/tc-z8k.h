@@ -1,6 +1,6 @@
 /* This file is tc-z8k.h
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1995, 1997, 1998,
-   2000, 2002, 2003
+   2000, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -27,16 +27,7 @@ struct internal_reloc;
 
 #define WORKING_DOT_WORD
 
-#ifndef BFD_ASSEMBLER
-#define LOCAL_LABEL(x) 0
-#endif
-
-/* This macro translates between an internal fix and a coff reloc type.  */
-#define TC_COFF_FIX2RTYPE(fixP) abort ();
-
-#define BFD_ARCH bfd_arch_z8k
 #define COFF_MAGIC 0x8000
-#define TC_COUNT_RELOC(x) (1)
 #define IGNORE_NONSTANDARD_ESCAPES
 #undef WARN_SIGNED_OVERFLOW_WORD
 
@@ -45,7 +36,6 @@ extern void tc_reloc_mangle
   PARAMS ((struct fix *, struct internal_reloc *, bfd_vma));
 
 #define LISTING_HEADER "Zilog Z8000 GAS "
-#define NEED_FX_R_TYPE 1
 #define RELOC_32 1234
 
 #define md_operand(x)

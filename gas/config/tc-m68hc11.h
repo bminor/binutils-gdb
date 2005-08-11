@@ -32,10 +32,6 @@ struct fix;
 /* Motorola assembler specs does not require '.' before pseudo-ops.  */
 #define NO_PSEUDO_DOT 1
 
-#ifndef BFD_ASSEMBLER
-#error M68HC11 support requires BFD_ASSEMBLER
-#endif
-
 /* The target BFD architecture.  */
 #define TARGET_ARCH (m68hc11_arch ())
 extern enum bfd_architecture m68hc11_arch (void);

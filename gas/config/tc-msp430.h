@@ -1,5 +1,5 @@
 /* This file is tc-msp430.h
-   Copyright (C) 2002, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Dmitry Diky <diwil@mail.ru>
 
@@ -19,10 +19,6 @@
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
-
-#ifndef BFD_ASSEMBLER
- #error MSP430 support requires BFD_ASSEMBLER
-#endif
 
 #define TC_MSP430
 /*   By convention, you should define this macro in the `.h' file.  For

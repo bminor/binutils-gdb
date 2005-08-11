@@ -49,8 +49,6 @@ const char comment_chars[] = "#/";
 const char line_separator_chars[] = ";";
 const char line_comment_chars[] = "#/";
 
-const int md_reloc_size = 8;
-
 static int do_jsri2bsr = 0;	/* Change here from 1 by Cruess 19 August 97.  */
 static int sifilter_mode = 0;
 

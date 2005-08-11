@@ -29,10 +29,6 @@ struct fix;
 #define TARGET_BYTES_BIG_ENDIAN 1
 #endif
 
-#ifndef BFD_ASSEMBLER
- #error I370 support requires BFD_ASSEMBLER
-#endif
-
 /* The target BFD architecture.  */
 #define TARGET_ARCH (i370_arch ())
 extern enum bfd_architecture i370_arch (void);

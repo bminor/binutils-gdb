@@ -24,14 +24,12 @@ asconfig.texi: $(CONFIG).texi
 	  || cp $(srcdir)/$(CONFIG).texi ./asconfig.texi
 
 CPU_DOCS = \
-	c-a29k.texi \
 	c-alpha.texi \
 	c-arc.texi \
 	c-arm.texi \
 	c-d10v.texi \
 	c-cris.texi \
 	c-h8300.texi \
-	c-h8500.texi \
 	c-hppa.texi \
 	c-i370.texi \
 	c-i386.texi \
@@ -42,7 +40,6 @@ CPU_DOCS = \
 	c-m32r.texi \
 	c-m68hc11.texi \
 	c-m68k.texi \
-	c-m88k.texi \
 	c-mips.texi \
 	c-mmix.texi \
 	c-msp430.texi \

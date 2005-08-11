@@ -53,8 +53,6 @@
 # define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8)
 #endif
 
-#ifdef BFD_ASSEMBLER
-
 #include "subsegs.h"
 
 #include "elf/dwarf2.h"
@@ -1424,54 +1422,3 @@ dwarf2_finish (void)
       out_debug_info (info_seg, abbrev_seg, line_seg);
     }
 }
-
-#else
-void
-dwarf2_finish ()
-{
-}
-
-int
-dwarf2dbg_estimate_size_before_relax (frag)
-     fragS *frag ATTRIBUTE_UNUSED;
-{
-  as_fatal (_("dwarf2 is not supported for this object file format"));
-  return 0;
-}
-
-int
-dwarf2dbg_relax_frag (frag)
-     fragS *frag ATTRIBUTE_UNUSED;
-{
-  as_fatal (_("dwarf2 is not supported for this object file format"));
-  return 0;
-}
-
-void
-dwarf2dbg_convert_frag (frag)
-     fragS *frag ATTRIBUTE_UNUSED;
-{
-  as_fatal (_("dwarf2 is not supported for this object file format"));
-}
-
-void
-dwarf2_emit_insn (size)
-     int size ATTRIBUTE_UNUSED;
-{
-}
-
-char *
-dwarf2_directive_file (dummy)
-     int dummy ATTRIBUTE_UNUSED;
-{
-  s_app_file (0);
-  return NULL;
-}
-
-void
-dwarf2_directive_loc (dummy)
-     int dummy ATTRIBUTE_UNUSED;
-{
-  as_fatal (_("dwarf2 is not supported for this object file format"));
-}
-#endif /* BFD_ASSEMBLER */

@@ -1,5 +1,5 @@
 /* tc-vax.h -- Header file for tc-vax.c.
-   Copyright 1987, 1991, 1992, 1993, 1995, 1996, 1997, 2000, 2002
+   Copyright 1987, 1991, 1992, 1993, 1995, 1996, 1997, 2000, 2002, 2005
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -40,18 +40,11 @@
 #define TARGET_FORMAT "elf32-vax"
 #endif
 
-#define BFD_ARCH	bfd_arch_vax	/* for non-BFD_ASSEMBLER */
-#define TARGET_ARCH	bfd_arch_vax	/* BFD_ASSEMBLER */
+#define TARGET_ARCH	bfd_arch_vax
 
-#ifdef BFD_ASSEMBLER
 #define NO_RELOC	BFD_RELOC_NONE
-#else
-#define NO_RELOC	0
-#endif
 #define NOP_OPCODE	0x01
 
-#define tc_aout_pre_write_hook(x)	{;}	/* not used */
-#define tc_crawl_symbol_chain(a)	{;}	/* not used */
 #define md_operand(x)
 
 long md_chars_to_number PARAMS ((unsigned char *, int));
@@ -59,7 +52,6 @@ long md_chars_to_number PARAMS ((unsigned char *, int));
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
-#ifdef BFD_ASSEMBLER
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
@@ -73,7 +65,6 @@ extern const struct relax_type md_relax_table[];
 		 && (S_GET_SEGMENT ((FIX)->fx_subsy)		\
 		     == S_GET_SEGMENT ((FIX)->fx_addsy)))	\
 	     || S_IS_LOCAL ((FIX)->fx_addsy)))
-#endif
 
 /*
  * Local Variables:

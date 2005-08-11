@@ -20,11 +20,6 @@
 
 #define TC_MS1
 
-#ifndef BFD_ASSEMBLER
-/* Leading space so will compile with cc.  */
- #error MS1 support requires BFD_ASSEMBLER
-#endif
-
 #define LISTING_HEADER "MS1 GAS "
 
 /* The target BFD architecture.  */

@@ -22,10 +22,6 @@
 
 #define TC_D30V
 
-#ifndef BFD_ASSEMBLER
- #error D30V support requires BFD_ASSEMBLER
-#endif
-
 /* The target BFD architecture.  */
 #define TARGET_ARCH              bfd_arch_d30v
 #define TARGET_FORMAT            "elf32-d30v"

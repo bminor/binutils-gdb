@@ -23,17 +23,9 @@
 #ifndef	TC_MCORE
 #define TC_MCORE 1
 
-#ifndef BFD_ASSEMBLER
- #error MCORE support requires BFD_ASSEMBLER
-#endif
-
 #define TARGET_ARCH	bfd_arch_mcore
 /* Used to initialise target_big_endian.  */
 #define TARGET_BYTES_BIG_ENDIAN 0
-
-/* Don't write out relocs for pcrel stuff.  */
-#define TC_COUNT_RELOC(x) (((x)->fx_addsy || (x)->fx_subsy) && \
-			   (x)->fx_r_type < BFD_RELOC_MCORE_PCREL_IMM8BY4)
 
 #define IGNORE_NONSTANDARD_ESCAPES
 
@@ -45,14 +37,8 @@
 #define LISTING_HEADER        	"M.CORE GAS Version 2.9.4"
 #define LISTING_LHS_CONT_LINES	4
 
-#define NEED_FX_R_TYPE	1
-#define COFF_FLAGS 	1
-
 /* We want local label support.  */
 #define LOCAL_LABELS_FB 1
-
-#define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
-int tc_coff_sizemachdep (struct frag *);
 
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table

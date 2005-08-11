@@ -174,9 +174,6 @@ const pseudo_typeS md_pseudo_table[] =
   {NULL, 0, 0},
 };
 
-/* Size of relocation record.  */
-const int md_reloc_size = 12;
-
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  */
 const char comment_chars[] = "!";	/* JF removed '|' from
@@ -3961,9 +3958,7 @@ s_common (ignore)
       goto allocate_common;
     }
 
-#ifdef BFD_ASSEMBLER
   symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
-#endif
 
   demand_empty_rest_of_line ();
   return;

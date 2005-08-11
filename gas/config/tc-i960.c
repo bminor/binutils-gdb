@@ -123,14 +123,6 @@
 
 extern char *input_line_pointer;
 
-#if !defined (BFD_ASSEMBLER) && !defined (BFD)
-#ifdef OBJ_COFF
-const int md_reloc_size = sizeof (struct reloc);
-#else /* OBJ_COFF */
-const int md_reloc_size = sizeof (struct relocation_info);
-#endif /* OBJ_COFF */
-#endif
-
 /* Local i80960 routines.  */
 struct memS;
 struct regop;
@@ -2050,17 +2042,10 @@ relax_cobr (fragS *fragP)	/* fragP->fr_opcode is assumed to point to
    If the fragment substate is 2, a 13-bit displacement was not enough.
    Replace the cobr with a two instructions (a compare and a branch).  */
 
-#ifndef BFD_ASSEMBLER
-void
-md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED,
-		 segT seg ATTRIBUTE_UNUSED,
-		 fragS *fragP)
-#else
 void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 		 segT sec ATTRIBUTE_UNUSED,
 		 fragS *fragP)
-#endif
 {
   /* Structure describing needed address fix.  */
   fixS *fixP;
@@ -2455,15 +2440,6 @@ md_apply_fix (fixS *fixP,
 
   if (!fixP->fx_bit_fixP)
     {
-#ifndef BFD_ASSEMBLER
-      /* For callx, we always want to write out zero, and emit a
-	 symbolic relocation.  */
-      if (fixP->fx_bsr)
-	val = 0;
-
-      fixP->fx_addnumber = val;
-#endif
-
       md_number_to_imm (place, val, fixP->fx_size);
     }
   else if ((int) (size_t) fixP->fx_bit_fixP == 13
@@ -2546,33 +2522,6 @@ tc_bout_fix_to_chars (char *where,
 
 #endif /* OBJ_AOUT or OBJ_BOUT */
 
-#if defined (OBJ_COFF) && defined (BFD)
-short
-tc_coff_fix2rtype (fixS *fixP)
-{
-  if (fixP->fx_bsr)
-    abort ();
-
-  if (fixP->fx_pcrel == 0 && fixP->fx_size == 4)
-    return R_RELLONG;
-
-  if (fixP->fx_pcrel != 0 && fixP->fx_size == 4)
-    return R_IPRMED;
-
-  abort ();
-  return 0;
-}
-
-int
-tc_coff_sizemachdep (fragS *frag)
-{
-  if (frag->fr_next)
-    return frag->fr_next->fr_address - frag->fr_address;
-  else
-    return 0;
-}
-#endif
-
 /* Align an address by rounding it up to the specified boundary.  */
 
 valueT
@@ -2581,138 +2530,11 @@ md_section_align (segT seg,
 {
   int align;
 
-#ifdef BFD_ASSEMBLER
   align = bfd_get_section_alignment (stdoutput, seg);
-#else
-  align = section_alignment[(int) seg];
-#endif
   return (addr + (1 << align) - 1) & (-1 << align);
 }
 
 extern int coff_flags;
-
-#ifdef OBJ_COFF
-void
-tc_headers_hook (object_headers *headers)
-{
-  switch (architecture)
-    {
-    case ARCH_KA:
-      coff_flags |= F_I960KA;
-      break;
-
-    case ARCH_KB:
-      coff_flags |= F_I960KB;
-      break;
-
-    case ARCH_MC:
-      coff_flags |= F_I960MC;
-      break;
-
-    case ARCH_CA:
-      coff_flags |= F_I960CA;
-      break;
-
-    case ARCH_JX:
-      coff_flags |= F_I960JX;
-      break;
-
-    case ARCH_HX:
-      coff_flags |= F_I960HX;
-      break;
-
-    default:
-      if (iclasses_seen == I_BASE)
-	coff_flags |= F_I960CORE;
-      else if (iclasses_seen & I_CX)
-	coff_flags |= F_I960CA;
-      else if (iclasses_seen & I_HX)
-	coff_flags |= F_I960HX;
-      else if (iclasses_seen & I_JX)
-	coff_flags |= F_I960JX;
-      else if (iclasses_seen & I_CX2)
-	coff_flags |= F_I960CA;
-      else if (iclasses_seen & I_MIL)
-	coff_flags |= F_I960MC;
-      else if (iclasses_seen & (I_DEC | I_FP))
-	coff_flags |= F_I960KB;
-      else
-	coff_flags |= F_I960KA;
-      break;
-    }
-
-  if (flag_readonly_data_in_text)
-    {
-      headers->filehdr.f_magic = I960RWMAGIC;
-      headers->aouthdr.magic = OMAGIC;
-    }
-  else
-    {
-      headers->filehdr.f_magic = I960ROMAGIC;
-      headers->aouthdr.magic = NMAGIC;
-    }				/* set magic numbers */
-}
-
-#endif /* OBJ_COFF */
-
-#ifndef BFD_ASSEMBLER
-
-/* Things going on here:
-
-   For bout, We need to assure a couple of simplifying
-   assumptions about leafprocs for the linker: the leafproc
-   entry symbols will be defined in the same assembly in
-   which they're declared with the '.leafproc' directive;
-   and if a leafproc has both 'call' and 'bal' entry points
-   they are both global or both local.
-
-   For coff, the call symbol has a second aux entry that
-   contains the bal entry point.  The bal symbol becomes a
-   label.
-
-   For coff representation, the call symbol has a second aux entry that
-   contains the bal entry point.  The bal symbol becomes a label.  */
-
-void
-tc_crawl_symbol_chain (object_headers *headers ATTRIBUTE_UNUSED)
-{
-  symbolS *symbolP;
-
-  for (symbolP = symbol_rootP; symbolP; symbolP = symbol_next (symbolP))
-    {
-#ifdef OBJ_COFF
-      if (TC_S_IS_SYSPROC (symbolP))
-	{
-	  /* Second aux entry already contains the sysproc number.  */
-	  S_SET_NUMBER_AUXILIARY (symbolP, 2);
-	  S_SET_STORAGE_CLASS (symbolP, C_SCALL);
-	  S_SET_DATA_TYPE (symbolP, S_GET_DATA_TYPE (symbolP) | (DT_FCN << N_BTSHFT));
-	  continue;
-	}
-#endif /* OBJ_COFF */
-
-      if (!TC_S_IS_BALNAME (symbolP) && !TC_S_IS_CALLNAME (symbolP))
-	continue;
-
-      if (!S_IS_DEFINED (symbolP))
-	as_bad (_("leafproc symbol '%s' undefined"), S_GET_NAME (symbolP));
-
-      if (TC_S_IS_CALLNAME (symbolP))
-	{
-	  symbolS *balP = tc_get_bal_of_call (symbolP);
-
-	  if (S_IS_EXTERNAL (symbolP) != S_IS_EXTERNAL (balP))
-	    {
-	      S_SET_EXTERNAL (symbolP);
-	      S_SET_EXTERNAL (balP);
-	      as_warn (_("Warning: making leafproc entries %s and %s both global\n"),
-		       S_GET_NAME (symbolP), S_GET_NAME (balP));
-	    }			/* externality mismatch */
-	}			/* if callname */
-    }				/* walk the symbol chain */
-}
-
-#endif /* ! BFD_ASSEMBLER */
 
 /* For aout or bout, the bal immediately follows the call.
 
@@ -2841,8 +2663,6 @@ i960_validate_fix (fixS *fixP, segT this_segment_type ATTRIBUTE_UNUSED)
   return 1;
 }
 
-#ifdef BFD_ASSEMBLER
-
 /* From cgen.c:  */
 
 static short
@@ -2894,8 +2714,6 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 }
 
 /* end from cgen.c */
-
-#endif /* BFD_ASSEMBLER */
 
 const pseudo_typeS md_pseudo_table[] =
 {

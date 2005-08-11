@@ -29,7 +29,6 @@
 #define OCTETS_PER_BYTE_POWER 1
 
 #define TARGET_ARCH		bfd_arch_tic54x
-#define BFD_ARCH                TARGET_ARCH
 
 #define WORKING_DOT_WORD        1
 
@@ -47,10 +46,6 @@
 #define DOUBLEBAR_PARALLEL 1
 /* affects preprocessor */
 #define KEEP_WHITE_AROUND_COLON 1
-
-/* We need the extra field in the fixup struct to put the relocation in.  */
-
-#define NEED_FX_R_TYPE
 
 struct bit_info
 {

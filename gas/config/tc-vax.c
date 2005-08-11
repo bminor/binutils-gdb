@@ -30,10 +30,6 @@
 #include "elf/vax.h"
 #endif
 
-#if defined (OBJ_AOUT) && !defined (BFD_ASSEMBLER) && defined (TE_NetBSD)
-#include <netinet/in.h>
-#endif
-
 /* These chars start a comment anywhere in a source file (except inside
    another comment */
 const char comment_chars[] = "#";
@@ -322,12 +318,11 @@ md_apply_fix (fixP, valueP, seg)
      segT seg ATTRIBUTE_UNUSED;
 {
   valueT value = * valueP;
-#ifdef BFD_ASSEMBLER
+
   if (((fixP->fx_addsy == NULL && fixP->fx_subsy == NULL)
        && fixP->fx_r_type != BFD_RELOC_32_PLT_PCREL
        && fixP->fx_r_type != BFD_RELOC_32_GOT_PCREL)
       || fixP->fx_r_type == NO_RELOC)
-#endif
     number_to_chars_littleendian (fixP->fx_where + fixP->fx_frag->fr_literal,
 				  value, fixP->fx_size);
 
@@ -751,13 +746,8 @@ md_assemble (instruction_string)
       this_add_number = expP->X_add_number;
       this_add_symbol = expP->X_add_symbol;
       to_seg = *segP;
-#ifdef BFD_ASSEMBLER
       is_undefined = (to_seg == undefined_section);
       is_absolute = (to_seg == absolute_section);
-#else
-      is_undefined = (to_seg == SEG_UNKNOWN);
-      is_absolute = (to_seg == SEG_ABSOLUTE);
-#endif
       at = operandP->vop_mode & 1;
       length = (operandP->vop_short == 'b'
 		? 1 : (operandP->vop_short == 'w'
@@ -834,11 +824,7 @@ md_assemble (instruction_string)
 		      p = frag_more (nbytes);
 		      /* Conventional relocation.  */
 		      fix_new (frag_now, p - frag_now->fr_literal, nbytes,
-#ifdef BFD_ASSEMBLER
 			       section_symbol (absolute_section),
-#else
-			       &abs_symbol,
-#endif
 			       this_add_number, 1, NO_RELOC);
 		    }
 		  else
@@ -922,11 +908,7 @@ md_assemble (instruction_string)
 		      know (!(opcode_as_number & VIT_OPCODE_SYNTHETIC));
 		      p = frag_more (nbytes);
 		      fix_new (frag_now, p - frag_now->fr_literal, nbytes,
-#ifdef BFD_ASSEMBLER
 			       section_symbol (absolute_section),
-#else
-			       &abs_symbol,
-#endif
 			       this_add_number, 1, NO_RELOC);
 		    }
 		  else
@@ -1442,19 +1424,11 @@ md_estimate_size_before_relax (fragP, segment)
  * Out:	Any fixSs and constants are set up.
  *	Caller will turn frag into a ".space 0".
  */
-#ifdef BFD_ASSEMBLER
 void
 md_convert_frag (headers, seg, fragP)
      bfd *headers ATTRIBUTE_UNUSED;
      segT seg ATTRIBUTE_UNUSED;
      fragS *fragP;
-#else
-void
-md_convert_frag (headers, seg, fragP)
-     object_headers *headers ATTRIBUTE_UNUSED;
-     segT seg ATTRIBUTE_UNUSED;
-     fragS *fragP;
-#endif
 {
   char *addressP;		/* -> _var to change.  */
   char *opcodeP;		/* -> opcode char(s) to change.  */
@@ -1618,42 +1592,6 @@ md_ri_to_chars (the_bytes, ri)
 }
 
 #endif /* comment */
-
-#ifdef OBJ_AOUT
-#ifndef BFD_ASSEMBLER
-void
-tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
-     char *where;
-     fixS *fixP;
-     relax_addressT segment_address_in_file;
-{
-  /*
-   * In: length of relocation (or of address) in chars: 1, 2 or 4.
-   * Out: GNU LD relocation length code: 0, 1, or 2.
-   */
-
-  static const unsigned char nbytes_r_length[] = {42, 0, 1, 42, 2};
-  long r_symbolnum;
-
-  know (fixP->fx_addsy != NULL);
-
-  md_number_to_chars (where,
-       fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
-		      4);
-
-  r_symbolnum = (S_IS_DEFINED (fixP->fx_addsy)
-		 ? S_GET_TYPE (fixP->fx_addsy)
-		 : fixP->fx_addsy->sy_number);
-
-  where[6] = (r_symbolnum >> 16) & 0x0ff;
-  where[5] = (r_symbolnum >> 8) & 0x0ff;
-  where[4] = r_symbolnum & 0x0ff;
-  where[7] = ((((!S_IS_DEFINED (fixP->fx_addsy)) << 3) & 0x08)
-	      | ((nbytes_r_length[fixP->fx_size] << 1) & 0x06)
-	      | (((fixP->fx_pcrel << 0) & 0x01) & 0x0f));
-}
-#endif /* !BFD_ASSEMBLER */
-#endif /* OBJ_AOUT */
 
 /*
  *       BUGS, GRIPES,  APOLOGIA, etc.
@@ -3279,7 +3217,6 @@ mumble (text, value)
 
 int md_short_jump_size = 3;
 int md_long_jump_size = 6;
-const int md_reloc_size = 8;	/* Size of relocation record */
 
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
@@ -3462,21 +3399,6 @@ md_pcrel_from (fixP)
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
-#ifdef OBJ_AOUT
-#ifndef BFD_ASSEMBLER
-void
-tc_headers_hook(headers)
-     object_headers *headers;
-{
-#ifdef TE_NetBSD
-  N_SET_INFO(headers->header, OMAGIC, M_VAX4K_NETBSD, 0);
-  headers->header.a_info = htonl (headers->header.a_info);
-#endif
-}
-#endif /* !BFD_ASSEMBLER */
-#endif /* OBJ_AOUT */
-
-#ifdef BFD_ASSEMBLER
 arelent *
 tc_gen_reloc (section, fixp)
      asection *section ATTRIBUTE_UNUSED;
@@ -3552,6 +3474,5 @@ tc_gen_reloc (section, fixp)
 
   return reloc;
 }
-#endif	/* BFD_ASSEMBLER */
 
 /* end of tc-vax.c */

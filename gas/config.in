@@ -3,9 +3,6 @@
 /* Define if using AIX 5.2 value for C_WEAKEXT. */
 #undef AIX_WEAK_SUPPORT
 
-/* Use BFD interface? */
-#undef BFD_ASSEMBLER
-
 /* assert broken? */
 #undef BROKEN_ASSERT
 
@@ -168,9 +165,6 @@
 /* Using m88k COFF? */
 #undef M88KCOFF
 
-/* old COFF support? */
-#undef MANY_SEGMENTS
-
 /* Default CPU for MIPS targets. */
 #undef MIPS_CPU_STRING_DEFAULT
 
@@ -218,9 +212,6 @@
 
 /* generic support? */
 #undef OBJ_MAYBE_GENERIC
-
-/* HP300 support? */
-#undef OBJ_MAYBE_HP300
 
 /* IEEE support? */
 #undef OBJ_MAYBE_IEEE

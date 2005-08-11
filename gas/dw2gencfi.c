@@ -42,11 +42,7 @@
 #endif
 
 #ifndef EH_FRAME_ALIGNMENT
-# ifdef BFD_ASSEMBLER
-#  define EH_FRAME_ALIGNMENT (bfd_get_arch_size (stdoutput) == 64 ? 3 : 2)
-# else
-#  define EH_FRAME_ALIGNMENT 2
-# endif
+# define EH_FRAME_ALIGNMENT (bfd_get_arch_size (stdoutput) == 64 ? 3 : 2)
 #endif
 
 #ifndef tc_cfi_frame_initial_instructions
@@ -1032,10 +1028,8 @@ cfi_finish (void)
 
   /* Open .eh_frame section.  */
   cfi_seg = subseg_new (".eh_frame", 0);
-#ifdef BFD_ASSEMBLER
   bfd_set_section_flags (stdoutput, cfi_seg,
 			 SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_READONLY);
-#endif
   subseg_set (cfi_seg, 0);
   record_alignment (cfi_seg, EH_FRAME_ALIGNMENT);
 

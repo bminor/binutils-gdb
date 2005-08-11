@@ -45,9 +45,6 @@
 @ifset H8/300
 @set H8
 @end ifset
-@ifset H8/500
-@set H8
-@end ifset
 @ifset SH
 @set H8
 @end ifset
@@ -239,9 +236,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c
 @c Target dependent options are listed below.  Keep the list sorted.
 @c Add an empty line for separation. 
-@ifset A29K
-@c am29k has no machine-dependent assembler options
-@end ifset
 @ifset ALPHA
 
 @emph{Target Alpha options:}
@@ -1177,10 +1171,6 @@ For information on the H8/300 machine instruction set, see @cite{H8/300
 Series Programming Manual}.  For the H8/300H, see @cite{H8/300H Series
 Programming Manual} (Renesas).
 @end ifset
-@ifset H8/500
-For information on the H8/500 machine instruction set, see @cite{H8/500
-Series Programming Manual} (Renesas M21T001).
-@end ifset
 @ifset SH
 For information on the Renesas (formerly Hitachi) / SuperH SH machine instruction set,
 see @cite{SH-Microcomputer User's Manual} (Renesas) or
@@ -1270,10 +1260,6 @@ For the @value{TARGET} target, @command{@value{AS}} is configured to produce
 @value{OBJ-NAME} format object files.
 @end ifclear
 @c The following should exhaust all configs that set MULTI-OBJ, ideally
-@ifset A29K
-On the @value{TARGET}, @command{@value{AS}} can be configured to produce either
-@code{a.out} or COFF format object files.
-@end ifset
 @ifset I960
 On the @value{TARGET}, @command{@value{AS}} can be configured to produce either
 @code{b.out} or COFF format object files.
@@ -1440,14 +1426,6 @@ the current input file is used.  If a logical line number was given
 @ifset GENERIC
 (@pxref{Line,,@code{.line}})
 @end ifset
-@ifclear GENERIC
-@ifclear A29K
-(@pxref{Line,,@code{.line}})
-@end ifclear
-@ifset A29K
-(@pxref{Ln,,@code{.ln}})
-@end ifset
-@end ifclear
 then it is used to calculate the number printed,
 otherwise the actual line in the current source file is printed.  The
 message text is intended to be self explanatory (in the grand Unix
@@ -2087,9 +2065,6 @@ This means you may not nest these comments.
 @cindex line comment character
 Anything from the @dfn{line comment} character to the next newline
 is considered a comment and is ignored.  The line comment character is
-@ifset A29K
-@samp{;} for the AMD 29K family;
-@end ifset
 @ifset ARC
 @samp{;} on the ARC;
 @end ifset
@@ -2098,9 +2073,6 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset H8/300
 @samp{;} for the H8/300 family;
-@end ifset
-@ifset H8/500
-@samp{!} for the H8/500 family;
 @end ifset
 @ifset HPPA
 @samp{;} for the HPPA;
@@ -2140,9 +2112,6 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset M68HC11
 @samp{#} on the 68HC11 and 68HC12;
-@end ifset
-@ifset M880X0
-@samp{;} on the M880x0;
 @end ifset
 @ifset VAX
 @samp{#} on the Vax;
@@ -2236,12 +2205,6 @@ the preceding statement.  Newlines and semicolons within character
 constants are an exception: they do not end statements.
 @end ifclear
 @ifset abnormal-separator
-@ifset A29K
-A @dfn{statement} ends at a newline character (@samp{\n}) or an ``at''
-sign (@samp{@@}).  The newline or at sign is considered part of the
-preceding statement.  Newlines and at signs within character constants
-are an exception: they do not end statements.
-@end ifset
 @ifset HPPA
 A @dfn{statement} ends at a newline character (@samp{\n}) or an exclamation 
 point (@samp{!}).  The newline or exclamation point is considered part of the
@@ -2250,9 +2213,7 @@ constants are an exception: they do not end statements.
 @end ifset
 @ifset H8
 A @dfn{statement} ends at a newline character (@samp{\n}); or (for the
-H8/300) a dollar sign (@samp{$}); or (for the
-Renesas-SH or the
-H8/500) a semicolon
+H8/300) a dollar sign (@samp{$}); or (for the Renesas-SH) a semicolon
 (@samp{;}).  The newline or separator character is considered part of
 the preceding statement.  Newlines and separators within character
 constants are an exception: they do not end statements.
@@ -2471,12 +2432,9 @@ grave accent.  A newline
 (or semicolon @samp{;})
 @end ifclear
 @ifset abnormal-separator
-@ifset A29K
-(or at sign @samp{@@})
-@end ifset
 @ifset H8
 (or dollar sign @samp{$}, for the H8/300; or semicolon @samp{;} for the
-Renesas SH or H8/500)
+Renesas SH)
 @end ifset
 @end ifset
 @end ifclear
@@ -2579,8 +2537,7 @@ A letter, to tell @command{@value{AS}} the rest of the number is a flonum.
 4.2 assembler seems to allow any of @samp{defghDEFGH}.)
 @end ignore
 
-On the H8/300, H8/500,
-Renesas / SuperH SH,
+On the H8/300, Renesas / SuperH SH,
 and AMD 29K architectures, the letter must be
 one of the letters @samp{DFPRSX} (in upper or lower case).
 
@@ -2593,9 +2550,6 @@ one of the letters @samp{DFT} (in upper or lower case).
 On the HPPA architecture, the letter must be @samp{E} (upper case only).
 @end ifset
 @ifclear GENERIC
-@ifset A29K
-One of the letters @samp{DFPRSX} (in upper or lower case).
-@end ifset
 @ifset ARC
 One of the letters @samp{DFRS} (in upper or lower case).
 @end ifset
@@ -2716,8 +2670,7 @@ run-time addresses to sections is called @dfn{relocation}.  It includes
 the task of adjusting mentions of object-file addresses so they refer to
 the proper run-time addresses.
 @ifset H8
-For the H8/300 and H8/500,
-and for the Renesas / SuperH SH,
+For the H8/300, and for the Renesas / SuperH SH,
 @command{@value{AS}} pads sections if needed to
 ensure they end on a word (sixteen bit) boundary.
 @end ifset
@@ -3009,7 +2962,7 @@ of @command{@value{AS}}.)
 @end ifset
 @ifclear GENERIC
 @ifset H8
-On the H8/300 and H8/500 platforms, each subsection is zero-padded to a word
+On the H8/300 platform, each subsection is zero-padded to a word
 boundary (two bytes).
 The same is true on the Renesas SH.
 @end ifset
@@ -3020,10 +2973,6 @@ The same is true on the Renesas SH.
 @c so for now I say nothing about it.  If this is a generic BFD issue,
 @c these paragraphs might need to vanish from this manual, and be
 @c discussed in BFD chapter of binutils (or some such).
-@end ifset
-@ifset A29K
-On the AMD 29K family, no particular padding is added to section or
-subsection sizes; @value{AS} forces no alignment on this platform.
 @end ifset
 @end ifclear
 
@@ -3170,15 +3119,10 @@ noted in @ref{Machine Dependencies}.  That character may be followed by any
 string of digits, letters, dollar signs (unless otherwise noted in
 @ref{Machine Dependencies}), and underscores.
 @end ifclear
-@ifset A29K
-For the AMD 29K family, @samp{?} is also allowed in the
-body of a symbol name, though not at its beginning.
-@end ifset
-
 @ifset SPECIAL-SYMS
 @ifset H8
 Symbol names begin with a letter or with one of @samp{._}.  On the
-Renesas SH or the H8/500, you can also use @code{$} in symbol names.  That
+Renesas SH you can also use @code{$} in symbol names.  That
 character may be followed by any string of digits, letters, dollar signs (save
 on the H8/300), and underscores.
 @end ifset
@@ -3300,11 +3244,6 @@ directive.  Thus, the expression @samp{.=.+4} is the same as saying
 @ifclear no-space-dir
 @samp{.space 4}.
 @end ifclear
-@ifset no-space-dir
-@ifset A29K
-@samp{.block 4}.
-@end ifset
-@end ifset
 
 @node Symbol Attributes
 @section Symbol Attributes
@@ -3937,7 +3876,7 @@ required alignment; this can be useful if you want the alignment to be filled
 with no-op instructions when appropriate.
 
 The way the required alignment is specified varies from system to system.
-For the a29k, arc, hppa, i386 using ELF, i860, iq2000, m68k, m88k, or32,
+For the arc, hppa, i386 using ELF, i860, iq2000, m68k, or32,
 s390, sparc, tic4x, tic80 and xtensa, the first expression is the
 alignment request in bytes.  For example @samp{.align 8} advances
 the location counter until it is a multiple of 8.  If the location counter
@@ -4329,10 +4268,6 @@ recognized whether or not it is surrounded by quotes @samp{"}; but if you wish
 to specify an empty file name, you must give the quotes--@code{""}.  This
 statement may go away in future: it is only recognized to be compatible with
 old @command{@value{AS}} programs.
-@ifset A29K
-In some configurations of @command{@value{AS}}, @code{.file} has already been
-removed to avoid conflicts with other assemblers.  @xref{Machine Dependencies}.
-@end ifset
 @end ifclear
 
 @node Fill
@@ -4588,7 +4523,7 @@ of target the assembly is for.
 
 @ifclear GENERIC
 @ifset H8
-On the H8/500 and most forms of the H8/300, @code{.int} emits 16-bit
+On most forms of the H8/300, @code{.int} emits 16-bit
 integers.  On the H8/300H and the Renesas SH, however, @code{.int} emits
 32-bit integers.
 @end ifset
@@ -4724,12 +4659,6 @@ reported as on logical line number @var{line-number} @minus{} 1.  One day
 @command{@value{AS}} will no longer support this directive: it is recognized only
 for compatibility with existing assembler programs.
 
-@ifset GENERIC
-@ifset A29K
-@emph{Warning:} In the AMD29K configuration of @value{AS}, this command is
-not available; use the synonym @code{.ln} in that context.
-@end ifset
-@end ifset
 @end ifset
 
 @ifclear no-line-dir
@@ -5625,21 +5554,6 @@ for a summary.
 @end ifset
 @end ifclear
 
-@ifset A29K
-@ifclear GENERIC
-@node Space
-@section @code{.space}
-@cindex @code{space} directive
-@end ifclear
-On the AMD 29K, this directive is ignored; it is accepted for
-compatibility with other AMD 29K assemblers.
-
-@quotation
-@emph{Warning:} In most versions of the @sc{gnu} assembler, the directive
-@code{.space} has the effect of @code{.block}  @xref{Machine Dependencies}.
-@end quotation
-@end ifset
-
 @ifset have-stabs
 @node Stab
 @section @code{.stabd, .stabn, .stabs}
@@ -6088,9 +6002,6 @@ include details on any machine's instruction set.  For details on that
 subject, see the hardware manufacturer's manual.
 
 @menu
-@ifset A29K
-* AMD29K-Dependent::            AMD 29K Dependent Features
-@end ifset
 @ifset ALPHA
 * Alpha-Dependent::		Alpha Dependent Features
 @end ifset
@@ -6111,9 +6022,6 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset H8/300
 * H8/300-Dependent::            Renesas H8/300 Dependent Features
-@end ifset
-@ifset H8/500
-* H8/500-Dependent::            Renesas H8/500 Dependent Features
 @end ifset
 @ifset HPPA
 * HPPA-Dependent::              HPPA Dependent Features
@@ -6147,9 +6055,6 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset M68HC11
 * M68HC11-Dependent::           M68HC11 and 68HC12 Dependent Features
-@end ifset
-@ifset M880X0
-* M88K-Dependent::		M880x0 Dependent Features
 @end ifset
 @ifset MIPS
 * MIPS-Dependent::              MIPS Dependent Features
@@ -6204,10 +6109,6 @@ subject, see the hardware manufacturer's manual.
 @c node and sectioning commands; hence the repetition of @chapter BLAH
 @c in both conditional blocks.
 
-@ifset A29K
-@include c-a29k.texi
-@end ifset
-
 @ifset ALPHA
 @include c-alpha.texi
 @end ifset
@@ -6236,7 +6137,6 @@ family.
 
 @menu
 * H8/300-Dependent::            Renesas H8/300 Dependent Features
-* H8/500-Dependent::            Renesas H8/500 Dependent Features
 * SH-Dependent::                Renesas SH Dependent Features
 @end menu
 @lowersections
@@ -6253,10 +6153,6 @@ family.
 
 @ifset H8/300
 @include c-h8300.texi
-@end ifset
-
-@ifset H8/500
-@include c-h8500.texi
 @end ifset
 
 @ifset HPPA
@@ -6301,10 +6197,6 @@ family.
 
 @ifset M68HC11
 @include c-m68hc11.texi
-@end ifset
-
-@ifset M880X0
-@include c-m88k.texi
 @end ifset
 
 @ifset MIPS
@@ -6616,8 +6508,8 @@ Keith Knowles at the Open Software Foundation wrote the original MIPS back end
 (which hasn't been merged in yet).  Ralph Campbell worked with the MIPS code to
 support a.out format.
 
-Support for the Zilog Z8k and Renesas H8/300 and H8/500 processors (tc-z8k,
-tc-h8300, tc-h8500), and IEEE 695 object file format (obj-ieee), was written by
+Support for the Zilog Z8k and Renesas H8/300 processors (tc-z8k,
+tc-h8300), and IEEE 695 object file format (obj-ieee), was written by
 Steve Chamberlain of Cygnus Support.  Steve also modified the COFF back end to
 use BFD for some low-level operations, for use with the H8/300 and AMD 29k
 targets.

@@ -21,11 +21,6 @@
 
 #define TC_FR30
 
-#ifndef BFD_ASSEMBLER
-/* Leading space so will compile with cc.  */
- #error FR30 support requires BFD_ASSEMBLER
-#endif
-
 #define LISTING_HEADER "FR30 GAS "
 
 /* The target BFD architecture.  */

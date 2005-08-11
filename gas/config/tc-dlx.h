@@ -22,10 +22,6 @@
 
 #define TC_DLX
 
-#ifndef BFD_ASSEMBLER
- #error DLX support requires BFD_ASSEMBLER
-#endif
-
 #ifndef  __BFD_H_SEEN__
 #include "bfd.h"
 #endif
@@ -52,21 +48,9 @@ extern bfd_boolean md_dlx_fix_adjustable  (struct fix *);
 
 #define tc_unrecognized_line(c) dlx_unrecognized_line (c)
 
-#define tc_headers_hook(a)		;	/* Not used.  */
-#define tc_headers_hook(a)		;	/* Not used.  */
-#define tc_crawl_symbol_chain(a)	;	/* Not used.  */
 #define tc_coff_symbol_emit_hook(a)	;	/* Not used.  */
 
-#define AOUT_MACHTYPE 101
-#define TC_COFF_FIX2RTYPE(fix_ptr) tc_coff_fix2rtype (fix_ptr)
-#define BFD_ARCH bfd_arch_dlx
 #define COFF_MAGIC DLXMAGIC
-/* Should the reloc be output ?
-	on the 29k, this is true only if there is a symbol attached.
-	on the h8, this is always true, since no fixup is done
-        on dlx, I have no idea!! but lets keep it here just for fun.  */
-#define TC_COUNT_RELOC(x) (x->fx_addsy)
-#define TC_CONS_RELOC BFD_RELOC_32_PCREL
 
 /* No shared lib support, so we don't need to ensure externally
    visible symbols can be overridden.  */
@@ -76,8 +60,6 @@ extern bfd_boolean md_dlx_fix_adjustable  (struct fix *);
 
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
-
-#define NEED_FX_R_TYPE
 
 /* Zero Based Segment?? sound very dangerous to me!     */
 #define ZERO_BASED_SEGMENTS

@@ -19,8 +19,6 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#define BFD 1
-
 #include "bfd.h"
 
 typedef struct
@@ -42,8 +40,6 @@ typedef struct
     int x;
   }
 object_headers;
-
-#define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE 1
 
 int lineno_rootP;
 

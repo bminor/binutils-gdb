@@ -21,11 +21,6 @@
 
 #define TC_M32R
 
-#ifndef BFD_ASSEMBLER
-/* Leading space so will compile with cc.  */
- #error M32R support requires BFD_ASSEMBLER
-#endif
-
 #define LISTING_HEADER \
   (target_big_endian ? "M32R GAS" : "M32R GAS Little Endian")
 

@@ -4870,9 +4870,6 @@ int md_short_jump_size = 2;
 /* Size of dword displacement jmp.  */
 int md_long_jump_size = 5;
 
-/* Size of relocation record.  */
-const int md_reloc_size = 8;
-
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
@@ -4986,10 +4983,7 @@ md_apply_fix (fixP, valP, seg)
       /* For some reason, the PE format does not store a
 	 section address offset for a PC relative symbol.  */
       if (S_GET_SEGMENT (fixP->fx_addsy) != seg
-#if defined(BFD_ASSEMBLER) || defined(S_IS_WEAK)
-	  || S_IS_WEAK (fixP->fx_addsy)
-#endif
-	  )
+	  || S_IS_WEAK (fixP->fx_addsy))
 	value += md_pcrel_from (fixP);
 #endif
     }

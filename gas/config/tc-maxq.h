@@ -1,6 +1,6 @@
 /* tc-maxq.h -- Header file for the asssembler(MAXQ)
 
-   Copyright 2004  Free Software Foundation, Inc.
+   Copyright 2004, 2005  Free Software Foundation, Inc.
 
    Contributed by HCL Technologies Pvt. Ltd.
 
@@ -50,10 +50,6 @@ typedef enum _RELOC_ENUM
 }
 RELOC_ENUM;
 
-#ifndef NEED_FX_R_TYPE
-#define NEED_FX_R_TYPE		/* For defining our own rloc type.  */
-#endif
-
 #ifndef MAX_STACK
 #define MAX_STACK 0xf
 #endif
@@ -86,9 +82,6 @@ RELOC_ENUM;
 /* Locally defined symbol shoudnot be adjusted to section symbol.  */
 #define tc_fix_adjustable(FIX) 0
 
-#define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
-extern int tc_coff_sizemachdep (fragS * frag);
-
 /* This specifies that the target has been defined as little endian -
    default.  */
 #define TARGET_BYTES_BIG_ENDIAN 0
@@ -106,23 +99,6 @@ extern int tc_coff_sizemachdep (fragS * frag);
    If not defines GAS will use 0.  */
 #define TARGET_MACH     	maxq20_mach ()
 extern unsigned long maxq20_mach (void);
-
-/* COFF format.  */
-#ifndef BFD_ASSEMBLER
-
-/* Defines the magic number we are using for the maxq-coff. defined in coff.h.  */
-#define COFF_MAGIC   MAXQ20MAGIC
-#define BFD_ARCH     bfd_arch_maxq
-
-/* Whether the reloc should be outputted to the file or not. This
-   is only true if the symbol we are relocating for is not empty.  */
-#define TC_COUNT_RELOC(fixp) ((fixp) -> fx_addsy != NULL)
-
-/* This macro translates between an internal fix and an coff reloc type.  */
-#define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype (fixP)
-extern short tc_coff_fix2rtype (struct fix *);
-
-#endif /* BFD_ASSEMBLER */
 
 #ifndef LEX_AT
 /* We define this macro to generate a fixup for a data allocation pseudo-op.  */

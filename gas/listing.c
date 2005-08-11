@@ -749,11 +749,10 @@ list_symbol_table (void)
       if (SEG_NORMAL (S_GET_SEGMENT (ptr))
 	  || S_GET_SEGMENT (ptr) == absolute_section)
 	{
-#ifdef BFD_ASSEMBLER
 	  /* Don't report section symbols.  They are not interesting.  */
 	  if (symbol_section_p (ptr))
 	    continue;
-#endif
+
 	  if (S_GET_NAME (ptr))
 	    {
 	      char buf[30], fmt[8];
@@ -1086,9 +1085,7 @@ listing_print (char *name)
 	using_stdout = 0;
       else
 	{
-#ifdef BFD_ASSEMBLER
-      bfd_set_error (bfd_error_system_call);
-#endif
+	  bfd_set_error (bfd_error_system_call);
 	  as_perror (_("can't open list file: %s"), name);
 	  list_file = stdout;
 	  using_stdout = 1;
@@ -1108,9 +1105,7 @@ listing_print (char *name)
     {
       if (fclose (list_file) == EOF)
 	{
-#ifdef BFD_ASSEMBLER
 	  bfd_set_error (bfd_error_system_call);
-#endif
 	  as_perror (_("error closing list file: %s"), name);
 	}
     }

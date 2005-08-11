@@ -107,11 +107,9 @@ get_stab_string_offset (const char *string, const char *stabstr_secname)
       p = frag_more (1);
       *p = 0;
       retval = seg_info (seg)->stabu.stab_string_size = 1;
-#ifdef BFD_ASSEMBLER
       bfd_set_section_flags (stdoutput, seg, SEC_READONLY | SEC_DEBUGGING);
       if (seg->name == stabstr_secname)
 	seg->name = xstrdup (stabstr_secname);
-#endif
     }
 
   if (length > 0)
@@ -331,10 +329,8 @@ s_stab_generic (int what, char *stab_secname, char *stabstr_secname)
 
       if (! seg_info (seg)->hadone)
 	{
-#ifdef BFD_ASSEMBLER
 	  bfd_set_section_flags (stdoutput, seg,
 				 SEC_READONLY | SEC_RELOC | SEC_DEBUGGING);
-#endif
 #ifdef INIT_STAB_SECTION
 	  INIT_STAB_SECTION (seg);
 #endif

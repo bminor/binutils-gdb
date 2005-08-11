@@ -22,14 +22,6 @@ AM_INIT_AUTOMAKE(gas, ${BFD_VERSION})
 
 AM_PROG_LIBTOOL
 
-user_bfd_gas=
-AC_ARG_ENABLE(bfd-assembler,
-[  --enable-bfd-assembler  use BFD back end for writing object files],
-[case "${enableval}" in
-  yes) need_bfd=yes user_bfd_gas=yes ;;
-  no)  user_bfd_gas=no ;;
-  *)   AC_MSG_ERROR(bad value ${enableval} given for bfd-assembler option) ;;
-esac])dnl
 AC_ARG_ENABLE(targets,
 [    targets            alternative target configurations besides the primary],
 [case "${enableval}" in
@@ -277,10 +269,6 @@ changequote([,])dnl
 	*opcodes*) shared_opcodes=true ;;
 	*) shared_opcodes=false ;;
 	esac
-	if test "${shared_opcodes}" = "true"; then
-	  # A shared libopcodes must be linked against libbfd.
-	  need_bfd=yes
-	fi
 	;;
     esac
 
@@ -355,17 +343,8 @@ changequote([,])dnl
 # See if we really can support this configuration with the emulation code.
 
     if test $this_target = $target ; then
-      primary_bfd_gas=$bfd_gas
       obj_format=$fmt
       te_file=$em
-
-      if test $bfd_gas = no ; then
-	# Can't support other configurations this way.
-	break
-      fi
-    elif test $bfd_gas = no ; then
-      # Can't support this configuration.
-      break
     fi
 
 # From target name and format, produce a list of supported emulations.
@@ -459,27 +438,6 @@ if test ! -r ${srcdir}/config/obj-${obj_format}.c; then
   AC_MSG_ERROR(GAS does not have support for object file format ${obj_format})
 fi
 
-case ${user_bfd_gas}-${primary_bfd_gas} in
-  yes-yes | no-no)
-    # We didn't override user's choice.
-    ;;
-  no-yes)
-    AC_MSG_WARN(Use of BFD is required for ${target}; overriding config options.)
-    ;;
-  no-preferred)
-    primary_bfd_gas=no
-    ;;
-  *-preferred)
-    primary_bfd_gas=yes
-    ;;
-  yes-*)
-    primary_bfd_gas=yes
-    ;;
-  -*)
-    # User specified nothing.
-    ;;
-esac
-
 # Some COFF configurations want these random other flags set.
 case ${obj_format} in
   coff)
@@ -492,8 +450,8 @@ case ${obj_format} in
 esac
 
 # Getting this done right is going to be a bitch.  Each configuration specified
-# with --enable-targets=... should be checked for environment, format, cpu, and
-# bfd_gas setting.
+# with --enable-targets=... should be checked for environment, format, cpu
+# setting.
 #
 # For each configuration, the necessary object file support code must be linked
 # in.  This might be only one, it might be up to four.  The necessary emulation
@@ -536,7 +494,6 @@ if test `set . $formats ; shift ; echo $#` -gt 1 ; then
       ecoff)	AC_DEFINE(OBJ_MAYBE_ECOFF, 1,   [ECOFF support?])   ;;
       elf)	AC_DEFINE(OBJ_MAYBE_ELF, 1,     [ELF support?])     ;;
       generic)	AC_DEFINE(OBJ_MAYBE_GENERIC, 1, [generic support?]) ;;
-      hp300)	AC_DEFINE(OBJ_MAYBE_HP300, 1,   [HP300 support?])   ;;
       ieee)	AC_DEFINE(OBJ_MAYBE_IEEE, 1,    [IEEE support?])    ;;
       som)	AC_DEFINE(OBJ_MAYBE_SOM, 1,     [SOM support?])     ;;
     esac
@@ -560,12 +517,6 @@ AC_DEFINE_UNQUOTED(EMULATIONS, $EMULATIONS, [Supported emulations.])
 AC_DEFINE_UNQUOTED(DEFAULT_EMULATION, "$DEFAULT_EMULATION",
 		   [Default emulation.])
 
-case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in
-  yes-*-coff)	need_bfd=yes ;;
-  no-*-coff)	need_bfd=yes
-		AC_DEFINE(MANY_SEGMENTS, 1, [old COFF support?]) ;;
-esac
-
 reject_dev_configs=yes
 
 case ${reject_dev_configs}-${dev} in
@@ -581,11 +532,6 @@ AC_SUBST(install_tooldir)
 AC_SUBST(atof)
 dnl AC_SUBST(emulation)
 
-case "${primary_bfd_gas}" in
-  yes)	AC_DEFINE(BFD_ASSEMBLER, 1, [Use BFD interface?])
-	need_bfd=yes ;;
-esac
-
 # do we need the opcodes library?
 case "${need_opcodes}" in
 yes)
@@ -593,13 +539,9 @@ yes)
   ;;
 esac
 
-case "${need_bfd}" in
-yes)
-  BFDLIB=../bfd/libbfd.la
-  BFDVER_H=../bfd/bfdver.h
-  ALL_OBJ_DEPS="$ALL_OBJ_DEPS"' ../bfd/bfd.h $(INCDIR)/symcat.h'
-  ;;
-esac
+BFDLIB=../bfd/libbfd.la
+BFDVER_H=../bfd/bfdver.h
+ALL_OBJ_DEPS="$ALL_OBJ_DEPS"' ../bfd/bfd.h $(INCDIR)/symcat.h'
 
 AC_SUBST(BFDLIB)
 AC_SUBST(OPCODES_LIB)

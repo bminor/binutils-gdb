@@ -257,7 +257,6 @@ const pseudo_typeS
 
 int md_short_jump_size = 4;
 int md_long_jump_size = 4;
-const int md_reloc_size = RELSZ;	/* Coff headers.  */
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  */

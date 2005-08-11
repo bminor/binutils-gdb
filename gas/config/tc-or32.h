@@ -40,14 +40,8 @@
 
 extern int or32_unrecognized_line (int);
 
-#define tc_headers_hook(a)          ; /* Not used.  */
-#define tc_headers_hook(a)          ; /* Not used.  */
-#define tc_crawl_symbol_chain(a)    ; /* Not used.  */
 #define tc_coff_symbol_emit_hook(a) ; /* Not used.  */
 
-#define AOUT_MACHTYPE               80
-#define TC_COFF_FIX2RTYPE(fix_ptr)  tc_coff_fix2rtype (fix_ptr)
-#define BFD_ARCH                    bfd_arch_or32
 #define COFF_MAGIC                  SIPFBOMAGIC
 
 /* No shared lib support, so we don't need to ensure externally
@@ -58,14 +52,5 @@ extern int or32_unrecognized_line (int);
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 #endif
-
-/* Should the reloc be output ?
-   on the 29k, this is true only if there is a symbol attached.
-   on the h8, this is always true, since no fixup is done.  */
-#define TC_COUNT_RELOC(x)           (x->fx_addsy)
-#define TC_CONS_RELOC               RELOC_32
-
-#define COFF_FLAGS                  F_AR32W
-#define NEED_FX_R_TYPE
 
 #define ZERO_BASED_SEGMENTS

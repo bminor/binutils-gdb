@@ -20,11 +20,6 @@
 
 #define TC_FRV
 
-#ifndef BFD_ASSEMBLER
-/* leading space so will compile with cc */
- #error FRV support requires BFD_ASSEMBLER
-#endif
-
 #define LISTING_HEADER "FRV GAS "
 
 /* The target BFD architecture.  */

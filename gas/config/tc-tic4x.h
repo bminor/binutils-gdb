@@ -22,10 +22,6 @@
 #define TC_TIC4X
 #define TIC4X
 
-#ifndef BFD_ASSEMBLER
-#error TMS320C4x requires BFD_ASSEMBLER
-#endif
-
 #define TARGET_ARCH bfd_arch_tic4x
 
 #define WORKING_DOT_WORD
@@ -57,13 +53,6 @@
 #define OCTETS_PER_BYTE_POWER 	2
 
 #define TARGET_ARCH		bfd_arch_tic4x
-#define BFD_ARCH                TARGET_ARCH
-
-#define TC_COUNT_RELOC(x) 	(x->fx_addsy)
-#define TC_CONS_RELOC 		RELOC_32
-#define TC_COFF_FIX2RTYPE(fixP) tc_coff_fix2rtype (fixP)
-#define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep (frag)
-#define NEED_FX_R_TYPE
 
 #define TIC_NOP_OPCODE		0x0c800000
 

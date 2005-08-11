@@ -1,5 +1,5 @@
 /* tc-i860.h -- Header file for the i860.
-   Copyright 1991, 1992, 1995, 1998, 2000, 2001, 2002, 2003
+   Copyright 1991, 1992, 1995, 1998, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    Brought back from the dead and completely reworked
@@ -23,10 +23,6 @@
 
 #ifndef TC_I860
 #define TC_I860 1
-
-#ifndef BFD_ASSEMBLER
-#error i860 support requires BFD_ASSEMBLER
-#endif
 
 enum i860_fix_info
 {

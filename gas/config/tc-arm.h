@@ -32,8 +32,6 @@
 #define COFF_MAGIC 	ARMMAGIC
 #define TARGET_ARCH 	bfd_arch_arm
 
-#define AOUT_MACHTYPE 	0
-
 #define DIFF_EXPR_OK
 
 #ifdef  LITTLE_ENDIAN
@@ -121,7 +119,6 @@ struct fix;
 #define TC_START_LABEL(C,STR)            (c == ':' || (c == '/' && arm_data_in_code ()))
 #define tc_canonicalize_symbol_name(str) arm_canonicalize_symbol_name (str);
 #define obj_adjust_symtab() 		 arm_adjust_symtab ()
-#define tc_aout_pre_write_hook(x)	 {;}	/* not used */
 
 #define LISTING_HEADER "ARM GAS "
 

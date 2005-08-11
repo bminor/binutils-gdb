@@ -26,15 +26,15 @@
    relocations, and one which uses extended relocations.
 
    Today, the extended reloc uses are
-   TC_SPARC, TC_A29K
+   TC_SPARC
 
    each must define the enum reloc_type
 
 */
 
-#define USE_EXTENDED_RELOC (defined(TC_SPARC) || defined(TC_A29K))
+#define USE_EXTENDED_RELOC defined(TC_SPARC)
 
-#if defined(TC_SPARC) || defined(TC_A29K)
+#if defined(TC_SPARC)
 enum reloc_type
   {
     RELOC_8, RELOC_16, RELOC_32,/* simple relocations */
@@ -62,7 +62,7 @@ enum reloc_type
     NO_RELOC
   };
 
-#endif /* TC_SPARC or TC_A29K */
+#endif /* TC_SPARC */
 
 #define __GNU_EXEC_MACROS__
 

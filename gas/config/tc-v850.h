@@ -25,10 +25,6 @@
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 
-#ifndef BFD_ASSEMBLER
- #error V850 support requires BFD_ASSEMBLER
-#endif
-
 /* The target BFD architecture.  */
 #define TARGET_ARCH 		bfd_arch_v850
 

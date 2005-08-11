@@ -1243,7 +1243,6 @@ parse (const char *line, int recursive_level)
   return recursive_level;
 }
 
-#ifdef BFD_ASSEMBLER
 /* This functionality should really be in the bfd library.  */
 
 static bfd_reloc_code_real_type
@@ -1307,7 +1306,6 @@ reloc (int size, int pcrel, int type)
   return BFD_RELOC_NONE;
 
 }
-#endif
 
 static void
 fix_new_ns32k (fragS *frag,		/* Which frag? */
@@ -1327,11 +1325,7 @@ fix_new_ns32k (fragS *frag,		/* Which frag? */
 {
   fixS *fixP = fix_new (frag, where, size, add_symbol,
 			offset, pcrel,
-#ifdef BFD_ASSEMBLER
 			bit_fixP ? NO_RELOC : reloc (size, pcrel, im_disp)
-#else
-			NO_RELOC
-#endif
 			);
 
   fix_opcode_frag (fixP) = opcode_frag;
@@ -1359,11 +1353,7 @@ fix_new_ns32k_exp (fragS *frag,		/* Which frag? */
 		   unsigned int opcode_offset)
 {
   fixS *fixP = fix_new_exp (frag, where, size, exp, pcrel,
-#ifdef BFD_ASSEMBLER
 			    bit_fixP ? NO_RELOC : reloc (size, pcrel, im_disp)
-#else
-			    NO_RELOC
-#endif
 			    );
 
   fix_opcode_frag (fixP) = opcode_frag;
@@ -2047,17 +2037,10 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 
 /* Convert a relaxed displacement to ditto in final output.  */
 
-#ifndef BFD_ASSEMBLER
-void
-md_convert_frag (object_headers *headers,
-		 segT sec,
-		 fragS *fragP)
-#else
 void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 		 segT sec ATTRIBUTE_UNUSED,
 		 fragS *fragP)
-#endif
 {
   long disp;
   long ext = 0;
@@ -2137,7 +2120,6 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 
 int md_short_jump_size = 3;
 int md_long_jump_size = 5;
-const int md_reloc_size = 8;	/* Size of relocation record.  */
 
 void
 md_create_short_jump (char *ptr,
@@ -2275,8 +2257,6 @@ md_pcrel_from (fixS *fixP)
       return res;
 }
 
-#ifdef BFD_ASSEMBLER
-
 arelent *
 tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
@@ -2308,39 +2288,3 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   return rel;
 }
-#else /* BFD_ASSEMBLER */
-
-#ifdef OBJ_AOUT
-void
-cons_fix_new_ns32k (char *where,
-		    struct fix *fixP,
-		    relax_addressT segment_address_in_file)
-{
-  /* In:  Length of relocation (or of address) in chars: 1, 2 or 4.
-     Out: GNU LD relocation length code: 0, 1, or 2.  */
-
-  static unsigned char nbytes_r_length[] = { 42, 0, 1, 42, 2 };
-  long r_symbolnum;
-
-  know (fixP->fx_addsy != NULL);
-
-  md_number_to_chars (where,
-       fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
-		      4);
-
-  r_symbolnum = (S_IS_DEFINED (fixP->fx_addsy)
-		 ? S_GET_TYPE (fixP->fx_addsy)
-		 : fixP->fx_addsy->sy_number);
-
-  md_number_to_chars (where + 4,
-		      ((long) (r_symbolnum)
-		       | (long) (fixP->fx_pcrel << 24)
-		       | (long) (nbytes_r_length[fixP->fx_size] << 25)
-		       | (long) ((!S_IS_DEFINED (fixP->fx_addsy)) << 27)
-		       | (long) (fix_bsr (fixP) << 28)
-		       | (long) (fix_im_disp (fixP) << 29)),
-		      4);
-}
-
-#endif /* OBJ_AOUT */
-#endif /* BFD_ASSEMBLER */

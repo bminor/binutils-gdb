@@ -5532,11 +5532,11 @@ md_apply_fix (fixP, valP, seg)
     fixP->fx_done = 1;
 #else
   /* FIXME FIXME FIXME: The value we are passed in *valP includes
-     the symbol values.  Since we are using BFD_ASSEMBLER, if we are
-     doing this relocation the code in write.c is going to call
-     bfd_install_relocation, which is also going to use the symbol
-     value.  That means that if the reloc is fully resolved we want to
-     use *valP since bfd_install_relocation is not being used.
+     the symbol values.  If we are doing this relocation the code in
+     write.c is going to call bfd_install_relocation, which is also
+     going to use the symbol value.  That means that if the reloc is
+     fully resolved we want to use *valP since bfd_install_relocation is
+     not being used.
      However, if the reloc is not fully resolved we do not want to use
      *valP, and must use fx_offset instead.  However, if the reloc
      is PC relative, we do want to use *valP since it includes the

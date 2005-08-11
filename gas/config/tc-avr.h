@@ -1,5 +1,5 @@
 /* This file is tc-avr.h
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
 
    Contributed by Denis Chertykov <denisc@overta.ru>
 
@@ -19,10 +19,6 @@
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
-
-#ifndef BFD_ASSEMBLER
- #error AVR support requires BFD_ASSEMBLER
-#endif
 
 /* By convention, you should define this macro in the `.h' file.  For
    example, `tc-m68k.h' defines `TC_M68K'.  You might have to use this
