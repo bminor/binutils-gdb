@@ -132,6 +132,7 @@
 	* doc/Makefile.am: Likewise.
 	* doc/all.texi: Likewise.
 	* doc/as.texinfo: Likewise.
+	* doc/internals.texi: Likewise.
 	* doc/Makefile.in: Regenerate.
 	* Makefile.in: Regenerate.
 	* configure: Regenerate.
