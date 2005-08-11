@@ -1,3 +1,56 @@
+2005-08-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/all/gas.exp: Remove a29k and m88k support.
+	* gas/m88k/allinsn.d: Delete.
+	* gas/m88k/allinsn.s: Delete.
+	* gas/m88k/init.d: Delete.
+	* gas/m88k/init.s: Delete.
+	* gas/m88k/m88k.exp: Delete.
+	* gas/tic80/add.d: Delete.
+	* gas/tic80/add.lst: Delete.
+	* gas/tic80/add.s: Delete.
+	* gas/tic80/align.d: Delete.
+	* gas/tic80/align.lst: Delete.
+	* gas/tic80/align.s: Delete.
+	* gas/tic80/bitnum.d: Delete.
+	* gas/tic80/bitnum.lst: Delete.
+	* gas/tic80/bitnum.s: Delete.
+	* gas/tic80/ccode.d: Delete.
+	* gas/tic80/ccode.lst: Delete.
+	* gas/tic80/ccode.s: Delete.
+	* gas/tic80/cregops.d: Delete.
+	* gas/tic80/cregops.lst: Delete.
+	* gas/tic80/cregops.s: Delete.
+	* gas/tic80/endmask.d: Delete.
+	* gas/tic80/endmask.lst: Delete.
+	* gas/tic80/endmask.s: Delete.
+	* gas/tic80/float.d: Delete.
+	* gas/tic80/float.lst: Delete.
+	* gas/tic80/float.s: Delete.
+	* gas/tic80/regops.d: Delete.
+	* gas/tic80/regops.lst: Delete.
+	* gas/tic80/regops.s: Delete.
+	* gas/tic80/regops2.d: Delete.
+	* gas/tic80/regops2.lst: Delete.
+	* gas/tic80/regops2.s: Delete.
+	* gas/tic80/regops3.d: Delete.
+	* gas/tic80/regops3.lst: Delete.
+	* gas/tic80/regops3.s: Delete.
+	* gas/tic80/regops4.d: Delete.
+	* gas/tic80/regops4.lst: Delete.
+	* gas/tic80/regops4.s: Delete.
+	* gas/tic80/relocs1.c: Delete.
+	* gas/tic80/relocs1.d: Delete.
+	* gas/tic80/relocs1.lst: Delete.
+	* gas/tic80/relocs1.s: Delete.
+	* gas/tic80/relocs1b.d: Delete.
+	* gas/tic80/relocs2.c: Delete.
+	* gas/tic80/relocs2.d: Delete.
+	* gas/tic80/relocs2.lst: Delete.
+	* gas/tic80/relocs2.s: Delete.
+	* gas/tic80/relocs2b.d: Delete.
+	* gas/tic80/tic80.exp: Delete.
+
 2005-08-05  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* gas/hppa/reloc/reloc.exp (do_function_reloc_bug): Add "L%" to regexp.

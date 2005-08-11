@@ -116,7 +116,6 @@ case $target_triplet in {
 
 # '<' and '>' appear to have special meanings on the excluded targets
 case $target_triplet in {
-    { a29k-*-* } { }
     { frv-*-* } { }
     { hppa*-*-* } { }
     { m32r-*-* } { }
@@ -134,16 +133,11 @@ case $target_triplet in {
 }
 
 # This test is for any COFF target.
-# We omit m88k COFF because it uses weird pseudo-op names.
 # We omit the ARM toolchains because they define locals to
 #  start with '.', which eliminates .eos, .text etc from the output.
 # Omit c54x, since .tag and .def mean something different on that target
-if {   ([istarget *-*-coff*] && ![istarget m88*-*-*] && ![istarget *arm*-*-coff] && ![istarget thumb*-*-coff] && ![istarget xscale-*-coff] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
+if {   ([istarget *-*-coff*] && ![istarget *arm*-*-coff] && ![istarget thumb*-*-coff] && ![istarget xscale-*-coff] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
      ||([istarget *-*-pe*] && ![istarget arm*-*-pe*] && ![istarget thumb*-*-pe*]) \
-     || [istarget a29k-*-udi*] \
-     || [istarget a29k-*-ebmon*] \
-     || [istarget a29k-*-sym*] \
-     || [istarget a29k-*-vxworks*] \
      || [istarget i*86-*-aix*] \
      || [istarget i*86-*-sco*] \
      || [istarget i*86-*-isc*] \
