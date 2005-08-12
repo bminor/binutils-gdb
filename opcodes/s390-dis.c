@@ -206,7 +206,7 @@ print_insn_s390 (bfd_vma memaddr, struct disassemble_info *info)
 	      else if (operand->flags & S390_OPERAND_SIGNED)
 		(*info->fprintf_func) (info->stream, "%i", (int) value);
 	      else
-		(*info->fprintf_func) (info->stream, "%i", value);
+		(*info->fprintf_func) (info->stream, "%u", value);
 
 	      if (operand->flags & S390_OPERAND_DISP)
 		{

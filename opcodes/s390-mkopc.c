@@ -35,7 +35,8 @@ enum s390_opcode_cpu_val
     S390_OPCODE_G5 = 0,
     S390_OPCODE_G6,
     S390_OPCODE_Z900,
-    S390_OPCODE_Z990
+    S390_OPCODE_Z990,
+    S390_OPCODE_Z9_109
   };
 
 struct op_struct
@@ -195,6 +196,8 @@ main (void)
 	    min_cpu = S390_OPCODE_Z900;
 	  else if (strcmp (cpu_string, "z990") == 0)
 	    min_cpu = S390_OPCODE_Z990;
+	  else if (strcmp (cpu_string, "z9-109") == 0)
+	    min_cpu = S390_OPCODE_Z9_109;
 	  else {
 	    fprintf (stderr, "Couldn't parse cpu string %s\n", cpu_string);
 	    exit (1);

@@ -1,3 +1,17 @@
+2005-08-12 Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* s390-dis.c (print_insn_s390): Print unsigned operands with %u.
+	* s390-mkopc.c (s390_opcode_cpu_val): Add support for cpu type z9-109.
+	(main): Likewise.
+	* s390-opc.c (I32_16, U32_16, M_16): Add defines 32 bit immediates
+	and 4 bit optional masks.
+	(INSTR_RIL_RI, INSTR_RIL_RU, INSTR_RRF_M0RR, INSTR_RSE_CCRD,
+	INSTR_RSY_CCRD, INSTR_SSF_RRDRD): Add new instruction formats.
+	(MASK_RIL_RI, MASK_RIL_RU, MASK_RRF_M0RR, MASK_RSE_CCRD,
+	MASK_RSY_CCRD, MASK_SSF_RRDRD): Likewise.
+	(s390_opformats): Likewise.
+	* s390-opc.txt: Add new instructions for cpu type z9-109.
+
 2005-08-05  John David Anglin  <dave.anglin@nrc-crnc.gc.ca>
 
 	* hppa-dis.c (print_insn_hppa): Prefix 21-bit values with "L%".
