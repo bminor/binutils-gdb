@@ -31,6 +31,49 @@
 #include "opcode/msp430.h"
 #include "safe-ctype.h"
 
+/*
+   We will disable polymorphs by default because it is dangerous.
+   The potencial problem here is the following: assume we got the
+   following code:
+
+	jump .l1
+	nop
+	jump  subroutine	; external symbol
+      .l1:
+	nop
+	ret
+   
+   In case of assembly time relaxation we'll get:
+	0: jmp .l1 <.text +0x08> (reloc deleted)
+	2: nop
+	4: br subroutine
+    .l1:
+	8: nop
+	10: ret
+
+   If the 'subroutine' wiys thin +-1024 bytes range then linker
+   will produce
+	0: jmp .text +0x08
+	2: nop
+	4: jmp subroutine
+	.l1:
+	6: nop
+	8: ret	; 'jmp .text +0x08' will land here. WRONG!!!
+
+
+   The workaround is the following:
+   1. Declare global var enable_polymorphs which set to 1 via option -mP.
+   2. Declare global var enable_relax	which set to 1 via option -mQ.
+
+   If polymorphs are enabled, and relax isn't, treat all jumps as long jumps,
+   do not delete any relocs and leave them for linker.
+   
+   If relax is enabled, relax at assembly time and kill relocs as necessary.
+ */
+
+int msp430_enable_relax;
+int msp430_enable_polys;
+
 /* GCC uses the some condition codes which we'll
    implement as new polymorph instructions.
   
@@ -660,6 +703,8 @@ extract_word (char * from, char * to, int limit)
 }
 
 #define OPTION_MMCU 'm'
+#define OPTION_RELAX 'Q'
+#define OPTION_POLYMORPHS 'P'
 
 static void
 msp430_set_arch (int dummy ATTRIBUTE_UNUSED)
@@ -709,6 +754,17 @@ md_parse_option (int c, char * arg)
 	as_fatal (_("redefinition of mcu type %s' to %s'"),
 		  msp430_mcu->name, mcu_types[i].name);
       return 1;
+      break;
+      
+    case OPTION_RELAX:
+      msp430_enable_relax = 1; 
+      return 1;
+      break;
+      
+    case OPTION_POLYMORPHS:
+      msp430_enable_polys = 1;
+      return 1;
+      break;
     }
 
   return 0;
@@ -727,6 +783,8 @@ const char *md_shortopts = "m:";
 struct option md_longopts[] =
 {
   {"mmcu", required_argument, NULL, OPTION_MMCU},
+  {"mP", no_argument, NULL, OPTION_POLYMORPHS},
+  {"mQ", no_argument, NULL, OPTION_RELAX},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -758,6 +816,9 @@ md_show_usage (FILE * stream)
 	     "                  msp430xG437 msp430xG438 msp430G439\n"
 	     "                  msp430x435  msp430x436  msp430x437\n"
 	     "                  msp430x447  msp430x448  msp430x449\n"));
+  fprintf (stream,
+	   _("  -mQ - enable relaxation at assembly time. DANGEROUS!\n"
+	     "  -mP - enable polymorph instructions\n"));
 
   show_mcu_list (stream);
 }
@@ -1683,6 +1744,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       break;
 
     case 4:	/* Extended jumps.  */
+      if (!msp430_enable_polys)
+	{
+	  as_bad(_("polymorphs are not enabled. Use -mP option to enable."));
+	  break;
+	}
+	
       line = extract_operand (line, l1, sizeof (l1));
       if (l1[0])
 	{
@@ -1714,6 +1781,11 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       break;
 
     case 5:	/* Emulated extended branches.  */
+      if (!msp430_enable_polys)
+	{
+	  as_bad(_("polymorphs are not enabled. Use -mP option to enable."));
+	  break;
+	}
       line = extract_operand (line, l1, sizeof (l1));
       if (l1[0])
 	{
@@ -1820,9 +1892,24 @@ md_pcrel_from_section (fixS * fixp, segT sec)
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
+/* Replaces standard TC_FORCE_RELOCATION_LOCAL.
+   Now it handles the situation when relocations
+   have to be passed to linker. */
+int
+msp430_force_relocation_local(fixS *fixp)
+{
+  if (msp430_enable_polys
+        && !msp430_enable_relax)
+    return 1;
+  else
+    return (!fixp->fx_pcrel
+	    || fixp->fx_plt
+	    || generic_force_reloc(fixp));
+}
+
+
 /* GAS will call this for each fixup.  It should store the correct
    value in the object file.  */
-
 void
 md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 {
@@ -1879,13 +1966,18 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 	}
     }
 
-  switch (fixp->fx_r_type)
+  fixp->fx_no_overflow = 1;
+
+  /* if polymorphs are enabled and relax disabled. 
+     do not kill any relocs and pass them to linker. */
+  if (msp430_enable_polys 
+      && !msp430_enable_relax)
     {
-    default:
-      fixp->fx_no_overflow = 1;
-      break;
-    case BFD_RELOC_MSP430_10_PCREL:
-      break;
+      if (!fixp->fx_addsy || (fixp->fx_addsy 
+	  && S_GET_SEGMENT (fixp->fx_addsy) == absolute_section))
+	fixp->fx_done = 1;	/* it is ok to kill 'abs' reloc */
+      else
+      	fixp->fx_done = 0;
     }
 
   if (fixp->fx_done)
@@ -2185,6 +2277,13 @@ msp430_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS * fragP,
       aim = S_GET_VALUE (symbolP) - fragP->fr_address - fragP->fr_fix;
     }
 
+  if (!msp430_enable_relax)
+    {
+      /* Relaxation is not enabled. So, make all jump as long ones
+         by setting 'aim' to quite high value. */
+      aim = 0x7fff;
+    }
+  
   this_state = fragP->fr_subtype;
   start_type = this_type = table + this_state;
 

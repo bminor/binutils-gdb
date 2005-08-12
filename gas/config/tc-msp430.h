@@ -112,3 +112,11 @@ extern long md_pcrel_from_section (struct fix *, segT);
 #define md_relax_frag(SEG, FRAGP, STRETCH)             \
    msp430_relax_frag (SEG, FRAGP, STRETCH)
 extern long msp430_relax_frag (segT, fragS *, long);
+
+#define TC_FORCE_RELOCATION_LOCAL(FIX)	\
+   msp430_force_relocation_local(FIX)
+extern int msp430_force_relocation_local(struct fix *);
+
+
+extern int msp430_enable_relax;
+extern int msp430_enable_polys;

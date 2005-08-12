@@ -26,8 +26,17 @@
 @section Options
 @cindex MSP 430 options (none)
 @cindex options for MSP430 (none)
-@code{@value{AS}} has only -m flag which selects the mpu arch. Currently has 
-no effect.
+@table @code
+
+@item -m
+select the mpu arch. Currently has no effect.
+@item -mP 
+enables polymorph instructions handler.
+
+@item -mQ 
+enables relaxation at assembly time. DANGEROUS!
+
+@end table
 
 @node MSP430 Syntax
 @section Syntax
@@ -214,7 +223,7 @@ This directive instructs assembler to add new profile entry to the object file.
 additional pseudo-instructions are needed on this family.
 
 For information on the 430 machine instruction set, see @cite{MSP430
-User's Manual, document slau049b}, Texas Instrument, Inc.
+User's Manual, document slau049d}, Texas Instrument, Inc.
 
 @node MSP430 Profiling Capability
 @section Profiling Capability

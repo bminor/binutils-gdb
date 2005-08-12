@@ -1,3 +1,20 @@
+2005-08-12  Dmitry Diky <diwil@spec.ru>
+	* config/tc-msp430.c (msp430_enable_relax): New flag.
+	(msp430_enable_polys): Likewise.
+	(OPTION_RELAX): New option.
+	(OPTION_POLYMORPHS): Likewise.
+	(md_longopts): New long options.
+	(md_show_usage): Updated.
+	(md_parse_option): Add new options handler.
+	(msp430_operands): Add check if polymorph insns are enabled.
+	(msp430_force_relocation_local): New function.
+	(md_apply_fix): Now delete relocs according to new flags combination.
+	(msp430_relax_frag): Convert long branches to short branches only if
+	flag msp430_enable_relax is set.
+	* config/tc-msp430.h (TC_FORCE_RELOCATION_LOCAL): Defined.
+	(msp430_force_relocation_local): Likewise.
+	* doc/c-msp430.texi: Describe new options.
+	
 2005-08-11  Ian Lance Taylor  <ian@airs.com>
 
 	* Makefile.am ($(srcdir)/make-gas.com): Remove target.
