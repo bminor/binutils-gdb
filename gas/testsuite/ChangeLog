@@ -1,3 +1,42 @@
+2005-08-12 Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* gas/testsuite/gas/s390/s390.exp: Reorganize gas testsuite for s390
+	and add tests for new cpu type z9-109.
+	* gas/testsuite/gas/s390/esa-g5.d: New.
+	* gas/testsuite/gas/s390/esa-g5.s: New.
+	* gas/testsuite/gas/s390/esa-operands.d: New.
+	* gas/testsuite/gas/s390/esa-operands.s: New.
+	* gas/testsuite/gas/s390/esa-reloc.d: New.
+	* gas/testsuite/gas/s390/esa-reloc.s: New.
+	* gas/testsuite/gas/s390/esa-z9-109.d: New.
+	* gas/testsuite/gas/s390/esa-z9-109.s: New.
+	* gas/testsuite/gas/s390/esa-z900.d: New.
+	* gas/testsuite/gas/s390/esa-z900.s: New.
+	* gas/testsuite/gas/s390/esa-z990.d: New.
+	* gas/testsuite/gas/s390/esa-z990.s: New.
+	* gas/testsuite/gas/s390/zarch-operands.d: New.
+	* gas/testsuite/gas/s390/zarch-operands.s: New.
+	* gas/testsuite/gas/s390/zarch-reloc.d: New.
+	* gas/testsuite/gas/s390/zarch-reloc.s: New.
+	* gas/testsuite/gas/s390/zarch-z9-109.d: New.
+	* gas/testsuite/gas/s390/zarch-z9-109.s: New.
+	* gas/testsuite/gas/s390/zarch-z900.d: New.
+	* gas/testsuite/gas/s390/zarch-z900.s: New.
+	* gas/testsuite/gas/s390/zarch-z990.d: New.
+	* gas/testsuite/gas/s390/zarch-z990.s: New.
+	* gas/testsuite/gas/s390/opcode.d: Delete.
+	* gas/testsuite/gas/s390/opcode.s: Delete.
+	* gas/testsuite/gas/s390/opcode64.d: Delete.
+	* gas/testsuite/gas/s390/opcode64.s: Delete.
+	* gas/testsuite/gas/s390/operands.d: Delete.
+	* gas/testsuite/gas/s390/operands.s: Delete.
+	* gas/testsuite/gas/s390/operands64.d: Delete.
+	* gas/testsuite/gas/s390/operands64.s: Delete.
+	* gas/testsuite/gas/s390/reloc.d: Likewise.
+	* gas/testsuite/gas/s390/reloc.s: Likewise.
+	* gas/testsuite/gas/s390/reloc64.d: Likewise.
+	* gas/testsuite/gas/s390/reloc64.s: Likewise.
+
 2005-08-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/all/gas.exp: Remove a29k and m88k support.
