@@ -1,3 +1,11 @@
+2005-08-11  Ian Lance Taylor  <ian@airs.com>
+
+	* Makefile.am ($(srcdir)/make-gas.com): Remove target.
+	(stamp-mk.com): Likewise.
+	(EXTRA_DIST): Remove make-gas.com from list.
+	(MOSTLYCLEANFILES): Remove stamp-mk.com from list.
+	* Makefile.in: Regenerate.
+
 2005-08-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* subsegs.c (subseg_change): Move declaration of seginfo to before

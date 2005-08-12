@@ -656,7 +656,7 @@ POTFILES = $(MULTI_CFILES) $(TARGET_ENV_HFILES) $(OBJ_FORMAT_HFILES) \
 
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
-EXTRA_DIST = make-gas.com m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
+EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
 DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-desc.h
 
 # Now figure out from those variables how to compile and link.
@@ -706,7 +706,7 @@ itbl_test_LDADD = itbl-tops.o itbl-test.o $(GASLIBS) @LEXLIB@
 CGEN_CPU_PREFIX = @cgen_cpu_prefix@
 
 # Remake the info files.
-MOSTLYCLEANFILES = $(STAGESTUFF) core stamp-mk.com \
+MOSTLYCLEANFILES = $(STAGESTUFF) core \
 	testsuite/*.o testsuite/*.out testsuite/gas.log testsuite/gas.sum \
 	testsuite/site.exp site.bak site.exp stage stage1 stage2
 
@@ -2713,12 +2713,6 @@ uninstall-info: uninstall-info-recursive
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
-
-$(srcdir)/make-gas.com: stamp-mk.com
-stamp-mk.com: vmsconf.sh Makefile
-	sh $(srcdir)/vmsconf.sh $(GENERIC_OBJS) > new-make.com
-	$(SHELL) $(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
-	touch stamp-mk.com
 diststuff: $(EXTRA_DIST) info
 all: info
 

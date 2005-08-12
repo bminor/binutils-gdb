@@ -437,13 +437,7 @@ noinst_PROGRAMS = as-new
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
 
-$(srcdir)/make-gas.com: stamp-mk.com
-stamp-mk.com: vmsconf.sh Makefile
-	sh $(srcdir)/vmsconf.sh $(GENERIC_OBJS) > new-make.com
-	$(SHELL) $(srcdir)/../move-if-change new-make.com $(srcdir)/make-gas.com
-	touch stamp-mk.com
-
-EXTRA_DIST = make-gas.com m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
+EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
 diststuff: $(EXTRA_DIST) info
 all: info
 
@@ -644,7 +638,7 @@ cgen.o: cgen.c cgen.h cgen-desc.h subsegs.h \
 
 # Remake the info files.
 
-MOSTLYCLEANFILES = $(STAGESTUFF) core stamp-mk.com \
+MOSTLYCLEANFILES = $(STAGESTUFF) core \
 	testsuite/*.o testsuite/*.out testsuite/gas.log testsuite/gas.sum \
 	testsuite/site.exp site.bak site.exp stage stage1 stage2
 
