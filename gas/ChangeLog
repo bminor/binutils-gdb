@@ -1,3 +1,8 @@
+2005-08-12 Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (md_parse_option):  Add cpu type z9-109.
+	(md_gather_operands): Add support for optional operands.
+
 2005-08-12  Dmitry Diky <diwil@spec.ru>
 	* config/tc-msp430.c (msp430_enable_relax): New flag.
 	(msp430_enable_polys): Likewise.
