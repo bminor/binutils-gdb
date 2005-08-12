@@ -1,3 +1,8 @@
+2005-08-12  Dmitry Diky  <diwil@spec.ru>
+
+	* elf32-msp430.c (msp430_elf_relax_delete_bytes): Adjust relocations
+	referenced by .section + DISPLACEMENT.
+
 2005-08-10  James E. Wilson  <wilson@specifix.com>
 
 	* dwarf2.c (scan_unit_for_symbols, case DT_AT_location): Verify that

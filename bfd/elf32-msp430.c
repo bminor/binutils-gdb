@@ -868,10 +868,22 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   sec->size -= count;
 
   /* Adjust all the relocs.  */
+  symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
+  isym = (Elf_Internal_Sym *) symtab_hdr->contents;
   for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
-    /* Get the new reloc address.  */
-    if ((irel->r_offset > addr && irel->r_offset < toaddr))
-      irel->r_offset -= count;
+    {
+      int sidx = ELF32_R_SYM(irel->r_info);
+      Elf_Internal_Sym *lsym = isym + sidx;
+      
+      /* Get the new reloc address.  */
+      if ((irel->r_offset > addr && irel->r_offset < toaddr))
+	irel->r_offset -= count;
+
+      /* Adjust symbols referenced by .sec+0xXX */
+      if (irel->r_addend > addr && irel->r_addend < toaddr 
+	  && lsym->st_shndx == sec_shndx)
+	irel->r_addend -= count;
+    }
 
   /* Adjust the local symbols defined in this section.  */
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
