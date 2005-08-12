@@ -1,5 +1,10 @@
 2005-08-11  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/expdyn1.s (expobj): Set size here, at definition...
+	* ld-cris/pv32.s: ...not here.
+	* ld-cris/expdyn1.d, ld-cris/libdso-12.d, ld-cris/locref1.d:
+	Adjust for expobj size being set at definition.
+
 	* ld-cris/v32-ba-1.d: Regexpize to adjust for symbol change.
 
 2005-08-08  Richard Earnshaw  <richard.earnshaw@arm.com>
