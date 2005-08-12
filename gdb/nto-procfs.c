@@ -545,10 +545,8 @@ procfs_attach (char *args, int from_tty)
 static void
 procfs_post_attach (pid_t pid)
 {
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
   if (exec_bfd)
-    SOLIB_CREATE_INFERIOR_HOOK (pid);
-#endif
+    solib_create_inferior_hook ();
 }
 
 static ptid_t
@@ -1091,11 +1089,9 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
   push_target (&procfs_ops);
   target_terminal_init ();
 
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
   if (exec_bfd != NULL
       || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
-    SOLIB_CREATE_INFERIOR_HOOK (pid);
-#endif
+    solib_create_inferior_hook ();
   stop_soon = 0;
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
 }

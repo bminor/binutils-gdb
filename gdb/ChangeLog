@@ -1,3 +1,12 @@
+2005-08-12  Kris Warkentin  <kewarken@qnx.com>
+
+	* i386-nto-tdep.c (i386nto_init_abi): Don't set gdbarch skip
+	trampoline code hook.
+	* nto-procfs.c (procfs_post_attach): Call solib_create_inferior_hook
+	instead of  SOLIB_CREATE_INFERIOR_HOOK.
+	(procfs_create_inferior): Ditto.
+	* config/tm-nto.h: Don't define SKIP_TRAMPOLINE_CODE.
+
 2005-08-11  Andreas Schwab  <schwab@suse.de>
 
 	PR exp/1978

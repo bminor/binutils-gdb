@@ -262,9 +262,6 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      default which is [unfortunately] to decrement the PC.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
-  /* NTO has shared libraries.  */
-  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
-
   tdep->gregset_reg_offset = i386nto_gregset_reg_offset;
   tdep->gregset_num_regs = ARRAY_SIZE (i386nto_gregset_reg_offset);
   tdep->sizeof_gregset = NUM_GPREGS * 4;
