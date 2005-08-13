@@ -1,3 +1,8 @@
+2005-08-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (fetch_register, store_register) 
+	(supply_gregset, fill_gregset): Remove redundant casts.
+
 2005-08-12  Kris Warkentin  <kewarken@qnx.com>
 
 	* i386-nto-tdep.c (i386nto_init_abi): Don't set gdbarch skip
