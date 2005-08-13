@@ -1,6 +1,6 @@
-/* Signal trampoline unwinder, for GDB the GNU Debugger.
+/* Signal trampoline unwinder.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,7 +64,7 @@ struct tramp_frame
   {
     ULONGEST bytes;
     ULONGEST mask;
-  } insn[8];
+  } insn[16];
   /* Initialize a trad-frame cache corresponding to the tramp-frame.
      FUNC is the address of the instruction TRAMP[0] in memory.  */
   void (*init) (const struct tramp_frame *self,
