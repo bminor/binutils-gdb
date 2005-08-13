@@ -1,3 +1,8 @@
+2005-08-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* readelf.c (get_parisc_segment_type): Handle PT_PARISC_WEAKORDER.
+	(get_parisc_section_type_name): Handle SHT_PARISC_DLKM.
+
 2005-08-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention "-t/--section-details" and

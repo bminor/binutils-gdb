@@ -2411,6 +2411,7 @@ get_parisc_segment_type (unsigned long type)
     case PT_HP_CORE_UTSNAME:	return "HP_CORE_UTSNAME";
     case PT_PARISC_ARCHEXT:	return "PARISC_ARCHEXT";
     case PT_PARISC_UNWIND:	return "PARISC_UNWIND";
+    case PT_PARISC_WEAKORDER:	return "PARISC_WEAKORDER";
     default:
       break;
     }
@@ -2577,6 +2578,7 @@ get_parisc_section_type_name (unsigned int sh_type)
     case SHT_PARISC_ANNOT:	return "PARISC_ANNOT";
     case SHT_PARISC_SYMEXTN:	return "PARISC_SYMEXTN";
     case SHT_PARISC_STUBS:	return "PARISC_STUBS";
+    case SHT_PARISC_DLKM:	return "PARISC_DLKM";
     default:
       break;
     }
