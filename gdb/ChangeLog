@@ -1,5 +1,8 @@
 2005-08-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* solib-som.c (som_current_sos): Cast to 'gdb_byte *' where
+	appropriate.
+
 	* inf-ptrace.c (inf_ptrace_him) [PT_GET_PROCESS_STATE]: Move
 	code...
 	(inf_ptrace_post_startup_inferior): ...here.  New function.

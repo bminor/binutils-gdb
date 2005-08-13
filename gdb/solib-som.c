@@ -1,6 +1,6 @@
-/* Handle SOM shared libraries for GDB, the GNU Debugger.
+/* Handle SOM shared libraries.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -601,9 +601,10 @@ som_current_sos (void)
       new->lm_info = xmalloc (sizeof (struct lm_info));
       make_cleanup (xfree, new->lm_info);
 
-      read_memory (lm, (char *)&dbuf, sizeof (struct dld_list));
+      read_memory (lm, (gdb_byte *)&dbuf, sizeof (struct dld_list));
 
-      addr = extract_unsigned_integer (&dbuf.name, sizeof (dbuf.name));
+      addr = extract_unsigned_integer ((gdb_byte *)&dbuf.name,
+				       sizeof (dbuf.name));
       target_read_string (addr, &namebuf, SO_NAME_MAX_PATH_SIZE - 1, &errcode);
       if (errcode != 0)
 	warning (_("Can't read pathname for load map: %s."),
@@ -624,7 +625,7 @@ som_current_sos (void)
 	    lmi->lm_addr = lm;
 
 #define EXTRACT(_fld) \
-  extract_unsigned_integer (&dbuf._fld, sizeof (dbuf._fld));
+  extract_unsigned_integer ((gdb_byte *)&dbuf._fld, sizeof (dbuf._fld));
 
 	    lmi->text_addr = EXTRACT (text_addr);
 	    tmp = EXTRACT (info);
