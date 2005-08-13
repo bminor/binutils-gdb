@@ -493,7 +493,7 @@ sparc32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static const gdb_byte *
 sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len)
 {
-  static gdb_byte break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
+  static const gdb_byte break_insn[] = { 0x91, 0xd0, 0x20, 0x01 };
 
   *len = sizeof (break_insn);
   return break_insn;

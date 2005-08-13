@@ -1,5 +1,7 @@
 2005-08-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc_breakpoint_from_pc): Constify break_insn.
+
 	* sparc-sol2-tdep.c (sparc_sol2_pc_in_sigtramp): Check for
 	"__sighndlr".
 
