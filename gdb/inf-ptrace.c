@@ -108,19 +108,6 @@ inf_ptrace_me (void)
 static void
 inf_ptrace_him (int pid)
 {
-#ifdef PT_GET_PROCESS_STATE
-  {
-    ptrace_event_t pe;
-
-    /* Set the initial event mask.  */
-    memset (&pe, 0, sizeof pe);
-    pe.pe_set_event |= PTRACE_FORK;
-    if (ptrace (PT_SET_EVENT_MASK, pid,
-		(PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
-      perror_with_name (("ptrace"));
-  }
-#endif
-
   push_target (ptrace_ops_hack);
 
   /* On some targets, there must be some explicit synchronization
@@ -158,6 +145,23 @@ inf_ptrace_create_inferior (char *exec_file, char *allargs, char **env,
   /* Pedal to the metal...  */
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
+
+#ifdef PT_GET_PROCESS_STATE
+
+static void
+inf_ptrace_post_startup_inferior (ptid_t pid)
+{
+  ptrace_event_t pe;
+
+  /* Set the initial event mask.  */
+  memset (&pe, 0, sizeof pe);
+  pe.pe_set_event |= PTRACE_FORK;
+  if (ptrace (PT_SET_EVENT_MASK, ptid_get_pid (pid),
+	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+    perror_with_name (("ptrace"));
+}
+
+#endif
 
 /* Clean up a rotting corpse of an inferior after it died.  */
 
@@ -222,19 +226,6 @@ inf_ptrace_attach (char *args, int from_tty)
   error (_("This system does not support attaching to a process"));
 #endif
 
-#ifdef PT_GET_PROCESS_STATE
-  {
-    ptrace_event_t pe;
-
-    /* Set the initial event mask.  */
-    memset (&pe, 0, sizeof pe);
-    pe.pe_set_event |= PTRACE_FORK;
-    if (ptrace (PT_SET_EVENT_MASK, pid,
-		(PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
-      perror_with_name (("ptrace"));
-  }
-#endif
-
   inferior_ptid = pid_to_ptid (pid);
   push_target (ptrace_ops_hack);
 
@@ -242,6 +233,23 @@ inf_ptrace_attach (char *args, int from_tty)
      inferior's symbol table or similar.  */
   observer_notify_inferior_created (&current_target, from_tty);
 }
+
+#ifdef PT_GET_PROCESS_STATE
+
+void
+inf_ptrace_post_attach (int pid)
+{
+  ptrace_event_t pe;
+
+  /* Set the initial event mask.  */
+  memset (&pe, 0, sizeof pe);
+  pe.pe_set_event |= PTRACE_FORK;
+  if (ptrace (PT_SET_EVENT_MASK, pid,
+	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+    perror_with_name (("ptrace"));
+}
+
+#endif
 
 /* Detach from the inferior, optionally passing it the signal
    specified ARGS.  If FROM_TTY is non-zero, be chatty about it.  */
@@ -590,6 +598,8 @@ inf_ptrace_target (void)
   t->to_create_inferior = inf_ptrace_create_inferior;
 #ifdef PT_GET_PROCESS_STATE
   t->to_follow_fork = inf_ptrace_follow_fork;
+  t->to_post_startup_inferior = inf_ptrace_post_startup_inferior;
+  t->to_post_attach = inf_ptrace_post_attach;
 #endif
   t->to_mourn_inferior = inf_ptrace_mourn_inferior;
   t->to_thread_alive = inf_ptrace_thread_alive;

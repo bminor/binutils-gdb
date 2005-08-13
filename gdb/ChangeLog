@@ -1,5 +1,13 @@
 2005-08-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* inf-ptrace.c (inf_ptrace_him) [PT_GET_PROCESS_STATE]: Move
+	code...
+	(inf_ptrace_post_startup_inferior): ...here.  New function.
+	(inf_ptrace_attach) [PT_GET_PROCESS_STATE]: Move code...
+	(inf_ptrace_post_attach): ...here.
+	(inf_ptrace_target) [PT_GET_PROCESS_STATE]: Set
+	to_post_startup_inferior and to_post_attch.
+
 	* sparc-tdep.c (sparc_breakpoint_from_pc): Constify break_insn.
 
 	* sparc-sol2-tdep.c (sparc_sol2_pc_in_sigtramp): Check for
