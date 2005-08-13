@@ -70,7 +70,8 @@ int
 sparc_sol2_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
   return (name && (strcmp (name, "sigacthandler") == 0
-		   || strcmp (name, "ucbsigvechandler") == 0));
+		   || strcmp (name, "ucbsigvechandler") == 0
+		   || strcmp (name, "__sighndlr") == 0));
 }
 
 static struct sparc_frame_cache *
