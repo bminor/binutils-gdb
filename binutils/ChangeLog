@@ -1,3 +1,8 @@
+2005-08-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* readelf.c (slurp_hppa_unwind_table): Fix entry size on hppa64-hpux.
+	Don't access table entries past the end of the table.
+
 2005-08-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* readelf.c (get_parisc_segment_type): Handle PT_PARISC_WEAKORDER.

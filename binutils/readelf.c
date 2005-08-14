@@ -5198,7 +5198,7 @@ slurp_hppa_unwind_table (FILE *file,
 			 struct hppa_unw_aux_info *aux,
 			 Elf_Internal_Shdr *sec)
 {
-  unsigned long size, unw_ent_size, nrelas, i;
+  unsigned long size, unw_ent_size, nentries, nrelas, i;
   Elf_Internal_Phdr *seg;
   struct hppa_unw_table_entry *tep;
   Elf_Internal_Shdr *relsec;
@@ -5238,31 +5238,26 @@ slurp_hppa_unwind_table (FILE *file,
   if (!table)
     return 0;
 
-  unw_ent_size = 2 * eh_addr_size + 8;
+  unw_ent_size = 16;
+  nentries = size / unw_ent_size;
+  size = unw_ent_size * nentries;
 
-  tep = aux->table = xcmalloc (size / unw_ent_size, sizeof (aux->table[0]));
+  tep = aux->table = xcmalloc (nentries, sizeof (aux->table[0]));
 
-  for (tp = table; tp < table + size; tp += (2 * eh_addr_size + 8), ++tep)
+  for (tp = table; tp < table + size; tp += unw_ent_size, ++tep)
     {
       unsigned int tmp1, tmp2;
 
       tep->start.section = SHN_UNDEF;
       tep->end.section   = SHN_UNDEF;
 
-      if (is_32bit_elf)
-	{
-	  tep->start.offset = byte_get ((unsigned char *) tp + 0, 4);
-	  tep->end.offset = byte_get ((unsigned char *) tp + 4, 4);
-	  tmp1 = byte_get ((unsigned char *) tp + 8, 4);
-	  tmp2 = byte_get ((unsigned char *) tp + 12, 4);
-	}
-      else
-	{
-	  tep->start.offset = BYTE_GET ((unsigned char *) tp + 0);
-	  tep->end.offset = BYTE_GET ((unsigned char *) tp + 8);
-	  tmp1 = byte_get ((unsigned char *) tp + 16, 4);
-	  tmp2 = byte_get ((unsigned char *) tp + 20, 4);
-	}
+      tep->start.offset = byte_get ((unsigned char *) tp + 0, 4);
+      tep->end.offset = byte_get ((unsigned char *) tp + 4, 4);
+      tmp1 = byte_get ((unsigned char *) tp + 8, 4);
+      tmp2 = byte_get ((unsigned char *) tp + 12, 4);
+
+      tep->start.offset += aux->seg_base;
+      tep->end.offset   += aux->seg_base;
 
       tep->Cannot_unwind = (tmp1 >> 31) & 0x1;
       tep->Millicode = (tmp1 >> 30) & 0x1;
@@ -5295,9 +5290,6 @@ slurp_hppa_unwind_table (FILE *file,
       tep->Pseudo_SP_Set = (tmp2 >> 28) & 0x1;
       tep->reserved4 = (tmp2 >> 27) & 0x1;
       tep->Total_frame_size = tmp2 & 0x7ffffff;
-
-      tep->start.offset += aux->seg_base;
-      tep->end.offset   += aux->seg_base;
     }
   free (table);
 
@@ -5356,7 +5348,7 @@ slurp_hppa_unwind_table (FILE *file,
       free (rela);
     }
 
-  aux->table_len = size / unw_ent_size;
+  aux->table_len = nentries;
 
   return 1;
 }
