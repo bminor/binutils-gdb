@@ -952,12 +952,12 @@ print_insn_hppa (bfd_vma memaddr, disassemble_info *info)
 
 		case 'Z':
 		  /* addil %r1 implicit output.  */
-		  (*info->fprintf_func) (info->stream, "%%r1");
+		  fputs_filtered ("r1", info);
 		  break;
 
 		case 'Y':
 		  /* be,l %sr0,%r31 implicit output.  */
-		  (*info->fprintf_func) (info->stream, "%%sr0,%%r31");
+		  fputs_filtered ("sr0,r31", info);
 		  break;
 
 		case '@':
@@ -973,7 +973,7 @@ print_insn_hppa (bfd_vma memaddr, disassemble_info *info)
 					 GET_FIELD (insn, 22, 25));
 		  break;
 		case '!':
-		  (*info->fprintf_func) (info->stream, "%%sar");
+		  fputs_filtered ("sar", info);
 		  break;
 		case 'p':
 		  (*info->fprintf_func) (info->stream, "%d",
@@ -1219,7 +1219,7 @@ print_insn_hppa (bfd_vma memaddr, disassemble_info *info)
 		    (memaddr + 8 + extract_22 (insn), info);
 		  break;
 		case 'L':
-		  fputs_filtered (",%r2", info);
+		  fputs_filtered (",rp", info);
 		  break;
 		default:
 		  (*info->fprintf_func) (info->stream, "%c", *s);

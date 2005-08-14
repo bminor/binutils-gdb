@@ -1,3 +1,8 @@
+2005-08-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* hppa-dis.c (print_insn_hppa): Don't print '%' before register names.
+	Use "rp" instead of "%r2" in "b,l" insns.
+
 2005-08-12 Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* s390-dis.c (print_insn_s390): Print unsigned operands with %u.
