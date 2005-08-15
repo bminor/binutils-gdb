@@ -22,7 +22,7 @@ Disassembly of section .text:
 #				-> R_X86_64_DTPMOD64	sg1
  +1010:	66[ 	]+data16
  +1011:	66[ 	]+data16
- +1012:	48 e8 20 f5 ff ff[ 	]+rex64 callq  [0-9a-f]+ <.*>
+ +1012:	48 e8 [0-9a-f 	]+rex64 callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +1018:	90[ 	]+nop *
  +1019:	90[ 	]+nop *
@@ -43,7 +43,7 @@ Disassembly of section .text:
 #				-> R_X86_64_DTPMOD64	[0 0x2000000000000000]
  +1038:	66[ 	]+data16
  +1039:	66[ 	]+data16
- +103a:	48 e8 f8 f4 ff ff[ 	]+rex64 callq  [0-9a-f]+ <.*>
+ +103a:	48 e8 [0-9a-f 	]+rex64 callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +1040:	90[ 	]+nop *
  +1041:	90[ 	]+nop *
@@ -64,7 +64,7 @@ Disassembly of section .text:
 #				-> R_X86_64_DTPMOD64	[0 0x4000000000000000]
  +1060:	66[ 	]+data16
  +1061:	66[ 	]+data16
- +1062:	48 e8 d0 f4 ff ff[ 	]+rex64 callq  [0-9a-f]+ <.*>
+ +1062:	48 e8 [0-9a-f 	]+rex64 callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +1068:	90[ 	]+nop *
  +1069:	90[ 	]+nop *
@@ -85,7 +85,7 @@ Disassembly of section .text:
 #				-> R_X86_64_DTPMOD64	[0 0x6000000000000000]
  +1088:	66[ 	]+data16
  +1089:	66[ 	]+data16
- +108a:	48 e8 a8 f4 ff ff[ 	]+rex64 callq  [0-9a-f]+ <.*>
+ +108a:	48 e8 [0-9a-f 	]+rex64 callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +1090:	90[ 	]+nop *
  +1091:	90[ 	]+nop *
@@ -103,7 +103,7 @@ Disassembly of section .text:
 #  LD
  +10a8:	48 8d 3d b1 02 10 00[ 	]+lea    1049265\(%rip\),%rdi +# 101360 <.*>
 #				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
- +10af:	e8 84 f4 ff ff[ 	]+callq  [0-9a-f]+ <.*>
+ +10af:	e8 [0-9a-f 	]+callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +10b4:	90[ 	]+nop *
  +10b5:	90[ 	]+nop *
@@ -118,7 +118,7 @@ Disassembly of section .text:
 #  LD against hidden and local variables
  +10ca:	48 8d 3d 8f 02 10 00[ 	]+lea    1049231\(%rip\),%rdi +# 101360 <.*>
 #				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
- +10d1:	e8 62 f4 ff ff[ 	]+callq  [0-9a-f]+ <.*>
+ +10d1:	e8 [0-9a-f 	]+callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +10d6:	90[ 	]+nop *
  +10d7:	90[ 	]+nop *
@@ -133,7 +133,7 @@ Disassembly of section .text:
 #  LD against hidden but not local variables
  +10ec:	48 8d 3d 6d 02 10 00[ 	]+lea    1049197\(%rip\),%rdi +# 101360 <.*>
 #				-> R_X86_64_DTPMOD64	[0 0x000000000000000]
- +10f3:	e8 40 f4 ff ff[ 	]+callq  [0-9a-f]+ <.*>
+ +10f3:	e8 [0-9a-f 	]+callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
  +10f8:	90[ 	]+nop *
  +10f9:	90[ 	]+nop *

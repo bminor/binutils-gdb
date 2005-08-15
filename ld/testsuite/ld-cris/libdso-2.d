@@ -51,7 +51,7 @@ Symbol table '\.symtab' contains 21 entries:
     10: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   10 
     11: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   11 
     12: [0-9a-f]+     0 SECTION LOCAL  DEFAULT   12 
-    13: 0+216c     0 OBJECT  LOCAL  DEFAULT  ABS _DYNAMIC
+    13: 0+216c     0 OBJECT  LOCAL  HIDDEN  ABS _DYNAMIC
     14: 0+2204     0 NOTYPE  LOCAL  DEFAULT  ABS __bss_start
     15: 0+2204     0 NOTYPE  LOCAL  DEFAULT  ABS _edata
     16: 0+21f4     0 OBJECT  LOCAL  HIDDEN  ABS _GLOBAL_OFFSET_TABLE_

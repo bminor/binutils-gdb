@@ -5,7 +5,6 @@ Symbol table for image:
    ..  ..: .......0    20    FUNC GLOBAL DEFAULT   6 lib_func1
    ..  ..: .......1     2    FUNC GLOBAL DEFAULT   6 lib_func2
    ..  ..: ........     0  NOTYPE GLOBAL DEFAULT ABS _bss_end__
-   ..  ..: ........     0  OBJECT GLOBAL DEFAULT ABS _DYNAMIC
    ..  ..: ........     0  NOTYPE GLOBAL DEFAULT ABS __bss_end__
    ..  ..: ........     0  NOTYPE GLOBAL DEFAULT ABS _stack
    ..  ..: ........     4  OBJECT GLOBAL DEFAULT   9 data_obj

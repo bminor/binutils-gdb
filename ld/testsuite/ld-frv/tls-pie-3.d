@@ -7,21 +7,21 @@
 
 Disassembly of section \.text:
 
-00000324 <_start>:
- 324:	92 c8 f0 0c 	ldi @\(gr15,12\),gr9
- 328:	00 88 00 00 	nop\.p
- 32c:	80 88 00 00 	nop
- 330:	92 c8 f0 0c 	ldi @\(gr15,12\),gr9
- 334:	80 88 00 00 	nop
- 338:	12 c8 f0 0c 	ldi\.p @\(gr15,12\),gr9
- 33c:	80 88 00 00 	nop
- 340:	80 88 00 00 	nop
- 344:	92 c8 f0 0c 	ldi @\(gr15,12\),gr9
- 348:	00 88 00 00 	nop\.p
- 34c:	80 88 00 00 	nop
- 350:	92 c8 f0 0c 	ldi @\(gr15,12\),gr9
+[0-9a-f ]+<_start>:
+[0-9a-f ]+:	92 c8 f0 0c 	ldi @\(gr15,12\),gr9
+[0-9a-f ]+:	00 88 00 00 	nop\.p
+[0-9a-f ]+:	80 88 00 00 	nop
+[0-9a-f ]+:	92 c8 f0 0c 	ldi @\(gr15,12\),gr9
+[0-9a-f ]+:	80 88 00 00 	nop
+[0-9a-f ]+:	12 c8 f0 0c 	ldi\.p @\(gr15,12\),gr9
+[0-9a-f ]+:	80 88 00 00 	nop
+[0-9a-f ]+:	80 88 00 00 	nop
+[0-9a-f ]+:	92 c8 f0 0c 	ldi @\(gr15,12\),gr9
+[0-9a-f ]+:	00 88 00 00 	nop\.p
+[0-9a-f ]+:	80 88 00 00 	nop
+[0-9a-f ]+:	92 c8 f0 0c 	ldi @\(gr15,12\),gr9
 Disassembly of section \.got:
 
-000043d8 <_GLOBAL_OFFSET_TABLE_>:
+[0-9a-f ]+<_GLOBAL_OFFSET_TABLE_>:
 	\.\.\.
-			43e4: R_FRV_TLSOFF	u
+[0-9a-f	 ]+: R_FRV_TLSOFF	u

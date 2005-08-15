@@ -5,7 +5,7 @@
 #readelf: -WSsrl
 #target: sparc-*-*
 
-There are 13 section headers, starting at offset 0x[0-9a-f]+:
+.*
 
 Section Headers:
  +\[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
@@ -18,10 +18,9 @@ Section Headers:
  +\[ 6\] .tbss +NOBITS +0+12000 0+2000 0+24 0+ WAT +0 +0 +4
  +\[ 7\] .dynamic +DYNAMIC +0+12000 0+2000 0+80 08 +WA +3 +0 +4
  +\[ 8\] .got +PROGBITS +0+12080 0+2080 0+1c 04 +WA +0 +0 +4
- +\[ 9\] .plt +.*
- +\[10\] .shstrtab +.*
- +\[11\] .symtab +.*
- +\[12\] .strtab +.*
+ +\[ 9\] .shstrtab +.*
+ +\[10\] .symtab +.*
+ +\[11\] .strtab +.*
 #...
 Elf file type is DYN \(Shared object file\)
 Entry point 0x1000
@@ -29,74 +28,69 @@ There are 4 program headers, starting at offset [0-9a-f]+
 
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz MemSiz +Flg Align
- +LOAD +0x0+ 0x0+ 0x0+ 0x0+2000 0x0+2000 R E 0x10000
- +LOAD +0x0+2000 0x0+12000 0x0+12000 0x0+9c 0x0+9c RWE 0x10000
- +DYNAMIC +0x0+2000 0x0+12000 0x0+12000 0x0+80 0x0+80 RW +0x4
- +TLS +0x0+2000 0x0+12000 0x0+12000 0x0+ 0x0+24 R +0x4
+ +LOAD .* R E 0x10000
+ +LOAD .* RW +0x10000
+ +DYNAMIC .* RW +0x4
+ +TLS .* 0x0+ 0x0+24 R +0x4
 #...
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 12 entries:
  Offset +Info +Type +Sym. Value +Symbol's Name \+ Addend
-0+1004 +0+309 R_SPARC_HI22 +0+12080 +\.got \+ 12080
-0+1008 +0+30c R_SPARC_LO10 +0+12080 +\.got \+ 12080
-0+10dc +0+48 R_SPARC_TLS_LE_HIX22 +0+9
-0+10e0 +0+49 R_SPARC_TLS_LE_LOX10 +0+9
-0+10f8 +0+48 R_SPARC_TLS_LE_HIX22 +0+1c
-0+10fc +0+49 R_SPARC_TLS_LE_LOX10 +0+1c
-0+12084 +0+4e R_SPARC_TLS_TPOFF32 +0+
-0+12088 +0+4e R_SPARC_TLS_TPOFF32 +0+4
-0+12094 +0+4e R_SPARC_TLS_TPOFF32 +0+14
-0+12098 +0+4e R_SPARC_TLS_TPOFF32 +0+18
-0+1208c +0+94e R_SPARC_TLS_TPOFF32 +0+ +sg1 \+ 0
-0+12090 +0+b4e R_SPARC_TLS_TPOFF32 +0+ +sg2 \+ 0
+[0-9a-f ]+R_SPARC_HI22 +0+12080 +\.got \+ 12080
+[0-9a-f ]+R_SPARC_LO10 +0+12080 +\.got \+ 12080
+[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +0+9
+[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +0+9
+[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +0+1c
+[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +0+1c
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+4
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+14
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+18
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+ +sg1 \+ 0
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+ +sg2 \+ 0
 
-Symbol table '.dynsym' contains 14 entries:
+Symbol table '.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
- +0: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
- +1: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +5 *
- +2: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +6 *
- +3: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +8 *
- +4: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
- +5: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
- +6: 0+12000 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
- +7: 0+1000 +0 FUNC +GLOBAL DEFAULT +5 fn3
- +8: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _PROCEDURE_LINKAGE_TABLE_
- +9: 0+ +0 TLS +GLOBAL DEFAULT +UND sg1
- +10: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
- +11: 0+ +0 TLS +GLOBAL DEFAULT +UND sg2
- +12: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +13: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
+.* NOTYPE +LOCAL +DEFAULT +UND *
+.* SECTION LOCAL +DEFAULT +5 *
+.* SECTION LOCAL +DEFAULT +6 *
+.* SECTION LOCAL +DEFAULT +8 *
+.* FUNC +GLOBAL DEFAULT +5 fn3
+.* TLS +GLOBAL DEFAULT +UND sg1
+.* NOTYPE +GLOBAL DEFAULT +ABS __bss_start
+.* TLS +GLOBAL DEFAULT +UND sg2
+.* NOTYPE +GLOBAL DEFAULT +ABS _edata
+.* NOTYPE +GLOBAL DEFAULT +ABS _end
 
-Symbol table '.symtab' contains 31 entries:
+Symbol table '.symtab' contains 30 entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
- +0: 0+ +0 NOTYPE +LOCAL +DEFAULT +UND *
- +1: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +1 *
- +2: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +2 *
- +3: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +3 *
- +4: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +4 *
- +5: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +5 *
- +6: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +6 *
- +7: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +7 *
- +8: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +8 *
- +9: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +9 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +10 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +11 *
- +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL +DEFAULT +12 *
- +[0-9]+: 0+ +0 TLS +LOCAL +DEFAULT +6 bl1
- +[0-9]+: 0+4 +0 TLS +LOCAL +DEFAULT +6 bl2
- +[0-9]+: 0+8 +0 TLS +LOCAL +DEFAULT +6 bl3
- +[0-9]+: 0+c +0 TLS +LOCAL +DEFAULT +6 bl4
- +[0-9]+: 0+10 +0 TLS +LOCAL +DEFAULT +6 bl5
- +[0-9]+: 0+1c +0 TLS +LOCAL +HIDDEN +6 sh3
- +[0-9]+: 0+20 +0 TLS +LOCAL +HIDDEN +6 sh4
- +[0-9]+: 0+14 +0 TLS +LOCAL +HIDDEN +6 sh1
- +[0-9]+: 0+12080 +0 OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
- +[0-9]+: 0+18 +0 TLS +LOCAL +HIDDEN +6 sh2
- +[0-9]+: 0+12000 +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
- +[0-9]+: 0+1000 +0 FUNC +GLOBAL DEFAULT +5 fn3
- +[0-9]+: [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _PROCEDURE_LINKAGE_TABLE_
- +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND sg1
- +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
- +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT +UND sg2
- +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
- +[0-9]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end
+.* NOTYPE +LOCAL +DEFAULT +UND *
+.* SECTION LOCAL +DEFAULT +1 *
+.* SECTION LOCAL +DEFAULT +2 *
+.* SECTION LOCAL +DEFAULT +3 *
+.* SECTION LOCAL +DEFAULT +4 *
+.* SECTION LOCAL +DEFAULT +5 *
+.* SECTION LOCAL +DEFAULT +6 *
+.* SECTION LOCAL +DEFAULT +7 *
+.* SECTION LOCAL +DEFAULT +8 *
+.* SECTION LOCAL +DEFAULT +9 *
+.* SECTION LOCAL +DEFAULT +10 *
+.* SECTION LOCAL +DEFAULT +11 *
+.* TLS +LOCAL +DEFAULT +6 bl1
+.* TLS +LOCAL +DEFAULT +6 bl2
+.* TLS +LOCAL +DEFAULT +6 bl3
+.* TLS +LOCAL +DEFAULT +6 bl4
+.* TLS +LOCAL +DEFAULT +6 bl5
+.* OBJECT +LOCAL +HIDDEN +ABS _DYNAMIC
+.* TLS +LOCAL +HIDDEN +6 sh3
+.* OBJECT +LOCAL +HIDDEN +ABS _PROCEDURE_LINKAGE_TABLE_
+.* TLS +LOCAL +HIDDEN +6 sh4
+.* TLS +LOCAL +HIDDEN +6 sh1
+.* OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
+.* TLS +LOCAL +HIDDEN +6 sh2
+.* FUNC +GLOBAL DEFAULT +5 fn3
+.* TLS +GLOBAL DEFAULT +UND sg1
+.* NOTYPE +GLOBAL DEFAULT +ABS __bss_start
+.* TLS +GLOBAL DEFAULT +UND sg2
+.* NOTYPE +GLOBAL DEFAULT +ABS _edata
+.* NOTYPE +GLOBAL DEFAULT +ABS _end

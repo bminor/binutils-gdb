@@ -81,14 +81,13 @@ Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym.Value +Sym. Name
 [0-9a-f ]+R_386_JUMP_SLOT   0+   ___tls_get_addr
 
-Symbol table '.dynsym' contains 18 entries:
+Symbol table '.dynsym' contains 17 entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +7 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +8 *
  +[0-9]+: [0-9a-f]+ +0 SECTION LOCAL  DEFAULT +9 *
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +8 sg8
- +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +8 sg3
  +[0-9]+: 0+c +0 TLS +GLOBAL DEFAULT +8 sg4
  +[0-9]+: 0+10 +0 TLS +GLOBAL DEFAULT +8 sg5
@@ -129,6 +128,7 @@ Symbol table '.symtab' contains 55 entries:
  +[0-9]+: 0+38 +0 TLS +LOCAL  DEFAULT +8 sl7
  +[0-9]+: 0+3c +0 TLS +LOCAL  DEFAULT +8 sl8
  +[0-9]+: 0+60 +0 TLS +LOCAL  HIDDEN +9 sH1
+ +[0-9]+: [0-9a-f]+ +0 OBJECT  LOCAL  HIDDEN  ABS _DYNAMIC
  +[0-9]+: 0+48 +0 TLS +LOCAL  HIDDEN +8 sh3
  +[0-9]+: 0+64 +0 TLS +LOCAL  HIDDEN +9 sH2
  +[0-9]+: 0+78 +0 TLS +LOCAL  HIDDEN +9 sH7
@@ -146,7 +146,6 @@ Symbol table '.symtab' contains 55 entries:
  +[0-9]+: 0+44 +0 TLS +LOCAL  HIDDEN +8 sh2
  +[0-9]+: 0+54 +0 TLS +LOCAL  HIDDEN +8 sh6
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +8 sg8
- +[0-9]+: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
  +[0-9]+: 0+8 +0 TLS +GLOBAL DEFAULT +8 sg3
  +[0-9]+: 0+c +0 TLS +GLOBAL DEFAULT +8 sg4
  +[0-9]+: 0+10 +0 TLS +GLOBAL DEFAULT +8 sg5

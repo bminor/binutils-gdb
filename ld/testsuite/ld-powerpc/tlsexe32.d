@@ -44,4 +44,4 @@ Disassembly of section \.got:
 .*:	4e 80 00 21 	blrl
 
 .* <_GLOBAL_OFFSET_TABLE_>:
-.*:	01 81 02 d0 00 00 00 00 00 00 00 00  .*
+.*:	01 81 02 b4 00 00 00 00 00 00 00 00  .*

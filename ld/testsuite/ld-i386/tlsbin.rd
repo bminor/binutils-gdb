@@ -56,26 +56,25 @@ Program Headers:
 
 Relocation section '.rel.dyn' at offset 0x[0-9a-f]+ contains 9 entries:
  Offset +Info +Type +Sym.Value +Sym. Name
-0+804a100  0000010e R_386_TLS_TPOFF +0+ +sG3
-0+804a104  0000020e R_386_TLS_TPOFF +0+ +sG5
-0+804a108  0000040e R_386_TLS_TPOFF +0+ +sG7
-0+804a10c  00000525 R_386_TLS_TPOFF32 0+ +sG2
-0+804a110  00000625 R_386_TLS_TPOFF32 0+ +sG4
-0+804a114  0000060e R_386_TLS_TPOFF +0+ +sG4
-0+804a118  00000825 R_386_TLS_TPOFF32 0+ +sG6
-0+804a11c  00000925 R_386_TLS_TPOFF32 0+ +sG1
-0+804a120  00000c0e R_386_TLS_TPOFF +0+ +sG8
+[0-9a-f ]+R_386_TLS_TPOFF +0+ +sG3
+[0-9a-f ]+R_386_TLS_TPOFF +0+ +sG5
+[0-9a-f ]+R_386_TLS_TPOFF +0+ +sG7
+[0-9a-f ]+R_386_TLS_TPOFF32 0+ +sG2
+[0-9a-f ]+R_386_TLS_TPOFF32 0+ +sG4
+[0-9a-f ]+R_386_TLS_TPOFF +0+ +sG4
+[0-9a-f ]+R_386_TLS_TPOFF32 0+ +sG6
+[0-9a-f ]+R_386_TLS_TPOFF32 0+ +sG1
+[0-9a-f ]+R_386_TLS_TPOFF +0+ +sG8
 
 Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym.Value  Sym. Name
-0+804a130  00000d07 R_386_JUMP_SLOT +[0-9a-f]+ +___tls_get_addr
+[0-9a-f ]+R_386_JUMP_SLOT +[0-9a-f]+ +___tls_get_addr
 
-Symbol table '.dynsym' contains 14 entries:
+Symbol table '.dynsym' contains 13 entries:
  +Num: +Value  Size Type +Bind +Vis +Ndx Name
  +[0-9]+: 0+ +0 NOTYPE  LOCAL  DEFAULT  UND *
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG3
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG5
- +[0-9]+: 0+804a060 +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG7
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG2
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG4
@@ -128,7 +127,7 @@ Symbol table '.symtab' contains 73 entries:
  +[0-9]+: 00000074 +0 TLS +GLOBAL DEFAULT +10 bg6
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG5
  +[0-9]+: 00000068 +0 TLS +GLOBAL DEFAULT +10 bg3
- +[0-9]+: 0+804a060 +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
+ +[0-9]+: 0+804a060 +0 OBJECT  GLOBAL HIDDEN +11 _DYNAMIC
  +[0-9]+: 00000008 +0 TLS +GLOBAL DEFAULT +9 sg3
  +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG7
  +[0-9]+: 00000048 +0 TLS +GLOBAL HIDDEN +9 sh3

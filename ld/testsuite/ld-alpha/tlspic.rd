@@ -62,11 +62,9 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* [0-9a-f]+     0 SECTION LOCAL  DEFAULT    8 
 .* [0-9a-f]+     0 SECTION LOCAL  DEFAULT    9 
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg8
-.* [0-9a-f]+     0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg3
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg4
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg5
-.* [0-9a-f]+     0 OBJECT  GLOBAL DEFAULT  ABS _PROCEDURE_LINKAGE_TABLE_
 .* [0-9a-f]+     0 NOTYPE  GLOBAL DEFAULT  UND __tls_get_addr
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg1
 .* [0-9a-f]+   172 FUNC    GLOBAL DEFAULT    6 fn1
@@ -75,7 +73,6 @@ Symbol table '.dynsym' contains [0-9]+ entries:
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg6
 .* [0-9a-f]+     0 TLS     GLOBAL DEFAULT    8 sg7
 .* [0-9a-f]+     0 NOTYPE  GLOBAL DEFAULT  ABS _edata
-.* [0-9a-f]+     0 OBJECT  GLOBAL DEFAULT  ABS _GLOBAL_OFFSET_TABLE_
 .* [0-9a-f]+     0 NOTYPE  GLOBAL DEFAULT  ABS _end
 
 Symbol table '.symtab' contains [0-9]+ entries:
@@ -105,9 +102,11 @@ Symbol table '.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 TLS +LOCAL +DEFAULT +8 sl7
 .* [0-9a-f]+ +0 TLS +LOCAL +DEFAULT +8 sl8
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +9 sH1
+.* [0-9a-f]+ +0 OBJECT +LOCAL +HIDDEN +ABS _DYNAMIC
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +8 sh3
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +9 sH2
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +9 sH7
+.* [0-9a-f]+ +0 OBJECT +LOCAL +HIDDEN +ABS _PROCEDURE_LINKAGE_TABLE_
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +8 sh7
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +8 sh8
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +9 sH4
@@ -118,14 +117,13 @@ Symbol table '.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +9 sH6
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +9 sH8
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +8 sh1
+.* [0-9a-f]+ +0 OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +8 sh2
 .* [0-9a-f]+ +0 TLS +LOCAL +HIDDEN +8 sh6
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg8
-.* [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _DYNAMIC
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg3
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg4
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg5
-.* [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _PROCEDURE_LINKAGE_TABLE_
 .* [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +UND __tls_get_addr
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg1
 .* [0-9a-f]+ +172 FUNC +GLOBAL DEFAULT +6 fn1
@@ -134,5 +132,4 @@ Symbol table '.symtab' contains [0-9]+ entries:
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg6
 .* [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +8 sg7
 .* [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
-.* [0-9a-f]+ +0 OBJECT +GLOBAL DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
 .* [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _end

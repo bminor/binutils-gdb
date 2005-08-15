@@ -10,22 +10,22 @@ There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
 Section Headers:
   \[Nr\] Name +Type +Addr +Off +Size +ES Flg Lk Inf Al
   \[ 0\] +NULL +0+ 0+ 0+ 0+ +0 +0 +0
-  \[ 1\] \.interp +.*
-  \[ 2\] \.hash +.*
-  \[ 3\] \.dynsym +.*
-  \[ 4\] \.dynstr +.*
-  \[ 5\] \.rela\.dyn +.*
-  \[ 6\] \.rela\.plt +.*
-  \[ 7\] \.plt +.*
-  \[ 8\] \.text +PROGBITS +0+401000 .*
-  \[ 9\] \.tdata +PROGBITS +0+413000 [0-9a-f]+ 0+018 00 WAT  0   0  4
-  \[10\] \.tbss +NOBITS +0+413018 [0-9a-f]+ 0+010 00 WAT  0   0  1
+  \[ 1\] \.interp .*
+  \[ 2\] \.hash .*
+  \[ 3\] \.dynsym .*
+  \[ 4\] \.dynstr .*
+  \[ 5\] \.rela\.dyn .*
+  \[ 6\] \.rela\.plt .*
+  \[ 7\] \.plt .*
+  \[ 8\] \.text +PROGBITS .*
+  \[ 9\] \.tdata +PROGBITS .* 0+018 00 WAT  0   0  4
+  \[10\] \.tbss +NOBITS .* 0+010 00 WAT  0   0  1
 #...
-  \[[0-9a-f]+\] \.got +PROGBITS +0+414000 .*
+  \[[0-9a-f]+\] \.got +PROGBITS .*
 #...
-  \[[0-9a-f]+\] \.shstrtab +.*
-  \[[0-9a-f]+\] \.symtab +.*
-  \[[0-9a-f]+\] \.strtab +.*
+  \[[0-9a-f]+\] \.shstrtab .*
+  \[[0-9a-f]+\] \.symtab .*
+  \[[0-9a-f]+\] \.strtab .*
 Key to Flags:
 .*
 .*
@@ -56,25 +56,24 @@ Program Headers:
 
 Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 4 entries:
  Offset +Info +Type +Sym\.Value +Sym\. Name \+ Addend
-0+414010  00000197 R_SH_TLS_TPOFF32 +0+ +sG3 \+ 0
-0+414014  00000397 R_SH_TLS_TPOFF32 +0+ +sG2 \+ 0
-0+414018  00000497 R_SH_TLS_TPOFF32 +0+ +sG4 \+ 0
-0+41401c  0000[0-9a-f]+97 R_SH_TLS_TPOFF32 +0+ +sG1 \+ 0
+[0-9a-f ]+R_SH_TLS_TPOFF32 +0+ +sG3 \+ 0
+[0-9a-f ]+R_SH_TLS_TPOFF32 +0+ +sG2 \+ 0
+[0-9a-f ]+R_SH_TLS_TPOFF32 +0+ +sG4 \+ 0
+[0-9a-f ]+R_SH_TLS_TPOFF32 +0+ +sG1 \+ 0
 
 Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym\.Value +Sym\. Name \+ Addend
-0+41400c  000005a4 R_SH_JMP_SLOT +[0-9a-f]+ +__tls_get_addr \+ [0-9a-f]+
+[0-9a-f ]+R_SH_JMP_SLOT[0-9a-f ]+__tls_get_addr \+ [0-9a-f]+
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
- +0: 0+ +0 NOTYPE +LOCAL +DEFAULT  UND *
- +1: 0+ +0 TLS +GLOBAL DEFAULT  UND sG3
- +2: [0-9a-f]+ +0 OBJECT  GLOBAL DEFAULT  ABS _DYNAMIC
- +3: 0+ +0 TLS +GLOBAL DEFAULT  UND sG2
- +4: 0+ +0 TLS +GLOBAL DEFAULT  UND sG4
- +5: [0-9a-f]+ +0 FUNC +GLOBAL DEFAULT  UND __tls_get_addr
+.* NOTYPE +LOCAL +DEFAULT  UND *
+.* TLS +GLOBAL DEFAULT  UND sG3
+.* TLS +GLOBAL DEFAULT  UND sG2
+.* TLS +GLOBAL DEFAULT  UND sG4
+.* FUNC +GLOBAL DEFAULT  UND __tls_get_addr
 #...
- +[0-9]+: 0+ +0 TLS +GLOBAL DEFAULT  UND sG1
+.* TLS +GLOBAL DEFAULT  UND sG1
 #...
 
 #pass

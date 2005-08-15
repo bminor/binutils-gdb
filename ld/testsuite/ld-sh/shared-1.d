@@ -13,10 +13,10 @@
 
 Relocation section '\.rela\.text' at offset 0x[0-9a-f]+ contains 1 entries:
 .*
-000001f8  000000a5 R_SH_RELATIVE +000001fc
+000001b0  000000a5 R_SH_RELATIVE +000001b4
 
 Hex dump of section '\.rela\.text':
-  0x000001e4          000001fc 000000a5 000001f8 .*
+  0x0000019c          000001b4 000000a5 000001b0 .*
 
 Hex dump of section '\.text':
-  0x000001f0          000001fc 00090009 00090009 .*
+  0x000001a8          000001b4 00090009 00090009 .*
