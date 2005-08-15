@@ -4301,22 +4301,15 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	 (or .got.plt) section.  We don't do this in the linker script
 	 because we don't want to define the symbol if we are not creating
 	 a global offset table.  */
-      bh = NULL;
-      if (!(_bfd_generic_link_add_one_symbol
-	    (info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
-	     0, (const char *) NULL, FALSE, bed->collect, &bh)))
+      h = _bfd_elf_define_linkage_sym (abfd, info, s, "_GLOBAL_OFFSET_TABLE_");
+      elf_hash_table (info)->hgot = h;
+      if (h == NULL)
 	return FALSE;
-      h = (struct elf_link_hash_entry *) bh;
-      h->def_regular = 1;
-      h->type = STT_OBJECT;
-      /* h->other = STV_HIDDEN; */ /* Should we?  */
 
       /* Machine-specific: we want the symbol for executables as
 	 well.  */
       if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
-
-      elf_hash_table (info)->hgot = h;
     }
 
   /* The first bit of the global offset table is the header.  */
@@ -4399,26 +4392,12 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   /* FRV-specific: remember it.  */
   frvfdpic_plt_section (info) = s;
 
-  if (bed->want_plt_sym)
-    {
-      /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
-	 .plt section.  */
-      struct elf_link_hash_entry *h;
-      struct bfd_link_hash_entry *bh = NULL;
-
-      if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s, 0, NULL,
-	      FALSE, get_elf_backend_data (abfd)->collect, &bh)))
-	return FALSE;
-      h = (struct elf_link_hash_entry *) bh;
-      h->def_regular = 1;
-      h->type = STT_OBJECT;
-      /* h->other = STV_HIDDEN; */ /* Should we?  */
-
-      if (! info->executable
-	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	return FALSE;
-    }
+  /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
+     .plt section.  */
+  if (bed->want_plt_sym
+      && !_bfd_elf_define_linkage_sym (abfd, info, s,
+				       "_PROCEDURE_LINKAGE_TABLE_"))
+    return FALSE;
 
   /* FRV-specific: we want rel relocations for the plt.  */
   s = bfd_make_section_with_flags (abfd, ".rel.plt",

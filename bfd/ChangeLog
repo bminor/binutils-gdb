@@ -1,3 +1,16 @@
+2005-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (_bfd_elf_define_linkage_sym): Declare.
+	* elflink.c (_bfd_elf_define_linkage_sym): New function, extracted
+	from..
+	(_bfd_elf_create_got_section): ..here.
+	(_bfd_elf_link_create_dynamic_sections): Call it for _DYNAMIC.
+	(_bfd_elf_create_dynamic_sections): ..and _PROCEDURE_LINKAGE_TABLE_.
+	* elf-m10300.c (_bfd_mn10300_elf_create_got_section): Use
+	_bfd_elf_define_linkage_sym.
+	* elf32-frv.c (_frv_create_got_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_create_dynamic_sections): Likewise.
+
 2005-08-15  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_howto_table_1): Make R_ARM_PLT32 the same as

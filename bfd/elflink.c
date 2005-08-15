@@ -27,13 +27,51 @@
 #include "safe-ctype.h"
 #include "libiberty.h"
 
+/* Define a symbol in a dynamic linkage section.  */
+
+struct elf_link_hash_entry *
+_bfd_elf_define_linkage_sym (bfd *abfd,
+			     struct bfd_link_info *info,
+			     asection *sec,
+			     const char *name)
+{
+  struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *bh;
+
+  h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
+  if (h != NULL)
+    {
+      /* Zap symbol defined in an as-needed lib that wasn't linked.
+	 This is a symptom of a larger problem:  Absolute symbols
+	 defined in shared libraries can't be overridden, because we
+	 lose the link to the bfd which is via the symbol section.  */
+      h->root.type = bfd_link_hash_new;
+    }
+
+  bh = &h->root;
+  if (!_bfd_generic_link_add_one_symbol (info, abfd, name, BSF_GLOBAL,
+					 sec, 0, NULL, FALSE,
+					 get_elf_backend_data (abfd)->collect,
+					 &bh))
+    return NULL;
+  h = (struct elf_link_hash_entry *) bh;
+  h->def_regular = 1;
+  h->type = STT_OBJECT;
+  h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+
+  if (!info->executable
+      && !bfd_elf_link_record_dynamic_symbol (info, h))
+    return NULL;
+
+  return h;
+}
+
 bfd_boolean
 _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags;
   asection *s;
   struct elf_link_hash_entry *h;
-  struct bfd_link_hash_entry *bh;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign;
 
@@ -78,21 +116,10 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	 (or .got.plt) section.  We don't do this in the linker script
 	 because we don't want to define the symbol if we are not creating
 	 a global offset table.  */
-      bh = NULL;
-      if (!(_bfd_generic_link_add_one_symbol
-	    (info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
-	     0, NULL, FALSE, bed->collect, &bh)))
-	return FALSE;
-      h = (struct elf_link_hash_entry *) bh;
-      h->def_regular = 1;
-      h->type = STT_OBJECT;
-      h->other = STV_HIDDEN;
-
-      if (! info->executable
-	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	return FALSE;
-
+      h = _bfd_elf_define_linkage_sym (abfd, info, s, "_GLOBAL_OFFSET_TABLE_");
       elf_hash_table (info)->hgot = h;
+      if (h == NULL)
+	return FALSE;
     }
 
   /* The first bit of the global offset table is the header.  */
@@ -132,8 +159,6 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags;
   register asection *s;
-  struct elf_link_hash_entry *h;
-  struct bfd_link_hash_entry *bh;
   const struct elf_backend_data *bed;
 
   if (! is_elf_hash_table (info->hash))
@@ -212,27 +237,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      section.  We don't want to define it if there is no .dynamic
      section, since on some ELF platforms the start up code examines it
      to decide how to initialize the process.  */
-  h = elf_link_hash_lookup (elf_hash_table (info), "_DYNAMIC",
-			    FALSE, FALSE, FALSE);
-  if (h != NULL)
-    {
-      /* Zap symbol defined in an as-needed lib that wasn't linked.
-	 This is a symptom of a larger problem:  Absolute symbols
-	 defined in shared libraries can't be overridden, because we
-	 lose the link to the bfd which is via the symbol section.  */
-      h->root.type = bfd_link_hash_new;
-    }
-  bh = &h->root;
-  if (! (_bfd_generic_link_add_one_symbol
-	 (info, abfd, "_DYNAMIC", BSF_GLOBAL, s, 0, NULL, FALSE,
-	  get_elf_backend_data (abfd)->collect, &bh)))
-    return FALSE;
-  h = (struct elf_link_hash_entry *) bh;
-  h->def_regular = 1;
-  h->type = STT_OBJECT;
-
-  if (! info->executable
-      && ! bfd_elf_link_record_dynamic_symbol (info, h))
+  if (!_bfd_elf_define_linkage_sym (abfd, info, s, "_DYNAMIC"))
     return FALSE;
 
   s = bfd_make_section_with_flags (abfd, ".hash",
@@ -282,25 +287,12 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
 
-  if (bed->want_plt_sym)
-    {
-      /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
-	 .plt section.  */
-      struct elf_link_hash_entry *h;
-      struct bfd_link_hash_entry *bh = NULL;
-
-      if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s, 0, NULL,
-	      FALSE, get_elf_backend_data (abfd)->collect, &bh)))
-	return FALSE;
-      h = (struct elf_link_hash_entry *) bh;
-      h->def_regular = 1;
-      h->type = STT_OBJECT;
-
-      if (! info->executable
-	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	return FALSE;
-    }
+  /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
+     .plt section.  */
+  if (bed->want_plt_sym
+      && !_bfd_elf_define_linkage_sym (abfd, info, s,
+				       "_PROCEDURE_LINKAGE_TABLE_"))
+    return FALSE;
 
   s = bfd_make_section_with_flags (abfd,
 				   (bed->default_use_rela_p

@@ -1639,6 +1639,8 @@ extern bfd_boolean _bfd_elf_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_create_got_section
   (bfd *, struct bfd_link_info *);
+extern struct elf_link_hash_entry *_bfd_elf_define_linkage_sym
+  (bfd *, struct bfd_link_info *, asection *, const char *);
 
 extern bfd_boolean _bfd_elfcore_make_pseudosection
   (bfd *, char *, size_t, ufile_ptr);

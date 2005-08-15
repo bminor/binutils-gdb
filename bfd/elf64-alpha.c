@@ -1232,7 +1232,6 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   asection *s;
   flagword flags;
   struct elf_link_hash_entry *h;
-  struct bfd_link_hash_entry *bh;
 
   /* We need to create .plt, .rela.plt, .got, and .rela.got sections.  */
 
@@ -1245,17 +1244,8 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
      .plt section.  */
-  bh = NULL;
-  if (! (_bfd_generic_link_add_one_symbol
-	 (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s,
-	  (bfd_vma) 0, (const char *) NULL, FALSE,
-	  get_elf_backend_data (abfd)->collect, &bh)))
-    return FALSE;
-  h = (struct elf_link_hash_entry *) bh;
-  h->def_regular = 1;
-  h->type = STT_OBJECT;
-
-  if (info->shared && ! bfd_elf_link_record_dynamic_symbol (info, h))
+  if (!_bfd_elf_define_linkage_sym (abfd, info, s,
+				    "_PROCEDURE_LINKAGE_TABLE_"))
     return FALSE;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
@@ -1292,21 +1282,11 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      dynobj's .got section.  We don't do this in the linker script
      because we don't want to define the symbol if we are not creating
      a global offset table.  */
-  bh = NULL;
-  if (!(_bfd_generic_link_add_one_symbol
-	(info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL,
-	 alpha_elf_tdata(abfd)->got, (bfd_vma) 0, (const char *) NULL,
-	 FALSE, get_elf_backend_data (abfd)->collect, &bh)))
-    return FALSE;
-  h = (struct elf_link_hash_entry *) bh;
-  h->def_regular = 1;
-  h->type = STT_OBJECT;
-
-  if (info->shared
-      && ! bfd_elf_link_record_dynamic_symbol (info, h))
-    return FALSE;
-
+  h = _bfd_elf_define_linkage_sym (abfd, info, alpha_elf_tdata(abfd)->got,
+				   "_GLOBAL_OFFSET_TABLE_");
   elf_hash_table (info)->hgot = h;
+  if (h == NULL)
+    return FALSE;
 
   return TRUE;
 }

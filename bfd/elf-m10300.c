@@ -542,7 +542,6 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
   flagword   flags;
   flagword   pltflags;
   asection * s;
-  struct bfd_link_hash_entry * bh;
   struct elf_link_hash_entry * h;
   const struct elf_backend_data * bed = get_elf_backend_data (abfd);
   int ptralign;
@@ -581,24 +580,12 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
 
-  if (bed->want_plt_sym)
-    {
-      /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
-	 .plt section.  */
-      bh = NULL;
-      if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s,
-	      (bfd_vma) 0, (const char *) NULL, FALSE,
-	      get_elf_backend_data (abfd)->collect, &bh)))
-	return FALSE;
-      h = (struct elf_link_hash_entry *) bh;
-      h->def_regular = 1;
-      h->type = STT_OBJECT;
-
-      if (info->shared
-	  && ! bfd_elf_link_record_dynamic_symbol (info, h))
-	return FALSE;
-    }
+  /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
+     .plt section.  */
+  if (bed->want_plt_sym
+      && !_bfd_elf_define_linkage_sym (abfd, info, s,
+				       "_PROCEDURE_LINKAGE_TABLE_"))
+    return FALSE;
 
   s = bfd_make_section_with_flags (abfd, ".got", flags);
   if (s == NULL
@@ -617,20 +604,10 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
      (or .got.plt) section.  We don't do this in the linker script
      because we don't want to define the symbol if we are not creating
      a global offset table.  */
-  bh = NULL;
-  if (!(_bfd_generic_link_add_one_symbol
-	(info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
-	 0, (const char *) NULL, FALSE, bed->collect, &bh)))
-    return FALSE;
-  h = (struct elf_link_hash_entry *) bh;
-  h->def_regular = 1;
-  h->type = STT_OBJECT;
-
-  if (info->shared
-      && ! bfd_elf_link_record_dynamic_symbol (info, h))
-    return FALSE;
-
+  h = _bfd_elf_define_linkage_sym (abfd, info, s, "_GLOBAL_OFFSET_TABLE_");
   elf_hash_table (info)->hgot = h;
+  if (h == NULL)
+    return FALSE;
 
   /* The first bit of the global offset table is the header.  */
   s->size += bed->got_header_size;
