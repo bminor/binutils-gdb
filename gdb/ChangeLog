@@ -1,3 +1,8 @@
+2005-08-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* MAINTAINERS (ms1): New target ISA entry.  List myself as
+	maintainer.
+
 2005-08-15  Michael Snyder  <msnyder@redhat.com>
             Kevin Buettner  <kevinb@redhat.com>
 

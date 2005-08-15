@@ -134,6 +134,9 @@ the native maintainer when resolving ABI issues.
 			(sim/ dies with make -j)
 			Michael Snyder		msnyder@redhat.com
 
+	ms1		--target=ms1-elf ,-Werror
+			Kevin Buettner		kevinb@redhat.com
+
 	ns32k		Deleted
 
 	pa		--target=hppa-elf ,-Werror
