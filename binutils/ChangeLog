@@ -1,3 +1,7 @@
+2005-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/binutils.texi (objdump): Document -M e300.
+
 2005-08-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* readelf.c (slurp_hppa_unwind_table): Fix entry size on hppa64-hpux.

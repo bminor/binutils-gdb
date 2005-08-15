@@ -1,3 +1,10 @@
+2005-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ppc-dis.c (powerpc_dialect): Handle e300.
+	(print_ppc_disassembler_options): Likewise.
+	* ppc-opc.c (PPCE300): Define.
+	(powerpc_opcodes): Mark icbt as available for the e300.
+
 2005-08-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* hppa-dis.c (print_insn_hppa): Don't print '%' before register names.

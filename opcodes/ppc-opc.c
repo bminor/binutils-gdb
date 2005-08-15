@@ -1844,6 +1844,7 @@ extract_tbr (unsigned long insn,
 #define BOOKE	PPC_OPCODE_BOOKE
 #define BOOKE64	PPC_OPCODE_BOOKE64
 #define CLASSIC	PPC_OPCODE_CLASSIC
+#define PPCE300 PPC_OPCODE_E300
 #define PPCSPE	PPC_OPCODE_SPE
 #define PPCISEL	PPC_OPCODE_ISEL
 #define PPCEFS	PPC_OPCODE_EFS
@@ -3327,7 +3328,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "ldx",     X(31,21),	X_MASK,		PPC64,		{ RT, RA0, RB } },
 
-{ "icbt",    X(31,22),	X_MASK,		BOOKE,		{ CT, RA, RB } },
+{ "icbt",    X(31,22),	X_MASK,		BOOKE|PPCE300,	{ CT, RA, RB } },
 { "icbt",    X(31,262),	XRT_MASK,	PPC403,		{ RA, RB } },
 
 { "lwzx",    X(31,23),	X_MASK,		PPCCOM,		{ RT, RA0, RB } },

@@ -63,6 +63,9 @@ powerpc_dialect (struct disassemble_info *info)
   else if (info->disassembler_options
 	   && strstr (info->disassembler_options, "efs") != NULL)
     dialect |= PPC_OPCODE_EFS;
+  else if (info->disassembler_options
+	   && strstr (info->disassembler_options, "e300") != NULL)
+    dialect |= PPC_OPCODE_E300 | PPC_OPCODE_CLASSIC | PPC_OPCODE_COMMON;
   else
     dialect |= (PPC_OPCODE_403 | PPC_OPCODE_601 | PPC_OPCODE_CLASSIC
 		| PPC_OPCODE_COMMON | PPC_OPCODE_ALTIVEC);
@@ -303,6 +306,7 @@ The following PPC specific disassembler options are supported for use with\n\
 the -M switch:\n");
 
   fprintf (stream, "  booke|booke32|booke64    Disassemble the BookE instructions\n");
+  fprintf (stream, "  e300                     Disassemble the e300 instructions\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
   fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");

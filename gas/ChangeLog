@@ -1,3 +1,9 @@
+2005-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-ppc.c (parse_cpu): Add -me300 support.
+	(md_show_usage): Likewise.
+	* doc/c-ppc.texi (PowerPC-Opts): Document it.
+
 2005-08-12 Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (md_parse_option):  Add cpu type z9-109.

@@ -858,6 +858,9 @@ parse_cpu (const char *arg)
 	   || strcmp (arg, "7455") == 0)
     ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
 	       | PPC_OPCODE_ALTIVEC | PPC_OPCODE_32);
+  else if (strcmp (arg, "e300") == 0)
+    ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC | PPC_OPCODE_32
+	       | PPC_OPCODE_E300);
   else if (strcmp (arg, "altivec") == 0)
     {
       if (ppc_cpu == 0)
@@ -1111,6 +1114,7 @@ PowerPC options:\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n"));
   fprintf (stream, _("\
 -maltivec		generate code for AltiVec\n\
+-me300			generate code for PowerPC e300 family\n\
 -me500, -me500x2	generate code for Motorola e500 core complex\n\
 -mspe			generate code for Motorola SPE instructions\n\
 -mregnames		Allow symbolic names for registers\n\
