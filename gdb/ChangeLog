@@ -1,3 +1,10 @@
+2005-08-15  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (op1_lgfi, op2_lgfi, op1_agfi, op2_agfi,
+	op1_afi, op2_afi, op1_algfi, op2_algfi, op1_alfi, op2_alfi,
+	op1_slgfi, op2_slgfi, op1_slfi, op2_slfi): New opcode enums.
+	(s390_analyze_prologue): Recognize new z9-109 instructions.
+
 2005-08-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib-som.c (som_current_sos): Cast to 'gdb_byte *' where

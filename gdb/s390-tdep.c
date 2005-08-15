@@ -811,6 +811,7 @@ enum
   {
     op1_lhi  = 0xa7,   op2_lhi  = 0x08,
     op1_lghi = 0xa7,   op2_lghi = 0x09,
+    op1_lgfi = 0xc0,   op2_lgfi = 0x01,
     op_lr    = 0x18,
     op_lgr   = 0xb904,
     op_l     = 0x58,
@@ -828,11 +829,17 @@ enum
     op1_stmg = 0xeb,   op2_stmg = 0x24,
     op1_aghi = 0xa7,   op2_aghi = 0x0b,
     op1_ahi  = 0xa7,   op2_ahi  = 0x0a,
+    op1_agfi = 0xc2,   op2_agfi = 0x08,
+    op1_afi  = 0xc2,   op2_afi  = 0x09,
+    op1_algfi= 0xc2,   op2_algfi= 0x0a,
+    op1_alfi = 0xc2,   op2_alfi = 0x0b,
     op_ar    = 0x1a,
     op_agr   = 0xb908,
     op_a     = 0x5a,
     op1_ay   = 0xe3,   op2_ay   = 0x5a,
     op1_ag   = 0xe3,   op2_ag   = 0x08,
+    op1_slgfi= 0xc2,   op2_slgfi= 0x04,
+    op1_slfi = 0xc2,   op2_slfi = 0x05,
     op_sr    = 0x1b,
     op_sgr   = 0xb909,
     op_s     = 0x5b,
@@ -1294,6 +1301,10 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
 	       && is_ri (insn, op1_lghi, op2_lghi, &r1, &i2))
         pv_set_to_constant (&data->gpr[r1], i2);
 
+      /* LGFI r1, i2 --- load fullword immediate */
+      else if (is_ril (insn, op1_lgfi, op2_lgfi, &r1, &i2))
+        pv_set_to_constant (&data->gpr[r1], i2);
+
       /* LR r1, r2 --- load from register */
       else if (word_size == 4
 	       && is_rr (insn, op_lr, &r1, &r2))
@@ -1434,6 +1445,26 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
                && is_ri (insn, op1_aghi, op2_aghi, &r1, &i2))
         pv_add_constant (&data->gpr[r1], i2);
 
+      /* AFI r1, i2 --- add fullword immediate */
+      else if (word_size == 4
+	       && is_ril (insn, op1_afi, op2_afi, &r1, &i2))
+        pv_add_constant (&data->gpr[r1], i2);
+
+      /* AGFI r1, i2 --- add fullword immediate (64-bit version) */
+      else if (word_size == 8
+               && is_ril (insn, op1_agfi, op2_agfi, &r1, &i2))
+        pv_add_constant (&data->gpr[r1], i2);
+
+      /* ALFI r1, i2 --- add logical immediate */
+      else if (word_size == 4
+	       && is_ril (insn, op1_alfi, op2_alfi, &r1, &i2))
+        pv_add_constant (&data->gpr[r1], (CORE_ADDR)i2 & 0xffffffff);
+
+      /* ALGFI r1, i2 --- add logical immediate (64-bit version) */
+      else if (word_size == 8
+               && is_ril (insn, op1_algfi, op2_algfi, &r1, &i2))
+        pv_add_constant (&data->gpr[r1], (CORE_ADDR)i2 & 0xffffffff);
+
       /* AR r1, r2 -- add register */
       else if (word_size == 4
 	       && is_rr (insn, op_ar, &r1, &r2))
@@ -1482,6 +1513,16 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
 	
 	  pv_add (&data->gpr[r1], &data->gpr[r1], &value);
 	}
+
+      /* SLFI r1, i2 --- subtract logical immediate */
+      else if (word_size == 4
+	       && is_ril (insn, op1_slfi, op2_slfi, &r1, &i2))
+        pv_add_constant (&data->gpr[r1], -((CORE_ADDR)i2 & 0xffffffff));
+
+      /* SLGFI r1, i2 --- subtract logical immediate (64-bit version) */
+      else if (word_size == 8
+               && is_ril (insn, op1_slgfi, op2_slgfi, &r1, &i2))
+        pv_add_constant (&data->gpr[r1], -((CORE_ADDR)i2 & 0xffffffff));
 
       /* SR r1, r2 -- subtract register */
       else if (word_size == 4
