@@ -1,3 +1,7 @@
+2005-08-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (m68kbsd-tdep.o): Ad missing space.
+
 2005-08-15  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (op1_lgfi, op2_lgfi, op1_agfi, op2_agfi,
