@@ -1,3 +1,8 @@
+2005-08-15  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_howto_table_1): Make R_ARM_PLT32 the same as
+	R_ARM_PC24.
+
 2005-08-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	PR ld/1135

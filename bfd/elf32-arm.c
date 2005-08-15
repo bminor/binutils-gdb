@@ -435,13 +435,13 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   HOWTO (R_ARM_PLT32,		/* type */
          2,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
-         26,                    /* bitsize */
+         24,                    /* bitsize */
          TRUE,			/* pc_relative */
          0,                     /* bitpos */
          complain_overflow_bitfield,/* complain_on_overflow */
          bfd_elf_generic_reloc, /* special_function */
          "R_ARM_PLT32",		/* name */
-         TRUE,			/* partial_inplace */
+         FALSE,			/* partial_inplace */
          0x00ffffff,		/* src_mask */
          0x00ffffff,		/* dst_mask */
          TRUE),			/* pcrel_offset */
