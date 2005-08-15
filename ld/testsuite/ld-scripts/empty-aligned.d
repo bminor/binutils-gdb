@@ -9,4 +9,4 @@ Program Headers:
 
  Section to Segment mapping:
  +Segment Sections\.\.\.
- +00.*\.text.*\.data.*
+ +00 +.text 

@@ -1,6 +1,7 @@
 #source: merge2.s
 #ld: -T merge.ld
 #objdump: -s
+#xfail: "arc-*-*" "dlx-*-*"
 
 .*:     file format .*elf.*
 

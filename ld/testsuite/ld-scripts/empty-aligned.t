@@ -25,6 +25,5 @@ SECTIONS
   {
     *(.text4)
   }
-  .data : { *(.data) }
-  .bss : { *(.bss) }
+  /DISCARD/ : { *(*) }
 }

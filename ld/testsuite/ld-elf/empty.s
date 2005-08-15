@@ -1,6 +1,9 @@
 	.section .bss
 bar:
 	.text
+	.type start,"function"
+	.global start
+start:
 	.type _start,"function"
 	.global _start
 _start:

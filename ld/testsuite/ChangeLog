@@ -1,3 +1,11 @@
+2005-08-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/empty.s: Define "start".
+	* ld-elf/merge2.d: xfail arc-*-* and dlx-*-*.
+	* ld-scripts/empty-aligned.s: No .data section.
+	* ld-scripts/empty-aligned.t: Discard most sections.
+	* ld-scripts/empty-aligned.d: Adjust.
+
 2005-08-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/expdyn1.s (expobj): Set size here, at definition...
