@@ -9487,14 +9487,8 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define TARGET_BIG_NAME			"elf32-xtensa-be"
 #define ELF_ARCH			bfd_arch_xtensa
 
-/* The new EM_XTENSA value will be recognized beginning in the Xtensa T1040
-   release. However, we still have to generate files with the EM_XTENSA_OLD
-   value so that pre-T1040 tools can read the files.  As soon as we stop
-   caring about pre-T1040 tools, the following two values should be
-   swapped. At the same time, any other code that uses EM_XTENSA_OLD
-   should be changed to use EM_XTENSA.  */
-#define ELF_MACHINE_CODE		EM_XTENSA_OLD
-#define ELF_MACHINE_ALT1		EM_XTENSA
+#define ELF_MACHINE_CODE		EM_XTENSA
+#define ELF_MACHINE_ALT1		EM_XTENSA_OLD
 
 #if XCHAL_HAVE_MMU
 #define ELF_MAXPAGESIZE			(1 << XCHAL_MMU_MIN_PTE_PAGE_SIZE)
