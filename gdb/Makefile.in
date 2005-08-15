@@ -2312,6 +2312,11 @@ mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 monitor.o: monitor.c $(defs_h) $(gdbcore_h) $(target_h) $(exceptions_h) \
 	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) $(gdbcmd_h) \
 	$(inferior_h) $(gdb_regex_h) $(srec_h) $(regcache_h)
+ms1-tdep.o: ms1-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) $(frame_base_h) \
+	$(symtab_h) $(dis_asm_h) $(arch_utils_h) $(gdbtypes_h) \
+	$(gdb_string_h) $(regcache_h) $(reggroups_h) $(gdbcore_h) \
+	$(trad_frame_h) $(inferior_h) $(dwarf2_frame_h) $(infcall_h) \
+	$(gdb_assert_h)
 nbsd-tdep.o: nbsd-tdep.c $(defs_h) $(gdb_string_h) $(solib_svr4_h)
 nlmread.o: nlmread.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(buildsym_h) $(stabsread_h) $(block_h)

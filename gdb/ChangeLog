@@ -1,3 +1,11 @@
+2005-08-15  Michael Snyder  <msnyder@redhat.com>
+            Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (ms1-tdep.o): Add dependencies.
+	* configure.tgt: Add ms1-*-* target.
+	* ms1-tdep.c: New file.
+	* config/ms1/ms1.mt: New file.
+
 2005-08-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in (m68kbsd-tdep.o): Ad missing space.
