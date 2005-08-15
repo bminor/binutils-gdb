@@ -6696,6 +6696,18 @@ do_t_mov_cmp (void)
     {
       int r0off = (inst.instruction == T_MNEM_mov
 		   || inst.instruction == T_MNEM_movs) ? 8 : 16;
+      bfd_boolean narrow;
+      bfd_boolean low_regs;
+
+      low_regs = (inst.operands[0].reg <= 7 && inst.operands[1].reg <= 7);
+      if (current_it_mask)
+	narrow = inst.instruction != T_MNEM_movs;
+      else
+	narrow = inst.instruction != T_MNEM_movs || low_regs;
+      if (inst.size_req == 4
+	  || inst.operands[1].shifted)
+	narrow = FALSE;
+
       if (!inst.operands[1].isreg)
 	{
 	  /* For an immediate, we always generate a 32-bit opcode;
@@ -6705,10 +6717,7 @@ do_t_mov_cmp (void)
 	  inst.instruction |= inst.operands[0].reg << r0off;
 	  inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
 	}
-      else if (inst.size_req == 4
-	       || inst.operands[1].shifted
-	       || (inst.instruction == T_MNEM_movs
-		   && (inst.operands[0].reg > 7 || inst.operands[1].reg > 7)))
+      else if (!narrow)
 	{
 	  inst.instruction = THUMB_OP32 (inst.instruction);
 	  inst.instruction |= inst.operands[0].reg << r0off;
@@ -6733,7 +6742,7 @@ do_t_mov_cmp (void)
 	    break;
 
 	  case T_MNEM_cmp:
-	    if (inst.operands[0].reg <= 7 && inst.operands[1].reg <= 7)
+	    if (low_regs)
 	      {
 		inst.instruction = T_OPCODE_CMP_LR;
 		inst.instruction |= inst.operands[0].reg;
@@ -6801,6 +6810,20 @@ do_t_mvn_tst (void)
     {
       int r0off = (inst.instruction == T_MNEM_mvn
 		   || inst.instruction == T_MNEM_mvns) ? 8 : 16;
+      bfd_boolean narrow;
+
+      if (inst.size_req == 4
+	  || inst.instruction > 0xffff
+	  || inst.operands[1].shifted
+	  || inst.operands[0].reg > 7 || inst.operands[1].reg > 7)
+	narrow = FALSE;
+      else if (inst.instruction == T_MNEM_cmn)
+	narrow = TRUE;
+      else if (THUMB_SETS_FLAGS (inst.instruction))
+	narrow = (current_it_mask == 0);
+      else
+	narrow = (current_it_mask != 0);
+
       if (!inst.operands[1].isreg)
 	{
 	  /* For an immediate, we always generate a 32-bit opcode;
@@ -6814,12 +6837,7 @@ do_t_mvn_tst (void)
       else
 	{
 	  /* See if we can do this with a 16-bit instruction.  */
-	  if (inst.instruction < 0xffff
-	      && THUMB_SETS_FLAGS (inst.instruction)
-	      && !inst.operands[1].shifted
-	      && inst.operands[0].reg <= 7
-	      && inst.operands[1].reg <= 7
-	      && inst.size_req != 4)
+	  if (narrow)
 	    {
 	      inst.instruction = THUMB_OP16 (inst.instruction);
 	      inst.instruction |= inst.operands[0].reg;
@@ -6947,9 +6965,18 @@ do_t_neg (void)
 {
   if (unified_syntax)
     {
-      if (inst.operands[0].reg > 7 || inst.operands[1].reg > 7
-	  || !THUMB_SETS_FLAGS (inst.instruction)
-	  || inst.size_req == 4)
+      bfd_boolean narrow;
+
+      if (THUMB_SETS_FLAGS (inst.instruction))
+	narrow = (current_it_mask == 0);
+      else
+	narrow = (current_it_mask != 0);
+      if (inst.operands[0].reg > 7 || inst.operands[1].reg > 7)
+	narrow = FALSE;
+      if (inst.size_req == 4)
+	narrow = FALSE;
+
+      if (!narrow)
 	{
 	  inst.instruction = THUMB_OP32 (inst.instruction);
 	  inst.instruction |= inst.operands[0].reg << 8;
@@ -7127,12 +7154,38 @@ do_t_shift (void)
 
   if (unified_syntax)
     {
-      if (inst.operands[0].reg > 7
-	  || inst.operands[1].reg > 7
-	  || !THUMB_SETS_FLAGS (inst.instruction)
-	  || (!inst.operands[2].isreg && inst.instruction == T_MNEM_rors)
-	  || (inst.operands[2].isreg && inst.operands[1].reg != inst.operands[0].reg)
-	  || inst.size_req == 4)
+      bfd_boolean narrow;
+      int shift_kind;
+
+      switch (inst.instruction)
+	{
+	case T_MNEM_asr:
+	case T_MNEM_asrs: shift_kind = SHIFT_ASR; break;
+	case T_MNEM_lsl:
+	case T_MNEM_lsls: shift_kind = SHIFT_LSL; break;
+	case T_MNEM_lsr:
+	case T_MNEM_lsrs: shift_kind = SHIFT_LSR; break;
+	case T_MNEM_ror:
+	case T_MNEM_rors: shift_kind = SHIFT_ROR; break;
+	default: abort ();
+	}
+
+      if (THUMB_SETS_FLAGS (inst.instruction))
+	narrow = (current_it_mask == 0);
+      else
+	narrow = (current_it_mask != 0);
+      if (inst.operands[0].reg > 7 || inst.operands[1].reg > 7)
+	narrow = FALSE;
+      if (!inst.operands[2].isreg && shift_kind == SHIFT_ROR)
+	narrow = FALSE;
+      if (inst.operands[2].isreg
+	  && (inst.operands[1].reg != inst.operands[0].reg
+	      || inst.operands[2].reg > 7))
+	narrow = FALSE;
+      if (inst.size_req == 4)
+	narrow = FALSE;
+
+      if (!narrow)
 	{
 	  if (inst.operands[2].isreg)
 	    {
@@ -7144,19 +7197,7 @@ do_t_shift (void)
 	  else
 	    {
 	      inst.operands[1].shifted = 1;
-	      switch (inst.instruction)
-		{
-		case T_MNEM_asr:
-		case T_MNEM_asrs: inst.operands[1].shift_kind = SHIFT_ASR; break;
-		case T_MNEM_lsl:
-		case T_MNEM_lsls: inst.operands[1].shift_kind = SHIFT_LSL; break;
-		case T_MNEM_lsr:
-		case T_MNEM_lsrs: inst.operands[1].shift_kind = SHIFT_LSR; break;
-		case T_MNEM_ror:
-		case T_MNEM_rors: inst.operands[1].shift_kind = SHIFT_ROR; break;
-		default: abort ();
-		}
-	      
+	      inst.operands[1].shift_kind = shift_kind;
 	      inst.instruction = THUMB_OP32 (THUMB_SETS_FLAGS (inst.instruction)
 					     ? T_MNEM_movs : T_MNEM_mov);
 	      inst.instruction |= inst.operands[0].reg << 8;
@@ -7169,12 +7210,12 @@ do_t_shift (void)
 	{
 	  if (inst.operands[2].isreg)
 	    {
-	      switch (inst.instruction)
+	      switch (shift_kind)
 		{
-		case T_MNEM_asrs: inst.instruction = T_OPCODE_ASR_R; break;
-		case T_MNEM_lsls: inst.instruction = T_OPCODE_LSL_R; break;
-		case T_MNEM_lsrs: inst.instruction = T_OPCODE_LSR_R; break;
-		case T_MNEM_rors: inst.instruction = T_OPCODE_ROR_R; break;
+		case SHIFT_ASR: inst.instruction = T_OPCODE_ASR_R; break;
+		case SHIFT_LSL: inst.instruction = T_OPCODE_LSL_R; break;
+		case SHIFT_LSR: inst.instruction = T_OPCODE_LSR_R; break;
+		case SHIFT_ROR: inst.instruction = T_OPCODE_ROR_R; break;
 		default: abort ();
 		}
 	  
@@ -7183,11 +7224,11 @@ do_t_shift (void)
 	    }
 	  else
 	    {
-	      switch (inst.instruction)
+	      switch (shift_kind)
 		{
-		case T_MNEM_asrs: inst.instruction = T_OPCODE_ASR_I; break;
-		case T_MNEM_lsls: inst.instruction = T_OPCODE_LSL_I; break;
-		case T_MNEM_lsrs: inst.instruction = T_OPCODE_LSR_I; break;
+		case SHIFT_ASR: inst.instruction = T_OPCODE_ASR_I; break;
+		case SHIFT_LSL: inst.instruction = T_OPCODE_LSL_I; break;
+		case SHIFT_LSR: inst.instruction = T_OPCODE_LSR_I; break;
 		default: abort ();
 		}
 	      inst.reloc.type = BFD_RELOC_ARM_THUMB_SHIFT;

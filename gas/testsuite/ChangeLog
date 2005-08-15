@@ -1,3 +1,8 @@
+2005-08-15  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_it.s: Add more instruction variants.
+	* gas/arm/thumb2_it.d: Ditto.
+
 2005-08-12 Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* gas/testsuite/gas/s390/s390.exp: Reorganize gas testsuite for s390

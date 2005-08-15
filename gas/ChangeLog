@@ -1,3 +1,9 @@
+2005-08-15  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_t_mov_cmp): Fix encoding of i16-bit conditional
+	instructions.
+	(do_t_mvn_tst, do_t_neg, do_t_shift): Ditto.
+
 2005-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/tc-ppc.c (parse_cpu): Add -me300 support.
