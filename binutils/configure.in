@@ -41,6 +41,7 @@ if test -z "$host" ; then
 fi
 
 AC_PROG_CC
+AC_GNU_SOURCE
 
 AC_PROG_YACC
 AM_PROG_LEX
@@ -171,7 +172,7 @@ if test $bu_cv_header_utime_h = yes; then
   AC_DEFINE(HAVE_GOOD_UTIME_H, 1, [Does <utime.h> define struct utimbuf?])
 fi
 
-AC_CHECK_DECLS([fprintf, strstr, sbrk, getenv, environ, getc_unlocked])
+AC_CHECK_DECLS([fprintf, stpcpy, strstr, sbrk, getenv, environ, getc_unlocked])
 
 BFD_BINARY_FOPEN
 

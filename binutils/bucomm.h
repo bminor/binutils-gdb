@@ -68,6 +68,10 @@ extern char *strrchr ();
 #endif
 #endif
 
+#if !HAVE_DECL_STPCPY
+extern char *stpcpy (char *, const char *);
+#endif
+
 #if !HAVE_DECL_STRSTR
 extern char *strstr ();
 #endif

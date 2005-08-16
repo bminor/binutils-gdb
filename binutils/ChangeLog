@@ -1,3 +1,12 @@
+2005-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bucomm.h (stpcpy): Declare if HAVE_DECL_STPCPY isn't defined.
+
+	* configure.in (AC_GNU_SOURCE): Added.
+	(AC_CHECK_DECLS): Add stpcpy.
+	* configure: Regenerated.
+	* config.in: Likewise.
+
 2005-08-16  Jakub Jelinek  <jakub@redhat.com>
 
 	* unwind-ia64.c (UNW_DEC_SPILL_SPREL, UNW_DEC_SPILL_PSPREL,
