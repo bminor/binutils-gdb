@@ -1,3 +1,9 @@
+2005-08-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* unwind-ia64.c (UNW_DEC_SPILL_SPREL, UNW_DEC_SPILL_PSPREL,
+	UNW_DEC_RESTORE, UNW_DEC_SPILL_REG): Increase {,ab,t}regname
+	buffer sizes.
+
 2005-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/binutils.texi (objdump): Document -M e300.
