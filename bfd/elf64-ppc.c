@@ -6461,8 +6461,9 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 
 	      if (skip)
 		{
-		  if (!dec_dynrel_count (rel->r_info, sec, info,
-					 NULL, h, sym_sec))
+		  if (!info->relocatable
+		      && !dec_dynrel_count (rel->r_info, sec, info,
+					    NULL, h, sym_sec))
 		    goto error_ret;
 		}
 	      else

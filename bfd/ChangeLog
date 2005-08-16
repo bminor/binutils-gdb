@@ -1,3 +1,8 @@
+2005-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_edit_opd): Don't call dec_dynrel_count
+	when relocatable.
+
 2005-08-15  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (ELF_MACHINE_CODE, ELF_MACHINE_ALT1): Swap values
