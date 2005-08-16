@@ -1,3 +1,8 @@
+2005-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_set_cpu): Don't select 64-bit based on
+	default cpu.
+
 2005-08-15  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_t_mov_cmp): Fix encoding of i16-bit conditional
