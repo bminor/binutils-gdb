@@ -1,8 +1,8 @@
 /* Target-dependent code for PowerPC systems using the SVR4 ABI
    for GDB, the GNU debugger.
 
-   Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation,
-   Inc.
+   Copyright 2000, 2001, 2002, 2003, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -294,6 +294,24 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  sp -= (argoffset + structoffset);
 	  /* Ensure that the stack is still 16 byte aligned.  */
 	  sp = align_down (sp, 16);
+	}
+
+      /* The psABI says that "A caller of a function that takes a
+	 variable argument list shall set condition register bit 6 to
+	 1 if it passes one or more arguments in the floating-point
+	 registers. It is strongly recommended that the caller set the
+	 bit to 0 otherwise..."  Doing this for normal functions too
+	 shouldn't hurt.  */
+      if (write_pass)
+	{
+	  ULONGEST cr;
+
+	  regcache_cooked_read_unsigned (regcache, tdep->ppc_cr_regnum, &cr);
+	  if (freg > 1)
+	    cr |= 0x02000000;
+	  else
+	    cr &= ~0x02000000;
+	  regcache_cooked_write_unsigned (regcache, tdep->ppc_cr_regnum, cr);
 	}
     }
 
