@@ -1,3 +1,8 @@
+2005-08-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/dso-1.s: Add missing alignment directive.
+	* ld-cris/libdso-10.d: Adjust accordingly.
+
 2005-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-alpha/tlsbin.rd: Adjust for dynamic sym changes.

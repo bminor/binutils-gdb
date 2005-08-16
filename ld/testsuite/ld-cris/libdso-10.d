@@ -9,7 +9,7 @@
 
 Program Header:
     LOAD off    0x0+ vaddr 0x0+ paddr 0x0+ align 2\*\*13
-         filesz 0x0+143 memsz 0x0+143 flags r-x
+         filesz 0x0+144 memsz 0x0+144 flags r-x
     LOAD off    0x0+144 vaddr 0x0+2144 paddr 0x0+2144 align 2\*\*13
          filesz 0x0+64 memsz 0x0+64 flags rw-
  DYNAMIC off    0x0+144 vaddr 0x0+2144 paddr 0x0+2144 align 2\*\*2
@@ -29,7 +29,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   2 \.dynstr       0+1f  0+120  0+120  0+120  2\*\*0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 \.text         0+4  0+13f  0+13f  0+13f  2\*\*0
+  3 \.text         0+4  0+140  0+140  0+140  2\*\*1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
   4 \.dynamic      0+58  0+2144  0+2144  0+144  2\*\*2
                   CONTENTS, ALLOC, LOAD, DATA
