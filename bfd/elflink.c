@@ -37,6 +37,7 @@ _bfd_elf_define_linkage_sym (bfd *abfd,
 {
   struct elf_link_hash_entry *h;
   struct bfd_link_hash_entry *bh;
+  const struct elf_backend_data *bed;
 
   h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
   if (h != NULL)
@@ -59,10 +60,8 @@ _bfd_elf_define_linkage_sym (bfd *abfd,
   h->type = STT_OBJECT;
   h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
 
-  if (!info->executable
-      && !bfd_elf_link_record_dynamic_symbol (info, h))
-    return NULL;
-
+  bed = get_elf_backend_data (abfd);
+  (*bed->elf_backend_hide_symbol) (info, h, TRUE);
   return h;
 }
 
@@ -736,7 +735,8 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd,
   if (dynsymcount != 0)
     ++dynsymcount;
 
-  return elf_hash_table (info)->dynsymcount = dynsymcount;
+  elf_hash_table (info)->dynsymcount = dynsymcount;
+  return dynsymcount;
 }
 
 /* This function is called when we want to define a new symbol.  It
@@ -8852,19 +8852,26 @@ _bfd_elf_gc_mark (struct bfd_link_info *info,
 
 /* Sweep symbols in swept sections.  Called via elf_link_hash_traverse.  */
 
-static bfd_boolean
-elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *idxptr)
-{
-  int *idx = idxptr;
+struct elf_gc_sweep_symbol_info {
+  struct bfd_link_info *info;
+  void (*hide_symbol) (struct bfd_link_info *, struct elf_link_hash_entry *,
+		       bfd_boolean);
+};
 
+static bfd_boolean
+elf_gc_sweep_symbol (struct elf_link_hash_entry *h, void *data)
+{
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  if (h->dynindx != -1
-      && ((h->root.type != bfd_link_hash_defined
-	   && h->root.type != bfd_link_hash_defweak)
-	  || h->root.u.def.section->gc_mark))
-    h->dynindx = (*idx)++;
+  if ((h->root.type == bfd_link_hash_defined
+       || h->root.type == bfd_link_hash_defweak)
+      && !h->root.u.def.section->gc_mark
+      && !(h->root.u.def.section->owner->flags & DYNAMIC))
+    {
+      struct elf_gc_sweep_symbol_info *inf = data;
+      (*inf->hide_symbol) (inf->info, h, TRUE);
+    }
 
   return TRUE;
 }
@@ -8875,9 +8882,13 @@ typedef bfd_boolean (*gc_sweep_hook_fn)
   (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 
 static bfd_boolean
-elf_gc_sweep (struct bfd_link_info *info, gc_sweep_hook_fn gc_sweep_hook)
+elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 {
   bfd *sub;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  gc_sweep_hook_fn gc_sweep_hook = bed->gc_sweep_hook;
+  unsigned long section_sym_count;
+  struct elf_gc_sweep_symbol_info sweep_info;
 
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
@@ -8934,20 +8945,12 @@ elf_gc_sweep (struct bfd_link_info *info, gc_sweep_hook_fn gc_sweep_hook)
   /* Remove the symbols that were in the swept sections from the dynamic
      symbol table.  GCFIXME: Anyone know how to get them out of the
      static symbol table as well?  */
-  {
-    int i = 0;
+  sweep_info.info = info;
+  sweep_info.hide_symbol = bed->elf_backend_hide_symbol;
+  elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol,
+			  &sweep_info);
 
-    elf_link_hash_traverse (elf_hash_table (info), elf_gc_sweep_symbol, &i);
-
-    /* There is an unused NULL entry at the head of the table which
-       we must account for in our count.  Unless there weren't any
-       symbols, which means we'll have no table at all.  */
-    if (i != 0)
-      ++i;
-
-    elf_hash_table (info)->dynsymcount = i;
-  }
-
+  _bfd_elf_link_renumber_dynsyms (abfd, info, &section_sym_count);
   return TRUE;
 }
 
@@ -9184,10 +9187,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* ... and mark SEC_EXCLUDE for those that go.  */
-  if (!elf_gc_sweep (info, get_elf_backend_data (abfd)->gc_sweep_hook))
-    return FALSE;
-
-  return TRUE;
+  return elf_gc_sweep (abfd, info);
 }
 
 /* Called from check_relocs to record the existence of a VTINHERIT reloc.  */

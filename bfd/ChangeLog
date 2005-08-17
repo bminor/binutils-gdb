@@ -1,3 +1,14 @@
+2005-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_define_linkage_sym): Don't call
+	bfd_elf_link_record_dynamic_symbol.  Call elf_backend_hide_symbol.
+	(_bfd_elf_link_renumber_dynsyms): Formatting.
+	(struct elf_gc_sweep_symbol_info): New.
+	(elf_gc_sweep_symbol): Rewrite.
+	(elf_gc_sweep): Adjust params and elf_gc_sweep_symbol call.
+	Call _bfd_elf_link_renumber_dynsyms.
+	(bfd_elf_gc_sections): Adjust elf_gc_sweep call.
+
 2005-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_edit_opd): Don't call dec_dynrel_count
