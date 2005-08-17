@@ -1,3 +1,8 @@
+2005-08-17  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* config/obj-coff.c (obj_coff_weak): Set auxiliary record
+	of NT weak externals to IMAGE_WEAK_EXTERN_SEARCH_NOLIBRARY.
+
 2005-08-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_set_cpu): Don't select 64-bit based on
