@@ -1,3 +1,8 @@
+2005-08-17  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_after_allocation):
+	Don't increment rel_count of .cranges here.  Set rawsize of .cranges.
+
 2005-08-10  Nick Clifton  <nickc@redhat.com>
 
 	* pe-dll.c (pe_exe_fill_sections): Call lang_reset_memory_regions
