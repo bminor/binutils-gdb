@@ -8,6 +8,10 @@
 OpenBSD/arm			arm*-*-openbsd*
 OpenBSD/mips64			mips64-*-openbsd*
 
+* New targets
+
+Morpho Technologies ms1		ms1-elf
+
 * Deprecated commands removed
 
 The following commands, that were deprecated in 2000, have been
