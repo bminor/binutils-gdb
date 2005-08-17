@@ -1093,7 +1093,7 @@ obj_coff_weak (int ignore ATTRIBUTE_UNUSED)
          the value of the weak symbol itself.  */
       S_SET_STORAGE_CLASS (symbolP, C_NT_WEAK);
       S_SET_NUMBER_AUXILIARY (symbolP, 1);
-      SA_SET_SYM_FSIZE (symbolP, IMAGE_WEAK_EXTERN_SEARCH_LIBRARY);
+      SA_SET_SYM_FSIZE (symbolP, IMAGE_WEAK_EXTERN_SEARCH_NOLIBRARY);
 
       alternateP = symbol_find_or_make (weak_name2altname (name));
       S_SET_EXTERNAL (alternateP);

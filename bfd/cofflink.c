@@ -2937,9 +2937,11 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 		     Note that weak symbols without aux records are a GNU
 		     extension.
 		     FIXME: All weak externals are treated as having
-		     characteristics IMAGE_WEAK_EXTERN_SEARCH_LIBRARY (2).
-		     There are no known uses of the other two types of
-		     weak externals.  */
+		     characteristic IMAGE_WEAK_EXTERN_SEARCH_NOLIBRARY (1).
+		     These behave as per SVR4 ABI:  A library member
+		     will resolve a weak external only if a normal
+		     external causes the library member to be linked.
+		     See also linker.c: generic_link_check_archive_element. */
 		  asection *sec;
 		  struct coff_link_hash_entry *h2 =
 		    input_bfd->tdata.coff_obj_data->sym_hashes[
