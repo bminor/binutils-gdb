@@ -2184,7 +2184,10 @@ mmix_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd_vma *valp ATTRIBUTE_UNUSED;
 {
   if (sym->st_shndx == SHN_REGISTER)
-    *secp = bfd_make_section_old_way (abfd, MMIX_REG_SECTION_NAME);
+    {
+      *secp = bfd_make_section_old_way (abfd, MMIX_REG_SECTION_NAME);
+      (*secp)->flags |= SEC_LINKER_CREATED;
+    }
   else if ((*namep)[0] == '_' && (*namep)[1] == '_' && (*namep)[2] == '.'
 	   && strncmp (*namep, MMIX_LOC_SECTION_START_SYMBOL_PREFIX,
 		       strlen (MMIX_LOC_SECTION_START_SYMBOL_PREFIX)) == 0)
@@ -2261,9 +2264,12 @@ mmix_elf_final_link (abfd, info)
       if (bfd_get_section_flags (abfd, reg_section) & SEC_HAS_CONTENTS)
 	_bfd_abort (__FILE__, __LINE__, _("Register section has contents\n"));
 
-      /* Really remove the section.  */
-      bfd_section_list_remove (abfd, reg_section);
-      --abfd->section_count;
+      /* Really remove the section, if it hasn't already been done.  */
+      if (!bfd_section_removed_from_list (abfd, reg_section))
+	{
+	  bfd_section_list_remove (abfd, reg_section);
+	  --abfd->section_count;
+	}
     }
 
   if (! bfd_elf_final_link (abfd, info))

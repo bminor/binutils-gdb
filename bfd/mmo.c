@@ -1853,6 +1853,7 @@ mmo_scan (bfd *abfd)
 		    rsec
 		      = bfd_make_section_old_way (abfd,
 						  MMIX_REG_CONTENTS_SECTION_NAME);
+		    rsec->flags |= SEC_LINKER_CREATED;
 		    rsec->vma = z * 8;
 		    loc = mmo_get_loc (rsec, z * 8, (255 - z) * 8);
 		    bfd_put_64 (abfd, first_octa, loc);
@@ -2146,6 +2147,7 @@ mmo_canonicalize_symtab (bfd *abfd, asymbol **alocation)
 	    {
 	      c->section
 		= bfd_make_section_old_way (abfd, MMIX_REG_SECTION_NAME);
+	      c->section->flags |= SEC_LINKER_CREATED;
 	    }
 	  else
 	    {
