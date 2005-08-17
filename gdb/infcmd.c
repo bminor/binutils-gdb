@@ -1111,6 +1111,7 @@ print_return_value (int struct_return, struct type *value_type)
   struct ui_stream *stb;
   struct value *value;
 
+  CHECK_TYPEDEF (value_type);
   gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
 
   /* FIXME: 2003-09-27: When returning from a nested inferior function
@@ -1124,8 +1125,8 @@ print_return_value (int struct_return, struct type *value_type)
     {
     case RETURN_VALUE_REGISTER_CONVENTION:
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
+    case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      CHECK_TYPEDEF (value_type);
       gdbarch_return_value (current_gdbarch, value_type, stop_registers,
 			    value_contents_raw (value), NULL);
       break;

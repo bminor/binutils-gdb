@@ -1,5 +1,8 @@
 2005-08-17  Mark Kettenis  <kettenis@gnu.org>
 
+	* infcmd.c (print_return_value): Move CHECK_TYPEDEF up.  Deal with
+	RETURN_VALUE_ABI_PRESERVED_ADDRESS.
+
 	* ppc-sysv-tdep.c (do_ppc_sysv_return_value): Fix the code that
 	deals with the broken GCC convention.
 	
