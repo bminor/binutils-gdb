@@ -98,8 +98,8 @@ Symbol table '\.symtab' contains 40 entries:
 .* TLS +LOCAL +DEFAULT +9 ie4
 .* TLS +LOCAL +DEFAULT +9 le4
 .* TLS +LOCAL +DEFAULT +9 le5
+.* OBJECT +LOCAL +HIDDEN +11 _DYNAMIC
 .* FUNC +LOCAL +DEFAULT +UND \.__tls_get_addr
-.* OBJECT +GLOBAL HIDDEN +11 _DYNAMIC
 .* GLOBAL DEFAULT +UND gd
 .* GLOBAL DEFAULT +10 le0
 .* GLOBAL DEFAULT +UND __tls_get_addr

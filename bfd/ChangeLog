@@ -1,3 +1,9 @@
+2005-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-cris.c (elf_cris_adjust_gotplt_to_got): Move assert later.
+	* elfxx-mips.c (_bfd_mips_elf_hide_symbol): Cope with being called
+	without any got section.
+
 2005-08-17  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Correct

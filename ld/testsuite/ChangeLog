@@ -1,3 +1,20 @@
+2005-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-alpha/tlsbin.rd: Update.
+	* ld-alpha/tlsbinr.rd: Update.
+	* ld-cris/locref1.d: Update.
+	* ld-cris/locref2.d: Update.
+	* ld-i386/tlsbin.rd: Update.
+	* ld-ia64/tlsbin.rd: Update.
+	* ld-powerpc/tlsexe.r: Update.
+	* ld-powerpc/tlsexe32.r: Update.
+	* ld-powerpc/tlsexetoc.r: Update.
+	* ld-s390/tlsbin.rd: Update.
+	* ld-s390/tlsbin_64.rd: Update.
+	* ld-sparc/tlssunbin32.rd: Update.
+	* ld-sparc/tlssunbin64.rd: Update.
+	* ld-x86-64/tlsbin.rd: Update.
+
 2005-08-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/dso-1.s: Add missing alignment directive.

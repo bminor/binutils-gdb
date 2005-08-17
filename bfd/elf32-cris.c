@@ -2078,9 +2078,6 @@ elf_cris_adjust_gotplt_to_got (h, p)
      PTR p;
 {
   struct bfd_link_info *info = (struct bfd_link_info *) p;
-  bfd *dynobj = elf_hash_table (info)->dynobj;
-
-  BFD_ASSERT (dynobj != NULL);
 
   if (h->root.root.type == bfd_link_hash_warning)
     h = (struct elf_cris_link_hash_entry *) h->root.root.u.i.link;
@@ -2100,9 +2097,13 @@ elf_cris_adjust_gotplt_to_got (h, p)
   else
     {
       /* No GOT entry for this symbol.  We need to create one.  */
-      asection *sgot = bfd_get_section_by_name (dynobj, ".got");
-      asection *srelgot
-	= bfd_get_section_by_name (dynobj, ".rela.got");
+      bfd *dynobj = elf_hash_table (info)->dynobj;
+      asection *sgot;
+      asection *srelgot;
+
+      BFD_ASSERT (dynobj != NULL);
+      sgot = bfd_get_section_by_name (dynobj, ".got");
+      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
 
       /* Put an accurate refcount there.  */
       h->root.got.refcount = h->gotplt_refcount;
