@@ -1226,6 +1226,9 @@ vers_defns:
 			}
 		vers_defns opt_semicolon '}'
 			{
+			  struct bfd_elf_version_expr *pat;
+			  for (pat = $7; pat->next != NULL; pat = pat->next);
+			  pat->next = $1;
 			  $$ = $7;
 			  ldgram_vers_current_lang = $<name>6;
 			}
@@ -1239,6 +1242,30 @@ vers_defns:
 			  $$ = $5;
 			  ldgram_vers_current_lang = $<name>4;
 			}
+	|	GLOBAL
+		{
+		  $$ = lang_new_vers_pattern (NULL, "global", ldgram_vers_current_lang);
+		}
+	|	vers_defns ';' GLOBAL
+		{
+		  $$ = lang_new_vers_pattern ($1, "global", ldgram_vers_current_lang);
+		}
+	|	LOCAL
+		{
+		  $$ = lang_new_vers_pattern (NULL, "local", ldgram_vers_current_lang);
+		}
+	|	vers_defns ';' LOCAL
+		{
+		  $$ = lang_new_vers_pattern ($1, "local", ldgram_vers_current_lang);
+		}
+	|	EXTERN
+		{
+		  $$ = lang_new_vers_pattern (NULL, "extern", ldgram_vers_current_lang);
+		}
+	|	vers_defns ';' EXTERN
+		{
+		  $$ = lang_new_vers_pattern ($1, "extern", ldgram_vers_current_lang);
+		}
 	;
 
 opt_semicolon:

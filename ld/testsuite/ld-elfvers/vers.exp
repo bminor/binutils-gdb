@@ -960,3 +960,7 @@ build_vers_lib_pic "vers28a" vers28a.c vers28a "" "" vers28a.ver vers28a.dsym ""
 build_vers_lib_pic "vers28b" vers28b.c vers28b "" vers28b.map vers28b.ver vers28b.dsym ""
 build_vers_lib_pic "vers28c" vers28c.c vers28c "vers28b.so vers28a.so" "" vers28c.ver vers28c.dsym ""
 build_vers_lib_pic_flags "vers29" vers29.c vers29 "" "" vers29.ver vers29.dsym "" "--default-symver"
+
+# Test #30 - test handling of symbol names global, local and extern in the
+# version script.
+build_vers_lib_pic "vers30" vers30.c vers30 "" vers30.map vers30.ver vers30.dsym ""
