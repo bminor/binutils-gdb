@@ -1,3 +1,8 @@
+2005-08-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* ppc-sysv-tdep.c (do_ppc_sysv_return_value): Fix the code that
+	deals with the broken GCC convention.
+	
 2005-08-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Set condition

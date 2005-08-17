@@ -451,52 +451,33 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
     }
   if (broken_gcc && TYPE_LENGTH (type) <= 8)
     {
+      /* GCC screwed up for structures or unions whose size is less
+	 than or equal to 8 bytes..  Instead of left-aligning, it
+	 right-aligns the data into the buffer formed by r3, r4.  */
+      gdb_byte regvals[MAX_REGISTER_SIZE * 2];
+      int len = TYPE_LENGTH (type);
+      int offset = (2 * tdep->wordsize - len) % tdep->wordsize;
+
       if (readbuf)
 	{
-	  /* GCC screwed up.  The last register isn't "left" aligned.
-	     Need to extract the least significant part of each
-	     register and then store that.  */
-	  /* Transfer any full words.  */
-	  int word = 0;
-	  while (1)
-	    {
-	      ULONGEST reg;
-	      int len = TYPE_LENGTH (type) - word * tdep->wordsize;
-	      if (len <= 0)
-		break;
-	      if (len > tdep->wordsize)
-		len = tdep->wordsize;
-	      regcache_cooked_read_unsigned (regcache,
-					     tdep->ppc_gp0_regnum + 3 + word,
-					     &reg);
-	      store_unsigned_integer (((bfd_byte *) readbuf
-				       + word * tdep->wordsize), len, reg);
-	      word++;
-	    }
+	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3,
+				regvals + 0 * tdep->wordsize);
+	  if (len > tdep->wordsize)
+	    regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 4,
+				  regvals + 1 * tdep->wordsize);
+	  memcpy (readbuf, regvals + offset, len);
 	}
       if (writebuf)
 	{
-	  /* GCC screwed up.  The last register isn't "left" aligned.
-	     Need to extract the least significant part of each
-	     register and then store that.  */
-	  /* Transfer any full words.  */
-	  int word = 0;
-	  while (1)
-	    {
-	      ULONGEST reg;
-	      int len = TYPE_LENGTH (type) - word * tdep->wordsize;
-	      if (len <= 0)
-		break;
-	      if (len > tdep->wordsize)
-		len = tdep->wordsize;
-	      reg = extract_unsigned_integer (((const bfd_byte *) writebuf
-					       + word * tdep->wordsize), len);
-	      regcache_cooked_write_unsigned (regcache,
-					      tdep->ppc_gp0_regnum + 3 + word,
-					      reg);
-	      word++;
-	    }
+	  memset (regvals, 0, sizeof regvals);
+	  memcpy (regvals + offset, writebuf, len);
+	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3,
+				 regvals + 0 * tdep->wordsize);
+	  if (len > tdep->wordsize)
+	    regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 4,
+				   regvals + 1 * tdep->wordsize);
 	}
+
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   if (TYPE_LENGTH (type) <= 8)
