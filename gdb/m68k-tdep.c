@@ -333,13 +333,25 @@ m68k_return_value (struct gdbarch *gdbarch, struct type *type,
 {
   enum type_code code = TYPE_CODE (type);
 
-  if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
-      && !m68k_reg_struct_return_p (gdbarch, type))
-    return RETURN_VALUE_STRUCT_CONVENTION;
+  /* GCC returns a `long double' in memory too.  */
+  if (((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
+       && !m68k_reg_struct_return_p (gdbarch, type))
+      || (code == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12))
+    {
+      /* The default on m68k is to return structures in static memory.
+         Consequently a function must return the address where we can
+         find the return value.  */
 
-  /* GCC returns a `long double' in memory.  */
-  if (code == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12)
-    return RETURN_VALUE_STRUCT_CONVENTION;
+      if (readbuf)
+	{
+	  ULONGEST addr;
+
+	  regcache_raw_read_unsigned (regcache, M68K_D0_REGNUM, &addr);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
 
   if (readbuf)
     m68k_extract_return_value (type, regcache, readbuf);
