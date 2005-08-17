@@ -226,8 +226,11 @@ proc default_ld_compile { cc source object } {
     # based on the name of the compiler.
     set ccexe $cc
     set ccparm [string first " " $cc]
+    set ccflags ""
     if { $ccparm > 0 } then {
+	set ccflags [string range $cc $ccparm end]
 	set ccexe [string range $cc 0 $ccparm]
+	set cc $ccexe
     }
     set ccexe [string replace $ccexe 0 [string last "/" $ccexe] ""]
     if {[string match "*gcc*" $ccexe] || [string match "*++*" $ccexe]} then {
@@ -238,9 +241,9 @@ proc default_ld_compile { cc source object } {
 	append flags " [board_info [target_info name] multilib_flags]"
     }
 
-    verbose -log "$cc $flags -c $source -o $object"
+    verbose -log "$cc $flags $ccflags -c $source -o $object"
 
-    catch "exec $cc $flags -c $source -o $object" exec_output
+    catch "exec $cc $flags $ccflags -c $source -o $object" exec_output
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 	if {![file exists $object]} then {
