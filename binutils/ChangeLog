@@ -1,3 +1,12 @@
+2005-08-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/1179
+	* objdump.c (disassemble_bytes): Don't adjust
+	adjust_section_vma.
+	(adjust_addresses): Don't adjust vma for debugging section.
+	Adjust lma only for relocatable files.
+	(dump_bfd): Tell adjust_addresses if it is a relocatable file.
+
 2005-08-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bucomm.h (stpcpy): Declare if HAVE_DECL_STPCPY isn't defined.

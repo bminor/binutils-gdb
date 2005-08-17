@@ -2183,9 +2183,9 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
   stash = *pinfo;
   addr = offset;
   if (section->output_section)
-    addr += section->output_section->vma + section->output_offset;
+    addr += section->output_section->lma + section->output_offset;
   else
-    addr += section->vma;
+    addr += section->lma;
   *filename_ptr = NULL;
   *functionname_ptr = NULL;
   *linenumber_ptr = 0;
@@ -2392,9 +2392,9 @@ _bfd_dwarf2_find_line (bfd *abfd,
 
   addr = symbol->value;
   if (section->output_section)
-    addr += section->output_section->vma + section->output_offset;
+    addr += section->output_section->lma + section->output_offset;
   else
-    addr += section->vma;
+    addr += section->lma;
 
   *filename_ptr = NULL;
   stash = *pinfo;

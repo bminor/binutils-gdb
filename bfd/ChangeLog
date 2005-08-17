@@ -1,3 +1,10 @@
+2005-08-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/1179
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Use section lma
+	instead of vma.
+	(_bfd_dwarf2_find_line): Likewise.
+
 2005-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-mmix.c (mmix_elf_add_symbol_hook): Mark reg section

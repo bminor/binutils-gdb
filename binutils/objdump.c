@@ -1354,10 +1354,7 @@ disassemble_bytes (struct disassemble_info * info,
 	  done_dot = FALSE;
 
 	  if (with_line_numbers || with_source_code)
-	    /* The line number tables will refer to unadjusted
-	       section VMAs, so we must undo any VMA modifications
-	       when calling show_line.  */
-	    show_line (aux->abfd, section, addr_offset - adjust_section_vma);
+	    show_line (aux->abfd, section, addr_offset);
 
 	  if (! prefix_addresses)
 	    {
@@ -2600,10 +2597,15 @@ add_include_path (const char *path)
 static void
 adjust_addresses (bfd *abfd ATTRIBUTE_UNUSED,
 		  asection *section,
-		  void *dummy ATTRIBUTE_UNUSED)
+		  void *arg)
 {
-  section->vma += adjust_section_vma;
-  section->lma += adjust_section_vma;
+  if ((section->flags & SEC_DEBUGGING) == 0)
+    {
+      bfd_boolean *has_reloc_p = (bfd_boolean *) arg;
+      section->vma += adjust_section_vma;
+      if (*has_reloc_p)
+	section->lma += adjust_section_vma;
+    }
 }
 
 /* Dump selected contents of ABFD.  */
@@ -2615,7 +2617,10 @@ dump_bfd (bfd *abfd)
      the BFD information is a hack.  However, we must do it, or
      bfd_find_nearest_line will not do the right thing.  */
   if (adjust_section_vma != 0)
-    bfd_map_over_sections (abfd, adjust_addresses, NULL);
+    {
+      bfd_boolean has_reloc = (abfd->flags & HAS_RELOC);
+      bfd_map_over_sections (abfd, adjust_addresses, &has_reloc);
+    }
 
   if (! dump_debugging_tags)
     printf (_("\n%s:     file format %s\n"), bfd_get_filename (abfd),
