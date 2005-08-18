@@ -243,8 +243,6 @@ OUTPUT_ARCH(${OUTPUT_ARCH})
 ENTRY(${ENTRY})
 
 ${RELOCATING+${LIB_SEARCH_DIRS}}
-${RELOCATING+/* Do we need any of these for elf?
-   __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 ${RELOCATING+${INPUT_FILES}}
 ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
