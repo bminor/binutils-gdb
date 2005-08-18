@@ -10,4 +10,7 @@ _start:
 	.type __start,"function"
 	.global __start
 __start:
+	.type main,"function"
+	.global main
+main:
 	.long 0

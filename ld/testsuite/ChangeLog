@@ -1,5 +1,22 @@
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* ld-d10v/default_layout.d: Adjust for section removal.
+	* ld-elf/empty.s: Define "main".
+	* ld-elf/frame.exp: Don't run for hppa64 and v850.
+	* ld-elf/group1.d: xfail various targets.
+	* ld-elf/merge.d: Likewise.
+	* ld-elf/merge2.d: Likewise.
+	* ld-elf/warn1.d: Likewise.
+	* ld-scripts/defined2.d: Likewise.
+	* ld-scripts/defined3.d: Likewise.
+	* ld-scripts/empty-aligned.d: Likewise.
+	* ld-scripts/size-2.d: Likewise.
+	* ld-scripts/weak.exp: Likewise.
+	* ld-selective/sel-dump.exp: Likewise.
+	* ld-undefined/weak-undef.exp: Likewise.
+
+2005-08-18  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld-scripts/crossref.exp: Remove a29k support.
 	* ld-srec/srec.exp: Likewise.
 

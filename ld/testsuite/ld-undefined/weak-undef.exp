@@ -46,6 +46,8 @@ if {! [istarget i?86-*-*]} {
     setup_xfail *-*-pe*
 }
 
+setup_xfail hppa64-*-* pj-*-*
+
 if {! [ld_assemble $as $srcdir/$subdir/weak-undef.s tmpdir/weak-undef.o]} then {
     # It's OK if .weak doesn't work on this target.
     unresolved $testname

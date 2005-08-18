@@ -25,7 +25,8 @@ set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 for { set i 0 } { $i < [llength $test_list] } { incr i } {
     # We need to strip the ".d", but can leave the dirname.
     verbose [file rootname [lindex $test_list $i]]
-    setup_xfail "alpha*-*" "arc*-*" "d30v*-*" "dlx*-*" "i370*-*" "i860*-*"
-    setup_xfail "i960*-*" "ia64*-*" "mn10200-*" "or32-*" "pj-*"
+    setup_xfail "alpha*-*" "arc*-*" "d30v*-*" "dlx*-*" "hppa64-*-*"
+    setup_xfail "i370*-*" "i860*-*" "i960*-*" "ia64*-*" "mn10200-*"
+    setup_xfail  "or32-*" "pj-*"
     run_dump_test [file rootname [lindex $test_list $i]]
 }

@@ -31,6 +31,9 @@ if {! [istarget i?86-*-*]} {
     setup_xfail *-*-pe*
 }
 
+# hppa64 and or32 are incredibly broken
+setup_xfail hppa64-*-* or32-*-*
+
 if {! [ld_assemble $as $srcdir/$subdir/weak1.s tmpdir/weak1.o]
     || ! [ld_assemble $as $srcdir/$subdir/weak2.s tmpdir/weak2.o]} then {
     # It's OK if .weak doesn't work on this target.

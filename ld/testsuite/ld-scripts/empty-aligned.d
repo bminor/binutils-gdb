@@ -1,6 +1,7 @@
 #source: empty-aligned.s
 #ld: -T empty-aligned.t
 #readelf: -l --wide
+#xfail: "hppa64-*-*"
 
 #...
 Program Headers:

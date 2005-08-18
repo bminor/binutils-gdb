@@ -35,6 +35,12 @@ if { [istarget "sh*-*-elf*"] } {
     return
 }
 
+# ??? These targets have their own .tbss section, with different meaning
+# to the usual ELF .tbss.
+if { [istarget "hppa64-*-*"] || [istarget "v850-*-*"] } {
+    return
+}
+
 set test1	"read-only .eh_frame section"
 set test2	"read-only .gcc_except_table section"
 
