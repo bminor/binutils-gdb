@@ -1,5 +1,7 @@
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-a29k.c: Delete.
+	* cpu-a29k.c: Delete.
 	* Makefile.am: Remove mention of a29k files.
 	* aoutf1.h: Remove a29k support.
 	* aoutx.h: Likewise.

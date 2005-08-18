@@ -1,5 +1,8 @@
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* emulparams/a29k.sh: Delete.
+	* emulparams/ebmon29k.sh: Delete.
+	* emulparams/sa29200.sh: Delete.
 	* Makefile.am: Remove a29k support.
 	* configure.tgt: Likewise.
 	* ld.texinfo: Likewise.
