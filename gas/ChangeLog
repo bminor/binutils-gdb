@@ -1,3 +1,10 @@
+2005-08-18  Nick Clifton  <nickc@redhat.com>
+
+	* write.c (relax_segment): Count the number of frags being
+	processed and use this to compute a maximum limit on the number of
+	iterations that will be allowed when attempting to relax the
+	segment.
+
 2005-08-17  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* config/obj-coff.c (obj_coff_weak): Set auxiliary record

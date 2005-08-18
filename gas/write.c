@@ -1721,8 +1721,9 @@ relax_align (register relax_addressT address,	/* Address now.  */
 int
 relax_segment (struct frag *segment_frag_root, segT segment)
 {
-  register struct frag *fragP;
-  register relax_addressT address;
+  unsigned long frag_count;
+  struct frag *fragP;
+  relax_addressT address;
   int ret;
 
   /* In case md_estimate_size_before_relax() wants to make fixSs.  */
@@ -1731,7 +1732,9 @@ relax_segment (struct frag *segment_frag_root, segT segment)
   /* For each frag in segment: count and store  (a 1st guess of)
      fr_address.  */
   address = 0;
-  for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
+  for (frag_count = 0, fragP = segment_frag_root;
+       fragP;
+       fragP = fragP->fr_next, frag_count ++)
     {
       fragP->relax_marker = 0;
       fragP->fr_address = address;
@@ -1807,6 +1810,7 @@ relax_segment (struct frag *segment_frag_root, segT segment)
 
   /* Do relax().  */
   {
+    unsigned long max_iterations;
     offsetT stretch;	/* May be any size, 0 or negative.  */
     /* Cumulative number of addresses we have relaxed this pass.
        We may have relaxed more than one address.  */
@@ -1814,6 +1818,20 @@ relax_segment (struct frag *segment_frag_root, segT segment)
     /* This is 'cuz stretch may be zero, when, in fact some piece of code
        grew, and another shrank.  If a branch instruction doesn't fit anymore,
        we could be scrod.  */
+
+    /* We want to prevent going into an infinite loop where one frag grows
+       depending upon the location of a symbol which is in turn moved by
+       the growing frag.  eg:
+
+         foo = .
+         .org foo+16
+         foo = .
+
+	So we dictate that this algorithm can be at most O2.  */
+    max_iterations = frag_count * frag_count;
+    /* Check for overflow.  */
+    if (max_iterations < frag_count)
+      max_iterations = frag_count;
 
     do
       {
@@ -2033,10 +2051,15 @@ relax_segment (struct frag *segment_frag_root, segT segment)
 		stretch += growth;
 		stretched = 1;
 	      }
-	  }			/* For each frag in the segment.  */
+	  }
       }
-    while (stretched);		/* Until nothing further to relax.  */
-  }				/* do_relax  */
+    /* Until nothing further to relax.  */
+    while (stretched && -- max_iterations);
+
+    if (stretched)
+      as_fatal (_("Infinite loop encountered whilst attempting to compute the addresses of symbols in section %s"),
+		segment_name (segment));
+  }
 
   ret = 0;
   for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
