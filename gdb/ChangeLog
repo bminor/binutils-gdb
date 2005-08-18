@@ -1,3 +1,31 @@
+2005-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* stack.c: Reformat.  Improve comments.  Include "valprint.h".
+	(args_info, locals_info, backtrace_command, backtrace_command_1)
+	(backtrace_full_command, frame_info, frame_command, down_command)
+	(down_silently_base, down_silently_command, up_command)
+	(up_silently_base, up_silently_command, parse_frame_specification)
+	(current_frame_command, print_frame_args_vars, catch_info)
+	(args_plus_locals_info), print_frame_label_vars)
+	(print_block_frame_labels, print_block_frame_locals)
+	(func_command): Remove prototypes.
+	(print_stack_frame, backtrace_command_stub, backtrace_command,
+	backtrace_full_command, print_frame_args, print_frame_arg_vars,
+	print_args_stub, func_command): Remove redundant casts.
+	(addressprint): Remove extern declaration.
+	(frame_command): Make static.
+	(struct print_stack_frame_args, struct print_args_args): Rename
+	`fi' member to `frame'.
+	(print_stack_frame, print_frame_nameless_args, print_frame_args)
+	(set_current_sal_from_frame, print_frame_info, print_frame)
+	(show_stack_frame, print_block_frame_locals)
+	(print_frame_local_vars, print_frame_label_vars)
+	(print_frame_arg_vars, select_and_print_frame): Rename `fi'
+	argument to `frame'.
+	(func_command): Rename `fp' variable to `frame'.
+	(get_language): Restructure.
+	* Makefile.in (stack.o): Update dependencies.
+
 2005-08-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* NEWS (ms1-elf): New target.
