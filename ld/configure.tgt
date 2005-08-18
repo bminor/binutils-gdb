@@ -20,10 +20,6 @@ targ_extra_ofiles=
 # architecture variants should be kept together even if their names
 # break the alpha sorting.
 case "${targ}" in
-a29k-*-udi)		targ_emul=sa29200 ;;
-a29k-*-ebmon)		targ_emul=ebmon29k ;;
-a29k-*-*)		targ_emul=a29k
-			;;
 alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
 		        targ_emul=elf64alpha_fbsd
 			targ_extra_emuls="elf64alpha alpha"

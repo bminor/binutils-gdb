@@ -42,13 +42,6 @@ if { ![ld_compile $CC "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
 
 set flags [big_or_little_endian]
 
-# The a29k compiled code calls V_SPILL and V_FILL.  Since we don't
-# need to run this code, but we don't have definitions for those
-# functions, we just define them out.
-if [istarget a29k*-*-*] {
-    set flags "$flags --defsym V_SPILL=0 --defsym V_FILL=0"
-}
-
 if [istarget sh64*-*-elf] {
     # This is what gcc passes to ld by default.
     set flags "-mshelf32"

@@ -108,11 +108,6 @@ NAME(lynx,set_arch_mach) (abfd, machtype)
       machine = 0;
       break;
 
-    case M_29K:
-      arch = bfd_arch_a29k;
-      machine = 0;
-      break;
-
     case M_HPUX:
       arch = bfd_arch_m68k;
       machine = 0;
@@ -139,7 +134,6 @@ choose_reloc_size (abfd)
   switch (bfd_get_arch (abfd))
     {
     case bfd_arch_sparc:
-    case bfd_arch_a29k:
       obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
       break;
     default:
@@ -179,9 +173,6 @@ NAME(aout,sparclynx_write_object_contents) (abfd)
       break;
     case bfd_arch_i386:
       N_SET_MACHTYPE (*execp, M_386);
-      break;
-    case bfd_arch_a29k:
-      N_SET_MACHTYPE (*execp, M_29K);
       break;
     default:
       N_SET_MACHTYPE (*execp, M_UNKNOWN);

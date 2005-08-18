@@ -1,3 +1,12 @@
+2005-08-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Remove a29k support.
+	* configure.in: Likewise.
+	* disassemble.c: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2005-08-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ppc-dis.c (powerpc_dialect): Handle e300.

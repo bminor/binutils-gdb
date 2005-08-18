@@ -719,10 +719,6 @@ NAME (aout, machine_type) (enum bfd_architecture arch,
 	arch_flags = M_386;
       break;
 
-    case bfd_arch_a29k:
-      if (machine == 0)	arch_flags = M_29K;
-      break;
-
     case bfd_arch_arm:
       if (machine == 0)	arch_flags = M_ARM;
       break;

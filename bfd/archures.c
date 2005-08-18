@@ -111,7 +111,6 @@ DESCRIPTION
 .
 .  bfd_arch_or32,      {* OpenRISC 32 *}
 .
-.  bfd_arch_a29k,      {* AMD 29000 *}
 .  bfd_arch_sparc,     {* SPARC *}
 .#define bfd_mach_sparc			1
 .{* The difference between v8plus and v9 is that v9 is a true 64 bit env.  *}
@@ -170,7 +169,6 @@ DESCRIPTION
 .  bfd_arch_i860,      {* Intel 860 *}
 .  bfd_arch_i370,      {* IBM 360/370 Mainframes *}
 .  bfd_arch_romp,      {* IBM ROMP PC/RT *}
-.  bfd_arch_alliant,   {* Alliant *}
 .  bfd_arch_convex,    {* Convex *}
 .  bfd_arch_m88k,      {* Motorola 88xxx *}
 .  bfd_arch_m98k,      {* Motorola 98xxx *}
@@ -403,7 +401,6 @@ DESCRIPTION
 .
 */
 
-extern const bfd_arch_info_type bfd_a29k_arch;
 extern const bfd_arch_info_type bfd_alpha_arch;
 extern const bfd_arch_info_type bfd_arc_arch;
 extern const bfd_arch_info_type bfd_arm_arch;
@@ -468,7 +465,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
 #ifdef SELECT_ARCHITECTURES
     SELECT_ARCHITECTURES,
 #else
-    &bfd_a29k_arch,
     &bfd_alpha_arch,
     &bfd_arc_arch,
     &bfd_arm_arch,

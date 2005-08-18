@@ -47,7 +47,6 @@ HFILES = \
 
 # C source files that correspond to .o's.
 CFILES = \
-	a29k-dis.c \
 	alpha-dis.c \
 	alpha-opc.c \
 	arc-dis.c \
@@ -182,7 +181,6 @@ CFILES = \
 	z8kgen.c
 
 ALL_MACHINES = \
-	a29k-dis.lo \
 	alpha-dis.lo \
 	alpha-opc.lo \
 	arc-dis.lo \
@@ -574,8 +572,6 @@ dep-am: DEP
 
 # DO NOT DELETE THIS LINE -- mkdep uses it.
 # DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-a29k-dis.lo: a29k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/a29k.h
 alpha-dis.lo: alpha-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/alpha.h
 alpha-opc.lo: alpha-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \

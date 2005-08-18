@@ -54,7 +54,6 @@ BFD64_LIBS_CFILES = archive64.c
 # This list is alphabetized to make it easier to keep in sync
 # with the decls and initializer in archures.c.
 ALL_MACHINES = \
-	cpu-a29k.lo \
 	cpu-alpha.lo \
 	cpu-arc.lo \
 	cpu-arm.lo \
@@ -114,7 +113,6 @@ ALL_MACHINES = \
 	cpu-z8k.lo
 
 ALL_MACHINES_CFILES = \
-	cpu-a29k.c \
 	cpu-alpha.c \
 	cpu-arc.c \
 	cpu-arm.c \
@@ -188,7 +186,6 @@ BFD32_BACKENDS = \
 	bout.lo \
 	cf-i386lynx.lo \
 	cf-sparclynx.lo \
-	coff-a29k.lo \
 	coff-apollo.lo \
 	coff-arm.lo \
 	coff-aux.lo \
@@ -358,7 +355,6 @@ BFD32_BACKENDS_CFILES = \
 	bout.c \
 	cf-i386lynx.c \
 	cf-sparclynx.c \
-	coff-a29k.c \
 	coff-apollo.c \
 	coff-arm.c \
 	coff-aux.c \
@@ -961,7 +957,6 @@ simple.lo: simple.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/bfdlink.h
 archive64.lo: archive64.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/aout/ar.h
-cpu-a29k.lo: cpu-a29k.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-arc.lo: cpu-arc.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-arm.lo: cpu-arm.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
@@ -1074,9 +1069,6 @@ cf-sparclynx.lo: cf-sparclynx.c coff-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/sparc.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
-coff-a29k.lo: coff-a29k.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
-  $(INCDIR)/coff/a29k.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
-  libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 coff-apollo.lo: coff-apollo.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/coff/apollo.h $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \

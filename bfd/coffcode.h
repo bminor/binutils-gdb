@@ -1888,12 +1888,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       arch = bfd_arch_ia64;
       break;
 #endif
-#ifdef A29K_MAGIC_BIG
-    case A29K_MAGIC_BIG:
-    case A29K_MAGIC_LITTLE:
-      arch = bfd_arch_a29k;
-      break;
-#endif
 #ifdef ARMMAGIC
     case ARMMAGIC:
     case ARMPEMAGIC:
@@ -2779,15 +2773,6 @@ coff_set_flags (bfd * abfd,
       *magicp = H8500MAGIC;
       return TRUE;
       break;
-#endif
-
-#ifdef A29K_MAGIC_BIG
-    case bfd_arch_a29k:
-      if (bfd_big_endian (abfd))
-	*magicp = A29K_MAGIC_BIG;
-      else
-	*magicp = A29K_MAGIC_LITTLE;
-      return TRUE;
 #endif
 
 #ifdef WE32KMAGIC
@@ -3771,18 +3756,6 @@ coff_write_object_contents (bfd * abfd)
     internal_f.f_flags |= flags;
     /* ...and the "opt"hdr...  */
 
-#ifdef A29K
-#ifdef ULTRA3			/* NYU's machine */
-    /* FIXME: This is a bogus check.  I really want to see if there
-       is a .shbss or a .shdata section, if so then set the magic
-       number to indicate a shared data executable.  */
-    if (internal_f.f_nscns >= 7)
-      internal_a.magic = SHMAGIC; /* Shared magic.  */
-    else
-#endif /* ULTRA3 */
-      internal_a.magic = NMAGIC; /* Assume separate i/d.  */
-#define __A_MAGIC_SET__
-#endif /* A29K */
 #ifdef TICOFF_AOUT_MAGIC
     internal_a.magic = TICOFF_AOUT_MAGIC;
 #define __A_MAGIC_SET__
@@ -4481,11 +4454,6 @@ coff_slurp_symbol_table (bfd * abfd)
 
 	    case C_MOS:		/* Member of structure.  */
 	    case C_EOS:		/* End of structure.  */
-#ifdef NOTDEF			/* C_AUTOARG has the same value.  */
-#ifdef C_GLBLREG
-	    case C_GLBLREG:	/* A29k-specific storage class.  */
-#endif
-#endif
 	    case C_REGPARM:	/* Register parameter.  */
 	    case C_REG:		/* register variable.  */
               /* C_AUTOARG conflicts with TI COFF C_UEXT.  */

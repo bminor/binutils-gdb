@@ -18,7 +18,6 @@
 @c Configure for the generation of man pages
 @set UsesEnvVars
 @set GENERIC
-@set A29K
 @set ARC
 @set ARM
 @set D10V

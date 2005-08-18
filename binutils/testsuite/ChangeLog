@@ -1,3 +1,8 @@
+2005-08-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/objcopy.exp: Remove a29k support.
+	* binutils-all/objdump.exp: Likewise, alliant and convex too.
+
 2005-05-07  Nick Clifton  <nickc@redhat.com>
 
 	* Update the address and phone number of the FSF organization in

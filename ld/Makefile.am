@@ -106,7 +106,6 @@ BFDLIB = ../bfd/libbfd.la
 LIBIBERTY = ../libiberty/libiberty.a
 
 ALL_EMULATIONS = \
-	ea29k.o \
 	eaixppc.o \
 	eaixrs6.o \
 	ealpha.o \
@@ -145,7 +144,6 @@ ALL_EMULATIONS = \
 	ed30velf.o \
 	edelta68.o \
 	eelf32_dlx.o \
-	eebmon29k.o \
 	eelf32_i960.o \
 	eelf32_i860.o \
 	eelf32_sparc.o \
@@ -335,7 +333,6 @@ ALL_EMULATIONS = \
 	eppcpe.o \
 	eppclynx.o \
 	eriscix.o \
-	esa29200.o \
 	esh.o \
 	eshelf32.o \
 	eshlelf32.o \
@@ -474,9 +471,6 @@ GEN_DEPENDS = $(srcdir)/genscripts.sh stringify.sed
 
 @TDIRS@
 
-ea29k.c: $(srcdir)/emulparams/a29k.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/a29k.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} a29k "$(tdir_a29k)"
 eaix5ppc.c: $(srcdir)/emulparams/aix5ppc.sh \
   $(srcdir)/emultempl/aix.em $(srcdir)/scripttempl/aix.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} aix5ppc "$(tdir_aixppc)"
@@ -624,9 +618,6 @@ edelta68.c: $(srcdir)/emulparams/delta68.sh \
 eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/dlx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_dlx "$(tdir_elf32_dlx)"
-eebmon29k.c: $(srcdir)/emulparams/ebmon29k.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/ebmon29k.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} ebmon29k "$(tdir_ebmon29k)"
 eelf32xstormy16.c: $(srcdir)/emulparams/elf32xstormy16.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/xstormy16.sc ${GEN_DEPENDS}
@@ -1391,9 +1382,6 @@ eppclynx.c: $(srcdir)/emulparams/ppclynx.sh \
 eriscix.c: $(srcdir)/emulparams/riscix.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} riscix "$(tdir_riscix)"
-esa29200.c: $(srcdir)/emulparams/sa29200.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sa29200.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} sa29200 "$(tdir_sa29200)"
 esh.c: $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sh "$(tdir_sh)"

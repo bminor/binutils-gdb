@@ -71,7 +71,6 @@ if ![string match "" $got] then {
     # in the first place, and may order things a little differently.
     # Those systems should use setup_xfail here.
 
-    setup_xfail "a29k-*"
     setup_xfail "h8300-*-rtems*" "h8300-*-coff"
     setup_xfail "h8500-*-rtems*" "h8500-*-coff"
     setup_xfail "hppa*-*-*"

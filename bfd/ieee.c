@@ -3412,11 +3412,6 @@ ieee_write_processor (bfd *abfd)
 	return FALSE;
       break;
 
-    case bfd_arch_a29k:
-      if (! ieee_write_id (abfd, "29000"))
-	return FALSE;
-      break;
-
     case bfd_arch_h8300:
       if (! ieee_write_id (abfd, "H8/300"))
 	return FALSE;

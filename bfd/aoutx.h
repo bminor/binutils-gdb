@@ -730,11 +730,6 @@ NAME (aout, machine_type) (enum bfd_architecture arch,
 	arch_flags = M_386;
       break;
 
-    case bfd_arch_a29k:
-      if (machine == 0)
-	arch_flags = M_29K;
-      break;
-
     case bfd_arch_arm:
       if (machine == 0)
 	arch_flags = M_ARM;
@@ -848,7 +843,6 @@ NAME (aout, set_arch_mach) (bfd *abfd,
   switch (arch)
     {
     case bfd_arch_sparc:
-    case bfd_arch_a29k:
     case bfd_arch_mips:
       obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
       break;

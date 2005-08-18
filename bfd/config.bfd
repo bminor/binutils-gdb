@@ -53,7 +53,7 @@ case $targ in
  vax-*-vms* | \
  arm-*-oabi | \
  thumb-*-oabi | \
- a29k-*rtems* | \
+ a29k-* | \
  hppa*-*-rtems* | \
  *-go32-rtems* | \
  i[3-7]86*-*-rtemscoff* | \
@@ -302,17 +302,6 @@ case "${targ}" in
   xscale-*-coff)
     targ_defvec=armcoff_little_vec
     targ_selvecs=armcoff_big_vec
-    targ_underscore=yes
-    ;;
-
-  a29k-*-ebmon* | a29k-*-udi* | a29k-*-coff* | a29k-*-sym1* | \
-  a29k-*-vxworks* | a29k-*-sysv*)
-    targ_defvec=a29kcoff_big_vec
-    targ_selvecs=sunos_big_vec
-    targ_underscore=yes
-    ;;
-  a29k-*-aout* | a29k-*-bsd* | a29k-*-vsta*)
-    targ_defvec=sunos_big_vec
     targ_underscore=yes
     ;;
 
@@ -1242,10 +1231,6 @@ case "${targ}" in
   sparc-*-linux-*)
     targ_defvec=bfd_elf32_sparc_vec
     targ_selvecs="sparclinux_vec bfd_elf64_sparc_vec sunos_big_vec"
-    ;;
-  sparc-*-lynxos*)
-    targ_defvec=sparclynx_coff_vec
-    targ_selvecs=sparclynx_aout_vec
     ;;
   sparc-*-netbsdelf*)
     targ_defvec=bfd_elf32_sparc_vec

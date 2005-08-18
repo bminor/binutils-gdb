@@ -20,7 +20,6 @@
 #include "dis-asm.h"
 
 #ifdef ARCH_all
-#define ARCH_a29k
 #define ARCH_alpha
 #define ARCH_arc
 #define ARCH_arm
@@ -94,12 +93,6 @@ disassembler (abfd)
     {
       /* If you add a case to this table, also add it to the
 	 ARCH_all definition right above this function.  */
-#ifdef ARCH_a29k
-    case bfd_arch_a29k:
-      /* As far as I know we only handle big-endian 29k objects.  */
-      disassemble = print_insn_big_a29k;
-      break;
-#endif
 #ifdef ARCH_alpha
     case bfd_arch_alpha:
       disassemble = print_insn_alpha;

@@ -1,5 +1,24 @@
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Remove mention of a29k files.
+	* aoutf1.h: Remove a29k support.
+	* aoutx.h: Likewise.
+	* archures.c: Likewise.
+	* coffcode.h: Likewise.
+	* config.bfd: Likewise.
+	* configure.in: Likewise.
+	* ieee.c: Likewise.
+	* mipsbsd.c: Likewise.
+	* pdp11.c: Likewise.
+	* sparclynx.c: Likewise.
+	* targets.c: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2005-08-18  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-m10300.c (_bfd_mn10300_elf_adjust_dynamic_symbol): Warn on
 	zero size dynamic variables.
 	* elf32-arm.c (elf32_arm_adjust_dynamic_symbol): Likewise.

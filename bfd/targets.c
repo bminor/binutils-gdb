@@ -522,7 +522,6 @@ to find an alternative output format that is suitable.
    Alphabetized for easy reference.
    They are listed a second time below, since
    we can't intermix extern's and initializers.  */
-extern const bfd_target a29kcoff_big_vec;
 extern const bfd_target a_out_adobe_vec;
 extern const bfd_target aix5coff64_vec;
 extern const bfd_target aout0_big_vec;
@@ -808,7 +807,6 @@ static const bfd_target * const _bfd_target_vector[] = {
 	   Vectors that don't compile on all systems, or aren't finished,
 	   should have an entry here with #if 0 around it, to show that
 	   it wasn't omitted by mistake.  */
-	&a29kcoff_big_vec,
 	&a_out_adobe_vec,
 #ifdef BFD64
 	&aix5coff64_vec,

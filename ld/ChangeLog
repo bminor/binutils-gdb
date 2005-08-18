@@ -1,3 +1,10 @@
+2005-08-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Remove a29k support.
+	* configure.tgt: Likewise.
+	* ld.texinfo: Likewise.
+	* Makefile.in: Regenerate.
+
 2005-08-17  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldgram.y (vers_defns): Don't lose pattern list before
