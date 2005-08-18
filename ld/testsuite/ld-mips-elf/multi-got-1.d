@@ -10,7 +10,7 @@ Dynamic section at offset 0xcc contains 18 entries:
  0x00000004 \(HASH\)                       0x184
  0x00000005 \(STRTAB\)                     0x[0-9a-f]+
  0x00000006 \(SYMTAB\)                     0x[0-9a-f]+
- 0x0000000a \(STRSZ\)                      178090 \(bytes\)
+ 0x0000000a \(STRSZ\)                      [0-9]+ \(bytes\)
  0x0000000b \(SYMENT\)                     16 \(bytes\)
  0x00000015 \(DEBUG\)                      0x0
  0x00000003 \(PLTGOT\)                     0x[0-9a-f]+
@@ -21,9 +21,9 @@ Dynamic section at offset 0xcc contains 18 entries:
  0x70000005 \(MIPS_FLAGS\)                 NOTPOT
  0x70000006 \(MIPS_BASE_ADDRESS\)          0
  0x7000000a \(MIPS_LOCAL_GOTNO\)           12
- 0x70000011 \(MIPS_SYMTABNO\)              16399
- 0x70000012 \(MIPS_UNREFEXTNO\)            14
- 0x70000013 \(MIPS_GOTSYM\)                0xf
+ 0x70000011 \(MIPS_SYMTABNO\)              [0-9]+
+ 0x70000012 \(MIPS_UNREFEXTNO\)            [0-9]+
+ 0x70000013 \(MIPS_GOTSYM\)                0x[0-9a-f]+
  0x00000000 \(NULL\)                       0x0
 
 Relocation section '\.rel\.dyn' at offset 0x[0-9a-f]+ contains 8203 entries:

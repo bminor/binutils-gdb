@@ -1,3 +1,11 @@
+2005-08-18  David Daney  <ddaney@avtrex.com>
+
+	* ld-mips-elf/multi-got-1.d: Adjust for new ld behavior.
+	* ld-mips-elf/multi-got-no-shared.d: Likewise.
+	* ld-mips-elf/rel32-n32.d: Likewise.
+	* ld-mips-elf/rel32-o32.d: Likewise.
+	* ld-mips-elf/rel64.d: Likewise.
+
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-d10v/default_layout.d: Adjust for section removal.
