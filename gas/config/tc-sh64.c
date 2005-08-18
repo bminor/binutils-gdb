@@ -2928,14 +2928,14 @@ sh64_target_format (void)
 {
 #ifdef TE_NetBSD
   /* For NetBSD, if the ISA is unspecified, always use SHmedia.  */
-  if (sh64_isa_mode == sh64_isa_unspecified)
+  if (preset_target_arch == 0 && sh64_isa_mode == sh64_isa_unspecified)
     sh64_isa_mode = sh64_isa_shmedia;
 
   /* If the ABI is unspecified, select a default: based on how
      we were configured: sh64 == sh64_abi_64, else sh64_abi_32.  */
   if (sh64_abi == sh64_abi_unspecified)
     {
-      if (sh64_isa_mode == sh64_isa_shcompact)
+      if (preset_target_arch != 0 || sh64_isa_mode == sh64_isa_shcompact)
 	sh64_abi = sh64_abi_32;
       else if (strncmp (TARGET_CPU, "sh64", 4) == 0)
         sh64_abi = sh64_abi_64;
@@ -2945,7 +2945,7 @@ sh64_target_format (void)
 #endif
 
 #ifdef TE_LINUX
-  if (sh64_isa_mode == sh64_isa_unspecified)
+  if (preset_target_arch == 0 && sh64_isa_mode == sh64_isa_unspecified)
     sh64_isa_mode = sh64_isa_shmedia;
 
   if (sh64_abi == sh64_abi_unspecified)

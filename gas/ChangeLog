@@ -1,3 +1,8 @@
+2005-08-18  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh64.c (sh64_target_format): Check preset_target_arch
+	to confirm that no ISA is specified.
+
 2005-08-18  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (relax_segment): Count the number of frags being
