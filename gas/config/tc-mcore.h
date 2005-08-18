@@ -29,8 +29,6 @@
 
 #define IGNORE_NONSTANDARD_ESCAPES
 
-#define TC_RELOC_MANGLE(a,b,c) tc_reloc_mangle (a, b, c)
-
 /* Some pseudo-op semantic extensions.  */
 #define	PSEUDO_LCOMM_OPTIONAL_ALIGN
 

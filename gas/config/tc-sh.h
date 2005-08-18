@@ -120,12 +120,6 @@ extern void sh_frob_file (void);
 
 #define COFF_MAGIC (!target_big_endian ? SH_ARCH_MAGIC_LITTLE : SH_ARCH_MAGIC_BIG)
 
-#define TC_RELOC_MANGLE(seg, fix, int, paddr) \
-  sh_coff_reloc_mangle ((seg), (fix), (int), (paddr))
-extern void sh_coff_reloc_mangle
-  (struct segment_info_struct *, struct fix *,
-   struct internal_reloc *, unsigned int);
-
 #define tc_coff_symbol_emit_hook(a) ; /* not used */
 
 #define TC_KEEP_FX_OFFSET 1

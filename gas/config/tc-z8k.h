@@ -31,10 +31,6 @@ struct internal_reloc;
 #define IGNORE_NONSTANDARD_ESCAPES
 #undef WARN_SIGNED_OVERFLOW_WORD
 
-#define TC_RELOC_MANGLE(s,a,b,c) tc_reloc_mangle(a,b,c)
-extern void tc_reloc_mangle
-  PARAMS ((struct fix *, struct internal_reloc *, bfd_vma));
-
 #define LISTING_HEADER "Zilog Z8000 GAS "
 #define RELOC_32 1234
 

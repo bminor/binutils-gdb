@@ -3937,7 +3937,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     case BFD_RELOC_SH_USES:
-      /* Pass the value into sh_coff_reloc_mangle.  */
+      /* Pass the value into sh_reloc().  */
       fixP->fx_addnumber = val;
       break;
 
