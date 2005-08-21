@@ -1,5 +1,19 @@
 2005-08-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* ppcobsd-tdep.c: Include "frame.h" and "frame-unwind.h".  Don't
+	include "tramp-frame.h".
+	(ppcobsd_sigtramp_cache_init): Remove function.
+	(ppcobsd_sigtramp): Remove variable.
+	(ppcobsd_page_size, ppcobsd_sigreturn_offset): New variables.
+	(ppcobsd_sigtramp_p): New function.
+	(ppcobsd_sigtramp_frame_cache, ppcobsd_sigtramp_frame_this_id)
+	(ppcobsd_sigtramp_frame_prev_register): New functions.
+	(ppcobsd_sigtramp_frame_unwind): New variable.
+	(ppcobsd_sigtramp_frame_sniffer): New function.
+	(ppcobsd_init_abi): Adjust to register new sigtramp sniffer
+	instead of the old one.
+	* Makefile.in (ppcobsd-tdep.o): Update dependencies.
+
 	* infcall.c (call_function_by_hand): For
 	RETURN_VALUE_ABI_RETURNS_ADDRESS and
 	RETURN_VALUE_ABI_PRESERVES_ADDRESS, use gdbarch_return_value to

@@ -22,11 +22,13 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "floatformat.h"
+#include "frame.h"
+#include "frame-unwind.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
+#include "symtab.h"
 #include "trad-frame.h"
-#include "tramp-frame.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -116,55 +118,154 @@ ppcobsd_regset_from_core_section (struct gdbarch *gdbarch,
 
 /* Signal trampolines.  */
 
-static void
-ppcobsd_sigtramp_cache_init (const struct tramp_frame *self,
-			     struct frame_info *next_frame,
-			     struct trad_frame_cache *this_cache,
-			     CORE_ADDR func)
+/* Since OpenBSD 3.2, the sigtramp routine is mapped at a random page
+   in virtual memory.  The randomness makes it somewhat tricky to
+   detect it, but fortunately we can rely on the fact that the start
+   of the sigtramp routine is page-aligned.  We recognize the
+   trampoline by looking for the code that invokes the sigreturn
+   system call.  The offset where we can find that code varies from
+   release to release.
+
+   By the way, the mapping mentioned above is read-only, so you cannot
+   place a breakpoint in the signal trampoline.  */
+
+/* Default page size.  */
+static const int ppcobsd_page_size = 4096;
+
+/* Offset for sigreturn(2).  */
+static const int ppcobsd_sigreturn_offset[] = {
+  0x98,				/* OpenBSD 3.8 */
+  0x0c,				/* OpenBSD 3.2 */
+  -1
+};
+
+static int
+ppcobsd_sigtramp_p (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR start_pc = (pc & ~(ppcobsd_page_size - 1));
+  const int *offset;
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (name)
+    return 0;
+
+  for (offset = ppcobsd_sigreturn_offset; *offset != -1; offset++)
+    {
+      gdb_byte buf[2 * PPC_INSN_SIZE];
+      unsigned long insn;
+
+      if (!safe_frame_unwind_memory (next_frame, start_pc + *offset,
+				     buf, sizeof buf))
+	continue;
+
+      /* Check for "li r0,SYS_sigreturn".  */
+      insn = extract_unsigned_integer (buf, PPC_INSN_SIZE);
+      if (insn != 0x38000067)
+	continue;
+
+      /* Check for "sc".  */
+      insn = extract_unsigned_integer (buf + PPC_INSN_SIZE, PPC_INSN_SIZE);
+      if (insn != 0x44000002)
+	continue;
+
+      return 1;
+    }
+
+  return 0;
+}
+
+static struct trad_frame_cache *
+ppcobsd_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  CORE_ADDR addr, base;
+  struct trad_frame_cache *cache;
+  CORE_ADDR addr, base, func;
+  gdb_byte buf[PPC_INSN_SIZE];
+  unsigned long insn, sigcontext_offset;
   int i;
 
+  if (*this_cache)
+    return *this_cache;
+
+  cache = trad_frame_cache_zalloc (next_frame);
+  *this_cache = cache;
+
+  func = frame_pc_unwind (next_frame);
+  func &= ~(ppcobsd_page_size - 1);
+  if (!safe_frame_unwind_memory (next_frame, func, buf, sizeof buf))
+    return cache;
+
+  /* Calculate the offset where we can find `struct sigcontext'.  We
+     base our calculation on the amount of stack space reserved by the
+     first instruction of the signal trampoline.  */
+  insn = extract_unsigned_integer (buf, PPC_INSN_SIZE);
+  sigcontext_offset = (0x10000 - (insn & 0x0000ffff)) + 8;
+
   base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
-  addr = base + 0x18 + 2 * tdep->wordsize;
+  addr = base + sigcontext_offset + 2 * tdep->wordsize;
   for (i = 0; i < ppc_num_gprs; i++, addr += tdep->wordsize)
     {
       int regnum = i + tdep->ppc_gp0_regnum;
-      trad_frame_set_reg_addr (this_cache, regnum, addr);
+      trad_frame_set_reg_addr (cache, regnum, addr);
     }
-  trad_frame_set_reg_addr (this_cache, tdep->ppc_lr_regnum, addr);
+  trad_frame_set_reg_addr (cache, tdep->ppc_lr_regnum, addr);
   addr += tdep->wordsize;
-  trad_frame_set_reg_addr (this_cache, tdep->ppc_cr_regnum, addr);
+  trad_frame_set_reg_addr (cache, tdep->ppc_cr_regnum, addr);
   addr += tdep->wordsize;
-  trad_frame_set_reg_addr (this_cache, tdep->ppc_xer_regnum, addr);
+  trad_frame_set_reg_addr (cache, tdep->ppc_xer_regnum, addr);
   addr += tdep->wordsize;
-  trad_frame_set_reg_addr (this_cache, tdep->ppc_ctr_regnum, addr);
+  trad_frame_set_reg_addr (cache, tdep->ppc_ctr_regnum, addr);
   addr += tdep->wordsize;
-  trad_frame_set_reg_addr (this_cache, PC_REGNUM, addr); /* SRR0? */
+  trad_frame_set_reg_addr (cache, PC_REGNUM, addr); /* SRR0? */
   addr += tdep->wordsize;
 
   /* Construct the frame ID using the function start.  */
-  trad_frame_set_id (this_cache, frame_id_build (base, func));
+  trad_frame_set_id (cache, frame_id_build (base, func));
+
+  return cache;
 }
 
-static const struct tramp_frame ppcobsd_sigtramp =
+static void
+ppcobsd_sigtramp_frame_this_id (struct frame_info *next_frame,
+				void **this_cache, struct frame_id *this_id)
 {
+  struct trad_frame_cache *cache =
+    ppcobsd_sigtramp_frame_cache (next_frame, this_cache);
+
+  trad_frame_get_id (cache, this_id);
+}
+
+static void
+ppcobsd_sigtramp_frame_prev_register (struct frame_info *next_frame,
+				      void **this_cache, int regnum,
+				      int *optimizedp, enum lval_type *lvalp,
+				      CORE_ADDR *addrp, int *realnump,
+				      gdb_byte *valuep)
+{
+  struct trad_frame_cache *cache =
+    ppcobsd_sigtramp_frame_cache (next_frame, this_cache);
+
+  trad_frame_get_register (cache, next_frame, regnum,
+			   optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind ppcobsd_sigtramp_frame_unwind = {
   SIGTRAMP_FRAME,
-  4,
-  {
-    { 0x3821fff0, -1 },		/* add r1,r1,-16 */
-    { 0x4e800021, -1 },		/* blrl */
-    { 0x38610018, -1 },		/* addi r3,r1,24 */
-    { 0x38000067, -1 },		/* li r0,103 */
-    { 0x44000002, -1 },		/* sc */
-    { 0x38000001, -1 },		/* li r0,1 */
-    { 0x44000002, -1 },		/* sc */
-    { TRAMP_SENTINEL_INSN, -1 }
-  },
-  ppcobsd_sigtramp_cache_init
+  ppcobsd_sigtramp_frame_this_id,
+  ppcobsd_sigtramp_frame_prev_register
 };
+
+static const struct frame_unwind *
+ppcobsd_sigtramp_frame_sniffer (struct frame_info *next_frame)
+{
+  if (ppcobsd_sigtramp_p (next_frame))
+    return &ppcobsd_sigtramp_frame_unwind;
+
+  return NULL;
+}
 
 
 static void
@@ -184,7 +285,7 @@ ppcobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_regset_from_core_section
     (gdbarch, ppcobsd_regset_from_core_section);
 
-  tramp_frame_prepend_unwinder (gdbarch, &ppcobsd_sigtramp);
+  frame_unwind_append_sniffer (gdbarch, ppcobsd_sigtramp_frame_sniffer);
 }
 
 
