@@ -854,39 +854,44 @@ the function call)."), name);
      leave the RETBUF alone.  */
   do_cleanups (inf_status_cleanup);
 
-  /* Figure out the value returned by the function, return that.  */
+  /* Figure out the value returned by the function.  */
   {
-    struct value *retval;
+    struct value *retval = NULL;
+
     if (TYPE_CODE (values_type) == TYPE_CODE_VOID)
-      /* If the function returns void, don't bother fetching the
-	 return value.  */
-      retval = allocate_value (values_type);
-    else if (struct_return)
-      /* NOTE: cagney/2003-09-27: This assumes that PUSH_DUMMY_CALL
-	 has correctly stored STRUCT_ADDR in the target.  In the past
-	 that hasn't been the case, the old MIPS PUSH_ARGUMENTS
-	 (PUSH_DUMMY_CALL precursor) would silently move the location
-	 of the struct return value making STRUCT_ADDR bogus.  If
-	 you're seeing problems with values being returned using the
-	 "struct return convention", check that PUSH_DUMMY_CALL isn't
-	 playing tricks.  */
-      retval = value_at (values_type, struct_addr);
+      {
+	/* If the function returns void, don't bother fetching the
+	   return value.  */
+	retval = allocate_value (values_type);
+      }
     else
       {
-	/* This code only handles "register convention".  */
-	retval = allocate_value (values_type);
-	gdb_assert (gdbarch_return_value (current_gdbarch, values_type,
-					  NULL, NULL, NULL)
-		    == RETURN_VALUE_REGISTER_CONVENTION);
-	gdbarch_return_value (current_gdbarch, values_type, retbuf,
-			      value_contents_raw (retval) /*read*/,
-			      NULL /*write*/);
+	struct gdbarch *arch = current_gdbarch;
+
+	switch (gdbarch_return_value (arch, values_type, NULL, NULL, NULL))
+	  {
+	  case RETURN_VALUE_REGISTER_CONVENTION:
+	  case RETURN_VALUE_ABI_RETURNS_ADDRESS:
+	  case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
+	    retval = allocate_value (values_type);
+	    gdbarch_return_value (current_gdbarch, values_type, retbuf,
+				  value_contents_raw (retval), NULL);
+	    break;
+	  case RETURN_VALUE_STRUCT_CONVENTION:
+	    retval = value_at (values_type, struct_addr);
+	    break;
+	  }
       }
+
     do_cleanups (retbuf_cleanup);
+
+    gdb_assert(retval);
     return retval;
   }
 }
+
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_infcall (void);
 
 void
