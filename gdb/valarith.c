@@ -1,8 +1,8 @@
 /* Perform arithmetic and other operations on values, for GDB.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1248,7 +1248,12 @@ value_equal (struct value *arg1, struct value *arg2)
 						       BINOP_EQUAL)));
   else if ((code1 == TYPE_CODE_FLT || is_int1)
 	   && (code2 == TYPE_CODE_FLT || is_int2))
-    return value_as_double (arg1) == value_as_double (arg2);
+    {
+      /* NOTE: kettenis/20050816: Avoid compiler bug on systems where
+	 `long double' values are returned in static storage (m68k).  */
+      DOUBLEST d = value_as_double (arg1);
+      return d == value_as_double (arg2);
+    }
 
   /* FIXME: Need to promote to either CORE_ADDR or LONGEST, whichever
      is bigger.  */
@@ -1307,7 +1312,12 @@ value_less (struct value *arg1, struct value *arg2)
 						       BINOP_LESS)));
   else if ((code1 == TYPE_CODE_FLT || is_int1)
 	   && (code2 == TYPE_CODE_FLT || is_int2))
-    return value_as_double (arg1) < value_as_double (arg2);
+    {
+      /* NOTE: kettenis/20050816: Avoid compiler bug on systems where
+	 `long double' values are returned in static storage (m68k).  */
+      DOUBLEST d = value_as_double (arg1);
+      return d < value_as_double (arg2);
+    }
   else if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
     return value_as_address (arg1) < value_as_address (arg2);
 

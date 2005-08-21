@@ -1,3 +1,8 @@
+2005-08-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* valarith.c (value_equal, value_less): Avoid compiler bug on
+	systems where `long double' values are returned in static storage.
+
 2005-08-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* stack.c: Reformat.  Improve comments.  Include "valprint.h".
