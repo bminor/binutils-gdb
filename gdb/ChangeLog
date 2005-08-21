@@ -1,5 +1,8 @@
 2005-08-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* doublest.c (floatformat_mantissa): Use xsnprintf instead of
+	sprintf.
+
 	* vaxobsd-tdep.c: New file.
 	* config/vax/obsd.mt (TDEPFILES): Add vaxobsd-tdep.o.
 	* Makefile.in (vaxobsd-tdep.o): New dependency.

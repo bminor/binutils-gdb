@@ -558,6 +558,7 @@ floatformat_mantissa (const struct floatformat *fmt,
   int mant_bits_left;
   static char res[50];
   char buf[9];
+  int len;
   enum floatformat_byteorders order;
   unsigned char newfrom[FLOATFORMAT_LARGEST_BYTES];
   
@@ -582,16 +583,17 @@ floatformat_mantissa (const struct floatformat *fmt,
 
   mant = get_field (uval, order, fmt->totalsize, mant_off, mant_bits);
 
-  sprintf (res, "%lx", mant);
+  len = xsnprintf (res, sizeof res, "%lx", mant);
 
   mant_off += mant_bits;
   mant_bits_left -= mant_bits;
-  
+
   while (mant_bits_left > 0)
     {
       mant = get_field (uval, order, fmt->totalsize, mant_off, 32);
 
-      sprintf (buf, "%08lx", mant);
+      xsnprintf (buf, sizeof buf, "%08lx", mant);
+      gdb_assert (len + strlen (buf) <= sizeof res);
       strcat (res, buf);
 
       mant_off += 32;
