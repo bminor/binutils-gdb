@@ -1,5 +1,9 @@
 2005-08-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* vaxobsd-tdep.c: New file.
+	* config/vax/obsd.mt (TDEPFILES): Add vaxobsd-tdep.o.
+	* Makefile.in (vaxobsd-tdep.o): New dependency.
+
 	* ppcobsd-tdep.c: Include "frame.h" and "frame-unwind.h".  Don't
 	include "tramp-frame.h".
 	(ppcobsd_sigtramp_cache_init): Remove function.

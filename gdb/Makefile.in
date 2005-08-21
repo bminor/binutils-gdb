@@ -2732,6 +2732,9 @@ vax-nat.o: vax-nat.c $(defs_h) $(inferior_h) $(gdb_assert_h) $(vax_tdep_h) \
 	$(inf_ptrace_h)
 vaxnbsd-tdep.o: vaxnbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
 	$(vax_tdep_h) $(solib_svr4_h) $(gdb_string_h)
+vaxobsd-tdep.o: vaxobsd-tdep.c  $(defs_h) $(arch_utils_h) $(frame_h) \
+	$(frame_unwind_h) $(osabi_h) $(symtab_h) $(trad_frame_h) \
+	$(vax_tdep_h) $(gdb_string_h)
 vax-tdep.o: vax-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) $(frame_h) \
 	$(frame_base_h) $(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) \
 	$(osabi_h) $(regcache_h) $(regset_h) $(trad_frame_h) $(value_h) \
