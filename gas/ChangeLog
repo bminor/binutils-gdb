@@ -1,3 +1,16 @@
+2005-08-22  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (object_64bit): New.
+	(i386_target_format): Initialize it.
+	(output_disp): Use object_64bit for relocation type determination.
+	(output_imm): Likewise.
+	(i386_validate_fix): Likewise.
+	(tc_gen_reloc): Likewise.
+	(lex_got): Likewise. Remove static mode_name. Change array size
+	of gotrel's rel field, and adjust its initializer. Adjust diagnostic.
+	(x86_cons): Use object_64bit for deciding whether quad fields can
+	have relocations.
+
 2005-08-18  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-h8300.h: Remove TC_RELOC_MANGLE/tc_reloc_mangle.

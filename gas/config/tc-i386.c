@@ -287,6 +287,7 @@ enum flag_code {
 #define NUM_FLAG_CODE ((int) CODE_64BIT + 1)
 
 static enum flag_code flag_code;
+static unsigned int object_64bit;
 static int use_rela_relocations = 0;
 
 /* The names used to print error messages.  */
@@ -3611,7 +3612,7 @@ output_disp (insn_start_frag, insn_start_off)
 		      add += p - frag_now->fr_literal;
 		    }
 
-		  if (flag_code != CODE_64BIT)
+		  if (!object_64bit)
 		    reloc_type = BFD_RELOC_386_GOTPC;
 		  else
 		    reloc_type = BFD_RELOC_X86_64_GOTPC32;
@@ -3748,7 +3749,7 @@ output_imm (insn_start_frag, insn_start_off)
 		      add += p - frag_now->fr_literal;
 		    }
 
-		  if (flag_code != CODE_64BIT)
+		  if (!object_64bit)
 		    reloc_type = BFD_RELOC_386_GOTPC;
 		  else
 		    reloc_type = BFD_RELOC_X86_64_GOTPC32;
@@ -3778,25 +3779,24 @@ lex_got (enum bfd_reloc_code_real *reloc,
      int *adjust,
      unsigned int *types)
 {
-  static const char * const mode_name[NUM_FLAG_CODE] = { "32", "16", "64" };
   static const struct {
     const char *str;
-    const enum bfd_reloc_code_real rel[NUM_FLAG_CODE];
+    const enum bfd_reloc_code_real rel[2];
     const unsigned int types64;
   } gotrel[] = {
-    { "PLT",      { BFD_RELOC_386_PLT32,      0, BFD_RELOC_X86_64_PLT32    }, Imm32|Imm32S|Disp32 },
-    { "GOTOFF",   { BFD_RELOC_386_GOTOFF,     0, BFD_RELOC_X86_64_GOTOFF64 }, Imm64|Disp64 },
-    { "GOTPCREL", { 0,                        0, BFD_RELOC_X86_64_GOTPCREL }, Imm32|Imm32S|Disp32 },
-    { "TLSGD",    { BFD_RELOC_386_TLS_GD,     0, BFD_RELOC_X86_64_TLSGD    }, Imm32|Imm32S|Disp32 },
-    { "TLSLDM",   { BFD_RELOC_386_TLS_LDM,    0, 0                         }, 0 },
-    { "TLSLD",    { 0,                        0, BFD_RELOC_X86_64_TLSLD    }, Imm32|Imm32S|Disp32 },
-    { "GOTTPOFF", { BFD_RELOC_386_TLS_IE_32,  0, BFD_RELOC_X86_64_GOTTPOFF }, Imm32|Imm32S|Disp32 },
-    { "TPOFF",    { BFD_RELOC_386_TLS_LE_32,  0, BFD_RELOC_X86_64_TPOFF32  }, Imm32|Imm32S|Imm64|Disp32|Disp64 },
-    { "NTPOFF",   { BFD_RELOC_386_TLS_LE,     0, 0                         }, 0 },
-    { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32, 0, BFD_RELOC_X86_64_DTPOFF32 }, Imm32|Imm32S|Imm64|Disp32|Disp64 },
-    { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,  0, 0                         }, 0 },
-    { "INDNTPOFF",{ BFD_RELOC_386_TLS_IE,     0, 0                         }, 0 },
-    { "GOT",      { BFD_RELOC_386_GOT32,      0, BFD_RELOC_X86_64_GOT32    }, Imm32|Imm32S|Disp32 }
+    { "PLT",      { BFD_RELOC_386_PLT32,      BFD_RELOC_X86_64_PLT32    }, Imm32|Imm32S|Disp32 },
+    { "GOTOFF",   { BFD_RELOC_386_GOTOFF,     BFD_RELOC_X86_64_GOTOFF64 }, Imm64|Disp64 },
+    { "GOTPCREL", { 0,                        BFD_RELOC_X86_64_GOTPCREL }, Imm32|Imm32S|Disp32 },
+    { "TLSGD",    { BFD_RELOC_386_TLS_GD,     BFD_RELOC_X86_64_TLSGD    }, Imm32|Imm32S|Disp32 },
+    { "TLSLDM",   { BFD_RELOC_386_TLS_LDM,    0                         }, 0 },
+    { "TLSLD",    { 0,                        BFD_RELOC_X86_64_TLSLD    }, Imm32|Imm32S|Disp32 },
+    { "GOTTPOFF", { BFD_RELOC_386_TLS_IE_32,  BFD_RELOC_X86_64_GOTTPOFF }, Imm32|Imm32S|Disp32 },
+    { "TPOFF",    { BFD_RELOC_386_TLS_LE_32,  BFD_RELOC_X86_64_TPOFF32  }, Imm32|Imm32S|Imm64|Disp32|Disp64 },
+    { "NTPOFF",   { BFD_RELOC_386_TLS_LE,     0                         }, 0 },
+    { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32, BFD_RELOC_X86_64_DTPOFF32 }, Imm32|Imm32S|Imm64|Disp32|Disp64 },
+    { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,  0                         }, 0 },
+    { "INDNTPOFF",{ BFD_RELOC_386_TLS_IE,     0                         }, 0 },
+    { "GOT",      { BFD_RELOC_386_GOT32,      BFD_RELOC_X86_64_GOT32    }, Imm32|Imm32S|Disp32 }
   };
   char *cp;
   unsigned int j;
@@ -3815,12 +3815,12 @@ lex_got (enum bfd_reloc_code_real *reloc,
       len = strlen (gotrel[j].str);
       if (strncasecmp (cp + 1, gotrel[j].str, len) == 0)
 	{
-	  if (gotrel[j].rel[(unsigned int) flag_code] != 0)
+	  if (gotrel[j].rel[object_64bit] != 0)
 	    {
 	      int first, second;
 	      char *tmpbuf, *past_reloc;
 
-	      *reloc = gotrel[j].rel[(unsigned int) flag_code];
+	      *reloc = gotrel[j].rel[object_64bit];
 	      if (adjust)
 		*adjust = len;
 
@@ -3859,8 +3859,8 @@ lex_got (enum bfd_reloc_code_real *reloc,
 	      return tmpbuf;
 	    }
 
-	  as_bad (_("@%s reloc is not supported in %s bit mode"),
-		  gotrel[j].str, mode_name[(unsigned int) flag_code]);
+	  as_bad (_("@%s reloc is not supported with %d-bit output format"),
+		  gotrel[j].str, 1 << (5 + object_64bit));
 	  return NULL;
 	}
     }
@@ -3890,7 +3890,7 @@ x86_cons (exp, size)
      expressionS *exp;
      int size;
 {
-  if (size == 4 || (flag_code == CODE_64BIT && size == 8))
+  if (size == 4 || (object_64bit && size == 8))
     {
       /* Handle @GOTOFF and the like in an expression.  */
       char *save;
@@ -5319,7 +5319,10 @@ i386_target_format ()
     case bfd_target_elf_flavour:
       {
 	if (flag_code == CODE_64BIT)
-	  use_rela_relocations = 1;
+	  {
+	    object_64bit = 1;
+	    use_rela_relocations = 1;
+	  }
 	return flag_code == CODE_64BIT ? "elf64-x86-64" : ELF_TARGET_FORMAT;
       }
 #endif
@@ -5456,13 +5459,13 @@ i386_validate_fix (fixp)
     {
       if (fixp->fx_r_type == BFD_RELOC_32_PCREL)
 	{
-	  if (flag_code != CODE_64BIT)
+	  if (!object_64bit)
 	    abort ();
 	  fixp->fx_r_type = BFD_RELOC_X86_64_GOTPCREL;
 	}
       else
 	{
-	  if (flag_code != CODE_64BIT)
+	  if (!object_64bit)
 	    fixp->fx_r_type = BFD_RELOC_386_GOTOFF;
 	  else
 	    fixp->fx_r_type = BFD_RELOC_X86_64_GOTOFF64;
@@ -5564,7 +5567,7 @@ tc_gen_reloc (section, fixp)
       && GOT_symbol
       && fixp->fx_addsy == GOT_symbol)
     {
-      if (flag_code != CODE_64BIT)
+      if (!object_64bit)
 	code = BFD_RELOC_386_GOTPC;
       else
 	code = BFD_RELOC_X86_64_GOTPC32;

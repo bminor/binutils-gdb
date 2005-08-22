@@ -1,3 +1,9 @@
+2005-08-22  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/mixed-mode-reloc.s, gas/i386/mixed-mode-reloc32.d,
+	gas/i386/mixed-mode-reloc64.d: New.
+	* gas/i386/i386.exp: Run new tests.
+
 2005-08-15  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_it.s: Add more instruction variants.
