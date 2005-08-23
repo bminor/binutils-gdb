@@ -1,3 +1,8 @@
+2005-08-23  David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add 5kf to the table of
+	cpu names.
+
 2005-08-23  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 1036
