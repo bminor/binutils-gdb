@@ -184,8 +184,10 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
 /* '+' and '-' can be used as postfix predicate predictors for conditional
-   branches.  So they need to be accepted as symbol characters.  */
-const char ppc_symbol_chars[] = "+-";
+   branches.  So they need to be accepted as symbol characters.
+   Also, anything that can start an operand needs to be mentioned here,
+   to stop the input scrubber eating whitespace.  */
+const char ppc_symbol_chars[] = "+-%[";
 
 /* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
 int ppc_cie_data_alignment;
