@@ -222,6 +222,10 @@ const struct mips_opcode mips16_opcodes[] =
 {"sw",	    "R,V(S)",	0x6200, 0xff00, RD_31|RD_SP,	0,	0 },
 {"xor",	    "x,y",	0xe80e, 0xf81f, WR_x|RD_x|RD_y, 0,	0 },
   /* MIPS16e additions */
+{"jalrc",   "x",	0xe8c0, 0xf8ff, WR_31|RD_x|TRAP, 0,     0 },
+{"jalrc",   "R,x",	0xe8c0, 0xf8ff, WR_31|RD_x|TRAP, 0,     0 },
+{"jrc",     "x",	0xe880, 0xf8ff, RD_x|TRAP,	0,      0 },
+{"jrc",     "R",	0xe8a0, 0xffff, RD_31|TRAP,	0,      0 },
 {"seb",	    "x",	0xe891, 0xf8ff, WR_x|RD_x,	0,      0 },
 {"seh",	    "x",	0xe8b1, 0xf8ff, WR_x|RD_x,	0,      0 },
 {"sew",	    "x",	0xe8d1, 0xf8ff, WR_x|RD_x,	0,      I3 },

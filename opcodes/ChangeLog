@@ -1,3 +1,8 @@
+2005-08-23  David Ung  <davidu@mips.com>
+
+	* mips16-opc.c (mips16_opcodes): Add the MIPS16e jalrc/jrc
+	instructions to the table. 
+
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* a29k-dis.c: Delete.
