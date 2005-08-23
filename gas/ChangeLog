@@ -1,3 +1,7 @@
+2005-08-23  Phil Edwards  <phil@codesourcery.com>
+
+	* configure.tgt (*-*-vxworks):  Match vxworks* instead.
+
 2005-08-22  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (object_64bit): New.
