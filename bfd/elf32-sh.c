@@ -6655,7 +6655,7 @@ sh_elf_set_mach_from_flags (bfd *abfd)
 int
 sh_elf_get_flags_from_mach (unsigned long mach)
 {
-  int i = ARRAY_SIZE (sh_ef_bfd_table);
+  int i = ARRAY_SIZE (sh_ef_bfd_table) - 1;
   
   for (; i>0; i--)
     if (sh_ef_bfd_table[i] == mach)

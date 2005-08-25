@@ -1,3 +1,7 @@
+2005-08-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_get_flags_from_mach): Fix off-by-one error.
+
 2005-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/1208
