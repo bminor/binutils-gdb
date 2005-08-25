@@ -762,6 +762,8 @@ if { [istarget mips*-*-*] } then {
     run_list_test "noat-6" ""
     run_list_test "noat-7" ""
 
+    run_dump_test_arches "mips32-dsp"	[mips_arch_list_matching mips32 !sb1]
+
     if { $elf && !$no_mips16 } {
 	run_dump_test "mips16-dwarf2"
 	if $has_newabi {

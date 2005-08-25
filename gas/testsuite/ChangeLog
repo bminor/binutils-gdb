@@ -1,3 +1,8 @@
+2005-08-25  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/mips.exp: Run DSP test.
+	* gas/mips/mips32-dsp.[sdl]: New test.
+
 2005-08-22  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/mixed-mode-reloc.s, gas/i386/mixed-mode-reloc32.d,
