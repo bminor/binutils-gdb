@@ -1,3 +1,22 @@
+2005-08-25  Chao-ying Fu  <fu@mips.com>
+
+	* config/tc-mips.c (mips_set_options): Add ase_dsp for DSP instructions.
+	(mips_opts): Add -1 to initialize ase_dsp.
+	(file_ase_dsp): New variable for -mdsp.
+	(CPU_HAS_DSP): New define.
+	(validate_mips_insn): Add supports for 3, 4, 5, 6, 7, 8, 9, 0, ', :, @
+	operand formats.
+	(mips_ip): Add min_range and max_range for checking singed numbers.
+	Check ase_dsp to enable DSP instructions.
+	Handle 3, 4, 5, 6, 7, 8, 9, 0, ', :, @ operand formats.
+	(OPTION_DSP, OPTION_NO_DSP): New define.
+	(OPTION_COMPAT_ARCH_BASE): Change because of inserting DSP define.
+	(md_parse_option): Parse OPTION_DSP and OPTION_NO_DSP.
+	(mips_after_parse_args): Set ase_dsp based on CPU.
+	(s_mipsset): Handle ".set dsp" and ".set nodsp".
+	(mips_elf_final_processing): Remind of adding new flag for DSP ASE.
+	(md_show_usage): Show usage of -mdsp and -mno-dsp.
+
 2005-08-23  David Ung  <davidu@mips.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Add 5kf to the table of

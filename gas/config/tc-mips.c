@@ -193,6 +193,7 @@ struct mips_set_options
      command line options, and based on the default architecture.  */
   int ase_mips3d;
   int ase_mdmx;
+  int ase_dsp;
   /* Whether we are assembling for the mips16 processor.  0 if we are
      not, 1 if we are, and -1 if the value has not been initialized.
      Changed by `.set mips16' and `.set nomips16', and the -mips16 and
@@ -243,7 +244,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
+  ISA_UNKNOWN, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -266,6 +267,10 @@ static int file_ase_mips3d;
 /* True if -mdmx was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_mdmx;
+
+/* True if -mdsp was passed or implied by arguments passed on the
+   command line (e.g., by -march).  */
+static int file_ase_dsp;
 
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int file_mips_arch = CPU_UNKNOWN;
@@ -363,6 +368,10 @@ static int mips_32bitmode = 0;
 
 /* Return true if the given CPU supports the MDMX ASE.  */
 #define CPU_HAS_MDMX(cpu)	(FALSE                 \
+				 )
+
+/* Return true if the given CPU supports the DSP ASE.  */
+#define CPU_HAS_DSP(cpu)	(FALSE                 \
 				 )
 
 /* True if CPU has a dror instruction.  */
@@ -7817,6 +7826,17 @@ validate_mips_insn (const struct mips_opcode *opc)
       case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
       case '[': break;
       case ']': break;
+      case '3': USE_BITS (OP_MASK_SA3,  	OP_SH_SA3);	break;
+      case '4': USE_BITS (OP_MASK_SA4,  	OP_SH_SA4);	break;
+      case '5': USE_BITS (OP_MASK_IMM8, 	OP_SH_IMM8);	break;
+      case '6': USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
+      case '7': USE_BITS (OP_MASK_DSPACC,	OP_SH_DSPACC);	break;
+      case '8': USE_BITS (OP_MASK_WRDSP,	OP_SH_WRDSP);	break;
+      case '9': USE_BITS (OP_MASK_DSPACC_S,	OP_SH_DSPACC_S);break;
+      case '0': USE_BITS (OP_MASK_DSPSFT,	OP_SH_DSPSFT);	break;
+      case '\'': USE_BITS (OP_MASK_RDDSP,	OP_SH_RDDSP);	break;
+      case ':': USE_BITS (OP_MASK_DSPSFT_7,	OP_SH_DSPSFT_7);break;
+      case '@': USE_BITS (OP_MASK_IMM10,	OP_SH_IMM10);	break;
       default:
 	as_bad (_("internal: bad mips opcode (unknown operand type `%c'): %s %s"),
 		c, opc->name, opc->args);
@@ -7851,6 +7871,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   unsigned int limlo, limhi;
   char *s_reset;
   char save_c = 0;
+  offsetT min_range, max_range;
 
   insn_error = NULL;
 
@@ -7913,6 +7934,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			    (mips_opts.isa
 			     | (file_ase_mips16 ? INSN_MIPS16 : 0)
 	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
+	      		     | (mips_opts.ase_dsp ? INSN_DSP : 0)
 			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
 			    mips_opts.arch))
 	ok = TRUE;
@@ -7964,6 +7986,175 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      if (*s == '\0')
 		return;
 	      break;
+
+	    case '3': /* dsp 3-bit unsigned immediate in bit 21 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~OP_MASK_SA3)
+		{
+		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
+			   OP_MASK_SA3, (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_SA3;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_SA3;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '4': /* dsp 4-bit unsigned immediate in bit 21 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~OP_MASK_SA4)
+		{
+		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
+			   OP_MASK_SA4, (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_SA4;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_SA4;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '5': /* dsp 8-bit unsigned immediate in bit 16 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~OP_MASK_IMM8)
+		{
+		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
+			   OP_MASK_IMM8, (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_IMM8;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_IMM8;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '6': /* dsp 5-bit unsigned immediate in bit 21 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~OP_MASK_RS)
+		{
+		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
+			   OP_MASK_RS, (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_RS;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_RS;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '7': /* four dsp accumulators in bits 11,12 */ 
+	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c' &&
+		  s[3] >= '0' && s[3] <= '3')
+		{
+		  regno = s[3] - '0';
+		  s += 4;
+		  ip->insn_opcode |= regno << OP_SH_DSPACC;
+		  continue;
+		}
+	      else
+		as_bad (_("Invalid dsp acc register"));
+	      break;
+
+	    case '8': /* dsp 6-bit unsigned immediate in bit 11 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~OP_MASK_WRDSP)
+		{
+		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
+			   OP_MASK_WRDSP,
+			   (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_WRDSP;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_WRDSP;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '9': /* four dsp accumulators in bits 21,22 */
+	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c' &&
+		  s[3] >= '0' && s[3] <= '3')
+		{
+		  regno = s[3] - '0';
+		  s += 4;
+		  ip->insn_opcode |= regno << OP_SH_DSPACC_S;
+		  continue;
+		}
+	      else
+		as_bad (_("Invalid dsp acc register"));
+	      break;
+
+	    case '0': /* dsp 6-bit signed immediate in bit 20 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      min_range = -((OP_MASK_DSPSFT + 1) >> 1);
+	      max_range = ((OP_MASK_DSPSFT + 1) >> 1) - 1;
+	      if (imm_expr.X_add_number < min_range ||
+		  imm_expr.X_add_number > max_range)
+		{
+		  as_warn (_("DSP immediate not in range %ld..%ld (%ld)"),
+			   (long) min_range, (long) max_range,
+			   (long) imm_expr.X_add_number);
+		}
+	      imm_expr.X_add_number &= OP_MASK_DSPSFT;
+	      ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
+				  << OP_SH_DSPSFT);
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '\'': /* dsp 6-bit unsigned immediate in bit 16 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~OP_MASK_RDDSP)
+		{
+		  as_warn (_("DSP immediate not in range 0..%d (%lu)"),
+			   OP_MASK_RDDSP,
+			   (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_RDDSP;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_RDDSP;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case ':': /* dsp 7-bit signed immediate in bit 19 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      min_range = -((OP_MASK_DSPSFT_7 + 1) >> 1);
+	      max_range = ((OP_MASK_DSPSFT_7 + 1) >> 1) - 1;
+	      if (imm_expr.X_add_number < min_range ||
+		  imm_expr.X_add_number > max_range)
+		{
+		  as_warn (_("DSP immediate not in range %ld..%ld (%ld)"),
+			   (long) min_range, (long) max_range,
+			   (long) imm_expr.X_add_number);
+		}
+	      imm_expr.X_add_number &= OP_MASK_DSPSFT_7;
+	      ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
+				  << OP_SH_DSPSFT_7);
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '@': /* dsp 10-bit signed immediate in bit 16 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      min_range = -((OP_MASK_IMM10 + 1) >> 1);
+	      max_range = ((OP_MASK_IMM10 + 1) >> 1) - 1;
+	      if (imm_expr.X_add_number < min_range ||
+		  imm_expr.X_add_number > max_range)
+		{
+		  as_warn (_("DSP immediate not in range %ld..%ld (%ld)"),
+			   (long) min_range, (long) max_range,
+			   (long) imm_expr.X_add_number);
+		}
+	      imm_expr.X_add_number &= OP_MASK_IMM10;
+	      ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
+				  << OP_SH_IMM10);
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
 
 	    case ',':
 	      if (*s++ == *args)
@@ -10027,9 +10218,13 @@ struct option md_longopts[] =
   {"mdmx", no_argument, NULL, OPTION_MDMX},
 #define OPTION_NO_MDMX (OPTION_ASE_BASE + 5)
   {"no-mdmx", no_argument, NULL, OPTION_NO_MDMX},
+#define OPTION_DSP (OPTION_ASE_BASE + 6)
+  {"mdsp", no_argument, NULL, OPTION_DSP},
+#define OPTION_NO_DSP (OPTION_ASE_BASE + 7)
+  {"mno-dsp", no_argument, NULL, OPTION_NO_DSP},
 
   /* Old-style architecture options.  Don't add more of these.  */
-#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 6)
+#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 8)
 #define OPTION_M4650 (OPTION_COMPAT_ARCH_BASE + 0)
   {"m4650", no_argument, NULL, OPTION_M4650},
 #define OPTION_NO_M4650 (OPTION_COMPAT_ARCH_BASE + 1)
@@ -10279,6 +10474,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_MDMX:
       mips_opts.ase_mdmx = 0;
+      break;
+
+    case OPTION_DSP:
+      mips_opts.ase_dsp = 1;
+      break;
+
+    case OPTION_NO_DSP:
+      mips_opts.ase_dsp = 0;
       break;
 
     case OPTION_MIPS16:
@@ -10635,11 +10838,14 @@ mips_after_parse_args (void)
     mips_opts.ase_mips3d = (CPU_HAS_MIPS3D (file_mips_arch)) ? 1 : 0;
   if (mips_opts.ase_mdmx == -1)
     mips_opts.ase_mdmx = (CPU_HAS_MDMX (file_mips_arch)) ? 1 : 0;
+  if (mips_opts.ase_dsp == -1)
+    mips_opts.ase_dsp = (CPU_HAS_DSP (file_mips_arch)) ? 1 : 0;
 
   file_mips_isa = mips_opts.isa;
   file_ase_mips16 = mips_opts.mips16;
   file_ase_mips3d = mips_opts.ase_mips3d;
   file_ase_mdmx = mips_opts.ase_mdmx;
+  file_ase_dsp = mips_opts.ase_dsp;
   mips_opts.gp32 = file_mips_gp32;
   mips_opts.fp32 = file_mips_fp32;
 
@@ -11577,6 +11783,10 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     mips_opts.ase_mdmx = 1;
   else if (strcmp (name, "nomdmx") == 0)
     mips_opts.ase_mdmx = 0;
+  else if (strcmp (name, "dsp") == 0)
+    mips_opts.ase_dsp = 1;
+  else if (strcmp (name, "nodsp") == 0)
+    mips_opts.ase_dsp = 0;
   else if (strncmp (name, "mips", 4) == 0 || strncmp (name, "arch=", 5) == 0)
     {
       int reset = 0;
@@ -13311,6 +13521,8 @@ mips_elf_final_processing (void)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_CPIC;
 
   /* Set MIPS ELF flags for ASEs.  */
+  /* We may need to define a new flag for DSP ASE, and set this flag when
+     file_ase_dsp is true.  */
   if (file_ase_mips16)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ARCH_ASE_M16;
 #if 0 /* XXX FIXME */
@@ -14014,6 +14226,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mips16			generate mips16 instructions\n\
 -no-mips16		do not generate mips16 instructions\n"));
+  fprintf (stream, _("\
+-mdsp			generate DSP instructions\n\
+-mno-dsp		do not generate DSP instructions\n"));
   fprintf (stream, _("\
 -mfix-vr4120		work around certain VR4120 errata\n\
 -mfix-vr4130		work around VR4130 mflo/mfhi errata\n\
