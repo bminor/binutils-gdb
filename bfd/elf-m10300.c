@@ -1457,9 +1457,12 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  else if (unresolved_reloc)
 	    (*_bfd_error_handler)
-	      (_("%s: warning: unresolvable relocation against symbol `%s' from %s section"),
-	       bfd_get_filename (input_bfd), h->root.root.root.string,
-	       bfd_get_section_name (input_bfd, input_section));
+	      (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+	       input_bfd,
+	       input_section,
+	       (long) rel->r_offset,
+	       howto->name,
+	       h->root.root.root.string);
 	}
 
       r = mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,

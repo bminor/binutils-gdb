@@ -1732,10 +1732,11 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	       && h->def_dynamic))
 	{
 	  (*_bfd_error_handler)
-	    (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
+	    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	     input_bfd,
 	     input_section,
 	     (long) rel->r_offset,
+	     howto->name,
 	     h->root.root.string);
 	  return FALSE;
 	}

@@ -4714,8 +4714,12 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      else if (sec->output_section == NULL)
 		{
 		  (*_bfd_error_handler)
-		    (_("%B(%A): unresolvable relocation against symbol `%s'"),
-		     input_bfd, input_section, h->root.root.string);
+		    (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
+		     input_bfd,
+		     input_section,
+		     (long) rel->r_offset,
+		     howto->name,
+		     h->root.root.string);
 		  return FALSE;
 		}
 	      else

@@ -1,3 +1,21 @@
+2005-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1208
+	* elf-hppa.h (elf_hppa_relocate_section): Print out the name
+	of unresolvable relocation.
+	* elf-m10300.c (mn10300_elf_relocate_section): Likewise.
+	* elf32-arm.c (elf32_arm_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_relocate_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sh64.c (sh_elf64_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Likewise.
+
 2005-08-18  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* config.bfd: Add bfd_elf32_shnbsd_vec and bfd_elf32_shlnbsd_vec

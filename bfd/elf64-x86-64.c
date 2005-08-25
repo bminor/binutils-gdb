@@ -2519,10 +2519,11 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && h->def_dynamic))
 	(*_bfd_error_handler)
-	  (_("%B(%A+0x%lx): unresolvable relocation against symbol `%s'"),
+	  (_("%B(%A+0x%lx): unresolvable %s relocation against symbol `%s'"),
 	   input_bfd,
 	   input_section,
 	   (long) rel->r_offset,
+	   howto->name,
 	   h->root.root.string);
 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
