@@ -119,6 +119,33 @@ Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, US
 #define G3      (I4             \
                  )
 
+/* MIPS DSP ASE support.
+   NOTE:
+   1. MIPS DSP ASE includes 4 accumulators ($ac0 - $ac3).  $ac0 is the pair
+   of original HI and LO.  $ac1, $ac2 and $ac3 are new registers, and have
+   the same structure as $ac0 (HI + LO).  For DSP instructions that write or
+   read accumulators (that may be $ac0), we add WR_a (WR_HILO) or RD_a
+   (RD_HILO) attritubes, such that HILO dependences are maintained
+   conservatively.
+
+   2. For some mul. instructions that use integer registers as destinations
+   but destroy HI+LO as side-effect, we add WR_HILO to their attritubes.
+
+   3. MIPS DSP ASE includes a new DSP control register, which has 6 fields
+   (ccond, outflag, EFI, c, scount, pos).  Many DSP instructions read or write
+   certain fields of the DSP control register.  For simplicity, we decide not
+   to track dependences of these fields.
+   However, "bposge32" is a branch instruction that depends on the "pos"
+   field.  In order to make sure that GAS does not reorder DSP instructions
+   that writes the "pos" field and "bposge32", we add DSP_VOLA (INSN_TRAP)
+   attritube to those instructions that write the "pos" field.  */
+
+#define WR_a	WR_HILO	/* Write dsp accumulators (reuse WR_HILO)  */
+#define RD_a	RD_HILO	/* Read dsp accumulators (reuse RD_HILO)  */
+#define MOD_a	WR_a|RD_a
+#define DSP_VOLA	INSN_TRAP
+#define D32	(INSN_DSP)
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -741,7 +768,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mfc3",    "t,G,H",    0x4c000000, 0xffe007f8, LCD|WR_t|RD_C3, 	0,		I32     },
 {"mfdr",    "t,G",	0x7000003d, 0xffe007ff,	LCD|WR_t|RD_C0,		0,		N5      },
 {"mfhi",    "d",	0x00000010, 0xffff07ff,	WR_d|RD_HI,		0,		I1	},
+{"mfhi",    "d,9",	0x00000010, 0xff9f07ff, WR_d|RD_HI,		0,		D32	},
 {"mflo",    "d",	0x00000012, 0xffff07ff,	WR_d|RD_LO,		0,		I1	},
+{"mflo",    "d,9",	0x00000012, 0xff9f07ff, WR_d|RD_LO,		0,		D32	},
 {"min.ob",  "X,Y,Q",	0x78000006, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	0,		MX|SB1	},
 {"min.ob",  "D,S,T",	0x4ac00006, 0xffe0003f,	WR_D|RD_S|RD_T,		0,		N54	},
 {"min.ob",  "D,S,T[e]",	0x48000006, 0xfe20003f,	WR_D|RD_S|RD_T,		0,		N54	},
@@ -804,7 +833,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mtc3",    "t,G,H",    0x4c800000, 0xffe007f8, COD|RD_t|WR_C3|WR_CC,   0,		I32     },
 {"mtdr",    "t,G",	0x7080003d, 0xffe007ff,	COD|RD_t|WR_C0,		0,		N5	},
 {"mthi",    "s",	0x00000011, 0xfc1fffff,	RD_s|WR_HI,		0,		I1	},
+{"mthi",    "s,7",	0x00000011, 0xfc1fe7ff, RD_s|WR_HI,		0,		D32	},
 {"mtlo",    "s",	0x00000013, 0xfc1fffff,	RD_s|WR_LO,		0,		I1	},
+{"mtlo",    "s,7",	0x00000013, 0xfc1fe7ff, RD_s|WR_LO,		0,		D32	},
 {"mul.d",   "D,V,T",	0x46200002, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	0,		I1	},
 {"mul.s",   "D,V,T",	0x46000002, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	0,		I1	},
 {"mul.ob",  "X,Y,Q",	0x78000030, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	0,		MX|SB1	},
@@ -1215,6 +1246,112 @@ const struct mips_opcode mips_builtin_opcodes[] =
      4010 any more, so move this insn out of the way.  If the object
      format gave us more info, we could do this right.  */
 {"addciu",  "t,r,j",	0x70000000, 0xfc000000,	WR_t|RD_s,		0,		L1	},
+/* MIPS DSP ASE */
+{"absq_s.ph", "d,t",	0x7c000252, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"absq_s.w", "d,t",	0x7c000452, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"addq.ph", "d,s,t",	0x7c000290, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"addq_s.ph", "d,s,t",	0x7c000390, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"addq_s.w", "d,s,t",	0x7c000590, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"addsc",   "d,s,t",	0x7c000410, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"addu.qb", "d,s,t",	0x7c000010, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"addu_s.qb", "d,s,t",	0x7c000110, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"addwc",   "d,s,t",	0x7c000450, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"bitrev",  "d,t",	0x7c0006d2, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"bposge32", "p",	0x041c0000, 0xffff0000, CBD,			0,		D32	},
+{"cmp.eq.ph", "s,t",	0x7c000211, 0xfc00ffff, RD_s|RD_t,		0,		D32	},
+{"cmpgu.eq.qb", "d,s,t", 0x7c000111, 0xfc0007ff, WR_d|RD_s|RD_t,	0,		D32	},
+{"cmpgu.le.qb", "d,s,t", 0x7c000191, 0xfc0007ff, WR_d|RD_s|RD_t,	0,		D32	},
+{"cmpgu.lt.qb", "d,s,t", 0x7c000151, 0xfc0007ff, WR_d|RD_s|RD_t,	0,		D32	},
+{"cmp.le.ph", "s,t",	0x7c000291, 0xfc00ffff, RD_s|RD_t,		0,		D32	},
+{"cmp.lt.ph", "s,t",	0x7c000251, 0xfc00ffff, RD_s|RD_t,		0,		D32	},
+{"cmpu.eq.qb", "s,t",	0x7c000011, 0xfc00ffff, RD_s|RD_t,		0,		D32	},
+{"cmpu.le.qb", "s,t",	0x7c000091, 0xfc00ffff, RD_s|RD_t,		0,		D32	},
+{"cmpu.lt.qb", "s,t",	0x7c000051, 0xfc00ffff, RD_s|RD_t,		0,		D32	},
+{"dpaq_sa.l.w", "7,s,t", 0x7c000330, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"dpaq_s.w.ph", "7,s,t", 0x7c000130, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"dpau.h.qbl", "7,s,t",	0x7c0000f0, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"dpau.h.qbr", "7,s,t",	0x7c0001f0, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"dpsq_sa.l.w", "7,s,t", 0x7c000370, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"dpsq_s.w.ph", "7,s,t", 0x7c000170, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"dpsu.h.qbl", "7,s,t",	0x7c0002f0, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"dpsu.h.qbr", "7,s,t",	0x7c0003f0, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"extpdp",  "t,7,6",	0x7c0002b8, 0xfc00e7ff, WR_t|RD_a|DSP_VOLA,	0,		D32	},
+{"extpdpv", "t,7,s",	0x7c0002f8, 0xfc00e7ff, WR_t|RD_a|RD_s|DSP_VOLA, 0,		D32	},
+{"extp",    "t,7,6",	0x7c0000b8, 0xfc00e7ff, WR_t|RD_a,		0,		D32	},
+{"extpv",   "t,7,s",	0x7c0000f8, 0xfc00e7ff, WR_t|RD_a|RD_s,		0,		D32	},
+{"extr_rs.w", "t,7,6",	0x7c0001b8, 0xfc00e7ff, WR_t|RD_a,		0,		D32	},
+{"extr_r.w", "t,7,6",	0x7c000138, 0xfc00e7ff, WR_t|RD_a,		0,		D32	},
+{"extr_s.h", "t,7,6",	0x7c0003b8, 0xfc00e7ff, WR_t|RD_a,		0,		D32	},
+{"extrv_rs.w", "t,7,s",	0x7c0001f8, 0xfc00e7ff, WR_t|RD_a|RD_s,		0,		D32	},
+{"extrv_r.w", "t,7,s",	0x7c000178, 0xfc00e7ff, WR_t|RD_a|RD_s,		0,		D32	},
+{"extrv_s.h", "t,7,s",	0x7c0003f8, 0xfc00e7ff, WR_t|RD_a|RD_s,		0,		D32	},
+{"extrv.w", "t,7,s",	0x7c000078, 0xfc00e7ff, WR_t|RD_a|RD_s,		0,		D32	},
+{"extr.w",  "t,7,6",	0x7c000038, 0xfc00e7ff, WR_t|RD_a,		0,		D32	},
+{"insv",    "t,s",	0x7c00000c, 0xfc00ffff, WR_t|RD_s,		0,		D32	},
+{"lbux",    "d,t(b)",	0x7c00018a, 0xfc0007ff, LDD|WR_d|RD_t|RD_b,	0,		D32	},
+{"lhx",     "d,t(b)",	0x7c00010a, 0xfc0007ff, LDD|WR_d|RD_t|RD_b,	0,		D32	},
+{"lwx",     "d,t(b)",	0x7c00000a, 0xfc0007ff, LDD|WR_d|RD_t|RD_b,	0,		D32	},
+{"maq_sa.w.phl", "7,s,t", 0x7c000430, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"maq_sa.w.phr", "7,s,t", 0x7c0004b0, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"maq_s.w.phl", "7,s,t", 0x7c000530, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"maq_s.w.phr", "7,s,t", 0x7c0005b0, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"modsub",  "d,s,t",	0x7c000490, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"mthlip",  "s,7",	0x7c0007f8, 0xfc1fe7ff, RD_s|MOD_a|DSP_VOLA,	0,		D32	},
+{"muleq_s.w.phl", "d,s,t", 0x7c000710, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HILO, 0,		D32	},
+{"muleq_s.w.phr", "d,s,t", 0x7c000750, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HILO, 0,		D32	},
+{"muleu_s.ph.qbl", "d,s,t", 0x7c000190, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HILO, 0,		D32	},
+{"muleu_s.ph.qbr", "d,s,t", 0x7c0001d0, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HILO, 0,		D32	},
+{"mulq_rs.ph", "d,s,t",	0x7c0007d0, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HILO,	0,		D32	},
+{"mulsaq_s.w.ph", "7,s,t", 0x7c0001b0, 0xfc00e7ff, MOD_a|RD_s|RD_t,	0,		D32	},
+{"packrl.ph", "d,s,t",	0x7c000391, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"pick.ph", "d,s,t",	0x7c0002d1, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"pick.qb", "d,s,t",	0x7c0000d1, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"precequ.ph.qbla", "d,t", 0x7c000192, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"precequ.ph.qbl", "d,t", 0x7c000112, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"precequ.ph.qbra", "d,t", 0x7c0001d2, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"precequ.ph.qbr", "d,t", 0x7c000152, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"preceq.w.phl", "d,t",	0x7c000312, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"preceq.w.phr", "d,t",	0x7c000352, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"preceu.ph.qbla", "d,t", 0x7c000792, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"preceu.ph.qbl", "d,t", 0x7c000712, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"preceu.ph.qbra", "d,t", 0x7c0007d2, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"preceu.ph.qbr", "d,t", 0x7c000752, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"precrq.ph.w", "d,s,t", 0x7c000511, 0xfc0007ff, WR_d|RD_s|RD_t,	0,		D32	},
+{"precrq.qb.ph", "d,s,t", 0x7c000311, 0xfc0007ff, WR_d|RD_s|RD_t,	0,		D32	},
+{"precrq_rs.ph.w", "d,s,t", 0x7c000551, 0xfc0007ff, WR_d|RD_s|RD_t,	0,		D32	},
+{"precrqu_s.qb.ph", "d,s,t", 0x7c0003d1, 0xfc0007ff, WR_d|RD_s|RD_t,	0,		D32	},
+{"raddu.w.qb", "d,s",	0x7c000510, 0xfc1f07ff, WR_d|RD_s,		0,		D32	},
+{"rddsp",   "d",	0x7fff04b8, 0xffff07ff, WR_d,			0,		D32	},
+{"rddsp",   "d,'",	0x7c0004b8, 0xffc007ff, WR_d,			0,		D32	},
+{"repl.ph", "d,@",	0x7c000292, 0xfc0007ff, WR_d,			0,		D32	},
+{"repl.qb", "d,5",	0x7c000092, 0xff0007ff, WR_d,			0,		D32	},
+{"replv.ph", "d,t",	0x7c0002d2, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"replv.qb", "d,t",	0x7c0000d2, 0xffe007ff, WR_d|RD_t,		0,		D32	},
+{"shilo",   "7,0",	0x7c0006b8, 0xfc0fe7ff, MOD_a,			0,		D32	},
+{"shilov",  "7,s",	0x7c0006f8, 0xfc1fe7ff, MOD_a|RD_s,		0,		D32	},
+{"shll.ph", "d,t,4",	0x7c000213, 0xfe0007ff, WR_d|RD_t,		0,		D32	},
+{"shll.qb", "d,t,3",	0x7c000013, 0xff0007ff, WR_d|RD_t,		0,		D32	},
+{"shll_s.ph", "d,t,4",	0x7c000313, 0xfe0007ff, WR_d|RD_t,		0,		D32	},
+{"shll_s.w", "d,t,6",	0x7c000513, 0xfc0007ff, WR_d|RD_t,		0,		D32	},
+{"shllv.ph", "d,t,s",	0x7c000293, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"shllv.qb", "d,t,s",	0x7c000093, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"shllv_s.ph", "d,t,s",	0x7c000393, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"shllv_s.w", "d,t,s",	0x7c000593, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"shra.ph", "d,t,4",	0x7c000253, 0xfe0007ff, WR_d|RD_t,		0,		D32	},
+{"shra_r.ph", "d,t,4",	0x7c000353, 0xfe0007ff, WR_d|RD_t,		0,		D32	},
+{"shra_r.w", "d,t,6",	0x7c000553, 0xfc0007ff, WR_d|RD_t,		0,		D32	},
+{"shrav.ph", "d,t,s",	0x7c0002d3, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"shrav_r.ph", "d,t,s",	0x7c0003d3, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"shrav_r.w", "d,t,s",	0x7c0005d3, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"shrl.qb", "d,t,3",	0x7c000053, 0xff0007ff, WR_d|RD_t,		0,		D32	},
+{"shrlv.qb", "d,t,s",	0x7c0000d3, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"subq.ph", "d,s,t",	0x7c0002d0, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"subq_s.ph", "d,s,t",	0x7c0003d0, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"subq_s.w", "d,s,t",	0x7c0005d0, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"subu.qb", "d,s,t",	0x7c000050, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"subu_s.qb", "d,s,t",	0x7c000150, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		D32	},
+{"wrdsp",   "s",	0x7c1ffcf8, 0xfc1fffff, RD_s|DSP_VOLA,		0,		D32	},
+{"wrdsp",   "s,8",	0x7c0004f8, 0xfc1e07ff, RD_s|DSP_VOLA,		0,		D32	},
 };
 
 #define MIPS_NUM_OPCODES \

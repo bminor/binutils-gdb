@@ -370,26 +370,26 @@ const struct mips_arch_choice mips_arch_choices[] =
      MIPS32 Architecture_ (MIPS Document Number MD00082, Revision 0.95),
      page 1.  */
   { "mips32",	1, bfd_mach_mipsisa32, CPU_MIPS32,
-    ISA_MIPS32 | INSN_MIPS16,
+    ISA_MIPS32 | INSN_MIPS16 | INSN_DSP,
     mips_cp0_names_mips3264,
     mips_cp0sel_names_mips3264, ARRAY_SIZE (mips_cp0sel_names_mips3264),
     mips_hwr_names_numeric },
 
   { "mips32r2",	1, bfd_mach_mipsisa32r2, CPU_MIPS32R2,
-    ISA_MIPS32R2 | INSN_MIPS16,
+    ISA_MIPS32R2 | INSN_MIPS16 | INSN_DSP,
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
 
   /* For stock MIPS64, disassemble all applicable MIPS-specified ASEs.  */
   { "mips64",	1, bfd_mach_mipsisa64, CPU_MIPS64,
-    ISA_MIPS64 | INSN_MIPS16 | INSN_MIPS3D | INSN_MDMX,
+    ISA_MIPS64 | INSN_MIPS16 | INSN_MIPS3D | INSN_MDMX | INSN_DSP,
     mips_cp0_names_mips3264,
     mips_cp0sel_names_mips3264, ARRAY_SIZE (mips_cp0sel_names_mips3264),
     mips_hwr_names_numeric },
 
   { "mips64r2",	1, bfd_mach_mipsisa64r2, CPU_MIPS64R2,
-    ISA_MIPS64R2 | INSN_MIPS16 | INSN_MIPS3D | INSN_MDMX,
+    ISA_MIPS64R2 | INSN_MIPS16 | INSN_MIPS3D | INSN_MDMX | INSN_DSP,
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -778,6 +778,67 @@ print_insn_args (const char *d,
 				     *d);
 	      return;
 	    }
+	  break;
+
+	case '3':
+	  (*info->fprintf_func) (info->stream, "0x%lx",
+				 (l >> OP_SH_SA3) & OP_MASK_SA3);
+	  break;
+
+	case '4':
+	  (*info->fprintf_func) (info->stream, "0x%lx",
+				 (l >> OP_SH_SA4) & OP_MASK_SA4);
+	  break;
+
+	case '5':
+	  (*info->fprintf_func) (info->stream, "0x%lx",
+				 (l >> OP_SH_IMM8) & OP_MASK_IMM8);
+	  break;
+
+	case '6':
+	  (*info->fprintf_func) (info->stream, "0x%lx",
+				 (l >> OP_SH_RS) & OP_MASK_RS);
+	  break;
+
+	case '7':
+	  (*info->fprintf_func) (info->stream, "$ac%ld",
+				 (l >> OP_SH_DSPACC) & OP_MASK_DSPACC);
+	  break;
+
+	case '8':
+	  (*info->fprintf_func) (info->stream, "0x%lx",
+				 (l >> OP_SH_WRDSP) & OP_MASK_WRDSP);
+	  break;
+
+	case '9':
+	  (*info->fprintf_func) (info->stream, "$ac%ld",
+				 (l >> OP_SH_DSPACC_S) & OP_MASK_DSPACC_S);
+	  break;
+
+	case '0': /* dsp 6-bit signed immediate in bit 20 */
+	  delta = ((l >> OP_SH_DSPSFT) & OP_MASK_DSPSFT);
+	  if (delta & 0x20) /* test sign bit */
+	    delta |= ~OP_MASK_DSPSFT;
+	  (*info->fprintf_func) (info->stream, "%d", delta);
+	  break;
+
+	case ':': /* dsp 7-bit signed immediate in bit 19 */
+	  delta = ((l >> OP_SH_DSPSFT_7) & OP_MASK_DSPSFT_7);
+	  if (delta & 0x40) /* test sign bit */
+	    delta |= ~OP_MASK_DSPSFT_7;
+	  (*info->fprintf_func) (info->stream, "%d", delta);
+	  break;
+
+	case '\'':
+	  (*info->fprintf_func) (info->stream, "0x%lx",
+				 (l >> OP_SH_RDDSP) & OP_MASK_RDDSP);
+	  break;
+
+	case '@': /* dsp 10-bit signed immediate in bit 16 */
+	  delta = ((l >> OP_SH_IMM10) & OP_MASK_IMM10);
+	  if (delta & 0x200) /* test sign bit */
+	    delta |= ~OP_MASK_IMM10;
+	  (*info->fprintf_func) (info->stream, "%d", delta);
 	  break;
 
 	case 's':

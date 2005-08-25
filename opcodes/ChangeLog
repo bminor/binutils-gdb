@@ -1,3 +1,12 @@
+2005-08-25  Chao-ying Fu  <fu@mips.com>
+
+	* mips-opc.c (WR_a, RD_a, MOD_a, DSP_VOLA, D32): New define.
+	(mips_builtin_opcodes): Add DSP instructions.
+	* mips-dis.c (mips_arch_choices): Enable INSN_DSP for mips32, mips32r2,
+	mips64, mips64r2.
+	(print_insn_args): Add supports for 3, 4, 5, 6, 7, 8, 9, 0, :, ', @
+	operand formats.
+
 2005-08-23  David Ung  <davidu@mips.com>
 
 	* mips16-opc.c (mips16_opcodes): Add the MIPS16e jalrc/jrc
