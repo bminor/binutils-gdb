@@ -1,3 +1,10 @@
+2005-08-26  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (intel_e09): Set JumpAbsolute when seeing a PTR-
+	qualified operand of a branch.
+	(intel_bracket_expr): Set JumpAbsolute here...
+	(intel_e11): ... rather than here.
+
 2005-08-26  Christian Groessler  <chris@groessler.org>
 
 	* configure.tgt: Set bfd_gas also for z8k cpu.

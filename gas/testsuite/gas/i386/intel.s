@@ -520,7 +520,7 @@ foo:
  rcl    word ptr 0x90909090[eax], cl
  in     ax, 0x90
  out    0x90, ax
- call   word ptr .+3+0x9090
+ callw  .+3+0x9090
  jmpw   0x9090,0x9090
  in     ax, dx
  out    dx, ax

@@ -171,4 +171,6 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	a1 08 00 00 00[ 	]+mov[ 	]+eax,ds:0x8
 [ 	]*[0-9a-f]+:	9a 05 00 00 00 03 00[ 	]+l?call[ 	]+0x3[,:]0x5
 [ 	]*[0-9a-f]+:	ea 03 00 00 00 05 00[ 	]+l?jmp[ 	]+0x5[,:]0x3
+[ 	]*[0-9a-f]+:	ff 15 00 00 00 00[ 	]+call[ 	]+(DWORD PTR )?(ds:)?0x0
+[ 	]*[0-9a-f]+:	66 ff 25 00 00 00 00[ 	]+jmp[ 	]+(WORD PTR )?(ds:)?0x0
 #pass

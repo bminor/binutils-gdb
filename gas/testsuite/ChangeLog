@@ -1,5 +1,11 @@
 2005-08-26  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/intel.s: Adjust.
+	* gas/i386/intelok.s: Add two more insns.
+	* gas/i386/intelok.d: Adjust.
+
+2005-08-26  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/intelok.d: Adjust.
 
 2005-08-25  Chao-ying Fu  <fu@mips.com>

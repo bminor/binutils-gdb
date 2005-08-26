@@ -6159,7 +6159,7 @@ intel_e09 ()
 		suffix = WORD_MNEM_SUFFIX;
 	      else if (flag_code == CODE_16BIT
 		       && (current_templates->start->opcode_modifier
-			   & (Jump|JumpDword|JumpInterSegment)))
+			   & (Jump | JumpDword)))
 		suffix = LONG_DOUBLE_MNEM_SUFFIX;
 	      else if (intel_parser.got_a_float == 1)	/* "f..." */
 		suffix = SHORT_MNEM_SUFFIX;
@@ -6210,6 +6210,11 @@ intel_e09 ()
 	      as_bad (_("Unknown operand modifier `%s'"), prev_token.str);
 	      return 0;
 	    }
+
+	  /* Operands for jump/call using 'ptr' notation denote absolute
+	     addresses.  */
+	  if (current_templates->start->opcode_modifier & (Jump | JumpDword))
+	    i.types[this_operand] |= JumpAbsolute;
 
 	  if (current_templates->start->base_opcode == 0x8d /* lea */)
 	    ;
@@ -6295,6 +6300,11 @@ intel_bracket_expr ()
   if (!intel_parser.in_offset)
     {
       ++intel_parser.in_bracket;
+
+      /* Operands for jump/call inside brackets denote absolute addresses.  */
+      if (current_templates->start->opcode_modifier & (Jump | JumpDword))
+	i.types[this_operand] |= JumpAbsolute;
+
       /* Unfortunately gas always diverged from MASM in a respect that can't
 	 be easily fixed without risking to break code sequences likely to be
 	 encountered (the testsuite even check for this): MASM doesn't consider
@@ -6397,13 +6407,6 @@ intel_e11 ()
 
     /* e11  [ expr ] */
     case '[':
-      /* Operands for jump/call inside brackets denote absolute addresses.
-	 XXX This shouldn't be needed anymore (or if it should rather live
-	 in intel_bracket_expr).  */
-      if (current_templates->start->opcode_modifier
-	  & (Jump|JumpDword|JumpByte|JumpInterSegment))
-	i.types[this_operand] |= JumpAbsolute;
-
       return intel_bracket_expr ();
 
     /* e11  $
