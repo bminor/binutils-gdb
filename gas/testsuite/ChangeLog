@@ -1,3 +1,7 @@
+2005-08-26  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/intelok.d: Adjust.
+
 2005-08-25  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/mips.exp: Run DSP test.

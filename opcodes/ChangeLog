@@ -1,3 +1,17 @@
+2005-08-26  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (intel_operand_size): New, broken out from OP_E for
+	re-use.
+	(OP_E): Call intel_operand_size, move call site out of mode
+	dependent code.
+	(OP_OFF): Call intel_operand_size if suffix_always. Remove
+	ATTRIBUTE_UNUSED from parameters.
+	(OP_OFF64): Likewise.
+	(OP_ESreg): Call intel_operand_size.
+	(OP_DSreg): Likewise.
+	(OP_DIR): Use colon rather than semicolon as separator of far
+	jump/call operands.
+
 2005-08-25  Chao-ying Fu  <fu@mips.com>
 
 	* mips-opc.c (WR_a, RD_a, MOD_a, DSP_VOLA, D32): New define.

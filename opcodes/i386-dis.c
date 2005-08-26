@@ -3123,6 +3123,67 @@ print_operand_value (char *buf, int hex, bfd_vma disp)
 }
 
 static void
+intel_operand_size (int bytemode, int sizeflag)
+{
+  switch (bytemode)
+    {
+    case b_mode:
+      oappend ("BYTE PTR ");
+      break;
+    case w_mode:
+    case dqw_mode:
+      oappend ("WORD PTR ");
+      break;
+    case branch_v_mode:
+      if (mode_64bit && (sizeflag & DFLAG))
+	{
+	  oappend ("QWORD PTR ");
+	  used_prefixes |= (prefixes & PREFIX_DATA);
+	  break;
+	}
+      /* FALLTHRU */
+    case v_mode:
+    case dq_mode:
+      USED_REX (REX_MODE64);
+      if (rex & REX_MODE64)
+	oappend ("QWORD PTR ");
+      else if ((sizeflag & DFLAG) || bytemode == dq_mode)
+	oappend ("DWORD PTR ");
+      else
+	oappend ("WORD PTR ");
+      used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
+    case d_mode:
+      oappend ("DWORD PTR ");
+      break;
+    case q_mode:
+      oappend ("QWORD PTR ");
+      break;
+    case m_mode:
+      if (mode_64bit)
+	oappend ("QWORD PTR ");
+      else
+	oappend ("DWORD PTR ");
+      break;
+    case f_mode:
+      if (sizeflag & DFLAG)
+	oappend ("FWORD PTR ");
+      else
+	oappend ("DWORD PTR ");
+      used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
+    case t_mode:
+      oappend ("TBYTE PTR ");
+      break;
+    case x_mode:
+      oappend ("XMMWORD PTR ");
+      break;
+    default:
+      break;
+    }
+}
+
+static void
 OP_E (int bytemode, int sizeflag)
 {
   bfd_vma disp;
@@ -3196,6 +3257,8 @@ OP_E (int bytemode, int sizeflag)
     }
 
   disp = 0;
+  if (intel_syntax)
+    intel_operand_size (bytemode, sizeflag);
   append_seg ();
 
   if ((sizeflag & AFLAG) || mode_64bit) /* 32 bit address mode */
@@ -3262,60 +3325,6 @@ OP_E (int bytemode, int sizeflag)
 
       if (havebase || (havesib && (index != 4 || scale != 0)))
 	{
-	  if (intel_syntax)
-	    {
-	      switch (bytemode)
-		{
-		case b_mode:
-		  oappend ("BYTE PTR ");
-		  break;
-		case w_mode:
-		case dqw_mode:
-		  oappend ("WORD PTR ");
-		  break;
-		case branch_v_mode:
-		case v_mode:
-		case dq_mode:
-		  USED_REX (REX_MODE64);
-		  if (rex & REX_MODE64)
-		    oappend ("QWORD PTR ");
-		  else if ((sizeflag & DFLAG) || bytemode == dq_mode)
-		    oappend ("DWORD PTR ");
-		  else
-		    oappend ("WORD PTR ");
-		  used_prefixes |= (prefixes & PREFIX_DATA);
-		  break;
-		case d_mode:
-		  oappend ("DWORD PTR ");
-		  break;
-		case q_mode:
-		  oappend ("QWORD PTR ");
-		  break;
-		case m_mode:
-		  if (mode_64bit)
-		    oappend ("QWORD PTR ");
-		  else
-		    oappend ("DWORD PTR ");
-		  break;
-		case f_mode:
-		  if (sizeflag & DFLAG)
-		    {
-		      used_prefixes |= (prefixes & PREFIX_DATA);
-		      oappend ("FWORD PTR ");
-		    }
-		  else
-		    oappend ("DWORD PTR ");
-		  break;
-		case t_mode:
-		  oappend ("TBYTE PTR ");
-		  break;
-		case x_mode:
-		  oappend ("XMMWORD PTR ");
-		  break;
-		default:
-		  break;
-		}
-	    }
 	  *obufp++ = open_char;
 	  if (intel_syntax && riprel)
 	    oappend ("rip + ");
@@ -3908,17 +3917,19 @@ OP_DIR (int dummy ATTRIBUTE_UNUSED, int sizeflag)
     }
   used_prefixes |= (prefixes & PREFIX_DATA);
   if (intel_syntax)
-    sprintf (scratchbuf, "0x%x,0x%x", seg, offset);
+    sprintf (scratchbuf, "0x%x:0x%x", seg, offset);
   else
     sprintf (scratchbuf, "$0x%x,$0x%x", seg, offset);
   oappend (scratchbuf);
 }
 
 static void
-OP_OFF (int bytemode ATTRIBUTE_UNUSED, int sizeflag)
+OP_OFF (int bytemode, int sizeflag)
 {
   bfd_vma off;
 
+  if (intel_syntax && (sizeflag & SUFFIX_ALWAYS))
+    intel_operand_size (bytemode, sizeflag);
   append_seg ();
 
   if ((sizeflag & AFLAG) || mode_64bit)
@@ -3940,7 +3951,7 @@ OP_OFF (int bytemode ATTRIBUTE_UNUSED, int sizeflag)
 }
 
 static void
-OP_OFF64 (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+OP_OFF64 (int bytemode, int sizeflag)
 {
   bfd_vma off;
 
@@ -3950,6 +3961,8 @@ OP_OFF64 (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
       return;
     }
 
+  if (intel_syntax && (sizeflag & SUFFIX_ALWAYS))
+    intel_operand_size (bytemode, sizeflag);
   append_seg ();
 
   off = get64 ();
@@ -3994,22 +4007,7 @@ static void
 OP_ESreg (int code, int sizeflag)
 {
   if (intel_syntax)
-    {
-      if (codep[-1] & 1)
-	{
-	  USED_REX (REX_MODE64);
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	  if (rex & REX_MODE64)
-	    oappend ("QWORD PTR ");
-	  else if ((sizeflag & DFLAG))
-	    oappend ("DWORD PTR ");
-	  else
-	    oappend ("WORD PTR ");
-	}
-      else
-	oappend ("BYTE PTR ");
-    }
-
+    intel_operand_size (codep[-1] & 1 ? v_mode : b_mode, sizeflag);
   oappend ("%es:" + intel_syntax);
   ptr_reg (code, sizeflag);
 }
@@ -4018,22 +4016,10 @@ static void
 OP_DSreg (int code, int sizeflag)
 {
   if (intel_syntax)
-    {
-      if (codep[-1] != 0xd7 && (codep[-1] & 1))
-	{
-	  USED_REX (REX_MODE64);
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	  if (rex & REX_MODE64)
-	    oappend ("QWORD PTR ");
-	  else if ((sizeflag & DFLAG))
-	    oappend ("DWORD PTR ");
-	  else
-	    oappend ("WORD PTR ");
-	}
-      else
-	oappend ("BYTE PTR ");
-    }
-
+    intel_operand_size (codep[-1] != 0xd7 && (codep[-1] & 1)
+			? v_mode
+			: b_mode,
+			sizeflag);
   if ((prefixes
        & (PREFIX_CS
 	  | PREFIX_DS

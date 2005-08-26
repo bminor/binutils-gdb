@@ -126,7 +126,7 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	8b 00[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\]
 [ 	]*[0-9a-f]+:	8b 04 08[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\]
 [ 	]*[0-9a-f]+:	8b 04 08[ 	]+mov[ 	]+eax,(DWORD PTR )?\[eax\+ecx\]
-[ 	]*[0-9a-f]+:	26 8b 00[ 	]+mov[ 	]+eax,es:(DWORD PTR )?\[eax\]
+[ 	]*[0-9a-f]+:	26 8b 00[ 	]+mov[ 	]+eax,(DWORD PTR )?es:\[eax\]
 [ 	]*[0-9a-f]+:	6a 01[ 	]+push[ 	]+0x1
 [ 	]*[0-9a-f]+:	6a ff[ 	]+push[ 	]+0xffffffff
 [ 	]*[0-9a-f]+:	6a fe[ 	]+push[ 	]+0xfffffffe
