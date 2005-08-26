@@ -387,7 +387,7 @@ case ${generic_target} in
 esac
 
 case ${cpu_type} in
-  alpha | arm | i386 | ia64 | mips | ns32k | pdp11 | ppc | sparc)
+  alpha | arm | i386 | ia64 | mips | ns32k | pdp11 | ppc | sparc | z8k)
     bfd_gas=yes
     ;;
 esac

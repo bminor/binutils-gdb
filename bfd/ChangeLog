@@ -1,3 +1,19 @@
+2005-08-26  Christian Groessler  <chris@groessler.org>
+
+	* coff-z8k.c: (r_jr, r_disp7, r_callr): Fix src_mask and dst_mask
+	of HOWTO.
+	(coff_z8k_select_reloc): Remove.
+	(SELECT_RELOC): Remove.
+	(coff_z8k_reloc_type_lookup): New function.
+	(coff_bfd_reloc_type_lookup): Define.
+	* configure.in: Add cofflink.lo to z8kcoff_vec.
+	* configure: Regenerate.
+	* reloc.c: (bfd_reloc_code_type): Add z8k relocations.
+	(bfd_install_relocation): Don't clear reloc_entry->addend for
+	coff-z8k target.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2005-08-25  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_get_flags_from_mach): Fix off-by-one error.

@@ -1,3 +1,20 @@
+2005-08-26  Christian Groessler  <chris@groessler.org>
+
+	* configure.tgt: Set bfd_gas also for z8k cpu.
+	* config/tc-z8k.c (s_segm): Use bfd_set_arch_mach to set machine
+	type.
+	(newfix): Adapt to bfd reloc types.
+	(build_bytes): Adapt to bfd reloc types.  Ensure that enough space
+	is available in the current frag.
+	(md_convert_frag): Adapt function parameters.
+	(tc_gen_reloc): New function.
+	(md_section_align): Use bfd_get_section_alignment.
+	(md_apply_fix): Adapt to bfd reloc types.  Fix handling of
+	BFD_RELOC_Z8K_IMM4L, BFD_RELOC_8, BFD_RELOC_16, and BFD_RELOC_32
+	relocations.
+	* config/tc-z8k.h (TARGET_ARCH): Define.
+	(tc_fix_adjustable): Define.
+
 2005-08-25  Chao-ying Fu  <fu@mips.com>
 
 	* config/tc-mips.c (mips_set_options): Add ase_dsp for DSP instructions.

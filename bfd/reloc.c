@@ -1168,7 +1168,9 @@ space consuming.  For each target:
     7) if they are different you have to figure out which version is
        right.  */
 	  relocation -= reloc_entry->addend;
-	  reloc_entry->addend = 0;
+	  /* FIXME: There should be no target specific code here...  */
+	  if (strcmp (abfd->xvec->name, "coff-z8k") != 0)
+	    reloc_entry->addend = 0;
 	}
       else
 	{
@@ -4434,6 +4436,19 @@ ENUMDOC
   assembler-expanded instructions.  This is commonly used 
   internally by the linker after analysis of a 
   BFD_RELOC_XTENSA_ASM_EXPAND.
+
+ENUM
+  BFD_RELOC_Z8K_DISP7
+ENUMDOC
+  DJNZ offset.
+ENUM
+  BFD_RELOC_Z8K_CALLR
+ENUMDOC
+  CALR offset.
+ENUM
+  BFD_RELOC_Z8K_IMM4L
+ENUMDOC
+  4 bit value.
 
 ENDSENUM
   BFD_RELOC_UNUSED

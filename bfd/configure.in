@@ -810,7 +810,7 @@ do
     vms_vax_vec)		tb="$tb vms.lo vms-hdr.lo vms-gsd.lo vms-tir.lo vms-misc.lo" ;;
     w65_vec)			tb="$tb coff-w65.lo reloc16.lo" ;;
     we32kcoff_vec)		tb="$tb coff-we32k.lo" ;;
-    z8kcoff_vec)		tb="$tb coff-z8k.lo reloc16.lo" ;;
+    z8kcoff_vec)		tb="$tb coff-z8k.lo reloc16.lo cofflink.lo" ;;
 
     # These appear out of order in targets.c
     srec_vec)			tb="$tb srec.lo" ;;

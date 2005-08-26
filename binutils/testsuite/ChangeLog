@@ -1,3 +1,7 @@
+2005-08-26  Christian Groessler  <chris@groessler.org>
+
+	* binutils-all/objcopy.exp: Don't setup_xfail "z8*-*".
+
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/objcopy.exp: Remove a29k support.

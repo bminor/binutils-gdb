@@ -21,12 +21,12 @@
 
 /* Written By Steve Chamberlain <sac@cygnus.com>.  */
 
-#define DEFINE_TABLE
 #include <stdio.h>
 
 #include "as.h"
 #include "bfd.h"
 #include "safe-ctype.h"
+#define DEFINE_TABLE
 #include "opcodes/z8k-opc.h"
 
 const char comment_chars[] = "!";
@@ -46,14 +46,12 @@ s_segm (int segm)
   if (segm)
     {
       segmented_mode = 1;
-      machine = bfd_mach_z8001;
-      coff_flags = F_Z8001;
+      bfd_set_arch_mach (stdoutput, TARGET_ARCH, bfd_mach_z8001);
     }
   else
     {
       segmented_mode = 0;
-      machine = bfd_mach_z8002;
-      coff_flags = F_Z8002;
+      bfd_set_arch_mach (stdoutput, TARGET_ARCH, bfd_mach_z8002);
     }
 }
 
@@ -940,26 +938,24 @@ static void
 newfix (int ptr, int type, int size, expressionS *operand)
 {
   int is_pcrel = 0;
+  fixS *fixP;
 
-  /* size is in nibbles.  */
-
+  /* Size is in nibbles.  */
   if (operand->X_add_symbol
       || operand->X_op_symbol
       || operand->X_add_number)
     {
       switch(type)
         {
-        case R_JR:
-        case R_DISP7:
-        case R_CALLR:
+        case BFD_RELOC_8_PCREL:
+        case BFD_RELOC_Z8K_CALLR:
+        case BFD_RELOC_Z8K_DISP7:
           is_pcrel = 1;
         }
-      fix_new_exp (frag_now,
-		   ptr,
-		   size / 2,
-		   operand,
-		   is_pcrel,
-		   type);
+      fixP = fix_new_exp (frag_now, ptr, size / 2,
+                          operand, is_pcrel, type);
+      if (is_pcrel)
+	fixP->fx_no_overflow = 1;
     }
 }
 
@@ -1003,6 +999,9 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
   frag_wane (frag_now);
   frag_new (0);
 
+  if (frag_room () < 8)
+    frag_grow (8);  /* Make room for maximum instruction size.  */
+
   memset (buffer, 0, sizeof (buffer));
   class_ptr = this_try->byte_info;
 
@@ -1019,31 +1018,31 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
 	  if (segmented_mode)
 	    {
 	      /* da_operand->X_add_number |= 0x80000000;  --  Now set at relocation time.  */
-	      output_ptr = apply_fix (output_ptr, R_IMM32, da_operand, 8);
+	      output_ptr = apply_fix (output_ptr, BFD_RELOC_32, da_operand, 8);
 	    }
 	  else
 	    {
-	      output_ptr = apply_fix (output_ptr, R_IMM16, da_operand, 4);
+	      output_ptr = apply_fix (output_ptr, BFD_RELOC_16, da_operand, 4);
 	    }
 	  da_operand = 0;
 	  break;
 	case CLASS_DISP8:
 	  /* pc rel 8 bit  */
-	  output_ptr = apply_fix (output_ptr, R_JR, da_operand, 2);
+	  output_ptr = apply_fix (output_ptr, BFD_RELOC_8_PCREL, da_operand, 2);
 	  da_operand = 0;
 	  break;
 
 	case CLASS_0DISP7:
 	  /* pc rel 7 bit  */
 	  *output_ptr = 0;
-	  output_ptr = apply_fix (output_ptr, R_DISP7, da_operand, 2);
+	  output_ptr = apply_fix (output_ptr, BFD_RELOC_Z8K_DISP7, da_operand, 2);
 	  da_operand = 0;
 	  break;
 
 	case CLASS_1DISP7:
 	  /* pc rel 7 bit  */
 	  *output_ptr = 0x80;
-	  output_ptr = apply_fix (output_ptr, R_DISP7, da_operand, 2);
+	  output_ptr = apply_fix (output_ptr, BFD_RELOC_Z8K_DISP7, da_operand, 2);
 	  output_ptr[-2] = 0x8;
 	  da_operand = 0;
 	  break;
@@ -1103,13 +1102,13 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
           switch (c & ARG_MASK)
             {
             case ARG_DISP12:
-              output_ptr = apply_fix (output_ptr, R_CALLR, da_operand, 4);
+              output_ptr = apply_fix (output_ptr, BFD_RELOC_Z8K_CALLR, da_operand, 4);
               break;
             case ARG_DISP16:
-	      output_ptr = apply_fix (output_ptr, R_REL16, da_operand, 4);
+	      output_ptr = apply_fix (output_ptr, BFD_RELOC_16_PCREL, da_operand, 4);
 	      break;
 	    default:
-	      output_ptr = apply_fix (output_ptr, R_IMM16, da_operand, 4);
+	      output_ptr = apply_fix (output_ptr, BFD_RELOC_16, da_operand, 4);
 	    }
 	  da_operand = 0;
 	  break;
@@ -1120,11 +1119,9 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
 	      {
 	      case ARG_NIM4:
                 if (imm_operand->X_add_number > 15)
-                  {
-                    as_bad (_("immediate value out of range"));
-                  }
+		  as_bad (_("immediate value out of range"));
 		imm_operand->X_add_number = -imm_operand->X_add_number;
-		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
+		output_ptr = apply_fix (output_ptr, BFD_RELOC_Z8K_IMM4L, imm_operand, 1);
 		break;
               /*case ARG_IMMNMINUS1: not used.  */
 	      case ARG_IMM4M1:
@@ -1132,22 +1129,20 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
                 /* Drop through.  */
 	      case ARG_IMM4:
                 if (imm_operand->X_add_number > 15)
-                  {
-                    as_bad (_("immediate value out of range"));
-                  }
-		output_ptr = apply_fix (output_ptr, R_IMM4L, imm_operand, 1);
+		  as_bad (_("immediate value out of range"));
+		output_ptr = apply_fix (output_ptr, BFD_RELOC_Z8K_IMM4L, imm_operand, 1);
 		break;
 	      case ARG_NIM8:
 		imm_operand->X_add_number = -imm_operand->X_add_number;
                 /* Drop through.  */
 	      case ARG_IMM8:
-		output_ptr = apply_fix (output_ptr, R_IMM8, imm_operand, 2);
+		output_ptr = apply_fix (output_ptr, BFD_RELOC_8, imm_operand, 2);
 		break;
 	      case ARG_IMM16:
-		output_ptr = apply_fix (output_ptr, R_IMM16, imm_operand, 4);
+		output_ptr = apply_fix (output_ptr, BFD_RELOC_16, imm_operand, 4);
 		break;
 	      case ARG_IMM32:
-		output_ptr = apply_fix (output_ptr, R_IMM32, imm_operand, 8);
+		output_ptr = apply_fix (output_ptr, BFD_RELOC_32, imm_operand, 8);
 		break;
 	      default:
 		abort ();
@@ -1378,19 +1373,46 @@ md_show_usage (FILE *stream)
 }
 
 void
-md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED,
-                 segT seg ATTRIBUTE_UNUSED,
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+                 segT sec ATTRIBUTE_UNUSED,
                  fragS *fragP ATTRIBUTE_UNUSED)
 {
   printf (_("call to md_convert_frag\n"));
   abort ();
 }
 
+/* Generate a machine dependent reloc from a fixup.  */
+
+arelent*
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
+	      fixS *fixp      ATTRIBUTE_UNUSED)
+{
+  arelent *reloc;
+
+  reloc = xmalloc (sizeof (*reloc));
+  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  reloc->addend = fixp->fx_offset;
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+
+  if (! reloc->howto)
+    {
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+                    "Cannot represent %s relocation in object file",
+                    bfd_get_reloc_code_name (fixp->fx_r_type));
+      abort ();
+    }
+  return reloc;
+}
+
 valueT
 md_section_align (segT seg, valueT size)
 {
-  return ((size + (1 << section_alignment[(int) seg]) - 1)
-	  & (-1 << section_alignment[(int) seg]));
+  int align = bfd_get_section_alignment (stdoutput, seg);
+  valueT mask = ((valueT) 1 << align) - 1;
+
+  return (size + mask) & ~mask;
 }
 
 /* Attempt to simplify or eliminate a fixup. To indicate that a fixup
@@ -1404,11 +1426,55 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 
   switch (fixP->fx_r_type)
     {
-    case R_IMM4L:
-      buf[0] = (buf[0] & 0xf0) | (val & 0xf);
+    case BFD_RELOC_Z8K_IMM4L:
+      if (fixP->fx_addsy)
+        {
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 0;
+        }
+      else
+	buf[0] = (buf[0] & 0xf0) | (val & 0xf);
       break;
 
-    case R_JR:
+    case BFD_RELOC_8:
+      if (fixP->fx_addsy)
+        {
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 0;
+        }
+      else
+	*buf++ = val;
+      break;
+
+    case BFD_RELOC_16:
+      if (fixP->fx_addsy)
+        {
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 0;
+        }
+      else
+        {
+          *buf++ = (val >> 8);
+          *buf++ = val;
+        }
+      break;
+
+    case BFD_RELOC_32:
+      if (fixP->fx_addsy)
+        {
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 0;
+        }
+      else
+        {
+          *buf++ = (val >> 24);
+          *buf++ = (val >> 16);
+          *buf++ = (val >> 8);
+          *buf++ = val;
+        }
+      break;
+
+    case BFD_RELOC_8_PCREL:
       if (fixP->fx_addsy)
         {
           fixP->fx_no_overflow = 1;
@@ -1429,7 +1495,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
         }
       break;
 
-    case R_DISP7:
+    case BFD_RELOC_16_PCREL:
       if (fixP->fx_addsy)
         {
           fixP->fx_no_overflow = 1;
@@ -1437,20 +1503,18 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
         }
       else
         {
-          if (val & 1)
+          val = val - fixP->fx_frag->fr_address + fixP->fx_where - fixP->fx_size;
+          if (val > 32767 || val < -32768)
             as_bad_where (fixP->fx_file, fixP->fx_line,
-                          _("cannot branch to odd address"));
-          val /= 2;
-          if (val > 0 || val < -127)
-            as_bad_where (fixP->fx_file, fixP->fx_line,
-                          _("relative jump out of range"));
-          *buf = (*buf & 0x80) | (-val & 0x7f);
+                          _("relative address out of range"));
+          *buf++ = (val >> 8);
+          *buf++ = val;
           fixP->fx_no_overflow = 1;
           fixP->fx_done = 1;
         }
       break;
 
-    case R_CALLR:
+    case BFD_RELOC_Z8K_CALLR:
       if (fixP->fx_addsy)
         {
           fixP->fx_no_overflow = 1;
@@ -1473,34 +1537,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
         }
       break;
 
-    case R_IMM8:
-      *buf++ = val;
-      break;
-
-    case R_IMM16:
-      *buf++ = (val >> 8);
-      *buf++ = val;
-      break;
-
-    case R_IMM32:
-      *buf++ = (val >> 24);
-      *buf++ = (val >> 16);
-      *buf++ = (val >> 8);
-      *buf++ = val;
-      break;
-
-    case R_REL16:
-      val = val - fixP->fx_frag->fr_address + fixP->fx_where - fixP->fx_size;
-      if (val > 32767 || val < -32768)
-        as_bad_where (fixP->fx_file, fixP->fx_line,
-                      _("relative address out of range"));
-      *buf++ = (val >> 8);
-      *buf++ = val;
-      fixP->fx_no_overflow = 1;
-      break;
-
-    case 0:
-      md_number_to_chars (buf, val, fixP->fx_size);
+    case BFD_RELOC_Z8K_DISP7:
+      if (fixP->fx_addsy)
+        {
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 0;
+        }
+      else
+        {
+          if (val & 1)
+            as_bad_where (fixP->fx_file, fixP->fx_line,
+                          _("cannot branch to odd address"));
+          val /= 2;
+          if (val > 0 || val < -127)
+            as_bad_where (fixP->fx_file, fixP->fx_line,
+                          _("relative jump out of range"));
+          *buf = (*buf & 0x80) | (-val & 0x7f);
+          fixP->fx_no_overflow = 1;
+          fixP->fx_done = 1;
+        }
       break;
 
     default:
