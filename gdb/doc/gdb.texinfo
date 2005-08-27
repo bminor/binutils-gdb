@@ -5179,6 +5179,11 @@ for Debugging Your Program or @sc{gnu} CC, gcc.info, Using @sc{gnu} CC}.
 @xref{C, , Debugging C++}, for more info about debug info formats
 that are best suited to C@t{++} programs.
 
+If you ask to print an object whose contents are unknown to
+@value{GDBN}, e.g., because its data type is not completely specified
+by the debug information, @value{GDBN} will say @samp{<incomplete
+type>}.  @xref{Symbols, incomplete type}, for more about this.
+
 @node Arrays
 @section Artificial arrays
 
@@ -10007,6 +10012,30 @@ type = struct complex @{
 @noindent
 As with @code{whatis}, using @code{ptype} without an argument refers to
 the type of @code{$}, the last value in the value history.
+
+@cindex incomplete type
+Sometimes, programs use opaque data types or incomplete specifications
+of complex data structure.  If the debug information included in the
+program does not allow @value{GDBN} to display a full declaration of
+the data type, it will say @samp{<incomplete type>}.  For example,
+given these declarations:
+
+@smallexample
+    struct foo;
+    struct foo *fooptr;
+@end smallexample
+
+@noindent
+but no definition for @code{struct foo} itself, @value{GDBN} will say:
+
+@smallexample
+  (gdb) ptype foo
+  $1 = <incomplete type>
+@end smallexample
+
+@noindent
+``Incomplete type'' is C terminology for data types that are not
+completely specified.
 
 @kindex info types
 @item info types @var{regexp}

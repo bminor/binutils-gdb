@@ -3,6 +3,8 @@
 	* gdb.texinfo (File Options): Don't document --mapped, it's gone
 	since 19-Jan-2004.
 	(Files): Likewise.
+	(Variables, Symbols): Document the "<incomplete type>" message and
+	its reasons.
 
 2005-08-01  Fred Fish  <fnf@specifix.com>
 
