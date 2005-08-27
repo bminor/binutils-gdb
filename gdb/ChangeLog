@@ -1,3 +1,8 @@
+2005-08-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* main.c (print_gdb_help): Don't advertise the (long non-existent)
+	option --mapped.
+
 2005-08-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* doublest.c (floatformat_mantissa): Use xsnprintf instead of

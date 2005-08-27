@@ -938,25 +938,6 @@ Files,, Command files}.
 @cindex @code{-d}
 Add @var{directory} to the path to search for source files.
 
-@item -m
-@itemx -mapped
-@cindex @code{--mapped}
-@cindex @code{-m}
-@emph{Warning: this option depends on operating system facilities that are not
-supported on all systems.}@*
-If memory-mapped files are available on your system through the @code{mmap}
-system call, you can use this option
-to have @value{GDBN} write the symbols from your
-program into a reusable file in the current directory.  If the program you are debugging is
-called @file{/tmp/fred}, the mapped symbol file is @file{/tmp/fred.syms}.
-Future @value{GDBN} debugging sessions notice the presence of this file,
-and can quickly map in symbol information from it, rather than reading
-the symbol table from the executable program.
-
-The @file{.syms} file is specific to the host machine where @value{GDBN}
-is run.  It holds an exact image of the internal @value{GDBN} symbol
-table.  It cannot be shared across multiple host platforms.
-
 @item -r
 @itemx -readnow
 @cindex @code{--readnow}
@@ -966,16 +947,6 @@ the default, which is to read it incrementally as it is needed.
 This makes startup slower, but makes future operations faster.
 
 @end table
-
-You typically combine the @code{-mapped} and @code{-readnow} options in
-order to build a @file{.syms} file that contains complete symbol
-information.  (@xref{Files,,Commands to specify files}, for information
-on @file{.syms} files.)  A simple @value{GDBN} invocation to do nothing
-but build a @file{.syms} file for future use is:
-
-@smallexample
-gdb -batch -nx -mapped -readnow programname
-@end smallexample
 
 @node Mode Options
 @subsection Choosing modes
@@ -10666,15 +10637,6 @@ directories to search, just as the shell does when looking for a program
 to run.  You can change the value of this variable, for both @value{GDBN}
 and your program, using the @code{path} command.
 
-On systems with memory-mapped files, an auxiliary file named
-@file{@var{filename}.syms} may hold symbol table information for
-@var{filename}.  If so, @value{GDBN} maps in the symbol table from
-@file{@var{filename}.syms}, starting up more quickly.  See the
-descriptions of the file options @samp{-mapped} and @samp{-readnow}
-(available on the command line, see @ref{File Options, , -readnow},
-and with the commands @code{file}, @code{symbol-file}, or
-@code{add-symbol-file}, described below), for more information.
-
 @cindex unlinked object files
 @cindex patching object files
 You can load unlinked object @file{.o} files into @value{GDBN} using
@@ -10745,37 +10707,12 @@ in stabs format.
 @kindex readnow
 @cindex reading symbols immediately
 @cindex symbols, reading immediately
-@kindex mapped
-@cindex memory-mapped symbol file
-@cindex saving symbol table
-@item symbol-file @var{filename} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
-@itemx file @var{filename} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
+@item symbol-file @var{filename} @r{[} -readnow @r{]}
+@itemx file @var{filename} @r{[} -readnow @r{]}
 You can override the @value{GDBN} two-stage strategy for reading symbol
 tables by using the @samp{-readnow} option with any of the commands that
 load symbol table information, if you want to be sure @value{GDBN} has the
 entire symbol table available.
-
-If memory-mapped files are available on your system through the
-@code{mmap} system call, you can use another option, @samp{-mapped}, to
-cause @value{GDBN} to write the symbols for your program into a reusable
-file.  Future @value{GDBN} debugging sessions map in symbol information
-from this auxiliary symbol file (if the program has not changed), rather
-than spending time reading the symbol table from the executable
-program.  Using the @samp{-mapped} option has the same effect as
-starting @value{GDBN} with the @samp{-mapped} command-line option.
-
-You can use both options together, to make sure the auxiliary symbol
-file has all the symbol information for your program.
-
-The auxiliary symbol file for a program called @var{myprog} is called
-@samp{@var{myprog}.syms}.  Once this file exists (so long as it is newer
-than the corresponding executable), @value{GDBN} always attempts to use
-it when you debug @var{myprog}; no special options or commands are
-needed.
-
-The @file{.syms} file is specific to the host machine where you run
-@value{GDBN}.  It holds an exact image of the internal @value{GDBN}
-symbol table.  It cannot be shared across multiple host platforms.
 
 @c FIXME: for now no mention of directories, since this seems to be in
 @c flux.  13mar1992 status is that in theory GDB would look either in
@@ -10805,7 +10742,7 @@ the program is running.  To do this, use the @code{kill} command
 @kindex add-symbol-file
 @cindex dynamic linking
 @item add-symbol-file @var{filename} @var{address}
-@itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]} @r{[} -mapped @r{]}
+@itemx add-symbol-file @var{filename} @var{address} @r{[} -readnow @r{]}
 @itemx add-symbol-file @var{filename} @r{-s}@var{section} @var{address} @dots{}
 The @code{add-symbol-file} command reads additional symbol table
 information from the file @var{filename}.  You would use this command
@@ -10858,10 +10795,6 @@ as linking the relocatable object file into the program in the normal
 way.
 
 @code{add-symbol-file} does not repeat if you press @key{RET} after using it.
-
-You can use the @samp{-mapped} and @samp{-readnow} options just as with
-the @code{symbol-file} command, to change how @value{GDBN} manages the symbol
-table information for @var{filename}.
 
 @kindex add-symbol-file-from-memory
 @cindex @code{syscall DSO}

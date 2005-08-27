@@ -1,3 +1,9 @@
+2005-08-27  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (File Options): Don't document --mapped, it's gone
+	since 19-Jan-2004.
+	(Files): Likewise.
+
 2005-08-01  Fred Fish  <fnf@specifix.com>
 
 	* gdb.texinfo (SETUP_ARBITRARY_FRAME): Remove obsolete reference.

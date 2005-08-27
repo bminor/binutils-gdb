@@ -848,7 +848,6 @@ Options:\n\n\
 "), stream);
   fputs_unfiltered (_("\
   -l TIMEOUT         Set timeout in seconds for remote debugging.\n\
-  --mapped           Use mapped symbol files if supported on this system.\n\
   --nw		     Do not use a window interface.\n\
   --nx               Do not read "), stream);
   fputs_unfiltered (gdbinit, stream);
