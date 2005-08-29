@@ -1,3 +1,8 @@
+2005-08-29  Nick Clifton  <nickc@redhat.com>
+
+	* write.c (generic_force_reloc): Do not call S_FORCE_RELOC if
+	there is no symbol.
+
 2005-08-26  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (intel_e09): Set JumpAbsolute when seeing a PTR-

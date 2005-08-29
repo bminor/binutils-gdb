@@ -316,6 +316,9 @@ generic_force_reloc (fixS *fix)
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 1;
 
+  if (fix->fx_addsy == NULL)
+    return 0;
+
   return S_FORCE_RELOC (fix->fx_addsy, fix->fx_subsy == NULL);
 }
 
