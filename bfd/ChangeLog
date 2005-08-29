@@ -1,3 +1,8 @@
+2005-08-29  Steven J. Hill <sjhill@realitydiluted.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Initialise
+	'value' to avoid compile time warning message.
+
 2005-08-26  Christian Groessler  <chris@groessler.org>
 
 	* coff-z8k.c: (r_jr, r_disp7, r_callr): Fix src_mask and dst_mask
