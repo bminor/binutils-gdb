@@ -264,10 +264,6 @@ exec_file_attach (char *filename, int from_tty)
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
-#ifdef DEPRECATED_HPUX_TEXT_END
-      DEPRECATED_HPUX_TEXT_END (&exec_ops);
-#endif
-
       validate_files ();
 
       set_gdbarch_from_file (exec_bfd);

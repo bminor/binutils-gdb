@@ -251,12 +251,10 @@ select_source_symtab (struct symtab *s)
     {
       for (s = ofp->symtabs; s; s = s->next)
 	{
-	  char *name = s->filename;
+	  const char *name = s->filename;
 	  int len = strlen (name);
-	  if (!(len > 2 && (DEPRECATED_STREQ (&name[len - 2], ".h"))))
-	    {
-	      current_source_symtab = s;
-	    }
+	  if (!(len > 2 && strcmp(&name[len - 2], ".h") == 0))
+	    current_source_symtab = s;
 	}
     }
   if (current_source_symtab)
@@ -268,12 +266,10 @@ select_source_symtab (struct symtab *s)
     {
       for (ps = ofp->psymtabs; ps != NULL; ps = ps->next)
 	{
-	  char *name = ps->filename;
+	  const char *name = ps->filename;
 	  int len = strlen (name);
-	  if (!(len > 2 && (DEPRECATED_STREQ (&name[len - 2], ".h"))))
-	    {
-	      cs_pst = ps;
-	    }
+	  if (!(len > 2 && strcmp (&name[len - 2], ".h") == 0))
+	    cs_pst = ps;
 	}
     }
   if (cs_pst)

@@ -1,5 +1,13 @@
 2005-08-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* environ.c (unset_in_environ): Use strncmp instead of
+	DEPRECATED_STREQN.
+	* exec.c (exec_file_attach): Remove DEPRECATED_HPUX_TEXT_END.
+	* language.c (set_case_command, language_enum): Use strcmp instead
+	of DEPRECATED_STREQ.
+	* source.c (select_source_symtab): Sprinkle a few consts.  Use
+	strcmp instead of DEPRECATED_STREQ.
+
 	* solib-svr4.c (svr4_current_sos, svr4_fetch_objfile_link_map):
 	Use XZALLOC and xzalloc instead of xmalloc where appropriate.
 

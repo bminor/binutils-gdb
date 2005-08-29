@@ -324,32 +324,34 @@ show_case_command (struct ui_file *file, int from_tty,
 "Warning: the current case sensitivity setting does not match the language.\n");
 }
 
-/* Set command.  Change the setting for case sensitivity. */
+/* Set command.  Change the setting for case sensitivity.  */
+
 static void
 set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
-   if (DEPRECATED_STREQ (case_sensitive, "on"))
-   {
-      case_sensitivity = case_sensitive_on;
-      case_mode = case_mode_manual;
-   }
-   else if (DEPRECATED_STREQ (case_sensitive, "off"))
-   {
-      case_sensitivity = case_sensitive_off;
-      case_mode = case_mode_manual;
-   }
-   else if (DEPRECATED_STREQ (case_sensitive, "auto"))
-   {
-      case_mode = case_mode_auto;
-      set_type_range_case ();
-      /* Avoid hitting the set_case_str call below.  We
-         did it in set_type_range_case. */
-      return;
-   }
+   if (strcmp (case_sensitive, "on") == 0)
+     {
+       case_sensitivity = case_sensitive_on;
+       case_mode = case_mode_manual;
+     }
+   else if (strcmp (case_sensitive, "off") == 0)
+     {
+       case_sensitivity = case_sensitive_off;
+       case_mode = case_mode_manual;
+     }
+   else if (strcmp (case_sensitive, "auto") == 0)
+     {
+       case_mode = case_mode_auto;
+       set_type_range_case ();
+       /* Avoid hitting the set_case_str call below.  We did it in
+	  set_type_range_case.  */
+       return;
+     }
    else
-   {
-      warning (_("Unrecognized case-sensitive setting: \"%s\""), case_sensitive);
-   }
+     {
+       warning (_("Unrecognized case-sensitive setting: \"%s\""),
+		case_sensitive);
+     }
    set_case_str();
    show_case_command (NULL, from_tty, NULL, NULL);
 }
@@ -918,7 +920,7 @@ language_enum (char *str)
   int i;
 
   for (i = 0; i < languages_size; i++)
-    if (DEPRECATED_STREQ (languages[i]->la_name, str))
+    if (strcmp (languages[i]->la_name, str) == 0)
       return languages[i]->la_language;
 
   return language_unknown;

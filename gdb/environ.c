@@ -170,7 +170,7 @@ unset_in_environ (struct gdb_environ *e, char *var)
 
   for (; (s = *vector) != NULL; vector++)
     {
-      if (DEPRECATED_STREQN (s, var, len) && s[len] == '=')
+      if (strncmp (s, var, len) == 0 && s[len] == '=')
 	{
 	  xfree (s);
 	  /* Walk through the vector, shuffling args down by one, including
