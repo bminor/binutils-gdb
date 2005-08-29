@@ -604,18 +604,14 @@ svr4_current_sos (void)
   while (lm)
     {
       struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-      struct so_list *new
-	= (struct so_list *) xmalloc (sizeof (struct so_list));
+      struct so_list *new = XZALLOC (struct so_list);
       struct cleanup *old_chain = make_cleanup (xfree, new);
-
-      memset (new, 0, sizeof (*new));
 
       new->lm_info = xmalloc (sizeof (struct lm_info));
       make_cleanup (xfree, new->lm_info);
 
-      new->lm_info->lm = xmalloc (lmo->link_map_size);
+      new->lm_info->lm = xzalloc (lmo->link_map_size);
       make_cleanup (xfree, new->lm_info->lm);
-      memset (new->lm_info->lm, 0, lmo->link_map_size);
 
       read_memory (lm, new->lm_info->lm, lmo->link_map_size);
 
@@ -697,9 +693,8 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
       /* Set up the buffer to contain the portion of the link_map
          structure that gdb cares about.  Note that this is not the
          whole link_map structure.  */
-      objfile_lm_info.lm = xmalloc (lmo->link_map_size);
+      objfile_lm_info.lm = xzalloc (lmo->link_map_size);
       make_cleanup (xfree, objfile_lm_info.lm);
-      memset (objfile_lm_info.lm, 0, lmo->link_map_size);
 
       /* Read the link map into our internal structure.  */
       read_memory (lm, objfile_lm_info.lm, lmo->link_map_size);
