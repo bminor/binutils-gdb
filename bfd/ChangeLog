@@ -1,3 +1,8 @@
+2005-08-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1247
+	* elfxx-ia64.c (allocate_fptr): Check undefined symbol.
+
 2005-08-29  Steven J. Hill <sjhill@realitydiluted.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Initialise

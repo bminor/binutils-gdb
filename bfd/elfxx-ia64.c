@@ -2775,7 +2775,8 @@ allocate_fptr (dyn_i, data)
       if (!x->info->executable
 	  && (!h
 	      || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	      || h->root.type != bfd_link_hash_undefweak))
+	      || (h->root.type != bfd_link_hash_undefweak
+		  && h->root.type != bfd_link_hash_undefined)))
 	{
 	  if (h && h->dynindx == -1)
 	    {
