@@ -603,7 +603,7 @@ case "${targ}" in
   i[3-7]86-*-aout* | i[3-7]86*-*-vsta*)
     targ_defvec=i386aout_vec
     ;;
-  i[3-7]86-*-vxworks)
+  i[3-7]86-*-vxworks*)
     targ_defvec=bfd_elf32_i386_vxworks_vec
     targ_underscore=yes
     ;;
