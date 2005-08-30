@@ -12139,6 +12139,8 @@ main (int argc, char **argv)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
+  expandargv (&argc, &argv);
+
   parse_args (argc, argv);
 
   if (num_dump_sects > 0)

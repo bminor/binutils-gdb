@@ -24,8 +24,9 @@ Boston, MA 02111-1307, USA.  */
 
 #include "ansidecl.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
-#define ISBLANK(ch) ((ch) == ' ' || (ch) == '\t')
+#include <stdio.h>
 
 /*  Routines imported from standard C runtime libraries. */
 
@@ -302,6 +303,144 @@ char **buildargv (input)
       while (*input != EOS);
     }
   return (argv);
+}
+
+/*
+
+@deftypefn Extension void expandargv (int *@var{argcp}, char ***@var{argvp})
+
+The @var{argcp} and @code{argvp} arguments are pointers to the usual
+@code{argc} and @code{argv} arguments to @code{main}.  This function
+looks for arguments that begin with the character @samp{@@}.  Any such
+arguments are interpreted as ``response files''.  The contents of the
+response file are interpreted as additional command line options.  In
+particular, the file is separated into whitespace-separated strings;
+each such string is taken as a command-line option.  The new options
+are inserted in place of the option naming the response file, and
+@code{*argcp} and @code{*argvp} will be updated.  If the value of
+@code{*argvp} is modified by this function, then the new value has
+been dynamically allocated and should be deallocated by the caller
+with @code{freeargv}.
+
+@end deftypefn
+
+*/
+
+void
+expandargv (argcp, argvp)
+     int *argcp;
+     char ***argvp;
+{
+  /* A dynamically allocated buffer used to hold options read from a
+     response file.  NULL until needed.  */
+  char *buffer = NULL;
+  /* The number of bytes in BUFFER.  */
+  size_t buffer_len = 0;
+  /* Dynamically allocated storage for the options read from the
+     response file.  NULL until needed.  */
+  char **file_options = NULL;
+  /* The number of slots in the FILE_OPTIONS array.  */
+  size_t file_options_len = 0;
+  /* If non-NULL, the name of the response file that caused a
+     failure.  */
+  const char *error_file = NULL;
+  /* The argument we are currently processing.  */
+  int i = 0;
+  /* Non-zero if ***argvp has been dynamically allocated.  */
+  int argv_dynamic = 0;
+
+  /* Loop over the arguments, handling response files.  We always skip
+     ARGVP[0], as that is the name of the program being run.  */
+  while (++i != *argcp)
+    {
+      /* The name of the response file.  */
+      const char *filename;
+      /* The response file.  */
+      FILE *f;
+      /* The number of options read from the response file, if any.  */
+      size_t num_options;
+
+      /* We are only interested in options of the form "@file".  */
+      filename = (*argvp)[i];
+      if (filename[0] != '@')
+	continue;
+
+      /* Open the file.  */
+      f = fopen (++filename, "r");
+      if (!f)
+	continue;
+
+      /* Read all the options.  */
+      num_options = 0;
+      while (1)
+	{
+	  /* The insertion point in BUFFER.  */
+	  size_t buffer_pos = 0;
+	  /* The character immediately following the option in
+	     BUFFER.  */
+	  int c;
+	  /* Read the next option from the file.  */
+	  while (1)
+	    {
+	      if (buffer_pos + 32 > buffer_len)
+		{
+		  buffer_len = buffer_len ? 2 * buffer_len : 32;
+		  buffer = (char *) xrealloc (buffer, buffer_len);
+		}
+	      c = fscanf (f, "%31s", buffer + buffer_pos);
+	      if (c == EOF)
+		break;
+	      /* If the next character in the file is not whitespace,
+		 then we didn't yet read the entire argument.  */
+	      c = getc (f);
+	      if (c == EOF || ISSPACE (c))
+		break;
+	      /* Put back the character at which we peeked.  */
+	      ungetc (c, f);
+	      buffer_pos += 31;
+	    }
+	  if (c == EOF)
+	    break;
+	  /* Insert the option into FILE_OPTIONS.  */
+	  if (num_options == file_options_len)
+	    {
+	      file_options_len = file_options_len ? 2 * file_options_len : 32;
+	      file_options
+		= (char **) xrealloc (file_options,
+				      file_options_len * sizeof (char *));
+	    }
+	  file_options[num_options++] = xstrdup(buffer);
+	}
+
+      /* We're done with the file now.  */
+      fclose (f);
+      /* Insert all the options into ARGV.  */
+      if (!argv_dynamic)
+	{
+	  *argvp = dupargv (*argvp);
+	  if (!*argvp)
+	    /* We do not know exactly many bytes dupargv tried to
+	       allocate, so make a guess.  */
+	    xmalloc_failed (*argcp * 32);
+	}
+      /* The "+1" below handles the NULL terminator at the end of ARGV.  */
+      *argvp = ((char **) 
+		xrealloc (*argvp, 
+			  (*argcp + num_options + 1) * sizeof (char *)));
+      memmove (*argvp + i + num_options, *argvp + i + 1, 
+	       (*argcp - i) * sizeof (char *));
+      memcpy (*argvp + i, file_options, num_options * sizeof (char *));
+      /* The original option has been replaced by all the new
+	 options.  */
+      *argcp += num_options - 1;
+    }
+
+  if (buffer)
+    free (buffer);
+  if (file_options)
+    free (file_options);
+
+  return error_file;
 }
 
 #ifdef MAIN

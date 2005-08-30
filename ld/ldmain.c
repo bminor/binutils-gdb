@@ -197,6 +197,8 @@ main (int argc, char **argv)
 
   START_PROGRESS (program_name, 0);
 
+  expandargv (&argc, &argv);
+
   bfd_init ();
 
   bfd_set_error_program_name (program_name);
