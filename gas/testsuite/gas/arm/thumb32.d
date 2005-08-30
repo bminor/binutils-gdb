@@ -95,10 +95,10 @@ Disassembly of section .text:
 0+13e <[^>]+> f1b0 0005 	subs\.w	r0, r0, #5	; 0x5
 0+142 <[^>]+> f1b0 0081 	subs\.w	r0, r0, #129	; 0x81
 0+146 <[^>]+> f1b0 0508 	subs\.w	r5, r0, #8	; 0x8
-0+14a <[^>]+> 1a00      	sub	r0, r0, r0
-0+14c <[^>]+> 1a05      	sub	r5, r0, r0
-0+14e <[^>]+> 1a28      	sub	r0, r5, r0
-0+150 <[^>]+> 1b40      	sub	r0, r0, r5
+0+14a <[^>]+> 1a00      	subs	r0, r0, r0
+0+14c <[^>]+> 1a05      	subs	r5, r0, r0
+0+14e <[^>]+> 1a28      	subs	r0, r5, r0
+0+150 <[^>]+> 1b40      	subs	r0, r0, r5
 0+152 <[^>]+> f5a0 7d82 	sub\.w	sp, r0, #260	; 0x104
 0+156 <[^>]+> f5ad 7d82 	sub\.w	sp, sp, #260	; 0x104
 0+15a <[^>]+> ebb8 0800 	subs\.w	r8, r8, r0

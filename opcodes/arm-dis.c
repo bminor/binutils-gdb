@@ -724,9 +724,9 @@ static const struct opcode16 thumb_opcodes[] =
   {ARM_EXT_V4T, 0xBC00, 0xFE00, "pop\t%O"},
   /* format 2 */
   {ARM_EXT_V4T, 0x1800, 0xFE00, "adds\t%0-2r, %3-5r, %6-8r"},
-  {ARM_EXT_V4T, 0x1A00, 0xFE00, "sub\t%0-2r, %3-5r, %6-8r"},
+  {ARM_EXT_V4T, 0x1A00, 0xFE00, "subs\t%0-2r, %3-5r, %6-8r"},
   {ARM_EXT_V4T, 0x1C00, 0xFE00, "adds\t%0-2r, %3-5r, #%6-8d"},
-  {ARM_EXT_V4T, 0x1E00, 0xFE00, "sub\t%0-2r, %3-5r, #%6-8d"},
+  {ARM_EXT_V4T, 0x1E00, 0xFE00, "subs\t%0-2r, %3-5r, #%6-8d"},
   /* format 8 */
   {ARM_EXT_V4T, 0x5200, 0xFE00, "strh\t%0-2r, [%3-5r, %6-8r]"},
   {ARM_EXT_V4T, 0x5A00, 0xFE00, "ldrh\t%0-2r, [%3-5r, %6-8r]"},

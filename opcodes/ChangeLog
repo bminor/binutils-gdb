@@ -1,3 +1,7 @@
+2005-08-30  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (thumb_opcodes): Disassemble sub(3) as subs.
+
 2005-08-26  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (intel_operand_size): New, broken out from OP_E for

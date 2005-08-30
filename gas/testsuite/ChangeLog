@@ -1,3 +1,8 @@
+2005-08-30  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb.d: Change "sub rn, rn, rn" to "subs rn, rn, rn".
+	* gas/arm/thumb32.d: Ditto.
+
 2005-08-26  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/intel.s: Adjust.

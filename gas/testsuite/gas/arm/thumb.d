@@ -17,8 +17,8 @@ Disassembly of section \.text:
 0+00e <[^>]+> 1008      	asrs	r0, r1, #32
 0+010 <[^>]+> 18d1      	adds	r1, r2, r3
 0+012 <[^>]+> 1ca2      	adds	r2, r4, #2
-0+014 <[^>]+> 1beb      	sub	r3, r5, r7
-0+016 <[^>]+> 1fe2      	sub	r2, r4, #7
+0+014 <[^>]+> 1beb      	subs	r3, r5, r7
+0+016 <[^>]+> 1fe2      	subs	r2, r4, #7
 0+018 <[^>]+> 24ff      	movs	r4, #255
 0+01a <[^>]+> 2bfa      	cmp	r3, #250
 0+01c <[^>]+> 367b      	adds	r6, #123
