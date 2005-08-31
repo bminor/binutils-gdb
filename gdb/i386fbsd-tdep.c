@@ -50,7 +50,7 @@ CORE_ADDR i386fbsd_sigtramp_start_addr = 0xbfbfdf20;
 CORE_ADDR i386fbsd_sigtramp_end_addr = 0xbfbfdff0;
 
 /* From <machine/signal.h>.  */
-static int i386fbsd_sc_reg_offset[] =
+int i386fbsd_sc_reg_offset[] =
 {
   8 + 14 * 4,			/* %eax */
   8 + 13 * 4,			/* %ecx */
