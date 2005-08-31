@@ -122,8 +122,7 @@ m68k_register_name (int regnum)
     "fpcontrol", "fpstatus", "fpiaddr", "fpcode", "fpflags"
   };
 
-  if (regnum < 0 ||
-      regnum >= sizeof (register_names) / sizeof (register_names[0]))
+  if (regnum < 0 || regnum >= ARRAY_SIZE (register_names))
     internal_error (__FILE__, __LINE__,
 		    _("m68k_register_name: illegal register number %d"), regnum);
   else

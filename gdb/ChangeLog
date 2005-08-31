@@ -1,3 +1,7 @@
+2005-08-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68k-tdep.c (m68k_register_name): Use ARRAY_SIZE.
+
 2005-08-31  Jim Wilson  <wilson@specifix.com>
 
 	* i386fbsd-tdep.c (i386fbsd_sc_reg_offset): Make it non-static.
