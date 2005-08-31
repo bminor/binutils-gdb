@@ -1251,22 +1251,21 @@ find_separate_debug_file (struct objfile *objfile)
 
 /* This is the symbol-file command.  Read the file, analyze its
    symbols, and add a struct symtab to a symtab list.  The syntax of
-   the command is rather bizarre--(1) buildargv implements various
-   quoting conventions which are undocumented and have little or
-   nothing in common with the way things are quoted (or not quoted)
-   elsewhere in GDB, (2) options are used, which are not generally
-   used in GDB (perhaps "set mapped on", "set readnow on" would be
-   better), (3) the order of options matters, which is contrary to GNU
+   the command is rather bizarre:
+
+   1. The function buildargv implements various quoting conventions
+   which are undocumented and have little or nothing in common with
+   the way things are quoted (or not quoted) elsewhere in GDB.
+
+   2. Options are used, which are not generally used in GDB (perhaps
+   "set mapped on", "set readnow on" would be better)
+
+   3. The order of options matters, which is contrary to GNU
    conventions (because it is confusing and inconvenient).  */
 
 void
 symbol_file_command (char *args, int from_tty)
 {
-  char **argv;
-  char *name = NULL;
-  struct cleanup *cleanups;
-  int flags = OBJF_USERLOADED;
-
   dont_repeat ();
 
   if (args == NULL)
@@ -1275,10 +1274,14 @@ symbol_file_command (char *args, int from_tty)
     }
   else
     {
-      if ((argv = buildargv (args)) == NULL)
-	{
-	  nomem (0);
-	}
+      char **argv = buildargv (args);
+      int flags = OBJF_USERLOADED;
+      struct cleanup *cleanups;
+      char *name = NULL;
+
+      if (argv == NULL)
+	nomem (0);
+
       cleanups = make_cleanup_freeargv (argv);
       while (*argv != NULL)
 	{
@@ -1288,30 +1291,30 @@ symbol_file_command (char *args, int from_tty)
 	    error (_("unknown option `%s'"), *argv);
 	  else
 	    {
+	      symbol_file_add_main_1 (*argv, from_tty, flags);
 	      name = *argv;
-
-	      symbol_file_add_main_1 (name, from_tty, flags);
 	    }
+
 	  argv++;
 	}
 
       if (name == NULL)
-	{
-	  error (_("no symbol file name was specified"));
-	}
+	error (_("no symbol file name was specified"));
+
       do_cleanups (cleanups);
     }
 }
 
 /* Set the initial language.
 
-   A better solution would be to record the language in the psymtab when reading
-   partial symbols, and then use it (if known) to set the language.  This would
-   be a win for formats that encode the language in an easily discoverable place,
-   such as DWARF.  For stabs, we can jump through hoops looking for specially
-   named symbols or try to intuit the language from the specific type of stabs
-   we find, but we can't do that until later when we read in full symbols.
-   FIXME.  */
+   FIXME: A better solution would be to record the language in the
+   psymtab when reading partial symbols, and then use it (if known) to
+   set the language.  This would be a win for formats that encode the
+   language in an easily discoverable place, such as DWARF.  For
+   stabs, we can jump through hoops looking for specially named
+   symbols or try to intuit the language from the specific type of
+   stabs we find, but we can't do that until later when we read in
+   full symbols.  */
 
 static void
 set_initial_language (void)
@@ -1323,23 +1326,23 @@ set_initial_language (void)
   if (pst != NULL)
     {
       if (pst->filename != NULL)
-	{
-	  lang = deduce_language_from_filename (pst->filename);
-	}
+	lang = deduce_language_from_filename (pst->filename);
+
       if (lang == language_unknown)
 	{
 	  /* Make C the default language */
 	  lang = language_c;
 	}
+
       set_language (lang);
-      expected_language = current_language;	/* Don't warn the user */
+      expected_language = current_language; /* Don't warn the user.  */
     }
 }
 
-/* Open file specified by NAME and hand it off to BFD for preliminary
-   analysis.  Result is a newly initialized bfd *, which includes a newly
-   malloc'd` copy of NAME (tilde-expanded and made absolute).
-   In case of trouble, error() is called.  */
+/* Open the file specified by NAME and hand it off to BFD for
+   preliminary analysis.  Return a newly initialized bfd *, which
+   includes a newly malloc'd` copy of NAME (tilde-expanded and made
+   absolute).  In case of trouble, error() is called.  */
 
 bfd *
 symfile_bfd_open (char *name)
@@ -1348,13 +1351,11 @@ symfile_bfd_open (char *name)
   int desc;
   char *absolute_name;
 
-
-
-  name = tilde_expand (name);	/* Returns 1st new malloc'd copy */
+  name = tilde_expand (name);	/* Returns 1st new malloc'd copy.  */
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
-  desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, name, O_RDONLY | O_BINARY,
-		0, &absolute_name);
+  desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, name,
+		O_RDONLY | O_BINARY, 0, &absolute_name);
 #if defined(__GO32__) || defined(_WIN32) || defined (__CYGWIN__)
   if (desc < 0)
     {
@@ -1369,9 +1370,11 @@ symfile_bfd_open (char *name)
       make_cleanup (xfree, name);
       perror_with_name (name);
     }
-  xfree (name);			/* Free 1st new malloc'd copy */
-  name = absolute_name;		/* Keep 2nd malloc'd copy in bfd */
-  /* It'll be freed in free_objfile(). */
+
+  /* Free 1st new malloc'd copy, but keep the 2nd malloc'd copy in
+     bfd.  It'll be freed in free_objfile(). */
+  xfree (name);
+  name = absolute_name;
 
   sym_bfd = bfd_fopen (name, gnutarget, FOPEN_RB, desc);
   if (!sym_bfd)
@@ -1385,33 +1388,36 @@ symfile_bfd_open (char *name)
 
   if (!bfd_check_format (sym_bfd, bfd_object))
     {
-      /* FIXME: should be checking for errors from bfd_close (for one thing,
-         on error it does not free all the storage associated with the
-         bfd).  */
-      bfd_close (sym_bfd);	/* This also closes desc */
+      /* FIXME: should be checking for errors from bfd_close (for one
+         thing, on error it does not free all the storage associated
+         with the bfd).  */
+      bfd_close (sym_bfd);	/* This also closes desc.  */
       make_cleanup (xfree, name);
       error (_("\"%s\": can't read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
-  return (sym_bfd);
+
+  return sym_bfd;
 }
 
-/* Return the section index for the given section name. Return -1 if
-   the section was not found. */
+/* Return the section index for SECTION_NAME on OBJFILE.  Return -1 if
+   the section was not found.  */
+
 int
 get_section_index (struct objfile *objfile, char *section_name)
 {
   asection *sect = bfd_get_section_by_name (objfile->obfd, section_name);
+
   if (sect)
     return sect->index;
   else
     return -1;
 }
 
-/* Link a new symtab_fns into the global symtab_fns list.  Called on gdb
-   startup by the _initialize routine in each object file format reader,
-   to register information about each format the the reader is prepared
-   to handle. */
+/* Link SF into the global symtab_fns list.  Called on startup by the
+   _initialize routine in each object file format reader, to register
+   information about each format the the reader is prepared to
+   handle. */
 
 void
 add_symtab_fns (struct sym_fns *sf)
@@ -1420,11 +1426,10 @@ add_symtab_fns (struct sym_fns *sf)
   symtab_fns = sf;
 }
 
-
-/* Initialize to read symbols from the symbol file sym_bfd.  It either
-   returns or calls error().  The result is an initialized struct sym_fns
-   in the objfile structure, that contains cached information about the
-   symbol file.  */
+/* Initialize OBJFILE to read symbols from its associated BFD.  It
+   either returns or calls error().  The result is an initialized
+   struct sym_fns in the objfile structure, that contains cached
+   information about the symbol file.  */
 
 static void
 find_sym_fns (struct objfile *objfile)
@@ -1436,7 +1441,7 @@ find_sym_fns (struct objfile *objfile)
   if (our_flavour == bfd_target_srec_flavour
       || our_flavour == bfd_target_ihex_flavour
       || our_flavour == bfd_target_tekhex_flavour)
-    return;	/* No symbols. */
+    return;	/* No symbols.  */
 
   for (sf = symtab_fns; sf != NULL; sf = sf->next)
     {
@@ -1446,10 +1451,12 @@ find_sym_fns (struct objfile *objfile)
 	  return;
 	}
     }
+
   error (_("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown."),
 	 bfd_get_target (objfile->obfd));
 }
 
+
 /* This function runs the load command of our current target.  */
 
 static void

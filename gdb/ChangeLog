@@ -1,5 +1,9 @@
 2005-08-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* symfile.c (symbol_file_command, set_initial_language)
+	(symfile_bfd_open, get_section_index, add_symtab_fns)
+	(find_sym_fns): Reformat code and comments.  Tweak comments.
+
 	* m68k-tdep.c (m68k_register_name): Use ARRAY_SIZE.
 
 2005-08-31  Jim Wilson  <wilson@specifix.com>
