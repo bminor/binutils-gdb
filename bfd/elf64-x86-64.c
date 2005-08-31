@@ -946,6 +946,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		}
 	      else
 		{
+		  void **vpp;
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
@@ -956,8 +957,10 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		  if (s == NULL)
 		    return FALSE;
 
-		  head = ((struct elf64_x86_64_dyn_relocs **)
-			  &elf_section_data (s)->local_dynrel);
+		  /* Beware of type punned pointers vs strict aliasing
+		     rules.  */
+		  vpp = &(elf_section_data (s)->local_dynrel);
+		  head = (struct elf64_x86_64_dyn_relocs **)vpp;
 		}
 
 	      p = *head;
@@ -1586,8 +1589,8 @@ elf64_x86_64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  struct elf64_x86_64_dyn_relocs *p;
 
-	  for (p = *((struct elf64_x86_64_dyn_relocs **)
-		     &elf_section_data (s)->local_dynrel);
+	  for (p = (struct elf64_x86_64_dyn_relocs *)
+		    (elf_section_data (s)->local_dynrel);
 	       p != NULL;
 	       p = p->next)
 	    {

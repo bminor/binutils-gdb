@@ -1,3 +1,15 @@
+2005-08-31  DJ Delorie  <dj@redhat.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Don't cast a unary &
+	address operator, as that breaks GCC's strict aliasing rules.
+	(elf_i386_size_dynamic_sections): Avoid the need for type
+	punning.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Don't cast a unary
+	& address operator, as that breaks GCC's strict aliasing
+	rules.
+	(elf_x86_64_size_dynamic_sections): Avoid the need for type
+	punning.
+
 2005-08-30  Phil Edwards  <phil@codesourcery.com>
 
 	* config.bfd (i[3-7]86-*-vxworks):  Match vxworks* instead.

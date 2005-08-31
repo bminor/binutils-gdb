@@ -1165,6 +1165,7 @@ elf_i386_check_relocs (bfd *abfd,
 		}
 	      else
 		{
+		  void **vpp;
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
@@ -1175,8 +1176,8 @@ elf_i386_check_relocs (bfd *abfd,
 		  if (s == NULL)
 		    return FALSE;
 
-		  head = ((struct elf_i386_dyn_relocs **)
-			  &elf_section_data (s)->local_dynrel);
+		  vpp = &elf_section_data (s)->local_dynrel;
+		  head = (struct elf_i386_dyn_relocs **)vpp;
 		}
 
 	      p = *head;
@@ -1823,8 +1824,8 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  struct elf_i386_dyn_relocs *p;
 
-	  for (p = *((struct elf_i386_dyn_relocs **)
-		     &elf_section_data (s)->local_dynrel);
+	  for (p = ((struct elf_i386_dyn_relocs *)
+		     elf_section_data (s)->local_dynrel);
 	       p != NULL;
 	       p = p->next)
 	    {
