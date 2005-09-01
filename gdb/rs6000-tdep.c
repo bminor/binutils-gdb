@@ -1882,9 +1882,11 @@ rs6000_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (group == float_reggroup)
     return float_p;
 
-  vector_p = ((regnum >= tdep->ppc_vr0_regnum
+  vector_p = ((tdep->ppc_vr0_regnum >= 0
+	       && regnum >= tdep->ppc_vr0_regnum
 	       && regnum < tdep->ppc_vr0_regnum + 32)
-	      || (regnum >= tdep->ppc_ev0_regnum
+	      || (tdep->ppc_ev0_regnum >= 0
+		  && regnum >= tdep->ppc_ev0_regnum
 		  && regnum < tdep->ppc_ev0_regnum + 32)
 	      || regnum == tdep->ppc_vrsave_regnum
 	      || regnum == tdep->ppc_acc_regnum

@@ -1,3 +1,10 @@
+20050901  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * ppc-tdep.h (struct gdbarch_tdep): Better explanation of using
+        -1 for nonexistant registers.
+        * rs6000-tdep.c (rs6000_register_reggroup_p): Don't assume that
+        tdep->ppc_vr0_regnum and tdep->ppc_ev0_regnum are not -1.
+
 2005-09-01  Richard Earnshaw  <richard.earnshaw@arm.com>
 
 	* arm-linux-tdep.c (arm_linux_push_arguments): Delete.

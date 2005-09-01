@@ -152,26 +152,33 @@ struct gdbarch_tdep
     int ppc_ctr_regnum;		/* Count register */
     int ppc_xer_regnum;		/* Integer exception register */
 
-    /* On PPC and RS6000 variants that have no floating-point
-       registers, the next two members will be -1.  */
+    /* Not all PPC and RS6000 variants will have the registers
+       represented below.  A -1 is used to indicate that the register
+       is not present in this variant.  */
+
+    /* Floating-point registers.  */
     int ppc_fp0_regnum;         /* floating-point register 0 */
-    int ppc_fpscr_regnum;	/* Floating point status and condition
-    				   register */
+    int ppc_fpscr_regnum;	/* fp status and condition register */
 
-    int ppc_sr0_regnum;         /* segment register 0, or -1 on
-                                   variants that have no segment
-                                   registers.  */
+    /* Segment registers.  */
+    int ppc_sr0_regnum;         /* segment register 0 */
 
-    int ppc_mq_regnum;		/* Multiply/Divide extension register */
+    /* Multiplier-Quotient Register (older POWER architectures only).  */
+    int ppc_mq_regnum;
+
+    /* Altivec registers.  */
     int ppc_vr0_regnum;		/* First AltiVec register */
     int ppc_vrsave_regnum;	/* Last AltiVec register */
+
+    /* SPE registers.  */
     int ppc_ev0_upper_regnum;   /* First GPR upper half register */
     int ppc_ev0_regnum;         /* First ev register */
     int ppc_ev31_regnum;        /* Last ev register */
     int ppc_acc_regnum;         /* SPE 'acc' register */
     int ppc_spefscr_regnum;     /* SPE 'spefscr' register */
-    int lr_frame_offset;	/* Offset to ABI specific location where
-                                   link register is saved.  */
+
+    /* Offset to ABI specific location where link register is saved.  */
+    int lr_frame_offset;	
 
     /* An array of integers, such that sim_regno[I] is the simulator
        register number for GDB register number I, or -1 if the
