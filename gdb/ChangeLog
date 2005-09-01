@@ -1,3 +1,8 @@
+2005-09-01  Richard Earnshaw  <richard.earnshaw@arm.com>
+
+	* arm-linux-tdep.c (arm_linux_push_arguments): Delete.
+	(arm_linux_init_abi): Don't register it.
+
 2005-08-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* symfile.c (symbol_file_command, set_initial_language)

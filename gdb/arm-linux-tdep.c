@@ -75,147 +75,7 @@ arm_linux_extract_return_value (struct type *type,
 		? ARM_F0_REGNUM : ARM_A1_REGNUM);
   memcpy (valbuf, &regbuf[DEPRECATED_REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
 }
-
-/* Note: ScottB
-
-   This function does not support passing parameters using the FPA
-   variant of the APCS.  It passes any floating point arguments in the
-   general registers and/or on the stack.
-   
-   FIXME:  This and arm_push_arguments should be merged.  However this 
-   	   function breaks on a little endian host, big endian target
-   	   using the COFF file format.  ELF is ok.  
-   	   
-   	   ScottB.  */
-   	   
-/* Addresses for calling Thumb functions have the bit 0 set.
-   Here are some macros to test, set, or clear bit 0 of addresses.  */
-#define IS_THUMB_ADDR(addr)	((addr) & 1)
-#define MAKE_THUMB_ADDR(addr)	((addr) | 1)
-#define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
    	  
-static CORE_ADDR
-arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		          int struct_return, CORE_ADDR struct_addr)
-{
-  char *fp;
-  int argnum, argreg, nstack_size;
-
-  /* Walk through the list of args and determine how large a temporary
-     stack is required.  Need to take care here as structs may be
-     passed on the stack, and we have to to push them.  */
-  nstack_size = -4 * DEPRECATED_REGISTER_SIZE;	/* Some arguments go into A1-A4.  */
-
-  if (struct_return)			/* The struct address goes in A1.  */
-    nstack_size += DEPRECATED_REGISTER_SIZE;
-
-  /* Walk through the arguments and add their size to nstack_size.  */
-  for (argnum = 0; argnum < nargs; argnum++)
-    {
-      int len;
-      struct type *arg_type;
-
-      arg_type = check_typedef (value_type (args[argnum]));
-      len = TYPE_LENGTH (arg_type);
-
-      /* ANSI C code passes float arguments as integers, K&R code
-         passes float arguments as doubles.  Correct for this here.  */
-      if (TYPE_CODE_FLT == TYPE_CODE (arg_type) && DEPRECATED_REGISTER_SIZE == len)
-	nstack_size += TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
-      else
-	nstack_size += len;
-    }
-
-  /* Allocate room on the stack, and initialize our stack frame
-     pointer.  */
-  fp = NULL;
-  if (nstack_size > 0)
-    {
-      sp -= nstack_size;
-      fp = (char *) sp;
-    }
-
-  /* Initialize the integer argument register pointer.  */
-  argreg = ARM_A1_REGNUM;
-
-  /* The struct_return pointer occupies the first parameter passing
-     register.  */
-  if (struct_return)
-    write_register (argreg++, struct_addr);
-
-  /* Process arguments from left to right.  Store as many as allowed
-     in the parameter passing registers (A1-A4), and save the rest on
-     the temporary stack.  */
-  for (argnum = 0; argnum < nargs; argnum++)
-    {
-      int len;
-      char *val;
-      CORE_ADDR regval;
-      enum type_code typecode;
-      struct type *arg_type, *target_type;
-
-      arg_type = check_typedef (value_type (args[argnum]));
-      target_type = TYPE_TARGET_TYPE (arg_type);
-      len = TYPE_LENGTH (arg_type);
-      typecode = TYPE_CODE (arg_type);
-      val = (char *) value_contents (args[argnum]);
-
-      /* ANSI C code passes float arguments as integers, K&R code
-         passes float arguments as doubles.  The .stabs record for 
-         for ANSI prototype floating point arguments records the
-         type as FP_INTEGER, while a K&R style (no prototype)
-         .stabs records the type as FP_FLOAT.  In this latter case
-         the compiler converts the float arguments to double before
-         calling the function.  */
-      if (TYPE_CODE_FLT == typecode && DEPRECATED_REGISTER_SIZE == len)
-	{
-	  DOUBLEST dblval;
-	  dblval = deprecated_extract_floating (val, len);
-	  len = TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
-	  val = alloca (len);
-	  deprecated_store_floating (val, len, dblval);
-	}
-
-      /* If the argument is a pointer to a function, and it is a Thumb
-         function, set the low bit of the pointer.  */
-      if (TYPE_CODE_PTR == typecode
-	  && NULL != target_type
-	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
-	{
-	  CORE_ADDR regval = extract_unsigned_integer (val, len);
-	  if (arm_pc_is_thumb (regval))
-	    store_unsigned_integer (val, len, MAKE_THUMB_ADDR (regval));
-	}
-
-      /* Copy the argument to general registers or the stack in
-         register-sized pieces.  Large arguments are split between
-         registers and stack.  */
-      while (len > 0)
-	{
-	  int partial_len = len < DEPRECATED_REGISTER_SIZE ? len : DEPRECATED_REGISTER_SIZE;
-
-	  if (argreg <= ARM_LAST_ARG_REGNUM)
-	    {
-	      /* It's an argument being passed in a general register.  */
-	      regval = extract_unsigned_integer (val, partial_len);
-	      write_register (argreg++, regval);
-	    }
-	  else
-	    {
-	      /* Push the arguments onto the stack.  */
-	      write_memory ((CORE_ADDR) fp, val, DEPRECATED_REGISTER_SIZE);
-	      fp += DEPRECATED_REGISTER_SIZE;
-	    }
-
-	  len -= partial_len;
-	  val += partial_len;
-	}
-    }
-
-  /* Return adjusted stack pointer.  */
-  return sp;
-}
-
 /*
    Dynamic Linking on ARM GNU/Linux
    --------------------------------
@@ -489,9 +349,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, arm_linux_svr4_fetch_link_map_offsets);
 
-  /* The following two overrides shouldn't be needed.  */
+  /* The following override shouldn't be needed.  */
   set_gdbarch_deprecated_extract_return_value (gdbarch, arm_linux_extract_return_value);
-  set_gdbarch_deprecated_push_arguments (gdbarch, arm_linux_push_arguments);
 
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
