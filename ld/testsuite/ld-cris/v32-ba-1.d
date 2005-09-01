@@ -1,8 +1,10 @@
+# notarget: cris*-*-linux-gnu
 # as: --march=v32 --em=criself
 # ld: -m criself
 # objdump: -d
 
 # Check that 32-bit branches (PCREL:s) are relocated right.
+# Source code and "-m criself" doesn't work with *-linux-gnu.
 
 .*:     file format elf32-us-cris
 
