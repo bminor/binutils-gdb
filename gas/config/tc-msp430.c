@@ -30,6 +30,7 @@
 #include "subsegs.h"
 #include "opcode/msp430.h"
 #include "safe-ctype.h"
+#include "dwarf2dbg.h"
 
 /*
    We will disable polymorphs by default because it is dangerous.
@@ -1422,7 +1423,7 @@ static unsigned int
 msp430_operands (struct msp430_opcode_s * opcode, char * line)
 {
   int bin = opcode->bin_opcode;	/* Opcode mask.  */
-  int __is;
+  int __is = 0;
   char l1[MAX_OP_LEN], l2[MAX_OP_LEN];
   char *frag;
   int where;
@@ -1474,6 +1475,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  __is = 2;
 	  frag = frag_more (__is);
 	  bfd_putl16 ((bfd_vma) bin, frag);
+	  dwarf2_emit_insn (__is);
 	  break;
 	case 1:
 	  /* Something which works with destination operand.  */
@@ -1487,6 +1489,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  frag = frag_more (2 * __is);
 	  where = frag - frag_now->fr_literal;
 	  bfd_putl16 ((bfd_vma) bin, frag);
+	  dwarf2_emit_insn (2 * __is);
 
 	  if (op1.mode == OP_EXP)
 	    {
@@ -1520,7 +1523,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    frag = frag_more (2 * __is);
 	    where = frag - frag_now->fr_literal;
 	    bfd_putl16 ((bfd_vma) bin, frag);
-
+	    dwarf2_emit_insn (2 * __is);
+	    
 	    if (op1.mode == OP_EXP)
 	      {
 		where += 2;	/* Advance 'where' as we do not know _where_.  */
@@ -1564,6 +1568,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  frag = frag_more (2 * __is);
 	  where = frag - frag_now->fr_literal;
 	  bfd_putl16 ((bfd_vma) bin, frag);
+	  dwarf2_emit_insn (2 * __is);
 
 	  if (op1.mode == OP_EXP)
 	    {
@@ -1596,6 +1601,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       frag = frag_more (2 * __is);
       where = frag - frag_now->fr_literal;
       bfd_putl16 ((bfd_vma) bin, frag);
+      dwarf2_emit_insn (2 * __is);
 
       if (op1.mode == OP_EXP)
 	{
@@ -1630,6 +1636,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  /* reti instruction.  */
 	  frag = frag_more (2);
 	  bfd_putl16 ((bfd_vma) bin, frag);
+	  dwarf2_emit_insn (2);
 	  break;
 	}
 
@@ -1643,6 +1650,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       frag = frag_more (2 * __is);
       where = frag - frag_now->fr_literal;
       bfd_putl16 ((bfd_vma) bin, frag);
+      dwarf2_emit_insn (2 * __is);
 
       if (op1.mode == OP_EXP)
 	{
@@ -1727,14 +1735,14 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  else if (*l1 == '$')
 	    {
 	      as_bad (_("instruction requires label sans '$'"));
-	      break;
 	    }
 	  else
 	    {
 	      as_bad (_
 		      ("instruction requires label or value in range -511:512"));
-	      break;
 	    }
+	  dwarf2_emit_insn (2 * __is);
+	  break;
 	}
       else
 	{
@@ -1766,13 +1774,18 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      /* Relaxation required.  */
 	      struct rcodes_s rc = msp430_rcodes[opcode->insn_opnumb];
 
-	      frag = frag_more (8);
-	      bfd_putl16 ((bfd_vma) rc.sop, frag);
-	      frag = frag_variant (rs_machine_dependent, 8, 2,
+	      /* The parameter to dwarf2_emit_insn is actually the offset to the start
+		 of the insn from the fix piece of instruction that was emitted.
+		 Since next fragments may have variable size we tie debug info
+	         to the beginning of the instruction. */
+	      frag = frag_more (0);
+	      dwarf2_emit_insn (0);
+	      frag = frag_var/*iant*/ (rs_machine_dependent, 8, 2,
 				   ENCODE_RELAX (rc.lpos, STATE_BITS10), /* Wild guess.  */
 				   exp.X_add_symbol,
 				   0,	/* Offset is zero if jump dist less than 1K.  */
 				   (char *) frag);
+	      bfd_putl16 ((bfd_vma) rc.sop, frag);
 	      break;
 	    }
 	}
@@ -1802,14 +1815,15 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      /* Relaxation required.  */
 	      struct hcodes_s hc = msp430_hcodes[opcode->insn_opnumb];
 
-	      frag = frag_more (8);
-	      bfd_putl16 ((bfd_vma) hc.op0, frag);
-	      bfd_putl16 ((bfd_vma) hc.op1, frag+2);
-	      frag = frag_variant (rs_machine_dependent, 8, 2,
+	      frag = frag_more (0);
+	      dwarf2_emit_insn (0);
+	      frag = frag_var/*iant*/ (rs_machine_dependent, 8, 2,
 				   ENCODE_RELAX (STATE_EMUL_BRANCH, STATE_BITS10), /* Wild guess.  */
 				   exp.X_add_symbol,
 				   0,	/* Offset is zero if jump dist less than 1K.  */
 				   (char *) frag);
+	      bfd_putl16 ((bfd_vma) hc.op0, frag);
+	      bfd_putl16 ((bfd_vma) hc.op1, frag+2);
 	      break;
 	    }
 	}

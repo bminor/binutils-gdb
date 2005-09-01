@@ -1,3 +1,8 @@
+2005-09-01  Dmitry Diky  <diwil@spec.ru>
+
+	* config/tc-msp430.c (msp430_operands): Emit dwarf2_emit_insn()
+	as appropriate. Change frag_variant() to frag_var() for relaxes. 
+
 2005-08-29  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (generic_force_reloc): Do not call S_FORCE_RELOC if
