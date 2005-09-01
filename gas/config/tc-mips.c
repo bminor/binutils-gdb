@@ -2698,9 +2698,22 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      struct mips_cl_insn delay = history[0];
 	      if (mips_opts.mips16)
 		{
-		  know (delay.frag == ip->frag);
-		  move_insn (ip, delay.frag, delay.where);
-		  move_insn (&delay, ip->frag, ip->where + insn_length (ip));
+		  if (delay.frag == ip->frag)
+		    {
+		      move_insn (ip, delay.frag, delay.where);
+		      move_insn (&delay, ip->frag, delay.where 
+				 + insn_length (ip));
+		    }
+		  else if (insn_length (ip) == insn_length (&delay))
+		    {
+		      move_insn (&delay, ip->frag, ip->where);
+		      move_insn (ip, history[0].frag, history[0].where);
+		    }
+		  else
+		    {
+		      add_fixed_insn (NOP_INSN);
+		      delay = *NOP_INSN;
+		    }
 		}
 	      else if (relaxed_branch)
 		{

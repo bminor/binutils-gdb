@@ -1,3 +1,10 @@
+2005-09-01  David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (append_insn): Correctly handle mips16 case
+	when the frags are different for the 2 instructions we want to
+	swap.  If the lengths of the 2 instructions are not the same, we
+	won't do the swap but emit an nop.
+
 2005-09-01  Dmitry Diky  <diwil@spec.ru>
 
 	* config/tc-msp430.c (msp430_operands): Emit dwarf2_emit_insn()
