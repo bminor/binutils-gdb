@@ -830,6 +830,36 @@ msp430_elf_symbol_address_p (bfd * abfd,
   return FALSE;
 }
 
+/* Adjust all local symbols defined as '.section + 0xXXXX' (.section has sec_shndx)
+    referenced from current and other sections */
+static bfd_boolean
+msp430_elf_relax_adjust_locals(bfd * abfd, asection * sec, bfd_vma addr,
+    int count, unsigned int sec_shndx, bfd_vma toaddr)
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Rela *irel;
+  Elf_Internal_Rela *irelend;
+  Elf_Internal_Sym *isym;
+
+  irel = elf_section_data (sec)->relocs;
+  irelend = irel + sec->reloc_count;
+  symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
+  isym = (Elf_Internal_Sym *) symtab_hdr->contents;
+  
+  for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
+    {
+      int sidx = ELF32_R_SYM(irel->r_info);
+      Elf_Internal_Sym *lsym = isym + sidx;
+      
+      /* Adjust symbols referenced by .sec+0xXX */
+      if (irel->r_addend > addr && irel->r_addend < toaddr 
+	  && lsym->st_shndx == sec_shndx)
+	irel->r_addend -= count;
+    }
+  
+  return TRUE;
+}
+
 /* Delete some bytes from a section while relaxing.  */
 
 static bfd_boolean
@@ -848,6 +878,7 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   struct elf_link_hash_entry **sym_hashes;
   struct elf_link_hash_entry **end_hashes;
   unsigned int symcount;
+  asection *p;
 
   sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
 
@@ -872,19 +903,14 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
   for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
     {
-      int sidx = ELF32_R_SYM(irel->r_info);
-      Elf_Internal_Sym *lsym = isym + sidx;
-      
       /* Get the new reloc address.  */
       if ((irel->r_offset > addr && irel->r_offset < toaddr))
 	irel->r_offset -= count;
-
-      /* Adjust symbols referenced by .sec+0xXX */
-      if (irel->r_addend > addr && irel->r_addend < toaddr 
-	  && lsym->st_shndx == sec_shndx)
-	irel->r_addend -= count;
     }
 
+  for (p = abfd->sections; p != NULL; p = p->next)
+    msp430_elf_relax_adjust_locals(abfd,p,addr,count,sec_shndx,toaddr);
+  
   /* Adjust the local symbols defined in this section.  */
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
