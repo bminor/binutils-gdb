@@ -1,7 +1,6 @@
 #source: pushpopv32.s
-#as: --march=v32 --em=criself
+#as: --underscore --march=v32 --em=criself
 #objdump: -dr
-#name: pushpopv32
 
 .*:[ 	]+file format .*-cris
 

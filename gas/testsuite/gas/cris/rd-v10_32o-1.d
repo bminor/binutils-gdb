@@ -1,5 +1,5 @@
 #source: break.s
-#as: --em=criself --march=common_v10_v32
+#as: --underscore --em=criself --march=common_v10_v32
 #objdump: -p
 
 # Check that different command-line options result in different

@@ -1,4 +1,4 @@
-#as: --em=criself --march=v32
+#as: --underscore --em=criself --march=v32
 #objdump: -dr
 
 # Test that v32 flags are properly recognized and emitted at disassembly.

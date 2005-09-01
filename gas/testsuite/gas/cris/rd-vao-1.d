@@ -1,5 +1,5 @@
 #source: abs32-1.s
-#as: --em=criself --march=v0_v10
+#as: --underscore --em=criself --march=v0_v10
 #objdump: -p
 
 # Check that different command-line options result in different

@@ -1,5 +1,5 @@
 #source: arch-err-4.s
-#as: --march=common_v10_v32 --em=criself
+#as: --underscore --march=common_v10_v32 --em=criself
 #objdump: -p
 
 #...

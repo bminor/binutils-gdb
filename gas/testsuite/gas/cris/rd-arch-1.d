@@ -1,5 +1,5 @@
 #source: arch-err-2.s
-#as: --march=v32 --em=criself
+#as: --march=v32 --underscore --em=criself
 #objdump: -p
 
 #...
