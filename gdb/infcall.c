@@ -333,6 +333,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   if (!target_has_execution)
     noprocess ();
 
+  if (!gdbarch_push_dummy_call_p (current_gdbarch))
+    error (_("This target does not support function calls"));
+
   /* Create a cleanup chain that contains the retbuf (buffer
      containing the register values).  This chain is create BEFORE the
      inf_status chain so that the inferior status can cleaned up
@@ -653,19 +656,9 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
   /* Create the dummy stack frame.  Pass in the call dummy address as,
      presumably, the ABI code knows where, in the call dummy, the
      return address should be pointed.  */
-  if (gdbarch_push_dummy_call_p (current_gdbarch))
-    /* When there is no push_dummy_call method, should this code
-       simply error out.  That would the implementation of this method
-       for all ABIs (which is probably a good thing).  */
-    sp = gdbarch_push_dummy_call (current_gdbarch, function, current_regcache,
-				  bp_addr, nargs, args, sp, struct_return,
-				  struct_addr);
-  else  if (DEPRECATED_PUSH_ARGUMENTS_P ())
-    /* Keep old targets working.  */
-    sp = DEPRECATED_PUSH_ARGUMENTS (nargs, args, sp, struct_return,
-				    struct_addr);
-  else
-    error (_("This target does not support function calls"));
+  sp = gdbarch_push_dummy_call (current_gdbarch, function, current_regcache,
+				bp_addr, nargs, args, sp, struct_return,
+				struct_addr);
 
   /* Set up a frame ID for the dummy frame so we can pass it to
      set_momentary_breakpoint.  We need to give the breakpoint a frame

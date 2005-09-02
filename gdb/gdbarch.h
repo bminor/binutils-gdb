@@ -525,41 +525,13 @@ extern void set_gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch, int depre
 #define DEPRECATED_FP_REGNUM (gdbarch_deprecated_fp_regnum (current_gdbarch))
 #endif
 
-/* See gdbint.texinfo.  See infcall.c.  New, all singing all dancing,
-   replacement for DEPRECATED_PUSH_ARGUMENTS. */
+/* See gdbint.texinfo.  See infcall.c. */
 
 extern int gdbarch_push_dummy_call_p (struct gdbarch *gdbarch);
 
 typedef CORE_ADDR (gdbarch_push_dummy_call_ftype) (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr);
 extern CORE_ADDR gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr);
 extern void set_gdbarch_push_dummy_call (struct gdbarch *gdbarch, gdbarch_push_dummy_call_ftype *push_dummy_call);
-
-/* PUSH_DUMMY_CALL is a direct replacement for DEPRECATED_PUSH_ARGUMENTS. */
-
-#if defined (DEPRECATED_PUSH_ARGUMENTS)
-/* Legacy for systems yet to multi-arch DEPRECATED_PUSH_ARGUMENTS */
-#if !defined (DEPRECATED_PUSH_ARGUMENTS_P)
-#define DEPRECATED_PUSH_ARGUMENTS_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_push_arguments_p (struct gdbarch *gdbarch);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_PUSH_ARGUMENTS_P)
-#error "Non multi-arch definition of DEPRECATED_PUSH_ARGUMENTS"
-#endif
-#if !defined (DEPRECATED_PUSH_ARGUMENTS_P)
-#define DEPRECATED_PUSH_ARGUMENTS_P() (gdbarch_deprecated_push_arguments_p (current_gdbarch))
-#endif
-
-typedef CORE_ADDR (gdbarch_deprecated_push_arguments_ftype) (int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr);
-extern CORE_ADDR gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr);
-extern void set_gdbarch_deprecated_push_arguments (struct gdbarch *gdbarch, gdbarch_deprecated_push_arguments_ftype *deprecated_push_arguments);
-#if !defined (GDB_TM_FILE) && defined (DEPRECATED_PUSH_ARGUMENTS)
-#error "Non multi-arch definition of DEPRECATED_PUSH_ARGUMENTS"
-#endif
-#if !defined (DEPRECATED_PUSH_ARGUMENTS)
-#define DEPRECATED_PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) (gdbarch_deprecated_push_arguments (current_gdbarch, nargs, args, sp, struct_return, struct_addr))
-#endif
 
 /* DEPRECATED_REGISTER_SIZE can be deleted. */
 
@@ -753,7 +725,7 @@ typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct gdbarch *gdbarch, s
 extern CORE_ADDR gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_integer_to_address_ftype *integer_to_address);
 
-/* NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS. */
+/* NOTE: kettenis/2005-09-01: Replaced by PUSH_DUMMY_CALL. */
 
 #if defined (DEPRECATED_STORE_STRUCT_RETURN)
 /* Legacy for systems yet to multi-arch DEPRECATED_STORE_STRUCT_RETURN */

@@ -1,3 +1,12 @@
+2005-09-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* infcall.c (call_function_by_hand): Remove code handling
+	deprecated_push_arguments.  Bail out early if push_dummy_call
+	isn't available.
+	* gdbarch.sh (deprecated_push_arguments): Delete.  Adjust a few
+	comments accordingly.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2005-09-01  Paul Gilliam  <pgilliam@us.ibm.com>
 
         * ppc-tdep.h (struct gdbarch_tdep): Better explanation of using

@@ -469,11 +469,8 @@ M::struct frame_id:unwind_dummy_id:struct frame_info *info:info
 # DEPRECATED_FP_REGNUM.
 v:=:int:deprecated_fp_regnum:::-1:-1::0
 
-# See gdbint.texinfo.  See infcall.c.  New, all singing all dancing,
-# replacement for DEPRECATED_PUSH_ARGUMENTS.
+# See gdbint.texinfo.  See infcall.c.
 M::CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:function, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
-# PUSH_DUMMY_CALL is a direct replacement for DEPRECATED_PUSH_ARGUMENTS.
-F:=:CORE_ADDR:deprecated_push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr
 # DEPRECATED_REGISTER_SIZE can be deleted.
 v:=:int:deprecated_register_size
 v:=:int:call_dummy_location::::AT_ENTRY_POINT::0
@@ -501,7 +498,7 @@ f:=:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, bu
 f:=:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
 M::CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 #
-# NOTE: cagney/2003-03-24: Replaced by PUSH_ARGUMENTS.
+# NOTE: kettenis/2005-09-01: Replaced by PUSH_DUMMY_CALL.
 F:=:void:deprecated_store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp
 
 # It has been suggested that this, well actually its predecessor,
