@@ -1,3 +1,8 @@
+2005-09-02  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (opcode_lookup): Look for infix opcode when
+	incorrect suffix matches.
+
 2005-09-01  David Ung  <davidu@mips.com>
 
 	* config/tc-mips.c (append_insn): Correctly handle mips16 case

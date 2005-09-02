@@ -25,7 +25,10 @@ F:
 	sfmfd	f0, 4, [r0]
 	sfmea	f0, 4, [r0]
 	
-	# Add two nop instructions to ensure that the
-	# output is 32-byte aligned as required for arm-aout.
-	nop
-	nop
+	# Test mnemonic that is ambiguous between infix and suffic
+	# condition codes
+	# sfts condition code pl
+	stfpls	f0, [r0]
+	.syntax unified
+	# stfp condition code ls
+	stfpls	f0, [r0]

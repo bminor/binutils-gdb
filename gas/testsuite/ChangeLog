@@ -1,3 +1,8 @@
+2005-09-02  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/fpa-mem.d: Test "stfpls".
+	* gas/arm/fpa-mem.s: Ditto.
+
 2005-09-01  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris: Adjust all files for testing target

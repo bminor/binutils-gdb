@@ -7676,8 +7676,10 @@ opcode_lookup (char **str)
 	{
 	case OT_cinfix3:
 	case OT_odd_infix_unc:
+	  /* Some mnemonics are ambiguous between infix and suffix
+	     conditions.  Disambiguate based on assembly syntax.  */
 	  if (!unified_syntax)
-	    return 0;
+	    break;
 	  /* else fall through */
 
 	case OT_csuffix:
