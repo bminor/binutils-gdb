@@ -1,4 +1,4 @@
-20050901  Paul Gilliam  <pgilliam@us.ibm.com>
+2005-09-01  Paul Gilliam  <pgilliam@us.ibm.com>
 
         * ppc-tdep.h (struct gdbarch_tdep): Better explanation of using
         -1 for nonexistant registers.
