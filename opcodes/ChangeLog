@@ -1,5 +1,9 @@
 2005-09-02  Paul Brook  <paul@codesourcery.com>
 
+	* arm-dis.c (coprocessor_opcodes): Add null terminator.
+
+2005-09-02  Paul Brook  <paul@codesourcery.com>
+
 	* arm-dis.c (coprocessor_opcodes): New.
 	(arm_opcodes, thumb32_opcodes): Remove coprocessor insns.
 	(print_insn_coprocessor): New function.

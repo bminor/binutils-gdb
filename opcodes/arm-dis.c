@@ -381,7 +381,7 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_EXT_V5, 0xfe000000, 0xff000010, "cdp2\t%8-11d, %20-23d, cr%12-15d, cr%16-19d, cr%0-3d, {%5-7d}"},
   {ARM_EXT_V5, 0xfe000010, 0xff100010, "mcr2\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
   {ARM_EXT_V5, 0xfe100010, 0xff100010, "mrc2\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
-
+  {0, 0, 0, 0}
 };
 
 /* Opcode tables: ARM, 16-bit Thumb, 32-bit Thumb.  All three are partially
