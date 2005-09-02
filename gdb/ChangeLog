@@ -1,3 +1,13 @@
+2005-08-15  Michael Snyder  <msnyder@redhat.com>
+            Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-linux-tdep.c: New file.
+	* Makefile.in (mn10300-linux-tdep.o): New Makefile target.
+	* config/mn10300/linux.mt (TDEPFILES): Add mn10300-linux-tdep.o and
+	corelow.o.
+	* mn10300-tdep.h (E_E8_REGNUM, E_E9_REGNUM, E_E10_REGNUM)
+	(E_FPCR_REGNUM, E_FS0_REGNUM): New constants.
+
 2005-09-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* infcall.c (call_function_by_hand): Remove code handling

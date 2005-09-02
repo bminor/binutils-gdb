@@ -44,9 +44,14 @@ enum {
   E_E5_REGNUM = 20,
   E_E6_REGNUM = 21,
   E_E7_REGNUM = 22,
+  E_E8_REGNUM = 23,
+  E_E9_REGNUM = 24,
+  E_E10_REGNUM = 25,
   E_MCRH_REGNUM = 26,
   E_MCRL_REGNUM = 27,
   E_MCVF_REGNUM = 28,
+  E_FPCR_REGNUM = 29,
+  E_FS0_REGNUM = 32,
   E_NUM_REGS = 32
 };
 
@@ -76,5 +81,3 @@ struct gdbarch_tdep
 };
 
 #define AM33_MODE (gdbarch_tdep (current_gdbarch)->am33_mode)
-
-
