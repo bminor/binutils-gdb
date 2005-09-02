@@ -1,3 +1,12 @@
+2005-09-02  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (coprocessor_opcodes): New.
+	(arm_opcodes, thumb32_opcodes): Remove coprocessor insns.
+	(print_insn_coprocessor): New function.
+	(print_insn_arm): Use print_insn_coprocessor.  Remove coprocessor
+	format characters.
+	(print_insn_thumb32): Use print_insn_coprocessor.
+
 2005-08-30  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (thumb_opcodes): Disassemble sub(3) as subs.

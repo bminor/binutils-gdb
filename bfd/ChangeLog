@@ -1,3 +1,10 @@
+2005-09-02  Paul Brook  <paul@codesourcery.com>
+
+	* libbdf.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* reloc.c: Add BFD_RELOC_ARM_T32_CP_OFF_IMM and
+	BFD_RELOC_ARM_T32_CP_OFF_IMM_S2.
+
 2005-09-01  Dmitry Diky <diwil@spec.ru>
 
 	* elf32-msp430.c (msp430_elf_relax_delete_bytes): Do not adjust

@@ -1,5 +1,11 @@
 2005-09-02  Paul Brook  <paul@codesourcery.com>
 
+	* gas/arm/vfp-bad_t2.d, gas/arm/vfp-bad_t2.l, arm/vfp-bad_t2.s,
+	gas/arm/vfp1_t2.d, gas/arm/vfp1_t2.s, gas/arm/vfp1xD_t2.d,
+	gas/arm/vfp1xD_t2.s, gas/arm/vfp2_t2.d, gas/arm/vfp2_t2.s): New files.
+
+2005-09-02  Paul Brook  <paul@codesourcery.com>
+
 	* gas/arm/fpa-mem.d: Test "stfpls".
 	* gas/arm/fpa-mem.s: Ditto.
 
