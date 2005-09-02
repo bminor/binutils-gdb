@@ -36,7 +36,6 @@
 #include "trad-frame.h"
 #include "symtab.h"
 #include "dwarf2-frame.h"
-#include "regcache.h"
 #include "osabi.h"
 
 #include "mn10300-tdep.h"

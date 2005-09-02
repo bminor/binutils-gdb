@@ -1,4 +1,9 @@
 2005-09-02  Kevin Buettner  <kevinb@redhat.com>
+	
+	* mn10300-tdep.c (regcache.h): Delete duplicate include.
+	* Makefile.in (mn10300-tdep.o): Update dependencies.
+
+2005-09-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-tdep.c (osabi.h): Include.
 	(mn10300_gdbarch_init): Invoke gdbarch_init_osabi().
