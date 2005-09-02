@@ -1,4 +1,4 @@
-2005-08-15  Michael Snyder  <msnyder@redhat.com>
+2005-09-02  Michael Snyder  <msnyder@redhat.com>
             Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-linux-tdep.c: New file.
