@@ -7658,6 +7658,41 @@ free_debug_range (void)
   debug_range_size = 0;
 }
 
+static unsigned char *debug_abbrev_contents;
+static unsigned long debug_abbrev_size;
+
+static void
+load_debug_abbrev (FILE *file)
+{
+  Elf_Internal_Shdr *sec;
+
+  /* If it is already loaded, do nothing.  */
+  if (debug_abbrev_contents != NULL)
+    return;
+
+  /* Locate the .debug_ranges section.  */
+  sec = find_section (".debug_abbrev");
+  if (sec == NULL)
+    return;
+
+  debug_abbrev_size = sec->sh_size;
+
+  debug_abbrev_contents = get_data (NULL, file, sec->sh_offset, 1,
+				    sec->sh_size,
+				    _("debug_abbrev section data"));
+}
+
+static void
+free_debug_abbrev (void)
+{
+  if (debug_abbrev_contents == NULL)
+    return;
+
+  free ((char *) debug_abbrev_contents);
+  debug_abbrev_contents = NULL;
+  debug_abbrev_size = 0;
+}
+
 /* Apply addends of RELA relocations.  */
 
 static int
@@ -9051,6 +9086,13 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
       load_debug_range (file);
     }
 
+  load_debug_abbrev (file);
+  if (debug_abbrev_contents == NULL)
+    {
+      warn (_("Unable to locate .debug_abbrev section!\n"));
+      return 0;
+    }
+
   for (section_begin = start, unit = 0; start < end; unit++)
     {
       DWARF2_Internal_CompUnit compunit;
@@ -9132,29 +9174,10 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 
       free_abbrevs ();
 
-      /* Read in the abbrevs used by this compilation unit.  */
-      {
-	Elf_Internal_Shdr *sec;
-	unsigned char *begin;
-
-	/* Locate the .debug_abbrev section and process it.  */
-	sec = find_section (".debug_abbrev");
-	if (sec == NULL)
-	  {
-	    warn (_("Unable to locate .debug_abbrev section!\n"));
-	    return 0;
-	  }
-
-	begin = get_data (NULL, file, sec->sh_offset, 1, sec->sh_size,
-			  _("debug_abbrev section data"));
-	if (!begin)
-	  return 0;
-
-	process_abbrev_section (begin + compunit.cu_abbrev_offset,
-				begin + sec->sh_size);
-
-	free (begin);
-      }
+      /* Process the abbrevs used by this compilation unit.  */
+      process_abbrev_section
+	(debug_abbrev_contents + compunit.cu_abbrev_offset,
+	 debug_abbrev_contents + debug_abbrev_size);
 
       level = 0;
       while (tags < start)
@@ -9228,6 +9251,8 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
  	}
     }
  
+  free_debug_abbrev ();
+
   /* Set num_debug_info_entries here so that it can be used to check if
      we need to process .debug_loc and .debug_ranges sections.  */
   if ((do_loc || do_debug_loc || do_debug_ranges)

@@ -1,3 +1,11 @@
+2005-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (debug_abbrev_contents): New.
+	(debug_abbrev_size): Likewise.
+	(load_debug_abbrev): Likewise.
+	(free_debug_abbrev): Likewise.
+	(process_debug_info): Use them.
+
 2005-08-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/1179
