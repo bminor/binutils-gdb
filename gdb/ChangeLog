@@ -1,3 +1,9 @@
+2005-09-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (osabi.h): Include.
+	(mn10300_gdbarch_init): Invoke gdbarch_init_osabi().
+	* Makefile.in (mn10300-tdep.o): Update dependencies.
+
 2005-09-02  Michael Snyder  <msnyder@redhat.com>
             Kevin Buettner  <kevinb@redhat.com>
 

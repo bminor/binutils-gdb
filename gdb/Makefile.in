@@ -2310,7 +2310,8 @@ mn10300-linux-tdep.o: mn10300-linux-tdep.c $(defs_h) $(gdbcore_h) \
 mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 	$(gdbtypes_h) $(regcache_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(frame_h) $(frame_unwind_h) $(frame_base_h) $(trad_frame_h) \
-	$(symtab_h) $(dwarf2_frame_h) $(regcache_h) $(mn10300_tdep_h)
+	$(symtab_h) $(dwarf2_frame_h) $(regcache_h) $(osabi_h) $(mn10300_tdep_h)
+	
 monitor.o: monitor.c $(defs_h) $(gdbcore_h) $(target_h) $(exceptions_h) \
 	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) $(gdbcmd_h) \
 	$(inferior_h) $(gdb_regex_h) $(srec_h) $(regcache_h)

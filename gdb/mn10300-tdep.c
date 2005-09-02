@@ -37,6 +37,7 @@
 #include "symtab.h"
 #include "dwarf2-frame.h"
 #include "regcache.h"
+#include "osabi.h"
 
 #include "mn10300-tdep.h"
 
@@ -1002,6 +1003,9 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 
 
   mn10300_frame_unwind_init (gdbarch);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
 
   return gdbarch;
 }
