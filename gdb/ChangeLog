@@ -1,4 +1,14 @@
 2005-09-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_use_struct_convention): Delete parameter
+	``gcc_p''.  Adjust all callers.
+	(mn10300_store_return_value, mn10300_extract_return_value): Add new
+	parameter ``gdbarch''.
+	(mn10300_return_value): New function.
+	(mn10300_gdbarch_init): Delete old-style return value code calls.
+	Add call to set_gdbarch_return_value().
+
+2005-09-02  Kevin Buettner  <kevinb@redhat.com>
 	
 	* mn10300-tdep.c (regcache.h): Delete duplicate include.
 	* Makefile.in (mn10300-tdep.o): Update dependencies.

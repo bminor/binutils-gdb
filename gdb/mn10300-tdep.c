@@ -90,11 +90,9 @@ mn10300_type_align (struct type *type)
     }
 }
 
-/* MVS note this is deprecated.  */
 /* Should call_function allocate stack space for a struct return?  */
-/* gcc_p unused */
 static int
-mn10300_use_struct_convention (int gcc_p, struct type *type)
+mn10300_use_struct_convention (struct type *type)
 {
   /* Structures bigger than a pair of words can't be returned in
      registers.  */
@@ -108,8 +106,7 @@ mn10300_use_struct_convention (int gcc_p, struct type *type)
       /* Structures with a single field are handled as the field
 	 itself.  */
       if (TYPE_NFIELDS (type) == 1)
-	return mn10300_use_struct_convention (gcc_p, 
-					      TYPE_FIELD_TYPE (type, 0));
+	return mn10300_use_struct_convention (TYPE_FIELD_TYPE (type, 0));
 
       /* Structures with word or double-word size are passed in memory, as
 	 long as they require at least word alignment.  */
@@ -125,19 +122,17 @@ mn10300_use_struct_convention (int gcc_p, struct type *type)
       return 1;
 
     case TYPE_CODE_TYPEDEF:
-      return mn10300_use_struct_convention (gcc_p, check_typedef (type));
+      return mn10300_use_struct_convention (check_typedef (type));
 
     default:
       return 0;
     }
 }
 
-/* MVS note this is deprecated.  */
 static void
-mn10300_store_return_value (struct type *type,
+mn10300_store_return_value (struct gdbarch *gdbarch, struct type *type,
 			    struct regcache *regcache, const void *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int len = TYPE_LENGTH (type);
   int reg, regsz;
   
@@ -162,12 +157,10 @@ mn10300_store_return_value (struct type *type,
 		    _("Cannot store return value %d bytes long."), len);
 }
 
-/* MVS note deprecated.  */
 static void
-mn10300_extract_return_value (struct type *type,
+mn10300_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 			      struct regcache *regcache, void *valbuf)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   char buf[MAX_REGISTER_SIZE];
   int len = TYPE_LENGTH (type);
   int reg, regsz;
@@ -194,6 +187,28 @@ mn10300_extract_return_value (struct type *type,
   else
     internal_error (__FILE__, __LINE__,
 		    _("Cannot extract return value %d bytes long."), len);
+}
+
+/* Determine, for architecture GDBARCH, how a return value of TYPE
+   should be returned.  If it is supposed to be returned in registers,
+   and READBUF is non-zero, read the appropriate value from REGCACHE,
+   and copy it into READBUF.  If WRITEBUF is non-zero, write the value
+   from WRITEBUF into REGCACHE.  */
+
+static enum return_value_convention
+mn10300_return_value (struct gdbarch *gdbarch, struct type *type,
+		      struct regcache *regcache, gdb_byte *readbuf,
+		      const gdb_byte *writebuf)
+{
+  if (mn10300_use_struct_convention (type))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  if (readbuf)
+    mn10300_extract_return_value (gdbarch, type, regcache, readbuf);
+  if (writebuf)
+    mn10300_store_return_value (gdbarch, type, regcache, writebuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 static char *
@@ -990,11 +1005,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_print_insn (gdbarch, print_insn_mn10300);
 
   /* Stage 2 */
-  /* MVS Note: at least the first one is deprecated!  */
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, 
-						mn10300_use_struct_convention);
-  set_gdbarch_store_return_value (gdbarch, mn10300_store_return_value);
-  set_gdbarch_extract_return_value (gdbarch, mn10300_extract_return_value);
+  set_gdbarch_return_value (gdbarch, mn10300_return_value);
   
   /* Stage 3 -- get target calls working.  */
   set_gdbarch_push_dummy_call (gdbarch, mn10300_push_dummy_call);
