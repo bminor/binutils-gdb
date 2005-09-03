@@ -1,5 +1,10 @@
 2005-09-02  Kevin Buettner  <kevinb@redhat.com>
 
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): New function.
+	(mn10300_gdbarch_init): Register mn10300_dwarf2_reg_to_regnum().
+
+2005-09-02  Kevin Buettner  <kevinb@redhat.com>
+
 	* mn10300-tdep.c (is_my_frame_in_sp, is_my_frame_in_fp)
 	(is_my_frame_last): Delete these unused functions.
 

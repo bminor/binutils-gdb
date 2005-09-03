@@ -937,6 +937,37 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
   return sp;
 }
 
+/* If DWARF2 is a register number appearing in Dwarf2 debug info, then
+   mn10300_dwarf2_reg_to_regnum (DWARF2) is the corresponding GDB
+   register number.  Why don't Dwarf2 and GDB use the same numbering?
+   Who knows?  But since people have object files lying around with
+   the existing Dwarf2 numbering, and other people have written stubs
+   to work with the existing GDB, neither of them can change.  So we
+   just have to cope.  */
+static int
+mn10300_dwarf2_reg_to_regnum (int dwarf2)
+{
+  /* This table is supposed to be shaped like the REGISTER_NAMES
+     initializer in gcc/config/mn10300/mn10300.h.  Registers which
+     appear in GCC's numbering, but have no counterpart in GDB's
+     world, are marked with a -1.  */
+  static int dwarf2_to_gdb[] = {
+    0,  1,  2,  3,  4,  5,  6,  7, -1, 8,
+    15, 16, 17, 18, 19, 20, 21, 22,
+    32, 33, 34, 35, 36, 37, 38, 39,
+    40, 41, 42, 43, 44, 45, 46, 47,
+    48, 49, 50, 51, 52, 53, 54, 55,
+    56, 57, 58, 59, 60, 61, 62, 63
+  };
+
+  if (dwarf2 < 0
+      || dwarf2 >= (sizeof (dwarf2_to_gdb) / sizeof (dwarf2_to_gdb[0]))
+      || dwarf2_to_gdb[dwarf2] == -1)
+    internal_error (__FILE__, __LINE__,
+                    "bogus register number in debug info: %d", dwarf2);
+
+  return dwarf2_to_gdb[dwarf2];
+}
 
 static struct gdbarch *
 mn10300_gdbarch_init (struct gdbarch_info info,
@@ -977,6 +1008,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_write_pc (gdbarch, mn10300_write_pc);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mn10300_dwarf2_reg_to_regnum);
 
   /* Stack unwinding.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
