@@ -1,5 +1,10 @@
 2005-09-02  Kevin Buettner  <kevinb@redhat.com>
 
+	* mn10300-tdep.c (is_my_frame_in_sp, is_my_frame_in_fp)
+	(is_my_frame_last): Delete these unused functions.
+
+2005-09-02  Kevin Buettner  <kevinb@redhat.com>
+
 	* mn10300-tdep.c (mn10300_frame_prev_register): Change type of
 	``bufferp'' from ``void *'' to ``gdb_byte *''.
 

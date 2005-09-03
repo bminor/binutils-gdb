@@ -314,24 +314,6 @@ my_frame_is_last (struct frame_info *fi)
 {
 }
 
-static int
-is_my_frame_in_sp (struct frame_info *fi)
-{
-  return 0;
-}
-
-static int
-is_my_frame_in_fp (struct frame_info *fi)
-{
-  return 0;
-}
-
-static int
-is_my_frame_last (struct frame_info *fi)
-{
-  return 0;
-}
-
 static void
 set_my_stack_size (struct frame_info *fi, CORE_ADDR size)
 {
