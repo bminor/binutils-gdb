@@ -1,5 +1,11 @@
 2005-09-02  Kevin Buettner  <kevinb@redhat.com>
 
+	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Use ARRAY_SIZE.
+	Change internal error to warning.  Add i18n markup to warning
+	string.
+	
+2005-09-02  Kevin Buettner  <kevinb@redhat.com>
+
 	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): New function.
 	(mn10300_gdbarch_init): Register mn10300_dwarf2_reg_to_regnum().
 

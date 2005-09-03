@@ -961,10 +961,9 @@ mn10300_dwarf2_reg_to_regnum (int dwarf2)
   };
 
   if (dwarf2 < 0
-      || dwarf2 >= (sizeof (dwarf2_to_gdb) / sizeof (dwarf2_to_gdb[0]))
+      || dwarf2 >= ARRAY_SIZE (dwarf2_to_gdb)
       || dwarf2_to_gdb[dwarf2] == -1)
-    internal_error (__FILE__, __LINE__,
-                    "bogus register number in debug info: %d", dwarf2);
+    warning (_("bogus register number in debug info: %d"), dwarf2);
 
   return dwarf2_to_gdb[dwarf2];
 }
