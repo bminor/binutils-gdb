@@ -963,7 +963,10 @@ mn10300_dwarf2_reg_to_regnum (int dwarf2)
   if (dwarf2 < 0
       || dwarf2 >= ARRAY_SIZE (dwarf2_to_gdb)
       || dwarf2_to_gdb[dwarf2] == -1)
-    warning (_("bogus register number in debug info: %d"), dwarf2);
+    {
+      warning (_("Bogus register number in debug info: %d"), dwarf2);
+      return 0;
+    }
 
   return dwarf2_to_gdb[dwarf2];
 }
