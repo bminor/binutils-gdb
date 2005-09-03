@@ -1,5 +1,10 @@
 2005-09-02  Kevin Buettner  <kevinb@redhat.com>
 
+	* mn10300-tdep.c (mn10300_frame_prev_register): Change type of
+	``bufferp'' from ``void *'' to ``gdb_byte *''.
+
+2005-09-02  Kevin Buettner  <kevinb@redhat.com>
+
 	* mn10300-tdep.c (mn10300_use_struct_convention): Delete parameter
 	``gcc_p''.  Adjust all callers.
 	(mn10300_store_return_value, mn10300_extract_return_value): Add new

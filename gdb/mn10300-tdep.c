@@ -779,7 +779,7 @@ mn10300_frame_prev_register (struct frame_info *next_frame,
 			     void **this_prologue_cache,
 			     int regnum, int *optimizedp,
 			     enum lval_type *lvalp, CORE_ADDR *addrp,
-			     int *realnump, void *bufferp)
+			     int *realnump, gdb_byte *bufferp)
 {
   struct trad_frame_cache *cache =
     mn10300_frame_unwind_cache (next_frame, this_prologue_cache);
