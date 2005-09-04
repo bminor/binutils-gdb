@@ -334,7 +334,7 @@ child_post_startup_inferior (ptid_t ptid)
 #endif
 
 int
-child_follow_fork (int follow_child)
+child_follow_fork (struct target_ops *ops, int follow_child)
 {
   ptid_t last_ptid;
   struct target_waitstatus last_status;
@@ -466,7 +466,10 @@ child_follow_fork (int follow_child)
 	target_detach (NULL, 0);
 
       inferior_ptid = pid_to_ptid (child_pid);
-      push_target (&deprecated_child_ops);
+
+      /* Reinstall ourselves, since we might have been removed in
+	 target_detach (which does other necessary cleanup).  */
+      push_target (ops);
 
       /* Reset breakpoints in the child as appropriate.  */
       follow_inferior_reset_breakpoints ();

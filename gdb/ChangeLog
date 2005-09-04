@@ -1,3 +1,20 @@
+2005-09-04  Daniel Jacobowitz  <dan@debian.org>
+
+	* inf-child.c (inf_child_follow_fork): Add OPS argument.
+	* inf-ptrace.c (inf_ptrace_follow_fork): Likewise.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Likewise.
+	* inftarg.c (child_follow_fork): Likewise.
+	* linux-nat.c (child_follow_fork): Likewise.  Use ops instead of
+	&deprecated_child_ops.
+	* target.c (update_current_target): Do not inherit to_follow_fork.
+	(target_follow_fork): New function.
+	(debug_to_follow_fork): Remove.
+	(setup_target_debug): Don't set to_follow_fork.
+	* target.h (struct target_ops): Add struct target_ops * to
+	to_follow_fork.
+	(child_follow_fork): Add struct target_ops * argument.
+	(target_follow_fork): Replace macro with prototype.
+
 2005-09-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-tdep.c (mn10300_dwarf2_reg_to_regnum): Use ARRAY_SIZE.

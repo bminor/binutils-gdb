@@ -44,7 +44,7 @@ static struct target_ops *ptrace_ops_hack;
 #ifdef PT_GET_PROCESS_STATE
 
 static int
-inf_ptrace_follow_fork (int follow_child)
+inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
 {
   pid_t pid, fpid;
   ptrace_state_t pe;

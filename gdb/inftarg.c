@@ -1,7 +1,7 @@
 /* Target-vector operations for controlling Unix child processes, for GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2000, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -401,7 +401,7 @@ child_remove_vfork_catchpoint (int pid)
 
 #if !defined(CHILD_FOLLOW_FORK)
 int
-child_follow_fork (int follow_child)
+child_follow_fork (struct target_ops *ops, int follow_child)
 {
   /* This version of Unix doesn't support following fork or vfork events.  */
   return 0;

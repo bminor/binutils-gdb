@@ -2,7 +2,7 @@
    Unix.
 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -121,7 +121,7 @@ inf_child_remove_vfork_catchpoint (int pid)
 }
 
 static int
-inf_child_follow_fork (int follow_child)
+inf_child_follow_fork (struct target_ops *ops, int follow_child)
 {
   /* This version of Unix doesn't support following fork or vfork
      events.  */

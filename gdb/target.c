@@ -422,7 +422,7 @@ update_current_target (void)
       INHERIT (to_remove_fork_catchpoint, t);
       INHERIT (to_insert_vfork_catchpoint, t);
       INHERIT (to_remove_vfork_catchpoint, t);
-      INHERIT (to_follow_fork, t);
+      /* Do not inherit to_follow_fork.  */
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
       INHERIT (to_reported_exec_events_per_exec_call, t);
@@ -579,9 +579,6 @@ update_current_target (void)
   de_fault (to_remove_vfork_catchpoint, 
 	    (int (*) (int)) 
 	    tcomplain);
-  de_fault (to_follow_fork,
-	    (int (*) (int)) 
-	    target_ignore);
   de_fault (to_insert_exec_catchpoint, 
 	    (void (*) (int)) 
 	    tcomplain);
@@ -1501,6 +1498,31 @@ target_async_mask (int mask)
 }
 
 /* Look through the list of possible targets for a target that can
+   follow forks.  */
+
+int
+target_follow_fork (int follow_child)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_follow_fork != NULL)
+	{
+	  int retval = t->to_follow_fork (t, follow_child);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_follow_fork (%d) = %d\n",
+				follow_child, retval);
+	  return retval;
+	}
+    }
+
+  /* Some target returned a fork event, but did not know how to follow it.  */
+  internal_error (__FILE__, __LINE__,
+		  "could not find a target to follow fork");
+}
+
+/* Look through the list of possible targets for a target that can
    execute a run or attach command without any other data.  This is
    used to locate the default process stratum.
 
@@ -2336,17 +2358,6 @@ debug_to_remove_vfork_catchpoint (int pid)
   return retval;
 }
 
-static int
-debug_to_follow_fork (int follow_child)
-{
-  int retval =  debug_target.to_follow_fork (follow_child);
-
-  fprintf_unfiltered (gdb_stdlog, "target_follow_fork (%d) = %d\n",
-		      follow_child, retval);
-
-  return retval;
-}
-
 static void
 debug_to_insert_exec_catchpoint (int pid)
 {
@@ -2539,7 +2550,6 @@ setup_target_debug (void)
   current_target.to_remove_fork_catchpoint = debug_to_remove_fork_catchpoint;
   current_target.to_insert_vfork_catchpoint = debug_to_insert_vfork_catchpoint;
   current_target.to_remove_vfork_catchpoint = debug_to_remove_vfork_catchpoint;
-  current_target.to_follow_fork = debug_to_follow_fork;
   current_target.to_insert_exec_catchpoint = debug_to_insert_exec_catchpoint;
   current_target.to_remove_exec_catchpoint = debug_to_remove_exec_catchpoint;
   current_target.to_reported_exec_events_per_exec_call = debug_to_reported_exec_events_per_exec_call;
