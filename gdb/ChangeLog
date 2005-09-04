@@ -1,4 +1,4 @@
-2005-09-04  Daniel Jacobowitz  <dan@debian.org>
+2005-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* inf-child.c (inf_child_follow_fork): Add OPS argument.
 	* inf-ptrace.c (inf_ptrace_follow_fork): Likewise.
