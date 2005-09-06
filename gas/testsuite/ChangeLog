@@ -1,3 +1,8 @@
+2005-09-06  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/mips.exp: Run MT test for mips32r2 only.
+	* gas/mips/mips32-mt.[sdl]: New test.
+
 2005-09-06  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_relax.d: New test.
