@@ -1,5 +1,12 @@
 2005-09-06  Kevin Buettner  <kevinb@redhat.com>
 
+	* mn10300-linux-tdep.c (solib-svr4.h): Include.
+	(mn10300_linux_svr4_fetch_link_map_offsets): New function.
+	(am33_linux_init_osabi): Register it.
+	* Makefile.in (mn10300-linux-tdep.o): Update dependencies.
+
+2005-09-06  Kevin Buettner  <kevinb@redhat.com>
+
 	* mn10300-tdep.c (mn10300_analyze_prologue): Delete code disabled
 	via "#if 0".
 

@@ -29,6 +29,7 @@
 #include "elf-bfd.h"
 #include "osabi.h"
 #include "regset.h"
+#include "solib-svr4.h"
 
 #include <stdlib.h>
 
@@ -467,6 +468,49 @@ am33_regset_from_core_section (struct gdbarch *gdbarch,
 			 am33_collect_gregset_method);
 }
 
+/* Fetch, and possibly build, an appropriate link_map_offsets structure
+   for mn10300 linux targets using the struct offsets defined in <link.h>.
+   Note, however, that link.h is not actually referred to in this file.
+   Instead, the relevant structs offsets were obtained from examining
+   link.h.  (We can't refer to link.h from this file because the host
+   system won't necessarily have it, or if it does, the structs which
+   it defines will refer to the host system, not the target.)  */
+
+struct link_map_offsets *
+mn10300_linux_svr4_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = 0;
+
+  if (lmp == 0)
+    {
+      lmp = &lmo;
+
+      lmo.r_debug_size = 8;	/* Actual size is 20, but this is all we
+                                   need. */
+
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      lmo.link_map_size = 20;	/* Might be larger, but this is all we
+                                   need. */
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
+    }
+
+    return lmp;
+}
+
 /* AM33 Linux osabi has been recognized.
    Now's our chance to register our corefile handling.  */
 
@@ -475,6 +519,8 @@ am33_linux_init_osabi (struct gdbarch_info gdbinfo, struct gdbarch *gdbarch)
 {
   set_gdbarch_regset_from_core_section (gdbarch, 
 					am33_regset_from_core_section);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, mn10300_linux_svr4_fetch_link_map_offsets);
 }
 
 void
