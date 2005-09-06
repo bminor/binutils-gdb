@@ -42,10 +42,11 @@ encode_thumb32_immediate:
 	orr	r0, r1, #0xa5 << 1
 
 add_sub:
-	adds	r0, r0, #0	@ format 1
+	@ Should be format 1, Some have equivalent format 2 encodings
+	adds	r0, r0, #0
 	adds	r5, r0, #0
 	adds	r0, r5, #0
-	adds	r0, r0, #5
+	adds	r0, r2, #5
 
 	adds	r0, #129	@ format 2
 	adds	r0, r0, #129
@@ -83,6 +84,10 @@ add_sub:
 	add.w	r9, r0, #0
 	add.w	r0, r9, #0
 	add.w	r0, r0, #129
+	adds	r5, r3, #0x10000
+	add	r0, sp, #1
+	add	r9, sp, #0
+	add.w	sp, sp, #4
 
 	add.w	r0, r0, r0	@ T32 format 2
 	adds.w	r0, r0, r0
@@ -102,7 +107,7 @@ add_sub:
 	subs	r0, r0, #0	@ format 1
 	subs	r5, r0, #0
 	subs	r0, r5, #0
-	subs	r0, r0, #5
+	subs	r0, r2, #5
 
 	subs	r0, r0, #129
 	subs	r5, #8
@@ -118,6 +123,11 @@ add_sub:
 	subs	r8, r0		@ T32 format 2
 	subs	r0, r8
 	subs	r0, #260	@ T32 format 1
+	subs.w	r1, r2, #4
+	subs	r5, r3, #0x10000
+	sub	r1, sp, #4
+	sub	r9, sp, #0
+	sub.w	sp, sp, #4
 
 arit3:
 	.macro arit3 op ops opw opsw
@@ -197,27 +207,27 @@ branches:
 	@ bl, blx have no short form.
 	.balign 4
 1:
-	bra	beq
-	bra	bne
-	bra	bcs
-	bra	bhs
-	bra	bcc
-	bra	bul
-	bra	blo
-	bra	bmi
-	bra	bpl
-	bra	bvs
-	bra	bvc
-	bra	bhi
-	bra	bls
-	bra	bvc
-	bra	bhi
-	bra	bls
-	bra	bge
-	bra	blt
-	bra	bgt
-	bra	ble
-	bra	b
+	bra	beq.w
+	bra	bne.w
+	bra	bcs.w
+	bra	bhs.w
+	bra	bcc.w
+	bra	bul.w
+	bra	blo.w
+	bra	bmi.w
+	bra	bpl.w
+	bra	bvs.w
+	bra	bvc.w
+	bra	bhi.w
+	bra	bls.w
+	bra	bvc.w
+	bra	bhi.w
+	bra	bls.w
+	bra	bge.w
+	bra	blt.w
+	bra	bgt.w
+	bra	ble.w
+	bra	b.w
 	bra	bl
 	bra	blx
 	.balign 4
@@ -347,30 +357,7 @@ it:
 	it3 ne eq e e e
 
 ldst:
-	.macro	ls op
-	\op	r1, [r5]
-	\op	r1, [r5, #0x330]
-	\op	r1, [r5, #-0x30]
-	\op	r1, [r5], #0x30
-	\op	r1, [r5], #-0x30
-	\op	r1, [r5, #0x30]!
-	\op	r1, [r5, #-0x30]!
-	\op	r1, [r5, r4]
-	\op	r1, [r9, ip]
-	\op	r1, 1f
-	\op	r1, 1b
-	.endm
 1:
-	ls	ldrb
-	ls	ldrsb
-	ls	ldrh
-	ls	ldrsh
-	ls	ldr
-1:
-	ls	strb
-	ls	strh
-	ls	str
-
 	pld	[r5]
 	pld	[r5, #0x330]
 	pld	[r5, #-0x30]
@@ -401,8 +388,6 @@ ldst:
 	ldrsht	r1, [r5, #0x30]
 	ldrt	r1, [r5]
 	ldrt	r1, [r5, #0x30]
-
-	.purgem ls
 
 ldxstx:
 	ldrexb	r1, [r4]
@@ -454,8 +439,8 @@ tst_teq_cmp_cmn_mov_mvn:
 	\opw	r0, r0
 	\ops	r9, r0
 	\opsw	r0, r9
-	\op	r0, #129
-	\op	r5, #129
+	\opw	r0, #129
+	\opw	r5, #129
 	.endm
 
 	mt	tst tsts tst.w tsts.w

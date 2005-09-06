@@ -79,7 +79,9 @@ struct fix;
 
 #define TC_FORCE_RELOCATION(FIX) arm_force_relocation (FIX)
 
-#define md_convert_frag(b, s, f) { as_fatal (_("arm convert_frag\n")); }
+#define md_relax_frag(segment, fragp, stretch) \
+  arm_relax_frag(segment, fragp, stretch)
+extern int arm_relax_frag (asection *, struct frag *, long);
 
 #define md_cleanup() arm_cleanup ()
 

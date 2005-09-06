@@ -213,6 +213,9 @@ struct arm_it
   int		size;
   int		size_req;
   int		cond;
+  /* Set to the opcode if the instruction needs relaxation.
+     Zero if the instruction is not relaxed.  */
+  unsigned long	relax;
   struct
   {
     bfd_reloc_code_real_type type;
@@ -5759,17 +5762,24 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
    encodings (the latter only in post-V6T2 cores).  The index is the
    value used in the insns table below.  When there is more than one
    possible 16-bit encoding for the instruction, this table always
-   holds variant (1).  */
+   holds variant (1).
+   Also contains several pseudo-instructions used during relaxation.  */
 #define T16_32_TAB				\
   X(adc,   4140, eb400000),			\
   X(adcs,  4140, eb500000),			\
   X(add,   1c00, eb000000),			\
   X(adds,  1c00, eb100000),			\
+  X(addi,  0000, f1000000),			\
+  X(addis, 0000, f1100000),			\
+  X(add_pc,000f, f20f0000),			\
+  X(add_sp,000d, f10d0000),			\
   X(adr,   000f, f20f0000),			\
   X(and,   4000, ea000000),			\
   X(ands,  4000, ea100000),			\
   X(asr,   1000, fa40f000),			\
   X(asrs,  1000, fa50f000),			\
+  X(b,     e000, f000b000),			\
+  X(bcond, d000, f0008000),			\
   X(bic,   4380, ea200000),			\
   X(bics,  4380, ea300000),			\
   X(cmn,   42c0, eb100f00),			\
@@ -5777,14 +5787,19 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(cpsie, b660, f3af8400),			\
   X(cpsid, b670, f3af8600),			\
   X(cpy,   4600, ea4f0000),			\
+  X(dec_sp,80dd, f1bd0d00),			\
   X(eor,   4040, ea800000),			\
   X(eors,  4040, ea900000),			\
+  X(inc_sp,00dd, f10d0d00),			\
   X(ldmia, c800, e8900000),			\
   X(ldr,   6800, f8500000),			\
   X(ldrb,  7800, f8100000),			\
   X(ldrh,  8800, f8300000),			\
   X(ldrsb, 5600, f9100000),			\
   X(ldrsh, 5e00, f9300000),			\
+  X(ldr_pc,4800, f85f0000),			\
+  X(ldr_pc2,4800, f85f0000),			\
+  X(ldr_sp,9800, f85d0000),			\
   X(lsl,   0000, fa00f000),			\
   X(lsls,  0000, fa10f000),			\
   X(lsr,   0800, fa20f000),			\
@@ -5812,8 +5827,11 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(str,   6000, f8400000),			\
   X(strb,  7000, f8000000),			\
   X(strh,  8000, f8200000),			\
+  X(str_sp,9000, f84d0000),			\
   X(sub,   1e00, eba00000),			\
   X(subs,  1e00, ebb00000),			\
+  X(subi,  8000, f1a00000),			\
+  X(subis, 8000, f1b00000),			\
   X(sxtb,  b240, fa4ff080),			\
   X(sxth,  b200, fa0ff080),			\
   X(tst,   4200, ea100f00),			\
@@ -5875,17 +5893,61 @@ do_t_add_sub (void)
 
   if (unified_syntax)
     {
+      bfd_boolean flags;
+      bfd_boolean narrow;
+      int opcode;
+
+      flags = (inst.instruction == T_MNEM_adds
+	       || inst.instruction == T_MNEM_subs);
+      if (flags)
+	narrow = (current_it_mask == 0);
+      else
+	narrow = (current_it_mask != 0);
       if (!inst.operands[2].isreg)
 	{
-	  /* ??? Convert large immediates to addw/subw.  */
-	  /* ??? 16-bit adds with small immediates.  */
-	  /* For an immediate, we always generate a 32-bit opcode;
-	     section relaxation will shrink it later if possible.  */
-	  inst.instruction = THUMB_OP32 (inst.instruction);
-	  inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
-	  inst.instruction |= inst.operands[0].reg << 8;
-	  inst.instruction |= inst.operands[1].reg << 16;
-	  inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	  opcode = 0;
+	  if (inst.size_req != 4)
+	    {
+	      int add;
+
+	      add = (inst.instruction == T_MNEM_add
+		     || inst.instruction == T_MNEM_adds);
+	      /* Attempt to use a narrow opcode, with relaxation if
+	         appropriate.  */
+	      if (Rd == REG_SP && Rs == REG_SP && !flags)
+		opcode = add ? T_MNEM_inc_sp : T_MNEM_dec_sp;
+	      else if (Rd <= 7 && Rs == REG_SP && add && !flags)
+		opcode = T_MNEM_add_sp;
+	      else if (Rd <= 7 && Rs == REG_PC && add && !flags)
+		opcode = T_MNEM_add_pc;
+	      else if (Rd <= 7 && Rs <= 7 && narrow)
+		{
+		  if (flags)
+		    opcode = add ? T_MNEM_addis : T_MNEM_subis;
+		  else
+		    opcode = add ? T_MNEM_addi : T_MNEM_subi;
+		}
+	      if (opcode)
+		{
+		  inst.instruction = THUMB_OP16(opcode);
+		  inst.instruction |= (Rd << 4) | Rs;
+		  inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
+		  if (inst.size_req != 2)
+		    inst.relax = opcode;
+		}
+	      else
+		constraint (inst.size_req == 2, BAD_HIREG);
+	    }
+	  if (inst.size_req == 4
+	      || (inst.size_req != 2 && !opcode))
+	    {
+	      /* ??? Convert large immediates to addw/subw.  */
+	      inst.instruction = THUMB_OP32 (inst.instruction);
+	      inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
+	      inst.instruction |= inst.operands[0].reg << 8;
+	      inst.instruction |= inst.operands[1].reg << 16;
+	      inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	    }
 	}
       else
 	{
@@ -5893,13 +5955,6 @@ do_t_add_sub (void)
 	  /* See if we can do this with a 16-bit instruction.  */
 	  if (!inst.operands[2].shifted && inst.size_req != 4)
 	    {
-	      bfd_boolean narrow;
-
-	      if (inst.instruction == T_MNEM_adds
-		  || inst.instruction == T_MNEM_subs)
-		narrow = (current_it_mask == 0);
-	      else
-		narrow = (current_it_mask != 0);
 	      if (Rd > 7 || Rs > 7 || Rn > 7)
 		narrow = FALSE;
 
@@ -5992,10 +6047,16 @@ do_t_add_sub (void)
 static void
 do_t_adr (void)
 {
-  if (unified_syntax && inst.size_req != 2)
+  if (unified_syntax && inst.size_req == 0 && inst.operands[0].reg <= 7)
     {
-      /* Always generate a 32-bit opcode;
-	 section relaxation will shrink it later if possible.  */
+      /* Defer to section relaxation.  */
+      inst.relax = inst.instruction;
+      inst.instruction = THUMB_OP16 (inst.instruction);
+      inst.instruction |= inst.operands[0].reg << 4;
+    }
+  else if (unified_syntax && inst.size_req != 2)
+    {
+      /* Generate a 32-bit opcode.  */
       inst.instruction = THUMB_OP32 (inst.instruction);
       inst.instruction |= inst.operands[0].reg << 8;
       inst.reloc.type = BFD_RELOC_ARM_T32_ADD_PC12;
@@ -6003,6 +6064,7 @@ do_t_adr (void)
     }
   else
     {
+      /* Generate a 16-bit opcode.  */
       inst.instruction = THUMB_OP16 (inst.instruction);
       inst.reloc.type = BFD_RELOC_ARM_THUMB_ADD;
       inst.reloc.exp.X_add_number -= 4; /* PC relative adjust.  */
@@ -6266,29 +6328,37 @@ do_t_blx (void)
 static void
 do_t_branch (void)
 {
-  if (unified_syntax && inst.size_req != 2)
+  int opcode;
+  if (inst.cond != COND_ALWAYS)
+    opcode = T_MNEM_bcond;
+  else
+    opcode = inst.instruction;
+
+  if (unified_syntax && inst.size_req == 4)
     {
+      inst.instruction = THUMB_OP32(opcode);
       if (inst.cond == COND_ALWAYS)
-	{
-	  inst.instruction = 0xf000b000;
-	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH25;
-	}
+	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH25;
       else
 	{
 	  assert (inst.cond != 0xF);
-	  inst.instruction = (inst.cond << 22) | 0xf0008000;
+	  inst.instruction |= inst.cond << 22;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH20;
 	}
     }
   else
     {
+      inst.instruction = THUMB_OP16(opcode);
       if (inst.cond == COND_ALWAYS)
 	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH12;
       else
 	{
-	  inst.instruction = 0xd000 | (inst.cond << 8);
+	  inst.instruction |= inst.cond << 8;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH9;
 	}
+      /* Allow section relaxation.  */
+      if (unified_syntax && inst.size_req != 2)
+	inst.relax = opcode;
     }
 
   inst.reloc.pc_rel = 1;
@@ -6562,21 +6632,67 @@ do_t_ldrexd (void)
 static void
 do_t_ldst (void)
 {
+  unsigned long opcode;
+  int Rn;
+
+  opcode = inst.instruction;
   if (unified_syntax)
     {
-      /* Generation of 16-bit instructions for anything other than
-	 Rd, [Rn, Ri] is deferred to section relaxation time.  */
-      if (inst.operands[1].isreg && inst.operands[1].immisreg
+      if (inst.operands[1].isreg
+	  && !inst.operands[1].writeback
 	  && !inst.operands[1].shifted && !inst.operands[1].postind
 	  && !inst.operands[1].negative && inst.operands[0].reg <= 7
-	  && inst.operands[1].reg <= 7 && inst.operands[1].imm <= 7
-	  && inst.instruction <= 0xffff)
+	  && opcode <= 0xffff
+	  && inst.size_req != 4)
 	{
-	  inst.instruction = THUMB_OP16 (inst.instruction);
-	  goto op16;
+	  /* Insn may have a 16-bit form.  */
+	  Rn = inst.operands[1].reg;
+	  if (inst.operands[1].immisreg)
+	    {
+	      inst.instruction = THUMB_OP16 (opcode);
+	      /* [Rn, Ri] */
+	      if (Rn <= 7 && inst.operands[1].imm <= 7)
+		goto op16;
+	    }
+	  else if ((Rn <= 7 && opcode != T_MNEM_ldrsh
+		    && opcode != T_MNEM_ldrsb)
+		   || ((Rn == REG_PC || Rn == REG_SP) && opcode == T_MNEM_ldr)
+		   || (Rn == REG_SP && opcode == T_MNEM_str))
+	    {
+	      /* [Rn, #const] */
+	      if (Rn > 7)
+		{
+		  if (Rn == REG_PC)
+		    {
+		      if (inst.reloc.pc_rel)
+			opcode = T_MNEM_ldr_pc2;
+		      else
+			opcode = T_MNEM_ldr_pc;
+		    }
+		  else
+		    {
+		      if (opcode == T_MNEM_ldr)
+			opcode = T_MNEM_ldr_sp;
+		      else
+			opcode = T_MNEM_str_sp;
+		    }
+		  inst.instruction = inst.operands[0].reg << 8;
+		}
+	      else
+		{
+		  inst.instruction = inst.operands[0].reg;
+		  inst.instruction |= inst.operands[1].reg << 3;
+		}
+	      inst.instruction |= THUMB_OP16 (opcode);
+	      if (inst.size_req == 2)
+		inst.reloc.type = BFD_RELOC_ARM_THUMB_OFFSET;
+	      else
+		inst.relax = opcode;
+	      return;
+	    }
 	}
-
-      inst.instruction = THUMB_OP32 (inst.instruction);
+      /* Definitely a 32-bit variant.  */
+      inst.instruction = THUMB_OP32 (opcode);
       inst.instruction |= inst.operands[0].reg << 12;
       encode_thumb32_addr_mode (1, /*is_t=*/FALSE, /*is_d=*/FALSE);
       return;
@@ -6708,26 +6824,41 @@ do_t_mov_cmp (void)
     {
       int r0off = (inst.instruction == T_MNEM_mov
 		   || inst.instruction == T_MNEM_movs) ? 8 : 16;
+      unsigned long opcode;
       bfd_boolean narrow;
       bfd_boolean low_regs;
 
       low_regs = (inst.operands[0].reg <= 7 && inst.operands[1].reg <= 7);
+      opcode = inst.instruction;
       if (current_it_mask)
-	narrow = inst.instruction != T_MNEM_movs;
+	narrow = opcode != T_MNEM_movs;
       else
-	narrow = inst.instruction != T_MNEM_movs || low_regs;
+	narrow = opcode != T_MNEM_movs || low_regs;
       if (inst.size_req == 4
 	  || inst.operands[1].shifted)
 	narrow = FALSE;
 
       if (!inst.operands[1].isreg)
 	{
-	  /* For an immediate, we always generate a 32-bit opcode;
-	     section relaxation will shrink it later if possible.  */
-	  inst.instruction = THUMB_OP32 (inst.instruction);
-	  inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
-	  inst.instruction |= inst.operands[0].reg << r0off;
-	  inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	  /* Immediate operand.  */
+	  if (current_it_mask == 0 && opcode == T_MNEM_mov)
+	    narrow = 0;
+	  if (low_regs && narrow)
+	    {
+	      inst.instruction = THUMB_OP16 (opcode);
+	      inst.instruction |= inst.operands[0].reg << 8;
+	      if (inst.size_req == 2)
+		inst.reloc.type = BFD_RELOC_ARM_THUMB_IMM;
+	      else
+		inst.relax = opcode;
+	    }
+	  else
+	    {
+	      inst.instruction = THUMB_OP32 (inst.instruction);
+	      inst.instruction = (inst.instruction & 0xe1ffffff) | 0x10000000;
+	      inst.instruction |= inst.operands[0].reg << r0off;
+	      inst.reloc.type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	    }
 	}
       else if (!narrow)
 	{
@@ -7501,6 +7632,46 @@ fix_new_arm (fragS *	   frag,
   new_fix->tc_fix_data = thumb_mode;
 }
 
+/* Create a frg for an instruction requiring relaxation.  */
+static void
+output_relax_insn (void)
+{
+  char * to;
+  symbolS *sym;
+  int offset;
+
+  switch (inst.reloc.exp.X_op)
+    {
+    case O_symbol:
+      sym = inst.reloc.exp.X_add_symbol;
+      offset = inst.reloc.exp.X_add_number;
+      break;
+    case O_constant:
+      sym = NULL;
+      offset = inst.reloc.exp.X_add_number;
+      break;
+    default:
+      sym = make_expr_symbol (&inst.reloc.exp);
+      offset = 0;
+      break;
+  }
+  to = frag_var (rs_machine_dependent, INSN_SIZE, THUMB_SIZE,
+		 inst.relax, sym, offset, NULL/*offset, opcode*/);
+  md_number_to_chars (to, inst.instruction, THUMB_SIZE);
+
+#ifdef OBJ_ELF
+  dwarf2_emit_insn (INSN_SIZE);
+#endif
+}
+
+/* Write a 32-bit thumb instruction to buf.  */
+static void
+put_thumb32_insn (char * buf, unsigned long insn)
+{
+  md_number_to_chars (buf, insn >> 16, THUMB_SIZE);
+  md_number_to_chars (buf + THUMB_SIZE, insn, THUMB_SIZE);
+}
+
 static void
 output_inst (const char * str)
 {
@@ -7511,6 +7682,10 @@ output_inst (const char * str)
       as_bad ("%s -- `%s'", inst.error, str);
       return;
     }
+  if (inst.relax) {
+      output_relax_insn();
+      return;
+  }
   if (inst.size == 0)
     return;
 
@@ -7519,8 +7694,7 @@ output_inst (const char * str)
   if (thumb_mode && (inst.size > THUMB_SIZE))
     {
       assert (inst.size == (2 * THUMB_SIZE));
-      md_number_to_chars (to, inst.instruction >> 16, THUMB_SIZE);
-      md_number_to_chars (to + THUMB_SIZE, inst.instruction, THUMB_SIZE);
+      put_thumb32_insn (to, inst.instruction);
     }
   else if (inst.size > INSN_SIZE)
     {
@@ -7819,7 +7993,7 @@ md_assemble (char *str)
       if (current_it_mask == 0x10)
 	current_it_mask = 0;
 
-      if (!inst.error)
+      if (!(inst.error || inst.relax))
 	{
 	  assert (inst.instruction < 0xe800 || inst.instruction > 0xffff);
 	  inst.size = (inst.instruction > 0xffff ? 4 : 2);
@@ -8364,7 +8538,7 @@ static const struct asm_opcode insns[] =
  tC3(ldmfd,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
 
  TCE(swi,	f000000, df00,     1, (EXPi),        swi, t_swi),
- TCE(b,		a000000, e000,	   1, (EXPr),	     branch, t_branch),
+ tCE(b,		a000000, b,	   1, (EXPr),	     branch, t_branch),
  TCE(bl,	b000000, f000f800, 1, (EXPr),	     branch, t_branch23),
 
   /* Pseudo ops.  */
@@ -9600,12 +9774,344 @@ md_chars_to_number (char * buf, int n)
 
 /* MD interface: Sections.  */
 
+/* Estimate the size of a frag before relaxing.  Assume everything fits in
+   2 bytes.  */
+
 int
-md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED,
+md_estimate_size_before_relax (fragS * fragp,
 			       segT    segtype ATTRIBUTE_UNUSED)
 {
-  as_fatal (_("md_estimate_size_before_relax\n"));
-  return 1;
+  fragp->fr_var = 2;
+  return 2;
+}
+
+/* Convert a machine dependent frag.  */
+
+void
+md_convert_frag (bfd *abfd, segT asec ATTRIBUTE_UNUSED, fragS *fragp)
+{
+  unsigned long insn;
+  unsigned long old_op;
+  char *buf;
+  expressionS exp;
+  fixS *fixp;
+  int reloc_type;
+  int pc_rel;
+  int opcode;
+
+  buf = fragp->fr_literal + fragp->fr_fix;
+
+  old_op = bfd_get_16(abfd, buf);
+  if (fragp->fr_symbol) {
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = fragp->fr_symbol;
+  } else {
+      exp.X_op = O_constant;
+  }
+  exp.X_add_number = fragp->fr_offset;
+  opcode = fragp->fr_subtype;
+  switch (opcode)
+    {
+    case T_MNEM_ldr_pc:
+    case T_MNEM_ldr_pc2:
+    case T_MNEM_ldr_sp:
+    case T_MNEM_str_sp:
+    case T_MNEM_ldr:
+    case T_MNEM_ldrb:
+    case T_MNEM_ldrh:
+    case T_MNEM_str:
+    case T_MNEM_strb:
+    case T_MNEM_strh:
+      if (fragp->fr_var == 4)
+	{
+	  insn = THUMB_OP32(opcode);
+	  if ((old_op >> 12) == 4 || (old_op >> 12) == 9)
+	    {
+	      insn |= (old_op & 0x700) << 4;
+	    }
+	  else
+	    {
+	      insn |= (old_op & 7) << 12;
+	      insn |= (old_op & 0x38) << 13;
+	    }
+	  insn |= 0x00000c00;
+	  put_thumb32_insn (buf, insn);
+	  reloc_type = BFD_RELOC_ARM_T32_OFFSET_IMM;
+	}
+      else
+	{
+	  reloc_type = BFD_RELOC_ARM_THUMB_OFFSET;
+	}
+      pc_rel = (opcode == T_MNEM_ldr_pc2);
+      break;
+    case T_MNEM_adr:
+      if (fragp->fr_var == 4)
+	{
+	  insn = THUMB_OP32 (opcode);
+	  insn |= (old_op & 0xf0) << 4;
+	  put_thumb32_insn (buf, insn);
+	  reloc_type = BFD_RELOC_ARM_T32_ADD_PC12;
+	}
+      else
+	{
+	  reloc_type = BFD_RELOC_ARM_THUMB_ADD;
+	  exp.X_add_number -= 4;
+	}
+      pc_rel = 1;
+      break;
+    case T_MNEM_mov:
+    case T_MNEM_movs:
+    case T_MNEM_cmp:
+    case T_MNEM_cmn:
+      if (fragp->fr_var == 4)
+	{
+	  int r0off = (opcode == T_MNEM_mov
+		       || opcode == T_MNEM_movs) ? 0 : 8;
+	  insn = THUMB_OP32 (opcode);
+	  insn = (insn & 0xe1ffffff) | 0x10000000;
+	  insn |= (old_op & 0x700) << r0off;
+	  put_thumb32_insn (buf, insn);
+	  reloc_type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	}
+      else
+	{
+	  reloc_type = BFD_RELOC_ARM_THUMB_IMM;
+	}
+      pc_rel = 0;
+      break;
+    case T_MNEM_b:
+      if (fragp->fr_var == 4)
+	{
+	  insn = THUMB_OP32(opcode);
+	  put_thumb32_insn (buf, insn);
+	  reloc_type = BFD_RELOC_THUMB_PCREL_BRANCH25;
+	}
+      else
+	reloc_type = BFD_RELOC_THUMB_PCREL_BRANCH12;
+      pc_rel = 1;
+      break;
+    case T_MNEM_bcond:
+      if (fragp->fr_var == 4)
+	{
+	  insn = THUMB_OP32(opcode);
+	  insn |= (old_op & 0xf00) << 14;
+	  put_thumb32_insn (buf, insn);
+	  reloc_type = BFD_RELOC_THUMB_PCREL_BRANCH20;
+	}
+      else
+	reloc_type = BFD_RELOC_THUMB_PCREL_BRANCH9;
+      pc_rel = 1;
+      break;
+    case T_MNEM_add_sp:
+    case T_MNEM_add_pc:
+    case T_MNEM_inc_sp:
+    case T_MNEM_dec_sp:
+      if (fragp->fr_var == 4)
+	{
+	  /* ??? Choose between add and addw.  */
+	  insn = THUMB_OP32 (opcode);
+	  insn |= (old_op & 0xf0) << 4;
+	  put_thumb32_insn (buf, insn);
+	  reloc_type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	}
+      else
+	reloc_type = BFD_RELOC_ARM_THUMB_ADD;
+      pc_rel = 0;
+      break;
+
+    case T_MNEM_addi:
+    case T_MNEM_addis:
+    case T_MNEM_subi:
+    case T_MNEM_subis:
+      if (fragp->fr_var == 4)
+	{
+	  insn = THUMB_OP32 (opcode);
+	  insn |= (old_op & 0xf0) << 4;
+	  insn |= (old_op & 0xf) << 16;
+	  put_thumb32_insn (buf, insn);
+	  reloc_type = BFD_RELOC_ARM_T32_IMMEDIATE;
+	}
+      else
+	reloc_type = BFD_RELOC_ARM_THUMB_ADD;
+      pc_rel = 0;
+      break;
+    default:
+      abort();
+    }
+  fixp = fix_new_exp (fragp, fragp->fr_fix, fragp->fr_var, &exp, pc_rel,
+		      reloc_type);
+  fixp->fx_file = fragp->fr_file;
+  fixp->fx_line = fragp->fr_line;
+  fragp->fr_fix += fragp->fr_var;
+}
+
+/* Return the size of a relaxable immediate operand instruction.
+   SHIFT and SIZE specify the form of the allowable immediate.  */
+static int
+relax_immediate (fragS *fragp, int size, int shift)
+{
+  offsetT offset;
+  offsetT mask;
+  offsetT low;
+
+  /* ??? Should be able to do better than this.  */
+  if (fragp->fr_symbol)
+    return 4;
+
+  low = (1 << shift) - 1;
+  mask = (1 << (shift + size)) - (1 << shift);
+  offset = fragp->fr_offset;
+  /* Force misaligned offsets to 32-bit variant.  */
+  if (offset & low)
+    return -4;
+  if (offset & ~mask)
+    return 4;
+  return 2;
+}
+
+/* Return the size of a relaxable adr pseudo-instruction or PC-relative
+   load.  */
+static int
+relax_adr (fragS *fragp, asection *sec)
+{
+  addressT addr;
+  offsetT val;
+
+  /* Assume worst case for symbols not known to be in the same section.  */
+  if (!S_IS_DEFINED(fragp->fr_symbol)
+      || sec != S_GET_SEGMENT (fragp->fr_symbol))
+    return 4;
+
+  val = S_GET_VALUE(fragp->fr_symbol) + fragp->fr_offset;
+  addr = fragp->fr_address + fragp->fr_fix;
+  addr = (addr + 4) & ~3;
+  /* Fix the insn as the 4-byte version if the target address is not
+     sufficiently aligned.  This is prevents an infinite loop when two
+     instructions have contradictory range/alignment requirements.  */
+  if (val & 3)
+    return -4;
+  val -= addr;
+  if (val < 0 || val > 1020)
+    return 4;
+  return 2;
+}
+
+/* Return the size of a relaxable add/sub immediate instruction.  */
+static int
+relax_addsub (fragS *fragp, asection *sec)
+{
+  char *buf;
+  int op;
+
+  buf = fragp->fr_literal + fragp->fr_fix;
+  op = bfd_get_16(sec->owner, buf);
+  if ((op & 0xf) == ((op >> 4) & 0xf))
+    return relax_immediate (fragp, 8, 0);
+  else
+    return relax_immediate (fragp, 3, 0);
+}
+
+
+/* Return the size of a relaxable branch instruction.  BITS is the
+   size of the offset field in the narrow instruction.  */
+
+static int
+relax_branch (fragS *fragp, asection *sec, int bits)
+{
+  addressT addr;
+  offsetT val;
+  offsetT limit;
+
+  /* Assume worst case for symbols not known to be in the same section.  */
+  if (!S_IS_DEFINED(fragp->fr_symbol)
+      || sec != S_GET_SEGMENT (fragp->fr_symbol))
+    return 4;
+
+  val = S_GET_VALUE(fragp->fr_symbol) + fragp->fr_offset;
+  addr = fragp->fr_address + fragp->fr_fix + 4;
+  val -= addr;
+
+  /* Offset is a signed value *2 */
+  limit = 1 << bits;
+  if (val >= limit || val < -limit)
+    return 4;
+  return 2;
+}
+
+
+/* Relax a machine dependent frag.  This returns the amount by which
+   the current size of the frag should change.  */
+
+int
+arm_relax_frag (asection *sec, fragS *fragp, long stretch ATTRIBUTE_UNUSED)
+{
+  int oldsize;
+  int newsize;
+
+  oldsize = fragp->fr_var;
+  switch (fragp->fr_subtype)
+    {
+    case T_MNEM_ldr_pc2:
+      newsize = relax_adr(fragp, sec);
+      break;
+    case T_MNEM_ldr_pc:
+    case T_MNEM_ldr_sp:
+    case T_MNEM_str_sp:
+      newsize = relax_immediate(fragp, 8, 2);
+      break;
+    case T_MNEM_ldr:
+    case T_MNEM_str:
+      newsize = relax_immediate(fragp, 5, 2);
+      break;
+    case T_MNEM_ldrh:
+    case T_MNEM_strh:
+      newsize = relax_immediate(fragp, 5, 1);
+      break;
+    case T_MNEM_ldrb:
+    case T_MNEM_strb:
+      newsize = relax_immediate(fragp, 5, 0);
+      break;
+    case T_MNEM_adr:
+      newsize = relax_adr(fragp, sec);
+      break;
+    case T_MNEM_mov:
+    case T_MNEM_movs:
+    case T_MNEM_cmp:
+    case T_MNEM_cmn:
+      newsize = relax_immediate(fragp, 8, 0);
+      break;
+    case T_MNEM_b:
+      newsize = relax_branch(fragp, sec, 11);
+      break;
+    case T_MNEM_bcond:
+      newsize = relax_branch(fragp, sec, 8);
+      break;
+    case T_MNEM_add_sp:
+    case T_MNEM_add_pc:
+      newsize = relax_immediate (fragp, 8, 2);
+      break;
+    case T_MNEM_inc_sp:
+    case T_MNEM_dec_sp:
+      newsize = relax_immediate (fragp, 7, 2);
+      break;
+    case T_MNEM_addi:
+    case T_MNEM_addis:
+    case T_MNEM_subi:
+    case T_MNEM_subis:
+      newsize = relax_addsub (fragp, sec);
+      break;
+    default:
+      abort();
+    }
+  if (newsize < 0)
+    {
+      fragp->fr_var = -newsize;
+      md_convert_frag (sec->owner, sec, fragp);
+      frag_wane(fragp);
+      return -(newsize + oldsize);
+    }
+  fragp->fr_var = newsize;
+  return newsize - oldsize;
 }
 
 /* Round up a section size to the appropriate boundary.	 */
@@ -11476,7 +11982,10 @@ arm_force_relocation (struct fix * fixp)
   /* Resolve these relocations even if the symbol is extern or weak.  */
   if (fixp->fx_r_type == BFD_RELOC_ARM_IMMEDIATE
       || fixp->fx_r_type == BFD_RELOC_ARM_OFFSET_IMM
-      || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
+      || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE
+      || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE
+      || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMM12
+      || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_PC12)
     return 0;
 
   return generic_force_reloc (fixp);

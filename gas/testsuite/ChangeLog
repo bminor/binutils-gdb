@@ -1,3 +1,11 @@
+2005-09-06  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_relax.d: New test.
+	* gas/arm/thumb2_relax.s: New test.
+	* gas/arm/thumb32.d: Adjust expected results to include relaxation.
+	* gas/arm/thumb32.s: Tweak for better coverage of relaxable
+	instructions.  Remove load/store tests.
+
 2005-09-02  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/arm3-bad.s: New test.

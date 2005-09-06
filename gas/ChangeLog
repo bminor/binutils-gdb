@@ -1,3 +1,24 @@
+2005-09-06  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_it): Add relax field.
+	(T16_32_TAB): Add addi, addis, add_pc, add_sp, dec_sp, inc_sp,
+	b, bcond, ldr_pc, ldr_pc2, ldr_sp, str_sp, subi, subis.
+	(do_t_add_sub, do_t_addr, do_t_branch, do_t_ldst,
+	do_t_mov_cmp): Allow relaxation.
+	(output_relax_insn): New function.
+	(put_thumb32_insn): New function.
+	(output_inst): Use new functions.
+	(md_assemble): Don't throw error on relaxable instructions.
+	(insns): Change "b" entry from TCE(...) to tCE(...).
+	(md_estimate_size_before_relax): Return 2.
+	(md_convert_frag, relax_immediate, relax_adr, relax_addsub,
+	relax_branch, arm_relax_frag): New functions.
+	(arm_force_relocation): Return 0 for Thumb-2 immediate operand
+	relocations.
+	* config/tc-arm.h (md_convert_frag): Remove definition.
+	(md_relax_frag): Define.
+	(arm_relax_frag): Add prototype.
+
 2005-09-02  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_rn_rd): Enforce SWP operand constraints.
