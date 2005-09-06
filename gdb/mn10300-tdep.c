@@ -554,8 +554,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
 #if 0
   /* Get the next two bytes into buf, we need two because rets is a two
      byte insn and the first isn't enough to uniquely identify it.  */
-  status = deprecated_read_memory_nobpt (pc, buf, 2);
-  if (status != 0)
+  if (!safe_frame_unwind_memory (fi, pc, buf, 2))
     return pc;
 
   /* Note: kevinb/2003-07-16: We shouldn't be making these sorts of
@@ -596,8 +595,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
   addr = func_addr;
 
   /* Suck in two bytes.  */
-  if (addr + 2 >= stop
-      || (status = deprecated_read_memory_nobpt (addr, buf, 2)) != 0)
+  if (addr + 2 >= stop || !safe_frame_unwind_memory (fi, addr, buf, 2))
     goto finish_prologue;
 
   /* First see if this insn sets the stack pointer from a register; if
@@ -627,8 +625,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
 	goto finish_prologue;
 
       /* Get the next two bytes so the prologue scan can continue.  */
-      status = deprecated_read_memory_nobpt (addr, buf, 2);
-      if (status != 0)
+      if (!safe_frame_unwind_memory (fi, addr, buf, 2))
 	goto finish_prologue;
     }
 
@@ -648,8 +645,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
 	goto finish_prologue;
 
       /* Get two more bytes so scanning can continue.  */
-      status = deprecated_read_memory_nobpt (addr, buf, 2);
-      if (status != 0)
+      if (!safe_frame_unwind_memory (fi, addr, buf, 2))
 	goto finish_prologue;
     }
 
@@ -675,8 +671,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
     {
       /* Suck in imm_size more bytes, they'll hold the size of the
          current frame.  */
-      status = deprecated_read_memory_nobpt (addr + 2, buf, imm_size);
-      if (status != 0)
+      if (!safe_frame_unwind_memory (fi, addr + 2, buf, imm_size))
 	goto finish_prologue;
 
       /* Note the size of the stack in the frame info structure.  */

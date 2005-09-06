@@ -1,3 +1,8 @@
+2005-09-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_analyze_prologue): Use
+	safe_frame_unwind_memory() in place of deprecated_read_memory_nobpt().
+
 2005-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* inf-child.c (inf_child_follow_fork): Add OPS argument.
