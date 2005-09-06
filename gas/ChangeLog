@@ -1,3 +1,26 @@
+2005-09-06  Chao-ying Fu  <fu@mips.com>
+
+	* config/tc-mips.c (mips_set_options): Add ase_mt for MT instructions.
+	(mips_opts): Add -1 to initialize ase_mt.
+	(file_ase_mt): New variable for -mmt.
+	(CPU_HAS_MT): New define.
+	(validate_mips_insn): Add supports for +t, +T, !, $, *, &, g operand
+	formats.
+	(mips_ip): Check ase_mt to enable MT instructions.
+	Handle !, $, *, &, +T, +t, g operand formats.
+	For "mftc1", "mfthc1", "cftc1", "mttc1", "mtthc1", "cttc1", we allow
+	odd float registers.
+	(OPTION_MT, OPTION_NO_MT): New define.
+	(OPTION_COMPAT_ARCH_BASE): Change because of inserting MT define.
+	(md_parse_option): Parse OPTION_MT and OPTION_NO_MT.
+	(mips_after_parse_args): Set ase_mt based on CPU.
+	(s_mipsset): Handle ".set mt" and ".set nomt".
+	(mips_elf_final_processing): Remind of adding new flag for MT ASE.
+	(md_show_usage): Show usage of -mmt and -mno-mt.
+	* doc/as.texinfo: Document -mmt and -mno-mt options.
+	* doc/c-mips.texi: Likewise, and document ".set mt" and ".set nomt"
+	directives.
+
 2005-09-06  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_it): Add relax field.

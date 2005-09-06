@@ -118,6 +118,12 @@ Generate code for the MDMX Application Specific Extension.
 This tells the assembler to accept MDMX instructions.
 @samp{-no-mdmx} turns off this option.
 
+@item -mmt
+@itemx -mno-mt
+Generate code for the MT Application Specific Extension.
+This tells the assembler to accept MT instructions.
+@samp{-mno-mt} turns off this option.
+
 @item -mfix7000
 @itemx -mno-fix7000
 Cause nops to be inserted if the read of the destination register
@@ -449,6 +455,14 @@ instructions from being accepted.
 The directive @code{.set mdmx} makes the assembler accept instructions
 from the MDMX Application Specific Extension from that point on
 in the assembly.  The @code{.set nomdmx} directive prevents MDMX
+instructions from being accepted.
+
+@cindex MIPS MT instruction generation override
+@kindex @code{.set mt}
+@kindex @code{.set nomt}
+The directive @code{.set mt} makes the assembler accept instructions
+from the MT Application Specific Extension from that point on
+in the assembly.  The @code{.set nomt} directive prevents MT
 instructions from being accepted.
 
 Traditional @sc{mips} assemblers do not support these directives.

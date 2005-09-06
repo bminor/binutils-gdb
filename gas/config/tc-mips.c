@@ -194,6 +194,7 @@ struct mips_set_options
   int ase_mips3d;
   int ase_mdmx;
   int ase_dsp;
+  int ase_mt;
   /* Whether we are assembling for the mips16 processor.  0 if we are
      not, 1 if we are, and -1 if the value has not been initialized.
      Changed by `.set mips16' and `.set nomips16', and the -mips16 and
@@ -244,7 +245,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
+  ISA_UNKNOWN, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -271,6 +272,10 @@ static int file_ase_mdmx;
 /* True if -mdsp was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_dsp;
+
+/* True if -mmt was passed or implied by arguments passed on the
+   command line (e.g., by -march).  */
+static int file_ase_mt;
 
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int file_mips_arch = CPU_UNKNOWN;
@@ -372,6 +377,10 @@ static int mips_32bitmode = 0;
 
 /* Return true if the given CPU supports the DSP ASE.  */
 #define CPU_HAS_DSP(cpu)	(FALSE                 \
+				 )
+
+/* Return true if the given CPU supports the MT ASE.  */
+#define CPU_HAS_MT(cpu)		(FALSE                 \
 				 )
 
 /* True if CPU has a dror instruction.  */
@@ -7778,6 +7787,9 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'G': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
 	  case 'H': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
 	  case 'I': break;
+	  case 't': USE_BITS (OP_MASK_RT,	OP_SH_RT);	break;
+	  case 'T': USE_BITS (OP_MASK_RT,	OP_SH_RT);
+		    USE_BITS (OP_MASK_SEL,	OP_SH_SEL);	break;
 	  default:
 	    as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
 		    c, opc->name, opc->args);
@@ -7850,6 +7862,11 @@ validate_mips_insn (const struct mips_opcode *opc)
       case '\'': USE_BITS (OP_MASK_RDDSP,	OP_SH_RDDSP);	break;
       case ':': USE_BITS (OP_MASK_DSPSFT_7,	OP_SH_DSPSFT_7);break;
       case '@': USE_BITS (OP_MASK_IMM10,	OP_SH_IMM10);	break;
+      case '!': USE_BITS (OP_MASK_MT_U,		OP_SH_MT_U);	break;
+      case '$': USE_BITS (OP_MASK_MT_H,		OP_SH_MT_H);	break;
+      case '*': USE_BITS (OP_MASK_MTACC_T,	OP_SH_MTACC_T);	break;
+      case '&': USE_BITS (OP_MASK_MTACC_D,	OP_SH_MTACC_D);	break;
+      case 'g': USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
       default:
 	as_bad (_("internal: bad mips opcode (unknown operand type `%c'): %s %s"),
 		c, opc->name, opc->args);
@@ -7948,6 +7965,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			     | (file_ase_mips16 ? INSN_MIPS16 : 0)
 	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
 	      		     | (mips_opts.ase_dsp ? INSN_DSP : 0)
+	      		     | (mips_opts.ase_mt ? INSN_MT : 0)
 			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
 			    mips_opts.arch))
 	ok = TRUE;
@@ -8169,6 +8187,60 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      s = expr_end;
 	      continue;
 
+            case '!': /* mt 1-bit unsigned immediate in bit 5 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~OP_MASK_MT_U)
+		{
+		  as_warn (_("MT immediate not in range 0..%d (%lu)"),
+			   OP_MASK_MT_U, (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_MT_U;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_MT_U;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+            case '$': /* mt 1-bit unsigned immediate in bit 4 */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~OP_MASK_MT_H)
+		{
+		  as_warn (_("MT immediate not in range 0..%d (%lu)"),
+			   OP_MASK_MT_H, (unsigned long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_MT_H;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_MT_H;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case '*': /* four dsp accumulators in bits 18,19 */ 
+	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c' &&
+		  s[3] >= '0' && s[3] <= '3')
+		{
+		  regno = s[3] - '0';
+		  s += 4;
+		  ip->insn_opcode |= regno << OP_SH_MTACC_T;
+		  continue;
+		}
+	      else
+		as_bad (_("Invalid dsp/smartmips acc register"));
+	      break;
+
+	    case '&': /* four dsp accumulators in bits 13,14 */ 
+	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c' &&
+		  s[3] >= '0' && s[3] <= '3')
+		{
+		  regno = s[3] - '0';
+		  s += 4;
+		  ip->insn_opcode |= regno << OP_SH_MTACC_D;
+		  continue;
+		}
+	      else
+		as_bad (_("Invalid dsp/smartmips acc register"));
+	      break;
+
 	    case ',':
 	      if (*s++ == *args)
 		continue;
@@ -8321,6 +8393,34 @@ do_msbd:
 		  s = expr_end;
 		  continue;
 
+		case 'T': /* Coprocessor register */
+		  /* +T is for disassembly only; never match.  */
+		  break;
+
+		case 't': /* Coprocessor register number */
+		  if (s[0] == '$' && ISDIGIT (s[1]))
+		    {
+		      ++s;
+		      regno = 0;
+		      do
+		        {
+			  regno *= 10;
+			  regno += *s - '0';
+			  ++s;
+			}
+		      while (ISDIGIT (*s));
+		      if (regno > 31)
+			as_bad (_("Invalid register number (%d)"), regno);
+		      else
+			{
+			  ip->insn_opcode |= regno << OP_SH_RT;
+			  continue;
+			}
+		    }
+		  else
+		    as_bad (_("Invalid coprocessor 0 register number"));
+		  break;
+
 		default:
 		  as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
 		    *args, insn->name, insn->args);
@@ -8455,6 +8555,7 @@ do_msbd:
 	    case 'x':		/* ignore register name */
 	    case 'z':		/* must be zero register */
 	    case 'U':           /* destination register (clo/clz).  */
+	    case 'g':		/* coprocessor destination register */
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
@@ -8579,6 +8680,7 @@ do_msbd:
 		    case 'd':
 		    case 'G':
 		    case 'K':
+		    case 'g':
 		      INSERT_OPERAND (RD, *ip, regno);
 		      break;
 		    case 'U':
@@ -8694,7 +8796,13 @@ do_msbd:
 			    || strcmp (str, "lwc1") == 0
 			    || strcmp (str, "swc1") == 0
 			    || strcmp (str, "l.s") == 0
-			    || strcmp (str, "s.s") == 0))
+			    || strcmp (str, "s.s") == 0
+			    || strcmp (str, "mftc1") == 0
+			    || strcmp (str, "mfthc1") == 0
+			    || strcmp (str, "cftc1") == 0
+			    || strcmp (str, "mttc1") == 0
+			    || strcmp (str, "mtthc1") == 0
+			    || strcmp (str, "cttc1") == 0))
 		    as_warn (_("Float register should be even, was %d"),
 			     regno);
 
@@ -10235,9 +10343,13 @@ struct option md_longopts[] =
   {"mdsp", no_argument, NULL, OPTION_DSP},
 #define OPTION_NO_DSP (OPTION_ASE_BASE + 7)
   {"mno-dsp", no_argument, NULL, OPTION_NO_DSP},
+#define OPTION_MT (OPTION_ASE_BASE + 8)
+  {"mmt", no_argument, NULL, OPTION_MT},
+#define OPTION_NO_MT (OPTION_ASE_BASE + 9)
+  {"mno-mt", no_argument, NULL, OPTION_NO_MT},
 
   /* Old-style architecture options.  Don't add more of these.  */
-#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 8)
+#define OPTION_COMPAT_ARCH_BASE (OPTION_ASE_BASE + 10)
 #define OPTION_M4650 (OPTION_COMPAT_ARCH_BASE + 0)
   {"m4650", no_argument, NULL, OPTION_M4650},
 #define OPTION_NO_M4650 (OPTION_COMPAT_ARCH_BASE + 1)
@@ -10495,6 +10607,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_DSP:
       mips_opts.ase_dsp = 0;
+      break;
+
+    case OPTION_MT:
+      mips_opts.ase_mt = 1;
+      break;
+
+    case OPTION_NO_MT:
+      mips_opts.ase_mt = 0;
       break;
 
     case OPTION_MIPS16:
@@ -10853,12 +10973,15 @@ mips_after_parse_args (void)
     mips_opts.ase_mdmx = (CPU_HAS_MDMX (file_mips_arch)) ? 1 : 0;
   if (mips_opts.ase_dsp == -1)
     mips_opts.ase_dsp = (CPU_HAS_DSP (file_mips_arch)) ? 1 : 0;
+  if (mips_opts.ase_mt == -1)
+    mips_opts.ase_mt = (CPU_HAS_MT (file_mips_arch)) ? 1 : 0;
 
   file_mips_isa = mips_opts.isa;
   file_ase_mips16 = mips_opts.mips16;
   file_ase_mips3d = mips_opts.ase_mips3d;
   file_ase_mdmx = mips_opts.ase_mdmx;
   file_ase_dsp = mips_opts.ase_dsp;
+  file_ase_mt = mips_opts.ase_mt;
   mips_opts.gp32 = file_mips_gp32;
   mips_opts.fp32 = file_mips_fp32;
 
@@ -11800,6 +11923,10 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     mips_opts.ase_dsp = 1;
   else if (strcmp (name, "nodsp") == 0)
     mips_opts.ase_dsp = 0;
+  else if (strcmp (name, "mt") == 0)
+    mips_opts.ase_mt = 1;
+  else if (strcmp (name, "nomt") == 0)
+    mips_opts.ase_mt = 0;
   else if (strncmp (name, "mips", 4) == 0 || strncmp (name, "arch=", 5) == 0)
     {
       int reset = 0;
@@ -13536,6 +13663,8 @@ mips_elf_final_processing (void)
   /* Set MIPS ELF flags for ASEs.  */
   /* We may need to define a new flag for DSP ASE, and set this flag when
      file_ase_dsp is true.  */
+  /* We may need to define a new flag for MT ASE, and set this flag when
+     file_ase_mt is true.  */
   if (file_ase_mips16)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ARCH_ASE_M16;
 #if 0 /* XXX FIXME */
@@ -14242,6 +14371,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mdsp			generate DSP instructions\n\
 -mno-dsp		do not generate DSP instructions\n"));
+  fprintf (stream, _("\
+-mmt			generate MT instructions\n\
+-mno-mt			do not generate MT instructions\n"));
   fprintf (stream, _("\
 -mfix-vr4120		work around certain VR4120 errata\n\
 -mfix-vr4130		work around VR4130 mflo/mfhi errata\n\
