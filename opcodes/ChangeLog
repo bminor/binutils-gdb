@@ -1,3 +1,13 @@
+2005-09-06  Chao-ying Fu  <fu@mips.com>
+
+	* mips-opc.c (MT32): New define.
+	(mips_builtin_opcodes): Move "bc0f", "bc0fl", "bc0t", "bc0tl" to the
+	bottom to avoid opcode collision with "mftr" and "mttr".
+	Add MT instructions.
+	* mips-dis.c (mips_arch_choices): Enable INSN_MT for mips32r2.
+	(print_insn_args): Add supports for +t, +T, !, $, *, &, g operand
+	formats.
+
 2005-09-02  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (coprocessor_opcodes): Add null terminator.

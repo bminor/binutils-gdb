@@ -376,7 +376,7 @@ const struct mips_arch_choice mips_arch_choices[] =
     mips_hwr_names_numeric },
 
   { "mips32r2",	1, bfd_mach_mipsisa32r2, CPU_MIPS32R2,
-    ISA_MIPS32R2 | INSN_MIPS16 | INSN_DSP,
+    ISA_MIPS32R2 | INSN_MIPS16 | INSN_DSP | INSN_MT,
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -771,6 +771,34 @@ print_insn_args (const char *d,
 	      (*info->fprintf_func) (info->stream, "0x%x", msbd + 1);
 	      break;
 
+	    case 't': /* Coprocessor 0 reg name */
+	      (*info->fprintf_func) (info->stream, "%s",
+				     mips_cp0_names[(l >> OP_SH_RT) &
+						     OP_MASK_RT]);
+	      break;
+
+	    case 'T': /* Coprocessor 0 reg name */
+	      {
+		const struct mips_cp0sel_name *n;
+		unsigned int cp0reg, sel;
+
+		cp0reg = (l >> OP_SH_RT) & OP_MASK_RT;
+		sel = (l >> OP_SH_SEL) & OP_MASK_SEL;
+
+		/* CP0 register including 'sel' code for mftc0, to be
+		   printed textually if known.  If not known, print both
+		   CP0 register name and sel numerically since CP0 register
+		   with sel 0 may have a name unrelated to register being
+		   printed.  */
+		n = lookup_mips_cp0sel_name(mips_cp0sel_names,
+					    mips_cp0sel_names_len, cp0reg, sel);
+		if (n != NULL)
+		  (*info->fprintf_func) (info->stream, "%s", n->name);
+		else
+		  (*info->fprintf_func) (info->stream, "$%d,%d", cp0reg, sel);
+		break;
+	      }
+
 	    default:
 	      /* xgettext:c-format */
 	      (*info->fprintf_func) (info->stream,
@@ -839,6 +867,32 @@ print_insn_args (const char *d,
 	  if (delta & 0x200) /* test sign bit */
 	    delta |= ~OP_MASK_IMM10;
 	  (*info->fprintf_func) (info->stream, "%d", delta);
+	  break;
+
+	case '!':
+	  (*info->fprintf_func) (info->stream, "%ld",
+				 (l >> OP_SH_MT_U) & OP_MASK_MT_U);
+	  break;
+
+	case '$':
+	  (*info->fprintf_func) (info->stream, "%ld",
+				 (l >> OP_SH_MT_H) & OP_MASK_MT_H);
+	  break;
+
+	case '*':
+	  (*info->fprintf_func) (info->stream, "$ac%ld",
+				 (l >> OP_SH_MTACC_T) & OP_MASK_MTACC_T);
+	  break;
+
+	case '&':
+	  (*info->fprintf_func) (info->stream, "$ac%ld",
+				 (l >> OP_SH_MTACC_D) & OP_MASK_MTACC_D);
+	  break;
+
+	case 'g':
+	  /* Coprocessor register for CTTC1, MTTC2, MTHC2, CTTC2.  */
+	  (*info->fprintf_func) (info->stream, "$%ld",
+				 (l >> OP_SH_RD) & OP_MASK_RD);
 	  break;
 
 	case 's':
