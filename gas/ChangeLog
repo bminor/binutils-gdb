@@ -1,5 +1,9 @@
 2005-09-02  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (do_rn_rd): Enforce SWP operand constraints.
+
+2005-09-02  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (encode_arm_cp_address): Use
 	BFD_RELOC_ARM_T32_CP_OFF_IMM in thumb mode.
 	(do_iwmmxt_wldstbh): Use BFD_RELOC_ARM_T32_CP_OFF_IMM_S2 in thumb

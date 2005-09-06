@@ -4339,9 +4339,14 @@ do_rn_rd (void)
 static void
 do_rd_rm_rn (void)
 {
+  unsigned Rn = inst.operands[2].reg;
+  /* Enforce resutrictions on SWP instruction.  */
+  if ((inst.instruction & 0x0fbfffff) == 0x01000090)
+    constraint (Rn == inst.operands[0].reg || Rn == inst.operands[1].reg,
+		_("Rn must not overlap other operands"));
   inst.instruction |= inst.operands[0].reg << 12;
   inst.instruction |= inst.operands[1].reg;
-  inst.instruction |= inst.operands[2].reg << 16;
+  inst.instruction |= Rn << 16;
 }
 
 static void

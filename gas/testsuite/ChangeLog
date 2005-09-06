@@ -1,5 +1,12 @@
 2005-09-02  Paul Brook  <paul@codesourcery.com>
 
+	* gas/arm/arm3-bad.s: New test.
+	* gas/arm/arm3-bad.d: New test.
+	* gas/arm/arm3.s: Avoid illegal instructions.
+	* gas/arm/arm3.d: Ditto.
+
+2005-09-02  Paul Brook  <paul@codesourcery.com>
+
 	* gas/arm/vfp-bad_t2.d, gas/arm/vfp-bad_t2.l, arm/vfp-bad_t2.s,
 	gas/arm/vfp1_t2.d, gas/arm/vfp1_t2.s, gas/arm/vfp1xD_t2.d,
 	gas/arm/vfp1xD_t2.s, gas/arm/vfp2_t2.d, gas/arm/vfp2_t2.s): New files.
