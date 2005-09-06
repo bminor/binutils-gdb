@@ -10896,14 +10896,6 @@ get_thumb32_insn (char * buf)
   return insn;
 }
 
-/* Write a 32-bit thumb instruction to buf.  */
-static void
-put_thumb32_insn (char * buf, unsigned long insn)
-{
-  md_number_to_chars (buf, insn >> 16, THUMB_SIZE);
-  md_number_to_chars (buf + THUMB_SIZE, insn, THUMB_SIZE);
-}
-
 void
 md_apply_fix (fixS *	fixP,
 	       valueT * valP,
