@@ -551,36 +551,6 @@ mn10300_analyze_prologue (struct frame_info *fi,
       return pc;
     }
 
-#if 0
-  /* Get the next two bytes into buf, we need two because rets is a two
-     byte insn and the first isn't enough to uniquely identify it.  */
-  if (!safe_frame_unwind_memory (fi, pc, buf, 2))
-    return pc;
-
-  /* Note: kevinb/2003-07-16: We shouldn't be making these sorts of
-     changes to the frame in prologue examination code.  */
-  /* If we're physically on an "rets" instruction, then our frame has
-     already been deallocated.  Note this can also be true for retf
-     and ret if they specify a size of zero.
-
-     In this case fi->frame is bogus, we need to fix it.  */
-  if (fi && buf[0] == 0xf0 && buf[1] == 0xfc)
-    {
-      if (get_next_frame (fi) == NULL)
-	deprecated_update_frame_base_hack (fi, read_sp ());
-      return get_frame_pc (fi);
-    }
-
-  /* Similarly if we're stopped on the first insn of a prologue as our
-     frame hasn't been allocated yet.  */
-  if (fi && get_frame_pc (fi) == func_addr)
-    {
-      if (get_next_frame (fi) == NULL)
-	deprecated_update_frame_base_hack (fi, read_sp ());
-      return get_frame_pc (fi);
-    }
-#endif
-
   /* NOTE: from here on, we don't want to return without jumping to
      finish_prologue.  */
 
