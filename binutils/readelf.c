@@ -3794,7 +3794,11 @@ get_elf_section_flags (bfd_vma sh_flags)
 {
   static char buff[1024];
   char *p = buff;
-  int index, size = sizeof (buff) - (8 + 4 + 1);
+  int field_size = is_32bit_elf ? 8 : 16;
+  int index, size = sizeof (buff) - (field_size + 4 + 1);
+  bfd_vma os_flags = 0;
+  bfd_vma proc_flags = 0;
+  bfd_vma unknown_flags = 0;
   const struct
     {
       const char *str;
@@ -3816,8 +3820,9 @@ get_elf_section_flags (bfd_vma sh_flags)
 
   if (do_section_details)
     {
-      sprintf (buff, "[%8.8lx]: ", (unsigned long) sh_flags);
-      p += 8 + 4;
+      sprintf (buff, "[%*.*lx]: ",
+	       field_size, field_size, (unsigned long) sh_flags);
+      p += field_size + 4;
     }
 
   while (sh_flags)
@@ -3847,38 +3852,26 @@ get_elf_section_flags (bfd_vma sh_flags)
 	      break;
 	    }
 
-	  if (p != buff + 8 + 4)
-	    {
-	      if (size < 10 + 2)
-		abort ();
-	      size -= 2;
-	      *p++ = ',';
-	      *p++ = ' ';
-	    }
-
 	  if (index != -1)
 	    {
+	      if (p != buff + field_size + 4)
+		{
+		  if (size < (10 + 2))
+		    abort ();
+		  size -= 2;
+		  *p++ = ',';
+		  *p++ = ' ';
+		}
+
 	      size -= flags [index].len;
 	      p = stpcpy (p, flags [index].str);
 	    }
 	  else if (flag & SHF_MASKOS)
-	    {
-	      size -= 5 + 8;
-	      sprintf (p, "OS (%8.8lx)", (unsigned long) flag);
-	      p += 5 + 8;
-	    }
+	    os_flags |= flag;
 	  else if (flag & SHF_MASKPROC)
-	    {
-	      size -= 7 + 8;
-	      sprintf (p, "PROC (%8.8lx)", (unsigned long) flag);
-	      p += 7 + 8;
-	    }
+	    proc_flags |= flag;
 	  else
-	    {
-	      size -= 10 + 8;
-	      sprintf (p, "UNKNOWN (%8.8lx)", (unsigned long) flag);
-	      p += 10 + 8;
-	    }
+	    unknown_flags |= flag;
 	}
       else
 	{
@@ -3914,6 +3907,55 @@ get_elf_section_flags (bfd_vma sh_flags)
 	      break;
 	    }
 	  p++;
+	}
+    }
+
+  if (do_section_details)
+    {
+      if (os_flags)
+	{
+	  size -= 5 + field_size;
+	  if (p != buff + field_size + 4)
+	    {
+	      if (size < (2 + 1))
+		abort ();
+	      size -= 2;
+	      *p++ = ',';
+	      *p++ = ' ';
+	    }
+	  sprintf (p, "OS (%*.*lx)", field_size, field_size,
+		   (unsigned long) os_flags);
+	  p += 5 + field_size;
+	}
+      if (proc_flags)
+	{
+	  size -= 7 + field_size;
+	  if (p != buff + field_size + 4)
+	    {
+	      if (size < (2 + 1))
+		abort ();
+	      size -= 2;
+	      *p++ = ',';
+	      *p++ = ' ';
+	    }
+	  sprintf (p, "PROC (%*.*lx)", field_size, field_size,
+		   (unsigned long) proc_flags);
+	  p += 7 + field_size;
+	}
+      if (unknown_flags)
+	{
+	  size -= 10 + field_size;
+	  if (p != buff + field_size + 4)
+	    {
+	      if (size < (2 + 1))
+		abort ();
+	      size -= 2;
+	      *p++ = ',';
+	      *p++ = ' ';
+	    }
+	  sprintf (p, "UNKNOWN (%*.*lx)", field_size, field_size,
+		   (unsigned long) unknown_flags);
+	  p += 10 + field_size;
 	}
     }
 

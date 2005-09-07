@@ -1,3 +1,7 @@
+2005-09-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_elf_section_flags): Handle 64bit sh_flags.
+
 2005-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (debug_abbrev_contents): New.
