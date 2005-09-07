@@ -23,13 +23,16 @@
 
 #include "as.h"
 
-#define DWARF2_FLAG_BEGIN_STMT	(1 << 0)	/* beginning of statement */
-#define DWARF2_FLAG_BEGIN_BLOCK	(1 << 1)	/* beginning of basic block */
+#define DWARF2_FLAG_IS_STMT		(1 << 0)
+#define DWARF2_FLAG_BASIC_BLOCK		(1 << 1)
+#define DWARF2_FLAG_PROLOGUE_END	(1 << 2)
+#define DWARF2_FLAG_EPILOGUE_BEGIN	(1 << 3)
 
 struct dwarf2_line_info {
   unsigned int filenum;
   unsigned int line;
   unsigned int column;
+  unsigned int isa;
   unsigned int flags;
 };
 

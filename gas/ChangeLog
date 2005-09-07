@@ -1,3 +1,25 @@
+2005-09-07  Richard Henderson  <rth@redhat.com>
+
+	* dwarf2dbg.c: Include safe-ctype.h.
+	(DWARF2_LINE_OPCODE_BASE): Bump to 13.
+	(current): Initialize.
+	(dwarf2_emit_insn): Clear DWARF2_FLAG_BASIC_BLOCK,
+	DWARF2_FLAG_PROLOGUE_END, DWARF2_FLAG_EPILOGUE_BEGIN.
+	(dwarf2_directive_file): Cope with invalid filename.
+	(dwarf2_directive_loc): Add handling for basic_block, prologue_end,
+	epilogue_begin, is_stmt, isa.
+	(emit_inc_line_addr): Move line_delta == 0, addr_delta == 0 special
+	case down lower.
+	(process_entries): Handle isa, DWARF2_FLAG_PROLOGUE_END, 
+	and DWARF2_FLAG_EPILOGUE_BEGIN.
+	(out_debug_line): Emit sizes for DW_LNS_set_prologue_end,
+	DW_LNS_set_epilogue_begin, DW_LNS_set_isa.
+	* dwarf2dbg.h (DWARF2_FLAG_IS_STMT): Rename from DWARF2_FLAG_BEGIN_STMT.
+	(DWARF2_FLAG_BASIC_BLOCK): Rename from DWARF2_FLAG_BEGIN_BLOCK.
+	(DWARF2_FLAG_PROLOGUE_END, DWARF2_FLAG_EPILOGUE_BEGIN): New.
+	(struct dwarf2_line_info): Add isa member.
+	* doc/as.texinfo (LNS directives): New node.
+
 2005-09-07  David Ung  <davidu@mips.com>
 
 	* config/tc-mips.c (append_insn): Undo last change.  Instead add

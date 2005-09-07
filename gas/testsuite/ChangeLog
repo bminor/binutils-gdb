@@ -1,3 +1,9 @@
+2005-09-07  Richard Henderson  <rth@redhat.com>
+
+	* gas/lns/lns.exp: New file.
+	* gas/lns/lns-common-1.[sd]: New test.
+	* gas/lns/lns-diag-1.[sl]: New test.
+
 2005-09-06  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/mips.exp: Run MT test for mips32r2 only.

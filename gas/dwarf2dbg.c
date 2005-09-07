@@ -21,15 +21,20 @@
    02110-1301, USA.  */
 
 /* Logical line numbers can be controlled by the compiler via the
-   following two directives:
+   following directives:
 
 	.file FILENO "file.c"
 	.loc  FILENO LINENO [COLUMN]
-
-   FILENO is the filenumber.  */
+	.loc  basic_block
+	.loc  prologue_end
+	.loc  epilogue_begin
+	.loc  is_stmt [VALUE]
+	.loc  isa [VALUE]
+*/
 
 #include "ansidecl.h"
 #include "as.h"
+#include "safe-ctype.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -68,8 +73,8 @@
 /* First special line opcde - leave room for the standard opcodes.
    Note: If you want to change this, you'll have to update the
    "standard_opcode_lengths" table that is emitted below in
-   dwarf2_finish().  */
-#define DWARF2_LINE_OPCODE_BASE		10
+   out_debug_line().  */
+#define DWARF2_LINE_OPCODE_BASE		13
 
 #ifndef DWARF2_LINE_BASE
   /* Minimum line offset in a special line info. opcode.  This value
@@ -88,10 +93,7 @@
 # define DWARF2_LINE_MIN_INSN_LENGTH	1
 #endif
 
-/* Flag that indicates the initial value of the is_stmt_start flag.
-   In the present implementation, we do not mark any lines as
-   the beginning of a source statement, because that information
-   is not made available by the GCC front-end.  */
+/* Flag that indicates the initial value of the is_stmt_start flag.  */
 #define	DWARF2_LINE_DEFAULT_IS_STMT	1
 
 /* Given a special op, return the line skip amount.  */
@@ -150,7 +152,10 @@ static unsigned int dirs_allocated;
 static bfd_boolean loc_directive_seen;
 
 /* Current location as indicated by the most recent .loc directive.  */
-static struct dwarf2_line_info current;
+static struct dwarf2_line_info current = {
+  1, 1, 0, 0,
+  DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0
+};
 
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
@@ -291,7 +296,7 @@ dwarf2_where (struct dwarf2_line_info *line)
       as_where (&filename, &line->line);
       line->filenum = get_filenum (filename, 0);
       line->column = 0;
-      line->flags = DWARF2_FLAG_BEGIN_STMT;
+      line->flags = DWARF2_FLAG_IS_STMT;
     }
   else
     *line = current;
@@ -324,9 +329,13 @@ dwarf2_emit_insn (int size)
   else if (debug_type != DEBUG_DWARF2)
     return;
   else
-    dwarf2_where (& loc);
+    dwarf2_where (&loc);
 
   dwarf2_gen_line_info (frag_now_fix () - size, &loc);
+
+  current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
+		     | DWARF2_FLAG_PROLOGUE_END
+		     | DWARF2_FLAG_EPILOGUE_BEGIN);
 }
 
 /* Get a .debug_line file number for FILENAME.  If NUM is nonzero,
@@ -449,6 +458,8 @@ dwarf2_directive_file (int dummy ATTRIBUTE_UNUSED)
 
   num = get_absolute_expression ();
   filename = demand_copy_C_string (&filename_len);
+  if (filename == NULL)
+    return NULL;
   demand_empty_rest_of_line ();
 
   if (num < 1)
@@ -471,53 +482,105 @@ dwarf2_directive_file (int dummy ATTRIBUTE_UNUSED)
 void
 dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 {
-  offsetT filenum, line, column;
-
-  filenum = get_absolute_expression ();
   SKIP_WHITESPACE ();
-  line = get_absolute_expression ();
-  SKIP_WHITESPACE ();
-  column = get_absolute_expression ();
-  demand_empty_rest_of_line ();
-
-  if (filenum < 1)
+  if (ISALPHA (*input_line_pointer))
     {
-      as_bad (_("file number less than one"));
-      return;
-    }
-  if (filenum >= (int) files_in_use || files[filenum].filename == 0)
-    {
-      as_bad (_("unassigned file number %ld"), (long) filenum);
-      return;
-    }
+      char *p, c;
+      offsetT value;
 
-  current.filenum = filenum;
-  current.line = line;
-  current.column = column;
-  current.flags = DWARF2_FLAG_BEGIN_STMT;
+      p = input_line_pointer;
+      c = get_symbol_end ();
 
-  loc_directive_seen = TRUE;
-
-#ifndef NO_LISTING
-  if (listing)
-    {
-      if (files[filenum].dir)
+      if (strcmp (p, "basic_block") == 0)
 	{
-	  size_t dir_len = strlen (dirs[files[filenum].dir]);
-	  size_t file_len = strlen (files[filenum].filename);
-	  char *cp = (char *) alloca (dir_len + 1 + file_len + 1);
-
-	  memcpy (cp, dirs[files[filenum].dir], dir_len);
-	  cp[dir_len] = '/';
-	  memcpy (cp + dir_len + 1, files[filenum].filename, file_len);
-	  cp[dir_len + file_len + 1] = '\0';
-	  listing_source_file (cp);
+	  current.flags |= DWARF2_FLAG_BASIC_BLOCK;
+	  *input_line_pointer = c;
+	}
+      else if (strcmp (p, "prologue_end") == 0)
+	{
+	  current.flags |= DWARF2_FLAG_PROLOGUE_END;
+	  *input_line_pointer = c;
+	}
+      else if (strcmp (p, "epilogue_begin") == 0)
+	{
+	  current.flags |= DWARF2_FLAG_EPILOGUE_BEGIN;
+	  *input_line_pointer = c;
+	}
+      else if (strcmp (p, "is_stmt") == 0)
+	{
+	  *input_line_pointer = c;
+	  value = get_absolute_expression ();
+	  if (value == 0)
+	    current.flags &= ~DWARF2_FLAG_IS_STMT;
+	  else if (value == 1)
+	    current.flags |= DWARF2_FLAG_IS_STMT;
+	  else
+	    as_bad (_("is_stmt value not 0 or 1"));
+	}
+      else if (strcmp (p, "isa") == 0)
+	{
+          *input_line_pointer = c;
+	  value = get_absolute_expression ();
+	  if (value < 0)
+	    as_bad (_("isa number less than zero"));
+	  else
+	    current.isa = value;
 	}
       else
-	listing_source_file (files[filenum].filename);
-      listing_source_line (line);
+	{
+	  as_bad (_("unknown .loc sub-directive %s"), p);
+          *input_line_pointer = c;
+	}
     }
+  else
+    {
+      offsetT filenum, line, column;
+
+      filenum = get_absolute_expression ();
+      SKIP_WHITESPACE ();
+      line = get_absolute_expression ();
+      SKIP_WHITESPACE ();
+      column = get_absolute_expression ();
+
+      if (filenum < 1)
+	{
+	  as_bad (_("file number less than one"));
+	  return;
+	}
+      if (filenum >= (int) files_in_use || files[filenum].filename == 0)
+	{
+	  as_bad (_("unassigned file number %ld"), (long) filenum);
+	  return;
+	}
+
+      current.filenum = filenum;
+      current.line = line;
+      current.column = column;
+
+#ifndef NO_LISTING
+      if (listing)
+	{
+	  if (files[filenum].dir)
+	    {
+	      size_t dir_len = strlen (dirs[files[filenum].dir]);
+	      size_t file_len = strlen (files[filenum].filename);
+	      char *cp = (char *) alloca (dir_len + 1 + file_len + 1);
+
+	      memcpy (cp, dirs[files[filenum].dir], dir_len);
+	      cp[dir_len] = '/';
+	      memcpy (cp + dir_len + 1, files[filenum].filename, file_len);
+	      cp[dir_len + file_len + 1] = '\0';
+	      listing_source_file (cp);
+	    }
+	  else
+	    listing_source_file (files[filenum].filename);
+	  listing_source_line (line);
+	}
 #endif
+    }
+
+  demand_empty_rest_of_line ();
+  loc_directive_seen = TRUE;
 }
 
 static struct frag *
@@ -759,17 +822,17 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
       *p++ = DW_LNS_advance_line;
       p += output_leb128 (p, line_delta, 1);
 
-      /* Prettier, I think, to use DW_LNS_copy instead of a
-	 "line +0, addr +0" special opcode.  */
-      if (addr_delta == 0)
-	{
-	  *p++ = DW_LNS_copy;
-	  goto done;
-	}
-
       line_delta = 0;
       tmp = 0 - DWARF2_LINE_BASE;
       need_copy = 1;
+    }
+
+  /* Prettier, I think, to use DW_LNS_copy instead of a "line +0, addr +0"
+     special opcode.  */
+  if (line_delta == 0 && addr_delta == 0)
+    {
+      *p++ = DW_LNS_copy;
+      goto done;
     }
 
   /* Bias the opcode by the special opcode base.  */
@@ -913,7 +976,8 @@ process_entries (segT seg, struct line_entry *e)
   unsigned filenum = 1;
   unsigned line = 1;
   unsigned column = 0;
-  unsigned flags = DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_BEGIN_STMT : 0;
+  unsigned isa = 0;
+  unsigned flags = DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0;
   fragS *frag = NULL;
   fragS *last_frag;
   addressT frag_ofs = 0;
@@ -940,16 +1004,36 @@ process_entries (segT seg, struct line_entry *e)
 	  changed = 1;
 	}
 
-      if ((e->loc.flags ^ flags) & DWARF2_FLAG_BEGIN_STMT)
+      if (isa != e->loc.isa)
+	{
+	  isa = e->loc.isa;
+	  out_opcode (DW_LNS_set_isa);
+	  out_uleb128 (isa);
+	  changed = 1;
+	}
+
+      if ((e->loc.flags ^ flags) & DWARF2_FLAG_IS_STMT)
 	{
 	  flags = e->loc.flags;
 	  out_opcode (DW_LNS_negate_stmt);
 	  changed = 1;
 	}
 
-      if (e->loc.flags & DWARF2_FLAG_BEGIN_BLOCK)
+      if (e->loc.flags & DWARF2_FLAG_BASIC_BLOCK)
 	{
 	  out_opcode (DW_LNS_set_basic_block);
+	  changed = 1;
+	}
+
+      if (e->loc.flags & DWARF2_FLAG_PROLOGUE_END)
+	{
+	  out_opcode (DW_LNS_set_prologue_end);
+	  changed = 1;
+	}
+
+      if (e->loc.flags & DWARF2_FLAG_EPILOGUE_BEGIN)
+	{
+	  out_opcode (DW_LNS_set_epilogue_begin);
 	  changed = 1;
 	}
 
@@ -1115,6 +1199,9 @@ out_debug_line (segT line_seg)
   out_byte (0);			/* DW_LNS_set_basic_block */
   out_byte (0);			/* DW_LNS_const_add_pc */
   out_byte (1);			/* DW_LNS_fixed_advance_pc */
+  out_byte (0);			/* DW_LNS_set_prologue_end */
+  out_byte (0);			/* DW_LNS_set_epilogue_begin */
+  out_byte (1);			/* DW_LNS_set_isa */
 
   out_file_list ();
 
