@@ -1,5 +1,11 @@
 2005-09-07  Richard Henderson  <rth@redhat.com>
 
+	* gas/mips/mips16-dwarf2.d: Don't match anything but address and line
+        number increments.  Adjust relocation address.
+	* gas/mips/mips16-dwarf2-n32.d: Likewise.  Add "N32" to test name.
+
+2005-09-07  Richard Henderson  <rth@redhat.com>
+
 	* gas/cris/rd-dw2-1.d: Don't match anything but address and line
 	number increments.
 	* gas/cris/rd-dw2-10.d, gas/cris/rd-dw2-11.d, gas/cris/rd-dw2-12.d,
