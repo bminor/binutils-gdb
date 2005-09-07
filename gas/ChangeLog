@@ -1,3 +1,9 @@
+2005-09-07  David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (append_insn): Undo last change.  Instead add
+	guard to suppress calling frag_grow if the current instruction is
+	one that allows a delay slot.
+
 2005-09-06  Chao-ying Fu  <fu@mips.com>
 
 	* config/tc-mips.c (mips_set_options): Add ase_mt for MT instructions.

@@ -2312,10 +2312,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   else if (mips_opts.mips16
 	   && ! ip->use_extend
 	   && *reloc_type != BFD_RELOC_MIPS16_JMP)
-    {
-      /* Make sure there is enough room to swap this instruction with
-         a following jump instruction.  */
-      frag_grow (6);
+    {     
+      if ((pinfo & INSN_UNCOND_BRANCH_DELAY) == 0)
+	/* Make sure there is enough room to swap this instruction with
+	   a following jump instruction.  */
+	frag_grow (6);
       add_fixed_insn (ip);
     }
   else
@@ -2707,22 +2708,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      struct mips_cl_insn delay = history[0];
 	      if (mips_opts.mips16)
 		{
-		  if (delay.frag == ip->frag)
-		    {
-		      move_insn (ip, delay.frag, delay.where);
-		      move_insn (&delay, ip->frag, delay.where 
-				 + insn_length (ip));
-		    }
-		  else if (insn_length (ip) == insn_length (&delay))
-		    {
-		      move_insn (&delay, ip->frag, ip->where);
-		      move_insn (ip, history[0].frag, history[0].where);
-		    }
-		  else
-		    {
-		      add_fixed_insn (NOP_INSN);
-		      delay = *NOP_INSN;
-		    }
+		  know (delay.frag == ip->frag);
+                  move_insn (ip, delay.frag, delay.where);
+		  move_insn (&delay, ip->frag, ip->where + insn_length (ip));
 		}
 	      else if (relaxed_branch)
 		{
