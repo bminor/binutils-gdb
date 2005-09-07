@@ -1,3 +1,9 @@
+2005-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1263
+	* emultempl/elf32.em (gld${EMULATION_NAME}_load_symbols): Check
+	--just-symbols on DSO.
+
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/elf.sc: Remove commented out defines.

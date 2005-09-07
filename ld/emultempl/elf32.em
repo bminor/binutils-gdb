@@ -124,6 +124,11 @@ gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
   if (!entry->add_needed)
     class |= DYN_NO_ADD_NEEDED;
 
+  if (entry->just_syms_flag
+      && (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) != 0)
+    einfo (_("%P%F: --just-symbols may not be used on DSO: %B\n"),
+	   entry->the_bfd);
+
   if (!class
       || (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) == 0)
     return FALSE;
