@@ -590,7 +590,9 @@ fold_name (etree_type *tree)
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  if (os != NULL && os->processed > 0)
+	  if (os == NULL)
+	    new_abs (0);
+	  else if (os->processed > 0)
 	    new_abs (os->bfd_section->size / opb);
 	}
       break;
@@ -655,15 +657,8 @@ exp_fold_tree_1 (etree_type *tree)
 
     case etree_assert:
       exp_fold_tree_1 (tree->assert_s.child);
-      if (expld.result.valid_p)
-	{
-	  if (expld.phase == lang_mark_phase_enum)
-	    /* We don't care if assert fails or not when we are just
-	       marking if a section is used or not.  */
-	    expld.result.value = 1;
-	  else if (!expld.result.value)
-	    einfo ("%X%P: %s\n", tree->assert_s.message);
-	}
+      if (expld.phase == lang_final_phase_enum && !expld.result.value)
+	einfo ("%X%P: %s\n", tree->assert_s.message);
       break;
 
     case etree_unary:
