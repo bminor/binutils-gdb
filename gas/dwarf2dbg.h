@@ -55,6 +55,10 @@ extern void dwarf2_directive_loc (int dummy);
    returned.  */
 extern void dwarf2_where (struct dwarf2_line_info *l);
 
+/* A hook to allow the target backend to inform the line number state 
+   machine of isa changes when assembler debug info is enabled.  */
+extern void dwarf2_set_isa (unsigned int isa);
+
 /* This function generates .debug_line info based on the address and
    source information passed in the arguments.  ADDR should be the
    frag-relative offset of the instruction the information is for and

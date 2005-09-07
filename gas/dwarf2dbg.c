@@ -24,12 +24,8 @@
    following directives:
 
 	.file FILENO "file.c"
-	.loc  FILENO LINENO [COLUMN]
-	.loc  basic_block
-	.loc  prologue_end
-	.loc  epilogue_begin
-	.loc  is_stmt [VALUE]
-	.loc  isa [VALUE]
+	.loc  FILENO LINENO [COLUMN] [basic_block] [prologue_end] \
+	      [epilogue_begin] [is_stmt VALUE] [isa VALUE]
 */
 
 #include "ansidecl.h"
@@ -287,6 +283,11 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   ss->ptail = &e->next;
 }
 
+/* Returns the current source information.  If .file directives have
+   been encountered, the info for the corresponding source file is
+   returned.  Otherwise, the info for the assembly source file is
+   returned.  */
+
 void
 dwarf2_where (struct dwarf2_line_info *line)
 {
@@ -297,9 +298,19 @@ dwarf2_where (struct dwarf2_line_info *line)
       line->filenum = get_filenum (filename, 0);
       line->column = 0;
       line->flags = DWARF2_FLAG_IS_STMT;
+      line->isa = current.isa;
     }
   else
     *line = current;
+}
+
+/* A hook to allow the target backend to inform the line number state 
+   machine of isa changes when assembler debug info is enabled.  */
+
+void
+dwarf2_set_isa (unsigned int isa)
+{
+  current.isa = isa;
 }
 
 /* Called for each machine instruction, or relatively atomic group of
@@ -482,8 +493,55 @@ dwarf2_directive_file (int dummy ATTRIBUTE_UNUSED)
 void
 dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 {
+  offsetT filenum, line;
+
+  filenum = get_absolute_expression ();
   SKIP_WHITESPACE ();
-  if (ISALPHA (*input_line_pointer))
+  line = get_absolute_expression ();
+
+  if (filenum < 1)
+    {
+      as_bad (_("file number less than one"));
+      return;
+    }
+  if (filenum >= (int) files_in_use || files[filenum].filename == 0)
+    {
+      as_bad (_("unassigned file number %ld"), (long) filenum);
+      return;
+    }
+
+  current.filenum = filenum;
+  current.line = line;
+
+#ifndef NO_LISTING
+  if (listing)
+    {
+      if (files[filenum].dir)
+	{
+	  size_t dir_len = strlen (dirs[files[filenum].dir]);
+	  size_t file_len = strlen (files[filenum].filename);
+	  char *cp = (char *) alloca (dir_len + 1 + file_len + 1);
+
+	  memcpy (cp, dirs[files[filenum].dir], dir_len);
+	  cp[dir_len] = '/';
+	  memcpy (cp + dir_len + 1, files[filenum].filename, file_len);
+	  cp[dir_len + file_len + 1] = '\0';
+	  listing_source_file (cp);
+	}
+      else
+	listing_source_file (files[filenum].filename);
+      listing_source_line (line);
+    }
+#endif
+
+  SKIP_WHITESPACE ();
+  if (ISDIGIT (*input_line_pointer))
+    {
+      current.column = get_absolute_expression ();
+      SKIP_WHITESPACE ();
+    }
+
+  while (ISALPHA (*input_line_pointer))
     {
       char *p, c;
       offsetT value;
@@ -515,68 +573,31 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  else if (value == 1)
 	    current.flags |= DWARF2_FLAG_IS_STMT;
 	  else
-	    as_bad (_("is_stmt value not 0 or 1"));
+	    {
+	      as_bad (_("is_stmt value not 0 or 1"));
+	      return;
+	    }
 	}
       else if (strcmp (p, "isa") == 0)
 	{
           *input_line_pointer = c;
 	  value = get_absolute_expression ();
-	  if (value < 0)
-	    as_bad (_("isa number less than zero"));
-	  else
+	  if (value >= 0)
 	    current.isa = value;
+	  else
+	    {
+	      as_bad (_("isa number less than zero"));
+	      return;
+	    }
 	}
       else
 	{
-	  as_bad (_("unknown .loc sub-directive %s"), p);
+	  as_bad (_("unknown .loc sub-directive `%s'"), p);
           *input_line_pointer = c;
-	}
-    }
-  else
-    {
-      offsetT filenum, line, column;
-
-      filenum = get_absolute_expression ();
-      SKIP_WHITESPACE ();
-      line = get_absolute_expression ();
-      SKIP_WHITESPACE ();
-      column = get_absolute_expression ();
-
-      if (filenum < 1)
-	{
-	  as_bad (_("file number less than one"));
-	  return;
-	}
-      if (filenum >= (int) files_in_use || files[filenum].filename == 0)
-	{
-	  as_bad (_("unassigned file number %ld"), (long) filenum);
 	  return;
 	}
 
-      current.filenum = filenum;
-      current.line = line;
-      current.column = column;
-
-#ifndef NO_LISTING
-      if (listing)
-	{
-	  if (files[filenum].dir)
-	    {
-	      size_t dir_len = strlen (dirs[files[filenum].dir]);
-	      size_t file_len = strlen (files[filenum].filename);
-	      char *cp = (char *) alloca (dir_len + 1 + file_len + 1);
-
-	      memcpy (cp, dirs[files[filenum].dir], dir_len);
-	      cp[dir_len] = '/';
-	      memcpy (cp + dir_len + 1, files[filenum].filename, file_len);
-	      cp[dir_len + file_len + 1] = '\0';
-	      listing_source_file (cp);
-	    }
-	  else
-	    listing_source_file (files[filenum].filename);
-	  listing_source_line (line);
-	}
-#endif
+      SKIP_WHITESPACE ();
     }
 
   demand_empty_rest_of_line ();

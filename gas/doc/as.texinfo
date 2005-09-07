@@ -4065,7 +4065,7 @@ table is shared with the @code{.debug_info} section of the dwarf2 debugging
 information, and thus the user must know the exact indicies that table
 entries will have.
 
-@section @code{.loc @var{fileno} @var{lineno} [@var{column}]}
+@section @code{.loc @var{fileno} @var{lineno} [@var{column}] [@var{options}]}
 @cindex @code{loc} directive
 The @code{.loc} directive will add row to the @code{.debug_line} line
 number matrix corresponding to the immediately following assembly
@@ -4073,26 +4073,30 @@ instruction.  The @var{fileno}, @var{lineno}, and optional @var{column}
 arguments will be applied to the @code{.debug_line} state machine before
 the row is added.
 
-@section @code{.loc basic_block}
-This directive will set the @code{basic_block} register in the
+The @var{options} are a sequence of the following tokens in any order:
+
+@table @code
+@item basic_block
+This option will set the @code{basic_block} register in the
 @code{.debug_line} state machine to @code{true}.
 
-@section @code{.loc prologue_end}
-This directive will set the @code{prologue_end} register in the
+@item prologue_end
+This option will set the @code{prologue_end} register in the
 @code{.debug_line} state machine to @code{true}.
 
-@section @code{.loc epilogue_begin}
-This directive will set the @code{epilogue_begin} register in the
+@item epilogue_begin
+This option will set the @code{epilogue_begin} register in the
 @code{.debug_line} state machine to @code{true}.
 
-@section @code{.loc is_stmt @var{value}}
-This directive will set the @code{epilogue_begin} register in the
+@item is_stmt @var{value}
+This option will set the @code{is_stmt} register in the
 @code{.debug_line} state machine to @code{value}, which must be 
 either 0 or 1.
 
-@section @code{.loc isa @var{value}}
+@item isa @var{value}
 This directive will set the @code{isa} register in the @code{.debug_line}
 state machine to @var{value}, which must be an unsigned integer.
+@end table
 
 @node Data
 @section @code{.data @var{subsection}}

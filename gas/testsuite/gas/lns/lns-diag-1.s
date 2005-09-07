@@ -8,19 +8,22 @@
 	.loc 3 1
 	.loc 1 1 1 1
 
-	.loc basic_block
-	.loc basic_block 0
-	.loc prologue_end
-	.loc epilogue_begin
+	.loc 1 1 basic_block
+	.loc 1 1 basic_block 0
+	.loc 1 1 prologue_end
+	.loc 1 1 epilogue_begin
 
-	.loc is_stmt 0
-	.loc is_stmt 1
-	.loc is_stmt 2
-	.loc is_stmt foo
+	.loc 1 1 1 is_stmt 0
+	.loc 1 1 1 is_stmt 1
+	.loc 1 1 1 is_stmt 2
+	.loc 1 1 1 is_stmt foo
 
-	.loc isa 1
-	.loc isa 2
-	.loc isa -1
-	.loc isa 0
+	.loc 1 1 isa 1
+	.loc 1 1 isa 2
+	.loc 1 1 isa -1
+	.loc 1 1 isa 0
 
 	.loc frobnitz
+	.loc 1 frobnitz
+	.loc 1 1 frobnitz
+	.loc 1 1 1 frobnitz
