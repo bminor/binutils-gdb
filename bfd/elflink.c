@@ -902,9 +902,11 @@ _bfd_elf_merge_symbol (bfd *abfd,
   else
     olddef = TRUE;
 
-  /* Check TLS symbol.  */
+  /* Check TLS symbol.  We don't check undefined symbol introduced by
+     "ld -u".  */
   if ((ELF_ST_TYPE (sym->st_info) == STT_TLS || h->type == STT_TLS)
-      && ELF_ST_TYPE (sym->st_info) != h->type)
+      && ELF_ST_TYPE (sym->st_info) != h->type
+      && oldbfd != NULL)
     {
       bfd *ntbfd, *tbfd;
       bfd_boolean ntdef, tdef;

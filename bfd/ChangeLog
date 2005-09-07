@@ -1,3 +1,9 @@
+2005-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1301
+	* elflink.c (_bfd_elf_merge_symbol): Don't check undefined
+	symbol introduced by "ld -u" for TLS.
+
 2005-09-02  Paul Brook  <paul@codesourcery.com>
 
 	* libbdf.h: Regenerate.
