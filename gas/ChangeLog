@@ -1,3 +1,9 @@
+2005-09-08  Chao-ying Fu  <fu@mips.com>
+
+	* doc/as.texinfo: Document -mdsp and -mno-dsp options.
+	* doc/c-mips.texi: Likewise, and document ".set dsp" and ".set nodsp"
+	directives.
+
 2005-09-08  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_smi, do_t_smi): Rename ...

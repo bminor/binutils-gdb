@@ -118,6 +118,12 @@ Generate code for the MDMX Application Specific Extension.
 This tells the assembler to accept MDMX instructions.
 @samp{-no-mdmx} turns off this option.
 
+@item -mdsp
+@itemx -mno-dsp
+Generate code for the DSP Application Specific Extension.
+This tells the assembler to accept DSP instructions.
+@samp{-mno-dsp} turns off this option.
+
 @item -mmt
 @itemx -mno-mt
 Generate code for the MT Application Specific Extension.
@@ -455,6 +461,14 @@ instructions from being accepted.
 The directive @code{.set mdmx} makes the assembler accept instructions
 from the MDMX Application Specific Extension from that point on
 in the assembly.  The @code{.set nomdmx} directive prevents MDMX
+instructions from being accepted.
+
+@cindex MIPS DSP instruction generation override
+@kindex @code{.set dsp}
+@kindex @code{.set nodsp}
+The directive @code{.set dsp} makes the assembler accept instructions
+from the DSP Application Specific Extension from that point on
+in the assembly.  The @code{.set nodsp} directive prevents DSP
 instructions from being accepted.
 
 @cindex MIPS MT instruction generation override

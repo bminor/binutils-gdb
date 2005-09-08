@@ -368,6 +368,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mips16}] [@b{-no-mips16}]
    [@b{-mips3d}] [@b{-no-mips3d}]
    [@b{-mdmx}] [@b{-no-mdmx}]
+   [@b{-mdsp}] [@b{-mno-dsp}]
    [@b{-mmt}] [@b{-mno-mt}]
    [@b{-mdebug}] [@b{-no-mdebug}]
    [@b{-mpdr}] [@b{-mno-pdr}]
@@ -1000,6 +1001,12 @@ This tells the assembler to accept MIPS-3D instructions.
 Generate code for the MDMX Application Specific Extension.
 This tells the assembler to accept MDMX instructions.
 @samp{-no-mdmx} turns off this option.
+
+@item -mdsp
+@itemx -mno-dsp
+Generate code for the DSP Application Specific Extension.
+This tells the assembler to accept DSP instructions.
+@samp{-mno-dsp} turns off this option.
 
 @item -mmt
 @itemx -mno-mt
