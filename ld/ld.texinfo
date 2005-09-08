@@ -929,6 +929,9 @@ lookup caching possible.
 Disallows undefined symbols in object files.  Undefined symbols in
 shared libraries are still allowed.
 
+@item execstack
+Marks the object as requiring executable stack.
+
 @item initfirst
 This option is only meaningful when building a shared object.
 It marks the object so that its runtime initialization will occur
@@ -967,6 +970,12 @@ Marks the object not available to @code{dlopen}.
 @item nodump
 Marks the object can not be dumped by @code{dldump}.
 
+@item noexecstack
+Marks the object as not requiring executable stack.
+
+@item norelro
+Don't create an ELF @code{PT_GNU_RELRO} segment header in the object.
+
 @item now
 When generating an executable or shared library, mark it to tell the
 dynamic linker to resolve all symbols when the program is started, or
@@ -976,6 +985,9 @@ first called.
 
 @item origin
 Marks the object may contain $ORIGIN.
+
+@item relro
+Create an ELF @code{PT_GNU_RELRO} segment header in the object.
 
 @end table
 
@@ -1813,6 +1825,11 @@ links without the @option{--wrap} option will succeed.  If you do this,
 you should not put the definition of @code{__real_malloc} in the same
 file as @code{__wrap_malloc}; if you do, the assembler may resolve the
 call before the linker has a chance to wrap it to @code{malloc}.
+
+@kindex --eh-frame-hdr
+@item --eh-frame-hdr
+Request creation of @code{.eh_frame_hdr} section and ELF
+@code{PT_GNU_EH_FRAME} segment header.
 
 @kindex --enable-new-dtags
 @kindex --disable-new-dtags

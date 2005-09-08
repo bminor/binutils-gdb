@@ -1,3 +1,8 @@
+2005-09-08  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld.texinfo: Document -z {no,}execstack, -z {no,}relro
+	and --eh-frame-hdr options.
+
 2005-09-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldexp.c (fold_name <SIZEOF>): Return 0 for non-existent section.
