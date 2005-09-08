@@ -245,6 +245,22 @@ am33_register_name (int reg)
   return register_name (reg, regs, sizeof regs);
 }
 
+static const char *
+am33_2_register_name (int reg)
+{
+  static char *regs[] =
+  {
+    "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
+    "sp", "pc", "mdr", "psw", "lir", "lar", "mdrq", "r0",
+    "r1", "r2", "r3", "r4", "r5", "r6", "r7", "ssp",
+    "msp", "usp", "mcrh", "mcrl", "mcvf", "fpcr", "", "",
+    "fs0", "fs1", "fs2", "fs3", "fs4", "fs5", "fs6", "fs7",
+    "fs8", "fs9", "fs10", "fs11", "fs12", "fs13", "fs14", "fs15",
+    "fs16", "fs17", "fs18", "fs19", "fs20", "fs21", "fs22", "fs23",
+    "fs24", "fs25", "fs26", "fs27", "fs28", "fs29", "fs30", "fs31"
+  };
+  return register_name (reg, regs, sizeof regs);
+}
 
 static struct type *
 mn10300_register_type (struct gdbarch *gdbarch, int reg)
@@ -279,54 +295,16 @@ mn10300_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
   return breakpoint;
 }
 
-/* 
- * Frame Extra Info:
- *
- *   status -- actually frame type (SP, FP, or last frame)
- *   stack size -- offset to the next frame
- * 
- * The former might ultimately be stored in the frame_base.
- * Seems like there'd be a way to store the later too.
- *
- * Temporarily supply empty stub functions as place holders.
- */
-
-static void
-my_frame_is_in_sp (struct frame_info *fi, void **this_cache)
-{
-  struct trad_frame_cache *cache = mn10300_frame_unwind_cache (fi, this_cache);
-  trad_frame_set_this_base (cache, 
-			    frame_unwind_register_unsigned (fi, 
-							    E_SP_REGNUM));
-}
-
-static void
-my_frame_is_in_fp (struct frame_info *fi, void **this_cache)
-{
-  struct trad_frame_cache *cache = mn10300_frame_unwind_cache (fi, this_cache);
-  trad_frame_set_this_base (cache, 
-			    frame_unwind_register_unsigned (fi, 
-							    E_A3_REGNUM));
-}
-
-static void
-my_frame_is_last (struct frame_info *fi)
-{
-}
-
-static void
-set_my_stack_size (struct frame_info *fi, CORE_ADDR size)
-{
-}
-
-
-/* Set offsets of registers saved by movm instruction.
+/* Set offsets of saved registers.
    This is a helper function for mn10300_analyze_prologue.  */
 
 static void
-set_movm_offsets (struct frame_info *fi, 
+set_reg_offsets (struct frame_info *fi, 
 		  void **this_cache, 
-		  int movm_args)
+		  int movm_args,
+		  int fpregmask,
+		  int stack_extra_size,
+		  int frame_in_fp)
 {
   struct trad_frame_cache *cache;
   int offset = 0;
@@ -339,7 +317,38 @@ set_movm_offsets (struct frame_info *fi,
   if (cache == NULL)
     return;
 
-  base = trad_frame_get_this_base (cache);
+  if (frame_in_fp)
+    {
+      base = frame_unwind_register_unsigned (fi, E_A3_REGNUM);
+    }
+  else
+    {
+      base = frame_unwind_register_unsigned (fi, E_SP_REGNUM) + stack_extra_size;
+    }
+
+  trad_frame_set_this_base (cache, base);
+
+  if (AM33_MODE == 2)
+    {
+      /* If bit N is set in fpregmask, fsN is saved on the stack.
+	 The floating point registers are saved in ascending order.
+	 For example:  fs16 <- Frame Pointer
+	               fs17    Frame Pointer + 4 */
+      if (fpregmask != 0)
+	{
+	  int i;
+	  for (i = 0; i < 32; i++)
+	    {
+	      if (fpregmask & (1 << i))
+		{
+		  trad_frame_set_reg_addr (cache, E_FS0_REGNUM + i, base + offset);
+		  offset += 4;
+		}
+	    }
+	}
+    }
+
+
   if (movm_args & movm_other_bit)
     {
       /* The `other' bit leaves a blank area of four bytes at the
@@ -510,11 +519,14 @@ mn10300_analyze_prologue (struct frame_info *fi,
 			  CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end, addr, stop;
-  long      stack_size;
+  long stack_extra_size = 0;
   int imm_size;
   unsigned char buf[4];
-  int status, movm_args = 0;
+  int status;
+  int movm_args = 0;
+  int fpregmask = 0;
   char *name;
+  int frame_in_fp = 0;
 
   /* Use the PC in the frame if it's provided to look up the
      start of this function.
@@ -526,8 +538,6 @@ mn10300_analyze_prologue (struct frame_info *fi,
   if (fi)
     {
       pc = (pc ? pc : get_frame_pc (fi));
-      /* At the start of a function our frame is in the stack pointer.  */
-      my_frame_is_in_sp (fi, this_cache);
     }
 
   /* Find the start of this function.  */
@@ -540,20 +550,16 @@ mn10300_analyze_prologue (struct frame_info *fi,
      and I don't want to do that anyway.  */
   if (status == 0)
     {
-      return pc;
+      addr = pc;
+      goto finish_prologue;
     }
 
   /* If we're in start, then give up.  */
   if (strcmp (name, "start") == 0)
     {
-      if (fi != NULL)
-	my_frame_is_last (fi);
-      return pc;
+      addr = pc;
+      goto finish_prologue;
     }
-
-  /* NOTE: from here on, we don't want to return without jumping to
-     finish_prologue.  */
-
 
   /* Figure out where to stop scanning.  */
   stop = fi ? pc : func_end;
@@ -565,7 +571,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
   addr = func_addr;
 
   /* Suck in two bytes.  */
-  if (addr + 2 >= stop || !safe_frame_unwind_memory (fi, addr, buf, 2))
+  if (addr + 2 > stop || !safe_frame_unwind_memory (fi, addr, buf, 2))
     goto finish_prologue;
 
   /* First see if this insn sets the stack pointer from a register; if
@@ -573,8 +579,6 @@ mn10300_analyze_prologue (struct frame_info *fi,
      so mark this as the bottom-most frame.  */
   if (buf[0] == 0xf2 && (buf[1] & 0xf3) == 0xf0)
     {
-      if (fi)
-	my_frame_is_last (fi);
       goto finish_prologue;
     }
 
@@ -599,6 +603,134 @@ mn10300_analyze_prologue (struct frame_info *fi,
 	goto finish_prologue;
     }
 
+  if (AM33_MODE == 2)
+    {
+      /* Determine if any floating point registers are to be saved.
+	 Look for one of the following three prologue formats:
+
+	[movm [regs],(sp)] [movm [regs],(sp)] [movm [regs],(sp)]
+
+	 add -SIZE,sp       add -SIZE,sp       add -SIZE,sp
+	 fmov fs#,(sp)      mov sp,a0/a1       mov sp,a0/a1
+	 fmov fs#,(#,sp)    fmov fs#,(a0/a1+)  add SIZE2,a0/a1
+	 ...                ...                fmov fs#,(a0/a1+)
+	 ...                ...                ...
+	 fmov fs#,(#,sp)    fmov fs#,(a0/a1+)  fmov fs#,(a0/a1+)
+
+	[mov sp,a3]        [mov sp,a3]
+	[add -SIZE2,sp]    [add -SIZE2,sp]                                 */
+
+      /* First, look for add -SIZE,sp (i.e. add imm8,sp  (0xf8feXX)
+                                         or add imm16,sp (0xfafeXXXX)
+                                         or add imm32,sp (0xfcfeXXXXXXXX)) */
+      imm_size = 0;
+      if (buf[0] == 0xf8 && buf[1] == 0xfe)
+	imm_size = 1;
+      else if (buf[0] == 0xfa && buf[1] == 0xfe)
+	imm_size = 2;
+      else if (buf[0] == 0xfc && buf[1] == 0xfe)
+	imm_size = 4;
+      if (imm_size != 0)
+	{
+	  /* An "add -#,sp" instruction has been found. "addr + 2 + imm_size"
+	     is the address of the next instruction. Don't modify "addr" until
+	     the next "floating point prologue" instruction is found. If this
+	     is not a prologue that saves floating point registers we need to
+	     be able to back out of this bit of code and continue with the
+	     prologue analysis. */
+	  if (addr + 2 + imm_size < stop)
+	    {
+	      if (!safe_frame_unwind_memory (fi, addr + 2 + imm_size, buf, 3))
+		goto finish_prologue;
+	      if ((buf[0] & 0xfc) == 0x3c)
+		{
+		  /* Occasionally, especially with C++ code, the "fmov"
+		     instructions will be preceded by "mov sp,aN"
+		     (aN => a0, a1, a2, or a3).
+
+		     This is a one byte instruction:  mov sp,aN = 0011 11XX
+		     where XX is the register number.
+
+		     Skip this instruction by incrementing addr. (We're
+		     committed now.) The "fmov" instructions will have the
+		     form "fmov fs#,(aN+)" in this case, but that will not
+		     necessitate a change in the "fmov" parsing logic below. */
+
+		  addr++;
+
+		  if ((buf[1] & 0xfc) == 0x20)
+		    {
+		      /* Occasionally, especially with C++ code compiled with
+			 the -fomit-frame-pointer or -O3 options, the
+			 "mov sp,aN" instruction will be followed by an
+			 "add #,aN" instruction. This indicates the
+			 "stack_size", the size of the portion of the stack
+			 containing the arguments. This instruction format is:
+			 add #,aN = 0010 00XX YYYY YYYY
+			 where XX        is the register number
+			       YYYY YYYY is the constant.
+			 Note the size of the stack (as a negative number) in
+			 the frame info structure. */
+		      if (fi)
+			stack_extra_size += -buf[2];
+
+		      addr += 2;
+		    }
+		}
+
+	      if ((buf[0] & 0xfc) == 0x3c ||
+		  buf[0] == 0xf9 || buf[0] == 0xfb)
+		{
+		  /* An "fmov" instruction has been found indicating that this
+		     prologue saves floating point registers (or, as described
+		     above, a "mov sp,aN" and possible "add #,aN" have been
+		     found and we will assume an "fmov" follows). Process the
+		     consecutive "fmov" instructions. */
+		  for (addr += 2 + imm_size;;addr += imm_size)
+		    {
+		      int regnum;
+
+		      /* Read the "fmov" instruction. */
+		      if (addr >= stop ||
+			  !safe_frame_unwind_memory (fi, addr, buf, 4))
+			goto finish_prologue;
+
+		      if (buf[0] != 0xf9 && buf[0] != 0xfb)
+			break;
+
+		      /* Get the floating point register number from the 
+			 2nd and 3rd bytes of the "fmov" instruction:
+			 Machine Code: 0000 00X0 YYYY 0000 =>
+			 Regnum: 000X YYYY */
+		      regnum = (buf[1] & 0x02) << 3;
+		      regnum |= ((buf[2] & 0xf0) >> 4) & 0x0f;
+
+		      /* Add this register number to the bit mask of floating
+			 point registers that have been saved. */
+		      fpregmask |= 1 << regnum;
+		  
+		      /* Determine the length of this "fmov" instruction.
+			 fmov fs#,(sp)   => 3 byte instruction
+			 fmov fs#,(#,sp) => 4 byte instruction */
+		      imm_size = (buf[0] == 0xf9) ? 3 : 4;
+		    }
+		}
+	      else
+		{
+		  /* No "fmov" was found. Reread the two bytes at the original
+		     "addr" to reset the state. */
+		  if (!safe_frame_unwind_memory (fi, addr, buf, 2))
+		    goto finish_prologue;
+		}
+	    }
+	  /* else the prologue consists entirely of an "add -SIZE,sp"
+	     instruction. Handle this below. */
+	}
+      /* else no "add -SIZE,sp" was found indicating no floating point
+	 registers are saved in this prologue. Do not increment addr. Pretend
+	 this bit of code never happened. */
+    }
+
   /* Now see if we set up a frame pointer via "mov sp,a3" */
   if (buf[0] == 0x3f)
     {
@@ -607,7 +739,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
       /* The frame pointer is now valid.  */
       if (fi)
 	{
-	  my_frame_is_in_fp (fi, this_cache);
+	  frame_in_fp = 1;
 	}
 
       /* Quit now if we're beyond the stop point.  */
@@ -644,10 +776,8 @@ mn10300_analyze_prologue (struct frame_info *fi,
       if (!safe_frame_unwind_memory (fi, addr + 2, buf, imm_size))
 	goto finish_prologue;
 
-      /* Note the size of the stack in the frame info structure.  */
-      stack_size = extract_signed_integer (buf, imm_size);
-      if (fi)
-	set_my_stack_size (fi, stack_size);
+      /* Note the size of the stack.  */
+      stack_extra_size += extract_signed_integer (buf, imm_size);
 
       /* We just consumed 2 + imm_size bytes.  */
       addr += 2 + imm_size;
@@ -659,7 +789,7 @@ mn10300_analyze_prologue (struct frame_info *fi,
  finish_prologue:
   /* Note if/where callee saved registers were saved.  */
   if (fi)
-    set_movm_offsets (fi, this_cache, movm_args);
+    set_reg_offsets (fi, this_cache, movm_args, fpregmask, stack_extra_size, frame_in_fp);
   return addr;
 }
 
@@ -942,6 +1072,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
+  int num_regs;
 
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
@@ -956,10 +1087,18 @@ mn10300_gdbarch_init (struct gdbarch_info info,
     case bfd_mach_mn10300:
       set_gdbarch_register_name (gdbarch, mn10300_generic_register_name);
       tdep->am33_mode = 0;
+      num_regs = 32;
       break;
     case bfd_mach_am33:
       set_gdbarch_register_name (gdbarch, am33_register_name);
       tdep->am33_mode = 1;
+      num_regs = 32;
+      break;
+    case bfd_mach_am33_2:
+      set_gdbarch_register_name (gdbarch, am33_2_register_name);
+      tdep->am33_mode = 2;
+      num_regs = 64;
+      set_gdbarch_fp0_regnum (gdbarch, 32);
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -968,7 +1107,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
     }
 
   /* Registers.  */
-  set_gdbarch_num_regs (gdbarch, E_NUM_REGS);
+  set_gdbarch_num_regs (gdbarch, num_regs);
   set_gdbarch_register_type (gdbarch, mn10300_register_type);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
   set_gdbarch_read_pc (gdbarch, mn10300_read_pc);

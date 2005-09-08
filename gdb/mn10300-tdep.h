@@ -51,8 +51,7 @@ enum {
   E_MCRL_REGNUM = 27,
   E_MCVF_REGNUM = 28,
   E_FPCR_REGNUM = 29,
-  E_FS0_REGNUM = 32,
-  E_NUM_REGS = 32
+  E_FS0_REGNUM = 32
 };
 
 enum movm_register_bits {

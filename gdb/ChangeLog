@@ -1,3 +1,17 @@
+2005-09-08  Kevin Buettner  <kevinb@redhat.com>
+
+	From Kevin Buettner, Andrew Cagney, Jackie Smith Cashion, and
+	Alexandre Oliva:
+	* mn10300-tdep.c (am33_2_register_name): New function.
+	(my_frame_is_in_sp, my_frame_is_in_fp, my_frame_is_last)
+	(set_my_stack_size): Delete.
+	(set_movm_offsets, set_reg_offsets): Rename the former to the
+	latter.  Update for handling am33.
+	(mn10300_analyze_prologue): Update for handling am33.  Also, make
+	minor improvements in quality of prologue analysis.
+	(mn10300_gdbarch_init):  Add am33 support.
+	* mn10300-tdep.h (E_NUM_REGS): Delete.
+
 2005-09-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-linux-tdep.c (mn10300_linux_svr4_fetch_link_map_offsets):
