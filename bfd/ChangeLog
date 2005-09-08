@@ -1,3 +1,9 @@
+2005-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1263
+	* elflink.c (elf_link_add_object_symbols): Abort for
+	--just-symbols on DSO.
+
 2005-09-08  Paul Brook  <paul@codesourcery.com>
 
 	* reloc.c: Rename BFD_RELOC_ARM_SMI to BFD_RELOC_ARM_SMC.

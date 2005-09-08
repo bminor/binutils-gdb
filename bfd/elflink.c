@@ -3291,11 +3291,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       int ret;
 
       /* ld --just-symbols and dynamic objects don't mix very well.
-	 Test for --just-symbols by looking at info set up by
-	 _bfd_elf_link_just_syms.  */
+	 ld shouldn't allow it.  */
       if ((s = abfd->sections) != NULL
 	  && s->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
-	goto error_return;
+	abort ();
 
       /* If this dynamic lib was specified on the command line with
 	 --as-needed in effect, then we don't want to add a DT_NEEDED
