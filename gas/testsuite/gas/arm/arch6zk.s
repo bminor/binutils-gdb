@@ -23,8 +23,8 @@ label:
 	wfi
 	yield
 	# ARMV6Z instructions
-	smi 0xec31
-	smine 0x13ce
+	smc 0xec31
+	smcne 0x13ce
 
 	# Add three nop instructions to ensure that the 
 	# output is 32-byte aligned as required for arm-aout.

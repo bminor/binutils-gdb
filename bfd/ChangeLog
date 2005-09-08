@@ -1,3 +1,9 @@
+2005-09-08  Paul Brook  <paul@codesourcery.com>
+
+	* reloc.c: Rename BFD_RELOC_ARM_SMI to BFD_RELOC_ARM_SMC.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2005-09-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/1301

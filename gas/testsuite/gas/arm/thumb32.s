@@ -609,9 +609,9 @@ shift:
 
 	.purgem sh
 
-smi:
-	smi	#0
-	smi	#0xabcd
+smc:
+	smc	#0
+	smc	#0xabcd
 
 smla:
 	smlabb	r0, r0, r0, r0

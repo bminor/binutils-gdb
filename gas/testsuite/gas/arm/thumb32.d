@@ -810,8 +810,8 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> fa60 f009 	ror\.w	r0, r0, r9
 0[0-9a-f]+ <[^>]+> fa60 f005 	ror\.w	r0, r0, r5
 0[0-9a-f]+ <[^>]+> fa71 f002 	rors\.w	r0, r1, r2
-0[0-9a-f]+ <[^>]+> f7f0 8000 	smi	#0	; 0x0
-0[0-9a-f]+ <[^>]+> f7fd 8bca 	smi	#43981	; 0xabcd
+0[0-9a-f]+ <[^>]+> f7f0 8000 	smc	#0	; 0x0
+0[0-9a-f]+ <[^>]+> f7fd 8bca 	smc	#43981	; 0xabcd
 0[0-9a-f]+ <[^>]+> fb10 0000 	smlabb	r0, r0, r0, r0
 0[0-9a-f]+ <[^>]+> fb10 0900 	smlabb	r9, r0, r0, r0
 0[0-9a-f]+ <[^>]+> fb19 0000 	smlabb	r0, r9, r0, r0

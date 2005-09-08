@@ -1,3 +1,11 @@
+2005-09-08  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_smi, do_t_smi): Rename ...
+	(do_smc, do_t_smc): ... to this.
+	(insns): Remane smi to smc.
+	(md_apply_fix, tc_gen_reloc): Rename BFD_RELOC_ARM_SMI to
+	BFD_RELOC_ARM_SMC.
+
 2005-09-07  Richard Henderson  <rth@redhat.com>
 
 	* dwarf2dbg.c (dwarf2_where): Set line->isa.

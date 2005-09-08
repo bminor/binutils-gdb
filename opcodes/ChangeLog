@@ -1,3 +1,7 @@
+2005-09-08  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (arm_opcodes, thumb32_opcodes): Rename smi to smc.
+
 2005-09-06  Chao-ying Fu  <fu@mips.com>
 
 	* mips-opc.c (MT32): New define.

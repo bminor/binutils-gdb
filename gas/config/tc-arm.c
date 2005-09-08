@@ -5095,9 +5095,9 @@ do_shift (void)
 }
 
 static void
-do_smi (void)
+do_smc (void)
 {
-  inst.reloc.type = BFD_RELOC_ARM_SMI;
+  inst.reloc.type = BFD_RELOC_ARM_SMC;
   inst.reloc.pc_rel = 0;
 }
 
@@ -7430,7 +7430,7 @@ do_t_simd (void)
 }
 
 static void
-do_t_smi (void)
+do_t_smc (void)
 {
   unsigned int value = inst.reloc.exp.X_add_number;
   constraint (inst.reloc.exp.X_op != O_constant,
@@ -8846,7 +8846,7 @@ static const struct asm_opcode insns[] =
 
 #undef ARM_VARIANT
 #define ARM_VARIANT ARM_EXT_V6Z
- TCE(smi,	1600070, f7f08000, 1, (EXPi), smi, t_smi),
+ TCE(smc,	1600070, f7f08000, 1, (EXPi), smc, t_smc),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT ARM_EXT_V6T2
@@ -11268,10 +11268,10 @@ md_apply_fix (fixS *	fixP,
       md_number_to_chars (buf+2, (valueT) (newval & 0xffff), THUMB_SIZE);
       break;
 
-    case BFD_RELOC_ARM_SMI:
+    case BFD_RELOC_ARM_SMC:
       if (((unsigned long) value) > 0xffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("invalid smi expression"));
+		      _("invalid smc expression"));
       newval = md_chars_to_number (buf, INSN_SIZE);
       newval |= (value & 0xf) | ((value & 0xfff0) << 4);
       md_number_to_chars (buf, newval, INSN_SIZE);
@@ -11866,7 +11866,7 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
 	  case BFD_RELOC_NONE:		   type = "NONE";	  break;
 	  case BFD_RELOC_ARM_OFFSET_IMM8:  type = "OFFSET_IMM8";  break;
 	  case BFD_RELOC_ARM_SHIFT_IMM:	   type = "SHIFT_IMM";	  break;
-	  case BFD_RELOC_ARM_SMI:	   type = "SMI";	  break;
+	  case BFD_RELOC_ARM_SMC:	   type = "SMC";	  break;
 	  case BFD_RELOC_ARM_SWI:	   type = "SWI";	  break;
 	  case BFD_RELOC_ARM_MULTI:	   type = "MULTI";	  break;
 	  case BFD_RELOC_ARM_CP_OFF_IMM:   type = "CP_OFF_IMM";	  break;

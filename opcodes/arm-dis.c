@@ -440,7 +440,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6T2, 0x07a00050, 0x0fa00070, "%22?usbfx%c\t%12-15r, %0-3r, #%7-11d, #%16-20W"},
 
   /* ARM V6Z instructions.  */
-  {ARM_EXT_V6Z, 0x01600070, 0x0ff000f0, "smi%c\t%e"},
+  {ARM_EXT_V6Z, 0x01600070, 0x0ff000f0, "smc%c\t%e"},
 
   /* ARM V6K instructions.  */
   {ARM_EXT_V6K, 0xf57ff01f, 0xffffffff, "clrex"},
@@ -968,7 +968,7 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_EXT_V6T2, 0xfbe00000, 0xfff000f0, "umlal\t%12-15r, %8-11r, %16-19r, %0-3r"},
   {ARM_EXT_V6T2, 0xfbe00060, 0xfff000f0, "umaal\t%12-15r, %8-11r, %16-19r, %0-3r"},
   {ARM_EXT_V6T2, 0xe8500f00, 0xfff00f00, "ldrex\t%12-15r, [%16-19r, #%0-7W]"},
-  {ARM_EXT_V6T2, 0xf7f08000, 0xfff0f000, "smi\t%K"},
+  {ARM_EXT_V6T2, 0xf7f08000, 0xfff0f000, "smc\t%K"},
   {ARM_EXT_V6T2, 0xf04f0000, 0xfbef8000, "mov%20's.w\t%8-11r, %M"},
   {ARM_EXT_V6T2, 0xf06f0000, 0xfbef8000, "mvn%20's.w\t%8-11r, %M"},
   {ARM_EXT_V6T2, 0xf810f000, 0xff70f000, "pld\t%a"},
