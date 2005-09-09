@@ -1,5 +1,10 @@
 2005-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elflink.c (elf_get_linked_section_vma): Fix a typo in comment.
+	* elfxx-ia64.c (elf_backend_link_order_error_handler): Likewise.
+
+2005-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/1263
 	* elflink.c (elf_link_add_object_symbols): Abort for
 	--just-symbols on DSO.
