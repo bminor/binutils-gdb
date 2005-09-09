@@ -1,3 +1,11 @@
+2005-09-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* elf32-am33lin.c (bfd.h, sysdep.h, elf-bfd.h, elf/mn10300.h):
+	Include.
+	(elf32_am33lin_grok_prstatus, elf32_am33lin_grok_psinfo): New
+	functions.
+	(elf_backend_grok_prstatus, elf_backend_grok_psinfo): Define.
+
 2005-09-09  Richard Earnshaw  <richard.earnshaw@arm.com>
 
 	* elf32-arm.c (elf32_arm_section_from_shdr): Accept SHT_ARM_PREEMPTMAP
