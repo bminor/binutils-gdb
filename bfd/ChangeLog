@@ -1,3 +1,8 @@
+2005-09-09  Richard Earnshaw  <richard.earnshaw@arm.com>
+
+	* elf32-arm.c (elf32_arm_section_from_shdr): Accept SHT_ARM_PREEMPTMAP
+	and SHT_ARM_ATTRIBUTES.
+
 2005-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (elf_get_linked_section_vma): Fix a typo in comment.

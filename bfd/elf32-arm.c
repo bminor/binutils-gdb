@@ -6510,6 +6510,8 @@ elf32_arm_section_from_shdr (bfd *abfd,
   switch (hdr->sh_type)
     {
     case SHT_ARM_EXIDX:
+    case SHT_ARM_PREEMPTMAP:
+    case SHT_ARM_ATTRIBUTES:
       break;
 
     default:
