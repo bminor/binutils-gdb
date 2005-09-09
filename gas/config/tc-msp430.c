@@ -1778,14 +1778,14 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		 of the insn from the fix piece of instruction that was emitted.
 		 Since next fragments may have variable size we tie debug info
 	         to the beginning of the instruction. */
-	      frag = frag_more (0);
+	      frag = frag_more (8);
 	      dwarf2_emit_insn (0);
-	      frag = frag_var/*iant*/ (rs_machine_dependent, 8, 2,
+	      bfd_putl16 ((bfd_vma) rc.sop, frag);
+	      frag = frag_variant (rs_machine_dependent, 8, 2,
 				   ENCODE_RELAX (rc.lpos, STATE_BITS10), /* Wild guess.  */
 				   exp.X_add_symbol,
 				   0,	/* Offset is zero if jump dist less than 1K.  */
 				   (char *) frag);
-	      bfd_putl16 ((bfd_vma) rc.sop, frag);
 	      break;
 	    }
 	}
@@ -1815,15 +1815,16 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      /* Relaxation required.  */
 	      struct hcodes_s hc = msp430_hcodes[opcode->insn_opnumb];
 
-	      frag = frag_more (0);
+	      frag = frag_more (8);
 	      dwarf2_emit_insn (0);
-	      frag = frag_var/*iant*/ (rs_machine_dependent, 8, 2,
+	      bfd_putl16 ((bfd_vma) hc.op0, frag);
+	      bfd_putl16 ((bfd_vma) hc.op1, frag+2);
+
+	      frag = frag_variant (rs_machine_dependent, 8, 2,
 				   ENCODE_RELAX (STATE_EMUL_BRANCH, STATE_BITS10), /* Wild guess.  */
 				   exp.X_add_symbol,
 				   0,	/* Offset is zero if jump dist less than 1K.  */
 				   (char *) frag);
-	      bfd_putl16 ((bfd_vma) hc.op0, frag);
-	      bfd_putl16 ((bfd_vma) hc.op1, frag+2);
 	      break;
 	    }
 	}
@@ -2305,7 +2306,7 @@ msp430_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS * fragP,
     {
       /* Look backwards.  */
       for (next_state = this_type->rlx_more; next_state;)
-	if (aim >= this_type->rlx_backward)
+	if (aim >= this_type->rlx_backward || !this_type->rlx_backward)
 	  next_state = 0;
 	else
 	  {
@@ -2319,7 +2320,7 @@ msp430_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS * fragP,
     {
       /* Look forwards.  */
       for (next_state = this_type->rlx_more; next_state;)
-	if (aim <= this_type->rlx_forward)
+	if (aim <= this_type->rlx_forward || !this_type->rlx_forward)
 	  next_state = 0;
 	else
 	  {
