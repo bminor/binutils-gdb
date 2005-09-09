@@ -2622,6 +2622,10 @@ get_arm_section_type_name (unsigned int sh_type)
     {
     case SHT_ARM_EXIDX:
       return "ARM_EXIDX";
+    case SHT_ARM_PREEMPTMAP:
+      return "ARM_PREEMPTMAP";
+    case SHT_ARM_ATTRIBUTES:
+      return "ARM_ATTRIBUTES";
     default:
       break;
     }
