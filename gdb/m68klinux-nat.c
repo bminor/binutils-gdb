@@ -1,7 +1,7 @@
 /* Motorola m68k native support for GNU/Linux.
 
-   Copyright 1996, 1998, 2000, 2001, 2002 Free Software Foundation,
-   Inc.
+   Copyright 1996, 1998, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,8 @@
 #include "gdbcore.h"
 #include "gdb_string.h"
 #include "regcache.h"
+#include "target.h"
+#include "linux-nat.h"
 
 #include "m68k-tdep.h"
 
@@ -170,7 +172,7 @@ fetch_register (int regno)
    If REGNO is negative, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time). */
 
-void
+static void
 old_fetch_inferior_registers (int regno)
 {
   if (regno >= 0)
@@ -237,7 +239,7 @@ store_register (int regno)
    If REGNO is negative, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
-void
+static void
 old_store_inferior_registers (int regno)
 {
   if (regno >= 0)
@@ -442,8 +444,8 @@ static void store_fpregs (int tid, int regno) {}
    this for all registers (including the floating point and SSE
    registers).  */
 
-void
-fetch_inferior_registers (int regno)
+static void
+m68k_linux_fetch_inferior_registers (int regno)
 {
   int tid;
 
@@ -498,8 +500,8 @@ fetch_inferior_registers (int regno)
 /* Store register REGNO back into the child process.  If REGNO is -1,
    do this for all registers (including the floating point and SSE
    registers).  */
-void
-store_inferior_registers (int regno)
+static void
+m68k_linux_store_inferior_registers (int regno)
 {
   int tid;
 
@@ -616,8 +618,22 @@ static struct core_fns linux_elf_core_fns =
   NULL					/* next */
 };
 
+void _initialize_m68k_linux_nat (void);
+
 void
 _initialize_m68k_linux_nat (void)
 {
+  struct target_ops *t;
+
+  /* Fill in the generic GNU/Linux methods.  */
+  t = linux_target ();
+
+  /* Add our register access methods.  */
+  t->to_fetch_registers = m68k_linux_fetch_inferior_registers;
+  t->to_store_registers = m68k_linux_store_inferior_registers;
+
+  /* Register the target.  */
+  add_target (t);
+
   deprecated_add_core_fns (&linux_elf_core_fns);
 }

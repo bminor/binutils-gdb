@@ -83,6 +83,8 @@
 @V@/gdb/alphabsd-nat.c @V@/gdb/alphb-nat.c
 @V@/gdb/alphabsd-tdep.c @V@/gdb/alphb-tdep.c
 @V@/gdb/alphanbsd-tdep.c @V@/gdb/alphnb-tdep.c
+@V@/gdb/alpha-linux-nat.c @V@/gdb/alphl-nat.c
+@V@/gdb/alpha-linux-tdep.c @V@/gdb/alphl-tdep.c
 @V@/gdb/arm-linux-nat.c @V@/gdb/armlin-nat.c
 @V@/gdb/arm-linux-tdep.c @V@/gdb/armlin-tdep.c
 @V@/gdb/armnbsd-nat.c @V@/gdb/armnbd-nat.c
@@ -201,6 +203,8 @@
 @V@/gdb/sparc64-sol2-tdep.c @V@/gdb/sp64s2-tdep.c
 @V@/gdb/sparcnbsd-nat.c @V@/gdb/spnb-nat.c
 @V@/gdb/sparcnbsd-tdep.c @V@/gdb/spnb-tdep.c
+@V@/gdb/sparc-linux-nat.c @V@/gdb/splx-nat.c
+@V@/gdb/sparc-linux-tdep.c @V@/gdb/splx-tdep.c
 @V@/gdb/sparc-sol2-nat.c @V@/gdb/spsol2-nat.c
 @V@/gdb/sparc-sol2-tdep.c @V@/gdb/spsol2-tdep.c
 @V@/gdb/testsuite/.gdbinit @V@/gdb/testsuite/gdb.ini

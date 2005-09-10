@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,8 @@
 
 #include "defs.h"
 #include "mips-tdep.h"
+#include "target.h"
+#include "linux-nat.h"
 
 /* Pseudo registers can not be read.  ptrace does not provide a way to
    read (or set) MIPS_PS_REGNUM, and there's no point in reading or
@@ -61,4 +63,12 @@ mips_linux_cannot_store_register (int regno)
     return 0;
   else
     return 1;
+}
+
+void _initialize_mips_linux_nat (void);
+
+void
+_initialize_mips_linux_nat (void)
+{
+  add_target (linux_target ());
 }

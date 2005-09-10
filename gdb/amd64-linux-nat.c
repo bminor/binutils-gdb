@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86-64.
 
-   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -147,8 +147,8 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regnum)
    this for all registers (including the floating point and SSE
    registers).  */
 
-void
-fetch_inferior_registers (int regnum)
+static void
+amd64_linux_fetch_inferior_registers (int regnum)
 {
   int tid;
 
@@ -184,8 +184,8 @@ fetch_inferior_registers (int regnum)
    -1, do this for all registers (including the floating-point and SSE
    registers).  */
 
-void
-store_inferior_registers (int regnum)
+static void
+amd64_linux_store_inferior_registers (int regnum)
 {
   int tid;
 
@@ -360,11 +360,13 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-void
-child_post_startup_inferior (ptid_t ptid)
+static void (*super_post_startup_inferior) (ptid_t ptid);
+
+static void
+amd64_linux_child_post_startup_inferior (ptid_t ptid)
 {
   i386_cleanup_dregs ();
-  linux_child_post_startup_inferior (ptid);
+  super_post_startup_inferior (ptid);
 }
 
 
@@ -374,6 +376,8 @@ void _initialize_amd64_linux_nat (void);
 void
 _initialize_amd64_linux_nat (void)
 {
+  struct target_ops *t;
+
   amd64_native_gregset32_reg_offset = amd64_linux_gregset32_reg_offset;
   amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;
   amd64_native_gregset64_reg_offset = amd64_linux_gregset64_reg_offset;
@@ -382,4 +386,18 @@ _initialize_amd64_linux_nat (void)
 	      == amd64_native_gregset32_num_regs);
   gdb_assert (ARRAY_SIZE (amd64_linux_gregset64_reg_offset)
 	      == amd64_native_gregset64_num_regs);
+
+  /* Fill in the generic GNU/Linux methods.  */
+  t = linux_target ();
+
+  /* Override the GNU/Linux inferior startup hook.  */
+  super_post_startup_inferior = t->to_post_startup_inferior;
+  t->to_post_startup_inferior = amd64_linux_child_post_startup_inferior;
+
+  /* Add our register access methods.  */
+  t->to_fetch_registers = amd64_linux_fetch_inferior_registers;
+  t->to_store_registers = amd64_linux_store_inferior_registers;
+
+  /* Register the target.  */
+  add_target (t);
 }

@@ -626,8 +626,14 @@ inf_ptrace_fetch_register (int regnum)
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
+  if (CANNOT_FETCH_REGISTER (regnum))
+    {
+      regcache_raw_supply (current_regcache, regnum, NULL);
+      return;
+    }
+
   /* Cater for systems like GNU/Linux, that implement threads as
-     seperate processes.  */
+     separate processes.  */
   pid = ptid_get_lwp (inferior_ptid);
   if (pid == 0)
     pid = ptid_get_pid (inferior_ptid);
@@ -639,7 +645,7 @@ inf_ptrace_fetch_register (int regnum)
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
   buf = alloca (size);
 
-  /* Read the register contents from the inferior a chuck at the time.  */
+  /* Read the register contents from the inferior a chunk at a time.  */
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {
       errno = 0;
@@ -676,8 +682,11 @@ inf_ptrace_store_register (int regnum)
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
+  if (CANNOT_STORE_REGISTER (regnum))
+    return;
+
   /* Cater for systems like GNU/Linux, that implement threads as
-     seperate processes.  */
+     separate processes.  */
   pid = ptid_get_lwp (inferior_ptid);
   if (pid == 0)
     pid = ptid_get_pid (inferior_ptid);
@@ -689,7 +698,7 @@ inf_ptrace_store_register (int regnum)
   gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
   buf = alloca (size);
 
-  /* Write the register contents into the inferior a chunk at the time.  */
+  /* Write the register contents into the inferior a chunk at a time.  */
   regcache_raw_collect (current_regcache, regnum, buf);
   for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
     {

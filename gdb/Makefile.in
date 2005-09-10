@@ -1374,7 +1374,7 @@ MAKEOVERRIDES=
 
 ALLDEPFILES = \
 	aix-thread.c \
-	alpha-nat.c alphabsd-nat.c \
+	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
 	alpha-osf1-tdep.c alphafbsd-tdep.c alpha-mdebug-tdep.c \
 	amd64-nat.c amd64-tdep.c \
@@ -1416,6 +1416,7 @@ ALLDEPFILES = \
 	m32r-linux-nat.c m32r-linux-tdep.c \
 	m68k-tdep.c \
 	m68kbsd-nat.c m68kbsd-tdep.c \
+	m68klinux-nat.c m68klinux-tdep.c \
 	m88k-tdep.c m88kbsd-nat.c \
 	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
@@ -1439,6 +1440,7 @@ ALLDEPFILES = \
 	ser-go32.c ser-pipe.c ser-tcp.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	solib-irix.c solib-svr4.c solib-sunos.c \
+	sparc-linux-nat.c \
 	sparc-linux-tdep.c sparc-nat.c sparc-sol2-nat.c sparc-sol2-tdep.c \
 	sparc-tdep.c sparc-sol2-nat.c sparc-sol2-tdep.c sparc64-linux-nat.c \
 	sparc64-linux-tdep.c sparc64-nat.c sparc64-sol2-tdep.c \
@@ -1669,6 +1671,7 @@ alphabsd-tdep.o: alphabsd-tdep.c $(defs_h) $(alpha_tdep_h) \
 	$(alphabsd_tdep_h)
 alphafbsd-tdep.o: alphafbsd-tdep.c $(defs_h) $(value_h) $(osabi_h) \
 	$(alpha_tdep_h)
+alpha-linux-nat.o: alpha-linux-nat.c $(defs_h) $(target_h) $(linux_nat_h)
 alpha-linux-tdep.o: alpha-linux-tdep.c $(defs_h) $(frame_h) $(gdb_assert_h) \
 	$(osabi_h) $(solib_svr4_h) $(alpha_tdep_h)
 alpha-mdebug-tdep.o: alpha-mdebug-tdep.c $(defs_h) $(frame_h) \
@@ -1699,7 +1702,7 @@ amd64fbsd-tdep.o: amd64fbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 amd64-linux-nat.o: amd64-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gdb_proc_service_h) $(gregset_h) $(amd64_tdep_h) \
-	$(i386_linux_tdep_h) $(amd64_nat_h)
+	$(i386_linux_tdep_h) $(amd64_nat_h) $(target_h)
 amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(regcache_h) $(osabi_h) $(symtab_h) $(gdb_string_h) $(amd64_tdep_h) \
 	$(solib_svr4_h)
@@ -1732,7 +1735,8 @@ arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 	$(gdb_assert_h) $(sim_regno_h) $(gdbcore_h) $(osabi_h) $(version_h) \
 	$(floatformat_h)
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
-	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h)
+	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h) \
+	$(target_h) $(linux_nat_h)
 arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(gdbtypes_h) $(floatformat_h) $(gdbcore_h) $(frame_h) $(regcache_h) \
 	$(doublest_h) $(solib_svr4_h) $(osabi_h) $(arm_tdep_h) \
@@ -2013,7 +2017,8 @@ hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
 	$(hppa_tdep_h) $(solib_som_h) $(solib_pa64_h) $(regset_h) \
 	$(exceptions_h) $(gdb_string_h)
 hppa-linux-nat.o: hppa-linux-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
-	$(gdb_string_h) $(inferior_h) $(hppa_tdep_h) $(gregset_h)
+	$(gdb_string_h) $(inferior_h) $(hppa_tdep_h) $(gregset_h) \
+	$(target_h) $(linux_nat_h)
 hppa-linux-tdep.o: hppa-linux-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
 	$(target_h) $(objfiles_h) $(solib_svr4_h) $(glibc_tdep_h) \
 	$(frame_unwind_h) $(trad_frame_h) $(dwarf2_frame_h) $(value_h) \
@@ -2050,7 +2055,7 @@ i386gnu-tdep.o: i386gnu-tdep.c $(defs_h) $(osabi_h) $(i386_tdep_h)
 i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gregset_h) $(i387_tdep_h) $(i386_tdep_h) $(i386_linux_tdep_h) \
-	$(gdb_proc_service_h)
+	$(gdb_proc_service_h) $(target_h)
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(osabi_h) $(reggroups_h) \
 	$(dwarf2_frame_h) $(gdb_string_h) $(i386_tdep_h) \
@@ -2092,7 +2097,7 @@ i387-tdep.o: i387-tdep.c $(defs_h) $(doublest_h) $(floatformat_h) $(frame_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) $(i387_tdep_h)
 ia64-linux-nat.o: ia64-linux-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(target_h) $(gdbcore_h) $(regcache_h) $(ia64_tdep_h) $(gdb_wait_h) \
-	$(gregset_h)
+	$(gregset_h) $(linux_nat_h)
 ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(ia64_tdep_h) \
 	$(arch_utils_h) $(gdbcore_h) $(regcache_h) $(osabi_h) $(solib_svr4_h)
 ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
@@ -2174,8 +2179,8 @@ linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(objc_lang_h) $(linespec_h) $(exceptions_h)
 linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_wait_h) $(gdb_assert_h) $(linux_nat_h) $(gdbthread_h) \
-	$(gdbcmd_h) $(regcache_h) $(elf_bfd_h) $(gregset_h) $(gdbcore_h) \
-	$(gdbthread_h) $(gdb_stat_h)
+	$(gdbcmd_h) $(regcache_h) $(inf_ptrace.h) $(auxv.h) $(elf_bfd_h) \
+	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h)
 linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h) \
 	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(exceptions_h) \
 	$(gdbthread_h) $(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) \
@@ -2194,7 +2199,7 @@ m2-valprint.o: m2-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(m2_lang_h) $(c_lang_h)
 m32r-linux-nat.o: m32r-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(gregset_h) $(m32r_tdep_h)
+	$(gregset_h) $(m32r_tdep_h) $(target_h)
 m32r-linux-tdep.o: m32r-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(osabi_h) $(reggroups_h) \
 	$(regset_h) $(gdb_string_h) $(glibc_tdep_h) $(solib_svr4_h) \
@@ -2225,7 +2230,7 @@ m68kbsd-tdep.o: m68kbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 m68klinux-nat.o: m68klinux-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(language_h) $(gdbcore_h) $(gdb_string_h) $(regcache_h) \
 	$(m68k_tdep_h) $(gdb_stat_h) $(floatformat_h) $(target_h) \
-	$(gregset_h)
+	$(gregset_h) $(target_h) $(linux_nat_h)
 m68klinux-tdep.o: m68klinux-tdep.c $(defs_h) $(gdbcore_h) $(doublest_h) \
 	$(floatformat_h) $(frame_h) $(target_h) $(gdb_string_h) \
 	$(gdbtypes_h) $(osabi_h) $(regcache_h) $(objfiles_h) $(symtab_h) \
@@ -2276,7 +2281,8 @@ mips64obsd-tdep.o: mips64obsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) \
 	$(regset_h) $(trad_frame_h) $(tramp_frame_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(mips_tdep_h) $(solib_svr4_h)
 mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(elf_bfd_h)
-mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h)
+mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h) $(target_h) \
+	$(linux_nat_h)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(mips_tdep_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(frame_h) $(regcache_h) $(trad_frame_h) \
@@ -2369,7 +2375,8 @@ ppcbug-rom.o: ppcbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h)
 ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(gdbcore_h) $(regcache_h) $(gdb_assert_h) \
-	$(gdb_wait_h) $(gregset_h) $(ppc_tdep_h)
+	$(gdb_wait_h) $(gregset_h) $(ppc_tdep_h) $(target_h) \
+	$(linux_nat_h)
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \
 	$(objfiles_h) $(regcache_h) $(value_h) $(osabi_h) $(regset_h) \
@@ -2480,7 +2487,7 @@ rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(ppc_tdep_h) $(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) \
 	$(frame_unwind_h) $(frame_base_h) $(reggroups_h)
 s390-nat.o: s390-nat.c $(defs_h) $(tm_h) $(regcache_h) $(inferior_h) \
-	$(s390_tdep_h)
+	$(s390_tdep_h) $(target_h) $(linux_nat_h)
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(objfiles_h) \
 	$(tm_h) $(__bfd_bfd_h) $(floatformat_h) $(regcache_h) \
@@ -2580,7 +2587,7 @@ sparc64fbsd-tdep.o: sparc64fbsd-tdep.c $(defs_h) $(frame_h) \
 	$(target_h) $(trad_frame_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(sparc64_tdep_h) $(solib_svr4_h)
 sparc64-linux-nat.o: sparc64-linux-nat.c $(defs_h) $(sparc64_tdep_h) \
-	$(sparc_nat_h)
+	$(sparc_nat_h) $(inferior_h) $(target_h) $(linux_nat_h)
 sparc64-linux-tdep.o: sparc64-linux-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(osabi_h) $(solib_svr4_h) \
 	$(symtab_h) $(trad_frame_h) $(tramp_frame_h) $(sparc64_tdep_h)
@@ -2603,6 +2610,8 @@ sparc64-tdep.o: sparc64-tdep.c $(defs_h) $(arch_utils_h) $(dwarf2_frame_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(inferior_h) $(symtab_h) $(objfiles_h) \
 	$(osabi_h) $(regcache_h) $(target_h) $(value_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(sparc64_tdep_h)
+sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(inferior_h) $(target_h) \
+	$(linux_nat_h)
 sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(gdbcore_h) $(osabi_h) $(regcache_h) \
 	$(solib_svr4_h) $(symtab_h) $(trad_frame_h) $(tramp_frame_h) \

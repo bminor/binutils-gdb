@@ -1,6 +1,6 @@
 /* Functions specific to running GDB native on HPPA running GNU/Linux.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,8 @@
 #include "regcache.h"
 #include "gdb_string.h"
 #include "inferior.h"
+#include "target.h"
+#include "linux-nat.h"
 
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
@@ -267,8 +269,8 @@ store_register (int regno)
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
 
-void
-fetch_inferior_registers (int regno)
+static void
+hppa_linux_fetch_inferior_registers (int regno)
 {
   if (-1 == regno)
     {
@@ -285,8 +287,8 @@ fetch_inferior_registers (int regno)
    regno == -1, otherwise store all general registers or all floating
    point registers depending upon the value of regno.  */
 
-void
-store_inferior_registers (int regno)
+static void
+hppa_linux_store_inferior_registers (int regno)
 {
   if (-1 == regno)
     {
@@ -373,4 +375,22 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 	to += 4;
       regcache_raw_collect (current_regcache, i, to);
    }
+}
+
+void _initialize_hppa_linux_nat (void);
+
+void
+_initialize_hppa_linux_nat (void)
+{
+  struct target_ops *t;
+
+  /* Fill in the generic GNU/Linux methods.  */
+  t = linux_target ();
+
+  /* Add our register access methods.  */
+  t->to_fetch_registers = arm_linux_fetch_inferior_registers;
+  t->to_store_registers = arm_linux_store_inferior_registers;
+
+  /* Register the target.  */
+  add_target (t);
 }

@@ -1,6 +1,7 @@
 /* Native support for GNU/Linux.
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -42,11 +43,6 @@ struct target_ops;
 #endif
 
 
-/* Override child_wait in `inftarg.c'.  */
-struct target_waitstatus;
-extern ptid_t child_wait (ptid_t ptid, struct target_waitstatus *ourstatus);
-#define CHILD_WAIT
-
 extern void lin_lwp_attach_lwp (ptid_t ptid, int verbose);
 #define ATTACH_LWP(ptid, verbose) lin_lwp_attach_lwp ((ptid), (verbose))
 
@@ -58,17 +54,3 @@ extern void lin_thread_get_thread_signals (sigset_t *mask);
 
 #define GDB_GREGSET_T  elf_gregset_t
 #define GDB_FPREGSET_T elf_fpregset_t
-
-/* Override child_pid_to_exec_file in 'inftarg.c'.  */
-#define CHILD_PID_TO_EXEC_FILE
-
-#define CHILD_INSERT_FORK_CATCHPOINT
-#define CHILD_INSERT_VFORK_CATCHPOINT
-#define CHILD_INSERT_EXEC_CATCHPOINT
-#define CHILD_POST_STARTUP_INFERIOR
-#define CHILD_POST_ATTACH
-#define CHILD_FOLLOW_FORK
-#define DEPRECATED_KILL_INFERIOR
-
-#define NATIVE_XFER_AUXV	procfs_xfer_auxv
-#include "auxv.h"		/* Declares it. */

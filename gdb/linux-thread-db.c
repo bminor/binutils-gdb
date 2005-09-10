@@ -1,6 +1,7 @@
 /* libthread_db assisted debugging support, generic parts.
 
-   Copyright 1999, 2000, 2001, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -961,12 +962,13 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   return ptid;
 }
 
-static int
-thread_db_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
-		       struct mem_attrib *attrib, struct target_ops *target)
+static LONGEST
+thread_db_xfer_partial (struct target_ops *ops, enum target_object object,
+			const char *annex, gdb_byte *readbuf,
+			const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
-  int xfer;
+  LONGEST xfer;
 
   if (is_thread (inferior_ptid))
     {
@@ -978,9 +980,8 @@ thread_db_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 	inferior_ptid = lwp_from_thread (inferior_ptid);
     }
 
-  xfer =
-    target_beneath->deprecated_xfer_memory (memaddr, myaddr, len, write,
-					    attrib, target);
+  xfer = target_beneath->to_xfer_partial (ops, object, annex,
+					  readbuf, writebuf, offset, len);
 
   do_cleanups (old_chain);
   return xfer;
@@ -1298,7 +1299,7 @@ init_thread_db_ops (void)
   thread_db_ops.to_wait = thread_db_wait;
   thread_db_ops.to_fetch_registers = thread_db_fetch_registers;
   thread_db_ops.to_store_registers = thread_db_store_registers;
-  thread_db_ops.deprecated_xfer_memory = thread_db_xfer_memory;
+  thread_db_ops.to_xfer_partial = thread_db_xfer_partial;
   thread_db_ops.to_kill = thread_db_kill;
   thread_db_ops.to_create_inferior = thread_db_create_inferior;
   thread_db_ops.to_post_startup_inferior = thread_db_post_startup_inferior;

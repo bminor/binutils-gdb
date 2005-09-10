@@ -1,7 +1,7 @@
 /* PPC GNU/Linux native support.
 
    Copyright 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,8 @@
 #include "gdbcore.h"
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "target.h"
+#include "linux-nat.h"
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -494,8 +496,8 @@ fetch_ppc_registers (int tid)
 /* Fetch registers from the child process.  Fetch all registers if
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
-void
-fetch_inferior_registers (int regno)
+static void
+ppc_linux_fetch_inferior_registers (int regno)
 {
   /* Overload thread id onto process id */
   int tid = TIDGET (inferior_ptid);
@@ -775,8 +777,8 @@ store_ppc_registers (int tid)
     store_spe_register (tid, -1);
 }
 
-void
-store_inferior_registers (int regno)
+static void
+ppc_linux_store_inferior_registers (int regno)
 {
   /* Overload thread id onto process id */
   int tid = TIDGET (inferior_ptid);
@@ -882,4 +884,22 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
       if (regno == -1 || regno == tdep->ppc_fpscr_regnum)
         right_fill_reg (tdep->ppc_fpscr_regnum, (fpp + 8 * 32));
     }
+}
+
+void _initialize_ppc_linux_nat (void);
+
+void
+_initialize_ppc_linux_nat (void)
+{
+  struct target_ops *t;
+
+  /* Fill in the generic GNU/Linux methods.  */
+  t = linux_target ();
+
+  /* Add our register access methods.  */
+  t->to_fetch_registers = ppc_linux_fetch_inferior_registers;
+  t->to_store_registers = ppc_linux_store_inferior_registers;
+
+  /* Register the target.  */
+  add_target (t);
 }

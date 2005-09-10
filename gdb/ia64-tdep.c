@@ -2460,17 +2460,19 @@ getunwind_table (void *buf, size_t len)
 {
   LONGEST x;
 
-  /* FIXME: This is a temporary solution to backtracing syscalls in corefiles.
-            To do this properly, the AUXV section should be used.  This
-	    fix will work as long as the kernel used to generate the corefile
-	    is equivalent to the kernel used to debug the corefile.  */
-  x = ia64_linux_xfer_unwind_table (&current_target, 
-		  		    TARGET_OBJECT_UNWIND_TABLE, NULL,
-			   	    buf, NULL, 0, len);
+  /* FIXME drow/2005-09-10: This code used to call
+     ia64_linux_xfer_unwind_table directly to fetch the unwind table
+     for the currently running ia64-linux kernel.  That data should
+     come from the core file and be accessed via the auxv vector; if
+     we want to preserve fall back to the running kernel's table, then
+     we should find a way to override the corefile layer's
+     xfer_partial method.  */
+  x = target_read_partial (&current_target, TARGET_OBJECT_UNWIND_TABLE, NULL,
+			   buf, 0, len);
 
   return (int)x;
 }
-	
+
 /* Get the kernel unwind table.  */				 
 static int
 get_kernel_table (unw_word_t ip, unw_dyn_info_t *di)

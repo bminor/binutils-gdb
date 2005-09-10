@@ -1,6 +1,6 @@
-/* Native-dependent code for GNU/Linux UltraSPARC.
-
-   Copyright 2003, 2005 Free Software Foundation, Inc.
+/* Native-dependent code for GNU/Linux SPARC.
+   Copyright 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,32 +20,14 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-
-#include "sparc64-tdep.h"
-#include "sparc-nat.h"
 #include "inferior.h"
 #include "target.h"
 #include "linux-nat.h"
 
-static const struct sparc_gregset sparc64_linux_ptrace_gregset =
-{
-  16 * 8,			/* "tstate" */
-  17 * 8,			/* %pc */
-  18 * 8,			/* %npc */
-  19 * 8,			/* %y */
-  -1,				/* %wim */
-  -1,				/* %tbr */
-  0 * 8,			/* %g1 */
-  -1,				/* %l0 */
-  4				/* sizeof (%y) */
-};
-
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64_linux_nat (void);
+void _initialialize_sparc_linux_nat (void);
 
 void
-_initialize_sparc64_linux_nat (void)
+_initialize_sparc_linux_nat (void)
 {
   struct target_ops *t;
 
@@ -58,6 +40,4 @@ _initialize_sparc64_linux_nat (void)
 
   /* Register the target.  */
   add_target (t);
-
-  sparc_gregset = &sparc64_linux_ptrace_gregset;
 }

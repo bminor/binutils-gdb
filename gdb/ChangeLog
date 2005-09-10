@@ -1,3 +1,141 @@
+2005-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (ALLDEPFILES): Update.
+	(alpha-linux-nat.o, sparc-linux-nat.o): New rules.
+	(amd64-linux-nat.o, arm-linux-nat.o, hppa-linux-nat.o)
+	(i386-linux-nat.o, ia64-linux-nat.o, linux-nat.o, m32r-linux-nat.o)
+	(m68klinux-nat.o, mips-linux-nat.o, ppc-linux-nat.o, s390-nat.o)
+	(sparc64-linux-nat.o): Update dependencies.
+	* alpha-linux-nat.c, sparc-linux-nat.c: New files.
+	* amd64-linux-nat.c (amd64_linux_fetch_inferior_registers): Renamed
+	from fetch_inferior_registers and made static.
+	(amd64_linux_store_inferior_registers): Renamed from
+	store_inferior_registers and made static.
+	(amd64_linux_child_post_start_inferior): Renamed from
+	child_post_startup_inferior and made static.  Call
+	super_post_startup_inferior.
+	(super_post_startup_inferior): New.
+	(_initialize_amd64_linux_nat): Set it.  Call linux_target and
+	add_target.
+	* arm-linux-nat.c (arm_linux_fetch_inferior_registers): Renamed
+	from fetch_inferior_registers and made static.
+	(arm_linux_store_inferior_registers): Renamed from
+	store_inferior_registers and made static.
+	(_initialize_arm_linux_nat): Add a prototype.  Use linux_target and
+	add_target.
+	* hppa-linux-nat.c (hppa_linux_fetch_inferior_registers): Renamed
+	from fetch_inferior_registers and made static.
+	(hppa_linux_store_inferior_registers): Renamed from
+	store_inferior_registers and made static.
+	(_initialize_hppa_linux_nat): New function.
+	* i386-linux-nat.c (i386_linux_fetch_inferior_registers): Renamed
+	from fetch_inferior_registers and made static.
+	(i386_linux_store_inferior_registers): Renamed from
+	store_inferior_registers and made static.
+	(i386_linux_resume): Renamed from child_resume and made static.
+	(i386_linux_child_post_start_inferior): Renamed from
+	child_post_startup_inferior and made static.  Call
+	super_post_startup_inferior.
+	(super_post_startup_inferior): New.
+	(_initialize_i386_linux_nat): New function.
+	* i386-nat.c: Remove LINUX_CHILD_POST_STARTUP_INFERIOR #ifndef.
+	* ia64-linux-nat.c (ia64_linux_xfer_unwind_table): Remove.
+	(super_xfer_partial): New.
+	(ia64_linux_xfer_partial): New function.  Use it.
+	(_initialize_ia64_linux_nat): New function.
+	* ia64-tdep.c (getunwind_table): Revert 2005-06-08 change; use
+	target_read_partial and document the problem.
+	* inf-ptrace.c (inf_ptrace_fetch_register): Use
+	CANNOT_FETCH_REGISTER.  Fix some comments.
+	(inf_ptrace_store_register): Use CANNOT_STORE_REGISTER.  Fix some
+	comments.
+	* linux-nat.c: Include "inf-ptrace.h" and "auxv.h".
+	(linux_ops, super_xfer_partial): New variables.
+	(linux_child_post_startup_inferior): Make static.
+	(child_post_startup_inferior): Delete.
+	(linux_nat_attach, linux_nat_detach, resume_callback)
+	(linux_nat_resume, linux_nat_wait, linux_nat_create_inferior)
+	(linux_nat_mourn_inferior): Use linux_ops instead of
+	deprecated_child_ops.
+	(child_wait): Do not depend on CHILD_WAIT.
+	(linux_nat_xfer_memory): Remove, replace by ...
+	(linux_nat_xfer_partial): ... this.  Use linux_ops->to_xfer_partial
+	instead of linux_proc_xfer_memory and child_xfer_memory.
+	(linux_nat_fetch_registers, linux_nat_store_registers)
+	(linux_nat_child_post_startup_inferior): New functions.
+	(init_linux_nat_ops): Use the new functions.
+	(linux_proc_xfer_memory): Remove, replace by ...
+	(linux_proc_xfer_partial): ... this.  Make static.
+	(linux_xfer_partial, linux_register_u_offset, linux_target): New
+	functions.
+	(_initialize_linux_nat): Do not modify deprecated_child_ops.
+	* linux-nat.h (linux_proc_xfer_memory): Remove prototype.
+	(struct mem_attrib, struct target_ops): Remove forward declarations.
+	(linux_child_post_startup_inferior): Remove prototype.
+	(linux_target): Add prototype.
+	* linux-thread-db.c (thread_db_xfer_memory): Remove, replace by ...
+	(thread_db_xfer_partial): ... this.
+	(init_thread_db_ops): Set to_xfer_partial instead of
+	deprecated_xfer_memory.
+	* m32r-linux-nat.c (m32r_linux_fetch_inferior_registers): Renamed
+	from fetch_inferior_registers and made static.
+	(m32r_linux_store_inferior_registers): Renamed from
+	store_inferior_registers and made static.
+	(_initialize_m32r_linux_nat): New function.
+	* m68klinux-nat.c (m68k_linux_fetch_inferior_registers): Renamed
+	from fetch_inferior_registers and made static.
+	(m68k_linux_store_inferior_registers): Renamed from
+	store_inferior_registers and made static.
+	(old_fetch_inferior_registers, old_store_inferior_registers): Made
+	static.
+	(_initialize_m68k_linux_nat): Use linux_target and add_target.
+	* mips-linux-nat.c (_initialize_mips_linux_nat): New function.
+	* ppc-linux-nat.c (ppc_linux_fetch_inferior_registers): Renamed
+	from fetch_inferior_registers and made static.
+	(ppc_linux_store_inferior_registers): Renamed from
+	store_inferior_registers and made static.
+	(_initialize_ppc_linux_nat): New function.
+	* s390-nat.c (s390_linux_fetch_inferior_registers): Renamed
+	from fetch_inferior_registers and made static.
+	(s390_linux_store_inferior_registers): Renamed from
+	store_inferior_registers and made static.
+	(_initialize_s390_nat): New function.
+	* sparc64-linux-nat.c (_initialize_sparc64_linux_nat): Use
+	linux_target and add_target.
+	* config/nm-linux.h: Don't include "auxv.h".
+	(struct target_waitstatus, child_wait, CHILD_WAIT)
+	(CHILD_PID_TO_EXEC_FILE, CHILD_INSERT_FORK_CATCHPOINT)
+	(CHILD_INSERT_VFORK_CATCHPOINT, CHILD_INSERT_EXEC_CATCHPOINT)
+	(CHILD_POST_STARTUP_INFERIOR, CHILD_POST_ATTACH, CHILD_FOLLOW_FORK)
+	(DEPRECATED_KILL_INFERIOR, NATIVE_XFER_AUXV): Delete.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Replace infptrace.o
+	and inftarg.o with inf-ptrace.o and alpha-linux-nat.o.
+	* config/sparc/linux.mh (NATDEPFILES): Replace infptrace.o and
+	inftarg.o with sparc-linux-nat.o.
+	* config/sparc/linux64.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.
+	* config/arm/linux.mh (NATDEPFILES): Replace infptrace.o and
+	inftarg.o with inf-ptrace.o.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mh (NATDEPFILES): Likewise.
+	* config/m32r/linux.mh (NATDEPFILES): Likewise.
+	* config/m68k/linux.mh (NATDEPFILES): Likewise.
+	* config/mips/linux.mh (NATDEPFILES): Likewise.
+	* config/pa/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Likewise.
+	* config/s390/s390.mh (NATDEPFILES): Likewise.
+	* config/i386/nm-linux.h (DEPRECATED_CHILD_RESUME): Don't define.
+	(LINUX_CHILD_POST_STARTUP_INFERIOR): Don't define.
+	* config/i386/nm-linux64.h (LINUX_CHILD_POST_STARTUP_INFERIOR):
+	Don't define.
+	* config/ia64/nm-linux.h: Don't include "target.h".
+	(NATIVE_XFER_UNWIND_TABLE, ia64_linux_xfer_unwind_table): Remove.
+	* config/djgpp/fnchange.lst: Add alpha-linux-tdep.c,
+	alpha-linux-nat.c, sparc-linux-tdep.c, and sparc-linux-nat.c.
+
 2005-09-08  Kevin Buettner  <kevinb@redhat.com>
 
 	From Kevin Buettner, Andrew Cagney, Jackie Smith Cashion, and

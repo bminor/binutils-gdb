@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "target.h"
 #include "linux-nat.h"
 
 #include "gdb_assert.h"
@@ -480,8 +481,8 @@ cannot_store_register (int regno)
    this for all registers (including the floating point and SSE
    registers).  */
 
-void
-fetch_inferior_registers (int regno)
+static void
+i386_linux_fetch_inferior_registers (int regno)
 {
   int tid;
 
@@ -514,7 +515,7 @@ fetch_inferior_registers (int regno)
       /* The call above might reset `have_ptrace_getregs'.  */
       if (!have_ptrace_getregs)
 	{
-	  fetch_inferior_registers (regno);
+	  i386_linux_fetch_inferior_registers (regno);
 	  return;
 	}
 
@@ -552,8 +553,8 @@ fetch_inferior_registers (int regno)
 /* Store register REGNO back into the child process.  If REGNO is -1,
    do this for all registers (including the floating point and SSE
    registers).  */
-void
-store_inferior_registers (int regno)
+static void
+i386_linux_store_inferior_registers (int regno)
 {
   int tid;
 
@@ -755,8 +756,8 @@ static const unsigned char linux_syscall[] = { 0xcd, 0x80 };
    If STEP is nonzero, single-step it.
    If SIGNAL is nonzero, give it that signal.  */
 
-void
-child_resume (ptid_t ptid, int step, enum target_signal signal)
+static void
+i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
 {
   int pid = PIDGET (ptid);
 
@@ -814,9 +815,34 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
     perror_with_name (("ptrace"));
 }
 
-void
-child_post_startup_inferior (ptid_t ptid)
+static void (*super_post_startup_inferior) (ptid_t ptid);
+
+static void
+i386_linux_child_post_startup_inferior (ptid_t ptid)
 {
   i386_cleanup_dregs ();
-  linux_child_post_startup_inferior (ptid);
+  super_post_startup_inferior (ptid);
+}
+
+void
+_initialize_i386_linux_nat (void)
+{
+  struct target_ops *t;
+
+  /* Fill in the generic GNU/Linux methods.  */
+  t = linux_target ();
+
+  /* Override the default ptrace resume method.  */
+  t->to_resume = i386_linux_resume;
+
+  /* Override the GNU/Linux inferior startup hook.  */
+  super_post_startup_inferior = t->to_post_startup_inferior;
+  t->to_post_startup_inferior = i386_linux_child_post_startup_inferior;
+
+  /* Add our register access methods.  */
+  t->to_fetch_registers = i386_linux_fetch_inferior_registers;
+  t->to_store_registers = i386_linux_store_inferior_registers;
+
+  /* Register the target.  */
+  add_target (t);
 }

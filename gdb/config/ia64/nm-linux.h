@@ -1,6 +1,6 @@
 /* Native support for GNU/Linux, for GDB, the GNU debugger.
 
-   Copyright 1999, 2000, 2001, 2004
+   Copyright 1999, 2000, 2001, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -74,16 +74,5 @@ extern int ia64_linux_insert_watchpoint (ptid_t ptid, CORE_ADDR addr,
   ia64_linux_remove_watchpoint (inferior_ptid, addr, len)
 extern int ia64_linux_remove_watchpoint (ptid_t ptid, CORE_ADDR addr,
                                          int len);
-
-#include "target.h"
-
-#define NATIVE_XFER_UNWIND_TABLE ia64_linux_xfer_unwind_table
-extern LONGEST ia64_linux_xfer_unwind_table (struct target_ops *ops, 
-					     enum target_object object,
-					     const char *annex, 
-					     void *readbuf,
-					     const void *writebuf,
-					     ULONGEST offset, 
-					     LONGEST len);
 
 #endif /* #ifndef NM_LINUX_H */

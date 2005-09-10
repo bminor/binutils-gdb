@@ -1,5 +1,7 @@
 /* Native debugging support for GNU/Linux (LWP layer).
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -63,14 +65,6 @@ struct lwp_info
   struct lwp_info *next;
 };
 
-/* Read/write to target memory via the Linux kernel's "proc file
-   system".  */
-struct mem_attrib;
-struct target_ops;
-
-extern int linux_proc_xfer_memory (CORE_ADDR addr, gdb_byte *myaddr, int len,
-				   int write, struct mem_attrib *attrib,
-				   struct target_ops *target);
 
 /* Find process PID's pending signal set from /proc/pid/status.  */
 void linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored);
@@ -80,9 +74,12 @@ extern void linux_record_stopped_pid (int pid);
 extern void linux_enable_event_reporting (ptid_t ptid);
 extern ptid_t linux_handle_extended_wait (int pid, int status,
 					  struct target_waitstatus *ourstatus);
-extern void linux_child_post_startup_inferior (ptid_t ptid);
 
 /* Iterator function for lin-lwp's lwp list.  */
 struct lwp_info *iterate_over_lwps (int (*callback) (struct lwp_info *, 
 						     void *), 
 				    void *data);
+
+/* Create a prototype generic Linux target.  The client can override
+   it with local methods.  */
+struct target_ops * linux_target (void);

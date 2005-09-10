@@ -1,5 +1,5 @@
 /* S390 native-dependent code for GDB, the GNU debugger.
-   Copyright 2001, 2003 Free Software Foundation, Inc
+   Copyright 2001, 2003, 2004, 2005 Free Software Foundation, Inc
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -25,6 +25,8 @@
 #include "tm.h"
 #include "regcache.h"
 #include "inferior.h"
+#include "target.h"
+#include "linux-nat.h"
 
 #include "s390-tdep.h"
 
@@ -200,8 +202,8 @@ store_fpregs (int tid, int regnum)
 
 /* Fetch register REGNUM from the child process.  If REGNUM is -1, do
    this for all registers.  */
-void
-fetch_inferior_registers (int regnum)
+static void
+s390_linux_fetch_inferior_registers (int regnum)
 {
   int tid = s390_inferior_tid ();
 
@@ -216,8 +218,8 @@ fetch_inferior_registers (int regnum)
 
 /* Store register REGNUM back into the child process.  If REGNUM is
    -1, do this for all registers.  */
-void
-store_inferior_registers (int regnum)
+static void
+s390_linux_store_inferior_registers (int regnum)
 {
   int tid = s390_inferior_tid ();
 
@@ -357,3 +359,20 @@ kernel_u_size (void)
   return sizeof (struct user);
 }
 
+void _initialize_s390_nat (void);
+
+void
+_initialize_s390_nat (void)
+{
+  struct target_ops *t;
+
+  /* Fill in the generic GNU/Linux methods.  */
+  t = linux_target ();
+
+  /* Add our register access methods.  */
+  t->to_fetch_registers = s390_linux_fetch_inferior_registers;
+  t->to_store_registers = s390_linux_store_inferior_registers;
+
+  /* Register the target.  */
+  add_target (t);
+}

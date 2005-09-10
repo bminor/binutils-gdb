@@ -34,6 +34,8 @@
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "inf-ptrace.h"
+#include "auxv.h"
 #include <sys/param.h>		/* for MAXPATHLEN */
 #include <sys/procfs.h>		/* for elf_gregset etc. */
 #include "elf-bfd.h"		/* for elfcore_write_* */
@@ -80,6 +82,16 @@
 #ifndef __WALL
 #define __WALL          0x40000000 /* Wait for any child.  */
 #endif
+
+/* The single-threaded native GNU/Linux target_ops.  We save a pointer for
+   the use of the multi-threaded target.  */
+static struct target_ops *linux_ops;
+
+/* The saved to_xfer_partial method, inherited from inf-ptrace.c.  Called
+   by our to_xfer_partial.   */
+static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
+				      const char *, gdb_byte *, const gdb_byte *,
+				      ULONGEST, LONGEST);
 
 static int debug_linux_nat;
 static void
@@ -319,19 +331,11 @@ child_post_attach (int pid)
   linux_enable_event_reporting (pid_to_ptid (pid));
 }
 
-void
+static void
 linux_child_post_startup_inferior (ptid_t ptid)
 {
   linux_enable_event_reporting (ptid);
 }
-
-#ifndef LINUX_CHILD_POST_STARTUP_INFERIOR
-void
-child_post_startup_inferior (ptid_t ptid)
-{
-  linux_child_post_startup_inferior (ptid);
-}
-#endif
 
 int
 child_follow_fork (struct target_ops *ops, int follow_child)
@@ -913,7 +917,7 @@ linux_nat_attach (char *args, int from_tty)
 
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
-  deprecated_child_ops.to_attach (args, from_tty);
+  linux_ops->to_attach (args, from_tty);
 
   /* Add the initial process as the first LWP to the list.  */
   lp = add_lwp (BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid)));
@@ -1023,7 +1027,7 @@ linux_nat_detach (char *args, int from_tty)
   sigemptyset (&blocked_mask);
 
   inferior_ptid = pid_to_ptid (GET_PID (inferior_ptid));
-  deprecated_child_ops.to_detach (args, from_tty);
+  linux_ops->to_detach (args, from_tty);
 }
 
 /* Resume LP.  */
@@ -1035,7 +1039,8 @@ resume_callback (struct lwp_info *lp, void *data)
     {
       struct thread_info *tp;
 
-      child_resume (pid_to_ptid (GET_LWP (lp->ptid)), 0, TARGET_SIGNAL_0);
+      linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+			    0, TARGET_SIGNAL_0);
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "RC:  PTRACE_CONT %s, 0, 0 (resume sibling)\n",
@@ -1109,7 +1114,7 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
   if (resume_all)
     iterate_over_lwps (resume_callback, NULL);
 
-  child_resume (ptid, step, signo);
+  linux_ops->to_resume (ptid, step, signo);
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog,
 			"LLR: %s %s, %s (resume event thread)\n",
@@ -1683,8 +1688,6 @@ resumed_callback (struct lwp_info *lp, void *data)
   return lp->resumed;
 }
 
-#ifdef CHILD_WAIT
-
 /* We need to override child_wait to support attaching to cloned
    processes, since a normal wait (as done by the default version)
    ignores those processes.  */
@@ -1788,8 +1791,6 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   return pid_to_ptid (pid);
 }
-
-#endif
 
 /* Stop an active thread, verify it still exists, then resume it.  */
 
@@ -1899,8 +1900,8 @@ retry:
       /* Resume the thread.  It should halt immediately returning the
          pending SIGSTOP.  */
       registers_changed ();
-      child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step,
-		    TARGET_SIGNAL_0);
+      linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+			    lp->step, TARGET_SIGNAL_0);
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: %s %s, 0, 0 (expect SIGSTOP)\n",
@@ -2101,8 +2102,8 @@ retry:
 	      lp->signalled = 0;
 
 	      registers_changed ();
-	      child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step,
-			    TARGET_SIGNAL_0);
+	      linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+				    lp->step, TARGET_SIGNAL_0);
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog,
 				    "LLW: %s %s, 0, 0 (discard SIGSTOP)\n",
@@ -2161,7 +2162,8 @@ retry:
 	     newly attached threads may cause an unwanted delay in
 	     getting them running.  */
 	  registers_changed ();
-	  child_resume (pid_to_ptid (GET_LWP (lp->ptid)), lp->step, signo);
+	  linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+				lp->step, signo);
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"LLW: %s %s, %s (preempt 'handle')\n",
@@ -2310,7 +2312,7 @@ static void
 linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
 			 int from_tty)
 {
-  deprecated_child_ops.to_create_inferior (exec_file, allargs, env, from_tty);
+  linux_ops->to_create_inferior (exec_file, allargs, env, from_tty);
 }
 
 static void
@@ -2325,23 +2327,23 @@ linux_nat_mourn_inferior (void)
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);
   sigemptyset (&blocked_mask);
 
-  deprecated_child_ops.to_mourn_inferior ();
+  linux_ops->to_mourn_inferior ();
 }
 
-static int
-linux_nat_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
-		       int write, struct mem_attrib *attrib,
-		       struct target_ops *target)
+static LONGEST
+linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
+			const char *annex, gdb_byte *readbuf,
+			const gdb_byte *writebuf,
+			ULONGEST offset, LONGEST len)
 {
   struct cleanup *old_chain = save_inferior_ptid ();
-  int xfer;
+  LONGEST xfer;
 
   if (is_lwp (inferior_ptid))
     inferior_ptid = pid_to_ptid (GET_LWP (inferior_ptid));
 
-  xfer = linux_proc_xfer_memory (memaddr, myaddr, len, write, attrib, target);
-  if (xfer == 0)
-    xfer = child_xfer_memory (memaddr, myaddr, len, write, attrib, target);
+  xfer = linux_ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
+				     offset, len);
 
   do_cleanups (old_chain);
   return xfer;
@@ -2380,6 +2382,26 @@ linux_nat_pid_to_str (ptid_t ptid)
 }
 
 static void
+linux_nat_fetch_registers (int regnum)
+{
+  /* to_fetch_registers will honor the LWP ID, so we can use it directly.  */
+  linux_ops->to_fetch_registers (regnum);
+}
+
+static void
+linux_nat_store_registers (int regnum)
+{
+  /* to_store_registers will honor the LWP ID, so we can use it directly.  */
+  linux_ops->to_store_registers (regnum);
+}
+
+static void
+linux_nat_child_post_startup_inferior (ptid_t ptid)
+{
+  linux_ops->to_post_startup_inferior (ptid);
+}
+
+static void
 init_linux_nat_ops (void)
 {
 #if 0
@@ -2392,17 +2414,16 @@ init_linux_nat_ops (void)
   linux_nat_ops.to_detach = linux_nat_detach;
   linux_nat_ops.to_resume = linux_nat_resume;
   linux_nat_ops.to_wait = linux_nat_wait;
-  /* fetch_inferior_registers and store_inferior_registers will
-     honor the LWP id, so we can use them directly.  */
-  linux_nat_ops.to_fetch_registers = fetch_inferior_registers;
-  linux_nat_ops.to_store_registers = store_inferior_registers;
-  linux_nat_ops.deprecated_xfer_memory = linux_nat_xfer_memory;
+  linux_nat_ops.to_fetch_registers = linux_nat_fetch_registers;
+  linux_nat_ops.to_store_registers = linux_nat_store_registers;
+  linux_nat_ops.to_xfer_partial = linux_nat_xfer_partial;
   linux_nat_ops.to_kill = linux_nat_kill;
   linux_nat_ops.to_create_inferior = linux_nat_create_inferior;
   linux_nat_ops.to_mourn_inferior = linux_nat_mourn_inferior;
   linux_nat_ops.to_thread_alive = linux_nat_thread_alive;
   linux_nat_ops.to_pid_to_str = linux_nat_pid_to_str;
-  linux_nat_ops.to_post_startup_inferior = child_post_startup_inferior;
+  linux_nat_ops.to_post_startup_inferior
+    = linux_nat_child_post_startup_inferior;
   linux_nat_ops.to_post_attach = child_post_attach;
   linux_nat_ops.to_insert_fork_catchpoint = child_insert_fork_catchpoint;
   linux_nat_ops.to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
@@ -2948,14 +2969,22 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
     }
 }
 
-int
-linux_proc_xfer_memory (CORE_ADDR addr, gdb_byte *myaddr, int len, int write,
-			struct mem_attrib *attrib, struct target_ops *target)
+/* Implement the to_xfer_partial interface for memory reads using the /proc
+   filesystem.  Because we can use a single read() call for /proc, this
+   can be much more efficient than banging away at PTRACE_PEEKTEXT,
+   but it doesn't support writes.  */
+
+static LONGEST
+linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
+			 const char *annex, gdb_byte *readbuf,
+			 const gdb_byte *writebuf,
+			 ULONGEST offset, LONGEST len)
 {
-  int fd, ret;
+  LONGEST ret;
+  int fd;
   char filename[64];
 
-  if (write)
+  if (object != TARGET_OBJECT_MEMORY || !readbuf)
     return 0;
 
   /* Don't bother for one word.  */
@@ -2974,9 +3003,9 @@ linux_proc_xfer_memory (CORE_ADDR addr, gdb_byte *myaddr, int len, int write,
      32-bit platforms (for instance, SPARC debugging a SPARC64
      application).  */
 #ifdef HAVE_PREAD64
-  if (pread64 (fd, myaddr, len, addr) != len)
+  if (pread64 (fd, readbuf, len, offset) != len)
 #else
-  if (lseek (fd, addr, SEEK_SET) == -1 || read (fd, myaddr, len) != len)
+  if (lseek (fd, offset, SEEK_SET) == -1 || read (fd, readbuf, len) != len)
 #endif
     ret = 0;
   else
@@ -3067,14 +3096,79 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
   fclose (procfile);
 }
 
+static LONGEST
+linux_xfer_partial (struct target_ops *ops, enum target_object object,
+                    const char *annex, gdb_byte *readbuf,
+		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+{
+  LONGEST xfer;
+
+  if (object == TARGET_OBJECT_AUXV)
+    return procfs_xfer_auxv (ops, object, annex, readbuf, writebuf,
+			     offset, len);
+
+  xfer = linux_proc_xfer_partial (ops, object, annex, readbuf, writebuf,
+				  offset, len);
+  if (xfer != 0)
+    return xfer;
+
+  return super_xfer_partial (ops, object, annex, readbuf, writebuf,
+			     offset, len);
+}
+
+#ifndef FETCH_INFERIOR_REGISTERS
+
+/* Return the address in the core dump or inferior of register
+   REGNO.  */
+
+static CORE_ADDR
+linux_register_u_offset (int regno)
+{
+  /* FIXME drow/2005-09-04: The hardcoded use of register_addr should go
+     away.  This requires disentangling the various definitions of it
+     (particularly alpha-nat.c's).  */
+  return register_addr (regno, 0);
+}
+
+#endif
+
+/* Create a prototype generic Linux target.  The client can override
+   it with local methods.  */
+
+struct target_ops *
+linux_target (void)
+{
+  struct target_ops *t;
+
+#ifdef FETCH_INFERIOR_REGISTERS
+  t = inf_ptrace_target ();
+#else
+  t = inf_ptrace_trad_target (linux_register_u_offset);
+#endif
+  t->to_wait = child_wait;
+  t->to_kill = kill_inferior;
+  t->to_insert_fork_catchpoint = child_insert_fork_catchpoint;
+  t->to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
+  t->to_insert_exec_catchpoint = child_insert_exec_catchpoint;
+  t->to_pid_to_exec_file = child_pid_to_exec_file;
+  t->to_post_startup_inferior = linux_child_post_startup_inferior;
+  t->to_post_attach = child_post_attach;
+  t->to_follow_fork = child_follow_fork;
+  t->to_find_memory_regions = linux_nat_find_memory_regions;
+  t->to_make_corefile_notes = linux_nat_make_corefile_notes;
+
+  super_xfer_partial = t->to_xfer_partial;
+  t->to_xfer_partial = linux_xfer_partial;
+
+  linux_ops = t;
+  return t;
+}
+
 void
 _initialize_linux_nat (void)
 {
   struct sigaction action;
   extern void thread_db_init (struct target_ops *);
-
-  deprecated_child_ops.to_find_memory_regions = linux_nat_find_memory_regions;
-  deprecated_child_ops.to_make_corefile_notes = linux_nat_make_corefile_notes;
 
   add_info ("proc", linux_nat_info_proc_cmd, _("\
 Show /proc process information about any running process.\n\
