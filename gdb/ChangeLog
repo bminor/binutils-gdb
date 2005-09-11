@@ -1,3 +1,20 @@
+2005-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/s390/nm-linux.h (KERNEL_U_SIZE): Remove.
+	(PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE): Likewise.
+	(s390_stopped_by_watchpoint, s390_insert_watchpoint,
+	s390_remove_watchpoint, TARGET_CAN_USE_HARDWARE_WATCHPOINT,
+	TARGET_REGION_OK_FOR_HW_WATCHPOINT, HAVE_CONTINUABLE_WATCHPOINT,
+	STOPPED_BY_WATCHPOINT, target_insert_watchpoint,
+	target_remove_watchpoint): Likewise.
+	* s390-nat.c: Remove include of <sys/user.h>.
+	(kernel_u_size): Remove.
+	(s390_stopped_by_watchpoint): Make static.
+	(s390_insert_watchpoint, s390_remove_watchpoint): Likewise.
+	(s390_can_use_hw_breakpoint): New function.
+	(s390_region_size_ok_for_hw_watchpoint): Likewise.
+	(_initialize_s390_nat): Add watchpoint methods to target.
+
 2005-09-10  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 

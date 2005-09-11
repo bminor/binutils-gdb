@@ -30,33 +30,7 @@
 
 /* ptrace access.  */
 
-#define PTRACE_ARG3_TYPE long
-#define PTRACE_XFER_TYPE long
-
 #define FETCH_INFERIOR_REGISTERS
-
-#define KERNEL_U_SIZE kernel_u_size()
-extern int kernel_u_size (void);
-
-
-/* Hardware watchpoints.  */
-
-extern int s390_stopped_by_watchpoint (void);
-extern int s390_insert_watchpoint (CORE_ADDR addr, int len);
-extern int s390_remove_watchpoint (CORE_ADDR addr, int len);
-
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
-#define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr, len) 1
-#define HAVE_CONTINUABLE_WATCHPOINT 1
-
-#define STOPPED_BY_WATCHPOINT(w) \
-  s390_stopped_by_watchpoint ()
-
-#define target_insert_watchpoint(addr, len, type) \
-  s390_insert_watchpoint (addr, len)
-
-#define target_remove_watchpoint(addr, len, type) \
-  s390_remove_watchpoint (addr, len)
 
 
 #endif /* nm_linux.h */

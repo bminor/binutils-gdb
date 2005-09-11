@@ -34,7 +34,6 @@
 #include <sys/ptrace.h>
 #include <asm/types.h>
 #include <sys/procfs.h>
-#include <sys/user.h>
 #include <sys/ucontext.h>
 
 
@@ -250,7 +249,7 @@ struct watch_area
 
 static struct watch_area *watch_base = NULL;
 
-int
+static int
 s390_stopped_by_watchpoint (void)
 {
   per_lowcore_bits per_lowcore;
@@ -310,7 +309,7 @@ s390_fix_watch_points (void)
     perror_with_name (_("Couldn't modify watchpoint status"));
 }
 
-int
+static int
 s390_insert_watchpoint (CORE_ADDR addr, int len)
 {
   struct watch_area *area = xmalloc (sizeof (struct watch_area));
@@ -327,7 +326,7 @@ s390_insert_watchpoint (CORE_ADDR addr, int len)
   return 0;
 }
 
-int
+static int
 s390_remove_watchpoint (CORE_ADDR addr, int len)
 {
   struct watch_area *area, **parea;
@@ -352,12 +351,18 @@ s390_remove_watchpoint (CORE_ADDR addr, int len)
   return 0;
 }
 
-
-int
-kernel_u_size (void)
+static int
+s390_can_use_hw_breakpoint (int type, int cnt, int othertype)
 {
-  return sizeof (struct user);
+  return 1;
 }
+
+static int
+s390_region_size_ok_for_hw_watchpoint (int cnt)
+{
+  return 1;
+}
+
 
 void _initialize_s390_nat (void);
 
@@ -372,6 +377,14 @@ _initialize_s390_nat (void)
   /* Add our register access methods.  */
   t->to_fetch_registers = s390_linux_fetch_inferior_registers;
   t->to_store_registers = s390_linux_store_inferior_registers;
+
+  /* Add our watchpoint methods.  */
+  t->to_can_use_hw_breakpoint = s390_can_use_hw_breakpoint;
+  t->to_region_size_ok_for_hw_watchpoint = s390_region_size_ok_for_hw_watchpoint;
+  t->to_have_continuable_watchpoint = 1;
+  t->to_stopped_by_watchpoint = s390_stopped_by_watchpoint;
+  t->to_insert_watchpoint = s390_insert_watchpoint;
+  t->to_remove_watchpoint = s390_remove_watchpoint;
 
   /* Register the target.  */
   add_target (t);
