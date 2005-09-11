@@ -18,6 +18,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <stdlib.h>
+#include <string.h>
 
 struct _simple_struct {
   int integer;
