@@ -35,8 +35,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-set my_mi_gdb_prompt "\\(gdb\\)\[ \]*\[\r\n\]*"
-
 mi_gdb_exit
 mi_gdb_start separate-inferior-tty
 mi_delete_breakpoints
@@ -61,9 +59,11 @@ mi_gdb_test "402-stack-list-frames" "402\\^done,stack=\\\[frame=\{level=\"0\",ad
 # Continue back to main()
 #
 mi_gdb_test "403-exec-continue" \
-  "403\\^running\[\r\n\]+${my_mi_gdb_prompt}403\\\*stopped" \
+  "403\\^running" \
   "testing exec continue" \
   "hi in foo\[\r\n\]\+"
+
+mi_gdb_test "" "403\\*stopped" "finished exec continue"
 
 mi_gdb_test "404-stack-list-frames 0 0" \
   "404\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\"\}.*\\\]" \
@@ -91,8 +91,9 @@ mi_gdb_test "407-stack-list-frames" \
   "list stack frames"
 
 
-mi_gdb_test "408-exec-continue" \
-  "408\\^running\[\r\n\]+${my_mi_gdb_prompt}408\\\*stopped"
+mi_gdb_test "408-exec-continue" "408\\^running"
+
+mi_gdb_test "" "408\\*stopped.*" "finished exec continue"
 
 mi_gdb_test "409-stack-list-frames 0 0" \
   "409\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\"\}.*\\\]" \

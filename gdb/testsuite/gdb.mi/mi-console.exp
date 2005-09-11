@@ -58,15 +58,8 @@ mi_gdb_test "47-exec-next" \
 	    "47\\^running" \
 	    "Testing console output" \
 	    "Hello \\\\\"!\[\r\n\]+"
-    
-gdb_expect {
-    -re "47\\*stopped.*$mi_gdb_prompt$" {
-	pass "Finished step over hello"
-    }
-    timeout {
-	fail "Finished step over hello (timeout)"
-    }
-}
 
+mi_gdb_test "" "47\\*stopped.*" "Finished step over hello"
+    
 mi_gdb_exit
 return 0

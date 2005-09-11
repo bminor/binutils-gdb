@@ -1,5 +1,13 @@
 2005-09-11  Bob Rossi  <bob@brasko.net>
 
+ 	* lib/mi-support.exp (mi_gdb_test): Change -re to not be anchored.
+ 	* gdb.mi/mi-syn-frame.exp: Call mi_gdb_test twice instead of once for 
+ 	commands that return an MI output command and an asyncronous MI output
+ 	command.
+	* gdb.mi/mi-console.exp: Ditto.
+
+2005-09-11  Bob Rossi  <bob@brasko.net>
+
 	* gdb.mi/mi-var-child.c: Include <string.h>.
 
 2005-09-10  Daniel Jacobowitz  <dan@codesourcery.com>

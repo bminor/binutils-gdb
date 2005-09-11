@@ -659,7 +659,15 @@ proc mi_gdb_test { args } {
 	    gdb_start
 	    set result -1
 	}
-	 -re "\[\r\n\]*($pattern)\[\r\n\]+$mi_gdb_prompt\[ \]*$" {
+	 -re "\[\r\n\]*($pattern)\[\r\n\]+$mi_gdb_prompt\[ \]*" {
+	    # NOTE, there is no trailing anchor because with GDB/MI, 
+	    # asynchronous responses can happen at any point, causing more 
+	    # data to be available.  Normally an anchor is used to make 
+	    # sure the end of the output is matched, however, $mi_gdb_prompt 
+	    # is just as good of an anchor since mi_gdb_test is meant to 
+	    # match a single mi output command.  If a second GDB/MI output 
+	    # response is sent, it will be in the buffer for the next 
+	    # time mi_gdb_test is called.
 	    if ![string match "" $message] then {
 		pass "$message"
 	    }
