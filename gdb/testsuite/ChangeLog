@@ -1,5 +1,10 @@
 2005-09-13  Paul Gilliam  <pgilliam@us.ibm.com>
 
+        * gdb.arch/altivec-regs.exp: Adjust "info reg vrsave" and "info reg
+        vscr" tests to match output.
+
+2005-09-13  Paul Gilliam  <pgilliam@us.ibm.com>
+
         * gdb.arch/altivec-regs.exp: Adjust "print $vx<i>" tests to match
         output.
 

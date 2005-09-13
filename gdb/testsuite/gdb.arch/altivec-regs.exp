@@ -113,8 +113,8 @@ for {set i 0} {$i < 32} {incr i 1} {
         gdb_test "info reg vr$i" "vr$i.*$vector_register" "info reg vr$i"
 }
 
-gdb_test "info reg vrsave" "vrsave.*0x1" "info reg vrsave"
-gdb_test "info reg vscr" "vscr.*0x1" "info reg vscr"
+gdb_test "info reg vrsave" "vrsave.*0x1 +1" "info reg vrsave"
+gdb_test "info reg vscr" "vscr.*0x1 +1" "info reg vscr"
 
 # Now redo the same tests, but using the print command.
 # Note: in LE case, the char array is printed WITHOUT the last character.
