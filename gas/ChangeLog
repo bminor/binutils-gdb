@@ -1,3 +1,9 @@
+2005-09-14  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (tc_x86_regname_to_dw2regnum): Add selector
+	registers, floating point control and status words, and mxcsr as
+	well as (for 64-bit code) segment base registers and rflags.
+
 2005-09-09  Dmitry Diky  <diwil@spec.ru>
 
 	* config/tc-msp430.c (msp430_operands): Undo last changes. Instead...
