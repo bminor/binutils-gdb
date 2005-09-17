@@ -1,5 +1,5 @@
 /* Thread management interface, for the remote server for GDB.
-   Copyright 2002
+   Copyright 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
@@ -103,6 +103,10 @@ thread_db_err_str (td_err_e err)
       return "only part of register set was written/read";
     case TD_NOXREGS:
       return "X register set not available for this thread";
+#ifdef HAVE_TD_VERSION
+    case TD_VERSION:
+      return "version mismatch between libthread_db and libpthread";
+#endif
     default:
       snprintf (buf, sizeof (buf), "unknown thread_db error '%d'", err);
       return buf;
@@ -361,7 +365,8 @@ thread_db_init ()
       return 1;
 
     default:
-      warning ("error initializing thread_db library.");
+      warning ("error initializing thread_db library: %s",
+	       thread_db_err_str (err));
     }
 
   return 0;

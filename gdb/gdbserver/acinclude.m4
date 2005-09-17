@@ -38,6 +38,6 @@ AC_DEFUN([SRV_CHECK_THREAD_DB],
   [td_ta_new();],
   [srv_cv_thread_db="$thread_db"],
   [srv_cv_thread_db=no])
-  ]])
+  ])
  LIBS="$old_LIBS"
-)])
+])])

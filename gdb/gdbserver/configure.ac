@@ -142,6 +142,13 @@ fi
 if test "$srv_linux_thread_db" = "yes"; then
   srv_thread_depfiles="thread-db.o proc-service.o"
   USE_THREAD_DB="-DUSE_THREAD_DB"
+  AC_CACHE_CHECK([for TD_VERSION], gdbsrv_cv_have_td_version,
+  [AC_TRY_COMPILE([#include <thread_db.h>], [TD_VERSION;],
+                  [gdbsrv_cv_have_td_version=yes],
+                  [gdbsrv_cv_have_td_version=no])])
+  if test $gdbsrv_cv_have_td_version = yes; then
+    AC_DEFINE(HAVE_TD_VERSION, 1, [Define if TD_VERSION is available.])
+  fi
 fi
 
 GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_thread_depfiles"

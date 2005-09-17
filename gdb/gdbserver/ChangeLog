@@ -1,3 +1,14 @@
+2005-09-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* acinclude.m4: Correct quoting.
+	* aclocal.m4: Regenerated.
+
+	Suggested by SZOKOVACS Robert <szo@ies.hu>:
+	* thread-db.c (thread_db_err_str): Handle TD_VERSION.
+	(thread_db_init): Call thread_db_err_str.
+	* configure.ac: Check for TD_VERSION.
+	* config.in, configure: Regenerated.
+
 2005-07-31  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* server.h (error, fatal, warning): Add ATTR_FORMAT.
