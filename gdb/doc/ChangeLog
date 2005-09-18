@@ -1,3 +1,8 @@
+2005-09-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Contributors): Thank Andrew Cagney for releases
+	6.2 and 6.3.
+
 2005-08-27  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (File Options): Don't document --mapped, it's gone
