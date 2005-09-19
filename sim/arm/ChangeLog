@@ -1,3 +1,13 @@
+2005-09-19  Paul Brook  <paul@codesourcery.com>
+
+	* armdefs.h: Define ARMsword and ARMsdword. Use stdint.h when
+	available.
+	* armemu.c: Use them.
+	* armvirt.c (ARMul_MemoryInit): Use correct type for size.
+	* configure.ac: Check for stdint.h.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2005-05-24  Nick Clifton  <nickc@redhat.com>
 
 	* thumbemu.c (handle_v6_thumb_insn): New function.

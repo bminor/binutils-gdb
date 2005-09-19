@@ -139,7 +139,7 @@ ARMul_MemoryInit (ARMul_State * state, unsigned long initmemsize)
   if (initmemsize)
     state->MemSize = initmemsize;
 
-  pagetable = (ARMword **) malloc (sizeof (ARMword) * NUMPAGES);
+  pagetable = (ARMword **) malloc (sizeof (ARMword *) * NUMPAGES);
 
   if (pagetable == NULL)
     return FALSE;

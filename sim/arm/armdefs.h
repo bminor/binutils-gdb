@@ -15,6 +15,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. */
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,8 +30,18 @@
 typedef char *VoidStar;
 #endif
 
-typedef unsigned long ARMword;	/* must be 32 bits wide */
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+typedef uint32_t ARMword;
+typedef int32_t ARMsword;
+typedef uint64_t ARMdword;
+typedef int64_t ARMsdword;
+#else
+typedef unsigned int ARMword;	/* must be 32 bits wide */
+typedef signed int ARMsword;
 typedef unsigned long long ARMdword;	/* Must be at least 64 bits wide.  */
+typedef signed long long ARMsdword;
+#endif
 typedef struct ARMul_State ARMul_State;
 
 typedef unsigned ARMul_CPInits (ARMul_State * state);

@@ -9,7 +9,7 @@ sinclude(../common/aclocal.m4)
 # it by inlining the macro's contents.
 sinclude(../common/common.m4)
 
-AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(unistd.h stdint.h)
 
 COPRO="armcopro.o maverick.o iwmmxt.o"
 

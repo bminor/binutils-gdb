@@ -1584,9 +1584,9 @@ check_PMUintr:
 		      && (BIT (5) == 0 || BITS (12, 15) == 0))
 		    {
 		      /* ElSegundo SMLAWy/SMULWy insn.  */
-		      unsigned long long op1 = state->Reg[BITS (0, 3)];
-		      unsigned long long op2 = state->Reg[BITS (8, 11)];
-		      unsigned long long result;
+		      ARMdword op1 = state->Reg[BITS (0, 3)];
+		      ARMdword op2 = state->Reg[BITS (8, 11)];
+		      ARMdword result;
 
 		      if (BIT (6))
 			op2 >>= 16;
@@ -1733,10 +1733,10 @@ check_PMUintr:
 		  if (BIT (4) == 0 && BIT (7) == 1)
 		    {
 		      /* ElSegundo SMLALxy insn.  */
-		      unsigned long long op1 = state->Reg[BITS (0, 3)];
-		      unsigned long long op2 = state->Reg[BITS (8, 11)];
-		      unsigned long long dest;
-		      unsigned long long result;
+		      ARMdword op1 = state->Reg[BITS (0, 3)];
+		      ARMdword op2 = state->Reg[BITS (8, 11)];
+		      ARMdword dest;
+		      ARMdword result;
 
 		      if (BIT (5))
 			op1 >>= 16;
@@ -1749,7 +1749,7 @@ check_PMUintr:
 		      if (op2 & 0x8000)
 			op2 -= 65536;
 
-		      dest = (unsigned long long) state->Reg[BITS (16, 19)] << 32;
+		      dest = (ARMdword) state->Reg[BITS (16, 19)] << 32;
 		      dest |= state->Reg[BITS (12, 15)];
 		      dest += op1 * op2;
 		      state->Reg[BITS (12, 15)] = dest;
@@ -3684,8 +3684,8 @@ check_PMUintr:
 		      {
 			/* XScale MIA instruction.  Signed multiplication of
 			   two 32 bit values and addition to 40 bit accumulator.  */
-			long long Rm = state->Reg[MULLHSReg];
-			long long Rs = state->Reg[MULACCReg];
+			ARMsdword Rm = state->Reg[MULLHSReg];
+			ARMsdword Rs = state->Reg[MULACCReg];
 
 			if (Rm & (1 << 31))
 			  Rm -= 1ULL << 32;
@@ -3704,7 +3704,7 @@ check_PMUintr:
 			ARMword t2 = state->Reg[MULACCReg] >> 16;
 			ARMword t3 = state->Reg[MULLHSReg] & 0xffff;
 			ARMword t4 = state->Reg[MULACCReg] & 0xffff;
-			long long t5;
+			ARMsdword t5;
 
 			if (t1 & (1 << 15))
 			  t1 -= 1 << 16;
@@ -3734,7 +3734,7 @@ check_PMUintr:
 			/* XScale MIAxy instruction.  */
 			ARMword t1;
 			ARMword t2;
-			long long t5;
+			ARMsdword t5;
 
 			if (BIT (17))
 			  t1 = state->Reg[MULLHSReg] >> 16;
@@ -3926,9 +3926,9 @@ GetDPRegRHS (ARMul_State * state, ARMword instr)
 	  if (shamt == 0)
 	    return (base);
 	  else if (shamt >= 32)
-	    return ((ARMword) ((long int) base >> 31L));
+	    return ((ARMword) ((ARMsword) base >> 31L));
 	  else
-	    return ((ARMword) ((long int) base >> (int) shamt));
+	    return ((ARMword) ((ARMsword) base >> (int) shamt));
 	case ROR:
 	  shamt &= 0x1f;
 	  if (shamt == 0)
@@ -3958,9 +3958,9 @@ GetDPRegRHS (ARMul_State * state, ARMword instr)
 	    return (base >> shamt);
 	case ASR:
 	  if (shamt == 0)
-	    return ((ARMword) ((long int) base >> 31L));
+	    return ((ARMword) ((ARMsword) base >> 31L));
 	  else
-	    return ((ARMword) ((long int) base >> (int) shamt));
+	    return ((ARMword) ((ARMsword) base >> (int) shamt));
 	case ROR:
 	  if (shamt == 0)
 	    /* It's an RRX.  */
@@ -4041,12 +4041,12 @@ GetDPSRegRHS (ARMul_State * state, ARMword instr)
 	  else if (shamt >= 32)
 	    {
 	      ASSIGNC (base >> 31L);
-	      return ((ARMword) ((long int) base >> 31L));
+	      return ((ARMword) ((ARMsword) base >> 31L));
 	    }
 	  else
 	    {
-	      ASSIGNC ((ARMword) ((long int) base >> (int) (shamt - 1)) & 1);
-	      return ((ARMword) ((long int) base >> (int) shamt));
+	      ASSIGNC ((ARMword) ((ARMsword) base >> (int) (shamt - 1)) & 1);
+	      return ((ARMword) ((ARMsword) base >> (int) shamt));
 	    }
 	case ROR:
 	  if (shamt == 0)
@@ -4095,12 +4095,12 @@ GetDPSRegRHS (ARMul_State * state, ARMword instr)
 	  if (shamt == 0)
 	    {
 	      ASSIGNC (base >> 31L);
-	      return ((ARMword) ((long int) base >> 31L));
+	      return ((ARMword) ((ARMsword) base >> 31L));
 	    }
 	  else
 	    {
-	      ASSIGNC ((ARMword) ((long int) base >> (int) (shamt - 1)) & 1);
-	      return ((ARMword) ((long int) base >> (int) shamt));
+	      ASSIGNC ((ARMword) ((ARMsword) base >> (int) (shamt - 1)) & 1);
+	      return ((ARMword) ((ARMsword) base >> (int) shamt));
 	    }
 	case ROR:
 	  if (shamt == 0)
@@ -4239,9 +4239,9 @@ GetLSRegRHS (ARMul_State * state, ARMword instr)
 	return (base >> shamt);
     case ASR:
       if (shamt == 0)
-	return ((ARMword) ((long int) base >> 31L));
+	return ((ARMword) ((ARMsword) base >> 31L));
       else
-	return ((ARMword) ((long int) base >> (int) shamt));
+	return ((ARMword) ((ARMsword) base >> (int) shamt));
     case ROR:
       if (shamt == 0)
 	/* It's an RRX.  */
@@ -5086,10 +5086,10 @@ Multiply64 (ARMul_State * state, ARMword instr, int msigned, int scc)
 	  /* Compute sign of result and adjust operands if necessary.  */
 	  sign = (Rm ^ Rs) & 0x80000000;
 
-	  if (((signed long) Rm) < 0)
+	  if (((ARMsword) Rm) < 0)
 	    Rm = -Rm;
 
-	  if (((signed long) Rs) < 0)
+	  if (((ARMsword) Rs) < 0)
 	    Rs = -Rs;
 	}
 
