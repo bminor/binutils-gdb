@@ -852,55 +852,26 @@ _bfd_elf_merge_symbol (bfd *abfd,
   /* NEWDYN and OLDDYN indicate whether the new or old symbol,
      respectively, is from a dynamic object.  */
 
-  if ((abfd->flags & DYNAMIC) != 0)
-    newdyn = TRUE;
-  else
-    newdyn = FALSE;
+  newdyn = (abfd->flags & DYNAMIC) != 0;
 
+  olddyn = FALSE;
   if (oldbfd != NULL)
     olddyn = (oldbfd->flags & DYNAMIC) != 0;
-  else
+  else if (oldsec != NULL)
     {
-      asection *hsec;
-
-      /* This code handles the special SHN_MIPS_{TEXT,DATA} section
+      /* This handles the special SHN_MIPS_{TEXT,DATA} section
 	 indices used by MIPS ELF.  */
-      switch (h->root.type)
-	{
-	default:
-	  hsec = NULL;
-	  break;
-
-	case bfd_link_hash_defined:
-	case bfd_link_hash_defweak:
-	  hsec = h->root.u.def.section;
-	  break;
-
-	case bfd_link_hash_common:
-	  hsec = h->root.u.c.p->section;
-	  break;
-	}
-
-      if (hsec == NULL)
-	olddyn = FALSE;
-      else
-	olddyn = (hsec->symbol->flags & BSF_DYNAMIC) != 0;
+      olddyn = (oldsec->symbol->flags & BSF_DYNAMIC) != 0;
     }
 
   /* NEWDEF and OLDDEF indicate whether the new or old symbol,
      respectively, appear to be a definition rather than reference.  */
 
-  if (bfd_is_und_section (sec) || bfd_is_com_section (sec))
-    newdef = FALSE;
-  else
-    newdef = TRUE;
+  newdef = !bfd_is_und_section (sec) && !bfd_is_com_section (sec);
 
-  if (h->root.type == bfd_link_hash_undefined
-      || h->root.type == bfd_link_hash_undefweak
-      || h->root.type == bfd_link_hash_common)
-    olddef = FALSE;
-  else
-    olddef = TRUE;
+  olddef = (h->root.type != bfd_link_hash_undefined
+	    && h->root.type != bfd_link_hash_undefweak
+	    && h->root.type != bfd_link_hash_common);
 
   /* Check TLS symbol.  We don't check undefined symbol introduced by
      "ld -u".  */
