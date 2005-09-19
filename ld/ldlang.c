@@ -3974,6 +3974,21 @@ lang_size_sections_1
 	    lang_output_section_statement_type *os;
 
 	    os = &s->output_section_statement;
+	    if (os->addr_tree != NULL)
+	      {
+		os->processed = -1;
+		exp_fold_tree (os->addr_tree, bfd_abs_section_ptr, &dot);
+		os->processed = 0;
+
+		if (!expld.result.valid_p
+		    && expld.phase != lang_mark_phase_enum)
+		  einfo (_("%F%S: non constant or forward reference"
+			   " address expression for section %s\n"),
+			 os->name);
+
+		dot = expld.result.value + expld.result.section->vma;
+	      }
+
 	    if (os->bfd_section == NULL)
 	      /* This section was removed or never actually created.  */
 	      break;
@@ -4003,6 +4018,7 @@ lang_size_sections_1
 		break;
 	      }
 
+	    newdot = dot;
 	    if (bfd_is_abs_section (os->bfd_section))
 	      {
 		/* No matter what happens, an abs section starts at zero.  */
@@ -4073,22 +4089,6 @@ lang_size_sections_1
 				   " %s by %lu bytes\n"),
 				 os->name, (unsigned long) (newdot - savedot));
 		      }
-		  }
-		else
-		  {
-		    newdot = dot;
-		    os->processed = -1;
-		    exp_fold_tree (os->addr_tree, bfd_abs_section_ptr,
-				   &newdot);
-		    os->processed = 0;
-
-		    if (!expld.result.valid_p
-			&& expld.phase != lang_mark_phase_enum)
-		      einfo (_("%F%S: non constant or forward reference"
-			       " address expression for section %s\n"),
-			     os->name);
-
-		    newdot = expld.result.value + expld.result.section->vma;
 		  }
 
 		/* The section starts here.

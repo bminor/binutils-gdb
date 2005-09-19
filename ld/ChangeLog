@@ -1,3 +1,9 @@
+2005-09-20  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/1353
+	* ldlang.c (lang_size_sections_1): Process addr_tree earlier,
+	so that unused output section statements affect dot.
+
 2005-09-08  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld.texinfo: Document -z {no,}execstack, -z {no,}relro
