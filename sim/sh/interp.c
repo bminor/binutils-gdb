@@ -24,6 +24,15 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_MMAP
+#include <sys/mman.h>
+# ifndef MAP_FAILED
+#  define MAP_FAILED -1
+# endif
+# if !defined (MAP_ANONYMOUS) && defined (MAP_ANON)
+#  define MAP_ANONYMOUS MAP_ANON
+# endif
+#endif
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -1715,6 +1724,27 @@ static void ppi_insn ();
 
 #include "ppi.c"
 
+/* Provide calloc / free versions that use an anonymous mmap.  This can
+   significantly cut the start-up time when a large simulator memory is
+   required, because pages are only zeroed on demand.  */
+#ifdef MAP_ANONYMOUS
+void *
+mcalloc (size_t nmemb, size_t size)
+{
+  void *page;
+
+  if (nmemb != 1)
+    size *= nmemb;
+  return mmap (0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
+	       -1, 0);
+}
+
+#define mfree(start,length) munmap ((start), (length))
+#else
+#define mcalloc calloc
+#define mfree(start,length) free(start)
+#endif
+
 /* Set the memory size to the power of two provided. */
 
 void
@@ -1722,17 +1752,17 @@ sim_size (power)
      int power;
 
 {
-  saved_state.asregs.msize = 1 << power;
-
   sim_memory_size = power;
 
   if (saved_state.asregs.memory)
     {
-      free (saved_state.asregs.memory);
+      mfree (saved_state.asregs.memory, saved_state.asregs.msize);
     }
 
+  saved_state.asregs.msize = 1 << power;
+
   saved_state.asregs.memory =
-    (unsigned char *) calloc (64, saved_state.asregs.msize / 64);
+    (unsigned char *) mcalloc (1, saved_state.asregs.msize);
 
   if (!saved_state.asregs.memory)
     {
@@ -1741,7 +1771,7 @@ sim_size (power)
 	       saved_state.asregs.msize);
 
       saved_state.asregs.msize = 1;
-      saved_state.asregs.memory = (unsigned char *) calloc (1, 1);
+      saved_state.asregs.memory = (unsigned char *) mcalloc (1, 1);
     }
 }
 
