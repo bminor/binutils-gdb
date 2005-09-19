@@ -1,3 +1,12 @@
+2005-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_build_one_stub): Replace assertion that long
+	branch offset is in range with an error.  Print full stub name on
+	errors.
+	(ppc_size_one_stub): Print full stub name on errors.
+	(group_sections): Warn if section size exceeds group size.
+	(ppc64_elf_size_stubs): Continue relaxing when stub types change.
+
 2005-09-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* elf32-am33lin.c (bfd.h, sysdep.h, elf-bfd.h, elf/mn10300.h):

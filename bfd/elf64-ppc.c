@@ -8015,7 +8015,13 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	}
       bfd_put_32 (htab->stub_bfd, B_DOT | (off & 0x3fffffc), loc);
 
-      BFD_ASSERT (off + (1 << 25) < (bfd_vma) (1 << 26));
+      if (off + (1 << 25) >= (bfd_vma) (1 << 26))
+	{
+	  (*_bfd_error_handler) (_("long branch stub `%s' offset overflow"),
+				 stub_entry->root.string);
+	  htab->stub_error = TRUE;
+	  return FALSE;
+	}
 
       if (info->emitrelocations)
 	{
@@ -8087,7 +8093,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (br_entry == NULL)
 	{
 	  (*_bfd_error_handler) (_("can't find branch stub `%s'"),
-				 stub_entry->root.string + 9);
+				 stub_entry->root.string);
 	  htab->stub_error = TRUE;
 	  return FALSE;
 	}
@@ -8331,7 +8337,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  if (br_entry == NULL)
 	    {
 	      (*_bfd_error_handler) (_("can't build branch stub `%s'"),
-				     stub_entry->root.string + 9);
+				     stub_entry->root.string);
 	      htab->stub_error = TRUE;
 	      return FALSE;
 	    }
@@ -8752,7 +8758,10 @@ group_sections (struct ppc_link_hash_table *htab,
 
 	  curr = tail;
 	  total = tail->size;
-	  big_sec = total >= stub_group_size;
+	  big_sec = total > stub_group_size;
+	  if (big_sec)
+	    (*_bfd_error_handler) (_("%B section %A exceeds stub group size"),
+				     tail->owner, tail);
 	  curr_toc = htab->stub_group[tail->id].toc_off;
 
 	  while ((prev = PREV_SEC (curr)) != NULL
@@ -8854,10 +8863,8 @@ ppc64_elf_size_stubs (bfd *output_bfd,
       bfd *input_bfd;
       unsigned int bfd_indx;
       asection *stub_sec;
-      bfd_boolean stub_changed;
 
       htab->stub_iteration += 1;
-      stub_changed = FALSE;
 
       for (input_bfd = info->input_bfds, bfd_indx = 0;
 	   input_bfd != NULL;
@@ -9106,8 +9113,6 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 
 		  if (stub_entry->h != NULL)
 		    htab->stub_globals += 1;
-
-		  stub_changed = TRUE;
 		}
 
 	      /* We're done with the internal relocs, free them.  */
@@ -9125,16 +9130,14 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 	    }
 	}
 
-      if (!stub_changed)
-	break;
-
-      /* OK, we've added some stubs.  Find out the new size of the
+      /* We may have added some stubs.  Find out the new size of the
 	 stub sections.  */
       for (stub_sec = htab->stub_bfd->sections;
 	   stub_sec != NULL;
 	   stub_sec = stub_sec->next)
 	if ((stub_sec->flags & SEC_LINKER_CREATED) == 0)
 	  {
+	    stub_sec->rawsize = stub_sec->size;
 	    stub_sec->size = 0;
 	    stub_sec->reloc_count = 0;
 	  }
@@ -9144,6 +9147,18 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 	htab->relbrlt->size = 0;
 
       bfd_hash_traverse (&htab->stub_hash_table, ppc_size_one_stub, info);
+
+      for (stub_sec = htab->stub_bfd->sections;
+	   stub_sec != NULL;
+	   stub_sec = stub_sec->next)
+	if ((stub_sec->flags & SEC_LINKER_CREATED) == 0
+	    && stub_sec->rawsize != stub_sec->size)
+	  break;
+
+      /* Exit from this loop when no stubs have been added, and no stubs
+	 have changed size.  */
+      if (stub_sec == NULL)
+	break;
 
       /* Ask the linker to do its stuff.  */
       (*htab->layout_sections_again) ();
