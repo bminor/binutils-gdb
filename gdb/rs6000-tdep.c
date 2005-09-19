@@ -3415,9 +3415,4 @@ _initialize_rs6000_tdep (void)
 {
   gdbarch_register (bfd_arch_rs6000, rs6000_gdbarch_init, rs6000_dump_tdep);
   gdbarch_register (bfd_arch_powerpc, rs6000_gdbarch_init, rs6000_dump_tdep);
-
-  /* Add root prefix command for "info powerpc" commands */
-  add_prefix_cmd ("powerpc", class_info, rs6000_info_powerpc_command,
-		  _("Various POWERPC info specific commands."),
-		  &info_powerpc_cmdlist, "info powerpc ", 0, &infolist);
 }

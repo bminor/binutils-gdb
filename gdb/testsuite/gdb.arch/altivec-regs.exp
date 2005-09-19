@@ -140,8 +140,8 @@ for {set i 0} {$i < 32} {incr i 1} {
          append pattern$i $vector_register
 }
 
-send_gdb "info powerpc altivec\n"
-gdb_expect_list "info powerpc altivec" ".*$gdb_prompt $" {
+send_gdb "info vector\n"
+gdb_expect_list "info vector" ".*$gdb_prompt $" {
 [$pattern0]
 [$pattern1]
 [$pattern2]

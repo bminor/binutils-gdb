@@ -1,3 +1,8 @@
+2005-09-19  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* rs6000-tdep.c (_initialize_rs6000_tdep): Get rid of the unused
+	'info powerpc' command prefix.
+
 2005-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/s390/nm-linux.h (KERNEL_U_SIZE): Remove.

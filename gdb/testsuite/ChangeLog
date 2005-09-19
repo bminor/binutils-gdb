@@ -1,3 +1,8 @@
+2005-09-19  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* gdb.arch/altivec-regs.exp (info powerpc altivec): Replace the 'info
+	powerpc altivec' test with an almost identical 'info vector' test.
+
 2005-09-13  Paul Gilliam  <pgilliam@us.ibm.com>
 
         * gdb.arch/altivec-regs.exp: Adjust "info reg vrsave" and "info reg
