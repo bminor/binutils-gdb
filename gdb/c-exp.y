@@ -1074,43 +1074,48 @@ parse_number (p, len, parsed_float, putithere)
   if (parsed_float)
     {
       /* It's a float since it contains a point or an exponent.  */
-      char c;
+      char *s = malloc (len);
       int num = 0;	/* number of tokens scanned by scanf */
       char saved_char = p[len];
 
       p[len] = 0;	/* null-terminate the token */
+
       if (sizeof (putithere->typed_val_float.dval) <= sizeof (float))
-	num = sscanf (p, "%g%c", (float *) &putithere->typed_val_float.dval,&c);
+	num = sscanf (p, "%g%s", (float *) &putithere->typed_val_float.dval,s);
       else if (sizeof (putithere->typed_val_float.dval) <= sizeof (double))
-	num = sscanf (p, "%lg%c", (double *) &putithere->typed_val_float.dval,&c);
+	num = sscanf (p, "%lg%s", (double *) &putithere->typed_val_float.dval,s);
       else
 	{
 #ifdef SCANF_HAS_LONG_DOUBLE
-	  num = sscanf (p, "%Lg%c", &putithere->typed_val_float.dval,&c);
+	  num = sscanf (p, "%Lg%s", &putithere->typed_val_float.dval,s);
 #else
 	  /* Scan it into a double, then assign it to the long double.
 	     This at least wins with values representable in the range
 	     of doubles. */
 	  double temp;
-	  num = sscanf (p, "%lg%c", &temp,&c);
+	  num = sscanf (p, "%lg%s", &temp,s);
 	  putithere->typed_val_float.dval = temp;
 #endif
 	}
       p[len] = saved_char;	/* restore the input stream */
-      if (num != 1) 		/* check scanf found ONLY a float ... */
-	return ERROR;
-      /* See if it has `f' or `l' suffix (float or long double).  */
 
-      c = tolower (p[len - 1]);
+      if (num == 1)
+	putithere->typed_val_float.type = 
+	  builtin_type (current_gdbarch)->builtin_double;
 
-      if (c == 'f')
-	putithere->typed_val_float.type = builtin_type (current_gdbarch)->builtin_float;
-      else if (c == 'l')
-	putithere->typed_val_float.type = builtin_type (current_gdbarch)->builtin_long_double;
-      else if (isdigit (c) || c == '.')
-	putithere->typed_val_float.type = builtin_type (current_gdbarch)->builtin_double;
-      else
-	return ERROR;
+      if (num == 2 )
+	{
+	  /* See if it has any float suffix: 'f' for float, 'l' for long 
+	     double.  */
+	  if (!strcasecmp (s, "f"))
+	    putithere->typed_val_float.type = 
+	      builtin_type (current_gdbarch)->builtin_float;
+	  else if (!strcasecmp (s, "l"))
+	    putithere->typed_val_float.type = 
+	      builtin_type (current_gdbarch)->builtin_long_double;
+	  else
+	    return ERROR;
+	}
 
       return FLOAT;
     }

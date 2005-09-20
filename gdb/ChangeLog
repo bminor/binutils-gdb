@@ -1,5 +1,10 @@
 2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
 
+	* c-exp.y (parse-number): Modify the float parsing logic to let it 
+	recognize a suffix.
+
+2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
+
 	* expression.h (enum exp_opcode): Fix a format error of a comment.
  
 2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
