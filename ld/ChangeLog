@@ -1,5 +1,12 @@
 2005-09-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.h (lang_output_section_statement_struct): Change type of
+	"processed" to bfd_boolean.
+	* ldexp.c (fold_name): Update references to os->processed.
+	* ldlang.c (lang_output_section_statement_lookup_1): Likewise.
+	(lang_size_sections_1): Likewise.
+	(lang_reset_memory_regions): Likewise.
+
 	PR ld/1353
 	* ldlang.c (lang_size_sections_1): Process addr_tree earlier,
 	so that unused output section statements affect dot.

@@ -1024,7 +1024,7 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
 
       lookup->next = NULL;
       lookup->bfd_section = NULL;
-      lookup->processed = 0;
+      lookup->processed = FALSE;
       lookup->constraint = constraint;
       lookup->ignored = FALSE;
       lookup->sectype = normal_section;
@@ -3976,9 +3976,8 @@ lang_size_sections_1
 	    os = &s->output_section_statement;
 	    if (os->addr_tree != NULL)
 	      {
-		os->processed = -1;
+		os->processed = FALSE;
 		exp_fold_tree (os->addr_tree, bfd_abs_section_ptr, &dot);
-		os->processed = 0;
 
 		if (!expld.result.valid_p
 		    && expld.phase != lang_mark_phase_enum)
@@ -4105,7 +4104,7 @@ lang_size_sections_1
 	    lang_size_sections_1 (os->children.head, os, &os->children.head,
 				  os->fill, newdot, relax, check_regions);
 
-	    os->processed = 1;
+	    os->processed = TRUE;
 
 	    if (bfd_is_abs_section (os->bfd_section) || os->ignored)
 	      {
@@ -5163,7 +5162,7 @@ lang_reset_memory_regions (void)
   for (os = &lang_output_section_statement.head->output_section_statement;
        os != NULL;
        os = os->next)
-    os->processed = 0;
+    os->processed = FALSE;
 
   for (o = output_bfd->sections; o != NULL; o = o->next)
     {

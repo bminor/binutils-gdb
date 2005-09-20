@@ -562,7 +562,7 @@ fold_name (etree_type *tree)
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  if (os != NULL && os->processed > 0)
+	  if (os != NULL && os->processed)
 	    new_rel (0, NULL, os->bfd_section);
 	}
       break;
@@ -573,7 +573,7 @@ fold_name (etree_type *tree)
 	  lang_output_section_statement_type *os;
 
 	  os = lang_output_section_find (tree->name.name);
-	  if (os != NULL && os->processed > 0)
+	  if (os != NULL && os->processed)
 	    {
 	      if (os->load_base == NULL)
 		new_rel (0, NULL, os->bfd_section);
@@ -592,7 +592,7 @@ fold_name (etree_type *tree)
 	  os = lang_output_section_find (tree->name.name);
 	  if (os == NULL)
 	    new_abs (0);
-	  else if (os->processed > 0)
+	  else if (os->processed)
 	    new_abs (os->bfd_section->size / opb);
 	}
       break;

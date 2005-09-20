@@ -134,7 +134,7 @@ typedef struct lang_output_section_statement_struct
   struct lang_output_section_statement_struct *next;
   const char *name;
 
-  int processed;
+  bfd_boolean processed;
 
   asection *bfd_section;
   flagword flags;		/* Or together of all input sections.  */
