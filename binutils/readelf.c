@@ -9561,6 +9561,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	{
 	  unsigned char op_code;
 	  int adv;
+	  unsigned long int uladv;
 	  unsigned int bytes_read;
 
 	  op_code = *data++;
@@ -9568,10 +9569,10 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	  if (op_code >= info.li_opcode_base)
 	    {
 	      op_code -= info.li_opcode_base;
-	      adv      = (op_code / info.li_line_range) * info.li_min_insn_length;
-	      state_machine_regs.address += adv;
-	      printf (_("  Special opcode %d: advance Address by %d to 0x%lx"),
-		      op_code, adv, state_machine_regs.address);
+	      uladv = (op_code / info.li_line_range) * info.li_min_insn_length;
+	      state_machine_regs.address += uladv;
+	      printf (_("  Special opcode %d: advance Address by %lu to 0x%lx"),
+		      op_code, uladv, state_machine_regs.address);
 	      adv = (op_code % info.li_line_range) + info.li_line_base;
 	      state_machine_regs.line += adv;
 	      printf (_(" and Line by %d to %d\n"),
@@ -9595,10 +9596,11 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	      break;
 
 	    case DW_LNS_advance_pc:
-	      adv = info.li_min_insn_length * read_leb128 (data, & bytes_read, 0);
+	      uladv = read_leb128 (data, & bytes_read, 0);
+	      uladv *= info.li_min_insn_length;
 	      data += bytes_read;
-	      state_machine_regs.address += adv;
-	      printf (_("  Advance PC by %d to %lx\n"), adv,
+	      state_machine_regs.address += uladv;
+	      printf (_("  Advance PC by %lu to 0x%lx\n"), uladv,
 		      state_machine_regs.address);
 	      break;
 
@@ -9619,10 +9621,10 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	      break;
 
 	    case DW_LNS_set_column:
-	      adv = read_leb128 (data, & bytes_read, 0);
+	      uladv = read_leb128 (data, & bytes_read, 0);
 	      data += bytes_read;
-	      printf (_("  Set column to %d\n"), adv);
-	      state_machine_regs.column = adv;
+	      printf (_("  Set column to %lu\n"), uladv);
+	      state_machine_regs.column = uladv;
 	      break;
 
 	    case DW_LNS_negate_stmt:
@@ -9638,19 +9640,19 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	      break;
 
 	    case DW_LNS_const_add_pc:
-	      adv = (((255 - info.li_opcode_base) / info.li_line_range)
-		     * info.li_min_insn_length);
-	      state_machine_regs.address += adv;
-	      printf (_("  Advance PC by constant %d to 0x%lx\n"), adv,
+	      uladv = (((255 - info.li_opcode_base) / info.li_line_range)
+		      * info.li_min_insn_length);
+	      state_machine_regs.address += uladv;
+	      printf (_("  Advance PC by constant %lu to 0x%lx\n"), uladv,
 		      state_machine_regs.address);
 	      break;
 
 	    case DW_LNS_fixed_advance_pc:
-	      adv = byte_get (data, 2);
+	      uladv = byte_get (data, 2);
 	      data += 2;
-	      state_machine_regs.address += adv;
-	      printf (_("  Advance PC by fixed size amount %d to 0x%lx\n"),
-		      adv, state_machine_regs.address);
+	      state_machine_regs.address += uladv;
+	      printf (_("  Advance PC by fixed size amount %lu to 0x%lx\n"),
+		      uladv, state_machine_regs.address);
 	      break;
 
 	    case DW_LNS_set_prologue_end:
@@ -9662,9 +9664,9 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	      break;
 
 	    case DW_LNS_set_isa:
-	      adv = read_leb128 (data, & bytes_read, 0);
+	      uladv = read_leb128 (data, & bytes_read, 0);
 	      data += bytes_read;
-	      printf (_("  Set ISA to %d\n"), adv);
+	      printf (_("  Set ISA to %lu\n"), uladv);
 	      break;
 
 	    default:
