@@ -105,8 +105,7 @@
 
 struct line_entry {
   struct line_entry *next;
-  fragS *frag;
-  addressT frag_ofs;
+  symbolS *label;
   struct dwarf2_line_info loc;
 };
 
@@ -147,6 +146,10 @@ static unsigned int dirs_allocated;
    doing work when there's nothing to do.  */
 static bfd_boolean loc_directive_seen;
 
+/* TRUE when we're supposed to set the basic block mark whenever a
+   label is seen.  */
+bfd_boolean dwarf2_loc_mark_labels;
+
 /* Current location as indicated by the most recent .loc directive.  */
 static struct dwarf2_line_info current = {
   1, 1, 0, 0,
@@ -167,12 +170,11 @@ static void out_four (int);
 static void out_abbrev (int, int);
 static void out_uleb128 (addressT);
 static offsetT get_frag_fix (fragS *);
-static void out_set_addr (segT, fragS *, addressT);
+static void out_set_addr (symbolS *);
 static int size_inc_line_addr (int, addressT);
 static void emit_inc_line_addr (int, addressT, char *, int);
 static void out_inc_line_addr (int, addressT);
-static void relax_inc_line_addr (int, segT, fragS *, addressT,
-				 fragS *, addressT);
+static void relax_inc_line_addr (int, symbolS *, symbolS *);
 static void process_entries (segT, struct line_entry *);
 static void out_file_list (void);
 static void out_debug_line (segT);
@@ -247,15 +249,33 @@ get_line_subseg (segT seg, subsegT subseg)
   return ss;
 }
 
+/* Record an entry for LOC occurring at LABEL.  */
+
+static void
+dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
+{
+  struct line_subseg *ss;
+  struct line_entry *e;
+
+  e = (struct line_entry *) xmalloc (sizeof (*e));
+  e->next = NULL;
+  e->label = label;
+  e->loc = *loc;
+
+  ss = get_line_subseg (now_seg, now_subseg);
+  *ss->ptail = e;
+  ss->ptail = &e->next;
+}
+
 /* Record an entry for LOC occurring at OFS within the current fragment.  */
 
 void
 dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
 {
-  struct line_subseg *ss;
-  struct line_entry *e;
   static unsigned int line = -1;
   static unsigned int filenum = -1;
+
+  symbolS *sym;
 
   /* Early out for as-yet incomplete location information.  */
   if (loc->filenum == 0 || loc->line == 0)
@@ -272,15 +292,8 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   line = loc->line;
   filenum = loc->filenum;
 
-  e = (struct line_entry *) xmalloc (sizeof (*e));
-  e->next = NULL;
-  e->frag = frag_now;
-  e->frag_ofs = ofs;
-  e->loc = *loc;
-
-  ss = get_line_subseg (now_seg, now_subseg);
-  *ss->ptail = e;
-  ss->ptail = &e->next;
+  sym = symbol_temp_new (now_seg, ofs, frag_now);
+  dwarf2_gen_line_info_1 (sym, loc);
 }
 
 /* Returns the current source information.  If .file directives have
@@ -347,6 +360,38 @@ dwarf2_emit_insn (int size)
   current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
 		     | DWARF2_FLAG_PROLOGUE_END
 		     | DWARF2_FLAG_EPILOGUE_BEGIN);
+}
+
+/* Called for each (preferably code) label.  If dwarf2_loc_mark_labels
+   is enabled, emit a basic block marker.  */
+
+void
+dwarf2_emit_label (symbolS *label)
+{
+  struct dwarf2_line_info loc;
+
+  if (!dwarf2_loc_mark_labels)
+    return;
+  if (S_GET_SEGMENT (label) != now_seg)
+    return;
+  if (!(bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE))
+    return;
+  
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_where (&loc);
+  else
+    {
+      loc = current;
+      loc_directive_seen = FALSE;
+    }
+
+  loc.flags |= DWARF2_FLAG_BASIC_BLOCK;
+
+  current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
+		     | DWARF2_FLAG_PROLOGUE_END
+		     | DWARF2_FLAG_EPILOGUE_BEGIN);
+
+  dwarf2_gen_line_info_1 (label, &loc);
 }
 
 /* Get a .debug_line file number for FILENAME.  If NUM is nonzero,
@@ -603,6 +648,23 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
   loc_directive_seen = TRUE;
 }
+
+void
+dwarf2_directive_loc_mark_labels (int dummy ATTRIBUTE_UNUSED)
+{
+  offsetT value = get_absolute_expression ();
+
+  if (value != 0 && value != 1)
+    {
+      as_bad (_("expected 0 or 1"));
+      ignore_rest_of_line ();
+    }
+  else
+    {
+      dwarf2_loc_mark_labels = value != 0;
+      demand_empty_rest_of_line ();
+    }
+}
 
 static struct frag *
 first_frag_for_seg (segT seg)
@@ -702,12 +764,9 @@ get_frag_fix (fragS *frag)
 /* Set an absolute address (may result in a relocation entry).  */
 
 static void
-out_set_addr (segT seg, fragS *frag, addressT ofs)
+out_set_addr (symbolS *sym)
 {
   expressionS expr;
-  symbolS *sym;
-
-  sym = symbol_temp_new (seg, ofs, frag);
 
   out_opcode (DW_LNS_extended_op);
   out_uleb128 (sizeof_address + 1);
@@ -811,6 +870,10 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
   int need_copy = 0;
   char *end = p + len;
 
+  /* Line number sequences cannot go backward in addresses.  This means
+     we've incorrectly ordered the statements in the sequence.  */
+  assert ((offsetT) addr_delta >= 0);
+
   /* Scale the address delta by the minimum instruction length.  */
   scale_addr_delta (&addr_delta);
 
@@ -906,16 +969,10 @@ out_inc_line_addr (int line_delta, addressT addr_delta)
    increments between fragments of the target segment.  */
 
 static void
-relax_inc_line_addr (int line_delta, segT seg,
-		     fragS *to_frag, addressT to_ofs,
-		     fragS *from_frag, addressT from_ofs)
+relax_inc_line_addr (int line_delta, symbolS *to_sym, symbolS *from_sym)
 {
-  symbolS *to_sym, *from_sym;
   expressionS expr;
   int max_chars;
-
-  to_sym = symbol_temp_new (seg, to_ofs, to_frag);
-  from_sym = symbol_temp_new (seg, from_ofs, from_frag);
 
   expr.X_op = O_subtract;
   expr.X_add_symbol = to_sym;
@@ -999,22 +1056,20 @@ process_entries (segT seg, struct line_entry *e)
   unsigned column = 0;
   unsigned isa = 0;
   unsigned flags = DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0;
-  fragS *frag = NULL;
-  fragS *last_frag;
-  addressT frag_ofs = 0;
-  addressT last_frag_ofs;
+  fragS *last_frag = NULL, *frag;
+  addressT last_frag_ofs = 0, frag_ofs;
+  symbolS *last_lab, *lab;
   struct line_entry *next;
 
   while (e)
     {
-      int changed = 0;
+      int line_delta;
 
       if (filenum != e->loc.filenum)
 	{
 	  filenum = e->loc.filenum;
 	  out_opcode (DW_LNS_set_file);
 	  out_uleb128 (filenum);
-	  changed = 1;
 	}
 
       if (column != e->loc.column)
@@ -1022,7 +1077,6 @@ process_entries (segT seg, struct line_entry *e)
 	  column = e->loc.column;
 	  out_opcode (DW_LNS_set_column);
 	  out_uleb128 (column);
-	  changed = 1;
 	}
 
       if (isa != e->loc.isa)
@@ -1030,62 +1084,46 @@ process_entries (segT seg, struct line_entry *e)
 	  isa = e->loc.isa;
 	  out_opcode (DW_LNS_set_isa);
 	  out_uleb128 (isa);
-	  changed = 1;
 	}
 
       if ((e->loc.flags ^ flags) & DWARF2_FLAG_IS_STMT)
 	{
 	  flags = e->loc.flags;
 	  out_opcode (DW_LNS_negate_stmt);
-	  changed = 1;
 	}
 
       if (e->loc.flags & DWARF2_FLAG_BASIC_BLOCK)
-	{
-	  out_opcode (DW_LNS_set_basic_block);
-	  changed = 1;
-	}
+	out_opcode (DW_LNS_set_basic_block);
 
       if (e->loc.flags & DWARF2_FLAG_PROLOGUE_END)
-	{
-	  out_opcode (DW_LNS_set_prologue_end);
-	  changed = 1;
-	}
+	out_opcode (DW_LNS_set_prologue_end);
 
       if (e->loc.flags & DWARF2_FLAG_EPILOGUE_BEGIN)
-	{
-	  out_opcode (DW_LNS_set_epilogue_begin);
-	  changed = 1;
-	}
+	out_opcode (DW_LNS_set_epilogue_begin);
 
       /* Don't try to optimize away redundant entries; gdb wants two
 	 entries for a function where the code starts on the same line as
 	 the {, and there's no way to identify that case here.  Trust gcc
 	 to optimize appropriately.  */
-      if (1 /* line != e->loc.line || changed */)
-	{
-	  int line_delta = e->loc.line - line;
-	  if (frag == NULL)
-	    {
-	      out_set_addr (seg, e->frag, e->frag_ofs);
-	      out_inc_line_addr (line_delta, 0);
-	    }
-	  else if (frag == e->frag)
-	    out_inc_line_addr (line_delta, e->frag_ofs - frag_ofs);
-	  else
-	    relax_inc_line_addr (line_delta, seg, e->frag, e->frag_ofs,
-				 frag, frag_ofs);
+      line_delta = e->loc.line - line;
+      lab = e->label;
+      frag = symbol_get_frag (lab);
+      frag_ofs = S_GET_VALUE (lab);
 
-	  frag = e->frag;
-	  frag_ofs = e->frag_ofs;
-	  line = e->loc.line;
-	}
-      else if (frag == NULL)
+      if (last_frag == NULL)
 	{
-	  out_set_addr (seg, e->frag, e->frag_ofs);
-	  frag = e->frag;
-	  frag_ofs = e->frag_ofs;
+	  out_set_addr (lab);
+	  out_inc_line_addr (line_delta, 0);
 	}
+      else if (frag == last_frag)
+	out_inc_line_addr (line_delta, frag_ofs - last_frag_ofs);
+      else
+	relax_inc_line_addr (line_delta, lab, last_lab);
+
+      line = e->loc.line;
+      last_lab = lab;
+      last_frag = frag;
+      last_frag_ofs = frag_ofs;
 
       next = e->next;
       free (e);
@@ -1093,13 +1131,15 @@ process_entries (segT seg, struct line_entry *e)
     }
 
   /* Emit a DW_LNE_end_sequence for the end of the section.  */
-  last_frag = last_frag_for_seg (seg);
-  last_frag_ofs = get_frag_fix (last_frag);
+  frag = last_frag_for_seg (seg);
+  frag_ofs = get_frag_fix (frag);
   if (frag == last_frag)
-    out_inc_line_addr (INT_MAX, last_frag_ofs - frag_ofs);
+    out_inc_line_addr (INT_MAX, frag_ofs - last_frag_ofs);
   else
-    relax_inc_line_addr (INT_MAX, seg, last_frag, last_frag_ofs,
-			 frag, frag_ofs);
+    {
+      lab = symbol_temp_new (seg, frag_ofs, frag);
+      relax_inc_line_addr (INT_MAX, lab, last_lab);
+    }
 }
 
 /* Emit the directory and file tables for .debug_line.  */

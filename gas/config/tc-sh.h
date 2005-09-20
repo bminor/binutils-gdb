@@ -103,8 +103,8 @@ struct sh_segment_info_type
 
 /* We call a routine to emit a reloc for a label, so that the linker
    can align loads and stores without crossing a label.  */
-extern void sh_frob_label (void);
-#define tc_frob_label(sym) sh_frob_label ()
+extern void sh_frob_label (symbolS *);
+#define tc_frob_label(sym) sh_frob_label (sym)
 
 /* We call a routine to flush pending output in order to output a DATA
    reloc when required.  */

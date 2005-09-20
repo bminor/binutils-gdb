@@ -49,6 +49,9 @@ extern char *dwarf2_directive_file (int dummy);
    used.  */
 extern void dwarf2_directive_loc (int dummy);
 
+/* Implements the .loc_mark_labels {0,1} directive.  */
+extern void dwarf2_directive_loc_mark_labels (int dummy);
+
 /* Returns the current source information.  If .file directives have
    been encountered, the info for the corresponding source file is
    returned.  Otherwise, the info for the assembly source file is
@@ -68,6 +71,14 @@ extern void dwarf2_gen_line_info (addressT addr, struct dwarf2_line_info *l);
 
 /* Must be called for each generated instruction.  */
 extern void dwarf2_emit_insn (int);
+
+/* Should be called for each code label.  */
+extern void dwarf2_emit_label (symbolS *);
+
+/* True when we're supposed to set the basic block mark whenever a label
+   is seen.  Unless the target is doing Something Weird, just call 
+   dwarf2_emit_label.  */
+bfd_boolean dwarf2_loc_mark_labels;
 
 extern void dwarf2_finish (void);
 

@@ -5054,7 +5054,7 @@ xtensa_frob_label (symbolS *sym)
 
       xtensa_set_frag_assembly_state (frag_now);
       xtensa_move_labels (frag_now, 0, TRUE);
-  }
+    }
 
   /* No target aligning in the absolute section.  */
   if (now_seg != absolute_section
@@ -5083,6 +5083,8 @@ xtensa_frob_label (symbolS *sym)
   /* Loops only go forward, so they can be identified here.  */
   if (symbol_get_tc (sym)->is_loop_target)
     symbol_get_frag (sym)->tc_frag_data.is_loop_target = TRUE;
+
+  dwarf2_emit_label (sym);
 }
 
 

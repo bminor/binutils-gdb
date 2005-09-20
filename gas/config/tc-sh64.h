@@ -144,7 +144,7 @@ extern void sh64_frob_label (symbolS *);
 
 #undef  tc_frob_label
 #define tc_frob_label(sym) \
-  do { sh_frob_label (); sh64_frob_label (sym); } while (0)
+  do { sh_frob_label (sym); sh64_frob_label (sym); } while (0)
 
 #define tc_symbol_new_hook(s) sh64_frob_label (s)
 

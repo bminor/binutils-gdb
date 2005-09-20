@@ -4103,6 +4103,15 @@ either 0 or 1.
 @item isa @var{value}
 This directive will set the @code{isa} register in the @code{.debug_line}
 state machine to @var{value}, which must be an unsigned integer.
+
+@section @code{.loc_mark_blocks @var{enable}}
+@cindex @code{loc_mark_blocks} directive
+The @code{.loc_mark_blocks} directive makes the assembler emit an entry
+to the @code{.debug_line} line number matrix with the @code{basic_block}
+register in the state machine set whenever a code label is seen.
+The @var{enable} argument should be either 1 or 0, to enable or disable
+this function respectively.
+
 @end table
 
 @node Data

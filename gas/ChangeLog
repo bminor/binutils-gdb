@@ -1,3 +1,37 @@
+2005-09-20  Richard Henderson  <rth@redhat.com>
+
+	* dwarf2dbg.c (struct line_entry): Replace frag and frag_ofs
+	with label.
+	(dwarf2_loc_mark_labels): New.
+	(dwarf2_gen_line_info_1): Split out of ...
+	(dwarf2_gen_line_info): ... here.  Create the temp symbol here.
+	(dwarf2_emit_label): New.
+	(dwarf2_directive_loc_mark_labels): New.
+	(out_set_addr): Take a symbol instead of frag+ofs.
+	(relax_inc_line_addr): Likewise.
+	(emit_inc_line_addr): Assert delta non-negative.
+	(process_entries): Remove dead code.  Update to work with temp
+	symbols instead of frag+ofs.
+	* dwarf2dbg.h (dwarf2_directive_loc_mark_labels): Declare.
+	(dwarf2_emit_label, dwarf2_loc_mark_labels): Declare.
+	* config/obj-elf.c (elf_pseudo_tab): Add loc_mark_labels.
+	* config/obj-elf.h (obj_frob_label): New.
+	* config/tc-alpha.c (alpha_define_label): Call dwarf2_emit_label.
+	* config/tc-arm.c, config/tc-hppa.c, config/tc-m68k.c,
+	config/tc-mips.c, config/tc-ppc.c, config/tc-sh.c, config/tc-xtensa.c:
+	Similarly in the respective tc_frob_label implementation functions.
+	* config/tc-i386.c (md_pseudo_table): Move file and loc to
+	non-elf section; add loc_mark_labels.
+	* config/tc-ia64.c (struct label_fix): Add dw2_mark_labels.
+	(ia64_flush_insns): Check for marked labels; emit line entry if so.
+	(emit_one_bundle): Similarly.
+	(ia64_frob_label): Record marked labels.
+	* config/tc-m68hc11.h (tc_frob_label): Remove.
+	* config/tc-ms1.c (md_pseudo_table): Remove file and loc.
+	* config/tc-sh.h (tc_frob_label): Pass sym to sh_frob_label.
+	* config/tc-sh64.h (tc_frob_label): Likewise.
+	* doc/as.texinfo (LNS directives): Docuement .loc_mark_blocks.
+
 2005-09-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (pseudo_set): Set segment of expression syms to expr_section.

@@ -8092,6 +8092,10 @@ arm_frob_label (symbolS * sym)
 
       label_is_thumb_function_name = FALSE;
     }
+
+#ifdef OBJ_ELF
+  dwarf2_emit_label (sym);
+#endif
 }
 
 int

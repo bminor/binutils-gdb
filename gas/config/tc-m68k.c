@@ -4394,6 +4394,10 @@ m68k_frob_label (symbolS *sym)
   n->text = 0;
   labels = n;
   current_label = n;
+
+#ifdef OBJ_ELF
+  dwarf2_emit_label (sym);
+#endif
 }
 
 /* This is called when a value that is not an instruction is emitted.  */

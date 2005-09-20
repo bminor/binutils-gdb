@@ -13594,6 +13594,10 @@ mips_define_label (symbolS *sym)
   l->label = sym;
   l->next = insn_labels;
   insn_labels = l;
+
+#ifdef OBJ_ELF
+  dwarf2_emit_label (sym);
+#endif
 }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)

@@ -156,6 +156,13 @@ extern void elf_frob_file_before_adjust (void);
 #endif
 extern void elf_frob_file_after_relocs (void);
 
+/* If the target doesn't have special processing for labels, take care of
+   dwarf2 output at the object file level.  */
+#ifndef tc_frob_label
+#include "dwarf2dbg.h"
+#define obj_frob_label  dwarf2_emit_label
+#endif
+
 #ifndef obj_app_file
 #define obj_app_file elf_file_symbol
 #endif

@@ -469,10 +469,12 @@ const pseudo_typeS md_pseudo_table[] =
   {"code64", set_code_flag, CODE_64BIT},
   {"intel_syntax", set_intel_syntax, 1},
   {"att_syntax", set_intel_syntax, 0},
-  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
-  {"loc", dwarf2_directive_loc, 0},
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"largecomm", handle_large_common, 0},
+#else
+  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0},
+  {"loc", dwarf2_directive_loc, 0},
+  {"loc_mark_labels", dwarf2_directive_loc_mark_labels, 0},
 #endif
 #ifdef TE_PE
   {"secrel32", pe_directive_secrel, 0},

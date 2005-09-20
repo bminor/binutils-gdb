@@ -101,9 +101,6 @@ extern int tc_m68hc11_force_relocation (struct fix *);
 extern int tc_m68hc11_fix_adjustable (struct fix *);
 
 #define md_operand(x)
-#define tc_frob_label(sym) do {\
-  S_SET_VALUE (sym, (valueT) frag_now_fix ()); \
-} while (0)
 
 #define elf_tc_final_processing	m68hc11_elf_final_processing
 extern void m68hc11_elf_final_processing (void);

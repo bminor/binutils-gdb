@@ -115,6 +115,7 @@ static const pseudo_typeS elf_pseudo_table[] =
   /* These are used for dwarf2.  */
   { "file", (void (*) (int)) dwarf2_directive_file, 0 },
   { "loc",  dwarf2_directive_loc,  0 },
+  { "loc_mark_labels", dwarf2_directive_loc_mark_labels, 0 },
 
   /* We need to trap the section changing calls to handle .previous.  */
   {"data", obj_elf_data, 0},

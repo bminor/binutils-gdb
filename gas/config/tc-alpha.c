@@ -5464,6 +5464,9 @@ void
 alpha_define_label (symbolS *sym)
 {
   alpha_insn_label = sym;
+#ifdef OBJ_ELF
+  dwarf2_emit_label (sym);
+#endif
 }
 
 /* Return true if we must always emit a reloc for a type and false if

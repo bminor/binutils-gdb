@@ -2876,7 +2876,7 @@ md_assemble (char *str)
    emits a BFD_RELOC_SH_LABEL reloc if necessary.  */
 
 void
-sh_frob_label (void)
+sh_frob_label (symbolS *sym)
 {
   static fragS *last_label_frag;
   static int last_label_offset;
@@ -2895,6 +2895,8 @@ sh_frob_label (void)
 	  last_label_offset = offset;
 	}
     }
+
+  dwarf2_emit_label (sym);
 }
 
 /* This routine is called when the assembler is about to output some

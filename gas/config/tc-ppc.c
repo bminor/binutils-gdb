@@ -4840,6 +4840,10 @@ ppc_frob_label (sym)
 		     &symbol_rootP, &symbol_lastP);
       symbol_get_tc (ppc_current_csect)->within = sym;
     }
+
+#ifdef OBJ_ELF
+  dwarf2_emit_label (sym);
+#endif
 }
 
 /* This variable is set by ppc_frob_symbol if any absolute symbols are

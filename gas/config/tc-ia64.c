@@ -159,6 +159,7 @@ struct label_fix
 {
   struct label_fix *next;
   struct symbol *sym;
+  bfd_boolean dw2_mark_labels;
 };
 
 /* This is the endianness of the current section.  */
@@ -1083,6 +1084,7 @@ ia64_flush_insns ()
   segT saved_seg;
   subsegT saved_subseg;
   unw_rec_list *ptr;
+  bfd_boolean mark;
 
   if (!md.last_text_seg)
     return;
@@ -1096,18 +1098,23 @@ ia64_flush_insns ()
     emit_one_bundle ();		/* force out queued instructions */
 
   /* In case there are labels following the last instruction, resolve
-     those now:  */
+     those now.  */
+  mark = FALSE;
   for (lfix = CURR_SLOT.label_fixups; lfix; lfix = lfix->next)
     {
-      S_SET_VALUE (lfix->sym, frag_now_fix ());
-      symbol_set_frag (lfix->sym, frag_now);
+      symbol_set_value_now (lfix->sym);
+      mark |= lfix->dw2_mark_labels;
+    }
+  if (mark)
+    {
+      dwarf2_where (&CURR_SLOT.debug_line);
+      CURR_SLOT.debug_line.flags |= DWARF2_FLAG_BASIC_BLOCK;
+      dwarf2_gen_line_info (frag_now_fix (), &CURR_SLOT.debug_line);
     }
   CURR_SLOT.label_fixups = 0;
+
   for (lfix = CURR_SLOT.tag_fixups; lfix; lfix = lfix->next)
-    {
-      S_SET_VALUE (lfix->sym, frag_now_fix ());
-      symbol_set_frag (lfix->sym, frag_now);
-    }
+    symbol_set_value_now (lfix->sym);
   CURR_SLOT.tag_fixups = 0;
 
   /* In case there are unwind directives following the last instruction,
@@ -6647,6 +6654,7 @@ emit_one_bundle ()
   int n, i, j, first, curr, last_slot;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
+  bfd_boolean mark_label;
   struct insn_fix *ifix;
   char mnemonic[16];
   fixS *fix;
@@ -6967,11 +6975,30 @@ emit_one_bundle ()
       if (insn_unit != required_unit)
 	continue;		/* Try next slot.  */
 
-      if (debug_type == DEBUG_DWARF2 || md.slot[curr].loc_directive_seen)
+      /* Now is a good time to fix up the labels for this insn.  */
+      mark_label = FALSE;
+      for (lfix = md.slot[curr].label_fixups; lfix; lfix = lfix->next)
+	{
+	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16);
+	  symbol_set_frag (lfix->sym, frag_now);
+	  mark_label |= lfix->dw2_mark_labels;
+	}
+      for (lfix = md.slot[curr].tag_fixups; lfix; lfix = lfix->next)
+	{
+	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16 + i);
+	  symbol_set_frag (lfix->sym, frag_now);
+	}
+
+      if (debug_type == DEBUG_DWARF2
+	  || md.slot[curr].loc_directive_seen
+	  || mark_label)
 	{
 	  bfd_vma addr = frag_now->fr_address + frag_now_fix () - 16 + i;
 
 	  md.slot[curr].loc_directive_seen = 0;
+	  if (mark_label)
+	    md.slot[curr].debug_line.flags |= DWARF2_FLAG_BASIC_BLOCK;
+
 	  dwarf2_gen_line_info (addr, &md.slot[curr].debug_line);
 	}
 
@@ -6999,19 +7026,6 @@ emit_one_bundle ()
 	}
       --md.num_slots_in_use;
       last_slot = i;
-
-      /* now is a good time to fix up the labels for this insn:  */
-      for (lfix = md.slot[curr].label_fixups; lfix; lfix = lfix->next)
-	{
-	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16);
-	  symbol_set_frag (lfix->sym, frag_now);
-	}
-      /* and fix up the tags also.  */
-      for (lfix = md.slot[curr].tag_fixups; lfix; lfix = lfix->next)
-	{
-	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16 + i);
-	  symbol_set_frag (lfix->sym, frag_now);
-	}
 
       for (j = 0; j < md.slot[curr].num_fixups; ++j)
 	{
@@ -7904,6 +7918,7 @@ ia64_frob_label (sym)
       fix = obstack_alloc (&notes, sizeof (*fix));
       fix->sym = sym;
       fix->next = CURR_SLOT.tag_fixups;
+      fix->dw2_mark_labels = FALSE;
       CURR_SLOT.tag_fixups = fix;
 
       return;
@@ -7915,6 +7930,7 @@ ia64_frob_label (sym)
       fix = obstack_alloc (&notes, sizeof (*fix));
       fix->sym = sym;
       fix->next = CURR_SLOT.label_fixups;
+      fix->dw2_mark_labels = dwarf2_loc_mark_labels;
       CURR_SLOT.label_fixups = fix;
 
       /* Keep track of how many code entry points we've seen.  */

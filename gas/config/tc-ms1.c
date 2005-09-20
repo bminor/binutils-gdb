@@ -63,8 +63,6 @@ const char FLT_CHARS[]            = "dD";
 const pseudo_typeS md_pseudo_table[] =
 {
     { "word",   cons,                   4 }, 
-    { "file",	(void (*) (int)) dwarf2_directive_file, 0 },
-    { "loc",	dwarf2_directive_loc,	0 },
     { NULL, 	NULL,			0 }
 };
 

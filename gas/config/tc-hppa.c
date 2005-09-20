@@ -1287,6 +1287,10 @@ pa_define_label (symbol)
 
       label_symbols_rootp = label_chain;
     }
+
+#ifdef OBJ_ELF
+  dwarf2_emit_label (symbol);
+#endif
 }
 
 /* Removes a label definition for the current space.
