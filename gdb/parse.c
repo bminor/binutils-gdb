@@ -1,7 +1,7 @@
 /* Parse expressions for GDB.
 
    Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2004 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2004, 2005 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo, 1991.
@@ -43,6 +43,7 @@
 #include "value.h"
 #include "command.h"
 #include "language.h"
+#include "f-lang.h"
 #include "parser-defs.h"
 #include "gdbcmd.h"
 #include "symfile.h"		/* for overlay functions */
@@ -837,6 +838,7 @@ operator_length_standard (struct expression *expr, int endpos,
 {
   int oplen = 1;
   int args = 0;
+  enum f90_range_type range_type;
   int i;
 
   if (endpos < 1)
@@ -955,6 +957,26 @@ operator_length_standard (struct expression *expr, int endpos,
     case OP_THIS:
     case OP_OBJC_SELF:
       oplen = 2;
+      break;
+
+    case OP_F90_RANGE:
+      oplen = 3;
+
+      range_type = longest_to_int (expr->elts[endpos - 2].longconst);
+      switch (range_type)
+	{
+	case LOW_BOUND_DEFAULT:
+	case HIGH_BOUND_DEFAULT:
+	  args = 1;
+	  break;
+	case BOTH_BOUND_DEFAULT:
+	  args = 0;
+	  break;
+	case NONE_BOUND_DEFAULT:
+	  args = 2;
+	  break;
+	}
+
       break;
 
     default:

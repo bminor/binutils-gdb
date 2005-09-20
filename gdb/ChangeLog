@@ -1,3 +1,19 @@
+2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* expression.h (enum exp_opcode): Add a new operator for F90
+	subrange.
+	* f-lang.h (enum f90_range_type): New enumeration type to identify
+	F90 subrange type.
+	* f-exp.y (yyparse): Add support for parsing F90 subrange and
+	change substring parsing to subrange parsing.
+	* parse.c (operator_length_standard): Set the operator length
+	and args number for OP_F90_RANGE.
+	* eval.c (evaluate_subexp_standard): Add code to evaluate F90
+	array section and substring.
+	(value_f90_subarray): New function to evaluate F90 array section.
+	(evaluate_subexp_standard): Delete label op_f77_substr and its code
+	because the logic is implemented by function value_f90_subarray now.
+
 2005-09-19  Paul Gilliam  <pgilliam@us.ibm.com>
 
 	* rs6000-tdep.c (_initialize_rs6000_tdep): Get rid of the unused

@@ -378,6 +378,30 @@ init_array_element (struct value *array, struct value *element,
 }
 
 struct value *
+value_f90_subarray (struct value *array,
+		    struct expression *exp, int *pos, enum noside noside)
+{
+  int pc = (*pos) + 1;
+  LONGEST low_bound, high_bound;
+  struct type *range = check_typedef (TYPE_INDEX_TYPE (value_type (array)));
+  enum f90_range_type range_type = longest_to_int (exp->elts[pc].longconst);
+ 
+  *pos += 3;
+
+  if (range_type == LOW_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
+    low_bound = TYPE_LOW_BOUND (range);
+  else
+    low_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+
+  if (range_type == HIGH_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
+    high_bound = TYPE_HIGH_BOUND (range);
+  else
+    high_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
+
+  return value_slice (array, low_bound, high_bound - low_bound + 1);
+}
+
+struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
 			  enum noside noside)
@@ -1267,10 +1291,19 @@ evaluate_subexp_standard (struct type *expect_type,
       switch (code)
 	{
 	case TYPE_CODE_ARRAY:
-	  goto multi_f77_subscript;
+	  if (exp->elts[*pos].opcode == OP_F90_RANGE)
+	    return value_f90_subarray (arg1, exp, pos, noside);
+	  else
+	    goto multi_f77_subscript;
 
 	case TYPE_CODE_STRING:
-	  goto op_f77_substr;
+	  if (exp->elts[*pos].opcode == OP_F90_RANGE)
+	    return value_f90_subarray (arg1, exp, pos, noside);
+	  else
+	    {
+	      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
+	      return value_subscript (arg1, arg2);
+	    }
 
 	case TYPE_CODE_PTR:
 	case TYPE_CODE_FUNC:
@@ -1288,27 +1321,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	default:
 	  error (_("Cannot perform substring on this type"));
 	}
-
-    op_f77_substr:
-      /* We have a substring operation on our hands here, 
-         let us get the string we will be dealing with */
-
-      /* Now evaluate the 'from' and 'to' */
-
-      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-
-      if (nargs < 2)
-	return value_subscript (arg1, arg2);
-
-      arg3 = evaluate_subexp_with_coercion (exp, pos, noside);
-
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-
-      tem2 = value_as_long (arg2);
-      tem3 = value_as_long (arg3);
-
-      return value_slice (arg1, tem2, tem3 - tem2 + 1);
 
     case OP_COMPLEX:
       /* We have a complex number, There should be 2 floating 
