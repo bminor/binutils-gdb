@@ -3262,9 +3262,8 @@ pseudo_set (symbolS *symbolP)
       /* Fall thru */
 
     default:
-      /* The value is some complex expression.
-	 Set segment and frag back to that of a newly created symbol.  */
-      S_SET_SEGMENT (symbolP, undefined_section);
+      /* The value is some complex expression.  */
+      S_SET_SEGMENT (symbolP, expr_section);
       symbol_set_value_expression (symbolP, &exp);
       set_zero_frag (symbolP);
       break;

@@ -1,3 +1,7 @@
+2005-09-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c (pseudo_set): Set segment of expression syms to expr_section.
+
 2005-09-14  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (tc_x86_regname_to_dw2regnum): Add selector
