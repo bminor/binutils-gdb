@@ -1,5 +1,9 @@
 2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
 
+	* expression.h (enum exp_opcode): Fix a format error of a comment.
+ 
+2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
+
 	* expression.h (enum exp_opcode): Add a new operator for F90
 	subrange.
 	* f-lang.h (enum f90_range_type): New enumeration type to identify

@@ -324,7 +324,7 @@ enum exp_opcode
     /* An Objective C Foundation Class NSString constant */
     OP_OBJC_NSSTRING,
 
-    /* A F90 array range operator. (for "exp:exp", "exp:", ":exp" and ":") */
+    /* A F90 array range operator (for "exp:exp", "exp:", ":exp" and ":").  */
     OP_F90_RANGE,
 
      /* First extension operator.  Individual language modules define
