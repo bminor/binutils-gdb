@@ -1568,16 +1568,21 @@ find_abstract_instance_name (struct comp_unit *unit, bfd_uint64_t die_ref)
 	}
       else
 	{
-	  for (i = 0; i < abbrev->num_attrs && !name; ++i)
+	  for (i = 0; i < abbrev->num_attrs; ++i)
 	    {
 	      info_ptr = read_attribute (&attr, &abbrev->attrs[i], unit, info_ptr);
 	      switch (attr.name)
 		{
 		case DW_AT_name:
-		  name = attr.u.str;
+		  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
+		  if (name == NULL)
+		    name = attr.u.str;
 		  break;
 		case DW_AT_specification:
 		  name = find_abstract_instance_name (unit, attr.u.val);
+		  break;
+		case DW_AT_MIPS_linkage_name:
+		  name = attr.u.str;
 		  break;
 		default:
 		  break;

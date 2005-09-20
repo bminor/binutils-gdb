@@ -1,3 +1,9 @@
+2005-09-20  James E. Wilson  <wilson@specifix.com>
+
+	* dwarf2.c (find_abstract_instance_name): Don't early exit when name
+	set.  For DW_AT_name case, only set name if not already set.  Handle
+	DW_AT_MIPS_linkage_name.
+
 2005-09-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_merge_symbol): Simplify.
