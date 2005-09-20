@@ -59,6 +59,13 @@ proc test_character_literals_accepted {} {
     # Test various character values.
 
     gdb_test "p 'a'" " = 'a'"
+
+    # Test various substring expression.
+    gdb_test "p 'abcdefg'(2:4)" " = 'bcd'"
+    gdb_test "p 'abcdefg'(:3)"  " = 'abc'"
+    gdb_test "p 'abcdefg'(5:)"  " = 'efg'"
+    gdb_test "p 'abcdefg'(:)" " = 'abcdefg'"
+
 }
 
 proc test_integer_literals_rejected {} {
@@ -247,8 +254,6 @@ proc test_arithmetic_expressions {} {
     gdb_test "p 6 / 3"		" = 2"	"int divided by int"
     gdb_test "p 6.0 / 3"	" = 2"	"real divided by int"
     gdb_test "p 6.0 / 3.0"	" = 2"	"real divided by real"
-
-    # Test modulo with various operands
 
     # Test exponentiation with various operands
     

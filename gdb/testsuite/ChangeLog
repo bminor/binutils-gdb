@@ -1,3 +1,12 @@
+2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* gdb.fortran/subarray.exp: New testcase to test the evaluation
+	of subarray and substring variable.
+	* gdb.fortran/subarray.f: New source file for the test of subarray
+	and substring variable evaluation.
+	* gdb.fortran/exprs.exp: Add four tests for substring evaluation
+	of string constant.
+
 2005-09-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.arch/altivec-regs.exp, gdb.arch/altivec-abi.exp: Update
