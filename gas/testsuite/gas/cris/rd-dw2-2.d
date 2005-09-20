@@ -31,5 +31,5 @@
   Special opcode .*: advance Address by 6 to 0x500c0 and Line by 1 to 63
   Special opcode .*: advance Address by 6 to 0x500c6 and Line by 1 to 64
   Special opcode .*: advance Address by 6 to 0x500cc and Line by 1 to 65
-  Advance PC by 327776 to a012c
+  Advance PC by 327776 to 0xa012c
   Extended opcode 1: End of Sequence

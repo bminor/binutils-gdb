@@ -89,5 +89,5 @@
   Special opcode .*: advance Address by 4 to 0x13c and Line by 1 to 118
   Special opcode .*: advance Address by 2 to 0x13e and Line by 1 to 119
   Special opcode .*: advance Address by 2 to 0x140 and Line by 1 to 120
-  Advance PC by 4 to 144
+  Advance PC by 4 to 0x144
   Extended opcode 1: End of Sequence

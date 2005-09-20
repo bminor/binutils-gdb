@@ -24,7 +24,7 @@ Relocation section '\.rela\.debug_line' at offset .* contains 1 entries:
   Special opcode .*: advance Address by 2 to 0xa and Line by 1 to 5
   Special opcode .*: advance Address by 4 to 0xe and Line by 1 to 6
   Special opcode .*: advance Address by 4 to 0x12 and Line by 1 to 7
-  Advance PC by 2286 to 900
+  Advance PC by 2286 to 0x900
   Special opcode .*: advance Address by 0 to 0x900 and Line by 1 to 8
-  Advance PC by 15 to 90f
+  Advance PC by 15 to 0x90f
   Extended opcode 1: End of Sequence

@@ -8,9 +8,9 @@
   Extended opcode 2: set Address to 0x0
   Special opcode .*: advance Address by 0 to 0x0 and Line by 7 to 8
   Special opcode .*: advance Address by 2 to 0x2 and Line by 2 to 10
-  Advance PC by 32360 to 7e6a
+  Advance PC by 32360 to 0x7e6a
   Special opcode .*: advance Address by 0 to 0x7e6a and Line by 3 to 13
-  Advance PC by 196 to 7f2e
+  Advance PC by 196 to 0x7f2e
   Special opcode .*: advance Address by 0 to 0x7f2e and Line by 6 to 19
   Special opcode .*: advance Address by 2 to 0x7f30 and Line by 1 to 20
   Special opcode .*: advance Address by 2 to 0x7f32 and Line by 1 to 21
@@ -222,9 +222,9 @@
   Special opcode .*: advance Address by 2 to 0x8414 and Line by 1 to 261
   Special opcode .*: advance Address by 2 to 0x8416 and Line by 1 to 262
   Special opcode .*: advance Address by 2 to 0x8418 and Line by 2 to 264
-  Advance PC by 196 to 84dc
+  Advance PC by 196 to 0x84dc
   Special opcode .*: advance Address by 0 to 0x84dc and Line by 3 to 267
-  Advance PC by 32360 to 10344
+  Advance PC by 32360 to 0x10344
   Special opcode .*: advance Address by 0 to 0x10344 and Line by 3 to 270
-  Advance PC by 2 to 10346
+  Advance PC by 2 to 0x10346
   Extended opcode 1: End of Sequence

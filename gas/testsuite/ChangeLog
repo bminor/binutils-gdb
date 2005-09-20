@@ -1,3 +1,13 @@
+2005-09-20  Richard Henderson  <rth@redhat.com>
+
+	* gas/cris/rd-dw2-1.d, gas/cris/rd-dw2-10.d, gas/cris/rd-dw2-11.d,
+	gas/cris/rd-dw2-12.d, gas/cris/rd-dw2-13.d, gas/cris/rd-dw2-14.d,
+	gas/cris/rd-dw2-15.d, gas/cris/rd-dw2-2.d, gas/cris/rd-dw2-3.d,
+	gas/cris/rd-dw2-4.d, gas/cris/rd-dw2-5.d, gas/cris/rd-dw2-6.d,
+	gas/cris/rd-dw2-7.d, gas/cris/rd-dw2-8.d, gas/cris/rd-dw2-9.d,
+	gas/mips/mips16-dwarf2-n32.d, gas/mips/mips16-dwarf2.d: Add 0x
+	prefix in "Advance PC" lines.
+
 2005-09-08  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/arch6zk.d: Rename smi to smc.

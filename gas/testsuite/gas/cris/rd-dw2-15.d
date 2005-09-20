@@ -158,5 +158,5 @@
   Special opcode .*: advance Address by 2 to 0x1c6 and Line by 1 to 243
   Special opcode .*: advance Address by 2 to 0x1c8 and Line by 2 to 245
   Special opcode .*: advance Address by 2 to 0x1ca and Line by 1 to 246
-  Advance PC by 2 to 1cc
+  Advance PC by 2 to 0x1cc
   Extended opcode 1: End of Sequence

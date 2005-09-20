@@ -11,12 +11,12 @@
   Special opcode .*: advance Address by 4 to 0x6 and Line by 1 to 9
   Special opcode .*: advance Address by 4 to 0xa and Line by 1 to 10
   Advance Line by 47 to 57
-  Advance PC by 104 to 72
+  Advance PC by 104 to 0x72
   Copy
   Advance Line by 10 to 67
-  Advance PC by 260 to 176
+  Advance PC by 260 to 0x176
   Copy
-  Advance PC by 32770 to 8178
+  Advance PC by 32770 to 0x8178
   Special opcode .*: advance Address by 0 to 0x8178 and Line by 4 to 71
   Special opcode .*: advance Address by 2 to 0x817a and Line by 1 to 72
   Special opcode .*: advance Address by 2 to 0x817c and Line by 1 to 73
@@ -59,5 +59,5 @@
   Special opcode .*: advance Address by 2 to 0x81c6 and Line by 1 to 110
   Special opcode .*: advance Address by 2 to 0x81c8 and Line by 1 to 111
   Special opcode .*: advance Address by 2 to 0x81ca and Line by 1 to 112
-  Advance PC by 2 to 81cc
+  Advance PC by 2 to 0x81cc
   Extended opcode 1: End of Sequence

@@ -30,5 +30,5 @@
   Special opcode .*: advance Address by 6 to 0x8e and Line by 1 to 29
   Special opcode .*: advance Address by 6 to 0x94 and Line by 1 to 30
   Special opcode .*: advance Address by 6 to 0x9a and Line by 1 to 31
-  Advance PC by 8 to a2
+  Advance PC by 8 to 0xa2
   Extended opcode 1: End of Sequence

@@ -26,5 +26,5 @@
   Special opcode .*: advance Address by 2 to 0x42 and Line by 1 to 26
   Special opcode .*: advance Address by 2 to 0x44 and Line by 1 to 27
   Special opcode .*: advance Address by 2 to 0x46 and Line by 1 to 28
-  Advance PC by 2 to 48
+  Advance PC by 2 to 0x48
   Extended opcode 1: End of Sequence
