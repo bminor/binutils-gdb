@@ -1,5 +1,9 @@
 2005-09-20  Richard Henderson  <rth@redhat.com>
 
+	* dwarf2dbg.c (process_entries): Fix uninitialized variable warning.
+
+2005-09-20  Richard Henderson  <rth@redhat.com>
+
 	* dwarf2dbg.c (struct line_entry): Replace frag and frag_ofs
 	with label.
 	(dwarf2_loc_mark_labels): New.

@@ -1058,10 +1058,10 @@ process_entries (segT seg, struct line_entry *e)
   unsigned flags = DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0;
   fragS *last_frag = NULL, *frag;
   addressT last_frag_ofs = 0, frag_ofs;
-  symbolS *last_lab, *lab;
+  symbolS *last_lab = NULL, *lab;
   struct line_entry *next;
 
-  while (e)
+  do
     {
       int line_delta;
 
@@ -1129,6 +1129,7 @@ process_entries (segT seg, struct line_entry *e)
       free (e);
       e = next;
     }
+  while (e);
 
   /* Emit a DW_LNE_end_sequence for the end of the section.  */
   frag = last_frag_for_seg (seg);
