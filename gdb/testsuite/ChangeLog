@@ -1,5 +1,10 @@
 2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
 
+	* bfp-test.c: New file.
+	* bfp-test.exp: New testcase.
+
+2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
+
 	* gdb.fortran/subarray.exp: New testcase to test the evaluation
 	of subarray and substring variable.
 	* gdb.fortran/subarray.f: New source file for the test of subarray
