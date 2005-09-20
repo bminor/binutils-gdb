@@ -1,3 +1,8 @@
+2005-09-20  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * gdb.arch/altivec-abi.exp: Elide the 'in' from what's expected
+         after a 'finish' command.
+
 2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* c-exp.y (parse-number): Modify the float parsing logic to let it 

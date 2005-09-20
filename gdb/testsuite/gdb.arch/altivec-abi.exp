@@ -75,7 +75,7 @@ if ![runto_main] then {
 
 gdb_test "b marker" "Breakpoint 2 at.*file.*altivec-abi.c, line \[0-9\]+." "break marker"
 gdb_test "continue" "Breakpoint 2.*marker.*altivec-abi.c.*" "continue to marker"
-gdb_test "finish" "Run till exit from .0.*in marker.*at.*altivec-abi.c.*main \\(\\) at.*altivec-abi.c.*result = vec_func \\(vshort,.*goes in v2.*" "back to main (1)"
+gdb_test "finish" "Run till exit from .0.*marker.*at.*altivec-abi.c.*main \\(\\) at.*altivec-abi.c.*result = vec_func \\(vshort,.*goes in v2.*" "back to main (1)"
 
 # now all the arguments of vec_fun are initialized
 
@@ -100,7 +100,7 @@ gdb_test "step" \
   "step into vec_fun"
 
 set pattern2 $pattern
-append pattern2 " at.*altivec-abi.c.*in main.*result = vec_func .vshort,.*goes in v2.*Value returned is.*= .2, 2, 2, 2."
+append pattern2 " at.*altivec-abi.c.*main.*result = vec_func .vshort,.*goes in v2.*Value returned is.*= .2, 2, 2, 2."
 
 # Let's see if the result is returned correctly.
 gdb_test "finish" \
