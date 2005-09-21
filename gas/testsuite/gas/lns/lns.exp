@@ -18,9 +18,10 @@ if ![is_elf_format] then {
 
 run_list_test "lns-diag-1" ""
 
-# ??? Won't work on targets that don't have a bare "nop" insn,
-# which is only ia64, afaik.  Perhaps we could arrange for an
-# include file or something that defined a macro...
-if ![istarget ia64*-*-*] {
+# ??? Won't work on targets that don't have a bare "nop" insn.
+# Perhaps we could arrange for an include file or something that
+# defined a macro...
+if { ![istarget ia64*-*-*] && ![istarget i370-*-*] && ![istarget i960-*-*]
+     && ![istarget or32-*-*] && ![istarget s390*-*-*] } {
   run_dump_test "lns-common-1"
 }
