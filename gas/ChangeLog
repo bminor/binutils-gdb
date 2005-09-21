@@ -1,3 +1,7 @@
+2005-09-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c (pseudo_set): Don't set undefined symbols to expr_section.
+
 2005-09-20  Richard Henderson  <rth@redhat.com>
 
 	* dwarf2dbg.c (process_entries): Fix uninitialized variable warning.

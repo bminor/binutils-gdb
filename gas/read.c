@@ -3259,7 +3259,10 @@ pseudo_set (symbolS *symbolP)
 	  copy_symbol_attributes (symbolP, s);
 	  break;
 	}
-      /* Fall thru */
+      S_SET_SEGMENT (symbolP, undefined_section);
+      symbol_set_value_expression (symbolP, &exp);
+      set_zero_frag (symbolP);
+      break;
 
     default:
       /* The value is some complex expression.  */
