@@ -145,7 +145,7 @@ struct gdbarch_tdep
 
 static int
 n32n64_floatformat_always_valid (const struct floatformat *fmt,
-                                 const char *from)
+                                 const void *from)
 {
   return 1;
 }
