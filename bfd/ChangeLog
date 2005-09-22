@@ -1,3 +1,12 @@
+2005-09-22  James E. Wilson  <wilson@specifix.com>
+
+	* dwarf2.c (struct funcinfo): Delete nesting_level field.
+	(lookup_address_in_function_table): Delete code to set funcinfo
+	caller_func field.  Delete local curr_func.
+	(scan_unit_for_symbols): New locals nested_funcs, nested_funcs_size.
+	Delete code setting funcinfo nesting_level field.  Add code to set
+	funcinfo caller_func field.
+	
 2005-09-20  James E. Wilson  <wilson@specifix.com>
 
 	* dwarf2.c (find_abstract_instance_name): Don't early exit when name

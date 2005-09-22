@@ -722,7 +722,6 @@ struct funcinfo
   char *file;				/* Source location file name */
   int line;				/* Source location line number */
   int tag;
-  int nesting_level;
   char *name;
   struct arange arange;
   asection *sec;			/* Where the symbol is defined */
@@ -1431,28 +1430,8 @@ lookup_address_in_function_table (struct comp_unit *unit,
 
   if (best_fit)
     {
-      struct funcinfo* curr_func = best_fit;
-
       *functionname_ptr = best_fit->name;
       *function_ptr = best_fit;
-
-      /* If we found a match and it is a function that was inlined,
-	 traverse the function list looking for the function at the
-	 next higher scope and save a pointer to it for future use.
-	 Note that because of the way the DWARF info is generated, and
-	 the way we build the function list, the first function at the
-	 next higher level is the one we want. */
-
-      for (each_func = best_fit -> prev_func;
-	   each_func && (curr_func->tag == DW_TAG_inlined_subroutine);
-	   each_func = each_func->prev_func)
-	{
-	  if (each_func->nesting_level < curr_func->nesting_level)
-	    {
-	      curr_func->caller_func = each_func;
-	      curr_func = each_func;
-	    }
-	}
       return TRUE;
     }
   else
@@ -1645,6 +1624,16 @@ scan_unit_for_symbols (struct comp_unit *unit)
   bfd *abfd = unit->abfd;
   bfd_byte *info_ptr = unit->first_child_die_ptr;
   int nesting_level = 1;
+  struct funcinfo **nested_funcs;
+  int nested_funcs_size;
+
+  /* Maintain a stack of in-scope functions and inlined functions, which we
+     can use to set the caller_func field.  */
+  nested_funcs_size = 32;
+  nested_funcs = bfd_malloc (nested_funcs_size * sizeof (struct funcinfo *));
+  if (nested_funcs == NULL)
+    return FALSE;
+  nested_funcs[nesting_level] = 0;
 
   while (nesting_level)
     {
@@ -1671,6 +1660,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  (*_bfd_error_handler) (_("Dwarf Error: Could not find abbrev number %u."),
 			     abbrev_number);
 	  bfd_set_error (bfd_error_bad_value);
+	  free (nested_funcs);
 	  return FALSE;
 	}
 
@@ -1682,9 +1672,17 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  bfd_size_type amt = sizeof (struct funcinfo);
 	  func = bfd_zalloc (abfd, amt);
 	  func->tag = abbrev->tag;
-	  func->nesting_level = nesting_level;
 	  func->prev_func = unit->function_table;
 	  unit->function_table = func;
+
+	  if (func->tag == DW_TAG_inlined_subroutine)
+	    for (i = nesting_level - 1; i >= 1; i--)
+	      if (nested_funcs[i])
+		{
+		  func->caller_func = nested_funcs[i];
+		  break;
+		}
+	  nested_funcs[nesting_level] = func;
 	}
       else
 	{
@@ -1698,6 +1696,9 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	      var->prev_var = unit->variable_table;
 	      unit->variable_table = var;
 	    }
+
+	  /* No inline function in scope at this nesting level.  */
+	  nested_funcs[nesting_level] = 0;
 	}
 
       for (i = 0; i < abbrev->num_attrs; ++i)
@@ -1818,9 +1819,29 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	}
 
       if (abbrev->has_children)
-	nesting_level++;
+	{
+	  nesting_level++;
+
+	  if (nesting_level >= nested_funcs_size)
+	    {
+	      struct funcinfo **tmp;
+
+	      nested_funcs_size *= 2;
+	      tmp = bfd_realloc (nested_funcs,
+				 (nested_funcs_size
+				  * sizeof (struct funcinfo *)));
+	      if (tmp == NULL)
+		{
+		  free (nested_funcs);
+		  return FALSE;
+		}
+	      nested_funcs = tmp;
+	    }
+	  nested_funcs[nesting_level] = 0;
+	}
     }
 
+  free (nested_funcs);
   return TRUE;
 }
 
