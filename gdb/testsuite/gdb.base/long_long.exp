@@ -201,13 +201,16 @@ gdb_test_ptr "p/a val.oct" "" "" "0x77053977" "0xa72ee53977053977"
 gdb_test "p/c val.oct" "'w'"
 
 if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
-    # ARM floating point numbers are not strictly little endian or big endian,
-    # but a hybrid.  They are in little endian format with the two words
-    # swapped in big endian format.
+    # ARM FPA floating point numbers are not strictly little endian or big
+    # endian, but a hybrid.  They are in little endian format with the two
+    # words swapped in big endian format.
+    # EABI targets default to natural-endian VFP format.
 
-    if { [istarget "arm*-*-*"] || \
+    if { ([istarget "arm*-*-*"] || \
 	    [istarget "xscale*-*-*"] || \
-	    [istarget "strongarm*-*-*"] } then {
+	    [istarget "strongarm*-*-*"]) \
+	  && !([istarget "*-*-*eabi"] || \
+		[istarget "*-*-symbianelf"]) } then {
 	# assume the long long represents a floating point double in ARM format
 	gdb_test "p/f val.oct" "2.1386676354387559e\\+265"
     } else {

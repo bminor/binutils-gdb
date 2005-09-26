@@ -1,3 +1,7 @@
+2005-09-26  Paul Brook  <paul@codesourcery.com>
+
+	* long_long.exp: Exclude eabi targets from arm FPA float format test.
+
 2005-09-20  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* bfp-test.c: New file.

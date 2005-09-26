@@ -1204,6 +1204,54 @@ pop_stack_item (struct stack_item *si)
   return si;
 }
 
+
+/* Return the alignment (in bytes) of the given type.  */
+
+static int
+arm_type_align (struct type *t)
+{
+  int n;
+  int align;
+  int falign;
+
+  t = check_typedef (t);
+  switch (TYPE_CODE (t))
+    {
+    default:
+      /* Should never happen.  */
+      internal_error (__FILE__, __LINE__, _("unknown type alignment"));
+      return 4;
+
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_SET:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_BITSTRING:
+    case TYPE_CODE_REF:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
+      return TYPE_LENGTH (t);
+
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_COMPLEX:
+      /* TODO: What about vector types?  */
+      return arm_type_align (TYPE_TARGET_TYPE (t));
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      align = 1;
+      for (n = 0; n < TYPE_NFIELDS (t); n++)
+	{
+	  falign = arm_type_align (TYPE_FIELD_TYPE (t, n));
+	  if (falign > align)
+	    align = falign;
+	}
+      return align;
+    }
+}
+
 /* We currently only support passing parameters in integer registers.  This
    conforms with GCC's default model.  Several other variants exist and
    we should probably support some of them based on the selected ABI.  */
@@ -1255,12 +1303,42 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *target_type;
       enum type_code typecode;
       bfd_byte *val;
+      int align;
 
       arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
       target_type = TYPE_TARGET_TYPE (arg_type);
       typecode = TYPE_CODE (arg_type);
       val = value_contents_writeable (args[argnum]);
+
+      align = arm_type_align (arg_type);
+      /* Round alignment up to a whole number of words.  */
+      align = (align + INT_REGISTER_SIZE - 1) & ~(INT_REGISTER_SIZE - 1);
+      /* Different ABIs have different maximum alignments.  */
+      if (gdbarch_tdep (gdbarch)->arm_abi == ARM_ABI_APCS)
+	{
+	  /* The APCS ABI only requires word alignment.  */
+	  align = INT_REGISTER_SIZE;
+	}
+      else
+	{
+	  /* The AAPCS requires at most doubleword alignment.  */
+	  if (align > INT_REGISTER_SIZE * 2)
+	    align = INT_REGISTER_SIZE * 2;
+	}
+
+      /* Push stack padding for dowubleword alignment.  */
+      if (nstack & (align - 1))
+	{
+	  si = push_stack_item (si, val, INT_REGISTER_SIZE);
+	  nstack += INT_REGISTER_SIZE;
+	}
+      
+      /* Doubleword aligned quantities must go in even register pairs.  */
+      if (argreg <= ARM_LAST_ARG_REGNUM
+	  && align > INT_REGISTER_SIZE
+	  && argreg & 1)
+	argreg++;
 
       /* If the argument is a pointer to a function, and it is a
 	 Thumb function, create a LOCAL copy of the value and set
@@ -2094,24 +2172,13 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
     }
 }
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value.  */
-
-static CORE_ADDR
-arm_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST ret;
-
-  regcache_cooked_read_unsigned (regcache, ARM_A1_REGNUM, &ret);
-  return ret;
-}
 
 /* Will a function return an aggregate type in memory or in a
    register?  Return 0 if an aggregate type can be returned in a
    register, 1 if it must be returned in memory.  */
 
 static int
-arm_use_struct_convention (int gcc_p, struct type *type)
+arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 {
   int nRc;
   enum type_code code;
@@ -2141,6 +2208,11 @@ arm_use_struct_convention (int gcc_p, struct type *type)
     {
       return 1;
     }
+
+  /* The AAPCS says all aggregates not larger than a word are returned
+     in a register.  */
+  if (gdbarch_tdep (gdbarch)->arm_abi != ARM_ABI_APCS)
+    return 0;
 
   /* The only aggregate types that can be returned in a register are
      structs and unions.  Arrays must be returned in memory.  */
@@ -2288,6 +2360,32 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	}
     }
 }
+
+
+/* Handle function return values.  */
+
+static enum return_value_convention
+arm_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		  struct regcache *regcache, void *readbuf,
+		  const void *writebuf)
+{
+  if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+      || TYPE_CODE (valtype) == TYPE_CODE_UNION
+      || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+    {
+      if (arm_return_in_memory (gdbarch, valtype))
+	return RETURN_VALUE_STRUCT_CONVENTION;
+    }
+
+  if (writebuf)
+    arm_store_return_value (valtype, regcache, writebuf);
+
+  if (readbuf)
+    arm_extract_return_value (valtype, regcache, readbuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
 
 static int
 arm_get_longjmp_target (CORE_ADDR *pc)
@@ -2568,7 +2666,7 @@ arm_write_pc (CORE_ADDR pc, ptid_t ptid)
 static enum gdb_osabi
 arm_elf_osabi_sniffer (bfd *abfd)
 {
-  unsigned int elfosabi, eflags;
+  unsigned int elfosabi;
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
@@ -2646,6 +2744,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 		case EF_ARM_EABI_VER4:
 		  arm_abi = ARM_ABI_AAPCS;
+		  /* EABI binaries default to VFP float ordering.  */
+		  if (fp_model == ARM_FLOAT_AUTO)
+		    fp_model = ARM_FLOAT_SOFT_VFP;
 		  break;
 
 		default:
@@ -2787,10 +2888,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, arm_register_name);
 
   /* Returning results.  */
-  set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
-  set_gdbarch_deprecated_use_struct_convention (gdbarch, arm_use_struct_convention);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, arm_extract_struct_value_address);
+  set_gdbarch_return_value (gdbarch, arm_return_value);
 
   /* Single stepping.  */
   /* XXX For an RDI target we should ask the target if it can single-step.  */
