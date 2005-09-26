@@ -1,3 +1,7 @@
+2005-09-26  Mark Mitchell  <mark@codesourcery.com>
+
+	* BRANCHES: Mention binutils-csl-gxxpro-3_4-branch.
+
 2005-09-20  Richard Henderson  <rth@redhat.com>
 
 	* readelf.c (display_debug_lines): Use unsigned long for address

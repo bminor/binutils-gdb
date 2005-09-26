@@ -17,6 +17,11 @@ binutils-csl-arm-2005q1-branch
 			Please do not commit to this branch without
 			permission from a CodeSourcery developer.
 
+binutils-csl-gxxpro-3_4-branch
+			CodeSourcery branded GNU Toolchain release branch.
+			Please do not commit to this branch without
+			permission from a CodeSourcery developer.
+
 Release Branches
 ----------------
 binutils-2_10-branch
