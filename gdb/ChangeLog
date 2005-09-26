@@ -32,8 +32,8 @@
 	(arm_return_value): New function.
 	(arm_gdbarch_init): Default for VFP float model for EABI binaries.
 	Use set_gdbarch_return_value instead of obsolete functions.
-	* testsuite/long_long.exp: Exclude eabi targets from arm FPA float
-	format test.
+	* testsuite/gdb.base/long_long.exp: Exclude eabi targets from arm
+	FPA float format test.
 
 2005-09-21  Mark Kettenis  <kettenis@gnu.org>
 
