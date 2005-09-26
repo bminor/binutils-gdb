@@ -852,9 +852,9 @@ tui_winsource_h = $(srcdir)/tui/tui-winsource.h $(tui_data_h)
 HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	exceptions.h \
 	environ.h $(gdbcmd_h) gdb.h gdbcore.h \
-	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
+	gdb-stabs.h $(inferior_h) language.h monitor.h \
 	objfiles.h parser-defs.h serial.h solib.h \
-	symfile.h symfile-mem.h stabsread.h target.h terminal.h typeprint.h \
+	symfile.h stabsread.h target.h terminal.h typeprint.h \
 	xcoffsolib.h \
 	macrotab.h macroexp.h macroscope.h \
 	ada-lang.h c-lang.h f-lang.h \
@@ -881,16 +881,16 @@ REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 # Makefile.in
 
 DEPFILES = $(TDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
-	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_OBS)
+	   $(REMOTE_OBS) $(SIM_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
-	$(SUBDIR_CLI_SRCS)
+	$(CONFIG_SRCS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
-COMMON_OBS = $(DEPFILES) $(YYOBJ) \
+COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	version.o \
 	annotate.o \
 	auxv.o \
@@ -1232,7 +1232,7 @@ TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	@etags $(srcdir)/$(DEPRECATED_TM_FILE) \
 	  $(srcdir)/$(XM_FILE) \
 	  $(srcdir)/$(NAT_FILE) \
-	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \
+	`(for i in $(TAGFILES_NO_SRCDIR); do \
 		echo $(srcdir)/$$i ; \
 	done ; for i in $(TAGFILES_WITH_SRCDIR); do \
 		echo $$i ; \
@@ -1354,7 +1354,7 @@ observer.inc: observer.sh doc/observer.texi
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
-	   `echo $(DEPFILES) | sed 's/\.o /\.c /g'`
+	   `echo $(DEPFILES) $(CONFIG_OBS) | sed 's/\.o /\.c /g'`
 
 gdb.cxref: $(SFILES)
 	cxref -I. $(SFILES) >gdb.cxref
@@ -1378,7 +1378,7 @@ ALLDEPFILES = \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
 	alpha-osf1-tdep.c alphafbsd-tdep.c alpha-mdebug-tdep.c \
 	amd64-nat.c amd64-tdep.c \
-	amd64bsd-nat.c amdfbsd-nat.c amd64fbsd-tdep.c \
+	amd64bsd-nat.c amd64fbsd-nat.c amd64fbsd-tdep.c \
 	amd64nbsd-nat.c amd64nbsd-tdep.c \
 	amd64obsd-nat.c amd64obsd-tdep.c \
 	amd64-linux-nat.c amd64-linux-tdep.c \
@@ -1408,9 +1408,9 @@ ALLDEPFILES = \
 	i386gnu-nat.c i386gnu-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
 	inf-ptrace.c inf-ttrace.c \
-	infptrace.c inftarg.c irix4-nat.c irix5-nat.c \
+	infptrace.c inftarg.c irix5-nat.c \
 	libunwind-frame.c \
-	lynx-nat.c m3-nat.c \
+	lynx-nat.c \
 	m68hc11-tdep.c \
 	m32r-tdep.c \
 	m32r-linux-nat.c m32r-linux-tdep.c \
@@ -1418,14 +1418,13 @@ ALLDEPFILES = \
 	m68kbsd-nat.c m68kbsd-tdep.c \
 	m68klinux-nat.c m68klinux-tdep.c \
 	m88k-tdep.c m88kbsd-nat.c \
-	mcore-tdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-irix-tdep.c \
-	mips-tdep.c mipsm3-nat.c mipsv4-nat.c \
+	mips-tdep.c mipsv4-nat.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	mips64obsd-nat.c mips64obsd-tdep.c \
 	nbsd-tdep.c \
-	ns32k-tdep.c solib-osf.c \
+	solib-osf.c \
 	somread.c solib-som.c $(HPREAD_SOURCE) \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c \
 	ppcnbsd-nat.c ppcnbsd-tdep.c \
@@ -1447,7 +1446,6 @@ ALLDEPFILES = \
 	sparc64-tdep.c sparc64fbsd-nat.c sparc64fbsd-tdep.c \
 	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
-	symm-tdep.c symm-nat.c \
 	v850-tdep.c \
 	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	win32-nat.c \
