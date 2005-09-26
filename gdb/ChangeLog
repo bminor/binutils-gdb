@@ -1,5 +1,9 @@
 2005-09-26  Jan Beulich  <jbeulich@novell.com>
 
+	* MAINTAINERS (Write After Approval): Add myself.
+
+2005-09-26  Jan Beulich  <jbeulich@novell.com>
+
 	* amd64-tdep.h (AMD64_FCTRL_REGNUM, AMD64_FSTAT_REGNUM,
 	AMD64_MXCSR_REGNUM): New.
 	* amd64-tdep.c (amd64_dwarf_regmap): Add eflags, selector regs,
