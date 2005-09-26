@@ -212,7 +212,35 @@ static int amd64_dwarf_regmap[] =
   AMD64_ST0_REGNUM + 0, AMD64_ST0_REGNUM + 1,
   AMD64_ST0_REGNUM + 2, AMD64_ST0_REGNUM + 3,
   AMD64_ST0_REGNUM + 4, AMD64_ST0_REGNUM + 5,
-  AMD64_ST0_REGNUM + 6, AMD64_ST0_REGNUM + 7
+  AMD64_ST0_REGNUM + 6, AMD64_ST0_REGNUM + 7,
+  
+  /* Control and Status Flags Register.  */
+  AMD64_EFLAGS_REGNUM,
+
+  /* Selector Registers.  */
+  AMD64_ES_REGNUM,
+  AMD64_CS_REGNUM,
+  AMD64_SS_REGNUM,
+  AMD64_DS_REGNUM,
+  AMD64_FS_REGNUM,
+  AMD64_GS_REGNUM,
+  -1,
+  -1,
+
+  /* Segment Base Address Registers.  */
+  -1,
+  -1,
+  -1,
+  -1,
+
+  /* Special Selector Registers.  */
+  -1,
+  -1,
+
+  /* Floating Point Control Registers.  */
+  AMD64_MXCSR_REGNUM,
+  AMD64_FCTRL_REGNUM,
+  AMD64_FSTAT_REGNUM
 };
 
 static const int amd64_dwarf_regmap_len =

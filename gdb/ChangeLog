@@ -1,3 +1,12 @@
+2005-09-26  Jan Beulich  <jbeulich@novell.com>
+
+	* amd64-tdep.h (AMD64_FCTRL_REGNUM, AMD64_FSTAT_REGNUM,
+	AMD64_MXCSR_REGNUM): New.
+	* amd64-tdep.c (amd64_dwarf_regmap): Add eflags, selector regs,
+	mxcsr, fp control and status words.
+	* i386-tdep.c (): Add selector regs, mxcsr, fp control and status
+	words.
+
 2005-09-26  Paul Brook  <paul@codesourcery.com>
 
 	* arm-tdep.c (arm_type_align): New function.

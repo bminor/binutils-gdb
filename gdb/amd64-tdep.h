@@ -52,8 +52,11 @@ enum amd64_regnum
   AMD64_FS_REGNUM,		/* %fs */
   AMD64_GS_REGNUM,		/* %gs */
   AMD64_ST0_REGNUM = 24,	/* %st0 */
+  AMD64_FCTRL_REGNUM = AMD64_ST0_REGNUM + 8,
+  AMD64_FSTAT_REGNUM = AMD64_ST0_REGNUM + 9,
   AMD64_XMM0_REGNUM = 40,	/* %xmm0 */
-  AMD64_XMM1_REGNUM		/* %xmm1 */
+  AMD64_XMM1_REGNUM,		/* %xmm1 */
+  AMD64_MXCSR_REGNUM = AMD64_XMM0_REGNUM + 16
 };
 
 /* Number of general purpose registers.  */

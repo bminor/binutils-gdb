@@ -225,10 +225,23 @@ i386_svr4_reg_to_regnum (int reg)
       /* Floating-point registers.  */
       return reg - 11 + I387_ST0_REGNUM;
     }
-  else if (reg >= 21)
+  else if (reg >= 21 && reg <= 36)
     {
       /* The SSE and MMX registers have the same numbers as with dbx.  */
       return i386_dbx_reg_to_regnum (reg);
+    }
+
+  switch (reg)
+    {
+    case 37: return I387_FCTRL_REGNUM;
+    case 38: return I387_FSTAT_REGNUM;
+    case 39: return I387_MXCSR_REGNUM;
+    case 40: return I386_ES_REGNUM;
+    case 41: return I386_CS_REGNUM;
+    case 42: return I386_SS_REGNUM;
+    case 43: return I386_DS_REGNUM;
+    case 44: return I386_FS_REGNUM;
+    case 45: return I386_GS_REGNUM;
     }
 
   /* This will hopefully provoke a warning.  */
