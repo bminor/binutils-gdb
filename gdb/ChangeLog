@@ -1,3 +1,13 @@
+2005-09-26  Nick Roberts  <nickrob@snap.net.nz>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove minimon.h, symfile-mem.h.
+	(ALLDEPFILES) Correct typo amdfbsd-nat.c -> amd64fbsd-nat.c.
+	Remove irix4-nat.c, m3-nat.c, mipsm3-nat.c, ns32k-tdep.c
+	symm-tdep.c and symm-nat.c.
+	(TAGFILES_NO_SRCDIR): Add CONFIG_SRCS.
+	(DEPFILES): Remove CONFIG_OBS and include it explicitly where
+	needed.
+
 2005-09-26  Jan Beulich  <jbeulich@novell.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.
