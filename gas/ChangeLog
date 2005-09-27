@@ -1,3 +1,8 @@
+2005-09-27  Paul Brook  <paul@codesourcery.com>
+
+	* config/arm.c (arm_cpus): Add more cpu names.
+	* doc/c-arm.texi: Document them.
+
 2005-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (pseudo_set): Don't set undefined symbols to expr_section.
