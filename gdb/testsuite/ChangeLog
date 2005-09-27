@@ -1,3 +1,18 @@
+2005-09-27  Bob Rossi  <bob@brasko.net>
+
+	* gdb.mi/mi-disassemble.exp, gdb.mi/mi2-disassemble.exp: Remove .* 
+	from test.  Escape the | in mi_gdb_test call.
+	* gdb.mi/mi-basics.exp, gdb.mi/mi-cli.exp, gdb.mi/mi-disassemble.exp,
+	gdb.mi/mi-pthreads.exp, gdb.mi/mi-stack.exp, gdb.mi/mi2-basics.exp,
+	gdb.mi/mi2-cli.exp, gdb.mi/mi2-disassemble.exp,
+	gdb.mi/mi2-pthreads.exp, gdb.mi/mi2-stack.exp: Add extra details to
+	expected regex's in mi_gdb_test calls.
+	* lib/mi-support.exp: Remove arbitrary .* from tests.
+	(mi_gdb_test): Add string_regex variable. Add anchor to main -re.
+	Fully anchor GDB/MI expected results in mi_gdb_test.
+	* lib/gdb.exp (string_to_regexp): Escape the ] character.
+	* gdb.base/sizeof.exp: Remove escape character. Correct test.
+
 2005-09-26  Paul Brook  <paul@codesourcery.com>
 
 	* long_long.exp: Exclude eabi targets from arm FPA float format test.

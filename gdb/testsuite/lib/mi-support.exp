@@ -246,7 +246,7 @@ proc mi_delete_breakpoints {} {
 	    send_gdb "y\n";
 	    exp_continue
          }
-	 -re ".*102-break-delete\r\n102\\\^done\r\n$mi_gdb_prompt$" {
+	 -re "102-break-delete\r\n102\\\^done\r\n$mi_gdb_prompt$" {
             # This happens if there were no breakpoints
 	 }
 	 timeout { perror "Delete all breakpoints in mi_delete_breakpoints (timeout)" ; return }
@@ -596,6 +596,8 @@ proc mi_gdb_test { args } {
 
     set result -1
     set string "${command}\n";
+    set string_regex [string_to_regexp $command]
+
     if { $command != "" } {
 	while { "$string" != "" } {
 	    set foo [string first "\n" "$string"];
@@ -659,7 +661,11 @@ proc mi_gdb_test { args } {
 	    gdb_start
 	    set result -1
 	}
-	 -re "\[\r\n\]*($pattern)\[\r\n\]+$mi_gdb_prompt\[ \]*" {
+	 -re "^($string_regex\[\r\n\]+)?($pattern\[\r\n\]+$mi_gdb_prompt\[ \]*)" {
+	    # At this point, $expect_out(1,string) is the MI input command.
+	    # and $expect_out(2,string) is the MI output command.
+	    # If $expect_out(1,string) is "", then there was no MI input command here.
+
 	    # NOTE, there is no trailing anchor because with GDB/MI, 
 	    # asynchronous responses can happen at any point, causing more 
 	    # data to be available.  Normally an anchor is used to make 
@@ -925,11 +931,11 @@ proc mi_execute_to_helper { cmd reason func args file line extra test } {
     global fullname_syntax
     send_gdb "220-$cmd\n"
     gdb_expect {
-	-re ".*220\\^running\r\n${mi_gdb_prompt}.*220\\*stopped,reason=\"$reason\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$extra\r\n$mi_gdb_prompt$" {
+	-re "220\\^running\r\n${mi_gdb_prompt}.*220\\*stopped,reason=\"$reason\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$extra\r\n$mi_gdb_prompt$" {
 	    pass "$test"
 	    return 0
 	}
-	-re ".*220\\^running\r\n${mi_gdb_prompt}.*220\\*stopped,reason=\"$reason\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$mi_gdb_prompt$" {
+	-re "220\\^running\r\n${mi_gdb_prompt}.*220\\*stopped,reason=\"$reason\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$mi_gdb_prompt$" {
 	    fail "$test (stopped at wrong place)"
 	    return -1
 	}

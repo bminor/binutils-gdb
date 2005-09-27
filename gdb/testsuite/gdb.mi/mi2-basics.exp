@@ -1,4 +1,4 @@
-# Copyright 1999, 2000, 2001, 2002, 2003, 2004
+# Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -139,7 +139,7 @@ proc test_breakpoints_deletion {} {
 
     # The all parameter is actually no parameter.
     mi_gdb_test "200-break-delete" \
-             "\\\^done" \
+             "200\\\^done" \
              "break-delete (all) operation"
 
     mi_gdb_test "201-break-list" \
@@ -169,7 +169,7 @@ proc test_dir_specification {} {
              "environment-directory empty-string operation"
 
     mi_gdb_test "204-environment-directory -r" \
-             "\\\^done,source-path=\"\\\$cdir.\\\$cwd\"" \
+             "204\\\^done,source-path=\"\\\$cdir.\\\$cwd\"" \
              "environment-directory operation"
 
 #exp_internal 0
@@ -187,11 +187,11 @@ proc test_cwd_specification {} {
     # -environment-pwd
 
     mi_gdb_test "205-environment-cd ${objdir}" \
-             "\\\^done" \
+             "205\\\^done" \
              "environment-cd arg operation"
 
     mi_gdb_test "206-environment-pwd" \
-             "\\\^done,cwd=\"${escapedobjdir}\"" \
+             "206\\\^done,cwd=\"${escapedobjdir}\"" \
              "environment-pwd operation"
 }
 
@@ -222,7 +222,7 @@ proc test_path_specification {} {
     }
 
     mi_gdb_test "207-environment-path" \
-             "\\\^done,path=\"$orig_path\"" \
+             "207\\\^done,path=\"$orig_path\"" \
              "environment-path no-args operation"
 
     mi_gdb_test "208-environment-path $srcdir $objdir" \
@@ -230,11 +230,11 @@ proc test_path_specification {} {
              "environment-path dir1 dir2 operation"
 
     mi_gdb_test "209-environment-path -r $objdir" \
-             "\\\^done,path=\"$escapedobjdir.$orig_path\"" \
+             "209\\\^done,path=\"$escapedobjdir.$orig_path\"" \
              "environment-path -r dir operation"
 
     mi_gdb_test "210-environment-path -r" \
-             "\\\^done,path=\"$orig_path\"" \
+             "210\\\^done,path=\"$orig_path\"" \
              "environment-path -r operation"
 
 } 

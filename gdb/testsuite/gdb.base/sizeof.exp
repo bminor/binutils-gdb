@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
+# Copyright 2000, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@ set signof_char [get_valueof "/d" "(int) (char) -1" -1]
 set signof_signed_char [get_valueof "/d" "(int) (signed char) -1" -1]
 set signof_unsigned_char [get_valueof "/d" "(int) (unsigned char) -1" -1]
 
-check_valueof "'\\\\377'" ${signof_byte}
+check_valueof "'\\377'" ${signof_byte}
 check_valueof "(int) (char) -1" ${signof_char}
 check_valueof "(int) (signed char) -1" ${signof_signed_char}
 check_valueof "(int) (unsigned char) -1" ${signof_unsigned_char}

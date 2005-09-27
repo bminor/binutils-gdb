@@ -59,7 +59,7 @@ mi_gdb_test "-interpreter-exec console bogus" \
 #   {(=.*)+\^done} \
 #   "-interpreter-exec console \"file \$binfile\""
 mi_gdb_test "-interpreter-exec console \"file $binfile\"" \
-  {\^done} \
+  {~"Reading symbols from .*basics...".*\^done} \
   "-interpreter-exec console \"file \$binfile\""
 
 mi_run_to_main
@@ -125,7 +125,7 @@ mi_gdb_test "100-interpreter-exec console \"delete 2\"" \
 #   {.*=selected-frame-level-changed,level="1".*\^done} \
 #   "-interpreter-exec console \"up\""
 mi_gdb_test "200-interpreter-exec console \"up\"" \
-  {200\^done} \
+  {~"#.*".*200\^done} \
   "-interpreter-exec console \"up\""
 
 # NOTE: cagney/2003-02-03: Not yet.
@@ -133,7 +133,7 @@ mi_gdb_test "200-interpreter-exec console \"up\"" \
 #   {.*=selected-frame-level-changed,level="0".*\^done} \
 #   "-interpreter-exec console \"down\""
 mi_gdb_test "300-interpreter-exec console \"down\"" \
-  {300\^done} \
+  {~"#.*".*300\^done} \
   "-interpreter-exec console \"down\""
 
 # NOTE: cagney/2003-02-03: Not yet.
@@ -141,7 +141,7 @@ mi_gdb_test "300-interpreter-exec console \"down\"" \
 #   {.*=selected-frame-level-changed,level="2".*\^done} \
 #   "-interpreter-exec console \"frame 2\""
 mi_gdb_test "400-interpreter-exec console \"frame 2\"" \
-  {400\^done} \
+  {~"#.*".*400\^done} \
   "-interpreter-exec console \"frame 2\""
 
 # NOTE: cagney/2003-02-03: Not yet.
