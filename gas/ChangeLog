@@ -1,5 +1,13 @@
 2005-09-28  Jan Beulich  <jbeulich@novell.com>
 
+	* dw2gencfi.c (dot_cfi): Call ignore_rest_of_line when not fully
+	parsing the input.
+	(dot_cfi_startproc): Likewise.
+	(dot_cfi_endproc): Likewise. Also check no extra input was given.
+	(dot_cfi_escape): Likewise.
+
+2005-09-28  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.h (x86_cons_fix_new): Declare unconditionally.
 	(TC_CONS_FIX_NEW): Define unconditionally.
 	(x86_pe_cons_fix_new): Remove.

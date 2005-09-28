@@ -447,6 +447,7 @@ dot_cfi (int arg)
   if (!cur_fde_data)
     {
       as_bad (_("CFI instruction used without previous .cfi_startproc"));
+      ignore_rest_of_line ();
       return;
     }
 
@@ -548,6 +549,7 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
   if (!cur_fde_data)
     {
       as_bad (_("CFI instruction used without previous .cfi_startproc"));
+      ignore_rest_of_line ();
       return;
     }
 
@@ -570,6 +572,9 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
   insn = alloc_cfi_insn_data ();
   insn->insn = CFI_escape;
   insn->u.esc = head;
+
+  --input_line_pointer;
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -580,6 +585,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
   if (cur_fde_data)
     {
       as_bad (_("previous CFI entry not closed (missing .cfi_endproc)"));
+      ignore_rest_of_line ();
       return;
     }
 
@@ -614,10 +620,13 @@ dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
   if (! cur_fde_data)
     {
       as_bad (_(".cfi_endproc without corresponding .cfi_startproc"));
+      ignore_rest_of_line ();
       return;
     }
 
   cfi_end_fde (symbol_temp_new_now ());
+
+  demand_empty_rest_of_line ();
 }
 
 
