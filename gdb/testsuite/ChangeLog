@@ -1,3 +1,9 @@
+2005-09-29  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.base/annota3.exp, gdb.cp/annota3.exp: The annotations
+	frames-invalid and breakpoints-invalid are no longer generated
+	with level 3 so don't expect them in the output.
+
 2005-09-27  Bob Rossi  <bob@brasko.net>
 
 	* gdb.mi/mi-disassemble.exp, gdb.mi/mi2-disassemble.exp: Remove .* 

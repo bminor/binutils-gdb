@@ -1,3 +1,9 @@
+2005-09-29  Nick Roberts  <nickrob@snap.net.nz>
+
+	* annotate.c (breakpoints_changed, annotate_frames_invalid)
+	(_initialize_annotate): Print breakpoints-invalid and
+	frames-invalid for level 2 annotations only.
+
 2005-09-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infrun.c (init_execution_control_state): Initialize
