@@ -1,5 +1,12 @@
 2005-09-28  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (reloc): Disable signedness check for 4-byte
+	relocations in 16- and 32-bit modes.
+	(i386_displacement): Make pc-relative branch handling dependent
+	upon operand (rather than address) size.
+
+2005-09-28  Jan Beulich  <jbeulich@novell.com>
+
 	* dw2gencfi.c (dot_cfi): Call ignore_rest_of_line when not fully
 	parsing the input.
 	(dot_cfi_startproc): Likewise.

@@ -1,5 +1,11 @@
 2005-09-28  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/mixed-mode-reloc.s: Enable all insns.
+	* gas/i386/mixed-mode-reloc32.d: Adjust.
+	* gas/i386/mixed-mode-reloc64.d: Adjust.
+
+2005-09-28  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/reloc64.s: Also test .slong.
 	* gas/i386/reloc64.l: Adjust.
 	* gas/i386/reloc64.d: Adjust.

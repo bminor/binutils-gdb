@@ -1237,6 +1237,11 @@ reloc (unsigned int size,
 	    default:
 	      break;
 	  }
+
+      /* Sign-checking 4-byte relocations in 16-/32-bit code is pointless.  */
+      if (size == 4 && flag_code != CODE_64BIT)
+	sign = -1;
+
       reloc = bfd_reloc_type_lookup (stdoutput, other);
       if (!reloc)
 	as_bad (_("unknown relocation (%u)"), other);
@@ -4111,16 +4116,44 @@ i386_displacement (disp_start, disp_end)
   segT exp_seg = 0;
   char *save_input_line_pointer;
   char *gotfree_input_line;
-  int bigdisp = Disp32;
+  int bigdisp, override;
   unsigned int types = Disp;
 
+  if ((i.types[this_operand] & JumpAbsolute)
+      || !(current_templates->start->opcode_modifier & (Jump | JumpDword)))
+    {
+      bigdisp = Disp32;
+      override = (i.prefix[ADDR_PREFIX] != 0);
+    }
+  else
+    {
+      /* For PC-relative branches, the width of the displacement
+	 is dependent upon data size, not address size.  */
+      bigdisp = 0;
+      override = (i.prefix[DATA_PREFIX] != 0);
+    }
   if (flag_code == CODE_64BIT)
     {
-      if (i.prefix[ADDR_PREFIX] == 0)
+      if (!bigdisp)
+	bigdisp = (override || i.suffix == WORD_MNEM_SUFFIX)
+		  ? Disp16
+		  : Disp32S | Disp32;
+      else if (!override)
 	bigdisp = Disp64 | Disp32S | Disp32;
     }
-  else if ((flag_code == CODE_16BIT) ^ (i.prefix[ADDR_PREFIX] != 0))
-    bigdisp = Disp16;
+  else
+    {
+      if (!bigdisp)
+	{
+	  if (!override)
+	    override = (i.suffix == (flag_code != CODE_16BIT
+				     ? WORD_MNEM_SUFFIX
+				     : LONG_MNEM_SUFFIX));
+	  bigdisp = Disp32;
+	}
+      if ((flag_code == CODE_16BIT) ^ override)
+	bigdisp = Disp16;
+    }
   i.types[this_operand] |= bigdisp;
 
   exp = &disp_expressions[i.disp_operands];

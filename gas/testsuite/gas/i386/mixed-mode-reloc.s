@@ -2,12 +2,12 @@
 
  .code16
 _start16:
-#FIXME	movl	xtrn@got(%ebx), %eax
-#FIXME	calll	xtrn@plt
+	movl	xtrn@got(%ebx), %eax
+	calll	xtrn@plt
 
  .code32
 _start32:
-#FIXME	movl	xtrn@got(%ebx), %eax
+	movl	xtrn@got(%ebx), %eax
 	calll	xtrn@plt
 
  .code64
