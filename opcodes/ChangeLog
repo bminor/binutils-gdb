@@ -1,3 +1,23 @@
+2005-09-28  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (stack_v_mode): Renamed from branch_v_mode.
+	(indirEv): Use it.
+	(stackEv): New.
+	(Ob64, Ov64): Rename to Ob, Ov. Delete unused original definitions.
+	(dis386): Document and use new 'V' meta character. Use it for
+	single-byte push/pop opcode forms. Use stackEv for mod-r/m push/pop
+	opcode forms. Correct typo in 'pop ss'. Replace Ob64/Ov64 by Ob/Ov.
+	(putop): 'q' suffix for 'T' and 'U' meta depends on DFLAG. Mark
+	data prefix as used whenever DFLAG was examined. Handle 'V'.
+	(intel_operand_size): Use stack_v_mode.
+	(OP_E): Use stack_v_mode, but handle only the special case of
+	64-bit mode without operand size override here; fall through to
+	v_mode case otherwise.
+	(OP_REG): Special case rAX_reg ... rDI_reg only when 64-bit mode
+	and no operand size override is present.
+	(OP_J): Use get32s for obtaining the displacement also when rex64
+	is present.
+
 2005-09-08  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (arm_opcodes, thumb32_opcodes): Rename smi to smc.

@@ -20,10 +20,9 @@ Disassembly of section .text:
  +1008:	66 48 8d 3d 80 03 10[ 	]+lea    1049472\(%rip\),%rdi +# 101390 <.*>
  +100f:	00 *
 #				-> R_X86_64_DTPMOD64	sg1
- +1010:	66[ 	]+data16
- +1011:	66[ 	]+data16
- +1012:	48 e8 [0-9a-f 	]+rex64 callq  [0-9a-f]+ <.*>
+ +1010:	66 66 48 e8 [0-9a-f 	]+callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
+ +1017:	[0-9a-f 	]+
  +1018:	90[ 	]+nop *
  +1019:	90[ 	]+nop *
  +101a:	90[ 	]+nop *
@@ -41,10 +40,9 @@ Disassembly of section .text:
  +1030:	66 48 8d 3d 08 03 10[ 	]+lea    1049352\(%rip\),%rdi +# 101340 <.*>
  +1037:	00 *
 #				-> R_X86_64_DTPMOD64	[0 0x2000000000000000]
- +1038:	66[ 	]+data16
- +1039:	66[ 	]+data16
- +103a:	48 e8 [0-9a-f 	]+rex64 callq  [0-9a-f]+ <.*>
+ +1038:	66 66 48 e8 [0-9a-f 	]+callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
+ +103f:	[0-9a-f 	]+
  +1040:	90[ 	]+nop *
  +1041:	90[ 	]+nop *
  +1042:	90[ 	]+nop *
@@ -62,10 +60,9 @@ Disassembly of section .text:
  +1058:	66 48 8d 3d 58 03 10[ 	]+lea    1049432\(%rip\),%rdi +# 1013b8 <.*>
  +105f:	00 *
 #				-> R_X86_64_DTPMOD64	[0 0x4000000000000000]
- +1060:	66[ 	]+data16
- +1061:	66[ 	]+data16
- +1062:	48 e8 [0-9a-f 	]+rex64 callq  [0-9a-f]+ <.*>
+ +1060:	66 66 48 e8 [0-9a-f 	]+callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
+ +1067:	[0-9a-f 	]+
  +1068:	90[ 	]+nop *
  +1069:	90[ 	]+nop *
  +106a:	90[ 	]+nop *
@@ -83,10 +80,9 @@ Disassembly of section .text:
  +1080:	66 48 8d 3d e8 02 10[ 	]+lea    1049320\(%rip\),%rdi +# 101370 <.*>
  +1087:	00 *
 #				-> R_X86_64_DTPMOD64	[0 0x6000000000000000]
- +1088:	66[ 	]+data16
- +1089:	66[ 	]+data16
- +108a:	48 e8 [0-9a-f 	]+rex64 callq  [0-9a-f]+ <.*>
+ +1088:	66 66 48 e8 [0-9a-f 	]+callq  [0-9a-f]+ <.*>
 #				-> R_X86_64_JUMP_SLOT	__tls_get_addr
+ +108f:	[0-9a-f 	]+
  +1090:	90[ 	]+nop *
  +1091:	90[ 	]+nop *
  +1092:	90[ 	]+nop *

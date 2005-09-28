@@ -1,5 +1,11 @@
 2005-09-28  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/x86-64-stack.s, gas/i386/x86-64-stack.d,
+	gas/i386/x86-64-stack-suffix.d, gas/i386/x86-64-stack-intel.d: New.
+	* gas/i386/i386.exp: Run new tests.
+
+2005-09-28  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/mixed-mode-reloc.s: Enable all insns.
 	* gas/i386/mixed-mode-reloc32.d: Adjust.
 	* gas/i386/mixed-mode-reloc64.d: Adjust.
