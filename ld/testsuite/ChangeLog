@@ -457,9 +457,9 @@
 
 	* lib/ld-lib.exp (regexp_diff): Pass test if last line is "#...".
 	* ld-elfweak/elfweak.exp: Run size2.d.
-	* ld-elfwaek/size2.d: New file.
-	* ld-elfwaek/size2a.s: New file.
-	* ld-elfwaek/size2b.s: New file.
+	* ld-elfweak/size2.d: New file.
+	* ld-elfweak/size2a.s: New file.
+	* ld-elfweak/size2b.s: New file.
 
 2005-04-26  Mark Kettenis  <kettenis@gnu.org>
 
