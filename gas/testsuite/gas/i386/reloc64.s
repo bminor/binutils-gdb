@@ -154,6 +154,20 @@ bad	.long	xtrn@gotoff
 	.long	xtrn@dtpoff
 	.long	xtrn@tpoff
 	
+	.slong	xtrn
+	.slong	xtrn - .
+	.slong	xtrn@got
+bad	.slong	xtrn@gotoff
+	.slong	xtrn@gotpcrel
+	.slong	_GLOBAL_OFFSET_TABLE_
+	.slong	_GLOBAL_OFFSET_TABLE_ - .
+	.slong	xtrn@plt
+	.slong	xtrn@tlsgd
+	.slong	xtrn@gottpoff
+	.slong	xtrn@tlsld
+	.slong	xtrn@dtpoff
+	.slong	xtrn@tpoff
+	
 	.word	xtrn
 	.word	xtrn - .
 bad	.word	xtrn@got

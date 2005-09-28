@@ -1,3 +1,15 @@
+2005-09-28  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.h (x86_cons_fix_new): Declare unconditionally.
+	(TC_CONS_FIX_NEW): Define unconditionally.
+	(x86_pe_cons_fix_new): Remove.
+	* config/tc-i386.c (signed_cons): New.
+	(md_pseudo_table): Add slong.
+	(x86_cons_fix_new): Declare unconditionally.
+	(x86_pe_cons_fix_new): Merge into x86_cons_fix_new.
+	(tc_gen_reloc): Also consider BFD_RELOC_X86_64_32S for gotpc
+	conversion.
+
 2005-09-28  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* app.c (do_scrub_chars <LEX_IS_SYMBOL_COMPONENT>): Check for full

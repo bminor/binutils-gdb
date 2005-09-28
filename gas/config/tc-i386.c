@@ -80,6 +80,7 @@ static void set_cpu_arch PARAMS ((int));
 #ifdef TE_PE
 static void pe_directive_secrel PARAMS ((int));
 #endif
+static void signed_cons PARAMS ((int));
 static char *output_invalid PARAMS ((int c));
 static int i386_operand PARAMS ((char *operand_string));
 static int i386_intel_operand PARAMS ((char *operand_string, int got_a_float));
@@ -461,6 +462,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"dfloat", float_cons, 'd'},
   {"tfloat", float_cons, 'x'},
   {"value", cons, 2},
+  {"slong", signed_cons, 4},
   {"noopt", s_ignore, 0},
   {"optim", s_ignore, 0},
   {"code16gcc", set_16bit_gcc_code_flag, CODE_16BIT},
@@ -3764,6 +3766,32 @@ output_imm (insn_start_frag, insn_start_off)
     }
 }
 
+/* x86_cons_fix_new is called via the expression parsing code when a
+   reloc is needed.  We use this hook to get the correct .got reloc.  */
+static enum bfd_reloc_code_real got_reloc = NO_RELOC;
+static int cons_sign = -1;
+
+void
+x86_cons_fix_new (fragS *frag,
+     unsigned int off,
+     unsigned int len,
+     expressionS *exp)
+{
+  enum bfd_reloc_code_real r = reloc (len, 0, cons_sign, got_reloc);
+
+  got_reloc = NO_RELOC;
+
+#ifdef TE_PE
+  if (exp->X_op == O_secrel)
+    {
+      exp->X_op = O_symbol;
+      r = BFD_RELOC_32_SECREL;
+    }
+#endif
+
+  fix_new_exp (frag, off, len, exp, 0, r);
+}
+
 #if (!defined (OBJ_ELF) && !defined (OBJ_MAYBE_ELF)) || defined (LEX_AT)
 # define lex_got(reloc, adjust, types) NULL
 #else
@@ -3871,22 +3899,6 @@ lex_got (enum bfd_reloc_code_real *reloc,
   return NULL;
 }
 
-/* x86_cons_fix_new is called via the expression parsing code when a
-   reloc is needed.  We use this hook to get the correct .got reloc.  */
-static enum bfd_reloc_code_real got_reloc = NO_RELOC;
-
-void
-x86_cons_fix_new (frag, off, len, exp)
-     fragS *frag;
-     unsigned int off;
-     unsigned int len;
-     expressionS *exp;
-{
-  enum bfd_reloc_code_real r = reloc (len, 0, -1, got_reloc);
-  got_reloc = NO_RELOC;
-  fix_new_exp (frag, off, len, exp, 0, r);
-}
-
 void
 x86_cons (exp, size)
      expressionS *exp;
@@ -3922,26 +3934,15 @@ x86_cons (exp, size)
 }
 #endif
 
-#ifdef TE_PE
-
-void
-x86_pe_cons_fix_new (frag, off, len, exp)
-     fragS *frag;
-     unsigned int off;
-     unsigned int len;
-     expressionS *exp;
+static void signed_cons (int size)
 {
-  enum bfd_reloc_code_real r = reloc (len, 0, -1, NO_RELOC);
-
-  if (exp->X_op == O_secrel)
-    {
-      exp->X_op = O_symbol;
-      r = BFD_RELOC_32_SECREL;
-    }
-
-  fix_new_exp (frag, off, len, exp, 0, r);
+  if (flag_code == CODE_64BIT)
+    cons_sign = 1;
+  cons (size);
+  cons_sign = -1;
 }
 
+#ifdef TE_PE
 static void
 pe_directive_secrel (dummy)
      int dummy ATTRIBUTE_UNUSED;
@@ -3961,7 +3962,6 @@ pe_directive_secrel (dummy)
   input_line_pointer--;
   demand_empty_rest_of_line ();
 }
-
 #endif
 
 static int i386_immediate PARAMS ((char *));
@@ -5565,7 +5565,9 @@ tc_gen_reloc (section, fixp)
       break;
     }
 
-  if ((code == BFD_RELOC_32 || code == BFD_RELOC_32_PCREL)
+  if ((code == BFD_RELOC_32
+       || code == BFD_RELOC_32_PCREL
+       || code == BFD_RELOC_X86_64_32S)
       && GOT_symbol
       && fixp->fx_addsy == GOT_symbol)
     {

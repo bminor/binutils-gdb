@@ -390,17 +390,11 @@ arch_entry;
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
 extern void x86_cons PARAMS ((expressionS *, int));
+#endif
 
 #define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_cons_fix_new(FRAG, OFF, LEN, EXP)
 extern void x86_cons_fix_new
   PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
-#endif
-
-#ifdef TE_PE
-#define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) x86_pe_cons_fix_new(FRAG, OFF, LEN, EXP)
-extern void x86_pe_cons_fix_new
-  PARAMS ((fragS *, unsigned int, unsigned int, expressionS *));
-#endif
 
 #define DIFF_EXPR_OK    /* foo-. gets turned into PC relative relocs */
 
