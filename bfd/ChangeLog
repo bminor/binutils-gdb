@@ -1,3 +1,8 @@
+2005-09-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_fixup_link_order): Report locations for mixed
+	ordered and unordered input sections.
+
 2005-09-22  James E. Wilson  <wilson@specifix.com>
 
 	* dwarf2.c (struct funcinfo): Delete nesting_level field.

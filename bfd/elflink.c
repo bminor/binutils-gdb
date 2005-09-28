@@ -7635,40 +7635,53 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int elfsec;
   struct bfd_link_order **sections;
-  asection *s;
+  asection *s, *other_sec, *linkorder_sec;
   bfd_vma offset;
 
+  other_sec = NULL;
+  linkorder_sec = NULL;
   seen_other = 0;
   seen_linkorder = 0;
   for (p = o->map_head.link_order; p != NULL; p = p->next)
     {
-      if (p->type == bfd_indirect_link_order
-	  && (bfd_get_flavour ((sub = p->u.indirect.section->owner))
-	      == bfd_target_elf_flavour)
-	  && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass)
+      if (p->type == bfd_indirect_link_order)
 	{
 	  s = p->u.indirect.section;
-	  elfsec = _bfd_elf_section_from_bfd_section (sub, s);
-	  if (elfsec != -1
+	  sub = s->owner;
+	  if (bfd_get_flavour (sub) == bfd_target_elf_flavour
+	      && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass
+	      && (elfsec = _bfd_elf_section_from_bfd_section (sub, s)) != -1
 	      && elf_elfsections (sub)[elfsec]->sh_flags & SHF_LINK_ORDER)
-	    seen_linkorder++;
+	    {
+	      seen_linkorder++;
+	      linkorder_sec = s;
+	    }
 	  else
-	    seen_other++;
+	    {
+	      seen_other++;
+	      other_sec = s;
+	    }
 	}
       else
 	seen_other++;
+
+      if (seen_other && seen_linkorder)
+	{
+	  if (other_sec && linkorder_sec)
+	    (*_bfd_error_handler) (_("%A has both ordered [`%A' in %B] and unordered [`%A' in %B] sections"),
+				   o, linkorder_sec,
+				   linkorder_sec->owner, other_sec,
+				   other_sec->owner);
+	  else
+	    (*_bfd_error_handler) (_("%A has both ordered and unordered sections"),
+				   o);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
     }
 
   if (!seen_linkorder)
     return TRUE;
-
-  if (seen_other && seen_linkorder)
-    {
-      (*_bfd_error_handler) (_("%A has both ordered and unordered sections"),
-			     o);
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
-    }
 
   sections = (struct bfd_link_order **)
     xmalloc (seen_linkorder * sizeof (struct bfd_link_order *));
