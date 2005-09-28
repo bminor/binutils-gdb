@@ -1,3 +1,8 @@
+2005-09-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* symtocbase-1.s, symtocbase-2.s, symtocbase.d: New test.
+	* powerpc.exp: Run it.
+
 2005-09-28  Jan Beulich  <jbeulich@novell.com>
 
 	* ld-x86-64/tlspic.dd: Adjust.
