@@ -3065,7 +3065,7 @@ The full description of an output section looks like this:
 @smallexample
 @group
 @var{section} [@var{address}] [(@var{type})] :
-  [AT(@var{lma})] [SUBALIGN(@var{subsection_align})]
+  [AT(@var{lma})] [ALIGN(@var{section_align})] [SUBALIGN(@var{subsection_align})]
   @{
     @var{output-section-command}
     @var{output-section-command}
@@ -3641,7 +3641,7 @@ like this:
 @smallexample
 @group
 @var{section} [@var{address}] [(@var{type})] :
-  [AT(@var{lma})] [SUBALIGN(@var{subsection_align})]
+  [AT(@var{lma})] [ALIGN(@var{section_align})] [SUBALIGN(@var{subsection_align})]
   @{
     @var{output-section-command}
     @var{output-section-command}
@@ -3656,6 +3656,7 @@ remaining section attributes.
 @menu
 * Output Section Type::		Output section type
 * Output Section LMA::		Output section LMA
+* Forced Output Alignment::	Forced Output Alignment
 * Forced Input Alignment::	Forced Input Alignment
 * Output Section Region::	Output section region
 * Output Section Phdr::		Output section phdr
@@ -3768,6 +3769,15 @@ for (dst = &_bstart; dst< &_bend; dst++)
   *dst = 0;
 @end group
 @end smallexample
+
+@node Forced Output Alignment
+@subsubsection Forced Output Alignment
+@kindex ALIGN(@var{section_align})
+@cindex forcing output section alignment
+@cindex output section alignment
+You can force an output section alignment by using ALIGN.  The value
+specified overrides any alignment given by input sections, whether
+larger or smaller.
 
 @node Forced Input Alignment
 @subsubsection Forced Input Alignment

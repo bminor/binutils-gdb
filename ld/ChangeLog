@@ -1,3 +1,11 @@
+2005-09-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo (ALIGN): Document it as forcing output section
+	alignment.
+
+	* ldgram.y (ALIGN): Support it for forcing output section
+	alignment.
+
 2005-09-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (lang_output_section_statement_struct): Change type of
