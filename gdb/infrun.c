@@ -1075,7 +1075,7 @@ fetch_inferior_event (void *client_data)
 void
 init_execution_control_state (struct execution_control_state *ecs)
 {
-  /* ecs->another_trap? */
+  ecs->another_trap = 0;
   ecs->random_signal = 0;
   ecs->step_after_step_resume_breakpoint = 0;
   ecs->handling_longjmp = 0;	/* FIXME */
