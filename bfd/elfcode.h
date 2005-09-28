@@ -791,8 +791,8 @@ elf_object_p (bfd *abfd)
 	    shindex += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	}
 
-      /* Set up group pointers.  */
-      if (! _bfd_elf_setup_group_pointers (abfd))
+      /* Set up ELF sections for SHF_GROUP and SHF_LINK_ORDER.  */
+      if (! _bfd_elf_setup_sections (abfd))
 	goto got_wrong_format_error;
     }
 

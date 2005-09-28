@@ -626,12 +626,41 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 }
 
 bfd_boolean
-_bfd_elf_setup_group_pointers (bfd *abfd)
+_bfd_elf_setup_sections (bfd *abfd)
 {
   unsigned int i;
   unsigned int num_group = elf_tdata (abfd)->num_group;
   bfd_boolean result = TRUE;
+  asection *s;
 
+  /* Process SHF_LINK_ORDER.  */
+  for (s = abfd->sections; s != NULL; s = s->next)
+    {
+      Elf_Internal_Shdr *this_hdr = &elf_section_data (s)->this_hdr;
+      if ((this_hdr->sh_flags & SHF_LINK_ORDER) != 0)
+	{
+	  unsigned int elfsec = this_hdr->sh_link;
+	  /* FIXME: The old Intel compiler and old strip/objcopy may
+	     not set the sh_link or sh_info fields.  Hence we could
+	     get the situation where elfsec is 0.  */
+	  if (elfsec == 0)
+	    {
+	      const struct elf_backend_data *bed
+		= get_elf_backend_data (abfd);
+	      if (bed->link_order_error_handler)
+		bed->link_order_error_handler
+		  (_("%B: warning: sh_link not set for section `%A'"),
+		   abfd, s);
+	    }
+	  else
+	    {
+	      this_hdr = elf_elfsections (abfd)[elfsec];
+	      elf_linked_to_section (s) = this_hdr->bfd_section;
+	    }
+	}
+    }
+
+  /* Process section groups.  */
   if (num_group == (unsigned) -1)
     return result;
 
@@ -5665,7 +5694,14 @@ _bfd_elf_copy_private_section_data (bfd *ibfd,
   /* Set things up for objcopy.  The output SHT_GROUP section will
      have its elf_next_in_group pointing back to the input group
      members.  Ignore linker created group section.  See
-     elfNN_ia64_object_p in elfxx-ia64.c.  */
+     elfNN_ia64_object_p in elfxx-ia64.c.  We also need to handle
+     elf_linked_to_section for SHF_LINK_ORDER.  */
+
+  if ((ihdr->sh_flags & SHF_LINK_ORDER) != 0
+      && elf_linked_to_section (isec) != 0)
+    elf_linked_to_section (osec)
+      = elf_linked_to_section (isec)->output_section;
+
   if (elf_sec_group (isec) == NULL
       || (elf_sec_group (isec)->flags & SEC_LINKER_CREATED) == 0)
     {

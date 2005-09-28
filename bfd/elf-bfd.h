@@ -1675,7 +1675,7 @@ extern bfd_boolean _bfd_elf_symbol_refs_local_p
 extern bfd_boolean bfd_elf_match_symbols_in_sections
   (asection *sec1, asection *sec2);
 
-extern bfd_boolean _bfd_elf_setup_group_pointers
+extern bfd_boolean _bfd_elf_setup_sections
   (bfd *);
 
 extern const bfd_target *bfd_elf32_object_p

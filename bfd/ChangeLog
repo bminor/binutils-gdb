@@ -1,5 +1,16 @@
 2005-09-28  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/1321
+	* elf-bfd.h (_bfd_elf_setup_group_pointers): Renamed to ...
+	(_bfd_elf_setup_sections): This.
+	* elf.c: Likewise.
+	* elfcode.h (elf_object_p): Likewise.
+
+	* elf.c (_bfd_elf_setup_sections): Process SHF_LINK_ORDER.
+	(_bfd_elf_copy_private_section_data): Likewise.
+
+2005-09-28  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elflink.c (elf_fixup_link_order): Report locations for mixed
 	ordered and unordered input sections.
 
