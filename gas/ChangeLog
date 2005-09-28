@@ -1,3 +1,8 @@
+2005-09-28  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* app.c (do_scrub_chars <LEX_IS_SYMBOL_COMPONENT>): Check for full
+	buffer after copying string.
+
 2005-09-27  Paul Brook  <paul@codesourcery.com>
 
 	* config/arm.c (arm_cpus): Add more cpu names.
@@ -95,7 +100,7 @@
 	epilogue_begin, is_stmt, isa.
 	(emit_inc_line_addr): Move line_delta == 0, addr_delta == 0 special
 	case down lower.
-	(process_entries): Handle isa, DWARF2_FLAG_PROLOGUE_END, 
+	(process_entries): Handle isa, DWARF2_FLAG_PROLOGUE_END,
 	and DWARF2_FLAG_EPILOGUE_BEGIN.
 	(out_debug_line): Emit sizes for DW_LNS_set_prologue_end,
 	DW_LNS_set_epilogue_begin, DW_LNS_set_isa.
@@ -190,7 +195,7 @@
 2005-09-01  Dmitry Diky  <diwil@spec.ru>
 
 	* config/tc-msp430.c (msp430_operands): Emit dwarf2_emit_insn()
-	as appropriate. Change frag_variant() to frag_var() for relaxes. 
+	as appropriate. Change frag_variant() to frag_var() for relaxes.
 
 2005-08-29  Nick Clifton  <nickc@redhat.com>
 
@@ -333,7 +338,7 @@
 	* config/tc-msp430.h (TC_FORCE_RELOCATION_LOCAL): Defined.
 	(msp430_force_relocation_local): Likewise.
 	* doc/c-msp430.texi: Describe new options.
-	
+
 2005-08-11  Ian Lance Taylor  <ian@airs.com>
 
 	* Makefile.am ($(srcdir)/make-gas.com): Remove target.
@@ -778,7 +783,7 @@
 	* doc/as.texinfo: Add text for the M32C-specific options and line
 	comment characters, and refer to c-m32c.texi.
 	* doc/c-m32c.texi: New file.
-	
+
 2005-07-14  Nick Clifton  <nickc@redhat.com>
 
 	PR 1069

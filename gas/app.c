@@ -1302,6 +1302,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 			case 1: *to++ = *from++;
 			}
 		    }
+		  if (to >= toend)
+		    goto tofull;
 		  ch = GET ();
 		}
 	    }
