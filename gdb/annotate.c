@@ -55,7 +55,7 @@ print_value_flags (struct type *t)
 void
 breakpoints_changed (void)
 {
-  if (annotation_level > 1)
+  if (annotation_level == 2)
     {
       target_terminal_ours ();
       printf_unfiltered (("\n\032\032breakpoints-invalid\n"));
@@ -228,7 +228,7 @@ annotate_breakpoints_table_end (void)
 void
 annotate_frames_invalid (void)
 {
-  if (annotation_level > 1)
+  if (annotation_level == 2)
     {
       target_terminal_ours ();
       printf_unfiltered (("\n\032\032frames-invalid\n"));
@@ -577,7 +577,7 @@ breakpoint_changed (struct breakpoint *b)
 void
 _initialize_annotate (void)
 {
-  if (annotation_level > 1)
+  if (annotation_level == 2)
     {
       deprecated_delete_breakpoint_hook = breakpoint_changed;
       deprecated_modify_breakpoint_hook = breakpoint_changed;

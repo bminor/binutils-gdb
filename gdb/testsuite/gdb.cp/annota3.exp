@@ -93,9 +93,7 @@ send_gdb "run\n"
 gdb_expect_list "first run until main breakpoint" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
     "Starting program: .*annota3 \r\n"
-    "\(\r\n\032\032\(frames-invalid|breakpoints-invalid\)\r\n\)+"
     "\r\n\032\032starting\r\n"
-    "\(\r\n\032\032\(frames-invalid|breakpoints-invalid\)\r\n\)+"
     "\r\n\032\032breakpoint 1\r\n"
     "\r\n"
     "Breakpoint 1, main \\(\\) at .*annota3.cc:25\r\n"
@@ -122,13 +120,10 @@ gdb_expect_list "continue to exit" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
     "Continuing.\r\n"
     "\r\n\032\032starting\r\n"
-    "\r\n\032\032frames-invalid\r\n"
     "a.x is 1\r\n"
-    "\r\n\032\032frames-invalid\r\n"
     "\r\n\032\032exited 0\r\n"
     "\r\n"
     "Program exited normally.\r\n"
-    "\r\n\032\032frames-invalid\r\n"
     "\r\n\032\032stopped\r\n"
 }
 
@@ -155,7 +150,6 @@ gdb_expect {
 send_gdb "break 22\n"
 gdb_expect_list "break at main" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
-    "\r\n\032\032breakpoints-invalid\r\n"
     "Breakpoint.*at 0x\[a-z0-9\]+: file.*annota3.cc, line 22.\r\n"
 }
 
@@ -167,9 +161,7 @@ gdb_expect_list "break at main" "$gdb_prompt$" {
 send_gdb "run\n"
 gdb_expect_list "second run until main breakpoint" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
-    "\(\r\n\032\032\(frames-invalid|breakpoints-invalid\)\r\n\)+"
     "\r\n\032\032starting\r\n"
-    "\(\r\n\032\032\(frames-invalid|breakpoints-invalid\)\r\n\)+"
     "\r\n\032\032breakpoint 2\r\n"
     "\r\n"
     "Breakpoint 2, main \\(\\) at .*annota3.cc:22\r\n"
@@ -183,7 +175,6 @@ gdb_expect_list "second run until main breakpoint" "$gdb_prompt$" {
 send_gdb "watch a.x\n"
 gdb_expect_list "set watch on a.x" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
-    "\r\n\032\032breakpoints-invalid\r\n"
     ".*atchpoint 3: a.x\r\n" \
 }
 
@@ -193,10 +184,10 @@ gdb_expect_list "set watch on a.x" "$gdb_prompt$" {
 #
 send_gdb "next\n"
 gdb_expect {
-    -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n\(\r\n\032\032frames-invalid\r\n\)+\r\n\032\032watchpoint 3\r\n.*atchpoint 3: a.x\r\n\r\nOld value = 0\r\nNew value = 1\r\nmain \\(\\) at .*$srcfile:$decimal\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032stopped\r\n.*$gdb_prompt$" { 
+    -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n\r\n\032\032watchpoint 3\r\n.*atchpoint 3: a.x\r\n\r\nOld value = 0\r\nNew value = 1\r\nmain \\(\\) at .*$srcfile:$decimal\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032stopped\r\n.*$gdb_prompt$" { 
 	pass "watch triggered on a.x"
     }
-    -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
 	kfail "gdb/38" "watch triggered on a.x"
     }
     -re ".*$gdb_prompt$" {
