@@ -2852,6 +2852,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct rs6000_framedata fdata;
   int wordsize = tdep->wordsize;
+  CORE_ADDR func, pc;
 
   if ((*this_cache) != NULL)
     return (*this_cache);
@@ -2859,35 +2860,55 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = cache;
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  skip_prologue (frame_func_unwind (next_frame), frame_pc_unwind (next_frame),
-		 &fdata);
+  func = frame_func_unwind (next_frame);
+  pc = frame_pc_unwind (next_frame);
+  skip_prologue (func, pc, &fdata);
 
-  /* If there were any saved registers, figure out parent's stack
-     pointer.  */
-  /* The following is true only if the frame doesn't have a call to
-     alloca(), FIXME.  */
+  /* Figure out the parent's stack pointer.  */
 
-  if (fdata.saved_fpr == 0
-      && fdata.saved_gpr == 0
-      && fdata.saved_vr == 0
-      && fdata.saved_ev == 0
-      && fdata.lr_offset == 0
-      && fdata.cr_offset == 0
-      && fdata.vr_offset == 0
-      && fdata.ev_offset == 0)
-    cache->base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
-  else
+  /* NOTE: cagney/2002-04-14: The ->frame points to the inner-most
+     address of the current frame.  Things might be easier if the
+     ->frame pointed to the outer-most address of the frame.  In
+     the mean time, the address of the prev frame is used as the
+     base address of this frame.  */
+  cache->base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+
+  /* If the function appears to be frameless, check a couple of likely
+     indicators that we have simply failed to find the frame setup.
+     Two common cases of this are missing symbols (i.e.
+     frame_func_unwind returns the wrong address or 0), and assembly
+     stubs which have a fast exit path but set up a frame on the slow
+     path.
+
+     If the LR appears to return to this function, then presume that
+     we have an ABI compliant frame that we failed to find.  */
+  if (fdata.frameless && fdata.lr_offset == 0)
     {
-      /* NOTE: cagney/2002-04-14: The ->frame points to the inner-most
-	 address of the current frame.  Things might be easier if the
-	 ->frame pointed to the outer-most address of the frame.  In
-	 the mean time, the address of the prev frame is used as the
-	 base address of this frame.  */
-      cache->base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
-      if (!fdata.frameless)
-	/* Frameless really means stackless.  */
-	cache->base = read_memory_addr (cache->base, wordsize);
+      CORE_ADDR saved_lr;
+      int make_frame = 0;
+
+      saved_lr = frame_unwind_register_unsigned (next_frame,
+						 tdep->ppc_lr_regnum);
+      if (func == 0 && saved_lr == pc)
+	make_frame = 1;
+      else if (func != 0)
+	{
+	  CORE_ADDR saved_func = get_pc_function_start (saved_lr);
+	  if (func == saved_func)
+	    make_frame = 1;
+	}
+
+      if (make_frame)
+	{
+	  fdata.frameless = 0;
+	  fdata.lr_offset = wordsize;
+	}
     }
+
+  if (!fdata.frameless)
+    /* Frameless really means stackless.  */
+    cache->base = read_memory_addr (cache->base, wordsize);
+
   trad_frame_set_value (cache->saved_regs, SP_REGNUM, cache->base);
 
   /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr.
