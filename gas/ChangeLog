@@ -1,3 +1,9 @@
+2005-09-29  Arnold Metselaar <arnold.metselaar@planet.nl>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* app.c (do_scrub_chars): Match open and close quote of strings.
+	Remove redundant EOF test in case 7.
+
 2005-09-28  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (reloc): Disable signedness check for 4-byte

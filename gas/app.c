@@ -345,6 +345,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
   char *fromend;
   int fromlen;
   register int ch, ch2 = 0;
+  /* Character that started the string we're working on.  */
+  static char quotechar;
 
   /*State 0: beginning of normal line
 	  1: After first whitespace on line (flush more white)
@@ -536,11 +538,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	    for (s = from; s < fromend; s++)
 	      {
 		ch = *s;
-		/* This condition must be changed if the type of any
-		   other character can be LEX_IS_STRINGQUOTE.  */
 		if (ch == '\\'
-		    || ch == '"'
-		    || ch == '\''
+		    || ch == quotechar
 		    || ch == '\n')
 		  break;
 	      }
@@ -558,12 +557,12 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  ch = GET ();
 	  if (ch == EOF)
 	    {
-	      as_warn (_("end of file in string; inserted '\"'"));
+	      as_warn (_("end of file in string; '%c' inserted"), quotechar);
 	      state = old_state;
 	      UNGET ('\n');
-	      PUT ('"');
+	      PUT (quotechar);
 	    }
-	  else if (lex[ch] == LEX_IS_STRINGQUOTE)
+	  else if (ch == quotechar)
 	    {
 	      state = old_state;
 	      PUT (ch);
@@ -603,8 +602,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      continue;
 
 	    case EOF:
-	      as_warn (_("end of file in string; '\"' inserted"));
-	      PUT ('"');
+	      as_warn (_("end of file in string; '%c' inserted"), quotechar);
+	      PUT (quotechar);
 	      continue;
 
 	    case '"':
@@ -638,10 +637,9 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 
 	case 7:
 	  ch = GET ();
+	  quotechar = ch;
 	  state = 5;
 	  old_state = 8;
-	  if (ch == EOF)
-	    goto fromeof;
 	  PUT (ch);
 	  continue;
 
@@ -975,6 +973,7 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  break;
 
 	case LEX_IS_STRINGQUOTE:
+	  quotechar = ch;
 	  if (state == 10)
 	    {
 	      /* Preserve the whitespace in foo "bar".  */
