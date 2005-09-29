@@ -6278,34 +6278,38 @@ parse_operands (idesc)
   if (idesc->operands[2] == IA64_OPND_SOF
       || idesc->operands[1] == IA64_OPND_SOF)
     {
-      /* map alloc r1=ar.pfs,i,l,o,r to alloc r1=ar.pfs,(i+l+o),(i+l),r */
+      /* Map alloc r1=ar.pfs,i,l,o,r to alloc r1=ar.pfs,(i+l+o),(i+l),r.
+	 Note, however, that due to that mapping operand numbers in error
+	 messages for any of the constant operands will not be correct.  */
       know (strcmp (idesc->name, "alloc") == 0);
-      i = (CURR_SLOT.opnd[1].X_op == O_register
-          && CURR_SLOT.opnd[1].X_add_number == REG_AR + AR_PFS) ? 2 : 1;
-      if (num_operands == i + 3 /* first_arg not included in this count! */
-	  && CURR_SLOT.opnd[i].X_op == O_constant
-	  && CURR_SLOT.opnd[i + 1].X_op == O_constant
-	  && CURR_SLOT.opnd[i + 2].X_op == O_constant
-	  && CURR_SLOT.opnd[i + 3].X_op == O_constant)
-	{
-	  sof = set_regstack (CURR_SLOT.opnd[i].X_add_number,
-			      CURR_SLOT.opnd[i + 1].X_add_number,
-			      CURR_SLOT.opnd[i + 2].X_add_number,
-			      CURR_SLOT.opnd[i + 3].X_add_number);
+      /* The first operand hasn't been parsed/initialized, yet (but
+	 num_operands intentionally doesn't account for that).  */
+      i = num_operands > 4 ? 2 : 1;
+#define FORCE_CONST(n) (CURR_SLOT.opnd[n].X_op == O_constant \
+			? CURR_SLOT.opnd[n].X_add_number \
+			: 0)
+      sof = set_regstack (FORCE_CONST(i),
+			  FORCE_CONST(i + 1),
+			  FORCE_CONST(i + 2),
+			  FORCE_CONST(i + 3));
+#undef FORCE_CONST
 
-	  /* now we can parse the first arg:  */
-	  saved_input_pointer = input_line_pointer;
-	  input_line_pointer = first_arg;
-	  sep = parse_operand (CURR_SLOT.opnd + 0, '=');
-	  if (sep != '=')
-	    --num_outputs;	/* force error */
-	  input_line_pointer = saved_input_pointer;
+      /* now we can parse the first arg:  */
+      saved_input_pointer = input_line_pointer;
+      input_line_pointer = first_arg;
+      sep = parse_operand (CURR_SLOT.opnd + 0, '=');
+      if (sep != '=')
+	--num_outputs;	/* force error */
+      input_line_pointer = saved_input_pointer;
 
-	  CURR_SLOT.opnd[i].X_add_number = sof;
-	  CURR_SLOT.opnd[i + 1].X_add_number
-	    = sof - CURR_SLOT.opnd[i + 2].X_add_number;
-	  CURR_SLOT.opnd[i + 2] = CURR_SLOT.opnd[i + 3];
-	}
+      CURR_SLOT.opnd[i].X_add_number = sof;
+      if (CURR_SLOT.opnd[i + 1].X_op == O_constant
+	  && CURR_SLOT.opnd[i + 2].X_op == O_constant)
+	CURR_SLOT.opnd[i + 1].X_add_number
+	  = sof - CURR_SLOT.opnd[i + 2].X_add_number;
+      else
+	CURR_SLOT.opnd[i + 1].X_op = O_illegal;
+      CURR_SLOT.opnd[i + 2] = CURR_SLOT.opnd[i + 3];
     }
 
   highest_unmatched_operand = -4;

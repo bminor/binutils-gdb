@@ -1,3 +1,8 @@
+2005-09-29  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (parse_operands): Always parse first operand of
+	alloc.
+
 2005-09-29  Arnold Metselaar <arnold.metselaar@planet.nl>
 	    Alan Modra  <amodra@bigpond.net.au>
 

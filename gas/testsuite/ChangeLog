@@ -1,3 +1,8 @@
+2005-09-29  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/alloc.[sl]: New.
+	* gas/ia64/ia64.exp: Run new test.
+
 2005-09-28  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/x86-64-stack.s, gas/i386/x86-64-stack.d,
