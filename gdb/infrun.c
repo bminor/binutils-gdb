@@ -1200,8 +1200,12 @@ adjust_pc_after_break (struct execution_control_state *ecs)
       /* When using hardware single-step, a SIGTRAP is reported for
          both a completed single-step and a software breakpoint.  Need
          to differentiate between the two as the latter needs
-         adjusting but the former does not.  */
-      if (currently_stepping (ecs))
+         adjusting but the former does not.
+
+         When the thread to be examined does not match the current thread
+         context we can't use currently_stepping, so assume no
+         single-stepping in this case.  */
+      if (ptid_equal (ecs->ptid, inferior_ptid) && currently_stepping (ecs))
 	{
 	  if (prev_pc == breakpoint_pc
 	      && software_breakpoint_inserted_here_p (breakpoint_pc))
