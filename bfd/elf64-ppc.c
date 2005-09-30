@@ -7888,26 +7888,34 @@ ppc_type_of_stub (asection *input_sec,
 
   if (h != NULL)
     {
-      if (h->oh != NULL
-	  && h->oh->is_func_descriptor)
-	h = h->oh;
+      struct ppc_link_hash_entry *fdh = h;
+      if (fdh->oh != NULL
+	  && fdh->oh->is_func_descriptor)
+	fdh = fdh->oh;
 
-      if (h->elf.dynindx != -1)
+      if (fdh->elf.dynindx != -1)
 	{
 	  struct plt_entry *ent;
 
-	  for (ent = h->elf.plt.plist; ent != NULL; ent = ent->next)
+	  for (ent = fdh->elf.plt.plist; ent != NULL; ent = ent->next)
 	    if (ent->addend == rel->r_addend
 		&& ent->plt.offset != (bfd_vma) -1)
 	      {
-		*hash = h;
+		*hash = fdh;
 		return ppc_stub_plt_call;
 	      }
 	}
 
-      if (!(h->elf.root.type == bfd_link_hash_defined
-	    || h->elf.root.type == bfd_link_hash_defweak)
-	  || h->elf.root.u.def.section->output_section == NULL)
+      /* Here, we know we don't have a plt entry.  If we don't have a
+	 either a defined function descriptor or a defined entry symbol
+	 in a regular object file, then it is pointless trying to make
+	 any other type of stub.  */
+      if (!((fdh->elf.root.type == bfd_link_hash_defined
+	    || fdh->elf.root.type == bfd_link_hash_defweak)
+	    && fdh->elf.root.u.def.section->output_section != NULL)
+	  && !((h->elf.root.type == bfd_link_hash_defined
+		|| h->elf.root.type == bfd_link_hash_defweak)
+	       && h->elf.root.u.def.section->output_section != NULL))
 	return ppc_stub_none;
     }
 
@@ -8951,16 +8959,25 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 
 		  ok_dest = FALSE;
 		  fdh = NULL;
+		  sym_value = 0;
 		  if (hash == NULL)
 		    {
 		      sym_value = sym->st_value;
 		      ok_dest = TRUE;
 		    }
-		  else
+		  else if (hash->elf.root.type == bfd_link_hash_defined
+			   || hash->elf.root.type == bfd_link_hash_defweak)
 		    {
-		      sym_value = 0;
+		      sym_value = hash->elf.root.u.def.value;
+		      if (sym_sec->output_section != NULL)
+			ok_dest = TRUE;
+		    }
+		  else if (hash->elf.root.type == bfd_link_hash_undefweak
+			   || hash->elf.root.type == bfd_link_hash_undefined)
+		    {
 		      /* Recognise an old ABI func code entry sym, and
-			 use the func descriptor sym instead.  */
+			 use the func descriptor sym instead if it is
+			 defined.  */
 		      if (hash->elf.root.root.string[0] == '.'
 			  && (fdh = get_fdh (hash, htab)) != NULL)
 			{
@@ -8975,22 +8992,11 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 			  else
 			    fdh = NULL;
 			}
-		      else if (hash->elf.root.type == bfd_link_hash_defined
-			       || hash->elf.root.type == bfd_link_hash_defweak)
-			{
-			  sym_value = hash->elf.root.u.def.value;
-			  if (sym_sec->output_section != NULL)
-			    ok_dest = TRUE;
-			}
-		      else if (hash->elf.root.type == bfd_link_hash_undefweak)
-			;
-		      else if (hash->elf.root.type == bfd_link_hash_undefined)
-			;
-		      else
-			{
-			  bfd_set_error (bfd_error_bad_value);
-			  goto error_ret_free_internal;
-			}
+		    }
+		  else
+		    {
+		      bfd_set_error (bfd_error_bad_value);
+		      goto error_ret_free_internal;
 		    }
 
 		  destination = 0;

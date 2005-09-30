@@ -1,3 +1,11 @@
+2005-09-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc_type_of_stub): Check both func desc and func
+	entry sym before deciding no stub is needed.
+	(ppc64_elf_size_stubs): When calculating branch destination,
+	don't use func desc sym for old ABI objects unless func entry
+	is undefined.
+
 2005-09-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/1321
