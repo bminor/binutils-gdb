@@ -1,3 +1,7 @@
+2005-09-30  Catherine Moore  <clm@cm00re.com>
+
+	* ld-elf/merge.d: Xfail bfin.
+
 2005-09-28  Alexandre Oliva  <aoliva@redhat.com>
 
 	* symtocbase-1.s, symtocbase-2.s, symtocbase.d: New test.
