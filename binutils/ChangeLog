@@ -1,5 +1,47 @@
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* readelf.c: Reordered.
+	(is_relocatable): New.
+	(dwarf_section): New structure for DWARF section.
+	(load_debug_section): New.
+	(free_debug_section): Likewise.
+	(debug_str_section): Likewise.
+	(debug_abbrev_section): Likewise.
+	(debug_str_contents): Removed.
+	(debug_str_size): Likewise.
+	(debug_loc_contents): Likewise.
+	(debug_loc_size): Likewise.
+	(debug_range_contents): Likewise.
+	(debug_range_size): Likewise.
+	(load_debug_str): Likewise.
+	(free_debug_str): Likewise.
+	(load_debug_loc): Likewise.
+	(free_debug_loc): Likewise.
+	(load_debug_arange): Likewise.
+	(free_debug_arange): Likewise.
+	(load_debug_abbrev): Likewise.
+	(free_debug_abbrev): Likewise.
+	(fetch_indirect_string): Updated.
+	(debug_apply_rela_addends): Likewise.
+	(process_debug_info): Likewise.
+	(get_debug_info): Likewise.
+	(display_debug_lines): Likewise.
+	(display_debug_pubnames): Likewise.
+	(display_debug_macinfo): Likewise.
+	(display_debug_abbrev): Likewise.
+	(display_debug_loc): Likewise.
+	(display_debug_str): Likewise.
+	(display_debug_info): Likewise.
+	(display_debug_aranges): Likewise.
+	(display_debug_ranges): Likewise.
+	(display_debug_frames): Likewise.
+	(display_debug_not_supported): Likewise.
+	(debug_displays): Likewise.
+	(display_debug_section): Likewise.
+	(get_file_header): Set is_relocatable.
+
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* readelf.c (debug_apply_rela_addends): Relocate the whole
 	section.
 	(process_debug_info): Don't call debug_apply_rela_addends.

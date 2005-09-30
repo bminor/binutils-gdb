@@ -171,6 +171,7 @@ static int do_debug_loc;
 static int do_arch;
 static int do_notes;
 static int is_32bit_elf;
+static int is_relocatable;
 static int have_frame_base;
 static int need_base_address;
 static bfd_vma eh_addr_size;
@@ -363,68 +364,6 @@ get_data (void *var, FILE *file, long offset, size_t size, size_t nmemb,
   return mvar;
 }
 
-static bfd_vma
-byte_get_little_endian (unsigned char *field, int size)
-{
-  switch (size)
-    {
-    case 1:
-      return *field;
-
-    case 2:
-      return  ((unsigned int) (field[0]))
-	|    (((unsigned int) (field[1])) << 8);
-
-#ifndef BFD64
-    case 8:
-      /* We want to extract data from an 8 byte wide field and
-	 place it into a 4 byte wide field.  Since this is a little
-	 endian source we can just use the 4 byte extraction code.  */
-      /* Fall through.  */
-#endif
-    case 4:
-      return  ((unsigned long) (field[0]))
-	|    (((unsigned long) (field[1])) << 8)
-	|    (((unsigned long) (field[2])) << 16)
-	|    (((unsigned long) (field[3])) << 24);
-
-#ifdef BFD64
-    case 8:
-      return  ((bfd_vma) (field[0]))
-	|    (((bfd_vma) (field[1])) << 8)
-	|    (((bfd_vma) (field[2])) << 16)
-	|    (((bfd_vma) (field[3])) << 24)
-	|    (((bfd_vma) (field[4])) << 32)
-	|    (((bfd_vma) (field[5])) << 40)
-	|    (((bfd_vma) (field[6])) << 48)
-	|    (((bfd_vma) (field[7])) << 56);
-#endif
-    default:
-      error (_("Unhandled data length: %d\n"), size);
-      abort ();
-    }
-}
-
-static bfd_vma
-byte_get_signed (unsigned char *field, int size)
-{
-  bfd_vma x = byte_get (field, size);
-
-  switch (size)
-    {
-    case 1:
-      return (x ^ 0x80) - 0x80;
-    case 2:
-      return (x ^ 0x8000) - 0x8000;
-    case 4:
-      return (x ^ 0x80000000) - 0x80000000;
-    case 8:
-      return x;
-    default:
-      abort ();
-    }
-}
-
 static void
 byte_put_little_endian (unsigned char *field, bfd_vma value, int size)
 {
@@ -612,48 +551,6 @@ print_symbol (int width, const char *symbol)
     printf ("%-*.*s", width, width, symbol);
   else
     printf ("%-.*s", width, symbol);
-}
-
-static bfd_vma
-byte_get_big_endian (unsigned char *field, int size)
-{
-  switch (size)
-    {
-    case 1:
-      return *field;
-
-    case 2:
-      return ((unsigned int) (field[1])) | (((int) (field[0])) << 8);
-
-#ifndef BFD64
-    case 8:
-      /* Although we are extracing data from an 8 byte wide field,
-	 we are returning only 4 bytes of data.  */
-      field += 4;
-      /* Fall thru */
-#endif
-    case 4:
-      return ((unsigned long) (field[3]))
-	|   (((unsigned long) (field[2])) << 8)
-	|   (((unsigned long) (field[1])) << 16)
-	|   (((unsigned long) (field[0])) << 24);
-
-#ifdef BFD64
-    case 8:
-      return ((bfd_vma) (field[7]))
-	|   (((bfd_vma) (field[6])) << 8)
-	|   (((bfd_vma) (field[5])) << 16)
-	|   (((bfd_vma) (field[4])) << 24)
-	|   (((bfd_vma) (field[3])) << 32)
-	|   (((bfd_vma) (field[2])) << 40)
-	|   (((bfd_vma) (field[1])) << 48)
-	|   (((bfd_vma) (field[0])) << 56);
-#endif
-
-    default:
-      error (_("Unhandled data length: %d\n"), size);
-      abort ();
-    }
 }
 
 static void
@@ -7467,6 +7364,263 @@ dump_section (Elf_Internal_Shdr *section, FILE *file)
 }
 
 
+struct dwarf_section
+{
+  const char *name;
+  unsigned char *start;
+  bfd_vma address;
+  bfd_size_type size;
+};
+
+static int process_debug_info (struct dwarf_section *, void *, int);
+
+static void
+load_debug_section (struct dwarf_section *section, void *file)
+{
+  Elf_Internal_Shdr *sec;
+  char buf [64];
+
+  /* If it is already loaded, do nothing.  */
+  if (section->start != NULL)
+    return;
+
+  /* Locate the debug section.  */
+  sec = find_section (section->name);
+  if (sec == NULL)
+    return;
+
+  snprintf (buf, sizeof (buf), _("%s section data"), section->name);
+  section->address = sec->sh_addr;
+  section->size = sec->sh_size;
+  section->start = get_data (NULL, file, sec->sh_offset, 1,
+			     sec->sh_size, buf);
+}
+
+static void
+free_debug_section (struct dwarf_section *section)
+{
+  if (section->start == NULL)
+    return;
+
+  free ((char *) section->start);
+  section->start = NULL;
+  section->address = 0;
+  section->size = 0;
+}
+
+/* Apply addends of RELA relocations.  */
+
+static int
+debug_apply_rela_addends (void *file,
+			  Elf_Internal_Shdr *section,
+			  unsigned char *start)
+{
+  Elf_Internal_Shdr *relsec;
+  unsigned char *end = start + section->sh_size;
+  /* FIXME: The relocation field size is relocation type dependent.  */
+  unsigned int reloc_size = 4;
+
+  if (!is_relocatable)
+    return 1;
+
+  if (section->sh_size < reloc_size)
+    return 1;
+
+  for (relsec = section_headers;
+       relsec < section_headers + elf_header.e_shnum;
+       ++relsec)
+    {
+      unsigned long nrelas;
+      Elf_Internal_Rela *rela, *rp;
+      Elf_Internal_Shdr *symsec;
+      Elf_Internal_Sym *symtab;
+      Elf_Internal_Sym *sym;
+
+      if (relsec->sh_type != SHT_RELA
+	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
+	  || SECTION_HEADER (relsec->sh_info) != section
+	  || relsec->sh_size == 0
+	  || SECTION_HEADER_INDEX (relsec->sh_link) >= elf_header.e_shnum)
+	continue;
+
+      if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
+			      &rela, &nrelas))
+	return 0;
+
+      symsec = SECTION_HEADER (relsec->sh_link);
+      symtab = GET_ELF_SYMBOLS (file, symsec);
+
+      for (rp = rela; rp < rela + nrelas; ++rp)
+	{
+	  unsigned char *loc;
+
+	  loc = start + rp->r_offset;
+	  if ((loc + reloc_size) > end)
+	    {
+	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
+		    (unsigned long) rp->r_offset,
+		    SECTION_NAME (section));
+	      continue;
+	    }
+
+	  if (is_32bit_elf)
+	    {
+	      sym = symtab + ELF32_R_SYM (rp->r_info);
+
+	      if (ELF32_R_SYM (rp->r_info) != 0
+		  && ELF32_ST_TYPE (sym->st_info) != STT_SECTION
+		  /* Relocations against object symbols can happen,
+		     eg when referencing a global array.  For an
+		     example of this see the _clz.o binary in libgcc.a.  */
+		  && ELF32_ST_TYPE (sym->st_info) != STT_OBJECT)
+		{
+		  warn (_("skipping unexpected symbol type %s in relocation in section .rela%s\n"),
+			get_symbol_type (ELF32_ST_TYPE (sym->st_info)),
+			SECTION_NAME (section));
+		  continue;
+		}
+	    }
+	  else
+	    {
+	      /* In MIPS little-endian objects, r_info isn't really a
+		 64-bit little-endian value: it has a 32-bit little-endian
+		 symbol index followed by four individual byte fields.
+		 Reorder INFO accordingly.  */
+	      if (elf_header.e_machine == EM_MIPS
+		  && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
+		rp->r_info = (((rp->r_info & 0xffffffff) << 32)
+			      | ((rp->r_info >> 56) & 0xff)
+			      | ((rp->r_info >> 40) & 0xff00)
+			      | ((rp->r_info >> 24) & 0xff0000)
+			      | ((rp->r_info >> 8) & 0xff000000));
+
+	      sym = symtab + ELF64_R_SYM (rp->r_info);
+
+	      if (ELF64_R_SYM (rp->r_info) != 0
+		  && ELF64_ST_TYPE (sym->st_info) != STT_SECTION
+		  && ELF64_ST_TYPE (sym->st_info) != STT_OBJECT)
+		{
+		  warn (_("skipping unexpected symbol type %s in relocation in section .rela.%s\n"),
+			get_symbol_type (ELF64_ST_TYPE (sym->st_info)),
+			SECTION_NAME (section));
+		  continue;
+		}
+	    }
+
+	  byte_put (loc, rp->r_addend, reloc_size);
+	}
+
+      free (symtab);
+      free (rela);
+      break;
+    }
+  return 1;
+}
+
+static bfd_vma
+byte_get_little_endian (unsigned char *field, int size)
+{
+  switch (size)
+    {
+    case 1:
+      return *field;
+
+    case 2:
+      return  ((unsigned int) (field[0]))
+	|    (((unsigned int) (field[1])) << 8);
+
+#ifndef BFD64
+    case 8:
+      /* We want to extract data from an 8 byte wide field and
+	 place it into a 4 byte wide field.  Since this is a little
+	 endian source we can just use the 4 byte extraction code.  */
+      /* Fall through.  */
+#endif
+    case 4:
+      return  ((unsigned long) (field[0]))
+	|    (((unsigned long) (field[1])) << 8)
+	|    (((unsigned long) (field[2])) << 16)
+	|    (((unsigned long) (field[3])) << 24);
+
+#ifdef BFD64
+    case 8:
+      return  ((bfd_vma) (field[0]))
+	|    (((bfd_vma) (field[1])) << 8)
+	|    (((bfd_vma) (field[2])) << 16)
+	|    (((bfd_vma) (field[3])) << 24)
+	|    (((bfd_vma) (field[4])) << 32)
+	|    (((bfd_vma) (field[5])) << 40)
+	|    (((bfd_vma) (field[6])) << 48)
+	|    (((bfd_vma) (field[7])) << 56);
+#endif
+    default:
+      error (_("Unhandled data length: %d\n"), size);
+      abort ();
+    }
+}
+
+static bfd_vma
+byte_get_signed (unsigned char *field, int size)
+{
+  bfd_vma x = byte_get (field, size);
+
+  switch (size)
+    {
+    case 1:
+      return (x ^ 0x80) - 0x80;
+    case 2:
+      return (x ^ 0x8000) - 0x8000;
+    case 4:
+      return (x ^ 0x80000000) - 0x80000000;
+    case 8:
+      return x;
+    default:
+      abort ();
+    }
+}
+
+static bfd_vma
+byte_get_big_endian (unsigned char *field, int size)
+{
+  switch (size)
+    {
+    case 1:
+      return *field;
+
+    case 2:
+      return ((unsigned int) (field[1])) | (((int) (field[0])) << 8);
+
+#ifndef BFD64
+    case 8:
+      /* Although we are extracing data from an 8 byte wide field,
+	 we are returning only 4 bytes of data.  */
+      field += 4;
+      /* Fall thru */
+#endif
+    case 4:
+      return ((unsigned long) (field[3]))
+	|   (((unsigned long) (field[2])) << 8)
+	|   (((unsigned long) (field[1])) << 16)
+	|   (((unsigned long) (field[0])) << 24);
+
+#ifdef BFD64
+    case 8:
+      return ((bfd_vma) (field[7]))
+	|   (((bfd_vma) (field[6])) << 8)
+	|   (((bfd_vma) (field[5])) << 16)
+	|   (((bfd_vma) (field[4])) << 24)
+	|   (((bfd_vma) (field[3])) << 32)
+	|   (((bfd_vma) (field[2])) << 40)
+	|   (((bfd_vma) (field[1])) << 48)
+	|   (((bfd_vma) (field[0])) << 56);
+#endif
+
+    default:
+      error (_("Unhandled data length: %d\n"), size);
+      abort ();
+    }
+}
+
 static unsigned long int
 read_leb128 (unsigned char *data, unsigned int *length_return, int sign)
 {
@@ -7587,266 +7741,34 @@ process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
   return len;
 }
 
-static const char *debug_str_contents;
-static bfd_vma debug_str_size;
-
-static void
-load_debug_str (FILE *file)
-{
-  Elf_Internal_Shdr *sec;
-
-  /* If it is already loaded, do nothing.  */
-  if (debug_str_contents != NULL)
-    return;
-
-  /* Locate the .debug_str section.  */
-  sec = find_section (".debug_str");
-  if (sec == NULL)
-    return;
-
-  debug_str_size = sec->sh_size;
-
-  debug_str_contents = get_data (NULL, file, sec->sh_offset, 1, sec->sh_size,
-				 _("debug_str section data"));
-}
-
-static void
-free_debug_str (void)
-{
-  if (debug_str_contents == NULL)
-    return;
-
-  free ((char *) debug_str_contents);
-  debug_str_contents = NULL;
-  debug_str_size = 0;
-}
+static struct dwarf_section debug_str_section = {
+  ".debug_str",
+  NULL,
+  0,
+  0
+};
 
 static const char *
 fetch_indirect_string (unsigned long offset)
 {
-  if (debug_str_contents == NULL)
+  if (debug_str_section.start == NULL)
     return _("<no .debug_str section>");
 
-  if (offset > debug_str_size)
+  if (offset > debug_str_section.size)
     {
       warn (_("DW_FORM_strp offset too big: %lx\n"), offset);
       return _("<offset is too big>");
     }
 
-  return debug_str_contents + offset;
+  return debug_str_section.start + offset;
 }
 
-static const char *debug_loc_contents;
-static bfd_vma debug_loc_size;
-
-static void
-load_debug_loc (FILE *file)
-{
-  Elf_Internal_Shdr *sec;
-
-  /* If it is already loaded, do nothing.  */
-  if (debug_loc_contents != NULL)
-    return;
-
-  /* Locate the .debug_loc section.  */
-  sec = find_section (".debug_loc");
-  if (sec == NULL)
-    return;
-
-  debug_loc_size = sec->sh_size;
-
-  debug_loc_contents = get_data (NULL, file, sec->sh_offset, 1, sec->sh_size,
-				 _("debug_loc section data"));
-}
-
-static void
-free_debug_loc (void)
-{
-  if (debug_loc_contents == NULL)
-    return;
-
-  free ((char *) debug_loc_contents);
-  debug_loc_contents = NULL;
-  debug_loc_size = 0;
-}
-
-static const char *   debug_range_contents;
-static unsigned long  debug_range_size;
-
-static void
-load_debug_range (FILE *file)
-{
-  Elf_Internal_Shdr *sec;
-
-  /* If it is already loaded, do nothing.  */
-  if (debug_range_contents != NULL)
-    return;
-
-  /* Locate the .debug_ranges section.  */
-  sec = find_section (".debug_ranges");
-  if (sec == NULL)
-    return;
-
-  debug_range_size = sec->sh_size;
-
-  debug_range_contents = get_data (NULL, file, sec->sh_offset, 1, sec->sh_size,
-				   _("debug_range section data"));
-}
-
-static void
-free_debug_range (void)
-{
-  if (debug_range_contents == NULL)
-    return;
-
-  free ((char *) debug_range_contents);
-  debug_range_contents = NULL;
-  debug_range_size = 0;
-}
-
-static unsigned char *debug_abbrev_contents;
-static unsigned long debug_abbrev_size;
-
-static void
-load_debug_abbrev (FILE *file)
-{
-  Elf_Internal_Shdr *sec;
-
-  /* If it is already loaded, do nothing.  */
-  if (debug_abbrev_contents != NULL)
-    return;
-
-  /* Locate the .debug_ranges section.  */
-  sec = find_section (".debug_abbrev");
-  if (sec == NULL)
-    return;
-
-  debug_abbrev_size = sec->sh_size;
-
-  debug_abbrev_contents = get_data (NULL, file, sec->sh_offset, 1,
-				    sec->sh_size,
-				    _("debug_abbrev section data"));
-}
-
-static void
-free_debug_abbrev (void)
-{
-  if (debug_abbrev_contents == NULL)
-    return;
-
-  free ((char *) debug_abbrev_contents);
-  debug_abbrev_contents = NULL;
-  debug_abbrev_size = 0;
-}
-
-/* Apply addends of RELA relocations.  */
-
-static int
-debug_apply_rela_addends (FILE *file,
-			  Elf_Internal_Shdr *section,
-			  unsigned char *start)
-{
-  Elf_Internal_Shdr *relsec;
-  unsigned char *end = start + section->sh_size;
-  /* FIXME: The relocation field size is relocation type dependent.  */
-  unsigned int reloc_size = 4;
-
-  if (elf_header.e_type != ET_REL)
-    return 1;
-
-  if (section->sh_size < reloc_size)
-    return 1;
-
-  for (relsec = section_headers;
-       relsec < section_headers + elf_header.e_shnum;
-       ++relsec)
-    {
-      unsigned long nrelas;
-      Elf_Internal_Rela *rela, *rp;
-      Elf_Internal_Shdr *symsec;
-      Elf_Internal_Sym *symtab;
-      Elf_Internal_Sym *sym;
-
-      if (relsec->sh_type != SHT_RELA
-	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
-	  || SECTION_HEADER (relsec->sh_info) != section
-	  || relsec->sh_size == 0
-	  || SECTION_HEADER_INDEX (relsec->sh_link) >= elf_header.e_shnum)
-	continue;
-
-      if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
-			      &rela, &nrelas))
-	return 0;
-
-      symsec = SECTION_HEADER (relsec->sh_link);
-      symtab = GET_ELF_SYMBOLS (file, symsec);
-
-      for (rp = rela; rp < rela + nrelas; ++rp)
-	{
-	  unsigned char *loc;
-
-	  loc = start + rp->r_offset;
-	  if ((loc + reloc_size) > end)
-	    {
-	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
-		    (unsigned long) rp->r_offset,
-		    SECTION_NAME (section));
-	      continue;
-	    }
-
-	  if (is_32bit_elf)
-	    {
-	      sym = symtab + ELF32_R_SYM (rp->r_info);
-
-	      if (ELF32_R_SYM (rp->r_info) != 0
-		  && ELF32_ST_TYPE (sym->st_info) != STT_SECTION
-		  /* Relocations against object symbols can happen,
-		     eg when referencing a global array.  For an
-		     example of this see the _clz.o binary in libgcc.a.  */
-		  && ELF32_ST_TYPE (sym->st_info) != STT_OBJECT)
-		{
-		  warn (_("skipping unexpected symbol type %s in relocation in section .rela%s\n"),
-			get_symbol_type (ELF32_ST_TYPE (sym->st_info)),
-			SECTION_NAME (section));
-		  continue;
-		}
-	    }
-	  else
-	    {
-	      /* In MIPS little-endian objects, r_info isn't really a
-		 64-bit little-endian value: it has a 32-bit little-endian
-		 symbol index followed by four individual byte fields.
-		 Reorder INFO accordingly.  */
-	      if (elf_header.e_machine == EM_MIPS
-		  && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
-		rp->r_info = (((rp->r_info & 0xffffffff) << 32)
-			      | ((rp->r_info >> 56) & 0xff)
-			      | ((rp->r_info >> 40) & 0xff00)
-			      | ((rp->r_info >> 24) & 0xff0000)
-			      | ((rp->r_info >> 8) & 0xff000000));
-
-	      sym = symtab + ELF64_R_SYM (rp->r_info);
-
-	      if (ELF64_R_SYM (rp->r_info) != 0
-		  && ELF64_ST_TYPE (sym->st_info) != STT_SECTION
-		  && ELF64_ST_TYPE (sym->st_info) != STT_OBJECT)
-		{
-		  warn (_("skipping unexpected symbol type %s in relocation in section .rela.%s\n"),
-			get_symbol_type (ELF64_ST_TYPE (sym->st_info)),
-			SECTION_NAME (section));
-		  continue;
-		}
-	    }
-
-	  byte_put (loc, rp->r_addend, reloc_size);
-	}
-
-      free (symtab);
-      free (rela);
-      break;
-    }
-  return 1;
-}
+static struct dwarf_section debug_abbrev_section = {
+  ".debug_abbrev",
+  NULL,
+  0,
+  0
+};
 
 /* FIXME:  There are better and more efficient ways to handle
    these structures.  For now though, I just want something that
@@ -9080,10 +9002,11 @@ read_and_display_attr (unsigned long attribute,
    anything to the user.  */
 
 static int
-process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
-		    FILE *file, int do_loc)
+process_debug_info (struct dwarf_section *section, void *file,
+		    int do_loc)
 {
-  unsigned char *end = start + section->sh_size;
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
   unsigned char *section_begin;
   unsigned int unit;
   unsigned int num_units = 0;
@@ -9113,7 +9036,7 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 
       if (num_units == 0)
 	{
-	  error (_("No comp units in .debug_info section ?"));
+	  error (_("No comp units in %s section ?"), section->name);
 	  return 0;
 	}
 
@@ -9130,18 +9053,16 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 
   if (!do_loc)
     {
-      printf (_("The section %s contains:\n\n"),
-	      SECTION_NAME (section));
+      printf (_("The section %s contains:\n\n"), section->name);
 
-      load_debug_str (file);
-      load_debug_loc (file);
-      load_debug_range (file);
+      load_debug_section (&debug_str_section, file);
     }
 
-  load_debug_abbrev (file);
-  if (debug_abbrev_contents == NULL)
+  load_debug_section (&debug_abbrev_section, file);
+  if (debug_abbrev_section.start == NULL)
     {
-      warn (_("Unable to locate .debug_abbrev section!\n"));
+      warn (_("Unable to locate %s section!\n"),
+	    debug_abbrev_section.name);
       return 0;
     }
 
@@ -9223,8 +9144,10 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 
       /* Process the abbrevs used by this compilation unit.  */
       process_abbrev_section
-	(debug_abbrev_contents + compunit.cu_abbrev_offset,
-	 debug_abbrev_contents + debug_abbrev_size);
+	((unsigned char *) debug_abbrev_section.start
+	 + compunit.cu_abbrev_offset,
+	 (unsigned char *) debug_abbrev_section.start
+	 + debug_abbrev_section.size);
 
       level = 0;
       while (tags < start)
@@ -9298,7 +9221,7 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
  	}
     }
  
-  free_debug_abbrev ();
+  free_debug_section (&debug_abbrev_section);
 
   /* Set num_debug_info_entries here so that it can be used to check if
      we need to process .debug_loc and .debug_ranges sections.  */
@@ -9308,9 +9231,7 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
       
   if (!do_loc)
     {
-      free_debug_range ();
-      free_debug_str ();
-      free_debug_loc (); 
+      free_debug_section (&debug_str_section);
 
       printf ("\n");
     }
@@ -9367,11 +9288,11 @@ get_pointer_size_and_offset_of_comp_unit (unsigned int comp_unit,
    compilation units upon success.  */
 
 static unsigned int
-get_debug_info (FILE * file)
+get_debug_info (void * file)
 {
   Elf_Internal_Shdr * section;
-  unsigned char *     start;
-  int		      ret;
+  struct dwarf_section sec;
+  int ret;
 
   /* Reset the last pointer size so that we can issue correct error
      messages if we are displaying the contents of more than one section.  */
@@ -9382,33 +9303,37 @@ get_debug_info (FILE * file)
   if (num_debug_info_entries > 0)
     return num_debug_info_entries;
 
-  section = find_section (".debug_info");
+  sec.name = ".debug_info";
+  section = find_section (sec.name);
   if (section == NULL)
     return 0;
 
-  start = get_data (NULL, file, section->sh_offset, 1, section->sh_size,
-		    _("extracting information from .debug_info section"));
-  if (start == NULL)
+  sec.start = get_data (NULL, file, section->sh_offset, 1,
+			section->sh_size,
+			_("extracting information from .debug_info section"));
+  if (sec.start == NULL)
     return 0;
 
-  ret = (debug_apply_rela_addends (file, section, start)
-	 && process_debug_info (section, start, file, 1));
+  sec.address = section->sh_addr;
+  sec.size = section->sh_size;
+  ret = (debug_apply_rela_addends (file, section, sec.start)
+	 && process_debug_info (&sec, file, 1));
 
-  free (start);
+  free (sec.start);
 
   return ret ? num_debug_info_entries : 0;
 }
 
 static int
-display_debug_lines (Elf_Internal_Shdr *section,
-		     unsigned char *start, FILE *file)
+display_debug_lines (struct dwarf_section *section, void *file)
 {
+  unsigned char *start = section->start;
   unsigned char *data = start;
-  unsigned char *end = start + section->sh_size;
+  unsigned char *end = start + section->size;
   unsigned int comp_unit = 0;
 
   printf (_("\nDump of debug contents of section %s:\n\n"),
-	  SECTION_NAME (section));
+	  section->name);
 
   get_debug_info (file);
 
@@ -9443,7 +9368,7 @@ display_debug_lines (Elf_Internal_Shdr *section,
 	  initial_length_size = 4;
 	}
 
-      if (info.li_length + initial_length_size > section->sh_size)
+      if (info.li_length + initial_length_size > section->size)
 	{
 	  warn
 	    (_("The line info appears to be corrupt - the section is too small\n"));
@@ -9692,16 +9617,14 @@ display_debug_lines (Elf_Internal_Shdr *section,
 }
 
 static int
-display_debug_pubnames (Elf_Internal_Shdr *section,
-			unsigned char *start,
-			FILE *file ATTRIBUTE_UNUSED)
+display_debug_pubnames (struct dwarf_section *section,
+			void *file ATTRIBUTE_UNUSED)
 {
   DWARF2_Internal_PubNames pubnames;
-  unsigned char *end;
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
 
-  end = start + section->sh_size;
-
-  printf (_("Contents of the %s section:\n\n"), SECTION_NAME (section));
+  printf (_("Contents of the %s section:\n\n"), section->name);
 
   while (start < end)
     {
@@ -9778,16 +9701,16 @@ display_debug_pubnames (Elf_Internal_Shdr *section,
 }
 
 static int
-display_debug_macinfo (Elf_Internal_Shdr *section,
-		       unsigned char *start,
-		       FILE *file ATTRIBUTE_UNUSED)
+display_debug_macinfo (struct dwarf_section *section,
+		       void *file ATTRIBUTE_UNUSED)
 {
-  unsigned char *end = start + section->sh_size;
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
   unsigned char *curr = start;
   unsigned int bytes_read;
   enum dwarf_macinfo_record_type op;
 
-  printf (_("Contents of the %s section:\n\n"), SECTION_NAME (section));
+  printf (_("Contents of the %s section:\n\n"), section->name);
 
   while (curr < end)
     {
@@ -9855,14 +9778,14 @@ display_debug_macinfo (Elf_Internal_Shdr *section,
 
 
 static int
-display_debug_abbrev (Elf_Internal_Shdr *section,
-		      unsigned char *start,
-		      FILE *file ATTRIBUTE_UNUSED)
+display_debug_abbrev (struct dwarf_section *section,
+		      void *file ATTRIBUTE_UNUSED)
 {
   abbrev_entry *entry;
-  unsigned char *end = start + section->sh_size;
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
 
-  printf (_("Contents of the %s section:\n\n"), SECTION_NAME (section));
+  printf (_("Contents of the %s section:\n\n"), section->name);
 
   do
     {
@@ -9898,9 +9821,9 @@ display_debug_abbrev (Elf_Internal_Shdr *section,
 }
 
 static int
-display_debug_loc (Elf_Internal_Shdr *section,
-		   unsigned char *start, FILE *file)
+display_debug_loc (struct dwarf_section *section, void *file)
 {
+  unsigned char *start = section->start;
   unsigned char *section_end;
   unsigned long bytes;
   unsigned char *section_begin = start;
@@ -9913,12 +9836,12 @@ display_debug_loc (Elf_Internal_Shdr *section,
   int use_debug_info = 1;
   unsigned char *next;
 
-  bytes = section->sh_size;
+  bytes = section->size;
   section_end = start + bytes;
 
   if (bytes == 0)
     {
-      printf (_("\nThe .debug_loc section is empty.\n"));
+      printf (_("\nThe %s section is empty.\n"), section->name);
       return 0;
     }
 
@@ -9969,10 +9892,10 @@ display_debug_loc (Elf_Internal_Shdr *section,
     error (_("No location lists in .debug_info section!\n"));
 
   if (debug_information [first].loc_offsets [0] != 0)
-    warn (_("Location lists in .debug_loc section start at 0x%lx\n"),
-	  debug_information [first].loc_offsets [0]);
+    warn (_("Location lists in %s section start at 0x%lx\n"),
+	  section->name, debug_information [first].loc_offsets [0]);
 
-  printf (_("Contents of the .debug_loc section:\n\n"));
+  printf (_("Contents of the %s section:\n\n"), section->name);
   printf (_("    Offset   Begin    End      Expression\n"));
 
   seen_first_offset = 0;
@@ -10090,23 +10013,20 @@ display_debug_loc (Elf_Internal_Shdr *section,
 }
 
 static int
-display_debug_str (Elf_Internal_Shdr *section,
-		   unsigned char *start,
-		   FILE *file ATTRIBUTE_UNUSED)
+display_debug_str (struct dwarf_section *section,
+		   void *file ATTRIBUTE_UNUSED)
 {
-  unsigned long bytes;
-  bfd_vma addr;
-
-  addr  = section->sh_addr;
-  bytes = section->sh_size;
+  unsigned char *start = section->start;
+  unsigned long bytes = section->size;
+  bfd_vma addr = section->address;
 
   if (bytes == 0)
     {
-      printf (_("\nThe .debug_str section is empty.\n"));
+      printf (_("\nThe %s section is empty.\n"), section->name);
       return 0;
     }
 
-  printf (_("Contents of the .debug_str section:\n\n"));
+  printf (_("Contents of the %s section:\n\n"), section->name);
 
   while (bytes)
     {
@@ -10152,21 +10072,20 @@ display_debug_str (Elf_Internal_Shdr *section,
 
 
 static int
-display_debug_info (Elf_Internal_Shdr * section,
-		    unsigned char * start, FILE * file)
+display_debug_info (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, start, file, 0);
+  return process_debug_info (section, file, 0);
 }
 
 
 static int
-display_debug_aranges (Elf_Internal_Shdr *section,
-		       unsigned char *start,
-		       FILE *file ATTRIBUTE_UNUSED)
+display_debug_aranges (struct dwarf_section *section,
+		       void *file ATTRIBUTE_UNUSED)
 {
-  unsigned char *end = start + section->sh_size;
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
 
-  printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
+  printf (_("The section %s contains:\n\n"), section->name);
 
   while (start < end)
     {
@@ -10256,10 +10175,10 @@ display_debug_aranges (Elf_Internal_Shdr *section,
 }
 
 static int
-display_debug_ranges (Elf_Internal_Shdr *section,
-		      unsigned char *start,
-		      FILE *file ATTRIBUTE_UNUSED)
+display_debug_ranges (struct dwarf_section *section,
+		      void *file ATTRIBUTE_UNUSED)
 {
+  unsigned char *start = section->start;
   unsigned char *section_end;
   unsigned long bytes;
   unsigned char *section_begin = start;
@@ -10272,12 +10191,12 @@ display_debug_ranges (Elf_Internal_Shdr *section,
   int use_debug_info = 1;
   unsigned char *next;
 
-  bytes = section->sh_size;
+  bytes = section->size;
   section_end = start + bytes;
 
   if (bytes == 0)
     {
-      printf (_("\nThe .debug_ranges section is empty.\n"));
+      printf (_("\nThe %s section is empty.\n"), section->name);
       return 0;
     }
 
@@ -10328,10 +10247,10 @@ display_debug_ranges (Elf_Internal_Shdr *section,
     error (_("No range lists in .debug_info section!\n"));
 
   if (debug_information [first].range_lists [0] != 0)
-    warn (_("Range lists in .debug_ranges section start at 0x%lx\n"),
-	  debug_information [first].range_lists [0]);
+    warn (_("Range lists in %s section start at 0x%lx\n"),
+	  section->name, debug_information [first].range_lists [0]);
 
-  printf (_("Contents of the .debug_ranges section:\n\n"));
+  printf (_("Contents of the %s section:\n\n"), section->name);
   printf (_("    Offset   Begin    End\n"));
 
   seen_first_offset = 0;
@@ -10356,11 +10275,13 @@ display_debug_ranges (Elf_Internal_Shdr *section,
 	  else
 	    {
 	      if (start < next)
-		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_ranges section.\n"),
-		      (long)(start - section_begin), (long)(next - section_begin));
+		warn (_("There is a hole [0x%lx - 0x%lx] in %s section.\n"),
+		      (long)(start - section_begin),
+		      (long)(next - section_begin), section->name);
 	      else if (start > next)
-		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_ranges section.\n"),
-		      (long)(start - section_begin), (long)(next - section_begin));
+		warn (_("There is an overlap [0x%lx - 0x%lx] in %s section.\n"),
+		      (long)(start - section_begin),
+		      (long)(next - section_begin), section->name);
 	    }
 	  start = next;
 
@@ -10540,20 +10461,20 @@ get_encoded_value (unsigned char *data, int encoding)
 #define SLEB()	read_leb128 (start, & length_return, 1); start += length_return
 
 static int
-display_debug_frames (Elf_Internal_Shdr *section,
-		      unsigned char *start,
-		      FILE *file ATTRIBUTE_UNUSED)
+display_debug_frames (struct dwarf_section *section,
+		      void *file ATTRIBUTE_UNUSED)
 {
-  unsigned char *end = start + section->sh_size;
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
   unsigned char *section_start = start;
   Frame_Chunk *chunks = 0;
   Frame_Chunk *remembered_state = 0;
   Frame_Chunk *rs;
-  int is_eh = streq (SECTION_NAME (section), ".eh_frame");
+  int is_eh = streq (section->name, ".eh_frame");
   unsigned int length_return;
   int max_regs = 0;
 
-  printf (_("The section %s contains:\n"), SECTION_NAME (section));
+  printf (_("The section %s contains:\n"), section->name);
 
   while (start < end)
     {
@@ -10761,10 +10682,11 @@ display_debug_frames (Elf_Internal_Shdr *section,
 
 	  fc->pc_begin = get_encoded_value (start, fc->fde_encoding);
 	  if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel
-	      /* Don't adjust for ET_REL since there's invariably a pcrel
-		 reloc here, which we haven't applied.  */
-	      && elf_header.e_type != ET_REL)
-	    fc->pc_begin += section->sh_addr + (start - section_start);
+	      /* Don't adjust for relocatable file since there's
+		 invariably a pcrel reloc here, which we haven't
+		 applied.  */
+	      && !is_relocatable)
+	    fc->pc_begin += section->address + (start - section_start);
 	  start += encoded_ptr_size;
 	  fc->pc_range = byte_get (start, encoded_ptr_size);
 	  start += encoded_ptr_size;
@@ -10964,8 +10886,8 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	    case DW_CFA_set_loc:
 	      vma = get_encoded_value (start, fc->fde_encoding);
 	      if ((fc->fde_encoding & 0x70) == DW_EH_PE_pcrel
-		  && elf_header.e_type != ET_REL)
-		vma += section->sh_addr + (start - section_start);
+		  && !is_relocatable)
+		vma += section->address + (start - section_start);
 	      start += encoded_ptr_size;
 	      if (do_debug_frames_interp)
 		frame_display_row (fc, &need_col_headers, &max_regs);
@@ -11217,12 +11139,11 @@ display_debug_frames (Elf_Internal_Shdr *section,
 #undef SLEB
 
 static int
-display_debug_not_supported (Elf_Internal_Shdr *section,
-			     unsigned char *start ATTRIBUTE_UNUSED,
-			     FILE *file ATTRIBUTE_UNUSED)
+display_debug_not_supported (struct dwarf_section *section,
+			     void *file ATTRIBUTE_UNUSED)
 {
   printf (_("Displaying the debug contents of section %s is not yet supported.\n"),
-	    SECTION_NAME (section));
+	    section->name);
 
   return 1;
 }
@@ -11232,7 +11153,7 @@ display_debug_not_supported (Elf_Internal_Shdr *section,
 static struct
 {
   const char *const name;
-  int (*display) (Elf_Internal_Shdr *, unsigned char *, FILE *);
+  int (*display) (struct dwarf_section *, void *);
   unsigned int relocate : 1;
 }
 debug_displays[] =
@@ -11277,21 +11198,24 @@ display_debug_section (Elf_Internal_Shdr *section, FILE *file)
   for (i = NUM_ELEM (debug_displays); i--;)
     if (streq (debug_displays[i].name, name))
       {
-	unsigned char *start;
+	struct dwarf_section sec;
 
-	start = get_data (NULL, file, section->sh_offset, 1, length,
-			  _("debug section data"));
-	if (start == NULL)
+	sec.name = name;
+	sec.address = section->sh_addr;
+	sec.size = section->sh_size;
+	sec.start = get_data (NULL, file, section->sh_offset, 1,
+			      length, _("debug section data"));
+	if (sec.start == NULL)
 	  {
 	    result = 0;
 	    break;
 	  }
 
 	if (!debug_displays[i].relocate
-	    || debug_apply_rela_addends (file, section, start))
-	  result &= debug_displays[i].display (section, start, file);
+	    || debug_apply_rela_addends (file, section, sec.start))
+	  result &= debug_displays[i].display (&sec, file);
 
-	free (start);
+	free (sec.start);
 
 	/* If we loaded in the abbrev section
 	   at some point, we must release it here.  */
@@ -12229,6 +12153,8 @@ get_file_header (FILE *file)
       else
 	get_64bit_section_headers (file, 1);
     }
+
+  is_relocatable = elf_header.e_type == ET_REL;
 
   return 1;
 }
