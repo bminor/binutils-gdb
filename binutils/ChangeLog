@@ -1,3 +1,14 @@
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (debug_apply_rela_addends): Relocate the whole
+	section.
+	(process_debug_info): Don't call debug_apply_rela_addends.
+	(display_debug_frames): Likewise.
+	(get_debug_info): Call debug_apply_rela_addends.
+	(debug_displays): Add the "relocate" field.
+	(display_debug_section): Call debug_apply_rela_addends if
+	needed.
+
 2005-09-30  Matthias Kurz  <mk@baerlap.north.de>
 
 	* bucomm.h: Prevent the inclusion of <libintl.h> from the Solaris

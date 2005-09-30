@@ -7744,14 +7744,17 @@ free_debug_abbrev (void)
 static int
 debug_apply_rela_addends (FILE *file,
 			  Elf_Internal_Shdr *section,
-			  int reloc_size,
-			  unsigned char *sec_data,
-			  unsigned char *start,
-			  unsigned char *end)
+			  unsigned char *start)
 {
   Elf_Internal_Shdr *relsec;
+  unsigned char *end = start + section->sh_size;
+  /* FIXME: The relocation field size is relocation type dependent.  */
+  unsigned int reloc_size = 4;
 
-  if (end - start < reloc_size)
+  if (elf_header.e_type != ET_REL)
+    return 1;
+
+  if (section->sh_size < reloc_size)
     return 1;
 
   for (relsec = section_headers;
@@ -7782,11 +7785,14 @@ debug_apply_rela_addends (FILE *file,
 	{
 	  unsigned char *loc;
 
-	  if (rp->r_offset >= (bfd_vma) (start - sec_data)
-	      && rp->r_offset < (bfd_vma) (end - sec_data) - reloc_size)
-	    loc = sec_data + rp->r_offset;
-	  else
-	    continue;
+	  loc = start + rp->r_offset;
+	  if ((loc + reloc_size) > end)
+	    {
+	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
+		    (unsigned long) rp->r_offset,
+		    SECTION_NAME (section));
+	      continue;
+	    }
 
 	  if (is_32bit_elf)
 	    {
@@ -9174,11 +9180,6 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
       cu_offset = start - section_begin;
       start += compunit.cu_length + initial_length_size;
 
-      if (elf_header.e_type == ET_REL
-	  && !debug_apply_rela_addends (file, section, offset_size,
-					section_begin, hdrptr, start))
-	return 0;
-
       cu_abbrev_offset_ptr = hdrptr;
       compunit.cu_abbrev_offset = byte_get (hdrptr, offset_size);
       hdrptr += offset_size;
@@ -9390,7 +9391,9 @@ get_debug_info (FILE * file)
   if (start == NULL)
     return 0;
 
-  ret = process_debug_info (section, start, file, 1);
+  ret = (debug_apply_rela_addends (file, section, start)
+	 && process_debug_info (section, start, file, 1));
+
   free (start);
 
   return ret ? num_debug_info_entries : 0;
@@ -10593,11 +10596,6 @@ display_debug_frames (Elf_Internal_Shdr *section,
       block_end = saved_start + length + initial_length_size;
       cie_id = byte_get (start, offset_size); start += offset_size;
 
-      if (elf_header.e_type == ET_REL
-	  && !debug_apply_rela_addends (file, section, offset_size,
-					section_start, start, block_end))
-	return 0;
-
       if (is_eh ? (cie_id == 0) : (cie_id == DW_CIE_ID))
 	{
 	  int version;
@@ -11235,25 +11233,26 @@ static struct
 {
   const char *const name;
   int (*display) (Elf_Internal_Shdr *, unsigned char *, FILE *);
+  unsigned int relocate : 1;
 }
 debug_displays[] =
 {
-  { ".debug_abbrev",		display_debug_abbrev },
-  { ".debug_aranges",		display_debug_aranges },
-  { ".debug_frame",		display_debug_frames },
-  { ".debug_info",		display_debug_info },
-  { ".debug_line",		display_debug_lines },
-  { ".debug_pubnames",		display_debug_pubnames },
-  { ".eh_frame",		display_debug_frames },
-  { ".debug_macinfo",		display_debug_macinfo },
-  { ".debug_str",		display_debug_str },
-  { ".debug_loc",		display_debug_loc },
-  { ".debug_pubtypes",		display_debug_pubnames },
-  { ".debug_ranges",		display_debug_ranges },
-  { ".debug_static_func",	display_debug_not_supported },
-  { ".debug_static_vars",	display_debug_not_supported },
-  { ".debug_types",		display_debug_not_supported },
-  { ".debug_weaknames",		display_debug_not_supported }
+  { ".debug_abbrev",		display_debug_abbrev,		0 },
+  { ".debug_aranges",		display_debug_aranges,		0 },
+  { ".debug_frame",		display_debug_frames,		1 },
+  { ".debug_info",		display_debug_info,		1 },
+  { ".debug_line",		display_debug_lines,		0 },
+  { ".debug_pubnames",		display_debug_pubnames,		0 },
+  { ".eh_frame",		display_debug_frames,		1 },
+  { ".debug_macinfo",		display_debug_macinfo,		0 },
+  { ".debug_str",		display_debug_str,		0 },
+  { ".debug_loc",		display_debug_loc,		0 },
+  { ".debug_pubtypes",		display_debug_pubnames,		0 },
+  { ".debug_ranges",		display_debug_ranges,		0 },
+  { ".debug_static_func",	display_debug_not_supported,	0 },
+  { ".debug_static_vars",	display_debug_not_supported,	0 },
+  { ".debug_types",		display_debug_not_supported,	0 },
+  { ".debug_weaknames",		display_debug_not_supported,	0 }
 };
 
 static int
@@ -11288,7 +11287,10 @@ display_debug_section (Elf_Internal_Shdr *section, FILE *file)
 	    break;
 	  }
 
-	result &= debug_displays[i].display (section, start, file);
+	if (!debug_displays[i].relocate
+	    || debug_apply_rela_addends (file, section, start))
+	  result &= debug_displays[i].display (section, start, file);
+
 	free (start);
 
 	/* If we loaded in the abbrev section
