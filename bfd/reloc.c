@@ -2981,6 +2981,139 @@ ENUMDOC
   through 0.
 
 ENUM
+  BFD_RELOC_BFIN_16_IMM
+ENUMDOC
+  ADI Blackfin 16 bit immediate absolute reloc.
+ENUM
+  BFD_RELOC_BFIN_16_HIGH
+ENUMDOC
+  ADI Blackfin 16 bit immediate absolute reloc higher 16 bits.
+ENUM
+  BFD_RELOC_BFIN_4_PCREL
+ENUMDOC
+  ADI Blackfin 'a' part of LSETUP.
+ENUM
+  BFD_RELOC_BFIN_5_PCREL
+ENUMDOC
+  ADI Blackfin.
+ENUM
+  BFD_RELOC_BFIN_16_LOW
+ENUMDOC
+  ADI Blackfin 16 bit immediate absolute reloc lower 16 bits.
+ENUM
+  BFD_RELOC_BFIN_10_PCREL
+ENUMDOC
+  ADI Blackfin.
+ENUM
+  BFD_RELOC_BFIN_11_PCREL
+ENUMDOC
+  ADI Blackfin 'b' part of LSETUP.
+ENUM
+  BFD_RELOC_BFIN_12_PCREL_JUMP
+ENUMDOC
+  ADI Blackfin.
+ENUM
+  BFD_RELOC_BFIN_12_PCREL_JUMP_S
+ENUMDOC
+  ADI Blackfin Short jump, pcrel.
+ENUM
+  BFD_RELOC_BFIN_24_PCREL_CALL_X
+ENUMDOC
+  ADI Blackfin Call.x not implemented.
+ENUM
+  BFD_RELOC_BFIN_24_PCREL_JUMP_L
+ENUMDOC
+  ADI Blackfin Long Jump pcrel.
+ENUM
+  BFD_RELOC_BFIN_GOT
+ENUMDOC
+  ADI Blackfin GOT relocation.
+ENUM
+  BFD_RELOC_BFIN_PLTPC
+ENUMDOC
+  ADI Blackfin PLTPC relocation.
+ENUM
+  BFD_ARELOC_BFIN_PUSH
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_CONST
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_ADD
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_SUB
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_MULT
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_DIV
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_MOD
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_LSHIFT
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_RSHIFT
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_AND
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_OR
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_XOR
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_LAND
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_LOR
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_LEN
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_NEG
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_COMP
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_PAGE
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_HWPAGE
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+ENUM
+  BFD_ARELOC_BFIN_ADDR
+ENUMDOC
+  ADI Blackfin arithmetic relocation.
+
+ENUM
   BFD_RELOC_D10V_10_PCREL_R
 ENUMDOC
   Mitsubishi D10V relocs.

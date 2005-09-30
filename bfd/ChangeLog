@@ -1,3 +1,21 @@
+2005-09-30  Catherine Moore  <clm@cm00re.com>
+
+	* Makefile.am: Bfin support.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Regenerated.
+	* archures.c (bfd_mach_bfin): New.
+	(bfd_arch_bfin): New.
+	bfd-in.h (bfd_bfin_elf32_create_embedded_relocs): New.
+	* bfd-in2.h: Regenerated.
+	* config.bfd: Bfin support.
+	* configure: Regenerated.
+	* configure.in: Bfin support.
+	* libbfd.h: Regenerated.
+	* reloc.c: Add BFD relocations for Bfin.
+	* targets.c (bfd_elf32_bfin_vec): New.
+	* cpu-bfin.c: New file.
+	* elf32-bfin.c: New file.
+
 2005-09-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc_type_of_stub): Check both func desc and func

@@ -716,6 +716,10 @@ extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
    char **);
 
+extern bfd_boolean bfd_bfin_elf32_create_embedded_relocs
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
+   char **);
+
 /* SunOS shared library support routines for the linker.  */
 
 extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
@@ -1911,6 +1915,8 @@ enum bfd_architecture
 #define bfd_mach_avr3          3
 #define bfd_mach_avr4          4
 #define bfd_mach_avr5          5
+  bfd_arch_bfin,        /* ADI Blackfin */
+#define bfd_mach_bfin          1
   bfd_arch_cr16c,       /* National Semiconductor CompactRISC. */
 #define bfd_mach_cr16c         1
   bfd_arch_crx,       /*  National Semiconductor CRX.  */
@@ -2997,6 +3003,105 @@ through 7 of the instruction.  */
 stored in the instruction.  The high 24 bits are installed in bits 23
 through 0.  */
   BFD_RELOC_ARC_B26,
+
+/* ADI Blackfin 16 bit immediate absolute reloc.  */
+  BFD_RELOC_BFIN_16_IMM,
+
+/* ADI Blackfin 16 bit immediate absolute reloc higher 16 bits.  */
+  BFD_RELOC_BFIN_16_HIGH,
+
+/* ADI Blackfin 'a' part of LSETUP.  */
+  BFD_RELOC_BFIN_4_PCREL,
+
+/* ADI Blackfin.  */
+  BFD_RELOC_BFIN_5_PCREL,
+
+/* ADI Blackfin 16 bit immediate absolute reloc lower 16 bits.  */
+  BFD_RELOC_BFIN_16_LOW,
+
+/* ADI Blackfin.  */
+  BFD_RELOC_BFIN_10_PCREL,
+
+/* ADI Blackfin 'b' part of LSETUP.  */
+  BFD_RELOC_BFIN_11_PCREL,
+
+/* ADI Blackfin.  */
+  BFD_RELOC_BFIN_12_PCREL_JUMP,
+
+/* ADI Blackfin Short jump, pcrel.  */
+  BFD_RELOC_BFIN_12_PCREL_JUMP_S,
+
+/* ADI Blackfin Call.x not implemented.  */
+  BFD_RELOC_BFIN_24_PCREL_CALL_X,
+
+/* ADI Blackfin Long Jump pcrel.  */
+  BFD_RELOC_BFIN_24_PCREL_JUMP_L,
+
+/* ADI Blackfin GOT relocation.  */
+  BFD_RELOC_BFIN_GOT,
+
+/* ADI Blackfin PLTPC relocation.  */
+  BFD_RELOC_BFIN_PLTPC,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_PUSH,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_CONST,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_ADD,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_SUB,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_MULT,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_DIV,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_MOD,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_LSHIFT,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_RSHIFT,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_AND,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_OR,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_XOR,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_LAND,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_LOR,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_LEN,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_NEG,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_COMP,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_PAGE,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_HWPAGE,
+
+/* ADI Blackfin arithmetic relocation.  */
+  BFD_ARELOC_BFIN_ADDR,
 
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits

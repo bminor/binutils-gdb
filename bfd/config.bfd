@@ -71,6 +71,7 @@ targ_cpu=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 case "${targ_cpu}" in
 alpha*)		 targ_archs=bfd_alpha_arch ;;
 arm*)		 targ_archs=bfd_arm_arch ;;
+bfin*)		 targ_archs=bfd_bfin_arch ;;
 c30*)		 targ_archs=bfd_tic30_arch ;;
 c4x*)		 targ_archs=bfd_tic4x_arch ;;
 c54x*)		 targ_archs=bfd_tic54x_arch ;;
@@ -307,6 +308,11 @@ case "${targ}" in
 
   avr-*-*)
     targ_defvec=bfd_elf32_avr_vec
+    ;;
+
+  bfin-*-*)
+    targ_defvec=bfd_elf32_bfin_vec
+    tar_underscore=yes
     ;;
 
   c30-*-*aout* | tic30-*-*aout*)
