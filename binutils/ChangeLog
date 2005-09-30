@@ -1,5 +1,9 @@
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.in: Regenerated.
+
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* sysinfo.y (main): Undo last change.
 
 2005-08-30  Mark Mitchell  <mark@codesourcery.com>

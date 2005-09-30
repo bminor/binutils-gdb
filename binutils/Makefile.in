@@ -1350,3 +1350,6 @@ rclex.o: rclex.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h windres.h \
   winduni.h rcparse.h
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:
