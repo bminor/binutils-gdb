@@ -1,3 +1,8 @@
+2005-09-30  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-tic4x.c (tic4x_set): Advance input_line_pointer past
+	(removed) comma.
+
 2005-09-30  Catherine Moore  <clm@cm00re.com>
 
 	* Makefile.am: Bfin support.

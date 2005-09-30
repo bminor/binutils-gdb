@@ -1144,6 +1144,7 @@ tic4x_set (x)
 	  ignore_rest_of_line ();
 	  return;
 	}
+      ++input_line_pointer;
       symbolP = symbol_find_or_make (name);
     }
   else
