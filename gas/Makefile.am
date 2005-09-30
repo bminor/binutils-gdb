@@ -45,6 +45,7 @@ CPU_TYPES = \
 	arc \
 	arm \
 	avr \
+	bfin \
 	cris \
 	crx \
 	d10v \
@@ -227,6 +228,7 @@ TARGET_CPU_CFILES = \
 	config/tc-arc.c \
 	config/tc-arm.c \
 	config/tc-avr.c \
+	config/tc-bfin.c \
 	config/tc-cris.c \
 	config/tc-crx.c \
 	config/tc-d10v.c \
@@ -275,6 +277,7 @@ TARGET_CPU_HFILES = \
 	config/tc-arc.h \
 	config/tc-arm.h \
 	config/tc-avr.h \
+	config/tc-bfin.h \
 	config/tc-cris.h \
 	config/tc-crx.h \
 	config/tc-d10v.h \
@@ -437,7 +440,9 @@ noinst_PROGRAMS = as-new
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
 
-EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c
+EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c \
+	bfin-parse.c bfin-lex.l bfin-defs.h
+
 diststuff: $(EXTRA_DIST) info
 all: info
 
@@ -567,7 +572,7 @@ xtensa-relax.o: $(srcdir)/config/xtensa-relax.c
 
 # The m68k operand parser.
 
-EXTRA_as_new_SOURCES = config/m68k-parse.y
+EXTRA_as_new_SOURCES = config/m68k-parse.y config/bfin-parse.y
 
 # If m68k-parse.y is in a different directory, then ylwrap will use an
 # absolute path when it invokes yacc, which will cause yacc to put the
@@ -599,6 +604,18 @@ m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
 # Don't let the .y.h rule clobber m68k-parse.h.
 m68k-parse.h: ; @true
 $(srcdir)/config/m68k-parse.h: ; @true
+
+bfin-parse.c bfin-parse.tab.h: $(srcdir)/config/bfin-parse.y
+	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-parse.y y.tab.c bfin-parse.c y.tab.h bfin-parse.tab.h -- $(YACCCOMPILE) -d ;
+bfin-parse.o: bfin-parse.c bfin-parse.tab.h $(srcdir)/config/bfin-defs.h
+
+bfin-defs.h: ; @true
+$(srcdir)/config/bfin-defs.h: ; @true
+
+bfin-lex.c: $(srcdir)/config/bfin-lex.l
+	$(SHELL) $(YLWRAP) "$(LEX)" <$(srcdir)/config/bfin-lex.l lex.yy.c bfin-lex.c
+bfin-lex.o: bfin-lex.c bfin-parse.tab.h $(srcdir)/config/bfin-defs.h
+	$(COMPILE) -c $< $(NO_WERROR)
 
 # The instruction table specification lexical analyzer and parser.
 
@@ -989,6 +1006,11 @@ DEPTC_avr_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/avr.h
+DEPTC_bfin_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-bfin.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/opcode/bfin.h $(srcdir)/config/bfin-defs.h
 DEPTC_cris_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-cris.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
@@ -1525,6 +1547,11 @@ DEPOBJ_avr_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
   struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
+DEPOBJ_bfin_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-bfin.h \
+  $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
+  struc-symbol.h dwarf2dbg.h $(INCDIR)/aout/aout64.h
 DEPOBJ_cris_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-cris.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/obstack.h
@@ -1968,6 +1995,9 @@ DEP_avr_coff = $(srcdir)/config/obj-coff.h $(srcdir)/config/tc-avr.h \
 DEP_avr_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-avr.h
+DEP_bfin_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-bfin.h
 DEP_cris_aout = $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-cris.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h
 DEP_cris_elf = $(srcdir)/config/obj-elf.h $(INCDIR)/symcat.h \

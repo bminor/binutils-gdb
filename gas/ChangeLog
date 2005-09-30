@@ -1,3 +1,24 @@
+2005-09-30  Catherine Moore  <clm@cm00re.com>
+
+	* Makefile.am: Bfin support.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Regenerated.
+	* configure: Regenerated.
+	* configure.in: Bfin support.
+	* configure.tgt: Bfin support.
+	* config/bfin-aux.h: New file.
+	* config/bfin-defs.h: New file.
+	* config/bfin-lex.l: New file.
+	* config/bfin-parse.y: New file.
+	* config/tc-bfin.c: New file.
+	* config/tc-bfin.h: New file.
+	* doc/Makefile.am: Recognize c-bfin.texi.
+	* doc/Makefile.in: Regenerated.
+	* doc/all.texi: Bfin support.
+	* doc/as.texinfo: Likewise.
+	* doc/c-bfin.texi: Document bfin-specific syntax and
+	directives.
+
 2005-09-30  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (opcode_tag): Add OT_cinfix3_legacy.

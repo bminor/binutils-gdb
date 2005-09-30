@@ -274,6 +274,19 @@ changequote([,])dnl
 
     # Any other special object files needed ?
     case ${cpu_type} in
+
+      bfin)
+        echo ${extra_objects} | grep -s "bfin-parse.o"
+        if test $? -ne 0 ; then
+          extra_objects="$extra_objects bfin-parse.o"
+        fi
+
+        echo ${extra_objects} | grep -s "bfin-lex.o"
+        if test $? -ne 0 ; then
+          extra_objects="$extra_objects bfin-lex.o"
+        fi
+        ;;
+
       fr30 | ip2k | iq2000 | m32r | openrisc)
 	using_cgen=yes
 	;;

@@ -33,6 +33,7 @@ case ${cpu} in
   am33_2.0)		cpu_type=mn10300 endian=little ;;
   arm*be|arm*b)		cpu_type=arm endian=big ;;
   arm*)			cpu_type=arm endian=little ;;
+  bfin*)		cpu_type=bfin endian=little ;;
   c4x*)			cpu_type=tic4x ;;
   crisv32)		cpu_type=cris arch=crisv32 ;;
   crx*)			cpu_type=crx endian=little ;;
@@ -117,7 +118,9 @@ case ${generic_target} in
   arm-*-pe | thumb-*-pe)		fmt=coff em=pe ;;
   arm-*-riscix*)			fmt=aout em=riscix ;;
 
-  avr-*-*)				fmt=elf ;;
+  avr-*-*)				fmt=elf bfd_gas=yes ;;
+  bfin-*-*)				fmt=elf bfd_gas=yes ;;
+  bfin-*elf)				fmt=elf ;;
 
   cris-*-linux-* | crisv32-*-linux-*)
 					fmt=multi em=linux ;;

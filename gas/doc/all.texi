@@ -29,6 +29,7 @@
 @set ALPHA
 @set ARC
 @set ARM
+@set BFIN
 @set CRIS
 @set D10V
 @set D30V

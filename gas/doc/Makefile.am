@@ -27,6 +27,7 @@ CPU_DOCS = \
 	c-alpha.texi \
 	c-arc.texi \
 	c-arm.texi \
+	c-bfin.texi \
 	c-d10v.texi \
 	c-cris.texi \
 	c-h8300.texi \

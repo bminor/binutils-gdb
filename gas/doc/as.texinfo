@@ -6083,6 +6083,9 @@ subject, see the hardware manufacturer's manual.
 @ifset ARM
 * ARM-Dependent::               ARM Dependent Features
 @end ifset
+@ifset BFIN
+* BFIN-Dependent::		BFIN Dependent Features
+@end ifset
 @ifset CRIS
 * CRIS-Dependent::              CRIS Dependent Features
 @end ifset
@@ -6191,6 +6194,10 @@ subject, see the hardware manufacturer's manual.
 
 @ifset ARM
 @include c-arm.texi
+@end ifset
+
+@ifset BFIN
+@include c-bfin.texi
 @end ifset
 
 @ifset CRIS
