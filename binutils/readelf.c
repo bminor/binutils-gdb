@@ -71,6 +71,7 @@
 #include "elf/arc.h"
 #include "elf/arm.h"
 #include "elf/avr.h"
+#include "elf/bfin.h"
 #include "elf/cris.h"
 #include "elf/d10v.h"
 #include "elf/d30v.h"
@@ -598,6 +599,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_M32R:
     case EM_M32C:
     case EM_MS1:
+    case EM_BLACKFIN:
       return TRUE;
 
     case EM_MMA:
@@ -1113,6 +1115,11 @@ dump_relocations (FILE *file,
 	case EM_MS1:
 	  rtype = elf_ms1_reloc_type (type);
 	  break;
+
+	case EM_BLACKFIN:
+	  rtype = elf_bfin_reloc_type (type);
+	  break;
+
 	}
 
       if (rtype == NULL)

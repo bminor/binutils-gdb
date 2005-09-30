@@ -1,3 +1,12 @@
+2005-09-30  Catherine Moore  <clm@cm00re.com>
+
+	* Makefile.am: Bfin support.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Regenerated.
+	* readelf.c (elf/bfin.h): Include.
+	(guess_is_rela): EM_BLACKFIN support.
+	(dump_relocations): Likewise.
+
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (fetch_indirect_string): Adjust for section address.
