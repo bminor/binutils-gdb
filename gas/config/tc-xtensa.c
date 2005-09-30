@@ -5030,7 +5030,15 @@ xtensa_init_fix_data (fixS *x)
 void
 xtensa_frob_label (symbolS *sym)
 {
-  float freq = get_subseg_target_freq (now_seg, now_subseg);
+  float freq;
+
+  if (cur_vinsn.inside_bundle)
+    {
+      as_bad (_("labels are not valid inside bundles"));
+      return;
+    }
+
+  freq = get_subseg_target_freq (now_seg, now_subseg);
 
   /* Since the label was already attached to a frag associated with the
      previous basic block, it now needs to be reset to the current frag.  */
