@@ -1,3 +1,14 @@
+2005-09-30  Catherine Moore  <clm@cm00re.com>
+
+	* Makefile.am: Bfin support.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Regenerated.
+	* bfin-dis.c: New file.
+	* configure.in: Bfin support.
+	* configure: Regenerated.
+	* disassemble.c (ARCH_bfin): Define.
+	(disassembler): Add case for bfd_arch_bfin.
+
 2005-09-28  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (stack_v_mode): Renamed from branch_v_mode.

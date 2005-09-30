@@ -24,6 +24,7 @@
 #define ARCH_arc
 #define ARCH_arm
 #define ARCH_avr
+#define ARCH_bfin
 #define ARCH_cris
 #define ARCH_crx
 #define ARCH_d10v
@@ -116,6 +117,11 @@ disassembler (abfd)
 #ifdef ARCH_avr
     case bfd_arch_avr:
       disassemble = print_insn_avr;
+      break;
+#endif
+#ifdef ARCH_bfin
+    case bfd_arch_bfin:
+      disassemble = print_insn_bfin;
       break;
 #endif
 #ifdef ARCH_cris

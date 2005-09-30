@@ -54,6 +54,7 @@ CFILES = \
 	arc-ext.c \
 	arm-dis.c \
 	avr-dis.c \
+	bfin-dis.c \
 	cgen-asm.c \
 	cgen-dis.c \
 	cgen-opc.c \
@@ -188,6 +189,7 @@ ALL_MACHINES = \
 	arc-ext.lo \
 	arm-dis.lo \
 	avr-dis.lo \
+	bfin-dis.lo \
 	cgen-asm.lo \
 	cgen-dis.lo \
 	cgen-opc.lo \
@@ -596,6 +598,9 @@ arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 avr-dis.lo: avr-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/opcode/avr.h
+bfin-dis.lo: bfin-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h opintl.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/opcode/bfin.h
 cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h $(BFD_H) \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen.h opintl.h
