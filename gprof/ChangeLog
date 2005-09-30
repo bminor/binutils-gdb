@@ -1,3 +1,7 @@
+2005-09-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* gprof.c (main): Use expandargv.
+
 2005-09-30  Matthias Kurz  <mk@baerlap.north.de>
 
 	* gprof.c (main):Only invoke bindtextdomain() and textdomain() if

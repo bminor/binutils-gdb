@@ -1,3 +1,7 @@
+2005-09-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* ldmain.c (main): Use expandargv.
+
 2005-09-30  Catherine Moore  <clm@cm00re.com>
 	
 	* Makefile.am: Bfin support.

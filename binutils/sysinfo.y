@@ -412,6 +412,8 @@ int yydebug;
 int 
 main (int ac, char **av)
 {
+  expandargv (&ac, &av);
+
   yydebug=0;
   if (ac > 1)
     writecode = av[1][1];

@@ -1,3 +1,23 @@
+2005-08-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* addr2line.c (main): Likewise.
+	* ar.c (main): Likewise.
+	* coffdump.c (main): Likewise.
+	* cxxfilt.c (main): Likewise.
+	* dlltool.c (main): Likewise.
+	* dllwrap.c (main): Likewise.
+	* nlmconv.c (main): Likewise.
+	* nm.c (main): Likewise.
+	* objcopy.c (main): Likewise.
+	* objdump.c (main): Likewise.
+	* readelf.c (main): Likewise.
+	* size.c (main): Likeiwse.
+	* srcconv.c (main): Likewise.
+	* strings.c (main): Likewise.
+	* sysdump.c (main): Likewise.
+	* sysinfo.c (main): Likewise.
+	* windres.c (main): Likewise.
+	
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".

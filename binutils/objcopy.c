@@ -3181,6 +3181,8 @@ main (int argc, char *argv[])
 
   START_PROGRESS (program_name, 0);
 
+  expandargv (&argc, &argv);
+
   strip_symbols = STRIP_UNDEF;
   discard_locals = LOCALS_UNDEF;
 

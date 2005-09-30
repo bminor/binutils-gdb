@@ -1,3 +1,7 @@
+2005-09-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* as.c (main): Use expandargv.
+
 2005-09-30  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-tic4x.c (tic4x_set): Advance input_line_pointer past
