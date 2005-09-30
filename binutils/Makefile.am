@@ -88,7 +88,8 @@ GENERATED_HFILES = arparse.h sysroff.h sysinfo.h defparse.h rcparse.h
 
 CFILES = \
 	addr2line.c ar.c arsup.c binemul.c bucomm.c budemang.c \
-	coffdump.c coffgrok.c cxxfilt.c debug.c dlltool.c dllwrap.c \
+	coffdump.c coffgrok.c cxxfilt.c \
+	dwarf.c debug.c dlltool.c dllwrap.c \
 	emul_aix.c emul_vanilla.c filemode.c \
 	ieee.c is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
 	nlmconv.c nm.c not-ranlib.c not-strip.c \
@@ -160,7 +161,7 @@ objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
 strings_SOURCES = strings.c $(BULIBS)
 
-readelf_SOURCES = readelf.c version.c unwind-ia64.c
+readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c
 readelf_LDADD   = $(INTLLIBS) $(LIBIBERTY)
 
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
