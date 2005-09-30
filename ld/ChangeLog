@@ -1,5 +1,11 @@
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Likewise.
+
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ldlang.c (output_statement_hash_entry): New type.
 	(output_statement_table): New variable for hash table.
 	(output_statement_newfunc): New function.
