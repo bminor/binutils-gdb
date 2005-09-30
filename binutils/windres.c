@@ -767,7 +767,7 @@ main (int argc, char **argv)
   program_name = argv[0];
   xmalloc_set_program_name (program_name);
 
-  expandargv (&ac, &av);
+  expandargv (&argc, &argv);
 
   bfd_init ();
   set_default_bfd_target ();

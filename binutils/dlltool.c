@@ -3124,7 +3124,7 @@ main (int ac, char **av)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-  expandargv (&argc, &argv);
+  expandargv (&ac, &av);
 
   while ((c = getopt_long (ac, av,
 #ifdef DLLTOOL_MCORE_ELF

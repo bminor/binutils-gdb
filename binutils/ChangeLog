@@ -1,3 +1,8 @@
+2005-09-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* dlltool.c (main): Fix typo.
+	* windres.c (main): Likewise.
+
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in: Regenerated.
