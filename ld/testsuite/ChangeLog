@@ -1,3 +1,7 @@
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/sec64k.exp: Enabled for all ELF targets.
+
 2005-09-30  Catherine Moore  <clm@cm00re.com>
 
 	* ld-elf/merge.d: Xfail bfin.

@@ -1,3 +1,22 @@
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (output_statement_hash_entry): New type.
+	(output_statement_table): New variable for hash table.
+	(output_statement_newfunc): New function.
+	(output_statement_table_init): Likewise.
+	(output_statement_table_free): Likewise.
+	(lang_init): Call output_statement_table_init.
+	(lang_finish): Renamed to ...
+	(lang_end): This.
+	(lang_process): Updated.
+	(lang_finish): New function.
+	(lang_output_section_find_1): Use hash table.
+	(lang_output_section_statement_lookup_1): Likewise.
+
+	* ldlang.h (lang_finish): New.
+
+	* ldmain.c (main): Call lang_finish.
+
 2005-09-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* ldmain.c (main): Use expandargv.

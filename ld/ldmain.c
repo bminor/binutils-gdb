@@ -474,6 +474,8 @@ main (int argc, char **argv)
   if (nocrossref_list != NULL)
     check_nocrossrefs ();
 
+  lang_finish ();
+
   /* Even if we're producing relocatable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
      want to ignore for relocatable output?)  */

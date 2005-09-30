@@ -24,12 +24,6 @@ if ![is_elf_format] {
     return
 }
 
-# Per-port excludes, since this test takes an overwhelmingly long time
-# currently.
-if { ![istarget cris-*-*] } {
-    return
-}
-
 # Test >64k sections, with and without -r.  First, create the assembly
 # files.  Have a relocation to another section and one within the local
 # section.

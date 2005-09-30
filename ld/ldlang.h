@@ -449,6 +449,8 @@ extern int lang_statement_iteration;
 
 extern void lang_init
   (void);
+extern void lang_finish
+  (void);
 extern lang_memory_region_type *lang_memory_region_lookup
   (const char *const, bfd_boolean);
 extern lang_memory_region_type *lang_memory_region_default

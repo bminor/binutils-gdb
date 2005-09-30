@@ -868,6 +868,45 @@ lang_add_input_file (const char *name,
   return new_afile (name, file_type, target, TRUE);
 }
 
+struct output_statement_hash_entry
+{
+  struct bfd_hash_entry root;
+  lang_output_section_statement_type *entry;
+};
+
+/* The hash table.  */
+
+static struct bfd_hash_table output_statement_table;
+
+/* Support routines for the hash table used by lang_output_section_find_1,
+   initialize the table, fill in an entry and remove the table.  */
+
+static struct bfd_hash_entry *
+output_statement_newfunc (struct bfd_hash_entry *entry ATTRIBUTE_UNUSED, 
+			  struct bfd_hash_table *table,
+			  const char *string ATTRIBUTE_UNUSED)
+{
+  struct output_statement_hash_entry *ret
+    = bfd_hash_allocate (table,
+			 sizeof (struct output_statement_hash_entry));
+  ret->entry = NULL;
+  return (struct bfd_hash_entry *) ret;
+}
+
+static void
+output_statement_table_init (void)
+{
+  if (! bfd_hash_table_init_n (&output_statement_table,
+			       output_statement_newfunc, 61))
+    einfo (_("%P%F: Failed to create hash table\n"));
+}
+
+static void
+output_statement_table_free (void)
+{
+  bfd_hash_table_free (&output_statement_table);
+}
+
 /* Build enough state so that the parser can build its tree.  */
 
 void
@@ -876,6 +915,8 @@ lang_init (void)
   obstack_begin (&stat_obstack, 1000);
 
   stat_ptr = &statement_list;
+
+  output_statement_table_init ();
 
   lang_list_init (stat_ptr);
 
@@ -898,6 +939,12 @@ lang_init (void)
   if (!bfd_hash_table_init_n (&lang_definedness_table,
 			      lang_definedness_newfunc, 3))
     einfo (_("%P%F: out of memory during initialization"));
+}
+
+void
+lang_finish (void)
+{
+  output_statement_table_free ();
 }
 
 /*----------------------------------------------------------------------
@@ -985,18 +1032,30 @@ static lang_output_section_statement_type *
 lang_output_section_find_1 (const char *const name, int constraint)
 {
   lang_output_section_statement_type *lookup;
+  struct output_statement_hash_entry *entry;
+  unsigned long hash;
 
-  for (lookup = &lang_output_section_statement.head->output_section_statement;
-       lookup != NULL;
-       lookup = lookup->next)
+  entry = ((struct output_statement_hash_entry *)
+	   bfd_hash_lookup (&output_statement_table, name, FALSE,
+			    FALSE));
+  if (entry == NULL || (lookup = entry->entry) == NULL)
+    return NULL;
+
+  hash = entry->root.hash;
+  do
     {
-      if (strcmp (name, lookup->name) == 0
-	  && lookup->constraint != -1
+      if (lookup->constraint != -1
 	  && (constraint == 0
 	      || (constraint == lookup->constraint
 		  && constraint != SPECIAL)))
 	return lookup;
+      entry = (struct output_statement_hash_entry *) entry->root.next;
+      lookup = entry ? entry->entry : NULL;
     }
+  while (entry != NULL
+	 && entry->root.hash == hash
+	 && strcmp (name, lookup->name) == 0);
+
   return NULL;
 }
 
@@ -1015,6 +1074,8 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
   lookup = lang_output_section_find_1 (name, constraint);
   if (lookup == NULL)
     {
+      struct output_statement_hash_entry *entry;
+
       lookup = new_stat (lang_output_section_statement, stat_ptr);
       lookup->region = NULL;
       lookup->lma_region = NULL;
@@ -1038,6 +1099,15 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
       lookup->load_base = NULL;
       lookup->update_dot_tree = NULL;
       lookup->phdrs = NULL;
+
+      entry = ((struct output_statement_hash_entry *)
+	       bfd_hash_lookup (&output_statement_table, name, TRUE,
+				FALSE));
+      if (entry == NULL)
+	einfo (_("%P%F: bfd_hash_lookup failed creating section `%s'\n"),
+	       name);
+
+      entry->entry = lookup;
 
       /* GCC's strict aliasing rules prevent us from just casting the
 	 address, so we store the pointer in a variable and cast that
@@ -4637,7 +4707,7 @@ lang_set_startof (void)
 }
 
 static void
-lang_finish (void)
+lang_end (void)
 {
   struct bfd_link_hash_entry *h;
   bfd_boolean warn;
@@ -5413,7 +5483,7 @@ lang_process (void)
 
   /* Final stuffs.  */
   ldemul_finish ();
-  lang_finish ();
+  lang_end ();
 }
 
 /* EXPORTED TO YACC */
