@@ -1,3 +1,8 @@
+2005-09-30  Matthias Kurz  <mk@baerlap.north.de>
+
+	* bucomm.h: Prevent the inclusion of <libintl.h> from the Solaris
+	version of <locale.h> when ENABLE_NLS is not defined.
+
 2005-09-26  Mark Mitchell  <mark@codesourcery.com>
 
 	* BRANCHES: Mention binutils-csl-gxxpro-3_4-branch.

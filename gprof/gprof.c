@@ -189,8 +189,10 @@ main (int argc, char **argv)
 #if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
 #endif
+#ifdef ENABLE_NLS
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
+#endif
 
   whoami = argv[0];
   xmalloc_set_program_name (whoami);

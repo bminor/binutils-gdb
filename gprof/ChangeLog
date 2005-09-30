@@ -1,3 +1,8 @@
+2005-09-30  Matthias Kurz  <mk@baerlap.north.de>
+
+	* gprof.c (main):Only invoke bindtextdomain() and textdomain() if
+	ENABLE_NLS is defined.
+
 2005-05-09  Nick Clifton  <nickc@redhat.com>
 
 	* Update the address and phone number of the FSF organization in

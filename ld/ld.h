@@ -24,6 +24,42 @@
 #define LD_H
 
 #ifdef HAVE_LOCALE_H
+#endif
+#ifndef SEEK_CUR
+#define SEEK_CUR 1
+#endif
+#ifndef SEEK_END
+#define SEEK_END 2
+#endif
+
+#if defined(__GNUC__) && !defined(C_ALLOCA)
+# undef alloca
+# define alloca __builtin_alloca
+#else
+# if defined(HAVE_ALLOCA_H) && !defined(C_ALLOCA)
+#  include <alloca.h>
+# else
+#  ifndef alloca /* predefined by HP cc +Olibcalls */
+#   if !defined (__STDC__) && !defined (__hpux)
+char *alloca ();
+#   else
+void *alloca ();
+#   endif /* __STDC__, __hpux */
+#  endif /* alloca */
+# endif /* HAVE_ALLOCA_H */
+#endif
+
+
+#ifdef HAVE_LOCALE_H
+# ifndef ENABLE_NLS
+   /* The Solaris version of locale.h always includes libintl.h.  If we have
+      been configured with --disable-nls then ENABLE_NLS will not be defined
+      and the dummy definitions of bindtextdomain (et al) below will conflict
+      with the defintions in libintl.h.  So we define these values to prevent
+      the bogus inclusion of libintl.h.  */
+#  define _LIBINTL_H
+#  define _LIBGETTEXT_H
+# endif
 # include <locale.h>
 #endif
 

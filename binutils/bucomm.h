@@ -1,6 +1,6 @@
 /* bucomm.h -- binutils common include file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -125,7 +125,17 @@ void *alloca ();
 # endif /* HAVE_ALLOCA_H */
 #endif
 
+
 #ifdef HAVE_LOCALE_H
+# ifndef ENABLE_NLS
+   /* The Solaris version of locale.h always includes libintl.h.  If we have
+      been configured with --disable-nls then ENABLE_NLS will not be defined
+      and the dummy definitions of bindtextdomain (et al) below will conflict
+      with the defintions in libintl.h.  So we define these values to prevent
+      the bogus inclusion of libintl.h.  */
+#  define _LIBINTL_H
+#  define _LIBGETTEXT_H
+# endif
 # include <locale.h>
 #endif
 
