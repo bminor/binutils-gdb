@@ -122,6 +122,7 @@ case $target_triplet in {
     { mmix-*-* } { }
     { *c4x*-*-* } { }
     { *c54x*-*-* } { }
+    { bfin-*-* } { }
     default {
 	run_dump_test altmacro
 	# The second test is valid only when '!' is not a comment
