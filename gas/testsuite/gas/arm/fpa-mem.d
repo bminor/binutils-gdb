@@ -31,4 +31,4 @@ Disassembly of section .text:
 0+50 <[^>]*> ed00020c ?	sfm	f0, 4, \[r0, #-48\]
 0+54 <[^>]*> ed800200 ?	sfm	f0, 4, \[r0\]
 0+58 <[^>]*> 5d800100 ?	stfpls	f0, \[r0\]
-0+5c <[^>]*> 9dc08100 ?	stflsp	f0, \[r0\]
+0+5c <[^>]*> 5d800100 ?	stfpls	f0, \[r0\]

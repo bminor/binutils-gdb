@@ -27,8 +27,6 @@ F:
 	
 	# Test mnemonic that is ambiguous between infix and suffic
 	# condition codes
-	# sfts condition code pl
 	stfpls	f0, [r0]
 	.syntax unified
-	# stfp condition code ls
 	stfpls	f0, [r0]

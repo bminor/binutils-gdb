@@ -1,3 +1,12 @@
+2005-09-30  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (opcode_tag): Add OT_cinfix3_legacy.
+	(opcode_lookup): Handle OT_cinfix3_legacy.  Revert earlier change for
+	normal infix conditions.
+	(C3E): Include Thumb-2 definition.
+	(CL, cCL): Define.
+	(insns): Use them for legacy mnemonics.
+
 2005-09-30  Matthias Kurz  <mk@baerlap.north.de>
 
 	* asintl.h: Prevent the inclusion of <libintl.h> from the Solaris

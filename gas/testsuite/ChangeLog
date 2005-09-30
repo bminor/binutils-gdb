@@ -1,3 +1,8 @@
+2005-09-30  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/fpa-mem.s: Remove incorrect comments.
+	* gas/arm/fpa-mem.d: Update expected results.
+
 2005-09-29  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/ia64/alloc.[sl]: New.
