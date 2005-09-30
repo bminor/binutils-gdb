@@ -143,8 +143,9 @@ objcopy_OBJECTS = $(am_objcopy_OBJECTS)
 objcopy_LDADD = $(LDADD)
 objcopy_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3)
-am_objdump_OBJECTS = objdump.$(OBJEXT) budemang.$(OBJEXT) \
-	prdbg.$(OBJEXT) $(am__objects_2) $(am__objects_1)
+am_objdump_OBJECTS = objdump.$(OBJEXT) dwarf.$(OBJEXT) \
+	budemang.$(OBJEXT) prdbg.$(OBJEXT) $(am__objects_2) \
+	$(am__objects_1)
 objdump_OBJECTS = $(am_objdump_OBJECTS)
 am__DEPENDENCIES_4 = ../opcodes/libopcodes.la
 objdump_DEPENDENCIES = $(am__DEPENDENCIES_4) $(am__DEPENDENCIES_1) \
@@ -462,7 +463,7 @@ readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c
 readelf_LDADD = $(INTLLIBS) $(LIBIBERTY)
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c budemang.c $(BULIBS)
-objdump_SOURCES = objdump.c budemang.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
+objdump_SOURCES = objdump.c dwarf.c budemang.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
 objdump_LDADD = $(OPCODES) $(BFDLIB) $(LIBIBERTY) $(INTLLIBS)
 cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \

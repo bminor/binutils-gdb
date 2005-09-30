@@ -52,6 +52,7 @@
 #include "bfdver.h"
 #include "progress.h"
 #include "bucomm.h"
+#include "dwarf.h"
 #include "budemang.h"
 #include "getopt.h"
 #include "safe-ctype.h"
@@ -91,6 +92,7 @@ static int prefix_addresses;		/* --prefix-addresses */
 static int with_line_numbers;		/* -l */
 static bfd_boolean with_source_code;	/* -S */
 static int show_raw_insn;		/* --show-raw-insn */
+static int dump_dwarf_section_info;	/* --dwarf */
 static int dump_stab_section_info;	/* --stabs */
 static int do_demangle;			/* -C, --demangle */
 static bfd_boolean disassemble;		/* -d */
@@ -189,6 +191,7 @@ usage (FILE *stream, int status)
   -g, --debugging          Display debug information in object file\n\
   -e, --debugging-tags     Display debug information using ctags style\n\
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
+  -W, --dwarf              Display DWARF info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
   -r, --reloc              Display the relocation entries in the file\n\
@@ -275,6 +278,7 @@ static struct option long_options[]=
   {"source", no_argument, NULL, 'S'},
   {"special-syms", no_argument, &dump_special_syms, 1},
   {"include", required_argument, NULL, 'I'},
+  {"dwarf", no_argument, NULL, 'W'},
   {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
   {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
@@ -1965,6 +1969,116 @@ disassemble_data (bfd *abfd)
   free (sorted_syms);
 }
 
+int
+load_debug_section (enum dwarf_section_display_enum debug, void *file)
+{
+  struct dwarf_section *section = &debug_displays [debug].section;
+  bfd *abfd = file;
+  asection *sec;
+  bfd_boolean ret;
+
+  /* If it is already loaded, do nothing.  */
+  if (section->start != NULL)
+    return 1;
+
+  /* Locate the debug section.  */
+  sec = bfd_get_section_by_name (abfd, section->name);
+  if (sec == NULL)
+    return 0;
+
+  section->address = bfd_get_section_vma (abfd, sec);
+  section->size = bfd_get_section_size (sec);
+  section->start = xmalloc (section->size);
+
+  if (is_relocatable && debug_displays [debug].relocate)
+    ret = bfd_simple_get_relocated_section_contents (abfd,
+						     sec,
+						     section->start,
+						     syms) != NULL;
+  else
+    ret = bfd_get_section_contents (abfd, sec, section->start, 0,
+				    section->size);
+
+  if (!ret)
+    {
+      free_debug_section (debug);
+      printf (_("\nCan't get contents for section '%s'.\n"),
+	      section->name);
+    }
+
+  return ret;
+}
+
+void
+free_debug_section (enum dwarf_section_display_enum debug)
+{
+  struct dwarf_section *section = &debug_displays [debug].section;
+
+  if (section->start == NULL)
+    return;
+
+  free ((char *) section->start);
+  section->start = NULL;
+  section->address = 0;
+  section->size = 0;
+}
+
+static void
+dump_dwarf_section (bfd *abfd, asection *section,
+		    void *arg ATTRIBUTE_UNUSED)
+{
+  const char *name = bfd_get_section_name (abfd, section);
+  const char *match;
+  enum dwarf_section_display_enum i;
+
+  if (strncmp (name, ".gnu.linkonce.wi.", 17) == 0)
+    match = ".debug_info";
+  else
+    match = name;
+
+  for (i = 0; i < max; i++)
+    if (strcmp (debug_displays[i].section.name, match) == 0)
+      {
+	if (!debug_displays[i].eh_frame)
+	  {
+	    struct dwarf_section *sec = &debug_displays [i].section;
+
+	    if (load_debug_section (i, abfd))
+	      {
+		debug_displays[i].display (sec, abfd);
+
+		if (i != info && i != abbrev)
+		  free_debug_section (i);
+	      }
+	  }
+	break;
+      }
+}
+
+/* Dump the dwarf debugging information.  */
+
+static void
+dump_dwarf (bfd *abfd)
+{
+  is_relocatable = ((abfd->flags & (HAS_RELOC | EXEC_P | DYNAMIC))
+		    == HAS_RELOC);
+
+  /* FIXME: bfd_get_arch_size may return -1.  We assume that 64bit
+     targets will return 64.  */
+  eh_addr_size = bfd_get_arch_size (abfd) == 64 ? 8 : 4;
+
+  if (bfd_big_endian (abfd))
+    byte_get = byte_get_big_endian;
+  else if (bfd_little_endian (abfd))
+    byte_get = byte_get_little_endian;
+  else
+    abort ();
+
+  bfd_map_over_sections (abfd, dump_dwarf_section, NULL);
+
+  free_debug_memory ();
+}
+
 /* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
    it.  Return NULL on failure.   */
 
@@ -2636,7 +2750,11 @@ dump_bfd (bfd *abfd)
   if (dump_section_headers)
     dump_headers (abfd);
 
-  if (dump_symtab || dump_reloc_info || disassemble || dump_debugging)
+  if (dump_symtab
+      || dump_reloc_info
+      || disassemble
+      || dump_debugging
+      || dump_dwarf_section_info)
     syms = slurp_symtab (abfd);
   if (dump_dynamic_symtab || dump_dynamic_reloc_info
       || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
@@ -2653,6 +2771,8 @@ dump_bfd (bfd *abfd)
     dump_symbols (abfd, FALSE);
   if (dump_dynamic_symtab)
     dump_symbols (abfd, TRUE);
+  if (dump_dwarf_section_info)
+    dump_dwarf (abfd);
   if (dump_stab_section_info)
     dump_stabs (abfd);
   if (dump_reloc_info && ! disassemble)
@@ -2819,7 +2939,7 @@ main (int argc, char **argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfaHhrRtTxsSI:j:wE:zgeG",
+  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfaHhrRtTxsSI:j:wE:zgeGW",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -2959,6 +3079,20 @@ main (int argc, char **argv)
 	  dump_debugging_tags = 1;
 	  do_demangle = TRUE;
 	  seenflag = TRUE;
+	  break;
+	case 'W':
+	  dump_dwarf_section_info = TRUE;
+	  seenflag = TRUE;
+	  do_debug_info = 1;
+	  do_debug_abbrevs = 1;
+	  do_debug_lines = 1;
+	  do_debug_pubnames = 1;
+	  do_debug_aranges = 1;
+	  do_debug_ranges = 1;
+	  do_debug_frames = 1;
+	  do_debug_macinfo = 1;
+	  do_debug_str = 1;
+	  do_debug_loc = 1;
 	  break;
 	case 'G':
 	  dump_stab_section_info = TRUE;

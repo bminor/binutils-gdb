@@ -1,5 +1,22 @@
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am (objdump_SOURCES): Add dwarf.c.
+	* Makefile.in: Regenerated.
+
+	* objdump.c: Include "dwarf.h".
+	(usage): Add -W/--dwarf.
+	(long_options): Likewise.
+	(dump_dwarf_section_info): New.
+	(load_debug_section): Likewise.
+	(free_debug_section): Likewise.
+	(dump_dwarf_section): Likewise.
+	(dump_dwarf): Likewise.
+	(dump_bfd): Load symbol table and call dump_dwarf if
+	dump_dwarf_section_info isn't zero.
+	(main): Handle -W/--dwarf.
+
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* readelf.c: Reordered.
 	(is_relocatable): New.
 	(dwarf_section): New structure for DWARF section.
