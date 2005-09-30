@@ -1,6 +1,10 @@
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sysinfo.y (main): Undo last change.
+
 2005-08-30  Mark Mitchell  <mark@codesourcery.com>
 
-	* addr2line.c (main): Likewise.
+	* addr2line.c (main): Use expandargv.
 	* ar.c (main): Likewise.
 	* coffdump.c (main): Likewise.
 	* cxxfilt.c (main): Likewise.
@@ -15,7 +19,7 @@
 	* srcconv.c (main): Likewise.
 	* strings.c (main): Likewise.
 	* sysdump.c (main): Likewise.
-	* sysinfo.c (main): Likewise.
+	* sysinfo.y (main): Likewise.
 	* windres.c (main): Likewise.
 	
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
