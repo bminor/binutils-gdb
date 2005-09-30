@@ -1,5 +1,17 @@
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* dwarf.c (fetch_indirect_string): Adjust for section address.
+	(process_debug_info): Likewise.
+	(display_debug_loc): Likewise.
+	(display_debug_ranges): Likewise.
+
+	* objdump.c (mach_o_dwarf_sections): New.
+	(generic_dwarf_sections): Likewise.
+	(check_mach_o_dwarf): Likewise.
+	(dump_dwarf): Call check_mach_o_dwarf.
+
+2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.am (objdump_SOURCES): Add dwarf.c.
 	* Makefile.in: Regenerated.
 

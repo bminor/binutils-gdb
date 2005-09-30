@@ -287,6 +287,8 @@ fetch_indirect_string (unsigned long offset)
   if (section->start == NULL)
     return _("<no .debug_str section>");
 
+  /* DWARF sections under Mach-O have non-zero addresses.  */
+  offset -= section->address;
   if (offset > section->size)
     {
       warn (_("DW_FORM_strp offset too big: %lx\n"), offset);
@@ -1645,10 +1647,11 @@ process_debug_info (struct dwarf_section *section, void *file,
 
       free_abbrevs ();
 
-      /* Process the abbrevs used by this compilation unit.  */
+      /* Process the abbrevs used by this compilation unit. DWARF
+	 sections under Mach-O have non-zero addresses.  */
       process_abbrev_section
 	((unsigned char *) debug_displays [abbrev].section.start
-	 + compunit.cu_abbrev_offset,
+	 + compunit.cu_abbrev_offset - debug_displays [abbrev].section.address,
 	 (unsigned char *) debug_displays [abbrev].section.start
 	 + debug_displays [abbrev].section.size);
 
@@ -2371,7 +2374,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
   if (!seen_first_offset)
     error (_("No location lists in .debug_info section!\n"));
 
-  if (debug_information [first].loc_offsets [0] != 0)
+  /* DWARF sections under Mach-O have non-zero addresses.  */
+  if (debug_information [first].loc_offsets [0] != section->address)
     warn (_("Location lists in %s section start at 0x%lx\n"),
 	  section->name, debug_information [first].loc_offsets [0]);
 
@@ -2397,7 +2401,8 @@ display_debug_loc (struct dwarf_section *section, void *file)
       for (j = 0; j < debug_information [i].num_loc_offsets; j++)
 	{
 	  has_frame_base = debug_information [i].have_frame_base [j];
-	  offset = debug_information [i].loc_offsets [j];
+	  /* DWARF sections under Mach-O have non-zero addresses.  */
+	  offset = debug_information [i].loc_offsets [j] - section->address; 
 	  next = section_begin + offset;
 	  base_address = debug_information [i].base_address;
 
@@ -2726,7 +2731,8 @@ display_debug_ranges (struct dwarf_section *section,
   if (!seen_first_offset)
     error (_("No range lists in .debug_info section!\n"));
 
-  if (debug_information [first].range_lists [0] != 0)
+  /* DWARF sections under Mach-O have non-zero addresses.  */
+  if (debug_information [first].range_lists [0] != section->address)
     warn (_("Range lists in %s section start at 0x%lx\n"),
 	  section->name, debug_information [first].range_lists [0]);
 
@@ -2746,7 +2752,8 @@ display_debug_ranges (struct dwarf_section *section,
 
       for (j = 0; j < debug_information [i].num_range_lists; j++)
 	{
-	  offset = debug_information [i].range_lists [j];
+	  /* DWARF sections under Mach-O have non-zero addresses.  */
+	  offset = debug_information [i].range_lists [j] - section->address;
 	  next = section_begin + offset;
 	  base_address = debug_information [i].base_address;
 
