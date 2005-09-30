@@ -83,6 +83,8 @@ xscale-*-elf)		targ_emul=armelf
 avr-*-*)		targ_emul=avr2
 			targ_extra_emuls="avr1 avr3 avr4 avr5"
 			;;
+bfin-*-elf)		targ_emul=elf32bfin ;;
+bfin-*-uclinux*)	targ_emul=elf32bfin ;;
 cr16c-*-elf*)           targ_emul=elf32cr16c
 			;;
 cris-*-*aout*)		targ_emul=crisaout

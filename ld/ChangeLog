@@ -1,3 +1,12 @@
+2005-09-30  Catherine Moore  <clm@cm00re.com>
+	
+	* Makefile.am: Bfin support.
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Regenerated.
+	* configure.tgt: Bfin support.
+	* emulparams/bfin.sh: New file.
+	* emultempl/bfin.em: New file.
+
 2005-09-30  Matthias Kurz  <mk@baerlap.north.de>
 
 	* ld.h: Prevent the inclusion of <libintl.h> from the Solaris
