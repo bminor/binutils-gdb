@@ -1,3 +1,7 @@
+2005-09-30  James E Wilson  <wilson@specifix.com>
+
+	* ldlang.c (lang_startup): Add missing ": " to einfo call.
+
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".

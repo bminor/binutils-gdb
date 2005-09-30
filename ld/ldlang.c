@@ -5663,7 +5663,7 @@ lang_startup (const char *name)
 {
   if (startup_file != NULL)
     {
-      einfo (_("%P%Fmultiple STARTUP files\n"));
+      einfo (_("%P%F: multiple STARTUP files\n"));
     }
   first_file->filename = name;
   first_file->local_sym_name = name;
