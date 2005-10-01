@@ -7548,6 +7548,337 @@ process_mips_fpe_exception (int mask)
     fputs ("0", stdout);
 }
 
+/* ARM EABI attributes section.  */
+typedef struct
+{
+  int tag;
+  const char *name;
+  /* 0 = special, 1 = string, 2 = uleb123, > 0x80 == table lookup.  */
+  int type;
+  const char **table;
+} arm_attr_public_tag;
+
+static const char *arm_attr_tag_CPU_arch[] =
+  {"Pre-v4", "v4", "v4T", "v5T", "v5TE", "v5TEJ", "v6", "v6KZ", "v6T2",
+   "v6K", "v7"};
+static const char *arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
+static const char *arm_attr_tag_THUMB_ISA_use[] =
+  {"No", "Thumb-1", "Thumb-2"};
+static const char *arm_attr_tag_VFP_arch[] = {"No", "VFPv1", "VFPv2"};
+static const char *arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1"};
+static const char *arm_attr_tag_NEON_arch[] = {"No", "NEONv1"};
+static const char *arm_attr_tag_ABI_PCS_config[] =
+  {"None", "Bare platform", "Linux application", "Linux DSO", "PalmOS 2004",
+   "PalmOS (reserved)", "SymbianOS 2004", "SymbianOS (reserved)"};
+static const char *arm_attr_tag_ABI_PCS_R9_use[] =
+  {"V6", "SB", "TLS", "Unused"};
+static const char *arm_attr_tag_ABI_PCS_RW_data[] =
+  {"Absolute", "PC-relative", "SB-relative", "None"};
+static const char *arm_attr_tag_ABI_PCS_RO_DATA[] =
+  {"Absolute", "PC-relative", "None"};
+static const char *arm_attr_tag_ABI_PCS_GOT_use[] =
+  {"None", "direct", "GOT-indirect"};
+static const char *arm_attr_tag_ABI_PCS_wchar_t[] =
+  {"None", "??? 1", "2", "??? 3", "4"};
+static const char *arm_attr_tag_ABI_FP_rounding[] = {"Unused", "Needed"};
+static const char *arm_attr_tag_ABI_FP_denormal[] = {"Unused", "Needed"};
+static const char *arm_attr_tag_ABI_FP_exceptions[] = {"Unused", "Needed"};
+static const char *arm_attr_tag_ABI_FP_user_exceptions[] = {"Unused", "Needed"};
+static const char *arm_attr_tag_ABI_FP_number_model[] =
+  {"Unused", "Finite", "RTABI", "IEEE 754"};
+static const char *arm_attr_tag_ABI_align8_needed[] = {"No", "Yes", "4-byte"};
+static const char *arm_attr_tag_ABI_align8_preserved[] =
+  {"No", "Yes, except leaf SP", "Yes"};
+static const char *arm_attr_tag_ABI_enum_size[] =
+  {"Unused", "small", "int", "forced to int"};
+static const char *arm_attr_tag_ABI_HardFP_use[] =
+  {"As Tag_VFP_arch", "SP only", "DP only", "SP and DP"};
+static const char *arm_attr_tag_ABI_VFP_args[] =
+  {"AAPCS", "VFP registers", "custom"};
+static const char *arm_attr_tag_ABI_WMMX_args[] =
+  {"AAPCS", "WMMX registers", "custom"};
+static const char *arm_attr_tag_ABI_optimization_goals[] =
+  {"None", "Prefer Speed", "Aggressive Speed", "Prefer Size",
+    "Aggressive Size", "Prefer Debug", "Aggressive Debug"};
+static const char *arm_attr_tag_ABI_FP_optimization_goals[] =
+  {"None", "Prefer Speed", "Aggressive Speed", "Prefer Size",
+    "Aggressive Size", "Prefer Accuracy", "Aggressive Accuracy"};
+
+#define LOOKUP(id, name) \
+  {id, #name, 0x80 | ARRAY_SIZE(arm_attr_tag_##name), arm_attr_tag_##name}
+static arm_attr_public_tag arm_attr_public_tags[] = 
+{
+  {4, "CPU_raw_name", 1, NULL},
+  {5, "CPU_name", 1, NULL},
+  LOOKUP(6, CPU_arch),
+  {7, "CPU_arch_profile", 0, NULL},
+  LOOKUP(8, ARM_ISA_use),
+  LOOKUP(9, THUMB_ISA_use),
+  LOOKUP(10, VFP_arch),
+  LOOKUP(11, WMMX_arch),
+  LOOKUP(12, NEON_arch),
+  LOOKUP(13, ABI_PCS_config),
+  LOOKUP(14, ABI_PCS_R9_use),
+  LOOKUP(15, ABI_PCS_RW_data),
+  LOOKUP(16, ABI_PCS_RO_DATA),
+  LOOKUP(17, ABI_PCS_GOT_use),
+  LOOKUP(18, ABI_PCS_wchar_t),
+  LOOKUP(19, ABI_FP_rounding),
+  LOOKUP(20, ABI_FP_denormal),
+  LOOKUP(21, ABI_FP_exceptions),
+  LOOKUP(22, ABI_FP_user_exceptions),
+  LOOKUP(23, ABI_FP_number_model),
+  LOOKUP(24, ABI_align8_needed),
+  LOOKUP(25, ABI_align8_preserved),
+  LOOKUP(26, ABI_enum_size),
+  LOOKUP(27, ABI_HardFP_use),
+  LOOKUP(28, ABI_VFP_args),
+  LOOKUP(29, ABI_WMMX_args),
+  LOOKUP(30, ABI_optimization_goals),
+  LOOKUP(31, ABI_FP_optimization_goals),
+  {32, "compatibility", 0, NULL}
+};
+#undef LOOKUP
+
+/* Read an unsigned LEB128 encoded value from p.  Set *PLEN to the number of
+   bytes read.  */
+static unsigned int
+read_uleb128 (unsigned char *p, unsigned int *plen)
+{
+  unsigned char c;
+  unsigned int val;
+  int shift;
+  int len;
+
+  val = 0;
+  shift = 0;
+  len = 0;
+  do
+    {
+      c = *(p++);
+      len++;
+      val |= ((unsigned int)c & 0x7f) << shift;
+      shift += 7;
+    }
+  while (c & 0x80);
+
+  *plen = len;
+  return val;
+}
+
+static unsigned char *
+display_arm_attribute (unsigned char *p)
+{
+  int tag;
+  unsigned int len;
+  int val;
+  arm_attr_public_tag *attr;
+  unsigned i;
+  int type;
+
+  tag = read_uleb128 (p, &len);
+  p += len;
+  attr = NULL;
+  for (i = 0; i < ARRAY_SIZE(arm_attr_public_tags); i++)
+    {
+      if (arm_attr_public_tags[i].tag == tag)
+	{
+	  attr = &arm_attr_public_tags[i];
+	  break;
+	}
+    }
+
+  if (attr)
+    {
+      printf ("  Tag_%s: ", attr->name);
+      switch (attr->type)
+	{
+	case 0:
+	  switch (tag)
+	    {
+	    case 7: /* Tag_CPU_arch_profile.  */
+	      val = read_uleb128 (p, &len);
+	      p += len;
+	      switch (val)
+		{
+		case 0: printf ("None\n"); break;
+		case 'A': printf ("Application\n"); break;
+		case 'R': printf ("Realtime\n"); break;
+		case 'M': printf ("Microcontroller\n"); break;
+		default: printf ("??? (%d)\n", val); break;
+		}
+	      break;
+
+	    case 32: /* Tag_compatibility.  */
+	      val = read_uleb128 (p, &len);
+	      p += len;
+	      printf ("flag = %d, vendor = %s\n", val, p);
+	      p += strlen((char *)p) + 1;
+	      break;
+
+	    default:
+	      abort();
+	    }
+	  return p;
+
+	case 1:
+	case 2:
+	  type = attr->type;
+	  break;
+
+	default:
+	  assert (attr->type & 0x80);
+	  val = read_uleb128 (p, &len);
+	  p += len;
+	  type = attr->type & 0x7f;
+	  if (val >= type)
+	    printf ("??? (%d)\n", val);
+	  else
+	    printf ("%s\n", attr->table[val]);
+	  return p;
+	}
+    }
+  else
+    {
+      if (tag & 1)
+	type = 1; /* String.  */
+      else
+	type = 2; /* uleb128.  */
+      printf ("  Tag_unknown_%d: ", tag);
+    }
+
+  if (type == 1)
+    {
+      printf ("\"%s\"\n", p);
+      p += strlen((char *)p) + 1;
+    }
+  else
+    {
+      val = read_uleb128 (p, &len);
+      p += len;
+      printf ("%d (0x%x)\n", val, val);
+    }
+
+  return p;
+}
+
+static int
+process_arm_specific (FILE *file)
+{
+  Elf_Internal_Shdr *sect;
+  unsigned char *contents;
+  unsigned char *p;
+  unsigned char *end;
+  bfd_vma section_len;
+  bfd_vma len;
+  unsigned i;
+
+  /* Find the section header so that we get the size.  */
+  for (i = 0, sect = section_headers;
+       i < elf_header.e_shnum;
+       i++, sect++)
+    {
+      if (sect->sh_type != SHT_ARM_ATTRIBUTES)
+	continue;
+
+      contents = get_data (NULL, file, sect->sh_offset, 1, sect->sh_size,
+			   _("attributes"));
+      
+      if (!contents)
+	continue;
+      p = contents;
+      if (*p == 'A')
+	{
+	  len = sect->sh_size - 1;
+	  p++;
+	  while (len > 0)
+	    {
+	      int namelen;
+	      bfd_boolean public_section;
+
+	      section_len = byte_get (p, 4);
+	      p += 4;
+	      if (section_len > len)
+		{
+		  printf (_("ERROR: Bad section length (%d > %d)\n"),
+			  (int)section_len, (int)len);
+		  section_len = len;
+		}
+	      len -= section_len;
+	      printf ("Attribute Section: %s\n", p);
+	      if (strcmp ((char *)p, "aeabi") == 0)
+		public_section = TRUE;
+	      else
+		public_section = FALSE;
+	      namelen = strlen ((char *)p) + 1;
+	      p += namelen;
+	      section_len -= namelen + 4;
+	      while (section_len > 0)
+		{
+		  int tag = *(p++);
+		  int val;
+		  bfd_vma size;
+		  size = byte_get (p, 4);
+		  if (size > section_len)
+		    {
+		      printf (_("ERROR: Bad subsection length (%d > %d)\n"),
+			      (int)size, (int)section_len);
+		      size = section_len;
+		    }
+		  section_len -= size;
+		  end = p + size - 1;
+		  p += 4;
+		  switch (tag)
+		    {
+		    case 1:
+		      printf ("File Attributes\n");
+		      break;
+		    case 2:
+		      printf ("Section Attributes:");
+		      goto do_numlist;
+		    case 3:
+		      printf ("Symbol Attributes:");
+		    do_numlist:
+		      for (;;)
+			{
+			  unsigned int i;
+			  val = read_uleb128 (p, &i);
+			  p += i;
+			  if (val == 0)
+			    break;
+			  printf (" %d", val);
+			}
+		      printf ("\n");
+		      break;
+		    default:
+		      printf ("Unknown tag: %d\n", tag);
+		      public_section = FALSE;
+		      break;
+		    }
+		  if (public_section)
+		    {
+		      while (p < end)
+			p = display_arm_attribute(p);
+		    }
+		  else
+		    {
+		      /* ??? Do something sensible, like dump hex.  */
+		      printf ("  Unknown section contexts\n");
+		      p = end;
+		    }
+		}
+	    }
+	}
+      else
+	{
+	  printf (_("Unknown format '%c'\n"), *p);
+	}
+	
+      free(contents);
+    }
+  return 1;
+}
+
 static int
 process_mips_specific (FILE *file)
 {
@@ -8317,6 +8648,8 @@ process_arch_specific (FILE *file)
 
   switch (elf_header.e_machine)
     {
+    case EM_ARM:
+      return process_arm_specific (file);
     case EM_MIPS:
     case EM_MIPS_RS3_LE:
       return process_mips_specific (file);

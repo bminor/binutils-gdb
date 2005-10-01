@@ -1,3 +1,21 @@
+2005-10-01  Paul Brook  <paul@codesourcery.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch, arm_attr_tag_ARM_ISA_use,
+	arm_attr_tag_THUMB_ISA_use, arm_attr_tag_VFP_arch,
+	arm_attr_tag_WMMX_arch, arm_attr_tag_NEON_arch,
+	arm_attr_tag_ABI_PCS_config, arm_attr_tag_ABI_PCS_R9_use,
+	arm_attr_tag_ABI_PCS_RW_data, arm_attr_tag_ABI_PCS_RO_DATA,
+	arm_attr_tag_ABI_PCS_GOT_use, arm_attr_tag_ABI_PCS_wchar_t,
+	arm_attr_tag_ABI_FP_rounding, arm_attr_tag_ABI_FP_denormal,
+	arm_attr_tag_ABI_FP_exceptions, arm_attr_tag_ABI_FP_user_exceptions,
+	arm_attr_tag_ABI_FP_number_model, arm_attr_tag_ABI_align8_needed,
+	arm_attr_tag_ABI_align8_preserved, arm_attr_tag_ABI_enum_size,
+	arm_attr_tag_ABI_HardFP_use, arm_attr_tag_ABI_VFP_args,
+	arm_attr_tag_ABI_WMMX_args, arm_attr_tag_ABI_optimization_goals,
+	arm_attr_tag_ABI_FP_optimization_goals, arm_attr_public_tags): New.
+	(display_arm_attribute, process_arm_specific): New functions.
+	(process_arch_specific): Add EM_ARM.
+
 2005-09-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* dlltool.c (main): Fix typo.
