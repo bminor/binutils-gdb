@@ -1,3 +1,7 @@
+2005-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb_gcore.sh: Use a temporary file.  Use gdb from $PATH.
+
 2005-09-29  Andreas Schwab  <schwab@suse.de>
 
 	PR threads/2015
