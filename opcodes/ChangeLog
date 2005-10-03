@@ -1,3 +1,9 @@
+2005-09-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/ga.po: New Irish translation.
+	* configure.in (ALL_LINGUAS): Add "ga".
+	* configure: Regenerate.
+
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".
