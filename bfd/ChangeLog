@@ -1,3 +1,8 @@
+2005-10-03  David Heine  <dlheine@tensilica.com>
+
+	* elf32-xtensa.c (relocations_reach): Skip range check for
+	absolute literals.
+
 2005-10-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_get_synthetic_symtab): Set BSF_GLOBAL on

@@ -7462,6 +7462,11 @@ relocations_reach (source_reloc *reloc,
 	  != sec->output_section)
 	return FALSE;
 
+      /* Absolute literals in the same output section can always be
+	 combined.  */
+      if (reloc[i].is_abs_literal)
+	continue;
+
       /* A literal with no PC-relative relocations can be moved anywhere.  */
       if (reloc[i].opnd != -1)
 	{
