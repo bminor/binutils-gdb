@@ -364,7 +364,7 @@ read_unwind_info (struct objfile *objfile)
     }
 
   /* Now compute the size of the stub unwinds.  Note the ELF tools do not
-     use stub unwinds at the curren time.  */
+     use stub unwinds at the current time.  */
   stub_unwind_sec = bfd_get_section_by_name (objfile->obfd, "$UNWIND_END$");
 
   if (stub_unwind_sec)
