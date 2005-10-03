@@ -476,6 +476,7 @@ copy_usage (FILE *stream, int exit_status)
                                    Add <prefix> to start of every allocatable\n\
                                      section name\n\
   -v --verbose                     List all object files modified\n\
+  @<file>                          Read options from <file>\n\
   -V --version                     Display this program's version number\n\
   -h --help                        Display this output\n\
      --info                        List object formats & architectures supported\n\

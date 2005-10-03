@@ -88,7 +88,7 @@ Usage: %s [-_] [-n] [--strip-underscores] [--no-strip-underscores]\n\
   fprintf (stream, "]\n");
 
   fprintf (stream, "\
-       [--help] [--version] [arg...]\n");
+       [@file] [--help] [--version] [arg...]\n");
   exit (status);
 }
 

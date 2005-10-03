@@ -1,3 +1,22 @@
+2005-10-03  Mark Mitchell  <mark@codesourcery.com>
+
+	* addr2line.c (usage): Document @file.
+	* ar.c (usage): Likewise.
+	* coffdump (usage): Likewise.
+	* cxxfilt.c (usage): Likewise.
+	* dlltool.c (usage): Likewise.
+	* dllwrap.c (usage): Likewise.
+	* nlmconv.c (usage): Likewise.
+	* nm.c (usage): Likewise.
+	* objcopy.c (usage): Likewise.
+	* objdump.c (usage): Likewise.
+	* readelf.c (usage): Likewise.
+	* size.c (usage): Likeise.
+	* srconv.c (usage): Likewise.
+	* strings.c (usage): Likewise.
+	* windres.c (usage): Likewise.
+	* doc/binutils.texi: Add section on common options. 
+
 2005-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention -W/--dwarf.

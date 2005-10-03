@@ -473,6 +473,7 @@ usage (FILE *file, int status)
 {
   fprintf (file, _("Usage %s <option(s)> <object-file(s)>\n"), prog_name);
   fprintf (file, _("  Generic options:\n"));
+  fprintf (file, _("   @<file>                Read options from <file>\n"));    
   fprintf (file, _("   --quiet, -q            Work quietly\n"));
   fprintf (file, _("   --verbose, -v          Verbose\n"));
   fprintf (file, _("   --version              Print dllwrap version\n"));

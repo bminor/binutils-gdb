@@ -166,6 +166,7 @@ section entitled "GNU Free Documentation License".
 * nlmconv::                     Converts object code into an NLM
 * windres::			Manipulate Windows resources
 * dlltool::			Create files needed to build and use DLLs
+* Common Options::              Command-line options for all utilities
 * Selecting The Target System:: How these utilities determine the target.
 * Reporting Bugs::              Reporting Bugs
 * GNU Free Documentation License::  GNU Free Documentation License
@@ -3433,6 +3434,35 @@ Display the command line options understood by @command{readelf}.
 objdump(1), and the Info entries for @file{binutils}.
 @c man end
 @end ignore
+
+@node Common Options
+@chapter Common Options
+
+The following command-line options are supported by all of the
+programs described in this manual.
+
+@table @env
+@item @@@var{file}
+Read command-line options from @var{file}.  The options read are
+inserted in place of the original @@@var{file} option.  If @var{file}
+does not exist, or cannot be read, then the option will be treated
+literally, and not removed.  
+
+Options in @var{file} are separated by whitespace.  A whitespace
+character may be included in an option by surrounding the entire
+option in either single or double quotes.  Any character (including a
+backslash) may be included by prefixing the character to be included
+character with a backslash.  The @var{file} may itself contain
+additional @@@var{file} options; any such options will be processed
+recursively.
+
+@item --help
+Display the command-line options supported by the program.
+
+@item --version
+Display the version number of the program.
+
+@end table
 
 @node Selecting The Target System
 @chapter Selecting the Target System

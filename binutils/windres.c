@@ -659,6 +659,7 @@ usage (FILE *stream, int status)
 #endif
   fprintf (stream, _("\
   -r                           Ignored for compatibility with rc\n\
+  @<file>                      Read options from <file>\n\
   -h --help                    Print this help message\n\
   -V --version                 Print version information\n"));
   fprintf (stream, _("\

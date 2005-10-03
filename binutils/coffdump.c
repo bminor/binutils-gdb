@@ -457,6 +457,7 @@ show_usage (FILE *file, int status)
   fprintf (file, _("Usage: %s [option(s)] in-file\n"), program_name);
   fprintf (file, _(" Print a human readable interpretation of a SYSROFF object file\n"));
   fprintf (file, _(" The options are:\n\
+  @<file>                Read options from <file>\n\
   -h --help              Display this information\n\
   -v --version           Display the program's version\n\
 \n"));

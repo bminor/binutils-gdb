@@ -87,6 +87,7 @@ usage (FILE *stream, int status)
   -o|-d|-x  --radix={8|10|16}         Display numbers in octal, decimal or hex\n\
   -t        --totals                  Display the total sizes (Berkeley only)\n\
             --target=<bfdname>        Set the binary file format\n\
+            @<file>                   Read options from <file>\n\
   -h        --help                    Display this information\n\
   -v        --version                 Display the program's version\n\
 \n"),

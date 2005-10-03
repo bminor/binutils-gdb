@@ -3058,6 +3058,7 @@ usage (FILE *file, int status)
   fprintf (file, _("   -v --verbose              Be verbose.\n"));
   fprintf (file, _("   -V --version              Display the program version.\n"));
   fprintf (file, _("   -h --help                 Display this information.\n"));
+  fprintf (file, _("   @<file>                   Read options from <file>.\n"));
 #ifdef DLLTOOL_MCORE_ELF
   fprintf (file, _("   -M --mcore-elf <outname>  Process mcore-elf object files into <outname>.\n"));
   fprintf (file, _("   -L --linker <name>        Use <name> as the linker.\n"));

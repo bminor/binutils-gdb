@@ -1105,6 +1105,7 @@ show_usage (FILE *file, int status)
   -T --header-file=<file>       Read <file> for NLM header information\n\
   -l --linker=<linker>          Use <linker> for any linking\n\
   -d --debug                    Display on stderr the linker command line\n\
+  @<file>                       Read options from <file>.\n\
   -h --help                     Display this information\n\
   -v --version                  Display the program's version\n\
 "));

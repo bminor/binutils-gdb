@@ -1724,6 +1724,7 @@ show_usage (FILE *file, int status)
   -q --quick       (Obsolete - ignored)\n\
   -n --noprescan   Do not perform a scan to convert commons into defs\n\
   -d --debug       Display information about what is being done\n\
+  @<file>          Read options from <file>\n\
   -h --help        Display this information\n\
   -v --version     Print the program's version number\n"));
 

@@ -254,6 +254,7 @@ usage (FILE *stream, int status)
       --target=BFDNAME   Specify the target object format as BFDNAME\n\
   -u, --undefined-only   Display only undefined symbols\n\
   -X 32_64               (ignored)\n\
+  @FILE                  Read options from FILE\n\
   -h, --help             Display this information\n\
   -V, --version          Display this program's version number\n\
 \n"));

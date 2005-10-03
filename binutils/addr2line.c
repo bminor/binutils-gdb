@@ -77,6 +77,7 @@ usage (FILE *stream, int status)
   fprintf (stream, _(" Convert addresses into line number/file name pairs.\n"));
   fprintf (stream, _(" If no addresses are specified on the command line, they will be read from stdin\n"));
   fprintf (stream, _(" The options are:\n\
+  @<file>                Read options from <file>\n\
   -b --target=<bfdname>  Set the binary file format\n\
   -e --exe=<executable>  Set the input file name (default is a.out)\n\
   -i --inlines		 Unwind inlined functions\n\

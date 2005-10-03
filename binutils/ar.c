@@ -242,7 +242,8 @@ usage (int help)
       fprintf (s, _("  [S]          - do not build a symbol table\n"));
       fprintf (s, _("  [v]          - be verbose\n"));
       fprintf (s, _("  [V]          - display the version number\n"));
-
+      fprintf (s, _("  @<file>      - read options from <file>\n"));
+ 
       ar_emul_usage (s);
     }
   else
@@ -251,6 +252,7 @@ usage (int help)
       fprintf (s, _("Usage: %s [options] archive\n"), program_name);
       fprintf (s, _(" Generate an index to speed access to archives\n"));
       fprintf (s, _(" The options are:\n\
+  @<file>                      Read options from <file>\n\
   -h --help                    Print this help message\n\
   -V --version                 Print version information\n"));
     }

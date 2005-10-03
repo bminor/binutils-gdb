@@ -717,6 +717,7 @@ usage (FILE *stream, int status)
   -T --target=<BFDNAME>     Specify the binary file format\n\
   -e --encoding={s,S,b,l,B,L} Select character size and endianness:\n\
                             s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n\
+  @<file>                   Read options from <file>\n\
   -h --help                 Display this information\n\
   -v --version              Print the program's version number\n"));
   list_supported_targets (program_name, stream);

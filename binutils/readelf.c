@@ -2616,6 +2616,7 @@ usage (void)
   fprintf (stdout, _("\
   -I --histogram         Display histogram of bucket list lengths\n\
   -W --wide              Allow output width to exceed 80 characters\n\
+  @<file>                Read options from <file>\n\
   -H --help              Display this information\n\
   -v --version           Display the version number of readelf\n"));
   fprintf (stdout, _("Report bugs to %s\n"), REPORT_BUGS_TO);

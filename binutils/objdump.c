@@ -196,6 +196,7 @@ usage (FILE *stream, int status)
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
   -r, --reloc              Display the relocation entries in the file\n\
   -R, --dynamic-reloc      Display the dynamic relocation entries in the file\n\
+  @<file>                  Read options from <file>\n\
   -v, --version            Display this program's version number\n\
   -i, --info               List object formats and architectures supported\n\
   -H, --help               Display this information\n\
