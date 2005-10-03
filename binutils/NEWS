@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add "-W/--dwarf" to objdump to display the contents of the DWARF
+debug sections.
+
 * Add "-t/--section-details" to readelf to display section details.
 "-N/--full-section-name" is deprecated.
 

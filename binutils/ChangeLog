@@ -1,3 +1,9 @@
+2005-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention -W/--dwarf.
+
+	* doc/binutils.texi: Document -W/--dwarf for objdump.
+
 2005-10-01  Paul Brook  <paul@codesourcery.com>
 
 	* readelf.c (arm_attr_tag_CPU_arch, arm_attr_tag_ARM_ISA_use,
