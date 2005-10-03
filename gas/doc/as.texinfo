@@ -3567,12 +3567,10 @@ Highest Precedence
 @item %
 @dfn{Remainder}.
 
-@item <
-@itemx <<
+@item <<
 @dfn{Shift Left}.  Same as the C operator @samp{<<}.
 
-@item >
-@itemx >>
+@item >>
 @dfn{Shift Right}.  Same as the C operator @samp{>>}.
 @end table
 
@@ -3624,11 +3622,11 @@ You may not subtract arguments from different sections.
 @dfn{Is Not Equal To}
 @item <
 @dfn{Is Less Than}
-@itemx >
+@item >
 @dfn{Is Greater Than}
-@itemx >=
+@item >=
 @dfn{Is Greater Than Or Equal To}
-@itemx <=
+@item <=
 @dfn{Is Less Than Or Equal To}
 
 The comparison operators can be used as infix operators.  A true results has a
