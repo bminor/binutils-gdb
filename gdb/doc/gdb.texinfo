@@ -5692,6 +5692,20 @@ Return to compressed format for arrays.
 Show whether compressed or pretty format is selected for displaying
 arrays.
 
+@cindex print array indexes
+@item set print array-indexes
+@itemx set print array-indexes on
+Print the index of each element when displaying arrays.  May be more
+convenient to locate a given element in the array or quickly find the
+index of a given element in that printed array.  The default is off.
+
+@item set print array-indexes off
+Stop printing element indexes when displaying arrays.
+
+@item show print array-indexes
+Show whether the index of each element is printed when displaying
+arrays.
+
 @item set print elements @var{number-of-elements}
 @cindex number of array elements to print
 @cindex limit on number of printed array elements
