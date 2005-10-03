@@ -1,3 +1,8 @@
+2005-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_get_synthetic_symtab): Set BSF_GLOBAL on
+	synthetic syms.
+
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".

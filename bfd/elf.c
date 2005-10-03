@@ -8270,6 +8270,10 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
 	continue;
 
       *s = **p->sym_ptr_ptr;
+      /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
+	 we are defining a symbol, ensure one of them is set.  */
+      if ((s->flags & BSF_LOCAL) == 0)
+	s->flags |= BSF_GLOBAL;
       s->section = plt;
       s->value = addr - plt->vma;
       s->name = names;
