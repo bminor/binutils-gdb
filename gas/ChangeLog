@@ -3,7 +3,8 @@
 	* doc/as.texinfo (Infix Ops):  '<' and '>' are not shift
 	operators.
 
-2005-09-30  Bob Wilson  <bob.wilson@acm.org>
+2005-09-30  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_frob_label): Disallow labels in bundles.
 
