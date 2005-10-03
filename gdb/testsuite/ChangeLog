@@ -1,3 +1,8 @@
+2005-10-03  Joel Brobecker  <brobecker@adacore.com>
+
+        * gdb.base/arrayidx.c: New file.
+        * gdb.base/arrayidx.exp: New testcase.
+
 2005-09-29  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.base/annota3.exp, gdb.cp/annota3.exp: The annotations
