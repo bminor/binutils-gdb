@@ -1,4 +1,42 @@
-2005-10-02  Joel Brobecker  <brobecker@adacore.com>
+2005-10-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h (language_defn): New field la_print_array_index.
+	(LA_PRINT_ARRAY_INDEX): New macro.
+	(default_print_array_index): Add declaration.
+	* language.c (default_print_array_index): new function.
+	(unknown_language): Add value for new field.
+	(auto_language): Likewise.
+	(local_language): Likewise.
+	* ada-lang.c (ada_print_array_index): New function.
+	(ada_language_defn): Add value for new field.
+	* c-lang.c (c_language_defn): Likewise.
+	(cpluc_language_defn): Likewise.
+	(asm_language_defn): Likewise.
+	(minimal_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Likewise.
+	* jv-lang.c (java_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+	* scm-lang.c (scm_language_defn): Likewise.
+	* valprint.h (print_array_indexes_p): Add declaration.
+	(get_array_low_bound): Add declaration.
+	(maybe_print_array_index): Add declaration.
+	* valprint.c (print_array_indexes): New static variable.
+	(show_print_array_indexes): New function.
+	(print_array_indexes_p): New function.
+	(get_array_low_bound): New function.
+	(maybe_print_array_index): New function.
+	(val_print_array_elements): Print the index of each element if
+	requested by the user.
+	(_initialize_valprint): Add new array-indexes "set/show print" command.
+	* ada-valprint.c (print_optional_low_bound): Replace extracted code
+	by call to ada_get_array_low_bound_and_type(). Stop printing the low
+	bound if indexes will be printed for all elements of the array.
+	(val_print_packed_array_elements): Print the index of each element
+	of the array if necessary.
+
+2005-10-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* hppa-tdep.c (read_unwind_info): Fix typo in comment.
 

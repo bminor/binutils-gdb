@@ -100,6 +100,17 @@ Default output radix for printing of values is %s.\n"),
 }
 int output_format = 0;
 
+/* By default we print arrays without printing the index of each element in
+   the array.  This behavior can be changed by setting PRINT_ARRAY_INDEXES.  */
+
+static int print_array_indexes = 0;
+static void
+show_print_array_indexes (struct ui_file *file, int from_tty,
+		          struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Printing of array indexes is %s.\n"), value);
+}
+
 /* Print repeat counts if there are more than this many repetitions of an
    element in an array.  Referenced by the low level language dependent
    print routines. */
@@ -859,6 +870,70 @@ print_char_chars (struct ui_file *stream, const gdb_byte *valaddr,
     }
 }
 
+/* Return non-zero if the debugger should print the index of each element
+   when printing array values.  */
+
+int
+print_array_indexes_p (void)
+{              
+  return print_array_indexes;
+} 
+
+/* Assuming TYPE is a simple, non-empty array type, compute its lower bound.
+   Save it into LOW_BOUND if not NULL.
+
+   Return 1 if the operation was successful. Return zero otherwise,
+   in which case the value of LOW_BOUND is unmodified.
+   
+   Computing the array lower bound is pretty easy, but this function
+   does some additional verifications before returning the low bound.
+   If something incorrect is detected, it is better to return a status
+   rather than throwing an error, making it easier for the caller to
+   implement an error-recovery plan.  For instance, it may decide to
+   warn the user that the bound was not found and then use a default
+   value instead.  */
+
+int
+get_array_low_bound (struct type *type, long *low_bound)
+{
+  struct type *index = TYPE_INDEX_TYPE (type);
+  long low = 0;
+                                  
+  if (index == NULL)
+    return 0;
+
+  if (TYPE_CODE (index) != TYPE_CODE_RANGE
+      && TYPE_CODE (index) != TYPE_CODE_ENUM)
+    return 0;
+
+  low = TYPE_LOW_BOUND (index);
+  if (low > TYPE_HIGH_BOUND (index))
+    return 0;
+
+  if (low_bound)
+    *low_bound = low;
+
+  return 1;
+}
+                                       
+/* Print on STREAM using the given FORMAT the index for the element
+   at INDEX of an array whose index type is INDEX_TYPE.  */
+    
+void  
+maybe_print_array_index (struct type *index_type, LONGEST index,
+                         struct ui_file *stream, int format,
+                         enum val_prettyprint pretty)
+{
+  struct value *index_value;
+
+  if (!print_array_indexes)
+    return; 
+    
+  index_value = value_from_longest (index_type, index);
+
+  LA_PRINT_ARRAY_INDEX (index_value, stream, format, pretty);
+}   
+
 /*  Called by various <lang>_val_print routines to print elements of an
    array in the form "<elem1>, <elem2>, <elem3>, ...".
 
@@ -877,17 +952,25 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 {
   unsigned int things_printed = 0;
   unsigned len;
-  struct type *elttype;
+  struct type *elttype, *index_type;
   unsigned eltlen;
   /* Position of the array element we are examining to see
      whether it is repeated.  */
   unsigned int rep1;
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
+  long low_bound_index;
+
+  if (!get_array_low_bound (type, &low_bound_index))
+    {
+      warning ("unable to get low bound of array, using zero as default");
+      low_bound_index = 0;
+    }
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
   len = TYPE_LENGTH (type) / eltlen;
+  index_type = TYPE_INDEX_TYPE (type);
 
   annotate_array_section_begin (i, elttype);
 
@@ -906,6 +989,8 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 	    }
 	}
       wrap_here (n_spaces (2 + 2 * recurse));
+      maybe_print_array_index (index_type, i + low_bound_index,
+                               stream, format, pretty);
 
       rep1 = i + 1;
       reps = 1;
@@ -1395,6 +1480,12 @@ Without an argument, sets both radices back to the default value of 10."),
 Show the default input and output number radices.\n\
 Use 'show input-radix' or 'show output-radix' to independently show each."),
 	   &showlist);
+
+  add_setshow_boolean_cmd ("array-indexes", class_support,
+                           &print_array_indexes, _("\
+Set printing of array indexes."), _("\
+Show printing of array indexes"), NULL, NULL, show_print_array_indexes,
+                           &setprintlist, &showprintlist);
 
   /* Give people the defaults which they are used to.  */
   prettyprint_structs = 0;

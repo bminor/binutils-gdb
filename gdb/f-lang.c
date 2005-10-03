@@ -485,6 +485,7 @@ const struct language_defn f_language_defn =
   &builtin_type_f_character,	/* Type of string elements */
   default_word_break_characters,
   NULL, /* FIXME: la_language_arch_info.  */
+  default_print_array_index,
   LANG_MAGIC
 };
 

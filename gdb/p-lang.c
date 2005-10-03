@@ -477,6 +477,7 @@ const struct language_defn pascal_language_defn =
   &builtin_type_char,		/* Type of string elements */
   default_word_break_characters,
   NULL, /* FIXME: la_language_arch_info.  */
+  default_print_array_index,
   LANG_MAGIC
 };
 

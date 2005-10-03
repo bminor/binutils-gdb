@@ -303,6 +303,16 @@ ada_get_gdb_completer_word_break_characters (void)
   return ada_completer_word_break_characters;
 }
 
+/* Print an array element index using the Ada syntax.  */
+
+static void
+ada_print_array_index (struct value *index_value, struct ui_file *stream,
+                       int format, enum val_prettyprint pretty)
+{
+  LA_VALUE_PRINT (index_value, stream, format, pretty);
+  fprintf_filtered (stream, " => ");
+}
+
 /* Read the string located at ADDR from the inferior and store the
    result into BUF.  */
 
@@ -8766,6 +8776,7 @@ const struct language_defn ada_language_defn = {
   NULL,
   ada_get_gdb_completer_word_break_characters,
   ada_language_arch_info,
+  ada_print_array_index,
   LANG_MAGIC
 };
 

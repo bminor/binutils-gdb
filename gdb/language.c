@@ -1057,6 +1057,17 @@ default_word_break_characters (void)
   return " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
 }
 
+/* Print the index of array elements using the C99 syntax.  */
+
+void
+default_print_array_index (struct value *index_value, struct ui_file *stream,
+                           int format, enum val_prettyprint pretty)
+{
+  fprintf_filtered (stream, "[");
+  LA_VALUE_PRINT (index_value, stream, format, pretty);
+  fprintf_filtered (stream, "] = ");
+}
+
 /* Define the language that is no language.  */
 
 static int
@@ -1181,6 +1192,7 @@ const struct language_defn unknown_language_defn =
   NULL,
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
+  default_print_array_index,
   LANG_MAGIC
 };
 
@@ -1217,6 +1229,7 @@ const struct language_defn auto_language_defn =
   NULL,
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
+  default_print_array_index,
   LANG_MAGIC
 };
 
@@ -1252,6 +1265,7 @@ const struct language_defn local_language_defn =
   NULL,
   default_word_break_characters,
   unknown_language_arch_info,	/* la_language_arch_info.  */
+  default_print_array_index,
   LANG_MAGIC
 };
 

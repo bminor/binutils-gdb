@@ -50,6 +50,14 @@ extern int output_format;
 
 extern int stop_print_at_null;	/* Stop printing at null char? */
 
+extern int print_array_indexes_p (void);
+ 
+extern int get_array_low_bound (struct type *type, long *low_bound);
+
+extern void maybe_print_array_index (struct type *index_type, LONGEST index,
+                                     struct ui_file *stream, int format,
+                                     enum val_prettyprint pretty);
+
 extern void val_print_array_elements (struct type *, const gdb_byte *,
 				      CORE_ADDR, struct ui_file *, int,
 				      int, int, enum val_prettyprint,

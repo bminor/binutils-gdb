@@ -1114,6 +1114,7 @@ const struct language_defn java_language_defn =
   NULL,
   default_word_break_characters,
   c_language_arch_info,
+  default_print_array_index,
   LANG_MAGIC
 };
 

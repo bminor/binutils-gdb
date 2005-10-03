@@ -86,20 +86,13 @@ print_optional_low_bound (struct ui_file *stream, struct type *type)
   struct type *index_type;
   long low_bound;
 
-  index_type = TYPE_INDEX_TYPE (type);
-  low_bound = 0;
+  if (print_array_indexes_p ())
+    return 0;
 
-  if (index_type == NULL)
+  if (!get_array_low_bound (type, &low_bound))
     return 0;
-  if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
-    {
-      low_bound = TYPE_LOW_BOUND (index_type);
-      if (low_bound > TYPE_HIGH_BOUND (index_type))
-	return 0;
-      index_type = TYPE_TARGET_TYPE (index_type);
-    }
-  else
-    return 0;
+
+  index_type = TYPE_INDEX_TYPE (type);
 
   switch (TYPE_CODE (index_type))
     {
@@ -137,16 +130,18 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   unsigned int i;
   unsigned int things_printed = 0;
   unsigned len;
-  struct type *elttype;
+  struct type *elttype, *index_type;
   unsigned eltlen;
   unsigned long bitsize = TYPE_FIELD_BITSIZE (type, 0);
   struct value *mark = value_mark ();
+  LONGEST low = 0;
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
+  index_type = TYPE_INDEX_TYPE (type);
 
   {
-    LONGEST low, high;
+    LONGEST high;
     if (get_discrete_bounds (TYPE_FIELD_TYPE (type, 0), &low, &high) < 0)
       len = 1;
     else
@@ -174,6 +169,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	    }
 	}
       wrap_here (n_spaces (2 + 2 * recurse));
+      maybe_print_array_index (index_type, i + low, stream, format, pretty);
 
       i0 = i;
       v0 = ada_value_primitive_packed_val (NULL, valaddr,
@@ -219,6 +215,8 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		      fprintf_filtered (stream, ", ");
 		    }
 		  wrap_here (n_spaces (2 + 2 * recurse));
+		  maybe_print_array_index (index_type, j + low,
+					   stream, format, pretty);
 		}
 	      val_print (elttype, value_contents (v0), 0, 0, stream, format,
 			 0, recurse + 1, pretty);
