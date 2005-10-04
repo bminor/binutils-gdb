@@ -415,6 +415,18 @@ Yoshinori Sato					ysato@users.sourceforge.jp
 
 
 
+			Release Management
+
+The current release manager is: Joel Brobecker  <brobecker@adacore.com>
+
+His responsibilities are:
+
+    * organizing, scheduling, and managing releases of GDB.
+
+    * deciding the approval and commit policies for release branches,
+      and can change them as needed.
+
+                        
 			Past Maintainers
 
 Jimmy Guo (gdb.hp, tui)				guo at cup dot hp dot com

@@ -1,5 +1,9 @@
 2005-10-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* MAINTAINERS: Add section for release management.
+
+2005-10-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Add entry for new "set print array-indexes" command.
 
 2005-10-03  Joel Brobecker  <brobecker@adacore.com>
