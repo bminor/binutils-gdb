@@ -1,3 +1,12 @@
+2005-10-04  Nick Clifton  <nickc@redhat.com>
+
+	* cxxfilt.c: Treat mangled names specified on the command line in
+	the same way as mangled names read from stdin.
+	Add -i switch to disable the display of implementation details.
+	Add -t switch to disable the demangling of types.
+	* NEWS: Mention the new switches.
+	* doc/binutils.texi (cxxfilt): Document the -i and -t switches.
+
 2005-10-03  Mark Mitchell  <mark@codesourcery.com>
 
 	* addr2line.c (usage): Document @file.

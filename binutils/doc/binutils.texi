@@ -2397,9 +2397,10 @@ the Info entries for @file{binutils}.
 @smallexample
 @c man begin SYNOPSIS cxxfilt
 c++filt [@option{-_}|@option{--strip-underscores}]
-        [@option{-j}|@option{--java}]
         [@option{-n}|@option{--no-strip-underscores}]
         [@option{-p}|@option{--no-params}]
+        [@option{-t}|@option{--no-types}]
+        [@option{-i}|@option{--no-verbose}]
         [@option{-s} @var{format}|@option{--format=}@var{format}]
         [@option{--help}]  [@option{--version}]  [@var{symbol}@dots{}]
 @c man end
@@ -2420,9 +2421,9 @@ names into user-level names so that the linker can keep these overloaded
 functions from clashing.
 
 Every alphanumeric word (consisting of letters, digits, underscores,
-dollars, or periods) seen in the input is a potential label.  If the
-label decodes into a C++ name, the C++ name replaces the low-level
-name in the output.
+dollars, or periods) seen in the input is a potential mangled name.
+If the name decodes into a C++ name, the C++ name replaces the
+low-level name in the output.
 
 You can use @command{c++filt} to decipher individual symbols:
 
@@ -2459,6 +2460,16 @@ Do not remove the initial underscore.
 @itemx --no-params
 When demangling the name of a function, do not display the types of
 the function's parameters.
+
+@item -t
+@itemx --no-types
+Do not attempt to demangle types.  This is enabled by default, but it
+may not be desired if you are interested in mangled function names.
+
+@item -i
+@itemx --no-verbose
+Do not include implementation details (if any) in the demangled
+output.
 
 @item -s @var{format}
 @itemx --format=@var{format}

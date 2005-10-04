@@ -1,10 +1,17 @@
 -*- text -*-
 
+* Add -i and -t switches to cxxfilt.  -i disables the display of implementation
+  specific extra demangling information (if any) and -t disables the demangling
+  of types.
+
+* Add support for the "@<file>" syntax to the command lines of all tools, so
+  that extra switches can be read from <file>.
+
 * Add "-W/--dwarf" to objdump to display the contents of the DWARF
-debug sections.
+  debug sections.
 
 * Add "-t/--section-details" to readelf to display section details.
-"-N/--full-section-name" is deprecated.
+  "-N/--full-section-name" is deprecated.
 
 * powerpc-linux ld now supports a variant form of PLT and GOT for the security
   conscious.  This form will automatically be chosen when ld detects that all
