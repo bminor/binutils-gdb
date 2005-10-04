@@ -50,6 +50,12 @@ Matsushita MN10300 w/simulator			mn10300-*-*
 National Semiconductor NS32000			ns32k-*-*
 NEC V850					v850-*-*
 
+* New "set print array-indexes" command
+
+After turning this setting "on", GDB prints the index of each element
+when displaying arrays.  The default is "off" to preserve the previous
+behavior.
+
 *** Changes in GDB 6.3:
 
 * New command line option
