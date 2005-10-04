@@ -1,3 +1,9 @@
+2005-10-04  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (get_arm_elf_section_data): Cache the last pointer
+	matched so that the typical case of scanning for the previous
+	section to last one can be handled quickly.
+
 2005-10-03  David Heine  <dlheine@tensilica.com>
 
 	* elf32-xtensa.c (relocations_reach): Skip range check for

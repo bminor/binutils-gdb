@@ -6563,10 +6563,32 @@ static _arm_elf_section_data *
 get_arm_elf_section_data (asection * sec)
 {
   struct section_list * entry;
+  static struct section_list * last_entry = NULL;
 
+  /* This is a short cut for the typical case where the sections are added
+     to the sections_with_arm_elf_section_data list in forward order and
+     then looked up here in backwards order.  This makes a real difference
+     to the ld-srec/sec64k.exp linker test.  */
+  if (last_entry != NULL)
+    {
+      if (last_entry->sec == sec)
+	return elf32_arm_section_data (sec);
+
+      if (last_entry->prev != NULL
+	  && last_entry->prev->sec == sec)
+	{
+	  last_entry = last_entry->prev;
+	  return elf32_arm_section_data (sec);
+	}
+    }
+ 
   for (entry = sections_with_arm_elf_section_data; entry; entry = entry->next)
     if (entry->sec == sec)
-      return elf32_arm_section_data (sec);
+      {
+	last_entry = entry;
+	return elf32_arm_section_data (sec);
+      }
+
   return NULL;
 }
 
