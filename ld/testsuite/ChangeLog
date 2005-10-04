@@ -1,3 +1,11 @@
+2005-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1396
+	* ld-scripts/cross3.t: New file.
+	* ld-scripts/cross4.c: Likewise.
+
+	* ld-scripts/crossref.exp: Add a new test for "ld -r".
+
 2005-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/sec64k.exp: Enabled for all ELF targets.

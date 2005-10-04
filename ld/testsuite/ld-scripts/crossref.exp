@@ -19,10 +19,12 @@
 
 set test1 "NOCROSSREFS 1"
 set test2 "NOCROSSREFS 2"
+set test3 "NOCROSSREFS 3"
 
 if { [which $CC] == 0 } {
     untested $test1
     untested $test2
+    untested $test3
     return
 }
 
@@ -93,4 +95,31 @@ if [string match "" $exec_output] then {
     } else {
 	fail $test2
     }
+}
+
+# Check cross references for ld -r
+
+if { ![ld_compile $CC "$srcdir/$subdir/cross4.c" tmpdir/cross4.o] } {
+    unresolved $test3
+    return
+}
+
+if ![ld_relocate $ld tmpdir/cross3-partial.o "tmpdir/cross1.o tmpdir/cross4.o"] {
+    unresolved $test3
+    return
+}
+
+verbose -log "$ld $flags -o tmpdir/cross3 -T $srcdir/$subdir/cross3.t tmpdir/cross3-partial.o tmpdir/cross2.o"
+
+catch "exec $ld $flags -o tmpdir/cross3 -T $srcdir/$subdir/cross3.t tmpdir/cross3-partial.o tmpdir/cross2.o" exec_output
+
+set exec_output [prune_warnings $exec_output]
+
+regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
+
+if [string match "" $exec_output] then {
+    pass $test3
+} else {
+    verbose -log "$exec_output"
+    fail $test3
 }
