@@ -1,5 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
+test -z "${ENTRY}" && ENTRY="_mainCRTStartup"
 if [ -z "$MACHINE" ]; then
   OUTPUT_ARCH=${ARCH}
 else
@@ -143,6 +144,8 @@ gld_${EMULATION_NAME}_before_parse (void)
 #else
   lang_default_entry ("_WinMainCRTStartup");
 #endif
+#else
+  lang_default_entry ("${ENTRY}");
 #endif
 #endif
 }

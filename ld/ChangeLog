@@ -1,3 +1,9 @@
+2005-10-05  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):	Set
+	default entry symbol to ENTRY here.
+	* scripttempl/pe.sc: Not here.
+
 2005-09-30  James E Wilson  <wilson@specifix.com>
 
 	* ldlang.c (lang_startup): Add missing ": " to einfo call.

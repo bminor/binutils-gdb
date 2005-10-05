@@ -50,8 +50,6 @@ ${OUTPUT_ARCH+OUTPUT_ARCH(${OUTPUT_ARCH})}
 
 ${LIB_SEARCH_DIRS}
 
-ENTRY(${ENTRY})
-
 SECTIONS
 {
   ${RELOCATING+/* Make the virtual address and file offset synced if the alignment is}
