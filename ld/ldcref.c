@@ -71,7 +71,7 @@ struct cref_hash_table {
 static void output_one_cref (FILE *, struct cref_hash_entry *);
 static void check_local_sym_xref (lang_input_statement_type *);
 static bfd_boolean check_nocrossref (struct cref_hash_entry *, void *);
-static void check_refs (const char *, asection *, bfd *,
+static void check_refs (const char *, bfd_boolean, asection *, bfd *,
 			struct lang_nocrossrefs *);
 static void check_reloc_refs (bfd *, asection *, void *);
 
@@ -387,7 +387,7 @@ check_local_sym_xref (lang_input_statement_type *statement)
 	  for (ncrs = nocrossref_list; ncrs != NULL; ncrs = ncrs->next)
 	    for (ncr = ncrs->list; ncr != NULL; ncr = ncr->next)
 	      if (strcmp (ncr->name, outsecname) == 0)
-		check_refs (symname, sym->section, abfd, ncrs);
+		check_refs (symname, FALSE, sym->section, abfd, ncrs);
 	}
     }
 
@@ -429,7 +429,8 @@ check_nocrossref (struct cref_hash_entry *h, void *ignore ATTRIBUTE_UNUSED)
     for (ncr = ncrs->list; ncr != NULL; ncr = ncr->next)
       if (strcmp (ncr->name, defsecname) == 0)
 	for (ref = h->refs; ref != NULL; ref = ref->next)
-	  check_refs (hl->root.string, hl->u.def.section, ref->abfd, ncrs);
+	  check_refs (hl->root.string, TRUE, hl->u.def.section,
+		      ref->abfd, ncrs);
 
   return TRUE;
 }
@@ -442,6 +443,7 @@ struct check_refs_info {
   asection *defsec;
   struct lang_nocrossrefs *ncrs;
   asymbol **asymbols;
+  bfd_boolean global;
 };
 
 /* This function is called for each symbol defined in a section which
@@ -451,6 +453,7 @@ struct check_refs_info {
 
 static void
 check_refs (const char *name,
+	    bfd_boolean global,
 	    asection *sec,
 	    bfd *abfd,
 	    struct lang_nocrossrefs *ncrs)
@@ -488,6 +491,7 @@ check_refs (const char *name,
     }
 
   info.sym_name = name;
+  info.global = global;
   info.defsec = sec;
   info.ncrs = ncrs;
   info.asymbols = asymbols;
@@ -513,6 +517,7 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
   const char *outdefsecname;
   struct lang_nocrossref *ncr;
   const char *symname;
+  bfd_boolean global;
   long relsize;
   arelent **relpp;
   long relcount;
@@ -538,9 +543,13 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
   /* This section is one for which cross references are prohibited.
      Look through the relocations, and see if any of them are to
      INFO->SYM_NAME.  If INFO->SYMNAME is NULL, check for relocations
-     against the section symbol.  */
+     against the section symbol.  If INFO->GLOBAL is TRUE, the
+     definition is global, check for relocations against the global
+     symbols.  Otherwise check for relocations against the local and
+     section symbols.  */
 
   symname = info->sym_name;
+  global = info->global;
 
   relsize = bfd_get_reloc_upper_bound (abfd, sec);
   if (relsize < 0)
@@ -561,6 +570,14 @@ check_reloc_refs (bfd *abfd, asection *sec, void *iarg)
 
       if (q->sym_ptr_ptr != NULL
 	  && *q->sym_ptr_ptr != NULL
+	  && ((global
+	       && (bfd_is_und_section (bfd_get_section (*q->sym_ptr_ptr))
+		   || bfd_is_com_section (bfd_get_section (*q->sym_ptr_ptr))
+		   || ((*q->sym_ptr_ptr)->flags & (BSF_GLOBAL
+						   | BSF_WEAK)) != 0))
+	      || (!global
+		  && ((*q->sym_ptr_ptr)->flags & (BSF_LOCAL
+						  | BSF_SECTION_SYM)) != 0))
 	  && (symname != NULL
 	      ? strcmp (bfd_asymbol_name (*q->sym_ptr_ptr), symname) == 0
 	      : (((*q->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0

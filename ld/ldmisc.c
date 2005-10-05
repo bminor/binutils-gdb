@@ -339,7 +339,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 				&& strcmp (last_file, filename) != 0)
 			    || strcmp (last_function, functionname) != 0)
 			  {
-			    lfinfo (fp, _("%B: In function `%T':\n"),
+			    lfinfo (fp, _("%B: In function `%T'"),
 				    abfd, functionname);
 
 			    last_bfd = abfd;
@@ -355,19 +355,19 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 			discard_last = FALSE;
 		      }
 		    else
-		      lfinfo (fp, "%B:", abfd);
+		      lfinfo (fp, "%B", abfd);
 
 		    if (filename != NULL)
-		      fprintf (fp, "%s:", filename);
+		      fprintf (fp, ":%s", filename);
 
 		    if (functionname != NULL && fmt[-1] == 'G')
-		      lfinfo (fp, "%T", functionname);
+		      lfinfo (fp, ":%T", functionname);
 		    else if (filename != NULL)
 		      {
 			if (linenumber != 0)
-			  fprintf (fp, "%u", linenumber);
+			  fprintf (fp, ":%u", linenumber);
 			else
-			  lfinfo (fp, "(%A+0x%v)", section, offset);
+			  lfinfo (fp, ":(%A+0x%v)", section, offset);
 		      }
 		  }
 		else

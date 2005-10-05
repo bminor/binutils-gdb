@@ -1,3 +1,15 @@
+2005-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1396
+	* ldcref.c (check_refs): Accept bfd_boolean.
+	(check_local_sym_xref): Pass FALSE to check_refs.
+	(check_nocrossref): Pass TRUE to check_refs.
+	(check_refs_info): Add bfd_boolean.
+	(check_refs): Add bfd_boolean to check_refs_info.
+	(check_reloc_refs): Match relocations with proper symbols.
+
+	* ldmisc.c (vfinfo): Don't add extra ":\n".
+
 2005-10-05  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_before_parse):	Set
