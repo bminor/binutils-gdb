@@ -36,6 +36,8 @@ SECTION
 	close, closes it and opens the one wanted, returning its file
 	handle.
 
+SUBSECTION
+	Caching functions
 */
 
 #include "bfd.h"

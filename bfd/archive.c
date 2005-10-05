@@ -74,6 +74,8 @@ DESCRIPTION
 
 	Archives are supported in BFD in <<archive.c>>.
 
+SUBSECTION
+	Archive functions
 */
 
 /* Assumes:

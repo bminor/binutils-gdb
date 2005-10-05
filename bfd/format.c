@@ -38,6 +38,8 @@ SECTION
 
 	The BFD contains the result of an executable core dump.
 
+SUBSECTION
+	File format functions
 */
 
 #include "bfd.h"

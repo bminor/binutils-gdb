@@ -23,6 +23,9 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 SECTION
 	Core files
 
+SUBSECTION
+	Core file functions
+
 DESCRIPTION
 	These are functions pertaining to core files.
 */

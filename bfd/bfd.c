@@ -626,7 +626,10 @@ bfd_get_error_handler (void)
 
 /*
 SECTION
-	Symbols
+	Miscellaneous
+
+SUBSECTION
+	Miscellaneous functions
 */
 
 /*

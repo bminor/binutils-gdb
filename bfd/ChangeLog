@@ -1,3 +1,16 @@
+2005-10-04  Bob Wilson  <bob.wilson@acm.org>
+
+	* archive.c: Add missing SUBSECTION for documentation.
+	* bfd.c: Likewise.
+	* cache.c: Likewise.
+	* corefile.c: Likewise.
+	* format.c: Likewise.
+	* init.c: Likewise.
+	* libbfd.c: Likewise.
+	* opncls.c: Likewise.
+	* elf.c: Remove blank line after SECTION heading.
+	* reloc.c: Change "howto manager" SECTION to a SUBSECTION.
+
 2005-10-04  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.c (get_arm_elf_section_data): Cache the last pointer

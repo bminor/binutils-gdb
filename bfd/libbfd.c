@@ -30,6 +30,9 @@
 
 /*
 SECTION
+	Implementation details
+
+SUBSECTION
 	Internal functions
 
 DESCRIPTION

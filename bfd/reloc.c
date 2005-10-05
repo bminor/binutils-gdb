@@ -1581,7 +1581,7 @@ DOCDD
 INODE
 	howto manager,  , typedef arelent, Relocations
 
-SECTION
+SUBSECTION
 	The howto manager
 
 	When an application wants to create a relocation, but doesn't

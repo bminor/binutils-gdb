@@ -124,6 +124,8 @@ _bfd_delete_bfd (bfd *abfd)
 SECTION
 	Opening and closing BFDs
 
+SUBSECTION
+	Functions for opening and closing
 */
 
 /*
