@@ -1629,8 +1629,8 @@ ran_out_of_registers_for_arguments:
   regcache_raw_write_signed (regcache, SP_REGNUM, sp);
 
   /* Set back chain properly.  */
-  store_unsigned_integer (tmp_buffer, 4, saved_sp);
-  write_memory (sp, tmp_buffer, 4);
+  store_unsigned_integer (tmp_buffer, wordsize, saved_sp);
+  write_memory (sp, tmp_buffer, wordsize);
 
   /* Point the inferior function call's return address at the dummy's
      breakpoint.  */
@@ -2241,13 +2241,13 @@ rs6000_create_inferior (int pid)
 
    Usually a function pointer's representation is simply the address
    of the function. On the RS/6000 however, a function pointer is
-   represented by a pointer to a TOC entry. This TOC entry contains
+   represented by a pointer to an OPD entry. This OPD entry contains
    three words, the first word is the address of the function, the
    second word is the TOC pointer (r2), and the third word is the
    static chain value.  Throughout GDB it is currently assumed that a
    function pointer contains the address of the function, which is not
    easy to fix.  In addition, the conversion of a function address to
-   a function pointer would require allocation of a TOC entry in the
+   a function pointer would require allocation of an OPD entry in the
    inferior's memory space, with all its drawbacks.  To be able to
    call C++ virtual methods in the inferior (which are called via
    function pointers), find_function_addr uses this function to get the

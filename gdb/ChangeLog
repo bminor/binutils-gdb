@@ -1,3 +1,10 @@
+2005-10-06  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 1659
+	* rs6000-tdep.c (rs6000_push_dummy_call): Correct size of
+	backchain write.
+	(rs6000_convert_from_func_ptr_addr): Correct comment.
+
 2005-10-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS: Add section for release management.
