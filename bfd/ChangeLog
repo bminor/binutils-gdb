@@ -1,3 +1,26 @@
+2005-10-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_check_relocs): Avoid aliasing warnings from
+	GCC.
+	(elf32_arm_size_dynamic_sections): Likewise.
+	* ecofflink.c (bfd_ecoff_debug_one_external): Likewise.
+	* elf32-hppa.c (elf32_hppa_check_relocs): Likewise.
+	* elf32-m32r.c (m32r_elf_check_relocs): Likewise.
+	* elf32-m68k.c (elf_m68k_check_relocs): Likewise.
+	* elf32-ppc.c (ppc_elf_check_relocs): Likewise.
+	* elf32-s390.c (elf_s390_check_relocs): Likewise.
+	(elf_s390_size_dynamic_sections): Likewise.
+	* elf32-sh.c (sh_elf_check_relocs): Likewise.
+	* elf64-ppc.c (ppc64_elf_check_relocs, dec_dynrel_count)
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	* elf64-s390.c (elf_s390_check_relocs): Likewise.
+	(elf_s390_size_dynamic_sections): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Likewise.
+	(_bfd_sparc_elf_size_dynamic_sections): Likewise.
+	* ieee.c (ieee_slurp_section_data): Likewise.
+	* oasys.c (oasys_slurp_section_data): Likewise.
+
 2005-10-04  Bob Wilson  <bob.wilson@acm.org>
 
 	* archive.c: Add missing SUBSECTION for documentation.

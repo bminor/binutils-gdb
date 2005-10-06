@@ -1381,13 +1381,15 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     easily.  Oh well.  */
 
 		  asection *s;
+		  void *vpp;
+
 		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						 sec, r_symndx);
 		  if (s == NULL)
 		    return FALSE;
 
-		  head = ((struct _bfd_sparc_elf_dyn_relocs **)
-			  &elf_section_data (s)->local_dynrel);
+		  vpp = &elf_section_data (s)->local_dynrel;
+		  head = (struct _bfd_sparc_elf_dyn_relocs **) vpp;
 		}
 
 	      p = *head;
@@ -2071,10 +2073,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  struct _bfd_sparc_elf_dyn_relocs *p;
 
-	  for (p = *((struct _bfd_sparc_elf_dyn_relocs **)
-		     &elf_section_data (s)->local_dynrel);
-	       p != NULL;
-	       p = p->next)
+	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
 	      if (!bfd_is_abs_section (p->sec)
 		  && bfd_is_abs_section (p->sec->output_section))

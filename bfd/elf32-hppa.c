@@ -1446,13 +1446,15 @@ elf32_hppa_check_relocs (bfd *abfd,
 		     easily.  Oh well.  */
 
 		  asection *sr;
+		  void *vpp;
+
 		  sr = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						       sec, r_symndx);
 		  if (sr == NULL)
 		    return FALSE;
 
-		  hdh_head = ((struct elf32_hppa_dyn_reloc_entry **)
-			  &elf_section_data (sr)->local_dynrel);
+		  vpp = &elf_section_data (sr)->local_dynrel;
+		  hdh_head = (struct elf32_hppa_dyn_reloc_entry **) vpp;
 		}
 
 	      hdh_p = *hdh_head;

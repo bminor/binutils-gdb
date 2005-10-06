@@ -1338,10 +1338,14 @@ bfd_ecoff_debug_one_external (abfd, debug, swap, name, esym)
 		- (char *) debug->external_ext)
       < (symhdr->iextMax + 1) * external_ext_size)
     {
-      if (! ecoff_add_bytes ((char **) &debug->external_ext,
-			     (char **) &debug->external_ext_end,
+      char *external_ext = debug->external_ext;
+      char *external_ext_end = debug->external_ext_end;
+      if (! ecoff_add_bytes ((char **) &external_ext,
+			     (char **) &external_ext_end,
 			     (symhdr->iextMax + 1) * (size_t) external_ext_size))
 	return FALSE;
+      debug->external_ext = external_ext;
+      debug->external_ext_end = external_ext_end;
     }
 
   esym->asym.iss = symhdr->issExtMax;

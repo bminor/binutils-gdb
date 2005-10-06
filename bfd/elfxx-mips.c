@@ -7638,7 +7638,11 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_MIPS_TIME_STAMP:
-	      time ((time_t *) &dyn.d_un.d_val);
+	      {
+		time_t t;
+		time (&t);
+		dyn.d_un.d_val = t;
+	      }
 	      break;
 
 	    case DT_MIPS_ICHECKSUM:

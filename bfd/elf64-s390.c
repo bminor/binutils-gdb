@@ -1285,13 +1285,15 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		     easily.  Oh well.  */
 
 		  asection *s;
+		  void *vpp;
+
 		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						 sec, r_symndx);
 		  if (s == NULL)
 		    return FALSE;
 
-		  head = ((struct elf_s390_dyn_relocs **)
-			  &elf_section_data (s)->local_dynrel);
+		  vpp = &elf_section_data (s)->local_dynrel;
+		  head = (struct elf_s390_dyn_relocs **) vpp;
 		}
 
 	      p = *head;
@@ -2009,10 +2011,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	{
 	  struct elf_s390_dyn_relocs *p;
 
-	  for (p = *((struct elf_s390_dyn_relocs **)
-		     &elf_section_data (s)->local_dynrel);
-	       p != NULL;
-	       p = p->next)
+	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
 	      if (!bfd_is_abs_section (p->sec)
 		  && bfd_is_abs_section (p->sec->output_section))

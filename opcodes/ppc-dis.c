@@ -32,11 +32,6 @@ Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, US
 
 static int print_insn_powerpc (bfd_vma, struct disassemble_info *, int, int);
 
-struct dis_private {
-  /* Stash the result of parsing disassembler_options here.  */
-  int dialect;
-};
-
 /* Determine which set of machines to disassemble for.  PPC403/601 or
    BookE.  For convenience, also disassemble instructions supported
    by the AltiVec vector unit.  */
@@ -90,7 +85,7 @@ powerpc_dialect (struct disassemble_info *info)
 	dialect |= PPC_OPCODE_64;
     }
 
-  ((struct dis_private *) &info->private_data)->dialect = dialect;
+  info->private_data = (char *) 0 + dialect;
   return dialect;
 }
 
@@ -99,7 +94,7 @@ powerpc_dialect (struct disassemble_info *info)
 int
 print_insn_big_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
-  int dialect = ((struct dis_private *) &info->private_data)->dialect;
+  int dialect = (char *) info->private_data - (char *) 0;
   return print_insn_powerpc (memaddr, info, 1, dialect);
 }
 
@@ -108,7 +103,7 @@ print_insn_big_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 int
 print_insn_little_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
-  int dialect = ((struct dis_private *) &info->private_data)->dialect;
+  int dialect = (char *) info->private_data - (char *) 0;
   return print_insn_powerpc (memaddr, info, 0, dialect);
 }
 

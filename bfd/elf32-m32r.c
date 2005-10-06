@@ -3993,6 +3993,7 @@ m32r_elf_check_relocs (bfd *abfd,
               else
                 {
                   asection *s;
+                  void *vpp;
 
                   /* Track dynamic relocs needed for local syms too.  */
                   s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
@@ -4000,8 +4001,8 @@ m32r_elf_check_relocs (bfd *abfd,
                   if (s == NULL)
                     return FALSE;
 
-                  head = ((struct elf_m32r_dyn_relocs **)
-                          &elf_section_data (s)->local_dynrel);
+		  vpp = &elf_section_data (s)->local_dynrel;
+                  head = (struct elf_m32r_dyn_relocs **) vpp;
                 }
 
               p = *head;

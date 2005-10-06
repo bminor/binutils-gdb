@@ -1,3 +1,9 @@
+2005-10-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ppc-dis.c (struct dis_private): Remove.
+	(powerpc_dialect): Avoid aliasing warnings.
+	(print_insn_big_powerpc, print_insn_little_powerpc): Likewise.
+
 2005-09-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/ga.po: New Irish translation.

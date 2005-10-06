@@ -5118,13 +5118,15 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		       easily.  Oh well.  */
 
 		    asection *s;
+		    void *vpp;
+
 		    s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						   sec, r_symndx);
 		    if (s == NULL)
 		      return FALSE;
 
-		    head = ((struct elf32_arm_relocs_copied **)
-			    &elf_section_data (s)->local_dynrel);
+		    vpp = &elf_section_data (s)->local_dynrel;
+		    head = (struct elf32_arm_relocs_copied **) vpp;
 		  }
 
 		p = *head;
@@ -5785,10 +5787,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	{
 	  struct elf32_arm_relocs_copied *p;
 
-	  for (p = *((struct elf32_arm_relocs_copied **)
-		     &elf_section_data (s)->local_dynrel);
-	       p != NULL;
-	       p = p->next)
+	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
 	      if (!bfd_is_abs_section (p->section)
 		  && bfd_is_abs_section (p->section->output_section))

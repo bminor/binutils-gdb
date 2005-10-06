@@ -384,11 +384,13 @@ oasys_slurp_section_data (bfd *const abfd)
 
 	    if (! per->initialized)
 	      {
+		arelent **relpp;
+
 		per->data = bfd_zalloc (abfd, section->size);
 		if (!per->data)
 		  return FALSE;
-		per->reloc_tail_ptr
-		  = (oasys_reloc_type **) &section->relocation;
+		relpp = &section->relocation;
+		per->reloc_tail_ptr = (oasys_reloc_type **) relpp;
 		per->had_vma = FALSE;
 		per->initialized = TRUE;
 		section->reloc_count = 0;

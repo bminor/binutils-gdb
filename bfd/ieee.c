@@ -1666,14 +1666,15 @@ ieee_slurp_section_data (bfd *abfd)
   for (s = abfd->sections; s != (asection *) NULL; s = s->next)
     {
       ieee_per_section_type *per = ieee_per_section (s);
+      arelent **relpp;
 
       if ((s->flags & SEC_DEBUGGING) != 0)
 	continue;
       per->data = bfd_alloc (ieee->h.abfd, s->size);
       if (!per->data)
 	return FALSE;
-      per->reloc_tail_ptr =
-	(ieee_reloc_type **) & (s->relocation);
+      relpp = &s->relocation;
+      per->reloc_tail_ptr = (ieee_reloc_type **) relpp;
     }
 
   while (TRUE)

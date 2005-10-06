@@ -4767,13 +4767,15 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     easily.  Oh well.  */
 
 		  asection *s;
+		  void *vpp;
+
 		  s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						 sec, r_symndx);
 		  if (s == NULL)
 		    return FALSE;
 
-		  head = ((struct ppc_dyn_relocs **)
-			  &elf_section_data (s)->local_dynrel);
+		  vpp = &elf_section_data (s)->local_dynrel;
+		  head = (struct ppc_dyn_relocs **) vpp;
 		}
 
 	      p = *head;
@@ -6119,9 +6121,15 @@ dec_dynrel_count (bfd_vma r_info,
   if (h != NULL)
     pp = &((struct ppc_link_hash_entry *) h)->dyn_relocs;
   else if (sym_sec != NULL)
-    pp = (struct ppc_dyn_relocs **) &elf_section_data (sym_sec)->local_dynrel;
+    {
+      void *vpp = &elf_section_data (sym_sec)->local_dynrel;
+      pp = (struct ppc_dyn_relocs **) vpp;
+    }
   else
-    pp = (struct ppc_dyn_relocs **) &elf_section_data (sec)->local_dynrel;
+    {
+      void *vpp = &elf_section_data (sec)->local_dynrel;
+      pp = (struct ppc_dyn_relocs **) vpp;
+    }
 
   while ((p = *pp) != NULL)
     {
@@ -7638,10 +7646,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  struct ppc_dyn_relocs *p;
 
-	  for (p = *((struct ppc_dyn_relocs **)
-		     &elf_section_data (s)->local_dynrel);
-	       p != NULL;
-	       p = p->next)
+	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
 	      if (!bfd_is_abs_section (p->sec)
 		  && bfd_is_abs_section (p->sec->output_section))

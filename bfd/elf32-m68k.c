@@ -745,14 +745,16 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		  else
 		    {
 		      asection *s;
+		      void *vpp;
+
 		      s = (bfd_section_from_r_symndx
 			   (abfd, &elf_m68k_hash_table (info)->sym_sec,
 			    sec, r_symndx));
 		      if (s == NULL)
 			return FALSE;
 
-		      head = ((struct elf_m68k_pcrel_relocs_copied **)
-			      &elf_section_data (s)->local_dynrel);
+		      vpp = &elf_section_data (s)->local_dynrel;
+		      head = (struct elf_m68k_pcrel_relocs_copied **) vpp;
 		    }
 
 		  for (p = *head; p != NULL; p = p->next)
