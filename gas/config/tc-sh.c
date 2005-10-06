@@ -134,7 +134,11 @@ int sh_small;
 
 static int dont_adjust_reloc_32;
 
-/* preset architecture set, if given; zero otherwise.  */
+/* Flag to indicate that '$' is allowed as a register prefix.  */
+
+static int allow_dollar_register_prefix;
+
+/* Preset architecture set, if given; zero otherwise.  */
 
 static unsigned int preset_target_arch;
 
@@ -869,8 +873,8 @@ static int reg_b;
 
 /* Try to parse a reg name.  Return the number of chars consumed.  */
 
-static int
-parse_reg (char *src, int *mode, int *reg)
+static unsigned int
+parse_reg_without_prefix (char *src, int *mode, int *reg)
 {
   char l0 = TOLOWER (src[0]);
   char l1 = l0 ? TOLOWER (src[1]) : 0;
@@ -1223,6 +1227,36 @@ parse_reg (char *src, int *mode, int *reg)
     }
 
   return 0;
+}
+
+/* Like parse_reg_without_prefix, but this version supports
+   $-prefixed register names if enabled by the user.  */
+
+static unsigned int
+parse_reg (char *src, int *mode, int *reg)
+{
+  unsigned int prefix;
+  unsigned int consumed;
+
+  if (src[0] == '$')
+    {
+      if (allow_dollar_register_prefix)
+	{
+	  src ++;
+	  prefix = 1;
+	}
+      else
+	return 0;
+    }
+  else
+    prefix = 0;
+  
+  consumed = parse_reg_without_prefix (src, mode, reg);
+
+  if (consumed == 0)
+    return 0;
+
+  return consumed + prefix;
 }
 
 static char *
@@ -3005,31 +3039,39 @@ s_uses (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+enum options
+{
+  OPTION_RELAX = OPTION_MD_BASE,
+  OPTION_BIG,
+  OPTION_LITTLE,
+  OPTION_SMALL,
+  OPTION_DSP,
+  OPTION_ISA,
+  OPTION_RENESAS,
+  OPTION_ALLOW_REG_PREFIX,
+#ifdef HAVE_SH64
+  OPTION_ABI,
+  OPTION_NO_MIX,
+  OPTION_SHCOMPACT_CONST_CRANGE,
+  OPTION_NO_EXPAND,
+  OPTION_PT32,
+#endif
+  OPTION_DUMMY  /* Not used.  This is just here to make it easy to add and subtract options from this enum.  */
+};
+
 const char *md_shortopts = "";
 struct option md_longopts[] =
 {
-#define OPTION_RELAX  (OPTION_MD_BASE)
-#define OPTION_BIG (OPTION_MD_BASE + 1)
-#define OPTION_LITTLE (OPTION_BIG + 1)
-#define OPTION_SMALL (OPTION_LITTLE + 1)
-#define OPTION_DSP (OPTION_SMALL + 1)
-#define OPTION_ISA                    (OPTION_DSP + 1)
-#define OPTION_RENESAS (OPTION_ISA + 1)
-
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"big", no_argument, NULL, OPTION_BIG},
   {"little", no_argument, NULL, OPTION_LITTLE},
   {"small", no_argument, NULL, OPTION_SMALL},
   {"dsp", no_argument, NULL, OPTION_DSP},
-  {"isa",                    required_argument, NULL, OPTION_ISA},
+  {"isa", required_argument, NULL, OPTION_ISA},
   {"renesas", no_argument, NULL, OPTION_RENESAS},
+  {"allow-reg-prefix", no_argument, NULL, OPTION_ALLOW_REG_PREFIX},
 
 #ifdef HAVE_SH64
-#define OPTION_ABI                    (OPTION_RENESAS + 1)
-#define OPTION_NO_MIX                 (OPTION_ABI + 1)
-#define OPTION_SHCOMPACT_CONST_CRANGE (OPTION_NO_MIX + 1)
-#define OPTION_NO_EXPAND              (OPTION_SHCOMPACT_CONST_CRANGE + 1)
-#define OPTION_PT32                   (OPTION_NO_EXPAND + 1)
   {"abi",                    required_argument, NULL, OPTION_ABI},
   {"no-mix",                 no_argument, NULL, OPTION_NO_MIX},
   {"shcompact-const-crange", no_argument, NULL, OPTION_SHCOMPACT_CONST_CRANGE},
@@ -3070,6 +3112,10 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       dont_adjust_reloc_32 = 1;
       break;
 
+    case OPTION_ALLOW_REG_PREFIX:
+      allow_dollar_register_prefix = 1;
+      break;
+
     case OPTION_ISA:
       if (strcasecmp (arg, "dsp") == 0)
 	preset_target_arch = arch_sh_up & ~(arch_sh_sp_fpu|arch_sh_dp_fpu);
@@ -3097,6 +3143,7 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 	{
 	  extern const bfd_arch_info_type bfd_sh_arch;
 	  bfd_arch_info_type const *bfd_arch = &bfd_sh_arch;
+
 	  preset_target_arch = 0;
 	  for (; bfd_arch; bfd_arch=bfd_arch->next)
 	    {
@@ -3173,19 +3220,21 @@ md_show_usage (FILE *stream)
 {
   fprintf (stream, _("\
 SH options:\n\
--little			generate little endian code\n\
--big			generate big endian code\n\
--relax			alter jump instructions for long displacements\n\
--renesas		disable optimization with section symbol for\n\
+--little		generate little endian code\n\
+--big			generate big endian code\n\
+--relax			alter jump instructions for long displacements\n\
+--renesas		disable optimization with section symbol for\n\
 			compatibility with Renesas assembler.\n\
--small			align sections to 4 byte boundaries, not 16\n\
--dsp			enable sh-dsp insns, and disable floating-point ISAs.\n\
--isa=[any		use most appropriate isa\n\
+--small			align sections to 4 byte boundaries, not 16\n\
+--dsp			enable sh-dsp insns, and disable floating-point ISAs.\n\
+--allow-reg-prefix	allow '$' as a register name prefix.\n\
+--isa=[any		use most appropriate isa\n\
     | dsp               same as '-dsp'\n\
     | fp"));
   {
     extern const bfd_arch_info_type bfd_sh_arch;
     bfd_arch_info_type const *bfd_arch = &bfd_sh_arch;
+
     for (; bfd_arch; bfd_arch=bfd_arch->next)
       if (bfd_arch->mach != bfd_mach_sh5)
 	{
@@ -3196,19 +3245,19 @@ SH options:\n\
   fprintf (stream, "]\n");
 #ifdef HAVE_SH64
   fprintf (stream, _("\
--isa=[shmedia		set as the default instruction set for SH64\n\
+--isa=[shmedia		set as the default instruction set for SH64\n\
     | SHmedia\n\
     | shcompact\n\
     | SHcompact]\n"));
   fprintf (stream, _("\
--abi=[32|64]		set size of expanded SHmedia operands and object\n\
+--abi=[32|64]		set size of expanded SHmedia operands and object\n\
 			file type\n\
--shcompact-const-crange	emit code-range descriptors for constants in\n\
+--shcompact-const-crange  emit code-range descriptors for constants in\n\
 			SHcompact code sections\n\
--no-mix			disallow SHmedia code in the same section as\n\
+--no-mix		disallow SHmedia code in the same section as\n\
 			constants and SHcompact code\n\
--no-expand		do not expand MOVI, PT, PTA or PTB instructions\n\
--expand-pt32		with -abi=64, expand PT, PTA and PTB instructions\n\
+--no-expand		do not expand MOVI, PT, PTA or PTB instructions\n\
+--expand-pt32		with -abi=64, expand PT, PTA and PTB instructions\n\
 			to 32 bits only\n"));
 #endif /* HAVE_SH64 */
 }
@@ -4263,7 +4312,7 @@ sh_parse_name (char const *name, expressionS *exprP, char *nextcharP)
       exprP->X_add_symbol = GOT_symbol;
     no_suffix:
       /* If we have an absolute symbol or a reg, then we know its
-	     value now.  */
+	 value now.  */
       segment = S_GET_SEGMENT (exprP->X_add_symbol);
       if (segment == absolute_section)
 	{

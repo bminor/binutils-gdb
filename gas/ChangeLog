@@ -1,3 +1,14 @@
+2005-10-06  Khem Raj  <kraj@mvista.com>
+            NIIBE Yutaka  <gniibe@m17n.org>
+
+	* config/tc-sh.c (allow_dollar_register_prefix): New variable.
+	(parse_reg_without_prefix): New function.
+	(parse_reg): Check for '$' register prefix if --allow-reg-prefix is
+	set.
+	(option md_longopts): Add allow-reg-prefix option.
+	* doc/c-sh.texi: Document --allow-reg-prefix option.
+	* NEWS: Mention the new switch.
+
 2005-10-03  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* doc/as.texinfo (Infix Ops):  '<' and '>' are not shift
