@@ -92,6 +92,11 @@ extern int arm_relax_frag (asection *, struct frag *, long);
 /* We also need to mark assembler created symbols:  */
 #define tc_frob_fake_label(S) arm_frob_label (S)
 
+#ifdef OBJ_ELF
+#define md_end arm_md_end
+extern void arm_md_end (void);
+#endif
+
 /* NOTE: The fake label creation in stabs.c:s_stab_generic() has
    deliberately not been updated to mark assembler created stabs
    symbols as Thumb.  */

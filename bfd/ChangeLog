@@ -1,3 +1,22 @@
+2005-10-08  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c: Move #include "elf/arm.h" after libbfd.h.
+	(NUM_KNOWN_ATTRIBUTES): Define.
+	(aeabi_attribute, aeabi_attribute_list): Define.
+	(elf32_arm_obj_tdata): Add known_eabi_attributes and
+	other_eabi_attributes.
+	(uleb128_size, is_default_attr, eabi_attr_size,
+	elf32_arm_eabi_attr_size, write_uleb128, write_eabi_attribute,
+	elf32_arm_set_eabi_attr_contents, elf32_arm_bfd_final_link,
+	elf32_arm_new_eabi_attr, attr_strdup, elf32_arm_add_eabi_attr_int,
+	elf32_arm_add_eabi_attr_compat, copy_eabi_attributes,
+	elf32_arm_merge_eabi_attributes): New functions.
+	(elf32_arm_copy_private_bfd_data): Copy EABI object attributes.
+	(elf32_arm_fake_sections): Handle .ARM.attributes.
+	(elf32_arm_parse_attributes): New function.
+	(elf32_arm_section_from_shdr): Use it.
+	(bfd_elf32_bfd_final_link): Define.
+
 2005-10-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_check_relocs): Avoid aliasing warnings from

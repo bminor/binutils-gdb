@@ -115,8 +115,6 @@ enum arm_float_abi
 #else
 #if defined __thumb__
 #define CPU_DEFAULT	(ARM_ARCH_V5T)
-#else
-#define CPU_DEFAULT	ARM_ANY
 #endif
 #endif
 #endif
@@ -142,6 +140,8 @@ enum arm_float_abi
 #define streq(a, b)	      (strcmp (a, b) == 0)
 
 static unsigned long cpu_variant;
+static unsigned long arm_arch_used;
+static unsigned long thumb_arch_used;
 
 /* Flags stored in private area of BFD structure.  */
 static int uses_apcs_26	     = FALSE;
@@ -162,6 +162,11 @@ static int march_cpu_opt = -1;
 static int march_fpu_opt = -1;
 static int mfpu_opt = -1;
 static int mfloat_abi_opt = -1;
+/* Record user cpu selection for object attributes.
+   Zero if no default or user specified CPU.  */
+static int selected_cpu = -1;
+/* Must be long enough to hold any of the names in arm_cpus.  */
+static char selected_cpu_name[16];
 #ifdef OBJ_ELF
 # ifdef EABI_DEFAULT
 static int meabi_flags = EABI_DEFAULT;
@@ -2790,6 +2795,96 @@ s_arm_unwind_raw (int ignored ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 }
+
+
+/* Parse a .eabi_attribute directive.  */
+
+static void
+s_arm_eabi_attribute (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+  bfd_boolean is_string;
+  int tag;
+  unsigned int i = 0;
+  char *s = NULL;
+  char saved_char;
+
+  expression (& exp);
+  if (exp.X_op != O_constant)
+    goto bad;
+
+  tag = exp.X_add_number;
+  if (tag == 4 || tag == 5 || tag == 32 || (tag > 32 && (tag & 1) != 0))
+    is_string = 1;
+  else
+    is_string = 0;
+
+  if (skip_past_comma (&input_line_pointer) == FAIL)
+    goto bad;
+  if (tag == 32 || !is_string)
+    {
+      expression (& exp);
+      if (exp.X_op != O_constant)
+	{
+	  as_bad (_("expected numeric constant"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+      i = exp.X_add_number;
+    }
+  if (tag == Tag_compatibility
+      && skip_past_comma (&input_line_pointer) == FAIL)
+    {
+      as_bad (_("expected comma"));
+      ignore_rest_of_line ();
+      return;
+    }
+  if (is_string)
+    {
+      skip_whitespace(input_line_pointer);
+      if (*input_line_pointer != '"')
+	goto bad_string;
+      input_line_pointer++;
+      s = input_line_pointer;
+      while (*input_line_pointer && *input_line_pointer != '"')
+	input_line_pointer++;
+      if (*input_line_pointer != '"')
+	goto bad_string;
+      saved_char = *input_line_pointer;
+      *input_line_pointer = 0;
+    }
+  else
+    {
+      s = NULL;
+      saved_char = 0;
+    }
+  
+  if (tag == Tag_compatibility)
+    elf32_arm_add_eabi_attr_compat (stdoutput, i, s);
+  else if (is_string)
+    elf32_arm_add_eabi_attr_string (stdoutput, tag, s);
+  else
+    elf32_arm_add_eabi_attr_int (stdoutput, tag, i);
+
+  if (s)
+    {
+      *input_line_pointer = saved_char;
+      input_line_pointer++;
+    }
+  demand_empty_rest_of_line ();
+  return;
+bad_string:
+  as_bad (_("bad string constant"));
+  ignore_rest_of_line ();
+  return;
+bad:
+  as_bad (_("expected <tag> , <value>"));
+  ignore_rest_of_line ();
+}
+
+static void s_arm_arch (int);
+static void s_arm_cpu (int);
+static void s_arm_fpu (int);
 #endif /* OBJ_ELF */
 
 /* This table describes all the machine specific pseudo-ops the assembler
@@ -2830,6 +2925,10 @@ const pseudo_typeS md_pseudo_table[] =
   { "pad",		s_arm_unwind_pad,	0 },
   { "setfp",		s_arm_unwind_setfp,	0 },
   { "unwind_raw",	s_arm_unwind_raw,	0 },
+  { "cpu",		s_arm_cpu,		0 },
+  { "arch",		s_arm_arch,		0 },
+  { "fpu",		s_arm_fpu,		0 },
+  { "eabi_attribute",	s_arm_eabi_attribute,	0 },
 #else
   { "word",	   cons, 4},
 #endif
@@ -8010,6 +8109,14 @@ md_assemble (char *str)
 	      return;
 	    }
 	}
+      thumb_arch_used |= opcode->tvariant;
+      /* Many Thumb-2 instructions also have Thumb-1 variants, so explicitly
+         set those bits when Thumb-2 32-bit instuctions are seen.  ie.
+	 anything other than bl/blx.
+	 This is overly pessimistic for relaxable instructions.  */
+      if ((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
+	  || inst.relax)
+	thumb_arch_used |= ARM_EXT_V6T2;
     }
   else
     {
@@ -8034,6 +8141,12 @@ md_assemble (char *str)
       inst.size = INSN_SIZE;
       if (!parse_operands (p, opcode->operands))
 	opcode->aencode ();
+      /* Arm mode bx is marked as both v4T and v5 because it's still required
+         on a hypothetical non-thumb v5 core.  */
+      if (opcode->avariant == (ARM_EXT_V4T | ARM_EXT_V5))
+	arm_arch_used |= ARM_EXT_V4T;
+      else
+	arm_arch_used |= opcode->avariant;
     }
   output_inst (str);
 }
@@ -12279,10 +12392,22 @@ md_begin (void)
 	mfpu_opt = FPU_ARCH_FPA;
     }
 
+#ifdef CPU_DEFAULT
   if (mcpu_cpu_opt == -1)
-    mcpu_cpu_opt = CPU_DEFAULT;
+    selected_cpu = mcpu_cpu_opt = CPU_DEFAULT;
+#else
+  if (mcpu_cpu_opt == -1)
+    {
+      mcpu_cpu_opt = ARM_ANY;
+      selected_cpu = 0;
+    }
+  else
+    selected_cpu = mcpu_cpu_opt;
+#endif
 
   cpu_variant = mcpu_cpu_opt | mfpu_opt;
+
+  arm_arch_used = thumb_arch_used = 0;
 
 #if defined OBJ_COFF || defined OBJ_ELF
   {
@@ -12641,97 +12766,100 @@ struct arm_cpu_option_table
   /* For some CPUs we assume an FPU unless the user explicitly sets
      -mfpu=...	*/
   int	default_fpu;
+  /* The canonical name of the CPU, or NULL to use NAME converted to upper
+     case.  */
+  const char *canonical_name;
 };
 
 /* This list should, at a minimum, contain all the cpu names
    recognized by GCC.  */
 static struct arm_cpu_option_table arm_cpus[] =
 {
-  {"all",		ARM_ANY,	 FPU_ARCH_FPA},
-  {"arm1",		ARM_ARCH_V1,	 FPU_ARCH_FPA},
-  {"arm2",		ARM_ARCH_V2,	 FPU_ARCH_FPA},
-  {"arm250",		ARM_ARCH_V2S,	 FPU_ARCH_FPA},
-  {"arm3",		ARM_ARCH_V2S,	 FPU_ARCH_FPA},
-  {"arm6",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm60",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm600",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm610",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm620",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm7",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm7m",		ARM_ARCH_V3M,	 FPU_ARCH_FPA},
-  {"arm7d",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm7dm",		ARM_ARCH_V3M,	 FPU_ARCH_FPA},
-  {"arm7di",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm7dmi",		ARM_ARCH_V3M,	 FPU_ARCH_FPA},
-  {"arm70",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm700",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm700i",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm710",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm710t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm720",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm720t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm740t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm710c",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm7100",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm7500",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm7500fe",		ARM_ARCH_V3,	 FPU_ARCH_FPA},
-  {"arm7t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm7tdmi",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm7tdmi-s",	ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm8",		ARM_ARCH_V4,	 FPU_ARCH_FPA},
-  {"arm810",		ARM_ARCH_V4,	 FPU_ARCH_FPA},
-  {"strongarm",		ARM_ARCH_V4,	 FPU_ARCH_FPA},
-  {"strongarm1",	ARM_ARCH_V4,	 FPU_ARCH_FPA},
-  {"strongarm110",	ARM_ARCH_V4,	 FPU_ARCH_FPA},
-  {"strongarm1100",	ARM_ARCH_V4,	 FPU_ARCH_FPA},
-  {"strongarm1110",	ARM_ARCH_V4,	 FPU_ARCH_FPA},
-  {"arm9",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm920",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm920t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm922t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm940t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
-  {"arm9tdmi",		ARM_ARCH_V4T,	 FPU_ARCH_FPA},
+  {"all",		ARM_ANY,	 FPU_ARCH_FPA,    NULL},
+  {"arm1",		ARM_ARCH_V1,	 FPU_ARCH_FPA,    NULL},
+  {"arm2",		ARM_ARCH_V2,	 FPU_ARCH_FPA,    NULL},
+  {"arm250",		ARM_ARCH_V2S,	 FPU_ARCH_FPA,    NULL},
+  {"arm3",		ARM_ARCH_V2S,	 FPU_ARCH_FPA,    NULL},
+  {"arm6",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm60",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm600",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm610",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm620",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm7",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm7m",		ARM_ARCH_V3M,	 FPU_ARCH_FPA,    NULL},
+  {"arm7d",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm7dm",		ARM_ARCH_V3M,	 FPU_ARCH_FPA,    NULL},
+  {"arm7di",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm7dmi",		ARM_ARCH_V3M,	 FPU_ARCH_FPA,    NULL},
+  {"arm70",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm700",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm700i",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm710",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm710t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm720",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm720t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm740t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm710c",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm7100",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm7500",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm7500fe",		ARM_ARCH_V3,	 FPU_ARCH_FPA,    NULL},
+  {"arm7t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm7tdmi",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm7tdmi-s",	ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm8",		ARM_ARCH_V4,	 FPU_ARCH_FPA,    NULL},
+  {"arm810",		ARM_ARCH_V4,	 FPU_ARCH_FPA,    NULL},
+  {"strongarm",		ARM_ARCH_V4,	 FPU_ARCH_FPA,    NULL},
+  {"strongarm1",	ARM_ARCH_V4,	 FPU_ARCH_FPA,    NULL},
+  {"strongarm110",	ARM_ARCH_V4,	 FPU_ARCH_FPA,    NULL},
+  {"strongarm1100",	ARM_ARCH_V4,	 FPU_ARCH_FPA,    NULL},
+  {"strongarm1110",	ARM_ARCH_V4,	 FPU_ARCH_FPA,    NULL},
+  {"arm9",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm920",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    "ARM920T"},
+  {"arm920t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm922t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm940t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
+  {"arm9tdmi",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,	  NULL},
   /* For V5 or later processors we default to using VFP; but the user
      should really set the FPU type explicitly.	 */
-  {"arm9e-r0",		ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
-  {"arm9e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm926ej",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
-  {"arm926ejs",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
-  {"arm926ej-s",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
-  {"arm946e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
-  {"arm946e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm946e-s",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm966e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2},
-  {"arm966e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm966e-s",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm968e-s",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm10t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1},
-  {"arm10tdmi",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1},
-  {"arm10e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm1020",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm1020t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1},
-  {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm1022e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2},
-  {"arm1026ejs",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
-  {"arm1026ej-s",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2},
-  {"arm1136js",		ARM_ARCH_V6,	 FPU_NONE},
-  {"arm1136j-s",	ARM_ARCH_V6,	 FPU_NONE},
-  {"arm1136jfs",	ARM_ARCH_V6,	 FPU_ARCH_VFP_V2},
-  {"arm1136jf-s",	ARM_ARCH_V6,	 FPU_ARCH_VFP_V2},
-  {"mpcore",		ARM_ARCH_V6K,	 FPU_ARCH_VFP_V2},
-  {"mpcorenovfp",	ARM_ARCH_V6K,	 FPU_NONE},
-  {"arm1156t2-s",	ARM_ARCH_V6T2,	 FPU_NONE},
-  {"arm1156t2f-s",	ARM_ARCH_V6T2,	 FPU_ARCH_VFP_V2},
-  {"arm1176jz-s",	ARM_ARCH_V6ZK,	 FPU_NONE},
-  {"arm1176jzf-s",	ARM_ARCH_V6ZK,	 FPU_ARCH_VFP_V2},
+  {"arm9e-r0",		ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2, NULL},
+  {"arm9e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm926ej",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, "ARM926EJ-S"},
+  {"arm926ejs",		ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, "ARM926EJ-S"},
+  {"arm926ej-s",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm946e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2, NULL},
+  {"arm946e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, "ARM946E-S"},
+  {"arm946e-s",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm966e-r0",	ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2, NULL},
+  {"arm966e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, "ARM966E-S"},
+  {"arm966e-s",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm968e-s",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm10t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1, NULL},
+  {"arm10tdmi",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1, NULL},
+  {"arm10e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm1020",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, "ARM1020E"},
+  {"arm1020t",		ARM_ARCH_V5T,	 FPU_ARCH_VFP_V1, NULL},
+  {"arm1020e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm1022e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm1026ejs",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, "ARM1026EJ-S"},
+  {"arm1026ej-s",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm1136js",		ARM_ARCH_V6,	 FPU_NONE,	  "ARM1136J-S"},
+  {"arm1136j-s",	ARM_ARCH_V6,	 FPU_NONE,	  NULL},
+  {"arm1136jfs",	ARM_ARCH_V6,	 FPU_ARCH_VFP_V2, "ARM1136JF-S"},
+  {"arm1136jf-s",	ARM_ARCH_V6,	 FPU_ARCH_VFP_V2, NULL},
+  {"mpcore",		ARM_ARCH_V6K,	 FPU_ARCH_VFP_V2, NULL},
+  {"mpcorenovfp",	ARM_ARCH_V6K,	 FPU_NONE,	  NULL},
+  {"arm1156t2-s",	ARM_ARCH_V6T2,	 FPU_NONE,	  NULL},
+  {"arm1156t2f-s",	ARM_ARCH_V6T2,	 FPU_ARCH_VFP_V2, NULL},
+  {"arm1176jz-s",	ARM_ARCH_V6ZK,	 FPU_NONE,	  NULL},
+  {"arm1176jzf-s",	ARM_ARCH_V6ZK,	 FPU_ARCH_VFP_V2, NULL},
   /* ??? XSCALE is really an architecture.  */
-  {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
+  {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL},
   /* ??? iwmmxt is not a processor.  */
-  {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP_V2},
-  {"i80200",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
+  {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP_V2, NULL},
+  {"i80200",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL},
   /* Maverick */
-  {"ep9312",		ARM_ARCH_V4T | ARM_CEXT_MAVERICK, FPU_ARCH_MAVERICK},
-  {NULL, 0, 0}
+  {"ep9312",	ARM_ARCH_V4T | ARM_CEXT_MAVERICK, FPU_ARCH_MAVERICK, "ARM920T"},
+  {NULL, 0, 0, NULL}
 };
 
 struct arm_arch_option_table
@@ -12915,6 +13043,15 @@ arm_parse_cpu (char * str)
       {
 	mcpu_cpu_opt = opt->value;
 	mcpu_fpu_opt = opt->default_fpu;
+	if (opt->canonical_name)
+	  strcpy(selected_cpu_name, opt->canonical_name);
+	else
+	  {
+	    int i;
+	    for (i = 0; i < optlen; i++)
+	      selected_cpu_name[i] = TOUPPER (opt->name[i]);
+	    selected_cpu_name[i] = 0;
+	  }
 
 	if (ext != NULL)
 	  return arm_parse_extension (ext, &mcpu_cpu_opt);
@@ -12944,12 +13081,12 @@ arm_parse_arch (char * str)
       return 0;
     }
 
-
   for (opt = arm_archs; opt->name != NULL; opt++)
     if (streq (opt->name, str))
       {
 	march_cpu_opt = opt->value;
 	march_fpu_opt = opt->default_fpu;
+	strcpy(selected_cpu_name, opt->name);
 
 	if (ext != NULL)
 	  return arm_parse_extension (ext, &march_cpu_opt);
@@ -13125,3 +13262,198 @@ md_show_usage (FILE * fp)
   -EL                     assemble code for a little-endian cpu\n"));
 #endif
 }
+
+
+#ifdef OBJ_ELF
+/* Set the public EABI object attributes.  */
+static void
+aeabi_set_public_attributes (void)
+{
+  int arch;
+  int flags;
+
+  /* Choose the architecture based on the capabilities of the requested cpu
+     (if any) and/or the instructions actually used.  */
+  flags = mcpu_cpu_opt | arm_arch_used | thumb_arch_used;
+  if (flags & ARM_EXT_V6T2)
+    arch = 8;
+  else if (flags & ARM_EXT_V6Z)
+    arch = 7;
+  else if (flags & ARM_EXT_V6K)
+    arch = 9;
+  else if (flags & ARM_EXT_V6)
+    arch = 6;
+  else if (flags & ARM_EXT_V5E)
+    arch = 4;
+  else if (flags & (ARM_EXT_V5 | ARM_EXT_V5T))
+    arch = 3;
+  else if (flags & ARM_EXT_V4T)
+    arch = 2;
+  else if (flags & ARM_EXT_V4)
+    arch = 1;
+  else
+    arch = 0;
+
+  /* Tag_CPU_name.  */
+  if (selected_cpu_name[0])
+    {
+      char *p;
+
+      p = selected_cpu_name;
+      if (strncmp(p, "armv", 4) == 0)
+	{
+	  int i;
+	  
+	  p += 4;
+	  for (i = 0; p[i]; i++)
+	    p[i] = TOUPPER (p[i]);
+	}
+      elf32_arm_add_eabi_attr_string (stdoutput, 5, p);
+    }
+  /* Tag_CPU_arch.  */
+  elf32_arm_add_eabi_attr_int (stdoutput, 6, arch);
+  /* Tag_ARM_ISA_use.  */
+  if (arm_arch_used)
+    elf32_arm_add_eabi_attr_int (stdoutput, 8, 1);
+  /* Tag_THUMB_ISA_use.  */
+  if (thumb_arch_used)
+    elf32_arm_add_eabi_attr_int (stdoutput, 9,
+				 (thumb_arch_used & ARM_EXT_V6T2) ? 2 : 1);
+  /* Tag_VFP_arch.  */
+  if ((arm_arch_used | thumb_arch_used) & FPU_ARCH_VFP_V2)
+    elf32_arm_add_eabi_attr_int (stdoutput, 10, 2);
+  else if ((arm_arch_used | thumb_arch_used) & FPU_ARCH_VFP_V1)
+    elf32_arm_add_eabi_attr_int (stdoutput, 10, 1);
+  /* Tag_WMMX_arch.  */
+  if ((arm_arch_used | thumb_arch_used) & ARM_CEXT_IWMMXT)
+    elf32_arm_add_eabi_attr_int (stdoutput, 11, 1);
+}
+
+/* Add the .ARM.attributes section.  */
+void
+arm_md_end (void)
+{
+  segT s;
+  char *p;
+  addressT addr;
+  offsetT size;
+  
+  if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
+    return;
+
+  aeabi_set_public_attributes ();
+  size = elf32_arm_eabi_attr_size (stdoutput);
+  s = subseg_new (".ARM.attributes", 0);
+  bfd_set_section_flags (stdoutput, s, SEC_READONLY | SEC_DATA);
+  addr = frag_now_fix ();
+  p = frag_more (size);
+  elf32_arm_set_eabi_attr_contents (stdoutput, (bfd_byte *)p, size);
+}
+
+
+/* Parse a .cpu directive.  */
+
+static void
+s_arm_cpu (int ignored ATTRIBUTE_UNUSED)
+{
+  struct arm_cpu_option_table *opt;
+  char *name;
+  char saved_char;
+
+  name = input_line_pointer;
+  while (*input_line_pointer && !ISSPACE(*input_line_pointer))
+    input_line_pointer++;
+  saved_char = *input_line_pointer;
+  *input_line_pointer = 0;
+
+  /* Skip the first "all" entry.  */
+  for (opt = arm_cpus + 1; opt->name != NULL; opt++)
+    if (streq (opt->name, name))
+      {
+	mcpu_cpu_opt = opt->value;
+	selected_cpu = mcpu_cpu_opt;
+	if (opt->canonical_name)
+	  strcpy(selected_cpu_name, opt->canonical_name);
+	else
+	  {
+	    int i;
+	    for (i = 0; opt->name[i]; i++)
+	      selected_cpu_name[i] = TOUPPER (opt->name[i]);
+	    selected_cpu_name[i] = 0;
+	  }
+	cpu_variant = mcpu_cpu_opt | mfpu_opt;
+	*input_line_pointer = saved_char;
+	demand_empty_rest_of_line ();
+	return;
+      }
+  as_bad (_("unknown cpu `%s'"), name);
+  *input_line_pointer = saved_char;
+  ignore_rest_of_line ();
+}
+
+
+/* Parse a .arch directive.  */
+
+static void
+s_arm_arch (int ignored ATTRIBUTE_UNUSED)
+{
+  struct arm_arch_option_table *opt;
+  char saved_char;
+  char *name;
+
+  name = input_line_pointer;
+  while (*input_line_pointer && !ISSPACE(*input_line_pointer))
+    input_line_pointer++;
+  saved_char = *input_line_pointer;
+  *input_line_pointer = 0;
+
+  /* Skip the first "all" entry.  */
+  for (opt = arm_archs + 1; opt->name != NULL; opt++)
+    if (streq (opt->name, name))
+      {
+	mcpu_cpu_opt = opt->value;
+	selected_cpu = mcpu_cpu_opt;
+	strcpy(selected_cpu_name, opt->name);
+	cpu_variant = mcpu_cpu_opt | mfpu_opt;
+	*input_line_pointer = saved_char;
+	demand_empty_rest_of_line ();
+	return;
+      }
+
+  as_bad (_("unknown architecture `%s'\n"), name);
+  *input_line_pointer = saved_char;
+  ignore_rest_of_line ();
+}
+
+
+/* Parse a .fpu directive.  */
+
+static void
+s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
+{
+  struct arm_option_value_table *opt;
+  char saved_char;
+  char *name;
+
+  name = input_line_pointer;
+  while (*input_line_pointer && !ISSPACE(*input_line_pointer))
+    input_line_pointer++;
+  saved_char = *input_line_pointer;
+  *input_line_pointer = 0;
+  
+  for (opt = arm_fpus; opt->name != NULL; opt++)
+    if (streq (opt->name, name))
+      {
+	mfpu_opt = opt->value;
+	cpu_variant = mcpu_cpu_opt | mfpu_opt;
+	*input_line_pointer = saved_char;
+	demand_empty_rest_of_line ();
+	return;
+      }
+
+  as_bad (_("unknown floating point format `%s'\n"), name);
+  *input_line_pointer = saved_char;
+  ignore_rest_of_line ();
+}
+#endif /* OBJ_ELF */
+

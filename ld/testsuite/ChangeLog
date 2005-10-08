@@ -1,3 +1,12 @@
+2005-10-08  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-rel31.d: Ignore Arm object attribute sections.
+	* ld-arm/arm-target1-abs.d: Ditto.
+	* ld-arm/arm-target1-rel.d: Ditto.
+	* ld-arm/arm-target2-abs.d: Ditto.
+	* ld-arm/arm-target2-got-rel.d: Ditto.
+	* ld-arm/arm-target2-rel.d: Ditto.
+
 2005-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/1396

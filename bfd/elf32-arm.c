@@ -18,11 +18,11 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include "elf/arm.h"
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "elf/arm.h"
 
 #ifndef NUM_ELEM
 #define NUM_ELEM(a)  (sizeof (a) / (sizeof (a)[0]))
@@ -1529,12 +1529,31 @@ _arm_elf_section_data;
 /* The size of the thread control block.  */
 #define TCB_SIZE	8
 
+#define NUM_KNOWN_ATTRIBUTES 32
+
+typedef struct aeabi_attribute
+{
+  int type;
+  unsigned int i;
+  char *s;
+} aeabi_attribute;
+
+typedef struct aeabi_attribute_list
+{
+  struct aeabi_attribute_list *next;
+  int tag;
+  aeabi_attribute attr;
+} aeabi_attribute_list;
+
 struct elf32_arm_obj_tdata
 {
   struct elf_obj_tdata root;
 
   /* tls_type for each local got entry.  */
   char *local_got_tls_type;
+
+  aeabi_attribute known_eabi_attributes[NUM_KNOWN_ATTRIBUTES];
+  aeabi_attribute_list *other_eabi_attributes;
 };
 
 #define elf32_arm_tdata(abfd) \
@@ -3909,6 +3928,194 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     }
 }
 
+
+static int
+uleb128_size (unsigned int i)
+{
+  int size;
+  size = 1;
+  while (i >= 0x80)
+    {
+      i >>= 7;
+      size++;
+    }
+  return size;
+}
+
+/* Return TRUE if the attribute has the default value (0/"").  */
+static bfd_boolean
+is_default_attr (aeabi_attribute *attr)
+{
+  if ((attr->type & 1) && attr->i != 0)
+    return FALSE;
+  if ((attr->type & 2) && attr->s && *attr->s)
+    return FALSE;
+
+  return TRUE;
+}
+
+/* Return the size of a single attribute.  */
+static bfd_vma
+eabi_attr_size(int tag, aeabi_attribute *attr)
+{
+  bfd_vma size;
+
+  if (is_default_attr (attr))
+    return 0;
+
+  size = uleb128_size (tag);
+  if (attr->type & 1)
+    size += uleb128_size (attr->i);
+  if (attr->type & 2)
+    size += strlen ((char *)attr->s) + 1;
+  return size;
+}
+  
+/* Returns the size of the eabi object attributess section.  */
+bfd_vma
+elf32_arm_eabi_attr_size (bfd *abfd)
+{
+  bfd_vma size;
+  aeabi_attribute *attr;
+  aeabi_attribute_list *list;
+  int i;
+
+  attr = elf32_arm_tdata (abfd)->known_eabi_attributes;
+  size = 16; /* 'A' <size> "aeabi" 0x1 <size>.  */
+  for (i = 4; i < NUM_KNOWN_ATTRIBUTES; i++)
+    size += eabi_attr_size (i, &attr[i]);
+
+  for (list = elf32_arm_tdata (abfd)->other_eabi_attributes;
+       list;
+       list = list->next)
+    size += eabi_attr_size (list->tag, &list->attr);
+
+  return size;
+}
+
+static bfd_byte *
+write_uleb128 (bfd_byte *p, unsigned int val)
+{
+  bfd_byte c;
+  do
+    {
+      c = val & 0x7f;
+      val >>= 7;
+      if (val)
+	c |= 0x80;
+      *(p++) = c;
+    }
+  while (val);
+  return p;
+}
+
+/* Write attribute ATTR to butter P, and return a pointer to the following
+   byte.  */
+static bfd_byte *
+write_eabi_attribute (bfd_byte *p, int tag, aeabi_attribute *attr)
+{
+  /* Suppress default entries.  */
+  if (is_default_attr(attr))
+    return p;
+
+  p = write_uleb128 (p, tag);
+  if (attr->type & 1)
+    p = write_uleb128 (p, attr->i);
+  if (attr->type & 2)
+    {
+      int len;
+
+      len = strlen (attr->s) + 1;
+      memcpy (p, attr->s, len);
+      p += len;
+    }
+
+  return p;
+}
+
+/* Write the contents of the eabi attributes section to p.  */
+void
+elf32_arm_set_eabi_attr_contents (bfd *abfd, bfd_byte *contents, bfd_vma size)
+{
+  bfd_byte *p;
+  aeabi_attribute *attr;
+  aeabi_attribute_list *list;
+  int i;
+
+  p = contents;
+  *(p++) = 'A';
+  bfd_put_32 (abfd, size - 1, p);
+  p += 4;
+  memcpy (p, "aeabi", 6);
+  p += 6;
+  *(p++) = Tag_File;
+  bfd_put_32 (abfd, size - 11, p);
+  p += 4;
+
+  attr = elf32_arm_tdata (abfd)->known_eabi_attributes;
+  for (i = 4; i < NUM_KNOWN_ATTRIBUTES; i++)
+    p = write_eabi_attribute (p, i, &attr[i]);
+
+  for (list = elf32_arm_tdata (abfd)->other_eabi_attributes;
+       list;
+       list = list->next)
+    p = write_eabi_attribute (p, list->tag, &list->attr);
+}
+
+/* Override final_link to handle EABI object attribute sections.  */
+
+static bfd_boolean
+elf32_arm_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
+{
+  asection *o;
+  struct bfd_link_order *p;
+  asection *attr_section = NULL;
+  bfd_byte *contents;
+  bfd_vma size = 0;
+
+  /* elf32_arm_merge_private_bfd_data will already have merged the
+     object attributes.  Remove the input sections from the link, and set
+     the contents of the output secton.  */
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      if (strcmp (o->name, ".ARM.attributes") == 0)
+	{
+	  for (p = o->map_head.link_order; p != NULL; p = p->next)
+	    {
+	      asection *input_section;
+
+	      if (p->type != bfd_indirect_link_order)
+		continue;
+	      input_section = p->u.indirect.section;
+	      /* Hack: reset the SEC_HAS_CONTENTS flag so that
+		 elf_link_input_bfd ignores this section.  */
+	      input_section->flags &= ~SEC_HAS_CONTENTS;
+	    }
+	    
+	  size = elf32_arm_eabi_attr_size (abfd);
+	  bfd_set_section_size (abfd, o, size);
+	  attr_section = o;
+	  /* Skip this section later on.  */
+	  o->map_head.link_order = NULL;
+	}
+    }
+  /* Invoke the ELF linker to do all the work.  */
+  if (!bfd_elf_final_link (abfd, info))
+    return FALSE;
+
+  if (attr_section)
+    {
+      contents = bfd_malloc(size);
+      if (contents == NULL)
+	return FALSE;
+      elf32_arm_set_eabi_attr_contents (abfd, contents, size);
+      bfd_set_section_contents (abfd, attr_section, contents, 0, size);
+      free (contents);
+    }
+  return TRUE;
+}
+
+
 /* Add INCREMENT to the reloc (of type HOWTO) at ADDRESS.  */
 static void
 arm_add_to_rel (bfd *              abfd,
@@ -4239,6 +4446,105 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
   return TRUE;
 }
 
+/* Allocate/find an object attribute.  */
+static aeabi_attribute *
+elf32_arm_new_eabi_attr (bfd *abfd, int tag)
+{
+  aeabi_attribute *attr;
+  aeabi_attribute_list *list;
+  aeabi_attribute_list *p;
+  aeabi_attribute_list **lastp;
+
+
+  if (tag < NUM_KNOWN_ATTRIBUTES)
+    {
+      /* Knwon tags are preallocated.  */
+      attr = &elf32_arm_tdata (abfd)->known_eabi_attributes[tag];
+    }
+  else
+    {
+      /* Create a new tag.  */
+      list = (aeabi_attribute_list *)
+	bfd_alloc (abfd, sizeof (aeabi_attribute_list));
+      memset (list, 0, sizeof (aeabi_attribute_list));
+      list->tag = tag;
+      /* Keep the tag list in order.  */
+      lastp = &elf32_arm_tdata (abfd)->other_eabi_attributes;
+      for (p = *lastp; p; p = p->next)
+	{
+	  if (tag < p->tag)
+	    break;
+	  lastp = &p->next;
+	}
+      list->next = *lastp;
+      *lastp = list;
+      attr = &list->attr;
+    }
+
+  return attr;
+}
+
+void
+elf32_arm_add_eabi_attr_int (bfd *abfd, int tag, unsigned int i)
+{
+  aeabi_attribute *attr;
+
+  attr = elf32_arm_new_eabi_attr (abfd, tag);
+  attr->type = 1;
+  attr->i = i;
+}
+
+static char *
+attr_strdup (bfd *abfd, const char * s)
+{
+  char * p;
+  int len;
+  
+  len = strlen (s) + 1;
+  p = (char *)bfd_alloc(abfd, len);
+  return memcpy (p, s, len);
+}
+
+void
+elf32_arm_add_eabi_attr_string (bfd *abfd, int tag, const char *s)
+{
+  aeabi_attribute *attr;
+
+  attr = elf32_arm_new_eabi_attr (abfd, tag);
+  attr->type = 2;
+  attr->s = attr_strdup (abfd, s);
+}
+
+void
+elf32_arm_add_eabi_attr_compat (bfd *abfd, unsigned int i, const char *s)
+{
+  aeabi_attribute_list *list;
+  aeabi_attribute_list *p;
+  aeabi_attribute_list **lastp;
+
+  list = (aeabi_attribute_list *)
+    bfd_alloc (abfd, sizeof (aeabi_attribute_list));
+  memset (list, 0, sizeof (aeabi_attribute_list));
+  list->tag = Tag_compatibility;
+  list->attr.type = 3;
+  list->attr.i = i;
+  list->attr.s = attr_strdup (abfd, s);
+
+  lastp = &elf32_arm_tdata (abfd)->other_eabi_attributes;
+  for (p = *lastp; p; p = p->next)
+    {
+      int cmp;
+      if (p->tag != Tag_compatibility)
+	break;
+      cmp = strcmp(s, p->attr.s);
+      if (cmp < 0 || (cmp == 0 && i < p->attr.i))
+	break;
+      lastp = &p->next;
+    }
+  list->next = *lastp;
+  *lastp = list;
+}
+
 /* Set the right machine number.  */
 
 static bfd_boolean
@@ -4288,6 +4594,49 @@ elf32_arm_set_private_flags (bfd *abfd, flagword flags)
 
   return TRUE;
 }
+
+/* Copy the eabi object attribute from IBFD to OBFD.  */
+static void
+copy_eabi_attributes (bfd *ibfd, bfd *obfd)
+{
+  aeabi_attribute *in_attr;
+  aeabi_attribute *out_attr;
+  aeabi_attribute_list *list;
+  int i;
+
+  in_attr = elf32_arm_tdata (ibfd)->known_eabi_attributes;
+  out_attr = elf32_arm_tdata (obfd)->known_eabi_attributes;
+  for (i = 4; i < NUM_KNOWN_ATTRIBUTES; i++)
+    {
+      out_attr->i = in_attr->i;
+      if (in_attr->s && *in_attr->s)
+	out_attr->s = attr_strdup (obfd, in_attr->s);
+      in_attr++;
+      out_attr++;
+    }
+
+  for (list = elf32_arm_tdata (ibfd)->other_eabi_attributes;
+       list;
+       list = list->next)
+    {
+      in_attr = &list->attr;
+      switch (in_attr->type)
+	{
+	case 1:
+	  elf32_arm_add_eabi_attr_int (obfd, list->tag, in_attr->i);
+	  break;
+	case 2:
+	  elf32_arm_add_eabi_attr_string (obfd, list->tag, in_attr->s);
+	  break;
+	case 3:
+	  elf32_arm_add_eabi_attr_compat (obfd, in_attr->i, in_attr->s);
+	  break;
+	default:
+	  abort();
+	}
+    }
+}
+
 
 /* Copy backend specific data from one object module to another.  */
 
@@ -4340,6 +4689,289 @@ elf32_arm_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   elf_elfheader (obfd)->e_ident[EI_OSABI] =
     elf_elfheader (ibfd)->e_ident[EI_OSABI];
 
+  /* Copy EABI object attributes.  */
+  copy_eabi_attributes (ibfd, obfd);
+
+  return TRUE;
+}
+
+/* Values for Tag_ABI_PCS_R9_use.  */
+enum
+{
+  AEABI_R9_V6,
+  AEABI_R9_SB,
+  AEABI_R9_TLS,
+  AEABI_R9_unused
+};
+
+/* Values for Tag_ABI_PCS_RW_data.  */
+enum
+{
+  AEABI_PCS_RW_data_absolute,
+  AEABI_PCS_RW_data_PCrel,
+  AEABI_PCS_RW_data_SBrel,
+  AEABI_PCS_RW_data_unused
+};
+
+/* Values for Tag_ABI_enum_size.  */
+enum
+{
+  AEABI_enum_unused,
+  AEABI_enum_short,
+  AEABI_enum_wide,
+  AEABI_enum_forced_wide
+};
+
+/* Merge EABI object attributes from IBFD into OBFD.  Raise an error if there
+   are conflicting attributes.  */
+static bfd_boolean
+elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
+{
+  aeabi_attribute *in_attr;
+  aeabi_attribute *out_attr;
+  aeabi_attribute_list *in_list;
+  aeabi_attribute_list *out_list;
+  /* Some tags have 0 = don't care, 1 = strong requirement,
+     2 = weak requirement.  */
+  static const int order_312[3] = {3, 1, 2};
+  int i;
+
+  if (!elf32_arm_tdata (ibfd)->known_eabi_attributes[0].i)
+    {
+      /* This is the first object.  Copy the attributes.  */
+      copy_eabi_attributes (ibfd, obfd);
+      return TRUE;
+    }
+
+  /* Use the Tag_null value to indicate the attributes have been
+     initialized.  */
+  elf32_arm_tdata (ibfd)->known_eabi_attributes[0].i = 1;
+
+  in_attr = elf32_arm_tdata (ibfd)->known_eabi_attributes;
+  out_attr = elf32_arm_tdata (obfd)->known_eabi_attributes;
+  /* This needs to happen before Tag_ABI_FP_number_model is merged.  */
+  if (in_attr[Tag_ABI_VFP_args].i != out_attr[Tag_ABI_VFP_args].i)
+    {
+      /* Ignore mismatches if teh object doesn't use floating point.  */
+      if (out_attr[Tag_ABI_FP_number_model].i == 0)
+	out_attr[Tag_ABI_VFP_args].i = in_attr[Tag_ABI_VFP_args].i;
+      else if (in_attr[Tag_ABI_FP_number_model].i != 0)
+	{
+	  _bfd_error_handler
+	    (_("ERROR: %B uses VFP register arguments, %B does not"),
+	     ibfd, obfd);
+	  return FALSE;
+	}
+    }
+
+  for (i = 4; i < NUM_KNOWN_ATTRIBUTES; i++)
+    {
+      /* Merge this attribute with existing attributes.  */
+      switch (i)
+	{
+	case Tag_CPU_raw_name:
+	case Tag_CPU_name:
+	  /* Use whichever has the greatest architecture requirements.  */
+	  if (in_attr[Tag_CPU_arch].i > out_attr[Tag_CPU_arch].i)
+	    out_attr[i].s = attr_strdup(obfd, in_attr[i].s);
+	  break;
+
+	case Tag_ABI_optimization_goals:
+	case Tag_ABI_FP_optimization_goals:
+	  /* Use the first value seen.  */
+	  break;
+
+	case Tag_CPU_arch:
+	case Tag_ARM_ISA_use:
+	case Tag_THUMB_ISA_use:
+	case Tag_VFP_arch:
+	case Tag_WMMX_arch:
+	case Tag_NEON_arch:
+	  /* ??? Do NEON and WMMX conflict?  */
+	case Tag_ABI_FP_rounding:
+	case Tag_ABI_FP_denormal:
+	case Tag_ABI_FP_exceptions:
+	case Tag_ABI_FP_user_exceptions:
+	case Tag_ABI_FP_number_model:
+	case Tag_ABI_align8_preserved:
+	case Tag_ABI_HardFP_use:
+	  /* Use the largest value specified.  */
+	  if (in_attr[i].i > out_attr[i].i)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+
+	case Tag_CPU_arch_profile:
+	  /* Warn if conflicting architecture profiles used.  */
+	  if (out_attr[i].i && in_attr[i].i && in_attr[i].i != out_attr[i].i)
+	    {
+	      _bfd_error_handler
+		(_("ERROR: %B: Conflicting architecture profiles %c/%c"),
+		 ibfd, in_attr[i].i, out_attr[i].i);
+	      return FALSE;
+	    }
+	  if (in_attr[i].i)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_PCS_config:
+	  if (out_attr[i].i == 0)
+	    out_attr[i].i = in_attr[i].i;
+	  else if (in_attr[i].i != 0 && out_attr[i].i != 0)
+	    {
+	      /* It's sometimes ok to mix different configs, so this is only
+	         a warning.  */
+	      _bfd_error_handler
+		(_("Warning: %B: Conflicting platform configuration"), ibfd);
+	    }
+	  break;
+	case Tag_ABI_PCS_R9_use:
+	  if (out_attr[i].i != AEABI_R9_unused
+	      && in_attr[i].i != AEABI_R9_unused)
+	    {
+	      _bfd_error_handler
+		(_("ERROR: %B: Conflicting use of R9"), ibfd);
+	      return FALSE;
+	    }
+	  if (out_attr[i].i == AEABI_R9_unused)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_ABI_PCS_RW_data:
+	  if (in_attr[i].i == AEABI_PCS_RW_data_SBrel
+	      && out_attr[Tag_ABI_PCS_R9_use].i != AEABI_R9_SB
+	      && out_attr[Tag_ABI_PCS_R9_use].i != AEABI_R9_unused)
+	    {
+	      _bfd_error_handler
+		(_("ERROR: %B: SB relative addressing conflicts with use of R9"),
+		 ibfd);
+	      return FALSE;
+	    }
+	  /* Use the smallest value specified.  */
+	  if (in_attr[i].i < out_attr[i].i)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_ABI_PCS_RO_data:
+	  /* Use the smallest value specified.  */
+	  if (in_attr[i].i < out_attr[i].i)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_ABI_PCS_GOT_use:
+	  if (in_attr[i].i > 2 || out_attr[i].i > 2
+	      || order_312[in_attr[i].i] < order_312[out_attr[i].i])
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_ABI_PCS_wchar_t:
+	  if (out_attr[i].i && in_attr[i].i && out_attr[i].i != in_attr[i].i)
+	    {
+	      _bfd_error_handler
+		(_("ERROR: %B: Conflicting definitions of wchar_t"), ibfd);
+	      return FALSE;
+	    }
+	  if (in_attr[i].i)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_ABI_align8_needed:
+	  /* ??? Check against Tag_ABI_align8_preserved.  */
+	  if (in_attr[i].i > 2 || out_attr[i].i > 2
+	      || order_312[in_attr[i].i] < order_312[out_attr[i].i])
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_ABI_enum_size:
+	  if (in_attr[i].i != AEABI_enum_unused)
+	    {
+	      if (out_attr[i].i == AEABI_enum_unused
+		  || out_attr[i].i == AEABI_enum_forced_wide)
+		{
+		  /* The existing object is compatible with anything.
+		     Use whatever requirements the new object has.  */
+		  out_attr[i].i = in_attr[i].i;
+		}
+	      else if (in_attr[i].i != AEABI_enum_forced_wide
+		       && out_attr[i].i != in_attr[i].i)
+		{
+		  _bfd_error_handler
+		    (_("ERROR: %B: Conflicting enum sizes"), ibfd);
+		}
+	    }
+	  break;
+	case Tag_ABI_VFP_args:
+	  /* Aready done.  */
+	  break;
+	case Tag_ABI_WMMX_args:
+	  if (in_attr[i].i != out_attr[i].i)
+	    {
+	      _bfd_error_handler
+		(_("ERROR: %B uses iWMMXt register arguments, %B does not"),
+		 ibfd, obfd);
+	      return FALSE;
+	    }
+	  break;
+	default: /* All known attributes should be explicitly covered.   */
+	  abort ();
+	}
+    }
+
+  in_list = elf32_arm_tdata (ibfd)->other_eabi_attributes;
+  out_list = elf32_arm_tdata (ibfd)->other_eabi_attributes;
+  while (in_list && in_list->tag == Tag_compatibility)
+    {
+      in_attr = &in_list->attr;
+      if (in_attr->i == 0)
+	continue;
+      if (in_attr->i == 1)
+	{
+	  _bfd_error_handler
+	    (_("ERROR: %B: Must be processed by '%s' toolchain"),
+	     ibfd, in_attr->s);
+	  return FALSE;
+	}
+      if (!out_list || out_list->tag != Tag_compatibility
+	  || strcmp (in_attr->s, out_list->attr.s) != 0)
+	{
+	  /* Add this compatibility tag to the output.  */
+	  elf32_arm_add_eabi_attr_compat (obfd, in_attr->i, in_attr->s);
+	  continue;
+	}
+      out_attr = &out_list->attr;
+      /* Check all the input tags with the same identifier.  */
+      for (;;)
+	{
+	  if (out_list->tag != Tag_compatibility
+	      || in_attr->i != out_attr->i
+	      || strcmp (in_attr->s, out_attr->s) != 0)
+	    {
+	      _bfd_error_handler
+		(_("ERROR: %B: Incompatible object tag '%s':%d"),
+		 ibfd, in_attr->s, in_attr->i);
+	      return FALSE;
+	    }
+	  in_list = in_list->next;
+	  if (in_list->tag != Tag_compatibility
+	      || strcmp (in_attr->s, in_list->attr.s) != 0)
+	    break;
+	  in_attr = &in_list->attr;
+	  out_list = out_list->next;
+	  if (out_list)
+	    out_attr = &out_list->attr;
+	}
+
+      /* Check the output doesn't have extra tags with this identifier.  */
+      if (out_list && out_list->tag == Tag_compatibility
+	  && strcmp (in_attr->s, out_list->attr.s) == 0)
+	{
+	  _bfd_error_handler
+	    (_("ERROR: %B: Incompatible object tag '%s':%d"),
+	     ibfd, in_attr->s, out_list->attr.i);
+	  return FALSE;
+	}
+    }
+
+  for (; in_list; in_list = in_list->next)
+    {
+      if ((in_list->tag & 128) < 64)
+	_bfd_error_handler
+	  (_("Warning: %B: Unknown EABI object attribute %d"),
+	   ibfd, in_list->tag);
+      break;
+    }
   return TRUE;
 }
 
@@ -4361,6 +4993,9 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
+
+  if (!elf32_arm_merge_eabi_attributes (ibfd, obfd))
+    return FALSE;
 
   /* The input BFD must have had its flags initialised.  */
   /* The following seems bogus to me -- The flags are initialized in
@@ -6488,7 +7123,123 @@ elf32_arm_fake_sections (bfd * abfd, Elf_Internal_Shdr * hdr, asection * sec)
       hdr->sh_type = SHT_ARM_EXIDX;
       hdr->sh_flags |= SHF_LINK_ORDER;
     }
+  else if (strcmp(name, ".ARM.attributes") == 0)
+    {
+      hdr->sh_type = SHT_ARM_ATTRIBUTES;
+    }
   return TRUE;
+}
+
+/* Parse an Arm EABI attributes section.  */
+static void
+elf32_arm_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
+{
+  bfd_byte *contents;
+  bfd_byte *p;
+  bfd_vma len;
+
+  contents = bfd_malloc (hdr->sh_size);
+  if (!contents)
+    return;
+  if (!bfd_get_section_contents (abfd, hdr->bfd_section, contents, 0,
+				 hdr->sh_size))
+    {
+      free (contents);
+      return;
+    }
+  p = contents;
+  if (*(p++) == 'A')
+    {
+      len = hdr->sh_size - 1;
+      while (len > 0)
+	{
+	  int namelen;
+	  bfd_vma section_len;
+
+	  section_len = bfd_get_32 (abfd, p);
+	  p += 4;
+	  if (section_len > len)
+	    section_len = len;
+	  len -= section_len;
+	  namelen = strlen ((char *)p) + 1;
+	  section_len -= namelen + 4;
+	  if (strcmp((char *)p, "aeabi") != 0)
+	    {
+	      /* Vendor section.  Ignore it.  */
+	      p += namelen + section_len;
+	    }
+	  else
+	    {
+	      p += namelen;
+	      while (section_len > 0)
+		{
+		  int tag;
+		  unsigned int n;
+		  unsigned int val;
+		  bfd_vma subsection_len;
+		  bfd_byte *end;
+
+		  tag = read_unsigned_leb128 (abfd, p, &n);
+		  p += n;
+		  subsection_len = bfd_get_32 (abfd, p);
+		  p += 4;
+		  if (subsection_len > section_len)
+		    subsection_len = section_len;
+		  section_len -= subsection_len;
+		  subsection_len -= n + 4;
+		  end = p + subsection_len;
+		  switch (tag)
+		    {
+		    case Tag_File:
+		      while (p < end)
+			{
+			  bfd_boolean is_string;
+
+			  tag = read_unsigned_leb128 (abfd, p, &n);
+			  p += n;
+			  if (tag == 4 || tag == 5)
+			    is_string = 1;
+			  else if (tag < 32)
+			    is_string = 0;
+			  else
+			    is_string = (tag & 1) != 0;
+			  if (tag == Tag_compatibility)
+			    {
+			      val = read_unsigned_leb128 (abfd, p, &n);
+			      p += n;
+			      elf32_arm_add_eabi_attr_compat (abfd, val,
+							      (char *)p);
+			      p += strlen ((char *)p) + 1;
+			    }
+			  else if (is_string)
+			    {
+			      elf32_arm_add_eabi_attr_string (abfd, tag,
+							      (char *)p);
+			      p += strlen ((char *)p) + 1;
+			    }
+			  else
+			    {
+			      val = read_unsigned_leb128 (abfd, p, &n);
+			      p += n;
+			      elf32_arm_add_eabi_attr_int (abfd, tag, val);
+			    }
+			}
+		      break;
+		    case Tag_Section:
+		    case Tag_Symbol:
+		      /* Don't have anywhere convenient to attach these.
+		         Fall through for now.  */
+		    default:
+		      /* Ignore things we don't kow about.  */
+		      p += subsection_len;
+		      subsection_len = 0;
+		      break;
+		    }
+		}
+	    }
+	}
+    }
+  free (contents);
 }
 
 /* Handle an ARM specific section when reading an object file.  This is
@@ -6520,6 +7271,8 @@ elf32_arm_section_from_shdr (bfd *abfd,
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
+  if (hdr->sh_type == SHT_ARM_ATTRIBUTES)
+    elf32_arm_parse_attributes(abfd, hdr);
   return TRUE;
 }
 
@@ -6947,6 +7700,7 @@ const struct elf_size_info elf32_arm_size_info = {
 #define bfd_elf32_new_section_hook		elf32_arm_new_section_hook
 #define bfd_elf32_bfd_is_target_special_symbol	elf32_arm_is_target_special_symbol
 #define bfd_elf32_close_and_cleanup             elf32_arm_close_and_cleanup
+#define bfd_elf32_bfd_final_link		elf32_arm_bfd_final_link
 
 #define elf_backend_get_symbol_type             elf32_arm_get_symbol_type
 #define elf_backend_gc_mark_hook                elf32_arm_gc_mark_hook

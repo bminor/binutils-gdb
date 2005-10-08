@@ -1,3 +1,16 @@
+2005-10-08  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/eabi_attr_1.s: New test.
+	* gas/arm/eabi_attr_1.d: New test.
+	* gas/arm/arm7t.d: Only disassemble code sections.
+	* gas/arm/bignum1.d: Ignore Arm object attribute sections.
+	* gas/arm/mapping.d: Ditto.
+	* gas/arm/unwind.d: Ditto.
+	* gas/elf/section0.d: Ditto.
+	* gas/elf/section1.d: Ditto.
+	* gas/elf/elf.exp: Set target_machine for Arm EABI based targets.
+	* gas/elf/section2.e-armeabi: New file.
+
 2005-10-06  Khem Raj  <kraj@mvista.com>
             NIIBE Yutaka  <gniibe@m17n.org>
 

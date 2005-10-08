@@ -505,6 +505,27 @@ the stack pointer by @var{offset} bytes.
 For example @code{.unwind_raw 4, 0xb1, 0x01} is equivalent to
 @code{.save @{r0@}}
 
+@cindex @code{.cpu} directive, ARM
+@item .cpu @var{name}
+Select the target processor.  Valid values for @var{name} are the same as
+for the @option{-mcpu} commandline option.
+
+@cindex @code{.arch} directive, ARM
+@item .arch @var{name}
+Select the target architecture.  Valid values for @var{name} are the same as
+for the @option{-march} commandline option.
+
+@cindex @code{.fpu} directive, ARM
+@item .fpu @var{name}
+Select the floating point unit to assemble for.  Valid values for @var{name}
+are the same as for the @option{-mfpu} commandline option.
+
+@cindex @code{.eabi_attribute} directive, ARM
+@item .eabi_attribute @var{tag}, @var{value}
+Set the EABI object attribute number @var{tag} to @var{value}.  The value
+is either a @code{number}, @code{"string"}, or @code{number, "string"}
+depending on the tag.
+
 @end table
 
 @node ARM Opcodes

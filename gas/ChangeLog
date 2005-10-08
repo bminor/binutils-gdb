@@ -1,3 +1,18 @@
+2005-10-08  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c: Don't provide fallback default for CPU_DEFAULT.
+	(arm_arch_used, thumb_arch_used, selected_cpu, selected_cpu_name):
+	New variables.
+	(arm_cpu_option_table): Add canonical_name.
+	(arm_cpus): Populate canonical_name field.
+	(s_arm_eabi_attribute, s_arm_arch, s_arm_cpu, s_arm_fpu,
+	aeabi_set_public_attributes, arm_md_end): New functions.
+	(md_pseudo_table): Add "cpu", "arch", "fpu" and "eabi_attribute".
+	(md_assemble): Set thumb_arch_used and arm_arch_used.
+	(md_begin): Set defaut cpu if CPU_DEFAULT not defined.
+	* config/tc-arm.h (md_end): Define.
+	* doc/c-arm.texi: Document .cpu, .arch, .fpu and .eabi_attribute.
+
 2005-10-06  Khem Raj  <kraj@mvista.com>
             NIIBE Yutaka  <gniibe@m17n.org>
 
