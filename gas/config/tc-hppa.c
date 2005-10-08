@@ -771,11 +771,15 @@ static label_symbol_struct *label_symbols_rootp = NULL;
 /* Holds the last field selector.  */
 static int hppa_field_selector;
 
-/* Nonzero when strict syntax checking is enabled.  Zero otherwise.
+/* Nonzero when strict matching is enabled.  Zero otherwise.
 
-   Each opcode in the table has a flag which indicates whether or not
-   strict syntax checking should be enabled for that instruction.  */
-static int strict = 0;
+   Each opcode in the table has a flag which indicates whether or
+   not strict matching should be enabled for that instruction.
+
+   Mainly, strict causes errors to be ignored when a match failure
+   occurs.  However, it also affects the parsing of register fields
+   by pa_parse_number.  */
+static int strict;
 
 /* pa_parse_number returns values in `pa_number'.  Mostly
    pa_parse_number is used to return a register number, with floating
@@ -1581,12 +1585,10 @@ pa_ip (str)
   char *s, c, *argstart, *name, *save_s;
   const char *args;
   int match = FALSE;
-  int need_promotion = FALSE;
   int comma = 0;
   int cmpltr, nullif, flag, cond, num;
   unsigned long opcode;
   struct pa_opcode *insn;
-  struct pa_opcode *promoted_insn = NULL;
 
 #ifdef OBJ_SOM
   /* We must have a valid space and subspace.  */
@@ -1647,7 +1649,7 @@ pa_ip (str)
 
       the_insn.reloc = R_HPPA_NONE;
 
-      if (insn->arch >= 20
+      if (insn->arch >= pa20
 	  && bfd_get_mach (stdoutput) < insn->arch)
 	goto failed;
 
@@ -1844,9 +1846,9 @@ pa_ip (str)
 			else if ((strncasecmp (s, "s ", 2) == 0)
 				 || (strncasecmp (s, "s,", 2) == 0))
 			  uu = 1;
-			/* When in strict mode this is a match failure.  */
 			else if (strict)
 			  {
+			    /* This is a match failure.  */
 			    s--;
 			    break;
 			  }
@@ -1872,28 +1874,25 @@ pa_ip (str)
 		    int m = 0;
 		    if (*s == ',')
 		      {
-			int found = 0;
 			s++;
 			if (strncasecmp (s, "ma", 2) == 0)
 			  {
 			    a = 0;
 			    m = 1;
-			    found = 1;
+			    s += 2;
 			  }
 			else if (strncasecmp (s, "mb", 2) == 0)
 			  {
 			    a = 1;
 			    m = 1;
-			    found = 1;
+			    s += 2;
 			  }
-
-			/* When in strict mode, pass through for cache op.  */
-			if (!found && strict)
+			else if (strict)
+			  /* This is a match failure.  */
 			  s--;
 			else
 			  {
-			    if (!found)
-			      as_bad (_("Invalid Short Load/Store Completer."));
+			    as_bad (_("Invalid Short Load/Store Completer."));
 			    s += 2;
 			  }
 		      }
@@ -1946,7 +1945,7 @@ pa_ip (str)
 			  a = 0;
 			else if (strncasecmp (s, "e", 1) == 0)
 			  a = 1;
-			/* When in strict mode this is a match failure.  */
+			/* In strict mode, this is a match failure.  */
 			else if (strict)
 			  {
 			    s--;
@@ -3962,19 +3961,11 @@ pa_ip (str)
 	 then set a new architecture.  This automatic promotion crud is
 	 for compatibility with HP's old assemblers only.  */
       if (match == TRUE
-	  && bfd_get_mach (stdoutput) < insn->arch)
+	  && bfd_get_mach (stdoutput) < insn->arch
+	  && !bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
 	{
-	  if (need_promotion)
-	    {
-	      if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, insn->arch))
-		as_warn (_("could not update architecture and machine"));
-	    }
-	  else
-	    {
-	      match = FALSE;
-	      if (!promoted_insn)
-		promoted_insn = insn;
-	    }
+	  as_warn (_("could not update architecture and machine"));
+	  match = FALSE;
 	}
 
  failed:
@@ -3990,13 +3981,6 @@ pa_ip (str)
 	    }
 	  else
 	    {
-	      if (promoted_insn)
-		{
-		  insn = promoted_insn;
-		  need_promotion = TRUE;
-		  s = argstart;
-		  continue;
-		}
 	      as_bad (_("Invalid operands %s"), error_message);
 	      return;
 	    }
