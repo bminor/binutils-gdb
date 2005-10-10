@@ -661,7 +661,7 @@ POTFILES = $(MULTI_CFILES) $(TARGET_ENV_HFILES) $(OBJ_FORMAT_HFILES) \
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
 EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c \
-	bfin-parse.c bfin-lex.l bfin-defs.h
+	bfin-parse.c
 
 DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-desc.h
 

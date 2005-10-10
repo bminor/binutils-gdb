@@ -441,7 +441,7 @@ noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
 
 EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c \
-	bfin-parse.c bfin-lex.l bfin-defs.h
+	bfin-parse.c
 
 diststuff: $(EXTRA_DIST) info
 all: info
