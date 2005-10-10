@@ -1587,15 +1587,21 @@ operator (int *num_chars)
       return ret;
 
     case '!':
-      /* We accept !! as equivalent to ^ for MRI compatibility.  */
-      if (input_line_pointer[1] != '!')
+      switch (input_line_pointer[1])
 	{
+	case '!':
+	  /* We accept !! as equivalent to ^ for MRI compatibility. */
+	  *num_chars = 2;
+	  return O_bit_exclusive_or;
+	case '=':
+	  /* We accept != as equivalent to <>.  */
+	  *num_chars = 2;
+	  return O_ne;
+	default:
 	  if (flag_m68k_mri)
 	    return O_bit_inclusive_or;
 	  return op_encoding[c];
 	}
-      *num_chars = 2;
-      return O_bit_exclusive_or;
 
     case '|':
       if (input_line_pointer[1] != '|')

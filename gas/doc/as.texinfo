@@ -3619,6 +3619,7 @@ You may not subtract arguments from different sections.
 @item  ==
 @dfn{Is Equal To}
 @item <>
+@itemx !=
 @dfn{Is Not Equal To}
 @item <
 @dfn{Is Less Than}
