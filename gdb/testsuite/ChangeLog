@@ -1,3 +1,10 @@
+2005-10-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/array_return/pck.ads: New file.
+	* gdb.ada/array_return/pck.adb: New file.
+	* gdb.ada/array_return/p.adb: New file.
+	* gdb.ada/array_return.exp: New testcase.
+
 2005-10-03  Joel Brobecker  <brobecker@adacore.com>
 
         * gdb.base/arrayidx.c: New file.
