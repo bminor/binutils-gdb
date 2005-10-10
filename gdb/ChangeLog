@@ -1,3 +1,8 @@
+2005-10-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* valprint.c (val_print_array_elements): Check array size before
+	computing its low bound. If zero, then use a default bound of zero.
+
 2005-10-06  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 1659

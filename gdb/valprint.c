@@ -959,18 +959,20 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
   unsigned int rep1;
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
-  long low_bound_index;
-
-  if (!get_array_low_bound (type, &low_bound_index))
-    {
-      warning ("unable to get low bound of array, using zero as default");
-      low_bound_index = 0;
-    }
+  long low_bound_index = 0;
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
   len = TYPE_LENGTH (type) / eltlen;
   index_type = TYPE_INDEX_TYPE (type);
+
+  /* Get the array low bound.  This only makes sense if the array
+     has one or more element in it.  */
+  if (len > 0 && !get_array_low_bound (type, &low_bound_index))
+    {
+      warning ("unable to get low bound of array, using zero as default");
+      low_bound_index = 0;
+    }
 
   annotate_array_section_begin (i, elttype);
 
