@@ -1,4 +1,9 @@
-2005-10-05  Joel Brobecker  <brobecker@adacore.com>
+2005-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-valprint.c (print_optional_low_bound): Handle properly
+	cases where the array index type is a TYPE_CODE_RANGE.
+
+2005-10-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* valprint.c (val_print_array_elements): Check array size before
 	computing its low bound. If zero, then use a default bound of zero.

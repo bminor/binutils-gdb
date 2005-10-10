@@ -94,6 +94,16 @@ print_optional_low_bound (struct ui_file *stream, struct type *type)
 
   index_type = TYPE_INDEX_TYPE (type);
 
+  if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
+    {
+      /* We need to know what the base type is, in order to do the
+         appropriate check below.  Otherwise, if this is a subrange
+         of an enumerated type, where the underlying value of the
+         first element is typically 0, we might test the low bound
+         against the wrong value.  */
+      index_type = TYPE_TARGET_TYPE (index_type);
+    }
+
   switch (TYPE_CODE (index_type))
     {
     case TYPE_CODE_ENUM:
