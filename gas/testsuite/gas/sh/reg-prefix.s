@@ -1,2 +1,3 @@
         .text
-	movli.l @r1,$r0
+	mov.l @r1,$r0
+

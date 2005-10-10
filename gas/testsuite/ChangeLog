@@ -1,3 +1,9 @@
+2005-10-10  Nick Clifton  <nickc@redhat.com>
+
+	* gas/sh/reg-prefix.s: Use mov.l instruction in preference to
+	movli.l.
+	* gas/sh/reg-prefix.d: Force little endian assembly.
+
 2005-10-08  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/eabi_attr_1.s: New test.
