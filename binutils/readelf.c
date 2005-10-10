@@ -4580,6 +4580,11 @@ struct absaddr
     bfd_vma offset;
   };
 
+#define ABSADDR(a) \
+  ((a).section \
+   ? section_headers [(a).section].sh_addr + (a).offset \
+   : (a).offset)
+
 struct ia64_unw_aux_info
   {
     struct ia64_unw_table_entry
@@ -4672,7 +4677,7 @@ dump_ia64_unwind (struct ia64_unw_aux_info *aux)
       printf ("], info at +0x%lx\n",
 	      (unsigned long) (tp->info.offset - aux->seg_base));
 
-      head = aux->info + (tp->info.offset - aux->info_addr);
+      head = aux->info + (ABSADDR (tp->info) - aux->info_addr);
       stamp = byte_get ((unsigned char *) head, sizeof (stamp));
 
       printf ("  v%u, flags=0x%lx (%s%s), len=%lu bytes\n",

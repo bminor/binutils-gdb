@@ -1,3 +1,9 @@
+2005-10-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/1436
+	* readelf.c (ABSADDR): New.
+	(dump_ia64_unwind): Use ABSADDR to get the unwind info address.
+
 2005-10-10  Thomas Weidenmueller  <w3seek@reactos.com>
 
 	* resbin.c (res_to_bin_accelerator): Place the terminating NUL at
