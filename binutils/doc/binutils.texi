@@ -1714,7 +1714,7 @@ can be placed together into a comma separated list.
 
 If the target is an ARM architecture then this switch can be used to
 select which register name set is used during disassembler.  Specifying
-@option{-M reg-name-std} (the default) will select the register names as
+@option{-M reg-names-std} (the default) will select the register names as
 used in ARM's instruction set documentation, but with register 13 called
 'sp', register 14 called 'lr' and register 15 called 'pc'.  Specifying
 @option{-M reg-names-apcs} will select the name set used by the ARM

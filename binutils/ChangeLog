@@ -1,3 +1,8 @@
+2005-10-10  Bryce Schober  <bryce.schober@dynonavionics.com>
+
+	* doc/binutils.texi (objdump): Fix typo: -reg-name-std should be
+	-reg-names-std.
+
 2005-10-04  Nick Clifton  <nickc@redhat.com>
 
 	* cxxfilt.c: Treat mangled names specified on the command line in
