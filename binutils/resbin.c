@@ -1415,7 +1415,7 @@ res_to_bin_accelerator (const struct accelerator *accelerators,
 	      d->data);
       put_16 (big_endian, a->key, d->data + 2);
       put_16 (big_endian, a->id, d->data + 4);
-      put_16 (big_endian, 0, d->data + 8);
+      put_16 (big_endian, 0, d->data + 6);
 
       d->next = NULL;
       *pp = d;
