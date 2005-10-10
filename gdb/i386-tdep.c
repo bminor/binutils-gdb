@@ -1424,9 +1424,9 @@ static const char *valid_conventions[] =
 };
 static const char *struct_convention = default_struct_convention;
 
-/* Return non-zero if TYPE, which is assumed to be a structure or
-   union type, should be returned in registers for architecture
-   GDBARCH.  */
+/* Return non-zero if TYPE, which is assumed to be a structure,
+   a union type, or an array type, should be returned in registers
+   for architecture GDBARCH.  */
 
 static int
 i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
@@ -1435,7 +1435,9 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
   enum type_code code = TYPE_CODE (type);
   int len = TYPE_LENGTH (type);
 
-  gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION);
+  gdb_assert (code == TYPE_CODE_STRUCT
+              || code == TYPE_CODE_UNION
+              || code == TYPE_CODE_ARRAY);
 
   if (struct_convention == pcc_struct_convention
       || (struct_convention == default_struct_convention
@@ -1467,7 +1469,9 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
 {
   enum type_code code = TYPE_CODE (type);
 
-  if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
+  if ((code == TYPE_CODE_STRUCT
+       || code == TYPE_CODE_UNION
+       || code == TYPE_CODE_ARRAY)
       && !i386_reg_struct_return_p (gdbarch, type))
     {
       /* The System V ABI says that:
@@ -1480,6 +1484,12 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
 
 	 So the ABI guarantees that we can always find the return
 	 value just after the function has returned.  */
+
+      /* Note that the ABI doesn't mention functions returning arrays,
+         which is something possible in certain languages such as Ada.
+         In this case, the value is returned as if it was wrapped in
+         a record, so the convention applied to records also applies
+         to arrays.  */
 
       if (readbuf)
 	{

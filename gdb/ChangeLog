@@ -1,5 +1,11 @@
 2005-10-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* i386-tdep.c (i386_reg_struct_return_p): Allow array types as well.
+	(i386_return_value): Add handling for functions that return array
+	types.
+
+2005-10-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (print_optional_low_bound): Handle properly
 	cases where the array index type is a TYPE_CODE_RANGE.
 
