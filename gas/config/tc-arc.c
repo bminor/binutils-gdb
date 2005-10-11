@@ -1214,7 +1214,7 @@ arc_parse_cons_expression (expressionS *exp,
 	code_symbol_fix = 1;
 	strcpy (p, ";   ");
       }
-  expr (0, exp);
+  expression_and_evaluate (exp);
   if (code_symbol_fix)
     {
       arc_code_symbol (exp);

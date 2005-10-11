@@ -2743,9 +2743,10 @@ mn10300_end_of_match (cont, what)
 }  
 
 int
-mn10300_parse_name (name, exprP, nextcharP)
+mn10300_parse_name (name, exprP, mode, nextcharP)
      char const *name;
      expressionS *exprP;
+     enum expr_mode mode;
      char *nextcharP;
 {
   char *next = input_line_pointer;
@@ -2765,13 +2766,13 @@ mn10300_parse_name (name, exprP, nextcharP)
       /* If we have an absolute symbol or a reg,
 	 then we know its value now.  */
       segment = S_GET_SEGMENT (exprP->X_add_symbol);
-      if (segment == absolute_section)
+      if (mode != expr_defer && segment == absolute_section)
 	{
 	  exprP->X_op = O_constant;
 	  exprP->X_add_number = S_GET_VALUE (exprP->X_add_symbol);
 	  exprP->X_add_symbol = NULL;
 	}
-      else if (segment == reg_section)
+      else if (mode != expr_defer && segment == reg_section)
 	{
 	  exprP->X_op = O_register;
 	  exprP->X_add_number = S_GET_VALUE (exprP->X_add_symbol);

@@ -206,9 +206,10 @@ extern bfd_boolean sh_fix_adjustable (struct fix *);
   ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL		\
    || (sh_relax && SWITCH_TABLE (FIX)))
 
-#define md_parse_name(name, exprP, nextcharP) \
-  sh_parse_name ((name), (exprP), (nextcharP))
-int sh_parse_name (char const *name, expressionS *exprP, char *nextchar);
+#define md_parse_name(name, exprP, mode, nextcharP) \
+  sh_parse_name ((name), (exprP), (mode), (nextcharP))
+int sh_parse_name (char const *name, expressionS *exprP,
+		   enum expr_mode mode, char *nextchar);
 
 #define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP) \
   sh_cons_fix_new ((FRAG), (OFF), (LEN), (EXP))

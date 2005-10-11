@@ -1,3 +1,65 @@
+2005-10-11  Jan Beulich  <jbeulich@novell.com>
+
+	* expr.h (enum expr_mode): New.
+	(expression): Pass thrid argument to expr.
+	(expression_and_evaluate): New.
+	(deferred_expression): New.
+	(expr): Add third parameter.
+	(resolve_expression): New.
+	* struc-symbol.h (struct symbol): New members sy_volatile and
+	sy_forward_ref.
+	* symbols.c, symbols.h (symbol_clone): New.
+	(symbol_clone_if_forward_ref): New.
+	(snapshot_symbol): New.
+	(S_IS_VOLATILE): New.
+	(S_IS_FORWARD_REF): New.
+	(S_SET_VOLATILE): New.
+	(S_SET_FORWARD_REF): New.
+	* as.c (macro_expr): Use expression_and_evaluate.
+	* cond.c (s_if): Likewise.
+	(s_elseif): Likewise.
+	* dw2gencfi.c (cfi_parse_reg): Likewise.
+	* expr.c (operand): Add second parameter. Optionally call
+	deferred_expression. Pass mode argument to itself and md_parse_name.
+	Check mode before trying to evaluate symbol. Call
+	symbol_clone_if_forward_ref for both operands.
+	(expr): Add thrid parameter. Pass mode to operand and itself.
+	Optionally call resolve_expression.
+	(resolve_expression): New.
+	(get_single_number): Pass second argument to operand.
+	* read.c (potable): New entry for .eqv.
+	(read_a_source_file): Handle new == operator.
+	(get_absolute_expr): Use expression_and_evaluate.
+	(s_lsym): Likewise.
+	(assign_symbol): Rename second parameter. Call symbol_clone on
+	legal and illegal redefinition. Call S_SET_VOLATILE and
+	S_SET_FORWARD_REF depending on mode.
+	(s_set): Update description.
+	(s_space): Call resolve_expression.
+	(pseudo_set): Optionally call deferred_expression. Check
+	S_IS_FORWARD_REF before trying to simplify/resolve an expression.
+	(equals): Handle ==.
+	* config/tc-ia64.h (md_parse_name): Add mode parameter.
+	* config/tc-arc.c (arc_parse_cons_expression): Likewise.
+	* config/tc-m32r.h (md_parse_name): Likewise.
+	(m32r_parse_name): Likewise.
+	* config/tc-mmix.h (md_parse_name): Likewise.
+	* config/tc-mn10300.h (md_parse_name): Likewise.
+	(mn10300_parse_name): Likewise.
+	* config/tc-ppc.h (md_parse_name): Likewise.
+	* config/tc-sh.h (md_parse_name): Likewise.
+	(sh_parse_name): Likewise.
+	* config/tc-sh64.h (md_parse_name): Likewise.
+	(sh64_consume_datalabel): Likewise.
+	* config/tc-tic54x.h (md_parse_name): Likewise.
+	* config/tc-m32r.c (m32r_parse_name): Add mode parameter. Check it
+	before trying to evaluate symbol.
+	* config/tc-mn10300.c (mn10300_parse_name): Likewise.
+	* config/tc-sh.c (sh_parse_name): Likewise.
+	* config/tc-sh64.c (sh64_consume_datalabel): Add mode parameter. Pass
+	second argument to operandf. Pass mode parameter to sh_parse_name.
+	* doc/as.texinfo: Document .eqv and the == assignment operator.
+
 2005-10-10  Ian Lance Taylor  <ian@airs.com>
 
 	* Makefile.am (EXTRA_DIST): Remove bfin-lex.l and bfin-defs.h.

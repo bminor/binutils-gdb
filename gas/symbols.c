@@ -538,6 +538,94 @@ symbol_make (const char *name)
 }
 
 symbolS *
+symbol_clone (symbolS *orgsymP, int replace)
+{
+  symbolS *newsymP;
+
+  /* Running local_symbol_convert on a clone that's not the one currently
+     in local_hash would incorrectly replace the hash entry.  Thus the
+     symbol must be converted here.  Note that the rest of the function
+     depends on not encountering an unconverted symbol.  */
+  if (LOCAL_SYMBOL_CHECK (orgsymP))
+    orgsymP = local_symbol_convert ((struct local_symbol *) orgsymP);
+
+  know (S_IS_DEFINED (orgsymP));
+
+  newsymP = obstack_alloc (&notes, sizeof (*newsymP));
+  *newsymP = *orgsymP;
+
+  if (replace)
+    {
+      if (symbol_rootP == orgsymP)
+	symbol_rootP = newsymP;
+      else if (orgsymP->sy_previous)
+	{
+	  orgsymP->sy_previous->sy_next = newsymP;
+	  orgsymP->sy_previous = NULL;
+	}
+      if (symbol_lastP == orgsymP)
+	symbol_lastP = newsymP;
+      else if (orgsymP->sy_next)
+	orgsymP->sy_next->sy_previous = newsymP;
+      orgsymP->sy_next = NULL;
+      debug_verify_symchain (symbol_rootP, symbol_lastP);
+
+      symbol_table_insert (newsymP);
+    }
+
+  return newsymP;
+}
+
+/* Referenced symbols, if they are forward references, need to be cloned
+   (without replacing the original) so that the value of the referenced
+   symbols at the point of use .  */
+
+#undef symbol_clone_if_forward_ref
+symbolS *
+symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
+{
+  if (symbolP && !LOCAL_SYMBOL_CHECK (symbolP))
+    {
+      symbolS *add_symbol = symbolP->sy_value.X_add_symbol;
+      symbolS *op_symbol = symbolP->sy_value.X_op_symbol;
+
+      if (symbolP->sy_forward_ref)
+	is_forward = 1;
+
+      if (is_forward)
+	{
+	  /* assign_symbol() clones volatile symbols; pre-existing expressions
+	     hold references to the original instance, but want the current
+	     value.  Just repeat the lookup.  */
+	  if (add_symbol && S_IS_VOLATILE (add_symbol))
+	    add_symbol = symbol_find_exact (S_GET_NAME (add_symbol));
+	  if (op_symbol && S_IS_VOLATILE (op_symbol))
+	    op_symbol = symbol_find_exact (S_GET_NAME (op_symbol));
+	}
+
+      /* Re-using sy_resolving here, as this routine cannot get called from
+	 symbol resolution code.  */
+      if (symbolP->bsym->section == expr_section && !symbolP->sy_resolving)
+	{
+	  symbolP->sy_resolving = 1;
+	  add_symbol = symbol_clone_if_forward_ref (add_symbol, is_forward);
+	  op_symbol = symbol_clone_if_forward_ref (op_symbol, is_forward);
+	  symbolP->sy_resolving = 0;
+	}
+
+      if (symbolP->sy_forward_ref
+	  || add_symbol != symbolP->sy_value.X_add_symbol
+	  || op_symbol != symbolP->sy_value.X_op_symbol)
+	symbolP = symbol_clone (symbolP, 0);
+
+      symbolP->sy_value.X_add_symbol = add_symbol;
+      symbolP->sy_value.X_op_symbol = op_symbol;
+    }
+
+  return symbolP;
+}
+
+symbolS *
 symbol_temp_new (segT seg, valueT ofs, fragS *frag)
 {
   return symbol_new (FAKE_LABEL_NAME, seg, ofs, frag);
@@ -1189,6 +1277,71 @@ resolve_local_symbol_values (void)
   hash_traverse (local_hash, resolve_local_symbol);
 }
 
+/* Obtain the current value of a symbol without changing any
+   sub-expressions used.  */
+
+int
+snapshot_symbol (symbolS *symbolP, valueT *valueP, segT *segP, fragS **fragPP)
+{
+  if (LOCAL_SYMBOL_CHECK (symbolP))
+    {
+      struct local_symbol *locsym = (struct local_symbol *) symbolP;
+
+      *valueP = locsym->lsy_value;
+      *segP = locsym->lsy_section;
+      *fragPP = local_symbol_get_frag (locsym);
+    }
+  else
+    {
+      expressionS expr = symbolP->sy_value;
+
+      if (!symbolP->sy_resolved && expr.X_op != O_illegal)
+	{
+	  int resolved;
+
+	  if (symbolP->sy_resolving)
+	    return 0;
+	  symbolP->sy_resolving = 1;
+	  resolved = resolve_expression (&expr);
+	  symbolP->sy_resolving = 0;
+	  if (!resolved)
+	    return 0;
+
+	  switch (expr.X_op)
+	    {
+	    case O_constant:
+	    case O_register:
+	      /* This check wouldn't be needed if pseudo_set() didn't set
+		 symbols equated to bare symbols to undefined_section.  */
+	      if (symbolP->bsym->section != undefined_section
+		  || symbolP->sy_value.X_op != O_symbol)
+		break;
+	      /* Fall thru.  */
+	    case O_symbol:
+	    case O_symbol_rva:
+	      symbolP = expr.X_add_symbol;
+	      break;
+	    default:
+	      return 0;
+	    }
+	}
+
+      *valueP = expr.X_add_number;
+      *segP = symbolP->bsym->section;
+      *fragPP = symbolP->sy_frag;
+
+      if (*segP == expr_section)
+	switch (expr.X_op)
+	  {
+	  case O_constant: *segP = absolute_section; break;
+	  case O_register: *segP = reg_section; break;
+	  default: break;
+	  }
+    }
+
+  return 1;
+}
+
 /* Dollar labels look like a number followed by a dollar sign.  Eg, "42$".
    They are *really* local.  That is, they go out of scope whenever we see a
    label that isn't local.  Also, like fb labels, there can be multiple
@@ -1747,6 +1900,22 @@ S_IS_STABD (symbolS *s)
   return S_GET_NAME (s) == 0;
 }
 
+int
+S_IS_VOLATILE (const symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->sy_volatile;
+}
+
+int
+S_IS_FORWARD_REF (const symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->sy_forward_ref;
+}
+
 const char *
 S_GET_NAME (symbolS *s)
 {
@@ -1870,6 +2039,22 @@ S_SET_NAME (symbolS *s, const char *name)
       return;
     }
   s->bsym->name = name;
+}
+
+void
+S_SET_VOLATILE (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_volatile = 1;
+}
+
+void
+S_SET_FORWARD_REF (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_forward_ref = 1;
 }
 
 /* Return the previous symbol in a chain.  */

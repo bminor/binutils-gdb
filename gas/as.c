@@ -940,7 +940,7 @@ macro_expr (const char *emsg, int idx, sb *in, int *val)
 
   hold = input_line_pointer;
   input_line_pointer = in->ptr + idx;
-  expression (&ex);
+  expression_and_evaluate (&ex);
   idx = input_line_pointer - in->ptr;
   input_line_pointer = hold;
 

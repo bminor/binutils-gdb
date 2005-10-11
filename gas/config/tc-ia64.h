@@ -129,7 +129,7 @@ extern void ia64_convert_frag (fragS *);
 #define tc_frob_symbol(s,p)		p |= ia64_frob_symbol (s)
 #endif /* TE_HPUX */
 #define md_flush_pending_output()	ia64_flush_pending_output ()
-#define md_parse_name(s,e,c)		ia64_parse_name (s, e, c)
+#define md_parse_name(s,e,m,c)		ia64_parse_name (s, e, c)
 #define tc_canonicalize_symbol_name(s)	ia64_canonicalize_symbol_name (s)
 #define tc_canonicalize_section_name(s)	ia64_canonicalize_symbol_name (s)
 #define md_optimize_expr(l,o,r)		ia64_optimize_expr (l, o, r)

@@ -323,6 +323,7 @@ static const pseudo_typeS potable[] = {
 /* endef  */
   {"equ", s_set, 0},
   {"equiv", s_set, 1},
+  {"eqv", s_set, -1},
   {"err", s_err, 0},
   {"error", s_errwarn, 1},
   {"exitm", s_mexit, 0},
@@ -441,7 +442,7 @@ static const pseudo_typeS potable[] = {
 static offsetT
 get_absolute_expr (expressionS *exp)
 {
-  expression (exp);
+  expression_and_evaluate (exp);
   if (exp->X_op != O_constant)
     {
       if (exp->X_op != O_absent)
@@ -786,6 +787,14 @@ read_a_source_file (char *name)
 #endif
 		  /* Input_line_pointer->after ':'.  */
 		  SKIP_WHITESPACE ();
+		}
+              else if (input_line_pointer[1] == '='
+		       && (c == '='
+			   || ((c == ' ' || c == '\t')
+			       && input_line_pointer[2] == '=')))
+		{
+		  equals (s, -1);
+		  demand_empty_rest_of_line ();
 		}
               else if ((c == '='
                        || ((c == ' ' || c == '\t')
@@ -2210,7 +2219,7 @@ s_lsym (int ignore ATTRIBUTE_UNUSED)
     }
 
   input_line_pointer++;
-  expression (&exp);
+  expression_and_evaluate (&exp);
 
   if (exp.X_op != O_constant
       && exp.X_op != O_register)
@@ -2743,7 +2752,7 @@ end_repeat (int extra)
 }
 
 static void
-assign_symbol (char *name, int no_reassign)
+assign_symbol (char *name, int mode)
 {
   symbolS *symbolP;
 
@@ -2784,18 +2793,37 @@ assign_symbol (char *name, int no_reassign)
 #endif
     }
 
-  /* Permit register names to be redefined.  */
-  if (no_reassign
-      && S_IS_DEFINED (symbolP)
-      && S_GET_SEGMENT (symbolP) != reg_section)
-    as_bad (_("symbol `%s' is already defined"), name);
+  if (S_IS_DEFINED (symbolP))
+    {
+      /* Permit register names to be redefined.  */
+      if ((mode != 0 || !S_IS_VOLATILE (symbolP))
+	  && S_GET_SEGMENT (symbolP) != reg_section)
+	{
+	  as_bad (_("symbol `%s' is already defined"), name);
+	  symbolP = symbol_clone (symbolP, 0);
+	}
+      /* If the symbol is volatile, copy the symbol and replace the
+	 original with the copy, so that previous uses of the symbol will
+	 retain the value of the symbol at the point of use.  */
+      else if (S_IS_VOLATILE (symbolP)
+	  /* This could be avoided when the symbol wasn't used so far, but
+	     the comment in struc-symbol.h says this flag isn't reliable.  */
+	  && (1 || symbol_used_p (symbolP)))
+	symbolP = symbol_clone (symbolP, 1);
+    }
+
+  if (mode == 0)
+    S_SET_VOLATILE (symbolP);
+  else if (mode < 0)
+    S_SET_FORWARD_REF (symbolP);
 
   pseudo_set (symbolP);
 }
 
-/* Handle the .equ, .equiv and .set directives.  If EQUIV is 1, then
-   this is .equiv, and it is an error if the symbol is already
-   defined.  */
+/* Handle the .equ, .equiv, .eqv, and .set directives.  If EQUIV is 1,
+   then this is .equiv, and it is an error if the symbol is already
+   defined.  If EQUIV is -1, the symbol additionally is a forward
+   reference.  */
 
 void
 s_set (int equiv)
@@ -2917,6 +2945,7 @@ s_space (int mult)
       || val.X_add_number > 0xff
       || (mult != 0 && mult != 1 && val.X_add_number != 0))
     {
+      resolve_expression (&exp);
       if (exp.X_op != O_constant)
 	as_bad (_("unsupported variable size or fill value"));
       else
@@ -2932,6 +2961,9 @@ s_space (int mult)
     }
   else
     {
+      if (now_seg == absolute_section || mri_common_symbol != NULL)
+	resolve_expression (&exp);
+
       if (exp.X_op == O_constant)
 	{
 	  long repeat;
@@ -3185,7 +3217,10 @@ pseudo_set (symbolS *symbolP)
 
   know (symbolP);		/* NULL pointer is logic error.  */
 
-  (void) expression (&exp);
+  if (!S_IS_FORWARD_REF (symbolP))
+    (void) expression (&exp);
+  else
+    (void) deferred_expression (&exp);
 
   if (exp.X_op == O_illegal)
     as_bad (_("illegal expression"));
@@ -3199,6 +3234,7 @@ pseudo_set (symbolS *symbolP)
 	as_bad (_("floating point number invalid"));
     }
   else if (exp.X_op == O_subtract
+	   && !S_IS_FORWARD_REF (symbolP)
 	   && SEG_NORMAL (S_GET_SEGMENT (exp.X_add_symbol))
 	   && (symbol_get_frag (exp.X_add_symbol)
 	       == symbol_get_frag (exp.X_op_symbol)))
@@ -3245,7 +3281,7 @@ pseudo_set (symbolS *symbolP)
 	  *symbol_X_add_number (symbolP) += exp.X_add_number;
 	  break;
 	}
-      else if (seg != undefined_section)
+      else if (!S_IS_FORWARD_REF (symbolP) && seg != undefined_section)
 	{
 	  symbolS *s = exp.X_add_symbol;
 
@@ -4838,6 +4874,8 @@ equals (char *sym_name, int reassign)
   input_line_pointer++;
   if (*input_line_pointer == '=')
     input_line_pointer++;
+  if (reassign < 0 && *input_line_pointer == '=')
+    input_line_pointer++;
 
   while (*input_line_pointer == ' ' || *input_line_pointer == '\t')
     input_line_pointer++;
@@ -4845,7 +4883,7 @@ equals (char *sym_name, int reassign)
   if (flag_mri)
     stop = mri_comment_field (&stopc);
 
-  assign_symbol (sym_name, !reassign);
+  assign_symbol (sym_name, reassign >= 0 ? !reassign : reassign);
 
   if (flag_mri)
     {

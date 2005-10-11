@@ -70,7 +70,7 @@ extern char *mmix_current_prefix;
    The [DVWIOUZX]_Handler symbols are provided when-used.  */
 
 extern int mmix_gnu_syntax;
-#define md_parse_name(name, exp, cpos)				\
+#define md_parse_name(name, exp, mode, cpos)			\
  (! mmix_gnu_syntax						\
   && (name[0] == '@'						\
       ? (! is_part_of_name (name[1])				\

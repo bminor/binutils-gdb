@@ -34,6 +34,56 @@ if ![istarget hppa*-*-*] then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
 }
 
+# PR/1387
+setup_xfail "*-*-*"
+gas_test_error "equiv1.s" "" ".equiv for symbol already set to another one"
+gas_test_error "equiv2.s" "" ".equiv for symbol already set to an expression"
+
+# .equ works differently on some targets.
+case $target_triplet in {
+    { hppa*-*-* } { }
+    { *c54x*-*-* } { }
+    default {
+	gas_test "equ-ok.s" "" "" ".equ for symbol already set"
+	gas_test_error "equ-bad.s" "" ".equ for symbol already set through .eqv"
+    }
+}
+
+gas_test "eqv-ok.s" "" "" ".eqv support"
+gas_test_error "eqv-bad.s" "" ".eqv for symbol already set"
+
+gas_test "assign-ok.s" "" "" "== assignment support"
+gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
+
+# .equ works differently on some targets.
+# linkrelax-ing prevents most forward references from working.
+case $target_triplet in {
+    { crx*-*-* } { }
+    { h8300*-*-* } { }
+    { hppa*-*-* } { }
+    { mn10\[23\]00*-*-* } { }
+    { *c54x*-*-* } { }
+    default {
+	# Some targets don't manage to resolve BFD_RELOC_8 for constants.
+	setup_xfail "alpha*-*-*" "avr-*-*" "*c30*-*-*" "*c4x*-*-*" \
+	    "d\[13\]0v*-*-*" "i860-*-*" "mips*-*-*" "msp430-*-*" \
+	    "pdp11-*-*" "sparc*-*-*" "xtensa-*-*"
+	run_dump_test forward
+    }
+}
+
+# .set works differently on some targets.
+case $target_triplet in {
+    { alpha*-*-* } { }
+    { iq2000*-*-* } { }
+    { mips*-*-* } { }
+    { *c54x*-*-* } { }
+    default {
+	setup_xfail "*c30*-*-*" "*c4x*-*-*" "pdp11-*-*"
+	run_dump_test redef
+    }
+}
+
 proc do_comment {} {
     set testname "comment.s: comments in listings"
     set x1 0
@@ -129,6 +179,8 @@ case $target_triplet in {
 	# character (it is allowed to be a line comment character).
 	if [string match "" [lindex [gas_run excl.s "-o /dev/null" ""] 0]] {
 	    run_dump_test altmac2
+	    # Similarly this test does not work when ! is a line seperator.
+	    run_dump_test eval
 	}
     }
 }
@@ -162,7 +214,7 @@ proc test_cond {} {
 	send_log "$comp_output\n"
 	fail $testname
     } else {
-	if { [regexp_diff dump.out $srcdir/$subdir/cond.d] } {
+	if { [regexp_diff dump.out $srcdir/$subdir/cond.l] } {
 	    fail $testname
 	} else {
 	    pass $testname

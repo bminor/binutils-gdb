@@ -83,7 +83,7 @@ extern void tic54x_number_to_chars (char *, valueT, int);
 extern void tic54x_adjust_symtab (void);
 #define tc_unrecognized_line(ch) tic54x_unrecognized_line(ch)
 extern int tic54x_unrecognized_line (int ch);
-#define md_parse_name(s,e,c) tic54x_parse_name(s,e)
+#define md_parse_name(s,e,m,c) tic54x_parse_name(s,e)
 extern int tic54x_parse_name (char *name, expressionS *e);
 #define md_undefined_symbol(s) tic54x_undefined_symbol(s)
 extern symbolS *tic54x_undefined_symbol (char *name);

@@ -3119,7 +3119,9 @@ provides a special directive @code{.label} for defining labels more flexibly.
 A symbol can be given an arbitrary value by writing a symbol, followed
 by an equals sign @samp{=}, followed by an expression
 (@pxref{Expressions}).  This is equivalent to using the @code{.set}
-directive.  @xref{Set,,@code{.set}}.
+directive.  @xref{Set,,@code{.set}}.  In the same way, using a double
+equals sign @samp{=}@samp{=} here represents an equivalent of the
+@code{.eqv} directive.  @xref{Eqv,,@code{.eqv}}.
 
 @node Symbol Names
 @section Symbol Names
@@ -3716,6 +3718,7 @@ Some machine configurations provide additional directives.
 * Endif::                       @code{.endif}
 * Equ::                         @code{.equ @var{symbol}, @var{expression}}
 * Equiv::                       @code{.equiv @var{symbol}, @var{expression}}
+* Eqv::                         @code{.eqv @var{symbol}, @var{expression}}
 * Err::				@code{.err}
 * Error::			@code{.error @var{string}}
 * Exitm::			@code{.exitm}
@@ -4283,6 +4286,15 @@ Except for the contents of the error message, this is roughly equivalent to
 .endif
 .equ SYM,VAL
 @end smallexample
+plus it protects the symbol from later redefinition.
+
+@node Eqv
+@section @code{.eqv @var{symbol}, @var{expression}}
+@cindex @code{eqv} directive
+The @code{.eqv} directive is like @code{.equiv}, but no attempt is made to
+evaluate the expression or any part of it immediately.  Instead each time
+the resulting symbol is used in an expression, a snapshot of its current
+value is taken.
 
 @node Err
 @section @code{.err}

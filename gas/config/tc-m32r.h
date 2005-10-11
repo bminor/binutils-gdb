@@ -121,9 +121,9 @@ extern void m32r_flush_pending_output (void);
 #define elf_tc_final_processing 	m32r_elf_final_processing
 extern void m32r_elf_final_processing (void);
 
-#define md_parse_name(name, exprP, nextcharP) \
-  m32r_parse_name ((name), (exprP), (nextcharP))
-extern int m32r_parse_name (char const *, expressionS *, char *);
+#define md_parse_name(name, exprP, mode, nextcharP) \
+  m32r_parse_name ((name), (exprP), (mode), (nextcharP))
+extern int m32r_parse_name (char const *, expressionS *, enum expr_mode, char *);
 
 /* This is used to construct expressions out of @GOTOFF, @PLT and @GOT
    symbols.  The relocation type is stored in X_md.  */

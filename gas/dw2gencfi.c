@@ -415,7 +415,7 @@ cfi_parse_reg (void)
     }
 #endif
 
-  expression (&exp);
+  expression_and_evaluate (&exp);
   switch (exp.X_op)
     {
     case O_register:

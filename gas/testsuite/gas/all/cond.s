@@ -30,6 +30,14 @@
 	.long	9
 	.endif
 
+	.equiv	x, y
+	.equiv	y, 0
+	.if	x
+	.err
+	.elseif	x
+	.err
+	.endif
+
 	.macro	m x, y
 	.ifb \x
 	.long	-1

@@ -124,10 +124,11 @@ extern int sh64_target_mach (void);
    expression, since we have handled it ourselves.  FIXME: What we really
    need is a new GAS infrastructure feature: md_qualifier.  */
 #undef md_parse_name
-#define md_parse_name(NAME, EXP, CP) \
- sh64_consume_datalabel (NAME, EXP, CP, operand)
-extern int sh64_consume_datalabel (const char *, expressionS *, char *,
-				   segT (*) (expressionS *));
+#define md_parse_name(NAME, EXP, MODE, CP) \
+ sh64_consume_datalabel (NAME, EXP, MODE, CP, operand)
+extern int sh64_consume_datalabel (const char *, expressionS *,
+				   enum expr_mode, char *,
+				   segT (*) (expressionS *, enum expr_mode));
 
 /* Saying "$" is the same as saying ".".  */
 #define DOLLAR_DOT

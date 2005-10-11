@@ -2312,7 +2312,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   else if (mips_opts.mips16
 	   && ! ip->use_extend
 	   && *reloc_type != BFD_RELOC_MIPS16_JMP)
-    {     
+    {
       if ((pinfo & INSN_UNCOND_BRANCH_DELAY) == 0)
 	/* Make sure there is enough room to swap this instruction with
 	   a following jump instruction.  */
@@ -8547,7 +8547,6 @@ do_msbd:
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
-
 		  if (ISDIGIT (s[1]))
 		    {
 		      ++s;

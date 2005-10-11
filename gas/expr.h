@@ -143,8 +143,17 @@ typedef struct expressionS {
   unsigned short X_md;
 } expressionS;
 
+enum expr_mode
+{
+  expr_evaluate,
+  expr_normal,
+  expr_defer
+};
+
 /* "result" should be type (expressionS *).  */
-#define expression(result) expr (0, result)
+#define expression(result) expr (0, result, expr_normal)
+#define expression_and_evaluate(result) expr (0, result, expr_evaluate)
+#define deferred_expression(result) expr (0, result, expr_defer)
 
 /* If an expression is O_big, look here for its value. These common
    data may be clobbered whenever expr() is called.  */
@@ -160,10 +169,12 @@ typedef char operator_rankT;
 extern char get_symbol_end (void);
 extern void expr_begin (void);
 extern void expr_set_precedence (void);
-extern segT expr (int rank, expressionS * resultP);
+extern segT expr (int, expressionS *, enum expr_mode);
 extern unsigned int get_single_number (void);
 extern symbolS *make_expr_symbol (expressionS * expressionP);
 extern int expr_symbol_where (symbolS *, char **, unsigned int *);
 
 extern symbolS *expr_build_uconstant (offsetT);
 extern symbolS *expr_build_dot (void);
+
+int resolve_expression (expressionS *);

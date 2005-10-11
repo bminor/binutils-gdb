@@ -245,7 +245,7 @@ extern int ppc_force_relocation PARAMS ((struct fix *));
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
 extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
-#define md_parse_name(name, exp, c) ppc_parse_name (name, exp)
+#define md_parse_name(name, exp, mode, c) ppc_parse_name (name, exp)
 extern int ppc_parse_name PARAMS ((const char *, struct expressionS *));
 
 #define md_operand(x)

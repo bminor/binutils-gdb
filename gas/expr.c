@@ -41,7 +41,7 @@ static void integer_constant (int radix, expressionS * expressionP);
 static void mri_char_constant (expressionS *);
 static void current_location (expressionS *);
 static void clean_up_expression (expressionS * expressionP);
-static segT operand (expressionS *);
+static segT operand (expressionS *, enum expr_mode);
 static operatorT operator (int *);
 
 extern const char EXP_CHARS[], FLT_CHARS[];
@@ -708,7 +708,7 @@ current_location (expressionS *expressionp)
 	Input_line_pointer->(next non-blank) char after operand.  */
 
 static segT
-operand (expressionS *expressionP)
+operand (expressionS *expressionP, enum expr_mode mode)
 {
   char c;
   symbolS *symbolP;	/* Points to symbol.  */
@@ -944,7 +944,10 @@ operand (expressionS *expressionP)
     case '[':
 #endif
       /* Didn't begin with digit & not a name.  */
-      segment = expression (expressionP);
+      if (mode != expr_defer)
+	segment = expression (expressionP);
+      else
+	segment = deferred_expression (expressionP);
       /* expression () will pass trailing whitespace.  */
       if ((c == '(' && *input_line_pointer != ')')
 	  || (c == '[' && *input_line_pointer != ']'))
@@ -1002,7 +1005,7 @@ operand (expressionS *expressionP)
 	if (0 && (c == '-' || c == '+') && *input_line_pointer == c)
 	  goto target_op;
 	
-	operand (expressionP);
+	operand (expressionP, mode);
 	if (expressionP->X_op == O_constant)
 	  {
 	    /* input_line_pointer -> char after operand.  */
@@ -1214,7 +1217,7 @@ operand (expressionS *expressionP)
 	     specially in certain contexts.  If a name always has a
 	     specific value, it can often be handled by simply
 	     entering it in the symbol table.  */
-	  if (md_parse_name (name, expressionP, &c))
+	  if (md_parse_name (name, expressionP, mode, &c))
 	    {
 	      *input_line_pointer = c;
 	      break;
@@ -1265,12 +1268,12 @@ operand (expressionS *expressionP)
 	  /* If we have an absolute symbol or a reg, then we know its
 	     value now.  */
 	  segment = S_GET_SEGMENT (symbolP);
-	  if (segment == absolute_section)
+	  if (mode != expr_defer && segment == absolute_section)
 	    {
 	      expressionP->X_op = O_constant;
 	      expressionP->X_add_number = S_GET_VALUE (symbolP);
 	    }
-	  else if (segment == reg_section)
+	  else if (mode != expr_defer && segment == reg_section)
 	    {
 	      expressionP->X_op = O_register;
 	      expressionP->X_add_number = S_GET_VALUE (symbolP);
@@ -1313,6 +1316,9 @@ operand (expressionS *expressionP)
   /* The PA port needs this information.  */
   if (expressionP->X_add_symbol)
     symbol_mark_used (expressionP->X_add_symbol);
+
+  expressionP->X_add_symbol = symbol_clone_if_forward_ref (expressionP->X_add_symbol);
+  expressionP->X_op_symbol = symbol_clone_if_forward_ref (expressionP->X_op_symbol);
 
   switch (expressionP->X_op)
     {
@@ -1625,7 +1631,8 @@ operator (int *num_chars)
 
 segT
 expr (int rankarg,		/* Larger # is higher rank.  */
-      expressionS *resultP	/* Deliver result here.  */)
+      expressionS *resultP,	/* Deliver result here.  */
+      enum expr_mode mode	/* Controls behavior.  */)
 {
   operator_rankT rank = (operator_rankT) rankarg;
   segT retval;
@@ -1640,7 +1647,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
   if (rank == 0)
     dot_value = frag_now_fix ();
 
-  retval = operand (resultP);
+  retval = operand (resultP, mode);
 
   /* operand () gobbles spaces.  */
   know (*input_line_pointer != ' ');
@@ -1652,7 +1659,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 
       input_line_pointer += op_chars;	/* -> after operator.  */
 
-      rightseg = expr (op_rank[(int) op_left], &right);
+      rightseg = expr (op_rank[(int) op_left], &right, mode);
       if (right.X_op == O_absent)
 	{
 	  as_warn (_("missing operand; zero assumed"));
@@ -1867,7 +1874,200 @@ expr (int rankarg,		/* Larger # is higher rank.  */
   if (resultP->X_add_symbol)
     symbol_mark_used (resultP->X_add_symbol);
 
+  if (rank == 0 && mode == expr_evaluate)
+    resolve_expression (resultP);
+
   return resultP->X_op == O_constant ? absolute_section : retval;
+}
+
+/* Resolve an expression without changing any symbols/sub-expressions
+   used.  */
+
+int
+resolve_expression (expressionS *expressionP)
+{
+  /* Help out with CSE.  */
+  valueT final_val = expressionP->X_add_number;
+  symbolS *add_symbol = expressionP->X_add_symbol;
+  symbolS *op_symbol = expressionP->X_op_symbol;
+  operatorT op = expressionP->X_op;
+  valueT left, right;
+  segT seg_left, seg_right;
+  fragS *frag_left, *frag_right;
+
+  switch (op)
+    {
+    default:
+      return 0;
+
+    case O_constant:
+    case O_register:
+      left = 0;
+      break;
+
+    case O_symbol:
+    case O_symbol_rva:
+      if (!snapshot_symbol (add_symbol, &left, &seg_left, &frag_left))
+	return 0;
+
+      break;
+
+    case O_uminus:
+    case O_bit_not:
+    case O_logical_not:
+      if (!snapshot_symbol (add_symbol, &left, &seg_left, &frag_left))
+	return 0;
+
+      if (seg_left != absolute_section)
+	return 0;
+
+      if (op == O_logical_not)
+	left = !left;
+      else if (op == O_uminus)
+	left = -left;
+      else
+	left = ~left;
+      op = O_constant;
+      break;
+
+    case O_multiply:
+    case O_divide:
+    case O_modulus:
+    case O_left_shift:
+    case O_right_shift:
+    case O_bit_inclusive_or:
+    case O_bit_or_not:
+    case O_bit_exclusive_or:
+    case O_bit_and:
+    case O_add:
+    case O_subtract:
+    case O_eq:
+    case O_ne:
+    case O_lt:
+    case O_le:
+    case O_ge:
+    case O_gt:
+    case O_logical_and:
+    case O_logical_or:
+      if (!snapshot_symbol (add_symbol, &left, &seg_left, &frag_left)
+	  || !snapshot_symbol (op_symbol, &right, &seg_right, &frag_right))
+	return 0;
+
+      /* Simplify addition or subtraction of a constant by folding the
+	 constant into X_add_number.  */
+      if (op == O_add)
+	{
+	  if (seg_right == absolute_section)
+	    {
+	      final_val += right;
+	      op = O_symbol;
+	      break;
+	    }
+	  else if (seg_left == absolute_section)
+	    {
+	      final_val += left;
+	      left = right;
+	      seg_left = seg_right;
+	      expressionP->X_add_symbol = expressionP->X_op_symbol;
+	      op = O_symbol;
+	      break;
+	    }
+	}
+      else if (op == O_subtract)
+	{
+	  if (seg_right == absolute_section)
+	    {
+	      final_val -= right;
+	      op = O_symbol;
+	      break;
+	    }
+	}
+
+      /* Equality and non-equality tests are permitted on anything.
+	 Subtraction, and other comparison operators are permitted if
+	 both operands are in the same section.  Otherwise, both
+	 operands must be absolute.  We already handled the case of
+	 addition or subtraction of a constant above.  */
+      if (!(seg_left == absolute_section
+	       && seg_right == absolute_section)
+	  && !(op == O_eq || op == O_ne)
+	  && !((op == O_subtract
+		|| op == O_lt || op == O_le || op == O_ge || op == O_gt)
+	       && seg_left == seg_right
+	       && (finalize_syms || frag_left == frag_right)
+	       && ((seg_left != undefined_section
+		    && seg_left != reg_section)
+		   || add_symbol == op_symbol)))
+	return 0;
+
+      switch (op)
+	{
+	case O_add:			left += right; break;
+	case O_subtract:		left -= right; break;
+	case O_multiply:		left *= right; break;
+	case O_divide:
+	  if (right == 0)
+	    return 0;
+	  left = (offsetT) left / (offsetT) right;
+	  break;
+	case O_modulus:
+	  if (right == 0)
+	    return 0;
+	  left = (offsetT) left % (offsetT) right;
+	  break;
+	case O_left_shift:		left <<= right; break;
+	case O_right_shift:		left >>= right; break;
+	case O_bit_inclusive_or:	left |= right; break;
+	case O_bit_or_not:		left |= ~right; break;
+	case O_bit_exclusive_or:	left ^= right; break;
+	case O_bit_and:			left &= right; break;
+	case O_eq:
+	case O_ne:
+	  left = (left == right
+		  && seg_left == seg_right
+		  && (finalize_syms || frag_left == frag_right)
+		  && ((seg_left != undefined_section
+		       && seg_left != reg_section)
+		      || add_symbol == op_symbol)
+		  ? ~ (valueT) 0 : 0);
+	  if (op == O_ne)
+	    left = ~left;
+	  break;
+	case O_lt:
+	  left = (offsetT) left <  (offsetT) right ? ~ (valueT) 0 : 0;
+	  break;
+	case O_le:
+	  left = (offsetT) left <= (offsetT) right ? ~ (valueT) 0 : 0;
+	  break;
+	case O_ge:
+	  left = (offsetT) left >= (offsetT) right ? ~ (valueT) 0 : 0;
+	  break;
+	case O_gt:
+	  left = (offsetT) left >  (offsetT) right ? ~ (valueT) 0 : 0;
+	  break;
+	case O_logical_and:	left = left && right; break;
+	case O_logical_or:	left = left || right; break;
+	default:		abort ();
+	}
+
+      op = O_constant;
+      break;
+    }
+
+  if (op == O_symbol)
+    {
+      if (seg_left == absolute_section)
+	op = O_constant;
+      else if (seg_left == reg_section && final_val == 0)
+	op = O_register;
+    }
+  expressionP->X_op = op;
+
+  if (op == O_constant || op == O_register)
+    final_val += left;
+  expressionP->X_add_number = final_val;
+
+  return 1;
 }
 
 /* This lives here because it belongs equally in expr.c & read.c.
@@ -1905,6 +2105,6 @@ unsigned int
 get_single_number (void)
 {
   expressionS exp;
-  operand (&exp);
+  operand (&exp, expr_normal);
   return exp.X_add_number;
 }

@@ -4295,7 +4295,10 @@ sh_end_of_match (char *cont, char *what)
 }
 
 int
-sh_parse_name (char const *name, expressionS *exprP, char *nextcharP)
+sh_parse_name (char const *name,
+	       expressionS *exprP,
+	       enum expr_mode mode,
+	       char *nextcharP)
 {
   char *next = input_line_pointer;
   char *next_end;
@@ -4314,13 +4317,13 @@ sh_parse_name (char const *name, expressionS *exprP, char *nextcharP)
       /* If we have an absolute symbol or a reg, then we know its
 	 value now.  */
       segment = S_GET_SEGMENT (exprP->X_add_symbol);
-      if (segment == absolute_section)
+      if (mode != expr_defer && segment == absolute_section)
 	{
 	  exprP->X_op = O_constant;
 	  exprP->X_add_number = S_GET_VALUE (exprP->X_add_symbol);
 	  exprP->X_add_symbol = NULL;
 	}
-      else if (segment == reg_section)
+      else if (mode != expr_defer && segment == reg_section)
 	{
 	  exprP->X_op = O_register;
 	  exprP->X_add_number = S_GET_VALUE (exprP->X_add_symbol);

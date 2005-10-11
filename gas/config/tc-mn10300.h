@@ -36,9 +36,10 @@
 	   && S_IS_DEFINED ((FIX)->fx_addsy)			\
 	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
 
-#define md_parse_name(name, exprP, nextcharP) \
-    mn10300_parse_name ((name), (exprP), (nextcharP))
-int mn10300_parse_name PARAMS ((char const *, expressionS *, char *));
+#define md_parse_name(name, exprP, mode, nextcharP) \
+    mn10300_parse_name ((name), (exprP), (mode), (nextcharP))
+int mn10300_parse_name PARAMS ((char const *, expressionS *,
+				enum expr_mode, char *));
 
 #define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP) \
      mn10300_cons_fix_new ((FRAG), (OFF), (LEN), (EXP))

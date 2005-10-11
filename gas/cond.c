@@ -144,7 +144,7 @@ s_if (int arg)
     }
   else
     {
-      expression (&operand);
+      expression_and_evaluate (&operand);
       if (operand.X_op != O_constant)
 	as_bad (_("non-constant expression in \".if\" statement"));
     }
@@ -340,7 +340,7 @@ s_elseif (int arg)
       /* Leading whitespace is part of operand.  */
       SKIP_WHITESPACE ();
 
-      expression (&operand);
+      expression_and_evaluate (&operand);
       if (operand.X_op != O_constant)
 	as_bad (_("non-constant expression in \".elseif\" statement"));
 

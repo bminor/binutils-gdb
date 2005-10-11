@@ -1,3 +1,22 @@
+2005-10-11  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/all/cond.s: Add test for resolution of fully resolvable
+	forward references in .if/.endif.
+	* gas/all/cond.d: Rename to:
+	* gas/all/cond.l: New.
+	* gas/all/assign-bad.s: New.
+	* gas/all/assign-ok.s: New.
+	* gas/all/equ-bad.s: New.
+	* gas/all/equ-ok.s: New.
+	* gas/all/equiv1.s: New.
+	* gas/all/equiv2.s: New.
+	* gas/all/eqv-bad.s: New.
+	* gas/all/eqv-ok.s: New.
+	* gas/all/eval.[sd]: New.
+	* gas/all/forward.[sd]: New.
+	* gas/all/redef.[sd]: New.
+	* gas/all/gas.exp: Run new tests, but xfail equiv1 (PR/1387).
+
 2005-10-10  Nick Clifton  <nickc@redhat.com>
 
 	* gas/sh/reg-prefix.s: Use mov.l instruction in preference to

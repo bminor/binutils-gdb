@@ -60,6 +60,12 @@ struct symbol
      a symbol is used in backend routines.  */
   unsigned int sy_used : 1;
 
+  /* Whether the symbol can be re-defined.  */
+  unsigned int sy_volatile : 1;
+
+  /* Whether the symbol is a forward reference.  */
+  unsigned int sy_forward_ref : 1;
+
   /* This is set if the symbol is defined in an MRI common section.
      We handle such sections as single common symbols, so symbols
      defined within them must be treated specially by the relocation

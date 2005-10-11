@@ -3244,8 +3244,9 @@ sh64_frob_label (symbolS *symp)
    symbol hook.  */
 
 int
-sh64_consume_datalabel (const char *name, expressionS *exp, char *cp,
-			segT (*operandf) (expressionS *))
+sh64_consume_datalabel (const char *name, expressionS *exp,
+			enum expr_mode mode, char *cp,
+			segT (*operandf) (expressionS *, enum expr_mode))
 {
   static int parsing_datalabel = 0;
 
@@ -3258,7 +3259,7 @@ sh64_consume_datalabel (const char *name, expressionS *exp, char *cp,
 
       *input_line_pointer = *cp;
       parsing_datalabel = 1;
-      (*operandf) (exp);
+      (*operandf) (exp, expr_normal);
       parsing_datalabel = save_parsing_datalabel;
 
       if (exp->X_op == O_symbol || exp->X_op == O_PIC_reloc)
@@ -3331,7 +3332,7 @@ sh64_consume_datalabel (const char *name, expressionS *exp, char *cp,
       return 1;
     }
 
-  return sh_parse_name (name, exp, cp);
+  return sh_parse_name (name, exp, mode, cp);
 }
 
 /* This function is called just before symbols are being output.  It

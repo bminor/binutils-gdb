@@ -44,6 +44,10 @@ symbolS *symbol_new (const char *name, segT segment, valueT value,
 		     fragS * frag);
 symbolS *symbol_create (const char *name, segT segment, valueT value,
 			fragS * frag);
+symbolS *symbol_clone (symbolS *, int);
+#undef symbol_clone_if_forward_ref
+symbolS *symbol_clone_if_forward_ref (symbolS *, int);
+#define symbol_clone_if_forward_ref(s) symbol_clone_if_forward_ref (s, 0)
 symbolS *symbol_temp_new (segT, valueT, fragS *);
 symbolS *symbol_temp_new_now (void);
 symbolS *symbol_temp_make (void);
@@ -55,6 +59,7 @@ void symbol_print_statistics (FILE *);
 void symbol_table_insert (symbolS * symbolP);
 valueT resolve_symbol_value (symbolS *);
 void resolve_local_symbol_values (void);
+int snapshot_symbol (symbolS *, valueT *, segT *, fragS **);
 
 void print_symbol_value (symbolS *);
 void print_expr (expressionS *);
@@ -84,6 +89,8 @@ extern int S_FORCE_RELOC (symbolS *, int);
 extern int S_IS_DEBUG (symbolS *);
 extern int S_IS_LOCAL (symbolS *);
 extern int S_IS_STABD (symbolS *);
+extern int S_IS_VOLATILE (const symbolS *);
+extern int S_IS_FORWARD_REF (const symbolS *);
 extern const char *S_GET_NAME (symbolS *);
 extern segT S_GET_SEGMENT (symbolS *);
 extern void S_SET_SEGMENT (symbolS *, segT);
@@ -92,6 +99,8 @@ extern void S_SET_NAME (symbolS *, const char *);
 extern void S_CLEAR_EXTERNAL (symbolS *);
 extern void S_SET_WEAK (symbolS *);
 extern void S_SET_THREAD_LOCAL (symbolS *);
+extern void S_SET_VOLATILE (symbolS *);
+extern void S_SET_FORWARD_REF (symbolS *);
 
 #ifndef WORKING_DOT_WORD
 struct broken_word
