@@ -2399,7 +2399,7 @@ the Info entries for @file{binutils}.
 c++filt [@option{-_}|@option{--strip-underscores}]
         [@option{-n}|@option{--no-strip-underscores}]
         [@option{-p}|@option{--no-params}]
-        [@option{-t}|@option{--no-types}]
+        [@option{-t}|@option{--types}]
         [@option{-i}|@option{--no-verbose}]
         [@option{-s} @var{format}|@option{--format=}@var{format}]
         [@option{--help}]  [@option{--version}]  [@var{symbol}@dots{}]
@@ -2409,31 +2409,67 @@ c++filt [@option{-_}|@option{--strip-underscores}]
 @c man begin DESCRIPTION cxxfilt
 
 @kindex cxxfilt
-The C++ and Java languages provides function overloading, which means
-that you can write many functions with the same name (providing each
-takes parameters of different types).  All C++ and Java function names
-are encoded into a low-level assembly label (this process is known as
-@dfn{mangling}). The @command{c++filt}
-@footnote{MS-DOS does not allow @kbd{+} characters in file names, so on
+The C++ and Java languages provide function overloading, which means
+that you can write many functions with the same name, providing that
+each function takes parameters of different types.  In order to be
+able to distinguish these similarly named functions C++ and Java
+encode them into a low-level assembler name which uniquely identifies
+each different version.  This process is known as @dfn{mangling}. The
+@command{c++filt}
+@footnote{MS-DOS does not allow @kbd{+} characters in file names, so on 
 MS-DOS this program is named @command{CXXFILT}.}
 program does the inverse mapping: it decodes (@dfn{demangles}) low-level
-names into user-level names so that the linker can keep these overloaded
-functions from clashing.
+names into user-level names so that they can be read.
 
 Every alphanumeric word (consisting of letters, digits, underscores,
 dollars, or periods) seen in the input is a potential mangled name.
 If the name decodes into a C++ name, the C++ name replaces the
-low-level name in the output.
+low-level name in the output, otherwise the original word is output.
+In this way you can pass an entire assembler source file, containing
+mangled names, through @command{c++filt} and see the same source file
+containing demangled names.
 
-You can use @command{c++filt} to decipher individual symbols:
+You can also use @command{c++filt} to decipher individual symbols by
+passing them on the command line:
 
 @example
 c++filt @var{symbol}
 @end example
 
 If no @var{symbol} arguments are given, @command{c++filt} reads symbol
-names from the standard input and writes the demangled names to the
-standard output.  All results are printed on the standard output.
+names from the standard input instead.  All the results are printed on
+the standard output.  The difference between reading names from the
+command line versus reading names from the standard input is that
+command line arguments are expected to be just mangled names and no
+checking is performed to seperate them from surrounding text.  Thus
+for example:
+
+@smallexample
+c++filt -n _Z1fv
+@end smallexample
+
+will work and demangle the name to ``f()'' whereas:
+
+@smallexample
+c++filt -n _Z1fv,
+@end smallexample
+
+will not work.  (Note the extra comma at the end of the mangled
+name which makes it invalid).  This command however will work:
+
+@smallexample
+echo _Z1fv, | c++filt -n
+@end smallexample
+
+and will display ``f(),'' ie the demangled name followed by a
+trailing comma.  This behaviour is because when the names are read
+from the standard input it is expected that they might be part of an
+assembler source file where there might be extra, extraneous
+characters trailing after a mangled name.  eg:
+
+@smallexample
+    .type   _Z1fv, @@function
+@end smallexample
 
 @c man end
 
@@ -2462,9 +2498,12 @@ When demangling the name of a function, do not display the types of
 the function's parameters.
 
 @item -t
-@itemx --no-types
-Do not attempt to demangle types.  This is enabled by default, but it
-may not be desired if you are interested in mangled function names.
+@itemx --types
+Attempt to demangle types as well as function names.  This is disabled
+by default since mangled types are normally only used internally in
+the compiler, and they can be confused with non-mangled names.  eg
+a function called ``a'' treated as a mangled type name would be
+demangled to ``signed char''.
 
 @item -i
 @itemx --no-verbose

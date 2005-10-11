@@ -30,7 +30,7 @@
 #include "getopt.h"
 #include "safe-ctype.h"
 
-static int flags = DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE | DMGL_TYPES;
+static int flags = DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE;
 static int strip_underscore = TARGET_PREPENDS_UNDERSCORE;
 
 static const struct option long_options[] =
@@ -40,8 +40,8 @@ static const struct option long_options[] =
   {"help", no_argument, NULL, 'h'},
   {"no-params", no_argument, NULL, 'p'},
   {"no-strip-underscores", no_argument, NULL, 'n'},
-  {"no-types", no_argument, NULL, 't'},
   {"no-verbose", no_argument, NULL, 'i'},
+  {"types", no_argument, NULL, 't'},
   {"version", no_argument, NULL, 'v'},
   {NULL, no_argument, NULL, 0}
 };
@@ -52,6 +52,9 @@ demangle_it (char *mangled_name)
   char *result;
   unsigned int skip_first = 0;
 
+  /* _ and $ are sometimes found at the start of function names
+     in assembler sources in order to distinguish them from other
+     names (eg register names).  So skip them here.  */
   if (mangled_name[0] == '.' || mangled_name[0] == '$')
     ++skip_first;
   if (strip_underscore && mangled_name[skip_first] == '_')
@@ -60,12 +63,12 @@ demangle_it (char *mangled_name)
   result = cplus_demangle (mangled_name + skip_first, flags);
 
   if (result == NULL)
-    puts (mangled_name);
+    printf (mangled_name);
   else
     {
       if (mangled_name[0] == '.')
 	putchar ('.');
-      puts (result);
+      printf (result);
       free (result);
     }
 }
@@ -99,8 +102,8 @@ Options are:\n\
 	   TARGET_PREPENDS_UNDERSCORE ? "" : " (default)");
   fprintf (stream, "\
   [-p|--no-params]            Do not display function arguments\n\
-  [-t|--no-types]             Do not try to demangle type encodings\n\
   [-i|--no-verbose]           Do not show implementation details (if any)\n\
+  [-t|--types]                Also attempt to demangle type encodings\n\
   [-s|--format ");
   print_demangler_list (stream);
   fprintf (stream, "]\n");
@@ -191,7 +194,7 @@ main (int argc, char **argv)
 	  flags &= ~ DMGL_PARAMS;
 	  break;
 	case 't':
-	  flags &= ~ DMGL_TYPES;
+	  flags |= DMGL_TYPES;
 	  break;
 	case 'i':
 	  flags &= ~ DMGL_VERBOSE;
@@ -218,7 +221,10 @@ main (int argc, char **argv)
   if (optind < argc)
     {
       for ( ; optind < argc; optind++)
-	demangle_it (argv[optind]);
+	{
+	  demangle_it (argv[optind]);
+	  putchar ('\n');
+	}
 
       return 0;
     }
@@ -264,11 +270,16 @@ main (int argc, char **argv)
 	{
 	  mbuffer[i] = 0;
 	  demangle_it (mbuffer);
-	  fflush (stdout);
 	}
+
       if (c == EOF)
 	break;
+
+      /* Echo the whitespace characters so that the output looks
+	 like the input, only with the mangled names demangled.  */
+      putchar (c);
     }
 
+  fflush (stdout);
   return 0;
 }

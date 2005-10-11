@@ -1,3 +1,20 @@
+2005-10-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/1437
+	* cxxfilt.c (flags): Remove DMGL_TYPES;
+	(long_options): Rename --no-types to --types.
+	(usage): Likewise.
+	(demangle_it): Add a comment describing why _ and $ prefixes are
+	skipped.  Use printf rather than puts to emit the demangled output
+	in order to avoid emitting a new line character.
+	(main): Have the -t flag enable type demangling.
+	Emit a newline after every demangled command line argument.
+	Copy whitespace from stdin to stdout.
+	* doc/binutils.texi (c++filt): Document the change to the -t
+	switch.
+	Document why demangling names on the command line is slightly
+	different to demangling names read from the standard input.
+
 2005-10-10  Mark Mitchell  <mark@codesourcery.com>
 
 	* doc/Makefile.am (config.texi): Set top_srcdir.
