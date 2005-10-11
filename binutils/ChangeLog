@@ -1,3 +1,9 @@
+2005-10-10  Mark Mitchell  <mark@codesourcery.com>
+
+	* doc/Makefile.am (config.texi): Set top_srcdir.
+	* doc/Makefile.in: Regenerated.
+	* doc/binutils.texi: Use at-file.texi from libiberty.
+
 2005-10-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/1436
