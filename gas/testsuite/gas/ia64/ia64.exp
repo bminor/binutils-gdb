@@ -78,6 +78,7 @@ if [istarget "ia64-*"] then {
 
     run_list_test "alloc" ""
     run_dump_test "bundling"
+    run_dump_test "forward"
     run_list_test "label" ""
     run_list_test "last" ""
     run_list_test "no-fit" ""

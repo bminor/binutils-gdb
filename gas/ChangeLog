@@ -1,7 +1,15 @@
+2005-10-12  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (dot_reg_val): Use expression_and_evaluate.
+	(dot_pred_rel): Likewise.
+	(parse_operand): Likewise.
+	(ia64_unrecognized_line): Likewise.
+	(md_operand): Likewise.
+
 2005-10-11  Jan Beulich  <jbeulich@novell.com>
 
 	* expr.h (enum expr_mode): New.
-	(expression): Pass thrid argument to expr.
+	(expression): Pass third argument to expr.
 	(expression_and_evaluate): New.
 	(deferred_expression): New.
 	(expr): Add third parameter.
@@ -23,7 +31,7 @@
 	deferred_expression. Pass mode argument to itself and md_parse_name.
 	Check mode before trying to evaluate symbol. Call
 	symbol_clone_if_forward_ref for both operands.
-	(expr): Add thrid parameter. Pass mode to operand and itself.
+	(expr): Add third parameter. Pass mode to operand and itself.
 	Optionally call resolve_expression.
 	(resolve_expression): New.
 	(get_single_number): Pass second argument to operand.

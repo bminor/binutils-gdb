@@ -5103,7 +5103,7 @@ dot_reg_val (dummy)
 {
   expressionS reg;
 
-  expression (&reg);
+  expression_and_evaluate (&reg);
   if (reg.X_op != O_register)
     {
       as_bad (_("Register name expected"));
@@ -5275,7 +5275,7 @@ dot_pred_rel (type)
       int regno;
       expressionS pr, *pr1, *pr2;
 
-      expression (&pr);
+      expression_and_evaluate (&pr);
       if (pr.X_op == O_register
 	  && pr.X_add_number >= REG_P
 	  && pr.X_add_number <= REG_P + 63)
@@ -6181,7 +6181,7 @@ parse_operand (e, more)
   memset (e, 0, sizeof (*e));
   e->X_op = O_absent;
   SKIP_WHITESPACE ();
-  expression (e);
+  expression_and_evaluate (e);
   sep = *input_line_pointer;
   if (more && (sep == ',' || sep == more))
     ++input_line_pointer;
@@ -7822,7 +7822,7 @@ ia64_unrecognized_line (ch)
   switch (ch)
     {
     case '(':
-      expression (&md.qp);
+      expression_and_evaluate (&md.qp);
       if (*input_line_pointer++ != ')')
 	{
 	  as_bad ("Expected ')'");
@@ -11022,7 +11022,7 @@ md_operand (e)
     {
     case '[':
       ++input_line_pointer;
-      expression (e);
+      expression_and_evaluate (e);
       if (*input_line_pointer != ']')
 	{
 	  as_bad ("Closing bracket missing");
