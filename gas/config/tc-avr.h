@@ -53,13 +53,13 @@
 /* You may define this macro to parse an expression used in a data
    allocation pseudo-op such as `.word'.  You can use this to
    recognize relocation directives that may appear in such directives.  */
-#define TC_PARSE_CONS_EXPRESSION(EXPR,N) avr_parse_cons_expression (EXPR,N)
-void avr_parse_cons_expression (expressionS *exp, int nbytes);
+#define TC_PARSE_CONS_EXPRESSION(EXPR,N) avr_parse_cons_expression (EXPR, N)
+extern void avr_parse_cons_expression (expressionS *, int);
 
 /* You may define this macro to generate a fixup for a data
    allocation pseudo-op.  */
-#define TC_CONS_FIX_NEW(FRAG,WHERE,N,EXP) avr_cons_fix_new(FRAG,WHERE,N,EXP)
-void avr_cons_fix_new(fragS *frag,int where, int nbytes, expressionS *exp);
+#define TC_CONS_FIX_NEW(FRAG,WHERE,N,EXP) avr_cons_fix_new (FRAG, WHERE, N, EXP)
+extern void avr_cons_fix_new (fragS *,int, int, expressionS *);
 
 /* This should just call either `number_to_chars_bigendian' or
    `number_to_chars_littleendian', whichever is appropriate.  On
@@ -100,8 +100,8 @@ void avr_cons_fix_new(fragS *frag,int where, int nbytes, expressionS *exp);
    relative adjustment should be made.  On many processors, the base
    of a PC relative instruction is the next instruction, so this
    macro would return the length of an instruction.  */
-#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
-extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
+#define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
+extern long md_pcrel_from_section (struct fix *, segT);
 
 /* The number of bytes to put into a word in a listing.  This affects
    the way the bytes are clumped together in the listing.  For

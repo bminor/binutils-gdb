@@ -1,3 +1,9 @@
+2005-10-12  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-avr.c: Convert to ISO C90 format.  Fix formatting and
+	generally tidy up the code.
+	* config/tc-avr.h: Likewise.
+
 2005-10-12  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (dot_reg_val): Use expression_and_evaluate.
