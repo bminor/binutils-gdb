@@ -1,3 +1,8 @@
+2005-10-11  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* rclex.l (handle quotes): Stop parsing hex notation escaped
+	chars after the first two digits,
+
 2005-10-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/1437

@@ -308,6 +308,7 @@ handle_quotes (const char *input, unsigned long *len)
   char *ret, *s;
   const char *t;
   int ch;
+  int num_xdigits;
 
   ret = get_string (strlen (input) + 1);
 
@@ -389,7 +390,11 @@ handle_quotes (const char *input, unsigned long *len)
 	    case 'x':
 	      ++t;
 	      ch = 0;
-	      while (1)
+	      /* We only handle single byte chars here.  Make sure
+		 we finish an escape sequence like "/xB0ABC" after
+		 the first two digits.  */
+              num_xdigits = 2;
+ 	      while (num_xdigits--)
 		{
 		  if (*t >= '0' && *t <= '9')
 		    ch = (ch << 4) | (*t - '0');
