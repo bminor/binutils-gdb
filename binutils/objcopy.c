@@ -1349,13 +1349,6 @@ copy_object (bfd *ibfd, bfd *obfd)
 	  bfd_nonfatal (gnu_debuglink_filename);
 	  return FALSE;
 	}
-
-      if (bfd_get_flavour (obfd) == bfd_target_coff_flavour)
-	/* Try to set the VMA of the section to some non-zero value so
-	   that it will work for PE format files.  (We have no way to
-	   distinguish between COFF and PE flavours).  If this does not
-	   work, just ignore the failure.  */
-	bfd_set_section_vma (obfd, gnu_debuglink_section, 0xf0000000);
     }
 
   if (bfd_count_sections (obfd) == 0)
