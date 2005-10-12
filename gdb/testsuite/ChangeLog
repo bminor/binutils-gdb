@@ -1,3 +1,10 @@
+2005-10-12  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/structs.exp (any): New function.
+	(test_struct_returns): Don't make any assumptions at all about
+	what value the function returns when GDB can't set the return
+	value.
+
 2005-10-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/arrayidx/p.adb: New file.

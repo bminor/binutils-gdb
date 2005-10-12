@@ -162,6 +162,29 @@ proc zed { n } {
     } $n]
 }
 
+proc any { n } {
+    return [lindex {
+	"{}"
+	"{a = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*, p = \[^,\}\]*}"
+	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*, p = \[^,\}\]*, q = \[^,\}\]*}"
+    } $n]
+}
+
 # Given N (0..25), return the corresponding alphabetic letter in lower
 # or upper case.  This is ment to be i18n proof.
 
@@ -330,28 +353,43 @@ proc test_struct_returns { n } {
     # Check that the return-value is as expected.  At this stage we're
     # just checking that GDB has returned a value consistent with
     # "return_value_known" set above.
+    #
+    # Note that, when return_value_known is false, we can't make any
+    # assumptions at all about the value L<n>:
+    #
+    # - If the caller passed the address of L<n> directly as fun<n>'s
+    #   return value buffer, then L<n> will be unchanged, because we
+    #   forced fun<n> to return before it could store anything in it.
+    #
+    # - If the caller passed the address of some temporary buffer to
+    #   fun<n>, and then copied the buffer into L<n>, then L<n> will
+    #   have been overwritten with whatever garbage was in the
+    #   uninitialized buffer.
+    #
+    # - However, if the temporary buffer just happened to have the
+    #   "right" value of foo<n> in it, then L<n> will, in fact, have
+    #   the value you'd expect to see if the 'return' had worked!
+    #   This has actually been observed to happen on the Renesas M32C.
+    #
+    # So, really, anything is acceptable unless return_value_known is
+    # true.
 
     set test "value foo<n> returned; ${tests}"
     gdb_test_multiple "p/c L${n}" "${test}" {
 	-re " = [foo ${n}].*${gdb_prompt} $" {
-	    if $return_value_known {
-		pass "${test}"
-		# This contradicts the above claim that GDB didn't
-		# know the location of the return-value.
-	    } else {
-		fail "${test}"
-	    }
+            # This answer is okay regardless of whether GDB claims to
+            # have set the return value: if it did, then this is what
+            # we expected; and if it didn't, then any answer is okay.
+            pass "${test}"
 	}
-	-re " = [zed ${n}].*${gdb_prompt} $" {
+	-re " = [any $n].*${gdb_prompt} $" {
 	    if $return_value_known {
 		# This contradicts the above claim that GDB knew
-		# the location of the return-value.
+		# the location of the return value.
 		fail "${test}"
 	    } else {
-		# The struct return case.  Since any modification
-		# would be by reference, and that can't happen, the
-		# value should be unmodified and hence Z is expected.
-		# Is this a reasonable assumption?
+                # We expected L${n} to be set to garbage, so any
+                # answer is acceptable.
 		pass "${test}"
 	    }
 	}
