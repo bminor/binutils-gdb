@@ -2881,12 +2881,10 @@ proc do_system {} {
 	    -re "^ +\[0-9\]+ 0048 04A41346\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 004c 04A41366\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0050 04A41306\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0054 04A41326\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0058 04A41306\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 005c 04A41040\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0060 04A42040\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0064 04A41000\[^\n]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0068 04A42000\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0054 04A41040\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0058 04A42040\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 005c 04A41000\[^\n]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0060 04A42000\[^\n]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
@@ -2898,7 +2896,7 @@ proc do_system {} {
     gas_finish
 
     # Did we find what we were looking for?  If not, flunk it.
-    if [expr $x==27] then { pass $testname } else { fail $testname }
+    if [expr $x==25] then { pass $testname } else { fail $testname }
 }
 
 proc do_system2 {} {

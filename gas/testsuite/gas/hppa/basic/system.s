@@ -28,8 +28,6 @@
 	
 	lpa %r4(%sr0,%r5),%r6
 	lpa,m %r4(%sr0,%r5),%r6
-	lha %r4(%sr0,%r5),%r6
-	lha,m %r4(%sr0,%r5),%r6
 	lci %r4(%sr0,%r5),%r6
 
 	idtlba %r4,(%sr0,%r5)
