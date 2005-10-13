@@ -1622,7 +1622,8 @@ pa_ip (str)
       break;
 
     default:
-      as_fatal (_("Unknown opcode: `%s'"), str);
+      as_bad (_("Unknown opcode: `%s'"), str);
+      return;
     }
 
   /* Look up the opcode in the has table.  */

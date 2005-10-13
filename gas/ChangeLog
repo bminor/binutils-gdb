@@ -1,3 +1,9 @@
+2005-10-12  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR binutils/941
+	* config/tc-hppa.c (pa_ip): Use as_bad instead of as_fatal when an
+	unknown opcode is found.
+
 2005-10-12  Mark Mitchell  <mark@codesourcery.com>
 
 	* NEWS: Mention @file.
