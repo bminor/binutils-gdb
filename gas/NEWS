@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add support for the "@<file>" syntax to the command line, so that extra
+  switches can be read from <file>.
+
 * The SH target supports a new command line switch --enable-reg-prefix which,
   if enabled, will allow register names to be optionally prefixed with a $
   character.  This allows register names to be distinguished from label names.

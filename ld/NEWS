@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add support for the "@<file>" syntax to the command line, so that extra
+  switches can be read from <file>.
+
 Changes in 2.16:
 
 * Support for the R_ARM_V4BX relocation as defined in the ARM AAELF

@@ -1,3 +1,7 @@
+2005-10-12  Mark Mitchell  <mark@codesourcery.com>
+
+	* NEWS: Mention @file.
+
 2005-10-12  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-avr.c: Convert to ISO C90 format.  Fix formatting and
