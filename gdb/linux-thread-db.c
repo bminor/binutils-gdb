@@ -36,6 +36,7 @@
 #include "target.h"
 #include "regcache.h"
 #include "solib-svr4.h"
+#include "gdbcore.h"
 
 #ifdef HAVE_GNU_LIBC_VERSION_H
 #include <gnu/libc-version.h>
@@ -505,9 +506,14 @@ enable_thread_event (td_thragent_t *thread_agent, int event, CORE_ADDR *bp)
     return err;
 
   /* Set up the breakpoint.  */
-  (*bp) = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
-					      (CORE_ADDR) notify.u.bptaddr,
-					      &current_target);
+  gdb_assert (exec_bfd);
+  (*bp) = (gdbarch_convert_from_func_ptr_addr
+	   (current_gdbarch,
+	    /* Do proper sign extension for the target.  */
+	    (bfd_get_sign_extend_vma (exec_bfd) > 0
+	     ? (CORE_ADDR) (intptr_t) notify.u.bptaddr
+	     : (CORE_ADDR) (uintptr_t) notify.u.bptaddr),
+	    &current_target));
   create_thread_event_breakpoint ((*bp));
 
   return TD_OK;
@@ -1277,7 +1283,11 @@ thread_db_get_thread_local_address (ptid_t ptid,
                      (("%s")), thread_db_err_str (err));
 
       /* Cast assuming host == target.  Joy.  */
-      return (CORE_ADDR) address;
+      /* Do proper sign extension for the target.  */
+      gdb_assert (exec_bfd);
+      return (bfd_get_sign_extend_vma (exec_bfd) > 0
+	      ? (CORE_ADDR) (intptr_t) address
+	      : (CORE_ADDR) (uintptr_t) address);
     }
 
   if (target_beneath->to_get_thread_local_address)
