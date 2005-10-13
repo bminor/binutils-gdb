@@ -1219,11 +1219,19 @@ vers_tag:
 vers_defns:
 		VERS_IDENTIFIER
 		{
-		  $$ = lang_new_vers_pattern (NULL, $1, ldgram_vers_current_lang);
+		  $$ = lang_new_vers_pattern (NULL, $1, ldgram_vers_current_lang, FALSE);
+		}
+        |       NAME
+		{
+		  $$ = lang_new_vers_pattern (NULL, $1, ldgram_vers_current_lang, TRUE);
 		}
 	|	vers_defns ';' VERS_IDENTIFIER
 		{
-		  $$ = lang_new_vers_pattern ($1, $3, ldgram_vers_current_lang);
+		  $$ = lang_new_vers_pattern ($1, $3, ldgram_vers_current_lang, FALSE);
+		}
+	|	vers_defns ';' NAME
+		{
+		  $$ = lang_new_vers_pattern ($1, $3, ldgram_vers_current_lang, TRUE);
 		}
 	|	vers_defns ';' EXTERN NAME '{'
 			{
@@ -1250,27 +1258,27 @@ vers_defns:
 			}
 	|	GLOBAL
 		{
-		  $$ = lang_new_vers_pattern (NULL, "global", ldgram_vers_current_lang);
+		  $$ = lang_new_vers_pattern (NULL, "global", ldgram_vers_current_lang, FALSE);
 		}
 	|	vers_defns ';' GLOBAL
 		{
-		  $$ = lang_new_vers_pattern ($1, "global", ldgram_vers_current_lang);
+		  $$ = lang_new_vers_pattern ($1, "global", ldgram_vers_current_lang, FALSE);
 		}
 	|	LOCAL
 		{
-		  $$ = lang_new_vers_pattern (NULL, "local", ldgram_vers_current_lang);
+		  $$ = lang_new_vers_pattern (NULL, "local", ldgram_vers_current_lang, FALSE);
 		}
 	|	vers_defns ';' LOCAL
 		{
-		  $$ = lang_new_vers_pattern ($1, "local", ldgram_vers_current_lang);
+		  $$ = lang_new_vers_pattern ($1, "local", ldgram_vers_current_lang, FALSE);
 		}
 	|	EXTERN
 		{
-		  $$ = lang_new_vers_pattern (NULL, "extern", ldgram_vers_current_lang);
+		  $$ = lang_new_vers_pattern (NULL, "extern", ldgram_vers_current_lang, FALSE);
 		}
 	|	vers_defns ';' EXTERN
 		{
-		  $$ = lang_new_vers_pattern ($1, "extern", ldgram_vers_current_lang);
+		  $$ = lang_new_vers_pattern ($1, "extern", ldgram_vers_current_lang, FALSE);
 		}
 	;
 

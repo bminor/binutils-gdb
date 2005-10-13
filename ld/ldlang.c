@@ -6222,8 +6222,8 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 		while (expr && strcmp (expr->symbol, sym) == 0)
 		  if (expr->mask == BFD_ELF_VERSION_C_TYPE)
 		    goto out_ret;
-		else
-		  expr = expr->next;
+		  else
+		    expr = expr->next;
 	      }
 	    /* Fallthrough */
 	  case BFD_ELF_VERSION_C_TYPE:
@@ -6234,8 +6234,8 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 		while (expr && strcmp (expr->symbol, cxx_sym) == 0)
 		  if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
 		    goto out_ret;
-		else
-		  expr = expr->next;
+		  else
+		    expr = expr->next;
 	      }
 	    /* Fallthrough */
 	  case BFD_ELF_VERSION_CXX_TYPE:
@@ -6246,8 +6246,8 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 		while (expr && strcmp (expr->symbol, java_sym) == 0)
 		  if (expr->mask == BFD_ELF_VERSION_JAVA_TYPE)
 		    goto out_ret;
-		else
-		  expr = expr->next;
+		  else
+		    expr = expr->next;
 	      }
 	    /* Fallthrough */
 	  default:
@@ -6260,9 +6260,12 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
     expr = head->remaining;
   else
     expr = prev->next;
-  while (expr)
+  for (; expr; expr = expr->next)
     {
       const char *s;
+
+      if (!expr->pattern)
+	continue;
 
       if (expr->pattern[0] == '*' && expr->pattern[1] == '\0')
 	break;
@@ -6275,7 +6278,6 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	s = sym;
       if (fnmatch (expr->pattern, s, 0) == 0)
 	break;
-      expr = expr->next;
     }
 
 out_ret:
@@ -6330,21 +6332,24 @@ realsymbol (const char *pattern)
     }
 }
 
-/* This is called for each variable name or match expression.  */
+/* This is called for each variable name or match expression.  NEW is
+   the name of the symbol to match, or, if LITERAL_P is FALSE, a glob
+   pattern to be matched against symbol names.  */
 
 struct bfd_elf_version_expr *
 lang_new_vers_pattern (struct bfd_elf_version_expr *orig,
 		       const char *new,
-		       const char *lang)
+		       const char *lang,
+		       bfd_boolean literal_p)
 {
   struct bfd_elf_version_expr *ret;
 
   ret = xmalloc (sizeof *ret);
   ret->next = orig;
-  ret->pattern = new;
+  ret->pattern = literal_p ? NULL : new;
   ret->symver = 0;
   ret->script = 0;
-  ret->symbol = realsymbol (new);
+  ret->symbol = literal_p ? new : realsymbol (new);
 
   if (lang == NULL || strcasecmp (lang, "C") == 0)
     ret->mask = BFD_ELF_VERSION_C_TYPE;
@@ -6628,7 +6633,7 @@ lang_do_version_exports_section (void)
       p = contents;
       while (p < contents + len)
 	{
-	  greg = lang_new_vers_pattern (greg, p, NULL);
+	  greg = lang_new_vers_pattern (greg, p, NULL, FALSE);
 	  p = strchr (p, '\0') + 1;
 	}
 
@@ -6638,7 +6643,7 @@ lang_do_version_exports_section (void)
       sec->flags |= SEC_EXCLUDE;
     }
 
-  lreg = lang_new_vers_pattern (NULL, "*", NULL);
+  lreg = lang_new_vers_pattern (NULL, "*", NULL, FALSE);
   lang_register_vers_node (command_line.version_exports_section,
 			   lang_new_vers_node (greg, lreg), NULL);
 }

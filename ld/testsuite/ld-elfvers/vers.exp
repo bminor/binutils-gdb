@@ -964,3 +964,6 @@ build_vers_lib_pic_flags "vers29" vers29.c vers29 "" "" vers29.ver vers29.dsym "
 # Test #30 - test handling of symbol names global, local and extern in the
 # version script.
 build_vers_lib_pic "vers30" vers30.c vers30 "" vers30.map vers30.ver vers30.dsym ""
+
+# Test #31 -- quoted strings in version sections.
+build_vers_lib_pic "vers31" vers31.c vers31 "" vers31.map vers31.ver vers31.dsym ""

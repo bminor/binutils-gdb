@@ -1,3 +1,11 @@
+2005-10-13 Mark Mitchell  <mark@codesourcery.com>
+
+	* ld-elfvers/vers.exp: Add vers31.
+	* ld-elfvers/vers31.c: New file.
+	* ld-elfvers/vers31.dsym: Likewise.
+	* ld-elfvers/vers31.map: Likewise.
+	* ld-elfvers/vers31.ver: Likewise.
+
 2005-10-08  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-rel31.d: Ignore Arm object attribute sections.
