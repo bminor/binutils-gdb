@@ -1,3 +1,8 @@
+2005-10-14  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* cpu/m32r.opc (parse_slo16): Do not assume a 32-bit host word
+	size.
+
 2005-07-25  DJ Delorie  <dj@redhat.com>
 
 	* m32c.opc (parse_unsigned8): Add %dsp8().

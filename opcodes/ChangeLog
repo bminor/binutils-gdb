@@ -1,3 +1,7 @@
+2005-10-14  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* m32r-asm.c: Regenerate after updating m32r.opc.
+
 2005-10-08  James Lemke  <jim@wasabisystems.com>
 
 	* arm-dis.c (coprocessor_opcodes): Fix mask for various Maverick CDP

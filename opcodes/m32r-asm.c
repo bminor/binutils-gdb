@@ -144,7 +144,7 @@ parse_slo16 (CGEN_CPU_DESC cd,
         {
 	  value &= 0xffff;
           if (value & 0x8000)
-             value |= 0xffff0000;
+	    value |= ~0xffff;
         }
       *valuep = value;
       return errmsg;
