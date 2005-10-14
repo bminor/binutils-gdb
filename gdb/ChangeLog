@@ -1,3 +1,8 @@
+2005-10-14  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * rs6000-tdep.c (rs6000_register_reggroup_p): Add vscr to test for
+        vector registers.
+
 2005-10-13  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (linux-thread-db.o): Depend on $(gdbcore_h).

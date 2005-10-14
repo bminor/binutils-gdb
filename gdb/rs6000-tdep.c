@@ -1888,6 +1888,7 @@ rs6000_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	      || (tdep->ppc_ev0_regnum >= 0
 		  && regnum >= tdep->ppc_ev0_regnum
 		  && regnum < tdep->ppc_ev0_regnum + 32)
+	      || regnum == tdep->ppc_vrsave_regnum - 1 /* vscr */
 	      || regnum == tdep->ppc_vrsave_regnum
 	      || regnum == tdep->ppc_acc_regnum
 	      || regnum == tdep->ppc_spefscr_regnum);
