@@ -1,5 +1,14 @@
 2005-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* coff-rs6000.c (rs6000coff_vec): Initialize
+	_bfd_match_sections_by_type with
+	_bfd_generic_match_sections_by_type.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
+	(aix5coff64_vec): Likewise.
+
+2005-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/1467
 	* elf-bfd.h (_bfd_elf_match_sections_by_type): New.
 	(_bfd_generic_match_sections_by_type): New. Defined.
