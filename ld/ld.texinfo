@@ -4442,6 +4442,7 @@ expressions.
 @menu
 * Constants::			Constants
 * Symbols::			Symbol Names
+* Orphan Sections::		Orphan Sections
 * Location Counter::		The Location Counter
 * Operators::			Operators
 * Evaluation::			Evaluation
@@ -4502,6 +4503,22 @@ keyword by surrounding the symbol name in double quotes:
 Since symbols can contain many non-alphabetic characters, it is safest
 to delimit symbols with spaces.  For example, @samp{A-B} is one symbol,
 whereas @samp{A - B} is an expression involving subtraction.
+
+@node Orphan Sections
+@subsection Orphan Sections
+@cindex orphan
+Orphan sections are sections present in the input files which
+are not explicitly placed into the output file by the linker
+script.  The linker will still copy these sections into the
+output file, but it has to guess as to where they should be
+placed.  The linker uses a simple heuristic to do this.  It
+attempts to place orphan sections after non-orphan sections of the
+same attribute, such as code vs data, loadable vs non-loadable, etc.
+If there is not enough room to do this then it places
+at the end of the file.
+
+For ELF targets, the attribute of the section includes section type as
+well as section flag.
 
 @node Location Counter
 @subsection The Location Counter

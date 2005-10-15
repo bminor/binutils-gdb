@@ -8502,3 +8502,18 @@ asection _bfd_elf_large_com_section
   = BFD_FAKE_SECTION (_bfd_elf_large_com_section,
 		      SEC_IS_COMMON, NULL, NULL, "LARGE_COMMON",
 		      0);
+
+/* Return TRUE if 2 section types are compatible.  */
+
+bfd_boolean
+_bfd_elf_match_sections_by_type (bfd *abfd, const asection *asec,
+				 bfd *bbfd, const asection *bsec)
+{
+  if (asec == NULL
+      || bsec == NULL
+      || abfd->xvec->flavour != bfd_target_elf_flavour
+      || bbfd->xvec->flavour != bfd_target_elf_flavour)
+    return TRUE;
+
+  return elf_section_type (asec) == elf_section_type (bsec);
+}

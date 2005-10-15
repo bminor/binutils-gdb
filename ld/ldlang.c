@@ -1149,7 +1149,13 @@ lang_output_section_find_by_flags (const asection *sec,
     {
       flags = look->flags;
       if (look->bfd_section != NULL)
-	flags = look->bfd_section->flags;
+	{
+	  flags = look->bfd_section->flags;
+	  if (!bfd_match_sections_by_type (output_bfd,
+					   look->bfd_section,
+					   sec->owner, sec))
+	    continue;
+	}
       flags ^= sec->flags;
       if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY
 		     | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
@@ -1168,7 +1174,13 @@ lang_output_section_find_by_flags (const asection *sec,
 	{
 	  flags = look->flags;
 	  if (look->bfd_section != NULL)
-	    flags = look->bfd_section->flags;
+	    {
+	      flags = look->bfd_section->flags;
+	      if (!bfd_match_sections_by_type (output_bfd,
+					       look->bfd_section,
+					       sec->owner, sec))
+		continue;
+	    }
 	  flags ^= sec->flags;
 	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
 			 | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
@@ -1184,7 +1196,13 @@ lang_output_section_find_by_flags (const asection *sec,
 	{
 	  flags = look->flags;
 	  if (look->bfd_section != NULL)
-	    flags = look->bfd_section->flags;
+	    {
+	      flags = look->bfd_section->flags;
+	      if (!bfd_match_sections_by_type (output_bfd,
+					       look->bfd_section,
+					       sec->owner, sec))
+		continue;
+	    }
 	  flags ^= sec->flags;
 	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
 			 | SEC_READONLY))
@@ -1201,7 +1219,13 @@ lang_output_section_find_by_flags (const asection *sec,
 	{
 	  flags = look->flags;
 	  if (look->bfd_section != NULL)
-	    flags = look->bfd_section->flags;
+	    {
+	      flags = look->bfd_section->flags;
+	      if (!bfd_match_sections_by_type (output_bfd,
+					       look->bfd_section,
+					       sec->owner, sec))
+		continue;
+	    }
 	  flags ^= sec->flags;
 	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
 			 | SEC_THREAD_LOCAL))
@@ -1219,7 +1243,13 @@ lang_output_section_find_by_flags (const asection *sec,
 	{
 	  flags = look->flags;
 	  if (look->bfd_section != NULL)
-	    flags = look->bfd_section->flags;
+	    {
+	      flags = look->bfd_section->flags;
+	      if (!bfd_match_sections_by_type (output_bfd,
+					       look->bfd_section,
+					       sec->owner, sec))
+		continue;
+	    }
 	  flags ^= sec->flags;
 	  if (!(flags & (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD
 			 | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
@@ -1233,7 +1263,13 @@ lang_output_section_find_by_flags (const asection *sec,
     {
       flags = look->flags;
       if (look->bfd_section != NULL)
-	flags = look->bfd_section->flags;
+	{
+	  flags = look->bfd_section->flags;
+	  if (!bfd_match_sections_by_type (output_bfd,
+					   look->bfd_section,
+					   sec->owner, sec))
+	    continue;
+	}
       flags ^= sec->flags;
       if (!(flags & SEC_ALLOC))
 	found = look;

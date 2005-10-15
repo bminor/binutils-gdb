@@ -1033,3 +1033,12 @@ _bfd_generic_find_line (bfd *abfd ATTRIBUTE_UNUSED,
 {
   return FALSE;
 }
+
+bfd_boolean
+_bfd_generic_match_sections_by_type (bfd *abfd ATTRIBUTE_UNUSED,
+				     const asection *asec ATTRIBUTE_UNUSED,
+				     bfd *bbfd ATTRIBUTE_UNUSED,
+				     const asection *bsec ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}

@@ -4926,6 +4926,7 @@ typedef struct bfd_target
   NAME##_bfd_link_split_section, \
   NAME##_bfd_gc_sections, \
   NAME##_bfd_merge_sections, \
+  _bfd_generic_match_sections_by_type, \
   NAME##_bfd_is_group_section, \
   NAME##_bfd_discard_group, \
   NAME##_section_already_linked \
@@ -4964,6 +4965,12 @@ typedef struct bfd_target
 
   /* Attempt to merge SEC_MERGE sections.  */
   bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);
+
+#define bfd_match_sections_by_type(abfd, asec, bbfd, bsec) \
+  BFD_SEND (abfd, _bfd_match_sections_by_type, (abfd, asec, bbfd, bsec))
+  /* Return TRUE if 2 section types are compatible.  */
+  bfd_boolean (*_bfd_match_sections_by_type)
+    (bfd *, const asection *, bfd *, const asection *);
 
   /* Is this section a member of a group?  */
   bfd_boolean (*_bfd_is_group_section) (bfd *, const struct bfd_section *);

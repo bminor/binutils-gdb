@@ -1,3 +1,23 @@
+2005-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1467
+	* elf-bfd.h (_bfd_elf_match_sections_by_type): New.
+	(_bfd_generic_match_sections_by_type): New. Defined.
+
+	* elf.c (_bfd_elf_match_sections_by_type): New.
+
+	* libbfd-in.h (_bfd_generic_match_sections_by_type): New.
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+	* libbfd.c (_bfd_generic_match_sections_by_type): New.
+
+	* targets.c (BFD_JUMP_TABLE_LINK): Initialize
+	_bfd_match_sections_by_type with
+	_bfd_generic_match_sections_by_type.
+	(bfd_target): Add _bfd_match_sections_by_type.
+
 2005-10-08  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c: Move #include "elf/arm.h" after libbfd.h.

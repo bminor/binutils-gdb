@@ -53,6 +53,7 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #include "ldemul.h"
 #include <ldgram.h>
 #include "elf/common.h"
+#include "elf-bfd.h"
 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
@@ -1324,19 +1325,34 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
   lang_output_section_statement_type *after;
   lang_output_section_statement_type *os;
   int isdyn = 0;
+  int iself = s->owner->xvec->flavour == bfd_target_elf_flavour;
+  unsigned int sh_type = iself ? elf_section_type (s) : SHT_NULL;
 
   secname = bfd_get_section_name (s->owner, s);
 
   if (! link_info.relocatable
       && link_info.combreloc
-      && (s->flags & SEC_ALLOC)
-      && strncmp (secname, ".rel", 4) == 0)
+      && (s->flags & SEC_ALLOC))
     {
-      if (secname[4] == 'a')
-	secname = ".rela.dyn";
-      else
-	secname = ".rel.dyn";
-      isdyn = 1;
+      if (iself)
+	switch (sh_type)
+	  {
+	  case SHT_RELA:
+	    secname = ".rela.dyn";
+	    isdyn = 1;
+	    break;
+	  case SHT_REL:
+	    secname = ".rel.dyn";
+	    isdyn = 1;
+	    break;
+	  default:
+	    break;
+	  }
+      else if (strncmp (secname, ".rel", 4) == 0)
+	{
+	  secname = secname[4] == 'a' ? ".rela.dyn" : ".rel.dyn";
+	  isdyn = 1;
+	}
     }
 
   if (isdyn || (!config.unique_orphan_sections && !unique_section_p (s)))
@@ -1347,8 +1363,10 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
       if (os != NULL
 	  && (os->bfd_section == NULL
 	      || os->bfd_section->flags == 0
-	      || ((s->flags ^ os->bfd_section->flags)
-		  & (SEC_LOAD | SEC_ALLOC)) == 0))
+	      || ((!iself
+		   || sh_type == elf_section_type (os->bfd_section))
+		  && ((s->flags ^ os->bfd_section->flags)
+		      & (SEC_LOAD | SEC_ALLOC)) == 0)))
 	{
 	  /* We already have an output section statement with this
 	     name, and its bfd section, if any, has compatible flags.
@@ -1395,7 +1413,8 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
   if ((s->flags & SEC_ALLOC) == 0)
     ;
   else if ((s->flags & SEC_LOAD) != 0
-	   && strncmp (secname, ".note", 5) == 0)
+	   && ((iself && sh_type == SHT_NOTE)
+	       || (!iself && strncmp (secname, ".note", 5) == 0)))
     place = &hold[orphan_interp];
   else if ((s->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
     place = &hold[orphan_bss];
@@ -1403,7 +1422,8 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
     place = &hold[orphan_sdata];
   else if ((s->flags & SEC_READONLY) == 0)
     place = &hold[orphan_data];
-  else if (strncmp (secname, ".rel", 4) == 0
+  else if (((iself && (sh_type == SHT_RELA || sh_type == SHT_REL))
+	    || (!iself && strncmp (secname, ".rel", 4) == 0))
 	   && (s->flags & SEC_LOAD) != 0)
     place = &hold[orphan_rel];
   else if ((s->flags & SEC_CODE) == 0)
