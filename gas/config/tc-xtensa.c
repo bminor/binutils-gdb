@@ -422,7 +422,6 @@ bfd_boolean directive_state[] =
 
 static void xtensa_begin_directive (int);
 static void xtensa_end_directive (int);
-static void xtensa_dwarf2_directive_loc (int);
 static void xtensa_literal_prefix (char const *, int);
 static void xtensa_literal_position (int);
 static void xtensa_literal_pseudo (int);
@@ -1016,7 +1015,6 @@ const pseudo_typeS md_pseudo_table[] =
   { "short", xtensa_elf_cons, 2 },
   { "begin", xtensa_begin_directive, 0 },
   { "end", xtensa_end_directive, 0 },
-  { "loc", xtensa_dwarf2_directive_loc, 0 },
   { "literal", xtensa_literal_pseudo, 0 },
   { "frequency", xtensa_frequency_pseudo, 0 },
   { NULL, 0, 0 },
@@ -1382,28 +1380,6 @@ xtensa_end_directive (int ignore ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
-}
-
-
-/* Wrap dwarf2 functions so that we correctly support the .loc directive.  */
-
-static bfd_boolean xtensa_loc_directive_seen = FALSE;
-
-static void
-xtensa_dwarf2_directive_loc (int x)
-{
-  xtensa_loc_directive_seen = TRUE;
-  dwarf2_directive_loc (x);
-}
-
-
-static void
-xtensa_dwarf2_emit_insn (int size, struct dwarf2_line_info *loc)
-{
-  if (debug_type != DEBUG_DWARF2 && ! xtensa_loc_directive_seen)
-    return;
-  xtensa_loc_directive_seen = FALSE;
-  dwarf2_gen_line_info (frag_now_fix () - size, loc);
 }
 
 
@@ -3348,7 +3324,7 @@ xg_build_to_insn (TInsn *targ, TInsn *insn, BuildInstr *bi)
   symbolS *sym;
 
   memset (targ, 0, sizeof (TInsn));
-  targ->loc = insn->loc;
+  targ->linenum = insn->linenum;
   switch (bi->typ)
     {
     case INSTR_INSTR:
@@ -3804,13 +3780,13 @@ xg_build_token_insn (BuildInstr *instr_spec, TInsn *old_insn, TInsn *new_insn)
       new_insn->insn_type = ITYPE_INSN;
       new_insn->opcode = instr_spec->opcode;
       new_insn->is_specific_opcode = FALSE;
-      new_insn->loc = old_insn->loc;
+      new_insn->linenum = old_insn->linenum;
       break;
     case INSTR_LITERAL_DEF:
       new_insn->insn_type = ITYPE_LITERAL;
       new_insn->opcode = XTENSA_UNDEFINED;
       new_insn->is_specific_opcode = FALSE;
-      new_insn->loc = old_insn->loc;
+      new_insn->linenum = old_insn->linenum;
       break;
     case INSTR_LABEL_DEF:
       as_bad (_("INSTR_LABEL_DEF not supported yet"));
@@ -5185,7 +5161,7 @@ void
 md_assemble (char *str)
 {
   xtensa_isa isa = xtensa_default_isa;
-  char *opname;
+  char *opname, *file_name;
   unsigned opnamelen;
   bfd_boolean has_underbar = FALSE;
   char *arg_strings[MAX_INSN_ARGS];
@@ -5274,7 +5250,11 @@ md_assemble (char *str)
       return;
     }
 
-  dwarf2_where (&orig_insn.loc);
+  /* A FLIX bundle may be spread across multiple input lines.  We want to
+     report the first such line in the debug information.  Record the line
+     number for each TInsn (assume the file name doesn't change), so the
+     first line can be found later.  */
+  as_where (&file_name, &orig_insn.linenum);
 
   xg_add_branch_and_loop_targets (&orig_insn);
 
@@ -6672,9 +6652,10 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
   int extra_space;
   char *f = NULL;
   int slot;
-  struct dwarf2_line_info best_loc;
+  unsigned current_line, best_linenum;
+  char *current_file;
 
-  best_loc.line = INT_MAX;
+  best_linenum = UINT_MAX;
 
   if (generating_literals)
     {
@@ -6736,8 +6717,8 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 	record_alignment (now_seg, 2);
 
       /* Also determine the best line number for debug info.  */
-      best_loc = vinsn->slots[i].loc.line < best_loc.line
-	? vinsn->slots[i].loc : best_loc;
+      best_linenum = vinsn->slots[i].linenum < best_linenum
+	? vinsn->slots[i].linenum : best_linenum;
     }
 
   /* Special cases for instructions that force an alignment... */
@@ -6805,7 +6786,12 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 
   xtensa_insnbuf_to_chars (isa, vinsn->insnbuf, (unsigned char *) f, 0);
 
-  xtensa_dwarf2_emit_insn (insn_size + extra_space, &best_loc);
+  /* Temporarily set the logical line number to the one we want to appear
+     in the debug information.  */
+  as_where (&current_file, &current_line);
+  new_logical_line (current_file, best_linenum);
+  dwarf2_emit_insn (insn_size + extra_space);
+  new_logical_line (current_file, current_line);
 
   for (slot = 0; slot < vinsn->num_slots; slot++)
     {

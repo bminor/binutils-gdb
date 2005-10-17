@@ -1,3 +1,15 @@
+2005-10-17  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/xtensa-istack.h (TInsn): Replace dwarf2_line_info with an
+	unsigned line number.  Do not include "dwarf2dbg.h".
+	* config/tc-xtensa.c (md_pseudo_table): Remove entry for "loc".
+	(xtensa_dwarf2_directive_loc, xtensa_dwarf2_emit_insn): Delete.
+	(xg_build_to_insn, xg_build_token_insn): Update TInsn uses.
+	(md_assemble): Use as_where instead of dwarf2_where.
+	(xg_assemble_vliw_tokens): Use unsigned line numbers instead of
+	dwarf2_line_infos.  Change to call new_logical_line followed by
+	dwarf2_emit_insn.
+
 2005-10-14  Mike Frysinger <vapier@gentoo.org>
 
 	* doc/as.texinfo (Section): Add missing ']' to .section example.

@@ -21,7 +21,6 @@
 #ifndef XTENSA_ISTACK_H
 #define XTENSA_ISTACK_H
 
-#include "dwarf2dbg.h"
 #include "xtensa-isa.h"
 
 #define MAX_ISTACK 12
@@ -47,7 +46,7 @@ typedef struct tinsn_struct
   bfd_boolean keep_wide;
   int ntok;
   expressionS tok[MAX_INSN_ARGS];
-  struct dwarf2_line_info loc;
+  unsigned linenum;
 
   struct fixP *fixup;
 
