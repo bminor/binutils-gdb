@@ -1,3 +1,8 @@
+2005-10-17  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * gdb.arch/altivec-regs.exp: Adjust "info reg vrsave" and "info reg
+        vscr" tests to better match output.
+
 2005-10-12  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/structs.exp (any): New function.
