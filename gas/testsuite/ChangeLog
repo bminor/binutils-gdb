@@ -1,3 +1,8 @@
+2005-10-17  Richard Earnshaw  <richard.earnshaw@arm.com>
+
+	* gas/arm/copro.d: 'mcrlt' instruction should not be disassembled as
+	'cfsh64lt'.
+
 2005-10-12  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* gas/hppa/basic/basic.exp (do_system): Adjust for removal of lha
