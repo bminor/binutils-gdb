@@ -1,3 +1,7 @@
+2005-10-18  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* doc/as.texinfo (.loc) Fix placement of '@end table'.
+
 2005-10-17  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/xtensa-istack.h (TInsn): Replace dwarf2_line_info with an
