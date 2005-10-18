@@ -1,3 +1,8 @@
+2005-10-18  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_end_directive): Restore
+	default_lit_sections regardless of use_literal_section.
+
 2005-10-18  Jie Zhang  <jie.zhang@analog.com>
 
 	* Makefile.am (bfin-lex.c): Update ylwrap invocation.

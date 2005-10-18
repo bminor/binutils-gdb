@@ -1361,8 +1361,7 @@ xtensa_end_directive (int ignore ATTRIBUTE_UNUSED)
 	      s = (lit_state *) state;
 	      assert (s);
 
-	      if (use_literal_section)
-		default_lit_sections = *s;
+	      default_lit_sections = *s;
 
 	      /* free the state storage */
 	      free (s);
