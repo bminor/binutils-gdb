@@ -1,3 +1,7 @@
+2005-10-18  Andreas Schwab  <schwab@suse.de>
+
+	* m32r.opc (parse_slo16): Better version of previous patch.
+
 2005-10-14  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
 
 	* cpu/m32r.opc (parse_slo16): Do not assume a 32-bit host word
