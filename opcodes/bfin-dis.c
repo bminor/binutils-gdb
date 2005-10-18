@@ -5765,13 +5765,18 @@ illegal_instruction:
 int
 print_insn_bfin (bfd_vma pc, disassemble_info *outf)
 {
-  short iw0 = 0;
-  int status = 0;
+  bfd_byte buf[2];
+  unsigned short iw0;
+  int status;
   int count = 0;
-  status = (*outf->read_memory_func) (pc & ~0x01, (bfd_byte *) & iw0, 2, outf);
+
+  status = (*outf->read_memory_func) (pc & ~0x01, buf, 2, outf);
+  iw0 = bfd_getl16 (buf);
 
   count += _print_insn_bfin (pc, outf);
+
   /* Proper display of multiple issue instructions.  */
+
   if ((iw0 & 0xc000) == 0xc000 && (iw0 & BIT_MULTI_INS)
       && ((iw0 & 0xe800) != 0xe800 /* not Linkage */ ))
     {
