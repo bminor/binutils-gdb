@@ -98,7 +98,7 @@ dwarf_expr_pop (struct dwarf_expr_context *ctx)
 CORE_ADDR
 dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n)
 {
-  if (ctx->stack_len < n)
+  if (ctx->stack_len <= n)
      error (_("Asked for position %d of stack, stack only has %d elements on it."),
 	    n, ctx->stack_len);
   return ctx->stack[ctx->stack_len - (1 + n)];

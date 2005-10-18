@@ -1,3 +1,8 @@
+2005-10-17  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2expr.c (dwarf_expr_fetch): Use correct comparison to
+	detect stack underflow.
+
 2005-10-14  Paul Gilliam  <pgilliam@us.ibm.com>
 
         * rs6000-tdep.c (rs6000_register_reggroup_p): Add vscr to test for
