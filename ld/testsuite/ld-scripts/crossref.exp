@@ -35,6 +35,13 @@ if [istarget xtensa*-*-*] {
     set CFLAGS "$CFLAGS -mtext-section-literals"
 }
 
+# If we have a compiler that doesn't use/reference dot-symbols, then
+# calls to functions reference the .opd section function descriptor.
+# This makes NOCROSSREFS rather useless on powerpc64.
+if [istarget powerpc64*-*-*] {
+    set CFLAGS "$CFLAGS -mcall-aixdesc"
+}
+
 if { ![ld_compile $CC "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
      || ![ld_compile $CC "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
     unresolved $test1
