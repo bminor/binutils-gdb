@@ -1,3 +1,8 @@
+2005-10-18  Jie Zhang  <jie.zhang@analog.com>
+
+	* Makefile.am (bfin-lex.c): Update ylwrap invocation.
+	* Makefile.in: Regenerated.
+
 2005-10-18  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* doc/as.texinfo (.loc) Fix placement of '@end table'.

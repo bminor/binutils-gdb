@@ -3142,7 +3142,7 @@ bfin-defs.h: ; @true
 $(srcdir)/config/bfin-defs.h: ; @true
 
 bfin-lex.c: $(srcdir)/config/bfin-lex.l
-	$(SHELL) $(YLWRAP) "$(LEX)" <$(srcdir)/config/bfin-lex.l lex.yy.c bfin-lex.c
+	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-lex.l lex.yy.c bfin-lex.c -- $(LEXCOMPILE)
 bfin-lex.o: bfin-lex.c bfin-parse.tab.h $(srcdir)/config/bfin-defs.h
 	$(COMPILE) -c $< $(NO_WERROR)
 
