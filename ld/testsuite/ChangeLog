@@ -1,3 +1,7 @@
+2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ia64/ia64.exp: Check link order for ld -r.
+
 2005-10-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/crossref.exp: Add -mcall-aixdesc to CFLAGS for

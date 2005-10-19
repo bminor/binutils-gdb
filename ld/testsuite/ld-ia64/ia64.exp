@@ -52,3 +52,49 @@ set ia64tests {
 }
 
 run_ld_link_tests $ia64tests
+
+# Check link order
+proc link_order {} {
+    global AS
+    global LD
+    global READELF
+    global srcdir
+    global subdir
+
+    set testname "link order"
+    if ![ld_assemble $AS $srcdir/../../binutils/testsuite/binutils-all/link-order.s tmpdir/link-order.o] {
+ 	unresolved $testname
+	return
+    }
+
+    if ![ld_simple_link $LD tmpdir/link-order.ro "-r tmpdir/link-order.o"] {
+ 	unresolved $testname
+	return
+    }
+
+    verbose -log "$READELF -t --wide tmpdir/link-order.o | grep IA_64_UNWIND > tmpdir/link-order.o.out"
+    catch "exec $READELF -t --wide tmpdir/link-order.o | grep IA_64_UNWIND > tmpdir/link-order.o.out" exec_output
+    set exec_output [prune_warnings $exec_output]
+    if ![string match "" $exec_output] then {
+ 	unresolved $testname
+	return
+    }
+
+    verbose -log "$READELF -t --wide tmpdir/link-order.ro | grep IA_64_UNWIND > tmpdir/link-order.ro.out"
+    catch "exec $READELF -t --wide tmpdir/link-order.ro | grep IA_64_UNWIND > tmpdir/link-order.ro.out" exec_output
+    set exec_output [prune_warnings $exec_output]
+    if ![string match "" $exec_output] then {
+ 	unresolved $testname
+	return
+    }
+
+    verbose -log "cmp tmpdir/link-order.o.out tmpdir/link-order.ro.out"
+    catch "exec cmp tmpdir/link-order.o.out tmpdir/link-order.ro.out" exec_output
+    if ![string match "" $exec_output] then {
+ 	fail $testname
+    } else {
+ 	pass $testname
+    }
+}
+
+link_order
