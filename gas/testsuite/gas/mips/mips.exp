@@ -771,4 +771,5 @@ if { [istarget mips*-*-*] } then {
 	    run_dump_test "mips16-dwarf2-n32"
 	}
     }
+    if { !$no_mips16 } { run_dump_test "mips16e-jrc" }
 }

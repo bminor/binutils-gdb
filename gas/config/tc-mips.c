@@ -2693,12 +2693,29 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		 sync.p, we can not swap.  */
 	      || (prev_pinfo & INSN_SYNC))
 	    {
-	      /* We could do even better for unconditional branches to
-		 portions of this object file; we could pick up the
-		 instruction at the destination, put it in the delay
-		 slot, and bump the destination address.  */
-	      insert_into_history (0, 1, ip);
-	      emit_nop ();
+	      if (mips_opts.mips16
+		  && (pinfo & INSN_UNCOND_BRANCH_DELAY)
+		  && (pinfo & (MIPS16_INSN_READ_X | MIPS16_INSN_READ_31))
+		  && (mips_opts.isa == ISA_MIPS32
+		      || mips_opts.isa == ISA_MIPS32R2
+		      || mips_opts.isa == ISA_MIPS64
+		      || mips_opts.isa == ISA_MIPS64R2))
+		{
+		  /* Convert MIPS16 jr/jalr into a "compact" jump.  */
+		  ip->insn_opcode |= 0x0080;
+		  install_insn (ip);
+		  insert_into_history (0, 1, ip);
+		} 
+	      else
+		{
+		  /* We could do even better for unconditional branches to
+		     portions of this object file; we could pick up the
+		     instruction at the destination, put it in the delay
+		     slot, and bump the destination address.  */
+		  insert_into_history (0, 1, ip);
+		  emit_nop ();
+		}
+		
 	      if (mips_relax.sequence)
 		mips_relax.sizes[mips_relax.sequence - 1] += 4;
 	    }

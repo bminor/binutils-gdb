@@ -1,3 +1,10 @@
+2005-10-19  David Ung  <davidu@mips.com>
+
+	* gas/mips/mips.exp: Run new test.
+	* gas/testsuite/gas/mips/mips16e-jrc.s: New test for converting
+	jalr/jr to the compact jalrc/jrc instructions.
+	* gas/testsuite/gas/mips/mips16e-jrc.d: New.
+
 2005-10-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* gas/s390/zarch-z9-109.s: Add tests for unnormalized hfp multiply
