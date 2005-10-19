@@ -1,5 +1,14 @@
 2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/1487
+	* binutils-all/objcopy.exp (objcopy_test): New procedure.
+	Use it to test simple copy, ia64 link order and ELF unknown
+	section type.
+
+	* binutils-all/unknown.s: New file.
+
+2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/1321
 	* binutils-all/link-order.s: New.
 

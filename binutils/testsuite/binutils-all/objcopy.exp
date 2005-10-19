@@ -30,12 +30,6 @@ if ![is_remote host] {
 
 send_user "Version [binutil_version $OBJCOPY]"
 
-if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
-    perror "unresolved 1"
-    unresolved "objcopy (simple copy)"
-    return
-}
-
 if ![is_remote host] {
     set tempfile tmpdir/bintest.o
     set copyfile tmpdir/copy
@@ -46,60 +40,78 @@ if ![is_remote host] {
 
 # Test that objcopy does not modify a file when copying it.
 
-set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $tempfile ${copyfile}.o"]
+proc objcopy_test {testname srcfile} {
+    global OBJCOPY
+    global OBJCOPYFLAGS
+    global srcdir
+    global subdir
+    global tempfile
+    global copyfile
 
-if ![string match "" $got] then {
-    fail "objcopy (simple copy)"
-} else {
-    send_log "cmp $tempfile ${copyfile}.o\n"
-    verbose "cmp $tempfile ${copyfile}.o"
-    if [is_remote host] {
-	set src1 tmpdir/bintest.o
-	set src2 tmpdir/copy.o
-	remote_upload host $tempfile $src1
-	remote_upload host ${copyfile}.o $src2
-    } else {
-	set src1 ${tempfile}
-	set src2 ${copyfile}.o
+    if {![binutils_assemble $srcdir/$subdir/${srcfile} tmpdir/bintest.o]} then {
+ 	perror "unresolved $testname"
+	unresolved "objcopy ($testname)"
+	return
     }
-    set status [remote_exec build cmp "${src1} ${src2}"]
-    set exec_output [lindex $status 1]
-    set exec_output [prune_warnings $exec_output]
 
-    # On some systems the result of objcopy will not be identical.
-    # Usually this is just because gas isn't using bfd to write the files
-    # in the first place, and may order things a little differently.
-    # Those systems should use setup_xfail here.
+    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $tempfile ${copyfile}.o"]
 
-    setup_xfail "h8300-*-rtems*" "h8300-*-coff"
-    setup_xfail "h8500-*-rtems*" "h8500-*-coff"
-    setup_xfail "hppa*-*-*"
-    setup_xfail "i960-*"
-    setup_xfail "m68*-*-*coff" "m68*-*-hpux*" "m68*-*-lynxos*"
-    setup_xfail "m68*-*-sysv*" "m68*-apple-aux*"
-    setup_xfail "m8*-*"
-    setup_xfail "or32-*-rtems*" "or32-*-coff"
-    setup_xfail "sh-*-coff*" "sh-*-rtems*" 
-    setup_xfail "tic4x-*-*" "tic80-*-*" "w65-*"
-
-    clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-    clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*" "m68*-*-sysv4*"
-
-    if [string match "" $exec_output] then {
-	pass "objcopy (simple copy)"
+    if ![string match "" $got] then {
+	fail "objcopy ($testname)"
     } else {
-	send_log "$exec_output\n"
-	verbose "$exec_output" 1
+	send_log "cmp $tempfile ${copyfile}.o\n"
+	verbose "cmp $tempfile ${copyfile}.o"
+	if [is_remote host] {
+	    set src1 tmpdir/bintest.o
+	    set src2 tmpdir/copy.o
+	    remote_upload host $tempfile $src1
+	    remote_upload host ${copyfile}.o $src2
+	} else {
+	    set src1 ${tempfile}
+	    set src2 ${copyfile}.o
+	}
+	set status [remote_exec build cmp "${src1} ${src2}"]
+	set exec_output [lindex $status 1]
+	set exec_output [prune_warnings $exec_output]
 
-	# On OSF/1, this succeeds with gas and fails with /bin/as.
-	setup_xfail "alpha*-*-osf*"
+	# On some systems the result of objcopy will not be identical.
+	# Usually this is just because gas isn't using bfd to write the
+	# files in the first place, and may order things a little
+	# differently. Those systems should use setup_xfail here.
 
-	# This fails for COFF i960-vxworks targets.
-	setup_xfail "i960-*-vxworks*"
+	setup_xfail "h8300-*-rtems*" "h8300-*-coff"
+	setup_xfail "h8500-*-rtems*" "h8500-*-coff"
+	setup_xfail "hppa*-*-*"
+	setup_xfail "i960-*"
+	setup_xfail "m68*-*-*coff" "m68*-*-hpux*" "m68*-*-lynxos*"
+	setup_xfail "m68*-*-sysv*" "m68*-apple-aux*"
+	setup_xfail "m8*-*"
+	setup_xfail "or32-*-rtems*" "or32-*-coff"
+	setup_xfail "sh-*-coff*" "sh-*-rtems*" 
+	setup_xfail "tic4x-*-*" "tic80-*-*" "w65-*"
 
-	fail "objcopy (simple copy)"
+	clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
+	clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
+	clear_xfail "m68*-*-sysv4*"
+
+	if [string match "" $exec_output] then {
+	    pass "objcopy ($testname)"
+	} else {
+	    send_log "$exec_output\n"
+	    verbose "$exec_output" 1
+
+	    # On OSF/1, this succeeds with gas and fails with /bin/as.
+	    setup_xfail "alpha*-*-osf*"
+
+	    # This fails for COFF i960-vxworks targets.
+	    setup_xfail "i960-*-vxworks*"
+
+	    fail "objcopy ($testname)"
+	}
     }
 }
+
+objcopy_test "simple copy" bintest.s
 
 # Test generating S records.
 
@@ -652,38 +664,10 @@ switch [copy_setup] {
 # ia64 specific tests
 if { ([istarget "ia64-*-elf*"]
        || [istarget "ia64-*-linux*"]) } {
-    if {![binutils_assemble $srcdir/$subdir/link-order.s tmpdir/bintest.o]} then {
-	perror "unresolved ia64 link order."
-	unresolved "objcopy (ia64 link order)"
-    } else {
-	# Test that objcopy does not modify a file with link order bit
-	# when copying it.
+    objcopy_test "ia64 link order" link-order.s
+}
 
-	set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $tempfile ${copyfile}.o"]
-
-	if ![string match "" $got] then {
-	    fail "objcopy (ia64 link order)"
-	} else {
-	    send_log "cmp $tempfile ${copyfile}.o\n"
-	    verbose "cmp $tempfile ${copyfile}.o"
-	    if [is_remote host] {
-		set src1 tmpdir/bintest.o
-		set src2 tmpdir/copy.o
-		remote_upload host $tempfile $src1
-		remote_upload host ${copyfile}.o $src2
-	    } else {
-		set src1 ${tempfile}
-		set src2 ${copyfile}.o
-	    }
-	    set status [remote_exec build cmp "${src1} ${src2}"]
-	    set exec_output [lindex $status 1]
-	    set exec_output [prune_warnings $exec_output]
-
-	    if [string match "" $exec_output] then {
-		pass "objcopy (ia64 link order)"
-	    } else {
-		fail "objcopy (ia64 link order)"
-	    }
-	}
-    }
+# ELF specific tests
+if [is_elf_format] {
+    objcopy_test "ELF unknown section type" unknown.s
 }

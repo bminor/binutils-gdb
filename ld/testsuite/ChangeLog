@@ -1,5 +1,10 @@
 2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/1487
+	* ld-elf/unknown.d: New file.
+
+2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-ia64/ia64.exp: Check link order for ld -r.
 
 2005-10-18  Alan Modra  <amodra@bigpond.net.au>
