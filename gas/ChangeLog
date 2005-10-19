@@ -1,3 +1,12 @@
+2005-10-19  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/tc-bfin.c (md_begin): Let the lex_type of '(' be
+	LEX_BEGIN_NAME.
+	(bfin_start_line_hook): Remove the workaround for LSETUP(.
+	(bfin_name_is_register): Remove the workarounds for LSETUP(
+	and SAA(.
+	(bfin_start_label): Ditto.
+
 2005-10-18  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_end_directive): Restore

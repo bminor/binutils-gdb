@@ -273,7 +273,7 @@ md_begin ()
 
   /* Ensure that lines can begin with '(', for multiple
      register stack pops. */
-  lex_type ['('] = 3;
+  lex_type ['('] = LEX_BEGIN_NAME;
   
 #ifdef OBJ_ELF
   record_alignment (text_section, 2);
@@ -754,21 +754,6 @@ bfin_start_line_hook ()
 
   while (ISSPACE (*c))
     c++;
-
-  /* Look for LSETUP(. */
-  if (!strncasecmp (input_line_pointer, "lsetup(", 7))
-    {
-      /* Need to insert space between lsetup and paren.  */
-      input_line_pointer --;
-      input_line_pointer[0] = 'l';
-      input_line_pointer[1] = 's';
-      input_line_pointer[2] = 'e';
-      input_line_pointer[3] = 't';
-      input_line_pointer[4] = 'u';
-      input_line_pointer[5] = 'p';
-      input_line_pointer[6] = ' ';
-      return;
-    }
 
   /* Look for Loop_Begin or Loop_End statements.  */
 
@@ -1892,12 +1877,6 @@ bfin_name_is_register (char *name)
   if ((name[0] == 'B' || name[0] == 'b') && name[1] == '[')
     return TRUE;
 
-  if (!strncasecmp (name, "saa(", 4))
-    return TRUE;
-
-  if (!strncasecmp (name, "lsetup(", 7))
-    return TRUE;
-
   for (i=0; bfin_reg_info[i].name != 0; i++)
    {
      if (!strcasecmp (bfin_reg_info[i].name, name))
@@ -1929,12 +1908,6 @@ bfin_start_label (char *ptr)
 
   ptr++;
   if (*ptr == '(' || *ptr == '[')
-    return FALSE;
-
-  if (!strncmp (ptr, "saa(", 4))
-    return FALSE;
-
-  if (!strncmp (ptr, "lsetup(", 7))
     return FALSE;
 
   return TRUE;
