@@ -141,11 +141,7 @@ parse_slo16 (CGEN_CPU_DESC cd,
       ++*strp;
       if (errmsg == NULL
 	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-        {
-	  value &= 0xffff;
-          if (value & 0x8000)
-	    value = ((value & 0xffff) ^ 0x8000) - 0x8000;
-	}
+	value = ((value & 0xffff) ^ 0x8000) - 0x8000;    
       *valuep = value;
       return errmsg;
     }
