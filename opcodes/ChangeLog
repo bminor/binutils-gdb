@@ -1,3 +1,8 @@
+2005-10-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* s390-opc.txt: Add unnormalized hfp multiply and multiply-and-add
+	instructions.
+
 2005-10-18  Nick Clifton  <nickc@redhat.com>
 
 	* m32r-asm.c: Regenerate after updating m32r.opc.

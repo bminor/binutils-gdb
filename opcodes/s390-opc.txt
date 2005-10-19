@@ -850,3 +850,16 @@ b9b2 cu41 RRF_M0RR "convert utf-32 to utf-8" z9-109 zarch
 b2a7 cu12 RRF_M0RR "convert utf-8 to utf-16" z9-109 zarch
 b2a7 cutfu RRF_M0RR "convert utf-8 to unicode" z9-109 zarch
 b9b0 cu14 RRF_M0RR "convert utf-8 to utf-32" z9-109 zarch
+# z9-109 unnormalized hfp multiply & multiply and add
+b33b myr RRF_F0FF "multiply unnormalized long hfp" z9-109 zarch
+b33d myhr RRF_F0FF "multiply unnormalized long hfp high" z9-109 zarch
+b339 mylr RRF_F0FF "multiply unnormalized long hfp low" z9-109 zarch
+ed000000003b my RXF_FRRDF "multiply unnormalized long hfp" z9-109 zarch
+ed000000003d myh RXF_FRRDF "multiply unnormalized long hfp high" z9-109 zarch
+ed0000000039 myl RXF_FRRDF "multiply unnormalized long hfp low" z9-109 zarch
+b33a mayr RRF_F0FF "multiply and add unnormalized long hfp" z9-109 zarch
+b33c mayhr RRF_F0FF "multiply and add unnormalized long hfp high" z9-109 zarch
+b338 maylr RRF_F0FF "multiply and add unnormalized long hfp low" z9-109 zarch
+ed000000003a may RXF_FRRDF "multiply and add unnormalized long hfp" z9-109 zarch
+ed000000003c mayh RXF_FRRDF "multiply and add unnormalized long hfp high" z9-109 zarch
+ed0000000038 mayl RXF_FRRDF "multiply and add unnormalized long hfp low" z9-109 zarch
