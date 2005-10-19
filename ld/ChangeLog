@@ -1,3 +1,7 @@
+2005-10-19  Paul Brook  <paul@codesourcery.com>
+
+	* emulparams/armelf.sh: Add .ARM.attributes to OTHER_SECTIONS.
+
 2005-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/1467
