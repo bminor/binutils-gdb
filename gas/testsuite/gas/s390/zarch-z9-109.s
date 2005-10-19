@@ -45,3 +45,15 @@ foo:
 	cu41	%r6,%r9,15
 	cu12	%r6,%r9,15
 	cu14	%r6,%r9,15
+	myr	%f6,%f9,%f5
+	myhr	%f6,%f9,%f5
+	mylr	%f6,%f9,%f5
+	my	%f6,%f9,4095(%r5,%r10)
+	myh	%f6,%f9,4095(%r5,%r10)
+	myl	%f6,%f9,4095(%r5,%r10)
+	mayr	%f6,%f9,%f5
+	mayhr	%f6,%f9,%f5
+	maylr	%f6,%f9,%f5
+	may	%f6,%f9,4095(%r5,%r10)
+	mayh	%f6,%f9,4095(%r5,%r10)
+	mayl	%f6,%f9,4095(%r5,%r10)

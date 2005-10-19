@@ -1,3 +1,9 @@
+2005-10-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* gas/s390/zarch-z9-109.s: Add tests for unnormalized hfp multiply
+	and multiply-and-add instructions.
+	* gas/s390/zarch-z9-109.d: Update expected result.
+
 2005-10-17  Richard Earnshaw  <richard.earnshaw@arm.com>
 
 	* gas/arm/copro.d: 'mcrlt' instruction should not be disassembled as
