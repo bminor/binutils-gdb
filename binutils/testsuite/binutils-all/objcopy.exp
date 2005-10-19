@@ -648,3 +648,42 @@ switch [copy_setup] {
 	strip_executable_with_saving_a_symbol "$STRIP" "-K main -K _main $STRIPFLAGS" "$test4"
     }
 }
+
+# ia64 specific tests
+if { ([istarget "ia64-*-elf*"]
+       || [istarget "ia64-*-linux*"]) } {
+    if {![binutils_assemble $srcdir/$subdir/link-order.s tmpdir/bintest.o]} then {
+	perror "unresolved ia64 link order."
+	unresolved "objcopy (ia64 link order)"
+    } else {
+	# Test that objcopy does not modify a file with link order bit
+	# when copying it.
+
+	set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $tempfile ${copyfile}.o"]
+
+	if ![string match "" $got] then {
+	    fail "objcopy (ia64 link order)"
+	} else {
+	    send_log "cmp $tempfile ${copyfile}.o\n"
+	    verbose "cmp $tempfile ${copyfile}.o"
+	    if [is_remote host] {
+		set src1 tmpdir/bintest.o
+		set src2 tmpdir/copy.o
+		remote_upload host $tempfile $src1
+		remote_upload host ${copyfile}.o $src2
+	    } else {
+		set src1 ${tempfile}
+		set src2 ${copyfile}.o
+	    }
+	    set status [remote_exec build cmp "${src1} ${src2}"]
+	    set exec_output [lindex $status 1]
+	    set exec_output [prune_warnings $exec_output]
+
+	    if [string match "" $exec_output] then {
+		pass "objcopy (ia64 link order)"
+	    } else {
+		fail "objcopy (ia64 link order)"
+	    }
+	}
+    }
+}
