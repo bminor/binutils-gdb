@@ -7311,8 +7311,8 @@ record_section_with_arm_elf_section_data (asection * sec)
   sections_with_arm_elf_section_data = entry;
 }
 
-static _arm_elf_section_data *
-get_arm_elf_section_data (asection * sec)
+static struct section_list *
+find_arm_elf_section_entry (asection * sec)
 {
   struct section_list * entry;
   static struct section_list * last_entry = NULL;
@@ -7321,27 +7321,41 @@ get_arm_elf_section_data (asection * sec)
      to the sections_with_arm_elf_section_data list in forward order and
      then looked up here in backwards order.  This makes a real difference
      to the ld-srec/sec64k.exp linker test.  */
+  entry = sections_with_arm_elf_section_data;
   if (last_entry != NULL)
     {
       if (last_entry->sec == sec)
-	return elf32_arm_section_data (sec);
-
-      if (last_entry->prev != NULL
-	  && last_entry->prev->sec == sec)
-	{
-	  last_entry = last_entry->prev;
-	  return elf32_arm_section_data (sec);
-	}
+	entry = last_entry;
+      else if (last_entry->next != NULL
+	       && last_entry->next->sec == sec)
+	entry = last_entry->next;
     }
- 
-  for (entry = sections_with_arm_elf_section_data; entry; entry = entry->next)
-    if (entry->sec == sec)
-      {
-	last_entry = entry;
-	return elf32_arm_section_data (sec);
-      }
 
-  return NULL;
+  for (; entry; entry = entry->next)
+    if (entry->sec == sec)
+      break;
+
+  if (entry)
+    /* Record the entry prior to this one - it is the entry we are most
+       likely to want to locate next time.  Also this way if we have been
+       called from unrecord_section_with_arm_elf_section_data() we will not
+       be caching a pointer that is about to be freed.  */
+    last_entry = entry->prev;
+
+  return entry;
+}
+
+static _arm_elf_section_data *
+get_arm_elf_section_data (asection * sec)
+{
+  struct section_list * entry;
+
+  entry = find_arm_elf_section_entry (sec);
+
+  if (entry)
+    return elf32_arm_section_data (entry->sec);
+  else
+    return NULL;
 }
 
 static void
@@ -7349,18 +7363,18 @@ unrecord_section_with_arm_elf_section_data (asection * sec)
 {
   struct section_list * entry;
 
-  for (entry = sections_with_arm_elf_section_data; entry; entry = entry->next)
-    if (entry->sec == sec)
-      {
-	if (entry->prev != NULL)
-	  entry->prev->next = entry->next;
-	if (entry->next != NULL)
-	  entry->next->prev = entry->prev;
-	if (entry == sections_with_arm_elf_section_data)
-	  sections_with_arm_elf_section_data = entry->next;
-	free (entry);
-	break;
-      }
+  entry = find_arm_elf_section_entry (sec);
+
+  if (entry)
+    {
+      if (entry->prev != NULL)
+	entry->prev->next = entry->next;
+      if (entry->next != NULL)
+	entry->next->prev = entry->prev;
+      if (entry == sections_with_arm_elf_section_data)
+	sections_with_arm_elf_section_data = entry->next;
+      free (entry);
+    }
 }
 
 /* Called for each symbol.  Builds a section map based on mapping symbols.

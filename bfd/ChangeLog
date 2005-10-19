@@ -1,3 +1,9 @@
+2005-10-19  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (find_arm_elf_section_entry): New function.
+	(get_arm_elf_section_data): Use it.
+	(unrecord_section_with_arm_elf_section_data): Use it.
+
 2005-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coff-rs6000.c (rs6000coff_vec): Initialize
