@@ -22,6 +22,12 @@
 #include "server.h"
 #include "linux-low.h"
 
+#include "../gdb_proc_service.h"
+
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 22
+#endif
+
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
@@ -93,6 +99,23 @@ arm_reinsert_addr ()
   unsigned long pc;
   collect_register_by_name ("lr", &pc);
   return pc;
+}
+  
+/* Fetch the thread-local storage pointer for libthread_db.  */
+
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+                    lwpid_t lwpid, int idx, void **base)
+{
+  if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
+    return PS_ERR;
+
+  /* IDX is the bias from the thread pointer to the beginning of the
+     thread descriptor.  It has to be subtracted due to implementation
+     quirks in libthread_db.  */
+  *base = (void *) ((char *)*base - idx);
+
+  return PS_OK;
 }
 
 struct linux_target_ops the_low_target = {

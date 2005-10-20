@@ -37,6 +37,13 @@
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 
+/* Defines ps_err_e, struct ps_prochandle.  */
+#include "gdb_proc_service.h"
+
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 22
+#endif
+
 extern int arm_apcs_32;
 
 #define		typeNone		0x00
@@ -95,7 +102,7 @@ get_thread_id (ptid_t ptid)
     tid = PIDGET (ptid);
   return tid;
 }
-#define GET_THREAD_ID(PTID)	get_thread_id ((PTID));
+#define GET_THREAD_ID(PTID)	get_thread_id (PTID)
 
 static void
 fetch_nwfpe_single (unsigned int fn, FPA11 * fpa11)
@@ -692,6 +699,23 @@ int
 arm_linux_kernel_u_size (void)
 {
   return (sizeof (struct user));
+}
+
+/* Fetch the thread-local storage pointer for libthread_db.  */
+
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+                    lwpid_t lwpid, int idx, void **base)
+{
+  if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
+    return PS_ERR;
+
+  /* IDX is the bias from the thread pointer to the beginning of the
+     thread descriptor.  It has to be subtracted due to implementation
+     quirks in libthread_db.  */
+  *base = (void *) ((char *)*base - idx);
+
+  return PS_OK;
 }
 
 static unsigned int
