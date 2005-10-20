@@ -208,6 +208,14 @@ struct arm_prologue_cache
 #define MAKE_THUMB_ADDR(addr)	((addr) | 1)
 #define UNMAKE_THUMB_ADDR(addr) ((addr) & ~1)
 
+/* Support routines for bitfield extraction.  */
+
+#define submask(x) ((1L << ((x) + 1)) - 1)
+#define bit(obj,st) (((obj) >> (st)) & 1)
+#define bits(obj,st,fn) (((obj) >> (st)) & submask ((fn) - (st)))
+#define sbits(obj,st,fn) \
+  ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
+
 /* Set to true if the 32-bit mode is in use.  */
 
 int arm_apcs_32 = 1;
@@ -265,83 +273,73 @@ arm_saved_pc_after_call (struct frame_info *frame)
   return ADDR_BITS_REMOVE (read_register (ARM_LR_REGNUM));
 }
 
-/* A typical Thumb prologue looks like this:
-   push    {r7, lr}
-   add     sp, sp, #-28
-   add     r7, sp, #12
-   Sometimes the latter instruction may be replaced by:
-   mov     r7, sp
-   
-   or like this:
-   push    {r7, lr}
-   mov     r7, sp
-   sub	   sp, #12
-   
-   or, on tpcs, like this:
-   sub     sp,#16
-   push    {r7, lr}
-   (many instructions)
-   mov     r7, sp
-   sub	   sp, #12
+/* Read a thumb instruction from memory. 16-bit instructions are returned in
+   the lower half of the returned word. 32-bit instructions are returned with
+   the first halfword at the most-significant end. If non-zero, the int
+   pointed to by length is set to the instruction's length in bytes.  */
 
-   There is always one instruction of three classes:
-   1 - push
-   2 - setting of r7
-   3 - adjusting of sp
+static unsigned long
+thumb_get_insn (CORE_ADDR addr, int *length)
+{
+  unsigned long insn = read_memory_unsigned_integer (addr, 2);
+  int len = 2;
+
+  if ((insn & 0xf800) > 0xe000)
+    {
+      insn = (insn << 16) | read_memory_unsigned_integer (addr + 2, 2);
+      len = 4;
+    }
+
+  if (length)
+    *length = len;
+
+  return insn;
+}
+
+/* Advance the PC across any function entry prologue instructions, apart
+   from those which have been scheduled later into the function. This function
+   handles Thumb and Thumb-2 prologues.
+   We skip over instructions of the form:
    
-   When we have found at least one of each class we are done with the prolog.
-   Note that the "sub sp, #NN" before the push does not count.
-   */
+     - push  OR  stmdb  OR  str rn,[sp,#-4]!  OR  fstmdb
+     - mov r7, sp  OR  add r7, sp, #imm
+     - sub.n sp, sp, #n  OR  sub.w sp, sp, #n
+  
+   That is, instructions which push callee-saved registers onto the stack,
+   instructions to move SP to FP (if there is one) with a possible offset, and
+   instructions to decrement the stack pointer.
+ 
+   GCC usually optimises the frame pointer away at > -O0, so we don't require
+   all the above to be present.  */
 
 static CORE_ADDR
 thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
 {
   CORE_ADDR current_pc;
-  /* findmask:
-     bit 0 - push { rlist }
-     bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
-     bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
-  */
-  int findmask = 0;
 
-  for (current_pc = pc;
-       current_pc + 2 < func_end && current_pc < pc + 40;
-       current_pc += 2)
+  for (current_pc = pc; current_pc < func_end && current_pc < pc+40;)
     {
-      unsigned short insn = read_memory_unsigned_integer (current_pc, 2);
+      int length;
+      unsigned long insn = thumb_get_insn (current_pc, &length);
 
-      if ((insn & 0xfe00) == 0xb400)		/* push { rlist } */
-	{
-	  findmask |= 1;			/* push found */
-	}
-      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
-						   sub sp, #simm */
-	{
-	  if ((findmask & 1) == 0)		/* before push ? */
-	    continue;
-	  else
-	    findmask |= 4;			/* add/sub sp found */
-	}
-      else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
-	{
-	  findmask |= 2;			/* setting of r7 found */
-	}
-      else if (insn == 0x466f)			/* mov r7, sp */
-	{
-	  findmask |= 2;			/* setting of r7 found */
-	}
-      else if (findmask == (4+2+1))
-	{
-	  /* We have found one of each type of prologue instruction */
-	  break;
-	}
+      /* FIXME: stmdb must store two or more registers!  */
+      if ((insn & 0xfffffe00) == 0xb400               /* push  */
+	  || (insn & 0xffffa000) == 0xe92d0000        /* stmdb.w sp!,{...}  */
+	  || (insn & 0xffff0fff) == 0xf84d0d04        /* str rn, [sp, #-4]!  */
+	  || (insn & 0xffff0f00) == 0xed2d0b00)       /* fstmdb[xd] sp!,{..}  */
+	;
+      else if (insn == 0x466f)                        /* mov r7, sp  */
+	;
+      else if ((insn & 0xffffff00) == 0xaf00)         /* add r7, sp, #imm  */
+	;
+      else if ((insn & 0xffffff00) == 0xb000          /* add/sub sp, #n  */
+	       || (insn & 0xfbef8f00) == 0xf1ad0d00)  /* sub.w sp, sp, #n  */
+	;
       else
-	/* Something in the prolog that we don't care about or some
-	   instruction from outside the prolog scheduled here for
-	   optimization.  */
-	continue;
-    }
+	break;
 
+      current_pc += length;
+    }
   return current_pc;
 }
 
@@ -390,7 +388,7 @@ arm_skip_prologue (CORE_ADDR pc)
         }
     }
 
-  /* Check if this is Thumb code.  */
+  /* Check if this is Thumb[-2] code.  */
   if (arm_pc_is_thumb (pc))
     return thumb_skip_prologue (pc, func_end);
 
@@ -461,6 +459,53 @@ arm_skip_prologue (CORE_ADDR pc)
   return skip_pc;		/* End of prologue */
 }
 
+/* Perform the Thumb-2 modify-constant(imm12) transformation.
+   This is how the transformation works:
+     1. 0...255 are represented as-is.
+
+     2. Otherwise the 32-bit constant is normalized by rotating left until the
+     most-significant bit is bit 7. The size of the rotation is then encoded
+     in bits 7-11, overwriting bit 7.
+
+     3. Constants of form 0x00XY00XY have bits[11:8] of imm12 set to 0b0001
+     and bits[7:0] set to 0xXY.
+
+     4. Constants of form 0xXY00XY00 as above, but bits[11:8] of imm12 are set
+     to 0b0010.
+
+     5. Similarly constants of form 0xXYXYXYXY have bits[11:8] set to 0b0011.
+*/
+
+static unsigned long
+thumb2_modify_constant (unsigned long imm12)
+{
+  unsigned int rotation = bits (imm12, 7, 11);
+  unsigned int replicate = rotation >> 1;  /* bits 8-11.  */
+
+  if (rotation >= 8)
+    {
+      imm12 = bits (imm12, 0, 6) | 0x80;
+      return (imm12 >> rotation) | (imm12 << (32 - rotation));
+    }
+  else
+    {
+      switch (replicate)
+	{
+	case 0:
+	  return imm12;
+
+	case 1:
+	  return imm12 | (imm12 << 16);
+
+	case 2:
+	  return (imm12 << 8) | (imm12 << 24);
+
+	case 3:
+	  return imm12 | (imm12 << 8) | (imm12 << 16) | (imm12 << 24);
+	}
+    }
+}
+
 /* *INDENT-OFF* */
 /* Function: thumb_scan_prologue (helper function for arm_scan_prologue)
    This function decodes a Thumb function prologue to determine:
@@ -526,16 +571,16 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 
   cache->framesize = 0;
   for (current_pc = prologue_start;
-       (current_pc < prologue_end) && ((findmask & 7) != 7);
-       current_pc += 2)
+       (current_pc < prologue_end) && ((findmask & 7) != 7);)
     {
-      unsigned short insn;
+      unsigned long insn;
+      int length;
       int regno;
       int offset;
 
-      insn = read_memory_unsigned_integer (current_pc, 2);
+      insn = thumb_get_insn (current_pc, &length);
 
-      if ((insn & 0xfe00) == 0xb400)	/* push { rlist } */
+      if ((insn & 0xfffffe00) == 0xb400)	/* push { rlist } */
 	{
 	  int mask;
 	  findmask |= 1;		/* push found */
@@ -553,11 +598,40 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 		saved_reg[regno] = regno;
 	      }
 	}
-      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
+      else if (((insn & 0xffffa000) == 0xe92d0000)
+	       && bitcount (insn & 0x5fff) > 1) /* stmfd.w sp!, { rlist }  */
+	{
+          unsigned int mask;
+	  findmask |= 1;
+
+	  /* As above, but Thumb-2 can store R0-R12 and LR.  */
+          mask = insn & 0x5fff;
+
+	  for (regno = ARM_LR_REGNUM; regno >= 0; regno--)
+	    if (mask & (1 << regno))
+	      {
+                cache->framesize += 4;
+		/* Thumb-2 doesn't need to copy high registers to low registers
+		   in order to push them, so we don't need the saved_reg
+		   array.  */
+		cache->saved_regs[regno].addr = -cache->framesize;
+	      }
+	}
+      else if ((insn & 0xffff0fff) == 0xf84d0d04)  /* str.w rn, [sp, #-4]!  */
+	{
+	  /* A single callee-saved high register (except LR) is saved with an
+	     STR instruction on Thumb-2.  */
+          int rn = bits (insn, 12, 15);
+	  cache->framesize += 4;
+	  /* Again, no need to use saved_reg[] because the high register will
+	     be pushed directly when using Thumb-2.  */
+	  cache->saved_regs[rn].addr = -cache->framesize;
+	}
+      else if ((insn & 0xffffff00) == 0xb000)	/* add sp, #simm  OR  
 						   sub sp, #simm */
 	{
 	  if ((findmask & 1) == 0)		/* before push?  */
-	    continue;
+	    goto next_iter;
 	  else
 	    findmask |= 4;			/* add/sub sp found */
 	  
@@ -569,7 +643,24 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 	    }
 	  cache->framesize -= offset;
 	}
-      else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
+      else if ((insn & 0xfbef8f00) == 0xf1ad0d00)  /* sub.w sp, sp, #imm  */
+	{
+          unsigned int imm;
+
+	  if ((findmask & 1) == 0)              /* before push?  */
+	    goto next_iter;
+	  else
+	    findmask |= 4;                      /* sub sp found.  */
+
+	  imm = bits (insn, 0, 7) | (bits (insn, 12, 14) << 8)
+	        | (bit (insn, 26) << 11);
+
+	  imm = thumb2_modify_constant (imm);
+
+	  cache->frameoffset += imm;
+	  cache->framesize += offset;
+	}
+      else if ((insn & 0xffffff00) == 0xaf00)	/* add r7, sp, #imm */
 	{
 	  findmask |= 2;			/* setting of r7 found */
 	  cache->framereg = THUMB_FP_REGNUM;
@@ -583,7 +674,7 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 	  cache->frameoffset = 0;
 	  saved_reg[THUMB_FP_REGNUM] = ARM_SP_REGNUM;
 	}
-      else if ((insn & 0xffc0) == 0x4640)	/* mov r0-r7, r8-r15 */
+      else if ((insn & 0xffffffc0) == 0x4640)	/* mov r0-r7, r8-r15 */
 	{
 	  int lo_reg = insn & 7;		/* dest.  register (r0-r7) */
 	  int hi_reg = ((insn >> 3) & 7) + 8;	/* source register (r8-15) */
@@ -593,7 +684,10 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 	/* Something in the prolog that we don't care about or some
 	   instruction from outside the prolog scheduled here for
 	   optimization.  */ 
-	continue;
+	goto next_iter;
+
+    next_iter:
+      current_pc += length;
     }
 }
 
@@ -1842,11 +1936,6 @@ condition_true (unsigned long cond, unsigned long status_reg)
 }
 
 /* Support routines for single stepping.  Calculate the next PC value.  */
-#define submask(x) ((1L << ((x) + 1)) - 1)
-#define bit(obj,st) (((obj) >> (st)) & 1)
-#define bits(obj,st,fn) (((obj) >> (st)) & submask ((fn) - (st)))
-#define sbits(obj,st,fn) \
-  ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
 #define BranchDest(addr,instr) \
   ((CORE_ADDR) (((long) (addr)) + 8 + (sbits (instr, 0, 23) << 2)))
 #define ARM_PC_32 1
