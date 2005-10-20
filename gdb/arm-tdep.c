@@ -515,6 +515,8 @@ thumb2_modify_constant (unsigned long imm12)
 	  return imm12 | (imm12 << 8) | (imm12 << 16) | (imm12 << 24);
 	}
     }
+
+  return 0;
 }
 
 /* *INDENT-OFF* */
@@ -669,7 +671,7 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 	  imm = thumb2_modify_constant (imm);
 
 	  cache->frameoffset += imm;
-	  cache->framesize += offset;
+	  cache->framesize += imm;
 	}
       else if ((insn & 0xffffff00) == 0xaf00)	/* add r7, sp, #imm */
 	{
