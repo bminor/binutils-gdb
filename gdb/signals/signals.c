@@ -30,6 +30,10 @@
 
 #include <signal.h>
 
+#ifndef SIGTRAP
+#define SIGTRAP 5
+#endif
+
 /* Always use __SIGRTMIN if it's available.  SIGRTMIN is the lowest
    _available_ realtime signal, not the lowest supported; glibc takes
    several for its own use.  */
