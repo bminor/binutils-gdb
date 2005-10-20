@@ -61,6 +61,8 @@ extern const char **gdbserver_expedite_regs;
 
 void supply_register (int n, const void *buf);
 
+void supply_register_as_string (int n, const char *buf);
+
 void supply_register_by_name (const char *name, const void *buf);
 
 void collect_register (int n, void *buf);

@@ -156,6 +156,9 @@ struct target_ops
 
   CORE_ADDR (*stopped_data_address) (void);
 
+  /* Return a string describing the optional available registers,
+     or NULL if there are none.  */
+  char *(*available_registers) (void);
 };
 
 extern struct target_ops *the_target;

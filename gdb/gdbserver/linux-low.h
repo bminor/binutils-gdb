@@ -67,9 +67,15 @@ struct linux_target_ops
   /* Whether to left-pad registers for PEEKUSR/POKEUSR if they are smaller
      than an xfer unit.  */
   int left_pad_xfer;
+
+  char *(*available_registers) (void);
 };
 
 extern struct linux_target_ops the_low_target;
+
+#ifdef HAVE_LINUX_REGSETS
+extern int use_regsets_p;
+#endif
 
 #define get_process(inf) ((struct process_info *)(inf))
 #define get_thread_process(thr) (get_process (inferior_target_data (thr)))

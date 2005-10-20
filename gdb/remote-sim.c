@@ -458,6 +458,12 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
     argv = NULL;
   sim_create_inferior (gdbsim_desc, exec_bfd, argv, env);
 
+  /* This doesn't seem like quite the right place... it would
+     be nice to have an inferior_created in a central location,
+     and a separate "target connected" observer for the ARM
+     registers hook.  */
+  observer_notify_inferior_created (current_target, from_tty);
+
   inferior_ptid = pid_to_ptid (42);
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
@@ -772,6 +778,69 @@ gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
   return len;
 }
 
+/* Implement xfer_partial for the simulator.  */
+static LONGEST
+gdbsim_xfer_partial (struct target_ops *ops, enum target_object object,
+		     const char *annex, void *readbuf, const void *writebuf,
+		     ULONGEST offset, LONGEST len)
+{
+  /* Handle memory using remote_xfer_memory.  */
+  if (object == TARGET_OBJECT_MEMORY)
+    {
+      int xfered;
+      errno = 0;
+
+      if (writebuf != NULL)
+	{
+	  void *buffer = xmalloc (len);
+	  struct cleanup *cleanup = make_cleanup (xfree, buffer);
+	  memcpy (buffer, writebuf, len);
+	  xfered = gdbsim_xfer_inferior_memory (offset, buffer, len, 1, NULL, ops);
+	  do_cleanups (cleanup);
+	}
+      else
+	xfered = gdbsim_xfer_inferior_memory (offset, readbuf, len, 0, NULL, ops);
+
+      if (xfered > 0)
+	return xfered;
+      else if (xfered == 0 && errno == 0)
+	return 0;
+      else
+	return -1;
+    }
+
+  /* Only handle reads.  */
+  if (writebuf != NULL || readbuf == NULL)
+    return -1;
+
+  switch (object)
+    {
+    case TARGET_OBJECT_AVAILABLE_REGISTERS:
+      /* FIXME: Should this be a NULL terminated string or a binary blob
+	 without trailing NUL?  */
+      if (gdbarch_sim_available_registers_p (current_gdbarch))
+	{
+	  char *result = gdbarch_sim_available_registers (current_gdbarch, ops);
+	  int total_len = strlen (result);
+	  int bytes_read;
+
+	  if (total_len > offset)
+	    {
+	      bytes_read = min (total_len - offset, len);
+	      memcpy (readbuf, result + offset, bytes_read);
+	      xfree (result);
+	      return bytes_read;
+	    }
+
+	  xfree (result);
+	  return 0;
+	}
+
+    default:
+      return -1;
+    }
+}
+
 static void
 gdbsim_files_info (struct target_ops *target)
 {
@@ -862,7 +931,8 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_fetch_registers = gdbsim_fetch_register;
   gdbsim_ops.to_store_registers = gdbsim_store_register;
   gdbsim_ops.to_prepare_to_store = gdbsim_prepare_to_store;
-  gdbsim_ops.deprecated_xfer_memory = gdbsim_xfer_inferior_memory;
+  /* gdbsim_ops.deprecated_xfer_memory = gdbsim_xfer_inferior_memory; */
+  gdbsim_ops.to_xfer_partial = gdbsim_xfer_partial;
   gdbsim_ops.to_files_info = gdbsim_files_info;
   gdbsim_ops.to_insert_breakpoint = gdbsim_insert_breakpoint;
   gdbsim_ops.to_remove_breakpoint = gdbsim_remove_breakpoint;

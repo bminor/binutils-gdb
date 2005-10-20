@@ -129,6 +129,7 @@ offset=0
 i=0
 name=x
 expedite=x
+last_g_reg=NULL
 exec < $1
 while do_read
 do
@@ -138,6 +139,9 @@ do
     continue
   elif test "${type}" = "expedite"; then
     expedite="${entry}"
+    continue
+  elif test "${type}" = "last_g_reg"; then
+    last_g_reg="\"${entry}\""
     continue
   elif test "${name}" = x; then
     echo "$0: $1 does not specify \`\`name''." 1>&2
@@ -152,13 +156,14 @@ done
 echo "};"
 echo
 echo "const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
+echo "const char *last_g_reg_${name} = $last_g_reg;"
 echo
 
 cat <<EOF
 void
 init_registers ()
 {
-    set_register_cache (regs_${name},
+    set_register_cache (regs_${name}, last_g_reg_${name},
 			sizeof (regs_${name}) / sizeof (regs_${name}[0]));
     gdbserver_expedite_regs = expedite_regs_${name};
 }

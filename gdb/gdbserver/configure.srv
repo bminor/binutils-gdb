@@ -21,6 +21,7 @@ case "${target}" in
   arm*-*-linux*)	srv_regobj=reg-arm.o
 			srv_tgtobj="linux-low.o linux-arm-low.o"
 			srv_linux_usrregs=yes
+			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
   crisv32-*-linux*)	srv_regobj=reg-crisv32.o

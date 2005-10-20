@@ -35,10 +35,10 @@ struct inferior_regcache_data
   unsigned char *registers;
 };
 
-static int register_bytes;
+static int register_bytes, g_register_bytes;
 
 static struct reg *reg_defs;
-static int num_registers;
+int num_registers;
 
 const char **gdbserver_expedite_regs;
 
@@ -91,7 +91,7 @@ regcache_invalidate ()
 int
 registers_length (void)
 {
-  return 2 * register_bytes;
+  return 2 * g_register_bytes;
 }
 
 void *
@@ -124,7 +124,7 @@ free_register_cache (void *regcache_p)
 }
 
 void
-set_register_cache (struct reg *regs, int n)
+set_register_cache (struct reg *regs, const char *last_g_reg, int n)
 {
   int offset, i;
   
@@ -139,6 +139,14 @@ set_register_cache (struct reg *regs, int n)
     }
 
   register_bytes = offset / 8;
+
+  if (last_g_reg == NULL)
+    g_register_bytes = register_bytes;
+  else
+    {
+      int n = find_regno (last_g_reg);
+      g_register_bytes = regs[n].offset + regs[n].size / 8;
+    }
 }
 
 void
@@ -146,7 +154,7 @@ registers_to_string (char *buf)
 {
   unsigned char *registers = get_regcache (current_inferior, 1)->registers;
 
-  convert_int_to_ascii (registers, buf, register_bytes);
+  convert_int_to_ascii (registers, buf, g_register_bytes);
 }
 
 void
@@ -155,11 +163,11 @@ registers_from_string (char *buf)
   int len = strlen (buf);
   unsigned char *registers = get_regcache (current_inferior, 1)->registers;
 
-  if (len != register_bytes * 2)
+  if (len != g_register_bytes * 2)
     {
-      warning ("Wrong sized register packet (expected %d bytes, got %d)", 2*register_bytes, len);
-      if (len > register_bytes * 2)
-	len = register_bytes * 2;
+      warning ("Wrong sized register packet (expected %d bytes, got %d)", 2*g_register_bytes, len);
+      if (len > g_register_bytes * 2)
+	len = g_register_bytes * 2;
     }
   convert_ascii_to_int (buf, registers, len / 2);
 }
@@ -213,6 +221,12 @@ void
 supply_register (int n, const void *buf)
 {
   memcpy (register_data (n, 0), buf, register_size (n));
+}
+
+void
+supply_register_as_string (int n, const char *buf)
+{
+  convert_ascii_to_int (buf, register_data (n, 0), register_size (n));
 }
 
 void

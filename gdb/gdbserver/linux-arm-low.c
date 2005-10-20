@@ -28,6 +28,23 @@
 #define PTRACE_GET_THREAD_AREA 22
 #endif
 
+#include <sys/ptrace.h>
+
+/* Correct for all GNU/Linux targets (for quite some time).  */
+#define GDB_GREGSET_T elf_gregset_t
+#define GDB_FPREGSET_T elf_fpregset_t
+
+#ifndef HAVE_ELF_FPREGSET_T
+/* Make sure we have said types.  Not all platforms bring in <linux/elf.h>
+   via <sys/procfs.h>.  */
+#ifdef HAVE_LINUX_ELF_H   
+#include <linux/elf.h>    
+#endif
+#endif
+   
+#define PTRACE_GETWMMXREGS 18
+#define PTRACE_SETWMMXREGS 19
+
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
@@ -89,6 +106,85 @@ arm_breakpoint_at (CORE_ADDR where)
      one.  */
   return 0;
 }
+  
+static void
+arm_fill_gregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < arm_num_regs; i++)
+    if (arm_regmap[i] != -1)
+      collect_register (i, ((char *) buf) + arm_regmap[i]);
+}
+ 
+static void
+arm_store_gregset (const void *buf)
+{
+  int i;
+  char zerobuf[8];
+
+  memset (zerobuf, 0, 8); 
+  for (i = 0; i < arm_num_regs; i++)
+    if (arm_regmap[i] != -1)
+      supply_register (i, ((char *) buf) + arm_regmap[i]);
+    else
+      supply_register (i, zerobuf);
+}
+ 
+static void
+arm_fill_wmmxregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < 16; i++)
+    collect_register (arm_num_regs + i, ((char *) buf) + i * 8);
+ 
+  for (i = 0; i < 2; i++)
+    collect_register (arm_num_regs + i + 16 + 2, ((char *) buf) + 16 * 8 + i * 4);
+ 
+  for (i = 0; i < 4; i++)
+    collect_register (arm_num_regs + i + 16 + 8, ((char *) buf) + 16 * 8 + 8 + i * 4);
+}
+ 
+static void
+arm_store_wmmxregset (const void *buf)
+{
+  int i;
+
+  for (i = 0; i < 16; i++)
+    supply_register (arm_num_regs + i, ((char *) buf) + i * 8);
+  
+  for (i = 0; i < 2; i++)
+    supply_register (arm_num_regs + i + 16 + 2, ((char *) buf) + 16 * 8 + i * 4);
+ 
+  for (i = 0; i < 4; i++)
+    supply_register (arm_num_regs + i + 16 + 8, ((char *) buf) + 16 * 8 + 8 + i * 4);
+}
+
+char *
+arm_available_registers (void)
+{
+  char buf[64];
+
+  if (use_regsets_p && target_regsets[1].size > 0)
+    {
+      int wr0 = find_regno ("wr0");
+      sprintf (buf, "iwmmxt:%x", wr0);
+      return strdup (buf);
+    }
+
+  return NULL;
+}
+
+struct regset_info target_regsets[] = {
+  { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+    GENERAL_REGS,
+    arm_fill_gregset, arm_store_gregset },
+  { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 16 * 8 + 6 * 4,
+    EXTENDED_REGS,
+    arm_fill_wmmxregset, arm_store_wmmxregset },
+  { 0, 0, -1, -1, NULL, NULL }
+};
 
 /* We only place breakpoints in empty marker functions, and thread locking
    is outside of the function.  So rather than importing software single-step,
@@ -130,4 +226,5 @@ struct linux_target_ops the_low_target = {
   arm_reinsert_addr,
   0,
   arm_breakpoint_at,
+  arm_available_registers
 };

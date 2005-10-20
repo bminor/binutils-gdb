@@ -39,8 +39,9 @@ struct reg
 };
 
 /* Set the current remote protocol and register cache according to the array
-   ``regs'', with ``n'' elements.  */
+   ``regs'', with ``n'' elements.  If non-NULL, LAST_G_REG is the last
+   register to include in g/G packets.  */
 
-void set_register_cache (struct reg *regs, int n);
+void set_register_cache (struct reg *regs, const char *last_g_reg, int n);
 
 #endif /* REGDEF_H */

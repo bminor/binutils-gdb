@@ -41,17 +41,17 @@ enum gdb_regnum {
   THUMB_FP_REGNUM = 7,		/* Frame register in Thumb code, if used.  */
   ARM_NUM_ARG_REGS = 4, 
   ARM_LAST_ARG_REGNUM = ARM_A4_REGNUM,
-  ARM_NUM_FP_ARG_REGS = 4,
-  ARM_LAST_FP_ARG_REGNUM = ARM_F3_REGNUM
+  ARM_NUM_FPA_ARG_REGS = 4,
+  ARM_LAST_FPA_ARG_REGNUM = ARM_F3_REGNUM,
 };
 
 /* Size of integer registers.  */
 #define INT_REGISTER_SIZE		4
 
-/* Say how long FP registers are.  Used for documentation purposes and
+/* Say how long FPA registers are.  Used for documentation purposes and
    code readability in this header.  IEEE extended doubles are 80
    bits.  DWORD aligned they use 96 bits.  */
-#define FP_REGISTER_SIZE	12
+#define FPA_REGISTER_SIZE	12
 
 /* Status registers are the same size as general purpose registers.
    Used for documentation purposes and code readability in this
@@ -65,10 +65,31 @@ enum gdb_regnum {
    (and called PS for processor status) so the status bits can be cleared
    from the PC (register 15).  For 32 bit ARM code, a copy of CPSR is placed
    in PS.  */
-#define NUM_FREGS	8	/* Number of floating point registers.  */
+#define NUM_FPA_REGS	8	/* Number of FPA floating point registers.  */
 #define NUM_SREGS	2	/* Number of status registers.  */
 #define NUM_GREGS	16	/* Number of general purpose registers.  */
 
+/* Optional supported coprocessors.  */
+enum
+{
+  NUM_IWMMXT_COP0REGS = 16,
+  NUM_IWMMXT_COP1REGS = 16,
+  NUM_IWMMXT_REGS = NUM_IWMMXT_COP0REGS + NUM_IWMMXT_COP1REGS,
+  IWMMXT_COP0_REGSIZE = 8,
+  IWMMXT_COP1_REGSIZE = 4
+};
+
+enum
+{
+  /* Status registers.  */
+  NUM_VFP_XREGS = 16,
+  VFP_XREG_SIZE = 4,
+  /* Single precision registers.  */
+  NUM_VFP_SREGS = 32,
+  VFP_SREG_SIZE = 4,
+  /* Pseudo regs for access to double precision values.  */
+  NUM_VFP_PSEUDOS = 16
+};
 
 /* Instruction condition field values.  */
 #define INST_EQ		0x0
@@ -125,6 +146,16 @@ enum arm_abi_kind
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
+  /* These fields are architecture-specific properties of the target.
+     After connecting to a new target, we check the target's properties,
+     and switch to a new gdbarch if necessary.   */
+
+  int target_has_iwmmxt_regs;    /* Does the target have iWMMXt registers?  */
+
+  int target_has_vfp_regs;	/* Does the target have VFP registers?  */
+
+  /* End of target properties.  */
+
   /* The ABI for this architecture.  It should never be set to
      ARM_ABI_AUTO.  */
   enum arm_abi_kind arm_abi;
@@ -143,6 +174,17 @@ struct gdbarch_tdep
 				   If this is negative, longjmp support
 				   will be disabled.  */
   size_t jb_elt_size;		/* And the size of each entry in the buf.  */
+
+  int first_iwmmxt_regnum;	/* The first iWMMXt register, or -1 if none.  */
+
+  int target_iwmmxt_regnum;	/* The target-supplied numbering for the
+				   iWMMXt registers, or -1 if none.  */
+  int first_vfp_regnum;		/* The first VFP register, or -1 if none.  */
+  int first_vfp_pseudo;		/* The first VFP pseudoreg, or -1 if none.  
+				   This is an offset from NUM_REGS.  */
+
+  int target_vfp_regnum;	/* The target-supplied numbering for the
+				   VFP registers, or -1 if none.  */
 };
 
 #ifndef LOWEST_PC

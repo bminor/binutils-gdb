@@ -68,7 +68,7 @@ struct pending_signals
 #define PTRACE_XFER_TYPE long
 
 #ifdef HAVE_LINUX_REGSETS
-static int use_regsets_p = 1;
+int use_regsets_p = 1;
 #endif
 
 int debug_threads = 0;
@@ -1355,6 +1355,15 @@ linux_store_registers (int regno)
 #endif
 }
 
+static char *
+linux_available_registers (void)
+{
+  if (the_low_target.available_registers == NULL)
+    return NULL;
+  else
+    return (*the_low_target.available_registers) ();
+}
+
 
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
@@ -1555,6 +1564,7 @@ static struct target_ops linux_target_ops = {
   linux_remove_watchpoint,
   linux_stopped_by_watchpoint,
   linux_stopped_data_address,
+  linux_available_registers,
 };
 
 static void

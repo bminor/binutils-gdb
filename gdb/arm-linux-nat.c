@@ -26,6 +26,7 @@
 #include "regcache.h"
 #include "target.h"
 #include "linux-nat.h"
+#include "gdb_assert.h"
 
 #include "arm-tdep.h"
 
@@ -43,6 +44,13 @@
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 22
 #endif
+
+#ifndef PTRACE_GETWMMXREGS
+#define PTRACE_GETWMMXREGS 18
+#define PTRACE_SETWMMXREGS 19
+#endif
+
+static int arm_linux_has_wmmx_registers = 1;
 
 extern int arm_apcs_32;
 
@@ -234,7 +242,7 @@ store_nwfpe_register (int regno, FPA11 * fpa11)
    state of the process and store it into regcache.  */
 
 static void
-fetch_fpregister (int regno)
+fetch_fpa_register (int regno)
 {
   int ret, tid;
   FPA11 fp;
@@ -283,7 +291,7 @@ fetch_fpregister (int regno)
    into regcache.  */
 
 static void
-fetch_fpregs (void)
+fetch_fpa_regs (void)
 {
   int ret, regno, tid;
   FPA11 fp;
@@ -331,7 +339,7 @@ fetch_fpregs (void)
    process using the contents from regcache.  */
 
 static void
-store_fpregister (int regno)
+store_fpa_register (int regno)
 {
   int ret, tid;
   FPA11 fp;
@@ -369,7 +377,7 @@ store_fpregister (int regno)
    the contents from regcache.  */
 
 static void
-store_fpregs (void)
+store_fpa_regs (void)
 {
   int ret, regno, tid;
   FPA11 fp;
@@ -553,6 +561,97 @@ store_regs (void)
     }
 }
 
+/* Fetch all WMMX registers of the process and store into
+   regcache.  */
+
+#define IWMMXT_REGS_SIZE (16 * 8 + 6 * 4)
+
+static void
+fetch_wmmx_regs (void)
+{
+  char regbuf[IWMMXT_REGS_SIZE];
+  int ret, regno, tid, first;
+
+  /* Get the thread id for the ptrace call.  */
+  tid = GET_THREAD_ID (inferior_ptid);
+  
+  ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
+  if (ret < 0)
+    {
+      warning (_("Unable to fetch WMMX registers."));
+      return;
+    }
+
+  first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+
+  for (regno = 0; regno < NUM_IWMMXT_COP0REGS; regno++)
+    regcache_raw_supply (current_regcache, first + regno,
+			 &regbuf[regno * 8]);
+
+  first += NUM_IWMMXT_COP0REGS;
+
+  for (regno = 0; regno < 2; regno++)
+    regcache_raw_supply (current_regcache, first + regno, NULL);
+
+  for (regno = 2; regno < 4; regno++)
+    regcache_raw_supply (current_regcache, first + regno,
+			 &regbuf[16 * 8 + (regno - 2) * 4]);
+
+  for (regno = 4; regno < 8; regno++)
+    regcache_raw_supply (current_regcache, first + regno, NULL);
+
+  for (regno = 8; regno < 12; regno++)
+    regcache_raw_supply (current_regcache, first + regno,
+			 &regbuf[16 * 8 + 2 * 4 + (regno - 8) * 4]);
+
+  for (regno = 12; regno < 16; regno++)
+    regcache_raw_supply (current_regcache, first + regno, NULL);
+}
+
+static void
+store_wmmx_regs (void)
+{
+  char regbuf[IWMMXT_REGS_SIZE];
+  int ret, regno, tid, first;
+
+  /* Get the thread id for the ptrace call.  */
+  tid = GET_THREAD_ID (inferior_ptid);
+  
+  ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
+  if (ret < 0)
+    {
+      warning (_("Unable to fetch WMMX registers."));
+      return;
+    }
+
+  first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+
+  for (regno = 0; regno < NUM_IWMMXT_COP0REGS; regno++)
+    if (register_cached (first + regno))
+      regcache_raw_collect (current_regcache, first + regno,
+			    &regbuf[regno * 8]);
+
+  first += 18;
+  for (regno = 0; regno < 2; regno++)
+    if (register_cached (first + regno))
+      regcache_raw_collect (current_regcache, first + regno,
+			    &regbuf[16 * 8 + regno * 4]);
+
+  first += 6;
+  for (regno = 0; regno < 4; regno++)
+    if (register_cached (first + regno))
+      regcache_raw_collect (current_regcache, first + regno,
+			    &regbuf[16 * 8 + 2 * 4 + regno * 4]);
+
+  ret = ptrace (PTRACE_SETWMMXREGS, tid, 0, regbuf);
+
+  if (ret < 0)
+    {
+      warning (_("Unable to store WMMX registers."));
+      return;
+    }
+}
+
 /* Fetch registers from the child process.  Fetch all registers if
    regno == -1, otherwise fetch all general registers or all floating
    point registers depending upon the value of regno.  */
@@ -563,15 +662,22 @@ arm_linux_fetch_inferior_registers (int regno)
   if (-1 == regno)
     {
       fetch_regs ();
-      fetch_fpregs ();
+      fetch_fpa_regs ();
+      if (arm_linux_has_wmmx_registers)
+	fetch_wmmx_regs ();
     }
   else 
     {
-      if (regno < ARM_F0_REGNUM || regno > ARM_FPS_REGNUM)
+      if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
         fetch_register (regno);
-
-      if (regno >= ARM_F0_REGNUM && regno <= ARM_FPS_REGNUM)
-        fetch_fpregister (regno);
+      else if (regno >= ARM_F0_REGNUM && regno <= ARM_FPS_REGNUM)
+        fetch_fpa_register (regno);
+      else if (arm_linux_has_wmmx_registers)
+	{
+	  int first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+	  if (regno >= first && regno < first + NUM_IWMMXT_REGS)
+	    fetch_wmmx_regs ();
+	}
     }
 }
 
@@ -585,15 +691,22 @@ arm_linux_store_inferior_registers (int regno)
   if (-1 == regno)
     {
       store_regs ();
-      store_fpregs ();
+      store_fpa_regs ();
+      if (arm_linux_has_wmmx_registers)
+	store_wmmx_regs ();
     }
   else
     {
-      if ((regno < ARM_F0_REGNUM) || (regno > ARM_FPS_REGNUM))
+      if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
         store_register (regno);
-
-      if ((regno >= ARM_F0_REGNUM) && (regno <= ARM_FPS_REGNUM))
-        store_fpregister (regno);
+      else if ((regno >= ARM_F0_REGNUM) && (regno <= ARM_FPS_REGNUM))
+        store_fpa_register (regno); 
+      else if (arm_linux_has_wmmx_registers)
+	{
+	  int first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+	  if (regno >= first && regno < first + NUM_IWMMXT_REGS)
+	    store_wmmx_regs ();
+	}
     }
 }
 
@@ -744,6 +857,50 @@ get_linux_version (unsigned int *vmajor,
 }
 
 void _initialize_arm_linux_nat (void);
+
+LONGEST
+arm_linux_available_registers (struct target_ops *ops,
+			       int /* enum target_object */ object,
+			       const char *annex,
+			       void *readbuf,
+			       const void *writebuf,
+			       ULONGEST offset,
+			       LONGEST len)
+{
+  char *result = NULL;
+  int total_len;
+
+  gdb_assert (object == TARGET_OBJECT_AVAILABLE_REGISTERS);
+  gdb_assert (readbuf && !writebuf);
+
+  if (arm_linux_has_wmmx_registers)
+    {
+      int ret;
+      char regbuf[IWMMXT_REGS_SIZE];
+
+      ret = ptrace (PTRACE_GETWMMXREGS, GET_THREAD_ID (inferior_ptid), 0,
+		    regbuf);
+      if (ret < 0)
+	/* Should we be checking the error code?  */
+	arm_linux_has_wmmx_registers = 0;
+    }
+
+  if (arm_linux_has_wmmx_registers)
+    result = "iwmmxt";
+
+  if (result == NULL)
+    return 0;
+
+  total_len = strlen (result);
+  if (total_len > offset)
+    {
+      int bytes_read = min (total_len - offset, len);
+      memcpy (readbuf, result + offset, bytes_read);
+      return bytes_read;
+    }
+
+  return 0;
+}
 
 void
 _initialize_arm_linux_nat (void)

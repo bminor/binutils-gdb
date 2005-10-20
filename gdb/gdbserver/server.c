@@ -143,6 +143,26 @@ handle_query (char *own_buf)
       return;
     }
 
+  if (the_target->available_registers != NULL
+      && strncmp ("qPart:availableRegisters:read::", own_buf, 31) == 0)
+    {
+      char *data;
+      CORE_ADDR ofs;
+      unsigned int len;
+      decode_m_packet (&own_buf[31], &ofs, &len); /* "OFS,LEN" */
+      if (len > sizeof data)
+	len = sizeof data;
+      /* FIXME: Handle OFS, LEN */
+      data = (*the_target->available_registers) ();
+      if (data == NULL || *data == 0)
+	write_ok (own_buf);
+      else
+	convert_int_to_ascii (data, own_buf, strlen (data));
+      if (data)
+	free (data);
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -281,6 +301,41 @@ handle_v_requests (char *own_buf, char *status, int *signal)
      understand it.  */
   own_buf[0] = 0;
   return;
+}
+
+extern int num_registers;
+
+/* Handle a register fetch ('p') request.  */
+void
+handle_p_packet (char *own_buf)
+{
+  char *end = own_buf + 1;
+  int regnum = strtol (own_buf + 1, &end, 16);
+
+  if (*end || regnum < 0 || regnum >= num_registers)
+    {
+      write_enn (own_buf);
+      return;
+    }
+
+  collect_register_as_string (regnum, own_buf);
+  own_buf[2 * register_size (regnum)] = 0;
+}
+
+void
+handle_P_packet (char *own_buf)
+{
+  char *end = own_buf + 1;
+  int regnum = strtol (own_buf + 1, &end, 16);
+
+  if (*end != '=' || regnum < 0 || regnum >= num_registers)
+    {
+      write_enn (own_buf);
+      return;
+    }
+
+  supply_register_as_string (regnum, end + 1);
+  write_ok (own_buf);
 }
 
 void
@@ -477,6 +532,15 @@ main (int argc, char *argv[])
 	    case 'G':
 	      set_desired_inferior (1);
 	      registers_from_string (&own_buf[1]);
+	      write_ok (own_buf);
+	      break;
+	    case 'p':
+	      set_desired_inferior (1);
+	      handle_p_packet (own_buf);
+	      break;
+	    case 'P':
+	      set_desired_inferior (1);
+	      handle_P_packet (own_buf);
 	      write_ok (own_buf);
 	      break;
 	    case 'm':

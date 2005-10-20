@@ -152,6 +152,7 @@ struct gdbarch
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
   int num_regs;
   int num_pseudo_regs;
+  int remote_num_g_packet_regs;
   int sp_regnum;
   int pc_regnum;
   int ps_regnum;
@@ -177,6 +178,8 @@ struct gdbarch
   gdbarch_register_bytes_ok_ftype *register_bytes_ok;
   gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
   gdbarch_cannot_store_register_ftype *cannot_store_register;
+  gdbarch_sim_available_registers_ftype *sim_available_registers;
+  gdbarch_register_remote_regno_ftype *register_remote_regno;
   gdbarch_get_longjmp_target_ftype *get_longjmp_target;
   int believe_pcc_promotion;
   gdbarch_convert_register_p_ftype *convert_register_p;
@@ -278,6 +281,7 @@ struct gdbarch startup_gdbarch =
   0,  /* pseudo_register_write */
   0,  /* num_regs */
   0,  /* num_pseudo_regs */
+  0,  /* remote_num_g_packet_regs */
   -1,  /* sp_regnum */
   -1,  /* pc_regnum */
   -1,  /* ps_regnum */
@@ -303,6 +307,8 @@ struct gdbarch startup_gdbarch =
   0,  /* register_bytes_ok */
   0,  /* cannot_fetch_register */
   0,  /* cannot_store_register */
+  0,  /* sim_available_registers */
+  0,  /* register_remote_regno */
   0,  /* get_longjmp_target */
   0,  /* believe_pcc_promotion */
   0,  /* convert_register_p */
@@ -536,6 +542,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   if (current_gdbarch->num_regs == -1)
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
+  /* Skip verify of remote_num_g_packet_regs, has predicate */
   /* Skip verify of sp_regnum, invalid_p == 0 */
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
@@ -559,6 +566,8 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of register_bytes_ok, has predicate */
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
   /* Skip verify of cannot_store_register, invalid_p == 0 */
+  /* Skip verify of sim_available_registers, has predicate */
+  /* Skip verify of register_remote_regno, has predicate */
   /* Skip verify of get_longjmp_target, has predicate */
   /* Skip verify of convert_register_p, invalid_p == 0 */
   /* Skip verify of pointer_to_address, invalid_p == 0 */
@@ -1444,6 +1453,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_reggroup_p = <0x%lx>\n",
                       (long) current_gdbarch->register_reggroup_p);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_register_remote_regno_p() = %d\n",
+                      gdbarch_register_remote_regno_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: register_remote_regno = <0x%lx>\n",
+                      (long) current_gdbarch->register_remote_regno);
 #ifdef REGISTER_SIM_REGNO
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1475,6 +1490,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: regset_from_core_section = <0x%lx>\n",
                       (long) current_gdbarch->regset_from_core_section);
   fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_remote_num_g_packet_regs_p() = %d\n",
+                      gdbarch_remote_num_g_packet_regs_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: remote_num_g_packet_regs = %s\n",
+                      paddr_d (current_gdbarch->remote_num_g_packet_regs));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: remote_translate_xfer_address = <0x%lx>\n",
                       (long) current_gdbarch->remote_translate_xfer_address);
   fprintf_unfiltered (file,
@@ -1500,6 +1521,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: short_bit = %s\n",
                       paddr_d (current_gdbarch->short_bit));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_sim_available_registers_p() = %d\n",
+                      gdbarch_sim_available_registers_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: sim_available_registers = <0x%lx>\n",
+                      (long) current_gdbarch->sim_available_registers);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_single_step_through_delay_p() = %d\n",
                       gdbarch_single_step_through_delay_p (current_gdbarch));
@@ -2071,6 +2098,29 @@ set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch,
 }
 
 int
+gdbarch_remote_num_g_packet_regs_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->remote_num_g_packet_regs != 0;
+}
+
+int
+gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_remote_num_g_packet_regs called\n");
+  return gdbarch->remote_num_g_packet_regs;
+}
+
+void
+set_gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch,
+                                      int remote_num_g_packet_regs)
+{
+  gdbarch->remote_num_g_packet_regs = remote_num_g_packet_regs;
+}
+
+int
 gdbarch_sp_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -2549,6 +2599,54 @@ set_gdbarch_cannot_store_register (struct gdbarch *gdbarch,
                                    gdbarch_cannot_store_register_ftype cannot_store_register)
 {
   gdbarch->cannot_store_register = cannot_store_register;
+}
+
+int
+gdbarch_sim_available_registers_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->sim_available_registers != NULL;
+}
+
+char *
+gdbarch_sim_available_registers (struct gdbarch *gdbarch, const struct target_ops *target)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->sim_available_registers != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_sim_available_registers called\n");
+  return gdbarch->sim_available_registers (gdbarch, target);
+}
+
+void
+set_gdbarch_sim_available_registers (struct gdbarch *gdbarch,
+                                     gdbarch_sim_available_registers_ftype sim_available_registers)
+{
+  gdbarch->sim_available_registers = sim_available_registers;
+}
+
+int
+gdbarch_register_remote_regno_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->register_remote_regno != NULL;
+}
+
+int
+gdbarch_register_remote_regno (struct gdbarch *gdbarch, int reg_nr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->register_remote_regno != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_remote_regno called\n");
+  return gdbarch->register_remote_regno (reg_nr);
+}
+
+void
+set_gdbarch_register_remote_regno (struct gdbarch *gdbarch,
+                                   gdbarch_register_remote_regno_ftype register_remote_regno)
+{
+  gdbarch->register_remote_regno = register_remote_regno;
 }
 
 int

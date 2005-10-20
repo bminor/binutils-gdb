@@ -210,9 +210,10 @@ struct remote_state
 {
   /* Description of the remote protocol registers.  */
   long sizeof_g_packet;
+  long num_g_regs;
 
   /* Description of the remote protocol registers indexed by REGNUM
-     (making an array of NUM_REGS + NUM_PSEUDO_REGS in size).  */
+     (making an array NUM_REGS in size).  */
   struct packet_reg *regs;
 
   /* This is the size (in chars) of the first response to the ``g''
@@ -243,24 +244,33 @@ init_remote_state (struct gdbarch *gdbarch)
 {
   int regnum;
   struct remote_state *rs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_state);
+  int num_g_regs;
+
+  if (gdbarch_remote_num_g_packet_regs_p (gdbarch))
+    num_g_regs = gdbarch_remote_num_g_packet_regs (gdbarch);
+  else
+    num_g_regs = NUM_REGS;
 
   rs->sizeof_g_packet = 0;
 
   /* Assume a 1:1 regnum<->pnum table.  */
-  rs->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS + NUM_PSEUDO_REGS,
-				     struct packet_reg);
-  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+  rs->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS, struct packet_reg);
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       struct packet_reg *r = &rs->regs[regnum];
-      r->pnum = regnum;
+
+      if (gdbarch_register_remote_regno_p (gdbarch))
+	r->pnum = gdbarch_register_remote_regno (gdbarch, regnum);
+      else
+	r->pnum = regnum;
+
       r->regnum = regnum;
       r->offset = DEPRECATED_REGISTER_BYTE (regnum);
-      r->in_g_packet = (regnum < NUM_REGS);
+      r->in_g_packet = (regnum < num_g_regs);
       /* ...name = REGISTER_NAME (regnum); */
 
       /* Compute packet size by accumulating the size of all registers.  */
-      if (regnum < NUM_REGS)
-	rs->sizeof_g_packet += register_size (current_gdbarch, regnum);
+      rs->sizeof_g_packet += register_size (current_gdbarch, regnum);
     }
 
   /* Default maximum number of characters in a packet body. Many
@@ -290,7 +300,7 @@ init_remote_state (struct gdbarch *gdbarch)
 static struct packet_reg *
 packet_reg_from_regnum (struct remote_state *rs, long regnum)
 {
-  if (regnum < 0 && regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+  if (regnum < 0 && regnum >= NUM_REGS)
     return NULL;
   else
     {
@@ -304,7 +314,7 @@ static struct packet_reg *
 packet_reg_from_pnum (struct remote_state *rs, LONGEST pnum)
 {
   int i;
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+  for (i = 0; i < NUM_REGS; i++)
     {
       struct packet_reg *r = &rs->regs[i];
       if (r->pnum == pnum)
@@ -976,6 +986,26 @@ show_remote_protocol_qGetTLSAddr_packet_cmd (struct ui_file *file, int from_tty,
 					     const char *value)
 {
   show_packet_config_cmd (&remote_protocol_qGetTLSAddr);
+}
+
+/* FIXME: Kill these duplicated functions.  */
+/* Should we try the 'qPart:availableRegisters' request? */
+static struct packet_config remote_protocol_qPart_availableRegisters;
+
+static void
+set_remote_protocol_qPart_availableRegisters_packet_cmd (char *args, int from_tty,
+					   struct cmd_list_element *c)
+{
+  update_packet_config (&remote_protocol_qPart_availableRegisters);
+}
+
+static void
+show_remote_protocol_qPart_availableRegisters_packet_cmd (struct ui_file *file, int from_tty,
+					    struct cmd_list_element *c,
+					    const char * value)
+{
+  deprecated_show_value_hack (file, from_tty, c, value);
+  show_packet_config_cmd (&remote_protocol_qPart_availableRegisters);
 }
 
 static struct packet_config remote_protocol_p;
@@ -2109,6 +2139,7 @@ init_all_packet_configs (void)
   update_packet_config (&remote_protocol_binary_download);
   update_packet_config (&remote_protocol_qPart_auxv);
   update_packet_config (&remote_protocol_qGetTLSAddr);
+  update_packet_config (&remote_protocol_qPart_availableRegisters);
 }
 
 /* Symbol look-up.  */
@@ -3213,60 +3244,69 @@ got_status:
   return inferior_ptid;
 }
 
-/* Number of bytes of registers this stub implements.  */
-
-static int register_bytes_found;
-
-/* Read the remote registers into the block REGS.  */
-/* Currently we just read all the registers, so we don't use regnum.  */
+/* Fetch a single register using a 'p' packet.  */
 
 static int
-fetch_register_using_p (int regnum)
+fetch_register_using_p (struct packet_reg *reg)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size), *p;
   char regp[MAX_REGISTER_SIZE];
   int i;
 
+  if (remote_protocol_p.support == PACKET_DISABLE)
+    return 0;
+
   p = buf;
   *p++ = 'p';
-  p += hexnumstr (p, regnum);
+  p += hexnumstr (p, reg->pnum);
   *p++ = '\0';
   remote_send (buf, rs->remote_packet_size);
 
-  /* If the stub didn't recognize the packet, or if we got an error,
-     tell our caller.  */
-  if (buf[0] == '\0' || buf[0] == 'E')
-    return 0;
+  if (buf[0] == 0)
+    {
+      if (remote_protocol_p.support == PACKET_ENABLE)
+	error ("Protocol error: p packet enabled but not recognized by stub");
+      else
+	{
+	  /* The stub does not support the 'P' packet.  Use 'G'
+	     instead, and don't try using 'P' in the future (it
+	     will just waste our time).  */
+	  remote_protocol_p.support = PACKET_DISABLE;
+	  return 0;
+  	}
+      }
+  
+  remote_protocol_p.support = PACKET_ENABLE;
 
-  /* If this register is unfetchable, tell the regcache.  */
   if (buf[0] == 'x')
     {
-      regcache_raw_supply (current_regcache, regnum, NULL);
-      set_register_cached (regnum, -1);
+      regcache_raw_supply (current_regcache, reg->regnum, NULL);
+      set_register_cached (reg->regnum, -1);
       return 1;
     }
 
-  /* Otherwise, parse and supply the value.  */
   p = buf;
   i = 0;
   while (p[0] != 0)
     {
       if (p[1] == 0)
-        {
-          error (_("fetch_register_using_p: early buf termination"));
-          return 0;
-        }
-
+	error("fetch_register_using_p: early buf termination");
       regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
       p += 2;
     }
-  regcache_raw_supply (current_regcache, regnum, regp);
+  regcache_raw_supply (current_regcache, reg->regnum, regp);
   return 1;
 }
 
+/* Number of bytes of registers this stub implements.  */
+
+static int register_bytes_found;
+
+/* Fetch the registers included in the target's 'g' packet.  */
+
 static void
-remote_fetch_registers (int regnum)
+fetch_registers_using_g (void)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size);
@@ -3275,41 +3315,6 @@ remote_fetch_registers (int regnum)
   char *regs = alloca (rs->sizeof_g_packet);
 
   set_thread (PIDGET (inferior_ptid), 1);
-
-  if (regnum >= 0)
-    {
-      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
-      gdb_assert (reg != NULL);
-      if (!reg->in_g_packet)
-	internal_error (__FILE__, __LINE__,
-			_("Attempt to fetch a non G-packet register when this "
-			"remote.c does not support the p-packet."));
-    }
-      switch (remote_protocol_p.support)
-	{
-	case PACKET_DISABLE:
-	  break;
-	case PACKET_ENABLE:
-	  if (fetch_register_using_p (regnum))
-	    return;
-	  else
-	    error (_("Protocol error: p packet not recognized by stub"));
-	case PACKET_SUPPORT_UNKNOWN:
-	  if (fetch_register_using_p (regnum))
-	    {
-	      /* The stub recognized the 'p' packet.  Remember this.  */
-	      remote_protocol_p.support = PACKET_ENABLE;
-	      return;
-	    }
-	  else
-	    {
-	      /* The stub does not support the 'P' packet.  Use 'G'
-	         instead, and don't try using 'P' in the future (it
-	         will just waste our time).  */
-	      remote_protocol_p.support = PACKET_DISABLE;
-	      break;
-	    }
-	}
 
   sprintf (buf, "g");
   remote_send (buf, (rs->remote_packet_size));
@@ -3371,7 +3376,7 @@ remote_fetch_registers (int regnum)
  supply_them:
   {
     int i;
-    for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    for (i = 0; i < NUM_REGS; i++)
       {
 	struct packet_reg *r = &rs->regs[i];
 	if (r->in_g_packet)
@@ -3396,6 +3401,38 @@ remote_fetch_registers (int regnum)
 	  }
       }
   }
+}
+
+static void
+remote_fetch_registers (int regnum)
+{
+  struct remote_state *rs = get_remote_state ();
+  int i;
+
+  set_thread (PIDGET (inferior_ptid), 1);
+
+  if (regnum >= 0)
+    {
+      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
+      gdb_assert (reg != NULL);
+
+      if (fetch_register_using_p (reg))
+	return;
+
+      if (!reg->in_g_packet)
+	error ("Protocol error: register %ld not supported by stub", reg->regnum);
+
+      fetch_registers_using_g ();
+      return;
+    }
+
+  fetch_registers_using_g ();
+
+  for (i = 0; i < NUM_REGS; i++)
+    if (!rs->regs[i].in_g_packet)
+      if (!fetch_register_using_p (&rs->regs[i]))
+	error ("Protocol error: register %ld not supported by stub",
+	       rs->regs[i].regnum);
 }
 
 /* Prepare to store registers.  Since we may send them all (using a
@@ -3428,14 +3465,16 @@ remote_prepare_to_store (void)
    packet was not recognized.  */
 
 static int
-store_register_using_P (int regnum)
+store_register_using_P (struct packet_reg *reg)
 {
   struct remote_state *rs = get_remote_state ();
-  struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
   /* Try storing a single register.  */
   char *buf = alloca (rs->remote_packet_size);
   char regp[MAX_REGISTER_SIZE];
   char *p;
+
+  if (remote_protocol_P.support == PACKET_DISABLE)
+    return 0;
 
   xsnprintf (buf, rs->remote_packet_size, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
@@ -3443,51 +3482,33 @@ store_register_using_P (int regnum)
   bin2hex (regp, p, register_size (current_gdbarch, reg->regnum));
   remote_send (buf, rs->remote_packet_size);
 
-  return buf[0] != '\0';
+  if (buf[0] == 0)
+    {
+      if (remote_protocol_P.support == PACKET_ENABLE)
+	error ("Protocol error: P packet enabled but not recognized by stub");
+      else
+	{
+	  /* The stub does not support the 'P' packet.  Use 'G'
+	     instead, and don't try using 'P' in the future (it
+	     will just waste our time).  */
+	  remote_protocol_P.support = PACKET_DISABLE;
+	  return 0;
+	}
+    }
+  
+  return 1;
 }
-
 
 /* Store register REGNUM, or all registers if REGNUM == -1, from the
    contents of the register cache buffer.  FIXME: ignores errors.  */
 
-static void
-remote_store_registers (int regnum)
+void
+store_registers_using_G (void)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf;
   char *regs;
   char *p;
-
-  set_thread (PIDGET (inferior_ptid), 1);
-
-  if (regnum >= 0)
-    {
-      switch (remote_protocol_P.support)
-	{
-	case PACKET_DISABLE:
-	  break;
-	case PACKET_ENABLE:
-	  if (store_register_using_P (regnum))
-	    return;
-	  else
-	    error (_("Protocol error: P packet not recognized by stub"));
-	case PACKET_SUPPORT_UNKNOWN:
-	  if (store_register_using_P (regnum))
-	    {
-	      /* The stub recognized the 'P' packet.  Remember this.  */
-	      remote_protocol_P.support = PACKET_ENABLE;
-	      return;
-	    }
-	  else
-	    {
-	      /* The stub does not support the 'P' packet.  Use 'G'
-	         instead, and don't try using 'P' in the future (it
-	         will just waste our time).  */
-	      remote_protocol_P.support = PACKET_DISABLE;
-	      break;
-	    }
-	}
-    }
 
   /* Extract all the registers in the regcache copying them into a
      local buffer.  */
@@ -3495,7 +3516,7 @@ remote_store_registers (int regnum)
     int i;
     regs = alloca (rs->sizeof_g_packet);
     memset (regs, 0, rs->sizeof_g_packet);
-    for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    for (i = 0; i < NUM_REGS; i++)
       {
 	struct packet_reg *r = &rs->regs[i];
 	if (r->in_g_packet)
@@ -4456,6 +4477,41 @@ extended_remote_async_create_inferior (char *exec_file, char *args,
   /* Let the remote process run.  */
   proceed (-1, TARGET_SIGNAL_0, 0);
 }
+
+/* Store register REGNUM, or all registers if REGNUM == -1, from the contents
+   of the register cache buffer.  FIXME: ignores errors.  */
+
+static void
+remote_store_registers (int regnum)
+{
+  struct remote_state *rs = get_remote_state ();
+  int i;
+
+  set_thread (PIDGET (inferior_ptid), 1);
+
+  if (regnum >= 0)
+    {
+      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
+      gdb_assert (reg != NULL);
+
+      if (store_register_using_P (reg))
+	return;
+
+      if (!reg->in_g_packet)
+	error ("Protocol error: register %ld not supported by stub", reg->regnum);
+
+      store_registers_using_G ();
+      return;
+    }
+
+  store_registers_using_G ();
+
+  for (i = 0; i < NUM_REGS; i++)
+    if (!rs->regs[i].in_g_packet)
+      if (!store_register_using_P (&rs->regs[i]))
+	error ("Protocol error: register %ld not supported by stub",
+	       rs->regs[i].regnum);
+}
 
 
 /* On some machines, e.g. 68k, we may use a different breakpoint
@@ -5035,6 +5091,44 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 	}
       return -1;
 
+      /* FIXME:
+	 - Currently hex encoded.  Should this be just a string?
+	 - One way or another remove the copy/paste.
+      */
+    case TARGET_OBJECT_AVAILABLE_REGISTERS:
+      if (remote_protocol_qPart_availableRegisters.support != PACKET_DISABLE)
+	{
+	  unsigned int total = 0;
+	  while (len > 0)
+	    {
+	      LONGEST n = min ((rs->remote_packet_size - 2) / 2, len);
+	      snprintf (buf2, rs->remote_packet_size,
+			"qPart:availableRegisters:read::%s,%s",
+			phex_nz (offset, sizeof offset),
+			phex_nz (n, sizeof n));
+	      i = putpkt (buf2);
+	      if (i < 0)
+		return total > 0 ? total : i;
+	      buf2[0] = '\0';
+	      getpkt (buf2, rs->remote_packet_size, 0);
+	      if (packet_ok (buf2, &remote_protocol_qPart_availableRegisters) != PACKET_OK)
+		return total > 0 ? total : -1;
+	      if (buf2[0] == 'O' && buf2[1] == 'K' && buf2[2] == '\0')
+		break;		/* Got EOF indicator.  */
+	      /* Got some data.  */
+	      i = hex2bin (buf2, readbuf, len);
+	      if (i > 0)
+		{
+		  readbuf = (void *) ((char *) readbuf + i);
+		  offset += i;
+		  len -= i;
+		  total += i;
+		}
+	    }
+	  return total;
+	}
+      return -1;
+
     default:
       return -1;
     }
@@ -5583,6 +5677,7 @@ show_remote_cmd (char *args, int from_tty)
   show_remote_protocol_binary_download_cmd (gdb_stdout, from_tty, NULL, NULL);
   show_remote_protocol_qPart_auxv_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
   show_remote_protocol_qGetTLSAddr_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
+  show_remote_protocol_qPart_availableRegisters_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
 }
 
 static void
@@ -5816,6 +5911,13 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			 "qGetTLSAddr", "get-thread-local-storage-address",
 			 set_remote_protocol_qGetTLSAddr_packet_cmd,
 			 show_remote_protocol_qGetTLSAddr_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
+
+  add_packet_config_cmd (&remote_protocol_qPart_availableRegisters,
+			 "qPart_availableRegisters", "available-registers",
+			 set_remote_protocol_qPart_availableRegisters_packet_cmd,
+			 show_remote_protocol_qPart_availableRegisters_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 

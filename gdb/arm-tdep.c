@@ -39,6 +39,7 @@
 #include "trad-frame.h"
 #include "objfiles.h"
 #include "dwarf2-frame.h"
+#include "observer.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -50,6 +51,19 @@
 #include "gdb_assert.h"
 
 static int arm_debug;
+
+/* Extra information which ARM uses to select the appropriate GDB
+   architecture.  */
+
+struct gdbarch_tdep_info
+{
+  /* See the descriptions of these fields in struct gdbarch_tdep.  */
+
+  int target_has_iwmmxt_regs;
+  int target_iwmmxt_regnum;
+  int target_has_vfp_regs;
+  int target_vfp_regnum;
+};
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.
@@ -1450,7 +1464,42 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 static struct type *
 arm_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
+  int first;
+
+  first = gdbarch_tdep (gdbarch)->first_iwmmxt_regnum;
+  if (first != -1)
+    {
+      if (regnum >= first && regnum < first + NUM_IWMMXT_COP0REGS)
+	return builtin_type_vec64i;
+
+      first += NUM_IWMMXT_COP0REGS;
+
+      if (regnum >= first && regnum < first + NUM_IWMMXT_COP1REGS)
+	return builtin_type_int32;
+    }
+
+  first = gdbarch_tdep (gdbarch)->first_vfp_regnum;
+  if (first != -1)
+    {
+      if (regnum >= first && regnum < first + NUM_VFP_XREGS)
+	return builtin_type_int32;
+
+      first += NUM_VFP_XREGS;
+
+      if (regnum >= first && regnum < first + NUM_VFP_SREGS)
+	return builtin_type_float;
+    }
+
+  first = gdbarch_tdep (gdbarch)->first_vfp_pseudo;
+  if (first != -1)
+    {
+      first += gdbarch_num_regs (gdbarch);
+
+      if (regnum >= first && regnum < first + NUM_VFP_PSEUDOS)
+	return builtin_type_double;
+    }
+
+  if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FPA_REGS)
     {
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	return builtin_type_arm_ext_big;
@@ -1467,15 +1516,162 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
 static int
 arm_register_byte (int regnum)
 {
+  int offset;
+  int first;
+
+  offset = 0;
+  first = 0;
   if (regnum < ARM_F0_REGNUM)
     return regnum * INT_REGISTER_SIZE;
-  else if (regnum < ARM_PS_REGNUM)
-    return (NUM_GREGS * INT_REGISTER_SIZE
-	    + (regnum - ARM_F0_REGNUM) * FP_REGISTER_SIZE);
-  else
-    return (NUM_GREGS * INT_REGISTER_SIZE
-	    + NUM_FREGS * FP_REGISTER_SIZE
-	    + (regnum - ARM_FPS_REGNUM) * STATUS_REGISTER_SIZE);
+  offset += NUM_GREGS * INT_REGISTER_SIZE;
+  first += NUM_GREGS;
+
+  if (regnum < first + NUM_FPA_REGS)
+    return offset + (regnum - first) * FPA_REGISTER_SIZE;
+  offset += NUM_FPA_REGS * FPA_REGISTER_SIZE;
+  first += NUM_FPA_REGS;
+
+  if (regnum < first + NUM_SREGS)
+    return offset + (regnum - first) * STATUS_REGISTER_SIZE;
+  offset += NUM_SREGS * STATUS_REGISTER_SIZE;
+  
+  first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+  if (first != -1)
+    {
+      if (regnum >= first && regnum < first + NUM_IWMMXT_COP0REGS)
+	return offset + (regnum - first) * IWMMXT_COP0_REGSIZE;
+
+      offset += NUM_IWMMXT_COP0REGS * IWMMXT_COP0_REGSIZE;
+      first += NUM_IWMMXT_COP0REGS;
+
+      if (regnum >= first && regnum < first + NUM_IWMMXT_COP1REGS)
+	return offset + (regnum - first) * IWMMXT_COP1_REGSIZE;
+
+      offset += NUM_IWMMXT_COP1REGS * IWMMXT_COP1_REGSIZE;
+    }
+
+  first = gdbarch_tdep (current_gdbarch)->first_vfp_regnum;
+  if (first != -1)
+    {
+      if (regnum >= first && regnum < first + NUM_VFP_XREGS)
+	return offset + (regnum - first) * VFP_XREG_SIZE;
+
+      offset += NUM_VFP_XREGS * VFP_XREG_SIZE;
+      first += NUM_VFP_XREGS;
+
+      if (regnum >= first && regnum < first + NUM_VFP_SREGS)
+	return offset + (regnum - first) * VFP_SREG_SIZE;
+    }
+  internal_error (__FILE__, __LINE__, _("Bad REGNUM %d"), regnum);
+}
+
+static void
+arm_pseudo_register_read (struct gdbarch *gdbarch,
+			  struct regcache *regcache,
+			  int regnum, void *buf)
+{
+  int first;
+  int low_regnum;
+  int high_regnum;
+
+  first = gdbarch_tdep (current_gdbarch)->first_vfp_pseudo;
+  if (first != -1)
+    {
+      first += gdbarch_num_regs (gdbarch);
+
+      if (regnum >= first && regnum < first + NUM_VFP_PSEUDOS)
+	{
+	  regnum = gdbarch_tdep (current_gdbarch)->first_vfp_regnum
+	    + NUM_VFP_XREGS + 2 * (regnum - first);
+	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
+	    {
+	      low_regnum = regnum;
+	      high_regnum = regnum + 1;
+	    }
+	  else
+	    {
+	      low_regnum = regnum + 1;
+	      high_regnum = regnum;
+	    }
+	  regcache_raw_read (regcache, low_regnum, buf);
+	  regcache_raw_read (regcache, high_regnum, ((char *)buf) + 4);
+	  return;
+	}
+    }
+  internal_error (__FILE__, __LINE__, _("Bad pseudo %d"), regnum);
+}
+
+static void
+arm_pseudo_register_write (struct gdbarch *gdbarch,
+			   struct regcache *regcache,
+			   int regnum, const void *buf)
+{
+  int first;
+  int low_regnum;
+  int high_regnum;
+
+  first = gdbarch_tdep (current_gdbarch)->first_vfp_pseudo;
+  if (first != -1)
+    {
+      first += gdbarch_num_regs (gdbarch);
+
+      if (regnum >= first && regnum < first + NUM_VFP_PSEUDOS)
+	{
+	  regnum = gdbarch_tdep (current_gdbarch)->first_vfp_regnum
+	    + NUM_VFP_XREGS + 2 * (regnum - first);
+	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
+	    {
+	      low_regnum = regnum;
+	      high_regnum = regnum + 1;
+	    }
+	  else
+	    {
+	      low_regnum = regnum + 1;
+	      high_regnum = regnum;
+	    }
+	  regcache_raw_write (regcache, low_regnum, buf);
+	  regcache_raw_write (regcache, high_regnum + 1, ((char *)buf) + 4);
+	  return;
+	}
+    }
+  internal_error (__FILE__, __LINE__, _("Bad pseudo %d"), regnum);
+}
+
+/* Map DWARF register numbers onto internal GDB register numbers.  */
+static int
+arm_dwarf_reg_to_regnum (int reg)
+{
+  int first;
+ 
+  if (reg >= 0 && reg <= 16)
+    return reg; /* Core integer regs.  */
+  if (reg >= 16 && reg <= 23)
+    return ARM_F0_REGNUM + reg - 16; /* Legacy FPA encoding.  */
+  if (reg >= 96 && reg <= 103)
+    return ARM_F0_REGNUM + reg - 96; /* FPA regs.  */
+
+  /* VFP regs.  */
+  first = gdbarch_tdep (current_gdbarch)->first_vfp_regnum;
+  if (first != -1 && reg >= 64 && reg <= 95);
+      return first + NUM_VFP_XREGS + reg - 64;;
+
+  /* iWMMXt regs.  */
+  first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+  if (first != -1)
+    {
+      if (reg >= 112 && reg <= 127) /* wr0-wr15 */
+	return first + reg - 112;
+      first += NUM_IWMMXT_COP0REGS;
+      if (reg >= 192 && reg <= 199) /* wc0-wc7 */
+	return first + reg - 104;
+      first += 8;
+      if (reg >= 104 && reg <= 111) /*wcgr0-wcgr7 */
+	return first + reg - 104;
+    }
+
+  warning (_("Unmapped DWARF Register #%d encountered."), reg);
+
+  return -1;
 }
 
 /* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
@@ -1485,19 +1681,56 @@ arm_register_sim_regno (int regnum)
   int reg = regnum;
   gdb_assert (reg >= 0 && reg < NUM_REGS);
 
+  if (gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum != -1)
+    {
+      int first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+
+      if (regnum >= first && regnum < first + NUM_IWMMXT_REGS)
+	return SIM_ARM_IWMMXT_COP0R0_REGNUM + (regnum - first);
+    }
+
   if (reg < NUM_GREGS)
     return SIM_ARM_R0_REGNUM + reg;
   reg -= NUM_GREGS;
 
-  if (reg < NUM_FREGS)
+  if (reg < NUM_FPA_REGS)
     return SIM_ARM_FP0_REGNUM + reg;
-  reg -= NUM_FREGS;
+  reg -= NUM_FPA_REGS;
 
   if (reg < NUM_SREGS)
     return SIM_ARM_FPS_REGNUM + reg;
   reg -= NUM_SREGS;
 
   internal_error (__FILE__, __LINE__, _("Bad REGNUM %d"), regnum);
+}
+
+/* Map GDB internal REGNUM onto the current remote protocol
+   register numbers.  */
+
+static int
+arm_register_remote_regno (int regnum)
+{
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
+
+  if (gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum != -1)
+    {
+      int first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+
+      if (regnum >= first && regnum < first + NUM_IWMMXT_REGS)
+	return gdbarch_tdep (current_gdbarch)->target_iwmmxt_regnum
+			     + (regnum - first);
+    }
+
+  if (gdbarch_tdep (current_gdbarch)->first_vfp_regnum != -1)
+    {
+      int first = gdbarch_tdep (current_gdbarch)->first_vfp_regnum;
+
+      if (regnum >= first && regnum < first + NUM_VFP_XREGS + NUM_VFP_SREGS)
+	return gdbarch_tdep (current_gdbarch)->target_vfp_regnum
+			     + (regnum - first);
+    }
+
+  return regnum;
 }
 
 /* NOTE: cagney/2001-08-20: Both convert_from_extended() and
@@ -2103,7 +2336,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	    /* The value is in register F0 in internal format.  We need to
 	       extract the raw value and then convert it to the desired
 	       internal type.  */
-	    bfd_byte tmpbuf[FP_REGISTER_SIZE];
+	    bfd_byte tmpbuf[FPA_REGISTER_SIZE];
 
 	    regcache_cooked_read (regs, ARM_F0_REGNUM, tmpbuf);
 	    convert_from_extended (floatformat_from_type (type), tmpbuf,
@@ -2571,9 +2804,59 @@ set_disassembly_style_sfunc (char *args, int from_tty,
 
 /* Return the ARM register name corresponding to register I.  */
 static const char *
-arm_register_name (int i)
+arm_register_name (int regnum)
 {
-  return arm_register_names[i];
+  int first;
+
+  first = gdbarch_tdep (current_gdbarch)->first_iwmmxt_regnum;
+  if (first != -1)
+    {
+      static const char *const iwmmxt_register_names[] = 
+	{
+	  "wr0", "wr1", "wr2", "wr3", "wr4", "wr5", "wr6", "wr7",
+	  "wr8", "wr9", "wr10", "wr11", "wr12", "wr13", "wr14", "wr15",
+	  "wcid", "wcon", "wcssf", "wcasf", "", "", "", "",
+	  "wcgr0", "wcgr1", "wcgr2", "wcgr3", "", "", "", ""
+	};
+
+      if (regnum >= first && regnum < first + NUM_IWMMXT_REGS)
+	return iwmmxt_register_names[regnum - first];
+    }
+
+  first = gdbarch_tdep (current_gdbarch)->first_vfp_regnum;
+  if (first != -1)
+    {
+      static const char *const vfp_register_names[] = 
+	{
+	  "fpsid", "fpscr", "", "", "", "", "", "",
+	  "fpexc", "", "", "", "", "", "", "",
+	  "s0",  "s1",  "s2",  "s3",  "s4",  "s5",  "s6",  "s7",
+	  "s8",  "s9",  "s10", "s11", "s12", "s13", "s14", "s15",
+	  "s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23",
+	  "s24", "s25", "s26", "s27", "s28", "s29", "s30", "s31"
+	};
+
+      if (regnum >= first && regnum < first + NUM_VFP_XREGS + NUM_VFP_SREGS)
+	return vfp_register_names[regnum - first];
+    }
+
+  first = gdbarch_tdep (current_gdbarch)->first_vfp_pseudo;
+  if (first != -1)
+    {
+      static const char *const vfp_pseudo_names[] = 
+	{
+	  "d0", "d1", "d2",  "d3",  "d4",  "d5",  "d6",  "d7",
+	  "d8", "d9", "d10", "d11", "d12", "d13", "d14", "d15",
+	};
+
+      first += gdbarch_num_regs (current_gdbarch);
+
+      if (regnum >= first && regnum < first + NUM_VFP_PSEUDOS)
+	return vfp_pseudo_names[regnum - first];
+    }
+
+  gdb_assert (regnum < NUM_GREGS + NUM_FPA_REGS + NUM_SREGS);
+  return arm_register_names[regnum];
 }
 
 static void
@@ -2681,6 +2964,70 @@ arm_elf_osabi_sniffer (bfd *abfd)
   /* Anything else will be handled by the generic ELF sniffer.  */
   return osabi;
 }
+
+/* */
+
+static char *
+arm_sim_available_registers (struct gdbarch *gdbarch,
+			     const struct target_ops *target)
+{
+  /* The built-in simulator supports iWMMXt.  */
+  return xstrdup ("iwmmxt");
+}
+
+/* Update the current architecture based on architecture features.  */
+
+static void
+arm_update_architecture (struct target_ops *target, int from_tty)
+{
+  struct gdbarch_tdep_info tdep;
+  struct gdbarch_info info;
+  char buf[64];
+  int bytes_read;
+
+  memset (&tdep, 0, sizeof (tdep));
+
+  /* FIXME: Define TARGET_READ_FULL which allocates the buffer large
+     enough, modelled on auxv.c.  */
+  bytes_read = target_read_partial (target, TARGET_OBJECT_AVAILABLE_REGISTERS,
+				    "", buf, 0, 64);
+
+  /* "Parse" the response.  */
+  if (bytes_read == 6 && strncmp (buf, "iwmmxt", 6) == 0)
+    {
+      tdep.target_has_iwmmxt_regs = 1;
+      tdep.target_iwmmxt_regnum = -1;
+    }
+  else if (bytes_read > 6 && strncmp (buf, "iwmmxt:", 7) == 0)
+    {
+      char *end;
+      tdep.target_has_iwmmxt_regs = 1;
+      tdep.target_iwmmxt_regnum = strtol (buf + 7, &end, 16);
+    }
+  else
+    {
+      tdep.target_has_iwmmxt_regs = 0;
+      tdep.target_iwmmxt_regnum = -1;
+    }
+
+  if (bytes_read > 3 && strncmp (buf, "vfp:", 4) == 0)
+    {
+      char *end;
+      tdep.target_has_vfp_regs = 1;
+      tdep.target_vfp_regnum = strtol (buf + 4, &end, 16);
+    }
+  else
+    {
+      tdep.target_has_vfp_regs = 0;
+      tdep.target_vfp_regnum = -1;
+    }
+
+  /* Update the architecture.  */
+  gdbarch_info_init (&info);
+  info.tdep_info = &tdep;
+  if (!gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, "could not update architecture");
+}
 
 
 /* Initialize the current architecture based on INFO.  If possible,
@@ -2698,6 +3045,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_list *best_arch;
   enum arm_abi_kind arm_abi = arm_abi_global;
   enum arm_float_model fp_model = arm_fp_model;
+  int nregs;
+  int pseudos;
 
   /* If we have an object to base this architecture on, try to determine
      its ABI.  */
@@ -2792,6 +3141,25 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        best_arch != NULL;
        best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
     {
+      /* If we have target-specific bits in INFO, then make sure
+	 they match.  */
+      if (info.tdep_info)
+	{
+	  if (gdbarch_tdep (best_arch->gdbarch)->target_has_iwmmxt_regs
+	      != info.tdep_info->target_has_iwmmxt_regs)
+	    continue;
+	  if (gdbarch_tdep (best_arch->gdbarch)->target_iwmmxt_regnum
+	      != info.tdep_info->target_iwmmxt_regnum)
+	    continue;
+
+	  if (gdbarch_tdep (best_arch->gdbarch)->target_has_vfp_regs
+	      != info.tdep_info->target_has_vfp_regs)
+	    continue;
+	  if (gdbarch_tdep (best_arch->gdbarch)->target_vfp_regnum
+	      != info.tdep_info->target_vfp_regnum)
+	    continue;
+	}
+
       if (arm_abi != gdbarch_tdep (best_arch->gdbarch)->arm_abi)
 	continue;
 
@@ -2812,6 +3180,35 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      These are gdbarch discriminators, like the OSABI.  */
   tdep->arm_abi = arm_abi;
   tdep->fp_model = fp_model;
+
+  if (info.tdep_info)
+    {
+      /* If specific target capabilities were requested, use them.  */
+      tdep->target_has_iwmmxt_regs = info.tdep_info->target_has_iwmmxt_regs;
+      tdep->target_iwmmxt_regnum = info.tdep_info->target_iwmmxt_regnum;
+      tdep->target_has_vfp_regs = info.tdep_info->target_has_vfp_regs;
+      tdep->target_vfp_regnum = info.tdep_info->target_vfp_regnum;
+    }
+  else if (arches)
+    {
+      /* Otherwise, inherit from the last ARM architecture, if any.  */
+      tdep->target_has_iwmmxt_regs
+	= gdbarch_tdep (arches->gdbarch)->target_has_iwmmxt_regs;
+      tdep->target_iwmmxt_regnum
+	= gdbarch_tdep (arches->gdbarch)->target_iwmmxt_regnum;
+      tdep->target_has_vfp_regs
+	= gdbarch_tdep (arches->gdbarch)->target_has_vfp_regs;
+      tdep->target_vfp_regnum
+	= gdbarch_tdep (arches->gdbarch)->target_vfp_regnum;
+    }
+  else
+    {
+      /* Set defaults.  */
+      tdep->target_has_iwmmxt_regs = 0;
+      tdep->target_iwmmxt_regnum = -1;
+      tdep->target_has_vfp_regs = 0;
+      tdep->target_vfp_regnum = -1;
+    }
 
   /* Breakpoints.  */
   switch (info.byte_order)
@@ -2877,11 +3274,48 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_deprecated_register_byte (gdbarch, arm_register_byte);
-  set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
   set_gdbarch_register_type (gdbarch, arm_register_type);
 
+  nregs = NUM_GREGS + NUM_FPA_REGS + NUM_SREGS;
+  pseudos = 0;
+  if (tdep->target_has_iwmmxt_regs)
+    {
+      tdep->first_iwmmxt_regnum = nregs;
+      nregs += NUM_IWMMXT_REGS;
+    }
+  else
+    tdep->first_iwmmxt_regnum = -1;
+
+  if (tdep->target_has_vfp_regs)
+    {
+      tdep->first_vfp_regnum = nregs;
+      nregs += NUM_VFP_XREGS + NUM_VFP_SREGS;
+      tdep->first_vfp_pseudo = pseudos;
+      pseudos += NUM_VFP_PSEUDOS;
+    }
+  else
+    {
+      tdep->first_vfp_regnum = -1;
+      tdep->first_vfp_pseudo = -1;
+    }
+
+  set_gdbarch_num_regs (gdbarch, nregs);
+  set_gdbarch_num_pseudo_regs (gdbarch, pseudos);
+  set_gdbarch_pseudo_register_read (gdbarch, arm_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, arm_pseudo_register_write);
+
+  /* The FPA registers are included in the remote 'g' packet for
+     historic reasons.  */
+  set_gdbarch_remote_num_g_packet_regs (gdbarch,
+					NUM_GREGS + NUM_FPA_REGS + NUM_SREGS);
+
   /* Internal <-> external register number maps.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, arm_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, arm_dwarf_reg_to_regnum);
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
+
+  set_gdbarch_sim_available_registers (gdbarch, arm_sim_available_registers);
+  set_gdbarch_register_remote_regno (gdbarch, arm_register_remote_regno);
 
   /* Integer registers are 4 bytes.  */
   set_gdbarch_deprecated_register_size (gdbarch, 4);
@@ -3078,4 +3512,6 @@ vfp - VFP co-processor."),
 			   NULL,
 			   NULL, /* FIXME: i18n: "ARM debugging is %s.  */
 			   &setdebuglist, &showdebuglist);
+
+  observer_attach_inferior_created (arm_update_architecture);
 }

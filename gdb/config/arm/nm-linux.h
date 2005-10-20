@@ -38,4 +38,20 @@ extern int kernel_u_size (void);
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 #define FETCH_INFERIOR_REGISTERS
 
+/* This function is called like a to_xfer_partial hook,
+   but must be called with TARGET_OBJECT_AVAILABLE_REGISTERS.  */
+
+struct target_ops;
+
+extern LONGEST arm_linux_available_registers
+  (struct target_ops *ops,
+   int /* enum target_object */ object,
+   const char *annex,
+   void *readbuf,
+   const void *writebuf,
+   ULONGEST offset,
+   LONGEST len);
+
+#define NATIVE_XFER_AVAILABLE_REGISTERS arm_linux_available_registers
+
 #endif /* NM_ARMLINUX_H */
