@@ -220,6 +220,17 @@ struct arm_prologue_cache
 
 int arm_apcs_32 = 1;
 
+/* Return number of 1-bits in VAL.  */
+
+static int
+bitcount (unsigned long val)
+{
+  int nbits;
+  for (nbits = 0; val != 0; nbits++)
+    val &= val - 1;		/* delete rightmost 1-bit in val */
+  return nbits;
+}
+
 /* Determine if the program counter specified in MEMADDR is in a Thumb
    function.  */
 
@@ -1990,69 +2001,251 @@ shifted_reg_val (unsigned long inst, int carry, unsigned long pc_val,
   return res & 0xffffffff;
 }
 
-/* Return number of 1-bits in VAL.  */
 
-static int
-bitcount (unsigned long val)
+/* Find the next instruction to be executed in an IT block.  */
+
+static CORE_ADDR
+thumb2_it_block (CORE_ADDR nextpc, unsigned long status, unsigned int cond,
+                 unsigned int mask)
 {
-  int nbits;
-  for (nbits = 0; val != 0; nbits++)
-    val &= val - 1;		/* delete rightmost 1-bit in val */
-  return nbits;
+  int cond_true = condition_true (cond, status);
+  int numinsns;
+
+  if ((mask & 0x7) == 0)
+    numinsns = 1;
+  else if ((mask & 0x3) == 0)
+    numinsns = 2;
+  else if ((mask & 0x1) == 0)
+    numinsns = 3;
+  else
+    numinsns = 4;
+
+  for (; numinsns > 0; numinsns--, mask <<= 1)
+    {
+      int length;
+      thumb_get_insn (nextpc, &length);
+
+      if ((cond_true && (mask & 0x8))
+	  || (!cond_true && !(mask & 0x8)))
+	break;
+
+      nextpc += length;
+    }
+
+  return nextpc;
 }
+
+/* Get next Thumb PC. We must consider both 16-bit and 32-bit instructions
+   which can modify control flow. Thankfully, this doesn't include most of the
+   ALU instructions (unlike ARM).  */
 
 CORE_ADDR
 thumb_get_next_pc (CORE_ADDR pc)
 {
-  unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
-  unsigned short inst1 = read_memory_integer (pc, 2);
-  CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
+  int length;
+  unsigned long inst = thumb_get_insn (pc, &length);
+  unsigned long status = read_register (ARM_PS_REGNUM);
+  CORE_ADDR nextpc = pc + length;
   unsigned long offset;
 
-  if ((inst1 & 0xff00) == 0xbd00)	/* pop {rlist, pc} */
+  /* Check CPSR to see if we're in the middle of an IT block.  */
+
+  if (bits (status, 13, 15) != 0)
+    {
+      int cond = bits (status, 12, 15);
+      int mask = bits (status, 25, 26) | (bits (status, 10, 11) << 2);
+      return thumb2_it_block (nextpc, status, cond, mask);
+    }
+
+  /* Thumb/Thumb-2 16-bit instructions.  */
+ 
+  /* If-Then. We must:
+     (a) Decode the IT instruction.
+     (b) Evaluate the current condition.
+     (c) Insert breakpoint on one of the following four instructions, depending
+     on the IT mask and (2).
+
+     Subsequent conditional instructions are handled by decoding the CPSR,
+     above.
+  */
+  if ((inst & 0xffffff00) == 0xbf00
+      && (inst & 0x000f) != 0)
+    {
+      unsigned int mask = inst & 0xf;
+      unsigned int cond = bits (inst, 4, 7);
+      return thumb2_it_block (nextpc, status, cond, mask);
+    }
+  /* Compare zero and branch.  */
+  else if ((inst & 0xfffff500) == 0xb100)
+    {
+      int reg = bits (inst, 0, 2);
+      unsigned int regval = read_register (reg);
+      int not_equal = bit (inst, 11);
+      int do_branch = (regval == 0) ^ not_equal;
+      unsigned int offset = (bits (inst, 3, 7) << 1) | (bit (inst, 9) << 6);
+      if (do_branch)
+	nextpc = pc + 4 + offset;
+    }
+  else if ((inst & 0xffffff00) == 0xbd00)         /* pop {rlist, pc} */
     {
       CORE_ADDR sp;
 
       /* Fetch the saved PC from the stack.  It's stored above
          all of the other registers.  */
-      offset = bitcount (bits (inst1, 0, 7)) * DEPRECATED_REGISTER_SIZE;
+      offset = bitcount (bits (inst, 0, 7)) * DEPRECATED_REGISTER_SIZE;
       sp = read_register (ARM_SP_REGNUM);
       nextpc = (CORE_ADDR) read_memory_integer (sp + offset, 4);
       nextpc = ADDR_BITS_REMOVE (nextpc);
-      if (nextpc == pc)
-	error (_("Infinite loop detected"));
     }
-  else if ((inst1 & 0xf000) == 0xd000)	/* conditional branch */
+  else if ((inst & 0xfffff000) == 0xd000)         /* conditional branch */
     {
       unsigned long status = read_register (ARM_PS_REGNUM);
-      unsigned long cond = bits (inst1, 8, 11);
+      unsigned long cond = bits (inst, 8, 11);
       if (cond != 0x0f && condition_true (cond, status))    /* 0x0f = SWI */
-	nextpc = pc_val + (sbits (inst1, 0, 7) << 1);
+	nextpc = pc + 4 + (sbits (inst, 0, 7) << 1);
     }
-  else if ((inst1 & 0xf800) == 0xe000)	/* unconditional branch */
+  else if ((inst & 0xfffff800) == 0xe000)         /* unconditional branch */
     {
-      nextpc = pc_val + (sbits (inst1, 0, 10) << 1);
+      nextpc = pc + 4 + (sbits (inst, 0, 10) << 1);
     }
-  else if ((inst1 & 0xf800) == 0xf000)	/* long branch with link, and blx */
+  else if ((inst & 0xffffff00) == 0x4700)         /* bx REG, blx REG */
     {
-      unsigned short inst2 = read_memory_integer (pc + 2, 2);
-      offset = (sbits (inst1, 0, 10) << 12) + (bits (inst2, 0, 10) << 1);
-      nextpc = pc_val + offset;
-      /* For BLX make sure to clear the low bits.  */
-      if (bits (inst2, 11, 12) == 1)
-	nextpc = nextpc & 0xfffffffc;
-    }
-  else if ((inst1 & 0xff00) == 0x4700)	/* bx REG, blx REG */
-    {
-      if (bits (inst1, 3, 6) == 0x0f)
-	nextpc = pc_val;
+      if (bits (inst, 3, 6) == 0x0f)
+	nextpc = pc + 4;
       else
-	nextpc = read_register (bits (inst1, 3, 6));
+	nextpc = read_register (bits (inst, 3, 6));
 
       nextpc = ADDR_BITS_REMOVE (nextpc);
-      if (nextpc == pc)
-	error (_("Infinite loop detected"));
     }
+
+  /* 32-bit instructions.  */
+
+  else if ((inst & 0xf800d000) == 0xf0009000      /* B (unconditional)  */
+           || (inst & 0xf800d000) == 0xf000d000)  /* BL  */
+    {
+      unsigned int s = bit (inst, 26);
+      unsigned int i1 = bit (inst, 13);
+      unsigned int i2 = bit (inst, 11);
+      unsigned int offset = (bits (inst, 0, 10) << 1)
+	                    | (bits (inst, 16, 25) << 12)
+			    | (!(i2 ^ s) << 22)
+			    | (!(i1 ^ s) << 23)
+			    | (s << 24);
+      nextpc = pc + 4 + sbits (offset, 0, 24);
+    }
+  else if ((inst & 0xf800d000) == 0xf0008000)     /* B (conditional)  */
+    {
+      unsigned int s = bit (inst, 26);
+      unsigned int j1 = bit (inst, 13);
+      unsigned int j2 = bit (inst, 11);
+      unsigned int offset = (bits (inst, 0, 10) << 1)
+	                  | (bits (inst, 16, 21) << 12)
+			  | (j1 << 18)
+			  | (j2 << 19)
+			  | (s << 20);
+      unsigned int cond = bits (inst, 22, 25);
+      int cond_true = condition_true (cond, status);
+      if (cond_true)
+	nextpc = pc + 4 + sbits (offset, 0, 20);
+    }
+  else if ((inst & 0xf800d001) == 0xf000c000)     /* BLX  */
+    {
+      unsigned int s = bit (inst, 26);
+      unsigned int i1 = bit (inst, 13);
+      unsigned int i2 = bit (inst, 11);
+      unsigned int offset = (bits (inst, 1, 10) << 2)
+	                    | (bits (inst, 16, 25) << 12)
+			    | (!(i2 ^ s) << 22)
+			    | (!(i1 ^ s) << 23)
+			    | (s << 24);
+      nextpc = ((pc + 4) & 0xfffffffc) + sbits (offset, 0, 24);
+    }
+  else if (((inst & 0xffd08000) == 0xe9108000     /* LDM rb,{..pc..}  */
+            || (inst & 0xffd08000) == 0xe8908000)
+           && bitcount (inst & 0x0000dfff) > 1)
+    {
+      int incr_after = bit (inst, 23);
+      /* We know the PC is loaded because of the mask we use to detect the
+         instruction. LR cannot be loaded at the same time, so just count
+	 r0-r12.  */
+      int numregs = bitcount (bits (inst, 0, 12));
+      CORE_ADDR base = read_register (bits (inst, 16, 19));
+      CORE_ADDR pcaddr = incr_after ? base + 4 * numregs : base - 4;
+      nextpc = read_memory_integer (pcaddr, 4) & 0xfffffffe;
+    }
+  else if ((inst & 0xfff0f000) == 0xf8d0f000)     /* LDR pc, [rn, #imm]  */
+    {
+      CORE_ADDR base = read_register (bits (inst, 16, 19));
+      int offset = bits (inst, 0, 11);
+      nextpc = read_memory_integer (base + offset, 4) & 0xfffffffe;
+    }
+  else if ((inst & 0xfff0ff00) == 0xf850fc00)     /* LDR pc, [rn, #-imm]  */
+    {
+      CORE_ADDR base = read_register (bits (inst, 16, 19));
+      int offset = bits (inst, 0, 7);
+      nextpc = read_memory_integer (base - offset, 4) & 0xfffffffe;
+    }
+  else if ((inst & 0xfff0fd00) == 0xf850f900)     /* LDR pc, [rn], #+/-imm  */
+    {
+      CORE_ADDR addr = read_register (bits (inst, 16, 19));
+      nextpc = read_memory_integer (addr, 4) & 0xfffffffe;
+    }
+  else if ((inst & 0xfff0fd00) == 0xf850fd00)     /* LDR pc, [rn, #+/-imm]  */
+    {
+      CORE_ADDR base = read_register (bits (inst, 16, 19));
+      int plus = bit (inst, 9);
+      int offset = bits (inst, 0, 7);
+      CORE_ADDR addr = plus ? base + offset : base - offset;
+      nextpc = read_memory_integer (addr, 4) & 0xfffffffe;
+    }
+  else if ((inst & 0xfff0ffc0) ==0xf850f000)      /* LDR pc, [rn, rm, lsl]  */
+    {
+      CORE_ADDR base = read_register (bits (inst, 16, 19));
+      CORE_ADDR index = read_register (bits (inst, 0, 3));
+      int shift = bits (inst, 4, 5);
+      nextpc = read_memory_integer (base + (index << shift), 4) & 0xfffffffe;
+    }
+  else if ((inst & 0xff7ff000) == 0xf85ff000)     /* LDR pc, [pc, #+/-imm]  */
+    {
+      CORE_ADDR base = (pc + 4) & 0xfffffffc;
+      int plus = bit (inst, 23);
+      int offset = bits (inst, 0, 11);
+      CORE_ADDR addr = plus ? base + offset : base - offset;
+      nextpc = read_memory_integer (addr, 4) & 0xfffffffe;
+    }
+  else if (((inst & 0xffd00000) == 0xe8100000)    /* RFE  */
+           || ((inst & 0xffd00000) == 0xe9900000))
+    {
+      unsigned int incr_after = bit (inst, 23);
+      CORE_ADDR base = read_register (bits (inst, 16, 19));
+      CORE_ADDR pcaddr = incr_after ? base : base - 8;
+      nextpc = read_memory_integer (pcaddr, 4) & 0xfffffffe;
+    }
+  else if ((inst & 0xffffdf00) == 0xf3de8f00)     /* SUBS PC, LR, #imm  */
+    {
+      int imm = bits (inst, 0, 7);
+      CORE_ADDR lr = read_register (ARM_LR_REGNUM);
+      nextpc = lr - imm;
+    }
+  else if ((inst & 0xfff000f0) == 0xe8d00000)     /* TBB  */
+    {
+      unsigned int rn = bits (inst, 16, 19);
+      CORE_ADDR base = (rn == ARM_PC_REGNUM) ? pc + 4 : read_register (rn);
+      unsigned int index = read_register (bits (inst, 0, 3));
+      unsigned int offset = read_memory_unsigned_integer (base + index, 1) << 1;
+      nextpc = pc + offset;
+    }
+  else if ((inst & 0xfff000f0) == 0xe8d00010)     /* TBH  */
+    {
+      unsigned int rn = bits (inst, 16, 19);
+      CORE_ADDR base = (rn == ARM_PC_REGNUM) ? pc + 4 : read_register (rn);
+      unsigned int index = read_register (bits (inst, 0, 3)) << 1;
+      unsigned int offset = read_memory_unsigned_integer (base + index, 2) << 1;
+      nextpc = pc + offset;
+    }
+
+  if (nextpc == pc)
+    error (_("Infinite loop detected"));
 
   return nextpc;
 }
