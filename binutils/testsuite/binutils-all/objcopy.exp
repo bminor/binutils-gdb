@@ -661,6 +661,52 @@ switch [copy_setup] {
     }
 }
 
+proc objcopy_test_readelf {testname srcfile} {
+    global OBJCOPY
+    global OBJCOPYFLAGS
+    global READELF
+    global srcdir
+    global subdir
+
+    if {![binutils_assemble $srcdir/$subdir/${srcfile} tmpdir/bintest.o]} then {
+	unresolved "objcopy ($testname)"
+	return
+    }
+
+    verbose -log "$OBJCOPY $OBJCOPYFLAGS tmpdir/bintest.o tmpdir/copy.o"
+    catch "exec $OBJCOPY $OBJCOPYFLAGS tmpdir/bintest.o tmpdir/copy.o" exec_output
+    if ![string match "" $exec_output] then {
+	fail "objcopy ($testname)"
+	return;
+    }
+
+    verbose -log "$READELF -a tmpdir/bintest.o > tmpdir/bintest.o.out"
+    catch "exec $READELF -a tmpdir/bintest.o > tmpdir/bintest.o.out" exec_output
+    set exec_output [prune_warnings $exec_output]
+    if ![string match "" $exec_output] then {
+	unresolved "objcopy ($testname)"
+	return
+    }
+
+    verbose -log "$READELF -a tmpdir/copy.o > tmpdir/copy.o.out"
+    catch "exec $READELF -a tmpdir/copy.o > tmpdir/copy.o.out" exec_output
+    set exec_output [prune_warnings $exec_output]
+    if ![string match "" $exec_output] then {
+	unresolved "objcopy ($testname)"
+	return
+    }
+
+    verbose -log "diff tmpdir/bintest.o.out tmpdir/copy.o.out"
+    catch "exec diff tmpdir/bintest.o.out tmpdir/copy.o.out" exec_output
+    set exec_output [prune_warnings $exec_output]
+
+    if [string match "" $exec_output] then {
+	pass "objcopy ($testname)"
+    } else {
+	fail "objcopy ($testname)"
+    }
+}
+
 # ia64 specific tests
 if { ([istarget "ia64-*-elf*"]
        || [istarget "ia64-*-linux*"]) } {
@@ -670,4 +716,5 @@ if { ([istarget "ia64-*-elf*"]
 # ELF specific tests
 if [is_elf_format] {
     objcopy_test "ELF unknown section type" unknown.s
+    objcopy_test_readelf "ELF group" group.s
 }

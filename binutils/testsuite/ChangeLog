@@ -1,6 +1,15 @@
+2005-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/251
+	* binutils-all/group.s: New file.
+
+	* binutils-all/objcopy.exp (objcopy_test_readelf): New
+	procedure.
+	Use it to test ELF group.
+
 2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR binutils/1487
+	PR ld/1487
 	* binutils-all/objcopy.exp (objcopy_test): New procedure.
 	Use it to test simple copy, ia64 link order and ELF unknown
 	section type.

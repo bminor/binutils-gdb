@@ -1,6 +1,11 @@
+2005-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/251
+	* ld-elf/group.2d: New file.
+
 2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR binutils/1487
+	PR ld/1487
 	* ld-elf/unknown.d: New file.
 
 2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
