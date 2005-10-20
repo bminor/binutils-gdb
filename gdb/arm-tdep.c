@@ -1458,6 +1458,42 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   print_fpu_flags (status);
 }
 
+/* Type for iWMMXt registers.  */
+static struct type *arm_iwmmxt_type;
+
+/* Construct the type for iWMMXt registers.  */
+static struct type *
+arm_build_iwmmxt_type (void)
+{
+  /* The type we're building is this: */
+#if 0
+  union __gdb_builtin_type_vec64i 
+  {
+    int64_t uint64;
+    int32_t v2_int32[2];
+    int16_t v4_int16[4];
+    int8_t v8_int8[8];
+  };
+#endif
+
+  if (!arm_iwmmxt_type)
+    {
+      struct type *t;
+
+      t = init_composite_type ("__gdb_builtin_type_vec64i", TYPE_CODE_UNION);
+      append_composite_type_field (t, "uint64", builtin_type_int64);
+      append_composite_type_field (t, "v2_int32", builtin_type_v2_int32);
+      append_composite_type_field (t, "v4_int16", builtin_type_v4_int16);
+      append_composite_type_field (t, "v8_int8", builtin_type_v8_int8);
+
+      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_NAME (t) = "builtin_type_vec64i";
+
+      arm_iwmmxt_type = t;
+    }
+
+  return arm_iwmmxt_type;
+}
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
@@ -1470,7 +1506,7 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
   if (first != -1)
     {
       if (regnum >= first && regnum < first + NUM_IWMMXT_COP0REGS)
-	return builtin_type_vec64i;
+	return arm_build_iwmmxt_type ();
 
       first += NUM_IWMMXT_COP0REGS;
 
