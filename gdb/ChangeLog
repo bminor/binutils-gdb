@@ -1,3 +1,7 @@
+2005-10-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (YYFILES): Add ada-lex.c
+
 2005-10-17  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2expr.c (dwarf_expr_fetch): Use correct comparison to

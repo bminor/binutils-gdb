@@ -948,6 +948,7 @@ SUBDIRS = @subdirs@
 YYFILES = c-exp.c \
 	cp-name-parser.c \
 	objc-exp.c \
+	ada-lex.c \
 	ada-exp.c \
 	jv-exp.c \
 	f-exp.c m2-exp.c p-exp.c
