@@ -1,3 +1,10 @@
+2005-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1467
+	* ld-elf/orphan.d: New file.
+	* ld-elf/orphan.ld: Likewise.
+	* ld-elf/orphan.s: Likewise.
+
 2005-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ia64/ia64.exp: Undo the last change. Add support for *.d.
