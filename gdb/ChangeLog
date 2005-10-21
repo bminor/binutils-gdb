@@ -1,3 +1,8 @@
+2005-10-21  Andreas Schwab  <schwab@suse.de>
+
+	* dwarf2read.c (isreg): Removed.
+	(decode_locdesc): Don't set it.
+
 2005-10-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (YYFILES): Add ada-lex.c
