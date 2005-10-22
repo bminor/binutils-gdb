@@ -1,3 +1,12 @@
+2005-10-21  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (lde, ste): Add dsp[a0] and [a1a] addressing.
+	(indexb, indexbd, indexbs, indexw, indexwd, indexws, indexl,
+	indexld, indexls): .w variants have `1' bit.
+	(rot32.b): QI, not SI.
+	(rot32.w): HI, not SI.
+	(xchg16): HI for .w variant.
+
 2005-10-19  Nick Clifton  <nickc@redhat.com>
 
 	* m32r.opc (parse_slo16): Fix bad application of previous patch.

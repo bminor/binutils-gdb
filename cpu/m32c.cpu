@@ -6702,59 +6702,91 @@
 
 ;-------------------------------------------------------------
 ; lde dsp24,dst -- for m16c
-; TODO abs20[a0], [a0a1] for dsp24
 ;-------------------------------------------------------------
 
-(define-pmacro (lde-defn mach dstgroup dsp mode wstr op encoding sem)
-  (dni (.sym op mach wstr -dst-dspsp- dstgroup)
-       (.str op wstr " " mach "-dsp[sp]-" dstgroup "-" dsp "-" mode)
-       ((machine mach))
-       (.str op wstr " ${" dsp "},${dst" mach "-" dstgroup "-" mode "}")
-       encoding
-       (sem mode (.sym dst mach - dstgroup - mode) dsp)
-       ())
-)
-
-(define-pmacro (lde-dst mode wstr wbit op opc1 opc2 opc3 sem)
+(define-pmacro (lde-dst-dsp mode wstr wbit dstgroup srcdisp)
   (begin
-    (lde-defn 16 basic Dsp-16-u20 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-basic- mode) Dsp-16-u20)
-			     sem)
-    (lde-defn 16 16-16 Dsp-32-u20 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-16- mode) Dsp-32-u20)
-			     sem)
-    (lde-defn 16 16-8 Dsp-24-u20 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-8- mode) Dsp-24-u20)
-			     sem)
+
+    (dni (.sym lde wstr - dstgroup -u20)
+	 (.str "lde" wstr "-" dstgroup "-u20")
+	 ((machine 16))
+	 (.str "lde" wstr " ${" srcdisp "},${dst16-" dstgroup "-" mode "}")
+	 (+ (f-0-4 #x7) (f-4-3 #x2) (f-7-1 wbit) (f-8-4 #x8)
+	  (.sym dst16- dstgroup - mode) srcdisp)
+	 (nop)
+	 ())
+
+    (dni (.sym lde wstr - dstgroup -u20a0)
+	 (.str "lde" wstr "-" dstgroup "-u20a0")
+	 ((machine 16))
+	 (.str "lde" wstr " ${" srcdisp "}[a0],${dst16-" dstgroup "-" mode "}")
+	 (+ (f-0-4 #x7) (f-4-3 #x2) (f-7-1 wbit) (f-8-4 #x9)
+	  (.sym dst16- dstgroup - mode) srcdisp)
+	 (nop)
+	 ())
+
+    (dni (.sym lde wstr - dstgroup -a1a0)
+	 (.str "lde" wstr "-" dstgroup "-a1a0")
+	 ((machine 16))
+	 (.str "lde" wstr " [a1a0],${dst16-" dstgroup "-" mode "}")
+	 (+ (f-0-4 #x7) (f-4-3 #x2) (f-7-1 wbit) (f-8-4 #xa)
+	  (.sym dst16- dstgroup - mode))
+	 (nop)
+	 ())
+    )
+  )
+
+(define-pmacro (lde-dst mode wstr wbit)
+  (begin
+    ; like:       QI   .b   0 
+    (lde-dst-dsp mode wstr wbit basic Dsp-16-u20)
+    (lde-dst-dsp mode wstr wbit 16-8  Dsp-24-u20)
+    (lde-dst-dsp mode wstr wbit 16-16 Dsp-32-u20)
   )
 )
 
 ;-------------------------------------------------------------
-; ste src,dsp24 -- for m16c
-; TODO abs20[a0], [a0a1] for dsp24
+; ste dst,dsp24 -- for m16c
 ;-------------------------------------------------------------
 
-(define-pmacro (ste-defn mach dstgroup dsp mode wstr op encoding sem)
-  (dni (.sym op mach wstr -dst-dspsp- dstgroup)
-       (.str op wstr " " mach "-dsp[sp]-" dstgroup "-" dsp "-" mode)
-       ((machine mach))
-       (.str op wstr " ${dst" mach "-" dstgroup "-" mode "},${" dsp "}")
-       encoding
-       (sem mode (.sym dst mach - dstgroup - mode) dsp)
-       ())
-)
-
-(define-pmacro (ste-dst mode wstr wbit op opc1 opc2 opc3 sem)
+(define-pmacro (ste-dst-dsp mode wstr wbit dstgroup srcdisp)
   (begin
-    (ste-defn 16 basic Dsp-16-u20 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-basic- mode) Dsp-16-u20)
-			     sem)
-    (ste-defn 16 16-16 Dsp-32-u20 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-16- mode) Dsp-32-u20)
-			     sem)
-    (ste-defn 16 16-8 Dsp-24-u20 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-8- mode) Dsp-24-u20)
-			     sem)
+
+    (dni (.sym ste wstr - dstgroup -u20)
+	 (.str "ste" wstr "-" dstgroup "-u20")
+	 ((machine 16))
+	 (.str "ste" wstr " ${dst16-" dstgroup "-" mode "},${" srcdisp "}")
+	 (+ (f-0-4 #x7) (f-4-3 #x2) (f-7-1 wbit) (f-8-4 #x0)
+	  (.sym dst16- dstgroup - mode) srcdisp)
+	 (nop)
+	 ())
+
+    (dni (.sym ste wstr - dstgroup -u20a0)
+	 (.str "ste" wstr "-" dstgroup "-u20a0")
+	 ((machine 16))
+	 (.str "ste" wstr " ${dst16-" dstgroup "-" mode "},${" srcdisp "}[a0]")
+	 (+ (f-0-4 #x7) (f-4-3 #x2) (f-7-1 wbit) (f-8-4 #x1)
+	  (.sym dst16- dstgroup - mode) srcdisp)
+	 (nop)
+	 ())
+
+    (dni (.sym ste wstr - dstgroup -a1a0)
+	 (.str "ste" wstr "-" dstgroup "-a1a0")
+	 ((machine 16))
+	 (.str "ste" wstr " ${dst16-" dstgroup "-" mode "},[a1a0]")
+	 (+ (f-0-4 #x7) (f-4-3 #x2) (f-7-1 wbit) (f-8-4 #x2)
+	  (.sym dst16- dstgroup - mode))
+	 (nop)
+	 ())
+    )
+  )
+
+(define-pmacro (ste-dst mode wstr wbit)
+  (begin
+    ; like:       QI   .b   0 
+    (ste-dst-dsp mode wstr wbit basic Dsp-16-u20)
+    (ste-dst-dsp mode wstr wbit 16-8  Dsp-24-u20)
+    (ste-dst-dsp mode wstr wbit 16-16 Dsp-32-u20)
   )
 )
 
@@ -7905,31 +7937,31 @@
 
 ; indexb src (index byte)
 (unary32-defn QI .b 0 indexb #x8 0 #x3 indexb-sem)
-(unary32-defn HI .w 0 indexb #x8 1 #x3 indexb-sem)
+(unary32-defn HI .w 1 indexb #x8 1 #x3 indexb-sem)
 ; indexbd src (index byte dest)
 (unary32-defn QI .b 0 indexbd #xA 0 3 indexbd-sem)
-(unary32-defn HI .w 0 indexbd #xA 1 3 indexbd-sem)
+(unary32-defn HI .w 1 indexbd #xA 1 3 indexbd-sem)
 ; indexbs src (index byte src)
 (unary32-defn QI .b 0 indexbs #xC 0 3 indexbs-sem)
-(unary32-defn HI .w 0 indexbs #xC 1 3 indexbs-sem)
+(unary32-defn HI .w 1 indexbs #xC 1 3 indexbs-sem)
 ; indexl src (index long)
 (unary32-defn QI .b 0 indexl 9 2 3 indexl-sem)
-(unary32-defn HI .w 0 indexl 9 3 3 indexl-sem)
+(unary32-defn HI .w 1 indexl 9 3 3 indexl-sem)
 ; indexld src (index long dest)
 (unary32-defn QI .b 0 indexld #xB 2 3 indexld-sem)
-(unary32-defn HI .w 0 indexld #xB 3 3 indexld-sem)
+(unary32-defn HI .w 1 indexld #xB 3 3 indexld-sem)
 ; indexls src (index long src)
 (unary32-defn QI .b 0 indexls 9 0 3 indexls-sem)
-(unary32-defn HI .w 0 indexls 9 1 3 indexls-sem)
+(unary32-defn HI .w 1 indexls 9 1 3 indexls-sem)
 ; indexw src (index word)
 (unary32-defn QI .b 0 indexw 8 2 3 indexw-sem)
-(unary32-defn HI .w 0 indexw 8 3 3 indexw-sem)
+(unary32-defn HI .w 1 indexw 8 3 3 indexw-sem)
 ; indexwd src (index word dest)
 (unary32-defn QI .b 0 indexwd #xA 2 3 indexwd-sem)
-(unary32-defn HI .w 0 indexwd #xA 3 3 indexwd-sem)
+(unary32-defn HI .w 1 indexwd #xA 3 3 indexwd-sem)
 ; indexws (index word src)
 (unary32-defn QI .b 0 indexws #xC 2 3 indexws-sem)
-(unary32-defn HI .w 0 indexws #xC 3 3 indexws-sem)
+(unary32-defn HI .w 1 indexws #xC 3 3 indexws-sem)
 
 ;-------------------------------------------------------------
 ; jcc - jump on condition
@@ -8450,21 +8482,11 @@
 ; ste - store to extra far data area (m16)
 ;-------------------------------------------------------------
 
-; A special variant of mem16 for lde and ste
-(define-pmacro (extra-mem16 mode address)
-  (mem mode (and #xfffff address)))
+(lde-dst QI .b 0)
+(lde-dst HI .w 1)
 
-(define-pmacro (lde-sem mode src1 dst)
-  (set mode src1 (extra-mem16 mode dst))
-)
-(lde-dst QI .b 0 lde (f-0-4 #x7) (f-4-3 2) (f-8-4 #x8) lde-sem)
-(lde-dst HI .w 1 lde (f-0-4 #x7) (f-4-3 2) (f-8-4 #x8) lde-sem)
-
-(define-pmacro (ste-sem mode src1 dst)
-  (set (extra-mem16 mode dst) src1)
-)
-(ste-dst QI .b 0 ste (f-0-4 #x7) (f-4-3 2) (f-8-4 #x0) ste-sem)
-(ste-dst HI .w 1 ste (f-0-4 #x7) (f-4-3 2) (f-8-4 #x0) ste-sem)
+(ste-dst QI .b 0)
+(ste-dst HI .w 1)
 
 ;-------------------------------------------------------------
 ; ldipl - load interrupt permission level
@@ -9481,9 +9503,9 @@
 ; rot.BW src,dst
 
 (dni rot16.b-dst "rot r1h,dest" ((machine 16))
-     ("rot.b r1h,${dst16-16-HI}")
-     (+ (f-0-4 7) (f-4-4 #x4) (f-8-4 #x6) dst16-16-HI)
-     (rot-2-sem QI dst16-16-HI)
+     ("rot.b r1h,${dst16-16-QI}")
+     (+ (f-0-4 7) (f-4-4 #x4) (f-8-4 #x6) dst16-16-QI)
+     (rot-2-sem QI dst16-16-QI)
      ())
 (dni rot16.w-dst "rot r1h,dest" ((machine 16))
      ("rot.w r1h,${dst16-16-HI}")
@@ -9492,14 +9514,14 @@
      ())
  
 (dni rot32.b-dst "rot r1h,dest" ((machine 32))
-     ("rot.b r1h,${dst32-16-Unprefixed-SI}")
-     (+ (f-0-4 #xA) dst32-16-Unprefixed-SI (f-7-1 0) (f-10-2 3) (f-12-4 #xF))
-     (rot-2-sem QI dst32-16-Unprefixed-SI)
+     ("rot.b r1h,${dst32-16-Unprefixed-QI}")
+     (+ (f-0-4 #xA) dst32-16-Unprefixed-QI (f-7-1 0) (f-10-2 3) (f-12-4 #xF))
+     (rot-2-sem QI dst32-16-Unprefixed-QI)
      ())
 (dni rot32.w-dst "rot r1h,dest" ((machine 32))
-     ("rot.w r1h,${dst32-16-Unprefixed-SI}")
-     (+ (f-0-4 #xA) dst32-16-Unprefixed-SI (f-7-1 1) (f-10-2 3) (f-12-4 #xF))
-     (rot-2-sem HI dst32-16-Unprefixed-SI)
+     ("rot.w r1h,${dst32-16-Unprefixed-HI}")
+     (+ (f-0-4 #xA) dst32-16-Unprefixed-HI (f-7-1 1) (f-10-2 3) (f-12-4 #xF))
+     (rot-2-sem HI dst32-16-Unprefixed-HI)
      ())
 
 ;-------------------------------------------------------------
@@ -10215,7 +10237,7 @@
 (xchg16-defn QI b 0 1 r0h)
 (xchg16-defn QI b 0 2 r1l)
 (xchg16-defn QI b 0 3 r1h)
-(xchg16-defn QI w 1 0 r0)
+(xchg16-defn HI w 1 0 r0)
 (xchg16-defn HI w 1 1 r1)
 (xchg16-defn HI w 1 2 r2)
 (xchg16-defn HI w 1 3 r3)
