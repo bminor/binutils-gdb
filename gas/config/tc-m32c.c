@@ -738,6 +738,12 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
     int offset;
   } op_reloc_table[] = {
 
+    /* PC-REL relocs for 8-bit fields.  */
+    { M32C_OPERAND_LAB_16_8,   BFD_RELOC_8_PCREL, 2 },
+    { M32C_OPERAND_LAB_24_8,   BFD_RELOC_8_PCREL, 3 },
+    { M32C_OPERAND_LAB_32_8,   BFD_RELOC_8_PCREL, 4 },
+    { M32C_OPERAND_LAB_40_8,   BFD_RELOC_8_PCREL, 5 },
+
     /* Absolute relocs for 8-bit fields.  */
     { M32C_OPERAND_IMM_8_QI,   BFD_RELOC_8, 1 },
     { M32C_OPERAND_IMM_16_QI,  BFD_RELOC_8, 2 },
@@ -763,6 +769,10 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
     { M32C_OPERAND_IMM_16_HI,  BFD_RELOC_16, 2 },
     { M32C_OPERAND_IMM_24_HI,  BFD_RELOC_16, 3 },
     { M32C_OPERAND_IMM_32_HI,  BFD_RELOC_16, 4 },
+    { M32C_OPERAND_IMM_40_HI,  BFD_RELOC_16, 5 },
+    { M32C_OPERAND_IMM_48_HI,  BFD_RELOC_16, 6 },
+    { M32C_OPERAND_IMM_56_HI,  BFD_RELOC_16, 7 },
+    { M32C_OPERAND_IMM_64_HI,  BFD_RELOC_16, 8 },
     { M32C_OPERAND_DSP_16_S16, BFD_RELOC_16, 2 },
     { M32C_OPERAND_DSP_24_S16, BFD_RELOC_16, 3 },
     { M32C_OPERAND_DSP_32_S16, BFD_RELOC_16, 4 },
@@ -771,14 +781,20 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
     { M32C_OPERAND_DSP_16_U16, BFD_RELOC_16, 2 },
     { M32C_OPERAND_DSP_24_U16, BFD_RELOC_16, 3 },
     { M32C_OPERAND_DSP_32_U16, BFD_RELOC_16, 4 },
+    { M32C_OPERAND_DSP_40_U16, BFD_RELOC_16, 5 },
+    { M32C_OPERAND_DSP_48_U16, BFD_RELOC_16, 6 },
 
     /* Absolute relocs for 24-bit fields.  */
     { M32C_OPERAND_LAB_8_24,   BFD_RELOC_24, 1 },
+    { M32C_OPERAND_DSP_8_U24,  BFD_RELOC_24, 1 },
     { M32C_OPERAND_DSP_16_U24, BFD_RELOC_24, 2 },
     { M32C_OPERAND_DSP_24_U24, BFD_RELOC_24, 3 },
     { M32C_OPERAND_DSP_32_U24, BFD_RELOC_24, 4 },
     { M32C_OPERAND_DSP_40_U24, BFD_RELOC_24, 5 },
-    { M32C_OPERAND_DSP_8_U24,  BFD_RELOC_24, 1 },
+    { M32C_OPERAND_DSP_48_U24, BFD_RELOC_24, 6 },
+    { M32C_OPERAND_DSP_16_U20, BFD_RELOC_24, 2 },
+    { M32C_OPERAND_DSP_24_U20, BFD_RELOC_24, 3 },
+    { M32C_OPERAND_DSP_32_U20, BFD_RELOC_24, 4 },
 
     /* Absolute relocs for 32-bit fields.  */
     { M32C_OPERAND_IMM_16_SI,  BFD_RELOC_32, 2 },
@@ -809,8 +825,8 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
 
   fprintf
     (stderr,
-     "Error: tc-m32c.c:md_cgen_lookup_reloc Unimplemented relocation for operand %d\n",
-     operand->type);
+     "Error: tc-m32c.c:md_cgen_lookup_reloc Unimplemented relocation for operand %s\n",
+     operand->name);
 
   return BFD_RELOC_NONE;
 }

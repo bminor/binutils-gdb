@@ -1,3 +1,8 @@
+2005-10-21  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-m32c.c (md_cgen_lookup_reloc): Add more relocs.  Print
+	names unstead of numbers.
+
 2005-10-19  David Ung  <davidu@mips.com>
 
 	* config/tc-mips.c (append_insn): Convert MIPS16 jr/jalr jumps
