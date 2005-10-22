@@ -3420,14 +3420,6 @@ rs6000_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   /* FIXME: Dump gdbarch_tdep.  */
 }
 
-static struct cmd_list_element *info_powerpc_cmdlist = NULL;
-
-static void
-rs6000_info_powerpc_command (char *args, int from_tty)
-{
-  help_list (info_powerpc_cmdlist, "info powerpc ", class_info, gdb_stdout);
-}
-
 /* Initialization code.  */
 
 extern initialize_file_ftype _initialize_rs6000_tdep; /* -Wmissing-prototypes */
