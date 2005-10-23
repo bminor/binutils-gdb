@@ -95,6 +95,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
 #define elf_backend_always_size_sections      ppc64_elf_func_desc_adjust
 #define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
+#define elf_backend_action_discarded	      ppc64_elf_action_discarded
 #define elf_backend_relocate_section	      ppc64_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol     ppc64_elf_finish_dynamic_symbol
 #define elf_backend_reloc_type_class	      ppc64_elf_reloc_type_class
@@ -6120,15 +6121,24 @@ dec_dynrel_count (bfd_vma r_info,
 
   if (h != NULL)
     pp = &((struct ppc_link_hash_entry *) h)->dyn_relocs;
-  else if (sym_sec != NULL)
-    {
-      void *vpp = &elf_section_data (sym_sec)->local_dynrel;
-      pp = (struct ppc_dyn_relocs **) vpp;
-    }
   else
     {
-      void *vpp = &elf_section_data (sec)->local_dynrel;
-      pp = (struct ppc_dyn_relocs **) vpp;
+      if (sym_sec != NULL)
+	{
+	  void *vpp = &elf_section_data (sym_sec)->local_dynrel;
+	  pp = (struct ppc_dyn_relocs **) vpp;
+	}
+      else
+	{
+	  void *vpp = &elf_section_data (sec)->local_dynrel;
+	  pp = (struct ppc_dyn_relocs **) vpp;
+	}
+
+      /* elf_gc_sweep may have already removed all dyn relocs associated
+	 with local syms for a given section.  Don't report a dynreloc
+	 miscount.  */
+      if (*pp == NULL)
+	return TRUE;
     }
 
   while ((p = *pp) != NULL)
@@ -6476,7 +6486,8 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 
 	      if (skip)
 		{
-		  if (!info->relocatable
+		  if (!NO_OPD_RELOCS
+		      && !info->relocatable
 		      && !dec_dynrel_count (rel->r_info, sec, info,
 					    NULL, h, sym_sec))
 		    goto error_ret;
@@ -9452,6 +9463,21 @@ ppc64_elf_restore_symbols (struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
   elf_link_hash_traverse (&htab->elf, undo_symbol_twiddle, info);
+}
+
+/* What to do when ld finds relocations against symbols defined in
+   discarded sections.  */
+
+static unsigned int
+ppc64_elf_action_discarded (asection *sec)
+{
+  if (strcmp (".opd", sec->name) == 0)
+    return 0;
+
+  if (strcmp (".toc", sec->name) == 0)
+    return 0;
+
+  return _bfd_elf_default_action_discarded (sec);
 }
 
 /* The RELOCATE_SECTION function is called by the ELF backend linker

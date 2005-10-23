@@ -1,3 +1,11 @@
+2005-10-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (dec_dynrel_count): Don't report errors for local
+	syms in gc'd sections.
+	(ppc64_elf_edit_opd): Don't adjust reloc counts when NO_OPD_RELOCS.
+	(elf_backend_action_discarded): Define.
+	(ppc64_elf_action_discarded): New function.
+
 2005-10-19  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (find_arm_elf_section_entry): New function.
