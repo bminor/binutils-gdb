@@ -157,6 +157,9 @@
 #ifdef TE_PE
 /* PE weak symbols need USE_UNIQUE.  */
 #define USE_UNIQUE 1
+
+#define obj_set_weak_hook pecoff_obj_set_weak_hook
+#define obj_clear_weak_hook pecoff_obj_clear_weak_hook
 #endif
 
 #ifndef OBJ_COFF_MAX_AUXENTRIES
@@ -384,6 +387,10 @@ extern void coff_adjust_section_syms     (bfd *, asection *, void *);
 extern void coff_frob_file_after_relocs  (void);
 extern void coff_obj_symbol_new_hook     (symbolS *);
 extern void coff_obj_read_begin_hook     (void);
+#ifdef TE_PE
+extern void pecoff_obj_set_weak_hook     (symbolS *);
+extern void pecoff_obj_clear_weak_hook   (symbolS *);
+#endif
 extern void obj_coff_section             (int);
 extern segT obj_coff_add_segment         (const char *);
 extern void obj_coff_section             (int);

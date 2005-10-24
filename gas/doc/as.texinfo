@@ -3842,6 +3842,7 @@ Some machine configurations provide additional directives.
 
 * Warning::			@code{.warning @var{string}}
 * Weak::                        @code{.weak @var{names}}
+* Weakref::                     @code{.weakref @var{alias}, @var{symbol}}
 * Word::                        @code{.word @var{expressions}}
 * Deprecated::                  Deprecated Directives
 @end menu
@@ -5988,6 +5989,25 @@ directive sets the weak attribute on the comma separated list of symbol
 On the PE target, weak symbols are supported natively as weak aliases.
 When a weak symbol is created that is not an alias, GAS creates an 
 alternate symbol to hold the default value.
+
+@node Weakref
+@section @code{.weakref @var{alias}, @var{target}}
+
+@cindex @code{weakref} directive
+This directive creates an alias to the target symbol that enables the symbol to
+be referenced with weak-symbol semantics, but without actually making it weak.
+If direct references or definitions of the symbol are present, then the symbol
+will not be weak, but if all references to it are through weak references, the
+symbol will be marked as weak in the symbol table.
+
+The effect is equivalent to moving all references to the alias to a separate
+assembly source file, renaming the alias to the symbol in it, declaring the
+symbol as weak there, and running a reloadable link to merge the object files
+resulting from the assembly of the new source file and the old source file that
+had the references to the alias removed.
+
+The alias itself never makes to the symbol table, and is entirely handled
+within the assembler.
 
 @node Word
 @section @code{.word @var{expressions}}

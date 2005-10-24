@@ -1055,6 +1055,39 @@ weak_uniquify (const char * name)
   return ret;
 }
 
+void
+pecoff_obj_set_weak_hook (symbolS *symbolP)
+{
+  symbolS *alternateP;
+
+  /* See _Microsoft Portable Executable and Common Object
+     File Format Specification_, section 5.5.3.
+     Create a symbol representing the alternate value.
+     coff_frob_symbol will set the value of this symbol from
+     the value of the weak symbol itself.  */
+  S_SET_STORAGE_CLASS (symbolP, C_NT_WEAK);
+  S_SET_NUMBER_AUXILIARY (symbolP, 1);
+  SA_SET_SYM_FSIZE (symbolP, IMAGE_WEAK_EXTERN_SEARCH_NOLIBRARY);
+
+  alternateP = symbol_find_or_make (weak_name2altname (S_GET_NAME (symbolP)));
+  S_SET_EXTERNAL (alternateP);
+  S_SET_STORAGE_CLASS (alternateP, C_NT_WEAK);
+
+  SA_SET_SYM_TAGNDX (symbolP, alternateP);
+}
+
+void
+pecoff_obj_clear_weak_hook (symbolS *symbolP)
+{
+  symbolS *alternateP;
+
+  S_SET_STORAGE_CLASS (symbolP, 0);
+  SA_SET_SYM_FSIZE (symbolP, 0);
+
+  alternateP = symbol_find (weak_name2altname (S_GET_NAME (symbolP)));
+  S_CLEAR_EXTERNAL (alternateP);
+}
+
 #endif  /* TE_PE */
 
 /* Handle .weak.  This is a GNU extension in formats other than PE. */
@@ -1065,9 +1098,6 @@ obj_coff_weak (int ignore ATTRIBUTE_UNUSED)
   char *name;
   int c;
   symbolS *symbolP;
-#ifdef TE_PE
-  symbolS *alternateP;
-#endif
 
   do
     {
@@ -1084,23 +1114,6 @@ obj_coff_weak (int ignore ATTRIBUTE_UNUSED)
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
       S_SET_WEAK (symbolP);
-
-#ifdef TE_PE
-      /* See _Microsoft Portable Executable and Common Object
-         File Format Specification_, section 5.5.3.
-         Create a symbol representing the alternate value.
-         coff_frob_symbol will set the value of this symbol from
-         the value of the weak symbol itself.  */
-      S_SET_STORAGE_CLASS (symbolP, C_NT_WEAK);
-      S_SET_NUMBER_AUXILIARY (symbolP, 1);
-      SA_SET_SYM_FSIZE (symbolP, IMAGE_WEAK_EXTERN_SEARCH_NOLIBRARY);
-
-      alternateP = symbol_find_or_make (weak_name2altname (name));
-      S_SET_EXTERNAL (alternateP);
-      S_SET_STORAGE_CLASS (alternateP, C_NT_WEAK);
-
-      SA_SET_SYM_TAGNDX (symbolP, alternateP);
-#endif
 
       if (c == ',')
 	{
@@ -1157,12 +1170,19 @@ coff_frob_symbol (symbolS *symp, int *punt)
     {
       /* This is a weak alternate symbol.  All processing of
 	 PECOFFweak symbols is done here, through the alternate.  */
-      symbolS *weakp = symbol_find (weak_altname2name (S_GET_NAME (symp)));
+      symbolS *weakp = symbol_find_noref (weak_altname2name
+					  (S_GET_NAME (symp)), 1);
 
       assert (weakp);
       assert (S_GET_NUMBER_AUXILIARY (weakp) == 1);
 
-      if (symbol_equated_p (weakp))
+      if (! S_IS_WEAK (weakp))
+	{
+	  /* The symbol was turned from weak to strong.  Discard altname.  */
+	  *punt = 1;
+	  return;
+	}
+      else if (symbol_equated_p (weakp))
 	{
 	  /* The weak symbol has an alternate specified; symp is unneeded.  */
 	  S_SET_STORAGE_CLASS (weakp, C_NT_WEAK);
@@ -1225,7 +1245,7 @@ coff_frob_symbol (symbolS *symp, int *punt)
 	  && !SF_GET_STATICS (symp)
 	  && S_GET_STORAGE_CLASS (symp) != C_LABEL
 	  && symbol_constant_p (symp)
-	  && (real = symbol_find (S_GET_NAME (symp)))
+	  && (real = symbol_find_noref (S_GET_NAME (symp), 1))
 	  && S_GET_STORAGE_CLASS (real) == C_NULL
 	  && real != symp)
 	{
@@ -1237,7 +1257,10 @@ coff_frob_symbol (symbolS *symp, int *punt)
       if (!S_IS_DEFINED (symp) && !SF_GET_LOCAL (symp))
 	{
 	  assert (S_GET_VALUE (symp) == 0);
-	  S_SET_EXTERNAL (symp);
+	  if (S_IS_WEAKREFD (symp))
+	    *punt = 1;
+	  else
+	    S_SET_EXTERNAL (symp);
 	}
       else if (S_GET_STORAGE_CLASS (symp) == C_NULL)
 	{

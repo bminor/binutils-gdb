@@ -1,3 +1,40 @@
+2005-10-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* read.c (potable): Add weakref.
+	(s_weakref): New.
+	* read.h (s_weakref): Declare.
+	* struc-symbol.h (struct symbol): Add sy_weakrefr and sy_weakrefd.
+	* symbols.c (colon): Clear weakrefr.
+	(symbol_find_exact): Rename to, and reimplement in terms of...
+	(symbol_find_exact_noref): ... new function.
+	(symbol_find): Likewise...
+	(symbol_find_noref): ... ditto.
+	(resolve_symbol_value): Resolve weakrefr without setting their
+	values.
+	(S_SET_WEAK): Call hook.
+	(S_GET_VALUE): Follow weakref link.
+	(S_SET_VALUE): Clear weakrefr.
+	(S_IS_WEAK): Follow weakref link.
+	(S_IS_WEAKREFR, S_SET_WEAKREFR, S_CLEAR_WEAKREFR): New.
+	(S_IS_WEAKREFD, S_SET_WEAKREFD, S_CLEAR_WEAKREFD): New.
+	(symbol_set_value_expression, symbol_set_frag): Clear weakrefr.
+	(symbol_mark_used): Follow weakref link.
+	(print_symbol_value_1): Print weak, weakrefr and weakrefd.
+	* symbols.h (symbol_find_noref, symbol_find_exact_noref): Declare.
+	(S_IS_WEAKREFR, S_SET_WEAKREFR, S_CLEAR_WEAKREFR): Declare.
+	(S_IS_WEAKREFD, S_SET_WEAKREFD, S_CLEAR_WEAKREFD): Declare.
+	* write.c (adust_reloc_syms): Follow weakref link.  Do not
+	complain if target is undefined.
+	(write_object_file): Likewise.  Remove weakrefr symbols.  Drop
+	unreferenced weakrefd symbols.
+	* config/obj-coff.c (obj_frob_symbol): Do not force WEAKREFD
+	symbols EXTERNAL.
+	(pecoff_obj_set_weak_hook, pecoff_obj_clear_weak_hook): New.
+	* config/obj-coff.h (obj_set_weak_hook, obj_clear_weak_hook): Define.
+	* doc/as.texinfo: Document weakref.
+	* doc/internals.texi: Document new struct members, internal
+	functions and hooks.
+
 2005-10-24  Jie Zhang  <jie.zhang@analog.com>
 
 	* Makefile.am (bfin-parse.h): Renamed from bfin-parse.tab.h.

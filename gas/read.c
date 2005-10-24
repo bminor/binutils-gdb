@@ -434,6 +434,7 @@ static const pseudo_typeS potable[] = {
   {"xref", s_ignore, 0},
   {"xstabs", s_xstab, 's'},
   {"warning", s_errwarn, 0},
+  {"weakref", s_weakref, 0},
   {"word", cons, 2},
   {"zero", s_space, 0},
   {NULL, NULL, 0}			/* End sentinel.  */
@@ -3149,6 +3150,124 @@ s_text (int ignore ATTRIBUTE_UNUSED)
 #ifdef OBJ_VMS
   const_flag &= ~IN_DEFAULT_SECTION;
 #endif
+}
+
+/* .weakref x, y sets x as an alias to y that, as long as y is not
+   referenced directly, will cause y to become a weak symbol.  */
+void
+s_weakref (int ignore ATTRIBUTE_UNUSED)
+{
+  char *name;
+  char delim;
+  char *end_name;
+  symbolS *symbolP;
+  symbolS *symbolP2;
+  expressionS exp;
+
+  name = input_line_pointer;
+  delim = get_symbol_end ();
+  end_name = input_line_pointer;
+
+  if (name == end_name)
+    {
+      as_bad (_("expected symbol name"));
+      *end_name = delim;
+      ignore_rest_of_line ();
+      return;
+    }
+
+  symbolP = symbol_find_or_make (name);
+
+  *end_name = delim;
+
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != ',')
+    {
+      *end_name = 0;
+      as_bad (_("expected comma after \"%s\""), name);
+      *end_name = delim;
+      ignore_rest_of_line ();
+      return;
+    }
+
+  input_line_pointer++;
+
+  SKIP_WHITESPACE ();
+
+  name = input_line_pointer;
+  delim = get_symbol_end ();
+  end_name = input_line_pointer;
+
+  if (name == end_name)
+    {
+      as_bad (_("expected symbol name"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if ((symbolP2 = symbol_find_noref (name, 1)) == NULL
+      && (symbolP2 = md_undefined_symbol (name)) == NULL)
+    {
+      symbolP2 = symbol_find_or_make (name);
+      S_SET_WEAKREFD (symbolP2);
+    }
+  else
+    {
+      symbolS *symp = symbolP2;
+
+      while (S_IS_WEAKREFR (symp) && symp != symbolP)
+	{
+	  expressionS *expP = symbol_get_value_expression (symp);
+
+	  assert (expP->X_op == O_symbol
+		  && expP->X_add_number == 0);
+	  symp = expP->X_add_symbol;
+	}
+      if (symp == symbolP)
+	{
+	  char *loop;
+
+	  loop = concat (S_GET_NAME (symbolP),
+			 " => ", S_GET_NAME (symbolP2), NULL);
+
+	  symp = symbolP2;
+	  while (symp != symbolP)
+	    {
+	      char *old_loop = loop;
+	      symp = symbol_get_value_expression (symp)->X_add_symbol;
+	      loop = concat (loop, " => ", S_GET_NAME (symp), NULL);
+	      free (old_loop);
+	    }
+
+	  as_bad (_("%s: would close weakref loop: %s"),
+		  S_GET_NAME (symbolP), loop);
+
+	  free (loop);
+
+	  *end_name = delim;
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      /* Short-circuiting instead of just checking here might speed
+	 things up a tiny little bit, but loop error messages would
+	 miss intermediate links.  */
+      /* symbolP2 = symp; */
+    }
+
+  *end_name = delim;
+
+  memset (&exp, 0, sizeof (exp));
+  exp.X_op = O_symbol;
+  exp.X_add_symbol = symbolP2;
+
+  S_SET_SEGMENT (symbolP, undefined_section);
+  symbol_set_value_expression (symbolP, &exp);
+  symbol_set_frag (symbolP, &zero_address_frag);
+  S_SET_WEAKREFR (symbolP);
+
+  demand_empty_rest_of_line ();
 }
 
 

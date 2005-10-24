@@ -678,13 +678,15 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 
 	/* If this symbol is equated to an undefined or common symbol,
 	   convert the fixup to being against that symbol.  */
-	if (symbol_equated_reloc_p (sym))
+	if (symbol_equated_reloc_p (sym)
+	    || S_IS_WEAKREFR (sym))
 	  {
 	    symbolS *new_sym
 	      = symbol_get_value_expression (sym)->X_add_symbol;
 	    const char *name = S_GET_NAME (sym);
 	    if (!S_IS_COMMON (new_sym)
 		&& !TC_FAKE_LABEL (name)
+		&& !S_IS_WEAKREFR (sym)
 		&& (!S_IS_EXTERNAL (sym) || S_IS_LOCAL (sym)))
 	      as_bad (_("Local symbol `%s' can't be equated to undefined symbol `%s'"),
 		      name, S_GET_NAME (new_sym));
@@ -1483,11 +1485,13 @@ write_object_file (void)
 
 	  /* Skip symbols which were equated to undefined or common
              symbols.  */
-	  if (symbol_equated_reloc_p (symp))
+	  if (symbol_equated_reloc_p (symp)
+	      || S_IS_WEAKREFR (symp))
 	    {
 	      const char *name = S_GET_NAME (symp);
 	      if (S_IS_COMMON (symp)
 		  && !TC_FAKE_LABEL (name)
+		  && !S_IS_WEAKREFR (symp)
 		  && (!S_IS_EXTERNAL (symp) || S_IS_LOCAL (symp)))
 		{
 		  expressionS *e = symbol_get_value_expression (symp);
@@ -1524,7 +1528,7 @@ write_object_file (void)
 		 opposites.  Sometimes the former checks flags and the
 		 latter examines the name...  */
 	      || (!S_IS_EXTERNAL (symp)
-		  && (punt || S_IS_LOCAL (symp))
+		  && (punt || S_IS_LOCAL (symp) || S_IS_WEAKREFD (symp))
 		  && ! symbol_used_in_reloc_p (symp)))
 	    {
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);

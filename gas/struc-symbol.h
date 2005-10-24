@@ -72,6 +72,15 @@ struct symbol
      routines.  */
   unsigned int sy_mri_common : 1;
 
+  /* This is set if the symbol is set with a .weakref directive.  */
+  unsigned int sy_weakrefr : 1;
+
+  /* This is set when the symbol is referenced as part of a .weakref
+     directive, but only if the symbol was not in the symbol table
+     before.  It is cleared as soon as any direct reference to the
+     symbol is present.  */
+  unsigned int sy_weakrefd : 1;
+
 #ifdef OBJ_SYMFIELD_TYPE
   OBJ_SYMFIELD_TYPE sy_obj;
 #endif

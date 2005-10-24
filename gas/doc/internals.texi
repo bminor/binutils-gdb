@@ -93,6 +93,13 @@ responsible for setting it when a symbol is used in backend routines.
 Whether the symbol is an MRI common symbol created by the @code{COMMON}
 pseudo-op when assembling in MRI mode.
 
+@item sy_weakrefr
+Whether the symbol is a @code{weakref} alias to another symbol.
+
+@item sy_weakrefd
+Whether the symbol is or was referenced by one or more @code{weakref} aliases,
+and has not had any direct references.
+
 @item bsym
 This points to the BFD @code{asymbol} that
 will be used in writing the object file.
@@ -146,7 +153,17 @@ A synonym for @code{S_IS_EXTERNAL}.  Don't use it.
 
 @item S_IS_WEAK
 @cindex S_IS_WEAK
-Return non-zero if the symbol is weak.
+Return non-zero if the symbol is weak, or if it is a @code{weakref} alias or
+symbol that has not been strongly referenced.
+
+@item S_IS_WEAKREFR
+@cindex S_IS_WEAKREFR
+Return non-zero if the symbol is a @code{weakref} alias.
+
+@item S_IS_WEAKREFD
+@cindex S_IS_WEAKREFD
+Return non-zero if the symbol was aliased by a @code{weakref} alias and has not
+had any strong references.
 
 @item S_IS_COMMON
 @cindex S_IS_COMMON
@@ -181,6 +198,29 @@ Mark the symbol as not externally visible.
 @item S_SET_WEAK
 @cindex S_SET_WEAK
 Mark the symbol as weak.
+
+@item S_SET_WEAKREFR
+@cindex S_SET_WEAKREFR
+Mark the symbol as the referrer in a @code{weakref} directive.  The symbol it
+aliases must have been set to the value expression before this point.  If the
+alias has already been used, the symbol is marked as used too.
+
+@item S_CLEAR_WEAKREFR
+@cindex S_CLEAR_WEAKREFR
+Clear the @code{weakref} alias status of a symbol.  This is implicitly called
+whenever a symbol is defined or set to a new expression.
+
+@item S_SET_WEAKREFD
+@cindex S_SET_WEAKREFD
+Mark the symbol as the referred symbol in a @code{weakref} directive.
+Implicitly marks the symbol as weak, but see below.  It should only be called
+if the referenced symbol has just been added to the symbol table.
+
+@item S_SET_WEAKREFD
+@cindex S_SET_WEAKREFD
+Clear the @code{weakref} aliased status of a symbol.  This is implicitly called
+whenever the symbol is looked up, as part of a direct reference or a
+definition, but not as part of a @code{weakref} directive.
 
 @item S_GET_TYPE
 @item S_GET_DESC
@@ -1532,6 +1572,16 @@ symbols.
 If you define this macro, GAS will call it for each symbol.  You can indicate
 that the symbol should not be included in the object file by defining this
 macro to set its second argument to a non-zero value.
+
+@item obj_set_weak_hook
+@cindex obj_set_weak_hook
+If you define this macro, @code{S_SET_WEAK} will call it before modifying the
+symbol's flags.
+
+@item obj_clear_weak_hook
+@cindex obj_clear_weak_hook
+If you define this macro, @code{S_CLEAR_WEAKREFD} will call it after clearning
+the @code{weakrefd} flag, but before modifying any other flags.
 
 @item obj_frob_file
 @cindex obj_frob_file

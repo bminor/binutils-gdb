@@ -309,6 +309,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 
   if ((symbolP = symbol_find (sym_name)) != 0)
     {
+      S_CLEAR_WEAKREFR (symbolP);
 #ifdef RESOLVE_SYMBOL_REDEFINITION
       if (RESOLVE_SYMBOL_REDEFINITION (symbolP))
 	return symbolP;
@@ -651,17 +652,40 @@ symbol_temp_make (void)
 symbolS *
 symbol_find_exact (const char *name)
 {
+  return symbol_find_exact_noref (name, 0);
+}
+
+symbolS *
+symbol_find_exact_noref (const char *name, int noref)
+{
   struct local_symbol *locsym;
+  symbolS* sym;
 
   locsym = (struct local_symbol *) hash_find (local_hash, name);
   if (locsym != NULL)
     return (symbolS *) locsym;
 
-  return ((symbolS *) hash_find (sy_hash, name));
+  sym = ((symbolS *) hash_find (sy_hash, name));
+
+  /* Any references to the symbol, except for the reference in
+     .weakref, must clear this flag, such that the symbol does not
+     turn into a weak symbol.  Note that we don't have to handle the
+     local_symbol case, since a weakrefd is always promoted out of the
+     local_symbol table when it is turned into a weak symbol.  */
+  if (sym && ! noref)
+    S_CLEAR_WEAKREFD (sym);
+
+  return sym;
 }
 
 symbolS *
 symbol_find (const char *name)
+{
+  return symbol_find_noref (name, 0);
+}
+
+symbolS *
+symbol_find_noref (const char *name, int noref)
 {
 #ifdef tc_canonicalize_symbol_name
   {
@@ -690,7 +714,7 @@ symbol_find (const char *name)
       *copy = '\0';
     }
 
-  return symbol_find_exact (name);
+  return symbol_find_exact_noref (name, noref);
 }
 
 /* Once upon a time, symbols were kept in a singly linked list.  At
@@ -970,6 +994,19 @@ resolve_symbol_value (symbolS *symp)
 	    symp->sy_value.X_op_symbol = NULL;
 
 	do_symbol:
+	  if (S_IS_WEAKREFR (symp))
+	    {
+	      assert (final_val == 0);
+	      if (S_IS_WEAKREFR (add_symbol))
+		{
+		  assert (add_symbol->sy_value.X_op == O_symbol
+			  && add_symbol->sy_value.X_add_number == 0);
+		  add_symbol = add_symbol->sy_value.X_add_symbol;
+		  assert (! S_IS_WEAKREFR (add_symbol));
+		  symp->sy_value.X_add_symbol = add_symbol;
+		}
+	    }
+
 	  if (symp->sy_mri_common)
 	    {
 	      /* This is a symbol inside an MRI common section.  The
@@ -1039,6 +1076,8 @@ resolve_symbol_value (symbolS *symp)
 	    }
 
 	  resolved = symbol_resolved_p (add_symbol);
+	  if (S_IS_WEAKREFR (symp))
+	    goto exit_dont_set_value;
 	  break;
 
 	case O_uminus:
@@ -1717,6 +1756,9 @@ S_GET_VALUE (symbolS *s)
       if (!finalize_syms)
 	return val;
     }
+  if (S_IS_WEAKREFR (s))
+    return S_GET_VALUE (s->sy_value.X_add_symbol);
+
   if (s->sy_value.X_op != O_constant)
     {
       static symbolS *recur;
@@ -1751,6 +1793,7 @@ S_SET_VALUE (symbolS *s, valueT val)
   s->sy_value.X_op = O_constant;
   s->sy_value.X_add_number = (offsetT) val;
   s->sy_value.X_unsigned = 0;
+  S_CLEAR_WEAKREFR (s);
 }
 
 void
@@ -1806,7 +1849,29 @@ S_IS_WEAK (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
+  /* Conceptually, a weakrefr is weak if the referenced symbol is.  We
+     could probably handle a WEAKREFR as always weak though.  E.g., if
+     the referenced symbol has lost its weak status, there's no reason
+     to keep handling the weakrefr as if it was weak.  */
+  if (S_IS_WEAKREFR (s))
+    return S_IS_WEAK (s->sy_value.X_add_symbol);
   return (s->bsym->flags & BSF_WEAK) != 0;
+}
+
+int
+S_IS_WEAKREFR (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->sy_weakrefr != 0;
+}
+
+int
+S_IS_WEAKREFD (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return s->sy_weakrefd != 0;
 }
 
 int
@@ -2008,8 +2073,68 @@ S_SET_WEAK (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
+#ifdef obj_set_weak_hook
+  obj_set_weak_hook (s);
+#endif
   s->bsym->flags |= BSF_WEAK;
   s->bsym->flags &= ~(BSF_GLOBAL | BSF_LOCAL);
+}
+
+void
+S_SET_WEAKREFR (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_weakrefr = 1;
+  /* If the alias was already used, make sure we mark the target as
+     used as well, otherwise it might be dropped from the symbol
+     table.  This may have unintended side effects if the alias is
+     later redirected to another symbol, such as keeping the unused
+     previous target in the symbol table.  Since it will be weak, it's
+     not a big deal.  */
+  if (s->sy_used)
+    symbol_mark_used (s->sy_value.X_add_symbol);
+}
+
+void
+S_CLEAR_WEAKREFR (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return;
+  s->sy_weakrefr = 0;
+}
+
+void
+S_SET_WEAKREFD (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->sy_weakrefd = 1;
+  S_SET_WEAK (s);
+}
+
+void
+S_CLEAR_WEAKREFD (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return;
+  if (s->sy_weakrefd)
+    {
+      s->sy_weakrefd = 0;
+      /* If a weakref target symbol is weak, then it was never
+	 referenced directly before, not even in a .global directive,
+	 so decay it to local.  If it remains undefined, it will be
+	 later turned into a global, like any other undefined
+	 symbol.  */
+      if (s->bsym->flags & BSF_WEAK)
+	{
+#ifdef obj_clear_weak_hook
+	  obj_clear_weak_hook (s);
+#endif
+	  s->bsym->flags &= ~BSF_WEAK;
+	  s->bsym->flags |= BSF_LOCAL;
+	}
+    }
 }
 
 void
@@ -2095,6 +2220,7 @@ symbol_set_value_expression (symbolS *s, const expressionS *exp)
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
   s->sy_value = *exp;
+  S_CLEAR_WEAKREFR (s);
 }
 
 /* Return a pointer to the X_add_number component of a symbol.  */
@@ -2129,6 +2255,7 @@ symbol_set_frag (symbolS *s, fragS *f)
       return;
     }
   s->sy_frag = f;
+  S_CLEAR_WEAKREFR (s);
 }
 
 /* Return the frag of a symbol.  */
@@ -2149,6 +2276,8 @@ symbol_mark_used (symbolS *s)
   if (LOCAL_SYMBOL_CHECK (s))
     return;
   s->sy_used = 1;
+  if (S_IS_WEAKREFR (s))
+    symbol_mark_used (s->sy_value.X_add_symbol);
 }
 
 /* Clear the mark of whether a symbol has been used.  */
@@ -2472,11 +2601,17 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
 	fprintf (file, " local");
       if (S_IS_EXTERNAL (sym))
 	fprintf (file, " extern");
+      if (S_IS_WEAK (sym))
+	fprintf (file, " weak");
       if (S_IS_DEBUG (sym))
 	fprintf (file, " debug");
       if (S_IS_DEFINED (sym))
 	fprintf (file, " defined");
     }
+  if (S_IS_WEAKREFR (sym))
+    fprintf (file, " weakrefr");
+  if (S_IS_WEAKREFD (sym))
+    fprintf (file, " weakrefd");
   fprintf (file, " %s", segment_name (S_GET_SEGMENT (sym)));
   if (symbol_resolved_p (sym))
     {
