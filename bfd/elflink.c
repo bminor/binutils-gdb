@@ -6827,8 +6827,10 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	isec = bfd_com_section_ptr;
       else
 	{
-	  /* Who knows?  */
-	  isec = NULL;
+	  /* Don't attempt to output symbols with st_shnx in the
+	     reserved range other than SHN_ABS and SHN_COMMON.  */
+	  *ppsection = NULL;
+	  continue;
 	}
 
       *ppsection = isec;
@@ -6859,20 +6861,12 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	continue;
 
       /* If this symbol is defined in a section which we are
-	 discarding, we don't need to keep it, but note that
-	 linker_mark is only reliable for sections that have contents.
-	 For the benefit of the MIPS ELF linker, we check SEC_EXCLUDE
-	 as well as linker_mark.  */
-      if ((isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
+	 discarding, we don't need to keep it.  */
+      if (isym->st_shndx != SHN_UNDEF
+	  && (isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
 	  && (isec == NULL
-	      || (! isec->linker_mark && (isec->flags & SEC_HAS_CONTENTS) != 0)
-	      || (! finfo->info->relocatable
-		  && (isec->flags & SEC_EXCLUDE) != 0)))
-	continue;
-
-      /* If the section is not in the output BFD's section list, it is not
-	 being output.  */
-      if (bfd_section_removed_from_list (output_bfd, isec->output_section))
+	      || bfd_section_removed_from_list (output_bfd,
+						isec->output_section)))
 	continue;
 
       /* Get the name of the symbol.  */

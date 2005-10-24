@@ -1,5 +1,15 @@
 2005-10-24  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (elf_link_input_bfd): Don't use linker_mark and
+	SEC_EXCLUDE to test for sections dropped from output.  Instead,
+	use bfd_section_removed_from_list on normal sections.  Don't
+	attempt to handle symbols with unknown reserved section indices.
+	* linker.c (_bfd_generic_link_output_symbols): Don't use
+	linker_mark to test for symbols belonging to dropped sections.
+	Do allow absolute symbols.
+
+2005-10-24  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-i370.c (i370_elf_fake_sections): Don't set SHF_EXCLUDE on
 	group sections.
 
