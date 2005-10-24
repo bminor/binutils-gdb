@@ -1003,6 +1003,21 @@ Expr_Node_Gen_Reloc (Expr_Node * head, int parent_reloc)
       if (note1 != NULL_CODE)
 	note = conscode (note1, note);
     }
+  else if (head->type == Expr_Node_Binop
+	   && (head->value.op_value == Expr_Op_Type_Add
+	       || head->value.op_value == Expr_Op_Type_Sub)
+	   && head->Left_Child->type == Expr_Node_Reloc
+	   && head->Right_Child->type == Expr_Node_Constant)
+    {
+      int val = head->Right_Child->value.i_value;
+      if (head->value.op_value == Expr_Op_Type_Sub)
+	val = -val;
+      note = conscode (note_reloc2 (gencode (0), head->Left_Child->value.s_value,
+				    parent_reloc, val, 0),
+		       NULL_CODE);
+      if (note1 != NULL_CODE)
+	note = conscode (note1, note);
+    }
   else
     {
       /* Call the recursive function.  */

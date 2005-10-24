@@ -1,3 +1,9 @@
+2005-10-24  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* config/tc-bfin.c (Expr_Node_Gen_Reloc): If have symbol + constant,
+	make a single reloc with an offset rather than a stack.
+	* config/tc-bfin.h (MD_APPLY_SYM_VALUE): Define to 0.
+
 2005-10-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* read.c (potable): Add weakref.
