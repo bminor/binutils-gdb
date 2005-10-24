@@ -63,6 +63,7 @@ responsibility among the other maintainers.
   AVR		   Denis Chertykov <denisc@overta.ru>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   BFIN		   Jie Zhang <jie.zhang@analog.com>
+  BFIN		   Bernd Schmidt <bernd.schmidt@analog.com>
   BUILD SYSTEM	   Ben Elliston <bje@gnu.org>
   BUILD SYSTEM	   Daniel Jacobowitz <dan@debian.org>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
