@@ -1363,8 +1363,9 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
       if (os != NULL
 	  && (os->bfd_section == NULL
 	      || os->bfd_section->flags == 0
-	      || ((!iself
-		   || sh_type == elf_section_type (os->bfd_section))
+	      || (bfd_match_sections_by_type (output_bfd,
+					      os->bfd_section,
+					      s->owner, s)
 		  && ((s->flags ^ os->bfd_section->flags)
 		      & (SEC_LOAD | SEC_ALLOC)) == 0)))
 	{

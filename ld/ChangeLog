@@ -1,3 +1,15 @@
+2005-10-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1487
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Call
+	bfd_match_sections_by_type to match section types.
+
+	* ldlang.c (init_os): Take the input section. Call
+	bfd_init_private_section_data if the input section isn't NULL.
+	(exp_init_os): Pass NULL to init_os.
+	(map_input_to_output_sections): Likewise.
+	(lang_add_section): Pass the input section to init_os.
+
 2005-10-19  Paul Brook  <paul@codesourcery.com>
 
 	* emulparams/armelf.sh: Add .ARM.attributes to OTHER_SECTIONS.

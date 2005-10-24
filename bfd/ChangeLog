@@ -1,3 +1,30 @@
+2005-10-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1487
+	* elf-bfd.h (_bfd_generic_init_private_section_data): New.
+	(_bfd_elf_init_private_section_data): New.
+
+	* elf.c (elf_fake_sections): Don't set SHF_GROUP for
+	relocatable link.
+	(bfd_elf_set_group_contents): Don't handle relocatable link
+	specially.
+	(assign_section_numbers): If it isn't called by assembler,
+	use the output section of elf_linked_to_section for
+	SHF_LINK_ORDER.
+	(_bfd_elf_init_private_section_data): New.
+	(_bfd_elf_copy_private_section_data): Call it.
+
+	* libbfd-in.h (_bfd_generic_init_private_section_data): New.
+
+	* libbfd.c (_bfd_generic_init_private_section_data): New.
+
+	* targets.c (BFD_JUMP_TABLE_COPY): Add
+	_bfd_generic_init_private_section_data.
+	(bfd_init_private_section_data): Likewise.
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
 2005-10-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (dec_dynrel_count): Don't report errors for local

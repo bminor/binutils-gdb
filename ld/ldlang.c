@@ -1674,7 +1674,7 @@ sort_def_symbol (hash_entry, info)
 /* Initialize an output section.  */
 
 static void
-init_os (lang_output_section_statement_type *s)
+init_os (lang_output_section_statement_type *s, asection *isec)
 {
   if (s->bfd_section != NULL)
     return;
@@ -1711,6 +1711,11 @@ init_os (lang_output_section_statement_type *s)
 
   if (s->load_base != NULL)
     exp_init_os (s->load_base);
+
+  if (isec)
+    bfd_init_private_section_data (isec->owner, isec,
+				   output_bfd, s->bfd_section,
+				   &link_info);
 }
 
 /* Make sure that all output sections mentioned in an expression are
@@ -1756,7 +1761,7 @@ exp_init_os (etree_type *exp)
 
 	    os = lang_output_section_find (exp->name.name);
 	    if (os != NULL && os->bfd_section == NULL)
-	      init_os (os);
+	      init_os (os, NULL);
 	  }
 	}
       break;
@@ -1833,7 +1838,7 @@ lang_add_section (lang_statement_list_type *ptr,
       flagword flags;
 
       if (output->bfd_section == NULL)
-	init_os (output);
+	init_os (output, section);
 
       first = ! output->bfd_section->linker_has_input;
       output->bfd_section->linker_has_input = 1;
@@ -3099,7 +3104,7 @@ map_input_to_output_sections
 	     are initialized.  */
 	  exp_init_os (s->data_statement.exp);
 	  if (os != NULL && os->bfd_section == NULL)
-	    init_os (os);
+	    init_os (os, NULL);
 	  /* The output section gets contents, and then we inspect for
 	     any flags set in the input script which override any ALLOC.  */
 	  os->bfd_section->flags |= SEC_HAS_CONTENTS;
@@ -3113,11 +3118,11 @@ map_input_to_output_sections
 	case lang_padding_statement_enum:
 	case lang_input_statement_enum:
 	  if (os != NULL && os->bfd_section == NULL)
-	    init_os (os);
+	    init_os (os, NULL);
 	  break;
 	case lang_assignment_statement_enum:
 	  if (os != NULL && os->bfd_section == NULL)
-	    init_os (os);
+	    init_os (os, NULL);
 
 	  /* Make sure that any sections mentioned in the assignment
 	     are initialized.  */
@@ -3145,7 +3150,7 @@ map_input_to_output_sections
 		   (s->address_statement.section_name));
 	      
 	      if (aos->bfd_section == NULL)
-		init_os (aos);
+		init_os (aos, NULL);
 	      aos->addr_tree = s->address_statement.address;
 	    }
 	  break;

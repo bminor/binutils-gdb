@@ -4770,6 +4770,7 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_COPY(NAME) \
   NAME##_bfd_copy_private_bfd_data, \
   NAME##_bfd_merge_private_bfd_data, \
+  _bfd_generic_init_private_section_data, \
   NAME##_bfd_copy_private_section_data, \
   NAME##_bfd_copy_private_symbol_data, \
   NAME##_bfd_copy_private_header_data, \
@@ -4782,6 +4783,12 @@ typedef struct bfd_target
   /* Called to merge BFD general private data from one object file
      to a common output file when linking.  */
   bfd_boolean (*_bfd_merge_private_bfd_data) (bfd *, bfd *);
+  /* Called to initialize BFD private section data from one object file
+     to another.  */
+#define bfd_init_private_section_data(ibfd, isec, obfd, osec, link_info) \
+  BFD_SEND (obfd, _bfd_init_private_section_data, (ibfd, isec, obfd, osec, link_info))
+  bfd_boolean (*_bfd_init_private_section_data)
+    (bfd *, sec_ptr, bfd *, sec_ptr, struct bfd_link_info *);
   /* Called to copy BFD private section data from one object file
      to another.  */
   bfd_boolean (*_bfd_copy_private_section_data)

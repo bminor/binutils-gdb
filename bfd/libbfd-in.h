@@ -234,6 +234,9 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
 #define _bfd_generic_bfd_print_private_bfd_data \
   ((bfd_boolean (*) (bfd *, void *)) bfd_true)
 
+extern bfd_boolean _bfd_generic_init_private_section_data
+  (bfd *, asection *, bfd *, asection *, struct bfd_link_info *);
+
 /* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
    support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */
 

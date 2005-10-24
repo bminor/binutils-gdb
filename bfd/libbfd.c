@@ -1042,3 +1042,13 @@ _bfd_generic_match_sections_by_type (bfd *abfd ATTRIBUTE_UNUSED,
 {
   return TRUE;
 }
+
+bfd_boolean
+_bfd_generic_init_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
+					asection *isec ATTRIBUTE_UNUSED,
+					bfd *obfd ATTRIBUTE_UNUSED,
+					asection *osec ATTRIBUTE_UNUSED,
+					struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
