@@ -1,3 +1,7 @@
+2005-10-24  Jan Beulich  <jbeulich@novell.com>
+
+	* ld-elf/empty2.[sd]: New.
+
 2005-10-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/1487
