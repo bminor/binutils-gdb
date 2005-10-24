@@ -36,7 +36,7 @@ extern YY_BUFFER_STATE yy_scan_string (const char *yy_str);
 extern void yy_delete_buffer (YY_BUFFER_STATE b);
 static parse_state parse (char *line);
 static void bfin_s_bss PARAMS ((int));
-static int md_chars_to_number PARAMS ((unsigned char *, int));
+static int md_chars_to_number PARAMS ((char *, int));
 
 /* Global variables. */
 struct bfin_insn *insn;
@@ -453,9 +453,7 @@ md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED,
 /* Convert from target byte order to host byte order.  */
 
 static int
-md_chars_to_number (val, n)
-     unsigned char *val;	/* Value in target byte order.  */
-     int n;			/* Number of bytes in the input.  */
+md_chars_to_number (char *val, int n)
 {
   int retval;
 

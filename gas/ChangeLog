@@ -1,3 +1,12 @@
+2005-10-24  Jie Zhang  <jie.zhang@analog.com>
+
+	* Makefile.am (bfin-parse.h): Renamed from bfin-parse.tab.h.
+	(EXTRA_DIST): Add bfin-parse.h and bfin-lex.c.
+	* Makefile.in: Regenerate.
+	* config/bfin-lex.l: Include bfin-parse.h instead of bfin-parse.tab.h.
+	* config/tc-bfin.c (md_chars_to_number): Change the type of first
+	argument from unsigned char * to char * to remove signedness warnings.
+
 2005-10-24  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (enum reg_symbol): Delete IND_MEM.

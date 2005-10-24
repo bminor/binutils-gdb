@@ -1,3 +1,8 @@
+2005-10-24  Jie Zhang <jie.zhang@analog.com>
+
+	* elf32-bfin.c (bfd_bfin_elf32_create_embedded_relocs): Fix signedness
+	warning.
+
 2005-10-24  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* elf32-bfin.c (bfin_howto_table): Set src_mask to 0 for all relocs.
