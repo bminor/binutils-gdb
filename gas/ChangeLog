@@ -1,5 +1,12 @@
 2005-10-24  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (enum reg_symbol): Delete IND_MEM.
+	(dot_rot): Change type of num_* variables. Check for positive count.
+	(ia64_optimize_expr): Re-structure.
+	(md_operand): Check for general register.
+
+2005-10-24  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (declare_register): Call symbol_create.
 	(md_begin): Remove local variables total, ar_base, and cr_base.
 	Start loops for registers at their respective first one. Don't

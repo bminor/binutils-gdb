@@ -1,5 +1,11 @@
 2005-10-24  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/ia64/index.[sl]: New.
+	* gas/ia64/rotX.[sl]: New.
+	* gas/ia64/ia64.exp: Run new tests.
+
+2005-10-24  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/ia64/regs.pl: Also check tp alias of r13.
 	* gas/ia64/regs.s: Regenerate.
 	* gas/ia64/regs.d: Adjust.

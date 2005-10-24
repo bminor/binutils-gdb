@@ -124,7 +124,6 @@ enum reg_symbol
     IND_DTR,
     IND_ITR,
     IND_IBR,
-    IND_MEM,
     IND_MSR,
     IND_PKR,
     IND_PMC,
@@ -4772,7 +4771,8 @@ static void
 dot_rot (type)
      int type;
 {
-  unsigned num_regs, num_alloced = 0;
+  offsetT num_regs;
+  valueT num_alloced = 0;
   struct dynreg **drpp, *dr;
   int ch, base_reg = 0;
   char *name, *start;
@@ -4815,6 +4815,11 @@ dot_rot (type)
       if (*input_line_pointer++ != ']')
 	{
 	  as_bad ("Expected ']'");
+	  goto err;
+	}
+      if (num_regs <= 0)
+	{
+	  as_bad ("Number of elements must be positive");
 	  goto err;
 	}
       SKIP_WHITESPACE ();
@@ -7979,31 +7984,38 @@ ia64_optimize_expr (l, op, r)
      operatorT op;
      expressionS *r;
 {
-  unsigned num_regs;
-
-  if (op == O_index)
+  if (op != O_index)
+    return 0;
+  resolve_expression (l);
+  if (l->X_op == O_register)
     {
-      if (l->X_op == O_register && r->X_op == O_constant)
+      unsigned num_regs = l->X_add_number >> 16;
+
+      resolve_expression (r);
+      if (num_regs)
 	{
-	  num_regs = (l->X_add_number >> 16);
-	  if ((unsigned) r->X_add_number >= num_regs)
+	  /* Left side is a .rotX-allocated register.  */
+	  if (r->X_op != O_constant)
 	    {
-	      if (!num_regs)
-		as_bad ("No current frame");
-	      else
-		as_bad ("Index out of range 0..%u", num_regs - 1);
+	      as_bad ("Rotating register index must be a non-negative constant");
+	      r->X_add_number = 0;
+	    }
+	  else if ((valueT) r->X_add_number >= num_regs)
+	    {
+	      as_bad ("Index out of range 0..%u", num_regs - 1);
 	      r->X_add_number = 0;
 	    }
 	  l->X_add_number = (l->X_add_number & 0xffff) + r->X_add_number;
 	  return 1;
 	}
-      else if (l->X_op == O_register && r->X_op == O_register)
+      else if (l->X_add_number >= IND_CPUID && l->X_add_number <= IND_RR)
 	{
-	  if (l->X_add_number < IND_CPUID || l->X_add_number > IND_RR
-	      || l->X_add_number == IND_MEM)
+	  if (r->X_op != O_register
+	      || r->X_add_number < REG_GR
+	      || r->X_add_number > REG_GR + 127)
 	    {
-	      as_bad ("Indirect register set name expected");
-	      l->X_add_number = IND_CPUID;
+	      as_bad ("Indirect register index must be a general register");
+	      r->X_add_number = REG_GR;
 	    }
 	  l->X_op = O_index;
 	  l->X_op_symbol = md.regsym[l->X_add_number];
@@ -8011,7 +8023,12 @@ ia64_optimize_expr (l, op, r)
 	  return 1;
 	}
     }
-  return 0;
+  as_bad ("Index can only be applied to rotating or indirect registers");
+  /* Fall back to some register use of which has as little as possible
+     side effects, to minimize subsequent error messages.  */
+  l->X_op = O_register;
+  l->X_add_number = REG_GR + 3;
+  return 1;
 }
 
 int
@@ -11020,8 +11037,13 @@ md_operand (e)
 	}
       else
 	{
-	  if (e->X_op != O_register)
-	    as_bad ("Register expected as index");
+	  if (e->X_op != O_register
+	      || e->X_add_number < REG_GR
+	      || e->X_add_number > REG_GR + 127)
+	    {
+	      as_bad ("Index must be a general register");
+	      e->X_add_number = REG_GR;
+	    }
 
 	  ++input_line_pointer;
 	  e->X_op = O_index;

@@ -1,3 +1,8 @@
+2005-10-24  Jan Beulich  <jbeulich@novell.com>
+
+	* cpu-ia64-opc.c (elf64_ia64_operands): Move memory operand out of
+	set of indirect operands.
+
 2005-10-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_fake_sections): Don't set SHF_EXCLUDE on

@@ -1,3 +1,7 @@
+2005-10-24  Jan Beulich  <jbeulich@novell.com>
+
+	* ia64-asmtab.c: Regenerate.
+
 2005-10-21  DJ Delorie  <dj@redhat.com>
 
 	* m32c-asm.c: Regenerate.
