@@ -1265,8 +1265,8 @@ Disassembly of section \.text:
     1a26:	00 00 00 02 00 00 	            nop\.i 0x0
     1a2c:	00 00 04 00       	            nop\.i 0x0;;
     1a30:	01 08 00 00 00 21 	\[MII\]       mov r1=r0
-    1a36:	c0 00 00 00 42 00 	            mov r12=r0
-    1a3c:	00 00 04 00       	            nop\.i 0x0;;
+    1a36:	c0 00 00 00 42 a0 	            mov r12=r0
+    1a3c:	01 00 00 84       	            mov r13=r0;;
     1a40:	0d 00 00 00 01 00 	\[MFI\]       nop\.m 0x0
     1a46:	20 00 00 20 00 00 	            mov f2=f0
     1a4c:	00 00 04 00       	            nop\.i 0x0;;

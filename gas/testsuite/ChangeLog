@@ -1,3 +1,9 @@
+2005-10-24  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/ia64/regs.pl: Also check tp alias of r13.
+	* gas/ia64/regs.s: Regenerate.
+	* gas/ia64/regs.d: Adjust.
+
 2005-10-19  David Ung  <davidu@mips.com>
 
 	* gas/mips/mips.exp: Run new test.

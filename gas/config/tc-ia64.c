@@ -5599,7 +5599,7 @@ declare_register (name, regnum)
   const char *err;
   symbolS *sym;
 
-  sym = symbol_new (name, reg_section, regnum, &zero_address_frag);
+  sym = symbol_create (name, reg_section, regnum, &zero_address_frag);
 
   err = hash_insert (md.reg_hash, S_GET_NAME (sym), (PTR) sym);
   if (err)
@@ -7366,7 +7366,7 @@ extra_goodness (int templ, int slot)
 void
 md_begin ()
 {
-  int i, j, k, t, total, ar_base, cr_base, goodness, best, regnum, ok;
+  int i, j, k, t, goodness, best, regnum, ok;
   const char *err;
   char name[8];
 
@@ -7541,51 +7541,42 @@ md_begin ()
   md.entry_hash = hash_new ();
 
   /* general registers:  */
-
-  total = 128;
-  for (i = 0; i < total; ++i)
+  for (i = REG_GR; i < REG_GR + 128; ++i)
     {
       sprintf (name, "r%d", i - REG_GR);
       md.regsym[i] = declare_register (name, i);
     }
 
   /* floating point registers:  */
-  total += 128;
-  for (; i < total; ++i)
+  for (i = REG_FR; i < REG_FR + 128; ++i)
     {
       sprintf (name, "f%d", i - REG_FR);
       md.regsym[i] = declare_register (name, i);
     }
 
   /* application registers:  */
-  total += 128;
-  ar_base = i;
-  for (; i < total; ++i)
+  for (i = REG_AR; i < REG_AR + 128; ++i)
     {
       sprintf (name, "ar%d", i - REG_AR);
       md.regsym[i] = declare_register (name, i);
     }
 
   /* control registers:  */
-  total += 128;
-  cr_base = i;
-  for (; i < total; ++i)
+  for (i = REG_CR; i < REG_CR + 128; ++i)
     {
       sprintf (name, "cr%d", i - REG_CR);
       md.regsym[i] = declare_register (name, i);
     }
 
   /* predicate registers:  */
-  total += 64;
-  for (; i < total; ++i)
+  for (i = REG_P; i < REG_P + 64; ++i)
     {
       sprintf (name, "p%d", i - REG_P);
       md.regsym[i] = declare_register (name, i);
     }
 
   /* branch registers:  */
-  total += 8;
-  for (; i < total; ++i)
+  for (i = REG_BR; i < REG_BR + 8; ++i)
     {
       sprintf (name, "b%d", i - REG_BR);
       md.regsym[i] = declare_register (name, i);
@@ -7606,17 +7597,16 @@ md_begin ()
     }
 
   /* define synonyms for application registers:  */
-  for (i = REG_AR; i < REG_AR + NELEMS (ar); ++i)
-    md.regsym[i] = declare_register (ar[i - REG_AR].name,
-				     REG_AR + ar[i - REG_AR].regnum);
+  for (i = 0; i < NELEMS (ar); ++i)
+    declare_register (ar[i].name, REG_AR + ar[i].regnum);
 
   /* define synonyms for control registers:  */
-  for (i = REG_CR; i < REG_CR + NELEMS (cr); ++i)
-    md.regsym[i] = declare_register (cr[i - REG_CR].name,
-				     REG_CR + cr[i - REG_CR].regnum);
+  for (i = 0; i < NELEMS (cr); ++i)
+    declare_register (cr[i].name, REG_CR + cr[i].regnum);
 
   declare_register ("gp", REG_GR +  1);
   declare_register ("sp", REG_GR + 12);
+  declare_register ("tp", REG_GR + 13);
   declare_register ("rp", REG_BR +  0);
 
   /* pseudo-registers used to specify unwind info:  */

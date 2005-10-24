@@ -1,3 +1,10 @@
+2005-10-24  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (declare_register): Call symbol_create.
+	(md_begin): Remove local variables total, ar_base, and cr_base.
+	Start loops for registers at their respective first one. Don't
+	update md.regsym for alias names. Generate alias name tp for r13.
+
 2005-10-21  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.c (md_cgen_lookup_reloc): Add more relocs.  Print
