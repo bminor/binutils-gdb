@@ -1,3 +1,7 @@
+2005-10-25  Chris Metcalf <cdmetcalf@comcast.net>
+
+	* ld.texinfo (--reduce-memory-overheads): Fix typo.
+
 2005-10-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/1487

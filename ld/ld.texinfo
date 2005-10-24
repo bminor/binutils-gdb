@@ -1857,7 +1857,7 @@ linking speed.  This was introduced to to select the old O(n^2) algorithm
 for link map file generation, rather than the new O(n) algorithm which uses
 about 40% more memory for symbol storage.
 
-Another affect of the switch is to set the default hash table size to
+Another effect of the switch is to set the default hash table size to
 1021, which again saves memory at the cost of lengthening the linker's
 run time.  This is not done however if the @option{--hash-size} switch
 has been used.
