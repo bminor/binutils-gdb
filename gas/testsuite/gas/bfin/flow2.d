@@ -41,9 +41,9 @@ Disassembly of section .text:
   48:	00 e2 01 00 	JUMP.L  4a <MY_LABEL1\+0x20>;
   4c:	ff e2 ff ff 	JUMP.L  4a <MY_LABEL1\+0x20>;
   50:	ed 2f       	JUMP.S  2a <MY_LABEL1>;
-  52:	d7 2f       	JUMP.S  0 <MY_LABEL1-0x2a>;
-  54:	ea 2f       	JUMP.S  28 <MY_LABEL1-0x2>;
-  56:	d4 2f       	JUMP.S  fffffffe.*
+  52:	d7 2f       	JUMP.S  0 .*
+  54:	d6 2f       	JUMP.S  0 .*
+  56:	d5 2f       	JUMP.S  0 .*
   58:	04 1b       	IF CC JUMP fffffe60.*
   5a:	5a 18       	IF CC JUMP 10e.*
   5c:	00 18       	IF CC JUMP 5c <MY_LABEL1\+0x32>;

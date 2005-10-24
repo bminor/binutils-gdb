@@ -1,3 +1,8 @@
+2005-10-24  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* gas/bfin/flow2.d: Match changed assembler behaviour.
+	* gas/bfin/reloc.d: Likewise.
+
 2005-10-24  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/all/weakref1.s, gas/all/weakref1.d: New test.
