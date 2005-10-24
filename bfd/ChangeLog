@@ -1,3 +1,8 @@
+2005-10-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_fake_sections): Don't set SHF_EXCLUDE on
+	group sections.
+
 2005-10-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coff-rs6000.c (rs6000coff_vec): Initialize
