@@ -1,3 +1,8 @@
+2005-10-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i370.c (i370_elf_fake_sections): Don't set SHF_EXCLUDE on
+	group sections.
+
 2005-10-24  Jan Beulich  <jbeulich@novell.com>
 
 	* cpu-ia64-opc.c (elf64_ia64_operands): Move memory operand out of
