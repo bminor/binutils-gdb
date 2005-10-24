@@ -433,11 +433,8 @@ bfin_imm16_reloc (bfd *abfd,
       if (!relocatable || !strcmp (symbol->name, symbol->section->name))
 	relocation += output_base + symbol->section->output_offset;
 
-      if (symbol->flags & BSF_SECTION_SYM)
-	{
-	  /* Add in supplied addend.  */
-	  relocation += reloc_entry->addend;
-	}
+      /* Add in supplied addend.  */
+      relocation += reloc_entry->addend;
     }
   else
     {
@@ -470,7 +467,6 @@ bfin_imm16_reloc (bfd *abfd,
   /* Here the variable relocation holds the final address of the
      symbol we are relocating against, plus any addend.  */
 
-  x = bfd_get_16 (abfd, (bfd_byte *) data + reloc_addr);
   relocation >>= (bfd_vma) howto->rightshift;
   x = relocation;
   bfd_put_16 (abfd, x, (unsigned char *) data + reloc_addr);
@@ -759,7 +755,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_bfd_reloc,	/* special_function.  */
 	 "R_pcrel5m2",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x0000000F,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x0000000F,		/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 
@@ -787,7 +783,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_bfd_reloc,	/* special_function.  */
 	 "R_pcrel10",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x000003FF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x000003FF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
  
@@ -805,7 +801,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_bfd_reloc,	/* special_function.  */
 	 "R_pcrel12_jump",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x0FFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x0FFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -819,7 +815,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_imm16_reloc,	/* special_function.  */
 	 "R_rimm16",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x0000FFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x0000FFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -833,7 +829,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_imm16_reloc,	/* special_function.  */
 	 "R_luimm16",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x0000FFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x0000FFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
  
@@ -847,7 +843,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_imm16_reloc,	/* special_function.  */
 	 "R_huimm16",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x0000FFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x0000FFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -861,7 +857,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_bfd_reloc,	/* special_function.  */
 	 "R_pcrel12_jump_s",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x00000FFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x00000FFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -875,7 +871,7 @@ static reloc_howto_type bfin_howto_table [] =
          bfin_pcrel24_reloc,	/* special_function.  */
          "R_pcrel24_jump_x",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x00FFFFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x00FFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -889,7 +885,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_pcrel24_reloc,	/* special_function.  */
 	 "R_pcrel24",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x00FFFFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x00FFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -931,7 +927,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_pcrel24_reloc,	/* special_function.  */
 	 "R_pcrel24_jump_l",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x00FFFFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x00FFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -945,7 +941,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_pcrel24_reloc,	/* special_function.  */
 	 "R_pcrel24_call_x",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x00FFFFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x00FFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -973,7 +969,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_bfd_reloc,	/* special_function.  */
 	 "R_byte_data",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0xFF,			/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0xFF,			/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -987,7 +983,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_bfd_reloc,	/* special_function.  */
 	 "R_byte2_data",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0xFFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0xFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -1001,7 +997,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_byte4_reloc,	/* special_function.  */
 	 "R_byte4_data",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0xFFFFFFFF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0xFFFFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
@@ -1015,7 +1011,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 bfin_bfd_reloc,	/* special_function.  */
 	 "R_pcrel11",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
-	 0x000003FF,		/* src_mask.  */
+	 0,			/* src_mask.  */
 	 0x000003FF,		/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 };
@@ -1660,6 +1656,7 @@ elf32_bfin_reloc_type_class (const Elf_Internal_Rela * rela)
       return reloc_class_normal;
     }
 }
+
 static bfd_boolean
 bfin_relocate_section (bfd * output_bfd,
 		       struct bfd_link_info *info,
@@ -1678,7 +1675,6 @@ bfin_relocate_section (bfd * output_bfd,
   asection *sreloc;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  char *error_msg = NULL;
   int i = 0;
 
   if (info->relocatable)
@@ -1705,6 +1701,7 @@ bfin_relocate_section (bfd * output_bfd,
       bfd_vma relocation = 0;
       bfd_boolean unresolved_reloc;
       bfd_reloc_status_type r;
+      bfd_vma address;
 
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_type < 0 || r_type >= 243)
@@ -1735,10 +1732,6 @@ bfin_relocate_section (bfd * output_bfd,
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
-	  /* Call to bfd_elf_rela_local_sym would have CHANGED the sec
-             as well as updated relocation. The value returned is
-             w.r.t the original section.  */
-	  sec = local_sections[r_symndx];
 	}
       else
 	{
@@ -1762,6 +1755,45 @@ bfin_relocate_section (bfd * output_bfd,
 	    }
 	}
 
+      address = rel->r_offset;
+      /* First, get stack relocs out of the way.  */
+      switch (r_type)
+	{
+	case R_push:
+	  reloc_stack_push (relocation + rel->r_addend);
+	  r = bfd_reloc_ok;
+	  goto done_reloc;
+	case R_const:
+	  reloc_stack_push (rel->r_addend);
+	  r = bfd_reloc_ok;
+	  goto done_reloc;
+	case R_add:
+	case R_sub:
+	case R_mult:
+	case R_div:
+	case R_mod:
+	case R_lshift:
+	case R_rshift:
+	case R_neg:
+	case R_and:
+	case R_or:
+	case R_xor:
+	case R_land:
+	case R_lor:
+	case R_comp:
+	case R_page:
+	case R_hwpage:
+	  reloc_stack_operate (r_type);
+	  r = bfd_reloc_ok;
+	  goto done_reloc;
+
+	default:
+	  if (!is_reloc_stack_empty())
+	    relocation = reloc_stack_pop ();
+	  break;
+	}
+
+      /* Then, process normally.  */
       switch (r_type)
 	{
 	case R_BFIN_GNU_VTINHERIT:
@@ -1773,7 +1805,7 @@ bfin_relocate_section (bfd * output_bfd,
 	     in the global offset table.  */
 	  if (h != NULL
 	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
-	    break;
+	    goto do_default;
 	  /* Fall through.  */
 	  /* Relocation is the offset of the entry for this symbol in
 	     the global offset table.  */
@@ -1793,13 +1825,14 @@ bfin_relocate_section (bfd * output_bfd,
 
 		off = h->got.offset;
 		BFD_ASSERT (off != (bfd_vma) - 1);
-
 		dyn = elf_hash_table (info)->dynamic_sections_created;
+
 		if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		    || (info->shared
 			&& (info->symbolic
 			    || h->dynindx == -1
-			    || h->forced_local) && h->def_regular))
+			    || h->forced_local)
+			&& h->def_regular))
 		  {
 		    /* This is actually a static link, or it is a
 		       -Bsymbolic link and the symbol is defined
@@ -1827,10 +1860,9 @@ bfin_relocate_section (bfd * output_bfd,
 	      }
 	    else
 	      {
-		BFD_ASSERT (local_got_offsets != NULL
-			    && local_got_offsets[r_symndx] != (bfd_vma) - 1);
-
+		BFD_ASSERT (local_got_offsets != NULL);
 		off = local_got_offsets[r_symndx];
+		BFD_ASSERT (off != (bfd_vma) - 1);
 
 		/* The offset must always be a multiple of 4.  We use
 		   the least significant bit to record whether we have
@@ -1839,7 +1871,6 @@ bfin_relocate_section (bfd * output_bfd,
 		  off &= ~1;
 		else
 		  {
-
 		    bfd_put_32 (output_bfd, relocation, sgot->contents + off);
 
 		    if (info->shared)
@@ -1871,71 +1902,52 @@ bfin_relocate_section (bfd * output_bfd,
             /* bfin : preg = [preg + 17bitdiv4offset] relocation is div by 4.  */
             relocation /= 4;
 	  }
+	  goto do_default;
+
+	case R_pcrel24:
+	case R_pcrel24_jump_l:
+	  {
+	    bfd_vma x;
+
+	    relocation += rel->r_addend;
+
+	    /* Perform usual pc-relative correction.  */
+	    relocation -= input_section->output_section->vma + input_section->output_offset;
+	    relocation -= address;
+
+	    /* We are getting reloc_entry->address 2 byte off from
+	       the start of instruction. Assuming absolute postion
+	       of the reloc data. But, following code had been written assuming 
+	       reloc address is starting at begining of instruction.
+	       To compensate that I have increased the value of 
+	       relocation by 1 (effectively 2) and used the addr -2 instead of addr.  */ 
+
+	    relocation += 2;
+	    address -= 2;
+
+	    relocation >>= 1;
+
+	    x = bfd_get_16 (input_bfd, contents + address);
+	    x = (x & 0xff00) | ((relocation >> 16) & 0xff);
+	    bfd_put_16 (input_bfd, x, contents + address);
+
+	    x = bfd_get_16 (input_bfd, contents + address + 2);
+	    x = relocation & 0xFFFF;
+	    bfd_put_16 (input_bfd, x, contents + address + 2);
+	    r = bfd_reloc_ok;
+	  }
 	  break;
 
 	default:
-	  if (howto->special_function)
-	    {
-	      bfd_reloc_status_type cont;
-	      arelent reloc_ent;
-	      asymbol symbol;
-	      asymbol *symbol1;
-	      symbol.flags = 0;
-	      symbol.section = bfd_und_section_ptr;
-	      symbol.value = 0;
+	do_default:
+	  r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+					contents, address,
+					relocation, rel->r_addend);
 
-	      if (h != NULL)
-		{
-		  if (unresolved_reloc)
-		    {
-		      break;
-		    }
-		  if (h->root.type != bfd_link_hash_undefweak
-		      && h->root.type != bfd_link_hash_undefined)
-		    {
-		      symbol.the_bfd = input_bfd;
-		      symbol.section = h->root.u.def.section;
-		      symbol.name = h->root.root.string;
-		      symbol.value = h->root.u.def.value;
-		    }
-		  if (h->root.type == bfd_link_hash_defweak
-                      || h->root.type == bfd_link_hash_undefweak)
-		    {
-		      symbol.name = h->root.root.string;
-		      symbol.flags |= BSF_WEAK;
-		    }
-		}
-	      else
-		{
-		  symbol = *sec->symbol;
-		}
-	      reloc_ent.address = rel->r_offset;
-	      reloc_ent.howto = howto;
-	      reloc_ent.addend = rel->r_addend;
-	      symbol1 = &symbol;
-	      reloc_ent.sym_ptr_ptr = &symbol1;
-
-	      cont =
-		howto->special_function (input_bfd, &reloc_ent, &symbol,
-					 contents, input_section,
-					 info->
-					 relocatable ? output_bfd : NULL,
-					 &error_msg);
-	      if (cont == bfd_reloc_ok)
-		{
-		  continue;
-		}
-	    }
-	  else
-	    {
-	      fprintf (stderr, "%s no special func r_type is %d\n",
-		       input_bfd->filename, r_type);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
 	  break;
 	}
 
+    done_reloc:
       /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
          because such sections are not SEC_ALLOC and thus ld.so will
          not process them.  */
@@ -1948,10 +1960,6 @@ bfin_relocate_section (bfd * output_bfd,
 	     input_section, (long) rel->r_offset, h->root.root.string);
 	  return FALSE;
 	}
-
-      r = _bfd_final_link_relocate (howto, input_bfd, input_section,
-				    contents, rel->r_offset,
-				    relocation, rel->r_addend);
 
       if (r != bfd_reloc_ok)
 	{

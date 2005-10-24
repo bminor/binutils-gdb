@@ -1,3 +1,11 @@
+2005-10-24  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfin_howto_table): Set src_mask to 0 for all relocs.
+	(bfin_imm16_reloc): Always add in the addend.  Don't fetch existing
+	contents from section.
+	(bfin_relocate_section): Rework so as to not call special_functions.
+	Handle the relocation stack here.  Treat pcrel24 relocs specially.
+
 2005-10-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_link_input_bfd): Don't use linker_mark and
