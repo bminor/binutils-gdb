@@ -97,7 +97,7 @@ extern struct bfd_link_hash_table *_bfd_sparc_elf_link_hash_table_create
 extern bfd_boolean _bfd_sparc_elf_create_dynamic_sections
   (bfd *, struct bfd_link_info *);
 extern void _bfd_sparc_elf_copy_indirect_symbol
-  (const struct elf_backend_data *,
+  (struct bfd_link_info *,
    struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
 extern bfd_boolean _bfd_sparc_elf_check_relocs

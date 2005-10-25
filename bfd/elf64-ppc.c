@@ -3844,10 +3844,9 @@ move_plt_plist (struct ppc_link_hash_entry *from,
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-ppc64_elf_copy_indirect_symbol
-  (const struct elf_backend_data *bed ATTRIBUTE_UNUSED,
-   struct elf_link_hash_entry *dir,
-   struct elf_link_hash_entry *ind)
+ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
+				struct elf_link_hash_entry *dir,
+				struct elf_link_hash_entry *ind)
 {
   struct ppc_link_hash_entry *edir, *eind;
 
@@ -3862,10 +3861,7 @@ ppc64_elf_copy_indirect_symbol
 	  struct ppc_dyn_relocs **pp;
 	  struct ppc_dyn_relocs *p;
 
-	  if (eind->elf.root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
+	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -3945,15 +3941,16 @@ ppc64_elf_copy_indirect_symbol
   /* And plt entries.  */
   move_plt_plist (eind, edir);
 
-  if (edir->elf.dynindx == -1)
+  if (eind->elf.dynindx != -1)
     {
+      if (edir->elf.dynindx != -1)
+	_bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				edir->elf.dynstr_index);
       edir->elf.dynindx = eind->elf.dynindx;
       edir->elf.dynstr_index = eind->elf.dynstr_index;
       eind->elf.dynindx = -1;
       eind->elf.dynstr_index = 0;
     }
-  else
-    BFD_ASSERT (eind->elf.dynindx == -1);
 }
 
 /* Find the function descriptor hash entry from the given function code

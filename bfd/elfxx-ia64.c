@@ -216,7 +216,7 @@ static struct bfd_hash_entry *elfNN_ia64_new_elf_hash_entry
   PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
 	   const char *string));
 static void elfNN_ia64_hash_copy_indirect
-  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
 static void elfNN_ia64_hash_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
@@ -1798,8 +1798,8 @@ elfNN_ia64_new_elf_hash_entry (entry, table, string)
 }
 
 static void
-elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
-     const struct elf_backend_data *bed ATTRIBUTE_UNUSED;
+elfNN_ia64_hash_copy_indirect (info, xdir, xind)
+     struct bfd_link_info *info;
      struct elf_link_hash_entry *xdir, *xind;
 {
   struct elfNN_ia64_link_hash_entry *dir, *ind;
@@ -1821,29 +1821,34 @@ elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
   /* Copy over the got and plt data.  This would have been done
      by check_relocs.  */
 
-  if (dir->info == NULL)
+  if (ind->info != NULL)
     {
       struct elfNN_ia64_dyn_sym_info *dyn_i;
+      struct elfNN_ia64_dyn_sym_info **pdyn;
 
-      dir->info = dyn_i = ind->info;
+      pdyn = &dir->info;
+      while ((dyn_i = *pdyn) != NULL)
+	pdyn = &dyn_i->next;
+      *pdyn = dyn_i = ind->info;
       ind->info = NULL;
 
       /* Fix up the dyn_sym_info pointers to the global symbol.  */
       for (; dyn_i; dyn_i = dyn_i->next)
 	dyn_i->h = &dir->root;
     }
-  BFD_ASSERT (ind->info == NULL);
 
   /* Copy over the dynindx.  */
 
-  if (dir->root.dynindx == -1)
+  if (ind->root.dynindx != -1)
     {
+      if (dir->root.dynindx != -1)
+	_bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				dir->root.dynstr_index);
       dir->root.dynindx = ind->root.dynindx;
       dir->root.dynstr_index = ind->root.dynstr_index;
       ind->root.dynindx = -1;
       ind->root.dynstr_index = 0;
     }
-  BFD_ASSERT (ind->root.dynindx == -1);
 }
 
 static void

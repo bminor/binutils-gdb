@@ -2565,12 +2565,11 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed ATTRIBUTE_UNUSED,
+ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
 			      struct elf_link_hash_entry *dir,
 			      struct elf_link_hash_entry *ind)
 {
   struct ppc_elf_link_hash_entry *edir, *eind;
-  bfd_signed_vma tmp;
 
   edir = (struct ppc_elf_link_hash_entry *) dir;
   eind = (struct ppc_elf_link_hash_entry *) ind;
@@ -2582,10 +2581,7 @@ ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed ATTRIBUTE_UNUSE
 	  struct ppc_elf_dyn_relocs **pp;
 	  struct ppc_elf_dyn_relocs *p;
 
-	  if (ind->root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
+	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -2631,14 +2627,8 @@ ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed ATTRIBUTE_UNUSE
 
   /* Copy over the GOT refcount entries that we may have already seen to
      the symbol which just became indirect.  */
-  tmp = edir->elf.got.refcount;
-  if (tmp < 1)
-    {
-      edir->elf.got.refcount = eind->elf.got.refcount;
-      eind->elf.got.refcount = tmp;
-    }
-  else
-    BFD_ASSERT (eind->elf.got.refcount < 1);
+  edir->elf.got.refcount += eind->elf.got.refcount;
+  eind->elf.got.refcount = 0;
 
   /* And plt entries.  */
   if (eind->elf.plt.plist != NULL)
@@ -2669,15 +2659,16 @@ ppc_elf_copy_indirect_symbol (const struct elf_backend_data *bed ATTRIBUTE_UNUSE
       eind->elf.plt.plist = NULL;
     }
 
-  if (edir->elf.dynindx == -1)
+  if (eind->elf.dynindx != -1)
     {
+      if (edir->elf.dynindx != -1)
+	_bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				edir->elf.dynstr_index);
       edir->elf.dynindx = eind->elf.dynindx;
       edir->elf.dynstr_index = eind->elf.dynstr_index;
       eind->elf.dynindx = -1;
       eind->elf.dynstr_index = 0;
     }
-  else
-    BFD_ASSERT (eind->elf.dynindx == -1);
 }
 
 /* Return 1 if target is one of ours.  */

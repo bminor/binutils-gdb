@@ -870,7 +870,7 @@ struct elf_backend_data
      newly created and plt/got refcounts and dynamic indices should not
      be copied.  */
   void (*elf_backend_copy_indirect_symbol)
-    (const struct elf_backend_data *, struct elf_link_hash_entry *,
+    (struct bfd_link_info *, struct elf_link_hash_entry *,
      struct elf_link_hash_entry *);
 
   /* Modify any information related to dynamic linking such that the
@@ -1462,7 +1462,7 @@ extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
   (bfd *);
 extern void _bfd_elf_link_hash_copy_indirect
-  (const struct elf_backend_data *, struct elf_link_hash_entry *,
+  (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
 extern void _bfd_elf_link_hash_hide_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);

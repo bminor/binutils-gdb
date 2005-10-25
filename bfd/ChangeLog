@@ -1,3 +1,28 @@
+2005-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/1540
+	* elf-bfd.h (elf_backend_copy_indirect_symbol): Replace pointer to
+	elf_backend_data with pointer to bfd_link_info.
+	(_bfd_elf_link_hash_copy_indirect): Likewise.
+	* elf.c (_bfd_elf_link_hash_copy_indirect): Likewise.  Handle
+	direct and indirect symbols both having dynamic link info.
+	* elf32-arm.c (elf32_arm_copy_indirect_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Likewise.
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_copy_indirect_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Likewise.
+	* elf32-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elf32-sh.c (sh_elf_copy_indirect_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+	* elf64-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_copy_indirect_symbol): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_hash_copy_indirect): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_copy_indirect_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_copy_indirect_symbol): Likewise.
+	* elflink.c: Adjust all calls to bed->elf_backend_copy_indirect_symbol.
+	* elfxx-mips.h (_bfd_mips_elf_copy_indirect_symbol): Update prototype.
+	* elfxx-sparc.h (_bfd_sparc_elf_copy_indirect_symbol): Likewise.
+
 2005-10-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/SRC-POTFILES.in: Regenerate.

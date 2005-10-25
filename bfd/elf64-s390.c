@@ -41,7 +41,7 @@ static bfd_boolean create_got_section
 static bfd_boolean elf_s390_create_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
 static void elf_s390_copy_indirect_symbol
-  PARAMS ((const struct elf_backend_data *, struct elf_link_hash_entry *,
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *,
 	   struct elf_link_hash_entry *));
 static bfd_boolean elf_s390_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -808,8 +808,8 @@ elf_s390_create_dynamic_sections (dynobj, info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf_s390_copy_indirect_symbol (bed, dir, ind)
-     const struct elf_backend_data *bed;
+elf_s390_copy_indirect_symbol (info, dir, ind)
+     struct bfd_link_info *info;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct elf_s390_link_hash_entry *edir, *eind;
@@ -824,10 +824,7 @@ elf_s390_copy_indirect_symbol (bed, dir, ind)
 	  struct elf_s390_dyn_relocs **pp;
 	  struct elf_s390_dyn_relocs *p;
 
-	  if (ind->root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
+	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -871,7 +868,7 @@ elf_s390_copy_indirect_symbol (bed, dir, ind)
       dir->needs_plt |= ind->needs_plt;
     }
   else
-    _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+    _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
 static int

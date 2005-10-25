@@ -1458,12 +1458,11 @@ _bfd_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
    old indirect symbol.  Also used for copying flags to a weakdef.  */
 
 void
-_bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
+_bfd_elf_link_hash_copy_indirect (struct bfd_link_info *info,
 				  struct elf_link_hash_entry *dir,
 				  struct elf_link_hash_entry *ind)
 {
-  bfd_signed_vma tmp;
-  bfd_signed_vma lowest_valid = bed->can_refcount;
+  struct elf_link_hash_table *htab;
 
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
@@ -1480,33 +1479,32 @@ _bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
 
   /* Copy over the global and procedure linkage table refcount entries.
      These may have been already set up by a check_relocs routine.  */
-  tmp = dir->got.refcount;
-  if (tmp < lowest_valid)
+  htab = elf_hash_table (info);
+  if (ind->got.refcount > htab->init_got_refcount.refcount)
     {
-      dir->got.refcount = ind->got.refcount;
-      ind->got.refcount = tmp;
+      if (dir->got.refcount < 0)
+	dir->got.refcount = 0;
+      dir->got.refcount += ind->got.refcount;
+      ind->got.refcount = htab->init_got_refcount.refcount;
     }
-  else
-    BFD_ASSERT (ind->got.refcount < lowest_valid);
 
-  tmp = dir->plt.refcount;
-  if (tmp < lowest_valid)
+  if (ind->plt.refcount > htab->init_plt_refcount.refcount)
     {
-      dir->plt.refcount = ind->plt.refcount;
-      ind->plt.refcount = tmp;
+      if (dir->plt.refcount < 0)
+	dir->plt.refcount = 0;
+      dir->plt.refcount += ind->plt.refcount;
+      ind->plt.refcount = htab->init_plt_refcount.refcount;
     }
-  else
-    BFD_ASSERT (ind->plt.refcount < lowest_valid);
 
-  if (dir->dynindx == -1)
+  if (ind->dynindx != -1)
     {
+      if (dir->dynindx != -1)
+	_bfd_elf_strtab_delref (htab->dynstr, dir->dynstr_index);
       dir->dynindx = ind->dynindx;
       dir->dynstr_index = ind->dynstr_index;
       ind->dynindx = -1;
       ind->dynstr_index = 0;
     }
-  else
-    BFD_ASSERT (ind->dynindx == -1);
 }
 
 void

@@ -881,7 +881,7 @@ _bfd_sparc_elf_create_dynamic_sections (bfd *dynobj,
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 void
-_bfd_sparc_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
+_bfd_sparc_elf_copy_indirect_symbol (struct bfd_link_info *info,
 				     struct elf_link_hash_entry *dir,
 				     struct elf_link_hash_entry *ind)
 {
@@ -897,10 +897,7 @@ _bfd_sparc_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
 	  struct _bfd_sparc_elf_dyn_relocs **pp;
 	  struct _bfd_sparc_elf_dyn_relocs *p;
 
-	  if (ind->root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
+	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -930,7 +927,7 @@ _bfd_sparc_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
       edir->tls_type = eind->tls_type;
       eind->tls_type = GOT_UNKNOWN;
     }
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+  _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
 static int

@@ -1755,7 +1755,7 @@ m32r_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-m32r_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
+m32r_elf_copy_indirect_symbol (struct bfd_link_info *info,
                                struct elf_link_hash_entry *dir,
                                struct elf_link_hash_entry *ind)
 {
@@ -1772,10 +1772,7 @@ m32r_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
           struct elf_m32r_dyn_relocs **pp;
           struct elf_m32r_dyn_relocs *p;
 
-          if (ind->root.type == bfd_link_hash_indirect)
-            abort ();
-
-          /* Add reloc counts against the weak sym to the strong sym
+          /* Add reloc counts against the indirect sym to the direct sym
              list.  Merge any entries against the same section.  */
           for (pp = &eind->dyn_relocs; (p = *pp) != NULL;)
             {
@@ -1799,7 +1796,7 @@ m32r_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
       eind->dyn_relocs = NULL;
     }
 
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+  _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
 

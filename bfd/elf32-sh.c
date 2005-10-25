@@ -6063,14 +6063,11 @@ sh_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-sh_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
+sh_elf_copy_indirect_symbol (struct bfd_link_info *info,
 			     struct elf_link_hash_entry *dir,
 			     struct elf_link_hash_entry *ind)
 {
   struct elf_sh_link_hash_entry *edir, *eind;
-#ifdef INCLUDE_SHMEDIA
-  bfd_signed_vma tmp;
-#endif
 
   edir = (struct elf_sh_link_hash_entry *) dir;
   eind = (struct elf_sh_link_hash_entry *) ind;
@@ -6082,9 +6079,7 @@ sh_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
 	  struct elf_sh_dyn_relocs **pp;
 	  struct elf_sh_dyn_relocs *p;
 
-	  BFD_ASSERT (ind->root.type != bfd_link_hash_indirect);
-
-	  /* Add reloc counts against the weak sym to the strong sym
+	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -6110,14 +6105,8 @@ sh_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
   edir->gotplt_refcount = eind->gotplt_refcount;
   eind->gotplt_refcount = 0;
 #ifdef INCLUDE_SHMEDIA
-  tmp = edir->datalabel_got.refcount;
-  if (tmp < 1)
-    {
-      edir->datalabel_got.refcount = eind->datalabel_got.refcount;
-      eind->datalabel_got.refcount = tmp;
-    }
-  else
-    BFD_ASSERT (eind->datalabel_got.refcount < 1);
+  edir->datalabel_got.refcount += eind->datalabel_got.refcount;
+  eind->datalabel_got.refcount = 0;
 #endif
 
   if (ind->root.type == bfd_link_hash_indirect
@@ -6139,7 +6128,7 @@ sh_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
       dir->needs_plt |= ind->needs_plt;
     }
   else
-    _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+    _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
 static int
