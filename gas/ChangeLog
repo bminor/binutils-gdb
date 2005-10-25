@@ -1,3 +1,8 @@
+2005-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* write.c (adjust_reloc_syms): Undo the change made on
+	2005-04-26 to allow local symbol set to undefined symbol.
+
 2005-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (bfin-parse.tab.h): Removed.

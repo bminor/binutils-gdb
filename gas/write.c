@@ -681,17 +681,8 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	if (symbol_equated_reloc_p (sym)
 	    || S_IS_WEAKREFR (sym))
 	  {
-	    symbolS *new_sym
-	      = symbol_get_value_expression (sym)->X_add_symbol;
-	    const char *name = S_GET_NAME (sym);
-	    if (!S_IS_COMMON (new_sym)
-		&& !TC_FAKE_LABEL (name)
-		&& !S_IS_WEAKREFR (sym)
-		&& (!S_IS_EXTERNAL (sym) || S_IS_LOCAL (sym)))
-	      as_bad (_("Local symbol `%s' can't be equated to undefined symbol `%s'"),
-		      name, S_GET_NAME (new_sym));
 	    fixp->fx_offset += symbol_get_value_expression (sym)->X_add_number;
-	    sym = new_sym;
+	    sym = symbol_get_value_expression (sym)->X_add_symbol;
 	    fixp->fx_addsy = sym;
 	  }
 
