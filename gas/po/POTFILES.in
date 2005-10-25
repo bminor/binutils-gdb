@@ -36,6 +36,8 @@ config/tc-arm.c
 config/tc-arm.h
 config/tc-avr.c
 config/tc-avr.h
+config/tc-bfin.c
+config/tc-bfin.h
 config/tc-cris.c
 config/tc-cris.h
 config/tc-crx.c

@@ -1,3 +1,7 @@
+2005-10-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/gprof.pot: Regenerate.
+
 2005-09-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/ga.po: New Irish translation.

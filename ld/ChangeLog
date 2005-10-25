@@ -1,3 +1,7 @@
+2005-10-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/ld.pot: Regenerate.
+
 2005-10-25  Chris Metcalf <cdmetcalf@comcast.net>
 
 	* ld.texinfo (--reduce-memory-overheads): Fix typo.

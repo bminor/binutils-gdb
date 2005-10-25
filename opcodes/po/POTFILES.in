@@ -5,6 +5,7 @@ arc-ext.c
 arc-opc.c
 arm-dis.c
 avr-dis.c
+bfin-dis.c
 cgen-asm.c
 cgen-dis.c
 cgen-opc.c

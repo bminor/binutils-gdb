@@ -1,3 +1,8 @@
+2005-10-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2005-10-24  Jan Beulich  <jbeulich@novell.com>
 
 	* ia64-asmtab.c: Regenerate.

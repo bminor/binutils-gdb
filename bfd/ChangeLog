@@ -1,3 +1,8 @@
+2005-10-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
 2005-10-24  Jie Zhang <jie.zhang@analog.com>
 
 	* elf32-bfin.c (bfd_bfin_elf32_create_embedded_relocs): Fix signedness

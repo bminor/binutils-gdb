@@ -1,3 +1,8 @@
+2005-10-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/POTFILES.in: Regenerate.
+	* po/gas.pot: Regenerate.
+
 2005-10-24  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* config/tc-bfin.c (Expr_Node_Gen_Reloc): If have symbol + constant,
