@@ -299,9 +299,6 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_A1 :
       print_keyword (cd, info, & m32c_cgen_opval_h_a1, 0, 0);
       break;
-    case M32C_OPERAND_A1A0 :
-      print_keyword (cd, info, & m32c_cgen_opval_h_ar_SI, 0, 0);
-      break;
     case M32C_OPERAND_AN16_PUSH_S :
       print_keyword (cd, info, & m32c_cgen_opval_h_ar_HI, fields->f_4_1, 0);
       break;

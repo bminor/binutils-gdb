@@ -1422,10 +1422,6 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
   { "A1", M32C_OPERAND_A1, HW_H_A1, 0, 0,
     { 0, { (const PTR) 0 } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
-/* A1A0: a1a0 */
-  { "A1A0", M32C_OPERAND_A1A0, HW_H_AR_SI, 0, 0,
-    { 0, { (const PTR) 0 } }, 
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* sb: SB register */
   { "sb", M32C_OPERAND_SB, HW_H_SB, 0, 0,
     { 0, { (const PTR) 0 } }, 
@@ -2046,24 +2042,6 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
 /* src32-24-8-An-relative-Prefixed-SI: m32c dsp:8[An] relative destination SI */
 /* src32-24-16-An-relative-Prefixed-SI: m32c dsp:16[An] relative destination SI */
 /* src32-24-24-An-relative-Prefixed-SI: m32c dsp:16[An] relative destination SI */
-/* dsp20-16-u20-QI: m16c dsp:20 absolute destination QI */
-/* dsp20-16-u20-A0-QI: m16c dsp:20[A0] relative destination QI */
-/* dsp20-16-A1A0-QI: m16c [A1A0] relative destination QI */
-/* dsp20-24-u20-QI: m16c dsp:20 absolute destination QI */
-/* dsp20-24-u20-A0-QI: m16c dsp:20[A0] relative destination QI */
-/* dsp20-24-A1A0-QI: m16c [A1A0] relative destination QI */
-/* dsp20-32-u20-QI: m16c dsp:20 absolute destination QI */
-/* dsp20-32-u20-A0-QI: m16c dsp:20[A0] relative destination QI */
-/* dsp20-32-A1A0-QI: m16c [A1A0] relative destination QI */
-/* dsp20-16-u20-HI: m16c dsp:20 absolute destination HI */
-/* dsp20-16-u20-A0-HI: m16c dsp:20[A0] relative destination HI */
-/* dsp20-16-A1A0-HI: m16c [A1A0] relative destination HI */
-/* dsp20-24-u20-HI: m16c dsp:20 absolute destination HI */
-/* dsp20-24-u20-A0-HI: m16c dsp:20[A0] relative destination HI */
-/* dsp20-24-A1A0-HI: m16c [A1A0] relative destination HI */
-/* dsp20-32-u20-HI: m16c dsp:20 absolute destination HI */
-/* dsp20-32-u20-A0-HI: m16c dsp:20[A0] relative destination HI */
-/* dsp20-32-A1A0-HI: m16c [A1A0] relative destination HI */
 /* src16-16-16-absolute-QI: m16c absolute address QI */
 /* src16-16-16-absolute-HI: m16c absolute address HI */
 /* src32-16-16-absolute-Unprefixed-QI: m32c absolute address QI */
@@ -61854,9 +61832,9 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_ABS16_B_16_DST16_16_16_ABSOLUTE_QI, "abs16.b-16-dst16-16-16-absolute-QI", "abs.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* add${size}$Q #${Imm-12-s4},sp */
+/* add.w$Q #${Imm-12-s4},sp */
   {
-    M32C_INSN_ADD16_Q_SP, "add16-Q-sp", "add", 16,
+    M32C_INSN_ADD16_WQ_SP, "add16-wQ-sp", "add.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
 /* add.b$G #${Imm-16-QI},sp */

@@ -562,8 +562,6 @@ m32c_cgen_insert_operand (CGEN_CPU_DESC cd,
       break;
     case M32C_OPERAND_A1 :
       break;
-    case M32C_OPERAND_A1A0 :
-      break;
     case M32C_OPERAND_AN16_PUSH_S :
       errmsg = insert_normal (cd, fields->f_4_1, 0, 0, 4, 1, 32, total_length, buffer);
       break;
@@ -1711,8 +1709,6 @@ m32c_cgen_extract_operand (CGEN_CPU_DESC cd,
       break;
     case M32C_OPERAND_A1 :
       break;
-    case M32C_OPERAND_A1A0 :
-      break;
     case M32C_OPERAND_AN16_PUSH_S :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 4, 1, 32, total_length, pc, & fields->f_4_1);
       break;
@@ -2822,9 +2818,6 @@ m32c_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case M32C_OPERAND_A1 :
       value = 0;
       break;
-    case M32C_OPERAND_A1A0 :
-      value = 0;
-      break;
     case M32C_OPERAND_AN16_PUSH_S :
       value = fields->f_4_1;
       break;
@@ -3404,9 +3397,6 @@ m32c_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       value = 0;
       break;
     case M32C_OPERAND_A1 :
-      value = 0;
-      break;
-    case M32C_OPERAND_A1A0 :
       value = 0;
       break;
     case M32C_OPERAND_AN16_PUSH_S :
@@ -3995,8 +3985,6 @@ m32c_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case M32C_OPERAND_A1 :
       break;
-    case M32C_OPERAND_A1A0 :
-      break;
     case M32C_OPERAND_AN16_PUSH_S :
       fields->f_4_1 = value;
       break;
@@ -4555,8 +4543,6 @@ m32c_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case M32C_OPERAND_A0 :
       break;
     case M32C_OPERAND_A1 :
-      break;
-    case M32C_OPERAND_A1A0 :
       break;
     case M32C_OPERAND_AN16_PUSH_S :
       fields->f_4_1 = value;

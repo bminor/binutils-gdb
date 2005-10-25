@@ -879,9 +879,6 @@ m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_A1 :
       errmsg = cgen_parse_keyword (cd, strp, & m32c_cgen_opval_h_a1, & junk);
       break;
-    case M32C_OPERAND_A1A0 :
-      errmsg = cgen_parse_keyword (cd, strp, & m32c_cgen_opval_h_ar_SI, & junk);
-      break;
     case M32C_OPERAND_AN16_PUSH_S :
       errmsg = cgen_parse_keyword (cd, strp, & m32c_cgen_opval_h_ar_HI, & fields->f_4_1);
       break;

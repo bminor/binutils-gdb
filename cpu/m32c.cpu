@@ -5997,10 +5997,10 @@
 ;-------------------------------------------------------------
 
 (define-pmacro (binary-arith16-Q-sp op opc1 opc2 opc3 sem)
-  (dni (.sym op 16 -Q-sp)
-       (.str op ":Q #imm4,sp")
+  (dni (.sym op 16 -wQ-sp)
+       (.str op ".w:q #imm4,sp")
        ((machine 16))
-       (.str op "${size}$Q #${Imm-12-s4},sp")
+       (.str op ".w$Q #${Imm-12-s4},sp")
        (+ opc1 opc2 opc3 Imm-12-s4)
        (sem QI Imm-12-s4 sp)
        ())
@@ -7123,6 +7123,9 @@
 (binary-arith16-b-S-imm8-dst3 add ".b" (f-0-4 8) (f-4-1 0) add-sem)
 ; add.BW:Q #imm4,sp (m16 #7)
 (binary-arith16-Q-sp add (f-0-4 7) (f-4-4 #xD) (f-8-4 #xB) add-sem)
+(dnmi add16-bQ-sp "add16-bQ-sp" ()
+      "add.b:q #${Imm-12-s4},sp"
+      (emit add16-wQ-sp Imm-12-s4))
 ; add.BW:G #imm,sp (m16 #6)
 (binary-arith16-G-sp add (f-0-4 7) (f-4-3 6) (f-8-4 #xE) (f-12-4 #xB) add-sem)
 ; add.BW:G src,dst (m16 #4 m32 #6)

@@ -1,3 +1,8 @@
+2005-10-25  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (add16-bQ-sp,add16-wQ-sp): Fix to allow either width by
+	making one a macro of the other.
+
 2005-10-21  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (lde, ste): Add dsp[a0] and [a1a] addressing.

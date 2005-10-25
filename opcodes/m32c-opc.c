@@ -7497,7 +7497,7 @@ static const CGEN_IFMT ifmt_add32_l_imm4_Q_16_Unprefixed_dst32_16_24_absolute_Un
   32, 40, 0xfff00000, { { F (F_0_3) }, { F (F_4_3) }, { F (F_8_2) }, { F (F_DSP_16_U24) }, { F (F_3_1) }, { F (F_7_1) }, { F (F_10_2) }, { F (F_IMM_12_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_add16_Q_sp ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_add16_wQ_sp ATTRIBUTE_UNUSED = {
   16, 16, 0xfff0, { { F (F_0_4) }, { F (F_4_4) }, { F (F_8_4) }, { F (F_IMM_12_S4) }, { 0 } }
 };
 
@@ -78714,11 +78714,11 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, ' ', OP (DSP_16_U16), 0 } },
     & ifmt_rorc16_b_16_dst16_16_16_absolute_QI, { 0x76ff0000 }
   },
-/* add${size}$Q #${Imm-12-s4},sp */
+/* add.w$Q #${Imm-12-s4},sp */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (SIZE), OP (Q), ' ', '#', OP (IMM_12_S4), ',', 's', 'p', 0 } },
-    & ifmt_add16_Q_sp, { 0x7db0 }
+    { { MNEM, OP (Q), ' ', '#', OP (IMM_12_S4), ',', 's', 'p', 0 } },
+    & ifmt_add16_wQ_sp, { 0x7db0 }
   },
 /* add.b$G #${Imm-16-QI},sp */
   {
@@ -79682,6 +79682,10 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
 #else
 #define F(f) & m32c_cgen_ifld_table[M32C_/**/f]
 #endif
+static const CGEN_IFMT ifmt_add16_bQ_sp ATTRIBUTE_UNUSED = {
+  16, 16, 0xfff0, { { F (F_0_4) }, { F (F_4_4) }, { F (F_8_4) }, { F (F_IMM_12_S4) }, { 0 } }
+};
+
 #undef F
 
 /* Each non-simple macro entry points to an array of expansion possibilities.  */
@@ -79703,12 +79707,23 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
 
 static const CGEN_IBASE m32c_cgen_macro_insn_table[] =
 {
+/* add.b:q #${Imm-12-s4},sp */
+  {
+    -1, "add16-bQ-sp", "add.b:q", 16,
+    { 0|A(ALIAS), { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
 };
 
 /* The macro instruction opcode table.  */
 
 static const CGEN_OPCODE m32c_cgen_macro_insn_opcode_table[] =
 {
+/* add.b:q #${Imm-12-s4},sp */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', '#', OP (IMM_12_S4), ',', 's', 'p', 0 } },
+    & ifmt_add16_bQ_sp, { 0x7db0 }
+  },
 };
 
 #undef A
