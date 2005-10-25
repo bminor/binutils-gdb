@@ -1,3 +1,7 @@
+2005-10-25  Andreas Schwab  <schwab@suse.de>
+
+	* regformats/reg-ia64.dat: Remove NAT registers.
+
 2005-10-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* rs6000-tdep.c (info_powerpc_cmdlist): Remove variable.

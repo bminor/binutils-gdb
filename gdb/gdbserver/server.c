@@ -322,7 +322,7 @@ int
 main (int argc, char *argv[])
 {
   char ch, status, *own_buf;
-  unsigned char mem_buf[2000];
+  unsigned char *mem_buf;
   int i = 0;
   int signal;
   unsigned int len;
@@ -359,6 +359,7 @@ main (int argc, char *argv[])
   initialize_low ();
 
   own_buf = malloc (PBUFSIZ);
+  mem_buf = malloc (PBUFSIZ);
 
   if (pid == 0)
     {
