@@ -53,6 +53,9 @@ if ![regexp $want $got all text data bss dtot hextot] then {
     fail "size (no arguments)"
 } else {
     if {$text < 8 || $data < 4} then {
+	# The z80-coff port defaults to a "binary" like output
+	# file format which does not include a data section.
+	setup_xfail "z80-*-coff"
 	fail "size (no arguments)"
     } else {
 	pass "size (no arguments)"
