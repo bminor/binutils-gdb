@@ -1,3 +1,11 @@
+2005-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* configure.in: Add target architecture bfd_arch_z80.
+	* configure: Regenerated.
+	* disassemble.c (disassembler)<ARCH_z80>: Add case  
+	bfd_arch_z80.
+	* z80-dis.c: New file.
+
 2005-10-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/POTFILES.in: Regenerate.

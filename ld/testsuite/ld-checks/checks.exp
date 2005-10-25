@@ -54,6 +54,7 @@ proc section_check {} {
     # Perform the equivalent of invoking ld_simple_link
     # except that we need to massage the output futher.
     
+    verbose -log "$ld -o tmpdir/asm.x $ldflags tmpdir/asm.o"
     catch "exec $ld -o tmpdir/asm.x $ldflags tmpdir/asm.o" exec_output
     set exec_output [prune_warnings $exec_output]
 

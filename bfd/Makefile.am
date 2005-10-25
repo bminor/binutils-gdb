@@ -111,6 +111,7 @@ ALL_MACHINES = \
 	cpu-w65.lo \
 	cpu-xstormy16.lo \
 	cpu-xtensa.lo \
+	cpu-z80.lo \
 	cpu-z8k.lo
 
 ALL_MACHINES_CFILES = \
@@ -171,6 +172,7 @@ ALL_MACHINES_CFILES = \
 	cpu-w65.c \
 	cpu-xstormy16.c \
 	cpu-xtensa.c \
+	cpu-z80.c \
 	cpu-z8k.c
 
 # The .o files needed by all of the 32 bit vectors that are configured into
@@ -214,6 +216,7 @@ BFD32_BACKENDS = \
 	coff-u68k.lo \
 	coff-we32k.lo \
 	coff-w65.lo \
+	coff-z80.lo \
 	coff-z8k.lo \
 	cofflink.lo \
 	dwarf1.lo \
@@ -384,6 +387,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-u68k.c \
 	coff-we32k.c \
 	coff-w65.c \
+	coff-z80.c \
 	coff-z8k.c \
 	cofflink.c \
 	dwarf1.c \
@@ -1084,6 +1088,8 @@ cpu-xstormy16.lo: cpu-xstormy16.c ./bfd.h ./config.h \
   $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-xtensa.lo: cpu-xtensa.c ./bfd.h ./config.h $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
+cpu-z80.lo: cpu-z80.c ./bfd.h ./config.h $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h
 cpu-z8k.lo: cpu-z8k.c ./bfd.h ./config.h $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
 aout-adobe.lo: aout-adobe.c ./bfd.h ./config.h $(INCDIR)/filenames.h \
@@ -1239,6 +1245,10 @@ coff-we32k.lo: coff-we32k.c ./bfd.h ./config.h $(INCDIR)/filenames.h \
   coffcode.h coffswap.h
 coff-w65.lo: coff-w65.c ./bfd.h ./config.h $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/coff/w65.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  libcoff.h coffcode.h coffswap.h
+coff-z80.lo: coff-z80.c ./bfd.h ./config.h $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h $(INCDIR)/bfdlink.h $(INCDIR)/coff/z80.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   libcoff.h coffcode.h coffswap.h
 coff-z8k.lo: coff-z8k.c ./bfd.h ./config.h $(INCDIR)/filenames.h \

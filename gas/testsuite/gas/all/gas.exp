@@ -23,8 +23,9 @@ if { [istarget hppa*-*-*] || [istarget *c54x*-*-*] } then {
     gas_test "p1480.s" "" "-a>" "simplifiable double subtraction"
 }
 
-# No floating point support in assembly code for CRIS.
-if { ![istarget cris-*-*] && ![istarget crisv32-*-*] } then {
+# No floating point support in assembly code for CRIS and Z80.
+if { ![istarget cris-*-*] && ![istarget crisv32-*-*] 
+     && ![istarget z80-*-*] } then {
     gas_test "float.s" ""   "" "simple FP constants"
 }
 
@@ -78,6 +79,7 @@ case $target_triplet in {
     { iq2000*-*-* } { }
     { mips*-*-* } { }
     { *c54x*-*-* } { }
+    { z80-*-* } { }
     default {
 	setup_xfail "*c30*-*-*" "*c4x*-*-*" "pdp11-*-*"
 	run_dump_test redef
@@ -189,7 +191,8 @@ case $target_triplet in {
 # We omit the ARM toolchains because they define locals to
 #  start with '.', which eliminates .eos, .text etc from the output.
 # Omit c54x, since .tag and .def mean something different on that target
-if {   ([istarget *-*-coff*] && ![istarget *arm*-*-coff] && ![istarget thumb*-*-coff] && ![istarget xscale-*-coff] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
+# Omit Z80, since octal numbers need a suffix on that target
+if {   ([istarget *-*-coff*] && ![istarget *arm*-*-coff] && ![istarget thumb*-*-coff] && ![istarget xscale-*-coff] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff] && ![istarget z80-*-coff]) \
      ||([istarget *-*-pe*] && ![istarget arm*-*-pe*] && ![istarget thumb*-*-pe*]) \
      || [istarget i*86-*-aix*] \
      || [istarget i*86-*-sco*] \
@@ -250,11 +253,18 @@ if { ![istarget "i960-*-*"] } {
     run_dump_test quad
 }
 
-run_dump_test weakref1
-run_dump_test weakref1g
-run_dump_test weakref1l
-run_dump_test weakref1u
-run_dump_test weakref1w
+
+# .set works differently on some targets.
+case $target_triplet in {
+    { z80-*-* } { }
+    default {
+	run_dump_test weakref1
+	run_dump_test weakref1g
+	run_dump_test weakref1l
+	run_dump_test weakref1u
+	run_dump_test weakref1w
+    }
+}
 gas_test_error "weakref2.s" "" "e: would close weakref loop: e => a => b => c => d => e"
 gas_test_error "weakref3.s" "" "a: would close weakref loop: a => b => c => d => e => a"
 

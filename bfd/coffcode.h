@@ -1955,6 +1955,23 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
       machine = 88100;
       break;
 #endif
+#ifdef Z80MAGIC
+    case Z80MAGIC:
+      arch = bfd_arch_z80;
+      switch (internal_f->f_flags & F_MACHMASK)
+	{
+	case 0:
+	case bfd_mach_z80strict << 12:
+	case bfd_mach_z80 << 12:
+	case bfd_mach_z80full << 12:
+	case bfd_mach_r800 << 12:
+	  machine = ((unsigned)internal_f->f_flags & F_MACHMASK) >> 12;
+	  break;
+	default:
+	  return FALSE;
+	}
+      break;
+#endif
 #ifdef Z8KMAGIC
     case Z8KMAGIC:
       arch = bfd_arch_z8k;
@@ -2555,6 +2572,24 @@ coff_set_flags (bfd * abfd,
 {
   switch (bfd_get_arch (abfd))
     {
+#ifdef Z80MAGIC
+    case bfd_arch_z80:
+      *magicp = Z80MAGIC;
+      switch (bfd_get_mach (abfd))
+	{
+	case 0:
+	case bfd_mach_z80strict:
+	case bfd_mach_z80:
+	case bfd_mach_z80full:
+	case bfd_mach_r800:
+	  *flagsp = bfd_get_mach (abfd) << 12;
+	  break;
+	default:
+	  return FALSE;
+	}
+      return TRUE;
+#endif
+
 #ifdef Z8KMAGIC
     case bfd_arch_z8k:
       *magicp = Z8KMAGIC;

@@ -85,6 +85,11 @@
 #define TARGET_FORMAT "coff-Intel-little"
 #endif
 
+#ifdef TC_Z80
+#include "coff/z80.h"
+#define TARGET_FORMAT "coff-z80"
+#endif
+
 #ifdef TC_Z8K
 #include "coff/z8k.h"
 #define TARGET_FORMAT "coff-z8k"

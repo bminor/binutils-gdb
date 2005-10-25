@@ -420,6 +420,19 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{-mcpu=54[123589]}|@b{-mcpu=54[56]lp}] [@b{-mfar-mode}|@b{-mf}] 
  [@b{-merrors-to-file} @var{<filename>}|@b{-me} @var{<filename>}]
 @end ifset
+
+@ifset Z80
+
+@emph{Target Z80 options:}
+  [@b{-z80}] [@b{-r800}]
+  [@b{ -ignore-undocumented-instructions}] [@b{-Wnud}]
+  [@b{ -ignore-unportable-instructions}] [@b{-Wnup}]
+  [@b{ -warn-undocumented-instructions}] [@b{-Wud}]
+  [@b{ -warn-unportable-instructions}] [@b{-Wup}]
+  [@b{ -forbid-undocumented-instructions}] [@b{-Fud}]
+  [@b{ -forbid-unportable-instructions}] [@b{-Fup}]
+@end ifset
+
 @ifset Z8000
 @c Z8000 has no machine-dependent assembler options
 @end ifset
@@ -1135,6 +1148,35 @@ Enable or disable all assembler transformations of Xtensa instructions.
 The default is @option{--transform};
 @option{--no-transform} should be used only in the rare cases when the
 instructions must be exactly as specified in the assembly source.
+@end table
+@end ifset
+
+@ifset Z80
+The following options are available when @value{AS} is configured for
+a Z80 family processor.
+@table @gcctabopt
+@item -z80
+Assemble for Z80 processor.
+@item -r800
+Assemble for R800 processor.
+@item  -ignore-undocumented-instructions 
+@itemx -Wnud
+Assemble undocumented Z80 instructions that also work on R800 without warning.
+@item  -ignore-unportable-instructions 
+@itemx -Wnup
+Assemble all undocumented Z80 instructions without warning.
+@item  -warn-undocumented-instructions 
+@itemx -Wud
+Issue a warning for undocumented Z80 instructions that also work on R800.
+@item  -warn-unportable-instructions 
+@itemx -Wup
+Issue a warning for undocumented Z80 instructions that do notwork on R800.  
+@item  -forbid-undocumented-instructions 
+@itemx -Fud
+Treat all undocumented instructions as errors.
+@item  -forbid-unportable-instructions 
+@itemx -Fup
+Treat undocumented Z80 intructions that do notwork on R800 as errors.
 @end table
 @end ifset
 
@@ -2129,6 +2171,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset VAX
 @samp{#} on the Vax;
+@end ifset
+@ifset Z80
+@samp{;} for the Z80;
 @end ifset
 @ifset Z8000
 @samp{!} for the Z8000;
@@ -4272,6 +4317,13 @@ The syntax for @code{equ} on the HPPA is
 @samp{@var{symbol} .equ @var{expression}}.
 @end ifset
 
+@ifset Z80
+The syntax for @code{equ} on the Z80 is 
+@samp{@var{symbol} equ @var{expression}}. 
+On the Z80 it is an eror if @var{symbol} is already defined,
+compare @xref{Equiv}.
+@end ifset
+
 @node Equiv
 @section @code{.equiv @var{symbol}, @var{expression}}
 @cindex @code{equiv} directive
@@ -5512,6 +5564,11 @@ The syntax for @code{set} on the HPPA is
 @samp{@var{symbol} .set @var{expression}}.
 @end ifset
 
+@ifset Z80
+On Z80 @code{set} is a real instruction, use
+@samp{@var{symbol} defl @var{expression}} instead.
+@end ifset
+
 @node Short
 @section @code{.short @var{expressions}}
 
@@ -6196,6 +6253,9 @@ subject, see the hardware manufacturer's manual.
 @ifset XTENSA
 * Xtensa-Dependent::            Xtensa Dependent Features
 @end ifset
+@ifset Z80
+* Z80-Dependent::               Z80 Dependent Features
+@end ifset
 @ifset Z8000
 * Z8000-Dependent::             Z8000 Dependent Features
 @end ifset
@@ -6348,6 +6408,10 @@ family.
 
 @ifset TIC54X
 @include c-tic54x.texi
+@end ifset
+
+@ifset Z80
+@include c-z80.texi
 @end ifset
 
 @ifset Z8000

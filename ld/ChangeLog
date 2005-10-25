@@ -1,3 +1,13 @@
+2005-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* Makefile.am: Add support for Z80
+	* Makefile.in: Regenerated
+	* configure.tgt: Add z80-*-coff
+	* emulparams/z80.sh: New file.
+	* emultempl/z80.em: New file.
+	* scripttempl/z80.sc New file.
+	* NEWS: Mention this new support.
+
 2005-10-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/ld.pot: Regenerate.

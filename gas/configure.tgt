@@ -375,6 +375,8 @@ case ${generic_target} in
 
   xtensa-*-*)				fmt=elf ;;
 
+  z80-*-coff)				fmt=coff ;;
+
   z8k-*-coff | z8k-*-sim)		fmt=coff ;;
 
   *-*-aout | *-*-scout)			fmt=aout ;;
@@ -390,7 +392,7 @@ case ${generic_target} in
 esac
 
 case ${cpu_type} in
-  alpha | arm | i386 | ia64 | mips | ns32k | pdp11 | ppc | sparc | z8k)
+  alpha | arm | i386 | ia64 | mips | ns32k | pdp11 | ppc | sparc | z80 | z8k)
     bfd_gas=yes
     ;;
 esac

@@ -555,6 +555,8 @@ xstormy16-*-*)		targ_emul=elf32xstormy16
 			;;
 xtensa-*-*)		targ_emul=elf32xtensa
 			;;
+z80-*-coff)		targ_emul=z80
+			;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001
 			;;
 *-*-ieee*)		targ_emul=vanilla

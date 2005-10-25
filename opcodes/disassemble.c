@@ -75,6 +75,7 @@
 #define ARCH_w65
 #define ARCH_xstormy16
 #define ARCH_xtensa
+#define ARCH_z80
 #define ARCH_z8k
 #define INCLUDE_SHMEDIA
 #endif
@@ -372,6 +373,11 @@ disassembler (abfd)
 #ifdef ARCH_xtensa
     case bfd_arch_xtensa:
       disassemble = print_insn_xtensa;
+      break;
+#endif
+#ifdef ARCH_z80
+    case bfd_arch_z80:
+      disassemble = print_insn_z80;
       break;
 #endif
 #ifdef ARCH_z8k

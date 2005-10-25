@@ -1,3 +1,20 @@
+2005-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* Makefile.am: Add Z80 cpu.
+	* Makefile.in: Regenerated.
+	* app.c (do_scrub_chars)<TC_Z80>: Correctly scrub "ex af,af'" 
+	and disallow newlines in quoted strings.
+	* configure.tgt: Add z80-*-coff.
+	* config/obj-coff.h: Add format "coff-z80".
+	* doc/Makefile.am: Add c-z80.texi.
+	* doc/Makefile.in: Regenerated.
+	* doc/all.texi: Add Z80.
+	* doc/c-z80.texi: New file
+	* doc/as.texinfo: Add z80 options and some z80-related remarks.
+	* config/tc-z80.c: New file
+	* config/tc-z80.h: New file
+	* NEWS: Mention new support.
+
 2005-10-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* write.c (adjust_reloc_syms): Undo the change made on

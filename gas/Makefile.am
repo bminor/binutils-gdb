@@ -88,6 +88,7 @@ CPU_TYPES = \
 	v850 \
 	xstormy16 \
 	xtensa \
+	z80 \
 	z8k
 
 # Object format types.  This is only used for dependency information.
@@ -270,6 +271,7 @@ TARGET_CPU_CFILES = \
 	config/tc-v850.c \
 	config/tc-xstormy16.c \
 	config/tc-xtensa.c \
+	config/tc-z80.c \
 	config/tc-z8k.c
 
 TARGET_CPU_HFILES = \
@@ -319,6 +321,7 @@ TARGET_CPU_HFILES = \
 	config/tc-v850.h \
 	config/tc-xstormy16.h \
 	config/tc-xtensa.h \
+	config/tc-z80.h \
 	config/tc-z8k.h
 
 # OBJ files in config

@@ -782,6 +782,7 @@ extern const bfd_target vms_alpha_vec;
 extern const bfd_target vms_vax_vec;
 extern const bfd_target w65_vec;
 extern const bfd_target we32kcoff_vec;
+extern const bfd_target z80coff_vec;
 extern const bfd_target z8kcoff_vec;
 
 /* These are always included.  */
@@ -1134,6 +1135,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&vms_vax_vec,
 	&w65_vec,
 	&we32kcoff_vec,
+	&z80coff_vec,
 	&z8kcoff_vec,
 	&bfd_elf32_am33lin_vec,
 #endif /* not SELECT_VECS */

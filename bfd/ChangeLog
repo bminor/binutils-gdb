@@ -1,3 +1,20 @@
+2005-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* Makefile.am: Add rules for coff-z80 and cpu-z80.
+	* Makefile.in: Regenerated.
+	* archures.c: Add bfd_arch_z80 and support for it.
+	* coffcode.h(coff_set_arch_mach_hook): Add case Z80MAGIC.
+	(coff_set_flags): Add case bfd_arch_z80.
+	* config.bfd: Add z80coff_vec.
+	* configure.in: Add z80coff_vec.
+	* reloc.c: Add BFD_RELOC_Z80_DISP8
+	* targets.c: Add z80coff_vec.
+	* coff-z80.c: New file
+	* cpu-z80.c: New file
+	* configure: Regenerated.
+	* libbfd.h: Regenerated.
+	* bfd-in2.h: Regenerated.
+
 2005-10-26  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/1540

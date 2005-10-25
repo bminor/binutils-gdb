@@ -55,6 +55,7 @@ CPU_DOCS = \
 	c-vax.texi \
 	c-v850.texi \
 	c-xtensa.texi \
+	c-z80.texi \
 	c-z8k.texi
 
 gasver.texi: $(srcdir)/../../bfd/configure

@@ -376,6 +376,10 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	 15: After seeing a `(' at state 1, looking for a `)' as
 	     predicate.
 #endif
+#ifdef TC_Z80
+	 16: After seeing an 'a' or an 'A' at the start of a symbol
+	 17: After seeing an 'f' or an 'F' in state 16
+#endif
 	  */
 
   /* I added states 9 and 10 because the MIPS ECOFF assembler uses
@@ -664,6 +668,32 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  state = 1;
 	  PUT ('|');
 	  continue;
+#endif
+#ifdef TC_Z80
+	case 16:
+	  /* We have seen an 'a' at the start of a symbol, look for an 'f'.  */
+	  ch = GET ();
+	  if (ch == 'f' || ch == 'F') 
+	    {
+	      state = 17;
+	      PUT (ch);
+	    }
+	  else
+	    {
+	      state = 9;
+	      break;
+	    }
+	case 17:
+	  /* We have seen "af" at the start of a symbol,
+	     a ' here is a part of that symbol.  */
+	  ch = GET ();
+	  state = 9;
+	  if (ch == '\'')
+	    /* Change to avoid warning about unclosed string.  */
+	    PUT ('`');
+	  else
+	    UNGET (ch);
+	  break;
 #endif
 	}
 
@@ -1242,6 +1272,30 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      break;
 	    }
 
+#ifdef TC_Z80
+	  /* "af'" is a symbol containing '\''.  */
+	  if (state == 3 && (ch == 'a' || ch == 'A')) 
+	    {
+	      state = 16;
+	      PUT (ch);
+	      ch = GET ();
+	      if (ch == 'f' || ch == 'F') 
+		{
+		  state = 17;
+		  PUT (ch);
+		  break;
+		}
+	      else
+		{
+		  state = 9;
+		  if (!IS_SYMBOL_COMPONENT (ch)) 
+		    {
+		      UNGET (ch);
+		      break;
+		    }
+		}
+	    }
+#endif
 	  if (state == 3)
 	    state = 9;
 

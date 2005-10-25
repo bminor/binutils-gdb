@@ -56,6 +56,7 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
     setup_xfail "powerpc*-*-aix*" "powerpc*-*-beos*" "powerpc*-*-macos*"
     setup_xfail "powerpc*-*-pe" "powerpc*-*-*win*"
     setup_xfail "rs6000-*-*"
+    setup_xfail "z80-*-*"
 
     # FIXME: Due to difference in what "consecutive octets" means.
     setup_xfail "*c4x*-*-*" "*c54x*-*"
@@ -75,6 +76,7 @@ case $target_triplet in {
     { m68*-*-* } { }
     { m88*-*-* } { }
     { mmix-* } { }
+    { z80-* } { }
     default { run_list_test dot "-alm" }
 }
 run_list_test end ""

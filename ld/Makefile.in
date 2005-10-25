@@ -595,6 +595,7 @@ ALL_EMULATIONS = \
 	ew65.o \
 	ez8001.o \
 	eelf32frvfd.o \
+	ez80.o \
 	ez8002.o
 
 ALL_64_EMULATIONS = \
@@ -2341,6 +2342,10 @@ ev850.c: $(srcdir)/emulparams/v850.sh \
 ew65.c: $(srcdir)/emulparams/w65.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/w65.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} w65 "$(tdir_w65)"
+ez80.c: $(srcdir)/emulparams/z80.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/z80.em \
+  $(srcdir)/scripttempl/z80.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} z80 "$(tdir_z80)"
 ez8001.c: $(srcdir)/emulparams/z8001.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/z8000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} z8001 "$(tdir_z8001)"

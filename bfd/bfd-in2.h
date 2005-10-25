@@ -1953,6 +1953,11 @@ enum bfd_architecture
    bfd_arch_maxq,     /* Dallas MAXQ 10/20 */
 #define bfd_mach_maxq10    10
 #define bfd_mach_maxq20    20
+  bfd_arch_z80,
+#define bfd_mach_z80strict      1 /* No undocumented opcodes.  */
+#define bfd_mach_z80            3 /* With ixl, ixh, iyl, and iyh.  */
+#define bfd_mach_z80full        7 /* All undocumented instructions.  */
+#define bfd_mach_r800           11 /* R800: successor with multiplication.  */
   bfd_arch_last
   };
 
@@ -4057,6 +4062,9 @@ assembler-expanded instructions.  This is commonly used
 internally by the linker after analysis of a 
 BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_XTENSA_ASM_SIMPLIFY,
+
+/* 8 bit signed offset in (ix+d) or (iy+d).  */
+  BFD_RELOC_Z80_DISP8,
 
 /* DJNZ offset.  */
   BFD_RELOC_Z8K_DISP7,
