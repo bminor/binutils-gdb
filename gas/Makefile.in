@@ -2740,9 +2740,6 @@ distclean-compile:
 .y.c:
 	$(SHELL) $(YLWRAP) $< y.tab.c $@ y.tab.h $*.h y.output $*.output -- $(YACCCOMPILE)
 
-bfin-parse.c: config/bfin-parse.y
-	$(SHELL) $(YLWRAP) `test -f 'config/bfin-parse.y' || echo '$(srcdir)/'`config/bfin-parse.y y.tab.c bfin-parse.c y.tab.h bfin-parse.h y.output bfin-parse.output -- $(YACC) $(YFLAGS) $(AM_YFLAGS)
-
 mostlyclean-libtool:
 	-rm -f *.lo
 
@@ -3134,8 +3131,9 @@ m68k-parse.o: m68k-parse.c $(srcdir)/config/m68k-parse.h
 m68k-parse.h: ; @true
 $(srcdir)/config/m68k-parse.h: ; @true
 
-bfin-parse.c bfin-parse.tab.h: $(srcdir)/config/bfin-parse.y
+bfin-parse.c: $(srcdir)/config/bfin-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-parse.y y.tab.c bfin-parse.c y.tab.h bfin-parse.h -- $(YACCCOMPILE) -d ;
+bfin-parse.h: bfin-parse.c
 bfin-parse.o: bfin-parse.c bfin-parse.h $(srcdir)/config/bfin-defs.h
 
 bfin-defs.h: ; @true
