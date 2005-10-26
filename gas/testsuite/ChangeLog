@@ -1,3 +1,7 @@
+2005-10-26  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/archv6.d: Adjust expected output.
+
 2005-10-26  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/intel.s: Replace register used in offset expression.

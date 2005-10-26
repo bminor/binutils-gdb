@@ -557,7 +557,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6, 0x06e00470, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ROR #8"},
   {ARM_EXT_V6, 0x06e00870, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ROR #16"},
   {ARM_EXT_V6, 0x06e00c70, 0x0ff00ff0, "uxtab%c\t%12-15r, %16-19r, %0-3r, ROR #24"},
-  {ARM_EXT_V6, 0x068000b0, 0x0ff00ff0, "sel%c\t%12-15r, %16-19r, %0-3r"},
+  {ARM_EXT_V6, 0x06800fb0, 0x0ff00ff0, "sel%c\t%12-15r, %16-19r, %0-3r"},
   {ARM_EXT_V6, 0xf1010000, 0xfffffc00, "setend\t%9?ble"},
   {ARM_EXT_V6, 0x0700f010, 0x0ff0f0d0, "smuad%5'x%c\t%16-19r, %0-3r, %8-11r"},
   {ARM_EXT_V6, 0x0700f050, 0x0ff0f0d0, "smusd%5'x%c\t%16-19r, %0-3r, %8-11r"},
