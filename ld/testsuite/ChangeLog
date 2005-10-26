@@ -1,3 +1,8 @@
+2005-10-26  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/bpo-6.d, ld-mmix/bpo-19.d: Adjust for symbols between
+	section symbols and the _start symbol.
+
 2005-10-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/orphan.d: Adjust for mips.
