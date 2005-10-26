@@ -1,3 +1,11 @@
+2005-10-26  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/intel.s: Replace register used in offset expression.
+	* gas/i386/intel.e: Adjust.
+	* gas/i386/intelbad.l: Adjust.
+	* gas/i386/equ.[sed]: New.
+	* gas/i386/i386.exp: Run new test.
+
 2005-10-26  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/z80/z80.exp: Fix misplaced-open-brace typo.

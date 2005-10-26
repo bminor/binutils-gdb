@@ -434,7 +434,8 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
    || (FIX)->fx_r_type == BFD_RELOC_386_GOTPC		\
    || TC_FORCE_RELOCATION (FIX))
 
-#define md_operand(x)
+extern int i386_parse_name (char *, expressionS *, char *);
+#define md_parse_name(s, e, m, c) i386_parse_name (s, e, c)
 
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table

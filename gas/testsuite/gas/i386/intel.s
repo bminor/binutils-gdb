@@ -577,7 +577,7 @@ bar:
  call	gs_foo
  call	short_foo
  fstp   QWORD PTR [eax+edx*8]
- mov	ecx, OFFSET FLAT:ss
+ mov	ecx, OFFSET FLAT:xyz
  mov	BYTE PTR [esi+edx], al
  mov	BYTE PTR [edx+esi], al
  mov	BYTE PTR [edx*2+esi], al

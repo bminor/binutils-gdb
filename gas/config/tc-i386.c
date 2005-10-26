@@ -4419,8 +4419,7 @@ i386_operand (operand_string)
     }
 
   /* Check if operand is a register.  */
-  if ((*op_string == REGISTER_PREFIX || allow_naked_reg)
-      && (r = parse_register (op_string, &end_op)) != NULL)
+  if ((r = parse_register (op_string, &end_op)) != NULL)
     {
       /* Check for a segment override by searching for ':' after a
 	 segment register.  */
@@ -4558,8 +4557,7 @@ i386_operand (operand_string)
 	    ++base_string;
 
 	  if (*base_string == ','
-	      || ((*base_string == REGISTER_PREFIX || allow_naked_reg)
-		  && (i.base_reg = parse_register (base_string, &end_op)) != NULL))
+	      || ((i.base_reg = parse_register (base_string, &end_op)) != NULL))
 	    {
 	      displacement_string_end = temp_string;
 
@@ -4579,8 +4577,7 @@ i386_operand (operand_string)
 		  if (is_space_char (*base_string))
 		    ++base_string;
 
-		  if ((*base_string == REGISTER_PREFIX || allow_naked_reg)
-		      && (i.index_reg = parse_register (base_string, &end_op)) != NULL)
+		  if ((i.index_reg = parse_register (base_string, &end_op)) != NULL)
 		    {
 		      base_string = end_op;
 		      if (is_space_char (*base_string))
@@ -5157,9 +5154,7 @@ output_invalid (c)
 /* REG_STRING starts *before* REGISTER_PREFIX.  */
 
 static const reg_entry *
-parse_register (reg_string, end_op)
-     char *reg_string;
-     char **end_op;
+parse_real_register (char *reg_string, char **end_op)
 {
   char *s = reg_string;
   char *p;
@@ -5226,6 +5221,80 @@ parse_register (reg_string, end_op)
 
   return r;
 }
+
+/* REG_STRING starts *before* REGISTER_PREFIX.  */
+
+static const reg_entry *
+parse_register (char *reg_string, char **end_op)
+{
+  const reg_entry *r;
+
+  if (*reg_string == REGISTER_PREFIX || allow_naked_reg)
+    r = parse_real_register (reg_string, end_op);
+  else
+    r = NULL;
+  if (!r)
+    {
+      char *save = input_line_pointer;
+      char c;
+      symbolS *symbolP;
+
+      input_line_pointer = reg_string;
+      c = get_symbol_end ();
+      symbolP = symbol_find (reg_string);
+      if (symbolP && S_GET_SEGMENT (symbolP) == reg_section)
+	{
+	  const expressionS *e = symbol_get_value_expression (symbolP);
+
+	  know (e->X_op == O_register);
+	  know (e->X_add_number >= 0 && (valueT) e->X_add_number < ARRAY_SIZE (i386_regtab));
+	  r = i386_regtab + e->X_add_number;
+	  *end_op = input_line_pointer;
+	}
+      *input_line_pointer = c;
+      input_line_pointer = save;
+    }
+  return r;
+}
+
+int
+i386_parse_name (char *name, expressionS *e, char *nextcharP)
+{
+  const reg_entry *r;
+  char *end = input_line_pointer;
+
+  *end = *nextcharP;
+  r = parse_register (name, &input_line_pointer);
+  if (r && end <= input_line_pointer)
+    {
+      *nextcharP = *input_line_pointer;
+      *input_line_pointer = 0;
+      e->X_op = O_register;
+      e->X_add_number = r - i386_regtab;
+      return 1;
+    }
+  input_line_pointer = end;
+  *end = 0;
+  return 0;
+}
+
+void
+md_operand (expressionS *e)
+{
+  if (*input_line_pointer == REGISTER_PREFIX)
+    {
+      char *end;
+      const reg_entry *r = parse_real_register (input_line_pointer, &end);
+
+      if (r)
+	{
+	  e->X_op = O_register;
+	  e->X_add_number = r - i386_regtab;
+	  input_line_pointer = end;
+	}
+    }
+}
+
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 const char *md_shortopts = "kVQ:sqn";
@@ -6566,16 +6635,8 @@ intel_e11 ()
 	    i.types[this_operand] |= BaseIndex;
 	  }
 
-	/* Offset modifier. Add the register to the displacement string to be
-	   parsed as an immediate expression after we're done.  */
-	else if (intel_parser.in_offset)
-	  {
-	    as_warn (_("Using register names in OFFSET expressions is deprecated"));
-	    strcat (intel_parser.disp, reg->reg_name);
-	  }
-
-	/* It's neither base nor index nor offset.  */
-	else if (!intel_parser.is_mem)
+	/* It's neither base nor index.  */
+	else if (!intel_parser.in_offset && !intel_parser.is_mem)
 	  {
 	    i.types[this_operand] |= reg->reg_type & ~BaseIndex;
 	    i.op[this_operand].regs = reg;
@@ -6804,19 +6865,15 @@ intel_get_token ()
 	new_token.code = T_ID;
     }
 
-  else if ((*intel_parser.op_string == REGISTER_PREFIX || allow_naked_reg)
-	   && ((reg = parse_register (intel_parser.op_string, &end_op)) != NULL))
+  else if ((reg = parse_register (intel_parser.op_string, &end_op)) != NULL)
     {
+      size_t len = end_op - intel_parser.op_string;
+
       new_token.code = T_REG;
       new_token.reg = reg;
 
-      if (*intel_parser.op_string == REGISTER_PREFIX)
-	{
-	  new_token.str[0] = REGISTER_PREFIX;
-	  new_token.str[1] = '\0';
-	}
-
-      strcat (new_token.str, reg->reg_name);
+      memcpy (new_token.str, intel_parser.op_string, len);
+      new_token.str[len] = '\0';
     }
 
   else if (is_identifier_char (*intel_parser.op_string))

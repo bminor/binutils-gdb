@@ -101,9 +101,9 @@
 .*:131: Error: .*
 .*:132: Error: .*
 .*:133: Error: .*
-.*:135: Warning: .*
-.*:136: Warning: .*
-.*:137: Warning: .*
+.*:135: Error: .*
+.*:136: Error: .*
+.*:137: Error: .*
 .*:138: Warning: .*
 .*:139: Warning: .*
 .*:141: Error: .*

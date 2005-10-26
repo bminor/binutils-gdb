@@ -1,3 +1,17 @@
+2005-10-26  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (i386_operand): Don't check register prefix here.
+	(parse_real_register): Rename from parse_register.
+	(parse_register): New.
+	(i386_parse_name): New.
+	(md_operand): New.
+	(intel_e11): Don't tolerate registers in offset expressions anymore.
+	(intel_get_token): Don't check register prefix here. Copy the actual
+	register token, not the canonical register name.
+	* config/tc-i386.h (md_operand): Delete.
+	(i386_parse_name): Declare.
+	(md_parse_name): Define.
+
 2005-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* Makefile.am: Add Z80 cpu.
