@@ -433,6 +433,26 @@ parse_unsigned24 (CGEN_CPU_DESC cd, const char **strp,
   return 0;
 }
 
+/* This should only be used for #imm->reg.  */
+static const char *
+parse_signed24 (CGEN_CPU_DESC cd, const char **strp,
+		 int opindex, signed long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+
+  PARSE_SIGNED;
+
+  if (value <= 0xffffff && value > 0x7fffff)
+    value -= 0x1000000;
+
+  if (value > 0xffffff)
+    return _("dsp:24 immediate is out of range");
+
+  *valuep = value;
+  return 0;
+}
+
 static const char *
 parse_signed32 (CGEN_CPU_DESC cd, const char **strp,
 		int opindex, signed long *valuep)

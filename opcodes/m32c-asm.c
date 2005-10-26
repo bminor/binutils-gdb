@@ -407,6 +407,26 @@ parse_unsigned24 (CGEN_CPU_DESC cd, const char **strp,
   return 0;
 }
 
+/* This should only be used for #imm->reg.  */
+static const char *
+parse_signed24 (CGEN_CPU_DESC cd, const char **strp,
+		 int opindex, signed long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+
+  PARSE_SIGNED;
+
+  if (value <= 0xffffff && value > 0x7fffff)
+    value -= 0x1000000;
+
+  if (value > 0xffffff)
+    return _("dsp:24 immediate is out of range");
+
+  *valuep = value;
+  return 0;
+}
+
 static const char *
 parse_signed32 (CGEN_CPU_DESC cd, const char **strp,
 		int opindex, signed long *valuep)
@@ -1037,6 +1057,9 @@ m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case M32C_OPERAND_DSP_48_U8 :
       errmsg = parse_unsigned8 (cd, strp, M32C_OPERAND_DSP_48_U8, (unsigned long *) (& fields->f_dsp_48_u8));
+      break;
+    case M32C_OPERAND_DSP_8_S24 :
+      errmsg = parse_signed24 (cd, strp, M32C_OPERAND_DSP_8_S24, (long *) (& fields->f_dsp_8_s24));
       break;
     case M32C_OPERAND_DSP_8_S8 :
       errmsg = parse_signed8 (cd, strp, M32C_OPERAND_DSP_8_S8, (long *) (& fields->f_dsp_8_s8));

@@ -557,6 +557,15 @@
 		     (and UHI (srl UHI value 8) #x00ff)
 		     (and UHI (sll UHI value 8) #xff00))) ; extract
 )
+(df  f-dsp-8-s24 "24 bit signed" (all-isas) 8 24 INT
+     ((value pc) (or SI
+		     (or (srl value 16) (and value #xff00))
+		     (sll (ext INT (trunc QI (and value #xff))) 16)))
+     ((value pc) (or SI
+		     (or (srl value 16) (and value #xff00))
+		     (sll (ext INT (trunc QI (and value #xff))) 16)))
+ )
+
 (df  f-dsp-8-u24 "24 bit unsigned" (all-isas) 8 24 UINT
      ((value pc) (or SI
 		     (or (srl value 16) (and value #xff00))
@@ -1755,6 +1764,10 @@
 (define-full-operand Dsp-8-s8 "signed 8 bit displacement at offset 8 bits" (all-isas)
   h-sint DFLT f-dsp-8-s8
   ((parse "signed8")) () ()
+)
+(define-full-operand Dsp-8-s24 "signed 24 bit displacement at offset 8 bits" (all-isas)
+  h-sint DFLT f-dsp-8-s24
+  ((parse "signed24")) () ()
 )
 (define-full-operand Dsp-8-u24 "unsigned 24 bit displacement at offset 8 bits" (all-isas)
   h-uint DFLT f-dsp-8-u24
@@ -6595,7 +6608,7 @@
   (dni (.sym op mach wstr -dspsp-dst- dstgroup)
        (.str op wstr " " mach "-dsp[sp]-" dstgroup "-" dsp "-" mode)
        ((machine mach))
-       (.str op wstr " ${" dsp "}[sp],${dst" mach "-" dstgroup "-" mode "}")
+       (.str op wstr "$G ${" dsp "}[sp],${dst" mach "-" dstgroup "-" mode "}")
        encoding
        (sem mach mode dsp (.sym dst mach - dstgroup - mode))
        ())
@@ -6604,7 +6617,7 @@
   (dni (.sym op mach wstr -dst-dspsp- dstgroup)
        (.str op wstr " " mach "-dsp[sp]-" dstgroup "-" dsp "-" mode)
        ((machine mach))
-       (.str op wstr " ${dst" mach "-" dstgroup "-" mode "},${" dsp "}[sp]")
+       (.str op wstr "$G ${dst" mach "-" dstgroup "-" mode "},${" dsp "}[sp]")
        encoding
        (sem mach mode (.sym dst mach - dstgroup - mode) dsp)
        ())
@@ -6613,28 +6626,28 @@
 ; m16c variants
 (define-pmacro (mov16-dspsp-dst-defn mode wstr wbit op opc1 opc2 opc3 sem)
   (begin
-    (mov-dspsp-dst-defn 16 basic Dsp-16-u8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-basic- mode) Dsp-16-u8)
+    (mov-dspsp-dst-defn 16 basic Dsp-16-s8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-basic- mode) Dsp-16-s8)
 			     sem)
-    (mov-dspsp-dst-defn 16 16-16 Dsp-32-u8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-16- mode) Dsp-32-u8)
+    (mov-dspsp-dst-defn 16 16-16 Dsp-32-s8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-16- mode) Dsp-32-s8)
 			     sem)
-    (mov-dspsp-dst-defn 16 16-8 Dsp-24-u8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-8- mode) Dsp-24-u8)
+    (mov-dspsp-dst-defn 16 16-8 Dsp-24-s8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-8- mode) Dsp-24-s8)
 			     sem)
   )
 )
 
 (define-pmacro (mov16-src-dspsp-defn mode wstr wbit op opc1 opc2 opc3 sem)
   (begin
-    (mov-src-dspsp-defn 16 basic Dsp-16-u8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-basic- mode) Dsp-16-u8)
+    (mov-src-dspsp-defn 16 basic Dsp-16-s8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-basic- mode) Dsp-16-s8)
 			     sem)
-    (mov-src-dspsp-defn 16 16-16 Dsp-32-u8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-16- mode) Dsp-32-u8)
+    (mov-src-dspsp-defn 16 16-16 Dsp-32-s8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-16- mode) Dsp-32-s8)
 			     sem)
-    (mov-src-dspsp-defn 16 16-8 Dsp-24-u8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-8- mode) Dsp-24-u8)
+    (mov-src-dspsp-defn 16 16-8 Dsp-24-s8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16-8- mode) Dsp-24-s8)
 			     sem)
   )
 )
@@ -6642,33 +6655,33 @@
 ; m32c variants
 (define-pmacro (mov32-dspsp-dst-defn mode wstr wbit op opc1 opc2 opc3 sem)
   (begin
-    (mov-dspsp-dst-defn 32 basic-Unprefixed Dsp-16-u8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-basic-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-16-u8)
+    (mov-dspsp-dst-defn 32 basic-Unprefixed Dsp-16-s8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-basic-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-16-s8)
 		     sem)
-    (mov-dspsp-dst-defn 32 16-24-Unprefixed Dsp-40-u8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-24-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-40-u8)
+    (mov-dspsp-dst-defn 32 16-24-Unprefixed Dsp-40-s8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-24-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-40-s8)
 		     sem)
-    (mov-dspsp-dst-defn 32 16-16-Unprefixed Dsp-32-u8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-16-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-32-u8)
+    (mov-dspsp-dst-defn 32 16-16-Unprefixed Dsp-32-s8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-16-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-32-s8)
 		     sem)
-    (mov-dspsp-dst-defn 32 16-8-Unprefixed Dsp-24-u8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-8-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-24-u8)
+    (mov-dspsp-dst-defn 32 16-8-Unprefixed Dsp-24-s8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-8-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-24-s8)
 		     sem)
   )
 )
 (define-pmacro (mov32-src-dspsp-defn mode wstr wbit op opc1 opc2 opc3 sem)
   (begin
-    (mov-src-dspsp-defn 32 basic-Unprefixed Dsp-16-u8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-basic-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-16-u8)
+    (mov-src-dspsp-defn 32 basic-Unprefixed Dsp-16-s8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-basic-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-16-s8)
 		     sem)
-    (mov-src-dspsp-defn 32 16-24-Unprefixed Dsp-40-u8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-24-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-40-u8)
+    (mov-src-dspsp-defn 32 16-24-Unprefixed Dsp-40-s8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-24-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-40-s8)
 		     sem)
-    (mov-src-dspsp-defn 32 16-16-Unprefixed Dsp-32-u8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-16-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-32-u8)
+    (mov-src-dspsp-defn 32 16-16-Unprefixed Dsp-32-s8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-16-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-32-s8)
 		     sem)
-    (mov-src-dspsp-defn 32 16-8-Unprefixed Dsp-24-u8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-8-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-24-u8)
+    (mov-src-dspsp-defn 32 16-8-Unprefixed Dsp-24-s8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-8-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3) Dsp-24-s8)
 		     sem)
   )
 )
@@ -8600,8 +8613,8 @@
 )
 (mov32-wl-s-defn HI w #x9 Imm-8-HI a0 #xC)
 (mov32-wl-s-defn HI w #x9 Imm-8-HI a1 #xD)
-(mov32-wl-s-defn SI l #xB Dsp-8-u24 a0 #xC)
-(mov32-wl-s-defn SI l #xB Dsp-8-u24 a1 #xD)
+(mov32-wl-s-defn SI l #xB Dsp-8-s24 a0 #xC)
+(mov32-wl-s-defn SI l #xB Dsp-8-s24 a1 #xD)
 
 ; mov.size:Q #imm4,dst (m16 #2 m32 #3)
 (binary-arith16-imm4-dst-defn QI .b 0 0 mov (f-0-4 #xD) (f-4-3 4) mov-sem)
@@ -8674,7 +8687,7 @@
 (mov32-src-r b 0 QI dst32-2-S-8 r0l 0 4)
 (mov32-src-r w 1 HI dst32-2-S-8 r0 0 4)
 (mov32-src-r b 0 QI dst32-2-S-basic r1l 1 7)
-(mov32-src-r w 1 HI dst32-2-S-basic r1l 1 7)
+(mov32-src-r w 1 HI dst32-2-S-basic r1 1 7)
 (mov32-src-r b 0 QI dst32-2-S-16 r1l 1 7)
 (mov32-src-r w 1 HI dst32-2-S-16 r1 1 7)
 (mov32-src-r b 0 QI dst32-2-S-8 r1l 1 7)
@@ -10174,12 +10187,12 @@
 )
 
 ; tst.BW #imm,dst (m16 #1 m32 #1)
-(binary-arith-imm-dst tst X (f-0-4 7) (f-4-3 3) (f-8-4 0) #x9 #x3 #xE tst-sem)
+(binary-arith-imm-dst tst G (f-0-4 7) (f-4-3 3) (f-8-4 0) #x9 #x3 #xE tst-sem)
 ; tst.BW src,dst (m16 #2 m32 #3)
 (binary-arith16-src-dst-defn QI QI .b 0 tst X (f-0-4 #x8) (f-4-3 0) tst-sem)
 (binary-arith16-src-dst-defn HI HI .w 1 tst X (f-0-4 #x8) (f-4-3 0) tst-sem)
-(binary-arith32-src-dst-Prefixed QI QI .b 0 tst X #x1 #x9 tst-sem)
-(binary-arith32-src-dst-Prefixed HI HI .w 1 tst X #x1 #x9 tst-sem)
+(binary-arith32-src-dst-Prefixed QI QI .b 0 tst G #x1 #x9 tst-sem)
+(binary-arith32-src-dst-Prefixed HI HI .w 1 tst G #x1 #x9 tst-sem)
 ; tst.BW:S #imm,dst2 (m32 #2)
 (binary-arith32-s-imm-dst QI .b 0 tst #x0 #x6 tst-sem)
 (binary-arith32-s-imm-dst HI .w 1 tst #x0 #x6 tst-sem)

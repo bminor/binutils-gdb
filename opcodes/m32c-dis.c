@@ -458,6 +458,9 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_DSP_48_U8 :
       print_normal (cd, info, fields->f_dsp_48_u8, 0, pc, length);
       break;
+    case M32C_OPERAND_DSP_8_S24 :
+      print_normal (cd, info, fields->f_dsp_8_s24, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
     case M32C_OPERAND_DSP_8_S8 :
       print_normal (cd, info, fields->f_dsp_8_s8, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
