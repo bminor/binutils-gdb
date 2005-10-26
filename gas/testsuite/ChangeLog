@@ -1,3 +1,7 @@
+2005-10-26  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/z80/z80.exp: Fix misplaced-open-brace typo.
+
 2005-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* gas/all/gas.exp: Exclude Z80-*-* from floating point, string,
