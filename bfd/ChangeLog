@@ -1,3 +1,10 @@
+2005-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* cache.c (bfd_open_file): Set bfd_error_system_call on failure
+	to open file.
+	(bfd_cache_lookup_worker): Remove check that file pos is in
+	unsigned long range.  Print system error before aborting.
+
 2005-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* Makefile.am: Add rules for coff-z80 and cpu-z80.

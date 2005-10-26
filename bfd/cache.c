@@ -447,7 +447,9 @@ bfd_open_file (bfd *abfd)
       break;
     }
 
-  if (abfd->iostream != NULL)
+  if (abfd->iostream == NULL)
+    bfd_set_error (bfd_error_system_call);
+  else
     {
       if (! bfd_cache_init (abfd))
 	return NULL;
@@ -489,14 +491,17 @@ bfd_cache_lookup_worker (bfd *abfd)
 	  snip (abfd);
 	  insert (abfd);
 	}
-    }
-  else
-    {
-      if (bfd_open_file (abfd) == NULL
-	  || abfd->where != (unsigned long) abfd->where
-	  || real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0)
-	abort ();
+      return (FILE *) abfd->iostream;
     }
 
-  return (FILE *) abfd->iostream;
+  if (bfd_open_file (abfd) == NULL)
+    ;
+  else if (real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0)
+    bfd_set_error (bfd_error_system_call);
+  else
+    return (FILE *) abfd->iostream;
+
+  bfd_perror ("Cannot continue");
+  abort ();
+  return NULL;
 }
