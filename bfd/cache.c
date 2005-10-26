@@ -477,6 +477,7 @@ DESCRIPTION
 FILE *
 bfd_cache_lookup_worker (bfd *abfd)
 {
+  bfd *orig_bfd = abfd;
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     abort ();
 
@@ -501,7 +502,8 @@ bfd_cache_lookup_worker (bfd *abfd)
   else
     return (FILE *) abfd->iostream;
 
-  bfd_perror ("Cannot continue");
+  (*_bfd_error_handler) (_("reopening %B: %s\n"),
+			 orig_bfd, bfd_errmsg (bfd_get_error ()));
   abort ();
   return NULL;
 }

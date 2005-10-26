@@ -1,5 +1,10 @@
 2005-10-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* cache.c (bfd_cache_lookup_worker): Use bfd_error_handler
+	rather than bfd_perror.  Print file name.  Internationalise.
+
+2005-10-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* cache.c (bfd_open_file): Set bfd_error_system_call on failure
 	to open file.
 	(bfd_cache_lookup_worker): Remove check that file pos is in
