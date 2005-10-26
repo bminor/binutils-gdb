@@ -89,7 +89,10 @@ parse_hi16 (CGEN_CPU_DESC cd,
       ++*strp;
       if (errmsg == NULL
   	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	value >>= 16;
+	{
+	  value >>= 16;
+	  value &= 0xffff;
+	}
       *valuep = value;
       return errmsg;
     }
@@ -104,8 +107,9 @@ parse_hi16 (CGEN_CPU_DESC cd,
       if (errmsg == NULL
 	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
         {
-          value = value + (value & 0x8000 ? 0x10000 : 0);
+          value += 0x8000;
           value >>= 16;
+	  value &= 0xffff;
         }
       *valuep = value;
       return errmsg;

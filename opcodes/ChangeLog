@@ -1,3 +1,7 @@
+2005-10-26  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* m32r-asm.c: Regenerate.
+
 2005-10-25  DJ Delorie  <dj@redhat.com>
 
 	* m32c-asm.c: Regenerate.

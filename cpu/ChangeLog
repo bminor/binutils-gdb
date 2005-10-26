@@ -1,3 +1,7 @@
+2005-10-26  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* m32r.opc (parse_hi16): Do not assume a 32-bit host word size.
+
 2005-10-25  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (add16-bQ-sp,add16-wQ-sp): Fix to allow either width by
