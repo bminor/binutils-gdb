@@ -153,6 +153,8 @@ bfd_get_file_window (bfd *abfd,
 	  abfd = abfd->my_archive;
 	}
       f = bfd_cache_lookup (abfd);
+      if (f == NULL)
+	return FALSE;
       fd = fileno (f);
 
       /* Compute offsets and size for mmap and for the user's data.  */

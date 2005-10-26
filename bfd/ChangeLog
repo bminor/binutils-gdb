@@ -1,5 +1,17 @@
 2005-10-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* cache.c (bfd_cache_lookup_worker): Don't abort on failing to
+	reopen file.
+	(cache_btell, cache_bseek, cache_bflush, cache_bstat): Return -1 on
+	bfd_cache_lookup failure.
+	(cache_bread, cache_bwrite): Return 0 on the same.
+	* bfdwin.c (bfd_get_file_window): Likewise.
+	* hppabsd-core.c (hppabsd_core_core_file_p): Likewise.
+	* sco5-core.c (sco5_core_file_p): Likewise.
+	* trad-core.c (trad_unix_core_file_p): Likewise.
+
+2005-10-26  Alan Modra  <amodra@bigpond.net.au>
+
 	* cache.c (bfd_cache_lookup_worker): Use bfd_error_handler
 	rather than bfd_perror.  Print file name.  Internationalise.
 

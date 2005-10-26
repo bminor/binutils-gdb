@@ -51,13 +51,19 @@ static bfd_boolean bfd_cache_delete (bfd *);
 static file_ptr
 cache_btell (struct bfd *abfd)
 {
-  return real_ftell (bfd_cache_lookup (abfd));
+  FILE *f = bfd_cache_lookup (abfd);
+  if (f == NULL)
+    return -1;
+  return real_ftell (f);
 }
 
 static int
 cache_bseek (struct bfd *abfd, file_ptr offset, int whence)
 {
-  return real_fseek (bfd_cache_lookup (abfd), offset, whence);
+  FILE *f = bfd_cache_lookup (abfd);
+  if (f == NULL)
+    return -1;
+  return real_fseek (f, offset, whence);
 }
 
 /* Note that archive entries don't have streams; they share their parent's.
@@ -70,6 +76,7 @@ cache_bseek (struct bfd *abfd, file_ptr offset, int whence)
 static file_ptr
 cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
 {
+  FILE *f;
   file_ptr nread;
   /* FIXME - this looks like an optimization, but it's really to cover
      up for a feature of some OSs (not solaris - sigh) that
@@ -83,10 +90,14 @@ cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
   if (nbytes == 0)
     return 0;
 
+  f = bfd_cache_lookup (abfd);
+  if (f == NULL)
+    return 0;
+
 #if defined (__VAX) && defined (VMS)
   /* Apparently fread on Vax VMS does not keep the record length
      information.  */
-  nread = read (fileno (bfd_cache_lookup (abfd)), buf, nbytes);
+  nread = read (fileno (f), buf, nbytes);
   /* Set bfd_error if we did not read as much data as we expected.  If
      the read failed due to an error set the bfd_error_system_call,
      else set bfd_error_file_truncated.  */
@@ -96,11 +107,11 @@ cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
       return -1;
     }
 #else
-  nread = fread (buf, 1, nbytes, bfd_cache_lookup (abfd));
+  nread = fread (buf, 1, nbytes, f);
   /* Set bfd_error if we did not read as much data as we expected.  If
      the read failed due to an error set the bfd_error_system_call,
      else set bfd_error_file_truncated.  */
-  if (nread < nbytes && ferror (bfd_cache_lookup (abfd)))
+  if (nread < nbytes && ferror (f))
     {
       bfd_set_error (bfd_error_system_call);
       return -1;
@@ -112,8 +123,12 @@ cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
 static file_ptr
 cache_bwrite (struct bfd *abfd, const void *where, file_ptr nbytes)
 {
-  file_ptr nwrite = fwrite (where, 1, nbytes, bfd_cache_lookup (abfd));
-  if (nwrite < nbytes && ferror (bfd_cache_lookup (abfd)))
+  file_ptr nwrite;
+  FILE *f = bfd_cache_lookup (abfd);
+  if (f == NULL)
+    return 0;
+  nwrite = fwrite (where, 1, nbytes, f);
+  if (nwrite < nbytes && ferror (f))
     {
       bfd_set_error (bfd_error_system_call);
       return -1;
@@ -130,7 +145,11 @@ cache_bclose (struct bfd *abfd)
 static int
 cache_bflush (struct bfd *abfd)
 {
-  int sts = fflush (bfd_cache_lookup (abfd));
+  int sts;
+  FILE *f = bfd_cache_lookup (abfd);
+  if (f == NULL)
+    return -1;
+  sts = fflush (f);
   if (sts < 0)
     bfd_set_error (bfd_error_system_call);
   return sts;
@@ -139,7 +158,11 @@ cache_bflush (struct bfd *abfd)
 static int
 cache_bstat (struct bfd *abfd, struct stat *sb)
 {
-  int sts = fstat (fileno (bfd_cache_lookup (abfd)), sb);
+  int sts;
+  FILE *f = bfd_cache_lookup (abfd);
+  if (f == NULL)
+    return -1;
+  sts = fstat (fileno (f), sb);
   if (sts < 0)
     bfd_set_error (bfd_error_system_call);
   return sts;
@@ -470,8 +493,8 @@ DESCRIPTION
 	quick answer.  Find a file descriptor for @var{abfd}.  If
 	necessary, it open it.  If there are already more than
 	<<BFD_CACHE_MAX_OPEN>> files open, it tries to close one first, to
-	avoid running out of file descriptors.  It will abort rather than
-	returning NULL if it is unable to (re)open the @var{abfd}.
+	avoid running out of file descriptors.  It will return NULL
+	if it is unable to (re)open the @var{abfd}.
 */
 
 FILE *
@@ -504,6 +527,5 @@ bfd_cache_lookup_worker (bfd *abfd)
 
   (*_bfd_error_handler) (_("reopening %B: %s\n"),
 			 orig_bfd, bfd_errmsg (bfd_get_error ()));
-  abort ();
   return NULL;
 }

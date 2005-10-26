@@ -129,6 +129,8 @@ sco5_core_file_p (abfd)
     FILE *stream = bfd_cache_lookup (abfd);
     struct stat statbuf;
 
+    if (stream == NULL)
+      return NULL;
     if (fstat (fileno (stream), &statbuf) < 0)
       {
 	bfd_set_error (bfd_error_system_call);
