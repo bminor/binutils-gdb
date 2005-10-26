@@ -1,3 +1,10 @@
+2005-10-26  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-m32c.c (md_assemble): Don't use errmsg as the format
+	itself.
+	(md_cgen_lookup_reloc): Add m32c bitbase operands.  Add 8-s24
+	and imm-8-HI operands.
+
 2005-10-26  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (insns): Correct "sel" entry.
