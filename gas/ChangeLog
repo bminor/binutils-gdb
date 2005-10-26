@@ -1,5 +1,8 @@
 2005-10-26  DJ Delorie  <dj@redhat.com>
 
+	* config/tc-m32c.c (md_relax_table, subtype_mappings,
+	md_convert_frag): Add jsr.w support.
+	
 	* config/tc-m32c.c (md_assemble): Don't use errmsg as the format
 	itself.
 	(md_cgen_lookup_reloc): Add m32c bitbase operands.  Add 8-s24

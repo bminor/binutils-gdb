@@ -395,7 +395,12 @@ const relax_typeS md_relax_table[] =
  /* 15 */ {     8,      1, 1, 16 }, /* jmp32.s */
  /* 16 */ {   127,   -128, 2, 17 }, /* jmp32.b */
  /* 17 */ { 32767, -32768, 3, 18 }, /* jmp32.w */
- /* 18 */ {     0,      0, 4,  0 }  /* jmp32.a */
+ /* 18 */ {     0,      0, 4,  0 }, /* jmp32.a */
+
+ /* 19 */ { 32767, -32768, 3, 20 }, /* jsr16.w */
+ /* 20 */ {     0,      0, 4,  0 }, /* jsr16.a */
+ /* 21 */ { 32767, -32768, 3, 11 }, /* jsr32.w */
+ /* 22 */ {     0,      0, 4,  0 }  /* jsr32.a */
 };
 
 enum {
@@ -436,7 +441,12 @@ static struct {
  /* 15 */ {  M32C_INSN_JMP32_S,     1, M32C_INSN_JMP32_A,     0 },
  /* 16 */ {  M32C_INSN_JMP32_B,     2, M32C_INSN_JMP32_A,     1 },
  /* 17 */ {  M32C_INSN_JMP32_W,     3, M32C_INSN_JMP32_A,     2 },
- /* 18 */ {  M32C_INSN_JMP32_A,     4, M32C_INSN_JMP32_A,     0 }
+ /* 18 */ {  M32C_INSN_JMP32_A,     4, M32C_INSN_JMP32_A,     0 },
+
+ /* 19 */ {  M32C_INSN_JSR16_W,     3, M32C_INSN_JSR16_A,     2 },
+ /* 20 */ {  M32C_INSN_JSR16_A,     4, M32C_INSN_JSR16_A,     0 },
+ /* 21 */ {  M32C_INSN_JSR32_W,     3, M32C_INSN_JSR32_A,     2 },
+ /* 22 */ {  M32C_INSN_JSR32_A,     4, M32C_INSN_JSR32_A,     0 }
 };
 #define NUM_MAPPINGS (sizeof (subtype_mappings) / sizeof (subtype_mappings[0]))
 
@@ -675,6 +685,38 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[3] = 0;
       operand = M32C_OPERAND_LAB_8_24;
       break;
+
+
+    case M32C_INSN_JSR16_W:
+      op[0] = 0xf5;
+      op[1] = addend - 1;
+      op[2] = (addend - 1) >> 8;
+      operand = M32C_OPERAND_LAB_8_16;
+      break;
+
+    case M32C_INSN_JSR16_A:
+      op[0] = 0xfd;
+      op[1] = 0;
+      op[2] = 0;
+      op[3] = 0;
+      operand = M32C_OPERAND_LAB_8_24;
+      break;
+
+    case M32C_INSN_JSR32_W:
+      op[0] = 0xcf;
+      op[1] = addend - 1;
+      op[2] = (addend - 1) >> 8;
+      operand = M32C_OPERAND_LAB_8_16;
+      break;
+
+    case M32C_INSN_JSR32_A:
+      op[0] = 0xcd;
+      op[1] = 0;
+      op[2] = 0;
+      op[3] = 0;
+      operand = M32C_OPERAND_LAB_8_24;
+      break;
+
 
 
     default:
