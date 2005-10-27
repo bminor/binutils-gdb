@@ -1,5 +1,8 @@
 2005-10-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* bfdwin.c (bfd_get_file_window): Seek into file in place of
+	using bfd_cache_lookup.
+
 	* cache.c (BFD_CACHE_MAX_OPEN): Make private to this file.
 	(bfd_last_cache, bfd_cache_lookup, bfd_cache_lookup_worker): Likewise.
 	* libbfd-in.h (bfd_cache_lookup_worker, bfd_last_cache): Delete.
