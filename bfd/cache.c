@@ -1,7 +1,7 @@
 /* BFD library -- caching of file descriptors.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1996, 2000, 2001, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
 
    Hacked by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
@@ -45,36 +45,20 @@ SUBSECTION
 #include "libbfd.h"
 #include "libiberty.h"
 
-/*
-INTERNAL_FUNCTION
-	BFD_CACHE_MAX_OPEN macro
+/* The maximum number of files which the cache will keep open at
+   one time.  */
 
-DESCRIPTION
-	The maximum number of files which the cache will keep open at
-	one time.
-
-.#define BFD_CACHE_MAX_OPEN 10
-
-*/
+#define BFD_CACHE_MAX_OPEN 10
 
 /* The number of BFD files we have open.  */
 
 static int open_files;
 
-/*
-INTERNAL_FUNCTION
-	bfd_last_cache
+/* Zero, or a pointer to the topmost BFD on the chain.  This is
+   used by the <<bfd_cache_lookup>> macro in @file{libbfd.h} to
+   determine when it can avoid a function call.  */
 
-SYNOPSIS
-	extern bfd *bfd_last_cache;
-
-DESCRIPTION
-	Zero, or a pointer to the topmost BFD on the chain.  This is
-	used by the <<bfd_cache_lookup>> macro in @file{libbfd.h} to
-	determine when it can avoid a function call.
-*/
-
-bfd *bfd_last_cache = NULL;
+static bfd *bfd_last_cache = NULL;
 
 /* Insert a BFD into the cache.  */
 
@@ -169,40 +153,24 @@ close_one (void)
   return bfd_cache_delete (kill);
 }
 
-/*
-  INTERNAL_FUNCTION
-  	bfd_cache_lookup
+/* Check to see if the required BFD is the same as the last one
+   looked up. If so, then it can use the stream in the BFD with
+   impunity, since it can't have changed since the last lookup;
+   otherwise, it has to perform the complicated lookup function.  */
 
-  DESCRIPTION
- 	Check to see if the required BFD is the same as the last one
- 	looked up. If so, then it can use the stream in the BFD with
- 	impunity, since it can't have changed since the last lookup;
- 	otherwise, it has to perform the complicated lookup function.
+#define bfd_cache_lookup(x) \
+  ((x) == bfd_last_cache			\
+   ? (FILE *) (bfd_last_cache->iostream)	\
+   : bfd_cache_lookup_worker (x))
 
-  .#define bfd_cache_lookup(x) \
-  .    ((x) == bfd_last_cache ? \
-  .      (FILE *) (bfd_last_cache->iostream): \
-  .       bfd_cache_lookup_worker (x))
+/* Called when the macro <<bfd_cache_lookup>> fails to find a
+   quick answer.  Find a file descriptor for @var{abfd}.  If
+   necessary, it open it.  If there are already more than
+   <<BFD_CACHE_MAX_OPEN>> files open, it tries to close one first, to
+   avoid running out of file descriptors.  It will return NULL
+   if it is unable to (re)open the @var{abfd}.  */
 
- */
-
-/*
-INTERNAL_FUNCTION
-	bfd_cache_lookup_worker
-
-SYNOPSIS
-	FILE *bfd_cache_lookup_worker (bfd *abfd);
-
-DESCRIPTION
-	Called when the macro <<bfd_cache_lookup>> fails to find a
-	quick answer.  Find a file descriptor for @var{abfd}.  If
-	necessary, it open it.  If there are already more than
-	<<BFD_CACHE_MAX_OPEN>> files open, it tries to close one first, to
-	avoid running out of file descriptors.  It will return NULL
-	if it is unable to (re)open the @var{abfd}.
-*/
-
-FILE *
+static FILE *
 bfd_cache_lookup_worker (bfd *abfd)
 {
   bfd *orig_bfd = abfd;

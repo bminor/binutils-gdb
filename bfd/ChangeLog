@@ -1,5 +1,10 @@
 2005-10-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* cache.c (BFD_CACHE_MAX_OPEN): Make private to this file.
+	(bfd_last_cache, bfd_cache_lookup, bfd_cache_lookup_worker): Likewise.
+	* libbfd-in.h (bfd_cache_lookup_worker, bfd_last_cache): Delete.
+	* libbfd.h: Regenerate.
+
 	* hppabsd-core.c (hppabsd_core_core_file_p): Use bfd_stat, not fstat.
 	* sco5-core.c (sco5_core_file_p): Likewise.
 	* trad-core.c (trad_unix_core_file_p): Likewise.
