@@ -1,5 +1,10 @@
 2005-10-27  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/equ.d: Fix typo.
+	* gas/i386/equ.s: Don't globalize r.
+
+2005-10-27  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/all/gas.exp: Don't xfail equiv1 test anymore.
 
 2005-10-26  Paul Brook  <paul@codesourcery.com>

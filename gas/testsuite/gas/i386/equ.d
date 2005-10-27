@@ -23,4 +23,4 @@ Disassembly of section .text:
 [ 0-9a-f]+:[ 	0-9a-f]+mov[ 	]+%gs:\(%edx,%edx,8\),%edx
 [ 0-9a-f]+:[ 	0-9a-f]+fadd[ 	]+%st\(1\),%st
 [ 0-9a-f]+:[ 	0-9a-f]+fadd[ 	]+%st\(7\),%st
-pass
+#pass

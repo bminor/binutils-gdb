@@ -6,7 +6,7 @@ _start:
  .equ s, -1
 	movl	$r, %eax
 	movl	(r), %eax
- .equ r, xtrn; .global r # temporary (hopefully)
+ .equ r, xtrn
 	movl	$r, %eax
 	movl	r, %eax
  .equ r, %ecx
