@@ -1599,6 +1599,10 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
   { "Imm-8-s4", M32C_OPERAND_IMM_8_S4, HW_H_SINT, 8, 4,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_IMM_8_S4] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+/* Imm-8-s4n: negated 4 bit immediate at offset 8 bits */
+  { "Imm-8-s4n", M32C_OPERAND_IMM_8_S4N, HW_H_SINT, 8, 4,
+    { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_IMM_8_S4] } }, 
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Imm-sh-8-s4: signed 4 bit shift immediate at offset 8 bits */
   { "Imm-sh-8-s4", M32C_OPERAND_IMM_SH_8_S4, HW_H_SHIMM, 8, 4,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_IMM_8_S4] } }, 
@@ -1613,6 +1617,10 @@ const CGEN_OPERAND m32c_cgen_operand_table[] =
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Imm-12-s4: signed 4 bit immediate at offset 12 bits */
   { "Imm-12-s4", M32C_OPERAND_IMM_12_S4, HW_H_SINT, 12, 4,
+    { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_IMM_12_S4] } }, 
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
+/* Imm-12-s4n: negated 4 bit immediate at offset 12 bits */
+  { "Imm-12-s4n", M32C_OPERAND_IMM_12_S4N, HW_H_SINT, 12, 4,
     { 0, { (const PTR) &m32c_cgen_ifld_table[M32C_F_IMM_12_S4] } }, 
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C)|(1<<ISA_M32C) } }  },
 /* Imm-sh-12-s4: signed 4 bit shift immediate at offset 12 bits */
@@ -12632,212 +12640,212 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_SCCND_DST32_16_24_ABSOLUTE_UNPREFIXED_HI, "sccnd-dst32-16-24-absolute-Unprefixed-HI", "sc", 40,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-u8}[$Dst32AnUnprefixed],${Lab-24-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-u8}[$Dst32AnUnprefixed],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_8_UNPREFIXED_DST32_16_8_AN_RELATIVE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-8-Unprefixed-dst32-16-8-An-relative-Unprefixed-HI", "sbjnz.w", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-u8}[sb],${Lab-24-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-u8}[sb],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_8_UNPREFIXED_DST32_16_8_SB_RELATIVE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-8-Unprefixed-dst32-16-8-SB-relative-Unprefixed-HI", "sbjnz.w", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-s8}[fb],${Lab-24-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-s8}[fb],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_8_UNPREFIXED_DST32_16_8_FB_RELATIVE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-8-Unprefixed-dst32-16-8-FB-relative-Unprefixed-HI", "sbjnz.w", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-u16}[$Dst32AnUnprefixed],${Lab-32-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-u16}[$Dst32AnUnprefixed],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_16_UNPREFIXED_DST32_16_16_AN_RELATIVE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-16-Unprefixed-dst32-16-16-An-relative-Unprefixed-HI", "sbjnz.w", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-u16}[sb],${Lab-32-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-u16}[sb],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_16_UNPREFIXED_DST32_16_16_SB_RELATIVE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-16-Unprefixed-dst32-16-16-SB-relative-Unprefixed-HI", "sbjnz.w", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-s16}[fb],${Lab-32-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-s16}[fb],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_16_UNPREFIXED_DST32_16_16_FB_RELATIVE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-16-Unprefixed-dst32-16-16-FB-relative-Unprefixed-HI", "sbjnz.w", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-u16},${Lab-32-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-u16},${Lab-32-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_16_UNPREFIXED_DST32_16_16_ABSOLUTE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-16-Unprefixed-dst32-16-16-absolute-Unprefixed-HI", "sbjnz.w", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-u24}[$Dst32AnUnprefixed],${Lab-40-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-u24}[$Dst32AnUnprefixed],${Lab-40-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_24_UNPREFIXED_DST32_16_24_AN_RELATIVE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-24-Unprefixed-dst32-16-24-An-relative-Unprefixed-HI", "sbjnz.w", 48,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},${Dsp-16-u24},${Lab-40-8} */
+/* sbjnz.w #${Imm-12-s4n},${Dsp-16-u24},${Lab-40-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_16_24_UNPREFIXED_DST32_16_24_ABSOLUTE_UNPREFIXED_HI, "sbjnz32.w-imm4-16-24-Unprefixed-dst32-16-24-absolute-Unprefixed-HI", "sbjnz.w", 48,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},$Dst32RnUnprefixedHI,${Lab-16-8} */
+/* sbjnz.w #${Imm-12-s4n},$Dst32RnUnprefixedHI,${Lab-16-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_BASIC_UNPREFIXED_DST32_RN_DIRECT_UNPREFIXED_HI, "sbjnz32.w-imm4-basic-Unprefixed-dst32-Rn-direct-Unprefixed-HI", "sbjnz.w", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},$Dst32AnUnprefixedHI,${Lab-16-8} */
+/* sbjnz.w #${Imm-12-s4n},$Dst32AnUnprefixedHI,${Lab-16-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_BASIC_UNPREFIXED_DST32_AN_DIRECT_UNPREFIXED_HI, "sbjnz32.w-imm4-basic-Unprefixed-dst32-An-direct-Unprefixed-HI", "sbjnz.w", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-12-s4},[$Dst32AnUnprefixed],${Lab-16-8} */
+/* sbjnz.w #${Imm-12-s4n},[$Dst32AnUnprefixed],${Lab-16-8} */
   {
     M32C_INSN_SBJNZ32_W_IMM4_BASIC_UNPREFIXED_DST32_AN_INDIRECT_UNPREFIXED_HI, "sbjnz32.w-imm4-basic-Unprefixed-dst32-An-indirect-Unprefixed-HI", "sbjnz.w", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-u8}[$Dst32AnUnprefixed],${Lab-24-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-u8}[$Dst32AnUnprefixed],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_8_UNPREFIXED_DST32_16_8_AN_RELATIVE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-8-Unprefixed-dst32-16-8-An-relative-Unprefixed-QI", "sbjnz.b", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-u8}[sb],${Lab-24-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-u8}[sb],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_8_UNPREFIXED_DST32_16_8_SB_RELATIVE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-8-Unprefixed-dst32-16-8-SB-relative-Unprefixed-QI", "sbjnz.b", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-s8}[fb],${Lab-24-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-s8}[fb],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_8_UNPREFIXED_DST32_16_8_FB_RELATIVE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-8-Unprefixed-dst32-16-8-FB-relative-Unprefixed-QI", "sbjnz.b", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-u16}[$Dst32AnUnprefixed],${Lab-32-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-u16}[$Dst32AnUnprefixed],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_16_UNPREFIXED_DST32_16_16_AN_RELATIVE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-16-Unprefixed-dst32-16-16-An-relative-Unprefixed-QI", "sbjnz.b", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-u16}[sb],${Lab-32-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-u16}[sb],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_16_UNPREFIXED_DST32_16_16_SB_RELATIVE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-16-Unprefixed-dst32-16-16-SB-relative-Unprefixed-QI", "sbjnz.b", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-s16}[fb],${Lab-32-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-s16}[fb],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_16_UNPREFIXED_DST32_16_16_FB_RELATIVE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-16-Unprefixed-dst32-16-16-FB-relative-Unprefixed-QI", "sbjnz.b", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-u16},${Lab-32-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-u16},${Lab-32-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_16_UNPREFIXED_DST32_16_16_ABSOLUTE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-16-Unprefixed-dst32-16-16-absolute-Unprefixed-QI", "sbjnz.b", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-u24}[$Dst32AnUnprefixed],${Lab-40-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-u24}[$Dst32AnUnprefixed],${Lab-40-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_24_UNPREFIXED_DST32_16_24_AN_RELATIVE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-24-Unprefixed-dst32-16-24-An-relative-Unprefixed-QI", "sbjnz.b", 48,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},${Dsp-16-u24},${Lab-40-8} */
+/* sbjnz.b #${Imm-12-s4n},${Dsp-16-u24},${Lab-40-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_16_24_UNPREFIXED_DST32_16_24_ABSOLUTE_UNPREFIXED_QI, "sbjnz32.b-imm4-16-24-Unprefixed-dst32-16-24-absolute-Unprefixed-QI", "sbjnz.b", 48,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},$Dst32RnUnprefixedQI,${Lab-16-8} */
+/* sbjnz.b #${Imm-12-s4n},$Dst32RnUnprefixedQI,${Lab-16-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_BASIC_UNPREFIXED_DST32_RN_DIRECT_UNPREFIXED_QI, "sbjnz32.b-imm4-basic-Unprefixed-dst32-Rn-direct-Unprefixed-QI", "sbjnz.b", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},$Dst32AnUnprefixedQI,${Lab-16-8} */
+/* sbjnz.b #${Imm-12-s4n},$Dst32AnUnprefixedQI,${Lab-16-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_BASIC_UNPREFIXED_DST32_AN_DIRECT_UNPREFIXED_QI, "sbjnz32.b-imm4-basic-Unprefixed-dst32-An-direct-Unprefixed-QI", "sbjnz.b", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.b #${Imm-12-s4},[$Dst32AnUnprefixed],${Lab-16-8} */
+/* sbjnz.b #${Imm-12-s4n},[$Dst32AnUnprefixed],${Lab-16-8} */
   {
     M32C_INSN_SBJNZ32_B_IMM4_BASIC_UNPREFIXED_DST32_AN_INDIRECT_UNPREFIXED_QI, "sbjnz32.b-imm4-basic-Unprefixed-dst32-An-indirect-Unprefixed-QI", "sbjnz.b", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* sbjnz.w #${Imm-8-s4},${Dsp-16-u8}[$Dst16An],${Lab-24-8} */
+/* sbjnz.w #${Imm-8-s4n},${Dsp-16-u8}[$Dst16An],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_16_8_DST16_16_8_AN_RELATIVE_HI, "sbjnz16.w-imm4-16-8-dst16-16-8-An-relative-HI", "sbjnz.w", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.w #${Imm-8-s4},${Dsp-16-u8}[sb],${Lab-24-8} */
+/* sbjnz.w #${Imm-8-s4n},${Dsp-16-u8}[sb],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_16_8_DST16_16_8_SB_RELATIVE_HI, "sbjnz16.w-imm4-16-8-dst16-16-8-SB-relative-HI", "sbjnz.w", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.w #${Imm-8-s4},${Dsp-16-s8}[fb],${Lab-24-8} */
+/* sbjnz.w #${Imm-8-s4n},${Dsp-16-s8}[fb],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_16_8_DST16_16_8_FB_RELATIVE_HI, "sbjnz16.w-imm4-16-8-dst16-16-8-FB-relative-HI", "sbjnz.w", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.w #${Imm-8-s4},${Dsp-16-u16}[$Dst16An],${Lab-32-8} */
+/* sbjnz.w #${Imm-8-s4n},${Dsp-16-u16}[$Dst16An],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_16_16_DST16_16_16_AN_RELATIVE_HI, "sbjnz16.w-imm4-16-16-dst16-16-16-An-relative-HI", "sbjnz.w", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.w #${Imm-8-s4},${Dsp-16-u16}[sb],${Lab-32-8} */
+/* sbjnz.w #${Imm-8-s4n},${Dsp-16-u16}[sb],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_16_16_DST16_16_16_SB_RELATIVE_HI, "sbjnz16.w-imm4-16-16-dst16-16-16-SB-relative-HI", "sbjnz.w", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.w #${Imm-8-s4},${Dsp-16-u16},${Lab-32-8} */
+/* sbjnz.w #${Imm-8-s4n},${Dsp-16-u16},${Lab-32-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_16_16_DST16_16_16_ABSOLUTE_HI, "sbjnz16.w-imm4-16-16-dst16-16-16-absolute-HI", "sbjnz.w", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.w #${Imm-8-s4},$Dst16RnHI,${Lab-16-8} */
+/* sbjnz.w #${Imm-8-s4n},$Dst16RnHI,${Lab-16-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_BASIC_DST16_RN_DIRECT_HI, "sbjnz16.w-imm4-basic-dst16-Rn-direct-HI", "sbjnz.w", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.w #${Imm-8-s4},$Dst16AnHI,${Lab-16-8} */
+/* sbjnz.w #${Imm-8-s4n},$Dst16AnHI,${Lab-16-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_BASIC_DST16_AN_DIRECT_HI, "sbjnz16.w-imm4-basic-dst16-An-direct-HI", "sbjnz.w", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.w #${Imm-8-s4},[$Dst16An],${Lab-16-8} */
+/* sbjnz.w #${Imm-8-s4n},[$Dst16An],${Lab-16-8} */
   {
     M32C_INSN_SBJNZ16_W_IMM4_BASIC_DST16_AN_INDIRECT_HI, "sbjnz16.w-imm4-basic-dst16-An-indirect-HI", "sbjnz.w", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},${Dsp-16-u8}[$Dst16An],${Lab-24-8} */
+/* sbjnz.b #${Imm-8-s4n},${Dsp-16-u8}[$Dst16An],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_16_8_DST16_16_8_AN_RELATIVE_QI, "sbjnz16.b-imm4-16-8-dst16-16-8-An-relative-QI", "sbjnz.b", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},${Dsp-16-u8}[sb],${Lab-24-8} */
+/* sbjnz.b #${Imm-8-s4n},${Dsp-16-u8}[sb],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_16_8_DST16_16_8_SB_RELATIVE_QI, "sbjnz16.b-imm4-16-8-dst16-16-8-SB-relative-QI", "sbjnz.b", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},${Dsp-16-s8}[fb],${Lab-24-8} */
+/* sbjnz.b #${Imm-8-s4n},${Dsp-16-s8}[fb],${Lab-24-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_16_8_DST16_16_8_FB_RELATIVE_QI, "sbjnz16.b-imm4-16-8-dst16-16-8-FB-relative-QI", "sbjnz.b", 32,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},${Dsp-16-u16}[$Dst16An],${Lab-32-8} */
+/* sbjnz.b #${Imm-8-s4n},${Dsp-16-u16}[$Dst16An],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_16_16_DST16_16_16_AN_RELATIVE_QI, "sbjnz16.b-imm4-16-16-dst16-16-16-An-relative-QI", "sbjnz.b", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},${Dsp-16-u16}[sb],${Lab-32-8} */
+/* sbjnz.b #${Imm-8-s4n},${Dsp-16-u16}[sb],${Lab-32-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_16_16_DST16_16_16_SB_RELATIVE_QI, "sbjnz16.b-imm4-16-16-dst16-16-16-SB-relative-QI", "sbjnz.b", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},${Dsp-16-u16},${Lab-32-8} */
+/* sbjnz.b #${Imm-8-s4n},${Dsp-16-u16},${Lab-32-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_16_16_DST16_16_16_ABSOLUTE_QI, "sbjnz16.b-imm4-16-16-dst16-16-16-absolute-QI", "sbjnz.b", 40,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},$Dst16RnQI,${Lab-16-8} */
+/* sbjnz.b #${Imm-8-s4n},$Dst16RnQI,${Lab-16-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_BASIC_DST16_RN_DIRECT_QI, "sbjnz16.b-imm4-basic-dst16-Rn-direct-QI", "sbjnz.b", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},$Dst16AnQI,${Lab-16-8} */
+/* sbjnz.b #${Imm-8-s4n},$Dst16AnQI,${Lab-16-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_BASIC_DST16_AN_DIRECT_QI, "sbjnz16.b-imm4-basic-dst16-An-direct-QI", "sbjnz.b", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* sbjnz.b #${Imm-8-s4},[$Dst16An],${Lab-16-8} */
+/* sbjnz.b #${Imm-8-s4n},[$Dst16An],${Lab-16-8} */
   {
     M32C_INSN_SBJNZ16_B_IMM4_BASIC_DST16_AN_INDIRECT_QI, "sbjnz16.b-imm4-basic-dst16-An-indirect-QI", "sbjnz.b", 24,
     { 0|A(COND_CTI), { (1<<MACH_BASE), (1<<ISA_M16C) } }
@@ -16417,92 +16425,92 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_PUSH32_B_16_UNPREFIXED_DST32_16_24_ABSOLUTE_UNPREFIXED_QI, "push32.b-16-Unprefixed-dst32-16-24-absolute-Unprefixed-QI", "push.b", 40,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* push.w $Dst16RnHI */
+/* push.w${G} $Dst16RnHI */
   {
     M32C_INSN_PUSH16_W_16_DST16_RN_DIRECT_HI, "push16.w-16-dst16-Rn-direct-HI", "push.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.w $Dst16AnHI */
+/* push.w${G} $Dst16AnHI */
   {
     M32C_INSN_PUSH16_W_16_DST16_AN_DIRECT_HI, "push16.w-16-dst16-An-direct-HI", "push.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.w [$Dst16An] */
+/* push.w${G} [$Dst16An] */
   {
     M32C_INSN_PUSH16_W_16_DST16_AN_INDIRECT_HI, "push16.w-16-dst16-An-indirect-HI", "push.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.w ${Dsp-16-u8}[$Dst16An] */
+/* push.w${G} ${Dsp-16-u8}[$Dst16An] */
   {
     M32C_INSN_PUSH16_W_16_DST16_16_8_AN_RELATIVE_HI, "push16.w-16-dst16-16-8-An-relative-HI", "push.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.w ${Dsp-16-u16}[$Dst16An] */
+/* push.w${G} ${Dsp-16-u16}[$Dst16An] */
   {
     M32C_INSN_PUSH16_W_16_DST16_16_16_AN_RELATIVE_HI, "push16.w-16-dst16-16-16-An-relative-HI", "push.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.w ${Dsp-16-u8}[sb] */
+/* push.w${G} ${Dsp-16-u8}[sb] */
   {
     M32C_INSN_PUSH16_W_16_DST16_16_8_SB_RELATIVE_HI, "push16.w-16-dst16-16-8-SB-relative-HI", "push.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.w ${Dsp-16-u16}[sb] */
+/* push.w${G} ${Dsp-16-u16}[sb] */
   {
     M32C_INSN_PUSH16_W_16_DST16_16_16_SB_RELATIVE_HI, "push16.w-16-dst16-16-16-SB-relative-HI", "push.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.w ${Dsp-16-s8}[fb] */
+/* push.w${G} ${Dsp-16-s8}[fb] */
   {
     M32C_INSN_PUSH16_W_16_DST16_16_8_FB_RELATIVE_HI, "push16.w-16-dst16-16-8-FB-relative-HI", "push.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.w ${Dsp-16-u16} */
+/* push.w${G} ${Dsp-16-u16} */
   {
     M32C_INSN_PUSH16_W_16_DST16_16_16_ABSOLUTE_HI, "push16.w-16-dst16-16-16-absolute-HI", "push.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b $Dst16RnQI */
+/* push.b${G} $Dst16RnQI */
   {
     M32C_INSN_PUSH16_B_16_DST16_RN_DIRECT_QI, "push16.b-16-dst16-Rn-direct-QI", "push.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b $Dst16AnQI */
+/* push.b${G} $Dst16AnQI */
   {
     M32C_INSN_PUSH16_B_16_DST16_AN_DIRECT_QI, "push16.b-16-dst16-An-direct-QI", "push.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b [$Dst16An] */
+/* push.b${G} [$Dst16An] */
   {
     M32C_INSN_PUSH16_B_16_DST16_AN_INDIRECT_QI, "push16.b-16-dst16-An-indirect-QI", "push.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b ${Dsp-16-u8}[$Dst16An] */
+/* push.b${G} ${Dsp-16-u8}[$Dst16An] */
   {
     M32C_INSN_PUSH16_B_16_DST16_16_8_AN_RELATIVE_QI, "push16.b-16-dst16-16-8-An-relative-QI", "push.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b ${Dsp-16-u16}[$Dst16An] */
+/* push.b${G} ${Dsp-16-u16}[$Dst16An] */
   {
     M32C_INSN_PUSH16_B_16_DST16_16_16_AN_RELATIVE_QI, "push16.b-16-dst16-16-16-An-relative-QI", "push.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b ${Dsp-16-u8}[sb] */
+/* push.b${G} ${Dsp-16-u8}[sb] */
   {
     M32C_INSN_PUSH16_B_16_DST16_16_8_SB_RELATIVE_QI, "push16.b-16-dst16-16-8-SB-relative-QI", "push.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b ${Dsp-16-u16}[sb] */
+/* push.b${G} ${Dsp-16-u16}[sb] */
   {
     M32C_INSN_PUSH16_B_16_DST16_16_16_SB_RELATIVE_QI, "push16.b-16-dst16-16-16-SB-relative-QI", "push.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b ${Dsp-16-s8}[fb] */
+/* push.b${G} ${Dsp-16-s8}[fb] */
   {
     M32C_INSN_PUSH16_B_16_DST16_16_8_FB_RELATIVE_QI, "push16.b-16-dst16-16-8-FB-relative-QI", "push.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* push.b ${Dsp-16-u16} */
+/* push.b${G} ${Dsp-16-u16} */
   {
     M32C_INSN_PUSH16_B_16_DST16_16_16_ABSOLUTE_QI, "push16.b-16-dst16-16-16-absolute-QI", "push.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
@@ -19252,212 +19260,237 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_OR16_B_IMM_G_16_16_DST16_16_16_ABSOLUTE_QI, "or16.b-imm-G-16-16-dst16-16-16-absolute-QI", "or.b", 40,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w $Dst32RnUnprefixedHI */
+/* not.b:s r0l */
+  {
+    M32C_INSN_NOT16_B_S_DST16_3_S_R0L_DIRECT_QI, "not16.b.s-dst16-3-S-R0l-direct-QI", "not.b:s", 8,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* not.b:s r0h */
+  {
+    M32C_INSN_NOT16_B_S_DST16_3_S_R0H_DIRECT_QI, "not16.b.s-dst16-3-S-R0h-direct-QI", "not.b:s", 8,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* not.b:s ${Dsp-8-u8}[sb] */
+  {
+    M32C_INSN_NOT16_B_S_DST16_3_S_8_8_SB_RELATIVE_QI, "not16.b.s-dst16-3-S-8-8-SB-relative-QI", "not.b:s", 16,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* not.b:s ${Dsp-8-s8}[fb] */
+  {
+    M32C_INSN_NOT16_B_S_DST16_3_S_8_8_FB_RELATIVE_QI, "not16.b.s-dst16-3-S-8-8-FB-relative-QI", "not.b:s", 16,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* not.b:s ${Dsp-8-u16} */
+  {
+    M32C_INSN_NOT16_B_S_DST16_3_S_8_16_ABSOLUTE_QI, "not16.b.s-dst16-3-S-8-16-absolute-QI", "not.b:s", 24,
+    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+  },
+/* not.w${G} $Dst32RnUnprefixedHI */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_RN_DIRECT_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-Rn-direct-Unprefixed-HI", "not.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w $Dst32AnUnprefixedHI */
+/* not.w${G} $Dst32AnUnprefixedHI */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_AN_DIRECT_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-An-direct-Unprefixed-HI", "not.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w [$Dst32AnUnprefixed] */
+/* not.w${G} [$Dst32AnUnprefixed] */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_AN_INDIRECT_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-An-indirect-Unprefixed-HI", "not.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-u8}[$Dst32AnUnprefixed] */
+/* not.w${G} ${Dsp-16-u8}[$Dst32AnUnprefixed] */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_8_AN_RELATIVE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-8-An-relative-Unprefixed-HI", "not.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-u16}[$Dst32AnUnprefixed] */
+/* not.w${G} ${Dsp-16-u16}[$Dst32AnUnprefixed] */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_16_AN_RELATIVE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-16-An-relative-Unprefixed-HI", "not.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-u24}[$Dst32AnUnprefixed] */
+/* not.w${G} ${Dsp-16-u24}[$Dst32AnUnprefixed] */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_24_AN_RELATIVE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-24-An-relative-Unprefixed-HI", "not.w", 40,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-u8}[sb] */
+/* not.w${G} ${Dsp-16-u8}[sb] */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_8_SB_RELATIVE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-8-SB-relative-Unprefixed-HI", "not.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-u16}[sb] */
+/* not.w${G} ${Dsp-16-u16}[sb] */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_16_SB_RELATIVE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-16-SB-relative-Unprefixed-HI", "not.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-s8}[fb] */
+/* not.w${G} ${Dsp-16-s8}[fb] */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_8_FB_RELATIVE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-8-FB-relative-Unprefixed-HI", "not.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-s16}[fb] */
+/* not.w${G} ${Dsp-16-s16}[fb] */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_16_FB_RELATIVE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-16-FB-relative-Unprefixed-HI", "not.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-u16} */
+/* not.w${G} ${Dsp-16-u16} */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_16_ABSOLUTE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-16-absolute-Unprefixed-HI", "not.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w ${Dsp-16-u24} */
+/* not.w${G} ${Dsp-16-u24} */
   {
     M32C_INSN_NOT32_W_16_UNPREFIXED_DST32_16_24_ABSOLUTE_UNPREFIXED_HI, "not32.w-16-Unprefixed-dst32-16-24-absolute-Unprefixed-HI", "not.w", 40,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b $Dst32RnUnprefixedQI */
+/* not.b${G} $Dst32RnUnprefixedQI */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_RN_DIRECT_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-Rn-direct-Unprefixed-QI", "not.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b $Dst32AnUnprefixedQI */
+/* not.b${G} $Dst32AnUnprefixedQI */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_AN_DIRECT_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-An-direct-Unprefixed-QI", "not.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b [$Dst32AnUnprefixed] */
+/* not.b${G} [$Dst32AnUnprefixed] */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_AN_INDIRECT_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-An-indirect-Unprefixed-QI", "not.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-u8}[$Dst32AnUnprefixed] */
+/* not.b${G} ${Dsp-16-u8}[$Dst32AnUnprefixed] */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_8_AN_RELATIVE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-8-An-relative-Unprefixed-QI", "not.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-u16}[$Dst32AnUnprefixed] */
+/* not.b${G} ${Dsp-16-u16}[$Dst32AnUnprefixed] */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_16_AN_RELATIVE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-16-An-relative-Unprefixed-QI", "not.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-u24}[$Dst32AnUnprefixed] */
+/* not.b${G} ${Dsp-16-u24}[$Dst32AnUnprefixed] */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_24_AN_RELATIVE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-24-An-relative-Unprefixed-QI", "not.b", 40,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-u8}[sb] */
+/* not.b${G} ${Dsp-16-u8}[sb] */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_8_SB_RELATIVE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-8-SB-relative-Unprefixed-QI", "not.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-u16}[sb] */
+/* not.b${G} ${Dsp-16-u16}[sb] */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_16_SB_RELATIVE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-16-SB-relative-Unprefixed-QI", "not.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-s8}[fb] */
+/* not.b${G} ${Dsp-16-s8}[fb] */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_8_FB_RELATIVE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-8-FB-relative-Unprefixed-QI", "not.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-s16}[fb] */
+/* not.b${G} ${Dsp-16-s16}[fb] */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_16_FB_RELATIVE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-16-FB-relative-Unprefixed-QI", "not.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-u16} */
+/* not.b${G} ${Dsp-16-u16} */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_16_ABSOLUTE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-16-absolute-Unprefixed-QI", "not.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.b ${Dsp-16-u24} */
+/* not.b${G} ${Dsp-16-u24} */
   {
     M32C_INSN_NOT32_B_16_UNPREFIXED_DST32_16_24_ABSOLUTE_UNPREFIXED_QI, "not32.b-16-Unprefixed-dst32-16-24-absolute-Unprefixed-QI", "not.b", 40,
     { 0, { (1<<MACH_BASE), (1<<ISA_M32C) } }
   },
-/* not.w $Dst16RnHI */
+/* not.w${G} $Dst16RnHI */
   {
     M32C_INSN_NOT16_W_16_DST16_RN_DIRECT_HI, "not16.w-16-dst16-Rn-direct-HI", "not.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w $Dst16AnHI */
+/* not.w${G} $Dst16AnHI */
   {
     M32C_INSN_NOT16_W_16_DST16_AN_DIRECT_HI, "not16.w-16-dst16-An-direct-HI", "not.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w [$Dst16An] */
+/* not.w${G} [$Dst16An] */
   {
     M32C_INSN_NOT16_W_16_DST16_AN_INDIRECT_HI, "not16.w-16-dst16-An-indirect-HI", "not.w", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w ${Dsp-16-u8}[$Dst16An] */
+/* not.w${G} ${Dsp-16-u8}[$Dst16An] */
   {
     M32C_INSN_NOT16_W_16_DST16_16_8_AN_RELATIVE_HI, "not16.w-16-dst16-16-8-An-relative-HI", "not.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w ${Dsp-16-u16}[$Dst16An] */
+/* not.w${G} ${Dsp-16-u16}[$Dst16An] */
   {
     M32C_INSN_NOT16_W_16_DST16_16_16_AN_RELATIVE_HI, "not16.w-16-dst16-16-16-An-relative-HI", "not.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w ${Dsp-16-u8}[sb] */
+/* not.w${G} ${Dsp-16-u8}[sb] */
   {
     M32C_INSN_NOT16_W_16_DST16_16_8_SB_RELATIVE_HI, "not16.w-16-dst16-16-8-SB-relative-HI", "not.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w ${Dsp-16-u16}[sb] */
+/* not.w${G} ${Dsp-16-u16}[sb] */
   {
     M32C_INSN_NOT16_W_16_DST16_16_16_SB_RELATIVE_HI, "not16.w-16-dst16-16-16-SB-relative-HI", "not.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w ${Dsp-16-s8}[fb] */
+/* not.w${G} ${Dsp-16-s8}[fb] */
   {
     M32C_INSN_NOT16_W_16_DST16_16_8_FB_RELATIVE_HI, "not16.w-16-dst16-16-8-FB-relative-HI", "not.w", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.w ${Dsp-16-u16} */
+/* not.w${G} ${Dsp-16-u16} */
   {
     M32C_INSN_NOT16_W_16_DST16_16_16_ABSOLUTE_HI, "not16.w-16-dst16-16-16-absolute-HI", "not.w", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b $Dst16RnQI */
+/* not.b${G} $Dst16RnQI */
   {
     M32C_INSN_NOT16_B_16_DST16_RN_DIRECT_QI, "not16.b-16-dst16-Rn-direct-QI", "not.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b $Dst16AnQI */
+/* not.b${G} $Dst16AnQI */
   {
     M32C_INSN_NOT16_B_16_DST16_AN_DIRECT_QI, "not16.b-16-dst16-An-direct-QI", "not.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b [$Dst16An] */
+/* not.b${G} [$Dst16An] */
   {
     M32C_INSN_NOT16_B_16_DST16_AN_INDIRECT_QI, "not16.b-16-dst16-An-indirect-QI", "not.b", 16,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b ${Dsp-16-u8}[$Dst16An] */
+/* not.b${G} ${Dsp-16-u8}[$Dst16An] */
   {
     M32C_INSN_NOT16_B_16_DST16_16_8_AN_RELATIVE_QI, "not16.b-16-dst16-16-8-An-relative-QI", "not.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b ${Dsp-16-u16}[$Dst16An] */
+/* not.b${G} ${Dsp-16-u16}[$Dst16An] */
   {
     M32C_INSN_NOT16_B_16_DST16_16_16_AN_RELATIVE_QI, "not16.b-16-dst16-16-16-An-relative-QI", "not.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b ${Dsp-16-u8}[sb] */
+/* not.b${G} ${Dsp-16-u8}[sb] */
   {
     M32C_INSN_NOT16_B_16_DST16_16_8_SB_RELATIVE_QI, "not16.b-16-dst16-16-8-SB-relative-QI", "not.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b ${Dsp-16-u16}[sb] */
+/* not.b${G} ${Dsp-16-u16}[sb] */
   {
     M32C_INSN_NOT16_B_16_DST16_16_16_SB_RELATIVE_QI, "not16.b-16-dst16-16-16-SB-relative-QI", "not.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b ${Dsp-16-s8}[fb] */
+/* not.b${G} ${Dsp-16-s8}[fb] */
   {
     M32C_INSN_NOT16_B_16_DST16_16_8_FB_RELATIVE_QI, "not16.b-16-dst16-16-8-FB-relative-QI", "not.b", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* not.b ${Dsp-16-u16} */
+/* not.b${G} ${Dsp-16-u16} */
   {
     M32C_INSN_NOT16_B_16_DST16_16_16_ABSOLUTE_QI, "not16.b-16-dst16-16-16-absolute-QI", "not.b", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
@@ -62577,17 +62610,17 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_STZX16_IMM8_IMM8_R0L, "stzx16-imm8-imm8-r0l", "stzx", 24,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* stzx #${Imm-8-QI},#${Imm-16-QI},Dsp-24-u8[sb] */
+/* stzx #${Imm-8-QI},#${Imm-24-QI},${Dsp-16-u8}[sb] */
   {
     M32C_INSN_STZX16_IMM8_IMM8_DSP8SB, "stzx16-imm8-imm8-dsp8sb", "stzx", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* stzx #${Imm-8-QI},#${Imm-16-QI},Dsp-24-u8[fb] */
+/* stzx #${Imm-8-QI},#${Imm-24-QI},${Dsp-16-s8}[fb] */
   {
     M32C_INSN_STZX16_IMM8_IMM8_DSP8FB, "stzx16-imm8-imm8-dsp8fb", "stzx", 32,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
   },
-/* stzx #${Imm-8-QI},#${Imm-16-QI},Dsp-24-u16 */
+/* stzx #${Imm-8-QI},#${Imm-32-QI},${Dsp-16-u16} */
   {
     M32C_INSN_STZX16_IMM8_IMM8_ABS16, "stzx16-imm8-imm8-abs16", "stzx", 40,
     { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }

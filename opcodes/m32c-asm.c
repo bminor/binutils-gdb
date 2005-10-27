@@ -192,6 +192,31 @@ parse_signed4 (CGEN_CPU_DESC cd, const char **strp,
 }
 
 static const char *
+parse_signed4n (CGEN_CPU_DESC cd, const char **strp,
+		int opindex, signed long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+  long have_zero = 0;
+
+  if (strncmp (*strp, "0x0", 3) == 0 
+      || (**strp == '0' && *(*strp + 1) != 'x'))
+    have_zero = 1;
+
+  PARSE_SIGNED;
+
+  if (value < -7 || value > 8)
+    return _("Immediate is out of range -7 to 8");
+
+  /* If this field may require a relocation then use larger dsp16.  */
+  if (! have_zero && value == 0)
+    return _("Immediate is out of range -7 to 8");
+
+  *valuep = -value;
+  return 0;
+}
+
+static const char *
 parse_signed8 (CGEN_CPU_DESC cd, const char **strp,
 	       int opindex, signed long *valuep)
 {
@@ -1172,6 +1197,9 @@ m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_IMM_12_S4 :
       errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_12_S4, (long *) (& fields->f_imm_12_s4));
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      errmsg = parse_signed4n (cd, strp, M32C_OPERAND_IMM_12_S4N, (long *) (& fields->f_imm_12_s4));
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_13_U3, (long *) (& fields->f_imm_13_u3));
       break;
@@ -1240,6 +1268,9 @@ m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case M32C_OPERAND_IMM_8_S4 :
       errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_8_S4, (long *) (& fields->f_imm_8_s4));
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
+      errmsg = parse_signed4n (cd, strp, M32C_OPERAND_IMM_8_S4N, (long *) (& fields->f_imm_8_s4));
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :
       errmsg = cgen_parse_keyword (cd, strp, & m32c_cgen_opval_h_shimm, & fields->f_imm_12_s4);

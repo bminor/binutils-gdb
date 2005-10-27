@@ -262,6 +262,19 @@ print_push_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   print_regset (cd, dis_info, value, attrs, pc, length, PUSH);
 }
 
+static void
+print_signed4n (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+		void * dis_info,
+		signed long value,
+		unsigned int attrs ATTRIBUTE_UNUSED,
+		bfd_vma pc ATTRIBUTE_UNUSED,
+		int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = dis_info;
+
+  (*info->fprintf_func) (info->stream, "%ld", -value);
+}
+
 void m32c_cgen_print_operand
   (CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *, void const *, bfd_vma, int);
 
@@ -572,6 +585,9 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_IMM_12_S4 :
       print_normal (cd, info, fields->f_imm_12_s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      print_signed4n (cd, info, fields->f_imm_12_s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       print_normal (cd, info, fields->f_imm_13_u3, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
@@ -639,6 +655,9 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
       print_normal (cd, info, fields->f_dsp_8_s8, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case M32C_OPERAND_IMM_8_S4 :
+      print_normal (cd, info, fields->f_imm_8_s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
       print_normal (cd, info, fields->f_imm_8_s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :

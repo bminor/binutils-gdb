@@ -69,6 +69,10 @@ m32c_asm_hash (const char *mnem)
   if (mnem[0] == 's' && mnem[1] == 'c')
     return 's';
   
+  /* Don't hash bmCND  */
+  if (mnem[0] == 'b' && mnem[1] == 'm')
+    return 'b';
+  
   for (h = 0; *mnem && *mnem != ' ' && *mnem != ':'; ++mnem)
     h += *mnem;
   return h % CGEN_ASM_HASH_SIZE;
@@ -214,6 +218,31 @@ parse_signed4 (CGEN_CPU_DESC cd, const char **strp,
     return _("Immediate is out of range -8 to 7");
 
   *valuep = value;
+  return 0;
+}
+
+static const char *
+parse_signed4n (CGEN_CPU_DESC cd, const char **strp,
+		int opindex, signed long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+  long have_zero = 0;
+
+  if (strncmp (*strp, "0x0", 3) == 0 
+      || (**strp == '0' && *(*strp + 1) != 'x'))
+    have_zero = 1;
+
+  PARSE_SIGNED;
+
+  if (value < -7 || value > 8)
+    return _("Immediate is out of range -7 to 8");
+
+  /* If this field may require a relocation then use larger dsp16.  */
+  if (! have_zero && value == 0)
+    return _("Immediate is out of range -7 to 8");
+
+  *valuep = -value;
   return 0;
 }
 
@@ -1091,4 +1120,17 @@ print_push_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 		   int length ATTRIBUTE_UNUSED)
 {
   print_regset (cd, dis_info, value, attrs, pc, length, PUSH);
+}
+
+static void
+print_signed4n (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+		void * dis_info,
+		signed long value,
+		unsigned int attrs ATTRIBUTE_UNUSED,
+		bfd_vma pc ATTRIBUTE_UNUSED,
+		int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = dis_info;
+
+  (*info->fprintf_func) (info->stream, "%ld", -value);
 }

@@ -1894,6 +1894,10 @@
   h-sint DFLT f-imm-8-s4
   ((parse "signed4")) () ()
 )
+(define-full-operand Imm-8-s4n "negated 4 bit immediate at offset 8 bits" (all-isas)
+  h-sint DFLT f-imm-8-s4
+  ((parse "signed4n")) () ()
+)
 (define-full-operand Imm-sh-8-s4 "signed 4 bit shift immediate at offset 8 bits" (all-isas)
   h-shimm DFLT f-imm-8-s4
   () () ()
@@ -1909,6 +1913,10 @@
 (define-full-operand Imm-12-s4 "signed 4 bit immediate at offset 12 bits" (all-isas)
   h-sint DFLT f-imm-12-s4
   ((parse "signed4")) () ()
+)
+(define-full-operand Imm-12-s4n "negated 4 bit immediate at offset 12 bits" (all-isas)
+  h-sint DFLT f-imm-12-s4
+  ((parse "signed4n") (print "signed4n")) () ()
 )
 (define-full-operand Imm-sh-12-s4 "signed 4 bit shift immediate at offset 12 bits" (all-isas)
   h-shimm DFLT f-imm-12-s4
@@ -5848,24 +5856,31 @@
 ; Unary insn macros
 ;-------------------------------------------------------------
 
-(define-pmacro (unary-insn-defn mach group mode wstr op encoding sem)
+(define-pmacro (unary-insn-defn-g mach group mode wstr op encoding sem opg)
   (dni (.sym op mach wstr - group)
-       (.str op wstr " dst" mach "-" group "-" mode)
+       (.str op wstr opg " dst" mach "-" group "-" mode)
        ((machine mach))
-       (.str op wstr " ${dst" mach "-" group "-" mode "}")
+       (.str op wstr opg " ${dst" mach "-" group "-" mode "}")
        encoding
        (sem mode (.sym dst mach - group - mode))
        ())
 )
 
-
-(define-pmacro (unary16-defn mode wstr wbit op opc1 opc2 opc3 sem)
-  (unary-insn-defn 16 16 mode wstr op
-		   (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16- mode))
-		   sem)
+(define-pmacro (unary-insn-defn mach group mode wstr op encoding sem)
+  (unary-insn-defn-g mach group mode wstr op encoding sem "")
 )
 
-(define-pmacro (unary32-defn mode wstr wbit op opc1 opc2 opc3 sem)
+
+(define-pmacro (unary16-defn-g mode wstr wbit op opc1 opc2 opc3 sem opg)
+  (unary-insn-defn-g 16 16 mode wstr op
+		     (+ opc1 opc2 (f-7-1 wbit) opc3 (.sym dst16-16- mode))
+		     sem opg)
+)
+(define-pmacro (unary16-defn mode wstr wbit op opc1 opc2 opc3 sem)
+  (unary-16-defn-g mode wstr wbit op opc1 opc2 opc3 sem "")
+)
+
+(define-pmacro (unary32-defn-g mode wstr wbit op opc1 opc2 opc3 sem opg)
   (begin
     ; Multi insns are tried for assembly in the reverse order in which they appear here, so
     ; define the absolute-indirect insns first in order to prevent them from being selected
@@ -5873,26 +5888,39 @@
 ;     (unary-insn-defn 32 24-absolute-indirect mode wstr op
 ; 		     (+ (f-0-4 0) (f-4-4 9) (f-8-4 opc1) (f-15-1 wbit) (.sym dst32-24-absolute-indirect- mode) (f-18-2 opc2) (f-20-4 opc3))
 ; 		     sem)
-    (unary-insn-defn 32 16-Unprefixed mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3))
-		     sem)
+    (unary-insn-defn-g 32 16-Unprefixed mode wstr op
+		       (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-Unprefixed- mode) (f-10-2 opc2) (f-12-4 opc3))
+		       sem opg)
 ;     (unary-insn-defn 32 24-indirect mode wstr op
 ; 		     (+ (f-0-4 0) (f-4-4 9) (f-8-4 opc1) (f-15-1 wbit) (.sym dst32-24-indirect- mode) (f-18-2 opc2) (f-20-4 opc3))
 ; 		     sem)
   )
 )
+(define-pmacro (unary32-defn mode wstr wbit op opc1 opc2 opc3 sem)
+  (unary32-defn-g mode wstr wbit op opc1 opc2 opc3 sem "")
+)
 
-(define-pmacro (unary-insn-mach mach op opc1 opc2 opc3 sem)
+(define-pmacro (unary-insn-mach-g mach op opc1 opc2 opc3 sem opg)
   (begin
-    (.apply (.sym unary mach -defn) (QI .b 0 op opc1 opc2 opc3 sem))
-    (.apply (.sym unary mach -defn) (HI .w 1 op opc1 opc2 opc3 sem))
+    (.apply (.sym unary mach -defn-g) (QI .b 0 op opc1 opc2 opc3 sem opg))
+    (.apply (.sym unary mach -defn-g) (HI .w 1 op opc1 opc2 opc3 sem opg))
   )
+)
+(define-pmacro (unary-insn-mach mach op opc1 opc2 opc3 sem)
+  (unary-insn-mach-g mach op opc1 opc2 opc3 sem "")
 )
 
 (define-pmacro (unary-insn op opc16-1 opc16-2 opc16-3 opc32-1 opc32-2 opc32-3 sem)
   (begin
-    (unary-insn-mach 16 op opc16-1 opc16-2 opc16-3 sem)
-    (unary-insn-mach 32 op opc32-1 opc32-2 opc32-3 sem)
+    (unary-insn-mach-g 16 op opc16-1 opc16-2 opc16-3 sem "")
+    (unary-insn-mach-g 32 op opc32-1 opc32-2 opc32-3 sem "")
+  )
+)
+
+(define-pmacro (unary-insn-g op opc16-1 opc16-2 opc16-3 opc32-1 opc32-2 opc32-3 sem)
+  (begin
+    (unary-insn-mach-g 16 op opc16-1 opc16-2 opc16-3 sem "$G")
+    (unary-insn-mach-g 32 op opc32-1 opc32-2 opc32-3 sem "$G")
   )
 )
 
@@ -6555,49 +6583,49 @@
 )
 
 ; m16c variants
-(define-pmacro (arith-jnz16-imm4-dst-defn mode wstr wbit op opc1 opc2 sem)
+(define-pmacro (arith-jnz16-imm4-dst-defn mode wstr wbit op i4n opc1 opc2 sem)
   (begin
-    (arith-jnz-imm4-dst-defn 16 Imm-8-s4 basic Lab-16-8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) Imm-8-s4 (.sym dst16-basic- mode) Lab-16-8)
+    (arith-jnz-imm4-dst-defn 16 (.sym Imm-8- i4n) basic Lab-16-8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) (.sym Imm-8- i4n) (.sym dst16-basic- mode) Lab-16-8)
 			     sem)
-    (arith-jnz-imm4-dst-defn 16 Imm-8-s4 16-16 Lab-32-8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) Imm-8-s4 (.sym dst16-16-16- mode) Lab-16-8)
+    (arith-jnz-imm4-dst-defn 16 (.sym Imm-8- i4n) 16-16 Lab-32-8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) (.sym Imm-8- i4n) (.sym dst16-16-16- mode) Lab-16-8)
 			     sem)
-    (arith-jnz-imm4-dst-defn 16 Imm-8-s4 16-8 Lab-24-8 mode wstr op
-			     (+ opc1 opc2 (f-7-1 wbit) Imm-8-s4 (.sym dst16-16-8- mode) Lab-16-8)
+    (arith-jnz-imm4-dst-defn 16 (.sym Imm-8- i4n) 16-8 Lab-24-8 mode wstr op
+			     (+ opc1 opc2 (f-7-1 wbit) (.sym Imm-8- i4n) (.sym dst16-16-8- mode) Lab-16-8)
 			     sem)
   )
 )
 
 ; m32c variants
-(define-pmacro (arith-jnz32-imm4-dst-defn mode wstr wbit op opc1 opc2 sem)
+(define-pmacro (arith-jnz32-imm4-dst-defn mode wstr wbit op i4n opc1 opc2 sem)
   (begin
-    (arith-jnz-imm4-dst-defn 32 Imm-12-s4 basic-Unprefixed Lab-16-8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-basic-Unprefixed- mode) (f-10-2 opc2) Imm-12-s4 Lab-16-8)
+    (arith-jnz-imm4-dst-defn 32 (.sym Imm-12- i4n) basic-Unprefixed Lab-16-8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-basic-Unprefixed- mode) (f-10-2 opc2) (.sym Imm-12- i4n) Lab-16-8)
 		     sem)
-    (arith-jnz-imm4-dst-defn 32 Imm-12-s4 16-24-Unprefixed Lab-40-8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-24-Unprefixed- mode) (f-10-2 opc2) Imm-12-s4 Lab-40-8)
+    (arith-jnz-imm4-dst-defn 32 (.sym Imm-12- i4n) 16-24-Unprefixed Lab-40-8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-24-Unprefixed- mode) (f-10-2 opc2) (.sym Imm-12- i4n) Lab-40-8)
 		     sem)
-    (arith-jnz-imm4-dst-defn 32 Imm-12-s4 16-16-Unprefixed Lab-32-8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-16-Unprefixed- mode) (f-10-2 opc2) Imm-12-s4 Lab-32-8)
+    (arith-jnz-imm4-dst-defn 32 (.sym Imm-12- i4n) 16-16-Unprefixed Lab-32-8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-16-Unprefixed- mode) (f-10-2 opc2) (.sym Imm-12- i4n) Lab-32-8)
 		     sem)
-    (arith-jnz-imm4-dst-defn 32 Imm-12-s4 16-8-Unprefixed Lab-24-8 mode wstr op
-		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-8-Unprefixed- mode) (f-10-2 opc2) Imm-12-s4 Lab-24-8)
+    (arith-jnz-imm4-dst-defn 32 (.sym Imm-12- i4n) 16-8-Unprefixed Lab-24-8 mode wstr op
+		     (+ (f-0-4 opc1) (f-7-1 wbit) (.sym dst32-16-8-Unprefixed- mode) (f-10-2 opc2) (.sym Imm-12- i4n) Lab-24-8)
 		     sem)
   )
 )
 
-(define-pmacro (arith-jnz-imm4-dst-mach mach op opc1 opc2 sem)
+(define-pmacro (arith-jnz-imm4-dst-mach mach op i4n opc1 opc2 sem)
   (begin
-    (.apply (.sym arith-jnz mach -imm4-dst-defn) (QI .b 0 op opc1 opc2 sem))
-    (.apply (.sym arith-jnz mach -imm4-dst-defn) (HI .w 1 op opc1 opc2 sem))
+    (.apply (.sym arith-jnz mach -imm4-dst-defn) (QI .b 0 op i4n opc1 opc2 sem))
+    (.apply (.sym arith-jnz mach -imm4-dst-defn) (HI .w 1 op i4n opc1 opc2 sem))
   )
 )
 
-(define-pmacro (arith-jnz-imm4-dst op opc16-1 opc16-2 opc32-1 opc32-2 sem)
+(define-pmacro (arith-jnz-imm4-dst op i4n opc16-1 opc16-2 opc32-1 opc32-2 sem)
   (begin
-    (arith-jnz-imm4-dst-mach 16 op opc16-1 opc16-2 sem)
-    (arith-jnz-imm4-dst-mach 32 op opc32-1 opc32-2 sem)
+    (arith-jnz-imm4-dst-mach 16 op i4n opc16-1 opc16-2 sem)
+    (arith-jnz-imm4-dst-mach 32 op i4n opc32-1 opc32-2 sem)
   )
 )
 
@@ -7294,7 +7322,7 @@
 )
 
 ; adjnz.size #imm4,dst,label
-(arith-jnz-imm4-dst adjnz (f-0-4 #xF) (f-4-3 4) #xf #x1 arith-jnz-sem)
+(arith-jnz-imm4-dst adjnz s4 (f-0-4 #xF) (f-4-3 4) #xf #x1 arith-jnz-sem)
 
 ;-------------------------------------------------------------
 ; and - binary and
@@ -8928,7 +8956,15 @@
 )
 
 ; not.BW:G
-(unary-insn not (f-0-4 7) (f-4-3 2) (f-8-4 #x7) #xA #x1 #xE not-sem)
+(unary-insn-g not (f-0-4 7) (f-4-3 2) (f-8-4 #x7) #xA #x1 #xE not-sem)
+
+(dni not16.b.s
+     "not.b:s Dst16-3-S-8"
+     ((machine 16))
+     "not.b:s ${Dst16-3-S-8}"
+     (+ (f-0-4 #xb) (f-4-1 #x1) Dst16-3-S-8)
+     (not-sem QI Dst16-3-S-8)
+     ())
 
 ;-------------------------------------------------------------
 ; nop
@@ -9317,7 +9353,7 @@
      ())
 
 ; push.BW:G src (m16 #2)
-(unary-insn-mach 16 push (f-0-4 7) (f-4-3 2) (f-8-4 #x4) push-sem16)
+(unary-insn-mach-g 16 push (f-0-4 7) (f-4-3 2) (f-8-4 #x4) push-sem16 $G)
 ; push.BW:G src (m32 #2)
 (unary-insn-mach 32 push #xC #x0 #xE push-sem32)
 
@@ -9613,7 +9649,7 @@
 )
 
 ; sbjnz.size #imm4,dst,label
-(arith-jnz-imm4-dst sbjnz (f-0-4 #xF) (f-4-3 4) #xf #x1 sub-jnz-sem)
+(arith-jnz-imm4-dst sbjnz s4n (f-0-4 #xF) (f-4-3 4) #xf #x1 sub-jnz-sem)
 
 ;-------------------------------------------------------------
 ; sccnd - store condition on condition (m32)
@@ -10143,17 +10179,17 @@
      (stzx-sem QI Imm-8-QI Imm-16-QI (reg h-r0l))
      ())
 (dni stzx16-imm8-imm8-dsp8sb "stzx #Imm8,#Imm8,dsp8[sb]" ((machine 16))
-     ("stzx #${Imm-8-QI},#${Imm-16-QI},Dsp-24-u8[sb]")
+     ("stzx #${Imm-8-QI},#${Imm-24-QI},${Dsp-16-u8}[sb]")
      (+ (f-0-4 #xD) (f-4-4 #xD) Imm-8-QI Dsp-16-u8 Imm-24-QI)
      (stzx-sem QI Imm-8-QI Imm-16-QI (mem16 QI (add (reg h-sb) Dsp-24-u8)))
      ())
 (dni stzx16-imm8-imm8-dsp8fb "stzx #Imm8,#Imm8,dsp8[fb]" ((machine 16))
-     ("stzx #${Imm-8-QI},#${Imm-16-QI},Dsp-24-u8[fb]")
-     (+ (f-0-4 #xD) (f-4-4 #xE) Imm-8-QI Dsp-16-u8 Imm-24-QI)
-     (stzx-sem QI Imm-8-QI Imm-16-QI (mem16 QI (add (reg h-fb) Dsp-24-u8)))
+     ("stzx #${Imm-8-QI},#${Imm-24-QI},${Dsp-16-s8}[fb]")
+     (+ (f-0-4 #xD) (f-4-4 #xE) Imm-8-QI Dsp-16-s8 Imm-24-QI)
+     (stzx-sem QI Imm-8-QI Imm-24-QI (mem16 QI (add (reg h-fb) Dsp-16-s8)))
      ())
 (dni stzx16-imm8-imm8-abs16 "stzx #Imm8,#Imm8,abs16" ((machine 16))
-     ("stzx #${Imm-8-QI},#${Imm-16-QI},Dsp-24-u16")
+     ("stzx #${Imm-8-QI},#${Imm-32-QI},${Dsp-16-u16}")
      (+ (f-0-4 #xD) (f-4-4 #xE) Imm-8-QI Dsp-16-u16 Imm-32-QI)
      (stzx-sem QI Imm-8-QI Imm-32-QI (mem16 QI Dsp-16-u16))
      ())

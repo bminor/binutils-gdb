@@ -1,3 +1,18 @@
+2005-10-27  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (Imm-8-s4n, Imm-12-s4n): New.
+	(arith-jnz16-imm4-dst-defn, arith-jnz32-imm4-dst-defn,
+	arith-jnz-imm4-dst-mach, arith-jnz-imm4-dst): Keep track of which
+	imm operand is needed.
+	(adjnz, sbjnz): Pass the right operands.
+	(unary-insn-defn, unary16-defn, unary32-defn, unary-insn-mach,
+	unary-insn): Add -g variants for opcodes that need to support :G.
+	(not.BW:G, push.BW:G): Call it.
+	(stzx16-imm8-imm8-dsp8sb, stzx16-imm8-imm8-dsp8fb,
+	stzx16-imm8-imm8-abs16): Fix operand typos.
+	* m32c.opc (m32c_asm_hash): Support bnCND.
+	(parse_signed4n, print_signed4n): New.
+	
 2005-10-26  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (f-dsp-8-s24, Dsp-8-s24): New.

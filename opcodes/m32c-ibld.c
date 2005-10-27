@@ -1174,6 +1174,9 @@ m32c_cgen_insert_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_IMM_12_S4 :
       errmsg = insert_normal (cd, fields->f_imm_12_s4, 0|(1<<CGEN_IFLD_SIGNED), 0, 12, 4, 32, total_length, buffer);
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      errmsg = insert_normal (cd, fields->f_imm_12_s4, 0|(1<<CGEN_IFLD_SIGNED), 0, 12, 4, 32, total_length, buffer);
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       errmsg = insert_normal (cd, fields->f_imm_13_u3, 0, 0, 13, 3, 32, total_length, buffer);
       break;
@@ -1359,6 +1362,9 @@ m32c_cgen_insert_operand (CGEN_CPU_DESC cd,
       errmsg = insert_normal (cd, fields->f_dsp_8_s8, 0|(1<<CGEN_IFLD_SIGNED), 0, 8, 8, 32, total_length, buffer);
       break;
     case M32C_OPERAND_IMM_8_S4 :
+      errmsg = insert_normal (cd, fields->f_imm_8_s4, 0|(1<<CGEN_IFLD_SIGNED), 0, 8, 4, 32, total_length, buffer);
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
       errmsg = insert_normal (cd, fields->f_imm_8_s4, 0|(1<<CGEN_IFLD_SIGNED), 0, 8, 4, 32, total_length, buffer);
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :
@@ -2298,6 +2304,9 @@ m32c_cgen_extract_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_IMM_12_S4 :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 12, 4, 32, total_length, pc, & fields->f_imm_12_s4);
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 12, 4, 32, total_length, pc, & fields->f_imm_12_s4);
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 13, 3, 32, total_length, pc, & fields->f_imm_13_u3);
       break;
@@ -2478,6 +2487,9 @@ m32c_cgen_extract_operand (CGEN_CPU_DESC cd,
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 8, 8, 32, total_length, pc, & fields->f_dsp_8_s8);
       break;
     case M32C_OPERAND_IMM_8_S4 :
+      length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 8, 4, 32, total_length, pc, & fields->f_imm_8_s4);
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 8, 4, 32, total_length, pc, & fields->f_imm_8_s4);
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :
@@ -3106,6 +3118,9 @@ m32c_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case M32C_OPERAND_IMM_12_S4 :
       value = fields->f_imm_12_s4;
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      value = fields->f_imm_12_s4;
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       value = fields->f_imm_13_u3;
       break;
@@ -3173,6 +3188,9 @@ m32c_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       value = fields->f_dsp_8_s8;
       break;
     case M32C_OPERAND_IMM_8_S4 :
+      value = fields->f_imm_8_s4;
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
       value = fields->f_imm_8_s4;
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :
@@ -3690,6 +3708,9 @@ m32c_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case M32C_OPERAND_IMM_12_S4 :
       value = fields->f_imm_12_s4;
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      value = fields->f_imm_12_s4;
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       value = fields->f_imm_13_u3;
       break;
@@ -3757,6 +3778,9 @@ m32c_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       value = fields->f_dsp_8_s8;
       break;
     case M32C_OPERAND_IMM_8_S4 :
+      value = fields->f_imm_8_s4;
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
       value = fields->f_imm_8_s4;
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :
@@ -4276,6 +4300,9 @@ m32c_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case M32C_OPERAND_IMM_12_S4 :
       fields->f_imm_12_s4 = value;
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      fields->f_imm_12_s4 = value;
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       fields->f_imm_13_u3 = value;
       break;
@@ -4343,6 +4370,9 @@ m32c_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       fields->f_dsp_8_s8 = value;
       break;
     case M32C_OPERAND_IMM_8_S4 :
+      fields->f_imm_8_s4 = value;
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
       fields->f_imm_8_s4 = value;
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :
@@ -4838,6 +4868,9 @@ m32c_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case M32C_OPERAND_IMM_12_S4 :
       fields->f_imm_12_s4 = value;
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      fields->f_imm_12_s4 = value;
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       fields->f_imm_13_u3 = value;
       break;
@@ -4905,6 +4938,9 @@ m32c_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       fields->f_dsp_8_s8 = value;
       break;
     case M32C_OPERAND_IMM_8_S4 :
+      fields->f_imm_8_s4 = value;
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
       fields->f_imm_8_s4 = value;
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :

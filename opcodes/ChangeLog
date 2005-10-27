@@ -1,3 +1,13 @@
+2005-10-27  DJ Delorie  <dj@redhat.com>
+
+	* m32c-asm.c: Regenerate.
+	* m32c-desc.c: Regenerate.
+	* m32c-desc.h: Regenerate.
+	* m32c-dis.c: Regenerate.
+	* m32c-ibld.c: Regenerate.
+	* m32c-opc.c: Regenerate.
+	* m32c-opc.h: Regenerate.
+
 2005-10-26  DJ Delorie  <dj@redhat.com>
 
 	* m32c-asm.c: Regenerate.
