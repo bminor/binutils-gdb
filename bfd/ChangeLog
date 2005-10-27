@@ -1,5 +1,9 @@
 2005-10-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* hppabsd-core.c (hppabsd_core_core_file_p): Use bfd_stat, not fstat.
+	* sco5-core.c (sco5_core_file_p): Likewise.
+	* trad-core.c (trad_unix_core_file_p): Likewise.
+
 	* cache.c: Reorganize file to avoid forward reference.
 
 2005-10-26  Alan Modra  <amodra@bigpond.net.au>

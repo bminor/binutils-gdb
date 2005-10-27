@@ -1,5 +1,5 @@
 /* BFD back-end for HPPA BSD core files.
-   Copyright 1993, 1994, 1995, 1998, 1999, 2001, 2002, 2003, 2004
+   Copyright 1993, 1994, 1995, 1998, 1999, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -137,16 +137,11 @@ hppabsd_core_core_file_p (abfd)
   /* Sanity checks.  Make sure the size of the core file matches the
      the size computed from information within the core itself.  */
   {
-    FILE *stream = bfd_cache_lookup (abfd);
     struct stat statbuf;
 
-    if (stream == NULL)
+    if (bfd_stat (abfd, &statbuf) < 0)
       return NULL;
-    if (fstat (fileno (stream), &statbuf) < 0)
-      {
-	bfd_set_error (bfd_error_system_call);
-	return NULL;
-      }
+
     if (NBPG * (UPAGES + u.u_dsize + u.u_ssize) > statbuf.st_size)
       {
 	bfd_set_error (bfd_error_file_truncated);

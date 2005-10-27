@@ -1,6 +1,6 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
@@ -109,16 +109,11 @@ trad_unix_core_file_p (abfd)
 
   /* Check that the size claimed is no greater than the file size.  */
   {
-    FILE *stream = bfd_cache_lookup (abfd);
     struct stat statbuf;
 
-    if (stream == NULL)
+    if (bfd_stat (abfd, &statbuf) < 0)
       return 0;
-    if (fstat (fileno (stream), &statbuf) < 0)
-      {
-	bfd_set_error (bfd_error_system_call);
-	return 0;
-      }
+
     if ((unsigned long) (NBPG * (UPAGES + u.u_dsize
 #ifdef TRAD_CORE_DSIZE_INCLUDES_TSIZE
 				 - u.u_tsize
