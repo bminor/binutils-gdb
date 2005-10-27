@@ -1,3 +1,7 @@
+2005-10-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* cache.c: Reorganize file to avoid forward reference.
+
 2005-10-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* cache.c (bfd_cache_lookup_worker): Don't abort on failing to

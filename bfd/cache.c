@@ -45,8 +45,195 @@ SUBSECTION
 #include "libbfd.h"
 #include "libiberty.h"
 
-static bfd_boolean bfd_cache_delete (bfd *);
+/*
+INTERNAL_FUNCTION
+	BFD_CACHE_MAX_OPEN macro
 
+DESCRIPTION
+	The maximum number of files which the cache will keep open at
+	one time.
+
+.#define BFD_CACHE_MAX_OPEN 10
+
+*/
+
+/* The number of BFD files we have open.  */
+
+static int open_files;
+
+/*
+INTERNAL_FUNCTION
+	bfd_last_cache
+
+SYNOPSIS
+	extern bfd *bfd_last_cache;
+
+DESCRIPTION
+	Zero, or a pointer to the topmost BFD on the chain.  This is
+	used by the <<bfd_cache_lookup>> macro in @file{libbfd.h} to
+	determine when it can avoid a function call.
+*/
+
+bfd *bfd_last_cache = NULL;
+
+/* Insert a BFD into the cache.  */
+
+static void
+insert (bfd *abfd)
+{
+  if (bfd_last_cache == NULL)
+    {
+      abfd->lru_next = abfd;
+      abfd->lru_prev = abfd;
+    }
+  else
+    {
+      abfd->lru_next = bfd_last_cache;
+      abfd->lru_prev = bfd_last_cache->lru_prev;
+      abfd->lru_prev->lru_next = abfd;
+      abfd->lru_next->lru_prev = abfd;
+    }
+  bfd_last_cache = abfd;
+}
+
+/* Remove a BFD from the cache.  */
+
+static void
+snip (bfd *abfd)
+{
+  abfd->lru_prev->lru_next = abfd->lru_next;
+  abfd->lru_next->lru_prev = abfd->lru_prev;
+  if (abfd == bfd_last_cache)
+    {
+      bfd_last_cache = abfd->lru_next;
+      if (abfd == bfd_last_cache)
+	bfd_last_cache = NULL;
+    }
+}
+
+/* Close a BFD and remove it from the cache.  */
+
+static bfd_boolean
+bfd_cache_delete (bfd *abfd)
+{
+  bfd_boolean ret;
+
+  if (fclose ((FILE *) abfd->iostream) == 0)
+    ret = TRUE;
+  else
+    {
+      ret = FALSE;
+      bfd_set_error (bfd_error_system_call);
+    }
+
+  snip (abfd);
+
+  abfd->iostream = NULL;
+  --open_files;
+
+  return ret;
+}
+
+/* We need to open a new file, and the cache is full.  Find the least
+   recently used cacheable BFD and close it.  */
+
+static bfd_boolean
+close_one (void)
+{
+  register bfd *kill;
+
+  if (bfd_last_cache == NULL)
+    kill = NULL;
+  else
+    {
+      for (kill = bfd_last_cache->lru_prev;
+	   ! kill->cacheable;
+	   kill = kill->lru_prev)
+	{
+	  if (kill == bfd_last_cache)
+	    {
+	      kill = NULL;
+	      break;
+	    }
+	}
+    }
+
+  if (kill == NULL)
+    {
+      /* There are no open cacheable BFD's.  */
+      return TRUE;
+    }
+
+  kill->where = real_ftell ((FILE *) kill->iostream);
+
+  return bfd_cache_delete (kill);
+}
+
+/*
+  INTERNAL_FUNCTION
+  	bfd_cache_lookup
+
+  DESCRIPTION
+ 	Check to see if the required BFD is the same as the last one
+ 	looked up. If so, then it can use the stream in the BFD with
+ 	impunity, since it can't have changed since the last lookup;
+ 	otherwise, it has to perform the complicated lookup function.
+
+  .#define bfd_cache_lookup(x) \
+  .    ((x) == bfd_last_cache ? \
+  .      (FILE *) (bfd_last_cache->iostream): \
+  .       bfd_cache_lookup_worker (x))
+
+ */
+
+/*
+INTERNAL_FUNCTION
+	bfd_cache_lookup_worker
+
+SYNOPSIS
+	FILE *bfd_cache_lookup_worker (bfd *abfd);
+
+DESCRIPTION
+	Called when the macro <<bfd_cache_lookup>> fails to find a
+	quick answer.  Find a file descriptor for @var{abfd}.  If
+	necessary, it open it.  If there are already more than
+	<<BFD_CACHE_MAX_OPEN>> files open, it tries to close one first, to
+	avoid running out of file descriptors.  It will return NULL
+	if it is unable to (re)open the @var{abfd}.
+*/
+
+FILE *
+bfd_cache_lookup_worker (bfd *abfd)
+{
+  bfd *orig_bfd = abfd;
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    abort ();
+
+  if (abfd->my_archive)
+    abfd = abfd->my_archive;
+
+  if (abfd->iostream != NULL)
+    {
+      /* Move the file to the start of the cache.  */
+      if (abfd != bfd_last_cache)
+	{
+	  snip (abfd);
+	  insert (abfd);
+	}
+      return (FILE *) abfd->iostream;
+    }
+
+  if (bfd_open_file (abfd) == NULL)
+    ;
+  else if (real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0)
+    bfd_set_error (bfd_error_system_call);
+  else
+    return (FILE *) abfd->iostream;
+
+  (*_bfd_error_handler) (_("reopening %B: %s\n"),
+			 orig_bfd, bfd_errmsg (bfd_get_error ()));
+  return NULL;
+}
 
 static file_ptr
 cache_btell (struct bfd *abfd)
@@ -172,147 +359,6 @@ static const struct bfd_iovec cache_iovec = {
   &cache_bread, &cache_bwrite, &cache_btell, &cache_bseek,
   &cache_bclose, &cache_bflush, &cache_bstat
 };
-
-/*
-INTERNAL_FUNCTION
-	BFD_CACHE_MAX_OPEN macro
-
-DESCRIPTION
-	The maximum number of files which the cache will keep open at
-	one time.
-
-.#define BFD_CACHE_MAX_OPEN 10
-
-*/
-
-/* The number of BFD files we have open.  */
-
-static int open_files;
-
-/*
-INTERNAL_FUNCTION
-	bfd_last_cache
-
-SYNOPSIS
-	extern bfd *bfd_last_cache;
-
-DESCRIPTION
-	Zero, or a pointer to the topmost BFD on the chain.  This is
-	used by the <<bfd_cache_lookup>> macro in @file{libbfd.h} to
-	determine when it can avoid a function call.
-*/
-
-bfd *bfd_last_cache = NULL;
-
-/*
-  INTERNAL_FUNCTION
-  	bfd_cache_lookup
-
-  DESCRIPTION
- 	Check to see if the required BFD is the same as the last one
- 	looked up. If so, then it can use the stream in the BFD with
- 	impunity, since it can't have changed since the last lookup;
- 	otherwise, it has to perform the complicated lookup function.
-
-  .#define bfd_cache_lookup(x) \
-  .    ((x) == bfd_last_cache ? \
-  .      (FILE *) (bfd_last_cache->iostream): \
-  .       bfd_cache_lookup_worker (x))
-
- */
-
-/* Insert a BFD into the cache.  */
-
-static void
-insert (bfd *abfd)
-{
-  if (bfd_last_cache == NULL)
-    {
-      abfd->lru_next = abfd;
-      abfd->lru_prev = abfd;
-    }
-  else
-    {
-      abfd->lru_next = bfd_last_cache;
-      abfd->lru_prev = bfd_last_cache->lru_prev;
-      abfd->lru_prev->lru_next = abfd;
-      abfd->lru_next->lru_prev = abfd;
-    }
-  bfd_last_cache = abfd;
-}
-
-/* Remove a BFD from the cache.  */
-
-static void
-snip (bfd *abfd)
-{
-  abfd->lru_prev->lru_next = abfd->lru_next;
-  abfd->lru_next->lru_prev = abfd->lru_prev;
-  if (abfd == bfd_last_cache)
-    {
-      bfd_last_cache = abfd->lru_next;
-      if (abfd == bfd_last_cache)
-	bfd_last_cache = NULL;
-    }
-}
-
-/* We need to open a new file, and the cache is full.  Find the least
-   recently used cacheable BFD and close it.  */
-
-static bfd_boolean
-close_one (void)
-{
-  register bfd *kill;
-
-  if (bfd_last_cache == NULL)
-    kill = NULL;
-  else
-    {
-      for (kill = bfd_last_cache->lru_prev;
-	   ! kill->cacheable;
-	   kill = kill->lru_prev)
-	{
-	  if (kill == bfd_last_cache)
-	    {
-	      kill = NULL;
-	      break;
-	    }
-	}
-    }
-
-  if (kill == NULL)
-    {
-      /* There are no open cacheable BFD's.  */
-      return TRUE;
-    }
-
-  kill->where = real_ftell ((FILE *) kill->iostream);
-
-  return bfd_cache_delete (kill);
-}
-
-/* Close a BFD and remove it from the cache.  */
-
-static bfd_boolean
-bfd_cache_delete (bfd *abfd)
-{
-  bfd_boolean ret;
-
-  if (fclose ((FILE *) abfd->iostream) == 0)
-    ret = TRUE;
-  else
-    {
-      ret = FALSE;
-      bfd_set_error (bfd_error_system_call);
-    }
-
-  snip (abfd);
-
-  abfd->iostream = NULL;
-  --open_files;
-
-  return ret;
-}
 
 /*
 INTERNAL_FUNCTION
@@ -479,53 +525,4 @@ bfd_open_file (bfd *abfd)
     }
 
   return (FILE *) abfd->iostream;
-}
-
-/*
-INTERNAL_FUNCTION
-	bfd_cache_lookup_worker
-
-SYNOPSIS
-	FILE *bfd_cache_lookup_worker (bfd *abfd);
-
-DESCRIPTION
-	Called when the macro <<bfd_cache_lookup>> fails to find a
-	quick answer.  Find a file descriptor for @var{abfd}.  If
-	necessary, it open it.  If there are already more than
-	<<BFD_CACHE_MAX_OPEN>> files open, it tries to close one first, to
-	avoid running out of file descriptors.  It will return NULL
-	if it is unable to (re)open the @var{abfd}.
-*/
-
-FILE *
-bfd_cache_lookup_worker (bfd *abfd)
-{
-  bfd *orig_bfd = abfd;
-  if ((abfd->flags & BFD_IN_MEMORY) != 0)
-    abort ();
-
-  if (abfd->my_archive)
-    abfd = abfd->my_archive;
-
-  if (abfd->iostream != NULL)
-    {
-      /* Move the file to the start of the cache.  */
-      if (abfd != bfd_last_cache)
-	{
-	  snip (abfd);
-	  insert (abfd);
-	}
-      return (FILE *) abfd->iostream;
-    }
-
-  if (bfd_open_file (abfd) == NULL)
-    ;
-  else if (real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0)
-    bfd_set_error (bfd_error_system_call);
-  else
-    return (FILE *) abfd->iostream;
-
-  (*_bfd_error_handler) (_("reopening %B: %s\n"),
-			 orig_bfd, bfd_errmsg (bfd_get_error ()));
-  return NULL;
 }
