@@ -45,6 +45,21 @@ SUBSECTION
 #include "libbfd.h"
 #include "libiberty.h"
 
+/* In some cases we can optimize cache operation when reopening files.
+   For instance, a flush is entirely unnecessary if the file is already
+   closed, so a flush would use CACHE_NO_OPEN.  Similarly, a seek using
+   SEEK_SET or SEEK_END need not first seek to the current position.
+   For stat we ignore seek errors, just in case the file has changed
+   while we weren't looking.  If it has, then it's possible that the
+   file is shorter and we don't want a seek error to prevent us doing
+   the stat.  */
+enum cache_flag {
+  CACHE_NORMAL = 0,
+  CACHE_NO_OPEN = 1,
+  CACHE_NO_SEEK = 2,
+  CACHE_NO_SEEK_ERROR = 4
+};
+
 /* The maximum number of files which the cache will keep open at
    one time.  */
 
@@ -150,6 +165,22 @@ close_one (void)
 
   kill->where = real_ftell ((FILE *) kill->iostream);
 
+  /* Save the file st_mtime.  This is a hack so that gdb can detect when
+     an executable has been deleted and recreated.  The only thing that
+     makes this reasonable is that st_mtime doesn't change when a file
+     is unlinked, so saving st_mtime makes BFD's file cache operation
+     a little more transparent for this particular usage pattern.  If we
+     hadn't closed the file then we would not have lost the original
+     contents, st_mtime etc.  Of course, if something is writing to an
+     existing file, then this is the wrong thing to do.
+     FIXME: gdb should save these times itself on first opening a file,
+     and this hack be removed.  */
+  if (kill->direction == no_direction || kill->direction == read_direction)
+    {
+      bfd_get_mtime (kill);
+      kill->mtime_set = TRUE;
+    }
+
   return bfd_cache_delete (kill);
 }
 
@@ -158,10 +189,10 @@ close_one (void)
    impunity, since it can't have changed since the last lookup;
    otherwise, it has to perform the complicated lookup function.  */
 
-#define bfd_cache_lookup(x) \
+#define bfd_cache_lookup(x, flag) \
   ((x) == bfd_last_cache			\
    ? (FILE *) (bfd_last_cache->iostream)	\
-   : bfd_cache_lookup_worker (x))
+   : bfd_cache_lookup_worker (x, flag))
 
 /* Called when the macro <<bfd_cache_lookup>> fails to find a
    quick answer.  Find a file descriptor for @var{abfd}.  If
@@ -171,7 +202,7 @@ close_one (void)
    if it is unable to (re)open the @var{abfd}.  */
 
 static FILE *
-bfd_cache_lookup_worker (bfd *abfd)
+bfd_cache_lookup_worker (bfd *abfd, enum cache_flag flag)
 {
   bfd *orig_bfd = abfd;
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
@@ -191,9 +222,14 @@ bfd_cache_lookup_worker (bfd *abfd)
       return (FILE *) abfd->iostream;
     }
 
+  if (flag & CACHE_NO_OPEN)
+    return NULL;
+
   if (bfd_open_file (abfd) == NULL)
     ;
-  else if (real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0)
+  else if (!(flag & CACHE_NO_SEEK)
+	   && real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0
+	   && !(flag & CACHE_NO_SEEK_ERROR))
     bfd_set_error (bfd_error_system_call);
   else
     return (FILE *) abfd->iostream;
@@ -206,16 +242,16 @@ bfd_cache_lookup_worker (bfd *abfd)
 static file_ptr
 cache_btell (struct bfd *abfd)
 {
-  FILE *f = bfd_cache_lookup (abfd);
+  FILE *f = bfd_cache_lookup (abfd, CACHE_NO_OPEN);
   if (f == NULL)
-    return -1;
+    return abfd->where;
   return real_ftell (f);
 }
 
 static int
 cache_bseek (struct bfd *abfd, file_ptr offset, int whence)
 {
-  FILE *f = bfd_cache_lookup (abfd);
+  FILE *f = bfd_cache_lookup (abfd, whence != SEEK_CUR ? CACHE_NO_SEEK : 0);
   if (f == NULL)
     return -1;
   return real_fseek (f, offset, whence);
@@ -245,7 +281,7 @@ cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
   if (nbytes == 0)
     return 0;
 
-  f = bfd_cache_lookup (abfd);
+  f = bfd_cache_lookup (abfd, 0);
   if (f == NULL)
     return 0;
 
@@ -279,7 +315,7 @@ static file_ptr
 cache_bwrite (struct bfd *abfd, const void *where, file_ptr nbytes)
 {
   file_ptr nwrite;
-  FILE *f = bfd_cache_lookup (abfd);
+  FILE *f = bfd_cache_lookup (abfd, 0);
   if (f == NULL)
     return 0;
   nwrite = fwrite (where, 1, nbytes, f);
@@ -301,9 +337,9 @@ static int
 cache_bflush (struct bfd *abfd)
 {
   int sts;
-  FILE *f = bfd_cache_lookup (abfd);
+  FILE *f = bfd_cache_lookup (abfd, CACHE_NO_OPEN);
   if (f == NULL)
-    return -1;
+    return 0;
   sts = fflush (f);
   if (sts < 0)
     bfd_set_error (bfd_error_system_call);
@@ -314,7 +350,7 @@ static int
 cache_bstat (struct bfd *abfd, struct stat *sb)
 {
   int sts;
-  FILE *f = bfd_cache_lookup (abfd);
+  FILE *f = bfd_cache_lookup (abfd, CACHE_NO_SEEK_ERROR);
   if (f == NULL)
     return -1;
   sts = fstat (fileno (f), sb);

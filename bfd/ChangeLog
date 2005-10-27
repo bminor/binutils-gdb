@@ -1,5 +1,16 @@
 2005-10-27  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 973
+	* cache.c (enum cache_flag): New.
+	(close_one): Save file mtime.
+	(bfd_cache_lookup): Add flag arg, adjust all users.
+	(bfd_cache_lookup_worker): Likewise.
+	(cache_btell): Use CACHE_NO_OPEN and return abfd->where if file
+	not open.
+	(cache_bflush): Similarly, and return success of file not open.
+	(cache_bseek): Use CACHE_NO_SEEK if SEEK_SET or SEEK_END.
+	(cache_bstat): Use CACHE_NO_SEEK_ERROR.
+
 	* bfdwin.c (bfd_get_file_window): Seek into file in place of
 	using bfd_cache_lookup.
 
