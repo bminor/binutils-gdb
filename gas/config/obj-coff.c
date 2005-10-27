@@ -329,6 +329,18 @@ coff_obj_symbol_new_hook (symbolS *symbolP)
     SF_SET_LOCAL (symbolP);
 }
 
+void
+coff_obj_symbol_clone_hook (symbolS *newsymP, symbolS *orgsymP)
+{
+  long sz = (OBJ_COFF_MAX_AUXENTRIES + 1) * sizeof (combined_entry_type);
+  combined_entry_type * s = xmalloc (sz);
+
+  memcpy (s, coffsymbol (symbol_get_bfdsym (orgsymP))->native, sz);
+  coffsymbol (symbol_get_bfdsym (newsymP))->native = s;
+
+  SF_SET (newsymP, SF_GET (orgsymP));
+}
+
 
 /* Handle .ln directives.  */
 

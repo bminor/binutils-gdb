@@ -542,6 +542,7 @@ symbolS *
 symbol_clone (symbolS *orgsymP, int replace)
 {
   symbolS *newsymP;
+  asymbol *bsymorg, *bsymnew;
 
   /* Running local_symbol_convert on a clone that's not the one currently
      in local_hash would incorrectly replace the hash entry.  Thus the
@@ -549,11 +550,30 @@ symbol_clone (symbolS *orgsymP, int replace)
      depends on not encountering an unconverted symbol.  */
   if (LOCAL_SYMBOL_CHECK (orgsymP))
     orgsymP = local_symbol_convert ((struct local_symbol *) orgsymP);
+  bsymorg = orgsymP->bsym;
 
   know (S_IS_DEFINED (orgsymP));
 
   newsymP = obstack_alloc (&notes, sizeof (*newsymP));
   *newsymP = *orgsymP;
+  bsymnew = bfd_make_empty_symbol (bfd_asymbol_bfd (bsymorg));
+  if (bsymnew == NULL)
+    as_perror ("%s", "bfd_make_empty_symbol");
+  newsymP->bsym = bsymnew;
+  bsymnew->name = bsymorg->name;
+  bsymnew->flags =  bsymorg->flags;
+  bsymnew->section =  bsymorg->section;
+  bsymnew->udata.p = (PTR) newsymP;
+  bfd_copy_private_symbol_data (bfd_asymbol_bfd (bsymorg), bsymorg,
+				bfd_asymbol_bfd (bsymnew), bsymnew);
+
+#ifdef obj_symbol_clone_hook
+  obj_symbol_clone_hook (newsymP, orgsymP);
+#endif
+
+#ifdef tc_symbol_clone_hook
+  tc_symbol_clone_hook (newsymP, orgsymP);
+#endif
 
   if (replace)
     {

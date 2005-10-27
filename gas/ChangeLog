@@ -1,3 +1,11 @@
+2005-10-27  Jan Beulich  <jbeulich@novell.com>
+
+	* read.c (assign_symbol): Also consider equates already defined.
+	* symbols.c (symbol_clone): Also clone the underlying BFD symbol.
+	* config/obj-coff.h (obj_symbol_clone_hook): New.
+	(coff_obj_symbol_clone_hook): Declare.
+	* config/obj-coff.c (coff_obj_symbol_clone_hook): New.
+
 2005-10-26  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.c (md_relax_table, subtype_mappings,

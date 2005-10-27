@@ -172,6 +172,7 @@
 #endif
 
 #define obj_symbol_new_hook coff_obj_symbol_new_hook
+#define obj_symbol_clone_hook coff_obj_symbol_clone_hook
 #define obj_read_begin_hook coff_obj_read_begin_hook
 
 #include "bfd/libcoff.h"
@@ -391,6 +392,7 @@ extern void coff_frob_section            (segT);
 extern void coff_adjust_section_syms     (bfd *, asection *, void *);
 extern void coff_frob_file_after_relocs  (void);
 extern void coff_obj_symbol_new_hook     (symbolS *);
+extern void coff_obj_symbol_clone_hook   (symbolS *, symbolS *);
 extern void coff_obj_read_begin_hook     (void);
 #ifdef TE_PE
 extern void pecoff_obj_set_weak_hook     (symbolS *);

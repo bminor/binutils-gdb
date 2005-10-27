@@ -35,8 +35,6 @@ if ![istarget hppa*-*-*] then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
 }
 
-# PR/1387
-setup_xfail "*-*-*"
 gas_test_error "equiv1.s" "" ".equiv for symbol already set to another one"
 gas_test_error "equiv2.s" "" ".equiv for symbol already set to an expression"
 

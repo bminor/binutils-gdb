@@ -2794,7 +2794,7 @@ assign_symbol (char *name, int mode)
 #endif
     }
 
-  if (S_IS_DEFINED (symbolP))
+  if (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
     {
       /* Permit register names to be redefined.  */
       if ((mode != 0 || !S_IS_VOLATILE (symbolP))
