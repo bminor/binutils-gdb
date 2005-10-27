@@ -6185,12 +6185,12 @@ find_vinsn_conflicts (vliw_insn *vinsn)
 			  xtensa_opcode_name (isa, op2->opcode), j);
 		  return TRUE;
 		case 'e':
-		  as_bad (_("opcodes '%s' (slot %d) and '%s' (slot %d) write the same queue"),
+		  as_bad (_("opcodes '%s' (slot %d) and '%s' (slot %d) write the same port"),
 			  xtensa_opcode_name (isa, op1->opcode), i,
 			  xtensa_opcode_name (isa, op2->opcode), j);
 		  return TRUE;
 		case 'f':
-		  as_bad (_("opcodes '%s' (slot %d) and '%s' (slot %d) both have volatile queue accesses"),
+		  as_bad (_("opcodes '%s' (slot %d) and '%s' (slot %d) both have volatile port accesses"),
 			  xtensa_opcode_name (isa, op1->opcode), i,
 			  xtensa_opcode_name (isa, op2->opcode), j);
 		  return TRUE;
@@ -6349,7 +6349,7 @@ check_t1_t2_reads_and_writes (TInsn *t1, TInsn *t2)
 	= xtensa_interfaceOperand_interface (isa, t2->opcode, j);
       int t2_class = xtensa_interface_class_id (isa, t2_int);
 
-      t2_inout = xtensa_interface_inout (isa, j);
+      t2_inout = xtensa_interface_inout (isa, t2_int);
       if (xtensa_interface_has_side_effect (isa, t2_int) == 1)
 	t2_volatile = TRUE;
 
@@ -6359,7 +6359,7 @@ check_t1_t2_reads_and_writes (TInsn *t1, TInsn *t2)
 	    = xtensa_interfaceOperand_interface (isa, t1->opcode, j);
 	  int t1_class = xtensa_interface_class_id (isa, t1_int);
 
-	  t1_inout = xtensa_interface_inout (isa, i);
+	  t1_inout = xtensa_interface_inout (isa, t1_int);
 	  if (xtensa_interface_has_side_effect (isa, t1_int) == 1)
 	    t1_volatile = TRUE;
 

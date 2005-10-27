@@ -1,3 +1,10 @@
+2005-10-27  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (find_vinsn_conflicts): Change error messages to
+	refer to "ports" instead of "queues".
+	(check_t1_t2_reads_and_writes): Pass correct interface values to
+	xtensa_interface_inout.
+
 2005-10-27  Jan Beulich  <jbeulich@novell.com>
 
 	* read.c (assign_symbol): Also consider equates already defined.
