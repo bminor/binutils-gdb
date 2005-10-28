@@ -1,3 +1,11 @@
+2005-10-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/1472
+	* aoutx.h (NAME (aout, machine_type)): Handle
+	bfd_mach_sparc_v8plus, bfd_mach_sparc_v8plusa,
+	bfd_mach_sparc_v8plusb, bfd_mach_sparc_v9, bfd_mach_sparc_v9a
+	and bfd_mach_sparc_v9b.
+
 2005-10-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/1567
