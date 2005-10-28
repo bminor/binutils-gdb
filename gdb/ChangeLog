@@ -1,3 +1,9 @@
+2005-10-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ttrace.c (inf_ttrace_mourn_inferior): Remove redundant cast.
+	(inf_ttrace_kill): Renamed from inf_ttrace_kill_inferior.
+	(inf_ttrace_target): Resort assignments.
+
 2005-10-28  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el: Sync with Emacs 22.0.50.
