@@ -1,3 +1,8 @@
+2005-10-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/1567
+	* ld-cris/noov.s, ld-cris/noov.d: New test.
+
 2005-10-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/empty2.d: Allow more symbols.
