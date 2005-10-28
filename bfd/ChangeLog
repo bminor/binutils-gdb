@@ -1,3 +1,9 @@
+2005-10-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/1567
+	* elf32-cris.c (cris_elf_howto_table) <R_CRIS_32>: Set
+	complain_on_overflow field to complain_overflow_dont.
+
 2005-10-27  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 973

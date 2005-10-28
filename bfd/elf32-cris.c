@@ -156,7 +156,12 @@ static reloc_howto_type cris_elf_howto_table [] =
 	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
+	 /* We don't want overflow complaints for 64-bit vma builds
+	    for e.g. sym+0x40000000 (or actually sym-0xc0000000 in
+	    32-bit ELF) where sym=0xc0001234.
+	    Don't do this for the PIC relocs, as we don't expect to
+	    see them with large offsets.  */
+	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_CRIS_32",		/* name */
 	 FALSE,			/* partial_inplace */
