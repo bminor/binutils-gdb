@@ -1,3 +1,50 @@
+2005-10-28  Dave Brolley  <brolley@redhat.com>
+
+	* All CGEN-generated sources: Regenerate.
+
+	Contribute the following changes:
+	2005-09-19  Dave Brolley  <brolley@redhat.com>
+
+	* disassemble.c (disassemble_init_for_target): Add 'break' to case for
+	bfd_arch_tic4x. Use cgen_bitset_create and cgen_bitset_set for
+	bfd_arch_m32c case.
+
+	2005-02-16  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-dis.in: Rename CGEN_ISA_MASK to CGEN_BITSET. Rename
+	cgen_isa_mask_* to cgen_bitset_*.
+	* cgen-opc.c: Likewise.
+
+	2003-11-28  Richard Sandiford  <rsandifo@redhat.com>
+
+	* cgen-dis.in (print_insn_@arch@): Fix comparison with cached isas.
+	* *-dis.c: Regenerate.
+
+	2003-06-05  DJ Delorie	<dj@redhat.com>
+
+	* cgen-dis.in (print_insn_@arch@): Copy prev_isas, don't assign
+	it, as it may point to a reused buffer.	Set prev_isas when we
+	change cpus.
+
+	2002-12-13  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-opc.c (cgen_isa_mask_create): New support function for
+	CGEN_ISA_MASK.
+	(cgen_isa_mask_init): Ditto.
+	(cgen_isa_mask_clear): Ditto.
+	(cgen_isa_mask_add): Ditto.
+	(cgen_isa_mask_set): Ditto.
+	(cgen_isa_supported): Ditto.
+	(cgen_isa_mask_compare): Ditto.
+	(cgen_isa_mask_intersection): Ditto.
+	(cgen_isa_mask_copy): Ditto.
+	(cgen_isa_mask_combine): Ditto.
+	* cgen-dis.in (libiberty.h): #include it.
+	(isas): Renamed from 'isa' and now (CGEN_ISA_MASK *).
+	(print_insn_@arch@): Use CGEN_ISA_MASK and support functions.
+	* Makefile.am (CGENDEPS): Add utils-cgen.scm and attrs.scm.
+	* Makefile.in: Regenerated.
+
 2005-10-27  DJ Delorie  <dj@redhat.com>
 
 	* m32c-asm.c: Regenerate.

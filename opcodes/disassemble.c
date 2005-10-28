@@ -452,14 +452,19 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_tic4x
     case bfd_arch_tic4x:
       info->skip_zeroes = 32;
+      break;
 #endif
 #ifdef ARCH_m32c
     case bfd_arch_m32c:
       info->endian = BFD_ENDIAN_BIG;
-      if (info->mach == bfd_mach_m16c)
-	info->insn_sets = 1 << ISA_M16C;
-      else
-	info->insn_sets = 1 << ISA_M32C;
+      if (! info->insn_sets)
+	{
+	  info->insn_sets = cgen_bitset_create (ISA_MAX);
+	  if (info->mach == bfd_mach_m16c)
+	    cgen_bitset_set (info->insn_sets, ISA_M16C);
+	  else
+	    cgen_bitset_set (info->insn_sets, ISA_M32C);
+	}
       break;
 #endif
     default:

@@ -726,32 +726,32 @@ static const CGEN_IBASE ip2k_cgen_macro_insn_table[] =
 /* sc */
   {
     -1, "sc", "sc", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* snc */
   {
     -1, "snc", "snc", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* sz */
   {
     -1, "sz", "sz", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* snz */
   {
     -1, "snz", "snz", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* skip */
   {
     -1, "skip", "skip", 16,
-    { 0|A(SKIPA)|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(SKIPA)|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* skip */
   {
     -1, "skipb", "skip", 16,
-    { 0|A(SKIPA)|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(SKIPA)|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 };
 

@@ -794,14 +794,14 @@ m32c_cgen_insn_supported (CGEN_CPU_DESC cd,
 			  const CGEN_INSN *insn)
 {
   int machs = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH);
-  int isas = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_ISA);
+  CGEN_BITSET isas = CGEN_INSN_BITSET_ATTR_VALUE (insn, CGEN_INSN_ISA);
 
   /* If attributes are absent, assume no restriction.  */
   if (machs == 0)
     machs = ~0;
 
   return ((machs & cd->machs)
-	  && (isas & cd->isas));
+          && cgen_bitset_intersect_p (& isas, cd->isas));
 }
 
 /* Parse a set of registers, R0,R1,A0,A1,SB,FB.  */

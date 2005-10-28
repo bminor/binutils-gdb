@@ -1228,17 +1228,17 @@ static const CGEN_IBASE fr30_cgen_macro_insn_table[] =
 /* ldi8 $i8,$Ri */
   {
     -1, "ldi8m", "ldi8", 16,
-    { 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* ldi20 $i20,$Ri */
   {
     -1, "ldi20m", "ldi20", 32,
-    { 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* ldi32 $i32,$Ri */
   {
     -1, "ldi32m", "ldi32", 48,
-    { 0|A(NO_DIS)|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(NO_DIS)|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 };
 
