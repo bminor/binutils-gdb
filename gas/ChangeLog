@@ -1,3 +1,8 @@
+2005-10-28  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (aeabi_set_public_attributes): Use selected_cpu
+	instead of mcpu_cpu_opt.
+
 2005-10-27  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (find_vinsn_conflicts): Change error messages to

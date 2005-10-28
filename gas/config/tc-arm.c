@@ -13274,7 +13274,7 @@ aeabi_set_public_attributes (void)
 
   /* Choose the architecture based on the capabilities of the requested cpu
      (if any) and/or the instructions actually used.  */
-  flags = mcpu_cpu_opt | arm_arch_used | thumb_arch_used;
+  flags = selected_cpu | mfpu_opt | arm_arch_used | thumb_arch_used;
   if (flags & ARM_EXT_V6T2)
     arch = 8;
   else if (flags & ARM_EXT_V6Z)
