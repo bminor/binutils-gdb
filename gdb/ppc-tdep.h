@@ -1,7 +1,7 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation,
-   Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -381,4 +381,7 @@ enum
     ppc_spr_pbu2      = 1023
   };
 
-#endif
+/* Instruction size.  */
+#define PPC_INSN_SIZE 4
+
+#endif /* ppc-tdep.h */
