@@ -1,3 +1,13 @@
+2005-10-28  Dave Brolley  <brolley@redhat.com>
+
+	Contribute the following change:
+	2003-09-24  Dave Brolley  <brolley@redhat.com>
+
+	* frv.opc: Use CGEN_ATTR_VALUE_ENUM_TYPE in place of
+	CGEN_ATTR_VALUE_TYPE.
+	* m32c.opc (m32c_cgen_insn_supported): Use CGEN_INSN_BITSET_ATTR_VALUE.
+	Use cgen_bitset_intersect_p.
+
 2005-10-27  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (Imm-8-s4n, Imm-12-s4n): New.
