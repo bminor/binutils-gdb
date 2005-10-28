@@ -87,12 +87,13 @@ static int insn_size;
 /* Flags to set in the elf header */
 static flagword m32c_flags = DEFAULT_FLAGS;
 
-static unsigned int m32c_isa = (1 << ISA_M16C);
+static char default_isa = 1 << (7 - ISA_M16C);
+static CGEN_BITSET m32c_isa = {1, & default_isa};
 
 static void
 set_isa (enum isa_attr isa_num)
 {
-  m32c_isa = (1 << isa_num);
+  cgen_bitset_set (& m32c_isa, isa_num);
 }
 
 static void s_bss (int);
@@ -156,7 +157,7 @@ md_begin (void)
   gas_cgen_cpu_desc = m32c_cgen_cpu_open (CGEN_CPU_OPEN_MACHS, cpu_mach,
 					  CGEN_CPU_OPEN_ENDIAN,
 					  CGEN_ENDIAN_BIG,
-					  CGEN_CPU_OPEN_ISAS, m32c_isa,
+					  CGEN_CPU_OPEN_ISAS, & m32c_isa,
 					  CGEN_CPU_OPEN_END);
 
   m32c_cgen_init_asm (gas_cgen_cpu_desc);

@@ -1,3 +1,12 @@
+2005-10-28  Dave Brolley  <brolley@redhat.com>
+
+	Contribute the following change:
+	2005-09-19  Dave Brolley  <brolley@redhat.com>
+
+	* config/tc-m32c.c (default_isa): New static variable.
+	(m32c_isa): Now of type CGEN_BITSET.
+	(md_begin): Pass &m32c_isa to m32c_cgen_cpu_open.
+
 2005-10-28  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (aeabi_set_public_attributes): Use selected_cpu
