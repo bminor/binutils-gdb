@@ -1,3 +1,7 @@
+2005-10-28  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el: Sync with Emacs 22.0.50.
+
 2005-10-25  Andreas Schwab  <schwab@suse.de>
 
 	* regformats/reg-ia64.dat: Remove NAT registers.
