@@ -1,3 +1,8 @@
+2005-10-28  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Fix @pxref usage under
+	"The -var-update Command".
+
 2005-10-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Print Settings): Add documentation for set/show
