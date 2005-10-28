@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2004 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -27,6 +27,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-main.h"
 #include "cgen-ops.h"
+
+/* Get the value of h-reloc-ann.  */
+
+BI
+frvbf_h_reloc_ann_get (SIM_CPU *current_cpu)
+{
+  return CPU (h_reloc_ann);
+}
+
+/* Set a value for h-reloc-ann.  */
+
+void
+frvbf_h_reloc_ann_set (SIM_CPU *current_cpu, BI newval)
+{
+  CPU (h_reloc_ann) = newval;
+}
 
 /* Get the value of h-pc.  */
 

@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "bfd.h"
 #include "libiberty.h"
 
-CGEN_ATTR_VALUE_TYPE frv_current_fm_slot;
+CGEN_ATTR_VALUE_ENUM_TYPE frv_current_fm_slot;
 
 /* The semantic code invokes this for invalid (unrecognized) instructions.  */
 

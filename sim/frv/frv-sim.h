@@ -143,7 +143,7 @@ struct _device { int foo; };
 
 /* maintain the address of the start of the previous VLIW insn sequence.  */
 extern IADDR previous_vliw_pc;
-extern CGEN_ATTR_VALUE_TYPE frv_current_fm_slot;
+extern CGEN_ATTR_VALUE_ENUM_TYPE frv_current_fm_slot;
 
 /* Hardware status.  */
 #define GET_HSR0() GET_H_SPR (H_SPR_HSR0)
