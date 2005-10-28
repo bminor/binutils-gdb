@@ -1,3 +1,14 @@
+2005-10-28  Joel Brobecker  <brobecker@adacore.com>
+
+	Mostly from Eric Botcazou <botcazou@adacore.com>
+	* rs6000-core.c: ANSIfy all function definitions.
+	Add missing function prototypes.
+	(ptr_to_uint): New type.
+	(rs6000coff_core_p): Use it as intermediate step in casts.
+	(rs6000coff_core_file_matches_executable_p): Likewise.
+	* xcoff-target.h (rs6000coff_core_p): Fix prototype.
+	(rs6000coff_core_file_matches_executable_p): Likewise.
+
 2005-10-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/1472

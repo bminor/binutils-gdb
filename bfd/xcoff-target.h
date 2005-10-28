@@ -63,8 +63,8 @@
 
 #undef  CORE_FILE_P
 #define CORE_FILE_P rs6000coff_core_p
-extern const bfd_target * rs6000coff_core_p (void);
-extern bfd_boolean rs6000coff_core_file_matches_executable_p (void);
+extern const bfd_target * rs6000coff_core_p (bfd *);
+extern bfd_boolean rs6000coff_core_file_matches_executable_p (bfd *, bfd*);
 
 #undef	coff_core_file_matches_executable_p
 #define coff_core_file_matches_executable_p  \
