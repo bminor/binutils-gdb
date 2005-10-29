@@ -1,5 +1,12 @@
 2005-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerated.
+
+	* dep-in.sed: Replace " ./" with " ".
+
+2005-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* hpux-core.c: Include <machine/reg.h> only if HPUX_CORE is
 	define.
 	* osf-core.c: Include <sys/core.h> only if OSF_CORE is defined.
