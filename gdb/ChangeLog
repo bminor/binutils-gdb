@@ -1,3 +1,8 @@
+2005-10-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ttrace.c (inf_ttrace_wait): Comment out TARGET_WAITKIND_EXEC
+	code; return TARGET_WAITKIND_STOPPED instead.
+
 2005-10-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* ppc-tdep.h (PPC_INSN_SIZE): Define.
