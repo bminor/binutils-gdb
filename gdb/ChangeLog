@@ -1,5 +1,10 @@
 2005-10-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.h (HPPA_INSN_SIZE): New define.
+	* hppa-hpux-tdep.c (hppa_hpux_search_pattern)
+	(hppa64_hpux_search_dummy_call_sequence): Rewrite to avoid
+	assumption on sizeof(unsigned).
+
 	* inf-ttrace.c (inf_ttrace_wait): Comment out TARGET_WAITKIND_EXEC
 	code; return TARGET_WAITKIND_STOPPED instead.
 

@@ -75,6 +75,9 @@ enum hppa_regnum
   HPPA_ARG3_REGNUM = 23		/* The fourth argument of a callee. */
 };
 
+/* Instruction size.  */
+#define HPPA_INSN_SIZE 4
+
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
