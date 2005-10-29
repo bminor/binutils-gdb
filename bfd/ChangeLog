@@ -1,3 +1,8 @@
+2005-10-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2005-10-28  Joel Brobecker  <brobecker@adacore.com>
 
 	From Eric Botcazou  <botcazou@adacore.com>
