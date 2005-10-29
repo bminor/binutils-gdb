@@ -26,7 +26,9 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #include "libbfd.h"
 
 #include <sys/user.h>
+#ifdef OSF_CORE
 #include <sys/core.h>
+#endif
 
 /* forward declarations */
 

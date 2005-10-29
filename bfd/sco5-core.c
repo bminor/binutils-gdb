@@ -31,8 +31,10 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 #include <signal.h>
 
 #include <sys/user.h>		/* After a.out.h  */
+#ifdef SCO5_CORE
 #include <sys/paccess.h>
 #include <sys/region.h>
+#endif
 
 struct sco5_core_struct
 {

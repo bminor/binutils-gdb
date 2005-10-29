@@ -61,7 +61,9 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 # endif
 #endif
 #include <signal.h>
+#ifdef HPUX_CORE
 #include <machine/reg.h>
+#endif
 #include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
 

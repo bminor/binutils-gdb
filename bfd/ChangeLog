@@ -1,3 +1,11 @@
+2005-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* hpux-core.c: Include <machine/reg.h> only if HPUX_CORE is
+	define.
+	* osf-core.c: Include <sys/core.h> only if OSF_CORE is defined.
+	* sco5-core.c: Include <sys/paccess.h> and <sys/region.h> only
+	if SCO5_CORE is defined.
+
 2005-10-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.am: Run "make dep-am".
