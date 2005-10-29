@@ -1,3 +1,9 @@
+2005-10-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR gas/1630
+	* gas/all/gas.exp <weakref1, weakref1g, weakref1l, weakref1u,
+	weakref1w>: Xfail for cris-*-* and mmix-*-*.
+
 2005-10-27  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/equ.d: Fix typo.

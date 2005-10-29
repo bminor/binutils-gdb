@@ -256,10 +256,15 @@ if { ![istarget "i960-*-*"] } {
 case $target_triplet in {
     { z80-*-* } { }
     default {
+	setup_xfail cris-*-* mmix-*-*
 	run_dump_test weakref1
+	setup_xfail cris-*-* mmix-*-*
 	run_dump_test weakref1g
+	setup_xfail cris-*-* mmix-*-*
 	run_dump_test weakref1l
+	setup_xfail cris-*-* mmix-*-*
 	run_dump_test weakref1u
+	setup_xfail cris-*-* mmix-*-*
 	run_dump_test weakref1w
     }
 }
