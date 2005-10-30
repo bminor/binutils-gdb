@@ -1442,6 +1442,7 @@ help (void)
 {
   unsigned i;
   const char **targets, **pp;
+  int len;
 
   printf (_("Usage: %s [options] file...\n"), program_name);
 
@@ -1451,7 +1452,6 @@ help (void)
       if (ld_options[i].doc != NULL)
 	{
 	  bfd_boolean comma;
-	  int len;
 	  unsigned j;
 
 	  printf ("  ");
@@ -1524,6 +1524,10 @@ help (void)
 	  printf ("%s\n", _(ld_options[i].doc));
 	}
     }
+  printf (_("  @FILE"));
+  for (len = strlen ("  @FILE"); len < 30; len++)
+    putchar (' ');
+  printf (_("Read options from FILE\n"));
 
   /* Note: Various tools (such as libtool) depend upon the
      format of the listings below - do not change them.  */

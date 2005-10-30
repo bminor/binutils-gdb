@@ -167,7 +167,7 @@ Usage: %s [-[abcDhilLsTvwxyz]] [-[ACeEfFJnNOpPqQZ][name]] [-I dirs]\n\
 	[--no-static] [--print-path] [--separate-files]\n\
 	[--static-call-graph] [--sum] [--table-length=len] [--traditional]\n\
 	[--version] [--width=n] [--ignore-non-functions]\n\
-	[--demangle[=STYLE]] [--no-demangle]\n\
+	[--demangle[=STYLE]] [--no-demangle] [@FILE]\n\
 	[image-file] [profile-file...]\n"),
 	   whoami);
   if (status == 0)

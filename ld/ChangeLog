@@ -1,3 +1,7 @@
+2005-10-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* lexsup.c (help): Document "@FILE".
+
 2005-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".

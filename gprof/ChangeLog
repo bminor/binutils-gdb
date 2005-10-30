@@ -1,6 +1,6 @@
-2005-10-25  Alan Modra  <amodra@bigpond.net.au>
+2005-10-30  Mark Mitchell  <mark@codesourcery.com>
 
-	* po/gprof.pot: Regenerate.
+	* gprof.c (usage): Document "@FILE".
 
 2005-09-30  Nick Clifton  <nickc@redhat.com>
 

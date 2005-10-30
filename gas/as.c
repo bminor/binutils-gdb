@@ -346,6 +346,8 @@ Options:\n\
   fprintf (stream, _("\
   --listing-cont-lines    set the maximum number of continuation lines used\n\
                           for the output data column of the listing\n"));
+  fprintf (stream, _("\
+  @FILE                   read options from FILE\n")); 
 
   md_show_usage (stream);
 
