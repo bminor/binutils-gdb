@@ -2854,13 +2854,13 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       size = 2;
 
       status = info->read_memory_func (pc, (bfd_byte *)b, 2, info);
+      if (little)
+	given = (b[0]) | (b[1] << 8);
+      else
+	given = (b[1]) | (b[0] << 8);
+
       if (!status)
 	{
-	  if (little)
-	    given = (b[0]) | (b[1] << 8);
-	  else
-	    given = (b[1]) | (b[0] << 8);
-
 	  /* These bit patterns signal a four-byte Thumb
 	     instruction.  */
 	  if ((given & 0xF800) == 0xF800

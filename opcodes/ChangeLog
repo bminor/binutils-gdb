@@ -1,3 +1,7 @@
+2005-10-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* arm-dis.c (print_insn): Warning fix.
+
 2005-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".
