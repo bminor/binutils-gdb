@@ -1,3 +1,48 @@
+2005-10-31  Christopher Faylor  <cgf@timesys.com>
+
+	Change child_ to win32_ throughout.
+	* win32-nat.c (win32_ops): New variable.
+	(win32_so_ops): Ditto.
+	(psapi_get_dll_name): Make function static.
+	(struct so_stuff): Delete.
+	(struct lm_info): New struct.
+	(solib_start, solib_end): Redefine as struct so_list.
+	(safe_symbol_file_add_stub): Use so_list rather than so_stuff.
+	(register_loaded_dll): Ditto.  Special-case ntdll.dll.  Fill in lm_info
+	field of so_list with information previously stored in so_stuff.
+	(get_image_name): Make function static.
+	(max_dll_name_len): Make variable static.
+	(win32_free_so): New function.
+	(win32_current_sos): Ditto.
+	(win32_relocate_section_addresses): Ditto.
+	(handle_unload_dll): Use so_list rather than so_stuff.  Call free_so to
+	delete shared library.
+	(solib_address): Delete function.
+	(child_solib_loaded_library_pathname): Ditto.
+	(win32_clear_solib): Rename from child_clear_solibs.  Use so_list
+	rather than so_stuff.  Just clear win32-specific stuff.
+	(get_relocated_section_addrs): Delete.
+	(solib_symbols_add): Ditto.
+	(info_dll_command): Make static.  Use lm_info field from so_list to
+	retrieve load address.
+	(fake_create_process): Make function static.
+	(win32_xfer_memory): Ditto.
+	(win32_kill_inferior): Ditto.
+	(win32_resume): Ditto.
+	(cygwin_pid_to_str): Ditto.
+	(do_initial_win32_stuff): Use win32_ops rather than
+	deprecated_child_ops.
+	(child_detach): Ditto.
+	(win32_mourn_inferior): Ditto.
+	(_initialize_win32_nat): Ditto.
+	(init_win32_ops): Ditto.  Fill out win32_so_ops and set
+	current_target_so_ops to win32_so_ops.
+	(core_dll_symbols_add): Delete.
+	(map_single_dll_code_section): Ditto.
+	(dll_code_sections_add): Ditto.
+	(core_section_load_dll_symbols): Ditto.
+	(child_solib_add): Ditto.
+
 2005-10-31  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* tui/tui-command.c (tui_dispatch_ctrl_char): Test output of
