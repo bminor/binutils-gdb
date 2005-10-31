@@ -1,3 +1,8 @@
+2005-10-31  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR ld/1501
+	* ld-mmix/bpo-10.d: Adjust for empty-section-removal.
+
 2005-10-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/1567
