@@ -1,3 +1,7 @@
+2005-10-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/bfp-test.exp: Properly anchor gdb_multiple_test usage.
+
 2005-10-17  Paul Gilliam  <pgilliam@us.ibm.com>
 
         * gdb.arch/altivec-regs.exp: Adjust "info reg vrsave" and "info reg

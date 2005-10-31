@@ -59,7 +59,7 @@ gdb_test_multiple "set var b32=10.5f" "$test" {
     -re "$gdb_prompt $" {
 	pass "$test"
     }
-    -re "Invalid number" {
+    -re "Invalid number.*$gdb_prompt $" {
 	fail "$test (do not recognize 10.5f)"
     }
 }
@@ -69,7 +69,7 @@ gdb_test_multiple "set var b64=20.25f" "$test" {
     -re "$gdb_prompt $" {
 	pass "$test"
     }
-    -re "Invalid number" {
+    -re "Invalid number.*$gdb_prompt $" {
 	fail "$test (do not recognize 20.25f)"
     }
 }
@@ -79,7 +79,7 @@ gdb_test_multiple "set var b128=30.375l" "$test" {
     -re "$gdb_prompt $" {
 	pass "$test"
     }
-    -re "Invalid number" {
+    -re "Invalid number.*$gdb_prompt $" {
 	fail "$test (do not recognize 30.375l)"
     }
 }
@@ -92,7 +92,7 @@ gdb_test "print b128" ".*9 = 30\.375.*" "The value of b128 is changed to 30.375"
 
 set test "set variable b32 = 100.5a"
 gdb_test_multiple "set var b32=100.5a" "$test" {
-    -re "Invalid number" {
+    -re "Invalid number.*$gdb_prompt $" {
 	pass "$test"
     }
     -re "$gdb_prompt $" {
@@ -102,7 +102,7 @@ gdb_test_multiple "set var b32=100.5a" "$test" {
 
 set test "set variable b64 = 200.25x"
 gdb_test_multiple "set var b64=200.25x" "$test" {
-    -re "Invalid number" {
+    -re "Invalid number.*$gdb_prompt $" {
 	pass "$test"
     }
     -re "$gdb_prompt $" {
@@ -112,7 +112,7 @@ gdb_test_multiple "set var b64=200.25x" "$test" {
 
 set test "set variable b128 = 300.375fl"
 gdb_test_multiple "set var b128=300.375fl" "$test" {
-    -re "Invalid number" {
+    -re "Invalid number.*$gdb_prompt $" {
 	pass "$test"
     }
     -re "$gdb_prompt $" {
@@ -122,7 +122,7 @@ gdb_test_multiple "set var b128=300.375fl" "$test" {
 
 set test "set variable b128 = 300.375fff"
 gdb_test_multiple "set var b128=300.375fff" "$test" {
-    -re "Invalid number" {
+    -re "Invalid number.*$gdb_prompt $" {
 	pass "$test"
     }
     -re "$gdb_prompt $" {
