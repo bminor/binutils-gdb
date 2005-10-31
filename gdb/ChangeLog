@@ -1,3 +1,8 @@
+2005-10-31  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* tui/tui-command.c (tui_dispatch_ctrl_char): Test output of
+	getenv() before using it.
+
 2005-10-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-tdep.h (HPPA_INSN_SIZE): New define.
