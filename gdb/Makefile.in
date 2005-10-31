@@ -2747,10 +2747,10 @@ vaxnbsd-tdep.o: vaxnbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
 vaxobsd-tdep.o: vaxobsd-tdep.c  $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(frame_unwind_h) $(osabi_h) $(symtab_h) $(trad_frame_h) \
 	$(vax_tdep_h) $(gdb_string_h)
-vax-tdep.o: vax-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) $(frame_h) \
-	$(frame_base_h) $(frame_unwind_h) $(gdbcore_h) $(gdbtypes_h) \
-	$(osabi_h) $(regcache_h) $(regset_h) $(trad_frame_h) $(value_h) \
-	$(gdb_string_h) $(vax_tdep_h)
+vax-tdep.o: vax-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
+	$(float_format_h)$(frame_h) $(frame_base_h) $(frame_unwind_h) \
+	$(gdbcore_h) $(gdbtypes_h) $(osabi_h) $(regcache_h) $(regset_h) \
+	$(trad_frame_h) $(value_h) $(gdb_string_h) $(vax_tdep_h)
 win32-nat.o: win32-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(exceptions_h) $(gdbcore_h) $(command_h) $(completer_h) \
 	$(regcache_h) $(top_h) $(buildsym_h) $(symfile_h) $(objfiles_h) \

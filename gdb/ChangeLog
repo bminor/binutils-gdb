@@ -1,3 +1,14 @@
+2005-11-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* doublest.c (floatformat_normalize_byteorder): Handle
+	floatformat_vax.
+	(convert_doublest_to_floatformat): Use
+	floatformat_normalize_byteorder to swap bytes if necessary.
+	* vax-tdep.c: Include floatformat.h.
+	(vax_gdbarch_init): Set float_format, double_format,
+	long_double_format and long_double_bit.
+	* Makefile.in (vax-tdep.o): Update dependencies.
+
 2005-10-31  Christopher Faylor  <cgf@timesys.com>
 
 	Change child_ to win32_ throughout.
