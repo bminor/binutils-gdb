@@ -10709,8 +10709,8 @@ md_parse_option (int c, char *arg)
       mips_abicalls = FALSE;
       break;
 
-      /* The -xgot option tells the assembler to use 32 offsets when
-         accessing the got in SVR4_PIC mode.  It is for Irix
+      /* The -xgot option tells the assembler to use 32 bit offsets
+         when accessing the got in SVR4_PIC mode.  It is for Irix
          compatibility.  */
     case OPTION_XGOT:
       mips_big_got = 1;
