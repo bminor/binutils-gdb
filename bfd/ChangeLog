@@ -1,3 +1,9 @@
+2005-11-02  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/1775
+	* elf32-m68k.c (elf_m68k_finish_dynamic_symbol): Add required
+	parentheses.
+
 2005-10-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am: Run "make dep-am".

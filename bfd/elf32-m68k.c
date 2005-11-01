@@ -1871,7 +1871,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 		  + got_offset
 		  - (splt->output_section->vma
 		     + h->plt.offset
-		     + CFV4E_FLAG (output_bfd) ? 8 : 2),
+		     + (CFV4E_FLAG (output_bfd) ? 8 : 2)),
 		  splt->contents + h->plt.offset + plt_off1);
 
       bfd_put_32 (output_bfd, plt_index * sizeof (Elf32_External_Rela),
@@ -1884,7 +1884,7 @@ elf_m68k_finish_dynamic_symbol (output_bfd, info, h, sym)
 		  (splt->output_section->vma
 		   + splt->output_offset
 		   + h->plt.offset
-		   + CFV4E_FLAG (output_bfd) ? 12 : 8),
+		   + (CFV4E_FLAG (output_bfd) ? 12 : 8)),
 		  sgot->contents + got_offset);
 
       /* Fill in the entry in the .rela.plt section.  */
