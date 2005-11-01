@@ -1,5 +1,11 @@
 2005-11-01  Thiemo Seufer  <ths@networkno.de>
 
+	PR gas/1299
+	* Makefile.am: Disable -Werror for the itbl-lex.o rule.
+	* Makefile.in: Regenerate.
+
+2005-11-01  Thiemo Seufer  <ths@networkno.de>
+
 	* config/tc-mips.c (md_parse_option): Fix typo in comment.
 
 2005-10-30  Mark Mitchell  <mark@codesourcery.com>

@@ -623,7 +623,11 @@ bfin-lex.o: bfin-lex.c bfin-parse.h $(srcdir)/config/bfin-defs.h
 # The instruction table specification lexical analyzer and parser.
 
 itbl-lex.c: $(srcdir)/itbl-lex.l
+
+# Disable -Werror, if it has been enabled, since old versions of bison/
+# yacc will produce working code which contain compile time warnings. 
 itbl-lex.o: itbl-lex.c itbl-parse.h $(srcdir)/itbl-lex.h
+	$(COMPILE) -c $< $(NO_WERROR)
 
 # Disable -Werror, if it has been enabled, since old versions of bison/
 # yacc will produce working code which contain compile time warnings. 
