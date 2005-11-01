@@ -56,6 +56,10 @@ After turning this setting "on", GDB prints the index of each element
 when displaying arrays.  The default is "off" to preserve the previous
 behavior.
 
+* VAX floating point support
+
+GDB now supports the not-quite-ieee VAX F and D floating point formats.
+
 *** Changes in GDB 6.3:
 
 * New command line option

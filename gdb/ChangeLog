@@ -1,3 +1,7 @@
+2005-11-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS: Mention VAX floating point support.
+
 2005-10-31  Christopher Faylor  <cgf@timesys.com>
 
 	* win32-nat.c (get_relocated_section_addrs): Reinstate.
