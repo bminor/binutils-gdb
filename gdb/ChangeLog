@@ -1,3 +1,19 @@
+2005-11-01  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c (CYGWIN_SIGNAL_STRING): Delete.
+	(_CYGWIN_SIGNAL_STRING): Define if not already defined in cygwin.h.
+	(win32_add_thread): Use XZALLOC rather than xmalloc/memset.
+	(register_loaded_dll): Ditto.
+	(handle_load_dll): Call solib_add here.
+	(handle_unload_dll): Ditto.
+	(info_dll_command): Delete.
+	(handle_output_debug_string): Use official _CYGWIN_SIGNAL_STRING.
+	(win32_current_sos): Duplicate table to pass off to caller rather than
+	deleting our version.
+	(set_win32_aliases): New function.
+	(_initialize_win32_nat): Remove local handling of "info shared".  Set
+	deprecated_init_ui_hook to allow late setting of "info dll" alias.
+
 2005-11-01  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* event-top.c (gdb_setup_readline): Don't set gdb_stdout when

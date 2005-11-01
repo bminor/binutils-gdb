@@ -84,7 +84,9 @@ static int debug_registers_used;
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file. */
-#define CYGWIN_SIGNAL_STRING "cygwin: signal"
+#ifndef _CYGWIN_SIGNAL_STRING
+#define _CYGWIN_SIGNAL_STRING "cYgSiGw00f"
+#endif
 
 #define CHECK(x)	check (x, __FILE__,__LINE__)
 #define DEBUG_EXEC(x)	if (debug_exec)		printf_unfiltered x
@@ -263,8 +265,7 @@ win32_add_thread (DWORD id, HANDLE h)
   if ((th = thread_rec (id, FALSE)))
     return th;
 
-  th = (thread_info *) xmalloc (sizeof (*th));
-  memset (th, 0, sizeof (*th));
+  th = XZALLOC (thread_info);
   th->id = id;
   th->h = h;
   th->next = thread_head.next;
@@ -722,8 +723,7 @@ register_loaded_dll (const char *name, DWORD load_addr, int readsyms)
       GetSystemDirectory (buf, sizeof (buf));
       strcat (buf, "\\ntdll.dll");
     }
-  so = (struct so_list *) xmalloc (sizeof (struct so_list));
-  memset (so, 0, sizeof (*so));
+  so = XZALLOC (struct so_list);
   so->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
   so->lm_info->load_addr = load_addr;
   cygwin_conv_to_posix_path (buf, so->so_name);
@@ -803,6 +803,7 @@ handle_load_dll (void *dummy)
     return 1;
 
   register_loaded_dll (dll_name, (DWORD) event->lpBaseOfDll + 0x1000, auto_solib_add);
+  solib_add (NULL, 0, NULL, auto_solib_add);
 
   return 1;
 }
@@ -843,8 +844,10 @@ handle_unload_dll (void *dummy)
 	if (!so->next)
 	  solib_end = so;
 	free_so (sodel);
+	solib_add (NULL, 0, NULL, auto_solib_add);
 	return 1;
       }
+
   error (_("Error: dll starting at 0x%lx not found."), (DWORD) lpBaseOfDll);
 
   return 0;
@@ -887,22 +890,6 @@ dll_symbol_command (char *args, int from_tty)
   safe_symbol_file_add (args, from_tty, NULL, 0, OBJF_SHARED | OBJF_USERLOADED);
 }
 
-/* List currently loaded DLLs. */
-static void
-info_dll_command (char *ignore, int from_tty)
-{
-  struct so_list *so = &solib_start;
-
-  if (!so->next)
-    return;
-
-  printf_filtered ("%*s  Load Address\n", -max_dll_name_len, "DLL Name");
-  while ((so = so->next) != NULL)
-    printf_filtered ("%*s  %08lx\n", -max_dll_name_len, so->so_name, so->lm_info->load_addr);
-
-  return;
-}
-
 /* Handle DEBUG_STRING output from child process.
    Cygwin prepends its messages with a "cygwin:".  Interpret this as
    a Cygwin signal.  Otherwise just print the string as a warning. */
@@ -917,7 +904,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
       || !s || !*s)
     return gotasig;
 
-  if (strncmp (s, CYGWIN_SIGNAL_STRING, sizeof (CYGWIN_SIGNAL_STRING) - 1) != 0)
+  if (strncmp (s, _CYGWIN_SIGNAL_STRING, sizeof (_CYGWIN_SIGNAL_STRING) - 1) != 0)
     {
       if (strncmp (s, "cYg", 3) != 0)
 	warning (("%s"), s);
@@ -925,7 +912,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
   else
     {
       char *p;
-      int sig = strtol (s + sizeof (CYGWIN_SIGNAL_STRING) - 1, &p, 0);
+      int sig = strtol (s + sizeof (_CYGWIN_SIGNAL_STRING) - 1, &p, 0);
       gotasig = target_signal_from_host (sig);
       ourstatus->value.sig = gotasig;
       if (gotasig)
@@ -2237,16 +2224,32 @@ out:
 static struct so_list *
 win32_current_sos (void)
 {
-  struct so_list *head = solib_start.next;
-  win32_clear_solib ();
-  if (!head && core_bfd)
+  struct so_list *sop;
+  struct so_list *start = NULL;
+  struct so_list *last;
+
+  if (!solib_start.next && core_bfd)
     {
+      win32_clear_solib ();
       bfd_map_over_sections (core_bfd, &core_section_load_dll_symbols,
 			     &win32_ops);
-      head = solib_start.next;
-      win32_clear_solib ();
     }
-  return head;
+
+  for (sop = solib_start.next; sop; sop = sop->next)
+    {
+      struct so_list *new = XZALLOC (struct so_list);
+      strcpy (new->so_name, sop->so_name);
+      strcpy (new->so_original_name, sop->so_original_name);
+      if (!start)
+	last = start = new;
+      else
+	{
+	  last->next = new;
+	  last = new;
+	}
+    }
+
+  return start;
 }
 
 static void
@@ -2319,6 +2322,12 @@ init_win32_ops (void)
   current_target_so_ops = &win32_so_ops;
 }
 
+static void
+set_win32_aliases (char *argv0)
+{
+  add_info_alias ("dll", "sharedlibrary", 1);
+}
+
 void
 _initialize_win32_nat (void)
 {
@@ -2382,9 +2391,6 @@ Show whether to display kernel exceptions in child process."), NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
 
-  add_info ("dll", info_dll_command, _("Status of loaded DLLs."));
-  add_info_alias ("sharedlibrary", "dll", 1);
-
   add_prefix_cmd ("w32", class_info, info_w32_command,
 		  _("Print information specific to Win32 debugging."),
 		  &info_w32_cmdlist, "info w32 ", 0, &infolist);
@@ -2393,6 +2399,7 @@ Show whether to display kernel exceptions in child process."), NULL,
 	   _("Display selectors infos."),
 	   &info_w32_cmdlist);
   add_target (&win32_ops);
+  deprecated_init_ui_hook = set_win32_aliases;
 }
 
 /* Hardware watchpoint support, adapted from go32-nat.c code.  */
