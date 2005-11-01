@@ -513,7 +513,6 @@ struct safe_symbol_file_add_args
   struct objfile *ret;
 };
 
-/*CGF*/
 /* Maintain a linked list of "so" information. */
 struct lm_info
 {

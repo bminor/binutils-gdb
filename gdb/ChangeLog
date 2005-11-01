@@ -1,3 +1,7 @@
+2005-10-31  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c: Remove comment intended only for debugging.
+
 2005-11-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* doublest.c (floatformat_normalize_byteorder): Handle
