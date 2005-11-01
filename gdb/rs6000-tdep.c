@@ -3376,10 +3376,21 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   switch (info.osabi)
     {
+    case GDB_OSABI_LINUX:
+      /* FIXME: pgilliam/2005-10-21: Assume all PowerPC 64-bit linux systems
+         have altivec registers.  If not, ptrace will fail the first time it's
+         called to access one and will not be called again.  This wart will
+         be removed when Daniel Jacobowitz's proposal for autodetecting target
+         registers is implemented. */
+      if ((v->arch == bfd_arch_powerpc) && ((v->mach)== bfd_mach_ppc64))
+        {
+          tdep->ppc_vr0_regnum = 71;
+          tdep->ppc_vrsave_regnum = 104;
+        }
+      /* Fall Thru */
     case GDB_OSABI_NETBSD_AOUT:
     case GDB_OSABI_NETBSD_ELF:
     case GDB_OSABI_UNKNOWN:
-    case GDB_OSABI_LINUX:
       set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
       frame_unwind_append_sniffer (gdbarch, rs6000_frame_sniffer);
       set_gdbarch_unwind_dummy_id (gdbarch, rs6000_unwind_dummy_id);
