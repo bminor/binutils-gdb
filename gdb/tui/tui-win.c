@@ -1322,31 +1322,30 @@ make_visible_with_new_height (struct tui_win_info * win_info)
       tui_make_visible (win_info->detail.source_info.execution_info);
       if (win_info->generic.content != NULL)
 	{
-	  union tui_line_or_address line_or_addr;
+	  struct tui_line_or_address line_or_addr;
 	  struct symtab_and_line cursal
 	    = get_current_source_symtab_and_line ();
 
-	  if (win_info->generic.type == SRC_WIN)
-	    line_or_addr.line_no =
-	      win_info->detail.source_info.start_line_or_addr.line_no;
-	  else
-	    line_or_addr.addr =
-	      win_info->detail.source_info.start_line_or_addr.addr;
+	  line_or_addr = win_info->detail.source_info.start_line_or_addr;
 	  tui_free_win_content (&win_info->generic);
 	  tui_update_source_window (win_info, cursal.symtab, line_or_addr, TRUE);
 	}
       else if (deprecated_selected_frame != (struct frame_info *) NULL)
 	{
-	  union tui_line_or_address line;
+	  struct tui_line_or_address line;
 	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
 
 	  s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
 	  if (win_info->generic.type == SRC_WIN)
-	    line.line_no = cursal.line;
+	    {
+	      line.loa = LOA_LINE;
+	      line.u.line_no = cursal.line;
+	    }
 	  else
 	    {
-	      find_line_pc (s, cursal.line, &line.addr);
+	      line.loa = LOA_ADDRESS;
+	      find_line_pc (s, cursal.line, &line.u.addr);
 	    }
 	  tui_update_source_window (win_info, s, line, TRUE);
 	}

@@ -1,3 +1,13 @@
+2005-11-01  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* tui/tui-data.h (tui_line_or_address): Encapsulate the union in a
+	struct with a tag.
+	(tui_source_element, tui_source_info): Update.
+	* tui/tui-disasm.c, tui/tui-source.c: Update to use the tagged union.
+	* tui/tui-source.h, tui/tui-stack.c, tui/tui-win.c: Likewise.
+	* tui/tui-winsource.c, tui/tui-data.c, tui/tui-layout.c: Likewise.
+	* tui/tui-winsource.h: Likewise.
+
 2005-11-01  Christopher Faylor  <cgf@timesys.com>
 
 	* win32-nat.c (CYGWIN_SIGNAL_STRING): Delete.

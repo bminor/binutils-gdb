@@ -519,14 +519,14 @@ extract_display_start_addr (void)
     case SRC_COMMAND:
     case SRC_DATA_COMMAND:
       find_line_pc (cursal.symtab,
-		    TUI_SRC_WIN->detail.source_info.start_line_or_addr.line_no,
+		    TUI_SRC_WIN->detail.source_info.start_line_or_addr.u.line_no,
 		    &pc);
       addr = pc;
       break;
     case DISASSEM_COMMAND:
     case SRC_DISASSEM_COMMAND:
     case DISASSEM_DATA_COMMAND:
-      addr = TUI_DISASM_WIN->detail.source_info.start_line_or_addr.addr;
+      addr = TUI_DISASM_WIN->detail.source_info.start_line_or_addr.u.addr;
       break;
     default:
       addr = 0;

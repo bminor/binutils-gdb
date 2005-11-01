@@ -188,7 +188,8 @@ tui_set_disassem_content (CORE_ADDR pc)
   if (ret != TUI_SUCCESS)
     return ret;
 
-  TUI_DISASM_WIN->detail.source_info.start_line_or_addr.addr = pc;
+  TUI_DISASM_WIN->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
+  TUI_DISASM_WIN->detail.source_info.start_line_or_addr.u.addr = pc;
   cur_pc = (CORE_ADDR)
     (((struct tui_win_element *) locator->content[0])->which_element.locator.addr);
 
@@ -249,7 +250,8 @@ tui_set_disassem_content (CORE_ADDR pc)
       else
         src->line[0] = '\0';
 
-      src->line_or_addr.addr = asm_lines[i].addr;
+      src->line_or_addr.loa = LOA_ADDRESS;
+      src->line_or_addr.u.addr = asm_lines[i].addr;
       src->is_exec_point = asm_lines[i].addr == cur_pc;
 
       /* See whether there is a breakpoint installed.  */
@@ -270,9 +272,10 @@ tui_show_disassem (CORE_ADDR start_addr)
 {
   struct symtab *s = find_pc_symtab (start_addr);
   struct tui_win_info * win_with_focus = tui_win_with_focus ();
-  union tui_line_or_address val;
+  struct tui_line_or_address val;
 
-  val.addr = start_addr;
+  val.loa = LOA_ADDRESS;
+  val.u.addr = start_addr;
   tui_add_win_to_layout (DISASSEM_WIN);
   tui_update_source_window (TUI_DISASM_WIN, s, val, FALSE);
   /*
@@ -295,14 +298,15 @@ tui_show_disassem_and_update_source (CORE_ADDR start_addr)
   tui_show_disassem (start_addr);
   if (tui_current_layout () == SRC_DISASSEM_COMMAND)
     {
-      union tui_line_or_address val;
+      struct tui_line_or_address val;
 
       /*
          ** Update what is in the source window if it is displayed too,
          ** note that it follows what is in the disassembly window and visa-versa
        */
       sal = find_pc_line (start_addr, 0);
-      val.line_no = sal.line;
+      val.loa = LOA_LINE;
+      val.u.line_no = sal.line;
       tui_update_source_window (TUI_SRC_WIN, sal.symtab, val, TRUE);
       if (sal.symtab)
 	{
@@ -376,7 +380,7 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scroll_direction,
       CORE_ADDR pc;
       tui_win_content content;
       struct symtab *s;
-      union tui_line_or_address val;
+      struct tui_line_or_address val;
       int max_lines, dir;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
@@ -388,10 +392,11 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scroll_direction,
 
       /* account for hilite */
       max_lines = TUI_DISASM_WIN->generic.height - 2;
-      pc = content[0]->which_element.source.line_or_addr.addr;
+      pc = content[0]->which_element.source.line_or_addr.u.addr;
       dir = (scroll_direction == FORWARD_SCROLL) ? max_lines : - max_lines;
 
-      val.addr = tui_find_disassembly_address (pc, dir);
+      val.loa = LOA_ADDRESS;
+      val.u.addr = tui_find_disassembly_address (pc, dir);
       tui_update_source_window_as_is (TUI_DISASM_WIN, s, val, FALSE);
     }
 }
