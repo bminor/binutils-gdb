@@ -106,7 +106,8 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 		  stream = fdopen (desc, FOPEN_RT);
 		  clearerr (stream);
 		  cur_line = 0;
-		  cur_line_no = src->start_line_or_addr.line_no = line_no;
+		  src->start_line_or_addr.loa = LOA_LINE;
+		  cur_line_no = src->start_line_or_addr.u.line_no = line_no;
 		  if (offset > 0)
 		    src_line = (char *) xmalloc (
 					   (threshold + 1) * sizeof (char));
@@ -137,7 +138,9 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 
 		      /* Set whether element is the execution point and
 		         whether there is a break point on it.  */
-		      element->which_element.source.line_or_addr.line_no =
+		      element->which_element.source.line_or_addr.loa =
+			LOA_LINE;
+		      element->which_element.source.line_or_addr.u.line_no =
 			cur_line_no;
 		      element->which_element.source.is_exec_point =
 			(strcmp (((struct tui_win_element *)
@@ -247,7 +250,8 @@ tui_set_source_content_nil (struct tui_win_info * win_info, char *warning_string
 
       struct tui_win_element * element =
       (struct tui_win_element *) win_info->generic.content[curr_line];
-      element->which_element.source.line_or_addr.line_no = 0;
+      element->which_element.source.line_or_addr.loa = LOA_LINE;
+      element->which_element.source.line_or_addr.u.line_no = 0;
       element->which_element.source.is_exec_point = FALSE;
       element->which_element.source.has_break = FALSE;
 
@@ -295,7 +299,7 @@ tui_set_source_content_nil (struct tui_win_info * win_info, char *warning_string
 /* Function to display source in the source window.  This function
    initializes the horizontal scroll to 0.  */
 void
-tui_show_symtab_source (struct symtab *s, union tui_line_or_address line, int noerror)
+tui_show_symtab_source (struct symtab *s, struct tui_line_or_address line, int noerror)
 {
   TUI_SRC_WIN->detail.source_info.horizontal_offset = 0;
   tui_update_source_window_as_is (TUI_SRC_WIN, s, line, noerror);
@@ -320,7 +324,7 @@ tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
 {
   if (TUI_SRC_WIN->generic.content != NULL)
     {
-      union tui_line_or_address l;
+      struct tui_line_or_address l;
       struct symtab *s;
       tui_win_content content = (tui_win_content) TUI_SRC_WIN->generic.content;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
@@ -330,23 +334,24 @@ tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
       else
 	s = cursal.symtab;
 
+      l.loa = LOA_LINE;
       if (scroll_direction == FORWARD_SCROLL)
 	{
-	  l.line_no = content[0]->which_element.source.line_or_addr.line_no +
-	    num_to_scroll;
-	  if (l.line_no > s->nlines)
+	  l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no
+	    + num_to_scroll;
+	  if (l.u.line_no > s->nlines)
 	    /*line = s->nlines - win_info->generic.content_size + 1; */
 	    /*elz: fix for dts 23398 */
-	    l.line_no = content[0]->which_element.source.line_or_addr.line_no;
+	    l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no;
 	}
       else
 	{
-	  l.line_no = content[0]->which_element.source.line_or_addr.line_no -
-	    num_to_scroll;
-	  if (l.line_no <= 0)
-	    l.line_no = 1;
+	  l.u.line_no = content[0]->which_element.source.line_or_addr.u.line_no
+	    - num_to_scroll;
+	  if (l.u.line_no <= 0)
+	    l.u.line_no = 1;
 	}
 
-      print_source_lines (s, l.line_no, l.line_no + 1, 0);
+      print_source_lines (s, l.u.line_no, l.u.line_no + 1, 0);
     }
 }

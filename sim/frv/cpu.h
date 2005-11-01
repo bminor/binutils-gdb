@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2004 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -36,6 +36,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef struct {
   /* Hardware elements.  */
   struct {
+  /* relocation annotation */
+  BI h_reloc_ann;
+#define GET_H_RELOC_ANN() CPU (h_reloc_ann)
+#define SET_H_RELOC_ANN(x) (CPU (h_reloc_ann) = (x))
   /* program counter */
   USI h_pc;
 #define GET_H_PC() CPU (h_pc)
@@ -267,6 +271,8 @@ SET_H_SPR (((UINT) 281), TRUNCDISI ((x)));\
 ;} while (0)
 
 /* Cover fns for register access.  */
+BI frvbf_h_reloc_ann_get (SIM_CPU *);
+void frvbf_h_reloc_ann_set (SIM_CPU *, BI);
 USI frvbf_h_pc_get (SIM_CPU *);
 void frvbf_h_pc_set (SIM_CPU *, USI);
 UQI frvbf_h_psr_imple_get (SIM_CPU *);

@@ -71,6 +71,9 @@
 #include <sys/core.h>
 #include <sys/systemcfg.h>
 
+/* Borrowed from <sys/inttypes.h> on recent AIX versions.  */
+typedef unsigned long ptr_to_uint;
+
 #define	core_hdr(bfd)		((CoreHdr *) bfd->tdata.any)
 
 /* AIX 4.1 changed the names and locations of a few items in the core file.
@@ -250,6 +253,15 @@ typedef union {
 #define CORE_COMMONSZ	((int) &((struct core_dump *) 0)->c_entries \
 			 + sizeof (((struct core_dump *) 0)->c_entries))
 
+/* Define prototypes for certain functions, to avoid a compiler warning
+   saying that they are missing.  */
+
+const bfd_target * rs6000coff_core_p (bfd *abfd);
+bfd_boolean rs6000coff_core_file_matches_executable_p (bfd *core_bfd,
+                                                       bfd *exec_bfd);
+char * rs6000coff_core_file_failing_command (bfd *abfd);
+int rs6000coff_core_file_failing_signal (bfd *abfd);
+
 /* Try to read into CORE the header from the core file associated with ABFD.
    Return success.  */
 
@@ -277,13 +289,8 @@ read_hdr (bfd *abfd, CoreHdr *core)
 }
 
 static asection *
-make_bfd_asection (abfd, name, flags, size, vma, filepos)
-     bfd *abfd;
-     const char *name;
-     flagword flags;
-     bfd_size_type size;
-     bfd_vma vma;
-     file_ptr filepos;
+make_bfd_asection (bfd *abfd, const char *name, flagword flags,
+		   bfd_size_type size, bfd_vma vma, file_ptr filepos)
 {
   asection *asect;
 
@@ -304,8 +311,7 @@ make_bfd_asection (abfd, name, flags, size, vma, filepos)
    magic number or anything like, in rs6000coff.  */
 
 const bfd_target *
-rs6000coff_core_p (abfd)
-     bfd *abfd;
+rs6000coff_core_p (bfd *abfd)
 {
   CoreHdr core;
   struct stat statbuf;
@@ -341,11 +347,11 @@ rs6000coff_core_p (abfd)
   else
     {
       c_flag = core.old.c_flag;
-      c_stack = (file_ptr) core.old.c_stack;
+      c_stack = (file_ptr) (ptr_to_uint) core.old.c_stack;
       c_size = core.old.c_size;
       c_stackend = COLD_STACKEND;
       c_lsize = 0x7ffffff;
-      c_loader = (file_ptr) COLD_LOADER (core.old);
+      c_loader = (file_ptr) (ptr_to_uint) COLD_LOADER (core.old);
       proc64 = 0;
     }
 
@@ -523,9 +529,9 @@ rs6000coff_core_p (abfd)
     else
       {
 	c_datasize = core.old.c_datasize;
-	c_data = (file_ptr) core.old.c_data;
+	c_data = (file_ptr) (ptr_to_uint) core.old.c_data;
 	c_vmregions = core.old.c_vmregions;
-	c_vmm = (file_ptr) core.old.c_vmm;
+	c_vmm = (file_ptr) (ptr_to_uint) core.old.c_vmm;
       }
 
     /* .data section from executable.  */
@@ -633,9 +639,7 @@ rs6000coff_core_p (abfd)
 /* Return `TRUE' if given core is from the given executable.  */
 
 bfd_boolean
-rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd;
-     bfd *exec_bfd;
+rs6000coff_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
 {
   CoreHdr core;
   bfd_size_type size;
@@ -651,7 +655,7 @@ rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
   if (CORE_NEW (core))
     c_loader = CNEW_LOADER (core.new);
   else
-    c_loader = (file_ptr) COLD_LOADER (core.old);
+    c_loader = (file_ptr) (ptr_to_uint) COLD_LOADER (core.old);
 
   if (CORE_NEW (core) && CNEW_PROC64 (core.new))
     size = (int) ((LdInfo *) 0)->l64.ldinfo_filename;
@@ -711,8 +715,7 @@ rs6000coff_core_file_matches_executable_p (core_bfd, exec_bfd)
 }
 
 char *
-rs6000coff_core_file_failing_command (abfd)
-     bfd *abfd;
+rs6000coff_core_file_failing_command (bfd *abfd)
 {
   CoreHdr *core = core_hdr (abfd);
   char *com = CORE_NEW (*core) ?
@@ -725,8 +728,7 @@ rs6000coff_core_file_failing_command (abfd)
 }
 
 int
-rs6000coff_core_file_failing_signal (abfd)
-     bfd *abfd;
+rs6000coff_core_file_failing_signal (bfd *abfd)
 {
   CoreHdr *core = core_hdr (abfd);
   return CORE_NEW (*core) ? core->new.c_signo : core->old.c_signo;

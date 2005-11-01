@@ -75,6 +75,7 @@
 #define ARCH_w65
 #define ARCH_xstormy16
 #define ARCH_xtensa
+#define ARCH_z80
 #define ARCH_z8k
 #define INCLUDE_SHMEDIA
 #endif
@@ -374,6 +375,11 @@ disassembler (abfd)
       disassemble = print_insn_xtensa;
       break;
 #endif
+#ifdef ARCH_z80
+    case bfd_arch_z80:
+      disassemble = print_insn_z80;
+      break;
+#endif
 #ifdef ARCH_z8k
     case bfd_arch_z8k:
       if (bfd_get_mach(abfd) == bfd_mach_z8001)
@@ -446,14 +452,19 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_tic4x
     case bfd_arch_tic4x:
       info->skip_zeroes = 32;
+      break;
 #endif
 #ifdef ARCH_m32c
     case bfd_arch_m32c:
       info->endian = BFD_ENDIAN_BIG;
-      if (info->mach == bfd_mach_m16c)
-	info->insn_sets = 1 << ISA_M16C;
-      else
-	info->insn_sets = 1 << ISA_M32C;
+      if (! info->insn_sets)
+	{
+	  info->insn_sets = cgen_bitset_create (ISA_MAX);
+	  if (info->mach == bfd_mach_m16c)
+	    cgen_bitset_set (info->insn_sets, ISA_M16C);
+	  else
+	    cgen_bitset_set (info->insn_sets, ISA_M32C);
+	}
       break;
 #endif
     default:

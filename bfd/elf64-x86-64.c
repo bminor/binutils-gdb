@@ -525,7 +525,7 @@ elf64_x86_64_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf64_x86_64_copy_indirect_symbol (const struct elf_backend_data *bed,
+elf64_x86_64_copy_indirect_symbol (struct bfd_link_info *info,
 				   struct elf_link_hash_entry *dir,
 				   struct elf_link_hash_entry *ind)
 {
@@ -541,10 +541,7 @@ elf64_x86_64_copy_indirect_symbol (const struct elf_backend_data *bed,
 	  struct elf64_x86_64_dyn_relocs **pp;
 	  struct elf64_x86_64_dyn_relocs *p;
 
-	  if (ind->root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
+	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -589,7 +586,7 @@ elf64_x86_64_copy_indirect_symbol (const struct elf_backend_data *bed,
       dir->pointer_equality_needed |= ind->pointer_equality_needed;
     }
   else
-    _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+    _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
 static bfd_boolean

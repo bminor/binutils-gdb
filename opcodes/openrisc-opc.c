@@ -560,7 +560,7 @@ static const CGEN_IBASE openrisc_cgen_macro_insn_table[] =
 /* l.ret */
   {
     -1, "l-ret", "l.ret", 32,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 };
 

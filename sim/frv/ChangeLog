@@ -1,3 +1,16 @@
+2005-10-28  Dave Brolley  <brolley@redhat.com>
+
+	* cpu.c,cpu.h,decode.c,decode.h,model.c,sem.c: Regenerate.
+	
+	Contribute the following changes:
+	2003-09-29  Dave Brolley  <brolley@redhat.com>
+
+	* frv-sim.h: Use CGEN_ATTR_VALUE_ENUM_TYPE in place of
+	CGEN_ATTR_VALUE_TYPE.
+	* mloop.in: Ditto.
+	* pipeline.c: Ditto.
+	* traps.c: Ditto.
+
 2005-03-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure: Regenerate.

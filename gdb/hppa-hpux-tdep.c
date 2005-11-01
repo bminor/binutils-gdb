@@ -1,6 +1,6 @@
 /* Target-dependent code for HP-UX on PA-RISC.
 
-   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1309,32 +1309,31 @@ static CORE_ADDR
 hppa_hpux_search_pattern (CORE_ADDR start, CORE_ADDR end, 
 			  unsigned int *patterns, int count)
 {
-  unsigned int *buf;
+  int num_insns = (end - start + HPPA_INSN_SIZE) / HPPA_INSN_SIZE;
+  unsigned int *insns;
+  gdb_byte *buf;
   int offset, i;
-  int region, insns;
 
-  region = end - start + 4;
-  insns = region / 4;
-  buf = (unsigned int *) alloca (region);
+  buf = alloca (num_insns * HPPA_INSN_SIZE);
+  insns = alloca (num_insns * sizeof (unsigned int));
 
-  read_memory (start, (char *) buf, region);
+  read_memory (start, buf, num_insns * HPPA_INSN_SIZE);
+  for (i = 0; i < num_insns; i++, buf += HPPA_INSN_SIZE)
+    insns[i] = extract_unsigned_integer (buf, HPPA_INSN_SIZE);
 
-  for (i = 0; i < insns; i++)
-    buf[i] = extract_unsigned_integer (&buf[i], 4);
-
-  for (offset = 0; offset <= insns - count; offset++)
+  for (offset = 0; offset <= num_insns - count; offset++)
     {
       for (i = 0; i < count; i++)
         {
-	  if ((buf[offset + i] & patterns[i]) != patterns[i])
+	  if ((insns[offset + i] & patterns[i]) != patterns[i])
 	    break;
 	}
       if (i == count)
         break;
     }
-    
-  if (offset <= insns - count)
-    return start + offset * 4;
+
+  if (offset <= num_insns - count)
+    return start + offset * HPPA_INSN_SIZE;
   else
     return 0;
 }
@@ -1472,7 +1471,7 @@ hppa64_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
     {
       CORE_ADDR begin, end;
       char *name;
-      unsigned int insns[2];
+      gdb_byte buf[2 * HPPA_INSN_SIZE];
       int offset;
 
       find_pc_partial_function (SYMBOL_VALUE_ADDRESS (msym), &name,
@@ -1481,16 +1480,16 @@ hppa64_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
       if (name == NULL || begin == 0 || end == 0)
         continue;
 
-      if (target_read_memory (end - sizeof (insns), (char *)insns, sizeof (insns)) == 0)
+      if (target_read_memory (end - sizeof (buf), buf, sizeof (buf)) == 0)
         {
-	  for (offset = 0; offset < ARRAY_SIZE (insns); offset++)
+	  for (offset = 0; offset < sizeof (buf); offset++)
 	    {
 	      unsigned int insn;
 
-	      insn = extract_unsigned_integer (&insns[offset], 4);
+	      insn = extract_unsigned_integer (buf + offset, HPPA_INSN_SIZE);
 	      if (insn == 0xe840d002) /* bve,n (rp) */
 	        {
-		  addr = (end - sizeof (insns)) + (offset * 4);
+		  addr = (end - sizeof (buf)) + offset;
 		  goto found_pattern;
 		}
 	    }

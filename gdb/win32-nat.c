@@ -53,9 +53,14 @@
 #include <sys/param.h>
 #include <unistd.h>
 #include "exec.h"
+#include "solist.h"
+#include "solib.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+
+static struct target_ops win32_ops;
+static struct target_so_ops win32_so_ops;
 
 /* If we're not using the old Cygwin header file set, define the
    following which never should have been in the generic Win32 API
@@ -79,7 +84,9 @@ static int debug_registers_used;
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file. */
-#define CYGWIN_SIGNAL_STRING "cygwin: signal"
+#ifndef _CYGWIN_SIGNAL_STRING
+#define _CYGWIN_SIGNAL_STRING "cYgSiGw00f"
+#endif
 
 #define CHECK(x)	check (x, __FILE__,__LINE__)
 #define DEBUG_EXEC(x)	if (debug_exec)		printf_unfiltered x
@@ -87,9 +94,9 @@ static int debug_registers_used;
 #define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
-static void child_stop (void);
-static int win32_child_thread_alive (ptid_t);
-void child_kill_inferior (void);
+static void win32_stop (void);
+static int win32_win32_thread_alive (ptid_t);
+static void win32_kill_inferior (void);
 
 static enum target_signal last_sig = TARGET_SIGNAL_0;
 /* Set if a signal was received from the debugged process */
@@ -251,15 +258,14 @@ thread_rec (DWORD id, int get_context)
 
 /* Add a thread to the thread list */
 static thread_info *
-child_add_thread (DWORD id, HANDLE h)
+win32_add_thread (DWORD id, HANDLE h)
 {
   thread_info *th;
 
   if ((th = thread_rec (id, FALSE)))
     return th;
 
-  th = (thread_info *) xmalloc (sizeof (*th));
-  memset (th, 0, sizeof (*th));
+  th = XZALLOC (thread_info);
   th->id = id;
   th->h = h;
   th->next = thread_head.next;
@@ -287,11 +293,11 @@ child_add_thread (DWORD id, HANDLE h)
 /* Clear out any old thread list and reintialize it to a
    pristine state. */
 static void
-child_init_thread_list (void)
+win32_init_thread_list (void)
 {
   thread_info *th = &thread_head;
 
-  DEBUG_EVENTS (("gdb: child_init_thread_list\n"));
+  DEBUG_EVENTS (("gdb: win32_init_thread_list\n"));
   init_thread_list ();
   while (th->next != NULL)
     {
@@ -305,7 +311,7 @@ child_init_thread_list (void)
 
 /* Delete a thread from the list of threads */
 static void
-child_delete_thread (DWORD id)
+win32_delete_thread (DWORD id)
 {
   thread_info *th;
 
@@ -328,7 +334,7 @@ child_delete_thread (DWORD id)
 }
 
 static void
-do_child_fetch_inferior_registers (int r)
+do_win32_fetch_inferior_registers (int r)
 {
   char *context_offset = ((char *) &current_thread->context) + mappings[r];
   long l;
@@ -369,24 +375,24 @@ do_child_fetch_inferior_registers (int r)
   else
     {
       for (r = 0; r < NUM_REGS; r++)
-	do_child_fetch_inferior_registers (r);
+	do_win32_fetch_inferior_registers (r);
     }
 
 #undef I387_ST0_REGNUM
 }
 
 static void
-child_fetch_inferior_registers (int r)
+win32_fetch_inferior_registers (int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events */
   if (current_thread)
-    do_child_fetch_inferior_registers (r);
+    do_win32_fetch_inferior_registers (r);
 }
 
 static void
-do_child_store_inferior_registers (int r)
+do_win32_store_inferior_registers (int r)
 {
   if (!current_thread)
     /* Windows sometimes uses a non-existent thread id in its events */;
@@ -396,19 +402,19 @@ do_child_store_inferior_registers (int r)
   else
     {
       for (r = 0; r < NUM_REGS; r++)
-	do_child_store_inferior_registers (r);
+	do_win32_store_inferior_registers (r);
     }
 }
 
 /* Store a new register value into the current thread context */
 static void
-child_store_inferior_registers (int r)
+win32_store_inferior_registers (int r)
 {
   current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events */
   if (current_thread)
-    do_child_store_inferior_registers (r);
+    do_win32_store_inferior_registers (r);
 }
 
 static int psapi_loaded = 0;
@@ -417,7 +423,7 @@ static BOOL WINAPI (*psapi_EnumProcessModules) (HANDLE, HMODULE *, DWORD, LPDWOR
 static BOOL WINAPI (*psapi_GetModuleInformation) (HANDLE, HMODULE, LPMODULEINFO, DWORD) = NULL;
 static DWORD WINAPI (*psapi_GetModuleFileNameExA) (HANDLE, HMODULE, LPSTR, DWORD) = NULL;
 
-int
+static int
 psapi_get_dll_name (DWORD BaseAddress, char *dll_name_ret)
 {
   DWORD len;
@@ -510,27 +516,21 @@ struct safe_symbol_file_add_args
 };
 
 /* Maintain a linked list of "so" information. */
-struct so_stuff
+struct lm_info
 {
-  struct so_stuff *next;
   DWORD load_addr;
-  DWORD end_addr;
-  int loaded;
-  struct objfile *objfile;
-  char name[1];
-} solib_start, *solib_end;
+};
+
+static struct so_list solib_start, *solib_end;
 
 /* Call symbol_file_add with stderr redirected.  We don't care if there
    are errors. */
 static int
 safe_symbol_file_add_stub (void *argv)
 {
-#define p ((struct safe_symbol_file_add_args *)argv)
-  struct so_stuff *so = &solib_start;
+#define p ((struct safe_symbol_file_add_args *) argv)
+  struct so_list *so = &solib_start;
 
-  while ((so = so->next))
-    if (so->loaded && strcasecmp (so->name, p->name) == 0)
-      return 0;
   p->ret = symbol_file_add (p->name, p->from_tty, p->addrs, p->mainline, p->flags);
   return !!p->ret;
 #undef p
@@ -578,14 +578,121 @@ safe_symbol_file_add (char *name, int from_tty,
   return p.ret;
 }
 
-/* Remember the maximum DLL length for printing in info dll command. */
-int max_dll_name_len;
+/* Get the loaded address of all sections, given that .text was loaded
+   at text_load. Assumes that all sections are subject to the same
+   relocation offset. Returns NULL if problems occur or if the
+   sections were not relocated. */
 
-static void
-register_loaded_dll (const char *name, DWORD load_addr)
+static struct section_addr_info *
+get_relocated_section_addrs (bfd *abfd, CORE_ADDR text_load)
 {
-  struct so_stuff *so;
-  char ppath[MAX_PATH + 1];
+  struct section_addr_info *result = NULL;
+  int section_count = bfd_count_sections (abfd);
+  asection *text_section = bfd_get_section_by_name (abfd, ".text");
+  CORE_ADDR text_vma;
+
+  if (!text_section)
+    {
+      /* Couldn't get the .text section. Weird. */
+    }
+
+  else if (text_load == (text_vma = bfd_get_section_vma (abfd, text_section)))
+    {
+      /* DLL wasn't relocated. */
+    }
+
+  else
+    {
+      /* Figure out all sections' loaded addresses. The offset here is
+	 such that taking a bfd_get_section_vma() result and adding
+	 offset will give the real load address of the section. */
+
+      CORE_ADDR offset = text_load - text_vma;
+
+      struct section_table *table_start = NULL;
+      struct section_table *table_end = NULL;
+      struct section_table *iter = NULL;
+
+      build_section_table (abfd, &table_start, &table_end);
+
+      for (iter = table_start; iter < table_end; ++iter)
+	{
+	  /* Relocated addresses. */
+	  iter->addr += offset;
+	  iter->endaddr += offset;
+	}
+
+      result = build_section_addr_info_from_section_table (table_start,
+							   table_end);
+
+      xfree (table_start);
+    }
+
+  return result;
+}
+
+/* Add DLL symbol information. */
+static void
+solib_symbols_add (struct so_list *so, CORE_ADDR load_addr)
+{
+  struct section_addr_info *addrs = NULL;
+  static struct objfile *result = NULL;
+  char *name = so->so_name;
+  bfd *abfd = NULL;
+
+  /* The symbols in a dll are offset by 0x1000, which is the
+     the offset from 0 of the first byte in an image - because
+     of the file header and the section alignment. */
+
+  if (!name || !name[0])
+    return;
+
+  abfd = bfd_openr (name, "pei-i386");
+
+  if (!abfd)
+    {
+      /* pei failed - try pe */
+      abfd = bfd_openr (name, "pe-i386");
+    }
+
+  if (abfd)
+    {
+      if (bfd_check_format (abfd, bfd_object))
+	addrs = get_relocated_section_addrs (abfd, load_addr);
+
+      bfd_close (abfd);
+    }
+
+  if (addrs)
+    {
+      result = safe_symbol_file_add (name, 0, addrs, 0, OBJF_SHARED);
+      free_section_addr_info (addrs);
+    }
+  else
+    {
+      /* Fallback on handling just the .text section. */
+      struct cleanup *my_cleanups;
+
+      addrs = alloc_section_addr_info (1);
+      my_cleanups = make_cleanup (xfree, addrs);
+      addrs->other[0].name = ".text";
+      addrs->other[0].addr = load_addr;
+
+      result = safe_symbol_file_add (name, 0, addrs, 0, OBJF_SHARED);
+      do_cleanups (my_cleanups);
+    }
+
+  so->symbols_loaded = !!result;
+  return;
+}
+
+/* Remember the maximum DLL length for printing in info dll command. */
+static int max_dll_name_len;
+
+static char *
+register_loaded_dll (const char *name, DWORD load_addr, int readsyms)
+{
+  struct so_list *so;
   char buf[MAX_PATH + 1];
   char cwd[MAX_PATH + 1];
   char *p;
@@ -611,28 +718,28 @@ register_loaded_dll (const char *name, DWORD load_addr)
 	}
     }
 
-  cygwin_conv_to_posix_path (buf, ppath);
-  so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (ppath) + 8 + 1);
-  so->loaded = 0;
-  so->load_addr = load_addr;
-  if (VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
-		      sizeof (m)))
-    so->end_addr = (DWORD) m.AllocationBase + m.RegionSize;
-  else
-    so->end_addr = load_addr + 0x2000;	/* completely arbitrary */
-
-  so->next = NULL;
-  so->objfile = NULL;
-  strcpy (so->name, ppath);
+  if (strcasecmp (buf, "ntdll.dll") == 0)
+    {
+      GetSystemDirectory (buf, sizeof (buf));
+      strcat (buf, "\\ntdll.dll");
+    }
+  so = XZALLOC (struct so_list);
+  so->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
+  so->lm_info->load_addr = load_addr;
+  cygwin_conv_to_posix_path (buf, so->so_name);
+  strcpy (so->so_original_name, so->so_name);
 
   solib_end->next = so;
   solib_end = so;
-  len = strlen (ppath);
+  len = strlen (so->so_name);
   if (len > max_dll_name_len)
     max_dll_name_len = len;
+  if (readsyms)
+    solib_symbols_add (so, (CORE_ADDR) load_addr);
+  return so->so_name;
 }
 
-char *
+static char *
 get_image_name (HANDLE h, void *address, int unicode)
 {
   static char buf[(2 * MAX_PATH) + 1];
@@ -695,175 +802,70 @@ handle_load_dll (void *dummy)
   if (!dll_name)
     return 1;
 
-  register_loaded_dll (dll_name, (DWORD) event->lpBaseOfDll + 0x1000);
+  register_loaded_dll (dll_name, (DWORD) event->lpBaseOfDll + 0x1000, auto_solib_add);
+  solib_add (NULL, 0, NULL, auto_solib_add);
 
   return 1;
+}
+
+static void
+win32_free_so (struct so_list *so)
+{
+  if (so->lm_info)
+    xfree (so->lm_info);
+}
+
+static void
+win32_relocate_section_addresses (struct so_list *so,
+				  struct section_table *sec)
+{
+  /* FIXME */
+  return;
+}
+
+static void
+win32_solib_create_inferior_hook (void)
+{
+  solib_add (NULL, 0, NULL, auto_solib_add);
+  return;
 }
 
 static int
 handle_unload_dll (void *dummy)
 {
   DWORD lpBaseOfDll = (DWORD) current_event.u.UnloadDll.lpBaseOfDll + 0x1000;
-  struct so_stuff *so;
+  struct so_list *so;
 
   for (so = &solib_start; so->next != NULL; so = so->next)
-    if (so->next->load_addr == lpBaseOfDll)
+    if (so->next->lm_info->load_addr == lpBaseOfDll)
       {
-	struct so_stuff *sodel = so->next;
+	struct so_list *sodel = so->next;
 	so->next = sodel->next;
 	if (!so->next)
 	  solib_end = so;
-	if (sodel->objfile)
-	  free_objfile (sodel->objfile);
-	xfree(sodel);
+	free_so (sodel);
+	solib_add (NULL, 0, NULL, auto_solib_add);
 	return 1;
       }
+
   error (_("Error: dll starting at 0x%lx not found."), (DWORD) lpBaseOfDll);
 
   return 0;
 }
 
-char *
-solib_address (CORE_ADDR address)
-{
-  struct so_stuff *so;
-  for (so = &solib_start; so->next != NULL; so = so->next)
-    if (address >= so->load_addr && address <= so->end_addr)
-      return so->name;
-  return NULL;
-}
-
-/* Return name of last loaded DLL. */
-char *
-child_solib_loaded_library_pathname (int pid)
-{
-  return !solib_end || !solib_end->name[0] ? NULL : solib_end->name;
-}
-
 /* Clear list of loaded DLLs. */
-void
-child_clear_solibs (void)
+static void
+win32_clear_solib (void)
 {
-  struct so_stuff *so, *so1 = solib_start.next;
-
-  while ((so = so1) != NULL)
-    {
-      so1 = so->next;
-      xfree (so);
-    }
-
   solib_start.next = NULL;
-  solib_start.objfile = NULL;
   solib_end = &solib_start;
   max_dll_name_len = sizeof ("DLL Name") - 1;
 }
 
-/* Get the loaded address of all sections, given that .text was loaded
-   at text_load. Assumes that all sections are subject to the same
-   relocation offset. Returns NULL if problems occur or if the
-   sections were not relocated. */
-
-static struct section_addr_info *
-get_relocated_section_addrs (bfd *abfd, CORE_ADDR text_load)
+static void
+win32_special_symbol_handling (void)
 {
-  struct section_addr_info *result = NULL;
-  int section_count = bfd_count_sections (abfd);
-  asection *text_section = bfd_get_section_by_name (abfd, ".text");
-  CORE_ADDR text_vma;
-
-  if (!text_section)
-    {
-      /* Couldn't get the .text section. Weird. */
-    }
-
-  else if (text_load == (text_vma = bfd_get_section_vma (abfd, text_section)))
-    {
-      /* DLL wasn't relocated. */
-    }
-
-  else
-    {
-      /* Figure out all sections' loaded addresses. The offset here is
-	 such that taking a bfd_get_section_vma() result and adding
-	 offset will give the real load address of the section. */
-
-      CORE_ADDR offset = text_load - text_vma;
-
-      struct section_table *table_start = NULL;
-      struct section_table *table_end = NULL;
-      struct section_table *iter = NULL;
-
-      build_section_table (abfd, &table_start, &table_end);
-
-      for (iter = table_start; iter < table_end; ++iter)
-	{
-	  /* Relocated addresses. */
-	  iter->addr += offset;
-	  iter->endaddr += offset;
-	}
-
-      result = build_section_addr_info_from_section_table (table_start,
-							   table_end);
-
-      xfree (table_start);
-    }
-
-  return result;
-}
-
-/* Add DLL symbol information. */
-static struct objfile *
-solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
-{
-  struct section_addr_info *addrs = NULL;
-  static struct objfile *result = NULL;
-  bfd *abfd = NULL;
-
-  /* The symbols in a dll are offset by 0x1000, which is the
-     the offset from 0 of the first byte in an image - because
-     of the file header and the section alignment. */
-
-  if (!name || !name[0])
-    return NULL;
-
-  abfd = bfd_openr (name, "pei-i386");
-
-  if (!abfd)
-    {
-      /* pei failed - try pe */
-      abfd = bfd_openr (name, "pe-i386");
-    }
-
-  if (abfd)
-    {
-      if (bfd_check_format (abfd, bfd_object))
-	{
-	  addrs = get_relocated_section_addrs (abfd, load_addr);
-	}
-
-      bfd_close (abfd);
-    }
-
-  if (addrs)
-    {
-      result = safe_symbol_file_add (name, from_tty, addrs, 0, OBJF_SHARED);
-      free_section_addr_info (addrs);
-    }
-  else
-    {
-      /* Fallback on handling just the .text section. */
-      struct cleanup *my_cleanups;
-
-      addrs = alloc_section_addr_info (1);
-      my_cleanups = make_cleanup (xfree, addrs);
-      addrs->other[0].name = ".text";
-      addrs->other[0].addr = load_addr;
-
-      result = safe_symbol_file_add (name, from_tty, addrs, 0, OBJF_SHARED);
-      do_cleanups (my_cleanups);
-    }
-
-  return result;
+  return;
 }
 
 /* Load DLL symbol info. */
@@ -888,22 +890,6 @@ dll_symbol_command (char *args, int from_tty)
   safe_symbol_file_add (args, from_tty, NULL, 0, OBJF_SHARED | OBJF_USERLOADED);
 }
 
-/* List currently loaded DLLs. */
-void
-info_dll_command (char *ignore, int from_tty)
-{
-  struct so_stuff *so = &solib_start;
-
-  if (!so->next)
-    return;
-
-  printf_filtered ("%*s  Load Address\n", -max_dll_name_len, "DLL Name");
-  while ((so = so->next) != NULL)
-    printf_filtered ("%*s  %08lx\n", -max_dll_name_len, so->name, so->load_addr);
-
-  return;
-}
-
 /* Handle DEBUG_STRING output from child process.
    Cygwin prepends its messages with a "cygwin:".  Interpret this as
    a Cygwin signal.  Otherwise just print the string as a warning. */
@@ -918,7 +904,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
       || !s || !*s)
     return gotasig;
 
-  if (strncmp (s, CYGWIN_SIGNAL_STRING, sizeof (CYGWIN_SIGNAL_STRING) - 1) != 0)
+  if (strncmp (s, _CYGWIN_SIGNAL_STRING, sizeof (_CYGWIN_SIGNAL_STRING) - 1) != 0)
     {
       if (strncmp (s, "cYg", 3) != 0)
 	warning (("%s"), s);
@@ -926,7 +912,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
   else
     {
       char *p;
-      int sig = strtol (s + sizeof (CYGWIN_SIGNAL_STRING) - 1, &p, 0);
+      int sig = strtol (s + sizeof (_CYGWIN_SIGNAL_STRING) - 1, &p, 0);
       gotasig = target_signal_from_host (sig);
       ourstatus->value.sig = gotasig;
       if (gotasig)
@@ -1175,7 +1161,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 /* Resume all artificially suspended threads if we are continuing
    execution */
 static BOOL
-child_continue (DWORD continue_status, int id)
+win32_continue (DWORD continue_status, int id)
 {
   int i;
   thread_info *th;
@@ -1219,13 +1205,13 @@ child_continue (DWORD continue_status, int id)
 
 /* Called in pathological case where Windows fails to send a
    CREATE_PROCESS_DEBUG_EVENT after an attach.  */
-DWORD
+static DWORD
 fake_create_process (void)
 {
   current_process_handle = OpenProcess (PROCESS_ALL_ACCESS, FALSE,
 					current_event.dwProcessId);
   main_thread_id = current_event.dwThreadId;
-  current_thread = child_add_thread (main_thread_id,
+  current_thread = win32_add_thread (main_thread_id,
 				     current_event.u.CreateThread.hThread);
   return main_thread_id;
 }
@@ -1234,7 +1220,7 @@ fake_create_process (void)
    handling by WFI (or whatever).
  */
 static int
-get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
+get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 {
   BOOL debug_event;
   DWORD continue_status, event_code;
@@ -1274,7 +1260,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 	  break;
 	}
       /* Record the existence of this thread */
-      th = child_add_thread (current_event.dwThreadId,
+      th = win32_add_thread (current_event.dwThreadId,
 			     current_event.u.CreateThread.hThread);
       if (info_verbose)
 	printf_unfiltered ("[New %s]\n",
@@ -1290,7 +1276,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     "EXIT_THREAD_DEBUG_EVENT"));
       if (current_event.dwThreadId != main_thread_id)
 	{
-	  child_delete_thread (current_event.dwThreadId);
+	  win32_delete_thread (current_event.dwThreadId);
 	  th = &dummy_thread_info;
 	}
       break;
@@ -1309,10 +1295,10 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
 
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       if (main_thread_id)
-	child_delete_thread (main_thread_id);
+	win32_delete_thread (main_thread_id);
       main_thread_id = current_event.dwThreadId;
       /* Add the main thread */
-      th = child_add_thread (main_thread_id,
+      th = win32_add_thread (main_thread_id,
 			     current_event.u.CreateProcessInfo.hThread);
       retval = ourstatus->value.related_pid = current_event.dwThreadId;
       break;
@@ -1395,7 +1381,7 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus)
     }
 
   if (!retval || saw_create != 1)
-    CHECK (child_continue (continue_status, -1));
+    CHECK (win32_continue (continue_status, -1));
   else
     {
       inferior_ptid = pid_to_ptid (retval);
@@ -1408,7 +1394,7 @@ out:
 
 /* Wait for interesting events to occur in the target process. */
 static ptid_t
-child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   int pid = PIDGET (ptid);
 
@@ -1420,7 +1406,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   while (1)
     {
-      int retval = get_child_debug_event (pid, ourstatus);
+      int retval = get_win32_debug_event (pid, ourstatus);
       if (retval)
 	return pid_to_ptid (retval);
       else
@@ -1431,13 +1417,13 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	    detach = deprecated_ui_loop_hook (0);
 
 	  if (detach)
-	    child_kill_inferior ();
+	    win32_kill_inferior ();
 	}
     }
 }
 
 static void
-do_initial_child_stuff (DWORD pid)
+do_initial_win32_stuff (DWORD pid)
 {
   extern int stop_after_trap;
   int i;
@@ -1451,9 +1437,9 @@ do_initial_child_stuff (DWORD pid)
     dr[i] = 0;
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
-  push_target (&deprecated_child_ops);
+  push_target (&win32_ops);
   disable_breakpoints_in_shlibs (1);
-  child_clear_solibs ();
+  win32_clear_solib ();
   clear_proceed_status ();
   init_wait_for_inferior ();
 
@@ -1563,7 +1549,7 @@ set_process_privilege (const char *privilege, BOOL enable)
 #if 0
   /* Disabled, otherwise every `attach' in an unprivileged user session
      would raise the "Failed to get SE_DEBUG_NAME privilege" warning in
-     child_attach(). */
+     win32_attach(). */
   /* AdjustTokenPrivileges returns TRUE even if the privilege could not
      be enabled. GetLastError () returns an correct error code, though. */
   if (enable && GetLastError () == ERROR_NOT_ALL_ASSIGNED)
@@ -1581,7 +1567,7 @@ out:
 
 /* Attach to process PID, then initialize for debugging it.  */
 static void
-child_attach (char *args, int from_tty)
+win32_attach (char *args, int from_tty)
 {
   BOOL ok;
   DWORD pid;
@@ -1597,7 +1583,7 @@ child_attach (char *args, int from_tty)
 
   pid = strtoul (args, 0, 0);		/* Windows pid */
 
-  child_init_thread_list ();
+  win32_init_thread_list ();
   ok = DebugActiveProcess (pid);
   saw_create = 0;
 
@@ -1632,19 +1618,19 @@ child_attach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  do_initial_child_stuff (pid);
+  do_initial_win32_stuff (pid);
   target_terminal_ours ();
 }
 
 static void
-child_detach (char *args, int from_tty)
+win32_detach (char *args, int from_tty)
 {
   int detached = 1;
 
   if (has_detach_ability ())
     {
       delete_command (NULL, 0);
-      child_continue (DBG_CONTINUE, -1);
+      win32_continue (DBG_CONTINUE, -1);
       if (!DebugActiveProcessStop (current_event.dwProcessId))
 	{
 	  error (_("Can't detach process %lu (error %lu)"),
@@ -1663,11 +1649,11 @@ child_detach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
   inferior_ptid = null_ptid;
-  unpush_target (&deprecated_child_ops);
+  unpush_target (&win32_ops);
 }
 
-char *
-child_pid_to_exec_file (int pid)
+static char *
+win32_pid_to_exec_file (int pid)
 {
   /* Try to find the process path using the Cygwin internal process list
      pid isn't a valid pid, unfortunately.  Use current_event.dwProcessId
@@ -1682,31 +1668,31 @@ child_pid_to_exec_file (int pid)
   cygwin_internal (CW_LOCK_PINFO, 1000);
   for (cpid = 0;
        (pinfo = (struct external_pinfo *)
-                       cygwin_internal (CW_GETPINFO, cpid | CW_NEXTPID));
+	cygwin_internal (CW_GETPINFO, cpid | CW_NEXTPID));
        cpid = pinfo->pid)
     {
       if (pinfo->dwProcessId == current_event.dwProcessId) /* Got it */
        {
-         cygwin_conv_to_full_posix_path (pinfo->progname, path);
-         path_ptr = path; 
-         break;
+	 cygwin_conv_to_full_posix_path (pinfo->progname, path);
+	 path_ptr = path;
+	 break;
        }
     }
   cygwin_internal (CW_UNLOCK_PINFO);
-  return path_ptr; 
+  return path_ptr;
 }
 
 /* Print status information about what we're accessing.  */
 
 static void
-child_files_info (struct target_ops *ignore)
+win32_files_info (struct target_ops *ignore)
 {
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
       attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
 }
 
 static void
-child_open (char *arg, int from_tty)
+win32_open (char *arg, int from_tty)
 {
   error (_("Use the \"run\" command to start a Unix child process."));
 }
@@ -1717,7 +1703,7 @@ child_open (char *arg, int from_tty)
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-child_create_inferior (char *exec_file, char *allargs, char **env,
+win32_create_inferior (char *exec_file, char *allargs, char **env,
 		       int from_tty)
 {
   char *winenv;
@@ -1871,7 +1857,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
 	}
     }
 
-  child_init_thread_list ();
+  win32_init_thread_list ();
   ret = CreateProcess (0,
 		       args,	/* command line */
 		       NULL,	/* Security */
@@ -1905,18 +1891,18 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
   else
     saw_create = 0;
 
-  do_initial_child_stuff (pi.dwProcessId);
+  do_initial_win32_stuff (pi.dwProcessId);
 
-  /* child_continue (DBG_CONTINUE, -1); */
+  /* win32_continue (DBG_CONTINUE, -1); */
   proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
 }
 
 static void
-child_mourn_inferior (void)
+win32_mourn_inferior (void)
 {
-  (void) child_continue (DBG_CONTINUE, -1);
+  (void) win32_continue (DBG_CONTINUE, -1);
   i386_cleanup_dregs();
-  unpush_target (&deprecated_child_ops);
+  unpush_target (&win32_ops);
   generic_mourn_inferior ();
 }
 
@@ -1924,15 +1910,15 @@ child_mourn_inferior (void)
    ^C on the controlling terminal. */
 
 static void
-child_stop (void)
+win32_stop (void)
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));
   registers_changed ();		/* refresh register state */
 }
 
-int
-child_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
+static int
+win32_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
 		   int write, struct mem_attrib *mem,
 		   struct target_ops *target)
 {
@@ -1957,14 +1943,14 @@ child_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
   return done;
 }
 
-void
-child_kill_inferior (void)
+static void
+win32_kill_inferior (void)
 {
   CHECK (TerminateProcess (current_process_handle, 0));
 
   for (;;)
     {
-      if (!child_continue (DBG_CONTINUE, -1))
+      if (!win32_continue (DBG_CONTINUE, -1))
 	break;
       if (!WaitForDebugEvent (&current_event, INFINITE))
 	break;
@@ -1977,11 +1963,11 @@ child_kill_inferior (void)
   /* this may fail in an attached process so don't check. */
   if (current_thread && current_thread->h)
     (void) CloseHandle (current_thread->h);
-  target_mourn_inferior ();	/* or just child_mourn_inferior? */
+  target_mourn_inferior ();	/* or just win32_mourn_inferior? */
 }
 
-void
-child_resume (ptid_t ptid, int step, enum target_signal sig)
+static void
+win32_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   thread_info *th;
   DWORD continue_status = DBG_CONTINUE;
@@ -2024,7 +2010,7 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
 
   last_sig = TARGET_SIGNAL_0;
 
-  DEBUG_EXEC (("gdb: child_resume (pid=%d, step=%d, sig=%d);\n",
+  DEBUG_EXEC (("gdb: win32_resume (pid=%d, step=%d, sig=%d);\n",
 	       pid, step, sig));
 
   /* Get context for currently selected thread */
@@ -2034,7 +2020,7 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
       if (step)
 	{
 	  /* Single step by setting t bit */
-	  child_fetch_inferior_registers (PS_REGNUM);
+	  win32_fetch_inferior_registers (PS_REGNUM);
 	  th->context.EFlags |= FLAG_TRACE_BIT;
 	}
 
@@ -2058,197 +2044,30 @@ child_resume (ptid_t ptid, int step, enum target_signal sig)
   /* Allow continuing with the same signal that interrupted us.
      Otherwise complain. */
 
-  child_continue (continue_status, pid);
+  win32_continue (continue_status, pid);
 }
 
 static void
-child_prepare_to_store (void)
+win32_prepare_to_store (void)
 {
   /* Do nothing, since we can store individual regs */
 }
 
 static int
-child_can_run (void)
+win32_can_run (void)
 {
   return 1;
 }
 
 static void
-child_close (int x)
+win32_close (int x)
 {
-  DEBUG_EVENTS (("gdb: child_close, inferior_ptid=%d\n",
+  DEBUG_EVENTS (("gdb: win32_close, inferior_ptid=%d\n",
 		PIDGET (inferior_ptid)));
 }
 
-static void
-init_child_ops (void)
-{
-  deprecated_child_ops.to_shortname = "child";
-  deprecated_child_ops.to_longname = "Win32 child process";
-  deprecated_child_ops.to_doc = "Win32 child process (started by the \"run\" command).";
-  deprecated_child_ops.to_open = child_open;
-  deprecated_child_ops.to_close = child_close;
-  deprecated_child_ops.to_attach = child_attach;
-  deprecated_child_ops.to_detach = child_detach;
-  deprecated_child_ops.to_resume = child_resume;
-  deprecated_child_ops.to_wait = child_wait;
-  deprecated_child_ops.to_fetch_registers = child_fetch_inferior_registers;
-  deprecated_child_ops.to_store_registers = child_store_inferior_registers;
-  deprecated_child_ops.to_prepare_to_store = child_prepare_to_store;
-  deprecated_child_ops.deprecated_xfer_memory = child_xfer_memory;
-  deprecated_child_ops.to_files_info = child_files_info;
-  deprecated_child_ops.to_insert_breakpoint = memory_insert_breakpoint;
-  deprecated_child_ops.to_remove_breakpoint = memory_remove_breakpoint;
-  deprecated_child_ops.to_terminal_init = terminal_init_inferior;
-  deprecated_child_ops.to_terminal_inferior = terminal_inferior;
-  deprecated_child_ops.to_terminal_ours_for_output = terminal_ours_for_output;
-  deprecated_child_ops.to_terminal_ours = terminal_ours;
-  deprecated_child_ops.to_terminal_save_ours = terminal_save_ours;
-  deprecated_child_ops.to_terminal_info = child_terminal_info;
-  deprecated_child_ops.to_kill = child_kill_inferior;
-  deprecated_child_ops.to_create_inferior = child_create_inferior;
-  deprecated_child_ops.to_mourn_inferior = child_mourn_inferior;
-  deprecated_child_ops.to_can_run = child_can_run;
-  deprecated_child_ops.to_thread_alive = win32_child_thread_alive;
-  deprecated_child_ops.to_pid_to_str = cygwin_pid_to_str;
-  deprecated_child_ops.to_stop = child_stop;
-  deprecated_child_ops.to_stratum = process_stratum;
-  deprecated_child_ops.to_has_all_memory = 1;
-  deprecated_child_ops.to_has_memory = 1;
-  deprecated_child_ops.to_has_stack = 1;
-  deprecated_child_ops.to_has_registers = 1;
-  deprecated_child_ops.to_has_execution = 1;
-  deprecated_child_ops.to_magic = OPS_MAGIC;
-  deprecated_child_ops.to_pid_to_exec_file = child_pid_to_exec_file;
-}
-
-void
-_initialize_win32_nat (void)
-{
-  struct cmd_list_element *c;
-
-  init_child_ops ();
-
-  c = add_com ("dll-symbols", class_files, dll_symbol_command,
-	       _("Load dll library symbols from FILE."));
-  set_cmd_completer (c, filename_completer);
-
-  add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
-
-  add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\
-Set use of shell to start subprocess."), _("\
-Show use of shell to start subprocess."), NULL,
-			   NULL,
-			   NULL, /* FIXME: i18n: */
-			   &setlist, &showlist);
-
-  add_setshow_boolean_cmd ("new-console", class_support, &new_console, _("\
-Set creation of new console when creating child process."), _("\
-Show creation of new console when creating child process."), NULL,
-			   NULL,
-			   NULL, /* FIXME: i18n: */
-			   &setlist, &showlist);
-
-  add_setshow_boolean_cmd ("new-group", class_support, &new_group, _("\
-Set creation of new group when creating child process."), _("\
-Show creation of new group when creating child process."), NULL,
-			   NULL,
-			   NULL, /* FIXME: i18n: */
-			   &setlist, &showlist);
-
-  add_setshow_boolean_cmd ("debugexec", class_support, &debug_exec, _("\
-Set whether to display execution in child process."), _("\
-Show whether to display execution in child process."), NULL,
-			   NULL,
-			   NULL, /* FIXME: i18n: */
-			   &setlist, &showlist);
-
-  add_setshow_boolean_cmd ("debugevents", class_support, &debug_events, _("\
-Set whether to display kernel events in child process."), _("\
-Show whether to display kernel events in child process."), NULL,
-			   NULL,
-			   NULL, /* FIXME: i18n: */
-			   &setlist, &showlist);
-
-  add_setshow_boolean_cmd ("debugmemory", class_support, &debug_memory, _("\
-Set whether to display memory accesses in child process."), _("\
-Show whether to display memory accesses in child process."), NULL,
-			   NULL,
-			   NULL, /* FIXME: i18n: */
-			   &setlist, &showlist);
-
-  add_setshow_boolean_cmd ("debugexceptions", class_support,
-			   &debug_exceptions, _("\
-Set whether to display kernel exceptions in child process."), _("\
-Show whether to display kernel exceptions in child process."), NULL,
-			   NULL,
-			   NULL, /* FIXME: i18n: */
-			   &setlist, &showlist);
-
-  add_info ("dll", info_dll_command, _("Status of loaded DLLs."));
-  add_info_alias ("sharedlibrary", "dll", 1);
-
-  add_prefix_cmd ("w32", class_info, info_w32_command,
-		  _("Print information specific to Win32 debugging."),
-		  &info_w32_cmdlist, "info w32 ", 0, &infolist);
-
-  add_cmd ("selector", class_info, display_selectors,
-	   _("Display selectors infos."),
-	   &info_w32_cmdlist);
-
-  add_target (&deprecated_child_ops);
-}
-
-/* Hardware watchpoint support, adapted from go32-nat.c code.  */
-
-/* Pass the address ADDR to the inferior in the I'th debug register.
-   Here we just store the address in dr array, the registers will be
-   actually set up when child_continue is called.  */
-void
-cygwin_set_dr (int i, CORE_ADDR addr)
-{
-  if (i < 0 || i > 3)
-    internal_error (__FILE__, __LINE__,
-		    _("Invalid register %d in cygwin_set_dr.\n"), i);
-  dr[i] = (unsigned) addr;
-  debug_registers_changed = 1;
-  debug_registers_used = 1;
-}
-
-/* Pass the value VAL to the inferior in the DR7 debug control
-   register.  Here we just store the address in D_REGS, the watchpoint
-   will be actually set up in child_wait.  */
-void
-cygwin_set_dr7 (unsigned val)
-{
-  dr[7] = val;
-  debug_registers_changed = 1;
-  debug_registers_used = 1;
-}
-
-/* Get the value of the DR6 debug status register from the inferior.
-   Here we just return the value stored in dr[6]
-   by the last call to thread_rec for current_event.dwThreadId id.  */
-unsigned
-cygwin_get_dr6 (void)
-{
-  return dr[6];
-}
-
-/* Determine if the thread referenced by "pid" is alive
-   by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
-   it means that the pid has died.  Otherwise it is assumed to be alive. */
-static int
-win32_child_thread_alive (ptid_t ptid)
-{
-  int pid = PIDGET (ptid);
-
-  return WaitForSingleObject (thread_rec (pid, FALSE)->h, 0) == WAIT_OBJECT_0 ?
-    FALSE : TRUE;
-}
-
 /* Convert pid to printable format. */
-char *
+static char *
 cygwin_pid_to_str (ptid_t ptid)
 {
   static char buf[80];
@@ -2261,38 +2080,6 @@ cygwin_pid_to_str (ptid_t ptid)
   return buf;
 }
 
-static int
-core_dll_symbols_add (char *dll_name, DWORD base_addr)
-{
-  struct objfile *objfile;
-  char *objfile_basename;
-  const char *dll_basename;
-
-  if (!(dll_basename = strrchr (dll_name, '/')))
-    dll_basename = dll_name;
-  else
-    dll_basename++;
-
-  ALL_OBJFILES (objfile)
-  {
-    objfile_basename = strrchr (objfile->name, '/');
-
-    if (objfile_basename &&
-	strcmp (dll_basename, objfile_basename + 1) == 0)
-      {
-	printf_unfiltered ("%08lx:%s (symbols previously loaded)\n",
-			   base_addr, dll_name);
-	goto out;
-      }
-  }
-
-  register_loaded_dll (dll_name, base_addr + 0x1000);
-  solib_symbols_add (dll_name, 0, (CORE_ADDR) base_addr + 0x1000);
-
- out:
-  return 1;
-}
-
 typedef struct
 {
   struct target_ops *target;
@@ -2300,7 +2087,7 @@ typedef struct
 } map_code_section_args;
 
 static void
-map_single_dll_code_section (bfd * abfd, asection * sect, void *obj)
+map_single_dll_code_section (bfd *abfd, asection *sect, void *obj)
 {
   int old;
   int update_coreops;
@@ -2372,19 +2159,22 @@ dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *t
 }
 
 static void
-core_section_load_dll_symbols (bfd * abfd, asection * sect, void *obj)
+core_section_load_dll_symbols (bfd *abfd, asection *sect, void *obj)
 {
   struct target_ops *target = (struct target_ops *) obj;
 
   DWORD base_addr;
 
   int dll_name_size;
-  char *dll_name = NULL;
-  char *buf = NULL;
   struct win32_pstatus *pstatus;
+  struct so_list *so;
+  char *dll_name;
+  char *buf = NULL;
   char *p;
+  struct objfile *objfile;
+  const char *dll_basename;
 
-  if (strncmp (sect->name, ".module", 7))
+  if (strncmp (sect->name, ".module", 7) != 0)
     return;
 
   buf = (char *) xmalloc (bfd_get_section_size (sect) + 1);
@@ -2403,48 +2193,63 @@ core_section_load_dll_symbols (bfd * abfd, asection * sect, void *obj)
   if (offsetof (struct win32_pstatus, data.module_info.module_name) + dll_name_size > bfd_get_section_size (sect))
       goto out;
 
-  dll_name = (char *) xmalloc (dll_name_size + 1);
-  if (!dll_name)
-    {
-      printf_unfiltered ("memory allocation failed for %s\n", sect->name);
+  dll_name = pstatus->data.module_info.module_name;
+
+  if (!(dll_basename = strrchr (dll_name, '/')))
+    dll_basename = dll_name;
+  else
+    dll_basename++;
+
+  ALL_OBJFILES (objfile)
+  {
+    char *objfile_basename = strrchr (objfile->name, '/');
+
+    if (objfile_basename &&
+	strcasecmp (dll_basename, objfile_basename + 1) == 0)
       goto out;
-    }
-  strncpy (dll_name, pstatus->data.module_info.module_name, dll_name_size);
+  }
 
-  while ((p = strchr (dll_name, '\\')))
-    *p = '/';
+  base_addr += 0x1000;
+  dll_name = register_loaded_dll (dll_name, base_addr, 1);
 
-  if (!core_dll_symbols_add (dll_name, (DWORD) base_addr))
-    printf_unfiltered ("%s: Failed to load dll symbols.\n", dll_name);
-
-  if (!dll_code_sections_add (dll_name, (DWORD) base_addr + 0x1000, target))
+  if (!dll_code_sections_add (dll_name, (DWORD) base_addr, target))
     printf_unfiltered ("%s: Failed to map dll code sections.\n", dll_name);
 
 out:
   if (buf)
     xfree (buf);
-  if (dll_name)
-    xfree (dll_name);
   return;
 }
 
-void
-child_solib_add (char *filename, int from_tty, struct target_ops *target,
-		 int readsyms)
+static struct so_list *
+win32_current_sos (void)
 {
-  if (!readsyms)
-    return;
-  if (core_bfd)
+  struct so_list *sop;
+  struct so_list *start = NULL;
+  struct so_list *last;
+
+  if (!solib_start.next && core_bfd)
     {
-      child_clear_solibs ();
-      bfd_map_over_sections (core_bfd, &core_section_load_dll_symbols, target);
+      win32_clear_solib ();
+      bfd_map_over_sections (core_bfd, &core_section_load_dll_symbols,
+			     &win32_ops);
     }
-  else
+
+  for (sop = solib_start.next; sop; sop = sop->next)
     {
-      if (solib_end && solib_end->name)
-	     solib_end->objfile = solib_symbols_add (solib_end->name, from_tty,
-						solib_end->load_addr);
+      struct so_list *new = XZALLOC (struct so_list);
+      strcpy (new->so_name, sop->so_name);
+      strcpy (new->so_original_name, sop->so_original_name);
+      if (!start)
+	last = start = new;
+      else
+	{
+	  last->next = new;
+	  last = new;
+	}
     }
+
+  return start;
 }
 
 static void
@@ -2461,6 +2266,188 @@ fetch_elf_core_registers (char *core_reg_sect,
     }
   for (r = 0; r < NUM_REGS; r++)
     regcache_raw_supply (current_regcache, r, core_reg_sect + mappings[r]);
+}
+
+static void
+init_win32_ops (void)
+{
+  win32_ops.to_shortname = "child";
+  win32_ops.to_longname = "Win32 child process";
+  win32_ops.to_doc = "Win32 child process (started by the \"run\" command).";
+  win32_ops.to_open = win32_open;
+  win32_ops.to_close = win32_close;
+  win32_ops.to_attach = win32_attach;
+  win32_ops.to_detach = win32_detach;
+  win32_ops.to_resume = win32_resume;
+  win32_ops.to_wait = win32_wait;
+  win32_ops.to_fetch_registers = win32_fetch_inferior_registers;
+  win32_ops.to_store_registers = win32_store_inferior_registers;
+  win32_ops.to_prepare_to_store = win32_prepare_to_store;
+  win32_ops.deprecated_xfer_memory = win32_xfer_memory;
+  win32_ops.to_files_info = win32_files_info;
+  win32_ops.to_insert_breakpoint = memory_insert_breakpoint;
+  win32_ops.to_remove_breakpoint = memory_remove_breakpoint;
+  win32_ops.to_terminal_init = terminal_init_inferior;
+  win32_ops.to_terminal_inferior = terminal_inferior;
+  win32_ops.to_terminal_ours_for_output = terminal_ours_for_output;
+  win32_ops.to_terminal_ours = terminal_ours;
+  win32_ops.to_terminal_save_ours = terminal_save_ours;
+  win32_ops.to_terminal_info = child_terminal_info;
+  win32_ops.to_kill = win32_kill_inferior;
+  win32_ops.to_create_inferior = win32_create_inferior;
+  win32_ops.to_mourn_inferior = win32_mourn_inferior;
+  win32_ops.to_can_run = win32_can_run;
+  win32_ops.to_thread_alive = win32_win32_thread_alive;
+  win32_ops.to_pid_to_str = cygwin_pid_to_str;
+  win32_ops.to_stop = win32_stop;
+  win32_ops.to_stratum = process_stratum;
+  win32_ops.to_has_all_memory = 1;
+  win32_ops.to_has_memory = 1;
+  win32_ops.to_has_stack = 1;
+  win32_ops.to_has_registers = 1;
+  win32_ops.to_has_execution = 1;
+  win32_ops.to_magic = OPS_MAGIC;
+  win32_ops.to_pid_to_exec_file = win32_pid_to_exec_file;
+
+  win32_so_ops.relocate_section_addresses = win32_relocate_section_addresses;
+  win32_so_ops.free_so = win32_free_so;
+  win32_so_ops.clear_solib = win32_clear_solib;
+  win32_so_ops.solib_create_inferior_hook = win32_solib_create_inferior_hook;
+  win32_so_ops.special_symbol_handling = win32_special_symbol_handling;
+  win32_so_ops.current_sos = win32_current_sos;
+  win32_so_ops.open_symbol_file_object = NULL;
+  win32_so_ops.in_dynsym_resolve_code = NULL;
+
+  /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
+  current_target_so_ops = &win32_so_ops;
+}
+
+static void
+set_win32_aliases (char *argv0)
+{
+  add_info_alias ("dll", "sharedlibrary", 1);
+}
+
+void
+_initialize_win32_nat (void)
+{
+  struct cmd_list_element *c;
+
+  init_win32_ops ();
+
+  c = add_com ("dll-symbols", class_files, dll_symbol_command,
+	       _("Load dll library symbols from FILE."));
+  set_cmd_completer (c, filename_completer);
+
+  add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
+
+  add_setshow_boolean_cmd ("shell", class_support, &useshell, _("\
+Set use of shell to start subprocess."), _("\
+Show use of shell to start subprocess."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("new-console", class_support, &new_console, _("\
+Set creation of new console when creating child process."), _("\
+Show creation of new console when creating child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("new-group", class_support, &new_group, _("\
+Set creation of new group when creating child process."), _("\
+Show creation of new group when creating child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("debugexec", class_support, &debug_exec, _("\
+Set whether to display execution in child process."), _("\
+Show whether to display execution in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("debugevents", class_support, &debug_events, _("\
+Set whether to display kernel events in child process."), _("\
+Show whether to display kernel events in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("debugmemory", class_support, &debug_memory, _("\
+Set whether to display memory accesses in child process."), _("\
+Show whether to display memory accesses in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("debugexceptions", class_support,
+			   &debug_exceptions, _("\
+Set whether to display kernel exceptions in child process."), _("\
+Show whether to display kernel exceptions in child process."), NULL,
+			   NULL,
+			   NULL, /* FIXME: i18n: */
+			   &setlist, &showlist);
+
+  add_prefix_cmd ("w32", class_info, info_w32_command,
+		  _("Print information specific to Win32 debugging."),
+		  &info_w32_cmdlist, "info w32 ", 0, &infolist);
+
+  add_cmd ("selector", class_info, display_selectors,
+	   _("Display selectors infos."),
+	   &info_w32_cmdlist);
+  add_target (&win32_ops);
+  deprecated_init_ui_hook = set_win32_aliases;
+}
+
+/* Hardware watchpoint support, adapted from go32-nat.c code.  */
+
+/* Pass the address ADDR to the inferior in the I'th debug register.
+   Here we just store the address in dr array, the registers will be
+   actually set up when win32_continue is called.  */
+void
+cygwin_set_dr (int i, CORE_ADDR addr)
+{
+  if (i < 0 || i > 3)
+    internal_error (__FILE__, __LINE__,
+		    _("Invalid register %d in cygwin_set_dr.\n"), i);
+  dr[i] = (unsigned) addr;
+  debug_registers_changed = 1;
+  debug_registers_used = 1;
+}
+
+/* Pass the value VAL to the inferior in the DR7 debug control
+   register.  Here we just store the address in D_REGS, the watchpoint
+   will be actually set up in win32_wait.  */
+void
+cygwin_set_dr7 (unsigned val)
+{
+  dr[7] = val;
+  debug_registers_changed = 1;
+  debug_registers_used = 1;
+}
+
+/* Get the value of the DR6 debug status register from the inferior.
+   Here we just return the value stored in dr[6]
+   by the last call to thread_rec for current_event.dwThreadId id.  */
+unsigned
+cygwin_get_dr6 (void)
+{
+  return dr[6];
+}
+
+/* Determine if the thread referenced by "pid" is alive
+   by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
+   it means that the pid has died.  Otherwise it is assumed to be alive. */
+static int
+win32_win32_thread_alive (ptid_t ptid)
+{
+  int pid = PIDGET (ptid);
+
+  return WaitForSingleObject (thread_rec (pid, FALSE)->h, 0) == WAIT_OBJECT_0 ?
+    FALSE : TRUE;
 }
 
 static struct core_fns win32_elf_core_fns =

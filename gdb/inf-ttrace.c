@@ -645,28 +645,6 @@ inf_ttrace_create_inferior (char *exec_file, char *allargs, char **env,
 }
 
 static void
-inf_ttrace_kill_inferior (void)
-{
-  pid_t pid = ptid_get_pid (inferior_ptid);
-
-  if (pid == 0)
-    return;
-
-  if (ttrace (TT_PROC_EXIT, pid, 0, 0, 0, 0) == -1)
-    perror_with_name (("ttrace"));
-  /* ??? Is it necessary to call ttrace_wait() here?  */
-
-  if (inf_ttrace_vfork_ppid != -1)
-    {
-      if (ttrace (TT_PROC_DETACH, inf_ttrace_vfork_ppid, 0, 0, 0, 0) == -1)
-	perror_with_name (("ttrace"));
-      inf_ttrace_vfork_ppid = -1;
-    }
-
-  target_mourn_inferior ();
-}
-
-static void
 inf_ttrace_mourn_inferior (void)
 {
   const int num_buckets = ARRAY_SIZE (inf_ttrace_page_dict.buckets);
@@ -715,7 +693,7 @@ inf_ttrace_attach (char *args, int from_tty)
 
   if (from_tty)
     {
-      exec_file = (char *) get_exec_file (0);
+      exec_file = get_exec_file (0);
 
       if (exec_file)
 	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
@@ -790,6 +768,28 @@ inf_ttrace_detach (char *args, int from_tty)
 
   unpush_target (ttrace_ops_hack);
   inferior_ptid = null_ptid;
+}
+
+static void
+inf_ttrace_kill (void)
+{
+  pid_t pid = ptid_get_pid (inferior_ptid);
+
+  if (pid == 0)
+    return;
+
+  if (ttrace (TT_PROC_EXIT, pid, 0, 0, 0, 0) == -1)
+    perror_with_name (("ttrace"));
+  /* ??? Is it necessary to call ttrace_wait() here?  */
+
+  if (inf_ttrace_vfork_ppid != -1)
+    {
+      if (ttrace (TT_PROC_DETACH, inf_ttrace_vfork_ppid, 0, 0, 0, 0) == -1)
+	perror_with_name (("ttrace"));
+      inf_ttrace_vfork_ppid = -1;
+    }
+
+  target_mourn_inferior ();
 }
 
 static int
@@ -894,6 +894,10 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 #endif
 
     case TTEVT_EXEC:
+      /* FIXME: kettenis/20051029: GDB doesn't really know how to deal
+	 with TARGET_WAITKIND_EXECD events yet.  So we make it look
+	 like a SIGTRAP instead.  */
+#if 0
       ourstatus->kind = TARGET_WAITKIND_EXECD;
       ourstatus->value.execd_pathname =
 	xmalloc (tts.tts_u.tts_exec.tts_pathlen + 1);
@@ -902,6 +906,10 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 		  tts.tts_u.tts_exec.tts_pathlen, 0) == -1)
 	perror_with_name (("ttrace"));
       ourstatus->value.execd_pathname[tts.tts_u.tts_exec.tts_pathlen] = 0;
+#else
+      ourstatus->kind = TARGET_WAITKIND_STOPPED;
+      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+#endif
       break;
 
     case TTEVT_EXIT:
@@ -1081,9 +1089,9 @@ inf_ttrace_xfer_partial (struct target_ops *ops, enum target_object object,
 static void
 inf_ttrace_files_info (struct target_ops *ignore)
 {
-  printf_unfiltered (_("\tUsing the running image of %s %s.\n"),
-		     attach_flag ? "attached" : "child",
-		     target_pid_to_str (inferior_ptid));
+  printf_filtered (_("\tUsing the running image of %s %s.\n"),
+		   attach_flag ? "attached" : "child",
+		   target_pid_to_str (inferior_ptid));
 }
 
 static int
@@ -1115,24 +1123,24 @@ inf_ttrace_target (void)
 {
   struct target_ops *t = inf_child_target ();
 
-  t->to_create_inferior = inf_ttrace_create_inferior;
-  t->to_kill = inf_ttrace_kill_inferior;
-  t->to_mourn_inferior = inf_ttrace_mourn_inferior;
   t->to_attach = inf_ttrace_attach;
   t->to_detach = inf_ttrace_detach;
   t->to_resume = inf_ttrace_resume;
   t->to_wait = inf_ttrace_wait;
-  t->to_xfer_partial = inf_ttrace_xfer_partial;
   t->to_files_info = inf_ttrace_files_info;
-  t->to_thread_alive = inf_ttrace_thread_alive;
-  t->to_pid_to_str = inf_ttrace_pid_to_str;
-  t->to_follow_fork = inf_ttrace_follow_fork;
   t->to_can_use_hw_breakpoint = inf_ttrace_can_use_hw_breakpoint;
-  t->to_region_size_ok_for_hw_watchpoint =
-    inf_ttrace_region_size_ok_for_hw_watchpoint;
   t->to_insert_watchpoint = inf_ttrace_insert_watchpoint;
   t->to_remove_watchpoint = inf_ttrace_remove_watchpoint;
   t->to_stopped_by_watchpoint = inf_ttrace_stopped_by_watchpoint;
+  t->to_region_size_ok_for_hw_watchpoint =
+    inf_ttrace_region_size_ok_for_hw_watchpoint;
+  t->to_kill = inf_ttrace_kill;
+  t->to_create_inferior = inf_ttrace_create_inferior;
+  t->to_follow_fork = inf_ttrace_follow_fork;
+  t->to_mourn_inferior = inf_ttrace_mourn_inferior;
+  t->to_thread_alive = inf_ttrace_thread_alive;
+  t->to_pid_to_str = inf_ttrace_pid_to_str;
+  t->to_xfer_partial = inf_ttrace_xfer_partial;
 
   ttrace_ops_hack = t;
   return t;

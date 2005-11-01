@@ -61,7 +61,7 @@ frv_vliw_setup_insn (SIM_CPU *current_cpu, const CGEN_INSN *insn)
     {
       /* Clear the appropriate MSR fields depending on which slot
 	 this insn is in.  */
-      CGEN_ATTR_VALUE_TYPE preserve_ovf;
+      CGEN_ATTR_VALUE_ENUM_TYPE preserve_ovf;
       SI msr0 = GET_MSR (0);
 
       preserve_ovf = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_PRESERVE_OVF);

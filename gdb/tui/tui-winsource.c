@@ -41,6 +41,7 @@
 
 #include "gdb_string.h"
 #include "gdb_curses.h"
+#include "gdb_assert.h"
 
 /* Function to display the "main" routine.  */
 void
@@ -71,7 +72,7 @@ tui_display_main (void)
    initializes the horizontal scroll to 0.  */
 void
 tui_update_source_window (struct tui_win_info * win_info, struct symtab *s,
-			  union tui_line_or_address line_or_addr, int noerror)
+			  struct tui_line_or_address line_or_addr, int noerror)
 {
   win_info->detail.source_info.horizontal_offset = 0;
   tui_update_source_window_as_is (win_info, s, line_or_addr, noerror);
@@ -84,14 +85,14 @@ tui_update_source_window (struct tui_win_info * win_info, struct symtab *s,
    shows the source as specified by the horizontal offset.  */
 void
 tui_update_source_window_as_is (struct tui_win_info * win_info, struct symtab *s,
-				union tui_line_or_address line_or_addr, int noerror)
+				struct tui_line_or_address line_or_addr, int noerror)
 {
   enum tui_status ret;
 
   if (win_info->generic.type == SRC_WIN)
-    ret = tui_set_source_content (s, line_or_addr.line_no, noerror);
+    ret = tui_set_source_content (s, line_or_addr.u.line_no, noerror);
   else
-    ret = tui_set_disassem_content (line_or_addr.addr);
+    ret = tui_set_disassem_content (line_or_addr.u.addr);
 
   if (ret == TUI_FAILURE)
     {
@@ -107,7 +108,7 @@ tui_update_source_window_as_is (struct tui_win_info * win_info, struct symtab *s
 	{
 	  struct symtab_and_line sal;
 	  
-	  sal.line = line_or_addr.line_no +
+	  sal.line = line_or_addr.u.line_no +
 	    (win_info->generic.content_size - 2);
 	  sal.symtab = s;
 	  set_current_source_symtab_and_line (&sal);
@@ -134,7 +135,7 @@ tui_update_source_windows_with_addr (CORE_ADDR addr)
   if (addr != 0)
     {
       struct symtab_and_line sal;
-      union tui_line_or_address l;
+      struct tui_line_or_address l;
       
       switch (tui_current_layout ())
 	{
@@ -147,7 +148,8 @@ tui_update_source_windows_with_addr (CORE_ADDR addr)
 	  break;
 	default:
 	  sal = find_pc_line (addr, 0);
-	  l.line_no = sal.line;
+	  l.loa = LOA_LINE;
+	  l.u.line_no = sal.line;
 	  tui_show_symtab_source (sal.symtab, l, FALSE);
 	  break;
 	}
@@ -172,7 +174,7 @@ void
 tui_update_source_windows_with_line (struct symtab *s, int line)
 {
   CORE_ADDR pc;
-  union tui_line_or_address l;
+  struct tui_line_or_address l;
   
   switch (tui_current_layout ())
     {
@@ -182,7 +184,8 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
       tui_update_source_windows_with_addr (pc);
       break;
     default:
-      l.line_no = line;
+      l.loa = LOA_LINE;
+      l.u.line_no = line;
       tui_show_symtab_source (s, l, FALSE);
       if (tui_current_layout () == SRC_DISASSEM_COMMAND)
 	{
@@ -336,7 +339,7 @@ tui_horizontal_source_scroll (struct tui_win_info * win_info,
 
 /* Set or clear the has_break flag in the line whose line is line_no.  */
 void
-tui_set_is_exec_point_at (union tui_line_or_address l, struct tui_win_info * win_info)
+tui_set_is_exec_point_at (struct tui_line_or_address l, struct tui_win_info * win_info)
 {
   int changed = 0;
   int i;
@@ -346,8 +349,15 @@ tui_set_is_exec_point_at (union tui_line_or_address l, struct tui_win_info * win
   while (i < win_info->generic.content_size)
     {
       int new_state;
+      struct tui_line_or_address content_loa =
+	content[i]->which_element.source.line_or_addr;
 
-      if (content[i]->which_element.source.line_or_addr.addr == l.addr)
+      gdb_assert (l.loa == LOA_ADDRESS || l.loa == LOA_LINE);
+      gdb_assert (content_loa.loa == LOA_LINE
+		  || content_loa.loa == LOA_ADDRESS);
+      if (content_loa.loa == l.loa
+	  && ((l.loa == LOA_LINE && content_loa.u.line_no == l.u.line_no)
+              || (content_loa.u.addr == l.u.addr)))
         new_state = TRUE;
       else
 	new_state = FALSE;
@@ -414,12 +424,16 @@ tui_update_breakpoint_info (struct tui_win_info * win, int current_only)
            bp != (struct breakpoint *) NULL;
            bp = bp->next)
         {
+	  gdb_assert (line->line_or_addr.loa == LOA_LINE
+		      || line->line_or_addr.loa == LOA_ADDRESS);
           if ((win == TUI_SRC_WIN
                && bp->source_file
                && (strcmp (src->filename, bp->source_file) == 0)
-               && bp->line_number == line->line_or_addr.line_no)
+	       && line->line_or_addr.loa == LOA_LINE
+               && bp->line_number == line->line_or_addr.u.line_no)
               || (win == TUI_DISASM_WIN
-                  && bp->loc->address == line->line_or_addr.addr))
+		  && line->line_or_addr.loa == LOA_ADDRESS
+                  && bp->loc->address == line->line_or_addr.u.addr))
             {
               if (bp->enable_state == bp_disabled)
                 mode |= TUI_BP_DISABLED;
@@ -614,8 +628,11 @@ tui_line_is_displayed (int line, struct tui_win_info * win_info,
   while (i < win_info->generic.content_size - threshold && !is_displayed)
     {
       is_displayed = (((struct tui_win_element *)
-		      win_info->generic.content[i])->which_element.source.line_or_addr.line_no
-		     == (int) line);
+		      win_info->generic.content[i])->which_element.source.line_or_addr.loa
+		      == LOA_LINE)
+		     && (((struct tui_win_element *)
+		      win_info->generic.content[i])->which_element.source.line_or_addr.u.line_no
+		      == (int) line);
       i++;
     }
 
@@ -640,8 +657,11 @@ tui_addr_is_displayed (CORE_ADDR addr, struct tui_win_info * win_info,
   while (i < win_info->generic.content_size - threshold && !is_displayed)
     {
       is_displayed = (((struct tui_win_element *)
-		      win_info->generic.content[i])->which_element.source.line_or_addr.addr
-		     == addr);
+		      win_info->generic.content[i])->which_element.source.line_or_addr.loa
+		      == LOA_ADDRESS)
+		     && (((struct tui_win_element *)
+		      win_info->generic.content[i])->which_element.source.line_or_addr.u.addr
+		      == addr);
       i++;
     }
 

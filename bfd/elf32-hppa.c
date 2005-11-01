@@ -1004,7 +1004,7 @@ elf32_hppa_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf32_hppa_copy_indirect_symbol (const struct elf_backend_data *bed,
+elf32_hppa_copy_indirect_symbol (struct bfd_link_info *info,
 				 struct elf_link_hash_entry *eh_dir,
 				 struct elf_link_hash_entry *eh_ind)
 {
@@ -1020,16 +1020,15 @@ elf32_hppa_copy_indirect_symbol (const struct elf_backend_data *bed,
 	  struct elf32_hppa_dyn_reloc_entry **hdh_pp;
 	  struct elf32_hppa_dyn_reloc_entry *hdh_p;
 
-	  if (eh_ind->root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
+	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (hdh_pp = &hh_ind->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
 	    {
 	      struct elf32_hppa_dyn_reloc_entry *hdh_q;
 
-	      for (hdh_q = hh_dir->dyn_relocs; hdh_q != NULL; hdh_q = hdh_q->hdh_next)
+	      for (hdh_q = hh_dir->dyn_relocs;
+		   hdh_q != NULL;
+		   hdh_q = hdh_q->hdh_next)
 		if (hdh_q->sec == hdh_p->sec)
 		  {
 #if RELATIVE_DYNRELOCS
@@ -1062,7 +1061,7 @@ elf32_hppa_copy_indirect_symbol (const struct elf_backend_data *bed,
       eh_dir->needs_plt |= eh_ind->needs_plt;
     }
   else
-   _bfd_elf_link_hash_copy_indirect (bed, eh_dir, eh_ind);
+   _bfd_elf_link_hash_copy_indirect (info, eh_dir, eh_ind);
 }
 
 /* Look through the relocs for a section during the first phase, and

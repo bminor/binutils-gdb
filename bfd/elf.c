@@ -1458,12 +1458,11 @@ _bfd_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
    old indirect symbol.  Also used for copying flags to a weakdef.  */
 
 void
-_bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
+_bfd_elf_link_hash_copy_indirect (struct bfd_link_info *info,
 				  struct elf_link_hash_entry *dir,
 				  struct elf_link_hash_entry *ind)
 {
-  bfd_signed_vma tmp;
-  bfd_signed_vma lowest_valid = bed->can_refcount;
+  struct elf_link_hash_table *htab;
 
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
@@ -1480,33 +1479,32 @@ _bfd_elf_link_hash_copy_indirect (const struct elf_backend_data *bed,
 
   /* Copy over the global and procedure linkage table refcount entries.
      These may have been already set up by a check_relocs routine.  */
-  tmp = dir->got.refcount;
-  if (tmp < lowest_valid)
+  htab = elf_hash_table (info);
+  if (ind->got.refcount > htab->init_got_refcount.refcount)
     {
-      dir->got.refcount = ind->got.refcount;
-      ind->got.refcount = tmp;
+      if (dir->got.refcount < 0)
+	dir->got.refcount = 0;
+      dir->got.refcount += ind->got.refcount;
+      ind->got.refcount = htab->init_got_refcount.refcount;
     }
-  else
-    BFD_ASSERT (ind->got.refcount < lowest_valid);
 
-  tmp = dir->plt.refcount;
-  if (tmp < lowest_valid)
+  if (ind->plt.refcount > htab->init_plt_refcount.refcount)
     {
-      dir->plt.refcount = ind->plt.refcount;
-      ind->plt.refcount = tmp;
+      if (dir->plt.refcount < 0)
+	dir->plt.refcount = 0;
+      dir->plt.refcount += ind->plt.refcount;
+      ind->plt.refcount = htab->init_plt_refcount.refcount;
     }
-  else
-    BFD_ASSERT (ind->plt.refcount < lowest_valid);
 
-  if (dir->dynindx == -1)
+  if (ind->dynindx != -1)
     {
+      if (dir->dynindx != -1)
+	_bfd_elf_strtab_delref (htab->dynstr, dir->dynstr_index);
       dir->dynindx = ind->dynindx;
       dir->dynstr_index = ind->dynstr_index;
       ind->dynindx = -1;
       ind->dynstr_index = 0;
     }
-  else
-    BFD_ASSERT (ind->dynindx == -1);
 }
 
 void
@@ -2670,29 +2668,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
   if (this_hdr->sh_type == SHT_NULL)
     {
       if ((asect->flags & SEC_GROUP) != 0)
-	{
-	  /* We also need to mark SHF_GROUP here for relocatable
-	     link.  */
-	  struct bfd_link_order *l;
-	  asection *elt;
-
-	  for (l = asect->map_head.link_order; l != NULL; l = l->next)
-	    if (l->type == bfd_indirect_link_order
-		&& (elt = elf_next_in_group (l->u.indirect.section)) != NULL)
-	      do
-		{
-		  /* The name is not important. Anything will do.  */
-		  elf_group_name (elt->output_section) = "G";
-		  elf_section_flags (elt->output_section) |= SHF_GROUP;
-
-		  elt = elf_next_in_group (elt);
-		  /* During a relocatable link, the lists are
-		     circular.  */
-		}
-	      while (elt != elf_next_in_group (l->u.indirect.section));
-
-	  this_hdr->sh_type = SHT_GROUP;
-	}
+	this_hdr->sh_type = SHT_GROUP;
       else if ((asect->flags & SEC_ALLOC) != 0
 	  && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
 	      || (asect->flags & SEC_NEVER_LOAD) != 0))
@@ -2827,7 +2803,6 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
   unsigned long symindx;
   asection *elt, *first;
   unsigned char *loc;
-  struct bfd_link_order *l;
   bfd_boolean gas;
 
   /* Ignore linker created group section.  See elfNN_ia64_object_p in
@@ -2895,22 +2870,6 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
       if (elt == first)
 	break;
     }
-
-  /* If this is a relocatable link, then the above did nothing because
-     SEC is the output section.  Look through the input sections
-     instead.  */
-  for (l = sec->map_head.link_order; l != NULL; l = l->next)
-    if (l->type == bfd_indirect_link_order
-	&& (elt = elf_next_in_group (l->u.indirect.section)) != NULL)
-      do
-	{
-	  loc -= 4;
-	  H_PUT_32 (abfd,
-		    elf_section_data (elt->output_section)->this_idx, loc);
-	  elt = elf_next_in_group (elt);
-	  /* During a relocatable link, the lists are circular.  */
-	}
-      while (elt != elf_next_in_group (l->u.indirect.section));
 
   if ((loc -= 4) != sec->contents)
     abort ();
@@ -3091,67 +3050,46 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	{
 	  s = elf_linked_to_section (sec);
 	  if (s)
-	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+	    {
+	      if (link_info != NULL)
+		{
+		  /* For linker, elf_linked_to_section points to the
+		     input section.  */
+		  if (elf_discarded_section (s))
+		    {
+		      asection *kept;
+		      (*_bfd_error_handler)
+			(_("%B: sh_link of section `%A' points to discarded section `%A' of `%B'"),
+			 abfd, d->this_hdr.bfd_section,
+			 s, s->owner);
+		      /* Point to the kept section if it has the same
+			 size as the discarded one.  */
+		      kept = _bfd_elf_check_kept_section (s);
+		      if (kept == NULL)
+			{
+			  bfd_set_error (bfd_error_bad_value);
+			  return FALSE;
+			}
+		      s = kept;
+		    }
+		  s = s->output_section;
+		  BFD_ASSERT (s != NULL);
+		}
+	      d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+	    }
 	  else
 	    {
-	      struct bfd_link_order *p;
-
-	      /* Find out what the corresponding section in output
-		 is.  */
-	      for (p = sec->map_head.link_order; p != NULL; p = p->next)
-		{
-		  s = p->u.indirect.section;
-		  if (p->type == bfd_indirect_link_order
-		      && (bfd_get_flavour (s->owner)
-			  == bfd_target_elf_flavour))
-		    {
-		      Elf_Internal_Shdr ** const elf_shdrp
-			= elf_elfsections (s->owner);
-		      int elfsec
-			= _bfd_elf_section_from_bfd_section (s->owner, s);
-		      elfsec = elf_shdrp[elfsec]->sh_link;
-		      /* PR 290:
-			 The Intel C compiler generates SHT_IA_64_UNWIND with
-			 SHF_LINK_ORDER.  But it doesn't set the sh_link or
-			 sh_info fields.  Hence we could get the situation
-		         where elfsec is 0.  */
-		      if (elfsec == 0)
-			{
-			  const struct elf_backend_data *bed
-			    = get_elf_backend_data (abfd);
-			  if (bed->link_order_error_handler)
-			    bed->link_order_error_handler
-			      (_("%B: warning: sh_link not set for section `%A'"),
-			       abfd, s);
-			}
-		      else
-			{
-			  s = elf_shdrp[elfsec]->bfd_section;
-			  if (elf_discarded_section (s))
-			    {
-			      asection *kept;
-			       (*_bfd_error_handler)
-				  (_("%B: sh_link of section `%A' points to discarded section `%A' of `%B'"),
-				   abfd, d->this_hdr.bfd_section,
-				   s, s->owner);
-			       /* Point to the kept section if it has
-				  the same size as the discarded
-				  one.  */
-			       kept = _bfd_elf_check_kept_section (s);
-			       if (kept == NULL)
-				 {
-				   bfd_set_error (bfd_error_bad_value);
-				   return FALSE;
-				 }
-			       s = kept;
-			    }
-			  s = s->output_section;
-			  BFD_ASSERT (s != NULL);
-			  d->this_hdr.sh_link = elf_section_data (s)->this_idx;
-			}
-		      break;
-		    }
-		}
+	      /* PR 290:
+		 The Intel C compiler generates SHT_IA_64_UNWIND with
+		 SHF_LINK_ORDER.  But it doesn't set the sh_link or
+		 sh_info fields.  Hence we could get the situation
+	         where s is NULL.  */
+	      const struct elf_backend_data *bed
+		= get_elf_backend_data (abfd);
+	      if (bed->link_order_error_handler)
+		bed->link_order_error_handler
+		  (_("%B: warning: sh_link not set for section `%A'"),
+		   abfd, sec);
 	    }
 	}
 
@@ -5665,6 +5603,62 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
+/* Initialize private output section information from input section.  */
+
+bfd_boolean
+_bfd_elf_init_private_section_data (bfd *ibfd,
+				    asection *isec,
+				    bfd *obfd,
+				    asection *osec,
+				    struct bfd_link_info *link_info)
+
+{
+  Elf_Internal_Shdr *ihdr, *ohdr;
+  bfd_boolean need_group = link_info == NULL || link_info->relocatable;
+
+  if (ibfd->xvec->flavour != bfd_target_elf_flavour
+      || obfd->xvec->flavour != bfd_target_elf_flavour)
+    return TRUE;
+
+  /* FIXME: What if the output ELF section type has been set to
+     something different?  */
+  if (elf_section_type (osec) == SHT_NULL)
+    elf_section_type (osec) = elf_section_type (isec);
+
+  /* Set things up for objcopy and relocatable link.  The output
+     SHT_GROUP section will have its elf_next_in_group pointing back
+     to the input group members.  Ignore linker created group section.
+     See elfNN_ia64_object_p in elfxx-ia64.c.  */
+
+  if (need_group)
+    {
+      if (elf_sec_group (isec) == NULL
+	  || (elf_sec_group (isec)->flags & SEC_LINKER_CREATED) == 0)
+	{
+	  if (elf_section_flags (isec) & SHF_GROUP)
+	    elf_section_flags (osec) |= SHF_GROUP;
+	  elf_next_in_group (osec) = elf_next_in_group (isec);
+	  elf_group_name (osec) = elf_group_name (isec);
+	}
+    }
+
+  ihdr = &elf_section_data (isec)->this_hdr;
+
+  /* We need to handle elf_linked_to_section for SHF_LINK_ORDER. We
+     don't use the output section of the linked-to section since it
+     may be NULL at this point.  */
+  if ((ihdr->sh_flags & SHF_LINK_ORDER) != 0)
+    {
+      ohdr = &elf_section_data (osec)->this_hdr;
+      ohdr->sh_flags |= SHF_LINK_ORDER;
+      elf_linked_to_section (osec) = elf_linked_to_section (isec);
+    }
+
+  osec->use_rela_p = isec->use_rela_p;
+
+  return TRUE;
+}
+
 /* Copy private section information.  This copies over the entsize
    field, and sometimes the info field.  */
 
@@ -5691,27 +5685,8 @@ _bfd_elf_copy_private_section_data (bfd *ibfd,
       || ihdr->sh_type == SHT_GNU_verdef)
     ohdr->sh_info = ihdr->sh_info;
 
-  /* Set things up for objcopy.  The output SHT_GROUP section will
-     have its elf_next_in_group pointing back to the input group
-     members.  Ignore linker created group section.  See
-     elfNN_ia64_object_p in elfxx-ia64.c.  We also need to handle
-     elf_linked_to_section for SHF_LINK_ORDER.  */
-
-  if ((ihdr->sh_flags & SHF_LINK_ORDER) != 0
-      && elf_linked_to_section (isec) != 0)
-    elf_linked_to_section (osec)
-      = elf_linked_to_section (isec)->output_section;
-
-  if (elf_sec_group (isec) == NULL
-      || (elf_sec_group (isec)->flags & SEC_LINKER_CREATED) == 0)
-    {
-      elf_next_in_group (osec) = elf_next_in_group (isec);
-      elf_group_name (osec) = elf_group_name (isec);
-    }
-
-  osec->use_rela_p = isec->use_rela_p;
-
-  return TRUE;
+  return _bfd_elf_init_private_section_data (ibfd, isec, obfd, osec,
+					     NULL);
 }
 
 /* Copy private header information.  */

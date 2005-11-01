@@ -580,15 +580,6 @@ struct dwarf_block
 /* A zeroed version of a partial die for initialization purposes.  */
 static struct partial_die_info zeroed_partial_die;
 
-/* FIXME: decode_locdesc sets these variables to describe the location
-   to the caller.  These ought to be a structure or something.   If
-   none of the flags are set, the object lives at the address returned
-   by decode_locdesc.  */
-
-static int isreg;		/* Object lives in register.
-				   decode_locdesc's return value is
-				   the register number.  */
-
 /* FIXME: We might want to set this from BFD via bfd_arch_bits_per_byte,
    but this would require a corresponding change in unpack_field_as_long
    and friends.  */
@@ -8559,9 +8550,6 @@ dwarf2_fundamental_type (struct objfile *objfile, int typeid,
    callers will only want a very basic result and this can become a
    complaint.
 
-   When the result is a register number, the global isreg flag is set,
-   otherwise it is cleared.
-
    Note that stack[0] is unused except as a default error return.
    Note that stack overflow is not yet handled.  */
 
@@ -8581,7 +8569,6 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
   i = 0;
   stacki = 0;
   stack[stacki] = 0;
-  isreg = 0;
 
   while (i < size)
     {
@@ -8655,14 +8642,12 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	case DW_OP_reg29:
 	case DW_OP_reg30:
 	case DW_OP_reg31:
-	  isreg = 1;
 	  stack[++stacki] = op - DW_OP_reg0;
 	  if (i < size)
 	    dwarf2_complex_location_expr_complaint ();
 	  break;
 
 	case DW_OP_regx:
-	  isreg = 1;
 	  unsnd = read_unsigned_leb128 (NULL, (data + i), &bytes_read);
 	  i += bytes_read;
 	  stack[++stacki] = unsnd;

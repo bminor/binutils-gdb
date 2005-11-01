@@ -1,3 +1,177 @@
+2005-11-01  Paul Gilliam  <pgilliam@us.ibm.com>
+
+        * rs6000-tdep.c (rs6000_gdbarch_init): On GNU/Linux, assume that
+	 bfd_mach_ppc64 has altivec unit, just like bfd_mach_ppc.
+
+2005-11-01  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* tui/tui-data.h (tui_line_or_address): Encapsulate the union in a
+	struct with a tag.
+	(tui_source_element, tui_source_info): Update.
+	* tui/tui-disasm.c, tui/tui-source.c: Update to use the tagged union.
+	* tui/tui-source.h, tui/tui-stack.c, tui/tui-win.c: Likewise.
+	* tui/tui-winsource.c, tui/tui-data.c, tui/tui-layout.c: Likewise.
+	* tui/tui-winsource.h: Likewise.
+
+2005-11-01  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c (CYGWIN_SIGNAL_STRING): Delete.
+	(_CYGWIN_SIGNAL_STRING): Define if not already defined in cygwin.h.
+	(win32_add_thread): Use XZALLOC rather than xmalloc/memset.
+	(register_loaded_dll): Ditto.
+	(handle_load_dll): Call solib_add here.
+	(handle_unload_dll): Ditto.
+	(info_dll_command): Delete.
+	(handle_output_debug_string): Use official _CYGWIN_SIGNAL_STRING.
+	(win32_current_sos): Duplicate table to pass off to caller rather than
+	deleting our version.
+	(set_win32_aliases): New function.
+	(_initialize_win32_nat): Remove local handling of "info shared".  Set
+	deprecated_init_ui_hook to allow late setting of "info dll" alias.
+
+2005-11-01  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* event-top.c (gdb_setup_readline): Don't set gdb_stdout when
+	--batch-silent option was given.
+	* main.c (batch_silent): New variable.
+	(captured_main): Add new option --batch-silent.
+	(print_gdb_help): Likewise.
+
+2005-11-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS: Mention VAX floating point support.
+
+2005-10-31  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c (get_relocated_section_addrs): Reinstate.
+	(solib_symbols_add): New function.
+	(lm_info): Remove end_addr field.
+	(register_loaded_dll): Don't try to find end_addr since gdb will do
+	this automatically now.  Make so_original_name == so_name for now.
+	Eliminate strcpy by using so_name directly.  Read in symbols if new
+	paramater "readsyms" is true.
+	(handle_load_dll): Pass auto_solib_add to register_loaded_dll to
+	control when symbols should be read.
+	(win32_free_so): Don't free objfile here.
+	(win32_create_inferior_hook): New function.
+	(handle_unload_dll): Remove left-over cruft.
+	(win32_special_symbol_handling): New (dummy) function.
+	(map_single_dll_code_section): Reinstate.
+	(dll_code_sections_add): Reinstate.
+	(core_section_load_dll_symbols): Reinstate.  Don't issue an error on
+	duplicate attempts to read same dll.  Make sure that UNIX-like name is
+	used to register DLL.
+	(win32_current_sos): Handle core files.  Reset private list before
+	passing start of list pointer to gdb.
+	(init_win32_ops): Fill out (currently unused)
+	solib_create_inferior_hook.  Fill out special_symbol_handling.
+	* config/i386/tm-cygwin.h: Remove most special solib stuff.
+
+2005-10-31  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c: Remove comment intended only for debugging.
+
+2005-11-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* doublest.c (floatformat_normalize_byteorder): Handle
+	floatformat_vax.
+	(convert_doublest_to_floatformat): Use
+	floatformat_normalize_byteorder to swap bytes if necessary.
+	* vax-tdep.c: Include floatformat.h.
+	(vax_gdbarch_init): Set float_format, double_format,
+	long_double_format and long_double_bit.
+	* Makefile.in (vax-tdep.o): Update dependencies.
+
+2005-10-31  Christopher Faylor  <cgf@timesys.com>
+
+	Change child_ to win32_ throughout.
+	* win32-nat.c (win32_ops): New variable.
+	(win32_so_ops): Ditto.
+	(psapi_get_dll_name): Make function static.
+	(struct so_stuff): Delete.
+	(struct lm_info): New struct.
+	(solib_start, solib_end): Redefine as struct so_list.
+	(safe_symbol_file_add_stub): Use so_list rather than so_stuff.
+	(register_loaded_dll): Ditto.  Special-case ntdll.dll.  Fill in lm_info
+	field of so_list with information previously stored in so_stuff.
+	(get_image_name): Make function static.
+	(max_dll_name_len): Make variable static.
+	(win32_free_so): New function.
+	(win32_current_sos): Ditto.
+	(win32_relocate_section_addresses): Ditto.
+	(handle_unload_dll): Use so_list rather than so_stuff.  Call free_so to
+	delete shared library.
+	(solib_address): Delete function.
+	(child_solib_loaded_library_pathname): Ditto.
+	(win32_clear_solib): Rename from child_clear_solibs.  Use so_list
+	rather than so_stuff.  Just clear win32-specific stuff.
+	(get_relocated_section_addrs): Delete.
+	(solib_symbols_add): Ditto.
+	(info_dll_command): Make static.  Use lm_info field from so_list to
+	retrieve load address.
+	(fake_create_process): Make function static.
+	(win32_xfer_memory): Ditto.
+	(win32_kill_inferior): Ditto.
+	(win32_resume): Ditto.
+	(cygwin_pid_to_str): Ditto.
+	(do_initial_win32_stuff): Use win32_ops rather than
+	deprecated_child_ops.
+	(child_detach): Ditto.
+	(win32_mourn_inferior): Ditto.
+	(_initialize_win32_nat): Ditto.
+	(init_win32_ops): Ditto.  Fill out win32_so_ops and set
+	current_target_so_ops to win32_so_ops.
+	(core_dll_symbols_add): Delete.
+	(map_single_dll_code_section): Ditto.
+	(dll_code_sections_add): Ditto.
+	(core_section_load_dll_symbols): Ditto.
+	(child_solib_add): Ditto.
+
+2005-10-31  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* tui/tui-command.c (tui_dispatch_ctrl_char): Test output of
+	getenv() before using it.
+
+2005-10-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-tdep.h (HPPA_INSN_SIZE): New define.
+	* hppa-hpux-tdep.c (hppa_hpux_search_pattern)
+	(hppa64_hpux_search_dummy_call_sequence): Rewrite to avoid
+	assumption on sizeof(unsigned).
+
+	* inf-ttrace.c (inf_ttrace_wait): Comment out TARGET_WAITKIND_EXEC
+	code; return TARGET_WAITKIND_STOPPED instead.
+
+2005-10-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* ppc-tdep.h (PPC_INSN_SIZE): Define.
+
+	* inf-ttrace.c (inf_ttrace_mourn_inferior): Remove redundant cast.
+	(inf_ttrace_kill): Renamed from inf_ttrace_kill_inferior.
+	(inf_ttrace_target): Resort assignments.
+
+2005-10-28  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el: Sync with Emacs 22.0.50.
+
+2005-10-25  Andreas Schwab  <schwab@suse.de>
+
+	* regformats/reg-ia64.dat: Remove NAT registers.
+
+2005-10-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* rs6000-tdep.c (info_powerpc_cmdlist): Remove variable.
+	(rs6000_info_powerpc_command): Remove function.
+
+2005-10-21  Andreas Schwab  <schwab@suse.de>
+
+	* dwarf2read.c (isreg): Removed.
+	(decode_locdesc): Don't set it.
+
+2005-10-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (YYFILES): Add ada-lex.c
+
 2005-10-17  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2expr.c (dwarf_expr_fetch): Use correct comparison to

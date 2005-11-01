@@ -365,6 +365,11 @@ DESCRIPTION
 .   bfd_arch_maxq,     {* Dallas MAXQ 10/20 *}
 .#define bfd_mach_maxq10    10
 .#define bfd_mach_maxq20    20
+.  bfd_arch_z80,
+.#define bfd_mach_z80strict      1 {* No undocumented opcodes.  *}
+.#define bfd_mach_z80            3 {* With ixl, ixh, iyl, and iyh.  *}
+.#define bfd_mach_z80full        7 {* All undocumented instructions.  *}
+.#define bfd_mach_r800           11 {* R800: successor with multiplication.  *}
 .  bfd_arch_last
 .  };
 */
@@ -461,6 +466,7 @@ extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
 extern const bfd_arch_info_type bfd_xtensa_arch;
+extern const bfd_arch_info_type bfd_z80_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
@@ -524,6 +530,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_we32k_arch,
     &bfd_xstormy16_arch,
     &bfd_xtensa_arch,
+    &bfd_z80_arch,
     &bfd_z8k_arch,
 #endif
   0

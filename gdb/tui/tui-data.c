@@ -207,7 +207,8 @@ tui_clear_win_detail (struct tui_win_info * win_info)
 	{
 	case SRC_WIN:
 	case DISASSEM_WIN:
-	  win_info->detail.source_info.start_line_or_addr.addr = 0;
+	  win_info->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
+	  win_info->detail.source_info.start_line_or_addr.u.addr = 0;
 	  win_info->detail.source_info.horizontal_offset = 0;
 	  break;
 	case CMD_WIN:
@@ -486,7 +487,8 @@ init_content_element (struct tui_win_element * element, enum tui_win_type type)
     case SRC_WIN:
     case DISASSEM_WIN:
       element->which_element.source.line = (char *) NULL;
-      element->which_element.source.line_or_addr.line_no = 0;
+      element->which_element.source.line_or_addr.loa = LOA_LINE;
+      element->which_element.source.line_or_addr.u.line_no = 0;
       element->which_element.source.is_exec_point = FALSE;
       element->which_element.source.has_break = FALSE;
       break;
@@ -537,7 +539,8 @@ init_win_info (struct tui_win_info * win_info)
       win_info->detail.source_info.execution_info = (struct tui_gen_win_info *) NULL;
       win_info->detail.source_info.has_locator = FALSE;
       win_info->detail.source_info.horizontal_offset = 0;
-      win_info->detail.source_info.start_line_or_addr.addr = 0;
+      win_info->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
+      win_info->detail.source_info.start_line_or_addr.u.addr = 0;
       win_info->detail.source_info.filename = 0;
       break;
     case DATA_WIN:

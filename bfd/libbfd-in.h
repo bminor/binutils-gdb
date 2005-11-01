@@ -234,6 +234,9 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
 #define _bfd_generic_bfd_print_private_bfd_data \
   ((bfd_boolean (*) (bfd *, void *)) bfd_true)
 
+extern bfd_boolean _bfd_generic_init_private_section_data
+  (bfd *, asection *, bfd *, asection *, struct bfd_link_info *);
+
 /* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
    support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */
 
@@ -648,11 +651,6 @@ extern void _bfd_abort
    the system "off_t" or "off64_t", as the offset.  */
 extern file_ptr real_ftell (FILE *file);
 extern int real_fseek (FILE *file, file_ptr offset, int whence);
-
-FILE *	bfd_cache_lookup_worker
-  (bfd *);
-
-extern bfd *bfd_last_cache;
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */

@@ -4575,6 +4575,11 @@ ENUMDOC
   BFD_RELOC_XTENSA_ASM_EXPAND.
 
 ENUM
+  BFD_RELOC_Z80_DISP8
+ENUMDOC
+  8 bit signed offset in (ix+d) or (iy+d).
+
+ENUM
   BFD_RELOC_Z8K_DISP7
 ENUMDOC
   DJNZ offset.

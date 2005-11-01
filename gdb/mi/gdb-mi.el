@@ -187,7 +187,8 @@ GUD buffer (I/O of GDB)           | Locals buffer
         gdb-find-file-unhook nil
         gdb-source-file-list nil
         gdb-last-command nil
-	gdb-prompt-name nil)
+	gdb-prompt-name nil
+	gdb-buffer-fringe-width (car (window-fringes)))
   ;;
   (setq gdb-buffer-type 'gdbmi)
   ;;

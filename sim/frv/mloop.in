@@ -456,7 +456,7 @@ cat <<EOF
   int first_insn_p = 1;
   int last_insn_p = 0;
   int ninsns;
-  CGEN_ATTR_VALUE_TYPE slot;
+  CGEN_ATTR_VALUE_ENUM_TYPE slot;
 
   /* If the timer is enabled, then enable model profiling.  This is because
      the timer needs accurate cycles counts to work properly.  */

@@ -1953,6 +1953,11 @@ enum bfd_architecture
    bfd_arch_maxq,     /* Dallas MAXQ 10/20 */
 #define bfd_mach_maxq10    10
 #define bfd_mach_maxq20    20
+  bfd_arch_z80,
+#define bfd_mach_z80strict      1 /* No undocumented opcodes.  */
+#define bfd_mach_z80            3 /* With ixl, ixh, iyl, and iyh.  */
+#define bfd_mach_z80full        7 /* All undocumented instructions.  */
+#define bfd_mach_r800           11 /* R800: successor with multiplication.  */
   bfd_arch_last
   };
 
@@ -4058,6 +4063,9 @@ internally by the linker after analysis of a
 BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_XTENSA_ASM_SIMPLIFY,
 
+/* 8 bit signed offset in (ix+d) or (iy+d).  */
+  BFD_RELOC_Z80_DISP8,
+
 /* DJNZ offset.  */
   BFD_RELOC_Z8K_DISP7,
 
@@ -4770,6 +4778,7 @@ typedef struct bfd_target
 #define BFD_JUMP_TABLE_COPY(NAME) \
   NAME##_bfd_copy_private_bfd_data, \
   NAME##_bfd_merge_private_bfd_data, \
+  _bfd_generic_init_private_section_data, \
   NAME##_bfd_copy_private_section_data, \
   NAME##_bfd_copy_private_symbol_data, \
   NAME##_bfd_copy_private_header_data, \
@@ -4782,6 +4791,12 @@ typedef struct bfd_target
   /* Called to merge BFD general private data from one object file
      to a common output file when linking.  */
   bfd_boolean (*_bfd_merge_private_bfd_data) (bfd *, bfd *);
+  /* Called to initialize BFD private section data from one object file
+     to another.  */
+#define bfd_init_private_section_data(ibfd, isec, obfd, osec, link_info) \
+  BFD_SEND (obfd, _bfd_init_private_section_data, (ibfd, isec, obfd, osec, link_info))
+  bfd_boolean (*_bfd_init_private_section_data)
+    (bfd *, sec_ptr, bfd *, sec_ptr, struct bfd_link_info *);
   /* Called to copy BFD private section data from one object file
      to another.  */
   bfd_boolean (*_bfd_copy_private_section_data)

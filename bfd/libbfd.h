@@ -239,6 +239,9 @@ extern bfd_boolean _bfd_generic_get_section_contents_in_window
 #define _bfd_generic_bfd_print_private_bfd_data \
   ((bfd_boolean (*) (bfd *, void *)) bfd_true)
 
+extern bfd_boolean _bfd_generic_init_private_section_data
+  (bfd *, asection *, bfd *, asection *, struct bfd_link_info *);
+
 /* Routines to use for BFD_JUMP_TABLE_CORE when there is no core file
    support.  Use BFD_JUMP_TABLE_CORE (_bfd_nocore).  */
 
@@ -654,11 +657,6 @@ extern void _bfd_abort
 extern file_ptr real_ftell (FILE *file);
 extern int real_fseek (FILE *file, file_ptr offset, int whence);
 
-FILE *	bfd_cache_lookup_worker
-  (bfd *);
-
-extern bfd *bfd_last_cache;
-
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
 extern const bfd_target * const *bfd_target_vector;
@@ -764,20 +762,11 @@ struct _bfd_window_internal {
   unsigned mapped : 1;         /* 1 = mmap, 0 = malloc */
 };
 /* Extracted from cache.c.  */
-#define BFD_CACHE_MAX_OPEN 10
-extern bfd *bfd_last_cache;
-
-#define bfd_cache_lookup(x) \
-    ((x) == bfd_last_cache ? \
-      (FILE *) (bfd_last_cache->iostream): \
-       bfd_cache_lookup_worker (x))
 bfd_boolean bfd_cache_init (bfd *abfd);
 
 bfd_boolean bfd_cache_close (bfd *abfd);
 
 FILE* bfd_open_file (bfd *abfd);
-
-FILE *bfd_cache_lookup_worker (bfd *abfd);
 
 /* Extracted from reloc.c.  */
 #ifdef _BFD_MAKE_TABLE_bfd_reloc_code_real
@@ -1827,6 +1816,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_XTENSA_OP2",
   "BFD_RELOC_XTENSA_ASM_EXPAND",
   "BFD_RELOC_XTENSA_ASM_SIMPLIFY",
+  "BFD_RELOC_Z80_DISP8",
   "BFD_RELOC_Z8K_DISP7",
   "BFD_RELOC_Z8K_CALLR",
   "BFD_RELOC_Z8K_IMM4L",

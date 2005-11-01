@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2004 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -873,22 +873,70 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_ADD; goto extract_sfmt_add;
-          case 1 : itype = FRVBF_INSN_ADDCC; goto extract_sfmt_addcc;
-          case 2 : itype = FRVBF_INSN_ADDX; goto extract_sfmt_addx;
-          case 3 : itype = FRVBF_INSN_ADDXCC; goto extract_sfmt_addcc;
-          case 4 : itype = FRVBF_INSN_SUB; goto extract_sfmt_add;
-          case 5 : itype = FRVBF_INSN_SUBCC; goto extract_sfmt_addcc;
-          case 6 : itype = FRVBF_INSN_SUBX; goto extract_sfmt_addx;
-          case 7 : itype = FRVBF_INSN_SUBXCC; goto extract_sfmt_addcc;
-          case 8 : itype = FRVBF_INSN_SMUL; goto extract_sfmt_smul;
-          case 9 : itype = FRVBF_INSN_SMULCC; goto extract_sfmt_smulcc;
-          case 10 : itype = FRVBF_INSN_UMUL; goto extract_sfmt_smul;
-          case 11 : itype = FRVBF_INSN_UMULCC; goto extract_sfmt_smulcc;
-          case 12 : itype = FRVBF_INSN_CMPB; goto extract_sfmt_cmpb;
-          case 13 : itype = FRVBF_INSN_CMPBA; goto extract_sfmt_cmpb;
-          case 14 : itype = FRVBF_INSN_SDIV; goto extract_sfmt_sdiv;
-          case 15 : itype = FRVBF_INSN_UDIV; goto extract_sfmt_sdiv;
+          case 0 :
+            if ((entire_insn & 0x1fc0fc0) == 0x0)
+              { itype = FRVBF_INSN_ADD; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc03c0) == 0x40)
+              { itype = FRVBF_INSN_ADDCC; goto extract_sfmt_addcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc03c0) == 0x80)
+              { itype = FRVBF_INSN_ADDX; goto extract_sfmt_addx; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc03c0) == 0xc0)
+              { itype = FRVBF_INSN_ADDXCC; goto extract_sfmt_addcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1fc0fc0) == 0x100)
+              { itype = FRVBF_INSN_SUB; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x1fc03c0) == 0x140)
+              { itype = FRVBF_INSN_SUBCC; goto extract_sfmt_addcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x1fc03c0) == 0x180)
+              { itype = FRVBF_INSN_SUBX; goto extract_sfmt_addx; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x1fc03c0) == 0x1c0)
+              { itype = FRVBF_INSN_SUBXCC; goto extract_sfmt_addcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x1fc0fc0) == 0x200)
+              { itype = FRVBF_INSN_SMUL; goto extract_sfmt_smul; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x1fc03c0) == 0x240)
+              { itype = FRVBF_INSN_SMULCC; goto extract_sfmt_smulcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x1fc0fc0) == 0x280)
+              { itype = FRVBF_INSN_UMUL; goto extract_sfmt_smul; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x1fc03c0) == 0x2c0)
+              { itype = FRVBF_INSN_UMULCC; goto extract_sfmt_smulcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x7ffc03c0) == 0x300)
+              { itype = FRVBF_INSN_CMPB; goto extract_sfmt_cmpb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x7ffc03c0) == 0x340)
+              { itype = FRVBF_INSN_CMPBA; goto extract_sfmt_cmpb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x1fc0fc0) == 0x380)
+              { itype = FRVBF_INSN_SDIV; goto extract_sfmt_sdiv; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x1fc0fc0) == 0x3c0)
+              { itype = FRVBF_INSN_UDIV; goto extract_sfmt_sdiv; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -897,21 +945,66 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_AND; goto extract_sfmt_add;
-          case 1 : itype = FRVBF_INSN_ANDCC; goto extract_sfmt_andcc;
-          case 2 : itype = FRVBF_INSN_OR; goto extract_sfmt_add;
-          case 3 : itype = FRVBF_INSN_ORCC; goto extract_sfmt_andcc;
-          case 4 : itype = FRVBF_INSN_XOR; goto extract_sfmt_add;
-          case 5 : itype = FRVBF_INSN_XORCC; goto extract_sfmt_andcc;
-          case 6 : itype = FRVBF_INSN_NOT; goto extract_sfmt_not;
-          case 8 : itype = FRVBF_INSN_SLL; goto extract_sfmt_add;
-          case 9 : itype = FRVBF_INSN_SLLCC; goto extract_sfmt_addcc;
-          case 10 : itype = FRVBF_INSN_SRL; goto extract_sfmt_add;
-          case 11 : itype = FRVBF_INSN_SRLCC; goto extract_sfmt_addcc;
-          case 12 : itype = FRVBF_INSN_SRA; goto extract_sfmt_add;
-          case 13 : itype = FRVBF_INSN_SRACC; goto extract_sfmt_addcc;
-          case 14 : itype = FRVBF_INSN_NSDIV; goto extract_sfmt_sdiv;
-          case 15 : itype = FRVBF_INSN_NUDIV; goto extract_sfmt_sdiv;
+          case 0 :
+            if ((entire_insn & 0x1fc0fc0) == 0x40000)
+              { itype = FRVBF_INSN_AND; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc03c0) == 0x40040)
+              { itype = FRVBF_INSN_ANDCC; goto extract_sfmt_andcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc0fc0) == 0x40080)
+              { itype = FRVBF_INSN_OR; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc03c0) == 0x400c0)
+              { itype = FRVBF_INSN_ORCC; goto extract_sfmt_andcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1fc0fc0) == 0x40100)
+              { itype = FRVBF_INSN_XOR; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x1fc03c0) == 0x40140)
+              { itype = FRVBF_INSN_XORCC; goto extract_sfmt_andcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x1ffffc0) == 0x40180)
+              { itype = FRVBF_INSN_NOT; goto extract_sfmt_not; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x1fc0fc0) == 0x40200)
+              { itype = FRVBF_INSN_SLL; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x1fc03c0) == 0x40240)
+              { itype = FRVBF_INSN_SLLCC; goto extract_sfmt_addcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x1fc0fc0) == 0x40280)
+              { itype = FRVBF_INSN_SRL; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x1fc03c0) == 0x402c0)
+              { itype = FRVBF_INSN_SRLCC; goto extract_sfmt_addcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x1fc0fc0) == 0x40300)
+              { itype = FRVBF_INSN_SRA; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x1fc03c0) == 0x40340)
+              { itype = FRVBF_INSN_SRACC; goto extract_sfmt_addcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x1fc0fc0) == 0x40380)
+              { itype = FRVBF_INSN_NSDIV; goto extract_sfmt_sdiv; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x1fc0fc0) == 0x403c0)
+              { itype = FRVBF_INSN_NUDIV; goto extract_sfmt_sdiv; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -920,60 +1013,222 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (63 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_LDSB; goto extract_sfmt_ldsb;
-          case 1 : itype = FRVBF_INSN_LDUB; goto extract_sfmt_ldsb;
-          case 2 : itype = FRVBF_INSN_LDSH; goto extract_sfmt_ldsb;
-          case 3 : itype = FRVBF_INSN_LDUH; goto extract_sfmt_ldsb;
-          case 4 : itype = FRVBF_INSN_LD; goto extract_sfmt_ldsb;
-          case 5 : itype = FRVBF_INSN_LDD; goto extract_sfmt_ldd;
-          case 6 : itype = FRVBF_INSN_LDQ; goto extract_sfmt_ldq;
-          case 8 : itype = FRVBF_INSN_LDBF; goto extract_sfmt_ldbf;
-          case 9 : itype = FRVBF_INSN_LDHF; goto extract_sfmt_ldbf;
-          case 10 : itype = FRVBF_INSN_LDF; goto extract_sfmt_ldbf;
-          case 11 : itype = FRVBF_INSN_LDDF; goto extract_sfmt_lddf;
-          case 12 : itype = FRVBF_INSN_LDQF; goto extract_sfmt_ldqf;
-          case 13 : itype = FRVBF_INSN_LDC; goto extract_sfmt_ldc;
-          case 14 : itype = FRVBF_INSN_LDDC; goto extract_sfmt_lddc;
-          case 15 : itype = FRVBF_INSN_LDQC; goto extract_sfmt_ldqc;
-          case 16 : itype = FRVBF_INSN_LDSBU; goto extract_sfmt_ldsbu;
-          case 17 : itype = FRVBF_INSN_LDUBU; goto extract_sfmt_ldsbu;
-          case 18 : itype = FRVBF_INSN_LDSHU; goto extract_sfmt_ldsbu;
-          case 19 : itype = FRVBF_INSN_LDUHU; goto extract_sfmt_ldsbu;
-          case 20 : itype = FRVBF_INSN_LDU; goto extract_sfmt_ldsbu;
-          case 21 : itype = FRVBF_INSN_LDDU; goto extract_sfmt_lddu;
-          case 22 : itype = FRVBF_INSN_LDQU; goto extract_sfmt_ldqu;
-          case 24 : itype = FRVBF_INSN_LDBFU; goto extract_sfmt_ldbfu;
-          case 25 : itype = FRVBF_INSN_LDHFU; goto extract_sfmt_ldbfu;
-          case 26 : itype = FRVBF_INSN_LDFU; goto extract_sfmt_ldbfu;
-          case 27 : itype = FRVBF_INSN_LDDFU; goto extract_sfmt_lddfu;
-          case 28 : itype = FRVBF_INSN_LDQFU; goto extract_sfmt_ldqfu;
-          case 29 : itype = FRVBF_INSN_LDCU; goto extract_sfmt_ldcu;
-          case 30 : itype = FRVBF_INSN_LDDCU; goto extract_sfmt_lddcu;
-          case 31 : itype = FRVBF_INSN_LDQCU; goto extract_sfmt_ldqcu;
-          case 32 : itype = FRVBF_INSN_NLDSB; goto extract_sfmt_nldsb;
-          case 33 : itype = FRVBF_INSN_NLDUB; goto extract_sfmt_nldsb;
-          case 34 : itype = FRVBF_INSN_NLDSH; goto extract_sfmt_nldsb;
-          case 35 : itype = FRVBF_INSN_NLDUH; goto extract_sfmt_nldsb;
-          case 36 : itype = FRVBF_INSN_NLD; goto extract_sfmt_nldsb;
-          case 37 : itype = FRVBF_INSN_NLDD; goto extract_sfmt_nldd;
-          case 38 : itype = FRVBF_INSN_NLDQ; goto extract_sfmt_nldq;
-          case 40 : itype = FRVBF_INSN_NLDBF; goto extract_sfmt_nldbf;
-          case 41 : itype = FRVBF_INSN_NLDHF; goto extract_sfmt_nldbf;
-          case 42 : itype = FRVBF_INSN_NLDF; goto extract_sfmt_nldbf;
-          case 43 : itype = FRVBF_INSN_NLDDF; goto extract_sfmt_nlddf;
-          case 44 : itype = FRVBF_INSN_NLDQF; goto extract_sfmt_nldqf;
-          case 48 : itype = FRVBF_INSN_NLDSBU; goto extract_sfmt_nldsbu;
-          case 49 : itype = FRVBF_INSN_NLDUBU; goto extract_sfmt_nldsbu;
-          case 50 : itype = FRVBF_INSN_NLDSHU; goto extract_sfmt_nldsbu;
-          case 51 : itype = FRVBF_INSN_NLDUHU; goto extract_sfmt_nldsbu;
-          case 52 : itype = FRVBF_INSN_NLDU; goto extract_sfmt_nldsbu;
-          case 53 : itype = FRVBF_INSN_NLDDU; goto extract_sfmt_nlddu;
-          case 54 : itype = FRVBF_INSN_NLDQU; goto extract_sfmt_nldqu;
-          case 56 : itype = FRVBF_INSN_NLDBFU; goto extract_sfmt_nldbfu;
-          case 57 : itype = FRVBF_INSN_NLDHFU; goto extract_sfmt_nldbfu;
-          case 58 : itype = FRVBF_INSN_NLDFU; goto extract_sfmt_nldbfu;
-          case 59 : itype = FRVBF_INSN_NLDDFU; goto extract_sfmt_nlddfu;
-          case 60 : itype = FRVBF_INSN_NLDQFU; goto extract_sfmt_nldqfu;
+          case 0 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80000)
+              { itype = FRVBF_INSN_LDSB; goto extract_sfmt_ldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80040)
+              { itype = FRVBF_INSN_LDUB; goto extract_sfmt_ldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80080)
+              { itype = FRVBF_INSN_LDSH; goto extract_sfmt_ldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc0fc0) == 0x800c0)
+              { itype = FRVBF_INSN_LDUH; goto extract_sfmt_ldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80100)
+              { itype = FRVBF_INSN_LD; goto extract_sfmt_ldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80140)
+              { itype = FRVBF_INSN_LDD; goto extract_sfmt_ldd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80180)
+              { itype = FRVBF_INSN_LDQ; goto extract_sfmt_ldq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80200)
+              { itype = FRVBF_INSN_LDBF; goto extract_sfmt_ldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80240)
+              { itype = FRVBF_INSN_LDHF; goto extract_sfmt_ldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80280)
+              { itype = FRVBF_INSN_LDF; goto extract_sfmt_ldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x1fc0fc0) == 0x802c0)
+              { itype = FRVBF_INSN_LDDF; goto extract_sfmt_lddf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80300)
+              { itype = FRVBF_INSN_LDQF; goto extract_sfmt_ldqf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80340)
+              { itype = FRVBF_INSN_LDC; goto extract_sfmt_ldc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80380)
+              { itype = FRVBF_INSN_LDDC; goto extract_sfmt_lddc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x1fc0fc0) == 0x803c0)
+              { itype = FRVBF_INSN_LDQC; goto extract_sfmt_ldqc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 16 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80400)
+              { itype = FRVBF_INSN_LDSBU; goto extract_sfmt_ldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 17 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80440)
+              { itype = FRVBF_INSN_LDUBU; goto extract_sfmt_ldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 18 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80480)
+              { itype = FRVBF_INSN_LDSHU; goto extract_sfmt_ldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 19 :
+            if ((entire_insn & 0x1fc0fc0) == 0x804c0)
+              { itype = FRVBF_INSN_LDUHU; goto extract_sfmt_ldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 20 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80500)
+              { itype = FRVBF_INSN_LDU; goto extract_sfmt_ldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 21 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80540)
+              { itype = FRVBF_INSN_LDDU; goto extract_sfmt_lddu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 22 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80580)
+              { itype = FRVBF_INSN_LDQU; goto extract_sfmt_ldqu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 24 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80600)
+              { itype = FRVBF_INSN_LDBFU; goto extract_sfmt_ldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 25 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80640)
+              { itype = FRVBF_INSN_LDHFU; goto extract_sfmt_ldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 26 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80680)
+              { itype = FRVBF_INSN_LDFU; goto extract_sfmt_ldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 27 :
+            if ((entire_insn & 0x1fc0fc0) == 0x806c0)
+              { itype = FRVBF_INSN_LDDFU; goto extract_sfmt_lddfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 28 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80700)
+              { itype = FRVBF_INSN_LDQFU; goto extract_sfmt_ldqfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 29 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80740)
+              { itype = FRVBF_INSN_LDCU; goto extract_sfmt_ldcu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 30 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80780)
+              { itype = FRVBF_INSN_LDDCU; goto extract_sfmt_lddcu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 31 :
+            if ((entire_insn & 0x1fc0fc0) == 0x807c0)
+              { itype = FRVBF_INSN_LDQCU; goto extract_sfmt_ldqcu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 32 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80800)
+              { itype = FRVBF_INSN_NLDSB; goto extract_sfmt_nldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 33 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80840)
+              { itype = FRVBF_INSN_NLDUB; goto extract_sfmt_nldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 34 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80880)
+              { itype = FRVBF_INSN_NLDSH; goto extract_sfmt_nldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 35 :
+            if ((entire_insn & 0x1fc0fc0) == 0x808c0)
+              { itype = FRVBF_INSN_NLDUH; goto extract_sfmt_nldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 36 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80900)
+              { itype = FRVBF_INSN_NLD; goto extract_sfmt_nldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 37 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80940)
+              { itype = FRVBF_INSN_NLDD; goto extract_sfmt_nldd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 38 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80980)
+              { itype = FRVBF_INSN_NLDQ; goto extract_sfmt_nldq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 40 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80a00)
+              { itype = FRVBF_INSN_NLDBF; goto extract_sfmt_nldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 41 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80a40)
+              { itype = FRVBF_INSN_NLDHF; goto extract_sfmt_nldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 42 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80a80)
+              { itype = FRVBF_INSN_NLDF; goto extract_sfmt_nldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 43 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80ac0)
+              { itype = FRVBF_INSN_NLDDF; goto extract_sfmt_nlddf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 44 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80b00)
+              { itype = FRVBF_INSN_NLDQF; goto extract_sfmt_nldqf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 48 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80c00)
+              { itype = FRVBF_INSN_NLDSBU; goto extract_sfmt_nldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 49 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80c40)
+              { itype = FRVBF_INSN_NLDUBU; goto extract_sfmt_nldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 50 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80c80)
+              { itype = FRVBF_INSN_NLDSHU; goto extract_sfmt_nldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 51 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80cc0)
+              { itype = FRVBF_INSN_NLDUHU; goto extract_sfmt_nldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 52 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80d00)
+              { itype = FRVBF_INSN_NLDU; goto extract_sfmt_nldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 53 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80d40)
+              { itype = FRVBF_INSN_NLDDU; goto extract_sfmt_nlddu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 54 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80d80)
+              { itype = FRVBF_INSN_NLDQU; goto extract_sfmt_nldqu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 56 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80e00)
+              { itype = FRVBF_INSN_NLDBFU; goto extract_sfmt_nldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 57 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80e40)
+              { itype = FRVBF_INSN_NLDHFU; goto extract_sfmt_nldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 58 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80e80)
+              { itype = FRVBF_INSN_NLDFU; goto extract_sfmt_nldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 59 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80ec0)
+              { itype = FRVBF_INSN_NLDDFU; goto extract_sfmt_nlddfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 60 :
+            if ((entire_insn & 0x1fc0fc0) == 0x80f00)
+              { itype = FRVBF_INSN_NLDQFU; goto extract_sfmt_nldqfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -982,60 +1237,222 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (63 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_STB; goto extract_sfmt_stb;
-          case 1 : itype = FRVBF_INSN_STH; goto extract_sfmt_stb;
-          case 2 : itype = FRVBF_INSN_ST; goto extract_sfmt_stb;
-          case 3 : itype = FRVBF_INSN_STD; goto extract_sfmt_std;
-          case 4 : itype = FRVBF_INSN_STQ; goto extract_sfmt_ldq;
-          case 5 : itype = FRVBF_INSN_SWAP; goto extract_sfmt_swap;
-          case 6 : itype = FRVBF_INSN_MOVGS; goto extract_sfmt_movgs;
-          case 7 : itype = FRVBF_INSN_MOVSG; goto extract_sfmt_movsg;
-          case 8 : itype = FRVBF_INSN_STBF; goto extract_sfmt_stbf;
-          case 9 : itype = FRVBF_INSN_STHF; goto extract_sfmt_stbf;
-          case 10 : itype = FRVBF_INSN_STF; goto extract_sfmt_stbf;
-          case 11 : itype = FRVBF_INSN_STDF; goto extract_sfmt_stdf;
-          case 12 : itype = FRVBF_INSN_STQF; goto extract_sfmt_ldqf;
-          case 13 : itype = FRVBF_INSN_MOVFG; goto extract_sfmt_movfg;
-          case 14 : itype = FRVBF_INSN_MOVFGD; goto extract_sfmt_movfgd;
-          case 15 : itype = FRVBF_INSN_MOVFGQ; goto extract_sfmt_movfgq;
-          case 16 : itype = FRVBF_INSN_STBU; goto extract_sfmt_stbu;
-          case 17 : itype = FRVBF_INSN_STHU; goto extract_sfmt_stbu;
-          case 18 : itype = FRVBF_INSN_STU; goto extract_sfmt_stbu;
-          case 19 : itype = FRVBF_INSN_STDU; goto extract_sfmt_stdu;
-          case 20 : itype = FRVBF_INSN_STQU; goto extract_sfmt_stqu;
-          case 21 : itype = FRVBF_INSN_MOVGF; goto extract_sfmt_movgf;
-          case 22 : itype = FRVBF_INSN_MOVGFD; goto extract_sfmt_movgfd;
-          case 23 : itype = FRVBF_INSN_MOVGFQ; goto extract_sfmt_movgfq;
-          case 24 : itype = FRVBF_INSN_STBFU; goto extract_sfmt_stbfu;
-          case 25 : itype = FRVBF_INSN_STHFU; goto extract_sfmt_stbfu;
-          case 26 : itype = FRVBF_INSN_STFU; goto extract_sfmt_stbfu;
-          case 27 : itype = FRVBF_INSN_STDFU; goto extract_sfmt_stdfu;
-          case 28 : itype = FRVBF_INSN_STQFU; goto extract_sfmt_ldqfu;
-          case 32 : itype = FRVBF_INSN_LRAI; goto extract_sfmt_rei;
-          case 33 : itype = FRVBF_INSN_LRAD; goto extract_sfmt_rei;
-          case 36 : itype = FRVBF_INSN_TLBPR; goto extract_sfmt_rei;
-          case 37 : itype = FRVBF_INSN_STC; goto extract_sfmt_stc;
-          case 38 : itype = FRVBF_INSN_STDC; goto extract_sfmt_stdc;
-          case 39 : itype = FRVBF_INSN_STQC; goto extract_sfmt_ldqc;
-          case 45 : itype = FRVBF_INSN_STCU; goto extract_sfmt_stcu;
-          case 46 : itype = FRVBF_INSN_STDCU; goto extract_sfmt_stdcu;
-          case 47 : itype = FRVBF_INSN_STQCU; goto extract_sfmt_ldqcu;
-          case 48 : itype = FRVBF_INSN_ICPL; goto extract_sfmt_icpl;
-          case 49 : itype = FRVBF_INSN_ICUL; goto extract_sfmt_icul;
-          case 50 : itype = FRVBF_INSN_WITLB; goto extract_sfmt_rei;
-          case 51 : itype = FRVBF_INSN_ITLBI; goto extract_sfmt_rei;
-          case 52 : itype = FRVBF_INSN_DCPL; goto extract_sfmt_icpl;
-          case 53 : itype = FRVBF_INSN_DCUL; goto extract_sfmt_icul;
-          case 54 : itype = FRVBF_INSN_WDTLB; goto extract_sfmt_rei;
-          case 55 : itype = FRVBF_INSN_DTLBI; goto extract_sfmt_rei;
-          case 56 : itype = FRVBF_INSN_ICI; goto extract_sfmt_ici;
-          case 57 : itype = FRVBF_INSN_ICEI; goto extract_sfmt_icei;
-          case 58 : itype = FRVBF_INSN_DCEI; goto extract_sfmt_icei;
-          case 59 : itype = FRVBF_INSN_DCEF; goto extract_sfmt_icei;
-          case 60 : itype = FRVBF_INSN_DCI; goto extract_sfmt_ici;
-          case 61 : itype = FRVBF_INSN_DCF; goto extract_sfmt_ici;
-          case 62 : itype = FRVBF_INSN_BAR; goto extract_sfmt_rei;
-          case 63 : itype = FRVBF_INSN_MEMBAR; goto extract_sfmt_rei;
+          case 0 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0000)
+              { itype = FRVBF_INSN_STB; goto extract_sfmt_stb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0040)
+              { itype = FRVBF_INSN_STH; goto extract_sfmt_stb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0080)
+              { itype = FRVBF_INSN_ST; goto extract_sfmt_stb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc00c0)
+              { itype = FRVBF_INSN_STD; goto extract_sfmt_std; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0100)
+              { itype = FRVBF_INSN_STQ; goto extract_sfmt_ldq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0140)
+              { itype = FRVBF_INSN_SWAP; goto extract_sfmt_swap; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0180)
+              { itype = FRVBF_INSN_MOVGS; goto extract_sfmt_movgs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc01c0)
+              { itype = FRVBF_INSN_MOVSG; goto extract_sfmt_movsg; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0200)
+              { itype = FRVBF_INSN_STBF; goto extract_sfmt_stbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0240)
+              { itype = FRVBF_INSN_STHF; goto extract_sfmt_stbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0280)
+              { itype = FRVBF_INSN_STF; goto extract_sfmt_stbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc02c0)
+              { itype = FRVBF_INSN_STDF; goto extract_sfmt_stdf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0300)
+              { itype = FRVBF_INSN_STQF; goto extract_sfmt_ldqf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x1ffffc0) == 0xc0340)
+              { itype = FRVBF_INSN_MOVFG; goto extract_sfmt_movfg; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x1ffffc0) == 0xc0380)
+              { itype = FRVBF_INSN_MOVFGD; goto extract_sfmt_movfgd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x1ffffc0) == 0xc03c0)
+              { itype = FRVBF_INSN_MOVFGQ; goto extract_sfmt_movfgq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 16 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0400)
+              { itype = FRVBF_INSN_STBU; goto extract_sfmt_stbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 17 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0440)
+              { itype = FRVBF_INSN_STHU; goto extract_sfmt_stbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 18 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0480)
+              { itype = FRVBF_INSN_STU; goto extract_sfmt_stbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 19 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc04c0)
+              { itype = FRVBF_INSN_STDU; goto extract_sfmt_stdu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 20 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0500)
+              { itype = FRVBF_INSN_STQU; goto extract_sfmt_stqu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 21 :
+            if ((entire_insn & 0x1ffffc0) == 0xc0540)
+              { itype = FRVBF_INSN_MOVGF; goto extract_sfmt_movgf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 22 :
+            if ((entire_insn & 0x1ffffc0) == 0xc0580)
+              { itype = FRVBF_INSN_MOVGFD; goto extract_sfmt_movgfd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 23 :
+            if ((entire_insn & 0x1ffffc0) == 0xc05c0)
+              { itype = FRVBF_INSN_MOVGFQ; goto extract_sfmt_movgfq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 24 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0600)
+              { itype = FRVBF_INSN_STBFU; goto extract_sfmt_stbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 25 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0640)
+              { itype = FRVBF_INSN_STHFU; goto extract_sfmt_stbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 26 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0680)
+              { itype = FRVBF_INSN_STFU; goto extract_sfmt_stbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 27 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc06c0)
+              { itype = FRVBF_INSN_STDFU; goto extract_sfmt_stdfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 28 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0700)
+              { itype = FRVBF_INSN_STQFU; goto extract_sfmt_ldqfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 32 :
+            if ((entire_insn & 0x1fc0fc7) == 0xc0800)
+              { itype = FRVBF_INSN_LRAI; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 33 :
+            if ((entire_insn & 0x1fc0fc7) == 0xc0840)
+              { itype = FRVBF_INSN_LRAD; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 36 :
+            if ((entire_insn & 0x61fc0fc0) == 0xc0900)
+              { itype = FRVBF_INSN_TLBPR; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 37 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0940)
+              { itype = FRVBF_INSN_STC; goto extract_sfmt_stc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 38 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0980)
+              { itype = FRVBF_INSN_STDC; goto extract_sfmt_stdc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 39 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc09c0)
+              { itype = FRVBF_INSN_STQC; goto extract_sfmt_ldqc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 45 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0b40)
+              { itype = FRVBF_INSN_STCU; goto extract_sfmt_stcu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 46 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0b80)
+              { itype = FRVBF_INSN_STDCU; goto extract_sfmt_stdcu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 47 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0bc0)
+              { itype = FRVBF_INSN_STQCU; goto extract_sfmt_ldqcu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 48 :
+            if ((entire_insn & 0x7dfc0fc0) == 0xc0c00)
+              { itype = FRVBF_INSN_ICPL; goto extract_sfmt_icpl; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 49 :
+            if ((entire_insn & 0x7ffc0fff) == 0xc0c40)
+              { itype = FRVBF_INSN_ICUL; goto extract_sfmt_icul; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 50 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0c80)
+              { itype = FRVBF_INSN_WITLB; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 51 :
+            if ((entire_insn & 0x7ffc0fc0) == 0xc0cc0)
+              { itype = FRVBF_INSN_ITLBI; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 52 :
+            if ((entire_insn & 0x7dfc0fc0) == 0xc0d00)
+              { itype = FRVBF_INSN_DCPL; goto extract_sfmt_icpl; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 53 :
+            if ((entire_insn & 0x7ffc0fff) == 0xc0d40)
+              { itype = FRVBF_INSN_DCUL; goto extract_sfmt_icul; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 54 :
+            if ((entire_insn & 0x1fc0fc0) == 0xc0d80)
+              { itype = FRVBF_INSN_WDTLB; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 55 :
+            if ((entire_insn & 0x7ffc0fc0) == 0xc0dc0)
+              { itype = FRVBF_INSN_DTLBI; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 56 :
+            if ((entire_insn & 0x7ffc0fc0) == 0xc0e00)
+              { itype = FRVBF_INSN_ICI; goto extract_sfmt_ici; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 57 :
+            if ((entire_insn & 0x7dfc0fc0) == 0xc0e40)
+              { itype = FRVBF_INSN_ICEI; goto extract_sfmt_icei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 58 :
+            if ((entire_insn & 0x7dfc0fc0) == 0xc0e80)
+              { itype = FRVBF_INSN_DCEI; goto extract_sfmt_icei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 59 :
+            if ((entire_insn & 0x7dfc0fc0) == 0xc0ec0)
+              { itype = FRVBF_INSN_DCEF; goto extract_sfmt_icei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 60 :
+            if ((entire_insn & 0x7ffc0fc0) == 0xc0f00)
+              { itype = FRVBF_INSN_DCI; goto extract_sfmt_ici; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 61 :
+            if ((entire_insn & 0x7ffc0fc0) == 0xc0f40)
+              { itype = FRVBF_INSN_DCF; goto extract_sfmt_ici; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 62 :
+            if ((entire_insn & 0x7fffffff) == 0xc0f80)
+              { itype = FRVBF_INSN_BAR; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 63 :
+            if ((entire_insn & 0x7fffffff) == 0xc0fc0)
+              { itype = FRVBF_INSN_MEMBAR; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1044,65 +1461,218 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 25) & (15 << 2)) | ((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_TNO; goto extract_sfmt_rei;
-          case 1 : itype = FRVBF_INSN_FTNO; goto extract_sfmt_rei;
-          case 2 : itype = FRVBF_INSN_MTRAP; goto extract_sfmt_rei;
-          case 3 : itype = FRVBF_INSN_BREAK; goto extract_sfmt_break;
-          case 4 : itype = FRVBF_INSN_TC; goto extract_sfmt_teq;
-          case 5 : itype = FRVBF_INSN_FTU; goto extract_sfmt_ftne;
-          case 8 : itype = FRVBF_INSN_TV; goto extract_sfmt_teq;
-          case 9 : itype = FRVBF_INSN_FTGT; goto extract_sfmt_ftne;
-          case 12 : itype = FRVBF_INSN_TLT; goto extract_sfmt_teq;
-          case 13 : itype = FRVBF_INSN_FTUG; goto extract_sfmt_ftne;
-          case 16 : itype = FRVBF_INSN_TEQ; goto extract_sfmt_teq;
-          case 17 : itype = FRVBF_INSN_FTLT; goto extract_sfmt_ftne;
-          case 20 : itype = FRVBF_INSN_TLS; goto extract_sfmt_teq;
-          case 21 : itype = FRVBF_INSN_FTUL; goto extract_sfmt_ftne;
-          case 24 : itype = FRVBF_INSN_TN; goto extract_sfmt_teq;
-          case 25 : itype = FRVBF_INSN_FTLG; goto extract_sfmt_ftne;
-          case 28 : itype = FRVBF_INSN_TLE; goto extract_sfmt_teq;
-          case 29 : itype = FRVBF_INSN_FTNE; goto extract_sfmt_ftne;
-          case 32 : itype = FRVBF_INSN_TRA; goto extract_sfmt_tra;
-          case 33 : itype = FRVBF_INSN_FTEQ; goto extract_sfmt_ftne;
-          case 36 : itype = FRVBF_INSN_TNC; goto extract_sfmt_teq;
-          case 37 : itype = FRVBF_INSN_FTUE; goto extract_sfmt_ftne;
-          case 40 : itype = FRVBF_INSN_TNV; goto extract_sfmt_teq;
-          case 41 : itype = FRVBF_INSN_FTGE; goto extract_sfmt_ftne;
-          case 44 : itype = FRVBF_INSN_TGE; goto extract_sfmt_teq;
-          case 45 : itype = FRVBF_INSN_FTUGE; goto extract_sfmt_ftne;
-          case 48 : itype = FRVBF_INSN_TNE; goto extract_sfmt_teq;
-          case 49 : itype = FRVBF_INSN_FTLE; goto extract_sfmt_ftne;
-          case 52 : itype = FRVBF_INSN_THI; goto extract_sfmt_teq;
-          case 53 : itype = FRVBF_INSN_FTULE; goto extract_sfmt_ftne;
-          case 56 : itype = FRVBF_INSN_TP; goto extract_sfmt_teq;
-          case 57 : itype = FRVBF_INSN_FTO; goto extract_sfmt_ftne;
-          case 60 : itype = FRVBF_INSN_TGT; goto extract_sfmt_teq;
-          case 61 : itype = FRVBF_INSN_FTRA; goto extract_sfmt_tra;
+          case 0 :
+            if ((entire_insn & 0x7fffffff) == 0x100000)
+              { itype = FRVBF_INSN_TNO; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x7fffffff) == 0x100040)
+              { itype = FRVBF_INSN_FTNO; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x7fffffff) == 0x100080)
+              { itype = FRVBF_INSN_MTRAP; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x7fffffff) == 0x1000c0)
+              { itype = FRVBF_INSN_BREAK; goto extract_sfmt_break; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fc0fc0) == 0x8100000)
+              { itype = FRVBF_INSN_TC; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fc0fc0) == 0x8100040)
+              { itype = FRVBF_INSN_FTU; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x79fc0fc0) == 0x10100000)
+              { itype = FRVBF_INSN_TV; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fc0fc0) == 0x10100040)
+              { itype = FRVBF_INSN_FTGT; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fc0fc0) == 0x18100000)
+              { itype = FRVBF_INSN_TLT; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fc0fc0) == 0x18100040)
+              { itype = FRVBF_INSN_FTUG; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 16 :
+            if ((entire_insn & 0x79fc0fc0) == 0x20100000)
+              { itype = FRVBF_INSN_TEQ; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 17 :
+            if ((entire_insn & 0x79fc0fc0) == 0x20100040)
+              { itype = FRVBF_INSN_FTLT; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 20 :
+            if ((entire_insn & 0x79fc0fc0) == 0x28100000)
+              { itype = FRVBF_INSN_TLS; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 21 :
+            if ((entire_insn & 0x79fc0fc0) == 0x28100040)
+              { itype = FRVBF_INSN_FTUL; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 24 :
+            if ((entire_insn & 0x79fc0fc0) == 0x30100000)
+              { itype = FRVBF_INSN_TN; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 25 :
+            if ((entire_insn & 0x79fc0fc0) == 0x30100040)
+              { itype = FRVBF_INSN_FTLG; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 28 :
+            if ((entire_insn & 0x79fc0fc0) == 0x38100000)
+              { itype = FRVBF_INSN_TLE; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 29 :
+            if ((entire_insn & 0x79fc0fc0) == 0x38100040)
+              { itype = FRVBF_INSN_FTNE; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 32 :
+            if ((entire_insn & 0x7ffc0fc0) == 0x40100000)
+              { itype = FRVBF_INSN_TRA; goto extract_sfmt_tra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 33 :
+            if ((entire_insn & 0x79fc0fc0) == 0x40100040)
+              { itype = FRVBF_INSN_FTEQ; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 36 :
+            if ((entire_insn & 0x79fc0fc0) == 0x48100000)
+              { itype = FRVBF_INSN_TNC; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 37 :
+            if ((entire_insn & 0x79fc0fc0) == 0x48100040)
+              { itype = FRVBF_INSN_FTUE; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 40 :
+            if ((entire_insn & 0x79fc0fc0) == 0x50100000)
+              { itype = FRVBF_INSN_TNV; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 41 :
+            if ((entire_insn & 0x79fc0fc0) == 0x50100040)
+              { itype = FRVBF_INSN_FTGE; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 44 :
+            if ((entire_insn & 0x79fc0fc0) == 0x58100000)
+              { itype = FRVBF_INSN_TGE; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 45 :
+            if ((entire_insn & 0x79fc0fc0) == 0x58100040)
+              { itype = FRVBF_INSN_FTUGE; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 48 :
+            if ((entire_insn & 0x79fc0fc0) == 0x60100000)
+              { itype = FRVBF_INSN_TNE; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 49 :
+            if ((entire_insn & 0x79fc0fc0) == 0x60100040)
+              { itype = FRVBF_INSN_FTLE; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 52 :
+            if ((entire_insn & 0x79fc0fc0) == 0x68100000)
+              { itype = FRVBF_INSN_THI; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 53 :
+            if ((entire_insn & 0x79fc0fc0) == 0x68100040)
+              { itype = FRVBF_INSN_FTULE; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 56 :
+            if ((entire_insn & 0x79fc0fc0) == 0x70100000)
+              { itype = FRVBF_INSN_TP; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 57 :
+            if ((entire_insn & 0x79fc0fc0) == 0x70100040)
+              { itype = FRVBF_INSN_FTO; goto extract_sfmt_ftne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 60 :
+            if ((entire_insn & 0x79fc0fc0) == 0x78100000)
+              { itype = FRVBF_INSN_TGT; goto extract_sfmt_teq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 61 :
+            if ((entire_insn & 0x7ffc0fc0) == 0x78100040)
+              { itype = FRVBF_INSN_FTRA; goto extract_sfmt_tra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 5 : itype = FRVBF_INSN_RETT; goto extract_sfmt_rett;
+      case 5 :
+        if ((entire_insn & 0x7dffffff) == 0x140000)
+          { itype = FRVBF_INSN_RETT; goto extract_sfmt_rett; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 6 :
         {
           unsigned int val = (((insn >> 27) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_BNO; goto extract_sfmt_bno;
-          case 1 : itype = FRVBF_INSN_BC; goto extract_sfmt_beq;
-          case 2 : itype = FRVBF_INSN_BV; goto extract_sfmt_beq;
-          case 3 : itype = FRVBF_INSN_BLT; goto extract_sfmt_beq;
-          case 4 : itype = FRVBF_INSN_BEQ; goto extract_sfmt_beq;
-          case 5 : itype = FRVBF_INSN_BLS; goto extract_sfmt_beq;
-          case 6 : itype = FRVBF_INSN_BN; goto extract_sfmt_beq;
-          case 7 : itype = FRVBF_INSN_BLE; goto extract_sfmt_beq;
-          case 8 : itype = FRVBF_INSN_BRA; goto extract_sfmt_bra;
-          case 9 : itype = FRVBF_INSN_BNC; goto extract_sfmt_beq;
-          case 10 : itype = FRVBF_INSN_BNV; goto extract_sfmt_beq;
-          case 11 : itype = FRVBF_INSN_BGE; goto extract_sfmt_beq;
-          case 12 : itype = FRVBF_INSN_BNE; goto extract_sfmt_beq;
-          case 13 : itype = FRVBF_INSN_BHI; goto extract_sfmt_beq;
-          case 14 : itype = FRVBF_INSN_BP; goto extract_sfmt_beq;
-          case 15 : itype = FRVBF_INSN_BGT; goto extract_sfmt_beq;
+          case 0 :
+            if ((entire_insn & 0x7ffcffff) == 0x180000)
+              { itype = FRVBF_INSN_BNO; goto extract_sfmt_bno; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x79fc0000) == 0x8180000)
+              { itype = FRVBF_INSN_BC; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x79fc0000) == 0x10180000)
+              { itype = FRVBF_INSN_BV; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x79fc0000) == 0x18180000)
+              { itype = FRVBF_INSN_BLT; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fc0000) == 0x20180000)
+              { itype = FRVBF_INSN_BEQ; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fc0000) == 0x28180000)
+              { itype = FRVBF_INSN_BLS; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x79fc0000) == 0x30180000)
+              { itype = FRVBF_INSN_BN; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x79fc0000) == 0x38180000)
+              { itype = FRVBF_INSN_BLE; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x7ffc0000) == 0x40180000)
+              { itype = FRVBF_INSN_BRA; goto extract_sfmt_bra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fc0000) == 0x48180000)
+              { itype = FRVBF_INSN_BNC; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fc0000) == 0x50180000)
+              { itype = FRVBF_INSN_BNV; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x79fc0000) == 0x58180000)
+              { itype = FRVBF_INSN_BGE; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fc0000) == 0x60180000)
+              { itype = FRVBF_INSN_BNE; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fc0000) == 0x68180000)
+              { itype = FRVBF_INSN_BHI; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fc0000) == 0x70180000)
+              { itype = FRVBF_INSN_BP; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x79fc0000) == 0x78180000)
+              { itype = FRVBF_INSN_BGT; goto extract_sfmt_beq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1111,22 +1681,70 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 27) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_FBNO; goto extract_sfmt_bno;
-          case 1 : itype = FRVBF_INSN_FBU; goto extract_sfmt_fbne;
-          case 2 : itype = FRVBF_INSN_FBGT; goto extract_sfmt_fbne;
-          case 3 : itype = FRVBF_INSN_FBUG; goto extract_sfmt_fbne;
-          case 4 : itype = FRVBF_INSN_FBLT; goto extract_sfmt_fbne;
-          case 5 : itype = FRVBF_INSN_FBUL; goto extract_sfmt_fbne;
-          case 6 : itype = FRVBF_INSN_FBLG; goto extract_sfmt_fbne;
-          case 7 : itype = FRVBF_INSN_FBNE; goto extract_sfmt_fbne;
-          case 8 : itype = FRVBF_INSN_FBEQ; goto extract_sfmt_fbne;
-          case 9 : itype = FRVBF_INSN_FBUE; goto extract_sfmt_fbne;
-          case 10 : itype = FRVBF_INSN_FBGE; goto extract_sfmt_fbne;
-          case 11 : itype = FRVBF_INSN_FBUGE; goto extract_sfmt_fbne;
-          case 12 : itype = FRVBF_INSN_FBLE; goto extract_sfmt_fbne;
-          case 13 : itype = FRVBF_INSN_FBULE; goto extract_sfmt_fbne;
-          case 14 : itype = FRVBF_INSN_FBO; goto extract_sfmt_fbne;
-          case 15 : itype = FRVBF_INSN_FBRA; goto extract_sfmt_bra;
+          case 0 :
+            if ((entire_insn & 0x7ffcffff) == 0x1c0000)
+              { itype = FRVBF_INSN_FBNO; goto extract_sfmt_bno; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x79fc0000) == 0x81c0000)
+              { itype = FRVBF_INSN_FBU; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x79fc0000) == 0x101c0000)
+              { itype = FRVBF_INSN_FBGT; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x79fc0000) == 0x181c0000)
+              { itype = FRVBF_INSN_FBUG; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fc0000) == 0x201c0000)
+              { itype = FRVBF_INSN_FBLT; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fc0000) == 0x281c0000)
+              { itype = FRVBF_INSN_FBUL; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x79fc0000) == 0x301c0000)
+              { itype = FRVBF_INSN_FBLG; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x79fc0000) == 0x381c0000)
+              { itype = FRVBF_INSN_FBNE; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x79fc0000) == 0x401c0000)
+              { itype = FRVBF_INSN_FBEQ; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fc0000) == 0x481c0000)
+              { itype = FRVBF_INSN_FBUE; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fc0000) == 0x501c0000)
+              { itype = FRVBF_INSN_FBGE; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x79fc0000) == 0x581c0000)
+              { itype = FRVBF_INSN_FBUGE; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fc0000) == 0x601c0000)
+              { itype = FRVBF_INSN_FBLE; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fc0000) == 0x681c0000)
+              { itype = FRVBF_INSN_FBULE; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fc0000) == 0x701c0000)
+              { itype = FRVBF_INSN_FBO; goto extract_sfmt_fbne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x7ffc0000) == 0x781c0000)
+              { itype = FRVBF_INSN_FBRA; goto extract_sfmt_bra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1135,22 +1753,70 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 27) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CKNO; goto extract_sfmt_ckra;
-          case 1 : itype = FRVBF_INSN_CKC; goto extract_sfmt_ckeq;
-          case 2 : itype = FRVBF_INSN_CKV; goto extract_sfmt_ckeq;
-          case 3 : itype = FRVBF_INSN_CKLT; goto extract_sfmt_ckeq;
-          case 4 : itype = FRVBF_INSN_CKEQ; goto extract_sfmt_ckeq;
-          case 5 : itype = FRVBF_INSN_CKLS; goto extract_sfmt_ckeq;
-          case 6 : itype = FRVBF_INSN_CKN; goto extract_sfmt_ckeq;
-          case 7 : itype = FRVBF_INSN_CKLE; goto extract_sfmt_ckeq;
-          case 8 : itype = FRVBF_INSN_CKRA; goto extract_sfmt_ckra;
-          case 9 : itype = FRVBF_INSN_CKNC; goto extract_sfmt_ckeq;
-          case 10 : itype = FRVBF_INSN_CKNV; goto extract_sfmt_ckeq;
-          case 11 : itype = FRVBF_INSN_CKGE; goto extract_sfmt_ckeq;
-          case 12 : itype = FRVBF_INSN_CKNE; goto extract_sfmt_ckeq;
-          case 13 : itype = FRVBF_INSN_CKHI; goto extract_sfmt_ckeq;
-          case 14 : itype = FRVBF_INSN_CKP; goto extract_sfmt_ckeq;
-          case 15 : itype = FRVBF_INSN_CKGT; goto extract_sfmt_ckeq;
+          case 0 :
+            if ((entire_insn & 0x79ffffff) == 0x200000)
+              { itype = FRVBF_INSN_CKNO; goto extract_sfmt_ckra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x79fffffc) == 0x8200000)
+              { itype = FRVBF_INSN_CKC; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x79fffffc) == 0x10200000)
+              { itype = FRVBF_INSN_CKV; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x79fffffc) == 0x18200000)
+              { itype = FRVBF_INSN_CKLT; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fffffc) == 0x20200000)
+              { itype = FRVBF_INSN_CKEQ; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fffffc) == 0x28200000)
+              { itype = FRVBF_INSN_CKLS; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x79fffffc) == 0x30200000)
+              { itype = FRVBF_INSN_CKN; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x79fffffc) == 0x38200000)
+              { itype = FRVBF_INSN_CKLE; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x79ffffff) == 0x40200000)
+              { itype = FRVBF_INSN_CKRA; goto extract_sfmt_ckra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fffffc) == 0x48200000)
+              { itype = FRVBF_INSN_CKNC; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fffffc) == 0x50200000)
+              { itype = FRVBF_INSN_CKNV; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x79fffffc) == 0x58200000)
+              { itype = FRVBF_INSN_CKGE; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fffffc) == 0x60200000)
+              { itype = FRVBF_INSN_CKNE; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fffffc) == 0x68200000)
+              { itype = FRVBF_INSN_CKHI; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fffffc) == 0x70200000)
+              { itype = FRVBF_INSN_CKP; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x79fffffc) == 0x78200000)
+              { itype = FRVBF_INSN_CKGT; goto extract_sfmt_ckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1159,22 +1825,70 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 27) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_FCKNO; goto extract_sfmt_fckra;
-          case 1 : itype = FRVBF_INSN_FCKU; goto extract_sfmt_fckne;
-          case 2 : itype = FRVBF_INSN_FCKGT; goto extract_sfmt_fckne;
-          case 3 : itype = FRVBF_INSN_FCKUG; goto extract_sfmt_fckne;
-          case 4 : itype = FRVBF_INSN_FCKLT; goto extract_sfmt_fckne;
-          case 5 : itype = FRVBF_INSN_FCKUL; goto extract_sfmt_fckne;
-          case 6 : itype = FRVBF_INSN_FCKLG; goto extract_sfmt_fckne;
-          case 7 : itype = FRVBF_INSN_FCKNE; goto extract_sfmt_fckne;
-          case 8 : itype = FRVBF_INSN_FCKEQ; goto extract_sfmt_fckne;
-          case 9 : itype = FRVBF_INSN_FCKUE; goto extract_sfmt_fckne;
-          case 10 : itype = FRVBF_INSN_FCKGE; goto extract_sfmt_fckne;
-          case 11 : itype = FRVBF_INSN_FCKUGE; goto extract_sfmt_fckne;
-          case 12 : itype = FRVBF_INSN_FCKLE; goto extract_sfmt_fckne;
-          case 13 : itype = FRVBF_INSN_FCKULE; goto extract_sfmt_fckne;
-          case 14 : itype = FRVBF_INSN_FCKO; goto extract_sfmt_fckne;
-          case 15 : itype = FRVBF_INSN_FCKRA; goto extract_sfmt_fckra;
+          case 0 :
+            if ((entire_insn & 0x79fffffc) == 0x240000)
+              { itype = FRVBF_INSN_FCKNO; goto extract_sfmt_fckra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x79fffffc) == 0x8240000)
+              { itype = FRVBF_INSN_FCKU; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x79fffffc) == 0x10240000)
+              { itype = FRVBF_INSN_FCKGT; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x79fffffc) == 0x18240000)
+              { itype = FRVBF_INSN_FCKUG; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fffffc) == 0x20240000)
+              { itype = FRVBF_INSN_FCKLT; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fffffc) == 0x28240000)
+              { itype = FRVBF_INSN_FCKUL; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x79fffffc) == 0x30240000)
+              { itype = FRVBF_INSN_FCKLG; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x79fffffc) == 0x38240000)
+              { itype = FRVBF_INSN_FCKNE; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x79fffffc) == 0x40240000)
+              { itype = FRVBF_INSN_FCKEQ; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fffffc) == 0x48240000)
+              { itype = FRVBF_INSN_FCKUE; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fffffc) == 0x50240000)
+              { itype = FRVBF_INSN_FCKGE; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x79fffffc) == 0x58240000)
+              { itype = FRVBF_INSN_FCKUGE; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fffffc) == 0x60240000)
+              { itype = FRVBF_INSN_FCKLE; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fffffc) == 0x68240000)
+              { itype = FRVBF_INSN_FCKULE; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fffffc) == 0x70240000)
+              { itype = FRVBF_INSN_FCKO; goto extract_sfmt_fckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x79fffffc) == 0x78240000)
+              { itype = FRVBF_INSN_FCKRA; goto extract_sfmt_fckra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1183,35 +1897,98 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (31 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CLRGR; goto extract_sfmt_clrgr;
-          case 1 : itype = FRVBF_INSN_CLRGA; goto extract_sfmt_rei;
-          case 2 : itype = FRVBF_INSN_CLRFR; goto extract_sfmt_clrfr;
-          case 3 : itype = FRVBF_INSN_CLRFA; goto extract_sfmt_rei;
-          case 4 : itype = FRVBF_INSN_COMMITGR; goto extract_sfmt_commitgr;
-          case 5 : itype = FRVBF_INSN_COMMITGA; goto extract_sfmt_rei;
-          case 6 : itype = FRVBF_INSN_COMMITFR; goto extract_sfmt_commitfr;
-          case 7 : itype = FRVBF_INSN_COMMITFA; goto extract_sfmt_rei;
-          case 8 : itype = FRVBF_INSN_ANDCR; goto extract_sfmt_andcr;
-          case 9 : itype = FRVBF_INSN_ORCR; goto extract_sfmt_andcr;
-          case 10 : itype = FRVBF_INSN_XORCR; goto extract_sfmt_andcr;
-          case 11 : itype = FRVBF_INSN_NOTCR; goto extract_sfmt_notcr;
-          case 12 : itype = FRVBF_INSN_NANDCR; goto extract_sfmt_andcr;
-          case 13 : itype = FRVBF_INSN_NORCR; goto extract_sfmt_andcr;
-          case 16 : itype = FRVBF_INSN_ANDNCR; goto extract_sfmt_andcr;
-          case 17 : itype = FRVBF_INSN_ORNCR; goto extract_sfmt_andcr;
-          case 20 : itype = FRVBF_INSN_NANDNCR; goto extract_sfmt_andcr;
-          case 21 : itype = FRVBF_INSN_NORNCR; goto extract_sfmt_andcr;
+          case 0 :
+            if ((entire_insn & 0x1ffffff) == 0x280000)
+              { itype = FRVBF_INSN_CLRGR; goto extract_sfmt_clrgr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x7fffffff) == 0x280040)
+              { itype = FRVBF_INSN_CLRGA; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1ffffff) == 0x280080)
+              { itype = FRVBF_INSN_CLRFR; goto extract_sfmt_clrfr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x7fffffff) == 0x2800c0)
+              { itype = FRVBF_INSN_CLRFA; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1ffffff) == 0x280100)
+              { itype = FRVBF_INSN_COMMITGR; goto extract_sfmt_commitgr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x7fffffff) == 0x280140)
+              { itype = FRVBF_INSN_COMMITGA; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x1ffffff) == 0x280180)
+              { itype = FRVBF_INSN_COMMITFR; goto extract_sfmt_commitfr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x7fffffff) == 0x2801c0)
+              { itype = FRVBF_INSN_COMMITFA; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280200)
+              { itype = FRVBF_INSN_ANDCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280240)
+              { itype = FRVBF_INSN_ORCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280280)
+              { itype = FRVBF_INSN_XORCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x71fffff8) == 0x2802c0)
+              { itype = FRVBF_INSN_NOTCR; goto extract_sfmt_notcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280300)
+              { itype = FRVBF_INSN_NANDCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280340)
+              { itype = FRVBF_INSN_NORCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 16 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280400)
+              { itype = FRVBF_INSN_ANDNCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 17 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280440)
+              { itype = FRVBF_INSN_ORNCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 20 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280500)
+              { itype = FRVBF_INSN_NANDNCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 21 :
+            if ((entire_insn & 0x71ff8ff8) == 0x280540)
+              { itype = FRVBF_INSN_NORNCR; goto extract_sfmt_andcr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 11 : itype = FRVBF_INSN_SCAN; goto extract_sfmt_add;
+      case 11 :
+        if ((entire_insn & 0x1fc0fc0) == 0x2c0000)
+          { itype = FRVBF_INSN_SCAN; goto extract_sfmt_add; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 12 :
         {
           unsigned int val = (((insn >> 25) & (1 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_JMPL; goto extract_sfmt_jmpl;
-          case 1 : itype = FRVBF_INSN_CALLL; goto extract_sfmt_jmpl;
+          case 0 :
+            if ((entire_insn & 0x7ffc0fc0) == 0x300000)
+              { itype = FRVBF_INSN_JMPL; goto extract_sfmt_jmpl; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x7ffc0fc0) == 0x2300000)
+              { itype = FRVBF_INSN_CALLL; goto extract_sfmt_jmpl; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1220,8 +1997,14 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 25) & (1 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_JMPIL; goto extract_sfmt_jmpil;
-          case 1 : itype = FRVBF_INSN_CALLIL; goto extract_sfmt_jmpil;
+          case 0 :
+            if ((entire_insn & 0x7ffc0000) == 0x340000)
+              { itype = FRVBF_INSN_JMPIL; goto extract_sfmt_jmpil; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x7ffc0000) == 0x2340000)
+              { itype = FRVBF_INSN_CALLIL; goto extract_sfmt_jmpil; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1230,116 +2013,398 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 25) & (15 << 2)) | ((insn >> 14) & (1 << 1)) | ((insn >> 13) & (1 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_BNOLR; goto extract_sfmt_bnolr;
+          case 0 :
+            if ((entire_insn & 0x7ffcffff) == 0x384000)
+              { itype = FRVBF_INSN_BNOLR; goto extract_sfmt_bnolr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 1 :
             {
               unsigned int val = (((insn >> 14) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_BCTRLR; goto extract_sfmt_bctrlr;
-              case 1 : itype = FRVBF_INSN_BCNOLR; goto extract_sfmt_bcnolr;
+              case 0 :
+                if ((entire_insn & 0x7ffcefff) == 0x382000)
+                  { itype = FRVBF_INSN_BCTRLR; goto extract_sfmt_bctrlr; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x7ffcffff) == 0x386000)
+                  { itype = FRVBF_INSN_BCNOLR; goto extract_sfmt_bcnolr; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 2 : itype = FRVBF_INSN_FBNOLR; goto extract_sfmt_bnolr;
-          case 3 : itype = FRVBF_INSN_FCBNOLR; goto extract_sfmt_bcnolr;
-          case 4 : itype = FRVBF_INSN_BCLR; goto extract_sfmt_beqlr;
-          case 5 : itype = FRVBF_INSN_BCCLR; goto extract_sfmt_bceqlr;
-          case 6 : itype = FRVBF_INSN_FBULR; goto extract_sfmt_fbeqlr;
-          case 7 : itype = FRVBF_INSN_FCBULR; goto extract_sfmt_fcbeqlr;
-          case 8 : itype = FRVBF_INSN_BVLR; goto extract_sfmt_beqlr;
-          case 9 : itype = FRVBF_INSN_BCVLR; goto extract_sfmt_bceqlr;
-          case 10 : itype = FRVBF_INSN_FBGTLR; goto extract_sfmt_fbeqlr;
-          case 11 : itype = FRVBF_INSN_FCBGTLR; goto extract_sfmt_fcbeqlr;
-          case 12 : itype = FRVBF_INSN_BLTLR; goto extract_sfmt_beqlr;
-          case 13 : itype = FRVBF_INSN_BCLTLR; goto extract_sfmt_bceqlr;
-          case 14 : itype = FRVBF_INSN_FBUGLR; goto extract_sfmt_fbeqlr;
-          case 15 : itype = FRVBF_INSN_FCBUGLR; goto extract_sfmt_fcbeqlr;
-          case 16 : itype = FRVBF_INSN_BEQLR; goto extract_sfmt_beqlr;
-          case 17 : itype = FRVBF_INSN_BCEQLR; goto extract_sfmt_bceqlr;
-          case 18 : itype = FRVBF_INSN_FBLTLR; goto extract_sfmt_fbeqlr;
-          case 19 : itype = FRVBF_INSN_FCBLTLR; goto extract_sfmt_fcbeqlr;
-          case 20 : itype = FRVBF_INSN_BLSLR; goto extract_sfmt_beqlr;
-          case 21 : itype = FRVBF_INSN_BCLSLR; goto extract_sfmt_bceqlr;
-          case 22 : itype = FRVBF_INSN_FBULLR; goto extract_sfmt_fbeqlr;
-          case 23 : itype = FRVBF_INSN_FCBULLR; goto extract_sfmt_fcbeqlr;
-          case 24 : itype = FRVBF_INSN_BNLR; goto extract_sfmt_beqlr;
-          case 25 : itype = FRVBF_INSN_BCNLR; goto extract_sfmt_bceqlr;
-          case 26 : itype = FRVBF_INSN_FBLGLR; goto extract_sfmt_fbeqlr;
-          case 27 : itype = FRVBF_INSN_FCBLGLR; goto extract_sfmt_fcbeqlr;
-          case 28 : itype = FRVBF_INSN_BLELR; goto extract_sfmt_beqlr;
-          case 29 : itype = FRVBF_INSN_BCLELR; goto extract_sfmt_bceqlr;
-          case 30 : itype = FRVBF_INSN_FBNELR; goto extract_sfmt_fbeqlr;
-          case 31 : itype = FRVBF_INSN_FCBNELR; goto extract_sfmt_fcbeqlr;
-          case 32 : itype = FRVBF_INSN_BRALR; goto extract_sfmt_bralr;
-          case 33 : itype = FRVBF_INSN_BCRALR; goto extract_sfmt_bcralr;
-          case 34 : itype = FRVBF_INSN_FBEQLR; goto extract_sfmt_fbeqlr;
-          case 35 : itype = FRVBF_INSN_FCBEQLR; goto extract_sfmt_fcbeqlr;
-          case 36 : itype = FRVBF_INSN_BNCLR; goto extract_sfmt_beqlr;
-          case 37 : itype = FRVBF_INSN_BCNCLR; goto extract_sfmt_bceqlr;
-          case 38 : itype = FRVBF_INSN_FBUELR; goto extract_sfmt_fbeqlr;
-          case 39 : itype = FRVBF_INSN_FCBUELR; goto extract_sfmt_fcbeqlr;
-          case 40 : itype = FRVBF_INSN_BNVLR; goto extract_sfmt_beqlr;
-          case 41 : itype = FRVBF_INSN_BCNVLR; goto extract_sfmt_bceqlr;
-          case 42 : itype = FRVBF_INSN_FBGELR; goto extract_sfmt_fbeqlr;
-          case 43 : itype = FRVBF_INSN_FCBGELR; goto extract_sfmt_fcbeqlr;
-          case 44 : itype = FRVBF_INSN_BGELR; goto extract_sfmt_beqlr;
-          case 45 : itype = FRVBF_INSN_BCGELR; goto extract_sfmt_bceqlr;
-          case 46 : itype = FRVBF_INSN_FBUGELR; goto extract_sfmt_fbeqlr;
-          case 47 : itype = FRVBF_INSN_FCBUGELR; goto extract_sfmt_fcbeqlr;
-          case 48 : itype = FRVBF_INSN_BNELR; goto extract_sfmt_beqlr;
-          case 49 : itype = FRVBF_INSN_BCNELR; goto extract_sfmt_bceqlr;
-          case 50 : itype = FRVBF_INSN_FBLELR; goto extract_sfmt_fbeqlr;
-          case 51 : itype = FRVBF_INSN_FCBLELR; goto extract_sfmt_fcbeqlr;
-          case 52 : itype = FRVBF_INSN_BHILR; goto extract_sfmt_beqlr;
-          case 53 : itype = FRVBF_INSN_BCHILR; goto extract_sfmt_bceqlr;
-          case 54 : itype = FRVBF_INSN_FBULELR; goto extract_sfmt_fbeqlr;
-          case 55 : itype = FRVBF_INSN_FCBULELR; goto extract_sfmt_fcbeqlr;
-          case 56 : itype = FRVBF_INSN_BPLR; goto extract_sfmt_beqlr;
-          case 57 : itype = FRVBF_INSN_BCPLR; goto extract_sfmt_bceqlr;
-          case 58 : itype = FRVBF_INSN_FBOLR; goto extract_sfmt_fbeqlr;
-          case 59 : itype = FRVBF_INSN_FCBOLR; goto extract_sfmt_fcbeqlr;
-          case 60 : itype = FRVBF_INSN_BGTLR; goto extract_sfmt_beqlr;
-          case 61 : itype = FRVBF_INSN_BCGTLR; goto extract_sfmt_bceqlr;
-          case 62 : itype = FRVBF_INSN_FBRALR; goto extract_sfmt_bralr;
-          case 63 : itype = FRVBF_INSN_FCBRALR; goto extract_sfmt_bcralr;
+          case 2 :
+            if ((entire_insn & 0x7ffcffff) == 0x38c000)
+              { itype = FRVBF_INSN_FBNOLR; goto extract_sfmt_bnolr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x7ffcffff) == 0x38e000)
+              { itype = FRVBF_INSN_FCBNOLR; goto extract_sfmt_bcnolr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fcffff) == 0x8384000)
+              { itype = FRVBF_INSN_BCLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fcefff) == 0x8386000)
+              { itype = FRVBF_INSN_BCCLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x79fcffff) == 0x838c000)
+              { itype = FRVBF_INSN_FBULR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x79fcefff) == 0x838e000)
+              { itype = FRVBF_INSN_FCBULR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x79fcffff) == 0x10384000)
+              { itype = FRVBF_INSN_BVLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fcefff) == 0x10386000)
+              { itype = FRVBF_INSN_BCVLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fcffff) == 0x1038c000)
+              { itype = FRVBF_INSN_FBGTLR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x79fcefff) == 0x1038e000)
+              { itype = FRVBF_INSN_FCBGTLR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fcffff) == 0x18384000)
+              { itype = FRVBF_INSN_BLTLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fcefff) == 0x18386000)
+              { itype = FRVBF_INSN_BCLTLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fcffff) == 0x1838c000)
+              { itype = FRVBF_INSN_FBUGLR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x79fcefff) == 0x1838e000)
+              { itype = FRVBF_INSN_FCBUGLR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 16 :
+            if ((entire_insn & 0x79fcffff) == 0x20384000)
+              { itype = FRVBF_INSN_BEQLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 17 :
+            if ((entire_insn & 0x79fcefff) == 0x20386000)
+              { itype = FRVBF_INSN_BCEQLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 18 :
+            if ((entire_insn & 0x79fcffff) == 0x2038c000)
+              { itype = FRVBF_INSN_FBLTLR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 19 :
+            if ((entire_insn & 0x79fcefff) == 0x2038e000)
+              { itype = FRVBF_INSN_FCBLTLR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 20 :
+            if ((entire_insn & 0x79fcffff) == 0x28384000)
+              { itype = FRVBF_INSN_BLSLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 21 :
+            if ((entire_insn & 0x79fcefff) == 0x28386000)
+              { itype = FRVBF_INSN_BCLSLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 22 :
+            if ((entire_insn & 0x79fcffff) == 0x2838c000)
+              { itype = FRVBF_INSN_FBULLR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 23 :
+            if ((entire_insn & 0x79fcefff) == 0x2838e000)
+              { itype = FRVBF_INSN_FCBULLR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 24 :
+            if ((entire_insn & 0x79fcffff) == 0x30384000)
+              { itype = FRVBF_INSN_BNLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 25 :
+            if ((entire_insn & 0x79fcefff) == 0x30386000)
+              { itype = FRVBF_INSN_BCNLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 26 :
+            if ((entire_insn & 0x79fcffff) == 0x3038c000)
+              { itype = FRVBF_INSN_FBLGLR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 27 :
+            if ((entire_insn & 0x79fcefff) == 0x3038e000)
+              { itype = FRVBF_INSN_FCBLGLR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 28 :
+            if ((entire_insn & 0x79fcffff) == 0x38384000)
+              { itype = FRVBF_INSN_BLELR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 29 :
+            if ((entire_insn & 0x79fcefff) == 0x38386000)
+              { itype = FRVBF_INSN_BCLELR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 30 :
+            if ((entire_insn & 0x79fcffff) == 0x3838c000)
+              { itype = FRVBF_INSN_FBNELR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 31 :
+            if ((entire_insn & 0x79fcefff) == 0x3838e000)
+              { itype = FRVBF_INSN_FCBNELR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 32 :
+            if ((entire_insn & 0x7ffcffff) == 0x40384000)
+              { itype = FRVBF_INSN_BRALR; goto extract_sfmt_bralr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 33 :
+            if ((entire_insn & 0x7ffcefff) == 0x40386000)
+              { itype = FRVBF_INSN_BCRALR; goto extract_sfmt_bcralr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 34 :
+            if ((entire_insn & 0x79fcffff) == 0x4038c000)
+              { itype = FRVBF_INSN_FBEQLR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 35 :
+            if ((entire_insn & 0x79fcefff) == 0x4038e000)
+              { itype = FRVBF_INSN_FCBEQLR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 36 :
+            if ((entire_insn & 0x79fcffff) == 0x48384000)
+              { itype = FRVBF_INSN_BNCLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 37 :
+            if ((entire_insn & 0x79fcefff) == 0x48386000)
+              { itype = FRVBF_INSN_BCNCLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 38 :
+            if ((entire_insn & 0x79fcffff) == 0x4838c000)
+              { itype = FRVBF_INSN_FBUELR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 39 :
+            if ((entire_insn & 0x79fcefff) == 0x4838e000)
+              { itype = FRVBF_INSN_FCBUELR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 40 :
+            if ((entire_insn & 0x79fcffff) == 0x50384000)
+              { itype = FRVBF_INSN_BNVLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 41 :
+            if ((entire_insn & 0x79fcefff) == 0x50386000)
+              { itype = FRVBF_INSN_BCNVLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 42 :
+            if ((entire_insn & 0x79fcffff) == 0x5038c000)
+              { itype = FRVBF_INSN_FBGELR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 43 :
+            if ((entire_insn & 0x79fcefff) == 0x5038e000)
+              { itype = FRVBF_INSN_FCBGELR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 44 :
+            if ((entire_insn & 0x79fcffff) == 0x58384000)
+              { itype = FRVBF_INSN_BGELR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 45 :
+            if ((entire_insn & 0x79fcefff) == 0x58386000)
+              { itype = FRVBF_INSN_BCGELR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 46 :
+            if ((entire_insn & 0x79fcffff) == 0x5838c000)
+              { itype = FRVBF_INSN_FBUGELR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 47 :
+            if ((entire_insn & 0x79fcefff) == 0x5838e000)
+              { itype = FRVBF_INSN_FCBUGELR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 48 :
+            if ((entire_insn & 0x79fcffff) == 0x60384000)
+              { itype = FRVBF_INSN_BNELR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 49 :
+            if ((entire_insn & 0x79fcefff) == 0x60386000)
+              { itype = FRVBF_INSN_BCNELR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 50 :
+            if ((entire_insn & 0x79fcffff) == 0x6038c000)
+              { itype = FRVBF_INSN_FBLELR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 51 :
+            if ((entire_insn & 0x79fcefff) == 0x6038e000)
+              { itype = FRVBF_INSN_FCBLELR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 52 :
+            if ((entire_insn & 0x79fcffff) == 0x68384000)
+              { itype = FRVBF_INSN_BHILR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 53 :
+            if ((entire_insn & 0x79fcefff) == 0x68386000)
+              { itype = FRVBF_INSN_BCHILR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 54 :
+            if ((entire_insn & 0x79fcffff) == 0x6838c000)
+              { itype = FRVBF_INSN_FBULELR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 55 :
+            if ((entire_insn & 0x79fcefff) == 0x6838e000)
+              { itype = FRVBF_INSN_FCBULELR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 56 :
+            if ((entire_insn & 0x79fcffff) == 0x70384000)
+              { itype = FRVBF_INSN_BPLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 57 :
+            if ((entire_insn & 0x79fcefff) == 0x70386000)
+              { itype = FRVBF_INSN_BCPLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 58 :
+            if ((entire_insn & 0x79fcffff) == 0x7038c000)
+              { itype = FRVBF_INSN_FBOLR; goto extract_sfmt_fbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 59 :
+            if ((entire_insn & 0x79fcefff) == 0x7038e000)
+              { itype = FRVBF_INSN_FCBOLR; goto extract_sfmt_fcbeqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 60 :
+            if ((entire_insn & 0x79fcffff) == 0x78384000)
+              { itype = FRVBF_INSN_BGTLR; goto extract_sfmt_beqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 61 :
+            if ((entire_insn & 0x79fcefff) == 0x78386000)
+              { itype = FRVBF_INSN_BCGTLR; goto extract_sfmt_bceqlr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 62 :
+            if ((entire_insn & 0x7ffcffff) == 0x7838c000)
+              { itype = FRVBF_INSN_FBRALR; goto extract_sfmt_bralr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 63 :
+            if ((entire_insn & 0x7ffcefff) == 0x7838e000)
+              { itype = FRVBF_INSN_FCBRALR; goto extract_sfmt_bcralr; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 15 : itype = FRVBF_INSN_CALL; goto extract_sfmt_call;
-      case 16 : itype = FRVBF_INSN_ADDI; goto extract_sfmt_addi;
-      case 17 : itype = FRVBF_INSN_ADDICC; goto extract_sfmt_addicc;
-      case 18 : itype = FRVBF_INSN_ADDXI; goto extract_sfmt_addxi;
-      case 19 : itype = FRVBF_INSN_ADDXICC; goto extract_sfmt_addicc;
-      case 20 : itype = FRVBF_INSN_SUBI; goto extract_sfmt_addi;
-      case 21 : itype = FRVBF_INSN_SUBICC; goto extract_sfmt_addicc;
-      case 22 : itype = FRVBF_INSN_SUBXI; goto extract_sfmt_addxi;
-      case 23 : itype = FRVBF_INSN_SUBXICC; goto extract_sfmt_addicc;
-      case 24 : itype = FRVBF_INSN_SMULI; goto extract_sfmt_smuli;
-      case 25 : itype = FRVBF_INSN_SMULICC; goto extract_sfmt_smulicc;
-      case 26 : itype = FRVBF_INSN_UMULI; goto extract_sfmt_smuli;
-      case 27 : itype = FRVBF_INSN_UMULICC; goto extract_sfmt_smulicc;
+      case 15 :
+        if ((entire_insn & 0x1fc0000) == 0x3c0000)
+          { itype = FRVBF_INSN_CALL; goto extract_sfmt_call; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 16 :
+        if ((entire_insn & 0x1fc0000) == 0x400000)
+          { itype = FRVBF_INSN_ADDI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 17 :
+        if ((entire_insn & 0x1fc0000) == 0x440000)
+          { itype = FRVBF_INSN_ADDICC; goto extract_sfmt_addicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 18 :
+        if ((entire_insn & 0x1fc0000) == 0x480000)
+          { itype = FRVBF_INSN_ADDXI; goto extract_sfmt_addxi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 19 :
+        if ((entire_insn & 0x1fc0000) == 0x4c0000)
+          { itype = FRVBF_INSN_ADDXICC; goto extract_sfmt_addicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 20 :
+        if ((entire_insn & 0x1fc0000) == 0x500000)
+          { itype = FRVBF_INSN_SUBI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 21 :
+        if ((entire_insn & 0x1fc0000) == 0x540000)
+          { itype = FRVBF_INSN_SUBICC; goto extract_sfmt_addicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 22 :
+        if ((entire_insn & 0x1fc0000) == 0x580000)
+          { itype = FRVBF_INSN_SUBXI; goto extract_sfmt_addxi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 23 :
+        if ((entire_insn & 0x1fc0000) == 0x5c0000)
+          { itype = FRVBF_INSN_SUBXICC; goto extract_sfmt_addicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 24 :
+        if ((entire_insn & 0x1fc0000) == 0x600000)
+          { itype = FRVBF_INSN_SMULI; goto extract_sfmt_smuli; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 25 :
+        if ((entire_insn & 0x1fc0000) == 0x640000)
+          { itype = FRVBF_INSN_SMULICC; goto extract_sfmt_smulicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 26 :
+        if ((entire_insn & 0x1fc0000) == 0x680000)
+          { itype = FRVBF_INSN_UMULI; goto extract_sfmt_smuli; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 27 :
+        if ((entire_insn & 0x1fc0000) == 0x6c0000)
+          { itype = FRVBF_INSN_UMULICC; goto extract_sfmt_smulicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 28 :
         {
           unsigned int val = (((insn >> 27) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_TINO; goto extract_sfmt_rei;
-          case 1 : itype = FRVBF_INSN_TIC; goto extract_sfmt_tieq;
-          case 2 : itype = FRVBF_INSN_TIV; goto extract_sfmt_tieq;
-          case 3 : itype = FRVBF_INSN_TILT; goto extract_sfmt_tieq;
-          case 4 : itype = FRVBF_INSN_TIEQ; goto extract_sfmt_tieq;
-          case 5 : itype = FRVBF_INSN_TILS; goto extract_sfmt_tieq;
-          case 6 : itype = FRVBF_INSN_TIN; goto extract_sfmt_tieq;
-          case 7 : itype = FRVBF_INSN_TILE; goto extract_sfmt_tieq;
-          case 8 : itype = FRVBF_INSN_TIRA; goto extract_sfmt_tira;
-          case 9 : itype = FRVBF_INSN_TINC; goto extract_sfmt_tieq;
-          case 10 : itype = FRVBF_INSN_TINV; goto extract_sfmt_tieq;
-          case 11 : itype = FRVBF_INSN_TIGE; goto extract_sfmt_tieq;
-          case 12 : itype = FRVBF_INSN_TINE; goto extract_sfmt_tieq;
-          case 13 : itype = FRVBF_INSN_TIHI; goto extract_sfmt_tieq;
-          case 14 : itype = FRVBF_INSN_TIP; goto extract_sfmt_tieq;
-          case 15 : itype = FRVBF_INSN_TIGT; goto extract_sfmt_tieq;
+          case 0 :
+            if ((entire_insn & 0x7fffffff) == 0x700000)
+              { itype = FRVBF_INSN_TINO; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x79fc0000) == 0x8700000)
+              { itype = FRVBF_INSN_TIC; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x79fc0000) == 0x10700000)
+              { itype = FRVBF_INSN_TIV; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x79fc0000) == 0x18700000)
+              { itype = FRVBF_INSN_TILT; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fc0000) == 0x20700000)
+              { itype = FRVBF_INSN_TIEQ; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fc0000) == 0x28700000)
+              { itype = FRVBF_INSN_TILS; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x79fc0000) == 0x30700000)
+              { itype = FRVBF_INSN_TIN; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x79fc0000) == 0x38700000)
+              { itype = FRVBF_INSN_TILE; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x7ffc0000) == 0x40700000)
+              { itype = FRVBF_INSN_TIRA; goto extract_sfmt_tira; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fc0000) == 0x48700000)
+              { itype = FRVBF_INSN_TINC; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fc0000) == 0x50700000)
+              { itype = FRVBF_INSN_TINV; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x79fc0000) == 0x58700000)
+              { itype = FRVBF_INSN_TIGE; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fc0000) == 0x60700000)
+              { itype = FRVBF_INSN_TINE; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fc0000) == 0x68700000)
+              { itype = FRVBF_INSN_TIHI; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fc0000) == 0x70700000)
+              { itype = FRVBF_INSN_TIP; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x79fc0000) == 0x78700000)
+              { itype = FRVBF_INSN_TIGT; goto extract_sfmt_tieq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1348,104 +2413,350 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 27) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_FTINO; goto extract_sfmt_rei;
-          case 1 : itype = FRVBF_INSN_FTIU; goto extract_sfmt_ftine;
-          case 2 : itype = FRVBF_INSN_FTIGT; goto extract_sfmt_ftine;
-          case 3 : itype = FRVBF_INSN_FTIUG; goto extract_sfmt_ftine;
-          case 4 : itype = FRVBF_INSN_FTILT; goto extract_sfmt_ftine;
-          case 5 : itype = FRVBF_INSN_FTIUL; goto extract_sfmt_ftine;
-          case 6 : itype = FRVBF_INSN_FTILG; goto extract_sfmt_ftine;
-          case 7 : itype = FRVBF_INSN_FTINE; goto extract_sfmt_ftine;
-          case 8 : itype = FRVBF_INSN_FTIEQ; goto extract_sfmt_ftine;
-          case 9 : itype = FRVBF_INSN_FTIUE; goto extract_sfmt_ftine;
-          case 10 : itype = FRVBF_INSN_FTIGE; goto extract_sfmt_ftine;
-          case 11 : itype = FRVBF_INSN_FTIUGE; goto extract_sfmt_ftine;
-          case 12 : itype = FRVBF_INSN_FTILE; goto extract_sfmt_ftine;
-          case 13 : itype = FRVBF_INSN_FTIULE; goto extract_sfmt_ftine;
-          case 14 : itype = FRVBF_INSN_FTIO; goto extract_sfmt_ftine;
-          case 15 : itype = FRVBF_INSN_FTIRA; goto extract_sfmt_tira;
+          case 0 :
+            if ((entire_insn & 0x7fffffff) == 0x740000)
+              { itype = FRVBF_INSN_FTINO; goto extract_sfmt_rei; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x79fc0000) == 0x8740000)
+              { itype = FRVBF_INSN_FTIU; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x79fc0000) == 0x10740000)
+              { itype = FRVBF_INSN_FTIGT; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x79fc0000) == 0x18740000)
+              { itype = FRVBF_INSN_FTIUG; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fc0000) == 0x20740000)
+              { itype = FRVBF_INSN_FTILT; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fc0000) == 0x28740000)
+              { itype = FRVBF_INSN_FTIUL; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x79fc0000) == 0x30740000)
+              { itype = FRVBF_INSN_FTILG; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x79fc0000) == 0x38740000)
+              { itype = FRVBF_INSN_FTINE; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x79fc0000) == 0x40740000)
+              { itype = FRVBF_INSN_FTIEQ; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fc0000) == 0x48740000)
+              { itype = FRVBF_INSN_FTIUE; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fc0000) == 0x50740000)
+              { itype = FRVBF_INSN_FTIGE; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x79fc0000) == 0x58740000)
+              { itype = FRVBF_INSN_FTIUGE; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fc0000) == 0x60740000)
+              { itype = FRVBF_INSN_FTILE; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fc0000) == 0x68740000)
+              { itype = FRVBF_INSN_FTIULE; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fc0000) == 0x70740000)
+              { itype = FRVBF_INSN_FTIO; goto extract_sfmt_ftine; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x7ffc0000) == 0x78740000)
+              { itype = FRVBF_INSN_FTIRA; goto extract_sfmt_tira; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 30 : itype = FRVBF_INSN_SDIVI; goto extract_sfmt_sdivi;
-      case 31 : itype = FRVBF_INSN_UDIVI; goto extract_sfmt_sdivi;
-      case 32 : itype = FRVBF_INSN_ANDI; goto extract_sfmt_addi;
-      case 33 : itype = FRVBF_INSN_ANDICC; goto extract_sfmt_andicc;
-      case 34 : itype = FRVBF_INSN_ORI; goto extract_sfmt_addi;
-      case 35 : itype = FRVBF_INSN_ORICC; goto extract_sfmt_andicc;
-      case 36 : itype = FRVBF_INSN_XORI; goto extract_sfmt_addi;
-      case 37 : itype = FRVBF_INSN_XORICC; goto extract_sfmt_andicc;
-      case 40 : itype = FRVBF_INSN_SLLI; goto extract_sfmt_addi;
-      case 41 : itype = FRVBF_INSN_SLLICC; goto extract_sfmt_addicc;
-      case 42 : itype = FRVBF_INSN_SRLI; goto extract_sfmt_addi;
-      case 43 : itype = FRVBF_INSN_SRLICC; goto extract_sfmt_addicc;
-      case 44 : itype = FRVBF_INSN_SRAI; goto extract_sfmt_addi;
-      case 45 : itype = FRVBF_INSN_SRAICC; goto extract_sfmt_addicc;
-      case 46 : itype = FRVBF_INSN_NSDIVI; goto extract_sfmt_sdivi;
-      case 47 : itype = FRVBF_INSN_NUDIVI; goto extract_sfmt_sdivi;
-      case 48 : itype = FRVBF_INSN_LDSBI; goto extract_sfmt_ldsbi;
-      case 49 : itype = FRVBF_INSN_LDSHI; goto extract_sfmt_ldsbi;
-      case 50 : itype = FRVBF_INSN_LDI; goto extract_sfmt_ldsbi;
-      case 51 : itype = FRVBF_INSN_LDDI; goto extract_sfmt_lddi;
-      case 52 : itype = FRVBF_INSN_LDQI; goto extract_sfmt_ldqi;
-      case 53 : itype = FRVBF_INSN_LDUBI; goto extract_sfmt_ldsbi;
-      case 54 : itype = FRVBF_INSN_LDUHI; goto extract_sfmt_ldsbi;
-      case 55 : itype = FRVBF_INSN_REI; goto extract_sfmt_rei;
-      case 56 : itype = FRVBF_INSN_LDBFI; goto extract_sfmt_ldbfi;
-      case 57 : itype = FRVBF_INSN_LDHFI; goto extract_sfmt_ldbfi;
-      case 58 : itype = FRVBF_INSN_LDFI; goto extract_sfmt_ldbfi;
-      case 59 : itype = FRVBF_INSN_LDDFI; goto extract_sfmt_lddfi;
-      case 60 : itype = FRVBF_INSN_LDQFI; goto extract_sfmt_ldqfi;
-      case 61 : itype = FRVBF_INSN_SETLO; goto extract_sfmt_setlo;
-      case 62 : itype = FRVBF_INSN_SETHI; goto extract_sfmt_sethi;
-      case 63 : itype = FRVBF_INSN_SETLOS; goto extract_sfmt_setlos;
-      case 64 : itype = FRVBF_INSN_NLDSBI; goto extract_sfmt_nldsbi;
-      case 65 : itype = FRVBF_INSN_NLDUBI; goto extract_sfmt_nldsbi;
-      case 66 : itype = FRVBF_INSN_NLDSHI; goto extract_sfmt_nldsbi;
-      case 67 : itype = FRVBF_INSN_NLDUHI; goto extract_sfmt_nldsbi;
-      case 68 : itype = FRVBF_INSN_NLDI; goto extract_sfmt_nldsbi;
-      case 69 : itype = FRVBF_INSN_NLDDI; goto extract_sfmt_nlddi;
+      case 30 :
+        if ((entire_insn & 0x1fc0000) == 0x780000)
+          { itype = FRVBF_INSN_SDIVI; goto extract_sfmt_sdivi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 31 :
+        if ((entire_insn & 0x1fc0000) == 0x7c0000)
+          { itype = FRVBF_INSN_UDIVI; goto extract_sfmt_sdivi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 32 :
+        if ((entire_insn & 0x1fc0000) == 0x800000)
+          { itype = FRVBF_INSN_ANDI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 33 :
+        if ((entire_insn & 0x1fc0000) == 0x840000)
+          { itype = FRVBF_INSN_ANDICC; goto extract_sfmt_andicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 34 :
+        if ((entire_insn & 0x1fc0000) == 0x880000)
+          { itype = FRVBF_INSN_ORI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 35 :
+        if ((entire_insn & 0x1fc0000) == 0x8c0000)
+          { itype = FRVBF_INSN_ORICC; goto extract_sfmt_andicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 36 :
+        if ((entire_insn & 0x1fc0000) == 0x900000)
+          { itype = FRVBF_INSN_XORI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 37 :
+        if ((entire_insn & 0x1fc0000) == 0x940000)
+          { itype = FRVBF_INSN_XORICC; goto extract_sfmt_andicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 40 :
+        if ((entire_insn & 0x1fc0000) == 0xa00000)
+          { itype = FRVBF_INSN_SLLI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 41 :
+        if ((entire_insn & 0x1fc0000) == 0xa40000)
+          { itype = FRVBF_INSN_SLLICC; goto extract_sfmt_addicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 42 :
+        if ((entire_insn & 0x1fc0000) == 0xa80000)
+          { itype = FRVBF_INSN_SRLI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 43 :
+        if ((entire_insn & 0x1fc0000) == 0xac0000)
+          { itype = FRVBF_INSN_SRLICC; goto extract_sfmt_addicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 44 :
+        if ((entire_insn & 0x1fc0000) == 0xb00000)
+          { itype = FRVBF_INSN_SRAI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 45 :
+        if ((entire_insn & 0x1fc0000) == 0xb40000)
+          { itype = FRVBF_INSN_SRAICC; goto extract_sfmt_addicc; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 46 :
+        if ((entire_insn & 0x1fc0000) == 0xb80000)
+          { itype = FRVBF_INSN_NSDIVI; goto extract_sfmt_sdivi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 47 :
+        if ((entire_insn & 0x1fc0000) == 0xbc0000)
+          { itype = FRVBF_INSN_NUDIVI; goto extract_sfmt_sdivi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 48 :
+        if ((entire_insn & 0x1fc0000) == 0xc00000)
+          { itype = FRVBF_INSN_LDSBI; goto extract_sfmt_ldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 49 :
+        if ((entire_insn & 0x1fc0000) == 0xc40000)
+          { itype = FRVBF_INSN_LDSHI; goto extract_sfmt_ldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 50 :
+        if ((entire_insn & 0x1fc0000) == 0xc80000)
+          { itype = FRVBF_INSN_LDI; goto extract_sfmt_ldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 51 :
+        if ((entire_insn & 0x1fc0000) == 0xcc0000)
+          { itype = FRVBF_INSN_LDDI; goto extract_sfmt_lddi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 52 :
+        if ((entire_insn & 0x1fc0000) == 0xd00000)
+          { itype = FRVBF_INSN_LDQI; goto extract_sfmt_ldqi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 53 :
+        if ((entire_insn & 0x1fc0000) == 0xd40000)
+          { itype = FRVBF_INSN_LDUBI; goto extract_sfmt_ldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 54 :
+        if ((entire_insn & 0x1fc0000) == 0xd80000)
+          { itype = FRVBF_INSN_LDUHI; goto extract_sfmt_ldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 55 :
+        if ((entire_insn & 0x7ffc0fff) == 0xdc0000)
+          { itype = FRVBF_INSN_REI; goto extract_sfmt_rei; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 56 :
+        if ((entire_insn & 0x1fc0000) == 0xe00000)
+          { itype = FRVBF_INSN_LDBFI; goto extract_sfmt_ldbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 57 :
+        if ((entire_insn & 0x1fc0000) == 0xe40000)
+          { itype = FRVBF_INSN_LDHFI; goto extract_sfmt_ldbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 58 :
+        if ((entire_insn & 0x1fc0000) == 0xe80000)
+          { itype = FRVBF_INSN_LDFI; goto extract_sfmt_ldbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 59 :
+        if ((entire_insn & 0x1fc0000) == 0xec0000)
+          { itype = FRVBF_INSN_LDDFI; goto extract_sfmt_lddfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 60 :
+        if ((entire_insn & 0x1fc0000) == 0xf00000)
+          { itype = FRVBF_INSN_LDQFI; goto extract_sfmt_ldqfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 61 :
+        if ((entire_insn & 0x1ff0000) == 0xf40000)
+          { itype = FRVBF_INSN_SETLO; goto extract_sfmt_setlo; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 62 :
+        if ((entire_insn & 0x1ff0000) == 0xf80000)
+          { itype = FRVBF_INSN_SETHI; goto extract_sfmt_sethi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 63 :
+        if ((entire_insn & 0x1ff0000) == 0xfc0000)
+          { itype = FRVBF_INSN_SETLOS; goto extract_sfmt_setlos; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 64 :
+        if ((entire_insn & 0x1fc0000) == 0x1000000)
+          { itype = FRVBF_INSN_NLDSBI; goto extract_sfmt_nldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 65 :
+        if ((entire_insn & 0x1fc0000) == 0x1040000)
+          { itype = FRVBF_INSN_NLDUBI; goto extract_sfmt_nldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 66 :
+        if ((entire_insn & 0x1fc0000) == 0x1080000)
+          { itype = FRVBF_INSN_NLDSHI; goto extract_sfmt_nldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 67 :
+        if ((entire_insn & 0x1fc0000) == 0x10c0000)
+          { itype = FRVBF_INSN_NLDUHI; goto extract_sfmt_nldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 68 :
+        if ((entire_insn & 0x1fc0000) == 0x1100000)
+          { itype = FRVBF_INSN_NLDI; goto extract_sfmt_nldsbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 69 :
+        if ((entire_insn & 0x1fc0000) == 0x1140000)
+          { itype = FRVBF_INSN_NLDDI; goto extract_sfmt_nlddi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 70 :
         {
           unsigned int val = (((insn >> 6) & (7 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_ADDSS; goto extract_sfmt_add;
-          case 1 : itype = FRVBF_INSN_SUBSS; goto extract_sfmt_add;
-          case 2 : itype = FRVBF_INSN_SLASS; goto extract_sfmt_add;
-          case 4 : itype = FRVBF_INSN_SCUTSS; goto extract_sfmt_scutss;
-          case 5 : itype = FRVBF_INSN_SMU; goto extract_sfmt_smu;
-          case 6 : itype = FRVBF_INSN_SMASS; goto extract_sfmt_smass;
-          case 7 : itype = FRVBF_INSN_SMSSS; goto extract_sfmt_smass;
+          case 0 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1180000)
+              { itype = FRVBF_INSN_ADDSS; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1180040)
+              { itype = FRVBF_INSN_SUBSS; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1180080)
+              { itype = FRVBF_INSN_SLASS; goto extract_sfmt_add; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1ffffc0) == 0x1180100)
+              { itype = FRVBF_INSN_SCUTSS; goto extract_sfmt_scutss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x7ffc0fc0) == 0x1180140)
+              { itype = FRVBF_INSN_SMU; goto extract_sfmt_smu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x7ffc0fc0) == 0x1180180)
+              { itype = FRVBF_INSN_SMASS; goto extract_sfmt_smass; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x7ffc0fc0) == 0x11801c0)
+              { itype = FRVBF_INSN_SMSSS; goto extract_sfmt_smass; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 71 : itype = FRVBF_INSN_SCANI; goto extract_sfmt_addi;
-      case 72 : itype = FRVBF_INSN_NLDBFI; goto extract_sfmt_nldbfi;
-      case 73 : itype = FRVBF_INSN_NLDHFI; goto extract_sfmt_nldbfi;
-      case 74 : itype = FRVBF_INSN_NLDFI; goto extract_sfmt_nldbfi;
-      case 75 : itype = FRVBF_INSN_NLDDFI; goto extract_sfmt_nlddfi;
-      case 76 : itype = FRVBF_INSN_NLDQFI; goto extract_sfmt_nldqfi;
-      case 77 : itype = FRVBF_INSN_SWAPI; goto extract_sfmt_swapi;
-      case 78 : itype = FRVBF_INSN_STBFI; goto extract_sfmt_stbfi;
-      case 79 : itype = FRVBF_INSN_STHFI; goto extract_sfmt_stbfi;
-      case 80 : itype = FRVBF_INSN_STBI; goto extract_sfmt_stbi;
-      case 81 : itype = FRVBF_INSN_STHI; goto extract_sfmt_stbi;
-      case 82 : itype = FRVBF_INSN_STI; goto extract_sfmt_stbi;
-      case 83 : itype = FRVBF_INSN_STDI; goto extract_sfmt_stdi;
-      case 84 : itype = FRVBF_INSN_STQI; goto extract_sfmt_ldqi;
-      case 85 : itype = FRVBF_INSN_STFI; goto extract_sfmt_stbfi;
-      case 86 : itype = FRVBF_INSN_STDFI; goto extract_sfmt_stdfi;
-      case 87 : itype = FRVBF_INSN_STQFI; goto extract_sfmt_ldqfi;
+      case 71 :
+        if ((entire_insn & 0x1fc0000) == 0x11c0000)
+          { itype = FRVBF_INSN_SCANI; goto extract_sfmt_addi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 72 :
+        if ((entire_insn & 0x1fc0000) == 0x1200000)
+          { itype = FRVBF_INSN_NLDBFI; goto extract_sfmt_nldbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 73 :
+        if ((entire_insn & 0x1fc0000) == 0x1240000)
+          { itype = FRVBF_INSN_NLDHFI; goto extract_sfmt_nldbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 74 :
+        if ((entire_insn & 0x1fc0000) == 0x1280000)
+          { itype = FRVBF_INSN_NLDFI; goto extract_sfmt_nldbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 75 :
+        if ((entire_insn & 0x1fc0000) == 0x12c0000)
+          { itype = FRVBF_INSN_NLDDFI; goto extract_sfmt_nlddfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 76 :
+        if ((entire_insn & 0x1fc0000) == 0x1300000)
+          { itype = FRVBF_INSN_NLDQFI; goto extract_sfmt_nldqfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 77 :
+        if ((entire_insn & 0x1fc0000) == 0x1340000)
+          { itype = FRVBF_INSN_SWAPI; goto extract_sfmt_swapi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 78 :
+        if ((entire_insn & 0x1fc0000) == 0x1380000)
+          { itype = FRVBF_INSN_STBFI; goto extract_sfmt_stbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 79 :
+        if ((entire_insn & 0x1fc0000) == 0x13c0000)
+          { itype = FRVBF_INSN_STHFI; goto extract_sfmt_stbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 80 :
+        if ((entire_insn & 0x1fc0000) == 0x1400000)
+          { itype = FRVBF_INSN_STBI; goto extract_sfmt_stbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 81 :
+        if ((entire_insn & 0x1fc0000) == 0x1440000)
+          { itype = FRVBF_INSN_STHI; goto extract_sfmt_stbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 82 :
+        if ((entire_insn & 0x1fc0000) == 0x1480000)
+          { itype = FRVBF_INSN_STI; goto extract_sfmt_stbi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 83 :
+        if ((entire_insn & 0x1fc0000) == 0x14c0000)
+          { itype = FRVBF_INSN_STDI; goto extract_sfmt_stdi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 84 :
+        if ((entire_insn & 0x1fc0000) == 0x1500000)
+          { itype = FRVBF_INSN_STQI; goto extract_sfmt_ldqi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 85 :
+        if ((entire_insn & 0x1fc0000) == 0x1540000)
+          { itype = FRVBF_INSN_STFI; goto extract_sfmt_stbfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 86 :
+        if ((entire_insn & 0x1fc0000) == 0x1580000)
+          { itype = FRVBF_INSN_STDFI; goto extract_sfmt_stdfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 87 :
+        if ((entire_insn & 0x1fc0000) == 0x15c0000)
+          { itype = FRVBF_INSN_STQFI; goto extract_sfmt_ldqfi; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       case 88 :
         {
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CADD; goto extract_sfmt_cadd;
-          case 1 : itype = FRVBF_INSN_CSUB; goto extract_sfmt_cadd;
-          case 2 : itype = FRVBF_INSN_CSMUL; goto extract_sfmt_csmul;
-          case 3 : itype = FRVBF_INSN_CSDIV; goto extract_sfmt_csdiv;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1600000)
+              { itype = FRVBF_INSN_CADD; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1600040)
+              { itype = FRVBF_INSN_CSUB; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1600080)
+              { itype = FRVBF_INSN_CSMUL; goto extract_sfmt_csmul; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x16000c0)
+              { itype = FRVBF_INSN_CSDIV; goto extract_sfmt_csdiv; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1454,10 +2765,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CADDCC; goto extract_sfmt_caddcc;
-          case 1 : itype = FRVBF_INSN_CSUBCC; goto extract_sfmt_caddcc;
-          case 2 : itype = FRVBF_INSN_CSMULCC; goto extract_sfmt_csmulcc;
-          case 3 : itype = FRVBF_INSN_CUDIV; goto extract_sfmt_csdiv;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1640000)
+              { itype = FRVBF_INSN_CADDCC; goto extract_sfmt_caddcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1640040)
+              { itype = FRVBF_INSN_CSUBCC; goto extract_sfmt_caddcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1640080)
+              { itype = FRVBF_INSN_CSMULCC; goto extract_sfmt_csmulcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x16400c0)
+              { itype = FRVBF_INSN_CUDIV; goto extract_sfmt_csdiv; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1466,10 +2789,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CAND; goto extract_sfmt_cadd;
-          case 1 : itype = FRVBF_INSN_COR; goto extract_sfmt_cadd;
-          case 2 : itype = FRVBF_INSN_CXOR; goto extract_sfmt_cadd;
-          case 3 : itype = FRVBF_INSN_CNOT; goto extract_sfmt_cnot;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1680000)
+              { itype = FRVBF_INSN_CAND; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1680040)
+              { itype = FRVBF_INSN_COR; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1680080)
+              { itype = FRVBF_INSN_CXOR; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fff0c0) == 0x16800c0)
+              { itype = FRVBF_INSN_CNOT; goto extract_sfmt_cnot; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1478,9 +2813,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CANDCC; goto extract_sfmt_caddcc;
-          case 1 : itype = FRVBF_INSN_CORCC; goto extract_sfmt_caddcc;
-          case 2 : itype = FRVBF_INSN_CXORCC; goto extract_sfmt_caddcc;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x16c0000)
+              { itype = FRVBF_INSN_CANDCC; goto extract_sfmt_caddcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x16c0040)
+              { itype = FRVBF_INSN_CORCC; goto extract_sfmt_caddcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x16c0080)
+              { itype = FRVBF_INSN_CXORCC; goto extract_sfmt_caddcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1489,9 +2833,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CSLL; goto extract_sfmt_cadd;
-          case 1 : itype = FRVBF_INSN_CSRL; goto extract_sfmt_cadd;
-          case 2 : itype = FRVBF_INSN_CSRA; goto extract_sfmt_cadd;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1700000)
+              { itype = FRVBF_INSN_CSLL; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1700040)
+              { itype = FRVBF_INSN_CSRL; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1700080)
+              { itype = FRVBF_INSN_CSRA; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1500,9 +2853,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CSLLCC; goto extract_sfmt_caddcc;
-          case 1 : itype = FRVBF_INSN_CSRLCC; goto extract_sfmt_caddcc;
-          case 2 : itype = FRVBF_INSN_CSRACC; goto extract_sfmt_caddcc;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1740000)
+              { itype = FRVBF_INSN_CSLLCC; goto extract_sfmt_caddcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1740040)
+              { itype = FRVBF_INSN_CSRLCC; goto extract_sfmt_caddcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1740080)
+              { itype = FRVBF_INSN_CSRACC; goto extract_sfmt_caddcc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1511,10 +2873,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CLDSB; goto extract_sfmt_cldsb;
-          case 1 : itype = FRVBF_INSN_CLDUB; goto extract_sfmt_cldsb;
-          case 2 : itype = FRVBF_INSN_CLDSH; goto extract_sfmt_cldsb;
-          case 3 : itype = FRVBF_INSN_CLDUH; goto extract_sfmt_cldsb;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1780000)
+              { itype = FRVBF_INSN_CLDSB; goto extract_sfmt_cldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1780040)
+              { itype = FRVBF_INSN_CLDUB; goto extract_sfmt_cldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1780080)
+              { itype = FRVBF_INSN_CLDSH; goto extract_sfmt_cldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x17800c0)
+              { itype = FRVBF_INSN_CLDUH; goto extract_sfmt_cldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1523,9 +2897,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CLD; goto extract_sfmt_cldsb;
-          case 1 : itype = FRVBF_INSN_CLDD; goto extract_sfmt_cldd;
-          case 2 : itype = FRVBF_INSN_CLDQ; goto extract_sfmt_cldq;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x17c0000)
+              { itype = FRVBF_INSN_CLD; goto extract_sfmt_cldsb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x17c0040)
+              { itype = FRVBF_INSN_CLDD; goto extract_sfmt_cldd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x17c0080)
+              { itype = FRVBF_INSN_CLDQ; goto extract_sfmt_cldq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1534,10 +2917,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CLDBF; goto extract_sfmt_cldbf;
-          case 1 : itype = FRVBF_INSN_CLDHF; goto extract_sfmt_cldbf;
-          case 2 : itype = FRVBF_INSN_CLDF; goto extract_sfmt_cldbf;
-          case 3 : itype = FRVBF_INSN_CLDDF; goto extract_sfmt_clddf;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1800000)
+              { itype = FRVBF_INSN_CLDBF; goto extract_sfmt_cldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1800040)
+              { itype = FRVBF_INSN_CLDHF; goto extract_sfmt_cldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1800080)
+              { itype = FRVBF_INSN_CLDF; goto extract_sfmt_cldbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x18000c0)
+              { itype = FRVBF_INSN_CLDDF; goto extract_sfmt_clddf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1546,10 +2941,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CLDSBU; goto extract_sfmt_cldsbu;
-          case 1 : itype = FRVBF_INSN_CLDUBU; goto extract_sfmt_cldsbu;
-          case 2 : itype = FRVBF_INSN_CLDSHU; goto extract_sfmt_cldsbu;
-          case 3 : itype = FRVBF_INSN_CLDUHU; goto extract_sfmt_cldsbu;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1840000)
+              { itype = FRVBF_INSN_CLDSBU; goto extract_sfmt_cldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1840040)
+              { itype = FRVBF_INSN_CLDUBU; goto extract_sfmt_cldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1840080)
+              { itype = FRVBF_INSN_CLDSHU; goto extract_sfmt_cldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x18400c0)
+              { itype = FRVBF_INSN_CLDUHU; goto extract_sfmt_cldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1558,9 +2965,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CLDU; goto extract_sfmt_cldsbu;
-          case 1 : itype = FRVBF_INSN_CLDDU; goto extract_sfmt_clddu;
-          case 2 : itype = FRVBF_INSN_CLDQU; goto extract_sfmt_cldqu;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1880000)
+              { itype = FRVBF_INSN_CLDU; goto extract_sfmt_cldsbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1880040)
+              { itype = FRVBF_INSN_CLDDU; goto extract_sfmt_clddu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1880080)
+              { itype = FRVBF_INSN_CLDQU; goto extract_sfmt_cldqu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1569,10 +2985,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CLDBFU; goto extract_sfmt_cldbfu;
-          case 1 : itype = FRVBF_INSN_CLDHFU; goto extract_sfmt_cldbfu;
-          case 2 : itype = FRVBF_INSN_CLDFU; goto extract_sfmt_cldbfu;
-          case 3 : itype = FRVBF_INSN_CLDDFU; goto extract_sfmt_clddfu;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x18c0000)
+              { itype = FRVBF_INSN_CLDBFU; goto extract_sfmt_cldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x18c0040)
+              { itype = FRVBF_INSN_CLDHFU; goto extract_sfmt_cldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x18c0080)
+              { itype = FRVBF_INSN_CLDFU; goto extract_sfmt_cldbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x18c00c0)
+              { itype = FRVBF_INSN_CLDDFU; goto extract_sfmt_clddfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1581,10 +3009,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CSTB; goto extract_sfmt_cstb;
-          case 1 : itype = FRVBF_INSN_CSTH; goto extract_sfmt_cstb;
-          case 2 : itype = FRVBF_INSN_CST; goto extract_sfmt_cstb;
-          case 3 : itype = FRVBF_INSN_CSTD; goto extract_sfmt_cstd;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1900000)
+              { itype = FRVBF_INSN_CSTB; goto extract_sfmt_cstb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1900040)
+              { itype = FRVBF_INSN_CSTH; goto extract_sfmt_cstb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1900080)
+              { itype = FRVBF_INSN_CST; goto extract_sfmt_cstb; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x19000c0)
+              { itype = FRVBF_INSN_CSTD; goto extract_sfmt_cstd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1593,9 +3033,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CSTQ; goto extract_sfmt_cldq;
-          case 2 : itype = FRVBF_INSN_CSWAP; goto extract_sfmt_cswap;
-          case 3 : itype = FRVBF_INSN_CSCAN; goto extract_sfmt_cadd;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1940000)
+              { itype = FRVBF_INSN_CSTQ; goto extract_sfmt_cldq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1940080)
+              { itype = FRVBF_INSN_CSWAP; goto extract_sfmt_cswap; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x19400c0)
+              { itype = FRVBF_INSN_CSCAN; goto extract_sfmt_cadd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1604,10 +3053,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CSTBF; goto extract_sfmt_cstbf;
-          case 1 : itype = FRVBF_INSN_CSTHF; goto extract_sfmt_cstbf;
-          case 2 : itype = FRVBF_INSN_CSTF; goto extract_sfmt_cstbf;
-          case 3 : itype = FRVBF_INSN_CSTDF; goto extract_sfmt_cstdf;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1980000)
+              { itype = FRVBF_INSN_CSTBF; goto extract_sfmt_cstbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1980040)
+              { itype = FRVBF_INSN_CSTHF; goto extract_sfmt_cstbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1980080)
+              { itype = FRVBF_INSN_CSTF; goto extract_sfmt_cstbf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x19800c0)
+              { itype = FRVBF_INSN_CSTDF; goto extract_sfmt_cstdf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1616,10 +3077,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CSTBU; goto extract_sfmt_cstbu;
-          case 1 : itype = FRVBF_INSN_CSTHU; goto extract_sfmt_cstbu;
-          case 2 : itype = FRVBF_INSN_CSTU; goto extract_sfmt_cstbu;
-          case 3 : itype = FRVBF_INSN_CSTDU; goto extract_sfmt_cstdu;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x19c0000)
+              { itype = FRVBF_INSN_CSTBU; goto extract_sfmt_cstbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x19c0040)
+              { itype = FRVBF_INSN_CSTHU; goto extract_sfmt_cstbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x19c0080)
+              { itype = FRVBF_INSN_CSTU; goto extract_sfmt_cstbu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x19c00c0)
+              { itype = FRVBF_INSN_CSTDU; goto extract_sfmt_cstdu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1628,10 +3101,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CSTBFU; goto extract_sfmt_cstbfu;
-          case 1 : itype = FRVBF_INSN_CSTHFU; goto extract_sfmt_cstbfu;
-          case 2 : itype = FRVBF_INSN_CSTFU; goto extract_sfmt_cstbfu;
-          case 3 : itype = FRVBF_INSN_CSTDFU; goto extract_sfmt_cstdfu;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1a00000)
+              { itype = FRVBF_INSN_CSTBFU; goto extract_sfmt_cstbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1a00040)
+              { itype = FRVBF_INSN_CSTHFU; goto extract_sfmt_cstbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1a00080)
+              { itype = FRVBF_INSN_CSTFU; goto extract_sfmt_cstbfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x1a000c0)
+              { itype = FRVBF_INSN_CSTDFU; goto extract_sfmt_cstdfu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1640,10 +3125,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMOVGF; goto extract_sfmt_cmovgf;
-          case 1 : itype = FRVBF_INSN_CMOVGFD; goto extract_sfmt_cmovgfd;
-          case 2 : itype = FRVBF_INSN_CMOVFG; goto extract_sfmt_cmovfg;
-          case 3 : itype = FRVBF_INSN_CMOVFGD; goto extract_sfmt_cmovfgd;
+          case 0 :
+            if ((entire_insn & 0x1fff0c0) == 0x1a40000)
+              { itype = FRVBF_INSN_CMOVGF; goto extract_sfmt_cmovgf; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fff0c0) == 0x1a40040)
+              { itype = FRVBF_INSN_CMOVGFD; goto extract_sfmt_cmovgfd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fff0c0) == 0x1a40080)
+              { itype = FRVBF_INSN_CMOVFG; goto extract_sfmt_cmovfg; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fff0c0) == 0x1a400c0)
+              { itype = FRVBF_INSN_CMOVFGD; goto extract_sfmt_cmovfgd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1658,43 +3155,145 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               switch (val)
               {
               case 0 : /* fall through */
-              case 2 : itype = FRVBF_INSN_CCKNO; goto extract_sfmt_cckra;
-              case 1 : itype = FRVBF_INSN_CJMPL; goto extract_sfmt_cjmpl;
-              case 3 : itype = FRVBF_INSN_CCALLL; goto extract_sfmt_cjmpl;
+              case 2 :
+                if ((entire_insn & 0x79fff0ff) == 0x1a80000)
+                  { itype = FRVBF_INSN_CCKNO; goto extract_sfmt_cckra; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x7ffc00c0) == 0x1a80080)
+                  { itype = FRVBF_INSN_CJMPL; goto extract_sfmt_cjmpl; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x7ffc00c0) == 0x3a80080)
+                  { itype = FRVBF_INSN_CCALLL; goto extract_sfmt_cjmpl; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 1 : itype = FRVBF_INSN_CFCKNO; goto extract_sfmt_cfckra;
-          case 2 : itype = FRVBF_INSN_CCKC; goto extract_sfmt_cckeq;
-          case 3 : itype = FRVBF_INSN_CFCKU; goto extract_sfmt_cfckne;
-          case 4 : itype = FRVBF_INSN_CCKV; goto extract_sfmt_cckeq;
-          case 5 : itype = FRVBF_INSN_CFCKGT; goto extract_sfmt_cfckne;
-          case 6 : itype = FRVBF_INSN_CCKLT; goto extract_sfmt_cckeq;
-          case 7 : itype = FRVBF_INSN_CFCKUG; goto extract_sfmt_cfckne;
-          case 8 : itype = FRVBF_INSN_CCKEQ; goto extract_sfmt_cckeq;
-          case 9 : itype = FRVBF_INSN_CFCKLT; goto extract_sfmt_cfckne;
-          case 10 : itype = FRVBF_INSN_CCKLS; goto extract_sfmt_cckeq;
-          case 11 : itype = FRVBF_INSN_CFCKUL; goto extract_sfmt_cfckne;
-          case 12 : itype = FRVBF_INSN_CCKN; goto extract_sfmt_cckeq;
-          case 13 : itype = FRVBF_INSN_CFCKLG; goto extract_sfmt_cfckne;
-          case 14 : itype = FRVBF_INSN_CCKLE; goto extract_sfmt_cckeq;
-          case 15 : itype = FRVBF_INSN_CFCKNE; goto extract_sfmt_cfckne;
-          case 16 : itype = FRVBF_INSN_CCKRA; goto extract_sfmt_cckra;
-          case 17 : itype = FRVBF_INSN_CFCKEQ; goto extract_sfmt_cfckne;
-          case 18 : itype = FRVBF_INSN_CCKNC; goto extract_sfmt_cckeq;
-          case 19 : itype = FRVBF_INSN_CFCKUE; goto extract_sfmt_cfckne;
-          case 20 : itype = FRVBF_INSN_CCKNV; goto extract_sfmt_cckeq;
-          case 21 : itype = FRVBF_INSN_CFCKGE; goto extract_sfmt_cfckne;
-          case 22 : itype = FRVBF_INSN_CCKGE; goto extract_sfmt_cckeq;
-          case 23 : itype = FRVBF_INSN_CFCKUGE; goto extract_sfmt_cfckne;
-          case 24 : itype = FRVBF_INSN_CCKNE; goto extract_sfmt_cckeq;
-          case 25 : itype = FRVBF_INSN_CFCKLE; goto extract_sfmt_cfckne;
-          case 26 : itype = FRVBF_INSN_CCKHI; goto extract_sfmt_cckeq;
-          case 27 : itype = FRVBF_INSN_CFCKULE; goto extract_sfmt_cfckne;
-          case 28 : itype = FRVBF_INSN_CCKP; goto extract_sfmt_cckeq;
-          case 29 : itype = FRVBF_INSN_CFCKO; goto extract_sfmt_cfckne;
-          case 30 : itype = FRVBF_INSN_CCKGT; goto extract_sfmt_cckeq;
-          case 31 : itype = FRVBF_INSN_CFCKRA; goto extract_sfmt_cfckra;
+          case 1 :
+            if ((entire_insn & 0x79fff0ff) == 0x1a80040)
+              { itype = FRVBF_INSN_CFCKNO; goto extract_sfmt_cfckra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x79fff0fc) == 0x9a80000)
+              { itype = FRVBF_INSN_CCKC; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x79fff0fc) == 0x9a80040)
+              { itype = FRVBF_INSN_CFCKU; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x79fff0fc) == 0x11a80000)
+              { itype = FRVBF_INSN_CCKV; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x79fff0fc) == 0x11a80040)
+              { itype = FRVBF_INSN_CFCKGT; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x79fff0fc) == 0x19a80000)
+              { itype = FRVBF_INSN_CCKLT; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x79fff0fc) == 0x19a80040)
+              { itype = FRVBF_INSN_CFCKUG; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x79fff0fc) == 0x21a80000)
+              { itype = FRVBF_INSN_CCKEQ; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x79fff0fc) == 0x21a80040)
+              { itype = FRVBF_INSN_CFCKLT; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fff0fc) == 0x29a80000)
+              { itype = FRVBF_INSN_CCKLS; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x79fff0fc) == 0x29a80040)
+              { itype = FRVBF_INSN_CFCKUL; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x79fff0fc) == 0x31a80000)
+              { itype = FRVBF_INSN_CCKN; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x79fff0fc) == 0x31a80040)
+              { itype = FRVBF_INSN_CFCKLG; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fff0fc) == 0x39a80000)
+              { itype = FRVBF_INSN_CCKLE; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x79fff0fc) == 0x39a80040)
+              { itype = FRVBF_INSN_CFCKNE; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 16 :
+            if ((entire_insn & 0x79fff0ff) == 0x41a80000)
+              { itype = FRVBF_INSN_CCKRA; goto extract_sfmt_cckra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 17 :
+            if ((entire_insn & 0x79fff0fc) == 0x41a80040)
+              { itype = FRVBF_INSN_CFCKEQ; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 18 :
+            if ((entire_insn & 0x79fff0fc) == 0x49a80000)
+              { itype = FRVBF_INSN_CCKNC; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 19 :
+            if ((entire_insn & 0x79fff0fc) == 0x49a80040)
+              { itype = FRVBF_INSN_CFCKUE; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 20 :
+            if ((entire_insn & 0x79fff0fc) == 0x51a80000)
+              { itype = FRVBF_INSN_CCKNV; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 21 :
+            if ((entire_insn & 0x79fff0fc) == 0x51a80040)
+              { itype = FRVBF_INSN_CFCKGE; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 22 :
+            if ((entire_insn & 0x79fff0fc) == 0x59a80000)
+              { itype = FRVBF_INSN_CCKGE; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 23 :
+            if ((entire_insn & 0x79fff0fc) == 0x59a80040)
+              { itype = FRVBF_INSN_CFCKUGE; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 24 :
+            if ((entire_insn & 0x79fff0fc) == 0x61a80000)
+              { itype = FRVBF_INSN_CCKNE; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 25 :
+            if ((entire_insn & 0x79fff0fc) == 0x61a80040)
+              { itype = FRVBF_INSN_CFCKLE; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 26 :
+            if ((entire_insn & 0x79fff0fc) == 0x69a80000)
+              { itype = FRVBF_INSN_CCKHI; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 27 :
+            if ((entire_insn & 0x79fff0fc) == 0x69a80040)
+              { itype = FRVBF_INSN_CFCKULE; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 28 :
+            if ((entire_insn & 0x79fff0fc) == 0x71a80000)
+              { itype = FRVBF_INSN_CCKP; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 29 :
+            if ((entire_insn & 0x79fff0fc) == 0x71a80040)
+              { itype = FRVBF_INSN_CFCKO; goto extract_sfmt_cfckne; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 30 :
+            if ((entire_insn & 0x79fff0fc) == 0x79a80000)
+              { itype = FRVBF_INSN_CCKGT; goto extract_sfmt_cckeq; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 31 :
+            if ((entire_insn & 0x79fff0ff) == 0x79a80040)
+              { itype = FRVBF_INSN_CFCKRA; goto extract_sfmt_cfckra; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1703,8 +3302,14 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (1 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CFITOS; goto extract_sfmt_cfitos;
-          case 1 : itype = FRVBF_INSN_CFSTOI; goto extract_sfmt_cfstoi;
+          case 0 :
+            if ((entire_insn & 0x1fff0c0) == 0x1ac0000)
+              { itype = FRVBF_INSN_CFITOS; goto extract_sfmt_cfitos; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fff0c0) == 0x1ac0040)
+              { itype = FRVBF_INSN_CFSTOI; goto extract_sfmt_cfstoi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1713,9 +3318,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CFMOVS; goto extract_sfmt_cfmovs;
-          case 1 : itype = FRVBF_INSN_CFNEGS; goto extract_sfmt_cfmovs;
-          case 2 : itype = FRVBF_INSN_CFABSS; goto extract_sfmt_cfmovs;
+          case 0 :
+            if ((entire_insn & 0x1fff0c0) == 0x1b00000)
+              { itype = FRVBF_INSN_CFMOVS; goto extract_sfmt_cfmovs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fff0c0) == 0x1b00040)
+              { itype = FRVBF_INSN_CFNEGS; goto extract_sfmt_cfmovs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fff0c0) == 0x1b00080)
+              { itype = FRVBF_INSN_CFABSS; goto extract_sfmt_cfmovs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1724,9 +3338,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CFADDS; goto extract_sfmt_cfadds;
-          case 1 : itype = FRVBF_INSN_CFSUBS; goto extract_sfmt_cfadds;
-          case 2 : itype = FRVBF_INSN_CFCMPS; goto extract_sfmt_cfcmps;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1b40000)
+              { itype = FRVBF_INSN_CFADDS; goto extract_sfmt_cfadds; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1b40040)
+              { itype = FRVBF_INSN_CFSUBS; goto extract_sfmt_cfadds; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x79fc00c0) == 0x1b40080)
+              { itype = FRVBF_INSN_CFCMPS; goto extract_sfmt_cfcmps; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1735,9 +3358,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CFMULS; goto extract_sfmt_cfadds;
-          case 1 : itype = FRVBF_INSN_CFDIVS; goto extract_sfmt_cfadds;
-          case 2 : itype = FRVBF_INSN_CFSQRTS; goto extract_sfmt_cfmovs;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1b80000)
+              { itype = FRVBF_INSN_CFMULS; goto extract_sfmt_cfadds; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1b80040)
+              { itype = FRVBF_INSN_CFDIVS; goto extract_sfmt_cfadds; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fff0c0) == 0x1b80080)
+              { itype = FRVBF_INSN_CFSQRTS; goto extract_sfmt_cfmovs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1746,10 +3378,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CFMADDS; goto extract_sfmt_cfmadds;
-          case 1 : itype = FRVBF_INSN_CFMSUBS; goto extract_sfmt_cfmadds;
-          case 2 : itype = FRVBF_INSN_CFMAS; goto extract_sfmt_cfmas;
-          case 3 : itype = FRVBF_INSN_CFMSS; goto extract_sfmt_cfmas;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1bc0000)
+              { itype = FRVBF_INSN_CFMADDS; goto extract_sfmt_cfmadds; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1bc0040)
+              { itype = FRVBF_INSN_CFMSUBS; goto extract_sfmt_cfmadds; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1bc0080)
+              { itype = FRVBF_INSN_CFMAS; goto extract_sfmt_cfmas; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x1bc00c0)
+              { itype = FRVBF_INSN_CFMSS; goto extract_sfmt_cfmas; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1758,10 +3402,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMAND; goto extract_sfmt_cmand;
-          case 1 : itype = FRVBF_INSN_CMOR; goto extract_sfmt_cmand;
-          case 2 : itype = FRVBF_INSN_CMXOR; goto extract_sfmt_cmand;
-          case 3 : itype = FRVBF_INSN_CMNOT; goto extract_sfmt_cmnot;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c00000)
+              { itype = FRVBF_INSN_CMAND; goto extract_sfmt_cmand; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c00040)
+              { itype = FRVBF_INSN_CMOR; goto extract_sfmt_cmand; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c00080)
+              { itype = FRVBF_INSN_CMXOR; goto extract_sfmt_cmand; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fff0c0) == 0x1c000c0)
+              { itype = FRVBF_INSN_CMNOT; goto extract_sfmt_cmnot; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1770,10 +3426,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMADDHSS; goto extract_sfmt_cmaddhss;
-          case 1 : itype = FRVBF_INSN_CMADDHUS; goto extract_sfmt_cmaddhss;
-          case 2 : itype = FRVBF_INSN_CMSUBHSS; goto extract_sfmt_cmaddhss;
-          case 3 : itype = FRVBF_INSN_CMSUBHUS; goto extract_sfmt_cmaddhss;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c40000)
+              { itype = FRVBF_INSN_CMADDHSS; goto extract_sfmt_cmaddhss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c40040)
+              { itype = FRVBF_INSN_CMADDHUS; goto extract_sfmt_cmaddhss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c40080)
+              { itype = FRVBF_INSN_CMSUBHSS; goto extract_sfmt_cmaddhss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c400c0)
+              { itype = FRVBF_INSN_CMSUBHUS; goto extract_sfmt_cmaddhss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1782,10 +3450,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMMULHS; goto extract_sfmt_cmmulhs;
-          case 1 : itype = FRVBF_INSN_CMMULHU; goto extract_sfmt_cmmulhs;
-          case 2 : itype = FRVBF_INSN_CMMACHS; goto extract_sfmt_cmmachs;
-          case 3 : itype = FRVBF_INSN_CMMACHU; goto extract_sfmt_cmmachu;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c80000)
+              { itype = FRVBF_INSN_CMMULHS; goto extract_sfmt_cmmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c80040)
+              { itype = FRVBF_INSN_CMMULHU; goto extract_sfmt_cmmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c80080)
+              { itype = FRVBF_INSN_CMMACHS; goto extract_sfmt_cmmachs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x1c800c0)
+              { itype = FRVBF_INSN_CMMACHU; goto extract_sfmt_cmmachu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1794,10 +3474,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMQADDHSS; goto extract_sfmt_cmqaddhss;
-          case 1 : itype = FRVBF_INSN_CMQADDHUS; goto extract_sfmt_cmqaddhss;
-          case 2 : itype = FRVBF_INSN_CMQSUBHSS; goto extract_sfmt_cmqaddhss;
-          case 3 : itype = FRVBF_INSN_CMQSUBHUS; goto extract_sfmt_cmqaddhss;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1cc0000)
+              { itype = FRVBF_INSN_CMQADDHSS; goto extract_sfmt_cmqaddhss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1cc0040)
+              { itype = FRVBF_INSN_CMQADDHUS; goto extract_sfmt_cmqaddhss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1cc0080)
+              { itype = FRVBF_INSN_CMQSUBHSS; goto extract_sfmt_cmqaddhss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x1cc00c0)
+              { itype = FRVBF_INSN_CMQSUBHUS; goto extract_sfmt_cmqaddhss; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1806,10 +3498,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMQMULHS; goto extract_sfmt_cmqmulhs;
-          case 1 : itype = FRVBF_INSN_CMQMULHU; goto extract_sfmt_cmqmulhs;
-          case 2 : itype = FRVBF_INSN_CMQMACHS; goto extract_sfmt_cmqmachs;
-          case 3 : itype = FRVBF_INSN_CMQMACHU; goto extract_sfmt_cmqmachu;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d00000)
+              { itype = FRVBF_INSN_CMQMULHS; goto extract_sfmt_cmqmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d00040)
+              { itype = FRVBF_INSN_CMQMULHU; goto extract_sfmt_cmqmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d00080)
+              { itype = FRVBF_INSN_CMQMACHS; goto extract_sfmt_cmqmachs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d000c0)
+              { itype = FRVBF_INSN_CMQMACHU; goto extract_sfmt_cmqmachu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1818,10 +3522,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMCPXRS; goto extract_sfmt_cmcpxrs;
-          case 1 : itype = FRVBF_INSN_CMCPXRU; goto extract_sfmt_cmcpxrs;
-          case 2 : itype = FRVBF_INSN_CMCPXIS; goto extract_sfmt_cmcpxrs;
-          case 3 : itype = FRVBF_INSN_CMCPXIU; goto extract_sfmt_cmcpxrs;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d40000)
+              { itype = FRVBF_INSN_CMCPXRS; goto extract_sfmt_cmcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d40040)
+              { itype = FRVBF_INSN_CMCPXRU; goto extract_sfmt_cmcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d40080)
+              { itype = FRVBF_INSN_CMCPXIS; goto extract_sfmt_cmcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d400c0)
+              { itype = FRVBF_INSN_CMCPXIU; goto extract_sfmt_cmcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1830,8 +3546,14 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (1 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMEXPDHW; goto extract_sfmt_cmexpdhw;
-          case 1 : itype = FRVBF_INSN_CMEXPDHD; goto extract_sfmt_cmexpdhd;
+          case 0 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d80080)
+              { itype = FRVBF_INSN_CMEXPDHW; goto extract_sfmt_cmexpdhw; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc00c0) == 0x1d800c0)
+              { itype = FRVBF_INSN_CMEXPDHD; goto extract_sfmt_cmexpdhd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1840,9 +3562,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (3 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_CMBTOH; goto extract_sfmt_cmbtoh;
-          case 1 : itype = FRVBF_INSN_CMHTOB; goto extract_sfmt_cmhtob;
-          case 2 : itype = FRVBF_INSN_CMBTOHE; goto extract_sfmt_cmbtohe;
+          case 0 :
+            if ((entire_insn & 0x1fff0c0) == 0x1dc0000)
+              { itype = FRVBF_INSN_CMBTOH; goto extract_sfmt_cmbtoh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fff0c0) == 0x1dc0040)
+              { itype = FRVBF_INSN_CMHTOB; goto extract_sfmt_cmhtob; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fff0c0) == 0x1dc0080)
+              { itype = FRVBF_INSN_CMBTOHE; goto extract_sfmt_cmbtohe; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1851,31 +3582,106 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (63 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_MQXMACHS; goto extract_sfmt_mqmachs;
-          case 1 : itype = FRVBF_INSN_MQXMACXHS; goto extract_sfmt_mqmachs;
-          case 2 : itype = FRVBF_INSN_MQMACXHS; goto extract_sfmt_mqmachs;
-          case 4 : itype = FRVBF_INSN_MADDACCS; goto extract_sfmt_maddaccs;
-          case 5 : itype = FRVBF_INSN_MSUBACCS; goto extract_sfmt_maddaccs;
-          case 6 : itype = FRVBF_INSN_MDADDACCS; goto extract_sfmt_mdaddaccs;
-          case 7 : itype = FRVBF_INSN_MDSUBACCS; goto extract_sfmt_mdaddaccs;
-          case 8 : itype = FRVBF_INSN_MASACCS; goto extract_sfmt_masaccs;
-          case 9 : itype = FRVBF_INSN_MDASACCS; goto extract_sfmt_mdasaccs;
-          case 10 : itype = FRVBF_INSN_MABSHS; goto extract_sfmt_mabshs;
-          case 11 : itype = FRVBF_INSN_MDROTLI; goto extract_sfmt_mdrotli;
-          case 12 : itype = FRVBF_INSN_MCPLHI; goto extract_sfmt_mcplhi;
-          case 13 : itype = FRVBF_INSN_MCPLI; goto extract_sfmt_mcpli;
-          case 14 : itype = FRVBF_INSN_MDCUTSSI; goto extract_sfmt_mdcutssi;
-          case 15 : itype = FRVBF_INSN_MQSATHS; goto extract_sfmt_mqsaths;
-          case 16 : itype = FRVBF_INSN_MQLCLRHS; goto extract_sfmt_mqsaths;
-          case 17 : itype = FRVBF_INSN_MQSLLHI; goto extract_sfmt_mqsllhi;
-          case 19 : itype = FRVBF_INSN_MQSRAHI; goto extract_sfmt_mqsllhi;
-          case 20 : itype = FRVBF_INSN_MQLMTHS; goto extract_sfmt_mqsaths;
-          case 32 : itype = FRVBF_INSN_MHSETLOS; goto extract_sfmt_mhsetlos;
-          case 33 : itype = FRVBF_INSN_MHSETLOH; goto extract_sfmt_mhsetloh;
-          case 34 : itype = FRVBF_INSN_MHSETHIS; goto extract_sfmt_mhsethis;
-          case 35 : itype = FRVBF_INSN_MHSETHIH; goto extract_sfmt_mhsethih;
-          case 36 : itype = FRVBF_INSN_MHDSETS; goto extract_sfmt_mhdsets;
-          case 37 : itype = FRVBF_INSN_MHDSETH; goto extract_sfmt_mhdseth;
+          case 0 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00000)
+              { itype = FRVBF_INSN_MQXMACHS; goto extract_sfmt_mqmachs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00040)
+              { itype = FRVBF_INSN_MQXMACXHS; goto extract_sfmt_mqmachs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00080)
+              { itype = FRVBF_INSN_MQMACXHS; goto extract_sfmt_mqmachs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1fc0fff) == 0x1e00100)
+              { itype = FRVBF_INSN_MADDACCS; goto extract_sfmt_maddaccs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x1fc0fff) == 0x1e00140)
+              { itype = FRVBF_INSN_MSUBACCS; goto extract_sfmt_maddaccs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x1fc0fff) == 0x1e00180)
+              { itype = FRVBF_INSN_MDADDACCS; goto extract_sfmt_mdaddaccs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x1fc0fff) == 0x1e001c0)
+              { itype = FRVBF_INSN_MDSUBACCS; goto extract_sfmt_mdaddaccs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x1fc0fff) == 0x1e00200)
+              { itype = FRVBF_INSN_MASACCS; goto extract_sfmt_masaccs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x1fc0fff) == 0x1e00240)
+              { itype = FRVBF_INSN_MDASACCS; goto extract_sfmt_mdasaccs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x1ffffc0) == 0x1e00280)
+              { itype = FRVBF_INSN_MABSHS; goto extract_sfmt_mabshs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e002c0)
+              { itype = FRVBF_INSN_MDROTLI; goto extract_sfmt_mdrotli; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00300)
+              { itype = FRVBF_INSN_MCPLHI; goto extract_sfmt_mcplhi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00340)
+              { itype = FRVBF_INSN_MCPLI; goto extract_sfmt_mcpli; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00380)
+              { itype = FRVBF_INSN_MDCUTSSI; goto extract_sfmt_mdcutssi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e003c0)
+              { itype = FRVBF_INSN_MQSATHS; goto extract_sfmt_mqsaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 16 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00400)
+              { itype = FRVBF_INSN_MQLCLRHS; goto extract_sfmt_mqsaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 17 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00440)
+              { itype = FRVBF_INSN_MQSLLHI; goto extract_sfmt_mqsllhi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 19 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e004c0)
+              { itype = FRVBF_INSN_MQSRAHI; goto extract_sfmt_mqsllhi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 20 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00500)
+              { itype = FRVBF_INSN_MQLMTHS; goto extract_sfmt_mqsaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 32 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00800)
+              { itype = FRVBF_INSN_MHSETLOS; goto extract_sfmt_mhsetlos; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 33 :
+            if ((entire_insn & 0x1ffffe0) == 0x1e00840)
+              { itype = FRVBF_INSN_MHSETLOH; goto extract_sfmt_mhsetloh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 34 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00880)
+              { itype = FRVBF_INSN_MHSETHIS; goto extract_sfmt_mhsethis; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 35 :
+            if ((entire_insn & 0x1ffffe0) == 0x1e008c0)
+              { itype = FRVBF_INSN_MHSETHIH; goto extract_sfmt_mhsethih; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 36 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e00900)
+              { itype = FRVBF_INSN_MHDSETS; goto extract_sfmt_mhdsets; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 37 :
+            if ((entire_insn & 0x1ffffe0) == 0x1e00940)
+              { itype = FRVBF_INSN_MHDSETH; goto extract_sfmt_mhdseth; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1889,10 +3695,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FITOS; goto extract_sfmt_fitos;
-              case 1 : itype = FRVBF_INSN_FMULS; goto extract_sfmt_fadds;
-              case 2 : itype = FRVBF_INSN_NFITOS; goto extract_sfmt_nfitos;
-              case 3 : itype = FRVBF_INSN_NFMULS; goto extract_sfmt_nfadds;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40000)
+                  { itype = FRVBF_INSN_FITOS; goto extract_sfmt_fitos; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40200)
+                  { itype = FRVBF_INSN_FMULS; goto extract_sfmt_fadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40800)
+                  { itype = FRVBF_INSN_NFITOS; goto extract_sfmt_nfitos; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40a00)
+                  { itype = FRVBF_INSN_NFMULS; goto extract_sfmt_nfadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1901,10 +3719,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FSTOI; goto extract_sfmt_fstoi;
-              case 1 : itype = FRVBF_INSN_FDIVS; goto extract_sfmt_fadds;
-              case 2 : itype = FRVBF_INSN_NFSTOI; goto extract_sfmt_nfstoi;
-              case 3 : itype = FRVBF_INSN_NFDIVS; goto extract_sfmt_nfadds;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40040)
+                  { itype = FRVBF_INSN_FSTOI; goto extract_sfmt_fstoi; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40240)
+                  { itype = FRVBF_INSN_FDIVS; goto extract_sfmt_fadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40840)
+                  { itype = FRVBF_INSN_NFSTOI; goto extract_sfmt_nfstoi; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40a40)
+                  { itype = FRVBF_INSN_NFDIVS; goto extract_sfmt_nfadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1913,8 +3743,14 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FMOVS; goto extract_sfmt_fmovs;
-              case 1 : itype = FRVBF_INSN_FCMPS; goto extract_sfmt_fcmps;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40080)
+                  { itype = FRVBF_INSN_FMOVS; goto extract_sfmt_fmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x79fc0fc0) == 0x1e40280)
+                  { itype = FRVBF_INSN_FCMPS; goto extract_sfmt_fcmps; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1923,9 +3759,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FNEGS; goto extract_sfmt_fmovs;
-              case 1 : itype = FRVBF_INSN_FMADDS; goto extract_sfmt_fmadds;
-              case 3 : itype = FRVBF_INSN_NFMADDS; goto extract_sfmt_nfmadds;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e400c0)
+                  { itype = FRVBF_INSN_FNEGS; goto extract_sfmt_fmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e402c0)
+                  { itype = FRVBF_INSN_FMADDS; goto extract_sfmt_fmadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40ac0)
+                  { itype = FRVBF_INSN_NFMADDS; goto extract_sfmt_nfmadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1934,9 +3779,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FABSS; goto extract_sfmt_fmovs;
-              case 1 : itype = FRVBF_INSN_FMSUBS; goto extract_sfmt_fmadds;
-              case 3 : itype = FRVBF_INSN_NFMSUBS; goto extract_sfmt_nfmadds;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40100)
+                  { itype = FRVBF_INSN_FABSS; goto extract_sfmt_fmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40300)
+                  { itype = FRVBF_INSN_FMSUBS; goto extract_sfmt_fmadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40b00)
+                  { itype = FRVBF_INSN_NFMSUBS; goto extract_sfmt_nfmadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1945,9 +3799,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FSQRTS; goto extract_sfmt_fmovs;
-              case 1 : itype = FRVBF_INSN_FNOP; goto extract_sfmt_rei;
-              case 2 : itype = FRVBF_INSN_NFSQRTS; goto extract_sfmt_nfsqrts;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40140)
+                  { itype = FRVBF_INSN_FSQRTS; goto extract_sfmt_fmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x7fffffff) == 0x1e40340)
+                  { itype = FRVBF_INSN_FNOP; goto extract_sfmt_rei; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40940)
+                  { itype = FRVBF_INSN_NFSQRTS; goto extract_sfmt_nfsqrts; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1956,10 +3819,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FADDS; goto extract_sfmt_fadds;
-              case 1 : itype = FRVBF_INSN_FMAS; goto extract_sfmt_fmas;
-              case 2 : itype = FRVBF_INSN_NFADDS; goto extract_sfmt_nfadds;
-              case 3 : itype = FRVBF_INSN_NFMAS; goto extract_sfmt_fmas;
+              case 0 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40180)
+                  { itype = FRVBF_INSN_FADDS; goto extract_sfmt_fadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40380)
+                  { itype = FRVBF_INSN_FMAS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40980)
+                  { itype = FRVBF_INSN_NFADDS; goto extract_sfmt_nfadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40b80)
+                  { itype = FRVBF_INSN_NFMAS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1968,10 +3843,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FSUBS; goto extract_sfmt_fadds;
-              case 1 : itype = FRVBF_INSN_FMSS; goto extract_sfmt_fmas;
-              case 2 : itype = FRVBF_INSN_NFSUBS; goto extract_sfmt_nfadds;
-              case 3 : itype = FRVBF_INSN_NFMSS; goto extract_sfmt_fmas;
+              case 0 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e401c0)
+                  { itype = FRVBF_INSN_FSUBS; goto extract_sfmt_fadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e403c0)
+                  { itype = FRVBF_INSN_FMSS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e409c0)
+                  { itype = FRVBF_INSN_NFSUBS; goto extract_sfmt_nfadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40bc0)
+                  { itype = FRVBF_INSN_NFMSS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1980,10 +3867,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FDITOS; goto extract_sfmt_fditos;
-              case 1 : itype = FRVBF_INSN_FDMULS; goto extract_sfmt_fmas;
-              case 2 : itype = FRVBF_INSN_NFDITOS; goto extract_sfmt_fditos;
-              case 3 : itype = FRVBF_INSN_NFDMULS; goto extract_sfmt_fmas;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40400)
+                  { itype = FRVBF_INSN_FDITOS; goto extract_sfmt_fditos; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40600)
+                  { itype = FRVBF_INSN_FDMULS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40c00)
+                  { itype = FRVBF_INSN_NFDITOS; goto extract_sfmt_fditos; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40e00)
+                  { itype = FRVBF_INSN_NFDMULS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -1992,10 +3891,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FDSTOI; goto extract_sfmt_fdstoi;
-              case 1 : itype = FRVBF_INSN_FDDIVS; goto extract_sfmt_fmas;
-              case 2 : itype = FRVBF_INSN_NFDSTOI; goto extract_sfmt_fdstoi;
-              case 3 : itype = FRVBF_INSN_NFDDIVS; goto extract_sfmt_fmas;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40440)
+                  { itype = FRVBF_INSN_FDSTOI; goto extract_sfmt_fdstoi; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40640)
+                  { itype = FRVBF_INSN_FDDIVS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40c40)
+                  { itype = FRVBF_INSN_NFDSTOI; goto extract_sfmt_fdstoi; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40e40)
+                  { itype = FRVBF_INSN_NFDDIVS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -2004,9 +3915,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FDMOVS; goto extract_sfmt_fdmovs;
-              case 1 : itype = FRVBF_INSN_FDCMPS; goto extract_sfmt_fdcmps;
-              case 3 : itype = FRVBF_INSN_NFDCMPS; goto extract_sfmt_nfdcmps;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40480)
+                  { itype = FRVBF_INSN_FDMOVS; goto extract_sfmt_fdmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x79fc0fc0) == 0x1e40680)
+                  { itype = FRVBF_INSN_FDCMPS; goto extract_sfmt_fdcmps; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x79fc0fc0) == 0x1e40e80)
+                  { itype = FRVBF_INSN_NFDCMPS; goto extract_sfmt_nfdcmps; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -2015,9 +3935,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FDNEGS; goto extract_sfmt_fdmovs;
-              case 1 : itype = FRVBF_INSN_FDMADDS; goto extract_sfmt_fdmadds;
-              case 3 : itype = FRVBF_INSN_NFDMADDS; goto extract_sfmt_fdmadds;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e404c0)
+                  { itype = FRVBF_INSN_FDNEGS; goto extract_sfmt_fdmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e406c0)
+                  { itype = FRVBF_INSN_FDMADDS; goto extract_sfmt_fdmadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40ec0)
+                  { itype = FRVBF_INSN_NFDMADDS; goto extract_sfmt_fdmadds; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -2026,9 +3955,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FDABSS; goto extract_sfmt_fdmovs;
-              case 1 : itype = FRVBF_INSN_FDMAS; goto extract_sfmt_fdmas;
-              case 3 : itype = FRVBF_INSN_NFDMAS; goto extract_sfmt_fdmas;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40500)
+                  { itype = FRVBF_INSN_FDABSS; goto extract_sfmt_fdmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40700)
+                  { itype = FRVBF_INSN_FDMAS; goto extract_sfmt_fdmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40f00)
+                  { itype = FRVBF_INSN_NFDMAS; goto extract_sfmt_fdmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -2037,10 +3975,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FDSQRTS; goto extract_sfmt_fdmovs;
-              case 1 : itype = FRVBF_INSN_FDMSS; goto extract_sfmt_fdmas;
-              case 2 : itype = FRVBF_INSN_NFDSQRTS; goto extract_sfmt_fdmovs;
-              case 3 : itype = FRVBF_INSN_NFDMSS; goto extract_sfmt_fdmas;
+              case 0 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40540)
+                  { itype = FRVBF_INSN_FDSQRTS; goto extract_sfmt_fdmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40740)
+                  { itype = FRVBF_INSN_FDMSS; goto extract_sfmt_fdmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1ffffc0) == 0x1e40d40)
+                  { itype = FRVBF_INSN_NFDSQRTS; goto extract_sfmt_fdmovs; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40f40)
+                  { itype = FRVBF_INSN_NFDMSS; goto extract_sfmt_fdmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -2049,10 +3999,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FDADDS; goto extract_sfmt_fmas;
-              case 1 : itype = FRVBF_INSN_FDSADS; goto extract_sfmt_fmas;
-              case 2 : itype = FRVBF_INSN_NFDADDS; goto extract_sfmt_fmas;
-              case 3 : itype = FRVBF_INSN_NFDSADS; goto extract_sfmt_fmas;
+              case 0 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40580)
+                  { itype = FRVBF_INSN_FDADDS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40780)
+                  { itype = FRVBF_INSN_FDSADS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40d80)
+                  { itype = FRVBF_INSN_NFDADDS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40f80)
+                  { itype = FRVBF_INSN_NFDSADS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -2061,10 +4023,22 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
               unsigned int val = (((insn >> 10) & (1 << 1)) | ((insn >> 9) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_FDSUBS; goto extract_sfmt_fmas;
-              case 1 : itype = FRVBF_INSN_FDMULCS; goto extract_sfmt_fmas;
-              case 2 : itype = FRVBF_INSN_NFDSUBS; goto extract_sfmt_fmas;
-              case 3 : itype = FRVBF_INSN_NFDMULCS; goto extract_sfmt_fmas;
+              case 0 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e405c0)
+                  { itype = FRVBF_INSN_FDSUBS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 1 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e407c0)
+                  { itype = FRVBF_INSN_FDMULCS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 2 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40dc0)
+                  { itype = FRVBF_INSN_NFDSUBS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 3 :
+                if ((entire_insn & 0x1fc0fc0) == 0x1e40fc0)
+                  { itype = FRVBF_INSN_NFDMULCS; goto extract_sfmt_fmas; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
@@ -2076,21 +4050,66 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (15 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_FITOD; goto extract_sfmt_fitod;
-          case 1 : itype = FRVBF_INSN_FDTOI; goto extract_sfmt_fdtoi;
-          case 2 : itype = FRVBF_INSN_FMOVD; goto extract_sfmt_fmovd;
-          case 3 : itype = FRVBF_INSN_FNEGD; goto extract_sfmt_fmovd;
-          case 4 : itype = FRVBF_INSN_FABSD; goto extract_sfmt_fmovd;
-          case 5 : itype = FRVBF_INSN_FSQRTD; goto extract_sfmt_fmovd;
-          case 6 : itype = FRVBF_INSN_FADDD; goto extract_sfmt_faddd;
-          case 7 : itype = FRVBF_INSN_FSUBD; goto extract_sfmt_faddd;
-          case 8 : itype = FRVBF_INSN_FMULD; goto extract_sfmt_faddd;
-          case 9 : itype = FRVBF_INSN_FDIVD; goto extract_sfmt_faddd;
-          case 10 : itype = FRVBF_INSN_FCMPD; goto extract_sfmt_fcmpd;
-          case 11 : itype = FRVBF_INSN_FMADDD; goto extract_sfmt_fmaddd;
-          case 12 : itype = FRVBF_INSN_FMSUBD; goto extract_sfmt_fmaddd;
-          case 14 : itype = FRVBF_INSN_FMAD; goto extract_sfmt_fmas;
-          case 15 : itype = FRVBF_INSN_FMSD; goto extract_sfmt_fmas;
+          case 0 :
+            if ((entire_insn & 0x1ffffc0) == 0x1e80000)
+              { itype = FRVBF_INSN_FITOD; goto extract_sfmt_fitod; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1ffffc0) == 0x1e80040)
+              { itype = FRVBF_INSN_FDTOI; goto extract_sfmt_fdtoi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1ffffc0) == 0x1e80080)
+              { itype = FRVBF_INSN_FMOVD; goto extract_sfmt_fmovd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1ffffc0) == 0x1e800c0)
+              { itype = FRVBF_INSN_FNEGD; goto extract_sfmt_fmovd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1ffffc0) == 0x1e80100)
+              { itype = FRVBF_INSN_FABSD; goto extract_sfmt_fmovd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x1ffffc0) == 0x1e80140)
+              { itype = FRVBF_INSN_FSQRTD; goto extract_sfmt_fmovd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e80180)
+              { itype = FRVBF_INSN_FADDD; goto extract_sfmt_faddd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e801c0)
+              { itype = FRVBF_INSN_FSUBD; goto extract_sfmt_faddd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e80200)
+              { itype = FRVBF_INSN_FMULD; goto extract_sfmt_faddd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e80240)
+              { itype = FRVBF_INSN_FDIVD; goto extract_sfmt_faddd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x79fc0fc0) == 0x1e80280)
+              { itype = FRVBF_INSN_FCMPD; goto extract_sfmt_fcmpd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e802c0)
+              { itype = FRVBF_INSN_FMADDD; goto extract_sfmt_fmaddd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e80300)
+              { itype = FRVBF_INSN_FMSUBD; goto extract_sfmt_fmaddd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e80380)
+              { itype = FRVBF_INSN_FMAD; goto extract_sfmt_fmas; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1e803c0)
+              { itype = FRVBF_INSN_FMSD; goto extract_sfmt_fmas; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -2099,71 +4118,251 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 6) & (63 << 0)));
           switch (val)
           {
-          case 0 : itype = FRVBF_INSN_MAND; goto extract_sfmt_mand;
-          case 1 : itype = FRVBF_INSN_MOR; goto extract_sfmt_mand;
-          case 2 : itype = FRVBF_INSN_MXOR; goto extract_sfmt_mand;
-          case 3 : itype = FRVBF_INSN_MNOT; goto extract_sfmt_mnot;
-          case 4 : itype = FRVBF_INSN_MROTLI; goto extract_sfmt_mrotli;
-          case 5 : itype = FRVBF_INSN_MROTRI; goto extract_sfmt_mrotli;
-          case 6 : itype = FRVBF_INSN_MWCUT; goto extract_sfmt_mwcut;
-          case 7 : itype = FRVBF_INSN_MWCUTI; goto extract_sfmt_mwcuti;
-          case 8 : itype = FRVBF_INSN_MAVEH; goto extract_sfmt_mand;
-          case 9 : itype = FRVBF_INSN_MSLLHI; goto extract_sfmt_msllhi;
-          case 10 : itype = FRVBF_INSN_MSRLHI; goto extract_sfmt_msllhi;
-          case 11 : itype = FRVBF_INSN_MSRAHI; goto extract_sfmt_msllhi;
-          case 12 : itype = FRVBF_INSN_MSATHS; goto extract_sfmt_msaths;
-          case 13 : itype = FRVBF_INSN_MSATHU; goto extract_sfmt_msaths;
-          case 14 : itype = FRVBF_INSN_MCMPSH; goto extract_sfmt_mcmpsh;
-          case 15 : itype = FRVBF_INSN_MCMPUH; goto extract_sfmt_mcmpsh;
-          case 16 : itype = FRVBF_INSN_MADDHSS; goto extract_sfmt_msaths;
-          case 17 : itype = FRVBF_INSN_MADDHUS; goto extract_sfmt_msaths;
-          case 18 : itype = FRVBF_INSN_MSUBHSS; goto extract_sfmt_msaths;
-          case 19 : itype = FRVBF_INSN_MSUBHUS; goto extract_sfmt_msaths;
-          case 20 : itype = FRVBF_INSN_MMULHS; goto extract_sfmt_mmulhs;
-          case 21 : itype = FRVBF_INSN_MMULHU; goto extract_sfmt_mmulhs;
-          case 22 : itype = FRVBF_INSN_MMACHS; goto extract_sfmt_mmachs;
-          case 23 : itype = FRVBF_INSN_MMACHU; goto extract_sfmt_mmachu;
-          case 24 : itype = FRVBF_INSN_MQADDHSS; goto extract_sfmt_mqsaths;
-          case 25 : itype = FRVBF_INSN_MQADDHUS; goto extract_sfmt_mqsaths;
-          case 26 : itype = FRVBF_INSN_MQSUBHSS; goto extract_sfmt_mqsaths;
-          case 27 : itype = FRVBF_INSN_MQSUBHUS; goto extract_sfmt_mqsaths;
-          case 28 : itype = FRVBF_INSN_MQMULHS; goto extract_sfmt_mqmulhs;
-          case 29 : itype = FRVBF_INSN_MQMULHU; goto extract_sfmt_mqmulhs;
-          case 30 : itype = FRVBF_INSN_MQMACHS; goto extract_sfmt_mqmachs;
-          case 31 : itype = FRVBF_INSN_MQMACHU; goto extract_sfmt_mqmachu;
-          case 32 : itype = FRVBF_INSN_MCPXRS; goto extract_sfmt_mcpxrs;
-          case 33 : itype = FRVBF_INSN_MCPXRU; goto extract_sfmt_mcpxrs;
-          case 34 : itype = FRVBF_INSN_MCPXIS; goto extract_sfmt_mcpxrs;
-          case 35 : itype = FRVBF_INSN_MCPXIU; goto extract_sfmt_mcpxrs;
-          case 36 : itype = FRVBF_INSN_MQCPXRS; goto extract_sfmt_mqcpxrs;
-          case 37 : itype = FRVBF_INSN_MQCPXRU; goto extract_sfmt_mqcpxrs;
-          case 38 : itype = FRVBF_INSN_MQCPXIS; goto extract_sfmt_mqcpxrs;
-          case 39 : itype = FRVBF_INSN_MQCPXIU; goto extract_sfmt_mqcpxrs;
-          case 40 : itype = FRVBF_INSN_MMULXHS; goto extract_sfmt_mmulhs;
-          case 41 : itype = FRVBF_INSN_MMULXHU; goto extract_sfmt_mmulhs;
-          case 42 : itype = FRVBF_INSN_MQMULXHS; goto extract_sfmt_mqmulhs;
-          case 43 : itype = FRVBF_INSN_MQMULXHU; goto extract_sfmt_mqmulhs;
-          case 44 : itype = FRVBF_INSN_MCUT; goto extract_sfmt_mcut;
-          case 45 : itype = FRVBF_INSN_MCUTSS; goto extract_sfmt_mcut;
-          case 46 : itype = FRVBF_INSN_MCUTI; goto extract_sfmt_mcuti;
-          case 47 : itype = FRVBF_INSN_MCUTSSI; goto extract_sfmt_mcuti;
-          case 48 : itype = FRVBF_INSN_MMRDHS; goto extract_sfmt_mmachs;
-          case 49 : itype = FRVBF_INSN_MMRDHU; goto extract_sfmt_mmachu;
-          case 50 : itype = FRVBF_INSN_MEXPDHW; goto extract_sfmt_mexpdhw;
-          case 51 : itype = FRVBF_INSN_MEXPDHD; goto extract_sfmt_mexpdhd;
-          case 52 : itype = FRVBF_INSN_MPACKH; goto extract_sfmt_mpackh;
-          case 53 : itype = FRVBF_INSN_MUNPACKH; goto extract_sfmt_munpackh;
-          case 54 : itype = FRVBF_INSN_MDPACKH; goto extract_sfmt_mdpackh;
-          case 55 : itype = FRVBF_INSN_MDUNPACKH; goto extract_sfmt_mdunpackh;
-          case 56 : itype = FRVBF_INSN_MBTOH; goto extract_sfmt_mbtoh;
-          case 57 : itype = FRVBF_INSN_MHTOB; goto extract_sfmt_mhtob;
-          case 58 : itype = FRVBF_INSN_MBTOHE; goto extract_sfmt_mbtohe;
+          case 0 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0000)
+              { itype = FRVBF_INSN_MAND; goto extract_sfmt_mand; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 1 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0040)
+              { itype = FRVBF_INSN_MOR; goto extract_sfmt_mand; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 2 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0080)
+              { itype = FRVBF_INSN_MXOR; goto extract_sfmt_mand; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 3 :
+            if ((entire_insn & 0x1ffffc0) == 0x1ec00c0)
+              { itype = FRVBF_INSN_MNOT; goto extract_sfmt_mnot; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 4 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0100)
+              { itype = FRVBF_INSN_MROTLI; goto extract_sfmt_mrotli; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 5 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0140)
+              { itype = FRVBF_INSN_MROTRI; goto extract_sfmt_mrotli; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 6 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0180)
+              { itype = FRVBF_INSN_MWCUT; goto extract_sfmt_mwcut; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 7 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec01c0)
+              { itype = FRVBF_INSN_MWCUTI; goto extract_sfmt_mwcuti; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 8 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0200)
+              { itype = FRVBF_INSN_MAVEH; goto extract_sfmt_mand; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 9 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0240)
+              { itype = FRVBF_INSN_MSLLHI; goto extract_sfmt_msllhi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 10 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0280)
+              { itype = FRVBF_INSN_MSRLHI; goto extract_sfmt_msllhi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 11 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec02c0)
+              { itype = FRVBF_INSN_MSRAHI; goto extract_sfmt_msllhi; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 12 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0300)
+              { itype = FRVBF_INSN_MSATHS; goto extract_sfmt_msaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 13 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0340)
+              { itype = FRVBF_INSN_MSATHU; goto extract_sfmt_msaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 14 :
+            if ((entire_insn & 0x79fc0fc0) == 0x1ec0380)
+              { itype = FRVBF_INSN_MCMPSH; goto extract_sfmt_mcmpsh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 15 :
+            if ((entire_insn & 0x79fc0fc0) == 0x1ec03c0)
+              { itype = FRVBF_INSN_MCMPUH; goto extract_sfmt_mcmpsh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 16 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0400)
+              { itype = FRVBF_INSN_MADDHSS; goto extract_sfmt_msaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 17 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0440)
+              { itype = FRVBF_INSN_MADDHUS; goto extract_sfmt_msaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 18 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0480)
+              { itype = FRVBF_INSN_MSUBHSS; goto extract_sfmt_msaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 19 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec04c0)
+              { itype = FRVBF_INSN_MSUBHUS; goto extract_sfmt_msaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 20 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0500)
+              { itype = FRVBF_INSN_MMULHS; goto extract_sfmt_mmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 21 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0540)
+              { itype = FRVBF_INSN_MMULHU; goto extract_sfmt_mmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 22 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0580)
+              { itype = FRVBF_INSN_MMACHS; goto extract_sfmt_mmachs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 23 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec05c0)
+              { itype = FRVBF_INSN_MMACHU; goto extract_sfmt_mmachu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 24 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0600)
+              { itype = FRVBF_INSN_MQADDHSS; goto extract_sfmt_mqsaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 25 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0640)
+              { itype = FRVBF_INSN_MQADDHUS; goto extract_sfmt_mqsaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 26 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0680)
+              { itype = FRVBF_INSN_MQSUBHSS; goto extract_sfmt_mqsaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 27 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec06c0)
+              { itype = FRVBF_INSN_MQSUBHUS; goto extract_sfmt_mqsaths; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 28 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0700)
+              { itype = FRVBF_INSN_MQMULHS; goto extract_sfmt_mqmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 29 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0740)
+              { itype = FRVBF_INSN_MQMULHU; goto extract_sfmt_mqmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 30 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0780)
+              { itype = FRVBF_INSN_MQMACHS; goto extract_sfmt_mqmachs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 31 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec07c0)
+              { itype = FRVBF_INSN_MQMACHU; goto extract_sfmt_mqmachu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 32 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0800)
+              { itype = FRVBF_INSN_MCPXRS; goto extract_sfmt_mcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 33 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0840)
+              { itype = FRVBF_INSN_MCPXRU; goto extract_sfmt_mcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 34 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0880)
+              { itype = FRVBF_INSN_MCPXIS; goto extract_sfmt_mcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 35 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec08c0)
+              { itype = FRVBF_INSN_MCPXIU; goto extract_sfmt_mcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 36 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0900)
+              { itype = FRVBF_INSN_MQCPXRS; goto extract_sfmt_mqcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 37 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0940)
+              { itype = FRVBF_INSN_MQCPXRU; goto extract_sfmt_mqcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 38 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0980)
+              { itype = FRVBF_INSN_MQCPXIS; goto extract_sfmt_mqcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 39 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec09c0)
+              { itype = FRVBF_INSN_MQCPXIU; goto extract_sfmt_mqcpxrs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 40 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0a00)
+              { itype = FRVBF_INSN_MMULXHS; goto extract_sfmt_mmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 41 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0a40)
+              { itype = FRVBF_INSN_MMULXHU; goto extract_sfmt_mmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 42 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0a80)
+              { itype = FRVBF_INSN_MQMULXHS; goto extract_sfmt_mqmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 43 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0ac0)
+              { itype = FRVBF_INSN_MQMULXHU; goto extract_sfmt_mqmulhs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 44 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0b00)
+              { itype = FRVBF_INSN_MCUT; goto extract_sfmt_mcut; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 45 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0b40)
+              { itype = FRVBF_INSN_MCUTSS; goto extract_sfmt_mcut; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 46 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0b80)
+              { itype = FRVBF_INSN_MCUTI; goto extract_sfmt_mcuti; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 47 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0bc0)
+              { itype = FRVBF_INSN_MCUTSSI; goto extract_sfmt_mcuti; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 48 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0c00)
+              { itype = FRVBF_INSN_MMRDHS; goto extract_sfmt_mmachs; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 49 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0c40)
+              { itype = FRVBF_INSN_MMRDHU; goto extract_sfmt_mmachu; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 50 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0c80)
+              { itype = FRVBF_INSN_MEXPDHW; goto extract_sfmt_mexpdhw; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 51 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0cc0)
+              { itype = FRVBF_INSN_MEXPDHD; goto extract_sfmt_mexpdhd; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 52 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0d00)
+              { itype = FRVBF_INSN_MPACKH; goto extract_sfmt_mpackh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 53 :
+            if ((entire_insn & 0x1fc0fff) == 0x1ec0d40)
+              { itype = FRVBF_INSN_MUNPACKH; goto extract_sfmt_munpackh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 54 :
+            if ((entire_insn & 0x1fc0fc0) == 0x1ec0d80)
+              { itype = FRVBF_INSN_MDPACKH; goto extract_sfmt_mdpackh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 55 :
+            if ((entire_insn & 0x1fc0fff) == 0x1ec0dc0)
+              { itype = FRVBF_INSN_MDUNPACKH; goto extract_sfmt_mdunpackh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 56 :
+            if ((entire_insn & 0x1ffffc0) == 0x1ec0e00)
+              { itype = FRVBF_INSN_MBTOH; goto extract_sfmt_mbtoh; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 57 :
+            if ((entire_insn & 0x1ffffc0) == 0x1ec0e40)
+              { itype = FRVBF_INSN_MHTOB; goto extract_sfmt_mhtob; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 58 :
+            if ((entire_insn & 0x1ffffc0) == 0x1ec0e80)
+              { itype = FRVBF_INSN_MBTOHE; goto extract_sfmt_mbtohe; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 59 :
             {
               unsigned int val = (((insn >> 17) & (1 << 0)));
               switch (val)
               {
-              case 0 : itype = FRVBF_INSN_MCLRACC_0; goto extract_sfmt_mclracc_0;
+              case 0 :
+                if ((entire_insn & 0x1ffffff) == 0x1ec0ec0)
+                  { itype = FRVBF_INSN_MCLRACC_0; goto extract_sfmt_mclracc_0; }
+                itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               case 1 :
                 {
                   unsigned int val = (((insn >> 25) & (63 << 0)));
@@ -2231,25 +4430,55 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
                   case 59 : /* fall through */
                   case 60 : /* fall through */
                   case 61 : /* fall through */
-                  case 62 : itype = FRVBF_INSN_MCLRACC_1; goto extract_sfmt_mclracc_0;
-                  case 63 : itype = FRVBF_INSN_MNOP; goto extract_sfmt_rei;
+                  case 62 :
+                    if ((entire_insn & 0x1ffffff) == 0x1ee0ec0)
+                      { itype = FRVBF_INSN_MCLRACC_1; goto extract_sfmt_mclracc_0; }
+                    itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+                  case 63 :
+                    if ((entire_insn & 0x7fffffff) == 0x7fee0ec0)
+                      { itype = FRVBF_INSN_MNOP; goto extract_sfmt_rei; }
+                    itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
                   default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
                   }
                 }
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
-          case 60 : itype = FRVBF_INSN_MRDACC; goto extract_sfmt_mrdacc;
-          case 61 : itype = FRVBF_INSN_MWTACC; goto extract_sfmt_mwtacc;
-          case 62 : itype = FRVBF_INSN_MRDACCG; goto extract_sfmt_mrdaccg;
-          case 63 : itype = FRVBF_INSN_MWTACCG; goto extract_sfmt_mwtaccg;
+          case 60 :
+            if ((entire_insn & 0x1fc0fff) == 0x1ec0f00)
+              { itype = FRVBF_INSN_MRDACC; goto extract_sfmt_mrdacc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 61 :
+            if ((entire_insn & 0x1fc0fff) == 0x1ec0f40)
+              { itype = FRVBF_INSN_MWTACC; goto extract_sfmt_mwtacc; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 62 :
+            if ((entire_insn & 0x1fc0fff) == 0x1ec0f80)
+              { itype = FRVBF_INSN_MRDACCG; goto extract_sfmt_mrdaccg; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 63 :
+            if ((entire_insn & 0x1fc0fff) == 0x1ec0fc0)
+              { itype = FRVBF_INSN_MWTACCG; goto extract_sfmt_mwtaccg; }
+            itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
-      case 124 : itype = FRVBF_INSN_MCOP1; goto extract_sfmt_rei;
-      case 125 : itype = FRVBF_INSN_MCOP2; goto extract_sfmt_rei;
-      case 126 : itype = FRVBF_INSN_COP1; goto extract_sfmt_rei;
-      case 127 : itype = FRVBF_INSN_COP2; goto extract_sfmt_rei;
+      case 124 :
+        if ((entire_insn & 0x1fc0fc0) == 0x1f00000)
+          { itype = FRVBF_INSN_MCOP1; goto extract_sfmt_rei; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 125 :
+        if ((entire_insn & 0x1fc0fc0) == 0x1f40000)
+          { itype = FRVBF_INSN_MCOP2; goto extract_sfmt_rei; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 126 :
+        if ((entire_insn & 0x1fc0000) == 0x1f80000)
+          { itype = FRVBF_INSN_COP1; goto extract_sfmt_rei; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 127 :
+        if ((entire_insn & 0x1fc0000) == 0x1fc0000)
+          { itype = FRVBF_INSN_COP2; goto extract_sfmt_rei; }
+        itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
       }
     }

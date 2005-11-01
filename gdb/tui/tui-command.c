@@ -68,33 +68,36 @@ tui_dispatch_ctrl_char (unsigned int ch)
          ** Seems like a bug in the curses library?
        */
       term = (char *) getenv ("TERM");
-      for (i = 0; (term && term[i]); i++)
-	term[i] = toupper (term[i]);
-      if ((strcmp (term, "XTERM") == 0) && key_is_start_sequence (ch))
+      if (term)
 	{
-	  unsigned int page_ch = 0;
-	  unsigned int tmp_char;
-
-	  tmp_char = 0;
-	  while (!key_is_end_sequence (tmp_char))
+	  for (i = 0; term[i]; i++)
+	    term[i] = toupper (term[i]);
+	  if ((strcmp (term, "XTERM") == 0) && key_is_start_sequence (ch))
 	    {
-	      tmp_char = (int) wgetch (w);
-	      if (tmp_char == ERR)
+	      unsigned int page_ch = 0;
+	      unsigned int tmp_char;
+
+	      tmp_char = 0;
+	      while (!key_is_end_sequence (tmp_char))
 		{
-		  return ch;
+		  tmp_char = (int) wgetch (w);
+		  if (tmp_char == ERR)
+		    {
+		      return ch;
+		    }
+		  if (!tmp_char)
+		    break;
+		  if (tmp_char == 53)
+		    page_ch = KEY_PPAGE;
+		  else if (tmp_char == 54)
+		    page_ch = KEY_NPAGE;
+		  else
+		    {
+		      return 0;
+		    }
 		}
-	      if (!tmp_char)
-		break;
-	      if (tmp_char == 53)
-		page_ch = KEY_PPAGE;
-	      else if (tmp_char == 54)
-		page_ch = KEY_NPAGE;
-	      else
-		{
-		  return 0;
-		}
+	      ch_copy = page_ch;
 	    }
-	  ch_copy = page_ch;
 	}
 
       switch (ch_copy)

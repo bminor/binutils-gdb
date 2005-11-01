@@ -364,14 +364,15 @@ tui_show_frame_info (struct frame_info *fi)
 
 	  if (win_info == TUI_SRC_WIN)
 	    {
-	      union tui_line_or_address l;
-	      l.line_no = start_line;
+	      struct tui_line_or_address l;
+	      l.loa = LOA_LINE;
+	      l.u.line_no = start_line;
 	      if (!(source_already_displayed
 		    && tui_line_is_displayed (item->locator.line_no, win_info, TRUE)))
 		tui_update_source_window (win_info, sal.symtab, l, TRUE);
 	      else
 		{
-		  l.line_no = item->locator.line_no;
+		  l.u.line_no = item->locator.line_no;
 		  tui_set_is_exec_point_at (l, win_info);
 		}
 	    }
@@ -379,13 +380,14 @@ tui_show_frame_info (struct frame_info *fi)
 	    {
 	      if (win_info == TUI_DISASM_WIN)
 		{
-		  union tui_line_or_address a;
-		  a.addr = low;
+		  struct tui_line_or_address a;
+		  a.loa = LOA_ADDRESS;
+		  a.u.addr = low;
 		  if (!tui_addr_is_displayed (item->locator.addr, win_info, TRUE))
 		    tui_update_source_window (win_info, sal.symtab, a, TRUE);
 		  else
 		    {
-		      a.addr = item->locator.addr;
+		      a.u.addr = item->locator.addr;
 		      tui_set_is_exec_point_at (a, win_info);
 		    }
 		}

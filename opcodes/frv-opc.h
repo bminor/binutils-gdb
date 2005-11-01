@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define FRV_VLIW_SIZE 8 /* fr550 has largest vliw size of 8.  */
 #define PAD_VLIW_COMBO ,UNIT_NIL,UNIT_NIL,UNIT_NIL,UNIT_NIL
 
-typedef CGEN_ATTR_VALUE_TYPE VLIW_COMBO[FRV_VLIW_SIZE];
+typedef CGEN_ATTR_VALUE_ENUM_TYPE VLIW_COMBO[FRV_VLIW_SIZE];
 
 typedef struct
 {
@@ -47,15 +47,15 @@ typedef struct
   int                    constraint_violation;
   unsigned long          mach;
   unsigned long          elf_flags;
-  CGEN_ATTR_VALUE_TYPE * unit_mapping;
+  CGEN_ATTR_VALUE_ENUM_TYPE * unit_mapping;
   VLIW_COMBO *           current_vliw;
-  CGEN_ATTR_VALUE_TYPE   major[FRV_VLIW_SIZE];
+  CGEN_ATTR_VALUE_ENUM_TYPE   major[FRV_VLIW_SIZE];
   const CGEN_INSN *      insn[FRV_VLIW_SIZE];
 } FRV_VLIW;
 
-int frv_is_branch_major (CGEN_ATTR_VALUE_TYPE, unsigned long);
-int frv_is_float_major  (CGEN_ATTR_VALUE_TYPE, unsigned long);
-int frv_is_media_major  (CGEN_ATTR_VALUE_TYPE, unsigned long);
+int frv_is_branch_major (CGEN_ATTR_VALUE_ENUM_TYPE, unsigned long);
+int frv_is_float_major  (CGEN_ATTR_VALUE_ENUM_TYPE, unsigned long);
+int frv_is_media_major  (CGEN_ATTR_VALUE_ENUM_TYPE, unsigned long);
 int frv_is_branch_insn  (const CGEN_INSN *);
 int frv_is_float_insn   (const CGEN_INSN *);
 int frv_is_media_insn   (const CGEN_INSN *);

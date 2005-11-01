@@ -1,3 +1,240 @@
+2005-11-02  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/1775
+	* elf32-m68k.c (elf_m68k_finish_dynamic_symbol): Add required
+	parentheses.
+
+2005-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerated.
+
+	* dep-in.sed: Replace " ./" with " ".
+
+2005-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* hpux-core.c: Include <machine/reg.h> only if HPUX_CORE is
+	define.
+	* osf-core.c: Include <sys/core.h> only if OSF_CORE is defined.
+	* sco5-core.c: Include <sys/paccess.h> and <sys/region.h> only
+	if SCO5_CORE is defined.
+
+2005-10-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2005-10-28  Joel Brobecker  <brobecker@adacore.com>
+
+	From Eric Botcazou  <botcazou@adacore.com>
+	* coffcode.h (coff_compute_section_file_positions): Fix small
+	error in preprocessor directives.
+
+2005-10-28  Joel Brobecker  <brobecker@adacore.com>
+
+	Mostly from Eric Botcazou <botcazou@adacore.com>
+	* rs6000-core.c: ANSIfy all function definitions.
+	Add missing function prototypes.
+	(ptr_to_uint): New type.
+	(rs6000coff_core_p): Use it as intermediate step in casts.
+	(rs6000coff_core_file_matches_executable_p): Likewise.
+	* xcoff-target.h (rs6000coff_core_p): Fix prototype.
+	(rs6000coff_core_file_matches_executable_p): Likewise.
+
+2005-10-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/1472
+	* aoutx.h (NAME (aout, machine_type)): Handle
+	bfd_mach_sparc_v8plus, bfd_mach_sparc_v8plusa,
+	bfd_mach_sparc_v8plusb, bfd_mach_sparc_v9, bfd_mach_sparc_v9a
+	and bfd_mach_sparc_v9b.
+
+2005-10-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/1567
+	* elf32-cris.c (cris_elf_howto_table) <R_CRIS_32>: Set
+	complain_on_overflow field to complain_overflow_dont.
+
+2005-10-27  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 973
+	* cache.c (enum cache_flag): New.
+	(close_one): Save file mtime.
+	(bfd_cache_lookup): Add flag arg, adjust all users.
+	(bfd_cache_lookup_worker): Likewise.
+	(cache_btell): Use CACHE_NO_OPEN and return abfd->where if file
+	not open.
+	(cache_bflush): Similarly, and return success of file not open.
+	(cache_bseek): Use CACHE_NO_SEEK if SEEK_SET or SEEK_END.
+	(cache_bstat): Use CACHE_NO_SEEK_ERROR.
+
+	* bfdwin.c (bfd_get_file_window): Seek into file in place of
+	using bfd_cache_lookup.
+
+	* cache.c (BFD_CACHE_MAX_OPEN): Make private to this file.
+	(bfd_last_cache, bfd_cache_lookup, bfd_cache_lookup_worker): Likewise.
+	* libbfd-in.h (bfd_cache_lookup_worker, bfd_last_cache): Delete.
+	* libbfd.h: Regenerate.
+
+	* hppabsd-core.c (hppabsd_core_core_file_p): Use bfd_stat, not fstat.
+	* sco5-core.c (sco5_core_file_p): Likewise.
+	* trad-core.c (trad_unix_core_file_p): Likewise.
+
+	* cache.c: Reorganize file to avoid forward reference.
+
+2005-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* cache.c (bfd_cache_lookup_worker): Don't abort on failing to
+	reopen file.
+	(cache_btell, cache_bseek, cache_bflush, cache_bstat): Return -1 on
+	bfd_cache_lookup failure.
+	(cache_bread, cache_bwrite): Return 0 on the same.
+	* bfdwin.c (bfd_get_file_window): Likewise.
+	* hppabsd-core.c (hppabsd_core_core_file_p): Likewise.
+	* sco5-core.c (sco5_core_file_p): Likewise.
+	* trad-core.c (trad_unix_core_file_p): Likewise.
+
+2005-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* cache.c (bfd_cache_lookup_worker): Use bfd_error_handler
+	rather than bfd_perror.  Print file name.  Internationalise.
+
+2005-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* cache.c (bfd_open_file): Set bfd_error_system_call on failure
+	to open file.
+	(bfd_cache_lookup_worker): Remove check that file pos is in
+	unsigned long range.  Print system error before aborting.
+
+2005-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* Makefile.am: Add rules for coff-z80 and cpu-z80.
+	* Makefile.in: Regenerated.
+	* archures.c: Add bfd_arch_z80 and support for it.
+	* coffcode.h(coff_set_arch_mach_hook): Add case Z80MAGIC.
+	(coff_set_flags): Add case bfd_arch_z80.
+	* config.bfd: Add z80coff_vec.
+	* configure.in: Add z80coff_vec.
+	* reloc.c: Add BFD_RELOC_Z80_DISP8
+	* targets.c: Add z80coff_vec.
+	* coff-z80.c: New file
+	* cpu-z80.c: New file
+	* configure: Regenerated.
+	* libbfd.h: Regenerated.
+	* bfd-in2.h: Regenerated.
+
+2005-10-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/1540
+	* elf-bfd.h (elf_backend_copy_indirect_symbol): Replace pointer to
+	elf_backend_data with pointer to bfd_link_info.
+	(_bfd_elf_link_hash_copy_indirect): Likewise.
+	* elf.c (_bfd_elf_link_hash_copy_indirect): Likewise.  Handle
+	direct and indirect symbols both having dynamic link info.
+	* elf32-arm.c (elf32_arm_copy_indirect_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Likewise.
+	* elf32-i386.c (elf_i386_copy_indirect_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_copy_indirect_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Likewise.
+	* elf32-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elf32-sh.c (sh_elf_copy_indirect_symbol): Likewise.
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Likewise.
+	* elf64-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_copy_indirect_symbol): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_hash_copy_indirect): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_copy_indirect_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_copy_indirect_symbol): Likewise.
+	* elflink.c: Adjust all calls to bed->elf_backend_copy_indirect_symbol.
+	* elfxx-mips.h (_bfd_mips_elf_copy_indirect_symbol): Update prototype.
+	* elfxx-sparc.h (_bfd_sparc_elf_copy_indirect_symbol): Likewise.
+
+2005-10-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/SRC-POTFILES.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2005-10-24  Jie Zhang <jie.zhang@analog.com>
+
+	* elf32-bfin.c (bfd_bfin_elf32_create_embedded_relocs): Fix signedness
+	warning.
+
+2005-10-24  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfin_howto_table): Set src_mask to 0 for all relocs.
+	(bfin_imm16_reloc): Always add in the addend.  Don't fetch existing
+	contents from section.
+	(bfin_relocate_section): Rework so as to not call special_functions.
+	Handle the relocation stack here.  Treat pcrel24 relocs specially.
+
+2005-10-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_link_input_bfd): Don't use linker_mark and
+	SEC_EXCLUDE to test for sections dropped from output.  Instead,
+	use bfd_section_removed_from_list on normal sections.  Don't
+	attempt to handle symbols with unknown reserved section indices.
+	* linker.c (_bfd_generic_link_output_symbols): Don't use
+	linker_mark to test for symbols belonging to dropped sections.
+	Do allow absolute symbols.
+
+2005-10-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i370.c (i370_elf_fake_sections): Don't set SHF_EXCLUDE on
+	group sections.
+
+2005-10-24  Jan Beulich  <jbeulich@novell.com>
+
+	* cpu-ia64-opc.c (elf64_ia64_operands): Move memory operand out of
+	set of indirect operands.
+
+2005-10-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_fake_sections): Don't set SHF_EXCLUDE on
+	group sections.
+
+2005-10-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* coff-rs6000.c (rs6000coff_vec): Initialize
+	_bfd_init_private_section_data with
+	_bfd_generic_init_private_section_data.
+	(pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec): Likewise.
+	(aix5coff64_vec): Likewise.
+
+2005-10-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1487
+	* elf-bfd.h (_bfd_generic_init_private_section_data): New.
+	(_bfd_elf_init_private_section_data): New.
+
+	* elf.c (elf_fake_sections): Don't set SHF_GROUP for
+	relocatable link.
+	(bfd_elf_set_group_contents): Don't handle relocatable link
+	specially.
+	(assign_section_numbers): If it isn't called by assembler,
+	use the output section of elf_linked_to_section for
+	SHF_LINK_ORDER.
+	(_bfd_elf_init_private_section_data): New.
+	(_bfd_elf_copy_private_section_data): Call it.
+
+	* libbfd-in.h (_bfd_generic_init_private_section_data): New.
+
+	* libbfd.c (_bfd_generic_init_private_section_data): New.
+
+	* targets.c (BFD_JUMP_TABLE_COPY): Add
+	_bfd_generic_init_private_section_data.
+	(bfd_init_private_section_data): Likewise.
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+2005-10-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (dec_dynrel_count): Don't report errors for local
+	syms in gc'd sections.
+	(ppc64_elf_edit_opd): Don't adjust reloc counts when NO_OPD_RELOCS.
+	(elf_backend_action_discarded): Define.
+	(ppc64_elf_action_discarded): New function.
+
 2005-10-19  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (find_arm_elf_section_entry): New function.

@@ -379,7 +379,7 @@ i370_elf_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 			Elf_Internal_Shdr *shdr,
 			asection *asect)
 {
-  if ((asect->flags & SEC_EXCLUDE) != 0)
+  if ((asect->flags & (SEC_GROUP | SEC_EXCLUDE)) == SEC_EXCLUDE)
     shdr->sh_flags |= SHF_EXCLUDE;
 
   if ((asect->flags & SEC_SORT_ENTRIES) != 0)

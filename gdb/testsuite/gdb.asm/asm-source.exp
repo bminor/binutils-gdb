@@ -34,7 +34,7 @@ set bug_id 0
 set asm-arch ""
 set asm-note "empty"
 set asm-flags ""
-set link-flags "--entry _start"
+set link-flags "-e _start"
 set debug-flags ""
 
 switch -glob -- [istarget] {

@@ -8387,13 +8387,13 @@ _bfd_mips_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
    _bfd_elf_link_hash_copy_indirect copy the flags for us.  */
 
 void
-_bfd_mips_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
+_bfd_mips_elf_copy_indirect_symbol (struct bfd_link_info *info,
 				    struct elf_link_hash_entry *dir,
 				    struct elf_link_hash_entry *ind)
 {
   struct mips_elf_link_hash_entry *dirmips, *indmips;
 
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+  _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 
   if (ind->root.type != bfd_link_hash_indirect)
     return;
@@ -8408,8 +8408,6 @@ _bfd_mips_elf_copy_indirect_symbol (const struct elf_backend_data *bed,
 
   if (dirmips->tls_type == 0)
     dirmips->tls_type = indmips->tls_type;
-  else
-    BFD_ASSERT (indmips->tls_type == 0);
 }
 
 void

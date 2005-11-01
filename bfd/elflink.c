@@ -1283,7 +1283,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       flip->root.type = h->root.type;
       h->root.type = bfd_link_hash_indirect;
       h->root.u.i.link = (struct bfd_link_hash_entry *) flip;
-      (*bed->elf_backend_copy_indirect_symbol) (bed, flip, h);
+      (*bed->elf_backend_copy_indirect_symbol) (info, flip, h);
       flip->root.u.undef.abfd = h->root.u.undef.abfd;
       if (h->def_dynamic)
 	{
@@ -1437,7 +1437,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
       struct elf_link_hash_entry *ht;
 
       ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
-      (*bed->elf_backend_copy_indirect_symbol) (bed, ht, hi);
+      (*bed->elf_backend_copy_indirect_symbol) (info, ht, hi);
 
       /* See if the new flags lead us to realize that the symbol must
 	 be dynamic.  */
@@ -1506,7 +1506,7 @@ nondefault:
 
       if (hi->root.type == bfd_link_hash_indirect)
 	{
-	  (*bed->elf_backend_copy_indirect_symbol) (bed, h, hi);
+	  (*bed->elf_backend_copy_indirect_symbol) (info, h, hi);
 
 	  /* See if the new flags lead us to realize that the symbol
 	     must be dynamic.  */
@@ -2317,7 +2317,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 	  const struct elf_backend_data *bed;
 
 	  bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
-	  (*bed->elf_backend_copy_indirect_symbol) (bed, weakdef, h);
+	  (*bed->elf_backend_copy_indirect_symbol) (eif->info, weakdef, h);
 	}
     }
 
@@ -4139,7 +4139,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      (*bed->elf_backend_hide_symbol) (info, hi, TRUE);
 	      hi->root.type = bfd_link_hash_indirect;
 	      hi->root.u.i.link = (struct bfd_link_hash_entry *) h;
-	      (*bed->elf_backend_copy_indirect_symbol) (bed, h, hi);
+	      (*bed->elf_backend_copy_indirect_symbol) (info, h, hi);
 	      sym_hash = elf_sym_hashes (abfd);
 	      if (sym_hash)
 		for (symidx = 0; symidx < extsymcount; ++symidx)
@@ -6827,8 +6827,10 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	isec = bfd_com_section_ptr;
       else
 	{
-	  /* Who knows?  */
-	  isec = NULL;
+	  /* Don't attempt to output symbols with st_shnx in the
+	     reserved range other than SHN_ABS and SHN_COMMON.  */
+	  *ppsection = NULL;
+	  continue;
 	}
 
       *ppsection = isec;
@@ -6859,20 +6861,12 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	continue;
 
       /* If this symbol is defined in a section which we are
-	 discarding, we don't need to keep it, but note that
-	 linker_mark is only reliable for sections that have contents.
-	 For the benefit of the MIPS ELF linker, we check SEC_EXCLUDE
-	 as well as linker_mark.  */
-      if ((isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
+	 discarding, we don't need to keep it.  */
+      if (isym->st_shndx != SHN_UNDEF
+	  && (isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
 	  && (isec == NULL
-	      || (! isec->linker_mark && (isec->flags & SEC_HAS_CONTENTS) != 0)
-	      || (! finfo->info->relocatable
-		  && (isec->flags & SEC_EXCLUDE) != 0)))
-	continue;
-
-      /* If the section is not in the output BFD's section list, it is not
-	 being output.  */
-      if (bfd_section_removed_from_list (output_bfd, isec->output_section))
+	      || bfd_section_removed_from_list (output_bfd,
+						isec->output_section)))
 	continue;
 
       /* Get the name of the symbol.  */

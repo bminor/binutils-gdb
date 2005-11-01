@@ -1010,27 +1010,27 @@ static const CGEN_IBASE xstormy16_cgen_macro_insn_table[] =
 /* mov Rx,#$imm8 */
   {
     -1, "movimm8", "mov", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* mov $Rm,#$imm8small */
   {
     -1, "movgrimm8", "mov", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* mov $Rd,#$imm16 */
   {
     -1, "movgrimm16", "mov", 32,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* inc $Rd */
   {
     -1, "incgr", "inc", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 /* dec $Rd */
   {
     -1, "decgr", "dec", 16,
-    { 0|A(ALIAS), { (1<<MACH_BASE) } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } } } }
   },
 };
 

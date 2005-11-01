@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2004 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -3267,7 +3267,7 @@ SEM_FN_NAME (frvbf,lduh) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* ld: ld$pack @($GRi,$GRj),$GRk */
+/* ld: ld$pack $ldann($GRi,$GRj),$GRk */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,ld) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3604,7 +3604,7 @@ if (tmp_do_op) {
 #undef FLD
 }
 
-/* ldd: ldd$pack @($GRi,$GRj),$GRdoublek */
+/* ldd: ldd$pack $lddann($GRi,$GRj),$GRdoublek */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,ldd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -11303,7 +11303,7 @@ frvbf_model_branch (current_cpu, pc, 2);
 #undef FLD
 }
 
-/* calll: calll$pack @($GRi,$GRj) */
+/* calll: calll$pack $callann($GRi,$GRj) */
 
 static SEM_PC
 SEM_FN_NAME (frvbf,calll) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -16643,7 +16643,7 @@ SEM_FN_NAME (frvbf,fitos) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->floatsisf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->floatsisf (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -16664,7 +16664,7 @@ SEM_FN_NAME (frvbf,fstoi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = (* CGEN_CPU_FPU (current_cpu)->ops->fixsfsi) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SI opval = CGEN_CPU_FPU (current_cpu)->ops->fixsfsi (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_si_write (current_cpu, frvbf_h_fr_int_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_int", 'x', opval);
   }
@@ -16685,7 +16685,7 @@ SEM_FN_NAME (frvbf,fitod) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->floatsidf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->floatsidf (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -16706,7 +16706,7 @@ SEM_FN_NAME (frvbf,fdtoi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SI opval = (* CGEN_CPU_FPU (current_cpu)->ops->fixdfsi) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRj)));
+    SI opval = CGEN_CPU_FPU (current_cpu)->ops->fixdfsi (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRj)));
     sim_queue_fn_si_write (current_cpu, frvbf_h_fr_int_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_int", 'x', opval);
   }
@@ -16728,12 +16728,12 @@ SEM_FN_NAME (frvbf,fditos) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->floatsisf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->floatsisf (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->floatsisf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->floatsisf (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -16756,12 +16756,12 @@ SEM_FN_NAME (frvbf,fdstoi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SI opval = (* CGEN_CPU_FPU (current_cpu)->ops->fixsfsi) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SI opval = CGEN_CPU_FPU (current_cpu)->ops->fixsfsi (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_si_write (current_cpu, frvbf_h_fr_int_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_int", 'x', opval);
   }
   {
-    USI opval = (* CGEN_CPU_FPU (current_cpu)->ops->fixsfsi) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
+    USI opval = CGEN_CPU_FPU (current_cpu)->ops->fixsfsi (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_si_write (current_cpu, frvbf_h_fr_int_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_int", 'x', opval);
   }
@@ -16785,13 +16785,13 @@ SEM_FN_NAME (frvbf,nfditos) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->floatsisf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->floatsisf (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->floatsisf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->floatsisf (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -16815,13 +16815,13 @@ SEM_FN_NAME (frvbf,nfdstoi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SI opval = (* CGEN_CPU_FPU (current_cpu)->ops->fixsfsi) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SI opval = CGEN_CPU_FPU (current_cpu)->ops->fixsfsi (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_si_write (current_cpu, frvbf_h_fr_int_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_int", 'x', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    USI opval = (* CGEN_CPU_FPU (current_cpu)->ops->fixsfsi) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
+    USI opval = CGEN_CPU_FPU (current_cpu)->ops->fixsfsi (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_si_write (current_cpu, frvbf_h_fr_int_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_int", 'x', opval);
   }
@@ -16844,7 +16844,7 @@ SEM_FN_NAME (frvbf,cfitos) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->floatsisf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->floatsisf (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 3);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -16869,7 +16869,7 @@ SEM_FN_NAME (frvbf,cfstoi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SI opval = (* CGEN_CPU_FPU (current_cpu)->ops->fixsfsi) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SI opval = CGEN_CPU_FPU (current_cpu)->ops->fixsfsi (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_si_write (current_cpu, frvbf_h_fr_int_set, FLD (f_FRk), opval);
     written |= (1 << 3);
     TRACE_RESULT (current_cpu, abuf, "fr_int", 'x', opval);
@@ -16895,7 +16895,7 @@ SEM_FN_NAME (frvbf,nfitos) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->floatsisf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->floatsisf (CGEN_CPU_FPU (current_cpu), GET_H_FR_INT (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -16919,7 +16919,7 @@ SEM_FN_NAME (frvbf,nfstoi) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SI opval = (* CGEN_CPU_FPU (current_cpu)->ops->fixsfsi) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SI opval = CGEN_CPU_FPU (current_cpu)->ops->fixsfsi (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_si_write (current_cpu, frvbf_h_fr_int_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_int", 'x', opval);
   }
@@ -17036,7 +17036,7 @@ SEM_FN_NAME (frvbf,fnegs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->negsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->negsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17057,7 +17057,7 @@ SEM_FN_NAME (frvbf,fnegd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->negdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRj)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->negdf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRj)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -17079,12 +17079,12 @@ SEM_FN_NAME (frvbf,fdnegs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->negsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->negsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->negsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->negsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17107,7 +17107,7 @@ SEM_FN_NAME (frvbf,cfnegs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->negsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->negsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 3);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -17131,7 +17131,7 @@ SEM_FN_NAME (frvbf,fabss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->abssf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->abssf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17152,7 +17152,7 @@ SEM_FN_NAME (frvbf,fabsd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->absdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRj)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->absdf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRj)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -17174,12 +17174,12 @@ SEM_FN_NAME (frvbf,fdabss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->abssf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->abssf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->abssf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->abssf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17202,7 +17202,7 @@ SEM_FN_NAME (frvbf,cfabss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->abssf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->abssf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 3);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -17226,7 +17226,7 @@ SEM_FN_NAME (frvbf,fsqrts) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->sqrtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->sqrtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17248,12 +17248,12 @@ SEM_FN_NAME (frvbf,fdsqrts) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->sqrtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->sqrtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->sqrtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->sqrtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17277,13 +17277,13 @@ SEM_FN_NAME (frvbf,nfdsqrts) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->sqrtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->sqrtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->sqrtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->sqrtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17305,7 +17305,7 @@ SEM_FN_NAME (frvbf,fsqrtd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->sqrtdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRj)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->sqrtdf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRj)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -17327,7 +17327,7 @@ SEM_FN_NAME (frvbf,cfsqrts) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->sqrtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->sqrtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 3);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -17353,7 +17353,7 @@ SEM_FN_NAME (frvbf,nfsqrts) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->sqrtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->sqrtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17375,7 +17375,7 @@ SEM_FN_NAME (frvbf,fadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17396,7 +17396,7 @@ SEM_FN_NAME (frvbf,fsubs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17417,7 +17417,7 @@ SEM_FN_NAME (frvbf,fmuls) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17438,7 +17438,7 @@ SEM_FN_NAME (frvbf,fdivs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->divsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->divsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17459,7 +17459,7 @@ SEM_FN_NAME (frvbf,faddd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->adddf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->adddf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -17480,7 +17480,7 @@ SEM_FN_NAME (frvbf,fsubd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->subdf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -17501,7 +17501,7 @@ SEM_FN_NAME (frvbf,fmuld) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->muldf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->muldf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -17522,7 +17522,7 @@ SEM_FN_NAME (frvbf,fdivd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->divdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->divdf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -17544,7 +17544,7 @@ SEM_FN_NAME (frvbf,cfadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -17569,7 +17569,7 @@ SEM_FN_NAME (frvbf,cfsubs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -17594,7 +17594,7 @@ SEM_FN_NAME (frvbf,cfmuls) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -17619,7 +17619,7 @@ SEM_FN_NAME (frvbf,cfdivs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->divsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->divsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 4);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -17645,7 +17645,7 @@ SEM_FN_NAME (frvbf,nfadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17669,7 +17669,7 @@ SEM_FN_NAME (frvbf,nfsubs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17693,7 +17693,7 @@ SEM_FN_NAME (frvbf,nfmuls) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17717,7 +17717,7 @@ SEM_FN_NAME (frvbf,nfdivs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->divsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->divsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17738,7 +17738,7 @@ SEM_FN_NAME (frvbf,fcmps) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->gtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 2;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17746,7 +17746,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->eqsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 8;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17754,7 +17754,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->ltsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->ltsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 4;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17788,7 +17788,7 @@ SEM_FN_NAME (frvbf,fcmpd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-if ((* CGEN_CPU_FPU (current_cpu)->ops->gtdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->gtdf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)))) {
   {
     UQI opval = 2;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17796,7 +17796,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->gtdf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->eqdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->eqdf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)))) {
   {
     UQI opval = 8;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17804,7 +17804,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->eqdf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->ltdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->ltdf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj)))) {
   {
     UQI opval = 4;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17839,7 +17839,7 @@ SEM_FN_NAME (frvbf,cfcmps) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->gtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 2;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17847,7 +17847,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->eqsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 8;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17855,7 +17855,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->ltsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->ltsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 4;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17891,7 +17891,7 @@ SEM_FN_NAME (frvbf,fdcmps) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
 {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->gtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 2;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17899,7 +17899,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->eqsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 8;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17907,7 +17907,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->ltsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->ltsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 4;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -17924,7 +17924,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->ltsf) (CGEN_CPU_FPU (current_cpu), GET_H
 }
 }
 }
-if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->gtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
   {
     UQI opval = 2;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[((FLD (f_FCCi_2)) + (1))]), opval);
@@ -17932,7 +17932,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->eqsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
   {
     UQI opval = 8;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[((FLD (f_FCCi_2)) + (1))]), opval);
@@ -17940,7 +17940,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->ltsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->ltsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
   {
     UQI opval = 4;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[((FLD (f_FCCi_2)) + (1))]), opval);
@@ -17976,7 +17976,7 @@ SEM_FN_NAME (frvbf,fmadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -17997,7 +17997,7 @@ SEM_FN_NAME (frvbf,fmsubs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18018,7 +18018,7 @@ SEM_FN_NAME (frvbf,fmaddd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->adddf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->muldf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj))), GET_H_FR_DOUBLE (FLD (f_FRk)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->adddf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->muldf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj))), GET_H_FR_DOUBLE (FLD (f_FRk)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -18039,7 +18039,7 @@ SEM_FN_NAME (frvbf,fmsubd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    DF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subdf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->muldf) (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj))), GET_H_FR_DOUBLE (FLD (f_FRk)));
+    DF opval = CGEN_CPU_FPU (current_cpu)->ops->subdf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->muldf (CGEN_CPU_FPU (current_cpu), GET_H_FR_DOUBLE (FLD (f_FRi)), GET_H_FR_DOUBLE (FLD (f_FRj))), GET_H_FR_DOUBLE (FLD (f_FRk)));
     sim_queue_fn_df_write (current_cpu, frvbf_h_fr_double_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr_double", 'f', opval);
   }
@@ -18061,12 +18061,12 @@ SEM_FN_NAME (frvbf,fdmadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1)))), GET_H_FR (((FLD (f_FRk)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1)))), GET_H_FR (((FLD (f_FRk)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18090,13 +18090,13 @@ SEM_FN_NAME (frvbf,nfdmadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1)))), GET_H_FR (((FLD (f_FRk)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1)))), GET_H_FR (((FLD (f_FRk)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18119,7 +18119,7 @@ SEM_FN_NAME (frvbf,cfmadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 5);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -18144,7 +18144,7 @@ SEM_FN_NAME (frvbf,cfmsubs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 5);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -18170,7 +18170,7 @@ SEM_FN_NAME (frvbf,nfmadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18194,7 +18194,7 @@ SEM_FN_NAME (frvbf,nfmsubs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj))), GET_H_FR (FLD (f_FRk)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18217,12 +18217,12 @@ SEM_FN_NAME (frvbf,fmas) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18245,12 +18245,12 @@ SEM_FN_NAME (frvbf,fmss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18273,22 +18273,22 @@ SEM_FN_NAME (frvbf,fdmas) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (2))), GET_H_FR (((FLD (f_FRj)) + (2))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (2))), GET_H_FR (((FLD (f_FRj)) + (2))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (2)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (3))), GET_H_FR (((FLD (f_FRj)) + (3))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (3))), GET_H_FR (((FLD (f_FRj)) + (3))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (3)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18311,22 +18311,22 @@ SEM_FN_NAME (frvbf,fdmss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (2))), GET_H_FR (((FLD (f_FRj)) + (2))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (2))), GET_H_FR (((FLD (f_FRj)) + (2))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (2)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (3))), GET_H_FR (((FLD (f_FRj)) + (3))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (3))), GET_H_FR (((FLD (f_FRj)) + (3))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (3)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18353,22 +18353,22 @@ frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 2));
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 3));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (2))), GET_H_FR (((FLD (f_FRj)) + (2))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (2))), GET_H_FR (((FLD (f_FRj)) + (2))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (2)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (3))), GET_H_FR (((FLD (f_FRj)) + (3))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (3))), GET_H_FR (((FLD (f_FRj)) + (3))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (3)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18395,22 +18395,22 @@ frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 2));
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 3));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (2))), GET_H_FR (((FLD (f_FRj)) + (2))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (2))), GET_H_FR (((FLD (f_FRj)) + (2))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (2)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (3))), GET_H_FR (((FLD (f_FRj)) + (3))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (3))), GET_H_FR (((FLD (f_FRj)) + (3))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (3)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18434,13 +18434,13 @@ SEM_FN_NAME (frvbf,cfmas) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     written |= (1 << 10);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -18467,13 +18467,13 @@ SEM_FN_NAME (frvbf,cfmss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     written |= (1 << 9);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     written |= (1 << 10);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
@@ -18499,12 +18499,12 @@ SEM_FN_NAME (frvbf,fmad) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->muldf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->fextsfdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi))), (* CGEN_CPU_FPU (current_cpu)->ops->fextsfdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->muldf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi))), CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->adddf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->fextsfdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1)))), (* CGEN_CPU_FPU (current_cpu)->ops->fextsfdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->adddf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1)))), CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18527,12 +18527,12 @@ SEM_FN_NAME (frvbf,fmsd) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->muldf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->fextsfdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi))), (* CGEN_CPU_FPU (current_cpu)->ops->fextsfdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->muldf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi))), CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRj)))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->subdf) (CGEN_CPU_FPU (current_cpu), (* CGEN_CPU_FPU (current_cpu)->ops->fextsfdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1)))), (* CGEN_CPU_FPU (current_cpu)->ops->fextsfdf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->subdf (CGEN_CPU_FPU (current_cpu), CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1)))), CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRj)) + (1))))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18556,13 +18556,13 @@ SEM_FN_NAME (frvbf,nfmas) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18586,13 +18586,13 @@ SEM_FN_NAME (frvbf,nfmss) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18615,12 +18615,12 @@ SEM_FN_NAME (frvbf,fdadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18643,12 +18643,12 @@ SEM_FN_NAME (frvbf,fdsubs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18671,12 +18671,12 @@ SEM_FN_NAME (frvbf,fdmuls) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18699,12 +18699,12 @@ SEM_FN_NAME (frvbf,fddivs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->divsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->divsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->divsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->divsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18727,12 +18727,12 @@ SEM_FN_NAME (frvbf,fdsads) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18755,12 +18755,12 @@ SEM_FN_NAME (frvbf,fdmulcs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18784,13 +18784,13 @@ SEM_FN_NAME (frvbf,nfdmulcs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18814,13 +18814,13 @@ SEM_FN_NAME (frvbf,nfdadds) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18844,13 +18844,13 @@ SEM_FN_NAME (frvbf,nfdsubs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18874,13 +18874,13 @@ SEM_FN_NAME (frvbf,nfdmuls) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->mulsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->mulsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18904,13 +18904,13 @@ SEM_FN_NAME (frvbf,nfddivs) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->divsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->divsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->divsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->divsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18934,13 +18934,13 @@ SEM_FN_NAME (frvbf,nfdsads) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->addsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->addsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, FLD (f_FRk), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
   {
-    SF opval = (* CGEN_CPU_FPU (current_cpu)->ops->subsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
+    SF opval = CGEN_CPU_FPU (current_cpu)->ops->subsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))));
     sim_queue_fn_sf_write (current_cpu, frvbf_h_fr_set, ((FLD (f_FRk)) + (1)), opval);
     TRACE_RESULT (current_cpu, abuf, "fr", 'f', opval);
   }
@@ -18963,7 +18963,7 @@ SEM_FN_NAME (frvbf,nfdcmps) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 
 {
 frvbf_set_ne_index (current_cpu, FLD (f_FRk));
-if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->gtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 2;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -18971,7 +18971,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->eqsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 8;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -18979,7 +18979,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->ltsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->ltsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (FLD (f_FRi)), GET_H_FR (FLD (f_FRj)))) {
   {
     UQI opval = 4;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[FLD (f_FCCi_2)]), opval);
@@ -18997,7 +18997,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->ltsf) (CGEN_CPU_FPU (current_cpu), GET_H
 }
 }
 frvbf_set_ne_index (current_cpu, ADDSI (FLD (f_FRk), 1));
-if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->gtsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
   {
     UQI opval = 2;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[((FLD (f_FCCi_2)) + (1))]), opval);
@@ -19005,7 +19005,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->gtsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->eqsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
   {
     UQI opval = 8;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[((FLD (f_FCCi_2)) + (1))]), opval);
@@ -19013,7 +19013,7 @@ if ((* CGEN_CPU_FPU (current_cpu)->ops->eqsf) (CGEN_CPU_FPU (current_cpu), GET_H
     TRACE_RESULT (current_cpu, abuf, "fccr", 'x', opval);
   }
 } else {
-if ((* CGEN_CPU_FPU (current_cpu)->ops->ltsf) (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
+if (CGEN_CPU_FPU (current_cpu)->ops->ltsf (CGEN_CPU_FPU (current_cpu), GET_H_FR (((FLD (f_FRi)) + (1))), GET_H_FR (((FLD (f_FRj)) + (1))))) {
   {
     UQI opval = 4;
     sim_queue_qi_write (current_cpu, & CPU (h_fccr[((FLD (f_FCCi_2)) + (1))]), opval);

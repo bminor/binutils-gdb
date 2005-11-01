@@ -4,7 +4,7 @@
    THIS FILE IS MACHINE GENERATED WITH CGEN.
    - the resultant file is machine generated, cgen-dis.in isn't
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2005
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils and GDB, the GNU debugger.
@@ -262,6 +262,19 @@ print_push_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   print_regset (cd, dis_info, value, attrs, pc, length, PUSH);
 }
 
+static void
+print_signed4n (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+		void * dis_info,
+		signed long value,
+		unsigned int attrs ATTRIBUTE_UNUSED,
+		bfd_vma pc ATTRIBUTE_UNUSED,
+		int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = dis_info;
+
+  (*info->fprintf_func) (info->stream, "%ld", -value);
+}
+
 void m32c_cgen_print_operand
   (CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *, void const *, bfd_vma, int);
 
@@ -458,6 +471,9 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_DSP_48_U8 :
       print_normal (cd, info, fields->f_dsp_48_u8, 0, pc, length);
       break;
+    case M32C_OPERAND_DSP_8_S24 :
+      print_normal (cd, info, fields->f_dsp_8_s24, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
     case M32C_OPERAND_DSP_8_S8 :
       print_normal (cd, info, fields->f_dsp_8_s8, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
@@ -569,6 +585,9 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_IMM_12_S4 :
       print_normal (cd, info, fields->f_imm_12_s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      print_signed4n (cd, info, fields->f_imm_12_s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       print_normal (cd, info, fields->f_imm_13_u3, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
@@ -636,6 +655,9 @@ m32c_cgen_print_operand (CGEN_CPU_DESC cd,
       print_normal (cd, info, fields->f_dsp_8_s8, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case M32C_OPERAND_IMM_8_S4 :
+      print_normal (cd, info, fields->f_imm_8_s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
       print_normal (cd, info, fields->f_imm_8_s4, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :
@@ -1168,7 +1190,7 @@ default_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
 typedef struct cpu_desc_list
 {
   struct cpu_desc_list *next;
-  int isa;
+  CGEN_BITSET *isa;
   int mach;
   int endian;
   CGEN_CPU_DESC cd;
@@ -1180,11 +1202,12 @@ print_insn_m32c (bfd_vma pc, disassemble_info *info)
   static cpu_desc_list *cd_list = 0;
   cpu_desc_list *cl = 0;
   static CGEN_CPU_DESC cd = 0;
-  static int prev_isa;
+  static CGEN_BITSET *prev_isa;
   static int prev_mach;
   static int prev_endian;
   int length;
-  int isa,mach;
+  CGEN_BITSET *isa;
+  int mach;
   int endian = (info->endian == BFD_ENDIAN_BIG
 		? CGEN_ENDIAN_BIG
 		: CGEN_ENDIAN_LITTLE);
@@ -1207,25 +1230,34 @@ print_insn_m32c (bfd_vma pc, disassemble_info *info)
 #endif
 
 #ifdef CGEN_COMPUTE_ISA
-  isa = CGEN_COMPUTE_ISA (info);
+  {
+    static CGEN_BITSET *permanent_isa;
+
+    if (!permanent_isa)
+      permanent_isa = cgen_bitset_create (MAX_ISAS);
+    isa = permanent_isa;
+    cgen_bitset_clear (isa);
+    cgen_bitset_add (isa, CGEN_COMPUTE_ISA (info));
+  }
 #else
   isa = info->insn_sets;
 #endif
 
   /* If we've switched cpu's, try to find a handle we've used before */
   if (cd
-      && (isa != prev_isa
+      && (cgen_bitset_compare (isa, prev_isa) != 0
 	  || mach != prev_mach
 	  || endian != prev_endian))
     {
       cd = 0;
       for (cl = cd_list; cl; cl = cl->next)
 	{
-	  if (cl->isa == isa &&
+	  if (cgen_bitset_compare (cl->isa, isa) == 0 &&
 	      cl->mach == mach &&
 	      cl->endian == endian)
 	    {
 	      cd = cl->cd;
+ 	      prev_isa = cd->isas;
 	      break;
 	    }
 	}
@@ -1241,7 +1273,7 @@ print_insn_m32c (bfd_vma pc, disassemble_info *info)
 	abort ();
       mach_name = arch_type->printable_name;
 
-      prev_isa = isa;
+      prev_isa = cgen_bitset_copy (isa);
       prev_mach = mach;
       prev_endian = endian;
       cd = m32c_cgen_cpu_open (CGEN_CPU_OPEN_ISAS, prev_isa,
@@ -1254,7 +1286,7 @@ print_insn_m32c (bfd_vma pc, disassemble_info *info)
       /* Save this away for future reference.  */
       cl = xmalloc (sizeof (struct cpu_desc_list));
       cl->cd = cd;
-      cl->isa = isa;
+      cl->isa = prev_isa;
       cl->mach = mach;
       cl->endian = endian;
       cl->next = cd_list;

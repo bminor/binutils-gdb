@@ -1793,7 +1793,7 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf32_arm_copy_indirect_symbol (const struct elf_backend_data *bed,
+elf32_arm_copy_indirect_symbol (struct bfd_link_info *info,
 				struct elf_link_hash_entry *dir,
 				struct elf_link_hash_entry *ind)
 {
@@ -1809,10 +1809,7 @@ elf32_arm_copy_indirect_symbol (const struct elf_backend_data *bed,
 	  struct elf32_arm_relocs_copied **pp;
 	  struct elf32_arm_relocs_copied *p;
 
-	  if (ind->root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
+	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->relocs_copied; (p = *pp) != NULL; )
 	    {
@@ -1836,16 +1833,9 @@ elf32_arm_copy_indirect_symbol (const struct elf_backend_data *bed,
       eind->relocs_copied = NULL;
     }
 
-  /* If the direct symbol already has an associated PLT entry, the
-     indirect symbol should not.  If it doesn't, swap refcount information
-     from the indirect symbol.  */
-  if (edir->plt_thumb_refcount == 0)
-    {
-      edir->plt_thumb_refcount = eind->plt_thumb_refcount;
-      eind->plt_thumb_refcount = 0;
-    }
-  else
-    BFD_ASSERT (eind->plt_thumb_refcount == 0);
+  /* Copy over PLT info.  */
+  edir->plt_thumb_refcount += eind->plt_thumb_refcount;
+  eind->plt_thumb_refcount = 0;
 
   if (ind->root.type == bfd_link_hash_indirect
       && dir->got.refcount <= 0)
@@ -1854,7 +1844,7 @@ elf32_arm_copy_indirect_symbol (const struct elf_backend_data *bed,
       eind->tls_type = GOT_UNKNOWN;
     }
 
-  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
+  _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
 /* Create an ARM elf linker hash table.  */

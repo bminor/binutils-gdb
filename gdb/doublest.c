@@ -1,8 +1,8 @@
 /* Floating point routines for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005 Free Software
-   Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -110,9 +110,10 @@ get_field (const bfd_byte *data, enum floatformat_byteorders order,
   return result;
 }
 
-/* Normalize the byte order of FROM into TO.  If no normalization is needed
-   then FMT->byteorder is returned and TO is not changed; otherwise the format
-   of the normalized form in TO is returned.  */
+/* Normalize the byte order of FROM into TO.  If no normalization is
+   needed then FMT->byteorder is returned and TO is not changed;
+   otherwise the format of the normalized form in TO is returned.  */
+
 static enum floatformat_byteorders
 floatformat_normalize_byteorder (const struct floatformat *fmt,
 				 const void *from, void *to)
@@ -125,23 +126,40 @@ floatformat_normalize_byteorder (const struct floatformat *fmt,
       || fmt->byteorder == floatformat_big)
     return fmt->byteorder;
 
-  gdb_assert (fmt->byteorder == floatformat_littlebyte_bigword);
-
   words = fmt->totalsize / FLOATFORMAT_CHAR_BIT;
   words >>= 2;
 
   swapout = (unsigned char *)to;
   swapin = (const unsigned char *)from;
 
-  while (words-- > 0)
+  if (fmt->byteorder == floatformat_vax)
     {
-      *swapout++ = swapin[3];
-      *swapout++ = swapin[2];
-      *swapout++ = swapin[1];
-      *swapout++ = swapin[0];
-      swapin += 4;
+      while (words-- > 0)
+	{
+	  *swapout++ = swapin[1];
+	  *swapout++ = swapin[0];
+	  *swapout++ = swapin[3];
+	  *swapout++ = swapin[2];
+	  swapin += 4;
+	}
+      /* This may look weird, since VAX is little-endian, but it is
+	 easier to translate to big-endian than to little-endian.  */
+      return floatformat_big;
     }
-  return floatformat_big;
+  else
+    {
+      gdb_assert (fmt->byteorder == floatformat_littlebyte_bigword);
+
+      while (words-- > 0)
+	{
+	  *swapout++ = swapin[3];
+	  *swapout++ = swapin[2];
+	  *swapout++ = swapin[1];
+	  *swapout++ = swapin[0];
+	  swapin += 4;
+	}
+      return floatformat_big;
+    }
 }
   
 /* Convert from FMT to a DOUBLEST.
@@ -337,14 +355,13 @@ ldfrexp (long double value, int *eptr)
 #endif /* HAVE_LONG_DOUBLE */
 
 
-/* The converse: convert the DOUBLEST *FROM to an extended float
-   and store where TO points.  Neither FROM nor TO have any alignment
+/* The converse: convert the DOUBLEST *FROM to an extended float and
+   store where TO points.  Neither FROM nor TO have any alignment
    restrictions.  */
 
 static void
 convert_doublest_to_floatformat (CONST struct floatformat *fmt,
-				 const DOUBLEST *from,
-				 void *to)
+				 const DOUBLEST *from, void *to)
 {
   DOUBLEST dfrom;
   int exponent;
@@ -353,9 +370,13 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
   int mant_bits_left;
   unsigned char *uto = (unsigned char *) to;
   enum floatformat_byteorders order = fmt->byteorder;
+  unsigned char newto[FLOATFORMAT_LARGEST_BYTES];
 
-  if (order == floatformat_littlebyte_bigword)
+  if (order != floatformat_little)
     order = floatformat_big;
+
+  if (order != fmt->byteorder)
+    uto = newto;
 
   memcpy (&dfrom, from, sizeof (dfrom));
   memset (uto, 0, (fmt->totalsize + FLOATFORMAT_CHAR_BIT - 1) 
@@ -447,24 +468,7 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
  finalize_byteorder:
   /* Do we need to byte-swap the words in the result?  */
   if (order != fmt->byteorder)
-    {
-      int words;
-      unsigned char *curword = uto;
-      unsigned char tmp;
-
-      words = fmt->totalsize / FLOATFORMAT_CHAR_BIT;
-      words >>= 2;
-      while (words-- > 0)
-	{
-	  tmp = curword[0];
-	  curword[0] = curword[3];
-	  curword[3] = tmp;
-	  tmp = curword[1];
-	  curword[1] = curword[2];
-	  curword[2] = tmp;
-	  curword += 4;
-	}
-    }
+    floatformat_normalize_byteorder (fmt, newto, to);
 }
 
 /* Check if VAL (which is assumed to be a floating point number whose

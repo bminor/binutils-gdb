@@ -1110,8 +1110,10 @@ gdb_setup_readline (void)
      that the sync setup is ALL done in gdb_init, and we would only
      mess it up here.  The sync stuff should really go away over
      time.  */
+  extern batch_silent;
 
-  gdb_stdout = stdio_fileopen (stdout);
+  if (!batch_silent)
+    gdb_stdout = stdio_fileopen (stdout);
   gdb_stderr = stdio_fileopen (stderr);
   gdb_stdlog = gdb_stderr;  /* for moment */
   gdb_stdtarg = gdb_stderr; /* for moment */

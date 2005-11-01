@@ -50,7 +50,7 @@
 #define FRV_VLIW_SIZE 8 /* fr550 has largest vliw size of 8.  */
 #define PAD_VLIW_COMBO ,UNIT_NIL,UNIT_NIL,UNIT_NIL,UNIT_NIL
 
-typedef CGEN_ATTR_VALUE_TYPE VLIW_COMBO[FRV_VLIW_SIZE];
+typedef CGEN_ATTR_VALUE_ENUM_TYPE VLIW_COMBO[FRV_VLIW_SIZE];
 
 typedef struct
 {
@@ -58,15 +58,15 @@ typedef struct
   int                    constraint_violation;
   unsigned long          mach;
   unsigned long          elf_flags;
-  CGEN_ATTR_VALUE_TYPE * unit_mapping;
+  CGEN_ATTR_VALUE_ENUM_TYPE * unit_mapping;
   VLIW_COMBO *           current_vliw;
-  CGEN_ATTR_VALUE_TYPE   major[FRV_VLIW_SIZE];
+  CGEN_ATTR_VALUE_ENUM_TYPE   major[FRV_VLIW_SIZE];
   const CGEN_INSN *      insn[FRV_VLIW_SIZE];
 } FRV_VLIW;
 
-int frv_is_branch_major (CGEN_ATTR_VALUE_TYPE, unsigned long);
-int frv_is_float_major  (CGEN_ATTR_VALUE_TYPE, unsigned long);
-int frv_is_media_major  (CGEN_ATTR_VALUE_TYPE, unsigned long);
+int frv_is_branch_major (CGEN_ATTR_VALUE_ENUM_TYPE, unsigned long);
+int frv_is_float_major  (CGEN_ATTR_VALUE_ENUM_TYPE, unsigned long);
+int frv_is_media_major  (CGEN_ATTR_VALUE_ENUM_TYPE, unsigned long);
 int frv_is_branch_insn  (const CGEN_INSN *);
 int frv_is_float_insn   (const CGEN_INSN *);
 int frv_is_media_insn   (const CGEN_INSN *);
@@ -83,7 +83,7 @@ int spr_valid           (long);
    development tree.  */
 
 bfd_boolean
-frv_is_branch_major (CGEN_ATTR_VALUE_TYPE major, unsigned long mach)
+frv_is_branch_major (CGEN_ATTR_VALUE_ENUM_TYPE major, unsigned long mach)
 {
   switch (mach)
     {
@@ -107,7 +107,7 @@ frv_is_branch_major (CGEN_ATTR_VALUE_TYPE major, unsigned long mach)
 /* Returns TRUE if {MAJOR,MACH} supports floating point insns.  */
 
 bfd_boolean
-frv_is_float_major (CGEN_ATTR_VALUE_TYPE major, unsigned long mach)
+frv_is_float_major (CGEN_ATTR_VALUE_ENUM_TYPE major, unsigned long mach)
 {
   switch (mach)
     {
@@ -126,7 +126,7 @@ frv_is_float_major (CGEN_ATTR_VALUE_TYPE major, unsigned long mach)
 /* Returns TRUE if {MAJOR,MACH} supports media insns.  */
 
 bfd_boolean
-frv_is_media_major (CGEN_ATTR_VALUE_TYPE major, unsigned long mach)
+frv_is_media_major (CGEN_ATTR_VALUE_ENUM_TYPE major, unsigned long mach)
 {
   switch (mach)
     {
@@ -270,7 +270,7 @@ static VLIW_COMBO fr550_allowed_vliw[] =
 /* Some insns are assigned specialized implementation units which map to
    different actual implementation units on different machines.  These
    tables perform that mapping.  */
-static CGEN_ATTR_VALUE_TYPE fr400_unit_mapping[] =
+static CGEN_ATTR_VALUE_ENUM_TYPE fr400_unit_mapping[] =
 {
 /* unit in insn    actual unit */
 /* NIL      */     UNIT_NIL,
@@ -305,7 +305,7 @@ static CGEN_ATTR_VALUE_TYPE fr400_unit_mapping[] =
 /* Some insns are assigned specialized implementation units which map to
    different actual implementation units on different machines.  These
    tables perform that mapping.  */
-static CGEN_ATTR_VALUE_TYPE fr450_unit_mapping[] =
+static CGEN_ATTR_VALUE_ENUM_TYPE fr450_unit_mapping[] =
 {
 /* unit in insn    actual unit */
 /* NIL      */     UNIT_NIL,
@@ -337,7 +337,7 @@ static CGEN_ATTR_VALUE_TYPE fr450_unit_mapping[] =
 /* MCLRACC-1*/     UNIT_FM0  /* mclracc,A==1   insn only in FM0 unit.  */
 };
 
-static CGEN_ATTR_VALUE_TYPE fr500_unit_mapping[] =
+static CGEN_ATTR_VALUE_ENUM_TYPE fr500_unit_mapping[] =
 {
 /* unit in insn    actual unit */
 /* NIL      */     UNIT_NIL,
@@ -369,7 +369,7 @@ static CGEN_ATTR_VALUE_TYPE fr500_unit_mapping[] =
 /* MCLRACC-1*/     UNIT_FM01 /* mclracc,A==1 in FM0 or FM1 unit.  */
 };
 
-static CGEN_ATTR_VALUE_TYPE fr550_unit_mapping[] =
+static CGEN_ATTR_VALUE_ENUM_TYPE fr550_unit_mapping[] =
 {
 /* unit in insn    actual unit */
 /* NIL      */     UNIT_NIL,
@@ -435,7 +435,7 @@ frv_vliw_reset (FRV_VLIW *vliw, unsigned long mach, unsigned long elf_flags)
    *_allowed_vliw tables above.  */
 static bfd_boolean
 match_unit (FRV_VLIW *vliw,
-	    CGEN_ATTR_VALUE_TYPE unit1, CGEN_ATTR_VALUE_TYPE unit2)
+	    CGEN_ATTR_VALUE_ENUM_TYPE unit1, CGEN_ATTR_VALUE_ENUM_TYPE unit2)
 {
   /* Map any specialized implementation units to actual ones.  */
   unit1 = vliw->unit_mapping[unit1];
@@ -487,7 +487,7 @@ match_vliw (VLIW_COMBO *vliw1, VLIW_COMBO *vliw2, int vliw_size)
    If one is found then return it. Otherwise return NULL.  */
 
 static VLIW_COMBO *
-add_next_to_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE unit)
+add_next_to_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_ENUM_TYPE unit)
 {
   int           next    = vliw->next_slot;
   VLIW_COMBO    *current = vliw->current_vliw;
@@ -518,7 +518,7 @@ add_next_to_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE unit)
    Returns TRUE if found, FALSE otherwise.  */
 
 static bfd_boolean
-find_major_in_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE major)
+find_major_in_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_ENUM_TYPE major)
 {
   int i;
 
@@ -533,7 +533,7 @@ find_major_in_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE major)
    types.  */
 
 static bfd_boolean
-fr400_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE major)
+fr400_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_ENUM_TYPE major)
 {
   /* In the cpu file, all media insns are represented as being allowed in
      both media units. This makes it easier since this is the case for fr500.
@@ -553,9 +553,9 @@ fr400_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE major)
 }
 
 static bfd_boolean
-fr450_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE major)
+fr450_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_ENUM_TYPE major)
 {
-  CGEN_ATTR_VALUE_TYPE other_major;
+  CGEN_ATTR_VALUE_ENUM_TYPE other_major;
 
   /* Our caller guarantees there's at least one other instruction.  */
   other_major = CGEN_INSN_ATTR_VALUE (vliw->insn[0], CGEN_INSN_FR450_MAJOR);
@@ -588,7 +588,7 @@ fr450_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE major)
 }
 
 static bfd_boolean
-find_unit_in_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE unit)
+find_unit_in_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_ENUM_TYPE unit)
 {
   int i;
 
@@ -601,8 +601,8 @@ find_unit_in_vliw (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE unit)
 
 static bfd_boolean
 find_major_in_slot (FRV_VLIW *vliw,
-		    CGEN_ATTR_VALUE_TYPE major,
-		    CGEN_ATTR_VALUE_TYPE slot)
+		    CGEN_ATTR_VALUE_ENUM_TYPE major,
+		    CGEN_ATTR_VALUE_ENUM_TYPE slot)
 {
   int i;
 
@@ -657,11 +657,11 @@ fr550_find_float_in_vliw (FRV_VLIW *vliw)
 
 static bfd_boolean
 fr550_check_insn_major_constraints (FRV_VLIW *vliw,
-				    CGEN_ATTR_VALUE_TYPE major,
+				    CGEN_ATTR_VALUE_ENUM_TYPE major,
 				    const CGEN_INSN *insn)
 {
-  CGEN_ATTR_VALUE_TYPE unit;
-  CGEN_ATTR_VALUE_TYPE slot = (*vliw->current_vliw)[vliw->next_slot];
+  CGEN_ATTR_VALUE_ENUM_TYPE unit;
+  CGEN_ATTR_VALUE_ENUM_TYPE slot = (*vliw->current_vliw)[vliw->next_slot];
   switch (slot)
     {
     case UNIT_I2:
@@ -707,7 +707,7 @@ fr550_check_insn_major_constraints (FRV_VLIW *vliw,
 }
 
 static bfd_boolean
-fr500_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE major)
+fr500_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_ENUM_TYPE major)
 {
   /* TODO: A table might be faster for some of the more complex instances
      here.  */
@@ -815,7 +815,7 @@ fr500_check_insn_major_constraints (FRV_VLIW *vliw, CGEN_ATTR_VALUE_TYPE major)
 
 static bfd_boolean
 check_insn_major_constraints (FRV_VLIW *vliw,
-			      CGEN_ATTR_VALUE_TYPE major,
+			      CGEN_ATTR_VALUE_ENUM_TYPE major,
 			      const CGEN_INSN *insn)
 {
   switch (vliw->mach)
@@ -841,8 +841,8 @@ int
 frv_vliw_add_insn (FRV_VLIW *vliw, const CGEN_INSN *insn)
 {
   int index;
-  CGEN_ATTR_VALUE_TYPE major;
-  CGEN_ATTR_VALUE_TYPE unit;
+  CGEN_ATTR_VALUE_ENUM_TYPE major;
+  CGEN_ATTR_VALUE_ENUM_TYPE unit;
   VLIW_COMBO *new_vliw;
 
   if (vliw->constraint_violation || CGEN_INSN_INVALID_P (insn))

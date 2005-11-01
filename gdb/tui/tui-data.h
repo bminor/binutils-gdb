@@ -147,10 +147,14 @@ enum tui_register_display_type
 };
 
 /* Structure describing source line or line address */
-union tui_line_or_address
+struct tui_line_or_address
 {
-  int line_no;
-  CORE_ADDR addr;
+  enum { LOA_LINE, LOA_ADDRESS } loa;
+  union
+    {
+      int line_no;
+      CORE_ADDR addr;
+    } u;
 };
 
 /* Current Layout definition */
@@ -166,7 +170,7 @@ struct tui_layout_def
 struct tui_source_element
 {
   char *line;
-  union tui_line_or_address line_or_addr;
+  struct tui_line_or_address line_or_addr;
   int is_exec_point;
   int has_break;
 };
@@ -259,7 +263,7 @@ struct tui_source_info
   /* Execution information window.  */
   struct tui_gen_win_info *execution_info;
   int horizontal_offset;	/* used for horizontal scroll */
-  union tui_line_or_address start_line_or_addr;
+  struct tui_line_or_address start_line_or_addr;
   char* filename;
 };
 

@@ -192,6 +192,31 @@ parse_signed4 (CGEN_CPU_DESC cd, const char **strp,
 }
 
 static const char *
+parse_signed4n (CGEN_CPU_DESC cd, const char **strp,
+		int opindex, signed long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+  long have_zero = 0;
+
+  if (strncmp (*strp, "0x0", 3) == 0 
+      || (**strp == '0' && *(*strp + 1) != 'x'))
+    have_zero = 1;
+
+  PARSE_SIGNED;
+
+  if (value < -7 || value > 8)
+    return _("Immediate is out of range -7 to 8");
+
+  /* If this field may require a relocation then use larger dsp16.  */
+  if (! have_zero && value == 0)
+    return _("Immediate is out of range -7 to 8");
+
+  *valuep = -value;
+  return 0;
+}
+
+static const char *
 parse_signed8 (CGEN_CPU_DESC cd, const char **strp,
 	       int opindex, signed long *valuep)
 {
@@ -399,6 +424,26 @@ parse_unsigned24 (CGEN_CPU_DESC cd, const char **strp,
   errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
   if (errmsg)
     return errmsg;
+
+  if (value > 0xffffff)
+    return _("dsp:24 immediate is out of range");
+
+  *valuep = value;
+  return 0;
+}
+
+/* This should only be used for #imm->reg.  */
+static const char *
+parse_signed24 (CGEN_CPU_DESC cd, const char **strp,
+		 int opindex, signed long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+
+  PARSE_SIGNED;
+
+  if (value <= 0xffffff && value > 0x7fffff)
+    value -= 0x1000000;
 
   if (value > 0xffffff)
     return _("dsp:24 immediate is out of range");
@@ -749,14 +794,14 @@ m32c_cgen_insn_supported (CGEN_CPU_DESC cd,
 			  const CGEN_INSN *insn)
 {
   int machs = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH);
-  int isas = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_ISA);
+  CGEN_BITSET isas = CGEN_INSN_BITSET_ATTR_VALUE (insn, CGEN_INSN_ISA);
 
   /* If attributes are absent, assume no restriction.  */
   if (machs == 0)
     machs = ~0;
 
   return ((machs & cd->machs)
-	  && (isas & cd->isas));
+          && cgen_bitset_intersect_p (& isas, cd->isas));
 }
 
 /* Parse a set of registers, R0,R1,A0,A1,SB,FB.  */
@@ -1038,6 +1083,9 @@ m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_DSP_48_U8 :
       errmsg = parse_unsigned8 (cd, strp, M32C_OPERAND_DSP_48_U8, (unsigned long *) (& fields->f_dsp_48_u8));
       break;
+    case M32C_OPERAND_DSP_8_S24 :
+      errmsg = parse_signed24 (cd, strp, M32C_OPERAND_DSP_8_S24, (long *) (& fields->f_dsp_8_s24));
+      break;
     case M32C_OPERAND_DSP_8_S8 :
       errmsg = parse_signed8 (cd, strp, M32C_OPERAND_DSP_8_S8, (long *) (& fields->f_dsp_8_s8));
       break;
@@ -1149,6 +1197,9 @@ m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_IMM_12_S4 :
       errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_12_S4, (long *) (& fields->f_imm_12_s4));
       break;
+    case M32C_OPERAND_IMM_12_S4N :
+      errmsg = parse_signed4n (cd, strp, M32C_OPERAND_IMM_12_S4N, (long *) (& fields->f_imm_12_s4));
+      break;
     case M32C_OPERAND_IMM_13_U3 :
       errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_13_U3, (long *) (& fields->f_imm_13_u3));
       break;
@@ -1217,6 +1268,9 @@ m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case M32C_OPERAND_IMM_8_S4 :
       errmsg = parse_signed4 (cd, strp, M32C_OPERAND_IMM_8_S4, (long *) (& fields->f_imm_8_s4));
+      break;
+    case M32C_OPERAND_IMM_8_S4N :
+      errmsg = parse_signed4n (cd, strp, M32C_OPERAND_IMM_8_S4N, (long *) (& fields->f_imm_8_s4));
       break;
     case M32C_OPERAND_IMM_SH_12_S4 :
       errmsg = cgen_parse_keyword (cd, strp, & m32c_cgen_opval_h_shimm, & fields->f_imm_12_s4);

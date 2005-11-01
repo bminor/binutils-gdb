@@ -73,6 +73,9 @@ struct ui_file *gdb_stdtargin;
 struct ui_file *gdb_stdtarg;
 struct ui_file *gdb_stdtargerr;
 
+/* Support for the --batch-silent option.  */
+int batch_silent = 0;
+
 /* Whether to enable writing into executable and core files */
 extern int write_files;
 
@@ -254,6 +257,7 @@ captured_main (void *data)
       {"silent", no_argument, &quiet, 1},
       {"nx", no_argument, &inhibit_gdbinit, 1},
       {"n", no_argument, &inhibit_gdbinit, 1},
+      {"batch-silent", no_argument, 0, 'B'},
       {"batch", no_argument, &batch, 1},
       {"epoch", no_argument, &epoch_interface, 1},
 
@@ -378,6 +382,10 @@ captured_main (void *data)
 		cmdarg = (char **) xrealloc ((char *) cmdarg,
 					     cmdsize * sizeof (*cmdarg));
 	      }
+	    break;
+	  case 'B':
+	    batch = batch_silent = 1;
+	    gdb_stdout = ui_file_new();
 	    break;
 #ifdef GDBTK
 	  case 'z':
@@ -829,6 +837,7 @@ Options:\n\n\
   fputs_unfiltered (_("\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   --batch            Exit after processing options.\n\
+  --batch-silent     As for --batch, but suppress all gdb stdout output.\n\
   --cd=DIR           Change current directory to DIR.\n\
   --command=FILE     Execute GDB commands from FILE.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
