@@ -1,3 +1,7 @@
+2005-11-01  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.texinfo (Choosing modes): Add --batch-silent.
+
 2005-10-28  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Fix @pxref usage under

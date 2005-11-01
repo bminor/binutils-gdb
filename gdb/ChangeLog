@@ -1,3 +1,11 @@
+2005-11-01  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* event-top.c (gdb_setup_readline): Don't set gdb_stdout when
+	--batch-silent option was given.
+	* main.c (batch_silent): New variable.
+	(captured_main): Add new option --batch-silent.
+	(print_gdb_help): Likewise.
+
 2005-11-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* NEWS: Mention VAX floating point support.

@@ -994,6 +994,19 @@ Program exited normally.
 @value{GDBN} control terminates) is not issued when running in batch
 mode.
 
+@item -batch-silent
+@cindex @code{--batch-silent}
+Run in batch mode exactly like @samp{-batch}, but totally silently.  All
+@value{GDBN} output to @code{stdout} is prevented (@code{stderr} is
+unaffected).  This is much quieter than @samp{-silent} and would be useless
+for an interactive session.
+
+This is particularly useful when using targets that give @samp{Loading section}
+messages, for example.
+
+Note that targets that give their output via @value{GDBN}, as opposed to
+writing directly to @code{stdout}, will also be made silent.
+
 @item -nowindows
 @itemx -nw
 @cindex @code{--nowindows}
