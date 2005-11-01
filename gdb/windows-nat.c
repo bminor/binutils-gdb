@@ -54,6 +54,7 @@
 #include <unistd.h>
 #include "exec.h"
 #include "solist.h"
+#include "solib.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -517,7 +518,6 @@ struct safe_symbol_file_add_args
 struct lm_info
 {
   DWORD load_addr;
-  DWORD end_addr;
 };
 
 static struct so_list solib_start, *solib_end;
@@ -577,14 +577,121 @@ safe_symbol_file_add (char *name, int from_tty,
   return p.ret;
 }
 
+/* Get the loaded address of all sections, given that .text was loaded
+   at text_load. Assumes that all sections are subject to the same
+   relocation offset. Returns NULL if problems occur or if the
+   sections were not relocated. */
+
+static struct section_addr_info *
+get_relocated_section_addrs (bfd *abfd, CORE_ADDR text_load)
+{
+  struct section_addr_info *result = NULL;
+  int section_count = bfd_count_sections (abfd);
+  asection *text_section = bfd_get_section_by_name (abfd, ".text");
+  CORE_ADDR text_vma;
+
+  if (!text_section)
+    {
+      /* Couldn't get the .text section. Weird. */
+    }
+
+  else if (text_load == (text_vma = bfd_get_section_vma (abfd, text_section)))
+    {
+      /* DLL wasn't relocated. */
+    }
+
+  else
+    {
+      /* Figure out all sections' loaded addresses. The offset here is
+	 such that taking a bfd_get_section_vma() result and adding
+	 offset will give the real load address of the section. */
+
+      CORE_ADDR offset = text_load - text_vma;
+
+      struct section_table *table_start = NULL;
+      struct section_table *table_end = NULL;
+      struct section_table *iter = NULL;
+
+      build_section_table (abfd, &table_start, &table_end);
+
+      for (iter = table_start; iter < table_end; ++iter)
+	{
+	  /* Relocated addresses. */
+	  iter->addr += offset;
+	  iter->endaddr += offset;
+	}
+
+      result = build_section_addr_info_from_section_table (table_start,
+							   table_end);
+
+      xfree (table_start);
+    }
+
+  return result;
+}
+
+/* Add DLL symbol information. */
+static void
+solib_symbols_add (struct so_list *so, CORE_ADDR load_addr)
+{
+  struct section_addr_info *addrs = NULL;
+  static struct objfile *result = NULL;
+  char *name = so->so_name;
+  bfd *abfd = NULL;
+
+  /* The symbols in a dll are offset by 0x1000, which is the
+     the offset from 0 of the first byte in an image - because
+     of the file header and the section alignment. */
+
+  if (!name || !name[0])
+    return;
+
+  abfd = bfd_openr (name, "pei-i386");
+
+  if (!abfd)
+    {
+      /* pei failed - try pe */
+      abfd = bfd_openr (name, "pe-i386");
+    }
+
+  if (abfd)
+    {
+      if (bfd_check_format (abfd, bfd_object))
+	addrs = get_relocated_section_addrs (abfd, load_addr);
+
+      bfd_close (abfd);
+    }
+
+  if (addrs)
+    {
+      result = safe_symbol_file_add (name, 0, addrs, 0, OBJF_SHARED);
+      free_section_addr_info (addrs);
+    }
+  else
+    {
+      /* Fallback on handling just the .text section. */
+      struct cleanup *my_cleanups;
+
+      addrs = alloc_section_addr_info (1);
+      my_cleanups = make_cleanup (xfree, addrs);
+      addrs->other[0].name = ".text";
+      addrs->other[0].addr = load_addr;
+
+      result = safe_symbol_file_add (name, 0, addrs, 0, OBJF_SHARED);
+      do_cleanups (my_cleanups);
+    }
+
+  so->symbols_loaded = !!result;
+  return;
+}
+
 /* Remember the maximum DLL length for printing in info dll command. */
 static int max_dll_name_len;
 
-static void
-register_loaded_dll (const char *name, DWORD load_addr)
+static char *
+register_loaded_dll (const char *name, DWORD load_addr, int readsyms)
 {
   struct so_list *so;
-  char ppath[MAX_PATH + 1];
   char buf[MAX_PATH + 1];
   char cwd[MAX_PATH + 1];
   char *p;
@@ -615,25 +722,21 @@ register_loaded_dll (const char *name, DWORD load_addr)
       GetSystemDirectory (buf, sizeof (buf));
       strcat (buf, "\\ntdll.dll");
     }
-  cygwin_conv_to_posix_path (buf, ppath);
-  so = (struct so_list *) xmalloc (sizeof (struct so_list) + strlen (ppath) + 8 + 1);
+  so = (struct so_list *) xmalloc (sizeof (struct so_list));
   memset (so, 0, sizeof (*so));
   so->lm_info = (struct lm_info *) xmalloc (sizeof (struct lm_info));
   so->lm_info->load_addr = load_addr;
-  if (VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
-		      sizeof (m)))
-    so->lm_info->end_addr = (DWORD) m.AllocationBase + m.RegionSize;
-  else
-    so->lm_info->end_addr = load_addr + 0x2000;	/* completely arbitrary */
-
-  so->next = NULL;
-  strcpy (so->so_name, ppath);
+  cygwin_conv_to_posix_path (buf, so->so_name);
+  strcpy (so->so_original_name, so->so_name);
 
   solib_end->next = so;
   solib_end = so;
-  len = strlen (ppath);
+  len = strlen (so->so_name);
   if (len > max_dll_name_len)
     max_dll_name_len = len;
+  if (readsyms)
+    solib_symbols_add (so, (CORE_ADDR) load_addr);
+  return so->so_name;
 }
 
 static char *
@@ -699,7 +802,7 @@ handle_load_dll (void *dummy)
   if (!dll_name)
     return 1;
 
-  register_loaded_dll (dll_name, (DWORD) event->lpBaseOfDll + 0x1000);
+  register_loaded_dll (dll_name, (DWORD) event->lpBaseOfDll + 0x1000, auto_solib_add);
 
   return 1;
 }
@@ -707,16 +810,8 @@ handle_load_dll (void *dummy)
 static void
 win32_free_so (struct so_list *so)
 {
-  if (so->objfile)
-    free_objfile (so->objfile);
   if (so->lm_info)
     xfree (so->lm_info);
-}
-
-static struct so_list *
-win32_current_sos (void)
-{
-  return solib_start.next;
 }
 
 static void
@@ -724,6 +819,13 @@ win32_relocate_section_addresses (struct so_list *so,
 				  struct section_table *sec)
 {
   /* FIXME */
+  return;
+}
+
+static void
+win32_solib_create_inferior_hook (void)
+{
+  solib_add (NULL, 0, NULL, auto_solib_add);
   return;
 }
 
@@ -752,11 +854,15 @@ handle_unload_dll (void *dummy)
 static void
 win32_clear_solib (void)
 {
-  struct so_list *so, *so1 = solib_start.next;
-
   solib_start.next = NULL;
   solib_end = &solib_start;
   max_dll_name_len = sizeof ("DLL Name") - 1;
+}
+
+static void
+win32_special_symbol_handling (void)
+{
+  return;
 }
 
 /* Load DLL symbol info. */
@@ -1575,18 +1681,18 @@ win32_pid_to_exec_file (int pid)
   cygwin_internal (CW_LOCK_PINFO, 1000);
   for (cpid = 0;
        (pinfo = (struct external_pinfo *)
-                       cygwin_internal (CW_GETPINFO, cpid | CW_NEXTPID));
+	cygwin_internal (CW_GETPINFO, cpid | CW_NEXTPID));
        cpid = pinfo->pid)
     {
       if (pinfo->dwProcessId == current_event.dwProcessId) /* Got it */
        {
-         cygwin_conv_to_full_posix_path (pinfo->progname, path);
-         path_ptr = path; 
-         break;
+	 cygwin_conv_to_full_posix_path (pinfo->progname, path);
+	 path_ptr = path;
+	 break;
        }
     }
   cygwin_internal (CW_UNLOCK_PINFO);
-  return path_ptr; 
+  return path_ptr;
 }
 
 /* Print status information about what we're accessing.  */
@@ -1987,6 +2093,178 @@ cygwin_pid_to_str (ptid_t ptid)
   return buf;
 }
 
+typedef struct
+{
+  struct target_ops *target;
+  bfd_vma addr;
+} map_code_section_args;
+
+static void
+map_single_dll_code_section (bfd *abfd, asection *sect, void *obj)
+{
+  int old;
+  int update_coreops;
+  struct section_table *new_target_sect_ptr;
+
+  map_code_section_args *args = (map_code_section_args *) obj;
+  struct target_ops *target = args->target;
+  if (sect->flags & SEC_CODE)
+    {
+      update_coreops = core_ops.to_sections == target->to_sections;
+
+      if (target->to_sections)
+	{
+	  old = target->to_sections_end - target->to_sections;
+	  target->to_sections = (struct section_table *)
+	    xrealloc ((char *) target->to_sections,
+		      (sizeof (struct section_table)) * (1 + old));
+	}
+      else
+	{
+	  old = 0;
+	  target->to_sections = (struct section_table *)
+	    xmalloc ((sizeof (struct section_table)));
+	}
+      target->to_sections_end = target->to_sections + (1 + old);
+
+      /* Update the to_sections field in the core_ops structure
+	 if needed.  */
+      if (update_coreops)
+	{
+	  core_ops.to_sections = target->to_sections;
+	  core_ops.to_sections_end = target->to_sections_end;
+	}
+      new_target_sect_ptr = target->to_sections + old;
+      new_target_sect_ptr->addr = args->addr + bfd_section_vma (abfd, sect);
+      new_target_sect_ptr->endaddr = args->addr + bfd_section_vma (abfd, sect) +
+	bfd_section_size (abfd, sect);;
+      new_target_sect_ptr->the_bfd_section = sect;
+      new_target_sect_ptr->bfd = abfd;
+    }
+}
+
+static int
+dll_code_sections_add (const char *dll_name, int base_addr, struct target_ops *target)
+{
+  bfd *dll_bfd;
+  map_code_section_args map_args;
+  asection *lowest_sect;
+  char *name;
+  if (dll_name == NULL || target == NULL)
+    return 0;
+  name = xstrdup (dll_name);
+  dll_bfd = bfd_openr (name, "pei-i386");
+  if (dll_bfd == NULL)
+    return 0;
+
+  if (bfd_check_format (dll_bfd, bfd_object))
+    {
+      lowest_sect = bfd_get_section_by_name (dll_bfd, ".text");
+      if (lowest_sect == NULL)
+	return 0;
+      map_args.target = target;
+      map_args.addr = base_addr - bfd_section_vma (dll_bfd, lowest_sect);
+
+      bfd_map_over_sections (dll_bfd, &map_single_dll_code_section, (void *) (&map_args));
+    }
+
+  return 1;
+}
+
+static void
+core_section_load_dll_symbols (bfd *abfd, asection *sect, void *obj)
+{
+  struct target_ops *target = (struct target_ops *) obj;
+
+  DWORD base_addr;
+
+  int dll_name_size;
+  struct win32_pstatus *pstatus;
+  struct so_list *so;
+  char *dll_name;
+  char *buf = NULL;
+  char *p;
+  struct objfile *objfile;
+  const char *dll_basename;
+
+  if (strncmp (sect->name, ".module", 7) != 0)
+    return;
+
+  buf = (char *) xmalloc (bfd_get_section_size (sect) + 1);
+  if (!buf)
+    {
+      printf_unfiltered ("memory allocation failed for %s\n", sect->name);
+      goto out;
+    }
+  if (!bfd_get_section_contents (abfd, sect, buf, 0, bfd_get_section_size (sect)))
+    goto out;
+
+  pstatus = (struct win32_pstatus *) buf;
+
+  memmove (&base_addr, &(pstatus->data.module_info.base_address), sizeof (base_addr));
+  dll_name_size = pstatus->data.module_info.module_name_size;
+  if (offsetof (struct win32_pstatus, data.module_info.module_name) + dll_name_size > bfd_get_section_size (sect))
+      goto out;
+
+  dll_name = pstatus->data.module_info.module_name;
+
+  if (!(dll_basename = strrchr (dll_name, '/')))
+    dll_basename = dll_name;
+  else
+    dll_basename++;
+
+  ALL_OBJFILES (objfile)
+  {
+    char *objfile_basename = strrchr (objfile->name, '/');
+
+    if (objfile_basename &&
+	strcasecmp (dll_basename, objfile_basename + 1) == 0)
+      goto out;
+  }
+
+  base_addr += 0x1000;
+  dll_name = register_loaded_dll (dll_name, base_addr, 1);
+
+  if (!dll_code_sections_add (dll_name, (DWORD) base_addr, target))
+    printf_unfiltered ("%s: Failed to map dll code sections.\n", dll_name);
+
+out:
+  if (buf)
+    xfree (buf);
+  return;
+}
+
+static struct so_list *
+win32_current_sos (void)
+{
+  struct so_list *head = solib_start.next;
+  win32_clear_solib ();
+  if (!head && core_bfd)
+    {
+      bfd_map_over_sections (core_bfd, &core_section_load_dll_symbols,
+			     &win32_ops);
+      head = solib_start.next;
+      win32_clear_solib ();
+    }
+  return head;
+}
+
+static void
+fetch_elf_core_registers (char *core_reg_sect,
+			  unsigned core_reg_size,
+			  int which,
+			  CORE_ADDR reg_addr)
+{
+  int r;
+  if (core_reg_size < sizeof (CONTEXT))
+    {
+      error (_("Core file register section too small (%u bytes)."), core_reg_size);
+      return;
+    }
+  for (r = 0; r < NUM_REGS; r++)
+    regcache_raw_supply (current_regcache, r, core_reg_sect + mappings[r]);
+}
+
 static void
 init_win32_ops (void)
 {
@@ -2031,8 +2309,8 @@ init_win32_ops (void)
   win32_so_ops.relocate_section_addresses = win32_relocate_section_addresses;
   win32_so_ops.free_so = win32_free_so;
   win32_so_ops.clear_solib = win32_clear_solib;
-  win32_so_ops.solib_create_inferior_hook = NULL;
-  win32_so_ops.special_symbol_handling = NULL;
+  win32_so_ops.solib_create_inferior_hook = win32_solib_create_inferior_hook;
+  win32_so_ops.special_symbol_handling = win32_special_symbol_handling;
   win32_so_ops.current_sos = win32_current_sos;
   win32_so_ops.open_symbol_file_object = NULL;
   win32_so_ops.in_dynsym_resolve_code = NULL;
@@ -2163,22 +2441,6 @@ win32_win32_thread_alive (ptid_t ptid)
 
   return WaitForSingleObject (thread_rec (pid, FALSE)->h, 0) == WAIT_OBJECT_0 ?
     FALSE : TRUE;
-}
-
-static void
-fetch_elf_core_registers (char *core_reg_sect,
-			  unsigned core_reg_size,
-			  int which,
-			  CORE_ADDR reg_addr)
-{
-  int r;
-  if (core_reg_size < sizeof (CONTEXT))
-    {
-      error (_("Core file register section too small (%u bytes)."), core_reg_size);
-      return;
-    }
-  for (r = 0; r < NUM_REGS; r++)
-    regcache_raw_supply (current_regcache, r, core_reg_sect + mappings[r]);
 }
 
 static struct core_fns win32_elf_core_fns =

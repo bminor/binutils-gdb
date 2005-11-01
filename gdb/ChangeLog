@@ -1,5 +1,31 @@
 2005-10-31  Christopher Faylor  <cgf@timesys.com>
 
+	* win32-nat.c (get_relocated_section_addrs): Reinstate.
+	(solib_symbols_add): New function.
+	(lm_info): Remove end_addr field.
+	(register_loaded_dll): Don't try to find end_addr since gdb will do
+	this automatically now.  Make so_original_name == so_name for now.
+	Eliminate strcpy by using so_name directly.  Read in symbols if new
+	paramater "readsyms" is true.
+	(handle_load_dll): Pass auto_solib_add to register_loaded_dll to
+	control when symbols should be read.
+	(win32_free_so): Don't free objfile here.
+	(win32_create_inferior_hook): New function.
+	(handle_unload_dll): Remove left-over cruft.
+	(win32_special_symbol_handling): New (dummy) function.
+	(map_single_dll_code_section): Reinstate.
+	(dll_code_sections_add): Reinstate.
+	(core_section_load_dll_symbols): Reinstate.  Don't issue an error on
+	duplicate attempts to read same dll.  Make sure that UNIX-like name is
+	used to register DLL.
+	(win32_current_sos): Handle core files.  Reset private list before
+	passing start of list pointer to gdb.
+	(init_win32_ops): Fill out (currently unused)
+	solib_create_inferior_hook.  Fill out special_symbol_handling.
+	* config/i386/tm-cygwin.h: Remove most special solib stuff.
+
+2005-10-31  Christopher Faylor  <cgf@timesys.com>
+
 	* win32-nat.c: Remove comment intended only for debugging.
 
 2005-11-01  Mark Kettenis  <kettenis@gnu.org>
