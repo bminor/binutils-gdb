@@ -80,13 +80,13 @@ static ptid_t monitor_wait (ptid_t ptid, struct target_waitstatus *status);
 static void monitor_fetch_registers (int regno);
 static void monitor_store_registers (int regno);
 static void monitor_prepare_to_store (void);
-static int monitor_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+static int monitor_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 				int write, 
 				struct mem_attrib *attrib,
 				struct target_ops *target);
 static void monitor_files_info (struct target_ops *ops);
-static int monitor_insert_breakpoint (CORE_ADDR addr, char *shadow);
-static int monitor_remove_breakpoint (CORE_ADDR addr, char *shadow);
+static int monitor_insert_breakpoint (CORE_ADDR addr, gdb_byte *shadow);
+static int monitor_remove_breakpoint (CORE_ADDR addr, gdb_byte *shadow);
 static void monitor_kill (void);
 static void monitor_load (char *file, int from_tty);
 static void monitor_mourn_inferior (void);
@@ -1982,7 +1982,7 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
    unused. */
 
 static int
-monitor_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+monitor_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		     struct mem_attrib *attrib, struct target_ops *target)
 {
   int res;
@@ -2038,7 +2038,7 @@ monitor_mourn_inferior (void)
 /* Tell the monitor to add a breakpoint.  */
 
 static int
-monitor_insert_breakpoint (CORE_ADDR addr, char *shadow)
+monitor_insert_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 {
   int i;
   const unsigned char *bp;
@@ -2072,7 +2072,7 @@ monitor_insert_breakpoint (CORE_ADDR addr, char *shadow)
 /* Tell the monitor to remove a breakpoint.  */
 
 static int
-monitor_remove_breakpoint (CORE_ADDR addr, char *shadow)
+monitor_remove_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 {
   int i;
 

@@ -1,3 +1,20 @@
+2005-11-02  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* monitor.c (monitor_xfer_memory): Change char to gdb_byte.
+	(monitor_insert_breakpoint): Likewise.
+	(monitor_remove_breakpoint): Likewise.
+	* remote-e7000.c (e7000_xfer_inferior_memory): Likewise.
+	* sh-tdep.c (sh_return_value_nofpu): Change void to gdb_byte.
+	(sh_return_value_fpu): Likewise.
+	(sh_pseudo_register_read): Likewise.
+	(sh_pseudo_register_write): Likewise.
+	(sh_frame_prev_register): Likewise.
+	* sh64-tdep.c (sh64_extract_return_value): Change char to gdb_byte.
+	(sh64_return_value): Change void to gdb_byte.
+	(sh64_pseudo_register_read): Likewise.
+	(sh64_pseudo_register_write): Likewise.
+	(sh64_frame_prev_register): Likewise.
+
 2005-11-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* event-top.c (gdb_setup_readline): Add missing type in extern

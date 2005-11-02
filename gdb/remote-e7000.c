@@ -1478,7 +1478,7 @@ fast_but_for_the_pause_e7000_read_inferior_memory (CORE_ADDR memaddr,
    Returns the number of bytes transferred. */
 
 static int
-e7000_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+e7000_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			    int write, struct mem_attrib *attrib,
 			    struct target_ops *target)
 {
