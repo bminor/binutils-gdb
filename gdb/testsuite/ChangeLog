@@ -1,3 +1,7 @@
+2005-11-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.arch/gdb1558.c: Include stdio.h.
+
 2005-10-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp: Use -e instead of --entry.
