@@ -1,3 +1,7 @@
+2005-11-02  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (print_insn_thumb32): Word align blx target address.
+
 2005-10-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* arm-dis.c (print_insn): Warning fix.
