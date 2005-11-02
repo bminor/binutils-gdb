@@ -1,6 +1,6 @@
 /* GNU/Linux/x86-64 specific low level interface, for the remote server
    for GDB.
-   Copyright 2002, 2004
+   Copyright 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -129,9 +129,53 @@ struct regset_info target_regsets[] = {
   { 0, 0, -1, -1, NULL, NULL }
 };
 
+static const unsigned char x86_64_breakpoint[] = { 0xCC };
+#define x86_64_breakpoint_len 1
+                
+extern int debug_threads;
+
+static CORE_ADDR
+x86_64_get_pc ()
+{
+  unsigned long pc;
+
+  collect_register_by_name ("rip", &pc);
+
+  if (debug_threads)
+    fprintf (stderr, "stop pc (before any decrement) is %08lx\n", pc);
+  return pc;
+}
+
+static void
+x86_64_set_pc (CORE_ADDR newpc)
+{
+  if (debug_threads)
+    fprintf (stderr, "set pc to %08lx\n", (long) newpc);
+  supply_register_by_name ("rip", &newpc);
+}
+
+static int
+x86_64_breakpoint_at (CORE_ADDR pc)
+{
+  unsigned char c;
+
+  read_inferior_memory (pc, &c, 1);
+  if (c == 0xCC)
+    return 1;
+
+  return 0;
+}
+
 struct linux_target_ops the_low_target = {
   -1,
   NULL,
   NULL,
   NULL,
+  x86_64_get_pc,
+  x86_64_set_pc,
+  x86_64_breakpoint,  
+  x86_64_breakpoint_len,
+  NULL,                                 
+  1,
+  x86_64_breakpoint_at,
 };
