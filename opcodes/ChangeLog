@@ -1,3 +1,10 @@
+2005-11-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* iq2000-desc.c: Regenerated.
+	* iq2000-desc.h: Likewise.
+	* iq2000-dis.c: Likewise.
+	* iq2000-opc.c: Likewise.
+
 2005-11-02  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (print_insn_thumb32): Word align blx target address.
