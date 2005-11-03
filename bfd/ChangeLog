@@ -1,3 +1,11 @@
+2005-11-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elf_fake_sections): When calculating tbss size, just use
+	the last link_order.
+	(assign_file_positions_for_segments): Likewise.
+	* elflink.c (bfd_elf_final_link): Likewise.
+	(elf_reloc_link_order): Correct comment.
+
 2005-11-02  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/1775

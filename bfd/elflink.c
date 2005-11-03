@@ -7394,7 +7394,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 }
 
 /* Generate a reloc when linking an ELF file.  This is a reloc
-   requested by the linker, and does come from any input file.  This
+   requested by the linker, and does not come from any input file.  This
    is used to build constructor and destructor tables when linking
    with -Ur.  */
 
@@ -8129,15 +8129,14 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	   sec && (sec->flags & SEC_THREAD_LOCAL);
 	   sec = sec->next)
 	{
-	  bfd_vma size = sec->size;
+	  bfd_size_type size = sec->size;
 
-	  if (size == 0 && (sec->flags & SEC_HAS_CONTENTS) == 0)
+	  if (size == 0
+	      && (sec->flags & SEC_HAS_CONTENTS) == 0)
 	    {
-	      struct bfd_link_order *o;
-
-	      for (o = sec->map_head.link_order; o != NULL; o = o->next)
-		if (size < o->offset + o->size)
-		  size = o->offset + o->size;
+	      struct bfd_link_order *o = sec->map_tail.link_order;
+	      if (o != NULL)
+		size = o->offset + o->size;
 	    }
 	  end = sec->vma + size;
 	}
