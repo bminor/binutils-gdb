@@ -921,7 +921,7 @@ AC_SUBST(bfd_default_target_size)
 # fseeko, long.  This assumes that sizeof off_t is .ge. sizeof long.
 # Hopefully a reasonable assumption since fseeko et.al. should be
 # upward compatible.
-AC_CHECK_FUNCS(ftello ftello64 fseeko fseeko64)
+AC_CHECK_FUNCS(ftello ftello64 fseeko fseeko64 fopen64)
 if test x"$ac_cv_func_ftello" = xyes -a x"$ac_cv_func_fseeko" = xyes; then
     AC_CHECK_SIZEOF(off_t)
 fi

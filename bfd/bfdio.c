@@ -63,6 +63,16 @@ real_fseek (FILE *file, file_ptr offset, int whence)
 #endif
 }
 
+FILE *
+real_fopen (const char *filename, const char *modes)
+{
+#if defined (HAVE_FOPEN64)
+  return fopen64 (filename, modes);
+#else
+  return fopen (filename, modes);
+#endif
+}
+
 /*
 INTERNAL_DEFINITION
 	struct bfd_iovec
