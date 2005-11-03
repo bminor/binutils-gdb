@@ -211,26 +211,30 @@ cat <<EOF
      segment; there is no runtime relocation applied to these
      arrays.  */
 
-  /* Ensure the __preinit_array_start label is properly aligned.  We
-     could instead move the label definition inside the section, but
-     the linker would then create the section even if it turns out to
-     be empty, which isn't pretty.  */
-  ${RELOCATING+. = ALIGN(${ALIGNMENT});}
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_start = .);}}
-  .preinit_array   ${RELOCATING-0} : { *(.preinit_array) }
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__preinit_array_end = .);}}
-
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_start = .);}}
-  /* SymbianOS uses this symbol.  */
-  ${RELOCATING+PROVIDE (SHT\$\$INIT_ARRAY\$\$Base = .);}
-  .init_array   ${RELOCATING-0} : { *(.init_array) }
-  /* SymbianOS uses this symbol.  */
-  ${RELOCATING+PROVIDE (SHT\$\$INIT_ARRAY\$\$Limit = .);}
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__init_array_end = .);}}
-
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_start = .);}}
-  .fini_array   ${RELOCATING-0} : { *(.fini_array) }
-  ${RELOCATING+${CREATE_SHLIB-PROVIDE (__fini_array_end = .);}}
+  .preinit_array   ${RELOCATING-0} :
+  {
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__preinit_array_start = .);}}
+    KEEP (*(.preinit_array))
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__preinit_array_end = .);}}
+  }
+  .init_array   ${RELOCATING-0} :
+  {
+    /* SymbianOS uses this symbol.  */
+    ${RELOCATING+PROVIDE (SHT\$\$INIT_ARRAY\$\$Base = .);}
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__init_array_start = .);}}
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array))
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__init_array_end = .);}}
+    /* SymbianOS uses this symbol.  */
+    ${RELOCATING+PROVIDE (SHT\$\$INIT_ARRAY\$\$Limit = .);}
+  }
+  .fini_array   ${RELOCATING-0} :
+  {
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__fini_array_start = .);}}
+    KEEP (*(.fini_array))
+    KEEP (*(SORT(.fini_array.*)))
+    ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__fini_array_end = .);}}
+  }
 
   ${OTHER_READONLY_SECTIONS}
   .eh_frame_hdr : { *(.eh_frame_hdr) }

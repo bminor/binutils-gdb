@@ -384,6 +384,7 @@ cat <<EOF
   .init_array   ${RELOCATING-0} :
   {
      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__init_array_start = .);}}
+     KEEP (*(SORT(.init_array.*)))
      KEEP (*(.init_array))
      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__init_array_end = .);}}
   }
@@ -391,6 +392,7 @@ cat <<EOF
   {
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__fini_array_start = .);}}
     KEEP (*(.fini_array))
+    KEEP (*(SORT(.fini_array.*)))
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__fini_array_end = .);}}
   }
   ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}

@@ -1,3 +1,11 @@
+2005-11-03  Paul Brook  <paul@codesourcery.com>
+
+	* scripttempl/elf.sc: Add .init_array.* and .fini_array.*.
+	* scripttempl/armbpabi.sc: Make init/fini array consistent with
+	elf.sc.
+	* scripttempl/elf32sh-symbian.sc: Ditto.
+	* scripttempl/elfxtensa.sc: Ditto.
+
 2005-11-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (lang_output_section_statement_type): Rearrange.  Remove
