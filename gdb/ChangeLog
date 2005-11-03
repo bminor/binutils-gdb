@@ -1,3 +1,9 @@
+2005-11-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-nat.c (linux_nat_resume): Add more debugging messages.  Do
+	not short-circuit resuming all threads if the signal will be ignored
+	in linux_nat_wait.
+
 2005-11-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Changes sinces GDB 6.3 are now labled as changes in GDB 6.4.

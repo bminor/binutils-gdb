@@ -1072,6 +1072,14 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
   struct lwp_info *lp;
   int resume_all;
 
+  if (debug_linux_nat)
+    fprintf_unfiltered (gdb_stdlog,
+			"LLR: Preparing to %s %s, %s, inferior_ptid %s\n",
+			step ? "step" : "resume",
+			target_pid_to_str (ptid),
+			signo ? strsignal (signo) : "0",
+			target_pid_to_str (inferior_ptid));
+
   /* A specific PTID means `step only this process id'.  */
   resume_all = (PIDGET (ptid) == -1);
 
@@ -1097,12 +1105,45 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
       lp->resumed = 1;
 
       /* If we have a pending wait status for this thread, there is no
-         point in resuming the process.  */
+	 point in resuming the process.  But first make sure that
+	 linux_nat_wait won't preemptively handle the event - we
+	 should never take this short-circuit if we are going to
+	 leave LP running, since we have skipped resuming all the
+	 other threads.  This bit of code needs to be synchronized
+	 with linux_nat_wait.  */
+
+      if (lp->status && WIFSTOPPED (lp->status))
+	{
+	  int saved_signo = target_signal_from_host (WSTOPSIG (lp->status));
+
+	  if (signal_stop_state (saved_signo) == 0
+	      && signal_print_state (saved_signo) == 0
+	      && signal_pass_state (saved_signo) == 1)
+	    {
+	      if (debug_linux_nat)
+		fprintf_unfiltered (gdb_stdlog,
+				    "LLR: Not short circuiting for ignored "
+				    "status 0x%x\n", lp->status);
+
+	      /* FIXME: What should we do if we are supposed to continue
+		 this thread with a signal?  */
+	      gdb_assert (signo == TARGET_SIGNAL_0);
+	      signo = saved_signo;
+	      lp->status = 0;
+	    }
+	}
+
       if (lp->status)
 	{
 	  /* FIXME: What should we do if we are supposed to continue
 	     this thread with a signal?  */
 	  gdb_assert (signo == TARGET_SIGNAL_0);
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LLR: Short circuiting for status 0x%x\n",
+				lp->status);
+
 	  return;
 	}
 
