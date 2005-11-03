@@ -1087,12 +1087,12 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
       lookup->bfd_section = NULL;
       lookup->processed = FALSE;
       lookup->constraint = constraint;
+      lookup->all_input_readonly = FALSE;
       lookup->ignored = FALSE;
       lookup->sectype = normal_section;
       lookup->addr_tree = NULL;
       lang_list_init (&lookup->children);
 
-      lookup->memspec = NULL;
       lookup->flags = 0;
       lookup->subsection_alignment = -1;
       lookup->section_alignment = -1;
@@ -1691,9 +1691,6 @@ init_os (lang_output_section_statement_type *s, asection *isec)
 	     output_bfd->xvec->name, s->name);
     }
   s->bfd_section->output_section = s->bfd_section;
-
-  /* We initialize an output sections output offset to minus its own
-     vma to allow us to output a section through itself.  */
   s->bfd_section->output_offset = 0;
   if (!command_line.reduce_memory_overheads)
     {
@@ -3545,7 +3542,7 @@ print_data_statement (lang_data_statement_type *data)
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
 
-  addr = data->output_vma;
+  addr = data->output_offset;
   if (data->output_section != NULL)
     addr += data->output_section->vma;
 
@@ -3612,7 +3609,7 @@ print_reloc_statement (lang_reloc_statement_type *reloc)
   for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
     print_space ();
 
-  addr = reloc->output_vma;
+  addr = reloc->output_offset;
   if (reloc->output_section != NULL)
     addr += reloc->output_section->vma;
 
@@ -4292,7 +4289,7 @@ lang_size_sections_1
 	  {
 	    unsigned int size = 0;
 
-	    s->data_statement.output_vma =
+	    s->data_statement.output_offset =
 	      dot - output_section_statement->bfd_section->vma;
 	    s->data_statement.output_section =
 	      output_section_statement->bfd_section;
@@ -4330,7 +4327,7 @@ lang_size_sections_1
 	  {
 	    int size;
 
-	    s->reloc_statement.output_vma =
+	    s->reloc_statement.output_offset =
 	      dot - output_section_statement->bfd_section->vma;
 	    s->reloc_statement.output_section =
 	      output_section_statement->bfd_section;
@@ -5680,7 +5677,7 @@ lang_add_reloc (bfd_reloc_code_real_type reloc,
 
   p->addend_value = 0;
   p->output_section = NULL;
-  p->output_vma = 0;
+  p->output_offset = 0;
 }
 
 lang_assignment_statement_type *

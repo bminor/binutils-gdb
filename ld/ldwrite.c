@@ -55,7 +55,7 @@ build_link_order (lang_statement_union_type *statement)
 	  einfo (_("%P%F: bfd_new_link_order failed\n"));
 
 	link_order->type = bfd_data_link_order;
-	link_order->offset = statement->data_statement.output_vma;
+	link_order->offset = statement->data_statement.output_offset;
 	link_order->u.data.contents = xmalloc (QUAD_SIZE);
 
 	value = statement->data_statement.value;
@@ -190,7 +190,7 @@ build_link_order (lang_statement_union_type *statement)
 	if (link_order == NULL)
 	  einfo (_("%P%F: bfd_new_link_order failed\n"));
 
-	link_order->offset = rs->output_vma;
+	link_order->offset = rs->output_offset;
 	link_order->size = bfd_get_reloc_size (rs->howto);
 
 	link_order->u.reloc.p = xmalloc (sizeof (struct bfd_link_order_reloc));

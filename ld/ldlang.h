@@ -128,28 +128,14 @@ typedef struct lang_output_section_phdr_list
 typedef struct lang_output_section_statement_struct
 {
   lang_statement_header_type header;
-  union etree_union *addr_tree;
   lang_statement_list_type children;
-  const char *memspec;
   struct lang_output_section_statement_struct *next;
   const char *name;
-
-  bfd_boolean processed;
-
   asection *bfd_section;
-  flagword flags;		/* Or together of all input sections.  */
-  enum section_type sectype;
   lang_memory_region_type *region;
   lang_memory_region_type *lma_region;
-  size_t block_value;
   fill_type *fill;
-
-  int subsection_alignment;	/* Alignment of components.  */
-  int section_alignment;	/* Alignment of start of section.  */
-  int constraint;
-  unsigned int all_input_readonly : 1;
-  unsigned int ignored : 1; 
-
+  union etree_union *addr_tree;
   union etree_union *load_base;
 
   /* If non-null, an expression to evaluate after setting the section's
@@ -159,6 +145,16 @@ typedef struct lang_output_section_statement_struct
   union etree_union *update_dot_tree;
 
   lang_output_section_phdr_list *phdrs;
+
+  unsigned int block_value;
+  int subsection_alignment;	/* Alignment of components.  */
+  int section_alignment;	/* Alignment of start of section.  */
+  int constraint;
+  flagword flags;
+  enum section_type sectype;
+  unsigned int processed : 1;
+  unsigned int all_input_readonly : 1;
+  unsigned int ignored : 1; 
 } lang_output_section_statement_type;
 
 typedef struct
@@ -186,7 +182,7 @@ typedef struct
   union etree_union *exp;
   bfd_vma value;
   asection *output_section;
-  bfd_vma output_vma;
+  bfd_vma output_offset;
 } lang_data_statement_type;
 
 /* Generate a reloc in the output file.  */
@@ -218,8 +214,8 @@ typedef struct
   /* Output section where reloc should be performed.  */
   asection *output_section;
 
-  /* VMA within output section.  */
-  bfd_vma output_vma;
+  /* Offset within output section.  */
+  bfd_vma output_offset;
 } lang_reloc_statement_type;
 
 typedef struct lang_input_statement_struct

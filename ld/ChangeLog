@@ -1,3 +1,17 @@
+2005-11-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h (lang_output_section_statement_type): Rearrange.  Remove
+	memspec.  Make "processed" a bitfield.
+	(lang_data_statement_type, lang_reloc_statement_type): Rename
+	output_vma to output_offset.
+	* ldlang.c (lang_output_section_statement_lookup_1): Init
+	all_input_readonly.  Don't init memspec.
+	(init_os): Remove incorrect comment.
+	(print_data_statement, print_reloc_statement): Adjust for
+	lang_data_statement_type and lang_reloc_statement_type change.
+	(lang_size_sections_1, lang_add_reloc): Likewise.
+	* ldwrite.c (build_link_order): Likewise.
+
 2005-10-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* lexsup.c (help): Document "@FILE".
