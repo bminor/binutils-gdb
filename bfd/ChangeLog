@@ -1,3 +1,10 @@
+2005-11-03  Thiemo Seufer  <ths@networkno.de>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Handle only
+	forced local symbols here.
+	(mips_elf_create_dynamic_relocation): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Fix typo in comment.
+
 2005-11-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elf_fake_sections): When calculating tbss size, just use

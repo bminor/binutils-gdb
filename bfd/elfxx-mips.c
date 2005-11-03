@@ -3918,7 +3918,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  if (h->tls_type == GOT_NORMAL
 	      && (! elf_hash_table(info)->dynamic_sections_created
 		  || (info->shared
-		      && (info->symbolic || h->root.dynindx == -1)
+		      && (info->symbolic || h->root.forced_local)
 		      && h->root.def_regular)))
 	    {
 	      /* This is a static link or a -Bsymbolic link.  The
@@ -4483,10 +4483,8 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
   /* We must now calculate the dynamic symbol table index to use
      in the relocation.  */
   if (h != NULL
-      && (! info->symbolic || !h->root.def_regular)
-      /* h->root.dynindx may be -1 if this symbol was marked to
-	 become local.  */
-      && h->root.dynindx != -1)
+      && (!h->root.def_regular
+	  || (info->shared && !info->symbolic && !h->root.forced_local)))
     {
       indx = h->root.dynindx;
       if (SGI_COMPAT (output_bfd))
@@ -7379,7 +7377,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 				   MIPS_ELF_STUB_SECTION_NAME (dynobj));
       BFD_ASSERT (s != NULL);
 
-      /* FIXME: Can h->dynindex be more than 64K?  */
+      /* FIXME: Can h->dynindx be more than 64K?  */
       if (h->dynindx & 0xffff0000)
 	return FALSE;
 
