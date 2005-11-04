@@ -3855,6 +3855,28 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 		  TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
 		}
 	    }
+	  else if (cu->producer
+		   && strncmp (cu->producer,
+			       "IBM(R) XL C/C++ Advanced Edition", 32) == 0)
+	    {
+	      /* The IBM XLC compiler does not provide direct indication
+	         of the containing type, but the vtable pointer is
+	         always named __vfp.  */
+
+	      int i;
+
+	      for (i = TYPE_NFIELDS (type) - 1;
+		   i >= TYPE_N_BASECLASSES (type);
+		   --i)
+		{
+		  if (strcmp (TYPE_FIELD_NAME (type, i), "__vfp") == 0)
+		    {
+		      TYPE_VPTR_FIELDNO (type) = i;
+		      TYPE_VPTR_BASETYPE (type) = type;
+		      break;
+		    }
+		}
+	    }
 	}
 
       do_cleanups (back_to);
