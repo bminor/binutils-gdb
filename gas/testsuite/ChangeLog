@@ -1,3 +1,7 @@
+2005-11-04  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/all/gas.exp: xfail weakref dump tests for all targets.
+
 2005-10-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR gas/1630
