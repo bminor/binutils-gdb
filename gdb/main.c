@@ -76,6 +76,12 @@ struct ui_file *gdb_stdtargerr;
 /* Support for the --batch-silent option.  */
 int batch_silent = 0;
 
+/* Support for --return-child-result option.
+   Set the default to -1 to return error in the case
+   that the program does not run or does not complete.  */
+int return_child_result = 0;
+int return_child_result_value = -1;
+
 /* Whether to enable writing into executable and core files */
 extern int write_files;
 
@@ -303,6 +309,7 @@ captured_main (void *data)
       {"write", no_argument, &write_files, 1},
       {"args", no_argument, &set_args, 1},
      {"l", required_argument, 0, 'l'},
+      {"return-child-result", no_argument, &return_child_result, 1},
       {0, no_argument, 0, 0}
     };
 
@@ -730,15 +737,8 @@ extern int gdbtk_test (char *);
 
   if (batch)
     {
-      if (attach_flag)
-	/* Either there was a problem executing the command in the
-	   batch file aborted early, or the batch file forgot to do an
-	   explicit detach.  Explicitly detach the inferior ensuring
-	   that there are no zombies.  */
-	target_detach (NULL, 0);
-      
       /* We have hit the end of the batch file.  */
-      exit (0);
+      quit_force (NULL, 0);
     }
 
   /* Do any host- or target-specific hacks.  This is used for i960 targets
@@ -838,6 +838,8 @@ Options:\n\n\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   --batch            Exit after processing options.\n\
   --batch-silent     As for --batch, but suppress all gdb stdout output.\n\
+  --return-child-result\n\
+                     GDB exit code will be the child's exit code.\n\
   --cd=DIR           Change current directory to DIR.\n\
   --command=FILE     Execute GDB commands from FILE.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\

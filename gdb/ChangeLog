@@ -1,3 +1,13 @@
+2005-11-04  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* infrun.c (print_stop_reason): Set return_child_result_value on exit.
+	* main.c (return_child_result): New variable.
+	(return_child_result_value): Likewise.
+	(captured_main): Add option --return-child-result.
+	Replace call to target_detach and exit (in batch mode) with quit_force.
+	(print_gdb_help): Add option --return-child-result.
+	* top.c (quit_force): Return child result if appropriate.
+
 2005-11-03  Wu Zhou  <woodzltc@cn.ibm.com>
 
         Checked in by Elena Zannoni  <ezannoni@redhat.com>

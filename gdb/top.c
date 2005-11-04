@@ -1177,6 +1177,7 @@ quit_force (char *args, int from_tty)
 {
   int exit_code = 0;
   struct qt_args qt;
+  extern int return_child_result, return_child_result_value;
 
   /* An optional expression may be used to cause gdb to terminate with the 
      value of that expression. */
@@ -1186,6 +1187,8 @@ quit_force (char *args, int from_tty)
 
       exit_code = (int) value_as_long (val);
     }
+  else if (return_child_result)
+    exit_code = return_child_result_value;
 
   qt.args = args;
   qt.from_tty = from_tty;
