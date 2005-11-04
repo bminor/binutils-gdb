@@ -3178,6 +3178,14 @@ s_weakref (int ignore ATTRIBUTE_UNUSED)
 
   symbolP = symbol_find_or_make (name);
 
+  if (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
+    {
+      as_bad (_("symbol `%s' is already defined"), name);
+      *end_name = delim;
+      ignore_rest_of_line ();
+      return;
+    }
+
   *end_name = delim;
 
   SKIP_WHITESPACE ();

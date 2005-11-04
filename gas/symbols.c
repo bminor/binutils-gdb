@@ -332,7 +332,8 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 	  local_symbol_set_frag (locsym, frag_now);
 	  locsym->lsy_value = frag_now_fix ();
 	}
-      else if (!S_IS_DEFINED (symbolP) || S_IS_COMMON (symbolP))
+      else if (!(S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
+	       || S_IS_COMMON (symbolP))
 	{
 	  if (S_GET_VALUE (symbolP) == 0)
 	    {

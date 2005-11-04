@@ -11,9 +11,7 @@ OFFSET +TYPE +VALUE *
 # the rest of this file is generated with the following script:
 # # script begin
 # echo \#...
-# sed -n 's:^\.weakref .*, \(\(u\|\(w\)\).*\)$:.*( \3 |\(sec  0\)).* \1:p' weakref1.s | uniq | while read line; do echo "$line"; echo "#..."; done
-
-# sed -n 's:^\.long \(W\|\)\(.*[^a-z]\)[a-z]*\(\| - .*\)$:\2:p' weakref1.s | sed -e 's,^[lg].*,(&|\\.text)(\\+0x[0-9a-f]+)?,' | sed 's,^,[0-9a-f]+ [^ ]*  +,'
+# sed -n 's:^[ 	]*\.long \(W\|\)\(.*[^a-z]\)[a-z]*\(\| - .*\)$:\2:p' weakref1.s | sed -e 's,^[lg].*,(&|\\.text)(\\+0x[0-9a-f]+)?,' | sed 's,^,[0-9a-f]+ [^ ]*  +,'
 # # script output:
 #...
 [0-9a-f]+ [^ ]*  +wa1
@@ -71,8 +69,6 @@ OFFSET +TYPE +VALUE *
 [0-9a-f]+ [^ ]*  +ww9
 [0-9a-f]+ [^ ]*  +ww10
 [0-9a-f]+ [^ ]*  +ww10
-[0-9a-f]+ [^ ]*  +um2
-[0-9a-f]+ [^ ]*  +wm3
 [0-9a-f]+ [^ ]*  +um5
 [0-9a-f]+ [^ ]*  +wm6
 [0-9a-f]+ [^ ]*  +wm7
@@ -87,18 +83,6 @@ OFFSET +TYPE +VALUE *
 [0-9a-f]+ [^ ]*  +uh8
 [0-9a-f]+ [^ ]*  +uh9
 [0-9a-f]+ [^ ]*  +uh9
-[0-9a-f]+ [^ ]*  +(lr1|\.text)(\+0x[0-9a-f]+)?
-[0-9a-f]+ [^ ]*  +(lr1|\.text)(\+0x[0-9a-f]+)?
-[0-9a-f]+ [^ ]*  +(lr2|\.text)(\+0x[0-9a-f]+)?
-[0-9a-f]+ [^ ]*  +(lr2|\.text)(\+0x[0-9a-f]+)?
-[0-9a-f]+ [^ ]*  +wr3
-[0-9a-f]+ [^ ]*  +wr3
-[0-9a-f]+ [^ ]*  +wr4
-[0-9a-f]+ [^ ]*  +wr5
-[0-9a-f]+ [^ ]*  +(lr6|\.text)(\+0x[0-9a-f]+)?
-[0-9a-f]+ [^ ]*  +ur6
-[0-9a-f]+ [^ ]*  +(lr7|\.text)(\+0x[0-9a-f]+)?
-[0-9a-f]+ [^ ]*  +(lr7|\.text)(\+0x[0-9a-f]+)?
 [0-9a-f]+ [^ ]*  +(ld1|\.text)(\+0x[0-9a-f]+)?
 [0-9a-f]+ [^ ]*  +(ld2|\.text)(\+0x[0-9a-f]+)?
 [0-9a-f]+ [^ ]*  +(ld3|\.text)(\+0x[0-9a-f]+)?

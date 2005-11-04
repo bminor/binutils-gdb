@@ -1,3 +1,14 @@
+2005-11-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/all/gas.exp: Remove weakref xfail.  Run weakref4.s.
+	* gas/all/weakref1.s: Move redefinition bits to...
+	* gas/all/weakref4.s: ... new file.
+	* gas/all/weakref1.d: Remove command moved to weakref1u.  Adjust
+	remaining command for leading tabs.  Regenerate.
+	* gas/all/weakref1l.d: Regenerate.
+	* gas/all/weakref1u.d: Likewise.
+	* gas/all/wealref1w.d: Likewise.
+
 2005-11-04  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/all/gas.exp: xfail weakref dump tests for all targets.
