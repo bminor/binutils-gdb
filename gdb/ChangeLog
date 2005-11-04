@@ -1,3 +1,14 @@
+2005-11-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+        Checked in by Elena Zannoni  <ezannoni@redhat.com>
+
+	* elfread.c (elf_symtab_read): Add number_of_symbols and
+	symbol_table as arguments.  Do not load the symbol table
+	here.
+	(elf_symfile_read): Load the static and dynamic symbol tables
+	here, before calling elf_symtab_read.  Also load any synthetic
+	symbols and process those.
+
 2005-11-03 Andrew Cagney  <cagney@gnu.org>
 
 	Checked in by Elena Zannoni  <ezannoni@redhat.com>
