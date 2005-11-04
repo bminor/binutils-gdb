@@ -1,3 +1,10 @@
+2005-11-03 Andrew Cagney  <cagney@gnu.org>
+
+	Checked in by Elena Zannoni  <ezannoni@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Handle DW_OP_piece
+	reads.
+
 2005-11-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (linux_nat_resume): Add more debugging messages.  Do
