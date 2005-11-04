@@ -1,3 +1,13 @@
+2005-11-03  Jim Blandy  <jimb@redhat.com>
+
+        Checked in by Elena Zannoni  <ezannoni@redhat.com>
+ 
+ 	* gdb.dwarf2/mac-fileno.exp, gdb.dwarf2/mac-fileno.S: New tests.
+
+2005-11-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.arch/gdb1558.c: Include stdio.h.
+
 2005-10-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp: Use -e instead of --entry.
