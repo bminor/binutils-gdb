@@ -1,3 +1,14 @@
+2005-11-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (struct output_statement_hash_entry): Don't indirect to os.
+	(output_statement_newfunc): Rewrite.
+	(lang_output_section_find_1): Merge into..
+	(lang_output_section_find): ..here.
+	(lang_output_section_statement_lookup_1): Rewrite to handle
+	multiple sections with the same name.
+	(output_statement_table_init): Commonise error message.
+	(lang_init, open_output): Likewise.
+
 2005-11-03  Paul Brook  <paul@codesourcery.com>
 
 	* scripttempl/elf.sc: Add .init_array.* and .fini_array.*.
@@ -145,7 +156,7 @@
 	* ldmain.c (main): Use expandargv.
 
 2005-09-30  Catherine Moore  <clm@cm00re.com>
-	
+
 	* Makefile.am: Bfin support.
 	* Makefile.in: Regenerated.
 	* aclocal.m4: Regenerated.
