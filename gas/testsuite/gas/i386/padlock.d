@@ -5,7 +5,7 @@
 
 Disassembly of section .text:
 
-00000000 <foo>:
+0+000 <foo>:
    0:[	 ]*0f a7 c0 [	 ]*xstore-rng 
    3:[	 ]*f3 0f a7 c0 [	 ]*repz xstore-rng 
    7:[	 ]*f3 0f a7 c8 [	 ]*repz xcrypt-ecb 
