@@ -212,7 +212,7 @@ main (int argc, char **argv)
     {
       if (*TARGET_SYSTEM_ROOT == 0)
 	{
-	  einfo ("%P%F: this linker was not configured to use sysroots");
+	  einfo ("%P%F: this linker was not configured to use sysroots\n");
 	  ld_sysroot = "";
 	}
       else
