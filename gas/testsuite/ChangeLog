@@ -1,3 +1,9 @@
+2005-11-07  Arnold Metselaar <arnold.metselaar@planet.nl>
+
+	* gas/z80/z80.exp: Added "suffix" test.
+	* gas/z80/suffix.s: New file.
+	* gas/z80/suffix.d: New file.
+
 2005-11-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/padlock.d: Support 64bit BFD.
