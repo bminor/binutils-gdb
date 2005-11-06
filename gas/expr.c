@@ -301,7 +301,10 @@ integer_constant (int radix, expressionS *expressionP)
 	{
 	  c = *--suffix;
 	  c = TOUPPER (c);
-	  if (c == 'B')
+	  /* If we have both NUMBERS_WITH_SUFFIX and LOCAL_LABELS_FB,
+	     we distinguish between 'B' and 'b'.  This is the case for
+	     Z80.  */
+	  if ((NUMBERS_WITH_SUFFIX && LOCAL_LABELS_FB ? *suffix : c) == 'B')
 	    radix = 2;
 	  else if (c == 'D')
 	    radix = 10;
