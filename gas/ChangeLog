@@ -1,3 +1,12 @@
+2005-11-07  John Levon  <levon@movementarian.org>
+
+	* config/tc-i386.h (tc_comment_chars): Define.
+	* config/tc-i386.c (line_comment_chars): Use '/' unconditionally.
+	(i386_comment_chars): Add.
+	(md_parse_options): Process OPTION_DIVIDE.
+	(md_show_usage): Describe --divide option.
+	* doc/c-i386.texi: Document --divide option.
+
 2005-11-07  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* expr.c (op_encoding): Map '=' to O_SINGLE_EQ, if defined.

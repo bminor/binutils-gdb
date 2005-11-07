@@ -67,6 +67,15 @@ usage and use x86-64 as target platform).
 By default, x86 GAS replaces multiple nop instructions used for
 alignment within code sections with multi-byte nop instructions such
 as leal 0(%esi,1),%esi.  This switch disables the optimization.
+
+@cindex @samp{--divide} option, i386
+@item --divide
+On SVR4-derived platforms, the character @samp{/} is treated as a comment
+character, which means that it cannot be used in expressions.  The
+@samp{--divide} option turns @samp{/} into a normal character.  This does
+not disable @samp{/} at the beginning of a line starting a comment, or
+affect using @samp{#} for starting a comment.
+
 @end table
 
 @node i386-Syntax

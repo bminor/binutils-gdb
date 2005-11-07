@@ -88,6 +88,9 @@ extern void i386_elf_emit_arch_note PARAMS ((void));
 extern const char extra_symbol_chars[];
 #define tc_symbol_chars extra_symbol_chars
 
+extern const char *i386_comment_chars;
+#define tc_comment_chars i386_comment_chars
+
 #define MAX_OPERANDS 3		/* max operands per insn */
 #define MAX_IMMEDIATE_OPERANDS 2/* max immediates per insn (lcall, ljmp) */
 #define MAX_MEMORY_OPERANDS 2	/* max memory refs per insn (string ops) */

@@ -203,9 +203,16 @@ const char extra_symbol_chars[] = "*%-(["
 	 && !defined (TE_FreeBSD)			\
 	 && !defined (TE_NetBSD)))
 /* This array holds the chars that always start a comment.  If the
-   pre-processor is disabled, these aren't very useful.  */
-const char comment_chars[] = "#/";
+   pre-processor is disabled, these aren't very useful.  The option
+   --divide will remove '/' from this list.  */
+const char *i386_comment_chars = "#/";
+#define SVR4_COMMENT_CHARS 1
 #define PREFIX_SEPARATOR '\\'
+
+#else
+const char *i386_comment_chars = "#";
+#define PREFIX_SEPARATOR '/'
+#endif
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
@@ -215,16 +222,7 @@ const char comment_chars[] = "#/";
    #NO_APP at the beginning of its output.
    Also note that comments started like this one will always work if
    '/' isn't otherwise defined.  */
-const char line_comment_chars[] = "#";
-
-#else
-/* Putting '/' here makes it impossible to use the divide operator.
-   However, we need it for compatibility with SVR4 systems.  */
-const char comment_chars[] = "#";
-#define PREFIX_SEPARATOR '/'
-
-const char line_comment_chars[] = "/#";
-#endif
+const char line_comment_chars[] = "#/";
 
 const char line_separator_chars[] = ";";
 
@@ -5302,13 +5300,16 @@ const char *md_shortopts = "kVQ:sqn";
 const char *md_shortopts = "qn";
 #endif
 
-struct option md_longopts[] = {
 #define OPTION_32 (OPTION_MD_BASE + 0)
+#define OPTION_64 (OPTION_MD_BASE + 1)
+#define OPTION_DIVIDE (OPTION_MD_BASE + 2)
+
+struct option md_longopts[] = {
   {"32", no_argument, NULL, OPTION_32},
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-#define OPTION_64 (OPTION_MD_BASE + 1)
   {"64", no_argument, NULL, OPTION_64},
 #endif
+  {"divide", no_argument, NULL, OPTION_DIVIDE},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -5370,6 +5371,23 @@ md_parse_option (c, arg)
       default_arch = "i386";
       break;
 
+    case OPTION_DIVIDE:
+#ifdef SVR4_COMMENT_CHARS
+      {
+	char *n, *t;
+	const char *s;
+
+	n = (char *) xmalloc (strlen (i386_comment_chars) + 1);
+	t = n;
+	for (s = i386_comment_chars; *s != '\0'; s++)
+	  if (*s != '/')
+	    *t++ = *s;
+	*t = '\0';
+	i386_comment_chars = n;
+      }
+#endif
+      break;
+
     default:
       return 0;
     }
@@ -5384,14 +5402,21 @@ md_show_usage (stream)
   fprintf (stream, _("\
   -Q                      ignored\n\
   -V                      print assembler version number\n\
-  -k                      ignored\n\
-  -n                      Do not optimize code alignment\n\
-  -q                      quieten some warnings\n\
-  -s                      ignored\n"));
-#else
+  -k                      ignored\n"));
+#endif
   fprintf (stream, _("\
   -n                      Do not optimize code alignment\n\
   -q                      quieten some warnings\n"));
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  fprintf (stream, _("\
+  -s                      ignored\n"));
+#endif
+#ifdef SVR4_COMMENT_CHARS
+  fprintf (stream, _("\
+  --divide                do not treat `/' as a comment character\n"));
+#else
+  fprintf (stream, _("\
+  --divide                ignored\n"));
 #endif
 }
 
