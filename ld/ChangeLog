@@ -1,3 +1,7 @@
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate after modifying bfd/warning.m4.
+
 2005-11-07  Olaf Hering  <olh@suse.de>
 
 	* ldmain.c (main): Add \n to error message.

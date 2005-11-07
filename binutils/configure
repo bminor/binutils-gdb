@@ -4075,7 +4075,7 @@ echo "$as_me: error: bad value ${enableval} for BFD commonbfdlib option" >&2;}
 esac
 fi;
 
-WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
+GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 
 # Check whether --enable-werror or --disable-werror was given.
 if test "${enable_werror+set}" = set; then
@@ -4096,20 +4096,26 @@ fi
 
 NO_WERROR=
 if test "${ERROR_ON_WARNING}" = yes ; then
-    WARN_CFLAGS="$WARN_CFLAGS -Werror"
+    GCC_WARN_CFLAGS="$GCC_WARN_CFLAGS -Werror"
     NO_WERROR="-Wno-error"
+fi
+
+if test "${GCC}" = yes ; then
+  WARN_CFLAGS="${GCC_WARN_CFLAGS}"
 fi
 
 # Check whether --enable-build-warnings or --disable-build-warnings was given.
 if test "${enable_build_warnings+set}" = set; then
   enableval="$enable_build_warnings"
   case "${enableval}" in
-  yes)	;;
-  no)	WARN_CFLAGS="-w";;
+  yes)	WARN_CFLAGS="${GCC_WARN_CFLAGS}";;
+  no)	if test "${GCC}" = yes ; then
+	  WARN_CFLAGS="-w"
+	fi;;
   ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        WARN_CFLAGS="${WARN_CFLAGS} ${t}";;
+        WARN_CFLAGS="${GCC_WARN_CFLAGS} ${t}";;
   *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        WARN_CFLAGS="${t} ${WARN_CFLAGS}";;
+        WARN_CFLAGS="${t} ${GCC_WARN_CFLAGS}";;
   *)    WARN_CFLAGS=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 fi;

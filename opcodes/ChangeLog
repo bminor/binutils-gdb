@@ -1,3 +1,7 @@
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate after modifying bfd/warning.m4.
+
 2005-11-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-dis.c (ckprefix): Handle rex on fwait.  Don't print
