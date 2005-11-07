@@ -932,6 +932,20 @@ file named @var{number}.
 Execute @value{GDBN} commands from file @var{file}.  @xref{Command
 Files,, Command files}.
 
+@item -eval-command @var{command}
+@itemx -ex @var{command}
+@cindex @code{--eval-command}
+@cindex @code{-ex}
+Execute a single @value{GDBN} command.
+
+This option may be used multiple times to call multiple commands.  It may
+also be interleaved with @samp{-command} as required.
+
+@smallexample
+@value{GDBP} -ex 'target sim' -ex 'load' \
+   -x setbreakpoints -ex 'run' a.out
+@end smallexample
+
 @item -directory @var{directory}
 @itemx -d @var{directory}
 @cindex @code{--directory}

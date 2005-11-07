@@ -1,3 +1,7 @@
+2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.texinfo (Choosing files): Add --eval-command.
+
 2005-11-04  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gdb.texinfo (Choosing modes): Add --return-child-result.
