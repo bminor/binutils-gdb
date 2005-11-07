@@ -19,9 +19,8 @@ info_TEXINFOS = as.texinfo
 
 asconfig.texi: $(CONFIG).texi
 	rm -f asconfig.texi
-	ln -s $(srcdir)/$(CONFIG).texi ./asconfig.texi >/dev/null 2>&1 \
-	  || ln $(srcdir)/$(CONFIG).texi ./asconfig.texi >/dev/null 2>&1 \
-	  || cp $(srcdir)/$(CONFIG).texi ./asconfig.texi
+	cp $(srcdir)/$(CONFIG).texi ./asconfig.texi	
+	echo "@set top_srcdir $(top_srcdir)" >> ./asconfig.texi
 
 CPU_DOCS = \
 	c-alpha.texi \

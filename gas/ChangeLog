@@ -1,3 +1,9 @@
+2005-11-07  Mark Mitchell  <mark@codesourcery.com>
+
+	* doc/Makefile.am (asconfig.texi): Set top_srcdir.
+	* doc/Makefile.in: Regenerated.
+	* doc/as.texinfo: Document "@FILE".
+
 2005-11-07  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/1568

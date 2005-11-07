@@ -231,8 +231,9 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}] [@b{-o}
  @var{objfile}] [@b{-R}] [@b{--reduce-memory-overheads}] [@b{--statistics}]
  [@b{-v}] [@b{-version}] [@b{--version}] [@b{-W}] [@b{--warn}]
- [@b{--fatal-warnings}] [@b{-w}] [@b{-x}] [@b{-Z}] [@b{--target-help}]
- [@var{target-options}] [@b{--}|@var{files} @dots{}]
+ [@b{--fatal-warnings}] [@b{-w}] [@b{-x}] [@b{-Z}] [@b{@@@var{FILE}}]
+ [@b{--target-help}] [@var{target-options}]
+ [@b{--}|@var{files} @dots{}]
 @c
 @c Target dependent options are listed below.  Keep the list sorted.
 @c Add an empty line for separation. 
@@ -450,6 +451,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c man begin OPTIONS
 
 @table @gcctabopt
+@include @value{top_srcdir}/../libiberty/at-file.texi
+
 @item -a[cdhlmns]
 Turn on listings, in any of a variety of ways:
 
