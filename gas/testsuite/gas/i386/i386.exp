@@ -32,7 +32,6 @@ proc gas_32_check { } {
     return [regexp "targets:.*i386" $nm_help]
 }
 
-
 if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]]  then {
 
     global ASFLAGS
@@ -64,17 +63,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "suffix"
     run_dump_test "immed32"
     run_dump_test "equ"
-
-    if {![istarget "*-*-aix*"]
-	&& (![is_elf_format] || [istarget "*-*-linux*"]
-	    || [istarget "*-*-netbsd*"]
-	    || [istarget "*-*-freebsd*"]
-	    || [istarget "*-*-netware*"]
-	    || [istarget "*-*-vxworks*"])} {
-	# Don't run this test on targets where '/' starts comments.
-	run_dump_test "divide"
-    }
-
+    run_dump_test "divide"
     run_dump_test "padlock"
     run_dump_test "crx"
     run_list_test "cr-err" ""

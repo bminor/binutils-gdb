@@ -1,3 +1,10 @@
+2005-11-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/divide.s: Test line comment starting with '/'.
+	* gas/i386/divide.d: Pass --divide to gas.
+	* gas/i386/intelok.d: Likewise.
+	* gas/i386/i386.exp (divide): Run for all targets.
+
 2005-11-07  Arnold Metselaar <arnold.metselaar@planet.nl>
 
 	* gas/z80/z80.exp: Added "suffix" test.
