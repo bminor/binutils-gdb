@@ -199,13 +199,13 @@ _initialize_tui_interp (void)
 
   /* Create a default uiout builder for the TUI. */
   tui_out = tui_out_new (gdb_stdout);
-  interp_add (interp_new ("tui", NULL, tui_out, &procs));
-  if (interpreter_p && strcmp (interpreter_p, "tui") == 0)
+  interp_add (interp_new (INTERP_TUI, NULL, tui_out, &procs));
+  if (interpreter_p && strcmp (interpreter_p, INTERP_TUI) == 0)
     tui_start_enabled = 1;
 
   if (interpreter_p && strcmp (interpreter_p, INTERP_CONSOLE) == 0)
     {
       xfree (interpreter_p);
-      interpreter_p = xstrdup ("tui");
+      interpreter_p = xstrdup (INTERP_TUI);
     }
 }

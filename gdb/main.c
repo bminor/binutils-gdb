@@ -350,11 +350,16 @@ captured_main (void *data)
 	  case OPT_TUI:
 	    /* --tui is equivalent to -i=tui.  */
 	    xfree (interpreter_p);
-	    interpreter_p = xstrdup ("tui");
+	    interpreter_p = xstrdup (INTERP_TUI);
 	    break;
 	  case OPT_WINDOWS:
 	    /* FIXME: cagney/2003-03-01: Not sure if this option is
                actually useful, and if it is, what it should do.  */
+#ifdef GDBTK
+	    /* --windows is equivalent to -i=insight.  */
+	    xfree (interpreter_p);
+	    interpreter_p = xstrdup (INTERP_INSIGHT);
+#endif
 	    use_windows = 1;
 	    break;
 	  case OPT_NOWINDOWS:
