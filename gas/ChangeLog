@@ -1,9 +1,14 @@
+2005-11-07  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* expr.c (op_encoding): Map '=' to O_SINGLE_EQ, if defined.
+	* config/tc-z80.h: Define O_SINGLE_EQ as O_eq.
+
 2005-11-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* macro.c (buffer_and_nest): Skip labels regardless of
 	NO_PSEUDO_DOT and flag_m68k_mri.
 
-2005-11-07  Arnold Metselaar <arnold.metselaar@planet.nl>
+2005-11-07  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* expr.c (integer_constant): Match only 'B' as binary suffix if
 	NUMBERS_WITH_SUFFIX and LOCAL_LABELS_FB.  Allow both 'b' and 'B'

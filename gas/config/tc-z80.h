@@ -78,10 +78,12 @@ extern int z80_optimize_expr (expressionS *, operatorT, expressionS *);
 
 #define LISTING_WORD_SIZE 2
 
+/* A single '=' is accepted as a comparison operator.  */
+#define O_SINGLE_EQ O_eq
+
 /* A '$' is used to refer to the current location or as a hex. prefix.  */
 #define DOLLAR_DOT
 #define DOLLAR_AMBIGU                1
-#define SINGLE_EQ_COMPARES
 #define LOCAL_LABELS_FB              1
 #define LITERAL_PREFIXPERCENT_BIN
 #define NUMBERS_WITH_SUFFIX          1

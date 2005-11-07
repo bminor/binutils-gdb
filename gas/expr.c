@@ -1390,6 +1390,9 @@ clean_up_expression (expressionS *expressionP)
 
 #undef __
 #define __ O_illegal
+#ifndef O_SINGLE_EQ
+#define O_SINGLE_EQ O_illegal
+#endif
 
 /* Maps ASCII -> operators.  */
 static const operatorT op_encoding[256] = {
@@ -1399,7 +1402,7 @@ static const operatorT op_encoding[256] = {
   __, O_bit_or_not, __, __, __, O_modulus, O_bit_and, __,
   __, __, O_multiply, O_add, __, O_subtract, __, O_divide,
   __, __, __, __, __, __, __, __,
-  __, __, __, __, O_lt, __, O_gt, __,
+  __, __, __, __, O_lt, O_SINGLE_EQ, O_gt, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __,
