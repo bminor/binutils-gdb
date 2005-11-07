@@ -1,3 +1,10 @@
+2005-11-07  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/all/redef2.[sd]: New.
+	* gas/all/gas.exp: Run new test.
+	* gas/elf/redef.d: New.
+	* gas/elf/elf.exp: Run new test.
+
 2005-11-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/divide.s: Test line comment starting with '/'.

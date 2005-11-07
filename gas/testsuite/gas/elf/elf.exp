@@ -61,6 +61,16 @@ if { ([istarget "*-*-*elf*"]
     run_dump_test "group0b" 
     run_dump_test "group1a" 
     run_dump_test "group1b" 
+    case $target_triplet in {
+	{ alpha*-*-* } { }
+	{ hppa*-*-* } { }
+	{ iq2000*-*-* } { }
+	{ mips*-*-* } { }
+	{ *c54x*-*-* } { }
+	default {
+	    run_dump_test redef
+	}
+    }
     run_dump_test "section0" 
     run_dump_test "section1" 
     run_list_test "section2" "$target_machine" "-al" "-s" ""
