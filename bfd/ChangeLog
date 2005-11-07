@@ -1,3 +1,7 @@
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure.host (ia64-*-hpux*): Set _LARGEFILE64_SOURCE.
+
 2005-11-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.in: Check for fopen64.
