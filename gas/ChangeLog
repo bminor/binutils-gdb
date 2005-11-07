@@ -1,8 +1,13 @@
+2005-11-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* macro.c (buffer_and_nest): Skip labels regardless of
+	NO_PSEUDO_DOT and flag_m68k_mri.
+
 2005-11-07  Arnold Metselaar <arnold.metselaar@planet.nl>
 
 	* expr.c (integer_constant): Match only 'B' as binary suffix if
-        NUMBERS_WITH_SUFFIX and LOCAL_LABELS_FB.  Allow both 'b' and 'B'
-        otherwise.
+	NUMBERS_WITH_SUFFIX and LOCAL_LABELS_FB.  Allow both 'b' and 'B'
+	otherwise.
 
 2005-11-04  Alexandre Oliva  <aoliva@redhat.com>
 
@@ -65,7 +70,7 @@
 
 	* config/tc-m32c.c (md_relax_table, subtype_mappings,
 	md_convert_frag): Add jsr.w support.
-	
+
 	* config/tc-m32c.c (md_assemble): Don't use errmsg as the format
 	itself.
 	(md_cgen_lookup_reloc): Add m32c bitbase operands.  Add 8-s24
@@ -93,7 +98,7 @@
 
 	* Makefile.am: Add Z80 cpu.
 	* Makefile.in: Regenerated.
-	* app.c (do_scrub_chars)<TC_Z80>: Correctly scrub "ex af,af'" 
+	* app.c (do_scrub_chars)<TC_Z80>: Correctly scrub "ex af,af'"
 	and disallow newlines in quoted strings.
 	* configure.tgt: Add z80-*-coff.
 	* config/obj-coff.h: Add format "coff-z80".
@@ -356,7 +361,7 @@
 	* doc/c-arm.texi: Document .cpu, .arch, .fpu and .eabi_attribute.
 
 2005-10-06  Khem Raj  <kraj@mvista.com>
-            NIIBE Yutaka  <gniibe@m17n.org>
+	    NIIBE Yutaka  <gniibe@m17n.org>
 
 	* config/tc-sh.c (allow_dollar_register_prefix): New variable.
 	(parse_reg_without_prefix): New function.

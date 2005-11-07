@@ -180,49 +180,46 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 
   while (more)
     {
-      /* Try and find the first pseudo op on the line.  */
+      /* Try to find the first pseudo op on the line.  */
       int i = line_start;
 
-      if (! NO_PSEUDO_DOT && ! flag_m68k_mri)
+      /* With normal syntax we can suck what we want till we get
+	 to the dot.  With the alternate, labels have to start in
+	 the first column, since we can't tell what's a label and
+	 what's a pseudoop.  */
+
+      if (! LABELS_WITHOUT_COLONS)
 	{
-	  /* With normal syntax we can suck what we want till we get
-	     to the dot.  With the alternate, labels have to start in
-	     the first column, since we can't tell what's a label and
-	     whats a pseudoop.  */
-
-	  if (! LABELS_WITHOUT_COLONS)
-	    {
-	      /* Skip leading whitespace.  */
-	      while (i < ptr->len && ISWHITE (ptr->ptr[i]))
-		i++;
-	    }
-
-	  for (;;)
-	    {
-	      /* Skip over a label, if any.  */
-	      if (i >= ptr->len || ! is_name_beginner (ptr->ptr[i]))
-		break;
-	      i++;
-	      while (i < ptr->len && is_part_of_name (ptr->ptr[i]))
-		i++;
-	      if (i < ptr->len && is_name_ender (ptr->ptr[i]))
-		i++;
-	      if (LABELS_WITHOUT_COLONS)
-		break;
-	      /* Skip whitespace.  */
-	      while (i < ptr->len && ISWHITE (ptr->ptr[i]))
-		i++;
-	      /* Check for the colon.  */
-	      if (i >= ptr->len || ptr->ptr[i] != ':')
-		{
-		  i = line_start;
-		  break;
-		}
-	      i++;
-	      line_start = i;
-	    }
-
+	  /* Skip leading whitespace.  */
+	  while (i < ptr->len && ISWHITE (ptr->ptr[i]))
+	    i++;
 	}
+
+      for (;;)
+	{
+	  /* Skip over a label, if any.  */
+	  if (i >= ptr->len || ! is_name_beginner (ptr->ptr[i]))
+	    break;
+	  i++;
+	  while (i < ptr->len && is_part_of_name (ptr->ptr[i]))
+	    i++;
+	  if (i < ptr->len && is_name_ender (ptr->ptr[i]))
+	    i++;
+	  if (LABELS_WITHOUT_COLONS)
+	    break;
+	  /* Skip whitespace.  */
+	  while (i < ptr->len && ISWHITE (ptr->ptr[i]))
+	    i++;
+	  /* Check for the colon.  */
+	  if (i >= ptr->len || ptr->ptr[i] != ':')
+	    {
+	      i = line_start;
+	      break;
+	    }
+	  i++;
+	  line_start = i;
+	}
+
       /* Skip trailing whitespace.  */
       while (i < ptr->len && ISWHITE (ptr->ptr[i]))
 	i++;
