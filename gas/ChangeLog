@@ -1,3 +1,10 @@
+2005-11-07  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/1568
+	* config/obj-coff.c (obj_coff_section): Set readonly flag with the
+	'x' attribute.  Remember the actions of the 'w' and 'n' attributes
+	and do not allow the 'x','s' or 'd' attributes to change them.
+
 2005-11-07  John Levon  <levon@movementarian.org>
 
 	* config/tc-i386.h (tc_comment_chars): Define.

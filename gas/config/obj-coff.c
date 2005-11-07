@@ -1522,38 +1522,81 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 	exp = get_absolute_expression ();
       else
 	{
-	  ++input_line_pointer;
-	  while (*input_line_pointer != '"'
-		 && ! is_end_of_line[(unsigned char) *input_line_pointer])
+	  unsigned char attr;
+	  int readonly_removed = 0;
+	  int load_removed = 0;
+
+	  while (attr = *++input_line_pointer,
+		 attr != '"'
+		 && ! is_end_of_line[attr])
 	    {
-	      switch (*input_line_pointer)
+	      switch (attr)
 		{
-		case 'b': flags |= SEC_ALLOC; flags &=~ SEC_LOAD; break;
-		case 'n': flags &=~ SEC_LOAD; flags |= SEC_NEVER_LOAD; break;
+		case 'b':
+		  /* Uninitialised data section.  */
+		  flags |= SEC_ALLOC;
+		  flags &=~ SEC_LOAD;
+		  break;
 
-		case 's': flags |= SEC_COFF_SHARED; /* Fall through.  */
-		case 'd': flags |= SEC_DATA | SEC_LOAD; /* Fall through.  */
-		case 'w': flags &=~ SEC_READONLY; break;
+		case 'n':
+		  /* Section not loaded.  */
+		  flags &=~ SEC_LOAD;
+		  flags |= SEC_NEVER_LOAD;
+		  load_removed = 1;
+		  break;
 
-		case 'a': break; /* For compatibility with ELF.  */
-		case 'x': flags |= SEC_CODE | SEC_LOAD; break;
-		case 'r': flags |= SEC_DATA | SEC_LOAD | SEC_READONLY; break;
+		case 's':
+		  /* Shared section.  */
+		  flags |= SEC_COFF_SHARED;
+		  /* Fall through.  */
+		case 'd':
+		  /* Data section.  */
+		  flags |= SEC_DATA;
+		  if (! load_removed)
+		    flags |= SEC_LOAD;
+		  flags &=~ SEC_READONLY;
+		  break;
+
+		case 'w':
+		  /* Writable section.  */
+		  flags &=~ SEC_READONLY;
+		  readonly_removed = 1;
+		  break;
+
+		case 'a':
+		  /* Ignore.  Here for compatibility with ELF.  */
+		  break;
+
+		case 'r': /* Read-only section.  Implies a data section.  */
+		  readonly_removed = 0;
+		  /* Fall through.  */
+		case 'x': /* Executable section.  */
+		  /* If we are setting the 'x' attribute or if the 'r'
+		     attribute is being used to restore the readonly status
+		     of a code section (eg "wxr") then set the SEC_CODE flag,
+		     otherwise set the SEC_DATA flag.  */
+		  flags |= (attr == 'x' || (flags & SEC_CODE) ? SEC_CODE : SEC_DATA);
+		  if (! load_removed)
+		    flags |= SEC_LOAD;
+		  /* Note - the READONLY flag is set here, even for the 'x'
+		     attrbiute in order to be compatible with the MSVC
+		     linker.  */
+		  if (! readonly_removed)
+		    flags |= SEC_READONLY;
+		  break;
 
 		case 'i': /* STYP_INFO */
 		case 'l': /* STYP_LIB */
 		case 'o': /* STYP_OVER */
-		  as_warn (_("unsupported section attribute '%c'"),
-			   *input_line_pointer);
+		  as_warn (_("unsupported section attribute '%c'"), attr);
 		  break;
 
 		default:
-		  as_warn (_("unknown section attribute '%c'"),
-			   *input_line_pointer);
+		  as_warn (_("unknown section attribute '%c'"), attr);
 		  break;
 		}
-	      ++input_line_pointer;
 	    }
-	  if (*input_line_pointer == '"')
+	  if (attr == '"')
 	    ++input_line_pointer;
 	}
     }
