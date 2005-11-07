@@ -1814,7 +1814,7 @@ ckprefix (void)
 	  /* fwait is really an instruction.  If there are prefixes
 	     before the fwait, they belong to the fwait, *not* to the
 	     following instruction.  */
-	  if (prefixes)
+	  if (prefixes || rex)
 	    {
 	      prefixes |= PREFIX_FWAIT;
 	      codep++;
@@ -1828,8 +1828,8 @@ ckprefix (void)
       /* Rex is ignored when followed by another prefix.  */
       if (rex)
 	{
-	  oappend (prefix_name (rex, 0));
-	  oappend (" ");
+	  rex_used = rex;
+	  return;
 	}
       rex = newrex;
       codep++;
@@ -2117,13 +2117,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
   FETCH_DATA (info, codep + 1);
   two_source_ops = (*codep == 0x62) || (*codep == 0xc8);
 
-  if ((prefixes & PREFIX_FWAIT)
-      && ((*codep < 0xd8) || (*codep > 0xdf)))
+  if (((prefixes & PREFIX_FWAIT)
+       && ((*codep < 0xd8) || (*codep > 0xdf)))
+      || (rex && rex_used))
     {
       const char *name;
 
-      /* fwait not followed by floating point instruction.  Print the
-	 first prefix, which is probably fwait itself.  */
+      /* fwait not followed by floating point instruction, or rex followed
+	 by other prefixes.  Print the first prefix.  */
       name = prefix_name (priv.the_buffer[0], priv.orig_sizeflag);
       if (name == NULL)
 	name = INTERNAL_DISASSEMBLER_ERROR;
