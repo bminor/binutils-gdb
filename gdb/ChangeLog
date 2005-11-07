@@ -1,3 +1,11 @@
+2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* main.c (main): Use INTERP_TUI instead of "tui".
+	Set interpreter to INTERP_INSIGHT when '-w' given.
+	* interps.h (INTERP_INSIGHT): New define.
+	* tui/tui-interp.c (_initialize_tui_interp): Use INTERP_TUI instead
+	of "tui".
+
 2005-11-04  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* infrun.c (print_stop_reason): Set return_child_result_value on exit.
