@@ -1,5 +1,15 @@
 2005-11-07  Steve Ellcey  <sje@cup.hp.com>
 
+	* warning.m4 (AM_BINUTILS_WARNINGS): Default to empty string
+	if compiler is not GCC.
+	* configure: Regenerate
+
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate after modifying bfd/warning.m4.
+
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
 	* configure.host (ia64-*-hpux*): Set _LARGEFILE64_SOURCE.
 
 2005-11-03  Daniel Jacobowitz  <dan@codesourcery.com>
