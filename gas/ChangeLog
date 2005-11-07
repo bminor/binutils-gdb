@@ -1,3 +1,9 @@
+2005-11-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR gas/1804
+	* config/tc-hppa.c (md_apply_fix): Use number_to_chars_bigendian to
+	output constant data.
+
 2005-11-07  Mark Mitchell  <mark@codesourcery.com>
 
 	* doc/Makefile.am (asconfig.texi): Set top_srcdir.

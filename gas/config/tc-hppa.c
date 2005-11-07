@@ -4436,7 +4436,7 @@ md_apply_fix (fixP, valP, seg)
      valueT *valP;
      segT seg ATTRIBUTE_UNUSED;
 {
-  unsigned char *buf;
+  char *fixpos;
   struct hppa_fix_struct *hppa_fixP;
   offsetT new_val;
   int insn, val, fmt;
@@ -4470,8 +4470,7 @@ md_apply_fix (fixP, valP, seg)
   if (fixP->fx_addsy == NULL && fixP->fx_pcrel == 0)
     fixP->fx_done = 1;
 
-  /* There should have been an HPPA specific fixup associated
-     with the GAS fixup.  */
+  /* There should be a HPPA specific fixup associated with the GAS fixup.  */
   hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
   if (hppa_fixP == NULL)
     {
@@ -4481,8 +4480,16 @@ md_apply_fix (fixP, valP, seg)
       return;
     }
 
-  buf = (unsigned char *) (fixP->fx_frag->fr_literal + fixP->fx_where);
-  insn = bfd_get_32 (stdoutput, buf);
+  fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
+
+  if (fixP->fx_size != 4 || hppa_fixP->fx_r_format == 32)
+    {
+      /* Handle constant output. */
+      number_to_chars_bigendian (fixpos, *valP, fixP->fx_size);
+      return;
+    }
+
+  insn = bfd_get_32 (stdoutput, fixpos);
   fmt = bfd_hppa_insn2fmt (stdoutput, insn);
 
   /* If there is a symbol associated with this fixup, then it's something
@@ -4652,7 +4659,7 @@ md_apply_fix (fixP, valP, seg)
     }
 
   /* Insert the relocation.  */
-  bfd_put_32 (stdoutput, insn, buf);
+  bfd_put_32 (stdoutput, insn, fixpos);
 }
 
 /* Exactly what point is a PC-relative offset relative TO?
