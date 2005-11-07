@@ -2133,7 +2133,7 @@ infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(gdbcore_h) $(gdbcmd_h) $(cli_script_h) $(target_h) $(gdbthread_h) \
 	$(annotate_h) $(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) \
 	$(value_h) $(observer_h) $(language_h) $(solib_h) $(gdb_assert_h) \
-	$(mi_common_h)
+	$(mi_common_h) $(main_h)
 inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(observer_h) $(gdb_wait_h) \
 	$(inflow_h)
@@ -2689,7 +2689,7 @@ top.o: top.c $(defs_h) $(gdbcmd_h) $(call_cmds_h) $(cli_cmds_h) \
 	$(annotate_h) $(completer_h) $(top_h) $(version_h) $(serial_h) \
 	$(doublest_h) $(gdb_assert_h) $(readline_h) $(readline_history_h) \
 	$(event_top_h) $(gdb_string_h) $(gdb_stat_h) $(ui_out_h) \
-	$(cli_out_h)
+	$(cli_out_h) $(main_h)
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(gdbtypes_h) \
 	$(expression_h) $(gdbcmd_h) $(value_h) $(target_h) $(language_h) \
 	$(gdb_string_h) $(inferior_h) $(tracepoint_h) $(remote_h) \

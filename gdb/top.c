@@ -46,6 +46,7 @@
 #include "serial.h"
 #include "doublest.h"
 #include "gdb_assert.h"
+#include "main.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -1177,7 +1178,6 @@ quit_force (char *args, int from_tty)
 {
   int exit_code = 0;
   struct qt_args qt;
-  extern int return_child_result, return_child_result_value;
 
   /* An optional expression may be used to cause gdb to terminate with the 
      value of that expression. */

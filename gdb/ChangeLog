@@ -1,5 +1,15 @@
 2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* main.h (return_child_result, return_child_result_value): Declare.
+	* infrun.c: Include main.h.
+	(print_stop_reason): Remove declaration of return_child_result_value.
+	* top.c: Include main.h.
+	(quit_force): Remove declarations of return_child_result_value and
+	return_child_result.
+	* Makefile.in (top.o, infrun.o): Add main.h to dependencies.
+
+2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* Makefile.in (tui-winsource.o): Add gdb_assert.h to dependencies.
 
 2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
