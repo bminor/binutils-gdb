@@ -19263,27 +19263,27 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
 /* not.b:s r0l */
   {
     M32C_INSN_NOT16_B_S_DST16_3_S_R0L_DIRECT_QI, "not16.b.s-dst16-3-S-R0l-direct-QI", "not.b:s", 8,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* not.b:s r0h */
   {
     M32C_INSN_NOT16_B_S_DST16_3_S_R0H_DIRECT_QI, "not16.b.s-dst16-3-S-R0h-direct-QI", "not.b:s", 8,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* not.b:s ${Dsp-8-u8}[sb] */
   {
     M32C_INSN_NOT16_B_S_DST16_3_S_8_8_SB_RELATIVE_QI, "not16.b.s-dst16-3-S-8-8-SB-relative-QI", "not.b:s", 16,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* not.b:s ${Dsp-8-s8}[fb] */
   {
     M32C_INSN_NOT16_B_S_DST16_3_S_8_8_FB_RELATIVE_QI, "not16.b.s-dst16-3-S-8-8-FB-relative-QI", "not.b:s", 16,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* not.b:s ${Dsp-8-u16} */
   {
     M32C_INSN_NOT16_B_S_DST16_3_S_8_16_ABSOLUTE_QI, "not16.b.s-dst16-3-S-8-16-absolute-QI", "not.b:s", 24,
-    { 0, { (1<<MACH_BASE), (1<<ISA_M16C) } }
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* not.w${G} $Dst32RnUnprefixedHI */
   {

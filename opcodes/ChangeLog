@@ -1,3 +1,7 @@
+2005-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* m32c-desc.c: Regenerated.
+
 2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Add ms2.
