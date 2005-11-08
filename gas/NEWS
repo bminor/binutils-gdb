@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for ms2 architecture has been added.
+
 * Support for the Z80 processor family has been added.
 
 * Add support for the "@<file>" syntax to the command line, so that extra
