@@ -1,3 +1,27 @@
+2005-11-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-linux-tdep.c (frv_linux_sigtrapm_frame_prev_register): Change
+	type of `valuep' argument to `gdb_byte *'.
+	* frv-tdep.c (frv_pseudo_register_write): Change type of `buffer'
+	argument to `gdb_byte *'.
+	(frv_extract_return_value): Change type of `valbuf' argument to
+	`gdb_byte *'.
+	(frv_store_return_value): Likewise.
+	(frv_frame_prev_register): Change type of `bufferp' argument to
+	`gdb_byte *'
+	* solib-frv.c (ext_Elf32_Half, ext_Elf32_Addr, ext_Elf32_Word)
+	(ext_ptr): Change base type from `unsigned char' to `gdb_byte'.  Adjust
+	calls to extract_unsigned_integer which use struct members declared
+	with these array types to not try to take the address of those
+	members.
+	(fetch_loadmap, frv_current_sos): Change cast in target_read_memory()
+	calls from `char *' to `gdb_byte *'.
+	(lm_base): Change base type of `buf' from `char' to `gdb_byte'.
+	(enable_break2): Change type of `buf' from `char *' to `gdb_byte *'.
+	Change base type of `addr_buf' from `char' to `gdb_byte'.
+	(find_canonical_descriptor_in_load_object): Change base type of `buf'
+	from `char' to `gdb_byte'.
+
 2005-11-07  Paul Gilliam  <pgilliam@us.ibm.com
 
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value): Copy code from
