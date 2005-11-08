@@ -1,3 +1,23 @@
+2005-11-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* m32r-linux-tdep.c (linux_sigtramp_code): Use 'gdb_byte' instead
+	of 'unsigned char'.
+	(m32r_linux_sigtramp_start): Likewise.
+	(linux_rt_sigtramp_code): Likewise.
+	(m32r_linux_rt_sigtramp_start): Likewise.
+	(m32r_linux_sigtramp_frame_prev_register): Use 'gdb_byte *' instead
+	of 'void *'.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint): Use 'gdb_byte'
+	instead of 'char'.
+	(m32r_memory_remove_breakpoint): Likewise.
+	(m32r_breakpoint_from_pc): Likewise.
+	(m32r_store_return_value): Likewise.
+	(decode_prologue): Likewise.
+	(m32r_push_dummy_call): Likewise.
+	(m32r_return_value): Use 'gdb_byte *' instead of 'void *'.
+	* remote-m32r-sdi.c (m32r_xfer_memory): Use 'gdb_byte' instead of
+	'char'.
+
 2005-11-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-tdep.c (floatformat_valid): Change type of `from' from

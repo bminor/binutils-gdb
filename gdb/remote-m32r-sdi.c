@@ -1032,7 +1032,7 @@ m32r_files_info (struct target_ops *target)
 
 /* Read/Write memory.  */
 static int
-m32r_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+m32r_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 		  int write,
 		  struct mem_attrib *attrib, struct target_ops *target)
 {
