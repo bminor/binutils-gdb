@@ -1,5 +1,10 @@
 2005-11-07  Kevin Buettner  <kevinb@redhat.com>
 
+	* ia64-tdep.c (floatformat_valid): Change type of `from' from
+	`const char *' to `const void *'.
+
+2005-11-07  Kevin Buettner  <kevinb@redhat.com>
+
 	* frv-linux-tdep.c (frv_linux_sigtrapm_frame_prev_register): Change
 	type of `valuep' argument to `gdb_byte *'.
 	* frv-tdep.c (frv_pseudo_register_write): Change type of `buffer'
