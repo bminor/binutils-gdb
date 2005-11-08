@@ -1,0 +1,44 @@
+@c Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+@c Free Software Foundation, Inc.
+@c This is part of the GAS manual.
+@c For copying conditions, see the file as.texinfo.
+
+@ifset GENERIC
+@page
+@node MS1-Dependent
+@chapter MS1 Dependent Features
+@end ifset
+
+@ifclear GENERIC
+@node Machine Dependencies
+@chapter MS1 Dependent Features
+@end ifclear
+
+@cindex MS1 support
+@menu
+* MS1 Options::              Options
+@end menu
+
+@node MS1 Options
+@section Options
+@cindex MS1 options (none)
+@cindex options for MS1 (none)
+
+@table @code
+
+@cindex @code{-march=} command line option, MS1
+@item -march=@var{processor}
+This option specifies the target processor.  The assembler will issue an
+error message if an attempt is made to assemble an instruction which
+will not execute on the target processor.  The following processor names are
+recognized: 
+@code{ms1-64-001},
+@code{ms1-16-002},
+@code{ms1-16-003},
+and @code{ms2}.
+
+@cindex @code{-nosched} command line option, MS1
+@item -nosched
+This option disables scheduling restriction checking.
+
+@end table

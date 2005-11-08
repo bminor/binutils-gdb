@@ -20,7 +20,7 @@ proc regexp_test { file1 file2 test } {
 
 
 global srcdir subdir
-if [istarget mrisc1*-*-* || istarget ms1-*] {
+if [istarget ms1-*] {
     gas_test "relocs1.s" {-o relocs1.o} {} {assembling relocs1}
 
     #    gas_test "relocs2.s" {-o relocs2.o} {} {assembling relocs2}

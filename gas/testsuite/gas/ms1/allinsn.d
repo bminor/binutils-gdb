@@ -88,16 +88,16 @@ Disassembly of section .text:
   68:	25 00 00 00 	asri R0,R0,#\$0
 
 0000006c <brlt>:
-  6c:	31 00 00 00 	brlt R0,R0,\$0
+  6c:	31 00 00 00 	brlt R0,R0,6c <brlt>
 
 00000070 <brle>:
-  70:	33 00 00 00 	brle R0,R0,\$0
+  70:	33 00 00 00 	brle R0,R0,70 <brle>
 
 00000074 <breq>:
-  74:	35 00 00 00 	breq R0,R0,\$0
+  74:	35 00 00 00 	breq R0,R0,74 <breq>
 
 00000078 <jmp>:
-  78:	37 00 00 00 	jmp \$0
+  78:	37 00 00 00 	jmp 78 <jmp>
 
 0000007c <jal>:
   7c:	38 00 00 00 	jal R0,R0
@@ -121,7 +121,7 @@ Disassembly of section .text:
   94:	64 00 00 00 	si R0
 
 00000098 <brne>:
-  98:	3b 00 00 00 	brne R0,R0,\$0
+  98:	3b 00 00 00 	brne R0,R0,98 <brne>
 
 0000009c <break>:
   9c:	68 00 00 00 	break

@@ -4424,6 +4424,10 @@ ENUM
   BFD_RELOC_MS1_GNU_VTENTRY
 ENUMDOC
   Morpho MS1 - Used to tell the linker which vtable entries are used.
+ENUM
+  BFD_RELOC_MS1_PCINSN8
+ENUMDOC
+  Morpho MS1 - 8 bit immediate relocation. 
 
 ENUM
   BFD_RELOC_MSP430_10_PCREL

@@ -1,3 +1,9 @@
+2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Add ms2.
+	* ms1-asm.c, ms1-desc.c, ms1-desc.h, ms1-dis.c, ms1-ibld.c,
+	ms1-opc.c, ms1-opc.h: Regenerated.
+
 2005-11-07  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure: Regenerate after modifying bfd/warning.m4.

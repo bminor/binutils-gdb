@@ -84,7 +84,7 @@ const char * md_shortopts = "";
 
 /* Mach selected from command line.  */
 static int ms1_mach = bfd_mach_ms1;
-static unsigned ms1_mach_bitmask = 0;
+static unsigned ms1_mach_bitmask = 1 << MACH_MS1;
 
 /* Flags to set in the elf header */
 static flagword ms1_flags = EF_MS1_CPU_MRISC;
@@ -94,7 +94,8 @@ enum ms1_architectures
   {
     ms1_64_001,
     ms1_16_002,
-    ms1_16_003
+    ms1_16_003,
+    ms2
   };
 
 /* MS1 architecture we are using for this output file.  */
@@ -127,6 +128,13 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg)
  	  ms1_mach_bitmask = 1 << MACH_MS1_003;
  	  ms1_arch = ms1_16_003;
  	}
+      else if (strcasecmp (arg, "MS2") == 0)
+ 	{
+ 	  ms1_flags = (ms1_flags & ~EF_MS1_CPU_MASK) | EF_MS1_CPU_MS2;
+ 	  ms1_mach = bfd_mach_mrisc2;
+ 	  ms1_mach_bitmask = 1 << MACH_MS2;
+ 	  ms1_arch = ms2;
+ 	}
     case OPTION_NO_SCHED_REST:
       no_scheduling_restrictions = 1;
       break;
@@ -145,6 +153,7 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("  -march=ms1-64-001         allow ms1-64-001 instructions (default) \n"));
   fprintf (stream, _("  -march=ms1-16-002         allow ms1-16-002 instructions \n"));
   fprintf (stream, _("  -march=ms1-16-003         allow ms1-16-003 instructions \n"));
+  fprintf (stream, _("  -march=ms2                allow ms2 instructions \n"));
   fprintf (stream, _("  -nosched                  disable scheduling restrictions \n"));
 }
 
@@ -176,6 +185,7 @@ void
 md_assemble (char * str)
 {
   static long delayed_load_register = 0;
+  static long prev_delayed_load_register = 0;
   static int last_insn_had_delay_slot = 0;
   static int last_insn_in_noncond_delay_slot = 0;
   static int last_insn_has_load_delay = 0;
@@ -241,6 +251,24 @@ md_assemble (char * str)
 		     insn.fields.f_sr2);
 	}
 
+      /* Detect JAL/RETI hazard */
+      if (ms1_mach == ms2
+	  && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_JAL_HAZARD))
+	{
+	  if ((CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_USES_FRSR1)
+	       && insn.fields.f_sr1 == delayed_load_register)
+	      || (CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_USES_FRSR2)
+		  && insn.fields.f_sr2 == delayed_load_register))
+	    as_warn (_("operand references R%ld of previous instrutcion."),
+		     delayed_load_register);
+	  else if ((CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_USES_FRSR1)
+		    && insn.fields.f_sr1 == prev_delayed_load_register)
+		   || (CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_USES_FRSR2)
+		       && insn.fields.f_sr2 == prev_delayed_load_register))
+	    as_warn (_("operand references R%ld of instructcion before previous."),
+		     prev_delayed_load_register);
+	}
+      
       /* Detect data dependency between conditional branch instruction
          and an immediately preceding arithmetic or logical instruction.  */
       if (last_insn_was_arithmetic_or_logic
@@ -286,6 +314,8 @@ md_assemble (char * str)
   last_insn_was_conditional_branch_insn =
   CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_BR_INSN)
     && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_USES_FRSR2);
+  
+  prev_delayed_load_register = delayed_load_register;
   
   if (CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_USES_FRDR))
      delayed_load_register = insn.fields.f_dr; 
@@ -380,6 +410,12 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn     ATTRIBUTE_UNUSED,
       if (fixP->fx_cgen.opinfo != 0)
         result = fixP->fx_cgen.opinfo;
       fixP->fx_no_overflow = 1;
+      break;
+    case MS1_OPERAND_LOOPSIZE:
+      result = BFD_RELOC_MS1_PCINSN8;
+      fixP->fx_pcrel = 1;
+      /* Adjust for the delay slot, which is not part of the loop  */
+      fixP->fx_offset -= 8;
       break;
     default:
       result = BFD_RELOC_NONE;

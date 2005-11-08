@@ -1908,6 +1908,7 @@ enum bfd_architecture
   bfd_arch_ms1,
 #define bfd_mach_ms1           1
 #define bfd_mach_mrisc2        2
+#define bfd_mach_ms2           3
   bfd_arch_pj,
   bfd_arch_avr,       /* Atmel AVR microcontrollers.  */
 #define bfd_mach_avr1          1
@@ -3969,6 +3970,9 @@ This is the 5 bits of a value.  */
 
 /* Morpho MS1 - Used to tell the linker which vtable entries are used.  */
   BFD_RELOC_MS1_GNU_VTENTRY,
+
+/* Morpho MS1 - 8 bit immediate relocation.  */
+  BFD_RELOC_MS1_PCINSN8,
 
 /* msp430 specific relocation codes  */
   BFD_RELOC_MSP430_10_PCREL,

@@ -501,6 +501,7 @@ elf32_ms1_machine (bfd *abfd)
     {
     case EF_MS1_CPU_MRISC:	return bfd_mach_ms1;
     case EF_MS1_CPU_MRISC2:  return bfd_mach_mrisc2;
+    case EF_MS1_CPU_MS2:  return bfd_mach_ms2;
     }
 
   return bfd_mach_ms1;
@@ -548,7 +549,6 @@ ms1_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 {
   flagword     old_flags, new_flags;
   bfd_boolean  error = FALSE;
-  static bfd * last_ibfd = 0;
 
   /* Check if we have the same endianess.  */
   if (_bfd_generic_verify_endian_match (ibfd, obfd) == FALSE)
@@ -569,13 +569,29 @@ ms1_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 		      ibfd, old_flags, new_flags, elf_flags_init (obfd) ? "yes" : "no");
 #endif
 
-  elf_flags_init (obfd) = TRUE;
-
-  if ((new_flags & EF_MS1_CPU_MASK) == EF_MS1_CPU_MRISC2)
+  if (!elf_flags_init (obfd))
     {
-      elf_elfheader (obfd)->e_flags = new_flags;
-      last_ibfd = ibfd;
+      old_flags = new_flags;
+      elf_flags_init (obfd) = TRUE;
+    }
+  else if ((new_flags & EF_MS1_CPU_MASK) != (old_flags & EF_MS1_CPU_MASK))
+    {
+      /* CPU has changed.  This is invalid, because MRISC, MRISC2 and
+	 MS2 are not subsets of each other.   */
+      error = 1;
+      
+      /* FIXME:However, until the compiler is multilibbed, preventing
+	 mixing breaks the build.  So we allow merging and use the
+	 greater CPU value.  This is of course unsafe.  */
+      error = 0;
+      if ((new_flags & EF_MS1_CPU_MASK) > (old_flags & EF_MS1_CPU_MASK))
+	old_flags = ((old_flags & ~EF_MS1_CPU_MASK)
+		     | (new_flags & EF_MS1_CPU_MASK));
+    }
+  if (!error)
+    {
       obfd->arch_info = ibfd->arch_info;
+      elf_elfheader (obfd)->e_flags = old_flags;
     }
 
   return !error;
@@ -598,8 +614,9 @@ ms1_elf_print_private_bfd_data (bfd * abfd, void * ptr)
   switch (flags & EF_MS1_CPU_MASK)
     {
     default:
-    case EF_MS1_CPU_MRISC:	fprintf (file, " ms1-16-002");	break;
+    case EF_MS1_CPU_MRISC:   fprintf (file, " ms1-16-002");	break;
     case EF_MS1_CPU_MRISC2:  fprintf (file, " ms1-16-003");	break;
+    case EF_MS1_CPU_MS2:     fprintf (file, " ms2");	break;
     }
 
   fputc ('\n', file);

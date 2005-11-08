@@ -61,6 +61,31 @@ signed_out_of_bounds (long val)
 }
 
 static const char *
+parse_loopsize (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		void *arg)
+{
+  signed long * valuep = (signed long *) arg;
+  const char *errmsg;
+  bfd_reloc_code_real_type code = BFD_RELOC_NONE;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  /* Is it a control transfer instructions?  */ 
+  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_LOOPSIZE)
+    {
+      code = BFD_RELOC_MS1_PCINSN8;
+      errmsg = cgen_parse_address (cd, strp, opindex, code,
+                                   & result_type, & value);
+      *valuep = value;
+      return errmsg;
+    }
+
+  abort ();
+}
+
+static const char *
 parse_imm16 (CGEN_CPU_DESC cd,
 	     const char **strp,
 	     int opindex,
@@ -89,7 +114,9 @@ parse_imm16 (CGEN_CPU_DESC cd,
 
   /* If it's not a control transfer instruction, then
      we have to check for %OP relocating operators.  */
-  if (strncmp (*strp, "%hi16", 5) == 0)
+  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16L)
+    ;
+  else if (strncmp (*strp, "%hi16", 5) == 0)
     {
       *strp += 5;
       code = BFD_RELOC_HI16;
@@ -417,6 +444,18 @@ ms1_cgen_parse_operand (CGEN_CPU_DESC cd,
     case MS1_OPERAND_BRC2 :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_BRC2, (unsigned long *) (& fields->f_brc2));
       break;
+    case MS1_OPERAND_CB1INCR :
+      errmsg = cgen_parse_signed_integer (cd, strp, MS1_OPERAND_CB1INCR, (long *) (& fields->f_cb1incr));
+      break;
+    case MS1_OPERAND_CB1SEL :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CB1SEL, (unsigned long *) (& fields->f_cb1sel));
+      break;
+    case MS1_OPERAND_CB2INCR :
+      errmsg = cgen_parse_signed_integer (cd, strp, MS1_OPERAND_CB2INCR, (long *) (& fields->f_cb2incr));
+      break;
+    case MS1_OPERAND_CB2SEL :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CB2SEL, (unsigned long *) (& fields->f_cb2sel));
+      break;
     case MS1_OPERAND_CBRB :
       errmsg = parse_cbrb (cd, strp, MS1_OPERAND_CBRB, (unsigned long *) (& fields->f_cbrb));
       break;
@@ -474,6 +513,9 @@ ms1_cgen_parse_operand (CGEN_CPU_DESC cd,
     case MS1_OPERAND_IMM16 :
       errmsg = parse_imm16 (cd, strp, MS1_OPERAND_IMM16, (long *) (& fields->f_imm16s));
       break;
+    case MS1_OPERAND_IMM16L :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_IMM16L, (unsigned long *) (& fields->f_imm16l));
+      break;
     case MS1_OPERAND_IMM16O :
       errmsg = parse_imm16 (cd, strp, MS1_OPERAND_IMM16O, (unsigned long *) (& fields->f_imm16s));
       break;
@@ -488,6 +530,9 @@ ms1_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_LENGTH :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_LENGTH, (unsigned long *) (& fields->f_length));
+      break;
+    case MS1_OPERAND_LOOPSIZE :
+      errmsg = parse_loopsize (cd, strp, MS1_OPERAND_LOOPSIZE, (unsigned long *) (& fields->f_loopo));
       break;
     case MS1_OPERAND_MASK :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_MASK, (unsigned long *) (& fields->f_mask));
@@ -512,6 +557,9 @@ ms1_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_RC2 :
       errmsg = parse_rc (cd, strp, MS1_OPERAND_RC2, (unsigned long *) (& fields->f_rc2));
+      break;
+    case MS1_OPERAND_RC3 :
+      errmsg = parse_rc (cd, strp, MS1_OPERAND_RC3, (unsigned long *) (& fields->f_rc3));
       break;
     case MS1_OPERAND_RCNUM :
       errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_RCNUM, (unsigned long *) (& fields->f_rcnum));

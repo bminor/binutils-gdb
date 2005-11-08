@@ -1,8 +1,8 @@
 
-relocs.x:     file format elf32-mrisc1
+relocs.x:     file format elf32-(mrisc1|ms1)
 
 Contents of section .text:
- 2000 00131000 37000004 12000000 3700fff8  ....7.......7...
+ 2000 00131000 3700dffc 12000000 3700fff8  ....7.......7...
  2010 03210000 03212215 03210001 03210000  .!...!"..!...!..
  2020 0321ffff 0321eeee 03210005 03210006  .!...!...!...!..
  2030 00675000                             .gP.            
@@ -38,18 +38,19 @@ Contents of section .data:
  22f4 00000000 00000000 00000000 00000000  ................
  2304 00000000 00000000 00000000 00000000  ................
  2314 000003                               ...             
-Contents of section .sbss:
+Contents of section .stack:
+ 7ffff0 deaddead                             ....            
 Disassembly of section .text:
 
 00002000 <_start>:
     2000:	00 13 10 00 	add R1,R1,R3
 
 00002004 <local>:
-    2004:	37 00 00 04 	jmp \$4
+    2004:	37 00 df fc 	jmp 0 <_start-0x2000>
 
 00002008 <none>:
-    2008:	12 00 00 00 	or R0,R0,R0
-    200c:	37 00 ff f8 	jmp \$fffffff8
+    2008:	12 00 00 00 	nop
+    200c:	37 00 ff f8 	jmp 2004 <local>
     2010:	03 21 00 00 	addui R1,R2,#\$0
     2014:	03 21 22 15 	addui R1,R2,#\$2215
     2018:	03 21 00 01 	addui R1,R2,#\$1

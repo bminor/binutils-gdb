@@ -12,7 +12,7 @@ muli:
 	muli R0, R0, #0
 
 	.global dbnz
-dbnz:
+dbnz_:
 	dbnz	r0, dbnz
 
 	.global fbcbincs

@@ -1,3 +1,16 @@
+2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Add ms2 support
+	* archures.c (bfd_mach_ms2): Define.
+	* cpu-ms1.c (arch_info_struct): Add ms2 stanza.
+	* elf32-ms1.c (elf32_ms1_machine): Add ms2 case.
+	(ms1_elf_merge_private_bfd_data): Remove unused variables.  Add
+	correct merging logic, with workaround.
+	(ms1_elf_print_private_bfd_data): Add ms2 case.
+	* reloc.c (BFD_RELOC_MS1_PCINSN8): Add ms2 specific reloc.
+	* libbfd.h: Regenerated.
+	* bfd-in2.h: Regenerated.
+
 2005-11-07  Steve Ellcey  <sje@cup.hp.com>
 
 	* warning.m4 (AM_BINUTILS_WARNINGS): Default to empty string

@@ -32,7 +32,7 @@
   (comment "Morpho Technologies mRISC family")
   (default-alignment aligned)
   (insn-lsb0? #t)
-  (machs ms1 ms1-003)
+  (machs ms1 ms1-003 ms2)
   (isas ms1)
 )
 
@@ -66,6 +66,14 @@
   (word-bitsize 32)
 )
 
+(define-cpu
+  ; cpu names must be distinct from the architecture name and machine names.
+  (name ms2bf)
+  (comment "Morpho Technologies mRISC family")
+  (endian big)
+  (word-bitsize 32)
+)
+
 (define-mach
   (name ms1)
   (comment "Morpho Technologies mrisc")
@@ -77,6 +85,13 @@
   (name ms1-003)
   (comment "Morpho Technologies mrisc")
   (cpu ms1-003bf)
+  (isas ms1)
+)
+
+(define-mach
+  (name ms2)
+  (comment "Morpho Technologies ms2")
+  (cpu ms2bf)
   (isas ms1)
 )
 
@@ -109,10 +124,18 @@
 	)
 )
 
-; Macros to simplify MACH attribute specification.
-
-(define-pmacro MACHMS1 (MACH ms1))
-(define-pmacro MACHMS1-003 (MACH ms1-003))
+(define-model
+  (name ms2)
+  (comment "Morpho Technologies ms2")
+  (mach ms2)
+  (unit u-exec "Execution Unit" ()
+	1 1 ; issue done
+	() ; state
+	() ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+)
 
 ; FIXME: It might simplify things to separate the execute process from the
 ; one that updates the PC.
@@ -140,6 +163,7 @@
 ; f-imm16a: 16 bit immediate value when it's a pc-rel offset.
 ; f-uu4a: unused 4 bit field.
 ; f-uu4b: second unsed 4 bit field.
+; f-uu1: unused 1 bit field
 ; f-uu12: unused 12 bit field.
 ; f-uu16: unused 16 bit field.
 ; f-uu24: unused 24 bit field.
@@ -158,7 +182,9 @@
 (dnf f-uu4a      "unused 4 bit field"		() 19 4)
 (dnf f-uu4b      "unused 4 bit field"		() 23 4)
 (dnf f-uu12      "unused 12 bit field"	        () 11 12)
+(dnf f-uu8       "unused 8 bit field"           () 15 8)
 (dnf f-uu16      "unused 16 bit field" 	        () 15 16)
+(dnf f-uu1       "unused 1 bit field" 	        ()  7 1)
 
 ; The following ifields are used exclusively for the MorphoSys instructions.
 ; In a few cases, a bit field is used for something in addition to what its
@@ -214,6 +240,17 @@
 (dnf f-rc2       "rc2"           		()  6 1)
 (dnf f-ctxdisp   "context displacement"		()  5 6)
 
+; additional fields in ms2
+(dnf f-imm16l    "loop count"                   () 23 16)
+(df  f-loopo	 "loop offset"			() 7 8 UINT
+    ((value pc) (srl SI value 2))
+    ((value pc) (add SI (sll value 2) 8))
+ )
+(dnf f-cb1sel    "cb1 select"                   () 25 3)
+(dnf f-cb2sel    "cb2 select"                   () 22 3)
+(dnf f-cb1incr   "cb1 increment"                (SIGNED) 19 6)
+(dnf f-cb2incr   "cb2 increment"                (SIGNED) 13 6)
+(dnf f-rc3       "row/colum context"            ()  7 1)
 
 ; The following is just for a test
 (dnf f-msysfrsr2 "sr2 for msys"			() 19 4)
@@ -237,7 +274,7 @@
   (ADD  ADDU SUB  SUBU MUL   -      -    -
    AND  OR   XOR  NAND NOR   XNOR   LDUI -
    LSL  LSR  ASR  -    -     -      -    -
-   BRLT BRLE BREQ JMP  JAL   BRNEQ  DBNZ -
+   BRLT BRLE BREQ JMP  JAL   BRNEQ  DBNZ LOOP
    LDW  STW  -    -    -     -      -    -
    -    -    -    -    -     -      -    -
    EI   DI   SI   RETI BREAK IFLUSH -    -
@@ -257,7 +294,7 @@
 ; insn-imm: bit 24.  Immediate operand indicator.
 (define-normal-insn-enum insn-imm "imm enums" () IMM_ f-imm
   ; This bit specifies whether and immediate operand will be present.
-  ; It's 1 if ther is, 0 if there is not.
+  ; It's 1 if there is, 0 if there is not.
   (NO YES)
 )
 ;;;;;;;;;;;;;;;;
@@ -305,6 +342,13 @@
   (type boolean)
   (name BR-INSN)
   (comment "insn performs an I/O operation")
+)
+
+(define-attr
+  (for insn)
+  (type boolean)
+  (name JAL-HAZARD)
+  (comment "insn has jal-like hazard")
 )
 
 (define-pmacro (define-reg-use-attr regfield)
@@ -375,8 +419,8 @@
   (type h-sint) (index f-imm16s) (handlers (parse "imm16") (print "dollarhex")))
 (define-operand (name imm16z) (comment "immediate value - zero extd") (attrs) 
   (type h-uint) (index f-imm16u) (handlers (parse "imm16") (print "dollarhex")))
-(define-operand (name imm16o) (comment "immediate value") (attrs) 
-  (type h-uint) (index f-imm16s) (handlers (parse "imm16") (print "dollarhex")))
+(define-operand (name imm16o) (comment "immediate value") (attrs PCREL-ADDR) 
+  (type h-uint) (index f-imm16s) (handlers (parse "imm16") (print "pcrel")))
 
 ; Operands for MorphoSys Instructions
 
@@ -490,6 +534,24 @@
 (define-operand (name fbincr)	(comment "fb incr") (attrs)
   (type h-uint) (index f-fbincr) (handlers (print "dollarhex")))
 
+; For the ms2 insns
+(define-operand (name loopsize) (comment "immediate value")
+  (attrs (MACH ms2) PCREL-ADDR)
+  (type h-uint) (index f-loopo) (handlers (parse "loopsize") (print "pcrel")))
+(define-operand (name imm16l) (comment "immediate value")
+  (attrs (MACH ms2))
+  (type h-uint) (index f-imm16l) (handlers (print "dollarhex")))
+(define-operand (name rc3) (comment "rc3") (attrs (MACH ms2))
+  (type h-uint) (index f-rc3) (handlers (parse "rc") (print "dollarhex")))
+(define-operand (name cb1sel) (comment "cb1sel") (attrs (MACH ms2))
+  (type h-uint) (index f-cb1sel) (handlers (print "dollarhex")))
+(define-operand (name cb2sel) (comment "cb2sel") (attrs (MACH ms2))
+  (type h-uint) (index f-cb2sel) (handlers (print "dollarhex")))
+(define-operand (name cb1incr) (comment "cb1incr") (attrs (MACH ms2))
+  (type h-sint) (index f-cb1incr) (handlers (print "dollarhex")))
+(define-operand (name cb2incr) (comment "cb2incr") (attrs (MACH ms2))
+  (type h-sint) (index f-cb2incr) (handlers (print "dollarhex")))
+
 ; Probaby won't need most of these.
 (define-pmacro r0    (reg h-spr #x0))
 (define-pmacro r1    (reg h-spr #x01))
@@ -594,7 +656,7 @@
 )
 
 (dni mul "MUL DstReg, SrcReg1, SrcReg2"
-     (MACHMS1-003 AL-INSN USES-FRDRRR USES-FRSR1 USES-FRSR2)
+     ((MACH ms1-003,ms2) AL-INSN USES-FRDRRR USES-FRSR1 USES-FRSR2)
      "mul $frdrrr,$frsr1,$frsr2"
      (+ MSYS_NO OPC_MUL IMM_NO frsr1 frsr2 frdrrr (f-uu12 0))
      (sequence((HI op1) (HI op2))
@@ -612,7 +674,7 @@
 )
 
 (dni muli "MULI DstReg, SrcReg1, UnsImm"
-     (MACHMS1-003 AL-INSN USES-FRDR USES-FRSR1)
+     ((MACH ms1-003,ms2) AL-INSN USES-FRDR USES-FRSR1)
      "muli $frdr,$frsr1,#$imm16"
      (+ MSYS_NO OPC_MUL IMM_YES frsr1 frdr imm16)
      (sequence((HI op1) (HI op2))
@@ -851,7 +913,7 @@
 )
 
 (dni jal "JAL DstReg, SrcReg1"
-     (BR-INSN DELAY-SLOT BR-INSN USES-FRDR USES-FRSR1)
+     (BR-INSN DELAY-SLOT BR-INSN USES-FRDR USES-FRSR1 JAL-HAZARD)
      "jal $frdrrr,$frsr1"
      (+ MSYS_NO OPC_JAL IMM_NO frsr1 (f-uu4a 0) frdrrr (f-uu12 0))
      (sequence()
@@ -867,7 +929,7 @@
 )
 
 (dni dbnz "DBNZ SrcReg1, label"
-     (MACHMS1-003 BR-INSN DELAY-SLOT USES-FRSR1)
+     ((MACH ms1-003,ms2) BR-INSN DELAY-SLOT USES-FRSR1)
      "dbnz $frsr1,$imm16o"
      (+ MSYS_NO OPC_DBNZ IMM_YES frsr1 (f-uu4a 0) imm16o)
      (sequence()
@@ -913,7 +975,7 @@
 )
 
 (dni reti "RETI SrcReg1"
-     (DELAY-SLOT BR-INSN USES-FRSR1)
+     (DELAY-SLOT BR-INSN USES-FRSR1 JAL-HAZARD)
      "reti $frsr1"
      (+ MSYS_NO OPC_RETI IMM_NO frsr1 (f-uu4a 0) (f-uu16 0))
      (sequence()
@@ -962,7 +1024,7 @@
 ; Cache Flush Instruction
 
 (dni iflush "IFLUSH"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "iflush"
      (+ MSYS_NO OPC_IFLUSH (f-imm 0) (f-uu24 0))
      (nop)
@@ -972,7 +1034,7 @@
 ; MorphoSys Instructions
 
 (dni ldctxt "LDCTXT SRC1, SRC2, r/c, r/c#, context#"
-     ()
+     ((MACH ms1))
      "ldctxt $frsr1,$frsr2,#$rc,#$rcnum,#$contnum"
      (+ MSYS_YES MSOPC_LDCTXT (f-uu-2-25 0) frsr1 frsr2 rc rcnum (f-uu-3-11 0)
 	contnum )
@@ -981,7 +1043,7 @@
 )
 
 (dni ldfb "LDFB SRC1, byte#"
-     ()
+     ((MACH ms1))
      "ldfb $frsr1,$frsr2,#$imm16z"
      (+ MSYS_YES MSOPC_LDFB (f-uu-2-25 0) frsr1 frsr2 imm16z)
      (nop)
@@ -989,7 +1051,7 @@
 )
 
 (dni stfb "STFB SRC1, SRC2, byte "
-     ()
+     ((MACH ms1))
      "stfb $frsr1,$frsr2,#$imm16z"
      (+ MSYS_YES MSOPC_STFB (f-uu-2-25 0) frsr1 frsr2 imm16z)
      (nop)
@@ -997,7 +1059,7 @@
 )
 
 (dni fbcb "FBCB SRC1, RT/BR1/BR2/CS, B_all, B_r_c, r/c, CB/RB, cell, dup, ctx_disp"
-     ()
+     ((MACH ms1,ms1-003))
      "fbcb $frsr1,#$rbbc,#$ball,#$brc,#$rc1,#$cbrb,#$cell,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_FBCB rbbc frsr1 ball brc (f-uu-4-15 0) rc cbrb cell dup ctxdisp)
      (nop)
@@ -1176,7 +1238,7 @@
 ;; Issue 66262: The documenatation gives the wrong order for 
 ;;               the arguments to the WFBINC instruction.
 (dni wfbinc "WFBINC type, ccb/rcb, incr, all, c/r, length, rca_row, word, dup, ctxt_disp"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "wfbinc #$rda,#$wr,#$fbincr,#$ball,#$colnum,#$length,#$rownum1,#$rownum2,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_WFBINC rda wr fbincr ball colnum length rownum1 rownum2 dup ctxdisp)
      (nop)
@@ -1184,7 +1246,7 @@
 )
 
 (dni mwfbinc "MWFBINC mreg, type, ccb/rcb, incr, length, rca_row, word, dup, ctxt_disp"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "mwfbinc $frsr2,#$rda,#$wr,#$fbincr,#$length,#$rownum1,#$rownum2,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_MWFBINC rda wr fbincr frsr2 length rownum1 rownum2 dup ctxdisp)
      (nop)
@@ -1192,7 +1254,7 @@
 )
 
 (dni wfbincr "WFBINCR ireg, type, ccb/rcb, all, c/r, length, rca_row, word, dup, ctxt_disp"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "wfbincr $frsr1,#$rda,#$wr,#$ball,#$colnum,#$length,#$rownum1,#$rownum2,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_WFBINCR rda wr frsr1 ball colnum length rownum1 rownum2 dup ctxdisp)
      (nop)
@@ -1200,7 +1262,7 @@
 )
 
 (dni mwfbincr "MWFBINCR ireg, mreg, type, ccb/rcb, length, rca_row, word, dup, ctxt_disp"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "mwfbincr $frsr1,$frsr2,#$rda,#$wr,#$length,#$rownum1,#$rownum2,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_MWFBINCR rda wr frsr1 frsr2 length rownum1 rownum2 dup ctxdisp)
      (nop)
@@ -1208,7 +1270,7 @@
 )
 
 (dni fbcbincs "FBCBINCS	     perm, all, c/r, cbs, incr, ccb/rcb, cdb/rdb, word, dup, ctxt_disp"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "fbcbincs #$perm,#$a23,#$cr,#$cbs,#$incr,#$ccb,#$cdb,#$rownum2,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_FBCBINCS perm a23 cr cbs incr ccb cdb rownum2 dup ctxdisp)
      (nop)
@@ -1216,7 +1278,7 @@
 )
 
 (dni mfbcbincs "MFBCBINCS		ireg, perm, cbs, incr, ccb/rcb, cdb/rdb, word, dup, ctxt_disp"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "mfbcbincs $frsr1,#$perm,#$cbs,#$incr,#$ccb,#$cdb,#$rownum2,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_MFBCBINCS perm frsr1 cbs incr ccb cdb rownum2 dup ctxdisp)
      (nop)
@@ -1224,7 +1286,7 @@
 )
 
 (dni fbcbincrs "FBCBINCRS	     ireg, perm, all, c/r, cbs, ccb/rcb, cdb/rdb, word, dup, ctxt_disp"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "fbcbincrs $frsr1,#$perm,#$ball,#$colnum,#$cbx,#$ccb,#$cdb,#$rownum2,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_FBCBINCRS perm frsr1 ball colnum (f-uu-1-15 0) cbx ccb cdb rownum2 dup ctxdisp)
      (nop)
@@ -1232,9 +1294,58 @@
 )
 
 (dni mfbcbincrs "MFBCBINCRS ireg, mreg, perm, cbs, ccb/rcb, cdb/rdb, word, dup, ctxt_disp"
-     (MACHMS1-003)
+     ((MACH ms1-003,ms2))
      "mfbcbincrs $frsr1,$frsr2,#$perm,#$cbx,#$ccb,#$cdb,#$rownum2,#$dup,#$ctxdisp"
      (+ MSYS_YES MSOPC_MFBCBINCRS perm frsr1 frsr2 (f-uu-1-15 0) cbx ccb cdb rownum2 dup ctxdisp)
+     (nop)
+     ()
+)
+
+; MS2 instructions
+(dni loop "LOOP SrcReg1, label"
+     ((MACH ms2) DELAY-SLOT USES-FRSR1)
+     "loop $frsr1,$loopsize"
+     (+ MSYS_NO OPC_LOOP IMM_NO frsr1 (f-uu4a 0) (f-uu8 0) loopsize)
+     (nop)      ;; to be filled in
+     ()
+)
+
+(dni loopi "LOOPI niter, label"
+     ((MACH ms2) DELAY-SLOT)
+     "loopi #$imm16l,$loopsize"
+     (+ MSYS_NO OPC_LOOP IMM_YES imm16l loopsize)
+     (nop)      ;; to be filled in
+     ()
+)
+
+(dni dfbc "dfbc cb1sel,cb2sel,cb1inc,cb2inc,dr/c,cr/c,ctxdisp"
+     ((MACH ms2))
+     "dfbc #$cb1sel,#$cb2sel,#$cb1incr,#$cb2incr,#$rc3,#$rc2,#$ctxdisp"
+     (+ MSYS_YES MSOPC_LDCTXT cb1sel cb2sel cb1incr cb2incr rc3 rc2 ctxdisp)
+     (nop)
+     ()
+)
+
+(dni dwfb "dwfb cb1sel,cb2sel,cb1inc,cb2inc,cr/c,ctxdisp"
+     ((MACH ms2))
+     "dwfb #$cb1sel,#$cb2sel,#$cb1incr,#$cb2incr,#$rc2,#$ctxdisp"
+     (+ MSYS_YES MSOPC_LDFB cb1sel cb2sel cb1incr cb2incr (f-uu1 0) rc2 ctxdisp)
+     (nop)
+     ()
+)
+
+(dni fbwfb "fbwfb cb1sel,cb2sel,cb1inc,cb2inc,r0/1,cr/c,ctxdisp"
+     ((MACH ms2))
+     "fbwfb #$cb1sel,#$cb2sel,#$cb1incr,#$cb2incr,#$rc3,#$rc2,#$ctxdisp"
+     (+ MSYS_YES MSOPC_STFB cb1sel cb2sel cb1incr cb2incr rc3 rc2 ctxdisp)
+     (nop)
+     ()
+)
+
+(dni dfbr "dfbr cb1sel,cb2sel,reg,W/O1,W/O2,mode,cr/c,ctxdisp"
+     ((MACH ms2) USES-FRSR2)
+     "dfbr #$cb1sel,#$cb2sel,$frsr2,#$length,#$rownum1,#$rownum2,#$rc2,#$ctxdisp"
+     (+ MSYS_YES MSOPC_FBCB cb1sel cb2sel frsr2 length rownum1 rownum2 rc2 ctxdisp)
      (nop)
      ()
 )
