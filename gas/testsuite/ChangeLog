@@ -1,3 +1,9 @@
+2005-11-08  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* gas/all/cofftag.s: Convert numbers in .type 
+	directives to decimal.
+	* gas/all/gas.exp: enable cofftag-test for z80-*-coff.
+
 2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Add ms2.
