@@ -1,3 +1,9 @@
+2005-11-08  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* expr.c (operand <case '$'>): Use DOLLAR_AMBIGU rather than
+	flag_mri_m68k as condition for parsing the '$' as a prefix.
+	* as.h (DOLLAR_AMBIGU): Define if needed.
+
 2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Add ms2 support.

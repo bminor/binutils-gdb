@@ -1095,10 +1095,10 @@ operand (expressionS *expressionP, enum expr_mode mode)
       if (! flag_m68k_mri)
 	goto de_fault;
 #endif
-      if (flag_m68k_mri && hex_p (*input_line_pointer))
+      if (DOLLAR_AMBIGU && hex_p (*input_line_pointer))
 	{
-	  /* In MRI mode, '$' is also used as the prefix for a
-	     hexadecimal constant.  */
+	  /* In MRI mode and on Z80, '$' is also used as the prefix
+	     for a hexadecimal constant.  */
 	  integer_constant (16, expressionP);
 	  break;
 	}

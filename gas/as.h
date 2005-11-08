@@ -586,6 +586,7 @@ int generic_force_reloc (struct fix *);
 #ifdef TC_M68K
 /* True if we are assembling in m68k MRI mode.  */
 COMMON int flag_m68k_mri;
+#define DOLLAR_AMBIGU flag_m68k_mri
 #else
 #define flag_m68k_mri 0
 #endif
@@ -594,6 +595,10 @@ COMMON int flag_m68k_mri;
 COMMON int           warn_comment;
 COMMON unsigned int  found_comment;
 COMMON char *        found_comment_file;
+#endif
+
+#ifndef DOLLAR_AMBIGU
+#define DOLLAR_AMBIGU 0
 #endif
 
 #ifndef NUMBERS_WITH_SUFFIX
