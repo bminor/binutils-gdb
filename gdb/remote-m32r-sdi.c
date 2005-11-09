@@ -1,6 +1,6 @@
 /* Remote debugging interface for M32R/SDI.
 
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Renesas Technology Co.
    Written by Kei Sakamoto <sakamoto.kei@renesas.com>.
@@ -534,7 +534,7 @@ m32r_resume (ptid_t ptid, int step, enum target_signal sig)
 
       /* Write DBT instruction. */
       buf[0] = SDI_WRITE_MEMORY;
-      store_long_parameter (buf + 1, bp_addr);
+      store_long_parameter (buf + 1, (bp_addr & 0xfffffffc));
       store_long_parameter (buf + 5, 4);
       if ((bp_addr & 2) == 0 && bp_addr != (pc_addr & 0xfffffffc))
 	{
@@ -810,7 +810,7 @@ m32r_wait (ptid_t ptid, struct target_waitstatus *status)
 	{
 	  if (!mmu_on)
 	    bp_addr &= 0x7fffffff;
-	  buf[0] = SDI_READ_MEMORY;
+	  buf[0] = SDI_WRITE_MEMORY;
 	  store_long_parameter (buf + 1, bp_addr & 0xfffffffc);
 	  store_long_parameter (buf + 5, 4);
 	  buf[9] = bp_data[i][0];

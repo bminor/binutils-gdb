@@ -1,3 +1,9 @@
+2005-11-09  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* remote-m32r-sdi.c: Update copyright years.
+	(m32r_resume): Write DBT at word-aligned addresses.
+	(m32r_wait): Use SDI_WRITE_MEMORY to remove DBT.
+
 2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* Makefile.in (tui-winsource.o): Add gdb_assert.h to dependencies.
