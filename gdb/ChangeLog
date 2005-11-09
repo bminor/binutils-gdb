@@ -1,3 +1,9 @@
+2005-11-09  Randolph Chung <tausq@debian.org>
+
+	* hppa-linux-nat.c (_initialize_hppa_linux_nat): Use
+	hppa_linux_{store,fetch}_inferior_registers instead of
+	arm_linux_{store,fetch}_inferior_registers.
+
 2005-11-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* remote-m32r-sdi.c: Update copyright years.

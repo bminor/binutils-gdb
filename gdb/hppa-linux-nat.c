@@ -388,8 +388,8 @@ _initialize_hppa_linux_nat (void)
   t = linux_target ();
 
   /* Add our register access methods.  */
-  t->to_fetch_registers = arm_linux_fetch_inferior_registers;
-  t->to_store_registers = arm_linux_store_inferior_registers;
+  t->to_fetch_registers = hppa_linux_fetch_inferior_registers;
+  t->to_store_registers = hppa_linux_store_inferior_registers;
 
   /* Register the target.  */
   add_target (t);
