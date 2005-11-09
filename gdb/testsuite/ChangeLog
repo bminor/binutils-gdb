@@ -1,3 +1,7 @@
+2005-11-09  Randolph Chung <tausq@debian.org>
+
+	* gdb.base/structs2.exp: Update xfail to only trigger for gcc-3.x.
+
 2005-11-09  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* gdb.base/break.exp: Fix a comment typo.
