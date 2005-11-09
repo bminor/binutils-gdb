@@ -1,3 +1,7 @@
+2005-11-09  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* gdb.base/break.exp: Fix a comment typo.
+
 2005-11-03  Jim Blandy  <jimb@redhat.com>
 
         Checked in by Elena Zannoni  <ezannoni@redhat.com>

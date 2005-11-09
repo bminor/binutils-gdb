@@ -67,7 +67,7 @@ if [target_info exists gdb_stub] {
 
 # Test deleting all breakpoints when there are none installed,
 # GDB should not prompt for confirmation.
-# Note that gdb-init.exp provides a "delete_breakpoints" proc
+# Note that lib/gdb.exp provides a "delete_breakpoints" proc
 # for general use elsewhere.
 
 send_gdb "delete breakpoints\n"
