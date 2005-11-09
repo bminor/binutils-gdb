@@ -1,5 +1,11 @@
 2005-11-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
+	* remote-m32r-sdi.c: Update copyright years.
+	(m32r_resume): Write DBT at word-aligned addresses.
+	(m32r_wait): Use SDI_WRITE_MEMORY to remove DBT.
+
+2005-11-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
 	* m32r-linux-tdep.c (linux_sigtramp_code): Use 'gdb_byte' instead
 	of 'unsigned char'.
 	(m32r_linux_sigtramp_start): Likewise.
