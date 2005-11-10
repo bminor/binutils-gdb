@@ -1,3 +1,8 @@
+2005-11-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* MAINTAINERS: Mark m68k-elf, sparc-elf and vax-netbsd as no
+	longer broken.
+
 2005-11-09  Randolph Chung <tausq@debian.org>
 
 	* hppa-linux-nat.c (_initialize_hppa_linux_nat): Use

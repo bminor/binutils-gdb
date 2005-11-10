@@ -120,8 +120,7 @@ the native maintainer when resolving ABI issues.
 	m68hc11		--target=m68hc11-elf ,-Werror ,
 			Stephane Carrez		stcarrez@nerim.fr
 
-	m68k		--target=m68k-elf broken
-			(opcodes/m68k-dis.c:338 longjmp clober)
+	m68k		--target=m68k-elf ,-Werror
 
 	m88k		--target=m88k-openbsd ,-Werror
 			Mark Kettenis		kettenis@gnu.org
@@ -148,13 +147,11 @@ the native maintainer when resolving ABI issues.
 	sh		--target=sh-elf ,-Werror
 			--target=sh64-elf ,-Werror
 
-	sparc		--target=sparc-elf broken
-			(bfd/elfxx-sparc:512 bfd_elf64_swap_reloca_out undef)
+	sparc		--target=sparc-elf ,-Werror
 
 	v850		--target=v850-elf ,-Werror
 
-	vax		--target=vax-netbsd broken
-			(opcodes/vax-dis.c:224 longjmp clober)
+	vax		--target=vax-netbsd ,-Werror
 
 	x86-64		--target=x86_64-linux-gnu ,-Werror
 
