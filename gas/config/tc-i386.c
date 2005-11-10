@@ -6644,7 +6644,7 @@ intel_e11 ()
 	/* No scaling. If this is a memory operand, the register is either a
 	   base register (first occurrence) or an index register (second
 	   occurrence).  */
-	else if (intel_parser.in_bracket && !(reg->reg_type & (SReg2 | SReg3)))
+	else if (intel_parser.in_bracket)
 	  {
 
 	    if (!i.base_reg)

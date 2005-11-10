@@ -113,6 +113,28 @@ start:
 	mov	eax, [eax]+2*ecx
 	mov	eax, [[eax]ecx]
 	mov	eax, eax:[ecx]
+
+	mov	eax, [ss]
+	mov	eax, [st]
+	mov	eax, [mm0]
+	mov	eax, [xmm0]
+	mov	eax, [cr0]
+	mov	eax, [dr7]
+
+	mov	eax, [ss+edx]
+	mov	eax, [st+edx]
+	mov	eax, [mm0+edx]
+	mov	eax, [xmm0+edx]
+	mov	eax, [cr0+edx]
+	mov	eax, [dr7+edx]
+
+	mov	eax, [edx+ss]
+	mov	eax, [edx+st]
+	mov	eax, [edx+cr0]
+	mov	eax, [edx+dr7]
+	mov	eax, [edx+mm0]
+	mov	eax, [edx+xmm0]
+
 	lea	eax, [bx+si*1]
 	lea	eax, [bp+si*2]
 	lea	eax, [bx+di*4]
@@ -121,6 +143,7 @@ start:
 	lea	eax, [bp+2*si]
 	lea	eax, [bx+4*di]
 	lea	eax, [bp+8*di]
+
 	mov	eax, [ah]
 	mov	eax, [ax]
 	mov	eax, [eax+bx]

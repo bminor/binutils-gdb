@@ -1,3 +1,8 @@
+2005-11-10  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (intel_e11): Don't special-case segment
+	registers in brackets.
+
 2005-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (BAD_ADDR_MODE): Define.

@@ -1,3 +1,8 @@
+2005-11-10  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/intelbad.d: Add tests for ill registers in brackets.
+	* gas/i386/intelbad.l: Adjust.
+
 2005-11-10  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/archv6t2-bad.s: Add tests of badly composed ldrex and
