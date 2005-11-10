@@ -36,3 +36,5 @@
 [^:]*:51: Warning: destination register same as write-back base
 [^:]*:52: Warning: destination register same as write-back base
 [^:]*:53: Warning: source register same as write-back base
+[^:]*:59: Error: instruction does not accept this addressing mode -- `ldrex r0,r2'
+[^:]*:60: Error: instruction does not accept this addressing mode -- `strex r1,r0,r2'

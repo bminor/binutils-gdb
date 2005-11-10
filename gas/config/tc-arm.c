@@ -502,6 +502,7 @@ struct asm_opcode
 #define BAD_OVERLAP	_("registers may not be the same")
 #define BAD_HIREG	_("lo register required")
 #define BAD_THUMB32	_("instruction not supported in Thumb16 mode")
+#define BAD_ADDR_MODE   _("instruction does not accept this addressing mode");
 
 static struct hash_control *arm_ops_hsh;
 static struct hash_control *arm_cond_hsh;
@@ -843,7 +844,7 @@ arm_reg_parse_multi (char **ccp)
 
 #ifdef REGISTER_PREFIX
   if (*start != REGISTER_PREFIX)
-    return FAIL;
+    return NULL;
   start++;
 #endif
 #ifdef OPTIONAL_REGISTER_PREFIX
@@ -869,7 +870,7 @@ arm_reg_parse_multi (char **ccp)
 }
 
 /* As above, but the register must be of type TYPE, and the return
-   value is the register number or NULL.  */
+   value is the register number or FAIL.  */
 
 static int
 arm_reg_parse (char **ccp, enum arm_reg_type type)
@@ -4825,10 +4826,20 @@ do_ldrex (void)
   constraint (!inst.operands[1].isreg || !inst.operands[1].preind
 	      || inst.operands[1].postind || inst.operands[1].writeback
 	      || inst.operands[1].immisreg || inst.operands[1].shifted
-	      || inst.operands[1].negative,
-	      _("instruction does not accept this addressing mode"));
-
-  constraint (inst.operands[1].reg == REG_PC, BAD_PC);
+	      || inst.operands[1].negative
+	      /* This can arise if the programmer has written
+		   strex rN, rM, foo
+		 or if they have mistakenly used a register name as the last
+		 operand,  eg:
+		   strex rN, rM, rX
+		 It is very difficult to distinguish between these two cases
+		 because "rX" might actually be a label. ie the register
+		 name has been occluded by a symbol of the same name. So we
+		 just generate a general 'bad addressing mode' type error
+		 message and leave it up to the programmer to discover the
+		 true cause and fix their mistake.  */
+	      || (inst.operands[1].reg == REG_PC),
+	      BAD_ADDR_MODE);
 
   constraint (inst.reloc.exp.X_op != O_constant
 	      || inst.reloc.exp.X_add_number != 0,
@@ -5268,10 +5279,10 @@ do_strex (void)
   constraint (!inst.operands[2].isreg || !inst.operands[2].preind
 	      || inst.operands[2].postind || inst.operands[2].writeback
 	      || inst.operands[2].immisreg || inst.operands[2].shifted
-	      || inst.operands[2].negative,
-	      _("instruction does not accept this addressing mode"));
-
-  constraint (inst.operands[2].reg == REG_PC, BAD_PC);
+	      || inst.operands[2].negative
+	      /* See comment in do_ldrex().  */
+	      || (inst.operands[2].reg == REG_PC),
+	      BAD_ADDR_MODE);
 
   constraint (inst.operands[0].reg == inst.operands[1].reg
 	      || inst.operands[0].reg == inst.operands[2].reg, BAD_OVERLAP);
@@ -6703,7 +6714,7 @@ do_t_ldrex (void)
 	      || inst.operands[1].postind || inst.operands[1].writeback
 	      || inst.operands[1].immisreg || inst.operands[1].shifted
 	      || inst.operands[1].negative,
-	      _("instruction does not accept this addressing mode"));
+	      BAD_ADDR_MODE);
 
   inst.instruction |= inst.operands[0].reg << 12;
   inst.instruction |= inst.operands[1].reg << 16;
@@ -7578,7 +7589,7 @@ do_t_strex (void)
 	      || inst.operands[2].postind || inst.operands[2].writeback
 	      || inst.operands[2].immisreg || inst.operands[2].shifted
 	      || inst.operands[2].negative,
-	      _("instruction does not accept this addressing mode"));
+	      BAD_ADDR_MODE);
 
   inst.instruction |= inst.operands[0].reg << 8;
   inst.instruction |= inst.operands[1].reg << 12;

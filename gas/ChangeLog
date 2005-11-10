@@ -1,3 +1,15 @@
+2005-11-10  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (BAD_ADDR_MODE): Define.
+	(arm_reg_parse_multi): Return NULL rather than FAIL.
+	(arm_reg_parse): Fix comment, the function returns FAIL rather
+	than NULL if it is unable to parse the register name.
+	(do_ldrex): Use BAD_ADDR_MODE.
+	Change error message for PC-relative addressing.
+	(do_strex): Likewise.
+	(do_t_ldrex): Use BAD_ADDR_MODE.
+	(do_t_strex): Likewise.
+
 2005-11-08   Jean-Jacques Metayer  <jean-jacques.metayer@thomson.net>
 
 	* config/tc-sparc.c (isoctal): Fix thinko.

@@ -51,3 +51,11 @@ x:
 	ldrsbt	r0,[r0]
 	ldrsht	r0,[r0]
 	strht	r0,[r0]
+
+	@ Bug reported by user.  GAS used to issue an error message
+	@ "r15 not allowed here" for these two instructions because
+	@ it thought that the "r2" operand was a PC-relative branch
+	@ to a label called "r2".
+	ldrex	r0, r2
+	strex	r1, r0, r2
+	
