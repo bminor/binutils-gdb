@@ -1,3 +1,8 @@
+2005-11-10  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-dis.c (print_insn_m68k): Only match FPU insns with
+	coprocessor ID 1.
+
 2005-11-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* m32c-desc.c: Regenerated.
