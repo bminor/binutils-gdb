@@ -1,3 +1,13 @@
+2005-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 1150
+	* elfxx-mips.c (mips_elf_calculate_relocation): Ignore an
+	undefined symbol if it is optional.
+	(_bfd_mips_elf_merge_symbol_attribute): Make sure that the
+	optional flag is merged as well as the visibility.
+	* elfxx-mips.h (_bfd_mips_elf_merge_symbol_attribute): Prototype.
+	(elf_backend_merge_symbol_attribute): Define.
+
 2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Add ms2 support

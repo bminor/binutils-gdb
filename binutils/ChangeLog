@@ -1,3 +1,12 @@
+2005-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 1150
+	* readelf.c (get_mips_symbol_other): New function.
+	(get_symbol_other): New function.
+	(process_symbol_table): Call get_symbol_other() to get a
+	description of the st_other field if it contains more information
+	than just the visibility.
+
 2005-11-07  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure: Regenerate after modifying bfd/warning.m4.

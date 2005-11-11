@@ -6690,6 +6690,41 @@ get_symbol_visibility (unsigned int visibility)
 }
 
 static const char *
+get_mips_symbol_other (unsigned int other)
+{
+  switch (other)
+    {
+    case STO_OPTIONAL:  return "OPTIONAL";
+    case STO_MIPS16:    return "MIPS16";
+    default:      	return NULL;
+    }
+}
+
+static const char *
+get_symbol_other (unsigned int other)
+{
+  const char * result = NULL;
+  static char buff [32];
+
+  if (other == 0)
+    return "";
+
+  switch (elf_header.e_machine)
+    {
+    case EM_MIPS:
+      result = get_mips_symbol_other (other);
+    default:
+      break;
+    }
+
+  if (result)
+    return result;
+
+  snprintf (buff, sizeof buff, _("<other>: %x"), other);
+  return buff;
+}
+
+static const char *
 get_symbol_index_type (unsigned int type)
 {
   static char buff[32];
@@ -6851,6 +6886,11 @@ process_symbol_table (FILE *file)
 	      printf ("  %6s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
 	      printf (" %6s",  get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %3s",  get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
+	      /* Check to see if any other bits in the st_other field are set.
+	         Note - displaying this information disrupts the layout of the
+	         table being generated, but for the moment this case is very rare.  */
+	      if (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other))
+		printf (" [%s] ", get_symbol_other (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other)));
 	      printf (" %3.3s ", get_symbol_index_type (psym->st_shndx));
 	      if (VALID_DYNAMIC_NAME (psym->st_name))
 		print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
@@ -6918,6 +6958,11 @@ process_symbol_table (FILE *file)
 	      printf (" %-7s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
 	      printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %-3s", get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
+	      /* Check to see if any other bits in the st_other field are set.
+	         Note - displaying this information disrupts the layout of the
+	         table being generated, but for the moment this case is very rare.  */
+	      if (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other))
+		printf (" [%s] ", get_symbol_other (psym->st_other ^ ELF_ST_VISIBILITY (psym->st_other)));
 	      printf (" %4s ", get_symbol_index_type (psym->st_shndx));
 	      print_symbol (25, psym->st_name < strtab_size
 			    ? strtab + psym->st_name : "<corrupt>");
