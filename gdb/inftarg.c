@@ -102,7 +102,6 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   int status;
   char *execd_pathname = NULL;
   int exit_status;
-  int related_pid;
   int syscall_id;
   enum target_waitkind kind;
   int pid;

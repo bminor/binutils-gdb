@@ -1,3 +1,7 @@
+2005-11-11  Michael Snyder  <msnyder@redhat.com>
+
+	* inftarg.c (child_wait): Delete unused local variable.
+
 2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
 
 	PR tui/1995
@@ -1464,6 +1468,12 @@
 
 	* eval.c (evaluate_struct_tuple): Use strcmp instead of
 	DEPRECATED_STREQ.
+
+2005-06-27  Michael Snyder  <msnyder@redhat.com>
+
+	* mn10300-linux-tdep.c: New file.  OSABI sniffer at end.
+	* Makefile.in: Add rule for mn10300-linux-tdep.c.
+	* config/mn10300/linux.mt: Add mn10300-linux-tdep.c to tdep files.
 
 2005-06-27  Michael Snyder  <msnyder@redhat.com>
 
