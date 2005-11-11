@@ -1,6 +1,6 @@
 /* Specific command window processing.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
    Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
@@ -48,13 +48,14 @@ unsigned int
 tui_dispatch_ctrl_char (unsigned int ch)
 {
   struct tui_win_info *win_info = tui_win_with_focus ();
-  WINDOW *w = TUI_CMD_WIN->generic.handle;
 
-  /*
-     ** If the command window has the logical focus, or no-one does
-     ** assume it is the command window; in this case, pass the
-     ** character on through and do nothing here.
-   */
+  /* Handle the CTRL-L refresh for each window.  */
+  if (ch == '\f')
+    tui_refresh_all_win ();
+
+  /* If the command window has the logical focus, or no-one does
+     assume it is the command window; in this case, pass the
+     character on through and do nothing here.  */
   if (win_info == NULL || win_info == TUI_CMD_WIN)
     return ch;
   else
@@ -76,6 +77,7 @@ tui_dispatch_ctrl_char (unsigned int ch)
 	    {
 	      unsigned int page_ch = 0;
 	      unsigned int tmp_char;
+              WINDOW *w = TUI_CMD_WIN->generic.handle;
 
 	      tmp_char = 0;
 	      while (!key_is_end_sequence (tmp_char))
@@ -123,8 +125,7 @@ tui_dispatch_ctrl_char (unsigned int ch)
 	  tui_scroll_right (win_info, 1);
 	  break;
 	case '\f':
-	  tui_refresh_all_win ();
-	  break;
+          break;
 	default:
 	  c = ch_copy;
 	  break;

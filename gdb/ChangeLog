@@ -1,5 +1,11 @@
 2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
 
+	PR tui/1995
+	* tui/tui-command.c (tui_dispatch_ctrl_char): Handle CTRL-L even if the
+	focus is on the command window.
+
+2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tui/tui-win.c (tui_update_gdb_sizes): Use tui_term_width() and
 	tui_term_height() to restore the terminal size when leaving the
 	TUI mode.
