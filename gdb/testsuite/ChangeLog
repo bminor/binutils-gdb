@@ -1,3 +1,10 @@
+2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.asm/m68hc11.inc: Setup the data section.
+	* gdb.asm/asm-source.exp (m6811-*-*): Don't use the target board linker
+	script for this test.
+	(m6812-*-*): Likewise.
+
 2005-11-09  Randolph Chung <tausq@debian.org>
 
 	* gdb.base/structs2.exp: Update xfail to only trigger for gcc-3.x.
