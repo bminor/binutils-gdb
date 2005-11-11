@@ -1,3 +1,9 @@
+2005-11-11  Jan Beulich  <jbeulich@novell.com>
+
+	* doc/Makefile.am: Make asconfig.texi writeable before trying
+	to write to it.
+	* doc/Makefile.in: Refresh.
+
 2005-11-10  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (intel_e11): Don't special-case segment

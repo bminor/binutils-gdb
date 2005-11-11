@@ -19,7 +19,8 @@ info_TEXINFOS = as.texinfo
 
 asconfig.texi: $(CONFIG).texi
 	rm -f asconfig.texi
-	cp $(srcdir)/$(CONFIG).texi ./asconfig.texi	
+	cp $(srcdir)/$(CONFIG).texi ./asconfig.texi
+	chmod u+w ./asconfig.texi
 	echo "@set top_srcdir $(top_srcdir)" >> ./asconfig.texi
 
 CPU_DOCS = \
