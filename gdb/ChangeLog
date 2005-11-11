@@ -1,3 +1,15 @@
+2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-tdep.c (m68hc11_pseudo_register_write): Use gdb_byte
+	for buffers.
+	(m68hc11_pseudo_register_read): Likewise.
+	(m68hc11_return_value): Likewise.
+	(m68hc11_frame_prev_register): Likewise.
+	(m68hc11_frame_align): Remove as its seems no longer necessary.
+	(m68hc11_gdbarch_init): Don't install frame_align handler.
+	(m68hc11_scan_prologue): Fix crash that occurred when called from
+	m68hc11_skip_prologue
+
 2005-11-09  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* remote-m32r-sdi.c: Update copyright years.
