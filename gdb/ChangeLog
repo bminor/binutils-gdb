@@ -1,5 +1,11 @@
 2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tui/tui-win.c (tui_update_gdb_sizes): Use tui_term_width() and
+	tui_term_height() to restore the terminal size when leaving the
+	TUI mode.
+
+2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* m68hc11-tdep.c (m68hc11_pseudo_register_write): Use gdb_byte
 	for buffers.
 	(m68hc11_pseudo_register_read): Likewise.
