@@ -80,11 +80,25 @@ switch -glob -- [istarget] {
     }
     "m6811-*-*" {
         set asm-arch m68hc11
-        set asm-flags "-mshort-double -m68hc11 -gdwarf-2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+        set asm-flags "-mshort-double -m68hc11 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+	set debug-flags "-gdwarf-2"
+	# This asm test is specific and uses the linker directly.
+	# We must not use the target board linker script defined for other
+	# tests.  Remove it and restore it later on.
+	set board [target_info name]
+	set old_ldscript [board_info $board ldscript]
+	unset_board_info "ldscript"
     }
     "m6812-*-*" {
         set asm-arch m68hc11
-        set asm-flags "-mshort-double -m68hc12 -gdwarf-2 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+        set asm-flags "-mshort-double -m68hc12 --no-warn -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+	set debug-flags "-gdwarf-2"
+	# This asm test is specific and uses the linker directly.
+	# We must not use the target board linker script defined for other
+	# tests.  Remove it and restore it later on.
+	set board [target_info name]
+	set old_ldscript [board_info $board ldscript]
+	set_board_info ldscript ""
     }
     "mips*-*" {
         set asm-arch mips
@@ -224,6 +238,11 @@ if {[target_assemble ${srcdir}/${subdir}/${srcfile2} asmsrc2.o "${asm-flags} ${d
 # *-*-*bsd* and *-*-solaris2*.
 if {[target_link "asmsrc1.o asmsrc2.o" "${binfile}" ${link-flags}] != "" } then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+# Restore the target board linker script for HC11/HC12.
+if { [istarget "m6811-*-*"] || [istarget "m6812-*-*"] } {
+    set_board_info ldscript $old_ldscript
 }
 
 remote_exec build "mv asmsrc1.o asmsrc2.o ${objdir}/${subdir}"
