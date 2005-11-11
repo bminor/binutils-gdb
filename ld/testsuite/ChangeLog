@@ -1,3 +1,7 @@
+2005-11-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/noov.d: Restrict to cris-*-*elf*.
+
 2005-10-31  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR ld/1501

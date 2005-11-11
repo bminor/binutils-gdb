@@ -1,4 +1,4 @@
-#notarget: cris-*-*aout*
+#target: cris-*-*elf*
 #ld: --section-start=.text=0xc0010000
 #objdump: -s -j .text
 
