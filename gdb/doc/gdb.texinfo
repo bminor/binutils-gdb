@@ -22762,6 +22762,17 @@ Where @var{pid} is an unsigned hexidecimal process id.
 Any other reply implies the old pid.
 @end table
 
+@item @code{q}@code{CRC:}@var{addr}@code{,}@var{length} --- compute CRC of memory block
+@cindex CRC of memory block, remote request
+@cindex @code{qCRC} packet
+Reply:
+@table @samp
+@item @code{E}@var{NN}
+An error (such as memory fault)
+@item @code{C}@var{CRC32}
+A 32 bit cyclic redundancy check of the specified memory region.
+@end table
+
 @item @code{q}@code{fThreadInfo} -- all thread ids
 @cindex list active threads, remote request
 @cindex @code{qfThreadInfo} packet
@@ -22792,24 +22803,42 @@ more thread ids, in big-endian unsigned hex, separated by commas.
 ids (using the @code{qs} form of the query), until the target responds
 with @code{l} (lower-case el, for @code{'last'}).
 
-@item @code{q}@code{ThreadExtraInfo}@code{,}@var{id} --- extra thread info
-@cindex thread attributes info, remote request
-@cindex @code{qThreadExtraInfo} packet
-Where @var{id} is a thread-id in big-endian hex.  Obtain a printable
-string description of a thread's attributes from the target OS.  This
-string may contain anything that the target OS thinks is interesting for
-@value{GDBN} to tell the user about the thread.  The string is displayed
-in @value{GDBN}'s @samp{info threads} display.  Some examples of
-possible thread extra info strings are ``Runnable'', or ``Blocked on
-Mutex''.
+@item @code{qGetTLSAddr}:@var{thread-id},@var{offset},@var{lm} --- get thread local storage address
+@cindex get thread-local storage address, remote request
+@cindex @code{qGetTLSAddr} packet
+Fetch the address associated with thread local storage specified
+by @var{thread-id}, @var{offset}, and @var{lm}.
+
+@var{thread-id} is the (big endian, hex encoded) thread id associated with the
+thread for which to fetch the TLS address.
+
+@var{offset} is the (big endian, hex encoded) offset associated with the
+thread local variable.  (This offset is obtained from the debug
+information associated with the variable.)
+
+@var{lm} is the (big endian, hex encoded) OS/ABI specific encoding of the
+the load module associated with the thread local storage.  For example,
+a @sc{gnu}/Linux system will pass the link map address of the shared
+object associated with the thread local storage under consideration. 
+Other operating environments may choose to represent the load module
+differently, so the precise meaning of this parameter will vary.
 
 Reply:
-@table @samp
+@table @asis
 @item @var{XX@dots{}}
-Where @var{XX@dots{}} is a hex encoding of @sc{ascii} data, comprising
-the printable string containing the extra information about the thread's
-attributes.
+Hex encoded (big endian) bytes representing the address of the thread
+local storage requested.
+
+@item @code{E}@var{nn} (where @var{nn} are hex digits)
+An error occurred.
+
+@item @code{""} (empty)
+An empty reply indicates that @code{qGetTLSAddr} is not supported by the stub.
 @end table
+
+Use of this request packet is controlled by the @code{set remote
+get-thread-local-storage-address} command (@pxref{Remote
+configuration, set remote get-thread-local-storage-address}).
 
 @item @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread} --- query @var{LIST} or @var{threadLIST} @strong{(deprecated)}
 
@@ -22832,17 +22861,6 @@ and one indicates no further threads; @var{argthreadid} (eight hex
 digits) is @var{nextthread} from the request packet; @var{thread@dots{}}
 is a sequence of thread IDs from the target.  @var{threadid} (eight hex
 digits).  See @code{remote.c:parse_threadlist_response()}.
-@end table
-
-@item @code{q}@code{CRC:}@var{addr}@code{,}@var{length} --- compute CRC of memory block
-@cindex CRC of memory block, remote request
-@cindex @code{qCRC} packet
-Reply:
-@table @samp
-@item @code{E}@var{NN}
-An error (such as memory fault)
-@item @code{C}@var{CRC32}
-A 32 bit cyclic redundancy check of the specified memory region.
 @end table
 
 @item @code{q}@code{Offsets} --- query sect offs
@@ -22870,65 +22888,6 @@ Reply:
 @end table
 
 See @code{remote.c:remote_unpack_thread_info_response()}.
-
-@item @code{q}@code{Rcmd,}@var{command} --- remote command
-@cindex execute remote command, remote request
-@cindex @code{qRcmd} packet
-@var{command} (hex encoded) is passed to the local interpreter for
-execution.  Invalid commands should be reported using the output string.
-Before the final result packet, the target may also respond with a
-number of intermediate @code{O}@var{output} console output packets.
-@emph{Implementors should note that providing access to a stubs's
-interpreter may have security implications}.
-
-Reply:
-@table @samp
-@item OK
-A command response with no output.
-@item @var{OUTPUT}
-A command response with the hex encoded output string @var{OUTPUT}.
-@item @code{E}@var{NN}
-Indicate a badly formed request.
-@item @samp{}
-When @samp{q}@samp{Rcmd} is not recognized.
-@end table
-z
-@item @code{qSymbol::} --- symbol lookup
-@cindex symbol lookup, remote request
-@cindex @code{qSymbol} packet
-Notify the target that @value{GDBN} is prepared to serve symbol lookup
-requests.  Accept requests from the target for the values of symbols.
-
-Reply:
-@table @samp
-@item @code{OK}
-The target does not need to look up any (more) symbols.
-@item @code{qSymbol:}@var{sym_name}
-The target requests the value of symbol @var{sym_name} (hex encoded).
-@value{GDBN} may provide the value by using the
-@code{qSymbol:}@var{sym_value}:@var{sym_name} message, described below.
-@end table
-
-@item @code{qSymbol:}@var{sym_value}:@var{sym_name} --- symbol value
-
-Set the value of @var{sym_name} to @var{sym_value}.
-
-@var{sym_name} (hex encoded) is the name of a symbol whose value the
-target has previously requested.
-
-@var{sym_value} (hex) is the value for symbol @var{sym_name}.  If
-@value{GDBN} cannot supply a value for @var{sym_name}, then this field
-will be empty.
-
-Reply:
-@table @samp
-@item @code{OK}
-The target does not need to look up any (more) symbols.
-@item @code{qSymbol:}@var{sym_name}
-The target requests the value of a new symbol @var{sym_name} (hex
-encoded).  @value{GDBN} will continue to supply the values of symbols
-(if available), until the target ceases to request them.
-@end table
 
 @item @code{qPart}:@var{object}:@code{read}:@var{annex}:@var{offset},@var{length} --- read special data
 @cindex read special object, remote request
@@ -23009,42 +22968,83 @@ not recognize the @var{object} keyword, or its support for
 @var{object} does not recognize the @var{operation} keyword,
 the stub must respond with an empty packet.
 
-@item @code{qGetTLSAddr}:@var{thread-id},@var{offset},@var{lm} --- get thread local storage address
-@cindex get thread-local storage address, remote request
-@cindex @code{qGetTLSAddr} packet
-Fetch the address associated with thread local storage specified
-by @var{thread-id}, @var{offset}, and @var{lm}.
-
-@var{thread-id} is the (big endian, hex encoded) thread id associated with the
-thread for which to fetch the TLS address.
-
-@var{offset} is the (big endian, hex encoded) offset associated with the
-thread local variable.  (This offset is obtained from the debug
-information associated with the variable.)
-
-@var{lm} is the (big endian, hex encoded) OS/ABI specific encoding of the
-the load module associated with the thread local storage.  For example,
-a @sc{gnu}/Linux system will pass the link map address of the shared
-object associated with the thread local storage under consideration. 
-Other operating environments may choose to represent the load module
-differently, so the precise meaning of this parameter will vary.
+@item @code{q}@code{Rcmd,}@var{command} --- remote command
+@cindex execute remote command, remote request
+@cindex @code{qRcmd} packet
+@var{command} (hex encoded) is passed to the local interpreter for
+execution.  Invalid commands should be reported using the output string.
+Before the final result packet, the target may also respond with a
+number of intermediate @code{O}@var{output} console output packets.
+@emph{Implementors should note that providing access to a stubs's
+interpreter may have security implications}.
 
 Reply:
-@table @asis
-@item @var{XX@dots{}}
-Hex encoded (big endian) bytes representing the address of the thread
-local storage requested.
-
-@item @code{E}@var{nn} (where @var{nn} are hex digits)
-An error occurred.
-
-@item @code{""} (empty)
-An empty reply indicates that @code{qGetTLSAddr} is not supported by the stub.
+@table @samp
+@item OK
+A command response with no output.
+@item @var{OUTPUT}
+A command response with the hex encoded output string @var{OUTPUT}.
+@item @code{E}@var{NN}
+Indicate a badly formed request.
+@item @samp{}
+When @samp{q}@samp{Rcmd} is not recognized.
 @end table
 
-Use of this request packet is controlled by the @code{set remote
-get-thread-local-storage-address} command (@pxref{Remote
-configuration, set remote get-thread-local-storage-address}).
+@item @code{qSymbol::} --- symbol lookup
+@cindex symbol lookup, remote request
+@cindex @code{qSymbol} packet
+Notify the target that @value{GDBN} is prepared to serve symbol lookup
+requests.  Accept requests from the target for the values of symbols.
+
+Reply:
+@table @samp
+@item @code{OK}
+The target does not need to look up any (more) symbols.
+@item @code{qSymbol:}@var{sym_name}
+The target requests the value of symbol @var{sym_name} (hex encoded).
+@value{GDBN} may provide the value by using the
+@code{qSymbol:}@var{sym_value}:@var{sym_name} message, described below.
+@end table
+
+@item @code{qSymbol:}@var{sym_value}:@var{sym_name} --- symbol value
+
+Set the value of @var{sym_name} to @var{sym_value}.
+
+@var{sym_name} (hex encoded) is the name of a symbol whose value the
+target has previously requested.
+
+@var{sym_value} (hex) is the value for symbol @var{sym_name}.  If
+@value{GDBN} cannot supply a value for @var{sym_name}, then this field
+will be empty.
+
+Reply:
+@table @samp
+@item @code{OK}
+The target does not need to look up any (more) symbols.
+@item @code{qSymbol:}@var{sym_name}
+The target requests the value of a new symbol @var{sym_name} (hex
+encoded).  @value{GDBN} will continue to supply the values of symbols
+(if available), until the target ceases to request them.
+@end table
+
+@item @code{q}@code{ThreadExtraInfo}@code{,}@var{id} --- extra thread info
+@cindex thread attributes info, remote request
+@cindex @code{qThreadExtraInfo} packet
+Where @var{id} is a thread-id in big-endian hex.  Obtain a printable
+string description of a thread's attributes from the target OS.  This
+string may contain anything that the target OS thinks is interesting for
+@value{GDBN} to tell the user about the thread.  The string is displayed
+in @value{GDBN}'s @samp{info threads} display.  Some examples of
+possible thread extra info strings are ``Runnable'', or ``Blocked on
+Mutex''.
+
+Reply:
+@table @samp
+@item @var{XX@dots{}}
+Where @var{XX@dots{}} is a hex encoding of @sc{ascii} data, comprising
+the printable string containing the extra information about the thread's
+attributes.
+@end table
 
 @end table
 
