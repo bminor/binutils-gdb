@@ -1,3 +1,9 @@
+2005-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-linux-tdep.c (eabi_linux_arm_le_breakpoint)
+	(eabi_linux_arm_be_breakpoint): New variables.
+	(arm_linux_init_abi): Use them.
+
 2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
 
 	PR tui/1995
