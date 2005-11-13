@@ -1,3 +1,9 @@
+2005-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-arm-low.c (arm_eabi_breakpoint): New variable.
+	(arm_breakpoint_at): Recognize both breakpoints.
+	(the_low_target): Use the correct breakpoint instruction.
+
 2005-10-25  Andreas Schwab  <schwab@suse.de>
 
 	* server.c (main): Allocate mem_buf with PBUFSIZ bytes.
