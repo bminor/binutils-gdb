@@ -4,6 +4,13 @@
 	(arm_breakpoint_at): Recognize both breakpoints.
 	(the_low_target): Use the correct breakpoint instruction.
 
+2005-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.srv (x86_64-*-linux*): Turn on thread_db support.
+	* linux-x86-64-low.c (x86_64_breakpoint, x86_64_breakpoint_len)
+	(x86_64_get_pc, x86_64_set_pc, x86_64_breakpoint_at): New.
+	(the_low_target): Update.
+
 2005-10-25  Andreas Schwab  <schwab@suse.de>
 
 	* server.c (main): Allocate mem_buf with PBUFSIZ bytes.
