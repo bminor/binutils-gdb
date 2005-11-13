@@ -45,6 +45,19 @@ static const char arm_linux_arm_le_breakpoint[] = { 0x01, 0x00, 0x9f, 0xef };
 
 static const char arm_linux_arm_be_breakpoint[] = { 0xef, 0x9f, 0x00, 0x01 };
 
+/* However, the EABI syscall interface (new in Nov. 2005) does not look at
+   the operand of the swi if old-ABI compatibility is disabled.  Therefore,
+   use an undefined instruction instead.  This is supported as of kernel
+   version 2.5.70 (May 2003), so should be a safe assumption for EABI
+   binaries.  */
+
+static const char eabi_linux_arm_le_breakpoint[] = { 0xf0, 0x01, 0xf0, 0xe7 };
+
+static const char eabi_linux_arm_be_breakpoint[] = { 0xe7, 0xf0, 0x01, 0xf0 };
+
+/* All the kernels which support Thumb support using a specific undefined
+   instruction for the Thumb breakpoint.  */
+
 static const char arm_linux_thumb_be_breakpoint[] = {0xde, 0x01};
 
 static const char arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
@@ -329,12 +342,18 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->lowest_pc = 0x8000;
   if (info.byte_order == BFD_ENDIAN_BIG)
     {
-      tdep->arm_breakpoint = arm_linux_arm_be_breakpoint;
+      if (tdep->arm_abi == ARM_ABI_AAPCS)
+	tdep->arm_breakpoint = eabi_linux_arm_be_breakpoint;
+      else
+	tdep->arm_breakpoint = arm_linux_arm_be_breakpoint;
       tdep->thumb_breakpoint = arm_linux_thumb_be_breakpoint;
     }
   else
     {
-      tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
+      if (tdep->arm_abi == ARM_ABI_AAPCS)
+	tdep->arm_breakpoint = eabi_linux_arm_le_breakpoint;
+      else
+	tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
       tdep->thumb_breakpoint = arm_linux_thumb_le_breakpoint;
     }
   tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
