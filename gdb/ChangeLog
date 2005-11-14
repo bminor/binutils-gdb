@@ -1,3 +1,10 @@
+2005-11-14  James E Wilson  <wilson@specifix.com>
+
+	PR 2024
+	* dwarf2loc.c (dwarf_expr_frame_base): Use get_frame_address_in_block
+	instead of get_frame_pc.
+	(loclist_read_variable): Likewise.
+
 2005-11-14  Paul Gilliam  <pgilliam@us.ibm.com>
 
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value): Copy code from
