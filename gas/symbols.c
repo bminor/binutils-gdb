@@ -1782,20 +1782,11 @@ S_GET_VALUE (symbolS *s)
 
   if (s->sy_value.X_op != O_constant)
     {
-      static symbolS *recur;
-
-      /* FIXME: In non BFD assemblers, S_IS_DEFINED and S_IS_COMMON
-	 may call S_GET_VALUE.  We use a static symbol to avoid the
-	 immediate recursion.  */
-      if (recur == s)
-	return (valueT) s->sy_value.X_add_number;
-      recur = s;
       if (! s->sy_resolved
 	  || s->sy_value.X_op != O_symbol
 	  || (S_IS_DEFINED (s) && ! S_IS_COMMON (s)))
 	as_bad (_("attempt to get value of unresolved symbol `%s'"),
 		S_GET_NAME (s));
-      recur = NULL;
     }
   return (valueT) s->sy_value.X_add_number;
 }

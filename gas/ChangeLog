@@ -1,3 +1,7 @@
+2005-11-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* symbols.c (S_GET_VALUE): Remove non-BFD assembler recursion guard.
+
 2005-11-14  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-ia64.c (AR_FCR, AR_EFLAG, AR_CSD, AR_SSD, AR_CFLG,
