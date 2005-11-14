@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add "-x NAME" to readelf in addition to "-x NUMBER".
+
 * Add -i and -t switches to cxxfilt.  -i disables the display of implementation
   specific extra demangling information (if any) and -t disables the demangling
   of types.

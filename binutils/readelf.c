@@ -177,6 +177,16 @@ static size_t group_count;
 static struct group *section_groups;
 static struct group **section_headers_groups;
 
+/* A linked list of the section names for which dumps were requested
+   by name.  */
+struct dump_list_entry
+{
+  char *name;
+  int type;
+  struct dump_list_entry *next;
+};
+static struct dump_list_entry *dump_sects_byname;
+
 /* A dynamic array of flags indicating for which sections a hex dump
    has been requested (via the -x switch) and/or a disassembly dump
    (via the -i switch).  */
@@ -185,8 +195,9 @@ unsigned num_cmdline_dump_sects = 0;
 
 /* A dynamic array of flags indicating for which sections a dump of
    some kind has been requested.  It is reset on a per-object file
-   basis and then initialised from the cmdline_dump_sects array and
-   the results of interpreting the -w switch.  */
+   basis and then initialised from the cmdline_dump_sects array,
+   the results of interpreting the -w switch, and the
+   dump_sects_byname list.  */
 char *dump_sects = NULL;
 unsigned int num_dump_sects = 0;
 
@@ -2658,6 +2669,27 @@ request_dump (unsigned int section, int type)
   return;
 }
 
+/* Request a dump by section name.  */
+
+static void
+request_dump_byname (const char *section, int type)
+{
+  struct dump_list_entry *new_request;
+
+  new_request = malloc (sizeof (struct dump_list_entry));
+  if (!new_request)
+    error (_("Out of memory allocating dump request table."));
+
+  new_request->name = strdup (section);
+  if (!new_request->name)
+    error (_("Out of memory allocating dump request table."));
+
+  new_request->type = type;
+
+  new_request->next = dump_sects_byname;
+  dump_sects_byname = new_request;
+}
+
 static void
 parse_args (int argc, char **argv)
 {
@@ -2745,11 +2777,10 @@ parse_args (int argc, char **argv)
 	  do_dump++;
 	  section = strtoul (optarg, & cp, 0);
 	  if (! *cp && section >= 0)
-	    {
-	      request_dump (section, HEX_DUMP);
-	      break;
-	    }
-	  goto oops;
+	    request_dump (section, HEX_DUMP);
+	  else
+	    request_dump_byname (optarg, HEX_DUMP);
+	  break;
 	case 'w':
 	  do_dump++;
 	  if (optarg == 0)
@@ -2913,7 +2944,9 @@ parse_args (int argc, char **argv)
 	  do_wide++;
 	  break;
 	default:
+#ifdef SUPPORT_DISASSEMBLY
 	oops:
+#endif
 	  /* xgettext:c-format */
 	  error (_("Invalid option '-%c'\n"), c);
 	  /* Drop through.  */
@@ -7547,6 +7580,32 @@ display_debug_section (Elf_Internal_Shdr *section, FILE *file)
   return result;
 }
 
+/* Set DUMP_SECTS for all sections where dumps were requested
+   based on section name.  */
+
+static void
+initialise_dumps_byname (void)
+{
+  struct dump_list_entry *cur;
+
+  for (cur = dump_sects_byname; cur; cur = cur->next)
+    {
+      unsigned int i;
+      int any;
+
+      for (i = 0, any = 0; i < elf_header.e_shnum; i++)
+	if (streq (SECTION_NAME (section_headers + i), cur->name))
+	  {
+	    request_dump (i, cur->type);
+	    any = 1;
+	  }
+
+      if (!any)
+	warn (_("Section '%s' was not dumped because it does not exist!\n"),
+	      cur->name);
+    }
+}
+
 static void
 process_section_contents (FILE *file)
 {
@@ -7555,6 +7614,8 @@ process_section_contents (FILE *file)
 
   if (! do_dump)
     return;
+
+  initialise_dumps_byname ();
 
   for (i = 0, section = section_headers;
        i < elf_header.e_shnum && i < num_dump_sects;

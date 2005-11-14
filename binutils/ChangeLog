@@ -1,3 +1,12 @@
+2005-11-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* readelf.c (struct dump_list_entry, request_dump_byname)
+	(initialise_dumps_byname): New.
+	(parse_args): Call request_dump_byname.
+	(process_section_contents): Call initialise_dumps_byname.
+	* doc/binutils.texi (readelf): Mention -x NAME.
+	* NEWS: Likewise.
+
 2005-11-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 1150

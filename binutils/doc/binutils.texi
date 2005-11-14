@@ -3324,7 +3324,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-V}|@option{--version-info}]
         [@option{-A}|@option{--arch-specific}]
         [@option{-D}|@option{--use-dynamic}]
-        [@option{-x} <number>|@option{--hex-dump=}<number>]
+        [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
         [@option{-w[liaprmfFsoR]}|
          @option{--debug-dump}[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]]
         [@option{-I}|@option{-histogram}]
@@ -3444,9 +3444,11 @@ When displaying symbols, this option makes @command{readelf} use the
 symbol table in the file's dynamic section, rather than the one in the
 symbols section.
 
-@item -x <number>
-@itemx --hex-dump=<number>
+@item -x <number or name>
+@itemx --hex-dump=<number or name>
 Displays the contents of the indicated section as a hexadecimal dump.
+A number identifies a particular section by index in the section table;
+any other string identifies all sections with that name in the object file.
 
 @item -w[liaprmfFsoR]
 @itemx --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]
