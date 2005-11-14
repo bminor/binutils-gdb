@@ -1,3 +1,22 @@
+2005-11-14  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-ia64.c (md): Rename regsym to indregsym and move
+	it to the end of the structure.
+	(ar): Field regnum is unsigned.
+	(cr): Likewise:
+	(indirect_reg): Likewise.
+	(declare_register_set): Parameter regnum is unsigned.
+	(declare_register): Parameter numregs and base_regnum are
+	unsigned. So is the local loop variable.
+	(md_begin): Restrict scope of local variable regnum, which
+	also is unsigned. Replace loops with function calls where
+	possible. Re-order things so that register groups are kept
+	together. Remove all uses of regsym except for indirect
+	registers. Replace use of regsym by indregsym for indirect
+	registers.
+	(ia64_optimize_expr): Replace use of regsym by indregsym for
+	indirect registers, with appropriate bias.
+
 2005-11-14  David Ung  <davidu@mips.com>
 
 	* config/tc-mips.c (mips16_ip): Add handling of 'm' and 'M' codes

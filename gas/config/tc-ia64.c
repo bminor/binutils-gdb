@@ -225,8 +225,6 @@ static struct
     struct hash_control *const_hash;	/* constant hash table */
     struct hash_control *entry_hash;    /* code entry hint hash table */
 
-    symbolS *regsym[REG_NUM];
-
     /* If X_op is != O_absent, the registername for the instruction's
        qualifying predicate.  If NULL, p0 is assumed for instructions
        that are predicatable.  */
@@ -328,6 +326,8 @@ static struct
 
     int pointer_size;       /* size in bytes of a pointer */
     int pointer_size_shift; /* shift size of a pointer for alignment */
+
+    symbolS *indregsym[IND_RR - IND_CPUID + 1];
   }
 md;
 
@@ -363,7 +363,7 @@ static unsigned char le_nop_stop[16] =
 static const struct
   {
     const char *name;
-    int regnum;
+    unsigned int regnum;
   }
 ar[] =
   {
@@ -402,7 +402,7 @@ ar[] =
 static const struct
   {
     const char *name;
-    int regnum;
+    unsigned int regnum;
   }
 cr[] =
   {
@@ -490,7 +490,7 @@ const_bits[] =
 static const struct
   {
     const char *name;
-    int regnum;
+    unsigned int regnum;
   }
 indirect_reg[] =
   {
@@ -810,8 +810,8 @@ static void dot_dv_mode PARAMS ((int));
 static void dot_entry PARAMS ((int));
 static void dot_mem_offset PARAMS ((int));
 static void add_unwind_entry PARAMS((unw_rec_list *, int));
-static symbolS *declare_register PARAMS ((const char *name, int regnum));
-static void declare_register_set PARAMS ((const char *, int, int));
+static symbolS *declare_register PARAMS ((const char *name, unsigned int regnum));
+static void declare_register_set PARAMS ((const char *, unsigned int, unsigned int));
 static unsigned int operand_width PARAMS ((enum ia64_opnd));
 static enum operand_match_result operand_match PARAMS ((const struct ia64_opcode *idesc,
 							int index,
@@ -5599,7 +5599,7 @@ pseudo_opcode[] =
 static symbolS *
 declare_register (name, regnum)
      const char *name;
-     int regnum;
+     unsigned int regnum;
 {
   const char *err;
   symbolS *sym;
@@ -5617,11 +5617,11 @@ declare_register (name, regnum)
 static void
 declare_register_set (prefix, num_regs, base_regnum)
      const char *prefix;
-     int num_regs;
-     int base_regnum;
+     unsigned int num_regs;
+     unsigned int base_regnum;
 {
   char name[8];
-  int i;
+  unsigned int i;
 
   for (i = 0; i < num_regs; ++i)
     {
@@ -7371,7 +7371,7 @@ extra_goodness (int templ, int slot)
 void
 md_begin ()
 {
-  int i, j, k, t, goodness, best, regnum, ok;
+  int i, j, k, t, goodness, best, ok;
   const char *err;
   char name[8];
 
@@ -7546,80 +7546,51 @@ md_begin ()
   md.entry_hash = hash_new ();
 
   /* general registers:  */
-  for (i = REG_GR; i < REG_GR + 128; ++i)
-    {
-      sprintf (name, "r%d", i - REG_GR);
-      md.regsym[i] = declare_register (name, i);
-    }
-
-  /* floating point registers:  */
-  for (i = REG_FR; i < REG_FR + 128; ++i)
-    {
-      sprintf (name, "f%d", i - REG_FR);
-      md.regsym[i] = declare_register (name, i);
-    }
-
-  /* application registers:  */
-  for (i = REG_AR; i < REG_AR + 128; ++i)
-    {
-      sprintf (name, "ar%d", i - REG_AR);
-      md.regsym[i] = declare_register (name, i);
-    }
-
-  /* control registers:  */
-  for (i = REG_CR; i < REG_CR + 128; ++i)
-    {
-      sprintf (name, "cr%d", i - REG_CR);
-      md.regsym[i] = declare_register (name, i);
-    }
-
-  /* predicate registers:  */
-  for (i = REG_P; i < REG_P + 64; ++i)
-    {
-      sprintf (name, "p%d", i - REG_P);
-      md.regsym[i] = declare_register (name, i);
-    }
-
-  /* branch registers:  */
-  for (i = REG_BR; i < REG_BR + 8; ++i)
-    {
-      sprintf (name, "b%d", i - REG_BR);
-      md.regsym[i] = declare_register (name, i);
-    }
-
-  md.regsym[REG_IP] = declare_register ("ip", REG_IP);
-  md.regsym[REG_CFM] = declare_register ("cfm", REG_CFM);
-  md.regsym[REG_PR] = declare_register ("pr", REG_PR);
-  md.regsym[REG_PR_ROT] = declare_register ("pr.rot", REG_PR_ROT);
-  md.regsym[REG_PSR] = declare_register ("psr", REG_PSR);
-  md.regsym[REG_PSR_L] = declare_register ("psr.l", REG_PSR_L);
-  md.regsym[REG_PSR_UM] = declare_register ("psr.um", REG_PSR_UM);
-
-  for (i = 0; i < NELEMS (indirect_reg); ++i)
-    {
-      regnum = indirect_reg[i].regnum;
-      md.regsym[regnum] = declare_register (indirect_reg[i].name, regnum);
-    }
-
-  /* define synonyms for application registers:  */
-  for (i = 0; i < NELEMS (ar); ++i)
-    declare_register (ar[i].name, REG_AR + ar[i].regnum);
-
-  /* define synonyms for control registers:  */
-  for (i = 0; i < NELEMS (cr); ++i)
-    declare_register (cr[i].name, REG_CR + cr[i].regnum);
-
+  declare_register_set ("r", 128, REG_GR);
   declare_register ("gp", REG_GR +  1);
   declare_register ("sp", REG_GR + 12);
   declare_register ("tp", REG_GR + 13);
-  declare_register ("rp", REG_BR +  0);
+  declare_register_set ("ret", 4, REG_GR + 8);
+
+  /* floating point registers:  */
+  declare_register_set ("f", 128, REG_FR);
+  declare_register_set ("farg", 8, REG_FR + 8);
+  declare_register_set ("fret", 8, REG_FR + 8);
+
+  /* branch registers:  */
+  declare_register_set ("b", 8, REG_BR);
+  declare_register ("rp", REG_BR + 0);
+
+  /* predicate registers:  */
+  declare_register_set ("p", 64, REG_P);
+  declare_register ("pr", REG_PR);
+  declare_register ("pr.rot", REG_PR_ROT);
+
+  /* application registers:  */
+  declare_register_set ("ar", 128, REG_AR);
+  for (i = 0; i < NELEMS (ar); ++i)
+    declare_register (ar[i].name, REG_AR + ar[i].regnum);
+
+  /* control registers:  */
+  declare_register_set ("cr", 128, REG_CR);
+  for (i = 0; i < NELEMS (cr); ++i)
+    declare_register (cr[i].name, REG_CR + cr[i].regnum);
+
+  declare_register ("ip", REG_IP);
+  declare_register ("cfm", REG_CFM);
+  declare_register ("psr", REG_PSR);
+  declare_register ("psr.l", REG_PSR_L);
+  declare_register ("psr.um", REG_PSR_UM);
+
+  for (i = 0; i < NELEMS (indirect_reg); ++i)
+    {
+      unsigned int regnum = indirect_reg[i].regnum;
+
+      md.indregsym[regnum - IND_CPUID] = declare_register (indirect_reg[i].name, regnum);
+    }
 
   /* pseudo-registers used to specify unwind info:  */
   declare_register ("psp", REG_PSP);
-
-  declare_register_set ("ret", 4, REG_GR + 8);
-  declare_register_set ("farg", 8, REG_FR + 8);
-  declare_register_set ("fret", 8, REG_FR + 8);
 
   for (i = 0; i < NELEMS (const_bits); ++i)
     {
@@ -8018,7 +7989,7 @@ ia64_optimize_expr (l, op, r)
 	      r->X_add_number = REG_GR;
 	    }
 	  l->X_op = O_index;
-	  l->X_op_symbol = md.regsym[l->X_add_number];
+	  l->X_op_symbol = md.indregsym[l->X_add_number - IND_CPUID];
 	  l->X_add_number = r->X_add_number;
 	  return 1;
 	}
