@@ -46,6 +46,7 @@
 #include "observer.h"
 #include "language.h"
 #include "solib.h"
+#include "main.h"
 
 #include "gdb_assert.h"
 #include "mi/mi-common.h"
@@ -2931,6 +2932,8 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 	       async_reason_lookup (EXEC_ASYNC_EXITED_NORMALLY));
 	  ui_out_text (uiout, "\nProgram exited normally.\n");
 	}
+      /* Support the --return-child-result option.  */
+      return_child_result_value = stop_info;
       break;
     case SIGNAL_RECEIVED:
       /* Signal received. The signal table tells us to print about

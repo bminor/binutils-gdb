@@ -1007,6 +1007,27 @@ messages, for example.
 Note that targets that give their output via @value{GDBN}, as opposed to
 writing directly to @code{stdout}, will also be made silent.
 
+@item -return-child-result
+@cindex @code{--return-child-result}
+The return code from @value{GDBN} will be the return code from the child
+process (the process being debugged), with the following exceptions:
+
+@itemize @bullet
+@item
+@value{GDBN} exits abnormally.  E.g., due to an incorrect argument or an
+internal error.  In this case the exit code is the same as it would have been
+without @samp{-return-child-result}.
+@item
+The user quits with an explicit value.  E.g., @samp{quit 1}.
+@item
+The child process never runs, or is not allowed to terminate, in which case
+the exit code will be -1.
+@end itemize
+
+This option is useful in conjunction with @samp{-batch} or @samp{-batch-silent},
+when @value{GDBN} is being used as a remote program loader or simulator
+interface.
+
 @item -nowindows
 @itemx -nw
 @cindex @code{--nowindows}

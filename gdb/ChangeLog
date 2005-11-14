@@ -1,3 +1,17 @@
+2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* infrun.c: Include main.h.
+	(print_stop_reason): Set return_child_result_value on exit.
+	* main.c (return_child_result): New variable.
+	(return_child_result_value): Likewise.
+	(captured_main): Add option --return-child-result.
+	Replace call to target_detach and exit (in batch mode) with quit_force.
+	(print_gdb_help): Add option --return-child-result.
+	* top.c: Include main.h.
+	(quit_force): Return child result if appropriate.
+	* main.h (return_child_result, return_child_result_value): Declare.
+	* Makefile.in (top.o, infrun.o): Add main.h to dependencies.
+
 2005-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Merge from mainline:

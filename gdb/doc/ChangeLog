@@ -1,3 +1,7 @@
+2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.texinfo (Choosing modes): Add --return-child-result.
+
 2005-11-01  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gdb.texinfo (Choosing modes): Add --batch-silent.
