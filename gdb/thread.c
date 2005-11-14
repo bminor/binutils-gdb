@@ -691,7 +691,7 @@ The new thread ID must be currently known."),
 
   add_prefix_cmd ("apply", class_run, thread_apply_command,
 		  _("Apply a command to a list of threads."),
-		  &thread_apply_list, "apply ", 1, &thread_cmd_list);
+		  &thread_apply_list, "thread apply ", 1, &thread_cmd_list);
 
   add_cmd ("all", class_run, thread_apply_all_command,
 	   _("Apply a command to all threads."), &thread_apply_list);
