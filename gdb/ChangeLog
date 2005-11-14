@@ -1,3 +1,8 @@
+2005-11-14  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value): Copy code from
+	ppc_sysv_abi_return_value() to handle a vector return value.
+
 2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* main.c (captured_main): Define struct cmdarg. Change type of cmdarg.

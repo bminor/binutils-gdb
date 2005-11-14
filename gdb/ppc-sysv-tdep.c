@@ -906,11 +906,11 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
+  /* Integers in r3.  */
   if ((TYPE_CODE (valtype) == TYPE_CODE_INT
        || TYPE_CODE (valtype) == TYPE_CODE_ENUM)
       && TYPE_LENGTH (valtype) <= 8)
     {
-      /* Integers in r3.  */
       if (writebuf != NULL)
 	{
 	  /* Be careful to sign extend the value.  */
@@ -938,24 +938,36 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, readbuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
-  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
-      && TYPE_LENGTH (valtype) <= 8
-      && TYPE_CODE (TYPE_TARGET_TYPE (valtype)) == TYPE_CODE_INT
-      && TYPE_LENGTH (TYPE_TARGET_TYPE (valtype)) == 1)
+  /* Array type has more than one use.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
     {
       /* Small character arrays are returned, right justified, in r3.  */
-      int offset = (register_size (gdbarch, tdep->ppc_gp0_regnum + 3)
-		    - TYPE_LENGTH (valtype));
-      if (writebuf != NULL)
-	regcache_cooked_write_part (regcache, tdep->ppc_gp0_regnum + 3,
-				    offset, TYPE_LENGTH (valtype), writebuf);
-      if (readbuf != NULL)
-	regcache_cooked_read_part (regcache, tdep->ppc_gp0_regnum + 3,
-				   offset, TYPE_LENGTH (valtype), readbuf);
-      return RETURN_VALUE_REGISTER_CONVENTION;
+      if (TYPE_LENGTH (valtype) <= 8
+        && TYPE_CODE (TYPE_TARGET_TYPE (valtype)) == TYPE_CODE_INT
+        && TYPE_LENGTH (TYPE_TARGET_TYPE (valtype)) == 1)
+        {
+          int offset = (register_size (gdbarch, tdep->ppc_gp0_regnum + 3)
+		        - TYPE_LENGTH (valtype));
+          if (writebuf != NULL)
+	    regcache_cooked_write_part (regcache, tdep->ppc_gp0_regnum + 3,
+				       offset, TYPE_LENGTH (valtype), writebuf);
+          if (readbuf != NULL)
+	    regcache_cooked_read_part (regcache, tdep->ppc_gp0_regnum + 3,
+				       offset, TYPE_LENGTH (valtype), readbuf);
+          return RETURN_VALUE_REGISTER_CONVENTION;
+        }
+      /* A VMX vector is returned in v2.  */
+      if (TYPE_VECTOR (valtype) && tdep->ppc_vr0_regnum >= 0)
+	{
+	  if (readbuf)
+	    regcache_cooked_read (regcache, tdep->ppc_vr0_regnum + 2, readbuf);
+	  if (writebuf)
+	    regcache_cooked_write (regcache, tdep->ppc_vr0_regnum + 2, writebuf);
+	  return RETURN_VALUE_REGISTER_CONVENTION;
+	}
     }
   /* Big floating point values get stored in adjacent floating
-     point registers.  */
+     point registers, starting with F1.  */
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT
       && (TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 32))
     {
