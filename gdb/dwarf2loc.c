@@ -164,9 +164,11 @@ dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
   if (SYMBOL_OPS (framefunc) == &dwarf2_loclist_funcs)
     {
       struct dwarf2_loclist_baton *symbaton;
+      struct frame_info *frame = debaton->frame;
+
       symbaton = SYMBOL_LOCATION_BATON (framefunc);
       *start = find_location_expression (symbaton, length,
-					 get_frame_pc (debaton->frame));
+					 get_frame_address_in_block (frame));
     }
   else
     {
@@ -597,7 +599,8 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
   size_t size;
 
   data = find_location_expression (dlbaton, &size,
-				   frame ? get_frame_pc (frame) : 0);
+				   frame ? get_frame_address_in_block (frame)
+				   : 0);
   if (data == NULL)
     {
       val = allocate_value (SYMBOL_TYPE (symbol));
