@@ -1,5 +1,13 @@
 2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* main.c (captured_main): Define struct cmdarg. Change type of cmdarg.
+	Add new options --eval-command and alias -ex.
+	Adjust --command to use the new struct cmdarg.
+	Execute commands given with --eval-command.
+	(print_gdb_help): Add new options --eval-command, -ex and mention -x.
+
+2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* infrun.c: Include main.h.
 	(print_stop_reason): Set return_child_result_value on exit.
 	* main.c (return_child_result): New variable.

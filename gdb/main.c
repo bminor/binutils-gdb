@@ -138,7 +138,13 @@ captured_main (void *data)
   static int print_version;
 
   /* Pointers to all arguments of --command option.  */
-  char **cmdarg;
+  struct cmdarg {
+    enum {
+      CMDARG_FILE,
+      CMDARG_COMMAND
+    } type;
+    char *string;
+  } *cmdarg;
   /* Allocated size of cmdarg.  */
   int cmdsize;
   /* Number of elements of cmdarg used.  */
@@ -178,7 +184,7 @@ captured_main (void *data)
 #endif
 
   cmdsize = 1;
-  cmdarg = (char **) xmalloc (cmdsize * sizeof (*cmdarg));
+  cmdarg = (struct cmdarg *) xmalloc (cmdsize * sizeof (*cmdarg));
   ncmd = 0;
   dirsize = 1;
   dirarg = (char **) xmalloc (dirsize * sizeof (*dirarg));
@@ -285,8 +291,10 @@ captured_main (void *data)
       {"pid", required_argument, 0, 'p'},
       {"p", required_argument, 0, 'p'},
       {"command", required_argument, 0, 'x'},
+      {"eval-command", required_argument, 0, 'X'},
       {"version", no_argument, &print_version, 1},
       {"x", required_argument, 0, 'x'},
+      {"ex", required_argument, 0, 'X'},
 #ifdef GDBTK
       {"tclcommand", required_argument, 0, 'z'},
       {"enable-external-editor", no_argument, 0, 'y'},
@@ -382,12 +390,23 @@ captured_main (void *data)
 	    corearg = optarg;
 	    break;
 	  case 'x':
-	    cmdarg[ncmd++] = optarg;
+	    cmdarg[ncmd].type = CMDARG_FILE;
+	    cmdarg[ncmd++].string = optarg;
 	    if (ncmd >= cmdsize)
 	      {
 		cmdsize *= 2;
-		cmdarg = (char **) xrealloc ((char *) cmdarg,
-					     cmdsize * sizeof (*cmdarg));
+		cmdarg = xrealloc ((char *) cmdarg,
+				   cmdsize * sizeof (*cmdarg));
+	      }
+	    break;
+	  case 'X':
+	    cmdarg[ncmd].type = CMDARG_COMMAND;
+	    cmdarg[ncmd++].string = optarg;
+	    if (ncmd >= cmdsize)
+	      {
+		cmdsize *= 2;
+		cmdarg = xrealloc ((char *) cmdarg,
+				   cmdsize * sizeof (*cmdarg));
 	      }
 	    break;
 	  case 'B':
@@ -728,7 +747,12 @@ extern int gdbtk_test (char *);
 	  do_cleanups (ALL_CLEANUPS);
 	}
 #endif
-      catch_command_errors (source_command, cmdarg[i], !batch, RETURN_MASK_ALL);
+      if (cmdarg[i].type == CMDARG_FILE)
+        catch_command_errors (source_command, cmdarg[i].string,
+			      !batch, RETURN_MASK_ALL);
+      else  /* cmdarg[i].type == CMDARG_COMMAND */
+        catch_command_errors (execute_command, cmdarg[i].string,
+			      !batch, RETURN_MASK_ALL);
     }
   xfree (cmdarg);
 
@@ -841,7 +865,11 @@ Options:\n\n\
   --return-child-result\n\
                      GDB exit code will be the child's exit code.\n\
   --cd=DIR           Change current directory to DIR.\n\
-  --command=FILE     Execute GDB commands from FILE.\n\
+  --command=FILE, -x Execute GDB commands from FILE.\n\
+  --eval-command=COMMAND, -ex\n\
+                     Execute a single GDB command.\n\
+                     May be used multiple times and in conjunction\n\
+                     with --command.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
   --pid=PID          Attach to running process PID.\n\
 "), stream);
