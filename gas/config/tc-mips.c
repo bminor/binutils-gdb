@@ -9303,6 +9303,8 @@ do_msbd:
     }
 }
 
+#define SKIP_SPACE_TABS(S) { while (*(S) == ' ' || *(S) == '\t') ++(S); }
+
 /* This routine assembles an instruction into its binary format when
    assembling for the mips16.  As a side effect, it sets one of the
    global variables imm_reloc or offset_reloc to the type of
@@ -9833,6 +9835,184 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
                    applying the actual mask.  */
 		ip->insn_opcode &= ~ ((7 << 3) << MIPS16OP_SH_IMM6);
 		ip->insn_opcode |= mask << MIPS16OP_SH_IMM6;
+	      }
+	    continue;
+
+	    case 'm':		/* Register list for save insn.  */
+	    case 'M':		/* Register list for restore insn.  */
+	      {
+		int opcode = 0;
+		int framesz = 0, seen_framesz = 0;
+		int args = 0, statics = 0, sregs = 0;
+
+		while (*s != '\0')
+		  {
+		    unsigned int reg1, reg2;
+
+		    SKIP_SPACE_TABS (s);
+		    while (*s == ',')
+		      ++s;
+		    SKIP_SPACE_TABS (s);
+
+		    my_getExpression (&imm_expr, s);
+		    if (imm_expr.X_op == O_constant)
+		      {
+			/* Handle the frame size.  */
+			if (seen_framesz)
+			  {
+			    as_bad (_("more than one frame size in list"));
+			    break;
+			  }
+			seen_framesz = 1;
+			framesz = imm_expr.X_add_number;
+			imm_expr.X_op = O_absent;
+			s = expr_end;
+			continue;
+		      }
+
+		    if (*s != '$')
+		      {
+			as_bad (_("can't parse register list"));
+			break;
+		      }
+		    ++s;
+
+		    reg1 = 0;
+		    while (ISDIGIT (*s))
+		      {
+			reg1 *= 10;
+			reg1 += *s - '0';
+			++s;
+		      }
+		    SKIP_SPACE_TABS (s);
+		    if (*s != '-')
+		      reg2 = reg1;
+		    else
+		      {
+			++s;
+			if (*s != '$')
+			  {
+			    as_bad (_("can't parse register list"));
+			    break;
+			  }
+			++s;
+			reg2 = 0;
+			while (ISDIGIT (*s))
+			  {
+			    reg2 *= 10;
+			    reg2 += *s - '0';
+			    ++s;
+			  }
+		      }
+
+		    while (reg1 <= reg2)
+		      {
+			if (reg1 >= 4 && reg1 <= 7)
+			  {
+			    if (c == 'm' && !seen_framesz)
+				/* args $a0-$a3 */
+				args |= 1 << (reg1 - 4);
+			    else
+				/* statics $a0-$a3 */
+				statics |= 1 << (reg1 - 4);
+			  }
+			else if ((reg1 >= 16 && reg1 <= 23) || reg1 == 30)
+			  {
+			    /* $s0-$s8 */
+			    sregs |= 1 << ((reg1 == 30) ? 8 : (reg1 - 16));
+			  }
+			else if (reg1 == 31)
+			  {
+			    /* Add $ra to insn.  */
+			    opcode |= 0x40;
+			  }
+			else
+			  {
+			    as_bad (_("unexpected register in list"));
+			    break;
+			  }
+			if (++reg1 == 24)
+			  reg1 = 30;
+		      }
+		  }
+
+		/* Encode args/statics combination.  */
+		if (args & statics)
+		  as_bad (_("arg/static registers overlap"));
+		else if (args == 0xf)
+		  /* All $a0-$a3 are args.  */
+		  opcode |= MIPS16_ALL_ARGS << 16;
+		else if (statics == 0xf)
+		  /* All $a0-$a3 are statics.  */
+		  opcode |= MIPS16_ALL_STATICS << 16;
+		else 
+		  {
+		    int narg = 0, nstat = 0;
+
+		    /* Count arg registers.  */
+		    while (args & 0x1)
+		      {
+			args >>= 1;
+			narg++;
+		      }
+		    if (args != 0)
+		      as_bad (_("invalid arg register list"));
+
+		    /* Count static registers.  */
+		    while (statics & 0x8)
+		      {
+			statics = (statics << 1) & 0xf;
+			nstat++;
+		      }
+		    if (statics != 0) 
+		      as_bad (_("invalid static register list"));
+
+		    /* Encode args/statics.  */
+		    opcode |= ((narg << 2) | nstat) << 16;
+		  }
+
+		/* Encode $s0/$s1.  */
+		if (sregs & (1 << 0))		/* $s0 */
+		  opcode |= 0x20;
+		if (sregs & (1 << 1))		/* $s1 */
+		  opcode |= 0x10;
+		sregs >>= 2;
+
+		if (sregs != 0)
+		  {
+		    /* Count regs $s2-$s8.  */
+		    int nsreg = 0;
+		    while (sregs & 1)
+		      {
+			sregs >>= 1;
+			nsreg++;
+		      }
+		    if (sregs != 0)
+		      as_bad (_("invalid static register list"));
+		    /* Encode $s2-$s8. */
+		    opcode |= nsreg << 24;
+		  }
+
+		/* Encode frame size.  */
+		if (!seen_framesz)
+		  as_bad (_("missing frame size"));
+		else if ((framesz & 7) != 0 || framesz < 0
+			 || framesz > 0xff * 8)
+		  as_bad (_("invalid frame size"));
+		else if (framesz != 128 || (opcode >> 16) != 0)
+		  {
+		    framesz /= 8;
+		    opcode |= (((framesz & 0xf0) << 16)
+			     | (framesz & 0x0f));
+		  }
+
+		/* Finally build the instruction.  */
+		if ((opcode >> 16) != 0 || framesz == 0)
+		  {
+		    ip->use_extend = TRUE;
+		    ip->extend = opcode >> 16;
+		  }
+		ip->insn_opcode |= opcode & 0x7f;
 	      }
 	    continue;
 

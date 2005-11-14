@@ -1,3 +1,9 @@
+2005-11-14  David Ung  <davidu@mips.com>
+
+	* mips16-opc.c: Add MIPS16e save/restore opcodes.
+	* mips-dis.c (print_mips16_insn_arg): Handle printing of 'm'/'M'
+	codes for save/restore.
+
 2005-11-10  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-dis.c (print_insn_m68k): Only match FPU insns with

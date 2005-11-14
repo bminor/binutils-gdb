@@ -1,3 +1,8 @@
+2005-11-14  David Ung  <davidu@mips.com>
+
+	* config/tc-mips.c (mips16_ip): Add handling of 'm' and 'M' codes
+	for the MIPS16e save/restore instructions.
+
 2005-11-11  Jan Beulich  <jbeulich@novell.com>
 
 	* doc/Makefile.am: Make asconfig.texi writeable before trying

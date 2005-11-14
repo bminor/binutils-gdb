@@ -1,3 +1,10 @@
+2005-11-14  David Ung  <davidu@mips.com>
+
+	* gas/mips/mips.exp: Run new save/restore tests.
+	* gas/testsuite/gas/mips/mips16e-save.s: New test for generating
+	different styles of save/restore instructions.
+	* gas/testsuite/gas/mips/mips16e-save.d: New.
+
 2005-11-10  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/intelbad.d: Add tests for ill registers in brackets.
