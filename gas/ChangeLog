@@ -1,5 +1,14 @@
 2005-11-14  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (AR_FCR, AR_EFLAG, AR_CSD, AR_SSD, AR_CFLG,
+	AR_FSR, AR_FIR, AR_FDR, AR_CCV, AR_EC): Define.
+	(ar): Use AR_* instead of literals.
+	(CR_DCR, CR_ITM, CR_IVA, CR_PTA, CR_GPTA, CR_LID, CR_ITV,
+	CR_PMV, CR_CMCV): Define.
+	(cr): Use CR_* instead of literals.
+
+2005-11-14  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c (md): Rename regsym to indregsym and move
 	it to the end of the structure.
 	(ar): Field regnum is unsigned.

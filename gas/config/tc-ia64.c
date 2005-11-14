@@ -354,11 +354,21 @@ static unsigned char le_nop_stop[16] =
 #define AR_BSP		17
 #define AR_BSPSTORE	18
 #define AR_RNAT		19
+#define AR_FCR		21
+#define AR_EFLAG	24
+#define AR_CSD		25
+#define AR_SSD		26
+#define AR_CFLG		27
+#define AR_FSR		28
+#define AR_FIR		29
+#define AR_FDR		30
+#define AR_CCV		32
 #define AR_UNAT		36
 #define AR_FPSR		40
 #define AR_ITC		44
 #define AR_PFS		64
 #define AR_LC		65
+#define AR_EC		66
 
 static const struct
   {
@@ -367,20 +377,29 @@ static const struct
   }
 ar[] =
   {
-    {"ar.k0", 0}, {"ar.k1", 1}, {"ar.k2", 2}, {"ar.k3", 3},
-    {"ar.k4", 4}, {"ar.k5", 5}, {"ar.k6", 6}, {"ar.k7", 7},
-    {"ar.rsc",		16}, {"ar.bsp",		17},
-    {"ar.bspstore",	18}, {"ar.rnat",	19},
-    {"ar.fcr",		21}, {"ar.eflag",	24},
-    {"ar.csd",		25}, {"ar.ssd",		26},
-    {"ar.cflg",		27}, {"ar.fsr",		28},
-    {"ar.fir",		29}, {"ar.fdr",		30},
-    {"ar.ccv",		32}, {"ar.unat",	36},
-    {"ar.fpsr",		40}, {"ar.itc",		44},
-    {"ar.pfs",		64}, {"ar.lc",		65},
-    {"ar.ec",		66},
+    {"ar.k0",		AR_K0},		{"ar.k1",	AR_K0 + 1},
+    {"ar.k2",		AR_K0 + 2},	{"ar.k3",	AR_K0 + 3},
+    {"ar.k4",		AR_K0 + 4},	{"ar.k5",	AR_K0 + 5},
+    {"ar.k6",		AR_K0 + 6},	{"ar.k7",	AR_K7},
+    {"ar.rsc",		AR_RSC},	{"ar.bsp",	AR_BSP},
+    {"ar.bspstore",	AR_BSPSTORE},	{"ar.rnat",	AR_RNAT},
+    {"ar.fcr",		AR_FCR},	{"ar.eflag",	AR_EFLAG},
+    {"ar.csd",		AR_CSD},	{"ar.ssd",	AR_SSD},
+    {"ar.cflg",		AR_CFLG},	{"ar.fsr",	AR_FSR},
+    {"ar.fir",		AR_FIR},	{"ar.fdr",	AR_FDR},
+    {"ar.ccv",		AR_CCV},	{"ar.unat",	AR_UNAT},
+    {"ar.fpsr",		AR_FPSR},	{"ar.itc",	AR_ITC},
+    {"ar.pfs",		AR_PFS},	{"ar.lc",	AR_LC},
+    {"ar.ec",		AR_EC},
   };
 
+/* control registers:  */
+
+#define CR_DCR           0
+#define CR_ITM           1
+#define CR_IVA           2
+#define CR_PTA           8
+#define CR_GPTA          9
 #define CR_IPSR         16
 #define CR_ISR          17
 #define CR_IIP          19
@@ -390,15 +409,18 @@ ar[] =
 #define CR_IFS          23
 #define CR_IIM          24
 #define CR_IHA          25
+#define CR_LID          64
 #define CR_IVR          65
 #define CR_TPR          66
 #define CR_EOI          67
 #define CR_IRR0         68
 #define CR_IRR3         71
+#define CR_ITV          72
+#define CR_PMV          73
+#define CR_CMCV         74
 #define CR_LRR0         80
 #define CR_LRR1         81
 
-/* control registers:  */
 static const struct
   {
     const char *name;
@@ -406,33 +428,33 @@ static const struct
   }
 cr[] =
   {
-    {"cr.dcr",	 0},
-    {"cr.itm",	 1},
-    {"cr.iva",	 2},
-    {"cr.pta",	 8},
-    {"cr.gpta",	 9},
-    {"cr.ipsr",	16},
-    {"cr.isr",	17},
-    {"cr.iip",	19},
-    {"cr.ifa",	20},
-    {"cr.itir",	21},
-    {"cr.iipa",	22},
-    {"cr.ifs",	23},
-    {"cr.iim",	24},
-    {"cr.iha",	25},
-    {"cr.lid",	64},
-    {"cr.ivr",	65},
-    {"cr.tpr",	66},
-    {"cr.eoi",	67},
-    {"cr.irr0",	68},
-    {"cr.irr1",	69},
-    {"cr.irr2",	70},
-    {"cr.irr3",	71},
-    {"cr.itv",	72},
-    {"cr.pmv",	73},
-    {"cr.cmcv",	74},
-    {"cr.lrr0",	80},
-    {"cr.lrr1",	81}
+    {"cr.dcr",	CR_DCR},
+    {"cr.itm",	CR_ITM},
+    {"cr.iva",	CR_IVA},
+    {"cr.pta",	CR_PTA},
+    {"cr.gpta",	CR_GPTA},
+    {"cr.ipsr",	CR_IPSR},
+    {"cr.isr",	CR_ISR},
+    {"cr.iip",	CR_IIP},
+    {"cr.ifa",	CR_IFA},
+    {"cr.itir",	CR_ITIR},
+    {"cr.iipa",	CR_IIPA},
+    {"cr.ifs",	CR_IFS},
+    {"cr.iim",	CR_IIM},
+    {"cr.iha",	CR_IHA},
+    {"cr.lid",	CR_LID},
+    {"cr.ivr",	CR_IVR},
+    {"cr.tpr",	CR_TPR},
+    {"cr.eoi",	CR_EOI},
+    {"cr.irr0",	CR_IRR0},
+    {"cr.irr1",	CR_IRR0 + 1},
+    {"cr.irr2",	CR_IRR0 + 2},
+    {"cr.irr3",	CR_IRR3},
+    {"cr.itv",	CR_ITV},
+    {"cr.pmv",	CR_PMV},
+    {"cr.cmcv",	CR_CMCV},
+    {"cr.lrr0",	CR_LRR0},
+    {"cr.lrr1",	CR_LRR1}
   };
 
 #define PSR_MFL         4
