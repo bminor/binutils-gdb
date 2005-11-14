@@ -1,5 +1,9 @@
 2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
+2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* thread.c (_initialize_thread): Correct the 'thread apply' help
 	message.
 
