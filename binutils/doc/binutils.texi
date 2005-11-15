@@ -991,6 +991,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--prefix-sections=}@var{string}]
         [@option{--prefix-alloc-sections=}@var{string}]
         [@option{--add-gnu-debuglink=}@var{path-to-file}]
+        [@option{--keep-file-symbols}]
         [@option{--only-keep-debug}]
         [@option{--writable-text}]
         [@option{--readonly-text}]
@@ -1427,6 +1428,11 @@ Prefix all the names of all allocated sections in the output file with
 @item --add-gnu-debuglink=@var{path-to-file}
 Creates a .gnu_debuglink section which contains a reference to @var{path-to-file}
 and adds it to the output file.
+
+@item --keep-file-symbols
+When stripping a file, perhaps with @option{--strip-debug} or
+@option{--strip-unneeded}, retain any symbols specifying source file names,
+which would otherwise get stripped.
 
 @item --only-keep-debug
 Strip a file, removing contents of any sections that would not be
@@ -2223,6 +2229,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
+      [@option{--keep-file-symbols}]
       [@option{--only-keep-debug}]
       [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
       [@option{--help}] [@option{--info}]
@@ -2330,6 +2337,11 @@ Remove non-global symbols.
 @itemx --discard-locals
 Remove compiler-generated local symbols.
 (These usually start with @samp{L} or @samp{.}.)
+
+@item --keep-file-symbols
+When stripping a file, perhaps with @option{--strip-debug} or
+@option{--strip-unneeded}, retain any symbols specifying source file names,
+which would otherwise get stripped.
 
 @item --only-keep-debug
 Strip a file, removing any sections that would be stripped by

@@ -1,3 +1,17 @@
+2005-11-15  Jan Beulich  <jbeulich@novell.com>
+
+	* objcopy.c (keep_file_symbols): New.
+	(enum command_line_switch): Add OPTION_KEEP_FILE_SYMBOLS.
+	(strip_options): Add --keep-file-symbols.
+	(copy_options): Likewise.
+	(copy_usage): Likewise.
+	(strip_usage): Likewise.
+	(filter_symbols): Act upon keep_file_symbols.
+	(strip_main): Handle OPTION_KEEP_FILE_SYMBOLS.
+	(copy_main): Likewise.
+	* doc/binutils.texi: Document --keep-file-symbols for objcopy
+	and strip.
+
 2005-11-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* readelf.c (struct dump_list_entry, request_dump_byname)

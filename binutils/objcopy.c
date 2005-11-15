@@ -203,6 +203,9 @@ static struct redefine_node *redefine_sym_list = NULL;
 /* If this is TRUE, we weaken global symbols (set BSF_WEAK).  */
 static bfd_boolean weaken = FALSE;
 
+/* If this is TRUE, we retain BSF_FILE symbols.  */
+static bfd_boolean keep_file_symbols = FALSE;
+
 /* Prefix symbols/sections.  */
 static char *prefix_symbols_string = 0;
 static char *prefix_sections_string = 0;
@@ -249,6 +252,7 @@ enum command_line_switch
     OPTION_FORMATS_INFO,
     OPTION_ADD_GNU_DEBUGLINK,
     OPTION_ONLY_KEEP_DEBUG,
+    OPTION_KEEP_FILE_SYMBOLS,
     OPTION_READONLY_TEXT,
     OPTION_WRITABLE_TEXT,
     OPTION_PURE,
@@ -266,6 +270,7 @@ static struct option strip_options[] =
   {"info", no_argument, 0, OPTION_FORMATS_INFO},
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
+  {"keep-file-symbols", no_argument, 0, OPTION_KEEP_FILE_SYMBOLS},
   {"keep-symbol", required_argument, 0, 'K'},
   {"only-keep-debug", no_argument, 0, OPTION_ONLY_KEEP_DEBUG},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
@@ -317,6 +322,7 @@ static struct option copy_options[] =
   {"input-format", required_argument, 0, 'I'}, /* Obsolete */
   {"input-target", required_argument, 0, 'I'},
   {"interleave", required_argument, 0, 'i'},
+  {"keep-file-symbols", no_argument, 0, OPTION_KEEP_FILE_SYMBOLS},
   {"keep-global-symbol", required_argument, 0, 'G'},
   {"keep-global-symbols", required_argument, 0, OPTION_KEEPGLOBAL_SYMBOLS},
   {"keep-symbol", required_argument, 0, 'K'},
@@ -420,6 +426,7 @@ copy_usage (FILE *stream, int exit_status)
                                      relocations\n\
      --only-keep-debug             Strip everything but the debug information\n\
   -K --keep-symbol <name>          Do not strip symbol <name>\n\
+     --keep-file-symbols           Do not strip file symbol(s)\n\
   -L --localize-symbol <name>      Force symbol <name> to be marked as a local\n\
      --globalize-symbol <name>     Force symbol <name> to be marked as a global\n\
   -G --keep-global-symbol <name>   Localize all symbols except <name>\n\
@@ -505,6 +512,7 @@ strip_usage (FILE *stream, int exit_status)
      --only-keep-debug             Strip everything but the debug information\n\
   -N --strip-symbol=<name>         Do not copy symbol <name>\n\
   -K --keep-symbol=<name>          Do not strip symbol <name>\n\
+     --keep-file-symbols           Do not strip file symbol(s)\n\
   -w --wildcard                    Permit wildcard in symbol comparison\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
@@ -926,7 +934,9 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	  && !(flags & BSF_KEEP)
 	  && is_specified_symbol (name, strip_unneeded_list))
 	keep = 0;
-      if (!keep && is_specified_symbol (name, keep_specific_list))
+      if (!keep
+	  && ((keep_file_symbols && (flags & BSF_FILE))
+	      || is_specified_symbol (name, keep_specific_list)))
 	keep = 1;
       if (keep && is_strip_section (abfd, bfd_get_section (sym)))
 	keep = 0;
@@ -2460,6 +2470,9 @@ strip_main (int argc, char *argv[])
 	case OPTION_ONLY_KEEP_DEBUG:
 	  strip_symbols = STRIP_NONDEBUG;
 	  break;
+	case OPTION_KEEP_FILE_SYMBOLS:
+	  keep_file_symbols = 1;
+	  break;
 	case 0:
 	  /* We've been given a long option.  */
 	  break;
@@ -2615,6 +2628,10 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_ONLY_KEEP_DEBUG:
 	  strip_symbols = STRIP_NONDEBUG;
+	  break;
+
+	case OPTION_KEEP_FILE_SYMBOLS:
+	  keep_file_symbols = 1;
 	  break;
 
 	case OPTION_ADD_GNU_DEBUGLINK:
