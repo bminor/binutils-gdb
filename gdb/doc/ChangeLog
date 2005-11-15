@@ -1,3 +1,9 @@
+2005-11-15  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Packets): Mention that packets beginning with
+	letters are reserved once, at the top, instead of actually listing
+	them all and saying "reserved".
+
 2005-11-15  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gdb.texinfo (User-defined commands): Add $argc. Add missing 'end'.

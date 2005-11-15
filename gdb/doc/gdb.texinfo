@@ -22128,6 +22128,9 @@ The following table provides a complete list of all currently defined
 @xref{File-I/O remote protocol extension}, for details about the File
 I/O extension of the remote protocol.
 
+Note that all packet forms beginning with an upper- or lower-case
+letter, other than those described here, are reserved for future use.
+
 @table @r
 
 @item @code{!} --- extended mode
@@ -22151,10 +22154,6 @@ step and continue.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
-
-@item @code{a} --- reserved
-
-Reserved for future use.
 
 @item @code{A}@var{arglen}@code{,}@var{argnum}@code{,}@var{arg}@code{,@dots{}} ---  set program arguments @strong{(reserved)}
 @cindex @code{A} packet
@@ -22230,18 +22229,6 @@ for success
 for an error
 @end table
 
-@item @code{e} --- reserved
-
-Reserved for future use.
-
-@item @code{E} --- reserved
-
-Reserved for future use.
-
-@item @code{f} --- reserved
-
-Reserved for future use.
-
 @item @code{F}@var{RC}@code{,}@var{EE}@code{,}@var{CF}@code{;}@var{XX} --- Reply to target's F packet.
 @cindex @code{F} packet
 
@@ -22281,10 +22268,6 @@ for success
 @item E@var{NN}
 for an error
 @end table
-
-@item @code{h} --- reserved
-
-Reserved for future use.
 
 @item @code{H}@var{c}@var{t@dots{}} --- set thread
 @cindex @code{H} packet
@@ -22331,32 +22314,12 @@ step starting at that address.
 
 @xref{step with signal packet}.  @xref{cycle step packet}.
 
-@item @code{j} --- reserved
-
-Reserved for future use.
-
-@item @code{J} --- reserved
-
-Reserved for future use.
-
 @item @code{k} --- kill request
 @cindex @code{k} packet
 
 FIXME: @emph{There is no description of how to operate when a specific
 thread context has been selected (i.e.@: does 'k' kill only that
 thread?)}.
-
-@item @code{K} --- reserved
-
-Reserved for future use.
-
-@item @code{l} --- reserved
-
-Reserved for future use.
-
-@item @code{L} --- reserved
-
-Reserved for future use.
 
 @item @code{m}@var{addr}@code{,}@var{length} --- read memory
 @cindex @code{m} packet
@@ -22392,20 +22355,6 @@ for success
 for an error (this includes the case where only part of the data was
 written).
 @end table
-
-@item @code{n} --- reserved
-
-Reserved for future use.
-
-@item @code{N} --- reserved
-
-Reserved for future use.
-
-@item @code{o} --- reserved
-
-Reserved for future use.
-
-@item @code{O} --- reserved
 
 @item @code{p}@var{hex number of register} --- read register packet
 @cindex @code{p} packet
@@ -22520,14 +22469,6 @@ thread is still alive
 thread is dead
 @end table
 
-@item @code{u} --- reserved
-
-Reserved for future use.
-
-@item @code{U} --- reserved
-
-Reserved for future use.
-
 @item @code{v} --- verbose packet prefix
 
 Packets starting with @code{v} are identified by a multi-letter name,
@@ -22574,22 +22515,6 @@ command in the @code{vCont} packet.
 The @code{vCont} packet is not supported.
 @end table
 
-@item @code{V} --- reserved
-
-Reserved for future use.
-
-@item @code{w} --- reserved
-
-Reserved for future use.
-
-@item @code{W} --- reserved
-
-Reserved for future use.
-
-@item @code{x} --- reserved
-
-Reserved for future use.
-
 @item @code{X}@var{addr}@code{,}@var{length}@var{:}@var{XX@dots{}} --- write mem (binary)
 @cindex @code{X} packet
 
@@ -22605,14 +22530,6 @@ for success
 @item E@var{NN}
 for an error
 @end table
-
-@item @code{y} --- reserved
-
-Reserved for future use.
-
-@item @code{Y} reserved
-
-Reserved for future use.
 
 @item @code{z}@var{type}@code{,}@var{addr}@code{,}@var{length} --- remove breakpoint or watchpoint @strong{(draft)}
 @itemx @code{Z}@var{type}@code{,}@var{addr}@code{,}@var{length} --- insert breakpoint or watchpoint @strong{(draft)}
