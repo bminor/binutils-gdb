@@ -1,3 +1,10 @@
+2005-11-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c (s_comm_internal): Set bfd_com_section segment.
+	(s_mri_common): Likewise.
+	* write.c (write_object_file): Remove non-BFD assembler common
+	sym handling.
+
 2005-11-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/tc-arm.c (s_arm_unwind_save_core): Don't emit an extra

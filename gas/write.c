@@ -1493,12 +1493,6 @@ write_object_file (void)
 	      continue;
 	    }
 
-	  /* So far, common symbols have been treated like undefined symbols.
-	     Put them in the common section now.  */
-	  if (S_IS_DEFINED (symp) == 0
-	      && S_GET_VALUE (symp) != 0)
-	    S_SET_SEGMENT (symp, bfd_com_section_ptr);
-
 #ifdef obj_frob_symbol
 	  obj_frob_symbol (symp, punt);
 #endif

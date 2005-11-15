@@ -1490,6 +1490,7 @@ s_comm_internal (int param,
     {
       S_SET_VALUE (symbolP, (valueT) size);
       S_SET_EXTERNAL (symbolP);
+      S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
 #ifdef OBJ_VMS
       {
 	extern int flag_one;
@@ -1583,6 +1584,7 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
     }
 
   S_SET_EXTERNAL (sym);
+  S_SET_SEGMENT (sym, bfd_com_section_ptr);
   mri_common_symbol = sym;
 
 #ifdef S_SET_ALIGN
