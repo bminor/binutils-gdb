@@ -1,3 +1,8 @@
+2005-11-15  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* NEWS: Add --batch-silent, --return-child-result, and --eval-command
+	options to the 6.4 section.
+
 2005-11-14  James E Wilson  <wilson@specifix.com>
 
 	PR 2024

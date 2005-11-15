@@ -12,6 +12,16 @@ OpenBSD/mips64			mips64-*-openbsd*
 
 Morpho Technologies ms1		ms1-elf
 
+* New command line options
+
+--batch-silent			As for --batch, but totally silent.
+--return-child-result		The debugger will exist with the same value
+				the child (debugged) program exited with.
+--eval-command COMMAND, -ex COMMAND
+				Execute a single GDB CLI command. This may be
+				specified multiple times and in conjunction
+				with the --command (-x) option.
+
 * Deprecated commands removed
 
 The following commands, that were deprecated in 2000, have been
