@@ -22325,18 +22325,19 @@ thread?)}.
 @cindex @code{m} packet
 
 Read @var{length} bytes of memory starting at address @var{addr}.
-Neither @value{GDBN} nor the stub assume that sized memory transfers are
-assumed using word aligned accesses. FIXME: @emph{A word aligned memory
-transfer mechanism is needed.}
+Note that @var{addr} may not be aligned to any particular boundary.
+
+The stub need not use any particular size or alignment when gathering
+data from memory for the response; even if @var{addr} is word-aligned
+and @var{length} is a multiple of the word size, the stub is free to
+use byte accesses, or not.  For this reason, this packet may not be
+suitable for accessing memory-mapped I/O devices.
 
 Reply:
 @table @samp
 @item @var{XX@dots{}}
 @var{XX@dots{}} is mem contents. Can be fewer bytes than requested if able
-to read only part of the data.  Neither @value{GDBN} nor the stub assume
-that sized memory transfers are assumed using word aligned
-accesses. FIXME: @emph{A word aligned memory transfer mechanism is
-needed.}
+to read only part of the data.
 @item E@var{NN}
 @var{NN} is errno
 @end table
