@@ -1,3 +1,8 @@
+2005-11-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_opcodes): Add frin,friz,frip,frim.  Correct
+	frsqrtes.
+
 2005-11-14  David Ung  <davidu@mips.com>
 
 	* mips16-opc.c: Add MIPS16e save/restore opcodes.
