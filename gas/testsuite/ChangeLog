@@ -1,3 +1,8 @@
+2005-11-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/unwind.s, gas/arm/unwind.d, gas/arm/unwind_vxworks.d: Add
+	a test for saving only the low registers.
+
 2005-11-14  Thiemo Seufer  <ths@networkno.de>
 
 	* gas/testsuite/gas/mips/mips16e-jrc.d: Tighten file format

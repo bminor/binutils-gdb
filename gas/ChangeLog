@@ -1,3 +1,8 @@
+2005-11-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-arm.c (s_arm_unwind_save_core): Don't emit an extra
+	opcode if r4-r15 are not saved.
+
 2005-11-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (S_GET_VALUE): Remove non-BFD assembler recursion guard.

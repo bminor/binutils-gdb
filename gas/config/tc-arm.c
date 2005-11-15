@@ -2249,30 +2249,34 @@ s_arm_unwind_save_core (void)
       unwind.pending_offset = 0;
     }
 
-  /* See if we can use the short opcodes.  These pop a block of upto 8
-     registers starting with r4, plus maybe r14.  */
-  for (n = 0; n < 8; n++)
+  /* Pop r4-r15.  */
+  if (range & 0xfff0)
     {
-      /* Break at the first non-saved register.	 */
-      if ((range & (1 << (n + 4))) == 0)
-	break;
-    }
-  /* See if there are any other bits set.  */
-  if (n == 0 || (range & (0xfff0 << n) & 0xbff0) != 0)
-    {
-      /* Use the long form.  */
-      op = 0x8000 | ((range >> 4) & 0xfff);
-      add_unwind_opcode (op, 2);
-    }
-  else
-    {
-      /* Use the short form.  */
-      if (range & 0x4000)
-	op = 0xa8; /* Pop r14.	*/
+      /* See if we can use the short opcodes.  These pop a block of up to 8
+	 registers starting with r4, plus maybe r14.  */
+      for (n = 0; n < 8; n++)
+	{
+	  /* Break at the first non-saved register.	 */
+	  if ((range & (1 << (n + 4))) == 0)
+	    break;
+	}
+      /* See if there are any other bits set.  */
+      if (n == 0 || (range & (0xfff0 << n) & 0xbff0) != 0)
+	{
+	  /* Use the long form.  */
+	  op = 0x8000 | ((range >> 4) & 0xfff);
+	  add_unwind_opcode (op, 2);
+	}
       else
-	op = 0xa0; /* Do not pop r14.  */
-      op |= (n - 1);
-      add_unwind_opcode (op, 1);
+	{
+	  /* Use the short form.  */
+	  if (range & 0x4000)
+	    op = 0xa8; /* Pop r14.	*/
+	  else
+	    op = 0xa0; /* Do not pop r14.  */
+	  op |= (n - 1);
+	  add_unwind_opcode (op, 1);
+	}
     }
 
   /* Pop r0-r3.	 */

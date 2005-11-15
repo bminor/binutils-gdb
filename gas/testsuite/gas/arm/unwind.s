@@ -44,3 +44,8 @@ foo4:	@ Thumb frame pointer
 	@sub sp, sp, #8
 	mov r0, #4
 	.fnend
+foo5:	@ Save r0-r3 only.
+	.fnstart
+	.save {r0, r1, r2, r3}
+	mov r0, #5
+	.fnend
