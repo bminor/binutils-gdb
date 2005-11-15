@@ -1,3 +1,10 @@
+2005-11-15  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* cli/cli-script.c: Include gdb_assert.h.
+	(locate_arg): Detect $argc.
+	(insert_args): Substitute $argc.
+	* Makefile.in (cli-script.o): Add dependency on gdb_assert.h.
+
 2005-11-14  James E Wilson  <wilson@specifix.com>
 
 	PR 2024
