@@ -45,3 +45,5 @@ set array_tests {
 
 # NetBSD ELF systems do not currently support the .*_array sections.
 run_ld_link_exec_tests [list "*-*-netbsdelf*"] $array_tests
+
+catch "exec rm -f tmpdir/preinit tmpdir/init tmpdir/fini" status

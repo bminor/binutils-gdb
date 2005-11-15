@@ -1,3 +1,11 @@
+2005-11-15  Jan Beulich  <jbeulich@novell.com>
+
+	* ld-bootstrap/bootstrap.exp: Delete ld-partial.o and ld[123]*
+	after test.
+	* ld-elf/elf.exp: Delete preinit, init, and fini after test.
+	* ld-elf/sec64k.exp: Use macro and repeat in generated source
+	files. Delete object files after test.
+
 2005-11-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/noov.d: Restrict to cris-*-*elf*.

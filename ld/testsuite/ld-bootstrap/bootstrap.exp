@@ -169,3 +169,6 @@ foreach flags {"" "strip" "--static" "--traditional-format"
 	fail $testname
     }
 }
+
+catch "exec rm -f tmpdir/ld-partial.o tmpdir/ld1 tmpdir/ld2 tmpdir/ld3" status
+catch "exec rm -f tmpdir/ld1tail tmpdir/ld2tail tmpdir/ld3tail" status

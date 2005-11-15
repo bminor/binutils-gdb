@@ -39,7 +39,6 @@ if { ![runtest_file_p $runtests $test1] \
 set sfiles {}
 set max_sec 66000
 set secs_per_file 1000
-set secn 0
 for { set i 0 } { $i < $max_sec / $secs_per_file } { incr i } {
     set sfile "$objdir/tmpdir/sec64-$i.s"
     lappend sfiles $sfile
@@ -50,7 +49,7 @@ for { set i 0 } { $i < $max_sec / $secs_per_file } { incr i } {
 	return
     }
 
-    if { $secn == 0 } {
+    if { $i == 0 } {
 	puts $ofd " .global _start"
 	puts $ofd "_start:"
 	puts $ofd " .global foo_0"
@@ -59,15 +58,20 @@ for { set i 0 } { $i < $max_sec / $secs_per_file } { incr i } {
 
     # Make sure the used section is not covered by common linker scripts.
     # They should get separate section entries even without -r.
-    for { set j 0 } { $j < $secs_per_file } { incr j } {
-	incr secn
-	puts $ofd " .section .foo.$secn,\"ax\""
-	puts $ofd " .global foo_$secn"
-	puts $ofd "foo_$secn:"
-	puts $ofd " .long foo_[expr $secn - 1]"
-	puts $ofd "bar_$secn:"
-	puts $ofd " .long bar_$secn"
-    }
+    puts $ofd " .altmacro"
+    puts $ofd " .macro sec secn, secp"
+    puts $ofd "  .section .foo.\\secn,\"ax\""
+    puts $ofd "  .global foo_\\secn"
+    puts $ofd "foo_\\secn:"
+    puts $ofd "  .long foo_\\secp"
+    puts $ofd "bar_\\secn:"
+    puts $ofd "  .long bar_\\secn"
+    puts $ofd " .endm"
+    puts $ofd " secn = [expr $i * $secs_per_file]"
+    puts $ofd " .rept $secs_per_file"
+    puts $ofd "  secn = secn + 1"
+    puts $ofd "  sec %(secn), %(secn-1)"
+    puts $ofd " .endr"
 
     close $ofd
 }
@@ -141,3 +145,7 @@ puts $ofd ".* (\[0-9\] foo_1|66... foo_66000)"
 puts $ofd "#pass"
 close $ofd
 run_dump_test "tmpdir/$test2"
+
+for { set i 1 } { $i < $max_sec / $secs_per_file } { incr i } {
+    catch "exec rm -f tmpdir/dump$i.o" status
+}
