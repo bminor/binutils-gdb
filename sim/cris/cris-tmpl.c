@@ -121,13 +121,15 @@ MY (f_model_insn_before) (SIM_CPU *current_cpu, int first_p ATTRIBUTE_UNUSED)
     char flags[7];
     SIM_DESC sd = CPU_STATE (current_cpu);
 
-    cris_trace_printf (sd, current_cpu, "%lx ", (unsigned long) (CPU (h_pc)));
+    cris_trace_printf (sd, current_cpu, "%lx ",
+		       0xffffffffUL & (unsigned long) (CPU (h_pc)));
 
     for (i = 0; i < 15; i++)
       cris_trace_printf (sd, current_cpu, "%lx ",
-			 (unsigned long) (XCONCAT3(crisv,BASENUM,
-						   f_h_gr_get) (current_cpu,
-								i)));
+			 0xffffffffUL
+			 & (unsigned long) (XCONCAT3(crisv,BASENUM,
+						     f_h_gr_get) (current_cpu,
+								  i)));
     flags[0] = GET_H_IBIT () != 0 ? 'I' : 'i';
     flags[1] = GET_H_XBIT () != 0 ? 'X' : 'x';
     flags[2] = GET_H_NBIT () != 0 ? 'N' : 'n';
@@ -148,9 +150,10 @@ MY (f_model_insn_before) (SIM_CPU *current_cpu, int first_p ATTRIBUTE_UNUSED)
 			     ->unaligned_mem_dword_count
 			     - CPU_CRIS_PREV_MISC_PROFILE (current_cpu)
 			     ->unaligned_mem_dword_count)),
-			 (unsigned long) (XCONCAT3(crisv,BASENUM,
-						   f_h_gr_get) (current_cpu,
-								15)));
+			 0xffffffffUL
+			 & (unsigned long) (XCONCAT3(crisv,BASENUM,
+						     f_h_gr_get) (current_cpu,
+								  15)));
     else
       cris_trace_printf (sd, current_cpu, "%s %d\n", flags,
 			 (int)
