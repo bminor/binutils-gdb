@@ -1,5 +1,9 @@
 2005-11-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-hppa.c (pa_comm): Set bfd_com_section segment.
+
+2005-11-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* configure.tgt (i386-*-gnu*): Set em=gnu.
 	* config/te-gnu.h: New file.
 	* config/tc-i386.c: Don't use '/' as comment char for TE_GNU.

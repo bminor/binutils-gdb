@@ -6400,7 +6400,7 @@ pa_comm (unused)
     {
       symbol_get_bfdsym (symbol)->flags |= BSF_OBJECT;
       S_SET_VALUE (symbol, size);
-      S_SET_SEGMENT (symbol, bfd_und_section_ptr);
+      S_SET_SEGMENT (symbol, bfd_com_section_ptr);
       S_SET_EXTERNAL (symbol);
 
       /* colon() has already set the frag to the current location in the
