@@ -198,6 +198,7 @@ const char extra_symbol_chars[] = "*%-(["
 
 #if (defined (TE_I386AIX)				\
      || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))	\
+	 && !defined (TE_GNU)				\
 	 && !defined (TE_LINUX)				\
  	 && !defined (TE_NETWARE)			\
 	 && !defined (TE_FreeBSD)			\
