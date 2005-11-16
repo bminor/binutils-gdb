@@ -1,3 +1,26 @@
+2005-11-16  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Packets, Stop Reply Packets)
+	(General Query Packets): Various formatting cleanups.
+	- Use @samp for packet contents.
+	- Drop summaries from packet @item lines; the same information appears
+	  immediately below in the description.
+	- Delete paragraph breaks after packet @item commands, so that the
+	  description appears directly to the right of the packet prototype
+	  in the printed manual, if it fits.
+	- Place spaces in packet prototypes between @vars and non-@var
+	  letters, and explain that they're just for formatting.
+	- Use @dots{} instead of '...'.
+	- Fix uses of @code where @var was needed.
+	- Replace "deprecated" markers with English text spelling out the
+	  packet's status and the preferred alternatives.
+	- Remove "(reserved)" markers on 'A' and 'I' packets; it's unclear
+	  what this ever meant.
+	- Remove "(draft)" markers on 'i' packets; nobody has commented on
+	  this for a long time.
+	- Remove "(draft)" markers on 'z' and 'Z' packets; these have been
+	  implemented several times, and have been in use for years.
+
 2005-11-15  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Packets): Add index entries for 'm' packet

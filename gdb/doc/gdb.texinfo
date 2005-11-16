@@ -22128,14 +22128,26 @@ The following table provides a complete list of all currently defined
 @xref{File-I/O remote protocol extension}, for details about the File
 I/O extension of the remote protocol.
 
+Each packet's description has a template showing the packet's overall
+syntax, followed by an explanation of the packet's meaning.  We
+include spaces in some of the templates for clarity; these are not
+part of the packet's syntax.  No @value{GDBN} packet uses spaces to
+separate its components.  For example, a template like @samp{foo
+@var{bar} @var{baz}} describes a packet beginning with the three ASCII
+bytes @samp{foo}, followed by a @var{bar}, followed directly by a
+@var{baz}.  GDB does not transmit a space character between the
+@samp{foo} and the @var{bar}, or between the @var{bar} and the
+@var{baz}.
+
 Note that all packet forms beginning with an upper- or lower-case
 letter, other than those described here, are reserved for future use.
 
-@table @r
+Here are the packet descriptions.
 
-@item @code{!} --- extended mode
-@cindex @code{!} packet
+@table @samp
 
+@item !
+@cindex @samp{!} packet
 Enable extended mode.  In extended mode, the remote server is made
 persistent.  The @samp{R} packet is used to restart the program being
 debugged.
@@ -22146,31 +22158,31 @@ Reply:
 The remote target both supports and has enabled extended mode.
 @end table
 
-@item @code{?} --- last signal
-@cindex @code{?} packet
-
+@item ?
+@cindex @samp{?} packet
 Indicate the reason the target halted.  The reply is the same as for
 step and continue.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item @code{A}@var{arglen}@code{,}@var{argnum}@code{,}@var{arg}@code{,@dots{}} ---  set program arguments @strong{(reserved)}
-@cindex @code{A} packet
-
-Initialized @samp{argv[]} array passed into program. @var{arglen}
-specifies the number of bytes in the hex encoded byte stream @var{arg}.
-See @code{gdbserver} for more details.
+@item A @var{arglen},@var{argnum},@var{arg},@dots{}
+@cindex @samp{A} packet
+Initialized @code{argv[]} array passed into program. @var{arglen}
+specifies the number of bytes in the hex encoded byte stream
+@var{arg}.  See @code{gdbserver} for more details.
 
 Reply:
 @table @samp
 @item OK
-@item E@var{NN}
+The arguments were set.
+@item E @var{NN}
+An error occurred.
 @end table
 
-@item @code{b}@var{baud} --- set baud @strong{(deprecated)}
-@cindex @code{b} packet
-
+@item b @var{baud}
+@cindex @samp{b} packet
+(Don't use this packet; its behavior is not well-defined.)
 Change the serial line speed to @var{baud}.
 
 JTC: @emph{When does the transport layer state change?  When it's
@@ -22183,41 +22195,39 @@ some kind of out-of-band message to a specially-setup stub and have the
 switch happen "in between" packets, so that from remote protocol's point
 of view, nothing actually happened.}
 
-@item @code{B}@var{addr},@var{mode} --- set breakpoint @strong{(deprecated)}
-@cindex @code{B} packet
-
+@item B @var{addr},@var{mode}
+@cindex @samp{B} packet
 Set (@var{mode} is @samp{S}) or clear (@var{mode} is @samp{C}) a
 breakpoint at @var{addr}.
 
-This packet has been replaced by the @samp{Z} and @samp{z} packets
+Don't use this packet.  Use the @samp{Z} and @samp{z} packets instead
 (@pxref{insert breakpoint or watchpoint packet}).
 
-@item @code{c}@var{addr} --- continue
-@cindex @code{c} packet
-
-@var{addr} is address to resume.  If @var{addr} is omitted, resume at
-current address.
+@item c @var{addr}
+@cindex @samp{c} packet
+Continue.  @var{addr} is address to resume.  If @var{addr} is omitted,
+resume at current address.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item @code{C}@var{sig}@code{;}@var{addr} --- continue with signal
-@cindex @code{C} packet
-
+@item C @var{sig};@var{addr}
+@cindex @samp{C} packet
 Continue with signal @var{sig} (hex signal number).  If
-@code{;}@var{addr} is omitted, resume at same address.
+@samp{;@var{addr}} is omitted, resume at same address.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item @code{d} --- toggle debug @strong{(deprecated)}
-@cindex @code{d} packet
-
+@item d
+@cindex @samp{d} packet
 Toggle debug flag.
 
-@item @code{D} --- detach
-@cindex @code{D} packet
+Don't use this packet; instead, define a general set packet
+(@pxref{General Query Packets}).
 
+@item D
+@cindex @samp{D} packet
 Detach @value{GDBN} from the remote system.  Sent to the remote target
 before @value{GDBN} disconnects via the @code{detach} command.
 
@@ -22225,21 +22235,19 @@ Reply:
 @table @samp
 @item OK
 for success
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
-@item @code{F}@var{RC}@code{,}@var{EE}@code{,}@var{CF}@code{;}@var{XX} --- Reply to target's F packet.
-@cindex @code{F} packet
+@item F @var{RC},@var{EE},@var{CF};@var{XX}
+@cindex @samp{F} packet
+A reply from @value{GDBN} to an @samp{F} packet sent by the target.
+This is part of the File-I/O protocol extension.  @xref{File-I/O
+remote protocol extension}, for the specification.
 
-This packet is send by @value{GDBN} as reply to a @code{F} request packet
-sent by the target.  This is part of the File-I/O protocol extension.
-@xref{File-I/O remote protocol extension}, for the specification.
-
-@item @code{g} --- read registers
+@item g
 @anchor{read registers packet}
-@cindex @code{g} packet
-
+@cindex @samp{g} packet
 Read general registers.
 
 Reply:
@@ -22247,42 +22255,40 @@ Reply:
 @item @var{XX@dots{}}
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
-each register and their position within the @samp{g} @var{packet} are
+each register and their position within the @samp{g} packet are
 determined by the @value{GDBN} internal macros
-@var{DEPRECATED_REGISTER_RAW_SIZE} and @var{REGISTER_NAME} macros.  The
-specification of several standard @code{g} packets is specified below.
-@item E@var{NN}
+@code{DEPRECATED_REGISTER_RAW_SIZE} and @code{REGISTER_NAME} macros.  The
+specification of several standard @samp{g} packets is specified below.
+@item E @var{NN}
 for an error.
 @end table
 
-@item @code{G}@var{XX@dots{}} --- write regs
-@cindex @code{G} packet
-
-@xref{read registers packet}, for a description of the @var{XX@dots{}}
-data.
+@item G @var{XX@dots{}}
+@cindex @samp{G} packet
+Write general registers.  @xref{read registers packet}, for a
+description of the @var{XX@dots{}} data.
 
 Reply:
 @table @samp
 @item OK
 for success
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
-@item @code{H}@var{c}@var{t@dots{}} --- set thread
-@cindex @code{H} packet
-
+@item H @var{c} @var{t}
+@cindex @samp{H} packet
 Set thread for subsequent operations (@samp{m}, @samp{M}, @samp{g},
 @samp{G}, et.al.).  @var{c} depends on the operation to be performed: it
 should be @samp{c} for step and continue operations, @samp{g} for other
-operations.  The thread designator @var{t@dots{}} may be -1, meaning all
-the threads, a thread number, or zero which means pick any thread.
+operations.  The thread designator @var{t} may be @samp{-1}, meaning all
+the threads, a thread number, or @samp{0} which means pick any thread.
 
 Reply:
 @table @samp
 @item OK
 for success
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
@@ -22301,29 +22307,28 @@ for an error
 @c                selected, sets the registers of the register block of
 @c                that thread; otherwise sets current registers.
 
-@item @code{i}@var{addr}@code{,}@var{nnn} --- cycle step @strong{(draft)}
+@item i @r{[}@var{addr}@r{[},@var{nnn}@r{]]}
 @anchor{cycle step packet}
-@cindex @code{i} packet
-
-Step the remote target by a single clock cycle.  If @code{,}@var{nnn} is
+@cindex @samp{i} packet
+Step the remote target by a single clock cycle.  If @samp{,@var{nnn}} is
 present, cycle step @var{nnn} cycles.  If @var{addr} is present, cycle
 step starting at that address.
 
-@item @code{I} --- signal then cycle step @strong{(reserved)}
-@cindex @code{I} packet
+@item I
+@cindex @samp{I} packet
+Signal, then cycle step.  @xref{step with signal packet}.  @xref{cycle
+step packet}.
 
-@xref{step with signal packet}.  @xref{cycle step packet}.
-
-@item @code{k} --- kill request
-@cindex @code{k} packet
+@item k
+@cindex @samp{k} packet
+Kill request.
 
 FIXME: @emph{There is no description of how to operate when a specific
 thread context has been selected (i.e.@: does 'k' kill only that
 thread?)}.
 
-@item @code{m}@var{addr}@code{,}@var{length} --- read memory
-@cindex @code{m} packet
-
+@item m @var{addr},@var{length}
+@cindex @samp{m} packet
 Read @var{length} bytes of memory starting at address @var{addr}.
 Note that @var{addr} may not be aligned to any particular boundary.
 
@@ -22339,30 +22344,31 @@ suitable for accessing memory-mapped I/O devices.
 Reply:
 @table @samp
 @item @var{XX@dots{}}
-@var{XX@dots{}} is mem contents. Can be fewer bytes than requested if able
-to read only part of the data.
-@item E@var{NN}
+Memory contents; each byte is transmitted as a two-digit hexidecimal
+number.  The reply may contain fewer bytes than requested if the
+server was able to read only part of the region of memory.
+@item E @var{NN}
 @var{NN} is errno
 @end table
 
-@item @code{M}@var{addr},@var{length}@code{:}@var{XX@dots{}} --- write mem
-@cindex @code{M} packet
-
+@item M @var{addr},@var{length}:@var{XX@dots{}}
+@cindex @samp{M} packet
 Write @var{length} bytes of memory starting at address @var{addr}.
-@var{XX@dots{}} is the data.
+@var{XX@dots{}} is the data; each byte is transmitted as a two-digit
+hexidecimal number.
 
 Reply:
 @table @samp
 @item OK
 for success
-@item E@var{NN}
+@item E @var{NN}
 for an error (this includes the case where only part of the data was
 written).
 @end table
 
-@item @code{p}@var{hex number of register} --- read register packet
-@cindex @code{p} packet
-
+@item p @var{n}
+@cindex @samp{p} packet
+Read the value of register @var{n}; @var{n} is in hex.
 @xref{read registers packet}, for a description of how the returned
 register value is encoded.
 
@@ -22370,178 +22376,168 @@ Reply:
 @table @samp
 @item @var{XX@dots{}}
 the register's value
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @item
 Indicating an unrecognized @var{query}.
 @end table
 
-@item @code{P}@var{n@dots{}}@code{=}@var{r@dots{}} --- write register
+@item P @var{n@dots{}}=@var{r@dots{}}
 @anchor{write register packet}
-@cindex @code{P} packet
-
-Write register @var{n@dots{}} with value @var{r@dots{}}, which contains two hex
+@cindex @samp{P} packet
+Write register @var{n@dots{}} with value @var{r@dots{}}.  The register
+number @var{n} is in hexidecimal, and @var{r@dots{}} contains two hex
 digits for each byte in the register (target byte order).
 
 Reply:
 @table @samp
 @item OK
 for success
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
-@item @code{q}@var{query} --- general query
+@item q @var{query}
 @anchor{general query packet}
-@cindex @code{q} packet
-
-Request info about @var{query}.  In general @value{GDBN} queries have a
-leading upper case letter.  Custom vendor queries should use a company
-prefix (in lower case) ex: @samp{qfsf.var}.  @var{query} may optionally
-be followed by a @samp{,} or @samp{;} separated list.  Stubs must ensure
-that they match the full @var{query} name.
+@cindex @samp{q} packet
+General query.  Request info about @var{query}.  In general
+@value{GDBN} queries have a leading upper case letter.  Custom vendor
+queries should use a company prefix (in lower case) ex:
+@samp{qfsf.var}.  @var{query} may optionally be followed by a @samp{,}
+or @samp{;} separated list.  Stubs must ensure that they match the
+full @var{query} name.
 
 Reply:
 @table @samp
 @item @var{XX@dots{}}
-Hex encoded data from query.  The reply can not be empty.
-@item E@var{NN}
+Hex encoded data from query.  The reply must not be empty.
+@item E @var{NN}
 error reply
 @item
 Indicating an unrecognized @var{query}.
 @end table
 
-@item @code{Q}@var{var}@code{=}@var{val} --- general set
-@cindex @code{Q} packet
-
-Set value of @var{var} to @var{val}.
-
+@item Q @var{var}=@var{val}
+@cindex @samp{Q} packet
+General set.  Set value of @var{var} to @var{val}.
 @xref{general query packet}, for a discussion of naming conventions.
 
-@item @code{r} --- reset @strong{(deprecated)}
-@cindex @code{r} packet
-
+@item r
+@cindex @samp{r} packet
 Reset the entire system.
 
-@item @code{R}@var{XX} --- remote restart
-@cindex @code{R} packet
+Don't use this packet; use the @samp{R} packet instead.
 
+@item R @var{XX}
+@cindex @samp{R} packet
 Restart the program being debugged.  @var{XX}, while needed, is ignored.
 This packet is only available in extended mode.
 
-Reply:
-@table @samp
-@item @emph{no reply}
 The @samp{R} packet has no reply.
-@end table
 
-@item @code{s}@var{addr} --- step
-@cindex @code{s} packet
-
-@var{addr} is address to resume.  If @var{addr} is omitted, resume at
-same address.
+@item s @var{addr}
+@cindex @samp{s} packet
+Single step.  @var{addr} is the address at which to resume.  If
+@var{addr} is omitted, resume at same address.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item @code{S}@var{sig}@code{;}@var{addr} --- step with signal
+@item S @var{sig};@var{addr}
 @anchor{step with signal packet}
-@cindex @code{S} packet
-
-Like @samp{C} but step not continue.
+@cindex @samp{S} packet
+Step with signal.  This is analogous to the @samp{C} packet, but
+requests a single-step, rather than a normal resumption of execution.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item @code{t}@var{addr}@code{:}@var{PP}@code{,}@var{MM} --- search
-@cindex @code{t} packet
-
+@item t @var{addr}:@var{PP},@var{MM}
+@cindex @samp{t} packet
 Search backwards starting at address @var{addr} for a match with pattern
 @var{PP} and mask @var{MM}.  @var{PP} and @var{MM} are 4 bytes.
 @var{addr} must be at least 3 digits.
 
-@item @code{T}@var{XX} --- thread alive
-@cindex @code{T} packet
-
+@item T @var{XX}
+@cindex @samp{T} packet
 Find out if the thread XX is alive.
 
 Reply:
 @table @samp
 @item OK
 thread is still alive
-@item E@var{NN}
+@item E @var{NN}
 thread is dead
 @end table
 
-@item @code{v} --- verbose packet prefix
+@item v
+Packets starting with @samp{v} are identified by a multi-letter name,
+up to the first @samp{;} or @samp{?} (or the end of the packet).
 
-Packets starting with @code{v} are identified by a multi-letter name,
-up to the first @code{;} or @code{?} (or the end of the packet).
-
-@item @code{vCont}[;@var{action}[@code{:}@var{tid}]]... --- extended resume
-@cindex @code{vCont} packet
-
-Resume the inferior.  Different actions may be specified for each thread.
+@item vCont@r{[};@var{action}@r{[}:@var{tid}@r{]]}@dots{}
+@cindex @samp{vCont} packet
+Resume the inferior, specifying different actions for each thread.
 If an action is specified with no @var{tid}, then it is applied to any
 threads that don't have a specific action specified; if no default action is
 specified then other threads should remain stopped.  Specifying multiple
 default actions is an error; specifying no actions is also an error.
 Thread IDs are specified in hexadecimal.  Currently supported actions are:
 
-@table @code
+@table @samp
 @item c
 Continue.
-@item C@var{sig}
+@item C @var{sig}
 Continue with signal @var{sig}.  @var{sig} should be two hex digits.
 @item s
 Step.
-@item S@var{sig}
+@item S @var{sig}
 Step with signal @var{sig}.  @var{sig} should be two hex digits.
 @end table
 
 The optional @var{addr} argument normally associated with these packets is
-not supported in @code{vCont}.
+not supported in @samp{vCont}.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item @code{vCont?} --- extended resume query
-@cindex @code{vCont?} packet
-
-Query support for the @code{vCont} packet.
+@item vCont?
+@cindex @samp{vCont?} packet
+Request a list of actions supporetd by the @samp{vCont} packet.
 
 Reply:
 @table @samp
-@item @code{vCont}[;@var{action}]...
-The @code{vCont} packet is supported.  Each @var{action} is a supported
-command in the @code{vCont} packet.
+@item vCont@r{[};@var{action}@dots{}@r{]}
+The @samp{vCont} packet is supported.  Each @var{action} is a supported
+command in the @samp{vCont} packet.
 @item
-The @code{vCont} packet is not supported.
+The @samp{vCont} packet is not supported.
 @end table
 
-@item @code{X}@var{addr}@code{,}@var{length}@var{:}@var{XX@dots{}} --- write mem (binary)
-@cindex @code{X} packet
-
-@var{addr} is address, @var{length} is number of bytes, @var{XX@dots{}}
-is binary data.  The characters @code{$}, @code{#}, and @code{0x7d} are
-escaped using @code{0x7d}, and then XORed with @code{0x20}.
-For example, @code{0x7d} would be transmitted as @code{0x7d 0x5d}.
+@item X @var{addr},@var{length}:@var{XX@dots{}}
+@cindex @samp{X} packet
+Write data to memory, where the data is transmitted in binary.
+@var{addr} is address, @var{length} is number of bytes,
+@samp{@var{XX}@dots{}} is binary data.  The bytes @code{0x23}
+(@sc{ascii} @samp{#}), @code{0x24} (@sc{ascii} @samp{$}), and
+@code{0x7d} (@sc{ascii} @samp{@}}) are escaped using @code{0x7d}
+(@sc{ascii} @samp{@}}), and then XORed with @code{0x20}.  For example,
+the byte @code{0x7d} would be transmitted as the two bytes @code{0x7d
+0x5d}.
 
 Reply:
 @table @samp
 @item OK
 for success
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
-@item @code{z}@var{type}@code{,}@var{addr}@code{,}@var{length} --- remove breakpoint or watchpoint @strong{(draft)}
-@itemx @code{Z}@var{type}@code{,}@var{addr}@code{,}@var{length} --- insert breakpoint or watchpoint @strong{(draft)}
+@item z @var{type},@var{addr},@var{length}
+@itemx Z @var{type},@var{addr},@var{length}
 @anchor{insert breakpoint or watchpoint packet}
-@cindex @code{z} packet
-@cindex @code{Z} packets
-
-Insert (@code{Z}) or remove (@code{z}) a @var{type} breakpoint or
+@cindex @samp{z} packet
+@cindex @samp{Z} packets
+Insert (@samp{Z}) or remove (@samp{z}) a @var{type} breakpoint or
 watchpoint starting at address @var{address} and covering the next
 @var{length} bytes.
 
@@ -22551,21 +22547,20 @@ separately.
 @emph{Implementation notes: A remote target shall return an empty string
 for an unrecognized breakpoint or watchpoint packet @var{type}.  A
 remote target shall support either both or neither of a given
-@code{Z}@var{type}@dots{} and @code{z}@var{type}@dots{} packet pair.  To
+@samp{Z@var{type}@dots{}} and @samp{z@var{type}@dots{}} packet pair.  To
 avoid potential problems with duplicate packets, the operations should
 be implemented in an idempotent way.}
 
-@item @code{z}@code{0}@code{,}@var{addr}@code{,}@var{length} --- remove memory breakpoint @strong{(draft)}
-@item @code{Z}@code{0}@code{,}@var{addr}@code{,}@var{length} --- insert memory breakpoint @strong{(draft)}
-@cindex @code{z0} packet
-@cindex @code{Z0} packet
-
-Insert (@code{Z0}) or remove (@code{z0}) a memory breakpoint at address
-@code{addr} of size @code{length}.
+@item z0,@var{addr},@var{length}
+@itemx Z0,@var{addr},@var{length}
+@cindex @samp{z0} packet
+@cindex @samp{Z0} packet
+Insert (@samp{Z0}) or remove (@samp{z0}) a memory breakpoint at address
+@var{addr} of size @var{length}.
 
 A memory breakpoint is implemented by replacing the instruction at
 @var{addr} with a software breakpoint or trap instruction.  The
-@code{length} is used by targets that indicates the size of the
+@var{length} is used by targets that indicates the size of the
 breakpoint (in bytes) that should be inserted (e.g., the @sc{arm} and
 @sc{mips} can insert either a 2 or 4 byte breakpoint).
 
@@ -22580,17 +22575,16 @@ Reply:
 success
 @item
 not supported
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
-@item @code{z}@code{1}@code{,}@var{addr}@code{,}@var{length} --- remove hardware breakpoint @strong{(draft)}
-@item @code{Z}@code{1}@code{,}@var{addr}@code{,}@var{length} --- insert hardware breakpoint @strong{(draft)}
-@cindex @code{z1} packet
-@cindex @code{Z1} packet
-
-Insert (@code{Z1}) or remove (@code{z1}) a hardware breakpoint at
-address @code{addr} of size @code{length}.
+@item z1,@var{addr},@var{length}
+@itemx Z1,@var{addr},@var{length}
+@cindex @samp{z1} packet
+@cindex @samp{Z1} packet
+Insert (@samp{Z1}) or remove (@samp{z1}) a hardware breakpoint at
+address @var{addr} of size @var{length}.
 
 A hardware breakpoint is implemented using a mechanism that is not
 dependant on being able to modify the target's memory.
@@ -22604,16 +22598,15 @@ Reply:
 success
 @item
 not supported
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
-@item @code{z}@code{2}@code{,}@var{addr}@code{,}@var{length} --- remove write watchpoint @strong{(draft)}
-@item @code{Z}@code{2}@code{,}@var{addr}@code{,}@var{length} --- insert write watchpoint @strong{(draft)}
-@cindex @code{z2} packet
-@cindex @code{Z2} packet
-
-Insert (@code{Z2}) or remove (@code{z2}) a write watchpoint.
+@item z2,@var{addr},@var{length}
+@itemx Z2,@var{addr},@var{length}
+@cindex @samp{z2} packet
+@cindex @samp{Z2} packet
+Insert (@samp{Z2}) or remove (@samp{z2}) a write watchpoint.
 
 Reply:
 @table @samp
@@ -22621,16 +22614,15 @@ Reply:
 success
 @item
 not supported
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
-@item @code{z}@code{3}@code{,}@var{addr}@code{,}@var{length} --- remove read watchpoint @strong{(draft)}
-@item @code{Z}@code{3}@code{,}@var{addr}@code{,}@var{length} --- insert read watchpoint @strong{(draft)}
-@cindex @code{z3} packet
-@cindex @code{Z3} packet
-
-Insert (@code{Z3}) or remove (@code{z3}) a read watchpoint.
+@item z3,@var{addr},@var{length}
+@itemx Z3,@var{addr},@var{length}
+@cindex @samp{z3} packet
+@cindex @samp{Z3} packet
+Insert (@samp{Z3}) or remove (@samp{z3}) a read watchpoint.
 
 Reply:
 @table @samp
@@ -22638,16 +22630,15 @@ Reply:
 success
 @item
 not supported
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
-@item @code{z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- remove access watchpoint @strong{(draft)}
-@item @code{Z}@code{4}@code{,}@var{addr}@code{,}@var{length} --- insert access watchpoint @strong{(draft)}
-@cindex @code{z4} packet
-@cindex @code{Z4} packet
-
-Insert (@code{Z4}) or remove (@code{z4}) an access watchpoint.
+@item z4,@var{addr},@var{length}
+@itemx Z4,@var{addr},@var{length}
+@cindex @samp{z4} packet
+@cindex @samp{Z4} packet
+Insert (@samp{Z4}) or remove (@samp{z4}) an access watchpoint.
 
 Reply:
 @table @samp
@@ -22655,7 +22646,7 @@ Reply:
 success
 @item
 not supported
-@item E@var{NN}
+@item E @var{NN}
 for an error
 @end table
 
@@ -22668,60 +22659,75 @@ for an error
 The @samp{C}, @samp{c}, @samp{S}, @samp{s} and @samp{?} packets can
 receive any of the below as a reply.  In the case of the @samp{C},
 @samp{c}, @samp{S} and @samp{s} packets, that reply is only returned
-when the target halts.  In the below the exact meaning of @samp{signal
-number} is poorly defined.  In general one of the UNIX signal numbering
-conventions is used.
+when the target halts.  In the below the exact meaning of @dfn{signal
+number} is poorly defined.  In general one of the UNIX signal
+numbering conventions is used.
+
+As in the description of request packets, we include spaces in the
+reply templates for clarity; these are not part of the reply packet's
+syntax.  No @value{GDBN} stop reply packet uses spaces to separate its
+components.
 
 @table @samp
 
-@item S@var{AA}
-@var{AA} is the signal number
+@item S @var{AA}
+The program received signal number @var{AA} (a two-digit hexidecimal
+number).
 
-@item @code{T}@var{AA}@var{n...}@code{:}@var{r...}@code{;}@var{n...}@code{:}@var{r...}@code{;}@var{n...}@code{:}@var{r...}@code{;}
-@cindex @code{T} packet reply
+@item T @var{AA} @var{n1}:@var{r1};@var{n2}:@var{r2};@dots{}
+@cindex @samp{T} packet reply
+The program received signal number @var{AA} (a two-digit hexidecimal
+number).  Single-step and breakpoint traps are reported this way.  The
+@samp{@var{n}:@var{r}} pairs give the values of important registers or
+other information:
+@enumerate
+@item
+If @var{n} is a hexidecimal number, it is a register number, and the
+corresponding @var{r} gives that register's value.  @var{r} is a
+series of bytes in target byte order, with each byte given by a
+two-digit hex number.
+@item
+If @var{n} is @samp{thread}, then @var{r} is the thread process ID, in
+hex.
+@item
+If @var{n} is @samp{watch}, @samp{rwatch}, or @samp{awatch}, then the
+packet indicates a watchpoint hit, and @var{r} is the data address, in
+hex.
+@item
+Otherwise, @value{GDBN} should ignore this @samp{@var{n}:@var{r}} pair
+and go on to the next; this allows us to extend the protocol in the
+future.
+@end enumerate
 
-@var{AA} = two hex digit signal number; @var{n...} = register number
-(hex), @var{r...}  = target byte ordered register contents, size defined
-by @code{DEPRECATED_REGISTER_RAW_SIZE}; @var{n...} = @samp{thread},
-@var{r...} = thread process ID, this is a hex integer; @var{n...} =
-(@samp{watch} | @samp{rwatch} | @samp{awatch}, @var{r...} = data
-address, this is a hex integer; @var{n...} = other string not starting
-with valid hex digit.  @value{GDBN} should ignore this @var{n...},
-@var{r...} pair and go on to the next.  This way we can extend the
-protocol.
-
-@item W@var{AA}
-
+@item W @var{AA}
 The process exited, and @var{AA} is the exit status.  This is only
 applicable to certain targets.
 
-@item X@var{AA}
-
+@item X @var{AA}
 The process terminated with signal @var{AA}.
 
-@item O@var{XX@dots{}}
+@item O @var{XX}@dots{}
+@samp{@var{XX}@dots{}} is hex encoding of @sc{ascii} data, to be
+written as the program's console output.  This can happen at any time
+while the program is running and the debugger should continue to wait
+for @samp{W}, @samp{T}, etc.
 
-@var{XX@dots{}} is hex encoding of @sc{ascii} data.  This can happen at
-any time while the program is running and the debugger should continue
-to wait for @samp{W}, @samp{T}, etc.
-
-@item F@var{call-id}@code{,}@var{parameter@dots{}}
-
+@item F @var{call-id},@var{parameter}@dots{}
 @var{call-id} is the identifier which says which host system call should
 be called.  This is just the name of the function.  Translation into the
 correct system call is only applicable as it's defined in @value{GDBN}.
 @xref{File-I/O remote protocol extension}, for a list of implemented
 system calls.
 
-@var{parameter@dots{}} is a list of parameters as defined for this very
-system call.
+@samp{@var{parameter}@dots{}} is a list of parameters as defined for
+this very system call.
 
-The target replies with this packet when it expects @value{GDBN} to call
-a host system call on behalf of the target.  @value{GDBN} replies with
-an appropriate @code{F} packet and keeps up waiting for the next reply
-packet from the target.  The latest @samp{C}, @samp{c}, @samp{S} or
-@samp{s} action is expected to be continued.
-@xref{File-I/O remote protocol extension}, for more details.
+The target replies with this packet when it expects @value{GDBN} to
+call a host system call on behalf of the target.  @value{GDBN} replies
+with an appropriate @samp{F} packet and keeps up waiting for the next
+reply packet from the target.  The latest @samp{C}, @samp{c}, @samp{S}
+or @samp{s} action is expected to be continued.  @xref{File-I/O remote
+protocol extension}, for more details.
 
 @end table
 
@@ -22731,65 +22737,72 @@ packet from the target.  The latest @samp{C}, @samp{c}, @samp{S} or
 
 The following set and query packets have already been defined.
 
-@table @r
+Like the descriptions of the other packets, each description here
+has a template showing the packet's overall syntax, followed by an
+explanation of the packet's meaning.  We include spaces in some of the
+templates for clarity; these are not part of the packet's syntax.  No
+@value{GDBN} packet uses spaces to separate its components.
 
-@item @code{q}@code{C} --- current thread
+@table @samp
+
+@item qC
 @cindex current thread, remote request
-@cindex @code{qC} packet
+@cindex @samp{qC} packet
 Return the current thread id.
 
 Reply:
 @table @samp
-@item @code{QC}@var{pid}
+@item QC @var{pid}
 Where @var{pid} is an unsigned hexidecimal process id.
-@item *
+@item @r{(anything else)}
 Any other reply implies the old pid.
 @end table
 
-@item @code{q}@code{CRC:}@var{addr}@code{,}@var{length} --- compute CRC of memory block
+@item qCRC:@var{addr},@var{length}
 @cindex CRC of memory block, remote request
-@cindex @code{qCRC} packet
+@cindex @samp{qCRC} packet
+Compute the CRC checksum of a block of memory.
 Reply:
 @table @samp
-@item @code{E}@var{NN}
+@item E @var{NN}
 An error (such as memory fault)
-@item @code{C}@var{CRC32}
-A 32 bit cyclic redundancy check of the specified memory region.
+@item C @var{crc32}
+The specified memory region's checksum is @var{crc32}.
 @end table
 
-@item @code{q}@code{fThreadInfo} -- all thread ids
+@item qfThreadInfo
+@itemx qsThreadInfo
 @cindex list active threads, remote request
-@cindex @code{qfThreadInfo} packet
-@code{q}@code{sThreadInfo}
-
-Obtain a list of active thread ids from the target (OS).  Since there
+@cindex @samp{qfThreadInfo} packet
+@cindex @samp{qsThreadInfo} packet
+Obtain a list of all active thread ids from the target (OS).  Since there
 may be too many active threads to fit into one reply packet, this query
 works iteratively: it may require more than one query/reply sequence to
 obtain the entire list of threads.  The first query of the sequence will
-be the @code{qf}@code{ThreadInfo} query; subsequent queries in the
-sequence will be the @code{qs}@code{ThreadInfo} query.
+be the @samp{qfThreadInfo} query; subsequent queries in the
+sequence will be the @samp{qsThreadInfo} query.
 
-NOTE: replaces the @code{qL} query (see below).
+NOTE: This packet replaces the @samp{qL} query (see below).
 
 Reply:
 @table @samp
-@item @code{m}@var{id}
+@item m @var{id}
 A single thread id
-@item @code{m}@var{id},@var{id}@dots{}
+@item m @var{id},@var{id}@dots{}
 a comma-separated list of thread ids
-@item @code{l}
-(lower case 'el') denotes end of list.
+@item l
+(lower case letter @samp{L}) denotes end of list.
 @end table
 
 In response to each query, the target will reply with a list of one or
 more thread ids, in big-endian unsigned hex, separated by commas.
 @value{GDBN} will respond to each reply with a request for more thread
-ids (using the @code{qs} form of the query), until the target responds
-with @code{l} (lower-case el, for @code{'last'}).
+ids (using the @samp{qs} form of the query), until the target responds
+with @samp{l} (lower-case el, for @dfn{last}).
 
-@item @code{qGetTLSAddr}:@var{thread-id},@var{offset},@var{lm} --- get thread local storage address
+@item qGetTLSAddr:@var{thread-id},@var{offset},@var{lm}
 @cindex get thread-local storage address, remote request
-@cindex @code{qGetTLSAddr} packet
+@cindex @samp{qGetTLSAddr} packet
 Fetch the address associated with thread local storage specified
 by @var{thread-id}, @var{offset}, and @var{lm}.
 
@@ -22808,24 +22821,23 @@ Other operating environments may choose to represent the load module
 differently, so the precise meaning of this parameter will vary.
 
 Reply:
-@table @asis
-@item @var{XX@dots{}}
+@table @samp
+@item @var{XX}@dots{}
 Hex encoded (big endian) bytes representing the address of the thread
 local storage requested.
 
-@item @code{E}@var{nn} (where @var{nn} are hex digits)
-An error occurred.
+@item E @var{nn}
+An error occurred.  @var{nn} are hex digits.
 
-@item @code{""} (empty)
-An empty reply indicates that @code{qGetTLSAddr} is not supported by the stub.
+@item
+An empty reply indicates that @samp{qGetTLSAddr} is not supported by the stub.
 @end table
 
 Use of this request packet is controlled by the @code{set remote
 get-thread-local-storage-address} command (@pxref{Remote
 configuration, set remote get-thread-local-storage-address}).
 
-@item @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread} --- query @var{LIST} or @var{threadLIST} @strong{(deprecated)}
-
+@item qL @var{startflag} @var{threadcount} @var{nextthread}
 Obtain thread information from RTOS.  Where: @var{startflag} (one hex
 digit) is one to indicate the first query and zero to indicate a
 subsequent query; @var{threadcount} (two hex digits) is the maximum
@@ -22833,23 +22845,22 @@ number of threads the response packet can contain; and @var{nextthread}
 (eight hex digits), for subsequent queries (@var{startflag} is zero), is
 returned in the response as @var{argthread}.
 
-NOTE: this query is replaced by the @code{q}@code{fThreadInfo} query
-(see above).
+Don't use this packet; use the @samp{qfThreadInfo} query instead (see above).
 
 Reply:
 @table @samp
-@item @code{q}@code{M}@var{count}@var{done}@var{argthread}@var{thread@dots{}}
+@item qM @var{count} @var{done} @var{argthread} @var{thread}@dots{}
 Where: @var{count} (two hex digits) is the number of threads being
 returned; @var{done} (one hex digit) is zero to indicate more threads
 and one indicates no further threads; @var{argthreadid} (eight hex
-digits) is @var{nextthread} from the request packet; @var{thread@dots{}}
+digits) is @var{nextthread} from the request packet; @var{thread}@dots{}
 is a sequence of thread IDs from the target.  @var{threadid} (eight hex
 digits).  See @code{remote.c:parse_threadlist_response()}.
 @end table
 
-@item @code{q}@code{Offsets} --- query sect offs
+@item qOffsets
 @cindex section offsets, remote request
-@cindex @code{qOffsets} packet
+@cindex @samp{qOffsets} packet
 Get section offsets that the target used when re-locating the downloaded
 image.  @emph{Note: while a @code{Bss} offset is included in the
 response, @value{GDBN} ignores this and instead applies the @code{Data}
@@ -22857,110 +22868,104 @@ offset to the @code{Bss} section.}
 
 Reply:
 @table @samp
-@item @code{Text=}@var{xxx}@code{;Data=}@var{yyy}@code{;Bss=}@var{zzz}
+@item Text=@var{xxx};Data=@var{yyy};Bss=@var{zzz}
 @end table
 
-@item @code{q}@code{P}@var{mode}@var{threadid} --- thread info request
+@item qP @var{mode} @var{threadid}
 @cindex thread information, remote request
-@cindex @code{qP} packet
+@cindex @samp{qP} packet
 Returns information on @var{threadid}.  Where: @var{mode} is a hex
 encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
 
-Reply:
-@table @samp
-@item *
-@end table
+Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
 
-See @code{remote.c:remote_unpack_thread_info_response()}.
-
-@item @code{qPart}:@var{object}:@code{read}:@var{annex}:@var{offset},@var{length} --- read special data
+@item qPart:@var{object}:read:@var{annex}:@var{offset},@var{length}
 @cindex read special object, remote request
-@cindex @code{qPart} packet
+@cindex @samp{qPart} packet
 Read uninterpreted bytes from the target's special data area
-identified by the keyword @code{object}.
-Request @var{length} bytes starting at @var{offset} bytes into the data.
-The content and encoding of @var{annex} is specific to the object;
-it can supply additional details about what data to access.
+identified by the keyword @var{object}.  Request @var{length} bytes
+starting at @var{offset} bytes into the data.  The content and
+encoding of @var{annex} is specific to the object; it can supply
+additional details about what data to access.
 
-Here are the specific requests of this form defined so far.
-All @samp{@code{qPart}:@var{object}:@code{read}:@dots{}}
-requests use the same reply formats, listed below.
+Here are the specific requests of this form defined so far.  All
+@samp{qPart:@var{object}:read:@dots{}} requests use the same reply
+formats, listed below.
 
-@table @asis
-@item @code{qPart}:@code{auxv}:@code{read}::@var{offset},@var{length}
+@table @samp
+@item qPart:auxv:read::@var{offset},@var{length}
 Access the target's @dfn{auxiliary vector}.  @xref{OS Information,
 auxiliary vector}, and see @ref{Remote configuration,
 read-aux-vector-packet}.  Note @var{annex} must be empty.
 @end table
 
 Reply:
-@table @asis
-@item @code{OK}
+@table @samp
+@item OK
 The @var{offset} in the request is at the end of the data.
 There is no more data to be read.
 
-@item @var{XX@dots{}}
+@item @var{XX}@dots{}
 Hex encoded data bytes read.
 This may be fewer bytes than the @var{length} in the request.
 
-@item @code{E00}
+@item E00
 The request was malformed, or @var{annex} was invalid.
 
-@item @code{E}@var{nn}
+@item E @var{nn}
 The offset was invalid, or there was an error encountered reading the data.
 @var{nn} is a hex-encoded @code{errno} value.
 
-@item @code{""} (empty)
+@item
 An empty reply indicates the @var{object} or @var{annex} string was not
 recognized by the stub.
 @end table
 
-@item @code{qPart}:@var{object}:@code{write}:@var{annex}:@var{offset}:@var{data@dots{}}
+@item qPart:@var{object}:write:@var{annex}:@var{offset}:@var{data}@dots{}
 @cindex write data into object, remote request
 Write uninterpreted bytes into the target's special data area
-identified by the keyword @code{object},
-starting at @var{offset} bytes into the data.
-@var{data@dots{}} is the hex-encoded data to be written.
-The content and encoding of @var{annex} is specific to the object;
-it can supply additional details about what data to access.
+identified by the keyword @var{object}, starting at @var{offset} bytes
+into the data.  @samp{@var{data}@dots{}} is the hex-encoded data to be
+written.  The content and encoding of @var{annex} is specific to the
+object; it can supply additional details about what data to access.
 
 No requests of this form are presently in use.  This specification
 serves as a placeholder to document the common format that new
 specific request specifications ought to use.
 
 Reply:
-@table @asis
+@table @samp
 @item @var{nn}
 @var{nn} (hex encoded) is the number of bytes written.
 This may be fewer bytes than supplied in the request.
 
-@item @code{E00}
+@item E00
 The request was malformed, or @var{annex} was invalid.
 
-@item @code{E}@var{nn}
+@item E @var{nn}
 The offset was invalid, or there was an error encountered writing the data.
 @var{nn} is a hex-encoded @code{errno} value.
 
-@item @code{""} (empty)
+@item
 An empty reply indicates the @var{object} or @var{annex} string was not
 recognized by the stub, or that the object does not support writing.
 @end table
 
-@item @code{qPart}:@var{object}:@var{operation}:@dots{}
+@item qPart:@var{object}:@var{operation}:@dots{}
 Requests of this form may be added in the future.  When a stub does
 not recognize the @var{object} keyword, or its support for
-@var{object} does not recognize the @var{operation} keyword,
-the stub must respond with an empty packet.
+@var{object} does not recognize the @var{operation} keyword, the stub
+must respond with an empty packet.
 
-@item @code{q}@code{Rcmd,}@var{command} --- remote command
+@item qRcmd,@var{command}
 @cindex execute remote command, remote request
-@cindex @code{qRcmd} packet
+@cindex @samp{qRcmd} packet
 @var{command} (hex encoded) is passed to the local interpreter for
-execution.  Invalid commands should be reported using the output string.
-Before the final result packet, the target may also respond with a
-number of intermediate @code{O}@var{output} console output packets.
-@emph{Implementors should note that providing access to a stubs's
-interpreter may have security implications}.
+execution.  Invalid commands should be reported using the output
+string.  Before the final result packet, the target may also respond
+with a number of intermediate @samp{O@var{output}} console output
+packets.  @emph{Implementors should note that providing access to a
+stubs's interpreter may have security implications}.
 
 Reply:
 @table @samp
@@ -22968,30 +22973,30 @@ Reply:
 A command response with no output.
 @item @var{OUTPUT}
 A command response with the hex encoded output string @var{OUTPUT}.
-@item @code{E}@var{NN}
+@item E @var{NN}
 Indicate a badly formed request.
-@item @samp{}
-When @samp{q}@samp{Rcmd} is not recognized.
+@item
+An empty reply indicates that @samp{qRcmd} is not recognized.
 @end table
 
-@item @code{qSymbol::} --- symbol lookup
+@item qSymbol::
 @cindex symbol lookup, remote request
-@cindex @code{qSymbol} packet
+@cindex @samp{qSymbol} packet
 Notify the target that @value{GDBN} is prepared to serve symbol lookup
 requests.  Accept requests from the target for the values of symbols.
 
 Reply:
 @table @samp
-@item @code{OK}
+@item OK
 The target does not need to look up any (more) symbols.
-@item @code{qSymbol:}@var{sym_name}
+@item qSymbol:@var{sym_name}
 The target requests the value of symbol @var{sym_name} (hex encoded).
 @value{GDBN} may provide the value by using the
-@code{qSymbol:}@var{sym_value}:@var{sym_name} message, described below.
+@samp{qSymbol:@var{sym_value}:@var{sym_name}} message, described
+below.
 @end table
 
-@item @code{qSymbol:}@var{sym_value}:@var{sym_name} --- symbol value
-
+@item qSymbol:@var{sym_value}:@var{sym_name}
 Set the value of @var{sym_name} to @var{sym_value}.
 
 @var{sym_name} (hex encoded) is the name of a symbol whose value the
@@ -23003,31 +23008,31 @@ will be empty.
 
 Reply:
 @table @samp
-@item @code{OK}
+@item OK
 The target does not need to look up any (more) symbols.
-@item @code{qSymbol:}@var{sym_name}
+@item qSymbol:@var{sym_name}
 The target requests the value of a new symbol @var{sym_name} (hex
 encoded).  @value{GDBN} will continue to supply the values of symbols
 (if available), until the target ceases to request them.
 @end table
 
-@item @code{q}@code{ThreadExtraInfo}@code{,}@var{id} --- extra thread info
+@item qThreadExtraInfo,@var{id}
 @cindex thread attributes info, remote request
-@cindex @code{qThreadExtraInfo} packet
-Where @var{id} is a thread-id in big-endian hex.  Obtain a printable
-string description of a thread's attributes from the target OS.  This
-string may contain anything that the target OS thinks is interesting for
-@value{GDBN} to tell the user about the thread.  The string is displayed
-in @value{GDBN}'s @samp{info threads} display.  Some examples of
-possible thread extra info strings are ``Runnable'', or ``Blocked on
-Mutex''.
+@cindex @samp{qThreadExtraInfo} packet
+Obtain a printable string description of a thread's attributes from
+the target OS.  @var{id} is a thread-id in big-endian hex.  This
+string may contain anything that the target OS thinks is interesting
+for @value{GDBN} to tell the user about the thread.  The string is
+displayed in @value{GDBN}'s @code{info threads} display.  Some
+examples of possible thread extra info strings are @samp{Runnable}, or
+@samp{Blocked on Mutex}.
 
 Reply:
 @table @samp
-@item @var{XX@dots{}}
-Where @var{XX@dots{}} is a hex encoding of @sc{ascii} data, comprising
-the printable string containing the extra information about the thread's
-attributes.
+@item @var{XX}@dots{}
+Where @samp{@var{XX}@dots{}} is a hex encoding of @sc{ascii} data,
+comprising the printable string containing the extra information about
+the thread's attributes.
 @end table
 
 @end table
@@ -23035,7 +23040,7 @@ attributes.
 @node Register Packet Format
 @section Register Packet Format
 
-The following @samp{g}/@samp{G} packets have previously been defined.
+The following @code{g}/@code{G} packets have previously been defined.
 In the below, some thirty-two bit registers are transferred as
 sixty-four bits.  Those registers should be zero/sign extended (which?)
 to fill the space allocated.  Register bytes are transfered in target
