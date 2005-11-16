@@ -1,3 +1,7 @@
+2005-11-16  Richard Henderson  <rth@redhat.com>
+
+	* gas/all/weakref1.s: Use "=" instead of ".set" for equivalence.
+
 2005-11-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/arm/unwind.s, gas/arm/unwind.d, gas/arm/unwind_vxworks.d: Add
