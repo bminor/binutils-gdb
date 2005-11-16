@@ -3775,9 +3775,7 @@ for (dst = &_bstart; dst< &_bend; dst++)
 @kindex ALIGN(@var{section_align})
 @cindex forcing output section alignment
 @cindex output section alignment
-You can force an output section alignment by using ALIGN.  The value
-specified overrides any alignment given by input sections, whether
-larger or smaller.
+You can increase an output section's alignment by using ALIGN.
 
 @node Forced Input Alignment
 @subsubsection Forced Input Alignment

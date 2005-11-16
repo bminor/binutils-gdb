@@ -1720,6 +1720,10 @@ init_os (lang_output_section_statement_type *s, asection *isec)
   if (s->load_base != NULL)
     exp_init_os (s->load_base);
 
+  /* If supplied an alignment, set it.  */
+  if (s->section_alignment != -1)
+    s->bfd_section->alignment_power = s->section_alignment;
+
   if (isec)
     bfd_init_private_section_data (isec->owner, isec,
 				   output_bfd, s->bfd_section,
@@ -1940,10 +1944,6 @@ lang_add_section (lang_statement_list_type *ptr,
 
       if (section->alignment_power > output->bfd_section->alignment_power)
 	output->bfd_section->alignment_power = section->alignment_power;
-
-      /* If supplied an alignment, then force it.  */
-      if (output->section_alignment != -1)
-	output->bfd_section->alignment_power = output->section_alignment;
 
       if (bfd_get_arch (section->owner) == bfd_arch_tic54x
 	  && (section->flags & SEC_TIC54X_BLOCK) != 0)
@@ -4144,6 +4144,8 @@ lang_size_sections_1
 	      }
 	    else
 	      {
+		bfd_vma savedot;
+
 		if (os->addr_tree == NULL)
 		  {
 		    /* No address specified for this section, get one
@@ -4193,27 +4195,20 @@ lang_size_sections_1
 		      }
 
 		    newdot = os->region->current;
-
-		    if (os->section_alignment == -1)
-		      {
-			bfd_vma savedot = newdot;
-			newdot = align_power (newdot,
-					      os->bfd_section->alignment_power);
-
-			if (newdot != savedot
-			    && config.warn_section_align
-			    && expld.phase != lang_mark_phase_enum)
-			  einfo (_("%P: warning: changing start of section"
-				   " %s by %lu bytes\n"),
-				 os->name, (unsigned long) (newdot - savedot));
-		      }
 		  }
 
-		/* The section starts here.
-		   First, align to what the section needs.  */
+		/* Align to what the section needs.  */
+		savedot = newdot;
+		newdot = align_power (newdot,
+				      os->bfd_section->alignment_power);
 
-		if (os->section_alignment != -1)
-		  newdot = align_power (newdot, os->section_alignment);
+		if (newdot != savedot
+		    && (config.warn_section_align
+			|| os->addr_tree != NULL)
+		    && expld.phase != lang_mark_phase_enum)
+		  einfo (_("%P: warning: changing start of section"
+			   " %s by %lu bytes\n"),
+			 os->name, (unsigned long) (newdot - savedot));
 
 		bfd_set_section_vma (0, os->bfd_section, newdot);
 

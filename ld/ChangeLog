@@ -1,3 +1,12 @@
+2005-11-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld.texinfo (Forced Output Alignment): Specify that this is an
+	alignment increase, not an override.
+	* ldlang.c (init_os): Set output section alignment here..
+	(lang_add_section): ..rather than here.
+	(lang_size_sections_1): Consolidate alignment code.  Warn if section
+	alignment affects start address when explicit address given.
+
 2005-11-07  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure: Regenerate after modifying bfd/warning.m4.
