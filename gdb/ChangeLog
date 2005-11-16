@@ -1,3 +1,11 @@
+2005-11-16  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* NEWS (6.4): Mention $argc.
+	* cli/cli-script.c: Include gdb_assert.h.
+	(locate_arg): Detect $argc.
+	(insert_args): Substitute $argc.
+	* Makefile.in (cli-script.o): Add dependency on gdb_assert.h.
+
 2005-11-15  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* NEWS: Add --batch-silent, --return-child-result, and --eval-command

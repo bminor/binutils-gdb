@@ -15660,11 +15660,12 @@ A @dfn{user-defined command} is a sequence of @value{GDBN} commands to
 which you assign a new name as a command.  This is done with the
 @code{define} command.  User commands may accept up to 10 arguments
 separated by whitespace.  Arguments are accessed within the user command
-via @var{$arg0@dots{}$arg9}.  A trivial example:
+via @code{$arg0@dots{}$arg9}.  A trivial example:
 
 @smallexample
 define adder
   print $arg0 + $arg1 + $arg2
+end
 @end smallexample
 
 @noindent
@@ -15679,6 +15680,20 @@ This defines the command @code{adder}, which prints the sum of
 its three arguments.  Note the arguments are text substitutions, so they may
 reference variables, use complex expressions, or even perform inferior
 functions calls.
+
+In addition, @code{$argc} may be used to find out how many arguments have
+been passed.  This expands to a number in the range 0@dots{}10.
+
+@smallexample
+define adder
+  if $argc == 2
+    print $arg0 + $arg1
+  end
+  if $argc == 3
+    print $arg0 + $arg1 + $arg2
+  end
+end
+@end smallexample
 
 @table @code
 

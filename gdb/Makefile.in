@@ -2807,7 +2807,7 @@ cli-logging.o: $(srcdir)/cli/cli-logging.c $(defs_h) $(gdbcmd_h) $(ui_out_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-logging.c
 cli-script.o: $(srcdir)/cli/cli-script.c $(defs_h) $(value_h) $(language_h) \
 	$(ui_out_h) $(gdb_string_h) $(exceptions_h) $(top_h) $(cli_cmds_h) \
-	$(cli_decode_h) $(cli_script_h)
+	$(cli_decode_h) $(cli_script_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-script.c
 cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(defs_h) $(readline_tilde_h) \
 	$(value_h) $(gdb_string_h) $(ui_out_h) $(cli_decode_h) $(cli_cmds_h) \
