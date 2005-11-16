@@ -2235,15 +2235,7 @@ s_lsym (int ignore ATTRIBUTE_UNUSED)
   *p = 0;
   symbolP = symbol_find_or_make (name);
 
-  /* FIXME-SOON I pulled a (&& symbolP->sy_other == 0 &&
-     symbolP->sy_desc == 0) out of this test because coff doesn't have
-     those fields, and I can't see when they'd ever be tripped.  I
-     don't think I understand why they were here so I may have
-     introduced a bug. As recently as 1.37 didn't have this test
-     anyway.  xoxorich.  */
-
-  if (S_GET_SEGMENT (symbolP) == undefined_section
-      && S_GET_VALUE (symbolP) == 0)
+  if (S_GET_SEGMENT (symbolP) == undefined_section)
     {
       /* The name might be an undefined .global symbol; be sure to
 	 keep the "external" bit.  */

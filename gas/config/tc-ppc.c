@@ -4416,6 +4416,7 @@ ppc_pe_comm (lcomm)
     {
       S_SET_VALUE (symbolP, (valueT) temp);
       S_SET_EXTERNAL (symbolP);
+      S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
     }
 
   demand_empty_rest_of_line ();

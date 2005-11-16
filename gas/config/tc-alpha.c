@@ -3331,10 +3331,10 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
       subseg_set (new_seg, 0);
       p = frag_more (temp);
       new_seg->flags |= SEC_IS_COMMON;
-      if (! S_IS_DEFINED (symbolP))
-	S_SET_SEGMENT (symbolP, new_seg);
+      S_SET_SEGMENT (symbolP, new_seg);
 #else
       S_SET_VALUE (symbolP, (valueT) temp);
+      S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
 #endif
       S_SET_EXTERNAL (symbolP);
     }

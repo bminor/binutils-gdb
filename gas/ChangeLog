@@ -1,5 +1,12 @@
 2005-11-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-ppc.c (ppc_pe_comm): Set bfd_com_section segment.
+	* config/tc-alpha.c (s_alpha_comm): Likewise.  Also, remove
+	redundant check.
+	* read.c (s_lsym): Remove non-BFD assembler sym handling.
+
+2005-11-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* read.c (s_comm_internal): Set bfd_com_section segment.
 	(s_mri_common): Likewise.
 	* write.c (write_object_file): Remove non-BFD assembler common
