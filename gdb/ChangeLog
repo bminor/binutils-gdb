@@ -1,3 +1,7 @@
+2005-11-16  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* NEWS (6.4): Mention $argc.
+
 2005-11-15  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* NEWS: Add --batch-silent, --return-child-result, and --eval-command

@@ -70,6 +70,12 @@ behavior.
 
 GDB now supports the not-quite-ieee VAX F and D floating point formats.
 
+* User-defined command support
+
+In addition to using $arg0..$arg9 for argument passing, it is now possible
+to use $argc to determine now many arguments have been passed.  See the
+section on user-defined commands in the user manual for more information.
+
 *** Changes in GDB 6.3:
 
 * New command line option
