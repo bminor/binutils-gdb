@@ -1,5 +1,16 @@
 2005-11-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.h (lang_output_section_statement_type): Add prev.
+	* ldlang.c (new_afile): Always init header.type.
+	(output_statement_newfunc): Set os.prev.
+	(output_prev_sec_find): Use os.prev.
+	(lang_enter_output_section_statement): Formatting.
+	(lang_final, lang_add_target, lang_add_fill): Likewise.
+	(lang_add_data, lang_add_reloc): Likewise.
+	(lang_add_attribute): Only alloc the header.
+
+2005-11-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* ld.texinfo (Forced Output Alignment): Specify that this is an
 	alignment increase, not an override.
 	* ldlang.c (init_os): Set output section alignment here..

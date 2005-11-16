@@ -783,6 +783,7 @@ new_afile (const char *name,
   else
     {
       p = stat_alloc (sizeof (lang_input_statement_type));
+      p->header.type = lang_input_statement_enum;
       p->header.next = NULL;
     }
 
@@ -911,6 +912,8 @@ output_statement_newfunc (struct bfd_hash_entry *entry,
 			 (lang_statement_union_type *) &ret->os,
 			 &ret->os.header.next);
 
+  ret->os.prev = &((*lang_output_section_statement.tail)
+		   ->output_section_statement);
   /* GCC's strict aliasing rules prevent us from just casting the
      address, so we store the pointer in a variable and cast that
      instead.  */
@@ -1295,20 +1298,15 @@ lang_output_section_find_by_flags (const asection *sec,
 static asection *
 output_prev_sec_find (lang_output_section_statement_type *os)
 {
-  asection *s = (asection *) NULL;
   lang_output_section_statement_type *lookup;
 
-  for (lookup = &lang_output_section_statement.head->output_section_statement;
-       lookup != NULL;
-       lookup = lookup->next)
+  for (lookup = os->prev; lookup != NULL; lookup = lookup->prev)
     {
       if (lookup->constraint == -1)
 	continue;
-      if (lookup == os)
-	return s;
 
       if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
-	s = lookup->bfd_section;
+	return lookup->bfd_section;
     }
 
   return NULL;
@@ -5221,10 +5219,9 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
 {
   lang_output_section_statement_type *os;
 
-  current_section =
-   os =
-    lang_output_section_statement_lookup_1 (output_section_statement_name,
-					    constraint);
+   os = lang_output_section_statement_lookup_1 (output_section_statement_name,
+						constraint);
+   current_section = os;
 
   /* Make next things chain into subchain of this.  */
 
@@ -5252,9 +5249,9 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
 void
 lang_final (void)
 {
-  lang_output_statement_type *new =
-    new_stat (lang_output_statement, stat_ptr);
+  lang_output_statement_type *new;
 
+  new = new_stat (lang_output_statement, stat_ptr);
   new->name = output_filename;
 }
 
@@ -5616,11 +5613,10 @@ lang_default_entry (const char *name)
 void
 lang_add_target (const char *name)
 {
-  lang_target_statement_type *new = new_stat (lang_target_statement,
-					      stat_ptr);
+  lang_target_statement_type *new;
 
+  new = new_stat (lang_target_statement, stat_ptr);
   new->target = name;
-
 }
 
 void
@@ -5641,22 +5637,20 @@ lang_add_map (const char *name)
 void
 lang_add_fill (fill_type *fill)
 {
-  lang_fill_statement_type *new = new_stat (lang_fill_statement,
-					    stat_ptr);
+  lang_fill_statement_type *new;
 
+  new = new_stat (lang_fill_statement, stat_ptr);
   new->fill = fill;
 }
 
 void
 lang_add_data (int type, union etree_union *exp)
 {
+  lang_data_statement_type *new;
 
-  lang_data_statement_type *new = new_stat (lang_data_statement,
-					    stat_ptr);
-
+  new = new_stat (lang_data_statement, stat_ptr);
   new->exp = exp;
   new->type = type;
-
 }
 
 /* Create a new reloc statement.  RELOC is the BFD relocation type to
@@ -5689,9 +5683,9 @@ lang_add_reloc (bfd_reloc_code_real_type reloc,
 lang_assignment_statement_type *
 lang_add_assignment (etree_type *exp)
 {
-  lang_assignment_statement_type *new = new_stat (lang_assignment_statement,
-						  stat_ptr);
+  lang_assignment_statement_type *new;
 
+  new = new_stat (lang_assignment_statement, stat_ptr);
   new->exp = exp;
   return new;
 }
@@ -5699,7 +5693,7 @@ lang_add_assignment (etree_type *exp)
 void
 lang_add_attribute (enum statement_enum attribute)
 {
-  new_statement (attribute, sizeof (lang_statement_union_type), stat_ptr);
+  new_statement (attribute, sizeof (lang_statement_header_type), stat_ptr);
 }
 
 void
