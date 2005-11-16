@@ -1,5 +1,8 @@
 2005-11-15  Jim Blandy  <jimb@redhat.com>
 
+	* gdb.texinfo (Packets): Add index entries for 'm' packet
+	disclaimers.
+	
 	* gdb.texinfo (Packets): Clarify lack of restrictions on behavior
 	of stub when processing an 'm' packet.
 

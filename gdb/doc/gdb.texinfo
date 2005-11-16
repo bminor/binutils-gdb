@@ -22332,6 +22332,9 @@ data from memory for the response; even if @var{addr} is word-aligned
 and @var{length} is a multiple of the word size, the stub is free to
 use byte accesses, or not.  For this reason, this packet may not be
 suitable for accessing memory-mapped I/O devices.
+@cindex alignment of remote memory accesses
+@cindex size of remote memory accesses
+@cindex memory, alignment and size of remote accesses
 
 Reply:
 @table @samp
