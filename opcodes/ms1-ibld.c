@@ -576,6 +576,18 @@ ms1_cgen_insert_operand (CGEN_CPU_DESC cd,
     case MS1_OPERAND_BRC2 :
       errmsg = insert_normal (cd, fields->f_brc2, 0, 0, 14, 3, 32, total_length, buffer);
       break;
+    case MS1_OPERAND_CB1INCR :
+      errmsg = insert_normal (cd, fields->f_cb1incr, 0|(1<<CGEN_IFLD_SIGNED), 0, 19, 6, 32, total_length, buffer);
+      break;
+    case MS1_OPERAND_CB1SEL :
+      errmsg = insert_normal (cd, fields->f_cb1sel, 0, 0, 25, 3, 32, total_length, buffer);
+      break;
+    case MS1_OPERAND_CB2INCR :
+      errmsg = insert_normal (cd, fields->f_cb2incr, 0|(1<<CGEN_IFLD_SIGNED), 0, 13, 6, 32, total_length, buffer);
+      break;
+    case MS1_OPERAND_CB2SEL :
+      errmsg = insert_normal (cd, fields->f_cb2sel, 0, 0, 22, 3, 32, total_length, buffer);
+      break;
     case MS1_OPERAND_CBRB :
       errmsg = insert_normal (cd, fields->f_cbrb, 0, 0, 10, 1, 32, total_length, buffer);
       break;
@@ -637,6 +649,9 @@ ms1_cgen_insert_operand (CGEN_CPU_DESC cd,
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 15, 16, 32, total_length, buffer);
       }
       break;
+    case MS1_OPERAND_IMM16L :
+      errmsg = insert_normal (cd, fields->f_imm16l, 0, 0, 23, 16, 32, total_length, buffer);
+      break;
     case MS1_OPERAND_IMM16O :
       {
         long value = fields->f_imm16s;
@@ -655,6 +670,13 @@ ms1_cgen_insert_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_LENGTH :
       errmsg = insert_normal (cd, fields->f_length, 0, 0, 15, 3, 32, total_length, buffer);
+      break;
+    case MS1_OPERAND_LOOPSIZE :
+      {
+        long value = fields->f_loopo;
+        value = ((unsigned int) (value) >> (2));
+        errmsg = insert_normal (cd, value, 0, 0, 7, 8, 32, total_length, buffer);
+      }
       break;
     case MS1_OPERAND_MASK :
       errmsg = insert_normal (cd, fields->f_mask, 0, 0, 25, 16, 32, total_length, buffer);
@@ -679,6 +701,9 @@ ms1_cgen_insert_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_RC2 :
       errmsg = insert_normal (cd, fields->f_rc2, 0, 0, 6, 1, 32, total_length, buffer);
+      break;
+    case MS1_OPERAND_RC3 :
+      errmsg = insert_normal (cd, fields->f_rc3, 0, 0, 7, 1, 32, total_length, buffer);
       break;
     case MS1_OPERAND_RCNUM :
       errmsg = insert_normal (cd, fields->f_rcnum, 0, 0, 14, 3, 32, total_length, buffer);
@@ -768,6 +793,18 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
     case MS1_OPERAND_BRC2 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 14, 3, 32, total_length, pc, & fields->f_brc2);
       break;
+    case MS1_OPERAND_CB1INCR :
+      length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 19, 6, 32, total_length, pc, & fields->f_cb1incr);
+      break;
+    case MS1_OPERAND_CB1SEL :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 3, 32, total_length, pc, & fields->f_cb1sel);
+      break;
+    case MS1_OPERAND_CB2INCR :
+      length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 13, 6, 32, total_length, pc, & fields->f_cb2incr);
+      break;
+    case MS1_OPERAND_CB2SEL :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 22, 3, 32, total_length, pc, & fields->f_cb2sel);
+      break;
     case MS1_OPERAND_CBRB :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 10, 1, 32, total_length, pc, & fields->f_cbrb);
       break;
@@ -830,6 +867,9 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
         fields->f_imm16s = value;
       }
       break;
+    case MS1_OPERAND_IMM16L :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 23, 16, 32, total_length, pc, & fields->f_imm16l);
+      break;
     case MS1_OPERAND_IMM16O :
       {
         long value;
@@ -849,6 +889,14 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_LENGTH :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 3, 32, total_length, pc, & fields->f_length);
+      break;
+    case MS1_OPERAND_LOOPSIZE :
+      {
+        long value;
+        length = extract_normal (cd, ex_info, insn_value, 0, 0, 7, 8, 32, total_length, pc, & value);
+        value = ((((value) << (2))) + (8));
+        fields->f_loopo = value;
+      }
       break;
     case MS1_OPERAND_MASK :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 16, 32, total_length, pc, & fields->f_mask);
@@ -873,6 +921,9 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_RC2 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 6, 1, 32, total_length, pc, & fields->f_rc2);
+      break;
+    case MS1_OPERAND_RC3 :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 7, 1, 32, total_length, pc, & fields->f_rc3);
       break;
     case MS1_OPERAND_RCNUM :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 14, 3, 32, total_length, pc, & fields->f_rcnum);
@@ -957,6 +1008,18 @@ ms1_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MS1_OPERAND_BRC2 :
       value = fields->f_brc2;
       break;
+    case MS1_OPERAND_CB1INCR :
+      value = fields->f_cb1incr;
+      break;
+    case MS1_OPERAND_CB1SEL :
+      value = fields->f_cb1sel;
+      break;
+    case MS1_OPERAND_CB2INCR :
+      value = fields->f_cb2incr;
+      break;
+    case MS1_OPERAND_CB2SEL :
+      value = fields->f_cb2sel;
+      break;
     case MS1_OPERAND_CBRB :
       value = fields->f_cbrb;
       break;
@@ -1014,6 +1077,9 @@ ms1_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MS1_OPERAND_IMM16 :
       value = fields->f_imm16s;
       break;
+    case MS1_OPERAND_IMM16L :
+      value = fields->f_imm16l;
+      break;
     case MS1_OPERAND_IMM16O :
       value = fields->f_imm16s;
       break;
@@ -1028,6 +1094,9 @@ ms1_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MS1_OPERAND_LENGTH :
       value = fields->f_length;
+      break;
+    case MS1_OPERAND_LOOPSIZE :
+      value = fields->f_loopo;
       break;
     case MS1_OPERAND_MASK :
       value = fields->f_mask;
@@ -1052,6 +1121,9 @@ ms1_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MS1_OPERAND_RC2 :
       value = fields->f_rc2;
+      break;
+    case MS1_OPERAND_RC3 :
+      value = fields->f_rc3;
       break;
     case MS1_OPERAND_RCNUM :
       value = fields->f_rcnum;
@@ -1118,6 +1190,18 @@ ms1_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MS1_OPERAND_BRC2 :
       value = fields->f_brc2;
       break;
+    case MS1_OPERAND_CB1INCR :
+      value = fields->f_cb1incr;
+      break;
+    case MS1_OPERAND_CB1SEL :
+      value = fields->f_cb1sel;
+      break;
+    case MS1_OPERAND_CB2INCR :
+      value = fields->f_cb2incr;
+      break;
+    case MS1_OPERAND_CB2SEL :
+      value = fields->f_cb2sel;
+      break;
     case MS1_OPERAND_CBRB :
       value = fields->f_cbrb;
       break;
@@ -1175,6 +1259,9 @@ ms1_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MS1_OPERAND_IMM16 :
       value = fields->f_imm16s;
       break;
+    case MS1_OPERAND_IMM16L :
+      value = fields->f_imm16l;
+      break;
     case MS1_OPERAND_IMM16O :
       value = fields->f_imm16s;
       break;
@@ -1189,6 +1276,9 @@ ms1_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MS1_OPERAND_LENGTH :
       value = fields->f_length;
+      break;
+    case MS1_OPERAND_LOOPSIZE :
+      value = fields->f_loopo;
       break;
     case MS1_OPERAND_MASK :
       value = fields->f_mask;
@@ -1213,6 +1303,9 @@ ms1_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MS1_OPERAND_RC2 :
       value = fields->f_rc2;
+      break;
+    case MS1_OPERAND_RC3 :
+      value = fields->f_rc3;
       break;
     case MS1_OPERAND_RCNUM :
       value = fields->f_rcnum;
@@ -1286,6 +1379,18 @@ ms1_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MS1_OPERAND_BRC2 :
       fields->f_brc2 = value;
       break;
+    case MS1_OPERAND_CB1INCR :
+      fields->f_cb1incr = value;
+      break;
+    case MS1_OPERAND_CB1SEL :
+      fields->f_cb1sel = value;
+      break;
+    case MS1_OPERAND_CB2INCR :
+      fields->f_cb2incr = value;
+      break;
+    case MS1_OPERAND_CB2SEL :
+      fields->f_cb2sel = value;
+      break;
     case MS1_OPERAND_CBRB :
       fields->f_cbrb = value;
       break;
@@ -1343,6 +1448,9 @@ ms1_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MS1_OPERAND_IMM16 :
       fields->f_imm16s = value;
       break;
+    case MS1_OPERAND_IMM16L :
+      fields->f_imm16l = value;
+      break;
     case MS1_OPERAND_IMM16O :
       fields->f_imm16s = value;
       break;
@@ -1357,6 +1465,9 @@ ms1_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MS1_OPERAND_LENGTH :
       fields->f_length = value;
+      break;
+    case MS1_OPERAND_LOOPSIZE :
+      fields->f_loopo = value;
       break;
     case MS1_OPERAND_MASK :
       fields->f_mask = value;
@@ -1381,6 +1492,9 @@ ms1_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MS1_OPERAND_RC2 :
       fields->f_rc2 = value;
+      break;
+    case MS1_OPERAND_RC3 :
+      fields->f_rc3 = value;
       break;
     case MS1_OPERAND_RCNUM :
       fields->f_rcnum = value;
@@ -1444,6 +1558,18 @@ ms1_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MS1_OPERAND_BRC2 :
       fields->f_brc2 = value;
       break;
+    case MS1_OPERAND_CB1INCR :
+      fields->f_cb1incr = value;
+      break;
+    case MS1_OPERAND_CB1SEL :
+      fields->f_cb1sel = value;
+      break;
+    case MS1_OPERAND_CB2INCR :
+      fields->f_cb2incr = value;
+      break;
+    case MS1_OPERAND_CB2SEL :
+      fields->f_cb2sel = value;
+      break;
     case MS1_OPERAND_CBRB :
       fields->f_cbrb = value;
       break;
@@ -1501,6 +1627,9 @@ ms1_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case MS1_OPERAND_IMM16 :
       fields->f_imm16s = value;
       break;
+    case MS1_OPERAND_IMM16L :
+      fields->f_imm16l = value;
+      break;
     case MS1_OPERAND_IMM16O :
       fields->f_imm16s = value;
       break;
@@ -1515,6 +1644,9 @@ ms1_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MS1_OPERAND_LENGTH :
       fields->f_length = value;
+      break;
+    case MS1_OPERAND_LOOPSIZE :
+      fields->f_loopo = value;
       break;
     case MS1_OPERAND_MASK :
       fields->f_mask = value;
@@ -1539,6 +1671,9 @@ ms1_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case MS1_OPERAND_RC2 :
       fields->f_rc2 = value;
+      break;
+    case MS1_OPERAND_RC3 :
+      fields->f_rc3 = value;
       break;
     case MS1_OPERAND_RCNUM :
       fields->f_rcnum = value;

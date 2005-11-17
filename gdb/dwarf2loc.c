@@ -164,9 +164,11 @@ dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
   if (SYMBOL_OPS (framefunc) == &dwarf2_loclist_funcs)
     {
       struct dwarf2_loclist_baton *symbaton;
+      struct frame_info *frame = debaton->frame;
+
       symbaton = SYMBOL_LOCATION_BATON (framefunc);
       *start = find_location_expression (symbaton, length,
-					 get_frame_pc (debaton->frame));
+					 get_frame_address_in_block (frame));
     }
   else
     {
@@ -302,11 +304,28 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   dwarf_expr_eval (ctx, data, size);
   if (ctx->num_pieces > 0)
     {
-      /* We haven't implemented splicing together pieces from
-         arbitrary sources yet.  */
-      error (_("The value of variable '%s' is distributed across several\n"
-             "locations, and GDB cannot access its value.\n"),
-             SYMBOL_NATURAL_NAME (var));
+      int i;
+      long offset = 0;
+      bfd_byte *contents;
+
+      retval = allocate_value (SYMBOL_TYPE (var));
+      contents = value_contents_raw (retval);
+      for (i = 0; i < ctx->num_pieces; i++)
+	{
+	  struct dwarf_expr_piece *p = &ctx->pieces[i];
+	  if (p->in_reg)
+	    {
+	      bfd_byte regval[MAX_REGISTER_SIZE];
+	      int gdb_regnum = DWARF2_REG_TO_REGNUM (p->value);
+	      get_frame_register (frame, gdb_regnum, regval);
+	      memcpy (contents + offset, regval, p->size);
+	    }
+	  else /* In memory?  */
+	    {
+	      read_memory (p->value, contents + offset, p->size);
+	    }
+	  offset += p->size;
+	}
     }
   else if (ctx->in_reg)
     {
@@ -580,7 +599,8 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
   size_t size;
 
   data = find_location_expression (dlbaton, &size,
-				   frame ? get_frame_pc (frame) : 0);
+				   frame ? get_frame_address_in_block (frame)
+				   : 0);
   if (data == NULL)
     {
       val = allocate_value (SYMBOL_TYPE (symbol));

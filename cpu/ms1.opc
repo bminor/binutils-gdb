@@ -101,6 +101,31 @@ signed_out_of_bounds (long val)
 }
 
 static const char *
+parse_loopsize (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		void *arg)
+{
+  signed long * valuep = (signed long *) arg;
+  const char *errmsg;
+  bfd_reloc_code_real_type code = BFD_RELOC_NONE;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  /* Is it a control transfer instructions?  */ 
+  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_LOOPSIZE)
+    {
+      code = BFD_RELOC_MS1_PCINSN8;
+      errmsg = cgen_parse_address (cd, strp, opindex, code,
+                                   & result_type, & value);
+      *valuep = value;
+      return errmsg;
+    }
+
+  abort ();
+}
+
+static const char *
 parse_imm16 (CGEN_CPU_DESC cd,
 	     const char **strp,
 	     int opindex,
@@ -129,7 +154,9 @@ parse_imm16 (CGEN_CPU_DESC cd,
 
   /* If it's not a control transfer instruction, then
      we have to check for %OP relocating operators.  */
-  if (strncmp (*strp, "%hi16", 5) == 0)
+  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16L)
+    ;
+  else if (strncmp (*strp, "%hi16", 5) == 0)
     {
       *strp += 5;
       code = BFD_RELOC_HI16;
@@ -411,6 +438,7 @@ parse_type (CGEN_CPU_DESC cd,
 
 /* -- dis.c */
 static void print_dollarhex (CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int);
+static void print_pcrel (CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int);
 
 static void
 print_dollarhex (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -428,6 +456,16 @@ print_dollarhex (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     print_normal (cd, dis_info, value, attrs, pc, length);
 }
 
+static void
+print_pcrel (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	     void * dis_info,
+	     long value,
+	     unsigned int attrs ATTRIBUTE_UNUSED,
+	     bfd_vma pc ATTRIBUTE_UNUSED,
+	     int length ATTRIBUTE_UNUSED)
+{
+  print_address (cd, dis_info, value + pc, attrs, pc, length);
+}
 
 /* -- */
 

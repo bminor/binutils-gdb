@@ -450,15 +450,13 @@ void
 tui_update_gdb_sizes (void)
 {
   char cmd[50];
-  int screenheight, screenwidth;
 
-  rl_get_screen_size (&screenheight, &screenwidth);
   /* Set to TUI command window dimension or use readline values.  */
   sprintf (cmd, "set width %d",
-           tui_active ? TUI_CMD_WIN->generic.width : screenwidth);
+           tui_active ? TUI_CMD_WIN->generic.width : tui_term_width());
   execute_command (cmd, 0);
   sprintf (cmd, "set height %d",
-           tui_active ? TUI_CMD_WIN->generic.height : screenheight);
+           tui_active ? TUI_CMD_WIN->generic.height : tui_term_height());
   execute_command (cmd, 0);
 }
 

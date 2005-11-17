@@ -46,6 +46,7 @@
 #include "serial.h"
 #include "doublest.h"
 #include "gdb_assert.h"
+#include "main.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -1186,6 +1187,8 @@ quit_force (char *args, int from_tty)
 
       exit_code = (int) value_as_long (val);
     }
+  else if (return_child_result)
+    exit_code = return_child_result_value;
 
   qt.args = args;
   qt.from_tty = from_tty;

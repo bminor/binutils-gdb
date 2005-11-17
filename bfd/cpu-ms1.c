@@ -35,8 +35,22 @@ const bfd_arch_info_type arch_info_struct[] =
   FALSE,		        /* The default ?  */
   bfd_default_compatible,	/* Architecture comparison fn.  */
   bfd_default_scan,		/* String to architecture convert fn.  */
+  &arch_info_struct[1]          /* Next in list.  */
+},
+{
+  32,				/* Bits per word - not really true.  */
+  32,				/* Bits per address.  */
+  8,				/* Bits per byte.  */
+  bfd_arch_ms1,			/* Architecture.  */
+  bfd_mach_ms2,		        /* Machine.  */
+  "ms1",			/* Architecture name.  */
+  "ms2",			/* Printable name.  */
+  1,				/* Section align power.  */
+  FALSE,		        /* The default ?  */
+  bfd_default_compatible,	/* Architecture comparison fn.  */
+  bfd_default_scan,		/* String to architecture convert fn.  */
   NULL				/* Next in list.  */
-}
+},
 };
 
 const bfd_arch_info_type bfd_ms1_arch =

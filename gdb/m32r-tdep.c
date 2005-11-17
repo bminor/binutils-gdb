@@ -84,8 +84,8 @@ static int
 m32r_memory_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   int val;
-  char buf[4];
-  char bp_entry[] = { 0x10, 0xf1 };	/* dpt */
+  gdb_byte buf[4];
+  gdb_byte bp_entry[] = { 0x10, 0xf1 };	/* dpt */
 
   /* Save the memory contents.  */
   val = target_read_memory (addr & 0xfffffffc, contents_cache, 4);
@@ -137,7 +137,7 @@ static int
 m32r_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
 {
   int val;
-  char buf[4];
+  gdb_byte buf[4];
 
   buf[0] = contents_cache[0];
   buf[1] = contents_cache[1];
@@ -161,12 +161,12 @@ m32r_memory_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
   return val;
 }
 
-static const unsigned char *
+static const gdb_byte *
 m32r_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
-  static char be_bp_entry[] = { 0x10, 0xf1, 0x70, 0x00 };	/* dpt -> nop */
-  static char le_bp_entry[] = { 0x00, 0x70, 0xf1, 0x10 };	/* dpt -> nop */
-  unsigned char *bp;
+  static gdb_byte be_bp_entry[] = { 0x10, 0xf1, 0x70, 0x00 };	/* dpt -> nop */
+  static gdb_byte le_bp_entry[] = { 0x00, 0x70, 0xf1, 0x10 };	/* dpt -> nop */
+  gdb_byte *bp;
 
   /* Determine appropriate breakpoint.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -250,7 +250,7 @@ m32r_store_return_value (struct type *type, struct regcache *regcache,
 
   if (len > 4)
     {
-      regval = extract_unsigned_integer ((char *) valbuf + 4, len - 4);
+      regval = extract_unsigned_integer ((gdb_byte *) valbuf + 4, len - 4);
       regcache_cooked_write_unsigned (regcache, RET1_REGNUM + 1, regval);
     }
 }
@@ -345,7 +345,7 @@ decode_prologue (CORE_ADDR start_pc, CORE_ADDR scan_limit,
       if ((insn >> 8) == 0x4f)	/* addi sp, xx */
 	/* add 8 bit sign-extended offset */
 	{
-	  int stack_adjust = (char) (insn & 0xff);
+	  int stack_adjust = (gdb_byte) (insn & 0xff);
 
 	  /* there are probably two of these stack adjustments:
 	     1) A negative one in the prologue, and
@@ -574,7 +574,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
       else if ((op & 0xff00) == 0x4f00)
 	{
 	  /* addi sp, xx */
-	  int n = (char) (op & 0xff);
+	  int n = (gdb_byte) (op & 0xff);
 	  info->sp_offset += n;
 	}
       else if (op == 0x1d8f)
@@ -679,8 +679,8 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   struct type *type;
   enum type_code typecode;
   CORE_ADDR regval;
-  char *val;
-  char valbuf[MAX_REGISTER_SIZE];
+  gdb_byte *val;
+  gdb_byte valbuf[MAX_REGISTER_SIZE];
   int len;
   int odd_sized_struct;
 
@@ -726,11 +726,11 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  /* value gets right-justified in the register or stack word */
 	  memcpy (valbuf + (register_size (gdbarch, argreg) - len),
-		  (char *) value_contents (args[argnum]), len);
+		  (gdb_byte *) value_contents (args[argnum]), len);
 	  val = valbuf;
 	}
       else
-	val = (char *) value_contents (args[argnum]);
+	val = (gdb_byte *) value_contents (args[argnum]);
 
       while (len > 0)
 	{
@@ -791,8 +791,8 @@ m32r_extract_return_value (struct type *type, struct regcache *regcache,
 
 enum return_value_convention
 m32r_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		   struct regcache *regcache, void *readbuf,
-		   const void *writebuf)
+		   struct regcache *regcache, gdb_byte *readbuf,
+		   const gdb_byte *writebuf)
 {
   if (TYPE_LENGTH (valtype) > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -852,7 +852,7 @@ m32r_frame_prev_register (struct frame_info *next_frame,
 			  void **this_prologue_cache,
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, void *bufferp)
+			  int *realnump, gdb_byte *bufferp)
 {
   struct m32r_unwind_cache *info
     = m32r_frame_unwind_cache (next_frame, this_prologue_cache);

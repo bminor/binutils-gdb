@@ -3855,6 +3855,28 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 		  TYPE_VPTR_FIELDNO (type) = TYPE_VPTR_FIELDNO (t);
 		}
 	    }
+	  else if (cu->producer
+		   && strncmp (cu->producer,
+			       "IBM(R) XL C/C++ Advanced Edition", 32) == 0)
+	    {
+	      /* The IBM XLC compiler does not provide direct indication
+	         of the containing type, but the vtable pointer is
+	         always named __vfp.  */
+
+	      int i;
+
+	      for (i = TYPE_NFIELDS (type) - 1;
+		   i >= TYPE_N_BASECLASSES (type);
+		   --i)
+		{
+		  if (strcmp (TYPE_FIELD_NAME (type, i), "__vfp") == 0)
+		    {
+		      TYPE_VPTR_FIELDNO (type) = i;
+		      TYPE_VPTR_BASETYPE (type) = type;
+		      break;
+		    }
+		}
+	    }
 	}
 
       do_cleanups (back_to);
@@ -8795,32 +8817,51 @@ dwarf_alloc_die (void)
 static char *
 file_full_name (int file, struct line_header *lh, const char *comp_dir)
 {
-  struct file_entry *fe = &lh->file_names[file - 1];
+  /* Is the file number a valid index into the line header's file name
+     table?  Remember that file numbers start with one, not zero.  */
+  if (1 <= file && file <= lh->num_file_names)
+    {
+      struct file_entry *fe = &lh->file_names[file - 1];
   
-  if (IS_ABSOLUTE_PATH (fe->name))
-    return xstrdup (fe->name);
+      if (IS_ABSOLUTE_PATH (fe->name))
+        return xstrdup (fe->name);
+      else
+        {
+          const char *dir;
+          int dir_len;
+          char *full_name;
+
+          if (fe->dir_index)
+            dir = lh->include_dirs[fe->dir_index - 1];
+          else
+            dir = comp_dir;
+
+          if (dir)
+            {
+              dir_len = strlen (dir);
+              full_name = xmalloc (dir_len + 1 + strlen (fe->name) + 1);
+              strcpy (full_name, dir);
+              full_name[dir_len] = '/';
+              strcpy (full_name + dir_len + 1, fe->name);
+              return full_name;
+            }
+          else
+            return xstrdup (fe->name);
+        }
+    }
   else
     {
-      const char *dir;
-      int dir_len;
-      char *full_name;
+      /* The compiler produced a bogus file number.  We can at least
+         record the macro definitions made in the file, even if we
+         won't be able to find the file by name.  */
+      char fake_name[80];
+      sprintf (fake_name, "<bad macro file number %d>", file);
 
-      if (fe->dir_index)
-        dir = lh->include_dirs[fe->dir_index - 1];
-      else
-        dir = comp_dir;
+      complaint (&symfile_complaints, 
+                 _("bad file number in macro information (%d)"),
+                 file);
 
-      if (dir)
-        {
-          dir_len = strlen (dir);
-          full_name = xmalloc (dir_len + 1 + strlen (fe->name) + 1);
-          strcpy (full_name, dir);
-          full_name[dir_len] = '/';
-          strcpy (full_name + dir_len + 1, fe->name);
-          return full_name;
-        }
-      else
-        return xstrdup (fe->name);
+      return xstrdup (fake_name);
     }
 }
 

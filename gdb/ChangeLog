@@ -1,19 +1,244 @@
+2005-11-16  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* NEWS (6.4): Mention $argc.
+
+2005-11-15  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* NEWS: Add --batch-silent, --return-child-result, and --eval-command
+	options to the 6.4 section.
+
+2005-11-15  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* cli/cli-script.c: Include gdb_assert.h.
+	(locate_arg): Detect $argc.
+	(insert_args): Substitute $argc.
+	* Makefile.in (cli-script.o): Add dependency on gdb_assert.h.
+
+2005-11-14  James E Wilson  <wilson@specifix.com>
+
+	PR 2024
+	* dwarf2loc.c (dwarf_expr_frame_base): Use get_frame_address_in_block
+	instead of get_frame_pc.
+	(loclist_read_variable): Likewise.
+
+2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
+2005-11-14  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* thread.c (_initialize_thread): Correct the 'thread apply' help
+	message.
+
+2005-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfread.c (elf_symtab_read): Remove if (1) and reindent.
+
+2005-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-linux-tdep.c (eabi_linux_arm_le_breakpoint)
+	(eabi_linux_arm_be_breakpoint): New variables.
+	(arm_linux_init_abi): Use them.
+
+2005-11-11  Michael Snyder  <msnyder@redhat.com>
+
+	* inftarg.c (child_wait): Delete unused local variable.
+
+2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
+
+	PR tui/1995
+	* tui/tui-command.c (tui_dispatch_ctrl_char): Handle CTRL-L even if the
+	focus is on the command window.
+
+2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui/tui-win.c (tui_update_gdb_sizes): Use tui_term_width() and
+	tui_term_height() to restore the terminal size when leaving the
+	TUI mode.
+
+2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-tdep.c (m68hc11_pseudo_register_write): Use gdb_byte
+	for buffers.
+	(m68hc11_pseudo_register_read): Likewise.
+	(m68hc11_return_value): Likewise.
+	(m68hc11_frame_prev_register): Likewise.
+	(m68hc11_frame_align): Remove as its seems no longer necessary.
+	(m68hc11_gdbarch_init): Don't install frame_align handler.
+	(m68hc11_scan_prologue): Fix crash that occurred when called from
+	m68hc11_skip_prologue
+
+2005-11-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* MAINTAINERS: Mark m68k-elf, sparc-elf and vax-netbsd as no
+	longer broken.
+
+2005-11-09  Randolph Chung <tausq@debian.org>
+
+	* hppa-linux-nat.c (_initialize_hppa_linux_nat): Use
+	hppa_linux_{store,fetch}_inferior_registers instead of
+	arm_linux_{store,fetch}_inferior_registers.
+
+2005-11-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* remote-m32r-sdi.c: Update copyright years.
+	(m32r_resume): Write DBT at word-aligned addresses.
+	(m32r_wait): Use SDI_WRITE_MEMORY to remove DBT.
+
+2005-11-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* m32r-linux-tdep.c (linux_sigtramp_code): Use 'gdb_byte' instead
+	of 'unsigned char'.
+	(m32r_linux_sigtramp_start): Likewise.
+	(linux_rt_sigtramp_code): Likewise.
+	(m32r_linux_rt_sigtramp_start): Likewise.
+	(m32r_linux_sigtramp_frame_prev_register): Use 'gdb_byte *' instead
+	of 'void *'.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint): Use 'gdb_byte'
+	instead of 'char'.
+	(m32r_memory_remove_breakpoint): Likewise.
+	(m32r_breakpoint_from_pc): Likewise.
+	(m32r_store_return_value): Likewise.
+	(decode_prologue): Likewise.
+	(m32r_push_dummy_call): Likewise.
+	(m32r_return_value): Use 'gdb_byte *' instead of 'void *'.
+	* remote-m32r-sdi.c (m32r_xfer_memory): Use 'gdb_byte' instead of
+	'char'.
+
+2005-11-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-tdep.c (floatformat_valid): Change type of `from' from
+	`const char *' to `const void *'.
+
+2005-11-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-linux-tdep.c (frv_linux_sigtrapm_frame_prev_register): Change
+	type of `valuep' argument to `gdb_byte *'.
+	* frv-tdep.c (frv_pseudo_register_write): Change type of `buffer'
+	argument to `gdb_byte *'.
+	(frv_extract_return_value): Change type of `valbuf' argument to
+	`gdb_byte *'.
+	(frv_store_return_value): Likewise.
+	(frv_frame_prev_register): Change type of `bufferp' argument to
+	`gdb_byte *'
+	* solib-frv.c (ext_Elf32_Half, ext_Elf32_Addr, ext_Elf32_Word)
+	(ext_ptr): Change base type from `unsigned char' to `gdb_byte'.  Adjust
+	calls to extract_unsigned_integer which use struct members declared
+	with these array types to not try to take the address of those
+	members.
+	(fetch_loadmap, frv_current_sos): Change cast in target_read_memory()
+	calls from `char *' to `gdb_byte *'.
+	(lm_base): Change base type of `buf' from `char' to `gdb_byte'.
+	(enable_break2): Change type of `buf' from `char *' to `gdb_byte *'.
+	Change base type of `addr_buf' from `char' to `gdb_byte'.
+	(find_canonical_descriptor_in_load_object): Change base type of `buf'
+	from `char' to `gdb_byte'.
+
+2005-11-07  Paul Gilliam  <pgilliam@us.ibm.com
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value): Copy code from
+	ppc_sysv_abi_return_value() to handle a vector return value.
+
+2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* main.h (return_child_result, return_child_result_value): Declare.
+	* infrun.c: Include main.h.
+	(print_stop_reason): Remove declaration of return_child_result_value.
+	* top.c: Include main.h.
+	(quit_force): Remove declarations of return_child_result_value and
+	return_child_result.
+	* Makefile.in (top.o, infrun.o): Add main.h to dependencies.
+
+2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* Makefile.in (tui-winsource.o): Add gdb_assert.h to dependencies.
+
+2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* main.c (captured_main): Define struct cmdarg. Change type of cmdarg.
+	Add new options --eval-command and alias -ex.
+	Adjust --command to use the new struct cmdarg.
+	Execute commands given with --eval-command.
+	(print_gdb_help): Add new options --eval-command, -ex and mention -x.
+
+2005-11-07  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* main.c (main): Use INTERP_TUI instead of "tui".
+	Set interpreter to INTERP_INSIGHT when '-w' given.
+	* interps.h (INTERP_INSIGHT): New define.
+	* tui/tui-interp.c (_initialize_tui_interp): Use INTERP_TUI instead
+	of "tui".
+
+2005-11-04  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* infrun.c (print_stop_reason): Set return_child_result_value on exit.
+	* main.c (return_child_result): New variable.
+	(return_child_result_value): Likewise.
+	(captured_main): Add option --return-child-result.
+	Replace call to target_detach and exit (in batch mode) with quit_force.
+	(print_gdb_help): Add option --return-child-result.
+	* top.c (quit_force): Return child result if appropriate.
+
+2005-11-03  Wu Zhou  <woodzltc@cn.ibm.com>
+
+        Checked in by Elena Zannoni  <ezannoni@redhat.com>
+
+	* dwarf2read.c (read_structure_type): Add IBM XL C++
+	specific code to set TYPE_VPTR_FIELDNO and TYPE_VPTR_BASETYPE
+	of a virtual class if a field named "__vfp" is found. 
+
+2005-11-03  Jim Blandy  <jimb@redhat.com>
+
+        Checked in by Elena Zannoni  <ezannoni@redhat.com>	
+
+	* dwarf2read.c (file_full_name): Cope with file numbers that are
+	out of range for the given line header.
+
 2005-11-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+        Checked in by Elena Zannoni  <ezannoni@redhat.com>
+
+	* elfread.c (elf_symtab_read): Add number_of_symbols and
+	symbol_table as arguments.  Do not load the symbol table
+	here.
+	(elf_symfile_read): Load the static and dynamic symbol tables
+	here, before calling elf_symtab_read.  Also load any synthetic
+	symbols and process those.
+	
+2005-11-03 Andrew Cagney  <cagney@gnu.org>
+
+	Checked in by Elena Zannoni  <ezannoni@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Handle DW_OP_piece
+	reads.
+
+2006-11-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (linux_nat_resume): Add more debugging messages.  Do
 	not short-circuit resuming all threads if the signal will be ignored
 	in linux_nat_wait.
 
-2005-11-02  Joel Brobecker  <brobecker@adacore.com>
+2005-11-02  Andrew Stubbs  <andrew.stubbs@st.com>
 
-	* NEWS: Changes sinces GDB 6.3 are now labled as changes in GDB 6.4.
-	* README: Update README for GDB 6.4 release by replacing all 6.3
-	occurrences with 6.4.
+	* monitor.c (monitor_xfer_memory): Change char to gdb_byte.
+	(monitor_insert_breakpoint): Likewise.
+	(monitor_remove_breakpoint): Likewise.
+	* remote-e7000.c (e7000_xfer_inferior_memory): Likewise.
+	* sh-tdep.c (sh_return_value_nofpu): Change void to gdb_byte.
+	(sh_return_value_fpu): Likewise.
+	(sh_pseudo_register_read): Likewise.
+	(sh_pseudo_register_write): Likewise.
+	(sh_frame_prev_register): Likewise.
+	* sh64-tdep.c (sh64_extract_return_value): Change char to gdb_byte.
+	(sh64_return_value): Change void to gdb_byte.
+	(sh64_pseudo_register_read): Likewise.
+	(sh64_pseudo_register_write): Likewise.
+	(sh64_frame_prev_register): Likewise.
 
-2005-11-02  Joel Brobecker  <brobecker@adacore.com>
+2005-11-01  Joel Brobecker  <brobecker@adacore.com>
 
-	* version.in: Bump version number to 6.3.90 in preparation for
-	the 6.4 release.
+	* event-top.c (gdb_setup_readline): Add missing type in extern
+	declaration.
 
 2005-11-01  Paul Gilliam  <pgilliam@us.ibm.com>
 
@@ -1285,6 +1510,12 @@
 
 	* eval.c (evaluate_struct_tuple): Use strcmp instead of
 	DEPRECATED_STREQ.
+
+2005-06-27  Michael Snyder  <msnyder@redhat.com>
+
+	* mn10300-linux-tdep.c: New file.  OSABI sniffer at end.
+	* Makefile.in: Add rule for mn10300-linux-tdep.c.
+	* config/mn10300/linux.mt: Add mn10300-linux-tdep.c to tdep files.
 
 2005-06-27  Michael Snyder  <msnyder@redhat.com>
 

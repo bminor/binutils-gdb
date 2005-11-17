@@ -33,6 +33,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-script.h"
+#include "gdb_assert.h"
 
 /* Prototypes for local functions */
 
@@ -572,7 +573,8 @@ locate_arg (char *p)
 {
   while ((p = strchr (p, '$')))
     {
-      if (strncmp (p, "$arg", 4) == 0 && isdigit (p[4]))
+      if (strncmp (p, "$arg", 4) == 0
+	  && (isdigit (p[4]) || p[4] == 'c'))
 	return p;
       p++;
     }
@@ -596,12 +598,20 @@ insert_args (char *line)
       len += p - line;
       i = p[4] - '0';
 
-      if (i >= user_args->count)
+      if (p[4] == 'c')
+	{
+	  /* $argc.  Number will be <=10.  */
+	  len += user_args->count == 10 ? 2 : 1;
+	}
+      else if (i >= user_args->count)
 	{
 	  error (_("Missing argument %d in user function."), i);
 	  return NULL;
 	}
-      len += user_args->a[i].len;
+      else
+	{
+	  len += user_args->a[i].len;
+	}
       line = p + 5;
     }
 
@@ -625,13 +635,27 @@ insert_args (char *line)
 
       memcpy (new_line, line, p - line);
       new_line += p - line;
-      i = p[4] - '0';
 
-      len = user_args->a[i].len;
-      if (len)
+      if (p[4] == 'c')
 	{
-	  memcpy (new_line, user_args->a[i].arg, len);
-	  new_line += len;
+	  gdb_assert (user_args->count >= 0 && user_args->count <= 10);
+	  if (user_args->count == 10)
+	    {
+	      *(new_line++) = '1';
+	      *(new_line++) = '0';
+	    }
+	  else
+	    *(new_line++) = user_args->count + '0';
+	}
+      else
+	{
+	  i = p[4] - '0';
+	  len = user_args->a[i].len;
+	  if (len)
+	  {
+	    memcpy (new_line, user_args->a[i].arg, len);
+	    new_line += len;
+	  }
 	}
       line = p + 5;
     }

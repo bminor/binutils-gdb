@@ -2764,16 +2764,18 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
   if ((asect->flags & SEC_THREAD_LOCAL) != 0)
     {
       this_hdr->sh_flags |= SHF_TLS;
-      if (asect->size == 0 && (asect->flags & SEC_HAS_CONTENTS) == 0)
+      if (asect->size == 0
+	  && (asect->flags & SEC_HAS_CONTENTS) == 0)
 	{
-	  struct bfd_link_order *o;
+	  struct bfd_link_order *o = asect->map_tail.link_order;
 
 	  this_hdr->sh_size = 0;
-	  for (o = asect->map_head.link_order; o != NULL; o = o->next)
-	    if (this_hdr->sh_size < o->offset + o->size)
+	  if (o != NULL)
+	    {
 	      this_hdr->sh_size = o->offset + o->size;
-	  if (this_hdr->sh_size)
-	    this_hdr->sh_type = SHT_NOBITS;
+	      if (this_hdr->sh_size != 0)
+		this_hdr->sh_type = SHT_NOBITS;
+	    }
 	}
     }
 
@@ -4396,14 +4398,9 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 		  && sec->size == 0
 		  && (sec->flags & SEC_HAS_CONTENTS) == 0)
 		{
-		  struct bfd_link_order *o;
-		  bfd_vma tbss_size = 0;
-
-		  for (o = sec->map_head.link_order; o != NULL; o = o->next)
-		    if (tbss_size < o->offset + o->size)
-		      tbss_size = o->offset + o->size;
-
-		  p->p_memsz += tbss_size;
+		  struct bfd_link_order *o = sec->map_tail.link_order;
+		  if (o != NULL)
+		    p->p_memsz += o->offset + o->size;
 		}
 
 	      if (align > p->p_align

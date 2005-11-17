@@ -44,9 +44,9 @@ enum { FRV_PTR_SIZE = 4 };
 /* External versions; the size and alignment of the fields should be
    the same as those on the target.  When loaded, the placement of
    the bits in each field will be the same as on the target.  */
-typedef unsigned char ext_Elf32_Half[2];
-typedef unsigned char ext_Elf32_Addr[4];
-typedef unsigned char ext_Elf32_Word[4];
+typedef gdb_byte ext_Elf32_Half[2];
+typedef gdb_byte ext_Elf32_Addr[4];
+typedef gdb_byte ext_Elf32_Word[4];
 
 struct ext_elf32_fdpic_loadseg
 {
@@ -105,7 +105,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
   int version, seg, nsegs;
 
   /* Fetch initial portion of the loadmap.  */
-  if (target_read_memory (ldmaddr, (char *) &ext_ldmbuf_partial,
+  if (target_read_memory (ldmaddr, (gdb_byte *) &ext_ldmbuf_partial,
                           sizeof ext_ldmbuf_partial))
     {
       /* Problem reading the target's memory.  */
@@ -113,7 +113,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
     }
 
   /* Extract the version.  */
-  version = extract_unsigned_integer (&ext_ldmbuf_partial.version,
+  version = extract_unsigned_integer (ext_ldmbuf_partial.version,
                                       sizeof ext_ldmbuf_partial.version);
   if (version != 0)
     {
@@ -122,7 +122,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
     }
 
   /* Extract the number of segments.  */
-  nsegs = extract_unsigned_integer (&ext_ldmbuf_partial.nsegs,
+  nsegs = extract_unsigned_integer (ext_ldmbuf_partial.nsegs,
                                     sizeof ext_ldmbuf_partial.nsegs);
 
   /* Allocate space for the complete (external) loadmap.  */
@@ -135,7 +135,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Read the rest of the loadmap from the target.  */
   if (target_read_memory (ldmaddr + sizeof ext_ldmbuf_partial,
-                          (char *) ext_ldmbuf + sizeof ext_ldmbuf_partial,
+                          (gdb_byte *) ext_ldmbuf + sizeof ext_ldmbuf_partial,
                           ext_ldmbuf_size - sizeof ext_ldmbuf_partial))
     {
       /* Couldn't read rest of the loadmap.  */
@@ -155,13 +155,13 @@ fetch_loadmap (CORE_ADDR ldmaddr)
   for (seg = 0; seg < nsegs; seg++)
     {
       int_ldmbuf->segs[seg].addr
-	= extract_unsigned_integer (&ext_ldmbuf->segs[seg].addr,
+	= extract_unsigned_integer (ext_ldmbuf->segs[seg].addr,
 	                            sizeof (ext_ldmbuf->segs[seg].addr));
       int_ldmbuf->segs[seg].p_vaddr
-	= extract_unsigned_integer (&ext_ldmbuf->segs[seg].p_vaddr,
+	= extract_unsigned_integer (ext_ldmbuf->segs[seg].p_vaddr,
 	                            sizeof (ext_ldmbuf->segs[seg].p_vaddr));
       int_ldmbuf->segs[seg].p_memsz
-	= extract_unsigned_integer (&ext_ldmbuf->segs[seg].p_memsz,
+	= extract_unsigned_integer (ext_ldmbuf->segs[seg].p_memsz,
 	                            sizeof (ext_ldmbuf->segs[seg].p_memsz));
     }
 
@@ -171,7 +171,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
 /* External link_map and elf32_fdpic_loadaddr struct definitions.  */
 
-typedef unsigned char ext_ptr[4];
+typedef gdb_byte ext_ptr[4];
 
 struct ext_elf32_fdpic_loadaddr
 {
@@ -359,7 +359,7 @@ lm_base (void)
 {
   struct minimal_symbol *got_sym;
   CORE_ADDR addr;
-  char buf[FRV_PTR_SIZE];
+  gdb_byte buf[FRV_PTR_SIZE];
 
   /* If we already have a cached value, return it.  */
   if (lm_base_cache)
@@ -438,14 +438,14 @@ frv_current_sos (void)
 			    "current_sos: reading link_map entry at %s\n",
 			    hex_string_custom (lm_addr, 8));
 
-      if (target_read_memory (lm_addr, (char *) &lm_buf, sizeof (lm_buf)) != 0)
+      if (target_read_memory (lm_addr, (gdb_byte *) &lm_buf, sizeof (lm_buf)) != 0)
 	{
 	  warning (_("frv_current_sos: Unable to read link map entry.  Shared object chain may be incomplete."));
 	  break;
 	}
 
       got_addr
-	= extract_unsigned_integer (&lm_buf.l_addr.got_value,
+	= extract_unsigned_integer (lm_buf.l_addr.got_value,
 				    sizeof (lm_buf.l_addr.got_value));
       /* If the got_addr is the same as mgotr, then we're looking at the
 	 entry for the main executable.  By convention, we don't include
@@ -459,7 +459,7 @@ frv_current_sos (void)
 	  CORE_ADDR addr;
 
 	  /* Fetch the load map address.  */
-	  addr = extract_unsigned_integer (&lm_buf.l_addr.map,
+	  addr = extract_unsigned_integer (lm_buf.l_addr.map,
 					   sizeof lm_buf.l_addr.map);
 	  loadmap = fetch_loadmap (addr);
 	  if (loadmap == NULL)
@@ -474,7 +474,7 @@ frv_current_sos (void)
 	  sop->lm_info->got_value = got_addr;
 	  sop->lm_info->lm_addr = lm_addr;
 	  /* Fetch the name.  */
-	  addr = extract_unsigned_integer (&lm_buf.l_name,
+	  addr = extract_unsigned_integer (lm_buf.l_name,
 					   sizeof (lm_buf.l_name));
 	  target_read_string (addr, &name_buf, SO_NAME_MAX_PATH_SIZE - 1,
 			      &errcode);
@@ -502,7 +502,7 @@ frv_current_sos (void)
 	  main_lm_addr = lm_addr;
 	}
 
-      lm_addr = extract_unsigned_integer (&lm_buf.l_next, sizeof (lm_buf.l_next));
+      lm_addr = extract_unsigned_integer (lm_buf.l_next, sizeof (lm_buf.l_next));
     }
 
   enable_break2 ();
@@ -621,13 +621,13 @@ enable_break2 (void)
   if (interp_sect)
     {
       unsigned int interp_sect_size;
-      char *buf;
+      gdb_byte *buf;
       bfd *tmp_bfd = NULL;
       int tmp_fd = -1;
       char *tmp_pathname = NULL;
       int status;
       CORE_ADDR addr, interp_loadmap_addr;
-      char addr_buf[FRV_PTR_SIZE];
+      gdb_byte addr_buf[FRV_PTR_SIZE];
       struct int_elf32_fdpic_loadmap *ldm;
 
       /* Read the contents of the .interp section into a local buffer;
@@ -1185,7 +1185,7 @@ find_canonical_descriptor_in_load_object
       if ((name == 0 || strcmp (name, (*rel->sym_ptr_ptr)->name) == 0)
           && rel->howto->type == R_FRV_FUNCDESC)
 	{
-	  char buf[FRV_PTR_SIZE];
+	  gdb_byte buf [FRV_PTR_SIZE];
 
 	  /* Compute address of address of candidate descriptor.  */
 	  addr = rel->address + displacement_from_map (lm->map, rel->address);

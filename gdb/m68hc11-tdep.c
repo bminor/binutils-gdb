@@ -291,7 +291,7 @@ m68hc11_which_soft_register (CORE_ADDR addr)
 static void
 m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
 			      struct regcache *regcache,
-			      int regno, void *buf)
+			      int regno, gdb_byte *buf)
 {
   /* The PC is a pseudo reg only for 68HC12 with the memory bank
      addressing mode.  */
@@ -332,7 +332,7 @@ m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
 static void
 m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
 			       struct regcache *regcache,
-			       int regno, const void *buf)
+			       int regno, const gdb_byte *buf)
 {
   /* The PC is a pseudo reg only for 68HC12 with the memory bank
      addressing mode.  */
@@ -706,7 +706,8 @@ m68hc11_scan_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
                 break;
 
               save_addr -= 2;
-              info->saved_regs[saved_reg].addr = save_addr;
+              if (info->saved_regs)
+                info->saved_regs[saved_reg].addr = save_addr;
             }
           else
             {
@@ -905,7 +906,7 @@ m68hc11_frame_prev_register (struct frame_info *next_frame,
                              void **this_prologue_cache,
                              int regnum, int *optimizedp,
                              enum lval_type *lvalp, CORE_ADDR *addrp,
-                             int *realnump, void *bufferp)
+                             int *realnump, gdb_byte *bufferp)
 {
   struct m68hc11_unwind_cache *info
     = m68hc11_frame_unwind_cache (next_frame, this_prologue_cache);
@@ -1156,12 +1157,6 @@ m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 }
 
 static CORE_ADDR
-m68hc11_stack_align (CORE_ADDR addr)
-{
-  return ((addr + 1) & -2);
-}
-
-static CORE_ADDR
 m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                          struct regcache *regcache, CORE_ADDR bp_addr,
                          int nargs, struct value **args, CORE_ADDR sp,
@@ -1177,11 +1172,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   first_stack_argnum = 0;
   if (struct_return)
     {
-      /* The struct is allocated on the stack and gdb used the stack
-         pointer for the address of that struct.  We must apply the
-         stack offset on the address.  */
-      regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM,
-                                      struct_addr + STACK_CORRECTION);
+      regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM, struct_addr);
     }
   else if (nargs > 0)
     {
@@ -1324,8 +1315,8 @@ m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
 
 enum return_value_convention
 m68hc11_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		      struct regcache *regcache, void *readbuf,
-		      const void *writebuf)
+		      struct regcache *regcache, gdb_byte *readbuf,
+		      const gdb_byte *writebuf)
 {
   if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
       || TYPE_CODE (valtype) == TYPE_CODE_UNION
@@ -1526,7 +1517,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
-  set_gdbarch_deprecated_stack_align (gdbarch, m68hc11_stack_align);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_m68hc11);
 
   m68hc11_add_reggroups (gdbarch);

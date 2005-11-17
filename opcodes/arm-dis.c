@@ -2607,8 +2607,13 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  offset |= (given & 0x03ff0000u) >> 4;
 		  offset |= (given & 0x000007ffu) << 1;
 		  offset -= (1 << 24);
+		  offset += pc + 4;
 
-		  info->print_address_func (pc + 4 + offset, info);
+		  /* BLX target addresses are always word aligned.  */
+		  if ((given & 0x00001000u) == 0)
+		      offset &= ~2u;
+
+		  info->print_address_func (offset, info);
 		}
 		break;
 

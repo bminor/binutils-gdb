@@ -60,6 +60,7 @@ static int read_insn
 
 /* -- dis.c */
 static void print_dollarhex (CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int);
+static void print_pcrel (CGEN_CPU_DESC, PTR, long, unsigned, bfd_vma, int);
 
 static void
 print_dollarhex (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -77,6 +78,16 @@ print_dollarhex (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     print_normal (cd, dis_info, value, attrs, pc, length);
 }
 
+static void
+print_pcrel (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	     void * dis_info,
+	     long value,
+	     unsigned int attrs ATTRIBUTE_UNUSED,
+	     bfd_vma pc ATTRIBUTE_UNUSED,
+	     int length ATTRIBUTE_UNUSED)
+{
+  print_address (cd, dis_info, value + pc, attrs, pc, length);
+}
 
 /* -- */
 
@@ -128,6 +139,18 @@ ms1_cgen_print_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_BRC2 :
       print_dollarhex (cd, info, fields->f_brc2, 0, pc, length);
+      break;
+    case MS1_OPERAND_CB1INCR :
+      print_dollarhex (cd, info, fields->f_cb1incr, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case MS1_OPERAND_CB1SEL :
+      print_dollarhex (cd, info, fields->f_cb1sel, 0, pc, length);
+      break;
+    case MS1_OPERAND_CB2INCR :
+      print_dollarhex (cd, info, fields->f_cb2incr, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      break;
+    case MS1_OPERAND_CB2SEL :
+      print_dollarhex (cd, info, fields->f_cb2sel, 0, pc, length);
       break;
     case MS1_OPERAND_CBRB :
       print_dollarhex (cd, info, fields->f_cbrb, 0, pc, length);
@@ -186,8 +209,11 @@ ms1_cgen_print_operand (CGEN_CPU_DESC cd,
     case MS1_OPERAND_IMM16 :
       print_dollarhex (cd, info, fields->f_imm16s, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
+    case MS1_OPERAND_IMM16L :
+      print_dollarhex (cd, info, fields->f_imm16l, 0, pc, length);
+      break;
     case MS1_OPERAND_IMM16O :
-      print_dollarhex (cd, info, fields->f_imm16s, 0, pc, length);
+      print_pcrel (cd, info, fields->f_imm16s, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
       break;
     case MS1_OPERAND_IMM16Z :
       print_dollarhex (cd, info, fields->f_imm16u, 0, pc, length);
@@ -200,6 +226,9 @@ ms1_cgen_print_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_LENGTH :
       print_dollarhex (cd, info, fields->f_length, 0, pc, length);
+      break;
+    case MS1_OPERAND_LOOPSIZE :
+      print_pcrel (cd, info, fields->f_loopo, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
       break;
     case MS1_OPERAND_MASK :
       print_dollarhex (cd, info, fields->f_mask, 0, pc, length);
@@ -224,6 +253,9 @@ ms1_cgen_print_operand (CGEN_CPU_DESC cd,
       break;
     case MS1_OPERAND_RC2 :
       print_dollarhex (cd, info, fields->f_rc2, 0, pc, length);
+      break;
+    case MS1_OPERAND_RC3 :
+      print_dollarhex (cd, info, fields->f_rc3, 0, pc, length);
       break;
     case MS1_OPERAND_RCNUM :
       print_dollarhex (cd, info, fields->f_rcnum, 0, pc, length);

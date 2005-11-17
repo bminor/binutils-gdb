@@ -1656,6 +1656,92 @@ print_mips16_insn_arg (char type,
       }
       break;
 
+    case 'm':
+    case 'M':
+      /* MIPS16e save/restore.  */
+      {
+      int need_comma = 0;
+      int amask, args, statics;
+      int nsreg, smask;
+      int framesz;
+      int i, j;
+
+      l = l & 0x7f;
+      if (use_extend)
+        l |= extend << 16;
+
+      amask = (l >> 16) & 0xf;
+      if (amask == MIPS16_ALL_ARGS)
+        {
+          args = 4;
+          statics = 0;
+        }
+      else if (amask == MIPS16_ALL_STATICS)
+        {
+          args = 0;
+          statics = 4;
+        }
+      else
+        {
+          args = amask >> 2;
+          statics = amask & 3;
+        }
+
+      if (args > 0) {
+          (*info->fprintf_func) (info->stream, "%s", mips_gpr_names[4]);
+          if (args > 1)
+            (*info->fprintf_func) (info->stream, "-%s",
+                                   mips_gpr_names[4 + args - 1]);
+          need_comma = 1;
+      }
+
+      framesz = (((l >> 16) & 0xf0) | (l & 0x0f)) * 8;
+      if (framesz == 0 && !use_extend)
+        framesz = 128;
+
+      (*info->fprintf_func) (info->stream, "%s%d", 
+                             need_comma ? "," : "",
+                             framesz);
+
+      if (l & 0x40)                   /* $ra */
+        (*info->fprintf_func) (info->stream, ",%s", mips_gpr_names[31]);
+
+      nsreg = (l >> 24) & 0x7;
+      smask = 0;
+      if (l & 0x20)                   /* $s0 */
+        smask |= 1 << 0;
+      if (l & 0x10)                   /* $s1 */
+        smask |= 1 << 1;
+      if (nsreg > 0)                  /* $s2-$s8 */
+        smask |= ((1 << nsreg) - 1) << 2;
+
+      /* Find first set static reg bit.  */
+      for (i = 0; i < 9; i++)
+        {
+          if (smask & (1 << i))
+            {
+              (*info->fprintf_func) (info->stream, ",%s",
+                                     mips_gpr_names[i == 8 ? 30 : (16 + i)]);
+              /* Skip over string of set bits.  */
+              for (j = i; smask & (2 << j); j++)
+                continue;
+              if (j > i)
+                (*info->fprintf_func) (info->stream, "-%s",
+                                       mips_gpr_names[j == 8 ? 30 : (16 + j)]);
+              i = j + 1;
+            }
+        }
+
+      /* Statics $ax - $a3.  */
+      if (statics == 1)
+        (*info->fprintf_func) (info->stream, ",%s", mips_gpr_names[7]);
+      else if (statics > 0) 
+        (*info->fprintf_func) (info->stream, ",%s-%s", 
+                               mips_gpr_names[7 - statics + 1],
+                               mips_gpr_names[7]);
+      }
+      break;
+
     default:
       /* xgettext:c-format */
       (*info->fprintf_func)

@@ -300,7 +300,7 @@ frv_linux_sigtramp_frame_prev_register (struct frame_info *next_frame,
 				   void **this_cache,
 				   int regnum, int *optimizedp,
 				   enum lval_type *lvalp, CORE_ADDR *addrp,
-				   int *realnump, void *valuep)
+				   int *realnump, gdb_byte *valuep)
 {
   /* Make sure we've initialized the cache.  */
   struct trad_frame_cache *cache =

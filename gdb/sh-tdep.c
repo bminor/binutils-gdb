@@ -1285,7 +1285,7 @@ sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
 static enum return_value_convention
 sh_return_value_nofpu (struct gdbarch *gdbarch, struct type *type,
 		       struct regcache *regcache,
-		       void *readbuf, const void *writebuf)
+		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (sh_use_struct_convention (0, type))
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -1299,7 +1299,7 @@ sh_return_value_nofpu (struct gdbarch *gdbarch, struct type *type,
 static enum return_value_convention
 sh_return_value_fpu (struct gdbarch *gdbarch, struct type *type,
 		     struct regcache *regcache,
-		     void *readbuf, const void *writebuf)
+		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (sh_use_struct_convention (0, type))
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -1890,7 +1890,7 @@ dr_reg_base_num (int dr_regnum)
 
 static void
 sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
-			 int reg_nr, void *buffer)
+			 int reg_nr, gdb_byte *buffer)
 {
   int base_regnum, portion;
   char temp_buffer[MAX_REGISTER_SIZE];
@@ -1929,7 +1929,7 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static void
 sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
-			  int reg_nr, const void *buffer)
+			  int reg_nr, const gdb_byte *buffer)
 {
   int base_regnum, portion;
   char temp_buffer[MAX_REGISTER_SIZE];
@@ -2282,7 +2282,7 @@ static void
 sh_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			int regnum, int *optimizedp,
 			enum lval_type *lvalp, CORE_ADDR *addrp,
-			int *realnump, void *valuep)
+			int *realnump, gdb_byte *valuep)
 {
   struct sh_frame_cache *cache = sh_frame_cache (next_frame, this_cache);
 

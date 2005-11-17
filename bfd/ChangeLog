@@ -1,3 +1,40 @@
+2005-11-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 1150
+	* elfxx-mips.c (mips_elf_calculate_relocation): Ignore an
+	undefined symbol if it is optional.
+	(_bfd_mips_elf_merge_symbol_attribute): Make sure that the
+	optional flag is merged as well as the visibility.
+	* elfxx-mips.h (_bfd_mips_elf_merge_symbol_attribute): Prototype.
+	(elf_backend_merge_symbol_attribute): Define.
+
+2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Add ms2 support
+	* archures.c (bfd_mach_ms2): Define.
+	* cpu-ms1.c (arch_info_struct): Add ms2 stanza.
+	* elf32-ms1.c (elf32_ms1_machine): Add ms2 case.
+	(ms1_elf_merge_private_bfd_data): Remove unused variables.  Add
+	correct merging logic, with workaround.
+	(ms1_elf_print_private_bfd_data): Add ms2 case.
+	* reloc.c (BFD_RELOC_MS1_PCINSN8): Add ms2 specific reloc.
+	* libbfd.h: Regenerated.
+	* bfd-in2.h: Regenerated.
+
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
+	* warning.m4 (AM_BINUTILS_WARNINGS): Default to empty string
+	if compiler is not GCC.
+	* configure: Regenerate
+
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate after modifying bfd/warning.m4.
+
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure.host (ia64-*-hpux*): Set _LARGEFILE64_SOURCE.
+
 2005-11-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.in: Check for fopen64.
@@ -6,6 +43,21 @@
 	* bfdio.c (real_fopen): New function.
 	* opncls.c (bfd_fopen, bfd_fill_in_gnu_debuglink_section): Use it.
 	* cache.c (bfd_open_file): Likewise.
+
+2005-11-03  Thiemo Seufer  <ths@networkno.de>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Handle only
+	forced local symbols here.
+	(mips_elf_create_dynamic_relocation): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Fix typo in comment.
+
+2005-11-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elf_fake_sections): When calculating tbss size, just use
+	the last link_order.
+	(assign_file_positions_for_segments): Likewise.
+	* elflink.c (bfd_elf_final_link): Likewise.
+	(elf_reloc_link_order): Correct comment.
 
 2005-11-02  Alan Modra  <amodra@bigpond.net.au>
 

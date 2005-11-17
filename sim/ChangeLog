@@ -1,3 +1,8 @@
+2005-11-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/cris-tmpl.c (MY (f_model_insn_before)): Make sure only the
+	low 32 bits are used after an unsigned long cast.
+
 2005-05-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/Makefile.in (stamp-v32fmloop): Depend on stamp-v10fmloop.

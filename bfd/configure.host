@@ -29,6 +29,8 @@ hppa*-*-mpeix*)		HDEFINES=-DHOST_HPPAMPEIX ;;
 hppa*-*-bsd*)		HDEFINES=-DHOST_HPPABSD ;;
 hppa*-*-osf*)		HDEFINES=-DHOST_HPPAOSF ;;
 
+ia64-*-hpux*)		HDEFINES=-D_LARGEFILE64_SOURCE
+			host64=true;;
 ia64-*-*)		host64=true;;
 
 # Workaround for limitations on win9x where file contents are

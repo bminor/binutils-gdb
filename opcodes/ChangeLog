@@ -1,3 +1,51 @@
+2005-11-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_opcodes): Add frin,friz,frip,frim.  Correct
+	frsqrtes.
+
+2005-11-14  David Ung  <davidu@mips.com>
+
+	* mips16-opc.c: Add MIPS16e save/restore opcodes.
+	* mips-dis.c (print_mips16_insn_arg): Handle printing of 'm'/'M'
+	codes for save/restore.
+
+2005-11-10  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-dis.c (print_insn_m68k): Only match FPU insns with
+	coprocessor ID 1.
+
+2005-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* m32c-desc.c: Regenerated.
+
+2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Add ms2.
+	* ms1-asm.c, ms1-desc.c, ms1-desc.h, ms1-dis.c, ms1-ibld.c,
+	ms1-opc.c, ms1-opc.h: Regenerated.
+
+2005-11-07  Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate after modifying bfd/warning.m4.
+
+2005-11-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (ckprefix): Handle rex on fwait.  Don't print
+	ignored rex prefixes here.
+	(print_insn): Instead, handle them similarly to fwait followed
+	by non-fp insns.
+
+2005-11-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* iq2000-desc.c: Regenerated.
+	* iq2000-desc.h: Likewise.
+	* iq2000-dis.c: Likewise.
+	* iq2000-opc.c: Likewise.
+
+2005-11-02  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (print_insn_thumb32): Word align blx target address.
+
 2005-10-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* arm-dis.c (print_insn): Warning fix.
@@ -98,7 +146,7 @@
 
 	* configure.in: Add target architecture bfd_arch_z80.
 	* configure: Regenerated.
-	* disassemble.c (disassembler)<ARCH_z80>: Add case  
+	* disassemble.c (disassembler)<ARCH_z80>: Add case
 	bfd_arch_z80.
 	* z80-dis.c: New file.
 
@@ -259,7 +307,7 @@
 2005-08-23  David Ung  <davidu@mips.com>
 
 	* mips16-opc.c (mips16_opcodes): Add the MIPS16e jalrc/jrc
-	instructions to the table. 
+	instructions to the table.
 
 2005-08-18  Alan Modra  <amodra@bigpond.net.au>
 
@@ -394,7 +442,7 @@
 	* cgen-ops.h, cgen-types.h: New files.
 	* Makefile.am (HFILES): List them.
 	* Makefile.in: Regenerated.
-	
+
 2005-07-07  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* arc-dis.c, arm-dis.c, cris-dis.c, crx-dis.c, d10v-dis.c,
@@ -485,7 +533,7 @@
 	* vax-dis.c: Likewise.
 	* w65-dis.c: Likewise.
 	* z8kgen.c: Likewise.
-	
+
 	* fr30-*: Regenerate.
 	* frv-*: Regenerate.
 	* ip2k-*: Regenerate.
@@ -502,13 +550,13 @@
 
 2005-06-16  David Ung  <davidu@mips.com>
 
-        * mips16-opc.c (mips16_opcodes): Add the following MIPS16e
-        instructions to the table; seb/seh/sew/zeb/zeh/zew.
+	* mips16-opc.c (mips16_opcodes): Add the following MIPS16e
+	instructions to the table; seb/seh/sew/zeb/zeh/zew.
 
 2005-06-15  Dave Brolley  <brolley@redhat.com>
 
 	Contribute Morpho ms1 on behalf of Red Hat
-	* ms1-asm.c, ms1-desc.c, ms1-dis.c, ms1-ibld.c, ms1-opc.c, 
+	* ms1-asm.c, ms1-desc.c, ms1-dis.c, ms1-ibld.c, ms1-opc.c,
 	ms1-opc.h: New files, Morpho ms1 target.
 
 	2004-05-14  Stan Cox  <scox@redhat.com>

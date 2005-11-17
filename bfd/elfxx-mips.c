@@ -3792,6 +3792,17 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  BFD_ASSERT (bfd_get_section_by_name (abfd, ".dynamic") == NULL);
 	  symbol = 0;
 	}
+      else if (ELF_MIPS_IS_OPTIONAL (h->root.other))
+	{
+	  /* This is an optional symbol - an Irix specific extension to the
+	     ELF spec.  Ignore it for now.
+	     XXX - FIXME - there is more to the spec for OPTIONAL symbols
+	     than simply ignoring them, but we do not handle this for now.
+	     For information see the "64-bit ELF Object File Specification"
+	     which is available from here:
+	     http://techpubs.sgi.com/library/manuals/4000/007-4658-001/pdf/007-4658-001.pdf  */
+	  symbol = 0;
+	}
       else
 	{
 	  if (! ((*info->callbacks->undefined_symbol)
@@ -3918,7 +3929,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  if (h->tls_type == GOT_NORMAL
 	      && (! elf_hash_table(info)->dynamic_sections_created
 		  || (info->shared
-		      && (info->symbolic || h->root.dynindx == -1)
+		      && (info->symbolic || h->root.forced_local)
 		      && h->root.def_regular)))
 	    {
 	      /* This is a static link or a -Bsymbolic link.  The
@@ -4483,10 +4494,8 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
   /* We must now calculate the dynamic symbol table index to use
      in the relocation.  */
   if (h != NULL
-      && (! info->symbolic || !h->root.def_regular)
-      /* h->root.dynindx may be -1 if this symbol was marked to
-	 become local.  */
-      && h->root.dynindx != -1)
+      && (!h->root.def_regular
+	  || (info->shared && !info->symbolic && !h->root.forced_local)))
     {
       indx = h->root.dynindx;
       if (SGI_COMPAT (output_bfd))
@@ -7379,7 +7388,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 				   MIPS_ELF_STUB_SECTION_NAME (dynobj));
       BFD_ASSERT (s != NULL);
 
-      /* FIXME: Can h->dynindex be more than 64K?  */
+      /* FIXME: Can h->dynindx be more than 64K?  */
       if (h->dynindx & 0xffff0000)
 	return FALSE;
 
@@ -8869,8 +8878,7 @@ _bfd_elf_mips_get_relocated_section_contents
 		case bfd_reloc_undefined:
 		  if (!((*link_info->callbacks->undefined_symbol)
 			(link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-			 input_bfd, input_section, (*parent)->address,
-			 TRUE)))
+			 input_bfd, input_section, (*parent)->address, TRUE)))
 		    goto error_return;
 		  break;
 		case bfd_reloc_dangerous:
@@ -9996,3 +10004,16 @@ const struct bfd_elf_special_section _bfd_mips_elf_special_sections[] =
   { ".ucode",  6,  0, SHT_MIPS_UCODE, 0 },
   { NULL,      0,  0, 0,              0 }
 };
+
+/* Ensure that the STO_OPTIONAL flag is copied into h->other,
+   even if this is not a defintion of the symbol.  */
+void
+_bfd_mips_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
+				      const Elf_Internal_Sym *isym,
+				      bfd_boolean definition,
+				      bfd_boolean dynamic ATTRIBUTE_UNUSED)
+{
+  if (! definition
+      && ELF_MIPS_IS_OPTIONAL (isym->st_other))
+    h->other |= STO_OPTIONAL;
+}

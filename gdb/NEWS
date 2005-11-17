@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes in GDB 6.4
+*** Changes since GDB 6.3
 
 * New native configurations
 
@@ -11,6 +11,16 @@ OpenBSD/mips64			mips64-*-openbsd*
 * New targets
 
 Morpho Technologies ms1		ms1-elf
+
+* New command line options
+
+--batch-silent			As for --batch, but totally silent.
+--return-child-result		The debugger will exist with the same value
+				the child (debugged) program exited with.
+--eval-command COMMAND, -ex COMMAND
+				Execute a single GDB CLI command. This may be
+				specified multiple times and in conjunction
+				with the --command (-x) option.
 
 * Deprecated commands removed
 
@@ -59,6 +69,12 @@ behavior.
 * VAX floating point support
 
 GDB now supports the not-quite-ieee VAX F and D floating point formats.
+
+* User-defined command support
+
+In addition to using $arg0..$arg9 for argument passing, it is now possible
+to use $argc to determine now many arguments have been passed.  See the
+section on user-defined commands in the user manual for more information.
 
 *** Changes in GDB 6.3:
 

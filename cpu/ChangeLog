@@ -1,3 +1,25 @@
+2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Add ms2
+	* ms1.cpu (ms2, ms2bf): New architecture variant, cpu, machine and
+	model.
+	(f-uu8, f-uu1, f-imm16l, f-loopo, f-cb1sel, f-cb2sel, f-cb1incr,
+	f-cb2incr, f-rc3): New fields.
+	(LOOP): New instruction.
+	(JAL-HAZARD): New hazard.
+	(imm16o, loopsize, imm16l, rc3, cb1sel, cb2sel, cb1incr, cb2incr):
+	New operands.
+	(mul, muli, dbnz, iflush): Enable for ms2
+	(jal, reti): Has JAL-HAZARD.
+	(ldctxt, ldfb, stfb): Only ms1.
+	(fbcb): Only ms1,ms1-003.
+	(wfbinc, mefbinc, wfbincr, mwfbincr, fbcbincs, mfbcbincs,
+	fbcbincrs, mfbcbincrs): Enable for ms2.
+	(loop, loopu, dfbc, dwfb, fbwfb, dfbr): New ms2 insns.
+	* ms1.opc (parse_loopsize): New.
+	(parse_imm16): hi16/lo16 relocs are applicable to IMM16L.
+	(print_pcrel): New.
+
 2005-10-28  Dave Brolley  <brolley@redhat.com>
 
 	Contribute the following change:
