@@ -1,3 +1,39 @@
+2005-11-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h (lang_input_section_type): Remove "ifile" field.
+	(lang_insert_orphan, lang_add_section): Update prototypes.
+	* ldlang.c (lang_insert_orphan): Remove "file" param.
+	(lang_add_section): Likewise.  Update all callers.
+	(wild_sort): Get an input section's bfd via "section->owner".
+	(size_input_section): Access just_syms_flag via bfd usrdata.
+	(lang_place_orphans): Update ldemul_place_orphan call.
+	* ldemul.h (ldemul_place_orphan): Remove input_statement param.
+	(struct ld_emulation_xfer_struct <place_orphan>): Likewise.
+	* ldemul.c (ldemul_place_orphan): Likewise.
+	* ldwrite.c (build_link_order): Access just_syms_flag via bfd usrdata.
+	* emultempl/armelf.em (arm_elf_set_bfd_for_interworking): Likewise.
+	* emultempl/beos.em (sort_by_file_name): Access bfd by section->owner.
+	(sort_sections): Likewise.
+	(place_orphan): Remove "file" param.  Adjust lang_add_section call.
+	* emultempl/elf32.em (place_orphan): Remove "file" param.  Adjust
+	lang_add_section and lang_insert_orphan calls.
+	* emultempl/hppaelf.em (hppaelf_add_stub_section): Adjust
+	lang_add_section call.
+	(build_section_lists): Access just_syms_flag via bfd usrdata.
+	* emultempl/m68hc1xelf.em (m68hc11elf_add_stub_section): Adjust
+	lang_add_section call.
+	* emultempl/mmo.em (mmo_place_orphan): Remove "file" param.  Adjust
+	lang_add_section and lang_insert_orphan calls.
+	* emultempl/pe.em (place_orphan): Likewise.  Access bfd via section
+	owner.
+	* emultempl/ppc64elf.em (ppc_add_stub_section): Adjust
+	lang_add_section call.
+	(build_toc_list): Access just_syms_flag via bfd usrdata.
+	(build_section_lists): Likewise.
+	* emultempl/xtensaelf.em (elf_xtensa_place_orphan): Remove "file"
+	param.  Adjust place_orphan call.
+	(ld_build_required_section_dependence): Access bfd via section owner.
+
 2005-11-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (lang_output_section_statement_type): Add prev.

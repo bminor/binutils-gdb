@@ -1518,7 +1518,7 @@ gld_${EMULATION_NAME}_finish (void)
    sort_sections.  */
 
 static bfd_boolean
-gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
+gld_${EMULATION_NAME}_place_orphan (asection *s)
 {
   const char *secname;
   const char *orig_secname;
@@ -1555,7 +1555,7 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 	 If the section already exists but does not have any flags set,
 	 then it has been created by the linker, probably as a result of
 	 a --section-start command line switch.  */
-      lang_add_section (&add_child, s, os, file);
+      lang_add_section (&add_child, s, os);
     }
   else
     {
@@ -1641,8 +1641,7 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 
       /* All sections in an executable must be aligned to a page boundary.  */
       address = exp_unop (ALIGN_K, exp_nameop (NAME, "__section_alignment__"));
-      os = lang_insert_orphan (file, s, secname, after, place, address,
-			       &add_child);
+      os = lang_insert_orphan (s, secname, after, place, address, &add_child);
     }
 
   {
@@ -1665,7 +1664,7 @@ gld_${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s
 
 	    ls = &(*pl)->input_section;
 
-	    lname = bfd_get_section_name (ls->ifile->the_bfd, ls->section);
+	    lname = bfd_get_section_name (ls->section->owner, ls->section);
 	    if (strchr (lname, '$') == NULL)
 	      {
 		if (found_dollar)

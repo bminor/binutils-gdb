@@ -59,13 +59,13 @@ elf_xtensa_choose_target (int argc ATTRIBUTE_UNUSED,
 
 
 static bfd_boolean
-elf_xtensa_place_orphan (lang_input_statement_type *file, asection *s)
+elf_xtensa_place_orphan (asection *s)
 {
   /* Early exit for relocatable links.  */
   if (link_info.relocatable)
     return FALSE;
 
-  return gld${EMULATION_NAME}_place_orphan (file, s);
+  return gld${EMULATION_NAME}_place_orphan (s);
 }
 
 
@@ -1137,7 +1137,7 @@ ld_build_required_section_dependence (lang_statement_union_type *s)
 	{
 	  lang_input_section_type *input;
 	  input = &l->input_section;
-	  xtensa_callback_required_dependence (input->ifile->the_bfd,
+	  xtensa_callback_required_dependence (input->section->owner,
 					       input->section,
 					       &link_info,
 					       /* Use the same closure.  */

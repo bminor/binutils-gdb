@@ -71,24 +71,27 @@ arm_elf_after_open (void)
 static void
 arm_elf_set_bfd_for_interworking (lang_statement_union_type *statement)
 {
-  if (statement->header.type == lang_input_section_enum
-      && !statement->input_section.ifile->just_syms_flag
-      && (statement->input_section.section->flags & SEC_EXCLUDE) == 0)
+  if (statement->header.type == lang_input_section_enum)
     {
       asection *i = statement->input_section.section;
-      asection *output_section = i->output_section;
 
-      ASSERT (output_section->owner == output_bfd);
-
-      /* Don't attach the interworking stubs to a dynamic object, to
-	 an empty section, etc.  */
-      if ((output_section->flags & SEC_HAS_CONTENTS) != 0
-	  && (i->flags & SEC_NEVER_LOAD) == 0
-	  && ! (i->owner->flags & DYNAMIC)
-	  && ! i->owner->output_has_begun)
+      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+	  && (i->flags & SEC_EXCLUDE) == 0)
 	{
-	  bfd_for_interwork = i->owner;
-	  bfd_for_interwork->output_has_begun = TRUE;
+	  asection *output_section = i->output_section;
+
+	  ASSERT (output_section->owner == output_bfd);
+
+	  /* Don't attach the interworking stubs to a dynamic object, to
+	     an empty section, etc.  */
+	  if ((output_section->flags & SEC_HAS_CONTENTS) != 0
+	      && (i->flags & SEC_NEVER_LOAD) == 0
+	      && ! (i->owner->flags & DYNAMIC)
+	      && ! i->owner->output_has_begun)
+	    {
+	      bfd_for_interwork = i->owner;
+	      bfd_for_interwork->output_has_begun = TRUE;
+	    }
 	}
     }
 }

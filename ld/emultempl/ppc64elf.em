@@ -235,7 +235,7 @@ ppc_add_stub_section (const char *stub_sec_name, asection *input_section)
 
   info.input_section = input_section;
   lang_list_init (&info.add);
-  lang_add_section (&info.add, stub_sec, os, stub_file);
+  lang_add_section (&info.add, stub_sec, os);
 
   if (info.add.head == NULL)
     goto err_ret;
@@ -277,26 +277,33 @@ gld${EMULATION_NAME}_after_allocation (void)
 static void
 build_toc_list (lang_statement_union_type *statement)
 {
-  if (statement->header.type == lang_input_section_enum
-      && !statement->input_section.ifile->just_syms_flag
-      && (statement->input_section.section->flags & SEC_EXCLUDE) == 0
-      && statement->input_section.section->output_section == toc_section)
-    ppc64_elf_next_toc_section (&link_info, statement->input_section.section);
+  if (statement->header.type == lang_input_section_enum)
+    {
+      asection *i = statement->input_section.section;
+
+      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+	  && (i->flags & SEC_EXCLUDE) == 0
+	  && i->output_section == toc_section)
+	ppc64_elf_next_toc_section (&link_info, i);
+    }
 }
 
 
 static void
 build_section_lists (lang_statement_union_type *statement)
 {
-  if (statement->header.type == lang_input_section_enum
-      && !statement->input_section.ifile->just_syms_flag
-      && (statement->input_section.section->flags & SEC_EXCLUDE) == 0
-      && statement->input_section.section->output_section != NULL
-      && statement->input_section.section->output_section->owner == output_bfd)
+  if (statement->header.type == lang_input_section_enum)
     {
-      if (!ppc64_elf_next_input_section (&link_info,
-					 statement->input_section.section))
-	einfo ("%X%P: can not size stub section: %E\n");
+      asection *i = statement->input_section.section;
+
+      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+	  && (i->flags & SEC_EXCLUDE) == 0
+	  && i->output_section != NULL
+	  && i->output_section->owner == output_bfd)
+	{
+	  if (!ppc64_elf_next_input_section (&link_info, i))
+	    einfo ("%X%P: can not size stub section: %E\n");
+	}
     }
 }
 

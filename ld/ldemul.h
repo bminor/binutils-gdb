@@ -54,7 +54,7 @@ extern void ldemul_set_symbols
 extern void ldemul_create_output_section_statements
   (void);
 extern bfd_boolean ldemul_place_orphan
-  (struct lang_input_statement_struct *, asection *);
+  (asection *);
 extern bfd_boolean ldemul_parse_args
   (int, char **);
 extern void ldemul_add_options
@@ -147,7 +147,7 @@ typedef struct ld_emulation_xfer_struct {
      the default action should be taken.  This field may be NULL, in
      which case the default action will always be taken.  */
   bfd_boolean (*place_orphan)
-    (struct lang_input_statement_struct *, asection *);
+    (asection *);
 
   /* Run after assigning parsing with the args, but before
      reading the script.  Used to initialize symbols used in the script.  */

@@ -198,7 +198,7 @@ hppaelf_add_stub_section (const char *stub_sec_name, asection *input_section)
 
   info.input_section = input_section;
   lang_list_init (&info.add);
-  lang_add_section (&info.add, stub_sec, os, stub_file);
+  lang_add_section (&info.add, stub_sec, os);
 
   if (info.add.head == NULL)
     goto err_ret;
@@ -229,14 +229,17 @@ hppaelf_layout_sections_again (void)
 static void
 build_section_lists (lang_statement_union_type *statement)
 {
-  if (statement->header.type == lang_input_section_enum
-      && !statement->input_section.ifile->just_syms_flag
-      && (statement->input_section.section->flags & SEC_EXCLUDE) == 0
-      && statement->input_section.section->output_section != NULL
-      && statement->input_section.section->output_section->owner == output_bfd)
+  if (statement->header.type == lang_input_section_enum)
     {
-      elf32_hppa_next_input_section (&link_info,
-				     statement->input_section.section);
+      asection *i = statement->input_section.section;
+
+      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+	  && (i->flags & SEC_EXCLUDE) == 0
+	  && i->output_section != NULL
+	  && i->output_section->owner == output_bfd)
+	{
+	  elf32_hppa_next_input_section (&link_info, i);
+	}
     }
 }
 

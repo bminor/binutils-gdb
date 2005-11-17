@@ -218,43 +218,46 @@ build_link_order (lang_statement_union_type *statement)
       break;
 
     case lang_input_section_enum:
-      /* Create a new link_order in the output section with this
-	 attached */
-      if (!statement->input_section.ifile->just_syms_flag
-	  && (statement->input_section.section->flags & SEC_EXCLUDE) == 0)
-	{
-	  asection *i = statement->input_section.section;
-	  asection *output_section = i->output_section;
+      {
+	/* Create a new link_order in the output section with this
+	   attached */
+	asection *i = statement->input_section.section;
 
-	  ASSERT (output_section->owner == output_bfd);
+	if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+	    && (i->flags & SEC_EXCLUDE) == 0)
+	  {
+	    asection *output_section = i->output_section;
 
-	  if ((output_section->flags & SEC_HAS_CONTENTS) != 0
-	      || ((output_section->flags & SEC_LOAD) != 0
-		  && (output_section->flags & SEC_THREAD_LOCAL)))
-	    {
-	      struct bfd_link_order *link_order;
+	    ASSERT (output_section->owner == output_bfd);
 
-	      link_order = bfd_new_link_order (output_bfd, output_section);
+	    if ((output_section->flags & SEC_HAS_CONTENTS) != 0
+		|| ((output_section->flags & SEC_LOAD) != 0
+		    && (output_section->flags & SEC_THREAD_LOCAL)))
+	      {
+		struct bfd_link_order *link_order;
 
-	      if (i->flags & SEC_NEVER_LOAD)
-		{
-		  /* We've got a never load section inside one which
-		     is going to be output, we'll change it into a
-		     fill.  */
-		  link_order->type = bfd_data_link_order;
-		  link_order->u.data.contents = (unsigned char *) "";
-		  link_order->u.data.size = 1;
-		}
-	      else
-		{
-		  link_order->type = bfd_indirect_link_order;
-		  link_order->u.indirect.section = i;
-		  ASSERT (i->output_section == output_section);
-		}
-	      link_order->size = i->size;
-	      link_order->offset = i->output_offset;
-	    }
-	}
+		link_order = bfd_new_link_order (output_bfd, output_section);
+
+		if (i->flags & SEC_NEVER_LOAD)
+		  {
+		    /* We've got a never load section inside one which
+		       is going to be output, we'll change it into a
+		       fill.  */
+		    link_order->type = bfd_data_link_order;
+		    link_order->u.data.contents = (unsigned char *) "";
+		    link_order->u.data.size = 1;
+		  }
+		else
+		  {
+		    link_order->type = bfd_indirect_link_order;
+		    link_order->u.indirect.section = i;
+		    ASSERT (i->output_section == output_section);
+		  }
+		link_order->size = i->size;
+		link_order->offset = i->output_offset;
+	      }
+	  }
+      }
       break;
 
     case lang_padding_statement_enum:

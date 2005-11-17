@@ -272,7 +272,7 @@ m68hc11elf_add_stub_section (const char *stub_sec_name,
      at the correct place.  */
   info.input_section = tramp_section;
   lang_list_init (&info.add);
-  lang_add_section (&info.add, stub_sec, os, stub_file);
+  lang_add_section (&info.add, stub_sec, os);
 
   if (info.add.head == NULL)
     goto err_ret;

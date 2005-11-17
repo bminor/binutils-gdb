@@ -1313,8 +1313,7 @@ output_prev_sec_find (lang_output_section_statement_type *os)
 }
 
 lang_output_section_statement_type *
-lang_insert_orphan (lang_input_statement_type *file,
-		    asection *s,
+lang_insert_orphan (asection *s,
 		    const char *secname,
 		    lang_output_section_statement_type *after,
 		    struct orphan_save *place,
@@ -1385,7 +1384,7 @@ lang_insert_orphan (lang_input_statement_type *file,
 
   if (add_child == NULL)
     add_child = &os->children;
-  lang_add_section (add_child, s, os, file);
+  lang_add_section (add_child, s, os);
 
   lang_leave_output_section_statement (0, "*default*", NULL, NULL);
 
@@ -1811,8 +1810,7 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
 void
 lang_add_section (lang_statement_list_type *ptr,
 		  asection *section,
-		  lang_output_section_statement_type *output,
-		  lang_input_statement_type *file)
+		  lang_output_section_statement_type *output)
 {
   flagword flags = section->flags;
   bfd_boolean discard;
@@ -1870,7 +1868,6 @@ lang_add_section (lang_statement_list_type *ptr,
       new = new_stat (lang_input_section, ptr);
 
       new->section = section;
-      new->ifile = file;
       section->output_section = output->bfd_section;
 
       flags = section->flags;
@@ -2046,15 +2043,14 @@ wild_sort (lang_wild_statement_type *wild,
 	      fa = FALSE;
 	    }
 
-	  if (ls->ifile->the_bfd != NULL
-	      && bfd_my_archive (ls->ifile->the_bfd) != NULL)
+	  if (bfd_my_archive (ls->section->owner) != NULL)
 	    {
-	      ln = bfd_get_filename (bfd_my_archive (ls->ifile->the_bfd));
+	      ln = bfd_get_filename (bfd_my_archive (ls->section->owner));
 	      la = TRUE;
 	    }
 	  else
 	    {
-	      ln = ls->ifile->filename;
+	      ln = ls->section->owner->filename;
 	      la = FALSE;
 	    }
 
@@ -2069,7 +2065,7 @@ wild_sort (lang_wild_statement_type *wild,
 	      if (fa)
 		fn = file->filename;
 	      if (la)
-		ln = ls->ifile->filename;
+		ln = ls->section->owner->filename;
 
 	      i = strcmp (fn, ln);
 	      if (i > 0)
@@ -2115,8 +2111,7 @@ output_section_callback (lang_wild_statement_type *ptr,
 
   if (before == NULL)
     lang_add_section (&ptr->children, section,
-		      (lang_output_section_statement_type *) output,
-		      file);
+		      (lang_output_section_statement_type *) output);
   else
     {
       lang_statement_list_type list;
@@ -2124,8 +2119,7 @@ output_section_callback (lang_wild_statement_type *ptr,
 
       lang_list_init (&list);
       lang_add_section (&list, section,
-			(lang_output_section_statement_type *) output,
-			file);
+			(lang_output_section_statement_type *) output);
 
       /* If we are discarding the section, LIST.HEAD will
 	 be NULL.  */
@@ -3903,7 +3897,8 @@ size_input_section
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
 
-  if (!is->ifile->just_syms_flag && (i->flags & SEC_EXCLUDE) == 0)
+  if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+      && (i->flags & SEC_EXCLUDE) == 0)
     {
       unsigned int alignment_needed;
       asection *o;
@@ -5061,17 +5056,17 @@ lang_place_orphans (void)
 
 			}
 		      lang_add_section (&default_common_section->children, s,
-					default_common_section, file);
+					default_common_section);
 		    }
 		}
-	      else if (ldemul_place_orphan (file, s))
+	      else if (ldemul_place_orphan (s))
 		;
 	      else
 		{
 		  lang_output_section_statement_type *os;
 
 		  os = lang_output_section_statement_lookup (s->name);
-		  lang_add_section (&os->children, s, os, file);
+		  lang_add_section (&os->children, s, os);
 		}
 	    }
 	}

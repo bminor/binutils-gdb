@@ -59,8 +59,7 @@ Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA. 
 static void gld${EMULATION_NAME}_before_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
-static bfd_boolean gld${EMULATION_NAME}_place_orphan
-  (lang_input_statement_type *file, asection *s);
+static bfd_boolean gld${EMULATION_NAME}_place_orphan (asection *s);
 static void gld${EMULATION_NAME}_layout_sections_again (void);
 static void gld${EMULATION_NAME}_finish (void) ATTRIBUTE_UNUSED;
 
@@ -1283,7 +1282,7 @@ output_rel_find (asection *sec, int isdyn)
    sections in the right segment.  */
 
 static bfd_boolean
-gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
+gld${EMULATION_NAME}_place_orphan (asection *s)
 {
   static struct orphan_save hold[] =
     {
@@ -1374,7 +1373,7 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 	     If the section already exists but does not have any flags
 	     set, then it has been created by the linker, probably as a
 	     result of a --section-start command line switch.  */
-	  lang_add_section (&os->children, s, os, file);
+	  lang_add_section (&os->children, s, os);
 	  return TRUE;
 	}
     }
@@ -1400,7 +1399,7 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
       && hold[orphan_text].os != NULL)
     {
       lang_add_section (&hold[orphan_text].os->children, s,
-			hold[orphan_text].os, file);
+			hold[orphan_text].os);
       return TRUE;
     }
 
@@ -1461,7 +1460,7 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
 	einfo ("%F%P: place_orphan failed: %E\n");
     }
 
-  lang_insert_orphan (file, s, secname, after, place, NULL, NULL);
+  lang_insert_orphan (s, secname, after, place, NULL, NULL);
 
   return TRUE;
 }

@@ -121,10 +121,10 @@ ldemul_open_dynamic_archive (const char *arch, search_dirs_type *search,
 }
 
 bfd_boolean
-ldemul_place_orphan (lang_input_statement_type *file, asection *s)
+ldemul_place_orphan (asection *s)
 {
   if (ld_emulation->place_orphan)
-    return (*ld_emulation->place_orphan) (file, s);
+    return (*ld_emulation->place_orphan) (s);
   return FALSE;
 }
 

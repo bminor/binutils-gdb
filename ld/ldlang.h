@@ -285,8 +285,6 @@ typedef struct
 {
   lang_statement_header_type header;
   asection *section;
-  lang_input_statement_type *ifile;
-
 } lang_input_section_type;
 
 typedef struct
@@ -525,9 +523,8 @@ extern lang_output_section_statement_type *lang_output_section_find
 extern lang_output_section_statement_type *lang_output_section_find_by_flags
   (const asection *, lang_output_section_statement_type **exact);
 extern lang_output_section_statement_type *lang_insert_orphan
-  (lang_input_statement_type *, asection *, const char *,
-   lang_output_section_statement_type *, struct orphan_save *,
-   etree_type *, lang_statement_list_type *);
+  (asection *, const char *, lang_output_section_statement_type *,
+   struct orphan_save *, etree_type *, lang_statement_list_type *);
 extern lang_input_statement_type *lang_add_input_file
   (const char *, lang_input_file_enum_type, const char *);
 extern void lang_add_keepsyms_file
@@ -564,7 +561,7 @@ extern void lang_leave_group
   (void);
 extern void lang_add_section
   (lang_statement_list_type *, asection *,
-   lang_output_section_statement_type *, lang_input_statement_type *);
+   lang_output_section_statement_type *);
 extern void lang_new_phdr
   (const char *, etree_type *, bfd_boolean, bfd_boolean, etree_type *,
    etree_type *);
