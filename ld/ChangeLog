@@ -1,3 +1,10 @@
+2005-11-16  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (configdoc.texi): Set top_srcdir in configdoc.texi..
+	* Makefile.in: Regenerated.
+	* ld.texinfo: Include configdoc.texi and ldver.texi in man pages.
+	Add @file documentation.
+	
 2005-11-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (lang_input_section_type): Remove "ifile" field.

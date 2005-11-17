@@ -2445,9 +2445,8 @@ bootstrap: ld3$(EXEEXT)
 # because almost all configs use "gen" version of manual.
 #  Set DOCVER above to change.
 configdoc.texi:	${DOCVER}-doc.texi
-	ln -s ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
-	  || ln ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi >/dev/null 2>&1 \
-	  || cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
+	cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
+	echo "@set top_srcdir $(top_srcdir)" >> ./configdoc.texi
 
 ldver.texi: $(srcdir)/../bfd/configure
 	rm -f $@

@@ -58,10 +58,15 @@ POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
 info_TEXINFOS = gprof.texi
 man_MANS = gprof.1
 
+$(srcdir)/gprof.info: gprof.texi config.texi
+
+config.texi:
+	echo "@set top_srcdir $(top_srcdir)" >> ./config.texi
+
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that
 # the man output looks standard.
-gprof.1: $(srcdir)/gprof.texi
+gprof.1: $(srcdir)/gprof.texi config.texi
 	touch $@
 	-$(TEXI2POD) $(MANCONF) -Dgprof < $(srcdir)/gprof.texi > gprof.pod
 	-($(POD2MAN) gprof.pod | \

@@ -2,7 +2,9 @@
 @setfilename binutils.info
 @c Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
+@c man begin INCLUDE
 @include config.texi
+@c man end
 
 @ifinfo
 @format
@@ -3505,8 +3507,10 @@ objdump(1), and the Info entries for @file{binutils}.
 The following command-line options are supported by all of the
 programs described in this manual.
 
+@c man begin OPTIONS
 @table @env
 @include @value{top_srcdir}/../libiberty/at-file.texi
+@c man end
 
 @item --help
 Display the command-line options supported by the program.
@@ -3514,7 +3518,9 @@ Display the command-line options supported by the program.
 @item --version
 Display the version number of the program.
 
+@c man begin OPTIONS
 @end table
+@c man end
 
 @node Selecting The Target System
 @chapter Selecting the Target System

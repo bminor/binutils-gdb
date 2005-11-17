@@ -1,3 +1,9 @@
+2005-11-16  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (gprof.info, gprof.1): Depend on config.texi.
+	(config.texi): New file.
+	* Makefile.in: Regenerated.
+
 2005-11-07  Steve Ellcey  <sje@cup.hp.com>
 
 	* configure: Regenerate after modifying bfd/warning.m4.
