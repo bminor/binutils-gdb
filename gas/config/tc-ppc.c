@@ -1931,7 +1931,7 @@ ppc_frob_file_before_adjust ()
       dotname = xmalloc (len + 1);
       dotname[0] = '.';
       memcpy (dotname + 1, name, len);
-      dotsym = symbol_find (dotname);
+      dotsym = symbol_find_noref (dotname, 1);
       free (dotname);
       if (dotsym != NULL && (symbol_used_p (dotsym)
 			     || symbol_used_in_reloc_p (dotsym)))

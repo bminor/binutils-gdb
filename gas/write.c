@@ -1513,7 +1513,8 @@ write_object_file (void)
 		 opposites.  Sometimes the former checks flags and the
 		 latter examines the name...  */
 	      || (!S_IS_EXTERNAL (symp)
-		  && (punt || S_IS_LOCAL (symp) || S_IS_WEAKREFD (symp))
+		  && (punt || S_IS_LOCAL (symp) ||
+		      (S_IS_WEAKREFD (symp) && ! symbol_used_p (symp)))
 		  && ! symbol_used_in_reloc_p (symp)))
 	    {
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
