@@ -278,6 +278,8 @@ main (int argc, char **argv)
       /* Echo the whitespace characters so that the output looks
 	 like the input, only with the mangled names demangled.  */
       putchar (c);
+      if (c == '\n')
+	fflush (stdout);
     }
 
   fflush (stdout);
