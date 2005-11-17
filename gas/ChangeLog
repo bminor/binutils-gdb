@@ -1,5 +1,10 @@
 2005-11-17  Jan Beulich  <jbeulich@novell.com>
 
+	* dw2gencfi.c (dot_cfi): Put argument parsing for cases
+	DW_CFA_restore and DW_CFA_undefined in a loop.
+
+2005-11-17  Jan Beulich  <jbeulich@novell.com>
+
 
 	* symbols.h (S_CLEAR_VOLATILE): Declare.
 	* symbols.c (colon): Also accept redefinable symbols for

@@ -502,13 +502,27 @@ dot_cfi (int arg)
       break;
 
     case DW_CFA_restore:
-      reg1 = cfi_parse_reg ();
-      cfi_add_CFA_restore (reg1);
+      for (;;)
+	{
+	  reg1 = cfi_parse_reg ();
+	  cfi_add_CFA_restore (reg1);
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer != ',')
+	    break;
+	  ++input_line_pointer;
+	}
       break;
 
     case DW_CFA_undefined:
-      reg1 = cfi_parse_reg ();
-      cfi_add_CFA_undefined (reg1);
+      for (;;)
+	{
+	  reg1 = cfi_parse_reg ();
+	  cfi_add_CFA_undefined (reg1);
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer != ',')
+	    break;
+	  ++input_line_pointer;
+	}
       break;
 
     case DW_CFA_same_value:
