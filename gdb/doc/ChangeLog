@@ -1,3 +1,8 @@
+2005-11-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.texinfo (Remote Configuration): Fix typo in description of
+	"set remotebreak" command.
+
 2005-11-16  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Packets, Stop Reply Packets)

@@ -12149,7 +12149,7 @@ Show the current speed of the remote connection.
 @cindex BREAK signal instead of Ctrl-C
 If set to on, @value{GDBN} sends a @code{BREAK} signal to the remote
 when you press the @key{Ctrl-C} key to interrupt the program running
-on the remote.  If set to off, @value{GDBN} sends the @samp{Strl-C}
+on the remote.  If set to off, @value{GDBN} sends the @samp{Ctrl-C}
 character instead.  The default is off, since most remote systems
 expect to see @samp{Ctrl-C} as the interrupt signal.
 
