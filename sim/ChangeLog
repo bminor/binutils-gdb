@@ -1,3 +1,9 @@
+2005-11-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/traps.c (TARGET_SYS_stat): Define.
+	(syscall_stat32_map): Add entry for TARGET_SYS_stat.
+	(cris_break_13_handler) <case TARGET_SYS_stat>: New case.
+
 2005-11-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/cris-tmpl.c (MY (f_model_insn_before)): Make sure only the

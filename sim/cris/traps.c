@@ -63,6 +63,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define TARGET_SYS_truncate 92
 #define TARGET_SYS_ftruncate 93
 #define TARGET_SYS_socketcall 102
+#define TARGET_SYS_stat 106
 #define TARGET_SYS_fstat 108
 #define TARGET_SYS_wait4 114
 #define TARGET_SYS_sigreturn 119
@@ -260,6 +261,7 @@ static const char stat32_map[] =
 static const CB_TARGET_DEFS_MAP syscall_stat32_map[] =
 {
   { CB_SYS_fstat, TARGET_SYS_fstat },
+  { CB_SYS_stat, TARGET_SYS_stat },
   { 0, -1 }
 };
 
@@ -2324,6 +2326,7 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	  /* Add case labels here for other syscalls using the 32-bit
 	     "struct stat", provided they have a corresponding simulator
 	     function of course.  */
+	case TARGET_SYS_stat:
 	case TARGET_SYS_fstat:
 	  {
 	    /* As long as the infrastructure doesn't cache anything
