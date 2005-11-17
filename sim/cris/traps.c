@@ -20,8 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sim-main.h"
 #include "sim-options.h"
-#include "targ-vals.h"
 #include "bfd.h"
+/* FIXME: get rid of targ-vals.h usage everywhere else.  */
+
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
@@ -662,6 +663,9 @@ static const CB_TARGET_DEFS_MAP errno_map[] =
    on pertinent parts of .../include/asm/fcntl.h in a GNU/Linux/CRIS
    installation and removing synonyms and unnecessary items.  Don't
    forget the end-marker.  */
+
+/* This one we treat specially, as it's used in the fcntl syscall.  */
+#define TARGET_O_ACCMODE 3
 
 static const CB_TARGET_DEFS_MAP open_map[] = {
 #ifdef O_ACCMODE
@@ -1399,8 +1403,9 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 
 	case TARGET_SYS_fcntl64:
 	case TARGET_SYS_fcntl:
-	  if (arg2 == 1)
+	  switch (arg2)
 	    {
+	    case 1:
 	      /* F_GETFD.
 		 Glibc checks stdin, stdout and stderr fd:s for
 		 close-on-exec security sanity.  We just need to provide a
@@ -1408,12 +1413,35 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		 close-on-exec flag true, we could just do a real fcntl
 		 here.  */
 	      retval = 0;
-	    }
-	  else if (arg2 == 2)
-	    {
+	      break;
+
+	    case 2:
 	      /* F_SETFD.  Just ignore attempts to set the close-on-exec
 		 flag.  */
 	      retval = 0;
+	      break;
+
+	    case 3:
+	      /* F_GETFL.  Check for the special case for open+fdopen.  */
+	      if (current_cpu->last_syscall == TARGET_SYS_open
+		  && arg1 == current_cpu->last_open_fd)
+		{
+		  retval = current_cpu->last_open_flags & TARGET_O_ACCMODE;
+		  break;
+		}
+	      /* FALLTHROUGH */
+	      /* Abort for all other cases.  */
+	    default:
+	      sim_io_eprintf (sd, "Unimplemented %s syscall "
+			      "(fd: 0x%lx: cmd: 0x%lx arg: 0x%lx)\n",
+			      callnum == TARGET_SYS_fcntl
+			      ? "fcntl" : "fcntl64",
+			      (unsigned long) (USI) arg1,
+			      (unsigned long) (USI) arg2,
+			      (unsigned long) (USI) arg3);
+	      sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
+			       SIM_SIGILL);
+	      break;
 	    }
 	  break;
 
@@ -2818,6 +2846,14 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 			   SIM_SIGILL);
 	}
     }
+
+  /* Minimal support for fcntl F_GETFL as used in open+fdopen.  */
+  if (callnum == TARGET_SYS_open)
+    {
+      current_cpu->last_open_fd = retval;
+      current_cpu->last_open_flags = arg2;
+    }
+  current_cpu->last_syscall = callnum;
 
   /* A system call is a rescheduling point.  For the time being, we don't
      reschedule anywhere else.  */

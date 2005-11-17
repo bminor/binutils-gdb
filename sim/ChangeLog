@@ -1,5 +1,14 @@
 2005-11-17  Hans-Peter Nilsson  <hp@axis.com>
 
+	* cris/sim-main.h (struct _sim_cpu): New members last_syscall,
+	last_open_fd, last_open_flags.
+	* cris/traps.c: Don't include targ-vals.h.
+	(TARGET_O_ACCMODE): Define.
+	(cris_break_13_handler): Set new _sim_cpu members.
+	<case TARGET_SYS_fcntl>: Support special case of F_GETFL.
+	Rearrange code as switch.  Emit "unimplemented" abort for
+	unimplemented fcntl calls.
+
 	* cris/traps.c (TARGET_SYS_stat): Define.
 	(syscall_stat32_map): Add entry for TARGET_SYS_stat.
 	(cris_break_13_handler) <case TARGET_SYS_stat>: New case.
