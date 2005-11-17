@@ -1,3 +1,18 @@
+2005-11-16  Shaun Jackman  <sjackman@gmail.com>
+
+	* sim/arm/armos.c: Include limits.h
+	(unlink): Remove this macro. It is unused in this file and
+	conflicts with sim_callback->unlink.
+	(PATH_MAX): Define as 1024 if not already defined.
+	(ReadFileName): New function.
+	(SWIopen): Fix a potential buffer overflow.
+	(SWIremove): New function.
+	(SWIrename): Ditto.
+	(ARMul_OSHandleSWI): Handle the RDP calls SWI_IsTTY,
+	SWI_Remove, and SWI_Rename, as well as the RDI calls
+	AngelSWI_Reason_IsTTY, AngelSWI_Reason_Remove, and
+	AngelSWI_Reason_Rename.
+
 2005-09-19  Paul Brook  <paul@codesourcery.com>
 
 	* armdefs.h: Define ARMsword and ARMsdword. Use stdint.h when
