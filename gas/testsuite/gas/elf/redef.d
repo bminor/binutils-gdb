@@ -1,6 +1,5 @@
 #objdump: -t
 #name: .equ redefinitions (ELF)
-#source: ../all/redef2.s
 
 .*: .*
 

@@ -1,3 +1,19 @@
+2005-11-17  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/all/cond.s: Also check ifdef works on equates and
+	commons.
+	* gas/all/cond.l: Adjust.
+	* gas/all/redef2.s: Also test redefining equate to label.
+	* gas/all/redef2.d: Adjust.
+	* gas/all/redef3.[sd]: New.
+	* gas/all/redef4.s: New.
+	* gas/all/redef5.s: New.
+	* gas/elf/redef.s: New, copied from original gas/all/redef2.s.
+	* gas/elf/redef.d: Remove #source.
+	* gas/all/gas.exp: Remove exclusion of iq2000-*-* from and
+	adjust xfails for redefinition tests. Run new tests. Exclude
+	alpha*-*-*, mips*-*-*, *c54x*-*-* from weakref tests.
+
 2005-11-16  Richard Henderson  <rth@redhat.com>
 
 	* gas/all/weakref1.s: Use "=" instead of ".set" for equivalence.

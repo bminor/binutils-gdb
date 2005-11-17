@@ -333,8 +333,18 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 	  locsym->lsy_value = frag_now_fix ();
 	}
       else if (!(S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
-	       || S_IS_COMMON (symbolP))
+	       || S_IS_COMMON (symbolP)
+	       || S_IS_VOLATILE (symbolP))
 	{
+	  if (S_IS_VOLATILE (symbolP)
+	      /* This could be avoided when the symbol wasn't used so far, but
+		 the comment in struc-symbol.h says this flag isn't reliable.  */
+	      && (1 || !symbol_used_p (symbolP)))
+	    {
+	      symbolP = symbol_clone (symbolP, 1);
+	      S_SET_VALUE (symbolP, 0);
+	      S_CLEAR_VOLATILE (symbolP);
+	    }
 	  if (S_GET_VALUE (symbolP) == 0)
 	    {
 	      symbolP->sy_frag = frag_now;
@@ -421,7 +431,10 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 	  if (!(frag_now == symbolP->sy_frag
 		&& S_GET_VALUE (symbolP) == frag_now_fix ()
 		&& S_GET_SEGMENT (symbolP) == now_seg))
-	    as_bad (_("symbol `%s' is already defined"), sym_name);
+	    {
+	      as_bad (_("symbol `%s' is already defined"), sym_name);
+	      symbolP = symbol_clone (symbolP, 0);
+	    }
 	}
 
     }
@@ -2184,6 +2197,13 @@ S_SET_VOLATILE (symbolS *s)
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
   s->sy_volatile = 1;
+}
+
+void
+S_CLEAR_VOLATILE (symbolS *s)
+{
+  if (!LOCAL_SYMBOL_CHECK (s))
+    s->sy_volatile = 0;
 }
 
 void

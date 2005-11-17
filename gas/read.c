@@ -1467,13 +1467,25 @@ s_comm_internal (int param,
 
   *p = 0;
   symbolP = symbol_find_or_make (name);
-  if (S_IS_DEFINED (symbolP) && !S_IS_COMMON (symbolP))
+  if ((S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
+      && !S_IS_COMMON (symbolP))
     {
-      symbolP = NULL;
-      as_bad (_("symbol `%s' is already defined"), name);
-      *p = c;
-      ignore_rest_of_line ();
-      goto out;
+      if (!S_IS_VOLATILE (symbolP))
+	{
+	  symbolP = NULL;
+	  as_bad (_("symbol `%s' is already defined"), name);
+	  *p = c;
+	  ignore_rest_of_line ();
+	  goto out;
+	}
+      /* This could be avoided when the symbol wasn't used so far, but
+	 the comment in struc-symbol.h says this flag isn't reliable.  */
+      if (1 || !symbol_used_p (symbolP))
+	symbolP = symbol_clone (symbolP, 1);
+      S_SET_SEGMENT (symbolP, undefined_section);
+      S_SET_VALUE (symbolP, 0);
+      symbol_set_frag (symbolP, &zero_address_frag);
+      S_CLEAR_VOLATILE (symbolP);
     }
 
   size = S_GET_VALUE (symbolP);
@@ -3174,10 +3186,18 @@ s_weakref (int ignore ATTRIBUTE_UNUSED)
 
   if (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
     {
-      as_bad (_("symbol `%s' is already defined"), name);
-      *end_name = delim;
-      ignore_rest_of_line ();
-      return;
+      if(!S_IS_VOLATILE (symbolP))
+	{
+	  as_bad (_("symbol `%s' is already defined"), name);
+	  *end_name = delim;
+	  ignore_rest_of_line ();
+	  return;
+	}
+      /* This could be avoided when the symbol wasn't used so far, but
+	 the comment in struc-symbol.h says this flag isn't reliable.  */
+      if (1 || !symbol_used_p (symbolP))
+	symbolP = symbol_clone (symbolP, 1);
+      S_CLEAR_VOLATILE (symbolP);
     }
 
   *end_name = delim;

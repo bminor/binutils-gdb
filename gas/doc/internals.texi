@@ -93,6 +93,12 @@ responsible for setting it when a symbol is used in backend routines.
 Whether the symbol is an MRI common symbol created by the @code{COMMON}
 pseudo-op when assembling in MRI mode.
 
+@item sy_volatile
+Whether the symbol can be re-defined.
+
+@item sy_forward_ref
+Whether the symbol's value must only be evaluated upon use.
+
 @item sy_weakrefr
 Whether the symbol is a @code{weakref} alias to another symbol.
 
@@ -165,6 +171,16 @@ Return non-zero if the symbol is a @code{weakref} alias.
 Return non-zero if the symbol was aliased by a @code{weakref} alias and has not
 had any strong references.
 
+@item S_IS_VOLATILE
+@cindex S_IS_VOLATILE
+Return non-zero if the symbol may be re-defined. Such symbols get created by
+the @code{=} operator, @code{equ}, or @code{set}.
+
+@item S_IS_FORWARD_REF
+@cindex S_IS_FORWARD_REF
+Return non-zero if the symbol is a forward reference, that is its value must
+only be determined upon use.
+
 @item S_IS_COMMON
 @cindex S_IS_COMMON
 Return non-zero if this is a common symbol.  Common symbols are sometimes
@@ -221,6 +237,19 @@ if the referenced symbol has just been added to the symbol table.
 Clear the @code{weakref} aliased status of a symbol.  This is implicitly called
 whenever the symbol is looked up, as part of a direct reference or a
 definition, but not as part of a @code{weakref} directive.
+
+@item S_SET_VOLATILE
+@cindex S_SET_VOLATILE
+Indicate that the symbol may be re-defined.
+
+@item S_CLEAR_VOLATILE
+@cindex S_CLEAR_VOLATILE
+Indicate that the symbol may no longer be re-defined.
+
+@item S_SET_FORWARD_REF
+@cindex S_SET_FORWARD_REF
+Indicate that the symbol is a forward reference, that is its value must only
+be determined upon use.
 
 @item S_GET_TYPE
 @item S_GET_DESC

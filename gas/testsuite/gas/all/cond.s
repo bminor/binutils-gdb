@@ -30,7 +30,15 @@
 	.long	9
 	.endif
 
+	.comm	c, 1
+	.ifndef c
+	.err
+	.endif
+
 	.equiv	x, y
+	.ifndef x
+	.err
+	.endif
 	.equiv	y, 0
 	.if	x
 	.err

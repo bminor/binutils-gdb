@@ -8,5 +8,3 @@ here:
  .long sym
  .set sym, 0x22222222
  .long sym
-sym:
- .long sym

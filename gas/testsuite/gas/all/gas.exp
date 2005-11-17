@@ -74,16 +74,24 @@ case $target_triplet in {
 # .set works differently on some targets.
 case $target_triplet in {
     { alpha*-*-* } { }
-    { iq2000*-*-* } { }
     { mips*-*-* } { }
     { *c54x*-*-* } { }
     { z80-*-* } { }
     default {
 	setup_xfail "*c30*-*-*" "*c4x*-*-*" "pdp11-*-*"
 	run_dump_test redef
-	setup_xfail "*c30*-*-*" "*c4x*-*-*" "*arm*-*-coff" "arm*-*-pe*" "crx*-*-*"
-	setup_xfail "h8300*-*-*" "m68hc*-*-*" "maxq-*-*" "pdp11-*-*" "vax*-*-*" "z8k-*-*"
+	setup_xfail "*c30*-*-*" "*c4x*-*-*" "*arm*-*-*aout*" "*arm*-*-*coff" \
+	    "*arm*-*-pe" "crx*-*-*" "h8300*-*-*" "m68hc*-*-*" "maxq-*-*" \
+	    "pdp11-*-*" "vax*-*-*" "z8k-*-*"
 	run_dump_test redef2
+	setup_xfail "*-*-aix*" "*-*-coff" "*-*-cygwin" "*-*-mingw*" "*-*-pe*" \
+	    "bfin-*-*" "*c4x*-*-*" "crx*-*-*" "h8300*-*-*" "m68hc*-*-*" \
+	    "maxq-*-*" "or32-*-*" "pdp11-*-*" "vax*-*-*" "z8k-*-*"
+	run_dump_test redef3
+	setup_xfail "*c4x*-*-*"
+	gas_test_error "redef4.s" "" ".set for symbol already used as label"
+	setup_xfail "*c4x*-*-*"
+	gas_test_error "redef5.s" "" ".set for symbol already defined through .comm"
     }
 }
 
@@ -256,6 +264,9 @@ if { ![istarget "i960-*-*"] } {
 
 # .set works differently on some targets.
 case $target_triplet in {
+    { alpha*-*-* } { }
+    { mips*-*-* } { }
+    { *c54x*-*-* } { }
     { z80-*-* } { }
     default {
 	run_dump_test weakref1

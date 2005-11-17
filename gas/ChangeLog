@@ -1,3 +1,18 @@
+2005-11-17  Jan Beulich  <jbeulich@novell.com>
+
+
+	* symbols.h (S_CLEAR_VOLATILE): Declare.
+	* symbols.c (colon): Also accept redefinable symbols for
+	redefinition. Clone them before modifying.
+	(S_CLEAR_VOLATILE): Define.
+	* cond.c (s_ifdef): Also test for equated symbols.
+	* read.c (s_comm_internal): Also exclude non-redefinable
+	equated symbols. Clone redefinable ones before modifying.
+	(s_weakref): Clone redefinable symbols before modifying.
+	* doc/internals.texi: Document sy_volatile, sy_forward_ref,
+	S_IS_VOLATILE, S_SET_VOLATILE, S_CLEAR_VOLATILE,
+	S_IS_FORWARD_REF, and S_SET_FORWARD_REF.
+
 2005-11-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-hppa.c (pa_comm): Set bfd_com_section segment.

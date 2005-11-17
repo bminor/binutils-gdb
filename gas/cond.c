@@ -102,7 +102,7 @@ s_ifdef (int test_defined)
 	 considered to be undefined.  */
       is_defined =
 	symbolP != NULL
-	&& S_IS_DEFINED (symbolP)
+	&& (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
 	&& S_GET_SEGMENT (symbolP) != reg_section;
 
       cframe.ignoring = ! (test_defined ^ is_defined);

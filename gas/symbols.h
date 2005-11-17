@@ -108,6 +108,7 @@ extern void S_SET_WEAKREFD (symbolS *);
 extern void S_CLEAR_WEAKREFD (symbolS *);
 extern void S_SET_THREAD_LOCAL (symbolS *);
 extern void S_SET_VOLATILE (symbolS *);
+extern void S_CLEAR_VOLATILE (symbolS *);
 extern void S_SET_FORWARD_REF (symbolS *);
 
 #ifndef WORKING_DOT_WORD
