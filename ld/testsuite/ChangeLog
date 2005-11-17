@@ -1,3 +1,8 @@
+2005-11-17  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/sec-1.d: Adjust section order for recent ELF section
+	rearrangement.
+
 2005-11-15  Jan Beulich  <jbeulich@novell.com>
 
 	* ld-bootstrap/bootstrap.exp: Delete ld-partial.o and ld[123]*
