@@ -1,3 +1,7 @@
+2005-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* version.in: Update to 6.4.50.
+
 2005-11-16  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* NEWS (6.4): Mention $argc.
