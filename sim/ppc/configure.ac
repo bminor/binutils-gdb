@@ -567,6 +567,16 @@ AC_ARG_PROGRAM
 
 . ${srcdir}/../../bfd/configure.host
 
+case ${host} in
+  *mingw32*)
+    AC_DEFINE(USE_WIN32API, 1,
+              [Define if we should use the Windows API, instead of the 
+	       POSIX API.  On Windows, we use the Windows API when 
+	       building for MinGW, but the POSIX API when building 
+	       for Cygwin.])
+    ;;
+esac	    
+
 AC_CONFIG_HEADER(config.h:config.in)
 
 AC_STRUCT_ST_BLKSIZE
@@ -584,7 +594,7 @@ AC_TYPE_UID_T
 
 AC_CHECK_FUNCS(access cfgetispeed cfgetospeed cfsetispeed cfsetospeed chdir chmod chown dup dup2 fchmod fchown fcntl fstat fstatfs getdirentries getegid geteuid getgid getpid getppid getrusage gettimeofday getuid ioctl kill link lseek lstat mkdir pipe readlink rmdir setreuid setregid stat sigprocmask stat symlink tcgetattr tcsetattr tcsendbreak tcdrain tcflush tcflow tcgetpgrp tcsetpgrp time umask unlink)
 
-AC_CHECK_HEADERS(fcntl.h stdlib.h string.h strings.h sys/ioctl.h sys/mount.h sys/param.h sys/resource.h sys/stat.h sys/termio.h sys/termios.h sys/time.h sys/times.h sys/types.h time.h unistd.h sys/vfs.h sys/statfs.h)
+AC_CHECK_HEADERS(fcntl.h stdlib.h string.h strings.h sys/ioctl.h sys/mount.h sys/param.h sys/resource.h sys/stat.h sys/termio.h sys/termios.h sys/time.h sys/times.h sys/types.h time.h unistd.h sys/vfs.h sys/statfs.h sys/errno.h)
 AC_HEADER_DIRENT
 
 dnl Figure out what type of termio/termios support there is

@@ -43,7 +43,9 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifdef HAVE_SYS_ERRNO_H
 #include <sys/errno.h>
+#endif
 #include <sys/param.h>
 #include <sys/time.h>
 
@@ -224,7 +226,7 @@ write_timeval(unsigned_word addr,
   emul_write_buffer(&t, addr, sizeof(t), processor, cia);
 }
 
-
+#ifdef HAVE_GETTIMEOFDAY
 STATIC_INLINE_EMUL_NETBSD void
 write_timezone(unsigned_word addr,
 	       struct timezone tz,
@@ -235,6 +237,7 @@ write_timezone(unsigned_word addr,
   H2T(tz.tz_dsttime);
   emul_write_buffer(&tz, addr, sizeof(tz), processor, cia);
 }
+#endif
 
 
 #ifdef HAVE_GETDIRENTRIES

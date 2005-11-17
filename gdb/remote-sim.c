@@ -674,8 +674,7 @@ gdbsim_wait (ptid_t ptid, struct target_waitstatus *status)
 #else
   prev_sigint = signal (SIGINT, gdbsim_cntrl_c);
 #endif
-  sim_resume (gdbsim_desc, resume_step,
-	      target_signal_to_host (resume_siggnal));
+  sim_resume (gdbsim_desc, resume_step, resume_siggnal);
   signal (SIGINT, prev_sigint);
   resume_step = 0;
 
@@ -690,24 +689,20 @@ gdbsim_wait (ptid_t ptid, struct target_waitstatus *status)
     case sim_stopped:
       switch (sigrc)
 	{
-	case SIGABRT:
+	case TARGET_SIGNAL_ABRT:
 	  quit ();
 	  break;
-	case SIGINT:
-	case SIGTRAP:
+	case TARGET_SIGNAL_INT:
+	case TARGET_SIGNAL_TRAP:
 	default:
 	  status->kind = TARGET_WAITKIND_STOPPED;
-	  /* The signal in sigrc is a host signal.  That probably
-	     should be fixed.  */
-	  status->value.sig = target_signal_from_host (sigrc);
+	  status->value.sig = sigrc;
 	  break;
 	}
       break;
     case sim_signalled:
       status->kind = TARGET_WAITKIND_SIGNALLED;
-      /* The signal in sigrc is a host signal.  That probably
-         should be fixed.  */
-      status->value.sig = target_signal_from_host (sigrc);
+      status->value.sig = sigrc;
       break;
     case sim_running:
     case sim_polling:
