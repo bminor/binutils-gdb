@@ -229,7 +229,7 @@ char **buildargv (input)
 	  arg = copybuf;
 	  while (*input != EOS)
 	    {
-	      if (ISBLANK (*input) && !squote && !dquote && !bsquote)
+	      if (ISSPACE (*input) && !squote && !dquote && !bsquote)
 		{
 		  break;
 		}
@@ -295,7 +295,7 @@ char **buildargv (input)
 	  argc++;
 	  argv[argc] = NULL;
 
-	  while (ISBLANK (*input))
+	  while (ISSPACE (*input))
 	    {
 	      input++;
 	    }
@@ -331,90 +331,60 @@ expandargv (argcp, argvp)
      int *argcp;
      char ***argvp;
 {
-  /* A dynamically allocated buffer used to hold options read from a
-     response file.  NULL until needed.  */
-  char *buffer = NULL;
-  /* The number of bytes in BUFFER.  */
-  size_t buffer_len = 0;
-  /* Dynamically allocated storage for the options read from the
-     response file.  NULL until needed.  */
-  char **file_options = NULL;
-  /* The number of slots in the FILE_OPTIONS array.  */
-  size_t file_options_len = 0;
-  /* If non-NULL, the name of the response file that caused a
-     failure.  */
-  const char *error_file = NULL;
   /* The argument we are currently processing.  */
   int i = 0;
   /* Non-zero if ***argvp has been dynamically allocated.  */
   int argv_dynamic = 0;
-
   /* Loop over the arguments, handling response files.  We always skip
      ARGVP[0], as that is the name of the program being run.  */
-  while (++i != *argcp)
+  while (++i < *argcp)
     {
       /* The name of the response file.  */
       const char *filename;
       /* The response file.  */
       FILE *f;
+      /* An upper bound on the number of characters in the response
+	 file.  */
+      long pos;
+      /* The number of characters in the response file, when actually
+	 read.  */
+      size_t len;
+      /* A dynamically allocated buffer used to hold options read from a
+	 response file.  */
+      char *buffer;
+      /* Dynamically allocated storage for the options read from the
+	 response file.  */
+      char **file_argv;
       /* The number of options read from the response file, if any.  */
-      size_t num_options;
-
+      size_t file_argc;
       /* We are only interested in options of the form "@file".  */
       filename = (*argvp)[i];
       if (filename[0] != '@')
 	continue;
-
-      /* Open the file.  */
+      /* Read the contents of the file.  */
       f = fopen (++filename, "r");
       if (!f)
 	continue;
-
-      /* Read all the options.  */
-      num_options = 0;
-      while (1)
-	{
-	  /* The insertion point in BUFFER.  */
-	  size_t buffer_pos = 0;
-	  /* The character immediately following the option in
-	     BUFFER.  */
-	  int c;
-	  /* Read the next option from the file.  */
-	  while (1)
-	    {
-	      if (buffer_pos + 32 > buffer_len)
-		{
-		  buffer_len = buffer_len ? 2 * buffer_len : 32;
-		  buffer = (char *) xrealloc (buffer, buffer_len);
-		}
-	      c = fscanf (f, "%31s", buffer + buffer_pos);
-	      if (c == EOF)
-		break;
-	      /* If the next character in the file is not whitespace,
-		 then we didn't yet read the entire argument.  */
-	      c = getc (f);
-	      if (c == EOF || ISSPACE (c))
-		break;
-	      /* Put back the character at which we peeked.  */
-	      ungetc (c, f);
-	      buffer_pos += 31;
-	    }
-	  if (c == EOF)
-	    break;
-	  /* Insert the option into FILE_OPTIONS.  */
-	  if (num_options == file_options_len)
-	    {
-	      file_options_len = file_options_len ? 2 * file_options_len : 32;
-	      file_options
-		= (char **) xrealloc (file_options,
-				      file_options_len * sizeof (char *));
-	    }
-	  file_options[num_options++] = xstrdup(buffer);
-	}
-
-      /* We're done with the file now.  */
-      fclose (f);
-      /* Insert all the options into ARGV.  */
+      if (fseek (f, 0L, SEEK_END) == -1)
+	goto error;
+      pos = ftell (f);
+      if (pos == -1)
+	goto error;
+      if (fseek (f, 0L, SEEK_SET) == -1)
+	goto error;
+      buffer = (char *) xmalloc (pos * sizeof (char) + 1);
+      len = fread (buffer, sizeof (char), pos, f);
+      if (len != (size_t) pos
+	  /* On Windows, fread may return a value smaller than POS,
+	     due to CR/LF->CR translation when reading text files.
+	     That does not in-and-of itself indicate failure.  */
+	  && ferror (f))
+	goto error;
+      /* Add a NUL terminator.  */
+      buffer[len] = '\0';
+      /* Parse the string.  */
+      file_argv = buildargv (buffer);
+      /* If *ARGVP is not already dynamically allocated, copy it.  */
       if (!argv_dynamic)
 	{
 	  *argvp = dupargv (*argvp);
@@ -423,24 +393,33 @@ expandargv (argcp, argvp)
 	       allocate, so make a guess.  */
 	    xmalloc_failed (*argcp * 32);
 	}
-      /* The "+1" below handles the NULL terminator at the end of ARGV.  */
+      /* Count the number of arguments.  */
+      file_argc = 0;
+      while (file_argv[file_argc] && *file_argv[file_argc])
+	++file_argc;
+      /* Now, insert FILE_ARGV into ARGV.  The "+1" below handles the
+	 NULL terminator at the end of ARGV.  */ 
       *argvp = ((char **) 
 		xrealloc (*argvp, 
-			  (*argcp + num_options + 1) * sizeof (char *)));
-      memmove (*argvp + i + num_options, *argvp + i + 1, 
+			  (*argcp + file_argc + 1) * sizeof (char *)));
+      memmove (*argvp + i + file_argc, *argvp + i + 1, 
 	       (*argcp - i) * sizeof (char *));
-      memcpy (*argvp + i, file_options, num_options * sizeof (char *));
+      memcpy (*argvp + i, file_argv, file_argc * sizeof (char *));
       /* The original option has been replaced by all the new
 	 options.  */
-      *argcp += num_options - 1;
+      *argcp += file_argc - 1;
+      /* Free up memory allocated to process the response file.  We do
+	 not use freeargv because the individual options in FILE_ARGV
+	 are now in the main ARGV.  */
+      free (file_argv);
+      free (buffer);
+      /* Rescan all of the arguments just read to support response
+	 files that include other response files.  */
+      --i;
+    error:
+      /* We're all done with the file now.  */
+      fclose (f);
     }
-
-  if (buffer)
-    free (buffer);
-  if (file_options)
-    free (file_options);
-
-  return error_file;
 }
 
 #ifdef MAIN
