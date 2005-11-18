@@ -1,3 +1,7 @@
+2005-11-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/symtocbase.d: Adjust for alignment change.
+
 2005-11-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/sec-1.d: Adjust section order for recent ELF section
