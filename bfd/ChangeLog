@@ -1,3 +1,8 @@
+2005-11-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_check_relocs): Don't set has_14bit_branch
+	on branches to same section.
+
 2005-11-17  Randolph Chung  <tausq@debian.org>
 
 	* elf64-hppa.c (elf64_hppa_object_p): Recognize corefiles under
