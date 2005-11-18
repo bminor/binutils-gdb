@@ -22397,30 +22397,12 @@ for success
 for an error
 @end table
 
-@item q @var{query}
-@anchor{general query packet}
+@item q @var{name} @var{params}@dots{}
+@itemx Q @var{name} @var{params}@dots{}
 @cindex @samp{q} packet
-General query.  Request info about @var{query}.  In general
-@value{GDBN} queries have a leading upper case letter.  Custom vendor
-queries should use a company prefix (in lower case) ex:
-@samp{qfsf.var}.  @var{query} may optionally be followed by a @samp{,}
-or @samp{;} separated list.  Stubs must ensure that they match the
-full @var{query} name.
-
-Reply:
-@table @samp
-@item @var{XX@dots{}}
-Hex encoded data from query.  The reply must not be empty.
-@item E @var{NN}
-error reply
-@item
-Indicating an unrecognized @var{query}.
-@end table
-
-@item Q @var{var}=@var{val}
 @cindex @samp{Q} packet
-General set.  Set value of @var{var} to @var{val}.
-@xref{general query packet}, for a discussion of naming conventions.
+General query (@samp{q}) and set (@samp{Q}).  These packets are
+described fully in @ref{General Query Packets}.
 
 @item r
 @cindex @samp{r} packet
@@ -22735,13 +22717,41 @@ protocol extension}, for more details.
 @section General Query Packets
 @cindex remote query requests
 
-The following set and query packets have already been defined.
+Packets starting with @samp{q} are @dfn{general query packets};
+packets starting with @samp{Q} are @dfn{general set packets}.  General
+query and set packets are a semi-unified form for retrieving and
+sending information to and from the stub.
+
+The initial letter of a query or set packet is followed by a name
+indicating what sort of thing the packet applies to.  For example,
+@value{GDBN} may use a @samp{qSymbol} packet to exchange symbol
+definitions with the stub.  These packet names follow some
+conventions:
+
+@itemize @bullet
+@item
+The name must not contain commas, colons or semicolons.
+@item
+Most @value{GDBN} query and set packets have a leading upper case
+letter.
+@item
+The names of custom vendor packets should use a company prefix, in
+lower case, followed by a period.  For example, packets designed at
+the Acme Corporation might begin with @samp{qacme.foo} (for querying
+foos) or @samp{Qacme.bar} (for setting bars).
+@end itemize
+
+A query or set packet may optionally be followed by a @samp{,} or
+@samp{;} separated list.  Stubs must be careful to match the full
+packet name, in case packet names have common prefixes.
 
 Like the descriptions of the other packets, each description here
 has a template showing the packet's overall syntax, followed by an
 explanation of the packet's meaning.  We include spaces in some of the
 templates for clarity; these are not part of the packet's syntax.  No
 @value{GDBN} packet uses spaces to separate its components.
+
+Here are the currently defined query and set packets:
 
 @table @samp
 

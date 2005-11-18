@@ -1,3 +1,12 @@
+2005-11-18  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Packets): Move information out of 'q' and 'Q'
+	entries into the General Query Packets section.  Add a
+	cross-reference to that section.  Drop description of replies, as
+	these are covered in the descriptions of each packet.
+	(General Query Packets): Add introductory text.  Explain naming
+	conventions, and how the end of a name is recognized.
+
 2005-11-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.texinfo (Remote configuration): Fix typo in description of
