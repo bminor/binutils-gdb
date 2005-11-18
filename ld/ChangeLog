@@ -1,5 +1,10 @@
 2005-11-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* emulparams/elf64ppc.sh (.tocbss): Use new section alignment scheme.
+	(.got, .toc1, .opd): Likewise.
+
+2005-11-18  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldlang.c (lang_size_sections_1): Revert 2005-11-16 functional
 	changes to section alignment.
 	* ldmisc.c (vfinfo): Handle %ld and %lu.
