@@ -199,6 +199,8 @@ enum reg_class
 #define IS_PREG(r)       _TYPECHECK(r, P)
 #define IS_IREG(r)       (((r).regno & 0xf4) == T_REG_I)
 #define IS_MREG(r)       (((r).regno & 0xf4) == T_REG_M)
+#define IS_BREG(r)       (((r).regno & 0xf4) == T_REG_B)
+#define IS_LREG(r)       (((r).regno & 0xf4) == T_REG_L)
 #define IS_CREG(r)       ((r).regno == REG_LC0 || (r).regno == REG_LC1)
 #define IS_ALLREG(r)     ((r).regno < T_NOGROUP)
 

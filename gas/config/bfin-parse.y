@@ -1189,8 +1189,14 @@ asm_1:
 	| HALF_REG ASSIGN expr
 	{
 	  notethat ("LDIMMhalf: pregs_half = imm16\n");
+
+	  if (!IS_DREG ($1) && !IS_PREG ($1) && !IS_IREG ($1)
+	      && !IS_MREG ($1) && !IS_BREG ($1) && !IS_LREG ($1))
+	    return yyerror ("Wrong register for load immediate");
+
 	  if (!IS_IMM ($3, 16) && !IS_UIMM ($3, 16))
 	    return yyerror ("Constant out of range");
+
 	  $$ = LDIMMHALF_R (&$1, IS_H ($1), 0, 0, $3);
 	}
 
@@ -1206,6 +1212,10 @@ asm_1:
 
 	| REG ASSIGN expr xpmod1
 	{
+	  if (!IS_DREG ($1) && !IS_PREG ($1) && !IS_IREG ($1)
+	      && !IS_MREG ($1) && !IS_BREG ($1) && !IS_LREG ($1))
+	    return yyerror ("Wrong register for load immediate");
+
 	  if ($4.r0 == 0)
 	    {
 	      /* 7 bit immediate value if possible.
