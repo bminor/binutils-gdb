@@ -4137,7 +4137,7 @@ lang_size_sections_1
 	      }
 	    else
 	      {
-		bfd_vma savedot;
+		int align;
 
 		if (os->addr_tree == NULL)
 		  {
@@ -4188,20 +4188,25 @@ lang_size_sections_1
 		      }
 
 		    newdot = os->region->current;
+		    align = os->bfd_section->alignment_power;
 		  }
+		else
+		  align = os->section_alignment;
 
 		/* Align to what the section needs.  */
-		savedot = newdot;
-		newdot = align_power (newdot,
-				      os->bfd_section->alignment_power);
+		if (align > 0)
+		  {
+		    bfd_vma savedot = newdot;
+		    newdot = align_power (newdot, align);
 
-		if (newdot != savedot
-		    && (config.warn_section_align
-			|| os->addr_tree != NULL)
-		    && expld.phase != lang_mark_phase_enum)
-		  einfo (_("%P: warning: changing start of section"
-			   " %s by %lu bytes\n"),
-			 os->name, (unsigned long) (newdot - savedot));
+		    if (newdot != savedot
+			&& (config.warn_section_align
+			    || os->addr_tree != NULL)
+			&& expld.phase != lang_mark_phase_enum)
+		      einfo (_("%P: warning: changing start of section"
+			       " %s by %lu bytes\n"),
+			     os->name, (unsigned long) (newdot - savedot));
+		  }
 
 		bfd_set_section_vma (0, os->bfd_section, newdot);
 

@@ -55,6 +55,8 @@
  %W hex bfd_vma with 0x with no leading zeros taking up 8 spaces
  %X no object output, fail return
  %d integer, like printf
+ %ld long, like printf
+ %lu unsigned long, like printf
  %s arbitrary string, like printf
  %u integer, like printf
  %v hex bfd_vma, no leading zeros
@@ -78,10 +80,6 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 	  fmt++;
 	  switch (*fmt++)
 	    {
-	    default:
-	      fprintf (fp, "%%%c", fmt[-1]);
-	      break;
-
 	    case '%':
 	      /* literal % */
 	      putc ('%', fp);
@@ -406,6 +404,25 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 	    case 'u':
 	      /* unsigned integer, like printf */
 	      fprintf (fp, "%u", va_arg (arg, unsigned int));
+	      break;
+
+	    case 'l':
+	      if (*fmt == 'd')
+		{
+		  fprintf (fp, "%ld", va_arg (arg, long));
+		  ++fmt;
+		  break;
+		}
+	      else if (*fmt == 'u')
+		{
+		  fprintf (fp, "%lu", va_arg (arg, unsigned long));
+		  ++fmt;
+		  break;
+		}
+	      /* Fall thru */
+
+	    default:
+	      fprintf (fp, "%%%c", fmt[-1]);
 	      break;
 	    }
 	}
