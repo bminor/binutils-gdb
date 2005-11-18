@@ -12147,6 +12147,7 @@ Show the current speed of the remote connection.
 @item set remotebreak
 @cindex interrupt remote programs
 @cindex BREAK signal instead of Ctrl-C
+@anchor{set remotebreak}
 If set to on, @value{GDBN} sends a @code{BREAK} signal to the remote
 when you press the @key{Ctrl-C} key to interrupt the program running
 on the remote.  If set to off, @value{GDBN} sends the @samp{Ctrl-C}
@@ -22016,6 +22017,7 @@ Show the current setting of the target wait timeout.
 * Stop Reply Packets::
 * General Query Packets::
 * Register Packet Format::
+* Interrupts::
 * Examples::
 * File-I/O remote protocol extension::
 @end menu
@@ -22496,6 +22498,7 @@ The @samp{vCont} packet is not supported.
 @end table
 
 @item X @var{addr},@var{length}:@var{XX@dots{}}
+@anchor{X packet}
 @cindex @samp{X} packet
 Write data to memory, where the data is transmitted in binary.
 @var{addr} is address, @var{length} is number of bytes,
@@ -23072,6 +23075,37 @@ thirty-two bit registers such as @code{sr}).  The ordering is the same
 as @code{MIPS32}.
 
 @end table
+
+@node Interrupts
+@section Interrupts
+@cindex interrupts (remote protocol)
+
+When a program on the remote target is running, @value{GDBN} may
+attempt to interrupt it by sending a @samp{Ctrl-C} or a @code{BREAK},
+control of which is specified via @value{GDBN}'s @samp{remotebreak}
+setting (@pxref{set remotebreak}).
+
+The precise meaning of @code{BREAK} is defined by the transport
+mechanism and may, in fact, be undefined.  @value{GDBN} does
+not currently define a @code{BREAK} mechanism for any of the network
+interfaces.
+
+@samp{Ctrl-C}, on the other hand, is defined and implemented for all
+transport mechanisms.  It is represented by sending the single byte
+@code{0x03} without any of the usual packet overhead described in
+the Overview section (@pxref{Overview}).  When a @code{0x03} byte is
+transmitted as part of a packet, it is considered to be packet data
+and does @emph{not} represent an interrupt.  E.g., an @samp{X} packet
+(@pxref{X packet}, used for binary downloads, may include an unescaped
+@code{0x03} as part of its packet.
+
+Stubs are not required to recognize these interrupt mechanisms and the
+precise meaning associated with receipt of the interrupt is
+implementation defined.  If the stub is successful at interrupting the
+running program, it is expected that it will send one of the Stop
+Reply Packets (@pxref{Stop Reply Packets}) to @value{GDBN} as a result
+of successfully stopping the program.  Interrupts received while the
+program is stopped will be discarded.
 
 @node Examples
 @section Examples
