@@ -381,13 +381,16 @@ elf64_hppa_object_p (abfd)
     {
       /* GCC on hppa-linux produces binaries with OSABI=Linux,
 	 but the kernel produces corefiles with OSABI=SysV.  */
-      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_LINUX &&
-	  i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_NONE) /* aka SYSV */
+      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_LINUX
+	  && i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_NONE) /* aka SYSV */
 	return FALSE;
     }
   else
     {
-      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_HPUX)
+      /* HPUX produces binaries with OSABI=HPUX,
+	 but the kernel produces corefiles with OSABI=SysV.  */
+      if (i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_HPUX
+	  && i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_NONE) /* aka SYSV */
 	return FALSE;
     }
 
@@ -399,7 +402,10 @@ elf64_hppa_object_p (abfd)
     case EFA_PARISC_1_1:
       return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 11);
     case EFA_PARISC_2_0:
-      return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 20);
+      if (i_ehdrp->e_ident[EI_CLASS] == ELFCLASS64)
+        return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 25);
+      else
+        return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 20);
     case EFA_PARISC_2_0 | EF_PARISC_WIDE:
       return bfd_default_set_arch_mach (abfd, bfd_arch_hppa, 25);
     }
@@ -2641,6 +2647,36 @@ elf64_hppa_elf_get_symbol_type (elf_sym, type)
     return type;
 }
 
+/* Support HP specific sections for core files.  */
+static bfd_boolean
+elf64_hppa_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index,
+			      const char *typename)
+{
+  if (hdr->p_type == PT_HP_CORE_PROC)
+    {
+      int sig;
+
+      if (bfd_seek (abfd, hdr->p_offset, SEEK_SET) != 0)
+	return FALSE;
+      if (bfd_bread (&sig, 4, abfd) != 4)
+	return FALSE;
+
+      elf_tdata (abfd)->core_signal = sig;
+
+      /* gdb uses the ".reg" section to read register contents.  */
+      if (!_bfd_elfcore_make_pseudosection (abfd, ".reg", hdr->p_filesz,
+	  				    hdr->p_offset))
+	return FALSE;
+    }
+
+  if (hdr->p_type == PT_HP_CORE_LOADABLE
+      || hdr->p_type == PT_HP_CORE_STACK
+      || hdr->p_type == PT_HP_CORE_MMF)
+    hdr->p_type = PT_LOAD;
+
+  return _bfd_elf_make_section_from_phdr (abfd, hdr, index, typename);
+}
+
 static const struct bfd_elf_special_section elf64_hppa_special_sections[] =
 {
   { ".fini",   5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
@@ -2751,6 +2787,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_rela_normal		1
 #define elf_backend_special_sections	elf64_hppa_special_sections
 #define elf_backend_action_discarded	elf_hppa_action_discarded
+#define elf_backend_section_from_phdr   elf64_hppa_section_from_phdr
 
 #include "elf64-target.h"
 

@@ -1,3 +1,10 @@
+2005-11-17  Randolph Chung  <tausq@debian.org>
+
+	* elf64-hppa.c (elf64_hppa_object_p): Recognize corefiles under
+	hppa64-hp-hpux11.11.
+	(elf64_hppa_section_from_phdr): New function.
+	(elf_backend_section_from_phdr): Define.
+
 2005-11-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 1150
