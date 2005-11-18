@@ -1,3 +1,18 @@
+2005-11-18  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el (gdb-source-file-list): Declare.
+	(gdbmi): Bind new functions.
+	(gdbmi-var-list-children-handler, gdbmi-var-list-children-regexp):
+	Handle string expressions properly.  Move "type" field into regexp.
+	(gdbmi-var-update-regexp, gdbmi-var-update-handler): Handle string
+	expressions properly.  Update speedbar.
+	(gdbmi-breakpoints-buffer, gdb-stack-buffer, gdb-locals-buffer)
+	(gdb-registers-buffer): Use def-gdb-auto-update-trigger instead of
+	def-gdb-auto-updated-buffer as handlers is defined explicitly.
+	(gdb-stack-list-locals-handler): Handle string expressions properly.
+	(gdb-data-list-register-values-handler)
+	(gdb-data-list-register-values-custom): Fontify buffer.
+
 2005-11-16  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* NEWS (6.4): Mention $argc.
