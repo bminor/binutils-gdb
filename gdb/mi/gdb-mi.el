@@ -58,6 +58,7 @@
 (require 'gud)
 (require 'gdb-ui)
 
+(defvar gdb-source-file-list nil)
 (defvar gdb-register-names nil "List of register names.")
 (defvar gdb-changed-registers nil
   "List of changed register numbers (strings).")
@@ -81,7 +82,7 @@ given in relevant buffer.
 
 Watch expressions appear in the speedbar/slowbar.
 
-The following interactive lisp functions help control operation :
+The following commands help control operation :
 
 `gdb-many-windows'    - Toggle the number of windows gdb uses.
 `gdb-restore-windows' - To restore the window layout.
@@ -90,29 +91,28 @@ See Info node `(emacs)GDB Graphical Interface' for a more
 detailed description of this mode.
 
 
----------------------------------------------------------------------
-                               GDB Toolbar
----------------------------------------------------------------------
-GUD buffer (I/O of GDB)           | Locals buffer
-                                  |
-                                  |
-                                  |
----------------------------------------------------------------------
- Source buffer                    | Input/Output (of inferior) buffer
-                                  | (comint-mode)
-                                  |
-                                  |
-                                  |
-                                  |
-                                  |
-                                  |
----------------------------------------------------------------------
- Stack buffer                     | Breakpoints buffer
- RET      gdb-frames-select       | SPC    gdb-toggle-breakpoint
-                                  | RET    gdb-goto-breakpoint
-                                  |   d    gdb-delete-breakpoint
----------------------------------------------------------------------
-"
++--------------------------------------------------------------+
+|                           GDB Toolbar                        |
++-------------------------------+------------------------------+
+| GUD buffer (I/O of GDB)       | Locals buffer                |
+|                               |                              |
+|                               |                              |
+|                               |                              |
++-------------------------------+------------------------------+
+| Source buffer                                                |
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
+|                                                              |
++-------------------------------+------------------------------+
+| Stack buffer                  | Breakpoints buffer           |
+| RET      gdb-frames-select    | SPC    gdb-toggle-breakpoint |
+|                               | RET    gdb-goto-breakpoint   |
+|                               | d      gdb-delete-breakpoint |
++-------------------------------+------------------------------+"
   ;;
   (interactive (list (gud-query-cmdline 'gdbmi)))
   ;;
@@ -162,8 +162,14 @@ GUD buffer (I/O of GDB)           | Locals buffer
     'gdb-mouse-set-clear-breakpoint)
   (define-key gud-minor-mode-map [left-fringe mouse-1]
     'gdb-mouse-set-clear-breakpoint)
+  (define-key gud-minor-mode-map [left-fringe mouse-2]
+    'gdb-mouse-until)
+  (define-key gud-minor-mode-map [left-fringe drag-mouse-1]
+    'gdb-mouse-until)
   (define-key gud-minor-mode-map [left-margin mouse-3]
-    'gdb-mouse-toggle-breakpoint)
+    'gdb-mouse-toggle-breakpoint-margin)
+  (define-key gud-minor-mode-map [left-fringe mouse-3]
+    'gdb-mouse-toggle-breakpoint-fringe)
 
   (setq comint-input-sender 'gdbmi-send)
   ;;
@@ -223,8 +229,8 @@ GUD buffer (I/O of GDB)           | Locals buffer
 	     `(lambda () (gdbmi-var-list-children-handler ,varnum)))))
 
 (defconst gdbmi-var-list-children-regexp
-"name=\"\\(.*?\\)\",exp=\"\\(.*?\\)\",numchild=\"\\(.*?\\)\",\
-value=\"\\(.*?\\)\"")
+  "name=\"\\(.+?\\)\",exp=\"\\(.+?\\)\",numchild=\"\\(.+?\\)\",\
+value=\\(\".*?\"\\),type=\"\\(.+?\\)\"}")
 
 (defun gdbmi-var-list-children-handler (varnum)
   (with-current-buffer (gdb-get-create-buffer 'gdb-partial-output-buffer)
@@ -239,11 +245,9 @@ value=\"\\(.*?\\)\"")
 		 (let ((varchild (list (match-string 2)
 				       (match-string 1)
 				       (match-string 3)
-				       nil
-				       (match-string 4)
+				       (match-string 5)
+				       (read (match-string 4))
 				       nil)))
-		   (if (looking-at ",type=\"\\(.*?\\)\"")
-		       (setcar (nthcdr 3 varchild) (match-string 1)))
 		   (dolist (var1 gdb-var-list)
 		     (if (string-equal (cadr var1) (cadr varchild))
 			 (throw 'child-already-watched nil)))
@@ -257,24 +261,26 @@ value=\"\\(.*?\\)\"")
   (gdb-enqueue-input
    (list "-var-update --all-values *\n" 'gdbmi-var-update-handler)))
 
-(defconst gdbmi-var-update-regexp "name=\"\\(.*?\\)\",value=\"\\(.*?\\)\"")
+(defconst gdbmi-var-update-regexp "name=\"\\(.*?\\)\",value=\\(\".*\"\\),")
 
 (defun gdbmi-var-update-handler ()
   (with-current-buffer (gdb-get-create-buffer 'gdb-partial-output-buffer)
     (goto-char (point-min))
     (while (re-search-forward gdbmi-var-update-regexp nil t)
 	(let ((varnum (match-string 1)))
-	  (catch 'var-found1
+	  (catch 'var-found-1
 	    (let ((num 0))
 	      (dolist (var gdb-var-list)
 		(if (string-equal varnum (cadr var))
 		    (progn
 		      (setcar (nthcdr 5 var) t)
-		      (setcar (nthcdr 4 var) (match-string 2))
+		      (setcar (nthcdr 4 var) (read (match-string 2)))
 		      (setcar (nthcdr num gdb-var-list) var)
-		      (throw 'var-found1 nil)))
+		      (throw 'var-found-1 nil)))
 		(setq num (+ num 1))))))
-	(setq gdb-var-changed t))))
+	(setq gdb-var-changed t)))
+  (with-current-buffer gud-comint-buffer
+    (speedbar-timer-fn)))
 
 (defun gdbmi-send (proc string)
   "A comint send filter for gdb."
@@ -454,23 +460,10 @@ value=\"\\(.*?\\)\"")
 
 ;; Breakpoint buffer : This displays the output of `-break-list'.
 ;;
-(def-gdb-auto-updated-buffer gdb-breakpoints-buffer
-  ;; This defines the auto update rule for buffers of type
-  ;; `gdb-breakpoints-buffer'.
-  ;;
-  ;; It defines a function that queues the command below.  That function is
-  ;; called:
-  gdbmi-invalidate-breakpoints
-  ;;
-  ;; To update the buffer, this command is sent to gdb.
+(def-gdb-auto-update-trigger gdbmi-invalidate-breakpoints
+  (gdb-get-buffer 'gdb-breakpoints-buffer)
   "-break-list\n"
-  ;;
-  ;; This also defines a function to be the handler for the output
-  ;; from the command above.  That function will copy the output into
-  ;; the appropriately typed buffer.  That function will be called:
-  gdb-break-list-handler
-  ;; buffer specific functions
-  gdb-break-list-custom)
+  gdb-break-list-handler)
 
 (defconst gdb-break-list-regexp
 "number=\"\\(.*?\\)\",type=\"\\(.*?\\)\",disp=\"\\(.*?\\)\",enabled=\"\\(.\\)\",\
@@ -560,6 +553,8 @@ addr=\"\\(.*?\\)\",func=\"\\(.*?\\)\",file=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
       (end-of-line)))
   (if (gdb-get-buffer 'gdb-assembler-buffer) (gdb-assembler-custom)))
 
+(defvar gdb-source-file-regexp "fullname=\"\\(.*?\\)\"")
+
 (defun gdbmi-get-location (bptno line flag)
   "Find the directory containing the relevant source file.
 Put in buffer and place breakpoint icon."
@@ -586,11 +581,11 @@ Add directory to search path for source files using the GDB command, dir."))
 
 ;; Frames buffer.  This displays a perpetually correct bactrack trace.
 ;;
-(def-gdb-auto-updated-buffer gdb-stack-buffer
-  gdbmi-invalidate-frames
+(def-gdb-auto-update-trigger gdbmi-invalidate-frames
+  (gdb-get-buffer 'gdb-stack-buffer)
   "-stack-list-frames\n"
-  gdb-stack-list-frames-handler
-  gdb-stack-list-frames-custom)
+  gdb-stack-list-frames-handler)
+
 
 (defconst gdb-stack-list-frames-regexp
 "level=\"\\(.*?\\)\",addr=\"\\(.*?\\)\",func=\"\\(.*?\\)\",\
@@ -644,11 +639,10 @@ file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
 
 ;; Locals buffer.
 ;; uses "-stack-list-locals --simple-values". Needs GDB 6.1 onwards.
-(def-gdb-auto-updated-buffer gdb-locals-buffer
-  gdbmi-invalidate-locals
+(def-gdb-auto-update-trigger gdbmi-invalidate-locals
+  (gdb-get-buffer 'gdb-locals-buffer)
   "-stack-list-locals --simple-values\n"
-  gdb-stack-list-locals-handler
-  gdb-stack-list-locals-custom)
+  gdb-stack-list-locals-handler)
 
 (defconst gdb-stack-list-locals-regexp
   (concat "name=\"\\(.*?\\)\",type=\"\\(.*?\\)\""))
@@ -666,12 +660,13 @@ file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
 	(let ((local (list (match-string 1)
 			   (match-string 2)
 			   nil)))
-	  (if (looking-at ",value=\"\\(.*?\\)\"")
-	      (setcar (nthcdr 2 local) (match-string 1)))
+	  (if (looking-at ",value=\\(\".*\"\\)}")
+	      (setcar (nthcdr 2 local) (read (match-string 1))))
 	(push local locals-list))))
     (let ((buf (gdb-get-buffer 'gdb-locals-buffer)))
       (and buf (with-current-buffer buf
-		 (let ((p (window-point (get-buffer-window buf 0)))
+	      (let* ((window (get-buffer-window buf 0))
+		     (p (window-point window))
 		       (buffer-read-only nil))
 		   (erase-buffer)
 		   (dolist (local locals-list)
@@ -682,19 +677,15 @@ file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
 				      "(structure)"
 				    "(array)"))
 			      "\n")))
-		   (set-window-point (get-buffer-window buf 0) p)))))))
-
-(defun gdb-stack-list-locals-custom ()
-  nil)
+		   (set-window-point window p)))))))
 
 
 ;; Registers buffer.
 ;;
-(def-gdb-auto-updated-buffer gdb-registers-buffer
-  gdbmi-invalidate-registers
+(def-gdb-auto-update-trigger gdbmi-invalidate-registers
+  (gdb-get-buffer 'gdb-registers-buffer)
   "-data-list-register-values x\n"
-  gdb-data-list-register-values-handler
-  gdb-data-list-register-values-custom)
+  gdb-data-list-register-values-handler)
 
 (defconst gdb-data-list-register-values-regexp
   "number=\"\\(.*?\\)\",value=\"\\(.*?\\)\"")
@@ -731,9 +722,21 @@ file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
 		  (buffer-read-only nil))
 	      (erase-buffer)
 	      (insert register-values)
-	      (set-window-point (get-buffer-window buf 0) p))))))))
+	      (set-window-point (get-buffer-window buf 0) p)))))))
+  (gdb-data-list-register-values-custom))
 
-(defun gdb-data-list-register-values-custom ())
+(defun gdb-data-list-register-values-custom ()
+  (with-current-buffer (gdb-get-buffer 'gdb-registers-buffer)
+    (save-excursion
+      (let ((buffer-read-only nil)
+	    bl)
+	(goto-char (point-min))
+	(while (< (point) (point-max))
+	  (setq bl (line-beginning-position))
+	  (when (looking-at "^[^\t]+")
+	    (put-text-property bl (match-end 0)
+			       'face font-lock-variable-name-face))
+	  (forward-line 1))))))
 
 (defun gdb-get-changed-registers ()
   (if (and (gdb-get-buffer 'gdb-registers-buffer)
@@ -745,6 +748,8 @@ file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
 	  'gdb-get-changed-registers-handler))
 	(push 'gdb-get-changed-registers gdb-pending-triggers))))
 
+(defconst gdb-data-list-register-names-regexp "\"\\(.*?\\)\"")
+
 (defun gdb-get-changed-registers-handler ()
   (setq gdb-pending-triggers
 	(delq 'gdb-get-changed-registers gdb-pending-triggers))
@@ -753,9 +758,6 @@ file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
     (goto-char (point-min))
     (while (re-search-forward gdb-data-list-register-names-regexp nil t)
       (push (match-string 1) gdb-changed-registers))))
-
-
-(defconst gdb-data-list-register-names-regexp "\"\\(.*?\\)\"")
 
 (defun gdb-get-register-names ()
   "Create a list of register names."
@@ -766,9 +768,6 @@ file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
 
 ;; these functions/variables may go into gdb-ui.el in the near future
 ;; (from gdb-nui.el)
-
-(defvar gdb-source-file-list nil)
-(defvar gdb-source-file-regexp "fullname=\"\\(.*?\\)\"")
 
 (defun gdb-get-source-file ()
   "Find the source file where the program starts and display it with related
