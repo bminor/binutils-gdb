@@ -1,4 +1,4 @@
-2005-11-14  Nick Roberts  <nickrob@snap.net.nz>
+2005-11-18  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el (gdb-source-file-list): Declare.
 	(gdbmi): Bind new functions.
