@@ -1,3 +1,9 @@
+2005-11-19  Jim Blandy  <jimb@redhat.com>
+
+	* tracepoint.c (stringify_collection_list): Indicate absolute
+	memory ranges by using "-1" as the memory range's base register
+	number, not "FFFFFFFF".
+
 2005-11-19  Randolph Chung  <tausq@debian.org>
 
 	* dwarf2loc.c (dwarf2_tracepoint_var_ref): Remove extra add for

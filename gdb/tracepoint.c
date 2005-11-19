@@ -1437,10 +1437,17 @@ stringify_collection_list (struct collection_list *list, char *string)
 	  end = temp_buf;
 	}
 
-      sprintf (end, "M%X,%s,%lX", 
-	       list->list[i].type,
-	       tmp2,
-	       (long) (list->list[i].end - list->list[i].start));
+      {
+        bfd_signed_vma length = list->list[i].end - list->list[i].start;
+
+        /* The "%X" conversion specifier expects an unsigned argument,
+           so passing -1 to it directly gives you "FFFFFFFF" (or more,
+           depending on sizeof (unsigned)).  Special-case it.  */
+        if (list->list[i].type == -1)
+          sprintf (end, "M-1,%s,%lX", tmp2, (long) length);
+        else
+          sprintf (end, "M%X,%s,%lX", list->list[i].type, tmp2, (long) length);
+      }
 
       count += strlen (end);
       end = temp_buf + count;
