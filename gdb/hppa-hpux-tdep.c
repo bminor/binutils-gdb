@@ -1246,12 +1246,12 @@ static const struct frame_unwind hppa_hpux_sigtramp_frame_unwind = {
 static const struct frame_unwind *
 hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
 {
+  struct unwind_table_entry *u;
   CORE_ADDR pc = frame_pc_unwind (next_frame);
-  char *name;
 
-  find_pc_partial_function (pc, &name, NULL, NULL);
+  u = find_unwind_entry (pc);
 
-  if (name && strcmp(name, "_sigreturn") == 0)
+  if (u && u->HP_UX_interrupt_marker)
     return &hppa_hpux_sigtramp_frame_unwind;
 
   return NULL;

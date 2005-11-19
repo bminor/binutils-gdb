@@ -1,5 +1,11 @@
 2005-11-19  Randolph Chung  <tausq@debian.org>
 
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_unwind_sniffer): Rely on the
+	unwind record to determine a signal frame, instead of hardcoding
+	a function name.
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (skip_prologue_hard_way): Add one more insn pattern 
 	for "std rp,-0x10(sp)".
 	(hppa_frame_cache): Likewise.
