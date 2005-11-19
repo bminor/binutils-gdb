@@ -49,6 +49,26 @@
 #define IS_32BIT_TARGET(_gdbarch) \
 	((gdbarch_tdep (_gdbarch))->bytes_per_address == 4)
 
+/* Bit in the `ss_flag' member of `struct save_state' that indicates
+   that the 64-bit register values are live.  From
+   <machine/save_state.h>.  */
+#define HPPA_HPUX_SS_WIDEREGS		0x40
+
+/* Offsets of various parts of `struct save_state'.  From
+   <machine/save_state.h>.  */
+#define HPPA_HPUX_SS_FLAGS_OFFSET	0
+#define HPPA_HPUX_SS_NARROW_OFFSET	4
+#define HPPA_HPUX_SS_FPBLOCK_OFFSET 	256
+#define HPPA_HPUX_SS_WIDE_OFFSET        640
+
+/* The size of `struct save_state.  */
+#define HPPA_HPUX_SAVE_STATE_SIZE	1152
+
+/* The size of `struct pa89_save_state', which corresponds to PA-RISC
+   1.1, the lowest common denominator that we support.  */
+#define HPPA_HPUX_PA89_SAVE_STATE_SIZE	512
+
+
 /* Forward declarations.  */
 extern void _initialize_hppa_hpux_tdep (void);
 extern initialize_file_ftype _initialize_hppa_hpux_tdep;
@@ -1158,8 +1178,8 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct hppa_hpux_sigtramp_unwind_cache *info;
   unsigned int flag;
-  CORE_ADDR sp, scptr;
-  int i, incr, off, szoff;
+  CORE_ADDR sp, scptr, off;
+  int i, incr, szoff;
 
   if (*this_cache)
     return *this_cache;
@@ -1170,25 +1190,29 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 
   sp = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
 
-  scptr = sp - 1352;
+  if (IS_32BIT_TARGET (gdbarch))
+    scptr = sp - 1352;
+  else
+    scptr = sp - 1520;
+
   off = scptr;
 
   /* See /usr/include/machine/save_state.h for the structure of the save_state_t
      structure. */
   
-  flag = read_memory_unsigned_integer(scptr, 4);
-    
-  if (!(flag & 0x40))
+  flag = read_memory_unsigned_integer(scptr + HPPA_HPUX_SS_FLAGS_OFFSET, 4);
+
+  if (!(flag & HPPA_HPUX_SS_WIDEREGS))
     {
       /* Narrow registers. */
-      off = scptr + offsetof (save_state_t, ss_narrow);
+      off = scptr + HPPA_HPUX_SS_NARROW_OFFSET;
       incr = 4;
       szoff = 0;
     }
   else
     {
       /* Wide registers. */
-      off = scptr + offsetof (save_state_t, ss_wide) + 8;
+      off = scptr + HPPA_HPUX_SS_WIDE_OFFSET + 8;
       incr = 8;
       szoff = (tdep->bytes_per_address == 4 ? 4 : 0);
     }
@@ -1203,10 +1227,14 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
     {
       if (hppa_hpux_tramp_reg[i] > 0)
         info->saved_regs[hppa_hpux_tramp_reg[i]].addr = off + szoff;
+
       off += incr;
     }
 
   /* TODO: fp regs */
+
+  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].addr = 
+    info->saved_regs[HPPA_RP_REGNUM].addr;
 
   info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
 
@@ -1759,25 +1787,6 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 }
 
 
-
-/* Bit in the `ss_flag' member of `struct save_state' that indicates
-   that the 64-bit register values are live.  From
-   <machine/save_state.h>.  */
-#define HPPA_HPUX_SS_WIDEREGS		0x40
-
-/* Offsets of various parts of `struct save_state'.  From
-   <machine/save_state.h>.  */
-#define HPPA_HPUX_SS_FLAGS_OFFSET	0
-#define HPPA_HPUX_SS_NARROW_OFFSET	4
-#define HPPA_HPUX_SS_FPBLOCK_OFFSET 	256
-#define HPPA_HPUX_SS_WIDE_OFFSET        640
-
-/* The size of `struct save_state.  */
-#define HPPA_HPUX_SAVE_STATE_SIZE	1152
-
-/* The size of `struct pa89_save_state', which corresponds to PA-RISC
-   1.1, the lowest common denominator that we support.  */
-#define HPPA_HPUX_PA89_SAVE_STATE_SIZE	512
 
 static void
 hppa_hpux_supply_ss_narrow (struct regcache *regcache,

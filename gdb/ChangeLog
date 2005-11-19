@@ -1,5 +1,12 @@
 2005-11-19  Randolph Chung  <tausq@debian.org>
 
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_unwind_cache): Use 
+	HPPA_HPUX_SS_* constants.  Ensure "off" is large enough to hold 
+	64-bit offset.  Set proper signal context offset for 64-bit 
+	programs.  Set pc properly for signal frames.
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
 	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_unwind_sniffer): Rely on the
 	unwind record to determine a signal frame, instead of hardcoding
 	a function name.
