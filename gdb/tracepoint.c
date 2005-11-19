@@ -1071,7 +1071,7 @@ make_cleanup_free_actions (struct tracepoint *t)
 
 struct memrange
 {
-  int type;		/* 0 for absolute memory range, else basereg number */
+  int type;		/* -1 for absolute memory range, else basereg number */
   bfd_signed_vma start;
   bfd_signed_vma end;
 };
