@@ -1,5 +1,11 @@
 2005-11-19  Randolph Chung  <tausq@debian.org>
 
+	* dwarf2loc.c (dwarf2_tracepoint_var_ref): Remove extra add for
+	DW_OP_fbreg.  Handle DW_OP_breg0 through DW_OP_breg31.  Print 
+	DWARF opcode for unsupported case.
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
 	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_unwind_cache): Use 
 	HPPA_HPUX_SS_* constants.  Ensure "off" is large enough to hold 
 	64-bit offset.  Set proper signal context offset for 64-bit 
