@@ -1226,7 +1226,7 @@ collect_symbol (struct collection_list *collect,
 			   DEPRECATED_SYMBOL_NAME (sym), len, 
 			   tmp /* address */);
 	}
-      add_memrange (collect, -1, offset, len);	/* 0 == memory */
+      add_memrange (collect, -1, offset, len);	/* -1 == memory */
       break;
     case LOC_REGISTER:
     case LOC_REGPARM:

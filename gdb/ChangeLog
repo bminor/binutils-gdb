@@ -1,6 +1,6 @@
 2005-11-18  Jim Blandy  <jimb@redhat.com>
 
-	* tracepoint.c (struct memrange): Doc fix.
+	* tracepoint.c (struct memrange, collect_symbol): Doc fix.
 
 2005-11-18  Andrew Stubbs  <andrew.stubbs@st.com>
 
