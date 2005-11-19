@@ -1,5 +1,12 @@
 2005-11-19  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (skip_prologue_hard_way): Add one more insn pattern 
+	for "std rp,-0x10(sp)".
+	(hppa_frame_cache): Likewise.
+	(hppa_fallback_frame_cache): Likewise.
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_frame_cache): Reformat code and enhance 
 	debugging.
 

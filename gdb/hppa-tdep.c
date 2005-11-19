@@ -1491,7 +1491,7 @@ restart:
 
       /* There are limited ways to store the return pointer into the
 	 stack.  */
-      if (inst == 0x6bc23fd9 || inst == 0x0fc212c1)
+      if (inst == 0x6bc23fd9 || inst == 0x0fc212c1 || inst == 0x73c23fe1)
 	save_rp = 0;
 
       /* These are the only ways we save SP into the stack.  At this time
@@ -1846,7 +1846,8 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	    looking_for_rp = 0;
 	    cache->saved_regs[HPPA_RP_REGNUM].addr = -24;
 	  }
-	else if (inst == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
+	else if (inst == 0x0fc212c1 
+	         || inst == 0x73c23fe1) /* std rp,-0x10(sr0,sp) */
 	  {
 	    looking_for_rp = 0;
 	    cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
@@ -2187,7 +2188,8 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
 	      cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
 	      found_rp = 1;
 	    }
-	  else if (insn == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
+	  else if (insn == 0x0fc212c1
+	           || insn == 0x73c23fe1) /* std rp,-0x10(sr0,sp) */
 	    {
 	      cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
 	      found_rp = 1;
