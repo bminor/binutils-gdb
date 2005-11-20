@@ -664,18 +664,22 @@ static const CB_TARGET_DEFS_MAP errno_map[] =
    installation and removing synonyms and unnecessary items.  Don't
    forget the end-marker.  */
 
-/* This one we treat specially, as it's used in the fcntl syscall.  */
-#define TARGET_O_ACCMODE 3
+/* These we treat specially, as they're used in the fcntl F_GETFL
+   syscall.  For consistency, open_map is also manually edited to use
+   these macros.  */
+#define TARGET_O_ACCMODE 0x3
+#define TARGET_O_RDONLY 0x0
+#define TARGET_O_WRONLY 0x1
 
 static const CB_TARGET_DEFS_MAP open_map[] = {
 #ifdef O_ACCMODE
-  { O_ACCMODE, 0x3 },
+  { O_ACCMODE, TARGET_O_ACCMODE },
 #endif
 #ifdef O_RDONLY
-  { O_RDONLY, 0x0 },
+  { O_RDONLY, TARGET_O_RDONLY },
 #endif
 #ifdef O_WRONLY
-  { O_WRONLY, 0x1 },
+  { O_WRONLY, TARGET_O_WRONLY },
 #endif
 #ifdef O_RDWR
   { O_RDWR, 0x2 },
@@ -1429,9 +1433,24 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		  retval = current_cpu->last_open_flags & TARGET_O_ACCMODE;
 		  break;
 		}
+	      else if (arg1 == 0)
+		{
+		  /* Because we can't freopen fd:s 0, 1, 2 to mean
+		     something else than stdin, stdout and stderr
+		     (sim/common/syscall.c:cb_syscall special cases fd
+		     0, 1 and 2), we know what flags that we can
+		     sanely return for these fd:s.  */
+		  retval = TARGET_O_RDONLY;
+		  break;
+		}
+	      else if (arg1 == 1 || arg1 == 2)
+		{
+		  retval = TARGET_O_WRONLY;
+		  break;
+		}
 	      /* FALLTHROUGH */
-	      /* Abort for all other cases.  */
 	    default:
+	      /* Abort for all other cases.  */
 	      sim_io_eprintf (sd, "Unimplemented %s syscall "
 			      "(fd: 0x%lx: cmd: 0x%lx arg: 0x%lx)\n",
 			      callnum == TARGET_SYS_fcntl
