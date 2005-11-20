@@ -1,3 +1,10 @@
+2005-11-19  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Tracepoint Packets): New node.
+	(General Query Packets): Add entries for the tracepoint packets,
+	referring to the "Tracepoint Packets" node.
+	(Tracepoints): Add reference to "Tracepoint Packets".
+	
 2005-11-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.texinfo (set remotebreak): Add anchor.

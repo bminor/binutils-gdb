@@ -7126,10 +7126,12 @@ values without interacting with you, it can do so quickly and
 unobtrusively, hopefully not disturbing the program's behavior.
 
 The tracepoint facility is currently available only for remote
-targets.  @xref{Targets}.  In addition, your remote target must know how
-to collect trace data.  This functionality is implemented in the remote
-stub; however, none of the stubs distributed with @value{GDBN} support
-tracepoints as of this writing.
+targets.  @xref{Targets}.  In addition, your remote target must know
+how to collect trace data.  This functionality is implemented in the
+remote stub; however, none of the stubs distributed with @value{GDBN}
+support tracepoints as of this writing.  The format of the remote
+packets used to implement tracepoints are described in @ref{Tracepoint
+Packets}.
 
 This chapter describes the tracepoint commands and features.
 
@@ -22017,6 +22019,7 @@ Show the current setting of the target wait timeout.
 * Stop Reply Packets::
 * General Query Packets::
 * Register Packet Format::
+* Tracepoint Packets::
 * Interrupts::
 * Examples::
 * File-I/O remote protocol extension::
@@ -23029,6 +23032,10 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 (if available), until the target ceases to request them.
 @end table
 
+@item QTDP
+@itemx QTFrame
+@xref{Tracepoint Packets}.
+
 @item qThreadExtraInfo,@var{id}
 @cindex thread attributes info, remote request
 @cindex @samp{qThreadExtraInfo} packet
@@ -23047,6 +23054,13 @@ Where @samp{@var{XX}@dots{}} is a hex encoding of @sc{ascii} data,
 comprising the printable string containing the extra information about
 the thread's attributes.
 @end table
+
+@item QTStart    
+@itemx QTStop     
+@itemx QTinit     
+@itemx QTro       
+@itemx qTStatus   
+@xref{Tracepoint Packets}.
 
 @end table
 
@@ -23075,6 +23089,167 @@ thirty-two bit registers such as @code{sr}).  The ordering is the same
 as @code{MIPS32}.
 
 @end table
+
+@node Tracepoint Packets
+@section Tracepoint Packets
+@cindex tracepoint packets
+@cindex packets, tracepoint
+
+Here we describe the packets @value{GDBN} uses to implement
+tracepoints (@pxref{Tracepoints}).
+
+@table @samp
+
+@item QTDP:@var{n}:@var{addr}:@var{ena}:@var{step}:@var{pass}@r{[}-@r{]}
+Create a new tracepoint, number @var{n}, at @var{addr}.  If @var{ena}
+is @samp{E}, then the tracepoint is enabled; if it is @samp{D}, then
+the tracepoint is disabled.  @var{step} is the tracepoint's step
+count, and @var{pass} is its pass count.  If the trailing @samp{-} is
+present, further @samp{QTDP} packets will follow to specify this
+tracepoint's actions.
+
+Replies:
+@table @samp
+@item OK
+The packet was understood and carried out.
+@item 
+The packet was not recognized.
+@end table
+
+@item QTDP:-@var{n}:@var{addr}:@r{[}S@r{]}@var{action}@dots{}@r{[}-@r{]}
+Define actions to be taken when a tracepoint is hit.  @var{n} and
+@var{addr} must be the same as in the initial @samp{QTDP} packet for
+this tracepoint.  This packet may only be sent immediately after
+another @samp{QTDP} packet that ended with a @samp{-}.  If the
+trailing @samp{-} is present, further @samp{QTDP} packets will follow,
+specifying more actions for this tracepoint.
+
+In the series of action packets for a given tracepoint, at most one
+can have an @samp{S} before its first @var{action}.  If such a packet
+is sent, it and the following packets define ``while-stepping''
+actions.  Any prior packets define ordinary actions --- that is, those
+taken when the tracepoint is first hit.  If no action packet has an
+@samp{S}, then all the packets in the series specify ordinary
+tracepoint actions.
+
+The @samp{@var{action}@dots{}} portion of the packet is a series of
+actions, concatenated without separators.  Each action has one of the
+following forms:
+
+@table @samp
+
+@item R @var{mask}
+Collect the registers whose bits are set in @var{mask}.  @var{mask} is
+a hexidecimal number whose @var{i}'th bit is set if register number
+@var{i} should be collected.  (The least significant bit is numbered
+zero.)  Note that @var{mask} may be any number of digits long; it may
+not fit in a 32-bit word.
+
+@item M @var{basereg},@var{offset},@var{len}
+Collect @var{len} bytes of memory starting at the address in register
+number @var{basereg}, plus @var{offset}.  If @var{basereg} is
+@samp{-1}, then the range has a fixed address: @var{offset} is the
+address of the lowest byte to collect.  The @var{basereg},
+@var{offset}, and @var{len} parameters are all unsigned hexidecimal
+values (the @samp{-1} value for @var{basereg} is a special case).
+
+@item X @var{len},@var{expr}
+Evaluate @var{expr}, whose length is @var{len}, and collect memory as
+it directs.  @var{expr} is an agent expression, as described in
+@ref{Agent Expressions}.  Each byte of the expression is encoded as a
+two-digit hex number in the packet; @var{len} is the number of bytes
+in the expression (and thus one-half the number of hex digits in the
+packet).
+
+@end table
+
+Any number of actions may be packed together in a single @samp{QTDP}
+packet, as long as the packet does not exceed the maximum packet
+length (400 bytes, for many stubs).
+
+Replies:
+@table @samp
+@item OK
+The packet was understood and carried out.
+@item 
+The packet was not recognized.
+@end table
+
+@item QTFrame:@var{n}
+Select the @var{n}'th tracepoint frame from the buffer, and use the
+register and memory contents recorded there to answer subsequent
+request packets from @value{GDBN}.
+
+A successful reply from the stub indicates that the stub has found the
+requested frame.  The response is a series of parts, concatenated
+without separators, describing the frame we selected.  Each part has
+one of the following forms:
+
+@table @samp
+@item F @var{f}
+The selected frame is number @var{n} in the trace frame buffer;
+@var{f} is a hexidecimal number.  If @var{f} is @samp{-1}, then there
+was no frame matching the criteria in the request packet.
+
+@item T @var{t}
+The selected trace frame records a hit of tracepoint number @var{t};
+@var{t} is a hexidecimal number.
+
+@end table
+
+@item QTFrame:pc:@var{addr}
+Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
+currently selected frame whose PC is @var{addr};
+@var{addr} is a hexidecimal number.
+
+@item QTFrame:tdp:@var{t}
+Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
+currently selected frame that is a hit of tracepoint @var{t}; @var{t}
+is a hexidecimal number.
+
+@item QTFrame:range:@var{start}:@var{end}
+Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
+currently selected frame whose PC is between @var{start} (inclusive)
+and @var{end} (exclusive); @var{start} and @var{end} are hexidecimal
+numbers.
+
+@item QTFrame:outside:@var{start}:@var{end}
+Like @samp{QTFrame:range:@var{start}:@var{end}}, but select the first
+frame @emph{outside} the given range of addresses.
+
+@item QTStart
+Begin the tracepoint experiment.  Begin collecting data from tracepoint
+hits in the trace frame buffer.
+
+@item QTStop
+End the tracepoint experiment.  Stop collecting trace frames.
+
+@item QTinit
+Clear the table of tracepoints, and empty the trace frame buffer.
+
+@item QTro:@var{start1},@var{end1}:@var{start2},@var{end2}:@dots{}
+Establish the given ranges of memory as ``transparent''.  The stub
+will answer requests for these ranges from memory's current contents,
+if they were not collected as part of the tracepoint hit.
+
+@value{GDBN} uses this to mark read-only regions of memory, like those
+containing program code.  Since these areas never change, they should
+still have the same contents they did when the tracepoint was hit, so
+there's no reason for the stub to refuse to provide their contents.
+
+@item qTStatus
+Ask the stub if there is a trace experiment running right now.
+
+Replies:
+@table @samp
+@item T0
+There is no trace experiment running.
+@item T1
+There is a trace experiment running.
+@end table
+
+@end table
+
 
 @node Interrupts
 @section Interrupts
