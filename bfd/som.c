@@ -5355,11 +5355,30 @@ som_decode_symclass (asymbol *symbol)
   if (bfd_is_com_section (symbol->section))
     return 'C';
   if (bfd_is_und_section (symbol->section))
-    return 'U';
+    {
+      if (symbol->flags & BSF_WEAK)
+	{
+	  /* If weak, determine if it's specifically an object
+	     or non-object weak.  */
+	  if (symbol->flags & BSF_OBJECT)
+	    return 'v';
+	  else
+	    return 'w';
+	}
+      else
+	 return 'U';
+    }
   if (bfd_is_ind_section (symbol->section))
     return 'I';
   if (symbol->flags & BSF_WEAK)
-    return 'W';
+    {
+      /* If weak, determine if it's specifically an object
+	 or non-object weak.  */
+      if (symbol->flags & BSF_OBJECT)
+	return 'V';
+      else
+	return 'W';
+    }
   if (!(symbol->flags & (BSF_GLOBAL | BSF_LOCAL)))
     return '?';
 

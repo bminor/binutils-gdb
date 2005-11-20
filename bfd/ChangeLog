@@ -1,3 +1,8 @@
+2005-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* som.c (som_decode_symclass): Decode BSF_WEAK symbols in the same
+	manner as bfd_decode_symclass.
+
 2005-11-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_check_relocs): Don't set has_14bit_branch
