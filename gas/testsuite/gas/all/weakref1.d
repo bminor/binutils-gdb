@@ -6,7 +6,7 @@
 #not-target: alpha*-*-osf* *-*-ecoff pdp11-*-aout
 
 #...
-RELOCATION RECORDS FOR \[\.text\]:
+RELOCATION RECORDS FOR \[(\.text|\$CODE\$)\]:
 OFFSET +TYPE +VALUE *
 # the rest of this file is generated with the following script:
 # # script begin

@@ -1,4 +1,4 @@
-#nm: --defined-only --extern-only --no-sort
+#nm: --defined-only --extern-only
 #name: weakref tests, global syms
 #source: weakref1.s
 # see weakref1.d for comments on the not-targets

@@ -1,3 +1,15 @@
+2005-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	Bug gas/1879
+	* gas/all/weakref1.d: Check for "$CODE$" as well as ".text".
+	* gas/all/weakref1.s: Indent "-ld1 = l".
+	* gas/all/weakref1g.d: Remove --no-sort option.
+	* gas/all/weakref1l.d: Likewise.
+	* gas/all/weakref1u.d: Likewise.  Sort expected results.
+	* gas/all/weakref1w.d: Likewise.
+	* gas/all/weakref2.s: Indent directives.
+	* gas/all/weakref3.s: Likewise.
+
 2005-11-17  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/all/cond.s: Also check ifdef works on equates and

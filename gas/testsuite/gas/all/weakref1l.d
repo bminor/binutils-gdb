@@ -1,4 +1,4 @@
-#nm: --defined-only --no-sort
+#nm: --defined-only
 #name: weakref tests, local syms
 #source: weakref1.s
 # aix drops local symbols

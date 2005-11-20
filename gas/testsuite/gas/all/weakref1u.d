@@ -1,4 +1,4 @@
-#nm: --undefined-only --no-sort
+#nm: --undefined-only
 #name: weakref tests, strong undefined syms
 #source: weakref1.s
 # aout turns undefined into *ABS* symbols.
@@ -39,11 +39,11 @@
 #...
 .* U uc9
 #...
-.* U um5
+.* U ud5
 #...
 .* U uh8
 #...
 .* U uh9
 #...
-.* U ud5
+.* U um5
 #pass
