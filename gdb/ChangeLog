@@ -1,3 +1,79 @@
+2005-11-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Use PIOD_WRITE_I instead
+	of PIOD_WRITE_D.
+
+2005-11-19  Jim Blandy  <jimb@redhat.com>
+
+	* tracepoint.c (memrange_absolute): New enum constant.
+	(struct memrange, memrange_cmp, add_memrange, collect_symbol,
+	stringify_collection_list, encode_actions): Use it instead of '-1'
+	to indicate an fixed-address memory range.
+	(Suggested by Eli Zaretskii.)
+
+	* tracepoint.c (stringify_collection_list): Indicate absolute
+	memory ranges by using "-1" as the memory range's base register
+	number, not "FFFFFFFF".
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
+	* dwarf2loc.c (dwarf2_tracepoint_var_ref): Remove extra add for
+	DW_OP_fbreg.  Handle DW_OP_breg0 through DW_OP_breg31.  Print 
+	DWARF opcode for unsupported case.
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_unwind_cache): Use 
+	HPPA_HPUX_SS_* constants.  Ensure "off" is large enough to hold 
+	64-bit offset.  Set proper signal context offset for 64-bit 
+	programs.  Set pc properly for signal frames.
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_unwind_sniffer): Rely on the
+	unwind record to determine a signal frame, instead of hardcoding
+	a function name.
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (skip_prologue_hard_way): Add one more insn pattern 
+	for "std rp,-0x10(sp)".
+	(hppa_frame_cache): Likewise.
+	(hppa_fallback_frame_cache): Likewise.
+
+2005-11-19  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_frame_cache): Reformat code and enhance 
+	debugging.
+
+2005-11-18  Jim Blandy  <jimb@redhat.com>
+
+	* tracepoint.c (struct memrange, collect_symbol): Doc fix.
+
+2005-11-18  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* mi/mi-main.c (mi_load_progress): Ensure the use of the correct mi
+	uiout for the duration of the function.
+
+2005-11-18  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el (gdb-source-file-list): Declare.
+	(gdbmi): Bind new functions.
+	(gdbmi-var-list-children-handler, gdbmi-var-list-children-regexp):
+	Handle string expressions properly.  Move "type" field into regexp.
+	(gdbmi-var-update-regexp, gdbmi-var-update-handler): Handle string
+	expressions properly.  Update speedbar.
+	(gdbmi-breakpoints-buffer, gdb-stack-buffer, gdb-locals-buffer)
+	(gdb-registers-buffer): Use def-gdb-auto-update-trigger instead of
+	def-gdb-auto-updated-buffer as handlers is defined explicitly.
+	(gdb-stack-list-locals-handler): Handle string expressions properly.
+	(gdb-data-list-register-values-handler)
+	(gdb-data-list-register-values-custom): Fontify buffer.
+
+2005-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* version.in: Update to 6.4.50.
+
 2005-11-16  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* NEWS (6.4): Mention $argc.

@@ -4507,7 +4507,24 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_REL14:
 	case R_PPC64_REL14_BRTAKEN:
 	case R_PPC64_REL14_BRNTAKEN:
-	  htab->has_14bit_branch = 1;
+	  {
+	    asection *dest = NULL;
+
+	    /* Heuristic: If jumping outside our section, chances are
+	       we are going to need a stub.  */
+	    if (h != NULL)
+	      {
+		/* If the sym is weak it may be overridden later, so
+		   don't assume we know where a weak sym lives.  */
+		if (h->root.type == bfd_link_hash_defined)
+		  dest = h->root.u.def.section;
+	      }
+	    else
+	      dest = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
+						sec, r_symndx);
+	    if (dest != sec)
+	      htab->has_14bit_branch = 1;
+	  }
 	  /* Fall through.  */
 
 	case R_PPC64_REL24:

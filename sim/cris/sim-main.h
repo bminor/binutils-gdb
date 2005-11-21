@@ -166,6 +166,17 @@ struct _sim_cpu {
      for sigmasks and sigpendings. */
   USI sighandler[64];
 
+  /* This is a hack to implement just the parts of fcntl F_GETFL that
+     are used in open+fdopen calls for the standard scenario: for such
+     a call we check that the last syscall was open, we check that the
+     passed fd is the same returned then, and so we return the same
+     flags passed to open.  This way, we avoid complicating the
+     generic sim callback machinery by introducing fcntl
+     mechanisms.  */
+  USI last_syscall;
+  USI last_open_fd;
+  USI last_open_flags;
+
   /* Function for initializing CPU thread context, which varies in size
      with each CPU model.  They should be in some constant parts or
      initialized in *_init_cpu, but we can't modify that for now.  */

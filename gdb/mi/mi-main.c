@@ -1365,9 +1365,18 @@ mi_load_progress (const char *section_name,
   static struct timeval last_update;
   static char *previous_sect_name = NULL;
   int new_section;
+  struct ui_out *saved_uiout;
 
-  if (!current_interp_named_p (INTERP_MI)
-      && !current_interp_named_p (INTERP_MI1))
+  /* This function is called through deprecated_show_load_progress
+     which means uiout may not be correct.  Fix it for the duration
+     of this function.  */
+  saved_uiout = uiout;
+
+  if (current_interp_named_p (INTERP_MI))
+    uiout = mi_out_new (2);
+  else if (current_interp_named_p (INTERP_MI1))
+    uiout = mi_out_new (1);
+  else
     return;
 
   update_threshold.tv_sec = 0;
@@ -1424,6 +1433,9 @@ mi_load_progress (const char *section_name,
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);
     }
+
+  xfree (uiout);
+  uiout = saved_uiout;
 }
 
 void

@@ -1491,7 +1491,7 @@ restart:
 
       /* There are limited ways to store the return pointer into the
 	 stack.  */
-      if (inst == 0x6bc23fd9 || inst == 0x0fc212c1)
+      if (inst == 0x6bc23fd9 || inst == 0x0fc212c1 || inst == 0x73c23fe1)
 	save_rp = 0;
 
       /* These are the only ways we save SP into the stack.  At this time
@@ -1846,7 +1846,8 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	    looking_for_rp = 0;
 	    cache->saved_regs[HPPA_RP_REGNUM].addr = -24;
 	  }
-	else if (inst == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
+	else if (inst == 0x0fc212c1 
+	         || inst == 0x73c23fe1) /* std rp,-0x10(sr0,sp) */
 	  {
 	    looking_for_rp = 0;
 	    cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
@@ -1984,7 +1985,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
  	cache->base = fp;
  
  	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [frame pointer] }",
+	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [frame pointer]",
  	    paddr_nz (cache->base));
       }
      else if (u->Save_SP 
@@ -1996,7 +1997,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
             cache->base = read_memory_integer (this_sp, TARGET_PTR_BIT / 8);
 
 	    if (hppa_debug)
-	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [saved] }",
+	      fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [saved]",
 			          paddr_nz (cache->base));
       }
     else
@@ -2005,7 +2006,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	   the SP back.  */
         cache->base = this_sp - frame_size;
 	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [unwind adjust] } ",
+	  fprintf_unfiltered (gdb_stdlog, " (base=0x%s) [unwind adjust]",
 			      paddr_nz (cache->base));
 
       }
@@ -2017,21 +2018,34 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (u->Millicode)
     {
       if (trad_frame_addr_p (cache->saved_regs, 31))
-        cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
+        {
+          cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
+	  if (hppa_debug)
+	    fprintf_unfiltered (gdb_stdlog, " (pc=r31) [stack] } ");
+        }
       else
 	{
 	  ULONGEST r31 = frame_unwind_register_unsigned (next_frame, 31);
 	  trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, r31);
+	  if (hppa_debug)
+	    fprintf_unfiltered (gdb_stdlog, " (pc=r31) [frame] } ");
         }
     }
   else
     {
       if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
-        cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[HPPA_RP_REGNUM];
+        {
+          cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = 
+	    cache->saved_regs[HPPA_RP_REGNUM];
+	  if (hppa_debug)
+	    fprintf_unfiltered (gdb_stdlog, " (pc=rp) [stack] } ");
+        }
       else
 	{
 	  ULONGEST rp = frame_unwind_register_unsigned (next_frame, HPPA_RP_REGNUM);
 	  trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, rp);
+	  if (hppa_debug)
+	    fprintf_unfiltered (gdb_stdlog, " (pc=rp) [frame] } ");
 	}
     }
 
@@ -2174,7 +2188,8 @@ hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
 	      cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
 	      found_rp = 1;
 	    }
-	  else if (insn == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
+	  else if (insn == 0x0fc212c1
+	           || insn == 0x73c23fe1) /* std rp,-0x10(sr0,sp) */
 	    {
 	      cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
 	      found_rp = 1;

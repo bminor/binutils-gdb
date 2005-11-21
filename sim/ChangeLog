@@ -1,3 +1,26 @@
+2005-11-20  Hans-Peter Nilsson  <hp@axis.com>
+
+	cris/traps.c (TARGET_O_RDONLY, TARGET_O_WRONLY): Define.
+	(open_map): Use TARGET_O_ACCMODE, TARGET_O_RDONLY and
+	TARGET_O_WRONLY.
+	(cris_break_13_handler) <case TARGET_SYS_fcntl>: Add support for
+	F_GETFL on fd 0, 1 and 2.
+
+2005-11-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/sim-main.h (struct _sim_cpu): New members last_syscall,
+	last_open_fd, last_open_flags.
+	* cris/traps.c: Don't include targ-vals.h.
+	(TARGET_O_ACCMODE): Define.
+	(cris_break_13_handler): Set new _sim_cpu members.
+	<case TARGET_SYS_fcntl>: Support special case of F_GETFL.
+	Rearrange code as switch.  Emit "unimplemented" abort for
+	unimplemented fcntl calls.
+
+	* cris/traps.c (TARGET_SYS_stat): Define.
+	(syscall_stat32_map): Add entry for TARGET_SYS_stat.
+	(cris_break_13_handler) <case TARGET_SYS_stat>: New case.
+
 2005-11-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/cris-tmpl.c (MY (f_model_insn_before)): Make sure only the
