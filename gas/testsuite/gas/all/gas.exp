@@ -85,8 +85,8 @@ case $target_triplet in {
 	    "pdp11-*-*" "vax*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "*-*-aix*" "*-*-coff" "*-*-cygwin" "*-*-mingw*" "*-*-pe*" \
-	    "bfin-*-*" "*c4x*-*-*" "crx*-*-*" "h8300*-*-*" "m68hc*-*-*" \
-	    "maxq-*-*" "or32-*-*" "pdp11-*-*" "vax*-*-*" "z8k-*-*"
+	    "bfin-*-*" "*c4x*-*-*" "crx*-*-*" "h8300*-*-*" "hppa*-*-hpux*" \
+	    "m68hc*-*-*" "maxq-*-*" "or32-*-*" "pdp11-*-*" "vax*-*-*" "z8k-*-*"
 	run_dump_test redef3
 	setup_xfail "*c4x*-*-*"
 	gas_test_error "redef4.s" "" ".set for symbol already used as label"

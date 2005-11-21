@@ -1,5 +1,11 @@
 2005-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	Bug gas/1894 Bug gas/1895
+	* gas/all/gas.exp (redef3): xfail on hppa*-*-hpux*.
+	* gas/all/redef.d: Add -j "\$DATA\$".  Modify regexp to check for
+	"$DATA$" as well as ".data".
+	* gas/all/redef2.d: Likewise.
+
 	Bug gas/1879
 	* gas/all/weakref1.d: Check for "$CODE$" as well as ".text".
 	* gas/all/weakref1.s: Indent "-ld1 = l".
