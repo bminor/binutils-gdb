@@ -1,5 +1,11 @@
 2005-11-19  Jim Blandy  <jimb@redhat.com>
 
+	* tracepoint.c (memrange_absolute): New enum constant.
+	(struct memrange, memrange_cmp, add_memrange, collect_symbol,
+	stringify_collection_list, encode_actions): Use it instead of '-1'
+	to indicate an fixed-address memory range.
+	(Suggested by Eli Zaretskii.)
+
 	* tracepoint.c (stringify_collection_list): Indicate absolute
 	memory ranges by using "-1" as the memory range's base register
 	number, not "FFFFFFFF".

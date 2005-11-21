@@ -1069,9 +1069,14 @@ make_cleanup_free_actions (struct tracepoint *t)
   return make_cleanup (do_free_actions_cleanup, t);
 }
 
+enum {
+  memrange_absolute = -1
+};
+
 struct memrange
 {
-  int type;		/* -1 for absolute memory range, else basereg number */
+  int type;		/* memrange_absolute for absolute memory range,
+                           else basereg number */
   bfd_signed_vma start;
   bfd_signed_vma end;
 };
@@ -1103,7 +1108,7 @@ memrange_cmp (const void *va, const void *vb)
     return -1;
   if (a->type > b->type)
     return 1;
-  if (a->type == 0)
+  if (a->type == memrange_absolute)
     {
       if ((bfd_vma) a->start < (bfd_vma) b->start)
 	return -1;
@@ -1175,7 +1180,7 @@ add_memrange (struct collection_list *memranges,
       printf_filtered (",%ld)\n", len);
     }
 
-  /* type: -1 == memory, n == basereg */
+  /* type: memrange_absolute == memory, other n == basereg */
   memranges->list[memranges->next_memrange].type = type;
   /* base: addr if memory, offset if reg relative.  */
   memranges->list[memranges->next_memrange].start = base;
@@ -1189,7 +1194,7 @@ add_memrange (struct collection_list *memranges,
 				  memranges->listsize);
     }
 
-  if (type != -1)		/* Better collect the base register!  */
+  if (type != memrange_absolute)		/* Better collect the base register!  */
     add_register (memranges, type);
 }
 
@@ -1226,7 +1231,7 @@ collect_symbol (struct collection_list *collect,
 			   DEPRECATED_SYMBOL_NAME (sym), len, 
 			   tmp /* address */);
 	}
-      add_memrange (collect, -1, offset, len);	/* -1 == memory */
+      add_memrange (collect, memrange_absolute, offset, len);
       break;
     case LOC_REGISTER:
     case LOC_REGPARM:
@@ -1441,9 +1446,10 @@ stringify_collection_list (struct collection_list *list, char *string)
         bfd_signed_vma length = list->list[i].end - list->list[i].start;
 
         /* The "%X" conversion specifier expects an unsigned argument,
-           so passing -1 to it directly gives you "FFFFFFFF" (or more,
-           depending on sizeof (unsigned)).  Special-case it.  */
-        if (list->list[i].type == -1)
+           so passing -1 (memrange_absolute) to it directly gives you
+           "FFFFFFFF" (or more, depending on sizeof (unsigned)).
+           Special-case it.  */
+        if (list->list[i].type == memrange_absolute)
           sprintf (end, "M-1,%s,%lX", tmp2, (long) length);
         else
           sprintf (end, "M%X,%s,%lX", list->list[i].type, tmp2, (long) length);
@@ -1605,7 +1611,7 @@ encode_actions (struct tracepoint *t, char ***tdp_actions,
 		      tempval = evaluate_expression (exp);
 		      addr = VALUE_ADDRESS (tempval) + value_offset (tempval);
 		      len = TYPE_LENGTH (check_typedef (exp->elts[1].type));
-		      add_memrange (collect, -1, addr, len);
+		      add_memrange (collect, memrange_absolute, addr, len);
 		      break;
 
 		    case OP_VAR_VALUE:
