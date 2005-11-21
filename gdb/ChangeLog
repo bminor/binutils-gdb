@@ -1,3 +1,8 @@
+2005-11-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Use PIOD_WRITE_I instead
+	of PIOD_WRITE_D.
+
 2005-11-19  Jim Blandy  <jimb@redhat.com>
 
 	* tracepoint.c (memrange_absolute): New enum constant.

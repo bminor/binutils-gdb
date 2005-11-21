@@ -462,8 +462,12 @@ inf_ptrace_xfer_partial (struct target_ops *ops, enum target_object object,
 	struct ptrace_io_desc piod;
 
 	/* NOTE: We assume that there are no distinct address spaces
-	   for instruction and data.  */
-	piod.piod_op = writebuf ? PIOD_WRITE_D : PIOD_READ_D;
+	   for instruction and data.  However, on OpenBSD 3.9 and
+	   later, PIOD_WRITE_D doesn't allow changing memory that's
+	   mapped read-only.  Since most code segments will be
+	   read-only, using PIOD_WRITE_D will prevent us from
+	   inserting breakpoints, so we use PIOD_WRITE_I instead.  */
+	piod.piod_op = writebuf ? PIOD_WRITE_I : PIOD_READ_D;
 	piod.piod_addr = writebuf ? (void *) writebuf : readbuf;
 	piod.piod_offs = (void *) (long) offset;
 	piod.piod_len = len;
