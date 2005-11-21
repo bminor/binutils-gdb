@@ -1,6 +1,10 @@
+2005-11-21  Arnold Metselaar <arnoldm@sourceware.org>
+
+	* MAINTAINERS: add myself as Z80 maintainer
+
 2005-11-17  Andrew Haley  <aph@redhat.com>
 
-	* cxxfilt.c (main): Flush ouput at newline.
+	* cxxfilt.c (main): Flush output at newline.
 
 2005-11-16  Mark Mitchell  <mark@codesourcery.com>
 
