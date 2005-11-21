@@ -1,3 +1,8 @@
+2005-11-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_xfer_partial): Use PIOD_WRITE_I instead
+	of PIOD_WRITE_D.
+
 2005-11-18  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* mi/mi-main.c (mi_load_progress): Ensure the use of the correct mi
