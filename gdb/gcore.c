@@ -205,6 +205,48 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
   return 1;
 }
 
+/* Call target sbrk.  */
+
+static bfd_vma top_of_heap;
+
+static bfd_vma
+call_target_sbrk (int sbrk_arg)
+{
+  struct value *target_sbrk_arg;
+  struct value *sbrk_fn, *ret;
+  bfd_vma tmp;
+
+  if (lookup_minimal_symbol ("sbrk", NULL, NULL) != NULL)
+    {
+      sbrk_fn = find_function_in_inferior ("sbrk");
+      if (sbrk_fn == NULL)
+	return (bfd_vma) 0;
+    }
+  else if (lookup_minimal_symbol ("_sbrk", NULL, NULL) != NULL)
+    {
+      sbrk_fn = find_function_in_inferior ("_sbrk");
+      if (sbrk_fn == NULL)
+	return (bfd_vma) 0;
+    }
+  else
+    return (bfd_vma) 0;
+
+  target_sbrk_arg = value_from_longest (builtin_type_int, sbrk_arg);
+  if (target_sbrk_arg == NULL)
+    return (bfd_vma) 0;
+
+  ret = call_function_by_hand (sbrk_fn, 1, &target_sbrk_arg);
+  if (ret == NULL)
+    return (bfd_vma) 0;
+
+  tmp = value_as_long (ret);
+  if ((LONGEST) tmp <= 0 || (LONGEST) tmp == 0xffffffff)
+    return (bfd_vma) 0;
+
+  top_of_heap = tmp;
+  return top_of_heap;
+}
+
 /* Derive a reasonable heap segment for ABFD by looking at sbrk and
    the static data sections.  Store its limits in *BOTTOM and *TOP.
    Return non-zero if successful.  */
@@ -213,7 +255,6 @@ static int
 derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 {
   bfd_vma top_of_data_memory = 0;
-  bfd_vma top_of_heap = 0;
   bfd_size_type sec_size;
   struct value *zero, *sbrk;
   bfd_vma sec_vaddr;
@@ -251,6 +292,7 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
     }
 
   /* Now get the top-of-heap by calling sbrk in the inferior.  */
+#if 0
   if (lookup_minimal_symbol ("sbrk", NULL, NULL) != NULL)
     {
       sbrk = find_function_in_inferior ("sbrk");
@@ -272,6 +314,10 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
   if (sbrk == NULL)
     return 0;
   top_of_heap = value_as_long (sbrk);
+#else
+  if (call_target_sbrk (0) == (bfd_vma) 0)
+    return 0;
+#endif
 
   /* Return results.  */
   if (top_of_heap > top_of_data_memory)
@@ -488,6 +534,182 @@ gcore_memory_sections (bfd *obfd)
   return 1;
 }
 
+/* OK now, I want to add a new command to read a corefile, 
+   and restore its state into the inferior process.  Obviously
+   dangerous, probably want to make certain that they are 
+   actually the same process!  But we can put that off till
+   later.  Let's see what's required.  This should actually
+   be pretty easy.  */
+
+static void
+load_core_sections (bfd *abfd, asection *asect, void *arg)
+{
+  unsigned long from_tty = (unsigned long) arg;
+  char *memhunk;
+  int ret;
+
+  if ((bfd_section_size (abfd, asect) > 0) &&
+      (bfd_get_section_flags (abfd, asect) & SEC_LOAD))
+    {
+      if (info_verbose && from_tty)
+	{
+	  printf_filtered (_("Load core section %s"), 
+			   bfd_section_name (abfd, asect));
+	  printf_filtered (_(", vma 0x%08lx to 0x%08lx"), 
+			   (unsigned long) bfd_section_vma (abfd, asect),
+			   (unsigned long) bfd_section_vma (abfd, asect) +
+			   (int) bfd_section_size (abfd, asect));
+	  printf_filtered (_(", size = %d"), 
+			   (int) bfd_section_size (abfd, asect));
+	  printf_filtered (_(".\n"));
+	}
+      /* Fixme cleanup? */
+      memhunk = xmalloc (bfd_section_size (abfd, asect));
+      bfd_get_section_contents (abfd, asect, memhunk, 0, 
+				bfd_section_size (abfd, asect));
+      if ((ret = target_write_memory (bfd_section_vma (abfd, asect), 
+				      memhunk, 
+				      bfd_section_size (abfd, asect))) != 0)
+	{
+	  print_sys_errmsg ("load_core_sections", ret);
+	  if ((LONGEST) top_of_heap < 
+	      (LONGEST) bfd_section_vma (abfd, asect) + 
+	      (LONGEST) bfd_section_size (abfd, asect))
+	    {
+	      int increment = bfd_section_vma (abfd, asect) +
+		bfd_section_size (abfd, asect) - top_of_heap;
+
+	      if (call_target_sbrk (increment) == 0)
+		error ("sbrk failed, TOH = 0x%08lx", top_of_heap);
+	      else
+		printf_filtered ("Increase TOH to 0x%08lx and retry.\n",
+				 (unsigned long) top_of_heap);
+	      if (target_write_memory (bfd_section_vma (abfd, asect), 
+				       memhunk, 
+				       bfd_section_size (abfd, asect)) != 0)
+		{
+		  error ("Nope, still failed.");
+		}
+	    }
+	}
+      xfree (memhunk);
+    }
+}
+
+#include <fcntl.h>
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
+#include "regcache.h"
+#include "regset.h"
+
+static int rcore_warned;
+
+static void
+rcore_command (char *args, int from_tty)
+{
+  /* corelow.c core_open */
+  /* scratch_chan = open (filename)
+     temp_bfd = bfd_fdopenr (filename, gnutarget, scratch_chan)
+     bfd_check_format (temp_bfd, bfd_core)
+     build_section_table (core_bfd, to_sections, to_sections_end)
+     bfd_map_over_sections (core_bfd, myfunc)
+     myfunc will check for loadable, contents, and size, 
+     and then write the section contents into memory at vma.
+  */
+  char *corefilename, corefilename_buffer[40], *scratch_path;
+  int  scratch_chan;
+  bfd  *core_bfd;
+
+  /* Can't restore a corefile without a target process.  */
+  if (!target_has_execution)
+    noprocess ();
+
+  /* Experimental warning.  Remove upon confidence.  */
+  if (!rcore_warned)
+    {
+      warning ("This command is experimental, and may have dire\n\
+and unexpected results!  Proceed at your own risk.");
+      if (!query ("Are you sure you want to go there? "))
+	{
+	  fputs_filtered ("Cancelled at user request.\n", gdb_stdout);
+	  return;
+	}
+      else
+	{
+	  fputs_filtered ("Very well.  Warning will not be repeated.\n",
+			  gdb_stdout);
+	}
+    }
+  rcore_warned = 1;
+
+  if (args && *args)
+    corefilename = args;
+  else
+    {
+      /* Default corefile name is "core.PID".  */
+      sprintf (corefilename_buffer, "core.%d", PIDGET (inferior_ptid));
+      corefilename = corefilename_buffer;
+    }
+
+  if (info_verbose)
+    fprintf_filtered (gdb_stdout,
+		      _("Opening corefile '%s' for input.\n"), corefilename);
+
+  scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, corefilename, 
+			O_BINARY | O_RDONLY | O_LARGEFILE, 0, &scratch_path);
+  if (scratch_chan < 0)
+    perror_with_name (corefilename);
+
+  core_bfd = bfd_fdopenr (scratch_path, gnutarget, scratch_chan);
+  if (!core_bfd)
+    perror_with_name (scratch_path);
+
+  if (!bfd_check_format (core_bfd, bfd_core))
+    {
+      make_cleanup_bfd_close (core_bfd);
+      error (_("\"%s\" is not a core file: %s"), 
+	     corefilename, bfd_errmsg (bfd_get_error ()));
+    }
+
+  if (call_target_sbrk (0) == (bfd_vma) 0)
+    error ("Couldn't get sbrk.");
+
+  bfd_map_over_sections (core_bfd, load_core_sections, (void *) from_tty);
+  /* Now need to get/set registers.  */
+  {
+    struct bfd_section *regsect = bfd_get_section_by_name (core_bfd, ".reg");
+    char *contents;
+    int size;
+
+    if (!regsect)
+      error (_("Couldn't find .reg section."));
+
+    size = bfd_section_size (core_bfd, regsect);
+    contents = xmalloc (size);
+    bfd_get_section_contents (core_bfd, regsect, contents, 0, size);
+
+    if (gdbarch_regset_from_core_section_p (current_gdbarch))
+      {
+	const struct regset *regset;
+
+	regset = gdbarch_regset_from_core_section (current_gdbarch, 
+						   ".reg", size);
+	if (!regset)
+	  error (_("Failed to allocate regset."));
+
+	registers_changed ();
+	regset->supply_regset (regset, current_regcache, 
+			       -1, contents, size);
+	reinit_frame_cache ();
+	target_store_registers (-1);
+      }
+  }
+
+  bfd_close (core_bfd);
+}
+
 void
 _initialize_gcore (void)
 {
@@ -497,4 +719,9 @@ Argument is optional filename.  Default filename is 'core.<process_id>'."));
 
   add_com_alias ("gcore", "generate-core-file", class_files, 1);
   exec_set_find_memory_regions (objfile_find_memory_regions);
+
+  add_com ("restore-core-file", class_experimental, rcore_command, _("\
+Restore the machine state from a core file into the debugged process.\n\
+Argument is optional filename.  Default filename is 'core.<process_id>'."));
+  add_com_alias ("rcore", "restore-core-file", class_experimental, 1);
 }

@@ -1,3 +1,14 @@
+2005-11-21  Michael Snyder  <msnyder@redhat.com>
+
+	* gcore.c: Add restore-corefile-command.
+
+	(call_target_sbrk): Abstracted from derive_heap_segment.
+	(derive_heap_segment): Call call_target_sbrk instead of 
+	coding it inline.
+	(load_core_sections): Callback for bfd_map_over_sections.
+	(rcore_command): Implements restore-corefile-command ('rcore').
+	(__initialize_gcore): Add new command rcore/restore-corefile.
+
 2005-11-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c (inf_ptrace_xfer_partial): Use PIOD_WRITE_I instead
