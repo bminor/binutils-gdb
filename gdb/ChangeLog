@@ -1,5 +1,9 @@
 2005-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* top.c (print_gdb_version): Update copyright year.
+
+2005-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Bump version number to 6.3.91 now that the first
 	release candidate (6.3.90) has been made.
 
