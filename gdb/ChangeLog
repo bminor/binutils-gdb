@@ -1,5 +1,27 @@
 2005-11-21  Michael Snyder  <msnyder@redhat.com>
 
+	* linux-nat.c: Add crude checkpoint/restart using forks.
+
+	(child_follow_fork): Put a conditional around PTRACE_DETACH.
+	FIXME needs to be done in the parent branch too.
+	(__initialize_linux_nat): Call checkpoint_init.
+	(struct fork_info): Analog of thread_info.
+	(fork_load_infrun_state, fork_save_infrun_state): 
+	Save and restore necessary info for fork context switch.
+	(add_fork, free_fork, delete_fork, find_fork_id, init_fork_list,
+	find_fork_ptid, iterate_over_forks, valid_fork_id, pid_to_fork_id,
+	fork_id_to_ptid, in_fork_list): Analogs to thread_list methods.
+	(info_forks_command): Implement "info forks" (info checkpoints).
+	(delete_checkpoint): Implement "delete-checkpoint" command.
+	(checkpoint_command): Implement "checkpoint" command.
+	(restart_command): Implement "restart" command.
+	(checkpoint_init): Initialization for checkpoint sub-module.
+
+	* infrun.c (set_last_target_status): Supporting function 
+	for checkpoint/restart based on forks (linux).
+
+2005-11-21  Michael Snyder  <msnyder@redhat.com>
+
 	* gcore.c: Add restore-corefile-command.
 
 	(call_target_sbrk): Abstracted from derive_heap_segment.

@@ -46,6 +46,8 @@
 #include "gdb_stat.h"		/* for struct stat */
 #include <fcntl.h>		/* for O_RDONLY */
 
+#include "infcall.h"		/* for call_function_by_hand */
+
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
@@ -337,6 +339,8 @@ linux_child_post_startup_inferior (ptid_t ptid)
   linux_enable_event_reporting (ptid);
 }
 
+int forky_forky;
+
 int
 child_follow_fork (struct target_ops *ops, int follow_child)
 {
@@ -371,7 +375,9 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 			      child_pid);
 	}
 
-      ptrace (PTRACE_DETACH, child_pid, 0, 0);
+      /* Don't detach if doing forky command.  */
+      if (!forky_forky)
+	ptrace (PTRACE_DETACH, child_pid, 0, 0);
 
       if (has_vforked)
 	{
@@ -3208,6 +3214,7 @@ linux_target (void)
 void
 _initialize_linux_nat (void)
 {
+  static void checkpoint_init (void);
   struct sigaction action;
   extern void thread_db_init (struct target_ops *);
 
@@ -3245,6 +3252,7 @@ Enables printf debugging output."),
 			    NULL,
 			    show_debug_linux_nat,
 			    &setdebuglist, &showdebuglist);
+  checkpoint_init ();
 }
 
 
@@ -3312,3 +3320,381 @@ lin_thread_get_thread_signals (sigset_t *set)
   /* ... except during a sigsuspend.  */
   sigdelset (&suspend_mask, cancel);
 }
+
+/* Hack and slash, steal code from all over the place, 
+   and just try stuff out.  */
+
+struct fork_info
+{
+  struct fork_info *next;
+  ptid_t ptid;			/* "Actual process id";
+				    In fact, this may be overloaded with 
+				    kernel thread id, etc.  */
+  int num;			/* Convenient handle (GDB fork id) */
+  struct inferior_status *status;
+  struct regcache *savedregs;
+
+  ptid_t last_target_ptid;
+  struct target_waitstatus last_target_waitstatus;
+};
+
+/* Load infrun state for the fork PTID.  */
+
+static void
+fork_load_infrun_state (struct fork_info *fp)
+{
+  if (fp->status)
+    {
+      restore_inferior_status (fp->status);
+      fp->status = NULL;
+    }
+  if (fp->savedregs)
+    regcache_cpy (current_regcache, fp->savedregs);
+  set_last_target_status (fp->ptid, fp->last_target_waitstatus);
+}
+
+/* Save infrun state for the fork PTID.  */
+
+static void
+fork_save_infrun_state (struct fork_info *fp)
+{
+  fp->status = save_inferior_status (0);
+  fp->savedregs = regcache_dup (current_regcache);
+  get_last_target_status (&fp->last_target_ptid, 
+			  &fp->last_target_waitstatus);
+}
+
+static struct fork_info *fork_list = NULL;
+static int highest_fork_num;
+
+struct fork_info *
+add_fork (ptid_t ptid)
+{
+  struct fork_info *fp;
+
+  fp = (struct fork_info *) xmalloc (sizeof (*fp));
+  memset (fp, 0, sizeof (*fp));
+  fp->ptid = ptid;
+  fp->num = ++highest_fork_num;
+  fp->next = fork_list;
+  fork_list = fp;
+  return fp;
+}
+
+static void
+free_fork (struct fork_info *fp)
+{
+  /* FIXME: take care of any left-over step_resume breakpoints.  */
+  if (fp)
+    {
+      if (fp->status)
+	xfree (fp->status);
+      if (fp->savedregs)
+	regcache_xfree (fp->savedregs);
+      xfree (fp);
+    }
+}
+
+void
+delete_fork (ptid_t ptid)
+{
+  struct fork_info *fp, *fpprev;
+
+  fpprev = NULL;
+
+  for (fp = fork_list; fp; fpprev = fp, fp = fp->next)
+    if (ptid_equal (fp->ptid, ptid))
+      break;
+
+  if (!fp)
+    return;
+
+  if (fpprev)
+    fpprev->next = fp->next;
+  else
+    fork_list = fp->next;
+
+  free_fork (fp);
+}
+
+static struct fork_info *
+find_fork_id (int num)
+{
+  struct fork_info *fp;
+
+  for (fp = fork_list; fp; fp = fp->next)
+    if (fp->num == num)
+      return fp;
+
+  return NULL;
+}
+
+void
+init_fork_list (void)
+{
+  struct fork_info *fp, *fpnext;
+
+  highest_fork_num = 0;
+  if (!fork_list)
+    return;
+
+  for (fp = fork_list; fp; fp = fpnext)
+    {
+      fpnext = fp->next;
+      free_fork (fp);
+    }
+
+  fork_list = NULL;
+}
+
+/* Find a fork_info by matching PTID.  */
+struct fork_info *
+find_fork_ptid (ptid_t ptid)
+{
+  struct fork_info *fp;
+
+  for (fp = fork_list; fp; fp = fp->next)
+    if (ptid_equal (fp->ptid, ptid))
+      return fp;
+
+  return NULL;
+}
+
+/*
+ * Fork iterator function.
+ *
+ * Calls a callback function once for each fork, so long as
+ * the callback function returns false.  If the callback function
+ * returns true, the iteration will end and the current fork
+ * will be returned.  This can be useful for implementing a 
+ * search for a fork with arbitrary attributes, or for applying
+ * some operation to every fork.
+ *
+ * FIXME: some of the existing functionality, such as 
+ * "Fork apply all", might be rewritten using this functionality.
+ */
+
+struct fork_info *
+iterate_over_forks (int (*callback) (struct fork_info *, void *),
+		      void *data)
+{
+  struct fork_info *fp;
+
+  for (fp = fork_list; fp; fp = fp->next)
+    if ((*callback) (fp, data))
+      return fp;
+
+  return NULL;
+}
+
+int
+valid_fork_id (int num)
+{
+  struct fork_info *fp;
+
+  for (fp = fork_list; fp; fp = fp->next)
+    if (fp->num == num)
+      return 1;
+
+  return 0;
+}
+
+int
+pid_to_fork_id (ptid_t ptid)
+{
+  struct fork_info *fp;
+
+  for (fp = fork_list; fp; fp = fp->next)
+    if (ptid_equal (fp->ptid, ptid))
+      return fp->num;
+
+  return 0;
+}
+
+ptid_t
+fork_id_to_ptid (int num)
+{
+  struct fork_info *fork = find_fork_id (num);
+  if (fork)
+    return fork->ptid;
+  else
+    return pid_to_ptid (-1);
+}
+
+static void
+delete_checkpoint (char *args, int from_tty)
+{
+  ptid_t ptid;
+
+  if (!args || !*args)
+    error ("Requires argument (checkpoint id to delete, see info checkpoint)");
+
+  ptid = fork_id_to_ptid (strtol (args, NULL, 0));
+  if (ptrace (PTRACE_KILL, ptid, 0, 0))
+    error ("Unable to kill pid %s", target_tid_to_str (ptid));
+
+  delete_fork (ptid);
+}
+
+int
+in_fork_list (ptid_t ptid)
+{
+  struct fork_info *fp;
+
+  for (fp = fork_list; fp; fp = fp->next)
+    if (ptid_equal (fp->ptid, ptid))
+      return 1;
+
+  return 0;			/* Never heard of 'im */
+}
+
+/* Print information about currently known forks 
+
+ * Note: this has the drawback that it _really_ switches
+ *       forks, which frees the frame cache.  A no-side
+ *       effects info-forks command would be nicer.
+ */
+
+static void
+info_forks_command (char *arg, int from_tty)
+{
+  struct frame_info *cur_frame;
+  struct symtab_and_line sal;
+  struct symtab *cur_symtab;
+  struct fork_info *fp;
+  int cur_line;
+  ULONGEST pc;
+
+  for (fp = fork_list; fp; fp = fp->next)
+    {
+      if (ptid_equal (fp->ptid, inferior_ptid))
+	printf_filtered ("* ");
+      else
+	printf_filtered ("  ");
+      printf_filtered ("%d %s", fp->num, target_tid_to_str (fp->ptid));
+      regcache_raw_read_unsigned (fp->savedregs, PC_REGNUM, &pc);
+      printf_filtered (" at ");
+      deprecated_print_address_numeric (pc, 1, gdb_stdout);
+
+      sal = find_pc_line (pc, 0);
+      if (sal.symtab)
+	printf_filtered (", file %s", sal.symtab->filename);
+      if (sal.line)
+	printf_filtered (", line %d", sal.line);
+
+      putchar_filtered ('\n');
+    }
+}
+
+static void
+checkpoint_command (char *args, int from_tty)
+{
+  struct target_waitstatus last_target_waitstatus;
+  ptid_t last_target_ptid;
+  struct value *fork_fn = NULL, *ret;
+  struct fork_info *fp;
+  pid_t retpid;
+  long i;
+
+  /* Make the inferior fork, record its (and gdb's) state.  */
+
+  if (lookup_minimal_symbol ("fork", NULL, NULL) != NULL)
+    fork_fn = find_function_in_inferior ("fork");
+  if (!fork_fn)
+    if (lookup_minimal_symbol ("_fork", NULL, NULL) != NULL)
+      fork_fn = find_function_in_inferior ("fork");
+  if (!fork_fn)
+    error ("checkpoint: can't find fork function in inferior.");
+
+  ret = value_from_longest (builtin_type_int, 0);
+  forky_forky = 1;
+  ret = call_function_by_hand (fork_fn, 0, &ret);
+  forky_forky = 0;
+  if (!ret)	/* Probably can't happen.  */
+    error ("checkpoint: call_function_by_hand returned null.");
+
+  retpid = value_as_long (ret);
+  get_last_target_status (&last_target_ptid, &last_target_waitstatus);
+  if (from_tty)
+    {
+      int parent_pid;
+
+      printf_filtered ("checkpoint: fork returned %ld.\n", (long) retpid);
+      parent_pid = ptid_get_lwp (last_target_ptid);
+      if (parent_pid == 0)
+	parent_pid = ptid_get_pid (last_target_ptid);
+      printf_filtered ("   gdb says parent = %ld.\n", (long) parent_pid);
+    }
+
+  fp = add_fork (pid_to_ptid (retpid));
+  fork_save_infrun_state (fp);
+
+  /* FIXME: The new fork is still in the call_function_by_hand
+     state, in the call to fork.  It should be sufficient to just
+     copy its registers from the current state.  */
+
+  if (info_verbose && from_tty)
+    {
+      printf_filtered ("retpid registers:\n");
+      errno = 0;
+      for (i = 0; errno == 0; i += 4)
+	printf_filtered ("0x%08lx\n", 
+			 ptrace (PTRACE_PEEKUSER, retpid, i, 0));
+      errno = 0;
+    }
+}
+
+#include "string.h"
+
+static void
+restart_command (char *args, int from_tty)
+{
+  /* Now we attempt to switch processes.  */
+  struct fork_info *oldfp = find_fork_ptid (inferior_ptid);
+  struct fork_info *newfp;
+  ptid_t ptid;
+  int id;
+
+  if (!args || !*args)
+    error ("Requires argument (checkpoint or fork id, see info checkpoint)");
+
+  id = strtol (args, NULL, 0);
+  newfp = find_fork_id (id);
+  if (!newfp)
+    error ("No such checkpoint id: %d\n", id);
+
+  if (!oldfp)
+    {
+      oldfp = add_fork (inferior_ptid);
+    }
+
+  fork_save_infrun_state (oldfp);
+  inferior_ptid = newfp->ptid;
+  fork_load_infrun_state (newfp);
+  flush_cached_frames ();
+  registers_changed ();
+  stop_pc = read_pc ();
+  select_frame (get_current_frame ());
+  printf_filtered ("Switching to %s\n", 
+		   target_pid_or_tid_to_str (inferior_ptid));
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+}
+
+
+
+
+static void
+checkpoint_init (void)
+{
+  init_fork_list ();
+  add_com ("checkpoint", class_obscure, checkpoint_command, _("\
+Fork a duplicate process (experimental)."));
+  add_com ("restart", class_obscure, restart_command, _("\
+Flip from parent to child (experimental)."));
+  add_com ("delete-checkpoint", class_obscure, delete_checkpoint, _("\
+Delete a fork/checkpoint (experimental)."));
+  add_info ("checkpoints", info_forks_command,
+	    _("IDs of currently known forks/checkpoints."));
+  add_info_alias ("forks", "checkpoints", 0);
+}
+

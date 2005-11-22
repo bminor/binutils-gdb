@@ -1102,6 +1102,13 @@ get_last_target_status (ptid_t *ptidp, struct target_waitstatus *status)
   *status = target_last_waitstatus;
 }
 
+void
+set_last_target_status (ptid_t ptid, struct target_waitstatus status)
+{
+  target_last_wait_ptid = ptid;
+  target_last_waitstatus = status;
+}
+
 /* Switch thread contexts, maintaining "infrun state". */
 
 static void
