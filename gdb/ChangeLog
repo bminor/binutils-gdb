@@ -1,5 +1,10 @@
 2005-11-22  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Bump version number to 6.3.91 now that the first
+	release candidate (6.3.90) has been made.
+
+2005-11-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* README: Update last updated date and author.
 
 2005-11-20  Mark Kettenis  <kettenis@gnu.org>
