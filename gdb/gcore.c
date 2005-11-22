@@ -720,8 +720,8 @@ Argument is optional filename.  Default filename is 'core.<process_id>'."));
   add_com_alias ("gcore", "generate-core-file", class_files, 1);
   exec_set_find_memory_regions (objfile_find_memory_regions);
 
-  add_com ("restore-core-file", class_experimental, rcore_command, _("\
+  add_com ("restore-core-file", class_obscure, rcore_command, _("\
 Restore the machine state from a core file into the debugged process.\n\
 Argument is optional filename.  Default filename is 'core.<process_id>'."));
-  add_com_alias ("rcore", "restore-core-file", class_experimental, 1);
+  add_com_alias ("rcore", "restore-core-file", class_obscure, 1);
 }
