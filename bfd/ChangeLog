@@ -1,3 +1,8 @@
+2005-11-23  Frederic Riss  <frederic.riss@st.com>
+
+	* elfcode.h (elf_object_p): Delay the setting of start_address
+	until we're sure the backend matches the binary.
+
 2005-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* som.c (som_decode_symclass): Decode BSF_WEAK symbols in the same

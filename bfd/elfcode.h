@@ -607,9 +607,6 @@ elf_object_p (bfd *abfd)
 	goto got_no_match;
     }
 
-  /* Remember the entry point specified in the ELF file header.  */
-  bfd_set_start_address (abfd, i_ehdrp->e_entry);
-
   if (i_ehdrp->e_shoff != 0)
     {
       bfd_signed_vma where = i_ehdrp->e_shoff;
@@ -803,6 +800,9 @@ elf_object_p (bfd *abfd)
       if (! (*ebd->elf_backend_object_p) (abfd))
 	goto got_wrong_format_error;
     }
+
+  /* Remember the entry point specified in the ELF file header.  */
+  bfd_set_start_address (abfd, i_ehdrp->e_entry);
 
   /* If we have created any reloc sections that are associated with
      debugging sections, mark the reloc sections as debugging as well.  */
