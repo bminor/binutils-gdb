@@ -23165,7 +23165,12 @@ packet).
 
 Any number of actions may be packed together in a single @samp{QTDP}
 packet, as long as the packet does not exceed the maximum packet
-length (400 bytes, for many stubs).
+length (400 bytes, for many stubs).  There may be only one @samp{R}
+action per tracepoint, and it must precede any @samp{M} or @samp{X}
+actions.  Any registers referred to by @samp{M} and @samp{X} actions
+must be collected by a preceding @samp{R} action.  (The
+``while-stepping'' actions are treated as if they were attached to a
+separate tracepoint, as far as these restrictions are concerned.)
 
 Replies:
 @table @samp

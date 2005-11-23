@@ -1,3 +1,10 @@
+2005-11-21  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Tracepoint Packets): Document restrictions on
+	placement of 'R' actions in tracepoint action packets; document
+	dependence of 'X' and 'M' actions on a preceding 'R' action for
+	their registers.
+
 2005-11-19  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Tracepoint Packets): New node.
