@@ -7084,25 +7084,28 @@ emit_one_bundle ()
       curr = (curr + 1) % NUM_SLOTS;
       idesc = md.slot[curr].idesc;
     }
-  if (manual_bundling > 0)
+
+  /* A user template was specified, but the first following instruction did
+     not fit.  This can happen with or without manual bundling.  */
+  if (md.num_slots_in_use > 0 && last_slot < 0)
+    {
+      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
+		    "`%s' does not fit into %s template",
+		    idesc->name, ia64_templ_desc[template].name);
+      /* Drop first insn so we don't livelock.  */
+      --md.num_slots_in_use;
+      know (curr == first);
+      ia64_free_opcode (md.slot[curr].idesc);
+      memset (md.slot + curr, 0, sizeof (md.slot[curr]));
+      md.slot[curr].user_template = -1;
+    }
+  else if (manual_bundling > 0)
     {
       if (md.num_slots_in_use > 0)
 	{
 	  if (last_slot >= 2)
 	    as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
 			  "`%s' does not fit into bundle", idesc->name);
-	  else if (last_slot < 0)
-	    {
-	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
-			    "`%s' does not fit into %s template",
-			    idesc->name, ia64_templ_desc[template].name);
-	      /* Drop first insn so we don't livelock.  */
-	      --md.num_slots_in_use;
-	      know (curr == first);
-	      ia64_free_opcode (md.slot[curr].idesc);
-	      memset (md.slot + curr, 0, sizeof (md.slot[curr]));
-	      md.slot[curr].user_template = -1;
-	    }
 	  else
 	    {
 	      const char *where;
@@ -7122,6 +7125,7 @@ emit_one_bundle ()
 	as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
 		      "Missing '}' at end of file");
     }
+	
   know (md.num_slots_in_use < NUM_SLOTS);
 
   t0 = end_of_insn_group | (template << 1) | (insn[0] << 5) | (insn[1] << 46);

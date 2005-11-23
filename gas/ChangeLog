@@ -1,3 +1,8 @@
+2005-11-22  James E Wilson  <wilson@specifix.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Perform last_slot < 0 check
+	even when manual_bundling isn't set.
+
 2005-11-18  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin-defs.h (IS_BREG, IS_LREG): New macros.
