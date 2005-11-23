@@ -54,6 +54,15 @@
 #include <libintl.h>
 #define _(String) gettext (String)
 
+/* This is a copy of fprintf_vma from bfd/bfd-in2.h.  We have to use this
+   always, because we might be compiled without BFD64 defined, if configured
+   for a 32-bit target and --enable-targets=all is used.  This will work for
+   both 32-bit and 64-bit hosts.  */
+#define _opcode_int64_low(x) ((unsigned long) (((x) & 0xffffffff)))
+#define _opcode_int64_high(x) ((unsigned long) (((x) >> 32) & 0xffffffff))
+#define opcode_fprintf_vma(s,x) \
+  fprintf ((s), "%08lx%08lx", _opcode_int64_high (x), _opcode_int64_low (x))
+
 const char * program_name = NULL;
 int debug = 0;
 
@@ -2701,9 +2710,9 @@ print_main_table (void)
 	      ptr->name->num,
 	      ptr->opcode->type,
 	      ptr->opcode->num_outputs);
-      fprintf_vma (stdout, ptr->opcode->opcode);
+      opcode_fprintf_vma (stdout, ptr->opcode->opcode);
       printf ("ull, 0x");
-      fprintf_vma (stdout, ptr->opcode->mask);
+      opcode_fprintf_vma (stdout, ptr->opcode->mask);
       printf ("ull, { %d, %d, %d, %d, %d }, 0x%x, %d, },\n",
 	      ptr->opcode->operands[0],
 	      ptr->opcode->operands[1],

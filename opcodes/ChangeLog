@@ -1,3 +1,9 @@
+2005-11-22  James E Wilson  <wilson@specifix.com>
+
+	* ia64-gen.c (_opcode_int64_low, _opcode_int64_high,
+	opcode_fprintf_vma): New.
+	(print_main_table): New opcode_fprintf_vma instead of fprintf_vma.
+
 2005-11-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (powerpc_opcodes): Add frin,friz,frip,frim.  Correct
