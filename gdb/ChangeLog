@@ -1,3 +1,11 @@
+2005-11-23  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* sh-tdep.c (do_fv_register_info, do_dr_register_info): Delete function.
+	(do_bank_register_info, do_bank_register_info): Likewise.
+	(sh_print_pseudo_register, sh_do_fp_register): Likewise.
+	(sh_do_register, sh_print_register, sh_print_registers_info): Likewise.
+	(sh_gdbarch_init): Remove call to set_gdbarch_print_registers_info().
+
 2005-11-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* top.c (print_gdb_version): Update copyright year.
