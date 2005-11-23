@@ -1,3 +1,9 @@
+2005-11-22  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* gas/all/quad.d: Add -j "\$DATA\$".  Modify regexp to check for
+	"$DATA$" as well as ".data".
+	* gas/all/sleb128.d: Likewise.
+
 2005-11-20  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	Bug gas/1894 Bug gas/1895
