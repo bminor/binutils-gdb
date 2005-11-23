@@ -9124,6 +9124,59 @@ function, @code{_NSPrintForDebugger}, defined.
 @subsection Fortran
 @cindex Fortran-specific support in @value{GDBN}
 
+@value{GDBN} can be used to debug programs written in Fortran, but it
+currently supports only the features of Fortran 77 language.
+
+@cindex trailing underscore, in Fortran symbols
+Some Fortran compilers (@sc{gnu} Fortran 77 and Fortran 95 compilers
+among them) append an underscore to the names of variables and
+functions.  When you debug programs compiled by those compilers, you
+will need to refer to variables and functions with a trailing
+underscore.
+
+@menu
+* Fortran Operators::           Fortran operators and expressions
+* Fortran Defaults::            Default settings for Fortran
+* Special Fortran commands::    Special @value{GDBN} commands for Fortran
+@end menu
+
+@node Fortran Operators
+@subsubsection Fortran operators and expressions
+
+@cindex Fortran operators and expressions
+
+Operators must be defined on values of specific types.  For instance,
+@code{+} is defined on numbers, but not on characters or other non-
+arithmetic types.  Operators are often defined on groups of types.
+
+@table @code
+@item **
+The exponentiation operator. It raises the first operand to the power
+of the second one.
+
+@item :
+The range operator.  Normally used in the form of array(low:high) to
+represent a section of array.
+@end table
+
+@node Fortran Defaults
+@subsubsection Fortran Defaults
+
+@cindex Fortran Defaults
+
+Fortran symbols are usually case-insensitive, so @value{GDBN} by
+default uses case-insensitive matches for Fortran symbols.  You can
+change that with the @samp{set case-insensitive} command, see
+@ref{Symbols}, for the details.
+
+@node Special Fortran commands
+@subsubsection Special Fortran commands
+
+@cindex Special Fortran commands
+
+@value{GDBN} had some commands to support Fortran specific feature,
+such as common block displaying.
+
 @table @code
 @cindex @code{COMMON} blocks, Fortran
 @kindex info common
@@ -9133,11 +9186,6 @@ block whose name is @var{common-name}.  With no argument, the names of
 all @code{COMMON} blocks visible at current program location are
 printed.
 @end table
-
-Fortran symbols are usually case-insensitive, so @value{GDBN} by
-default uses case-insensitive matches for Fortran symbols.  You can
-change that with the @samp{set case-insensitive} command, see
-@ref{Symbols}, for the details.
 
 @node Pascal
 @subsection Pascal

@@ -1,3 +1,7 @@
+2005-11-23  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* gdb.texinfo (Fortran): Add some words about Fortran debugging.
+
 2005-11-16  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gdb.texinfo (User-defined commands): Add $argc. Add missing 'end'.
