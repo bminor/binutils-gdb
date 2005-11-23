@@ -1,3 +1,17 @@
+2005-11-23  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Thiemo Seufer <ths@networkno.de>
+
+	* gas/mips/bge.d, gas/mips/bge.s, gas/mips/bgeu.d, gas/mips/bgeu.s,
+	gas/mips/blt.d, gas/mips/blt.s, gas/mips/bltu.d,
+	gas/mips/bltu.s: Reactivate external branch tests.
+	* gas/mips/branch-misc-2.d, gas/mips/branch-misc-2pic.d,
+	gas/mips/branch-misc-2-64.d, gas/mips/branch-misc-2pic-64.d: New
+	tests.
+	* gas/mips/branch-misc-2.l, gas/mips/branch-misc-2pic.l,
+	gas/testsuite/gas/mips/branch-misc-2pic.s: Remove.
+	* gas/mips/mips.exp: Adjust branch-misc-2 tests.  Add 64-bit
+	variants.
+
 2005-11-22  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* gas/all/quad.d: Add -j "\$DATA\$".  Modify regexp to check for

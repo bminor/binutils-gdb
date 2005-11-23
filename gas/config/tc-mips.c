@@ -2410,7 +2410,16 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      break;
 
 	    case BFD_RELOC_16_PCREL_S2:
-	      goto need_reloc;
+	      if ((address_expr->X_add_number & 3) != 0)
+		as_bad (_("branch to misaligned address (0x%lx)"),
+			(unsigned long) address_expr->X_add_number);
+	      if (mips_relax_branch)
+		goto need_reloc;
+	      if ((address_expr->X_add_number + 0x20000) & ~0x3ffff)
+		as_bad (_("branch address range overflow (0x%lx)"),
+			(unsigned long) address_expr->X_add_number);
+	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0xffff;
+	      break;
 
 	    default:
 	      internalError ();
@@ -3139,15 +3148,22 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
 	case 'p':
 	  assert (ep != NULL);
+
 	  /*
 	   * This allows macro() to pass an immediate expression for
 	   * creating short branches without creating a symbol.
-	   * Note that the expression still might come from the assembly
-	   * input, in which case the value is not checked for range nor
-	   * is a relocation entry generated (yuck).
+	   *
+	   * We don't allow branch relaxation for these branches, as
+	   * they should only appear in ".set nomacro" anyway.
 	   */
 	  if (ep->X_op == O_constant)
 	    {
+	      if ((ep->X_add_number & 3) != 0)
+		as_bad (_("branch to misaligned address (0x%lx)"),
+			(unsigned long) ep->X_add_number);
+	      if ((ep->X_add_number + 0x20000) & ~0x3ffff)
+		as_bad (_("branch address range overflow (0x%lx)"),
+			(unsigned long) ep->X_add_number);
 	      insn.insn_opcode |= (ep->X_add_number >> 2) & 0xffff;
 	      ep = NULL;
 	    }
@@ -11361,83 +11377,6 @@ mips_force_relocation (fixS *fixp)
   return 0;
 }
 
-/* This hook is called before a fix is simplified.  We don't really
-   decide whether to skip a fix here.  Rather, we turn global symbols
-   used as branch targets into local symbols, such that they undergo
-   simplification.  We can only do this if the symbol is defined and
-   it is in the same section as the branch.  If this doesn't hold, we
-   emit a better error message than just saying the relocation is not
-   valid for the selected object format.
-
-   FIXP is the fix-up we're going to try to simplify, SEG is the
-   segment in which the fix up occurs.  The return value should be
-   non-zero to indicate the fix-up is valid for further
-   simplifications.  */
-
-int
-mips_validate_fix (struct fix *fixP, asection *seg)
-{
-  /* There's a lot of discussion on whether it should be possible to
-     use R_MIPS_PC16 to represent branch relocations.  The outcome
-     seems to be that it can, but gas/bfd are very broken in creating
-     RELA relocations for this, so for now we only accept branches to
-     symbols in the same section.  Anything else is of dubious value,
-     since there's no guarantee that at link time the symbol would be
-     in range.  Even for branches to local symbols this is arguably
-     wrong, since it we assume the symbol is not going to be
-     overridden, which should be possible per ELF library semantics,
-     but then, there isn't a dynamic relocation that could be used to
-     this effect, and the target would likely be out of range as well.
-
-     Unfortunately, it seems that there is too much code out there
-     that relies on branches to symbols that are global to be resolved
-     as if they were local, like the IRIX tools do, so we do it as
-     well, but with a warning so that people are reminded to fix their
-     code.  If we ever get back to using R_MIPS_PC16 for branch
-     targets, this entire block should go away (and probably the
-     whole function).  */
-
-  if (fixP->fx_r_type == BFD_RELOC_16_PCREL_S2
-      && ((OUTPUT_FLAVOR == bfd_target_ecoff_flavour
-	   || OUTPUT_FLAVOR == bfd_target_elf_flavour)
-	  || bfd_reloc_type_lookup (stdoutput, BFD_RELOC_16_PCREL_S2) == NULL)
-      && fixP->fx_addsy)
-    {
-      if (! S_IS_DEFINED (fixP->fx_addsy))
-	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("Cannot branch to undefined symbol."));
-	  /* Avoid any further errors about this fixup.  */
-	  fixP->fx_done = 1;
-	}
-      else if (S_GET_SEGMENT (fixP->fx_addsy) != seg)
-	{
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("Cannot branch to symbol in another section."));
-	  fixP->fx_done = 1;
-	}
-      else if (S_IS_EXTERNAL (fixP->fx_addsy))
-	{
-	  symbolS *sym = fixP->fx_addsy;
-
-	  if (mips_pic == SVR4_PIC)
-	    as_warn_where (fixP->fx_file, fixP->fx_line,
-			   _("Pretending global symbol used as branch target is local."));
-
-	  fixP->fx_addsy = symbol_create (S_GET_NAME (sym),
-					  S_GET_SEGMENT (sym),
-					  S_GET_VALUE (sym),
-					  symbol_get_frag (sym));
-	  copy_symbol_attributes (fixP->fx_addsy, sym);
-	  S_CLEAR_EXTERNAL (fixP->fx_addsy);
-	  assert (symbol_resolved_p (sym));
-	  symbol_mark_resolved (fixP->fx_addsy);
-	}
-    }
-
-  return 1;
-}
-
 /* Apply a fixup to the object file.  */
 
 void
@@ -11462,7 +11401,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
 
-  assert (! fixP->fx_pcrel);
+  assert (! fixP->fx_pcrel || fixP->fx_r_type == BFD_RELOC_16_PCREL_S2);
 
   /* Don't treat parts of a composite relocation as done.  There are two
      reasons for this:
@@ -11474,7 +11413,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 constants.  The easiest way of dealing with the pathological
 	 exceptions is to generate a relocation against STN_UNDEF and
 	 leave everything up to the linker.  */
-  if (fixP->fx_addsy == NULL && fixP->fx_tcbit == 0)
+  if (fixP->fx_addsy == NULL && ! fixP->fx_pcrel && fixP->fx_tcbit == 0)
     fixP->fx_done = 1;
 
   switch (fixP->fx_r_type)
@@ -11519,7 +11458,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS16_GPREL:
     case BFD_RELOC_MIPS16_HI16:
     case BFD_RELOC_MIPS16_HI16_S:
-      assert (! fixP->fx_pcrel);
       /* Nothing needed to do. The value comes from the reloc entry */
       break;
 
@@ -11589,7 +11527,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_16_PCREL_S2:
       if ((*valP & 0x3) != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Branch to odd address (%lx)"), (long) *valP);
+		      _("Branch to misaligned address (%lx)"), (long) *valP);
 
       /*
        * We need to save the bits in the instruction since fixup_segment()
@@ -13307,8 +13245,24 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
-  assert (! fixp->fx_pcrel);
-  reloc->addend = fixp->fx_addnumber;
+  if (fixp->fx_pcrel)
+    {
+      assert (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2);
+
+      /* At this point, fx_addnumber is "symbol offset - pcrel address".
+	 Relocations want only the symbol offset.  */
+      reloc->addend = fixp->fx_addnumber + reloc->address;
+      if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+	{
+	  /* A gruesome hack which is a result of the gruesome gas
+	     reloc handling.  What's worse, for COFF (as opposed to
+	     ECOFF), we might need yet another copy of reloc->address.
+	     See bfd_install_relocation.  */
+	  reloc->addend += reloc->address;
+	}
+    }
+  else
+    reloc->addend = fixp->fx_addnumber;
 
   /* Since the old MIPS ELF ABI uses Rel instead of Rela, encode the vtable
      entry to be used in the relocation's section offset.  */
@@ -13320,18 +13274,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   code = fixp->fx_r_type;
 
-  /* To support a PC relative reloc, we used a Cygnus extension.
-     We check for that here to make sure that we don't let such a
-     reloc escape normally.  (FIXME: This was formerly used by
-     embedded-PIC support, but is now used by branch handling in
-     general.  That probably should be fixed.)  */
-  if ((OUTPUT_FLAVOR == bfd_target_ecoff_flavour
-       || OUTPUT_FLAVOR == bfd_target_elf_flavour)
-      && code == BFD_RELOC_16_PCREL_S2)
-    reloc->howto = NULL;
-  else
-    reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
-
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
   if (reloc->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -13408,8 +13351,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  exp.X_add_number = fragp->fr_offset;
 
 	  fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-			      4, &exp, 1,
-			      BFD_RELOC_16_PCREL_S2);
+			      4, &exp, 1, BFD_RELOC_16_PCREL_S2);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 

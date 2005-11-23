@@ -257,9 +257,11 @@ static reloc_howto_type elf_mips_howto_table_rel[] =
 	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 16 bit PC relative reference.  */
+  /* 16 bit PC relative reference.  Note that the ABI document has a typo
+     and claims R_MIPS_PC16 to be not rightshifted, rendering it useless.
+     We do the right thing here.  */
   HOWTO (R_MIPS_PC16,		/* type */
-	 0,			/* rightshift */
+	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
@@ -1206,7 +1208,7 @@ static const struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_GPREL16, R_MIPS_GPREL16 },
   { BFD_RELOC_MIPS_LITERAL, R_MIPS_LITERAL },
   { BFD_RELOC_MIPS_GOT16, R_MIPS_GOT16 },
-  { BFD_RELOC_16_PCREL, R_MIPS_PC16 },
+  { BFD_RELOC_16_PCREL_S2, R_MIPS_PC16 },
   { BFD_RELOC_MIPS_CALL16, R_MIPS_CALL16 },
   { BFD_RELOC_GPREL32, R_MIPS_GPREL32 },
   { BFD_RELOC_MIPS_GOT_HI16, R_MIPS_GOT_HI16 },
@@ -1283,8 +1285,6 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
       return &elf_mips_gnu_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
       return &elf_mips_gnu_vtentry_howto;
-    case BFD_RELOC_16_PCREL_S2:
-      return &elf_mips_gnu_rel16_s2;
     case BFD_RELOC_32_PCREL:
       return &elf_mips_gnu_pcrel32;
     }

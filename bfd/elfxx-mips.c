@@ -456,7 +456,6 @@ static struct mips_got_info *mips_elf_got_for_ibfd
 static bfd *reldyn_sorting_bfd;
 
 /* Nonzero if ABFD is using the N32 ABI.  */
-
 #define ABI_N32_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ABI2) != 0)
 
@@ -2762,7 +2761,7 @@ mips_elf_bfd2got_entry_eq (const void *entry1, const void *entry2)
   return e1->bfd == e2->bfd;
 }
 
-/* In a multi-got link, determine the GOT to be used for IBDF.  G must
+/* In a multi-got link, determine the GOT to be used for IBFD.  G must
    be the master GOT data.  */
 
 static struct mips_got_info *
@@ -4035,12 +4034,6 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       value &= howto->dst_mask;
       break;
 
-    case R_MIPS_GNU_REL16_S2:
-      value = symbol + _bfd_mips_elf_sign_extend (addend, 18) - p;
-      overflowed_p = mips_elf_overflow_p (value, 18);
-      value = (value >> 2) & howto->dst_mask;
-      break;
-
     case R_MIPS16_26:
       /* The calculation for R_MIPS16_26 is just the same as for an
 	 R_MIPS_26.  It's only the storage of the relocated field into
@@ -4204,8 +4197,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       break;
 
     case R_MIPS_PC16:
-      value = _bfd_mips_elf_sign_extend (addend, 16) + symbol - p;
-      overflowed_p = mips_elf_overflow_p (value, 16);
+    case R_MIPS_GNU_REL16_S2:
+      value = symbol + _bfd_mips_elf_sign_extend (addend, 18) - p;
+      overflowed_p = mips_elf_overflow_p (value, 18);
+      value = (value >> 2) & howto->dst_mask;
       break;
 
     case R_MIPS_GOT_HI16:

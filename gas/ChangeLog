@@ -1,3 +1,15 @@
+2005-11-23  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Thiemo Seufer <ths@networkno.de>
+
+	* config/tc-mips.c (append_insn): Handle BFD_RELOC_16_PCREL_S2.
+	(macro_build): Complain for invalid branch displacements.
+	(mips_validate_fix): Delete.
+	(md_apply_fix): Re-add pcrel support for branches.  Use consistent
+	text for misaligned branch targets.
+	(tc_gen_reloc: Re-add pcrel support for branches.  Handle strange
+	BFD pcrel processing.  Remove error for unresolved branches.
+	* config/tc-mips.h (TC_VALIDATE_FIX, mips_validate_fix): Delete.
+
 2005-11-22  James E Wilson  <wilson@specifix.com>
 
 	* config/tc-ia64.c (emit_one_bundle): Perform last_slot < 0 check

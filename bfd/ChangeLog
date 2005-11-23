@@ -1,3 +1,27 @@
+2005-11-23  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Thiemo Seufer <ths@networkno.de>
+
+	* elf32-mips.c (elf_mips_howto_table_rel): Use rightshift 2 for
+	R_MIPS_PC16.
+	(mips_reloc_map): Map BFD_RELOC_16_PCREL_S2 to R_MIPS_PC16.
+	(bfd_elf32_bfd_reloc_type_lookup): Don't handle
+	BFD_RELOC_16_PCREL_S2.
+	* elf64-mips.c (mips_elf64_howto_table_rel): Use rightshift 2 for
+	R_MIPS_PC16.
+	(mips_elf64_howto_table_rela): Likewise.
+	(mips_reloc_map): Map BFD_RELOC_16_PCREL_S2 to R_MIPS_PC16.
+	(bfd_elf64_bfd_reloc_type_lookup): Don't handle
+	BFD_RELOC_16_PCREL_S2.
+	* elfn32-mips.c (elf_mips_howto_table_rel): Use rightshift 2 for
+	R_MIPS_PC16.
+	(elf_mips_howto_table_rela): Likewise.
+	(mips_reloc_map): Map BFD_RELOC_16_PCREL_S2 to R_MIPS_PC16.
+	(bfd_elf32_bfd_reloc_type_lookup): Don't handle
+	BFD_RELOC_16_PCREL_S2.
+	* elfxx-mips.c: Formatting fixes.
+	(mips_elf_calculate_relocation): Handle R_MIPS_GNU_REL16_S2
+	and R_MIPS_PC16 identically.
+
 2005-11-23  Frederic Riss  <frederic.riss@st.com>
 
 	* elfcode.h (elf_object_p): Delay the setting of start_address
