@@ -2895,24 +2895,11 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
       first_addr = (unsigned long) &first_frag->fr_literal;
 
       /* This can happen if there is section switching in the middle of a
-	 function, causing the frag chain for the function to be broken.  */
+	 function, causing the frag chain for the function to be broken.
+	 It is too difficult to recover safely from this problem, so we just
+	 exit with an error.  */
       if (first_frag == NULL)
-	{
-	  /* We get six warnings for one problem, because of the loop in
-	     fixup_unw_records, and because fixup_unw_records is called 3
-	     times: once before creating the variant frag, once to estimate
-	     its size, and once to relax it.  This is unreasonable, so we use
-	     a static var to make sure we only emit the warning once.  */
-	  static int warned = 0;
-
-	  if (!warned)
-	    {
-	      as_warn ("Corrupted unwind info due to unsupported section switching");
-	      warned = 1;
-	    }
-
-	  return index;
-	}
+	as_fatal ("Section switching in code is not supported.");
     }
 
   /* Add in the used part of the last frag.  */

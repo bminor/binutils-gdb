@@ -3,6 +3,9 @@
 	* config/tc-ia64.c (emit_one_bundle): Perform last_slot < 0 check
 	even when manual_bundling isn't set.
 
+	* config/tc-ia64.c (slot_index): Emit an error instead of a warning
+	when the frag chain is broken by section switching.
+
 2005-11-18  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin-defs.h (IS_BREG, IS_LREG): New macros.
