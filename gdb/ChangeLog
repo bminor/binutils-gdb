@@ -1,3 +1,23 @@
+2005-11-23  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-nat.c: Adapt fork list to work with follow_fork.
+
+	(child_follow_fork): Add non-detached fork to fork list.
+	Handle follow-child as well as follow-parent.
+	(fork_load_infrun_state, fork_save_infrun_state):
+	Don't save any actual infrun state except for last_ptid.
+	Just save registers, and add the option of NOT restoring them.
+	Also don't leak regcache objects.
+	(add_fork): Accept a pid instead of a ptid.
+	(find_fork_pid): New function.
+	(pid_to_fork_id): Delete function.
+	(detach_fork_command): New command.
+	(checkpoint_command): Remember previous setting of detach_fork.
+	Don't call add_fork, it's now done by child_follow_fork.
+	FIXME get rid of call to target_fetch_registers.
+	(checkpoint_init): Add setshow detach-on-fork.
+	Add detach-fork.
+
 2005-11-21  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-nat.c: Add crude checkpoint/restart using forks.

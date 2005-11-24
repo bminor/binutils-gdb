@@ -339,7 +339,11 @@ linux_child_post_startup_inferior (ptid_t ptid)
   linux_enable_event_reporting (ptid);
 }
 
-int forky_forky;
+struct fork_info;
+static int detach_fork = 1;
+static struct fork_info *add_fork (pid_t);
+static struct fork_info *find_fork_pid (pid_t);
+static void fork_save_infrun_state (struct fork_info *, int);
 
 int
 child_follow_fork (struct target_ops *ops, int follow_child)
@@ -376,8 +380,19 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 	}
 
       /* Don't detach if doing forky command.  */
-      if (!forky_forky)
-	ptrace (PTRACE_DETACH, child_pid, 0, 0);
+      if (detach_fork)
+	{
+	  ptrace (PTRACE_DETACH, child_pid, 0, 0);
+	}
+      else
+	{
+	  struct fork_info *fp;
+	  /* Retain child fork in ptrace (stopped) state.  */
+	  fp = find_fork_pid (child_pid);
+	  if (!fp)
+	    fp = add_fork (child_pid);
+	  fork_save_infrun_state (fp, 0);
+	}
 
       if (has_vforked)
 	{
@@ -472,6 +487,15 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 
       if (has_vforked)
 	linux_parent_pid = parent_pid;
+      else if (!detach_fork)
+	{
+	  struct fork_info *fp;
+	  /* Retain parent fork in ptrace (stopped) state.  */
+	  fp = find_fork_pid (parent_pid);
+	  if (!fp)
+	    fp = add_fork (parent_pid);
+	  fork_save_infrun_state (fp, 0);
+	}
       else
 	target_detach (NULL, 0);
 
@@ -479,6 +503,11 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 
       /* Reinstall ourselves, since we might have been removed in
 	 target_detach (which does other necessary cleanup).  */
+      /* FIXME: As written, we may do a push_target WITHOUT doing
+	 a target_detach (if has_vforked).  I'm going to momentarily
+	 assume that that means it's OK to do the same if we've
+	 forked but not detached.  */
+
       push_target (ops);
 
       /* Reset breakpoints in the child as appropriate.  */
@@ -3333,6 +3362,7 @@ struct fork_info
   int num;			/* Convenient handle (GDB fork id) */
   struct inferior_status *status;
   struct regcache *savedregs;
+  int clobber_regs;		/* True if we should restore saved regs.  */
 
   ptid_t last_target_ptid;
   struct target_waitstatus last_target_waitstatus;
@@ -3343,38 +3373,47 @@ struct fork_info
 static void
 fork_load_infrun_state (struct fork_info *fp)
 {
+  extern void set_last_target_status (ptid_t, struct target_waitstatus);
+
   if (fp->status)
     {
       restore_inferior_status (fp->status);
       fp->status = NULL;
     }
-  if (fp->savedregs)
+  if (fp->savedregs && fp->clobber_regs)
     regcache_cpy (current_regcache, fp->savedregs);
+
   set_last_target_status (fp->ptid, fp->last_target_waitstatus);
 }
 
 /* Save infrun state for the fork PTID.  */
 
 static void
-fork_save_infrun_state (struct fork_info *fp)
+fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 {
+#if 0
+  /* I claim that I no longer need any infrun status.  */
   fp->status = save_inferior_status (0);
+#endif
+  if (fp->savedregs)
+    regcache_xfree (fp->savedregs);
+
   fp->savedregs = regcache_dup (current_regcache);
   get_last_target_status (&fp->last_target_ptid, 
 			  &fp->last_target_waitstatus);
+  fp->clobber_regs = clobber_regs;
 }
 
 static struct fork_info *fork_list = NULL;
 static int highest_fork_num;
 
-struct fork_info *
-add_fork (ptid_t ptid)
+static struct fork_info *
+add_fork (pid_t pid)
 {
   struct fork_info *fp;
 
-  fp = (struct fork_info *) xmalloc (sizeof (*fp));
-  memset (fp, 0, sizeof (*fp));
-  fp->ptid = ptid;
+  fp = XZALLOC (struct fork_info);
+  fp->ptid = pid_to_ptid (pid);
   fp->num = ++highest_fork_num;
   fp->next = fork_list;
   fork_list = fp;
@@ -3448,7 +3487,7 @@ init_fork_list (void)
 }
 
 /* Find a fork_info by matching PTID.  */
-struct fork_info *
+static struct fork_info *
 find_fork_ptid (ptid_t ptid)
 {
   struct fork_info *fp;
@@ -3459,6 +3498,21 @@ find_fork_ptid (ptid_t ptid)
 
   return NULL;
 }
+
+/* Find a fork_info by matching pid.  */
+static struct fork_info *
+find_fork_pid (pid_t pid)
+{
+  struct fork_info *fp;
+
+  for (fp = fork_list; fp; fp = fp->next)
+    if (pid == ptid_get_pid (fp->ptid))
+      return fp;
+
+  return NULL;
+}
+
+
 
 /*
  * Fork iterator function.
@@ -3499,18 +3553,6 @@ valid_fork_id (int num)
   return 0;
 }
 
-int
-pid_to_fork_id (ptid_t ptid)
-{
-  struct fork_info *fp;
-
-  for (fp = fork_list; fp; fp = fp->next)
-    if (ptid_equal (fp->ptid, ptid))
-      return fp->num;
-
-  return 0;
-}
-
 ptid_t
 fork_id_to_ptid (int num)
 {
@@ -3529,10 +3571,33 @@ delete_checkpoint (char *args, int from_tty)
   if (!args || !*args)
     error ("Requires argument (checkpoint id to delete, see info checkpoint)");
 
+  /* FIXME: check for not-found!  */
   ptid = fork_id_to_ptid (strtol (args, NULL, 0));
   if (ptrace (PTRACE_KILL, ptid, 0, 0))
     error ("Unable to kill pid %s", target_tid_to_str (ptid));
 
+  delete_fork (ptid);
+}
+
+static void
+detach_fork_command (char *args, int from_tty)
+{
+  ptid_t ptid;
+
+  if (!args || !*args)
+    error ("Requires argument (fork id to delete, see info fork)");
+
+  /* FIXME: check for not-found!  */
+  ptid = fork_id_to_ptid (strtol (args, NULL, 0));
+  if (ptid_equal (ptid, inferior_ptid))
+    error ("Please switch to another fork before detaching the current fork");
+
+  if (ptrace (PTRACE_DETACH, ptid, 0, 0))
+    error ("Unable to detach pid %s", target_tid_to_str (ptid));
+
+  if (from_tty)
+    printf_filtered ("Detached process %s\n", 
+		     target_pid_or_tid_to_str (inferior_ptid));
   delete_fork (ptid);
 }
 
@@ -3594,6 +3659,7 @@ checkpoint_command (char *args, int from_tty)
   struct value *fork_fn = NULL, *ret;
   struct fork_info *fp;
   pid_t retpid;
+  int save_detach_fork;
   long i;
 
   /* Make the inferior fork, record its (and gdb's) state.  */
@@ -3607,9 +3673,10 @@ checkpoint_command (char *args, int from_tty)
     error ("checkpoint: can't find fork function in inferior.");
 
   ret = value_from_longest (builtin_type_int, 0);
-  forky_forky = 1;
+  save_detach_fork = detach_fork;
+  detach_fork = 0;
   ret = call_function_by_hand (fork_fn, 0, &ret);
-  forky_forky = 0;
+  detach_fork = save_detach_fork;
   if (!ret)	/* Probably can't happen.  */
     error ("checkpoint: call_function_by_hand returned null.");
 
@@ -3626,12 +3693,17 @@ checkpoint_command (char *args, int from_tty)
       printf_filtered ("   gdb says parent = %ld.\n", (long) parent_pid);
     }
 
-  fp = add_fork (pid_to_ptid (retpid));
-  fork_save_infrun_state (fp);
-
-  /* FIXME: The new fork is still in the call_function_by_hand
-     state, in the call to fork.  It should be sufficient to just
-     copy its registers from the current state.  */
+#if 0 /* child_follow_fork will have created the new fork.
+	 We still need to save its register state, to update
+	 the savedregs.  */
+  fp = add_fork (retpid);
+  fork_save_infrun_state (fp, 1);
+#else
+  fp = find_fork_ptid (pid_to_ptid (retpid));
+  if (!fp)
+    error ("Failed to find new fork");
+  fork_save_infrun_state (fp, 1);
+#endif
 
   if (info_verbose && from_tty)
     {
@@ -3665,14 +3737,17 @@ restart_command (char *args, int from_tty)
 
   if (!oldfp)
     {
-      oldfp = add_fork (inferior_ptid);
+      oldfp = add_fork (ptid_get_pid (inferior_ptid));
     }
 
-  fork_save_infrun_state (oldfp);
+  fork_save_infrun_state (oldfp, 1);
   inferior_ptid = newfp->ptid;
   fork_load_infrun_state (newfp);
-  flush_cached_frames ();
   registers_changed ();
+  /* FIXME lose this.  */
+  target_fetch_registers (-1);	/* FIXME should not be necessary;
+				   fill_gregset should do it automatically. */
+  reinit_frame_cache ();
   stop_pc = read_pc ();
   select_frame (get_current_frame ());
   printf_filtered ("Switching to %s\n", 
@@ -3680,19 +3755,25 @@ restart_command (char *args, int from_tty)
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
-
-
-
 static void
 checkpoint_init (void)
 {
   init_fork_list ();
+
+  add_setshow_boolean_cmd ("detach-on-fork", class_obscure, &detach_fork, _("\
+Set whether gdb will detach the child of a fork."), _("\
+Show whether gdb will detach the child of a fork."), _("\
+Tells gdb whether to detach the child of a fork."), 
+			   NULL, NULL, &setlist, &showlist);
+
   add_com ("checkpoint", class_obscure, checkpoint_command, _("\
 Fork a duplicate process (experimental)."));
   add_com ("restart", class_obscure, restart_command, _("\
-Flip from parent to child (experimental)."));
+Flip from parent to child fork (experimental)."));
   add_com ("delete-checkpoint", class_obscure, delete_checkpoint, _("\
 Delete a fork/checkpoint (experimental)."));
+  add_com ("detach-fork", class_obscure, detach_fork_command, _("\
+Detach from a fork/checkpoint (experimental)."));
   add_info ("checkpoints", info_forks_command,
 	    _("IDs of currently known forks/checkpoints."));
   add_info_alias ("forks", "checkpoints", 0);
