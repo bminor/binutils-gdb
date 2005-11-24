@@ -1467,13 +1467,20 @@ lang_insert_orphan (asection *s,
 	    {
 	      lang_statement_union_type **where;
 	      lang_statement_union_type **assign = NULL;
+	      bfd_boolean ignore_first;
 
 	      /* Look for a suitable place for the new statement list.
 		 The idea is to skip over anything that might be inside
 		 a SECTIONS {} statement in a script, before we find
 		 another output_section_statement.  Assignments to "dot"
 		 before an output section statement are assumed to
-		 belong to it.  */
+		 belong to it.  An exception to this rule is made for
+		 the first assignment to dot, otherwise we might put an
+		 orphan before . = . + SIZEOF_HEADERS or similar
+		 assignments that set the initial address.  */
+
+	      ignore_first = after == (&lang_output_section_statement.head
+				       ->output_section_statement);
 	      for (where = &after->header.next;
 		   *where != NULL;
 		   where = &(*where)->header.next)
@@ -1487,9 +1494,11 @@ lang_insert_orphan (asection *s,
 			  ass = &(*where)->assignment_statement;
 			  if (ass->exp->type.node_class != etree_assert
 			      && ass->exp->assign.dst[0] == '.'
-			      && ass->exp->assign.dst[1] == 0)
+			      && ass->exp->assign.dst[1] == 0
+			      && !ignore_first)
 			    assign = where;
 			}
+		      ignore_first = FALSE;
 		      continue;
 		    case lang_wild_statement_enum:
 		    case lang_input_section_enum:

@@ -1,3 +1,8 @@
+2005-11-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_insert_orphan): Skip first assignment to dot
+	in script when looking for place to insert orphan statements.
+
 2005-11-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf64ppc.sh (.tocbss): Use new section alignment scheme.
@@ -15,7 +20,7 @@
 	* Makefile.in: Regenerated.
 	* ld.texinfo: Include configdoc.texi and ldver.texi in man pages.
 	Add @file documentation.
-	
+
 2005-11-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (lang_input_section_type): Remove "ifile" field.
