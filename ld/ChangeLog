@@ -1,5 +1,14 @@
 2005-11-24  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.c (lang_output_section_find_by_flags): Add match_type param.
+	Run two passes, first using match_type, second without.
+	* ldlang.h (lang_match_sec_type_func): New typedef.
+	(lang_output_section_find_by_flags): Update prototype.
+	bfd_match_sections_by_type and lang_output_section_find_by_flags.
+	* emultempl/pe.em (place_orphan): Likewise.
+
+2005-11-24  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldlang.c (lang_insert_orphan): Skip first assignment to dot
 	in script when looking for place to insert orphan statements.
 

@@ -304,6 +304,9 @@ typedef void (*walk_wild_section_handler_t) (lang_wild_statement_type *,
 					     callback_t callback,
 					     void *data);
 
+typedef bfd_boolean (*lang_match_sec_type_func) (bfd *, const asection *,
+						 bfd *, const asection *);
+
 struct lang_wild_statement_struct
 {
   lang_statement_header_type header;
@@ -521,7 +524,8 @@ extern void ldlang_add_file
 extern lang_output_section_statement_type *lang_output_section_find
   (const char * const);
 extern lang_output_section_statement_type *lang_output_section_find_by_flags
-  (const asection *, lang_output_section_statement_type **exact);
+  (const asection *, lang_output_section_statement_type **,
+   lang_match_sec_type_func);
 extern lang_output_section_statement_type *lang_insert_orphan
   (asection *, const char *, lang_output_section_statement_type *,
    struct orphan_save *, etree_type *, lang_statement_list_type *);

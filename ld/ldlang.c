@@ -1147,7 +1147,8 @@ lang_output_section_statement_lookup (const char *const name)
 
 lang_output_section_statement_type *
 lang_output_section_find_by_flags (const asection *sec,
-				   lang_output_section_statement_type **exact)
+				   lang_output_section_statement_type **exact,
+				   lang_match_sec_type_func match_type)
 {
   lang_output_section_statement_type *first, *look, *found;
   flagword flags;
@@ -1165,9 +1166,8 @@ lang_output_section_find_by_flags (const asection *sec,
       if (look->bfd_section != NULL)
 	{
 	  flags = look->bfd_section->flags;
-	  if (!bfd_match_sections_by_type (output_bfd,
-					   look->bfd_section,
-					   sec->owner, sec))
+	  if (match_type && !match_type (output_bfd, look->bfd_section,
+					 sec->owner, sec))
 	    continue;
 	}
       flags ^= sec->flags;
@@ -1177,7 +1177,8 @@ lang_output_section_find_by_flags (const asection *sec,
     }
   if (found != NULL)
     {
-      *exact = found;
+      if (exact != NULL)
+	*exact = found;
       return found;
     }
 
@@ -1190,9 +1191,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	  if (look->bfd_section != NULL)
 	    {
 	      flags = look->bfd_section->flags;
-	      if (!bfd_match_sections_by_type (output_bfd,
-					       look->bfd_section,
-					       sec->owner, sec))
+	      if (match_type && !match_type (output_bfd, look->bfd_section,
+					     sec->owner, sec))
 		continue;
 	    }
 	  flags ^= sec->flags;
@@ -1200,10 +1200,8 @@ lang_output_section_find_by_flags (const asection *sec,
 			 | SEC_CODE | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
 	    found = look;
 	}
-      return found;
     }
-
-  if (sec->flags & (SEC_READONLY | SEC_THREAD_LOCAL))
+  else if (sec->flags & (SEC_READONLY | SEC_THREAD_LOCAL))
     {
       /* .rodata can go after .text, .sdata2 after .rodata.  */
       for (look = first; look; look = look->next)
@@ -1212,9 +1210,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	  if (look->bfd_section != NULL)
 	    {
 	      flags = look->bfd_section->flags;
-	      if (!bfd_match_sections_by_type (output_bfd,
-					       look->bfd_section,
-					       sec->owner, sec))
+	      if (match_type && !match_type (output_bfd, look->bfd_section,
+					     sec->owner, sec))
 		continue;
 	    }
 	  flags ^= sec->flags;
@@ -1223,10 +1220,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	      && !(look->flags & (SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
 	    found = look;
 	}
-      return found;
     }
-
-  if (sec->flags & SEC_SMALL_DATA)
+  else if (sec->flags & SEC_SMALL_DATA)
     {
       /* .sdata goes after .data, .sbss after .sdata.  */
       for (look = first; look; look = look->next)
@@ -1235,9 +1230,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	  if (look->bfd_section != NULL)
 	    {
 	      flags = look->bfd_section->flags;
-	      if (!bfd_match_sections_by_type (output_bfd,
-					       look->bfd_section,
-					       sec->owner, sec))
+	      if (match_type && !match_type (output_bfd, look->bfd_section,
+					     sec->owner, sec))
 		continue;
 	    }
 	  flags ^= sec->flags;
@@ -1247,10 +1241,8 @@ lang_output_section_find_by_flags (const asection *sec,
 		  && !(sec->flags & SEC_HAS_CONTENTS)))
 	    found = look;
 	}
-      return found;
     }
-
-  if (sec->flags & SEC_HAS_CONTENTS)
+  else if (sec->flags & SEC_HAS_CONTENTS)
     {
       /* .data goes after .rodata.  */
       for (look = first; look; look = look->next)
@@ -1259,9 +1251,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	  if (look->bfd_section != NULL)
 	    {
 	      flags = look->bfd_section->flags;
-	      if (!bfd_match_sections_by_type (output_bfd,
-					       look->bfd_section,
-					       sec->owner, sec))
+	      if (match_type && !match_type (output_bfd, look->bfd_section,
+					     sec->owner, sec))
 		continue;
 	    }
 	  flags ^= sec->flags;
@@ -1269,27 +1260,30 @@ lang_output_section_find_by_flags (const asection *sec,
 			 | SEC_SMALL_DATA | SEC_THREAD_LOCAL)))
 	    found = look;
 	}
-      return found;
     }
-
-  /* .bss goes last.  */
-  for (look = first; look; look = look->next)
+  else
     {
-      flags = look->flags;
-      if (look->bfd_section != NULL)
+      /* .bss goes last.  */
+      for (look = first; look; look = look->next)
 	{
-	  flags = look->bfd_section->flags;
-	  if (!bfd_match_sections_by_type (output_bfd,
-					   look->bfd_section,
-					   sec->owner, sec))
-	    continue;
+	  flags = look->flags;
+	  if (look->bfd_section != NULL)
+	    {
+	      flags = look->bfd_section->flags;
+	      if (match_type && !match_type (output_bfd, look->bfd_section,
+					     sec->owner, sec))
+		continue;
+	    }
+	  flags ^= sec->flags;
+	  if (!(flags & SEC_ALLOC))
+	    found = look;
 	}
-      flags ^= sec->flags;
-      if (!(flags & SEC_ALLOC))
-	found = look;
     }
 
-  return found;
+  if (found || !match_type)
+    return found;
+
+  return lang_output_section_find_by_flags (sec, NULL, NULL);
 }
 
 /* Find the last output section before given output statement.

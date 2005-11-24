@@ -1476,8 +1476,6 @@ extern bfd_boolean _bfd_elf_merge_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_match_sections_by_type
   (bfd *, const asection *, bfd *, const asection *);
-#define _bfd_generic_match_sections_by_type \
-  _bfd_elf_match_sections_by_type
 extern bfd_boolean bfd_elf_is_group_section
   (bfd *, const struct bfd_section *);
 extern void _bfd_elf_section_already_linked

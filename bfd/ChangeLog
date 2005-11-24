@@ -1,3 +1,15 @@
+2005-11-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (_bfd_generic_match_sections_by_type): Don't define.
+	* libbfd-in.h (_bfd_generic_match_sections_by_type): Delete.
+	* libbfd.c (_bfd_generic_match_sections_by_type): Delete.
+	* targets.c (bfd_match_sections_by_type): Don't define.
+	(BFD_JUMP_TABLE_LINK): Remove _bfd_generic_match_sections_by_type.
+	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Likewise.
+	* coff64-rs6000.c (rs6000coff64_vec, aix5coff64_vec): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2005-11-23  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Thiemo Seufer <ths@networkno.de>
 
