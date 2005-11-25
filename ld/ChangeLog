@@ -1,3 +1,9 @@
+2005-11-25  Jan Beulich  <jbeulich@novell.com>
+
+	* Makefile.am: Make configdoc.texi writeable before trying
+	to write to it.
+	* Makefile.in: Refresh.
+
 2005-11-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_output_section_find_by_flags): Add match_type param.

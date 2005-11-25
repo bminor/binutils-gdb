@@ -1653,6 +1653,7 @@ bootstrap: ld3$(EXEEXT)
 #  Set DOCVER above to change.
 configdoc.texi:	${DOCVER}-doc.texi
 	cp ${srcdir}/${DOCVER}-doc.texi ./configdoc.texi
+	chmod u+w ./configdoc.texi
 	echo "@set top_srcdir $(top_srcdir)" >> ./configdoc.texi
 
 ldver.texi: $(srcdir)/../bfd/configure
