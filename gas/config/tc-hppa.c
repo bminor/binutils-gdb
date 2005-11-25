@@ -8396,12 +8396,8 @@ pa_lsym (unused)
    any fixup which creates entries in the DLT (eg they use "T" field
    selectors).
 
-   Reject reductions involving symbols with external scope; such
-   reductions make life a living hell for object file editors.
-
-   FIXME.  Also reject R_HPPA relocations which are 32bits wide in
-   the code space.  The SOM BFD backend doesn't know how to pull the
-   right bits out of an instruction.  */
+   ??? Reject reductions involving symbols with external scope; such
+   reductions make life a living hell for object file editors.  */
 
 int
 hppa_fix_adjustable (fixp)
@@ -8413,17 +8409,6 @@ hppa_fix_adjustable (fixp)
   struct hppa_fix_struct *hppa_fix;
 
   hppa_fix = (struct hppa_fix_struct *) fixp->tc_fix_data;
-
-#ifdef OBJ_SOM
-  /* Reject reductions of symbols in 32bit relocs unless they
-     are fake labels.  */
-  if (fixp->fx_r_type == R_HPPA
-      && hppa_fix->fx_r_format == 32
-      && strncmp (S_GET_NAME (fixp->fx_addsy),
-		  FAKE_LABEL_NAME,
-		  strlen (FAKE_LABEL_NAME)))
-    return 0;
-#endif
 
 #ifdef OBJ_ELF
   /* LR/RR selectors are implicitly used for a number of different relocation

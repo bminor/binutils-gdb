@@ -1,3 +1,9 @@
+2005-11-24  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	Bug gas/1896
+	* config/tc-hppa.c (hppa_fix_adjustable): Don't reject for reduction
+	R_HPPA relocations that are 32-bits wide.
+
 2005-11-23  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Thiemo Seufer <ths@networkno.de>
 

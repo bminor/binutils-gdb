@@ -1,3 +1,10 @@
+2005-11-24  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	Bug gas/1896
+	* gas/all/redef2.d: Allow "$DATA$" as well as ".data" in matches.
+	* gas/all/weakref1.d: Allow "$CODE$" as well as ".text" in matches.
+	* gas/hppa/reloc/reloc.exp: Adjust regexp for new output.
+
 2005-11-23  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Thiemo Seufer <ths@networkno.de>
 
