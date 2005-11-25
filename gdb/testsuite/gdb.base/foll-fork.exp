@@ -41,7 +41,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # Until "set follow-fork-mode" and "catch fork" are implemented on
 # other targets...
 #
-if ![istarget "hppa*-hp-hpux*"] then {
+if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-pc-linux*"]} then {
     continue
 }
 
@@ -155,6 +155,8 @@ proc catch_fork_child_follow {} {
    gdb_expect {
       -re "Catchpoint.*(forked process.*),.*in _fork_sys.*$gdb_prompt $"\
                       {pass "explicit child follow, catch fork"}
+      -re "Catchpoint.*(forked process.*),.*in _dl_sysinfo.*$gdb_prompt $"\
+                      {pass "explicit child follow, catch fork"}
       -re "$gdb_prompt $" {fail "explicit child follow, catch fork"}
       timeout         {fail "(timeout) explicit child follow, catch fork"}
    }
@@ -226,6 +228,8 @@ proc tcatch_fork_parent_follow {} {
    send_gdb "continue\n"
    gdb_expect {
       -re ".*in _fork_sys.*$gdb_prompt $"\
+                      {pass "explicit parent follow, tcatch fork"}
+      -re ".*in _dl_sysinfo.*$gdb_prompt $"\
                       {pass "explicit parent follow, tcatch fork"}
       -re "$gdb_prompt $" {fail "explicit parent follow, tcatch fork"}
       timeout         {fail "(timeout) explicit parent follow, tcatch fork"}
