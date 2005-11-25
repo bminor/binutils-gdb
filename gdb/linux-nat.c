@@ -371,17 +371,17 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 	 also, but they'll be reinserted below.  */
       detach_breakpoints (child_pid);
 
-      if (debug_linux_nat)
-	{
-	  target_terminal_ours ();
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Detaching after fork from child process %d.\n",
-			      child_pid);
-	}
-
       /* Don't detach if doing forky command.  */
       if (detach_fork)
 	{
+	  if (1/*debug_linux_nat*/)
+	    {
+	      target_terminal_ours ();
+	      fprintf_filtered (gdb_stdlog,
+				"Detaching after fork from child process %d.\n",
+				child_pid);
+	    }
+
 	  ptrace (PTRACE_DETACH, child_pid, 0, 0);
 	}
       else
@@ -497,7 +497,14 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 	  fork_save_infrun_state (fp, 0);
 	}
       else
-	target_detach (NULL, 0);
+	{
+	  fprintf_filtered (gdb_stdlog, 
+			    "Detaching from program: %d.  ", parent_pid);
+	  fprintf_filtered (gdb_stdlog, 
+			    "Attaching after fork to process %d.\n",
+			    child_pid);
+	  target_detach (NULL, 0);
+	}
 
       inferior_ptid = pid_to_ptid (child_pid);
 
