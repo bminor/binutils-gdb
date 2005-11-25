@@ -1,5 +1,11 @@
 2005-11-25  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* event-top.h (async_init_signals): Add SIGTERM handler.
+	(handle_sigterm): New function.
+	* event-top.h (handle_sigterm): New prototype.
+
+2005-11-25  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* cli-decode.c (find_command_name_length): New function.
 	(lookup_cmd_1): Replace loop reading command name with
 	find_command_name_length().

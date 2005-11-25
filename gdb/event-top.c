@@ -892,6 +892,7 @@ async_init_signals (void)
   signal (SIGINT, handle_sigint);
   sigint_token =
     create_async_signal_handler (async_request_quit, NULL);
+  signal (SIGTERM, handle_sigterm);
 
   /* If SIGTRAP was set to SIG_IGN, then the SIG_IGN will get passed
      to the inferior and breakpoints will be ignored.  */
@@ -962,6 +963,15 @@ handle_sigint (int sig)
     /* If immediate quit is not set, we process SIGINT the next time
        through the loop, which is fine. */
     mark_async_signal_handler_wrapper (sigint_token);
+}
+
+/* Quit GDB if SIGTERM is received.
+   GDB would quit anyway, but this way it will clean up properly.  */
+void
+handle_sigterm (int sig)
+{
+  signal (sig, handle_sigterm);
+  quit_force ((char *) 0, stdin == instream);
 }
 
 /* Do the quit. All the checks have been done by the caller. */

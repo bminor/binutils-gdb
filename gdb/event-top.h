@@ -97,6 +97,7 @@ extern void handle_stop_sig (int sig);
 #endif
 #endif
 extern void handle_sigint (int sig);
+extern void handle_sigterm (int sig);
 extern void pop_prompt (void);
 extern void push_prompt (char *prefix, char *prompt, char *suffix);
 extern void gdb_readline2 (void *client_data);
