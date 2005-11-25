@@ -1,3 +1,11 @@
+2005-11-25  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* cli-decode.c (find_command_name_length): New function.
+	(lookup_cmd_1): Replace loop reading command name with
+	find_command_name_length().
+	(lookup_cmd): Likewise.
+	(lookup_cmd_composition): Likewise.
+
 2005-11-25 Frederic Riss <frederic.riss@st.com>
 	
 	* dwarf2-frame.c: (execute_cfa_program): Don't access past the 
