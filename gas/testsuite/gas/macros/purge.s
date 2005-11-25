@@ -1,3 +1,4 @@
+ .data
  .macro MACRO1
  .endm
  .macro macro2
