@@ -1,3 +1,7 @@
+2005-11-25 Frederic Riss <frederic.riss@st.com>
+	
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2005-11-23  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* sh-tdep.c (do_fv_register_info, do_dr_register_info): Delete function.
