@@ -1,5 +1,9 @@
 2005-11-25  Michael Snyder  <msnyder@redhat.com>
 
+	* linux-nat.c (restart_auto_finish): New set/show variable.
+	(restart_command): Automatically do "finish" a few times
+	on request.
+
 	* infrun.c (set_last_target_status): Remove, replace with following.
 	(nullify_last_target_wait_ptid): New function.  Now we don't need
 	to save this bit of state in linux-nat.

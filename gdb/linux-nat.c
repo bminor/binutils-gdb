@@ -3704,6 +3704,8 @@ checkpoint_command (char *args, int from_tty)
 
 #include "string.h"
 
+static int restart_auto_finish;
+
 static void
 restart_command (char *args, int from_tty)
 {
@@ -3711,7 +3713,7 @@ restart_command (char *args, int from_tty)
   struct fork_info *oldfp = find_fork_ptid (inferior_ptid);
   struct fork_info *newfp;
   ptid_t ptid;
-  int id;
+  int id, i;
 
   if (!args || !*args)
     error ("Requires argument (checkpoint or fork id, see info checkpoint)");
@@ -3738,6 +3740,12 @@ restart_command (char *args, int from_tty)
   select_frame (get_current_frame ());
   printf_filtered ("Switching to %s\n", 
 		   target_pid_or_tid_to_str (inferior_ptid));
+
+  for (i = 0; i < restart_auto_finish; i++)
+    {
+      execute_command ("finish", from_tty);
+    }
+
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
@@ -3752,16 +3760,25 @@ Show whether gdb will detach the child of a fork."), _("\
 Tells gdb whether to detach the child of a fork."), 
 			   NULL, NULL, &setlist, &showlist);
 
+  add_setshow_integer_cmd ("restart-auto-finish", class_obscure, 
+			   &restart_auto_finish, _("\
+Set number of finish commands gdb should do on restart of a fork."), _("\
+Show number of finish commands gdb should do on restart of a fork."), _("\
+Tells gdb how many finish commands to do on restart of a fork."),
+			   NULL, NULL, &setlist, &showlist);
+
+
   add_com ("checkpoint", class_obscure, checkpoint_command, _("\
 Fork a duplicate process (experimental)."));
   add_com ("restart", class_obscure, restart_command, _("\
-Flip from parent to child fork (experimental)."));
+Switch between parent and child fork (experimental)."));
+  add_com_alias ("fork", "restart", class_obscure, 1);
   add_com ("delete-checkpoint", class_obscure, delete_checkpoint, _("\
 Delete a fork/checkpoint (experimental)."));
+  add_com_alias ("delete-fork", "delete-checkpoint", class_obscure, 1);
   add_com ("detach-fork", class_obscure, detach_fork_command, _("\
 Detach from a fork/checkpoint (experimental)."));
   add_info ("checkpoints", info_forks_command,
 	    _("IDs of currently known forks/checkpoints."));
   add_info_alias ("forks", "checkpoints", 0);
 }
-
