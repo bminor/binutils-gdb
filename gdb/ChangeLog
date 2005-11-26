@@ -1,5 +1,18 @@
 2005-11-25  Michael Snyder  <msnyder@redhat.com>
 
+	* infrun.c (set_last_target_status): Remove, replace with following.
+	(nullify_last_target_wait_ptid): New function.  Now we don't need
+	to save this bit of state in linux-nat.
+
+	* linux-nat.c (struct fork_info): Get rid of last_target_ptid, 
+	last_target_waitstatus, and inferior status.
+	(fork_load_infrun_state): Forget about infrun status and target
+	wait ptid.  Call nullify_last_target_wait_ptid instead.
+	(fork_save_infrun_state): Forget about infrun status and target
+	wait ptid.
+	(free_fork): Forget about infrun status.
+	(detach_fork_command): Output cleanup.
+
 	* linux-nat.c (child_follow_fork): Add verbose messages when
 	detaching from parent or child (to match HPUX tests in testsuite).
 

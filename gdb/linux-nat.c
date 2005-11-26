@@ -510,10 +510,6 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 
       /* Reinstall ourselves, since we might have been removed in
 	 target_detach (which does other necessary cleanup).  */
-      /* FIXME: As written, we may do a push_target WITHOUT doing
-	 a target_detach (if has_vforked).  I'm going to momentarily
-	 assume that that means it's OK to do the same if we've
-	 forked but not detached.  */
 
       push_target (ops);
 
@@ -3367,12 +3363,8 @@ struct fork_info
 				    In fact, this may be overloaded with 
 				    kernel thread id, etc.  */
   int num;			/* Convenient handle (GDB fork id) */
-  struct inferior_status *status;
   struct regcache *savedregs;
   int clobber_regs;		/* True if we should restore saved regs.  */
-
-  ptid_t last_target_ptid;
-  struct target_waitstatus last_target_waitstatus;
 };
 
 /* Load infrun state for the fork PTID.  */
@@ -3380,17 +3372,12 @@ struct fork_info
 static void
 fork_load_infrun_state (struct fork_info *fp)
 {
-  extern void set_last_target_status (ptid_t, struct target_waitstatus);
+  extern void nullify_last_target_wait_ptid ();
 
-  if (fp->status)
-    {
-      restore_inferior_status (fp->status);
-      fp->status = NULL;
-    }
   if (fp->savedregs && fp->clobber_regs)
     regcache_cpy (current_regcache, fp->savedregs);
 
-  set_last_target_status (fp->ptid, fp->last_target_waitstatus);
+  nullify_last_target_wait_ptid ();
 }
 
 /* Save infrun state for the fork PTID.  */
@@ -3398,16 +3385,10 @@ fork_load_infrun_state (struct fork_info *fp)
 static void
 fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 {
-#if 0
-  /* I claim that I no longer need any infrun status.  */
-  fp->status = save_inferior_status (0);
-#endif
   if (fp->savedregs)
     regcache_xfree (fp->savedregs);
 
   fp->savedregs = regcache_dup (current_regcache);
-  get_last_target_status (&fp->last_target_ptid, 
-			  &fp->last_target_waitstatus);
   fp->clobber_regs = clobber_regs;
 }
 
@@ -3433,8 +3414,6 @@ free_fork (struct fork_info *fp)
   /* FIXME: take care of any left-over step_resume breakpoints.  */
   if (fp)
     {
-      if (fp->status)
-	xfree (fp->status);
       if (fp->savedregs)
 	regcache_xfree (fp->savedregs);
       xfree (fp);
@@ -3600,11 +3579,11 @@ detach_fork_command (char *args, int from_tty)
     error ("Please switch to another fork before detaching the current fork");
 
   if (ptrace (PTRACE_DETACH, ptid, 0, 0))
-    error ("Unable to detach pid %s", target_tid_to_str (ptid));
+    error ("Unable to detach %s", target_tid_to_str (ptid));
 
   if (from_tty)
-    printf_filtered ("Detached process %s\n", 
-		     target_pid_or_tid_to_str (inferior_ptid));
+    printf_filtered ("Detached %s\n", target_pid_or_tid_to_str (ptid));
+
   delete_fork (ptid);
 }
 

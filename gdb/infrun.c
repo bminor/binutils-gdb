@@ -1103,10 +1103,9 @@ get_last_target_status (ptid_t *ptidp, struct target_waitstatus *status)
 }
 
 void
-set_last_target_status (ptid_t ptid, struct target_waitstatus status)
+nullify_last_target_wait_ptid (void)
 {
-  target_last_wait_ptid = ptid;
-  target_last_waitstatus = status;
+  target_last_wait_ptid = minus_one_ptid;
 }
 
 /* Switch thread contexts, maintaining "infrun state". */
