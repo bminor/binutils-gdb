@@ -7,7 +7,6 @@
 @chapter Z80 Dependent Features
 @end ifset
 
-@c DO-NOT-COMMIT
 
 @ifclear GENERIC
 @node Machine Dependencies
@@ -168,9 +167,9 @@ Fill @var{count} bytes in the object file with @var{value}, if
 
 @item @var{symbol} equ @var{expression}
 @itemx @var{symbol} defl @var{expression}
-These directives set the value of @var{symbol} to @var{expression}.  To
-keep code portable to other assemblers it is best to use @samp{equ} for
-the first definition and @samp{defl} for redefinitions.
+These directives set the value of @var{symbol} to @var{expression}. If
+@code{equ} is used, it is an error if @var{symbol} is already defined.
+Symbols defined with @code{equ} are not protected from redefinition.
 
 @item set
 This is a normal instruction on Z80, and not an assembler directive. 

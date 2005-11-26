@@ -267,6 +267,7 @@ z80_start_line_hook (void)
     {
       char c, *rest, *line_start;
       int len;
+      symbolS * symbolP;
 
       line_start = input_line_pointer;
       LISTING_NEWLINE ();
@@ -293,10 +294,14 @@ z80_start_line_hook (void)
 	  if (line_start[-1] == '\n')
 	    bump_line_counters ();
 	  /* Most Z80 assemblers require the first definition of a
-             label to use "EQU" and redefinitions to have "DEFL".
-             That does not fit the way GNU as deals with labels, so
-             GNU as is more permissive.  */
-	  equals (line_start, TRUE);
+             label to use "EQU" and redefinitions to have "DEFL".  */
+	  if (len == 3 && (symbolP = symbol_find (line_start)) != NULL) 
+	    {
+	      if (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
+		as_bad (_("symbol `%s' is already defined"), line_start);
+	    }
+	  /* All symbols may be redefined.  */
+	  equals (line_start, 1);
 	  return 1;
 	}
       else

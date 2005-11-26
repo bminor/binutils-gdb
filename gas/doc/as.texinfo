@@ -4324,6 +4324,7 @@ The syntax for @code{equ} on the HPPA is
 The syntax for @code{equ} on the Z80 is 
 @samp{@var{symbol} equ @var{expression}}. 
 On the Z80 it is an eror if @var{symbol} is already defined,
+but the symbol is not protected from later redefinition, 
 compare @xref{Equiv}.
 @end ifset
 
@@ -4357,7 +4358,7 @@ value is taken.
 @cindex @code{err} directive
 If @command{@value{AS}} assembles a @code{.err} directive, it will print an error
 message and, unless the @option{-Z} option was used, it will not generate an
-object file.  This can be used to signal error an conditionally compiled code.
+object file.  This can be used to signal an error in conditionally compiled code.
 
 @node Error
 @section @code{.error "@var{string}"}
