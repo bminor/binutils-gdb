@@ -31,6 +31,7 @@
 #endif
 #include <sys/ptrace.h>
 #include "linux-nat.h"
+#include "linux-fork.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include "regcache.h"
@@ -339,11 +340,7 @@ linux_child_post_startup_inferior (ptid_t ptid)
   linux_enable_event_reporting (ptid);
 }
 
-struct fork_info;
 static int detach_fork = 1;
-static struct fork_info *add_fork (pid_t);
-static struct fork_info *find_fork_pid (pid_t);
-static void fork_save_infrun_state (struct fork_info *, int);
 
 int
 child_follow_fork (struct target_ops *ops, int follow_child)
@@ -617,30 +614,51 @@ kill_inferior (void)
   if (pid == 0)
     return;
 
-  /* If we're stopped while forking and we haven't followed yet, kill the
-     other task.  We need to do this first because the parent will be
-     sleeping if this is a vfork.  */
-
-  get_last_target_status (&last_ptid, &last);
-
-  if (last.kind == TARGET_WAITKIND_FORKED
-      || last.kind == TARGET_WAITKIND_VFORKED)
+  /* First cut -- let's crudely do everything inline.  */
+  if (fork_list)
     {
-      ptrace (PT_KILL, last.value.related_pid, 0, 0);
-      wait (&status);
+      /* Walk list and kill every pid.  No need to treat the
+	 current inferior_ptid as special (we do not return a
+	 status for it) -- however any process may be a child
+	 or a parent, so may get a SIGCHLD from a previously
+	 killed child.  Wait them all out.  */
+      
+      do {
+	pid = PIDGET (fork_list->ptid);
+	do {
+	  ptrace (PT_KILL, pid, 0, 0);
+	  ret = waitpid (pid, &status, 0);
+	} while (ret == pid && WIFSTOPPED (status));
+	delete_fork (fork_list->ptid);
+      } while (fork_list != NULL);
     }
-
-  /* Kill the current process.  */
-  ptrace (PT_KILL, pid, 0, 0);
-  ret = wait (&status);
-
-  /* We might get a SIGCHLD instead of an exit status.  This is
-     aggravated by the first kill above - a child has just died.  */
-
-  while (ret == pid && WIFSTOPPED (status))
+  else
     {
+      /* If we're stopped while forking and we haven't followed yet,
+	 kill the other task.  We need to do this first because the
+	 parent will be sleeping if this is a vfork.  */
+
+      get_last_target_status (&last_ptid, &last);
+
+      if (last.kind == TARGET_WAITKIND_FORKED
+	  || last.kind == TARGET_WAITKIND_VFORKED)
+	{
+	  ptrace (PT_KILL, last.value.related_pid, 0, 0);
+	  wait (&status);
+	}
+
+      /* Kill the current process.  */
       ptrace (PT_KILL, pid, 0, 0);
       ret = wait (&status);
+
+      /* We might get a SIGCHLD instead of an exit status.  This is
+	 aggravated by the first kill above - a child has just died.  */
+
+      while (ret == pid && WIFSTOPPED (status))
+	{
+	  ptrace (PT_KILL, pid, 0, 0);
+	  ret = wait (&status);
+	}
     }
 
   target_mourn_inferior ();
@@ -3356,17 +3374,6 @@ lin_thread_get_thread_signals (sigset_t *set)
 /* Hack and slash, steal code from all over the place, 
    and just try stuff out.  */
 
-struct fork_info
-{
-  struct fork_info *next;
-  ptid_t ptid;			/* "Actual process id";
-				    In fact, this may be overloaded with 
-				    kernel thread id, etc.  */
-  int num;			/* Convenient handle (GDB fork id) */
-  struct regcache *savedregs;
-  int clobber_regs;		/* True if we should restore saved regs.  */
-};
-
 /* Load infrun state for the fork PTID.  */
 
 static void
@@ -3382,7 +3389,7 @@ fork_load_infrun_state (struct fork_info *fp)
 
 /* Save infrun state for the fork PTID.  */
 
-static void
+extern void
 fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 {
   if (fp->savedregs)
@@ -3392,13 +3399,24 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
   fp->clobber_regs = clobber_regs;
 }
 
-static struct fork_info *fork_list = NULL;
+struct fork_info *fork_list = NULL;
 static int highest_fork_num;
 
-static struct fork_info *
+extern struct fork_info *
 add_fork (pid_t pid)
 {
   struct fork_info *fp;
+
+  if (fork_list == NULL &&
+      pid != PIDGET (inferior_ptid))
+    {
+      /* Special case -- if this is the first fork in the list
+	 (the list is hitherto empty), and if this new fork is
+	 NOT the current inferior_ptid, then add inferior_ptid
+	 first, as a special zeroeth fork id.  */
+      highest_fork_num = -1;
+      add_fork (PIDGET (inferior_ptid));	/* safe recursion */
+    }
 
   fp = XZALLOC (struct fork_info);
   fp->ptid = pid_to_ptid (pid);
@@ -3420,7 +3438,7 @@ free_fork (struct fork_info *fp)
     }
 }
 
-void
+extern void
 delete_fork (ptid_t ptid)
 {
   struct fork_info *fp, *fpprev;
@@ -3486,7 +3504,7 @@ find_fork_ptid (ptid_t ptid)
 }
 
 /* Find a fork_info by matching pid.  */
-static struct fork_info *
+extern struct fork_info *
 find_fork_pid (pid_t pid)
 {
   struct fork_info *fp;
@@ -3619,11 +3637,18 @@ info_forks_command (char *arg, int from_tty)
   for (fp = fork_list; fp; fp = fp->next)
     {
       if (ptid_equal (fp->ptid, inferior_ptid))
-	printf_filtered ("* ");
+	{
+	  printf_filtered ("* ");
+	  pc = read_pc ();
+	}
       else
-	printf_filtered ("  ");
+	{
+	  printf_filtered ("  ");
+	  regcache_raw_read_unsigned (fp->savedregs, PC_REGNUM, &pc);
+	}
       printf_filtered ("%d %s", fp->num, target_tid_to_str (fp->ptid));
-      regcache_raw_read_unsigned (fp->savedregs, PC_REGNUM, &pc);
+      if (fp->num == 0)
+	printf_filtered (" (main process)");
       printf_filtered (" at ");
       deprecated_print_address_numeric (pc, 1, gdb_stdout);
 
@@ -3632,6 +3657,14 @@ info_forks_command (char *arg, int from_tty)
 	printf_filtered (", file %s", sal.symtab->filename);
       if (sal.line)
 	printf_filtered (", line %d", sal.line);
+      if (!sal.symtab && !sal.line)
+	{
+	  struct minimal_symbol *msym;
+
+	  msym = lookup_minimal_symbol_by_pc (pc);
+	  if (msym)
+	    printf_filtered (", <%s>", SYMBOL_LINKAGE_NAME (msym));
+	}
 
       putchar_filtered ('\n');
     }
@@ -3729,6 +3762,7 @@ restart_command (char *args, int from_tty)
     }
 
   fork_save_infrun_state (oldfp, 1);
+  oldfp->been_restarted = 1;
   inferior_ptid = newfp->ptid;
   fork_load_infrun_state (newfp);
   registers_changed ();
@@ -3738,13 +3772,16 @@ restart_command (char *args, int from_tty)
   reinit_frame_cache ();
   stop_pc = read_pc ();
   select_frame (get_current_frame ());
+
+  if (!newfp->been_restarted)
+    for (i = 0; i < restart_auto_finish; i++)
+      {
+	execute_command ("finish", from_tty);
+      }
+
+  newfp->been_restarted = 1;
   printf_filtered ("Switching to %s\n", 
 		   target_pid_or_tid_to_str (inferior_ptid));
-
-  for (i = 0; i < restart_auto_finish; i++)
-    {
-      execute_command ("finish", from_tty);
-    }
 
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }

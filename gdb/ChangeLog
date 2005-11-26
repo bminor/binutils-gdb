@@ -1,3 +1,14 @@
+2005-11-26  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-fork.h: New file.
+	* linux-nat.c: Include linux-fork.h, remove forward declarations.
+	(kill_inferior): Loop over forks and PTRACE_KILL them all.
+	(add_fork): Special case -- insert original fork as special
+	zeroeth element in list.
+	(info_forks_command): Use current PC instead of savedregs pc
+	for current fork.  If no SAL, print a minsym.  Identify the
+	zeroeth fork as "main process".	
+
 2005-11-25  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-nat.c (restart_auto_finish): New set/show variable.
