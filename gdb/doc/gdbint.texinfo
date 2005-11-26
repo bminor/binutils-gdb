@@ -86,6 +86,7 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Coding::
 * Porting GDB::
 * Versions and Branches::
+* Start of New Year Procedure::
 * Releasing GDB::
 * Testsuite::
 * Hints::
@@ -5598,6 +5599,38 @@ merge.
 For further information on @sc{cvs}, see
 @uref{http://www.gnu.org/software/cvs/, Concurrent Versions System}.
  
+@node Start of New Year Procedure
+@chapter Start of New Year Procedure
+@cindex new year procedure
+
+At the start of each new year, the following actions should be performed:
+
+@itemize @bullet
+@item
+Rotate the ChangeLog file
+
+The current @file{ChangeLog} file should be renamed into
+@file{ChangeLog-YYYY} where YYYY is the year that has just passed.
+A new @file{ChangeLog} file should be created, and its contents should
+contain a reference to the previous ChangeLog.  The following should
+also be preserved at the end of the new ChangeLog, in order to provide
+the appropriate settings when editing this file with Emacs:
+@smallexample
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
+@end smallexample
+
+@item
+Update the copyright year in the startup message
+
+Update the copyright year in file @file{top.c}, function
+@code{print_gdb_version}.
+@end itemize
+
 @node Releasing GDB
 
 @chapter Releasing @value{GDBN}
