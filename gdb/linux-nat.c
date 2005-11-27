@@ -90,11 +90,17 @@
    the use of the multi-threaded target.  */
 static struct target_ops *linux_ops;
 
-/* The saved to_xfer_partial method, inherited from inf-ptrace.c.  Called
-   by our to_xfer_partial.   */
-static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
-				      const char *, gdb_byte *, const gdb_byte *,
+/* The saved to_xfer_partial method, inherited from inf-ptrace.c.
+   Called by our to_xfer_partial.  */
+static LONGEST (*super_xfer_partial) (struct target_ops *, 
+				      enum target_object,
+				      const char *, gdb_byte *, 
+				      const gdb_byte *,
 				      ULONGEST, LONGEST);
+
+/* The saved to_mourn_inferior method, inherited from inf-ptrace.c.
+   Called by our to_mourn_inferior.  */
+static void (*super_mourn_inferior) (void);
 
 static int debug_linux_nat;
 static void
@@ -1785,6 +1791,48 @@ resumed_callback (struct lwp_info *lp, void *data)
   return lp->resumed;
 }
 
+/* Local mourn_inferior -- we need to override mourn_inferior
+   so that we can do something clever if one of several forks
+   has exited.  */
+
+static void
+child_mourn_inferior (void)
+{
+  int status;
+
+  if (fork_list && 
+      fork_list->next == NULL &&
+      ptid_equal (fork_list->ptid, inferior_ptid))
+    {
+      /* Last fork -- delete from list and handle as solo process.  */
+      delete_fork (inferior_ptid);
+    }
+
+  if (fork_list == NULL)
+    {
+      /* Normal case, no other forks available.  */
+      super_mourn_inferior ();
+      return;
+    }
+
+  /* Multi-fork case.  */
+  /* Wait just one more time to collect the inferior's exit status.
+     Do not check whether this succeeds though, since we may be
+     dealing with a process that we attached to.  Such a process will
+     only report its exit status to its origional parent.  */
+  waitpid (ptid_get_pid (inferior_ptid), &status, 0);
+
+  /* OK, presumably inferior_ptid is the one who has exited.
+     We need to delete that one from the fork_list, and switch
+     to the next available fork.  FIXME safety?  */
+  delete_fork (inferior_ptid);
+  inferior_ptid = fork_list[0].ptid;
+  printf_filtered ("[Switching to %s]\n", 
+		   target_pid_to_str (inferior_ptid));
+
+  /* Is that enough?  Maybe infrun will take care of everything else... */
+}
+
 /* We need to override child_wait to support attaching to cloned
    processes, since a normal wait (as done by the default version)
    ignores those processes.  */
@@ -3257,6 +3305,9 @@ linux_target (void)
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = linux_xfer_partial;
 
+  super_mourn_inferior = t->to_mourn_inferior;
+  t->to_mourn_inferior = child_mourn_inferior;
+
   linux_ops = t;
   return t;
 }
@@ -3767,8 +3818,10 @@ restart_command (char *args, int from_tty)
   fork_load_infrun_state (newfp);
   registers_changed ();
   /* FIXME lose this.  */
+#if 0
   target_fetch_registers (-1);	/* FIXME should not be necessary;
 				   fill_gregset should do it automatically. */
+#endif
   reinit_frame_cache ();
   stop_pc = read_pc ();
   select_frame (get_current_frame ());
@@ -3781,7 +3834,7 @@ restart_command (char *args, int from_tty)
 
   newfp->been_restarted = 1;
   printf_filtered ("Switching to %s\n", 
-		   target_pid_or_tid_to_str (inferior_ptid));
+		   target_pid_to_str (inferior_ptid));
 
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }

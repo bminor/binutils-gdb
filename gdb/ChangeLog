@@ -1,5 +1,13 @@
 2005-11-26  Michael Snyder  <msnyder@redhat.com>
 
+	* linux-nat.c (super_mourn_inferior): New function pointer.
+	(child_mourn_inferior): New method, overrides to_mourn_inferior.
+	Handles multiple forks.
+	(linux_target): Intercept to_mourn_inferior, save pointer to
+	parent method.
+
+2005-11-26  Michael Snyder  <msnyder@redhat.com>
+
 	* linux-fork.h: New file.
 	* linux-nat.c: Include linux-fork.h, remove forward declarations.
 	(kill_inferior): Loop over forks and PTRACE_KILL them all.
