@@ -50,7 +50,7 @@
 
 #include "bfd.h"
 #include "libiberty.h"
-
+#include "gdb/signals.h"
 
 /* system structure, actual size of processor array determined at
    runtime */

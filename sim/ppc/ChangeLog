@@ -1,5 +1,7 @@
 2005-11-28  Mark Mitchell  <mark@codesourcery.com>
 
+	* psim.c: Include gdb/signals.h.
+	
 	* sim_calls.c (gdb/signals.h): Include it.
 	(sim_stop_reason): Use TARGET_SIGNAL_*.
 	* psim.c (cntrl_c_simulation): Use TARGET_SIGNAL_*.
