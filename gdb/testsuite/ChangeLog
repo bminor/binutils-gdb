@@ -1,6 +1,15 @@
+2005-11-28  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/multi-forks.c: New file.
+	* gdb.base/multi-forks.exp: New file.  Test debugging of 
+	multiple forked inferior processes (don't detach when inferior
+	calls fork).
+
 2005-11-25  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.base/foll-fork.exp: Add PASS cases for linux.
+	* gdb.base/foll-fork.exp: Run if istarget linux.
+	Add PASS cases for linux.
+	* gdb.base/foll-vfork.exp: Run if istarget linux.
 
 2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
 
