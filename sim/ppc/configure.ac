@@ -567,6 +567,16 @@ AC_ARG_PROGRAM
 
 . ${srcdir}/../../bfd/configure.host
 
+case ${host} in
+  *mingw32*)
+    AC_DEFINE(USE_WIN32API, 1,
+              [Define if we should use the Windows API, instead of the 
+	       POSIX API.  On Windows, we use the Windows API when 
+	       building for MinGW, but the POSIX API when building 
+	       for Cygwin.])
+    ;;
+esac	    
+
 AC_CONFIG_HEADER(config.h:config.in)
 
 AC_STRUCT_ST_BLKSIZE

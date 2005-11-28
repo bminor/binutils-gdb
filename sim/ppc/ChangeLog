@@ -1,3 +1,11 @@
+2005-11-28 Mark Mitchell  <mark@codesourcery.com>
+
+	* configure.ac (USE_WIN32API): Define it.
+	* configure.in: Regenerate.
+	* config.in: Likewise.
+	* emul_netbsd.c (write_timezone): Guard with HAVE_GETTIMEOFDAY.
+	* emul_unix.c (do_unix_mkdir): Handle Win32 1-argument mkdir.
+
 2005-11-28  Mark Mitchell  <mark@codesourcery.com>
 
 	* psim.c: Include gdb/signals.h.
