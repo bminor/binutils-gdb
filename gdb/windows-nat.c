@@ -1697,13 +1697,22 @@ win32_open (char *arg, int from_tty)
   error (_("Use the \"run\" command to start a Unix child process."));
 }
 
+/* Function called by qsort to sort environment strings.  */
+static int
+env_sort (const void *a, const void *b)
+{     
+  const char **p = (const char **) a; 
+  const char **q = (const char **) b;
+  return strcasecmp (*p, *q);
+}
+
 /* Start an inferior win32 child process and sets inferior_ptid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
 
 static void
-win32_create_inferior (char *exec_file, char *allargs, char **env,
+win32_create_inferior (char *exec_file, char *allargs, char **in_env,
 		       int from_tty)
 {
   char *winenv;
@@ -1783,26 +1792,32 @@ win32_create_inferior (char *exec_file, char *allargs, char **env,
        strings (i.e. two nulls terminate the list).  */
 
     /* Get total size for env strings.  */
-    for (envlen = 0, i = 0; env[i] && *env[i]; i++)
+    for (envlen = 0, i = 0; in_env[i] && *in_env[i]; i++)
       {
 	int j, len;
 
 	for (j = 0; conv_path_names[j]; j++)
 	  {
 	    len = strlen (conv_path_names[j]);
-	    if (strncmp (conv_path_names[j], env[i], len) == 0)
+	    if (strncmp (conv_path_names[j], in_env[i], len) == 0)
 	      {
-		if (cygwin_posix_path_list_p (env[i] + len))
+		if (cygwin_posix_path_list_p (in_env[i] + len))
 		  envlen += len
-		    + cygwin_posix_to_win32_path_list_buf_size (env[i] + len);
+		    + cygwin_posix_to_win32_path_list_buf_size (in_env[i] + len);
 		else
-		  envlen += strlen (env[i]) + 1;
+		  envlen += strlen (in_env[i]) + 1;
 		break;
 	      }
 	  }
 	if (conv_path_names[j] == NULL)
-	  envlen += strlen (env[i]) + 1;
+	  envlen += strlen (in_env[i]) + 1;
       }
+
+    size_t envsize = sizeof (in_env[0]) * (i + 1);
+    char **env = (char **) alloca (envsize);
+    memcpy (env, in_env, envsize);
+    /* Windows programs expect the environment block to be sorted.  */
+    qsort (env, i, sizeof (char *), env_sort);
 
     winenv = alloca (envlen + 1);
 
@@ -2226,7 +2241,7 @@ win32_current_sos (void)
 {
   struct so_list *sop;
   struct so_list *start = NULL;
-  struct so_list *last;
+  struct so_list *last = NULL;
 
   if (!solib_start.next && core_bfd)
     {
