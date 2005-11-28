@@ -1,3 +1,8 @@
+2005-11-25 Frederic Riss <frederic.riss@st.com>
+
+	* dwarf2-frame.c (execute_cfa_program): Don't access past the
+	allocated dwarf2_frame_state.initial.regs.
+
 2005-11-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* top.c (print_gdb_version): Update copyright year.

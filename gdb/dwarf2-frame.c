@@ -294,7 +294,17 @@ execute_cfa_program (gdb_byte *insn_ptr, gdb_byte *insn_end,
 	  gdb_assert (fs->initial.reg);
 	  reg = insn & 0x3f;
 	  dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
-	  fs->regs.reg[reg] = fs->initial.reg[reg];
+          if (reg < fs->initial.num_regs)
+            fs->regs.reg[reg] = fs->initial.reg[reg];
+          else
+            fs->regs.reg[reg].how = DWARF2_FRAME_REG_UNSPECIFIED;
+
+          if (fs->regs.reg[reg].how == DWARF2_FRAME_REG_UNSPECIFIED)
+            complaint (&symfile_complaints, _("\
+incomplete CFI data; DW_CFA_restore unspecified\n\
+register %s (#%d) at 0x%s"),
+                       REGISTER_NAME(DWARF2_REG_TO_REGNUM(reg)),
+                       DWARF2_REG_TO_REGNUM(reg), paddr (fs->pc));
 	}
       else
 	{
