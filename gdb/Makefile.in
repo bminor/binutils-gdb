@@ -1375,7 +1375,7 @@ MAKEOVERRIDES=
 
 ALLDEPFILES = \
 	aix-thread.c \
-	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c \
+	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c linux-fork.c \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
 	alpha-osf1-tdep.c alphafbsd-tdep.c alpha-mdebug-tdep.c \
 	amd64-nat.c amd64-tdep.c \
@@ -2176,10 +2176,12 @@ linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(source_h) $(demangle_h) $(value_h) \
 	$(completer_h) $(cp_abi_h) $(parser_defs_h) $(block_h) \
 	$(objc_lang_h) $(linespec_h) $(exceptions_h)
+linux-fork.o: linux-fork.c linux-fork.h $(defs_h) $(inferior_h) \
+	$(regcache_h) $(gdbcmd_h) $(infcall_h)
 linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_wait_h) $(gdb_assert_h) $(linux_nat_h) $(gdbthread_h) \
 	$(gdbcmd_h) $(regcache_h) $(inf_ptrace.h) $(auxv.h) $(elf_bfd_h) \
-	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h)
+	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h) linux-fork.h
 linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h) \
 	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(exceptions_h) \
 	$(gdbthread_h) $(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) \

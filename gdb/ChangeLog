@@ -6,6 +6,8 @@
 	(child_mourn_inferior): Use new API to linux-fork, instead of
 	manipulating the fork list directly.
 	(kill_inferior): Ditto.
+	* Makefile.in: Add linux-fork.c.
+	* config/i386/linux.mh: Add linux-fork.o.
 
 2005-11-26  Michael Snyder  <msnyder@redhat.com>
 
