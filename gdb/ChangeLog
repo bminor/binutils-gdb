@@ -1,3 +1,12 @@
+2005-11-28  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-fork.c: New file.  Move fork list and fork commands here.
+	* linux-fork.h: Now acts as interface between linux-nat and linux-fork.
+	* linux-nat.c: Move all fork-related functions to linux-fork.c.
+	(child_mourn_inferior): Use new API to linux-fork, instead of
+	manipulating the fork list directly.
+	(kill_inferior): Ditto.
+
 2005-11-26  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-nat.c (super_mourn_inferior): New function pointer.
