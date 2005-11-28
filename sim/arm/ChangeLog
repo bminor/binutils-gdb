@@ -1,3 +1,10 @@
+2005-11-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* wrapper.c (gdb/signals.h): Include it.
+	(SIGTRAP): Don't define.
+	(SIGBUS): Likewise.
+	(sim_stop_reason): Use TARGET_SIGNAL_* instead of SIG*.
+
 2005-11-16  Shaun Jackman  <sjackman@gmail.com>
 
 	* sim/arm/armos.c: Include limits.h
