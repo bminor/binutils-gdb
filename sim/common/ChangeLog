@@ -1,5 +1,7 @@
 2005-11-28  Mark Mitchell  <mark@codesourcery.com>
 
+	* sim-signal.c (sim_signal_to_target): Fix typos.
+
 	* sim-reason.c (sim_stop_reason): Use
 	sim_signal_to_target, not sim_signal_to_host.
 	* sim-signal.c (sim_signal_to_host): Fix typo.
