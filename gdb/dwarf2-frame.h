@@ -55,7 +55,8 @@ enum dwarf2_frame_reg_rule
      used internally by GDB.  */
   DWARF2_FRAME_REG_RA,		/* Return Address.  */
   DWARF2_FRAME_REG_RA_OFFSET,	/* Return Address with offset.  */
-  DWARF2_FRAME_REG_CFA		/* Call Frame Address.  */
+  DWARF2_FRAME_REG_CFA,		/* Call Frame Address.  */
+  DWARF2_FRAME_REG_CFA_OFFSET	/* Call Frame Address with offset.  */
 };
 
 /* Register state.  */

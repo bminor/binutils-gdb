@@ -928,6 +928,19 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 	}
       break;
 
+    case DWARF2_FRAME_REG_CFA_OFFSET:
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      if (valuep)
+	{
+	  /* Store the value.  */
+	  store_typed_address (valuep, builtin_type_void_data_ptr,
+			       cache->cfa + cache->reg[regnum].loc.offset);
+	}
+      break;
+
     case DWARF2_FRAME_REG_RA_OFFSET:
       *optimizedp = 0;
       *lvalp = not_lval;

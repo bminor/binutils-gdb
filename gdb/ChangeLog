@@ -1,3 +1,10 @@
+2005-11-25  Christophe Lyon  <christophe.lyon@st.com>
+
+	* dwarf2-frame.c (dwarf2_frame_prev_register): Handle
+	DWARF2_FRAME_REG_CFA_OFFSET.
+	* dwarf2-frame.h (enum dwarf2_frame_reg_rule): Add
+	DWARF2_FRAME_REG_CFA_OFFSET.
+
 2005-11-28  Mark Mitchell  <mark@codesourcery.com>
 
 	* remote-sim.c (gdbsim_wait): Pass target signal numbers to
