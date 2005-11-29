@@ -1,3 +1,14 @@
+2005-11-29  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-fork.c (process_command): New command, new function.
+	Switch fork contexts by process id, rather than fork id.
+	(linux_fork_context): New function.  Abstract out the guts
+	of restart_command, to be called by process_command and 
+	fork_command.
+	(fork_command): New function.  Look up a fork id, call 
+	linux_fork_context.
+	(_initialize_linux_fork): Add new "process" command.
+
 2005-11-28  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-fork.c: New file.  Move fork list and fork commands here.

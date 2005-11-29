@@ -429,21 +429,15 @@ checkpoint_command (char *args, int from_tty)
 static int restart_auto_finish;
 
 static void
-restart_command (char *args, int from_tty)
+linux_fork_context (struct fork_info *newfp, int from_tty)
 {
   /* Now we attempt to switch processes.  */
   struct fork_info *oldfp = find_fork_ptid (inferior_ptid);
-  struct fork_info *newfp;
   ptid_t ptid;
   int id, i;
 
-  if (!args || !*args)
-    error ("Requires argument (checkpoint or fork id, see info checkpoint)");
-
-  id = strtol (args, NULL, 0);
-  newfp = find_fork_id (id);
   if (!newfp)
-    error ("No such checkpoint id: %d\n", id);
+    error ("No such fork/process");
 
   if (!oldfp)
     {
@@ -472,6 +466,50 @@ restart_command (char *args, int from_tty)
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
+/* Switch inferior process (fork) context, by process id.  */
+static void
+process_command (char *args, int from_tty)
+{
+  struct fork_info *fp;
+
+  if (!args || !*args)
+    error ("Requires argument (process id, see info forks)");
+
+  if ((fp = find_fork_pid (parse_and_eval_long (args))) == NULL)
+    error ("Not found: process id %s", args);
+
+  linux_fork_context (fp, from_tty);
+}
+
+/* Switch inferior process (fork) context, by fork id.  */
+static void
+fork_command (char *args, int from_tty)
+{
+  struct fork_info *fp;
+
+  if (!args || !*args)
+    error ("Requires argument (fork id, see info forks)");
+
+  if ((fp = find_fork_id (parse_and_eval_long (args))) == NULL)
+    error ("Not found: fork id %s", args);
+
+  linux_fork_context (fp, from_tty);
+}
+
+/* Switch inferior process (fork) context, by checkpoint id.  */
+static void
+restart_command (char *args, int from_tty)
+{
+  struct fork_info *fp;
+
+  if (!args || !*args)
+    error ("Requires argument (checkpoint id, see info checkpoints)");
+
+  if ((find_fork_id (parse_and_eval_long (args))) == NULL)
+    error ("Not found: checkpoint id %s", args);
+
+  linux_fork_context (fp, from_tty);
+}
 
 /* Extern because called from core gdb.  */
 extern void
@@ -512,7 +550,8 @@ Fork a duplicate process (experimental)."));
      "debugger forks" (checkpoints).  */
 
   add_com ("restart", class_obscure, restart_command, _("\
-Switch between parent and child fork (experimental)."));
+restart <n>: restore program context from a checkpoint.\n\
+Argument 'n' is checkpoint ID, as displayed by 'info checkpoints'."));
 
   /* Delete-checkpoint command: kill the process and remove it from
      fork list.  */
@@ -540,6 +579,12 @@ Detach from a fork/checkpoint (experimental)."));
   add_info_alias ("forks", "checkpoints", 0);
 
   /* "fork <n>" (by analogy to "thread <n>").  */
+  add_com ("fork", class_obscure, fork_command, _("\
+fork <n>: Switch between forked processes.\n\
+Argument 'n' is fork ID, as displayed by 'info forks'."));
 
-  add_com_alias ("fork", "restart", class_obscure, 1);
+  /* "process <proc id>" as opposed to "fork <fork id>".  */
+  add_com ("process", class_obscure, process_command, _("\
+process <pid>: Switch between forked processes.\n\
+Argument 'pid' is process ID, as displayed by 'info forks' or 'shell ps'."));
 }
