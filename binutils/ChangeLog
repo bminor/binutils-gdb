@@ -1,3 +1,9 @@
+2005-11-30  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add fi.
+	* configure: Regenerate.
+	* po/fi.po: New file: Finnish translation.
+
 2005-11-21  Arnold Metselaar <arnoldm@sourceware.org>
 
 	* MAINTAINERS: add myself as Z80 maintainer
