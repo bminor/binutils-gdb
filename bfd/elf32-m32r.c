@@ -2878,6 +2878,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
             case R_M32R_24_RELA:
             case R_M32R_32_RELA:
             case R_M32R_REL32:
+	    case R_M32R_10_PCREL_RELA:
             case R_M32R_18_PCREL_RELA:
             case R_M32R_26_PCREL_RELA:
             case R_M32R_HI16_ULO_RELA:
@@ -2885,7 +2886,8 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
               if (info->shared
                   && r_symndx != 0
                   && (input_section->flags & SEC_ALLOC) != 0
-                  && ((r_type != R_M32R_18_PCREL_RELA
+                  && ((   r_type != R_M32R_10_PCREL_RELA
+                       && r_type != R_M32R_18_PCREL_RELA
                        && r_type != R_M32R_26_PCREL_RELA
                        && r_type != R_M32R_REL32)
                       || (h != NULL
@@ -2936,7 +2938,8 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
                   if (skip)
                     memset (&outrel, 0, sizeof outrel);
-                  else if (r_type == R_M32R_18_PCREL_RELA
+                  else if (   r_type == R_M32R_10_PCREL_RELA
+                           || r_type == R_M32R_18_PCREL_RELA
                            || r_type == R_M32R_26_PCREL_RELA
                            || r_type == R_M32R_REL32)
                     {
@@ -2975,8 +2978,11 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                      an addend for the dynamic reloc.  */
                   if (! relocate)
                     continue;
+		  break;
                 }
-              break;
+	      else if (r_type != R_M32R_10_PCREL_RELA)
+		break;
+	      /* Fall through.  */
 
 	    case (int) R_M32R_10_PCREL :
 	      r = m32r_elf_do_10_pcrel_reloc (input_bfd, howto, input_section,
@@ -3714,6 +3720,7 @@ m32r_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 	case R_M32R_HI16_SLO_RELA:
 	case R_M32R_LO16_RELA:
 	case R_M32R_SDA16_RELA:
+	case R_M32R_10_PCREL_RELA:
 	case R_M32R_18_PCREL_RELA:
 	case R_M32R_26_PCREL_RELA:
 	  if (h != NULL)
@@ -3730,8 +3737,9 @@ m32r_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
 		if (p->sec == sec)
 		  {
-		    if (ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
-			|| ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
+		    if (   ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
+			|| ELF32_R_TYPE (rel->r_info) == R_M32R_18_PCREL_RELA
+			|| ELF32_R_TYPE (rel->r_info) == R_M32R_10_PCREL_RELA
 			|| ELF32_R_TYPE (rel->r_info) == R_M32R_REL32)
 		      p->pc_count -= 1;
 		    p->count -= 1;
@@ -3897,6 +3905,7 @@ m32r_elf_check_relocs (bfd *abfd,
         case R_M32R_HI16_SLO_RELA:
         case R_M32R_LO16_RELA:
         case R_M32R_SDA16_RELA:
+	case R_M32R_10_PCREL_RELA:
         case R_M32R_18_PCREL_RELA:
         case R_M32R_26_PCREL_RELA:
 
@@ -3927,8 +3936,9 @@ m32r_elf_check_relocs (bfd *abfd,
              symbol.  */
           if ((info->shared
                && (sec->flags & SEC_ALLOC) != 0
-	       && ((r_type != R_M32R_26_PCREL_RELA
+	       && ((   r_type != R_M32R_26_PCREL_RELA
                     && r_type != R_M32R_18_PCREL_RELA
+                    && r_type != R_M32R_10_PCREL_RELA
                     && r_type != R_M32R_REL32)
 	           || (h != NULL
 		       && (! info->symbolic
@@ -4018,9 +4028,10 @@ m32r_elf_check_relocs (bfd *abfd,
                 }
 
               p->count += 1;
-              if (ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
-		  || ELF32_R_TYPE (rel->r_info) == R_M32R_REL32
-                  || ELF32_R_TYPE (rel->r_info) == R_M32R_18_PCREL_RELA)
+              if (   ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
+                  || ELF32_R_TYPE (rel->r_info) == R_M32R_18_PCREL_RELA
+		  || ELF32_R_TYPE (rel->r_info) == R_M32R_10_PCREL_RELA
+		  || ELF32_R_TYPE (rel->r_info) == R_M32R_REL32)
                 p->pc_count += 1;
             }
           break;

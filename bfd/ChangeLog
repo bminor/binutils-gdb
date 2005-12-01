@@ -1,3 +1,10 @@
+2005-12-01  Kazuhiro Inaoka <inaoka.kazuhiro@renesas.com>
+
+	* elf32-m32r.c (m32r_elf_sweep_hook): Fix an illegal duplicate check.
+	(m32r_elf_relocate_section): Fix R_M32R_10_PCREL_RELA linkage bug.
+	(m32r_elf_gc_sweep_hook): Likewise.
+	(m32r_elf_check_relocs): Likewise.
+
 2005-11-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (_bfd_generic_match_sections_by_type): Don't define.
