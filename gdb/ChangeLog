@@ -1,3 +1,14 @@
+2005-11-30  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-fork.c (struct fork_info): Add fields for saving
+	file offsets of all open file descriptors.
+	(free_fork): Free storage for file offsets.
+	(call_lseek): New function.  Call lseek in the inferior.
+	(fork_save_infrun_state): Use /proc and call_lseek to save
+	file offsets for all open file descriptors in inferior.
+	(fork_load_infrun_state): Use call_lseek to restore file offsets.
+	(restart_command): Fix oversight, save fork id.
+
 2005-11-29  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-fork.c (process_command): New command, new function.

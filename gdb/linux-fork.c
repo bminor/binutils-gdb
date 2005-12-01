@@ -29,6 +29,9 @@
 
 #include <sys/ptrace.h>
 #include <sys/wait.h>
+#include <sys/param.h>		/* For MAXPATHLEN */
+#include <dirent.h>
+#include <ctype.h>
 
 struct fork_info *fork_list;
 static int highest_fork_num;
@@ -48,6 +51,8 @@ struct fork_info
 				   having to actually switch contexts.  */
   int clobber_regs;		/* True if we should restore saved regs.  */
   int been_restarted;		/* One time flag.  */
+  off_t *filepos;
+  int maxfd;
 };
 
 /*
@@ -89,6 +94,8 @@ free_fork (struct fork_info *fp)
     {
       if (fp->savedregs)
 	regcache_xfree (fp->savedregs);
+      if (fp->filepos)
+	xfree (fp->filepos);
       xfree (fp);
     }
 }
@@ -199,17 +206,41 @@ init_fork_list (void)
  * Fork list <-> gdb interface:
  */
 
+/* call_lseek -- utility function for fork_load/fork_save.  
+   Calls lseek in the (current) inferior process.  */
+static off_t
+call_lseek (int fd, off_t offset, int whence)
+{
+  char exp[80];
+
+  snprintf (&exp[0], sizeof (exp), "lseek (%d, %ld, %d)",
+	    fd, (long) offset, whence);
+  return (off_t) parse_and_eval_long (&exp[0]);
+}
+
 /* Load infrun state for the fork PTID.  */
 
 static void
 fork_load_infrun_state (struct fork_info *fp)
 {
   extern void nullify_last_target_wait_ptid ();
+  int i;
 
   if (fp->savedregs && fp->clobber_regs)
     regcache_cpy (current_regcache, fp->savedregs);
 
   nullify_last_target_wait_ptid ();
+
+  /* Now restore the file positions of open file descriptors.  */
+  if (fp->filepos)
+    {
+      for (i = 0; i <= fp->maxfd; i++)
+	if (fp->filepos[i] != (off_t) -1)
+	  call_lseek (i, fp->filepos[i], SEEK_SET);
+      /* NOTE: I can get away with using SEEK_SET and SEEK_CUR because
+	 this is native-only.  If it ever has to be cross, we'll have
+	 to rethink this.  */
+    }
 }
 
 /* Save infrun state for the fork PTID.
@@ -219,11 +250,52 @@ fork_load_infrun_state (struct fork_info *fp)
 extern void
 fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 {
+  char path[MAXPATHLEN];
+  struct dirent *de;
+  DIR *d;
+
   if (fp->savedregs)
     regcache_xfree (fp->savedregs);
 
   fp->savedregs = regcache_dup (current_regcache);
   fp->clobber_regs = clobber_regs;
+
+  if (clobber_regs)
+    {
+      /* Now save the 'state' (file position) of all open file descriptors.
+	 Unfortunately fork does not take care of that for us...  */
+      snprintf (path, MAXPATHLEN, "/proc/%ld/fd", (long) PIDGET (fp->ptid));
+      if ((d = opendir (path)) != NULL)
+	{
+	  long tmp;
+
+	  fp->maxfd = 0;
+	  while ((de = readdir (d)) != NULL)
+	    {
+	      /* Count open file descriptors (actually find highest
+		 numbered).  */
+	      tmp = strtol (&de->d_name[0], NULL, 10);
+	      if (fp->maxfd < tmp)
+		fp->maxfd = tmp;
+	    }
+	  /* Allocate array of file positions.  */
+	  fp->filepos = xrealloc (fp->filepos, 
+				  (fp->maxfd + 1) * sizeof (*fp->filepos));
+
+	  /* Initialize to -1 (invalid).  */
+	  for (tmp = 0; tmp <= fp->maxfd; tmp++)
+	    fp->filepos[tmp] = -1;
+
+	  /* Now find actual file positions.  */
+	  rewinddir (d);
+	  while ((de = readdir (d)) != NULL)
+	    if (isdigit (de->d_name[0]))
+	      {
+		tmp = strtol (&de->d_name[0], NULL, 10);
+		fp->filepos[tmp] = call_lseek (tmp, 0, SEEK_CUR);
+	      }
+	}
+    }
 }
 
 /* linux_fork_killall.  Let God sort 'em out...  */
@@ -342,7 +414,7 @@ info_forks_command (char *arg, int from_tty)
 	  printf_filtered ("  ");
 	  regcache_raw_read_unsigned (fp->savedregs, PC_REGNUM, &pc);
 	}
-      printf_filtered ("%d %s", fp->num, target_tid_to_str (fp->ptid));
+      printf_filtered ("%d %s", fp->num, target_pid_to_str (fp->ptid));
       if (fp->num == 0)
 	printf_filtered (" (main process)");
       printf_filtered (" at ");
@@ -505,7 +577,7 @@ restart_command (char *args, int from_tty)
   if (!args || !*args)
     error ("Requires argument (checkpoint id, see info checkpoints)");
 
-  if ((find_fork_id (parse_and_eval_long (args))) == NULL)
+  if ((fp = find_fork_id (parse_and_eval_long (args))) == NULL)
     error ("Not found: checkpoint id %s", args);
 
   linux_fork_context (fp, from_tty);
