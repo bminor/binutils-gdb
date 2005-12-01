@@ -1,3 +1,10 @@
+2005-12-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ms1-tdep.c (ms1_register_name): Const qualify array.
+	(ms1_registers_info): Use gdb_byte.
+	(ms1_push_dummy_call): Likewise.
+	(ms1_gdbarch_init): Remove illformed nested prototype.
+
 2005-11-25  Christophe Lyon  <christophe.lyon@st.com>
 
 	* dwarf2-frame.c (dwarf2_frame_prev_register): Handle

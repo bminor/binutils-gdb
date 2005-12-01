@@ -126,7 +126,7 @@ enum ms1_gdb_regnums
 static const char *
 ms1_register_name (int regnum)
 {
-  static char *register_names[] = {
+  static const char *const register_names[] = {
     /* CPU regs.  */
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -530,7 +530,7 @@ ms1_registers_info (struct gdbarch *gdbarch,
                || regnum == MS1_COPRO_PSEUDOREG_REGNUM)
 	{
 	  /* Special output handling for the 'coprocessor' register.  */
-	  char *buf;
+	  gdb_byte *buf;
 
 	  buf = alloca (register_size (gdbarch, MS1_COPRO_REGNUM));
 	  frame_register_read (frame, MS1_COPRO_REGNUM, buf);
@@ -545,14 +545,15 @@ ms1_registers_info (struct gdbarch *gdbarch,
       else if (regnum == MS1_MAC_REGNUM || regnum == MS1_MAC_PSEUDOREG_REGNUM)
 	{
 	  ULONGEST oldmac, ext_mac, newmac;
-	  char buf[3 * sizeof (LONGEST)];
+	  gdb_byte buf[3 * sizeof (LONGEST)];
 
 	  /* Get the two "real" mac registers.  */
 	  frame_register_read (frame, MS1_MAC_REGNUM, buf);
 	  oldmac = extract_unsigned_integer (buf,
 					     register_size (gdbarch,
 							    MS1_MAC_REGNUM));
-	  if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2)
+	  if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
+	      || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	    {
 	      frame_register_read (frame, MS1_EXMAC_REGNUM, buf);
 	      ext_mac = extract_unsigned_integer (buf,
@@ -594,7 +595,7 @@ ms1_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     int struct_return, CORE_ADDR struct_addr)
 {
 #define wordsize 4
-  char buf[MS1_MAX_STRUCT_SIZE];
+  gdb_byte buf[MS1_MAX_STRUCT_SIZE];
   int argreg = MS1_1ST_ARGREG;
   int split_param_len = 0;
   int stack_dest = sp;
@@ -606,7 +607,7 @@ ms1_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      MS1_LAST_ARGREG.  */
   for (i = 0; i < nargs && argreg <= MS1_LAST_ARGREG; i++)
     {
-      const char *val;
+      const gdb_byte *val;
       typelen = TYPE_LENGTH (value_type (args[i]));
       switch (typelen)
 	{
@@ -658,7 +659,8 @@ ms1_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Next, the rest of the arguments go onto the stack, in reverse order.  */
   for (j = nargs - 1; j >= i; j--)
     {
-      char *val;
+      gdb_byte *val;
+      
       /* Right-justify the value in an aligned-length buffer.  */
       typelen = TYPE_LENGTH (value_type (args[j]));
       slacklen = (wordsize - (typelen % wordsize)) % wordsize;
@@ -961,7 +963,6 @@ static struct gdbarch *
 ms1_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  static void ms1_frame_unwind_init (struct gdbarch *);
 
   /* Find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
