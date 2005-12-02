@@ -1085,8 +1085,10 @@ symbol_file_clear (int from_tty)
 {
   if ((have_full_symbols () || have_partial_symbols ())
       && from_tty
-      && !query ("Discard symbol table from `%s'? ",
-		 symfile_objfile->name))
+      && (symfile_objfile
+	  ? !query (_("Discard symbol table from `%s'? "),
+		    symfile_objfile->name)
+	  : !query (_("Discard symbol table? "))))
     error (_("Not confirmed."));
     free_all_objfiles ();
 

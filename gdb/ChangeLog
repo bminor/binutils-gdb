@@ -1,3 +1,9 @@
+2005-12-02  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* symfile.c (symbol_file_clear): Test symfile_objfile is not NULL
+	before dereferencing it.
+	Gettextize the query.
+
 2005-12-02  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 6.4 released from GDB 6.4 branch.
