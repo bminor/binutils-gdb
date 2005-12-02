@@ -56,6 +56,7 @@ CFILES = \
 	avr-dis.c \
 	bfin-dis.c \
 	cgen-asm.c \
+	cgen-bitset.c \
 	cgen-dis.c \
 	cgen-opc.c \
 	cris-dis.c \
@@ -192,6 +193,7 @@ ALL_MACHINES = \
 	avr-dis.lo \
 	bfin-dis.lo \
 	cgen-asm.lo \
+	cgen-bitset.lo \
 	cgen-dis.lo \
 	cgen-opc.lo \
 	cris-dis.lo \
@@ -612,6 +614,10 @@ cgen-asm.lo: cgen-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
   $(INCDIR)/opcode/cgen.h $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h \
   opintl.h
+cgen-bitset.lo: cgen-bitset.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/safe-ctype.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \
+  $(INCDIR)/opcode/cgen.h $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h
 cgen-dis.lo: cgen-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/symcat.h \

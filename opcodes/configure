@@ -8685,7 +8685,7 @@ done
 
 # Utility var, documents generic cgen support files.
 
-cgen_files="cgen-opc.lo cgen-asm.lo cgen-dis.lo"
+cgen_files="cgen-opc.lo cgen-asm.lo cgen-dis.lo cgen-bitset.lo"
 
 # We don't do any links based on the target system, just makefile config.
 
@@ -8704,7 +8704,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
 	bfd_avr_arch)		ta="$ta avr-dis.lo" ;;
 	bfd_bfin_arch)		ta="$ta bfin-dis.lo" ;;
-	bfd_cris_arch)		ta="$ta cris-dis.lo cris-opc.lo" ;;
+	bfd_cris_arch)		ta="$ta cris-dis.lo cris-opc.lo cgen-bitset.lo" ;;
 	bfd_crx_arch)    	ta="$ta crx-dis.lo crx-opc.lo" ;;
 	bfd_d10v_arch)		ta="$ta d10v-dis.lo d10v-opc.lo" ;;
 	bfd_d30v_arch)		ta="$ta d30v-dis.lo d30v-opc.lo" ;;

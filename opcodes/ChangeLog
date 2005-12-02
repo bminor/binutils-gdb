@@ -1,3 +1,18 @@
+2005-12-02  Dave Brolley  <brolley@redhat.com>
+
+	* configure.in (cgen_files): Add cgen-bitset.lo.
+	(ta): Add cgen-bitset.lo when arch==bfd_cris_arch.
+	* Makefile.am (CFILES): Add cgen-bitset.c.
+	(ALL_MACHINES): Add cgen-bitset.lo.
+	(cgen-bitset.lo): New target.
+	* cgen-opc.c (cgen_bitset_create, cgen_bitset_init, cgen_bitset_clear) 
+	(cgen_bitset_add, cgen_bitset_set, cgen_bitset_contains) 
+	(cgen_bitset_compare, cgen_bitset_intersect_p, cgen_bitset_copy) 
+	(cgen_bitset_union): Moved from here ...
+	* cgen-bitset.c: ... to here. New file.
+	* Makefile.in: Regenerated.
+	* configure: Regenerated.
+
 2005-11-22  James E Wilson  <wilson@specifix.com>
 
 	* ia64-gen.c (_opcode_int64_low, _opcode_int64_high,
