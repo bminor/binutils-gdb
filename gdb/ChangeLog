@@ -1,5 +1,12 @@
 2005-12-02  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* breakpoint.c (BREAK_ARGS_HELP): New mecro.
+	(_initialize_breakpoint): Enhance break, tbreak, hbreak and thbreak
+	commands' help by adding more information and using BREAK_ARGS_HELP
+	to duplicate the common parts.  Remove now-redundant cross-references.
+
+2005-12-02  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* value.c (init_if_undefined_command): New function.
 	(_initialize_values): Add command init-if-undefined.
 	* NEWS (Changes since GDB 6.3): Rename to 'Changes in GDB 6.4'.

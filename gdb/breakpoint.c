@@ -7647,6 +7647,25 @@ decode_line_spec_1 (char *string, int funfirstline)
   return sals;
 }
 
+/* This help string is used for the break, hbreak, tbreak and thbreak commands.
+   It is defined as a macro to prevent duplication.
+   COMMAND should be a string constant containing the name of the command.  */
+#define BREAK_ARGS_HELP(command) \
+command" [LOCATION] [thread THREADNUM] [if CONDITION]\n\
+LOCATION may be a line number, function name, or \"*\" and an address.\n\
+If a line number is specified, break at start of code for that line.\n\
+If a function is specified, break at start of code for that function.\n\
+If an address is specified, break at that exact address.\n\
+With no LOCATION, uses current execution address of selected stack frame.\n\
+This is useful for breaking on return to a stack frame.\n\
+\n\
+THREADNUM is the number from \"info threads\".\n\
+CONDITION is a boolean expression.\n\
+\n\
+Multiple breakpoints at one place are permitted, and useful if conditional.\n\
+\n\
+Do \"help breakpoints\" for info on other commands dealing with breakpoints."
+
 void
 _initialize_breakpoint (void)
 {
@@ -7682,22 +7701,28 @@ Usage is `condition N COND', where N is an integer and COND is an\n\
 expression to be evaluated whenever breakpoint N is reached."));
 
   c = add_com ("tbreak", class_breakpoint, tbreak_command, _("\
-Set a temporary breakpoint.  Args like \"break\" command.\n\
+Set a temporary breakpoint.\n\
 Like \"break\" except the breakpoint is only temporary,\n\
 so it will be deleted when hit.  Equivalent to \"break\" followed\n\
-by using \"enable delete\" on the breakpoint number."));
+by using \"enable delete\" on the breakpoint number.\n\
+\n"
+BREAK_ARGS_HELP ("tbreak")));
   set_cmd_completer (c, location_completer);
 
   c = add_com ("hbreak", class_breakpoint, hbreak_command, _("\
-Set a hardware assisted  breakpoint. Args like \"break\" command.\n\
+Set a hardware assisted  breakpoint.\n\
 Like \"break\" except the breakpoint requires hardware support,\n\
-some target hardware may not have this support."));
+some target hardware may not have this support.\n\
+\n"
+BREAK_ARGS_HELP ("hbreak")));
   set_cmd_completer (c, location_completer);
 
   c = add_com ("thbreak", class_breakpoint, thbreak_command, _("\
-Set a temporary hardware assisted breakpoint. Args like \"break\" command.\n\
+Set a temporary hardware assisted breakpoint.\n\
 Like \"hbreak\" except the breakpoint is only temporary,\n\
-so it will be deleted when hit."));
+so it will be deleted when hit.\n\
+\n"
+BREAK_ARGS_HELP ("thbreak")));
   set_cmd_completer (c, location_completer);
 
   add_prefix_cmd ("enable", class_breakpoint, enable_command, _("\
@@ -7802,17 +7827,8 @@ is executing in.\n\
 See also the \"delete\" command which clears breakpoints by number."));
 
   c = add_com ("break", class_breakpoint, break_command, _("\
-Set breakpoint at specified line or function.\n\
-Argument may be line number, function name, or \"*\" and an address.\n\
-If line number is specified, break at start of code for that line.\n\
-If function is specified, break at start of code for that function.\n\
-If an address is specified, break at that exact address.\n\
-With no arg, uses current execution address of selected stack frame.\n\
-This is useful for breaking on return to a stack frame.\n\
-\n\
-Multiple breakpoints at one place are permitted, and useful if conditional.\n\
-\n\
-Do \"help breakpoints\" for info on other commands dealing with breakpoints."));
+Set breakpoint at specified line or function.\n"
+BREAK_ARGS_HELP ("break")));
   set_cmd_completer (c, location_completer);
 
   add_com_alias ("b", "break", class_run, 1);

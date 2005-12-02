@@ -1,3 +1,8 @@
+2005-12-02  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/help.exp (help b, help br, help bre, help brea)
+	(help break): Update the expected message.
+
 2005-11-11  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gdb.asm/m68hc11.inc: Setup the data section.
