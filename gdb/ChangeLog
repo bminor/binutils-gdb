@@ -2,7 +2,7 @@
 
 	* version.in: Set version to 6.4 for the release.
 
-2005-11-25 Frederic Riss <frederic.riss@st.com>
+2005-11-25  Frederic Riss  <frederic.riss@st.com>
 
 	* dwarf2-frame.c (execute_cfa_program): Don't access past the
 	allocated dwarf2_frame_state.initial.regs.
