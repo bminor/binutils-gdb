@@ -1,3 +1,7 @@
+2005-12-02  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 6.4 released from GDB 6.4 branch.
+
 2005-12-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ms1-tdep.c (ms1_register_name): Const qualify array.
