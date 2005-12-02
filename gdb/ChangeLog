@@ -1,5 +1,13 @@
 2005-12-02  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* value.c (init_if_undefined_command): New function.
+	(_initialize_values): Add command init-if-undefined.
+	* NEWS (Changes since GDB 6.3): Rename to 'Changes in GDB 6.4'.
+	(Changes since GDB 6.4): New section.
+	Mention new command init-if-undefined.
+
+2005-12-02  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* symfile.c (symbol_file_clear): Test symfile_objfile is not NULL
 	before dereferencing it.
 	Gettextize the query.

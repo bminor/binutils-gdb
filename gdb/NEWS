@@ -1,7 +1,14 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.3
+*** Changes since GDB 6.4
+
+* New commands
+
+init-if-undefined		Initialize a convenience variable, but
+				only if it doesn't already have a value.
+
+*** Changes in GDB 6.4
 
 * New native configurations
 

@@ -6131,6 +6131,18 @@ variable, when used as an expression, has the type of its current value.
 @item show convenience
 Print a list of convenience variables used so far, and their values.
 Abbreviated @code{show conv}.
+
+@kindex init-if-undefined
+@cindex convenience variables, initializing
+@item init-if-undefined $@var{variable} = @var{expression}
+Set a convenience variable if it has not already been set.  This is useful
+for user-defined commands that keep some state.  It is similar, in concept,
+to using local static variables with initializers in C (except that
+convenience variables are global).  It can also be used to allow users to
+override default values used in a command script.
+
+If the variable is already defined then the expression is not evaluated so
+any side-effects do not occur.
 @end table
 
 One of the ways to use a convenience variable is as a counter to be

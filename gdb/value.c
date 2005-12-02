@@ -727,6 +727,39 @@ show_values (char *num_exp, int from_tty)
 
 static struct internalvar *internalvars;
 
+/* If the variable does not already exist create it and give it the value given.
+   If no value is given then the default is zero.  */
+static void
+init_if_undefined_command (char* args, int from_tty)
+{
+  struct internalvar* intvar;
+
+  /* Parse the expression - this is taken from set_command().  */
+  struct expression *expr = parse_expression (args);
+  register struct cleanup *old_chain =
+    make_cleanup (free_current_contents, &expr);
+
+  /* Validate the expression.
+     Was the expression an assignment?
+     Or even an expression at all?  */
+  if (expr->nelts == 0 || expr->elts[0].opcode != BINOP_ASSIGN)
+    error (_("Init-if-undefined requires an assignment expression."));
+
+  /* Extract the variable from the parsed expression.
+     In the case of an assign the lvalue will be in elts[1] and elts[2].  */
+  if (expr->elts[1].opcode != OP_INTERNALVAR)
+    error (_("The first parameter to init-if-undefined should be a GDB variable."));
+  intvar = expr->elts[2].internalvar;
+
+  /* Only evaluate the expression if the lvalue is void.
+     This may still fail if the expresssion is invalid.  */
+  if (TYPE_CODE (value_type (intvar->value)) == TYPE_CODE_VOID)
+    evaluate_expression (expr);
+
+  do_cleanups (old_chain);
+}
+
+
 /* Look up an internal variable with name NAME.  NAME should not
    normally include a dollar sign.
 
@@ -1639,4 +1672,11 @@ A few convenience variables are given values automatically:\n\
   add_cmd ("values", no_class, show_values,
 	   _("Elements of value history around item number IDX (or last ten)."),
 	   &showlist);
+
+  add_com ("init-if-undefined", class_vars, init_if_undefined_command, _("\
+Initialize a convenience variable if necessary.\n\
+init-if-undefined VARIABLE = EXPRESSION\n\
+Set an internal VARIABLE to the result of the EXPRESSION if it does not\n\
+exist or does not contain a value.  The EXPRESSION is not evaluated if the\n\
+VARIABLE is already initialized."));
 }
