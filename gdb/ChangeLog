@@ -1,3 +1,10 @@
+2005-12-01  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-fork.c (fork_save_infrun_state): Close the DIR.
+	(info_forks_command): Print bare filename, not full path.
+	* linux-nat.c (kill_inferior): For multi-fork, pop target 
+	and call generic_mourn_inferior, not target_mourn_inferior.
+
 2005-11-30  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-fork.c (struct fork_info): Add fields for saving

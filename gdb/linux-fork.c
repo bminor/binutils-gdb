@@ -24,6 +24,7 @@
 #include "regcache.h"		/* For regcache copy/restore */
 #include "gdbcmd.h"
 #include "infcall.h"		/* For call_function_by_hand */
+#include "gdb_string.h"
 
 #include "linux-fork.h"		/* External interface */
 
@@ -294,6 +295,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 		tmp = strtol (&de->d_name[0], NULL, 10);
 		fp->filepos[tmp] = call_lseek (tmp, 0, SEEK_CUR);
 	      }
+	  closedir (d);
 	}
     }
 }
@@ -422,7 +424,14 @@ info_forks_command (char *arg, int from_tty)
 
       sal = find_pc_line (pc, 0);
       if (sal.symtab)
-	printf_filtered (", file %s", sal.symtab->filename);
+	{
+	  char *tmp = strrchr (sal.symtab->filename, '/');
+
+	  if (tmp)
+	    printf_filtered (", file %s", tmp + 1);
+	  else
+	    printf_filtered (", file %s", sal.symtab->filename);
+	}
       if (sal.line)
 	printf_filtered (", line %d", sal.line);
       if (!sal.symtab && !sal.line)

@@ -620,6 +620,8 @@ kill_inferior (void)
   if (FORKS_EXIST ())
     {
       linux_fork_killall ();
+      pop_target ();
+      generic_mourn_inferior ();
     }
   else
     {
@@ -648,9 +650,8 @@ kill_inferior (void)
 	  ptrace (PT_KILL, pid, 0, 0);
 	  ret = wait (&status);
 	}
+      target_mourn_inferior ();
     }
-
-  target_mourn_inferior ();
 }
 
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
