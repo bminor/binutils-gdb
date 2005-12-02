@@ -1604,7 +1604,7 @@ emit_ldreg (int dest, expressionS * src)
       /* Fall through.  */
     case REG_BC:
     case REG_DE:
-      if (src->X_op == O_register || src->X_op != O_md1)
+      if (src->X_op == O_register || src->X_op == O_md1)
 	ill_op ();
       q = frag_more (src->X_md ? 2 : 1);
       if (src->X_md)
