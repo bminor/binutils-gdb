@@ -11966,10 +11966,15 @@ the @code{disconnect} command, @value{GDBN} is again free to connect to
 another target.
 
 @cindex send command to remote monitor
+@cindex extend @value{GDBN} for remote targets
+@cindex add new commands for external monitor
 @kindex monitor
 @item monitor @var{cmd}
-This command allows you to send commands directly to the remote
-monitor.
+This command allows you to send arbitrary commands directly to the
+remote monitor.  Since @value{GDBN} doesn't care about the commands it
+sends like this, this command is the way to extend @value{GDBN}---you
+can add new commands that only the external monitor will understand
+and implement.
 @end table
 
 @node Server
