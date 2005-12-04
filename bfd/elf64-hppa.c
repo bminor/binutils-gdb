@@ -2652,6 +2652,22 @@ static bfd_boolean
 elf64_hppa_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index,
 			      const char *typename)
 {
+  if (hdr->p_type == PT_HP_CORE_KERNEL)
+    {
+      asection *sect;
+
+      if (!_bfd_elf_make_section_from_phdr (abfd, hdr, index, typename))
+	return FALSE;
+
+      sect = bfd_make_section_anyway (abfd, ".kernel");
+      if (sect == NULL)
+	return FALSE;
+      sect->size = hdr->p_filesz;
+      sect->filepos = hdr->p_offset;
+      sect->flags = SEC_HAS_CONTENTS | SEC_READONLY;
+      return TRUE;
+    }
+
   if (hdr->p_type == PT_HP_CORE_PROC)
     {
       int sig;
@@ -2663,10 +2679,12 @@ elf64_hppa_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index,
 
       elf_tdata (abfd)->core_signal = sig;
 
-      /* gdb uses the ".reg" section to read register contents.  */
-      if (!_bfd_elfcore_make_pseudosection (abfd, ".reg", hdr->p_filesz,
-	  				    hdr->p_offset))
+      if (!_bfd_elf_make_section_from_phdr (abfd, hdr, index, typename))
 	return FALSE;
+
+      /* GDB uses the ".reg" section to read register contents.  */
+      return _bfd_elfcore_make_pseudosection (abfd, ".reg", hdr->p_filesz,
+					      hdr->p_offset);
     }
 
   if (hdr->p_type == PT_HP_CORE_LOADABLE
