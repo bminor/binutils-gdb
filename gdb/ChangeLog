@@ -1,3 +1,13 @@
+2005-12-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64obsd-tdep.c: Include "regcache.h" and "bsd-uthread.h".
+	(amd64obsd_uthread_reg_offset): New variable.
+	(AMD64OBSD_UTHREAD_RSP_OFFSET): New define.
+	(amd64obsd_supply_uthread, amd64obsd_collect_uthread): New
+	functions.
+	(amd64obsd_init_abi): Set supply_uthread and collect_uthread.
+	* Makefile.in (amd64obsd-tdep.o): Update dependencies.
+
 2005-12-02  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* breakpoint.c (BREAK_ARGS_HELP): New mecro.
