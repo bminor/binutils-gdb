@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -717,9 +717,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVECBR_CODE \
   length = 4; \
-  word_1 = GETIMEMUHI (current_cpu, pc + 2); \
+  word_1 = GETIMEMUSI (current_cpu, pc + 2); \
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_indir_pc__byte = (0|(EXTRACT_LSB0_UINT (word_1, 16, 15, 16) << 0)); \
+  f_indir_pc__byte = (0|(EXTRACT_LSB0_UINT (word_1, 32, 15, 16) << 0)); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode = EXTRACT_LSB0_UINT (insn, 16, 9, 4); \
   f_size = EXTRACT_LSB0_UINT (insn, 16, 5, 2); \
@@ -737,9 +737,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVECWR_CODE \
   length = 4; \
-  word_1 = GETIMEMUHI (current_cpu, pc + 2); \
+  word_1 = GETIMEMUSI (current_cpu, pc + 2); \
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_indir_pc__word = (0|(EXTRACT_LSB0_UINT (word_1, 16, 15, 16) << 0)); \
+  f_indir_pc__word = (0|(EXTRACT_LSB0_UINT (word_1, 32, 15, 16) << 0)); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode = EXTRACT_LSB0_UINT (insn, 16, 9, 4); \
   f_size = EXTRACT_LSB0_UINT (insn, 16, 5, 2); \
@@ -777,9 +777,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVUCBR_CODE \
   length = 4; \
-  word_1 = GETIMEMUHI (current_cpu, pc + 2); \
+  word_1 = GETIMEMUSI (current_cpu, pc + 2); \
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_indir_pc__byte = (0|(EXTRACT_LSB0_UINT (word_1, 16, 15, 16) << 0)); \
+  f_indir_pc__byte = (0|(EXTRACT_LSB0_UINT (word_1, 32, 15, 16) << 0)); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode = EXTRACT_LSB0_UINT (insn, 16, 9, 4); \
   f_size = EXTRACT_LSB0_UINT (insn, 16, 5, 2); \
@@ -797,9 +797,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_MOVUCWR_CODE \
   length = 4; \
-  word_1 = GETIMEMUHI (current_cpu, pc + 2); \
+  word_1 = GETIMEMUSI (current_cpu, pc + 2); \
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_indir_pc__word = (0|(EXTRACT_LSB0_UINT (word_1, 16, 15, 16) << 0)); \
+  f_indir_pc__word = (0|(EXTRACT_LSB0_UINT (word_1, 32, 15, 16) << 0)); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode = EXTRACT_LSB0_UINT (insn, 16, 9, 4); \
   f_size = EXTRACT_LSB0_UINT (insn, 16, 5, 2); \
@@ -1121,9 +1121,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_BCC_W_CODE \
   length = 4; \
-  word_1 = GETIMEMUHI (current_cpu, pc + 2); \
+  word_1 = GETIMEMUSI (current_cpu, pc + 2); \
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_indir_pc__word_pcrel = ((EXTHISI (((HI) (UINT) ((0|(EXTRACT_LSB0_UINT (word_1, 16, 15, 16) << 0)))))) + (((pc) + (((GET_H_V32_V32 ()) ? (0) : (4)))))); \
+  f_indir_pc__word_pcrel = ((EXTHISI (((HI) (UINT) ((0|(EXTRACT_LSB0_UINT (word_1, 32, 15, 16) << 0)))))) + (((pc) + (((GET_H_V32_V32 ()) ? (0) : (4)))))); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode = EXTRACT_LSB0_UINT (insn, 16, 9, 4); \
   f_size = EXTRACT_LSB0_UINT (insn, 16, 5, 2); \
@@ -1141,9 +1141,9 @@ struct scache {
   unsigned int length;
 #define EXTRACT_IFMT_BA_W_CODE \
   length = 4; \
-  word_1 = GETIMEMUHI (current_cpu, pc + 2); \
+  word_1 = GETIMEMUSI (current_cpu, pc + 2); \
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
-  f_indir_pc__word_pcrel = ((EXTHISI (((HI) (UINT) ((0|(EXTRACT_LSB0_UINT (word_1, 16, 15, 16) << 0)))))) + (((pc) + (((GET_H_V32_V32 ()) ? (0) : (4)))))); \
+  f_indir_pc__word_pcrel = ((EXTHISI (((HI) (UINT) ((0|(EXTRACT_LSB0_UINT (word_1, 32, 15, 16) << 0)))))) + (((pc) + (((GET_H_V32_V32 ()) ? (0) : (4)))))); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode = EXTRACT_LSB0_UINT (insn, 16, 9, 4); \
   f_size = EXTRACT_LSB0_UINT (insn, 16, 5, 2); \
