@@ -1,3 +1,8 @@
+2005-12-06  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris-dis.c (bytes_to_skip): Handle new parameter prefix_matchedp.
+	(print_with_operands): Check for prefix when [PC+] is seen.
+
 2005-12-02  Dave Brolley  <brolley@redhat.com>
 
 	* configure.in (cgen_files): Add cgen-bitset.lo.
