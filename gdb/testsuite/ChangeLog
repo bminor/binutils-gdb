@@ -1,3 +1,10 @@
+2005-12-05  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/checkpoint.c: New file.
+	* gdb.base/checkpoint.exp: New file.  Test checkpoint/restart
+	on Linux (using fork).
+	* gdb.base/pi.txt: New file, test load for checkpoint.exp test.
+
 2005-11-28  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/multi-forks.c: New file.
