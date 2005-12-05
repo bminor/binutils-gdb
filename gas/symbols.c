@@ -376,6 +376,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 		    && S_IS_EXTERNAL (symbolP))
 		   || S_GET_SEGMENT (symbolP) == bss_section)
 		  && (now_seg == data_section
+		      || now_seg == bss_section
 		      || now_seg == S_GET_SEGMENT (symbolP)))
 		{
 		  /* Select which of the 2 cases this is.  */

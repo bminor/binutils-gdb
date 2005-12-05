@@ -1,3 +1,9 @@
+2005-12-05  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	Bug gas/1948
+	* symbols.c (colon): Also check if now_seg is bss_section when a symbol
+	is being redefined.
+
 2005-12-02  Arnold Metselaar  <arnoldm@sourceware.org>
 
 	* config/tc-z80.c (emit_ldreg): fix bug in ld rr,<xx>
