@@ -1,6 +1,6 @@
 2005-11-20  Hans-Peter Nilsson  <hp@axis.com>
 
-	cris/traps.c (TARGET_O_RDONLY, TARGET_O_WRONLY): Define.
+	* cris/traps.c (TARGET_O_RDONLY, TARGET_O_WRONLY): Define.
 	(open_map): Use TARGET_O_ACCMODE, TARGET_O_RDONLY and
 	TARGET_O_WRONLY.
 	(cris_break_13_handler) <case TARGET_SYS_fcntl>: Add support for
