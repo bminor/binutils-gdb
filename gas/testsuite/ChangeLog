@@ -1,3 +1,7 @@
+2005-12-06  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-pcplus.s, gas/cris/rd-pcplus.d: New test.
+
 2005-11-24  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* gas/macros/purge.l: Increment line numbers.
