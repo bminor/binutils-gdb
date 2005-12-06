@@ -371,59 +371,89 @@
 (define-pmacro cris-timing-const-QI cris-timing-const-HI)
 (define-pmacro cris-timing-const-sr-QI cris-timing-const-sr-HI)
 
-(define-pmacro (simplecris-common-specregs)
-  "The common special registers in pre-v32 models."
-  ((QI 0) (QI 1) (HI 4) (HI 5)
-   (SI 8) (SI 9) (SI 10) (SI 11) (SI 12) (SI 13))
+(define-pmacro (simplecris-common-writable-specregs)
+  "The common writable special registers in pre-v32 models."
+  ((HI 5) (SI 9) (SI 10) (SI 11) (SI 12) (SI 13))
 )
 
-(define-pmacro (cris-implemented-specregs-v0)
-  "Special registers in v0 and their sizes"
-  (.splice (.unsplice (simplecris-common-specregs)) (HI 6) (HI 7))
+(define-pmacro (simplecris-common-readable-specregs)
+  "The common readable special registers in pre-v32 models."
+  (.splice (.unsplice (simplecris-common-writable-specregs))
+	   (QI 0) (QI 1) (HI 4) (SI 8))
+)
+
+(define-pmacro (cris-implemented-writable-specregs-v0)
+  "Special writable registers in v0 and their sizes"
+  (.splice (.unsplice (simplecris-common-writable-specregs)) (HI 6) (HI 7))
 )
 (define-pmacro
   cris-implemented-specregs-const-v0
-  cris-implemented-specregs-v0
+  cris-implemented-writable-specregs-v0
+)
+(define-pmacro (cris-implemented-readable-specregs-v0)
+  "Special readable registers in v0 and their sizes"
+  (.splice (.unsplice (simplecris-common-readable-specregs)) (HI 6) (HI 7))
 )
 
-(define-pmacro (cris-implemented-specregs-v3)
-  "Special registers in v3 and their sizes"
-  (.splice (.unsplice (cris-implemented-specregs-v0)) (SI 14))
+(define-pmacro (cris-implemented-writable-specregs-v3)
+  "Special writable registers in v3 and their sizes"
+  (.splice (.unsplice (cris-implemented-writable-specregs-v0)) (SI 14))
 )
 (define-pmacro
   cris-implemented-specregs-const-v3
-  cris-implemented-specregs-v3
+  cris-implemented-writable-specregs-v3
+)
+(define-pmacro (cris-implemented-readable-specregs-v3)
+  "Special readable registers in v3 and their sizes"
+  (.splice (.unsplice (cris-implemented-readable-specregs-v0)) (SI 14))
 )
 
-(define-pmacro (cris-implemented-specregs-v8)
-  "Special registers in v8 and their sizes"
-  (.splice (.unsplice (simplecris-common-specregs)) (SI 14))
+(define-pmacro (cris-implemented-writable-specregs-v8)
+  "Special writable registers in v8 and their sizes"
+  (.splice (.unsplice (simplecris-common-writable-specregs)) (SI 14))
 )
 (define-pmacro
   cris-implemented-specregs-const-v8
-  cris-implemented-specregs-v8
+  cris-implemented-writable-specregs-v8
+)
+(define-pmacro (cris-implemented-readable-specregs-v8)
+  "Special readable registers in v8 and their sizes"
+  (.splice (.unsplice (simplecris-common-readable-specregs)) (SI 14))
 )
 
-(define-pmacro (cris-implemented-specregs-v10)
-  "Special registers in v10 and their sizes"
-  (.splice (.unsplice (simplecris-common-specregs)) (SI 7) (SI 14) (SI 15))
+(define-pmacro (cris-implemented-writable-specregs-v10)
+  "Special writable registers in v10 and their sizes"
+  (.splice (.unsplice (simplecris-common-writable-specregs))
+	   (SI 7) (SI 14) (SI 15))
 )
 (define-pmacro
   cris-implemented-specregs-const-v10
-  cris-implemented-specregs-v10
+  cris-implemented-writable-specregs-v10
+)
+(define-pmacro (cris-implemented-readable-specregs-v10)
+  "Special registers in v10 and their sizes"
+  (.splice (.unsplice (simplecris-common-readable-specregs))
+	   (SI 7) (SI 14) (SI 15))
 )
 
-(define-pmacro (cris-implemented-specregs-v32)
-  "Special registers in v32 and their sizes"
-  ((QI 0) (QI 1) (QI 2) (QI 3) (HI 4)
-   (SI 5) (SI 6) (SI 7) (SI 8) (SI 9)
+(define-pmacro (cris-implemented-writable-specregs-v32)
+  "Special writable registers in v32 and their sizes"
+  ((QI 2) (QI 3)
+   (SI 5) (SI 6) (SI 7) (SI 9)
    (SI 10) (SI 11) (SI 12) (SI 13) (SI 14) (SI 15))
 )
+(define-pmacro (cris-implemented-readable-specregs-v32)
+  "Special readable registers in v32 and their sizes"
+  (.splice (.unsplice (cris-implemented-writable-specregs-v32))
+	   (QI 0) (QI 1) (HI 4) (SI 8))
+)
+
 ; For v32, all special register operations on constants (that is,
 ; move) take 32-bit operands, not the real size of the register, as in
 ; other move operations.
 (define-pmacro (cris-implemented-specregs-const-v32)
-  (.map (.pmacro (regno) (SI regno)) (.iota 16))
+  (.map (.pmacro (x) (SI (.cadr2 x)))
+	(cris-implemented-writable-specregs-v32))
 )
 
 (define-pmacro cris-swap-codes
@@ -2579,7 +2609,7 @@
 	   (r)
 	   ((eq prno (.cadr2 r))
 	    (set-subreg-gr (.car2 r) (regno Rd-sfield) newval)))
-	  ((.sym cris-implemented-specregs- VER))))
+	  ((.sym cris-implemented-readable-specregs- VER))))
 	(else (error "move-spr-r from unimplemented register")))
        (reset-x-p))))
    (cris-cpu-models)))
@@ -2633,7 +2663,7 @@
 	   (r)
 	   ((eq rno (.cadr2 r))
 	    (set newval ((.sym (.car2 r) -ext) (cris-get-mem (.car2 r) Rs)))))
-	  ((.sym cris-implemented-specregs- VER))))
+	  ((.sym cris-implemented-writable-specregs- VER))))
 	(else (error "Trying to set unimplemented special register")))
        (set Pd newval)
        (reset-x-p))
@@ -2717,7 +2747,7 @@
 	   (r)
 	   ((eq rno (.cadr2 r))
 	    (cris-set-mem (.car2 r) Rd-sfield Ps)))
-	  ((.sym cris-implemented-specregs- VER))))
+	  ((.sym cris-implemented-readable-specregs- VER))))
 	(else (error "write from unimplemented special register")))
        (reset-x-p))))
    (cris-cpu-models)))
@@ -4331,6 +4361,59 @@
    ; We mark this insn as UNCOND-CTI so this insn will end a simulator
    ; basic block (the atomic unit of translation).
    (c-call VOID "cris_flush_simulator_decode_cache" pc))
+)
+
+; (BDAP.D  [PC+],PC   [ 1111 | 11010110 | 1111 ]
+; This [PC+I] prefix is used for DSO-local jumps in PIC code, together with
+; move-m-pcplus-p0: "move [pc=pc+N],p0"
+(dni-c-SI-attr
+ bdap-32-pc "bdap.d [PC+],PC"
+ (MACH-PC)
+ "bdap ${sconst32},PC"
+ (+ (f-dest 15) MODE_AUTOINCREMENT INDIR_BDAP_M SIZE_DWORD (f-source 15) const32)
+ (sequence
+   ((SI newpc) (SI oldpc) (SI offs))
+   (set offs const32)
+   (set oldpc (add SI pc 6))
+   (set newpc (add SI oldpc offs))
+   (set prefixreg newpc)
+   (set prefix-set 1))
+)
+
+; (MOVE    [PC+],P0        [ 0000 | 11100011 | 1111 ])
+; This insn is used for DSO-local jumps in PIC code.  See bdap-32-pc.
+(dni ; Must not use dni-cmt-* because we force MODE_AUTOINCREMENT.
+ move-m-pcplus-p0 "move [PC+],P0"
+ (MACH-PC)
+ "move [PC+],P0"
+ (+ (f-dest 0) MODE_AUTOINCREMENT INFIX_MOVE_M_S SIZE_FIXED (f-source 15))
+ (if prefix-set
+     (sequence
+       ((QI dummy))
+       ; We model the memory read, but throw the result away, as the
+       ; destination register is read-only.  We need to assign the result of
+       ; cris-get-mem though, as CGEN-FIXME: invalid C code will otherwise
+       ; be generated.
+       (set dummy (cris-get-mem QI pc))
+       (reset-x-p))
+     (error "move [PC+],P0 without prefix is not implemented"))
+ (cris-mem-timing)
+)
+
+; This insn is used in Linux in the form "move [$sp=$sp+16],$p8"; it's
+; similar to move-m-pcplus-p0 above.  The same comments apply here.
+(dni
+ move-m-spplus-p8 "move [SP+],P8"
+ (MACH-PC)
+ "move [SP+],P8"
+ (+ (f-dest 8) MODE_AUTOINCREMENT INFIX_MOVE_M_S SIZE_FIXED (f-source 14))
+ (if prefix-set
+     (sequence
+       ((SI dummy))
+       (set dummy (cris-get-mem SI sp))
+       (reset-x-p))
+     (error "move [SP+],P8 without prefix is not implemented"))
+ (cris-mem-timing)
 )
 
 ; ADDO.m  [Rs],Rd,ACR    [ Rd | 100101mm | Rs ]

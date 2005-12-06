@@ -1,3 +1,22 @@
+2005-12-06  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris.cpu (simplecris-common-writable-specregs)
+	(simplecris-common-readable-specregs): Split from
+	simplecris-common-specregs.  All users changed.
+	(cris-implemented-writable-specregs-v0)
+	(cris-implemented-readable-specregs-v0): Similar from
+	cris-implemented-specregs-v0.
+	(cris-implemented-writable-specregs-v3)
+	(cris-implemented-readable-specregs-v3)
+	(cris-implemented-writable-specregs-v8)
+	(cris-implemented-readable-specregs-v8)
+	(cris-implemented-writable-specregs-v10)
+	(cris-implemented-readable-specregs-v10)
+	(cris-implemented-writable-specregs-v32)
+	(cris-implemented-readable-specregs-v32): Similar.
+	(bdap-32-pc, move-m-pcplus-p0, move-m-spplus-p8): New
+	insns and specializations.
+
 2005-11-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Add ms2
