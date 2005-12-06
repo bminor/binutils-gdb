@@ -32,5 +32,6 @@ Disassembly of section .text:
   62:	f3 0f 12 dc [ 	]*movsldup %xmm4,%xmm3
   66:	0f 01 c9 [ 	]*mwait  %eax,%ecx
   69:	0f 01 c9 [ 	]*mwait  %eax,%ecx
-  6c:	00 00 [ 	]*add    %al,\(%eax\)
+  6c:	67 0f 01 c8 [ 	]*monitor %ax,%ecx,%edx
+  70:	67 0f 01 c8 [ 	]*monitor %ax,%ecx,%edx
 	...

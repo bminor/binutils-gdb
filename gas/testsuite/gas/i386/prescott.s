@@ -29,4 +29,7 @@ foo:
 	mwait
 	mwait		%eax,%ecx
 
+	monitor		%ax,%ecx,%edx
+	addr16 monitor
+
 	.p2align	4,0

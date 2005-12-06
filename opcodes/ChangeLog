@@ -1,3 +1,30 @@
+2005-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/1874
+	* i386-dis.c (address_mode): New enum type.
+	(address_mode): New variable.
+	(mode_64bit): Removed.
+	(ckprefix): Updated to check address_mode instead of mode_64bit.
+	(prefix_name): Likewise.
+	(print_insn): Likewise.
+	(putop): Likewise.
+	(print_operand_value): Likewise.
+	(intel_operand_size): Likewise.
+	(OP_E): Likewise.
+	(OP_G): Likewise.
+	(set_op): Likewise.
+	(OP_REG): Likewise.
+	(OP_I): Likewise.
+	(OP_I64): Likewise.
+	(OP_OFF): Likewise.
+	(OP_OFF64): Likewise.
+	(ptr_reg): Likewise.
+	(OP_C): Likewise.
+	(SVME_Fixup): Likewise.
+	(print_insn): Set address_mode.
+	(PNI_Fixup): Add 64bit and address size override support for
+	monitor and mwait.
+
 2005-12-06  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris-dis.c (bytes_to_skip): Handle new parameter prefix_matchedp.

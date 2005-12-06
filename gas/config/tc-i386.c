@@ -2275,10 +2275,15 @@ match_template ()
 	  overlap1 = i.types[1] & t->operand_types[1];
 	  if (!MATCH (overlap0, i.types[0], t->operand_types[0])
 	      || !MATCH (overlap1, i.types[1], t->operand_types[1])
-	      || !CONSISTENT_REGISTER_MATCH (overlap0, i.types[0],
-					     t->operand_types[0],
-					     overlap1, i.types[1],
-					     t->operand_types[1]))
+	      /* monitor in SSE3 is a very special case.  The first
+		 register and the second register may have differnet
+		 sizes.  */
+	      || !((t->base_opcode == 0x0f01
+		    && t->extension_opcode == 0xc8)
+		   || CONSISTENT_REGISTER_MATCH (overlap0, i.types[0],
+						 t->operand_types[0],
+						 overlap1, i.types[1],
+						 t->operand_types[1])))
 	    {
 	      /* Check if other direction is valid ...  */
 	      if ((t->opcode_modifier & (D | FloatD)) == 0)
@@ -2546,12 +2551,22 @@ process_suffix (void)
       /* Now select between word & dword operations via the operand
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
-      if (i.suffix != QWORD_MNEM_SUFFIX
-	  && i.suffix != LONG_DOUBLE_MNEM_SUFFIX
-	  && !(i.tm.opcode_modifier & (IgnoreSize | FloatMF))
-	  && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
-	      || (flag_code == CODE_64BIT
-		  && (i.tm.opcode_modifier & JumpByte))))
+      if (i.tm.base_opcode == 0x0f01 && i.tm.extension_opcode == 0xc8)
+	{
+	  /* monitor in SSE3 is a very special case. The default size
+	     of AX is the size of mode. The address size override
+	     prefix will change the size of AX.  */
+	  if (i.op->regs[0].reg_type &
+	      (flag_code == CODE_32BIT ? Reg16 : Reg32))
+	    if (!add_prefix (ADDR_PREFIX_OPCODE))
+	      return 0;
+	}
+      else if (i.suffix != QWORD_MNEM_SUFFIX
+	       && i.suffix != LONG_DOUBLE_MNEM_SUFFIX
+	       && !(i.tm.opcode_modifier & (IgnoreSize | FloatMF))
+	       && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
+		   || (flag_code == CODE_64BIT
+		       && (i.tm.opcode_modifier & JumpByte))))
 	{
 	  unsigned int prefix = DATA_PREFIX_OPCODE;
 

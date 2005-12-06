@@ -115,8 +115,14 @@ struct dis_private {
    when we can.  */
 #define FWAIT_OPCODE (0x9b)
 
-/* Set to 1 for 64bit mode disassembly.  */
-static int mode_64bit;
+enum address_mode
+{
+  mode_16bit,
+  mode_32bit,
+  mode_64bit
+};
+
+enum address_mode address_mode;
 
 /* Flags for the prefixes for the current instruction.  See below.  */
 static int prefixes;
@@ -1772,7 +1778,7 @@ ckprefix (void)
 	case 0x4d:
 	case 0x4e:
 	case 0x4f:
-	    if (mode_64bit)
+	    if (address_mode == mode_64bit)
 	      newrex = *codep;
 	    else
 	      return;
@@ -1898,7 +1904,7 @@ prefix_name (int pref, int sizeflag)
     case 0x66:
       return (sizeflag & DFLAG) ? "data16" : "data32";
     case 0x67:
-      if (mode_64bit)
+      if (address_mode == mode_64bit)
 	return (sizeflag & AFLAG) ? "addr32" : "addr64";
       else
 	return (sizeflag & AFLAG) ? "addr16" : "addr32";
@@ -1970,8 +1976,11 @@ print_insn (bfd_vma pc, disassemble_info *info)
   const char *p;
   struct dis_private priv;
 
-  mode_64bit = (info->mach == bfd_mach_x86_64_intel_syntax
-		|| info->mach == bfd_mach_x86_64);
+  if (info->mach == bfd_mach_x86_64_intel_syntax
+      || info->mach == bfd_mach_x86_64)
+    address_mode = mode_64bit;
+  else
+    address_mode = mode_32bit;
 
   if (intel_syntax == (char) -1)
     intel_syntax = (info->mach == bfd_mach_i386_i386_intel_syntax
@@ -1991,17 +2000,17 @@ print_insn (bfd_vma pc, disassemble_info *info)
     {
       if (strncmp (p, "x86-64", 6) == 0)
 	{
-	  mode_64bit = 1;
+	  address_mode = mode_64bit;
 	  priv.orig_sizeflag = AFLAG | DFLAG;
 	}
       else if (strncmp (p, "i386", 4) == 0)
 	{
-	  mode_64bit = 0;
+	  address_mode = mode_32bit;
 	  priv.orig_sizeflag = AFLAG | DFLAG;
 	}
       else if (strncmp (p, "i8086", 5) == 0)
 	{
-	  mode_64bit = 0;
+	  address_mode = mode_16bit;
 	  priv.orig_sizeflag = 0;
 	}
       else if (strncmp (p, "intel", 5) == 0)
@@ -2170,7 +2179,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
       sizeflag ^= AFLAG;
       if (dp->bytemode3 != loop_jcxz_mode || intel_syntax)
 	{
-	  if ((sizeflag & AFLAG) || mode_64bit)
+	  if ((sizeflag & AFLAG) || address_mode == mode_64bit)
 	    oappend ("addr32 ");
 	  else
 	    oappend ("addr16 ");
@@ -2237,7 +2246,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	      break;
 
 	    case X86_64_SPECIAL:
-	      dp = &x86_64_table[dp->bytemode2][mode_64bit];
+	      index = address_mode == mode_64bit ? 1 : 0;
+	      dp = &x86_64_table[dp->bytemode2][index];
 	      break;
 
 	    default:
@@ -2739,7 +2749,7 @@ putop (const char *template, int sizeflag)
 	  alt = 0;
 	  if (intel_syntax)
 	    alt += 1;
-	  if (mode_64bit)
+	  if (address_mode == mode_64bit)
 	    alt += 2;
 	  while (alt != 0)
 	    {
@@ -2795,7 +2805,7 @@ putop (const char *template, int sizeflag)
 	    }
 	  break;
 	case 'E':		/* For jcxz/jecxz */
-	  if (mode_64bit)
+	  if (address_mode == mode_64bit)
 	    {
 	      if (sizeflag & AFLAG)
 		*obufp++ = 'r';
@@ -2813,9 +2823,9 @@ putop (const char *template, int sizeflag)
 	  if ((prefixes & PREFIX_ADDR) || (sizeflag & SUFFIX_ALWAYS))
 	    {
 	      if (sizeflag & AFLAG)
-		*obufp++ = mode_64bit ? 'q' : 'l';
+		*obufp++ = address_mode == mode_64bit ? 'q' : 'l';
 	      else
-		*obufp++ = mode_64bit ? 'l' : 'w';
+		*obufp++ = address_mode == mode_64bit ? 'l' : 'w';
 	      used_prefixes |= (prefixes & PREFIX_ADDR);
 	    }
 	  break;
@@ -2861,7 +2871,7 @@ putop (const char *template, int sizeflag)
 	case 'T':
 	  if (intel_syntax)
 	    break;
-	  if (mode_64bit && (sizeflag & DFLAG))
+	  if (address_mode == mode_64bit && (sizeflag & DFLAG))
 	    {
 	      *obufp++ = 'q';
 	      break;
@@ -2890,7 +2900,7 @@ putop (const char *template, int sizeflag)
 	case 'U':
 	  if (intel_syntax)
 	    break;
-	  if (mode_64bit && (sizeflag & DFLAG))
+	  if (address_mode == mode_64bit && (sizeflag & DFLAG))
 	    {
 	      if (mod != 3 || (sizeflag & SUFFIX_ALWAYS))
 		*obufp++ = 'q';
@@ -2950,7 +2960,7 @@ putop (const char *template, int sizeflag)
 	case 'V':
 	  if (intel_syntax)
 	    break;
-	  if (mode_64bit && (sizeflag & DFLAG))
+	  if (address_mode == mode_64bit && (sizeflag & DFLAG))
 	    {
 	      if (sizeflag & SUFFIX_ALWAYS)
 		*obufp++ = 'q';
@@ -3080,7 +3090,7 @@ OP_indirE (int bytemode, int sizeflag)
 static void
 print_operand_value (char *buf, int hex, bfd_vma disp)
 {
-  if (mode_64bit)
+  if (address_mode == mode_64bit)
     {
       if (hex)
 	{
@@ -3147,7 +3157,7 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("WORD PTR ");
       break;
     case stack_v_mode:
-      if (mode_64bit && (sizeflag & DFLAG))
+      if (address_mode == mode_64bit && (sizeflag & DFLAG))
 	{
 	  oappend ("QWORD PTR ");
 	  used_prefixes |= (prefixes & PREFIX_DATA);
@@ -3172,7 +3182,7 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("QWORD PTR ");
       break;
     case m_mode:
-      if (mode_64bit)
+      if (address_mode == mode_64bit)
 	oappend ("QWORD PTR ");
       else
 	oappend ("DWORD PTR ");
@@ -3230,13 +3240,13 @@ OP_E (int bytemode, int sizeflag)
 	  oappend (names64[rm + add]);
 	  break;
 	case m_mode:
-	  if (mode_64bit)
+	  if (address_mode == mode_64bit)
 	    oappend (names64[rm + add]);
 	  else
 	    oappend (names32[rm + add]);
 	  break;
 	case stack_v_mode:
-	  if (mode_64bit && (sizeflag & DFLAG))
+	  if (address_mode == mode_64bit && (sizeflag & DFLAG))
 	    {
 	      oappend (names64[rm + add]);
 	      used_prefixes |= (prefixes & PREFIX_DATA);
@@ -3270,7 +3280,7 @@ OP_E (int bytemode, int sizeflag)
     intel_operand_size (bytemode, sizeflag);
   append_seg ();
 
-  if ((sizeflag & AFLAG) || mode_64bit) /* 32 bit address mode */
+  if ((sizeflag & AFLAG) || address_mode == mode_64bit) /* 32 bit address mode */
     {
       int havesib;
       int havebase;
@@ -3287,7 +3297,7 @@ OP_E (int bytemode, int sizeflag)
 	  havesib = 1;
 	  FETCH_DATA (the_info, codep + 1);
 	  index = (*codep >> 3) & 7;
-	  if (mode_64bit || index != 0x4)
+	  if (address_mode == mode_64bit || index != 0x4)
 	    /* When INDEX == 0x4 in 32 bit mode, SCALE is ignored.  */
 	    scale = (*codep >> 6) & 3;
 	  base = *codep & 7;
@@ -3304,7 +3314,7 @@ OP_E (int bytemode, int sizeflag)
 	  if ((base & 7) == 5)
 	    {
 	      havebase = 0;
-	      if (mode_64bit && !havesib)
+	      if (address_mode == mode_64bit && !havesib)
 		riprel = 1;
 	      disp = get32s ();
 	    }
@@ -3339,7 +3349,7 @@ OP_E (int bytemode, int sizeflag)
 	    oappend ("rip + ");
 	  *obufp = '\0';
 	  if (havebase)
-	    oappend (mode_64bit && (sizeflag & AFLAG)
+	    oappend (address_mode == mode_64bit && (sizeflag & AFLAG)
 		     ? names64[base] : names32[base]);
 	  if (havesib)
 	    {
@@ -3350,7 +3360,7 @@ OP_E (int bytemode, int sizeflag)
 		      *obufp++ = separator_char;
 		      *obufp = '\0';
 		    }
-		  oappend (mode_64bit && (sizeflag & AFLAG)
+		  oappend (address_mode == mode_64bit && (sizeflag & AFLAG)
 			   ? names64[index] : names32[index]);
 		}
 	      if (scale != 0 || (!intel_syntax && index != 4))
@@ -3511,7 +3521,7 @@ OP_G (int bytemode, int sizeflag)
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case m_mode:
-      if (mode_64bit)
+      if (address_mode == mode_64bit)
 	oappend (names64[reg + add]);
       else
 	oappend (names32[reg + add]);
@@ -3591,7 +3601,7 @@ static void
 set_op (bfd_vma op, int riprel)
 {
   op_index[op_ad] = op_ad;
-  if (mode_64bit)
+  if (address_mode == mode_64bit)
     {
       op_address[op_ad] = op;
       op_riprel[op_ad] = riprel;
@@ -3639,7 +3649,7 @@ OP_REG (int code, int sizeflag)
       break;
     case rAX_reg: case rCX_reg: case rDX_reg: case rBX_reg:
     case rSP_reg: case rBP_reg: case rSI_reg: case rDI_reg:
-      if (mode_64bit && (sizeflag & DFLAG))
+      if (address_mode == mode_64bit && (sizeflag & DFLAG))
 	{
 	  s = names64[code - rAX_reg + add];
 	  break;
@@ -3725,7 +3735,7 @@ OP_I (int bytemode, int sizeflag)
       mask = 0xff;
       break;
     case q_mode:
-      if (mode_64bit)
+      if (address_mode == mode_64bit)
 	{
 	  op = get32s ();
 	  break;
@@ -3773,7 +3783,7 @@ OP_I64 (int bytemode, int sizeflag)
   bfd_signed_vma op;
   bfd_signed_vma mask = -1;
 
-  if (!mode_64bit)
+  if (address_mode != mode_64bit)
     {
       OP_I (bytemode, sizeflag);
       return;
@@ -3941,7 +3951,7 @@ OP_OFF (int bytemode, int sizeflag)
     intel_operand_size (bytemode, sizeflag);
   append_seg ();
 
-  if ((sizeflag & AFLAG) || mode_64bit)
+  if ((sizeflag & AFLAG) || address_mode == mode_64bit)
     off = get32 ();
   else
     off = get16 ();
@@ -3964,7 +3974,7 @@ OP_OFF64 (int bytemode, int sizeflag)
 {
   bfd_vma off;
 
-  if (!mode_64bit)
+  if (address_mode != mode_64bit)
     {
       OP_OFF (bytemode, sizeflag);
       return;
@@ -3996,7 +4006,7 @@ ptr_reg (int code, int sizeflag)
 
   *obufp++ = open_char;
   used_prefixes |= (prefixes & PREFIX_ADDR);
-  if (mode_64bit)
+  if (address_mode == mode_64bit)
     {
       if (!(sizeflag & AFLAG))
 	s = names32[code - eAX_reg];
@@ -4050,7 +4060,7 @@ OP_C (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
       USED_REX (REX_EXTX);
       add = 8;
     }
-  else if (!mode_64bit && (prefixes & PREFIX_LOCK))
+  else if (address_mode != mode_64bit && (prefixes & PREFIX_LOCK))
     {
       used_prefixes |= PREFIX_LOCK;
       add = 8;
@@ -4412,18 +4422,31 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
   if (mod == 3 && reg == 1 && rm <= 1)
     {
       /* Override "sidt".  */
-      char *p = obuf + strlen (obuf) - 4;
+      size_t olen = strlen (obuf);
+      char *p = obuf + olen - 4;
+      const char **names = (address_mode == mode_64bit
+			    ? names64 : names32);
 
       /* We might have a suffix when disassembling with -Msuffix.  */
       if (*p == 'i')
 	--p;
+
+      /* Remove "addr16/addr32" if we aren't in Intel mode.  */
+      if (!intel_syntax
+	  && (prefixes & PREFIX_ADDR)
+	  && olen >= (4 + 7)
+	  && *(p - 1) == ' '
+	  && strncmp (p - 7, "addr", 4) == 0
+	  && (strncmp (p - 3, "16", 2) == 0
+	      || strncmp (p - 3, "32", 2) == 0))
+	p -= 7;
 
       if (rm)
 	{
 	  /* mwait %eax,%ecx  */
 	  strcpy (p, "mwait");
 	  if (!intel_syntax)
-	    strcpy (op1out, names32[0]);
+	    strcpy (op1out, names[0]);
 	}
       else
 	{
@@ -4431,21 +4454,23 @@ PNI_Fixup (int extrachar ATTRIBUTE_UNUSED, int sizeflag)
 	  strcpy (p, "monitor");
 	  if (!intel_syntax)
 	    {
-	      if (!mode_64bit)
-		strcpy (op1out, names32[0]);
-	      else if (!(prefixes & PREFIX_ADDR))
-		strcpy (op1out, names64[0]);
+	      const char **op1_names;
+	      if (!(prefixes & PREFIX_ADDR))
+		op1_names = (address_mode == mode_16bit
+			     ? names16 : names);
 	      else
 		{
-		  strcpy (op1out, names32[0]);
+		  op1_names = (address_mode != mode_32bit
+			       ? names32 : names16);
 		  used_prefixes |= PREFIX_ADDR;
 		}
-	      strcpy (op3out, names32[2]);
+	      strcpy (op1out, op1_names[0]);
+	      strcpy (op3out, names[2]);
 	    }
 	}
       if (!intel_syntax)
 	{
-	  strcpy (op2out, names32[1]);
+	  strcpy (op2out, names[1]);
 	  two_source_ops = 1;
 	}
 
@@ -4513,7 +4538,7 @@ SVME_Fixup (int bytemode, int sizeflag)
     case 0xda:
     case 0xdb:
       *obufp++ = open_char;
-      if (mode_64bit || (sizeflag & AFLAG))
+      if (address_mode == mode_64bit || (sizeflag & AFLAG))
         alt = names32[0];
       else
         alt = names16[0];

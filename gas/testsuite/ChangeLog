@@ -1,3 +1,14 @@
+2005-12-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/1874
+	* gas/i386/i386.exp: Add x86-64-prescott for 64bit.
+
+	* gas/i386/prescott.s: Test address size override for monitor.
+	* gas/i386/prescott.d: Updated.
+
+	* gas/i386/x86-64-prescott.d: New file.
+	* gas/i386/x86-64-prescott.s: Likewise.
+
 2005-12-06  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-pcplus.s, gas/cris/rd-pcplus.d: New test.
