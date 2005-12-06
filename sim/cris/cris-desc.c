@@ -1349,29 +1349,9 @@ static const CGEN_IBASE cris_cgen_insn_table[MAX_INSNS] =
     CRIS_INSN_MOVE_M_SPRV32, "move-m-sprv32", "move", 16,
     { 0, { { { (1<<MACH_CRISV32), 0 } } } }
   },
-/* move ${sconst8},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV0_P0, "move-c-sprv0-p0", "move", 32,
-    { 0, { { { (1<<MACH_CRISV0), 0 } } } }
-  },
-/* move ${sconst8},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV0_P1, "move-c-sprv0-p1", "move", 32,
-    { 0, { { { (1<<MACH_CRISV0), 0 } } } }
-  },
-/* move ${sconst16},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV0_P4, "move-c-sprv0-p4", "move", 32,
-    { 0, { { { (1<<MACH_CRISV0), 0 } } } }
-  },
 /* move ${sconst16},${Pd} */
   {
     CRIS_INSN_MOVE_C_SPRV0_P5, "move-c-sprv0-p5", "move", 32,
-    { 0, { { { (1<<MACH_CRISV0), 0 } } } }
-  },
-/* move ${const32},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV0_P8, "move-c-sprv0-p8", "move", 48,
     { 0, { { { (1<<MACH_CRISV0), 0 } } } }
   },
 /* move ${const32},${Pd} */
@@ -1409,29 +1389,9 @@ static const CGEN_IBASE cris_cgen_insn_table[MAX_INSNS] =
     CRIS_INSN_MOVE_C_SPRV0_P7, "move-c-sprv0-p7", "move", 32,
     { 0, { { { (1<<MACH_CRISV0), 0 } } } }
   },
-/* move ${sconst8},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV3_P0, "move-c-sprv3-p0", "move", 32,
-    { 0, { { { (1<<MACH_CRISV3), 0 } } } }
-  },
-/* move ${sconst8},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV3_P1, "move-c-sprv3-p1", "move", 32,
-    { 0, { { { (1<<MACH_CRISV3), 0 } } } }
-  },
-/* move ${sconst16},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV3_P4, "move-c-sprv3-p4", "move", 32,
-    { 0, { { { (1<<MACH_CRISV3), 0 } } } }
-  },
 /* move ${sconst16},${Pd} */
   {
     CRIS_INSN_MOVE_C_SPRV3_P5, "move-c-sprv3-p5", "move", 32,
-    { 0, { { { (1<<MACH_CRISV3), 0 } } } }
-  },
-/* move ${const32},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV3_P8, "move-c-sprv3-p8", "move", 48,
     { 0, { { { (1<<MACH_CRISV3), 0 } } } }
   },
 /* move ${const32},${Pd} */
@@ -1474,29 +1434,9 @@ static const CGEN_IBASE cris_cgen_insn_table[MAX_INSNS] =
     CRIS_INSN_MOVE_C_SPRV3_P14, "move-c-sprv3-p14", "move", 48,
     { 0, { { { (1<<MACH_CRISV3), 0 } } } }
   },
-/* move ${sconst8},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV8_P0, "move-c-sprv8-p0", "move", 32,
-    { 0, { { { (1<<MACH_CRISV8), 0 } } } }
-  },
-/* move ${sconst8},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV8_P1, "move-c-sprv8-p1", "move", 32,
-    { 0, { { { (1<<MACH_CRISV8), 0 } } } }
-  },
-/* move ${sconst16},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV8_P4, "move-c-sprv8-p4", "move", 32,
-    { 0, { { { (1<<MACH_CRISV8), 0 } } } }
-  },
 /* move ${sconst16},${Pd} */
   {
     CRIS_INSN_MOVE_C_SPRV8_P5, "move-c-sprv8-p5", "move", 32,
-    { 0, { { { (1<<MACH_CRISV8), 0 } } } }
-  },
-/* move ${const32},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV8_P8, "move-c-sprv8-p8", "move", 48,
     { 0, { { { (1<<MACH_CRISV8), 0 } } } }
   },
 /* move ${const32},${Pd} */
@@ -1529,29 +1469,9 @@ static const CGEN_IBASE cris_cgen_insn_table[MAX_INSNS] =
     CRIS_INSN_MOVE_C_SPRV8_P14, "move-c-sprv8-p14", "move", 48,
     { 0, { { { (1<<MACH_CRISV8), 0 } } } }
   },
-/* move ${sconst8},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV10_P0, "move-c-sprv10-p0", "move", 32,
-    { 0, { { { (1<<MACH_CRISV10), 0 } } } }
-  },
-/* move ${sconst8},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV10_P1, "move-c-sprv10-p1", "move", 32,
-    { 0, { { { (1<<MACH_CRISV10), 0 } } } }
-  },
-/* move ${sconst16},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV10_P4, "move-c-sprv10-p4", "move", 32,
-    { 0, { { { (1<<MACH_CRISV10), 0 } } } }
-  },
 /* move ${sconst16},${Pd} */
   {
     CRIS_INSN_MOVE_C_SPRV10_P5, "move-c-sprv10-p5", "move", 32,
-    { 0, { { { (1<<MACH_CRISV10), 0 } } } }
-  },
-/* move ${const32},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV10_P8, "move-c-sprv10-p8", "move", 48,
     { 0, { { { (1<<MACH_CRISV10), 0 } } } }
   },
 /* move ${const32},${Pd} */
@@ -1596,27 +1516,12 @@ static const CGEN_IBASE cris_cgen_insn_table[MAX_INSNS] =
   },
 /* move ${const32},${Pd} */
   {
-    CRIS_INSN_MOVE_C_SPRV32_P0, "move-c-sprv32-p0", "move", 48,
-    { 0, { { { (1<<MACH_CRISV32), 0 } } } }
-  },
-/* move ${const32},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV32_P1, "move-c-sprv32-p1", "move", 48,
-    { 0, { { { (1<<MACH_CRISV32), 0 } } } }
-  },
-/* move ${const32},${Pd} */
-  {
     CRIS_INSN_MOVE_C_SPRV32_P2, "move-c-sprv32-p2", "move", 48,
     { 0, { { { (1<<MACH_CRISV32), 0 } } } }
   },
 /* move ${const32},${Pd} */
   {
     CRIS_INSN_MOVE_C_SPRV32_P3, "move-c-sprv32-p3", "move", 48,
-    { 0, { { { (1<<MACH_CRISV32), 0 } } } }
-  },
-/* move ${const32},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV32_P4, "move-c-sprv32-p4", "move", 48,
     { 0, { { { (1<<MACH_CRISV32), 0 } } } }
   },
 /* move ${const32},${Pd} */
@@ -1632,11 +1537,6 @@ static const CGEN_IBASE cris_cgen_insn_table[MAX_INSNS] =
 /* move ${const32},${Pd} */
   {
     CRIS_INSN_MOVE_C_SPRV32_P7, "move-c-sprv32-p7", "move", 48,
-    { 0, { { { (1<<MACH_CRISV32), 0 } } } }
-  },
-/* move ${const32},${Pd} */
-  {
-    CRIS_INSN_MOVE_C_SPRV32_P8, "move-c-sprv32-p8", "move", 48,
     { 0, { { { (1<<MACH_CRISV32), 0 } } } }
   },
 /* move ${const32},${Pd} */
@@ -2453,6 +2353,21 @@ static const CGEN_IBASE cris_cgen_insn_table[MAX_INSNS] =
   {
     CRIS_INSN_BDAPQPC, "bdapqpc", "bdapq", 16,
     { 0|A(UNCOND_CTI), { { { (1<<MACH_CRISV0)|(1<<MACH_CRISV3)|(1<<MACH_CRISV8)|(1<<MACH_CRISV10), 0 } } } }
+  },
+/* bdap ${sconst32},PC */
+  {
+    CRIS_INSN_BDAP_32_PC, "bdap-32-pc", "bdap", 48,
+    { 0, { { { (1<<MACH_CRISV0)|(1<<MACH_CRISV3)|(1<<MACH_CRISV8)|(1<<MACH_CRISV10), 0 } } } }
+  },
+/* move [PC+],P0 */
+  {
+    CRIS_INSN_MOVE_M_PCPLUS_P0, "move-m-pcplus-p0", "move", 16,
+    { 0|A(COND_CTI), { { { (1<<MACH_CRISV0)|(1<<MACH_CRISV3)|(1<<MACH_CRISV8)|(1<<MACH_CRISV10), 0 } } } }
+  },
+/* move [SP+],P8 */
+  {
+    CRIS_INSN_MOVE_M_SPPLUS_P8, "move-m-spplus-p8", "move", 16,
+    { 0, { { { (1<<MACH_CRISV0)|(1<<MACH_CRISV3)|(1<<MACH_CRISV8)|(1<<MACH_CRISV10), 0 } } } }
   },
 /* addo-m.b [${Rs}${inc}],$Rd,ACR */
   {

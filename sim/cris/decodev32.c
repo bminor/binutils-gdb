@@ -92,22 +92,18 @@ static const struct insn_sem crisv32f_insn_sem[] =
   { CRIS_INSN_MOVE_R_SPRV32, CRISV32F_INSN_MOVE_R_SPRV32, CRISV32F_SFMT_MOVE_R_SPRV32 },
   { CRIS_INSN_MOVE_SPR_RV32, CRISV32F_INSN_MOVE_SPR_RV32, CRISV32F_SFMT_MOVE_SPR_RV32 },
   { CRIS_INSN_MOVE_M_SPRV32, CRISV32F_INSN_MOVE_M_SPRV32, CRISV32F_SFMT_MOVE_M_SPRV32 },
-  { CRIS_INSN_MOVE_C_SPRV32_P0, CRISV32F_INSN_MOVE_C_SPRV32_P0, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P1, CRISV32F_INSN_MOVE_C_SPRV32_P1, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P2, CRISV32F_INSN_MOVE_C_SPRV32_P2, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P3, CRISV32F_INSN_MOVE_C_SPRV32_P3, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P4, CRISV32F_INSN_MOVE_C_SPRV32_P4, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P5, CRISV32F_INSN_MOVE_C_SPRV32_P5, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P6, CRISV32F_INSN_MOVE_C_SPRV32_P6, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P7, CRISV32F_INSN_MOVE_C_SPRV32_P7, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P8, CRISV32F_INSN_MOVE_C_SPRV32_P8, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P9, CRISV32F_INSN_MOVE_C_SPRV32_P9, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P10, CRISV32F_INSN_MOVE_C_SPRV32_P10, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P11, CRISV32F_INSN_MOVE_C_SPRV32_P11, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P12, CRISV32F_INSN_MOVE_C_SPRV32_P12, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P13, CRISV32F_INSN_MOVE_C_SPRV32_P13, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P14, CRISV32F_INSN_MOVE_C_SPRV32_P14, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
-  { CRIS_INSN_MOVE_C_SPRV32_P15, CRISV32F_INSN_MOVE_C_SPRV32_P15, CRISV32F_SFMT_MOVE_C_SPRV32_P0 },
+  { CRIS_INSN_MOVE_C_SPRV32_P2, CRISV32F_INSN_MOVE_C_SPRV32_P2, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P3, CRISV32F_INSN_MOVE_C_SPRV32_P3, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P5, CRISV32F_INSN_MOVE_C_SPRV32_P5, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P6, CRISV32F_INSN_MOVE_C_SPRV32_P6, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P7, CRISV32F_INSN_MOVE_C_SPRV32_P7, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P9, CRISV32F_INSN_MOVE_C_SPRV32_P9, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P10, CRISV32F_INSN_MOVE_C_SPRV32_P10, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P11, CRISV32F_INSN_MOVE_C_SPRV32_P11, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P12, CRISV32F_INSN_MOVE_C_SPRV32_P12, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P13, CRISV32F_INSN_MOVE_C_SPRV32_P13, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P14, CRISV32F_INSN_MOVE_C_SPRV32_P14, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
+  { CRIS_INSN_MOVE_C_SPRV32_P15, CRISV32F_INSN_MOVE_C_SPRV32_P15, CRISV32F_SFMT_MOVE_C_SPRV32_P2 },
   { CRIS_INSN_MOVE_SPR_MV32, CRISV32F_INSN_MOVE_SPR_MV32, CRISV32F_SFMT_MOVE_SPR_MV32 },
   { CRIS_INSN_MOVE_SS_R, CRISV32F_INSN_MOVE_SS_R, CRISV32F_SFMT_MOVE_SS_R },
   { CRIS_INSN_MOVE_R_SS, CRISV32F_INSN_MOVE_R_SS, CRISV32F_SFMT_MOVE_R_SS },
@@ -1773,66 +1769,13 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 12) & (15 << 0)));
           switch (val)
           {
-          case 0 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV32F_INSN_MOVE_M_SPRV32; goto extract_sfmt_move_m_sprv32; }
-                itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0xe3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P0; goto extract_sfmt_move_c_sprv32_p0; }
-                itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 1 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV32F_INSN_MOVE_M_SPRV32; goto extract_sfmt_move_m_sprv32; }
-                itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x1e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P1; goto extract_sfmt_move_c_sprv32_p0; }
-                itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
+          case 0 : /* fall through */
+          case 1 : /* fall through */
+          case 4 : /* fall through */
+          case 8 :
+            if ((base_insn & 0xbf0) == 0xa30)
+              { itype = CRISV32F_INSN_MOVE_M_SPRV32; goto extract_sfmt_move_m_sprv32; }
+            itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
           case 2 :
             {
               unsigned int val = (((insn >> 0) & (15 << 0)));
@@ -1858,7 +1801,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0x2e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P2; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P2; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -1888,37 +1831,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0x3e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P3; goto extract_sfmt_move_c_sprv32_p0; }
-                itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 4 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV32F_INSN_MOVE_M_SPRV32; goto extract_sfmt_move_m_sprv32; }
-                itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x4e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P4; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P3; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -1948,7 +1861,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0x5e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P5; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P5; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -1978,7 +1891,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0x6e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P6; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P6; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -2008,37 +1921,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0x7e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P7; goto extract_sfmt_move_c_sprv32_p0; }
-                itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 8 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV32F_INSN_MOVE_M_SPRV32; goto extract_sfmt_move_m_sprv32; }
-                itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x8e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P8; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P7; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -2068,7 +1951,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0x9e3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P9; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P9; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -2098,7 +1981,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0xae3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P10; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P10; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -2128,7 +2011,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0xbe3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P11; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P11; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -2158,7 +2041,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0xce3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P12; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P12; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -2188,7 +2071,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0xde3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P13; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P13; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -2218,7 +2101,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0xee3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P14; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P14; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -2248,7 +2131,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               case 15 :
                 if ((base_insn & 0xffff) == 0xfe3f)
-                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P15; goto extract_sfmt_move_c_sprv32_p0; }
+                  { itype = CRISV32F_INSN_MOVE_C_SPRV32_P15; goto extract_sfmt_move_c_sprv32_p2; }
                 itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV32F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -3640,11 +3523,11 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
- extract_sfmt_move_c_sprv32_p0:
+ extract_sfmt_move_c_sprv32_p2:
   {
     const IDESC *idesc = &crisv32f_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.sfmt_move_c_sprv32_p0.f
+#define FLD(f) abuf->fields.sfmt_move_c_sprv32_p2.f
     INT f_indir_pc__dword;
     UINT f_operand2;
     /* Contents of trailing part of insn.  */
@@ -3657,7 +3540,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for the semantic handler.  */
   FLD (f_indir_pc__dword) = f_indir_pc__dword;
   FLD (f_operand2) = f_operand2;
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_c_sprv32_p0", "f_indir_pc__dword 0x%x", 'x', f_indir_pc__dword, "f_operand2 0x%x", 'x', f_operand2, (char *) 0));
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_c_sprv32_p2", "f_indir_pc__dword 0x%x", 'x', f_indir_pc__dword, "f_operand2 0x%x", 'x', f_operand2, (char *) 0));
 
 #if WITH_PROFILE_MODEL_P
   /* Record the fields for profiling.  */
@@ -5456,7 +5339,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
   {
     const IDESC *idesc = &crisv32f_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.sfmt_move_c_sprv32_p0.f
+#define FLD(f) abuf->fields.sfmt_move_c_sprv32_p2.f
     INT f_indir_pc__dword;
     UINT f_operand2;
     /* Contents of trailing part of insn.  */

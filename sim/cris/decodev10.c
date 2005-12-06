@@ -95,19 +95,15 @@ static const struct insn_sem crisv10f_insn_sem[] =
   { CRIS_INSN_MOVE_SPR_RV10, CRISV10F_INSN_MOVE_SPR_RV10, CRISV10F_SFMT_MOVE_SPR_RV10 },
   { CRIS_INSN_RET_TYPE, CRISV10F_INSN_RET_TYPE, CRISV10F_SFMT_RET_TYPE },
   { CRIS_INSN_MOVE_M_SPRV10, CRISV10F_INSN_MOVE_M_SPRV10, CRISV10F_SFMT_MOVE_M_SPRV10 },
-  { CRIS_INSN_MOVE_C_SPRV10_P0, CRISV10F_INSN_MOVE_C_SPRV10_P0, CRISV10F_SFMT_MOVE_C_SPRV10_P0 },
-  { CRIS_INSN_MOVE_C_SPRV10_P1, CRISV10F_INSN_MOVE_C_SPRV10_P1, CRISV10F_SFMT_MOVE_C_SPRV10_P0 },
-  { CRIS_INSN_MOVE_C_SPRV10_P4, CRISV10F_INSN_MOVE_C_SPRV10_P4, CRISV10F_SFMT_MOVE_C_SPRV10_P4 },
-  { CRIS_INSN_MOVE_C_SPRV10_P5, CRISV10F_INSN_MOVE_C_SPRV10_P5, CRISV10F_SFMT_MOVE_C_SPRV10_P4 },
-  { CRIS_INSN_MOVE_C_SPRV10_P8, CRISV10F_INSN_MOVE_C_SPRV10_P8, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
-  { CRIS_INSN_MOVE_C_SPRV10_P9, CRISV10F_INSN_MOVE_C_SPRV10_P9, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
-  { CRIS_INSN_MOVE_C_SPRV10_P10, CRISV10F_INSN_MOVE_C_SPRV10_P10, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
-  { CRIS_INSN_MOVE_C_SPRV10_P11, CRISV10F_INSN_MOVE_C_SPRV10_P11, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
-  { CRIS_INSN_MOVE_C_SPRV10_P12, CRISV10F_INSN_MOVE_C_SPRV10_P12, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
-  { CRIS_INSN_MOVE_C_SPRV10_P13, CRISV10F_INSN_MOVE_C_SPRV10_P13, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
-  { CRIS_INSN_MOVE_C_SPRV10_P7, CRISV10F_INSN_MOVE_C_SPRV10_P7, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
-  { CRIS_INSN_MOVE_C_SPRV10_P14, CRISV10F_INSN_MOVE_C_SPRV10_P14, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
-  { CRIS_INSN_MOVE_C_SPRV10_P15, CRISV10F_INSN_MOVE_C_SPRV10_P15, CRISV10F_SFMT_MOVE_C_SPRV10_P8 },
+  { CRIS_INSN_MOVE_C_SPRV10_P5, CRISV10F_INSN_MOVE_C_SPRV10_P5, CRISV10F_SFMT_MOVE_C_SPRV10_P5 },
+  { CRIS_INSN_MOVE_C_SPRV10_P9, CRISV10F_INSN_MOVE_C_SPRV10_P9, CRISV10F_SFMT_MOVE_C_SPRV10_P9 },
+  { CRIS_INSN_MOVE_C_SPRV10_P10, CRISV10F_INSN_MOVE_C_SPRV10_P10, CRISV10F_SFMT_MOVE_C_SPRV10_P9 },
+  { CRIS_INSN_MOVE_C_SPRV10_P11, CRISV10F_INSN_MOVE_C_SPRV10_P11, CRISV10F_SFMT_MOVE_C_SPRV10_P9 },
+  { CRIS_INSN_MOVE_C_SPRV10_P12, CRISV10F_INSN_MOVE_C_SPRV10_P12, CRISV10F_SFMT_MOVE_C_SPRV10_P9 },
+  { CRIS_INSN_MOVE_C_SPRV10_P13, CRISV10F_INSN_MOVE_C_SPRV10_P13, CRISV10F_SFMT_MOVE_C_SPRV10_P9 },
+  { CRIS_INSN_MOVE_C_SPRV10_P7, CRISV10F_INSN_MOVE_C_SPRV10_P7, CRISV10F_SFMT_MOVE_C_SPRV10_P9 },
+  { CRIS_INSN_MOVE_C_SPRV10_P14, CRISV10F_INSN_MOVE_C_SPRV10_P14, CRISV10F_SFMT_MOVE_C_SPRV10_P9 },
+  { CRIS_INSN_MOVE_C_SPRV10_P15, CRISV10F_INSN_MOVE_C_SPRV10_P15, CRISV10F_SFMT_MOVE_C_SPRV10_P9 },
   { CRIS_INSN_MOVE_SPR_MV10, CRISV10F_INSN_MOVE_SPR_MV10, CRISV10F_SFMT_MOVE_SPR_MV10 },
   { CRIS_INSN_SBFS, CRISV10F_INSN_SBFS, CRISV10F_SFMT_SBFS },
   { CRIS_INSN_MOVEM_R_M, CRISV10F_INSN_MOVEM_R_M, CRISV10F_SFMT_MOVEM_R_M },
@@ -237,6 +233,9 @@ static const struct insn_sem crisv10f_insn_sem[] =
   { CRIS_INSN_LZ, CRISV10F_INSN_LZ, CRISV10F_SFMT_MOVS_B_R },
   { CRIS_INSN_ADDOQ, CRISV10F_INSN_ADDOQ, CRISV10F_SFMT_ADDOQ },
   { CRIS_INSN_BDAPQPC, CRISV10F_INSN_BDAPQPC, CRISV10F_SFMT_BDAPQPC },
+  { CRIS_INSN_BDAP_32_PC, CRISV10F_INSN_BDAP_32_PC, CRISV10F_SFMT_BDAP_32_PC },
+  { CRIS_INSN_MOVE_M_PCPLUS_P0, CRISV10F_INSN_MOVE_M_PCPLUS_P0, CRISV10F_SFMT_MOVE_M_PCPLUS_P0 },
+  { CRIS_INSN_MOVE_M_SPPLUS_P8, CRISV10F_INSN_MOVE_M_SPPLUS_P8, CRISV10F_SFMT_MOVE_M_SPPLUS_P8 },
   { CRIS_INSN_ADDO_M_B_M, CRISV10F_INSN_ADDO_M_B_M, CRISV10F_SFMT_ADDO_M_B_M },
   { CRIS_INSN_ADDO_M_W_M, CRISV10F_INSN_ADDO_M_W_M, CRISV10F_SFMT_ADDO_M_W_M },
   { CRIS_INSN_ADDO_M_D_M, CRISV10F_INSN_ADDO_M_D_M, CRISV10F_SFMT_ADDO_M_D_M },
@@ -2038,7 +2037,7 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 214 :
         {
-          unsigned int val = (((insn >> 0) & (15 << 0)));
+          unsigned int val = (((insn >> 12) & (15 << 0)));
           switch (val)
           {
           case 0 : /* fall through */
@@ -2056,13 +2055,65 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
           case 12 : /* fall through */
           case 13 : /* fall through */
           case 14 :
-            if ((base_insn & 0xbf0) == 0x960)
-              { itype = CRISV10F_INSN_ADDO_M_D_M; goto extract_sfmt_addo_m_d_m; }
-            itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+            {
+              unsigned int val = (((insn >> 0) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 : /* fall through */
+              case 7 : /* fall through */
+              case 8 : /* fall through */
+              case 9 : /* fall through */
+              case 10 : /* fall through */
+              case 11 : /* fall through */
+              case 12 : /* fall through */
+              case 13 : /* fall through */
+              case 14 :
+                if ((base_insn & 0xbf0) == 0x960)
+                  { itype = CRISV10F_INSN_ADDO_M_D_M; goto extract_sfmt_addo_m_d_m; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 15 :
+                if ((base_insn & 0xfff) == 0xd6f)
+                  { itype = CRISV10F_INSN_ADDO_CD; goto extract_sfmt_addo_cd; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
           case 15 :
-            if ((base_insn & 0xfff) == 0xd6f)
-              { itype = CRISV10F_INSN_ADDO_CD; goto extract_sfmt_addo_cd; }
-            itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+            {
+              unsigned int val = (((insn >> 0) & (15 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 : /* fall through */
+              case 7 : /* fall through */
+              case 8 : /* fall through */
+              case 9 : /* fall through */
+              case 10 : /* fall through */
+              case 11 : /* fall through */
+              case 12 : /* fall through */
+              case 13 : /* fall through */
+              case 14 :
+                if ((base_insn & 0xbf0) == 0x960)
+                  { itype = CRISV10F_INSN_ADDO_M_D_M; goto extract_sfmt_addo_m_d_m; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 15 :
+                if ((base_insn & 0xffff) == 0xfd6f)
+                  { itype = CRISV10F_INSN_BDAP_32_PC; goto extract_sfmt_bdap_32_pc; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
           default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -2360,78 +2411,36 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
         }
       case 227 :
         {
-          unsigned int val = (((insn >> 12) & (15 << 0)));
+          unsigned int val = (((insn >> 11) & (15 << 1)) | ((insn >> 0) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0xe3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P0; goto extract_sfmt_move_c_sprv10_p0; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 1 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x1e3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P1; goto extract_sfmt_move_c_sprv10_p0; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
+          case 0 : /* fall through */
           case 2 : /* fall through */
           case 3 : /* fall through */
-          case 6 :
+          case 4 : /* fall through */
+          case 5 : /* fall through */
+          case 6 : /* fall through */
+          case 7 : /* fall through */
+          case 8 : /* fall through */
+          case 9 : /* fall through */
+          case 10 : /* fall through */
+          case 12 : /* fall through */
+          case 13 : /* fall through */
+          case 14 : /* fall through */
+          case 17 : /* fall through */
+          case 18 : /* fall through */
+          case 20 : /* fall through */
+          case 22 : /* fall through */
+          case 24 : /* fall through */
+          case 26 : /* fall through */
+          case 28 : /* fall through */
+          case 30 :
             if ((base_insn & 0xbf0) == 0xa30)
               { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
             itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 4 :
+          case 1 :
             {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
+              unsigned int val = (((insn >> 1) & (7 << 0)));
               switch (val)
               {
               case 0 : /* fall through */
@@ -2440,178 +2449,20 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
               case 3 : /* fall through */
               case 4 : /* fall through */
               case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
+              case 6 :
                 if ((base_insn & 0xbf0) == 0xa30)
                   { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
                 itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x4e3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P4; goto extract_sfmt_move_c_sprv10_p4; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 5 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x5e3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P5; goto extract_sfmt_move_c_sprv10_p4; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 7 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x7e3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P7; goto extract_sfmt_move_c_sprv10_p8; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 8 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x8e3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P8; goto extract_sfmt_move_c_sprv10_p8; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 9 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0x9e3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P9; goto extract_sfmt_move_c_sprv10_p8; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 10 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0xae3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P10; goto extract_sfmt_move_c_sprv10_p8; }
+              case 7 :
+                if ((base_insn & 0xffff) == 0xe3f)
+                  { itype = CRISV10F_INSN_MOVE_M_PCPLUS_P0; goto extract_sfmt_move_m_pcplus_p0; }
                 itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
           case 11 :
             {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
+              unsigned int val = (((insn >> 1) & (7 << 0)));
               switch (val)
               {
               case 0 : /* fall through */
@@ -2620,118 +2471,20 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
               case 3 : /* fall through */
               case 4 : /* fall through */
               case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
+              case 6 :
                 if ((base_insn & 0xbf0) == 0xa30)
                   { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
                 itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0xbe3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P11; goto extract_sfmt_move_c_sprv10_p8; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 12 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0xce3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P12; goto extract_sfmt_move_c_sprv10_p8; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 13 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0xde3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P13; goto extract_sfmt_move_c_sprv10_p8; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              }
-            }
-          case 14 :
-            {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
-              switch (val)
-              {
-              case 0 : /* fall through */
-              case 1 : /* fall through */
-              case 2 : /* fall through */
-              case 3 : /* fall through */
-              case 4 : /* fall through */
-              case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
-                if ((base_insn & 0xbf0) == 0xa30)
-                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
-                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
-                if ((base_insn & 0xffff) == 0xee3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P14; goto extract_sfmt_move_c_sprv10_p8; }
+              case 7 :
+                if ((base_insn & 0xffff) == 0x5e3f)
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P5; goto extract_sfmt_move_c_sprv10_p5; }
                 itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
             }
           case 15 :
             {
-              unsigned int val = (((insn >> 0) & (15 << 0)));
+              unsigned int val = (((insn >> 1) & (7 << 0)));
               switch (val)
               {
               case 0 : /* fall through */
@@ -2740,21 +2493,189 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
               case 3 : /* fall through */
               case 4 : /* fall through */
               case 5 : /* fall through */
-              case 6 : /* fall through */
-              case 7 : /* fall through */
-              case 8 : /* fall through */
-              case 9 : /* fall through */
-              case 10 : /* fall through */
-              case 11 : /* fall through */
-              case 12 : /* fall through */
-              case 13 : /* fall through */
-              case 14 :
+              case 6 :
                 if ((base_insn & 0xbf0) == 0xa30)
                   { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
                 itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
-              case 15 :
+              case 7 :
+                if ((base_insn & 0xffff) == 0x7e3f)
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P7; goto extract_sfmt_move_c_sprv10_p9; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
+          case 16 :
+            {
+              unsigned int val = (((insn >> 1) & (7 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 :
+                if ((base_insn & 0xbf0) == 0xa30)
+                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 7 :
+                if ((base_insn & 0xffff) == 0x8e3e)
+                  { itype = CRISV10F_INSN_MOVE_M_SPPLUS_P8; goto extract_sfmt_move_m_spplus_p8; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
+          case 19 :
+            {
+              unsigned int val = (((insn >> 1) & (7 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 :
+                if ((base_insn & 0xbf0) == 0xa30)
+                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 7 :
+                if ((base_insn & 0xffff) == 0x9e3f)
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P9; goto extract_sfmt_move_c_sprv10_p9; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
+          case 21 :
+            {
+              unsigned int val = (((insn >> 1) & (7 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 :
+                if ((base_insn & 0xbf0) == 0xa30)
+                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 7 :
+                if ((base_insn & 0xffff) == 0xae3f)
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P10; goto extract_sfmt_move_c_sprv10_p9; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
+          case 23 :
+            {
+              unsigned int val = (((insn >> 1) & (7 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 :
+                if ((base_insn & 0xbf0) == 0xa30)
+                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 7 :
+                if ((base_insn & 0xffff) == 0xbe3f)
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P11; goto extract_sfmt_move_c_sprv10_p9; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
+          case 25 :
+            {
+              unsigned int val = (((insn >> 1) & (7 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 :
+                if ((base_insn & 0xbf0) == 0xa30)
+                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 7 :
+                if ((base_insn & 0xffff) == 0xce3f)
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P12; goto extract_sfmt_move_c_sprv10_p9; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
+          case 27 :
+            {
+              unsigned int val = (((insn >> 1) & (7 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 :
+                if ((base_insn & 0xbf0) == 0xa30)
+                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 7 :
+                if ((base_insn & 0xffff) == 0xde3f)
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P13; goto extract_sfmt_move_c_sprv10_p9; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
+          case 29 :
+            {
+              unsigned int val = (((insn >> 1) & (7 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 :
+                if ((base_insn & 0xbf0) == 0xa30)
+                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 7 :
+                if ((base_insn & 0xffff) == 0xee3f)
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P14; goto extract_sfmt_move_c_sprv10_p9; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
+          case 31 :
+            {
+              unsigned int val = (((insn >> 1) & (7 << 0)));
+              switch (val)
+              {
+              case 0 : /* fall through */
+              case 1 : /* fall through */
+              case 2 : /* fall through */
+              case 3 : /* fall through */
+              case 4 : /* fall through */
+              case 5 : /* fall through */
+              case 6 :
+                if ((base_insn & 0xbf0) == 0xa30)
+                  { itype = CRISV10F_INSN_MOVE_M_SPRV10; goto extract_sfmt_move_m_sprv10; }
+                itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
+              case 7 :
                 if ((base_insn & 0xffff) == 0xfe3f)
-                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P15; goto extract_sfmt_move_c_sprv10_p8; }
+                  { itype = CRISV10F_INSN_MOVE_C_SPRV10_P15; goto extract_sfmt_move_c_sprv10_p9; }
                 itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = CRISV10F_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -4191,41 +4112,11 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
- extract_sfmt_move_c_sprv10_p0:
+ extract_sfmt_move_c_sprv10_p5:
   {
     const IDESC *idesc = &crisv10f_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p0.f
-    UINT f_operand2;
-    INT f_indir_pc__byte;
-    /* Contents of trailing part of insn.  */
-    UINT word_1;
-
-  word_1 = GETIMEMUSI (current_cpu, pc + 2);
-    f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4);
-    f_indir_pc__byte = (0|(EXTRACT_LSB0_UINT (word_1, 32, 15, 16) << 0));
-
-  /* Record the fields for the semantic handler.  */
-  FLD (f_indir_pc__byte) = f_indir_pc__byte;
-  FLD (f_operand2) = f_operand2;
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_c_sprv10_p0", "f_indir_pc__byte 0x%x", 'x', f_indir_pc__byte, "f_operand2 0x%x", 'x', f_operand2, (char *) 0));
-
-#if WITH_PROFILE_MODEL_P
-  /* Record the fields for profiling.  */
-  if (PROFILE_MODEL_P (current_cpu))
-    {
-      FLD (out_Pd) = f_operand2;
-    }
-#endif
-#undef FLD
-    return idesc;
-  }
-
- extract_sfmt_move_c_sprv10_p4:
-  {
-    const IDESC *idesc = &crisv10f_insn_data[itype];
-    CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p4.f
+#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p5.f
     UINT f_operand2;
     INT f_indir_pc__word;
     /* Contents of trailing part of insn.  */
@@ -4238,7 +4129,7 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for the semantic handler.  */
   FLD (f_indir_pc__word) = f_indir_pc__word;
   FLD (f_operand2) = f_operand2;
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_c_sprv10_p4", "f_indir_pc__word 0x%x", 'x', f_indir_pc__word, "f_operand2 0x%x", 'x', f_operand2, (char *) 0));
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_c_sprv10_p5", "f_indir_pc__word 0x%x", 'x', f_indir_pc__word, "f_operand2 0x%x", 'x', f_operand2, (char *) 0));
 
 #if WITH_PROFILE_MODEL_P
   /* Record the fields for profiling.  */
@@ -4251,11 +4142,11 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
- extract_sfmt_move_c_sprv10_p8:
+ extract_sfmt_move_c_sprv10_p9:
   {
     const IDESC *idesc = &crisv10f_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p8.f
+#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p9.f
     INT f_indir_pc__dword;
     UINT f_operand2;
     /* Contents of trailing part of insn.  */
@@ -4268,7 +4159,7 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
   /* Record the fields for the semantic handler.  */
   FLD (f_indir_pc__dword) = f_indir_pc__dword;
   FLD (f_operand2) = f_operand2;
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_c_sprv10_p8", "f_indir_pc__dword 0x%x", 'x', f_indir_pc__dword, "f_operand2 0x%x", 'x', f_operand2, (char *) 0));
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_c_sprv10_p9", "f_indir_pc__dword 0x%x", 'x', f_indir_pc__dword, "f_operand2 0x%x", 'x', f_operand2, (char *) 0));
 
 #if WITH_PROFILE_MODEL_P
   /* Record the fields for profiling.  */
@@ -4718,7 +4609,7 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
   {
     const IDESC *idesc = &crisv10f_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p8.f
+#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p9.f
     INT f_indir_pc__dword;
     /* Contents of trailing part of insn.  */
     UINT word_1;
@@ -5954,7 +5845,7 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
   {
     const IDESC *idesc = &crisv10f_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p8.f
+#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p9.f
     INT f_indir_pc__dword;
     UINT f_operand2;
     /* Contents of trailing part of insn.  */
@@ -6272,6 +6163,80 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
+ extract_sfmt_bdap_32_pc:
+  {
+    const IDESC *idesc = &crisv10f_insn_data[itype];
+    CGEN_INSN_INT insn = base_insn;
+#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p9.f
+    INT f_indir_pc__dword;
+    /* Contents of trailing part of insn.  */
+    UINT word_1;
+
+  word_1 = GETIMEMUSI (current_cpu, pc + 2);
+    f_indir_pc__dword = (0|(EXTRACT_LSB0_UINT (word_1, 32, 31, 32) << 0));
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_indir_pc__dword) = f_indir_pc__dword;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_bdap_32_pc", "f_indir_pc__dword 0x%x", 'x', f_indir_pc__dword, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_move_m_pcplus_p0:
+  {
+    const IDESC *idesc = &crisv10f_insn_data[itype];
+    CGEN_INSN_INT insn = base_insn;
+#define FLD(f) abuf->fields.sfmt_move_m_spplus_p8.f
+    UINT f_memmode;
+
+    f_memmode = EXTRACT_LSB0_UINT (insn, 16, 10, 1);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_memmode) = f_memmode;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_m_pcplus_p0", "f_memmode 0x%x", 'x', f_memmode, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_move_m_spplus_p8:
+  {
+    const IDESC *idesc = &crisv10f_insn_data[itype];
+    CGEN_INSN_INT insn = base_insn;
+#define FLD(f) abuf->fields.sfmt_move_m_spplus_p8.f
+    UINT f_memmode;
+
+    f_memmode = EXTRACT_LSB0_UINT (insn, 16, 10, 1);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_memmode) = f_memmode;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_move_m_spplus_p8", "f_memmode 0x%x", 'x', f_memmode, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_h_gr_SI_14) = 14;
+      FLD (out_h_gr_SI_14) = 14;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
  extract_sfmt_addo_m_b_m:
   {
     const IDESC *idesc = &crisv10f_insn_data[itype];
@@ -6490,7 +6455,7 @@ crisv10f_decode (SIM_CPU *current_cpu, IADDR pc,
   {
     const IDESC *idesc = &crisv10f_insn_data[itype];
     CGEN_INSN_INT insn = base_insn;
-#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p8.f
+#define FLD(f) abuf->fields.sfmt_move_c_sprv10_p9.f
     INT f_indir_pc__dword;
     /* Contents of trailing part of insn.  */
     UINT word_1;
