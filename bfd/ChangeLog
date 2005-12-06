@@ -1,3 +1,7 @@
+2005-12-06  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* cpu-powerpc.c (bfd_powerpc_archs): Add ppc 750.
+
 2005-11-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* elf64-hppa.c (elf64_hppa_section_from_phdr): Create .kernel
