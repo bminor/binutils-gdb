@@ -1,3 +1,10 @@
+2005-12-06  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-fork.c (linux_fork_mourn_inferior): Guard against null.
+	(delete_fork_command): Guard against not-found.  Replace strtol
+	with parse_and_eval_long.  Announce result.
+	(detach_fork_command): Ditto.
+
 2005-12-01  Michael Snyder  <msnyder@redhat.com>
 
 	* linux-fork.c (fork_save_infrun_state): Close the DIR.

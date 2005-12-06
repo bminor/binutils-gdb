@@ -184,13 +184,11 @@ fork_id_to_ptid (int num)
     return pid_to_ptid (-1);
 }
 
-/* FIXME: */
 static void
 init_fork_list (void)
 {
   struct fork_info *fp, *fpnext;
 
-  highest_fork_num = 0;
   if (!fork_list)
     return;
 
@@ -342,9 +340,12 @@ linux_fork_mourn_inferior (void)
      We need to delete that one from the fork_list, and switch
      to the next available fork.  FIXME safety?  */
   delete_fork (inferior_ptid);
-  inferior_ptid = fork_list[0].ptid;
-  printf_filtered ("[Switching to %s]\n", 
-		   target_pid_to_str (inferior_ptid));
+  if (fork_list)	/* Paranoia, shouldn't happen.  */
+    {
+      inferior_ptid = fork_list[0].ptid;
+      printf_filtered ("[Switching to %s]\n", 
+		       target_pid_to_str (inferior_ptid));
+    }
 }
 
 /*
@@ -359,11 +360,18 @@ delete_fork_command (char *args, int from_tty)
   if (!args || !*args)
     error ("Requires argument (checkpoint id to delete, see info checkpoint)");
 
-  /* FIXME: check for not-found!  */
-  /* FIXME: we can do better than strtol, too... */
-  ptid = fork_id_to_ptid (strtol (args, NULL, 0));
+  ptid = fork_id_to_ptid (parse_and_eval_long (args));
+  if (ptid_equal (ptid, minus_one_ptid))
+    error ("No such fork id, %s", args);
+
+  if (ptid_equal (ptid, inferior_ptid))
+    error ("Please switch to another fork before deleting the current fork");
+
   if (ptrace (PTRACE_KILL, ptid, 0, 0))
     error ("Unable to kill pid %s", target_tid_to_str (ptid));
+
+  if (from_tty)
+    printf_filtered ("Killed %s\n", target_pid_to_str (ptid));
 
   delete_fork (ptid);
 }
@@ -376,9 +384,10 @@ detach_fork_command (char *args, int from_tty)
   if (!args || !*args)
     error ("Requires argument (fork id to delete, see info fork)");
 
-  /* FIXME: check for not-found!  */
-  /* FIXME: we can do better than strtol, too... */
-  ptid = fork_id_to_ptid (strtol (args, NULL, 0));
+  ptid = fork_id_to_ptid (parse_and_eval_long (args));
+  if (ptid_equal (ptid, minus_one_ptid))
+    error ("No such fork id, %s", args);
+
   if (ptid_equal (ptid, inferior_ptid))
     error ("Please switch to another fork before detaching the current fork");
 
