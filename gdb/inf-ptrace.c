@@ -171,7 +171,7 @@ inf_ptrace_mourn_inferior (void)
   int status;
 
   /* Wait just one more time to collect the inferior's exit status.
-     Don not check whether this succeeds though, since we may be
+     Do not check whether this succeeds though, since we may be
      dealing with a process that we attached to.  Such a process will
      only report its exit status to its origional parent.  */
   waitpid (ptid_get_pid (inferior_ptid), &status, 0);
@@ -252,7 +252,7 @@ inf_ptrace_post_attach (int pid)
 #endif
 
 /* Detach from the inferior, optionally passing it the signal
-   specified ARGS.  If FROM_TTY is non-zero, be chatty about it.  */
+   specified by ARGS.  If FROM_TTY is non-zero, be chatty about it.  */
 
 static void
 inf_ptrace_detach (char *args, int from_tty)
@@ -274,7 +274,7 @@ inf_ptrace_detach (char *args, int from_tty)
 
 #ifdef PT_DETACH
   /* We'd better not have left any breakpoints in the program or it'll
-     die when it hits one.  Alsno note that this may only work if we
+     die when it hits one.  Also note that this may only work if we
      previously attached to the inferior.  It *might* work if we
      started the process ourselves.  */
   errno = 0;
