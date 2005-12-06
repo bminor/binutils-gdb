@@ -16,9 +16,14 @@ filler:
 
  .text
 ; Test that writing to zero-registers is a nop
+ .if 0
+ ; We used to just ignore the writes, but now an error is emitted.  We
+ ; keep the test-code but disabled, in case we need to change this again.
  move 0xaa,p0
  move 0x4433,p4
  move 0x55774433,p8
+ .endif
+
  moveq -1,r3
  setf zcvn
  clear.b r3
@@ -36,10 +41,13 @@ filler:
  dumpr3
 
 ; "Write" using ordinary memory references too.
+ .if 0 ; See ".if 0" above.
  move.d filler,r6
  move [r6],p0
  move [r6],p4
  move [r6],p8
+ .endif
+
  moveq -1,r3
  clear.b r3
  dumpr3
@@ -53,9 +61,12 @@ filler:
  dumpr3
 
 ; And postincremented.
+ .if 0 ; See ".if 0" above.
  move [r6+],p0
  move [r6+],p4
  move [r6+],p8
+ .endif
+
  moveq -1,r3
  clear.b r3
  dumpr3

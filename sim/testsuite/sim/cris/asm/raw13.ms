@@ -1,4 +1,4 @@
-; Checking read-after-write: write-WZ-then-read unaffected.
+; Checking read-after-write: write-MOF-then-read unaffected.
 #mach: crisv32
 #output: Basic clock cycles, total @: 4\n
 #output: Memory source stall cycles: 0\n
@@ -17,6 +17,6 @@
  .lcomm y,4
  move.d x,$r0
  move.d y,$r1
- move [$r0],$wz
+ move [$r0],$mof
  move [$r1],$srp
  break 15
