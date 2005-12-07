@@ -1175,7 +1175,8 @@ target_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write)
 
 /* Perform a partial memory transfer.
 
-   Result is -1 on error, or the number of bytes transfered.  */
+   If we succeed, set *ERR to zero and return the number of bytes transferred.
+   If we fail, set *ERR to a non-zero errno value, and return -1.  */
 
 static int
 target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
