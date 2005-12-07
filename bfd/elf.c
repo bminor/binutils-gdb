@@ -3053,10 +3053,10 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	  s = elf_linked_to_section (sec);
 	  if (s)
 	    {
+	      /* elf_linked_to_section points to the input section.  */
 	      if (link_info != NULL)
 		{
-		  /* For linker, elf_linked_to_section points to the
-		     input section.  */
+		  /* Check discarded linkonce section.  */
 		  if (elf_discarded_section (s))
 		    {
 		      asection *kept;
@@ -3074,8 +3074,25 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 			}
 		      s = kept;
 		    }
+		}
+	      if (link_info != NULL)
+		{
+		  /* Handle linker.  */
 		  s = s->output_section;
 		  BFD_ASSERT (s != NULL);
+		}
+	      else
+		{
+		  /* Handle objcopy. */
+		  if (s->output_section == NULL)
+		    {
+		      (*_bfd_error_handler)
+			(_("%B: sh_link of section `%A' points to removed section `%A' of `%B'"),
+			 abfd, d->this_hdr.bfd_section, s, s->owner);
+		      bfd_set_error (bfd_error_bad_value);
+		      return FALSE;
+		    }
+		  s = s->output_section;
 		}
 	      d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 	    }

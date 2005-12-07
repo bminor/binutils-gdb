@@ -1,3 +1,10 @@
+2005-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+	    Andreas Schwab  <schwab@suse.de>
+
+	PR binutils/1991
+	* elf.c (assign_section_numbers): Always use the output section
+	when setting up sh_link for SHF_LINK_ORDER.
+
 2005-12-07  Thiemo Seufer  <ths@networkno.de>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
