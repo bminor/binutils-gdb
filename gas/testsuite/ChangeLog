@@ -1,3 +1,9 @@
+2005-12-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-bcnst-pic.d, gas/cris/rd-branch-pic.d,
+	gas/cris/rd-brokw-pic-1.d, gas/cris/rd-brokw-pic-2.d,
+	gas/cris/rd-brokw-pic-3.d, gas/cris/rd-fragtest-pic.d: New tests.
+
 2005-12-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/1874
