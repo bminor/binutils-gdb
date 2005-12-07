@@ -1587,7 +1587,7 @@ value_struct_elt (struct value **argp, struct value **args,
       v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
 
       if (v == (struct value *) - 1)
-	error (_("Cannot take address of a method"));
+	error (_("Cannot take address of method %s."), name);
       else if (v == 0)
 	{
 	  if (TYPE_NFN_FIELDS (t))
