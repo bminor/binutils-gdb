@@ -735,8 +735,6 @@ exp_fold_tree_1 (etree_type *tree)
 		     defined by some object.  */
 		  break;
 		}
-	      if (tree->assign.hidden)
-		bfd_hide_symbol (output_bfd, &link_info, h, TRUE);
 	    }
 
 	  exp_fold_tree_1 (tree->assign.src);

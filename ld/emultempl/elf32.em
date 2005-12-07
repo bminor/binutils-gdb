@@ -986,8 +986,9 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 	 will do no harm.  */
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
-	  if (!bfd_elf_record_link_assignment (&link_info, exp->assign.dst,
-					       provide))
+	  if (!bfd_elf_record_link_assignment (output_bfd, &link_info,
+					       exp->assign.dst, provide,
+					       exp->assign.hidden))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",
 		   exp->assign.dst);
 	}

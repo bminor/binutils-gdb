@@ -424,9 +424,11 @@ bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
    this in case some dynamic object refers to this symbol.  */
 
 bfd_boolean
-bfd_elf_record_link_assignment (struct bfd_link_info *info,
+bfd_elf_record_link_assignment (bfd *output_bfd,
+				struct bfd_link_info *info,
 				const char *name,
-				bfd_boolean provide)
+				bfd_boolean provide,
+				bfd_boolean hidden)
 {
   struct elf_link_hash_entry *h;
   struct elf_link_hash_table *htab;
@@ -472,6 +474,14 @@ bfd_elf_record_link_assignment (struct bfd_link_info *info,
     h->verinfo.verdef = NULL;
 
   h->def_regular = 1;
+
+  if (provide && hidden)
+    {
+      const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+
+      h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+      (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+    }
 
   /* STV_HIDDEN and STV_INTERNAL symbols must be STB_LOCAL in shared objects
      and executables.  */

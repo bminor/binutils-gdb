@@ -1,3 +1,12 @@
+2005-12-07  Thiemo Seufer  <ths@networkno.de>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1932
+	* emultempl/elf32.em (gld${EMULATION_NAME}_find_exp_assignment):
+	Adjust bfd_elf_record_link_assignment call.
+
+	* ldexp.c (exp_fold_tree_1): Remove call to bfd_hide_symbol.
+
 2005-11-25  Jan Beulich  <jbeulich@novell.com>
 
 	* Makefile.am: Make configdoc.texi writeable before trying

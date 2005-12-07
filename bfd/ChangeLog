@@ -1,3 +1,17 @@
+2005-12-07  Thiemo Seufer  <ths@networkno.de>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/1932
+	* bfd-in.h (bfd_elf_record_link_assignment): Add output_bfd
+	and hidden arguments.
+
+	* bfd.c (bfd_hide_symbol): Removed.
+
+	* bfd-in2.h: Regenerated.
+
+	* elflink.c (bfd_elf_record_link_assignment): Handle hidden
+	symbols which were provided by a linker script.
+
 2005-12-06  Paul Gilliam  <pgilliam@us.ibm.com>
 
 	* cpu-powerpc.c (bfd_powerpc_archs): Add ppc 750.
