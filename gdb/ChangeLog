@@ -1,3 +1,8 @@
+2005-12-07  Jim Blandy  <jimb@redhat.com>
+
+	* ax-general.c (ax_reqs): Check stack heights for backward jumps,
+	too.  Correctly check height at target.  Doc fixes.
+
 2005-12-06  Michael Snyder  <msnyder@redhat.com>
 
 	* cli/cli-decode.c (add_setshow_string_cmd): Indent.
