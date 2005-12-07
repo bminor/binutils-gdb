@@ -267,6 +267,7 @@ const char FLT_CHARS[] = "";
 #define STATE_COND_BRANCH_COMMON    (5)
 #define STATE_ABS_BRANCH_V32	    (6)
 #define STATE_LAPC		    (7)
+#define STATE_COND_BRANCH_PIC       (8)
 
 #define STATE_LENGTH_MASK	    (3)
 #define STATE_BYTE		    (0)
@@ -390,6 +391,18 @@ const relax_typeS md_cris_relax_table[] =
   {0,	      0,	 4, 0},
 
   /* Unused (7, 3).  */
+  {1,	      1,	 0,  0},
+
+  /* PIC for pre-v32: Bcc o (8, 0).  */
+  {BRANCH_BF, BRANCH_BB, 0,  ENCODE_RELAX (STATE_COND_BRANCH_PIC, 1)},
+
+  /* Bcc [PC+] (8, 1).  */
+  {BRANCH_WF, BRANCH_WB, 2,  ENCODE_RELAX (STATE_COND_BRANCH_PIC, 2)},
+
+  /* 32-bit expansion, PIC (8, 2).  */
+  {0,	      0,	 12, 0},
+
+  /* Unused (8, 3).  */
   {1,	      1,	 0,  0}
 };
 
@@ -432,8 +445,10 @@ const char *md_shortopts = "hHN";
 
 int md_short_jump_size = 6;
 
-/* The v32 version has a delay-slot, hence two bytes longer.  */
+/* The v32 version has a delay-slot, hence two bytes longer.
+   The pre-v32 PIC version uses a prefixed insn.  */
 #define cris_any_v0_v10_long_jump_size 6
+#define cris_any_v0_v10_long_jump_size_pic 8
 #define crisv32_long_jump_size 8
 
 int md_long_jump_size = XCONCAT2 (DEFAULT_CRIS_ARCH,_long_jump_size);
@@ -633,6 +648,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment_type)
       HANDLE_RELAXABLE (STATE_COND_BRANCH);
       HANDLE_RELAXABLE (STATE_COND_BRANCH_V32);
       HANDLE_RELAXABLE (STATE_COND_BRANCH_COMMON);
+      HANDLE_RELAXABLE (STATE_COND_BRANCH_PIC);
       HANDLE_RELAXABLE (STATE_ABS_BRANCH_V32);
 
     case ENCODE_RELAX (STATE_LAPC, STATE_UNDF):
@@ -740,6 +756,9 @@ md_estimate_size_before_relax (fragS *fragP, segT segment_type)
     case ENCODE_RELAX (STATE_COND_BRANCH, STATE_BYTE):
     case ENCODE_RELAX (STATE_COND_BRANCH, STATE_WORD):
     case ENCODE_RELAX (STATE_COND_BRANCH, STATE_DWORD):
+    case ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_BYTE):
+    case ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_WORD):
+    case ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_DWORD):
     case ENCODE_RELAX (STATE_COND_BRANCH_V32, STATE_BYTE):
     case ENCODE_RELAX (STATE_COND_BRANCH_V32, STATE_WORD):
     case ENCODE_RELAX (STATE_COND_BRANCH_V32, STATE_DWORD):
@@ -824,6 +843,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
   switch (fragP->fr_subtype)
     {
     case ENCODE_RELAX (STATE_COND_BRANCH, STATE_BYTE):
+    case ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_BYTE):
     case ENCODE_RELAX (STATE_COND_BRANCH_V32, STATE_BYTE):
     case ENCODE_RELAX (STATE_COND_BRANCH_COMMON, STATE_BYTE):
     case ENCODE_RELAX (STATE_ABS_BRANCH_V32, STATE_BYTE):
@@ -832,6 +852,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
       break;
 
     case ENCODE_RELAX (STATE_COND_BRANCH, STATE_WORD):
+    case ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_WORD):
     case ENCODE_RELAX (STATE_COND_BRANCH_V32, STATE_WORD):
     case ENCODE_RELAX (STATE_COND_BRANCH_COMMON, STATE_WORD):
     case ENCODE_RELAX (STATE_ABS_BRANCH_V32, STATE_WORD):
@@ -857,6 +878,14 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
 			  fragP->fr_offset);
       /* Ten bytes added: a branch, nop and a jump.  */
       var_part_size = 2 + 2 + 4 + 2;
+      break;
+
+    case ENCODE_RELAX (STATE_COND_BRANCH_PIC, STATE_DWORD):
+      gen_cond_branch_32 (fragP->fr_opcode, var_partp, fragP,
+			  fragP->fr_symbol, (symbolS *) NULL,
+			  fragP->fr_offset);
+      /* Twelve bytes added: a branch, nop and a pic-branch-32.  */
+      var_part_size = 2 + 2 + 4 + 2 + 2;
       break;
 
     case ENCODE_RELAX (STATE_COND_BRANCH_V32, STATE_DWORD):
@@ -1093,12 +1122,13 @@ md_create_long_jump (char *storep, addressT from_addr, addressT to_addr,
   else
     {
       /* We have a "long" long jump: "JUMP [PC+]".  If CRISv32, always
-	 make it a BA.  Else make it an "ADD [PC+],PC" if we're supposed
+	 make it a BA.  Else make it an "MOVE [PC=PC+N],P0" if we're supposed
 	 to emit PIC code.  */
       md_number_to_chars (storep,
 			  cris_arch == arch_crisv32
 			  ? BA_DWORD_OPCODE
-			  : (pic ? ADD_PC_INCR_OPCODE : JUMP_PC_INCR_OPCODE),
+			  : (pic ? MOVE_PC_INCR_OPCODE_PREFIX
+			     : JUMP_PC_INCR_OPCODE),
 			  2);
 
       /* Follow with a ".DWORD to_addr", PC-relative for PIC.  */
@@ -1111,6 +1141,9 @@ md_create_long_jump (char *storep, addressT from_addr, addressT to_addr,
       /* Follow it with a "NOP" for CRISv32.  */
       if (cris_arch == arch_crisv32)
 	md_number_to_chars (storep + 6, NOP_OPCODE_V32, 2);
+      else if (pic)
+	/* ...and the rest of the move-opcode for pre-v32 PIC.  */
+	md_number_to_chars (storep + 6, MOVE_PC_INCR_OPCODE_SUFFIX, 2);
     }
 }
 
@@ -1321,11 +1354,12 @@ md_assemble (char *str)
 	     That case is handled by md_estimate_size_before_relax.  */
 	  length_code = to_seg == now_seg ? STATE_BYTE : STATE_UNDF;
 
-	  /* Make room for max twelve bytes of variable length for v32 mode,
-	     ten for v10 and older.  */
+	  /* Make room for max twelve bytes of variable length for v32 mode
+	     or PIC, ten for v10 and older.  */
 	  frag_var (rs_machine_dependent,
 		    (cris_arch == arch_crisv32
-		     || cris_arch == arch_cris_common_v10_v32) ? 12 : 10, 0,
+		     || cris_arch == arch_cris_common_v10_v32
+		     || pic) ? 12 : 10, 0,
 		    ENCODE_RELAX (cris_arch == arch_crisv32
 				  ? (output_instruction.opcode
 				     == BA_QUICK_OPCODE
@@ -1333,7 +1367,8 @@ md_assemble (char *str)
 				     : STATE_COND_BRANCH_V32)
 				  : (cris_arch == arch_cris_common_v10_v32
 				     ? STATE_COND_BRANCH_COMMON
-				     : STATE_COND_BRANCH),
+				     : (pic ? STATE_COND_BRANCH_PIC
+					: STATE_COND_BRANCH)),
 				  length_code),
 		    sym, addvalue, opcodep);
 	}
@@ -1344,7 +1379,8 @@ md_assemble (char *str)
 	     section, perhaps an absolute address.  Emit a 32-bit branch.  */
 	  char *cond_jump
 	    = frag_more ((cris_arch == arch_crisv32
-			  || cris_arch == arch_cris_common_v10_v32)
+			  || cris_arch == arch_cris_common_v10_v32
+			  || pic)
 			 ? 12 : 10);
 
 	  gen_cond_branch_32 (opcodep, cond_jump, frag_now,
@@ -3292,6 +3328,12 @@ gen_cond_branch_32 (char *opcodep, char *writep, fragS *fragP,
       opc_offset = 10;
       branch_offset = -2 - 8;
     }
+  else if (pic)
+    {
+      nop_opcode = NOP_OPCODE;
+      opc_offset = 10;
+      branch_offset = -2 - 8;
+    }
   else
     {
       nop_opcode = NOP_OPCODE;
@@ -3330,18 +3372,20 @@ gen_cond_branch_32 (char *opcodep, char *writep, fragS *fragP,
      merged later.  */
 
   md_number_to_chars (opcodep, BA_QUICK_OPCODE
-		      + (cris_arch == arch_crisv32 ? 12 : 8), 2);
+		      + (cris_arch == arch_crisv32 ? 12 : (pic ? 10 : 8)),
+		      2);
   md_number_to_chars (writep, nop_opcode, 2);
 
   /* Then the extended thing, the 32-bit jump insn.
        opcodep+4: JUMP [PC+]
      or, in the PIC case,
-       opcodep+4: ADD [PC+],PC.  */
+       opcodep+4: MOVE [PC=PC+N],P0.  */
 
   md_number_to_chars (writep + 2,
 		      cris_arch == arch_crisv32
 		      ? BA_DWORD_OPCODE
-		      : (pic ? ADD_PC_INCR_OPCODE : JUMP_PC_INCR_OPCODE), 2);
+		      : (pic ? MOVE_PC_INCR_OPCODE_PREFIX
+			 : JUMP_PC_INCR_OPCODE), 2);
 
   /* We have to fill in the actual value too.
        opcodep+6: .DWORD
@@ -3377,6 +3421,9 @@ gen_cond_branch_32 (char *opcodep, char *writep, fragS *fragP,
   if (cris_arch == arch_crisv32)
     /* Follow it with a "NOP" for CRISv32.  */
     md_number_to_chars (writep + 8, NOP_OPCODE_V32, 2);
+  else if (pic)
+    /* ...and the rest of the move-opcode for pre-v32 PIC.  */
+    md_number_to_chars (writep + 8, MOVE_PC_INCR_OPCODE_SUFFIX, 2);
 }
 
 /* Get the size of an immediate-reloc in bytes.  Only valid for PIC
@@ -3716,6 +3763,10 @@ md_parse_option (int arg, char *argp ATTRIBUTE_UNUSED)
 
     case OPTION_PIC:
       pic = TRUE;
+      if (cris_arch != arch_crisv32)
+	md_long_jump_size = cris_any_v0_v10_long_jump_size_pic;
+      else
+	md_long_jump_size = crisv32_long_jump_size;
       break;
 
     case OPTION_ARCH:
@@ -3734,7 +3785,12 @@ md_parse_option (int arg, char *argp ATTRIBUTE_UNUSED)
 	    md_long_jump_size = crisv32_long_jump_size;
 	  }
 	else
-	  md_long_jump_size = cris_any_v0_v10_long_jump_size;
+	  {
+	    if (pic)
+	      md_long_jump_size = cris_any_v0_v10_long_jump_size_pic;
+	    else
+	      md_long_jump_size = cris_any_v0_v10_long_jump_size;
+	  }
       }
       break;
 

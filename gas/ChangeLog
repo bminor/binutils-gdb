@@ -1,3 +1,16 @@
+2005-12-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	Change 32-bit-branch expansion for --pic.
+	* config/tc-cris.c (STATE_COND_BRANCH_PIC): New relaxation state.
+	(md_cris_relax_table): Add entry for STATE_COND_BRANCH_PIC.
+	(cris_any_v0_v10_long_jump_size_pic): New macro.
+	(md_estimate_size_before_relax): Handle STATE_COND_BRANCH_PIC.
+	(md_convert_frag): Similar.
+	(md_create_long_jump): Change 32-bit-branch expansion for --pic.
+	(md_assemble, gen_cond_branch_32): Adjust similarly.
+	(md_parse_option) <case OPTION_PIC>: Adjust md_long_jump_size.
+	<case OPTION_ARCH>: Similar, if --pic.
+
 2005-12-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/1874
