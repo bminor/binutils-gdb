@@ -1,3 +1,8 @@
+2005-12-08  Randolph Chung  <tausq@debian.org>
+
+	* somread.c (som_symfile_offsets): Iterate through number of sections
+	in addrs instead of objfile.
+
 2005-12-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* valops.c (value_struct_elt): Clarify error message.
