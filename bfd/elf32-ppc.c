@@ -2353,6 +2353,9 @@ struct ppc_elf_link_hash_table
   unsigned int new_plt:1;
   unsigned int old_plt:1;
 
+  /* Set if we should emit symbols for stubs.  */
+  unsigned int emit_stub_syms:1;
+
   /* Small local sym to section mapping cache.  */
   struct sym_sec_cache sym_sec;
 
@@ -3593,7 +3596,8 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 int
 ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *info,
-			   int force_old_plt)
+			   int force_old_plt,
+			   int emit_stub_syms)
 {
   struct ppc_elf_link_hash_table *htab;
   flagword flags;
@@ -3601,6 +3605,8 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
   htab = ppc_elf_hash_table (info);
   if (force_old_plt || !htab->new_plt)
     htab->old_plt = 1;
+
+  htab->emit_stub_syms = emit_stub_syms;
 
   if (htab->is_vxworks)
     {
@@ -4207,6 +4213,51 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Generate a symbol to mark plt call stubs, of the form
+   xxxxxxxx_plt_call_<callee> where xxxxxxxx is a hex number, usually 0,
+   specifying the addend on the plt relocation, or for -fPIC,
+   xxxxxxxx.got2_plt_call_<callee>.  */
+
+static bfd_boolean
+add_stub_sym (struct plt_entry *ent,
+	      struct elf_link_hash_entry *h,
+	      struct ppc_elf_link_hash_table *htab)
+{
+  struct elf_link_hash_entry *sh;
+  size_t len1, len2, len3;
+  char *name;
+
+  len1 = strlen (h->root.root.string);
+  len2 = sizeof ("plt_call_") - 1;
+  len3 = 0;
+  if (ent->sec)
+    len3 = strlen (ent->sec->name);
+  name = bfd_malloc (len1 + len2 + len3 + 10);
+  if (name == NULL)
+    return FALSE;
+  sprintf (name, "%08x", (unsigned) ent->addend & 0xffffffff);
+  if (ent->sec)
+    memcpy (name + 8, ent->sec->name, len3);
+  name[len3 + 8] = '_';
+  memcpy (name + len3 + 9, "plt_call_", len2);
+  memcpy (name + len3 + 9 + len2, h->root.root.string, len1 + 1);
+  sh = elf_link_hash_lookup (&htab->elf, name, TRUE, FALSE, FALSE);
+  if (sh == NULL)
+    return FALSE;
+  if (sh->root.type == bfd_link_hash_new)
+    {
+      sh->root.type = bfd_link_hash_defined;
+      sh->root.u.def.section = htab->glink;
+      sh->root.u.def.value = ent->glink_offset;
+      sh->ref_regular = 1;
+      sh->def_regular = 1;
+      sh->ref_regular_nonweak = 1;
+      sh->forced_local = 1;
+      sh->non_elf = 0;
+    }
+  return TRUE;
+}
+
 /* Allocate NEED contiguous space in .got, and return the offset.
    Handles allocation of the got header when crossing 32k.  */
 
@@ -4308,6 +4359,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 			h->root.u.def.value = glink_offset;
 		      }
 		    ent->glink_offset = glink_offset;
+
+		    if (htab->emit_stub_syms
+			&& !add_stub_sym (ent, h, htab))
+		      return FALSE;
 		  }
 		else
 		  {
@@ -4747,6 +4802,41 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Pad out to align the start of PLTresolve.  */
       htab->glink->size += -htab->glink->size & 15;
       htab->glink->size += GLINK_PLTRESOLVE;
+
+      if (htab->emit_stub_syms)
+	{
+	  struct elf_link_hash_entry *sh;
+	  sh = elf_link_hash_lookup (&htab->elf, "__glink",
+				     TRUE, FALSE, FALSE);
+	  if (sh == NULL)
+	    return FALSE;
+	  if (sh->root.type == bfd_link_hash_new)
+	    {
+	      sh->root.type = bfd_link_hash_defined;
+	      sh->root.u.def.section = htab->glink;
+	      sh->root.u.def.value = htab->glink_pltresolve;
+	      sh->ref_regular = 1;
+	      sh->def_regular = 1;
+	      sh->ref_regular_nonweak = 1;
+	      sh->forced_local = 1;
+	      sh->non_elf = 0;
+	    }
+	  sh = elf_link_hash_lookup (&htab->elf, "__glink_PLTresolve",
+				     TRUE, FALSE, FALSE);
+	  if (sh == NULL)
+	    return FALSE;
+	  if (sh->root.type == bfd_link_hash_new)
+	    {
+	      sh->root.type = bfd_link_hash_defined;
+	      sh->root.u.def.section = htab->glink;
+	      sh->root.u.def.value = htab->glink->size - GLINK_PLTRESOLVE;
+	      sh->ref_regular = 1;
+	      sh->def_regular = 1;
+	      sh->ref_regular_nonweak = 1;
+	      sh->forced_local = 1;
+	      sh->non_elf = 0;
+	    }
+	}
     }
 
   /* We've now determined the sizes of the various dynamic sections.

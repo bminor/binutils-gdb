@@ -1,5 +1,15 @@
 2005-12-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Add emit_stub_syms.
+	(ppc_elf_select_plt_layout): Add emit_stub_syms param, save to htab.
+	(add_stub_sym): New function.
+	(allocate_dynrelocs): Call add_stub_sym.
+	(ppc_elf_size_dynamic_sections): Emit __glink and __glink_PLTresolve
+	when emit_stub_syms.
+	* elf32-ppc.h (ppc_elf_select_plt_layout): Update prototype.
+
+2005-12-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* reloc.c (enum complain_overflow): Correct comments.
 	(bfd_check_overflow): Combine complain_overflow_bitfield and
 	complain_overflow_signed code.

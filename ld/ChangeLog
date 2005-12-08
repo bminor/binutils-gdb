@@ -1,5 +1,14 @@
 2005-12-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/ppc32elf.em (emit_stub_syms): New var.
+	(ppc_after_open): Pass it to ppc_elf_select_plt_layout.
+	(PARSE_AND_LIST_PROLOGUE <OPTION_STUBSYMS>): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add emit-stub-syms.
+	(PARSE_AND_LIST_OPTIONS): Describe emit-stub-syms.
+	(PARSE_AND_LIST_OPTIONS): Handle it.
+
+2005-12-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* pe-dll.c (build_filler_bfd): Conform error message to standard.
 	(pe_dll_generate_implib): Use %E in error message.
 	(add_bfd_to_link): Likewise.

@@ -41,6 +41,9 @@ is_ppc_elf32_vec(const bfd_target * vec)
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;
 
+/* Whether to emit symbols for stubs.  */
+static int emit_stub_syms = 0;
+
 /* Chooses the correct place for .plt and .got.  */
 static int old_plt = 0;
 static int old_got = 0;
@@ -58,7 +61,9 @@ ppc_after_open (void)
       lang_output_section_statement_type *plt_os[2];
       lang_output_section_statement_type *got_os[2];
 
-      new_plt = ppc_elf_select_plt_layout (output_bfd, &link_info, old_plt);
+      emit_stub_syms |= link_info.emitrelocations;
+      new_plt = ppc_elf_select_plt_layout (output_bfd, &link_info, old_plt,
+					   emit_stub_syms);
       if (new_plt < 0)
 	einfo ("%X%P: select_plt_layout problem %E\n");
 
@@ -126,9 +131,11 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_TLS_OPT		301
 #define OPTION_OLD_PLT			302
 #define OPTION_OLD_GOT			303
+#define OPTION_STUBSYMS			304
 '
 
 PARSE_AND_LIST_LONGOPTS='
+  { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
   { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
   { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },
@@ -136,6 +143,7 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
+  --emit-stub-syms      Label linker stubs with a symbol.\n\
   --no-tls-optimize     Don'\''t try to optimize TLS accesses.\n\
   --bss-plt             Force old-style BSS PLT.\n\
   --sdata-got           Force GOT location just before .sdata.\n"
@@ -143,6 +151,10 @@ PARSE_AND_LIST_OPTIONS='
 '
 
 PARSE_AND_LIST_ARGS_CASES='
+    case OPTION_STUBSYMS:
+      emit_stub_syms = 1;
+      break;
+
     case OPTION_NO_TLS_OPT:
       notlsopt = 1;
       break;
