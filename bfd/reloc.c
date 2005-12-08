@@ -255,11 +255,12 @@ CODE_FRAGMENT
 .  {* Do not complain on overflow.  *}
 .  complain_overflow_dont,
 .
-.  {* Complain if the bitfield overflows, whether it is considered
-.     as signed or unsigned.  *}
+.  {* Complain if the value overflows when considered as a signed
+.     number one bit larger than the field.  ie. A bitfield of N bits
+.     is allowed to represent -2**n to 2**n-1.  *}
 .  complain_overflow_bitfield,
 .
-.  {* Complain if the value overflows when considered as signed
+.  {* Complain if the value overflows when considered as a signed
 .     number.  *}
 .  complain_overflow_signed,
 .
@@ -496,14 +497,14 @@ bfd_check_overflow (enum complain_overflow how,
   bfd_vma fieldmask, addrmask, signmask, ss, a;
   bfd_reloc_status_type flag = bfd_reloc_ok;
 
-  a = relocation;
-
   /* Note: BITSIZE should always be <= ADDRSIZE, but in case it's not,
      we'll be permissive: extra bits in the field mask will
      automatically extend the address mask for purposes of the
      overflow check.  */
   fieldmask = N_ONES (bitsize);
+  signmask = ~fieldmask;
   addrmask = N_ONES (addrsize) | fieldmask;
+  a = (relocation & addrmask) >> rightshift;;
 
   switch (how)
     {
@@ -513,19 +514,8 @@ bfd_check_overflow (enum complain_overflow how,
     case complain_overflow_signed:
       /* If any sign bits are set, all sign bits must be set.  That
          is, A must be a valid negative address after shifting.  */
-      a = (a & addrmask) >> rightshift;
       signmask = ~ (fieldmask >> 1);
-      ss = a & signmask;
-      if (ss != 0 && ss != ((addrmask >> rightshift) & signmask))
-	flag = bfd_reloc_overflow;
-      break;
-
-    case complain_overflow_unsigned:
-      /* We have an overflow if the address does not fit in the field.  */
-      a = (a & addrmask) >> rightshift;
-      if ((a & ~ fieldmask) != 0)
-	flag = bfd_reloc_overflow;
-      break;
+      /* Fall thru */
 
     case complain_overflow_bitfield:
       /* Bitfields are sometimes signed, sometimes unsigned.  We
@@ -533,9 +523,14 @@ bfd_check_overflow (enum complain_overflow how,
 	 of n bits is allowed to store -2**n to 2**n-1.  Thus overflow
 	 if the value has some, but not all, bits set outside the
 	 field.  */
-      a >>= rightshift;
-      ss = a & ~ fieldmask;
-      if (ss != 0 && ss != (((bfd_vma) -1 >> rightshift) & ~ fieldmask))
+      ss = a & signmask;
+      if (ss != 0 && ss != ((addrmask >> rightshift) & signmask))
+	flag = bfd_reloc_overflow;
+      break;
+
+    case complain_overflow_unsigned:
+      /* We have an overflow if the address does not fit in the field.  */
+      if ((a & signmask) != 0)
 	flag = bfd_reloc_overflow;
       break;
 
@@ -1437,19 +1432,26 @@ _bfd_relocate_contents (reloc_howto_type *howto,
          the size of an address.  For bitfields, all the bits matter.
          See also bfd_check_overflow.  */
       fieldmask = N_ONES (howto->bitsize);
+      signmask = ~fieldmask;
       addrmask = N_ONES (bfd_arch_bits_per_address (input_bfd)) | fieldmask;
-      a = relocation;
-      b = x & howto->src_mask;
+      a = (relocation & addrmask) >> rightshift;
+      b = (x & howto->src_mask & addrmask) >> bitpos;
 
       switch (howto->complain_on_overflow)
 	{
 	case complain_overflow_signed:
-	  a = (a & addrmask) >> rightshift;
-
 	  /* If any sign bits are set, all sign bits must be set.
 	     That is, A must be a valid negative address after
 	     shifting.  */
-	  signmask = ~ (fieldmask >> 1);
+	  signmask = ~(fieldmask >> 1);
+	  /* Fall thru */
+
+	case complain_overflow_bitfield:
+	  /* Much like the signed check, but for a field one bit
+	     wider.  We allow a bitfield to represent numbers in the
+	     range -2**n to 2**n-1, where n is the number of bits in the
+	     field.  Note that when bfd_vma is 32 bits, a 32-bit reloc
+	     can't overflow, which is exactly what we want.  */
 	  ss = a & signmask;
 	  if (ss != 0 && ss != ((addrmask >> rightshift) & signmask))
 	    flag = bfd_reloc_overflow;
@@ -1460,12 +1462,11 @@ _bfd_relocate_contents (reloc_howto_type *howto,
              SRC_MASK has more bits than BITSIZE, we can get into
              trouble; we would need to verify that B is in range, as
              we do for A above.  */
-	  signmask = ((~ howto->src_mask) >> 1) & howto->src_mask;
+	  ss = ((~howto->src_mask) >> 1) & howto->src_mask;
+	  ss >>= bitpos;
 
 	  /* Set all the bits above the sign bit.  */
-	  b = (b ^ signmask) - signmask;
-
-	  b = (b & addrmask) >> bitpos;
+	  b = (b ^ ss) - ss;
 
 	  /* Now we can do the addition.  */
 	  sum = a + b;
@@ -1477,11 +1478,14 @@ _bfd_relocate_contents (reloc_howto_type *howto,
              positive inputs.  The test below looks only at the sign
              bits, and it really just
 	         SIGN (A) == SIGN (B) && SIGN (A) != SIGN (SUM)
-	     */
-	  signmask = (fieldmask >> 1) + 1;
-	  if (((~ (a ^ b)) & (a ^ sum)) & signmask)
-	    flag = bfd_reloc_overflow;
 
+	     We mask with addrmask here to explicitly allow an address
+	     wrap-around.  The Linux kernel relies on it, and it is
+	     the only way to write assembler code which can run when
+	     loaded at a location 0x80000000 away from the location at
+	     which it is linked.  */
+	  if (((~(a ^ b)) & (a ^ sum)) & signmask & addrmask)
+	    flag = bfd_reloc_overflow;
 	  break;
 
 	case complain_overflow_unsigned:
@@ -1496,44 +1500,9 @@ _bfd_relocate_contents (reloc_howto_type *howto,
              separate test, we can check for this by or-ing in the
              operands when testing for the sum overflowing its final
              field.  */
-	  a = (a & addrmask) >> rightshift;
-	  b = (b & addrmask) >> bitpos;
 	  sum = (a + b) & addrmask;
-	  if ((a | b | sum) & ~ fieldmask)
+	  if ((a | b | sum) & signmask)
 	    flag = bfd_reloc_overflow;
-
-	  break;
-
-	case complain_overflow_bitfield:
-	  /* Much like the signed check, but for a field one bit
-	     wider, and no trimming inputs with addrmask.  We allow a
-	     bitfield to represent numbers in the range -2**n to
-	     2**n-1, where n is the number of bits in the field.
-	     Note that when bfd_vma is 32 bits, a 32-bit reloc can't
-	     overflow, which is exactly what we want.  */
-	  a >>= rightshift;
-
-	  signmask = ~ fieldmask;
-	  ss = a & signmask;
-	  if (ss != 0 && ss != (((bfd_vma) -1 >> rightshift) & signmask))
-	    flag = bfd_reloc_overflow;
-
-	  signmask = ((~ howto->src_mask) >> 1) & howto->src_mask;
-	  b = (b ^ signmask) - signmask;
-
-	  b >>= bitpos;
-
-	  sum = a + b;
-
-	  /* We mask with addrmask here to explicitly allow an address
-	     wrap-around.  The Linux kernel relies on it, and it is
-	     the only way to write assembler code which can run when
-	     loaded at a location 0x80000000 away from the location at
-	     which it is linked.  */
-	  signmask = fieldmask + 1;
-	  if (((~ (a ^ b)) & (a ^ sum)) & signmask & addrmask)
-	    flag = bfd_reloc_overflow;
-
 	  break;
 
 	default:
@@ -4625,7 +4594,7 @@ bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
 }
 
 static reloc_howto_type bfd_howto_32 =
-HOWTO (0, 00, 2, 32, FALSE, 0, complain_overflow_bitfield, 0, "VRT32", FALSE, 0xffffffff, 0xffffffff, TRUE);
+HOWTO (0, 00, 2, 32, FALSE, 0, complain_overflow_dont, 0, "VRT32", FALSE, 0xffffffff, 0xffffffff, TRUE);
 
 /*
 INTERNAL_FUNCTION

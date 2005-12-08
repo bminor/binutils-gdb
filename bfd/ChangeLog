@@ -1,3 +1,13 @@
+2005-12-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c (enum complain_overflow): Correct comments.
+	(bfd_check_overflow): Combine complain_overflow_bitfield and
+	complain_overflow_signed code.
+	(_bfd_relocate_contents): Likewise.
+	(bfd_howto_32): Use complain_overflow_dont.
+	* elf32-d10v.c (elf_d10v_howto_table): Revert 2002-06-17 change.
+	* bfd-in2.h: Regenerate.
+
 2005-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (assign_section_numbers): Remove extra code in the last
@@ -559,7 +569,7 @@
 	(scan_unit_for_symbols): New locals nested_funcs, nested_funcs_size.
 	Delete code setting funcinfo nesting_level field.  Add code to set
 	funcinfo caller_func field.
-	
+
 2005-09-20  James E. Wilson  <wilson@specifix.com>
 
 	* dwarf2.c (find_abstract_instance_name): Don't early exit when name
@@ -628,7 +638,7 @@
 	local symbols and move it to
 	(msp430_elf_relax_adjust_locals): New function - walk over the
 	sections in the bfd and adjust relocations as necessary.
-	
+
 2005-08-31  DJ Delorie  <dj@redhat.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Don't cast a unary &

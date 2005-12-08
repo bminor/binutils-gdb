@@ -2073,11 +2073,12 @@ enum complain_overflow
   /* Do not complain on overflow.  */
   complain_overflow_dont,
 
-  /* Complain if the bitfield overflows, whether it is considered
-     as signed or unsigned.  */
+  /* Complain if the value overflows when considered as a signed
+     number one bit larger than the field.  ie. A bitfield of N bits
+     is allowed to represent -2**n to 2**n-1.  */
   complain_overflow_bitfield,
 
-  /* Complain if the value overflows when considered as signed
+  /* Complain if the value overflows when considered as a signed
      number.  */
   complain_overflow_signed,
 
