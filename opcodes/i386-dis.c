@@ -35,7 +35,7 @@
 #include "sysdep.h"
 #include "opintl.h"
 
-#define MAXLEN 20
+#define MAXLEN 15
 
 #include <setjmp.h>
 
@@ -179,10 +179,13 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
   struct dis_private *priv = (struct dis_private *) info->private_data;
   bfd_vma start = priv->insn_start + (priv->max_fetched - priv->the_buffer);
 
-  status = (*info->read_memory_func) (start,
-				      priv->max_fetched,
-				      addr - priv->max_fetched,
-				      info);
+  if (addr <= priv->the_buffer + MAXLEN)
+    status = (*info->read_memory_func) (start,
+					priv->max_fetched,
+					addr - priv->max_fetched,
+					info);
+  else
+    status = -1;
   if (status != 0)
     {
       /* If we did manage to read at least one byte, then
