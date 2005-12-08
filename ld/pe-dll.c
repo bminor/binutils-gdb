@@ -757,7 +757,7 @@ build_filler_bfd (int include_edata)
 			     bfd_get_arch (output_bfd),
 			     bfd_get_mach (output_bfd)))
     {
-      einfo ("%X%P: can not create BFD %E\n");
+      einfo ("%X%P: can not create BFD: %E\n");
       return;
     }
 
@@ -2272,10 +2272,10 @@ pe_dll_generate_implib (def_file *def, const char *impfilename)
   head = ar_tail;
 
   if (! bfd_set_archive_head (outarch, head))
-    einfo ("%Xbfd_set_archive_head: %s\n", bfd_errmsg (bfd_get_error ()));
+    einfo ("%Xbfd_set_archive_head: %E\n");
 
   if (! bfd_close (outarch))
-    einfo ("%Xbfd_close %s: %s\n", impfilename, bfd_errmsg (bfd_get_error ()));
+    einfo ("%Xbfd_close %s: %E\n", impfilename);
 
   while (head != NULL)
     {
@@ -2297,7 +2297,7 @@ add_bfd_to_link (bfd *abfd, const char *name, struct bfd_link_info *link_info)
   ldlang_add_file (fake_file);
 
   if (!bfd_link_add_symbols (abfd, link_info))
-    einfo ("%Xaddsym %s: %s\n", name, bfd_errmsg (bfd_get_error ()));
+    einfo ("%Xaddsym %s: %E\n", name);
 }
 
 void
@@ -2445,7 +2445,7 @@ pe_implied_import_dll (const char *filename)
   dll = bfd_openr (filename, pe_details->target_name);
   if (!dll)
     {
-      einfo ("%Xopen %s: %s\n", filename, bfd_errmsg (bfd_get_error ()));
+      einfo ("%Xopen %s: %E\n", filename);
       return FALSE;
     }
 
