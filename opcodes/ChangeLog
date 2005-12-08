@@ -1,3 +1,7 @@
+2005-12-08  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (OP_ST): Remove prefix in Intel mode.
+
 2005-12-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* i386-dis.c (dofloat): Handle %rip-relative floating point addressing.

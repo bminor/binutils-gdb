@@ -2725,7 +2725,7 @@ dofloat (int sizeflag)
 static void
 OP_ST (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
-  oappend ("%st");
+  oappend ("%st" + intel_syntax);
 }
 
 static void
