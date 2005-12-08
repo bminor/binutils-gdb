@@ -54,11 +54,8 @@ are not yet supported.
 * REMOVED configurations and files
 
 VxWorks and the XDR protocol			*-*-vxworks
-Renesas H8/300S					h8300*-*-*
 Motorola MCORE                                  mcore-*-*
-Matsushita MN10300 w/simulator			mn10300-*-*
 National Semiconductor NS32000			ns32k-*-*
-NEC V850					v850-*-*
 
 * New "set print array-indexes" command
 
