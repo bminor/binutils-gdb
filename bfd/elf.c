@@ -3074,10 +3074,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 			}
 		      s = kept;
 		    }
-		}
-	      if (link_info != NULL)
-		{
-		  /* Handle linker.  */
+
 		  s = s->output_section;
 		  BFD_ASSERT (s != NULL);
 		}

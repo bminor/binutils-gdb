@@ -1,4 +1,9 @@
 2005-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (assign_section_numbers): Remove extra code in the last
+	change.
+
+2005-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 	    Andreas Schwab  <schwab@suse.de>
 
 	PR binutils/1991
