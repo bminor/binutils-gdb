@@ -2689,6 +2689,7 @@ dofloat (int sizeflag)
 
       putop (float_mem[fp_indx], sizeflag);
       obufp = op1out;
+      op_ad = 2;
       OP_E (float_mem_mode[fp_indx], sizeflag);
       return;
     }
@@ -2710,9 +2711,12 @@ dofloat (int sizeflag)
       putop (dp->name, sizeflag);
 
       obufp = op1out;
+      op_ad = 2;
       if (dp->op1)
 	(*dp->op1) (dp->bytemode1, sizeflag);
+
       obufp = op2out;
+      op_ad = 1;
       if (dp->op2)
 	(*dp->op2) (dp->bytemode2, sizeflag);
     }

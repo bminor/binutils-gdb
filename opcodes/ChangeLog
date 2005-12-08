@@ -1,3 +1,7 @@
+2005-12-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* i386-dis.c (dofloat): Handle %rip-relative floating point addressing.
+
 2005-12-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris-opc.c (cris_opcodes) <"move" "s,P">: Define using
@@ -42,9 +46,9 @@
 	* Makefile.am (CFILES): Add cgen-bitset.c.
 	(ALL_MACHINES): Add cgen-bitset.lo.
 	(cgen-bitset.lo): New target.
-	* cgen-opc.c (cgen_bitset_create, cgen_bitset_init, cgen_bitset_clear) 
-	(cgen_bitset_add, cgen_bitset_set, cgen_bitset_contains) 
-	(cgen_bitset_compare, cgen_bitset_intersect_p, cgen_bitset_copy) 
+	* cgen-opc.c (cgen_bitset_create, cgen_bitset_init, cgen_bitset_clear)
+	(cgen_bitset_add, cgen_bitset_set, cgen_bitset_contains)
+	(cgen_bitset_compare, cgen_bitset_intersect_p, cgen_bitset_copy)
 	(cgen_bitset_union): Moved from here ...
 	* cgen-bitset.c: ... to here. New file.
 	* Makefile.in: Regenerated.
