@@ -198,7 +198,8 @@ ms1_register_type (struct gdbarch *arch, int regnum)
 	case MS1_COPRO_PSEUDOREG_REGNUM:
 	  return copro_type;
 	case MS1_MAC_PSEUDOREG_REGNUM:
-	  if (gdbarch_bfd_arch_info (arch)->mach == bfd_mach_mrisc2)
+	  if (gdbarch_bfd_arch_info (arch)->mach == bfd_mach_mrisc2
+	      || gdbarch_bfd_arch_info (arch)->mach == bfd_mach_ms2)
 	    return builtin_type_uint64;
 	  else
 	    return builtin_type_uint32;
@@ -362,15 +363,20 @@ ms1_skip_prologue (CORE_ADDR pc)
 /* The breakpoint instruction must be the same size as the smallest
    instruction in the instruction set.
 
-   The BP for ms1 is defined as 0x68000000.  */
+   The BP for ms1 is defined as 0x68000000 (BREAK).
+   The BP for ms2 is defined as 0x69000000 (illegal)  */
 
 static const gdb_byte *
 ms1_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
-  static gdb_byte breakpoint[] = { 0x68, 0, 0, 0 };
+  static gdb_byte ms1_breakpoint[] = { 0x68, 0, 0, 0 };
+  static gdb_byte ms2_breakpoint[] = { 0x69, 0, 0, 0 };
 
   *bp_size = 4;
-  return breakpoint;
+  if (gdbarch_bfd_arch_info (current_gdbarch)->mach == bfd_mach_ms2)
+    return ms2_breakpoint;
+  
+  return ms1_breakpoint;
 }
 
 /* Fetch the pseudo registers:
@@ -394,7 +400,8 @@ ms1_pseudo_register_read (struct gdbarch *gdbarch,
       break;
     case MS1_MAC_REGNUM:
     case MS1_MAC_PSEUDOREG_REGNUM:
-      if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2)
+      if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
+	  || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	{
 	  ULONGEST oldmac = 0, ext_mac = 0;
 	  ULONGEST newmac;
@@ -438,7 +445,8 @@ ms1_pseudo_register_write (struct gdbarch *gdbarch,
       break;
     case MS1_MAC_REGNUM:
     case MS1_MAC_PSEUDOREG_REGNUM:
-      if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2)
+      if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
+	  || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	{
 	  /* The 8-byte MAC pseudo-register must be broken down into two
 	     32-byte registers.  */
@@ -549,16 +557,14 @@ ms1_registers_info (struct gdbarch *gdbarch,
 
 	  /* Get the two "real" mac registers.  */
 	  frame_register_read (frame, MS1_MAC_REGNUM, buf);
-	  oldmac = extract_unsigned_integer (buf,
-					     register_size (gdbarch,
-							    MS1_MAC_REGNUM));
+	  oldmac = extract_unsigned_integer
+	    (buf, register_size (gdbarch, MS1_MAC_REGNUM));
 	  if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
 	      || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	    {
 	      frame_register_read (frame, MS1_EXMAC_REGNUM, buf);
-	      ext_mac = extract_unsigned_integer (buf,
-						  register_size (gdbarch,
-								 MS1_EXMAC_REGNUM));
+	      ext_mac = extract_unsigned_integer
+		(buf, register_size (gdbarch, MS1_EXMAC_REGNUM));
 	    }
 	  else
 	    ext_mac = 0;

@@ -8,6 +8,10 @@
 init-if-undefined		Initialize a convenience variable, but
 				only if it doesn't already have a value.
 
+* New architecture
+
+Morpho Technologies ms2		ms1-elf
+
 *** Changes in GDB 6.4
 
 * New native configurations
