@@ -1,5 +1,11 @@
 2005-12-09  Randolph Chung  <tausq@debian.org>
 
+	* gdb.asm/common.inc: Indent commands.
+	* gdb.asm/asmsrc1.s: Likewise.
+	* gdb.asm/asmsrc2.s: Likewise.
+
+2005-12-09  Randolph Chung  <tausq@debian.org>
+
 	* gdb.arch/pa-nullify.exp: Handle hppa64-*-* targets.
 	(get_addr_of_sym): Remove duplicate print.
 	(gen_core): xfail hppa*-*-hpux*, update expected output.
