@@ -1,5 +1,13 @@
 2005-12-09  Randolph Chung  <tausq@debian.org>
 
+	* gdb.arch/pa-nullify.exp: Handle hppa64-*-* targets.
+	(get_addr_of_sym): Remove duplicate print.
+	(gen_core): xfail hppa*-*-hpux*, update expected output.
+	* gdb.arch/pa-nullify.s: Reformat to also work on HPUX.
+	* gdb.arch/pa64-nullify.s: New file.
+
+2005-12-09  Randolph Chung  <tausq@debian.org>
+
 	* gdb.base/dump.exp: Mark hppa64-*-* as 64-bit target.
 
 2005-12-07  Christophe Lyon  <christophe.lyon@st.com>
