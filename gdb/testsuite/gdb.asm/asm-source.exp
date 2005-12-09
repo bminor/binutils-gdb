@@ -144,6 +144,11 @@ switch -glob -- [istarget] {
         set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir}"
 	set debug-flags "-gdwarf-2"
     }
+    "hppa64-*-hpux*" {
+        set asm-arch pa64
+        set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir}"
+	set debug-flags "-gdwarf-2"
+    }
     "h83*-*" {
 	set asm-arch h8300
 	set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"

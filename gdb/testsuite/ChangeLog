@@ -1,5 +1,10 @@
 2005-12-09  Randolph Chung  <tausq@debian.org>
 
+	* gdb.asm/asm-source.exp (hppa64-*-hpux*): New.
+	* gdb.asm/pa64.inc: New file.
+
+2005-12-09  Randolph Chung  <tausq@debian.org>
+
 	* gdb.asm/common.inc: Indent commands.
 	* gdb.asm/asmsrc1.s: Likewise.
 	* gdb.asm/asmsrc2.s: Likewise.
