@@ -897,6 +897,50 @@ hppa64_floating_p (const struct type *type)
   return 0;
 }
 
+/* If CODE points to a function entry address, try to look up the corresponding
+   function descriptor and return its address instead.  If CODE is not a
+   function entry address, then just return it unchanged.  */
+static CORE_ADDR
+hppa64_convert_code_addr_to_fptr (CORE_ADDR code)
+{
+  struct obj_section *sec, *opd;
+
+  sec = find_pc_section (code);
+
+  if (!sec)
+    return code;
+
+  /* If CODE is in a data section, assume it's already a fptr.  */
+  if (!(sec->the_bfd_section->flags & SEC_CODE))
+    return code;
+
+  ALL_OBJFILE_OSECTIONS (sec->objfile, opd)
+    {
+      if (strcmp (opd->the_bfd_section->name, ".opd") == 0)
+        break;
+    }
+
+  if (opd < sec->objfile->sections_end)
+    {
+      CORE_ADDR addr;
+
+      for (addr = opd->addr; addr < opd->endaddr; addr += 2 * 8)
+        {
+	  ULONGEST opdaddr;
+	  char tmp[8];
+
+	  if (target_read_memory (addr, tmp, sizeof (tmp)))
+	      break;
+	  opdaddr = extract_unsigned_integer (tmp, sizeof (tmp));
+
+          if (opdaddr == code)
+	    return addr - 16;
+	}
+    }
+
+  return code;
+}
+
 static CORE_ADDR
 hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			struct regcache *regcache, CORE_ADDR bp_addr,
@@ -917,6 +961,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *type = value_type (arg);
       int len = TYPE_LENGTH (type);
       const bfd_byte *valbuf;
+      bfd_byte fptrbuf[8];
       int regnum;
 
       /* "Each parameter begins on a 64-bit (8-byte) boundary."  */
@@ -992,10 +1037,26 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	}
 
-      /* Always store the argument in memory.  */
-      write_memory (sp + offset, value_contents (arg), len);
+      /* If we are passing a function pointer, make sure we pass a function
+         descriptor instead of the function entry address.  */
+      if (TYPE_CODE (type) == TYPE_CODE_PTR
+          && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
+        {
+	  ULONGEST codeptr, fptr;
 
-      valbuf = value_contents (arg);
+	  codeptr = unpack_long (type, value_contents (arg));
+	  fptr = hppa64_convert_code_addr_to_fptr (codeptr);
+	  store_unsigned_integer (fptrbuf, TYPE_LENGTH (type), fptr);
+	  valbuf = fptrbuf;
+	}
+      else
+        {
+          valbuf = value_contents (arg);
+	}
+
+      /* Always store the argument in memory.  */
+      write_memory (sp + offset, valbuf, len);
+
       regnum = HPPA_ARG0_REGNUM - offset / 8;
       while (regnum > HPPA_ARG0_REGNUM - 8 && len > 0)
 	{

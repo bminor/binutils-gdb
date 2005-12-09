@@ -1,5 +1,12 @@
 2005-12-09  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (hppa64_convert_code_addr_to_fptr): New function.
+	(hppa64_push_dummy_call): If passing a function pointer, ensure
+	it is a function descriptor address instead of the function entry
+	point.
+
+2005-12-09  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa64_dwarf_reg_to_regnum): New funtion.
 	(hppa_gdbarch_init): Set dwarf_reg_to_regnum and 
 	dwarf2_reg_to_regnum methods.
