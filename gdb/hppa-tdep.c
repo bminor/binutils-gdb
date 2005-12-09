@@ -662,6 +662,21 @@ hppa64_register_name (int i)
     return names[i];
 }
 
+static int
+hppa64_dwarf_reg_to_regnum (int reg)
+{
+  /* r0-r31 and sar map one-to-one.  */
+  if (reg <= 32)
+    return reg;
+
+  /* fr4-fr31 are mapped from 72 in steps of 2.  */
+  if (reg >= 72 || reg < 72 + 28 * 2)
+    return HPPA64_FP4_REGNUM + (reg - 72) / 2;
+
+  error ("Invalid DWARF register num %d.", reg);
+  return -1;
+}
+
 /* This function pushes a stack frame with arguments as part of the
    inferior function calling mechanism.
 
@@ -2747,6 +2762,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_num_regs (gdbarch, hppa64_num_regs);
         set_gdbarch_register_name (gdbarch, hppa64_register_name);
         set_gdbarch_register_type (gdbarch, hppa64_register_type);
+        set_gdbarch_dwarf_reg_to_regnum (gdbarch, hppa64_dwarf_reg_to_regnum);
+        set_gdbarch_dwarf2_reg_to_regnum (gdbarch, hppa64_dwarf_reg_to_regnum);
 	set_gdbarch_cannot_store_register (gdbarch,
 					   hppa64_cannot_store_register);
 	set_gdbarch_cannot_fetch_register (gdbarch,

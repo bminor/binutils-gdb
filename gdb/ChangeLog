@@ -1,3 +1,9 @@
+2005-12-09  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa64_dwarf_reg_to_regnum): New funtion.
+	(hppa_gdbarch_init): Set dwarf_reg_to_regnum and 
+	dwarf2_reg_to_regnum methods.
+
 2005-12-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* NEWS (Changes in GDB 6.4): Delete references indicating that
