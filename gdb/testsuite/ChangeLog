@@ -1,3 +1,7 @@
+2005-12-09  Randolph Chung  <tausq@debian.org>
+
+	* gdb.base/dump.exp: Mark hppa64-*-* as 64-bit target.
+
 2005-12-07  Christophe Lyon  <christophe.lyon@st.com>
 
 	* gdb.cp/printmethod.cc (main): Call virt and nonvirt, to force
