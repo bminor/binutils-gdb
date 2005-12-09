@@ -1,5 +1,13 @@
 2005-12-09  Randolph Chung  <tausq@debian.org>
 
+	PR corefiles/2026
+	* hppa-hpux-tdep.c (hppa_hpux_core_osabi_sniffer): Check for HPUX ELF
+	core files.
+	(_initialize_hppa_hpux_tdep): Install sniffer for ELF core files.
+	* config/pa/hpux.mh: Compile corelow.o.
+
+2005-12-09  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa64_convert_code_addr_to_fptr): New function.
 	(hppa64_push_dummy_call): If passing a function pointer, ensure
 	it is a function descriptor address instead of the function entry

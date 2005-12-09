@@ -2064,6 +2064,24 @@ hppa_hpux_core_osabi_sniffer (bfd *abfd)
 {
   if (strcmp (bfd_get_target (abfd), "hpux-core") == 0)
     return GDB_OSABI_HPUX_SOM;
+  else if (strcmp (bfd_get_target (abfd), "elf64-hppa") == 0)
+    {
+      asection *section;
+      
+      section = bfd_get_section_by_name (abfd, ".kernel");
+      if (section)
+        {
+	  bfd_size_type size;
+	  char *contents;
+
+	  size = bfd_section_size (abfd, section);
+	  contents = alloca (size);
+ 	  if (bfd_get_section_contents (abfd, section, contents, 
+	  				(file_ptr) 0, size)
+	      && strcmp (contents, "HP-UX") == 0)
+	    return GDB_OSABI_HPUX_ELF;
+	}
+    }
 
   return GDB_OSABI_UNKNOWN;
 }
@@ -2075,6 +2093,9 @@ _initialize_hppa_hpux_tdep (void)
      set the architecture either.  */
   gdbarch_register_osabi_sniffer (bfd_arch_unknown,
 				  bfd_target_unknown_flavour,
+				  hppa_hpux_core_osabi_sniffer);
+  gdbarch_register_osabi_sniffer (bfd_arch_hppa,
+                                  bfd_target_elf_flavour,
 				  hppa_hpux_core_osabi_sniffer);
 
   gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_HPUX_SOM,
