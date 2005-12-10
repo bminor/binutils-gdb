@@ -1,3 +1,8 @@
+2005-12-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_gc_mark_dynamic_ref_symbol):  Use !info-executable
+	to test for linking shared libs, not info->shared.
+
 2005-12-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (struct ppc_elf_link_hash_table): Add emit_stub_syms.
