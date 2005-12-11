@@ -1,3 +1,15 @@
+2005-12-11  Bernhard Fischer  <aldot@gcc.gnu.org>
+
+	* scripttempl/armbpabi.sc: Fix typo in comment for .ctors.
+	* scripttempl/elf.sc: Ditto.
+	* scripttempl/elf32sh-symbian.sc: Ditto.
+	* scripttempl/elf_chaos.sc: Ditto.
+	* scripttempl/elfd10v.sc: Ditto.
+	* scripttempl/elfd30v.sc: Ditto.
+	* scripttempl/elfxtensa.sc: Ditto.
+	* scripttempl/iq2000.sc: Ditto.
+	* scripttempl/xstormy16.sc: Ditto.
+
 2005-12-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (emit_stub_syms): New var.
