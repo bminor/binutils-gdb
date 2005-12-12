@@ -27,7 +27,7 @@
 #include "opcodes/ms1-opc.h"
 #include "cgen.h"
 #include "elf/common.h"
-#include "elf/ms1.h"
+#include "elf/mt.h"
 #include "libbfd.h"
 
 /* Structure to hold all of the different components

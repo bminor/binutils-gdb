@@ -22,7 +22,7 @@
 #include "sysdep.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
-#include "elf/ms1.h"
+#include "elf/mt.h"
 
 /* Prototypes.  */
 static reloc_howto_type * ms1_reloc_type_lookup 

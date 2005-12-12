@@ -1,3 +1,9 @@
+2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* configure.tgt: Replace ms1 arch with mt arch.
+	* config/mt: Renamed from ms1 dir.  Update file names as needed.
+	* config/mt/mt.mt (TDEPFILES): Replace ms1 file with mt file.
+
 2005-12-09  Randolph Chung  <tausq@debian.org>
 
 	PR corefiles/2026

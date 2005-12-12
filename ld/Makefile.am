@@ -173,7 +173,7 @@ ALL_EMULATIONS = \
 	eelf32m32c.o \
 	eelf32mcore.o \
 	eelf32mipswindiss.o \
-	eelf32ms1.o \
+	eelf32mt.o \
 	eelf32openrisc.o \
 	eelf32ppc.o \
 	eelf32ppc_fbsd.o \
@@ -1556,9 +1556,9 @@ eelf32m32c.c: $(srcdir)/emulparams/elf32m32c.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32m32c "$(tdir_m32c)"
-eelf32ms1.c: $(srcdir)/emulparams/elf32ms1.sh \
+eelf32mt.c: $(srcdir)/emulparams/elf32mt.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} elf32ms1 "$(tdir_ms1)"
+	${GENSCRIPTS} elf32mt "$(tdir_mt)"
 
 # We need this for automake to use YLWRAP.
 EXTRA_ld_new_SOURCES = deffilep.y

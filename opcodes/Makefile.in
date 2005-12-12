@@ -554,7 +554,7 @@ noinst_LIBRARIES = libopcodes.a
 POTFILES = $(HFILES) $(CFILES)
 CLEANFILES = \
 	stamp-ip2k stamp-m32c stamp-m32r stamp-fr30 stamp-frv \
-	stamp-openrisc stamp-iq2000 stamp-ms1 stamp-xstormy16 \
+	stamp-openrisc stamp-iq2000 stamp-mt stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 CGENDIR = @cgendir@
@@ -568,7 +568,7 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = fr30 frv ip2k m32c m32r ms1 openrisc xstormy16
+CGEN_CPUS = fr30 frv ip2k m32c m32r mt openrisc xstormy16
 @CGEN_MAINT_FALSE@IP2K_DEPS = 
 @CGEN_MAINT_TRUE@IP2K_DEPS = stamp-ip2k
 @CGEN_MAINT_FALSE@M32C_DEPS = 
@@ -579,8 +579,8 @@ CGEN_CPUS = fr30 frv ip2k m32c m32r ms1 openrisc xstormy16
 @CGEN_MAINT_TRUE@FR30_DEPS = stamp-fr30
 @CGEN_MAINT_FALSE@FRV_DEPS = 
 @CGEN_MAINT_TRUE@FRV_DEPS = stamp-frv
-@CGEN_MAINT_FALSE@MS1_DEPS = 
-@CGEN_MAINT_TRUE@MS1_DEPS = stamp-ms1
+@CGEN_MAINT_FALSE@MT_DEPS = 
+@CGEN_MAINT_TRUE@MT_DEPS = stamp-mt
 @CGEN_MAINT_FALSE@OPENRISC_DEPS = 
 @CGEN_MAINT_TRUE@OPENRISC_DEPS = stamp-openrisc
 @CGEN_MAINT_FALSE@IQ2000_DEPS = 
@@ -1026,12 +1026,12 @@ stamp-frv: $(CGENDEPS) $(srcdir)/../cpu/frv.cpu $(srcdir)/../cpu/frv.opc
 	$(MAKE) run-cgen arch=frv prefix=frv options= \
 		archfile=$(srcdir)/../cpu/frv.cpu opcfile=$(srcdir)/../cpu/frv.opc extrafiles=
 
-$(srcdir)/ms1-desc.h $(srcdir)/ms1-desc.c $(srcdir)/ms1-opc.h $(srcdir)/ms1-opc.c $(srcdir)/ms1-ibld.c $(srcdir)/ms1-asm.c $(srcdir)/ms1-dis.c: $(MS1_DEPS)
+$(srcdir)/ms1-desc.h $(srcdir)/ms1-desc.c $(srcdir)/ms1-opc.h $(srcdir)/ms1-opc.c $(srcdir)/ms1-ibld.c $(srcdir)/ms1-asm.c $(srcdir)/ms1-dis.c: $(MT_DEPS)
 	@true
-stamp-ms1: $(CGENDEPS) $(srcdir)/../cpu/ms1.cpu $(srcdir)/../cpu/ms1.opc
+stamp-mt: $(CGENDEPS) $(srcdir)/../cpu/mt.cpu $(srcdir)/../cpu/mt.opc
 	$(MAKE) run-cgen arch=ms1 prefix=ms1 options= \
-		archfile=$(srcdir)/../cpu/ms1.cpu \
-		opcfile=$(srcdir)/../cpu/ms1.opc extrafiles=
+		archfile=$(srcdir)/../cpu/mt.cpu \
+		opcfile=$(srcdir)/../cpu/mt.opc extrafiles=
 
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true

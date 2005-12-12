@@ -43,7 +43,7 @@ CPU_DOCS = \
 	c-m68k.texi \
 	c-mips.texi \
 	c-mmix.texi \
-	c-ms1.texi \
+	c-mt.texi \
 	c-msp430.texi \
 	c-ns32k.texi \
 	c-pdp11.texi \

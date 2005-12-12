@@ -1,3 +1,9 @@
+2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* Makefile.am: Replace ms1 files with mt files.
+	* Makefile.in: Rebuilt.
+	* readelf.c (elf/mt.h): Adjust #include.
+
 2005-11-30  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add fi.

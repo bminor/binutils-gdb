@@ -1,3 +1,15 @@
+2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* Makefile.am (ALL_MACHINES, ALL_MACHINES_CFILES,
+	BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Replace ms1 with mt.
+	(cpu_mt.lo, elf32-mt.lo): Update target and dependency names.
+	* Makefile.in: Rebuilt.
+	* config.bfd: Replace ms1 arch with mt.
+	* configure.in: Replace ms1 files with mt files.
+	* configure: Rebuilt.
+	* elf32-mt.c: Renamed from elf32-ms1.c.  Update include files.
+	* cpu-mt.c: Renamed from cpu-ms1.c.
+
 2005-12-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_size_stubs): Don't consider non-ppc64 input.

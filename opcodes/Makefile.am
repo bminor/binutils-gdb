@@ -378,7 +378,7 @@ uninstall_libopcodes:
 
 CLEANFILES = \
 	stamp-ip2k stamp-m32c stamp-m32r stamp-fr30 stamp-frv \
-	stamp-openrisc stamp-iq2000 stamp-ms1 stamp-xstormy16 \
+	stamp-openrisc stamp-iq2000 stamp-mt stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
@@ -394,7 +394,7 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = fr30 frv ip2k m32c m32r ms1 openrisc xstormy16
+CGEN_CPUS = fr30 frv ip2k m32c m32r mt openrisc xstormy16
 
 if CGEN_MAINT
 IP2K_DEPS = stamp-ip2k
@@ -402,7 +402,7 @@ M32C_DEPS = stamp-m32c
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
 FRV_DEPS = stamp-frv
-MS1_DEPS = stamp-ms1
+MT_DEPS = stamp-mt
 OPENRISC_DEPS = stamp-openrisc
 IQ2000_DEPS = stamp-iq2000
 XSTORMY16_DEPS = stamp-xstormy16
@@ -412,7 +412,7 @@ M32C_DEPS =
 M32R_DEPS =
 FR30_DEPS =
 FRV_DEPS =
-MS1_DEPS =
+MT_DEPS =
 OPENRISC_DEPS = 
 IQ2000_DEPS = 
 XSTORMY16_DEPS = 
@@ -484,12 +484,12 @@ stamp-frv: $(CGENDEPS) $(srcdir)/../cpu/frv.cpu $(srcdir)/../cpu/frv.opc
 	$(MAKE) run-cgen arch=frv prefix=frv options= \
 		archfile=$(srcdir)/../cpu/frv.cpu opcfile=$(srcdir)/../cpu/frv.opc extrafiles=
 
-$(srcdir)/ms1-desc.h $(srcdir)/ms1-desc.c $(srcdir)/ms1-opc.h $(srcdir)/ms1-opc.c $(srcdir)/ms1-ibld.c $(srcdir)/ms1-asm.c $(srcdir)/ms1-dis.c: $(MS1_DEPS)
+$(srcdir)/ms1-desc.h $(srcdir)/ms1-desc.c $(srcdir)/ms1-opc.h $(srcdir)/ms1-opc.c $(srcdir)/ms1-ibld.c $(srcdir)/ms1-asm.c $(srcdir)/ms1-dis.c: $(MT_DEPS)
 	@true
-stamp-ms1: $(CGENDEPS) $(srcdir)/../cpu/ms1.cpu $(srcdir)/../cpu/ms1.opc
+stamp-mt: $(CGENDEPS) $(srcdir)/../cpu/mt.cpu $(srcdir)/../cpu/mt.opc
 	$(MAKE) run-cgen arch=ms1 prefix=ms1 options= \
-		archfile=$(srcdir)/../cpu/ms1.cpu \
-		opcfile=$(srcdir)/../cpu/ms1.opc extrafiles=
+		archfile=$(srcdir)/../cpu/mt.cpu \
+		opcfile=$(srcdir)/../cpu/mt.opc extrafiles=
 
 $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
 	@true

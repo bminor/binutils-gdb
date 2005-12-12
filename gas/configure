@@ -4694,7 +4694,7 @@ _ACEOF
 	fi
 	;;
 
-      ms1)
+      mt)
         using_cgen=yes
 	;;
 
@@ -4812,6 +4812,7 @@ esac
 cgen_cpu_prefix=""
 if test $using_cgen = yes ; then
   case ${target_cpu} in
+    mt) cgen_cpu_prefix=ms1 ;;
     *) cgen_cpu_prefix=${target_cpu} ;;
   esac
 

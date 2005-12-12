@@ -1,3 +1,10 @@
+2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/mt: Renamed from ms1 dir.  Update file names as needed.
+	* gas/mt/errors.exp: Replace ms1 arch with mt arch.
+	* gas/mt/mt.exp: Replace ms1 arch with mt arch.
+	* gas/mt/relocs.exp: Replace ms1 arch with mt arch.
+
 2005-12-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-bcnst-pic.d, gas/cris/rd-branch-pic.d,

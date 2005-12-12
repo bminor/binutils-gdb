@@ -1,3 +1,10 @@
+2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* Makefile.am (CLEANFILES, CGEN_CPUS, MT_DEPS): Replace ms1 with mt.
+	* Makefile.in: Rebuilt.
+	* configure.in: Replace ms1 files with mt files.
+	* configure: Rebuilt.
+
 2005-12-08  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (MAXLEN): Reduce to architectural limit.

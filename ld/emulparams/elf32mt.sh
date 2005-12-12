@@ -1,7 +1,7 @@
 MACHINE=
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf32-ms1"
-# See also `include/elf/ms1.h'
+# See also `include/elf/mt.h'
 TEXT_START_ADDR=0x2000
 ARCH=ms1
 ENTRY=_start
