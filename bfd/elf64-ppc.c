@@ -8912,6 +8912,9 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 	  asection *section;
 	  Elf_Internal_Sym *local_syms = NULL;
 
+	  if (!is_ppc64_elf_target (input_bfd->xvec))
+	    continue;
+
 	  /* We'll need the symbol table in a second.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 	  if (symtab_hdr->sh_info == 0)
