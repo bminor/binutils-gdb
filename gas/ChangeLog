@@ -1,3 +1,20 @@
+2005-12-12  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_branch): Generate EABI branch relocations.
+	(do_bl): New function.
+	(do_blx): Generate BFD_RELOC_ARM_PCREL_CALL relocation.
+	(do_t_blx): Generate BFD_RELOC_THUMB_PCREL_BRANCH23.
+	(insns): Use do_bl.
+	(md_pcrel_from_section): Add BFD_RELOC_ARM_PCREL_CALL and
+	BFD_RELOC_ARM_PCREL_JUMP.
+	(md_apply_fix): Merge BFD_RELOC_ARM_PCREL_BRANCH and
+	BFD_RELOC_ARM_PCREL_BLX cases.  Handle BFD_RELOC_ARM_PCREL_CALL and
+	BFD_RELOC_ARM_PCREL_JUMP.
+	(tc_gen_reloc): Handle BFD_RELOC_ARM_PCREL_CALL and
+	BFD_RELOC_ARM_PCREL_JUMP.
+	gas/testsuite/
+	* gas/arm/pic.d: Allow R_ARM_CALL relocations.
+
 2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* configure.in: Replace ms1 arch with mt arch.

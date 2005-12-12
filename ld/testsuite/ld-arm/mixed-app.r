@@ -1,5 +1,5 @@
 
-tmpdir/mixed-app:     file format elf32-(little|big)arm
+tmpdir/mixed-app.*:     file format elf32-(little|big)arm
 
 DYNAMIC RELOCATION RECORDS
 OFFSET   TYPE              VALUE 

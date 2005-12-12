@@ -1297,6 +1297,8 @@ static const struct elf32_arm_reloc_map elf32_arm_reloc_map[] =
   {
     {BFD_RELOC_NONE,                 R_ARM_NONE},
     {BFD_RELOC_ARM_PCREL_BRANCH,     R_ARM_PC24},
+    {BFD_RELOC_ARM_PCREL_CALL,	     R_ARM_CALL},
+    {BFD_RELOC_ARM_PCREL_JUMP,	     R_ARM_JUMP24},
     {BFD_RELOC_ARM_PCREL_BLX,        R_ARM_XPC25},
     {BFD_RELOC_THUMB_PCREL_BLX,      R_ARM_THM_XPC22},
     {BFD_RELOC_32,                   R_ARM_ABS32},
@@ -2285,6 +2287,12 @@ bfd_elf32_arm_get_bfd_for_interworking (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
+static void check_use_blx(struct elf32_arm_link_hash_table *globals)
+{
+  if (elf32_arm_get_eabi_attr_int (globals->obfd, Tag_CPU_arch) > 2)
+    globals->use_blx = 1;
+}
+
 bfd_boolean
 bfd_elf32_arm_process_before_allocation (bfd *abfd,
 					 struct bfd_link_info *link_info,
@@ -2306,6 +2314,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
   /* Here we have a bfd that is to be included on the link.  We have a hook
      to do reloc rummaging, before section sizes are nailed down.  */
   globals = elf32_arm_hash_table (link_info);
+  check_use_blx (globals);
 
   BFD_ASSERT (globals != NULL);
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
@@ -2403,7 +2412,8 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	      /* This one is a call from arm code.  We need to look up
 	         the target of the call.  If it is a thumb target, we
 	         insert glue.  */
-	      if (ELF_ST_TYPE(h->type) == STT_ARM_TFUNC)
+	      if (ELF_ST_TYPE(h->type) == STT_ARM_TFUNC
+		  && !(r_type == R_ARM_CALL && globals->use_blx))
 		record_arm_to_thumb_glue (link_info, h);
 	      break;
 
@@ -2411,7 +2421,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	      /* This one is a call from thumb code.  We look
 	         up the target of the call.  If it is not a thumb
                  target, we insert glue.  */
-	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC)
+	      if (ELF_ST_TYPE (h->type) != STT_ARM_TFUNC && !globals->use_blx)
 		record_thumb_to_arm_glue (link_info, h);
 	      break;
 
@@ -3045,7 +3055,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		   input_bfd,
 		   h ? h->root.root.string : "(local)");
 	    }
-	  else
+	  else if (r_type != R_ARM_CALL || !globals->use_blx)
 	    {
 	      /* Check for Arm calling Thumb function.  */
 	      if (sym_flags == STT_ARM_TFUNC)
@@ -3101,14 +3111,30 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		return bfd_reloc_overflow;
 	    }
 
-	  /* If necessary set the H bit in the BLX instruction.  */
-	  if (r_type == R_ARM_XPC25 && ((value & 2) == 2))
-	    value = (signed_addend & howto->dst_mask)
-	      | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask))
-	      | (1 << 24);
-	  else
-	    value = (signed_addend & howto->dst_mask)
-	      | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
+	  addend = (value & 2);
+
+	  value = (signed_addend & howto->dst_mask)
+	    | (bfd_get_32 (input_bfd, hit_data) & (~ howto->dst_mask));
+
+	  /* Set the H bit in the BLX instruction.  */
+	  if (sym_flags == STT_ARM_TFUNC)
+	    {
+	      if (addend)
+		value |= (1 << 24);
+	      else
+		value &= ~(bfd_vma)(1 << 24);
+	    }
+	  if (r_type == R_ARM_CALL)
+	    {
+	      /* Select the correct instruction (BL or BLX).  */
+	      if (sym_flags == STT_ARM_TFUNC)
+		value |= (1 << 28);
+	      else
+		{
+		  value &= ~(bfd_vma)(1 << 28);
+		  value |= (1 << 24);
+		}
+	    }
 	  break;
 
 	case R_ARM_ABS32:
@@ -3204,7 +3230,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 	bfd_vma check;
 	bfd_signed_vma signed_check;
-	bfd_boolean thumb_plt_call = FALSE;
 
 	/* Need to refetch the addend and squish the two 11 bit pieces
 	   together.  */
@@ -3238,12 +3263,22 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		&& (h == NULL || splt == NULL
 		    || h->plt.offset == (bfd_vma) -1))
 	      {
-		if (elf32_thumb_to_arm_stub
+		if (globals->use_blx)
+		  {
+		    /* Convert BL to BLX.  */
+		    lower_insn = (lower_insn & ~0x1000) | 0x0800;
+		  }
+		else if (elf32_thumb_to_arm_stub
 		    (info, sym_name, input_bfd, output_bfd, input_section,
 		     hit_data, sym_sec, rel->r_offset, signed_addend, value))
 		  return bfd_reloc_ok;
 		else
 		  return bfd_reloc_dangerous;
+	      }
+	    else if (sym_flags == STT_ARM_TFUNC && globals->use_blx)
+	      {
+		/* Make sure this is a BL.  */
+		lower_insn |= 0x1800;
 	      }
 	  }
 
@@ -3257,11 +3292,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
  	      {
  		/* If the Thumb BLX instruction is available, convert the
 		   BL to a BLX instruction to call the ARM-mode PLT entry.  */
- 		if ((lower_insn & (0x3 << 11)) == 0x3 << 11)
-		  {
-		    lower_insn = (lower_insn & ~(0x3 << 11)) | 0x1 << 11;
-		    thumb_plt_call = TRUE;
-		  }
+		lower_insn = (lower_insn & ~0x1000) | 0x0800;
  	      }
  	    else
  	      /* Target the Thumb stub before the ARM PLT entry.  */
@@ -3288,9 +3319,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
 	  overflow = TRUE;
 
-	if ((r_type == R_ARM_THM_XPC22
-	     && ((lower_insn & 0x1800) == 0x0800))
-	    || thumb_plt_call)
+	if ((lower_insn & 0x1800) == 0x0800)
 	  /* For a BLX instruction, make sure that the relocation is rounded up
 	     to a word boundary.  This follows the semantics of the instruction
 	     which specifies that bit 1 of the target address will come from bit
@@ -4472,6 +4501,31 @@ elf32_arm_new_eabi_attr (bfd *abfd, int tag)
     }
 
   return attr;
+}
+
+int
+elf32_arm_get_eabi_attr_int (bfd *abfd, int tag)
+{
+  aeabi_attribute_list *p;
+
+  if (tag < NUM_KNOWN_ATTRIBUTES)
+    {
+      /* Knwon tags are preallocated.  */
+      return elf32_arm_tdata (abfd)->known_eabi_attributes[tag].i;
+    }
+  else
+    {
+      for (p = elf32_arm_tdata (abfd)->other_eabi_attributes;
+	   p;
+	   p = p->next)
+	{
+	  if (tag == p->tag)
+	    return p->attr.i;
+	  if (tag < p->tag)
+	    break;
+	}
+      return 0;
+    }
 }
 
 void
@@ -6381,6 +6435,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
   htab = elf32_arm_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
+  check_use_blx (htab);
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {

@@ -2610,6 +2610,14 @@ ENUMDOC
   Thumb 22 bit pc-relative branch.  The lowest bit must be zero and is
   not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
   field in the instruction.
+ENUM 
+  BFD_RELOC_ARM_PCREL_CALL
+ENUMDOC
+  ARM 26-bit pc-relative branch for an unconditional BL or BLX instruction.
+ENUM 
+  BFD_RELOC_ARM_PCREL_JUMP
+ENUMDOC
+  ARM 26-bit pc-relative branch for B or conditional BL instruction.
 
 ENUM
   BFD_RELOC_THUMB_PCREL_BRANCH7

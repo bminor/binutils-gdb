@@ -4610,7 +4610,28 @@ encode_branch (int default_reloc)
 static void
 do_branch (void)
 {
-  encode_branch (BFD_RELOC_ARM_PCREL_BRANCH);
+#ifdef OBJ_ELF
+  if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4)
+    encode_branch (BFD_RELOC_ARM_PCREL_JUMP);
+  else
+#endif
+    encode_branch (BFD_RELOC_ARM_PCREL_BRANCH);
+}
+
+static void
+do_bl (void)
+{
+#ifdef OBJ_ELF
+  if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4)
+    {
+      if (inst.cond == COND_ALWAYS)
+	encode_branch (BFD_RELOC_ARM_PCREL_CALL);
+      else
+	encode_branch (BFD_RELOC_ARM_PCREL_JUMP);
+    }
+  else
+#endif
+    encode_branch (BFD_RELOC_ARM_PCREL_BRANCH);
 }
 
 /* ARM V5 branch-link-exchange instruction (argument parse)
@@ -4639,7 +4660,12 @@ do_blx (void)
 	 conditionally, and the opcode must be adjusted.  */
       constraint (inst.cond != COND_ALWAYS, BAD_COND);
       inst.instruction = 0xfa000000;
-      encode_branch (BFD_RELOC_ARM_PCREL_BLX);
+#ifdef OBJ_ELF
+      if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4)
+	encode_branch (BFD_RELOC_ARM_PCREL_CALL);
+      else
+#endif
+	encode_branch (BFD_RELOC_ARM_PCREL_BLX);
     }
 }
 
@@ -6434,7 +6460,12 @@ do_t_blx (void)
     {
       /* No register.  This must be BLX(1).  */
       inst.instruction = 0xf000e800;
-      inst.reloc.type	= BFD_RELOC_THUMB_PCREL_BLX;
+#ifdef OBJ_ELF
+      if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4)
+	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH23;
+      else
+#endif
+	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BLX;
       inst.reloc.pc_rel = 1;
     }
 }
@@ -8689,7 +8720,7 @@ static const struct asm_opcode insns[] =
 
  TCE(swi,	f000000, df00,     1, (EXPi),        swi, t_swi),
  tCE(b,		a000000, b,	   1, (EXPr),	     branch, t_branch),
- TCE(bl,	b000000, f000f800, 1, (EXPr),	     branch, t_branch23),
+ TCE(bl,	b000000, f000f800, 1, (EXPr),	     bl, t_branch23),
 
   /* Pseudo ops.  */
  tCE(adr,	28f0000, adr,	   2, (RR, EXP),     adr,  t_adr),
@@ -10849,6 +10880,8 @@ md_pcrel_from_section (fixS * fixP, segT seg)
       /* ARM mode branches are offset by +8.  However, the Windows CE
 	 loader expects the relocation not to take this into account.  */
     case BFD_RELOC_ARM_PCREL_BRANCH:
+    case BFD_RELOC_ARM_PCREL_CALL:
+    case BFD_RELOC_ARM_PCREL_JUMP:
     case BFD_RELOC_ARM_PCREL_BLX:
     case BFD_RELOC_ARM_PLT32:
 #ifdef TE_WINCE
@@ -11457,15 +11490,30 @@ md_apply_fix (fixS *	fixP,
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
-    case BFD_RELOC_ARM_PCREL_BRANCH:
 #ifdef OBJ_ELF
+    case BFD_RELOC_ARM_PCREL_CALL:
+      newval = md_chars_to_number (buf, INSN_SIZE);
+      if ((newval & 0xf0000000) == 0xf0000000)
+	temp = 1;
+      else
+	temp = 3;
+      goto arm_branch_common;
+
+    case BFD_RELOC_ARM_PCREL_JUMP:
     case BFD_RELOC_ARM_PLT32:
 #endif
+    case BFD_RELOC_ARM_PCREL_BRANCH:
+      temp = 3;
+      goto arm_branch_common;
 
+    case BFD_RELOC_ARM_PCREL_BLX:
+      temp = 1;
+    arm_branch_common:
       /* We are going to store value (shifted right by two) in the
-	 instruction, in a 24 bit, signed field.  Bits 0 and 1 must be
-	 clear, and bits 26 through 32 either all clear or all set. */
-      if (value & 0x00000003)
+	 instruction, in a 24 bit, signed field.  Bits 26 through 32 either
+	 all clear or all set and bit 0 must be clear.  For B/BL bit 1 must
+	 also be be clear.  */
+      if (value & temp)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("misaligned branch destination"));
       if ((value & (offsetT)0xfe000000) != (offsetT)0
@@ -11477,30 +11525,6 @@ md_apply_fix (fixS *	fixP,
 	{
 	  newval = md_chars_to_number (buf, INSN_SIZE);
 	  newval |= (value >> 2) & 0x00ffffff;
-	  md_number_to_chars (buf, newval, INSN_SIZE);
-	}
-      break;
-
-    case BFD_RELOC_ARM_PCREL_BLX:
-      /* BLX allows bit 1 to be set in the branch destination, since
-	 it targets a Thumb instruction which is only required to be
-	 aligned modulo 2.  Other constraints are as for B/BL.  */
-      if (value & 0x00000001)
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("misaligned BLX destination"));
-      if ((value & (offsetT)0xfe000000) != (offsetT)0
-	  && (value & (offsetT)0xfe000000) != (offsetT)0xfe000000)
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("branch out of range"));
-
-      if (fixP->fx_done || !seg->use_rela_p)
-	{
-	  offsetT hbit;
-	  hbit   = (value >> 1) & 1;
-	  value  = (value >> 2) & 0x00ffffff;
-
-	  newval = md_chars_to_number (buf, INSN_SIZE);
-	  newval |= value | hbit << 24;
 	  md_number_to_chars (buf, newval, INSN_SIZE);
 	}
       break;
@@ -11969,6 +11993,8 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
     case BFD_RELOC_ARM_TARGET2:
     case BFD_RELOC_ARM_TLS_LE32:
     case BFD_RELOC_ARM_TLS_LDO32:
+    case BFD_RELOC_ARM_PCREL_CALL:
+    case BFD_RELOC_ARM_PCREL_JUMP:
       code = fixp->fx_r_type;
       break;
 

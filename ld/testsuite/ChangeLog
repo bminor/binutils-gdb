@@ -1,3 +1,13 @@
+2005-12-12  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-call.d: New test.
+	* ld-arm/arm-call1.s: New file.
+	* ld-arm/arm-call1.s: New file.
+	* ld-arm/arm-elf.exp: Add arm-call and mixed-app-v5.
+	* ld-arm/arm.ld: Add .glue_7 and .ARM.attribues.
+	* ld-arm/mixed-app-v5.d: New file.
+	* ld-arm/mixed-app.r: Tweak expected output.
+
 2005-11-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/symtocbase.d: Adjust for alignment change.

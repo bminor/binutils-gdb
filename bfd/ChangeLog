@@ -1,3 +1,18 @@
+2005-12-12  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (elf32_arm_reloc_map): Add BFD_RELOC_ARM_PCREL_CALL and
+	BFD_RELOC_ARM_PCREL_JUMP.
+	(check_use_blx): New function.
+	(bfd_elf32_arm_process_before_allocation): Don't allocate glue if
+	using BLX.
+	(elf32_arm_final_link_relocate): Perform bl<->blx conversion for
+	R_ARM_CALL and R_ARM_THM.
+	(elf32_arm_get_eabi_attr_int): New function.
+	(elf32_arm_size_dynamic_sections): Call check_use_blx.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add BFD_RELOC_ARM_PCREL_CALL and BFD_RELOC_ARM_PCREL_JUMP.
+
 2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* Makefile.am (ALL_MACHINES, ALL_MACHINES_CFILES,

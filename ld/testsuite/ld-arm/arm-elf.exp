@@ -57,6 +57,11 @@ set armelftests {
      {{objdump -fdw mixed-app.d} {objdump -Rw mixed-app.r}
       {readelf -Ds mixed-app.sym}}
      "mixed-app"}
+    {"Mixed ARM/Thumb arch5 dynamic application" "tmpdir/mixed-lib.so -T arm-dyn.ld --use-blx" ""
+     {mixed-app.s}
+     {{objdump -fdw mixed-app-v5.d} {objdump -Rw mixed-app.r}
+      {readelf -Ds mixed-app.sym}}
+     "mixed-app-v5"}
     {"target1-abs" "-static --target1-abs -T arm.ld" "" {arm-target1.s}
      {{objdump -s arm-target1-abs.d}}
      "arm-target1-abs"}
@@ -75,6 +80,9 @@ set armelftests {
     {"arm-rel31" "-static -T arm.ld" "" {arm-rel31.s}
      {{objdump -s arm-rel31.d}}
      "arm-rel31"}
+    {"arm-call" "-static -T arm.ld" "-meabi=4" {arm-call1.s arm-call2.s}
+     {{objdump -d arm-call.d}}
+     "arm-call"}
     {"TLS shared library" "-shared -T arm-lib.ld" "" {tls-lib.s}
      {{objdump -fdw tls-lib.d} {objdump -Rw tls-lib.r}}
      "tls-lib.so"}

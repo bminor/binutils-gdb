@@ -10,7 +10,9 @@ SECTIONS
     *(.before)
     *(.text)
     *(.after)
+    *(.glue_7)
   } =0
   . = 0x9000;
   .got            : { *(.got) *(.got.plt)}
+  .ARM.attribues 0 : { *(.ARM.atttributes) }
 }
