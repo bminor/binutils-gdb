@@ -1,5 +1,8 @@
 2005-12-13  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_unwind_sniffer): Detect
+	export stub for signal trampoline as a signal trampoline too.
+
 	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_unwind_cache): Don't
 	set pcoqh to rp.
 

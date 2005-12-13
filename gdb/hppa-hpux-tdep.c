@@ -1276,6 +1276,22 @@ hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
 
   u = find_unwind_entry (pc);
 
+  /* If this is an export stub, try to get the unwind descriptor for
+     the actual function itself.  */
+  if (u && u->stub_unwind.stub_type == EXPORT)
+    {
+      gdb_byte buf[HPPA_INSN_SIZE];
+      unsigned long insn;
+
+      if (!safe_frame_unwind_memory (next_frame, u->region_start,
+				     buf, sizeof buf))
+	return NULL;
+
+      insn = extract_unsigned_integer (buf, sizeof buf);
+      if ((insn & 0xffe0e000) == 0xe8400000)
+	u = find_unwind_entry(u->region_start + hppa_extract_17 (insn) + 8);
+    }
+
   if (u && u->HP_UX_interrupt_marker)
     return &hppa_hpux_sigtramp_frame_unwind;
 
