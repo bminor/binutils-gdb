@@ -10070,10 +10070,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if (stub_entry->stub_type == ppc_stub_plt_call)
 		    {
 		      /* If this is a plain branch rather than a branch
-			 and link, don't require a nop.  */
+			 and link, don't require a nop.  However, don't
+			 allow tail calls in a shared library as they
+			 will result in r2 being corrupted.  */
 		      unsigned long br;
 		      br = bfd_get_32 (input_bfd, contents + rel->r_offset);
-		      if ((br & 1) == 0)
+		      if (info->executable && (br & 1) == 0)
 			can_plt_call = TRUE;
 		      else
 			stub_entry = NULL;
