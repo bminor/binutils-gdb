@@ -500,7 +500,7 @@ static void
 h8300_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 			   int regnum, int *optimizedp,
 			   enum lval_type *lvalp, CORE_ADDR *addrp,
-			   int *realnump, void *valuep)
+			   int *realnump, gdb_byte *valuep)
 {
   struct h8300_frame_cache *cache =
     h8300_frame_cache (next_frame, this_cache);
@@ -685,7 +685,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       /* Pad the argument appropriately.  */
       int padded_len = align_up (len, wordsize);
-      char *padded = alloca (padded_len);
+      gdb_byte *padded = alloca (padded_len);
 
       memset (padded, 0, padded_len);
       memcpy (len < wordsize ? padded + padded_len - len : padded,
@@ -905,7 +905,7 @@ h8300h_store_return_value (struct type *type, struct regcache *regcache,
 static enum return_value_convention
 h8300_return_value (struct gdbarch *gdbarch, struct type *type,
 		    struct regcache *regcache,
-		    void *readbuf, const void *writebuf)
+		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (h8300_use_struct_convention (type))
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -919,7 +919,7 @@ h8300_return_value (struct gdbarch *gdbarch, struct type *type,
 static enum return_value_convention
 h8300h_return_value (struct gdbarch *gdbarch, struct type *type,
 		     struct regcache *regcache,
-		     void *readbuf, const void *writebuf)
+		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (h8300h_use_struct_convention (type))
     {
@@ -1145,7 +1145,8 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
 
 static void
 h8300_pseudo_register_read (struct gdbarch *gdbarch,
-			    struct regcache *regcache, int regno, void *buf)
+			    struct regcache *regcache, int regno,
+			    gdb_byte *buf)
 {
   if (regno == E_PSEUDO_CCR_REGNUM)
     regcache_raw_read (regcache, E_CCR_REGNUM, buf);
@@ -1158,7 +1159,7 @@ h8300_pseudo_register_read (struct gdbarch *gdbarch,
 static void
 h8300_pseudo_register_write (struct gdbarch *gdbarch,
 			     struct regcache *regcache, int regno,
-			     const void *buf)
+			     const gdb_byte *buf)
 {
   if (regno == E_PSEUDO_CCR_REGNUM)
     regcache_raw_write (regcache, E_CCR_REGNUM, buf);

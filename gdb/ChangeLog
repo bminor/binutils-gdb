@@ -1,5 +1,15 @@
 2005-12-13  Corinna Vinschen  <vinschen@redhat.com>
 
+	* h8300-tdep.c (h8300_frame_prev_register): Change valuep type to
+	gdb_byte *.
+	(h8300_push_dummy_call): Change `padded' to gdb_byte.
+	(h8300_return_value): Change buffer types to gdb_byte.
+	(h8300h_return_value): Ditto.
+	(h8300_pseudo_register_read): Ditto.
+	(h8300_pseudo_register_write): Ditto.
+
+2005-12-13  Corinna Vinschen  <vinschen@redhat.com>
+
 	* v850-tdep.c (v850_frame_prev_register): Change valuep type to
 	gdb_byte *.
 
