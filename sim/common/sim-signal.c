@@ -95,7 +95,7 @@ sim_signal_to_host (SIM_DESC sd, SIM_SIGNAL sig)
 #endif
 }
 
-int 
+enum target_signal
 sim_signal_to_target (SIM_DESC sd, SIM_SIGNAL sig)
 {
   switch (sig)
@@ -115,7 +115,7 @@ sim_signal_to_target (SIM_DESC sd, SIM_SIGNAL sig)
     case SIM_SIGBUS :
       return TARGET_SIGNAL_BUS;
 
-    case SIM_SIGSEGV 
+    case SIM_SIGSEGV :
       return TARGET_SIGNAL_SEGV;
 
     case SIM_SIGXCPU :

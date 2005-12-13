@@ -1,3 +1,7 @@
+2005-12-13  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* sim-signal.c (sim_signal_to_target): Fix typos.
+
 2005-07-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* sim-load.c (xprintf, eprintf): Remove fallout from ANSI_PROTOTYPES
