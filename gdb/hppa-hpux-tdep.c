@@ -1233,9 +1233,6 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 
   /* TODO: fp regs */
 
-  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].addr = 
-    info->saved_regs[HPPA_RP_REGNUM].addr;
-
   info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
 
   return info;

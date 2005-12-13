@@ -1,3 +1,8 @@
+2005-12-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_frame_unwind_cache): Don't
+	set pcoqh to rp.
+
 2005-12-13  Corinna Vinschen  <vinschen@redhat.com>
 
 	* h8300-tdep.c (h8300_frame_prev_register): Change valuep type to
