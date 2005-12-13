@@ -1,3 +1,8 @@
+2005-12-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* v850-tdep.c (v850_frame_prev_register): Change valuep type to
+	gdb_byte *.
+
 2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* configure.tgt: Replace ms1 arch with mt arch.
