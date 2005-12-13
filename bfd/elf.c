@@ -654,8 +654,23 @@ _bfd_elf_setup_sections (bfd *abfd)
 	    }
 	  else
 	    {
+	      asection *link;
+
 	      this_hdr = elf_elfsections (abfd)[elfsec];
-	      elf_linked_to_section (s) = this_hdr->bfd_section;
+
+	      /* PR 1991, 2008:
+		 Some strip/objcopy may leave an incorrect value in
+		 sh_link.  We don't want to proceed.  */
+	      link = this_hdr->bfd_section;
+	      if (link == NULL)
+		{
+		  (*_bfd_error_handler)
+		    (_("%B: sh_link [%d] in section `%A' is incorrect"),
+		     s->owner, s, elfsec);
+		  result = FALSE;
+		}
+
+	      elf_linked_to_section (s) = link;
 	    }
 	}
     }
