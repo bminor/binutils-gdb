@@ -1,3 +1,9 @@
+2005-12-14  Jakub Jelinek  <jakub@redhat.com>
+
+	* scripttempl/elf.sc: Put .gnu.linkonce.d.rel.ro.* sections into
+	.data.rel.ro output section.  Fix a pasto for -z nocombreloc
+	.rela.data.rel.ro section content.
+
 2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Replace ms1 files with mt files.
