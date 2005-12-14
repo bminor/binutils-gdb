@@ -1,3 +1,7 @@
+2005-12-13  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-m32c.c (m32c_md_end): Only pad code sections.
+
 2005-12-12  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_branch): Generate EABI branch relocations.

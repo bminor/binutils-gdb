@@ -31,6 +31,7 @@
 #include "libbfd.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
+#include "bfd.h"
 
 /* Structure to hold all of the different components
    describing an individual instruction.  */
@@ -180,10 +181,13 @@ m32c_md_end (void)
 {
   int i, n_nops;
 
-  /* Pad with nops for objdump.  */
-  n_nops = (32 - ((insn_size) % 32)) / 8;
-  for (i = 1; i <= n_nops; i++)
-    md_assemble ("nop");
+  if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
+    {
+      /* Pad with nops for objdump.  */
+      n_nops = (32 - ((insn_size) % 32)) / 8;
+      for (i = 1; i <= n_nops; i++)
+	md_assemble ("nop");
+    }
 }
 
 void
