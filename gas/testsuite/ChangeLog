@@ -1,3 +1,8 @@
+2005-12-14  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/rex.[sd]: New.
+	* gas/i386/i386.exp: Run new test.
+
 2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/mt: Renamed from ms1 dir.  Update file names as needed.

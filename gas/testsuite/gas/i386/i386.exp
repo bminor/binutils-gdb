@@ -133,6 +133,21 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "immed64"
     run_dump_test "x86-64-prescott"
 
+    if { ![istarget "*-*-aix*"]
+      && ![istarget "*-*-beos*"]
+      && ![istarget "*-*-*bsd*"]
+      && ![istarget "*-*-chaos*"]
+      && ![istarget "*-*-kaos*"]
+      && ![istarget "*-*-lynx*"]
+      && ![istarget "*-*-moss*"]
+      && ![istarget "*-*-nto-qnx*"]
+      && ![istarget "*-*-rtems*"]
+      && ![istarget "*-*-sco*"]
+      && ![istarget "*-*-solaris*"]
+      && ![istarget "*-*-sysv*"] } then {
+	run_dump_test "rex"
+    }
+
     # For ELF targets verify that @unwind works.
     if { ([istarget "*-*-elf*"] || [istarget "*-*-linux*"]
 	  || [istarget "*-*-solaris2.*"])

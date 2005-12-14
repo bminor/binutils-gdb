@@ -1,3 +1,9 @@
+2005-12-14  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (add_prefix): More fine-grained handling of
+	REX prefixes. Or new prefix value into i.prefix instead of
+	assigning.
+
 2005-12-13  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.c (m32c_md_end): Only pad code sections.

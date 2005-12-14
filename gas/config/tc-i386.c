@@ -730,55 +730,66 @@ add_prefix (prefix)
      unsigned int prefix;
 {
   int ret = 1;
-  int q;
+  unsigned int q;
 
   if (prefix >= REX_OPCODE && prefix < REX_OPCODE + 16
       && flag_code == CODE_64BIT)
-    q = REX_PREFIX;
-  else
-    switch (prefix)
-      {
-      default:
-	abort ();
-
-      case CS_PREFIX_OPCODE:
-      case DS_PREFIX_OPCODE:
-      case ES_PREFIX_OPCODE:
-      case FS_PREFIX_OPCODE:
-      case GS_PREFIX_OPCODE:
-      case SS_PREFIX_OPCODE:
-	q = SEG_PREFIX;
-	break;
-
-      case REPNE_PREFIX_OPCODE:
-      case REPE_PREFIX_OPCODE:
-	ret = 2;
-	/* fall thru */
-      case LOCK_PREFIX_OPCODE:
-	q = LOCKREP_PREFIX;
-	break;
-
-      case FWAIT_OPCODE:
-	q = WAIT_PREFIX;
-	break;
-
-      case ADDR_PREFIX_OPCODE:
-	q = ADDR_PREFIX;
-	break;
-
-      case DATA_PREFIX_OPCODE:
-	q = DATA_PREFIX;
-	break;
-      }
-
-  if (i.prefix[q] != 0)
     {
-      as_bad (_("same type of prefix used twice"));
-      return 0;
+      if ((i.prefix[REX_PREFIX] & prefix & REX_MODE64)
+	  || ((i.prefix[REX_PREFIX] & (REX_EXTX | REX_EXTY | REX_EXTZ))
+	      && (prefix & (REX_EXTX | REX_EXTY | REX_EXTZ))))
+	ret = 0;
+      q = REX_PREFIX;
+    }
+  else
+    {
+      switch (prefix)
+	{
+	default:
+	  abort ();
+
+	case CS_PREFIX_OPCODE:
+	case DS_PREFIX_OPCODE:
+	case ES_PREFIX_OPCODE:
+	case FS_PREFIX_OPCODE:
+	case GS_PREFIX_OPCODE:
+	case SS_PREFIX_OPCODE:
+	  q = SEG_PREFIX;
+	  break;
+
+	case REPNE_PREFIX_OPCODE:
+	case REPE_PREFIX_OPCODE:
+	  ret = 2;
+	  /* fall thru */
+	case LOCK_PREFIX_OPCODE:
+	  q = LOCKREP_PREFIX;
+	  break;
+
+	case FWAIT_OPCODE:
+	  q = WAIT_PREFIX;
+	  break;
+
+	case ADDR_PREFIX_OPCODE:
+	  q = ADDR_PREFIX;
+	  break;
+
+	case DATA_PREFIX_OPCODE:
+	  q = DATA_PREFIX;
+	  break;
+	}
+      if (i.prefix[q] != 0)
+	ret = 0;
     }
 
-  i.prefixes += 1;
-  i.prefix[q] = prefix;
+  if (ret)
+    {
+      if (!i.prefix[q])
+	++i.prefixes;
+      i.prefix[q] |= prefix;
+    }
+  else
+    as_bad (_("same type of prefix used twice"));
+
   return ret;
 }
 
