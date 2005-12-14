@@ -34340,6 +34340,36 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_JSRI32_A_DST32_16_24_ABSOLUTE_UNPREFIXED_SI, "jsri32.a-dst32-16-24-absolute-Unprefixed-SI", "jsri.w", 40,
     { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
+/* jsri.a $Dst32RnUnprefixedSI */
+  {
+    M32C_INSN_JSRI32A_DST32_BASIC_UNPREFIXED_SI_DST32_RN_DIRECT_UNPREFIXED_SI, "jsri32a-dst32-basic-Unprefixed-SI-dst32-Rn-direct-Unprefixed-SI", "jsri.a", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* jsri.a $Dst32AnUnprefixedSI */
+  {
+    M32C_INSN_JSRI32A_DST32_BASIC_UNPREFIXED_SI_DST32_AN_DIRECT_UNPREFIXED_SI, "jsri32a-dst32-basic-Unprefixed-SI-dst32-An-direct-Unprefixed-SI", "jsri.a", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* jsri.a [$Dst32AnUnprefixed] */
+  {
+    M32C_INSN_JSRI32A_DST32_BASIC_UNPREFIXED_SI_DST32_AN_INDIRECT_UNPREFIXED_SI, "jsri32a-dst32-basic-Unprefixed-SI-dst32-An-indirect-Unprefixed-SI", "jsri.a", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* jsri.a $Dst16RnSI */
+  {
+    M32C_INSN_JSRI16A_DST16_BASIC_SI_DST16_RN_DIRECT_SI, "jsri16a-dst16-basic-SI-dst16-Rn-direct-SI", "jsri.a", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* jsri.a $Dst16AnSI */
+  {
+    M32C_INSN_JSRI16A_DST16_BASIC_SI_DST16_AN_DIRECT_SI, "jsri16a-dst16-basic-SI-dst16-An-direct-SI", "jsri.a", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* jsri.a [$Dst16An] */
+  {
+    M32C_INSN_JSRI16A_DST16_BASIC_SI_DST16_AN_INDIRECT_SI, "jsri16a-dst16-basic-SI-dst16-An-indirect-SI", "jsri.a", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
 /* jsri.a ${Dsp-16-u16}[$Dst32AnUnprefixed] */
   {
     M32C_INSN_JSRI32A_DST32_16_16_UNPREFIXED_SI_DST32_16_16_AN_RELATIVE_UNPREFIXED_SI, "jsri32a-dst32-16-16-Unprefixed-SI-dst32-16-16-An-relative-Unprefixed-SI", "jsri.a", 32,
@@ -34405,36 +34435,6 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_JSRI16A_DST16_16_8_SI_DST16_16_8_FB_RELATIVE_SI, "jsri16a-dst16-16-8-SI-dst16-16-8-FB-relative-SI", "jsri.a", 24,
     { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* jsri.a $Dst32RnUnprefixedSI */
-  {
-    M32C_INSN_JSRI32A_DST32_BASIC_UNPREFIXED_SI_DST32_RN_DIRECT_UNPREFIXED_SI, "jsri32a-dst32-basic-Unprefixed-SI-dst32-Rn-direct-Unprefixed-SI", "jsri.a", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* jsri.a $Dst32AnUnprefixedSI */
-  {
-    M32C_INSN_JSRI32A_DST32_BASIC_UNPREFIXED_SI_DST32_AN_DIRECT_UNPREFIXED_SI, "jsri32a-dst32-basic-Unprefixed-SI-dst32-An-direct-Unprefixed-SI", "jsri.a", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* jsri.a [$Dst32AnUnprefixed] */
-  {
-    M32C_INSN_JSRI32A_DST32_BASIC_UNPREFIXED_SI_DST32_AN_INDIRECT_UNPREFIXED_SI, "jsri32a-dst32-basic-Unprefixed-SI-dst32-An-indirect-Unprefixed-SI", "jsri.a", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* jsri.a $Dst16RnSI */
-  {
-    M32C_INSN_JSRI16A_DST16_BASIC_SI_DST16_RN_DIRECT_SI, "jsri16a-dst16-basic-SI-dst16-Rn-direct-SI", "jsri.a", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* jsri.a $Dst16AnSI */
-  {
-    M32C_INSN_JSRI16A_DST16_BASIC_SI_DST16_AN_DIRECT_SI, "jsri16a-dst16-basic-SI-dst16-An-direct-SI", "jsri.a", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* jsri.a [$Dst16An] */
-  {
-    M32C_INSN_JSRI16A_DST16_BASIC_SI_DST16_AN_INDIRECT_SI, "jsri16a-dst16-basic-SI-dst16-An-indirect-SI", "jsri.a", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
 /* jsri.w ${Dsp-16-u24}[$Dst32AnUnprefixed] */
   {
     M32C_INSN_JSRI32_W_DST32_16_24_AN_RELATIVE_UNPREFIXED_HI, "jsri32.w-dst32-16-24-An-relative-Unprefixed-HI", "jsri.w", 40,
@@ -34444,6 +34444,36 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
   {
     M32C_INSN_JSRI32_W_DST32_16_24_ABSOLUTE_UNPREFIXED_HI, "jsri32.w-dst32-16-24-absolute-Unprefixed-HI", "jsri.w", 40,
     { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* jsri.w $Dst32RnUnprefixedHI */
+  {
+    M32C_INSN_JSRI32W_DST32_BASIC_UNPREFIXED_HI_DST32_RN_DIRECT_UNPREFIXED_HI, "jsri32w-dst32-basic-Unprefixed-HI-dst32-Rn-direct-Unprefixed-HI", "jsri.w", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* jsri.w $Dst32AnUnprefixedHI */
+  {
+    M32C_INSN_JSRI32W_DST32_BASIC_UNPREFIXED_HI_DST32_AN_DIRECT_UNPREFIXED_HI, "jsri32w-dst32-basic-Unprefixed-HI-dst32-An-direct-Unprefixed-HI", "jsri.w", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* jsri.w [$Dst32AnUnprefixed] */
+  {
+    M32C_INSN_JSRI32W_DST32_BASIC_UNPREFIXED_HI_DST32_AN_INDIRECT_UNPREFIXED_HI, "jsri32w-dst32-basic-Unprefixed-HI-dst32-An-indirect-Unprefixed-HI", "jsri.w", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* jsri.w $Dst16RnHI */
+  {
+    M32C_INSN_JSRI16W_DST16_BASIC_HI_DST16_RN_DIRECT_HI, "jsri16w-dst16-basic-HI-dst16-Rn-direct-HI", "jsri.w", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* jsri.w $Dst16AnHI */
+  {
+    M32C_INSN_JSRI16W_DST16_BASIC_HI_DST16_AN_DIRECT_HI, "jsri16w-dst16-basic-HI-dst16-An-direct-HI", "jsri.w", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* jsri.w [$Dst16An] */
+  {
+    M32C_INSN_JSRI16W_DST16_BASIC_HI_DST16_AN_INDIRECT_HI, "jsri16w-dst16-basic-HI-dst16-An-indirect-HI", "jsri.w", 16,
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsri.w ${Dsp-16-u16}[$Dst32AnUnprefixed] */
   {
@@ -34508,36 +34538,6 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
 /* jsri.w ${Dsp-16-s8}[fb] */
   {
     M32C_INSN_JSRI16W_DST16_16_8_HI_DST16_16_8_FB_RELATIVE_HI, "jsri16w-dst16-16-8-HI-dst16-16-8-FB-relative-HI", "jsri.w", 24,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* jsri.w $Dst32RnUnprefixedHI */
-  {
-    M32C_INSN_JSRI32W_DST32_BASIC_UNPREFIXED_HI_DST32_RN_DIRECT_UNPREFIXED_HI, "jsri32w-dst32-basic-Unprefixed-HI-dst32-Rn-direct-Unprefixed-HI", "jsri.w", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* jsri.w $Dst32AnUnprefixedHI */
-  {
-    M32C_INSN_JSRI32W_DST32_BASIC_UNPREFIXED_HI_DST32_AN_DIRECT_UNPREFIXED_HI, "jsri32w-dst32-basic-Unprefixed-HI-dst32-An-direct-Unprefixed-HI", "jsri.w", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* jsri.w [$Dst32AnUnprefixed] */
-  {
-    M32C_INSN_JSRI32W_DST32_BASIC_UNPREFIXED_HI_DST32_AN_INDIRECT_UNPREFIXED_HI, "jsri32w-dst32-basic-Unprefixed-HI-dst32-An-indirect-Unprefixed-HI", "jsri.w", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* jsri.w $Dst16RnHI */
-  {
-    M32C_INSN_JSRI16W_DST16_BASIC_HI_DST16_RN_DIRECT_HI, "jsri16w-dst16-basic-HI-dst16-Rn-direct-HI", "jsri.w", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* jsri.w $Dst16AnHI */
-  {
-    M32C_INSN_JSRI16W_DST16_BASIC_HI_DST16_AN_DIRECT_HI, "jsri16w-dst16-basic-HI-dst16-An-direct-HI", "jsri.w", 16,
-    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* jsri.w [$Dst16An] */
-  {
-    M32C_INSN_JSRI16W_DST16_BASIC_HI_DST16_AN_INDIRECT_HI, "jsri16w-dst16-basic-HI-dst16-An-indirect-HI", "jsri.w", 16,
     { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jmpi.a $Dst32RnUnprefixedSI */

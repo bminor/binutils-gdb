@@ -1,3 +1,10 @@
+2005-12-13  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (jsri): Fix order so register names aren't treated as
+	symbols.
+	(indexb, indexbd, indexbs, indexl, indexld, indexls, indexw,
+	indexwd, indexws): Fix encodings.
+
 2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* mt.cpu: Rename from ms1.cpu.

@@ -1,3 +1,9 @@
+2005-12-13  DJ Delorie  <dj@redhat.com>
+
+	* m32c-desc.c: Regenerate.
+	* m32c-opc.c: Regenerate.
+	* m32c-opc.h: Regenerate.
+
 2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* Makefile.am (CLEANFILES, CGEN_CPUS, MT_DEPS): Replace ms1 with mt.
