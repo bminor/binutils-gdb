@@ -87,7 +87,6 @@ m68*)		 targ_archs=bfd_m68k_arch ;;
 m88*)		 targ_archs=bfd_m88k_arch ;;
 maxq*)		 targ_archs=bfd_maxq_arch ;;
 mips*)		 targ_archs=bfd_mips_arch ;;
-mt)		 targ_archs=bfd_ms1_arch ;;
 or32*)		 targ_archs=bfd_or32_arch ;;
 pdp11*)		 targ_archs=bfd_pdp11_arch ;;
 pj*)		 targ_archs="bfd_pj_arch bfd_i386_arch";;
@@ -927,7 +926,7 @@ case "${targ}" in
     ;;
 
   mt-*-elf)
-    targ_defvec=bfd_elf32_ms1_vec
+    targ_defvec=bfd_elf32_mt_vec
     ;;
 
   msp430-*-*)

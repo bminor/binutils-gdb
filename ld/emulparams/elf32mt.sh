@@ -1,9 +1,9 @@
 MACHINE=
 SCRIPT_NAME=elf
-OUTPUT_FORMAT="elf32-ms1"
+OUTPUT_FORMAT="elf32-mt"
 # See also `include/elf/mt.h'
 TEXT_START_ADDR=0x2000
-ARCH=ms1
+ARCH=mt
 ENTRY=_start
 EMBEDDED=yes
 ELFSIZE=32

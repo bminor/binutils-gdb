@@ -1,4 +1,4 @@
-/* Morpho Technologies MS1 specific support for 32-bit ELF
+/* Morpho Technologies MT specific support for 32-bit ELF
    Copyright 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
@@ -25,28 +25,28 @@
 #include "elf/mt.h"
 
 /* Prototypes.  */
-static reloc_howto_type * ms1_reloc_type_lookup 
+static reloc_howto_type * mt_reloc_type_lookup 
   (bfd *, bfd_reloc_code_real_type);
 
-static void ms1_info_to_howto_rela
+static void mt_info_to_howto_rela
   (bfd *, arelent *, Elf_Internal_Rela *);
 
-static bfd_reloc_status_type ms1_elf_relocate_hi16
+static bfd_reloc_status_type mt_elf_relocate_hi16
   (bfd *, Elf_Internal_Rela *, bfd_byte *, bfd_vma);
 
-static bfd_reloc_status_type ms1_final_link_relocate
+static bfd_reloc_status_type mt_final_link_relocate
   (reloc_howto_type *, bfd *, asection *, bfd_byte *, 
    Elf_Internal_Rela *, bfd_vma);
 
-static bfd_boolean ms1_elf_relocate_section
+static bfd_boolean mt_elf_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *, 
    Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
 
 /* Relocation tables.  */
-static reloc_howto_type ms1_elf_howto_table [] =
+static reloc_howto_type mt_elf_howto_table [] =
 {
   /* This reloc does nothing.  */
-  HOWTO (R_MS1_NONE,           /* type */
+  HOWTO (R_MT_NONE,           /* type */
           0,                      /* rightshift */ 
           2,                      /* size (0 = byte, 1 = short, 2 = long) */ 
           32,                     /* bitsize */
@@ -54,14 +54,14 @@ static reloc_howto_type ms1_elf_howto_table [] =
           0,                      /* bitpos */ 
           complain_overflow_dont, /* complain_on_overflow */ 
           bfd_elf_generic_reloc,  /* special_function */ 
-          "R_MS1_NONE",          /* name */ 
+          "R_MT_NONE",          /* name */ 
           FALSE,                  /* partial_inplace */ 
           0 ,                     /* src_mask */ 
           0,                      /* dst_mask */ 
           FALSE),                 /* pcrel_offset */
 
   /* A 16 bit absolute relocation.  */
-  HOWTO (R_MS1_16,             /* type */
+  HOWTO (R_MT_16,             /* type */
           0,                      /* rightshift */ 
           2,                      /* size (0 = byte, 1 = short, 2 = long) */ 
           16,                     /* bitsize */
@@ -69,14 +69,14 @@ static reloc_howto_type ms1_elf_howto_table [] =
           0,                      /* bitpos */ 
           complain_overflow_dont, /* complain_on_overflow */ 
           bfd_elf_generic_reloc,  /* special_function */ 
-          "R_MS1_16",            /* name */ 
+          "R_MT_16",            /* name */ 
           FALSE,                  /* partial_inplace */ 
           0 ,                     /* src_mask */ 
           0xffff,                 /* dst_mask */ 
           FALSE),                 /* pcrel_offset */
 
   /* A 32 bit absolute relocation.  */
-  HOWTO (R_MS1_32,             /* type */
+  HOWTO (R_MT_32,             /* type */
           0,                      /* rightshift */ 
           2,                      /* size (0 = byte, 1 = short, 2 = long) */ 
           32,                     /* bitsize */
@@ -84,14 +84,14 @@ static reloc_howto_type ms1_elf_howto_table [] =
           0,                      /* bitpos */ 
           complain_overflow_dont, /* complain_on_overflow */ 
           bfd_elf_generic_reloc,  /* special_function */ 
-          "R_MS1_32",            /* name */ 
+          "R_MT_32",            /* name */ 
           FALSE,                  /* partial_inplace */ 
           0 ,                     /* src_mask */ 
           0xffffffff,             /* dst_mask */ 
           FALSE),                 /* pcrel_offset */
 
   /* A 32 bit pc-relative relocation.  */
-  HOWTO (R_MS1_32_PCREL,       /* type */
+  HOWTO (R_MT_32_PCREL,       /* type */
           0,                      /* rightshift */ 
           2,                      /* size (0 = byte, 1 = short, 2 = long) */ 
           32,                     /* bitsize */
@@ -99,14 +99,14 @@ static reloc_howto_type ms1_elf_howto_table [] =
           0,                      /* bitpos */ 
           complain_overflow_dont, /* complain_on_overflow */ 
           bfd_elf_generic_reloc,  /* special_function */ 
-          "R_MS1_32_PCREL",    /* name */ 
+          "R_MT_32_PCREL",    /* name */ 
           FALSE,                  /* partial_inplace */ 
           0 ,                     /* src_mask */ 
           0xffffffff,             /* dst_mask */ 
           TRUE),                  /* pcrel_offset */
 
   /* A 16 bit pc-relative relocation.  */
-  HOWTO (R_MS1_PC16,           /* type */
+  HOWTO (R_MT_PC16,           /* type */
           0,                      /* rightshift */ 
           2,                      /* size (0 = byte, 1 = short, 2 = long) */ 
           16,                     /* bitsize */
@@ -114,14 +114,14 @@ static reloc_howto_type ms1_elf_howto_table [] =
           0,                      /* bitpos */ 
           complain_overflow_signed, /* complain_on_overflow */ 
           bfd_elf_generic_reloc,  /* special_function */ 
-          "R_MS1_PC16",          /* name */ 
+          "R_MT_PC16",          /* name */ 
           FALSE,                  /* partial_inplace */ 
           0,                      /* src_mask */ 
           0xffff,                 /* dst_mask */ 
           TRUE),                  /* pcrel_offset */
 
   /* high 16 bits of symbol value.  */
-  HOWTO (R_MS1_HI16,          /* type */
+  HOWTO (R_MT_HI16,          /* type */
          0,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
          16,                    /* bitsize */
@@ -129,14 +129,14 @@ static reloc_howto_type ms1_elf_howto_table [] =
          0,                     /* bitpos */
          complain_overflow_dont, /* complain_on_overflow */
          bfd_elf_generic_reloc, /* special_function */
-         "R_MS1_HI16",        /* name */
+         "R_MT_HI16",        /* name */
          FALSE,                  /* partial_inplace */
          0xffff0000,            /* src_mask */
          0xffff0000,            /* dst_mask */
          FALSE),                /* pcrel_offset */
 
   /* Low 16 bits of symbol value.  */
-  HOWTO (R_MS1_LO16,          /* type */
+  HOWTO (R_MT_LO16,          /* type */
          0,                     /* rightshift */
          2,                     /* size (0 = byte, 1 = short, 2 = long) */
          16,                    /* bitsize */
@@ -144,41 +144,41 @@ static reloc_howto_type ms1_elf_howto_table [] =
          0,                     /* bitpos */
          complain_overflow_dont, /* complain_on_overflow */
          bfd_elf_generic_reloc, /* special_function */
-         "R_MS1_LO16",        /* name */
+         "R_MT_LO16",        /* name */
          FALSE,                  /* partial_inplace */
          0xffff,                /* src_mask */
          0xffff,                /* dst_mask */
          FALSE),                /* pcrel_offset */
 };
 
-/* Map BFD reloc types to MS1 ELF reloc types.  */
+/* Map BFD reloc types to MT ELF reloc types.  */
 
 static reloc_howto_type *
-ms1_reloc_type_lookup
+mt_reloc_type_lookup
     (bfd *                    abfd ATTRIBUTE_UNUSED,
      bfd_reloc_code_real_type code)
 {
-  /* Note that the ms1_elf_howto_table is indxed by the R_
+  /* Note that the mt_elf_howto_table is indxed by the R_
      constants.  Thus, the order that the howto records appear in the
      table *must* match the order of the relocation types defined in
-     include/elf/ms1.h.  */
+     include/elf/mt.h.  */
 
   switch (code)
     {
     case BFD_RELOC_NONE:
-      return &ms1_elf_howto_table[ (int) R_MS1_NONE];
+      return &mt_elf_howto_table[ (int) R_MT_NONE];
     case BFD_RELOC_16:
-      return &ms1_elf_howto_table[ (int) R_MS1_16];
+      return &mt_elf_howto_table[ (int) R_MT_16];
     case BFD_RELOC_32:
-      return &ms1_elf_howto_table[ (int) R_MS1_32];
+      return &mt_elf_howto_table[ (int) R_MT_32];
     case BFD_RELOC_32_PCREL:
-      return &ms1_elf_howto_table[ (int) R_MS1_32_PCREL];
+      return &mt_elf_howto_table[ (int) R_MT_32_PCREL];
     case BFD_RELOC_16_PCREL:
-      return &ms1_elf_howto_table[ (int) R_MS1_PC16];
+      return &mt_elf_howto_table[ (int) R_MT_PC16];
     case BFD_RELOC_HI16:
-      return &ms1_elf_howto_table[ (int) R_MS1_HI16];
+      return &mt_elf_howto_table[ (int) R_MT_HI16];
     case BFD_RELOC_LO16:
-      return &ms1_elf_howto_table[ (int) R_MS1_LO16];
+      return &mt_elf_howto_table[ (int) R_MT_LO16];
 
     default:
       /* Pacify gcc -Wall.  */
@@ -188,7 +188,7 @@ ms1_reloc_type_lookup
 }
 
 bfd_reloc_status_type
-ms1_elf_relocate_hi16
+mt_elf_relocate_hi16
     (bfd *               input_bfd,
      Elf_Internal_Rela * relhi,
      bfd_byte *          contents,
@@ -209,10 +209,10 @@ ms1_elf_relocate_hi16
 /* XXX: The following code is the result of a cut&paste.  This unfortunate
    practice is very widespread in the various target back-end files.  */
 
-/* Set the howto pointer for a MS1 ELF reloc.  */
+/* Set the howto pointer for a MT ELF reloc.  */
 
 static void
-ms1_info_to_howto_rela
+mt_info_to_howto_rela
     (bfd *               abfd ATTRIBUTE_UNUSED,
      arelent *           cache_ptr,
      Elf_Internal_Rela * dst)
@@ -220,14 +220,14 @@ ms1_info_to_howto_rela
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  cache_ptr->howto = & ms1_elf_howto_table [r_type];
+  cache_ptr->howto = & mt_elf_howto_table [r_type];
 }
 
 /* Perform a single relocation.  By default we use the standard BFD
    routines.  */
 
 static bfd_reloc_status_type
-ms1_final_link_relocate
+mt_final_link_relocate
     (reloc_howto_type *  howto,
      bfd *               input_bfd,
      asection *          input_section,
@@ -240,7 +240,7 @@ ms1_final_link_relocate
 				   relocation, rel->r_addend);
 }
 
-/* Relocate a MS1 ELF section.
+/* Relocate a MT ELF section.
    There is some attempt to make this function usable for many architectures,
    both USE_REL and USE_RELA ['twould be nice if such a critter existed],
    if only to serve as a learning tool.
@@ -274,7 +274,7 @@ ms1_final_link_relocate
    accordingly.  */
 
 static bfd_boolean
-ms1_elf_relocate_section
+mt_elf_relocate_section
     (bfd *                   output_bfd ATTRIBUTE_UNUSED,
      struct bfd_link_info *  info,
      bfd *                   input_bfd,
@@ -310,7 +310,7 @@ ms1_elf_relocate_section
       r_symndx = ELF32_R_SYM (rel->r_info);
 
       /* This is a final link.  */
-      howto  = ms1_elf_howto_table + ELF32_R_TYPE (rel->r_info);
+      howto  = mt_elf_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
@@ -339,14 +339,14 @@ ms1_elf_relocate_section
 	}
 
 
-      /* Finally, the sole MS1-specific part.  */
+      /* Finally, the sole MT-specific part.  */
       switch (r_type)
         {
-        case R_MS1_HI16:
-          r = ms1_elf_relocate_hi16 (input_bfd, rel, contents, relocation);
+        case R_MT_HI16:
+          r = mt_elf_relocate_hi16 (input_bfd, rel, contents, relocation);
           break;
 	default:
-          r = ms1_final_link_relocate (howto, input_bfd, input_section,
+          r = mt_final_link_relocate (howto, input_bfd, input_section,
 		        		  contents, rel, relocation);
           break;
         }
@@ -398,7 +398,7 @@ ms1_elf_relocate_section
    relocation.  */
 
 static asection *
-ms1_elf_gc_mark_hook
+mt_elf_gc_mark_hook
     (asection *                   sec,
      struct bfd_link_info *       info ATTRIBUTE_UNUSED,
      Elf_Internal_Rela *          rel ATTRIBUTE_UNUSED,
@@ -436,7 +436,7 @@ ms1_elf_gc_mark_hook
    removed.  */
 
 static bfd_boolean
-ms1_elf_gc_sweep_hook
+mt_elf_gc_sweep_hook
     (bfd *                     abfd ATTRIBUTE_UNUSED,
      struct bfd_link_info *    info ATTRIBUTE_UNUSED,
      asection *                sec ATTRIBUTE_UNUSED,
@@ -450,7 +450,7 @@ ms1_elf_gc_sweep_hook
    virtual table relocs for gc.  */
  
 static bfd_boolean
-ms1_elf_check_relocs
+mt_elf_check_relocs
     (bfd *                     abfd,
      struct bfd_link_info *    info,
      asection *                sec,
@@ -495,22 +495,22 @@ ms1_elf_check_relocs
 /* Return the MACH for an e_flags value.  */
 
 static int
-elf32_ms1_machine (bfd *abfd)
+elf32_mt_machine (bfd *abfd)
 {
-  switch (elf_elfheader (abfd)->e_flags & EF_MS1_CPU_MASK)
+  switch (elf_elfheader (abfd)->e_flags & EF_MT_CPU_MASK)
     {
-    case EF_MS1_CPU_MRISC:	return bfd_mach_ms1;
-    case EF_MS1_CPU_MRISC2:  return bfd_mach_mrisc2;
-    case EF_MS1_CPU_MS2:  return bfd_mach_ms2;
+    case EF_MT_CPU_MRISC:	return bfd_mach_ms1;
+    case EF_MT_CPU_MRISC2:	return bfd_mach_mrisc2;
+    case EF_MT_CPU_MS2:		return bfd_mach_ms2;
     }
 
   return bfd_mach_ms1;
 }
 
 static bfd_boolean
-ms1_elf_object_p (bfd * abfd)
+mt_elf_object_p (bfd * abfd)
 {
-  bfd_default_set_arch_mach (abfd, bfd_arch_ms1, elf32_ms1_machine (abfd));
+  bfd_default_set_arch_mach (abfd, bfd_arch_mt, elf32_mt_machine (abfd));
 
   return TRUE;
 }
@@ -518,7 +518,7 @@ ms1_elf_object_p (bfd * abfd)
 /* Function to set the ELF flag bits.  */
 
 static bfd_boolean
-ms1_elf_set_private_flags (bfd *    abfd,
+mt_elf_set_private_flags (bfd *    abfd,
 			   flagword flags)
 {
   elf_elfheader (abfd)->e_flags = flags;
@@ -527,7 +527,7 @@ ms1_elf_set_private_flags (bfd *    abfd,
 }
 
 static bfd_boolean
-ms1_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
+mt_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
 {
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -545,7 +545,7 @@ ms1_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
    object file when linking.  */
 
 static bfd_boolean
-ms1_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+mt_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 {
   flagword     old_flags, new_flags;
   bfd_boolean  error = FALSE;
@@ -554,11 +554,11 @@ ms1_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   if (_bfd_generic_verify_endian_match (ibfd, obfd) == FALSE)
     return FALSE;
 
-  /* If they're not both ms1, then merging is meaningless, so just
+  /* If they're not both mt, then merging is meaningless, so just
      don't do it.  */
-  if (strcmp (ibfd->arch_info->arch_name, "ms1") != 0)
+  if (strcmp (ibfd->arch_info->arch_name, "mt") != 0)
     return TRUE;
-  if (strcmp (obfd->arch_info->arch_name, "ms1") != 0)
+  if (strcmp (obfd->arch_info->arch_name, "mt") != 0)
     return TRUE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
@@ -574,7 +574,7 @@ ms1_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
       old_flags = new_flags;
       elf_flags_init (obfd) = TRUE;
     }
-  else if ((new_flags & EF_MS1_CPU_MASK) != (old_flags & EF_MS1_CPU_MASK))
+  else if ((new_flags & EF_MT_CPU_MASK) != (old_flags & EF_MT_CPU_MASK))
     {
       /* CPU has changed.  This is invalid, because MRISC, MRISC2 and
 	 MS2 are not subsets of each other.   */
@@ -584,9 +584,9 @@ ms1_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 	 mixing breaks the build.  So we allow merging and use the
 	 greater CPU value.  This is of course unsafe.  */
       error = 0;
-      if ((new_flags & EF_MS1_CPU_MASK) > (old_flags & EF_MS1_CPU_MASK))
-	old_flags = ((old_flags & ~EF_MS1_CPU_MASK)
-		     | (new_flags & EF_MS1_CPU_MASK));
+      if ((new_flags & EF_MT_CPU_MASK) > (old_flags & EF_MT_CPU_MASK))
+	old_flags = ((old_flags & ~EF_MT_CPU_MASK)
+		     | (new_flags & EF_MT_CPU_MASK));
     }
   if (!error)
     {
@@ -598,7 +598,7 @@ ms1_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 }
 
 static bfd_boolean
-ms1_elf_print_private_bfd_data (bfd * abfd, void * ptr)
+mt_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 {
   FILE *   file = (FILE *) ptr;
   flagword flags;
@@ -611,12 +611,12 @@ ms1_elf_print_private_bfd_data (bfd * abfd, void * ptr)
   flags = elf_elfheader (abfd)->e_flags;
   fprintf (file, _("private flags = 0x%lx:"), (long)flags);
 
-  switch (flags & EF_MS1_CPU_MASK)
+  switch (flags & EF_MT_CPU_MASK)
     {
     default:
-    case EF_MS1_CPU_MRISC:   fprintf (file, " ms1-16-002");	break;
-    case EF_MS1_CPU_MRISC2:  fprintf (file, " ms1-16-003");	break;
-    case EF_MS1_CPU_MS2:     fprintf (file, " ms2");	break;
+    case EF_MT_CPU_MRISC:   fprintf (file, " ms1-16-002");	break;
+    case EF_MT_CPU_MRISC2:  fprintf (file, " ms1-16-003");	break;
+    case EF_MT_CPU_MS2:     fprintf (file, " ms2");	break;
     }
 
   fputc ('\n', file);
@@ -625,31 +625,31 @@ ms1_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 }
 
 
-#define TARGET_BIG_SYM	 bfd_elf32_ms1_vec
-#define TARGET_BIG_NAME  "elf32-ms1"
+#define TARGET_BIG_SYM	 bfd_elf32_mt_vec
+#define TARGET_BIG_NAME  "elf32-mt"
 
-#define ELF_ARCH	 bfd_arch_ms1
-#define ELF_MACHINE_CODE EM_MS1
-#define ELF_MAXPAGESIZE  1 /* No pages on the MS1.  */
+#define ELF_ARCH	 bfd_arch_mt
+#define ELF_MACHINE_CODE EM_MT
+#define ELF_MAXPAGESIZE  1 /* No pages on the MT.  */
 
 #define elf_info_to_howto_rel			NULL
-#define elf_info_to_howto			ms1_info_to_howto_rela
+#define elf_info_to_howto			mt_info_to_howto_rela
 
-#define elf_backend_relocate_section		ms1_elf_relocate_section
+#define elf_backend_relocate_section		mt_elf_relocate_section
 
-#define bfd_elf32_bfd_reloc_type_lookup	        ms1_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_type_lookup	        mt_reloc_type_lookup
 
-#define elf_backend_gc_mark_hook		ms1_elf_gc_mark_hook
-#define elf_backend_gc_sweep_hook		ms1_elf_gc_sweep_hook
-#define elf_backend_check_relocs                ms1_elf_check_relocs
-#define elf_backend_object_p		        ms1_elf_object_p
+#define elf_backend_gc_mark_hook		mt_elf_gc_mark_hook
+#define elf_backend_gc_sweep_hook		mt_elf_gc_sweep_hook
+#define elf_backend_check_relocs                mt_elf_check_relocs
+#define elf_backend_object_p		        mt_elf_object_p
 #define elf_backend_rela_normal			1
 
 #define elf_backend_can_gc_sections		1
 
-#define bfd_elf32_bfd_set_private_flags		ms1_elf_set_private_flags
-#define bfd_elf32_bfd_copy_private_bfd_data	ms1_elf_copy_private_bfd_data
-#define bfd_elf32_bfd_merge_private_bfd_data	ms1_elf_merge_private_bfd_data
-#define bfd_elf32_bfd_print_private_bfd_data	ms1_elf_print_private_bfd_data
+#define bfd_elf32_bfd_set_private_flags		mt_elf_set_private_flags
+#define bfd_elf32_bfd_copy_private_bfd_data	mt_elf_copy_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data	mt_elf_merge_private_bfd_data
+#define bfd_elf32_bfd_print_private_bfd_data	mt_elf_print_private_bfd_data
 
 #include "elf32-target.h"

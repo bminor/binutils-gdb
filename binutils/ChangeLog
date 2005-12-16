@@ -1,3 +1,9 @@
+2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Second part of ms1 to mt renaming.
+	* readelf.c (guess_is_rela): Use EM_MT.
+	(dump_relocations, get_machine_name): Adjust.
+
 2005-12-12  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* Makefile.am: Replace ms1 files with mt files.

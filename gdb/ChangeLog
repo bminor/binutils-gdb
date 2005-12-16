@@ -1,3 +1,16 @@
+2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Second part of ms1 to mt renaming.
+	* mt-tdep.c (mt_arch_constants, mt_gdb_regnums): Rename, adjust.
+	(mt_register_name, mt_register_type, mt_register_reggroup_p,
+	mt_return_value, mt_skip_prologue, mt_breapoint_from_pc,
+	mt_pseudo_register_read, mt_pseudo_register_write, mt_frame_align,
+	mt_registers_info, mt_push_dummy_call, mt_unwind_cache,
+	mt_frame_unwind_cache, mt_unwind_pc, mt_unwind_dummy_id,
+	mt_frame_this_id, mt_frame_prev_register, mt_frame_base_address,
+	mt_frame_unwind, mt_frame_sniffer, mt_frame_base, mt_gdbarch_init,
+	_initialize_mt_tdep): Rename & adjust.
+
 2005-12-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-tdep.c (hppa_hpux_sigtramp_unwind_sniffer): Detect

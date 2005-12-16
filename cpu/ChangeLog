@@ -1,3 +1,12 @@
+2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Second part of ms1 to mt renaming.
+	* mt.cpu (define-arch, define-isa): Set name to mt.
+	(define-mach): Adjust.
+	* mt.opc (CGEN_ASM_HASH): Update.
+	(mt_asm_hash, mt_cgen_insn_supported): Renamed.
+	(parse_loopsize, parse_imm16): Adjust.
+
 2005-12-13  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (jsri): Fix order so register names aren't treated as

@@ -1,3 +1,23 @@
+2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Second part of ms1 to mt renaming.
+	* Makefile.am (HFILES, CFILES, ALL_MACHINES): Adjust.
+	(stamp-mt): Adjust rule.
+	(mt-asm.lo, mt-desc.lo, mt-dis.lo, mt-ibld.lo, mt-opc.lo): Rename &
+	adjust.
+	* Makefile.in: Rebuilt.
+	* configure: Rebuilt.
+	* configure.in (bfd_mt_arch): Rename & adjust.
+	* disassemble.c (ARCH_mt): Renamed.
+	(disassembler): Adjust.
+	* mt-asm.c: Renamed, rebuilt.
+	* mt-desc.c: Renamed, rebuilt.
+	* mt-desc.h: Renamed, rebuilt.
+	* mt-dis.c: Renamed, rebuilt.
+	* mt-ibld.c: Renamed, rebuilt.
+	* mt-opc.c: Renamed, rebuilt.
+	* mt-opc.h: Renamed, rebuilt.
+
 2005-12-13  DJ Delorie  <dj@redhat.com>
 
 	* m32c-desc.c: Regenerate.

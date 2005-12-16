@@ -1,3 +1,39 @@
+2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Second part of ms1 to mt renaming.
+	* archures.c (bfd_arch_mt): Renamed.
+	(bfd_mt_arch): Renamed.
+	(bfd_archures_list): Adjusted.
+	* bfd-in2.h: Rebuilt.
+	* config.bfd (mt): Remove special case targ_archs.
+	(mt-*-elf): Rename bfd_elf32_mt_vec.
+	* configure: Rebuilt.
+	* configure.in (bfd_elf32_mt_vec): Renamed.
+	(selarchs) Remove mt special case.
+	* cpu-mt.c (arch_info_struct): Adjust.
+	(bfd_mt_arch): Renamed, adjust.
+	* elf32-mt.c (mt_reloc_type_lookup, mt_info_to_howto_rela,
+	mt_elf_relocate_hi16, mt_final_link_relocate, mt_relocate_section,
+	mt_elf_howto_table): Renamed, adjusted.
+	(mt_elf_gc_mark_hook, mt_elf_gc_sweep_hook, mt_elf_check_relocs,
+	elf32_mt_machine, mt_elf_object_p, mt_elf_set_private_flags,
+	mt_elf_copy_private_bfd_data, mt_elf_merge_private_bfd_data,
+	mt_elf_print_private_bfd_data): Renamed, adjusted.
+	(TARGET_BIG_SYM, TARGET_BIG_NAME, ELF_ARCH, ELF_MACHINE_CODE,
+	ELF_MAXPAGESIZE, elf_info_to_howto, elf_backend_relocate_section,
+	bfd_elf32_bfd_reloc_type_lookup, elf_backend_gc_mark_hook,
+	elf_backend_gc_sweep_hook, elf_backend_check_relocs,
+	eld_backend_object_p, bfd_elf32_bfd_set_private_flags,
+	bfd_elf32_bfd_copy_private_bfd_data,
+	bfd_elf32_bfd_merge_private_bfd_data,
+	bfd_elf32_bfd_print_private_bfd_data): Adjusted.
+	* libbfd.h: Regenerated.
+	* reloc.c (BFD_RELOC_MT_PC16, BFD_RELOC_MT_HI16,
+	BFD_RELOC_MT_LO16, BFD_RELOC_MT_GNU_VTINHERIT,
+	BFD_RELOC_MT_GNU_VTENTRY, BFD_RELOC_MT_PCINSN8): Renamed.
+	* targets.c (bfd_elf32_mt_vec): Renamed.
+	(_bfd_target_vector): Adjusted.
+
 2005-12-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2008

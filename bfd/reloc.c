@@ -4382,29 +4382,29 @@ ENUMDOC
   Relocations used by VAX ELF.
   
 ENUM
-  BFD_RELOC_MS1_PC16
+  BFD_RELOC_MT_PC16
 ENUMDOC
-  Morpho MS1 - 16 bit immediate relocation. 
+  Morpho MT - 16 bit immediate relocation. 
 ENUM
-  BFD_RELOC_MS1_HI16
+  BFD_RELOC_MT_HI16
 ENUMDOC
-  Morpho MS1 - Hi 16 bits of an address. 
+  Morpho MT - Hi 16 bits of an address. 
 ENUM
-  BFD_RELOC_MS1_LO16
+  BFD_RELOC_MT_LO16
 ENUMDOC
-  Morpho MS1 - Low 16 bits of an address. 
+  Morpho MT - Low 16 bits of an address. 
 ENUM
-  BFD_RELOC_MS1_GNU_VTINHERIT
+  BFD_RELOC_MT_GNU_VTINHERIT
 ENUMDOC
-  Morpho MS1 - Used to tell the linker which vtable entries are used.
+  Morpho MT - Used to tell the linker which vtable entries are used.
 ENUM
-  BFD_RELOC_MS1_GNU_VTENTRY
+  BFD_RELOC_MT_GNU_VTENTRY
 ENUMDOC
-  Morpho MS1 - Used to tell the linker which vtable entries are used.
+  Morpho MT - Used to tell the linker which vtable entries are used.
 ENUM
-  BFD_RELOC_MS1_PCINSN8
+  BFD_RELOC_MT_PCINSN8
 ENUMDOC
-  Morpho MS1 - 8 bit immediate relocation. 
+  Morpho MT - 8 bit immediate relocation. 
 
 ENUM
   BFD_RELOC_MSP430_10_PCREL

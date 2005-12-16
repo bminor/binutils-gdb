@@ -609,7 +609,7 @@ guess_is_rela (unsigned long e_machine)
     case EM_XTENSA_OLD:
     case EM_M32R:
     case EM_M32C:
-    case EM_MS1:
+    case EM_MT:
     case EM_BLACKFIN:
       return TRUE;
 
@@ -1123,8 +1123,8 @@ dump_relocations (FILE *file,
 	  rtype = elf_m32c_reloc_type (type);
 	  break;
 
-	case EM_MS1:
-	  rtype = elf_ms1_reloc_type (type);
+	case EM_MT:
+	  rtype = elf_mt_reloc_type (type);
 	  break;
 
 	case EM_BLACKFIN:
@@ -1687,7 +1687,7 @@ get_machine_name (unsigned e_machine)
     case EM_XTENSA_OLD:
     case EM_XTENSA:		return "Tensilica Xtensa Processor";
     case EM_M32C:	        return "Renesas M32c";
-    case EM_MS1:                return "Morpho Techologies MS1 processor";
+    case EM_MT:                 return "Morpho Techologies MT processor";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_machine);
       return buff;

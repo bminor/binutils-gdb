@@ -603,7 +603,7 @@ extern const bfd_target bfd_elf32_mcore_big_vec;
 extern const bfd_target bfd_elf32_mcore_little_vec;
 extern const bfd_target bfd_elf32_mn10200_vec;
 extern const bfd_target bfd_elf32_mn10300_vec;
-extern const bfd_target bfd_elf32_ms1_vec;
+extern const bfd_target bfd_elf32_mt_vec;
 extern const bfd_target bfd_elf32_msp430_vec;
 extern const bfd_target bfd_elf32_nbigmips_vec;
 extern const bfd_target bfd_elf32_nlittlemips_vec;
@@ -909,7 +909,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_mcore_little_vec,
 	&bfd_elf32_mn10200_vec,
 	&bfd_elf32_mn10300_vec,
-	&bfd_elf32_ms1_vec,
+	&bfd_elf32_mt_vec,
 	&bfd_elf32_msp430_vec,
 #ifdef BFD64
 	&bfd_elf32_nbigmips_vec,

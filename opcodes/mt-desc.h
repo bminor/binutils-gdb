@@ -1,4 +1,4 @@
-/* CPU data header for ms1.
+/* CPU data header for mt.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
@@ -22,18 +22,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
-#ifndef MS1_CPU_H
-#define MS1_CPU_H
+#ifndef MT_CPU_H
+#define MT_CPU_H
 
 #include "opcode/cgen-bitset.h"
 
-#define CGEN_ARCH ms1
+#define CGEN_ARCH mt
 
-/* Given symbol S, return ms1_cgen_<S>.  */
+/* Given symbol S, return mt_cgen_<S>.  */
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
-#define CGEN_SYM(s) ms1##_cgen_##s
+#define CGEN_SYM(s) mt##_cgen_##s
 #else
-#define CGEN_SYM(s) ms1/**/_cgen_/**/s
+#define CGEN_SYM(s) mt/**/_cgen_/**/s
 #endif
 
 
@@ -114,7 +114,7 @@ typedef enum mach_attr {
 
 /* Enum declaration for instruction set selection.  */
 typedef enum isa_attr {
-  ISA_MS1, ISA_MAX
+  ISA_MT, ISA_MAX
 } ISA_ATTR;
 
 /* Number of architecture variants.  */
@@ -144,31 +144,31 @@ typedef enum cgen_ifld_attr {
 #define CGEN_ATTR_CGEN_IFLD_SIGN_OPT_VALUE(attrs) (((attrs)->bool & (1 << CGEN_IFLD_SIGN_OPT)) != 0)
 #define CGEN_ATTR_CGEN_IFLD_SIGNED_VALUE(attrs) (((attrs)->bool & (1 << CGEN_IFLD_SIGNED)) != 0)
 
-/* Enum declaration for ms1 ifield types.  */
+/* Enum declaration for mt ifield types.  */
 typedef enum ifield_type {
-  MS1_F_NIL, MS1_F_ANYOF, MS1_F_MSYS, MS1_F_OPC
- , MS1_F_IMM, MS1_F_UU24, MS1_F_SR1, MS1_F_SR2
- , MS1_F_DR, MS1_F_DRRR, MS1_F_IMM16U, MS1_F_IMM16S
- , MS1_F_IMM16A, MS1_F_UU4A, MS1_F_UU4B, MS1_F_UU12
- , MS1_F_UU8, MS1_F_UU16, MS1_F_UU1, MS1_F_MSOPC
- , MS1_F_UU_26_25, MS1_F_MASK, MS1_F_BANKADDR, MS1_F_RDA
- , MS1_F_UU_2_25, MS1_F_RBBC, MS1_F_PERM, MS1_F_MODE
- , MS1_F_UU_1_24, MS1_F_WR, MS1_F_FBINCR, MS1_F_UU_2_23
- , MS1_F_XMODE, MS1_F_A23, MS1_F_MASK1, MS1_F_CR
- , MS1_F_TYPE, MS1_F_INCAMT, MS1_F_CBS, MS1_F_UU_1_19
- , MS1_F_BALL, MS1_F_COLNUM, MS1_F_BRC, MS1_F_INCR
- , MS1_F_FBDISP, MS1_F_UU_4_15, MS1_F_LENGTH, MS1_F_UU_1_15
- , MS1_F_RC, MS1_F_RCNUM, MS1_F_ROWNUM, MS1_F_CBX
- , MS1_F_ID, MS1_F_SIZE, MS1_F_ROWNUM1, MS1_F_UU_3_11
- , MS1_F_RC1, MS1_F_CCB, MS1_F_CBRB, MS1_F_CDB
- , MS1_F_ROWNUM2, MS1_F_CELL, MS1_F_UU_3_9, MS1_F_CONTNUM
- , MS1_F_UU_1_6, MS1_F_DUP, MS1_F_RC2, MS1_F_CTXDISP
- , MS1_F_IMM16L, MS1_F_LOOPO, MS1_F_CB1SEL, MS1_F_CB2SEL
- , MS1_F_CB1INCR, MS1_F_CB2INCR, MS1_F_RC3, MS1_F_MSYSFRSR2
- , MS1_F_BRC2, MS1_F_BALL2, MS1_F_MAX
+  MT_F_NIL, MT_F_ANYOF, MT_F_MSYS, MT_F_OPC
+ , MT_F_IMM, MT_F_UU24, MT_F_SR1, MT_F_SR2
+ , MT_F_DR, MT_F_DRRR, MT_F_IMM16U, MT_F_IMM16S
+ , MT_F_IMM16A, MT_F_UU4A, MT_F_UU4B, MT_F_UU12
+ , MT_F_UU8, MT_F_UU16, MT_F_UU1, MT_F_MSOPC
+ , MT_F_UU_26_25, MT_F_MASK, MT_F_BANKADDR, MT_F_RDA
+ , MT_F_UU_2_25, MT_F_RBBC, MT_F_PERM, MT_F_MODE
+ , MT_F_UU_1_24, MT_F_WR, MT_F_FBINCR, MT_F_UU_2_23
+ , MT_F_XMODE, MT_F_A23, MT_F_MASK1, MT_F_CR
+ , MT_F_TYPE, MT_F_INCAMT, MT_F_CBS, MT_F_UU_1_19
+ , MT_F_BALL, MT_F_COLNUM, MT_F_BRC, MT_F_INCR
+ , MT_F_FBDISP, MT_F_UU_4_15, MT_F_LENGTH, MT_F_UU_1_15
+ , MT_F_RC, MT_F_RCNUM, MT_F_ROWNUM, MT_F_CBX
+ , MT_F_ID, MT_F_SIZE, MT_F_ROWNUM1, MT_F_UU_3_11
+ , MT_F_RC1, MT_F_CCB, MT_F_CBRB, MT_F_CDB
+ , MT_F_ROWNUM2, MT_F_CELL, MT_F_UU_3_9, MT_F_CONTNUM
+ , MT_F_UU_1_6, MT_F_DUP, MT_F_RC2, MT_F_CTXDISP
+ , MT_F_IMM16L, MT_F_LOOPO, MT_F_CB1SEL, MT_F_CB2SEL
+ , MT_F_CB1INCR, MT_F_CB2INCR, MT_F_RC3, MT_F_MSYSFRSR2
+ , MT_F_BRC2, MT_F_BALL2, MT_F_MAX
 } IFIELD_TYPE;
 
-#define MAX_IFLD ((int) MS1_F_MAX)
+#define MAX_IFLD ((int) MT_F_MAX)
 
 /* Hardware attribute indices.  */
 
@@ -188,7 +188,7 @@ typedef enum cgen_hw_attr {
 #define CGEN_ATTR_CGEN_HW_PC_VALUE(attrs) (((attrs)->bool & (1 << CGEN_HW_PC)) != 0)
 #define CGEN_ATTR_CGEN_HW_PROFILE_VALUE(attrs) (((attrs)->bool & (1 << CGEN_HW_PROFILE)) != 0)
 
-/* Enum declaration for ms1 hardware types.  */
+/* Enum declaration for mt hardware types.  */
 typedef enum cgen_hw_type {
   HW_H_MEMORY, HW_H_SINT, HW_H_UINT, HW_H_ADDR
  , HW_H_IADDR, HW_H_SPR, HW_H_PC, HW_MAX
@@ -219,22 +219,22 @@ typedef enum cgen_operand_attr {
 #define CGEN_ATTR_CGEN_OPERAND_RELAX_VALUE(attrs) (((attrs)->bool & (1 << CGEN_OPERAND_RELAX)) != 0)
 #define CGEN_ATTR_CGEN_OPERAND_SEM_ONLY_VALUE(attrs) (((attrs)->bool & (1 << CGEN_OPERAND_SEM_ONLY)) != 0)
 
-/* Enum declaration for ms1 operand types.  */
+/* Enum declaration for mt operand types.  */
 typedef enum cgen_operand_type {
-  MS1_OPERAND_PC, MS1_OPERAND_FRSR1, MS1_OPERAND_FRSR2, MS1_OPERAND_FRDR
- , MS1_OPERAND_FRDRRR, MS1_OPERAND_IMM16, MS1_OPERAND_IMM16Z, MS1_OPERAND_IMM16O
- , MS1_OPERAND_RC, MS1_OPERAND_RCNUM, MS1_OPERAND_CONTNUM, MS1_OPERAND_RBBC
- , MS1_OPERAND_COLNUM, MS1_OPERAND_ROWNUM, MS1_OPERAND_ROWNUM1, MS1_OPERAND_ROWNUM2
- , MS1_OPERAND_RC1, MS1_OPERAND_RC2, MS1_OPERAND_CBRB, MS1_OPERAND_CELL
- , MS1_OPERAND_DUP, MS1_OPERAND_CTXDISP, MS1_OPERAND_FBDISP, MS1_OPERAND_TYPE
- , MS1_OPERAND_MASK, MS1_OPERAND_BANKADDR, MS1_OPERAND_INCAMT, MS1_OPERAND_XMODE
- , MS1_OPERAND_MASK1, MS1_OPERAND_BALL, MS1_OPERAND_BRC, MS1_OPERAND_RDA
- , MS1_OPERAND_WR, MS1_OPERAND_BALL2, MS1_OPERAND_BRC2, MS1_OPERAND_PERM
- , MS1_OPERAND_A23, MS1_OPERAND_CR, MS1_OPERAND_CBS, MS1_OPERAND_INCR
- , MS1_OPERAND_LENGTH, MS1_OPERAND_CBX, MS1_OPERAND_CCB, MS1_OPERAND_CDB
- , MS1_OPERAND_MODE, MS1_OPERAND_ID, MS1_OPERAND_SIZE, MS1_OPERAND_FBINCR
- , MS1_OPERAND_LOOPSIZE, MS1_OPERAND_IMM16L, MS1_OPERAND_RC3, MS1_OPERAND_CB1SEL
- , MS1_OPERAND_CB2SEL, MS1_OPERAND_CB1INCR, MS1_OPERAND_CB2INCR, MS1_OPERAND_MAX
+  MT_OPERAND_PC, MT_OPERAND_FRSR1, MT_OPERAND_FRSR2, MT_OPERAND_FRDR
+ , MT_OPERAND_FRDRRR, MT_OPERAND_IMM16, MT_OPERAND_IMM16Z, MT_OPERAND_IMM16O
+ , MT_OPERAND_RC, MT_OPERAND_RCNUM, MT_OPERAND_CONTNUM, MT_OPERAND_RBBC
+ , MT_OPERAND_COLNUM, MT_OPERAND_ROWNUM, MT_OPERAND_ROWNUM1, MT_OPERAND_ROWNUM2
+ , MT_OPERAND_RC1, MT_OPERAND_RC2, MT_OPERAND_CBRB, MT_OPERAND_CELL
+ , MT_OPERAND_DUP, MT_OPERAND_CTXDISP, MT_OPERAND_FBDISP, MT_OPERAND_TYPE
+ , MT_OPERAND_MASK, MT_OPERAND_BANKADDR, MT_OPERAND_INCAMT, MT_OPERAND_XMODE
+ , MT_OPERAND_MASK1, MT_OPERAND_BALL, MT_OPERAND_BRC, MT_OPERAND_RDA
+ , MT_OPERAND_WR, MT_OPERAND_BALL2, MT_OPERAND_BRC2, MT_OPERAND_PERM
+ , MT_OPERAND_A23, MT_OPERAND_CR, MT_OPERAND_CBS, MT_OPERAND_INCR
+ , MT_OPERAND_LENGTH, MT_OPERAND_CBX, MT_OPERAND_CCB, MT_OPERAND_CDB
+ , MT_OPERAND_MODE, MT_OPERAND_ID, MT_OPERAND_SIZE, MT_OPERAND_FBINCR
+ , MT_OPERAND_LOOPSIZE, MT_OPERAND_IMM16L, MT_OPERAND_RC3, MT_OPERAND_CB1SEL
+ , MT_OPERAND_CB2SEL, MT_OPERAND_CB1INCR, MT_OPERAND_CB2INCR, MT_OPERAND_MAX
 } CGEN_OPERAND_TYPE;
 
 /* Number of operands types.  */
@@ -286,20 +286,20 @@ typedef enum cgen_insn_attr {
 /* cgen.h uses things we just defined.  */
 #include "opcode/cgen.h"
 
-extern const struct cgen_ifld ms1_cgen_ifld_table[];
+extern const struct cgen_ifld mt_cgen_ifld_table[];
 
 /* Attributes.  */
-extern const CGEN_ATTR_TABLE ms1_cgen_hardware_attr_table[];
-extern const CGEN_ATTR_TABLE ms1_cgen_ifield_attr_table[];
-extern const CGEN_ATTR_TABLE ms1_cgen_operand_attr_table[];
-extern const CGEN_ATTR_TABLE ms1_cgen_insn_attr_table[];
+extern const CGEN_ATTR_TABLE mt_cgen_hardware_attr_table[];
+extern const CGEN_ATTR_TABLE mt_cgen_ifield_attr_table[];
+extern const CGEN_ATTR_TABLE mt_cgen_operand_attr_table[];
+extern const CGEN_ATTR_TABLE mt_cgen_insn_attr_table[];
 
 /* Hardware decls.  */
 
-extern CGEN_KEYWORD ms1_cgen_opval_h_spr;
+extern CGEN_KEYWORD mt_cgen_opval_h_spr;
 
-extern const CGEN_HW_ENTRY ms1_cgen_hw_table[];
+extern const CGEN_HW_ENTRY mt_cgen_hw_table[];
 
 
 
-#endif /* MS1_CPU_H */
+#endif /* MT_CPU_H */

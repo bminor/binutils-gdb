@@ -1,4 +1,4 @@
-/* Instruction building/extraction support for ms1. -*- C -*-
+/* Instruction building/extraction support for mt. -*- C -*-
 
    THIS FILE IS MACHINE GENERATED WITH CGEN: Cpu tools GENerator.
    - the resultant file is machine generated, cgen-ibld.in isn't
@@ -31,8 +31,8 @@
 #include "dis-asm.h"
 #include "bfd.h"
 #include "symcat.h"
-#include "ms1-desc.h"
-#include "ms1-opc.h"
+#include "mt-desc.h"
+#include "mt-opc.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 
@@ -529,7 +529,7 @@ extract_insn_normal (CGEN_CPU_DESC cd,
 
 /* Machine generated code added here.  */
 
-const char * ms1_cgen_insert_operand
+const char * mt_cgen_insert_operand
   (CGEN_CPU_DESC, int, CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma);
 
 /* Main entry point for operand insertion.
@@ -547,7 +547,7 @@ const char * ms1_cgen_insert_operand
    resolved during parsing.  */
 
 const char *
-ms1_cgen_insert_operand (CGEN_CPU_DESC cd,
+mt_cgen_insert_operand (CGEN_CPU_DESC cd,
 			     int opindex,
 			     CGEN_FIELDS * fields,
 			     CGEN_INSN_BYTES_PTR buffer,
@@ -558,178 +558,178 @@ ms1_cgen_insert_operand (CGEN_CPU_DESC cd,
 
   switch (opindex)
     {
-    case MS1_OPERAND_A23 :
+    case MT_OPERAND_A23 :
       errmsg = insert_normal (cd, fields->f_a23, 0, 0, 23, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_BALL :
+    case MT_OPERAND_BALL :
       errmsg = insert_normal (cd, fields->f_ball, 0, 0, 19, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_BALL2 :
+    case MT_OPERAND_BALL2 :
       errmsg = insert_normal (cd, fields->f_ball2, 0, 0, 15, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_BANKADDR :
+    case MT_OPERAND_BANKADDR :
       errmsg = insert_normal (cd, fields->f_bankaddr, 0, 0, 25, 13, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_BRC :
+    case MT_OPERAND_BRC :
       errmsg = insert_normal (cd, fields->f_brc, 0, 0, 18, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_BRC2 :
+    case MT_OPERAND_BRC2 :
       errmsg = insert_normal (cd, fields->f_brc2, 0, 0, 14, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CB1INCR :
+    case MT_OPERAND_CB1INCR :
       errmsg = insert_normal (cd, fields->f_cb1incr, 0|(1<<CGEN_IFLD_SIGNED), 0, 19, 6, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CB1SEL :
+    case MT_OPERAND_CB1SEL :
       errmsg = insert_normal (cd, fields->f_cb1sel, 0, 0, 25, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CB2INCR :
+    case MT_OPERAND_CB2INCR :
       errmsg = insert_normal (cd, fields->f_cb2incr, 0|(1<<CGEN_IFLD_SIGNED), 0, 13, 6, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CB2SEL :
+    case MT_OPERAND_CB2SEL :
       errmsg = insert_normal (cd, fields->f_cb2sel, 0, 0, 22, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CBRB :
+    case MT_OPERAND_CBRB :
       errmsg = insert_normal (cd, fields->f_cbrb, 0, 0, 10, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CBS :
+    case MT_OPERAND_CBS :
       errmsg = insert_normal (cd, fields->f_cbs, 0, 0, 19, 2, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CBX :
+    case MT_OPERAND_CBX :
       errmsg = insert_normal (cd, fields->f_cbx, 0, 0, 14, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CCB :
+    case MT_OPERAND_CCB :
       errmsg = insert_normal (cd, fields->f_ccb, 0, 0, 11, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CDB :
+    case MT_OPERAND_CDB :
       errmsg = insert_normal (cd, fields->f_cdb, 0, 0, 10, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CELL :
+    case MT_OPERAND_CELL :
       errmsg = insert_normal (cd, fields->f_cell, 0, 0, 9, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_COLNUM :
+    case MT_OPERAND_COLNUM :
       errmsg = insert_normal (cd, fields->f_colnum, 0, 0, 18, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CONTNUM :
+    case MT_OPERAND_CONTNUM :
       errmsg = insert_normal (cd, fields->f_contnum, 0, 0, 8, 9, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CR :
+    case MT_OPERAND_CR :
       errmsg = insert_normal (cd, fields->f_cr, 0, 0, 22, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_CTXDISP :
+    case MT_OPERAND_CTXDISP :
       errmsg = insert_normal (cd, fields->f_ctxdisp, 0, 0, 5, 6, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_DUP :
+    case MT_OPERAND_DUP :
       errmsg = insert_normal (cd, fields->f_dup, 0, 0, 6, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_FBDISP :
+    case MT_OPERAND_FBDISP :
       errmsg = insert_normal (cd, fields->f_fbdisp, 0, 0, 15, 6, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_FBINCR :
+    case MT_OPERAND_FBINCR :
       errmsg = insert_normal (cd, fields->f_fbincr, 0, 0, 23, 4, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_FRDR :
+    case MT_OPERAND_FRDR :
       errmsg = insert_normal (cd, fields->f_dr, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 19, 4, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_FRDRRR :
+    case MT_OPERAND_FRDRRR :
       errmsg = insert_normal (cd, fields->f_drrr, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 15, 4, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_FRSR1 :
+    case MT_OPERAND_FRSR1 :
       errmsg = insert_normal (cd, fields->f_sr1, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 23, 4, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_FRSR2 :
+    case MT_OPERAND_FRSR2 :
       errmsg = insert_normal (cd, fields->f_sr2, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 19, 4, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_ID :
+    case MT_OPERAND_ID :
       errmsg = insert_normal (cd, fields->f_id, 0, 0, 14, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_IMM16 :
+    case MT_OPERAND_IMM16 :
       {
         long value = fields->f_imm16s;
         value = ((value) + (0));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 15, 16, 32, total_length, buffer);
       }
       break;
-    case MS1_OPERAND_IMM16L :
+    case MT_OPERAND_IMM16L :
       errmsg = insert_normal (cd, fields->f_imm16l, 0, 0, 23, 16, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_IMM16O :
+    case MT_OPERAND_IMM16O :
       {
         long value = fields->f_imm16s;
         value = ((value) + (0));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 15, 16, 32, total_length, buffer);
       }
       break;
-    case MS1_OPERAND_IMM16Z :
+    case MT_OPERAND_IMM16Z :
       errmsg = insert_normal (cd, fields->f_imm16u, 0, 0, 15, 16, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_INCAMT :
+    case MT_OPERAND_INCAMT :
       errmsg = insert_normal (cd, fields->f_incamt, 0, 0, 19, 8, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_INCR :
+    case MT_OPERAND_INCR :
       errmsg = insert_normal (cd, fields->f_incr, 0, 0, 17, 6, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_LENGTH :
+    case MT_OPERAND_LENGTH :
       errmsg = insert_normal (cd, fields->f_length, 0, 0, 15, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_LOOPSIZE :
+    case MT_OPERAND_LOOPSIZE :
       {
         long value = fields->f_loopo;
         value = ((unsigned int) (value) >> (2));
         errmsg = insert_normal (cd, value, 0, 0, 7, 8, 32, total_length, buffer);
       }
       break;
-    case MS1_OPERAND_MASK :
+    case MT_OPERAND_MASK :
       errmsg = insert_normal (cd, fields->f_mask, 0, 0, 25, 16, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_MASK1 :
+    case MT_OPERAND_MASK1 :
       errmsg = insert_normal (cd, fields->f_mask1, 0, 0, 22, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_MODE :
+    case MT_OPERAND_MODE :
       errmsg = insert_normal (cd, fields->f_mode, 0, 0, 25, 2, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_PERM :
+    case MT_OPERAND_PERM :
       errmsg = insert_normal (cd, fields->f_perm, 0, 0, 25, 2, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_RBBC :
+    case MT_OPERAND_RBBC :
       errmsg = insert_normal (cd, fields->f_rbbc, 0, 0, 25, 2, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_RC :
+    case MT_OPERAND_RC :
       errmsg = insert_normal (cd, fields->f_rc, 0, 0, 15, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_RC1 :
+    case MT_OPERAND_RC1 :
       errmsg = insert_normal (cd, fields->f_rc1, 0, 0, 11, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_RC2 :
+    case MT_OPERAND_RC2 :
       errmsg = insert_normal (cd, fields->f_rc2, 0, 0, 6, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_RC3 :
+    case MT_OPERAND_RC3 :
       errmsg = insert_normal (cd, fields->f_rc3, 0, 0, 7, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_RCNUM :
+    case MT_OPERAND_RCNUM :
       errmsg = insert_normal (cd, fields->f_rcnum, 0, 0, 14, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_RDA :
+    case MT_OPERAND_RDA :
       errmsg = insert_normal (cd, fields->f_rda, 0, 0, 25, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_ROWNUM :
+    case MT_OPERAND_ROWNUM :
       errmsg = insert_normal (cd, fields->f_rownum, 0, 0, 14, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_ROWNUM1 :
+    case MT_OPERAND_ROWNUM1 :
       errmsg = insert_normal (cd, fields->f_rownum1, 0, 0, 12, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_ROWNUM2 :
+    case MT_OPERAND_ROWNUM2 :
       errmsg = insert_normal (cd, fields->f_rownum2, 0, 0, 9, 3, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_SIZE :
+    case MT_OPERAND_SIZE :
       errmsg = insert_normal (cd, fields->f_size, 0, 0, 13, 14, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_TYPE :
+    case MT_OPERAND_TYPE :
       errmsg = insert_normal (cd, fields->f_type, 0, 0, 21, 2, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_WR :
+    case MT_OPERAND_WR :
       errmsg = insert_normal (cd, fields->f_wr, 0, 0, 24, 1, 32, total_length, buffer);
       break;
-    case MS1_OPERAND_XMODE :
+    case MT_OPERAND_XMODE :
       errmsg = insert_normal (cd, fields->f_xmode, 0, 0, 23, 1, 32, total_length, buffer);
       break;
 
@@ -743,7 +743,7 @@ ms1_cgen_insert_operand (CGEN_CPU_DESC cd,
   return errmsg;
 }
 
-int ms1_cgen_extract_operand
+int mt_cgen_extract_operand
   (CGEN_CPU_DESC, int, CGEN_EXTRACT_INFO *, CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma);
 
 /* Main entry point for operand extraction.
@@ -762,7 +762,7 @@ int ms1_cgen_extract_operand
    the handlers.  */
 
 int
-ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
+mt_cgen_extract_operand (CGEN_CPU_DESC cd,
 			     int opindex,
 			     CGEN_EXTRACT_INFO *ex_info,
 			     CGEN_INSN_INT insn_value,
@@ -775,91 +775,91 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
 
   switch (opindex)
     {
-    case MS1_OPERAND_A23 :
+    case MT_OPERAND_A23 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 23, 1, 32, total_length, pc, & fields->f_a23);
       break;
-    case MS1_OPERAND_BALL :
+    case MT_OPERAND_BALL :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 19, 1, 32, total_length, pc, & fields->f_ball);
       break;
-    case MS1_OPERAND_BALL2 :
+    case MT_OPERAND_BALL2 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 1, 32, total_length, pc, & fields->f_ball2);
       break;
-    case MS1_OPERAND_BANKADDR :
+    case MT_OPERAND_BANKADDR :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 13, 32, total_length, pc, & fields->f_bankaddr);
       break;
-    case MS1_OPERAND_BRC :
+    case MT_OPERAND_BRC :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 18, 3, 32, total_length, pc, & fields->f_brc);
       break;
-    case MS1_OPERAND_BRC2 :
+    case MT_OPERAND_BRC2 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 14, 3, 32, total_length, pc, & fields->f_brc2);
       break;
-    case MS1_OPERAND_CB1INCR :
+    case MT_OPERAND_CB1INCR :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 19, 6, 32, total_length, pc, & fields->f_cb1incr);
       break;
-    case MS1_OPERAND_CB1SEL :
+    case MT_OPERAND_CB1SEL :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 3, 32, total_length, pc, & fields->f_cb1sel);
       break;
-    case MS1_OPERAND_CB2INCR :
+    case MT_OPERAND_CB2INCR :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 13, 6, 32, total_length, pc, & fields->f_cb2incr);
       break;
-    case MS1_OPERAND_CB2SEL :
+    case MT_OPERAND_CB2SEL :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 22, 3, 32, total_length, pc, & fields->f_cb2sel);
       break;
-    case MS1_OPERAND_CBRB :
+    case MT_OPERAND_CBRB :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 10, 1, 32, total_length, pc, & fields->f_cbrb);
       break;
-    case MS1_OPERAND_CBS :
+    case MT_OPERAND_CBS :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 19, 2, 32, total_length, pc, & fields->f_cbs);
       break;
-    case MS1_OPERAND_CBX :
+    case MT_OPERAND_CBX :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 14, 3, 32, total_length, pc, & fields->f_cbx);
       break;
-    case MS1_OPERAND_CCB :
+    case MT_OPERAND_CCB :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 11, 1, 32, total_length, pc, & fields->f_ccb);
       break;
-    case MS1_OPERAND_CDB :
+    case MT_OPERAND_CDB :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 10, 1, 32, total_length, pc, & fields->f_cdb);
       break;
-    case MS1_OPERAND_CELL :
+    case MT_OPERAND_CELL :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 9, 3, 32, total_length, pc, & fields->f_cell);
       break;
-    case MS1_OPERAND_COLNUM :
+    case MT_OPERAND_COLNUM :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 18, 3, 32, total_length, pc, & fields->f_colnum);
       break;
-    case MS1_OPERAND_CONTNUM :
+    case MT_OPERAND_CONTNUM :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 8, 9, 32, total_length, pc, & fields->f_contnum);
       break;
-    case MS1_OPERAND_CR :
+    case MT_OPERAND_CR :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 22, 3, 32, total_length, pc, & fields->f_cr);
       break;
-    case MS1_OPERAND_CTXDISP :
+    case MT_OPERAND_CTXDISP :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 5, 6, 32, total_length, pc, & fields->f_ctxdisp);
       break;
-    case MS1_OPERAND_DUP :
+    case MT_OPERAND_DUP :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 6, 1, 32, total_length, pc, & fields->f_dup);
       break;
-    case MS1_OPERAND_FBDISP :
+    case MT_OPERAND_FBDISP :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 6, 32, total_length, pc, & fields->f_fbdisp);
       break;
-    case MS1_OPERAND_FBINCR :
+    case MT_OPERAND_FBINCR :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 23, 4, 32, total_length, pc, & fields->f_fbincr);
       break;
-    case MS1_OPERAND_FRDR :
+    case MT_OPERAND_FRDR :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 19, 4, 32, total_length, pc, & fields->f_dr);
       break;
-    case MS1_OPERAND_FRDRRR :
+    case MT_OPERAND_FRDRRR :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 15, 4, 32, total_length, pc, & fields->f_drrr);
       break;
-    case MS1_OPERAND_FRSR1 :
+    case MT_OPERAND_FRSR1 :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 23, 4, 32, total_length, pc, & fields->f_sr1);
       break;
-    case MS1_OPERAND_FRSR2 :
+    case MT_OPERAND_FRSR2 :
       length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 19, 4, 32, total_length, pc, & fields->f_sr2);
       break;
-    case MS1_OPERAND_ID :
+    case MT_OPERAND_ID :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 14, 1, 32, total_length, pc, & fields->f_id);
       break;
-    case MS1_OPERAND_IMM16 :
+    case MT_OPERAND_IMM16 :
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 15, 16, 32, total_length, pc, & value);
@@ -867,10 +867,10 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
         fields->f_imm16s = value;
       }
       break;
-    case MS1_OPERAND_IMM16L :
+    case MT_OPERAND_IMM16L :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 23, 16, 32, total_length, pc, & fields->f_imm16l);
       break;
-    case MS1_OPERAND_IMM16O :
+    case MT_OPERAND_IMM16O :
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED), 0, 15, 16, 32, total_length, pc, & value);
@@ -878,19 +878,19 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
         fields->f_imm16s = value;
       }
       break;
-    case MS1_OPERAND_IMM16Z :
+    case MT_OPERAND_IMM16Z :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 16, 32, total_length, pc, & fields->f_imm16u);
       break;
-    case MS1_OPERAND_INCAMT :
+    case MT_OPERAND_INCAMT :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 19, 8, 32, total_length, pc, & fields->f_incamt);
       break;
-    case MS1_OPERAND_INCR :
+    case MT_OPERAND_INCR :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 17, 6, 32, total_length, pc, & fields->f_incr);
       break;
-    case MS1_OPERAND_LENGTH :
+    case MT_OPERAND_LENGTH :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 3, 32, total_length, pc, & fields->f_length);
       break;
-    case MS1_OPERAND_LOOPSIZE :
+    case MT_OPERAND_LOOPSIZE :
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0, 0, 7, 8, 32, total_length, pc, & value);
@@ -898,58 +898,58 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
         fields->f_loopo = value;
       }
       break;
-    case MS1_OPERAND_MASK :
+    case MT_OPERAND_MASK :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 16, 32, total_length, pc, & fields->f_mask);
       break;
-    case MS1_OPERAND_MASK1 :
+    case MT_OPERAND_MASK1 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 22, 3, 32, total_length, pc, & fields->f_mask1);
       break;
-    case MS1_OPERAND_MODE :
+    case MT_OPERAND_MODE :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 2, 32, total_length, pc, & fields->f_mode);
       break;
-    case MS1_OPERAND_PERM :
+    case MT_OPERAND_PERM :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 2, 32, total_length, pc, & fields->f_perm);
       break;
-    case MS1_OPERAND_RBBC :
+    case MT_OPERAND_RBBC :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 2, 32, total_length, pc, & fields->f_rbbc);
       break;
-    case MS1_OPERAND_RC :
+    case MT_OPERAND_RC :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 15, 1, 32, total_length, pc, & fields->f_rc);
       break;
-    case MS1_OPERAND_RC1 :
+    case MT_OPERAND_RC1 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 11, 1, 32, total_length, pc, & fields->f_rc1);
       break;
-    case MS1_OPERAND_RC2 :
+    case MT_OPERAND_RC2 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 6, 1, 32, total_length, pc, & fields->f_rc2);
       break;
-    case MS1_OPERAND_RC3 :
+    case MT_OPERAND_RC3 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 7, 1, 32, total_length, pc, & fields->f_rc3);
       break;
-    case MS1_OPERAND_RCNUM :
+    case MT_OPERAND_RCNUM :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 14, 3, 32, total_length, pc, & fields->f_rcnum);
       break;
-    case MS1_OPERAND_RDA :
+    case MT_OPERAND_RDA :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 25, 1, 32, total_length, pc, & fields->f_rda);
       break;
-    case MS1_OPERAND_ROWNUM :
+    case MT_OPERAND_ROWNUM :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 14, 3, 32, total_length, pc, & fields->f_rownum);
       break;
-    case MS1_OPERAND_ROWNUM1 :
+    case MT_OPERAND_ROWNUM1 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 12, 3, 32, total_length, pc, & fields->f_rownum1);
       break;
-    case MS1_OPERAND_ROWNUM2 :
+    case MT_OPERAND_ROWNUM2 :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 9, 3, 32, total_length, pc, & fields->f_rownum2);
       break;
-    case MS1_OPERAND_SIZE :
+    case MT_OPERAND_SIZE :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 13, 14, 32, total_length, pc, & fields->f_size);
       break;
-    case MS1_OPERAND_TYPE :
+    case MT_OPERAND_TYPE :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 21, 2, 32, total_length, pc, & fields->f_type);
       break;
-    case MS1_OPERAND_WR :
+    case MT_OPERAND_WR :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 24, 1, 32, total_length, pc, & fields->f_wr);
       break;
-    case MS1_OPERAND_XMODE :
+    case MT_OPERAND_XMODE :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 23, 1, 32, total_length, pc, & fields->f_xmode);
       break;
 
@@ -963,18 +963,18 @@ ms1_cgen_extract_operand (CGEN_CPU_DESC cd,
   return length;
 }
 
-cgen_insert_fn * const ms1_cgen_insert_handlers[] = 
+cgen_insert_fn * const mt_cgen_insert_handlers[] = 
 {
   insert_insn_normal,
 };
 
-cgen_extract_fn * const ms1_cgen_extract_handlers[] = 
+cgen_extract_fn * const mt_cgen_extract_handlers[] = 
 {
   extract_insn_normal,
 };
 
-int ms1_cgen_get_int_operand     (CGEN_CPU_DESC, int, const CGEN_FIELDS *);
-bfd_vma ms1_cgen_get_vma_operand (CGEN_CPU_DESC, int, const CGEN_FIELDS *);
+int mt_cgen_get_int_operand     (CGEN_CPU_DESC, int, const CGEN_FIELDS *);
+bfd_vma mt_cgen_get_vma_operand (CGEN_CPU_DESC, int, const CGEN_FIELDS *);
 
 /* Getting values from cgen_fields is handled by a collection of functions.
    They are distinguished by the type of the VALUE argument they return.
@@ -982,7 +982,7 @@ bfd_vma ms1_cgen_get_vma_operand (CGEN_CPU_DESC, int, const CGEN_FIELDS *);
    not appropriate.  */
 
 int
-ms1_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+mt_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 			     int opindex,
 			     const CGEN_FIELDS * fields)
 {
@@ -990,166 +990,166 @@ ms1_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 
   switch (opindex)
     {
-    case MS1_OPERAND_A23 :
+    case MT_OPERAND_A23 :
       value = fields->f_a23;
       break;
-    case MS1_OPERAND_BALL :
+    case MT_OPERAND_BALL :
       value = fields->f_ball;
       break;
-    case MS1_OPERAND_BALL2 :
+    case MT_OPERAND_BALL2 :
       value = fields->f_ball2;
       break;
-    case MS1_OPERAND_BANKADDR :
+    case MT_OPERAND_BANKADDR :
       value = fields->f_bankaddr;
       break;
-    case MS1_OPERAND_BRC :
+    case MT_OPERAND_BRC :
       value = fields->f_brc;
       break;
-    case MS1_OPERAND_BRC2 :
+    case MT_OPERAND_BRC2 :
       value = fields->f_brc2;
       break;
-    case MS1_OPERAND_CB1INCR :
+    case MT_OPERAND_CB1INCR :
       value = fields->f_cb1incr;
       break;
-    case MS1_OPERAND_CB1SEL :
+    case MT_OPERAND_CB1SEL :
       value = fields->f_cb1sel;
       break;
-    case MS1_OPERAND_CB2INCR :
+    case MT_OPERAND_CB2INCR :
       value = fields->f_cb2incr;
       break;
-    case MS1_OPERAND_CB2SEL :
+    case MT_OPERAND_CB2SEL :
       value = fields->f_cb2sel;
       break;
-    case MS1_OPERAND_CBRB :
+    case MT_OPERAND_CBRB :
       value = fields->f_cbrb;
       break;
-    case MS1_OPERAND_CBS :
+    case MT_OPERAND_CBS :
       value = fields->f_cbs;
       break;
-    case MS1_OPERAND_CBX :
+    case MT_OPERAND_CBX :
       value = fields->f_cbx;
       break;
-    case MS1_OPERAND_CCB :
+    case MT_OPERAND_CCB :
       value = fields->f_ccb;
       break;
-    case MS1_OPERAND_CDB :
+    case MT_OPERAND_CDB :
       value = fields->f_cdb;
       break;
-    case MS1_OPERAND_CELL :
+    case MT_OPERAND_CELL :
       value = fields->f_cell;
       break;
-    case MS1_OPERAND_COLNUM :
+    case MT_OPERAND_COLNUM :
       value = fields->f_colnum;
       break;
-    case MS1_OPERAND_CONTNUM :
+    case MT_OPERAND_CONTNUM :
       value = fields->f_contnum;
       break;
-    case MS1_OPERAND_CR :
+    case MT_OPERAND_CR :
       value = fields->f_cr;
       break;
-    case MS1_OPERAND_CTXDISP :
+    case MT_OPERAND_CTXDISP :
       value = fields->f_ctxdisp;
       break;
-    case MS1_OPERAND_DUP :
+    case MT_OPERAND_DUP :
       value = fields->f_dup;
       break;
-    case MS1_OPERAND_FBDISP :
+    case MT_OPERAND_FBDISP :
       value = fields->f_fbdisp;
       break;
-    case MS1_OPERAND_FBINCR :
+    case MT_OPERAND_FBINCR :
       value = fields->f_fbincr;
       break;
-    case MS1_OPERAND_FRDR :
+    case MT_OPERAND_FRDR :
       value = fields->f_dr;
       break;
-    case MS1_OPERAND_FRDRRR :
+    case MT_OPERAND_FRDRRR :
       value = fields->f_drrr;
       break;
-    case MS1_OPERAND_FRSR1 :
+    case MT_OPERAND_FRSR1 :
       value = fields->f_sr1;
       break;
-    case MS1_OPERAND_FRSR2 :
+    case MT_OPERAND_FRSR2 :
       value = fields->f_sr2;
       break;
-    case MS1_OPERAND_ID :
+    case MT_OPERAND_ID :
       value = fields->f_id;
       break;
-    case MS1_OPERAND_IMM16 :
+    case MT_OPERAND_IMM16 :
       value = fields->f_imm16s;
       break;
-    case MS1_OPERAND_IMM16L :
+    case MT_OPERAND_IMM16L :
       value = fields->f_imm16l;
       break;
-    case MS1_OPERAND_IMM16O :
+    case MT_OPERAND_IMM16O :
       value = fields->f_imm16s;
       break;
-    case MS1_OPERAND_IMM16Z :
+    case MT_OPERAND_IMM16Z :
       value = fields->f_imm16u;
       break;
-    case MS1_OPERAND_INCAMT :
+    case MT_OPERAND_INCAMT :
       value = fields->f_incamt;
       break;
-    case MS1_OPERAND_INCR :
+    case MT_OPERAND_INCR :
       value = fields->f_incr;
       break;
-    case MS1_OPERAND_LENGTH :
+    case MT_OPERAND_LENGTH :
       value = fields->f_length;
       break;
-    case MS1_OPERAND_LOOPSIZE :
+    case MT_OPERAND_LOOPSIZE :
       value = fields->f_loopo;
       break;
-    case MS1_OPERAND_MASK :
+    case MT_OPERAND_MASK :
       value = fields->f_mask;
       break;
-    case MS1_OPERAND_MASK1 :
+    case MT_OPERAND_MASK1 :
       value = fields->f_mask1;
       break;
-    case MS1_OPERAND_MODE :
+    case MT_OPERAND_MODE :
       value = fields->f_mode;
       break;
-    case MS1_OPERAND_PERM :
+    case MT_OPERAND_PERM :
       value = fields->f_perm;
       break;
-    case MS1_OPERAND_RBBC :
+    case MT_OPERAND_RBBC :
       value = fields->f_rbbc;
       break;
-    case MS1_OPERAND_RC :
+    case MT_OPERAND_RC :
       value = fields->f_rc;
       break;
-    case MS1_OPERAND_RC1 :
+    case MT_OPERAND_RC1 :
       value = fields->f_rc1;
       break;
-    case MS1_OPERAND_RC2 :
+    case MT_OPERAND_RC2 :
       value = fields->f_rc2;
       break;
-    case MS1_OPERAND_RC3 :
+    case MT_OPERAND_RC3 :
       value = fields->f_rc3;
       break;
-    case MS1_OPERAND_RCNUM :
+    case MT_OPERAND_RCNUM :
       value = fields->f_rcnum;
       break;
-    case MS1_OPERAND_RDA :
+    case MT_OPERAND_RDA :
       value = fields->f_rda;
       break;
-    case MS1_OPERAND_ROWNUM :
+    case MT_OPERAND_ROWNUM :
       value = fields->f_rownum;
       break;
-    case MS1_OPERAND_ROWNUM1 :
+    case MT_OPERAND_ROWNUM1 :
       value = fields->f_rownum1;
       break;
-    case MS1_OPERAND_ROWNUM2 :
+    case MT_OPERAND_ROWNUM2 :
       value = fields->f_rownum2;
       break;
-    case MS1_OPERAND_SIZE :
+    case MT_OPERAND_SIZE :
       value = fields->f_size;
       break;
-    case MS1_OPERAND_TYPE :
+    case MT_OPERAND_TYPE :
       value = fields->f_type;
       break;
-    case MS1_OPERAND_WR :
+    case MT_OPERAND_WR :
       value = fields->f_wr;
       break;
-    case MS1_OPERAND_XMODE :
+    case MT_OPERAND_XMODE :
       value = fields->f_xmode;
       break;
 
@@ -1164,7 +1164,7 @@ ms1_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 }
 
 bfd_vma
-ms1_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+mt_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 			     int opindex,
 			     const CGEN_FIELDS * fields)
 {
@@ -1172,166 +1172,166 @@ ms1_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 
   switch (opindex)
     {
-    case MS1_OPERAND_A23 :
+    case MT_OPERAND_A23 :
       value = fields->f_a23;
       break;
-    case MS1_OPERAND_BALL :
+    case MT_OPERAND_BALL :
       value = fields->f_ball;
       break;
-    case MS1_OPERAND_BALL2 :
+    case MT_OPERAND_BALL2 :
       value = fields->f_ball2;
       break;
-    case MS1_OPERAND_BANKADDR :
+    case MT_OPERAND_BANKADDR :
       value = fields->f_bankaddr;
       break;
-    case MS1_OPERAND_BRC :
+    case MT_OPERAND_BRC :
       value = fields->f_brc;
       break;
-    case MS1_OPERAND_BRC2 :
+    case MT_OPERAND_BRC2 :
       value = fields->f_brc2;
       break;
-    case MS1_OPERAND_CB1INCR :
+    case MT_OPERAND_CB1INCR :
       value = fields->f_cb1incr;
       break;
-    case MS1_OPERAND_CB1SEL :
+    case MT_OPERAND_CB1SEL :
       value = fields->f_cb1sel;
       break;
-    case MS1_OPERAND_CB2INCR :
+    case MT_OPERAND_CB2INCR :
       value = fields->f_cb2incr;
       break;
-    case MS1_OPERAND_CB2SEL :
+    case MT_OPERAND_CB2SEL :
       value = fields->f_cb2sel;
       break;
-    case MS1_OPERAND_CBRB :
+    case MT_OPERAND_CBRB :
       value = fields->f_cbrb;
       break;
-    case MS1_OPERAND_CBS :
+    case MT_OPERAND_CBS :
       value = fields->f_cbs;
       break;
-    case MS1_OPERAND_CBX :
+    case MT_OPERAND_CBX :
       value = fields->f_cbx;
       break;
-    case MS1_OPERAND_CCB :
+    case MT_OPERAND_CCB :
       value = fields->f_ccb;
       break;
-    case MS1_OPERAND_CDB :
+    case MT_OPERAND_CDB :
       value = fields->f_cdb;
       break;
-    case MS1_OPERAND_CELL :
+    case MT_OPERAND_CELL :
       value = fields->f_cell;
       break;
-    case MS1_OPERAND_COLNUM :
+    case MT_OPERAND_COLNUM :
       value = fields->f_colnum;
       break;
-    case MS1_OPERAND_CONTNUM :
+    case MT_OPERAND_CONTNUM :
       value = fields->f_contnum;
       break;
-    case MS1_OPERAND_CR :
+    case MT_OPERAND_CR :
       value = fields->f_cr;
       break;
-    case MS1_OPERAND_CTXDISP :
+    case MT_OPERAND_CTXDISP :
       value = fields->f_ctxdisp;
       break;
-    case MS1_OPERAND_DUP :
+    case MT_OPERAND_DUP :
       value = fields->f_dup;
       break;
-    case MS1_OPERAND_FBDISP :
+    case MT_OPERAND_FBDISP :
       value = fields->f_fbdisp;
       break;
-    case MS1_OPERAND_FBINCR :
+    case MT_OPERAND_FBINCR :
       value = fields->f_fbincr;
       break;
-    case MS1_OPERAND_FRDR :
+    case MT_OPERAND_FRDR :
       value = fields->f_dr;
       break;
-    case MS1_OPERAND_FRDRRR :
+    case MT_OPERAND_FRDRRR :
       value = fields->f_drrr;
       break;
-    case MS1_OPERAND_FRSR1 :
+    case MT_OPERAND_FRSR1 :
       value = fields->f_sr1;
       break;
-    case MS1_OPERAND_FRSR2 :
+    case MT_OPERAND_FRSR2 :
       value = fields->f_sr2;
       break;
-    case MS1_OPERAND_ID :
+    case MT_OPERAND_ID :
       value = fields->f_id;
       break;
-    case MS1_OPERAND_IMM16 :
+    case MT_OPERAND_IMM16 :
       value = fields->f_imm16s;
       break;
-    case MS1_OPERAND_IMM16L :
+    case MT_OPERAND_IMM16L :
       value = fields->f_imm16l;
       break;
-    case MS1_OPERAND_IMM16O :
+    case MT_OPERAND_IMM16O :
       value = fields->f_imm16s;
       break;
-    case MS1_OPERAND_IMM16Z :
+    case MT_OPERAND_IMM16Z :
       value = fields->f_imm16u;
       break;
-    case MS1_OPERAND_INCAMT :
+    case MT_OPERAND_INCAMT :
       value = fields->f_incamt;
       break;
-    case MS1_OPERAND_INCR :
+    case MT_OPERAND_INCR :
       value = fields->f_incr;
       break;
-    case MS1_OPERAND_LENGTH :
+    case MT_OPERAND_LENGTH :
       value = fields->f_length;
       break;
-    case MS1_OPERAND_LOOPSIZE :
+    case MT_OPERAND_LOOPSIZE :
       value = fields->f_loopo;
       break;
-    case MS1_OPERAND_MASK :
+    case MT_OPERAND_MASK :
       value = fields->f_mask;
       break;
-    case MS1_OPERAND_MASK1 :
+    case MT_OPERAND_MASK1 :
       value = fields->f_mask1;
       break;
-    case MS1_OPERAND_MODE :
+    case MT_OPERAND_MODE :
       value = fields->f_mode;
       break;
-    case MS1_OPERAND_PERM :
+    case MT_OPERAND_PERM :
       value = fields->f_perm;
       break;
-    case MS1_OPERAND_RBBC :
+    case MT_OPERAND_RBBC :
       value = fields->f_rbbc;
       break;
-    case MS1_OPERAND_RC :
+    case MT_OPERAND_RC :
       value = fields->f_rc;
       break;
-    case MS1_OPERAND_RC1 :
+    case MT_OPERAND_RC1 :
       value = fields->f_rc1;
       break;
-    case MS1_OPERAND_RC2 :
+    case MT_OPERAND_RC2 :
       value = fields->f_rc2;
       break;
-    case MS1_OPERAND_RC3 :
+    case MT_OPERAND_RC3 :
       value = fields->f_rc3;
       break;
-    case MS1_OPERAND_RCNUM :
+    case MT_OPERAND_RCNUM :
       value = fields->f_rcnum;
       break;
-    case MS1_OPERAND_RDA :
+    case MT_OPERAND_RDA :
       value = fields->f_rda;
       break;
-    case MS1_OPERAND_ROWNUM :
+    case MT_OPERAND_ROWNUM :
       value = fields->f_rownum;
       break;
-    case MS1_OPERAND_ROWNUM1 :
+    case MT_OPERAND_ROWNUM1 :
       value = fields->f_rownum1;
       break;
-    case MS1_OPERAND_ROWNUM2 :
+    case MT_OPERAND_ROWNUM2 :
       value = fields->f_rownum2;
       break;
-    case MS1_OPERAND_SIZE :
+    case MT_OPERAND_SIZE :
       value = fields->f_size;
       break;
-    case MS1_OPERAND_TYPE :
+    case MT_OPERAND_TYPE :
       value = fields->f_type;
       break;
-    case MS1_OPERAND_WR :
+    case MT_OPERAND_WR :
       value = fields->f_wr;
       break;
-    case MS1_OPERAND_XMODE :
+    case MT_OPERAND_XMODE :
       value = fields->f_xmode;
       break;
 
@@ -1345,8 +1345,8 @@ ms1_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   return value;
 }
 
-void ms1_cgen_set_int_operand  (CGEN_CPU_DESC, int, CGEN_FIELDS *, int);
-void ms1_cgen_set_vma_operand  (CGEN_CPU_DESC, int, CGEN_FIELDS *, bfd_vma);
+void mt_cgen_set_int_operand  (CGEN_CPU_DESC, int, CGEN_FIELDS *, int);
+void mt_cgen_set_vma_operand  (CGEN_CPU_DESC, int, CGEN_FIELDS *, bfd_vma);
 
 /* Stuffing values in cgen_fields is handled by a collection of functions.
    They are distinguished by the type of the VALUE argument they accept.
@@ -1354,173 +1354,173 @@ void ms1_cgen_set_vma_operand  (CGEN_CPU_DESC, int, CGEN_FIELDS *, bfd_vma);
    not appropriate.  */
 
 void
-ms1_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+mt_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 			     int opindex,
 			     CGEN_FIELDS * fields,
 			     int value)
 {
   switch (opindex)
     {
-    case MS1_OPERAND_A23 :
+    case MT_OPERAND_A23 :
       fields->f_a23 = value;
       break;
-    case MS1_OPERAND_BALL :
+    case MT_OPERAND_BALL :
       fields->f_ball = value;
       break;
-    case MS1_OPERAND_BALL2 :
+    case MT_OPERAND_BALL2 :
       fields->f_ball2 = value;
       break;
-    case MS1_OPERAND_BANKADDR :
+    case MT_OPERAND_BANKADDR :
       fields->f_bankaddr = value;
       break;
-    case MS1_OPERAND_BRC :
+    case MT_OPERAND_BRC :
       fields->f_brc = value;
       break;
-    case MS1_OPERAND_BRC2 :
+    case MT_OPERAND_BRC2 :
       fields->f_brc2 = value;
       break;
-    case MS1_OPERAND_CB1INCR :
+    case MT_OPERAND_CB1INCR :
       fields->f_cb1incr = value;
       break;
-    case MS1_OPERAND_CB1SEL :
+    case MT_OPERAND_CB1SEL :
       fields->f_cb1sel = value;
       break;
-    case MS1_OPERAND_CB2INCR :
+    case MT_OPERAND_CB2INCR :
       fields->f_cb2incr = value;
       break;
-    case MS1_OPERAND_CB2SEL :
+    case MT_OPERAND_CB2SEL :
       fields->f_cb2sel = value;
       break;
-    case MS1_OPERAND_CBRB :
+    case MT_OPERAND_CBRB :
       fields->f_cbrb = value;
       break;
-    case MS1_OPERAND_CBS :
+    case MT_OPERAND_CBS :
       fields->f_cbs = value;
       break;
-    case MS1_OPERAND_CBX :
+    case MT_OPERAND_CBX :
       fields->f_cbx = value;
       break;
-    case MS1_OPERAND_CCB :
+    case MT_OPERAND_CCB :
       fields->f_ccb = value;
       break;
-    case MS1_OPERAND_CDB :
+    case MT_OPERAND_CDB :
       fields->f_cdb = value;
       break;
-    case MS1_OPERAND_CELL :
+    case MT_OPERAND_CELL :
       fields->f_cell = value;
       break;
-    case MS1_OPERAND_COLNUM :
+    case MT_OPERAND_COLNUM :
       fields->f_colnum = value;
       break;
-    case MS1_OPERAND_CONTNUM :
+    case MT_OPERAND_CONTNUM :
       fields->f_contnum = value;
       break;
-    case MS1_OPERAND_CR :
+    case MT_OPERAND_CR :
       fields->f_cr = value;
       break;
-    case MS1_OPERAND_CTXDISP :
+    case MT_OPERAND_CTXDISP :
       fields->f_ctxdisp = value;
       break;
-    case MS1_OPERAND_DUP :
+    case MT_OPERAND_DUP :
       fields->f_dup = value;
       break;
-    case MS1_OPERAND_FBDISP :
+    case MT_OPERAND_FBDISP :
       fields->f_fbdisp = value;
       break;
-    case MS1_OPERAND_FBINCR :
+    case MT_OPERAND_FBINCR :
       fields->f_fbincr = value;
       break;
-    case MS1_OPERAND_FRDR :
+    case MT_OPERAND_FRDR :
       fields->f_dr = value;
       break;
-    case MS1_OPERAND_FRDRRR :
+    case MT_OPERAND_FRDRRR :
       fields->f_drrr = value;
       break;
-    case MS1_OPERAND_FRSR1 :
+    case MT_OPERAND_FRSR1 :
       fields->f_sr1 = value;
       break;
-    case MS1_OPERAND_FRSR2 :
+    case MT_OPERAND_FRSR2 :
       fields->f_sr2 = value;
       break;
-    case MS1_OPERAND_ID :
+    case MT_OPERAND_ID :
       fields->f_id = value;
       break;
-    case MS1_OPERAND_IMM16 :
+    case MT_OPERAND_IMM16 :
       fields->f_imm16s = value;
       break;
-    case MS1_OPERAND_IMM16L :
+    case MT_OPERAND_IMM16L :
       fields->f_imm16l = value;
       break;
-    case MS1_OPERAND_IMM16O :
+    case MT_OPERAND_IMM16O :
       fields->f_imm16s = value;
       break;
-    case MS1_OPERAND_IMM16Z :
+    case MT_OPERAND_IMM16Z :
       fields->f_imm16u = value;
       break;
-    case MS1_OPERAND_INCAMT :
+    case MT_OPERAND_INCAMT :
       fields->f_incamt = value;
       break;
-    case MS1_OPERAND_INCR :
+    case MT_OPERAND_INCR :
       fields->f_incr = value;
       break;
-    case MS1_OPERAND_LENGTH :
+    case MT_OPERAND_LENGTH :
       fields->f_length = value;
       break;
-    case MS1_OPERAND_LOOPSIZE :
+    case MT_OPERAND_LOOPSIZE :
       fields->f_loopo = value;
       break;
-    case MS1_OPERAND_MASK :
+    case MT_OPERAND_MASK :
       fields->f_mask = value;
       break;
-    case MS1_OPERAND_MASK1 :
+    case MT_OPERAND_MASK1 :
       fields->f_mask1 = value;
       break;
-    case MS1_OPERAND_MODE :
+    case MT_OPERAND_MODE :
       fields->f_mode = value;
       break;
-    case MS1_OPERAND_PERM :
+    case MT_OPERAND_PERM :
       fields->f_perm = value;
       break;
-    case MS1_OPERAND_RBBC :
+    case MT_OPERAND_RBBC :
       fields->f_rbbc = value;
       break;
-    case MS1_OPERAND_RC :
+    case MT_OPERAND_RC :
       fields->f_rc = value;
       break;
-    case MS1_OPERAND_RC1 :
+    case MT_OPERAND_RC1 :
       fields->f_rc1 = value;
       break;
-    case MS1_OPERAND_RC2 :
+    case MT_OPERAND_RC2 :
       fields->f_rc2 = value;
       break;
-    case MS1_OPERAND_RC3 :
+    case MT_OPERAND_RC3 :
       fields->f_rc3 = value;
       break;
-    case MS1_OPERAND_RCNUM :
+    case MT_OPERAND_RCNUM :
       fields->f_rcnum = value;
       break;
-    case MS1_OPERAND_RDA :
+    case MT_OPERAND_RDA :
       fields->f_rda = value;
       break;
-    case MS1_OPERAND_ROWNUM :
+    case MT_OPERAND_ROWNUM :
       fields->f_rownum = value;
       break;
-    case MS1_OPERAND_ROWNUM1 :
+    case MT_OPERAND_ROWNUM1 :
       fields->f_rownum1 = value;
       break;
-    case MS1_OPERAND_ROWNUM2 :
+    case MT_OPERAND_ROWNUM2 :
       fields->f_rownum2 = value;
       break;
-    case MS1_OPERAND_SIZE :
+    case MT_OPERAND_SIZE :
       fields->f_size = value;
       break;
-    case MS1_OPERAND_TYPE :
+    case MT_OPERAND_TYPE :
       fields->f_type = value;
       break;
-    case MS1_OPERAND_WR :
+    case MT_OPERAND_WR :
       fields->f_wr = value;
       break;
-    case MS1_OPERAND_XMODE :
+    case MT_OPERAND_XMODE :
       fields->f_xmode = value;
       break;
 
@@ -1533,173 +1533,173 @@ ms1_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 }
 
 void
-ms1_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+mt_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 			     int opindex,
 			     CGEN_FIELDS * fields,
 			     bfd_vma value)
 {
   switch (opindex)
     {
-    case MS1_OPERAND_A23 :
+    case MT_OPERAND_A23 :
       fields->f_a23 = value;
       break;
-    case MS1_OPERAND_BALL :
+    case MT_OPERAND_BALL :
       fields->f_ball = value;
       break;
-    case MS1_OPERAND_BALL2 :
+    case MT_OPERAND_BALL2 :
       fields->f_ball2 = value;
       break;
-    case MS1_OPERAND_BANKADDR :
+    case MT_OPERAND_BANKADDR :
       fields->f_bankaddr = value;
       break;
-    case MS1_OPERAND_BRC :
+    case MT_OPERAND_BRC :
       fields->f_brc = value;
       break;
-    case MS1_OPERAND_BRC2 :
+    case MT_OPERAND_BRC2 :
       fields->f_brc2 = value;
       break;
-    case MS1_OPERAND_CB1INCR :
+    case MT_OPERAND_CB1INCR :
       fields->f_cb1incr = value;
       break;
-    case MS1_OPERAND_CB1SEL :
+    case MT_OPERAND_CB1SEL :
       fields->f_cb1sel = value;
       break;
-    case MS1_OPERAND_CB2INCR :
+    case MT_OPERAND_CB2INCR :
       fields->f_cb2incr = value;
       break;
-    case MS1_OPERAND_CB2SEL :
+    case MT_OPERAND_CB2SEL :
       fields->f_cb2sel = value;
       break;
-    case MS1_OPERAND_CBRB :
+    case MT_OPERAND_CBRB :
       fields->f_cbrb = value;
       break;
-    case MS1_OPERAND_CBS :
+    case MT_OPERAND_CBS :
       fields->f_cbs = value;
       break;
-    case MS1_OPERAND_CBX :
+    case MT_OPERAND_CBX :
       fields->f_cbx = value;
       break;
-    case MS1_OPERAND_CCB :
+    case MT_OPERAND_CCB :
       fields->f_ccb = value;
       break;
-    case MS1_OPERAND_CDB :
+    case MT_OPERAND_CDB :
       fields->f_cdb = value;
       break;
-    case MS1_OPERAND_CELL :
+    case MT_OPERAND_CELL :
       fields->f_cell = value;
       break;
-    case MS1_OPERAND_COLNUM :
+    case MT_OPERAND_COLNUM :
       fields->f_colnum = value;
       break;
-    case MS1_OPERAND_CONTNUM :
+    case MT_OPERAND_CONTNUM :
       fields->f_contnum = value;
       break;
-    case MS1_OPERAND_CR :
+    case MT_OPERAND_CR :
       fields->f_cr = value;
       break;
-    case MS1_OPERAND_CTXDISP :
+    case MT_OPERAND_CTXDISP :
       fields->f_ctxdisp = value;
       break;
-    case MS1_OPERAND_DUP :
+    case MT_OPERAND_DUP :
       fields->f_dup = value;
       break;
-    case MS1_OPERAND_FBDISP :
+    case MT_OPERAND_FBDISP :
       fields->f_fbdisp = value;
       break;
-    case MS1_OPERAND_FBINCR :
+    case MT_OPERAND_FBINCR :
       fields->f_fbincr = value;
       break;
-    case MS1_OPERAND_FRDR :
+    case MT_OPERAND_FRDR :
       fields->f_dr = value;
       break;
-    case MS1_OPERAND_FRDRRR :
+    case MT_OPERAND_FRDRRR :
       fields->f_drrr = value;
       break;
-    case MS1_OPERAND_FRSR1 :
+    case MT_OPERAND_FRSR1 :
       fields->f_sr1 = value;
       break;
-    case MS1_OPERAND_FRSR2 :
+    case MT_OPERAND_FRSR2 :
       fields->f_sr2 = value;
       break;
-    case MS1_OPERAND_ID :
+    case MT_OPERAND_ID :
       fields->f_id = value;
       break;
-    case MS1_OPERAND_IMM16 :
+    case MT_OPERAND_IMM16 :
       fields->f_imm16s = value;
       break;
-    case MS1_OPERAND_IMM16L :
+    case MT_OPERAND_IMM16L :
       fields->f_imm16l = value;
       break;
-    case MS1_OPERAND_IMM16O :
+    case MT_OPERAND_IMM16O :
       fields->f_imm16s = value;
       break;
-    case MS1_OPERAND_IMM16Z :
+    case MT_OPERAND_IMM16Z :
       fields->f_imm16u = value;
       break;
-    case MS1_OPERAND_INCAMT :
+    case MT_OPERAND_INCAMT :
       fields->f_incamt = value;
       break;
-    case MS1_OPERAND_INCR :
+    case MT_OPERAND_INCR :
       fields->f_incr = value;
       break;
-    case MS1_OPERAND_LENGTH :
+    case MT_OPERAND_LENGTH :
       fields->f_length = value;
       break;
-    case MS1_OPERAND_LOOPSIZE :
+    case MT_OPERAND_LOOPSIZE :
       fields->f_loopo = value;
       break;
-    case MS1_OPERAND_MASK :
+    case MT_OPERAND_MASK :
       fields->f_mask = value;
       break;
-    case MS1_OPERAND_MASK1 :
+    case MT_OPERAND_MASK1 :
       fields->f_mask1 = value;
       break;
-    case MS1_OPERAND_MODE :
+    case MT_OPERAND_MODE :
       fields->f_mode = value;
       break;
-    case MS1_OPERAND_PERM :
+    case MT_OPERAND_PERM :
       fields->f_perm = value;
       break;
-    case MS1_OPERAND_RBBC :
+    case MT_OPERAND_RBBC :
       fields->f_rbbc = value;
       break;
-    case MS1_OPERAND_RC :
+    case MT_OPERAND_RC :
       fields->f_rc = value;
       break;
-    case MS1_OPERAND_RC1 :
+    case MT_OPERAND_RC1 :
       fields->f_rc1 = value;
       break;
-    case MS1_OPERAND_RC2 :
+    case MT_OPERAND_RC2 :
       fields->f_rc2 = value;
       break;
-    case MS1_OPERAND_RC3 :
+    case MT_OPERAND_RC3 :
       fields->f_rc3 = value;
       break;
-    case MS1_OPERAND_RCNUM :
+    case MT_OPERAND_RCNUM :
       fields->f_rcnum = value;
       break;
-    case MS1_OPERAND_RDA :
+    case MT_OPERAND_RDA :
       fields->f_rda = value;
       break;
-    case MS1_OPERAND_ROWNUM :
+    case MT_OPERAND_ROWNUM :
       fields->f_rownum = value;
       break;
-    case MS1_OPERAND_ROWNUM1 :
+    case MT_OPERAND_ROWNUM1 :
       fields->f_rownum1 = value;
       break;
-    case MS1_OPERAND_ROWNUM2 :
+    case MT_OPERAND_ROWNUM2 :
       fields->f_rownum2 = value;
       break;
-    case MS1_OPERAND_SIZE :
+    case MT_OPERAND_SIZE :
       fields->f_size = value;
       break;
-    case MS1_OPERAND_TYPE :
+    case MT_OPERAND_TYPE :
       fields->f_type = value;
       break;
-    case MS1_OPERAND_WR :
+    case MT_OPERAND_WR :
       fields->f_wr = value;
       break;
-    case MS1_OPERAND_XMODE :
+    case MT_OPERAND_XMODE :
       fields->f_xmode = value;
       break;
 
@@ -1714,16 +1714,16 @@ ms1_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 /* Function to call before using the instruction builder tables.  */
 
 void
-ms1_cgen_init_ibld_table (CGEN_CPU_DESC cd)
+mt_cgen_init_ibld_table (CGEN_CPU_DESC cd)
 {
-  cd->insert_handlers = & ms1_cgen_insert_handlers[0];
-  cd->extract_handlers = & ms1_cgen_extract_handlers[0];
+  cd->insert_handlers = & mt_cgen_insert_handlers[0];
+  cd->extract_handlers = & mt_cgen_extract_handlers[0];
 
-  cd->insert_operand = ms1_cgen_insert_operand;
-  cd->extract_operand = ms1_cgen_extract_operand;
+  cd->insert_operand = mt_cgen_insert_operand;
+  cd->extract_operand = mt_cgen_extract_operand;
 
-  cd->get_int_operand = ms1_cgen_get_int_operand;
-  cd->set_int_operand = ms1_cgen_set_int_operand;
-  cd->get_vma_operand = ms1_cgen_get_vma_operand;
-  cd->set_vma_operand = ms1_cgen_set_vma_operand;
+  cd->get_int_operand = mt_cgen_get_int_operand;
+  cd->set_int_operand = mt_cgen_set_int_operand;
+  cd->get_vma_operand = mt_cgen_get_vma_operand;
+  cd->set_vma_operand = mt_cgen_set_vma_operand;
 }

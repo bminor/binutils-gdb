@@ -1,3 +1,21 @@
+2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	Second part of ms1 to mt renaming.
+	* configure: Rebuilt.
+	* configure.in (mt): Remove special case.
+	* config/tc-mt.c (opcodes/mt-desc.h, opcodes/mt-opc.h): Change
+	#includes.
+	(mt_insn, mt_mach, mt_mach_bitmask, mt_flags, mt_architectures):
+	Rename, adjust.
+	(md_parse_option, md_show_usage, md_begin, md_assemble,
+	md_cgen_lookup_reloc, md_atof): Adjust.
+	(mt_force_relocation, mt_apply_fix, mt_fix_adjustable): Rename, adjust.
+	* config/tc-mt.h (TC_MT): Rename.
+	(LISTING_HEADER, TARGET_ARCH, TARGET_FORMAT): Adjust.
+	(md_apply_fix): Adjust.
+	(mt_apply_fix, mt_fix_adjustable, mt_force_relocation): Rename.
+	(TC_FORCE_RELOCATION, tc_fix_adjustable): Adjust.
+
 2005-12-14  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (add_prefix): More fine-grained handling of

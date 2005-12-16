@@ -1,4 +1,4 @@
-/* Target-dependent code for Morpho ms1 processor, for GDB.
+/* Target-dependent code for Morpho mt processor, for GDB.
 
    Copyright 2005 Free Software Foundation, Inc.
 
@@ -39,92 +39,92 @@
 #include "infcall.h"
 #include "gdb_assert.h"
 
-enum ms1_arch_constants
+enum mt_arch_constants
 {
-  MS1_MAX_STRUCT_SIZE = 16
+  MT_MAX_STRUCT_SIZE = 16
 };
 
-enum ms1_gdb_regnums
+enum mt_gdb_regnums
 {
-  MS1_R0_REGNUM,			/* 32 bit regs.  */
-  MS1_R1_REGNUM,
-  MS1_1ST_ARGREG = MS1_R1_REGNUM,
-  MS1_R2_REGNUM,
-  MS1_R3_REGNUM,
-  MS1_R4_REGNUM,
-  MS1_LAST_ARGREG = MS1_R4_REGNUM,
-  MS1_R5_REGNUM,
-  MS1_R6_REGNUM,
-  MS1_R7_REGNUM,
-  MS1_R8_REGNUM,
-  MS1_R9_REGNUM,
-  MS1_R10_REGNUM,
-  MS1_R11_REGNUM,
-  MS1_R12_REGNUM,
-  MS1_FP_REGNUM = MS1_R12_REGNUM,
-  MS1_R13_REGNUM,
-  MS1_SP_REGNUM = MS1_R13_REGNUM,
-  MS1_R14_REGNUM,
-  MS1_RA_REGNUM = MS1_R14_REGNUM,
-  MS1_R15_REGNUM,
-  MS1_IRA_REGNUM = MS1_R15_REGNUM,
-  MS1_PC_REGNUM,
+  MT_R0_REGNUM,			/* 32 bit regs.  */
+  MT_R1_REGNUM,
+  MT_1ST_ARGREG = MT_R1_REGNUM,
+  MT_R2_REGNUM,
+  MT_R3_REGNUM,
+  MT_R4_REGNUM,
+  MT_LAST_ARGREG = MT_R4_REGNUM,
+  MT_R5_REGNUM,
+  MT_R6_REGNUM,
+  MT_R7_REGNUM,
+  MT_R8_REGNUM,
+  MT_R9_REGNUM,
+  MT_R10_REGNUM,
+  MT_R11_REGNUM,
+  MT_R12_REGNUM,
+  MT_FP_REGNUM = MT_R12_REGNUM,
+  MT_R13_REGNUM,
+  MT_SP_REGNUM = MT_R13_REGNUM,
+  MT_R14_REGNUM,
+  MT_RA_REGNUM = MT_R14_REGNUM,
+  MT_R15_REGNUM,
+  MT_IRA_REGNUM = MT_R15_REGNUM,
+  MT_PC_REGNUM,
 
   /* Interrupt Enable pseudo-register, exported by SID.  */
-  MS1_INT_ENABLE_REGNUM,
+  MT_INT_ENABLE_REGNUM,
   /* End of CPU regs.  */
 
-  MS1_NUM_CPU_REGS,
+  MT_NUM_CPU_REGS,
 
   /* Co-processor registers.  */
-  MS1_COPRO_REGNUM = MS1_NUM_CPU_REGS,	/* 16 bit regs.  */
-  MS1_CPR0_REGNUM,
-  MS1_CPR1_REGNUM,
-  MS1_CPR2_REGNUM,
-  MS1_CPR3_REGNUM,
-  MS1_CPR4_REGNUM,
-  MS1_CPR5_REGNUM,
-  MS1_CPR6_REGNUM,
-  MS1_CPR7_REGNUM,
-  MS1_CPR8_REGNUM,
-  MS1_CPR9_REGNUM,
-  MS1_CPR10_REGNUM,
-  MS1_CPR11_REGNUM,
-  MS1_CPR12_REGNUM,
-  MS1_CPR13_REGNUM,
-  MS1_CPR14_REGNUM,
-  MS1_CPR15_REGNUM,
-  MS1_BYPA_REGNUM,		/* 32 bit regs.  */
-  MS1_BYPB_REGNUM,
-  MS1_BYPC_REGNUM,
-  MS1_FLAG_REGNUM,
-  MS1_CONTEXT_REGNUM,		/* 38 bits (treat as array of
+  MT_COPRO_REGNUM = MT_NUM_CPU_REGS,	/* 16 bit regs.  */
+  MT_CPR0_REGNUM,
+  MT_CPR1_REGNUM,
+  MT_CPR2_REGNUM,
+  MT_CPR3_REGNUM,
+  MT_CPR4_REGNUM,
+  MT_CPR5_REGNUM,
+  MT_CPR6_REGNUM,
+  MT_CPR7_REGNUM,
+  MT_CPR8_REGNUM,
+  MT_CPR9_REGNUM,
+  MT_CPR10_REGNUM,
+  MT_CPR11_REGNUM,
+  MT_CPR12_REGNUM,
+  MT_CPR13_REGNUM,
+  MT_CPR14_REGNUM,
+  MT_CPR15_REGNUM,
+  MT_BYPA_REGNUM,		/* 32 bit regs.  */
+  MT_BYPB_REGNUM,
+  MT_BYPC_REGNUM,
+  MT_FLAG_REGNUM,
+  MT_CONTEXT_REGNUM,		/* 38 bits (treat as array of
 				   six bytes).  */
-  MS1_MAC_REGNUM,			/* 32 bits.  */
-  MS1_Z1_REGNUM,			/* 16 bits.  */
-  MS1_Z2_REGNUM,			/* 16 bits.  */
-  MS1_ICHANNEL_REGNUM,		/* 32 bits.  */
-  MS1_ISCRAMB_REGNUM,		/* 32 bits.  */
-  MS1_QSCRAMB_REGNUM,		/* 32 bits.  */
-  MS1_OUT_REGNUM,			/* 16 bits.  */
-  MS1_EXMAC_REGNUM,		/* 32 bits (8 used).  */
-  MS1_QCHANNEL_REGNUM,		/* 32 bits.  */
+  MT_MAC_REGNUM,			/* 32 bits.  */
+  MT_Z1_REGNUM,			/* 16 bits.  */
+  MT_Z2_REGNUM,			/* 16 bits.  */
+  MT_ICHANNEL_REGNUM,		/* 32 bits.  */
+  MT_ISCRAMB_REGNUM,		/* 32 bits.  */
+  MT_QSCRAMB_REGNUM,		/* 32 bits.  */
+  MT_OUT_REGNUM,			/* 16 bits.  */
+  MT_EXMAC_REGNUM,		/* 32 bits (8 used).  */
+  MT_QCHANNEL_REGNUM,		/* 32 bits.  */
 
   /* Number of real registers.  */
-  MS1_NUM_REGS,
+  MT_NUM_REGS,
 
   /* Pseudo-registers.  */
-  MS1_COPRO_PSEUDOREG_REGNUM = MS1_NUM_REGS,
-  MS1_MAC_PSEUDOREG_REGNUM,
+  MT_COPRO_PSEUDOREG_REGNUM = MT_NUM_REGS,
+  MT_MAC_PSEUDOREG_REGNUM,
 
   /* Two pseudo-regs ('coprocessor' and 'mac').  */
-  MS1_NUM_PSEUDO_REGS = 2
+  MT_NUM_PSEUDO_REGS = 2
 };
 
 /* Return name of register number specified by REGNUM.  */
 
 static const char *
-ms1_register_name (int regnum)
+mt_register_name (int regnum)
 {
   static const char *const register_names[] = {
     /* CPU regs.  */
@@ -149,13 +149,13 @@ ms1_register_name (int regnum)
    type of that register.  */
 
 static struct type *
-ms1_register_type (struct gdbarch *arch, int regnum)
+mt_register_type (struct gdbarch *arch, int regnum)
 {
   static struct type *void_func_ptr = NULL;
   static struct type *void_ptr = NULL;
   static struct type *copro_type;
 
-  if (regnum >= 0 && regnum < MS1_NUM_REGS + MS1_NUM_PSEUDO_REGS)
+  if (regnum >= 0 && regnum < MT_NUM_REGS + MT_NUM_PSEUDO_REGS)
     {
       if (void_func_ptr == NULL)
 	{
@@ -169,68 +169,68 @@ ms1_register_type (struct gdbarch *arch, int regnum)
 	}
       switch (regnum)
 	{
-	case MS1_PC_REGNUM:
-	case MS1_RA_REGNUM:
-	case MS1_IRA_REGNUM:
+	case MT_PC_REGNUM:
+	case MT_RA_REGNUM:
+	case MT_IRA_REGNUM:
 	  return void_func_ptr;
-	case MS1_SP_REGNUM:
-	case MS1_FP_REGNUM:
+	case MT_SP_REGNUM:
+	case MT_FP_REGNUM:
 	  return void_ptr;
-	case MS1_INT_ENABLE_REGNUM:
-	case MS1_ICHANNEL_REGNUM:
-	case MS1_QCHANNEL_REGNUM:
-	case MS1_ISCRAMB_REGNUM:
-	case MS1_QSCRAMB_REGNUM:
+	case MT_INT_ENABLE_REGNUM:
+	case MT_ICHANNEL_REGNUM:
+	case MT_QCHANNEL_REGNUM:
+	case MT_ISCRAMB_REGNUM:
+	case MT_QSCRAMB_REGNUM:
 	  return builtin_type_int32;
-	case MS1_EXMAC_REGNUM:
-	case MS1_MAC_REGNUM:
+	case MT_EXMAC_REGNUM:
+	case MT_MAC_REGNUM:
 	  return builtin_type_uint32;
-	case MS1_BYPA_REGNUM:
-	case MS1_BYPB_REGNUM:
-	case MS1_BYPC_REGNUM:
-	case MS1_Z1_REGNUM:
-	case MS1_Z2_REGNUM:
-	case MS1_OUT_REGNUM:
+	case MT_BYPA_REGNUM:
+	case MT_BYPB_REGNUM:
+	case MT_BYPC_REGNUM:
+	case MT_Z1_REGNUM:
+	case MT_Z2_REGNUM:
+	case MT_OUT_REGNUM:
 	  return builtin_type_int16;
-	case MS1_CONTEXT_REGNUM:
+	case MT_CONTEXT_REGNUM:
 	  return builtin_type_long_long;
-	case MS1_COPRO_REGNUM:
-	case MS1_COPRO_PSEUDOREG_REGNUM:
+	case MT_COPRO_REGNUM:
+	case MT_COPRO_PSEUDOREG_REGNUM:
 	  return copro_type;
-	case MS1_MAC_PSEUDOREG_REGNUM:
+	case MT_MAC_PSEUDOREG_REGNUM:
 	  if (gdbarch_bfd_arch_info (arch)->mach == bfd_mach_mrisc2
 	      || gdbarch_bfd_arch_info (arch)->mach == bfd_mach_ms2)
 	    return builtin_type_uint64;
 	  else
 	    return builtin_type_uint32;
-	case MS1_FLAG_REGNUM:
+	case MT_FLAG_REGNUM:
 	  return builtin_type_unsigned_char;
 	default:
-	  if (regnum >= MS1_R0_REGNUM && regnum <= MS1_R15_REGNUM)
+	  if (regnum >= MT_R0_REGNUM && regnum <= MT_R15_REGNUM)
 	    return builtin_type_int32;
-	  else if (regnum >= MS1_CPR0_REGNUM && regnum <= MS1_CPR15_REGNUM)
+	  else if (regnum >= MT_CPR0_REGNUM && regnum <= MT_CPR15_REGNUM)
 	    return builtin_type_int16;
 	}
     }
   internal_error (__FILE__, __LINE__,
-		  _("ms1_register_type: illegal register number %d"), regnum);
+		  _("mt_register_type: illegal register number %d"), regnum);
 }
 
 /* Return true if register REGNUM is a member of the register group
    specified by GROUP.  */
 
 static int
-ms1_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+mt_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			 struct reggroup *group)
 {
   /* Groups of registers that can be displayed via "info reg".  */
   if (group == all_reggroup)
     return (regnum >= 0
-	    && regnum < MS1_NUM_REGS + MS1_NUM_PSEUDO_REGS
-	    && ms1_register_name (regnum)[0] != '\0');
+	    && regnum < MT_NUM_REGS + MT_NUM_PSEUDO_REGS
+	    && mt_register_name (regnum)[0] != '\0');
 
   if (group == general_reggroup)
-    return (regnum >= MS1_R0_REGNUM && regnum <= MS1_R15_REGNUM);
+    return (regnum >= MT_R0_REGNUM && regnum <= MT_R15_REGNUM);
 
   if (group == float_reggroup)
     return 0;			/* No float regs.  */
@@ -248,7 +248,7 @@ ms1_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    values.  */
 
 static enum return_value_convention
-ms1_return_value (struct gdbarch *gdbarch, struct type *type,
+mt_return_value (struct gdbarch *gdbarch, struct type *type,
 		  struct regcache *regcache, gdb_byte *readbuf,
 		  const gdb_byte *writebuf)
 {
@@ -260,7 +260,7 @@ ms1_return_value (struct gdbarch *gdbarch, struct type *type,
 	{
 	  ULONGEST addr;
 
-	  regcache_cooked_read_unsigned (regcache, MS1_R11_REGNUM, &addr);
+	  regcache_cooked_read_unsigned (regcache, MT_R11_REGNUM, &addr);
 	  read_memory (addr, readbuf, TYPE_LENGTH (type));
 	}
 
@@ -268,7 +268,7 @@ ms1_return_value (struct gdbarch *gdbarch, struct type *type,
 	{
 	  ULONGEST addr;
 
-	  regcache_cooked_read_unsigned (regcache, MS1_R11_REGNUM, &addr);
+	  regcache_cooked_read_unsigned (regcache, MT_R11_REGNUM, &addr);
 	  write_memory (addr, writebuf, TYPE_LENGTH (type));
 	}
 
@@ -281,7 +281,7 @@ ms1_return_value (struct gdbarch *gdbarch, struct type *type,
 	  ULONGEST temp;
 
 	  /* Return values of <= 4 bytes are returned in R11.  */
-	  regcache_cooked_read_unsigned (regcache, MS1_R11_REGNUM, &temp);
+	  regcache_cooked_read_unsigned (regcache, MT_R11_REGNUM, &temp);
 	  store_unsigned_integer (readbuf, TYPE_LENGTH (type), temp);
 	}
 
@@ -294,10 +294,10 @@ ms1_return_value (struct gdbarch *gdbarch, struct type *type,
 	      memset (buf, 0, sizeof (buf));
 	      memcpy (buf + sizeof (buf) - TYPE_LENGTH (type),
 		      writebuf, TYPE_LENGTH (type));
-	      regcache_cooked_write (regcache, MS1_R11_REGNUM, buf);
+	      regcache_cooked_write (regcache, MT_R11_REGNUM, buf);
 	    }
 	  else			/* (TYPE_LENGTH (type) == 4 */
-	    regcache_cooked_write (regcache, MS1_R11_REGNUM, writebuf);
+	    regcache_cooked_write (regcache, MT_R11_REGNUM, writebuf);
 	}
 
       return RETURN_VALUE_REGISTER_CONVENTION;
@@ -314,7 +314,7 @@ ms1_return_value (struct gdbarch *gdbarch, struct type *type,
    call.  */
 
 static CORE_ADDR
-ms1_skip_prologue (CORE_ADDR pc)
+mt_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr = 0, func_end = 0;
   char *func_name;
@@ -367,7 +367,7 @@ ms1_skip_prologue (CORE_ADDR pc)
    The BP for ms2 is defined as 0x69000000 (illegal)  */
 
 static const gdb_byte *
-ms1_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
+mt_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
 {
   static gdb_byte ms1_breakpoint[] = { 0x68, 0, 0, 0 };
   static gdb_byte ms2_breakpoint[] = { 0x69, 0, 0, 0 };
@@ -389,47 +389,47 @@ ms1_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
    8-bit extended-MAC register).  */
 
 static void
-ms1_pseudo_register_read (struct gdbarch *gdbarch,
+mt_pseudo_register_read (struct gdbarch *gdbarch,
 			  struct regcache *regcache, int regno, gdb_byte *buf)
 {
   switch (regno)
     {
-    case MS1_COPRO_REGNUM:
-    case MS1_COPRO_PSEUDOREG_REGNUM:
-      regcache_raw_read (regcache, MS1_COPRO_REGNUM, buf);
+    case MT_COPRO_REGNUM:
+    case MT_COPRO_PSEUDOREG_REGNUM:
+      regcache_raw_read (regcache, MT_COPRO_REGNUM, buf);
       break;
-    case MS1_MAC_REGNUM:
-    case MS1_MAC_PSEUDOREG_REGNUM:
+    case MT_MAC_REGNUM:
+    case MT_MAC_PSEUDOREG_REGNUM:
       if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
 	  || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	{
 	  ULONGEST oldmac = 0, ext_mac = 0;
 	  ULONGEST newmac;
 
-	  regcache_cooked_read_unsigned (regcache, MS1_MAC_REGNUM, &oldmac);
-	  regcache_cooked_read_unsigned (regcache, MS1_EXMAC_REGNUM, &ext_mac);
+	  regcache_cooked_read_unsigned (regcache, MT_MAC_REGNUM, &oldmac);
+	  regcache_cooked_read_unsigned (regcache, MT_EXMAC_REGNUM, &ext_mac);
 	  newmac =
 	    (oldmac & 0xffffffff) | ((long long) (ext_mac & 0xff) << 32);
 	  store_signed_integer (buf, 8, newmac);
 	}
       else
-	regcache_raw_read (regcache, MS1_MAC_REGNUM, buf);
+	regcache_raw_read (regcache, MT_MAC_REGNUM, buf);
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      _("ms1_pseudo_register_read: bad reg # (%d)"), regno);
+		      _("mt_pseudo_register_read: bad reg # (%d)"), regno);
       break;
     }
 }
 
 /* Write the pseudo registers:
 
-   Ms1 pseudo-registers are stored directly to the target.  The
+   Mt pseudo-registers are stored directly to the target.  The
    'coprocessor' register is special, because when it is modified, all
    the other coprocessor regs must be flushed from the reg cache.  */
 
 static void
-ms1_pseudo_register_write (struct gdbarch *gdbarch,
+mt_pseudo_register_write (struct gdbarch *gdbarch,
 			   struct regcache *regcache,
 			   int regno, const gdb_byte *buf)
 {
@@ -437,14 +437,14 @@ ms1_pseudo_register_write (struct gdbarch *gdbarch,
 
   switch (regno)
     {
-    case MS1_COPRO_REGNUM:
-    case MS1_COPRO_PSEUDOREG_REGNUM:
-      regcache_raw_write (regcache, MS1_COPRO_REGNUM, buf);
-      for (i = MS1_NUM_CPU_REGS; i < MS1_NUM_REGS; i++)
+    case MT_COPRO_REGNUM:
+    case MT_COPRO_PSEUDOREG_REGNUM:
+      regcache_raw_write (regcache, MT_COPRO_REGNUM, buf);
+      for (i = MT_NUM_CPU_REGS; i < MT_NUM_REGS; i++)
 	set_register_cached (i, 0);
       break;
-    case MS1_MAC_REGNUM:
-    case MS1_MAC_PSEUDOREG_REGNUM:
+    case MT_MAC_REGNUM:
+    case MT_MAC_PSEUDOREG_REGNUM:
       if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
 	  || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	{
@@ -456,21 +456,21 @@ ms1_pseudo_register_write (struct gdbarch *gdbarch,
 	  newmac = extract_unsigned_integer (buf, 8);
 	  oldmac = newmac & 0xffffffff;
 	  ext_mac = (newmac >> 32) & 0xff;
-	  regcache_cooked_write_unsigned (regcache, MS1_MAC_REGNUM, oldmac);
-	  regcache_cooked_write_unsigned (regcache, MS1_EXMAC_REGNUM, ext_mac);
+	  regcache_cooked_write_unsigned (regcache, MT_MAC_REGNUM, oldmac);
+	  regcache_cooked_write_unsigned (regcache, MT_EXMAC_REGNUM, ext_mac);
 	}
       else
-	regcache_raw_write (regcache, MS1_MAC_REGNUM, buf);
+	regcache_raw_write (regcache, MT_MAC_REGNUM, buf);
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      _("ms1_pseudo_register_write: bad reg # (%d)"), regno);
+		      _("mt_pseudo_register_write: bad reg # (%d)"), regno);
       break;
     }
 }
 
 static CORE_ADDR
-ms1_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+mt_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
   /* Register size is 4 bytes.  */
   return align_down (sp, 4);
@@ -481,7 +481,7 @@ ms1_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
    of the registers.  */
 
 static void
-ms1_registers_info (struct gdbarch *gdbarch,
+mt_registers_info (struct gdbarch *gdbarch,
 		    struct ui_file *file,
 		    struct frame_info *frame, int regnum, int all)
 {
@@ -489,27 +489,27 @@ ms1_registers_info (struct gdbarch *gdbarch,
     {
       int lim;
 
-      lim = all ? MS1_NUM_REGS : MS1_NUM_CPU_REGS;
+      lim = all ? MT_NUM_REGS : MT_NUM_CPU_REGS;
 
       for (regnum = 0; regnum < lim; regnum++)
 	{
 	  /* Don't display the Qchannel register since it will be displayed
 	     along with Ichannel.  (See below.)  */
-	  if (regnum == MS1_QCHANNEL_REGNUM)
+	  if (regnum == MT_QCHANNEL_REGNUM)
 	    continue;
 
-	  ms1_registers_info (gdbarch, file, frame, regnum, all);
+	  mt_registers_info (gdbarch, file, frame, regnum, all);
 
 	  /* Display the Qchannel register immediately after Ichannel.  */
-	  if (regnum == MS1_ICHANNEL_REGNUM)
-	    ms1_registers_info (gdbarch, file, frame, MS1_QCHANNEL_REGNUM, all);
+	  if (regnum == MT_ICHANNEL_REGNUM)
+	    mt_registers_info (gdbarch, file, frame, MT_QCHANNEL_REGNUM, all);
 	}
     }
   else
     {
-      if (regnum == MS1_EXMAC_REGNUM)
+      if (regnum == MT_EXMAC_REGNUM)
 	return;
-      else if (regnum == MS1_CONTEXT_REGNUM)
+      else if (regnum == MT_CONTEXT_REGNUM)
 	{
 	  /* Special output handling for 38-bit context register.  */
 	  unsigned char *buff;
@@ -534,37 +534,37 @@ ms1_registers_info (struct gdbarch *gdbarch,
 			 extract_unsigned_integer (buff, regsize));
 	  fputs_filtered ("\n", file);
 	}
-      else if (regnum == MS1_COPRO_REGNUM
-               || regnum == MS1_COPRO_PSEUDOREG_REGNUM)
+      else if (regnum == MT_COPRO_REGNUM
+               || regnum == MT_COPRO_PSEUDOREG_REGNUM)
 	{
 	  /* Special output handling for the 'coprocessor' register.  */
 	  gdb_byte *buf;
 
-	  buf = alloca (register_size (gdbarch, MS1_COPRO_REGNUM));
-	  frame_register_read (frame, MS1_COPRO_REGNUM, buf);
+	  buf = alloca (register_size (gdbarch, MT_COPRO_REGNUM));
+	  frame_register_read (frame, MT_COPRO_REGNUM, buf);
 	  /* And print.  */
-	  regnum = MS1_COPRO_PSEUDOREG_REGNUM;
+	  regnum = MT_COPRO_PSEUDOREG_REGNUM;
 	  fputs_filtered (REGISTER_NAME (regnum), file);
 	  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);
 	  val_print (register_type (gdbarch, regnum), buf,
 		     0, 0, file, 0, 1, 0, Val_no_prettyprint);
 	  fputs_filtered ("\n", file);
 	}
-      else if (regnum == MS1_MAC_REGNUM || regnum == MS1_MAC_PSEUDOREG_REGNUM)
+      else if (regnum == MT_MAC_REGNUM || regnum == MT_MAC_PSEUDOREG_REGNUM)
 	{
 	  ULONGEST oldmac, ext_mac, newmac;
 	  gdb_byte buf[3 * sizeof (LONGEST)];
 
 	  /* Get the two "real" mac registers.  */
-	  frame_register_read (frame, MS1_MAC_REGNUM, buf);
+	  frame_register_read (frame, MT_MAC_REGNUM, buf);
 	  oldmac = extract_unsigned_integer
-	    (buf, register_size (gdbarch, MS1_MAC_REGNUM));
+	    (buf, register_size (gdbarch, MT_MAC_REGNUM));
 	  if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
 	      || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	    {
-	      frame_register_read (frame, MS1_EXMAC_REGNUM, buf);
+	      frame_register_read (frame, MT_EXMAC_REGNUM, buf);
 	      ext_mac = extract_unsigned_integer
-		(buf, register_size (gdbarch, MS1_EXMAC_REGNUM));
+		(buf, register_size (gdbarch, MT_EXMAC_REGNUM));
 	    }
 	  else
 	    ext_mac = 0;
@@ -573,7 +573,7 @@ ms1_registers_info (struct gdbarch *gdbarch,
 	  newmac = (oldmac & 0xffffffff) + ((ext_mac & 0xff) << 32);
 
 	  /* And print.  */
-	  regnum = MS1_MAC_PSEUDOREG_REGNUM;
+	  regnum = MT_MAC_PSEUDOREG_REGNUM;
 	  fputs_filtered (REGISTER_NAME (regnum), file);
 	  print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), file);
 	  fputs_filtered ("0x", file);
@@ -595,23 +595,23 @@ ms1_registers_info (struct gdbarch *gdbarch,
    Returns the updated (and aligned) stack pointer.  */
 
 static CORE_ADDR
-ms1_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+mt_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     struct regcache *regcache, CORE_ADDR bp_addr,
 		     int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
 #define wordsize 4
-  gdb_byte buf[MS1_MAX_STRUCT_SIZE];
-  int argreg = MS1_1ST_ARGREG;
+  gdb_byte buf[MT_MAX_STRUCT_SIZE];
+  int argreg = MT_1ST_ARGREG;
   int split_param_len = 0;
   int stack_dest = sp;
   int slacklen;
   int typelen;
   int i, j;
 
-  /* First handle however many args we can fit into MS1_1ST_ARGREG thru
-     MS1_LAST_ARGREG.  */
-  for (i = 0; i < nargs && argreg <= MS1_LAST_ARGREG; i++)
+  /* First handle however many args we can fit into MT_1ST_ARGREG thru
+     MT_LAST_ARGREG.  */
+  for (i = 0; i < nargs && argreg <= MT_LAST_ARGREG; i++)
     {
       const gdb_byte *val;
       typelen = TYPE_LENGTH (value_type (args[i]));
@@ -632,7 +632,7 @@ ms1_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  val = value_contents (args[i]);
 	  while (typelen > 0)
 	    {
-	      if (argreg <= MS1_LAST_ARGREG)
+	      if (argreg <= MT_LAST_ARGREG)
 		{
 		  /* This word of the argument is passed in a register.  */
 		  regcache_cooked_write_unsigned (regcache, argreg++,
@@ -687,17 +687,17 @@ ms1_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Set up return address (provided to us as bp_addr).  */
-  regcache_cooked_write_unsigned (regcache, MS1_RA_REGNUM, bp_addr);
+  regcache_cooked_write_unsigned (regcache, MT_RA_REGNUM, bp_addr);
 
   /* Store struct return address, if given.  */
   if (struct_return && struct_addr != 0)
-    regcache_cooked_write_unsigned (regcache, MS1_R11_REGNUM, struct_addr);
+    regcache_cooked_write_unsigned (regcache, MT_R11_REGNUM, struct_addr);
 
   /* Set aside 16 bytes for the callee to save regs 1-4.  */
   stack_dest -= 16;
 
   /* Update the stack pointer.  */
-  regcache_cooked_write_unsigned (regcache, MS1_SP_REGNUM, stack_dest);
+  regcache_cooked_write_unsigned (regcache, MT_SP_REGNUM, stack_dest);
 
   /* And that should do it.  Return the new stack pointer.  */
   return stack_dest;
@@ -706,7 +706,7 @@ ms1_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 /* The 'unwind_cache' data structure.  */
 
-struct ms1_unwind_cache
+struct mt_unwind_cache
 {
   /* The previous frame's inner most stack address.  
      Used as this frame ID's stack_addr.  */
@@ -722,12 +722,12 @@ struct ms1_unwind_cache
 /* Initialize an unwind_cache.  Build up the saved_regs table etc. for
    the frame.  */
 
-static struct ms1_unwind_cache *
-ms1_frame_unwind_cache (struct frame_info *next_frame,
+static struct mt_unwind_cache *
+mt_frame_unwind_cache (struct frame_info *next_frame,
 			void **this_prologue_cache)
 {
   struct gdbarch *gdbarch;
-  struct ms1_unwind_cache *info;
+  struct mt_unwind_cache *info;
   CORE_ADDR next_addr, start_addr, end_addr, prologue_end_addr;
   unsigned long instr, upper_half, delayed_store = 0;
   int regnum, offset;
@@ -737,7 +737,7 @@ ms1_frame_unwind_cache (struct frame_info *next_frame,
     return (*this_prologue_cache);
 
   gdbarch = get_frame_arch (next_frame);
-  info = FRAME_OBSTACK_ZALLOC (struct ms1_unwind_cache);
+  info = FRAME_OBSTACK_ZALLOC (struct mt_unwind_cache);
   (*this_prologue_cache) = info;
 
   info->prev_sp = 0;
@@ -749,8 +749,8 @@ ms1_frame_unwind_cache (struct frame_info *next_frame,
   /* Grab the frame-relative values of SP and FP, needed below. 
      The frame_saved_register function will find them on the
      stack or in the registers as appropriate.  */
-  frame_unwind_unsigned_register (next_frame, MS1_SP_REGNUM, &sp);
-  frame_unwind_unsigned_register (next_frame, MS1_FP_REGNUM, &fp);
+  frame_unwind_unsigned_register (next_frame, MT_SP_REGNUM, &sp);
+  frame_unwind_unsigned_register (next_frame, MT_FP_REGNUM, &fp);
 
   start_addr = frame_func_unwind (next_frame);
 
@@ -845,10 +845,10 @@ ms1_frame_unwind_cache (struct frame_info *next_frame,
       info->prev_sp = fp + info->framesize;
     }
   /* Save prev_sp in saved_regs as a value, not as an address.  */
-  trad_frame_set_value (info->saved_regs, MS1_SP_REGNUM, info->prev_sp);
+  trad_frame_set_value (info->saved_regs, MT_SP_REGNUM, info->prev_sp);
 
   /* Now convert frame offsets to actual addresses (not offsets).  */
-  for (regnum = 0; regnum < MS1_NUM_REGS; regnum++)
+  for (regnum = 0; regnum < MT_NUM_REGS; regnum++)
     if (trad_frame_addr_p (info->saved_regs, regnum))
       info->saved_regs[regnum].addr += info->frame_base - info->framesize;
 
@@ -856,26 +856,26 @@ ms1_frame_unwind_cache (struct frame_info *next_frame,
      Since this is an unwind, do the reverse.  Copy the location of RA
      into PC (the address / regnum) so that a request for PC will be
      converted into a request for the RA.  */
-  info->saved_regs[MS1_PC_REGNUM] = info->saved_regs[MS1_RA_REGNUM];
+  info->saved_regs[MT_PC_REGNUM] = info->saved_regs[MT_RA_REGNUM];
 
   return info;
 }
 
 static CORE_ADDR
-ms1_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+mt_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST pc;
 
-  frame_unwind_unsigned_register (next_frame, MS1_PC_REGNUM, &pc);
+  frame_unwind_unsigned_register (next_frame, MT_PC_REGNUM, &pc);
   return pc;
 }
 
 static CORE_ADDR
-ms1_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+mt_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST sp;
 
-  frame_unwind_unsigned_register (next_frame, MS1_SP_REGNUM, &sp);
+  frame_unwind_unsigned_register (next_frame, MT_SP_REGNUM, &sp);
   return sp;
 }
 
@@ -885,9 +885,9 @@ ms1_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
    breakpoint.  */
 
 static struct frame_id
-ms1_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+mt_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_id_build (ms1_unwind_sp (gdbarch, next_frame),
+  return frame_id_build (mt_unwind_sp (gdbarch, next_frame),
 			 frame_pc_unwind (next_frame));
 }
 
@@ -895,11 +895,11 @@ ms1_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-ms1_frame_this_id (struct frame_info *next_frame,
+mt_frame_this_id (struct frame_info *next_frame,
 		   void **this_prologue_cache, struct frame_id *this_id)
 {
-  struct ms1_unwind_cache *info =
-    ms1_frame_unwind_cache (next_frame, this_prologue_cache);
+  struct mt_unwind_cache *info =
+    mt_frame_unwind_cache (next_frame, this_prologue_cache);
 
   if (!(info == NULL || info->prev_sp == 0))
     {
@@ -910,25 +910,25 @@ ms1_frame_this_id (struct frame_info *next_frame,
 }
 
 static void
-ms1_frame_prev_register (struct frame_info *next_frame,
+mt_frame_prev_register (struct frame_info *next_frame,
 			 void **this_prologue_cache,
 			 int regnum, int *optimizedp,
 			 enum lval_type *lvalp, CORE_ADDR *addrp,
 			 int *realnump, gdb_byte *bufferp)
 {
-  struct ms1_unwind_cache *info =
-    ms1_frame_unwind_cache (next_frame, this_prologue_cache);
+  struct mt_unwind_cache *info =
+    mt_frame_unwind_cache (next_frame, this_prologue_cache);
 
   trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
 				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static CORE_ADDR
-ms1_frame_base_address (struct frame_info *next_frame,
+mt_frame_base_address (struct frame_info *next_frame,
 			void **this_prologue_cache)
 {
-  struct ms1_unwind_cache *info =
-    ms1_frame_unwind_cache (next_frame, this_prologue_cache);
+  struct mt_unwind_cache *info =
+    mt_frame_unwind_cache (next_frame, this_prologue_cache);
 
   return info->frame_base;
 }
@@ -939,34 +939,34 @@ ms1_frame_base_address (struct frame_info *next_frame,
 
    This exports the 'prev_register' and 'this_id' methods.  */
 
-static const struct frame_unwind ms1_frame_unwind = {
+static const struct frame_unwind mt_frame_unwind = {
   NORMAL_FRAME,
-  ms1_frame_this_id,
-  ms1_frame_prev_register
+  mt_frame_this_id,
+  mt_frame_prev_register
 };
 
 /* The sniffer is a registered function that identifies our family of
    frame unwind functions (this_id and prev_register).  */
 
 static const struct frame_unwind *
-ms1_frame_sniffer (struct frame_info *next_frame)
+mt_frame_sniffer (struct frame_info *next_frame)
 {
-  return &ms1_frame_unwind;
+  return &mt_frame_unwind;
 }
 
 /* Another shared interface:  the 'frame_base' object specifies how to
    unwind a frame and secure the base addresses for frame objects
    (locals, args).  */
 
-static struct frame_base ms1_frame_base = {
-  &ms1_frame_unwind,
-  ms1_frame_base_address,
-  ms1_frame_base_address,
-  ms1_frame_base_address
+static struct frame_base mt_frame_base = {
+  &mt_frame_unwind,
+  mt_frame_base_address,
+  mt_frame_base_address,
+  mt_frame_base_address
 };
 
 static struct gdbarch *
-ms1_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+mt_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
 
@@ -994,33 +994,33 @@ ms1_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      _("ms1_gdbarch_init: bad byte order for float format"));
+		      _("mt_gdbarch_init: bad byte order for float format"));
     }
 
-  set_gdbarch_register_name (gdbarch, ms1_register_name);
-  set_gdbarch_num_regs (gdbarch, MS1_NUM_REGS);
-  set_gdbarch_num_pseudo_regs (gdbarch, MS1_NUM_PSEUDO_REGS);
-  set_gdbarch_pc_regnum (gdbarch, MS1_PC_REGNUM);
-  set_gdbarch_sp_regnum (gdbarch, MS1_SP_REGNUM);
-  set_gdbarch_pseudo_register_read (gdbarch, ms1_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, ms1_pseudo_register_write);
-  set_gdbarch_skip_prologue (gdbarch, ms1_skip_prologue);
+  set_gdbarch_register_name (gdbarch, mt_register_name);
+  set_gdbarch_num_regs (gdbarch, MT_NUM_REGS);
+  set_gdbarch_num_pseudo_regs (gdbarch, MT_NUM_PSEUDO_REGS);
+  set_gdbarch_pc_regnum (gdbarch, MT_PC_REGNUM);
+  set_gdbarch_sp_regnum (gdbarch, MT_SP_REGNUM);
+  set_gdbarch_pseudo_register_read (gdbarch, mt_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, mt_pseudo_register_write);
+  set_gdbarch_skip_prologue (gdbarch, mt_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_breakpoint_from_pc (gdbarch, ms1_breakpoint_from_pc);
+  set_gdbarch_breakpoint_from_pc (gdbarch, mt_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_print_insn (gdbarch, print_insn_ms1);
-  set_gdbarch_register_type (gdbarch, ms1_register_type);
-  set_gdbarch_register_reggroup_p (gdbarch, ms1_register_reggroup_p);
+  set_gdbarch_print_insn (gdbarch, print_insn_mt);
+  set_gdbarch_register_type (gdbarch, mt_register_type);
+  set_gdbarch_register_reggroup_p (gdbarch, mt_register_reggroup_p);
 
-  set_gdbarch_return_value (gdbarch, ms1_return_value);
-  set_gdbarch_sp_regnum (gdbarch, MS1_SP_REGNUM);
+  set_gdbarch_return_value (gdbarch, mt_return_value);
+  set_gdbarch_sp_regnum (gdbarch, MT_SP_REGNUM);
 
-  set_gdbarch_frame_align (gdbarch, ms1_frame_align);
+  set_gdbarch_frame_align (gdbarch, mt_frame_align);
 
-  set_gdbarch_print_registers_info (gdbarch, ms1_registers_info);
+  set_gdbarch_print_registers_info (gdbarch, mt_registers_info);
 
-  set_gdbarch_push_dummy_call (gdbarch, ms1_push_dummy_call);
+  set_gdbarch_push_dummy_call (gdbarch, mt_push_dummy_call);
 
   /* Target builtin data types.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -1035,23 +1035,23 @@ ms1_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Register the DWARF 2 sniffer first, and then the traditional prologue
      based sniffer.  */
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, ms1_frame_sniffer);
-  frame_base_set_default (gdbarch, &ms1_frame_base);
+  frame_unwind_append_sniffer (gdbarch, mt_frame_sniffer);
+  frame_base_set_default (gdbarch, &mt_frame_base);
 
   /* Register the 'unwind_pc' method.  */
-  set_gdbarch_unwind_pc (gdbarch, ms1_unwind_pc);
-  set_gdbarch_unwind_sp (gdbarch, ms1_unwind_sp);
+  set_gdbarch_unwind_pc (gdbarch, mt_unwind_pc);
+  set_gdbarch_unwind_sp (gdbarch, mt_unwind_sp);
 
   /* Methods for saving / extracting a dummy frame's ID.  
      The ID's stack address must match the SP value returned by
      PUSH_DUMMY_CALL, and saved by generic_save_dummy_frame_tos.  */
-  set_gdbarch_unwind_dummy_id (gdbarch, ms1_unwind_dummy_id);
+  set_gdbarch_unwind_dummy_id (gdbarch, mt_unwind_dummy_id);
 
   return gdbarch;
 }
 
 void
-_initialize_ms1_tdep (void)
+_initialize_mt_tdep (void)
 {
-  register_gdbarch_init (bfd_arch_ms1, ms1_gdbarch_init);
+  register_gdbarch_init (bfd_arch_mt, mt_gdbarch_init);
 }

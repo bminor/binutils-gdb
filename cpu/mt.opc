@@ -46,11 +46,11 @@
 #define CGEN_DIS_HASH(buf, value) (((* (unsigned char *) (buf)) >> 5) % CGEN_DIS_HASH_SIZE)
 
 #define CGEN_ASM_HASH_SIZE 127
-#define CGEN_ASM_HASH(insn) ms1_asm_hash (insn)
+#define CGEN_ASM_HASH(insn) mt_asm_hash (insn)
 
-extern unsigned int ms1_asm_hash (const char *);
+extern unsigned int mt_asm_hash (const char *);
 
-extern int ms1_cgen_insn_supported (CGEN_CPU_DESC, const CGEN_INSN *);
+extern int mt_cgen_insn_supported (CGEN_CPU_DESC, const CGEN_INSN *);
 
 
 /* -- opc.c */
@@ -59,8 +59,7 @@ extern int ms1_cgen_insn_supported (CGEN_CPU_DESC, const CGEN_INSN *);
 /* Special check to ensure that instruction exists for given machine.  */
 
 int
-ms1_cgen_insn_supported (CGEN_CPU_DESC cd,
-			 const CGEN_INSN *insn)
+mt_cgen_insn_supported (CGEN_CPU_DESC cd, const CGEN_INSN *insn)
 {
   int machs = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH);
 
@@ -74,7 +73,7 @@ ms1_cgen_insn_supported (CGEN_CPU_DESC cd,
 /* A better hash function for instruction mnemonics.  */
 
 unsigned int
-ms1_asm_hash (const char* insn)
+mt_asm_hash (const char* insn)
 {
   unsigned int hash;
   const char* m = insn;
@@ -113,9 +112,9 @@ parse_loopsize (CGEN_CPU_DESC cd,
   bfd_vma value;
 
   /* Is it a control transfer instructions?  */ 
-  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_LOOPSIZE)
+  if (opindex == (CGEN_OPERAND_TYPE) MT_OPERAND_LOOPSIZE)
     {
-      code = BFD_RELOC_MS1_PCINSN8;
+      code = BFD_RELOC_MT_PCINSN8;
       errmsg = cgen_parse_address (cd, strp, opindex, code,
                                    & result_type, & value);
       *valuep = value;
@@ -138,7 +137,7 @@ parse_imm16 (CGEN_CPU_DESC cd,
   bfd_vma value;
 
   /* Is it a control transfer instructions?  */ 
-  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16O)
+  if (opindex == (CGEN_OPERAND_TYPE) MT_OPERAND_IMM16O)
     {
       code = BFD_RELOC_16_PCREL;
       errmsg = cgen_parse_address (cd, strp, opindex, code,
@@ -154,7 +153,7 @@ parse_imm16 (CGEN_CPU_DESC cd,
 
   /* If it's not a control transfer instruction, then
      we have to check for %OP relocating operators.  */
-  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16L)
+  if (opindex == (CGEN_OPERAND_TYPE) MT_OPERAND_IMM16L)
     ;
   else if (strncmp (*strp, "%hi16", 5) == 0)
     {
@@ -203,7 +202,7 @@ parse_imm16 (CGEN_CPU_DESC cd,
     {
       /* Parse hex values like 0xffff as unsigned, and sign extend
 	 them manually.  */
-      int parse_signed = (opindex == (CGEN_OPERAND_TYPE)MS1_OPERAND_IMM16);
+      int parse_signed = (opindex == (CGEN_OPERAND_TYPE)MT_OPERAND_IMM16);
 
       if ((*strp)[0] == '0'
 	  && ((*strp)[1] == 'x' || (*strp)[1] == 'X'))
@@ -235,10 +234,10 @@ parse_imm16 (CGEN_CPU_DESC cd,
 	}
       else  
 	{
-          /* MS1_OPERAND_IMM16Z.  Parse as an unsigned integer.  */
+          /* MT_OPERAND_IMM16Z.  Parse as an unsigned integer.  */
           errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, (unsigned long *) valuep);
 
-	  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16
+	  if (opindex == (CGEN_OPERAND_TYPE) MT_OPERAND_IMM16
 	      && *valuep >= 0x8000
 	      && *valuep <= 0xffff)
 	    *valuep -= 0x10000;

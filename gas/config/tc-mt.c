@@ -1,4 +1,4 @@
-/* tc-ms1.c -- Assembler for the Morpho Technologies ms-I.
+/* tc-mt.c -- Assembler for the Morpho Technologies mt .
    Copyright (C) 2005 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
@@ -23,8 +23,8 @@
 #include "dwarf2dbg.h"
 #include "subsegs.h"     
 #include "symcat.h"
-#include "opcodes/ms1-desc.h"
-#include "opcodes/ms1-opc.h"
+#include "opcodes/mt-desc.h"
+#include "opcodes/mt-opc.h"
 #include "cgen.h"
 #include "elf/common.h"
 #include "elf/mt.h"
@@ -50,7 +50,7 @@ typedef struct
   fixS *                fixups [GAS_CGEN_MAX_FIXUPS];
   int                   indices [MAX_OPERAND_INSTANCES];
 }
-ms1_insn;
+mt_insn;
 
 
 const char comment_chars[]        = ";";
@@ -83,14 +83,14 @@ size_t md_longopts_size = sizeof (md_longopts);
 const char * md_shortopts = "";
 
 /* Mach selected from command line.  */
-static int ms1_mach = bfd_mach_ms1;
-static unsigned ms1_mach_bitmask = 1 << MACH_MS1;
+static int mt_mach = bfd_mach_ms1;
+static unsigned mt_mach_bitmask = 1 << MACH_MS1;
 
 /* Flags to set in the elf header */
-static flagword ms1_flags = EF_MS1_CPU_MRISC;
+static flagword mt_flags = EF_MT_CPU_MRISC;
 
 /* The architecture to use.  */
-enum ms1_architectures
+enum mt_architectures
   {
     ms1_64_001,
     ms1_16_002,
@@ -98,8 +98,8 @@ enum ms1_architectures
     ms2
   };
 
-/* MS1 architecture we are using for this output file.  */
-static enum ms1_architectures ms1_arch = ms1_64_001;
+/* MT architecture we are using for this output file.  */
+static enum mt_architectures mt_arch = ms1_64_001;
 
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, char * arg)
@@ -109,31 +109,31 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg)
     case OPTION_MARCH:
       if (strcasecmp (arg, "MS1-64-001") == 0)
  	{
- 	  ms1_flags = (ms1_flags & ~EF_MS1_CPU_MASK) | EF_MS1_CPU_MRISC;
- 	  ms1_mach = bfd_mach_ms1;
- 	  ms1_mach_bitmask = 1 << MACH_MS1;
- 	  ms1_arch = ms1_64_001;
+ 	  mt_flags = (mt_flags & ~EF_MT_CPU_MASK) | EF_MT_CPU_MRISC;
+ 	  mt_mach = bfd_mach_ms1;
+ 	  mt_mach_bitmask = 1 << MACH_MS1;
+ 	  mt_arch = ms1_64_001;
  	}
       else if (strcasecmp (arg, "MS1-16-002") == 0)
  	{
- 	  ms1_flags = (ms1_flags & ~EF_MS1_CPU_MASK) | EF_MS1_CPU_MRISC;
- 	  ms1_mach = bfd_mach_ms1;
- 	  ms1_mach_bitmask = 1 << MACH_MS1;
- 	  ms1_arch = ms1_16_002;
+ 	  mt_flags = (mt_flags & ~EF_MT_CPU_MASK) | EF_MT_CPU_MRISC;
+ 	  mt_mach = bfd_mach_ms1;
+ 	  mt_mach_bitmask = 1 << MACH_MS1;
+ 	  mt_arch = ms1_16_002;
  	}
       else if (strcasecmp (arg, "MS1-16-003") == 0)
  	{
- 	  ms1_flags = (ms1_flags & ~EF_MS1_CPU_MASK) | EF_MS1_CPU_MRISC2;
- 	  ms1_mach = bfd_mach_mrisc2;
- 	  ms1_mach_bitmask = 1 << MACH_MS1_003;
- 	  ms1_arch = ms1_16_003;
+ 	  mt_flags = (mt_flags & ~EF_MT_CPU_MASK) | EF_MT_CPU_MRISC2;
+ 	  mt_mach = bfd_mach_mrisc2;
+ 	  mt_mach_bitmask = 1 << MACH_MS1_003;
+ 	  mt_arch = ms1_16_003;
  	}
       else if (strcasecmp (arg, "MS2") == 0)
  	{
- 	  ms1_flags = (ms1_flags & ~EF_MS1_CPU_MASK) | EF_MS1_CPU_MS2;
- 	  ms1_mach = bfd_mach_mrisc2;
- 	  ms1_mach_bitmask = 1 << MACH_MS2;
- 	  ms1_arch = ms2;
+ 	  mt_flags = (mt_flags & ~EF_MT_CPU_MASK) | EF_MT_CPU_MS2;
+ 	  mt_mach = bfd_mach_mrisc2;
+ 	  mt_mach_bitmask = 1 << MACH_MS2;
+ 	  mt_arch = ms2;
  	}
     case OPTION_NO_SCHED_REST:
       no_scheduling_restrictions = 1;
@@ -149,7 +149,7 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg)
 void
 md_show_usage (FILE * stream)
 {
-  fprintf (stream, _("MS1 specific command line options:\n"));
+  fprintf (stream, _("MT specific command line options:\n"));
   fprintf (stream, _("  -march=ms1-64-001         allow ms1-64-001 instructions (default) \n"));
   fprintf (stream, _("  -march=ms1-16-002         allow ms1-16-002 instructions \n"));
   fprintf (stream, _("  -march=ms1-16-003         allow ms1-16-003 instructions \n"));
@@ -164,21 +164,21 @@ md_begin (void)
   /* Initialize the `cgen' interface.  */
   
   /* Set the machine number and endian.  */
-  gas_cgen_cpu_desc = ms1_cgen_cpu_open (CGEN_CPU_OPEN_MACHS, ms1_mach_bitmask,
-					   CGEN_CPU_OPEN_ENDIAN,
-					   CGEN_ENDIAN_BIG,
-					   CGEN_CPU_OPEN_END);
-  ms1_cgen_init_asm (gas_cgen_cpu_desc);
+  gas_cgen_cpu_desc = mt_cgen_cpu_open (CGEN_CPU_OPEN_MACHS, mt_mach_bitmask,
+					CGEN_CPU_OPEN_ENDIAN,
+					CGEN_ENDIAN_BIG,
+					CGEN_CPU_OPEN_END);
+  mt_cgen_init_asm (gas_cgen_cpu_desc);
 
   /* This is a callback from cgen to gas to parse operands.  */
   cgen_set_parse_operand_fn (gas_cgen_cpu_desc, gas_cgen_parse_operand);
 
   /* Set the ELF flags if desired. */
-  if (ms1_flags)
-    bfd_set_private_flags (stdoutput, ms1_flags);
+  if (mt_flags)
+    bfd_set_private_flags (stdoutput, mt_flags);
 
   /* Set the machine type.  */
-  bfd_default_set_arch_mach (stdoutput, bfd_arch_ms1, ms1_mach);
+  bfd_default_set_arch_mach (stdoutput, bfd_arch_mt, mt_mach);
 }
 
 void
@@ -195,13 +195,13 @@ md_assemble (char * str)
   static int last_insn_was_branch_insn = 0;
   static int last_insn_was_conditional_branch_insn = 0;
 
-  ms1_insn insn;
+  mt_insn insn;
   char * errmsg;
 
   /* Initialize GAS's cgen interface for a new instruction.  */
   gas_cgen_init_parse ();
 
-  insn.insn = ms1_cgen_assemble_insn
+  insn.insn = mt_cgen_assemble_insn
       (gas_cgen_cpu_desc, str, & insn.fields, insn.buffer, & errmsg);
 
   if (!insn.insn)
@@ -221,7 +221,7 @@ md_assemble (char * str)
       /* Detect consecutive Memory Accesses.  */
       if (last_insn_was_memory_access
 	  && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_MEMORY_ACCESS)
-	  && ms1_mach == ms1_64_001)
+	  && mt_mach == ms1_64_001)
 	as_warn (_("instruction %s may not follow another memory access instruction."),
 		 CGEN_INSN_NAME (insn.insn));
 
@@ -252,7 +252,7 @@ md_assemble (char * str)
 	}
 
       /* Detect JAL/RETI hazard */
-      if (ms1_mach == ms2
+      if (mt_mach == ms2
 	  && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_JAL_HAZARD))
 	{
 	  if ((CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_USES_FRSR1)
@@ -275,7 +275,7 @@ md_assemble (char * str)
 	  && !last_insn_in_noncond_delay_slot
 	  && (delayed_load_register != 0)
 	  && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_BR_INSN)
-	  && ms1_arch == ms1_64_001)
+	  && mt_arch == ms1_64_001)
 	{
 	  if (CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_USES_FRSR1)
 	      && insn.fields.f_sr1 == delayed_load_register)
@@ -399,20 +399,20 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn     ATTRIBUTE_UNUSED,
 
   switch (operand->type)
     {
-    case MS1_OPERAND_IMM16O:
+    case MT_OPERAND_IMM16O:
       result = BFD_RELOC_16_PCREL;
       fixP->fx_pcrel = 1;
       /* fixP->fx_no_overflow = 1; */
       break;
-    case MS1_OPERAND_IMM16:
-    case MS1_OPERAND_IMM16Z:
+    case MT_OPERAND_IMM16:
+    case MT_OPERAND_IMM16Z:
       /* These may have been processed at parse time.  */
       if (fixP->fx_cgen.opinfo != 0)
         result = fixP->fx_cgen.opinfo;
       fixP->fx_no_overflow = 1;
       break;
-    case MS1_OPERAND_LOOPSIZE:
-      result = BFD_RELOC_MS1_PCINSN8;
+    case MT_OPERAND_LOOPSIZE:
+      result = BFD_RELOC_MT_PCINSN8;
       fixP->fx_pcrel = 1;
       /* Adjust for the delay slot, which is not part of the loop  */
       fixP->fx_offset -= 8;
@@ -480,7 +480,7 @@ md_atof (type, litP, sizeP)
   * sizeP = prec * sizeof (LITTLENUM_TYPE);
 
   /* This loops outputs the LITTLENUMs in REVERSE order;
-     in accord with the ms1 endianness.  */
+     in accord with the mt endianness.  */
   for (wordP = words; prec--;)
     {
       md_number_to_chars (litP, (valueT) (*wordP++), sizeof (LITTLENUM_TYPE));
@@ -493,13 +493,13 @@ md_atof (type, litP, sizeP)
 /* See whether we need to force a relocation into the output file.  */
 
 int
-ms1_force_relocation (fixS * fixp ATTRIBUTE_UNUSED)
+mt_force_relocation (fixS * fixp ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 void
-ms1_apply_fix (fixS *fixP, valueT *valueP, segT seg)
+mt_apply_fix (fixS *fixP, valueT *valueP, segT seg)
 {
   if ((fixP->fx_pcrel != 0) && (fixP->fx_r_type == BFD_RELOC_32))
     fixP->fx_r_type = BFD_RELOC_32_PCREL;
@@ -508,7 +508,7 @@ ms1_apply_fix (fixS *fixP, valueT *valueP, segT seg)
 }
 
 bfd_boolean
-ms1_fix_adjustable (fixS * fixP)
+mt_fix_adjustable (fixS * fixP)
 {
   bfd_reloc_code_real_type reloc_type;
 

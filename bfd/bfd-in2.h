@@ -1906,7 +1906,7 @@ enum bfd_architecture
  bfd_arch_iq2000,     /* Vitesse IQ2000.  */
 #define bfd_mach_iq2000        1
 #define bfd_mach_iq10          2
-  bfd_arch_ms1,
+  bfd_arch_mt,
 #define bfd_mach_ms1           1
 #define bfd_mach_mrisc2        2
 #define bfd_mach_ms2           3
@@ -3964,23 +3964,23 @@ This is the 5 bits of a value.  */
   BFD_RELOC_VAX_JMP_SLOT,
   BFD_RELOC_VAX_RELATIVE,
 
-/* Morpho MS1 - 16 bit immediate relocation.  */
-  BFD_RELOC_MS1_PC16,
+/* Morpho MT - 16 bit immediate relocation.  */
+  BFD_RELOC_MT_PC16,
 
-/* Morpho MS1 - Hi 16 bits of an address.  */
-  BFD_RELOC_MS1_HI16,
+/* Morpho MT - Hi 16 bits of an address.  */
+  BFD_RELOC_MT_HI16,
 
-/* Morpho MS1 - Low 16 bits of an address.  */
-  BFD_RELOC_MS1_LO16,
+/* Morpho MT - Low 16 bits of an address.  */
+  BFD_RELOC_MT_LO16,
 
-/* Morpho MS1 - Used to tell the linker which vtable entries are used.  */
-  BFD_RELOC_MS1_GNU_VTINHERIT,
+/* Morpho MT - Used to tell the linker which vtable entries are used.  */
+  BFD_RELOC_MT_GNU_VTINHERIT,
 
-/* Morpho MS1 - Used to tell the linker which vtable entries are used.  */
-  BFD_RELOC_MS1_GNU_VTENTRY,
+/* Morpho MT - Used to tell the linker which vtable entries are used.  */
+  BFD_RELOC_MT_GNU_VTENTRY,
 
-/* Morpho MS1 - 8 bit immediate relocation.  */
-  BFD_RELOC_MS1_PCINSN8,
+/* Morpho MT - 8 bit immediate relocation.  */
+  BFD_RELOC_MT_PCINSN8,
 
 /* msp430 specific relocation codes  */
   BFD_RELOC_MSP430_10_PCREL,

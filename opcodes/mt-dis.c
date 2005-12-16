@@ -33,8 +33,8 @@
 #include "bfd.h"
 #include "symcat.h"
 #include "libiberty.h"
-#include "ms1-desc.h"
-#include "ms1-opc.h"
+#include "mt-desc.h"
+#include "mt-opc.h"
 #include "opintl.h"
 
 /* Default text to print if an instruction isn't recognized.  */
@@ -91,7 +91,7 @@ print_pcrel (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 
 /* -- */
 
-void ms1_cgen_print_operand
+void mt_cgen_print_operand
   (CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *, void const *, bfd_vma, int);
 
 /* Main entry point for printing operands.
@@ -110,7 +110,7 @@ void ms1_cgen_print_operand
    the handlers.  */
 
 void
-ms1_cgen_print_operand (CGEN_CPU_DESC cd,
+mt_cgen_print_operand (CGEN_CPU_DESC cd,
 			   int opindex,
 			   void * xinfo,
 			   CGEN_FIELDS *fields,
@@ -122,166 +122,166 @@ ms1_cgen_print_operand (CGEN_CPU_DESC cd,
 
   switch (opindex)
     {
-    case MS1_OPERAND_A23 :
+    case MT_OPERAND_A23 :
       print_dollarhex (cd, info, fields->f_a23, 0, pc, length);
       break;
-    case MS1_OPERAND_BALL :
+    case MT_OPERAND_BALL :
       print_dollarhex (cd, info, fields->f_ball, 0, pc, length);
       break;
-    case MS1_OPERAND_BALL2 :
+    case MT_OPERAND_BALL2 :
       print_dollarhex (cd, info, fields->f_ball2, 0, pc, length);
       break;
-    case MS1_OPERAND_BANKADDR :
+    case MT_OPERAND_BANKADDR :
       print_dollarhex (cd, info, fields->f_bankaddr, 0, pc, length);
       break;
-    case MS1_OPERAND_BRC :
+    case MT_OPERAND_BRC :
       print_dollarhex (cd, info, fields->f_brc, 0, pc, length);
       break;
-    case MS1_OPERAND_BRC2 :
+    case MT_OPERAND_BRC2 :
       print_dollarhex (cd, info, fields->f_brc2, 0, pc, length);
       break;
-    case MS1_OPERAND_CB1INCR :
+    case MT_OPERAND_CB1INCR :
       print_dollarhex (cd, info, fields->f_cb1incr, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
-    case MS1_OPERAND_CB1SEL :
+    case MT_OPERAND_CB1SEL :
       print_dollarhex (cd, info, fields->f_cb1sel, 0, pc, length);
       break;
-    case MS1_OPERAND_CB2INCR :
+    case MT_OPERAND_CB2INCR :
       print_dollarhex (cd, info, fields->f_cb2incr, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
-    case MS1_OPERAND_CB2SEL :
+    case MT_OPERAND_CB2SEL :
       print_dollarhex (cd, info, fields->f_cb2sel, 0, pc, length);
       break;
-    case MS1_OPERAND_CBRB :
+    case MT_OPERAND_CBRB :
       print_dollarhex (cd, info, fields->f_cbrb, 0, pc, length);
       break;
-    case MS1_OPERAND_CBS :
+    case MT_OPERAND_CBS :
       print_dollarhex (cd, info, fields->f_cbs, 0, pc, length);
       break;
-    case MS1_OPERAND_CBX :
+    case MT_OPERAND_CBX :
       print_dollarhex (cd, info, fields->f_cbx, 0, pc, length);
       break;
-    case MS1_OPERAND_CCB :
+    case MT_OPERAND_CCB :
       print_dollarhex (cd, info, fields->f_ccb, 0, pc, length);
       break;
-    case MS1_OPERAND_CDB :
+    case MT_OPERAND_CDB :
       print_dollarhex (cd, info, fields->f_cdb, 0, pc, length);
       break;
-    case MS1_OPERAND_CELL :
+    case MT_OPERAND_CELL :
       print_dollarhex (cd, info, fields->f_cell, 0, pc, length);
       break;
-    case MS1_OPERAND_COLNUM :
+    case MT_OPERAND_COLNUM :
       print_dollarhex (cd, info, fields->f_colnum, 0, pc, length);
       break;
-    case MS1_OPERAND_CONTNUM :
+    case MT_OPERAND_CONTNUM :
       print_dollarhex (cd, info, fields->f_contnum, 0, pc, length);
       break;
-    case MS1_OPERAND_CR :
+    case MT_OPERAND_CR :
       print_dollarhex (cd, info, fields->f_cr, 0, pc, length);
       break;
-    case MS1_OPERAND_CTXDISP :
+    case MT_OPERAND_CTXDISP :
       print_dollarhex (cd, info, fields->f_ctxdisp, 0, pc, length);
       break;
-    case MS1_OPERAND_DUP :
+    case MT_OPERAND_DUP :
       print_dollarhex (cd, info, fields->f_dup, 0, pc, length);
       break;
-    case MS1_OPERAND_FBDISP :
+    case MT_OPERAND_FBDISP :
       print_dollarhex (cd, info, fields->f_fbdisp, 0, pc, length);
       break;
-    case MS1_OPERAND_FBINCR :
+    case MT_OPERAND_FBINCR :
       print_dollarhex (cd, info, fields->f_fbincr, 0, pc, length);
       break;
-    case MS1_OPERAND_FRDR :
-      print_keyword (cd, info, & ms1_cgen_opval_h_spr, fields->f_dr, 0|(1<<CGEN_OPERAND_ABS_ADDR));
+    case MT_OPERAND_FRDR :
+      print_keyword (cd, info, & mt_cgen_opval_h_spr, fields->f_dr, 0|(1<<CGEN_OPERAND_ABS_ADDR));
       break;
-    case MS1_OPERAND_FRDRRR :
-      print_keyword (cd, info, & ms1_cgen_opval_h_spr, fields->f_drrr, 0|(1<<CGEN_OPERAND_ABS_ADDR));
+    case MT_OPERAND_FRDRRR :
+      print_keyword (cd, info, & mt_cgen_opval_h_spr, fields->f_drrr, 0|(1<<CGEN_OPERAND_ABS_ADDR));
       break;
-    case MS1_OPERAND_FRSR1 :
-      print_keyword (cd, info, & ms1_cgen_opval_h_spr, fields->f_sr1, 0|(1<<CGEN_OPERAND_ABS_ADDR));
+    case MT_OPERAND_FRSR1 :
+      print_keyword (cd, info, & mt_cgen_opval_h_spr, fields->f_sr1, 0|(1<<CGEN_OPERAND_ABS_ADDR));
       break;
-    case MS1_OPERAND_FRSR2 :
-      print_keyword (cd, info, & ms1_cgen_opval_h_spr, fields->f_sr2, 0|(1<<CGEN_OPERAND_ABS_ADDR));
+    case MT_OPERAND_FRSR2 :
+      print_keyword (cd, info, & mt_cgen_opval_h_spr, fields->f_sr2, 0|(1<<CGEN_OPERAND_ABS_ADDR));
       break;
-    case MS1_OPERAND_ID :
+    case MT_OPERAND_ID :
       print_dollarhex (cd, info, fields->f_id, 0, pc, length);
       break;
-    case MS1_OPERAND_IMM16 :
+    case MT_OPERAND_IMM16 :
       print_dollarhex (cd, info, fields->f_imm16s, 0|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
-    case MS1_OPERAND_IMM16L :
+    case MT_OPERAND_IMM16L :
       print_dollarhex (cd, info, fields->f_imm16l, 0, pc, length);
       break;
-    case MS1_OPERAND_IMM16O :
+    case MT_OPERAND_IMM16O :
       print_pcrel (cd, info, fields->f_imm16s, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
       break;
-    case MS1_OPERAND_IMM16Z :
+    case MT_OPERAND_IMM16Z :
       print_dollarhex (cd, info, fields->f_imm16u, 0, pc, length);
       break;
-    case MS1_OPERAND_INCAMT :
+    case MT_OPERAND_INCAMT :
       print_dollarhex (cd, info, fields->f_incamt, 0, pc, length);
       break;
-    case MS1_OPERAND_INCR :
+    case MT_OPERAND_INCR :
       print_dollarhex (cd, info, fields->f_incr, 0, pc, length);
       break;
-    case MS1_OPERAND_LENGTH :
+    case MT_OPERAND_LENGTH :
       print_dollarhex (cd, info, fields->f_length, 0, pc, length);
       break;
-    case MS1_OPERAND_LOOPSIZE :
+    case MT_OPERAND_LOOPSIZE :
       print_pcrel (cd, info, fields->f_loopo, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
       break;
-    case MS1_OPERAND_MASK :
+    case MT_OPERAND_MASK :
       print_dollarhex (cd, info, fields->f_mask, 0, pc, length);
       break;
-    case MS1_OPERAND_MASK1 :
+    case MT_OPERAND_MASK1 :
       print_dollarhex (cd, info, fields->f_mask1, 0, pc, length);
       break;
-    case MS1_OPERAND_MODE :
+    case MT_OPERAND_MODE :
       print_dollarhex (cd, info, fields->f_mode, 0, pc, length);
       break;
-    case MS1_OPERAND_PERM :
+    case MT_OPERAND_PERM :
       print_dollarhex (cd, info, fields->f_perm, 0, pc, length);
       break;
-    case MS1_OPERAND_RBBC :
+    case MT_OPERAND_RBBC :
       print_dollarhex (cd, info, fields->f_rbbc, 0, pc, length);
       break;
-    case MS1_OPERAND_RC :
+    case MT_OPERAND_RC :
       print_dollarhex (cd, info, fields->f_rc, 0, pc, length);
       break;
-    case MS1_OPERAND_RC1 :
+    case MT_OPERAND_RC1 :
       print_dollarhex (cd, info, fields->f_rc1, 0, pc, length);
       break;
-    case MS1_OPERAND_RC2 :
+    case MT_OPERAND_RC2 :
       print_dollarhex (cd, info, fields->f_rc2, 0, pc, length);
       break;
-    case MS1_OPERAND_RC3 :
+    case MT_OPERAND_RC3 :
       print_dollarhex (cd, info, fields->f_rc3, 0, pc, length);
       break;
-    case MS1_OPERAND_RCNUM :
+    case MT_OPERAND_RCNUM :
       print_dollarhex (cd, info, fields->f_rcnum, 0, pc, length);
       break;
-    case MS1_OPERAND_RDA :
+    case MT_OPERAND_RDA :
       print_dollarhex (cd, info, fields->f_rda, 0, pc, length);
       break;
-    case MS1_OPERAND_ROWNUM :
+    case MT_OPERAND_ROWNUM :
       print_dollarhex (cd, info, fields->f_rownum, 0, pc, length);
       break;
-    case MS1_OPERAND_ROWNUM1 :
+    case MT_OPERAND_ROWNUM1 :
       print_dollarhex (cd, info, fields->f_rownum1, 0, pc, length);
       break;
-    case MS1_OPERAND_ROWNUM2 :
+    case MT_OPERAND_ROWNUM2 :
       print_dollarhex (cd, info, fields->f_rownum2, 0, pc, length);
       break;
-    case MS1_OPERAND_SIZE :
+    case MT_OPERAND_SIZE :
       print_dollarhex (cd, info, fields->f_size, 0, pc, length);
       break;
-    case MS1_OPERAND_TYPE :
+    case MT_OPERAND_TYPE :
       print_dollarhex (cd, info, fields->f_type, 0, pc, length);
       break;
-    case MS1_OPERAND_WR :
+    case MT_OPERAND_WR :
       print_dollarhex (cd, info, fields->f_wr, 0, pc, length);
       break;
-    case MS1_OPERAND_XMODE :
+    case MT_OPERAND_XMODE :
       print_dollarhex (cd, info, fields->f_xmode, 0, pc, length);
       break;
 
@@ -293,19 +293,19 @@ ms1_cgen_print_operand (CGEN_CPU_DESC cd,
   }
 }
 
-cgen_print_fn * const ms1_cgen_print_handlers[] = 
+cgen_print_fn * const mt_cgen_print_handlers[] = 
 {
   print_insn_normal,
 };
 
 
 void
-ms1_cgen_init_dis (CGEN_CPU_DESC cd)
+mt_cgen_init_dis (CGEN_CPU_DESC cd)
 {
-  ms1_cgen_init_opcode_table (cd);
-  ms1_cgen_init_ibld_table (cd);
-  cd->print_handlers = & ms1_cgen_print_handlers[0];
-  cd->print_operand = ms1_cgen_print_operand;
+  mt_cgen_init_opcode_table (cd);
+  mt_cgen_init_ibld_table (cd);
+  cd->print_handlers = & mt_cgen_print_handlers[0];
+  cd->print_operand = mt_cgen_print_operand;
 }
 
 
@@ -415,7 +415,7 @@ print_insn_normal (CGEN_CPU_DESC cd,
 	}
 
       /* We have an operand.  */
-      ms1_cgen_print_operand (cd, CGEN_SYNTAX_FIELD (*syn), info,
+      mt_cgen_print_operand (cd, CGEN_SYNTAX_FIELD (*syn), info,
 				 fields, CGEN_INSN_ATTRS (insn), pc, length);
     }
 }
@@ -494,7 +494,7 @@ print_insn (CGEN_CPU_DESC cd,
 #ifdef CGEN_VALIDATE_INSN_SUPPORTED 
       /* Not needed as insn shouldn't be in hash lists if not supported.  */
       /* Supported by this cpu?  */
-      if (! ms1_cgen_insn_supported (cd, insn))
+      if (! mt_cgen_insn_supported (cd, insn))
         {
           insn_list = CGEN_DIS_NEXT_INSN (insn_list);
 	  continue;
@@ -605,7 +605,7 @@ typedef struct cpu_desc_list
 } cpu_desc_list;
 
 int
-print_insn_ms1 (bfd_vma pc, disassemble_info *info)
+print_insn_mt (bfd_vma pc, disassemble_info *info)
 {
   static cpu_desc_list *cd_list = 0;
   cpu_desc_list *cl = 0;
@@ -623,7 +623,7 @@ print_insn_ms1 (bfd_vma pc, disassemble_info *info)
 
   /* ??? gdb will set mach but leave the architecture as "unknown" */
 #ifndef CGEN_BFD_ARCH
-#define CGEN_BFD_ARCH bfd_arch_ms1
+#define CGEN_BFD_ARCH bfd_arch_mt
 #endif
   arch = info->arch;
   if (arch == bfd_arch_unknown)
@@ -684,7 +684,7 @@ print_insn_ms1 (bfd_vma pc, disassemble_info *info)
       prev_isa = cgen_bitset_copy (isa);
       prev_mach = mach;
       prev_endian = endian;
-      cd = ms1_cgen_cpu_open (CGEN_CPU_OPEN_ISAS, prev_isa,
+      cd = mt_cgen_cpu_open (CGEN_CPU_OPEN_ISAS, prev_isa,
 				 CGEN_CPU_OPEN_BFDMACH, mach_name,
 				 CGEN_CPU_OPEN_ENDIAN, prev_endian,
 				 CGEN_CPU_OPEN_END);
@@ -700,7 +700,7 @@ print_insn_ms1 (bfd_vma pc, disassemble_info *info)
       cl->next = cd_list;
       cd_list = cl;
 
-      ms1_cgen_init_dis (cd);
+      mt_cgen_init_dis (cd);
     }
 
   /* We try to have as much common code as possible.

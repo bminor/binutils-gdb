@@ -31,8 +31,8 @@
 #include "ansidecl.h"
 #include "bfd.h"
 #include "symcat.h"
-#include "ms1-desc.h"
-#include "ms1-opc.h"
+#include "mt-desc.h"
+#include "mt-opc.h"
 #include "opintl.h"
 #include "xregex.h"
 #include "libiberty.h"
@@ -73,9 +73,9 @@ parse_loopsize (CGEN_CPU_DESC cd,
   bfd_vma value;
 
   /* Is it a control transfer instructions?  */ 
-  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_LOOPSIZE)
+  if (opindex == (CGEN_OPERAND_TYPE) MT_OPERAND_LOOPSIZE)
     {
-      code = BFD_RELOC_MS1_PCINSN8;
+      code = BFD_RELOC_MT_PCINSN8;
       errmsg = cgen_parse_address (cd, strp, opindex, code,
                                    & result_type, & value);
       *valuep = value;
@@ -98,7 +98,7 @@ parse_imm16 (CGEN_CPU_DESC cd,
   bfd_vma value;
 
   /* Is it a control transfer instructions?  */ 
-  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16O)
+  if (opindex == (CGEN_OPERAND_TYPE) MT_OPERAND_IMM16O)
     {
       code = BFD_RELOC_16_PCREL;
       errmsg = cgen_parse_address (cd, strp, opindex, code,
@@ -114,7 +114,7 @@ parse_imm16 (CGEN_CPU_DESC cd,
 
   /* If it's not a control transfer instruction, then
      we have to check for %OP relocating operators.  */
-  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16L)
+  if (opindex == (CGEN_OPERAND_TYPE) MT_OPERAND_IMM16L)
     ;
   else if (strncmp (*strp, "%hi16", 5) == 0)
     {
@@ -163,7 +163,7 @@ parse_imm16 (CGEN_CPU_DESC cd,
     {
       /* Parse hex values like 0xffff as unsigned, and sign extend
 	 them manually.  */
-      int parse_signed = (opindex == (CGEN_OPERAND_TYPE)MS1_OPERAND_IMM16);
+      int parse_signed = (opindex == (CGEN_OPERAND_TYPE)MT_OPERAND_IMM16);
 
       if ((*strp)[0] == '0'
 	  && ((*strp)[1] == 'x' || (*strp)[1] == 'X'))
@@ -195,10 +195,10 @@ parse_imm16 (CGEN_CPU_DESC cd,
 	}
       else  
 	{
-          /* MS1_OPERAND_IMM16Z.  Parse as an unsigned integer.  */
+          /* MT_OPERAND_IMM16Z.  Parse as an unsigned integer.  */
           errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, (unsigned long *) valuep);
 
-	  if (opindex == (CGEN_OPERAND_TYPE) MS1_OPERAND_IMM16
+	  if (opindex == (CGEN_OPERAND_TYPE) MT_OPERAND_IMM16
 	      && *valuep >= 0x8000
 	      && *valuep <= 0xffff)
 	    *valuep -= 0x10000;
@@ -398,7 +398,7 @@ parse_type (CGEN_CPU_DESC cd,
 
 /* -- dis.c */
 
-const char * ms1_cgen_parse_operand
+const char * mt_cgen_parse_operand
   (CGEN_CPU_DESC, int, const char **, CGEN_FIELDS *);
 
 /* Main entry point for operand parsing.
@@ -415,7 +415,7 @@ const char * ms1_cgen_parse_operand
    the handlers.  */
 
 const char *
-ms1_cgen_parse_operand (CGEN_CPU_DESC cd,
+mt_cgen_parse_operand (CGEN_CPU_DESC cd,
 			   int opindex,
 			   const char ** strp,
 			   CGEN_FIELDS * fields)
@@ -426,167 +426,167 @@ ms1_cgen_parse_operand (CGEN_CPU_DESC cd,
 
   switch (opindex)
     {
-    case MS1_OPERAND_A23 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_A23, (unsigned long *) (& fields->f_a23));
+    case MT_OPERAND_A23 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_A23, (unsigned long *) (& fields->f_a23));
       break;
-    case MS1_OPERAND_BALL :
-      errmsg = parse_ball (cd, strp, MS1_OPERAND_BALL, (unsigned long *) (& fields->f_ball));
+    case MT_OPERAND_BALL :
+      errmsg = parse_ball (cd, strp, MT_OPERAND_BALL, (unsigned long *) (& fields->f_ball));
       break;
-    case MS1_OPERAND_BALL2 :
-      errmsg = parse_ball (cd, strp, MS1_OPERAND_BALL2, (unsigned long *) (& fields->f_ball2));
+    case MT_OPERAND_BALL2 :
+      errmsg = parse_ball (cd, strp, MT_OPERAND_BALL2, (unsigned long *) (& fields->f_ball2));
       break;
-    case MS1_OPERAND_BANKADDR :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_BANKADDR, (unsigned long *) (& fields->f_bankaddr));
+    case MT_OPERAND_BANKADDR :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_BANKADDR, (unsigned long *) (& fields->f_bankaddr));
       break;
-    case MS1_OPERAND_BRC :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_BRC, (unsigned long *) (& fields->f_brc));
+    case MT_OPERAND_BRC :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_BRC, (unsigned long *) (& fields->f_brc));
       break;
-    case MS1_OPERAND_BRC2 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_BRC2, (unsigned long *) (& fields->f_brc2));
+    case MT_OPERAND_BRC2 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_BRC2, (unsigned long *) (& fields->f_brc2));
       break;
-    case MS1_OPERAND_CB1INCR :
-      errmsg = cgen_parse_signed_integer (cd, strp, MS1_OPERAND_CB1INCR, (long *) (& fields->f_cb1incr));
+    case MT_OPERAND_CB1INCR :
+      errmsg = cgen_parse_signed_integer (cd, strp, MT_OPERAND_CB1INCR, (long *) (& fields->f_cb1incr));
       break;
-    case MS1_OPERAND_CB1SEL :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CB1SEL, (unsigned long *) (& fields->f_cb1sel));
+    case MT_OPERAND_CB1SEL :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CB1SEL, (unsigned long *) (& fields->f_cb1sel));
       break;
-    case MS1_OPERAND_CB2INCR :
-      errmsg = cgen_parse_signed_integer (cd, strp, MS1_OPERAND_CB2INCR, (long *) (& fields->f_cb2incr));
+    case MT_OPERAND_CB2INCR :
+      errmsg = cgen_parse_signed_integer (cd, strp, MT_OPERAND_CB2INCR, (long *) (& fields->f_cb2incr));
       break;
-    case MS1_OPERAND_CB2SEL :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CB2SEL, (unsigned long *) (& fields->f_cb2sel));
+    case MT_OPERAND_CB2SEL :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CB2SEL, (unsigned long *) (& fields->f_cb2sel));
       break;
-    case MS1_OPERAND_CBRB :
-      errmsg = parse_cbrb (cd, strp, MS1_OPERAND_CBRB, (unsigned long *) (& fields->f_cbrb));
+    case MT_OPERAND_CBRB :
+      errmsg = parse_cbrb (cd, strp, MT_OPERAND_CBRB, (unsigned long *) (& fields->f_cbrb));
       break;
-    case MS1_OPERAND_CBS :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CBS, (unsigned long *) (& fields->f_cbs));
+    case MT_OPERAND_CBS :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CBS, (unsigned long *) (& fields->f_cbs));
       break;
-    case MS1_OPERAND_CBX :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CBX, (unsigned long *) (& fields->f_cbx));
+    case MT_OPERAND_CBX :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CBX, (unsigned long *) (& fields->f_cbx));
       break;
-    case MS1_OPERAND_CCB :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CCB, (unsigned long *) (& fields->f_ccb));
+    case MT_OPERAND_CCB :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CCB, (unsigned long *) (& fields->f_ccb));
       break;
-    case MS1_OPERAND_CDB :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CDB, (unsigned long *) (& fields->f_cdb));
+    case MT_OPERAND_CDB :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CDB, (unsigned long *) (& fields->f_cdb));
       break;
-    case MS1_OPERAND_CELL :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CELL, (unsigned long *) (& fields->f_cell));
+    case MT_OPERAND_CELL :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CELL, (unsigned long *) (& fields->f_cell));
       break;
-    case MS1_OPERAND_COLNUM :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_COLNUM, (unsigned long *) (& fields->f_colnum));
+    case MT_OPERAND_COLNUM :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_COLNUM, (unsigned long *) (& fields->f_colnum));
       break;
-    case MS1_OPERAND_CONTNUM :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CONTNUM, (unsigned long *) (& fields->f_contnum));
+    case MT_OPERAND_CONTNUM :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CONTNUM, (unsigned long *) (& fields->f_contnum));
       break;
-    case MS1_OPERAND_CR :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CR, (unsigned long *) (& fields->f_cr));
+    case MT_OPERAND_CR :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CR, (unsigned long *) (& fields->f_cr));
       break;
-    case MS1_OPERAND_CTXDISP :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_CTXDISP, (unsigned long *) (& fields->f_ctxdisp));
+    case MT_OPERAND_CTXDISP :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_CTXDISP, (unsigned long *) (& fields->f_ctxdisp));
       break;
-    case MS1_OPERAND_DUP :
-      errmsg = parse_dup (cd, strp, MS1_OPERAND_DUP, (unsigned long *) (& fields->f_dup));
+    case MT_OPERAND_DUP :
+      errmsg = parse_dup (cd, strp, MT_OPERAND_DUP, (unsigned long *) (& fields->f_dup));
       break;
-    case MS1_OPERAND_FBDISP :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_FBDISP, (unsigned long *) (& fields->f_fbdisp));
+    case MT_OPERAND_FBDISP :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_FBDISP, (unsigned long *) (& fields->f_fbdisp));
       break;
-    case MS1_OPERAND_FBINCR :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_FBINCR, (unsigned long *) (& fields->f_fbincr));
+    case MT_OPERAND_FBINCR :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_FBINCR, (unsigned long *) (& fields->f_fbincr));
       break;
-    case MS1_OPERAND_FRDR :
-      errmsg = cgen_parse_keyword (cd, strp, & ms1_cgen_opval_h_spr, & fields->f_dr);
+    case MT_OPERAND_FRDR :
+      errmsg = cgen_parse_keyword (cd, strp, & mt_cgen_opval_h_spr, & fields->f_dr);
       break;
-    case MS1_OPERAND_FRDRRR :
-      errmsg = cgen_parse_keyword (cd, strp, & ms1_cgen_opval_h_spr, & fields->f_drrr);
+    case MT_OPERAND_FRDRRR :
+      errmsg = cgen_parse_keyword (cd, strp, & mt_cgen_opval_h_spr, & fields->f_drrr);
       break;
-    case MS1_OPERAND_FRSR1 :
-      errmsg = cgen_parse_keyword (cd, strp, & ms1_cgen_opval_h_spr, & fields->f_sr1);
+    case MT_OPERAND_FRSR1 :
+      errmsg = cgen_parse_keyword (cd, strp, & mt_cgen_opval_h_spr, & fields->f_sr1);
       break;
-    case MS1_OPERAND_FRSR2 :
-      errmsg = cgen_parse_keyword (cd, strp, & ms1_cgen_opval_h_spr, & fields->f_sr2);
+    case MT_OPERAND_FRSR2 :
+      errmsg = cgen_parse_keyword (cd, strp, & mt_cgen_opval_h_spr, & fields->f_sr2);
       break;
-    case MS1_OPERAND_ID :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_ID, (unsigned long *) (& fields->f_id));
+    case MT_OPERAND_ID :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_ID, (unsigned long *) (& fields->f_id));
       break;
-    case MS1_OPERAND_IMM16 :
-      errmsg = parse_imm16 (cd, strp, MS1_OPERAND_IMM16, (long *) (& fields->f_imm16s));
+    case MT_OPERAND_IMM16 :
+      errmsg = parse_imm16 (cd, strp, MT_OPERAND_IMM16, (long *) (& fields->f_imm16s));
       break;
-    case MS1_OPERAND_IMM16L :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_IMM16L, (unsigned long *) (& fields->f_imm16l));
+    case MT_OPERAND_IMM16L :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_IMM16L, (unsigned long *) (& fields->f_imm16l));
       break;
-    case MS1_OPERAND_IMM16O :
-      errmsg = parse_imm16 (cd, strp, MS1_OPERAND_IMM16O, (unsigned long *) (& fields->f_imm16s));
+    case MT_OPERAND_IMM16O :
+      errmsg = parse_imm16 (cd, strp, MT_OPERAND_IMM16O, (unsigned long *) (& fields->f_imm16s));
       break;
-    case MS1_OPERAND_IMM16Z :
-      errmsg = parse_imm16 (cd, strp, MS1_OPERAND_IMM16Z, (unsigned long *) (& fields->f_imm16u));
+    case MT_OPERAND_IMM16Z :
+      errmsg = parse_imm16 (cd, strp, MT_OPERAND_IMM16Z, (unsigned long *) (& fields->f_imm16u));
       break;
-    case MS1_OPERAND_INCAMT :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_INCAMT, (unsigned long *) (& fields->f_incamt));
+    case MT_OPERAND_INCAMT :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_INCAMT, (unsigned long *) (& fields->f_incamt));
       break;
-    case MS1_OPERAND_INCR :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_INCR, (unsigned long *) (& fields->f_incr));
+    case MT_OPERAND_INCR :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_INCR, (unsigned long *) (& fields->f_incr));
       break;
-    case MS1_OPERAND_LENGTH :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_LENGTH, (unsigned long *) (& fields->f_length));
+    case MT_OPERAND_LENGTH :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_LENGTH, (unsigned long *) (& fields->f_length));
       break;
-    case MS1_OPERAND_LOOPSIZE :
-      errmsg = parse_loopsize (cd, strp, MS1_OPERAND_LOOPSIZE, (unsigned long *) (& fields->f_loopo));
+    case MT_OPERAND_LOOPSIZE :
+      errmsg = parse_loopsize (cd, strp, MT_OPERAND_LOOPSIZE, (unsigned long *) (& fields->f_loopo));
       break;
-    case MS1_OPERAND_MASK :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_MASK, (unsigned long *) (& fields->f_mask));
+    case MT_OPERAND_MASK :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_MASK, (unsigned long *) (& fields->f_mask));
       break;
-    case MS1_OPERAND_MASK1 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_MASK1, (unsigned long *) (& fields->f_mask1));
+    case MT_OPERAND_MASK1 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_MASK1, (unsigned long *) (& fields->f_mask1));
       break;
-    case MS1_OPERAND_MODE :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_MODE, (unsigned long *) (& fields->f_mode));
+    case MT_OPERAND_MODE :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_MODE, (unsigned long *) (& fields->f_mode));
       break;
-    case MS1_OPERAND_PERM :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_PERM, (unsigned long *) (& fields->f_perm));
+    case MT_OPERAND_PERM :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_PERM, (unsigned long *) (& fields->f_perm));
       break;
-    case MS1_OPERAND_RBBC :
-      errmsg = parse_rbbc (cd, strp, MS1_OPERAND_RBBC, (unsigned long *) (& fields->f_rbbc));
+    case MT_OPERAND_RBBC :
+      errmsg = parse_rbbc (cd, strp, MT_OPERAND_RBBC, (unsigned long *) (& fields->f_rbbc));
       break;
-    case MS1_OPERAND_RC :
-      errmsg = parse_rc (cd, strp, MS1_OPERAND_RC, (unsigned long *) (& fields->f_rc));
+    case MT_OPERAND_RC :
+      errmsg = parse_rc (cd, strp, MT_OPERAND_RC, (unsigned long *) (& fields->f_rc));
       break;
-    case MS1_OPERAND_RC1 :
-      errmsg = parse_rc (cd, strp, MS1_OPERAND_RC1, (unsigned long *) (& fields->f_rc1));
+    case MT_OPERAND_RC1 :
+      errmsg = parse_rc (cd, strp, MT_OPERAND_RC1, (unsigned long *) (& fields->f_rc1));
       break;
-    case MS1_OPERAND_RC2 :
-      errmsg = parse_rc (cd, strp, MS1_OPERAND_RC2, (unsigned long *) (& fields->f_rc2));
+    case MT_OPERAND_RC2 :
+      errmsg = parse_rc (cd, strp, MT_OPERAND_RC2, (unsigned long *) (& fields->f_rc2));
       break;
-    case MS1_OPERAND_RC3 :
-      errmsg = parse_rc (cd, strp, MS1_OPERAND_RC3, (unsigned long *) (& fields->f_rc3));
+    case MT_OPERAND_RC3 :
+      errmsg = parse_rc (cd, strp, MT_OPERAND_RC3, (unsigned long *) (& fields->f_rc3));
       break;
-    case MS1_OPERAND_RCNUM :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_RCNUM, (unsigned long *) (& fields->f_rcnum));
+    case MT_OPERAND_RCNUM :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_RCNUM, (unsigned long *) (& fields->f_rcnum));
       break;
-    case MS1_OPERAND_RDA :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_RDA, (unsigned long *) (& fields->f_rda));
+    case MT_OPERAND_RDA :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_RDA, (unsigned long *) (& fields->f_rda));
       break;
-    case MS1_OPERAND_ROWNUM :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_ROWNUM, (unsigned long *) (& fields->f_rownum));
+    case MT_OPERAND_ROWNUM :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_ROWNUM, (unsigned long *) (& fields->f_rownum));
       break;
-    case MS1_OPERAND_ROWNUM1 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_ROWNUM1, (unsigned long *) (& fields->f_rownum1));
+    case MT_OPERAND_ROWNUM1 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_ROWNUM1, (unsigned long *) (& fields->f_rownum1));
       break;
-    case MS1_OPERAND_ROWNUM2 :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_ROWNUM2, (unsigned long *) (& fields->f_rownum2));
+    case MT_OPERAND_ROWNUM2 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_ROWNUM2, (unsigned long *) (& fields->f_rownum2));
       break;
-    case MS1_OPERAND_SIZE :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_SIZE, (unsigned long *) (& fields->f_size));
+    case MT_OPERAND_SIZE :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_SIZE, (unsigned long *) (& fields->f_size));
       break;
-    case MS1_OPERAND_TYPE :
-      errmsg = parse_type (cd, strp, MS1_OPERAND_TYPE, (unsigned long *) (& fields->f_type));
+    case MT_OPERAND_TYPE :
+      errmsg = parse_type (cd, strp, MT_OPERAND_TYPE, (unsigned long *) (& fields->f_type));
       break;
-    case MS1_OPERAND_WR :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, MS1_OPERAND_WR, (unsigned long *) (& fields->f_wr));
+    case MT_OPERAND_WR :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, MT_OPERAND_WR, (unsigned long *) (& fields->f_wr));
       break;
-    case MS1_OPERAND_XMODE :
-      errmsg = parse_xmode (cd, strp, MS1_OPERAND_XMODE, (unsigned long *) (& fields->f_xmode));
+    case MT_OPERAND_XMODE :
+      errmsg = parse_xmode (cd, strp, MT_OPERAND_XMODE, (unsigned long *) (& fields->f_xmode));
       break;
 
     default :
@@ -598,18 +598,18 @@ ms1_cgen_parse_operand (CGEN_CPU_DESC cd,
   return errmsg;
 }
 
-cgen_parse_fn * const ms1_cgen_parse_handlers[] = 
+cgen_parse_fn * const mt_cgen_parse_handlers[] = 
 {
   parse_insn_normal,
 };
 
 void
-ms1_cgen_init_asm (CGEN_CPU_DESC cd)
+mt_cgen_init_asm (CGEN_CPU_DESC cd)
 {
-  ms1_cgen_init_opcode_table (cd);
-  ms1_cgen_init_ibld_table (cd);
-  cd->parse_handlers = & ms1_cgen_parse_handlers[0];
-  cd->parse_operand = ms1_cgen_parse_operand;
+  mt_cgen_init_opcode_table (cd);
+  mt_cgen_init_ibld_table (cd);
+  cd->parse_handlers = & mt_cgen_parse_handlers[0];
+  cd->parse_operand = mt_cgen_parse_operand;
 }
 
 
@@ -621,12 +621,12 @@ ms1_cgen_init_asm (CGEN_CPU_DESC cd)
    opcode) with the pattern '.*'
 
    It then compiles the regex and stores it in the opcode, for
-   later use by ms1_cgen_assemble_insn
+   later use by mt_cgen_assemble_insn
 
    Returns NULL for success, an error message for failure.  */
 
 char * 
-ms1_cgen_build_insn_regex (CGEN_INSN *insn)
+mt_cgen_build_insn_regex (CGEN_INSN *insn)
 {  
   CGEN_OPCODE *opc = (CGEN_OPCODE *) CGEN_INSN_OPCODE (insn);
   const char *mnem = CGEN_INSN_MNEMONIC (insn);
@@ -890,7 +890,7 @@ parse_insn_normal (CGEN_CPU_DESC cd,
    mind helps keep the design clean.  */
 
 const CGEN_INSN *
-ms1_cgen_assemble_insn (CGEN_CPU_DESC cd,
+mt_cgen_assemble_insn (CGEN_CPU_DESC cd,
 			   const char *str,
 			   CGEN_FIELDS *fields,
 			   CGEN_INSN_BYTES_PTR buf,
@@ -921,7 +921,7 @@ ms1_cgen_assemble_insn (CGEN_CPU_DESC cd,
       /* Not usually needed as unsupported opcodes
 	 shouldn't be in the hash lists.  */
       /* Is this insn supported by the selected cpu?  */
-      if (! ms1_cgen_insn_supported (cd, insn))
+      if (! mt_cgen_insn_supported (cd, insn))
 	continue;
 #endif
       /* If the RELAXED attribute is set, this is an insn that shouldn't be

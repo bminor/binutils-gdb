@@ -317,7 +317,7 @@ DESCRIPTION
 . bfd_arch_iq2000,     {* Vitesse IQ2000.  *}
 .#define bfd_mach_iq2000        1
 .#define bfd_mach_iq10          2
-.  bfd_arch_ms1,
+.  bfd_arch_mt,
 .#define bfd_mach_ms1           1
 .#define bfd_mach_mrisc2        2
 .#define bfd_mach_ms2           3
@@ -445,7 +445,7 @@ extern const bfd_arch_info_type bfd_mmix_arch;
 extern const bfd_arch_info_type bfd_mn10200_arch;
 extern const bfd_arch_info_type bfd_mn10300_arch;
 extern const bfd_arch_info_type bfd_msp430_arch;
-extern const bfd_arch_info_type bfd_ms1_arch;
+extern const bfd_arch_info_type bfd_mt_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_openrisc_arch;
 extern const bfd_arch_info_type bfd_or32_arch;
@@ -510,7 +510,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_mmix_arch,
     &bfd_mn10200_arch,
     &bfd_mn10300_arch,
-    &bfd_ms1_arch,
+    &bfd_mt_arch,
     &bfd_msp430_arch,
     &bfd_ns32k_arch,
     &bfd_openrisc_arch,

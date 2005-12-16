@@ -1,4 +1,4 @@
-/* BFD support for the Morpho Technologies MS1 processor.
+/* BFD support for the Morpho Technologies MT processor.
    Copyright (C) 2001, 2002, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -27,9 +27,9 @@ const bfd_arch_info_type arch_info_struct[] =
   32,				/* Bits per word - not really true.  */
   32,				/* Bits per address.  */
   8,				/* Bits per byte.  */
-  bfd_arch_ms1,			/* Architecture.  */
+  bfd_arch_mt,			/* Architecture.  */
   bfd_mach_mrisc2,		/* Machine.  */
-  "ms1",			/* Architecture name.  */
+  "mt",				/* Architecture name.  */
   "ms1-003",			/* Printable name.  */
   1,				/* Section align power.  */
   FALSE,		        /* The default ?  */
@@ -41,9 +41,9 @@ const bfd_arch_info_type arch_info_struct[] =
   32,				/* Bits per word - not really true.  */
   32,				/* Bits per address.  */
   8,				/* Bits per byte.  */
-  bfd_arch_ms1,			/* Architecture.  */
+  bfd_arch_mt,			/* Architecture.  */
   bfd_mach_ms2,		        /* Machine.  */
-  "ms1",			/* Architecture name.  */
+  "mt",				/* Architecture name.  */
   "ms2",			/* Printable name.  */
   1,				/* Section align power.  */
   FALSE,		        /* The default ?  */
@@ -53,14 +53,14 @@ const bfd_arch_info_type arch_info_struct[] =
 },
 };
 
-const bfd_arch_info_type bfd_ms1_arch =
+const bfd_arch_info_type bfd_mt_arch =
 {
   32,				/* Bits per word - not really true.  */
   32,				/* Bits per address.  */
   8,				/* Bits per byte.  */
-  bfd_arch_ms1,			/* Architecture.  */
+  bfd_arch_mt,			/* Architecture.  */
   bfd_mach_ms1,			/* Machine.  */
-  "ms1",			/* Architecture name.  */
+  "mt",				/* Architecture name.  */
   "ms1",			/* Printable name.  */
   1,				/* Section align power.  */
   TRUE,		        	/* The default ?  */

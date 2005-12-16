@@ -1,4 +1,4 @@
-; Morpho Technologies mRISC CPU description.  -*- Scheme -*-
+; Morpho Technologies MT Arch description.  -*- Scheme -*-
 ; Copyright 2001 Free Software Foundation, Inc.
 ;
 ; Contributed by Red Hat Inc; developed under contract from
@@ -28,19 +28,19 @@
 
 ; define-arch must appear first
 (define-arch
-  (name ms1) ; name of cpu family
+  (name mt) ; name of cpu family
   (comment "Morpho Technologies mRISC family")
   (default-alignment aligned)
   (insn-lsb0? #t)
   (machs ms1 ms1-003 ms2)
-  (isas ms1)
+  (isas mt)
 )
 
 ; Instruction set parameters.
 
 (define-isa
-  (name ms1)
-  (comment "Morpho Technologies mrisc ISA")
+  (name mt)
+  (comment "Morpho Technologies MT ISA")
   (default-insn-word-bitsize 32)
   (default-insn-bitsize 32)
   (base-insn-bitsize 32)
@@ -78,21 +78,21 @@
   (name ms1)
   (comment "Morpho Technologies mrisc")
   (cpu ms1bf)
-  (isas ms1)
+  (isas mt)
 )
 
 (define-mach
   (name ms1-003)
   (comment "Morpho Technologies mrisc")
   (cpu ms1-003bf)
-  (isas ms1)
+  (isas mt)
 )
 
 (define-mach
   (name ms2)
   (comment "Morpho Technologies ms2")
   (cpu ms2bf)
-  (isas ms1)
+  (isas mt)
 )
 
 

@@ -1,4 +1,4 @@
-/* Instruction opcode table for ms1.
+/* Instruction opcode table for mt.
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
@@ -26,8 +26,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "ansidecl.h"
 #include "bfd.h"
 #include "symcat.h"
-#include "ms1-desc.h"
-#include "ms1-opc.h"
+#include "mt-desc.h"
+#include "mt-opc.h"
 #include "libiberty.h"
 
 /* -- opc.c */
@@ -36,8 +36,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Special check to ensure that instruction exists for given machine.  */
 
 int
-ms1_cgen_insn_supported (CGEN_CPU_DESC cd,
-			 const CGEN_INSN *insn)
+mt_cgen_insn_supported (CGEN_CPU_DESC cd,
+			const CGEN_INSN *insn)
 {
   int machs = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH);
 
@@ -51,7 +51,7 @@ ms1_cgen_insn_supported (CGEN_CPU_DESC cd,
 /* A better hash function for instruction mnemonics.  */
 
 unsigned int
-ms1_asm_hash (const char* insn)
+mt_asm_hash (const char* insn)
 {
   unsigned int hash;
   const char* m = insn;
@@ -77,9 +77,9 @@ static unsigned int dis_hash_insn (const char *, CGEN_INSN_INT);
 /* Instruction formats.  */
 
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
-#define F(f) & ms1_cgen_ifld_table[MS1_##f]
+#define F(f) & mt_cgen_ifld_table[MT_##f]
 #else
-#define F(f) & ms1_cgen_ifld_table[MS1_/**/f]
+#define F(f) & mt_cgen_ifld_table[MT_/**/f]
 #endif
 static const CGEN_IFMT ifmt_empty ATTRIBUTE_UNUSED = {
   0, 0, 0x0, { { 0 } }
@@ -265,16 +265,16 @@ static const CGEN_IFMT ifmt_dfbr ATTRIBUTE_UNUSED = {
 #define A(a) (1 << CGEN_INSN_/**/a)
 #endif
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
-#define OPERAND(op) MS1_OPERAND_##op
+#define OPERAND(op) MT_OPERAND_##op
 #else
-#define OPERAND(op) MS1_OPERAND_/**/op
+#define OPERAND(op) MT_OPERAND_/**/op
 #endif
 #define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
 #define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
 
 /* The instruction table.  */
 
-static const CGEN_OPCODE ms1_cgen_insn_opcode_table[MAX_INSNS] =
+static const CGEN_OPCODE mt_cgen_insn_opcode_table[MAX_INSNS] =
 {
   /* Special null first entry.
      A `num' value of zero is thus invalid.
@@ -788,9 +788,9 @@ static const CGEN_OPCODE ms1_cgen_insn_opcode_table[MAX_INSNS] =
 /* Formats for ALIAS macro-insns.  */
 
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
-#define F(f) & ms1_cgen_ifld_table[MS1_##f]
+#define F(f) & mt_cgen_ifld_table[MT_##f]
 #else
-#define F(f) & ms1_cgen_ifld_table[MS1_/**/f]
+#define F(f) & mt_cgen_ifld_table[MT_/**/f]
 #endif
 #undef F
 
@@ -802,22 +802,22 @@ static const CGEN_OPCODE ms1_cgen_insn_opcode_table[MAX_INSNS] =
 #define A(a) (1 << CGEN_INSN_/**/a)
 #endif
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
-#define OPERAND(op) MS1_OPERAND_##op
+#define OPERAND(op) MT_OPERAND_##op
 #else
-#define OPERAND(op) MS1_OPERAND_/**/op
+#define OPERAND(op) MT_OPERAND_/**/op
 #endif
 #define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
 #define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
 
 /* The macro instruction table.  */
 
-static const CGEN_IBASE ms1_cgen_macro_insn_table[] =
+static const CGEN_IBASE mt_cgen_macro_insn_table[] =
 {
 };
 
 /* The macro instruction opcode table.  */
 
-static const CGEN_OPCODE ms1_cgen_macro_insn_opcode_table[] =
+static const CGEN_OPCODE mt_cgen_macro_insn_opcode_table[] =
 {
 };
 
@@ -907,13 +907,13 @@ set_fields_bitsize (CGEN_FIELDS *fields, int size)
    This plugs the opcode entries and macro instructions into the cpu table.  */
 
 void
-ms1_cgen_init_opcode_table (CGEN_CPU_DESC cd)
+mt_cgen_init_opcode_table (CGEN_CPU_DESC cd)
 {
   int i;
-  int num_macros = (sizeof (ms1_cgen_macro_insn_table) /
-		    sizeof (ms1_cgen_macro_insn_table[0]));
-  const CGEN_IBASE *ib = & ms1_cgen_macro_insn_table[0];
-  const CGEN_OPCODE *oc = & ms1_cgen_macro_insn_opcode_table[0];
+  int num_macros = (sizeof (mt_cgen_macro_insn_table) /
+		    sizeof (mt_cgen_macro_insn_table[0]));
+  const CGEN_IBASE *ib = & mt_cgen_macro_insn_table[0];
+  const CGEN_OPCODE *oc = & mt_cgen_macro_insn_opcode_table[0];
   CGEN_INSN *insns = xmalloc (num_macros * sizeof (CGEN_INSN));
 
   memset (insns, 0, num_macros * sizeof (CGEN_INSN));
@@ -921,18 +921,18 @@ ms1_cgen_init_opcode_table (CGEN_CPU_DESC cd)
     {
       insns[i].base = &ib[i];
       insns[i].opcode = &oc[i];
-      ms1_cgen_build_insn_regex (& insns[i]);
+      mt_cgen_build_insn_regex (& insns[i]);
     }
   cd->macro_insn_table.init_entries = insns;
   cd->macro_insn_table.entry_size = sizeof (CGEN_IBASE);
   cd->macro_insn_table.num_init_entries = num_macros;
 
-  oc = & ms1_cgen_insn_opcode_table[0];
+  oc = & mt_cgen_insn_opcode_table[0];
   insns = (CGEN_INSN *) cd->insn_table.init_entries;
   for (i = 0; i < MAX_INSNS; ++i)
     {
       insns[i].opcode = &oc[i];
-      ms1_cgen_build_insn_regex (& insns[i]);
+      mt_cgen_build_insn_regex (& insns[i]);
     }
 
   cd->sizeof_fields = sizeof (CGEN_FIELDS);
