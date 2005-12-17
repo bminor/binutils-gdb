@@ -1,5 +1,19 @@
 2005-12-18  Eli Zaretskii  <eliz@gnu.org>
 
+	* cli/cli-utils.h: 
+	* cli/cli-utils.c: 
+	* cli/cli-setshow.h: 
+	* cli/cli-setshow.c: 
+	* cli/cli-script.h: 
+	* cli/cli-script.c: 
+	* cli/cli-logging.c: 
+	* cli/cli-interp.c: 
+	* cli/cli-dump.h: 
+	* cli/cli-dump.c: 
+	* cli/cli-decode.h: 
+	* cli/cli-decode.c: 
+	* cli/cli-cmds.h: 
+	* cli/cli-cmds.c: 
 	* breakpoint.c: 
 	* arm-tdep.c: 
 	* ia64-tdep.c: 
