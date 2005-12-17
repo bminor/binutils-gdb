@@ -1,6 +1,6 @@
 /* Parse expressions for GDB.
 
-   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   Copyright (C) 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
    1997, 1998, 1999, 2000, 2001, 2004, 2005 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
@@ -20,8 +20,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 /* Parse an expression from text in a string,
    and return the result as a  struct expression  pointer.

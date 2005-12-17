@@ -1,6 +1,6 @@
 /* Ada language support definitions for GDB, the GNU debugger.
 
-   Copyright 1992, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   Copyright (C) 1992, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
    2005 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,7 +17,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 51 Franklin Street, Fifth Floor,
+Boston, MA 02110-1301, USA.  */
 
 #if !defined (ADA_LANG_H)
 #define ADA_LANG_H 1

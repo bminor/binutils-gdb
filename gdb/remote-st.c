@@ -1,6 +1,6 @@
 /* Remote debugging interface for Tandem ST2000 phone switch, for GDB.
 
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000,
+   Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000,
    2001, 2002 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
@@ -19,8 +19,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 /* This file was derived from remote-eb.c, which did a similar job, but for
    an AMD-29K running EBMON.  That file was in turn derived from remote.c

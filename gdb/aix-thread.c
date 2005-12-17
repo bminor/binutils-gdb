@@ -1,6 +1,6 @@
 /* Low level interface for debugging AIX 4.3+ pthreads.
 
-   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2002 Free Software Foundation, Inc.
    Written by Nick Duffek <nsd@redhat.com>.
 
    This file is part of GDB.
@@ -17,8 +17,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 
 /* This module uses the libpthdebug.a library provided by AIX 4.3+ for

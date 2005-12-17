@@ -1,6 +1,6 @@
 /* Win32 termcap emulation.
 
-   Copyright 2005 Free Software Foundation, Inc.
+   Copyright (C) 2005 Free Software Foundation, Inc.
 
    Contributed by CodeSourcery, LLC.
 

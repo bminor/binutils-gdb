@@ -1,6 +1,6 @@
 /* Remote debugging interface for Renesas E7000 ICE, for GDB
 
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
    2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support. 
@@ -21,8 +21,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 /* The E7000 is an in-circuit emulator for the Renesas H8/300-H and
    Renesas-SH processor.  It has serial port and a lan port.  

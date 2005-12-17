@@ -1,7 +1,7 @@
 /* Machine independent support for QNX Neutrino /proc (process file system)
    for GDB.  Written by Colin Burgess at QNX Software Systems Limited. 
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright (C) 2003 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -19,8 +19,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 #include "defs.h"
 
