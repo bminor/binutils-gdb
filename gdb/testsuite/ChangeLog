@@ -1,3 +1,7 @@
+2005-12-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/default.exp: Update check for "show version".
+
 2005-12-09  Randolph Chung  <tausq@debian.org>
 
 	* gdb.asm/asm-source.exp (hppa64-*-hpux*): New.
