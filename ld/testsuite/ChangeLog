@@ -1,3 +1,8 @@
+2005-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/unknown2.d: New.
+	* ld-elf/unknown2.s: Likewise.
+
 2005-12-12  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-call.d: New test.
