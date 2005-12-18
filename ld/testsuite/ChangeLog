@@ -1,5 +1,11 @@
 2005-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/2065
+	* ld-elf/orphan2.d: New file.
+	* ld-elf/orphan2.s: Likewise.
+
+2005-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elf/unknown2.d: New.
 	* ld-elf/unknown2.s: Likewise.
 
