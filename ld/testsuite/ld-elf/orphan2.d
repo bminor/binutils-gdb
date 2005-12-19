@@ -1,6 +1,7 @@
 #source: orphan2.s
 #ld: -r
 #readelf: -S --wide
+#xfail: *-*-*
 
 #...
   \[[ 0-9]+\] \.text[ \t]+PROGBITS[ \t0-9a-f]+AX?.*

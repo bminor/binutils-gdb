@@ -1,3 +1,8 @@
+2005-12-19  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-elf/unknown2.d: Only run for *-*-linux*.
+	* ld-elf/orphan2.d: Xfail everywhere.
+
 2005-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2065
