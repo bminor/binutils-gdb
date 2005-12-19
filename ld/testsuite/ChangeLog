@@ -97,7 +97,7 @@
 2005-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/251
-	* ld-elf/group.2d: New file.
+	* ld-elf/group2.d: New file.
 
 2005-10-19  H.J. Lu  <hongjiu.lu@intel.com>
 
