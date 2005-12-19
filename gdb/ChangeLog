@@ -1,3 +1,16 @@
+2005-12-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.h (I386_SEL_RPL, I386_SEL_UPL, I386_SEL_KPL): New
+	defines.
+	* i386obsd-tdep.c: Include "frame-unwind.h" and "trad-frame.h".
+	(i386obsd_tf_reg_offset, i386obsd_trapframe_unwind): New
+	variables.
+	(i386obsd_trapframe_cache, i386obsd_trapframe_this_id)
+	(i386obsd_trapframe_prev_register, i386obsd_trapframe_sniffer):
+	New functions.
+	(i386obsd_init_abi): Append i386obsd_trapframe_sniffer.
+	* Makefile.in (i386obsd-tdep.o): Update dependencies.
+
 2005-12-18  Eli Zaretskii  <eliz@gnu.org>
 
 	* cli/cli-utils.h: 

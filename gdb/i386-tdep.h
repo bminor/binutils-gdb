@@ -149,6 +149,11 @@ enum i386_regnum
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	16
 
+/* Segment selectors.  */
+#define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */
+#define I386_SEL_UPL	0x0003	/* User Privilige Level. */
+#define I386_SEL_KPL	0x0000	/* Kernel Privilige Level. */
+
 /* Functions exported from i386-tdep.c.  */
 extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
 
