@@ -1,3 +1,11 @@
+2005-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2065
+	* ldlang.c (output_statement_newfunc): Revert the change made on
+	2005-11-16.
+	(output_prev_sec_find): Likewsise.
+	* ldlang.h (lang_statement_list_type): Likewsise.
+
 2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Second part of ms1 to mt renaming.

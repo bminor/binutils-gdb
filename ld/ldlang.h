@@ -130,7 +130,6 @@ typedef struct lang_output_section_statement_struct
   lang_statement_header_type header;
   lang_statement_list_type children;
   struct lang_output_section_statement_struct *next;
-  struct lang_output_section_statement_struct *prev;
   const char *name;
   asection *bfd_section;
   lang_memory_region_type *region;

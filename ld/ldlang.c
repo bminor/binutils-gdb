@@ -912,8 +912,6 @@ output_statement_newfunc (struct bfd_hash_entry *entry,
 			 (lang_statement_union_type *) &ret->os,
 			 &ret->os.header.next);
 
-  ret->os.prev = &((*lang_output_section_statement.tail)
-		   ->output_section_statement);
   /* GCC's strict aliasing rules prevent us from just casting the
      address, so we store the pointer in a variable and cast that
      instead.  */
@@ -1292,15 +1290,20 @@ lang_output_section_find_by_flags (const asection *sec,
 static asection *
 output_prev_sec_find (lang_output_section_statement_type *os)
 {
+  asection *s = (asection *) NULL;
   lang_output_section_statement_type *lookup;
 
-  for (lookup = os->prev; lookup != NULL; lookup = lookup->prev)
+  for (lookup = &lang_output_section_statement.head->output_section_statement;
+       lookup != NULL;
+       lookup = lookup->next)
     {
       if (lookup->constraint == -1)
 	continue;
+      if (lookup == os)
+	return s;
 
       if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
-	return lookup->bfd_section;
+	s = lookup->bfd_section;
     }
 
   return NULL;
