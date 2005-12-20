@@ -3120,7 +3120,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	wordsize = 4;
     }
 
-  /* Find a candidate among existent architectures.  */
+  /* Find a candidate among extant architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
