@@ -2676,7 +2676,7 @@ been changed cannot be restored (at this time).
 
 However, within those constraints, you actually can ``rewind'' your
 program to a previously saved point in time, and begin debugging it
-again -- and you can change the course events so as to debug a
+again -- and you can change the course of events so as to debug a
 different execution path this time.
 
 
