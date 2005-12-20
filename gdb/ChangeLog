@@ -1,3 +1,7 @@
+2005-12-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* rs6000-tdep.c: Fix spelling errors.
+
 2005-12-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.h (I386_SEL_RPL, I386_SEL_UPL, I386_SEL_KPL): New
