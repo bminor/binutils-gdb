@@ -6403,6 +6403,9 @@ xg_find_narrowest_format (vliw_insn *vinsn)
   vliw_insn v_copy = *vinsn;
   xtensa_opcode nop_opcode = xtensa_nop_opcode;
 
+  if (vinsn->num_slots == 1)
+    return xg_get_single_format (vinsn->slots[0].opcode);
+
   for (format = 0; format < xtensa_isa_num_formats (isa); format++)
     {
       v_copy = *vinsn;
@@ -11417,8 +11420,6 @@ xg_init_vinsn (vliw_insn *v)
 
   for (i = 0; i < MAX_SLOTS; i++)
     {
-      tinsn_init (&v->slots[i]);
-      v->slots[i].opcode = XTENSA_UNDEFINED;
       v->slotbuf[i] = xtensa_insnbuf_alloc (isa);
       if (v->slotbuf[i] == NULL)
 	as_fatal (_("out of memory"));
@@ -11430,6 +11431,9 @@ static void
 xg_clear_vinsn (vliw_insn *v)
 {
   int i;
+
+  memset (v, 0, offsetof (vliw_insn, insnbuf));
+
   v->format = XTENSA_UNDEFINED;
   v->num_slots = 0;
   v->inside_bundle = FALSE;
@@ -11438,10 +11442,7 @@ xg_clear_vinsn (vliw_insn *v)
     debug_type = xt_saved_debug_type;
 
   for (i = 0; i < MAX_SLOTS; i++)
-    {
-      memset (&v->slots[i], 0, sizeof (TInsn));
-      v->slots[i].opcode = XTENSA_UNDEFINED;
-    }
+    v->slots[i].opcode = XTENSA_UNDEFINED;
 }
 
 

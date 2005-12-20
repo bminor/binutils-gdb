@@ -1,3 +1,10 @@
+2005-12-20  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (xg_find_narrowest_format): Optimize 1 slot case.
+	(xg_init_vinsn): Remove redundant initialization.
+	(xg_clear_vinsn): Zero all the slots with a single memset.
+	* config/xtensa-istack.h (vliw_insn): Move insnbuf field after slots.
+
 2005-12-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* doc/t-mt.texi: Update MS1 to MT.

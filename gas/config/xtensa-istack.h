@@ -89,10 +89,10 @@ expressionS *tinsn_get_tok (TInsn *, int);
 typedef struct vliw_insn
 {
   xtensa_format format;
-  xtensa_insnbuf insnbuf;
   int num_slots;
   unsigned int inside_bundle;
   TInsn slots[MAX_SLOTS];
+  xtensa_insnbuf insnbuf;
   xtensa_insnbuf slotbuf[MAX_SLOTS];
 } vliw_insn;
 
