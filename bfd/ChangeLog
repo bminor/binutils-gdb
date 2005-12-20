@@ -1,3 +1,10 @@
+2005-12-19  David Heine  <dlheine@tensilica.com>
+
+	* elf32-xtensa.c (action_list_count, xlate_map_entry, xlate_map,
+	xlate_offset_with_removed_text, build_xlate_map, free_xlate_map): New.
+	(check_section_ebb_pcrels_fit): Build new xlate_map, use it and free it
+	when finished.
+
 2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Second part of ms1 to mt renaming.
