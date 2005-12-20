@@ -1,3 +1,7 @@
+2005-12-20  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* doc/t-mt.texi: Update MS1 to MT.
+
 2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Second part of ms1 to mt renaming.

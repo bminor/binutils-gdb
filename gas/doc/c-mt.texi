@@ -5,8 +5,8 @@
 
 @ifset GENERIC
 @page
-@node MS1-Dependent
-@chapter MS1 Dependent Features
+@node MT-Dependent
+@chapter MT Dependent Features
 @end ifset
 
 @ifclear GENERIC
@@ -14,19 +14,19 @@
 @chapter MS1 Dependent Features
 @end ifclear
 
-@cindex MS1 support
+@cindex MT support
 @menu
-* MS1 Options::              Options
+* MT Options::              Options
 @end menu
 
-@node MS1 Options
+@node MT Options
 @section Options
-@cindex MS1 options (none)
-@cindex options for MS1 (none)
+@cindex MT options (none)
+@cindex options for MT (none)
 
 @table @code
 
-@cindex @code{-march=} command line option, MS1
+@cindex @code{-march=} command line option, MT
 @item -march=@var{processor}
 This option specifies the target processor.  The assembler will issue an
 error message if an attempt is made to assemble an instruction which
@@ -37,7 +37,7 @@ recognized:
 @code{ms1-16-003},
 and @code{ms2}.
 
-@cindex @code{-nosched} command line option, MS1
+@cindex @code{-nosched} command line option, MT
 @item -nosched
 This option disables scheduling restriction checking.
 
