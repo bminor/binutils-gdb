@@ -100,8 +100,8 @@ struct rs6000_framedata
 struct reg
   {
     char *name;			/* name of register */
-    unsigned char sz32;		/* size on 32-bit arch, 0 if nonexistant */
-    unsigned char sz64;		/* size on 64-bit arch, 0 if nonexistant */
+    unsigned char sz32;		/* size on 32-bit arch, 0 if nonexistent */
+    unsigned char sz64;		/* size on 64-bit arch, 0 if nonexistent */
     unsigned char fpr;		/* whether register is floating-point */
     unsigned char pseudo;       /* whether register is pseudo */
     int spr_num;                /* PowerPC SPR number, or -1 if not an SPR.
@@ -3120,7 +3120,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	wordsize = 4;
     }
 
-  /* Find a candidate among existant architectures.  */
+  /* Find a candidate among existent architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))

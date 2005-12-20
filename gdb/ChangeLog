@@ -1,5 +1,9 @@
 2005-12-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* rs6000-tdep.c: Use proper spelling for existent.
+
+2005-12-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* rs6000-tdep.c: Fix spelling errors.
 
 2005-12-19  Mark Kettenis  <kettenis@gnu.org>
