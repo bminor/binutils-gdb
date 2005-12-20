@@ -1740,6 +1740,7 @@ kill a child process.
 
 * Threads::                     Debugging programs with multiple threads
 * Processes::                   Debugging programs with multiple processes
+* Checkpoint/Restart::          Setting a 'bookmark' to return to later
 @end menu
 
 @node Compilation
@@ -2507,6 +2508,75 @@ unimpeded.
 Display the current debugger response to a @code{fork} or @code{vfork} call.
 @end table
 
+If you want to debug both the parent and child processes, use the
+command @w{@code{set detach-on-fork}}.
+
+@table @code
+@kindex set detach-on-fork
+@item set detach-on-fork @var{mode}
+Tells gdb whether to detach one of the processes after a fork, or
+retain debugger control over them both.
+
+@table @code
+@item on
+The child process (or parent process, depending on the value of
+@var{follow-fork-mode}) will be detached and allowed to run 
+independently.  This is the default.
+
+@item off
+Both processes will be held under the control of @value{GDBN}.
+One process (child or parent, depending on the value of 
+@var{follow-fork-mode}) is debugged as usual, while the other
+is held suspended.  
+
+@end table
+
+@kindex show detach-on-follow
+@item show detach-on-follow
+Show whether detach-on-follow mode is on/off.
+@end table
+
+If you choose to set @var{detach-on-follow} mode off, then gdb will
+retain control of all forked processes (including nested forks).  
+You can list the forked processes under the control of @value{GDBN}
+by using the @w{@code{info forks}} command, and switch from one 
+fork to another by using the @w{@code{fork}} command.
+
+@table @code
+@kindex info forks
+@item info forks
+Print a list of all forked processes under the control of @value{GDBN}.
+The listing will include a fork id, a process id, and the current 
+position (program counter) of the process.
+
+
+@kindex fork @var{fork-id}
+@item fork @var{fork-id}
+Make fork number @var{fork-id} the current process.  The argument
+@var{fork-id} is the internal fork number assigned by @value{GDBN},
+as shown in the first field of the @samp{info forks} display.
+
+@end table
+
+To quit debugging one of the forked processes, you can either 
+detach it by using the @w{@code{detach-fork}} command (allowing
+it to run independently), or delete (and kill) it using the
+@w{@code{delete-fork}} command.
+
+@table @code
+@kindex detach-fork @var{fork-id}
+@item detach-fork @var{fork-id}
+Detach the process identified by @value{GDBN} fork number @var{fork-id},
+and remove it from the fork list.  The process will be allowed to run
+independently.
+
+@kindex delete-fork @var{fork-id}
+@item delete-fork @var{fork-id}
+Kill the process identified by @value{GDBN} fork number @var{fork-id},
+and remove it from the fork list.
+
+@end table
+
 If you ask to debug a child process and a @code{vfork} is followed by an
 @code{exec}, @value{GDBN} executes the new target up to the first
 breakpoint in the new target.  If you have a breakpoint set on
@@ -2525,6 +2595,91 @@ You can use the @code{catch} command to make @value{GDBN} stop whenever
 a @code{fork}, @code{vfork}, or @code{exec} call is made.  @xref{Set
 Catchpoints, ,Setting catchpoints}.
 
+@node Checkpoint/Restart
+@section Setting a 'bookmark' to return to later
+
+@cindex checkpoint
+@cindex restart
+@cindex bookmark
+
+On certain operating systems @footnote{Currently, only
+@sc{gnu}/Linux.}, @value{GDBN} is able to save a @code{snapshot} of a
+program's state, called a @code{checkpoint}, and come back to it
+later.
+
+Returning to a @code{checkpoint} effectively undoes everything that
+has happened in the program since the @code{checkpoint} was saved.
+This includes changes in memory, registers, and even (within some
+limits) system state.  Effectively, it is like going back in time
+to the moment when the checkpoint was saved.
+
+Thus, if you're stepping thru a program and you think you're 
+getting close to the point where things go wrong, you can save
+a checkpoint.  Then, if you accidentally go too far and miss
+the critical statement, instead of having to restart your program
+from the beginning, you can just go back to the checkpoint and
+start again from there.
+
+This can be especially useful if it takes a lot of time or 
+steps to reach the point where you think the bug occurs.  
+
+To use the @code{checkpoint}/@code{restart} method of debugging:
+
+@table @code
+@kindex checkpoint
+@item checkpoint
+Save a snapshot of the debugged program's current execution state.
+The @code{checkpoint} command takes no arguments, but each checkpoint
+is assigned a small integer @code{id}, similar to a @code{breakpoint id}.
+
+@kindex info checkpoints
+@item info checkpoints
+List the checkpoints that have been saved in the current debugging
+session.  For each checkpoint, the following information will be
+listed:
+
+@table @code
+@item Checkpoint ID
+@item Process ID
+@item Code Address
+@item Source line, or label
+@end table
+
+@kindex restart @var{checkpoint-id}
+@item restart @var{checkpoint-id}
+Restore the program state that was saved as checkpoint number 
+@var{checkpoint-id}.  All variables, registers, stack frames etc.
+will be returned to the values that they had when the checkpoint
+was saved.  In essence, gdb will ``wind back the clock'' to the
+point in time when the checkpoint was saved.
+
+@kindex delete-checkpoint @var{checkpoint-id}
+@item delete-checkpoint @var{checkpoint-id}
+Delete the previously-saved checkpoint identified by @var{checkpoint-id}.
+
+@end table
+
+Returning to a previously saved checkpoint will restore all program
+state internal to the program being debugged, plus a significant 
+subset of the system (OS) state, including file pointers.  It won't
+``un-write'' data from a file, but it will rewind the file pointer
+to the previous location, so that the previously written data can
+be overwritten.  For files opened in read mode, the pointer will 
+also be restored so that the previously read data can be read again.
+
+Of course, characters that have been sent to a printer (or other
+external device) cannot be ``snatched back'', and characters received
+from eg. a serial device can be removed from internal program buffers,
+but they cannot be ``pushed back'' into the serial pipeline, ready to
+be received again.  Similarly, the actual contents of files that have
+been changed cannot be restored (at this time).
+
+However, within those constraints, you actually can ``rewind'' your
+program to a previously saved point in time, and begin debugging it
+again -- and you can change the course events so as to debug a
+different execution path this time.
+
+
 @node Stopping
 @chapter Stopping and Continuing
 
@@ -2539,6 +2694,13 @@ change variables, set new breakpoints or remove old ones, and then
 continue execution.  Usually, the messages shown by @value{GDBN} provide
 ample explanation of the status of your program---but you can also
 explicitly request this information at any time.
+
+Finally, there is one bit of internal program state that will be
+different when you return to a checkpoint -- the program's process
+id.  Each checkpoint will have a unique process id (or @var{pid}), 
+and each will be different from the program's original @var{pid}.
+If your program has saved a local copy of its process id, this could
+potentially pose a problem.
 
 @table @code
 @kindex info program

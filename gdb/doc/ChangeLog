@@ -1,3 +1,7 @@
+2005-12-19  Michael Van Meter Snyder  <michsnyd@clwang-lnx.cisco.com>
+
+	* gdb.texinfo: Add documentation for multi-fork and checkpoint.
+
 2005-11-19  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (Tracepoint Packets): New node.
