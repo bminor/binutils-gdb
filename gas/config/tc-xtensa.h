@@ -213,6 +213,10 @@ struct xtensa_frag_type
      contains an instruction.  */
   unsigned int is_first_loop_insn : 1;
 
+  /* A frag with this bit set is a branch that we are using to
+     align branch targets as if it were a normal narrow instruction.  */
+  unsigned int is_aligning_branch : 1;
+
   /* For text fragments that can generate literals at relax time, this
      variable points to the frag where the literal will be stored.  For
      literal frags, this variable points to the nearest literal pool

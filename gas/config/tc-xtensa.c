@@ -7066,6 +7066,7 @@ xtensa_mark_narrow_branches (void)
 		{
 		  fragP->fr_subtype = RELAX_SLOTS;
 		  fragP->tc_frag_data.slot_subtypes[0] = RELAX_NARROW;
+		  fragP->tc_frag_data.is_aligning_branch = 1;
 		}
 	    }
 	}
@@ -8426,7 +8427,7 @@ find_address_of_next_align_frag (fragS **fragPP,
   while (fragP)
     {
       /* Limit this to a small search.  */
-      if (*widens > 8)
+      if (*widens >= (int) xtensa_fetch_width)
 	{
 	  *fragPP = fragP;
 	  return 0;
@@ -8513,7 +8514,14 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
   address = find_address_of_next_align_frag
     (&fragP, &wide_nops, &narrow_nops, &num_widens, &paddable);
 
-  if (address)
+  if (!address)
+    {
+      if (this_frag->tc_frag_data.is_aligning_branch)
+	this_frag->tc_frag_data.slot_subtypes[0] = RELAX_IMMED;
+      else
+	frag_wane (this_frag);
+    }
+  else
     {
       local_opt_diff = get_aligned_diff (fragP, address, &max_diff);
       opt_diff = local_opt_diff;
@@ -8538,7 +8546,7 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
 	    (&fragP, &glob_widens, &dnn, &dw, &glob_pad);
 	  /* If there is a padable portion, then skip.  */
 	  if (glob_pad || glob_widens >= (1 << branch_align_power (now_seg)))
-	    break;
+	    address = 0;
 
 	  if (address)
 	    {
@@ -8794,7 +8802,6 @@ relax_frag_immed (segT segP,
 		  bfd_boolean estimate_only)
 {
   TInsn tinsn;
-  vliw_insn orig_vinsn;
   int old_size;
   bfd_boolean negatable_branch = FALSE;
   bfd_boolean branch_jmp_to_next = FALSE;
@@ -8809,12 +8816,12 @@ relax_frag_immed (segT segP,
 
   assert (fragP->fr_opcode != NULL);
 
-  xg_init_vinsn (&orig_vinsn);
-  vinsn_from_chars (&orig_vinsn, fragP->fr_opcode);
+  xg_clear_vinsn (&cur_vinsn);
+  vinsn_from_chars (&cur_vinsn, fragP->fr_opcode);
   if (xtensa_format_num_slots (isa, fmt) > 1)
     wide_insn = TRUE;
 
-  tinsn = orig_vinsn.slots[slot];
+  tinsn = cur_vinsn.slots[slot];
   tinsn_immed_from_frag (&tinsn, fragP, slot);
 
   if (estimate_only && xtensa_opcode_is_loop (isa, tinsn.opcode))
@@ -9076,7 +9083,7 @@ convert_frag_narrow (segT segP, fragS *fragP, xtensa_format fmt, int slot)
   assert (slot == 0);
   tinsn_from_chars (&tinsn, fragP->fr_opcode, 0);
 
-  if (xtensa_opcode_is_branch (xtensa_default_isa, tinsn.opcode) == 1)
+  if (fragP->tc_frag_data.is_aligning_branch == 1)
     {
       assert (fragP->tc_frag_data.text_expansion[0] == 1
 	      || fragP->tc_frag_data.text_expansion[0] == 0);
@@ -9166,7 +9173,6 @@ convert_frag_immed (segT segP,
   bfd_boolean expanded = FALSE;
   bfd_boolean branch_jmp_to_next = FALSE;
   char *fr_opcode = fragP->fr_opcode;
-  vliw_insn orig_vinsn;
   xtensa_isa isa = xtensa_default_isa;
   bfd_boolean wide_insn = FALSE;
   int bytes;
@@ -9174,13 +9180,13 @@ convert_frag_immed (segT segP,
 
   assert (fr_opcode != NULL);
 
-  xg_init_vinsn (&orig_vinsn);
+  xg_clear_vinsn (&cur_vinsn);
 
-  vinsn_from_chars (&orig_vinsn, fr_opcode);
+  vinsn_from_chars (&cur_vinsn, fr_opcode);
   if (xtensa_format_num_slots (isa, fmt) > 1)
     wide_insn = TRUE;
 
-  orig_tinsn = orig_vinsn.slots[slot];
+  orig_tinsn = cur_vinsn.slots[slot];
   tinsn_immed_from_frag (&orig_tinsn, fragP, slot);
 
   is_loop = xtensa_opcode_is_loop (xtensa_default_isa, orig_tinsn.opcode) == 1;
@@ -9194,20 +9200,20 @@ convert_frag_immed (segT segP,
       bytes = xtensa_format_length (isa, fmt);
       if (bytes >= 4)
 	{
-	  orig_vinsn.slots[slot].opcode =
-	    xtensa_format_slot_nop_opcode (isa, orig_vinsn.format, slot);
-	  orig_vinsn.slots[slot].ntok = 0;
+	  cur_vinsn.slots[slot].opcode =
+	    xtensa_format_slot_nop_opcode (isa, cur_vinsn.format, slot);
+	  cur_vinsn.slots[slot].ntok = 0;
 	}
       else
 	{
 	  bytes += fragP->tc_frag_data.text_expansion[0];
 	  assert (bytes == 2 || bytes == 3);
-	  build_nop (&orig_vinsn.slots[0], bytes);
+	  build_nop (&cur_vinsn.slots[0], bytes);
 	  fragP->fr_fix += fragP->tc_frag_data.text_expansion[0];
 	}
-      vinsn_to_insnbuf (&orig_vinsn, fr_opcode, frag_now, FALSE);
+      vinsn_to_insnbuf (&cur_vinsn, fr_opcode, frag_now, FALSE);
       xtensa_insnbuf_to_chars
-	(isa, orig_vinsn.insnbuf, (unsigned char *) fr_opcode, 0);
+	(isa, cur_vinsn.insnbuf, (unsigned char *) fr_opcode, 0);
       fragP->fr_var = 0;
     }
   else
@@ -9341,17 +9347,17 @@ convert_frag_immed (segT segP,
 		  if (opcode_fits_format_slot (tinsn->opcode, fmt, slot))
 		    {
 		      tinsn->record_fix = TRUE;
-		      orig_vinsn.slots[slot] = *tinsn;
+		      cur_vinsn.slots[slot] = *tinsn;
 		    }
 		  else
 		    {
-		      orig_vinsn.slots[slot].opcode =
+		      cur_vinsn.slots[slot].opcode =
 			xtensa_format_slot_nop_opcode (isa, fmt, slot);
-		      orig_vinsn.slots[slot].ntok = 0;
-		      orig_vinsn.slots[slot].record_fix = FALSE;
+		      cur_vinsn.slots[slot].ntok = 0;
+		      cur_vinsn.slots[slot].record_fix = FALSE;
 		    }
-		  vinsn_to_insnbuf (&orig_vinsn, immed_instr, fragP, TRUE);
-		  xtensa_insnbuf_to_chars (isa, orig_vinsn.insnbuf,
+		  vinsn_to_insnbuf (&cur_vinsn, immed_instr, fragP, TRUE);
+		  xtensa_insnbuf_to_chars (isa, cur_vinsn.insnbuf,
 					   (unsigned char *) immed_instr, 0);
 		  fragP->tc_frag_data.is_insn = TRUE;
 		  size = xtensa_format_length (isa, fmt);
@@ -9389,9 +9395,6 @@ convert_frag_immed (segT segP,
       fragP->fr_var -= diff;
       fragP->fr_fix += diff;
     }
-
-  /* Clean it up.  */
-  xg_free_vinsn (&orig_vinsn);
 
   /* Check for undefined immediates in LOOP instructions.  */
   if (is_loop)

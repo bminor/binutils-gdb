@@ -1,5 +1,18 @@
 2005-12-20  Sterling Augustine  <sterling@tensilica.com>
 
+	* config/tc-xtensa.c (xtensa_mark_narrow_branches): Set
+	is_aligning_branch flag.
+	(find_address_of_next_align_frag): Limit by xtensa_fetch_width.
+	(future_alignment_required): Except for frags with is_aligning_branch
+	flag set, call frag_wane for frags that do not need to be reexamined
+	for aligning.
+	(relax_frag_immed): Replace orig_vinsn with cur_vinsn to fix a leak.
+	(convert_frag_immed): Likewise.
+	(convert_frag_narrow): Check is_aligning_branch flag.
+	* config/tc-xtensa.h (xtensa_frag_type): Add is_aligning_branch flag.
+
+2005-12-20  Sterling Augustine  <sterling@tensilica.com>
+
 	* config/tc-xtensa.c (xg_find_narrowest_format): Optimize 1 slot case.
 	(xg_init_vinsn): Remove redundant initialization.
 	(xg_clear_vinsn): Zero all the slots with a single memset.
