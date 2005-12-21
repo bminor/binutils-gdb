@@ -1,3 +1,7 @@
+2005-12-21  H.J. Lu  <hjl@gnu.org>
+
+	* MAINTAINERS: Add myself as x86_64 maintainer.
+
 2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Second part of ms1 to mt renaming.
