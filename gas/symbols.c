@@ -1355,8 +1355,10 @@ resolve_local_symbol_values (void)
    sub-expressions used.  */
 
 int
-snapshot_symbol (symbolS *symbolP, valueT *valueP, segT *segP, fragS **fragPP)
+snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
 {
+  symbolS *symbolP = *symbolPP;
+
   if (LOCAL_SYMBOL_CHECK (symbolP))
     {
       struct local_symbol *locsym = (struct local_symbol *) symbolP;
@@ -1385,10 +1387,7 @@ snapshot_symbol (symbolS *symbolP, valueT *valueP, segT *segP, fragS **fragPP)
 	    {
 	    case O_constant:
 	    case O_register:
-	      /* This check wouldn't be needed if pseudo_set() didn't set
-		 symbols equated to bare symbols to undefined_section.  */
-	      if (symbolP->bsym->section != undefined_section
-		  || symbolP->sy_value.X_op != O_symbol)
+	      if (!symbol_equated_p (symbolP))
 		break;
 	      /* Fall thru.  */
 	    case O_symbol:
@@ -1400,6 +1399,7 @@ snapshot_symbol (symbolS *symbolP, valueT *valueP, segT *segP, fragS **fragPP)
 	    }
 	}
 
+      *symbolPP = symbolP;
       *valueP = expr.X_add_number;
       *segP = symbolP->bsym->section;
       *fragPP = symbolP->sy_frag;

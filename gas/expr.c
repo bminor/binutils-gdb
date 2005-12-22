@@ -1913,7 +1913,7 @@ resolve_expression (expressionS *expressionP)
 
     case O_symbol:
     case O_symbol_rva:
-      if (!snapshot_symbol (add_symbol, &left, &seg_left, &frag_left))
+      if (!snapshot_symbol (&add_symbol, &left, &seg_left, &frag_left))
 	return 0;
 
       break;
@@ -1921,7 +1921,7 @@ resolve_expression (expressionS *expressionP)
     case O_uminus:
     case O_bit_not:
     case O_logical_not:
-      if (!snapshot_symbol (add_symbol, &left, &seg_left, &frag_left))
+      if (!snapshot_symbol (&add_symbol, &left, &seg_left, &frag_left))
 	return 0;
 
       if (seg_left != absolute_section)
@@ -1955,8 +1955,8 @@ resolve_expression (expressionS *expressionP)
     case O_gt:
     case O_logical_and:
     case O_logical_or:
-      if (!snapshot_symbol (add_symbol, &left, &seg_left, &frag_left)
-	  || !snapshot_symbol (op_symbol, &right, &seg_right, &frag_right))
+      if (!snapshot_symbol (&add_symbol, &left, &seg_left, &frag_left)
+	  || !snapshot_symbol (&op_symbol, &right, &seg_right, &frag_right))
 	return 0;
 
       /* Simplify addition or subtraction of a constant by folding the
@@ -1974,7 +1974,7 @@ resolve_expression (expressionS *expressionP)
 	      final_val += left;
 	      left = right;
 	      seg_left = seg_right;
-	      expressionP->X_add_symbol = expressionP->X_op_symbol;
+	      add_symbol = op_symbol;
 	      op = O_symbol;
 	      break;
 	    }
@@ -1991,9 +1991,17 @@ resolve_expression (expressionS *expressionP)
 
       /* Equality and non-equality tests are permitted on anything.
 	 Subtraction, and other comparison operators are permitted if
-	 both operands are in the same section.  Otherwise, both
-	 operands must be absolute.  We already handled the case of
-	 addition or subtraction of a constant above.  */
+	 both operands are in the same section.
+	 Shifts by constant zero are permitted on anything.
+	 Multiplies, bit-ors, and bit-ands with constant zero are
+	 permitted on anything.
+	 Multiplies and divides by constant one are permitted on
+	 anything.
+	 Binary operations with both operands being the same register
+	 or undefined symbol are permitted if the result doesn't depend
+	 on the input value.
+	 Otherwise, both operands must be absolute.  We already handled
+	 the case of addition or subtraction of a constant above.  */
       if (!(seg_left == absolute_section
 	       && seg_right == absolute_section)
 	  && !(op == O_eq || op == O_ne)
@@ -2001,10 +2009,64 @@ resolve_expression (expressionS *expressionP)
 		|| op == O_lt || op == O_le || op == O_ge || op == O_gt)
 	       && seg_left == seg_right
 	       && (finalize_syms || frag_left == frag_right)
-	       && ((seg_left != undefined_section
-		    && seg_left != reg_section)
-		   || add_symbol == op_symbol)))
-	return 0;
+	       && (seg_left != reg_section || left == right)
+	       && (seg_left != undefined_section || add_symbol == op_symbol)))
+	{
+	  if ((seg_left == absolute_section && left == 0)
+	      || (seg_right == absolute_section && right == 0))
+	    {
+	      if (op == O_bit_exclusive_or || op == O_bit_inclusive_or)
+		{
+		  if (seg_right != absolute_section || right != 0)
+		    {
+		      seg_left = seg_right;
+		      left = right;
+		      add_symbol = op_symbol;
+		    }
+		  op = O_symbol;
+		  break;
+		}
+	      else if (op == O_left_shift || op == O_right_shift)
+		{
+		  if (seg_left != absolute_section || left != 0)
+		    {
+		      op = O_symbol;
+		      break;
+		    }
+		}
+	      else if (op != O_multiply
+		       && op != O_bit_or_not && op != O_bit_and)
+	        return 0;
+	    }
+	  else if (op == O_multiply
+		   && seg_left == absolute_section && left == 1)
+	    {
+	      seg_left = seg_right;
+	      left = right;
+	      add_symbol = op_symbol;
+	      op = O_symbol;
+	      break;
+	    }
+	  else if ((op == O_multiply || op == O_divide)
+		   && seg_right == absolute_section && right == 1)
+	    {
+	      op = O_symbol;
+	      break;
+	    }
+	  else if (left != right
+		   || ((seg_left != reg_section || seg_right != reg_section)
+		       && (seg_left != undefined_section
+			   || seg_right != undefined_section
+			   || add_symbol != op_symbol)))
+	    return 0;
+	  else if (op == O_bit_and || op == O_bit_inclusive_or)
+	    {
+	      op = O_symbol;
+	      break;
+	    }
+	  else if (op != O_bit_exclusive_or && op != O_bit_or_not)
+	    return 0;
+	}
 
       switch (op)
 	{
@@ -2032,8 +2094,7 @@ resolve_expression (expressionS *expressionP)
 	  left = (left == right
 		  && seg_left == seg_right
 		  && (finalize_syms || frag_left == frag_right)
-		  && ((seg_left != undefined_section
-		       && seg_left != reg_section)
+		  && (seg_left != undefined_section
 		      || add_symbol == op_symbol)
 		  ? ~ (valueT) 0 : 0);
 	  if (op == O_ne)
@@ -2066,6 +2127,9 @@ resolve_expression (expressionS *expressionP)
 	op = O_constant;
       else if (seg_left == reg_section && final_val == 0)
 	op = O_register;
+      else if (add_symbol != expressionP->X_add_symbol)
+	final_val += left;
+      expressionP->X_add_symbol = add_symbol;
     }
   expressionP->X_op = op;
 

@@ -1,3 +1,14 @@
+2005-12-22  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/all/cond.s: Also check .if works on equates to undefined
+	when the expression value can be known without knowing the
+	value of the symbol.
+	* gas/all/cond.l: Adjust.
+	* gas/i386/equ.s: Also check .if works on (equates to)
+	registers when the expression value can be known without
+	knowing the value of the register.
+	* gas/i386/equ.e: Adjust.
+
 2005-12-14  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/rex.[sd]: New.

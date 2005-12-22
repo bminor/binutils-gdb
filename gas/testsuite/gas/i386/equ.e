@@ -1,2 +1,2 @@
 .*: Assembler messages:
-.*:23: Warning: Treating .* as memory reference
+.*:30: Warning: Treating .* as memory reference

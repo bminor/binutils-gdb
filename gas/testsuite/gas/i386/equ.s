@@ -16,6 +16,13 @@ _start:
  .equ x, %st(1)
 	fadd	x
 
+ .if r <> %ecx
+ .err
+ .endif
+ .if r == s
+ .err
+ .endif
+
  .intel_syntax noprefix
  .equ r, -2
  .equ s, -2
@@ -32,6 +39,13 @@ _start:
 	fadd	x
  .equ x, st(7)
 	fadd	x
+
+ .if s <> gs
+ .err
+ .endif
+ .if s == x
+ .err
+ .endif
 
  .equ r, -3
  .equ s, -3

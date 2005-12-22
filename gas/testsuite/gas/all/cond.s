@@ -35,14 +35,40 @@
 	.err
 	.endif
 
-	.equiv	x, y
-	.ifndef x
+	.if	x <> x
 	.err
 	.endif
-	.equiv	y, 0
-	.if	x
+	.equiv	y, x
+	.ifndef	y
 	.err
-	.elseif	x
+	.endif
+	.if	x <> y
+	.err
+	.endif
+	.equiv	z, x
+	.if	y <> z
+	.err
+	.endif
+
+	.equiv	a, y + 1
+	.equiv	b, z - 1
+	.if	a == x
+	.err
+	.endif
+	.if	a - 1 <> x
+	.err
+	.endif
+	.if	a <> b + 2
+	.err
+	.endif
+	.if	a - b <> 2
+	.err
+	.endif
+
+	.equiv	x, 0
+	.if	y
+	.err
+	.elseif	y
 	.err
 	.endif
 

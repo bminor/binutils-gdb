@@ -1,3 +1,14 @@
+2005-12-22  Jan Beulich  <jbeulich@novell.com>
+
+	* symbols.h (snapshot_symbol): First parameter is now pointer
+	to pointer to symbolS.
+	* symbols.c (snapshot_symbol): Likewise. Store resulting symbol
+	there. Use symbol_equated_p.
+	* expr.c (resolve_expression): Change first argument to
+	snapshot_symbol. Track possibly changed add_symbol consistently
+	across function. Resolve more special cases with known result.
+	Also update final_val when replacing add_symbol.
+
 2005-12-13  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* config/tc-vax.c: Convert to ISO C90 format.  Fix formatting and
