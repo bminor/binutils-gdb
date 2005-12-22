@@ -370,7 +370,7 @@ amd64obsd_trapframe_cache(struct frame_info *next_frame, void **this_cache)
       trad_frame_set_reg_addr (cache, i, addr + amd64obsd_tf_reg_offset[i]);
 
   /* Read %cs from trap frame.  */
-  addr = sp + amd64obsd_tf_reg_offset[AMD64_CS_REGNUM];
+  addr += amd64obsd_tf_reg_offset[AMD64_CS_REGNUM];
   cs = read_memory_unsigned_integer (addr, 8); 
   if ((cs & I386_SEL_RPL) == I386_SEL_UPL)
     {

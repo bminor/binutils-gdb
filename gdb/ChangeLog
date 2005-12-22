@@ -1,5 +1,14 @@
 2005-12-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64obsd-tdep.c (amd64obsd_trapframe_cache): Fix detection of
+	interrupts from user space.
+	* i386obsd-tdep.c (i386obsd_trapframe_cache): Handle interrupt
+	frames too.
+	(i386obsd_trapframe_sniffer): Turn into a proper unwinder sniffer.
+	(i386obsd_trapframe_unwind): Add sniffer.
+	(i386obsd_init_abi): Prepend i386obsd_trapframe_unwind instead of
+	appending i386obsd_trapframe_sniffer.
+
 	* amd64obsd-tdep.c: Include "frame-unwind.h" and "trad-frame.h".
 	(amd64obsd_tf_reg_offset): New define.
 	(amd64obsd_trapframe_cache, amd64obsd_trapframe_this_id)
