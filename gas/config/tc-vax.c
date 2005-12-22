@@ -291,9 +291,12 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
     fixP->fx_done = 1;
 }
 
+/* Convert a number from VAX byte order (little endian)
+   into host byte order.
+   con		is the buffer to convert,
+   nbytes	is the length of the given buffer.  */
 long
-md_chars_to_number (unsigned char con[],	/* Low order byte 1st.  */
-		    int nbytes)		/* Number of bytes in the input.  */
+md_chars_to_number (unsigned char con[], int nbytes)
 {
   long retval;
 
@@ -803,13 +806,11 @@ static const short int vax_operand_width_size[256] =
    cases, we do the same idea. JACBxxx are all marked with a 'b!'
    JAOBxxx & JSOBxxx are marked with a 'b:'.  */
 #if (VIT_OPCODE_SYNTHETIC != 0x80000000)
-You have just broken the encoding below, which assumes the sign bit
-  means 'I am an imaginary instruction'.
+#error "You have just broken the encoding below, which assumes the sign bit means 'I am an imaginary instruction'."
 #endif
 
 #if (VIT_OPCODE_SPECIAL != 0x40000000)
-  You have just broken the encoding below, which assumes the 0x40 M bit means
-  'I am not to be "optimised" the way normal branches are'.
+#error "You have just broken the encoding below, which assumes the 0x40 M bit means 'I am not to be "optimised" the way normal branches are'."
 #endif
 
 static const struct vot
@@ -998,18 +999,18 @@ vip_begin (int synthetic_too,		/* 1 means include jXXX op-codes.  */
   	R14	SP
   	R15	PC  */
 
-#define AP (12)
-#define FP (13)
-#define SP (14)
-#define PC (15)
+#define AP 12
+#define FP 13
+#define SP 14
+#define PC 15
 
-static int				/* Return -1 or 0:15.  */
-vax_reg_parse (char c1, char c2,	/* 3 chars of register name.  */
-	       char c3, char c4)	/* c3 == 0 if 2-character reg name.  */
+/* Returns the register number of something like '%r15' or 'ap', supplied
+   in four single chars. Returns -1 if the register isn't recognized,
+   0..15 otherwise.  */
+static int
+vax_reg_parse (char c1, char c2, char c3, char c4)
 {
-  int retval;
-
-  retval = -1;
+  int retval = -1;
 
 #ifdef OBJ_ELF
   if (c1 != '%')	/* Register prefixes are mandatory for ELF.  */
@@ -1229,12 +1230,12 @@ vax_reg_parse (char c1, char c2,	/* 3 chars of register name.  */
   {@}#foo, no S^		8+@	PC	" i"	optional
   {@}{q^}{(Rn)}		10+@+q	option	" bwl"	optional  */
 
+/* Dissect user-input 'optext' (which is something like "@B^foo@bar(AP)[FP]:")
+   using the vop in vopP. vopP's vop_access and vop_width. We fill _ndx, _reg,
+   _mode, _short, _warn, _error, _expr_begin, _expr_end and _nbytes.  */
+
 static void
-vip_op (char *optext, /* user's input string e.g.: "@B^foo@bar(AP)[FP]:" */
-	struct vop *vopP) /* Input fields: vop_access, vop_width.
-			     Output fields: _ndx, _reg, _mode, _short, _warn,
-			     _error _expr_begin, _expr_end, _nbytes.
-			     vop_nbytes : number of bytes in a datum.  */
+vip_op (char *optext, struct vop *vopP)
 {
   /* Track operand text forward.  */
   char *p;
@@ -2142,9 +2143,8 @@ main (void)
     }
 }
 
-mumble (text, value)
-     char *text;
-     int value;
+void
+mumble (char *text, int value)
 {
   printf ("%s:", text);
   if (value >= 0)
@@ -2204,9 +2204,9 @@ struct option md_longopts[] =
 {
 #ifdef OBJ_ELF
 #define OPTION_PIC (OPTION_MD_BASE)
-  {"pic", no_argument, NULL, OPTION_PIC},
+  { "pic", no_argument, NULL, OPTION_PIC },
 #endif
-  {NULL, no_argument, NULL, 0}
+  { NULL, no_argument, NULL, 0 }
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
@@ -2408,6 +2408,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   return reloc;
 }
 
+/* vax:md_assemble() emit frags for 1 instruction given in textual form.  */
 void
 md_assemble (char *instruction_string)
 {
