@@ -1,7 +1,7 @@
 /* GNU/Linux on ARM target support.
 
-   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005 Free Software
-   Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,9 +31,13 @@
 #include "doublest.h"
 #include "solib-svr4.h"
 #include "osabi.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
 
 #include "arm-tdep.h"
 #include "glibc-tdep.h"
+
+#include "gdb_string.h"
 
 /* Under ARM GNU/Linux the traditional way of performing a breakpoint
    is to execute a particular software interrupt, rather than use a
@@ -262,76 +266,97 @@ arm_linux_svr4_fetch_link_map_offsets (void)
 #define ARM_LINUX_SIGRETURN_INSTR	0xef900077
 #define ARM_LINUX_RT_SIGRETURN_INSTR	0xef9000ad
 
-/* arm_linux_in_sigtramp determines if PC points at one of the
-   instructions which cause control to return to the Linux kernel upon
-   return from a signal handler.  FUNC_NAME is unused.  */
+/* For ARM EABI, recognize the pattern that glibc uses...  alternatively,
+   we could arrange to do this by function name, but they are not always
+   exported.  */
+#define ARM_SET_R7_SIGRETURN		0xe3a07077
+#define ARM_SET_R7_RT_SIGRETURN		0xe3a070ad
+#define ARM_EABI_SYSCALL		0xef000000
 
-int
-arm_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
+static void
+arm_linux_sigtramp_cache (struct frame_info *next_frame,
+			  struct trad_frame_cache *this_cache,
+			  CORE_ADDR func, int regs_offset)
 {
-  unsigned long inst;
+  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  CORE_ADDR base = sp + regs_offset;
+  int i;
 
-  inst = read_memory_integer (pc, 4);
+  for (i = 0; i < 16; i++)
+    trad_frame_set_reg_addr (this_cache, i, base + i * 4);
 
-  return (inst == ARM_LINUX_SIGRETURN_INSTR
-	  || inst == ARM_LINUX_RT_SIGRETURN_INSTR);
+  trad_frame_set_reg_addr (this_cache, ARM_PS_REGNUM, base + 16 * 4);
 
+  /* The VFP or iWMMXt registers may be saved on the stack, but there's
+     no reliable way to restore them (yet).  */
+
+  /* Save a frame ID.  */
+  trad_frame_set_id (this_cache, frame_id_build (sp, func));
 }
 
-/* arm_linux_sigcontext_register_address returns the address in the
-   sigcontext of register REGNO given a stack pointer value SP and
-   program counter value PC.  The value 0 is returned if PC is not
-   pointing at one of the signal return instructions or if REGNO is
-   not saved in the sigcontext struct.  */
-
-CORE_ADDR
-arm_linux_sigcontext_register_address (CORE_ADDR sp, CORE_ADDR pc, int regno)
+static void
+arm_linux_sigreturn_init (const struct tramp_frame *self,
+			  struct frame_info *next_frame,
+			  struct trad_frame_cache *this_cache,
+			  CORE_ADDR func)
 {
-  unsigned long inst;
-  CORE_ADDR reg_addr = 0;
-
-  inst = read_memory_integer (pc, 4);
-
-  if (inst == ARM_LINUX_SIGRETURN_INSTR
-      || inst == ARM_LINUX_RT_SIGRETURN_INSTR)
-    {
-      CORE_ADDR sigcontext_addr;
-
-      /* The sigcontext structure is at different places for the two
-         signal return instructions.  For ARM_LINUX_SIGRETURN_INSTR,
-	 it starts at the SP value.  For ARM_LINUX_RT_SIGRETURN_INSTR,
-	 it is at SP+8.  For the latter instruction, it may also be
-	 the case that the address of this structure may be determined
-	 by reading the 4 bytes at SP, but I'm not convinced this is
-	 reliable.
-
-	 In any event, these magic constants (0 and 8) may be
-	 determined by examining struct sigframe and struct
-	 rt_sigframe in arch/arm/kernel/signal.c in the Linux kernel
-	 sources.  */
-
-      if (inst == ARM_LINUX_RT_SIGRETURN_INSTR)
-	sigcontext_addr = sp + 8;
-      else /* inst == ARM_LINUX_SIGRETURN_INSTR */
-        sigcontext_addr = sp + 0;
-
-      /* The layout of the sigcontext structure for ARM GNU/Linux is
-         in include/asm-arm/sigcontext.h in the Linux kernel sources.
-
-	 There are three 4-byte fields which precede the saved r0
-	 field.  (This accounts for the 12 in the code below.)  The
-	 sixteen registers (4 bytes per field) follow in order.  The
-	 PSR value follows the sixteen registers which accounts for
-	 the constant 19 below. */
-
-      if (0 <= regno && regno <= ARM_PC_REGNUM)
-	reg_addr = sigcontext_addr + 12 + (4 * regno);
-      else if (regno == ARM_PS_REGNUM)
-	reg_addr = sigcontext_addr + 19 * 4;
-    }
-
-  return reg_addr;
+  arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			    0x0c /* Offset to registers.  */);
 }
+
+static void
+arm_linux_rt_sigreturn_init (const struct tramp_frame *self,
+			  struct frame_info *next_frame,
+			  struct trad_frame_cache *this_cache,
+			  CORE_ADDR func)
+{
+  arm_linux_sigtramp_cache (next_frame, this_cache, func,
+			    0x88 /* Offset to ucontext_t.  */
+			    + 0x14 /* Offset to sigcontext.  */
+			    + 0x0c /* Offset to registers.  */);
+}
+
+static struct tramp_frame arm_linux_sigreturn_tramp_frame = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { ARM_LINUX_SIGRETURN_INSTR, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_sigreturn_init
+};
+
+static struct tramp_frame arm_linux_rt_sigreturn_tramp_frame = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { ARM_LINUX_RT_SIGRETURN_INSTR, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_rt_sigreturn_init
+};
+
+static struct tramp_frame arm_eabi_linux_sigreturn_tramp_frame = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { ARM_SET_R7_SIGRETURN, -1 },
+    { ARM_EABI_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_sigreturn_init
+};
+
+static struct tramp_frame arm_eabi_linux_rt_sigreturn_tramp_frame = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { ARM_SET_R7_RT_SIGRETURN, -1 },
+    { ARM_EABI_SYSCALL, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_rt_sigreturn_init
+};
 
 static void
 arm_linux_init_abi (struct gdbarch_info info,
@@ -378,6 +403,15 @@ arm_linux_init_abi (struct gdbarch_info info,
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  tramp_frame_prepend_unwinder (gdbarch,
+				&arm_linux_sigreturn_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&arm_linux_rt_sigreturn_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&arm_eabi_linux_sigreturn_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&arm_eabi_linux_rt_sigreturn_tramp_frame);
 }
 
 void

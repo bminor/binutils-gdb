@@ -1,5 +1,26 @@
 2005-12-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* arm-linux-tdep.c (ARM_SET_R7_SIGRETURN, ARM_SET_R7_RT_SIGRETURN)
+	(ARM_EABI_SYSCALL, arm_linux_sigtramp_cache, arm_linux_sigreturn_init)
+	(arm_linux_rt_sigreturn_init, arm_linux_sigreturn_tramp_frame)
+	(arm_linux_rt_sigreturn_tramp_frame)
+	(arm_eabi_linux_sigreturn_tramp_frame)
+	(arm_eabi_linux_rt_sigreturn_tramp_frame): New.
+	(arm_linux_init_abi): Register the new signal unwinders.
+	(arm_linux_in_sigtramp, arm_linux_sigcontext_register_address):
+	Delete.
+	* arm-tdep.c (SIGCONTEXT_REGISTER_ADDRESS_P)
+	(SIGCONTEXT_REGISTER_ADDRESS, arm_make_sigtramp_cache)
+	(arm_sigtramp_this_id, arm_sigtramp_prev_register)
+	(arm_sigtramp_unwind, arm_sigtramp_unwind_sniffer): Delete.
+	(arm_gdbarch_init): Don't register a signal unwinder.
+	* config/arm/tm-linux.h (arm_linux_in_sigtramp)
+	(arm_linux_sigcontext_register_address): Delete prototypes.
+	(DEPRECATED_IN_SIGTRAMP, SIGCONTEXT_REGISTER_ADDRESS): Delete.
+	* Makefile.in (arm-linux-tdep.o): Update.
+
+2005-12-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* amd64obsd-tdep.c (amd64obsd_trapframe_sniffer): Spelling fix.
 	* i386obsd-tdep.c (i386obsd_trapframe_sniffer): Likewise.
 

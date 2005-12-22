@@ -51,36 +51,6 @@
 
 static int arm_debug;
 
-/* Each OS has a different mechanism for accessing the various
-   registers stored in the sigcontext structure.
-
-   SIGCONTEXT_REGISTER_ADDRESS should be defined to the name (or
-   function pointer) which may be used to determine the addresses
-   of the various saved registers in the sigcontext structure.
-
-   For the ARM target, there are three parameters to this function. 
-   The first is the pc value of the frame under consideration, the
-   second the stack pointer of this frame, and the last is the
-   register number to fetch.  
-
-   If the tm.h file does not define this macro, then it's assumed that
-   no mechanism is needed and we define SIGCONTEXT_REGISTER_ADDRESS to
-   be 0. 
-   
-   When it comes time to multi-arching this code, see the identically
-   named machinery in ia64-tdep.c for an example of how it could be
-   done.  It should not be necessary to modify the code below where
-   this macro is used.  */
-
-#ifdef SIGCONTEXT_REGISTER_ADDRESS
-#ifndef SIGCONTEXT_REGISTER_ADDRESS_P
-#define SIGCONTEXT_REGISTER_ADDRESS_P() 1
-#endif
-#else
-#define SIGCONTEXT_REGISTER_ADDRESS(SP,PC,REG) 0
-#define SIGCONTEXT_REGISTER_ADDRESS_P() 0
-#endif
-
 /* Macros for setting and testing a bit in a minimal symbol that marks
    it as Thumb function.  The MSB of the minimal symbol's "info" field
    is used for this purpose.
@@ -1062,84 +1032,6 @@ struct frame_base arm_normal_base = {
   arm_normal_frame_base,
   arm_normal_frame_base
 };
-
-static struct arm_prologue_cache *
-arm_make_sigtramp_cache (struct frame_info *next_frame)
-{
-  struct arm_prologue_cache *cache;
-  int reg;
-
-  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache));
-
-  cache->prev_sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
-
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
-
-  for (reg = 0; reg < NUM_REGS; reg++)
-    cache->saved_regs[reg].addr
-      = SIGCONTEXT_REGISTER_ADDRESS (cache->prev_sp,
-				     frame_pc_unwind (next_frame), reg);
-
-  /* FIXME: What about thumb mode?  */
-  cache->framereg = ARM_SP_REGNUM;
-  cache->prev_sp
-    = read_memory_integer (cache->saved_regs[cache->framereg].addr,
-			   register_size (current_gdbarch, cache->framereg));
-
-  return cache;
-}
-
-static void
-arm_sigtramp_this_id (struct frame_info *next_frame,
-		      void **this_cache,
-		      struct frame_id *this_id)
-{
-  struct arm_prologue_cache *cache;
-
-  if (*this_cache == NULL)
-    *this_cache = arm_make_sigtramp_cache (next_frame);
-  cache = *this_cache;
-
-  /* FIXME drow/2003-07-07: This isn't right if we single-step within
-     the sigtramp frame; the PC should be the beginning of the trampoline.  */
-  *this_id = frame_id_build (cache->prev_sp, frame_pc_unwind (next_frame));
-}
-
-static void
-arm_sigtramp_prev_register (struct frame_info *next_frame,
-			    void **this_cache,
-			    int prev_regnum,
-			    int *optimized,
-			    enum lval_type *lvalp,
-			    CORE_ADDR *addrp,
-			    int *realnump,
-			    gdb_byte *valuep)
-{
-  struct arm_prologue_cache *cache;
-
-  if (*this_cache == NULL)
-    *this_cache = arm_make_sigtramp_cache (next_frame);
-  cache = *this_cache;
-
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, prev_regnum,
-				optimized, lvalp, addrp, realnump, valuep);
-}
-
-struct frame_unwind arm_sigtramp_unwind = {
-  SIGTRAMP_FRAME,
-  arm_sigtramp_this_id,
-  arm_sigtramp_prev_register
-};
-
-static const struct frame_unwind *
-arm_sigtramp_unwind_sniffer (struct frame_info *next_frame)
-{
-  if (SIGCONTEXT_REGISTER_ADDRESS_P ()
-      && legacy_pc_in_sigtramp (frame_pc_unwind (next_frame), (char *) 0))
-    return &arm_sigtramp_unwind;
-
-  return NULL;
-}
 
 /* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
    dummy frame.  The frame ID's base needs to match the TOS value
@@ -2907,7 +2799,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Add some default predicates.  */
   frame_unwind_append_sniffer (gdbarch, arm_stub_unwind_sniffer);
-  frame_unwind_append_sniffer (gdbarch, arm_sigtramp_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, arm_prologue_unwind_sniffer);
 
