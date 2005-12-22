@@ -416,7 +416,7 @@ i386obsd_trapframe_sniffer (const struct frame_unwind *self,
   ULONGEST cs;
   char *name;
 
-  /* Check Current Privilige Level and bail out if we're not executing
+  /* Check Current Privilege Level and bail out if we're not executing
      in kernel space.  */
   cs = frame_unwind_register_unsigned (next_frame, I386_CS_REGNUM);
   if ((cs & I386_SEL_RPL) == I386_SEL_UPL)
