@@ -1,3 +1,19 @@
+2005-12-22  Laurent Menten  <laurent.menten@teledisnet.be>
+
+	* pj-opc.c (jsr, ret, getstatic, putstatic, getfield, putfield,
+	invokevirtual, invokespecial, invokestatic, invokeinterface,
+	goto_w, jsr_w, ldc_quick, ldc_w_quick, ldc2_w_quick,
+	getfield_quick, putfield_quick, getfield2_quick, putfield2_quick,
+	getstatic_quick, putstatic_quick, getstatic2_quick,
+	putstatic2_quick, invokevirtual_quick, invokenonvirtual_quick,
+	invokesuper_quick, invokestatic_quick, invokeinterface_quick,
+	aastore_quick, new_quick, anewarray_quick, multianewarray_quick,
+	checkcast_quick, instanceof_quick, invokevirtiual_quick_w,
+	getfield_quick_w, putfield_quick_w, nonnull_quick,
+	agetfield_quick,  aputfield_quick, agetstatic_quick,
+	aputstatic_quick, aldc_quick, aldc_w_quick, exit_sync_method): Fix
+	opcodes.
+
 2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Second part of ms1 to mt renaming.
