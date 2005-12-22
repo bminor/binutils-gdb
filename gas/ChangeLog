@@ -1,3 +1,8 @@
+2005-12-13  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* config/tc-vax.c: Convert to ISO C90 format.  Fix formatting and
+	white space usage as well.
+
 2005-12-20  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (xtensa_mark_narrow_branches): Set
