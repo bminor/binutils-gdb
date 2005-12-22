@@ -1,3 +1,14 @@
+2005-12-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64obsd-tdep.c: Include "frame-unwind.h" and "trad-frame.h".
+	(amd64obsd_tf_reg_offset): New define.
+	(amd64obsd_trapframe_cache, amd64obsd_trapframe_this_id)
+	(amd64obsd_trapframe_prev_register, amd64obsd_trapframe_sniffer):
+	New functions.
+	(amd64obsd_trapframe_unwind): New variable.
+	(amd64obsd_init_abi): Prepend amd64obsd_trapframe_unwind.
+	* Makefile.in (amd64obsd-tdep.o): Update dependencies.
+
 2005-12-20  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Doc fix.
