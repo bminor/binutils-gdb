@@ -334,6 +334,7 @@ cat <<EOF
   } =${NOP-0}
 
   ${TEXT_PLT+${PLT}}
+  ${TINY_READONLY_SECTION}
   .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
@@ -495,6 +496,9 @@ cat <<EOF
   .debug_funcnames 0 : { *(.debug_funcnames) }
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
+
+  ${TINY_DATA_SECTION}
+  ${TINY_BSS_SECTION}
 
   ${STACK_ADDR+${STACK}}
   ${OTHER_SECTIONS}

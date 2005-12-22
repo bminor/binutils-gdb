@@ -1,3 +1,12 @@
+2005-12-22  Santosh Raktawan <santoshr2@kpitcummins.com>
+
+	* ld/emulparms/h8300helf.sh (TINY_READONLY_SECTION,
+	TINY_DATA_SECTION, TINY_BSS_SECTION): Define.
+	* ld/emulparms/h8300self.sh: Likewise.
+	* ld/emulparms/h8300sxelf.sh: Likewise.
+	* ld/scripttempl/elf.sc: Add TINY_READONLY_SECTION,
+	TINY_DATA_SECTION, TINY_BSS_SECTION.
+ 
 2005-12-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2065
