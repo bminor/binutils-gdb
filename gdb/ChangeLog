@@ -1,7 +1,13 @@
 2005-12-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64obsd-tdep.c (amd64obsd_trapframe_cache): Fix typos.
+	(amd64obsd_trapframe_sniffer): Add comment.
+	* i386obsd-tdep.c (i386obsd_trapframe_cache): Fix typos.
+	(i386obsd_trapframe_sniffer): Add comment.
+
 	* amd64obsd-tdep.c (amd64obsd_trapframe_cache): Fix detection of
 	interrupts from user space.
+
 	* i386obsd-tdep.c (i386obsd_trapframe_cache): Handle interrupt
 	frames too.
 	(i386obsd_trapframe_sniffer): Turn into a proper unwinder sniffer.

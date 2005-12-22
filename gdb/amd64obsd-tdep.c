@@ -360,7 +360,7 @@ amd64obsd_trapframe_cache(struct frame_info *next_frame, void **this_cache)
   sp = frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
 
   find_pc_partial_function (func, &name, NULL, NULL);
-  if (name && strncmp(name, "Xintr", 5) == 0)
+  if (name && strncmp (name, "Xintr", 5) == 0)
     addr = sp + 8;		/* It's an interrupt frame.  */
   else
     addr = sp;
@@ -374,7 +374,7 @@ amd64obsd_trapframe_cache(struct frame_info *next_frame, void **this_cache)
   cs = read_memory_unsigned_integer (addr, 8); 
   if ((cs & I386_SEL_RPL) == I386_SEL_UPL)
     {
-      /* Trap from use space; terminate backtrace.  */
+      /* Trap from user space; terminate backtrace.  */
       trad_frame_set_id (cache, null_frame_id);
     }
   else
@@ -418,6 +418,8 @@ amd64obsd_trapframe_sniffer (const struct frame_unwind *self,
   ULONGEST cs;
   char *name;
 
+  /* Check Current Privilige Level and bail out if we're not executing
+     in kernel space.  */
   cs = frame_unwind_register_unsigned (next_frame, AMD64_CS_REGNUM);
   if ((cs & I386_SEL_RPL) == I386_SEL_UPL)
     return 0;
