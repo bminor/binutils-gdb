@@ -1,5 +1,6 @@
 2005-12-23  Eli Zaretskii  <eliz@gnu.org>
 
+	* signals/signals.c: 
 	* nlm/Makefile.in: 
 	* mi/mi-symbol-cmds.c: 
 	* mi/mi-parse.h: 
