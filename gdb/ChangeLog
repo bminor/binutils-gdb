@@ -1,5 +1,38 @@
 2005-12-23  Eli Zaretskii  <eliz@gnu.org>
 
+	* tui/tui-file.c: 
+	* tui/tui-disasm.c: 
+	* tui/tui-data.h: 
+	* tui/tui-data.c: 
+	* tui/tui-command.h: 
+	* tui/tui-command.c: 
+	* tui/tui-win.h: 
+	* tui/tui-win.h: 
+	* tui/tui-win.c: 
+	* tui/tui-stack.h: 
+	* tui/tui-stack.c: 
+	* tui/tui-source.h: 
+	* tui/tui-source.c: 
+	* tui/tui-regs.h: 
+	* tui/tui-regs.c: 
+	* tui/tui-out.c: 
+	* tui/tui-main.c: 
+	* tui/tui-layout.h: 
+	* tui/tui-layout.c: 
+	* tui/tui-io.h: 
+	* tui/tui-io.c: 
+	* tui/tui-interp.c: 
+	* tui/tui-hooks.h: 
+	* tui/tui-hooks.c: 
+	* tui/tui-file.h: 
+	* tui/tui.h: 
+	* tui/tui.c: 
+	* tui/tui-winsource.h: 
+	* tui/tui-winsource.c: 
+	* tui/tui-wingeneral.h: 
+	* tui/tui-wingeneral.c: 
+	* tui/tui-windata.h: 
+	* tui/tui-windata.c: 
 	* signals/signals.c: 
 	* nlm/Makefile.in: 
 	* mi/mi-symbol-cmds.c: 
