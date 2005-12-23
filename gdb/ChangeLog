@@ -1,3 +1,30 @@
+2005-12-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* nlm/Makefile.in: 
+	* mi/mi-symbol-cmds.c: 
+	* mi/mi-parse.h: 
+	* mi/mi-parse.c: 
+	* mi/mi-out.h: 
+	* mi/mi-out.c: 
+	* mi/mi-main.h: 
+	* mi/mi-main.c: 
+	* mi/mi-interp.c: 
+	* mi/mi-getopt.h: 
+	* mi/mi-getopt.c: 
+	* mi/mi-console.h: 
+	* mi/mi-console.c: 
+	* mi/mi-common.h: 
+	* mi/mi-common.c: 
+	* mi/mi-cmds.h: 
+	* mi/mi-cmds.c: 
+	* mi/mi-cmd-var.c: 
+	* mi/mi-cmd-stack.c: 
+	* mi/mi-cmd-file.c: 
+	* mi/mi-cmd-env.c: 
+	* mi/mi-cmd-disas.c: 
+	* mi/mi-cmd-break.c: Add (C) after Copyright.  Update the FSF
+	address.
+
 2005-12-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-linux-tdep.c (ARM_SET_R7_SIGRETURN, ARM_SET_R7_RT_SIGRETURN)
