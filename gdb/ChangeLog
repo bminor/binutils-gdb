@@ -1,3 +1,8 @@
+2005-12-23  Michael Snyder  <msnyder@redhat.com>
+
+	* inf-ptrace.c: Spelling correction, comment.
+	* inf-ttrace.c: Ditto.
+
 2005-12-23  Eli Zaretskii  <eliz@gnu.org>
 
 	* tui/tui-file.c: 

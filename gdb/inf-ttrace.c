@@ -952,7 +952,7 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       if (inf_ttrace_num_lwps == 0)
 	{
 	  /* Now that we're going to be multi-threaded, add the
-	     origional thread to the list first.  */
+	     original thread to the list first.  */
 	  add_thread (ptid_build (tts.tts_pid, tts.tts_lwpid, 0));
 	  inf_ttrace_num_lwps++;
 	}

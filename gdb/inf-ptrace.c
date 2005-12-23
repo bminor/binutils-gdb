@@ -173,7 +173,7 @@ inf_ptrace_mourn_inferior (void)
   /* Wait just one more time to collect the inferior's exit status.
      Do not check whether this succeeds though, since we may be
      dealing with a process that we attached to.  Such a process will
-     only report its exit status to its origional parent.  */
+     only report its exit status to its original parent.  */
   waitpid (ptid_get_pid (inferior_ptid), &status, 0);
 
   unpush_target (ptrace_ops_hack);
