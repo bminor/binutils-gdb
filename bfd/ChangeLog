@@ -1,3 +1,30 @@
+2005-12-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* corefile.c (generic_core_file_matches_executable_p): New function.
+	* libbfd-in.h (generic_core_file_matches_executable_p): Add
+	declaration.
+	* libbfd.h: Regenerate.
+	* hpux-core.c: ANSIfy function declarations and prototypes.
+	(thread_section_p): Manually expand bfd_section_name macro
+	to make it clear that parameter ABFD is not used.
+	(hpux_core_core_file_matches_executable_p): Delete, replaced
+	by macro pointing to generic_core_file_matches_executable_p.
+	
+	* aix386-core.c: Replace core_file_matches_executable_p null
+	implementation by generic_core_file_matches_executable_p by
+	using a macro.
+	* aix5ppc-core.c: Likewise.
+	* cisco-core.c: Likewise.
+	* hppabsd-core.c: Likewise.
+	* irix-core.c: Likewise.
+	* lynx-core.c: Likewise.
+	* mach-o.c: Likewise.
+	* netbsd-core.c: Likewise.
+	* osf-core.c: Likewise.
+	* ptrace-core.c: Likewise.
+	* sco5-core.c: Likewise.
+	* trad-core.c: Likewise.
+
 2005-12-19  David Heine  <dlheine@tensilica.com>
 
 	* elf32-xtensa.c (action_list_count, xlate_map_entry, xlate_map,

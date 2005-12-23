@@ -252,6 +252,12 @@ extern int _bfd_nocore_core_file_failing_signal
 extern bfd_boolean _bfd_nocore_core_file_matches_executable_p
   (bfd *, bfd *);
 
+/* A generic implementation of CORE_FILE_MATCHES_EXECUTABLE_P that
+   is independent of the target.  */
+
+extern bfd_boolean generic_core_file_matches_executable_p
+  (bfd *core_bfd, bfd *exec_bfd);
+
 /* Routines to use for BFD_JUMP_TABLE_ARCHIVE when there is no archive
    file support.  Use BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive).  */
 

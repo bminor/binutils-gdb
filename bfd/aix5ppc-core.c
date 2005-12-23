@@ -319,7 +319,7 @@ xcoff64_core_file_failing_signal (bfd *abfd)
 #else /* AIX_5_CORE */
 
 const bfd_target *xcoff64_core_p  (bfd *);
-bfd_boolean xcoff64_core_file_matches_executable_p (bfd *, bfd *);
+#define xcoff64_core_file_matches_executable_p generic_core_file_matches_executable_p
 char *xcoff64_core_file_failing_command (bfd *);
 int xcoff64_core_file_failing_signal (bfd *);
 
@@ -328,13 +328,6 @@ xcoff64_core_p (bfd *abfd ATTRIBUTE_UNUSED)
 {
   bfd_set_error (bfd_error_wrong_format);
   return 0;
-}
-
-bfd_boolean
-xcoff64_core_file_matches_executable_p (bfd *core_bfd ATTRIBUTE_UNUSED,
-					bfd *exec_bfd ATTRIBUTE_UNUSED)
-{
-  return FALSE;
 }
 
 char *
