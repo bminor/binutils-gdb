@@ -1,3 +1,17 @@
+2005-12-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* stabs.texinfo: 
+	* refcard.tex: 
+	* gpl.texi:
+	* gdbint.texinfo: 
+	* gdb.texinfo: 
+	* gdb-cfg.texi: 
+	* fdl.texi:
+	* annotate.texinfo: 
+	* all-cfg.texi: 
+	* Makefile.in: Add (C) after Copyright.  Update the FSF
+	address.
+
 2005-12-03  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Connecting): Explain that `monitor' is a way to
