@@ -1,4 +1,4 @@
-2005-12-22  Randolph Chung  <randolph@tausq.org>
+2005-12-22  Randolph Chung  <tausq@debian.org>
 
 	* rddbg.c (read_section_stabs_debugging_info): Add $GDB_SYMBOLS$
 	entry to names[] array for SOM binaries.
