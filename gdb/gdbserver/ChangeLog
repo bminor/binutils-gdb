@@ -1,3 +1,42 @@
+2005-12-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* linux-arm-low.c: 
+	* linux-arm-low.c: 
+	* inferiors.c: 
+	* i387-fp.h: 
+	* i387-fp.c: 
+	* gdbreplay.c: 
+	* regcache.c: 
+	* proc-service.c: 
+	* mem-break.h: 
+	* mem-break.c: 
+	* linux-x86-64-low.c: 
+	* linux-sh-low.c: 
+	* linux-s390-low.c: 
+	* linux-ppc64-low.c: 
+	* linux-ppc-low.c: 
+	* linux-mips-low.c: 
+	* linux-m68k-low.c: 
+	* linux-m32r-low.c: 
+	* linux-low.h: 
+	* linux-low.c: 
+	* linux-ia64-low.c: 
+	* linux-i386-low.c: 
+	* linux-crisv32-low.c: 
+	* thread-db.c: 
+	* terminal.h: 
+	* target.h: 
+	* target.c: 
+	* server.h: 
+	* server.c: 
+	* remote-utils.c: 
+	* regcache.h: 
+	* utils.c: 
+	* Makefile.in: 
+	* configure.ac: 
+	* gdbserver.1: Add (C) after Copyright.  Update the FSF
+	address.
+
 2005-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-arm-low.c (arm_eabi_breakpoint): New variable.
