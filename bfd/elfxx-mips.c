@@ -10012,3 +10012,11 @@ _bfd_mips_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
       && ELF_MIPS_IS_OPTIONAL (isym->st_other))
     h->other |= STO_OPTIONAL;
 }
+
+/* Decide whether an undefined symbol is special and can be ignored.
+   This is the case for OPTIONAL symbols on IRIX.  */
+bfd_boolean
+_bfd_mips_elf_ignore_undef_symbol (struct elf_link_hash_entry *h)
+{
+  return ELF_MIPS_IS_OPTIONAL (h->other) ? TRUE : FALSE;
+}

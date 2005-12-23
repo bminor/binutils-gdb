@@ -420,6 +420,9 @@
 #ifndef elf_backend_merge_symbol_attribute
 #define elf_backend_merge_symbol_attribute	NULL
 #endif
+#ifndef elf_backend_ignore_undef_symbol
+#define elf_backend_ignore_undef_symbol		NULL
+#endif
 #ifndef elf_backend_emit_relocs
 #define elf_backend_emit_relocs			_bfd_elf_link_output_relocs
 #endif
@@ -592,6 +595,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_copy_indirect_symbol,
   elf_backend_hide_symbol,
   elf_backend_merge_symbol_attribute,
+  elf_backend_ignore_undef_symbol,
   elf_backend_emit_relocs,
   elf_backend_count_relocs,
   elf_backend_grok_prstatus,

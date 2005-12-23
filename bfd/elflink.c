@@ -6346,22 +6346,32 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
 
   bed = get_elf_backend_data (finfo->output_bfd);
 
-  /* If we have an undefined symbol reference here then it must have
-     come from a shared library that is being linked in.  (Undefined
-     references in regular files have already been handled).  If we
-     are reporting errors for this situation then do so now.  */
-  if (h->root.type == bfd_link_hash_undefined
-      && h->ref_dynamic
-      && !h->ref_regular
-      && ! elf_link_check_versioned_symbol (finfo->info, bed, h)
-      && finfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
+  if (h->root.type == bfd_link_hash_undefined)
     {
-      if (! ((*finfo->info->callbacks->undefined_symbol)
-	     (finfo->info, h->root.root.string, h->root.u.undef.abfd,
-	      NULL, 0, finfo->info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)))
+      /* If we have an undefined symbol reference here then it must have
+	 come from a shared library that is being linked in.  (Undefined
+	 references in regular files have already been handled).  */
+      bfd_boolean ignore_undef = FALSE;
+
+      /* Some symbols may be special in that the fact that they're
+	 undefined can be safely ignored - let backend determine that.  */
+      if (bed->elf_backend_ignore_undef_symbol)
+	ignore_undef = bed->elf_backend_ignore_undef_symbol (h);
+
+      /* If we are reporting errors for this situation then do so now.  */
+      if (ignore_undef == FALSE
+	  && h->ref_dynamic
+	  && ! h->ref_regular
+	  && ! elf_link_check_versioned_symbol (finfo->info, bed, h)
+	  && finfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
 	{
-	  eoinfo->failed = TRUE;
-	  return FALSE;
+	  if (! (finfo->info->callbacks->undefined_symbol
+		 (finfo->info, h->root.root.string, h->root.u.undef.abfd,
+		  NULL, 0, finfo->info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)))
+	    {
+	      eoinfo->failed = TRUE;
+	      return FALSE;
+	    }
 	}
     }
 

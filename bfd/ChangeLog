@@ -1,3 +1,18 @@
+2005-12-23  Michael Weiser  <michael@weiser.dinsnail.net>
+
+	PR 1150
+	* elf-bfd.h (struct elf_backend_data): New field
+	'elf_backend_ignore_undef_symbol'.
+	* elfxx-target.h (elf_backend_ignore_undef_symbol): Define to NULL
+	if not already defined.
+	(elfNN_bed): Initialise the elf_backend_ignore_undef_symbol field.
+	* elfxx-mips.c (_bfd_mips_elf_ignore_undef_symbol): New function.
+	* elfxx-mips.h (elf_backend_ignore_undef_symbol): Define and
+	prototype.
+	* elflink.c (elf_link_output_extsym): Check
+	elf_backend_ignore_undef_symbol before reporting an undefined
+	symbol in a shared library.
+
 2005-12-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* corefile.c (generic_core_file_matches_executable_p): New function.

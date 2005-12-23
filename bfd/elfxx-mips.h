@@ -129,6 +129,8 @@ extern bfd_vma _bfd_mips_elf_sign_extend
   (bfd_vma, int);
 extern void _bfd_mips_elf_merge_symbol_attribute
   (struct elf_link_hash_entry *, const Elf_Internal_Sym *, bfd_boolean, bfd_boolean);
+extern bfd_boolean _bfd_mips_elf_ignore_undef_symbol
+  (struct elf_link_hash_entry *);
 
 extern const struct bfd_elf_special_section _bfd_mips_elf_special_sections [];
 
@@ -137,3 +139,4 @@ extern const struct bfd_elf_special_section _bfd_mips_elf_special_sections [];
 #define elf_backend_special_sections _bfd_mips_elf_special_sections
 #define elf_backend_eh_frame_address_size _bfd_mips_elf_eh_frame_address_size
 #define elf_backend_merge_symbol_attribute  _bfd_mips_elf_merge_symbol_attribute
+#define elf_backend_ignore_undef_symbol _bfd_mips_elf_ignore_undef_symbol

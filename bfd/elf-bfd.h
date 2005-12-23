@@ -883,6 +883,11 @@ struct elf_backend_data
     (struct elf_link_hash_entry *, const Elf_Internal_Sym *, bfd_boolean,
      bfd_boolean);
 
+  /* Decide whether an undefined symbol is special and can be ignored.
+     This is the case for OPTIONAL symbols on IRIX.  */
+  bfd_boolean (*elf_backend_ignore_undef_symbol)
+    (struct elf_link_hash_entry *);
+
   /* Emit relocations.  Overrides default routine for emitting relocs,
      except during a relocatable link, or if all relocs are being emitted.  */
   bfd_boolean (*elf_backend_emit_relocs)
