@@ -1458,7 +1458,7 @@ As a client querying @code{libgdb} (using the @file{ui-out} builder) to
 obtain various status values from @value{GDBN}.
 @end itemize
 
-Since @code{libgdb} could have multiple clients (e.g. a GUI supporting
+Since @code{libgdb} could have multiple clients (e.g., a GUI supporting
 the existing @value{GDBN} CLI), those clients must co-operate when
 controlling @code{libgdb}.  In particular, a client must ensure that
 @code{libgdb} is idle (i.e. no other client is using @code{libgdb})
@@ -1606,7 +1606,7 @@ symbol-file into a set of psymtabs or symtabs.
 @code{@var{xyz}_sym_init} for possible initialization.  @code{addr} is
 the offset between the file's specified start address and its true
 address in memory.  @code{mainline} is 1 if this is the main symbol
-table being read, and 0 if a secondary symbol file (e.g. shared library
+table being read, and 0 if a secondary symbol file (e.g., shared library
 or dynamically loaded file) is being read.@refill
 @end table
 
@@ -1680,7 +1680,7 @@ code in the debugger) to reference a symbol:
 @findex find_pc_function
 @findex find_pc_line
 @item
-By its address (e.g. execution stops at some address which is inside a
+By its address (e.g., execution stops at some address which is inside a
 function in this file).  The address will be noticed to be in the
 range of this psymtab, and the full symtab will be read in.
 @code{find_pc_function}, @code{find_pc_line}, and other
@@ -1689,7 +1689,7 @@ range of this psymtab, and the full symtab will be read in.
 @cindex lookup_symbol
 @item
 By its name
-(e.g. the user asks to print a variable, or set a breakpoint on a
+(e.g., the user asks to print a variable, or set a breakpoint on a
 function).  Global names and file-scope names will be found in the
 psymtab, which will cause the symtab to be pulled in.  Local names will
 have to be qualified by a global name, or a file-scope name, in which
@@ -4322,12 +4322,12 @@ code for parsing your OS's core files, or customize
 machine uses to define the struct of registers that is accessible
 (possibly in the u-area) in a core file (rather than
 @file{machine/reg.h}), and an include file that defines whatever header
-exists on a core file (e.g. the u-area or a @code{struct core}).  Then
+exists on a core file (e.g., the u-area or a @code{struct core}).  Then
 modify @code{trad_unix_core_file_p} to use these values to set up the
 section information for the data segment, stack segment, any other
 segments in the core file (perhaps shared library contents or control
 information), ``registers'' segment, and if there are two discontiguous
-sets of registers (e.g.  integer and float), the ``reg2'' segment.  This
+sets of registers (e.g., integer and float), the ``reg2'' segment.  This
 section information basically delimits areas in the core file in a
 standard way, which the section-reading routines in BFD know how to seek
 around in.
@@ -4728,7 +4728,7 @@ discard_cleanups (old);
 return file;
 @end smallexample
 
-Some functions, e.g. @code{fputs_filtered()} or @code{error()}, specify
+Some functions, e.g., @code{fputs_filtered()} or @code{error()}, specify
 that they ``should not be called when cleanups are not in place''.  This
 means that any actions you need to reverse in the case of an error or
 interruption must be on the cleanup chain before you call these

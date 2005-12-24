@@ -875,7 +875,7 @@ If the second argument begins with a decimal digit, @value{GDBN} will
 first attempt to attach to it as a process, and if that fails, attempt
 to open it as a corefile.  If you have a corefile whose name begins with
 a digit, you can prevent @value{GDBN} from treating it as a pid by
-prefixing it with @file{./}, eg. @file{./12345}.
+prefixing it with @file{./}, e.g.@: @file{./12345}.
 
 If @value{GDBN} has not been configured to included core file support,
 such as for most embedded targets, then it will complain about a second
@@ -10239,7 +10239,7 @@ whose names contain a match for regular expression @var{regexp}.
 Thus, @samp{info fun step} finds all functions whose names
 include @code{step}; @samp{info fun ^step} finds those whose names
 start with @code{step}.  If a function name contains characters
-that conflict with the regular expression language (eg.
+that conflict with the regular expression language (e.g.@:
 @samp{operator*()}), they may be quoted with a backslash.
 
 @kindex info variables
@@ -11640,7 +11640,7 @@ A core dump file.  @samp{target core @var{filename}} is the same as
 @item target remote @var{dev}
 @cindex remote target
 Remote serial target in GDB-specific protocol.  The argument @var{dev}
-specifies what serial device to use for the connection (e.g.
+specifies what serial device to use for the connection (e.g.@:
 @file{/dev/ttya}). @xref{Remote, ,Remote debugging}.  @code{target remote}
 supports the @code{load} command.  This is only useful if you have
 some other way of getting the stub to the target system, and you can put
@@ -15916,7 +15916,7 @@ end
 
 You can define a hook for any single-word command in @value{GDBN}, but
 not for command aliases; you should define a hook for the basic command
-name, e.g.  @code{backtrace} rather than @code{bt}.
+name, e.g.@:  @code{backtrace} rather than @code{bt}.
 @c FIXME!  So how does Joe User discover whether a command is an alias
 @c or not?
 If an error occurs during the execution of your hook, execution of
@@ -21220,12 +21220,12 @@ The type of machine you are using, and the operating system name and
 version number.
 
 @item
-What compiler (and its version) was used to compile @value{GDBN}---e.g.
+What compiler (and its version) was used to compile @value{GDBN}---e.g.@:
 ``@value{GCC}--2.8.1''.
 
 @item
 What compiler (and its version) was used to compile the program you are
-debugging---e.g.  ``@value{GCC}--2.8.1'', or ``HP92453-01 A.10.32.03 HP
+debugging---e.g.@:  ``@value{GCC}--2.8.1'', or ``HP92453-01 A.10.32.03 HP
 C Compiler''.  For GCC, you can say @code{gcc --version} to get this
 information; for other compilers, see the documentation for those
 compilers.

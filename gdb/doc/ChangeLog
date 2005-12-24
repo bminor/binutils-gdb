@@ -1,3 +1,11 @@
+2005-12-24  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Target Commands, Bug Reporting, File Options)
+	(Symbols): Fix usage of "e.g.".
+
+	* gdbint.texinfo (libgdb, Symbol Handling, Native Debugging)
+	(Coding): Fix usage of "e.g.".
+
 2005-12-23  Eli Zaretskii  <eliz@gnu.org>
 
 	* stabs.texinfo: 
