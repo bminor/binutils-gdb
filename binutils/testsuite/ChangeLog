@@ -1,3 +1,7 @@
+2005-12-24  Ben Elliston  <bje@gnu.org>
+
+	* config/default.exp: Do not load the unneeded util-defs.exp.
+
 2005-11-15  Jan Beulich  <jbeulich@novell.com>
 
 	* config/default.exp (link_or_copy): New. Use it for setting

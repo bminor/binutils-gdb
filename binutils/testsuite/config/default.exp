@@ -1,4 +1,4 @@
-#   Copyright 1993, 1994, 1995, 1997, 1999, 2001, 2002, 2004
+#   Copyright 1993, 1994, 1995, 1997, 1999, 2001, 2002, 2004, 2005
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,6 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
-load_lib util-defs.exp
 load_lib utils-lib.exp
 
 if ![info exists NM] then {
