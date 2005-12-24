@@ -1,3 +1,10 @@
+2005-12-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h (lang_output_section_statement_type): Add prev.
+	* ldlang.c (output_statement_newfunc): Set os.prev.
+	(lang_insert_orphan): Likewise.
+	(output_prev_sec_find): Use os.prev.
+
 2005-12-22  Santosh Raktawan <santoshr2@kpitcummins.com>
 
 	* ld/emulparms/h8300helf.sh (TINY_READONLY_SECTION,

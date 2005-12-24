@@ -912,6 +912,14 @@ output_statement_newfunc (struct bfd_hash_entry *entry,
 			 (lang_statement_union_type *) &ret->os,
 			 &ret->os.header.next);
 
+  /* For every output section statement added to the list, except the
+     first one, lang_output_section_statement.tail points to the "next"
+     field of the last element of the list.  */
+  if (lang_output_section_statement.head != NULL)
+    ret->os.prev = (lang_output_section_statement_type *)
+      ((char *) lang_output_section_statement.tail
+       - offsetof (lang_output_section_statement_type, next));
+
   /* GCC's strict aliasing rules prevent us from just casting the
      address, so we store the pointer in a variable and cast that
      instead.  */
@@ -1290,20 +1298,15 @@ lang_output_section_find_by_flags (const asection *sec,
 static asection *
 output_prev_sec_find (lang_output_section_statement_type *os)
 {
-  asection *s = (asection *) NULL;
   lang_output_section_statement_type *lookup;
 
-  for (lookup = &lang_output_section_statement.head->output_section_statement;
-       lookup != NULL;
-       lookup = lookup->next)
+  for (lookup = os->prev; lookup != NULL; lookup = lookup->prev)
     {
       if (lookup->constraint == -1)
 	continue;
-      if (lookup == os)
-	return s;
 
       if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
-	s = lookup->bfd_section;
+	return lookup->bfd_section;
     }
 
   return NULL;
@@ -1544,7 +1547,12 @@ lang_insert_orphan (asection *s,
 	  /* Do the same for the list of output section statements.  */
 	  newly_added_os = *os_tail;
 	  *os_tail = NULL;
+	  newly_added_os->prev = (lang_output_section_statement_type *)
+	    ((char *) place->os_tail
+	     - offsetof (lang_output_section_statement_type, next));
 	  newly_added_os->next = *place->os_tail;
+	  if (newly_added_os->next != NULL)
+	    newly_added_os->next->prev = newly_added_os;
 	  *place->os_tail = newly_added_os;
 	  place->os_tail = &newly_added_os->next;
 
