@@ -4637,6 +4637,9 @@ int bfd_core_file_failing_signal (bfd *abfd);
 bfd_boolean core_file_matches_executable_p
    (bfd *core_bfd, bfd *exec_bfd);
 
+bfd_boolean generic_core_file_matches_executable_p
+   (bfd *core_bfd, bfd *exec_bfd);
+
 /* Extracted from targets.c.  */
 #define BFD_SEND(bfd, message, arglist) \
   ((*((bfd)->xvec->message)) arglist)

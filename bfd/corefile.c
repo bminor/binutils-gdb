@@ -114,7 +114,7 @@ FUNCTION
 
 SYNOPSIS
         bfd_boolean generic_core_file_matches_executable_p
-          (bfd *core_bfd, bfd *exec_bfd)
+          (bfd *core_bfd, bfd *exec_bfd);
 
 DESCRIPTION
         Return TRUE if the core file attached to @var{core_bfd}
