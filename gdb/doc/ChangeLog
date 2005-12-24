@@ -2,6 +2,7 @@
 
 	* gdb.texinfo (Target Commands, Bug Reporting, File Options)
 	(Symbols): Fix usage of "e.g.".
+	(Memory Region Attributes): Fix usage of "etc."
 
 	* gdbint.texinfo (libgdb, Symbol Handling, Native Debugging)
 	(Coding): Fix usage of "e.g.".

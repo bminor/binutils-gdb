@@ -6446,7 +6446,7 @@ write accesses to a memory region.
 
 While these attributes prevent @value{GDBN} from performing invalid
 memory accesses, they do nothing to prevent the target system, I/O DMA,
-etc. from accessing memory.
+etc.@: from accessing memory.
 
 @table @code
 @item ro
@@ -15661,7 +15661,7 @@ Displays the current state of observer debugging.
 @item set debug overload
 @cindex C@t{++} overload debugging info
 Turns on or off display of @value{GDBN} C@t{++} overload debugging
-info. This includes info such as ranking of functions, etc. The default
+info. This includes info such as ranking of functions, etc.  The default
 is off.
 @item show debug overload
 Displays the current state of displaying @value{GDBN} C@t{++} overload
