@@ -105,6 +105,7 @@ responsibility among the other maintainers.
   TIC4X            Svein Seldal <svein@dev.seldal.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   VAX		   Jason R Thorpe <thorpej@netbsd.org>
+  VAX		   Jan-Benedict Glaw <jbglaw@lug-owl.de>
   x86_64	   Jan Hubicka <jh@suse.cz>
   x86_64	   Andreas Jaeger <aj@suse.de>
   x86_64	   H.J.Lu <hjl@gnu.org>
