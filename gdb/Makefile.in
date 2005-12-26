@@ -743,6 +743,7 @@ nbsd_tdep_h = nbsd-tdep.h
 nto_tdep_h = nto-tdep.h $(defs_h) $(solist_h) $(osabi_h) $(regset_h)
 objc_lang_h = objc-lang.h
 objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
+obsd_tdep_h = obsd-tdep.h
 ocd_h = ocd.h
 osabi_h = osabi.h
 parser_defs_h = parser-defs.h $(doublest_h)
@@ -1425,7 +1426,7 @@ ALLDEPFILES = \
 	mips-tdep.c mipsv4-nat.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	mips64obsd-nat.c mips64obsd-tdep.c \
-	nbsd-tdep.c \
+	nbsd-tdep.c obsd-tdep.c \
 	solib-osf.c \
 	somread.c solib-som.c $(HPREAD_SOURCE) \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c \
@@ -2338,6 +2339,7 @@ nto-procfs.o: nto-procfs.c $(defs_h) $(gdb_dirent_h) $(exceptions_h) \
 nto-tdep.o: nto-tdep.c $(gdb_stat_h) $(gdb_string_h) $(nto_tdep_h) $(top_h) \
 	$(cli_decode_h) $(cli_cmds_h) $(inferior_h) $(gdbarch_h) $(bfd_h) \
 	$(elf_bfd_h) $(solib_svr4_h) $(gdbcore_h)
+obsd-tdep.o: obsd-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(obsd_tdep_h)
 objc-exp.o: objc-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(objc_lang_h) $(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) \
 	$(bfd_h) $(symfile_h) $(objfiles_h) $(top_h) $(completer_h) \

@@ -1,3 +1,11 @@
+2005-12-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* obsd-tdep.c: New file.
+	* obsd-tdep.h: New file.
+	* Makefile.in (obsd_tdep_h): New variable.
+	(ALLDEPFILES): Add obsd-tdep.c.
+	(obsd-tdep.o): New target.
+
 2005-12-23  Michael Snyder  <msnyder@redhat.com>
 
 	* inf-ptrace.c: Spelling correction, comment.
