@@ -1,5 +1,10 @@
 2005-12-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcobsd-tdep.c: Include "obsd-tdep.h".
+	(sparc32obsd_init_abi): Set skip_solib_resolver.
+	* Makefile.in (sparcobsd-tdep.o): Update dependencies.
+	* config/sparc/obsd.mt (TDEPFILES): Add obsd-tdep.o.
+
 	* obsd-tdep.c: New file.
 	* obsd-tdep.h: New file.
 	* Makefile.in (obsd_tdep_h): New variable.
