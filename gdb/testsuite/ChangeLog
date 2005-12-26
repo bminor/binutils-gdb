@@ -1,3 +1,7 @@
+2005-12-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.gdb/selftest.exp (test_with_self): Update copyright check.
+
 2005-12-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/default.exp: Update check for "show version".
