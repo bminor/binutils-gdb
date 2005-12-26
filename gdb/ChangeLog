@@ -1,5 +1,11 @@
 2005-12-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64obsd-tdep.c: Include "obsd-tdep.h".
+	(sparc64obsd_init_abi): Set skip_solib_resolver to
+	obsd_skip_solib_resolver instead of find_solib_trampoline_target.
+	* Makefile.in (sparc64obsd-tdep.o): Update dependencies.
+	* config/sparc/obsd64.mt (TDEPFILES): Add obsd-tdep.o.
+
 	* sparcobsd-tdep.c: Include "obsd-tdep.h".
 	(sparc32obsd_init_abi): Set skip_solib_resolver.
 	* Makefile.in (sparcobsd-tdep.o): Update dependencies.

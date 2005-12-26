@@ -31,6 +31,7 @@
 
 #include "gdb_assert.h"
 
+#include "obsd-tdep.h"
 #include "sparc64-tdep.h"
 
 /* OpenBSD uses the traditional NetBSD core file format, even for
@@ -212,9 +213,9 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   sparc64_init_abi (info, gdbarch);
 
   /* OpenBSD/sparc64 has SVR4-style shared libraries.  */
-  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
+  set_gdbarch_skip_solib_resolver (gdbarch, obsd_skip_solib_resolver);
 }
 
 
