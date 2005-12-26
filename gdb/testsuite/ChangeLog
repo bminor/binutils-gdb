@@ -1,5 +1,7 @@
 2005-12-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb.base/freebpcmd.exp: Increase timeout.
+
 	* gdb.gdb/selftest.exp (test_with_self): Update copyright check.
 
 2005-12-17  Daniel Jacobowitz  <dan@codesourcery.com>
