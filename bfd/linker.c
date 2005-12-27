@@ -2717,11 +2717,10 @@ default_indirect_link_order (bfd *output_bfd,
 
   BFD_ASSERT ((output_section->flags & SEC_HAS_CONTENTS) != 0);
 
-  if (link_order->size == 0)
-    return TRUE;
-
   input_section = link_order->u.indirect.section;
   input_bfd = input_section->owner;
+  if (input_section->size == 0)
+    return TRUE;
 
   BFD_ASSERT (input_section->output_section == output_section);
   BFD_ASSERT (input_section->output_offset == link_order->offset);
@@ -2810,9 +2809,9 @@ default_indirect_link_order (bfd *output_bfd,
     goto error_return;
 
   /* Output the section contents.  */
-  loc = link_order->offset * bfd_octets_per_byte (output_bfd);
+  loc = input_section->output_offset * bfd_octets_per_byte (output_bfd);
   if (! bfd_set_section_contents (output_bfd, output_section,
-				  new_contents, loc, link_order->size))
+				  new_contents, loc, input_section->size))
     goto error_return;
 
   if (contents != NULL)

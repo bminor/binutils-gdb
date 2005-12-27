@@ -1,5 +1,16 @@
 2005-12-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* coff-h8300.c (h8300_reloc16_extra_cases): Use input section
+	"output_offset" instead of link order "offset".
+	* coff-h8500.c (extra_case): Likewise.
+	* coff-w65.c (w65_reloc16_extra_cases): Likewise.
+	* coff-z80.c (extra_case): Likewise.
+	* coff-z8k.c (extra_case): Likewise.
+	* linker.c (default_indirect_link_order): Likewise, "size" too.
+	* ecoff.c (ecoff_indirect_link_order): Likewise.
+
+2005-12-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* po/SRC-POTFILES.in: Regenerate.

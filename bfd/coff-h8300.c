@@ -671,7 +671,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       /* Get the address of the target of this branch.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
-      dot = (link_order->offset
+      dot = (input_section->output_offset
 	     + dst_address
 	     + link_order->u.indirect.section->output_section->vma);
 
@@ -703,7 +703,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
       /* Get the address of the instruction (not the reloc).  */
-      dot = (link_order->offset
+      dot = (input_section->output_offset
 	     + dst_address
 	     + link_order->u.indirect.section->output_section->vma + 1);
 
@@ -817,7 +817,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
       /* Get the address of the next instruction.  */
-      dot = (link_order->offset
+      dot = (input_section->output_offset
 	     + dst_address
 	     + link_order->u.indirect.section->output_section->vma + 1);
 
@@ -864,7 +864,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
       /* Get the address of the instruction (not the reloc).  */
-      dot = (link_order->offset
+      dot = (input_section->output_offset
 	     + dst_address
 	     + link_order->u.indirect.section->output_section->vma - 1);
 
@@ -925,7 +925,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
       /* Get the address of the instruction (not the reloc).  */
-      dot = (link_order->offset
+      dot = (input_section->output_offset
 	     + dst_address
 	     + link_order->u.indirect.section->output_section->vma + 2);
 
@@ -1064,7 +1064,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
       /* Get the address of the target of this branch.  */
       value = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 
-      dot = (link_order->offset
+      dot = (input_section->output_offset
 	     + dst_address
 	     + link_order->u.indirect.section->output_section->vma) + 1;
 

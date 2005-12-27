@@ -4002,11 +4002,10 @@ ecoff_indirect_link_order (bfd *output_bfd,
 
   BFD_ASSERT ((output_section->flags & SEC_HAS_CONTENTS) != 0);
 
-  if (link_order->size == 0)
-    return TRUE;
-
   input_section = link_order->u.indirect.section;
   input_bfd = input_section->owner;
+  if (input_section->size == 0)
+    return TRUE;
 
   BFD_ASSERT (input_section->output_section == output_section);
   BFD_ASSERT (input_section->output_offset == link_order->offset);
