@@ -1,0 +1,1944 @@
+# Vietnamese translation for LD.
+# Copyright © 2005 Free Software Foundation, Inc.
+# Clytie Siddall <clytie@riverland.net.au>, 2005.
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: ld-2.15.96\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2005-03-03 21:05+1030\n"
+"PO-Revision-Date: 2005-12-24 14:47+1030\n"
+"Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
+"Language-Team: Vietnamese <gnomevi-list@lists.sourceforge.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"X-Generator: LocFactoryEditor 1.5.1b\n"
+
+#: emultempl/armcoff.em:72
+#, c-format
+msgid "  --support-old-code   Support interworking with old code\n"
+msgstr "  --support-old-code   _Hỗ trợ_ dệt vào với _mã cũ_\n"
+
+#: emultempl/armcoff.em:73
+#, c-format
+msgid "  --thumb-entry=<sym>  Set the entry point to be Thumb symbol <sym>\n"
+msgstr "  --thumb-entry=<ký_hiệu>  Lập điểm _vào_ là ký hiệu _Hình Nhỏ_Thumb này\n"
+
+#: emultempl/armcoff.em:121
+#, c-format
+msgid "Errors encountered processing file %s"
+msgstr "Gặp lỗi khi xử lý tập tin %s"
+
+#: emultempl/armcoff.em:188 emultempl/pe.em:1455
+msgid "%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"
+msgstr "%P: cảnh báo: « --thumb-entry %s » đang lấy quyền cao hơn « -e %s »\n"
+
+#: emultempl/armcoff.em:193 emultempl/pe.em:1460
+msgid "%P: warning: connot find thumb start symbol %s\n"
+msgstr "%P: warning: connot find thumb start symbol %s\n"
+
+#: emultempl/pe.em:301
+#, c-format
+msgid "  --base_file <basefile>             Generate a base file for relocatable DLLs\n"
+msgstr ""
+"  --base_file <tập_tinbasefile>     Tạo ra một _tập tin cơ bản_ choocác ata\n"
+"\t\t\t\t\t\t\tcó thể định vị lạile DLLs\n"
+
+#: emultempl/pe.em:302
+#, c-format
+msgid "  --dll                              Set image base to the default for DLLs\n"
+msgstr "  --dll                              Lập cơ bản ảnh là mặc định cho các DLL\n"
+
+#: emultempl/pe.em:303
+#, c-format
+msgid "  --file-alignment <size>            Set file alignment\n"
+msgstr "  --file-alignment <kích_cỡ>            Lập cách _canh lề tập tin_\n"
+
+#: emultempl/pe.em:304
+#, c-format
+msgid "  --heap <size>                      Set initial size of the heap\n"
+msgstr "  --heap <kích_cỡ>                      Lập kích cỡ _miền nhớ_ ban đầu\n"
+
+#: emultempl/pe.em:305
+#, c-format
+msgid "  --image-base <address>             Set start address of the executable\n"
+msgstr ""
+"  --image-base <địa_chỉ>            Lập địa chỉ bắt đầu của ứng dụng chạy được\n"
+"\t\t\t\t\t\t\t\t (_cơ bản ảnh_)\n"
+
+#: emultempl/pe.em:306
+#, c-format
+msgid "  --major-image-version <number>     Set version number of the executable\n"
+msgstr ""
+"  --major-image-version <số>     \tLập số thứ tự _phiên bản_\n"
+"\t\t\t\t\tcủa ứng dụng chạy được (_ảnh lớn_)\n"
+
+#: emultempl/pe.em:307
+#, c-format
+msgid "  --major-os-version <number>        Set minimum required OS version\n"
+msgstr ""
+"  --major-os-version <số>        \t\tLập số thứ tự _phiên bản\n"
+"\t\t\t\thệ điều hành_ tối thiểu cần thiết (_lớn_)\n"
+
+#: emultempl/pe.em:308
+#, c-format
+msgid "  --major-subsystem-version <number> Set minimum required OS subsystem version\n"
+msgstr ""
+"  --major-subsystem-version <số> \t   Lập số thứ tự _phiên bản\n"
+"\t\t\t\thệ điều hành con_ tối thiểu cần thiết (_lớn_)\n"
+
+#: emultempl/pe.em:309
+#, c-format
+msgid "  --minor-image-version <number>     Set revision number of the executable\n"
+msgstr ""
+"  --minor-image-version <số>     \tLập số thứ tự bản sửa đổi\n"
+"\tcủa ứng dụng chạy được (_phiên bản ảnh nhỏ_)\n"
+
+#: emultempl/pe.em:310
+#, c-format
+msgid "  --minor-os-version <number>        Set minimum required OS revision\n"
+msgstr ""
+"  --minor-os-version <số>        \t\tLập số thứ tự bản sửa đổi\n"
+"\t\tcủa hệ điều hành cần thiết (_phiên bản hệ điều hành nhỏ_)\n"
+
+#: emultempl/pe.em:311
+#, c-format
+msgid "  --minor-subsystem-version <number> Set minimum required OS subsystem revision\n"
+msgstr ""
+"  --minor-subsystem-version <số> \t   Lập số thứ tự bản sửa đổi\n"
+"\t\tcủa hệ điều hành con cần thiết (_phiên bản hệ điều hành con nhỏ_)\n"
+
+#: emultempl/pe.em:312
+#, c-format
+msgid "  --section-alignment <size>         Set section alignment\n"
+msgstr "  --section-alignment <kích_cỡ>         Lập cách _canh lề phần_\n"
+
+#: emultempl/pe.em:313
+#, c-format
+msgid "  --stack <size>                     Set size of the initial stack\n"
+msgstr "  --stack <kích_cỡ>                    Lập kích cỡ của _đống_ ban đầu\n"
+
+#: emultempl/pe.em:314
+#, c-format
+msgid "  --subsystem <name>[:<version>]     Set required OS subsystem [& version]\n"
+msgstr "  --subsystem <tên>[:<phiên_bản>]     Lập _hệ điều hành con_ [và phiên bản] cần thiết\n"
+
+#: emultempl/pe.em:315
+#, c-format
+msgid "  --support-old-code                 Support interworking with old code\n"
+msgstr "  --support-old-code                 _Hỗ trợ_ dệt vào với _mã cũ_\n"
+
+#: emultempl/pe.em:316
+#, c-format
+msgid "  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"
+msgstr "  --thumb-entry=<ký_hiệu>  Lập điểm _vào_ là ký hiệu _Hình Nhỏ_ này\n"
+
+#: emultempl/pe.em:318
+#, c-format
+msgid "  --add-stdcall-alias                Export symbols with and without @nn\n"
+msgstr "  --add-stdcall-alias           Xuất ký hiệu với và không với « @nn » (_thêm bí danh gọi chuẩn_)\n"
+
+#: emultempl/pe.em:319
+#, c-format
+msgid "  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"
+msgstr "  --disable-stdcall-fixup            Đừng liên kết « _sym » đến « _sym@nn » (_tắt sửa gọi chuẩn_)\n"
+
+#: emultempl/pe.em:320
+#, c-format
+msgid "  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"
+msgstr ""
+"  --enable-stdcall-fixup             Liên kết « _sym » đến « _sym@nn », không có cảnh báo\n"
+" \t\t\t\t\t\t\t(_bật sửa gọi chuẩn_)\n"
+
+#: emultempl/pe.em:321
+#, c-format
+msgid "  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"
+msgstr "  --exclude-symbols ký_hiệu,ký_hiệu,...      _Loại trừ những ký hiệu_ này ra việc xuất tự động\n"
+
+#: emultempl/pe.em:322
+#, c-format
+msgid "  --exclude-libs lib,lib,...         Exclude libraries from automatic export\n"
+msgstr "  --exclude-libs thư_viên,thư_viên,...         _Loại trừ những thư viên_ này ra việc xuất tự động\n"
+
+#: emultempl/pe.em:323
+#, c-format
+msgid "  --export-all-symbols               Automatically export all globals to DLL\n"
+msgstr "  --export-all-symbols               Tự động _xuất mọi_ điều toàn cục vào DLL (_ký hiệu_)\n"
+
+#: emultempl/pe.em:324
+#, c-format
+msgid "  --kill-at                          Remove @nn from exported symbols\n"
+msgstr "  --kill-at                          Gỡ bỏ « @nn » ra những ký hiệu đã xuất (_buộc kết thức tại_)\n"
+
+#: emultempl/pe.em:325
+#, c-format
+msgid "  --out-implib <file>                Generate import library\n"
+msgstr "  --out-implib <tập_tin>                Tạo _ra thư viên nhập_\n"
+
+#: emultempl/pe.em:326
+#, c-format
+msgid "  --output-def <file>                Generate a .DEF file for the built DLL\n"
+msgstr "  --output-def <tập_tin>                Tạo _ra_ một tập tin .DEF cho DLL đã xây dụng\n"
+
+#: emultempl/pe.em:327
+#, c-format
+msgid "  --warn-duplicate-exports           Warn about duplicate exports.\n"
+msgstr "  --warn-duplicate-exports           _Cảnh báo_ về _việc xuất trùng_ nào.\n"
+
+#: emultempl/pe.em:328
+#, c-format
+msgid ""
+"  --compat-implib                    Create backward compatible import libs;\n"
+"                                       create __imp_<SYMBOL> as well.\n"
+msgstr ""
+"  --compat-implib                    Tạo các _thư viên nhập tương thích_ ngược;\n"
+"\t\t\t\t\tcũng tạo « __imp_<KÝ_HIỆU> ».\n"
+
+#: emultempl/pe.em:330
+#, c-format
+msgid ""
+"  --enable-auto-image-base           Automatically choose image base for DLLs\n"
+"                                       unless user specifies one\n"
+msgstr ""
+"  --enable-auto-image-base           Tự động chọn cơ bản ảnh cho mọi DLL\n"
+"\t\t\t\t\t\t\ttrừ khi người dùng gõ nó\n"
+
+#: emultempl/pe.em:332
+#, c-format
+msgid "  --disable-auto-image-base          Do not auto-choose image base. (default)\n"
+msgstr "  --disable-auto-image-base          Đừng _tự động_ chọn _cơ bản ảnh_ (mặc định) (_tắt_)\n"
+
+#: emultempl/pe.em:333
+#, c-format
+msgid ""
+"  --dll-search-prefix=<string>       When linking dynamically to a dll without\n"
+"                                       an importlib, use <string><basename>.dll\n"
+"                                       in preference to lib<basename>.dll \n"
+msgstr ""
+"  --dll-search-prefix=<chuỗi>       Khi liên kết động đến DLL không có thư viên nhập,\n"
+"\thãy dùng « <chuỗi><tên_cơ_bản>.dll » hơn « <tên_cơ_bản>.dll »\n"
+"\t(_tiền_tố_tìm_kiếm_)\n"
+
+#: emultempl/pe.em:336
+#, c-format
+msgid ""
+"  --enable-auto-import               Do sophistcated linking of _sym to\n"
+"                                       __imp_sym for DATA references\n"
+msgstr ""
+"  --enable-auto-import               Liên kết một cách tinh tế\n"
+"\t« _sym » đến « __imp_sym » cho các tham chiếu DATA (dữ liệu)\n"
+"\t(_bật nhập tự động)\n"
+
+#: emultempl/pe.em:338
+#, c-format
+msgid "  --disable-auto-import              Do not auto-import DATA items from DLLs\n"
+msgstr "  --disable-auto-import       Đừng _tự động nhập_ mục DATA từ DLL (_tắt_)\n"
+
+#: emultempl/pe.em:339
+#, c-format
+msgid ""
+"  --enable-runtime-pseudo-reloc      Work around auto-import limitations by\n"
+"                                       adding pseudo-relocations resolved at\n"
+"                                       runtime.\n"
+msgstr ""
+"  --enable-runtime-pseudo-reloc      Chỉnh sửa các hạn chế nhập tự động,\n"
+"\tbằng cách thêm các việc _định vị lại giả_ được tháo gỡ vào _lúc chạy_. (_bật_)\n"
+
+#: emultempl/pe.em:342
+#, c-format
+msgid ""
+"  --disable-runtime-pseudo-reloc     Do not add runtime pseudo-relocations for\n"
+"                                       auto-imported DATA.\n"
+msgstr ""
+"  --disable-runtime-pseudo-reloc        Đừng thêm việc _định vị lại giả_\n"
+"\tvào _lúc chạy_ cho DATA (dữ liệu) được nhập tự động. (_tắt_)\n"
+
+#: emultempl/pe.em:344
+#, c-format
+msgid ""
+"  --enable-extra-pe-debug            Enable verbose debug output when building\n"
+"                                       or linking to DLLs (esp. auto-import)\n"
+msgstr ""
+"  --enable-extra-pe-debug            _Bật_ xuất dữ liệu _gỡ lỗi_ chi tiết\n"
+"\ttrong khi xây dụng hay liên kết đến DLL nào (nhất là việc tự động nhập) (_thêm_)\n"
+
+#: emultempl/pe.em:347
+#, c-format
+msgid ""
+"  --large-address-aware              Executable supports virtual addresses\n"
+"                                       greater than 2 gigabytes\n"
+msgstr ""
+"  --large-address-aware         Ứng dụng chạy có hỗ trợ _địa chỉ_ ảo _lớn_ hơn 2 GB\n"
+"\t\t\t\t\t\t\t(_kiến thức_)\n"
+
+#: emultempl/pe.em:414
+msgid "%P: warning: bad version number in -subsystem option\n"
+msgstr "%P: cảnh báo: gặp số thứ tự phiên bản sai trong tùy chọn « -subsystem » (hệ thống con)\n"
+
+#: emultempl/pe.em:445
+msgid "%P%F: invalid subsystem type %s\n"
+msgstr "%P%F: invalid subsystem type %s\n"
+
+#: emultempl/pe.em:484
+msgid "%P%F: invalid hex number for PE parameter '%s'\n"
+msgstr "%P%F: invalid hex number for PE parameter '%s'\n"
+
+#: emultempl/pe.em:501
+msgid "%P%F: strange hex info for PE parameter '%s'\n"
+msgstr "%P%F: thông tin thập lục lạ cho tham sốstr « %s »or PE parameter '%s'\n"
+
+#: emultempl/pe.em:518
+#, c-format
+msgid "%s: Can't open base file %s\n"
+msgstr "%s: Không thể mở tập tin cơ bản %s\n"
+
+#: emultempl/pe.em:734
+msgid "%P: warning, file alignment > section alignment.\n"
+msgstr "%P: cảnh báo, canh lề tập tin > canh lề phần.\n"
+
+#: emultempl/pe.em:821 emultempl/pe.em:848
+#, c-format
+msgid "Warning: resolving %s by linking to %s\n"
+msgstr "Cảnh báo: đang tháo gỡ %s bằng cách liên kết đến %s\n"
+
+#: emultempl/pe.em:826 emultempl/pe.em:853
+msgid "Use --enable-stdcall-fixup to disable these warnings\n"
+msgstr "Hãy dùng « --enable-stdcall-fixup » (bật sửa gọi chuẩn) để tắt các cảnh báo này\n"
+
+#: emultempl/pe.em:827 emultempl/pe.em:854
+msgid "Use --disable-stdcall-fixup to disable these fixups\n"
+msgstr "Hãy dùng « --disable-stdcall-fixup » (tắt sửa gọi chuẩn) để tắt các việc sửa này\n"
+
+#: emultempl/pe.em:873
+#, c-format
+msgid "%C: Cannot get section contents - auto-import exception\n"
+msgstr "%C: Không thể lấy nội dung phần: ngoài lệ nhập tự động\n"
+
+#: emultempl/pe.em:910
+#, c-format
+msgid "Info: resolving %s by linking to %s (auto-import)\n"
+msgstr "Thông tin: đang tháo gỡ %s bằng cách liên kết đến %s (tự động nhập)\n"
+
+#: emultempl/pe.em:983
+msgid "%F%P: PE operations on non PE file.\n"
+msgstr "%F%P: thao tác PE với tập tin không phải PE.\n"
+
+#: emultempl/pe.em:1258
+#, c-format
+msgid "Errors encountered processing file %s\n"
+msgstr "Gặp lỗi trong khi xử lý tập tin %s\n"
+
+#: emultempl/pe.em:1281
+#, c-format
+msgid "Errors encountered processing file %s for interworking"
+msgstr "Gặp lỗi trong khi xử lý tập tin %s để dệt vào với nhau"
+
+#: emultempl/pe.em:1340 ldexp.c:570 ldlang.c:2408 ldlang.c:5135 ldlang.c:5166
+#: ldmain.c:1161
+msgid "%P%F: bfd_link_hash_lookup failed: %E\n"
+msgstr "%P%F: « bfd_link_hash_lookup » (bfd liên kết băm tra cứu) thất bại: %E\n"
+
+#: ldcref.c:153
+msgid "%X%P: bfd_hash_table_init of cref table failed: %E\n"
+msgstr "%X%P: « bfd_hash_table_init » (bfd băm bảng khởi động) với bảng cref thất bại: %E\n"
+
+#: ldcref.c:159
+msgid "%X%P: cref_hash_lookup failed: %E\n"
+msgstr "%X%P: cref_hash_lookup failed: %E\n"
+
+#: ldcref.c:225
+#, c-format
+msgid ""
+"\n"
+"Cross Reference Table\n"
+"\n"
+msgstr ""
+"\n"
+"Bảng Tham Chiếu Chéo\n"
+"\n"
+
+#: ldcref.c:226
+msgid "Symbol"
+msgstr "Ký hiệu"
+
+#: ldcref.c:234
+#, c-format
+msgid "File\n"
+msgstr "Tập tin\n"
+
+#: ldcref.c:238
+#, c-format
+msgid "No symbols\n"
+msgstr "Không có ký hiệu\n"
+
+#: ldcref.c:359 ldcref.c:478
+msgid "%B%F: could not read symbols; %E\n"
+msgstr "%B%F: could not read symbols; %E\n"
+
+#: ldcref.c:363 ldcref.c:482 ldmain.c:1226 ldmain.c:1230
+msgid "%B%F: could not read symbols: %E\n"
+msgstr "%B%F: could not read symbols: %E\n"
+
+#: ldcref.c:414
+msgid "%P: symbol `%T' missing from main hash table\n"
+msgstr "%P: thiếu ký hiệus« mb »ltrong bảng băm chính table\n"
+
+#: ldcref.c:547 ldcref.c:554 ldmain.c:1273 ldmain.c:1280
+msgid "%B%F: could not read relocs: %E\n"
+msgstr "%B%F: could not read relocs: %E\n"
+
+#. We found a reloc for the symbol.  The symbol is defined
+#. in OUTSECNAME.  This reloc is from a section which is
+#. mapped into a section from which references to OUTSECNAME
+#. are prohibited.  We must report an error.
+#: ldcref.c:573
+msgid "%X%C: prohibited cross reference from %s to `%T' in %s\n"
+msgstr "%X%C: không cho phép tham chiếu chéo từprohđếni« ed »ctrongss reference from %s to `%T' in %s\n"
+
+#: ldctor.c:84
+msgid "%P%X: Different relocs used in set %s\n"
+msgstr "%P%X: Sử dụng sự định vị lại khác nhau trong tập hợpDifferent relocs used in set %s\n"
+
+#: ldctor.c:102
+msgid "%P%X: Different object file formats composing set %s\n"
+msgstr "%P%X: Có gồm khuôn dạng tập tin đối tượng khác nhau trong %s\n"
+
+#: ldctor.c:281 ldctor.c:295
+msgid "%P%X: %s does not support reloc %s for set %s\n"
+msgstr "%P%X: %s không hỗ trợ định vị lại %s cho tập hợp %s\n"
+
+#: ldctor.c:316
+msgid "%P%X: Unsupported size %d for set %s\n"
+msgstr "%P%X: Unsupported size %d for set %s\n"
+
+#: ldctor.c:337
+msgid ""
+"\n"
+"Set                 Symbol\n"
+"\n"
+msgstr ""
+"\n"
+"Set                 Symbol\n"
+"\n"
+
+#: ldemul.c:227
+#, c-format
+msgid "%S SYSLIB ignored\n"
+msgstr "%S SYSLIB bị bỏ quaignored\n"
+
+#: ldemul.c:233
+#, c-format
+msgid "%S HLL ignored\n"
+msgstr "%S HLL bị bỏ qua\n"
+
+#: ldemul.c:253
+msgid "%P: unrecognised emulation mode: %s\n"
+msgstr "%P: unrecognised emulation mode: %s\n"
+
+#: ldemul.c:254
+msgid "Supported emulations: "
+msgstr "Mô phỏngHđã àm hỗ  trợ:"
+
+#: ldemul.c:296
+#, c-format
+msgid "  no emulation specific options.\n"
+msgstr "  không có tùy chọn đặc trưng cho mô phỏng.\n"
+
+#: ldexp.c:379
+#, c-format
+msgid "%F%S %% by zero\n"
+msgstr "%F%S %% cho số không\n"
+
+#: ldexp.c:386
+#, c-format
+msgid "%F%S / by zero\n"
+msgstr "%F%S / cho số không\n"
+
+#: ldexp.c:583
+#, c-format
+msgid "%X%S: unresolvable symbol `%s' referenced in expression\n"
+msgstr "%X%S: ký hiệu không tháo gỡ được « %s » được tham chiếu trong biểu thức\n"
+
+#: ldexp.c:604
+#, c-format
+msgid "%F%S: undefined symbol `%s' referenced in expression\n"
+msgstr "%F%S: ký hiệu chưa định nghĩa « %s » được tham chiếu trong biểu thức\n"
+
+#: ldexp.c:665 ldexp.c:678
+#, c-format
+msgid "%F%S: undefined MEMORY region `%s' referenced in expression\n"
+msgstr "%F%S: miền MEMORY (nhớ) chưa định nghĩa « %s » được tham chiếu trong biểu thức\n"
+
+#: ldexp.c:757
+#, c-format
+msgid "%F%S can not PROVIDE assignment to location counter\n"
+msgstr "%F%S không thể PROVIDE (cung cấp) việc gán cho bộ đếm địa điểm\n"
+
+#: ldexp.c:770
+#, c-format
+msgid "%F%S invalid assignment to location counter\n"
+msgstr "%F%S việc gán không hợp lệ cho bộ đếm địa điểm\n"
+
+#: ldexp.c:774
+#, c-format
+msgid "%F%S assignment to location counter invalid outside of SECTION\n"
+msgstr "%F%S việc gán cho bộ đếm địa điểm không phải hợp lệ bên ngoài SECTION (phần)\n"
+
+#: ldexp.c:783
+msgid "%F%S cannot move location counter backwards (from %V to %V)\n"
+msgstr "%F%S không thể chạy ngược bộ đếm địa điểm (từ %V về %V)\n"
+
+#: ldexp.c:810
+msgid "%P%F:%s: hash creation failed\n"
+msgstr "%P%F:%s: hash creation failed\n"
+
+#: ldexp.c:1077 ldexp.c:1109
+#, c-format
+msgid "%F%S nonconstant expression for %s\n"
+msgstr "%F%S biểu thức thay đổi chononconstant expression for %s\n"
+
+#: ldexp.c:1163
+#, c-format
+msgid "%F%S non constant expression for %s\n"
+msgstr "%F%S biểu thức thay đổi cho %s\n"
+
+#: ldfile.c:139
+#, c-format
+msgid "attempt to open %s failed\n"
+msgstr "việc cố mở %s bị lỗi\n"
+
+#: ldfile.c:141
+#, c-format
+msgid "attempt to open %s succeeded\n"
+msgstr "%s đã được mở\n"
+
+#: ldfile.c:147
+msgid "%F%P: invalid BFD target `%s'\n"
+msgstr "%F%P: invalid BFD target `%s'\n"
+
+#: ldfile.c:255 ldfile.c:282
+msgid "%P: skipping incompatible %s when searching for %s\n"
+msgstr "%P: đang nhảy quaskipkhông tương thích trong khi tìm kiếm%s when searching for %s\n"
+
+#: ldfile.c:267
+msgid "%F%P: attempted static link of dynamic object `%s'\n"
+msgstr "%F%P: đã cố liên kết tĩnh đối tượng động « %s »\n"
+
+#: ldfile.c:384
+msgid "%F%P: %s (%s): No such file: %E\n"
+msgstr "%F%P: %s (%s): Không có tập tin như vậy: %E\n"
+
+#: ldfile.c:387
+msgid "%F%P: %s: No such file: %E\n"
+msgstr "%F%P: %s: No such file: %E\n"
+
+#: ldfile.c:417
+msgid "%F%P: cannot find %s inside %s\n"
+msgstr "%F%P: cannot find %s inside %s\n"
+
+#: ldfile.c:420
+msgid "%F%P: cannot find %s\n"
+msgstr "%F%P: cannot find %s\n"
+
+#: ldfile.c:437 ldfile.c:453
+#, c-format
+msgid "cannot find script file %s\n"
+msgstr "không tìm thấy tập tin tập lệnh %s\n"
+
+#: ldfile.c:439 ldfile.c:455
+#, c-format
+msgid "opened script file %s\n"
+msgstr "đã mở tập tin tập lệnh %s\n"
+
+#: ldfile.c:499
+msgid "%P%F: cannot open linker script file %s: %E\n"
+msgstr "%P%F: cannot open linker script file %s: %E\n"
+
+#: ldfile.c:546
+msgid "%P%F: cannot represent machine `%s'\n"
+msgstr "%P%F: cannot represent machine `%s'\n"
+
+#: ldlang.c:511
+msgid "%P%F: out of memory during initialization"
+msgstr "%P%F: out of memory during initialization"
+
+#: ldlang.c:551
+msgid "%P:%S: warning: redeclaration of memory region '%s'\n"
+msgstr "%P:%S: warning: redeclaration of memory region '%s'\n"
+
+#: ldlang.c:557
+msgid "%P:%S: warning: memory region %s not declared\n"
+msgstr "%P:%S: cảnh báowachưa tuyên bố miền bộ nhớ reeclared\n"
+
+#: ldlang.c:1073
+msgid ""
+"\n"
+"Memory Configuration\n"
+"\n"
+msgstr ""
+"\n"
+"Memory Configuration\n"
+"\n"
+
+#: ldlang.c:1075
+msgid "Name"
+msgstr "Tên"
+
+#: ldlang.c:1075
+msgid "Origin"
+msgstr "Gốc"
+
+#: ldlang.c:1075
+msgid "Length"
+msgstr "Độ dài"
+
+#: ldlang.c:1075
+msgid "Attributes"
+msgstr "Thuộc tính"
+
+#: ldlang.c:1115
+#, c-format
+msgid ""
+"\n"
+"Linker script and memory map\n"
+"\n"
+msgstr ""
+"\n"
+"Tập lệnh liên kết được và bản đồ bộ nhớLinker script and memory map\n"
+"\n"
+
+#: ldlang.c:1183
+msgid "%P%F: Illegal use of `%s' section\n"
+msgstr "%P%F: Không cho phép cách sử dụng phần « %s »\n"
+
+#: ldlang.c:1193
+msgid "%P%F: output format %s cannot represent section called %s\n"
+msgstr "%P%F: khuôn dạng %s không thể miêu tả phần được gọi là %s\n"
+
+#: ldlang.c:1775
+msgid "%B: file not recognized: %E\n"
+msgstr "%B: file not recognized: %E\n"
+
+#: ldlang.c:1776
+msgid "%B: matching formats:"
+msgstr "%B: matching formats:"
+
+#: ldlang.c:1783
+msgid "%F%B: file not recognized: %E\n"
+msgstr "%F%B: file not recognized: %E\n"
+
+#: ldlang.c:1847
+msgid "%F%B: member %B in archive is not an object\n"
+msgstr "%F%B: bộ phạnmembtrong kho không phải là đối tượngobject\n"
+
+#: ldlang.c:1858 ldlang.c:1872
+msgid "%F%B: could not read symbols: %E\n"
+msgstr "%F%B: could not read symbols: %E\n"
+
+#: ldlang.c:2127
+msgid "%P: warning: could not find any targets that match endianness requirement\n"
+msgstr "%P: cảnh báowakhông tìm thấy đích nào khớp vớitkiểu endian đã cần thiếtirement\n"
+
+#: ldlang.c:2141
+msgid "%P%F: target %s not found\n"
+msgstr "%P%F: target %s not found\n"
+
+#: ldlang.c:2143
+msgid "%P%F: cannot open output file %s: %E\n"
+msgstr "%P%F: cannot open output file %s: %E\n"
+
+#: ldlang.c:2149
+msgid "%P%F:%s: can not make object file: %E\n"
+msgstr "%P%F:%s: can not make object file: %E\n"
+
+#: ldlang.c:2153
+msgid "%P%F:%s: can not set architecture: %E\n"
+msgstr "%P%F:%s: can not set architecture: %E\n"
+
+#: ldlang.c:2157
+msgid "%P%F: can not create link hash table: %E\n"
+msgstr "%P%F: can not create link hash table: %E\n"
+
+#: ldlang.c:2301
+msgid "%P%F: bfd_hash_lookup failed creating symbol %s\n"
+msgstr "%P%F: « bfd_hash_lookup » (bfd băm tra cứu) thất bại, tạo ký hiệu %s\n"
+
+#: ldlang.c:2319
+msgid "%P%F: bfd_hash_allocate failed creating symbol %s\n"
+msgstr "%P%F: « bfd_hash_allocate » (bfd băm cấp cho) thất bại, tạo ký hiệu %s\n"
+
+#: ldlang.c:2710
+msgid " load address 0x%V"
+msgstr " load address 0x%V"
+
+#: ldlang.c:2874
+msgid "%W (size before relaxing)\n"
+msgstr "%W (kích cỡ trước khi lơi rasize before relaxing)\n"
+
+#: ldlang.c:2961
+#, c-format
+msgid "Address of section %s set to "
+msgstr "Địa chỉ của phần %s được lập là "
+
+#: ldlang.c:3114
+#, c-format
+msgid "Fail with %d\n"
+msgstr "Thất bại với %d\n"
+
+#: ldlang.c:3351
+msgid "%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"
+msgstr "%X%P: phần %s [%V → %V] đè lên phần %s [%V → %V]\n"
+
+#: ldlang.c:3379
+msgid "%X%P: address 0x%v of %B section %s is not within region %s\n"
+msgstr "%X%P: địa chỉ 0x%v cửa %B phần %s không phải ở trong miền %s\n"
+
+#: ldlang.c:3388
+msgid "%X%P: region %s is full (%B section %s)\n"
+msgstr "%X%P: miền %s đầy (%B phần %s)\n"
+
+#: ldlang.c:3439
+msgid "%P%X: Internal error on COFF shared library section %s\n"
+msgstr "%P%X: Lỗi nội bộ trên phần thư viên dùng chung COFF %s\n"
+
+#: ldlang.c:3493
+msgid "%P%F: error: no memory region specified for loadable section `%s'\n"
+msgstr "%P%F: lỗi: chưa ghi rõ miền bộ nhớ cho phần tải được « %s »\n"
+
+#: ldlang.c:3498
+msgid "%P: warning: no memory region specified for loadable section `%s'\n"
+msgstr "%P: lỗi: chưa ghi rõ miền bộ nhớ cho phần tải được « %s »\n"
+
+#: ldlang.c:3515
+msgid "%P: warning: changing start of section %s by %u bytes\n"
+msgstr "%P: cảnh báo: đang thay đổi đầu phần %s bằng %u byte\n"
+
+#: ldlang.c:3532
+#, c-format
+msgid "%F%S: non constant or forward reference address expression for section %s\n"
+msgstr "%F%S: biểu thức địa chỉ tham chiếu thay đổi hay tiếp lên %s\n"
+
+#: ldlang.c:3703
+msgid "%P%F: can't relax section: %E\n"
+msgstr "%P%F: can't relax section: %E\n"
+
+#: ldlang.c:3960
+msgid "%F%P: invalid data statement\n"
+msgstr "%F%P: invalid data statement\n"
+
+#: ldlang.c:3999
+msgid "%F%P: invalid reloc statement\n"
+msgstr "%F%P: invalid reloc statement\n"
+
+#: ldlang.c:4141
+msgid "%P%F:%s: can't set start address\n"
+msgstr "%P%F:%s: can't set start address\n"
+
+#: ldlang.c:4154 ldlang.c:4173
+msgid "%P%F: can't set start address\n"
+msgstr "%P%F: can't set start address\n"
+
+#: ldlang.c:4166
+msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
+msgstr "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
+
+#: ldlang.c:4178
+msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
+msgstr "%P: cảnh báo: không tìm thấy ký hiệu vào %s;wnên không lập địa chỉ bắt đầu symbol %s; not setting start address\n"
+
+#: ldlang.c:4227
+msgid "%P%F: Relocatable linking with relocations from format %s (%B) to format %s (%B) is not supported\n"
+msgstr "%P%F: Không hỗ trợ liên kết định vị lại đưọc có định vị lại từ khuôn dạng %s (%B) sang khuôn dạng %s (%B)\n"
+
+#: ldlang.c:4237
+msgid "%P: warning: %s architecture of input file `%B' is incompatible with %s output\n"
+msgstr "%P: cảnh báo: kiến trức %s của tập tin nhập « %B » không tương thích với dữ liệu xuất %s\n"
+
+#: ldlang.c:4259
+msgid "%P%X: failed to merge target specific data of file %B\n"
+msgstr "%P%X: lỗi hợp nhất dữ liệu đặc trưng cho dữ liệu của tập tin %B\n"
+
+#: ldlang.c:4343
+msgid ""
+"\n"
+"Allocating common symbols\n"
+msgstr ""
+"\n"
+"Đang cấp phát các ký hiệu dùng chung\n"
+
+#: ldlang.c:4344
+msgid ""
+"Common symbol       size              file\n"
+"\n"
+msgstr ""
+"Common symbol       size              file\n"
+"\n"
+
+#: ldlang.c:4470
+msgid "%P%F: invalid syntax in flags\n"
+msgstr "%P%F: invalid syntax in flags\n"
+
+# Type: error
+# Description
+#: ldlang.c:4740
+msgid "%P%F: Failed to create hash table\n"
+msgstr "%P%F: Failed to create hash table\n"
+
+#: ldlang.c:5057
+msgid "%P%Fmultiple STARTUP files\n"
+msgstr "%P%Fmultiple STARTUP files\n"
+
+#: ldlang.c:5105
+msgid "%X%P:%S: section has both a load address and a load region\n"
+msgstr "%X%P:%S: phần có cả địa chỉ tải lẫn miền tải đềusection has both a load address and a load region\n"
+
+#: ldlang.c:5345
+msgid "%F%P: bfd_record_phdr failed: %E\n"
+msgstr "%F%P: « bfd_record_phdr » thất bại: %E\n"
+
+#: ldlang.c:5365
+msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
+msgstr "%X%P: phần « %s » được cấp cho phdr không có « %s »\n"
+
+#: ldlang.c:5751
+msgid "%X%P: unknown language `%s' in version information\n"
+msgstr "%X%P: không biết ngôn ngữ « %s » trong thông tin phiên bản\n"
+
+#: ldlang.c:5893
+msgid "%X%P: anonymous version tag cannot be combined with other version tags\n"
+msgstr "%X%P: thẻ phiên bản vô danh không kết hợp được với thẻ phiên bản khác\n"
+
+#: ldlang.c:5902
+msgid "%X%P: duplicate version tag `%s'\n"
+msgstr "%X%P: duplicate version tag `%s'\n"
+
+#: ldlang.c:5922 ldlang.c:5931 ldlang.c:5948 ldlang.c:5958
+msgid "%X%P: duplicate expression `%s' in version information\n"
+msgstr "%X%P: biểu thức trùng « %s » trong thông tin phiên bảnduplicate expression `%s' in version information\n"
+
+#: ldlang.c:5998
+msgid "%X%P: unable to find version dependency `%s'\n"
+msgstr "%X%P: unable to find version dependency `%s'\n"
+
+#: ldlang.c:6020
+msgid "%X%P: unable to read .exports section contents\n"
+msgstr "%X%P: unable to read .exports section contents\n"
+
+#: ldmain.c:229
+msgid "%X%P: can't set BFD default target to `%s': %E\n"
+msgstr "%X%P: không thể lập đích can'mặc định là « %s »:t to `%s': %E\n"
+
+#: ldmain.c:341
+msgid "%P%F: --relax and -r may not be used together\n"
+msgstr "%P%F: không cho phép sử dụng hai tùy chọn « --relax » (lơi ra) và « -r » với nhau \n"
+
+#: ldmain.c:343
+msgid "%P%F: -r and -shared may not be used together\n"
+msgstr "%P%F: -r and -shared may not be used together\n"
+
+#: ldmain.c:347
+msgid "%P%F: -static and -shared may not be used together\n"
+msgstr "%P%F: -static and -shared may not be used together\n"
+
+#: ldmain.c:352
+msgid "%P%F: -F may not be used without -shared\n"
+msgstr "%P%F: không thể sử dụng tùy chọn « -F » khi không có tùy chọn « -shared » (dùng chung)\n"
+
+#: ldmain.c:354
+msgid "%P%F: -f may not be used without -shared\n"
+msgstr "%P%F: không thể sử dụng tùy chọn « -f » khi không có tùy chọn « -shared » (dùng chung)\n"
+
+#: ldmain.c:396
+msgid "using external linker script:"
+msgstr "đang dùng tập lệnh liên kết bên ngoài:"
+
+#: ldmain.c:398
+msgid "using internal linker script:"
+msgstr "đang dùng tập lệnh liên kết bên trong:"
+
+#: ldmain.c:432
+msgid "%P%F: no input files\n"
+msgstr "%P%F: không có tập tin nhập nào\n"
+
+#: ldmain.c:436
+msgid "%P: mode %s\n"
+msgstr "%P: chế độ %s\n"
+
+#: ldmain.c:452
+msgid "%P%F: cannot open map file %s: %E\n"
+msgstr "%P%F: cannot open map file %s: %E\n"
+
+#: ldmain.c:482
+msgid "%P: link errors found, deleting executable `%s'\n"
+msgstr "%P: link errors found, deleting executable `%s'\n"
+
+#: ldmain.c:491
+msgid "%F%B: final close failed: %E\n"
+msgstr "%F%B: final close failed: %E\n"
+
+#: ldmain.c:517
+msgid "%X%P: unable to open for source of copy `%s'\n"
+msgstr "%X%P: unable to open for source of copy `%s'\n"
+
+#: ldmain.c:520
+msgid "%X%P: unable to open for destination of copy `%s'\n"
+msgstr "%X%P: unable to open for destination of copy `%s'\n"
+
+#: ldmain.c:527
+msgid "%P: Error writing file `%s'\n"
+msgstr "%P: Error writing file `%s'\n"
+
+#: ldmain.c:532 pe-dll.c:1447
+#, c-format
+msgid "%P: Error closing file `%s'\n"
+msgstr "%P: Gặp lỗi khi đóng tập tin « %s »\n"
+
+#: ldmain.c:548
+#, c-format
+msgid "%s: total time in link: %ld.%06ld\n"
+msgstr "%s: thời gian tổng trong liên kết: %ld.%06ld\n"
+
+#: ldmain.c:551
+#, c-format
+msgid "%s: data size %ld\n"
+msgstr "%s: kích cỡ dữ liệu %ld\n"
+
+#: ldmain.c:634
+msgid "%P%F: missing argument to -m\n"
+msgstr "%P%F: missing argument to -m\n"
+
+#: ldmain.c:780 ldmain.c:798 ldmain.c:828
+msgid "%P%F: bfd_hash_table_init failed: %E\n"
+msgstr "%P%F: « bfd_hash_table_init » (bfd băm bảng khởi động) thất bại: %E\n"
+
+#: ldmain.c:784 ldmain.c:802
+msgid "%P%F: bfd_hash_lookup failed: %E\n"
+msgstr "%P%F: bfd_hash_lookup failed: %E\n"
+
+#: ldmain.c:816
+msgid "%X%P: error: duplicate retain-symbols-file\n"
+msgstr "%X%P: lỗieicate retain-symbols (giữ lại tập tin ký hiệu) trùng-file\n"
+
+#: ldmain.c:858
+msgid "%P%F: bfd_hash_lookup for insertion failed: %E\n"
+msgstr "%P%F: « bfd_hash_lookup » (bfd băm tra cứu) cho sự chèn đã thất bại: %E\n"
+
+#: ldmain.c:863
+msgid "%P: `-retain-symbols-file' overrides `-s' and `-S'\n"
+msgstr "%P: tùy chọn « -retain-symbols-file » (giữ lại tập tin ký hiệu) đè lên « -s » và « -S »\n"
+
+#: ldmain.c:938
+#, c-format
+msgid ""
+"Archive member included because of file (symbol)\n"
+"\n"
+msgstr ""
+"Gồm bộ phạn kho vì tập tin (ký hiệu)\n"
+"\n"
+
+#: ldmain.c:1008
+msgid "%X%C: multiple definition of `%T'\n"
+msgstr "%X%C: multiple definition of `%T'\n"
+
+#: ldmain.c:1011
+msgid "%D: first defined here\n"
+msgstr "%D: first defined here\n"
+
+#: ldmain.c:1015
+msgid "%P: Disabling relaxation: it will not work with multiple definitions\n"
+msgstr "%P: Tắt khả năng lơi ra: nó sẽ không hoạt động với nhiều lời định nghĩaisabling relaxation: it will not work with multiple definitions\n"
+
+#: ldmain.c:1045
+msgid "%B: warning: definition of `%T' overriding common\n"
+msgstr "%B: cảnh báo: lời định nghĩa « %T » đè lên điều dùng chung\n"
+
+#: ldmain.c:1048
+msgid "%B: warning: common is here\n"
+msgstr "%B: warning: common is here\n"
+
+#: ldmain.c:1055
+msgid "%B: warning: common of `%T' overridden by definition\n"
+msgstr "%B: cảnh báowalời định nghĩa đè lên điềum« on » dùng chunginition\n"
+
+#: ldmain.c:1058
+msgid "%B: warning: defined here\n"
+msgstr "%B: warning: defined here\n"
+
+#: ldmain.c:1065
+msgid "%B: warning: common of `%T' overridden by larger common\n"
+msgstr ""
+"%B: cảnh báowađiều dùng chung lớn hơn có đè lên điềum« %T » dùng chung\n"
+"ommon\n"
+
+#: ldmain.c:1068
+msgid "%B: warning: larger common is here\n"
+msgstr "%B: cảnh báo: điều dùng chung lớn hơn tại đây\n"
+
+#: ldmain.c:1072
+msgid "%B: warning: common of `%T' overriding smaller common\n"
+msgstr "%B: cảnh báo: điều « %T » dùng chung có đè lên điều dùng chung nhỏ hơn\n"
+
+#: ldmain.c:1075
+msgid "%B: warning: smaller common is here\n"
+msgstr "%B: warning: smaller common is here\n"
+
+#: ldmain.c:1079
+msgid "%B: warning: multiple common of `%T'\n"
+msgstr "%B: warning: multiple common of `%T'\n"
+
+#: ldmain.c:1081
+msgid "%B: warning: previous common is here\n"
+msgstr "%B: warning: previous common is here\n"
+
+#: ldmain.c:1101 ldmain.c:1139
+msgid "%P: warning: global constructor %s used\n"
+msgstr "%P: warning: global constructor %s used\n"
+
+#: ldmain.c:1149
+msgid "%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n"
+msgstr "%P%F: lỗi hậu phương BFDbakhông hỗ trợ « ckend error: B »R unsupported\n"
+
+#. We found a reloc for the symbol we are looking for.
+#: ldmain.c:1203 ldmain.c:1205 ldmain.c:1207 ldmain.c:1245 ldmain.c:1293
+msgid "warning: "
+msgstr "cảnh báo: "
+
+#: ldmain.c:1327
+msgid "%F%P: bfd_hash_table_init failed: %E\n"
+msgstr "%F%P: « bfd_hash_table_init » (bfd băm bảng khởi động) thất bại: %E\n"
+
+#: ldmain.c:1334
+msgid "%F%P: bfd_hash_lookup failed: %E\n"
+msgstr "%F%P: bfd_hash_lookup failed: %E\n"
+
+#: ldmain.c:1355
+msgid "%X%C: undefined reference to `%T'\n"
+msgstr "%X%C: undefined reference to `%T'\n"
+
+#: ldmain.c:1358
+msgid "%C: warning: undefined reference to `%T'\n"
+msgstr "%C: warning: undefined reference to `%T'\n"
+
+#: ldmain.c:1364
+msgid "%X%D: more undefined references to `%T' follow\n"
+msgstr "%X%D: more undefined references to `%T' follow\n"
+
+#: ldmain.c:1367
+msgid "%D: warning: more undefined references to `%T' follow\n"
+msgstr "%D: chưa định nghĩa lời tham chiếu đến « %T » tại nhiều nơi nữa theo đây\n"
+
+#: ldmain.c:1378
+msgid "%X%B: undefined reference to `%T'\n"
+msgstr "%X%B: undefined reference to `%T'\n"
+
+#: ldmain.c:1381
+msgid "%B: warning: undefined reference to `%T'\n"
+msgstr "%B: cảnh báo: chưa định nghĩa lời tham chiếu đến « %T »\n"
+
+#: ldmain.c:1387
+msgid "%X%B: more undefined references to `%T' follow\n"
+msgstr "%X%B: more undefined references to `%T' follow\n"
+
+#: ldmain.c:1390
+msgid "%B: warning: more undefined references to `%T' follow\n"
+msgstr "%B: cảnh báo: chưa định nghĩa lời tham chiếu đến « %T » tại nhiều nơi nữa theo đây\n"
+
+#: ldmain.c:1425 ldmain.c:1478 ldmain.c:1496
+msgid "%P%X: generated"
+msgstr "%P%X: generated"
+
+#: ldmain.c:1432
+msgid " additional relocation overflows omitted from the output\n"
+msgstr "tràn định vị lại thêm bị bỏ đi khỏi dữ liệu xuấtdditional relocation overflows omitted from the output\n"
+
+#: ldmain.c:1445
+msgid " relocation truncated to fit: %s against undefined symbol `%T'"
+msgstr " sự định vị lại bị cắt xém để vừa: %s đối với ký hiệu chưa định nghĩa « %T »"
+
+#: ldmain.c:1450
+msgid " relocation truncated to fit: %s against symbol `%T' defined in %A section in %B"
+msgstr " sự định vị lại bị cắt xém để vừa: %s đối với ký hiệu « %T » đã định nghĩa trong phần %A trong %B"
+
+#: ldmain.c:1460
+msgid " relocation truncated to fit: %s against `%T'"
+msgstr "sự định vị lại bị cắt xém để vừa: %s đối với « %T »"
+
+#: ldmain.c:1481
+#, c-format
+msgid "dangerous relocation: %s\n"
+msgstr "sự định vị lại nguy hiểm: %s\n"
+
+#: ldmain.c:1499
+msgid " reloc refers to symbol `%T' which is not being output\n"
+msgstr " sự định vị lại tham chiếu đến ký hiệu « %T » mà không còn được xuất lại\n"
+
+#: ldmisc.c:149
+#, c-format
+msgid "no symbol"
+msgstr "không có ký hiệu"
+
+#: ldmisc.c:240
+#, c-format
+msgid "built in linker script:%u"
+msgstr "tập lệnh liên kết có sẵn:%u"
+
+#: ldmisc.c:289 ldmisc.c:293
+msgid "%B%F: could not read symbols\n"
+msgstr "%B%F: could not read symbols\n"
+
+#: ldmisc.c:329
+msgid "%B: In function `%T':\n"
+msgstr "%B: In function `%T':\n"
+
+#: ldmisc.c:480
+msgid "%F%P: internal error %s %d\n"
+msgstr "%F%P: internal error %s %d\n"
+
+#: ldmisc.c:526
+msgid "%P: internal error: aborting at %s line %d in %s\n"
+msgstr "%P: internal error: aborting at %s line %d in %s\n"
+
+#: ldmisc.c:529
+msgid "%P: internal error: aborting at %s line %d\n"
+msgstr "%P: internal error: aborting at %s line %d\n"
+
+#: ldmisc.c:531
+msgid "%P%F: please report this bug\n"
+msgstr "%P%F: vui lòng thông báo lỗi nàyplease report this bug\n"
+
+#. Output for noisy == 2 is intended to follow the GNU standards.
+#: ldver.c:38
+#, c-format
+msgid "GNU ld version %s\n"
+msgstr "Trình ld phiên bản %s của GNU\n"
+
+#: ldver.c:42
+#, c-format
+msgid "Copyright 2005 Free Software Foundation, Inc.\n"
+msgstr "Bản quyền © năm 2005 Tổ chức Phần mềm Tự do.\n"
+
+#: ldver.c:43
+#, c-format
+msgid ""
+"This program is free software; you may redistribute it under the terms of\n"
+"the GNU General Public License.  This program has absolutely no warranty.\n"
+msgstr ""
+"Chương trình này là phần mềm tự do mà không bảo đảm gì cả.\n"
+"Bạn có thể phân phối lại nó với điều kiện của Quyền công chung Gnu (GPL).\n"
+
+#: ldver.c:52
+#, c-format
+msgid "  Supported emulations:\n"
+msgstr "  Mô phỏng đã hỗ trợ :\n"
+
+#: ldwrite.c:55 ldwrite.c:191
+msgid "%P%F: bfd_new_link_order failed\n"
+msgstr "%P%F: « bfd_new_link_order » (bfd mới liên kết thứ tự) thất bại\n"
+
+#: ldwrite.c:341
+msgid "%F%P: cannot create split section name for %s\n"
+msgstr "%F%P: cannot create split section name for %s\n"
+
+#: ldwrite.c:353
+msgid "%F%P: clone section failed: %E\n"
+msgstr "%F%P: clone section failed: %E\n"
+
+#: ldwrite.c:391
+#, c-format
+msgid "%8x something else\n"
+msgstr "%8x cái gì khácsomething else\n"
+
+#: ldwrite.c:561
+msgid "%F%P: final link failed: %E\n"
+msgstr "%F%P: final link failed: %E\n"
+
+#: lexsup.c:195 lexsup.c:327
+msgid "KEYWORD"
+msgstr "TỪ_KHÓAÊN_BÀN_PHÍM"
+
+#: lexsup.c:195
+msgid "Shared library control for HP/UX compatibility"
+msgstr "Điều khiển thư viên dùng chung để tương thích với HP/UX"
+
+#: lexsup.c:198
+msgid "ARCH"
+msgstr "ARCH"
+
+#: lexsup.c:198
+msgid "Set architecture"
+msgstr "Lập kiến trúc"
+
+#: lexsup.c:200 lexsup.c:421
+msgid "TARGET"
+msgstr "ĐÍCH"
+
+#: lexsup.c:200
+msgid "Specify target for following input files"
+msgstr "Ghi rõ đích cho những tập tin nhập theo đây"
+
+#: lexsup.c:203 lexsup.c:252 lexsup.c:264 lexsup.c:277 lexsup.c:380
+#: lexsup.c:433 lexsup.c:490
+msgid "FILE"
+msgstr "TẬP TIN"
+
+#: lexsup.c:203
+msgid "Read MRI format linker script"
+msgstr "Đọc tập lệnh liên kết khuôn dạng MRI"
+
+#: lexsup.c:205
+msgid "Force common symbols to be defined"
+msgstr "Ép buộc định nghĩa mọi ký hiệu dùng chung"
+
+#: lexsup.c:209 lexsup.c:475 lexsup.c:477 lexsup.c:479
+msgid "ADDRESS"
+msgstr "ĐỊA CHỈ"
+
+#: lexsup.c:209
+msgid "Set start address"
+msgstr "Lập địa chỉ bắt đầu"
+
+#: lexsup.c:211
+msgid "Export all dynamic symbols"
+msgstr "Xuất mọi ký hiệu động"
+
+#: lexsup.c:213
+msgid "Link big-endian objects"
+msgstr "Liên kết mọi đối tượng big-endian (cuối lớn)"
+
+#: lexsup.c:215
+msgid "Link little-endian objects"
+msgstr "Liên kết mọi đối tượng little-endian (cuối nhỏ)"
+
+#: lexsup.c:217 lexsup.c:220
+msgid "SHLIB"
+msgstr "SHLIB"
+
+#: lexsup.c:217
+msgid "Auxiliary filter for shared object symbol table"
+msgstr "Bộ lọc phụ cho bảng ký hiệu đối tượng dùng chung"
+
+#: lexsup.c:220
+msgid "Filter for shared object symbol table"
+msgstr "Bộ lọc cho bảng ký hiệu đối tượng dùng chung"
+
+#: lexsup.c:223
+msgid "Ignored"
+msgstr "Ignored"
+
+#: lexsup.c:225
+msgid "SIZE"
+msgstr "CỠ"
+
+#: lexsup.c:225
+msgid "Small data size (if no size, same as --shared)"
+msgstr "Kích cỡ dữ liệu nhỏ (nếu không có, nó bằng tùy chọn « --shared »)"
+
+#: lexsup.c:228
+msgid "FILENAME"
+msgstr "TÊN TẬP TIN"
+
+#: lexsup.c:228
+msgid "Set internal name of shared library"
+msgstr "Lập tên nội bộ của thư viên dùng chung"
+
+#: lexsup.c:230
+msgid "PROGRAM"
+msgstr "CHƯƠNG TRÌNH"
+
+#: lexsup.c:230
+msgid "Set PROGRAM as the dynamic linker to use"
+msgstr "Lập CHƯƠNG TRÌNH là bộ liên kết động cần dùng"
+
+#: lexsup.c:233
+msgid "LIBNAME"
+msgstr "TÊN THƯ VIÊN"
+
+#: lexsup.c:233
+msgid "Search for library LIBNAME"
+msgstr "Tìm kiếm thư viên TÊN THƯ VIÊN"
+
+#: lexsup.c:235
+msgid "DIRECTORY"
+msgstr "THƯ MỤC"
+
+#: lexsup.c:235
+msgid "Add DIRECTORY to library search path"
+msgstr "Thêm THƯ MỤC vào đường dẫn tìm kiếm thư viên"
+
+#: lexsup.c:238
+msgid "Override the default sysroot location"
+msgstr "Đè lên địa điểm sysroot (gốc hệ thống) mặc định"
+
+#: lexsup.c:240
+msgid "EMULATION"
+msgstr "MÔ PHỎNG"
+
+#: lexsup.c:240
+msgid "Set emulation"
+msgstr "Lập cách mô phỏng"
+
+#: lexsup.c:242
+msgid "Print map file on standard output"
+msgstr "In tập tin bản đồ ra thiết bị xuất chuẩn"
+
+#: lexsup.c:244
+msgid "Do not page align data"
+msgstr "Đừng canh lề trang dữ liệu"
+
+#: lexsup.c:246
+msgid "Do not page align data, do not make text readonly"
+msgstr "Đừng canh lề trang dữ liệu, đừng lập văn bản là chỉ đọc"
+
+#: lexsup.c:249
+msgid "Page align data, make text readonly"
+msgstr "Canh lề trang dữ liệu, lập văn bản là chỉ đọc"
+
+#: lexsup.c:252
+msgid "Set output file name"
+msgstr "Lập tên tập tin xuất"
+
+#: lexsup.c:254
+msgid "Optimize output file"
+msgstr "Ưu tiên hóa tập tin xuất"
+
+#: lexsup.c:256
+msgid "Ignored for SVR4 compatibility"
+msgstr "Bị bỏ qua để tương thích với SVR4"
+
+#: lexsup.c:260
+msgid "Generate relocatable output"
+msgstr "Tạo ra dữ liệu có thể định vị lại"
+
+#: lexsup.c:264
+msgid "Just link symbols (if directory, same as --rpath)"
+msgstr "Chỉ liên kết ký hiệu (nếu thư mục, bằng tùy chọn « --rpath »)"
+
+#: lexsup.c:267
+msgid "Strip all symbols"
+msgstr "Tước mọi ký hiệu"
+
+#: lexsup.c:269
+msgid "Strip debugging symbols"
+msgstr "Tước ký hiệu gỡ lối"
+
+#: lexsup.c:271
+msgid "Strip symbols in discarded sections"
+msgstr "Tước ký hiệu trong phần bị hủy"
+
+#: lexsup.c:273
+msgid "Do not strip symbols in discarded sections"
+msgstr "Đừng tước ký hiệu trong phần bị hủy"
+
+#: lexsup.c:275
+msgid "Trace file opens"
+msgstr "Tập tin vết có mở"
+
+#: lexsup.c:277
+msgid "Read linker script"
+msgstr "Read linker script"
+
+#: lexsup.c:279 lexsup.c:297 lexsup.c:363 lexsup.c:378 lexsup.c:468
+#: lexsup.c:493 lexsup.c:520
+msgid "SYMBOL"
+msgstr "KÝ HIỆUSMB"
+
+#: lexsup.c:279
+msgid "Start with undefined reference to SYMBOL"
+msgstr "Bắt đầu với tham chiệu gạch chân đến KÝ HIỆU"
+
+#: lexsup.c:282
+msgid "[=SECTION]"
+msgstr "[=PHẦN]"
+
+#: lexsup.c:283
+msgid "Don't merge input [SECTION | orphan] sections"
+msgstr "Đừng kết hợp phần nhập [PHẦN | mồ côi]"
+
+#: lexsup.c:285
+msgid "Build global constructor/destructor tables"
+msgstr "Xây dụng bảng cấu tạo/phá toàn cục"
+
+#: lexsup.c:287
+msgid "Print version information"
+msgstr "In ra thông tin phiên bản"
+
+#: lexsup.c:289
+msgid "Print version and emulation information"
+msgstr "In ra thông tin phiên bản và mô phỏng"
+
+#: lexsup.c:291
+msgid "Discard all local symbols"
+msgstr "Discard all local symbols"
+
+#: lexsup.c:293
+msgid "Discard temporary local symbols (default)"
+msgstr "Hủy ký hiệu địa phương tạm (mặc định)"
+
+#: lexsup.c:295
+msgid "Don't discard any local symbols"
+msgstr "Đừng hủy ký hiệu địa phương nào"
+
+#: lexsup.c:297
+msgid "Trace mentions of SYMBOL"
+msgstr "Vết nơi ghi KÝ HIỆU"
+
+#: lexsup.c:299 lexsup.c:435 lexsup.c:437
+msgid "PATH"
+msgstr "ĐƯỜNG DẪN"
+
+#: lexsup.c:299
+msgid "Default search path for Solaris compatibility"
+msgstr "Đường dẫn tìm kiếm để tương thích với Solaris"
+
+#: lexsup.c:302
+msgid "Start a group"
+msgstr "Bắt đầu nhóm"
+
+#: lexsup.c:304
+msgid "End a group"
+msgstr "Kết thức nhóm"
+
+#: lexsup.c:308
+msgid "Accept input files whose architecture cannot be determined"
+msgstr "Chấp nhận tập tin nhập có kiến trức không thể được tháo gỡ"
+
+#: lexsup.c:312
+msgid "Reject input files whose architecture is unknown"
+msgstr "Từ chối tập tin nhập có kiến trức lạ"
+
+#: lexsup.c:315
+msgid ""
+"Set DT_NEEDED tags for DT_NEEDED entries in\n"
+"\t\t\t\tfollowing dynamic libs"
+msgstr ""
+"Lập thẻ « DT_NEEDED » (cần thiết DT)\n"
+"\tcho mục nhập « DT_NEEDED »\n"
+"\ttrong những thư viên động theo đây"
+
+#: lexsup.c:318
+msgid ""
+"Do not set DT_NEEDED tags for DT_NEEDED entries\n"
+"\t\t\t\tin following dynamic libs"
+msgstr ""
+"Đừng lập thẻ « DT_NEEDED » (cần thiết DT)\n"
+"\tcho mục nhập « DT_NEEDED »\n"
+"\ttrong những thư viên động theo đây"
+
+#: lexsup.c:321
+msgid "Only set DT_NEEDED for following dynamic libs if used"
+msgstr ""
+"Chỉ lập thẻ « DT_NEEDED » (cần thiết DT)\n"
+"\tcho những thư viên động theo đây nếu được dùng"
+
+#: lexsup.c:324
+msgid "Always set DT_NEEDED for following dynamic libs"
+msgstr ""
+"Luôn lập thẻ « DT_NEEDED » (cần thiết DT)\n"
+"\tcho những thư viên động theo đây"
+
+#: lexsup.c:327
+msgid "Ignored for SunOS compatibility"
+msgstr "Bị bỏ qua để tương thích với SunOS"
+
+#: lexsup.c:329
+msgid "Link against shared libraries"
+msgstr "Liên kết đối với thư viên dùng chung"
+
+#: lexsup.c:335
+msgid "Do not link against shared libraries"
+msgstr "Đừng liên kết đối với thư viên dùng chung"
+
+#: lexsup.c:343
+msgid "Bind global references locally"
+msgstr "Đóng kết tham chiếu toàn cục một cách địa phương"
+
+#: lexsup.c:345
+msgid "Check section addresses for overlaps (default)"
+msgstr "Kiểm tra địa chỉ phần có chồng chéo (mặc định)"
+
+#: lexsup.c:348
+msgid "Do not check section addresses for overlaps"
+msgstr "Đừng kiểm tra địa chỉ phần có chồng chéo"
+
+#: lexsup.c:351
+msgid "Output cross reference table"
+msgstr "Xuất bảng tham chiếu chéo"
+
+#: lexsup.c:353
+msgid "SYMBOL=EXPRESSION"
+msgstr "BIỂU THỨC=BIỂU THỨC"
+
+#: lexsup.c:353
+msgid "Define a symbol"
+msgstr "Định nghĩa ký hiệu"
+
+#: lexsup.c:355
+msgid "[=STYLE]"
+msgstr "[=KIỂU DÁNG]"
+
+#: lexsup.c:355
+msgid "Demangle symbol names [using STYLE]"
+msgstr "Tháo gỡ tên ký hiệu [bằng KIỂU DÁNG]"
+
+#: lexsup.c:358
+msgid "Generate embedded relocs"
+msgstr "Tạo ra sự định vị lại nhúng"
+
+#: lexsup.c:360
+msgid "Treat warnings as errors"
+msgstr "Xử lý cảnh báo là lỗi"
+
+#: lexsup.c:363
+msgid "Call SYMBOL at unload-time"
+msgstr "Gọi KÝ HIỆU vào lúc bỏ tải"
+
+#: lexsup.c:365
+msgid "Force generation of file with .exe suffix"
+msgstr "Ép buộc tạo ra tập tin có hậu tố « .exe »"
+
+#: lexsup.c:367
+msgid "Remove unused sections (on some targets)"
+msgstr "Gỡ bỏ phần không dùng (trên một số đích)"
+
+#: lexsup.c:370
+msgid "Don't remove unused sections (default)"
+msgstr "Đừng gỡ bỏ phần không dùng (mặc định)"
+
+#: lexsup.c:373
+msgid "Set default hash table size close to <NUMBER>"
+msgstr "Lập kích cỡ bảng băm mặc định là gần <SỐ>"
+
+#: lexsup.c:376
+msgid "Print option help"
+msgstr "In ra trợ giúp về tùy chọn"
+
+#: lexsup.c:378
+msgid "Call SYMBOL at load-time"
+msgstr "Gọi KÝ HIỆU vào lúc tải"
+
+#: lexsup.c:380
+msgid "Write a map file"
+msgstr "Ghi tập tin bản đồ"
+
+#: lexsup.c:382
+msgid "Do not define Common storage"
+msgstr "Đừng định nghĩa kho dùng chung"
+
+#: lexsup.c:384
+msgid "Do not demangle symbol names"
+msgstr "Đừng tháo gỡ tên ký hiệu"
+
+#: lexsup.c:386
+msgid "Use less memory and more disk I/O"
+msgstr "Chiếm ít bộ nhớ hơn, và nhiều nhập/xuất đĩa hơn"
+
+#: lexsup.c:388
+msgid "Do not allow unresolved references in object files"
+msgstr "Đừng cho phép tham chiệu chưa tháo gỡ trong tập tin đối tượng"
+
+#: lexsup.c:391
+msgid "Allow unresolved references in shared libaries"
+msgstr "Cho phép tham chiệu chưa tháo gỡ trong thư viên dùng chung"
+
+#: lexsup.c:395
+msgid "Do not allow unresolved references in shared libs"
+msgstr "Đừng cho phép tham chiệu chưa tháo gỡ trong thư viên dùng chung"
+
+#: lexsup.c:399
+msgid "Allow multiple definitions"
+msgstr "Cho phép nhiều lời định nghĩa"
+
+#: lexsup.c:401
+msgid "Disallow undefined version"
+msgstr "Bỏ cho phép phiên bản chưa định nghĩa"
+
+#: lexsup.c:403
+msgid "Create default symbol version"
+msgstr "Tạo phiên bản ký hiệu mặc định"
+
+#: lexsup.c:406
+msgid "Create default symbol version for imported symbols"
+msgstr "Tạo phiên bản ký hiệu mặc định cho ký hiệu đã nhập"
+
+#: lexsup.c:409
+msgid "Don't warn about mismatched input files"
+msgstr "Đừng cảnh báo về tập tin nhập không khớp với nhau"
+
+#: lexsup.c:411
+msgid "Turn off --whole-archive"
+msgstr "Tắt tùy chọn « --whole-archive » (toàn kho)"
+
+#: lexsup.c:413
+msgid "Create an output file even if errors occur"
+msgstr "Tạo tập tin xuất dù gặp lỗi"
+
+#: lexsup.c:418
+msgid ""
+"Only use library directories specified on\n"
+"\t\t\t\tthe command line"
+msgstr ""
+"Chỉ dùng thư mục thư viên\n"
+"\tđược ghi rõ trên dòng lệnh"
+
+#: lexsup.c:421
+msgid "Specify target of output file"
+msgstr "Ghi rõ đích của tập tin xuất"
+
+#: lexsup.c:424
+msgid "Ignored for Linux compatibility"
+msgstr "Bị bỏ qua để tương thích với Linux"
+
+#: lexsup.c:427
+msgid "Reduce memory overheads, possibly taking much longer"
+msgstr "Giảm bộ nhớ duy tu, có thể mất rất nhiều thời gian hơn"
+
+#: lexsup.c:430
+msgid "Relax branches on certain targets"
+msgstr "Lơi ra nhánh trên một số đích nào đó"
+
+#: lexsup.c:433
+msgid "Keep only symbols listed in FILE"
+msgstr "Giữ chỉ những ký hiệu được liệt kê trong TẬP TIN"
+
+#: lexsup.c:435
+msgid "Set runtime shared library search path"
+msgstr "Lập đường dẫn tìm kiếm thư viên dùng chung vào lúc chạy"
+
+#: lexsup.c:437
+msgid "Set link time shared library search path"
+msgstr "Lập đường dẫn tìm kiếm thư viên dùng chung vào lúc liên kết"
+
+#: lexsup.c:440
+msgid "Create a shared library"
+msgstr "Tạo thư viên dùng chung"
+
+#: lexsup.c:444
+msgid "Create a position independent executable"
+msgstr "Tạo ứng dụng chạy được không phụ thuộc vào vị trí"
+
+#: lexsup.c:448
+msgid "Sort common symbols by size"
+msgstr "Sắp xếp ký hiệu dùng chung theo kích cỡ"
+
+#: lexsup.c:452
+msgid "name|alignment"
+msgstr "tên|canh_hàng"
+
+#: lexsup.c:453
+msgid "Sort sections by name or maximum alignment"
+msgstr "Sắp xếp phần theo tên hay canh lề tối đa"
+
+#: lexsup.c:455
+msgid "COUNT"
+msgstr "SỐ_ĐẾM"
+
+#: lexsup.c:455
+msgid "How many tags to reserve in .dynamic section"
+msgstr "Số thẻ cần giữ lại trong phần « .dynamic » (động)"
+
+#: lexsup.c:458
+msgid "[=SIZE]"
+msgstr "[=SIZE]"
+
+#: lexsup.c:458
+msgid "Split output sections every SIZE octets"
+msgstr "Chia tách phần xuất tại mỗi CỠ octet"
+
+#: lexsup.c:461
+msgid "[=COUNT]"
+msgstr "[=SỐ_ĐẾM]"
+
+#: lexsup.c:461
+msgid "Split output sections every COUNT relocs"
+msgstr "Chia tách phần xuất tại mỗi SỐ_ĐẾM việc định vị lại"
+
+#: lexsup.c:464
+msgid "Print memory usage statistics"
+msgstr "In ra thống kê cách sử dụng bộ nhớ"
+
+#: lexsup.c:466
+msgid "Display target specific options"
+msgstr "Hiển thị tùy chọn đặc trưng cho đích"
+
+#: lexsup.c:468
+msgid "Do task level linking"
+msgstr "Liên kết trong lớp tác vụ"
+
+#: lexsup.c:470
+msgid "Use same format as native linker"
+msgstr "Dùng cùng khuôn dạng với bộ liên kết sở hữu"
+
+#: lexsup.c:472
+msgid "SECTION=ADDRESS"
+msgstr "PHẦN=ĐỊA CHỈ"
+
+#: lexsup.c:472
+msgid "Set address of named section"
+msgstr "Lập địa chỉ của phần có tên"
+
+#: lexsup.c:475
+msgid "Set address of .bss section"
+msgstr "Lập địa chỉ của phần « .bss »"
+
+#: lexsup.c:477
+msgid "Set address of .data section"
+msgstr "Lập địa chỉ của phần « .data » (dữ liệu)"
+
+#: lexsup.c:479
+msgid "Set address of .text section"
+msgstr "Lập địa chỉ của phần « .text » (văn bản)"
+
+#: lexsup.c:482
+msgid ""
+"How to handle unresolved symbols.  <method> is:\n"
+"\t\t\t\tignore-all, report-all, ignore-in-object-files,\n"
+"\t\t\t\tignore-in-shared-libs"
+msgstr ""
+"Cách quản lý ký hiệu chưa tháo gỡ.\n"
+"  \t<phương_pháp> là:\n"
+" • ignore-all\t\t\t\tbỏ qua hết\n"
+" • report-all\t\t\t\tthông báo hết\n"
+" • ignore-in-object-files\tbỏ qua trong tập tin đối tượng\n"
+" • ignore-in-shared-libs\tbỏ qua trong thư viên dùng chung"
+
+#: lexsup.c:486
+msgid "Output lots of information during link"
+msgstr "Xuất nhiều thông tin trong khi liên kết"
+
+#: lexsup.c:490
+msgid "Read version information script"
+msgstr "Đọc tập lệnh thông tin phiên bản"
+
+#: lexsup.c:493
+msgid ""
+"Take export symbols list from .exports, using\n"
+"\t\t\t\tSYMBOL as the version."
+msgstr ""
+"Lấy danh sách ký hiệu xuất từ « .exports » (xuất),\n"
+"\t\tvới phiên bản là KÝ HIỆU"
+
+#: lexsup.c:496
+msgid "Warn about duplicate common symbols"
+msgstr "Cảnh báo về ký hiệu dùng chung trùng"
+
+#: lexsup.c:498
+msgid "Warn if global constructors/destructors are seen"
+msgstr "Cảnh báo nếu gặp bộ cấu tạo/phá toàn cục"
+
+#: lexsup.c:501
+msgid "Warn if the multiple GP values are used"
+msgstr "Cảnh báo nếu sử dụng nhiều giá trị GP"
+
+#: lexsup.c:503
+msgid "Warn only once per undefined symbol"
+msgstr "Cảnh báo chỉ một lần về mỗi ký hiệu chưa định nghĩa"
+
+#: lexsup.c:505
+msgid "Warn if start of section changes due to alignment"
+msgstr "Cảnh báo nếu đầu phần thay đổi vì canh lề"
+
+#: lexsup.c:508
+msgid "Warn if shared object has DT_TEXTREL"
+msgstr "Cảnh báo nếu đối tượng dùng chung có « DT_TEXTREL »"
+
+#: lexsup.c:512
+msgid "Report unresolved symbols as warnings"
+msgstr "Thông báo ký hiệu chưa tháo gỡ là cảnh báo"
+
+#: lexsup.c:515
+msgid "Report unresolved symbols as errors"
+msgstr "Thông báo ký hiệu chưa tháo gỡ là lỗi"
+
+#: lexsup.c:517
+msgid "Include all objects from following archives"
+msgstr "Gồm mọi đối tượng từ những kho theo đây"
+
+#: lexsup.c:520
+msgid "Use wrapper functions for SYMBOL"
+msgstr "Sử dụng hàm cuốn cho KÝ HIỆU"
+
+#: lexsup.c:667
+msgid "%P: unrecognized option '%s'\n"
+msgstr "%P: unrecognized option '%s'\n"
+
+#: lexsup.c:669
+msgid "%P%F: use the --help option for usage information\n"
+msgstr "%P%F: use the --help option for usage information\n"
+
+#: lexsup.c:687
+msgid "%P%F: unrecognized -a option `%s'\n"
+msgstr "%P%F: unrecognized -a option `%s'\n"
+
+#: lexsup.c:700
+msgid "%P%F: unrecognized -assert option `%s'\n"
+msgstr "%P%F: unrecognized -assert option `%s'\n"
+
+#: lexsup.c:743
+msgid "%F%P: unknown demangling style `%s'"
+msgstr "%F%Ps:không biết  kiểu dáng tháo gõ (demangle « %s »n"
+
+#: lexsup.c:805
+msgid "%P%F: invalid number `%s'\n"
+msgstr "%P%F: invalid number `%s'\n"
+
+#: lexsup.c:897
+msgid "%P%F: bad --unresolved-symbols option: %s\n"
+msgstr "%P%F: tùy chọnb« ad --unresolved-symbo» (ký hiệu chưa tháo gỡ) saiion: %s\n"
+
+#. This can happen if the user put "-rpath,a" on the command
+#. line.  (Or something similar.  The comma is important).
+#. Getopt becomes confused and thinks that this is a -r option
+#. but it cannot parse the text after the -r so it refuses to
+#. increment the optind counter.  Detect this case and issue
+#. an error message here.  We cannot just make this a warning,
+#. increment optind, and continue because getopt is too confused
+#. and will seg-fault the next time around.
+#: lexsup.c:968
+msgid "%P%F: bad -rpath option\n"
+msgstr "%P%F: tùy chọn « -rpath » (đường dẫn r) sai\n"
+
+#: lexsup.c:1080
+msgid "%P%F: -shared not supported\n"
+msgstr "%P%F: -shared not supported\n"
+
+#: lexsup.c:1089
+msgid "%P%F: -pie not supported\n"
+msgstr "%P%F: không hỗ trợ tùy chọn « -pie » (bánh)\n"
+
+#: lexsup.c:1099
+msgid "name"
+msgstr "tên"
+
+#: lexsup.c:1101
+msgid "alignment"
+msgstr "canh lề"
+
+#: lexsup.c:1104
+msgid "%P%F: invalid section sorting option: %s\n"
+msgstr "%P%F: invalid section sorting option: %s\n"
+
+#: lexsup.c:1130
+msgid "%P%F: invalid argument to option \"--section-start\"\n"
+msgstr "%P%F: đối số không hợp lệ đối với tùy chọni« alid argument t » (bắt đầu phần)option \"--section-start\"\n"
+
+#: lexsup.c:1137
+msgid "%P%F: missing argument(s) to option \"--section-start\"\n"
+msgstr "%P%F: thiếu đối số đối với tùy chọn « --section-start » (bắt đầu phần)\n"
+
+#: lexsup.c:1311
+msgid "%P%F: may not nest groups (--help for usage)\n"
+msgstr "%P%F: không cho phép lồng nhóm với nhau (« --help » để xem cách sử dụng đúng)\n"
+
+#: lexsup.c:1318
+msgid "%P%F: group ended before it began (--help for usage)\n"
+msgstr "%P%F: nhóm kết thức trước bắt đầu (« --help » để xem cách sử dụng đúng)\n"
+
+#: lexsup.c:1346
+msgid "%P%X: --hash-size needs a numeric argument\n"
+msgstr "%P%X: --hash-size needs a numeric argument\n"
+
+#: lexsup.c:1397 lexsup.c:1410
+msgid "%P%F: invalid hex number `%s'\n"
+msgstr "%P%F: invalid hex number `%s'\n"
+
+#: lexsup.c:1445
+#, c-format
+msgid "Usage: %s [options] file...\n"
+msgstr "Cách sử dụng: %s <tùy_chọn> tập_tin...\n"
+
+#: lexsup.c:1447
+#, c-format
+msgid "Options:\n"
+msgstr "Tùy chọn:\n"
+
+#. Note: Various tools (such as libtool) depend upon the
+#. format of the listings below - do not change them.
+#: lexsup.c:1530
+#, c-format
+msgid "%s: supported targets:"
+msgstr "%s: đích hỗ trợ :"
+
+#: lexsup.c:1538
+#, c-format
+msgid "%s: supported emulations: "
+msgstr "%s: mô phỏng hỗ trợ :"
+
+#: lexsup.c:1543
+#, c-format
+msgid "%s: emulation specific options:\n"
+msgstr "%s: tùy chọn đặc trưng cho mô phỏng:\n"
+
+#: lexsup.c:1547
+#, c-format
+msgid "Report bugs to %s\n"
+msgstr "Hãy thông báo lỗi nào cho %s\n"
+
+#: mri.c:291
+msgid "%P%F: unknown format type %s\n"
+msgstr "%P%F: không biết kiểu khuôn dạng %s\n"
+
+#: pe-dll.c:303
+#, c-format
+msgid "%XUnsupported PEI architecture: %s\n"
+msgstr "%XChưa hỗ trợ kiến trúc PEI: %s\n"
+
+#: pe-dll.c:652
+#, c-format
+msgid "%XError, duplicate EXPORT with ordinals: %s (%d vs %d)\n"
+msgstr "%XLỗi: XUẤT trùng với điều thứ tự : %s (%d so với %d)\n"
+
+#: pe-dll.c:659
+#, c-format
+msgid "Warning, duplicate EXPORT: %s\n"
+msgstr "Cảnh báo, XUẤT trùng: %s\n"
+
+#: pe-dll.c:725
+#, c-format
+msgid "%XCannot export %s: symbol not defined\n"
+msgstr "%XKhông thể xuất %s: chưa định nghĩa ký hiệu\n"
+
+#: pe-dll.c:731
+#, c-format
+msgid "%XCannot export %s: symbol wrong type (%d vs %d)\n"
+msgstr "%XKhông thể xuất %s: ký hiệu sai kiểu (%d so với %d)\n"
+
+#: pe-dll.c:738
+#, c-format
+msgid "%XCannot export %s: symbol not found\n"
+msgstr "%XKhông thể xuất %s: không tìm thấy ký hiệu\n"
+
+#: pe-dll.c:850
+#, c-format
+msgid "%XError, ordinal used twice: %d (%s vs %s)\n"
+msgstr "%XLỗi, điều thứ tự được dùng hai lần: %d (%s so với %s)\n"
+
+#: pe-dll.c:1172
+#, c-format
+msgid "%XError: %d-bit reloc in dll\n"
+msgstr "%xLỗi: định vị lại %d-bit trong DLL\n"
+
+#: pe-dll.c:1300
+#, c-format
+msgid "%s: Can't open output def file %s\n"
+msgstr "%s: Không thể mở tập tin xuất def (định nghĩa) %s\n"
+
+#: pe-dll.c:1443
+#, c-format
+msgid "; no contents available\n"
+msgstr "; không có nội dung sẵn sàng\n"
+
+#: pe-dll.c:2205
+msgid "%C: variable '%T' can't be auto-imported. Please read the documentation for ld's --enable-auto-import for details.\n"
+msgstr "%C: không thể tự động nhập biến « %T ». Hãy đọc tài liệu hướng dẫn về tùy chọn « --enable-auto-import » (bật nhập tự động) của trình ld, để xem chi tiết.\n"
+
+#: pe-dll.c:2235
+#, c-format
+msgid "%XCan't open .lib file: %s\n"
+msgstr "%XKhông thể mở tập tin « .lib » (thư viên): %s\n"
+
+#: pe-dll.c:2240
+#, c-format
+msgid "Creating library file: %s\n"
+msgstr "Đang tạo tập tin thư viên: %s\n"
