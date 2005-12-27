@@ -1,5 +1,11 @@
 2005-12-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (add_stub_sym): Pass info rather than htab.
+	Use different names for pic vs non-pic, '.' instead of '_'.
+	(allocate_dynrelocs): Adjust add_stub_sym call.
+
+2005-12-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf.c (bfd_section_from_shdr): Treat invalid reloc sections as
 	normal sections rather than returning false.
 

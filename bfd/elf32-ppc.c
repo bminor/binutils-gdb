@@ -4213,34 +4213,41 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   return TRUE;
 }
 
-/* Generate a symbol to mark plt call stubs, of the form
-   xxxxxxxx_plt_call_<callee> where xxxxxxxx is a hex number, usually 0,
-   specifying the addend on the plt relocation, or for -fPIC,
-   xxxxxxxx.got2_plt_call_<callee>.  */
+/* Generate a symbol to mark plt call stubs.  For non-PIC code the sym is
+   xxxxxxxx.plt_call32.<callee> where xxxxxxxx is a hex number, usually 0,
+   specifying the addend on the plt relocation.  For -fpic code, the sym
+   is xxxxxxxx.plt_pic32.<callee>, and for -fPIC
+   xxxxxxxx.got2.plt_pic32.<callee>.  */
 
 static bfd_boolean
 add_stub_sym (struct plt_entry *ent,
 	      struct elf_link_hash_entry *h,
-	      struct ppc_elf_link_hash_table *htab)
+	      struct bfd_link_info *info)
 {
   struct elf_link_hash_entry *sh;
   size_t len1, len2, len3;
   char *name;
+  const char *stub;
+  struct ppc_elf_link_hash_table *htab = ppc_elf_hash_table (info);
+
+  if (info->shared || info->pie)
+    stub = ".plt_pic32.";
+  else
+    stub = ".plt_call32.";
 
   len1 = strlen (h->root.root.string);
-  len2 = sizeof ("plt_call_") - 1;
+  len2 = strlen (stub);
   len3 = 0;
   if (ent->sec)
     len3 = strlen (ent->sec->name);
-  name = bfd_malloc (len1 + len2 + len3 + 10);
+  name = bfd_malloc (len1 + len2 + len3 + 9);
   if (name == NULL)
     return FALSE;
   sprintf (name, "%08x", (unsigned) ent->addend & 0xffffffff);
   if (ent->sec)
     memcpy (name + 8, ent->sec->name, len3);
-  name[len3 + 8] = '_';
-  memcpy (name + len3 + 9, "plt_call_", len2);
-  memcpy (name + len3 + 9 + len2, h->root.root.string, len1 + 1);
+  memcpy (name + 8 + len3, stub, len2);
+  memcpy (name + 8 + len3 + len2, h->root.root.string, len1 + 1);
   sh = elf_link_hash_lookup (&htab->elf, name, TRUE, FALSE, FALSE);
   if (sh == NULL)
     return FALSE;
@@ -4361,7 +4368,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		    ent->glink_offset = glink_offset;
 
 		    if (htab->emit_stub_syms
-			&& !add_stub_sym (ent, h, htab))
+			&& !add_stub_sym (ent, h, info))
 		      return FALSE;
 		  }
 		else
