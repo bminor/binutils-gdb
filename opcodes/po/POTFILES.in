@@ -7,6 +7,7 @@ arm-dis.c
 avr-dis.c
 bfin-dis.c
 cgen-asm.c
+cgen-bitset.c
 cgen-dis.c
 cgen-opc.c
 cgen-ops.h
@@ -104,13 +105,13 @@ mips-dis.c
 mips-opc.c
 mmix-dis.c
 mmix-opc.c
-ms1-asm.c
-ms1-desc.c
-ms1-desc.h
-ms1-dis.c
-ms1-ibld.c
-ms1-opc.c
-ms1-opc.h
+mt-asm.c
+mt-desc.c
+mt-desc.h
+mt-dis.c
+mt-ibld.c
+mt-opc.c
+mt-opc.h
 ns32k-dis.c
 openrisc-asm.c
 openrisc-desc.c
@@ -157,6 +158,7 @@ xstormy16-ibld.c
 xstormy16-opc.c
 xstormy16-opc.h
 xtensa-dis.c
+z80-dis.c
 z8k-dis.c
 z8kgen.c
 z8k-opc.h

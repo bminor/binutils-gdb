@@ -1,3 +1,9 @@
+2005-12-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2005-12-22  Laurent Menten  <laurent.menten@teledisnet.be>
 
 	* pj-opc.c (jsr, ret, getstatic, putstatic, getfield, putfield,

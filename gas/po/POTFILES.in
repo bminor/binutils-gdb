@@ -120,6 +120,8 @@ config/tc-xstormy16.c
 config/tc-xstormy16.h
 config/tc-xtensa.c
 config/tc-xtensa.h
+config/tc-z80.c
+config/tc-z80.h
 config/tc-z8k.c
 config/tc-z8k.h
 depend.c

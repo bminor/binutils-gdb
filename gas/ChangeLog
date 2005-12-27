@@ -1,3 +1,9 @@
+2005-12-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2005-12-22  Jan Beulich  <jbeulich@novell.com>
 
 	* symbols.h (snapshot_symbol): First parameter is now pointer
