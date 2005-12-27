@@ -99,7 +99,7 @@ enum mt_architectures
   };
 
 /* MT architecture we are using for this output file.  */
-static enum mt_architectures mt_arch = ms1_64_001;
+static enum mt_architectures mt_arch = ms1_16_002;
 
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, char * arg)
@@ -107,28 +107,28 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg)
   switch (c)
     {
     case OPTION_MARCH:
-      if (strcasecmp (arg, "MS1-64-001") == 0)
+      if (strcmp (arg, "ms1-64-001") == 0)
  	{
  	  mt_flags = (mt_flags & ~EF_MT_CPU_MASK) | EF_MT_CPU_MRISC;
  	  mt_mach = bfd_mach_ms1;
  	  mt_mach_bitmask = 1 << MACH_MS1;
  	  mt_arch = ms1_64_001;
  	}
-      else if (strcasecmp (arg, "MS1-16-002") == 0)
+      else if (strcmp (arg, "ms1-16-002") == 0)
  	{
  	  mt_flags = (mt_flags & ~EF_MT_CPU_MASK) | EF_MT_CPU_MRISC;
  	  mt_mach = bfd_mach_ms1;
  	  mt_mach_bitmask = 1 << MACH_MS1;
  	  mt_arch = ms1_16_002;
  	}
-      else if (strcasecmp (arg, "MS1-16-003") == 0)
+      else if (strcmp (arg, "ms1-16-003") == 0)
  	{
  	  mt_flags = (mt_flags & ~EF_MT_CPU_MASK) | EF_MT_CPU_MRISC2;
  	  mt_mach = bfd_mach_mrisc2;
  	  mt_mach_bitmask = 1 << MACH_MS1_003;
  	  mt_arch = ms1_16_003;
  	}
-      else if (strcasecmp (arg, "MS2") == 0)
+      else if (strcmp (arg, "ms2") == 0)
  	{
  	  mt_flags = (mt_flags & ~EF_MT_CPU_MASK) | EF_MT_CPU_MS2;
  	  mt_mach = bfd_mach_mrisc2;
@@ -150,11 +150,11 @@ void
 md_show_usage (FILE * stream)
 {
   fprintf (stream, _("MT specific command line options:\n"));
-  fprintf (stream, _("  -march=ms1-64-001         allow ms1-64-001 instructions (default) \n"));
-  fprintf (stream, _("  -march=ms1-16-002         allow ms1-16-002 instructions \n"));
-  fprintf (stream, _("  -march=ms1-16-003         allow ms1-16-003 instructions \n"));
+  fprintf (stream, _("  -march=ms1-64-001         allow ms1-64-001 instructions\n"));
+  fprintf (stream, _("  -march=ms1-16-002         allow ms1-16-002 instructions (default)\n"));
+  fprintf (stream, _("  -march=ms1-16-003         allow ms1-16-003 instructions\n"));
   fprintf (stream, _("  -march=ms2                allow ms2 instructions \n"));
-  fprintf (stream, _("  -nosched                  disable scheduling restrictions \n"));
+  fprintf (stream, _("  -nosched                  disable scheduling restrictions\n"));
 }
 
 

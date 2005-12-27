@@ -1,3 +1,9 @@
+2005-12-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-mt.c (mt_arch): Default to ms1_16_002.
+	(md_parse_options): Only allow lowercase.
+	(md_show_usage): Update.
+
 2005-12-27  Leif Ekblad  <leif@rdos.net>
 
 	* configure.tgt: Add support for RDOS targets.
