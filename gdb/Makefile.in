@@ -2604,9 +2604,9 @@ sparc64nbsd-tdep.o: sparc64nbsd-tdep.c $(defs_h) $(frame_h) \
 	$(symtab_h) $(objfiles_h) $(solib_svr4_h) $(trad_frame_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(sparc64_tdep_h) $(nbsd_tdep_h)
 sparc64obsd-tdep.o: sparc64obsd-tdep.c $(defs_h) $(frame_h) \
-	$(frame_unwind_h) $(osabi_h) $(regset_h) $(symtab_h) $(objfiles_h) \
-	$(solib_svr4_h) $(trad_frame_h) $(gdb_assert_h) $(obsd_tdep_h) \
-	$(sparc64_tdep_h)
+	$(frame_unwind_h) $(gdbcore_h) $(osabi_h) $(regcache_h) $(regset_h) \
+	$(symtab_h) $(objfiles_h) $(trad_frame_h) $(gdb_assert_h) \
+	$(obsd_tdep_h) $(sparc64_tdep_h) $(solib_svr4_h) $(bsd_uthread_h)
 sparc64-sol2-tdep.o: sparc64-sol2-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(symtab_h) $(objfiles_h) $(osabi_h) \
 	$(trad_frame_h) $(gdb_assert_h) $(sparc64_tdep_h) $(solib_svr4_h)

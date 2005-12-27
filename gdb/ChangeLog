@@ -1,5 +1,14 @@
 2005-12-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64obsd-tdep.c: Include "gdbcore.h", "regcache.h" amd
+	"bsd-uthread.h".
+	(SPARC64OBSD_UTHREAD_FP_OFFSET, SPARC64OBSD_UTHREAD_PC_OFFSET):
+	New defines.
+	(sparc64obsd_supply_uthread, sparc64obsd_collect_uthread): New
+	functions.
+	(sparc64obsd_init_abi): Set supply_uthread and collect_uthread.
+	* Makefile.in (sparc64obsd-tdep.o): Update dependencies.
+
 	* sparcobsd-tdep.c: Include "gdbcore.h", "regcache.h" and
 	"bsd-uthread.h".
 	(SPARC32OBSD_UTHREAD_FP_OFFSET, SPARC32OBSD_UTHREAD_PC_OFFSET):
