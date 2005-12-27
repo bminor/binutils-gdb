@@ -6686,8 +6686,6 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 	  if (state == symbol_seen)
 	    state = file_after_symbol_seen;
 	  continue;
-	case STT_SECTION:
-	  continue;
 	case STT_NOTYPE:
 	case STT_FUNC:
 	  if (bfd_get_section (&q->symbol) == section
@@ -6696,12 +6694,10 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 	    {
 	      func = (asymbol *) q;
 	      low_func = q->symbol.value;
-	      if (file == NULL)
-		filename = NULL;
-	      else if (ELF_ST_BIND (q->internal_elf_sym.st_info) != STB_LOCAL
-		       && state == file_after_symbol_seen)
-		filename = NULL;
-	      else
+	      filename = NULL;
+	      if (file != NULL
+		  && (ELF_ST_BIND (q->internal_elf_sym.st_info) == STB_LOCAL
+		      || state != file_after_symbol_seen))
 		filename = bfd_asymbol_name (file);
 	    }
 	  break;
