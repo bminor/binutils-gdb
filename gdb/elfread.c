@@ -530,13 +530,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
       make_cleanup (xfree, synthsyms);
       synth_symbol_table = xmalloc (sizeof (asymbol *) * synthcount);
       for (i = 0; i < synthcount; i++)
-	{
-	  synth_symbol_table[i] = synthsyms + i;
-	  /* Synthetic symbols are not, strictly speaking, either local
-	     or global.  But we can treat them as global symbols, since
-	     they are effectively dynamic symbols.  */
-	  synth_symbol_table[i]->flags |= BSF_GLOBAL;
-	}
+	synth_symbol_table[i] = synthsyms + i;
       make_cleanup (xfree, synth_symbol_table);
       elf_symtab_read (objfile, 0, synthcount, synth_symbol_table);
     }

@@ -1,3 +1,7 @@
+2005-12-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elfread.c (elf_symfile_read): Don't make synth syms global.
+
 2005-12-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64obsd-tdep.c: Include "obsd-tdep.h".
