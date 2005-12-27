@@ -11747,8 +11747,9 @@ md_apply_fix (fixS *	fixP,
 	  if (value & 3)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid offset, target not word aligned (0x%08lX)"),
-			  (((unsigned int) fixP->fx_frag->fr_address
-			    + (unsigned int) fixP->fx_where) & ~3) + value);
+			  (((unsigned long) fixP->fx_frag->fr_address
+			    + (unsigned long) fixP->fx_where) & ~3)
+			  + (unsigned long) value);
 
 	  if (value & ~0x3fc)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,

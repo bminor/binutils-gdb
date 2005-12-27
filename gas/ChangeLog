@@ -1,3 +1,9 @@
+2005-12-27  James Troup  <james@nocrew.org>
+
+	PR 1300
+	* config/tc-arm.c (md_apply_fix): Fix casts to match type in
+	printf format.
+
 2005-12-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
