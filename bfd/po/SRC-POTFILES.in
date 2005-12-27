@@ -57,6 +57,7 @@ coff-tic80.c
 coff-u68k.c
 coff-w65.c
 coff-we32k.c
+coff-z80.c
 coff-z8k.c
 corefile.c
 cpu-alpha.c
@@ -94,8 +95,8 @@ cpu-maxq.c
 cpu-mcore.c
 cpu-mips.c
 cpu-mmix.c
-cpu-ms1.c
 cpu-msp430.c
+cpu-mt.c
 cpu-ns32k.c
 cpu-openrisc.c
 cpu-or32.c
@@ -116,6 +117,7 @@ cpu-w65.c
 cpu-we32k.c
 cpu-xstormy16.c
 cpu-xtensa.c
+cpu-z80.c
 cpu-z8k.c
 demo64.c
 dwarf1.c
@@ -158,8 +160,8 @@ elf32-m68k.c
 elf32-m88k.c
 elf32-mcore.c
 elf32-mips.c
-elf32-ms1.c
 elf32-msp430.c
+elf32-mt.c
 elf32-openrisc.c
 elf32-or32.c
 elf32-pj.c
