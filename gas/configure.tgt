@@ -213,6 +213,7 @@ case ${generic_target} in
   i386-*-nto-qnx*)			fmt=elf ;;
   i386-*-*nt*)				fmt=coff em=pe ;;
   i386-*-chaos)				fmt=elf ;;
+  i386-*-rdos*)				fmt=elf ;;
 
   i860-*-*)				fmt=elf endian=little ;;
 

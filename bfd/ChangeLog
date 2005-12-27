@@ -1,3 +1,7 @@
+2005-12-27  Leif Ekblad  <leif@rdos.net>
+
+	* config.bfd: Add support for RDOS targets.
+
 2005-12-27  Marty Leisner  <leisner@rochester.rr.com>
 
 	* dwarf2.c (lookup_symbol_in_function_table): Check for a function

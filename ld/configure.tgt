@@ -140,6 +140,7 @@ i[3-7]86-*-lynxos*)	targ_emul=i386lynx ;;
 i[3-7]86-*-coff)	targ_emul=i386coff ;;
 i[3-7]86-*-rtems*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-aros*)	targ_emul=elf_i386 ;;
+i[3-7]86-*-rdos*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-bsd)		targ_emul=i386bsd ;;
 i[3-7]86-*-bsd386)	targ_emul=i386bsd ;;
 i[3-7]86-*-bsdi*)	targ_emul=i386bsd ;;

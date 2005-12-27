@@ -1,3 +1,7 @@
+2005-12-27  Leif Ekblad  <leif@rdos.net>
+
+	* configure.tgt: Add support for RDOS targets.
+
 2005-12-27  James Troup  <james@nocrew.org>
 
 	PR 1300

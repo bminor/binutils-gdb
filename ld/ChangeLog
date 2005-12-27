@@ -1,3 +1,7 @@
+2005-12-27  Leif Ekblad  <leif@rdos.net>
+
+	* configure.tgt: Add support for RDOS targets.
+
 2005-12-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: New Vietnamese translation.
