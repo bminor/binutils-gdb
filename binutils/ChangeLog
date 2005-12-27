@@ -4,6 +4,10 @@
 	(Makefile): Remove dependency.
 	* Makefile.in: Regenerate.
 
+2005-12-26  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* MAINTAINERS: Add myself as VAX maintainer.
+
 2005-12-22  Randolph Chung  <tausq@debian.org>
 
 	* rddbg.c (read_section_stabs_debugging_info): Add $GDB_SYMBOLS$
