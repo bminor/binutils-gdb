@@ -548,7 +548,7 @@ static bfd_boolean
 mt_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 {
   flagword     old_flags, new_flags;
-  bfd_boolean  error = FALSE;
+  bfd_boolean  ok = TRUE;
 
   /* Check if we have the same endianess.  */
   if (_bfd_generic_verify_endian_match (ibfd, obfd) == FALSE)
@@ -578,23 +578,16 @@ mt_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
     {
       /* CPU has changed.  This is invalid, because MRISC, MRISC2 and
 	 MS2 are not subsets of each other.   */
-      error = 1;
-      
-      /* FIXME:However, until the compiler is multilibbed, preventing
-	 mixing breaks the build.  So we allow merging and use the
-	 greater CPU value.  This is of course unsafe.  */
-      error = 0;
-      if ((new_flags & EF_MT_CPU_MASK) > (old_flags & EF_MT_CPU_MASK))
-	old_flags = ((old_flags & ~EF_MT_CPU_MASK)
-		     | (new_flags & EF_MT_CPU_MASK));
+      ok = FALSE;
     }
-  if (!error)
+  
+  if (ok)
     {
       obfd->arch_info = ibfd->arch_info;
       elf_elfheader (obfd)->e_flags = old_flags;
     }
 
-  return !error;
+  return ok;
 }
 
 static bfd_boolean

@@ -1,3 +1,8 @@
+2005-12-27  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-mt.c (mt_elf_merge_private_bfd_data): Do not allow mixing
+	object files from different mt variants.
+
 2005-12-27  Leif Ekblad  <leif@rdos.net>
 
 	* config.bfd: Add support for RDOS targets.
