@@ -1,3 +1,8 @@
+2005-12-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/xtensaelf.em (elf_xtensa_place_orphan): Delete.
+	(LDEMUL_PLACE_ORPHAN): Delete.
+
 2005-12-27  Leif Ekblad  <leif@rdos.net>
 
 	* configure.tgt: Add support for RDOS targets.

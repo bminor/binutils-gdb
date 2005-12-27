@@ -58,17 +58,6 @@ elf_xtensa_choose_target (int argc ATTRIBUTE_UNUSED,
 }
 
 
-static bfd_boolean
-elf_xtensa_place_orphan (asection *s)
-{
-  /* Early exit for relocatable links.  */
-  if (link_info.relocatable)
-    return FALSE;
-
-  return gld${EMULATION_NAME}_place_orphan (s);
-}
-
-
 static void
 elf_xtensa_before_parse (void)
 {
@@ -1728,6 +1717,5 @@ PARSE_AND_LIST_ARGS_CASES='
 LDEMUL_BEFORE_PARSE=elf_xtensa_before_parse
 LDEMUL_AFTER_OPEN=elf_xtensa_after_open
 LDEMUL_CHOOSE_TARGET=elf_xtensa_choose_target
-LDEMUL_PLACE_ORPHAN=elf_xtensa_place_orphan
 LDEMUL_BEFORE_ALLOCATION=elf_xtensa_before_allocation
 
