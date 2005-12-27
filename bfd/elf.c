@@ -2045,15 +2045,16 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   represent such a section, so at least for now, we don't
 	   try.  We just present it as a normal section.  We also
 	   can't use it as a reloc section if it points to the null
-	   section.  */
-	if (hdr->sh_link != elf_onesymtab (abfd) || hdr->sh_info == SHN_UNDEF)
+	   section, an invalid section, or another reloc section.  */
+	if (hdr->sh_link != elf_onesymtab (abfd)
+	    || hdr->sh_info == SHN_UNDEF
+	    || (hdr->sh_info >= SHN_LORESERVE && hdr->sh_info <= SHN_HIRESERVE)
+	    || hdr->sh_info >= num_sec
+	    || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_REL
+	    || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_RELA)
 	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name,
 						  shindex);
 
-	/* Prevent endless recursion on broken objects.  */
-	if (elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_REL
-	    || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_RELA)
-	  return FALSE;
 	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return FALSE;
 	target_sect = bfd_section_from_elf_index (abfd, hdr->sh_info);

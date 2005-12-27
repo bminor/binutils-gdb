@@ -1,5 +1,10 @@
 2005-12-27  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (bfd_section_from_shdr): Treat invalid reloc sections as
+	normal sections rather than returning false.
+
+2005-12-27  Alan Modra  <amodra@bigpond.net.au>
+
 	* coff-h8300.c (h8300_reloc16_extra_cases): Use input section
 	"output_offset" instead of link order "offset".
 	* coff-h8500.c (extra_case): Likewise.
