@@ -1,3 +1,8 @@
+2005-12-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Use info->executable
+	instead of !info->shared.
+
 2005-12-27  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* vaxlinux.h: New file. (TRAD_CORE_EXTRA_SIZE_ALLOWED): Define.
