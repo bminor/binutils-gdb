@@ -1,3 +1,10 @@
+2005-12-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (Makefile): Remove dependency.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* gconfig.in: Regenerate.
+
 2005-11-16  Mark Mitchell  <mark@codesourcery.com>
 
 	* Makefile.am (gprof.info, gprof.1): Depend on config.texi.

@@ -75,8 +75,6 @@ gprof.1: $(srcdir)/gprof.texi config.texi
 	       (rm -f $@.T$$$$ && exit 1)
 	rm -f gprof.pod
 
-Makefile: $(BFDDIR)/configure.in
-
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
 install-data-local: install-info
