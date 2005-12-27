@@ -1467,6 +1467,7 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 	  if ((!each_func->sec || each_func->sec == sec)
 	      && addr >= arange->low
 	      && addr < arange->high
+	      && each_func->name
 	      && strcmp (name, each_func->name) == 0
 	      && (!best_fit
 		  || ((arange->high - arange->low)
