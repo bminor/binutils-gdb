@@ -1,3 +1,9 @@
+2005-12-27  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* vaxlinux.h: New file. (TRAD_CORE_EXTRA_SIZE_ALLOWED): Define.
+	(HOST_MACHINE_ARCH): Define. This allows cross-building vax-linux
+	hosted binutils.
+
 2005-12-27  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-mt.c (mt_elf_merge_private_bfd_data): Do not allow mixing
