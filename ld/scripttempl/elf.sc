@@ -452,8 +452,7 @@ cat <<EOF
   ${LARGE_SECTIONS}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+${OTHER_END_SYMBOLS}}
-  ${RELOCATING+_end = .;}
-  ${RELOCATING+PROVIDE (end = .);}
+  ${RELOCATING+${END_SYMBOLS-_end = .; PROVIDE (end = .);}}
   ${RELOCATING+${DATA_SEGMENT_END}}
 
   /* Stabs debugging sections.  */
