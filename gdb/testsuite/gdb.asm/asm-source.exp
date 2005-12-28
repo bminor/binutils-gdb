@@ -144,6 +144,11 @@ switch -glob -- [istarget] {
         set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir}"
 	set debug-flags "-gdwarf-2"
     }
+    "hppa-*-openbsd*" {
+        set asm-arch pa
+        set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir}"
+	set debug-flags "-gdwarf-2"
+    }
     "hppa64-*-hpux*" {
         set asm-arch pa64
         set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir}"

@@ -1,3 +1,8 @@
+2005-12-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp (hppa-*-openbsd*): New.
+	* gdb.asm/openbsd.inc: Indent commands.
+
 2005-12-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/freebpcmd.exp: Increase timeout.
