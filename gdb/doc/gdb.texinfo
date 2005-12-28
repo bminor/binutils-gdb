@@ -6279,6 +6279,36 @@ cases, @value{GDBN} normally works with the virtual format only (the format
 that makes sense for your program), but the @code{info registers} command
 prints the data in both formats.
 
+@cindex SSE registers (x86)
+@cindex MMX registers (x86)
+Some machines have special registers whose contents can be interpreted
+in several different ways.  For example, modern x86-based machines
+have SSE and MMX registers that can hold several values packed
+together in several different formats.  @value{GDBN} refers to such
+registers in @code{struct} notation:
+
+@smallexample
+(@value{GDBP}) print $xmm1
+$1 = @{
+  v4_float = @{0, 3.43859137e-038, 1.54142831e-044, 1.821688e-044@},
+  v2_double = @{9.92129282474342e-303, 2.7585945287983262e-313@},
+  v16_int8 = "\000\000\000\000\3706;\001\v\000\000\000\r\000\000",
+  v8_int16 = @{0, 0, 14072, 315, 11, 0, 13, 0@},
+  v4_int32 = @{0, 20657912, 11, 13@},
+  v2_int64 = @{88725056443645952, 55834574859@},
+  uint128 = 0x0000000d0000000b013b36f800000000
+@}
+@end smallexample
+
+@noindent
+To set values of such registers, you need to tell @value{GDBN} which
+view of the register you wish to change, as if you were assigning
+value to a @code{struct} member:
+
+@smallexample
+ (@value{GDBP}) set $xmm1.uint128 = 0x000000000000000000000000FFFFFFFF
+@end smallexample
+
 Normally, register values are relative to the selected stack frame
 (@pxref{Selection, ,Selecting a frame}).  This means that you get the
 value that the register would contain if all stack frames farther in
