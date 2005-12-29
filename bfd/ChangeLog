@@ -1,3 +1,9 @@
+2005-12-29  Nick Clifton  <nickc@redhat.com>
+
+	* stabs.c (_bfd_link_section_stabs): Use bfd_hash_table_init
+	rather than bfd_hash_table_init_n(...,251) so that the size of the
+	hash table can be controlled by the user.
+
 2005-12-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Use info->executable

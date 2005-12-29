@@ -194,9 +194,8 @@ _bfd_link_section_stabs (bfd *abfd,
 	goto error_return;
       /* Make sure the first byte is zero.  */
       (void) _bfd_stringtab_add (sinfo->strings, "", TRUE, TRUE);
-      if (! bfd_hash_table_init_n (&sinfo->includes,
-				   stab_link_includes_newfunc,
-				   251))
+      if (! bfd_hash_table_init (&sinfo->includes,
+				 stab_link_includes_newfunc))
 	goto error_return;
       sinfo->stabstr = bfd_make_section_anyway (abfd, ".stabstr");
       if (sinfo->stabstr == NULL)
