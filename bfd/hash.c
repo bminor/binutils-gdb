@@ -492,7 +492,7 @@ bfd_hash_set_default_size (bfd_size_type hash_size)
   /* Extend this prime list if you want more granularity of hash table size.  */
   static const bfd_size_type hash_size_primes[] =
     {
-      1021, 4051, 8599, 16699
+      251, 509, 1021, 2039, 4051, 8599, 16699, 32749
     };
   size_t index;
 

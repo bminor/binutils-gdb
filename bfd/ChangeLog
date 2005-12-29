@@ -1,5 +1,8 @@
 2005-12-29  Nick Clifton  <nickc@redhat.com>
 
+	* hash.c (bfd_hash_set_default_size): Add more entries to the
+	hash_size_primes table.
+
 	* stabs.c (_bfd_link_section_stabs): Use bfd_hash_table_init
 	rather than bfd_hash_table_init_n(...,251) so that the size of the
 	hash table can be controlled by the user.
