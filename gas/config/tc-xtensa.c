@@ -11220,8 +11220,6 @@ tinsn_to_slotbuf (xtensa_format fmt,
   int noperands = xtensa_opcode_num_operands (isa, opcode);
   int i;
 
-  *((int *) &slotbuf[0]) = 0;
-  *((int *) &slotbuf[1]) = 0;
   assert (tinsn->insn_type == ITYPE_INSN);
   if (noperands != tinsn->ntok)
     as_fatal (_("operand number mismatch"));
