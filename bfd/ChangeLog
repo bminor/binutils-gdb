@@ -1,3 +1,7 @@
+2005-12-30  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* configure.host (hppa*64*-*-hpux*): Set host64 to true.
+
 2005-12-29  Nick Clifton  <nickc@redhat.com>
 
 	* hash.c (bfd_hash_set_default_size): Add more entries to the
