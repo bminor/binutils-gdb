@@ -339,13 +339,55 @@ static string_pattern_pair widen_spec_list[] =
    "addi    %as, %as, 1;"	/* density -> addi.n %as, %as, 1 */
    "LABEL0"},
 
+  /* Relaxing to wide branches.  Order is important here.  With wide
+     branches, there is more than one correct relaxation for an
+     out-of-range branch.  Put the wide branch relaxations first in the
+     table since they are more efficient than the branch-around
+     relaxations.  */
+  
+  {"beqz %as,%label ? IsaUseWideBranches", "beqz.w18 %as,%label"},
+  {"bnez %as,%label ? IsaUseWideBranches", "bnez.w18 %as,%label"},
+  {"bgez %as,%label ? IsaUseWideBranches", "bgez.w18 %as,%label"},
+  {"bltz %as,%label ? IsaUseWideBranches", "bltz.w18 %as,%label"},
+  {"beqi %as,%imm,%label ? IsaUseWideBranches", "beqi.w18 %as,%imm,%label"},
+  {"bnei %as,%imm,%label ? IsaUseWideBranches", "bnei.w18 %as,%imm,%label"},
+  {"bgei %as,%imm,%label ? IsaUseWideBranches", "bgei.w18 %as,%imm,%label"},
+  {"blti %as,%imm,%label ? IsaUseWideBranches", "blti.w18 %as,%imm,%label"},
+  {"bgeui %as,%imm,%label ? IsaUseWideBranches", "bgeui.w18 %as,%imm,%label"},
+  {"bltui %as,%imm,%label ? IsaUseWideBranches", "bltui.w18 %as,%imm,%label"},
+  {"bbci %as,%imm,%label ? IsaUseWideBranches", "bbci.w18 %as,%imm,%label"},
+  {"bbsi %as,%imm,%label ? IsaUseWideBranches", "bbsi.w18 %as,%imm,%label"},
+  {"beq %as,%at,%label ? IsaUseWideBranches", "beq.w18 %as,%at,%label"},
+  {"bne %as,%at,%label ? IsaUseWideBranches", "bne.w18 %as,%at,%label"},
+  {"bge %as,%at,%label ? IsaUseWideBranches", "bge.w18 %as,%at,%label"},
+  {"blt %as,%at,%label ? IsaUseWideBranches", "blt.w18 %as,%at,%label"},
+  {"bgeu %as,%at,%label ? IsaUseWideBranches", "bgeu.w18 %as,%at,%label"},
+  {"bltu %as,%at,%label ? IsaUseWideBranches", "bltu.w18 %as,%at,%label"},
+  {"bany %as,%at,%label ? IsaUseWideBranches", "bany.w18 %as,%at,%label"},
+  {"bnone %as,%at,%label ? IsaUseWideBranches", "bnone.w18 %as,%at,%label"},
+  {"ball %as,%at,%label ? IsaUseWideBranches", "ball.w18 %as,%at,%label"},
+  {"bnall %as,%at,%label ? IsaUseWideBranches", "bnall.w18 %as,%at,%label"},
+  {"bbc %as,%at,%label ? IsaUseWideBranches", "bbc.w18 %as,%at,%label"},
+  {"bbs %as,%at,%label ? IsaUseWideBranches", "bbs.w18 %as,%at,%label"},
+  
+  /* Widening branch comparisons eq/ne to zero.  Prefer relaxing to narrow
+     branches if the density option is available.  */
   {"beqz %as,%label ? IsaUseDensityInstruction", "bnez.n %as,%LABEL0;j %label;LABEL0"},
   {"bnez %as,%label ? IsaUseDensityInstruction", "beqz.n %as,%LABEL0;j %label;LABEL0"},
   {"beqz %as,%label", "bnez %as,%LABEL0;j %label;LABEL0"},
   {"bnez %as,%label", "beqz %as,%LABEL0;j %label;LABEL0"},
+
+  /* Widening expect-taken branches.  */
   {"beqzt %as,%label ? IsaUsePredictedBranches", "bnez %as,%LABEL0;j %label;LABEL0"},
   {"bnezt %as,%label ? IsaUsePredictedBranches", "beqz %as,%LABEL0;j %label;LABEL0"},
+  {"beqt %as,%at,%label ? IsaUsePredictedBranches", "bne %as,%at,%LABEL0;j %label;LABEL0"},
+  {"bnet %as,%at,%label ? IsaUsePredictedBranches", "beq %as,%at,%LABEL0;j %label;LABEL0"},
 
+  /* Widening branches from the Xtensa boolean option.  */
+  {"bt %bs,%label ? IsaUseBooleans", "bf %bs,%LABEL0;j %label;LABEL0"},
+  {"bf %bs,%label ? IsaUseBooleans", "bt %bs,%LABEL0;j %label;LABEL0"},
+
+  /* Other branch-around-jump widenings.  */
   {"bgez %as,%label", "bltz %as,%LABEL0;j %label;LABEL0"},
   {"bltz %as,%label", "bgez %as,%LABEL0;j %label;LABEL0"},
   {"beqi %as,%imm,%label", "bnei %as,%imm,%LABEL0;j %label;LABEL0"},
@@ -358,17 +400,11 @@ static string_pattern_pair widen_spec_list[] =
   {"bbsi %as,%imm,%label", "bbci %as,%imm,%LABEL0;j %label;LABEL0"},
   {"beq %as,%at,%label", "bne %as,%at,%LABEL0;j %label;LABEL0"},
   {"bne %as,%at,%label", "beq %as,%at,%LABEL0;j %label;LABEL0"},
-  {"beqt %as,%at,%label ? IsaUsePredictedBranches", "bne %as,%at,%LABEL0;j %label;LABEL0"},
-  {"bnet %as,%at,%label ? IsaUsePredictedBranches", "beq %as,%at,%LABEL0;j %label;LABEL0"},
   {"bge %as,%at,%label", "blt %as,%at,%LABEL0;j %label;LABEL0"},
   {"blt %as,%at,%label", "bge %as,%at,%LABEL0;j %label;LABEL0"},
   {"bgeu %as,%at,%label", "bltu %as,%at,%LABEL0;j %label;LABEL0"},
   {"bltu %as,%at,%label", "bgeu %as,%at,%LABEL0;j %label;LABEL0"},
   {"bany %as,%at,%label", "bnone %as,%at,%LABEL0;j %label;LABEL0"},
-
-  {"bt %bs,%label ? IsaUseBooleans", "bf %bs,%LABEL0;j %label;LABEL0"},
-  {"bf %bs,%label ? IsaUseBooleans", "bt %bs,%LABEL0;j %label;LABEL0"},
-
   {"bnone %as,%at,%label", "bany %as,%at,%LABEL0;j %label;LABEL0"},
   {"ball %as,%at,%label", "bnall %as,%at,%LABEL0;j %label;LABEL0"},
   {"bnall %as,%at,%label", "ball %as,%at,%LABEL0;j %label;LABEL0"},
@@ -1489,6 +1525,8 @@ transition_applies (insn_pattern *initial_insn,
 	    option_available = (XCHAL_HAVE_CONST16 == 1);
 	  else if (!strcmp (option_name, "Loops"))
 	    option_available = (XCHAL_HAVE_LOOPS == 1);
+	  else if (!strcmp (option_name, "WideBranches"))
+	    option_available = (XCHAL_HAVE_WIDE_BRANCHES == 1);
 	  else if (!strcmp (option_name, "PredictedBranches"))
 	    option_available = (XCHAL_HAVE_PREDICTED_BRANCHES == 1);
 	  else if (!strcmp (option_name, "Booleans"))

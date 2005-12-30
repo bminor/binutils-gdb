@@ -1,3 +1,27 @@
+2005-12-30  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (op_placement_info_struct): Delete single,
+	single_size, widest, and widest_size fields.  Add narrowest_slot.
+	(xg_emit_insn_to_buf): Remove fmt parameter and compute it here.
+	Use xg_get_single_slot to find the slot.
+	(finish_vinsn): Use emit_single_op instead of bundle_single_op.
+	(bundle_single_op): Rename this to....
+	(bundle_tinsn): ...this function, which builds a vliw_insn but does
+	not call finish_vinsn.
+	(emit_single_op): Use bundle_tinsn instead of bundle_single_op.
+	(relax_frag_immed): Get num_slots from cur_vinsn.
+	(convert_frag_narrow): Update call to xg_emit_insn_to_buf.
+	(convert_frag_immed): Likewise.  Also, get num_slots from cur_vinsn.
+	(init_op_placement_info_table): Set narrowest_slot field.  Remove
+	code for deleted fields.
+	(xg_get_single_size): Return narrowest_size field, not single_size.
+	(xg_get_single_format): Return narrowest field, not single.
+	(xg_get_single_slot): New.
+	(tinsn_to_insnbuf): Rewrite to use tinsn_to_slotbuf.
+	* config/xtensa-relax.c (widen_spec_list): Add wide branch relaxations.
+	(transition_applies): Check wide branch option availability.
+
 2005-12-29  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.h (MAX_MEM_FOR_RS_ALIGN_CODE): Define.

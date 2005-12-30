@@ -327,15 +327,9 @@ typedef struct op_placement_info_struct
      restrictive is the opcode that fits only one slot in one
      format.  */
   int issuef;
-  /* The single format (i.e., if the op can live in a bundle by itself),
-     narrowest format, and widest format the op can be bundled in
-     and their sizes:  */
-  xtensa_format single;
   xtensa_format narrowest;
-  xtensa_format widest;
   char narrowest_size;
-  char widest_size;
-  char single_size;
+  char narrowest_slot;
 
   /* formats is a bitfield with the Nth bit set
      if the opcode fits in the Nth xtensa_format.  */
@@ -484,6 +478,7 @@ static void init_op_placement_info_table (void);
 extern bfd_boolean opcode_fits_format_slot (xtensa_opcode, xtensa_format, int);
 static int xg_get_single_size (xtensa_opcode);
 static xtensa_format xg_get_single_format (xtensa_opcode);
+static int xg_get_single_slot (xtensa_opcode);
 
 /* TInsn and IStack functions.  */
 
@@ -4189,7 +4184,6 @@ xg_add_opcode_fix (TInsn *tinsn,
 
 static bfd_boolean
 xg_emit_insn_to_buf (TInsn *tinsn,
-		     xtensa_format fmt,
 		     char *buf,
 		     fragS *fragP,
 		     offsetT offset,
@@ -4198,6 +4192,7 @@ xg_emit_insn_to_buf (TInsn *tinsn,
   static xtensa_insnbuf insnbuf = NULL;
   bfd_boolean has_symbolic_immed = FALSE;
   bfd_boolean ok = TRUE;
+
   if (!insnbuf)
     insnbuf = xtensa_insnbuf_alloc (xtensa_default_isa);
 
@@ -4205,10 +4200,12 @@ xg_emit_insn_to_buf (TInsn *tinsn,
   if (has_symbolic_immed && build_fix)
     {
       /* Add a fixup.  */
+      xtensa_format fmt = xg_get_single_format (tinsn->opcode);
+      int slot = xg_get_single_slot (tinsn->opcode);
       int opnum = get_relaxable_immed (tinsn->opcode);
       expressionS *exp = &tinsn->tok[opnum];
 
-      if (!xg_add_opcode_fix (tinsn, opnum, fmt, 0, exp, fragP, offset))
+      if (!xg_add_opcode_fix (tinsn, opnum, fmt, slot, exp, fragP, offset))
 	ok = FALSE;
     }
   fragP->tc_frag_data.is_insn = TRUE;
@@ -5937,7 +5934,6 @@ resources_conflict (vliw_insn *vinsn)
 
 static bfd_boolean find_vinsn_conflicts (vliw_insn *);
 static xtensa_format xg_find_narrowest_format (vliw_insn *);
-static void bundle_single_op (TInsn *);
 static void xg_assemble_vliw_tokens (vliw_insn *);
 
 
@@ -6065,7 +6061,7 @@ finish_vinsn (vliw_insn *vinsn)
 		}
 	      else
 		{
-		  bundle_single_op (&slotstack.insn[slotstack.ninsn - 1]);
+		  emit_single_op (&slotstack.insn[slotstack.ninsn - 1]);
 		  if (vinsn->format == XTENSA_UNDEFINED)
 		    vinsn->slots[i].opcode = xtensa_nop_opcode;
 		  else
@@ -6529,40 +6525,28 @@ relaxation_requirements (vliw_insn *vinsn)
 
 
 static void
-bundle_single_op (TInsn *orig_insn)
+bundle_tinsn (TInsn *tinsn, vliw_insn *vinsn)
 {
   xtensa_isa isa = xtensa_default_isa;
-  vliw_insn v;
-  int slot;
+  int slot, chosen_slot;
 
-  xg_init_vinsn (&v);
-  v.format = op_placement_table[orig_insn->opcode].narrowest;
-  assert (v.format != XTENSA_UNDEFINED);
-  v.num_slots = xtensa_format_num_slots (isa, v.format);
+  vinsn->format = xg_get_single_format (tinsn->opcode);
+  assert (vinsn->format != XTENSA_UNDEFINED);
+  vinsn->num_slots = xtensa_format_num_slots (isa, vinsn->format);
 
-  for (slot = 0;
-       !opcode_fits_format_slot (orig_insn->opcode, v.format, slot);
-       slot++)
+  chosen_slot = xg_get_single_slot (tinsn->opcode);
+  for (slot = 0; slot < vinsn->num_slots; slot++)
     {
-      v.slots[slot].opcode =
-	xtensa_format_slot_nop_opcode (isa, v.format, slot);
-      v.slots[slot].ntok = 0;
-      v.slots[slot].insn_type = ITYPE_INSN;
+      if (slot == chosen_slot)
+	vinsn->slots[slot] = *tinsn;
+      else
+	{
+	  vinsn->slots[slot].opcode =
+	    xtensa_format_slot_nop_opcode (isa, vinsn->format, slot);
+	  vinsn->slots[slot].ntok = 0;
+	  vinsn->slots[slot].insn_type = ITYPE_INSN;
+	}
     }
-
-  v.slots[slot] = *orig_insn;
-  slot++;
-
-  for ( ; slot < v.num_slots; slot++)
-    {
-      v.slots[slot].opcode =
-	xtensa_format_slot_nop_opcode (isa, v.format, slot);
-      v.slots[slot].ntok = 0;
-      v.slots[slot].insn_type = ITYPE_INSN;
-    }
-
-  finish_vinsn (&v);
-  xg_free_vinsn (&v);
 }
 
 
@@ -6612,11 +6596,17 @@ emit_single_op (TInsn *orig_insn)
 	  }
 	  break;
 	case ITYPE_INSN:
-	  if (lit_sym)
-	    xg_resolve_literals (insn, lit_sym);
-	  if (label_sym)
-	    xg_resolve_labels (insn, label_sym);
-	  bundle_single_op (insn);
+	  {
+	    vliw_insn v;
+	    if (lit_sym)
+	      xg_resolve_literals (insn, lit_sym);
+	    if (label_sym)
+	      xg_resolve_labels (insn, label_sym);
+	    xg_init_vinsn (&v);
+	    bundle_tinsn (insn, &v);
+	    finish_vinsn (&v);
+	    xg_free_vinsn (&v);
+	  }
 	  break;
 	default:
 	  assert (0);
@@ -8818,7 +8808,7 @@ relax_frag_immed (segT segP,
 
   xg_clear_vinsn (&cur_vinsn);
   vinsn_from_chars (&cur_vinsn, fragP->fr_opcode);
-  if (xtensa_format_num_slots (isa, fmt) > 1)
+  if (cur_vinsn.num_slots > 1)
     wide_insn = TRUE;
 
   tinsn = cur_vinsn.slots[slot];
@@ -9076,7 +9066,6 @@ static void
 convert_frag_narrow (segT segP, fragS *fragP, xtensa_format fmt, int slot)
 {
   TInsn tinsn, single_target;
-  xtensa_format single_fmt;
   int size, old_size, diff;
   offsetT frag_offset;
 
@@ -9119,10 +9108,8 @@ convert_frag_narrow (segT segP, fragS *fragP, xtensa_format fmt, int slot)
     }
 
   size = xg_get_single_size (single_target.opcode);
-  single_fmt = xg_get_single_format (single_target.opcode);
-
-  xg_emit_insn_to_buf (&single_target, single_fmt, fragP->fr_opcode,
-		       fragP, frag_offset, TRUE);
+  xg_emit_insn_to_buf (&single_target, fragP->fr_opcode, fragP,
+		       frag_offset, TRUE);
 
   diff = size - old_size;
   assert (diff >= 0);
@@ -9183,7 +9170,7 @@ convert_frag_immed (segT segP,
   xg_clear_vinsn (&cur_vinsn);
 
   vinsn_from_chars (&cur_vinsn, fr_opcode);
-  if (xtensa_format_num_slots (isa, fmt) > 1)
+  if (cur_vinsn.num_slots > 1)
     wide_insn = TRUE;
 
   orig_tinsn = cur_vinsn.slots[slot];
@@ -9363,22 +9350,16 @@ convert_frag_immed (segT segP,
 		  size = xtensa_format_length (isa, fmt);
 		  if (!opcode_fits_format_slot (tinsn->opcode, fmt, slot))
 		    {
-		      xtensa_format single_fmt =
-			xg_get_single_format (tinsn->opcode);
-
 		      xg_emit_insn_to_buf
-			(tinsn, single_fmt, immed_instr + size, fragP,
+			(tinsn, immed_instr + size, fragP,
 			 immed_instr - fragP->fr_literal + size, TRUE);
 		      size += xg_get_single_size (tinsn->opcode);
 		    }
 		}
 	      else
 		{
-		  xtensa_format single_format;
 		  size = xg_get_single_size (tinsn->opcode);
-		  single_format = xg_get_single_format (tinsn->opcode);
-		  xg_emit_insn_to_buf (tinsn, single_format, immed_instr,
-				       fragP,
+		  xg_emit_insn_to_buf (tinsn, immed_instr, fragP,
 				       immed_instr - fragP->fr_literal, TRUE);
 		}
 	      immed_instr += size;
@@ -10848,12 +10829,9 @@ init_op_placement_info_table (void)
       /* FIXME: Make tinsn allocation dynamic.  */
       if (xtensa_opcode_num_operands (isa, opcode) >= MAX_INSN_ARGS)
 	as_fatal (_("too many operands in instruction"));
-      opi->single = XTENSA_UNDEFINED;
-      opi->single_size = 0;
-      opi->widest = XTENSA_UNDEFINED;
-      opi->widest_size = 0;
       opi->narrowest = XTENSA_UNDEFINED;
       opi->narrowest_size = 0x7F;
+      opi->narrowest_slot = 0;
       opi->formats = 0;
       opi->num_formats = 0;
       opi->issuef = 0;
@@ -10873,20 +10851,7 @@ init_op_placement_info_table (void)
 		    {
 		      opi->narrowest = fmt;
 		      opi->narrowest_size = fmt_length;
-		    }
-		  if (fmt_length > opi->widest_size)
-		    {
-		      opi->widest = fmt;
-		      opi->widest_size = fmt_length;
-		    }
-		  if (xtensa_format_num_slots (isa, fmt) == 1)
-		    {
-		      if (opi->single_size == 0
-			  || fmt_length < opi->single_size)
-			{
-			  opi->single = fmt;
-			  opi->single_size = fmt_length;
-			}
+		      opi->narrowest_slot = slot;
 		    }
 		}
 	    }
@@ -10910,15 +10875,21 @@ opcode_fits_format_slot (xtensa_opcode opcode, xtensa_format fmt, int slot)
 static int
 xg_get_single_size (xtensa_opcode opcode)
 {
-  assert (op_placement_table[opcode].single != XTENSA_UNDEFINED);
-  return op_placement_table[opcode].single_size;
+  return op_placement_table[opcode].narrowest_size;
 }
 
 
 static xtensa_format
 xg_get_single_format (xtensa_opcode opcode)
 {
-  return op_placement_table[opcode].single;
+  return op_placement_table[opcode].narrowest;
+}
+
+
+static int
+xg_get_single_slot (xtensa_opcode opcode)
+{
+  return op_placement_table[opcode].narrowest_slot;
 }
 
 
@@ -11121,92 +11092,13 @@ tinsn_has_complex_operands (const TInsn *insn)
 }
 
 
-/* Convert the constant operands in the tinsn to insnbuf.
-   Return TRUE if there is a symbol in the immediate field.
-
-   Before this is called,
-   1) the number of operands are correct
-   2) the tinsn is a ITYPE_INSN
-   3) ONLY the relaxable_ is built
-   4) All operands are O_constant, O_symbol.  All constants fit
-   The return value tells whether there are any remaining O_symbols.  */
-
-static bfd_boolean
-tinsn_to_insnbuf (TInsn *tinsn, xtensa_insnbuf insnbuf)
-{
-  static xtensa_insnbuf slotbuf = 0;
-  xtensa_isa isa = xtensa_default_isa;
-  xtensa_opcode opcode = tinsn->opcode;
-  xtensa_format fmt = xg_get_single_format (opcode);
-  bfd_boolean has_fixup = FALSE;
-  int noperands = xtensa_opcode_num_operands (isa, opcode);
-  int i;
-  uint32 opnd_value;
-  char *file_name;
-  unsigned line;
-
-  if (!slotbuf)
-    slotbuf = xtensa_insnbuf_alloc (isa);
-
-  assert (tinsn->insn_type == ITYPE_INSN);
-  if (noperands != tinsn->ntok)
-    as_fatal (_("operand number mismatch"));
-
-  if (xtensa_opcode_encode (isa, fmt, 0, slotbuf, opcode))
-    as_fatal (_("cannot encode opcode"));
-
-  for (i = 0; i < noperands; ++i)
-    {
-      expressionS *expr = &tinsn->tok[i];
-      switch (expr->X_op)
-	{
-	case O_register:
-	  if (xtensa_operand_is_visible (isa, opcode, i) == 0)
-	    break;
-	  /* The register number has already been checked in
-	     expression_maybe_register, so we don't need to check here.  */
-	  opnd_value = expr->X_add_number;
-	  (void) xtensa_operand_encode (isa, opcode, i, &opnd_value);
-	  xtensa_operand_set_field (isa, opcode, i, fmt, 0,
-				    slotbuf, opnd_value);
-	  break;
-
-	case O_constant:
-	  if (xtensa_operand_is_visible (isa, opcode, i) == 0)
-	    break;
-	  as_where (&file_name, &line);
-	  /* It is a constant and we called this function,
-	     then we have to try to fit it.  */
-	  xtensa_insnbuf_set_operand (slotbuf, fmt, 0, opcode, i,
-				      expr->X_add_number, file_name, line);
-	  break;
-
-	default:
-	  has_fixup = TRUE;
-	  break;
-	}
-    }
-
-  xtensa_format_encode (isa, fmt, insnbuf);
-  xtensa_format_set_slot (isa, fmt, 0, insnbuf, slotbuf);
-
-  return has_fixup;
-}
-
-
-/* Convert the constant operands in the tinsn to slotbuf.
-   Return TRUE if there is a symbol in the immediate field.
-   (Eventually this should replace tinsn_to_insnbuf.)  */
-
-/* Before this is called,
-   1) the number of operands are correct
-   2) the tinsn is a ITYPE_INSN
-   3) ONLY the relaxable_ is built
-   4) All operands are
-       O_constant, O_symbol
-      All constants fit
-
-   The return value tells whether there are any remaining O_symbols.  */
+/* Encode a TInsn opcode and its constant operands into slotbuf.
+   Return TRUE if there is a symbol in the immediate field.  This
+   function assumes that:
+   1) The number of operands are correct.
+   2) The insn_type is ITYPE_INSN.
+   3) The opcode can be encoded in the specified format and slot.
+   4) Operands are either O_constant or O_symbol, and all constants fit.  */
 
 static bfd_boolean
 tinsn_to_slotbuf (xtensa_format fmt,
@@ -11268,6 +11160,44 @@ tinsn_to_slotbuf (xtensa_format fmt,
 	  has_fixup = TRUE;
 	  break;
 	}
+    }
+
+  return has_fixup;
+}
+
+
+/* Encode a single TInsn into an insnbuf.  If the opcode can only be encoded
+   into a multi-slot instruction, fill the other slots with NOPs.
+   Return TRUE if there is a symbol in the immediate field.  See also the
+   assumptions listed for tinsn_to_slotbuf.  */
+
+static bfd_boolean
+tinsn_to_insnbuf (TInsn *tinsn, xtensa_insnbuf insnbuf)
+{
+  static xtensa_insnbuf slotbuf = 0;
+  static vliw_insn vinsn;
+  xtensa_isa isa = xtensa_default_isa;
+  bfd_boolean has_fixup = FALSE;
+  int i;
+
+  if (!slotbuf)
+    {
+      slotbuf = xtensa_insnbuf_alloc (isa);
+      xg_init_vinsn (&vinsn);
+    }
+
+  xg_clear_vinsn (&vinsn);
+
+  bundle_tinsn (tinsn, &vinsn);
+
+  xtensa_format_encode (isa, vinsn.format, insnbuf);
+
+  for (i = 0; i < vinsn.num_slots; i++)
+    {
+      /* Only one slot may have a fix-up because the rest contains NOPs.  */
+      has_fixup |=
+	tinsn_to_slotbuf (vinsn.format, i, &vinsn.slots[i], vinsn.slotbuf[i]);
+      xtensa_format_set_slot (isa, vinsn.format, i, insnbuf, vinsn.slotbuf[i]);
     }
 
   return has_fixup;
