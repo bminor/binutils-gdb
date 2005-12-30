@@ -1,5 +1,9 @@
 2005-12-29  Sterling Augustine  <sterling@tensilica.com>
 
+	* config/tc-xtensa.h (MAX_MEM_FOR_RS_ALIGN_CODE): Define.
+
+2005-12-29  Sterling Augustine  <sterling@tensilica.com>
+
 	* config/tc-xtensa.c (tinsn_to_slotbuf): Do not zero slotbuf.
 
 2005-12-27  Nathan Sidwell  <nathan@codesourcery.com>
