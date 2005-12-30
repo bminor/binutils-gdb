@@ -1688,6 +1688,7 @@ get_machine_name (unsigned e_machine)
     case EM_XTENSA:		return "Tensilica Xtensa Processor";
     case EM_M32C:	        return "Renesas M32c";
     case EM_MT:                 return "Morpho Techologies MT processor";
+    case EM_BLACKFIN:		return "Analog Devices Blackfin";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_machine);
       return buff;
