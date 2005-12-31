@@ -1,3 +1,9 @@
+2005-12-31  Valeriy E. Ushakov  <uwe@NetBSD.org>
+	    Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_relocate_section): Don't reset relocation
+	for R_SH_REL32 in shared objects if the symbol is locally called.
+
 2005-12-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Adjust relocs against
