@@ -1,3 +1,10 @@
+2005-12-30  Eric Christopher  <echristo@apple.com>
+
+	* elfxx-mips.c (mips_elf_record_global_got_symbol): Add assert
+	to verify we have a got.
+	(_bfd_mips_elf_check_relocs): Add R_MIPS_TLS_GOTTPREL to relocs
+	needing a GOT.
+
 2005-12-30  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* configure.host (hppa*64*-*-hpux*): Set host64 to true.
@@ -106,7 +113,7 @@
 	to make it clear that parameter ABFD is not used.
 	(hpux_core_core_file_matches_executable_p): Delete, replaced
 	by macro pointing to generic_core_file_matches_executable_p.
-	
+
 	* aix386-core.c: Replace core_file_matches_executable_p null
 	implementation by generic_core_file_matches_executable_p by
 	using a macro.

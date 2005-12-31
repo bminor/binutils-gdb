@@ -2637,6 +2637,9 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
 	return FALSE;
     }
 
+  /* Make sure we have a GOT to put this entry into.  */
+  BFD_ASSERT (g != NULL);
+
   entry.abfd = abfd;
   entry.symndx = -1;
   entry.d.h = (struct mips_elf_link_hash_entry *) h;
@@ -3980,7 +3983,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
   if (gnu_local_gp_p)
     symbol = gp;
-  
+
   /* Figure out what kind of relocation is being performed.  */
   switch (r_type)
     {
@@ -5997,6 +6000,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_MIPS_GOT_PAGE:
 	    case R_MIPS_GOT_OFST:
 	    case R_MIPS_GOT_DISP:
+	    case R_MIPS_TLS_GOTTPREL:
 	    case R_MIPS_TLS_GD:
 	    case R_MIPS_TLS_LDM:
 	      if (dynobj == NULL)
@@ -8852,7 +8856,7 @@ _bfd_elf_mips_get_relocated_section_contents
 					       input_section, relocatable,
 					       data, gp);
 	  else
-	    r = bfd_perform_relocation (input_bfd, *parent, data, 
+	    r = bfd_perform_relocation (input_bfd, *parent, data,
 					input_section,
 					relocatable ? abfd : NULL,
 					&error_message);
@@ -9005,7 +9009,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		&& !(*bed->elf_backend_omit_section_dynsym) (abfd, info, p))
 	      ++ dynsecsymcount;
 	}
-      
+
       if (! mips_elf_sort_hash_table (info, dynsecsymcount + 1))
 	return FALSE;
 
