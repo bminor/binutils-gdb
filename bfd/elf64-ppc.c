@@ -9550,9 +9550,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   /* Disabled until we sort out how ld should choose 'y' vs 'at'.  */
   bfd_boolean is_power4 = FALSE;
 
-  if (info->relocatable)
-    return TRUE;
-
   /* Initialize howto table if needed.  */
   if (!ppc64_elf_howto_table[R_PPC64_ADDR32])
     ppc_howto_init ();
@@ -9574,7 +9571,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   for (; rel < relend; rel++)
     {
       enum elf_ppc64_reloc_type r_type;
-      bfd_vma addend;
+      bfd_vma addend, orig_addend;
       bfd_reloc_status_type r;
       Elf_Internal_Sym *sym;
       asection *sec;
@@ -9611,6 +9608,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       sym_name = NULL;
       unresolved_reloc = FALSE;
       warned = FALSE;
+      orig_addend = rel->r_addend;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -9629,11 +9627,25 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (adjust == -1)
 		relocation = 0;
 	      else
-		relocation += adjust;
+		{
+		  /* If this is a relocation against the opd section sym
+		     and we have edited .opd, adjust the reloc addend so
+		     that ld -r and ld --emit-relocs output is correct.
+		     If it is a reloc against some other .opd symbol,
+		     then the symbol value will be adjusted later.  */
+		  if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+		    rel->r_addend += adjust;
+		  else
+		    relocation += adjust;
+		}
 	    }
+	  if (info->relocatable)
+	    continue;
 	}
       else
 	{
+	  if (info->relocatable)
+	    continue;
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h_elf, sec, relocation,
@@ -10126,8 +10138,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && get_opd_info (sec) != NULL)
 	    {
 	      /* The branch destination is the value of the opd entry. */
-	      bfd_vma off = (relocation - sec->output_section->vma
-			     - sec->output_offset + rel->r_addend);
+	      bfd_vma off = (relocation + addend
+			     - sec->output_section->vma
+			     - sec->output_offset);
 	      bfd_vma dest = opd_entry_value (sec, off, NULL, NULL);
 	      if (dest != (bfd_vma) -1)
 		{
@@ -10143,7 +10156,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  + input_section->output_section->vma);
 
 	  if (stub_entry == NULL
-	      && (relocation + rel->r_addend - from + max_br_offset
+	      && (relocation + addend - from + max_br_offset
 		  >= 2 * max_br_offset)
 	      && r_type != R_PPC64_ADDR14_BRTAKEN
 	      && r_type != R_PPC64_ADDR14_BRNTAKEN)
@@ -10177,7 +10190,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      else
 		{
 		  /* Invert 'y' bit if not the default.  */
-		  if ((bfd_signed_vma) (relocation + rel->r_addend - from) < 0)
+		  if ((bfd_signed_vma) (relocation + addend - from) < 0)
 		    insn ^= 0x01 << 21;
 		}
 
@@ -10191,7 +10204,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   && h->elf.root.type == bfd_link_hash_undefweak
 		   && r_type == R_PPC64_REL24
 		   && relocation == 0
-		   && rel->r_addend == 0)
+		   && addend == 0)
 	    {
 	      bfd_put_32 (output_bfd, NOP, contents + rel->r_offset);
 	      continue;
@@ -10300,7 +10313,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  }
 
 		for (; ent != NULL; ent = ent->next)
-		  if (ent->addend == rel->r_addend
+		  if (ent->addend == orig_addend
 		      && ent->owner == input_bfd
 		      && ent->tls_type == tls_type)
 		    break;
@@ -10335,7 +10348,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    outrel.r_offset = (got->output_section->vma
 				       + got->output_offset
 				       + off);
-		    outrel.r_addend = rel->r_addend;
+		    outrel.r_addend = addend;
 		    if (tls_type & (TLS_LD | TLS_GD))
 		      {
 			outrel.r_addend = 0;
@@ -10348,7 +10361,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			    bfd_elf64_swap_reloca_out (output_bfd,
 						       &outrel, loc);
 			    outrel.r_offset += 8;
-			    outrel.r_addend = rel->r_addend;
+			    outrel.r_addend = addend;
 			    outrel.r_info
 			      = ELF64_R_INFO (indx, R_PPC64_DTPREL64);
 			  }
@@ -10386,7 +10399,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   emitting a reloc.  */
 		else
 		  {
-		    relocation += rel->r_addend;
+		    relocation += addend;
 		    if (tls_type == (TLS_TLS | TLS_LD))
 		      relocation = 1;
 		    else if (tls_type != 0)
@@ -10439,7 +10452,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      struct plt_entry *ent;
 	      for (ent = h->elf.plt.plist; ent != NULL; ent = ent->next)
-		if (ent->addend == rel->r_addend
+		if (ent->addend == orig_addend
 		    && ent->plt.offset != (bfd_vma) -1)
 		  {
 		    relocation = (htab->plt->output_section->vma
@@ -10885,7 +10898,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (!((*info->callbacks->reloc_overflow)
 		    (info, (h ? &h->elf.root : NULL), sym_name,
 		     ppc64_elf_howto_table[r_type]->name,
-		     rel->r_addend, input_bfd, input_section, rel->r_offset)))
+		     orig_addend, input_bfd, input_section, rel->r_offset)))
 		return FALSE;
 	    }
 	  else
@@ -10908,7 +10921,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
      adjusted.  Worse, reloc symbol indices will be for the output
      file rather than the input.  Save a copy of the relocs for
      opd_entry_value.  */
-  if (is_opd && info->emitrelocations)
+  if (is_opd && (info->emitrelocations || info->relocatable))
     {
       bfd_size_type amt;
       amt = input_section->reloc_count * sizeof (Elf_Internal_Rela);

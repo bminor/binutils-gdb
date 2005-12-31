@@ -1,3 +1,10 @@
+2005-12-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Adjust relocs against
+	opd section sym when opd has been edited.  Use correct addend
+	when determining branch 'y' bit and branch overflow.  Adjust and
+	save opd relocs for ld -r too.
+
 2005-12-30  Eric Christopher  <echristo@apple.com>
 
 	* elfxx-mips.c (mips_elf_record_global_got_symbol): Add assert
