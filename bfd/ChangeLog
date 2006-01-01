@@ -1,3 +1,8 @@
+2006-01-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-ppc.c (ppc64_elf_action_discarded): Return 0
+	for .toc1 section.
+
 2005-12-31  Valeriy E. Ushakov  <uwe@NetBSD.org>
 	    Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 

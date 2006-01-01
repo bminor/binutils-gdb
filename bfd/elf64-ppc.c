@@ -1,5 +1,5 @@
 /* PowerPC64-specific support for 64-bit ELF.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
@@ -9492,6 +9492,9 @@ ppc64_elf_action_discarded (asection *sec)
     return 0;
 
   if (strcmp (".toc", sec->name) == 0)
+    return 0;
+
+  if (strcmp (".toc1", sec->name) == 0)
     return 0;
 
   return _bfd_elf_default_action_discarded (sec);
