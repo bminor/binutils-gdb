@@ -54,7 +54,7 @@ struct frame_info;
    interest to users. Each name (a basic regular expression string)
    is followed by a comma. */
 #define ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS \
-   "___clean[.a-zA-Z0-9_]*$",
+   "___clean[.$a-zA-Z0-9_]*$",
 
 /* The maximum number of frame levels searched for non-local,
  * non-global symbols.  This limit exists as a precaution to prevent
@@ -141,6 +141,10 @@ struct task_control_block
   CORE_ADDR call;
   CORE_ADDR thread;
   CORE_ADDR lwp;    /* This field is not always present in the ATCB.  */
+
+  /* If the task is waiting on a task entry, this field contains the
+   task_id of the other task.  */
+  CORE_ADDR called_task;
 };
 
 struct task_ptid
@@ -161,9 +165,6 @@ struct task_entry
   task_ptid_t task_ptid;
   int stack_per;
 };
-
-/* The maximum number of tasks known to the Ada runtime.  */
-extern const int MAX_NUMBER_OF_KNOWN_TASKS;
 
 /* task entry list.  */
 extern struct task_entry *task_list;

@@ -161,7 +161,7 @@ print_range (struct type *type, struct ui_file *stream)
          than 2, just print the type name instead of the range itself.
          This check handles cases such as characters, for example.
 
-         Note that if the name is not defined, then we don't print anything.
+         If the name is not defined, then we don't print anything.
        */
       fprintf_filtered (stream, "%.*s",
 			ada_name_prefix_len (TYPE_NAME (type)),
@@ -828,7 +828,8 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 	else if (ada_is_vax_floating_type (type))
 	  print_vax_floating_point_type (type, stream);
 	else if (ada_is_modular_type (type))
-	  fprintf_filtered (stream, "mod %ld", (long) ada_modulus (type));
+	  fprintf_filtered (stream, "mod %s", 
+			    int_string (ada_modulus (type), 10, 0, 0, 1));
 	else
 	  {
 	    fprintf_filtered (stream, "range ");

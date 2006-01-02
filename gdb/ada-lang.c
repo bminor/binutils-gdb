@@ -266,12 +266,6 @@ static const char raise_unhandled_sym_name[] = "__gnat_unhandled_exception";
 static const char raise_assert_sym_name[] =
   "system__assertions__raise_assert_failure";
 
-/* When GDB stops on an unhandled exception, GDB will go up the stack until
-   if finds a frame corresponding to this function, in order to extract the
-   name of the exception that has been raised from one of the parameters.  */
-static const char process_raise_exception_name[] =
-  "ada__exceptions__process_raise_exception";
-
 /* A string that reflects the longest exception expression rewrite,
    aside from the exception name.  */
 static const char longest_exception_template[] =
@@ -821,19 +815,30 @@ ada_fold_name (const char *name)
   return fold_buffer;
 }
 
-/* decode:
-     0. Discard trailing .{DIGIT}+ or trailing ___{DIGIT}+
+/* Return nonzero if C is either a digit or a lowercase alphabet character.  */
+
+static int
+is_lower_alphanum (const char c)
+{
+  return (isdigit (c) || (isalpha (c) && islower (c)));
+}
+
+/* Decode:
+      . Discard trailing .{DIGIT}+, ${DIGIT}+ or ___{DIGIT}+
         These are suffixes introduced by GNAT5 to nested subprogram
         names, and do not serve any purpose for the debugger.
-     1. Discard final __{DIGIT}+ or $({DIGIT}+(__{DIGIT}+)*)
-     2. Convert other instances of embedded "__" to `.'.
-     3. Discard leading _ada_.
-     4. Convert operator names to the appropriate quoted symbols.
-     5. Remove everything after first ___ if it is followed by
+      . Discard final __{DIGIT}+ or $({DIGIT}+(__{DIGIT}+)*)
+      . Discard final N if it follows a lowercase alphanumeric character
+        (protected object subprogram suffix)
+      . Convert other instances of embedded "__" to `.'.
+      . Discard leading _ada_.
+      . Convert operator names to the appropriate quoted symbols.
+      . Remove everything after first ___ if it is followed by
         'X'.
-     6. Replace TK__ with __, and a trailing B or TKB with nothing.
-     7. Put symbols that should be suppressed in <...> brackets.
-     8. Remove trailing X[bn]* suffix (indicating names in package bodies).
+      . Replace TK__ with __, and a trailing B or TKB with nothing.
+      . Replace _[EB]{DIGIT}+[sb] with nothing (protected object entries)
+      . Put symbols that should be suppressed in <...> brackets.
+      . Remove trailing X[bn]* suffix (indicating names in package bodies).
 
    The resulting string is valid until the next call of ada_decode.
    If the string is unchanged by demangling, the original string pointer
@@ -856,7 +861,7 @@ ada_decode (const char *encoded)
   if (encoded[0] == '_' || encoded[0] == '<')
     goto Suppress;
 
-  /* Remove trailing .{DIGIT}+ or ___{DIGIT}+.  */
+  /* Remove trailing .{DIGIT}+ or ___{DIGIT}+ or __{DIGIT}+.  */
   len0 = strlen (encoded);
   if (len0 > 1 && isdigit (encoded[len0 - 1]))
     {
@@ -865,9 +870,28 @@ ada_decode (const char *encoded)
         i--;
       if (i >= 0 && encoded[i] == '.')
         len0 = i;
+      else if (i >= 0 && encoded[i] == '$')
+        len0 = i;
       else if (i >= 2 && strncmp (encoded + i - 2, "___", 3) == 0)
         len0 = i - 2;
+      else if (i >= 1 && strncmp (encoded + i - 1, "__", 2) == 0)
+        len0 = i - 1;
     }
+
+  /* Remove trailing N.  */
+
+  /* Protected entry subprograms are broken into two
+     separate subprograms: The first one is unprotected, and has
+     a 'N' suffix; the second is the protected version, and has
+     the 'P' suffix. The second calls the first one after handling
+     the protection.  Since the P subprograms are internally generated,
+     we leave these names undecoded, giving the user a clue that this
+     entity is internal.  */
+
+  if (len0 > 1
+      && encoded[len0 - 1] == 'N'
+      && (isdigit (encoded[len0 - 2]) || islower (encoded[len0 - 2])))
+    len0--;
 
   /* Remove the ___X.* suffix if present.  Do not forget to verify that
      the suffix is located before the current "end" of ENCODED.  We want
@@ -932,8 +956,64 @@ ada_decode (const char *encoded)
         }
       at_start_name = 0;
 
+      /* Replace "TK__" with "__", which will eventually be translated
+         into "." (just below).  */
+
       if (i < len0 - 4 && strncmp (encoded + i, "TK__", 4) == 0)
         i += 2;
+
+      /* Remove _E{DIGITS}+[sb] */
+
+      /* Just as for protected object subprograms, there are 2 categories
+         of subprograms created by the compiler for each entry. The first
+         one implements the actual entry code, and has a suffix following
+         the convention above; the second one implements the barrier and
+         uses the same convention as above, except that the 'E' is replaced
+         by a 'B'.
+
+         Just as above, we do not decode the name of barrier functions
+         to give the user a clue that the code he is debugging has been
+         internally generated.  */
+
+      if (len0 - i > 3 && encoded [i] == '_' && encoded[i+1] == 'E'
+          && isdigit (encoded[i+2]))
+        {
+          int k = i + 3;
+
+          while (k < len0 && isdigit (encoded[k]))
+            k++;
+
+          if (k < len0
+              && (encoded[k] == 'b' || encoded[k] == 's'))
+            {
+              k++;
+              /* Just as an extra precaution, make sure that if this
+                 suffix is followed by anything else, it is a '_'.
+                 Otherwise, we matched this sequence by accident.  */
+              if (k == len0
+                  || (k < len0 && encoded[k] == '_'))
+                i = k;
+            }
+        }
+
+      /* Remove trailing "N" in [a-z0-9]+N__.  The N is added by
+         the GNAT front-end in protected object subprograms.  */
+
+      if (i < len0 + 3
+          && encoded[i] == 'N' && encoded[i+1] == '_' && encoded[i+2] == '_')
+        {
+          /* Backtrack a bit up until we reach either the begining of
+             the encoded name, or "__".  Make sure that we only find
+             digits or lowercase characters.  */
+          const char *ptr = encoded + i - 1;
+
+          while (ptr >= encoded && is_lower_alphanum (ptr[0]))
+            ptr--;
+          if (ptr < encoded
+              || (ptr > encoded && ptr[0] == '_' && ptr[-1] == '_'))
+            i++;
+        }
+
       if (encoded[i] == 'X' && i != 0 && isalnum (encoded[i - 1]))
         {
           do
@@ -1498,8 +1578,8 @@ ada_type_of_array (struct value *arr, int bounds)
           arity -= 1;
 
           create_range_type (range_type, value_type (low),
-                             (int) value_as_long (low),
-                             (int) value_as_long (high));
+                             longest_to_int (value_as_long (low)),
+                             longest_to_int (value_as_long (high)));
           elt_type = create_array_type (array_type, elt_type, range_type);
         }
 
@@ -1540,6 +1620,7 @@ ada_coerce_to_simple_array (struct value *arr)
       struct value *arrVal = ada_coerce_to_simple_array_ptr (arr);
       if (arrVal == NULL)
         error (_("Bounds unavailable for null array pointer."));
+      check_size (TYPE_TARGET_TYPE (value_type (arrVal)));
       return value_ind (arrVal);
     }
   else if (ada_is_packed_array_type (value_type (arr)))
@@ -1883,7 +1964,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
             (HOST_CHAR_BIT - bit_size % HOST_CHAR_BIT) % HOST_CHAR_BIT;
           /* ... And are placed at the beginning (most-significant) bytes
              of the target.  */
-          targ = src;
+          targ = (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT - 1;
           break;
         default:
           accumSize = 0;
@@ -2006,7 +2087,6 @@ move_bits (gdb_byte *target, int targ_offset, const gdb_byte *source,
         }
     }
 }
-
 
 /* Store the contents of FROMVAL into the location of TOVAL.
    Return a new value with the location of TOVAL and contents of
@@ -3764,8 +3844,15 @@ add_defn_to_vec (struct obstack *obstackp,
   size_t tmp;
   struct ada_symbol_info *prevDefns = defns_collected (obstackp, 0);
 
-  if (SYMBOL_TYPE (sym) != NULL)
-    SYMBOL_TYPE (sym) = ada_check_typedef (SYMBOL_TYPE (sym));
+  /* Do not try to complete stub types, as the debugger is probably
+     already scanning all symbols matching a certain name at the
+     time when this function is called.  Trying to replace the stub
+     type by its associated full type will cause us to restart a scan
+     which may lead to an infinite recursion.  Instead, the client
+     collecting the matching symbols will end up collecting several
+     matches, with at least one of them complete.  It can then filter
+     out the stub ones if needed.  */
+
   for (i = num_defns_collected (obstackp) - 1; i >= 0; i -= 1)
     {
       if (lesseq_defined_than (sym, prevDefns[i].sym))
@@ -4550,8 +4637,15 @@ ada_lookup_symbol (const char *name, const struct block *block0,
                 *symtab = s;
                 return fixup_symbol_section (candidates[0].sym, objfile);
               }
-            return fixup_symbol_section (candidates[0].sym, NULL);
           }
+          /* FIXME: brobecker/2004-11-12: I think that we should never
+             reach this point.  I don't see a reason why we would not
+             find a symtab for a given block, so I suggest raising an
+             internal_error exception here.  Otherwise, we end up
+             returning a symbol but no symtab, which certain parts of
+             the code that rely (indirectly) on this function do not
+             expect, eventually causing a SEGV.  */
+          return fixup_symbol_section (candidates[0].sym, NULL);
         }
     }
   return candidates[0].sym;
@@ -4575,9 +4669,10 @@ ada_lookup_symbol_nonlocal (const char *name,
    names (e.g., XVE) are not included here.  Currently, the possible suffixes
    are given by either of the regular expression:
 
-   (__[0-9]+)?\.[0-9]+  [nested subprogram suffix, on platforms such 
-                         as GNU/Linux]
+   (__[0-9]+)?[.$][0-9]+  [nested subprogram suffix, on platforms such 
+                           as GNU/Linux]
    ___[0-9]+            [nested subprogram suffix, on platforms such as HP/UX]
+   _E[0-9]+[bs]$          [protected object entry suffixes]
    (X[nb]*)?((\$|__)[0-9](_?[0-9]+)|___(JM|LJM|X([FDBUP].*|R[^T]?)))?$
  */
 
@@ -4599,7 +4694,7 @@ is_name_suffix (const char *str)
         return 1;
     }
 
-  if (matching[0] == '.')
+  if (matching[0] == '.' || matching[0] == '$')
     {
       matching += 1;
       while (isdigit (matching[0]))
@@ -4615,6 +4710,34 @@ is_name_suffix (const char *str)
       while (isdigit (matching[0]))
         matching += 1;
       if (matching[0] == '\0')
+        return 1;
+    }
+
+#if 0
+  /* FIXME: brobecker/2005-09-23: Protected Object subprograms end
+     with a N at the end. Unfortunately, the compiler uses the same
+     convention for other internal types it creates. So treating
+     all entity names that end with an "N" as a name suffix causes
+     some regressions. For instance, consider the case of an enumerated
+     type. To support the 'Image attribute, it creates an array whose
+     name ends with N.
+     Having a single character like this as a suffix carrying some
+     information is a bit risky. Perhaps we should change the encoding
+     to be something like "_N" instead.  In the meantime, do not do
+     the following check.  */
+  /* Protected Object Subprograms */
+  if (len == 1 && str [0] == 'N')
+    return 1;
+#endif
+
+  /* _E[0-9]+[bs]$ */
+  if (len > 3 && str[0] == '_' && str [1] == 'E' && isdigit (str[2]))
+    {
+      matching = str + 3;
+      while (isdigit (matching[0]))
+        matching += 1;
+      if ((matching[0] == 'b' || matching[0] == 's')
+          && matching [1] == '\0')
         return 1;
     }
 
@@ -4699,6 +4822,24 @@ is_dot_digits_suffix (const char *str)
   return (str[0] == '\0');
 }
 
+/* Return non-zero if NAME0 is a valid match when doing wild matching.
+   Certain symbols appear at first to match, except that they turn out
+   not to follow the Ada encoding and hence should not be used as a wild
+   match of a given pattern.  */
+
+static int
+is_valid_name_for_wild_match (const char *name0)
+{
+  const char *decoded_name = ada_decode (name0);
+  int i;
+
+  for (i=0; decoded_name[i] != '\0'; i++)
+    if (isalpha (decoded_name[i]) && !islower (decoded_name[i]))
+      return 0;
+
+  return 1;
+}
+
 /* True if NAME represents a name of the form A1.A2....An, n>=1 and
    PATN[0..PATN_LEN-1] = Ak.Ak+1.....An for some k >= 1.  Ignores
    informational suffixes of NAME (i.e., for which is_name_suffix is
@@ -4764,7 +4905,7 @@ wild_match (const char *patn0, int patn_len, const char *name0)
     {
       if (strncmp (patn, name, patn_len) == 0
           && is_name_suffix (name + patn_len))
-        return 1;
+        return (is_valid_name_for_wild_match (name0));
       do
         {
           name += 1;
@@ -5044,6 +5185,10 @@ struct tag_args
   char *name;
 };
 
+
+static int ada_tag_name_1 (void *);
+static int ada_tag_name_2 (struct tag_args *);
+
 /* Wrapper function used by ada_tag_name.  Given a struct tag_args*
    value ARGS, sets ARGS->name to the tag name of ARGS->tag.  
    The value stored in ARGS->name is valid until the next call to 
@@ -5058,6 +5203,41 @@ ada_tag_name_1 (void *args0)
   struct value *val;
   args->name = NULL;
   val = ada_value_struct_elt (args->tag, "tsd", NULL);
+  if (val == NULL)
+    return ada_tag_name_2 (args);
+  val = ada_value_struct_elt (val, "expanded_name", NULL);
+  if (val == NULL)
+    return 0;
+  read_memory_string (value_as_address (val), name, sizeof (name) - 1);
+  for (p = name; *p != '\0'; p += 1)
+    if (isalpha (*p))
+      *p = tolower (*p);
+  args->name = name;
+  return 0;
+}
+
+/* Utility function for ada_tag_name_1 that tries the second
+   representation for the dispatch table (in which there is no
+   explicit 'tsd' field in the referent of the tag pointer, and instead
+   the tsd pointer is stored just before the dispatch table. */
+   
+static int
+ada_tag_name_2 (struct tag_args *args)
+{
+  struct type *info_type;
+  static char name[1024];
+  char *p;
+  struct value *val, *valp;
+
+  args->name = NULL;
+  info_type = ada_find_any_type ("ada__tags__type_specific_data");
+  if (info_type == NULL)
+    return 0;
+  info_type = lookup_pointer_type (lookup_pointer_type (info_type));
+  valp = value_cast (info_type, args->tag);
+  if (valp == NULL)
+    return 0;
+  val = value_ind (value_add (valp, value_from_longest (builtin_type_int, -1)));
   if (val == NULL)
     return 0;
   val = ada_value_struct_elt (val, "expanded_name", NULL);
@@ -5888,9 +6068,17 @@ ada_find_renaming_symbol (const char *name, struct block *block)
          as well as adding the ``___XR'' suffix to build the name of
          the associated renaming symbol.  */
       char *function_name = SYMBOL_LINKAGE_NAME (function_sym);
-      const int function_name_len = strlen (function_name);
+      /* Function names sometimes contain suffixes used
+         for instance to qualify nested subprograms.  When building
+         the XR type name, we need to make sure that this suffix is
+         not included.  So do not include any suffix in the function
+         name length below.  */
+      const int function_name_len = ada_name_prefix_len (function_name);
       const int rename_len = function_name_len + 2      /*  "__" */
         + strlen (name) + 6 /* "___XR\0" */ ;
+
+      /* Strip the suffix if necessary.  */
+      function_name[function_name_len] = '\0';
 
       /* Library-level functions are a special case, as GNAT adds
          a ``_ada_'' prefix to the function name to avoid namespace
@@ -6469,6 +6657,14 @@ to_fixed_array_type (struct type *type0, struct value *dval,
       /* NOTE: elt_type---the fixed version of elt_type0---should never
          depend on the contents of the array in properly constructed
          debugging data.  */
+      /* Create a fixed version of the array element type.
+         We're not providing the address of an element here,
+         and thus the actual object value can not be inspected to do
+         the conversion.  This should not be a problem, since arrays of
+         unconstrained objects are not allowed.  In particular, all
+         the elements of an array of a tagged type should all be of
+         the same type specified in the debugging info.  No need to
+         consult the object tag.  */
       struct type *elt_type = ada_to_fixed_type (elt_type0, 0, 0, dval);
 
       if (elt_type0 == elt_type)
@@ -6489,6 +6685,14 @@ to_fixed_array_type (struct type *type0, struct value *dval,
       /* NOTE: result---the fixed version of elt_type0---should never
          depend on the contents of the array in properly constructed
          debugging data.  */
+      /* Create a fixed version of the array element type.
+         We're not providing the address of an element here,
+         and thus the actual object value can not be inspected to do
+         the conversion.  This should not be a problem, since arrays of
+         unconstrained objects are not allowed.  In particular, all
+         the elements of an array of a tagged type should all be of
+         the same type specified in the debugging info.  No need to
+         consult the object tag.  */
       result = ada_to_fixed_type (ada_check_typedef (elt_type0), 0, 0, dval);
       for (i = TYPE_NFIELDS (index_type_desc) - 1; i >= 0; i -= 1)
         {
@@ -6511,8 +6715,14 @@ to_fixed_array_type (struct type *type0, struct value *dval,
    corresponding to TYPE for the value (TYPE, VALADDR, ADDRESS)
    DVAL describes a record containing any discriminants used in TYPE0,
    and may be NULL if there are none, or if the object of type TYPE at
-   ADDRESS or in VALADDR contains these discriminants.  */
-
+   ADDRESS or in VALADDR contains these discriminants.
+   
+   In the case of tagged types, this function attempts to locate the object's
+   tag and use it to compute the actual type.  However, when ADDRESS is null,
+   we cannot use it to determine the location of the tag, and therefore
+   compute the tagged type's actual type.  So we return the tagged type
+   without consulting the tag.  */
+   
 struct type *
 ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
                    CORE_ADDR address, struct value *dval)
@@ -6525,7 +6735,12 @@ ada_to_fixed_type (struct type *type, const gdb_byte *valaddr,
     case TYPE_CODE_STRUCT:
       {
         struct type *static_type = to_static_fixed_type (type);
-        if (ada_is_tagged_type (static_type, 0))
+
+        /* If STATIC_TYPE is a tagged type and we know the object's address,
+           then we can determine its tag, and compute the object's actual
+           type from there.  */
+
+        if (address != 0 && ada_is_tagged_type (static_type, 0))
           {
             struct type *real_type =
               type_from_tag (value_tag_from_contents_and_address (static_type,
@@ -6623,7 +6838,7 @@ ada_check_typedef (struct type *type)
 {
   CHECK_TYPEDEF (type);
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM
-      || (TYPE_FLAGS (type) & TYPE_FLAG_STUB) == 0
+      || !TYPE_STUB (type)
       || TYPE_TAG_NAME (type) == NULL)
     return type;
   else
@@ -7503,8 +7718,8 @@ array or function"));
                   to_fixed_array_type (TYPE_TARGET_TYPE (value_type (array)),
                                        NULL, 1);
                 return ada_value_slice_ptr (array, arr_type0,
-                                            (int) low_bound, 
-					    (int) high_bound);
+                                            longest_to_int (low_bound),
+					    longest_to_int (high_bound));
               }
           }
         else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -7512,7 +7727,8 @@ array or function"));
         else if (high_bound < low_bound)
           return empty_array (value_type (array), low_bound);
         else
-          return ada_value_slice (array, (int) low_bound, (int) high_bound);
+          return ada_value_slice (array, longest_to_int (low_bound),
+				  longest_to_int (high_bound));
       }
 
     case UNOP_IN_RANGE:

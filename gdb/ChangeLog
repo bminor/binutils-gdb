@@ -1,3 +1,72 @@
+2006-01-02  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+	* ada-lang.c (process_raise_exception_name): Remove extraneous 
+        definition from unsubmitted code.
+
+	(is_lower_alphanum): New function.
+	(ada_decode):  Add support for decoding protected object subprograms
+	and entries, and of entities declared inside protected object
+	subprograms. 
+	Also add missing handling for__{DIGITS}+ suffixes.
+	Allow '$<digits>' as valid overloading suffix.
+	(is_name_suffix): Add handling for protected type entriy suffixes.
+	Also add support for protected type subprogram suffixes, but keep
+	it commented out for now, as there is an ambiguity between these
+	entities and other internally generated entities.
+	Allow '$<digits>' as valid overloading suffix.
+	(is_valid_name_for_wild_match): New function.
+	(wild_match): Add an exra level of verification of the entity name
+	before declaring it a match for the given pattern.
+
+	(ada_type_of_array, ada_evaluate_subexp): Use more proper 
+	longest_to_int rather than cast.
+
+	(ada_evaluate_subexp): Use "invalid" rather than "illegal" in comment.
+
+	(ada_coerce_to_simple_array): Call check_size to make sure
+	that the object size is reasonable.
+
+	(ada_value_primitive_packed_val):  Use correct location in target 
+	buffer for extracting packed record fields that are themselves records.
+
+	(add_defn_to_vec): Do not try to replace a stub type by its full
+	type. Avoids a potential infinite loop.
+	
+	(ada_lookup_symbol): Move return incorrectly placed return statement, 
+	causing a loop that should be scanning all object files to only 
+	scan the first one.
+
+	(ada_tag_name_2): New function.
+	(ada_tag_name_1): If no 'tsd' field found in the dispatching table,
+	use alternative representation.
+
+	(ada_find_renaming_symbol): Strip the function name suffix when 
+	computing the XR type name.
+
+	(ada_to_fixed_type): Try determining the tag only if we have the
+	object's address.
+	(to_fixed_array_type): Add comments.
+
+	(ada_check_typedef): Replace expression checking whether the given
+	type is a stub or not by a "call" to TYPE_STUB. Clearer and more
+	consistent.
+	
+	* ada-lang.h (ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS): Allow
+	'$' in addition to '.' for runtime auxiliary function name suffixes.
+	See changes to ada_decode above.
+
+	(struct task_control_block): Add field called_task.  (This change is
+	to keep synchronized with our local sources; it does not affect the
+	public version yet.)
+
+	* ada-typeprint.c (ada_print_type): Use int_string for printing
+	modulus of modular type.
+	
+	(print_range): Trivial editorial comment fix.
+
+	* ada-valprint.c (ada_emit_char): Use normal Ada syntax for 
+	double quote in string.
+
 2006-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* top.c: Add 2006 to list of copyright years in file header.

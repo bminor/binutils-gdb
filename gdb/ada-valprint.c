@@ -266,7 +266,7 @@ ada_emit_char (int c, struct ui_file *stream, int quoter, int type_len)
   if (isascii (c) && isprint (c))
     {
       if (c == quoter && c == '"')
-	fprintf_filtered (stream, "[\"%c\"]", quoter);
+	fprintf_filtered (stream, "\"\"");
       else
 	fprintf_filtered (stream, "%c", c);
     }
