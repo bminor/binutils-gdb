@@ -868,7 +868,8 @@ xcoff_next_symbol_text (struct objfile *objfile)
   struct internal_syment symbol;
   char *retval;
   /* FIXME: is this the same as the passed arg? */
-  objfile = this_symtab_psymtab->objfile;
+  if (this_symtab_psymtab)
+    objfile = this_symtab_psymtab->objfile;
 
   bfd_coff_swap_sym_in (objfile->obfd, raw_symbol, &symbol);
   if (symbol.n_zeroes)
@@ -2170,6 +2171,7 @@ scan_xcoff_symtab (struct objfile *objfile)
   last_source_file = NULL;
 
   abfd = objfile->obfd;
+  next_symbol_text_func = xcoff_next_symbol_text;
 
   sraw_symbol = ((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl;
   nsyms = ((struct coff_symfile_info *) objfile->deprecated_sym_private)->symtbl_num_syms;
