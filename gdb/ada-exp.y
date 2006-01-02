@@ -252,7 +252,7 @@ primary :	primary '(' arglist ')'
 			  if ($1 != NULL)
 			    {
 			      if ($3 != 1)
-				error ("Illegal conversion");
+				error ("Invalid conversion");
 			      write_exp_elt_opcode (UNOP_CAST);
 			      write_exp_elt_type ($1);
 			      write_exp_elt_opcode (UNOP_CAST);
@@ -507,7 +507,7 @@ xor_exp :       relation XOR relation
         ;
 
 /* Primaries can denote types (OP_TYPE).  In cases such as 
-   primary TICK_ADDRESS, where a type would be illegal, it will be
+   primary TICK_ADDRESS, where a type would be invalid, it will be
    caught when evaluate_subexp in ada-lang.c tries to evaluate the
    primary, expecting a value.  Precedence rules resolve the ambiguity
    in NAME TICK_ACCESS in favor of shifting to form a var_or_type.  A
@@ -1238,7 +1238,7 @@ write_var_or_type (struct block *block, struct stoken name0)
 	      else if (tail_index == name_len)
 		return type;
 	      else 
-		error ("Illegal attempt to select from type: \"%s\".", name0.ptr);
+		error ("Invalid attempt to select from type: \"%s\".", name0.ptr);
 	    }
 	  else if (tail_index == name_len && nsyms == 0)
 	    {
@@ -1327,7 +1327,7 @@ write_name_assoc (struct stoken name)
     }
   else
     if (write_var_or_type (NULL, name) != NULL)
-      error ("Illegal use of type.");
+      error ("Invalid use of type.");
 }
 
 /* Convert the character literal whose ASCII value would be VAL to the
