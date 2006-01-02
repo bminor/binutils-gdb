@@ -1,3 +1,7 @@
+2006-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* top.c (print_gdb_version): Update copyright year to 2006.
+
 2006-01-01  Roger Sayle  <roger@eyesopen.com>
             Elena Zannoni <ezannoni@redhat.com>
 
