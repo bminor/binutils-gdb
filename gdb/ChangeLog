@@ -1,5 +1,9 @@
 2006-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* top.c: Add 2006 to list of copyright years in file header.
+
+2006-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* top.c (print_gdb_version): Update copyright year to 2006.
 
 2006-01-01  Roger Sayle  <roger@eyesopen.com>
