@@ -115,6 +115,54 @@ enum ada_operator
        type TYPE (typically a subrange). */
     UNOP_IN_RANGE,
 
+    /* An aggregate.   A single immediate operand, N>0, gives
+       the number of component specifications that follow.  The
+       immediate operand is followed by a second OP_AGGREGATE.  
+       Next come N component specifications.  A component
+       specification is either an OP_OTHERS (others=>...), an
+       OP_CHOICES (for named associations), or other expression (for
+       positional aggregates only).  Aggregates currently
+       occur only as the right sides of assignments. */
+    OP_AGGREGATE,
+
+    /* An others clause.  Followed by a single expression. */
+    OP_OTHERS,
+
+    /* An aggregate component association.  A single immediate operand, N, 
+       gives the number of choices that follow.  This is followed by a second
+       OP_CHOICES operator.  Next come N operands, each of which is an
+       expression, an OP_DISCRETE_RANGE, or an OP_NAME---the latter 
+       for a simple name that must be a record component name and does 
+       not correspond to a single existing symbol.  After the N choice 
+       indicators comes an expression giving the value.
+
+       In an aggregate such as (X => E1, ...), where X is a simple
+       name, X could syntactically be either a component_selector_name 
+       or an expression used as a discrete_choice, depending on the
+       aggregate's type context.  Since this is not known at parsing
+       time, we don't attempt to disambiguate X if it has multiple
+       definitions, but instead supply an OP_NAME.  If X has a single
+       definition, we represent it with an OP_VAR_VALUE, even though
+       it may turn out to be within a record aggregate.  Aggregate 
+       evaluation can use either OP_NAMEs or OP_VAR_VALUEs to get a
+       record field name, and can evaluate OP_VAR_VALUE normally to
+       get its value as an expression.  Unfortunately, we lose out in
+       cases where X has multiple meanings and is part of an array
+       aggregate.  I hope these are not common enough to annoy users,
+       who can work around the problem in any case by putting
+       parentheses around X. */
+    OP_CHOICES,
+
+    /* A positional aggregate component association.  The operator is 
+       followed by a single integer indicating the position in the 
+       aggregate (0-based), followed by a second OP_POSITIONAL.  Next 
+       follows a single expression giving the component value.  */
+    OP_POSITIONAL,
+
+    /* A range of values.  Followed by two expressions giving the
+       upper and lower bounds of the range. */
+    OP_DISCRETE_RANGE,       
+
     /* End marker */
     OP_ADA_LAST
   };

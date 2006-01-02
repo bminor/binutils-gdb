@@ -1,5 +1,86 @@
 2006-01-02  Paul N. Hilfinger  <hilfinger@adacore.com>
 
+	* ada-exp.y: Considerable reorganization to move functionality
+	from ada-lex.l to here, where it is logically more appropriate.
+	The original reason, however, was to prevent premature name
+	lookups for selector names in record aggregates.
+	(BLOCKNAME, TYPENAME, OBJECT_RENAMING): Remove; lexer now returns
+	NAME for all of these.
+	(VAR): New artificial token to clarify precedence rules.
+	(OTHERS): New lexeme.
+	(empty_stoken): New symbol.
+	(%union): Remove ssym, voidval.
+	(%type): Remove <voidval> type declarations.
+	(syntax definitions): Add aggregates.
+	Remove distinction between NAME, TYPENAME, BLOCKNAME, OBJECT_RENAMING.
+	Rename some non-terminals to be closer to reference manual usage.
+	Tighten up expression syntax to disallow certain non-Ada 
+	constructions such as X and then Y or else Z.
+	(ada_parse): Remove initialization of left_block_context.
+	(write_var_from_name): Remove.
+	(write_var_or_type): New function, containing previous code from
+	defunct write_var_from_name and name_lookup.
+	(block_lookup): New function, moved from ada-lex.l
+	(select_possible_type_sym): New function, factored out of
+	name_lookup, which used to be in ada-lex.l.
+	(find_primitive_type): Ditto.
+	(chop_selector): Ditto.
+	(write_ambiguous_var): New function, factored out of defunct
+	write_var_from_name.
+	(write_selectors): New function.
+	(write_name_assoc): New function.
+	(write_exp_op_with_string): New function.
+
+	* ada-lex.l (processId): Change interface to return stoken.
+	(tempbuf, resize_tempbuf, tempbuf_size, tempbuf_len): Remove.
+	(block_lookup, name_lookup): Remove.  Functionality moved to
+	ada-exp.y.
+	(state IN_STRING): Remove.
+	(rules): Handle string escapes in processString.
+	Add 'others' token.
+	Return all NAMEs, BLOCKNAMEs, OBJECT_RENAMINGs, TYPENAMEs in
+	yylval.sval (as simple strings).
+	All name look-ups now handled in ada-exp.y.
+	Introduce "::" (COLONCOLON) token and return as separate token.
+	(processId): Change return convention.  Comment.
+	Leave leading "'" in place.
+	(processString): New function.
+	(find_dot_all): Add note to comment.
+	Fix problem that allowed match only at the end.
+
+	* ada-lang.c: Introduce aggregates.
+	(find_struct_field): Add new parameter to count fields skipped, and
+	allow other output parameters to be NULL.
+	(value_tag_from_contents_and_address, ada_value_struct_elt): Use 
+	new find_struct_field.
+	(ada_index_struct_field, assign_aggregate, ada_is_array_type)
+	(num_visible_fields, ada_index_struct_field_1, ada_index_struct_field)
+	(num_component_specs, assign_component, assign_aggregate):
+	(aggregate_assign_from_choices,aggregate_assign_positional)
+	(aggregate_assign_others,add_component_interval):
+	New functions.
+	(ada_evaluate_subexp): Declare.
+	Add aggregate-related operators.
+	(ada_forward_operator_length): Declare.
+	(resolve_subexp): Add cases for new aggregate operators and OP_NAME.
+	Consolidate Ada operators, using ada_forward_operator_length.
+	(ada_search_struct_field): Search in forward order.
+	(ADA_OPERATORS): Add new aggregate operators.
+	(ada_operator_length, ada_op_name, ada_forward_operator_length)
+	(ada_dump_subexp_body, ada_print_subexp): Handle new aggregate 
+	operators and OP_NAME.
+	(ada_type_of_array): Use longest_to_int.
+	(value_assign_to_component): New function.
+	(ada_forward_operator_length, ada_op_name, ada_dump_subexp_body):
+	Add OP_NAME case.
+	(ada_forward_operator_length, ada_dump_subexp_body):
+	Add OP_STRING case.
+
+	* ada-lang.h (enum ada_operator): Add OP_AGGREGATE, OP_OTHERS,
+	OP_CHOICES, OP_DISCRETE_RANGE, OP_POSITIONAL.
+
+2006-01-02  Paul N. Hilfinger  <hilfinger@adacore.com>
+
 	* ada-lang.c (process_raise_exception_name): Remove extraneous 
         definition from unsubmitted code.
 
