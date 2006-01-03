@@ -3077,7 +3077,9 @@ mmix_handle_mmixal (void)
 	{
 	  if ((s[1] != 'B' && s[1] != 'F')
 	      || is_part_of_name (s[-1])
-	      || is_part_of_name (s[2]))
+	      || is_part_of_name (s[2])
+	      /* Don't treat e.g. #1F as a local-label reference.  */
+	      || (s != input_line_pointer && s[-1] == '#'))
 	    s++;
 	  else
 	    {

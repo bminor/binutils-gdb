@@ -1,3 +1,9 @@
+2006-01-03  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR gas/2101
+	* config/tc-mmix.c (mmix_handle_mmixal): Don't treat #[0-9][FB] as
+	a local-label reference.
+
 2005-12-30  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 
