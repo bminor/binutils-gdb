@@ -3,7 +3,7 @@
 
 Disassembly of section \.text:
 
-0+ <Main>:
+0+ <x>:
 [ 	]+0:[ 	]+fd000000[ 	]+swym 0,0,0
 [ 	]+4:[ 	]+e309001f[ 	]+setl \$9,0x1f
 [ 	]+8:[ 	]+e3081b2f[ 	]+setl \$8,0x1b2f
