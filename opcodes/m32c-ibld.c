@@ -3,7 +3,7 @@
    THIS FILE IS MACHINE GENERATED WITH CGEN: Cpu tools GENerator.
    - the resultant file is machine generated, cgen-ibld.in isn't
 
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2005
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils and GDB, the GNU debugger.
@@ -440,9 +440,8 @@ extract_normal (CGEN_CPU_DESC cd,
      word_length may be too big.  */
   if (cd->min_insn_bitsize < cd->base_insn_bitsize)
     {
-      if (word_offset == 0
-	  && word_length > total_length)
-	word_length = total_length;
+      if (word_offset + word_length > total_length)
+	word_length = total_length - word_offset;
     }
 
   /* Does the value reside in INSN_VALUE, and at the right alignment?  */
