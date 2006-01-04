@@ -1,3 +1,26 @@
+2006-01-04  Michael Snyder  <msnyder@redhat.com>
+
+	Checkpoint/Restart for Linux.
+	* linux-nat.c: Add support for debugging multiple forks.
+	Add #include for linux-fork.h (interface spec).
+	(super_mourn_inferior): New function pointer.
+	(child_mourn_inferior): New function / target method.
+	(linux_target): Claim to_mourn_inferior method pointer.
+	(child_follow_fork): Call interface to linux-fork, conditionally
+	add new fork processes to list of debugged processes.
+	(kill_inferior): Use interface to linux-fork to kill
+	multiple processes.
+
+	* linux-fork.h: New file.
+	* linux-fork.c: New file.  Support for debugging multiple forks
+	of the same program.  Support for checkpoint and restart commands.
+
+	* infrun.c (nullify_last_target_wait_ptid): New function.
+
+	* Makefile.in: Add linux-fork.
+	* config/*/linux.mh: Add linux-fork.
+	* NEWS: Mention new functionality.
+
 2006-01-02  Paul Hilfinger  <hilfingr@nile.gnat.com>
 
 	* ada-exp.y (syntax definitions,write_var_or_type,write_name_assoc): 

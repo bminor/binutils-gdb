@@ -31,6 +31,7 @@
 #endif
 #include <sys/ptrace.h>
 #include "linux-nat.h"
+#include "linux-fork.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include "regcache.h"
@@ -87,11 +88,17 @@
    the use of the multi-threaded target.  */
 static struct target_ops *linux_ops;
 
-/* The saved to_xfer_partial method, inherited from inf-ptrace.c.  Called
-   by our to_xfer_partial.   */
-static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
-				      const char *, gdb_byte *, const gdb_byte *,
+/* The saved to_xfer_partial method, inherited from inf-ptrace.c.
+   Called by our to_xfer_partial.  */
+static LONGEST (*super_xfer_partial) (struct target_ops *, 
+				      enum target_object,
+				      const char *, gdb_byte *, 
+				      const gdb_byte *,
 				      ULONGEST, LONGEST);
+
+/* The saved to_mourn_inferior method, inherited from inf-ptrace.c.
+   Called by our to_mourn_inferior.  */
+static void (*super_mourn_inferior) (void);
 
 static int debug_linux_nat;
 static void
@@ -363,15 +370,28 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 	 also, but they'll be reinserted below.  */
       detach_breakpoints (child_pid);
 
-      if (debug_linux_nat)
+      /* Detach new forked process?  */
+      if (detach_fork)
 	{
-	  target_terminal_ours ();
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Detaching after fork from child process %d.\n",
-			      child_pid);
-	}
+	  if (debug_linux_nat)
+	    {
+	      target_terminal_ours ();
+	      fprintf_filtered (gdb_stdlog,
+				"Detaching after fork from child process %d.\n",
+				child_pid);
+	    }
 
-      ptrace (PTRACE_DETACH, child_pid, 0, 0);
+	  ptrace (PTRACE_DETACH, child_pid, 0, 0);
+	}
+      else
+	{
+	  struct fork_info *fp;
+	  /* Retain child fork in ptrace (stopped) state.  */
+	  fp = find_fork_pid (child_pid);
+	  if (!fp)
+	    fp = add_fork (child_pid);
+	  fork_save_infrun_state (fp, 0);
+	}
 
       if (has_vforked)
 	{
@@ -441,9 +461,9 @@ child_follow_fork (struct target_ops *ops, int follow_child)
       if (debug_linux_nat)
 	{
 	  target_terminal_ours ();
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Attaching after fork to child process %d.\n",
-			      child_pid);
+	  fprintf_filtered (gdb_stdlog,
+			    "Attaching after fork to child process %d.\n",
+			    child_pid);
 	}
 
       /* If we're vforking, we may want to hold on to the parent until
@@ -466,13 +486,25 @@ child_follow_fork (struct target_ops *ops, int follow_child)
 
       if (has_vforked)
 	linux_parent_pid = parent_pid;
+      else if (!detach_fork)
+	{
+	  struct fork_info *fp;
+	  /* Retain parent fork in ptrace (stopped) state.  */
+	  fp = find_fork_pid (parent_pid);
+	  if (!fp)
+	    fp = add_fork (parent_pid);
+	  fork_save_infrun_state (fp, 0);
+	}
       else
-	target_detach (NULL, 0);
+	{
+	  target_detach (NULL, 0);
+	}
 
       inferior_ptid = pid_to_ptid (child_pid);
 
       /* Reinstall ourselves, since we might have been removed in
 	 target_detach (which does other necessary cleanup).  */
+
       push_target (ops);
 
       /* Reset breakpoints in the child as appropriate.  */
@@ -579,33 +611,42 @@ kill_inferior (void)
   if (pid == 0)
     return;
 
-  /* If we're stopped while forking and we haven't followed yet, kill the
-     other task.  We need to do this first because the parent will be
-     sleeping if this is a vfork.  */
-
-  get_last_target_status (&last_ptid, &last);
-
-  if (last.kind == TARGET_WAITKIND_FORKED
-      || last.kind == TARGET_WAITKIND_VFORKED)
+  /* First cut -- let's crudely do everything inline.  */
+  if (forks_exist_p ())
     {
-      ptrace (PT_KILL, last.value.related_pid, 0, 0);
-      wait (&status);
+      linux_fork_killall ();
+      pop_target ();
+      generic_mourn_inferior ();
     }
-
-  /* Kill the current process.  */
-  ptrace (PT_KILL, pid, 0, 0);
-  ret = wait (&status);
-
-  /* We might get a SIGCHLD instead of an exit status.  This is
-     aggravated by the first kill above - a child has just died.  */
-
-  while (ret == pid && WIFSTOPPED (status))
+  else
     {
+      /* If we're stopped while forking and we haven't followed yet,
+	 kill the other task.  We need to do this first because the
+	 parent will be sleeping if this is a vfork.  */
+
+      get_last_target_status (&last_ptid, &last);
+
+      if (last.kind == TARGET_WAITKIND_FORKED
+	  || last.kind == TARGET_WAITKIND_VFORKED)
+	{
+	  ptrace (PT_KILL, last.value.related_pid, 0, 0);
+	  wait (&status);
+	}
+
+      /* Kill the current process.  */
       ptrace (PT_KILL, pid, 0, 0);
       ret = wait (&status);
-    }
 
-  target_mourn_inferior ();
+      /* We might get a SIGCHLD instead of an exit status.  This is
+	 aggravated by the first kill above - a child has just died.  */
+
+      while (ret == pid && WIFSTOPPED (status))
+	{
+	  ptrace (PT_KILL, pid, 0, 0);
+	  ret = wait (&status);
+	}
+      target_mourn_inferior ();
+    }
 }
 
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
@@ -1677,7 +1718,7 @@ select_event_lwp (struct lwp_info **orig_lp, int *status)
   int random_selector;
   struct lwp_info *event_lp;
 
-  /* Record the wait status for the origional LWP.  */
+  /* Record the wait status for the original LWP.  */
   (*orig_lp)->status = *status;
 
   /* Give preference to any LWP that is being single-stepped.  */
@@ -1727,6 +1768,30 @@ static int
 resumed_callback (struct lwp_info *lp, void *data)
 {
   return lp->resumed;
+}
+
+/* Local mourn_inferior -- we need to override mourn_inferior
+   so that we can do something clever if one of several forks
+   has exited.  */
+
+static void
+child_mourn_inferior (void)
+{
+  int status;
+
+  if (! forks_exist_p ())
+    {
+      /* Normal case, no other forks available.  */
+      super_mourn_inferior ();
+      return;
+    }
+  else
+    {
+      /* Multi-fork case.  The current inferior_ptid has exited, but
+	 there are other viable forks to debug.  Delete the exiting
+	 one and context-switch to the first available.  */
+      linux_fork_mourn_inferior ();
+    }
 }
 
 /* We need to override child_wait to support attaching to cloned
@@ -3201,6 +3266,9 @@ linux_target (void)
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = linux_xfer_partial;
 
+  super_mourn_inferior = t->to_mourn_inferior;
+  t->to_mourn_inferior = child_mourn_inferior;
+
   linux_ops = t;
   return t;
 }
@@ -3312,3 +3380,4 @@ lin_thread_get_thread_signals (sigset_t *set)
   /* ... except during a sigsuspend.  */
   sigdelset (&suspend_mask, cancel);
 }
+

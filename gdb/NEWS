@@ -8,6 +8,35 @@
 init-if-undefined		Initialize a convenience variable, but
 				only if it doesn't already have a value.
 
+The following commands are presently only implemented for native GNU/Linux:
+
+checkpoint			Save a snapshot of the program state.
+
+restart	<n>			Return the program state to a 
+				previously saved state.
+
+info checkpoints		List currently saved checkpoints.
+
+delete-checkpoint <n>		Delete a previously saved checkpoint.
+
+set|show detach-on-fork		Tell gdb whether to detach from a newly
+				forked process, or to keep debugging it.
+
+info forks			List forks of the user program that
+				are available to be debugged.
+
+fork <n>			Switch to debugging one of several
+				forks of the user program that are
+				available to be debugged.
+
+delete-fork <n>			Delete a fork from the list of forks
+				that are available to be debugged (and
+				kill the forked process).
+
+detach-fork <n>			Delete a fork from the list of forks
+				that are available to be debugged (and
+				allow the process to continue).
+
 * New architecture
 
 Morpho Technologies ms2		ms1-elf
