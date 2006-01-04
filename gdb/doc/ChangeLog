@@ -1,3 +1,8 @@
+2006-01-04  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.texinfo: Add documentation for linux-fork.
+	* gdbint.texinfo: Add internal documentation for checkpoints. 
+
 2006-01-02  Paul N. Hilfinger  <hilfinger@gnat.com>
 
 	* gdb.texinfo (Omissions from Ada): Document that there is now

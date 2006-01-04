@@ -712,6 +712,38 @@ watchpoints might interfere with the underlying OS and are probably
 unavailable in many platforms.
 @end enumerate
 
+@section Checkpoints
+@cindex checkpoints
+@cindex restart
+In the abstract, a checkpoint is a point in the execution history of
+the program, which the user may wish to return to at some later time.
+
+Internally, a checkpoint is a saved copy of the program state, including
+whatever information is required in order to restore the program to that
+state at a later time.  This can be expected to include the state of 
+registers and memory, and may include external state such as the state
+of open files and devices.
+
+There are a number of ways in which checkpoints may be implemented
+in gdb, eg. as corefiles, as forked processes, and as some opaque
+method implemented on the target side.
+
+A corefile can be used to save an image of target memory and register
+state, which can in principle be restored later --- but corefiles do
+not typically include information about external entities such as 
+open files.  Currently this method is not implemented in gdb.
+
+A forked process can save the state of user memory and registers, 
+as well as some subset of external (kernel) state.  This method 
+is used to implement checkpoints on Linux, and in principle might
+be used on other systems.
+
+Some targets, eg.@: simulators, might have their own built-in 
+method for saving checkpoints, and gdb might be able to take
+advantage of that capability without necessarily knowing any
+details of how it is done.
+
+
 @section Observing changes in @value{GDBN} internals
 @cindex observer pattern interface
 @cindex notifications about changes in internals
