@@ -1,3 +1,11 @@
+2006-01-04  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/checkpoint.c: New file.
+	* gdb.base/checkpoint.exp: New file.
+	* gdb.base/multi-fork.c: New file.
+	* gdb.base/multi-fork.exp: New file.
+	* gdb.base/pi.txt: New file (data for checkpoint.c test).
+
 2006-01-04  Fred Fish  <fnf@specifix.com>
 
 	* gdb.base/ptype.c (foo): Add typedef.
