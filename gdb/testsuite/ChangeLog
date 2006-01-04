@@ -1,3 +1,12 @@
+2006-01-04  Fred Fish  <fnf@specifix.com>
+
+	* gdb.base/ptype.c (foo): Add typedef.
+	(intfoo): Add function.
+	* gdb.base/ptype1.c: New file.
+	* gdb.base/ptype.exp: Handle compilation and linking with two
+	source files.  Test that proper type for "foo" is found based
+	on source context rather than first match found in symtabs.
+
 2005-12-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp (hppa-*-openbsd*): New.
