@@ -8650,7 +8650,7 @@
 
 ; mov.size:Q #imm4,dst (m16 #2 m32 #3)
 (binary-arith16-imm4-dst-defn QI .b 0 0 mov (f-0-4 #xD) (f-4-3 4) mov-sem)
-(binary-arith16-imm4-dst-defn QI .w 0 1 mov (f-0-4 #xD) (f-4-3 4) mov-sem)
+(binary-arith16-imm4-dst-defn HI .w 0 1 mov (f-0-4 #xD) (f-4-3 4) mov-sem)
 (binary-arith32-imm4-dst-defn QI .b 1 0 mov #x7 #x2 mov-sem)
 (binary-arith32-imm4-dst-defn HI .w 1 1 mov #x7 #x2 mov-sem)
 
@@ -9344,7 +9344,7 @@
      (push-sem16 HI Imm-16-HI)
      ())
 
-(dni push32.b.imm "push.w #Imm-8-QI" ((machine 32))
+(dni push32.b.imm "push.b #Imm-8-QI" ((machine 32))
      ("push.b #Imm-8-QI")
      (+ (f-0-4 #xA) (f-4-4 #xE) Imm-8-QI)
      (push-sem32 QI Imm-8-QI)

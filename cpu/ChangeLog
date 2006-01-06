@@ -1,3 +1,8 @@
+2006-01-06  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (mov.w:q): Fix mode.
+	(push32.b.imm): Likewise, for the comment.
+
 2005-12-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	Second part of ms1 to mt renaming.
