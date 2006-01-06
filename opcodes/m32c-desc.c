@@ -29750,49 +29750,49 @@ static const CGEN_IBASE m32c_cgen_insn_table[MAX_INSNS] =
     M32C_INSN_MOV32_B_IMM4_Q_16_UNPREFIXED_DST32_16_24_ABSOLUTE_UNPREFIXED_QI, "mov32.b-imm4-Q-16-Unprefixed-dst32-16-24-absolute-Unprefixed-QI", "mov.b", 40,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* mov.w${Q} #${Imm-8-s4},$Dst16RnQI */
+/* mov.w${Q} #${Imm-8-s4},$Dst16RnHI */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_RN_DIRECT_QI, "mov16.w-imm4-Q-16-dst16-Rn-direct-QI", "mov.w", 16,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_RN_DIRECT_HI, "mov16.w-imm4-Q-16-dst16-Rn-direct-HI", "mov.w", 16,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* mov.w${Q} #${Imm-8-s4},$Dst16AnQI */
+/* mov.w${Q} #${Imm-8-s4},$Dst16AnHI */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_AN_DIRECT_QI, "mov16.w-imm4-Q-16-dst16-An-direct-QI", "mov.w", 16,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_AN_DIRECT_HI, "mov16.w-imm4-Q-16-dst16-An-direct-HI", "mov.w", 16,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* mov.w${Q} #${Imm-8-s4},[$Dst16An] */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_AN_INDIRECT_QI, "mov16.w-imm4-Q-16-dst16-An-indirect-QI", "mov.w", 16,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_AN_INDIRECT_HI, "mov16.w-imm4-Q-16-dst16-An-indirect-HI", "mov.w", 16,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u8}[$Dst16An] */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_8_AN_RELATIVE_QI, "mov16.w-imm4-Q-16-dst16-16-8-An-relative-QI", "mov.w", 24,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_8_AN_RELATIVE_HI, "mov16.w-imm4-Q-16-dst16-16-8-An-relative-HI", "mov.w", 24,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u16}[$Dst16An] */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_16_AN_RELATIVE_QI, "mov16.w-imm4-Q-16-dst16-16-16-An-relative-QI", "mov.w", 32,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_16_AN_RELATIVE_HI, "mov16.w-imm4-Q-16-dst16-16-16-An-relative-HI", "mov.w", 32,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u8}[sb] */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_8_SB_RELATIVE_QI, "mov16.w-imm4-Q-16-dst16-16-8-SB-relative-QI", "mov.w", 24,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_8_SB_RELATIVE_HI, "mov16.w-imm4-Q-16-dst16-16-8-SB-relative-HI", "mov.w", 24,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u16}[sb] */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_16_SB_RELATIVE_QI, "mov16.w-imm4-Q-16-dst16-16-16-SB-relative-QI", "mov.w", 32,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_16_SB_RELATIVE_HI, "mov16.w-imm4-Q-16-dst16-16-16-SB-relative-HI", "mov.w", 32,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-s8}[fb] */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_8_FB_RELATIVE_QI, "mov16.w-imm4-Q-16-dst16-16-8-FB-relative-QI", "mov.w", 24,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_8_FB_RELATIVE_HI, "mov16.w-imm4-Q-16-dst16-16-8-FB-relative-HI", "mov.w", 24,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u16} */
   {
-    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_16_ABSOLUTE_QI, "mov16.w-imm4-Q-16-dst16-16-16-absolute-QI", "mov.w", 32,
+    M32C_INSN_MOV16_W_IMM4_Q_16_DST16_16_16_ABSOLUTE_HI, "mov16.w-imm4-Q-16-dst16-16-16-absolute-HI", "mov.w", 32,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* mov.b${Q} #${Imm-8-s4},$Dst16RnQI */

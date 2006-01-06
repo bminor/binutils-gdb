@@ -6649,39 +6649,75 @@ static const CGEN_IFMT ifmt_mov32_b_imm4_Q_16_Unprefixed_dst32_16_24_absolute_Un
   32, 40, 0xfff00000, { { F (F_0_3) }, { F (F_4_3) }, { F (F_8_2) }, { F (F_DSP_16_U24) }, { F (F_3_1) }, { F (F_7_1) }, { F (F_10_2) }, { F (F_IMM_12_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_HI ATTRIBUTE_UNUSED = {
   16, 16, 0xff0c, { { F (F_0_4) }, { F (F_12_2) }, { F (F_DST16_RN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_An_direct_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_An_direct_HI ATTRIBUTE_UNUSED = {
   16, 16, 0xff0e, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_HI ATTRIBUTE_UNUSED = {
   16, 16, 0xff0e, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_HI ATTRIBUTE_UNUSED = {
   24, 24, 0xff0e00, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_HI ATTRIBUTE_UNUSED = {
   32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_HI ATTRIBUTE_UNUSED = {
   24, 24, 0xff0f00, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_HI ATTRIBUTE_UNUSED = {
   32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_HI ATTRIBUTE_UNUSED = {
   24, 24, 0xff0f00, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
-static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_QI ATTRIBUTE_UNUSED = {
+static const CGEN_IFMT ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_HI ATTRIBUTE_UNUSED = {
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_Rn_direct_QI ATTRIBUTE_UNUSED = {
+  16, 16, 0xff0c, { { F (F_0_4) }, { F (F_12_2) }, { F (F_DST16_RN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_An_direct_QI ATTRIBUTE_UNUSED = {
+  16, 16, 0xff0e, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_An_indirect_QI ATTRIBUTE_UNUSED = {
+  16, 16, 0xff0e, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_16_8_An_relative_QI ATTRIBUTE_UNUSED = {
+  24, 24, 0xff0e00, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_16_16_An_relative_QI ATTRIBUTE_UNUSED = {
+  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_16_8_SB_relative_QI ATTRIBUTE_UNUSED = {
+  24, 24, 0xff0f00, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_16_16_SB_relative_QI ATTRIBUTE_UNUSED = {
+  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_16_8_FB_relative_QI ATTRIBUTE_UNUSED = {
+  24, 24, 0xff0f00, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
+};
+
+static const CGEN_IFMT ifmt_mov16_b_imm4_Q_16_dst16_16_16_absolute_QI ATTRIBUTE_UNUSED = {
   32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
@@ -7091,42 +7127,6 @@ static const CGEN_IFMT ifmt_cmp32_b_S_src2_r0_QI_src32_2_S_8_FB_relative_QI ATTR
 
 static const CGEN_IFMT ifmt_cmp32_b_S_src2_r0_QI_src32_2_S_16_absolute_QI ATTRIBUTE_UNUSED = {
   24, 24, 0xff0000, { { F (F_0_2) }, { F (F_2_2) }, { F (F_DSP_8_U16) }, { F (F_4_3) }, { F (F_7_1) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_Rn_direct_HI ATTRIBUTE_UNUSED = {
-  16, 16, 0xff0c, { { F (F_0_4) }, { F (F_12_2) }, { F (F_DST16_RN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_An_direct_HI ATTRIBUTE_UNUSED = {
-  16, 16, 0xff0e, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_An_indirect_HI ATTRIBUTE_UNUSED = {
-  16, 16, 0xff0e, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_16_8_An_relative_HI ATTRIBUTE_UNUSED = {
-  24, 24, 0xff0e00, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U8) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_16_16_An_relative_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0e0000, { { F (F_0_4) }, { F (F_12_2) }, { F (F_14_1) }, { F (F_DSP_16_U16) }, { F (F_DST16_AN) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_16_8_SB_relative_HI ATTRIBUTE_UNUSED = {
-  24, 24, 0xff0f00, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_16_16_SB_relative_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_16_8_FB_relative_HI ATTRIBUTE_UNUSED = {
-  24, 24, 0xff0f00, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_S8) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
-};
-
-static const CGEN_IFMT ifmt_cmp16_w_imm4_Q_16_dst16_16_16_absolute_HI ATTRIBUTE_UNUSED = {
-  32, 32, 0xff0f0000, { { F (F_0_4) }, { F (F_12_4) }, { F (F_DSP_16_U16) }, { F (F_4_3) }, { F (F_7_1) }, { F (F_IMM_8_S4) }, { 0 } }
 };
 
 static const CGEN_IFMT ifmt_clip32_w_Imm_24_HI_Imm_40_HI_basic_Prefixed_dst32_Rn_direct_Prefixed_HI ATTRIBUTE_UNUSED = {
@@ -40376,113 +40376,113 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, OP (Q), ' ', '#', OP (IMM_12_S4), ',', OP (DSP_16_U24), 0 } },
     & ifmt_mov32_b_imm4_Q_16_Unprefixed_dst32_16_24_absolute_Unprefixed_QI, { 0xf6a00000 }
   },
-/* mov.w${Q} #${Imm-8-s4},$Dst16RnQI */
+/* mov.w${Q} #${Imm-8-s4},$Dst16RnHI */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16RNQI), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_QI, { 0xd900 }
+    { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16RNHI), 0 } },
+    & ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_HI, { 0xd900 }
   },
-/* mov.w${Q} #${Imm-8-s4},$Dst16AnQI */
+/* mov.w${Q} #${Imm-8-s4},$Dst16AnHI */
   {
     { 0, 0, 0, 0 },
-    { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16ANQI), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_An_direct_QI, { 0xd904 }
+    { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16ANHI), 0 } },
+    & ifmt_mov16_w_imm4_Q_16_dst16_An_direct_HI, { 0xd904 }
   },
 /* mov.w${Q} #${Imm-8-s4},[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_QI, { 0xd906 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_HI, { 0xd906 }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u8}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_QI, { 0xd90800 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_HI, { 0xd90800 }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u16}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_QI, { 0xd90c0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_HI, { 0xd90c0000 }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u8}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_QI, { 0xd90a00 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_HI, { 0xd90a00 }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u16}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', 's', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_QI, { 0xd90e0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_HI, { 0xd90e0000 }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-s8}[fb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_QI, { 0xd90b00 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_HI, { 0xd90b00 }
   },
 /* mov.w${Q} #${Imm-8-s4},${Dsp-16-u16} */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_QI, { 0xd90f0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_HI, { 0xd90f0000 }
   },
 /* mov.b${Q} #${Imm-8-s4},$Dst16RnQI */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16RNQI), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_QI, { 0xd800 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_Rn_direct_QI, { 0xd800 }
   },
 /* mov.b${Q} #${Imm-8-s4},$Dst16AnQI */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16ANQI), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_An_direct_QI, { 0xd804 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_An_direct_QI, { 0xd804 }
   },
 /* mov.b${Q} #${Imm-8-s4},[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_QI, { 0xd806 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_An_indirect_QI, { 0xd806 }
   },
 /* mov.b${Q} #${Imm-8-s4},${Dsp-16-u8}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_QI, { 0xd80800 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_An_relative_QI, { 0xd80800 }
   },
 /* mov.b${Q} #${Imm-8-s4},${Dsp-16-u16}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_QI, { 0xd80c0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_An_relative_QI, { 0xd80c0000 }
   },
 /* mov.b${Q} #${Imm-8-s4},${Dsp-16-u8}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_QI, { 0xd80a00 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_SB_relative_QI, { 0xd80a00 }
   },
 /* mov.b${Q} #${Imm-8-s4},${Dsp-16-u16}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', 's', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_QI, { 0xd80e0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_SB_relative_QI, { 0xd80e0000 }
   },
 /* mov.b${Q} #${Imm-8-s4},${Dsp-16-s8}[fb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_QI, { 0xd80b00 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_FB_relative_QI, { 0xd80b00 }
   },
 /* mov.b${Q} #${Imm-8-s4},${Dsp-16-u16} */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_QI, { 0xd80f0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_absolute_QI, { 0xd80f0000 }
   },
 /* mov.b${S} #${Imm-8-QI},r0l */
   {
@@ -60648,109 +60648,109 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16RNHI), 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_Rn_direct_HI, { 0xd100 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_HI, { 0xd100 }
   },
 /* cmp.w${Q} #${Imm-8-s4},$Dst16AnHI */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16ANHI), 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_An_direct_HI, { 0xd104 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_An_direct_HI, { 0xd104 }
   },
 /* cmp.w${Q} #${Imm-8-s4},[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', '[', OP (DST16AN), ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_An_indirect_HI, { 0xd106 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_HI, { 0xd106 }
   },
 /* cmp.w${Q} #${Imm-8-s4},${Dsp-16-u8}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_8_An_relative_HI, { 0xd10800 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_HI, { 0xd10800 }
   },
 /* cmp.w${Q} #${Imm-8-s4},${Dsp-16-u16}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_16_An_relative_HI, { 0xd10c0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_HI, { 0xd10c0000 }
   },
 /* cmp.w${Q} #${Imm-8-s4},${Dsp-16-u8}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_8_SB_relative_HI, { 0xd10a00 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_HI, { 0xd10a00 }
   },
 /* cmp.w${Q} #${Imm-8-s4},${Dsp-16-u16}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', 's', 'b', ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_16_SB_relative_HI, { 0xd10e0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_HI, { 0xd10e0000 }
   },
 /* cmp.w${Q} #${Imm-8-s4},${Dsp-16-s8}[fb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_8_FB_relative_HI, { 0xd10b00 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_HI, { 0xd10b00 }
   },
 /* cmp.w${Q} #${Imm-8-s4},${Dsp-16-u16} */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_16_absolute_HI, { 0xd10f0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_HI, { 0xd10f0000 }
   },
 /* cmp.b${Q} #${Imm-8-s4},$Dst16RnQI */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16RNQI), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_QI, { 0xd000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_Rn_direct_QI, { 0xd000 }
   },
 /* cmp.b${Q} #${Imm-8-s4},$Dst16AnQI */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16ANQI), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_An_direct_QI, { 0xd004 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_An_direct_QI, { 0xd004 }
   },
 /* cmp.b${Q} #${Imm-8-s4},[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_QI, { 0xd006 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_An_indirect_QI, { 0xd006 }
   },
 /* cmp.b${Q} #${Imm-8-s4},${Dsp-16-u8}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_QI, { 0xd00800 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_An_relative_QI, { 0xd00800 }
   },
 /* cmp.b${Q} #${Imm-8-s4},${Dsp-16-u16}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_QI, { 0xd00c0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_An_relative_QI, { 0xd00c0000 }
   },
 /* cmp.b${Q} #${Imm-8-s4},${Dsp-16-u8}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_QI, { 0xd00a00 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_SB_relative_QI, { 0xd00a00 }
   },
 /* cmp.b${Q} #${Imm-8-s4},${Dsp-16-u16}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', 's', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_QI, { 0xd00e0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_SB_relative_QI, { 0xd00e0000 }
   },
 /* cmp.b${Q} #${Imm-8-s4},${Dsp-16-s8}[fb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_QI, { 0xd00b00 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_FB_relative_QI, { 0xd00b00 }
   },
 /* cmp.b${Q} #${Imm-8-s4},${Dsp-16-u16} */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_QI, { 0xd00f0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_absolute_QI, { 0xd00f0000 }
   },
 /* cmp.w${G} #${Imm-16-HI},$Dst32RnUnprefixedHI */
   {
@@ -77988,109 +77988,109 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16RNHI), 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_Rn_direct_HI, { 0xc900 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_HI, { 0xc900 }
   },
 /* add.w${Q} #${Imm-8-s4},$Dst16AnHI */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16ANHI), 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_An_direct_HI, { 0xc904 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_An_direct_HI, { 0xc904 }
   },
 /* add.w${Q} #${Imm-8-s4},[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', '[', OP (DST16AN), ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_An_indirect_HI, { 0xc906 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_HI, { 0xc906 }
   },
 /* add.w${Q} #${Imm-8-s4},${Dsp-16-u8}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_8_An_relative_HI, { 0xc90800 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_HI, { 0xc90800 }
   },
 /* add.w${Q} #${Imm-8-s4},${Dsp-16-u16}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_16_An_relative_HI, { 0xc90c0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_HI, { 0xc90c0000 }
   },
 /* add.w${Q} #${Imm-8-s4},${Dsp-16-u8}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_8_SB_relative_HI, { 0xc90a00 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_HI, { 0xc90a00 }
   },
 /* add.w${Q} #${Imm-8-s4},${Dsp-16-u16}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', 's', 'b', ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_16_SB_relative_HI, { 0xc90e0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_HI, { 0xc90e0000 }
   },
 /* add.w${Q} #${Imm-8-s4},${Dsp-16-s8}[fb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_8_FB_relative_HI, { 0xc90b00 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_HI, { 0xc90b00 }
   },
 /* add.w${Q} #${Imm-8-s4},${Dsp-16-u16} */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), 0 } },
-    & ifmt_cmp16_w_imm4_Q_16_dst16_16_16_absolute_HI, { 0xc90f0000 }
+    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_HI, { 0xc90f0000 }
   },
 /* add.b${Q} #${Imm-8-s4},$Dst16RnQI */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16RNQI), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_Rn_direct_QI, { 0xc800 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_Rn_direct_QI, { 0xc800 }
   },
 /* add.b${Q} #${Imm-8-s4},$Dst16AnQI */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DST16ANQI), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_An_direct_QI, { 0xc804 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_An_direct_QI, { 0xc804 }
   },
 /* add.b${Q} #${Imm-8-s4},[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_An_indirect_QI, { 0xc806 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_An_indirect_QI, { 0xc806 }
   },
 /* add.b${Q} #${Imm-8-s4},${Dsp-16-u8}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_An_relative_QI, { 0xc80800 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_An_relative_QI, { 0xc80800 }
   },
 /* add.b${Q} #${Imm-8-s4},${Dsp-16-u16}[$Dst16An] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', OP (DST16AN), ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_An_relative_QI, { 0xc80c0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_An_relative_QI, { 0xc80c0000 }
   },
 /* add.b${Q} #${Imm-8-s4},${Dsp-16-u8}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U8), '[', 's', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_SB_relative_QI, { 0xc80a00 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_SB_relative_QI, { 0xc80a00 }
   },
 /* add.b${Q} #${Imm-8-s4},${Dsp-16-u16}[sb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), '[', 's', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_SB_relative_QI, { 0xc80e0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_SB_relative_QI, { 0xc80e0000 }
   },
 /* add.b${Q} #${Imm-8-s4},${Dsp-16-s8}[fb] */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_S8), '[', 'f', 'b', ']', 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_8_FB_relative_QI, { 0xc80b00 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_8_FB_relative_QI, { 0xc80b00 }
   },
 /* add.b${Q} #${Imm-8-s4},${Dsp-16-u16} */
   {
     { 0, 0, 0, 0 },
     { { MNEM, OP (Q), ' ', '#', OP (IMM_8_S4), ',', OP (DSP_16_U16), 0 } },
-    & ifmt_mov16_w_imm4_Q_16_dst16_16_16_absolute_QI, { 0xc80f0000 }
+    & ifmt_mov16_b_imm4_Q_16_dst16_16_16_absolute_QI, { 0xc80f0000 }
   },
 /* add.w${G} #${Imm-16-HI},$Dst32RnUnprefixedHI */
   {
