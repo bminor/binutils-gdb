@@ -45,6 +45,7 @@
 #include "breakpoint.h"
 #include "block.h"
 #include "dictionary.h"
+#include "source.h"
 
 /* Prototypes for local functions */
 
@@ -432,9 +433,23 @@ free_objfile (struct objfile *objfile)
      is unknown, but we play it safe for now and keep each action until
      it is shown to be no longer needed. */
 
-  /* I *think* all our callers call clear_symtab_users.  If so, no need
-     to call this here.  */
+  /* Not all our callers call clear_symtab_users (objfile_purge_solibs,
+     for example), so we need to call this here.  */
   clear_pc_function_cache ();
+
+  /* Check to see if the current_source_symtab belongs to this objfile,
+     and if so, call clear_current_source_symtab_and_line. */
+
+  {
+    struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+    struct symtab *s;
+
+    ALL_OBJFILE_SYMTABS (objfile, s)
+      {
+	if (s == cursal.symtab)
+	  clear_current_source_symtab_and_line ();
+      }
+  }
 
   /* The last thing we do is free the objfile struct itself. */
 
