@@ -1,3 +1,7 @@
+2006-01-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in: Sort dependencies.
+
 2006-01-07  Eli Zaretskii  <eliz@gnu.org>
 
 	* top.c (control_level): Remove unused variable.
