@@ -1,3 +1,7 @@
+2006-01-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* top.c (control_level): Remove unused variable.
+
 2006-01-06  Fred Fish  <fnf@specifix.com>
 
 	* objfiles.c (source.h): Include.

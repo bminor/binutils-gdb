@@ -184,9 +184,6 @@ int remote_debug = 0;
    target is off and running, which gdb is doing something else. */
 int target_executing = 0;
 
-/* Level of control structure.  */
-static int control_level;
-
 /* Sbrk location on entry to main.  Used for statistics only.  */
 #ifdef HAVE_SBRK
 char *lim_at_start;
