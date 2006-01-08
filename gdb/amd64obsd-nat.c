@@ -103,7 +103,7 @@ amd64obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
     return 0;
 
   /* Read the stack frame, and check its validity.  */
-  read_memory (pcb->pcb_rsp, (char *) &sf, sizeof sf);
+  read_memory (pcb->pcb_rsp, (gdb_byte *) &sf, sizeof sf);
   if (sf.sf_rbp == pcb->pcb_rbp)
     {
       /* Yes, we have a frame that matches cpu_switch().  */

@@ -1,3 +1,8 @@
+2006-01-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64obsd-nat.c (amd64obsd_supply_pcb): Use 'gdb_byte *' instead
+	of 'char *' in cast.
+
 2006-01-07  Paul N. Hilfinger <hilfinger@adacore.com>
 
 	* ada-exp.y, ada-lex.l, ada-typeprint.c: I18n markup.
