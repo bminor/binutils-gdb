@@ -124,11 +124,11 @@ static int find_dot_all (const char *);
 		}
 
 {NUM10}"#"{NUM16}"."{NUM16}"#"{EXP} {
-                   error ("Based real literals not implemented yet.");
+                   error (_("Based real literals not implemented yet."));
 		}
 
 {NUM10}"#"{NUM16}"."{NUM16}"#" {
-                   error ("Based real literals not implemented yet.");
+                   error (_("Based real literals not implemented yet."));
 		}
 
 <INITIAL>"'"({GRAPHIC}|\")"'" {
@@ -151,7 +151,7 @@ static int find_dot_all (const char *);
 		}
 
 \"              {
-                   error ("ill-formed or non-terminated string literal");
+                   error (_("ill-formed or non-terminated string literal"));
 		}
 
 
@@ -264,7 +264,7 @@ xor		{ return XOR; }
 
 	/* CATCH-ALL ERROR CASE */
 
-.		{ error ("Invalid character '%s' in expression.", yytext); }
+.		{ error (_("Invalid character '%s' in expression."), yytext); }
 %%
 
 #include <ctype.h>
@@ -380,7 +380,7 @@ processInt (const char *base0, const char *num0, const char *exp0)
     {
       base = strtol (base0, (char **) NULL, 10);
       if (base < 2 || base > 16)
-	error ("Invalid base: %d.", base);
+	error (_("Invalid base: %d."), base);
     }
 
   if (exp0 == NULL)
@@ -391,14 +391,14 @@ processInt (const char *base0, const char *num0, const char *exp0)
   errno = 0;
   result = strtoulst (num0, (const char **) &trailer, base);
   if (errno == ERANGE)
-    error ("Integer literal out of range");
+    error (_("Integer literal out of range"));
   if (isxdigit(*trailer))
-    error ("Invalid digit `%c' in based literal", *trailer);
+    error (_("Invalid digit `%c' in based literal"), *trailer);
 
   while (exp > 0)
     {
       if (result > (ULONG_MAX / base))
-	error ("Integer literal out of range");
+	error (_("Integer literal out of range"));
       result *= base;
       exp -= 1;
     }
@@ -652,10 +652,10 @@ processAttribute (const char *str)
 	if (k == -1)
 	  k = i;
 	else
-	  error ("ambiguous attribute name: `%s'", str);
+	  error (_("ambiguous attribute name: `%s'"), str);
       }
   if (k == -1)
-    error ("unrecognized attribute: `%s'", str);
+    error (_("unrecognized attribute: `%s'"), str);
 
   return attributes[k].code;
 }

@@ -1,3 +1,9 @@
+2006-01-07  Paul N. Hilfinger <hilfinger@adacore.com>
+
+	* ada-exp.y, ada-lex.l, ada-typeprint.c: I18n markup.
+	* ada-tasks.c, ada-lang.c: I18n markup.  
+	Editorial: change "can not" => "cannot" throughout.
+
 2006-01-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* Makefile.in: Sort dependencies.

@@ -380,7 +380,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	type = ada_coerce_to_simple_array_type (type);
       if (type == NULL)
         {
-          fprintf_filtered (stream, "<undecipherable array type>");
+          fprintf_filtered (stream, _("<undecipherable array type>"));
           return;
         }
       if (ada_is_simple_array_type (type))
@@ -813,7 +813,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 	  {
 	    char *name = ada_type_name (type);
 	    if (!ada_is_range_type_name (name))
-	      fprintf_filtered (stream, "<%d-byte integer>",
+	      fprintf_filtered (stream, _("<%d-byte integer>"),
 				TYPE_LENGTH (type));
 	    else
 	      {
@@ -837,7 +837,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 	  }
 	break;
       case TYPE_CODE_FLT:
-	fprintf_filtered (stream, "<%d-byte float>", TYPE_LENGTH (type));
+	fprintf_filtered (stream, _("<%d-byte float>"), TYPE_LENGTH (type));
 	break;
       case TYPE_CODE_ENUM:
 	if (show < 0)
@@ -850,7 +850,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 	  print_array_type (type, stream, show, level);
 	else if (ada_is_bogus_array_descriptor (type))
 	  fprintf_filtered (stream,
-			    "array (?) of ? (<mal-formed descriptor>)");
+			    _("array (?) of ? (<mal-formed descriptor>)"));
 	else
 	  print_record_type (type, stream, show, level);
 	break;

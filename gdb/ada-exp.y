@@ -252,7 +252,7 @@ primary :	primary '(' arglist ')'
 			  if ($1 != NULL)
 			    {
 			      if ($3 != 1)
-				error ("Invalid conversion");
+				error (_("Invalid conversion"));
 			      write_exp_elt_opcode (UNOP_CAST);
 			      write_exp_elt_type ($1);
 			      write_exp_elt_opcode (UNOP_CAST);
@@ -270,7 +270,7 @@ primary :	var_or_type '\'' save_qualifier { type_qualifier = $1; }
 		   '(' exp ')'
 			{
 			  if ($1 == NULL)
-			    error ("Type required for qualification");
+			    error (_("Type required for qualification"));
 			  write_exp_elt_opcode (UNOP_QUAL);
 			  write_exp_elt_type ($1);
 			  write_exp_elt_opcode (UNOP_QUAL);
@@ -288,7 +288,7 @@ primary :
 			{ if ($1 == NULL) 
                             write_exp_elt_opcode (TERNOP_SLICE);
 			  else
-			    error ("Cannot slice a type");
+			    error (_("Cannot slice a type"));
 			}
 	;
 
@@ -356,7 +356,7 @@ simple_exp :	'{' var_or_type '}' simple_exp  %prec '.'
 		/* GDB extension */
 			{ 
 			  if ($2 == NULL)
-			    error ("Type required within braces in coercion");
+			    error (_("Type required within braces in coercion"));
 			  write_exp_elt_opcode (UNOP_MEMVAL);
 			  write_exp_elt_type ($2);
 			  write_exp_elt_opcode (UNOP_MEMVAL);
@@ -426,7 +426,7 @@ relation :	simple_exp IN simple_exp DOTDOT simple_exp
  	|	simple_exp IN var_or_type	%prec TICK_ACCESS
 			{ 
 			  if ($3 == NULL)
-			    error ("Right operand of 'in' must be type");
+			    error (_("Right operand of 'in' must be type"));
 			  write_exp_elt_opcode (UNOP_IN_RANGE);
 		          write_exp_elt_type ($3);
 		          write_exp_elt_opcode (UNOP_IN_RANGE);
@@ -444,7 +444,7 @@ relation :	simple_exp IN simple_exp DOTDOT simple_exp
  	|	simple_exp NOT IN var_or_type	%prec TICK_ACCESS
 			{ 
 			  if ($4 == NULL)
-			    error ("Right operand of 'in' must be type");
+			    error (_("Right operand of 'in' must be type"));
 			  write_exp_elt_opcode (UNOP_IN_RANGE);
 		          write_exp_elt_type ($4);
 		          write_exp_elt_opcode (UNOP_IN_RANGE);
@@ -557,7 +557,7 @@ type_prefix :
                 var_or_type
 			{ 
 			  if ($1 == NULL)
-			    error ("Prefix must be type");
+			    error (_("Prefix must be type"));
 			  write_exp_elt_opcode (OP_TYPE);
 			  write_exp_elt_type ($1);
 			  write_exp_elt_opcode (OP_TYPE); }
@@ -602,7 +602,7 @@ primary	:	STRING
 	;
 
 primary	: 	NEW NAME
-			{ error ("NEW not implemented."); }
+			{ error (_("NEW not implemented.")); }
 	;
 
 var_or_type:	NAME   	    %prec VAR
@@ -768,7 +768,7 @@ ada_parse (void)
 void
 yyerror (char *msg)
 {
-  error ("A %s in expression, near `%s'.", (msg ? msg : "error"), lexptr);
+  error (_("A %s in expression, near `%s'."), (msg ? msg : _("error")), lexptr);
 }
 
 /* The operator name corresponding to operator symbol STRING (adds
@@ -796,7 +796,7 @@ string_to_operator (struct stoken string)
 	  return string;
 	}
     }
-  error ("Invalid operator symbol `%s'", string.ptr);
+  error (_("Invalid operator symbol `%s'"), string.ptr);
 }
 
 /* Emit expression to access an instance of SYM, in block BLOCK (if
@@ -856,7 +856,7 @@ write_object_renaming (struct block *orig_left_context,
   enum { SIMPLE_INDEX, LOWER_BOUND, UPPER_BOUND } slice_state;
 
   if (max_depth <= 0)
-    error ("Could not find renamed symbol");
+    error (_("Could not find renamed symbol"));
 
   /* if orig_left_context is null, then use the currently selected
      block; otherwise we might fail our symbol lookup below.  */
@@ -887,7 +887,7 @@ write_object_renaming (struct block *orig_left_context,
   name[suffix-expr] = '\000';
   sym = lookup_symbol (name, orig_left_context, VAR_DOMAIN, 0, NULL);
   if (sym == NULL)
-    error ("Could not find renamed variable: %s", ada_decode (name));
+    error (_("Could not find renamed variable: %s"), ada_decode (name));
   if (ada_is_object_renaming (sym))
     write_object_renaming (orig_left_context, sym, max_depth-1);
   else
@@ -943,7 +943,7 @@ write_object_renaming (struct block *orig_left_context,
 	    index_sym =
 	      lookup_symbol (index_name, NULL, VAR_DOMAIN, 0, NULL);
 	    if (index_sym == NULL)
-	      error ("Could not find %s", index_name);
+	      error (_("Could not find %s"), index_name);
 	    write_var_from_sym (NULL, block_found, sym);
 	  }
 	if (slice_state == SIMPLE_INDEX)
@@ -989,7 +989,7 @@ write_object_renaming (struct block *orig_left_context,
     return;
 
  BadEncoding:
-  error ("Internal error in encoding of renaming declaration: %s",
+  error (_("Internal error in encoding of renaming declaration: %s"),
 	 SYMBOL_LINKAGE_NAME (renaming));
 }
 
@@ -1021,14 +1021,14 @@ block_lookup (struct block *context, char *raw_name)
   else if (nsyms == 0 || SYMBOL_CLASS (syms[0].sym) != LOC_BLOCK)
     {
       if (context == NULL)
-	error ("No file or function \"%s\".", raw_name);
+	error (_("No file or function \"%s\"."), raw_name);
       else
-	error ("No function \"%s\" in specified context.", raw_name);
+	error (_("No function \"%s\" in specified context."), raw_name);
     }
   else
     {
       if (nsyms > 1)
-	warning ("Function name \"%s\" ambiguous here", raw_name);
+	warning (_("Function name \"%s\" ambiguous here"), raw_name);
       return SYMBOL_BLOCK_VALUE (syms[0].sym);
     }
 }
@@ -1210,7 +1210,7 @@ write_var_or_type (struct block *block, struct stoken name0)
 	      struct type *type = SYMBOL_TYPE (type_sym);
 
 	      if (TYPE_CODE (type) == TYPE_CODE_VOID)
-		error ("`%s' matches only void type name(s)", name0.ptr);
+		error (_("`%s' matches only void type name(s)"), name0.ptr);
 	      else if (ada_is_object_renaming (type_sym))
 		{
 		  write_object_renaming (block, type_sym, 
@@ -1238,7 +1238,7 @@ write_var_or_type (struct block *block, struct stoken name0)
 	      else if (tail_index == name_len)
 		return type;
 	      else 
-		error ("Invalid attempt to select from type: \"%s\".", name0.ptr);
+		error (_("Invalid attempt to select from type: \"%s\"."), name0.ptr);
 	    }
 	  else if (tail_index == name_len && nsyms == 0)
 	    {
@@ -1271,7 +1271,7 @@ write_var_or_type (struct block *block, struct stoken name0)
 	      if (tail_index == name_len
 		  && strncmp (encoded_name, "standard__", 
 			      sizeof ("standard__") - 1) == 0)
-		error ("No definition of \"%s\" found.", name0.ptr);
+		error (_("No definition of \"%s\" found."), name0.ptr);
 
 	      tail_index = chop_selector (encoded_name, tail_index);
 	    } 
@@ -1284,16 +1284,16 @@ write_var_or_type (struct block *block, struct stoken name0)
 	}
 
       if (!have_full_symbols () && !have_partial_symbols () && block == NULL)
-	error ("No symbol table is loaded.  Use the \"file\" command.");
+	error (_("No symbol table is loaded.  Use the \"file\" command."));
       if (block == expression_context_block)
-	error ("No definition of \"%s\" in current context.", name0.ptr);
+	error (_("No definition of \"%s\" in current context."), name0.ptr);
       else
-	error ("No definition of \"%s\" in specified context.", name0.ptr);
+	error (_("No definition of \"%s\" in specified context."), name0.ptr);
       
     TryAfterRenaming: ;
     }
 
-  error ("Could not find renamed symbol \"%s\"", name0.ptr);
+  error (_("Could not find renamed symbol \"%s\""), name0.ptr);
 
 }
 
@@ -1327,7 +1327,7 @@ write_name_assoc (struct stoken name)
     }
   else
     if (write_var_or_type (NULL, name) != NULL)
-      error ("Invalid use of type.");
+      error (_("Invalid use of type."));
 }
 
 /* Convert the character literal whose ASCII value would be VAL to the

@@ -4352,7 +4352,7 @@ is_package_name (const char *name)
      "_ada_" followed by NAME can be found.  */
 
   /* Do a quick check that NAME does not contain "__", since library-level
-     functions names can not contain "__" in them.  */
+     functions names cannot contain "__" in them.  */
   if (strstr (name, "__") != NULL)
     return 0;
 
@@ -6827,7 +6827,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
          debugging data.  */
       /* Create a fixed version of the array element type.
          We're not providing the address of an element here,
-         and thus the actual object value can not be inspected to do
+         and thus the actual object value cannot be inspected to do
          the conversion.  This should not be a problem, since arrays of
          unconstrained objects are not allowed.  In particular, all
          the elements of an array of a tagged type should all be of
@@ -6855,7 +6855,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
          debugging data.  */
       /* Create a fixed version of the array element type.
          We're not providing the address of an element here,
-         and thus the actual object value can not be inspected to do
+         and thus the actual object value cannot be inspected to do
          the conversion.  This should not be a problem, since arrays of
          unconstrained objects are not allowed.  In particular, all
          the elements of an array of a tagged type should all be of
@@ -7692,7 +7692,7 @@ aggregate_assign_positional (struct value *container,
   LONGEST ind = longest_to_int (exp->elts[*pos + 1].longconst) + low;
   
   if (ind - 1 == high)
-    warning ("Extra components in aggregate ignored.");
+    warning (_("Extra components in aggregate ignored."));
   if (ind <= high)
     {
       add_component_interval (ind, ind, indices, num_indices, max_indices);
@@ -8145,8 +8145,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                                                    nargs, argvec + 1));
 
         default:
-          error (_("Attempt to index or call something other than an \
-array or function"));
+          error (_("Attempt to index or call something other than an "
+		   "array or function"));
         }
 
     case TERNOP_SLICE:
@@ -8239,8 +8239,8 @@ array or function"));
       switch (TYPE_CODE (type))
         {
         default:
-          lim_warning (_("Membership test incompletely implemented; \
-always returns true"));
+          lim_warning (_("Membership test incompletely implemented; "
+			 "always returns true"));
           return value_from_longest (builtin_type_int, (LONGEST) 1);
 
         case TYPE_CODE_RANGE:
@@ -8585,7 +8585,7 @@ always returns true"));
         return
           ada_to_fixed_value (unwrap_value
                               (ada_value_struct_elt
-                               (arg1, &exp->elts[pc + 2].string, "record")));
+                               (arg1, &exp->elts[pc + 2].string, _("record"))));
     case OP_TYPE:
       /* The value is not supposed to be used.  This is here to make it
          easier to accommodate expressions that contain types.  */
@@ -8608,11 +8608,11 @@ always returns true"));
 	  {
 	  case OP_NAME:
 	    error (_("Undefined name, ambiguous name, or renaming used in "
-		   "component association: %s."), &exp->elts[pc+2].string);
+		     "component association: %s."), &exp->elts[pc+2].string);
 	  case OP_AGGREGATE:
 	    error (_("Aggregates only allowed on the right of an assignment"));
 	  default:
-	    internal_error (__FILE__, __LINE__, "aggregate apparently mangled");
+	    internal_error (__FILE__, __LINE__, _("aggregate apparently mangled"));
 	  }
 
       ada_forward_operator_length (exp, pc, &oplen, &nargs);
