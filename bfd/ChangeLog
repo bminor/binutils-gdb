@@ -1,3 +1,7 @@
+2006-01-09  Alexis Wilke  <alexis_wilke@yahoo.com>
+
+	* peXXigen.c (tbl): Add comma after "HIGH3ADJ".
+
 2006-01-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-ppc.c (ppc64_elf_action_discarded): Return 0

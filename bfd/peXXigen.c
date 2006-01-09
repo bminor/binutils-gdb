@@ -1668,7 +1668,7 @@ static const char * const tbl[] =
   "RESERVED1",
   "MIPS_JMPADDR16",
   "DIR64",
-  "HIGH3ADJ"
+  "HIGH3ADJ",
   "UNKNOWN",   /* MUST be last.  */
 };
 
