@@ -1,3 +1,18 @@
+2006-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/2117
+	* gas/ia64/ia64.exp: Add ltoff22x-2, ltoff22x-3, ltoff22x-4 and
+	ltoff22x-5.
+
+	* gas/ia64/ltoff22x-2.d: New file.
+	* gas/ia64/ltoff22x-2.s: Likewise.
+	* gas/ia64/ltoff22x-3.d: Likewise.
+	* gas/ia64/ltoff22x-3.s: Likewise.
+	* gas/ia64/ltoff22x-4.d: Likewise.
+	* gas/ia64/ltoff22x-4.s: Likewise.
+	* gas/ia64/ltoff22x-5.d: Likewise.
+	* gas/ia64/ltoff22x-5.s: Likewise.
+
 2006-01-03  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/2101

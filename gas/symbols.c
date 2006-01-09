@@ -1399,7 +1399,10 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
 	    }
 	}
 
-      *symbolPP = symbolP;
+      /* Never change a defined symbol.  */
+      if (symbolP->bsym->section == undefined_section
+	  || symbolP->bsym->section == expr_section)
+	*symbolPP = symbolP;
       *valueP = expr.X_add_number;
       *segP = symbolP->bsym->section;
       *fragPP = symbolP->sy_frag;
