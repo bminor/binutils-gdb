@@ -1,3 +1,8 @@
+2006-01-09  Mike Frysinger  <vapier@gentoo.org>:
+
+	* readelf.c (guess_is_rela): Add case for Nios/Nios II.
+	(get_machine_name): Likewise.
+
 2005-12-30  Jie Zhang  <jie.zhang@analog.com>
 
 	* readelf.c (get_machine_name): Add case for Blackfin.

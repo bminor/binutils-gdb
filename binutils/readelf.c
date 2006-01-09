@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
@@ -611,6 +611,8 @@ guess_is_rela (unsigned long e_machine)
     case EM_M32C:
     case EM_MT:
     case EM_BLACKFIN:
+    case EM_NIOS32:
+    case EM_ALTERA_NIOS2:
       return TRUE;
 
     case EM_MMA:
@@ -1689,6 +1691,8 @@ get_machine_name (unsigned e_machine)
     case EM_M32C:	        return "Renesas M32c";
     case EM_MT:                 return "Morpho Techologies MT processor";
     case EM_BLACKFIN:		return "Analog Devices Blackfin";
+    case EM_NIOS32:		return "Altera Nios";
+    case EM_ALTERA_NIOS2:	return "Altera Nios II";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_machine);
       return buff;
