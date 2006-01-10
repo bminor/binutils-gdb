@@ -119,6 +119,8 @@ MY (f_model_insn_before) (SIM_CPU *current_cpu, int first_p ATTRIBUTE_UNUSED)
   {
     int i;
     char flags[7];
+    unsigned64 cycle_count;
+
     SIM_DESC sd = CPU_STATE (current_cpu);
 
     cris_trace_printf (sd, current_cpu, "%lx ",
@@ -138,33 +140,24 @@ MY (f_model_insn_before) (SIM_CPU *current_cpu, int first_p ATTRIBUTE_UNUSED)
     flags[5] = GET_H_CBIT () != 0 ? 'C' : 'c';
     flags[6] = 0;
 
+    /* For anything else than basic tracing we'd add stall cycles for
+       e.g. unaligned accesses.  FIXME: add --cris-trace=x options to
+       match --cris-cycles=x.  */
+    cycle_count
+      = (CPU_CRIS_MISC_PROFILE (current_cpu)->basic_cycle_count
+	 - CPU_CRIS_PREV_MISC_PROFILE (current_cpu)->basic_cycle_count);
+
     /* Emit ACR after flags and cycle count for this insn.  */
     if (BASENUM == 32)
       cris_trace_printf (sd, current_cpu, "%s %d %lx\n", flags,
-			 (int)
-			 ((CPU_CRIS_MISC_PROFILE (current_cpu)
-			   ->basic_cycle_count
-			   - CPU_CRIS_PREV_MISC_PROFILE (current_cpu)
-			   ->basic_cycle_count)
-			  + (CPU_CRIS_MISC_PROFILE (current_cpu)
-			     ->unaligned_mem_dword_count
-			     - CPU_CRIS_PREV_MISC_PROFILE (current_cpu)
-			     ->unaligned_mem_dword_count)),
+			 (int) cycle_count,
 			 0xffffffffUL
 			 & (unsigned long) (XCONCAT3(crisv,BASENUM,
 						     f_h_gr_get) (current_cpu,
 								  15)));
     else
       cris_trace_printf (sd, current_cpu, "%s %d\n", flags,
-			 (int)
-			 ((CPU_CRIS_MISC_PROFILE (current_cpu)
-			   ->basic_cycle_count
-			   - CPU_CRIS_PREV_MISC_PROFILE (current_cpu)
-			   ->basic_cycle_count)
-			  + (CPU_CRIS_MISC_PROFILE (current_cpu)
-			     ->unaligned_mem_dword_count
-			     - CPU_CRIS_PREV_MISC_PROFILE (current_cpu)
-			     ->unaligned_mem_dword_count)));
+			 (int) cycle_count);
 
     CPU_CRIS_PREV_MISC_PROFILE (current_cpu)[0]
       = CPU_CRIS_MISC_PROFILE (current_cpu)[0];
