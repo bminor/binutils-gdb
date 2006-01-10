@@ -1,3 +1,8 @@
+2006-01-10  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/asm/x1-v10.ms, sim/cris/asm/x3-v10.ms,
+	sim/cris/asm/x7-v10.ms: Update expected cycle output.
+
 2005-12-06  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/asm/movmp8.ms, sim/cris/asm/pcplus.ms: New tests.
