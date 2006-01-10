@@ -1,5 +1,8 @@
 2006-01-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* mi/mi-main.c (mi_cmd_data_read_memory): Change type of mbus into
+	'gdb_byte *'.
+
 	* target.h (target_read_memory_partial,	target_write_memory_partial):
 	Change second argument to 'gdb_byte *'.
 	* target.c (target_xfer_memory_partial): Change third argument to

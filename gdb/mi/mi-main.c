@@ -761,7 +761,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   long word_size;
   char word_asize;
   char aschar;
-  char *mbuf;
+  gdb_byte *mbuf;
   int nr_bytes;
   long offset = 0;
   int optind = 0;
