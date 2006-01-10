@@ -1,5 +1,10 @@
 2006-01-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* corefile.c (read_memory_integer, read_memory_unsigned_integer)
+	(read_memory_typed_address, write_memory)
+	(write_memory_unsigned_integer, write_memory_signed_integer): Use
+	gdb_byte where appropriate.
+
 	* mi/mi-main.c (mi_cmd_data_read_memory): Change type of mbus into
 	'gdb_byte *'.
 
