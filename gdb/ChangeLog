@@ -1,3 +1,8 @@
+2006-01-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* linespec.c (decode_objc): Make i1 and i2 unsigned.
+	(find_method): Set values.sals to NULL.
+
 2006-01-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64obsd-nat.c (amd64obsd_supply_pcb): Use 'gdb_byte *' instead

@@ -1080,8 +1080,8 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
   struct symbol *sym = NULL;
   char *copy = NULL;
   struct block *block = NULL;
-  int i1 = 0;
-  int i2 = 0;
+  unsigned i1 = 0;
+  unsigned i2 = 0;
 
   values.sals = NULL;
   values.nelts = 0;
@@ -1427,6 +1427,7 @@ find_method (int funfirstline, char ***canonical, char *saved_arg,
 	}
       else
 	{
+	  values.sals = NULL;
 	  values.nelts = 0;
 	}
       return values;
