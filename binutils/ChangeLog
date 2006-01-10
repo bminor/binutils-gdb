@@ -1,5 +1,7 @@
 2006-01-11  Alan Modra  <amodra@bigpond.net.au>
 
+	* objcopy.c (copy_object): Fix thinko.
+
 	* objcopy.c (copy_object): Set isympp and osympp to NULL after free.
 
 2006-01-09  Mike Frysinger  <vapier@gentoo.org>:
