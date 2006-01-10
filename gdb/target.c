@@ -1,7 +1,8 @@
 /* Select target systems and architectures at runtime for GDB.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -1179,7 +1180,7 @@ target_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write)
    If we fail, set *ERR to a non-zero errno value, and return -1.  */
 
 static int
-target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
+target_xfer_memory_partial (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			    int write_p, int *err)
 {
   int res;
@@ -1240,7 +1241,8 @@ target_xfer_memory_partial (CORE_ADDR memaddr, char *myaddr, int len,
 }
 
 int
-target_read_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
+target_read_memory_partial (CORE_ADDR memaddr, gdb_byte *buf,
+			    int len, int *err)
 {
   if (target_xfer_partial_p ())
     {
@@ -1268,7 +1270,8 @@ target_read_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
 }
 
 int
-target_write_memory_partial (CORE_ADDR memaddr, char *buf, int len, int *err)
+target_write_memory_partial (CORE_ADDR memaddr, gdb_byte *buf,
+			     int len, int *err)
 {
   if (target_xfer_partial_p ())
     {
@@ -1421,7 +1424,7 @@ ULONGEST
 get_target_memory_unsigned (struct target_ops *ops,
 			    CORE_ADDR addr, int len)
 {
-  char buf[sizeof (ULONGEST)];
+  gdb_byte buf[sizeof (ULONGEST)];
 
   gdb_assert (len <= sizeof (buf));
   get_target_memory (ops, addr, buf, len);

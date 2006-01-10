@@ -1,5 +1,12 @@
 2006-01-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* target.h (target_read_memory_partial,	target_write_memory_partial):
+	Change second argument to 'gdb_byte *'.
+	* target.c (target_xfer_memory_partial): Change third argument to
+	'gdb_byte *'.
+	(target_read_memory_partial, target_write_memory_partial): Change
+	second argument to 'gdb_byte *'.
+
 	* linespec.c (decode_objc): Make i1 and i2 unsigned.
 	(find_method): Set values.sals to NULL.
 

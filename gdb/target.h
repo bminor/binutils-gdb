@@ -1,7 +1,8 @@
 /* Interface between GDB and target environments, including files and processes
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -554,11 +555,11 @@ extern int child_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
    of bytes actually transfered is not defined) and ERR is set to a
    non-zero error indication.  */
 
-extern int target_read_memory_partial (CORE_ADDR addr, char *buf, int len,
-				       int *err);
+extern int target_read_memory_partial (CORE_ADDR addr, gdb_byte *buf,
+				       int len, int *err);
 
-extern int target_write_memory_partial (CORE_ADDR addr, char *buf, int len,
-					int *err);
+extern int target_write_memory_partial (CORE_ADDR addr, gdb_byte *buf,
+					int len, int *err);
 
 extern char *child_pid_to_exec_file (int);
 
