@@ -1281,10 +1281,16 @@ copy_object (bfd *ibfd, bfd *obfd)
     }
 
   if (isympp)
-    free (isympp);
+    {
+      free (isympp);
+      isympp = NULL;
+    }
 
   if (osympp != isympp)
-    free (osympp);
+    {
+      free (osympp);
+      osympp = NULL;
+    }
 
   /* BFD mandates that all output sections be created and sizes set before
      any output is done.  Thus, we traverse all sections multiple times.  */
