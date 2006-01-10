@@ -1,6 +1,7 @@
 2006-01-10  Hans-Peter Nilsson  <hp@axis.com>
 
-	* 
+	* cris/cris-tmpl.c (MY (f_model_insn_before)): Only display basic
+	cycle count for the current insn.
 
 2005-12-06  Hans-Peter Nilsson  <hp@axis.com>
 
