@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -7459,6 +7459,7 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
 
   mapcount = arm_data->mapcount + 1;
   map = arm_data->map;
+
   /* TODO: This may be inefficient, but we probably don't usually have many
      mapping symbols per section.  */
   newmap = bfd_realloc (map, mapcount * sizeof (* map));
@@ -7467,8 +7468,8 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
       arm_data->map = newmap;
       arm_data->mapcount = mapcount;
 
-      map[mapcount - 1].vma = elfsym->st_value;
-      map[mapcount - 1].type = name[1];
+      newmap[mapcount - 1].vma = elfsym->st_value;
+      newmap[mapcount - 1].type = name[1];
     }
 
   return TRUE;
