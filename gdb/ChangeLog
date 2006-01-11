@@ -1,3 +1,18 @@
+2006-01-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* remote.c (get_memory_packet_size, set_thread) 
+	(remote_unpack_thread_info_response, remote_get_threadinfo) 
+	(parse_threadlist_response, remote_get_threadlist) 
+	(remote_current_thread, remote_threads_info) 
+	(remote_threads_extra_info, extended_remote_restart, get_offsets) 
+	(remote_check_symbols, remote_open_1, remote_detach) 
+	(remote_async_wait, remote_fetch_registers) 
+	(remote_store_registers, check_binary_download, putpkt_binary) 
+	(remote_insert_breakpoint, remote_insert_watchpoint) 
+	(remote_remove_watchpoint, remote_insert_hw_breakpoint) 
+	(remote_remove_hw_breakpoint, remote_xfer_partial, remote_rcmd) 
+	(packet_command): Remove redundant parenthesis.
+
 2006-01-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* corefile.c (read_memory_integer, read_memory_unsigned_integer)
