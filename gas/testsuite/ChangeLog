@@ -1,3 +1,25 @@
+2006-01-11  Nick Clifton  <nickc@redhat.com>
+
+	* gas/tic54x/address.d: Work with 64bit hosts.
+	* gas/tic54x/addrfar.d: Likewise.
+	* gas/tic54x/align.d: Likewise.
+	* gas/tic54x/all-opcodes.d: Likewise.
+	* gas/tic54x/asg.d: Likewise.
+	* gas/tic54x/cons.d: Likewise.
+	* gas/tic54x/consfar.d: Likewise.
+	* gas/tic54x/extaddr.d: Likewise.
+	* gas/tic54x/field.d: Likewise.
+	* gas/tic54x/labels.d: Likewise.
+	* gas/tic54x/loop.d: Likewise.
+	* gas/tic54x/lp.d: Likewise.
+	* gas/tic54x/macro.d: Likewise.
+	* gas/tic54x/math.d: Likewise.
+	* gas/tic54x/opcodes.d: Likewise.
+	* gas/tic54x/sections.d: Likewise.
+	* gas/tic54x/set.d: Likewise.
+	* gas/tic54x/struct.d: Likewise.
+	* gas/tic54x/subsym.d: Likewise.
+
 2006-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/2117

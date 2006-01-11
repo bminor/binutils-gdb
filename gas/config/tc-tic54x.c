@@ -1,5 +1,5 @@
 /* tc-tic54x.c -- Assembly code for the Texas Instruments TMS320C54X
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
@@ -4985,7 +4985,7 @@ subsym_substitute (line, forced)
 		      if (beg < 1)
 			{
 			  as_bad (_("Invalid subscript (use 1 to %d)"),
-				  strlen (value));
+				  (int) strlen (value));
 			  break;
 			}
 		      if (*input_line_pointer == ',')
@@ -4995,7 +4995,7 @@ subsym_substitute (line, forced)
 			  if (beg + len > strlen (value))
 			    {
 			      as_bad (_("Invalid length (use 0 to %d"),
-				      strlen (value) - beg);
+				      (int) strlen (value) - beg);
 			      break;
 			    }
 			}

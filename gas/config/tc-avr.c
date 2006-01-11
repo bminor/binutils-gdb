@@ -1,6 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000, 2001, 2002, 2004, 2005
+   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
@@ -173,6 +173,14 @@ static struct exp_mod_s exp_mod[] =
   {"hlo8",   -BFD_RELOC_AVR_LO8_LDI,   -BFD_RELOC_AVR_LO8_LDI_NEG,   0},
   {"hhi8",   -BFD_RELOC_AVR_HI8_LDI,   -BFD_RELOC_AVR_HI8_LDI_NEG,   0},
 };
+
+/* A union used to store indicies into the exp_mod[] array
+   in a hash table which expects void * data types.  */
+typedef union
+{
+  void * ptr;
+  int    index;
+} mod_index;
 
 /* Opcode hash table.  */
 static struct hash_control *avr_hash;
@@ -426,7 +434,12 @@ md_begin (void)
   avr_mod_hash = hash_new ();
 
   for (i = 0; i < ARRAY_SIZE (exp_mod); ++i)
-    hash_insert (avr_mod_hash, EXP_MOD_NAME (i), (void *) (i + 10));
+    {
+      mod_index m;
+
+      m.index = i + 10;
+      hash_insert (avr_mod_hash, EXP_MOD_NAME (i), m.ptr);
+    }
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);
 }
@@ -509,7 +522,10 @@ avr_ldi_expression (expressionS *exp)
 
   if (op[0])
     {
-      mod = (int) hash_find (avr_mod_hash, op);
+      mod_index m;
+      
+      m.ptr = hash_find (avr_mod_hash, op);
+      mod = m.index;
 
       if (mod)
 	{

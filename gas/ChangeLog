@@ -1,3 +1,21 @@
+2006-01-11  Nick Clifton  <nickc@redhat.com>
+
+	Fixes for building on 64-bit hosts:
+	* config/tc-avr.c (mod_index): New union to allow conversion
+	between pointers and integers.
+	(md_begin, avr_ldi_expression): Use it.
+	* config/tc-i370.c (md_assemble): Add cast for argument to print
+	statement.
+	* config/tc-tic54x.c (subsym_substitute): Likewise.
+	* config/tc-mn10200.c (md_assemble): Use a union to convert the
+	opindex field of fr_cgen structure into a pointer so that it can
+	be stored in a frag.
+	* config/tc-mn10300.c (md_assemble): Likewise.
+	* config/tc-frv.c (frv_debug_tomcat): Use %p to print pointer
+	types.
+	* config/tc-v850.c: Replace uses of (int) casts with correct
+	types.
+
 2006-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/2117

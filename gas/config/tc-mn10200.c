@@ -1,6 +1,6 @@
 /* tc-mn10200.c -- Assembler code for the Matsushita 10200
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005  Free Software Foundation, Inc.
+   2005, 2006  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1191,6 +1191,18 @@ keep_going:
   /* Write out the instruction.  */
   if (relaxable && fc > 0)
     {
+      /* On a 64-bit host the size of an 'int' is not the same
+	 as the size of a pointer, so we need a union to convert
+	 the opindex field of the fr_cgen structure into a char *
+	 so that it can be stored in the frag.  We do not have
+	 to worry about loosing accuracy as we are not going to
+	 be even close to the 32bit limit of the int.  */
+      union
+      {
+	int opindex;
+	char * ptr;
+      }
+      opindex_converter;
       int type;
 
       /* bCC  */
@@ -1218,10 +1230,11 @@ keep_going:
       else
 	type = 3;
 
+      opindex_converter.opindex = fixups[0].opindex;
       f = frag_var (rs_machine_dependent, 8, 8 - size, type,
 		    fixups[0].exp.X_add_symbol,
 		    fixups[0].exp.X_add_number,
-		    (char *)fixups[0].opindex);
+		    opindex_converter.ptr);
       number_to_chars_bigendian (f, insn, size);
       if (8 - size > 4)
 	{

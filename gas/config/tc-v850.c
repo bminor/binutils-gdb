@@ -1,6 +1,6 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2006  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1221,13 +1221,29 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 		 asection *sec,
 		 fragS *fragP)
 {
+  /* This code performs some nasty type punning between the
+     fr_opcode field of the frag structure (a char *) and the
+     fx_r_type field of the fix structure (a bfd_reloc_code_real_type)
+     On a 64bit host this causes problems because these two fields
+     are not the same size, but since we know that we are only
+     ever storing small integers in the fields, it is safe to use
+     a union to convert between them.  */
+  union u
+  {
+    bfd_reloc_code_real_type fx_r_type;
+    char * fr_opcode;
+  }
+  opcode_converter;
   subseg_change (sec, 0);
 
+  opcode_converter.fr_opcode = fragP->fr_opcode;
+      
   /* In range conditional or unconditional branch.  */
   if (fragP->fr_subtype == 0 || fragP->fr_subtype == 2)
     {
       fix_new (fragP, fragP->fr_fix, 2, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode);
+	       fragP->fr_offset, 1,
+	       BFD_RELOC_UNUSED + opcode_converter.fx_r_type);
       fragP->fr_fix += 2;
     }
   /* Out of range conditional branch.  Emit a branch around a jump.  */
@@ -1249,8 +1265,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
 	 target.  */
       md_number_to_chars ((char *) buffer + 2, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_UNUSED +
-	       (int) fragP->fr_opcode + 1);
+	       fragP->fr_offset, 1,
+	       BFD_RELOC_UNUSED + opcode_converter.fx_r_type + 1);
       fragP->fr_fix += 6;
     }
   /* Out of range unconditional branch.  Emit a jump.  */
@@ -1258,8 +1274,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
     {
       md_number_to_chars (fragP->fr_fix + fragP->fr_literal, 0x00000780, 4);
       fix_new (fragP, fragP->fr_fix, 4, fragP->fr_symbol,
-	       fragP->fr_offset, 1, BFD_RELOC_UNUSED +
-	       (int) fragP->fr_opcode + 1);
+	       fragP->fr_offset, 1,
+	       BFD_RELOC_UNUSED + opcode_converter.fx_r_type + 1);
       fragP->fr_fix += 4;
     }
   else
@@ -2036,6 +2052,20 @@ md_assemble (char *str)
 
   if (relaxable && fc > 0)
     {
+      /* On a 64-bit host the size of an 'int' is not the same
+	 as the size of a pointer, so we need a union to convert
+	 the opindex field of the fr_cgen structure into a char *
+	 so that it can be stored in the frag.  We do not have
+	 to worry about loosing accuracy as we are not going to
+	 be even close to the 32bit limit of the int.  */
+      union
+      {
+	int opindex;
+	char * ptr;
+      }
+      opindex_converter;
+
+      opindex_converter.opindex = fixups[0].opindex;
       insn_size = 2;
       fc = 0;
 
@@ -2044,7 +2074,7 @@ md_assemble (char *str)
 	  f = frag_var (rs_machine_dependent, 4, 2, 2,
 			fixups[0].exp.X_add_symbol,
 			fixups[0].exp.X_add_number,
-			(char *) fixups[0].opindex);
+			opindex_converter.ptr);
 	  md_number_to_chars (f, insn, insn_size);
 	  md_number_to_chars (f + 2, 0, 2);
 	}
@@ -2053,7 +2083,7 @@ md_assemble (char *str)
 	  f = frag_var (rs_machine_dependent, 6, 4, 0,
 			fixups[0].exp.X_add_symbol,
 			fixups[0].exp.X_add_number,
-			(char *) fixups[0].opindex);
+			opindex_converter.ptr);
 	  md_number_to_chars (f, insn, insn_size);
 	  md_number_to_chars (f + 2, 0, 4);
 	}

@@ -1,5 +1,5 @@
 /* tc-frv.c -- Assembler for the Fujitsu FRV.
-   Copyright 2002, 2003, 2004, 2005 Free Software Foundation.
+   Copyright 2002, 2003, 2004, 2005, 2006 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -648,11 +648,11 @@ frv_debug_tomcat (start_chain)
       for (this_insn = this_chain->insn_list; this_insn; this_insn = this_insn->next)
 	{
 	  if (this_insn->type == VLIW_LABEL_TYPE)
-	    fprintf (stderr, "Label Value: %d\n", (int) this_insn->sym);
+	    fprintf (stderr, "Label Value: %p\n", this_insn->sym);
 	  else if (this_insn->type == VLIW_BRANCH_TYPE)
-	    fprintf (stderr, "%s to %d\n", this_insn->insn->base->name, (int) this_insn->sym);
+	    fprintf (stderr, "%s to %p\n", this_insn->insn->base->name, this_insn->sym);
 	  else if (this_insn->type == VLIW_BRANCH_HAS_NOPS)
-	    fprintf (stderr, "nop'd %s to %d\n", this_insn->insn->base->name, (int) this_insn->sym);
+	    fprintf (stderr, "nop'd %s to %p\n", this_insn->insn->base->name, this_insn->sym);
 	  else if (this_insn->type == VLIW_NOP_TYPE)
 	    fprintf (stderr, "Nop\n");
 	  else

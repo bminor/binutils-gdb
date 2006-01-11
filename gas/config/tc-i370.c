@@ -1,7 +1,7 @@
 /* tc-i370.c -- Assembler for the IBM 360/370/390 instruction set.
    Loosely based on the ppc files by Linas Vepstas <linas@linas.org> 1998, 99
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -2102,7 +2102,7 @@ md_assemble (char *str)
 
           if (! register_name (&ex))
 	    as_bad ("expecting a register for operand %d",
-		    opindex_ptr - opcode->operands + 1);
+		    (int) (opindex_ptr - opcode->operands + 1));
         }
 
       /* Check for an address constant expression.  */
