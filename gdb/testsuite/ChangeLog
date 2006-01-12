@@ -1,3 +1,11 @@
+2006-01-04  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.asm/asm-source.exp: Independently provide default values for
+	asm-flags and debug-flags.  Use 'string equal' to do the
+	comparison, not the implicit expr's '==' operator.  Remove
+	now-unneeded assignments to asm-flags.  In h8300 case, place
+	"-gdwarf-2", not "-gdwarf2", in debug-flags, not asm-flags.
+
 2006-01-04  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/checkpoint.c: New file.
