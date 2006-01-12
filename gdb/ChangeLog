@@ -1,3 +1,18 @@
+2006-01-12  Paul N. Hilfinger <hilfinger@adacore.com>
+
+	* ada-exp.y (yyerror): Change message to ignore the argument, avoiding
+	translation problems.
+	* ada-lang.c (ada_value_struct_elt): Change interface and handling
+	of errors to avoid translation problem (and less than optimal error
+	messages).
+	(ada_value_tag, ada_tag_name_1, ada_tag_name_2,	ada_evaluate_subexp):
+	Use new interface to ada_value_struct_elt.
+	* ada_lang.h (ada_value_struct_elt): Update declaration to new 
+	interface.
+	
+	* ChangeLog: remove reference to ada-tasks.c from entry of
+	2006-01-07.
+	
 2006-01-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* remote.c (get_memory_packet_size, set_thread) 
@@ -41,7 +56,7 @@
 2006-01-07  Paul N. Hilfinger <hilfinger@adacore.com>
 
 	* ada-exp.y, ada-lex.l, ada-typeprint.c: I18n markup.
-	* ada-tasks.c, ada-lang.c: I18n markup.  
+	* ada-lang.c: I18n markup.  
 	Editorial: change "can not" => "cannot" throughout.
 
 2006-01-07  Mark Kettenis  <kettenis@gnu.org>

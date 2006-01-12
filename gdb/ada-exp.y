@@ -768,7 +768,7 @@ ada_parse (void)
 void
 yyerror (char *msg)
 {
-  error (_("A %s in expression, near `%s'."), (msg ? msg : _("error")), lexptr);
+  error (_("Error in expression, near `%s'."), lexptr);
 }
 
 /* The operator name corresponding to operator symbol STRING (adds

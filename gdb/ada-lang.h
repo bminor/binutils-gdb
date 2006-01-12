@@ -363,7 +363,7 @@ extern int ada_in_variant (LONGEST, struct type *, int);
 
 extern char *ada_variant_discrim_name (struct type *);
 
-extern struct value *ada_value_struct_elt (struct value *, char *, char *);
+extern struct value *ada_value_struct_elt (struct value *, char *, int);
 
 extern int ada_is_aligner_type (struct type *);
 

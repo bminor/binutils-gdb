@@ -5220,7 +5220,7 @@ ada_tag_type (struct value *val)
 struct value *
 ada_value_tag (struct value *val)
 {
-  return ada_value_struct_elt (val, "_tag", "record");
+  return ada_value_struct_elt (val, "_tag", 0);
 }
 
 /* The value of the tag on the object of type TYPE whose contents are
@@ -5279,10 +5279,10 @@ ada_tag_name_1 (void *args0)
   char *p;
   struct value *val;
   args->name = NULL;
-  val = ada_value_struct_elt (args->tag, "tsd", NULL);
+  val = ada_value_struct_elt (args->tag, "tsd", 1);
   if (val == NULL)
     return ada_tag_name_2 (args);
-  val = ada_value_struct_elt (val, "expanded_name", NULL);
+  val = ada_value_struct_elt (val, "expanded_name", 1);
   if (val == NULL)
     return 0;
   read_memory_string (value_as_address (val), name, sizeof (name) - 1);
@@ -5317,7 +5317,7 @@ ada_tag_name_2 (struct tag_args *args)
   val = value_ind (value_add (valp, value_from_longest (builtin_type_int, -1)));
   if (val == NULL)
     return 0;
-  val = ada_value_struct_elt (val, "expanded_name", NULL);
+  val = ada_value_struct_elt (val, "expanded_name", 1);
   if (val == NULL)
     return 0;
   read_memory_string (value_as_address (val), name, sizeof (name) - 1);
@@ -5823,14 +5823,11 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
    and (recursively) among all members of any wrapper members
    (e.g., '_parent').
 
-   ERR is a name (for use in error messages) that identifies the class
-   of entity that ARG is supposed to be.  ERR may be null, indicating
-   that on error, the function simply returns NULL, and does not
-   throw an error.  (FIXME: True only if ARG is a pointer or reference
-   at the moment). */
+   If NO_ERR, then simply return NULL in case of error, rather than 
+   calling error.  */
 
 struct value *
-ada_value_struct_elt (struct value *arg, char *name, char *err)
+ada_value_struct_elt (struct value *arg, char *name, int no_err)
 {
   struct type *t, *t1;
   struct value *v;
@@ -5841,12 +5838,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
     {
       t1 = TYPE_TARGET_TYPE (t);
       if (t1 == NULL)
-        {
-          if (err == NULL)
-            return NULL;
-          else
-            error (_("Bad value type in a %s."), err);
-        }
+	goto BadValue;
       t1 = ada_check_typedef (t1);
       if (TYPE_CODE (t1) == TYPE_CODE_PTR)
         {
@@ -5859,12 +5851,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
     {
       t1 = TYPE_TARGET_TYPE (t);
       if (t1 == NULL)
-        {
-          if (err == NULL)
-            return NULL;
-          else
-            error (_("Bad value type in a %s."), err);
-        }
+	goto BadValue;
       t1 = ada_check_typedef (t1);
       if (TYPE_CODE (t1) == TYPE_CODE_PTR)
         {
@@ -5876,13 +5863,7 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
     }
 
   if (TYPE_CODE (t1) != TYPE_CODE_STRUCT && TYPE_CODE (t1) != TYPE_CODE_UNION)
-    {
-      if (err == NULL)
-        return NULL;
-      else
-        error (_("Attempt to extract a component of a value that is not a %s."),
-               err);
-    }
+    goto BadValue;
 
   if (t1 == t)
     v = ada_search_struct_field (name, arg, 0, t);
@@ -5918,10 +5899,16 @@ ada_value_struct_elt (struct value *arg, char *name, char *err)
         }
     }
 
-  if (v == NULL && err != NULL)
+  if (v != NULL || no_err)
+    return v;
+  else
     error (_("There is no member named %s."), name);
 
-  return v;
+ BadValue:
+  if (no_err)
+    return NULL;
+  else
+    error (_("Attempt to extract a component of a value that is not a record."));
 }
 
 /* Given a type TYPE, look up the type of the component of type named NAME.
@@ -8585,7 +8572,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         return
           ada_to_fixed_value (unwrap_value
                               (ada_value_struct_elt
-                               (arg1, &exp->elts[pc + 2].string, _("record"))));
+                               (arg1, &exp->elts[pc + 2].string, 0)));
     case OP_TYPE:
       /* The value is not supposed to be used.  This is here to make it
          easier to accommodate expressions that contain types.  */
