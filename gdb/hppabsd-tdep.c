@@ -1,6 +1,6 @@
 /* Target-dependent code for HP PA-RISC BSD's.
 
-   Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -169,6 +169,10 @@ hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  /* OpenBSD and NetBSD have a 64-bit 'long double'.  */
+  set_gdbarch_long_double_bit (gdbarch, 64);
+  set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+
   /* Core file support.  */
   set_gdbarch_regset_from_core_section
     (gdbarch, hppabsd_regset_from_core_section);
@@ -177,7 +181,7 @@ hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->find_global_pointer = hppabsd_find_global_pointer;
   tdep->is_elf = 1;
 
-  /* OpenBSD and NetBSD uses SVR4-style shared libraries.  */
+  /* OpenBSD and NetBSD use SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }
