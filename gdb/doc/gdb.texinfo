@@ -3601,7 +3601,7 @@ enable other breakpoints.
 
 @table @code
 @kindex commands
-@kindex end
+@kindex end@r{ (breakpoint commands)}
 @item commands @r{[}@var{bnum}@r{]}
 @itemx @dots{} @var{command-list} @dots{}
 @itemx end
@@ -16038,6 +16038,7 @@ which are given following the @code{define} command.  The end of these
 commands is marked by a line containing @code{end}.
 
 @kindex document
+@kindex end@r{ (user-defined commands)}
 @item document @var{commandname}
 Document the user-defined command @var{commandname}, so that it can be
 accessed by @code{help}.  The command @var{commandname} must already be
@@ -16188,6 +16189,7 @@ command:
 
 @table @code
 @kindex source
+@cindex execute commands from a file
 @item source @var{filename}
 Execute the command file @var{filename}.
 @end table
@@ -16260,6 +16262,11 @@ This command skips the execution of the rest of the body of commands
 in the @code{while} loop in whose body it is included.  Execution
 branches to the beginning of the @code{while} loop, where it evaluates
 the controlling expression.
+
+@kindex end@r{ (if/else/while commands)}
+@item end
+Terminate the block of commands that are the body of @code{if},
+@code{else}, or @code{while} flow-control commands.
 @end table
 
 

@@ -5,6 +5,8 @@
 	commands.  Move the description of flow-control commands...
 	(Command Files): ...to here.  Document loop_break and
 	loop_continue.
+	(Define, Command Files): Document `end' and add index entries for
+	it.
 
 2006-01-04  Michael Snyder  <msnyder@redhat.com>
 
