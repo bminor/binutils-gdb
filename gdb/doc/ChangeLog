@@ -1,3 +1,11 @@
+2006-01-13  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Sequences): Improve menu annotations.
+	(Define): Add index entries for arguments of user-defined
+	commands.  Move the description of flow-control commands...
+	(Command Files): ...to here.  Document loop_break and
+	loop_continue.
+
 2006-01-04  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.texinfo: Add documentation for linux-fork.

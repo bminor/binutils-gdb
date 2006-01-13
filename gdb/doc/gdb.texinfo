@@ -15974,16 +15974,17 @@ commands for execution as a unit: user-defined commands and command
 files.
 
 @menu
-* Define::                      User-defined commands
-* Hooks::                       User-defined command hooks
-* Command Files::               Command files
-* Output::                      Commands for controlled output
+* Define::             How to define your own commands
+* Hooks::              Hooks for user-defined commands
+* Command Files::      How to write scripts of commands to be stored in a file
+* Output::             Commands for controlled output
 @end menu
 
 @node Define
 @section User-defined commands
 
 @cindex user-defined command
+@cindex arguments, to user-defined commands
 A @dfn{user-defined command} is a sequence of @value{GDBN} commands to
 which you assign a new name as a command.  This is done with the
 @code{define} command.  User commands may accept up to 10 arguments
@@ -16009,6 +16010,8 @@ its three arguments.  Note the arguments are text substitutions, so they may
 reference variables, use complex expressions, or even perform inferior
 functions calls.
 
+@cindex argument count in user-defined commands
+@cindex how many arguments (user-defined commands)
 In addition, @code{$argc} may be used to find out how many arguments have
 been passed.  This expands to a number in the range 0@dots{}10.
 
@@ -16033,25 +16036,6 @@ by that name, you are asked to confirm that you want to redefine it.
 The definition of the command is made up of other @value{GDBN} command lines,
 which are given following the @code{define} command.  The end of these
 commands is marked by a line containing @code{end}.
-
-@kindex if
-@kindex else
-@item if
-@itemx else
-Takes a single argument, which is an expression to evaluate.
-It is followed by a series of commands that are executed
-only if the expression is true (nonzero).
-There can then optionally be a line @code{else}, followed
-by a series of commands that are only executed if the expression
-was false.  The end of the list is marked by a line containing @code{end}.
-
-@kindex while
-@item while
-The syntax is similar to @code{if}: the command takes a single argument,
-which is an expression to evaluate, and must be followed by the commands to
-execute, one per line, terminated by an @code{end}.
-The commands are executed repeatedly as long as the expression
-evaluates to true.
 
 @kindex document
 @item document @var{commandname}
@@ -16085,7 +16069,7 @@ Display the @value{GDBN} commands used to define @var{commandname} (but
 not its documentation).  If no @var{commandname} is given, display the
 definitions for all user-defined commands.
 
-@cindex infinite recusrion in user-defined commands
+@cindex infinite recursion in user-defined commands
 @kindex show max-user-call-depth
 @kindex set max-user-call-depth
 @item show max-user-call-depth
@@ -16093,8 +16077,10 @@ definitions for all user-defined commands.
 The value of @code{max-user-call-depth} controls how many recursion
 levels are allowed in user-defined commands before GDB suspects an
 infinite recursion and aborts the command.
-
 @end table
+
+In addition to the above commands, user-defined commands frequently
+use control flow commands, described in @ref{Command Files}.
 
 When user-defined commands are executed, the
 commands of the definition are not printed.  An error in any command
@@ -16190,6 +16176,7 @@ get a warning from the @code{define} command.
 @section Command files
 
 @cindex command files
+@cindex scripting commands
 A command file for @value{GDBN} is a text file made of lines that are
 @value{GDBN} commands.  Comments (lines starting with @kbd{#}) may
 also be included.  An empty line in a command file does nothing; it
@@ -16205,7 +16192,9 @@ command:
 Execute the command file @var{filename}.
 @end table
 
-The lines in a command file are executed sequentially.  They are not
+The lines in a command file are generally executed sequentially,
+unless the order of execution is changed by one of the
+@emph{flow-control commands} described below.  The commands are not
 printed as they are executed.  An error in any command terminates
 execution of the command file and control is returned to the console.
 
@@ -16227,6 +16216,52 @@ gdb < cmds > log 2>&1
 (The syntax above will vary depending on the shell used.) This example
 will execute commands from the file @file{cmds}. All output and errors
 would be directed to @file{log}.
+
+Since commands stored on command files tend to be more general than
+commands typed interactively, they frequently need to deal with
+complicated situations, such as different or unexpected values of
+variables and symbols, changes in how the program being debugged is
+built, etc.  @value{GDBN} provides a set of flow-control commands to
+deal with these complexities.  Using these commands, you can write
+complex scripts that loop over data structures, execute commands
+conditionally, etc.
+
+@table @code
+@kindex if
+@kindex else
+@item if
+@itemx else
+This command allows to include in your script conditionally executed
+commands. The @code{if} command takes a single argument, which is an
+expression to evaluate.  It is followed by a series of commands that
+are executed only if the expression is true (its value is nonzero).
+There can then optionally be an @code{else} line, followed by a series
+of commands that are only executed if the expression was false.  The
+end of the list is marked by a line containing @code{end}.
+
+@kindex while
+@item while
+This command allows to write loops.  Its syntax is similar to
+@code{if}: the command takes a single argument, which is an expression
+to evaluate, and must be followed by the commands to execute, one per
+line, terminated by an @code{end}.  These commands are called the
+@dfn{body} of the loop.  The commands in the body of @code{while} are
+executed repeatedly as long as the expression evaluates to true.
+
+@kindex loop_break
+@item loop_break
+This command exits the @code{while} loop in whose body it is included.
+Execution of the script continues after that @code{while}s @code{end}
+line.
+
+@kindex loop_continue
+@item loop_continue
+This command skips the execution of the rest of the body of commands
+in the @code{while} loop in whose body it is included.  Execution
+branches to the beginning of the @code{while} loop, where it evaluates
+the controlling expression.
+@end table
+
 
 @node Output
 @section Commands for controlled output
