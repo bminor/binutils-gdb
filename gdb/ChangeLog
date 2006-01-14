@@ -1,3 +1,8 @@
+2006-01-13  Mark Mitchell  <mark@codesourcery.com>
+
+	* event-loop.c (gdb_select): Detect file descriptors that have
+	been closed.
+
 2006-01-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppabsd-tdep.c (hppabsd_init_abi): Set long_double_bit to 64,
