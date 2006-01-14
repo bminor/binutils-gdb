@@ -1,5 +1,7 @@
 2006-01-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-linux-tdep.c: Fix copyright indentation.
+
 	* hppa-tdep.h (enum hppa_regnum): Add HPPA_FP31R_REGNUM.
 	* hppabsd-nat.c (hppabsd_fpregset_supplies_p)
 	(hppabsd_supply_fpregset, hppabsd_collect_fpregset): New
