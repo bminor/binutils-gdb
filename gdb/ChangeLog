@@ -1,3 +1,12 @@
+2006-01-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-tdep.h (enum hppa_regnum): Add HPPA_FP31R_REGNUM.
+	* hppabsd-nat.c (hppabsd_fpregset_supplies_p)
+	(hppabsd_supply_fpregset, hppabsd_collect_fpregset): New
+	functions.
+	(hppabsd_fetch_registers, hppabsd_store_registers): Handle
+	floating-point registers.
+
 2006-01-13  Mark Mitchell  <mark@codesourcery.com>
 
 	* event-loop.c (gdb_select): Detect file descriptors that have
