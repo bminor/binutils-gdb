@@ -68,6 +68,7 @@ enum hppa_regnum
   HPPA_FP0_REGNUM = 64,		/* First floating-point.  */
   HPPA_FP4_REGNUM = 72,
   HPPA64_FP4_REGNUM = 68,
+  HPPA_FP31R_REGNUM = 127,	/* Last floating-point.  */
 
   HPPA_ARG0_REGNUM = 26,	/* The first argument of a callee. */
   HPPA_ARG1_REGNUM = 25,	/* The second argument of a callee. */
