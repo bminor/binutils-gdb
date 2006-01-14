@@ -749,22 +749,39 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
   int fd;
   int num_ready;
 
+  num_ready = 0;
   num_handles = 0;
   for (fd = 0; fd < n; ++fd)
     {
-      /* EXCEPTFDS is silently ignored.  GDB always sets GDB_EXCEPTION
-	 when calling add_file_handler, but there is no natural analog
-	 under Windows.  */
       /* There is no support yet for WRITEFDS.  At present, this isn't
 	 used by GDB -- but we do not want to silently ignore WRITEFDS
 	 if something starts using it.  */
       gdb_assert (!FD_ISSET (fd, writefds));
-      if (FD_ISSET (fd, readfds))
+      if (!FD_ISSET (fd, readfds) 
+	  && !FD_ISSET (fd, exceptfds))
+	continue;
+      h = (HANDLE) _get_osfhandle (fd);
+      if (h == INVALID_HANDLE_VALUE)
 	{
-	  gdb_assert (num_handles < MAXIMUM_WAIT_OBJECTS);
-	  handles[num_handles++] = (HANDLE) _get_osfhandle (fd);
+	  /* If the underlying handle is INVALID_HANDLE_VALUE, then
+	     this descriptor is no more.  */
+	  if (FD_ISSET (fd, exceptfds))
+	    ++num_ready;
+	  continue;
 	}
+      /* The only exceptional condition we recognize is a closed file
+	 descriptor.  Since we have already checked for that
+	 condition, clear the exceptional bit for this descriptor.  */
+      FD_CLR (fd, exceptfds);
+      if (FD_ISSET (fd, readfds))
+      {
+	gdb_assert (num_handles < MAXIMUM_WAIT_OBJECTS);
+	handles[num_handles++] = h;
+      }
     }
+  /* If we don't need to wait for any handles, we are done.  */
+  if (!num_handles)
+    return num_ready;
   event = WaitForMultipleObjects (num_handles,
 				  handles,
 				  FALSE,
@@ -779,10 +796,10 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
   if (event == WAIT_FAILED)
     return -1;
   if (event == WAIT_TIMEOUT)
-    return 0;
+    return num_ready;
   /* Run through the READFDS, clearing bits corresponding to descriptors
      for which input is unavailable.  */
-  num_ready = num_handles; 
+  num_ready += num_handles; 
   h = handles[event - WAIT_OBJECT_0];
   for (fd = 0; fd < n; ++fd)
     {
@@ -798,10 +815,6 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	  --num_ready;
 	}
     }
-  /* We never report any descriptors available for writing or with
-     exceptional conditions.  */ 
-  FD_ZERO (writefds);
-  FD_ZERO (exceptfds);
 
   return num_ready;
 #else
