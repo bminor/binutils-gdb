@@ -1,5 +1,24 @@
 2006-01-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* sol2-tdep.h. sol2-tdep.c: New files.
+	* amd64-sol2-tdep.c: Include "sol2-tdep.h".
+	(amd64_sol2_init_abi): Set skip_solib_resolver.
+	* i386-sol2-tdep.c: Include "sol2-tdep.h".
+	(i386_sol2_init_abi): Set skip_solib_resolver.
+	* sparc-sol2-tdep.c: Include "sol2-tdep.h".
+	(sparc32_sol2_init_abi): Set skip_solib_resolver.
+	* sparc64-sol2-tdep.c: Include "sol2-tdep.h".
+	(sparc64_sol2_init_abi): Set skip_solib_resolver.
+	* Makefile.in (sol2_tdep_h): New variable.
+	(ALLDEPFILES): Add sol2-tdep.c.
+	(sol2-tdep.o): New target.
+	(amd64-sol2-tdep.o, i386-sol2-tdep.o, sparc-sol2-tdep.o)
+	(sparc64-sol2-tdep.o): Update dependencies
+	* config/i386/i386sol2.mt (TDEPFILES): Add sol2-tdep.o.
+	* config/i386/sol2-64.mt (TDEPFILES): Add sol2-tdep.o.
+	* config/sparc/sol2.mt (TDEPFILES): Add sol2-tdep.o.
+	* config/sparc/sol2-64.mt (TDEPFILES): Add sol2-tdep.o.
+
 	* hppa-linux-tdep.c: Fix copyright indentation.
 
 	* hppa-tdep.h (enum hppa_regnum): Add HPPA_FP31R_REGNUM.

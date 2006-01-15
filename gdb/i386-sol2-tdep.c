@@ -1,6 +1,6 @@
 /* Target-dependent code for Solaris x86.
 
-   Copyright (C) 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,6 +25,7 @@
 
 #include "gdb_string.h"
 
+#include "sol2-tdep.h"
 #include "i386-tdep.h"
 #include "solib-svr4.h"
 
@@ -101,6 +102,8 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_reg_offset = tdep->gregset_reg_offset;
   tdep->sc_num_regs = tdep->gregset_num_regs;
 
+  /* Solaris has SVR4-style shared libraries.  */
+  set_gdbarch_skip_solib_resolver (gdbarch, sol2_skip_solib_resolver);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 }

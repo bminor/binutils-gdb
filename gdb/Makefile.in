@@ -768,6 +768,7 @@ ser_unix_h = ser-unix.h
 shnbsd_tdep_h = shnbsd-tdep.h
 sh_tdep_h = sh-tdep.h
 sim_regno_h = sim-regno.h
+sol2_tdep_h = sol2-tdep.h
 solib_h = solib.h
 solib_pa64_h = solib-pa64.h
 solib_som_h = solib-som.h
@@ -1441,6 +1442,7 @@ ALLDEPFILES = \
 	s390-tdep.c s390-nat.c \
 	ser-go32.c ser-pipe.c ser-tcp.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
+	sol2-tdep.c \
 	solib-irix.c solib-svr4.c solib-sunos.c \
 	sparc-linux-nat.c \
 	sparc-linux-tdep.c sparc-nat.c sparc-sol2-nat.c sparc-sol2-tdep.c \
@@ -1723,8 +1725,8 @@ amd64obsd-tdep.o: amd64obsd-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdb_string_h) $(amd64_tdep_h) $(i387_tdep_h) $(solib_svr4_h) \
 	$(bsd_uthread_h)
 amd64-sol2-tdep.o: amd64-sol2-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
-	$(regcache_h) $(osabi_h) $(symtab_h) $(gdb_string_h) $(amd64_tdep_h) \
-	$(solib_svr4_h)
+	$(regcache_h) $(osabi_h) $(symtab_h) $(gdb_string_h) \
+	$(sol2_tdep_h) $(amd64_tdep_h) $(solib_svr4_h)
 amd64-tdep.o: amd64-tdep.c $(defs_h) $(arch_utils_h) $(block_h) \
 	$(dummy_frame_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
 	$(inferior_h) $(gdbcmd_h) $(gdbcore_h) $(objfiles_h) $(regcache_h) \
@@ -2081,7 +2083,7 @@ i386obsd-tdep.o: i386obsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 i386-sol2-nat.o: i386-sol2-nat.c $(defs_h) $(regcache_h) $(gregset_h) \
 	$(amd64_nat_h) $(amd64_tdep_h)
 i386-sol2-tdep.o: i386-sol2-tdep.c $(defs_h) $(value_h) $(osabi_h) \
-	$(gdb_string_h) $(i386_tdep_h) $(solib_svr4_h)
+	$(gdb_string_h) $(sol2_tdep_h) $(i386_tdep_h) $(solib_svr4_h)
 i386-stub.o: i386-stub.c
 i386-tdep.o: i386-tdep.c $(defs_h) $(arch_utils_h) $(command_h) \
 	$(dummy_frame_h) $(dwarf2_frame_h) $(doublest_h) $(floatformat_h) \
@@ -2543,6 +2545,7 @@ sh-tdep.o: sh-tdep.c $(defs_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
 	$(gdb_assert_h) $(arch_utils_h) $(floatformat_h) $(regcache_h) \
 	$(doublest_h) $(osabi_h) $(sh_tdep_h) $(elf_bfd_h) $(solib_svr4_h) \
 	$(elf_sh_h) $(gdb_sim_sh_h)
+sol2-tdep.o: sol2-tdep.c $(defs_h) $(frame_h) $(symtab_h)
 solib-aix5.o: solib-aix5.c $(defs_h) $(gdb_string_h) $(elf_external_h) \
 	$(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) $(gdbcore_h) \
 	$(command_h) $(target_h) $(frame_h) $(gdb_regex_h) $(inferior_h) \
