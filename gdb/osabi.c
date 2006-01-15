@@ -546,7 +546,8 @@ generic_elf_osabi_sniffer (bfd *abfd)
       /* The FreeBSD folks have been naughty; they stored the string
          "FreeBSD" in the padding of the e_ident field of the ELF
          header to "brand" their ELF binaries in FreeBSD 3.x.  */
-      if (strcmp (&elf_elfheader (abfd)->e_ident[8], "FreeBSD") == 0)
+      if (memcmp (&elf_elfheader (abfd)->e_ident[8],
+		  "FreeBSD", sizeof ("FreeBSD") == 0)
 	osabi = GDB_OSABI_FREEBSD_ELF;
     }
 

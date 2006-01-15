@@ -1,3 +1,8 @@
+2006-01-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* osabi.c (generic_elf_osabi_sniffer): Use memcmp instead of
+	strcmp to compare string to a byte buffer.
+
 2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* printcmd.c (output_command): Always initialize fmt.size.
