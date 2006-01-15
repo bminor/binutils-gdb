@@ -1,7 +1,8 @@
 /* Common target dependent code for GDB on ARM systems.
 
    Copyright (C) 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2258,8 +2259,8 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
 static enum return_value_convention
 arm_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		  struct regcache *regcache, void *readbuf,
-		  const void *writebuf)
+		  struct regcache *regcache, gdb_byte *readbuf,
+		  const gdb_byte *writebuf)
 {
   if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
       || TYPE_CODE (valtype) == TYPE_CODE_UNION
