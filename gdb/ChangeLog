@@ -1,5 +1,8 @@
 2006-01-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* osabi.c (generic_elf_osabi_sniffer): Fix typo in previous
+	commit.
+
 	* alpha-tdep.c (alpha_gdbarch_init): Set cannot_step_breakpoint.
 	* config/alpha/nm-osf.h (CANNOT_STEP_BREAKPOINT): Remove.
 	* config/alpha/nm-linux.h (CANNOT_STEP_BREAKPOINT): Remove.
