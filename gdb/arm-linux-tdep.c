@@ -1,6 +1,6 @@
 /* GNU/Linux on ARM target support.
 
-   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -212,49 +212,6 @@ arm_linux_extract_return_value (struct type *type,
    with.  Before the fixup/resolver code returns, it actually calls
    the requested function and repairs &GOT[n+3].  */
 
-/* Fetch, and possibly build, an appropriate link_map_offsets structure
-   for ARM linux targets using the struct offsets defined in <link.h>.
-   Note, however, that link.h is not actually referred to in this file.
-   Instead, the relevant structs offsets were obtained from examining
-   link.h.  (We can't refer to link.h from this file because the host
-   system won't necessarily have it, or if it does, the structs which
-   it defines will refer to the host system, not the target).  */
-
-static struct link_map_offsets *
-arm_linux_svr4_fetch_link_map_offsets (void)
-{
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = 0;
-
-  if (lmp == 0)
-    {
-      lmp = &lmo;
-
-      lmo.r_debug_size = 8;	/* Actual size is 20, but this is all we
-                                   need.  */
-
-      lmo.r_map_offset = 4;
-      lmo.r_map_size   = 4;
-
-      lmo.link_map_size = 20;	/* Actual size is 552, but this is all we
-                                   need.  */
-
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 4;
-
-      lmo.l_name_offset = 4;
-      lmo.l_name_size   = 4;
-
-      lmo.l_next_offset = 12;
-      lmo.l_next_size   = 4;
-
-      lmo.l_prev_offset = 16;
-      lmo.l_prev_size   = 4;
-    }
-
-    return lmp;
-}
-
 /* The constants below were determined by examining the following files
    in the linux kernel sources:
 
@@ -391,7 +348,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
 
   set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, arm_linux_svr4_fetch_link_map_offsets);
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
   /* The following override shouldn't be needed.  */
   set_gdbarch_deprecated_extract_return_value (gdbarch, arm_linux_extract_return_value);

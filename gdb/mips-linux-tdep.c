@@ -1,6 +1,7 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright (C) 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -278,49 +279,6 @@ mips_linux_register_addr (int regno, CORE_ADDR blockend)
     error (_("Unknowable register number %d."), regno);
 
   return regaddr;
-}
-
-
-/* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native GNU/Linux MIPS targets using the struct
-   offsets defined in link.h (but without actual reference to that
-   file).
-
-   This makes it possible to access GNU/Linux MIPS shared libraries
-   from a GDB that was built on a different host platform (for cross
-   debugging).  */
-
-static struct link_map_offsets *
-mips_linux_svr4_fetch_link_map_offsets (void)
-{
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = NULL;
-
-  if (lmp == NULL)
-    {
-      lmp = &lmo;
-
-      lmo.r_debug_size = 8;	/* The actual size is 20 bytes, but
-				   this is all we need.  */
-      lmo.r_map_offset = 4;
-      lmo.r_map_size   = 4;
-
-      lmo.link_map_size = 20;
-
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 4;
-
-      lmo.l_name_offset = 4;
-      lmo.l_name_size   = 4;
-
-      lmo.l_next_offset = 12;
-      lmo.l_next_size   = 4;
-
-      lmo.l_prev_offset = 16;
-      lmo.l_prev_size   = 4;
-    }
-
-  return lmp;
 }
 
 /* Support for 64-bit ABIs.  */
@@ -631,48 +589,6 @@ static struct core_fns regset_core_fns =
   fetch_core_registers,			/* core_read_registers */
   NULL					/* next */
 };
-
-/* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native GNU/Linux MIPS targets using the struct
-   offsets defined in link.h (but without actual reference to that
-   file).
-
-   This makes it possible to access GNU/Linux MIPS shared libraries
-   from a GDB that was built on a different host platform (for cross
-   debugging).  */
-
-static struct link_map_offsets *
-mips64_linux_svr4_fetch_link_map_offsets (void)
-{
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = NULL;
-
-  if (lmp == NULL)
-    {
-      lmp = &lmo;
-
-      lmo.r_debug_size = 16;	/* The actual size is 40 bytes, but
-				   this is all we need.  */
-      lmo.r_map_offset = 8;
-      lmo.r_map_size   = 8;
-
-      lmo.link_map_size = 40;
-
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 8;
-
-      lmo.l_name_offset = 8;
-      lmo.l_name_size   = 8;
-
-      lmo.l_next_offset = 24;
-      lmo.l_next_size   = 8;
-
-      lmo.l_prev_offset = 32;
-      lmo.l_prev_size   = 8;
-    }
-
-  return lmp;
-}
 
 /* Handle for obtaining pointer to the current register_addr()
    function for a given architecture.  */
@@ -1183,7 +1099,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_get_longjmp_target (gdbarch,
 	                                mips_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
-	  (gdbarch, mips_linux_svr4_fetch_link_map_offsets);
+	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 	set_mips_linux_register_addr (gdbarch, mips_linux_register_addr);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_sigframe);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_o32_rt_sigframe);
@@ -1192,7 +1108,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_get_longjmp_target (gdbarch,
 	                                mips_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
-	  (gdbarch, mips_linux_svr4_fetch_link_map_offsets);
+	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 	set_mips_linux_register_addr (gdbarch, mips64_linux_register_addr);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n32_rt_sigframe);
 	break;
@@ -1200,7 +1116,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	set_gdbarch_get_longjmp_target (gdbarch,
 	                                mips64_linux_get_longjmp_target);
 	set_solib_svr4_fetch_link_map_offsets
-	  (gdbarch, mips64_linux_svr4_fetch_link_map_offsets);
+	  (gdbarch, svr4_lp64_fetch_link_map_offsets);
 	set_mips_linux_register_addr (gdbarch, mips64_linux_register_addr);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n64_rt_sigframe);
 	break;

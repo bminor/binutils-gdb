@@ -1,7 +1,7 @@
 /* Target dependent code for CRIS, for GDB, the GNU debugger.
 
-   Copyright (C) 2001, 2002, 2003, 2004, 2005 Free Software Foundation,
-   Inc.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    Contributed by Axis Communications AB.
    Written by Hendrik Ruijter, Stefan Andersson, and Orjan Friberg.
@@ -45,7 +45,7 @@ Boston, MA 02110-1301, USA.  */
 #include "objfiles.h"
 
 #include "solib.h"              /* Support for shared libraries.  */
-#include "solib-svr4.h"         /* For struct link_map_offsets.  */
+#include "solib-svr4.h"
 #include "gdb_string.h"
 #include "dis-asm.h"
 
@@ -3941,50 +3941,6 @@ static struct core_fns cris_elf_core_fns =
   NULL                                  /* next */
 };
 
-/* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for native GNU/Linux CRIS targets using the struct
-   offsets defined in link.h (but without actual reference to that
-   file).
-
-   This makes it possible to access GNU/Linux CRIS shared libraries
-   from a GDB that was not built on an GNU/Linux CRIS host (for cross
-   debugging).
-
-   See gdb/solib-svr4.h for an explanation of these fields.  */
-
-static struct link_map_offsets *
-cris_linux_svr4_fetch_link_map_offsets (void)
-{ 
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = NULL;
-
-  if (lmp == NULL)
-    { 
-      lmp = &lmo;
-
-      lmo.r_debug_size = 8;	/* The actual size is 20 bytes, but
-				   this is all we need.  */
-      lmo.r_map_offset = 4;
-      lmo.r_map_size   = 4;
-
-      lmo.link_map_size = 20;
-
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 4;
-
-      lmo.l_name_offset = 4;
-      lmo.l_name_size   = 4;
-
-      lmo.l_next_offset = 12;
-      lmo.l_next_size   = 4;
-
-      lmo.l_prev_offset = 16;
-      lmo.l_prev_size   = 4;
-    }
-
-  return lmp;
-}
-
 extern initialize_file_ftype _initialize_cris_tdep; /* -Wmissing-prototypes */
 
 void
@@ -4259,9 +4215,8 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_sniffer (gdbarch, cris_frame_sniffer);
   frame_base_set_default (gdbarch, &cris_frame_base);
 
-  /* Use target_specific function to define link map offsets.  */
-  set_solib_svr4_fetch_link_map_offsets 
-    (gdbarch, cris_linux_svr4_fetch_link_map_offsets);
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
   
   /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
      disassembler, even when there is no BFD.  Does something like
