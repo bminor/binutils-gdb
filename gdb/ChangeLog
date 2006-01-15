@@ -1,3 +1,8 @@
+2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-fork.c (delete_fork_command, detach_fork_command): Use
+	PIDGET.
+
 2006-01-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* arm-linux-tdep.c (arm_linux_svr4_fetch_link_map_offsets):

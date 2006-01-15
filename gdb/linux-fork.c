@@ -1,6 +1,6 @@
 /* GNU/Linux native-dependent code for debugging multiple forks.
 
-   Copyright (C) 2005 Free Software Foundation, Inc.
+   Copyright (C) 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -379,7 +379,7 @@ delete_fork_command (char *args, int from_tty)
   if (ptid_equal (ptid, inferior_ptid))
     error (_("Please switch to another fork/checkpoint before deleting the current one"));
 
-  if (ptrace (PTRACE_KILL, ptid, 0, 0))
+  if (ptrace (PTRACE_KILL, PIDGET (ptid), 0, 0))
     error (_("Unable to kill pid %s"), target_tid_to_str (ptid));
 
   if (from_tty)
@@ -403,7 +403,7 @@ detach_fork_command (char *args, int from_tty)
   if (ptid_equal (ptid, inferior_ptid))
     error (_("Please switch to another fork before detaching the current one"));
 
-  if (ptrace (PTRACE_DETACH, ptid, 0, 0))
+  if (ptrace (PTRACE_DETACH, PIDGET (ptid), 0, 0))
     error (_("Unable to detach %s"), target_pid_to_str (ptid));
 
   if (from_tty)
