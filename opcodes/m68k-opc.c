@@ -1206,6 +1206,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"fdsqrtd", 4,	two(0xF000, 0x0045), two(0xF1C0, 0xE07F), "IiF8F7", cfloat },
 {"fdsqrtd", 4,	two(0xF000, 0x0045), two(0xF1C0, 0xE07F), "IiFt",   cfloat },
 {"fdsqrtd", 4,	two(0xF000, 0x5445), two(0xF1C0, 0xFC7F), "Ii;FF7", m68040up },
+{"fdsqrtd", 4,	two(0xF000, 0x5445), two(0xF1C0, 0xFC7F), "IiwsF7", cfloat },
 {"fdsqrtl", 4,	two(0xF000, 0x4045), two(0xF1C0, 0xFC7F), "Ii;lF7", m68040up },
 {"fdsqrtl", 4,	two(0xF000, 0x4045), two(0xF1C0, 0xFC7F), "IibsF7", cfloat },
 {"fdsqrtp", 4,	two(0xF000, 0x4C45), two(0xF1C0, 0xFC7F), "Ii;pF7", m68040up },

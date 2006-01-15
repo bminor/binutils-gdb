@@ -1,3 +1,7 @@
+2006-01-05  Paul Brook  <paul@codesourcery.com>
+
+	* m68k-opc.c (m68k_opcodes): Add missing ColdFire fdsqrtd entry.
+
 2006-01-06  DJ Delorie  <dj@redhat.com>
 
 	* m32c-desc.c: Regenerate.
