@@ -1,3 +1,9 @@
+2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* macroexp.c (expand): Initialize argc.
+	* stabsread.c (read_type): Handle errors from read_args.
+	(read_args): Return NULL for errors.
+
 2006-01-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* osabi.c (generic_elf_osabi_sniffer): Use memcmp instead of

@@ -1804,6 +1804,8 @@ again:
 
 	  return_type = read_type (pp, objfile);
 	  args = read_args (pp, ';', objfile, &nargs, &varargs);
+	  if (args == NULL)
+	    return error_type (pp, objfile);
 	  type = dbx_alloc_type (typenums, objfile);
 	  smash_to_method_type (type, domain, return_type, args,
 				nargs, varargs);
@@ -3985,8 +3987,8 @@ handle_true_range:
 }
 
 /* Read in an argument list.  This is a list of types, separated by commas
-   and terminated with END.  Return the list of types read in, or (struct type
-   **)-1 if there is an error.  */
+   and terminated with END.  Return the list of types read in, or NULL
+   if there is an error.  */
 
 static struct field *
 read_args (char **pp, int end, struct objfile *objfile, int *nargsp,
@@ -4001,7 +4003,7 @@ read_args (char **pp, int end, struct objfile *objfile, int *nargsp,
     {
       if (**pp != ',')
 	/* Invalid argument list: no ','.  */
-	return (struct field *) -1;
+	return NULL;
       (*pp)++;
       STABS_CONTINUE (pp, objfile);
       types[n++] = read_type (pp, objfile);
