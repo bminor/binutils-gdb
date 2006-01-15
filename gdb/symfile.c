@@ -1,7 +1,8 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -1141,7 +1142,7 @@ separate_debug_file_exists (const char *name, unsigned long crc)
 {
   unsigned long file_crc = 0;
   int fd;
-  char buffer[8*1024];
+  gdb_byte buffer[8*1024];
   int count;
 
   fd = open (name, O_RDONLY | O_BINARY);
@@ -1523,7 +1524,7 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
       bfd_size_type size = bfd_get_section_size (asec);
       if (size > 0)
 	{
-	  char *buffer;
+	  gdb_byte *buffer;
 	  struct cleanup *old_chain;
 	  CORE_ADDR lma = bfd_section_lma (abfd, asec) + args->load_offset;
 	  bfd_size_type block_size;
@@ -1568,7 +1569,7 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 		     method to the target vector and then use
 		     that.  remote.c could implement that method
 		     using the ``qCRC'' packet.  */
-		  char *check = xmalloc (len);
+		  gdb_byte *check = xmalloc (len);
 		  struct cleanup *verify_cleanups =
 		    make_cleanup (xfree, check);
 
@@ -3475,7 +3476,7 @@ static void
 read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr, int len)
 {
   /* FIXME (alloca): Not safe if array is very large. */
-  char *buf = alloca (len * TARGET_LONG_BYTES);
+  gdb_byte *buf = alloca (len * TARGET_LONG_BYTES);
   int i;
 
   read_memory (memaddr, buf, len * TARGET_LONG_BYTES);
@@ -3515,7 +3516,7 @@ simple_read_overlay_table (void)
     = (void *) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
   cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym);
   read_target_long_array (cache_ovly_table_base,
-                          (int *) cache_ovly_table,
+                          (unsigned int *) cache_ovly_table,
                           cache_novlys * 4);
 
   return 1;			/* SUCCESS */
@@ -3543,7 +3544,7 @@ simple_read_overlay_region_table (void)
 	{
 	  cache_ovly_region_table_base = SYMBOL_VALUE_ADDRESS (msym);
 	  read_target_long_array (cache_ovly_region_table_base,
-				  (int *) cache_ovly_region_table,
+				  (unsigned int *) cache_ovly_region_table,
 				  cache_novly_regions * 3);
 	}
       else
@@ -3577,7 +3578,7 @@ simple_overlay_update_1 (struct obj_section *osect)
 	/* && cache_ovly_table[i][SIZE] == size */ )
       {
 	read_target_long_array (cache_ovly_table_base + i * TARGET_LONG_BYTES,
-				(int *) cache_ovly_table[i], 4);
+				(unsigned int *) cache_ovly_table[i], 4);
 	if (cache_ovly_table[i][VMA] == bfd_section_vma (obfd, bsect)
 	    && cache_ovly_table[i][LMA] == bfd_section_lma (obfd, bsect)
 	    /* && cache_ovly_table[i][SIZE] == size */ )

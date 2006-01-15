@@ -1,7 +1,7 @@
 /* Print values for GNU debugger GDB.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -966,6 +966,8 @@ output_command (char *exp, int from_tty)
   char format = 0;
   struct value *val;
   struct format_data fmt;
+
+  fmt.size = 0;
 
   if (exp && *exp == '/')
     {
@@ -1938,7 +1940,7 @@ printf_command (char *arg, int from_tty)
 	  {
 	  case string_arg:
 	    {
-	      char *str;
+	      gdb_byte *str;
 	      CORE_ADDR tem;
 	      int j;
 	      tem = value_as_address (val_args[i]);
@@ -1946,7 +1948,7 @@ printf_command (char *arg, int from_tty)
 	      /* This is a %s argument.  Find the length of the string.  */
 	      for (j = 0;; j++)
 		{
-		  char c;
+		  gdb_byte c;
 		  QUIT;
 		  read_memory (tem + j, &c, 1);
 		  if (c == 0)
@@ -1954,12 +1956,12 @@ printf_command (char *arg, int from_tty)
 		}
 
 	      /* Copy the string contents into a string inside GDB.  */
-	      str = (char *) alloca (j + 1);
+	      str = (gdb_byte *) alloca (j + 1);
 	      if (j != 0)
 		read_memory (tem, str, j);
 	      str[j] = 0;
 
-	      printf_filtered (current_substring, str);
+	      printf_filtered (current_substring, (char *) str);
 	    }
 	    break;
 	  case double_arg:

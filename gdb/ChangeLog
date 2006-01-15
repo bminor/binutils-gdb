@@ -1,3 +1,15 @@
+2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* printcmd.c (output_command): Always initialize fmt.size.
+	(printf_command): Use gdb_byte.
+	* symfile.c (separate_debug_file_exists): Use gdb_byte.
+	(load_section_callback, read_target_long_array): Likewise.
+	(simple_read_overlay_table, simple_read_overlay_region_table)
+	(simple_overlay_update_1): Correct calls to read_target_long_array.
+	* valprint.c (partial_memory_read): Change MYADDR to a gdb_byte *.
+	Also change local pointers.
+	(val_print_string): Use gdb_byte.
+
 2006-01-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* alphafbsd-tdep.c: Include "solib-svr4.h".
