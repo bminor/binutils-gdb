@@ -1,5 +1,11 @@
 2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/multi-forks.c: Add copyright notice.  Include <stdlib.h>.
+	* gdb.base/multi-forks.exp: Use a loop.  Allow "fork" as a stopped
+	function name.
+
+2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/checkpoint.c: Update copyright notice.  Include
 	<stdlib.h>.
 

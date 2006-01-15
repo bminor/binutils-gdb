@@ -1,4 +1,4 @@
-#   Copyright 2005 Free Software Foundation, Inc.
+#   Copyright 2005, 2006 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,10 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 if $tracelevel then {
 	strace $tracelevel
@@ -114,65 +111,11 @@ gdb_test "set detach off" "" "set detach off"
 # eventually winding up with 16 forks.
 #
 
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 1"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 1"
-gdb_test "restart 1" "_dl_sysinfo_int80.*" "restart 1"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 2"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 2"
-gdb_test "restart 2" "_dl_sysinfo_int80.*" "restart 2"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 3"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 3"
-gdb_test "restart 3" "_dl_sysinfo_int80.*" "restart 3"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 4"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 4"
-gdb_test "restart 4" "_dl_sysinfo_int80.*" "restart 4"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 5"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 5"
-gdb_test "restart 5" "_dl_sysinfo_int80.*" "restart 5"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 6"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 6"
-gdb_test "restart 6" "_dl_sysinfo_int80.*" "restart 6"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 7"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 7"
-gdb_test "restart 7" "_dl_sysinfo_int80.*" "restart 7"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 8"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 8"
-gdb_test "restart 8" "_dl_sysinfo_int80.*" "restart 8"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 9"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 9"
-gdb_test "restart 9" "_dl_sysinfo_int80.*" "restart 9"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 10"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 10"
-gdb_test "restart 10" "_dl_sysinfo_int80.*" "restart 10"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 11"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 11"
-gdb_test "restart 11" "_dl_sysinfo_int80.*" "restart 11"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 12"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 12"
-gdb_test "restart 12" "_dl_sysinfo_int80.*" "restart 12"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 13"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 13"
-gdb_test "restart 13" "_dl_sysinfo_int80.*" "restart 13"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 14"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 14"
-gdb_test "restart 14" "_dl_sysinfo_int80.*" "restart 14"
-
-gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 15"
-gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 15"
-gdb_test "restart 15" "_dl_sysinfo_int80.*" "restart 15"
+for {set i 1} {$i <= 15} {incr i} {
+  gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit $i"
+  gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork $i"
+  gdb_test "restart $i" "(_dl_sysinfo_int80|fork).*" "restart $i"
+}
 
 gdb_test "continue" "Breakpoint .* main .*exit.*" "Run to exit 16"
 gdb_test "info fork" " 4 .* 3 .* 2 .* 1 .*" "info fork 16"
