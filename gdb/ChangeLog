@@ -1,3 +1,13 @@
+2006-01-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* alpha-tdep.c (alpha_gdbarch_init): Set cannot_step_breakpoint.
+	* config/alpha/nm-osf.h (CANNOT_STEP_BREAKPOINT): Remove.
+	* config/alpha/nm-linux.h (CANNOT_STEP_BREAKPOINT): Remove.
+	* config/alpha/nm-nbsd.h: Remove file.
+	* config/alpha/nm-fbsd.h: Remove file
+	* config/alpha/nbsd.mh (NAT_FILE): Remove.
+	* config/alpha/fbsd.mh (NAT_FILE): Remove.
+
 2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* macroexp.c (expand): Initialize argc.

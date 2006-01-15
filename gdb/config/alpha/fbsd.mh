@@ -2,4 +2,3 @@
 NATDEPFILES= fork-child.o inf-ptrace.o \
 	fbsd-nat.o alphabsd-nat.o \
 	gcore.o corelow.o core-regset.o
-NAT_FILE= nm-fbsd.h
