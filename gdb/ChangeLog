@@ -1,5 +1,9 @@
 2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* source.c (_initialize_source): Use add_setshow_integer_cmd.
+
+2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-fork.c (delete_fork_command, detach_fork_command): Use
 	PIDGET.
 

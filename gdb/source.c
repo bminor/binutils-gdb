@@ -1638,7 +1638,7 @@ The matching line number is also stored as the value of \"$_\"."));
       add_com_alias ("?", "reverse-search", class_files, 0);
     }
 
-  add_setshow_uinteger_cmd ("listsize", class_support, &lines_to_list, _("\
+  add_setshow_integer_cmd ("listsize", class_support, &lines_to_list, _("\
 Set number of source lines gdb will list by default."), _("\
 Show number of source lines gdb will list by default."), NULL,
 			    NULL,
