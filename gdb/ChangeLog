@@ -1,3 +1,15 @@
+2006-01-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* alphafbsd-tdep.c: Include "solib-svr4.h".
+	(alphafbsd_init_abi): Set solib_svr4_fetch_link_map_offsets to
+	svr4_lp64_fetch_link_map_offsets.
+	* Makefile.in (alphafbsd-tdep.o): Update dependencies.
+	* config/alpha/fbsd.mt (TDEPFILES): Add corelow.o, solib.o and
+	solib-svr4.o.
+	* config/alpha/fbsd.mh (NATDEPFILES): Remove solib.o, solib-svr4.o
+	and solib-legacy.o.
+	* config/alpha/nm-fbsd.h: Don't include "solib.h".
+
 2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* source.c (_initialize_source): Use add_setshow_integer_cmd.
