@@ -1,3 +1,9 @@
+2006-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: New Chinese (simplified) translation.
+	* configure.in (ALL_LINGUAS): Add "zh_CH".
+	* configure: Regenerate.
+
 2006-01-05  Paul Brook  <paul@codesourcery.com>
 
 	* m68k-opc.c (m68k_opcodes): Add missing ColdFire fdsqrtd entry.

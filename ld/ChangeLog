@@ -1,3 +1,9 @@
+2006-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* po/zh_CN.po: New Chinese (simplified) translation.
+	* configure.in (ALL_LINGUAS): Add "zh_CH".
+	* configure: Regenerate.
+
 2006-01-16  Bernhard Fischer  <aldot@gcc.gnu.org>
 
 	* ld.texinfo (Options): Fix typo.
