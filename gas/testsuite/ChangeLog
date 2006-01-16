@@ -1,3 +1,9 @@
+2006-01-16  Paul Brook  <paul@codesourcery.com>
+
+	* gas/m68k/all.exp: Add mcf-fpu.
+	* gas/m68k/mcf-fpu.d: New file.
+	* gas/m68k/mcf-fpu.s: New file.
+
 2006-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* gas/tic54x/address.d: Work with 64bit hosts.

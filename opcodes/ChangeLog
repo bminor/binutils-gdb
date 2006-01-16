@@ -1,3 +1,8 @@
+2006-01-16  Paul Brook  <paul@codesourcery.com>
+
+	* m68k-opc.c(m68k_opcodes): Fix opcodes for ColdFire f?abss,
+	f?add?, and f?sub? instructions.
+
 2006-01-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_CN.po: New Chinese (simplified) translation.
