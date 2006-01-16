@@ -116,9 +116,16 @@ enum mt_gdb_regnums
   /* Pseudo-registers.  */
   MT_COPRO_PSEUDOREG_REGNUM = MT_NUM_REGS,
   MT_MAC_PSEUDOREG_REGNUM,
+  MT_COPRO_PSEUDOREG_ARRAY,
+
+  MT_COPRO_PSEUDOREG_DIM_1 = 2,
+  MT_COPRO_PSEUDOREG_DIM_2 = 8,
+  MT_COPRO_PSEUDOREG_REGS = 32,
 
   /* Two pseudo-regs ('coprocessor' and 'mac').  */
-  MT_NUM_PSEUDO_REGS = 2
+  MT_NUM_PSEUDO_REGS = 2 + (MT_COPRO_PSEUDOREG_REGS
+			    * MT_COPRO_PSEUDOREG_DIM_1
+			    * MT_COPRO_PSEUDOREG_DIM_2)
 };
 
 /* Return name of register number specified by REGNUM.  */
@@ -140,9 +147,89 @@ mt_register_name (int regnum)
     /* Pseudo-registers.  */
     "coprocessor", "MAC"
   };
+  static const char *array_names[MT_COPRO_PSEUDOREG_REGS
+				 * MT_COPRO_PSEUDOREG_DIM_1
+				 * MT_COPRO_PSEUDOREG_DIM_2];
 
-  gdb_assert (regnum >= 0 && regnum < ARRAY_SIZE (register_names));
-  return register_names[regnum];
+  if (regnum < 0)
+    return "";
+  if (regnum < ARRAY_SIZE (register_names))
+    return register_names[regnum];
+  if (array_names[regnum - MT_COPRO_PSEUDOREG_ARRAY])
+    return array_names[regnum - MT_COPRO_PSEUDOREG_ARRAY];
+  
+  {
+    char *name;
+    const char *stub;
+    unsigned dim_1;
+    unsigned dim_2;
+    unsigned index;
+    
+    regnum -= MT_COPRO_PSEUDOREG_ARRAY;
+    index = regnum % MT_COPRO_PSEUDOREG_REGS;
+    dim_2 = (regnum / MT_COPRO_PSEUDOREG_REGS) % MT_COPRO_PSEUDOREG_DIM_2;
+    dim_1 = ((regnum / MT_COPRO_PSEUDOREG_REGS / MT_COPRO_PSEUDOREG_DIM_2)
+	     %  MT_COPRO_PSEUDOREG_DIM_1);
+    
+    if (index == MT_COPRO_PSEUDOREG_REGS - 1)
+      stub = register_names[MT_MAC_PSEUDOREG_REGNUM];
+    else if (index > MT_QCHANNEL_REGNUM - MT_CPR0_REGNUM)
+      stub = "";
+    else
+      stub = register_names[index + MT_CPR0_REGNUM];
+    if (!*stub)
+      {
+	array_names[regnum] = stub;
+	return stub;
+      }
+    name = xmalloc (30);
+    sprintf (name, "copro_%d_%d_%s", dim_1, dim_2, stub);
+    array_names[regnum] = name;
+    return name;
+  }
+}
+
+/* Return the type of a coprocessor register.  */
+
+static struct type *
+mt_copro_register_type (struct gdbarch *arch, int regnum)
+{
+  switch (regnum)
+    {
+    case MT_INT_ENABLE_REGNUM:
+    case MT_ICHANNEL_REGNUM:
+    case MT_QCHANNEL_REGNUM:
+    case MT_ISCRAMB_REGNUM:
+    case MT_QSCRAMB_REGNUM:
+      return builtin_type_int32;
+    case MT_BYPA_REGNUM:
+    case MT_BYPB_REGNUM:
+    case MT_BYPC_REGNUM:
+    case MT_Z1_REGNUM:
+    case MT_Z2_REGNUM:
+    case MT_OUT_REGNUM:
+      return builtin_type_int16;
+    case MT_EXMAC_REGNUM:
+    case MT_MAC_REGNUM:
+      return builtin_type_uint32;
+    case MT_CONTEXT_REGNUM:
+      return builtin_type_long_long;
+    case MT_FLAG_REGNUM:
+      return builtin_type_unsigned_char;
+    default:
+      if (regnum >= MT_CPR0_REGNUM && regnum <= MT_CPR15_REGNUM)
+	return builtin_type_int16;
+      else if (regnum == MT_CPR0_REGNUM + MT_COPRO_PSEUDOREG_REGS - 1)
+	{
+	  if (gdbarch_bfd_arch_info (arch)->mach == bfd_mach_mrisc2
+	      || gdbarch_bfd_arch_info (arch)->mach == bfd_mach_ms2)
+	    return builtin_type_uint64;
+	  else
+	    return builtin_type_uint32;
+	}
+      else
+	return builtin_type_uint32;
+    }
 }
 
 /* Given ARCH and a register number specified by REGNUM, return the
@@ -176,40 +263,25 @@ mt_register_type (struct gdbarch *arch, int regnum)
 	case MT_SP_REGNUM:
 	case MT_FP_REGNUM:
 	  return void_ptr;
-	case MT_INT_ENABLE_REGNUM:
-	case MT_ICHANNEL_REGNUM:
-	case MT_QCHANNEL_REGNUM:
-	case MT_ISCRAMB_REGNUM:
-	case MT_QSCRAMB_REGNUM:
-	  return builtin_type_int32;
-	case MT_EXMAC_REGNUM:
-	case MT_MAC_REGNUM:
-	  return builtin_type_uint32;
-	case MT_BYPA_REGNUM:
-	case MT_BYPB_REGNUM:
-	case MT_BYPC_REGNUM:
-	case MT_Z1_REGNUM:
-	case MT_Z2_REGNUM:
-	case MT_OUT_REGNUM:
-	  return builtin_type_int16;
-	case MT_CONTEXT_REGNUM:
-	  return builtin_type_long_long;
 	case MT_COPRO_REGNUM:
 	case MT_COPRO_PSEUDOREG_REGNUM:
 	  return copro_type;
 	case MT_MAC_PSEUDOREG_REGNUM:
-	  if (gdbarch_bfd_arch_info (arch)->mach == bfd_mach_mrisc2
-	      || gdbarch_bfd_arch_info (arch)->mach == bfd_mach_ms2)
-	    return builtin_type_uint64;
-	  else
-	    return builtin_type_uint32;
-	case MT_FLAG_REGNUM:
-	  return builtin_type_unsigned_char;
+	  return mt_copro_register_type (arch,
+					 MT_CPR0_REGNUM
+					 + MT_COPRO_PSEUDOREG_REGS - 1);
 	default:
 	  if (regnum >= MT_R0_REGNUM && regnum <= MT_R15_REGNUM)
 	    return builtin_type_int32;
-	  else if (regnum >= MT_CPR0_REGNUM && regnum <= MT_CPR15_REGNUM)
-	    return builtin_type_int16;
+	  else if (regnum < MT_COPRO_PSEUDOREG_ARRAY)
+	    return mt_copro_register_type (arch, regnum);
+	  else
+	    {
+	      regnum -= MT_COPRO_PSEUDOREG_ARRAY;
+	      regnum %= MT_COPRO_PSEUDOREG_REGS;
+	      regnum += MT_CPR0_REGNUM;
+	      return mt_copro_register_type (arch, regnum);
+	    }
 	}
     }
   internal_error (__FILE__, __LINE__,
@@ -379,14 +451,53 @@ mt_breakpoint_from_pc (CORE_ADDR *bp_addr, int *bp_size)
   return ms1_breakpoint;
 }
 
+/* Select the correct coprocessor register bank.  Return the pseudo
+   regnum we really want to read.  */
+
+static int
+mt_select_coprocessor (struct gdbarch *gdbarch,
+			struct regcache *regcache, int regno)
+{
+  unsigned index, base;
+  gdb_byte copro[4];
+
+  /* Get the copro pseudo regnum. */
+  regcache_raw_read (regcache, MT_COPRO_REGNUM, copro);
+  base = (extract_signed_integer (&copro[0], 2) * MT_COPRO_PSEUDOREG_DIM_2
+	  + extract_signed_integer (&copro[2], 2));
+
+  regno -= MT_COPRO_PSEUDOREG_ARRAY;
+  index = regno % MT_COPRO_PSEUDOREG_REGS;
+  regno /= MT_COPRO_PSEUDOREG_REGS;
+  if (base != regno)
+    {
+      /* Select the correct coprocessor register bank.  Invalidate the
+	 coprocessor register cache.  */
+      unsigned ix;
+
+      store_signed_integer (&copro[0], 2, regno / MT_COPRO_PSEUDOREG_DIM_2);
+      store_signed_integer (&copro[2], 2, regno % MT_COPRO_PSEUDOREG_DIM_2);
+      regcache_raw_write (regcache, MT_COPRO_REGNUM, copro);
+      
+      /* We must flush the cache, as it is now invalid.  */
+      for (ix = MT_NUM_CPU_REGS; ix != MT_NUM_REGS; ix++)
+	set_register_cached (ix, 0);
+    }
+  
+  return index;
+}
+
 /* Fetch the pseudo registers:
 
-   There are two pseudo-registers:
+   There are two regular pseudo-registers:
    1) The 'coprocessor' pseudo-register (which mirrors the 
    "real" coprocessor register sent by the target), and
    2) The 'MAC' pseudo-register (which represents the union
    of the original 32 bit target MAC register and the new
-   8-bit extended-MAC register).  */
+   8-bit extended-MAC register).
+
+   Additionally there is an array of coprocessor registers which track
+   the coprocessor registers for each coprocessor.  */
 
 static void
 mt_pseudo_register_read (struct gdbarch *gdbarch,
@@ -416,8 +527,15 @@ mt_pseudo_register_read (struct gdbarch *gdbarch,
 	regcache_raw_read (regcache, MT_MAC_REGNUM, buf);
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("mt_pseudo_register_read: bad reg # (%d)"), regno);
+      {
+	unsigned index = mt_select_coprocessor (gdbarch, regcache, regno);
+	
+	if (index == MT_COPRO_PSEUDOREG_REGS - 1)
+	  mt_pseudo_register_read (gdbarch, regcache,
+				   MT_COPRO_PSEUDOREG_REGNUM, buf);
+	else if (index < MT_NUM_REGS - MT_CPR0_REGNUM)
+	  regcache_raw_read (regcache, index + MT_CPR0_REGNUM, buf);
+      }
       break;
     }
 }
@@ -463,8 +581,15 @@ mt_pseudo_register_write (struct gdbarch *gdbarch,
 	regcache_raw_write (regcache, MT_MAC_REGNUM, buf);
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("mt_pseudo_register_write: bad reg # (%d)"), regno);
+      {
+	unsigned index = mt_select_coprocessor (gdbarch, regcache, regno);
+	
+	if (index == MT_COPRO_PSEUDOREG_REGS - 1)
+	  mt_pseudo_register_write (gdbarch, regcache,
+				    MT_COPRO_PSEUDOREG_REGNUM, buf);
+	else if (index < MT_NUM_REGS - MT_CPR0_REGNUM)
+	  regcache_raw_write (regcache, index + MT_CPR0_REGNUM, buf);
+      }
       break;
     }
 }

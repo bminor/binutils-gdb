@@ -1,3 +1,17 @@
+2006-01-16  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* mt-tdep.c (enum mt_gdb_regnums): Add MT_COPRO_PSEUDOREG_ARRAY,
+	MT_COPRO_PSEUDOREG_DIM_1, MT_COPRO_PSEUDOREG_DIM_2,
+	MT_COPRO_PSEUDOREG_REGS members.  Adjust MT_NUM_PSEUDO_REGS.
+	(mt_register_name): Lazily synthesize name for coprocessor pseudo
+	array registers.
+	(mt_copro_register_type): New. Broken out of ...
+	(mt_register_type): ... here.  Use it.  Deal with coprocessor
+	pseudo array.
+	(mt_select_coprocessor): New.
+	(mt_pseudo_register_read, mt_pseudo_register_write): Deal with
+	coprocessor pseudo array.
+
 2006-01-16  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* breakpoint.c (insert_breakpoints): Check that a thread exists
