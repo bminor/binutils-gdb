@@ -1142,6 +1142,12 @@ insert_breakpoints (void)
       if (!breakpoint_enabled (b->owner))
 	continue;
 
+      /* There is no point inserting thread-specific breakpoints if the
+	 thread no longer exists.  */
+      if (b->owner->thread != -1
+	  && !valid_thread_id (b->owner->thread))
+	continue;
+
       /* FIXME drow/2003-10-07: This code should be pushed elsewhere when
 	 hardware watchpoints are split into multiple loc breakpoints.  */
       if ((b->loc_type == bp_loc_hardware_watchpoint
