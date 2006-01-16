@@ -1,3 +1,7 @@
+2006-01-16  Mark Mitchell  <mark@codesourcery.com>
+
+	* aclocal.m4: Regenerate.
+
 2006-01-16  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* mt-tdep.c (enum mt_gdb_regnums): Add MT_COPRO_PSEUDOREG_ARRAY,
