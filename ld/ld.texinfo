@@ -1857,7 +1857,7 @@ value can reduce the memory requirements at the expense of speed.
 @kindex --reduce-memory-overheads
 @item --reduce-memory-overheads
 This option reduces memory requirements at ld runtime, at the expense of
-linking speed.  This was introduced to to select the old O(n^2) algorithm
+linking speed.  This was introduced to select the old O(n^2) algorithm
 for link map file generation, rather than the new O(n) algorithm which uses
 about 40% more memory for symbol storage.
 

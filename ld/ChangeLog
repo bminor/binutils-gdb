@@ -1,3 +1,7 @@
+2006-01-16  Bernhard Fischer  <rep.nop@aon.at>
+
+	* ld.texinfo (Options): Fix typo.
+
 2005-12-28  Jie Zhang  <jie.zhang@analog.com>
 
 	* emulparams/bfin.sh: Define DATA_END_SYMBOLS and END_SYMBOLS.
