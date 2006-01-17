@@ -1,5 +1,10 @@
 2006-01-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c, remote-fileio.c, remote.h: Update copyright
+	notices.
+
+2006-01-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (peek_die_abbrev, read_address, read_initial_length)
 	(read_offset): Change BYTES_READ argument to unsigned int.
 	(dwarf2_build_psymtabs_easy, read_comp_unit_head)
