@@ -1710,7 +1710,7 @@ extern asection *dwarf_frame_section;
 extern asection *dwarf_eh_frame_section;
 
 /* Imported from dwarf2read.c.  */
-extern char *dwarf2_read_section (struct objfile *objfile, asection *sectp);
+extern gdb_byte *dwarf2_read_section (struct objfile *objfile, asection *sectp);
 
 void
 dwarf2_build_frame_info (struct objfile *objfile)

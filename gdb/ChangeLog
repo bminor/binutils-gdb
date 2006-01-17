@@ -1,3 +1,8 @@
+2006-01-17  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2-frame.c (dwarf2_read_section): Update forward declaration
+	to match prior change to dwarf2_read_section's type.
+
 2006-01-16  Paul Gilliam  <pgilliam@us.ibm.com>
 
 	* ppc-tdep.h (PPC_MAX_EPILOGUE_INSTRUCTIONS): New define.
