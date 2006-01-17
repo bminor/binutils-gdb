@@ -1,3 +1,9 @@
+2006-01-17  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/2159
+	* elf.c (elfcore_write_pstatus): Add ATTRIBUTE_UNUSED to unused
+	parameters.
+
 2006-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.c (elf32_arm_output_symbol_hook): Install new entry

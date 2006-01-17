@@ -7889,8 +7889,8 @@ elfcore_write_pstatus (bfd *abfd,
 		       char *buf,
 		       int *bufsiz,
 		       long pid,
-		       int cursig,
-		       const void *gregs)
+		       int cursig ATTRIBUTE_UNUSED,
+		       const void *gregs ATTRIBUTE_UNUSED)
 {
   pstatus_t pstat;
   char *note_name = "CORE";
