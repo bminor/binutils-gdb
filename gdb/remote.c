@@ -172,9 +172,9 @@ static void record_currthread (int currthread);
 
 static int fromhex (int a);
 
-static int hex2bin (const char *hex, char *bin, int count);
+static int hex2bin (const char *hex, gdb_byte *bin, int count);
 
-static int bin2hex (const char *bin, char *hex, int count);
+static int bin2hex (const gdb_byte *bin, char *hex, int count);
 
 static int putpkt_binary (char *buf, int cnt);
 
@@ -1409,7 +1409,7 @@ threadref_to_int (threadref *ref)
   int i, value = 0;
   unsigned char *scan;
 
-  scan = (char *) ref;
+  scan = *ref;
   scan += 4;
   i = 4;
   while (i-- > 0)
@@ -1487,7 +1487,7 @@ remote_unpack_thread_info_response (char *pkt, threadref *expectedref,
 {
   struct remote_state *rs = get_remote_state ();
   int mask, length;
-  unsigned int tag;
+  int tag;
   threadref ref;
   char *limit = pkt + rs->remote_packet_size; /* Plausible parsing limit.  */
   int retval = 1;
@@ -1876,7 +1876,7 @@ remote_threads_extra_info (struct thread_info *tp)
       if (bufp[0] != 0)
 	{
 	  n = min (strlen (bufp) / 2, sizeof (display_buf));
-	  result = hex2bin (bufp, display_buf, n);
+	  result = hex2bin (bufp, (gdb_byte *) display_buf, n);
 	  display_buf [result] = '\0';
 	  return display_buf;
 	}
@@ -2134,7 +2134,7 @@ remote_check_symbols (struct objfile *objfile)
   while (strncmp (reply, "qSymbol:", 8) == 0)
     {
       tmp = &reply[8];
-      end = hex2bin (tmp, msg, strlen (tmp) / 2);
+      end = hex2bin (tmp, (gdb_byte *) msg, strlen (tmp) / 2);
       msg[end] = '\0';
       sym = lookup_minimal_symbol (msg, NULL, NULL);
       if (sym == NULL)
@@ -2375,7 +2375,7 @@ fromhex (int a)
 }
 
 static int
-hex2bin (const char *hex, char *bin, int count)
+hex2bin (const char *hex, gdb_byte *bin, int count)
 {
   int i;
 
@@ -2405,12 +2405,12 @@ tohex (int nib)
 }
 
 static int
-bin2hex (const char *bin, char *hex, int count)
+bin2hex (const gdb_byte *bin, char *hex, int count)
 {
   int i;
   /* May use a length, or a nul-terminated string as input.  */
   if (count == 0)
-    count = strlen (bin);
+    count = strlen ((char *) bin);
 
   for (i = 0; i < count; i++)
     {
@@ -2830,7 +2830,7 @@ static ptid_t
 remote_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
-  unsigned char *buf = alloca (rs->remote_packet_size);
+  char *buf = alloca (rs->remote_packet_size);
   ULONGEST thread_num = -1;
   ULONGEST addr;
 
@@ -2839,7 +2839,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 
   while (1)
     {
-      unsigned char *p;
+      char *p;
 
       ofunc = signal (SIGINT, remote_interrupt);
       getpkt (buf, rs->remote_packet_size, 1);
@@ -2862,7 +2862,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	  continue;
 	case 'T':		/* Status with PC, SP, FP, ...  */
 	  {
-	    char regs[MAX_REGISTER_SIZE];
+	    gdb_byte regs[MAX_REGISTER_SIZE];
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat.  */
 	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
@@ -2874,7 +2874,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 
 	    while (*p)
 	      {
-		unsigned char *p1;
+		char *p1;
 		char *p_temp;
 		int fieldsize;
 		LONGEST pnum = 0;
@@ -2890,14 +2890,14 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 		  {
 		    /* Read the ``P'' register number.  */
 		    pnum = strtol (p, &p_temp, 16);
-		    p1 = (unsigned char *) p_temp;
+		    p1 = p_temp;
 		  }
 		else
 		  p1 = p;
 
 		if (p1 == p)	/* No register number present here.  */
 		  {
-		    p1 = (unsigned char *) strchr (p, ':');
+		    p1 = strchr (p, ':');
 		    if (p1 == NULL)
 		      warning (_("Malformed packet(a) (missing colon): %s\n\
 Packet: '%s'\n"),
@@ -2906,7 +2906,7 @@ Packet: '%s'\n"),
 		      {
 			p_temp = unpack_varlen_hex (++p1, &thread_num);
 			record_currthread (thread_num);
-			p = (unsigned char *) p_temp;
+			p = p_temp;
 		      }
 		    else if ((strncmp (p, "watch", p1 - p) == 0)
 			     || (strncmp (p, "rwatch", p1 - p) == 0)
@@ -2921,7 +2921,7 @@ Packet: '%s'\n"),
  			/* Silently skip unknown optional info.  */
  			p_temp = strchr (p1 + 1, ';');
  			if (p_temp)
-			  p = (unsigned char *) p_temp;
+			  p = p_temp;
  		      }
 		  }
 		else
@@ -2939,7 +2939,7 @@ Packet: '%s'\n"),
 Packet: '%s'\n"),
 			     phex_nz (pnum, 0), p, buf);
 
-		    fieldsize = hex2bin (p, regs, 
+		    fieldsize = hex2bin (p, regs,
 					 register_size (current_gdbarch, 
 							reg->regnum));
 		    p += 2 * fieldsize;
@@ -3019,7 +3019,7 @@ static ptid_t
 remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
-  unsigned char *buf = alloca (rs->remote_packet_size);
+  char *buf = alloca (rs->remote_packet_size);
   ULONGEST thread_num = -1;
   ULONGEST addr;
 
@@ -3030,7 +3030,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 
   while (1)
     {
-      unsigned char *p;
+      char *p;
 
       if (!target_is_async_p ())
 	ofunc = signal (SIGINT, remote_interrupt);
@@ -3057,7 +3057,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	  continue;
 	case 'T':		/* Status with PC, SP, FP, ...  */
 	  {
-	    char regs[MAX_REGISTER_SIZE];
+	    gdb_byte regs[MAX_REGISTER_SIZE];
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat.  */
 	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
@@ -3069,7 +3069,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 
 	    while (*p)
 	      {
-		unsigned char *p1;
+		char *p1;
 		char *p_temp;
 		int fieldsize;
 		long pnum = 0;
@@ -3085,14 +3085,14 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		  {
 		    /* Read the register number.  */
 		    pnum = strtol (p, &p_temp, 16);
-		    p1 = (unsigned char *) p_temp;
+		    p1 = p_temp;
 		  }
 		else
 		  p1 = p;
 
 		if (p1 == p)	/* No register number present here.  */
 		  {
-		    p1 = (unsigned char *) strchr (p, ':');
+		    p1 = strchr (p, ':');
 		    if (p1 == NULL)
 		      error (_("Malformed packet(a) (missing colon): %s\n\
 Packet: '%s'\n"),
@@ -3101,7 +3101,7 @@ Packet: '%s'\n"),
 		      {
 			p_temp = unpack_varlen_hex (++p1, &thread_num);
 			record_currthread (thread_num);
-			p = (unsigned char *) p_temp;
+			p = p_temp;
 		      }
 		    else if ((strncmp (p, "watch", p1 - p) == 0)
 			     || (strncmp (p, "rwatch", p1 - p) == 0)
@@ -3114,7 +3114,7 @@ Packet: '%s'\n"),
 		    else
  		      {
  			/* Silently skip unknown optional info.  */
- 			p_temp = (unsigned char *) strchr (p1 + 1, ';');
+ 			p_temp = strchr (p1 + 1, ';');
  			if (p_temp)
 			  p = p_temp;
  		      }
@@ -3134,7 +3134,7 @@ Packet: '%s'\n"),
 Packet: '%s'\n"),
 			     pnum, p, buf);
 
-		    fieldsize = hex2bin (p, regs, 
+		    fieldsize = hex2bin (p, regs,
 					 register_size (current_gdbarch, 
 							reg->regnum));
 		    p += 2 * fieldsize;
@@ -3405,7 +3405,7 @@ remote_prepare_to_store (void)
 {
   struct remote_state *rs = get_remote_state ();
   int i;
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
 
   /* Make sure the entire registers array is valid.  */
   switch (remote_protocol_P.support)
@@ -3432,7 +3432,7 @@ store_register_using_P (int regnum)
   struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
   /* Try storing a single register.  */
   char *buf = alloca (rs->remote_packet_size);
-  char regp[MAX_REGISTER_SIZE];
+  gdb_byte regp[MAX_REGISTER_SIZE];
   char *p;
 
   xsnprintf (buf, rs->remote_packet_size, "P%s=", phex_nz (reg->pnum, 0));
@@ -3453,7 +3453,7 @@ remote_store_registers (int regnum)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf;
-  char *regs;
+  gdb_byte *regs;
   char *p;
 
   set_thread (PIDGET (inferior_ptid), 1);
@@ -3637,17 +3637,17 @@ check_binary_download (CORE_ADDR addr)
    error.  Only transfer a single packet.  */
 
 int
-remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
+remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
-  unsigned char *buf;
-  unsigned char *p;
-  unsigned char *plen;
+  char *buf;
+  char *p;
+  char *plen;
   long sizeof_buf;
   int plenlen;
   int todo;
   int nr_bytes;
   int payload_size;
-  unsigned char *payload_start;
+  char *payload_start;
 
   /* Verify that the target can support a binary download.  */
   check_binary_download (memaddr);
@@ -3797,7 +3797,7 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
    handling partial reads.  */
 
 int
-remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
+remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   char *buf;
   int max_buf_size;		/* Max size of packet output buffer.  */
@@ -5078,9 +5078,9 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   if (i < 0)
     return i;
 
-  getpkt (readbuf, len, 0);
+  getpkt ((char *) readbuf, len, 0);
 
-  return strlen (readbuf);
+  return strlen ((char *) readbuf);
 }
 
 static void
@@ -5106,7 +5106,7 @@ remote_rcmd (char *command,
     error (_("\"monitor\" command ``%s'' is too long."), command);
 
   /* Encode the actual command.  */
-  bin2hex (command, p, 0);
+  bin2hex ((gdb_byte *) command, p, 0);
 
   if (putpkt (buf) < 0)
     error (_("Communication problem with target."));

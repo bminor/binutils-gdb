@@ -1,3 +1,31 @@
+2006-01-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-fileio.c (remote_fileio_return_success): Take a gdb_byte
+	argument.
+	(remote_fileio_func_open, remote_fileio_func_rename)
+	(remote_fileio_func_unlink, remote_fileio_func_stat)
+	(remote_fileio_func_fstat, remote_fileio_func_gettimeofday)
+	(remote_fileio_func_system): Cast the arguments to
+	remote_read_bytes and remote_write_bytes.
+	(remote_fileio_func_read, remote_fileio_func_write): Use a
+	gdb_byte buffer.
+	* remote.h (remote_read_bytes, remote_write_bytes): Update
+	prototypes.
+	* remote.c (hex2bin, bin2hex): Use gdb_byte for the BIN argument.
+	(threadref_to_int): Replace bogus char * cast.
+	(remote_unpack_thread_info_response): Use int for tag.
+	(remote_threads_extra_info, remote_check_symbols): Cast string
+	arguments to hex2bin.
+	(remote_wait): Use a char buffer for packets and a gdb_byte
+	buffer for registers.
+	(remote_async_wait): Likewise.
+	(remote_prepare_to_store, store_register_using_P)
+	(remote_store_registers): Use gdb_byte buffers.
+	(remote_write_bytes, remote_read_bytes): Use a gdb_byte pointer
+	for MYADDR and char buffers for strings.
+	(remote_xfer_partial): Add casts for string operations on READBUF.
+	(remote_rcmd): Cast strings passed to bin2hex.
+
 2006-01-16  Mark Mitchell  <mark@codesourcery.com>
 
 	* aclocal.m4: Regenerate.
