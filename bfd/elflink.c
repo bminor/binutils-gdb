@@ -1,6 +1,6 @@
 /* ELF linking support for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
-   Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   2005, 2006 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -9067,8 +9067,8 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
    building shared libraries, we must assume that any visible symbol is
    referenced.  */
 
-static bfd_boolean
-elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
+bfd_boolean
+bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
@@ -9097,8 +9097,9 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   asection * (*gc_mark_hook)
     (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
      struct elf_link_hash_entry *h, Elf_Internal_Sym *);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-  if (!get_elf_backend_data (abfd)->can_gc_sections
+  if (!bed->can_gc_sections
       || info->relocatable
       || info->emitrelocations
       || !is_elf_hash_table (info->hash))
@@ -9124,11 +9125,11 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   /* Mark dynamically referenced symbols.  */
   if (elf_hash_table (info)->dynamic_sections_created)
     elf_link_hash_traverse (elf_hash_table (info),
-			    elf_gc_mark_dynamic_ref_symbol,
+			    bed->gc_mark_dynamic_ref,
 			    info);
 
   /* Grovel through relocs to find out who stays ...  */
-  gc_mark_hook = get_elf_backend_data (abfd)->gc_mark_hook;
+  gc_mark_hook = bed->gc_mark_hook;
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
       asection *o;

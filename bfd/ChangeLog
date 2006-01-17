@@ -1,3 +1,15 @@
+2006-01-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_backend_data): Add gc_mark_dynamic_ref.
+	(bfd_elf_gc_mark_dynamic_ref_symbol): Declare.
+	* elflink.c (bfd_elf_gc_mark_dynamic_ref_symbol): Rename from
+	elf_gc_mark_dynamic_ref_symbol.  Make global.
+	(bfd_elf_gc_sections): Call bed->gc_mark_dynamic_ref.
+	* elfxx-target.h (elf_backend_gc_mark_dynamic_ref): Define.
+	(elfNN_bed): Init new field.
+	* elf64-ppc.c (elf_backend_gc_mark_dynamic_ref): Define.
+	(ppc64_elf_gc_mark_dynamic_ref): New function.
+
 2006-01-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_gc_mark_hook): Don't hang forever in loop.

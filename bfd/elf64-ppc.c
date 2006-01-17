@@ -89,6 +89,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_check_directives	      ppc64_elf_check_directives
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
+#define elf_backend_gc_mark_dynamic_ref       ppc64_elf_gc_mark_dynamic_ref
 #define elf_backend_gc_mark_hook	      ppc64_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook	      ppc64_elf_gc_sweep_hook
 #define elf_backend_adjust_dynamic_symbol     ppc64_elf_adjust_dynamic_symbol
@@ -4937,6 +4938,54 @@ opd_entry_value (asection *opd_sec,
     }
 
   return val;
+}
+
+/* Mark sections containing dynamically referenced symbols.  When
+   building shared libraries, we must assume that any visible symbol is
+   referenced.  */
+
+static bfd_boolean
+ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
+{
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+  struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) h;
+
+  if (eh->elf.root.type == bfd_link_hash_warning)
+    eh = (struct ppc_link_hash_entry *) eh->elf.root.u.i.link;
+
+  /* Dynamic linking info is on the func descriptor sym.  */
+  if (eh->oh != NULL
+      && eh->oh->is_func_descriptor
+      && (eh->oh->elf.root.type == bfd_link_hash_defined
+	  || eh->oh->elf.root.type == bfd_link_hash_defweak))
+    eh = eh->oh;
+
+  if ((eh->elf.root.type == bfd_link_hash_defined
+       || eh->elf.root.type == bfd_link_hash_defweak)
+      && (eh->elf.ref_dynamic
+	  || (!info->executable
+	      && eh->elf.def_regular
+	      && ELF_ST_VISIBILITY (eh->elf.other) != STV_INTERNAL
+	      && ELF_ST_VISIBILITY (eh->elf.other) != STV_HIDDEN)))
+    {
+      asection *code_sec;
+
+      eh->elf.root.u.def.section->flags |= SEC_KEEP;
+
+      /* Function descriptor syms cause the associated
+	 function code sym section to be marked.  */
+      if (eh->is_func_descriptor
+	  && (eh->oh->elf.root.type == bfd_link_hash_defined
+	      || eh->oh->elf.root.type == bfd_link_hash_defweak))
+	eh->oh->elf.root.u.def.section->flags |= SEC_KEEP;
+      else if (get_opd_info (eh->elf.root.u.def.section) != NULL
+	       && opd_entry_value (eh->elf.root.u.def.section,
+				   eh->elf.root.u.def.value,
+				   &code_sec, NULL) != (bfd_vma) -1)
+	code_sec->flags |= SEC_KEEP;
+    }
+
+  return TRUE;
 }
 
 /* Return the section that should be marked against GC for a given
