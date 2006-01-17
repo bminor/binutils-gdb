@@ -2006,7 +2006,11 @@ parse_comp_unit (bfd *abfd,
   return unit;
 }
 
-/* Return TRUE if UNIT contains the address given by ADDR.  */
+/* Return TRUE if UNIT may contain the address given by ADDR.  When
+   there are functions written entirely with inline asm statements, the
+   range info in the compilation unit header may not be correct.  We
+   need to consult the line info table to see if a compilation unit
+   really contains the given address.  */
 
 static bfd_boolean
 comp_unit_contains_address (struct comp_unit *unit, bfd_vma addr)
@@ -2210,9 +2214,9 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
   stash = *pinfo;
   addr = offset;
   if (section->output_section)
-    addr += section->output_section->lma + section->output_offset;
+    addr += section->output_section->vma + section->output_offset;
   else
-    addr += section->lma;
+    addr += section->vma;
   *filename_ptr = NULL;
   *functionname_ptr = NULL;
   *linenumber_ptr = 0;
@@ -2293,16 +2297,16 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
   /* Check the previously read comp. units first.  */
   for (each = stash->all_comp_units; each; each = each->next_unit)
-    if (comp_unit_contains_address (each, addr))
-      return comp_unit_find_nearest_line (each, addr, filename_ptr,
-					  functionname_ptr, linenumber_ptr,
-					  stash);
+    if (comp_unit_contains_address (each, addr)
+	&& comp_unit_find_nearest_line (each, addr, filename_ptr,
+					functionname_ptr,
+					linenumber_ptr, stash))
+      return TRUE;
 
   /* Read each remaining comp. units checking each as they are read.  */
   while (stash->info_ptr < stash->info_ptr_end)
     {
       bfd_vma length;
-      bfd_boolean found;
       unsigned int offset_size = addr_size;
       bfd_byte *info_ptr_unit = stash->info_ptr;
 
@@ -2358,25 +2362,14 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 		 unit->high == 0), we need to consult the line info
 		 table to see if a compilation unit contains the given
 		 address.  */
-	      if (each->arange.high > 0)
-		{
-		  if (comp_unit_contains_address (each, addr))
-		    return comp_unit_find_nearest_line (each, addr,
-							filename_ptr,
-							functionname_ptr,
-							linenumber_ptr,
-							stash);
-		}
-	      else
-		{
-		  found = comp_unit_find_nearest_line (each, addr,
-						       filename_ptr,
-						       functionname_ptr,
-						       linenumber_ptr,
-						       stash);
-		  if (found)
-		    return TRUE;
-		}
+	      if ((each->arange.high == 0
+		   || comp_unit_contains_address (each, addr))
+		  && comp_unit_find_nearest_line (each, addr,
+						  filename_ptr,
+						  functionname_ptr,
+						  linenumber_ptr,
+						  stash))
+		return TRUE;
 	    }
 	}
     }
@@ -2419,9 +2412,9 @@ _bfd_dwarf2_find_line (bfd *abfd,
 
   addr = symbol->value;
   if (section->output_section)
-    addr += section->output_section->lma + section->output_offset;
+    addr += section->output_section->vma + section->output_offset;
   else
-    addr += section->lma;
+    addr += section->vma;
 
   *filename_ptr = NULL;
   stash = *pinfo;
