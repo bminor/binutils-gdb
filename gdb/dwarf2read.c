@@ -7053,7 +7053,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 						      cu_header->addr_size,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));
-      SYMBOL_VALUE_BYTES (sym) = (char *)
+      SYMBOL_VALUE_BYTES (sym) = 
 	obstack_alloc (&objfile->objfile_obstack, cu_header->addr_size);
       /* NOTE: cagney/2003-05-09: In-lined store_address call with
          it's body - store_unsigned_integer.  */
@@ -7071,7 +7071,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 						      blk->size,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));
-      SYMBOL_VALUE_BYTES (sym) = (char *)
+      SYMBOL_VALUE_BYTES (sym) =
 	obstack_alloc (&objfile->objfile_obstack, blk->size);
       memcpy (SYMBOL_VALUE_BYTES (sym), blk->data, blk->size);
       SYMBOL_CLASS (sym) = LOC_CONST_BYTES;

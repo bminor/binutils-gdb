@@ -110,7 +110,7 @@ struct general_symbol_info
 
     struct block *block;
 
-    char *bytes;
+    gdb_byte *bytes;
 
     CORE_ADDR address;
 

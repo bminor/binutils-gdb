@@ -1,5 +1,13 @@
 2006-01-17  Jim Blandy  <jimb@redhat.com>
 
+	* symtab.h (struct general_symbol_info): Use gdb_byte for
+	value.bytes.
+	* stabsread.c (define_symbol): Use gdb_byte for the buffer holding
+	a floating-point constant's value.
+	* dwarf2read.c (dwarf2_const_value): Remove casts of value buffer
+	to char *.
+	* findvar.c (read_var_value): Eliminate needless temporary.
+
 	* dwarf2-frame.c (dwarf2_read_section): Update forward declaration
 	to match prior change to dwarf2_read_section's type.
 

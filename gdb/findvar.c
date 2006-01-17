@@ -433,9 +433,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 
     case LOC_CONST_BYTES:
       {
-	char *bytes_addr;
-	bytes_addr = SYMBOL_VALUE_BYTES (var);
-	memcpy (value_contents_raw (v), bytes_addr, len);
+	memcpy (value_contents_raw (v), SYMBOL_VALUE_BYTES (var), len);
 	VALUE_LVAL (v) = not_lval;
 	return v;
       }

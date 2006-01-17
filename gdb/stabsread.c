@@ -722,7 +722,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	case 'r':
 	  {
 	    double d = atof (p);
-	    char *dbl_valu;
+	    gdb_byte *dbl_valu;
 
 	    /* FIXME-if-picky-about-floating-accuracy: Should be using
 	       target arithmetic to get the value.  real.c in GCC
@@ -737,7 +737,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	    SYMBOL_TYPE (sym) = lookup_fundamental_type (objfile,
 							 FT_DBL_PREC_FLOAT);
-	    dbl_valu = (char *)
+	    dbl_valu =
 	      obstack_alloc (&objfile->objfile_obstack,
 			     TYPE_LENGTH (SYMBOL_TYPE (sym)));
 	    store_typed_floating (dbl_valu, SYMBOL_TYPE (sym), d);
