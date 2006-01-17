@@ -1,5 +1,10 @@
 2006-01-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* complaints.c (stop_whining): Make signed.
+	* linux-thread-db.c (thread_db_store_registers): Use gdb_byte.
+
+2006-01-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c, remote-fileio.c, remote.h: Update copyright
 	notices.
 

@@ -1,6 +1,6 @@
 /* libthread_db assisted debugging support, generic parts.
 
-   Copyright (C) 1999, 2000, 2001, 2003, 2004, 2005
+   Copyright (C) 1999, 2000, 2001, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1048,7 +1048,7 @@ thread_db_store_registers (int regno)
 
   if (regno != -1)
     {
-      char raw[MAX_REGISTER_SIZE];
+      gdb_byte raw[MAX_REGISTER_SIZE];
 
       deprecated_read_register_gen (regno, raw);
       thread_db_fetch_registers (-1);
