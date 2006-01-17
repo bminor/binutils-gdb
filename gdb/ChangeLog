@@ -1,3 +1,19 @@
+2006-01-17  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (struct dwarf2_per_objfile, struct comp_unit_head)
+	(struct line_header, struct partial_die_info, struct dwarf_block):
+	Use gdb_byte for members that refer to Dwarf section contents.
+	(dwarf2_read_abbrevs, dwarf2_read_section, dwarf_decode_lines,
+	dwarf_decode_macros, load_comp_unit, load_partial_dies,
+	locate_pdi_sibling, partial_read_comp_unit_head, peek_die_abbrev,
+	read_1_byte, read_1_signed_byte, read_2_bytes, read_4_bytes,
+	read_8_bytes, read_address, read_attribute, read_attribute_value,
+	read_comp_unit, read_comp_unit_head, read_die_and_children,
+	read_die_and_siblings, read_full_die, read_indirect_string,
+	read_initial_length, read_n_bytes, read_offset, read_partial_die,
+	read_signed_leb128, read_string, read_unsigned_leb128,
+	skip_children, skip_leb128, skip_one_die): Same.
+
 2006-01-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* complaints.c (stop_whining): Make signed.
