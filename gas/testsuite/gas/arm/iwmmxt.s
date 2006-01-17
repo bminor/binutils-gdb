@@ -88,7 +88,7 @@ iwmmxt:
 	wldrb		wr1, [r0, #36]
 	wldrheq		wr2, [r1, #24]!
 	wldrwne		wr3, [r2], #16
-	wldrdvs		wr4, [r3, #8]
+	wldrdvs		wr4, [r3, #-332]
 	wldrw		wcssf, [r1, #20]!
 	
 	wmacu		wr4, wr7, wr9
@@ -167,8 +167,8 @@ iwmmxt:
 	wstrb		wr1, [r1, #4]
 	wstrh		wr1, [r1, #4]!
 	wstrw		wr1, [r1], #4
-	wstrd		wr1, [r1, #4]
-	wstrw		wcasf, [r1], #4
+	wstrd		wr1, [r1, #0x3FC]
+	wstrw		wcasf, [r1], #300
 
 	wsubbusul	wr1, wr3, wr14
 	wsubhus		wr1, wr3, wr14
