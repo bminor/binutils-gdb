@@ -26,7 +26,7 @@ struct buffer
   bfd_vma base;
   int n_fetch;
   int n_used;
-  char data[4];
+  unsigned char data[4];
 } ;
 
 typedef int (*func)(struct buffer *, disassemble_info *, char *);
@@ -377,9 +377,9 @@ static int
 prt_d (struct buffer *buf, disassemble_info * info, char *txt)
 {
   int d;
-  signed char *p;
+  unsigned char *p;
 
-  p = (unsigned char*) buf->data + buf->n_fetch;
+  p = buf->data + buf->n_fetch;
 
   if (fetch_data (buf, info, 1))
     {
@@ -398,9 +398,9 @@ prt_d_n (struct buffer *buf, disassemble_info * info, char *txt)
 {
   char mytxt[TXTSIZ];
   int d;
-  signed char *p;
+  unsigned char *p;
 
-  p = (unsigned char*) buf->data + buf->n_fetch;
+  p = buf->data + buf->n_fetch;
 
   if (fetch_data (buf, info, 1))
     {
@@ -454,7 +454,7 @@ pref_xd_cb (struct buffer * buf, disassemble_info * info, char* txt)
     {
       int d;
       char arg[TXTSIZ];
-      signed char *p;
+      unsigned char *p;
 
       buf->n_used = 4;
       p = buf->data;
