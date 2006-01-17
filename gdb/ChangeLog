@@ -1,3 +1,8 @@
+2006-01-17  Christopher Faylor  <cgf@timesys.com>
+
+	* MAINTAINERS: Very belatedly remove myself from from the list of
+	people caught up in the paper trail.
+
 2006-01-17  Jim Blandy  <jimb@redhat.com>
 
 	* symtab.h (struct general_symbol_info): Use gdb_byte for
