@@ -754,7 +754,8 @@ static void dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
 
 static void dwarf2_free_abbrev_table (void *);
 
-static struct abbrev_info *peek_die_abbrev (char *, int *, struct dwarf2_cu *);
+static struct abbrev_info *peek_die_abbrev (char *, unsigned int *,
+					    struct dwarf2_cu *);
 
 static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int,
 						 struct dwarf2_cu *);
@@ -792,13 +793,13 @@ static unsigned int read_4_bytes (bfd *, char *);
 static unsigned long read_8_bytes (bfd *, char *);
 
 static CORE_ADDR read_address (bfd *, char *ptr, struct dwarf2_cu *,
-			       int *bytes_read);
+			       unsigned int *);
 
 static LONGEST read_initial_length (bfd *, char *,
-                                    struct comp_unit_head *, int *bytes_read);
+                                    struct comp_unit_head *, unsigned int *);
 
 static LONGEST read_offset (bfd *, char *, const struct comp_unit_head *,
-                            int *bytes_read);
+                            unsigned int *);
 
 static char *read_n_bytes (bfd *, char *, unsigned int);
 
@@ -1241,10 +1242,10 @@ dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
   while ((pubnames_ptr - pubnames_buffer) < dwarf2_per_objfile->pubnames_size)
     {
       struct comp_unit_head cu_header;
-      int bytes_read;
+      unsigned int bytes_read;
 
       entry_length = read_initial_length (abfd, pubnames_ptr, &cu_header,
-                                         &bytes_read);
+                                          &bytes_read);
       pubnames_ptr += bytes_read;
       version = read_1_byte (abfd, pubnames_ptr);
       pubnames_ptr += 1;
@@ -1268,7 +1269,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 		     char *info_ptr, bfd *abfd)
 {
   int signed_addr;
-  int bytes_read;
+  unsigned int bytes_read;
   cu_header->length = read_initial_length (abfd, info_ptr, cu_header,
                                            &bytes_read);
   info_ptr += bytes_read;
@@ -1626,7 +1627,7 @@ create_all_comp_units (struct objfile *objfile)
       char *beg_of_comp_unit;
       struct dwarf2_per_cu_data *this_cu;
       unsigned long offset;
-      int bytes_read;
+      unsigned int bytes_read;
 
       offset = info_ptr - dwarf2_per_objfile->info_buffer;
 
@@ -2137,7 +2138,8 @@ add_partial_enumeration (struct partial_die_info *enum_pdi,
    the initial number.  */
 
 static struct abbrev_info *
-peek_die_abbrev (char *info_ptr, int *bytes_read, struct dwarf2_cu *cu)
+peek_die_abbrev (char *info_ptr, unsigned int *bytes_read,
+		 struct dwarf2_cu *cu)
 {
   bfd *abfd = cu->objfile->obfd;
   unsigned int abbrev_number;
@@ -3055,7 +3057,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	  /* Base address selection entry.  */
 	  CORE_ADDR base;
 	  int found_base;
-	  int dummy;
+	  unsigned int dummy;
 	  char *buffer;
 	  CORE_ADDR marker;
 	  int low_set;
@@ -5801,7 +5803,8 @@ read_8_bytes (bfd *abfd, char *buf)
 }
 
 static CORE_ADDR
-read_address (bfd *abfd, char *buf, struct dwarf2_cu *cu, int *bytes_read)
+read_address (bfd *abfd, char *buf, struct dwarf2_cu *cu,
+	      unsigned int *bytes_read)
 {
   struct comp_unit_head *cu_header = &cu->header;
   CORE_ADDR retval = 0;
@@ -5894,7 +5897,7 @@ read_address (bfd *abfd, char *buf, struct dwarf2_cu *cu, int *bytes_read)
 
 static LONGEST
 read_initial_length (bfd *abfd, char *buf, struct comp_unit_head *cu_header,
-                     int *bytes_read)
+                     unsigned int *bytes_read)
 {
   LONGEST length = bfd_get_32 (abfd, (bfd_byte *) buf);
 
@@ -5938,7 +5941,7 @@ read_initial_length (bfd *abfd, char *buf, struct comp_unit_head *cu_header,
 
 static LONGEST
 read_offset (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
-             int *bytes_read)
+             unsigned int *bytes_read)
 {
   LONGEST retval = 0;
 
@@ -5993,7 +5996,7 @@ read_indirect_string (bfd *abfd, char *buf,
 		      unsigned int *bytes_read_ptr)
 {
   LONGEST str_offset = read_offset (abfd, buf, cu_header,
-				    (int *) bytes_read_ptr);
+				    bytes_read_ptr);
 
   if (dwarf2_per_objfile->str_buffer == NULL)
     {
@@ -6279,7 +6282,7 @@ dwarf_decode_line_header (unsigned int offset, bfd *abfd,
   struct cleanup *back_to;
   struct line_header *lh;
   char *line_ptr;
-  int bytes_read;
+  unsigned int bytes_read;
   int i;
   char *cur_dir, *cur_file;
 
@@ -6739,7 +6742,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
       && DW_BLOCK (attr)->size == 1 + cu_header->addr_size
       && DW_BLOCK (attr)->data[0] == DW_OP_addr)
     {
-      int dummy;
+      unsigned int dummy;
 
       SYMBOL_VALUE_ADDRESS (sym) =
 	read_address (objfile->obfd, DW_BLOCK (attr)->data + 1, cu, &dummy);
@@ -9107,7 +9110,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
         case DW_MACINFO_define:
         case DW_MACINFO_undef:
           {
-            int bytes_read;
+            unsigned int bytes_read;
             int line;
             char *body;
 
@@ -9135,7 +9138,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
         case DW_MACINFO_start_file:
           {
-            int bytes_read;
+            unsigned int bytes_read;
             int line, file;
 
             line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
@@ -9186,7 +9189,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
         case DW_MACINFO_vendor_ext:
           {
-            int bytes_read;
+            unsigned int bytes_read;
             int constant;
             char *string;
 

@@ -1,5 +1,16 @@
 2006-01-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (peek_die_abbrev, read_address, read_initial_length)
+	(read_offset): Change BYTES_READ argument to unsigned int.
+	(dwarf2_build_psymtabs_easy, read_comp_unit_head)
+	(create_all_comp_units, dwarf2_get_pc_bounds)
+	(dwarf_decode_line_header, var_decode_location)
+	(dwarf_decode_macros): Change local BYTES_READ variables to
+	unsigned int.
+	(read_indirect_string): Remove obsolete cast.
+
+2006-01-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* remote-fileio.c (remote_fileio_return_success): Take a gdb_byte
 	argument.
 	(remote_fileio_func_open, remote_fileio_func_rename)
