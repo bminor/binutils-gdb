@@ -4958,7 +4958,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
       struct bfd_sym_chain *sym = info->gc_sym_list;
 
       info->gc_sym_list = NULL;
-      do
+      for (; sym != NULL; sym = sym->next)
 	{
 	  struct ppc_link_hash_entry *eh;
 
@@ -4988,10 +4988,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	  rsec = eh->elf.root.u.def.section;
 	  if (!rsec->gc_mark)
 	    _bfd_elf_gc_mark (info, rsec, ppc64_elf_gc_mark_hook);
-
-	  sym = sym->next;
 	}
-      while (sym != NULL);
     }
 
   /* Syms return NULL if we're marking .opd, so we avoid marking all
