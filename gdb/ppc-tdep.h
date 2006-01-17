@@ -384,4 +384,7 @@ enum
 /* Instruction size.  */
 #define PPC_INSN_SIZE 4
 
+/* Estimate for the maximum number of instrctions in a function epilogue.  */
+#define PPC_MAX_EPILOGUE_INSTRUCTIONS  52
+
 #endif /* ppc-tdep.h */

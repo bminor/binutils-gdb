@@ -502,6 +502,108 @@ rs6000_skip_prologue (CORE_ADDR pc)
   return pc;
 }
 
+static int
+insn_changes_sp_or_jumps (unsigned long insn)
+{
+  int opcode = (insn >> 26) & 0x03f;
+  int sd = (insn >> 21) & 0x01f;
+  int a = (insn >> 16) & 0x01f;
+  int subcode = (insn >> 1) & 0x3ff;
+
+  /* Changes the stack pointer.  */
+
+  /* NOTE: There are many ways to change the value of a given register.
+           The ways below are those used when the register is R1, the SP,
+           in a funtion's epilogue.  */
+
+  if (opcode == 31 && subcode == 444 && a == 1)
+    return 1;  /* mr R1,Rn */
+  if (opcode == 14 && sd == 1)
+    return 1;  /* addi R1,Rn,simm */
+  if (opcode == 58 && sd == 1)
+    return 1;  /* ld R1,ds(Rn) */
+
+  /* Transfers control.  */
+
+  if (opcode == 18)
+    return 1;  /* b */
+  if (opcode == 16)
+    return 1;  /* bc */
+  if (opcode == 19 && subcode == 16)
+    return 1;  /* bclr */
+  if (opcode == 19 && subcode == 528)
+    return 1;  /* bcctr */
+
+  return 0;
+}
+
+/* Return true if we are in the function's epilogue, i.e. after the
+   instruction that destroyed the function's stack frame.
+
+   1) scan forward from the point of execution:
+       a) If you find an instruction that modifies the stack pointer
+          or transfers control (except a return), execution is not in
+          an epilogue, return.
+       b) Stop scanning if you find a return instruction or reach the
+          end of the function or reach the hard limit for the size of
+          an epilogue.
+   2) scan backward from the point of execution:
+        a) If you find an instruction that modifies the stack pointer,
+            execution *is* in an epilogue, return.
+        b) Stop scanning if you reach an instruction that transfers
+           control or the beginning of the function or reach the hard
+           limit for the size of an epilogue.  */
+
+static int
+rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  bfd_byte insn_buf[PPC_INSN_SIZE];
+  CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
+  unsigned long insn;
+  struct frame_info *curfrm;
+
+  /* Find the search limits based on function boundaries and hard limit.  */
+
+  if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
+    return 0;
+
+  epilogue_start = pc - PPC_MAX_EPILOGUE_INSTRUCTIONS * PPC_INSN_SIZE;
+  if (epilogue_start < func_start) epilogue_start = func_start;
+
+  epilogue_end = pc + PPC_MAX_EPILOGUE_INSTRUCTIONS * PPC_INSN_SIZE;
+  if (epilogue_end > func_end) epilogue_end = func_end;
+
+  curfrm = get_current_frame ();
+
+  /* Scan forward until next 'blr'.  */
+
+  for (scan_pc = pc; scan_pc < epilogue_end; scan_pc += PPC_INSN_SIZE)
+    {
+      if (!safe_frame_unwind_memory (curfrm, scan_pc, insn_buf, PPC_INSN_SIZE))
+        return 0;
+      insn = extract_signed_integer (insn_buf, PPC_INSN_SIZE);
+      if (insn == 0x4e800020)
+        break;
+      if (insn_changes_sp_or_jumps (insn))
+        return 0;
+    }
+
+  /* Scan backward until adjustment to stack pointer (R1).  */
+
+  for (scan_pc = pc - PPC_INSN_SIZE;
+       scan_pc >= epilogue_start;
+       scan_pc -= PPC_INSN_SIZE)
+    {
+      if (!safe_frame_unwind_memory (curfrm, scan_pc, insn_buf, PPC_INSN_SIZE))
+        return 0;
+      insn = extract_signed_integer (insn_buf, PPC_INSN_SIZE);
+      if (insn_changes_sp_or_jumps (insn))
+        return 1;
+    }
+
+  return 0;
+}
+
 
 /* Fill in fi->saved_regs */
 
@@ -3342,6 +3444,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);
+  set_gdbarch_in_function_epilogue_p (gdbarch, rs6000_in_function_epilogue_p);
+
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
 

@@ -1,3 +1,10 @@
+2006-01-16  Paul Gilliam  <pgilliam@us.ibm.com>
+
+	* ppc-tdep.h (PPC_MAX_EPILOGUE_INSTRUCTIONS): New define.
+	* rs6000-tdep.c (insn_changes_sp_or_jumps)
+	(rs6000_in_function_epilogue_p): New functions.
+	(rs6000_gdbarch_init): Set in_function_epilogue_p.
+
 2006-01-17  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (struct dwarf2_per_objfile, struct comp_unit_head)
