@@ -1,3 +1,17 @@
+2006-01-17  Andreas Schwab  <schwab@suse.de>
+
+	PR binutils/1486
+	* configure.in: Don't define DISASSEMBLER_NEEDS_RELOCS.
+	* configure: Regenerate.
+	* objdump.c (struct objdump_disasm_info): Don't check for
+	DISASSEMBLER_NEEDS_RELOCS.
+	(objdump_print_addr): Likewise.
+	(disassemble_bytes): Check disassembler_needs_relocs from
+	disassemble_info at run-time instead of DISASSEMBLER_NEEDS_RELOCS
+	at compile-time.
+	(disassemble_section): Likewise.
+	(disassemble_data): Initialize it.
+
 2006-01-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* objcopy.c (copy_object): Fix thinko.

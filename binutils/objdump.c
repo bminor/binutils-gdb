@@ -1,6 +1,6 @@
 /* objdump.c -- dump information about an object file.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -130,9 +130,7 @@ struct objdump_disasm_info
   arelent **         dynrelbuf;
   long               dynrelcount;
   disassembler_ftype disassemble_fn;
-#ifdef DISASSEMBLER_NEEDS_RELOCS
   arelent *          reloc;
-#endif
 };
 
 /* Architecture to disassemble for, or default if NULL.  */
@@ -866,9 +864,7 @@ objdump_print_addr (bfd_vma vma,
 {
   struct objdump_disasm_info *aux;
   asymbol *sym = NULL; /* Initialize to avoid compiler warning.  */
-#ifdef DISASSEMBLER_NEEDS_RELOCS
   bfd_boolean skip_find = FALSE;
-#endif
 
   if (sorted_symcount < 1)
     {
@@ -879,7 +875,6 @@ objdump_print_addr (bfd_vma vma,
 
   aux = (struct objdump_disasm_info *) info->application_data;
 
-#ifdef DISASSEMBLER_NEEDS_RELOCS
   if (aux->reloc != NULL
       && aux->reloc->sym_ptr_ptr != NULL
       && * aux->reloc->sym_ptr_ptr != NULL)
@@ -894,7 +889,6 @@ objdump_print_addr (bfd_vma vma,
     }
 
   if (!skip_find)
-#endif
     sym = find_symbol_for_address (vma, info, NULL);
 
   objdump_print_addr_with_sym (aux->abfd, aux->sec, sym, vma, info,
@@ -1319,12 +1313,10 @@ disassemble_bytes (struct disassemble_info * info,
     {
       bfd_vma z;
       bfd_boolean need_nl = FALSE;
-#ifdef DISASSEMBLER_NEEDS_RELOCS
       int previous_octets;
 
       /* Remember the length of the previous instruction.  */
       previous_octets = octets;
-#endif
       octets = 0;
 
       /* If we see more than SKIP_ZEROES octets of zeroes, we just
@@ -1389,8 +1381,8 @@ disassemble_bytes (struct disassemble_info * info,
 	      info->bytes_per_chunk = 0;
 	      info->flags = 0;
 
-#ifdef DISASSEMBLER_NEEDS_RELOCS
-	      if (*relppp < relppend)
+	      if (info->disassembler_needs_relocs
+		  && *relppp < relppend)
 		{
 		  bfd_signed_vma distance_to_rel;
 
@@ -1420,7 +1412,7 @@ disassemble_bytes (struct disassemble_info * info,
 		  else
 		    aux->reloc = NULL;
 		}
-#endif
+
 	      octets = (*disassemble_fn) (section->vma + addr_offset, info);
 	      info->fprintf_func = (fprintf_ftype) fprintf;
 	      info->stream = stdout;
@@ -1672,10 +1664,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
       rel_offset = 0;
 
       if ((section->flags & SEC_RELOC) != 0
-#ifndef DISASSEMBLER_NEEDS_RELOCS
-	  && dump_reloc_info
-#endif
-	  )
+	  && (dump_reloc_info || pinfo->disassembler_needs_relocs))
 	{
 	  long relsize;
 
@@ -1882,9 +1871,7 @@ disassemble_data (bfd *abfd)
   aux.require_sec = FALSE;
   aux.dynrelbuf = NULL;
   aux.dynrelcount = 0;
-#ifdef DISASSEMBLER_NEEDS_RELOCS
   aux.reloc = NULL;
-#endif
 
   disasm_info.print_address_func = objdump_print_address;
   disasm_info.symbol_at_address_func = objdump_symbol_at_address;
@@ -1926,6 +1913,7 @@ disassemble_data (bfd *abfd)
   disasm_info.octets_per_byte = bfd_octets_per_byte (abfd);
   disasm_info.skip_zeroes = DEFAULT_SKIP_ZEROES;
   disasm_info.skip_zeroes_at_end = DEFAULT_SKIP_ZEROES_AT_END;
+  disasm_info.disassembler_needs_relocs = FALSE;
 
   if (bfd_big_endian (abfd))
     disasm_info.display_endian = disasm_info.endian = BFD_ENDIAN_BIG;

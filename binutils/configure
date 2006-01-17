@@ -10474,9 +10474,6 @@ do
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_ARM"
 	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
 	  ;;
-  	arm*-* | xscale-* | strongarm-* | d10v-*)
-	  OBJDUMP_DEFS="-DDISASSEMBLER_NEEDS_RELOCS"
-	  ;;
 	i[3-7]86-*-pe* | i[3-7]86-*-cygwin* | i[3-7]86-*-mingw32** | i[3-7]86-*-netbsdpe*)
   	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
 	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_I386"
