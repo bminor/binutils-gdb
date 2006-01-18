@@ -1,8 +1,8 @@
 2006-01-18  Arnold Metselaar  <arnoldm@sourceware.org>
 
 	* gas/z80/z80.exp: Add offset.
-	* gas/z80/ofseet.d: New file.
-	* gas/z80/ofseet.s: New file.
+	* gas/z80/offset.d: New file.
+	* gas/z80/offset.s: New file.
 
 2006-01-16  Paul Brook  <paul@codesourcery.com>
 

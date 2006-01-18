@@ -7,6 +7,6 @@ if [istarget z80-*-*] then {
     run_dump_test "quotes"
 # test suffixes
     run_dump_test "suffix"
-# test assembling and disassembling insturction involving offsets
+# test assembling and disassembling instructions involving offsets
     run_dump_test "offset"
 }
