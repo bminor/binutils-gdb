@@ -1,6 +1,7 @@
 /* Target-dependent code for the i386.
 
-   Copyright (C) 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2003, 2004, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -148,6 +149,11 @@ enum i386_regnum
 
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	16
+
+/* Types for i386-specific registers.  */
+extern struct type *i386_eflags_type;
+extern struct type *i386_mmx_type;
+extern struct type *i386_sse_type;
 
 /* Segment selectors.  */
 #define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */

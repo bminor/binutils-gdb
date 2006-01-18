@@ -1,6 +1,22 @@
 2006-01-18  Mark Kettenis  <kettenis@gnu.org>
 
 	Based on a previous patch form Michal Ludvig:
+	* amd64-tdep.c (amd64_sse_type): Remove.
+	(amd64_register_info): Use i386_eflags_type and i386_sse_type
+	where appropriate.
+	(AMD64_NUM_REGS): Use ARRAY_SIZE.
+	(amd64_register_type): Remove code to build amd_sse_type.
+	* i386-tdep.c (i386_eflag_type): New variable.
+	(i386_mmx_type, i386_sse_type): Make global.
+	(i386_init_types): New function.
+	(i386_build_mmx_type, i386_build_sse_type): Remove functions.
+	(i386_register_type): Return i386_eflag_type, i386_sse_type and
+	i386_mmx_type when appropriate.
+	(_initialize_i386_tdep): Call i386_init_types.
+	* i386-tdep.h (i386_eflags_type, i386_mmx_type, i386_sse_type):
+	Declare extern.
+
+	Based on a previous patch form Michal Ludvig:
 	* gdbtypes.c (append_flags_type_flag, init_flags_type): New
 	functions.
 	(is_integral_type, rank_one_type, recursive_dump_type): Add
