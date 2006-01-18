@@ -1,6 +1,6 @@
 /* i386.c -- Assemble code for the Intel 80386
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -1345,6 +1345,8 @@ tc_i386_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_386_TLS_GOTIE
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LE_32
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LE
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_GOTDESC
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_DESC_CALL
       || fixP->fx_r_type == BFD_RELOC_X86_64_PLT32
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOT32
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOTPCREL
@@ -1356,6 +1358,8 @@ tc_i386_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_X86_64_TPOFF32
       || fixP->fx_r_type == BFD_RELOC_X86_64_TPOFF64
       || fixP->fx_r_type == BFD_RELOC_X86_64_GOTOFF64
+      || fixP->fx_r_type == BFD_RELOC_X86_64_GOTPC32_TLSDESC
+      || fixP->fx_r_type == BFD_RELOC_X86_64_TLSDESC_CALL
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
@@ -2196,7 +2200,14 @@ optimize_disp ()
 		&& fits_in_signed_byte (disp))
 	      i.types[op] |= Disp8;
 	  }
-	else
+	else if (i.reloc[op] == BFD_RELOC_386_TLS_DESC_CALL
+		 || i.reloc[op] == BFD_RELOC_X86_64_TLSDESC_CALL)
+	  {
+	    fix_new_exp (frag_now, frag_more (0) - frag_now->fr_literal, 0,
+			 i.op[op].disps, 0, i.reloc[op]);
+	    i.types[op] &= ~Disp;
+	  }
+ 	else
 	  /* We only support 64bit displacement on constants.  */
 	  i.types[op] &= ~Disp64;
       }
@@ -3157,7 +3168,13 @@ build_modrm_byte ()
 		  if ((i.index_reg->reg_flags & RegRex) != 0)
 		    i.rex |= REX_EXTY;
 		}
-	      i.rm.mode = mode_from_disp_size (i.types[op]);
+
+	      if (i.disp_operands
+		  && (i.reloc[op] == BFD_RELOC_386_TLS_DESC_CALL
+		      || i.reloc[op] == BFD_RELOC_X86_64_TLSDESC_CALL))
+		i.rm.mode = 0;
+	      else
+		i.rm.mode = mode_from_disp_size (i.types[op]);
 	    }
 
 	  if (fake_zero_displacement)
@@ -3856,7 +3873,9 @@ lex_got (enum bfd_reloc_code_real *reloc,
     { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32, BFD_RELOC_X86_64_DTPOFF32 }, Imm32|Imm32S|Imm64|Disp32|Disp64 },
     { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,  0                         }, 0 },
     { "INDNTPOFF",{ BFD_RELOC_386_TLS_IE,     0                         }, 0 },
-    { "GOT",      { BFD_RELOC_386_GOT32,      BFD_RELOC_X86_64_GOT32    }, Imm32|Imm32S|Disp32 }
+    { "GOT",      { BFD_RELOC_386_GOT32,      BFD_RELOC_X86_64_GOT32    }, Imm32|Imm32S|Disp32 },
+    { "TLSDESC",  { BFD_RELOC_386_TLS_GOTDESC, BFD_RELOC_X86_64_GOTPC32_TLSDESC }, Imm32|Imm32S|Disp32 },
+    { "TLSCALL",  { BFD_RELOC_386_TLS_DESC_CALL, BFD_RELOC_X86_64_TLSDESC_CALL }, Imm32|Imm32S|Disp32 }
   };
   char *cp;
   unsigned int j;
@@ -5063,9 +5082,11 @@ md_apply_fix (fixP, valP, seg)
       case BFD_RELOC_386_TLS_IE_32:
       case BFD_RELOC_386_TLS_IE:
       case BFD_RELOC_386_TLS_GOTIE:
+      case BFD_RELOC_386_TLS_GOTDESC:
       case BFD_RELOC_X86_64_TLSGD:
       case BFD_RELOC_X86_64_TLSLD:
       case BFD_RELOC_X86_64_GOTTPOFF:
+      case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
 	value = 0; /* Fully resolved at runtime.  No addend.  */
 	/* Fallthrough */
       case BFD_RELOC_386_TLS_LE:
@@ -5077,6 +5098,13 @@ md_apply_fix (fixP, valP, seg)
       case BFD_RELOC_X86_64_TPOFF64:
 	S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	break;
+
+      case BFD_RELOC_386_TLS_DESC_CALL:
+      case BFD_RELOC_X86_64_TLSDESC_CALL:
+	value = 0; /* Fully resolved at runtime.  No addend.  */
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+	fixP->fx_done = 0;
+	return;
 
       case BFD_RELOC_386_GOT32:
       case BFD_RELOC_X86_64_GOT32:
@@ -5655,6 +5683,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_386_TLS_GOTIE:
     case BFD_RELOC_386_TLS_LE_32:
     case BFD_RELOC_386_TLS_LE:
+    case BFD_RELOC_386_TLS_GOTDESC:
+    case BFD_RELOC_386_TLS_DESC_CALL:
     case BFD_RELOC_X86_64_TLSGD:
     case BFD_RELOC_X86_64_TLSLD:
     case BFD_RELOC_X86_64_DTPOFF32:
@@ -5664,6 +5694,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_X86_64_TPOFF64:
     case BFD_RELOC_X86_64_GOTOFF64:
     case BFD_RELOC_X86_64_GOTPC32:
+    case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
+    case BFD_RELOC_X86_64_TLSDESC_CALL:
     case BFD_RELOC_RVA:
     case BFD_RELOC_VTABLE_ENTRY:
     case BFD_RELOC_VTABLE_INHERIT:
@@ -5760,6 +5792,8 @@ tc_gen_reloc (section, fixp)
 	  case BFD_RELOC_X86_64_TLSGD:
 	  case BFD_RELOC_X86_64_TLSLD:
 	  case BFD_RELOC_X86_64_GOTTPOFF:
+	  case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
+	  case BFD_RELOC_X86_64_TLSDESC_CALL:
 	    rel->addend = fixp->fx_offset - fixp->fx_size;
 	    break;
 	  default:

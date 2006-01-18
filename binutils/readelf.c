@@ -1480,6 +1480,8 @@ get_dynamic_type (unsigned long type)
 
     case DT_VERSYM:	return "VERSYM";
 
+    case DT_TLSDESC_GOT: return "TLSDESC_GOT";
+    case DT_TLSDESC_PLT: return "TLSDESC_PLT";
     case DT_RELACOUNT:	return "RELACOUNT";
     case DT_RELCOUNT:	return "RELCOUNT";
     case DT_FLAGS_1:	return "FLAGS_1";

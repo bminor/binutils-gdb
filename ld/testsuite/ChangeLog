@@ -1,3 +1,39 @@
+2006-01-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	Introduce TLS descriptors for i386 and x86_64.
+	* ld-i386/i386.exp: Run on x86_64-*-linux* and amd64-*-linux*.
+	Add new tests.
+	* ld-i386/pcrel16.d: Add -melf_i386.
+	* ld-i386/pcrel8.d: Likewise.
+	* ld-i386/tlsbindesc.dd: New.
+	* ld-i386/tlsbindesc.rd: New.
+	* ld-i386/tlsbindesc.s: New.
+	* ld-i386/tlsbindesc.sd: New.
+	* ld-i386/tlsbindesc.td: New.
+	* ld-i386/tlsdesc.dd: New.
+	* ld-i386/tlsdesc.rd: New.
+	* ld-i386/tlsdesc.s: New.
+	* ld-i386/tlsdesc.sd: New.
+	* ld-i386/tlsdesc.td: New.
+	* ld-i386/tlsgdesc.dd: New.
+	* ld-i386/tlsgdesc.rd: New.
+	* ld-i386/tlsgdesc.s: New.
+	* ld-x86-64/x86-64.exp: Run new tests.
+	* ld-x86-64/tlsbindesc.dd: New.
+	* ld-x86-64/tlsbindesc.rd: New.
+	* ld-x86-64/tlsbindesc.s: New.
+	* ld-x86-64/tlsbindesc.sd: New.
+	* ld-x86-64/tlsbindesc.td: New.
+	* ld-x86-64/tlsdesc.dd: New.
+	* ld-x86-64/tlsdesc.pd: New.
+	* ld-x86-64/tlsdesc.rd: New.
+	* ld-x86-64/tlsdesc.s: New.
+	* ld-x86-64/tlsdesc.sd: New.
+	* ld-x86-64/tlsdesc.td: New.
+	* ld-x86-64/tlsgdesc.dd: New.
+	* ld-x86-64/tlsgdesc.rd: New.
+	* ld-x86-64/tlsgdesc.s: New.
+
 2006-01-03  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/sec-1.d: Adjust for section order changes.

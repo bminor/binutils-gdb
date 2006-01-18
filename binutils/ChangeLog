@@ -1,3 +1,9 @@
+2006-01-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	Introduce TLS descriptors for i386 and x86_64.
+	* readelf.c (get_dynamic_type): Handle DT_TLSDESC_GOT and
+	DT_TLSDESC_PLT.
+
 2006-01-18  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/1391

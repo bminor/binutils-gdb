@@ -8,7 +8,8 @@
 /* Main header file for the bfd library -- portable access to object files.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -2661,6 +2662,9 @@ in the instruction.  */
   BFD_RELOC_386_TLS_DTPMOD32,
   BFD_RELOC_386_TLS_DTPOFF32,
   BFD_RELOC_386_TLS_TPOFF32,
+  BFD_RELOC_386_TLS_GOTDESC,
+  BFD_RELOC_386_TLS_DESC_CALL,
+  BFD_RELOC_386_TLS_DESC,
 
 /* x86-64/elf relocations  */
   BFD_RELOC_X86_64_GOT32,
@@ -2681,6 +2685,9 @@ in the instruction.  */
   BFD_RELOC_X86_64_TPOFF32,
   BFD_RELOC_X86_64_GOTOFF64,
   BFD_RELOC_X86_64_GOTPC32,
+  BFD_RELOC_X86_64_GOTPC32_TLSDESC,
+  BFD_RELOC_X86_64_TLSDESC_CALL,
+  BFD_RELOC_X86_64_TLSDESC,
 
 /* ns32k relocations  */
   BFD_RELOC_NS32K_IMM_8,

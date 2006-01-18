@@ -1,5 +1,5 @@
 # Expect script for ld-i386 tests
-#   Copyright (C) 2002 Free Software Foundation
+#   Copyright (C) 2002, 2005, 2006 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@
 if { !([istarget "i?86-*-elf*"]		
        || ([istarget "i?86-*-linux*"]
 	   && ![istarget "*-*-*aout*"]
-	   && ![istarget "*-*-*oldld*"])) } {
+	   && ![istarget "*-*-*oldld*"])
+       || [istarget "x86_64-*-linux*"]
+       || [istarget "amd64-*-linux*"]) } {
     return
 }
 
@@ -41,6 +43,11 @@ set i386tests {
      {{readelf -Ssrl tlspic.rd} {objdump -drj.text tlspic.dd}
       {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
       "libtlspic.so"}
+    {"TLS descriptor -fpic -shared transitions" "-shared -melf_i386"
+     "--32" {tlsdesc.s tlspic2.s}
+     {{readelf -Ssrl tlsdesc.rd} {objdump -drj.text tlsdesc.dd}
+      {objdump "-s -j.got -j.got.plt" tlsdesc.sd} {objdump -sj.tdata tlsdesc.td}}
+      "libtlsdesc.so"}
     {"Helper shared library" "-shared -melf_i386"
      "--32" {tlslib.s} {} "libtlslib.so"}
     {"TLS -fpic and -fno-pic exec transitions"
@@ -48,10 +55,19 @@ set i386tests {
      {{readelf -Ssrl tlsbin.rd} {objdump -drj.text tlsbin.dd}
       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
       "tlsbin"}
+    {"TLS descriptor -fpic and -fno-pic exec transitions"
+     "-melf_i386 tmpdir/libtlslib.so" "--32" {tlsbindesc.s tlsbin.s}
+     {{readelf -Ssrl tlsbindesc.rd} {objdump -drj.text tlsbindesc.dd}
+      {objdump -sj.got tlsbindesc.sd} {objdump -sj.tdata tlsbindesc.td}}
+      "tlsbindesc"}
     {"TLS -fno-pic -shared" "-shared -melf_i386"
      "--32" {tlsnopic1.s tlsnopic2.s}
      {{readelf -Ssrl tlsnopic.rd} {objdump -drj.text tlsnopic.dd}
       {objdump -sj.got tlsnopic.sd}} "libtlsnopic.so"}
+    {"TLS with global dynamic and descriptors"
+	"-shared -melf_i386" "--32" {tlsgdesc.s}
+     {{readelf -Ssrl tlsgdesc.rd} {objdump -drj.text tlsgdesc.dd}}
+      "libtlsgdesc.so"}
     {"TLS in debug sections" "-melf_i386"
      "--32" {tlsg.s}
      {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}

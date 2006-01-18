@@ -1,5 +1,6 @@
 #name: PCREL16 overflow
-#ld: -Ttext 0x0
+#as: --32
+#ld: -melf_i386 -Ttext 0x0
 #objdump: -drj.text -m i8086
 
 .*: +file format elf32-i386

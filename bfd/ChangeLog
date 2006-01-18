@@ -1,3 +1,77 @@
+2006-01-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	Introduce TLS descriptors for i386 and x86_64.
+	* reloc.c (BFD_RELOC_386_TLS_GOTDESC, BFD_RELOC_386_TLS_DESC,
+	BFD_RELOC_386_TLS_DESC_CALL, BFD_RELOC_X86_64_GOTPC32_TLSDESC,
+	BFD_RELOC_X86_64_TLSDESC, BFD_RELOC_X86_64_TLSDESC_CALL): New.
+	* libbfd.h, bfd-in2.h: Rebuilt.
+	* elf32-i386.c (elf_howto_table): New relocations.
+	(R_386_tls): Adjust.
+	(elf_i386_reloc_type_lookup): Map new relocations.
+	(GOT_TLS_GDESC, GOT_TLS_GD_BOTH_P): New macros.
+	(GOT_TLS_GD_P, GOT_TLS_GDESC_P, GOT_TLS_GD_ANY_P): New macros.
+	(struct elf_i386_link_hash_entry): Add tlsdesc_got field.
+	(struct elf_i386_obj_tdata): Add local_tlsdesc_gotent field.
+	(elf_i386_local_tlsdesc_gotent): New macro.
+	(struct elf_i386_link_hash_table): Add sgotplt_jump_table_size.
+	(elf_i386_compute_jump_table_size): New macro.
+	(link_hash_newfunc): Initialize tlsdesc_got.
+	(elf_i386_link_hash_table_create): Set sgotplt_jump_table_size.
+	(elf_i386_tls_transition): Handle R_386_TLS_GOTDESC and
+	R_386_TLS_DESC_CALL.
+	(elf_i386_check_relocs): Likewise.  Allocate space for
+	local_tlsdesc_gotent.
+	(elf_i386_gc_sweep_hook): Handle R_386_TLS_GOTDESC and
+	R_386_TLS_DESC_CALL.
+	(allocate_dynrelocs): Count function PLT relocations.  Reserve
+	space for TLS descriptors and relocations.
+	(elf_i386_size_dynamic_sections): Reserve space for TLS
+	descriptors and relocations.  Set up sgotplt_jump_table_size.
+	Don't zero reloc_count in srelplt.
+	(elf_i386_always_size_sections): New.  Set up _TLS_MODULE_BASE_.
+	(elf_i386_relocate_section): Handle R_386_TLS_GOTDESC and
+	R_386_TLS_DESC_CALL.
+	(elf_i386_finish_dynamic_symbol): Use GOT_TLS_GD_ANY_P.
+	(elf_backend_always_size_sections): Define.
+	* elf64-x86-64.c (x86_64_elf_howto): Add R_X86_64_GOTPC32_TLSDESC,
+	R_X86_64_TLSDESC, R_X86_64_TLSDESC_CALL.
+	(R_X86_64_standard): Adjust.
+	(x86_64_reloc_map): Map new relocs.
+	(elf64_x86_64_rtype_to_howto): New, split out of...
+	(elf64_x86_64_info_to_howto): ... this function, and...
+	(elf64_x86_64_reloc_type_lookup): ... use it to map elf_reloc_val.
+	(GOT_TLS_GDESC, GOT_TLS_GD_BOTH_P): New macros.
+	(GOT_TLS_GD_P, GOT_TLS_GDESC_P, GOT_TLS_GD_ANY_P): New macros.
+	(struct elf64_x86_64_link_hash_entry): Add tlsdesc_got field.
+	(struct elf64_x86_64_obj_tdata): Add local_tlsdesc_gotent field.
+	(elf64_x86_64_local_tlsdesc_gotent): New macro.
+	(struct elf64_x86_64_link_hash_table): Add tlsdesc_plt,
+	tlsdesc_got and sgotplt_jump_table_size fields.
+	(elf64_x86_64_compute_jump_table_size): New macro.
+	(link_hash_newfunc): Initialize tlsdesc_got.
+	(elf64_x86_64_link_hash_table_create): Initialize new fields.
+	(elf64_x86_64_tls_transition): Handle R_X86_64_GOTPC32_TLSDESC and
+	R_X86_64_TLSDESC_CALL.
+	(elf64_x86_64_check_relocs): Likewise.  Allocate space for
+	local_tlsdesc_gotent.
+	(elf64_x86_64_gc_sweep_hook): Handle R_X86_64_GOTPC32_TLSDESC and
+	R_X86_64_TLSDESC_CALL.
+	(allocate_dynrelocs): Count function PLT relocations.  Reserve
+	space for TLS descriptors and relocations.
+	(elf64_x86_64_size_dynamic_sections): Reserve space for TLS
+	descriptors and relocations.  Set up sgotplt_jump_table_size,
+	tlsdesc_plt and tlsdesc_got.  Make room for them.  Don't zero
+	reloc_count in srelplt.  Add dynamic entries for DT_TLSDESC_PLT
+	and DT_TLSDESC_GOT.
+	(elf64_x86_64_always_size_sections): New.  Set up
+	_TLS_MODULE_BASE_.
+	(elf64_x86_64_relocate_section): Handle R_386_TLS_GOTDESC and
+	R_386_TLS_DESC_CALL.
+	(elf64_x86_64_finish_dynamic_symbol): Use GOT_TLS_GD_ANY_P.
+	(elf64_x86_64_finish_dynamic_sections): Set DT_TLSDESC_PLT and
+	DT_TLSDESC_GOT.  Set up TLS descriptor lazy resolver PLT entry.
+	(elf_backend_always_size_sections): Define.
+
 2006-01-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/2096

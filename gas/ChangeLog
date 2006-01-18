@@ -1,3 +1,16 @@
+2006-01-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	Introduce TLS descriptors for i386 and x86_64.
+	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
+	BFD_RELOC_386_TLS_GOTDESC, BFD_RELOC_386_TLS_DESC_CALL,
+	BFD_RELOC_X86_64_GOTPC32_TLSDESC, BFD_RELOC_X86_64_TLSDESC_CALL.
+	(optimize_disp): Emit fix up for BFD_RELOC_386_TLS_DESC_CALL and
+	BFD_RELOC_X86_64_TLSDESC_CALL immediately, and clear the
+	displacement bits.
+	(build_modrm_byte): Set up zero modrm for TLS desc calls.
+	(lex_got): Handle @tlsdesc and @tlscall.
+	(md_apply_fix, tc_gen_reloc): Handle the new relocations.
+
 2006-01-11  Nick Clifton  <nickc@redhat.com>
 
 	Fixes for building on 64-bit hosts:
