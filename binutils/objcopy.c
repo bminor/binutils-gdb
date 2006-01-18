@@ -1,6 +1,6 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005
+   2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -30,6 +30,7 @@
 #include "fnmatch.h"
 #include "elf-bfd.h"
 #include <sys/stat.h>
+#include "libbfd.h"
 
 /* A list of symbols to explicitly strip out, or to keep.  A linked
    list is good enough for a small number from the command line, but
@@ -1361,6 +1362,49 @@ copy_object (bfd *ibfd, bfd *obfd)
 	{
 	  bfd_nonfatal (gnu_debuglink_filename);
 	  return FALSE;
+	}
+
+      /* Special processing for PE format files.  We
+	 have no way to distinguish PE from COFF here.  */
+      if (bfd_get_flavour (obfd) == bfd_target_coff_flavour)
+	{
+	  bfd_vma debuglink_vma;
+	  asection * highest_section;
+	  asection * sec;
+
+	  /* The PE spec requires that all sections be adjacent and sorted
+	     in ascending order of VMA.  It also specifies that debug
+	     sections should be last.  This is despite the fact that debug
+	     sections are not loaded into memory and so in theory have no
+	     use for a VMA.
+
+	     This means that the debuglink section must be given a non-zero
+	     VMA which makes it contiguous with other debug sections.  So
+	     walk the current section list, find the section with the
+	     highest VMA and start the debuglink section after that one.  */
+	  for (sec = obfd->sections, highest_section = NULL;
+	       sec != NULL;
+	       sec = sec->next)
+	    if (sec->vma > 0
+		&& (highest_section == NULL
+		    || sec->vma > highest_section->vma))
+	      highest_section = sec;
+
+	  if (highest_section)
+	    debuglink_vma = BFD_ALIGN (highest_section->vma
+				       + highest_section->size,
+				       /* FIXME: We ought to be using
+					  COFF_PAGE_SIZE here or maybe
+					  bfd_get_section_alignment() (if it
+					  was set) but since this is for PE
+					  and we know the required alignment
+					  it is easier just to hard code it.  */
+				       0x1000);
+	  else
+	    /* Umm, not sure what to do in this case.  */
+	    debuglink_vma = 0x1000;
+
+	  bfd_set_section_vma (obfd, gnu_debuglink_section, debuglink_vma);
 	}
     }
 
