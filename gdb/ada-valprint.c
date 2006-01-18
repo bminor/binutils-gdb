@@ -1,7 +1,7 @@
 /* Support for printing Ada values for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1997, 2001,
-   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -772,6 +772,13 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	{
 	  print_longest (stream, 'd', 0, val);
 	}
+      break;
+
+    case TYPE_CODE_FLAGS:
+      if (format)
+	  print_scalar_formatted (valaddr, type, format, 0, stream);
+      else
+	val_print_type_code_flags (type, valaddr, stream);
       break;
 
     case TYPE_CODE_FLT:

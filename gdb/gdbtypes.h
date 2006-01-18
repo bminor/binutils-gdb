@@ -1,7 +1,7 @@
 /* Internal type definitions for GDB.
 
    Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -106,6 +106,7 @@ enum type_code
     TYPE_CODE_STRUCT,		/* C struct or Pascal record */
     TYPE_CODE_UNION,		/* C union or Pascal variant part */
     TYPE_CODE_ENUM,		/* Enumeration type */
+    TYPE_CODE_FLAGS,		/* Bit flags type */
     TYPE_CODE_FUNC,		/* Function type */
     TYPE_CODE_INT,		/* Integer type */
 
@@ -1189,6 +1190,12 @@ extern struct type *init_type (enum type_code, int, int, char *,
 extern struct type *init_composite_type (char *name, enum type_code code);
 extern void append_composite_type_field (struct type *t, char *name,
 					 struct type *field);
+
+/* Helper functions to construct a bit flags type.  An initially empty
+   type is created using init_flag_type().  Flags are then added using
+   append_flag_type_flag().  */
+extern struct type *init_flags_type (char *name, int length);
+extern void append_flags_type_flag (struct type *type, int bitpos, char *name);
 
 extern struct type *lookup_reference_type (struct type *);
 

@@ -66,6 +66,10 @@ extern void val_print_array_elements (struct type *, const gdb_byte *,
 extern void val_print_type_code_int (struct type *, const gdb_byte *,
 				     struct ui_file *);
 
+extern void val_print_type_code_flags (struct type *type,
+				       const gdb_byte *valaddr,
+				       struct ui_file *stream);
+
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
 				unsigned int);
 

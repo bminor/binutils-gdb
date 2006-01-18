@@ -1,7 +1,7 @@
 /* Support for printing Fortran values for GDB, the GNU debugger.
 
-   Copyright (C) 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2003, 2005 Free
-   Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2003, 2005, 2006
+   Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C definitions by Farooq Butt
    (fmbutt@engage.sps.mot.com), additionally worked over by Stan Shebs.
@@ -481,6 +481,13 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 			     stream);
 	    }
 	}
+      break;
+
+    case TYPE_CODE_FLAGS:
+      if (format)
+	  print_scalar_formatted (valaddr, type, format, 0, stream);
+      else
+	val_print_type_code_flags (type, valaddr, stream);
       break;
 
     case TYPE_CODE_FLT:

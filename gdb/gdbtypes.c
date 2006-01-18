@@ -1,6 +1,8 @@
 /* Support routines for manipulating internal types for GDB.
-   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+
+   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004, 2006 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -845,6 +847,39 @@ create_set_type (struct type *result_type, struct type *domain_type)
     TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
 
   return (result_type);
+}
+
+void
+append_flags_type_flag (struct type *type, int bitpos, char *name)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLAGS);
+  gdb_assert (bitpos < TYPE_NFIELDS (type));
+  gdb_assert (bitpos >= 0);
+
+  if (name)
+    {
+      TYPE_FIELD_NAME (type, bitpos) = xstrdup (name);
+      TYPE_FIELD_BITPOS (type, bitpos) = bitpos;
+    }
+  else
+    {
+      /* Don't show this field to the user.  */
+      TYPE_FIELD_BITPOS (type, bitpos) = -1;
+    }
+}
+
+struct type *
+init_flags_type (char *name, int length)
+{
+  int nfields = length * TARGET_CHAR_BIT;
+  struct type *type;
+
+  type = init_type (TYPE_CODE_FLAGS, length, TYPE_FLAG_UNSIGNED, name, NULL);
+  TYPE_NFIELDS (type) = nfields;
+  TYPE_FIELDS (type) = TYPE_ALLOC (type, nfields * sizeof (struct field));
+  memset (TYPE_FIELDS (type), 0, sizeof (struct field));
+
+  return type;
 }
 
 /* Construct and return a type of the form:
@@ -1822,6 +1857,7 @@ is_integral_type (struct type *t)
     ((t != NULL)
      && ((TYPE_CODE (t) == TYPE_CODE_INT)
 	 || (TYPE_CODE (t) == TYPE_CODE_ENUM)
+	 || (TYPE_CODE (t) == TYPE_CODE_FLAGS)
 	 || (TYPE_CODE (t) == TYPE_CODE_CHAR)
 	 || (TYPE_CODE (t) == TYPE_CODE_RANGE)
 	 || (TYPE_CODE (t) == TYPE_CODE_BOOL)));
@@ -2374,6 +2410,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg);
 	case TYPE_CODE_INT:
 	case TYPE_CODE_ENUM:
+	case TYPE_CODE_FLAGS:
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
@@ -2454,6 +2491,7 @@ rank_one_type (struct type *parm, struct type *arg)
 	  else
 	    return INTEGER_CONVERSION_BADNESS;
 	case TYPE_CODE_ENUM:
+	case TYPE_CODE_FLAGS:
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_BOOL:
@@ -2887,6 +2925,9 @@ recursive_dump_type (struct type *type, int spaces)
       break;
     case TYPE_CODE_ENUM:
       printf_filtered ("(TYPE_CODE_ENUM)");
+      break;
+    case TYPE_CODE_FLAGS:
+      printf_filtered ("(TYPE_CODE_FLAGS)");
       break;
     case TYPE_CODE_FUNC:
       printf_filtered ("(TYPE_CODE_FUNC)");

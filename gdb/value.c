@@ -1,8 +1,8 @@
 /* Low level packing and unpacking of values for GDB, the GNU Debugger.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1044,6 +1044,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_TYPEDEF:
       return unpack_long (check_typedef (type), valaddr);
     case TYPE_CODE_ENUM:
+    case TYPE_CODE_FLAGS:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
@@ -1492,6 +1493,7 @@ retry:
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_ENUM:
+    case TYPE_CODE_FLAGS:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_RANGE:
       store_signed_integer (value_contents_raw (val), len, num);
