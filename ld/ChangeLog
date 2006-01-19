@@ -1,3 +1,7 @@
+2006-01-18  Roger Sayle  <roger@eyesopen.com>
+
+	* emultempl/irix.em: Use lbasename instead of basename.
+
 2006-01-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/zh_CN.po: New Chinese (simplified) translation.
