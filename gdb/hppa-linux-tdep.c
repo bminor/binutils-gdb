@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux running on PA-RISC, for GDB.
 
-   Copyright (C) 2004 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -68,57 +68,6 @@ struct insn_pattern
   unsigned int mask;            /* ... with this mask.  */
 };
 
-/* See bfd/elf32-hppa.c */
-static struct insn_pattern hppa_long_branch_stub[] = {
-  /* ldil LR'xxx,%r1 */
-  { 0x20200000, 0xffe00000 },
-  /* be,n RR'xxx(%sr4,%r1) */
-  { 0xe0202002, 0xffe02002 }, 
-  { 0, 0 }
-};
-
-static struct insn_pattern hppa_long_branch_pic_stub[] = {
-  /* b,l .+8, %r1 */
-  { 0xe8200000, 0xffe00000 },
-  /* addil LR'xxx - ($PIC_pcrel$0 - 4), %r1 */
-  { 0x28200000, 0xffe00000 },
-  /* be,n RR'xxxx - ($PIC_pcrel$0 - 8)(%sr4, %r1) */
-  { 0xe0202002, 0xffe02002 }, 
-  { 0, 0 }
-};
-
-static struct insn_pattern hppa_import_stub[] = {
-  /* addil LR'xxx, %dp */
-  { 0x2b600000, 0xffe00000 },
-  /* ldw RR'xxx(%r1), %r21 */
-  { 0x48350000, 0xffffb000 },
-  /* bv %r0(%r21) */
-  { 0xeaa0c000, 0xffffffff },
-  /* ldw RR'xxx+4(%r1), %r19 */
-  { 0x48330000, 0xffffb000 },
-  { 0, 0 }
-};
-
-static struct insn_pattern hppa_import_pic_stub[] = {
-  /* addil LR'xxx,%r19 */
-  { 0x2a600000, 0xffe00000 },
-  /* ldw RR'xxx(%r1),%r21 */
-  { 0x48350000, 0xffffb000 },
-  /* bv %r0(%r21) */
-  { 0xeaa0c000, 0xffffffff },
-  /* ldw RR'xxx+4(%r1),%r19 */
-  { 0x48330000, 0xffffb000 },
-  { 0, 0 },
-};
-
-static struct insn_pattern hppa_plt_stub[] = {
-  /* b,l 1b, %r20 - 1b is 3 insns before here */
-  { 0xea9f1fdd, 0xffffffff },
-  /* depi 0,31,2,%r20 */
-  { 0xd6801c1e, 0xffffffff },
-  { 0, 0 }
-};
-
 static struct insn_pattern hppa_sigtramp[] = {
   /* ldi 0, %r25 or ldi 1, %r25 */
   { 0x34190000, 0xfffffffd },
@@ -160,133 +109,6 @@ insns_match_pattern (CORE_ADDR pc,
         return 0;
     }
   return 1;
-}
-
-/* The relaxed version of the insn matcher allows us to match from somewhere
-   inside the pattern, by looking backwards in the instruction scheme.  */
-static int
-insns_match_pattern_relaxed (CORE_ADDR pc,
-			     struct insn_pattern *pattern,
-			     unsigned int *insn)
-{
-  int pat_len = 0;
-  int offset;
-
-  while (pattern[pat_len].mask)
-    pat_len++;
-
-  for (offset = 0; offset < pat_len; offset++)
-    {
-      if (insns_match_pattern (pc - offset * 4,
-			       pattern, insn))
-	return 1;
-    }
-
-  return 0;
-}
-
-static int
-hppa_linux_in_dyncall (CORE_ADDR pc)
-{
-  struct unwind_table_entry *u;
-  u = find_unwind_entry (hppa_symbol_address ("$$dyncall"));
-
-  if (!u)
-    return 0;
-	
-  return pc >= u->region_start && pc <= u->region_end;
-}
-
-/* There are several kinds of "trampolines" that we need to deal with:
-   - long branch stubs: these are inserted by the linker when a branch
-     target is too far away for a branch insn to reach
-   - plt stubs: these should go into the .plt section, so are easy to find
-   - import stubs: used to call from object to shared lib or shared lib to 
-     shared lib; these go in regular text sections.  In fact the linker tries
-     to put them throughout the code because branches have limited reachability.
-     We use the same mechanism as ppc64 to recognize the stub insn patterns.
-   - $$dyncall: similar to hpux, hppa-linux uses $$dyncall for indirect function
-     calls. $$dyncall is exported by libgcc.a  */
-static int
-hppa_linux_in_solib_call_trampoline (CORE_ADDR pc, char *name)
-{
-  unsigned int insn[HPPA_MAX_INSN_PATTERN_LEN];
-  int r;
-  struct unwind_table_entry *u;
-
-  /* on hppa-linux, linker stubs have no unwind information.  Since the pattern
-     matching for linker stubs can be quite slow, we try to avoid it if
-     we can.  */
-  u = find_unwind_entry (pc);
-
-  r = in_plt_section (pc, name)
-      || hppa_linux_in_dyncall (pc)
-      || (u == NULL
-	  && (insns_match_pattern_relaxed (pc, hppa_import_stub, insn)
-	      || insns_match_pattern_relaxed (pc, hppa_import_pic_stub, insn)
-	      || insns_match_pattern_relaxed (pc, hppa_long_branch_stub, insn)
-	      || insns_match_pattern_relaxed (pc, hppa_long_branch_pic_stub, insn)));
-
-  return r;
-}
-
-static CORE_ADDR
-hppa_linux_skip_trampoline_code (CORE_ADDR pc)
-{
-  unsigned int insn[HPPA_MAX_INSN_PATTERN_LEN];
-  int dp_rel, pic_rel;
-
-  /* dyncall handles both PLABELs and direct addresses */
-  if (hppa_linux_in_dyncall (pc))
-    {
-      pc = (CORE_ADDR) read_register (22);
-
-      /* PLABELs have bit 30 set; if it's a PLABEL, then dereference it */
-      if (pc & 0x2)
-	pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, TARGET_PTR_BIT / 8);
-
-      return pc;
-    }
-
-  dp_rel = pic_rel = 0;
-  if ((dp_rel = insns_match_pattern (pc, hppa_import_stub, insn))
-      || (pic_rel = insns_match_pattern (pc, hppa_import_pic_stub, insn)))
-    {
-      /* Extract the target address from the addil/ldw sequence.  */
-      pc = hppa_extract_21 (insn[0]) + hppa_extract_14 (insn[1]);
-
-      if (dp_rel)
-        pc += (CORE_ADDR) read_register (27);
-      else
-        pc += (CORE_ADDR) read_register (19);
-
-      /* fallthrough */
-    }
-
-  if (in_plt_section (pc, NULL))
-    {
-      pc = (CORE_ADDR) read_memory_integer (pc, TARGET_PTR_BIT / 8);
-
-      /* if the plt slot has not yet been resolved, the target will
-         be the plt stub */
-      if (in_plt_section (pc, NULL))
-	{
-	  /* Sanity check: are we pointing to the plt stub? */
-  	  if (insns_match_pattern (pc, hppa_plt_stub, insn))
-	    {
-	      /* this should point to the fixup routine */
-      	      pc = (CORE_ADDR) read_memory_integer (pc + 8, TARGET_PTR_BIT / 8);
-	    }
-	  else
-	    {
-	      error (_("Cannot resolve plt stub at 0x%s."),
-		     paddr_nz (pc));
-	      pc = 0;
-	    }
-	}
-    }
-
-  return pc;
 }
 
 /* Signal frames.  */
@@ -600,9 +422,8 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
-  tdep->in_solib_call_trampoline = hppa_linux_in_solib_call_trampoline;
-  set_gdbarch_skip_trampoline_code
-	(gdbarch, hppa_linux_skip_trampoline_code);
+  tdep->in_solib_call_trampoline = hppa_in_solib_call_trampoline;
+  set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
 
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);

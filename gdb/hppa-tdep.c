@@ -2737,6 +2737,223 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
 }
 
 
+/* An instruction to match.  */
+struct insn_pattern
+{
+  unsigned int data;            /* See if it matches this....  */
+  unsigned int mask;            /* ... with this mask.  */
+};
+
+/* See bfd/elf32-hppa.c */
+static struct insn_pattern hppa_long_branch_stub[] = {
+  /* ldil LR'xxx,%r1 */
+  { 0x20200000, 0xffe00000 },
+  /* be,n RR'xxx(%sr4,%r1) */
+  { 0xe0202002, 0xffe02002 }, 
+  { 0, 0 }
+};
+
+static struct insn_pattern hppa_long_branch_pic_stub[] = {
+  /* b,l .+8, %r1 */
+  { 0xe8200000, 0xffe00000 },
+  /* addil LR'xxx - ($PIC_pcrel$0 - 4), %r1 */
+  { 0x28200000, 0xffe00000 },
+  /* be,n RR'xxxx - ($PIC_pcrel$0 - 8)(%sr4, %r1) */
+  { 0xe0202002, 0xffe02002 }, 
+  { 0, 0 }
+};
+
+static struct insn_pattern hppa_import_stub[] = {
+  /* addil LR'xxx, %dp */
+  { 0x2b600000, 0xffe00000 },
+  /* ldw RR'xxx(%r1), %r21 */
+  { 0x48350000, 0xffffb000 },
+  /* bv %r0(%r21) */
+  { 0xeaa0c000, 0xffffffff },
+  /* ldw RR'xxx+4(%r1), %r19 */
+  { 0x48330000, 0xffffb000 },
+  { 0, 0 }
+};
+
+static struct insn_pattern hppa_import_pic_stub[] = {
+  /* addil LR'xxx,%r19 */
+  { 0x2a600000, 0xffe00000 },
+  /* ldw RR'xxx(%r1),%r21 */
+  { 0x48350000, 0xffffb000 },
+  /* bv %r0(%r21) */
+  { 0xeaa0c000, 0xffffffff },
+  /* ldw RR'xxx+4(%r1),%r19 */
+  { 0x48330000, 0xffffb000 },
+  { 0, 0 },
+};
+
+static struct insn_pattern hppa_plt_stub[] = {
+  /* b,l 1b, %r20 - 1b is 3 insns before here */
+  { 0xea9f1fdd, 0xffffffff },
+  /* depi 0,31,2,%r20 */
+  { 0xd6801c1e, 0xffffffff },
+  { 0, 0 }
+};
+
+static struct insn_pattern hppa_sigtramp[] = {
+  /* ldi 0, %r25 or ldi 1, %r25 */
+  { 0x34190000, 0xfffffffd },
+  /* ldi __NR_rt_sigreturn, %r20 */
+  { 0x3414015a, 0xffffffff },
+  /* be,l 0x100(%sr2, %r0), %sr0, %r31 */
+  { 0xe4008200, 0xffffffff },
+  /* nop */
+  { 0x08000240, 0xffffffff },
+  { 0, 0 }
+};
+
+/* Maximum number of instructions on the patterns above.  */
+#define HPPA_MAX_INSN_PATTERN_LEN	4
+
+/* Return non-zero if the instructions at PC match the series
+   described in PATTERN, or zero otherwise.  PATTERN is an array of
+   'struct insn_pattern' objects, terminated by an entry whose mask is
+   zero.
+
+   When the match is successful, fill INSN[i] with what PATTERN[i]
+   matched.  */
+
+static int
+hppa_match_insns (CORE_ADDR pc, struct insn_pattern *pattern,
+		  unsigned int *insn)
+{
+  CORE_ADDR npc = pc;
+  int i;
+
+  for (i = 0; pattern[i].mask; i++)
+    {
+      gdb_byte buf[HPPA_INSN_SIZE];
+
+      deprecated_read_memory_nobpt (npc, buf, HPPA_INSN_SIZE);
+      insn[i] = extract_unsigned_integer (buf, HPPA_INSN_SIZE);
+      if ((insn[i] & pattern[i].mask) == pattern[i].data)
+        npc += 4;
+      else
+        return 0;
+    }
+
+  return 1;
+}
+
+/* This relaxed version of the insstruction matcher allows us to match
+   from somewhere inside the pattern, by looking backwards in the
+   instruction scheme.  */
+
+static int
+hppa_match_insns_relaxed (CORE_ADDR pc, struct insn_pattern *pattern,
+			  unsigned int *insn)
+{
+  int offset, len = 0;
+
+  while (pattern[len].mask)
+    len++;
+
+  for (offset = 0; offset < len; offset++)
+    if (hppa_match_insns (pc - offset * HPPA_INSN_SIZE, pattern, insn))
+      return 1;
+
+  return 0;
+}
+
+static int
+hppa_in_dyncall (CORE_ADDR pc)
+{
+  struct unwind_table_entry *u;
+
+  u = find_unwind_entry (hppa_symbol_address ("$$dyncall"));
+  if (!u)
+    return 0;
+
+  return (pc >= u->region_start && pc <= u->region_end);
+}
+
+int
+hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
+{
+  unsigned int insn[HPPA_MAX_INSN_PATTERN_LEN];
+  struct unwind_table_entry *u;
+
+  if (in_plt_section (pc, name) || hppa_in_dyncall (pc))
+    return 1;
+
+  /* The GNU toolchain produces linker stubs without unwind
+     information.  Since the pattern matching for linker stubs can be
+     quite slow, so bail out if we do have an unwind entry.  */
+
+  u = find_unwind_entry (pc);
+  if (u == NULL)
+    return 0;
+
+  return (hppa_match_insns_relaxed (pc, hppa_import_stub, insn)
+	  || hppa_match_insns_relaxed (pc, hppa_import_pic_stub, insn)
+	  || hppa_match_insns_relaxed (pc, hppa_long_branch_stub, insn)
+	  || hppa_match_insns_relaxed (pc, hppa_long_branch_pic_stub, insn));
+}
+
+/* This code skips several kind of "trampolines" used on PA-RISC
+   systems: $$dyncall, import stubs and PLT stubs.  */
+
+CORE_ADDR
+hppa_skip_trampoline_code (CORE_ADDR pc)
+{
+  unsigned int insn[HPPA_MAX_INSN_PATTERN_LEN];
+  int dp_rel;
+
+  /* $$dyncall handles both PLABELs and direct addresses.  */
+  if (hppa_in_dyncall (pc))
+    {
+      pc = read_register (HPPA_R0_REGNUM + 22);
+
+      /* PLABELs have bit 30 set; if it's a PLABEL, then dereference it.  */
+      if (pc & 0x2)
+	pc = read_memory_typed_address (pc & ~0x3, builtin_type_void_func_ptr);
+
+      return pc;
+    }
+
+  dp_rel = hppa_match_insns (pc, hppa_import_stub, insn);
+  if (dp_rel || hppa_match_insns (pc, hppa_import_pic_stub, insn))
+    {
+      /* Extract the target address from the addil/ldw sequence.  */
+      pc = hppa_extract_21 (insn[0]) + hppa_extract_14 (insn[1]);
+
+      if (dp_rel)
+        pc += read_register (HPPA_DP_REGNUM);
+      else
+        pc += read_register (HPPA_R0_REGNUM + 19);
+
+      /* fallthrough */
+    }
+
+  if (in_plt_section (pc, NULL))
+    {
+      pc = read_memory_typed_address (pc, builtin_type_void_func_ptr);
+
+      /* If the PLT slot has not yet been resolved, the target will be
+         the PLT stub.  */
+      if (in_plt_section (pc, NULL))
+	{
+	  /* Sanity check: are we pointing to the PLT stub?  */
+  	  if (!hppa_match_insns (pc, hppa_plt_stub, insn))
+	    {
+	      warning (_("Cannot resolve PLT stub at 0x%s."), paddr_nz (pc));
+	      return 0;
+	    }
+
+	  /* This should point to the fixup routine.  */
+	  pc = read_memory_typed_address (pc + 8, builtin_type_void_func_ptr);
+	}
+    }
+
+  return pc;
+}
+
+
 /* Here is a table of C type sizes on hppa with various compiles
    and options.  I measured this on PA 9000/800 with HP-UX 11.11
    and these compilers:

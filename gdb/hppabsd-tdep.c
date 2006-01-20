@@ -178,8 +178,10 @@ hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, hppabsd_regset_from_core_section);
 
   /* OpenBSD and NetBSD use ELF.  */
-  tdep->find_global_pointer = hppabsd_find_global_pointer;
   tdep->is_elf = 1;
+  tdep->find_global_pointer = hppabsd_find_global_pointer;
+  tdep->in_solib_call_trampoline = hppa_in_solib_call_trampoline;
+  set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
 
   /* OpenBSD and NetBSD use SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets

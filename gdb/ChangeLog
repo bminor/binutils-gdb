@@ -1,3 +1,27 @@
+2006-01-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppa-tdep.h (hppa_in_solib_call_trampoline)
+	(hppa_skip_trampoline_code): New prototypes.
+	* hppa-tdep.c (struct insn_pattern): New.
+	(hppa_long_branch_stub, hppa_long_branch_pic_stub)
+	(hppa_import_stub, hppa_import_pic_stub, hppa_plt_stub): Moved
+	here from hppa-linux-tdep.c
+	(HPPA_MAX_INSN_PATTERN_LEN): New define.
+	(hppa_match_insns, hppa_match_insns_relaxed, hppa_in_dyncall)
+	(hppa_in_solib_call_trampoline, hppa_skip_trampoline_code): New
+	functions based on functions removed from hppa-linux-tdep.c.
+	* hppa-linux-tdep.c (hppa_long_branch_stub)
+	(hppa_long_branch_pic_stub, hppa_import_stub)
+	(hppa_import_pic_stub, hppa_plt_stub): Moved to hppa-tdep.c.
+	(insns_match_pattern_relaxed, hppa_linux_in_dyncall)
+	(hppa_linux_in_solib_call_trampoline)
+	(hppa_linux_skip_trampoline_code): Removed.
+	(hppa_linux_init_abi): Set TDEP->in_solib_call_tranpoline to
+	hppa_in_solib_call_trampoline and skip_trampoline_code to
+	hppa_skip_trampoline_code.
+	* hppabsd-tdep.c (hppabsd_init_abi): Set
+	TDEP->in_solib_call_trampoline and skip_trampoline_code.
+
 2006-01-20  Jim Blandy  <jimb@redhat.com>
 
 	* MAINTAINERS: Change my E-mail address.
