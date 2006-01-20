@@ -1221,24 +1221,21 @@ asm_1:
 	      /* 7 bit immediate value if possible.
 		 We will check for that constant value for efficiency
 		 If it goes to reloc, it will be 16 bit.  */
-	      if (IS_CONST ($3) && IS_IMM ($3, 7) && (IS_DREG ($1) || IS_PREG ($1)))
+	      if (IS_CONST ($3) && IS_IMM ($3, 7) && IS_DREG ($1))
 		{
-		  /* if the expr is a relocation, generate it.  */
-		  if (IS_DREG ($1) && IS_IMM ($3, 7))
-		    {
-		      notethat ("COMPI2opD: dregs = imm7 (x) \n");
-		      $$ = COMPI2OPD (&$1, imm7 ($3), 0);
-		    }
-		  else if (IS_PREG ($1) && IS_IMM ($3, 7))
-		    {
-		      notethat ("COMPI2opP: pregs = imm7 (x)\n");
-		      $$ = COMPI2OPP (&$1, imm7 ($3), 0);
-		    }
-		  else
-		    return yyerror ("Bad register or value for assigment");
+		  notethat ("COMPI2opD: dregs = imm7 (x) \n");
+		  $$ = COMPI2OPD (&$1, imm7 ($3), 0);
+		}
+	      else if (IS_CONST ($3) && IS_IMM ($3, 7) && IS_PREG ($1))
+		{
+		  notethat ("COMPI2opP: pregs = imm7 (x)\n");
+		  $$ = COMPI2OPP (&$1, imm7 ($3), 0);
 		}
 	      else
 		{
+		  if (IS_CONST ($3) && !IS_IMM ($3, 16))
+		    return yyerror ("Immediate value out of range");
+
 		  notethat ("LDIMMhalf: regs = luimm16 (x)\n");
 		  /* reg, H, S, Z.   */
 		  $$ = LDIMMHALF_R5 (&$1, 0, 1, 0, $3);
@@ -1248,6 +1245,10 @@ asm_1:
 	    {
 	      /* (z) There is no 7 bit zero extended instruction.
 	      If the expr is a relocation, generate it.   */
+
+	      if (IS_CONST ($3) && !IS_UIMM ($3, 16))
+		return yyerror ("Immediate value out of range");
+
 	      notethat ("LDIMMhalf: regs = luimm16 (x)\n");
 	      /* reg, H, S, Z.  */
 	      $$ = LDIMMHALF_R5 (&$1, 0, 0, 1, $3);
