@@ -4232,7 +4232,7 @@ value_match (Expr_Node *expr, int sz, int sign, int mul, int issigned)
 
   if ((v % mul) != 0)
     {
-      error ("%s:%d: Value Error -- Must align to %d\n", __LINE__, __FILE__, mul); 
+      error ("%s:%d: Value Error -- Must align to %d\n", __FILE__, __LINE__, mul); 
       return 0;
     }
 
@@ -4308,7 +4308,7 @@ binary (Expr_Op_Type op, Expr_Node *x, Expr_Node *y)
 	  break;
 
 	default:
-	  error ("%s:%d: Internal compiler error\n", __LINE__, __FILE__); 
+	  error ("%s:%d: Internal compiler error\n", __FILE__, __LINE__); 
 	}
       return x;
     }
@@ -4335,7 +4335,7 @@ unary (Expr_Op_Type op, Expr_Node *x)
 	  x->value.i_value = ~x->value.i_value;
 	  break;
 	default:
-	  error ("%s:%d: Internal compiler error\n", __LINE__, __FILE__); 
+	  error ("%s:%d: Internal compiler error\n", __FILE__, __LINE__); 
 	}
       return x;
     }

@@ -1,3 +1,10 @@
+2006-01-21  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-parse.y (value_match): Use correct conversion
+	specifications in template string for __FILE__ and __LINE__.
+	(binary): Ditto.
+	(unary): Ditto.
+
 2006-01-18  Alexandre Oliva  <aoliva@redhat.com>
 
 	Introduce TLS descriptors for i386 and x86_64.
