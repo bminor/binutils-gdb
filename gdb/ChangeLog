@@ -1,3 +1,8 @@
+2006-01-20  Jim Blandy  <jimb@redhat.com>
+
+	* configure.ac: Add -Wno-pointer-sign to list of build warnings.
+	* configure: Regenerated.
+
 2006-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Overhaul.

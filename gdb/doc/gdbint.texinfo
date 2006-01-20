@@ -5016,6 +5016,15 @@ switch (sched)
 @end smallexample
 
 @item -Wunused-function
+
+@item -Wno-pointer-sign
+In version 4.0, GCC began warning about pointer argument passing or
+assignment even when the source and destination differed only in
+signedness.  However, most @value{GDBN} code doesn't distinguish
+carefully between @code{char} and @code{unsigned char}.  In early 2006
+the @value{GDBN} developers decided correcting these warnings wasn't
+worth the time it would take.
+
 @end table
 
 @emph{Pragmatics: Due to the way that @value{GDBN} is implemented most

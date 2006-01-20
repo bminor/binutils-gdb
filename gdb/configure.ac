@@ -1115,7 +1115,7 @@ AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
 -Wformat -Wparentheses -Wpointer-arith -Wformat-nonliteral \
--Wunused-label -Wunused-function"
+-Wunused-label -Wunused-function -Wno-pointer-sign"
 
 # GCC supports -Wuninitialized only with -O or -On, n != 0.
 if test x${CFLAGS+set} = xset; then
