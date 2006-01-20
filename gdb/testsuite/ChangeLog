@@ -1,3 +1,7 @@
+2006-01-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/maint.exp: Set complaints to a positive value.
+
 2006-01-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/multi-forks.c: Add copyright notice.  Include <stdlib.h>.
