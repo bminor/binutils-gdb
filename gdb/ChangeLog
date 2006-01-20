@@ -1,5 +1,7 @@
 2006-01-20  Jim Blandy  <jimb@redhat.com>
 
+	* MAINTAINERS: Change my E-mail address.
+
 	* configure.ac: Add -Wno-pointer-sign to list of build warnings.
 	* configure: Regenerated.
 

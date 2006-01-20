@@ -155,7 +155,7 @@ future, if there are, a reference to the list will be included here.
 
 The current global maintainers are (in alphabetical order):
 
-Jim Blandy			jimb@redhat.com
+Jim Blandy			jimb@red-bean.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			cagney@gnu.org
 J.T. Conklin			jtc@acorntoolworks.com
@@ -476,7 +476,7 @@ John David Anglin				dave.anglin@nrc-cnrc.gc.ca
 Shrinivas Atre					shrinivasa@kpitcummins.com
 Scott Bambrough					scottb@netwinder.org
 Jan Beulich					jbeulich@novell.com
-Jim Blandy					jimb@redhat.com
+Jim Blandy					jimb@red-bean.com
 Philip Blundell					philb@gnu.org
 Per Bothner					per@bothner.com
 Joel Brobecker					brobecker@gnat.com
