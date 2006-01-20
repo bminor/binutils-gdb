@@ -1,9 +1,116 @@
 		GDB Maintainers
+		===============
+
+
+		   Overview
+		   --------
+
+This file describes different groups of people who are, together, the
+maintainers and developers of the GDB project.  Don't worry - it sounds
+more complicated than it really is.
+
+There are four groups of GDB developers, covering the patch development and
+review process:
+
+  - The Global Maintainers.
+
+    These are the developers in charge of most daily development.  They
+    have wide authority to apply and reject patches, but defer to the
+    Responsible Maintainers (see below) within their spheres of
+    responsibility.
+
+  - The Responsible Maintainers.
+
+    These are developers who have expertise and interest in a particular
+    area of GDB, who are generally available to review patches, and who
+    prefer to enforce a single vision within their areas.
+
+  - The Authorized Committers.
+
+    These are developers who are trusted to make changes within a specific
+    area of GDB without additional oversight.
+
+  - The Write After Approval Maintainers.
+
+    These are developers who have write access to the GDB source tree.  They
+    can check in their own changes once a developer with the appropriate
+    authority has approved the changes; they can also apply the Obvious
+    Fix Rule (below).
+
+All maintainers are encouraged to post major patches to the gdb-patches
+mailing list for comments, even if they have the authority to commit the
+patch without review from another maintainer.  This especially includes
+patches which change internal interfaces (e.g. global functions, data
+structures) or external interfaces (e.g. user, remote, MI, et cetera).
+
+The term "review" is used in this file to describe several kinds of feedback
+from a maintainer: approval, rejection, and requests for changes or
+clarification with the intention of approving a revised version.  Review is
+a privilege and/or responsibility of various positions among the GDB
+Maintainers.  Of course, anyone - whether they hold a position but not the
+relevant one for a particular patch, or are just following along on the
+mailing lists for fun, or anything in between - may suggest changes or
+ask questions about a patch!
+
+There's also a couple of other people who play special roles in the GDB
+community, separately from the patch process:
+
+  - The GDB Steering Committee.
+
+    These are the official (FSF-appointed) maintainers of GDB.  They have
+    final and overriding authority for all GDB-related decisions, including
+    anything described in this file.  The committee is not generally
+    involved in day-to-day development (although its members may be, as
+    individuals).
+
+  - The Release Manager.
+
+    This developer is in charge of making new releases of GDB.
+
+  - The Patch Champions.
+
+    These volunteers make sure that no contribution is overlooked or
+    forgotten.
+
+Most changes to the list of maintainers in this file are handled by
+consensus among the global maintainers and any other involved parties.
+In cases where consensus can not be reached, the global maintainers may
+ask the Steering Committee for a final decision.
+
+
+			The Obvious Fix Rule
+			--------------------
+
+All maintainers listed in this file, including the Write After Approval
+developers, are allowed to check in obvious fixes.
+
+An "obvious fix" means that there is no possibility that anyone will
+disagree with the change.
+
+A good mental test is "will the person who hates my work the most be
+able to find fault with the change" - if so, then it's not obvious and
+needs to be posted first. :-)
+
+Something like changing or bypassing an interface is _not_ an obvious
+fix, since such a change without discussion will result in
+instantaneous and loud complaints.
+
 
 	     GDB Steering Committee
+	     ----------------------
 
 The members of the GDB Steering Committee are the FSF-appointed
 maintainers of the GDB project.
+
+The Steering Committee has final authority for all GDB-related topics;
+they may make whatever changes that they deem necessary, or that the FSF
+requests.  However, they are generally not involved in day-to-day
+development.
+
+The current members of the steering committee are listed below, in
+alphabetical order.  Their affiliations are provided for reference only -
+their membership on the Steering Committee is individual and not through
+their affiliation, and they act on behalf of the GNU project.
 
 	Jim Blandy (Red Hat)
 	Andrew Cagney (Red Hat)
@@ -17,8 +124,36 @@ maintainers of the GDB project.
 	Todd Whitesel
 
 
-			Global Maintainers
-			   (alphabetic)
+		  Global Maintainers
+		  ------------------
+
+The global maintainers may review and commit any change to GDB, except in
+areas with a Responsible Maintainer available.  For major changes, or
+changes to areas with other active developers, global maintainers are
+strongly encouraged to post their own patches for feedback before
+committing.
+
+The global maintainers are responsible for reviewing patches to any area
+for which no Responsible Maintainer is listed.
+
+Global maintainers also have the authority to revert patches which should
+not have been applied, e.g. patches which were not approved, controversial
+patches committed under the Obvious Fix Rule, patches with important bugs
+that can't be immediately fixed, or patches which go against an accepted and
+documented roadmap for GDB development.  Any global maintainer may request
+the reversion of a patch.  If no global maintainer, or responsible
+maintainer in the affected areas, supports the patch (except for the
+maintainer who originally committed it), then after 48 hours the maintainer
+who called for the reversion may revert the patch.
+
+No one may reapply a reverted patch without the agreement of the maintainer
+who reverted it, or bringing the issue to the GDB Steering Committee for
+discussion.
+
+At the moment there are no documented roadmaps for GDB development; in the
+future, if there are, a reference to the list will be included here.
+
+The current global maintainers are (in alphabetical order):
 
 Jim Blandy			jimb@redhat.com
 Kevin Buettner			kevinb@redhat.com
@@ -34,52 +169,73 @@ Elena Zannoni			ezannoni@redhat.com
 Eli Zaretskii			eliz@gnu.org
 
 
-			Various Maintainers
+			Release Manager
+			---------------
 
-Note individuals who maintain parts of the debugger need approval to
-check in changes outside of the immediate domain that they maintain.
+The current release manager is: Joel Brobecker  <brobecker@adacore.com>
 
-If there is no maintainer for a given domain then the responsibility
-falls to a global maintainer.
+His responsibilities are:
 
-If there are several maintainers for a given domain then
-responsibility falls to the first maintainer.  The first maintainer is
-free to devolve that responsibility among the other maintainers.
+    * organizing, scheduling, and managing releases of GDB.
 
-
-                        The Obvious Fix Rule
-
-All maintainers listed in this file are allowed to check in obvious
-fixes.
-
-An "obvious fix" means that there is no possibility that anyone will
-disagree with the change.
-
-A good mental test is "will the person who hates my work the most be
-able to find fault with the change" - if so, then it's not obvious and
-needs to be posted first. :-)
-
-Something like changing or bypassing an interface is _not_ an obvious
-fix, since such a change without discussion will result in
-instantaneous and loud complaints.
+    * deciding the approval and commit policies for release branches,
+      and can change them as needed.
 
 
-		Can Commit Without Approval
-		       (alphabetic)
 
-The following developers CAN COMMIT changes (and hence approve
-patches) to specific sections of GDB:
+			Patch Champions
+			---------------
 
-	Andrew Cagney (powerpc, powerpc-linux)
-	Hans-Peter Nilsson (cris)	
-	Jeff Johnston (ia64)
-	Joel Brobecker (mips)
-	Kei Sakamoto (m32r)
-	Kevin Buettner (powerpc)
-	Orjan Friberg (cris)
-	Randolph Chung (pa)
-	Ulrich Weigand (s390)
+These volunteers track all patches submitted to the gdb-patches list.  They
+endeavor to prevent any posted patch from being overlooked; work with
+contributors to meet GDB's coding style and general requirements, along with
+FSF copyright assignments; remind (ping) responsible maintainers to review
+patches; and ensure that contributors are given credit.
 
+Current patch champions (in alphabetical order):
+
+	Joel Brobecker  <brobecker@adacore.com>
+	Daniel Jacobowitz  <dan@debian.org>
+
+
+
+			Responsible Maintainers
+			-----------------------
+
+These developers have agreed to review patches in specific areas of GDB, in
+which they have knowledge and experience.  These areas are generally broad;
+the role of a responsible maintainer is to provide coherent and cohesive
+structure within their area of GDB, to assure that patches from many
+different contributors all work together for the best results.
+
+Global maintainers will defer to responsible maintainers within their areas,
+as long as the responsible maintainer is active.  Active means that
+responsible maintainers agree to review submitted patches in their area
+promptly; patches and followups should generally be answered within a week.
+If a responsible maintainer is interested in reviewing a patch but will not
+have time within a week of posting, the maintainer should send an
+acknowledgement of the patch to the gdb-patches mailing list, and
+plan to follow up with a review within a month.  These deadlines are for
+initial responses to a patch - if the maintainer has suggestions
+or questions, it may take an extended discussion before the patch
+is ready to commit.  There are no written requirements for discussion,
+but maintainers are asked to be responsive.
+
+If a responsible maintainer misses these deadlines occasionally (e.g.
+vacation or unexpected workload), it's not a disaster - any global
+maintainer may step in to review the patch.  But sometimes life intervenes
+more permanently, and a maintainer may no longer have time for these duties.
+When this happens, he or she should step down (either into the Authorized
+Committers section if still interested in the area, or simply removed from
+the list of Responsible Maintainers if not).
+
+If a responsible maintainer is unresponsive for an extended period of time
+without stepping down, please contact the Global Maintainers; they will try
+to contact the maintainer directly and fix the problem - potentially by
+removing that maintainer from their listed position.
+
+If there are several maintainers for a given domain then any one of them
+may review a submitted patch.
 
 Target Instruction Set Architectures:
 
@@ -288,6 +444,27 @@ readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 
 tcl/ tk/ itcl/		Ian Roxborough		irox@redhat.com
 
+
+		Authorized Committers
+		---------------------
+
+These are developers working on particular areas of GDB, who are trusted to
+commit their own (or other developers') patches in those areas without
+further review from a Global Maintainer or Responsible Maintainer.  They are
+under no obligation to review posted patches - but, of course, are invited
+to do so!
+
+	Andrew Cagney (powerpc, powerpc-linux)
+	Hans-Peter Nilsson (cris)	
+	Jeff Johnston (ia64)
+	Joel Brobecker (mips)
+	Kei Sakamoto (m32r)
+	Kevin Buettner (powerpc)
+	Orjan Friberg (cris)
+	Randolph Chung (pa)
+	Ulrich Weigand (s390)
+
+
 			Write After Approval
 			   (alphabetic)
 
@@ -413,19 +590,6 @@ Wu Zhou						woodzltc@cn.ibm.com
 Yoshinori Sato					ysato@users.sourceforge.jp
 
 
-
-			Release Management
-
-The current release manager is: Joel Brobecker  <brobecker@adacore.com>
-
-His responsibilities are:
-
-    * organizing, scheduling, and managing releases of GDB.
-
-    * deciding the approval and commit policies for release branches,
-      and can change them as needed.
-
-                        
 			Past Maintainers
 
 Jimmy Guo (gdb.hp, tui)				guo at cup dot hp dot com
@@ -447,8 +611,3 @@ Folks that have been caught up in a paper trail:
 
 Jim Kingdon					jkingdon@engr.sgi.com
 David Carlton					carlton@bactrian.org
-
---
-
-(*) Indicates folks that don't have a Kerberos/SSH account in the GDB
-group.
