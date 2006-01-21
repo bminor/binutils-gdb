@@ -283,7 +283,7 @@ hppa_linux_sigtramp_frame_prev_register (struct frame_info *next_frame,
 					 int regnum, int *optimizedp,
 					 enum lval_type *lvalp, 
 					 CORE_ADDR *addrp,
-					 int *realnump, void *valuep)
+					 int *realnump, gdb_byte *valuep)
 {
   struct hppa_linux_sigtramp_unwind_cache *info
     = hppa_linux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
