@@ -1,5 +1,10 @@
 2006-01-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* avr-tdep.c (avr_address_to_pointer, avr_pointer_to_address)
+	(avr_extract_return_value, avr_frame_prev_register): Use gdb_byte.
+
+2006-01-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* solib.c (info_sharedlibrary_command): Avoid internal_error.
 
 2006-01-21  Mark Kettenis  <kettenis@gnu.org>

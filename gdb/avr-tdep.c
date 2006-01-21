@@ -279,7 +279,7 @@ avr_convert_saddr_to_raw (CORE_ADDR x)
 /* Convert from address to pointer and vice-versa. */
 
 static void
-avr_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
+avr_address_to_pointer (struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
   /* Is it a code address?  */
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
@@ -297,7 +297,7 @@ avr_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
 }
 
 static CORE_ADDR
-avr_pointer_to_address (struct type *type, const void *buf)
+avr_pointer_to_address (struct type *type, const gdb_byte *buf)
 {
   CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
 
@@ -823,7 +823,7 @@ avr_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 
 static void
 avr_extract_return_value (struct type *type, struct regcache *regcache,
-                          void *valbuf)
+                          gdb_byte *valbuf)
 {
   ULONGEST r24, r25;
   ULONGEST c;
@@ -975,7 +975,7 @@ avr_frame_prev_register (struct frame_info *next_frame,
 			  void **this_prologue_cache,
 			  int regnum, int *optimizedp,
 			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, void *bufferp)
+			  int *realnump, gdb_byte *bufferp)
 {
   struct avr_unwind_cache *info
     = avr_frame_unwind_cache (next_frame, this_prologue_cache);
