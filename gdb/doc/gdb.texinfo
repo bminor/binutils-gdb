@@ -2424,13 +2424,14 @@ threads.
 
 @kindex thread apply
 @cindex apply command to several threads
-@item thread apply [@var{threadno}] [@var{all}]  @var{args}
-The @code{thread apply} command allows you to apply a command to one or
-more threads.  Specify the numbers of the threads that you want affected
-with the command argument @var{threadno}.  @var{threadno} is the internal
-@value{GDBN} thread number, as shown in the first field of the @samp{info
-threads} display.  To apply a command to all threads, use
-@code{thread apply all} @var{args}.
+@item thread apply [@var{threadno}] [@var{all}] @var{command}
+The @code{thread apply} command allows you to apply the named
+@var{command} to one or more threads.  Specify the numbers of the
+threads that you want affected with the command argument
+@var{threadno}.  It can be a single thread number, one of the numbers
+shown in the first field of the @samp{info threads} display; or it
+could be a range of thread numbers, as in @code{2-4}.  To apply a
+command to all threads, type @kbd{thread apply all @var{command}}.
 @end table
 
 @cindex automatic thread selection
@@ -4460,6 +4461,15 @@ Print the values of the local variables also.
 @kindex info stack
 The names @code{where} and @code{info stack} (abbreviated @code{info s})
 are additional aliases for @code{backtrace}.
+
+@cindex multiple threads, backtrace
+In a multi-threaded program, @value{GDBN} by default shows the
+backtrace only for the current thread.  To display the backtrace for
+several or all of the threads, use the command @code{thread apply}
+(@pxref{Threads, thread apply}).  For example, if you type @kbd{thread
+apply all backtrace}, @value{GDBN} will display the backtrace for all
+the threads; this is handy when you debug a core dump of a
+multi-threaded program.
 
 Each line in the backtrace shows the frame number and the function name.
 The program counter value is also shown---unless you use @code{set

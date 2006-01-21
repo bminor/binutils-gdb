@@ -1,3 +1,10 @@
+2006-01-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Backtrace): Describe how to get backtrace of all
+	the threads in a multi-threaded program.
+	(Threads): The threadno argument of "thread apply" can be a range
+	of numbers.
+
 2006-01-18  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo (Coding): Add entry for -Wno-pointer-sign to list
