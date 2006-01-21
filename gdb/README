@@ -454,7 +454,6 @@ monitors and other hardware:
 	remote-est.c	 EST emulator
 	remote-hms.c	 Renesas Micro Systems H8/300 monitor
 	remote-mips.c	 MIPS remote debugging protocol
-	remote-rdi.c	 ARM with Angel monitor
 	remote-rdp.c	 ARM with Demon monitor
 	remote-sds.c	 PowerPC SDS monitor
 	remote-sim.c	 Generalized simulator protocol

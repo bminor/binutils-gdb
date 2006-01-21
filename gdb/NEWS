@@ -41,6 +41,10 @@ detach-fork <n>			Delete a fork from the list of forks
 
 Morpho Technologies ms2		ms1-elf
 
+* REMOVED features
+
+The ARM rdi-share module.
+
 *** Changes in GDB 6.4
 
 * New native configurations

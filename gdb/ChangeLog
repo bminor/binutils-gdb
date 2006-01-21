@@ -1,3 +1,66 @@
+2006-01-20  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.in (remote-rdi.o): Remove.
+	(rdi-share/libangsd.a): Likewise.
+	* README: Don't mention remote-rdi.c.
+	* NEWS: Mention removal of rdi-share.
+	* configure.ac: Don't configure rdi-share subdirectory.
+	* remote-rdi.c: Remove.
+	* config/arm/embed.mt (TDEPFILES): Remove remote-rdi.o.
+	(TDEPLIBS): Remove rdi-share/libangsd.a.
+	* rdi-share/Makefile.am: Remove.
+	* rdi-share/Makefile.in: Likewise.
+	* rdi-share/README.CYGNUS: Likewise.
+	* rdi-share/aclocal.m4: Likewise.
+	* rdi-share/adp.h: Likewise.
+	* rdi-share/adperr.h: Likewise.
+	* rdi-share/angel.h: Likewise.
+	* rdi-share/angel_bytesex.c: Likewise.
+	* rdi-share/angel_bytesex.h: Likewise.
+	* rdi-share/angel_endian.h: Likewise.
+	* rdi-share/ardi.c: Likewise.
+	* rdi-share/ardi.h: Likewise.
+	* rdi-share/armdbg.h: Likewise.
+	* rdi-share/buffers.h: Likewise.
+	* rdi-share/chandefs.h: Likewise.
+	* rdi-share/channels.h: Likewise.
+	* rdi-share/chanpriv.h: Likewise.
+	* rdi-share/configure: Likewise.
+	* rdi-share/configure.in: Likewise.
+	* rdi-share/crc.c: Likewise.
+	* rdi-share/crc.h: Likewise.
+	* rdi-share/dbg_conf.h: Likewise.
+	* rdi-share/dbg_cp.h: Likewise.
+	* rdi-share/dbg_hif.h: Likewise.
+	* rdi-share/dbg_rdi.h: Likewise.
+	* rdi-share/devclnt.h: Likewise.
+	* rdi-share/devices.h: Likewise.
+	* rdi-share/devsw.c: Likewise.
+	* rdi-share/devsw.h: Likewise.
+	* rdi-share/drivers.c: Likewise.
+	* rdi-share/drivers.h: Likewise.
+	* rdi-share/etherdrv.c: Likewise.
+	* rdi-share/ethernet.h: Likewise.
+	* rdi-share/host.h: Likewise.
+	* rdi-share/hostchan.c: Likewise.
+	* rdi-share/hostchan.h: Likewise.
+	* rdi-share/hsys.c: Likewise.
+	* rdi-share/hsys.h: Likewise.
+	* rdi-share/logging.c: Likewise.
+	* rdi-share/logging.h: Likewise.
+	* rdi-share/msgbuild.c: Likewise.
+	* rdi-share/msgbuild.h: Likewise.
+	* rdi-share/params.c: Likewise.
+	* rdi-share/params.h: Likewise.
+	* rdi-share/rx.c: Likewise.
+	* rdi-share/rxtx.h: Likewise.
+	* rdi-share/serdrv.c: Likewise.
+	* rdi-share/serpardr.c: Likewise.
+	* rdi-share/sys.h: Likewise.
+	* rdi-share/tx.c: Likewise.
+	* rdi-share/unixcomm.c: Likewise.
+	* rdi-share/unixcomm.h: Likewise.
+
 2006-01-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-linux-tdep.c (hppa_linux_sigtramp_frame_prev_register):

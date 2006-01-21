@@ -2459,11 +2459,6 @@ remote-mips.o: remote-mips.c $(defs_h) $(inferior_h) $(bfd_h) $(symfile_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(serial_h) $(target_h) $(exceptions_h) \
 	$(remote_utils_h) $(gdb_string_h) $(gdb_stat_h) $(regcache_h) \
 	$(mips_tdep_h)
-remote-rdi.o: remote-rdi.c $(defs_h) $(gdb_string_h) $(frame_h) \
-	$(inferior_h) $(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) \
-	$(objfiles_h) $(gdb_stabs_h) $(gdbthread_h) $(gdbcore_h) \
-	$(breakpoint_h) $(completer_h) $(regcache_h) $(arm_tdep_h) \
-	$(rdi_share_ardi_h) $(rdi_share_adp_h) $(rdi_share_hsys_h)
 remote-rdp.o: remote-rdp.c $(defs_h) $(inferior_h) $(value_h) \
 	$(gdb_callback_h) $(command_h) $(symfile_h) $(remote_utils_h) \
 	$(gdb_string_h) $(gdbcore_h) $(regcache_h) $(serial_h) $(arm_tdep_h)
@@ -3035,22 +3030,6 @@ mi-symbol-cmds.o: $(srcdir)/mi/mi-symbol-cmds.c $(defs_h) $(mi_cmds_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-symbol-cmds.c
 mi-common.o: $(srcdir)/mi/mi-common.c $(mi_common_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-common.c
-
-#
-# rdi-share sub-directory
-#
-# Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the mi directory.
-
-rdi-share/libangsd.a:	force
-	@dir=rdi-share; \
-	if [ -f ./$${dir}/Makefile ] ; then \
-	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
-	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
-	else \
-	  true; \
-	fi
 
 #
 # gdb/signals/ dependencies

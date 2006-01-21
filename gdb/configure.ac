@@ -1488,11 +1488,6 @@ if test "x$target" = "x$host"; then
   fi
 fi
 
-# We build rdi-share on ARM-based targets, as instructed by configure.tgt.
-if test "x$build_rdi_share" = xyes; then
-   AC_CONFIG_SUBDIRS(rdi-share)
-fi
-
 # We configure the nlm subdirectory on netware targets, as instructed
 # by configure.tgt.
 if test "x$build_nlm" = xyes; then
