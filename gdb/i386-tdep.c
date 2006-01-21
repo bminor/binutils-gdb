@@ -1530,6 +1530,7 @@ struct type *i386_eflags_type;
 /* Types for the MMX and SSE registers.  */
 struct type *i386_mmx_type;
 struct type *i386_sse_type;
+struct type *i386_mxcsr_type;
 
 /* Construct types for ISA-specific registers.  */
 static void
@@ -1602,6 +1603,23 @@ i386_init_types (void)
   TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
   TYPE_NAME (type) = "builtin_type_vec128i";
   i386_sse_type = type;
+
+  type = init_flags_type ("builtin_type_i386_mxcsr", 4);
+  append_flags_type_flag (type, 0, "IE");
+  append_flags_type_flag (type, 1, "DE");
+  append_flags_type_flag (type, 2, "ZE");
+  append_flags_type_flag (type, 3, "OE");
+  append_flags_type_flag (type, 4, "UE");
+  append_flags_type_flag (type, 5, "PE");
+  append_flags_type_flag (type, 6, "DAZ");
+  append_flags_type_flag (type, 7, "IM");
+  append_flags_type_flag (type, 8, "DM");
+  append_flags_type_flag (type, 9, "ZM");
+  append_flags_type_flag (type, 10, "OM");
+  append_flags_type_flag (type, 11, "UM");
+  append_flags_type_flag (type, 12, "PM");
+  append_flags_type_flag (type, 15, "FZ");
+  i386_mxcsr_type = type;
 }
 
 /* Return the GDB type object for the "standard" data type of data in
@@ -1623,11 +1641,20 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
   if (i386_fp_regnum_p (regnum))
     return builtin_type_i387_ext;
 
+  if (i386_mmx_regnum_p (gdbarch, regnum))
+    return i386_mmx_type;
+
   if (i386_sse_regnum_p (gdbarch, regnum))
     return i386_sse_type;
 
-  if (i386_mmx_regnum_p (gdbarch, regnum))
-    return i386_mmx_type;
+#define I387_ST0_REGNUM I386_ST0_REGNUM
+#define I387_NUM_XMM_REGS (gdbarch_tdep (current_gdbarch)->num_xmm_regs)
+
+  if (regnum == I387_MXCSR_REGNUM)
+    return i386_mxcsr_type;
+
+#undef I387_ST0_REGNUM
+#undef I387_NUM_XMM_REGS
 
   return builtin_type_int;
 }

@@ -154,6 +154,7 @@ enum i386_regnum
 extern struct type *i386_eflags_type;
 extern struct type *i386_mmx_type;
 extern struct type *i386_sse_type;
+extern struct type *i386_mxcsr_type;
 
 /* Segment selectors.  */
 #define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */

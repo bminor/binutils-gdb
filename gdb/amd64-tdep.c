@@ -121,7 +121,7 @@ static struct amd64_register_info const amd64_register_info[] =
   { "xmm13", &i386_sse_type },
   { "xmm14", &i386_sse_type },
   { "xmm15", &i386_sse_type },
-  { "mxcsr", &builtin_type_int32 }
+  { "mxcsr", &i386_mxcsr_type }
 };
 
 /* Total number of registers.  */

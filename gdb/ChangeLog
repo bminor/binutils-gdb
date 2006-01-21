@@ -1,3 +1,12 @@
+2006-01-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_mxcsr_type): New variable.
+	(i386_init_types): Initialize i386_mxcsr_type.
+	(i386_register_type): Return i386_mxcsr_type for %mxcsr.
+	* i386-tdep.c (i386_mxcsr_type): New extern.
+	* amd64-tdep.c (amd64_register_info): Return i386_mxcsr_type for
+	%mxcsr.
+
 2006-01-20  Mark Mitchell  <mark@codesourcery.com>
 
 	* Makefile.in (remote-rdi.o): Remove.
