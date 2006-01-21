@@ -1,3 +1,7 @@
+2006-01-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib.c (info_sharedlibrary_command): Avoid internal_error.
+
 2006-01-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_mxcsr_type): New variable.

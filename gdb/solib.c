@@ -698,16 +698,8 @@ info_sharedlibrary_command (char *ignore, int from_tty)
   int header_done = 0;
   int addr_width;
 
-  if (TARGET_PTR_BIT == 32)
-    addr_width = 8 + 4;
-  else if (TARGET_PTR_BIT == 64)
-    addr_width = 16 + 4;
-  else
-    {
-      internal_error (__FILE__, __LINE__,
-		      _("TARGET_PTR_BIT returned unknown size %d"),
-		      TARGET_PTR_BIT);
-    }
+  /* "0x", a little whitespace, and two hex digits per byte of pointers.  */
+  addr_width = 4 + (TARGET_PTR_BIT / 4);
 
   update_solib_list (from_tty, 0);
 
