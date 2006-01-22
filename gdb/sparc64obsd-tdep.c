@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/sparc64.
 
-   Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -294,6 +294,9 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->gregset = regset_alloc (gdbarch, sparc64obsd_supply_gregset, NULL);
   tdep->sizeof_gregset = 832;
+
+  /* Make sure we can single-step "new" syscalls.  */
+  tdep->step_trap = sparcnbsd_step_trap;
 
   frame_unwind_append_sniffer (gdbarch, sparc64obsd_sigtramp_frame_sniffer);
 

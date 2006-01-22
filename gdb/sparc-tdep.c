@@ -170,7 +170,7 @@ sparc_fetch_wcookie (void)
 
 /* Return the contents if register REGNUM as an address.  */
 
-static CORE_ADDR
+CORE_ADDR
 sparc_address_from_register (int regnum)
 {
   ULONGEST addr;
@@ -1000,7 +1000,8 @@ sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
    software single-step mechanism.  */
 
 static CORE_ADDR
-sparc_analyze_control_transfer (CORE_ADDR pc, CORE_ADDR *npc)
+sparc_analyze_control_transfer (struct gdbarch *arch,
+				CORE_ADDR pc, CORE_ADDR *npc)
 {
   unsigned long insn = sparc_fetch_instruction (pc);
   int conditional_p = X_COND (insn) & 0x7;
@@ -1038,10 +1039,13 @@ sparc_analyze_control_transfer (CORE_ADDR pc, CORE_ADDR *npc)
       branch_p = 1;
       offset = 4 * X_DISP19 (insn);
     }
+  else if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3a)
+    {
+      /* Trap instruction (TRAP).  */
+      return gdbarch_tdep (arch)->step_trap (insn);
+    }
 
   /* FIXME: Handle DONE and RETRY instructions.  */
-
-  /* FIXME: Handle the Trap instruction.  */
 
   if (branch_p)
     {
@@ -1070,10 +1074,17 @@ sparc_analyze_control_transfer (CORE_ADDR pc, CORE_ADDR *npc)
   return 0;
 }
 
+static CORE_ADDR
+sparc_step_trap (unsigned long insn)
+{
+  return 0;
+}
+
 void
 sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch *arch = current_gdbarch;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
   static CORE_ADDR npc, nnpc;
   static gdb_byte npc_save[4], nnpc_save[4];
 
@@ -1085,7 +1096,7 @@ sparc_software_single_step (enum target_signal sig, int insert_breakpoints_p)
       orig_npc = npc = sparc_address_from_register (tdep->npc_regnum);
 
       /* Analyze the instruction at PC.  */
-      nnpc = sparc_analyze_control_transfer (pc, &npc);
+      nnpc = sparc_analyze_control_transfer (arch, pc, &npc);
       if (npc != 0)
 	target_insert_breakpoint (npc, npc_save);
       if (nnpc != 0)
@@ -1188,6 +1199,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->fpregset = NULL;
   tdep->sizeof_fpregset = 0;
   tdep->plt_entry_size = 0;
+  tdep->step_trap = sparc_step_trap;
 
   set_gdbarch_long_double_bit (gdbarch, 128);
   set_gdbarch_long_double_format (gdbarch, &floatformat_sparc_quad);

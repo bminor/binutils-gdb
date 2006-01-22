@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/sparc64.
 
-   Copyright (C) 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    Based on code contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -248,6 +248,9 @@ sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->fpregset = regset_alloc (gdbarch, sparc64nbsd_supply_fpregset, NULL);
   tdep->sizeof_fpregset = 272;
+
+  /* Make sure we can single-step "new" syscalls.  */
+  tdep->step_trap = sparcnbsd_step_trap;
 
   frame_unwind_append_sniffer (gdbarch, sparc64nbsd_sigtramp_frame_sniffer);
 

@@ -1,5 +1,22 @@
 2006-01-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.h (struct gdbarch_tdep): Add step_trap member.
+	(sparc_address_from_register): New prototype.
+	(sparcnbsd_step_trap): New prototype.
+	* sparc-tdep.c (sparc_address_from_register): Make globally
+	visible.
+	(sparc_analyze_control_transfer): Change prototype to accept
+	`struct gdbarch *' as first argument.  Allow for optional hnadling
+	for trap instructions.
+	(sparc_step_trap): New function.
+	(sparc_software_single_step): Adjust call to
+	sparc_analyze_control_trabsfer.
+	(sparc32_gdbarch_init): Initialize TDEP->step_trap.
+	* sparcnbsd-tdep.c (sparcnbsd_step_trap): New function.
+	(sparc32nbsd_init_abi): Set TDEP->step_trap.
+	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Set TDEP->step_trap.
+	* sparc64nbsd-tdep.c (sparc64nbsd_init_abi): Set TDEP->step_trap.
+
 	* sparc-tdep.c (sparc32_return_value): Convert to use
 	RETURN_VALUE_ABI_PRESERVES_ADDRESS instead of
 	RETURN_VALUE_STRUCT_CONVENTION.
