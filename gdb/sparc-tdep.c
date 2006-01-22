@@ -1,6 +1,6 @@
 /* Target-dependent code for SPARC.
 
-   Copyright (C) 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -956,9 +956,28 @@ sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
 		      struct regcache *regcache, gdb_byte *readbuf,
 		      const gdb_byte *writebuf)
 {
+  /* The psABI says that "...every stack frame reserves the word at
+     %fp+64.  If a function returns a structure, union, or
+     quad-precision value, this word should hold the address of the
+     object into which the return value should be copied."  This
+     guarantees that we can always find the return value, not just
+     before the function returns.  */
+
   if (sparc_structure_or_union_p (type)
       || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
-    return RETURN_VALUE_STRUCT_CONVENTION;
+    {
+      if (readbuf)
+	{
+	  ULONGEST sp;
+	  CORE_ADDR addr;
+
+	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
+	  addr = read_memory_unsigned_integer (sp + 64, 4);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+
+      return RETURN_VALUE_ABI_PRESERVES_ADDRESS;
+    }
 
   if (readbuf)
     sparc32_extract_return_value (type, regcache, readbuf);
@@ -967,32 +986,6 @@ sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
-
-#if 0
-/* NOTE: cagney/2004-01-17: For the moment disable this method.  The
-   architecture and CORE-gdb will need new code (and a replacement for
-   DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS) before this can be made to
-   work robustly.  Here is a possible function signature: */
-/* NOTE: cagney/2004-01-17: So far only the 32-bit SPARC ABI has been
-   identifed as having a way to robustly recover the address of a
-   struct-convention return-value (after the function has returned).
-   For all other ABIs so far examined, the calling convention makes no
-   guarenteed that the register containing the return-value will be
-   preserved and hence that the return-value's address can be
-   recovered.  */
-/* Extract from REGCACHE, which contains the (raw) register state, the
-   address in which a function should return its structure value, as a
-   CORE_ADDR.  */
-
-static CORE_ADDR
-sparc32_extract_struct_value_address (struct regcache *regcache)
-{
-  ULONGEST sp;
-
-  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
-  return read_memory_unsigned_integer (sp + 64, 4);
-}
-#endif
 
 static int
 sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
