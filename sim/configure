@@ -278,6 +278,7 @@ ac_subdirs_all="$ac_subdirs_all d10v"
 ac_subdirs_all="$ac_subdirs_all frv"
 ac_subdirs_all="$ac_subdirs_all h8300"
 ac_subdirs_all="$ac_subdirs_all iq2000"
+ac_subdirs_all="$ac_subdirs_all m32c"
 ac_subdirs_all="$ac_subdirs_all m32r"
 ac_subdirs_all="$ac_subdirs_all m68hc11"
 ac_subdirs_all="$ac_subdirs_all mcore"
@@ -3458,6 +3459,13 @@ subdirs="$subdirs iq2000"
 	   testsuite=yes
 	   common=yes
 	   ;;
+       m32c-*-*)
+
+
+subdirs="$subdirs m32c"
+
+           common=yes
+           ;;
        m32r-*-*)
 
 

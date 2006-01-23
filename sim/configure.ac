@@ -73,6 +73,10 @@ if test "${enable_sim}" != no; then
 	   testsuite=yes
 	   common=yes
 	   ;;
+       m32c-*-*)
+           AC_CONFIG_SUBDIRS(m32c)
+           common=yes
+           ;;
        m32r-*-*)
            AC_CONFIG_SUBDIRS(m32r)
 	   testsuite=yes
