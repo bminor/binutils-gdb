@@ -51,6 +51,8 @@
 #include "tui/tui.h"		/* For tui_active et.al.   */
 #endif
 
+#include <fcntl.h>
+
 /* Prototypes for local command functions */
 
 static void complete_command (char *, int);
@@ -427,6 +429,8 @@ source_command (char *args, int from_tty)
   FILE *stream;
   struct cleanup *old_cleanups;
   char *file = args;
+  char *full_pathname = NULL;
+  int fd;
 
   if (file == NULL)
     {
@@ -436,8 +440,18 @@ source_command (char *args, int from_tty)
   file = tilde_expand (file);
   old_cleanups = make_cleanup (xfree, file);
 
-  stream = fopen (file, FOPEN_RT);
-  if (!stream)
+  /* Search for and open 'file' on the search path used for source
+     files.  Put the full location in 'full_pathname'.  */
+  fd = openp (source_path, OPF_TRY_CWD_FIRST,
+	      file, O_RDONLY, 0, &full_pathname);
+
+  /* Use the full path name, if it is found.  */
+  if (full_pathname != NULL && fd != -1)
+    {
+      file = full_pathname;
+    }
+
+  if (fd == -1)
     {
       if (from_tty)
 	perror_with_name (file);
@@ -445,6 +459,7 @@ source_command (char *args, int from_tty)
 	return;
     }
 
+  stream = fdopen (fd, FOPEN_RT);
   script_from_file (stream, file);
 
   do_cleanups (old_cleanups);

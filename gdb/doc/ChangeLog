@@ -1,3 +1,10 @@
+2006-01-23  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.texinfo (Choosing files): Mention that -directory is used
+	for script files.
+	(Specifying source directories): Likewise.
+	(Command files): Explain how script files are found.
+
 2006-01-21  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Backtrace): Describe how to get backtrace of all

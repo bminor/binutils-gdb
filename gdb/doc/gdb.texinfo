@@ -950,7 +950,7 @@ also be interleaved with @samp{-command} as required.
 @itemx -d @var{directory}
 @cindex @code{--directory}
 @cindex @code{-d}
-Add @var{directory} to the path to search for source files.
+Add @var{directory} to the path to search for source and script files.
 
 @item -r
 @itemx -readnow
@@ -5017,6 +5017,9 @@ each line is in the file.
 When you start @value{GDBN}, its source path includes only @samp{cdir}
 and @samp{cwd}, in that order.
 To add other directories, use the @code{directory} command.
+
+The search path is used to find both program source files and @value{GDBN}
+script files (read using the @samp{-command} option and @samp{source} command).
 
 @table @code
 @item directory @var{dirname} @dots{}
@@ -16209,6 +16212,9 @@ unless the order of execution is changed by one of the
 @emph{flow-control commands} described below.  The commands are not
 printed as they are executed.  An error in any command terminates
 execution of the command file and control is returned to the console.
+
+@value{GDBN} searches for @var{filename} in the current directory and then
+on the search path (specified with the @samp{directory} command).
 
 Commands that would ask for confirmation if used interactively proceed
 without asking when used in a command file.  Many @value{GDBN} commands that

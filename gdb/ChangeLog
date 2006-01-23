@@ -1,3 +1,8 @@
+2006-01-23  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* cli/cli-cmds.c: Include fcntl.h.
+	(source_command): Use the GDB search path to find script files.
+
 2006-01-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR tdep/2029
