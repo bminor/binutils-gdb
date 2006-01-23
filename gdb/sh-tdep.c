@@ -44,6 +44,7 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "osabi.h"
+#include "reggroups.h"
 
 #include "sh-tdep.h"
 
@@ -1812,6 +1813,47 @@ sh_default_register_type (struct gdbarch *gdbarch, int reg_nr)
   return builtin_type_int;
 }
 
+/* Is a register in a reggroup?
+   The default code in reggroup.c doesn't identify system registers, some
+   float registers or any of the vector registers.
+   TODO: sh2a and dsp registers.  */
+int
+sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			struct reggroup *reggroup)
+{
+  if (REGISTER_NAME (regnum) == NULL
+      || *REGISTER_NAME (regnum) == '\0')
+    return 0;
+
+  if (reggroup == float_reggroup
+      && (regnum == FPUL_REGNUM
+	  || regnum == FPSCR_REGNUM))
+    return 1;
+
+  if (regnum >= FV0_REGNUM && regnum <= FV_LAST_REGNUM)
+    {
+      if (reggroup == vector_reggroup || reggroup == float_reggroup)
+	return 1;
+      if (reggroup == general_reggroup)
+	return 0;
+    }
+
+  if (regnum == VBR_REGNUM
+      || regnum == SR_REGNUM
+      || regnum == FPSCR_REGNUM
+      || regnum == SSR_REGNUM
+      || regnum == SPC_REGNUM)
+    {
+      if (reggroup == system_reggroup)
+	return 1;
+      if (reggroup == general_reggroup)
+	return 0;
+    }
+
+  /* The default code can cope with any other registers.  */
+  return default_register_reggroup_p (gdbarch, regnum, reggroup);
+}
+
 /* On the sh4, the DRi pseudo registers are problematic if the target
    is little endian. When the user writes one of those registers, for
    instance with 'ser var $dr0=1', we want the double to be stored
@@ -2371,6 +2413,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
 
   set_gdbarch_register_type (gdbarch, sh_default_register_type);
+  set_gdbarch_register_reggroup_p (gdbarch, sh_register_reggroup_p);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
 

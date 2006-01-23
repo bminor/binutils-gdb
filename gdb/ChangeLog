@@ -1,5 +1,12 @@
 2006-01-23  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* sh-tdep.c: Include reggroups.h.
+	(sh_register_reggroup_p): New function.
+	(sh_gdbarch_init): Add call to set_gdbarch_register_reggroup_p.
+	* Makefile.in (sh-tdep.o): Add dependency on reggroups.h.
+
+2006-01-23  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* cli/cli-cmds.c: Include fcntl.h.
 	(source_command): Use the GDB search path to find script files.
 
