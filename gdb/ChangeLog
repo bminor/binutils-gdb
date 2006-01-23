@@ -1,5 +1,12 @@
 2006-01-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	PR tdep/2029
+	Suggested by Till Straumann <strauman@slac.stanford.edu>:
+	* rs6000-tdep.c (skip_prologue): Update check for later mtlr
+	instructions.  Handle PIC bcl.
+
+2006-01-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* config/djgpp/README: Typo fix.
 	* config/djgpp/fnchange.lst: Update.
 

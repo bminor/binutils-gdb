@@ -1,8 +1,8 @@
 /* Target-dependent code for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software
-   Foundation, Inc.
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1013,7 +1013,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
 	     remember just the first one, but skip over additional
 	     ones.  */
-	  if (lr_reg < 0)
+	  if (lr_reg == -1)
 	    lr_reg = (op & 0x03e00000);
           if (lr_reg == 0)
             r0_contains_arg = 0;
@@ -1125,6 +1125,13 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	    }
 	  continue;
 
+	}
+      else if ((op & 0xfe80ffff) == 0x42800005 && lr_reg != -1)
+	{
+	  /* bcl 20,xx,.+4 is used to get the current PC, with or without
+	     prediction bits.  If the LR has already been saved, we can
+	     skip it.  */
+	  continue;
 	}
       else if (op == 0x48000005)
 	{			/* bl .+4 used in 
