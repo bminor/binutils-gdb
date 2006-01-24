@@ -1,7 +1,7 @@
 /* Fork a Unix child process, and set up to debug it, for GDB.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2004 Free Software Foundation, Inc.
+   2000, 2001, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -403,12 +403,6 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
      might be used to have target-specific code initialize a variable
      in the new process prior to executing the first instruction.  */
   TARGET_CREATE_INFERIOR_HOOK (pid);
-
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  SOLIB_CREATE_INFERIOR_HOOK (pid);
-#else
-  solib_create_inferior_hook ();
-#endif
 }
 
 /* Accept NTRAPS traps from the inferior.  */

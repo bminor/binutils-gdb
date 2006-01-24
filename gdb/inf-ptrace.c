@@ -26,7 +26,6 @@
 #include "inferior.h"
 #include "inflow.h"
 #include "gdbcore.h"
-#include "observer.h"
 #include "regcache.h"
 
 #include "gdb_assert.h"
@@ -222,10 +221,6 @@ inf_ptrace_attach (char *args, int from_tty)
 
   inferior_ptid = pid_to_ptid (pid);
   push_target (ptrace_ops_hack);
-
-  /* Do this first, before anything has had a chance to query the
-     inferior's symbol table or similar.  */
-  observer_notify_inferior_created (&current_target, from_tty);
 }
 
 #ifdef PT_GET_PROCESS_STATE
