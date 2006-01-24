@@ -1104,13 +1104,15 @@ thread_db_post_startup_inferior (ptid_t ptid)
 static void
 thread_db_mourn_inferior (void)
 {
-  remove_thread_event_breakpoints ();
-
   /* Forget about the child's process ID.  We shouldn't need it
      anymore.  */
   proc_handle.pid = 0;
 
   target_beneath->to_mourn_inferior ();
+
+  /* Delete the old thread event breakpoints.  Do this after mourning
+     the inferior, so that we don't try to uninsert them.  */
+  remove_thread_event_breakpoints ();
 
   /* Detach thread_db target ops.  */
   unpush_target (&thread_db_ops);
