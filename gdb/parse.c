@@ -52,6 +52,7 @@
 #include "doublest.h"
 #include "gdb_assert.h"
 #include "block.h"
+#include "source.h"
 
 /* Standard set of definitions for printing, dumping, prefixifying,
  * and evaluating expressions.  */
@@ -1075,13 +1076,27 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
   old_chain = make_cleanup (free_funcalls, 0 /*ignore*/);
   funcall_chain = 0;
 
+  /* If no context specified, try using the current frame, if any. */
+
+  if (!block)
+    block = get_selected_block (&expression_context_pc);
+
+  /* Fall back to using the current source static context, if any. */
+
+  if (!block)
+    {
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+      if (cursal.symtab)
+	block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (cursal.symtab), STATIC_BLOCK);
+    }
+
+  /* Save the context, if specified by caller, or found above. */
+
   if (block)
     {
       expression_context_block = block;
       expression_context_pc = BLOCK_START (block);
     }
-  else
-    expression_context_block = get_selected_block (&expression_context_pc);
 
   expout_size = 10;
   expout_ptr = 0;
