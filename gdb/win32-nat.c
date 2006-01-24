@@ -1,6 +1,7 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
 
-   Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   2005, 2006
    Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
@@ -1909,7 +1910,6 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
   do_initial_win32_stuff (pi.dwProcessId);
 
   /* win32_continue (DBG_CONTINUE, -1); */
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
 }
 
 static void

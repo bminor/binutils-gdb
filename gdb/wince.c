@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling Windows CE child processes, for GDB.
 
-   Copyright (C) 1999, 2000, 2001, 2004 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2004, 2006 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions, A Red Hat Company.
 
    This file is part of GDB.
@@ -1821,8 +1821,6 @@ child_create_inferior (char *exec_file, char *args, char **env,
   while (!get_child_debug_event (PIDGET (inferior_ptid), &dummy,
 				 CREATE_PROCESS_DEBUG_EVENT, &ret))
     continue;
-
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 /* Chile has gone bye-bye.  */

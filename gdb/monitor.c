@@ -1,7 +1,7 @@
 /* Remote debugging interface for boot monitors, for GDB.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Rob Savoye for Cygnus.
    Resurrected from the ashes by Stu Grossman.
@@ -2008,8 +2008,7 @@ monitor_kill (void)
   return;			/* ignore attempts to kill target system */
 }
 
-/* All we actually do is set the PC to the start address of exec_bfd, and start
-   the program at that point.  */
+/* All we actually do is set the PC to the start address of exec_bfd.  */
 
 static void
 monitor_create_inferior (char *exec_file, char *args, char **env,
@@ -2020,7 +2019,7 @@ monitor_create_inferior (char *exec_file, char *args, char **env,
 
   first_time = 1;
   clear_proceed_status ();
-  proceed (bfd_get_start_address (exec_bfd), TARGET_SIGNAL_0, 0);
+  write_pc (bfd_get_start_address (exec_bfd));
 }
 
 /* Clean up when a program exits.

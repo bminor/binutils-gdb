@@ -1,6 +1,6 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
 
-   Copyright (C) 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2006 Free Software Foundation,
    Inc.
 
    Written by Michael Snyder at Cygnus Solutions.
@@ -5103,11 +5103,6 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
   proc_trace_syscalls_1 (find_procinfo_or_die (PIDGET (inferior_ptid), 0),
                          SYS_syssgi, PR_SYSEXIT, FLAG_RESET, 0);
 #endif
-  
-  /* We are at the first instruction we care about.  */
-  /* Pedal to the metal... */
-
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 /*

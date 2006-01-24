@@ -1,6 +1,6 @@
 /* Remote debugging interface for M32R/SDI.
 
-   Copyright (C) 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Contributed by Renesas Technology Co.
    Written by Kei Sakamoto <sakamoto.kei@renesas.com>.
@@ -338,7 +338,7 @@ m32r_create_inferior (char *execfile, char *args, char **env, int from_tty)
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();
 
-  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
+  write_pc (entry_pt);
 }
 
 /* Open a connection to a remote debugger.

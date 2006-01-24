@@ -1,7 +1,7 @@
 /* Target-vector operations for controlling Unix child processes, for GDB.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2000, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -334,11 +334,6 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
 		       int from_tty)
 {
   fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, NULL, NULL);
-
-  /* We are at the first instruction we care about.  */
-  observer_notify_inferior_created (&current_target, from_tty);
-  /* Pedal to the metal... */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 #if !defined(CHILD_POST_STARTUP_INFERIOR)

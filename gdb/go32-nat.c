@@ -1,5 +1,6 @@
 /* Native debugging support for Intel x86 running DJGPP.
-   Copyright (C) 1997, 1999, 2000, 2001, 2005 Free Software Foundation, Inc.
+   Copyright (C) 1997, 1999, 2000, 2001, 2005, 2006
+   Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of GDB.
@@ -657,7 +658,6 @@ go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   push_target (&go32_ops);
   clear_proceed_status ();
   insert_breakpoints ();
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
   prog_has_started = 1;
 }
 

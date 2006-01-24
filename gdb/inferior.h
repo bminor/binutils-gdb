@@ -2,7 +2,7 @@
    Where it is, why it stopped, and how to step it.
 
    Copyright (C) 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1998, 1999, 2000, 2001, 2003, 2004, 2005 
+   1996, 1998, 1999, 2000, 2001, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -295,6 +295,8 @@ extern void follow_inferior_reset_breakpoints (void);
 /* From infcmd.c */
 
 extern void tty_command (char *, int);
+
+extern void post_create_inferior (struct target_ops *, int);
 
 extern void attach_command (char *, int);
 

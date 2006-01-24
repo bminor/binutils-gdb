@@ -1,7 +1,7 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
 
    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
@@ -2197,7 +2197,7 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
 
   /* FIXME: Should we set inferior_ptid here?  */
 
-  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
+  write_pc (entry_pt);
 }
 
 /* Clean up after a process.  Actually nothing to do.  */

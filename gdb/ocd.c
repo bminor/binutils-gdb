@@ -1,7 +1,7 @@
 /* Target communications support for Macraigor Systems' On-Chip Debugging
 
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004 Free
-   Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1011,8 +1011,7 @@ ocd_mourn (void)
   generic_mourn_inferior ();
 }
 
-/* All we actually do is set the PC to the start address of exec_bfd, and start
-   the program at that point.  */
+/* All we actually do is set the PC to the start address of exec_bfd.  */
 
 void
 ocd_create_inferior (char *exec_file, char *args, char **env, int from_tty)
@@ -1021,7 +1020,7 @@ ocd_create_inferior (char *exec_file, char *args, char **env, int from_tty)
     error (_("Args are not supported by BDM."));
 
   clear_proceed_status ();
-  proceed (bfd_get_start_address (exec_bfd), TARGET_SIGNAL_0, 0);
+  write_pc (bfd_get_start_address (exec_bfd));
 }
 
 void

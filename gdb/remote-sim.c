@@ -1,7 +1,7 @@
 /* Generic remote debugging interface for simulators.
 
    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2004, 2005 Free Software Foundation, Inc.
+   2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
    Steve Chamberlain (sac@cygnus.com).
@@ -458,9 +458,6 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
   clear_proceed_status ();
-
-  /* NB: Entry point already set by sim_create_inferior. */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* The open routine takes the rest of the parameters from the command,

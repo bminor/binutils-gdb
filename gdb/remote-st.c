@@ -1,7 +1,7 @@
 /* Remote debugging interface for Tandem ST2000 phone switch, for GDB.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Jim Kingdon for Cygnus.
 
@@ -258,8 +258,7 @@ st2000_create_inferior (char *execfile, char *args, char **env,
   target_terminal_inferior ();
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
-  /* Let 'er rip... */
-  proceed ((CORE_ADDR) entry_pt, TARGET_SIGNAL_DEFAULT, 0);
+  write_pc ((CORE_ADDR) entry_pt);
 }
 
 /* Open a connection to a remote debugger.

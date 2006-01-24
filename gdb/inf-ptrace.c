@@ -1,7 +1,7 @@
 /* Low-level child interface to ptrace.
 
    Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001, 2002, 2004, 2005
+   1998, 1999, 2000, 2001, 2002, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -138,12 +138,6 @@ inf_ptrace_create_inferior (char *exec_file, char *allargs, char **env,
 {
   fork_inferior (exec_file, allargs, env, inf_ptrace_me, inf_ptrace_him,
 		 NULL, NULL);
-
-  /* We are at the first instruction we care about.  */
-  observer_notify_inferior_created (&current_target, from_tty);
-
-  /* Pedal to the metal...  */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 #ifdef PT_GET_PROCESS_STATE

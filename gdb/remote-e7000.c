@@ -1,7 +1,7 @@
 /* Remote debugging interface for Renesas E7000 ICE, for GDB
 
    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support. 
 
@@ -405,7 +405,7 @@ e7000_create_inferior (char *execfile, char *args, char **env,
   target_terminal_inferior ();
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
-  proceed ((CORE_ADDR) entry_pt, -1, 0);	/* Let 'er rip... */
+  write_pc ((CORE_ADDR) entry_pt);
 }
 
 /* Open a connection to a remote debugger.  NAME is the filename used
