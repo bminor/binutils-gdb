@@ -285,9 +285,9 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
   return v;
 }
 
-/* Check to see if either argument is a structure.  This is called so
-   we know whether to go ahead with the normal binop or look for a 
-   user defined function instead.
+/* Check to see if either argument is a structure, or a reference to
+   one.  This is called so we know whether to go ahead with the normal
+   binop or look for a user defined function instead.
 
    For now, we do not overload the `=' operator.  */
 
@@ -297,14 +297,17 @@ binop_user_defined_p (enum exp_opcode op, struct value *arg1, struct value *arg2
   struct type *type1, *type2;
   if (op == BINOP_ASSIGN || op == BINOP_CONCAT)
     return 0;
+
   type1 = check_typedef (value_type (arg1));
+  if (TYPE_CODE (type1) == TYPE_CODE_REF)
+    type1 = check_typedef (TYPE_TARGET_TYPE (type1));
+
   type2 = check_typedef (value_type (arg2));
+  if (TYPE_CODE (type2) == TYPE_CODE_REF)
+    type2 = check_typedef (TYPE_TARGET_TYPE (type2));
+
   return (TYPE_CODE (type1) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (type2) == TYPE_CODE_STRUCT
-	  || (TYPE_CODE (type1) == TYPE_CODE_REF
-	      && TYPE_CODE (TYPE_TARGET_TYPE (type1)) == TYPE_CODE_STRUCT)
-	  || (TYPE_CODE (type2) == TYPE_CODE_REF
-	      && TYPE_CODE (TYPE_TARGET_TYPE (type2)) == TYPE_CODE_STRUCT));
+	  || TYPE_CODE (type2) == TYPE_CODE_STRUCT);
 }
 
 /* Check to see if argument is a structure.  This is called so
