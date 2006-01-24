@@ -1,3 +1,8 @@
+2006-01-23  Mark Mitchell  <mark@codesourcery.com>
+
+	* words.h (signed32): Define as "int".
+	(unsigned32): Define as "unsigned int".
+
 2005-11-28 Mark Mitchell  <mark@codesourcery.com>
 
 	* configure.ac (USE_WIN32API): Define it.
