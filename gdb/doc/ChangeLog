@@ -1,3 +1,7 @@
+2006-01-25  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo (Testsuite): Explain how to run selected tests.
+
 2006-01-24  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo (Frames): Document the basics of GDB's register
