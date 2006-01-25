@@ -1,3 +1,8 @@
+2006-01-24  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo (Frames): Document the basics of GDB's register
+	unwinding model, and explain the existence of the "sentinel" frame.
+
 2006-01-23  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gdb.texinfo (Choosing files): Mention that -directory is used

@@ -231,6 +231,36 @@ they use.
 A frame is a construct that @value{GDBN} uses to keep track of calling
 and called functions.
 
+@cindex frame, unwind
+@value{GDBN}'s current frame model is the result of an incremental
+cleanup of working code, not a fresh design, so it's a little weird.
+
+The natural model would have a frame object, with methods that read
+and write that frame's registers.  Reading or writing the youngest
+frame's registers would simply read or write the processor's current
+registers, since the youngest frame is running directly on the
+processor.  Older frames might have some registers saved on the stack
+by younger frames, so accessing the older frames' registers would do a
+mix of memory accesses and register accesses, as appropriate.
+
+@findex frame_register_unwind
+Instead, @value{GDBN}'s model is that you find a frame's registers by
+``unwinding'' them from the next younger frame.  That is, to access
+the registers of frame #1 (the next-to-youngest frame), you actually
+apply @code{frame_register_unwind} to frame #0 (the youngest frame).
+But then the obvious question is: how do you access the registers of
+the youngest frame itself?  How do you ``unwind'' them when they're
+not wound up?
+
+@cindex sentinel frame
+@findex get_frame_type
+@vindex SENTINEL_FRAME
+To answer this question, GDB has the @dfn{sentinel} frame, the
+``-1st'' frame.  Unwinding registers from the sentinel frame gives you
+the current values of the youngest real frame's registers.  If @var{f}
+is a sentinel frame, then @code{get_frame_type (@var{f}) ==
+SENTINEL_FRAME}.
+
 @findex create_new_frame
 @vindex FRAME_FP
 @code{FRAME_FP} in the machine description has no meaning to the
