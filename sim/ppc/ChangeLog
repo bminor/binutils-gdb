@@ -1,3 +1,7 @@
+2006-01-25  Mark Mitchell  <mark@codesourcery.com>
+
+	* words.h (natural32): Define as "int".
+
 2006-01-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* words.h (signed32): Define as "int".

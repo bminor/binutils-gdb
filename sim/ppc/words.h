@@ -51,7 +51,7 @@
 /* bit based */
 typedef char natural8;
 typedef short natural16;
-typedef long natural32;
+typedef int natural32;
 
 typedef signed char signed8;
 typedef signed short signed16;
