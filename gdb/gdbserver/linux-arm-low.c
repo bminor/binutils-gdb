@@ -22,12 +22,6 @@
 #include "server.h"
 #include "linux-low.h"
 
-#include "../gdb_proc_service.h"
-
-#ifndef PTRACE_GET_THREAD_AREA
-#define PTRACE_GET_THREAD_AREA 22
-#endif
-
 #include <sys/ptrace.h>
 
 /* Correct for all GNU/Linux targets (for quite some time).  */
@@ -42,6 +36,12 @@
 #endif
 #endif
    
+#include "../gdb_proc_service.h"
+
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 22
+#endif
+
 #define PTRACE_GETWMMXREGS 18
 #define PTRACE_SETWMMXREGS 19
 
