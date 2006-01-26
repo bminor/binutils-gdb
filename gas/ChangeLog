@@ -1,3 +1,7 @@
+2006-01-25  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (md_apply_fix): Set value to zero for PLT relocs.
+
 2006-01-21  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin-parse.y (asm_1): Check value range for 16 bit immediate

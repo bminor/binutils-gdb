@@ -1,5 +1,5 @@
 /* tc-xtensa.c -- Assemble Xtensa instructions.
-   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -5535,7 +5535,7 @@ void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   char *const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
-  valueT val;
+  valueT val = 0;
 
   switch (fixP->fx_r_type)
     {
@@ -5583,8 +5583,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  val = *valP;
 	  fixP->fx_done = 1;
 	}
-      else
-	break;
+      /* fall through */
+
+    case BFD_RELOC_XTENSA_PLT:
       md_number_to_chars (fixpos, val, fixP->fx_size);
       fixP->fx_no_overflow = 0; /* Use the standard overflow check.  */
       break;
@@ -5628,7 +5629,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	}
       break;
 
-    case BFD_RELOC_XTENSA_PLT:
     case BFD_RELOC_XTENSA_ASM_EXPAND:
     case BFD_RELOC_XTENSA_SLOT0_ALT:
     case BFD_RELOC_XTENSA_SLOT1_ALT:
