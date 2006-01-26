@@ -43,7 +43,6 @@
 #include "symfile.h"
 #include "exec.h"
 #include "readline/readline.h"
-#include "observer.h"
 #include "gdb_assert.h"
 #include "exceptions.h"
 #include "solib.h"
@@ -236,21 +235,6 @@ core_close_cleanup (void *ignore)
   core_close (0/*ignored*/);
 }
 
-/* Stub function for catch_errors around shared library hacking.  FROM_TTYP
-   is really an int * which points to from_tty.  */
-
-static int
-solib_add_stub (void *from_ttyp)
-{
-#ifdef SOLIB_ADD
-  SOLIB_ADD (NULL, *(int *) from_ttyp, &current_target, auto_solib_add);
-#else
-  solib_add (NULL, *(int *)from_ttyp, &current_target, auto_solib_add);
-#endif
-  re_enable_breakpoints_in_shlibs ();
-  return 0;
-}
-
 /* Look for sections whose names start with `.reg/' so that we can extract the
    list of threads in a core file.  */
 
@@ -372,7 +356,7 @@ core_open (char *filename, int from_tty)
 
   /* This is done first, before anything has a chance to query the
      inferior for information such as symbols.  */
-  observer_notify_inferior_created (&core_ops, from_tty);
+  post_create_inferior (&core_ops, from_tty);
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)
@@ -397,9 +381,6 @@ core_open (char *filename, int from_tty)
     {
       /* Fetch all registers from core file.  */
       target_fetch_registers (-1);
-
-      /* Add symbols and section mappings for any shared libraries.  */
-      catch_errors (solib_add_stub, &from_tty, (char *) 0, RETURN_MASK_ALL);
 
       /* Now, set up the frame cache, and print the top of stack.  */
       flush_cached_frames ();

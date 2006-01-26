@@ -405,6 +405,30 @@ tty_command (char *file, int from_tty)
 void
 post_create_inferior (struct target_ops *target, int from_tty)
 {
+  if (exec_bfd)
+    {
+      /* Sometimes the platform-specific hook loads initial shared
+	 libraries, and sometimes it doesn't.  Try to do so first, so
+	 that we can add them with the correct value for FROM_TTY.  */
+#ifdef SOLIB_ADD
+      SOLIB_ADD (NULL, from_tty, target, auto_solib_add);
+#else
+      solib_add (NULL, from_tty, target, auto_solib_add);
+#endif
+
+      /* Create the hooks to handle shared library load and unload
+	 events.  */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
+      SOLIB_CREATE_INFERIOR_HOOK (pid);
+#else
+      solib_create_inferior_hook ();
+#endif
+
+      /* Enable any breakpoints which were disabled when the
+	 underlying shared library was deleted.  */
+      re_enable_breakpoints_in_shlibs ();
+    }
+
   observer_notify_inferior_created (target, from_tty);
 }
 
@@ -1899,17 +1923,11 @@ attach_command (char *args, int from_tty)
       reread_symbols ();
     }
 
-#ifdef SOLIB_ADD
-  /* Add shared library symbols from the newly attached process, if any.  */
-  SOLIB_ADD ((char *) 0, from_tty, &current_target, auto_solib_add);
-#else
-  solib_add (NULL, from_tty, &current_target, auto_solib_add);
-#endif
-  re_enable_breakpoints_in_shlibs ();
-
   /* Take any necessary post-attaching actions for this platform.
    */
   target_post_attach (PIDGET (inferior_ptid));
+
+  post_create_inferior (&current_target, from_tty);
 
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();

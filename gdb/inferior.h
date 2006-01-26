@@ -213,8 +213,6 @@ extern void store_inferior_registers (int);
 
 extern void fetch_inferior_registers (int);
 
-extern void solib_create_inferior_hook (void);
-
 extern void child_terminal_info (char *, int);
 
 extern void term_info (char *, int);
