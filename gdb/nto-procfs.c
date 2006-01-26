@@ -1093,7 +1093,6 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
       || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
     solib_create_inferior_hook ();
   stop_soon = 0;
-  proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 static void

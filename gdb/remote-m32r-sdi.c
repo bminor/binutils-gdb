@@ -338,7 +338,7 @@ m32r_create_inferior (char *execfile, char *args, char **env, int from_tty)
   /* Install inferior's terminal modes.  */
   target_terminal_inferior ();
 
-  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
+  write_pc (entry_pt);
 }
 
 /* Open a connection to a remote debugger.

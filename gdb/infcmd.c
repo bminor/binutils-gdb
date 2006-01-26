@@ -47,6 +47,7 @@
 #include "solib.h"
 #include <ctype.h>
 #include "gdb_assert.h"
+#include "observer.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -397,6 +398,16 @@ tty_command (char *file, int from_tty)
   set_inferior_io_terminal (file);
 }
 
+/* Common actions to take after creating any sort of inferior, by any
+   means (running, attaching, connecting, et cetera).  The target
+   should be stopped.  */
+
+void
+post_create_inferior (struct target_ops *target, int from_tty)
+{
+  observer_notify_inferior_created (target, from_tty);
+}
+
 /* Kill the inferior if already running.  This function is designed
    to be called when we are about to start the execution of the program
    from the beginning.  Ask the user to confirm that he wants to restart
@@ -510,6 +521,11 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
      the value now.  */
   target_create_inferior (exec_file, get_inferior_args (),
 			  environ_vector (inferior_environ), from_tty);
+
+  post_create_inferior (&current_target, from_tty);
+
+  /* Start the target running.  */
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 

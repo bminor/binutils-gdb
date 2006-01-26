@@ -1894,7 +1894,6 @@ win32_create_inferior (char *exec_file, char *allargs, char **env,
   do_initial_win32_stuff (pi.dwProcessId);
 
   /* win32_continue (DBG_CONTINUE, -1); */
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
 }
 
 static void

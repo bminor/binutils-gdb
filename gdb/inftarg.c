@@ -334,11 +334,6 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
 		       int from_tty)
 {
   fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, NULL, NULL);
-
-  /* We are at the first instruction we care about.  */
-  observer_notify_inferior_created (&current_target, from_tty);
-  /* Pedal to the metal... */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 #if !defined(CHILD_POST_STARTUP_INFERIOR)

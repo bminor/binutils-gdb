@@ -1821,8 +1821,6 @@ child_create_inferior (char *exec_file, char *args, char **env,
   while (!get_child_debug_event (PIDGET (inferior_ptid), &dummy,
 				 CREATE_PROCESS_DEBUG_EVENT, &ret))
     continue;
-
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 /* Chile has gone bye-bye.  */

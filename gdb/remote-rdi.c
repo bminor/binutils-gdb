@@ -386,7 +386,7 @@ arm_rdi_create_inferior (char *exec_file, char *args, char **env, int from_tty)
       printf_filtered ("RDI_info: %s\n", rdi_error_message (rslt));
     }
 
-  proceed (entry_point, TARGET_SIGNAL_DEFAULT, 0);
+  write_pc (entry_point);
 }
 
 /* This takes a program previously attached to and detaches it.  After

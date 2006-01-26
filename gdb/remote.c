@@ -4424,9 +4424,6 @@ extended_remote_create_inferior (char *exec_file, char *args,
 
   /* Clean up from the last time we were running.  */
   clear_proceed_status ();
-
-  /* Let the remote process run.  */
-  proceed (-1, TARGET_SIGNAL_0, 0);
 }
 
 /* Async version of extended_remote_create_inferior.  */
@@ -4452,9 +4449,6 @@ extended_remote_async_create_inferior (char *exec_file, char *args,
 
   /* Clean up from the last time we were running.  */
   clear_proceed_status ();
-
-  /* Let the remote process run.  */
-  proceed (-1, TARGET_SIGNAL_0, 0);
 }
 
 

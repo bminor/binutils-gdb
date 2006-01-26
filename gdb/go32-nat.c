@@ -657,7 +657,6 @@ go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   push_target (&go32_ops);
   clear_proceed_status ();
   insert_breakpoints ();
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
   prog_has_started = 1;
 }
 

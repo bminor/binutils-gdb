@@ -2197,7 +2197,7 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
 
   /* FIXME: Should we set inferior_ptid here?  */
 
-  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
+  write_pc (entry_pt);
 }
 
 /* Clean up after a process.  Actually nothing to do.  */

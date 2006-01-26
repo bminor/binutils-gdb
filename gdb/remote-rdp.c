@@ -1376,8 +1376,7 @@ remote_rdp_create_inferior (char *exec_file, char *allargs, char **env,
      ** so we don't bother to look for MEMSIZE in the environment.
    */
 
-  /* Let's go! */
-  proceed (entry_point, TARGET_SIGNAL_DEFAULT, 0);
+  write_pc (entry_point);
 }
 
 /* Attach doesn't need to do anything */
