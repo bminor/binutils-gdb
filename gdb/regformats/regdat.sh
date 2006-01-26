@@ -124,6 +124,7 @@ exec > new-$2
 copyright $1
 echo '#include "regdef.h"'
 echo '#include "regcache.h"'
+echo '#include <stdlib.h>'
 echo
 offset=0
 i=0
