@@ -34,7 +34,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include "observer.h"
 #include "gdb_wait.h"
 #include "inflow.h"
 
@@ -211,10 +210,6 @@ child_attach (char *args, int from_tty)
   
   inferior_ptid = pid_to_ptid (pid);
   push_target (&deprecated_child_ops);
-
-  /* Do this first, before anything has had a chance to query the
-     inferior's symbol table or similar.  */
-  observer_notify_inferior_created (&current_target, from_tty);
 }
 
 #if !defined(CHILD_POST_ATTACH)

@@ -2328,24 +2328,10 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       getpkt (buf, (rs->remote_packet_size), 0);
     }
 
-  /* FIXME: need a master target_open vector from which all
-     remote_opens can be called, so that stuff like this can
-     go there.  Failing that, the following code must be copied
-     to the open function for any remote target that wants to
-     support svr4 shared libraries.  */
+  post_create_inferior (&current_target, from_tty);
 
-  /* Set up to detect and load shared libraries.  */
   if (exec_bfd) 	/* No use without an exec file.  */
-    {
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-#else
-      solib_create_inferior_hook ();
-#endif
-      remote_check_symbols (symfile_objfile);
-    }
-
-  observer_notify_inferior_created (&current_target, from_tty);
+    remote_check_symbols (symfile_objfile);
 }
 
 /* This takes a program previously attached to and detaches it.  After
