@@ -636,12 +636,6 @@ inf_ttrace_create_inferior (char *exec_file, char *allargs, char **env,
 
   fork_inferior (exec_file, allargs, env, inf_ttrace_me, inf_ttrace_him,
 		 inf_ttrace_prepare, NULL);
-
-  /* We are at the first instruction we care about.  */
-  observer_notify_inferior_created (&current_target, from_tty);
-
-  /* Pedal to the metal...  */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 static void

@@ -1908,7 +1908,6 @@ child_create_inferior (char *exec_file, char *allargs, char **env,
   do_initial_child_stuff (pi.dwProcessId);
 
   /* child_continue (DBG_CONTINUE, -1); */
-  proceed ((CORE_ADDR) - 1, TARGET_SIGNAL_0, 0);
 }
 
 static void

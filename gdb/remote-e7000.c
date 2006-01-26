@@ -405,7 +405,7 @@ e7000_create_inferior (char *execfile, char *args, char **env,
   target_terminal_inferior ();
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
-  proceed ((CORE_ADDR) entry_pt, -1, 0);	/* Let 'er rip... */
+  write_pc ((CORE_ADDR) entry_pt);
 }
 
 /* Open a connection to a remote debugger.  NAME is the filename used

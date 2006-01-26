@@ -258,8 +258,7 @@ st2000_create_inferior (char *execfile, char *args, char **env,
   target_terminal_inferior ();
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
-  /* Let 'er rip... */
-  proceed ((CORE_ADDR) entry_pt, TARGET_SIGNAL_DEFAULT, 0);
+  write_pc ((CORE_ADDR) entry_pt);
 }
 
 /* Open a connection to a remote debugger.

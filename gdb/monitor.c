@@ -2008,8 +2008,7 @@ monitor_kill (void)
   return;			/* ignore attempts to kill target system */
 }
 
-/* All we actually do is set the PC to the start address of exec_bfd, and start
-   the program at that point.  */
+/* All we actually do is set the PC to the start address of exec_bfd.  */
 
 static void
 monitor_create_inferior (char *exec_file, char *args, char **env,
@@ -2020,7 +2019,7 @@ monitor_create_inferior (char *exec_file, char *args, char **env,
 
   first_time = 1;
   clear_proceed_status ();
-  proceed (bfd_get_start_address (exec_bfd), TARGET_SIGNAL_0, 0);
+  write_pc (bfd_get_start_address (exec_bfd));
 }
 
 /* Clean up when a program exits.

@@ -296,6 +296,8 @@ extern void follow_inferior_reset_breakpoints (void);
 
 extern void tty_command (char *, int);
 
+extern void post_create_inferior (struct target_ops *, int);
+
 extern void attach_command (char *, int);
 
 extern char *get_inferior_args (void);

@@ -2089,9 +2089,6 @@ gnu_create_inferior (char *exec_file, char *allargs, char **env,
     inf_steal_exc_ports (inf);
   else
     inf_restore_exc_ports (inf);
-
-  /* Here we go!  */
-  proceed ((CORE_ADDR) -1, 0, 0);
 }
 
 /* Mark our target-struct as eligible for stray "run" and "attach"

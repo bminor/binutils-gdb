@@ -988,8 +988,7 @@ sds_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   /* Clean up from the last time we were running.  */
   clear_proceed_status ();
 
-  /* Let the remote process run.  */
-  proceed (bfd_get_start_address (exec_bfd), TARGET_SIGNAL_0, 0);
+  write_pc (bfd_get_start_address (exec_bfd));
 }
 
 static void

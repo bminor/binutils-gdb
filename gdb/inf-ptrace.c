@@ -138,12 +138,6 @@ inf_ptrace_create_inferior (char *exec_file, char *allargs, char **env,
 {
   fork_inferior (exec_file, allargs, env, inf_ptrace_me, inf_ptrace_him,
 		 NULL, NULL);
-
-  /* We are at the first instruction we care about.  */
-  observer_notify_inferior_created (&current_target, from_tty);
-
-  /* Pedal to the metal...  */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
 }
 
 #ifdef PT_GET_PROCESS_STATE
