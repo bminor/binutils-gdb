@@ -1,3 +1,11 @@
+2006-01-26  David Ung  <davidu@mips.com>
+
+	* mips-opc.c: Add I33 masks to these MIPS32R2 instructions: prefx,
+	ceil.l.d, ceil.l.s, cvt.d.l, cvt.l.d, cvt.l.s, cvt.s.l, floor.l.d,
+	floor.l.s, ldxc1, lwxc1, madd.d, madd.s, msub.d, msub.s, nmadd.d,
+	nmadd.s, nmsub.d, nmsub.s, recip.d, recip.s, round.l.d, rsqrt.d,
+	rsqrt.s, sdxc1, swxc1, trunc.l.d, trunc.l.s.
+
 2006-01-18  Arnold Metselaar  <arnoldm@sourceware.org>
 
 	* z80-dis.c (struct buffer, prt_d, prt_d_n, arit_d, ld_r_d,
