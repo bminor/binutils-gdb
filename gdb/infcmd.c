@@ -419,7 +419,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
       /* Create the hooks to handle shared library load and unload
 	 events.  */
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
-      SOLIB_CREATE_INFERIOR_HOOK (pid);
+      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #else
       solib_create_inferior_hook ();
 #endif

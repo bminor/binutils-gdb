@@ -1,3 +1,8 @@
+2006-01-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* infcmd.c (post_create_inferior): Fix copy/paste error introduced
+	in the previous change.
+
 2006-01-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/1914
