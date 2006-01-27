@@ -1,5 +1,9 @@
 2006-01-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* MAINTAINERS: Use a consistent email address for brobecker.
+
+2006-01-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* infcmd.c (post_create_inferior): Fix copy/paste error introduced
 	in the previous change.
 
