@@ -1,3 +1,13 @@
+2006-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2218
+	* ld-pie/pie.exp: New file.
+	* ld-pie/weakundef.c: Likewise.
+	* ld-pie/weakundef.out: Likewise.
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Fix nesting. Support
+	building PIE and shared library.
+
 2006-01-18  Alexandre Oliva  <aoliva@redhat.com>
 
 	Introduce TLS descriptors for i386 and x86_64.
