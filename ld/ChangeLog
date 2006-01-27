@@ -1,3 +1,8 @@
+2006-01-27  Yitzchak Scott-Thoennes  <sthoenna@efn.org>
+
+	* pe-dll.c (pe_dll_generate_implib): Issue "Creating library
+	file:" as informational message, not a warning.
+
 2006-01-18  Roger Sayle  <roger@eyesopen.com>
 
 	* emultempl/irix.em: Use lbasename instead of basename.
