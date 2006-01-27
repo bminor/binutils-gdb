@@ -5371,7 +5371,7 @@ elf32_arm_get_symbol_type (Elf_Internal_Sym * elf_sym, int type)
 	 This allows us to distinguish between data used by Thumb instructions
 	 and non-data (which is probably code) inside Thumb regions of an
 	 executable.  */
-      if (type != STT_OBJECT)
+      if (type != STT_OBJECT && type != STT_TLS)
 	return ELF_ST_TYPE (elf_sym->st_info);
       break;
 
