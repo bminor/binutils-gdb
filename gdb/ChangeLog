@@ -1,3 +1,8 @@
+2006-01-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64-tdep.c (amd64_classify): Handle TYPE_CODE_BOOL.
+	Fixes PR tdep/2075.
+
 2006-01-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS: Use a consistent email address for brobecker.
