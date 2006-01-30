@@ -1313,12 +1313,22 @@ copy_object (bfd *ibfd, bfd *obfd)
 	  if (pset != NULL && pset->set_flags)
 	    flags = pset->flags | SEC_HAS_CONTENTS;
 
-	  padd->section = bfd_make_section_with_flags (obfd, padd->name, flags);
-	  if (padd->section == NULL)
+	  /* bfd_make_section_with_flags() does not return very helpful
+	     error codes, so check for the most likely user error first.  */
+	  if (bfd_get_section_by_name (obfd, padd->name))
 	    {
-	      non_fatal (_("can't create section `%s': %s"),
-		       padd->name, bfd_errmsg (bfd_get_error ()));
+	      non_fatal (_("can't add section '%s' - it already exists!"), padd->name);
 	      return FALSE;
+	    }
+	  else
+	    {
+	      padd->section = bfd_make_section_with_flags (obfd, padd->name, flags);
+	      if (padd->section == NULL)
+		{
+		  non_fatal (_("can't create section `%s': %s"),
+			     padd->name, bfd_errmsg (bfd_get_error ()));
+		  return FALSE;
+		}
 	    }
 
 	  if (! bfd_set_section_size (obfd, padd->section, padd->size))
