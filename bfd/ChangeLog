@@ -1,3 +1,8 @@
+2006-01-31  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Reinstate bypass
+	for 32-bit relocs overflow.
+
 2006-01-27  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_get_symbol_type): Allow STT_TLS thumb
