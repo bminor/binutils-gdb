@@ -51,12 +51,10 @@ typedef struct tinsn_struct
   struct fixP *fixup;
 
   /* Filled out by relaxation_requirements:  */
-  bfd_boolean record_fix;
   enum xtensa_relax_statesE subtype;
   int literal_space;
   /* Filled out by vinsn_to_insnbuf:  */
   symbolS *symbol;
-  symbolS *sub_symbol;
   offsetT offset;
   fragS *literal_frag;
 } TInsn;

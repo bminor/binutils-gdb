@@ -510,8 +510,6 @@ void set_expr_const (expressionS *, offsetT);
 bfd_boolean expr_is_register (const expressionS *);
 offsetT get_expr_register (const expressionS *);
 void set_expr_symbol_offset (expressionS *, symbolS *, offsetT);
-static void set_expr_symbol_offset_diff
-  (expressionS *, symbolS *, symbolS *, offsetT);
 bfd_boolean expr_is_equal (expressionS *, expressionS *);
 static void copy_expr (expressionS *, const expressionS *);
 
@@ -5537,12 +5535,19 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
   char *const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
   valueT val = 0;
 
+  /* Subtracted symbols are only allowed for a few relocation types, and
+     unless linkrelax is enabled, they should not make it to this point.  */
+  if (fixP->fx_subsy && !(linkrelax && (fixP->fx_r_type == BFD_RELOC_32
+					|| fixP->fx_r_type == BFD_RELOC_16
+					|| fixP->fx_r_type == BFD_RELOC_8)))
+    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_32:
     case BFD_RELOC_16:
     case BFD_RELOC_8:
-      if (linkrelax && fixP->fx_subsy)
+      if (fixP->fx_subsy)
 	{
 	  switch (fixP->fx_r_type)
 	    {
@@ -6460,8 +6465,9 @@ xg_find_narrowest_format (vliw_insn *vinsn)
    each tinsn in the vinsn.  */
 
 static int
-relaxation_requirements (vliw_insn *vinsn)
+relaxation_requirements (vliw_insn *vinsn, bfd_boolean *pfinish_frag)
 {
+  bfd_boolean finish_frag = FALSE;
   int extra_space = 0;
   int slot;
 
@@ -6479,13 +6485,6 @@ relaxation_requirements (vliw_insn *vinsn)
 	      /* Difference in bytes between narrow and wide insns...  */
 	      extra_space += 1;
 	      tinsn->subtype = RELAX_NARROW;
-	      tinsn->record_fix = TRUE;
-	      break;
-	    }
-	  else
-	    {
-	      tinsn->record_fix = FALSE;
-	      /* No extra_space needed.  */
 	    }
 	}
       else
@@ -6510,16 +6509,17 @@ relaxation_requirements (vliw_insn *vinsn)
 	      tinsn->literal_space = max_literal_size;
 
 	      tinsn->subtype = RELAX_IMMED;
-	      tinsn->record_fix = FALSE;
 	      extra_space += max_size;
 	    }
 	  else
 	    {
-	      tinsn->record_fix = TRUE;
-	      /* No extra space needed.  */
+	      /* A fix record will be added for this instruction prior
+		 to relaxation, so make it end the frag.  */
+	      finish_frag = TRUE;
 	    }
 	}
     }
+  *pfinish_frag = finish_frag;
   return extra_space;
 }
 
@@ -6635,7 +6635,7 @@ total_frag_text_expansion (fragS *fragP)
 static void
 xg_assemble_vliw_tokens (vliw_insn *vinsn)
 {
-  bfd_boolean finish_frag = FALSE;
+  bfd_boolean finish_frag;
   bfd_boolean is_jump = FALSE;
   bfd_boolean is_branch = FALSE;
   xtensa_isa isa = xtensa_default_isa;
@@ -6762,7 +6762,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 
   insn_size = xtensa_format_length (isa, vinsn->format);
 
-  extra_space = relaxation_requirements (vinsn);
+  extra_space = relaxation_requirements (vinsn, &finish_frag);
 
   /* vinsn_to_insnbuf will produce the error.  */
   if (vinsn->format != XTENSA_UNDEFINED)
@@ -6772,7 +6772,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
       frag_now->tc_frag_data.is_insn = TRUE;
     }
 
-  vinsn_to_insnbuf (vinsn, f, frag_now, TRUE);
+  vinsn_to_insnbuf (vinsn, f, frag_now, FALSE);
   if (vinsn->format == XTENSA_UNDEFINED)
     return;
 
@@ -6790,7 +6790,6 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
       TInsn *tinsn = &vinsn->slots[slot];
       frag_now->tc_frag_data.slot_subtypes[slot] = tinsn->subtype;
       frag_now->tc_frag_data.slot_symbols[slot] = tinsn->symbol;
-      frag_now->tc_frag_data.slot_sub_symbols[slot] = tinsn->sub_symbol;
       frag_now->tc_frag_data.slot_offsets[slot] = tinsn->offset;
       frag_now->tc_frag_data.literal_frags[slot] = tinsn->literal_frag;
       if (tinsn->literal_space != 0)
@@ -6803,8 +6802,8 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
       if (xtensa_opcode_is_branch (isa, tinsn->opcode) == 1)
 	is_branch = TRUE;
 
-      if (tinsn->subtype || tinsn->symbol || tinsn->record_fix
-	  || tinsn->offset || tinsn->literal_frag || is_jump || is_branch)
+      if (tinsn->subtype || tinsn->symbol || tinsn->offset
+	  || tinsn->literal_frag || is_jump || is_branch)
 	finish_frag = TRUE;
     }
 
@@ -7038,14 +7037,9 @@ xtensa_mark_narrow_branches (void)
 	      && fragP->tc_frag_data.slot_subtypes[0] == RELAX_IMMED)
 	    {
 	      vliw_insn vinsn;
-	      const expressionS *expr;
-	      symbolS *symbolP;
 
 	      vinsn_from_chars (&vinsn, fragP->fr_opcode);
 	      tinsn_immed_from_frag (&vinsn.slots[0], fragP, 0);
-
-	      expr = &vinsn.slots[0].tok[1];
-	      symbolP = expr->X_add_symbol;
 
 	      if (vinsn.num_slots == 1
 		  && xtensa_opcode_is_branch (xtensa_default_isa,
@@ -7087,8 +7081,14 @@ is_narrow_branch_guaranteed_in_range (fragS *fragP, TInsn *tinsn)
 {
   const expressionS *expr = &tinsn->tok[1];
   symbolS *symbolP = expr->X_add_symbol;
-  fragS *target_frag = symbol_get_frag (symbolP);
   offsetT max_distance = expr->X_add_number;
+  fragS *target_frag;
+
+  if (expr->X_op != O_symbol)
+    return FALSE;
+
+  target_frag = symbol_get_frag (symbolP);
+
   max_distance += (S_GET_VALUE (symbolP) - target_frag->fr_address);
   if (is_branch_jmp_to_next (tinsn, fragP))
     return FALSE;
@@ -9198,7 +9198,7 @@ convert_frag_immed (segT segP,
 	  build_nop (&cur_vinsn.slots[0], bytes);
 	  fragP->fr_fix += fragP->tc_frag_data.text_expansion[0];
 	}
-      vinsn_to_insnbuf (&cur_vinsn, fr_opcode, frag_now, FALSE);
+      vinsn_to_insnbuf (&cur_vinsn, fr_opcode, frag_now, TRUE);
       xtensa_insnbuf_to_chars
 	(isa, cur_vinsn.insnbuf, (unsigned char *) fr_opcode, 0);
       fragP->fr_var = 0;
@@ -9333,7 +9333,6 @@ convert_frag_immed (segT segP,
 		  first = FALSE;
 		  if (opcode_fits_format_slot (tinsn->opcode, fmt, slot))
 		    {
-		      tinsn->record_fix = TRUE;
 		      cur_vinsn.slots[slot] = *tinsn;
 		    }
 		  else
@@ -9341,7 +9340,6 @@ convert_frag_immed (segT segP,
 		      cur_vinsn.slots[slot].opcode =
 			xtensa_format_slot_nop_opcode (isa, fmt, slot);
 		      cur_vinsn.slots[slot].ntok = 0;
-		      cur_vinsn.slots[slot].record_fix = FALSE;
 		    }
 		  vinsn_to_insnbuf (&cur_vinsn, immed_instr, fragP, TRUE);
 		  xtensa_insnbuf_to_chars (isa, cur_vinsn.insnbuf,
@@ -11042,12 +11040,7 @@ tinsn_has_invalid_symbolic_operands (const TInsn *insn)
 	default:
 	  /* Symbolic immediates are only allowed on the last immediate
 	     operand.  At this time, CONST16 is the only opcode where we
-	     support non-PC-relative relocations.  (It isn't necessary
-	     to complain about non-PC-relative relocations here, but
-	     otherwise, no error is reported until the relocations are
-	     generated, and the assembler won't get that far if there
-	     are any other errors.  It's nice to see all the problems
-	     at once.)  */
+	     support non-PC-relative relocations.  */
 	  if (i != get_relaxable_immed (insn->opcode)
 	      || (xtensa_operand_is_PCrelative (isa, insn->opcode, i) != 1
 		  && insn->opcode != xtensa_const16_opcode))
@@ -11284,21 +11277,9 @@ tinsn_immed_from_frag (TInsn *tinsn, fragS *fragP, int slot)
     {
       opnum = get_relaxable_immed (opcode);
       assert (opnum >= 0);
-      if (fragP->tc_frag_data.slot_sub_symbols[slot])
-	{
-	  set_expr_symbol_offset_diff
-	    (&tinsn->tok[opnum],
-	     fragP->tc_frag_data.slot_symbols[slot],
-	     fragP->tc_frag_data.slot_sub_symbols[slot],
-	     fragP->tc_frag_data.slot_offsets[slot]);
-	}
-      else
-	{
-	  set_expr_symbol_offset
-	    (&tinsn->tok[opnum],
-	     fragP->tc_frag_data.slot_symbols[slot],
-	     fragP->tc_frag_data.slot_offsets[slot]);
-	}
+      set_expr_symbol_offset (&tinsn->tok[opnum],
+			      fragP->tc_frag_data.slot_symbols[slot],
+			      fragP->tc_frag_data.slot_offsets[slot]);
     }
 }
 
@@ -11401,17 +11382,8 @@ xg_free_vinsn (vliw_insn *v)
 }
 
 
-/* Before this is called, we should have
-   filled out the following fields:
-
-   1) the number of operands for each opcode are correct
-   2) the tinsn in the slots are ITYPE_INSN
-   3) ONLY the relaxable_ is built
-   4) All operands are
-       O_constant, O_symbol
-      All constants fit
-
-   The return value tells whether there are any remaining O_symbols.  */
+/* Encode a vliw_insn into an insnbuf.  Return TRUE if there are any symbolic
+   operands.  See also the assumptions listed for tinsn_to_slotbuf.  */
 
 static bfd_boolean
 vinsn_to_insnbuf (vliw_insn *vinsn,
@@ -11436,14 +11408,7 @@ vinsn_to_insnbuf (vliw_insn *vinsn,
 
       xtensa_format_set_slot (isa, fmt, slot,
 			      insnbuf, vinsn->slotbuf[slot]);
-      /* tinsn_has_fixup tracks if there is a fixup at all.
-	 record_fixup controls globally.  I.E., we use this
-	 function from several places, some of which are after
-	 fixups have already been recorded.  Finally,
-	 tinsn->record_fixup controls based on the individual ops,
-	 which may or may not need it based on the relaxation
-	 requirements.  */
-      if (tinsn_has_fixup && record_fixup)
+      if (tinsn_has_fixup)
 	{
 	  int i;
 	  xtensa_opcode opcode = tinsn->opcode;
@@ -11460,48 +11425,35 @@ vinsn_to_insnbuf (vliw_insn *vinsn,
 		case O_hi16:
 		  if (get_relaxable_immed (opcode) == i)
 		    {
-		      if (tinsn->record_fix || expr->X_op != O_symbol)
+		      /* Add a fix record for the instruction, except if this
+			 function is being called prior to relaxation, i.e.,
+			 if record_fixup is false, and the instruction might
+			 be relaxed later.  */
+		      if (record_fixup
+			  || tinsn->is_specific_opcode
+			  || !xg_is_relaxable_insn (tinsn, 0))
 			{
-			  if (!xg_add_opcode_fix
-			      (tinsn, i, fmt, slot, expr, fragP,
-			       frag_offset - fragP->fr_literal))
-			    as_bad (_("instruction with constant operands does not fit"));
+			  xg_add_opcode_fix (tinsn, i, fmt, slot, expr, fragP,
+					     frag_offset - fragP->fr_literal);
 			}
 		      else
 			{
+			  if (expr->X_op != O_symbol)
+			    as_bad (_("invalid operand"));
 			  tinsn->symbol = expr->X_add_symbol;
 			  tinsn->offset = expr->X_add_number;
 			}
 		    }
 		  else
-		    as_bad (_("invalid operand %d on '%s'"),
-			    i, xtensa_opcode_name (isa, opcode));
+		    as_bad (_("symbolic operand not allowed"));
 		  break;
 
 		case O_constant:
 		case O_register:
 		  break;
 
-		case O_subtract:
-		  if (get_relaxable_immed (opcode) == i)
-		    {
-		      if (tinsn->record_fix)
-			  as_bad (_("invalid subtract operand"));
-		      else
-			{
-			  tinsn->symbol = expr->X_add_symbol;
-			  tinsn->sub_symbol = expr->X_op_symbol;
-			  tinsn->offset = expr->X_add_number;
-			}
-		    }
-		  else
-		    as_bad (_("invalid operand %d on '%s'"),
-			    i, xtensa_opcode_name (isa, opcode));
-		  break;
-
 		default:
-		  as_bad (_("invalid expression for operand %d on '%s'"),
-			  i, xtensa_opcode_name (isa, opcode));
+		  as_bad (_("expression too complex"));
 		  break;
 		}
 	    }
@@ -11603,21 +11555,6 @@ set_expr_symbol_offset (expressionS *s, symbolS *sym, offsetT offset)
   s->X_op = O_symbol;
   s->X_add_symbol = sym;
   s->X_op_symbol = NULL;	/* unused */
-  s->X_add_number = offset;
-}
-
-
-/* Set the expression to symbol - minus_sym + offset.  */
-
-static void
-set_expr_symbol_offset_diff (expressionS *s,
-			     symbolS *sym,
-			     symbolS *minus_sym,
-			     offsetT offset)
-{
-  s->X_op = O_subtract;
-  s->X_add_symbol = sym;
-  s->X_op_symbol = minus_sym;	/* unused */
   s->X_add_number = offset;
 }
 

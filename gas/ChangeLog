@@ -1,3 +1,26 @@
+2006-01-31  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/xtensa-istack.h (TInsn): Remove record_fix and sub_symbol
+	fields.
+	* config/tc-xtensa.h (xtensa_frag_type): Remove slot_sub_symbols field.
+	* config/tc-xtensa.c (md_apply_fix): Check for unexpected uses of
+	subtracted symbols.
+	(relaxation_requirements): Add pfinish_frag argument and use it to
+	replace setting tinsn->record_fix fields.
+	(xg_assemble_vliw_tokens): Adjust calls to relaxation_requirements
+	and vinsn_to_insnbuf.  Remove references to record_fix and
+	slot_sub_symbols fields.
+	(xtensa_mark_narrow_branches): Delete unused code.
+	(is_narrow_branch_guaranteed_in_range): Handle expr that is not just
+	a symbol.
+	(convert_frag_immed): Adjust vinsn_to_insnbuf call and do not set
+	record_fix fields.
+	(tinsn_immed_from_frag): Remove code for handling slot_sub_symbols.
+	(vinsn_to_insnbuf): Change use of record_fixup argument, replacing use
+	of the record_fix field.  Simplify error messages for unexpected
+	symbolic operands.
+	(set_expr_symbol_offset_diff): Delete.
+
 2006-01-31  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_reg_parse): Check if reg is non-NULL.

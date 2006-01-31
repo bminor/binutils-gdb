@@ -242,7 +242,6 @@ struct xtensa_frag_type
   fragS *literal_frags[MAX_SLOTS];
   enum xtensa_relax_statesE slot_subtypes[MAX_SLOTS];
   symbolS *slot_symbols[MAX_SLOTS];
-  symbolS *slot_sub_symbols[MAX_SLOTS];
   offsetT slot_offsets[MAX_SLOTS];
 
   /* The global aligner needs to walk backward through the list of
