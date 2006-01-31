@@ -1,5 +1,8 @@
 -*- text -*-
 
+* PE-COFF: Forward exports from DLL's can now be specified in .def files
+  passed directly to ld.
+
 * Support for the Z80 processor family has been added.
 
 * Add support for the "@<file>" syntax to the command line, so that extra
