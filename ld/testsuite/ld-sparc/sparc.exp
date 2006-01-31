@@ -88,6 +88,8 @@ set sparc64tests {
 if { ![istarget "sparc64-*-elf*"] } {
     run_ld_link_tests $sparctests
 }
-if { ![istarget "sparc-*-elf*"] } {
+if { !([istarget "sparc-*-elf*"]
+       || [istarget "sparc-sun-solaris2.5*"]
+       || [istarget "sparc-sun-solaris2.6"]) } {
     run_ld_link_tests $sparc64tests
 }

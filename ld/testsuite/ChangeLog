@@ -1,3 +1,8 @@
+2006-01-31  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* ld-sparc/sparc.exp: Do not run 64-bit tests on Solaris 2.5.1
+	and Solaris 2.6.
+
 2006-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2218
