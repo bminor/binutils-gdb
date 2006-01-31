@@ -36,7 +36,7 @@ typedef struct def_file_export {
   char *internal_name;		/* always set, may == name */
   int ordinal;			/* -1 if not specified */
   int hint;
-  char flag_private, flag_constant, flag_noname, flag_data;
+  char flag_private, flag_constant, flag_noname, flag_data, flag_forward;
 } def_file_export;
 
 typedef struct def_file_module {
