@@ -928,7 +928,7 @@ arm_reg_parse (char **ccp, enum arm_reg_type type)
     case REG_TYPE_MVFX:
     case REG_TYPE_MVDX:
       /* Generic coprocessor register names are allowed for these.  */
-      if (reg->type == REG_TYPE_CN)
+      if (reg && reg->type == REG_TYPE_CN)
 	return reg->number;
       break;
 
@@ -943,7 +943,7 @@ arm_reg_parse (char **ccp, enum arm_reg_type type)
     case REG_TYPE_MMXWC:
       /* WC includes WCG.  ??? I'm not sure this is true for all
 	 instructions that take WC registers.  */
-      if (reg->type == REG_TYPE_MMXWCG)
+      if (reg && reg->type == REG_TYPE_MMXWCG)
 	return reg->number;
       break;
 

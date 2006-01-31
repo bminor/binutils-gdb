@@ -7,3 +7,4 @@
 [^:]*:6: Error: iWMMXt data register expected -- `wstrb wcgr0,\[r1\]'
 [^:]*:7: Error: iWMMXt data register expected -- `wstrh wcgr0,\[r1\]'
 [^:]*:8: Error: iWMMXt data register expected -- `wstrd wcgr0,\[r1\]'
+[^:]*:9: Error: iWMMXt control register expected -- `tmcr wibble,r1'
