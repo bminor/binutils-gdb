@@ -1,3 +1,24 @@
+2006-01-31  Paul Brook  <paul@codesourcery.com>
+	Richard Earnshaw <rearnsha@arm.com>
+
+	* config/tc-arm.c: Use arm_feature_set.
+	(arm_ext_*, arm_arch_full, arm_arch_t2, arm_arch_none,
+	arm_cext_iwmmxt, arm_cext_xscale, arm_cext_maverick, fpu_fpa_ext_v1,
+	fpu_fpa_ext_v2, fpu_vfp_ext_v1xd, fpu_vfp_ext_v1, fpu_vfp_ext_v2):
+	New variables.
+	(insns): Use them.
+	(md_atof, opcode_select, opcode_select, md_assemble, md_assemble,
+	md_begin, arm_parse_extension, arm_parse_cpu, arm_parse_arch,
+	arm_parse_fpu, arm_parse_float_abi, aeabi_set_public_attributes,
+	s_arm_cpu, s_arm_arch, s_arm_fpu): Use macros for accessing CPU
+	feature flags.
+	(arm_legacy_option_table, arm_option_cpu_value_table): New types.
+	(arm_opts): Move old cpu/arch options from here...
+	(arm_legacy_opts): ... to here.
+	(md_parse_option): Search arm_legacy_opts.
+	(arm_cpus, arm_archs, arm_extensions, arm_fpus)
+	(arm_float_abis, arm_eabis): Make const.
+
 2006-01-25  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (md_apply_fix): Set value to zero for PLT relocs.
