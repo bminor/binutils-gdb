@@ -393,6 +393,10 @@ free_objfile (struct objfile *objfile)
       objfile->separate_debug_objfile_backlink->separate_debug_objfile = NULL;
     }
   
+  /* Remove any references to this objfile in the global value
+     lists.  */
+  preserve_values (objfile);
+
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
      is using reusable symbol information (via mmalloc) then each of

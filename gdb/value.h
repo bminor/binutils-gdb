@@ -502,9 +502,7 @@ extern void typedef_print (struct type *type, struct symbol *news,
 
 extern char *internalvar_name (struct internalvar *var);
 
-extern void clear_value_history (void);
-
-extern void clear_internalvars (void);
+extern void preserve_values (struct objfile *);
 
 /* From values.c */
 

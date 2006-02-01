@@ -1,3 +1,31 @@
+2006-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (gdbtypes_h, gdbtypes.o, utils.o): Update.
+	* defs.h (hashtab_obstack_allocate, dummy_obstack_deallocate): Add
+	prototypes.
+	* dwarf2read.c (read_subroutine_type): Use TYPE_ZALLOC.
+	(hashtab_obstack_allocate, dummy_obstack_deallocate): Moved to...
+	* utils.c (hashtab_obstack_allocate, dummy_obstack_deallocate):
+	...here.
+	* gdbtypes.c: Include "hashtab.h".
+	(build_gdbtypes): Remove extra prototype.
+	(struct type_pair, type_pair_hash, type_pair_eq)
+	(create_copied_types_hash, copy_type_recursive): New.
+	* gdbtypes.h: Include "hashtab.h".
+	(TYPE_ZALLOC): New.
+	(create_copied_types_hash, copy_type_recursive): New prototypes.
+	* objfiles.c (free_objfile): Call preserve_values.
+	* symfile.c (reread_symbols): Likewise.
+	(clear_symtab_users): Remove calls to clear_value_history and
+	clear_internalvars.
+	* value.c (clear_value_history, clear_internalvars): Removed.
+	(preserve_one_value, preserve_values): New functions.
+	* value.h (clear_value_history, clear_internalvars): Removed.
+	(preserve_values): New prototype.
+
+	* tracepoint.c (_initialize_tracepoint): Do not initialize convenience
+	variables here.
+
 2006-01-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64-tdep.c (amd64_classify): Handle TYPE_CODE_BOOL.

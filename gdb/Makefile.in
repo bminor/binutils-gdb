@@ -697,7 +697,7 @@ gdb_stat_h = gdb_stat.h
 gdb_string_h = gdb_string.h
 gdb_thread_db_h = gdb_thread_db.h
 gdbthread_h = gdbthread.h $(breakpoint_h) $(frame_h)
-gdbtypes_h = gdbtypes.h
+gdbtypes_h = gdbtypes.h $(hashtab_h)
 gdb_vfork_h = gdb_vfork.h
 gdb_wait_h = gdb_wait.h
 glibc_tdep_h = glibc-tdep.h
@@ -1984,7 +1984,7 @@ gdb-events.o: gdb-events.c $(defs_h) $(gdb_events_h) $(gdbcmd_h)
 gdbtypes.o: gdbtypes.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(expression_h) \
 	$(language_h) $(target_h) $(value_h) $(demangle_h) $(complaints_h) \
-	$(gdbcmd_h) $(wrapper_h) $(cp_abi_h) $(gdb_assert_h)
+	$(gdbcmd_h) $(wrapper_h) $(cp_abi_h) $(gdb_assert_h) $(hashtab_h)
 glibc-tdep.o: glibc-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(glibc_tdep_h)
 gnu-nat.o: gnu-nat.c $(gdb_string_h) $(defs_h) $(inferior_h) $(symtab_h) \
@@ -2720,7 +2720,7 @@ utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(exceptions_h) $(tui_h) $(gdbcmd_h) $(serial_h) $(bfd_h) \
 	$(target_h) $(demangle_h) $(expression_h) $(language_h) $(charset_h) \
 	$(annotate_h) $(filenames_h) $(symfile_h) $(inferior_h) \
-	$(gdb_curses_h) $(readline_h)
+	$(gdb_curses_h) $(readline_h) $(gdb_obstack_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)
 v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(frame_base_h) $(trad_frame_h) \

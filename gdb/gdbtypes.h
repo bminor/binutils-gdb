@@ -25,6 +25,8 @@
 #if !defined (GDBTYPES_H)
 #define GDBTYPES_H 1
 
+#include "hashtab.h"
+
 /* Forward declarations for prototypes.  */
 struct field;
 struct block;
@@ -1176,6 +1178,12 @@ extern struct type *builtin_type_f_void;
     ? obstack_alloc (&TYPE_OBJFILE (t) -> objfile_obstack, size) \
     : xmalloc (size))
 
+#define TYPE_ZALLOC(t,size)  \
+   (TYPE_OBJFILE (t) != NULL  \
+    ? memset (obstack_alloc (&TYPE_OBJFILE (t)->objfile_obstack, size),  \
+	      0, size)  \
+    : xzalloc (size))
+
 extern struct type *alloc_type (struct objfile *);
 
 extern struct type *init_type (enum type_code, int, int, char *,
@@ -1370,5 +1378,11 @@ extern int can_dereference (struct type *);
 extern int is_integral_type (struct type *);
 
 extern void maintenance_print_type (char *, int);
+
+extern htab_t create_copied_types_hash (struct objfile *objfile);
+
+extern struct type *copy_type_recursive (struct objfile *objfile,
+					 struct type *type,
+					 htab_t copied_types);
 
 #endif /* GDBTYPES_H */

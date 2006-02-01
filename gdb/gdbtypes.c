@@ -1,7 +1,7 @@
 /* Support routines for manipulating internal types for GDB.
 
    Copyright (C) 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2006 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -39,6 +39,7 @@
 #include "wrapper.h"
 #include "cp-abi.h"
 #include "gdb_assert.h"
+#include "hashtab.h"
 
 /* These variables point to the objects
    representing the predefined C data types.  */
@@ -3152,7 +3153,147 @@ recursive_dump_type (struct type *type, int spaces)
     obstack_free (&dont_print_type_obstack, NULL);
 }
 
-static void build_gdbtypes (void);
+/* Trivial helpers for the libiberty hash table, for mapping one
+   type to another.  */
+
+struct type_pair
+{
+  struct type *old, *new;
+};
+
+static hashval_t
+type_pair_hash (const void *item)
+{
+  const struct type_pair *pair = item;
+  return htab_hash_pointer (pair->old);
+}
+
+static int
+type_pair_eq (const void *item_lhs, const void *item_rhs)
+{
+  const struct type_pair *lhs = item_lhs, *rhs = item_rhs;
+  return lhs->old == rhs->old;
+}
+
+/* Allocate the hash table used by copy_type_recursive to walk
+   types without duplicates.  We use OBJFILE's obstack, because
+   OBJFILE is about to be deleted.  */
+
+htab_t
+create_copied_types_hash (struct objfile *objfile)
+{
+  return htab_create_alloc_ex (1, type_pair_hash, type_pair_eq,
+			       NULL, &objfile->objfile_obstack,
+			       hashtab_obstack_allocate,
+			       dummy_obstack_deallocate);
+}
+
+/* Recursively copy (deep copy) TYPE, if it is associated with OBJFILE.
+   Return a new type allocated using malloc, a saved type if we have already
+   visited TYPE (using COPIED_TYPES), or TYPE if it is not associated with
+   OBJFILE.  */
+
+struct type *
+copy_type_recursive (struct objfile *objfile, struct type *type,
+		     htab_t copied_types)
+{
+  struct type_pair *stored, pair;
+  void **slot;
+  struct type *new_type;
+
+  if (TYPE_OBJFILE (type) == NULL)
+    return type;
+
+  /* This type shouldn't be pointing to any types in other objfiles; if
+     it did, the type might disappear unexpectedly.  */
+  gdb_assert (TYPE_OBJFILE (type) == objfile);
+
+  pair.old = type;
+  slot = htab_find_slot (copied_types, &pair, INSERT);
+  if (*slot != NULL)
+    return ((struct type_pair *) *slot)->new;
+
+  new_type = alloc_type (NULL);
+
+  /* We must add the new type to the hash table immediately, in case
+     we encounter this type again during a recursive call below.  */
+  stored = xmalloc (sizeof (struct type_pair));
+  stored->old = type;
+  stored->new = new_type;
+  *slot = stored;
+
+  /* Copy the common fields of types.  */
+  TYPE_CODE (new_type) = TYPE_CODE (type);
+  TYPE_ARRAY_UPPER_BOUND_TYPE (new_type) = TYPE_ARRAY_UPPER_BOUND_TYPE (type);
+  TYPE_ARRAY_LOWER_BOUND_TYPE (new_type) = TYPE_ARRAY_LOWER_BOUND_TYPE (type);
+  if (TYPE_NAME (type))
+    TYPE_NAME (new_type) = xstrdup (TYPE_NAME (type));
+  if (TYPE_TAG_NAME (type))
+    TYPE_TAG_NAME (new_type) = xstrdup (TYPE_TAG_NAME (type));
+  TYPE_FLAGS (new_type) = TYPE_FLAGS (type);
+  TYPE_VPTR_FIELDNO (new_type) = TYPE_VPTR_FIELDNO (type);
+
+  TYPE_INSTANCE_FLAGS (new_type) = TYPE_INSTANCE_FLAGS (type);
+  TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
+
+  /* Copy the fields.  */
+  TYPE_NFIELDS (new_type) = TYPE_NFIELDS (type);
+  if (TYPE_NFIELDS (type))
+    {
+      int i, nfields;
+
+      nfields = TYPE_NFIELDS (type);
+      TYPE_FIELDS (new_type) = xmalloc (sizeof (struct field) * nfields);
+      for (i = 0; i < nfields; i++)
+	{
+	  TYPE_FIELD_ARTIFICIAL (new_type, i) = TYPE_FIELD_ARTIFICIAL (type, i);
+	  TYPE_FIELD_BITSIZE (new_type, i) = TYPE_FIELD_BITSIZE (type, i);
+	  if (TYPE_FIELD_TYPE (type, i))
+	    TYPE_FIELD_TYPE (new_type, i)
+	      = copy_type_recursive (objfile, TYPE_FIELD_TYPE (type, i),
+				     copied_types);
+	  if (TYPE_FIELD_NAME (type, i))
+	    TYPE_FIELD_NAME (new_type, i) = xstrdup (TYPE_FIELD_NAME (type, i));
+	  if (TYPE_FIELD_STATIC_HAS_ADDR (type, i))
+	    SET_FIELD_PHYSADDR (TYPE_FIELD (new_type, i),
+				TYPE_FIELD_STATIC_PHYSADDR (type, i));
+	  else if (TYPE_FIELD_STATIC (type, i))
+	    SET_FIELD_PHYSNAME (TYPE_FIELD (new_type, i),
+				xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type, i)));
+	  else
+	    {
+	      TYPE_FIELD_BITPOS (new_type, i) = TYPE_FIELD_BITPOS (type, i);
+	      TYPE_FIELD_STATIC_KIND (new_type, i) = 0;
+	    }
+	}
+    }
+
+  /* Copy pointers to other types.  */
+  if (TYPE_TARGET_TYPE (type))
+    TYPE_TARGET_TYPE (new_type) = copy_type_recursive (objfile,
+						       TYPE_TARGET_TYPE (type),
+						       copied_types);
+  if (TYPE_VPTR_BASETYPE (type))
+    TYPE_VPTR_BASETYPE (new_type) = copy_type_recursive (objfile,
+							 TYPE_VPTR_BASETYPE (type),
+							 copied_types);
+  /* Maybe copy the type_specific bits.
+
+     NOTE drow/2005-12-09: We do not copy the C++-specific bits like
+     base classes and methods.  There's no fundamental reason why we
+     can't, but at the moment it is not needed.  */
+
+  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+    TYPE_FLOATFORMAT (new_type) == TYPE_FLOATFORMAT (type);
+  else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	   || TYPE_CODE (type) == TYPE_CODE_UNION
+	   || TYPE_CODE (type) == TYPE_CODE_TEMPLATE
+	   || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
+    INIT_CPLUS_SPECIFIC (new_type);
+
+  return new_type;
+}
+
 static void
 build_gdbtypes (void)
 {

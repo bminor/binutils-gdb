@@ -1030,10 +1030,6 @@ static gdb_byte *skip_one_die (gdb_byte *info_ptr, struct abbrev_info *abbrev,
 
 static void free_stack_comp_unit (void *);
 
-static void *hashtab_obstack_allocate (void *data, size_t size, size_t count);
-
-static void dummy_obstack_deallocate (void *object, void *data);
-
 static hashval_t partial_die_hash (const void *item);
 
 static int partial_die_eq (const void *item_lhs, const void *item_rhs);
@@ -4627,7 +4623,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
       /* Allocate storage for parameters and fill them in.  */
       TYPE_NFIELDS (ftype) = nparams;
       TYPE_FIELDS (ftype) = (struct field *)
-	TYPE_ALLOC (ftype, nparams * sizeof (struct field));
+	TYPE_ZALLOC (ftype, nparams * sizeof (struct field));
 
       child_die = die->child;
       while (child_die && child_die->tag)
@@ -9620,28 +9616,6 @@ dwarf2_clear_marks (struct dwarf2_per_cu_data *per_cu)
       per_cu->cu->mark = 0;
       per_cu = per_cu->cu->read_in_chain;
     }
-}
-
-/* Allocation function for the libiberty hash table which uses an
-   obstack.  */
-
-static void *
-hashtab_obstack_allocate (void *data, size_t size, size_t count)
-{
-  unsigned int total = size * count;
-  void *ptr = obstack_alloc ((struct obstack *) data, total);
-  memset (ptr, 0, total);
-  return ptr;
-}
-
-/* Trivial deallocation function for the libiberty splay tree and hash
-   table - don't deallocate anything.  Rely on later deletion of the
-   obstack.  */
-
-static void
-dummy_obstack_deallocate (void *object, void *data)
-{
-  return;
 }
 
 /* Trivial hash function for partial_die_info: the hash value of a DIE

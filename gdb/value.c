@@ -653,29 +653,6 @@ access_value_history (int num)
   return value_copy (chunk->values[absnum % VALUE_HISTORY_CHUNK]);
 }
 
-/* Clear the value history entirely.
-   Must be done when new symbol tables are loaded,
-   because the type pointers become invalid.  */
-
-void
-clear_value_history (void)
-{
-  struct value_history_chunk *next;
-  int i;
-  struct value *val;
-
-  while (value_history_chain)
-    {
-      for (i = 0; i < VALUE_HISTORY_CHUNK; i++)
-	if ((val = value_history_chain->values[i]) != NULL)
-	  xfree (val);
-      next = value_history_chain->next;
-      xfree (value_history_chain);
-      value_history_chain = next;
-    }
-  value_history_count = 0;
-}
-
 static void
 show_values (char *num_exp, int from_tty)
 {
@@ -842,22 +819,49 @@ internalvar_name (struct internalvar *var)
   return var->name;
 }
 
-/* Free all internalvars.  Done when new symtabs are loaded,
-   because that makes the values invalid.  */
+/* Update VALUE before discarding OBJFILE.  COPIED_TYPES is used to
+   prevent cycles / duplicates.  */
+
+static void
+preserve_one_value (struct value *value, struct objfile *objfile,
+		    htab_t copied_types)
+{
+  if (TYPE_OBJFILE (value->type) == objfile)
+    value->type = copy_type_recursive (objfile, value->type, copied_types);
+
+  if (TYPE_OBJFILE (value->enclosing_type) == objfile)
+    value->enclosing_type = copy_type_recursive (objfile,
+						 value->enclosing_type,
+						 copied_types);
+}
+
+/* Update the internal variables and value history when OBJFILE is
+   discarded; we must copy the types out of the objfile.  New global types
+   will be created for every convenience variable which currently points to
+   this objfile's types, and the convenience variables will be adjusted to
+   use the new global types.  */
 
 void
-clear_internalvars (void)
+preserve_values (struct objfile *objfile)
 {
+  htab_t copied_types;
+  struct value_history_chunk *cur;
   struct internalvar *var;
+  int i;
 
-  while (internalvars)
-    {
-      var = internalvars;
-      internalvars = var->next;
-      xfree (var->name);
-      xfree (var->value);
-      xfree (var);
-    }
+  /* Create the hash table.  We allocate on the objfile's obstack, since
+     it is soon to be deleted.  */
+  copied_types = create_copied_types_hash (objfile);
+
+  for (cur = value_history_chain; cur; cur = cur->next)
+    for (i = 0; i < VALUE_HISTORY_CHUNK; i++)
+      if (cur->values[i])
+	preserve_one_value (cur->values[i], objfile, copied_types);
+
+  for (var = internalvars; var; var = var->next)
+    preserve_one_value (var->value, objfile, copied_types);
+
+  htab_delete (copied_types);
 }
 
 static void

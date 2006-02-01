@@ -2694,11 +2694,6 @@ _initialize_tracepoint (void)
   traceframe_number = -1;
   tracepoint_number = -1;
 
-  set_internalvar (lookup_internalvar ("tpnum"),
-		   value_from_longest (builtin_type_int, (LONGEST) 0));
-  set_internalvar (lookup_internalvar ("trace_frame"),
-		   value_from_longest (builtin_type_int, (LONGEST) - 1));
-
   if (tracepoint_list.list == NULL)
     {
       tracepoint_list.listsize = 128;

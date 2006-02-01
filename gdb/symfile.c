@@ -2013,6 +2013,10 @@ reread_symbols (void)
 	      memcpy (offsets, objfile->section_offsets,
 		      SIZEOF_N_SECTION_OFFSETS (num_offsets));
 
+	      /* Remove any references to this objfile in the global
+		 value lists.  */
+	      preserve_values (objfile);
+
 	      /* Nuke all the state that we will re-read.  Much of the following
 	         code which sets things to NULL really is necessary to tell
 	         other parts of GDB that there is nothing currently there.  */
@@ -2485,9 +2489,7 @@ clear_symtab_users (void)
      breakpoint_re_set may try to access the current symtab.  */
   clear_current_source_symtab_and_line ();
 
-  clear_value_history ();
   clear_displays ();
-  clear_internalvars ();
   breakpoint_re_set ();
   set_default_breakpoint (0, 0, 0, 0);
   clear_pc_function_cache ();

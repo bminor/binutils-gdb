@@ -11094,11 +11094,11 @@ table and program to run from the same file.
 @code{symbol-file} with no argument clears out @value{GDBN} information on your
 program's symbol table.
 
-The @code{symbol-file} command causes @value{GDBN} to forget the contents
-of its convenience variables, the value history, and all breakpoints and
-auto-display expressions.  This is because they may contain pointers to
-the internal data recording symbols and data types, which are part of
-the old symbol table data being discarded inside @value{GDBN}.
+The @code{symbol-file} command causes @value{GDBN} to forget the contents of
+some breakpoints and auto-display expressions.  This is because they may
+contain pointers to the internal data recording symbols and data types,
+which are part of the old symbol table data being discarded inside
+@value{GDBN}.
 
 @code{symbol-file} does not repeat if you press @key{RET} again after
 executing it once.

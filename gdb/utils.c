@@ -53,6 +53,7 @@
 #include "annotate.h"
 #include "filenames.h"
 #include "symfile.h"
+#include "gdb_obstack.h"
 
 #include "inferior.h"		/* for signed_pointer_to_address */
 
@@ -3123,4 +3124,27 @@ align_down (ULONGEST v, int n)
   /* Check that N is really a power of two.  */
   gdb_assert (n && (n & (n-1)) == 0);
   return (v & -n);
+}
+
+/* Allocation function for the libiberty hash table which uses an
+   obstack.  The obstack is passed as DATA.  */
+
+void *
+hashtab_obstack_allocate (void *data, size_t size, size_t count)
+{
+  unsigned int total = size * count;
+  void *ptr = obstack_alloc ((struct obstack *) data, total);
+  memset (ptr, 0, total);
+  return ptr;
+}
+
+/* Trivial deallocation function for the libiberty splay tree and hash
+   table - don't deallocate anything.  Rely on later deletion of the
+   obstack.  DATA will be the obstack, although it is not needed
+   here.  */
+
+void
+dummy_obstack_deallocate (void *object, void *data)
+{
+  return;
 }

@@ -1217,4 +1217,9 @@ extern int use_windows;
 extern ULONGEST align_up (ULONGEST v, int n);
 extern ULONGEST align_down (ULONGEST v, int n);
 
+/* Allocation and deallocation functions for the libiberty hash table
+   which use obstacks.  */
+void *hashtab_obstack_allocate (void *data, size_t size, size_t count);
+void dummy_obstack_deallocate (void *object, void *data);
+
 #endif /* #ifndef DEFS_H */
