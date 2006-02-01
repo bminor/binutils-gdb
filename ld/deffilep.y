@@ -654,7 +654,16 @@ def_image_name (const char *name, int base, int is_dll)
 	  def_filename, linenumber, is_dll ? "LIBRARY" : "NAME", name);
   if (def->name)
     free (def->name);
-  def->name = xstrdup (image_name);
+  /* Append the default suffix, if none specified.  */ 
+   if (strchr (image_name, '.') == 0)
+     {
+        const char * suffix = is_dll ? ".dll" : ".exe";
+
+        def->name = xmalloc (strlen (image_name) + strlen (suffix) + 1);
+        sprintf (def->name, "%s%s", image_name, suffix);
+     }
+  else
+    def->name = xstrdup (image_name);
   def->base_address = base;
   def->is_dll = is_dll;
 }

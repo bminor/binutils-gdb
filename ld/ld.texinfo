@@ -5598,6 +5598,22 @@ by "forwarding" to another module and treating it as an alias for
 @code{afoo} exported from the DLL @samp{abc.dll}. The final symbol
 @code{var1} is declared to be a data object.
 
+The optional @code{LIBRARY <name>} command indicates the @emph{internal}
+name of the output DLL. If @samp{<name>} does not include a suffix,
+the default library suffix, @samp{.DLL} is appended.
+
+When the .DEF file is used to build an application. rather than a
+library, the @code{NAME <name>} command shoud be used instead of
+@code{LIBRARY}. If @samp{<name>} does not include a suffix, the default
+executable suffix, @samp{.EXE} is appended. 
+
+With either @code{LIBRARY <name>} or @code{NAME <name>} the optional
+specification @code{BASE = <number>} may be used to specify a
+non-default base address for the image. 
+
+If neither @code{LIBRARY <name>} nor  @code{NAME <name>} is specified,
+the internal name is the same as the filename specified on the command line. 
+
 The complete specification of an export symbol is:
 
 @example
