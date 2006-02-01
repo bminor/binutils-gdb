@@ -181,4 +181,8 @@ void init_registers (void);
 		 ? (registers_length () + 32) \
 		 : 2000)
 
+/* Version information, from version.c.  */
+extern const char version[];
+extern const char host_name[];
+
 #endif /* SERVER_H */

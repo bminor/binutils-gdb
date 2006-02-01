@@ -1,6 +1,6 @@
 /* Main code for remote server for GDB.
    Copyright (C) 1989, 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2002, 2003, 2004,
-   2005
+   2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -309,13 +309,23 @@ myresume (int step, int sig)
 static int attached;
 
 static void
+gdbserver_version (void)
+{
+  printf ("GNU gdbserver %s\n"
+	  "Copyright (C) 2006 Free Software Foundation, Inc.\n"
+	  "gdbserver is free software, covered by the GNU General Public License.\n"
+	  "This gdbserver was configured as \"%s\"\n",
+	  version, host_name);
+}
+
+static void
 gdbserver_usage (void)
 {
-  error ("Usage:\tgdbserver COMM PROG [ARGS ...]\n"
-	 "\tgdbserver COMM --attach PID\n"
-	 "\n"
-	 "COMM may either be a tty device (for serial debugging), or \n"
-	 "HOST:PORT to listen for a TCP connection.\n");
+  printf ("Usage:\tgdbserver COMM PROG [ARGS ...]\n"
+	  "\tgdbserver COMM --attach PID\n"
+	  "\n"
+	  "COMM may either be a tty device (for serial debugging), or \n"
+	  "HOST:PORT to listen for a TCP connection.\n");
 }
 
 int
@@ -330,6 +340,18 @@ main (int argc, char *argv[])
   int bad_attach;
   int pid;
   char *arg_end;
+
+  if (argc >= 2 && strcmp (argv[1], "--version") == 0)
+    {
+      gdbserver_version ();
+      exit (0);
+    }
+
+  if (argc >= 2 && strcmp (argv[1], "--help") == 0)
+    {
+      gdbserver_usage ();
+      exit (0);
+    }
 
   if (setjmp (toplevel))
     {
@@ -354,7 +376,10 @@ main (int argc, char *argv[])
     }
 
   if (argc < 3 || bad_attach)
-    gdbserver_usage();
+    {
+      gdbserver_usage ();
+      exit (1);
+    }
 
   initialize_low ();
 

@@ -1,3 +1,15 @@
+2006-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (OBS): Add version.o.
+	(STAGESTUFF): Delete.
+	(version.o): Add dependencies.
+	(version.c): Replace rule.
+	(clean): Remove version.c.
+	* server.c (gdbserver_version): New.
+	(gdbserver_usage): Use printf.
+	(main): Handle --version and --help.
+	* server.h (version, host_name): Add declarations.
+
 2005-12-23  Eli Zaretskii  <eliz@gnu.org>
 
 	* linux-arm-low.c: 
