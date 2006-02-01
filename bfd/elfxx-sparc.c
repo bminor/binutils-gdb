@@ -3373,7 +3373,18 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  break;
 
 		if (h != NULL)
-		  name = NULL;
+		  {
+		    /* Assume this is a call protected by other code that
+		       detect the symbol is undefined.  If this is the case,
+		       we can safely ignore the overflow.  If not, the
+		       program is hosed anyway, and a little warning isn't
+		       going to help.  */
+		    if (h->root.type == bfd_link_hash_undefweak
+			&& howto->pc_relative)
+		      break;
+
+	            name = NULL;
+		  }
 		else
 		  {
 		    name = bfd_elf_string_from_elf_section (input_bfd,
