@@ -5278,8 +5278,6 @@ do_shift (void)
   inst.instruction |= Rm;
   if (inst.operands[2].isreg)  /* Rd, {Rm,} Rs */
     {
-      constraint (inst.operands[0].reg != Rm,
-		  _("source1 and dest must be same register"));
       inst.instruction |= inst.operands[2].reg << 8;
       inst.instruction |= SHIFT_BY_REG;
     }
