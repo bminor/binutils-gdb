@@ -3405,6 +3405,10 @@ process_program_headers (FILE *file)
 	  for (j = 1; j < elf_header.e_shnum; j++, section++)
 	    {
 	      if (section->sh_size > 0
+		  /* PT_DYNAMIC segment contains only SHT_DYNAMIC
+		     sections.  */
+		  && (segment->p_type != PT_DYNAMIC
+		      || section->sh_type == SHT_DYNAMIC)
 		  /* Compare allocated sections by VMA, unallocated
 		     sections by file offset.  */
 		  && (section->sh_flags & SHF_ALLOC
@@ -3413,12 +3417,7 @@ process_program_headers (FILE *file)
 			 <= segment->p_vaddr + segment->p_memsz)
 		      : ((bfd_vma) section->sh_offset >= segment->p_offset
 			 && (section->sh_offset + section->sh_size
-			     <= segment->p_offset + segment->p_filesz)))
-		  /* .tbss is special.  It doesn't contribute memory space
-		     to normal segments.  */
-		  && (!((section->sh_flags & SHF_TLS) != 0
-			&& section->sh_type == SHT_NOBITS)
-		      || segment->p_type == PT_TLS))
+			     <= segment->p_offset + segment->p_filesz))))
 		printf ("%s ", SECTION_NAME (section));
 	    }
 

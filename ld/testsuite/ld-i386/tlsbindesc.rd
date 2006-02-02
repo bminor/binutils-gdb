@@ -48,7 +48,7 @@ Program Headers:
    00 +
    01 +.interp *
    02 +.interp .hash .dynsym .dynstr .rel.dyn .text *
-   03 +.tdata .dynamic .got .got.plt *
+   03 +.tdata .tbss .dynamic .got .got.plt *
    04 +.dynamic *
    05 +.tdata .tbss *
 

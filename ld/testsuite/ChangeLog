@@ -1,3 +1,23 @@
+2006-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/tlsbin.rd: Update for changed segment map.
+	* ld-i386/tlsnopic.rd: Likewise.
+	* ld-i386/tlspic.rd: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexe32.r: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+	* ld-s390/tlsbin.rd: Likewise.
+	* ld-s390/tlsbin_64.rd: Likewise.
+	* ld-s390/tlspic.rd: Likewise.
+	* ld-s390/tlspic_64.rd: Likewise.
+	* ld-sh/tlsbin-2.d: Likewise.
+	* ld-sh/tlspic-2.d: Likewise.
+	* ld-x86-64/tlsbin.rd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+
 2006-01-31  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
 	* ld-sparc/sparc.exp: Do not run 64-bit tests on Solaris 2.5.1

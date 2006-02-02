@@ -39,7 +39,7 @@ Program Headers:
  Section to Segment mapping:
  +Segment Sections\.\.\.
  +0+ +\.hash \.dynsym \.dynstr \.rela\.dyn \.rela\.plt \.text 
- +01 +\.tdata \.dynamic \.got \.plt 
+ +01 +\.tdata \.tbss \.dynamic \.got \.plt 
  +02 +\.dynamic 
  +03 +\.tdata \.tbss 
 

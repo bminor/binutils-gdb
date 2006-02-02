@@ -1,3 +1,9 @@
+2006-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_program_headers): Undo the change made on
+	2004-09-22.  Match PT_DYNAMIC segment only with SHT_DYNAMIC
+	sections.
+
 2006-01-30  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_object): Catch the case where an attempt is made
