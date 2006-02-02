@@ -1,6 +1,7 @@
 /* GNU/Linux native-dependent code common to multiple platforms.
 
-   Copyright (C) 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -868,6 +869,92 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
   return NULL;
 }
 
+/* Record a PTID for later deletion.  */
+
+struct saved_ptids
+{
+  ptid_t ptid;
+  struct saved_ptids *next;
+};
+static struct saved_ptids *threads_to_delete;
+
+static void
+record_dead_thread (ptid_t ptid)
+{
+  struct saved_ptids *p = xmalloc (sizeof (struct saved_ptids));
+  p->ptid = ptid;
+  p->next = threads_to_delete;
+  threads_to_delete = p;
+}
+
+/* Delete any dead threads which are not the current thread.  */
+
+static void
+prune_lwps (void)
+{
+  struct saved_ptids **p = &threads_to_delete;
+
+  while (*p)
+    if (! ptid_equal ((*p)->ptid, inferior_ptid))
+      {
+	struct saved_ptids *tmp = *p;
+	delete_thread (tmp->ptid);
+	*p = tmp->next;
+	xfree (tmp);
+      }
+    else
+      p = &(*p)->next;
+}
+
+/* Callback for iterate_over_threads that finds a thread corresponding
+   to the given LWP.  */
+
+static int
+find_thread_from_lwp (struct thread_info *thr, void *dummy)
+{
+  ptid_t *ptid_p = dummy;
+
+  if (GET_LWP (thr->ptid) && GET_LWP (thr->ptid) == GET_LWP (*ptid_p))
+    return 1;
+  else
+    return 0;
+}
+
+/* Handle the exit of a single thread LP.  */
+
+static void
+exit_lwp (struct lwp_info *lp)
+{
+  if (in_thread_list (lp->ptid))
+    {
+      /* Core GDB cannot deal with us deleting the current thread.  */
+      if (!ptid_equal (lp->ptid, inferior_ptid))
+	delete_thread (lp->ptid);
+      else
+	record_dead_thread (lp->ptid);
+      printf_unfiltered (_("[%s exited]\n"),
+			 target_pid_to_str (lp->ptid));
+    }
+  else
+    {
+      /* Even if LP->PTID is not in the global GDB thread list, the
+	 LWP may be - with an additional thread ID.  We don't need
+	 to print anything in this case; thread_db is in use and
+	 already took care of that.  But it didn't delete the thread
+	 in order to handle zombies correctly.  */
+
+      struct thread_info *thr;
+
+      thr = iterate_over_threads (find_thread_from_lwp, &lp->ptid);
+      if (thr && !ptid_equal (thr->ptid, inferior_ptid))
+	delete_thread (thr->ptid);
+      else
+	record_dead_thread (thr->ptid);
+    }
+
+  delete_lwp (lp->ptid);
+}
+
 /* Attach to the LWP specified by PID.  If VERBOSE is non-zero, print
    a message telling the user that a new LWP has been added to the
    process.  */
@@ -1121,6 +1208,8 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			signo ? strsignal (signo) : "0",
 			target_pid_to_str (inferior_ptid));
 
+  prune_lwps ();
+
   /* A specific PTID means `step only this process id'.  */
   resume_all = (PIDGET (ptid) == -1);
 
@@ -1321,16 +1410,7 @@ wait_lwp (struct lwp_info *lp)
 
   if (thread_dead)
     {
-      if (in_thread_list (lp->ptid))
-	{
-	  /* Core GDB cannot deal with us deleting the current thread.  */
-	  if (!ptid_equal (lp->ptid, inferior_ptid))
-	    delete_thread (lp->ptid);
-	  printf_unfiltered (_("[%s exited]\n"),
-			     target_pid_to_str (lp->ptid));
-	}
-
-      delete_lwp (lp->ptid);
+      exit_lwp (lp);
       return 0;
     }
 
@@ -2117,16 +2197,6 @@ retry:
 	  /* Check if the thread has exited.  */
 	  if ((WIFEXITED (status) || WIFSIGNALED (status)) && num_lwps > 1)
 	    {
-	      if (in_thread_list (lp->ptid))
-		{
-		  /* Core GDB cannot deal with us deleting the current
-		     thread.  */
-		  if (!ptid_equal (lp->ptid, inferior_ptid))
-		    delete_thread (lp->ptid);
-		  printf_unfiltered (_("[%s exited]\n"),
-				     target_pid_to_str (lp->ptid));
-		}
-
 	      /* If this is the main thread, we must stop all threads and
 	         verify if they are still alive.  This is because in the nptl
 	         thread model, there is no signal issued for exiting LWPs
@@ -2148,7 +2218,7 @@ retry:
 				    "LLW: %s exited.\n",
 				    target_pid_to_str (lp->ptid));
 
-	      delete_lwp (lp->ptid);
+	      exit_lwp (lp);
 
 	      /* If there is at least one more LWP, then the exit signal
 	         was not the end of the debugged application and should be
@@ -2170,21 +2240,12 @@ retry:
 	     has stopped.  A similar check is made in stop_wait_callback().  */
 	  if (num_lwps > 1 && !linux_nat_thread_alive (lp->ptid))
 	    {
-	      if (in_thread_list (lp->ptid))
-		{
-		  /* Core GDB cannot deal with us deleting the current
-		     thread.  */
-		  if (!ptid_equal (lp->ptid, inferior_ptid))
-		    delete_thread (lp->ptid);
-		  printf_unfiltered (_("[%s exited]\n"),
-				     target_pid_to_str (lp->ptid));
-		}
 	      if (debug_linux_nat)
 		fprintf_unfiltered (gdb_stdlog,
 				    "LLW: %s exited.\n",
 				    target_pid_to_str (lp->ptid));
 
-	      delete_lwp (lp->ptid);
+	      exit_lwp (lp);
 
 	      /* Make sure there is at least one thread running.  */
 	      gdb_assert (iterate_over_lwps (running_callback, NULL));
