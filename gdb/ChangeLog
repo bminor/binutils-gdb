@@ -1,5 +1,14 @@
 2006-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (remote.o): Update.
+	* remote.c (show_packet_config_cmd): Shorten messages.
+	(remote_set_cmdlist, remote_show_cmdlist): Make file-static.
+	(show_remote_cmd): Iterate.
+	(_initialize_remote): Remove remote_set_cmdlist,
+	remote_show_cmdlist.
+
+2006-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (gdbtypes_h, gdbtypes.o, utils.o): Update.
 	* defs.h (hashtab_obstack_allocate, dummy_obstack_deallocate): Add
 	prototypes.

@@ -43,6 +43,8 @@
 #include "gdb_assert.h"
 #include "observer.h"
 #include "solib.h"
+#include "cli/cli-decode.h"
+#include "cli/cli-setshow.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -612,13 +614,13 @@ show_packet_config_cmd (struct packet_config *config)
   switch (config->detect)
     {
     case AUTO_BOOLEAN_AUTO:
-      printf_filtered (_("Support for remote protocol `%s' (%s) packet is auto-detected, currently %s.\n"),
-		       config->name, config->title, support);
+      printf_filtered (_("Support for the `%s' packet is auto-detected, currently %s.\n"),
+		       config->name, support);
       break;
     case AUTO_BOOLEAN_TRUE:
     case AUTO_BOOLEAN_FALSE:
-      printf_filtered (_("Support for remote protocol `%s' (%s) packet is currently %s.\n"),
-		       config->name, config->title, support);
+      printf_filtered (_("Support for the `%s' packet is currently %s.\n"),
+		       config->name, support);
       break;
     }
 }
@@ -5544,6 +5546,9 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   extended_async_remote_ops.to_mourn_inferior = extended_remote_mourn;
 }
 
+static struct cmd_list_element *remote_set_cmdlist;
+static struct cmd_list_element *remote_show_cmdlist;
+
 static void
 set_remote_cmd (char *args, int from_tty)
 {
@@ -5552,16 +5557,25 @@ set_remote_cmd (char *args, int from_tty)
 static void
 show_remote_cmd (char *args, int from_tty)
 {
-  /* FIXME: cagney/2002-06-15: This function should iterate over
-     remote_show_cmdlist for a list of sub commands to show.  */
-  show_remote_protocol_Z_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
-  show_remote_protocol_P_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
-  show_remote_protocol_p_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
-  show_remote_protocol_qSymbol_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
-  show_remote_protocol_vcont_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
-  show_remote_protocol_binary_download_cmd (gdb_stdout, from_tty, NULL, NULL);
-  show_remote_protocol_qPart_auxv_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
-  show_remote_protocol_qGetTLSAddr_packet_cmd (gdb_stdout, from_tty, NULL, NULL);
+  /* We can't just use cmd_show_list here, because we want to skip
+     the redundant "show remote Z-packet".  */
+  struct cleanup *showlist_chain;
+  struct cmd_list_element *list = remote_show_cmdlist;
+
+  showlist_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "showlist");
+  for (; list != NULL; list = list->next)
+    if (strcmp (list->name, "Z-packet") == 0)
+      continue;
+    else if (list->type == show_cmd)
+      {
+	struct cleanup *option_chain
+	  = make_cleanup_ui_out_tuple_begin_end (uiout, "option");
+	ui_out_field_string (uiout, "name", list->name);
+	ui_out_text (uiout, ":  ");
+	do_setshow_command ((char *) NULL, from_tty, list);
+	/* Close the tuple.  */
+	do_cleanups (option_chain);
+      }
 }
 
 static void
@@ -5590,9 +5604,6 @@ remote_new_objfile (struct objfile *objfile)
 void
 _initialize_remote (void)
 {
-  static struct cmd_list_element *remote_set_cmdlist;
-  static struct cmd_list_element *remote_show_cmdlist;
-
   /* architecture specific data */
   remote_gdbarch_data_handle = 
     gdbarch_data_register_post_init (init_remote_state);
@@ -5798,7 +5809,10 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  /* Keep the old ``set remote Z-packet ...'' working.  */
+  /* Keep the old ``set remote Z-packet ...'' working.  Each individual
+     Z sub-packet has its own set and show commands, but users may
+     have sets to this variable in their .gdbinit files (or in their
+     documentation).  */
   add_setshow_auto_boolean_cmd ("Z-packet", class_obscure,
 				&remote_Z_packet_detect, _("\
 Set use of remote protocol `Z' packets"), _("\

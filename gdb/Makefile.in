@@ -2441,7 +2441,8 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(symfile_h) $(exceptions_h) $(target_h) $(gdbcmd_h) $(objfiles_h) \
 	$(gdb_stabs_h) $(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) \
 	$(gdb_assert_h) $(event_loop_h) $(event_top_h) $(inf_loop_h) \
-	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(solib_h) $(observer_h)
+	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(solib_h) $(observer_h) \
+	$(cli_decode_h) $(cli_setshow_h)
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(exceptions_h) $(gdbcmd_h) $(serial_h) $(remote_utils_h) \
