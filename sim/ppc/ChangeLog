@@ -1,3 +1,11 @@
+2006-02-01  Mark Mitchell  <mark@codesourcery.com>
+
+	* emul_netbsd.c (emul_netbsd_create): Quote file-name property.
+	* emul_unix.c (emul_unix_create): Likewise.
+	* tree.c (libiberty.h): Include it.
+	(tree_quote_property): New function.
+	* tree.h (tree_quote_property): Declare.
+
 2006-01-25  Mark Mitchell  <mark@codesourcery.com>
 
 	* words.h (natural32): Define as "int".
