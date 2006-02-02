@@ -1,3 +1,12 @@
+2005-02-02  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (T2_OPCODE_MASK, T2_DATA_OP_SHIFT, T2_OPCODE_AND,
+	T2_OPCODE_BIC, T2_OPCODE_ORR, T2_OPCODE_ORN, T2_OPCODE_EOR,
+	T2_OPCODE_ADD, T2_OPCODE_ADC, T2_OPCODE_SBC, T2_OPCODE_SUB,
+	T2_OPCODE_RSB): Define.
+	(thumb32_negate_data_op): New function.
+	(md_apply_fix): Use it.
+
 2006-01-31  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/xtensa-istack.h (TInsn): Remove record_fix and sub_symbol

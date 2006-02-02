@@ -460,6 +460,9 @@ struct asm_opcode
 
 #define DATA_OP_SHIFT	21
 
+#define T2_OPCODE_MASK	0xfe1fffff
+#define T2_DATA_OP_SHIFT 21
+
 /* Codes to distinguish the arithmetic instructions.  */
 #define OPCODE_AND	0
 #define OPCODE_EOR	1
@@ -477,6 +480,17 @@ struct asm_opcode
 #define OPCODE_MOV	13
 #define OPCODE_BIC	14
 #define OPCODE_MVN	15
+
+#define T2_OPCODE_AND	0
+#define T2_OPCODE_BIC	1
+#define T2_OPCODE_ORR	2
+#define T2_OPCODE_ORN	3
+#define T2_OPCODE_EOR	4
+#define T2_OPCODE_ADD	8
+#define T2_OPCODE_ADC	10
+#define T2_OPCODE_SBC	11
+#define T2_OPCODE_SUB	13
+#define T2_OPCODE_RSB	14
 
 #define T_OPCODE_MUL 0x4340
 #define T_OPCODE_TST 0x4200
@@ -11113,6 +11127,82 @@ negate_data_op (unsigned long * instruction,
   return value;
 }
 
+/* Like negate_data_op, but for Thumb-2.   */
+
+static unsigned int
+thumb32_negate_data_op (offsetT *instruction, offsetT value)
+{
+  int op, new_inst;
+  int rd;
+  offsetT negated, inverted;
+
+  negated = encode_thumb32_immediate (-value);
+  inverted = encode_thumb32_immediate (~value);
+
+  rd = (*instruction >> 8) & 0xf;
+  op = (*instruction >> T2_DATA_OP_SHIFT) & 0xf;
+  switch (op)
+    {
+      /* ADD <-> SUB.  Includes CMP <-> CMN.  */
+    case T2_OPCODE_SUB:
+      new_inst = T2_OPCODE_ADD;
+      value = negated;
+      break;
+
+    case T2_OPCODE_ADD:
+      new_inst = T2_OPCODE_SUB;
+      value = negated;
+      break;
+
+      /* ORR <-> ORN.  Includes MOV <-> MVN.  */
+    case T2_OPCODE_ORR:
+      new_inst = T2_OPCODE_ORN;
+      value = inverted;
+      break;
+
+    case T2_OPCODE_ORN:
+      new_inst = T2_OPCODE_ORR;
+      value = inverted;
+      break;
+
+      /* AND <-> BIC.  TST has no inverted equivalent.  */
+    case T2_OPCODE_AND:
+      new_inst = T2_OPCODE_BIC;
+      if (rd == 15)
+	value = FAIL;
+      else
+	value = inverted;
+      break;
+
+    case T2_OPCODE_BIC:
+      new_inst = T2_OPCODE_AND;
+      value = inverted;
+      break;
+
+      /* ADC <-> SBC  */
+    case T2_OPCODE_ADC:
+      new_inst = T2_OPCODE_SBC;
+      value = inverted;
+      break;
+
+    case T2_OPCODE_SBC:
+      new_inst = T2_OPCODE_ADC;
+      value = inverted;
+      break;
+
+      /* We cannot do anything.	 */
+    default:
+      return FAIL;
+    }
+
+  if (value == FAIL)
+    return FAIL;
+
+  *instruction &= T2_OPCODE_MASK;
+  *instruction |= new_inst << T2_DATA_OP_SHIFT;
+  return value;
+}
+
 /* Read a 32-bit thumb instruction from buf.  */
 static unsigned long
 get_thumb32_insn (char * buf)
@@ -11465,7 +11555,11 @@ md_apply_fix (fixS *	fixP,
 
       /* FUTURE: Implement analogue of negate_data_op for T32.  */
       if (fixP->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE)
-	newimm = encode_thumb32_immediate (value);
+	{
+	  newimm = encode_thumb32_immediate (value);
+	  if (newimm == (unsigned int) FAIL)
+	    newimm = thumb32_negate_data_op (&newval, value);
+	}
       else
 	{
 	  /* 12 bit immediate for addw/subw.  */

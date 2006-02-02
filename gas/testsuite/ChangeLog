@@ -1,3 +1,8 @@
+2005-02-02  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_invert.d: New test.
+	* gas/arm/thumb2_invert.s: New test.
+
 2006-01-31  Paul Brook  <paul@codesourcery.com>
 
 	* gas/testsuite/gas/arm/iwmmxt-bad.s: Add check for bad register name.
