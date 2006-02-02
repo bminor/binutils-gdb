@@ -1,8 +1,8 @@
 /* General utility routines for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1069,14 +1069,12 @@ xstrvprintf (const char *format, va_list ap)
 {
   char *ret = NULL;
   int status = vasprintf (&ret, format, ap);
-  /* NULL is returned when there was a memory allocation problem.  */
-  if (ret == NULL)
-    nomem (0);
-  /* A negative status (the printed length) with a non-NULL buffer
-     should never happen, but just to be sure.  */
-  if (status < 0)
-    internal_error (__FILE__, __LINE__,
-		    _("vasprintf call failed (errno %d)"), errno);
+  /* NULL is returned when there was a memory allocation problem, or
+     any other error (for instance, a bad format string).  A negative
+     status (the printed length) with a non-NULL buffer should never
+     happen, but just to be sure.  */
+  if (ret == NULL || status < 0)
+    internal_error (__FILE__, __LINE__, _("vasprintf call failed"));
   return ret;
 }
 

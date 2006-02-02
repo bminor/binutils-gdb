@@ -1,5 +1,19 @@
 2006-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* printcmd.c (printf_command): Make format string checking
+	stricter.  Add separate cases for long_arg, ptr_arg, and
+	long_double_arg.
+	* utils.c (xstrvprintf): Improve the error message issued
+	for a bad format string.
+	* Makefile.in (GDB_WARN_CFLAGS_NO_FORMAT, INTERNAL_CFLAGS_BASE):
+	New variables.
+	(gnu-v3-abi.o, monitor.o, procfs.o, linux-thread-db.o): Remove
+	$(NO_WERROR_CFLAGS).
+	(printcmd.o): Likewise.  Use $(GDB_WARN_CFLAGS_NO_FORMAT) and
+	enable -Werror.
+
+2006-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (remote.o): Update.
 	* remote.c (show_packet_config_cmd): Shorten messages.
 	(remote_set_cmdlist, remote_show_cmdlist): Make file-static.

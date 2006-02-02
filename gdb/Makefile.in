@@ -132,6 +132,8 @@ WERROR_CFLAGS = @WERROR_CFLAGS@
 GDB_WARN_CFLAGS = $(WARN_CFLAGS)
 GDB_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
+GDB_WARN_CFLAGS_NO_FORMAT = `echo " $(GDB_WARN_CFLAGS) " | sed "s/ -Wformat-nonliteral / /g"`
+
 # Where is the INTL library?  Typically in ../intl.
 INTL_DIR = ../intl
 INTL = @INTLLIBS@
@@ -344,12 +346,12 @@ CFLAGS = @CFLAGS@
 CXXFLAGS = -g -O
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
-INTERNAL_WARN_CFLAGS = \
+INTERNAL_CFLAGS_BASE = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(ENABLE_CFLAGS) \
-	$(GDB_WARN_CFLAGS)
+	$(INTL_CFLAGS) $(ENABLE_CFLAGS)
+INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
 # LDFLAGS is specifically reserved for setting from the command line
@@ -1479,8 +1481,7 @@ main.o: main.c
 # return types - "enum gnu_v3_dtor_kinds" vs "enum ctor_kinds" -
 # conflict.
 gnu-v3-abi.o: $(srcdir)/gnu-v3-abi.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
-		$(srcdir)/gnu-v3-abi.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/gnu-v3-abi.c
 
 # FIXME: cagney/2003-08-10: "monitor.c" gets -Wformat-nonliteral
 # errors.  It turns out that that is the least of monitor.c's
@@ -1489,25 +1490,23 @@ gnu-v3-abi.o: $(srcdir)/gnu-v3-abi.c
 # definitly will not work.  "monitor.c" needs to be rewritten so that
 # it doesn't use format strings and instead uses callbacks.
 monitor.o: $(srcdir)/monitor.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/monitor.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/monitor.c
 
-# FIXME: cagney/2003-08-10: Do not try to build "printcmd.c" with
-# -Wformat-nonliteral.  It needs to be overhauled so that it doesn't
-# pass user input strings as the format parameter to host printf
-# function calls.
+# Do not try to build "printcmd.c" with -Wformat-nonliteral.  It manually
+# checks format strings.
 printcmd.o: $(srcdir)/printcmd.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/printcmd.c
+	$(CC) -c $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS_NO_FORMAT) \
+	   $(GDB_WERROR_CFLAGS) $(srcdir)/printcmd.c
 
 # FIXME: Procfs.o gets -Wformat errors because things like pid_t don't
 # match output format strings.
 procfs.o: $(srcdir)/procfs.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/procfs.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/procfs.c
 
 # FIXME: Thread-db.o gets warnings because the definitions of the register
 # sets are different from kernel to kernel.
 linux-thread-db.o: $(srcdir)/linux-thread-db.c
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
-		$(srcdir)/linux-thread-db.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/linux-thread-db.c
 
 v850ice.o: $(srcdir)/v850ice.c
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
