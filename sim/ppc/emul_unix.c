@@ -951,6 +951,7 @@ emul_unix_create(device *root,
   int elf_binary;
   os_emul_data *data;
   device *vm;
+  char *filename;
 
   /* merge any emulation specific entries into the device tree */
 
@@ -979,8 +980,10 @@ emul_unix_create(device *root,
 	     (unsigned long)(top_of_stack - stack_size));
   tree_parse(vm, "./nr-bytes 0x%x", stack_size);
 
+  filename = tree_quote_property (bfd_get_filename(image));
   tree_parse(root, "/openprom/vm/map-binary/file-name %s",
-	     bfd_get_filename(image));
+	     filename);
+  free (filename);
 
   /* finish the init */
   tree_parse(root, "/openprom/init/register/pc 0x%lx",
