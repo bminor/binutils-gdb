@@ -1,7 +1,7 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
 
    Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2003, 2004, 2005
+   2000, 2001, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -447,43 +447,40 @@ locate_base (void)
   return (debug_base);
 }
 
-/*
+/* Find the first element in the inferior's dynamic link map, and
+   return its address in the inferior.
 
-   LOCAL FUNCTION
-
-   first_link_map_member -- locate first member in dynamic linker's map
-
-   SYNOPSIS
-
-   static CORE_ADDR first_link_map_member (void)
-
-   DESCRIPTION
-
-   Find the first element in the inferior's dynamic link map, and
-   return its address in the inferior.  This function doesn't copy the
-   link map entry itself into our address space; current_sos actually
-   does the reading.  */
+   FIXME: Perhaps we should validate the info somehow, perhaps by
+   checking r_version for a known version number, or r_state for
+   RT_CONSISTENT.  */
 
 static CORE_ADDR
-first_link_map_member (void)
+solib_svr4_r_map (void)
 {
-  CORE_ADDR lm = 0;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  gdb_byte *r_map_buf = xmalloc (lmo->r_map_size);
-  struct cleanup *cleanups = make_cleanup (xfree, r_map_buf);
 
-  read_memory (debug_base + lmo->r_map_offset, r_map_buf, lmo->r_map_size);
+  return read_memory_typed_address (debug_base + lmo->r_map_offset,
+				    builtin_type_void_data_ptr);
+}
 
-  /* Assume that the address is unsigned.  */
-  lm = extract_unsigned_integer (r_map_buf, lmo->r_map_size);
+/* Find the link map for the dynamic linker (if it is not in the
+   normal list of loaded shared objects).  */
 
-  /* FIXME:  Perhaps we should validate the info somehow, perhaps by
-     checking r_version for a known version number, or r_state for
-     RT_CONSISTENT. */
+static CORE_ADDR
+solib_svr4_r_ldsomap (void)
+{
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  ULONGEST version;
 
-  do_cleanups (cleanups);
+  /* Check version, and return zero if `struct r_debug' doesn't have
+     the r_ldsomap member.  */
+  version = read_memory_unsigned_integer (debug_base + lmo->r_version_offset,
+					  lmo->r_version_size);
+  if (version < 2 || lmo->r_ldsomap_offset == -1)
+    return 0;
 
-  return (lm);
+  return read_memory_typed_address (debug_base + lmo->r_ldsomap_offset,
+				    builtin_type_void_data_ptr);
 }
 
 /*
@@ -527,7 +524,8 @@ open_symbol_file_object (void *from_ttyp)
     return 0;	/* failed somehow... */
 
   /* First link map member should be the executable.  */
-  if ((lm = first_link_map_member ()) == 0)
+  lm = solib_svr4_r_map ();
+  if (lm == 0)
     return 0;	/* failed somehow... */
 
   /* Read address of name from target memory to GDB.  */
@@ -585,6 +583,7 @@ svr4_current_sos (void)
   CORE_ADDR lm;
   struct so_list *head = 0;
   struct so_list **link_ptr = &head;
+  CORE_ADDR ldsomap = 0;
 
   /* Make sure we've looked up the inferior's dynamic linker's base
      structure.  */
@@ -600,7 +599,7 @@ svr4_current_sos (void)
 
   /* Walk the inferior's link map list, and build our list of
      `struct so_list' nodes.  */
-  lm = first_link_map_member ();  
+  lm = solib_svr4_r_map ();
   while (lm)
     {
       struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
@@ -622,7 +621,7 @@ svr4_current_sos (void)
          SVR4, it has no name.  For others (Solaris 2.3 for example), it
          does have a name, so we can no longer use a missing name to
          decide when to ignore it. */
-      if (IGNORE_FIRST_LINK_MAP_ENTRY (new))
+      if (IGNORE_FIRST_LINK_MAP_ENTRY (new) && ldsomap == 0)
 	free_so (new);
       else
 	{
@@ -656,6 +655,13 @@ svr4_current_sos (void)
 	    }
 	}
 
+      /* On Solaris, the dynamic linker is not in the normal list of
+	 shared objects, so make sure we pick it up too.  Having
+	 symbol information for the dynamic linker is quite crucial
+	 for skipping dynamic linker resolver code.  */
+      if (lm == 0 && ldsomap == 0)
+	lm = ldsomap = solib_svr4_r_ldsomap ();
+
       discard_cleanups (old_chain);
     }
 
@@ -677,7 +683,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
     return 0;   /* failed somehow... */
 
   /* Position ourselves on the first link map.  */
-  lm = first_link_map_member ();  
+  lm = solib_svr4_r_map ();  
   while (lm)
     {
       /* Get info on the layout of the r_debug and link_map structures. */
@@ -1345,21 +1351,21 @@ svr4_ilp32_fetch_link_map_offsets (void)
     {
       lmp = &lmo;
 
-      /* Everything we need is in the first 8 bytes.  */
-      lmo.r_debug_size = 8;
+      lmo.r_version_offset = 0;
+      lmo.r_version_size = 4;
       lmo.r_map_offset = 4;
-      lmo.r_map_size   = 4;
+      lmo.r_ldsomap_offset = 20;
 
       /* Everything we need is in the first 20 bytes.  */
       lmo.link_map_size = 20;
       lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 4;
+      lmo.l_addr_size = 4;
       lmo.l_name_offset = 4;
-      lmo.l_name_size   = 4;
+      lmo.l_name_size = 4;
       lmo.l_next_offset = 12;
-      lmo.l_next_size   = 4;
+      lmo.l_next_size = 4;
       lmo.l_prev_offset = 16;
-      lmo.l_prev_size   = 4;
+      lmo.l_prev_size = 4;
     }
 
   return lmp;
@@ -1378,21 +1384,21 @@ svr4_lp64_fetch_link_map_offsets (void)
     {
       lmp = &lmo;
 
-      /* Everything we need is in the first 16 bytes.  */
-      lmo.r_debug_size = 16;
+      lmo.r_version_offset = 0;
+      lmo.r_version_size = 4;
       lmo.r_map_offset = 8;
-      lmo.r_map_size   = 8;
+      lmo.r_ldsomap_offset = 40;
 
       /* Everything we need is in the first 40 bytes.  */
       lmo.link_map_size = 40;
       lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 8;
+      lmo.l_addr_size = 8;
       lmo.l_name_offset = 8;
-      lmo.l_name_size   = 8;
+      lmo.l_name_size = 8;
       lmo.l_next_offset = 24;
-      lmo.l_next_size   = 8;
+      lmo.l_next_size = 8;
       lmo.l_prev_offset = 32;
-      lmo.l_prev_size   = 8;
+      lmo.l_prev_size = 8;
     }
 
   return lmp;

@@ -1,6 +1,6 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 2000, 2004
+   Copyright (C) 2000, 2004, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -31,15 +31,14 @@ struct objfile;
 
 struct link_map_offsets
   {
-    /* Size of struct r_debug (or equivalent), or at least enough of it to
-       be able to obtain the r_map field.  */
-    int r_debug_size;
+    /* Offset and size of r_debug.r_version.  */
+    int r_version_offset, r_version_size;
 
-    /* Offset to the r_map field in struct r_debug.  */
+    /* Offset of r_debug.r_map.  */
     int r_map_offset;
 
-    /* Size of the r_map field in struct r_debug.  */
-    int r_map_size;
+    /* Offset of r_debug.r_ldsomap.  */
+    int r_ldsomap_offset;
 
     /* Size of struct link_map (or equivalent), or at least enough of it
        to be able to obtain the fields below.  */
