@@ -859,9 +859,26 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	    case 18: /* Time.  */
 	      sim_callback->printf_filtered
 		(sim_callback,
-		 "sim: unhandled RedBoot syscall '%d' encountered - ignoring\n",
+		 "sim: unhandled RedBoot syscall `%d' encountered - "
+		 "returning ENOSYS\n",
 		 state->Reg[0]);
-	      return FALSE;
+	      state->Reg[0] = -1;
+	      OSptr->ErrorNo = cb_host_to_target_errno
+		(sim_callback, ENOSYS);
+	      break;
+	    case 1001: /* Meminfo. */
+	      {
+		ARMword totmem = state->Reg[1],
+			topmem = state->Reg[2];
+		ARMword stack = state->MemSize > 0
+		  ? state->MemSize : ADDRUSERSTACK;
+		if (totmem != 0)
+		  ARMul_WriteWord (state, totmem, stack);
+		if (topmem != 0)
+		  ARMul_WriteWord (state, topmem, stack);
+		state->Reg[0] = 0;
+		break;
+	      }
 
 	    default:
 	      sim_callback->printf_filtered

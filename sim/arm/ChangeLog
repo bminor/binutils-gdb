@@ -1,3 +1,8 @@
+2006-02-01  Shaun Jackman  <sjackman@gmail.com>
+
+	* armos.c (ARMul_OSHandleSWI): Handle the RedBoot system
+	call meminfo. Return ENOSYS for unhandled RedBoot syscalls.
+
 2005-11-23  Mark Mitchell  <mark@codesourcery.com>
 
 	* wrapper.c (gdb/signals.h): Include it.
@@ -7,7 +12,7 @@
 
 2005-11-16  Shaun Jackman  <sjackman@gmail.com>
 
-	* sim/arm/armos.c: Include limits.h
+	* armos.c: Include limits.h
 	(unlink): Remove this macro. It is unused in this file and
 	conflicts with sim_callback->unlink.
 	(PATH_MAX): Define as 1024 if not already defined.
