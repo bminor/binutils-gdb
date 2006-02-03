@@ -1,3 +1,9 @@
+2006-02-03  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Cygwin Native): Fix typos.  Clarify the types of
+	debugging information produced by the various "set debug..."
+	options.
+
 2006-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Files): Remove obsolete bits from the description

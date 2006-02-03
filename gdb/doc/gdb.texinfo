@@ -13386,22 +13386,26 @@ Displays current value of new-group boolean.
 
 @kindex set debugevents
 @item set debugevents
-This boolean value adds debug output concerning events seen by the debugger.
+This boolean value adds debug output concerning kernel events related
+to the debuggee seen by the debugger.  This includes events that
+signal thread and process creation and exit, DLL loading and
+unloading, console interrupts, and debugging messages produced by the
+Windows @code{OutputDebugString} API call.
 
 @kindex set debugexec
 @item set debugexec
 This boolean value adds debug output concerning execute events
-seen by the debugger.
+(such as resume thread) seen by the debugger.
 
 @kindex set debugexceptions
 @item set debugexceptions
-This boolean value adds debug ouptut concerning exception events
-seen by the debugger.
+This boolean value adds debug output concerning exceptions in the
+debuggee seen by the debugger.
 
 @kindex set debugmemory
 @item set debugmemory
-This boolean value adds debug ouptut concerning memory events
-seen by the debugger.
+This boolean value adds debug output concerning debuggee memory reads
+and writes by the debugger.
 
 @kindex set shell
 @item set shell
