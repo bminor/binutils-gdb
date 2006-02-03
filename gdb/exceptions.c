@@ -1,8 +1,8 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -32,7 +32,7 @@
 #include "gdb_string.h"
 #include "serial.h"
 
-const struct gdb_exception exception_none = { 0, NO_ERROR, NULL };
+const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, NULL };
 
 /* Possible catcher states.  */
 enum catcher_state {
@@ -79,7 +79,7 @@ exceptions_state_mc_init (struct ui_out *func_uiout,
 
   /* Start with no exception, save it's address.  */
   exception->reason = 0;
-  exception->error = NO_ERROR;
+  exception->error = GDB_NO_ERROR;
   exception->message = NULL;
   new_catcher->exception = exception;
 
@@ -404,7 +404,7 @@ throw_verror (enum errors error, const char *fmt, va_list ap)
 NORETURN void
 throw_vfatal (const char *fmt, va_list ap)
 {
-  throw_it (RETURN_QUIT, NO_ERROR, fmt, ap);
+  throw_it (RETURN_QUIT, GDB_NO_ERROR, fmt, ap);
 }
 
 NORETURN void

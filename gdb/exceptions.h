@@ -1,8 +1,8 @@
 /* Exception (throw catch) mechanism, for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free
-   Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,7 +50,7 @@ typedef int return_mask;
 /* Describe all exceptions.  */
 
 enum errors {
-  NO_ERROR,
+  GDB_NO_ERROR,
   /* Any generic error, the corresponding text is in
      exception.message.  */
   GENERIC_ERROR,

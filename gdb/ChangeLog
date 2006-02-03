@@ -1,3 +1,9 @@
+2006-02-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* exceptions.h (enum errors): Rename NO_ERROR to GDB_NO_ERROR.
+	* exceptions.c (exception_none, exceptions_state_mc_init)
+	(throw_vfatal): Use GDB_NO_ERROR.
+
 2006-02-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib-svr4.h (struct link_map_offsets): Remove r_debug_size and
