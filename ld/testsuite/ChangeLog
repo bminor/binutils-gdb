@@ -1,5 +1,12 @@
 2006-02-04  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-mips-elf/tls-hidden2a.s, ld-mips-elf/tls-hidden2b.s,
+	* ld/testsuite/ld-mips-elf/tls-hidden2.d,
+	* ld/testsuite/ld-mips-elf/tls-hidden2-got.d: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
+2006-02-04  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-mips-elf/rel32-n32.d: Adjust for changes in linker behaviour.
 	* ld-mips-elf/rel32-o32.d: Likewise.
 	* ld-mips-elf/rel64.d: Likewise.

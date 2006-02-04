@@ -2994,7 +2994,10 @@ mips_elf_initialize_tls_index (void **entryp, void *p)
       if (g->next == NULL)
 	{
 	  if (entry->d.h->tls_type & GOT_TLS_OFFSET_DONE)
-	    return 1;
+	    {
+	      entry->gotidx = entry->d.h->tls_got_offset;
+	      return 1;
+	    }
 	  entry->d.h->tls_type |= GOT_TLS_OFFSET_DONE;
 	}
     }

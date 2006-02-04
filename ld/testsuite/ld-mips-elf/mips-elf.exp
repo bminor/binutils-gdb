@@ -162,6 +162,11 @@ set mips_tls_tests {
      "-EB -march=mips1 -32 -KPIC" {tlslib-o32.s}
      {{objdump {-dr -m mips:isa32r2} tlslib-o32.d} {objdump -Rsj.got tlslib-o32-hidden.got}}
      "tlslib-o32-hidden.so"}
+    {"Shared library with TLS and hidden symbols (2)"
+     "-shared -melf32btsmip -T mips-lib.ld"
+     "-EB -march=mips1 -32 -KPIC" {tls-hidden2a.s tls-hidden2b.s}
+     {{objdump -drj.text tls-hidden2.d} {objdump -sj.got tls-hidden2-got.d}}
+     "tls-hidden2.so"}
 }
 
 if {[istarget mips*-*-linux*]} {
