@@ -1,3 +1,22 @@
+2006-02-04  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/rel32-n32.d: Adjust for changes in linker behaviour.
+	* ld-mips-elf/rel32-o32.d: Likewise.
+	* ld-mips-elf/rel64.d: Likewise.
+	* ld-mips-elf/tls-multi-got-1.got: Likewise.
+	* ld-mips-elf/tls-multi-got-1.r: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32.got: Likewise.
+	* ld-mips-elf/tlslib-o32-hidden.got: Likewise.
+	* ld-mips-elf/tlslib-o32-ver.got: Likewise.
+	* ld-mips-elf/tlslib-o32.got: Likewise.
+
 2006-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/tlsbin.rd: Undo the last change.
