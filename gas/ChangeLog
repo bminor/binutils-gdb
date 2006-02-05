@@ -1,3 +1,21 @@
+2006-02-05  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* config/tc-z80.c (z80_start_line_hook): allow .equ and .defl as 
+	synonyms for equ and defl. 
+	(z80_cons_fix_new): New function.
+	(emit_byte): Disallow relative jumps to absolute locations.
+	(emit_data): Only handle defb, prototype changed, because defb is 
+	now handled as pseudo-op rather than an instruction.
+	(instab): Entries for defb,defw,db,dw moved from here...
+	(md_pseudo_table): ... to here, use generic cons() for defw,dw. 
+	Add entries for def24,def32,d24,d32.
+	(md_assemble): Improved error handling.
+	(md_apply_fix): New case BFD_RELOC_24, set fixP->fx_no_overflow to one.
+	* config/tc-z80.h (TC_CONS_FIX_NEW): Define.
+	(z80_cons_fix_new): Declare.
+	* doc/c-z80.texi (defb, db): Mention warning on overflow. 
+	(def24,d24,def32,d32): New pseudo-ops.
+	
 2006-02-02  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_shift): Remove Thumb-1 constraint.

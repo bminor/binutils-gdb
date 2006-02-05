@@ -1,3 +1,10 @@
+2006-02-05  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* coff-z80.c (r_imm24): New howto. 
+	(rtype2howto): New case R_IMM24.
+	(coff_z80_reloc_type_lookup): New case BFD_RELOC_24.
+	(extra_case): Use bfd_get_8 for R_IMM8, new case R_IMM24.
+
 2006-02-04  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_initialize_tls_index): If a TLS symbol

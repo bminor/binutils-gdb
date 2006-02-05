@@ -150,12 +150,22 @@ These are the additional directives in @code{@value{AS}} for the Z80:
 @item db @var{expression}|@var{string}[,@var{expression}|@var{string}...]
 @itemx defb @var{expression}|@var{string}[,@var{expression}|@var{string}...]
 For each @var{string} the characters are copied to the object file, for
-each other @var{expression} the value is stored in one byte, ignoring
-overflow. 
+each other @var{expression} the value is stored in one byte. 
+A warning is issued in case of an overflow. 
 
 @item dw @var{expression}[,@var{expression}...]
 @itemx defw @var{expression}[,@var{expression}...]
 For each @var{expression} the value is stored in two bytes, ignoring
+overflow. 
+
+@item d24 @var{expression}[,@var{expression}...]
+@itemx def24 @var{expression}[,@var{expression}...]
+For each @var{expression} the value is stored in three bytes, ignoring
+overflow. 
+
+@item d32 @var{expression}[,@var{expression}...]
+@itemx def32 @var{expression}[,@var{expression}...]
+For each @var{expression} the value is stored in four bytes, ignoring
 overflow. 
 
 @item ds @var{count}[, @var{value}]

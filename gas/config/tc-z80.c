@@ -210,16 +210,6 @@ z80_md_end (void)
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach_type);
 }
 
-/* Port specific features.  */
-const pseudo_typeS md_pseudo_table[] =
-{
-  { "defs",  s_space, 1}, /* Synonym for ds on some assemblers.  */
-  { "ds",    s_space, 1}, /* Fill with bytes rather than words.  */
-  { "psect", obj_coff_section, 0}, /* TODO: Translate attributes.  */
-  { "set", 0, 0}, 		/* Real instruction on z80.  */
-  { NULL, 0, 0 }
-} ;
-
 static const char *
 skip_space (const char *s)
 {
@@ -262,7 +252,7 @@ z80_start_line_hook (void)
 	  break;
 	}
     }
-  /* Check for <label>[:] (EQU|DEFL) <value>.  */
+  /* Check for <label>[:] [.](EQU|DEFL) <value>.  */
   if (is_name_beginner (*input_line_pointer))
     {
       char c, *rest, *line_start;
@@ -280,6 +270,8 @@ z80_start_line_hook (void)
       if (*rest == ':')
 	++rest;
       if (*rest == ' ' || *rest == '\t')
+	++rest;
+      if (*rest == '.')
 	++rest;
       if (strncasecmp (rest, "EQU", 3) == 0)
 	len = 3;
@@ -300,7 +292,6 @@ z80_start_line_hook (void)
 	      if (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
 		as_bad (_("symbol `%s' is already defined"), line_start);
 	    }
-	  /* All symbols may be redefined.  */
 	  equals (line_start, 1);
 	  return 1;
 	}
@@ -452,7 +443,7 @@ wrong_mach (int ins_type)
       p = "instruction only works R800";
       break;
     default:
-      p = 0; /* Not reachables.  */
+      p = 0; /* Not reachable.  */
     }
 
   if (ins_type & ins_err)
@@ -733,6 +724,26 @@ emit_insn (char prefix, char opcode, const char * args)
   return args;
 }
 
+void z80_cons_fix_new (fragS *frag_p, int offset, int nbytes, expressionS *exp)
+{
+  bfd_reloc_code_real_type r[4] =
+    {
+      BFD_RELOC_8,
+      BFD_RELOC_16,
+      BFD_RELOC_24,
+      BFD_RELOC_32
+    };
+
+  if (nbytes < 1 || nbytes > 4) 
+    {
+      as_bad (_("unsupported BFD relocation size %u"), nbytes);
+    }
+  else
+    {
+      fix_new_exp (frag_p, offset, nbytes, exp, 0, r[nbytes-1]);
+    }
+}
+
 static void
 emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
 {
@@ -742,7 +753,11 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
 
   p = frag_more (1);
   *p = val->X_add_number;
-  if ((r_type != BFD_RELOC_8_PCREL) && (val->X_op == O_constant))
+  if ((r_type == BFD_RELOC_8_PCREL) && (val->X_op == O_constant))
+    {
+      as_bad(_("cannot make a relative jump to an absolute location"));
+    }
+  else if (val->X_op == O_constant)
     {
       lo = -128;
       hi = (BFD_RELOC_8 == r_type) ? 255 : 127;
@@ -1717,38 +1732,33 @@ emit_ld (char prefix_in ATTRIBUTE_UNUSED, char opcode_in ATTRIBUTE_UNUSED,
   return p;
 }
 
-static const char *
-emit_data (char prefix ATTRIBUTE_UNUSED, char opcode, const char * args)
+static void
+emit_data (int size ATTRIBUTE_UNUSED)
 {
   const char *p, *q;
   char *u, quote;
   int cnt;
   expressionS exp;
 
-  p = skip_space (args);
-  if (!*p)
-    error (_("missing operand"));
+  if (is_it_end_of_statement ())
+    {
+      demand_empty_rest_of_line ();
+      return;
+    }
+  p = skip_space (input_line_pointer);
 
-  while (*p)
+  do
     {
       if (*p == '\"' || *p == '\'')
 	{
-	  if (opcode == 1)
-	    {
-	      for (quote = *p, q = ++p, cnt = 0; *p && quote != *p; ++p, ++cnt)
-		;
-	      u = frag_more (cnt);
-	      memcpy (u, q, cnt);
-	      if (!*p)
-		as_warn (_("unterminated string"));
-	      else
-		p = skip_space (p+1);
-	    }
-	  else
-	    {
-	      ill_op ();
-	      break;
-	    }
+	    for (quote = *p, q = ++p, cnt = 0; *p && quote != *p; ++p, ++cnt)
+	      ;
+	    u = frag_more (cnt);
+	    memcpy (u, q, cnt);
+	    if (!*p)
+	      as_warn (_("unterminated string"));
+	    else
+	      p = skip_space (p+1);
 	}
       else
 	{
@@ -1760,21 +1770,12 @@ emit_data (char prefix ATTRIBUTE_UNUSED, char opcode, const char * args)
 	    }
 	  if (exp.X_md)
 	    as_warn (_("parentheses ignored"));
-	  if (opcode == 1)
-	    emit_byte (&exp, BFD_RELOC_8);
-	  else
-	    emit_word (&exp);
+	  emit_byte (&exp, BFD_RELOC_8);
 	  p = skip_space (p);
 	}
-      if (*p)
-	{
-	  if (*p != ',')
-	    as_warn (_("missing ','"));
-	  else
-	    ++p;
-	}
     }
-  return p;
+  while (*p++ == ',') ;
+  input_line_pointer = (char *)(p-1);
 }
 
 static const char *
@@ -1843,6 +1844,24 @@ emit_muluw (char prefix ATTRIBUTE_UNUSED, char opcode, const char * args)
   return p;
 }
 
+/* Port specific pseudo ops.  */
+const pseudo_typeS md_pseudo_table[] =
+{
+  { "db" , emit_data, 1},
+  { "d24", cons, 3},
+  { "d32", cons, 4},
+  { "def24", cons, 3},
+  { "def32", cons, 4},
+  { "defb", emit_data, 1},  
+  { "defs", s_space, 1}, /* Synonym for ds on some assemblers.  */
+  { "defw", cons, 2},
+  { "ds",   s_space, 1}, /* Fill with bytes rather than words.  */
+  { "dw", cons, 2},
+  { "psect", obj_coff_section, 0}, /* TODO: Translate attributes.  */
+  { "set", 0, 0}, 		/* Real instruction on z80.  */
+  { NULL, 0, 0 }
+} ;
+
 static table_t instab[] =
 {
   { "adc",  0x88, 0x4A, emit_adc },
@@ -1858,13 +1877,9 @@ static table_t instab[] =
   { "cpir", 0xED, 0xB1, emit_insn },
   { "cpl",  0x00, 0x2F, emit_insn },
   { "daa",  0x00, 0x27, emit_insn },
-  { "db",   0x00, 0x01, emit_data },
   { "dec",  0x0B, 0x05, emit_incdec },
-  { "defb", 0x00, 0x01, emit_data },
-  { "defw", 0x00, 0x02, emit_data },
   { "di",   0x00, 0xF3, emit_insn },
   { "djnz", 0x00, 0x10, emit_jr },
-  { "dw",   0x00, 0x02, emit_data },
   { "ei",   0x00, 0xFB, emit_insn },
   { "ex",   0x00, 0x00, emit_ex},
   { "exx",  0x00, 0xD9, emit_insn },
@@ -1936,25 +1951,32 @@ md_assemble (char* str)
   for (i = 0; (i < BUFLEN) && (ISALPHA (*p));)
     buf[i++] = TOLOWER (*p++);
 
-  if ((i == BUFLEN)
-      || ((*p) && (!ISSPACE (*p))))
-    as_bad (_("illegal instruction '%s'"), buf);
-
-  buf[i] = 0;
-  p = skip_space (p);
-  key = buf;
-
-  insp = bsearch (&key, instab, ARRAY_SIZE (instab),
-		  sizeof (instab[0]), key_cmp);
-  if (!insp)
-    as_bad (_("illegal instruction '%s'"), buf);
-  else
+  if (i == BUFLEN)
     {
-      p = insp->fp (insp->prefix, insp->opcode, p);
+      buf[BUFLEN-3] = buf[BUFLEN-2] = '.'; /* Mark opcode as abbreviated.  */
+      buf[BUFLEN-1] = 0;
+      as_bad (_("Unknown instruction '%s'"), buf);
+    }
+  else if ((*p) && (!ISSPACE (*p)))
+    as_bad (_("syntax error"));
+  else 
+    {
+      buf[i] = 0;
       p = skip_space (p);
-      if ((!err_flag) && *p)
-	as_bad (_("junk at end of line, first unrecognized character is `%c'"),
-		*p);
+      key = buf;
+      
+      insp = bsearch (&key, instab, ARRAY_SIZE (instab),
+		    sizeof (instab[0]), key_cmp);
+      if (!insp)
+	as_bad (_("Unknown instruction '%s'"), buf);
+      else
+	{
+	  p = insp->fp (insp->prefix, insp->opcode, p);
+	  p = skip_space (p);
+	if ((!err_flag) && *p)
+	  as_bad (_("junk at end of line, first unrecognized character is `%c'"),
+		  *p);
+	}
     }
   input_line_pointer = old_ptr;
 }
@@ -2005,6 +2027,7 @@ md_apply_fix (fixS * fixP, valueT* valP, segT seg ATTRIBUTE_UNUSED)
       if (val > 255 || val < -128)
 	as_warn_where (fixP->fx_file, fixP->fx_line, _("overflow"));
       *buf++ = val;
+      fixP->fx_no_overflow = 1; 
       if (fixP->fx_addsy == NULL)
 	fixP->fx_done = 1;
       break;
@@ -2012,11 +2035,21 @@ md_apply_fix (fixS * fixP, valueT* valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_16:
       *buf++ = val;
       *buf++ = (val >> 8);
+      fixP->fx_no_overflow = 1; 
       if (fixP->fx_addsy == NULL)
 	fixP->fx_done = 1;
       break;
 
-    case BFD_RELOC_32: /* .Long may produce this.  */
+    case BFD_RELOC_24: /* Def24 may produce this.  */
+      *buf++ = val;
+      *buf++ = (val >> 8);
+      *buf++ = (val >> 16);
+      fixP->fx_no_overflow = 1; 
+      if (fixP->fx_addsy == NULL)
+	fixP->fx_done = 1;
+      break;
+
+    case BFD_RELOC_32: /* Def32 and .long may produce this.  */
       *buf++ = val;
       *buf++ = (val >> 8);
       *buf++ = (val >> 16);
