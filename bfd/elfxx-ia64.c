@@ -1524,6 +1524,11 @@ elfNN_ia64_fake_sections (abfd, hdr, sec)
   if (sec->flags & SEC_SMALL_DATA)
     hdr->sh_flags |= SHF_IA_64_SHORT;
 
+  /* Some HP linkers look for the SHF_IA_64_HP_TLS flag instead of SHF_TLS. */
+
+  if (elfNN_ia64_hpux_vec (abfd->xvec) && (sec->flags & SHF_TLS))
+    hdr->sh_flags |= SHF_IA_64_HP_TLS;
+
   return TRUE;
 }
 

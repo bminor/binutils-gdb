@@ -1,3 +1,8 @@
+2006-02-06  Steve Ellcey  <sje@cup.hp.com>
+
+	* elfxx-ia64.c (elfNN_ia64_fake_sections): Set SHF_IA_64_HP_TLS
+	if SHF_TLS is set.
+
 2006-02-05  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* coff-z80.c (r_imm24): New howto. 
