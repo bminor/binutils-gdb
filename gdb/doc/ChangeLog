@@ -1,3 +1,8 @@
+2006-02-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (Symbol Handling): Add a section
+	on memory management.
+
 2006-02-06  Vladimir Prus  <ghost@cs.msu.su>
 
 	* gdb.texinfo (Breakpoint table commands): Document the fullname

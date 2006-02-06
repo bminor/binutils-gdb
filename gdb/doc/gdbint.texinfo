@@ -9,7 +9,7 @@
 @ifinfo
 This file documents the internals of the GNU debugger @value{GDBN}.
 Copyright (C) 1990, 1991, 1992, 1993, 1994, 1996, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005
+   2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
@@ -49,7 +49,7 @@ Free Documentation License''.
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001,
-   2002, 2003, 2004, 2005  Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006  Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
@@ -1984,6 +1984,22 @@ platforms have different sizes and layouts.  Specialized routines that
 will only ever be implemented by one object file format may be called
 directly.  This interface should be described in a file
 @file{bfd/lib@var{xyz}.h}, which is included by @value{GDBN}.
+
+@section Memory Management for Symbol Files
+
+Most memory associated with a loaded symbol file is stored on
+its @code{objfile_obstack}.  This includes symbols, types,
+namespace data, and other information produced by the symbol readers.
+
+Because this data lives on the objfile's obstack, it is automatically
+released when the objfile is unloaded or reloaded.  Therefore one
+objfile must not reference symbol or type data from another objfile;
+they could be unloaded at different times.
+
+User convenience variables, et cetera, have associated types.  Normally
+these types live in the associated objfile.  However, when the objfile
+is unloaded, those types are deep copied to global memory, so that
+the values of the user variables and history items are not lost.
 
 
 @node Language Support
