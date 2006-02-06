@@ -1,3 +1,8 @@
+2006-02-06  Vladimir Prus  <ghost@cs.msu.su>
+
+	* breakpoint.c (print_one_breakpoint): For MI-like UI, output
+	fullname field.
+
 2006-02-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* exceptions.h (enum errors): Rename NO_ERROR to GDB_NO_ERROR.

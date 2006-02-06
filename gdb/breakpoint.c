@@ -1,7 +1,7 @@
 /* Everything about breakpoints, for GDB.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -3506,6 +3506,16 @@ print_one_breakpoint (struct breakpoint *b,
 	      }
 	    ui_out_field_string (uiout, "file", b->source_file);
 	    ui_out_text (uiout, ":");
+
+            if (ui_out_is_mi_like_p (uiout))
+              {
+                struct symtab_and_line sal = find_pc_line (b->loc->address, 0);
+                char *fullname = symtab_to_fullname (sal.symtab);
+
+                if (fullname)
+                  ui_out_field_string (uiout, "fullname", fullname);
+              }
+
 	    ui_out_field_int (uiout, "line", b->line_number);
 	  }
 	else if (b->pending)

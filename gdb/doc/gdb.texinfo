@@ -17592,7 +17592,7 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-addr="0x000100d0",func="main",file="hello.c",line="5",times="0",
+addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c"line="5",times="0",
 ignore="3"@}]@}
 (@value{GDBP})
 @end smallexample
@@ -17640,7 +17640,7 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-addr="0x000100d0",func="main",file="hello.c",line="5",cond="1",
+addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",line="5",cond="1",
 times="0",ignore="3"@}]@}
 (@value{GDBP})
 @end smallexample
@@ -17712,7 +17712,7 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="2",type="breakpoint",disp="keep",enabled="n",
-addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}]@}
+addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",line="5",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -17747,7 +17747,7 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
-addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}]@}
+addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",line="5",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -17853,9 +17853,9 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-addr="0x0001072c", func="main",file="recursive2.c",line="4",times="0"@},
+addr="0x0001072c", func="main",file="recursive2.c",fullname="/home/foo/recursive2.c,"line="4",times="0"@},
 bkpt=@{number="2",type="breakpoint",disp="del",enabled="y",
-addr="0x00010774",func="foo",file="recursive2.c",line="11",times="0"@}]@}
+addr="0x00010774",func="foo",file="recursive2.c",fullname="/home/foo/recursive2.c",line="11",times="0"@}]@}
 (@value{GDBP})
 -break-insert -r foo.*
 ~int foo(int, int);
@@ -17915,7 +17915,7 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@},
 bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
-addr="0x00010114",func="foo",file="hello.c",line="13",times="0"@}]@}
+addr="0x00010114",func="foo",file="hello.c",fullname="/home/foo/hello.c",line="13",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -18025,7 +18025,7 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c"line="8",times="1"@},
 bkpt=@{number="2",type="watchpoint",disp="keep",
 enabled="y",addr="",what="C",times="0"@}]@}
 (@value{GDBP})
@@ -18047,7 +18047,7 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
 bkpt=@{number="2",type="watchpoint",disp="keep",
 enabled="y",addr="",what="C",times="-5"@}]@}
 (@value{GDBP})
@@ -18069,7 +18069,7 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@}]@}
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@}]@}
 (@value{GDBP})
 @end smallexample
 
