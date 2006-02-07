@@ -1,6 +1,6 @@
 /* Motorola 68k series support for 32-bit ELF
    Copyright 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -24,6 +24,7 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/m68k.h"
+#include "opcode/m68k.h"
 
 static reloc_howto_type *reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
@@ -220,7 +221,7 @@ static const bfd_byte elf_m68k_plt_entry[PLT_ENTRY_SIZE] =
 
 #define CFV4E_PLT_ENTRY_SIZE 24 
 
-#define CFV4E_FLAG(abfd)  (elf_elfheader (abfd)->e_flags & EF_CFV4E)
+#define CFV4E_FLAG(abfd)  (elf_elfheader (abfd)->e_flags & EF_M68K_CFV4E)
 
 static const bfd_byte elf_cfv4e_plt0_entry[CFV4E_PLT_ENTRY_SIZE] =
 {
@@ -248,7 +249,7 @@ static const bfd_byte elf_cfv4e_plt_entry[CFV4E_PLT_ENTRY_SIZE] =
   0, 0, 0, 0              /* Replaced with offset to start of .plt.  */
 };
 
-#define CPU32_FLAG(abfd)  (elf_elfheader (abfd)->e_flags & EF_CPU32)
+#define CPU32_FLAG(abfd)  (elf_elfheader (abfd)->e_flags & EF_M68K_CPU32)
 
 #define PLT_CPU32_ENTRY_SIZE 24
 /* Procedure linkage table entries for the cpu32 */
@@ -372,6 +373,56 @@ elf_m68k_link_hash_table_create (abfd)
   return &ret->root.root;
 }
 
+/* Set the right machine number.  */
+
+static bfd_boolean
+elf32_m68k_object_p (bfd *abfd)
+{
+  unsigned int mach = 0;
+  unsigned features = 0;
+  flagword eflags = elf_elfheader (abfd)->e_flags;
+
+  if (eflags & EF_M68K_M68000)
+    features |= m68000;
+  else if (eflags & EF_M68K_CPU32)
+    features |= cpu32;
+  else if (eflags & EF_M68K_ISA_MASK)
+    {
+      switch (eflags & EF_M68K_ISA_MASK)
+	{
+	case EF_M68K_ISA_B:
+	  features |= mcfisa_b;
+	  /* FALLTHROUGH */
+	case EF_M68K_ISA_A_PLUS:
+	  features |= mcfisa_aa;
+	  /* FALLTHROUGH */
+	case EF_M68K_ISA_A:
+	  features |= mcfisa_a;
+	  break;
+	}
+      if (eflags & EF_M68K_HW_DIV)
+	features |= mcfhwdiv;
+      switch (eflags & EF_M68K_MAC_MASK)
+	{
+	case EF_M68K_MAC:
+	  features |= mcfmac;
+	  break;
+	case EF_M68K_EMAC:
+	  features |= mcfemac;
+	  break;
+	}
+      if (eflags & EF_M68K_USP)
+	features |= mcfusp;
+      if (eflags & EF_M68K_FLOAT)
+	features |= cfloat;
+    }
+
+  mach = bfd_m68k_features_to_mach (features);
+  bfd_default_set_arch_mach (abfd, bfd_arch_m68k, mach);
+
+  return TRUE;
+}
+
 /* Keep m68k-specific flags in the ELF header.  */
 static bfd_boolean
 elf32_m68k_set_private_flags (abfd, flags)
@@ -392,19 +443,86 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
 {
   flagword out_flags;
   flagword in_flags;
-
+  unsigned in_mach, out_mach;
+  
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
+    return FALSE;
 
+  in_mach = bfd_get_mach (ibfd);
+  out_mach = bfd_get_mach (obfd);
+  if (!out_mach || !in_mach)
+    /* One is unknown, copy the input machine.  */
+    out_mach = in_mach;
+  else if (in_mach != out_mach)
+    {
+      if (in_mach <= bfd_mach_m68060 && out_mach <= bfd_mach_m68060)
+	{
+	  /* Merge m68k machine. */
+	  if (in_mach > out_mach)
+	    out_mach = in_mach;
+	}
+      else if (in_mach >= bfd_mach_mcf_isa_a && out_mach >= bfd_mach_mcf_isa_a)
+	/* Merge cf machine.  */
+	out_mach = bfd_m68k_features_to_mach
+	  (bfd_m68k_mach_to_features (in_mach)
+	   | bfd_m68k_mach_to_features (out_mach));
+      else
+	/* They are incompatible.  */
+	return FALSE;
+    }
+  bfd_set_arch_mach (obfd, bfd_arch_m68k, out_mach);
+  
   in_flags  = elf_elfheader (ibfd)->e_flags;
   out_flags = elf_elfheader (obfd)->e_flags;
 
   if (!elf_flags_init (obfd))
     {
       elf_flags_init (obfd) = TRUE;
-      elf_elfheader (obfd)->e_flags = in_flags;
+      out_flags = in_flags;
     }
+  else
+    {
+      /* Copy legacy flags.  */
+      out_flags |= in_flags & (EF_M68K_CPU32 | EF_M68K_M68000 | EF_M68K_CFV4E);
+
+      if (((in_flags | out_flags) & EF_M68K_ISA_MASK)
+	  && ((in_flags | out_flags) & (EF_M68K_CPU32 | EF_M68K_M68000)))
+	/* Mixing m68k and cf is not allowed */
+	return FALSE;
+      
+      if (in_flags & EF_M68K_ISA_MASK)
+	{
+	  if (out_flags & EF_M68K_ISA_MASK)
+	    {
+	      /* Merge cf specific flags */
+	      if ((in_flags & EF_M68K_ISA_MASK)
+		  > (out_flags & EF_M68K_ISA_MASK))
+		{
+		  out_flags ^= out_flags & EF_M68K_ISA_MASK;
+		  out_flags |= in_flags & EF_M68K_ISA_MASK;
+		}
+	      out_flags |= in_flags
+		& (EF_M68K_HW_DIV | EF_M68K_USP | EF_M68K_FLOAT);
+	      if (in_flags & EF_M68K_MAC_MASK)
+		{
+		  if (!(out_flags & EF_M68K_MAC_MASK))
+		    out_flags |= in_flags & EF_M68K_MAC_MASK;
+		  else if ((out_flags & EF_M68K_MAC_MASK)
+			   != (in_flags & EF_M68K_MAC_MASK))
+		    /* Cannot mix MACs */
+		    return FALSE;
+		}
+	    }
+	  else
+	    {
+	      /* Copy the coldfire bits.  */
+	      out_flags &= ~EF_M68K_CF_MASK;
+	      out_flags |= in_flags & EF_M68K_CF_MASK;
+	    }
+	}
+    }
+  elf_elfheader (obfd)->e_flags = out_flags;
 
   return TRUE;
 }
@@ -416,6 +534,7 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
      PTR ptr;
 {
   FILE *file = (FILE *) ptr;
+  flagword eflags = elf_elfheader (abfd)->e_flags;
 
   BFD_ASSERT (abfd != NULL && ptr != NULL);
 
@@ -427,12 +546,55 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
   /* xgettext:c-format */
   fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
 
-  if (elf_elfheader (abfd)->e_flags & EF_CPU32)
-    fprintf (file, _(" [cpu32]"));
+  if (eflags & EF_M68K_CPU32)
+    fprintf (file, " [cpu32]");
 
-  if (elf_elfheader (abfd)->e_flags & EF_M68000)
-    fprintf (file, _(" [m68000]"));
+  if (eflags & EF_M68K_M68000)
+    fprintf (file, " [m68000]");
 
+  if (eflags & EF_M68K_CFV4E)
+    fprintf (file, " [cfv4e]");
+
+  if (eflags & EF_M68K_ISA_MASK)
+    {
+      char const *isa = _("unknown");
+      char const *mac = _("unknown");
+      
+      switch (eflags & EF_M68K_ISA_MASK)
+	{
+	case EF_M68K_ISA_A:
+	  isa = "A";
+	  break;
+	case EF_M68K_ISA_A_PLUS:
+	  isa = "A+";
+	  break;
+	case EF_M68K_ISA_B:
+	  isa = "B";
+	  break;
+	}
+      fprintf (file, " [isa %s]", isa);
+      if (eflags & EF_M68K_HW_DIV)
+	fprintf (file, " [hwdiv]");
+      switch (eflags & EF_M68K_MAC_MASK)
+	{
+	case 0:
+	  mac = NULL;
+	  break;
+	case EF_M68K_MAC:
+	  mac = "mac";
+	  break;
+	case EF_M68K_EMAC:
+	  mac = "emac";
+	  break;
+	}
+      if (mac)
+	fprintf (file, " [%s]", mac);
+      if (eflags & EF_M68K_USP)
+	fprintf (file, " [usp");
+      if (eflags & EF_M68K_FLOAT)
+	fprintf (file, " [float]");
+    }
+  
   fputc ('\n', file);
 
   return TRUE;
@@ -2313,6 +2475,7 @@ elf_m68k_plt_sym_val (bfd_vma i, const asection *plt,
                                         elf32_m68k_print_private_bfd_data
 #define elf_backend_reloc_type_class	elf32_m68k_reloc_type_class
 #define elf_backend_plt_sym_val		elf_m68k_plt_sym_val
+#define elf_backend_object_p		elf32_m68k_object_p
 
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1

@@ -1,3 +1,33 @@
+2006-01-26  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* archures.c (bfd_mach_mcf5200, bfd_mach_mcf5206e,
+	bfd_mach_mcf5307, bfd_mach_mcf5407, bfd_mach_mcf528x,
+	bfd_mach_mcfv4e, bfd_mach_mcf521x, bfd_mach_mcf5249,
+	bfd_mach_mcf547x, bfd_mach_mcf548x): Remove.
+	(bfd_mach_mcf_isa_a, bfd_mach_mcf_isa_a_div,
+	bfd_mach_mcf_isa_a_div_mac, bfd_mach_mcf_isa_a_div_emac,
+	bfd_mach_mcf_isa_aplus, bfd_mach_mcf_isa_aplus_mac,
+	bfd_mach_mcf_isa_aplus_emac, bfd_mach_mcf_isa_aplus_usp,
+	bfd_mach_mcf_isa_aplus_usp_mac, bfd_mach_mcf_isa_aplus_usp_emac,
+	bfd_mach_mcf_isa_b, bfd_mach_mcf_isa_b_mac, bfd_mach_mcf_isa_b_emac,
+	bfd_mach_mcf_isa_b_usp_float, bfd_mach_mcf_isa_b_usp_float_mac,
+	bfd_mach_mcf_isa_b_usp_float_emac): New.
+	(bfd_default_scan): Update coldfire mapping.
+	* bfd-in.h (bfd_m68k_mach_to_features,
+	bfd_m68k_features_to_mach): Declare.
+	* bfd-in2.h: Rebuilt.
+	* cpu-m68k.c (arch_info_struct): Add new coldfire machines,
+	adjust legacy names.
+	(m68k_arch_features): New.
+	(bfd_m68k_mach_to_features,
+	bfd_m68k_features_to_mach): Define.
+	* elf32-m68k.c (elf32_m68k_object_p): New.
+	(elf32_m68k_merge_private_bfd_data): Merge the CF EF flags.
+	(elf32_m68k_print_private_bfd_data): Print the CF EF flags.
+	(elf_backend_object_p): Define.
+	* ieee.c (ieee_write_processor): Update coldfire machines.
+	* libbfd.h: Rebuilt.
+
 2006-02-06  Steve Ellcey  <sje@cup.hp.com>
 
 	* elfxx-ia64.c (elfNN_ia64_fake_sections): Set SHF_IA_64_HP_TLS

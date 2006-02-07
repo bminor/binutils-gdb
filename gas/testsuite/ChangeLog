@@ -1,3 +1,8 @@
+2006-02-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* testsuite/gas/m68k/all.exp: Add arch-cpu-1 test.
+	* testsuite/gas/m68k/arch-cpu-1.[sd]: New.
+
 2005-02-02  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_invert.d: New test.

@@ -1,6 +1,6 @@
 /* BFD library support routines for architectures.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
@@ -80,16 +80,22 @@ DESCRIPTION
 .#define bfd_mach_m68040 6
 .#define bfd_mach_m68060 7
 .#define bfd_mach_cpu32  8
-.#define bfd_mach_mcf5200  9
-.#define bfd_mach_mcf5206e 10
-.#define bfd_mach_mcf5307  11
-.#define bfd_mach_mcf5407  12
-.#define bfd_mach_mcf528x  13
-.#define bfd_mach_mcfv4e   14
-.#define bfd_mach_mcf521x   15
-.#define bfd_mach_mcf5249   16
-.#define bfd_mach_mcf547x   17
-.#define bfd_mach_mcf548x   18
+.#define bfd_mach_mcf_isa_a 9
+.#define bfd_mach_mcf_isa_a_div 10
+.#define bfd_mach_mcf_isa_a_div_mac 11
+.#define bfd_mach_mcf_isa_a_div_emac 12
+.#define bfd_mach_mcf_isa_aplus 13
+.#define bfd_mach_mcf_isa_aplus_mac 14
+.#define bfd_mach_mcf_isa_aplus_emac 15
+.#define bfd_mach_mcf_isa_aplus_usp 16
+.#define bfd_mach_mcf_isa_aplus_usp_mac 17
+.#define bfd_mach_mcf_isa_aplus_usp_emac 18
+.#define bfd_mach_mcf_isa_b 19
+.#define bfd_mach_mcf_isa_b_mac 20
+.#define bfd_mach_mcf_isa_b_emac 21
+.#define bfd_mach_mcf_isa_b_usp_float 22
+.#define bfd_mach_mcf_isa_b_usp_float_mac 23
+.#define bfd_mach_mcf_isa_b_usp_float_emac 24
 .  bfd_arch_vax,       {* DEC Vax *}
 .  bfd_arch_i960,      {* Intel 960 *}
 .    {* The order of the following is important.
@@ -1004,23 +1010,23 @@ bfd_default_scan (const bfd_arch_info_type *info, const char *string)
       break;
     case 5200:
       arch = bfd_arch_m68k;
-      number = bfd_mach_mcf5200;
+      number = bfd_mach_mcf_isa_a;
       break;
     case 5206:
       arch = bfd_arch_m68k;
-      number = bfd_mach_mcf5206e;
+      number = bfd_mach_mcf_isa_a_div_mac;
       break;
     case 5307:
       arch = bfd_arch_m68k;
-      number = bfd_mach_mcf5307;
+      number = bfd_mach_mcf_isa_a_div_mac;
       break;
     case 5407:
       arch = bfd_arch_m68k;
-      number = bfd_mach_mcf5407;
+      number = bfd_mach_mcf_isa_b_mac;
       break;
     case 5282:
       arch = bfd_arch_m68k;
-      number = bfd_mach_mcf528x;
+      number = bfd_mach_mcf_isa_b_usp_float_emac;
       break;
 
     case 32000:

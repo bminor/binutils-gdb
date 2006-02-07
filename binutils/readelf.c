@@ -1940,10 +1940,53 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  break;
 
 	case EM_68K:
-	  if (e_flags & EF_CPU32)
+	  if (e_flags & EF_M68K_CPU32)
 	    strcat (buf, ", cpu32");
-	  if (e_flags & EF_M68000)
+	  if (e_flags & EF_M68K_M68000)
 	    strcat (buf, ", m68000");
+	  if (e_flags & EF_M68K_ISA_MASK)
+	    {
+	      char const *isa = _("unknown");
+	      char const *mac = _("unknown mac");
+      
+	      switch (e_flags & EF_M68K_ISA_MASK)
+		{
+		case EF_M68K_ISA_A:
+		  isa = "A";
+		  break;
+		case EF_M68K_ISA_A_PLUS:
+		  isa = "A+";
+		  break;
+		case EF_M68K_ISA_B:
+		  isa = "B";
+		  break;
+		}
+	      strcat (buf, ", cf, isa ");
+	      strcat (buf, isa);
+	      if (e_flags & EF_M68K_HW_DIV)
+		strcat (buf, ", hwdiv");
+	      switch (e_flags & EF_M68K_MAC_MASK)
+		{
+		case 0:
+		  mac = NULL;
+		  break;
+		case EF_M68K_MAC:
+		  mac = "mac";
+		  break;
+		case EF_M68K_EMAC:
+		  mac = "emac";
+		  break;
+		}
+	      if (mac)
+		{
+		  strcat (buf, ", ");
+		  strcat (buf, mac);
+		}
+	      if (e_flags & EF_M68K_USP)
+		strcat (buf, ", usp");
+	      if (e_flags & EF_M68K_FLOAT)
+		strcat (buf, ", float");
+	    }
 	  break;
 
 	case EM_PPC:

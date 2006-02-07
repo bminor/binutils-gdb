@@ -1,3 +1,7 @@
+2006-02-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* m68k-dis.c (print_insn_m68k): Use bfd_m68k_mach_to_features.
+
 2006-01-26  David Ung  <davidu@mips.com>
 
 	* mips-opc.c: Add I33 masks to these MIPS32R2 instructions: prefx,

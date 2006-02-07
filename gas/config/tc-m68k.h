@@ -145,9 +145,6 @@ extern void m68k_elf_final_processing (void);
 
 #define DIFF_EXPR_OK
 
-extern void m68k_init_after_args (void);
-#define tc_init_after_args m68k_init_after_args
-
 extern int m68k_parse_long_option (char *);
 #define md_parse_long_option m68k_parse_long_option
 

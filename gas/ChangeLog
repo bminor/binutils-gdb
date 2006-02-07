@@ -1,3 +1,31 @@
+2006-02-07  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (mcf5208_control_regs, mcf5213_control_regs,
+	mcf5329_control_regs): New.
+	(not_current_architecture, selected_arch, selected_cpu): New.
+	(m68k_archs, m68k_extensions): New.
+	(archs): Renamed to ...
+	(m68k_cpus): ... here.  Adjust.
+	(n_arches): Remove.
+	(md_pseudo_table): Add arch and cpu directives.
+	(find_cf_chip, m68k_ip): Adjust table scanning.
+	(no_68851, no_68881): Remove.
+	(md_assemble): Lazily initialize.
+	(select_control_regs): Adjust cpu names. Add 5208, 5213, 5329.
+	(md_init_after_args): Move functionality to m68k_init_arch.
+	(mri_chip): Adjust table scanning.
+	(md_parse_option): Reimplement 'm' processing to add -march & -mcpu
+	options with saner parsing.
+	(m68k_lookup_cpu, m68k_set_arch, m68k_set_cpu, m68k_set_extension,
+	m68k_init_arch): New.
+	(s_m68k_cpu, s_m68k_arch): New.
+	(md_show_usage): Adjust.
+	(m68k_elf_final_processing): Set CF EF flags.
+	* config/tc-m68k.h (m68k_init_after_args): Remove.
+	(tc_init_after_args): Remove.
+	* doc/c-m68k.texi (M68K-Opts): Document -march, -mcpu options.
+	(M68k-Directives): Document .arch and .cpu directives.
+
 2006-02-05  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* config/tc-z80.c (z80_start_line_hook): allow .equ and .defl as 
