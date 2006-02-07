@@ -1,3 +1,11 @@
+2006-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Update file based on maintainers survey.  Add
+	a note to Past Maintainers.  Move unresponsive or inactive
+	maintainers to Authorized Committers or Past Maintainers as
+	appropriate.  Correct Jim Kingdon's email address.  Remove
+	vacant areas of responsibility.
+
 2006-02-06  Vladimir Prus  <ghost@cs.msu.su>
 
 	* breakpoint.c (print_one_breakpoint): For MI-like UI, output
