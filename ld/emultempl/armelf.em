@@ -26,6 +26,8 @@
 test -z "$TARGET2_TYPE" && TARGET2_TYPE="rel"
 cat >>e${EMULATION_NAME}.c <<EOF
 
+#include "elf/arm.h"
+
 static char *thumb_entry_symbol = NULL;
 static bfd *bfd_for_interwork;
 static int byteswap_code = 0;
@@ -150,11 +152,25 @@ arm_elf_finish (void)
   /* Call the elf32.em routine.  */
   gld${EMULATION_NAME}_finish ();
 
-  if (thumb_entry_symbol == NULL)
-    return;
+  if (thumb_entry_symbol)
+    {
+      h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
+				FALSE, FALSE, TRUE);
+    }
+  else
+    {
+      struct elf_link_hash_entry * eh;
 
-  h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
-			    FALSE, FALSE, TRUE);
+      if (!entry_symbol.name)
+	return;
+
+      h = bfd_link_hash_lookup (link_info.hash, entry_symbol.name,
+				FALSE, FALSE, TRUE);
+      eh = (struct elf_link_hash_entry *)h;
+      if (!h || ELF_ST_TYPE(eh->type) != STT_ARM_TFUNC)
+	return;
+    }
+
 
   if (h != (struct bfd_link_hash_entry *) NULL
       && (h->type == bfd_link_hash_defined
@@ -180,7 +196,8 @@ arm_elf_finish (void)
 
       sprintf_vma (buffer + 2, val);
 
-      if (entry_symbol.name != NULL && entry_from_cmdline)
+      if (thumb_entry_symbol != NULL && entry_symbol.name != NULL
+	  && entry_from_cmdline)
 	einfo (_("%P: warning: '--thumb-entry %s' is overriding '-e %s'\n"),
 	       thumb_entry_symbol, entry_symbol.name);
       entry_symbol.name = buffer;

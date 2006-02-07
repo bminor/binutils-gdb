@@ -89,6 +89,9 @@ set armelftests {
     {"TLS dynamic application" "-T arm-dyn.ld tmpdir/tls-lib.so" "" {tls-app.s}
      {{objdump -fdw tls-app.d} {objdump -Rw tls-app.r}}
      "tls-app"}
+    {"Thumb entry point" "-T arm.ld" "" {thumb-entry.s}
+     {{readelf -h thumb-entry.d}}
+     "thumb-entry"}
 }
 
 run_ld_link_tests $armelftests
