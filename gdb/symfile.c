@@ -1876,6 +1876,13 @@ add_symbol_file_command (char *args, int from_tty)
       argcnt++;
     }
 
+  /* This command takes at least two arguments.  The first one is a
+     filename, and the second is the address where this file has been
+     loaded.  Abort now if this address hasn't been provided by the
+     user.  */
+  if (section_index < 1)
+    error (_("The address where %s has been loaded is missing"), filename);
+
   /* Print the prompt for the query below. And save the arguments into
      a sect_addr_info structure to be passed around to other
      functions.  We have to split this up into separate print
