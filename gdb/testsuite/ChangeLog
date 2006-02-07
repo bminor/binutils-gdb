@@ -1,3 +1,8 @@
+2006-02-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/array_return.exp: Mark the last test as expected to fail
+	on hppa32 targets.
+
 2006-02-06  Vladimir Prus  <ghost@cs.msu.su>
 
 	* gdb.mi/mi-break.exp, gdb.mi/mi2-break.exp: Test for the fullname
