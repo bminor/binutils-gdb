@@ -1,5 +1,13 @@
 2006-02-08  Wu Zhou  <woodzltc@cn.ibm.com>
 
+	* config/i386/nm-i386sol2.h: Update copyright year.
+	* config/mips/nm-irix5.h: Ditto.
+	* config/sparc/nm-sol2.h: Ditto.
+	* s390-nat.c: Ditto.
+	* ppc-linux-nat.c: Ditto.
+
+2006-02-08  Wu Zhou  <woodzltc@cn.ibm.com>
+
 	* breakpoint.c (TARGET_REGION_OK_FOR_HW_WATCHPOINT): Delete.
 	* config/i386/nm-i386sol2.h (TARGET_REGION_OK_FOR_HW_WATCHPOINT): New.
 	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Delete.
