@@ -3448,6 +3448,9 @@ process_program_headers (FILE *file)
 	  for (j = 1; j < elf_header.e_shnum; j++, section++)
 	    {
 	      if (section->sh_size > 0
+		  /* PT_TLS segment contains only SHF_TLS sections.  */
+		  && (segment->p_type != PT_TLS
+		      || (section->sh_flags & SHF_TLS) != 0)
 		  /* Compare allocated sections by VMA, unallocated
 		     sections by file offset.  */
 		  && (section->sh_flags & SHF_ALLOC

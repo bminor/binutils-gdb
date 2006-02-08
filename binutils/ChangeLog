@@ -1,3 +1,8 @@
+2006-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_program_headers): Match PT_TLS segment
+	only with SHT_TLS sections.
+
 2006-02-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* readelf.c (get_machine_flags): Add logic for EF_M68K flags.
