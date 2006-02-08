@@ -80,6 +80,12 @@ attach_inferior (int pid, char *statusptr, int *sigptr)
 
   *sigptr = mywait (statusptr, 0);
 
+  /* GDB knows to ignore the first SIGSTOP after attaching to a running
+     process using the "attach" command, but this is different; it's
+     just using "target remote".  Pretend it's just starting up.  */
+  if (*statusptr == 'T' && *sigptr == SIGSTOP)
+    *sigptr = SIGTRAP;
+
   return 0;
 }
 
