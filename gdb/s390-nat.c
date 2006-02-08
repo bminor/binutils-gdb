@@ -358,7 +358,7 @@ s390_can_use_hw_breakpoint (int type, int cnt, int othertype)
 }
 
 static int
-s390_region_size_ok_for_hw_watchpoint (int cnt)
+s390_region_ok_for_hw_watchpoint (CORE_ADDR addr, int cnt)
 {
   return 1;
 }
@@ -380,7 +380,7 @@ _initialize_s390_nat (void)
 
   /* Add our watchpoint methods.  */
   t->to_can_use_hw_breakpoint = s390_can_use_hw_breakpoint;
-  t->to_region_size_ok_for_hw_watchpoint = s390_region_size_ok_for_hw_watchpoint;
+  t->to_region_ok_for_hw_watchpoint = s390_region_ok_for_hw_watchpoint;
   t->to_have_continuable_watchpoint = 1;
   t->to_stopped_by_watchpoint = s390_stopped_by_watchpoint;
   t->to_insert_watchpoint = s390_insert_watchpoint;

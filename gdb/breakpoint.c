@@ -5807,11 +5807,6 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
    in hardware.  If the watchpoint can not be handled
    in hardware return zero.  */
 
-#if !defined(TARGET_REGION_OK_FOR_HW_WATCHPOINT)
-#define TARGET_REGION_OK_FOR_HW_WATCHPOINT(ADDR,LEN) \
-     (TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(LEN))
-#endif
-
 static int
 can_use_hardware_watchpoint (struct value *v)
 {

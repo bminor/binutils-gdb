@@ -359,7 +359,7 @@ inf_ttrace_can_use_hw_breakpoint (int type, int len, int ot)
 }
 
 static int
-inf_ttrace_region_size_ok_for_hw_watchpoint (int len)
+inf_ttrace_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
   return 1;
 }
@@ -1121,8 +1121,8 @@ inf_ttrace_target (void)
   t->to_insert_watchpoint = inf_ttrace_insert_watchpoint;
   t->to_remove_watchpoint = inf_ttrace_remove_watchpoint;
   t->to_stopped_by_watchpoint = inf_ttrace_stopped_by_watchpoint;
-  t->to_region_size_ok_for_hw_watchpoint =
-    inf_ttrace_region_size_ok_for_hw_watchpoint;
+  t->to_region_ok_for_hw_watchpoint =
+    inf_ttrace_region_ok_for_hw_watchpoint;
   t->to_kill = inf_ttrace_kill;
   t->to_create_inferior = inf_ttrace_create_inferior;
   t->to_follow_fork = inf_ttrace_follow_fork;

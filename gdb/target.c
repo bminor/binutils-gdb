@@ -50,8 +50,6 @@ static void default_terminal_info (char *, int);
 
 static int default_region_ok_for_hw_watchpoint (CORE_ADDR, int);
 
-static int default_region_size_ok_for_hw_watchpoint (int);
-
 static int nosymbol (char *, CORE_ADDR *);
 
 static void tcomplain (void);
@@ -132,8 +130,6 @@ static int debug_to_stopped_by_watchpoint (void);
 static int debug_to_stopped_data_address (struct target_ops *, CORE_ADDR *);
 
 static int debug_to_region_ok_for_hw_watchpoint (CORE_ADDR, int);
-
-static int debug_to_region_size_ok_for_hw_watchpoint (int);
 
 static void debug_to_terminal_init (void);
 
@@ -411,7 +407,6 @@ update_current_target (void)
       INHERIT (to_stopped_by_watchpoint, t);
       INHERIT (to_have_continuable_watchpoint, t);
       INHERIT (to_region_ok_for_hw_watchpoint, t);
-      INHERIT (to_region_size_ok_for_hw_watchpoint, t);
       INHERIT (to_terminal_init, t);
       INHERIT (to_terminal_inferior, t);
       INHERIT (to_terminal_ours_for_output, t);
@@ -539,8 +534,6 @@ update_current_target (void)
 	    return_zero);
   de_fault (to_region_ok_for_hw_watchpoint,
 	    default_region_ok_for_hw_watchpoint);
-  de_fault (to_region_size_ok_for_hw_watchpoint,
-	    default_region_size_ok_for_hw_watchpoint);
   de_fault (to_terminal_init, 
 	    (void (*) (void)) 
 	    target_ignore);
@@ -1588,13 +1581,7 @@ find_default_create_inferior (char *exec_file, char *allargs, char **env,
 static int
 default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
-  return TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT (len);
-}
-
-static int
-default_region_size_ok_for_hw_watchpoint (int byte_count)
-{
-  return (byte_count <= TYPE_LENGTH (builtin_type_void_data_ptr));
+  return (len <= TYPE_LENGTH (builtin_type_void_data_ptr));
 }
 
 static int
@@ -2147,20 +2134,6 @@ debug_to_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 }
 
 static int
-debug_to_region_size_ok_for_hw_watchpoint (int byte_count)
-{
-  CORE_ADDR retval;
-
-  retval = debug_target.to_region_size_ok_for_hw_watchpoint (byte_count);
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT (%ld) = 0x%lx\n",
-		      (unsigned long) byte_count,
-		      (unsigned long) retval);
-  return retval;
-}
-
-static int
 debug_to_stopped_by_watchpoint (void)
 {
   int retval;
@@ -2566,7 +2539,6 @@ setup_target_debug (void)
   current_target.to_stopped_by_watchpoint = debug_to_stopped_by_watchpoint;
   current_target.to_stopped_data_address = debug_to_stopped_data_address;
   current_target.to_region_ok_for_hw_watchpoint = debug_to_region_ok_for_hw_watchpoint;
-  current_target.to_region_size_ok_for_hw_watchpoint = debug_to_region_size_ok_for_hw_watchpoint;
   current_target.to_terminal_init = debug_to_terminal_init;
   current_target.to_terminal_inferior = debug_to_terminal_inferior;
   current_target.to_terminal_ours_for_output = debug_to_terminal_ours_for_output;

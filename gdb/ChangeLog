@@ -1,3 +1,33 @@
+2006-02-08  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* breakpoint.c (TARGET_REGION_OK_FOR_HW_WATCHPOINT): Delete.
+	* config/i386/nm-i386sol2.h (TARGET_REGION_OK_FOR_HW_WATCHPOINT): New.
+	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Delete.
+	* config/mips/nm-irix5.h (TARGET_REGION_OK_FOR_HW_WATCHPOINT): New.
+	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Delete.
+	* config/sparc/nm-sol2.h (TARGET_REGION_OK_FOR_HW_WATCHPOINT): New.
+	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Delete.
+	* inf-ttrace.c (inf_ttrace_region_ok_for_hw_watchpoint): New.
+	(inf_ttrace_region_size_ok_for_hw_watchpoint): Delete.
+	(inf_ttrace_target): Delete to_region_size_ok_for_hw_watchpoint and
+	add to_region_ok_for_hw_watchpoint.
+	* s390-nat.c (s390_region_size_ok_for_hw_watchpoint): Delete.
+	(s390_region_ok_for_hw_watchpoint): New.
+	(_initialize_s390_nat): Delete to_region_size_ok_for_hw_watchpoint
+	and add to_region_ok_for_hw_watchpoint.
+	* target.c (default_region_size_ok_for_hw_watchpoint, 
+	debug_to_region_size_ok_for_hw_watchpoint): Delete prototype.
+	(update_current_target): Delete to_region_size_ok_for_hw_watchpoint
+	inheritance and default_region_size_ok_for_hw_watchpoint.
+	(default_region_ok_for_hw_watchpoint): If len is less than or equal
+	the length of void pointer, return ok.
+	(default_region_size_ok_for_hw_watchpoint): Delete.
+	(debug_to_region_size_ok_for_hw_watchpoint): Delete.
+	(setup_target_debug): Delete to_region_size_ok_for_hw_watchpoint.
+	* target.h (struct target_ops): Delete 
+	to_region_size_ok_for_hw_watchpoint.
+	(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT): Delete.
+	
 2006-02-08  Ben Elliston  <bje@au1.ibm.com>
 	    Wu Zhou  <woodzltc@cn.ibm.com>
 
