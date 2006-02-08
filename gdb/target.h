@@ -346,6 +346,7 @@ struct target_ops
     int (*to_stopped_by_watchpoint) (void);
     int to_have_continuable_watchpoint;
     int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
+    int (*to_region_ok_for_hw_watchpoint) (CORE_ADDR, int);
     int (*to_region_size_ok_for_hw_watchpoint) (int);
     void (*to_terminal_init) (void);
     void (*to_terminal_inferior) (void);
@@ -1029,6 +1030,11 @@ extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
 #ifndef TARGET_CAN_USE_HARDWARE_WATCHPOINT
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) \
  (*current_target.to_can_use_hw_breakpoint) (TYPE, CNT, OTHERTYPE);
+#endif
+
+#ifndef TARGET_REGION_OK_FOR_HW_WATCHPOINT
+#define TARGET_REGION_OK_FOR_HW_WATCHPOINT(addr, len) \
+    (*current_target.to_region_ok_for_hw_watchpoint) (addr, len)
 #endif
 
 #if !defined(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT)

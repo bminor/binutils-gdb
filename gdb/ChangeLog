@@ -1,5 +1,33 @@
-2005-02-07  Joel Brobecker  <brobecker@adacore.com>
+2006-02-08  Ben Elliston  <bje@au1.ibm.com>
+	    Wu Zhou  <woodzltc@cn.ibm.com>
 
+	* ppc-linux-nat.c (PTRACE_GET_DEBUGREG, PTRACE_SET_DEBUGREG,
+	PTRACE_GETSIGINFO): Define.
+	(last_stopped_data_address): New.
+	(ppc_linux_check_watch_resources): New function.
+	(ppc_linux_region_ok_for_hw_watchpoint): New function.
+	(ppc_linux_insert_watchpoint): New function.
+	(ppc_linux_remove_watchpoint): New function.
+	(ppc_linux_stopped_data_address): New function.
+	(ppc_linux_stopped_by_watchpoint): New function.
+	(_initialize_ppc_linux_nat): Set the above hardware watchpoint
+	related target vectors.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Set PPC architectures
+	to have nonsteppable watchpoint.
+	* target.c (default_region_ok_for_hw_watchpoint,
+	debug_to_region_ok_for_hw_watchpoint): New prototypes.
+	(update_current_target): Inherit to_region_ok_for_hw_watchpoint
+	and set default to_region_ok_for_hw_watchpoint.
+	(default_region_ok_for_hw_watchpoint): New function.
+	(debug_to_region_ok_for_hw_watchpoint): New function.
+	(setup_target_debug): Set to_region_ok_for_hw_watchpoint of 
+	debug_target.
+	* target.h (struct target_ops): Add a new target vector 
+	to_region_ok_for_hw_watchpoint.
+	(TARGET_REGION_OK_FOR_HW_WATCHPOINT): Define this if it is not
+	defined anyplace else.
+
+2005-02-07  Joel Brobecker  <brobecker@adacore.com>
 	* symfile.c (add_symbol_file_command): Abort if the user forgot
 	to provide the address when the file has been loaded.
 

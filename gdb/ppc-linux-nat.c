@@ -81,6 +81,16 @@
 #define PTRACE_SETEVRREGS 21
 #endif
 
+/* Similarly for the hardware watchpoint support.  */
+#ifndef PTRACE_GET_DEBUGREG
+#define PTRACE_GET_DEBUGREG    25
+#endif
+#ifndef PTRACE_SET_DEBUGREG
+#define PTRACE_SET_DEBUGREG    26
+#endif
+#ifndef PTRACE_GETSIGINFO
+#define PTRACE_GETSIGINFO    0x4202
+#endif
 
 /* This oddity is because the Linux kernel defines elf_vrregset_t as
    an array of 33 16 bytes long elements.  I.e. it leaves out vrsave.
@@ -146,13 +156,13 @@ struct gdb_evrregset_t
    error.  */
 int have_ptrace_getvrregs = 1;
 
+static CORE_ADDR last_stopped_data_address = 0;
 
 /* Non-zero if our kernel may support the PTRACE_GETEVRREGS and
    PTRACE_SETEVRREGS requests, for reading and writing the SPE
    registers.  Zero if we've tried one of them and gotten an
    error.  */
 int have_ptrace_getsetevrregs = 1;
-
 
 int
 kernel_u_size (void)
@@ -777,6 +787,124 @@ store_ppc_registers (int tid)
     store_spe_register (tid, -1);
 }
 
+static int
+ppc_linux_check_watch_resources (int type, int cnt, int ot)
+{
+  int tid;
+  ptid_t ptid = inferior_ptid;
+
+  /* DABR (data address breakpoint register) is optional for PPC variants.
+     Some variants have one DABR, others have none.  So CNT can't be larger
+     than 1.  */
+  if (cnt > 1)
+    return 0;
+
+  /* We need to know whether ptrace supports PTRACE_SET_DEBUGREG and whether
+     the target has DABR.  If either answer is no, the ptrace call will
+     return -1.  Fail in that case.  */
+  tid = TIDGET (ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
+
+  if (ptrace (PTRACE_SET_DEBUGREG, tid, 0, 0) == -1)
+    return 0;
+  return 1;
+}
+
+static int
+ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+{
+  /* Handle sub-8-byte quantities.  */
+  if (len <= 0)
+    return 0;
+
+  /* addr+len must fall in the 8 byte watchable region.  */
+  if ((addr + len) > (addr & ~7) + 8)
+    return 0;
+
+  return 1;
+}
+
+/* Set a watchpoint of type TYPE at address ADDR.  */
+static long
+ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
+{
+  int tid;
+  long dabr_value;
+  ptid_t ptid = inferior_ptid;
+
+  dabr_value = addr & ~7;
+  switch (rw)
+    {
+    case hw_read:
+      /* Set read and translate bits.  */
+      dabr_value |= 5;
+      break;
+    case hw_write:
+      /* Set write and translate bits.  */
+      dabr_value |= 6;
+      break;
+    case hw_access:
+      /* Set read, write and translate bits.  */
+      dabr_value |= 7;
+      break;
+    }
+
+  tid = TIDGET (ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
+
+  return ptrace (PTRACE_SET_DEBUGREG, tid, 0, dabr_value);
+}
+
+static long
+ppc_linux_remove_watchpoint (CORE_ADDR addr, int len)
+{
+  int tid;
+  ptid_t ptid = inferior_ptid;
+
+  tid = TIDGET (ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
+
+  return ptrace (PTRACE_SET_DEBUGREG, tid, 0, 0);
+}
+
+static int
+ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
+{
+  if (last_stopped_data_address)
+    {
+      *addr_p = last_stopped_data_address;
+      last_stopped_data_address = 0;
+      return 1;
+    }
+  return 0;
+}
+
+static int
+ppc_linux_stopped_by_watchpoint (void)
+{
+  int tid;
+  struct siginfo siginfo;
+  ptid_t ptid = inferior_ptid;
+  CORE_ADDR *addr_p;
+
+  tid = TIDGET(ptid);
+  if (tid == 0)
+    tid = PIDGET (ptid);
+
+  errno = 0;
+  ptrace (PTRACE_GETSIGINFO, tid, (PTRACE_TYPE_ARG3) 0, &siginfo);
+
+  if (errno != 0 || siginfo.si_signo != SIGTRAP ||
+      (siginfo.si_code & 0xffff) != 0x0004)
+    return 0;
+
+  last_stopped_data_address = (CORE_ADDR) siginfo.si_addr;
+  return 1;
+}
+
 static void
 ppc_linux_store_inferior_registers (int regno)
 {
@@ -899,6 +1027,14 @@ _initialize_ppc_linux_nat (void)
   /* Add our register access methods.  */
   t->to_fetch_registers = ppc_linux_fetch_inferior_registers;
   t->to_store_registers = ppc_linux_store_inferior_registers;
+
+  /* Add our watchpoint methods.  */
+  t->to_can_use_hw_breakpoint = ppc_linux_check_watch_resources;
+  t->to_region_ok_for_hw_watchpoint = ppc_linux_region_ok_for_hw_watchpoint;
+  t->to_insert_watchpoint = ppc_linux_insert_watchpoint;
+  t->to_remove_watchpoint = ppc_linux_remove_watchpoint;
+  t->to_stopped_by_watchpoint = ppc_linux_stopped_by_watchpoint;
+  t->to_stopped_data_address = ppc_linux_stopped_data_address;
 
   /* Register the target.  */
   add_target (t);

@@ -3387,6 +3387,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                     _("rs6000_gdbarch_init: "
                     "received unexpected BFD 'arch' value"));
 
+  set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
+
   /* Sanity check on registers.  */
   gdb_assert (strcmp (tdep->regs[tdep->ppc_gp0_regnum].name, "r0") == 0);
 
