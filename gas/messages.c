@@ -21,28 +21,6 @@
 
 #include "as.h"
 
-#include <stdio.h>
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif
-
-#ifdef USE_STDARG
-#include <stdarg.h>
-#endif
-
-#ifdef USE_VARARGS
-#include <varargs.h>
-#endif
-
-#if !defined (USE_STDARG) && !defined (USE_VARARGS)
-/* Roll our own.  */
-#define va_alist REST
-#define va_dcl
-typedef int * va_list;
-#define va_start(ARGS)	ARGS = &REST
-#define va_end(ARGS)
-#endif
-
 static void identify (char *);
 static void as_show_where (void);
 static void as_warn_internal (char *, unsigned int, char *);

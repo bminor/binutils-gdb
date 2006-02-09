@@ -68,6 +68,19 @@ extern void *alloca ();
 # endif /* HAVE_ALLOCA_H */
 #endif /* __GNUC__ */
 
+/* Prefer varargs for non-ANSI compiler, since some will barf if the
+   ellipsis definition is used with a no-arguments declaration.  */
+#if defined (HAVE_VARARGS_H) && !defined (__STDC__)
+#undef HAVE_STDARG_H
+#endif
+
+#if defined (HAVE_STDARG_H)
+#define USE_STDARG
+#endif
+#if !defined (USE_STDARG) && defined (HAVE_VARARGS_H)
+#define USE_VARARGS
+#endif
+
 /* Now, tend to the rest of the configuration.  */
 
 /* System include files first...  */
@@ -88,6 +101,27 @@ extern void *alloca ();
 #ifdef HAVE_SYS_TYPES_H
 /* for size_t, pid_t */
 #include <sys/types.h>
+#endif
+
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+
+#ifdef USE_STDARG
+#include <stdarg.h>
+#endif
+
+#ifdef USE_VARARGS
+#include <varargs.h>
+#endif
+
+#if !defined (USE_STDARG) && !defined (USE_VARARGS)
+/* Roll our own.  */
+#define va_alist REST
+#define va_dcl
+typedef int * va_list;
+#define va_start(ARGS)	ARGS = &REST
+#define va_end(ARGS)
 #endif
 
 #include "getopt.h"
@@ -143,6 +177,10 @@ extern PTR realloc ();
 #endif
 #ifdef NEED_DECLARATION_STRSTR
 extern char *strstr ();
+#endif
+
+#if !HAVE_DECL_VSNPRINTF
+extern int vsnprintf(char *, size_t, const char *, va_list);
 #endif
 
 /* This is needed for VMS.  */
@@ -441,19 +479,6 @@ struct _pseudo_type
 };
 
 typedef struct _pseudo_type pseudo_typeS;
-
-/* Prefer varargs for non-ANSI compiler, since some will barf if the
-   ellipsis definition is used with a no-arguments declaration.  */
-#if defined (HAVE_VARARGS_H) && !defined (__STDC__)
-#undef HAVE_STDARG_H
-#endif
-
-#if defined (HAVE_STDARG_H)
-#define USE_STDARG
-#endif
-#if !defined (USE_STDARG) && defined (HAVE_VARARGS_H)
-#define USE_VARARGS
-#endif
 
 #ifdef USE_STDARG
 #if (__GNUC__ >= 2) && !defined(VMS)
