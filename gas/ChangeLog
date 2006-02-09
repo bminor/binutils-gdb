@@ -1,3 +1,13 @@
+2006-02-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
+	
+	* configure.in (CHECK_DECLS): Add vsnprintf.
+	* configure: Regenerate.
+	* messages.c (errno.h, stdarg.h, varargs.h, va_list): Do not
+	include/declare here, but...
+	* as.h: Move code detecting VARARGS idiom to the top.
+	(errno.h, stdarg.h, varargs.h, va_list): ...here.
+	(vsnprintf): Declare if not already declared.
+
 2006-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* as.c (close_output_file): New.
