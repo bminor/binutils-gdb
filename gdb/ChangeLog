@@ -69,6 +69,11 @@
 	* symfile.c (add_symbol_file_command): Abort if the user forgot
 	to provide the address when the file has been loaded.
 
+2006-02-10  Nick Roberts  <nickrob@snap.net.nz>
+
+	* breakpoint.c (print_one_breakpoint): Add break to case
+	bp_catch_vfork in switch statement.
+
 2006-02-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Update file based on maintainers survey.  Add
