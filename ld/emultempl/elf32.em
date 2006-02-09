@@ -919,6 +919,18 @@ cat >>e${EMULATION_NAME}.c <<EOF
 
 EOF
 fi
+if [ "x${USE_LIBPATH}" = xyes ] ; then
+  case ${target} in
+    *-*-linux-* | *-*-k*bsd*-*)
+    # Linux
+      cat >>e${EMULATION_NAME}.c <<EOF
+	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
+	    break;
+
+EOF
+    ;;
+  esac
+fi
 cat >>e${EMULATION_NAME}.c <<EOF
 	  len = strlen (l->name);
 	  for (search = search_head; search != NULL; search = search->next)
@@ -937,17 +949,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  if (search != NULL)
 	    break;
 EOF
-if [ "x${USE_LIBPATH}" = xyes ] ; then
-  case ${target} in
-    *-*-linux-* | *-*-k*bsd*-*)
-      cat >>e${EMULATION_NAME}.c <<EOF
-	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
-	    break;
-EOF
-    # Linux
-    ;;
-  esac
-fi
 cat >>e${EMULATION_NAME}.c <<EOF
 	}
 

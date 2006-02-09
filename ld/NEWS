@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Modify the Linux linker to seach /etc/ld.so.conf first before
+  checking default search directories for DT_NEEDED entries.
+
 * PE-COFF: Forward exports from DLL's can now be specified in .def files
   passed directly to ld.
 

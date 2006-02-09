@@ -1,3 +1,12 @@
+2006-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2290
+	* NEWS: Updated for the Linux linker search order change.
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Call
+	gld${EMULATION_NAME}_check_ld_so_conf before checking default
+	search directories for DT_NEEDED entries.
+
 2006-02-07  Paul Brook  <paul@codesourcery.com>
 
 	* emultempl/armelf.em: Include elf/arm.h.
