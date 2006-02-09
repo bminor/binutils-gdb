@@ -3432,6 +3432,7 @@ print_one_breakpoint (struct breakpoint *b,
 	    ui_out_field_int (uiout, "what", b->forked_inferior_pid);
 	    ui_out_spaces (uiout, 1);
 	  }
+	break;
 
       case bp_catch_exec:
 	/* Field 4, the address, is omitted (which makes the columns
