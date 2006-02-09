@@ -1,3 +1,9 @@
+2006-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* as.c (close_output_file): New.
+	(main): Register close_output_file with xatexit before
+	dump_statistics. Don't call output_file_close.
+
 2006-02-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-m68k.c (mcf5208_control_regs, mcf5213_control_regs,
