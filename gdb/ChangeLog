@@ -1,3 +1,13 @@
+2006-02-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (struct dwarf2_per_cu_data): Reduce length to
+	30 bits.  Add load_all_dies flag.
+	(load_partial_dies): Load all DIEs if per_cu->load_all_dies is set.
+	Load DW_TAG_member by default.  Remove internal_error call.
+	(find_partial_die): Reload the compilation unit if we can not find
+	a DIE in the cache.  Call internal_error here if we still can not
+	find the DIE.
+
 2006-02-10  Nick Roberts  <nickrob@snap.net.nz>
 
 	* breakpoint.c (print_one_breakpoint): Add break to case

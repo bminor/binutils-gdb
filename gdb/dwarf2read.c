@@ -360,15 +360,21 @@ struct dwarf2_cu
 
 struct dwarf2_per_cu_data
 {
-  /* The start offset and length of this compilation unit.  2**31-1
+  /* The start offset and length of this compilation unit.  2**30-1
      bytes should suffice to store the length of any compilation unit
      - if it doesn't, GDB will fall over anyway.  */
   unsigned long offset;
-  unsigned long length : 31;
+  unsigned long length : 30;
 
   /* Flag indicating this compilation unit will be read in before
      any of the current compilation units are processed.  */
   unsigned long queued : 1;
+
+  /* This flag will be set if we need to load absolutely all DIEs
+     for this compilation unit, instead of just the ones we think
+     are interesting.  It gets set if we look for a DIE in the
+     hash table and don't find it.  */
+  unsigned int load_all_dies : 1;
 
   /* Set iff currently read in.  */
   struct dwarf2_cu *cu;
@@ -5144,11 +5150,15 @@ load_partial_dies (bfd *abfd, gdb_byte *info_ptr, int building_psymtab,
   struct partial_die_info *parent_die, *last_die, *first_die = NULL;
   struct abbrev_info *abbrev;
   unsigned int bytes_read;
+  unsigned int load_all = 0;
 
   int nesting_level = 1;
 
   parent_die = NULL;
   last_die = NULL;
+
+  if (cu->per_cu && cu->per_cu->load_all_dies)
+    load_all = 1;
 
   cu->partial_dies
     = htab_create_alloc_ex (cu->header.length / 12,
@@ -5185,12 +5195,17 @@ load_partial_dies (bfd *abfd, gdb_byte *info_ptr, int building_psymtab,
 	  continue;
 	}
 
-      /* Check whether this DIE is interesting enough to save.  */
-      if (!is_type_tag_for_partial (abbrev->tag)
+      /* Check whether this DIE is interesting enough to save.  Normally
+	 we would not be interested in members here, but there may be
+	 later variables referencing them via DW_AT_specification (for
+	 static members).  */
+      if (!load_all
+	  && !is_type_tag_for_partial (abbrev->tag)
 	  && abbrev->tag != DW_TAG_enumerator
 	  && abbrev->tag != DW_TAG_subprogram
 	  && abbrev->tag != DW_TAG_variable
-	  && abbrev->tag != DW_TAG_namespace)
+	  && abbrev->tag != DW_TAG_namespace
+	  && abbrev->tag != DW_TAG_member)
 	{
 	  /* Otherwise we skip to the next sibling, if any.  */
 	  info_ptr = skip_one_die (info_ptr + bytes_read, abbrev, cu);
@@ -5290,9 +5305,11 @@ load_partial_dies (bfd *abfd, gdb_byte *info_ptr, int building_psymtab,
 
 	 Adding more things than necessary to the hash table is harmless
 	 except for the performance cost.  Adding too few will result in
-	 internal errors in find_partial_die.  */
+	 wasted time in find_partial_die, when we reread the compilation
+	 unit with load_all_dies set.  */
 
-      if (abbrev->tag == DW_TAG_subprogram
+      if (load_all
+	  || abbrev->tag == DW_TAG_subprogram
 	  || abbrev->tag == DW_TAG_variable
 	  || abbrev->tag == DW_TAG_namespace
 	  || part_die->is_declaration)
@@ -5312,7 +5329,8 @@ load_partial_dies (bfd *abfd, gdb_byte *info_ptr, int building_psymtab,
 	 languages we have to, both so that we can get at method physnames
 	 to infer fully qualified class names, and for DW_AT_specification.  */
       if (last_die->has_children
-	  && (last_die->tag == DW_TAG_namespace
+	  && (load_all
+	      || last_die->tag == DW_TAG_namespace
 	      || last_die->tag == DW_TAG_enumeration_type
 	      || (cu->language != language_c
 		  && (last_die->tag == DW_TAG_class_type
@@ -5464,10 +5482,6 @@ find_partial_die_in_comp_unit (unsigned long offset, struct dwarf2_cu *cu)
   part_die.offset = offset;
   lookup_die = htab_find_with_hash (cu->partial_dies, &part_die, offset);
 
-  if (lookup_die == NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("could not find partial DIE in cache\n"));
-
   return lookup_die;
 }
 
@@ -5476,11 +5490,16 @@ find_partial_die_in_comp_unit (unsigned long offset, struct dwarf2_cu *cu)
 static struct partial_die_info *
 find_partial_die (unsigned long offset, struct dwarf2_cu *cu)
 {
-  struct dwarf2_per_cu_data *per_cu;
+  struct dwarf2_per_cu_data *per_cu = NULL;
+  struct partial_die_info *pd = NULL;
 
   if (offset >= cu->header.offset
       && offset < cu->header.offset + cu->header.length)
-    return find_partial_die_in_comp_unit (offset, cu);
+    {
+      pd = find_partial_die_in_comp_unit (offset, cu);
+      if (pd != NULL)
+	return pd;
+    }
 
   per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
 
@@ -5492,7 +5511,42 @@ find_partial_die (unsigned long offset, struct dwarf2_cu *cu)
     }
 
   per_cu->cu->last_used = 0;
-  return find_partial_die_in_comp_unit (offset, per_cu->cu);
+  pd = find_partial_die_in_comp_unit (offset, per_cu->cu);
+
+  if (pd == NULL && per_cu->load_all_dies == 0)
+    {
+      struct cleanup *back_to;
+      struct partial_die_info comp_unit_die;
+      struct abbrev_info *abbrev;
+      unsigned int bytes_read;
+      char *info_ptr;
+
+      per_cu->load_all_dies = 1;
+
+      /* Re-read the DIEs.  */
+      back_to = make_cleanup (null_cleanup, 0);
+      if (per_cu->cu->dwarf2_abbrevs == NULL)
+	{
+	  dwarf2_read_abbrevs (per_cu->cu->objfile->obfd, per_cu->cu);
+	  back_to = make_cleanup (dwarf2_free_abbrev_table, per_cu->cu);
+	}
+      info_ptr = per_cu->cu->header.first_die_ptr;
+      abbrev = peek_die_abbrev (info_ptr, &bytes_read, per_cu->cu);
+      info_ptr = read_partial_die (&comp_unit_die, abbrev, bytes_read,
+				   per_cu->cu->objfile->obfd, info_ptr,
+				   per_cu->cu);
+      if (comp_unit_die.has_children)
+	load_partial_dies (per_cu->cu->objfile->obfd, info_ptr, 0, per_cu->cu);
+      do_cleanups (back_to);
+
+      pd = find_partial_die_in_comp_unit (offset, per_cu->cu);
+    }
+
+  if (pd == NULL)
+    internal_error (__FILE__, __LINE__,
+		    _("could not find partial DIE 0x%lx in cache [from module %s]\n"),
+		    offset, bfd_get_filename (cu->objfile->obfd));
+  return pd;
 }
 
 /* Adjust PART_DIE before generating a symbol for it.  This function
