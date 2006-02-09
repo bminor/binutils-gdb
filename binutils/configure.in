@@ -172,7 +172,8 @@ if test $bu_cv_header_utime_h = yes; then
   AC_DEFINE(HAVE_GOOD_UTIME_H, 1, [Does <utime.h> define struct utimbuf?])
 fi
 
-AC_CHECK_DECLS([fprintf, stpcpy, strstr, sbrk, getenv, environ, getc_unlocked])
+AC_CHECK_DECLS([fprintf, stpcpy, strstr, sbrk, getenv, environ, getc_unlocked,
+		snprintf, vsnprintf])
 
 BFD_BINARY_FOPEN
 

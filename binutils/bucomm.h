@@ -90,6 +90,18 @@ extern char *getenv ();
 extern char **environ;
 #endif
 
+#if !HAVE_DECL_FPRINTF
+extern int fprintf (FILE *, const char *, ...);
+#endif
+
+#if !HAVE_DECL_SNPRINTF
+extern int snprintf(char *, size_t, const char *, ...);
+#endif
+
+#if !HAVE_DECL_VSNPRINTF
+extern int vsnprintf(char *, size_t, const char *, va_list);
+#endif
+
 #ifndef O_RDONLY
 #define O_RDONLY 0
 #endif

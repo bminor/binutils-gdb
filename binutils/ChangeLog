@@ -1,3 +1,12 @@
+2006-02-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* configure.in (CHECK_DECLS): Add snprintf and vsnprintf.
+	* configure: Regenerate.
+	* objdump.c (fprintf): Remove declaration.
+	* bucomm.h (fprintf): Declare if not already declared.
+	(snprintf): Likewise.
+	(vsnprintf): Likewise.
+
 2006-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_program_headers): Match PT_TLS segment
