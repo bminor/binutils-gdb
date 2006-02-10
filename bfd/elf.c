@@ -5045,10 +5045,10 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
   return idx;
 }
 
-/* Copy private BFD data.  This copies any program header information.  */
+/* Rewrite program header information.  */
 
 static bfd_boolean
-copy_private_bfd_data (bfd *ibfd, bfd *obfd)
+rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 {
   Elf_Internal_Ehdr *iehdr;
   struct elf_segment_map *map;
@@ -5063,13 +5063,6 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   struct elf_segment_map *phdr_adjust_seg = NULL;
   unsigned int phdr_adjust_num = 0;
   const struct elf_backend_data *bed;
-
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
-
-  if (elf_tdata (ibfd)->phdr == NULL)
-    return TRUE;
 
   bed = get_elf_backend_data (ibfd);
   iehdr = elf_elfheader (ibfd);
@@ -5628,6 +5621,186 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #undef SEGMENT_AFTER_SEGMENT
 #undef SEGMENT_OVERLAPS
   return TRUE;
+}
+
+/* Copy ELF program header information.  */
+
+static bfd_boolean
+copy_elf_program_header (bfd *ibfd, bfd *obfd)
+{
+  Elf_Internal_Ehdr *iehdr;
+  struct elf_segment_map *map;
+  struct elf_segment_map *map_first;
+  struct elf_segment_map **pointer_to_map;
+  Elf_Internal_Phdr *segment;
+  unsigned int i;
+  unsigned int num_segments;
+  bfd_boolean phdr_included = FALSE;
+
+  iehdr = elf_elfheader (ibfd);
+
+  map_first = NULL;
+  pointer_to_map = &map_first;
+
+  num_segments = elf_elfheader (ibfd)->e_phnum;
+  for (i = 0, segment = elf_tdata (ibfd)->phdr;
+       i < num_segments;
+       i++, segment++)
+    {
+      asection *section;
+      unsigned int section_count;
+      bfd_size_type amt;
+      Elf_Internal_Shdr *this_hdr;
+
+      /* FIXME: Do we need to copy PT_NULL segment?  */
+      if (segment->p_type == PT_NULL)
+	continue;
+
+      /* Compute how many sections are in this segment.  */
+      for (section = ibfd->sections, section_count = 0;
+	   section != NULL;
+	   section = section->next)
+	{
+	  this_hdr = &(elf_section_data(section)->this_hdr);
+	  if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
+	    section_count++;
+	}
+
+      /* Allocate a segment map big enough to contain
+	 all of the sections we have selected.  */
+      amt = sizeof (struct elf_segment_map);
+      if (section_count != 0)
+	amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
+      map = bfd_alloc (obfd, amt);
+      if (map == NULL)
+	return FALSE;
+
+      /* Initialize the fields of the output segment map with the
+	 input segment.  */
+      map->next = NULL;
+      map->p_type = segment->p_type;
+      map->p_flags = segment->p_flags;
+      map->p_flags_valid = 1;
+      map->p_paddr = segment->p_paddr;
+      map->p_paddr_valid = 1;
+
+      /* Determine if this segment contains the ELF file header
+	 and if it contains the program headers themselves.  */
+      map->includes_filehdr = (segment->p_offset == 0
+			       && segment->p_filesz >= iehdr->e_ehsize);
+
+      map->includes_phdrs = 0;
+      if (! phdr_included || segment->p_type != PT_LOAD)
+	{
+	  map->includes_phdrs =
+	    (segment->p_offset <= (bfd_vma) iehdr->e_phoff
+	     && (segment->p_offset + segment->p_filesz
+		 >= ((bfd_vma) iehdr->e_phoff
+		     + iehdr->e_phnum * iehdr->e_phentsize)));
+
+	  if (segment->p_type == PT_LOAD && map->includes_phdrs)
+	    phdr_included = TRUE;
+	}
+
+      if (section_count != 0)
+	{
+	  unsigned int isec = 0;
+
+	  for (section = ibfd->sections;
+	       section != NULL;
+	       section = section->next)
+	    {
+	      this_hdr = &(elf_section_data(section)->this_hdr);
+	      if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
+		map->sections[isec++] = section->output_section;
+	    }
+	}
+
+      map->count = section_count;
+      *pointer_to_map = map;
+      pointer_to_map = &map->next;
+    }
+
+  elf_tdata (obfd)->segment_map = map_first;
+  return TRUE;
+}
+
+/* Copy private BFD data.  This copies or rewrites ELF program header
+   information.  */
+
+static bfd_boolean
+copy_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  Elf_Internal_Phdr *segment;
+
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return TRUE;
+
+  if (elf_tdata (ibfd)->phdr == NULL)
+    return TRUE;
+
+  if (ibfd->xvec == obfd->xvec)
+    {
+      /* Check if any sections in the input BFD covered by ELF program
+	 header are changed.  */
+      asection *section, *osec;
+      unsigned int i, num_segments;
+      Elf_Internal_Shdr *this_hdr;
+
+      /* Initialize the segment mark field.  */
+      for (section = obfd->sections; section != NULL;
+	   section = section->next)
+	section->segment_mark = FALSE;
+
+      num_segments = elf_elfheader (ibfd)->e_phnum;
+      for (i = 0, segment = elf_tdata (ibfd)->phdr;
+	   i < num_segments;
+	   i++, segment++)
+	{
+	  for (section = ibfd->sections;
+	       section != NULL; section = section->next)
+	    {
+	      /* We mark the output section so that we know it comes
+		 from the input BFD.  */
+	      osec = section->output_section;
+	      if (osec)
+		osec->segment_mark = TRUE;
+
+	      /* Check if this section is covered by the segment.  */
+	      this_hdr = &(elf_section_data(section)->this_hdr);
+	      if (ELF_IS_SECTION_IN_SEGMENT_FILE (this_hdr, segment))
+		{
+		  /* FIXME: Check if its output section is changed or
+		     removed.  What else do we need to check?  */
+		  if (osec == NULL
+		      || section->flags != osec->flags
+		      || section->lma != osec->lma
+		      || section->vma != osec->vma
+		      || section->size != osec->size
+		      || section->rawsize != osec->rawsize
+		      || section->alignment_power != osec->alignment_power)
+		    goto rewrite;
+		}
+	    }
+	}
+
+      /* Check to see if any output section doesn't come from the
+	 input BFD.  */
+      for (section = obfd->sections; section != NULL;
+	   section = section->next)
+	{
+	  if (section->segment_mark == FALSE)
+	    goto rewrite;
+	  else
+	    section->segment_mark = FALSE;
+	}
+
+      return copy_elf_program_header (ibfd, obfd);
+    }
+
+rewrite:
+  return rewrite_elf_program_header (ibfd, obfd);
 }
 
 /* Initialize private output section information from input section.  */

@@ -1,4 +1,12 @@
-2006-01-26  Nathan Sidwell  <nathan@codesourcery.com>
+2006-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2258
+	* elf.c (copy_private_bfd_data): Renamed to ...
+	(rewrite_elf_program_header): This.
+	(copy_elf_program_header): New function.
+	(copy_private_bfd_data): Likewise.
+
+2006-02-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* archures.c (bfd_mach_mcf5200, bfd_mach_mcf5206e,
 	bfd_mach_mcf5307, bfd_mach_mcf5407, bfd_mach_mcf528x,

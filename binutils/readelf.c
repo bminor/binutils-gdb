@@ -3447,24 +3447,7 @@ process_program_headers (FILE *file)
 
 	  for (j = 1; j < elf_header.e_shnum; j++, section++)
 	    {
-	      if (section->sh_size > 0
-		  /* PT_TLS segment contains only SHF_TLS sections.  */
-		  && (segment->p_type != PT_TLS
-		      || (section->sh_flags & SHF_TLS) != 0)
-		  /* Compare allocated sections by VMA, unallocated
-		     sections by file offset.  */
-		  && (section->sh_flags & SHF_ALLOC
-		      ? (section->sh_addr >= segment->p_vaddr
-			 && section->sh_addr + section->sh_size
-			 <= segment->p_vaddr + segment->p_memsz)
-		      : ((bfd_vma) section->sh_offset >= segment->p_offset
-			 && (section->sh_offset + section->sh_size
-			     <= segment->p_offset + segment->p_filesz)))
-		  /* .tbss is special.  It doesn't contribute memory space
-		     to normal segments.  */
-		  && (!((section->sh_flags & SHF_TLS) != 0
-			&& section->sh_type == SHT_NOBITS)
-		      || segment->p_type == PT_TLS))
+	      if (ELF_IS_SECTION_IN_SEGMENT_MEMORY(section, segment))
 		printf ("%s ", SECTION_NAME (section));
 	    }
 

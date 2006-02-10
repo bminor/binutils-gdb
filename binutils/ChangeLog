@@ -1,3 +1,9 @@
+2006-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2258
+	* readelf.c (process_program_headers): Use
+	ELF_IS_SECTION_IN_SEGMENT_MEMORY.
+
 2006-02-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
 
 	* configure.in (CHECK_DECLS): Add snprintf and vsnprintf.
