@@ -839,25 +839,6 @@ internal_warning (const char *file, int line, const char *string, ...)
   va_end (ap);
 }
 
-/* The strerror() function can return NULL for errno values that are
-   out of range.  Provide a "safe" version that always returns a
-   printable string. */
-
-char *
-safe_strerror (int errnum)
-{
-  char *msg;
-
-  msg = strerror (errnum);
-  if (msg == NULL)
-    {
-      static char buf[32];
-      xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
-      msg = buf;
-    }
-  return (msg);
-}
-
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.
    Then return to command level.  */

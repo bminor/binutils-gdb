@@ -112,6 +112,10 @@ AC_DEFINE_DIR(DEBUGDIR, debugdir,
 
 AC_CONFIG_SUBDIRS(doc testsuite)
 
+# Provide defaults for some variables set by the per-host and per-target
+# configuration.
+gdb_host_obs=posix-hdep.o
+
 . $srcdir/configure.host
 
 . $srcdir/configure.tgt
@@ -1224,6 +1228,9 @@ case ${host} in
     ;;
 esac	    
 AC_SUBST(WIN32LIBS)
+
+# Add any host-specific objects to GDB.
+CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 
 LIBGUI="../libgui/src/libgui.a"
 GUI_CFLAGS_X="-I${srcdir}/../libgui/src"

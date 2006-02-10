@@ -1,3 +1,15 @@
+2006-02-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (mingw-hdep.o, posix-hdep.o): New dependencies.
+	(ALLDEPFILES): Add mingw-hdep.c and posix-hdep.c.
+	* configure.ac: Add gdb_host_obs to CONFIG_OBS.  Set gdb_host_obs
+	to posix-hdep.o by default.
+	* configure: Regenerated.
+	* configure.host: Document gdb_host_obs.  Add an entry for
+	i[34567]86-*-mingw32*.
+	* mingw-hdep.c, posix-hdep.c: New files.
+	* utils.c (safe_strerror): Remove, moved to posix-hdep.o.
+
 2006-02-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* defs.h (gdb_osabi): New enum value GDB_OSABI_AIX.
