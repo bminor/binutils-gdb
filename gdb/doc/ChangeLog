@@ -1,3 +1,10 @@
+2006-02-10  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (GDB/MI Breakpoint Table Commands): Add fullname and
+	times fields where needed.  Fix typos.  Update general form given
+	for output of -break-insert.
+	(GDB/MI): Abbreviate some unnecessarily long fullnames.
+
 2006-02-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Symbol Handling): Add a section
