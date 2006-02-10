@@ -1,3 +1,8 @@
+2006-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arc.c (init_opcode_tables): Fix cast.
+	(arc_extoper, md_operand): Likewise.
+
 2006-02-09  David Heine  <dlheine@tensilica.com>
 
 	* config/tc-xtensa.c (xg_assembly_relax): Increment steps_taken for

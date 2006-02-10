@@ -1,6 +1,6 @@
 /* tc-arc.c -- Assembler for the ARC
-   Copyright 1994, 1995, 1997, 1999, 2000, 2001, 2002, 2003, 2004, 2005
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 1997, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2006  Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
    This file is part of GAS, the GNU Assembler.
@@ -246,7 +246,7 @@ init_opcode_tables (int mach)
 	 output registers into the object file's symbol table.  */
       symbol_table_insert (symbol_create (arc_reg_names[i].name,
 					  reg_section,
-					  (int) &arc_reg_names[i],
+					  (valueT) &arc_reg_names[i],
 					  &zero_address_frag));
     }
 
@@ -550,7 +550,7 @@ arc_extoper (int opertype)
       if ((symbolP = symbol_find (name)))
 	{
 	  if (S_GET_SEGMENT (symbolP) == reg_section)
-	    S_SET_VALUE (symbolP, (int) &ext_oper->operand);
+	    S_SET_VALUE (symbolP, (valueT) &ext_oper->operand);
 	  else
 	    {
 	      as_bad ("attempt to override symbol: %s", name);
@@ -564,7 +564,8 @@ arc_extoper (int opertype)
 	{
 	  /* If its not there, add it.  */
 	  symbol_table_insert (symbol_create (name, reg_section,
-					      (int) &ext_oper->operand, &zero_address_frag));
+					      (valueT) &ext_oper->operand,
+					      &zero_address_frag));
 	}
     }
 
@@ -1165,7 +1166,7 @@ md_operand (expressionS *expressionP)
 	    {
 	      input_line_pointer += l + 1;
 	      expressionP->X_op = O_register;
-	      expressionP->X_add_number = (int) &ext_oper->operand;
+	      expressionP->X_add_number = (offsetT) &ext_oper->operand;
 	      return;
 	    }
 	  ext_oper = ext_oper->next;
@@ -1177,7 +1178,7 @@ md_operand (expressionS *expressionP)
 	    {
 	      input_line_pointer += l + 1;
 	      expressionP->X_op = O_register;
-	      expressionP->X_add_number = (int) &arc_reg_names[i];
+	      expressionP->X_add_number = (offsetT) &arc_reg_names[i];
 	      break;
 	    }
 	}
