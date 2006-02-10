@@ -17577,7 +17577,8 @@ The corresponding @value{GDBN} command is @samp{ignore}.
 @smallexample
 (@value{GDBP})
 -break-insert main
-^done,bkpt=@{number="1",addr="0x000100d0",file="hello.c",line="5"@}
+^done,bkpt=@{number="1",addr="0x000100d0",file="hello.c",
+fullname="/home/foo/hello.c",line="5",times="0"@}
 (@value{GDBP})
 -break-after 1 3
 ~
@@ -17592,8 +17593,8 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c"line="5",times="0",
-ignore="3"@}]@}
+addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",
+line="5",times="0",ignore="3"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -17640,8 +17641,8 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",line="5",cond="1",
-times="0",ignore="3"@}]@}
+addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",
+line="5",cond="1",times="0",ignore="3"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -17712,7 +17713,8 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="2",type="breakpoint",disp="keep",enabled="n",
-addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",line="5",times="0"@}]@}
+addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",
+line="5",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -17747,7 +17749,8 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
-addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",line="5",times="0"@}]@}
+addr="0x000100d0",func="main",file="hello.c",fullname="/home/foo/hello.c",
+line="5",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -17798,7 +17801,7 @@ The possible optional parameters of this command are:
 
 @table @samp
 @item -t
-Insert a tempoary breakpoint.
+Insert a temporary breakpoint.
 @item -h
 Insert a hardware breakpoint.
 @item -c @var{condition}
@@ -17816,15 +17819,19 @@ expresson.
 The result is in the form:
 
 @smallexample
- ^done,bkptno="@var{number}",func="@var{funcname}",
-  file="@var{filename}",line="@var{lineno}"
+^done,bkpt=@{number="@var{number}",type="@var{type}",disp="del"|"keep",
+enabled="y"|"n",addr="@var{hex}",func="@var{funcname}",file="@var{filename}",
+fullname="@var{full_filename}",line="@var{lineno}",times="@var{times}"@}
 @end smallexample
 
 @noindent
-where @var{number} is the @value{GDBN} number for this breakpoint, @var{funcname}
-is the name of the function where the breakpoint was inserted,
-@var{filename} is the name of the source file which contains this
-function, and @var{lineno} is the source line number within that file.
+where @var{number} is the @value{GDBN} number for this breakpoint,
+@var{funcname} is the name of the function where the breakpoint was
+inserted, @var{filename} is the name of the source file which contains
+this function, @var{lineno} is the source line number within that file
+and @var{times} the number of times that the breakpoint has been hit
+(always 0 for -break-insert but may be greater for -break-info or -break-list
+which use the same output).
 
 Note: this format is open to change.
 @c An out-of-band breakpoint instead of part of the result?
@@ -17839,10 +17846,12 @@ The corresponding @value{GDBN} commands are @samp{break}, @samp{tbreak},
 @smallexample
 (@value{GDBP})
 -break-insert main
-^done,bkpt=@{number="1",addr="0x0001072c",file="recursive2.c",line="4"@}
+^done,bkpt=@{number="1",addr="0x0001072c",file="recursive2.c",
+fullname="/home/foo/recursive2.c,line="4",times="0"@}
 (@value{GDBP})
 -break-insert -t foo
-^done,bkpt=@{number="2",addr="0x00010774",file="recursive2.c",line="11"@}
+^done,bkpt=@{number="2",addr="0x00010774",file="recursive2.c",
+fullname="/home/foo/recursive2.c,line="11",times="0"@}
 (@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{nr_rows="2",nr_cols="6",
@@ -17853,13 +17862,16 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="10",alignment="-1",col_name="addr",colhdr="Address"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
-addr="0x0001072c", func="main",file="recursive2.c",fullname="/home/foo/recursive2.c,"line="4",times="0"@},
+addr="0x0001072c", func="main",file="recursive2.c",
+fullname="/home/foo/recursive2.c,"line="4",times="0"@},
 bkpt=@{number="2",type="breakpoint",disp="del",enabled="y",
-addr="0x00010774",func="foo",file="recursive2.c",fullname="/home/foo/recursive2.c",line="11",times="0"@}]@}
+addr="0x00010774",func="foo",file="recursive2.c",
+fullname="/home/foo/recursive2.c",line="11",times="0"@}]@}
 (@value{GDBP})
 -break-insert -r foo.*
 ~int foo(int, int);
-^done,bkpt=@{number="3",addr="0x00010774",file="recursive2.c",line="11"@}
+^done,bkpt=@{number="3",addr="0x00010774",file="recursive2.c,
+"fullname="/home/foo/recursive2.c",line="11",times="0"@}
 (@value{GDBP})
 @end smallexample
 
@@ -17915,7 +17927,8 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@},
 bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
-addr="0x00010114",func="foo",file="hello.c",fullname="/home/foo/hello.c",line="13",times="0"@}]@}
+addr="0x00010114",func="foo",file="hello.c",fullname="/home/foo/hello.c",
+line="13",times="0"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -17975,7 +17988,7 @@ Setting a watchpoint on a variable in the @code{main} function:
 ^done,reason="watchpoint-trigger",wpt=@{number="2",exp="x"@},
 value=@{old="-268439212",new="55"@},
 frame=@{func="main",args=[],file="recursive2.c",
-fullname="/home/foo/bar/devo/myproject/recursive2.c",line="5"@}
+fullname="/home/foo/bar/recursive2.c",line="5"@}
 (@value{GDBP})
 @end smallexample
 
@@ -18025,7 +18038,8 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c"line="8",times="1"@},
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c"line="8",times="1"@},
 bkpt=@{number="2",type="watchpoint",disp="keep",
 enabled="y",addr="",what="C",times="0"@}]@}
 (@value{GDBP})
@@ -18047,7 +18061,8 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
 bkpt=@{number="2",type="watchpoint",disp="keep",
 enabled="y",addr="",what="C",times="-5"@}]@}
 (@value{GDBP})
@@ -18069,7 +18084,9 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 @{width="40",alignment="2",col_name="what",colhdr="What"@}],
 body=[bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
-file="../../../devo/gdb/testsuite/gdb.mi/basics.c",fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@}]@}
+file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
+fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c",line="8",
+times="1"@}]@}
 (@value{GDBP})
 @end smallexample
 
@@ -18292,7 +18309,7 @@ On a PPC MBX board:
 
 (@value{GDBP})
 *stopped,reason="breakpoint-hit",bkptno="1",frame=@{func="main",
-args=[],file="try.c",fullname="/home/foo/bar/devo/myproject/try.c",line="5"@}
+args=[],file="try.c",fullname="/home/foo/bar/try.c",line="5"@}
 (@value{GDBP})
 -data-list-changed-registers
 ^done,changed-registers=["0","1","2","4","5","6","7","8","9",
@@ -18899,7 +18916,7 @@ The corresponding @value{GDBN} corresponding is @samp{continue}.
 (@value{GDBP})
 @@Hello world
 *stopped,reason="breakpoint-hit",bkptno="2",frame=@{func="foo",args=[],
-file="hello.c",fullname="/home/foo/bar/devo/myproject/hello.c",line="13"@}
+file="hello.c",fullname="/home/foo/bar/hello.c",line="13"@}
 (@value{GDBP})
 @end smallexample
 
@@ -18931,7 +18948,7 @@ Function returning @code{void}.
 (@value{GDBP})
 @@hello from foo
 *stopped,reason="function-finished",frame=@{func="main",args=[],
-file="hello.c",fullname="/home/foo/bar/devo/myproject/hello.c",line="7"@}
+file="hello.c",fullname="/home/foo/bar/hello.c",line="7"@}
 (@value{GDBP})
 @end smallexample
 
@@ -18945,7 +18962,7 @@ value itself.
 (@value{GDBP})
 *stopped,reason="function-finished",frame=@{addr="0x000107b0",func="foo",
 args=[@{name="a",value="1"],@{name="b",value="9"@}@},
-file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 gdb-result-var="$1",return-value="0"
 (@value{GDBP})
 @end smallexample
@@ -18983,7 +19000,7 @@ The corresponding @value{GDBN} command is @samp{interrupt}.
 (@value{GDBP})
 111*stopped,signal-name="SIGINT",signal-meaning="Interrupt",
 frame=@{addr="0x00010140",func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/devo/myproject/try.c",line="13"@}
+fullname="/home/foo/bar/try.c",line="13"@}
 (@value{GDBP})
 
 (@value{GDBP})
@@ -19126,7 +19143,7 @@ The corresponding @value{GDBN} command is @samp{run}.
 (@value{GDBP})
 *stopped,reason="breakpoint-hit",bkptno="1",
 frame=@{func="main",args=[],file="recursive2.c",
-fullname="/home/foo/bar/devo/myproject/recursive2.c",line="4"@}
+fullname="/home/foo/bar/recursive2.c",line="4"@}
 (@value{GDBP})
 @end smallexample
 
@@ -19180,7 +19197,7 @@ Stepping into a function:
 *stopped,reason="end-stepping-range",
 frame=@{func="foo",args=[@{name="a",value="10"@},
 @{name="b",value="0"@}],file="recursive2.c",
-fullname="/home/foo/bar/devo/myproject/recursive2.c",line="11"@}
+fullname="/home/foo/bar/recursive2.c",line="11"@}
 (@value{GDBP})
 @end smallexample
 
@@ -19224,7 +19241,7 @@ The corresponding @value{GDBN} command is @samp{stepi}.
 (@value{GDBP})
 *stopped,reason="end-stepping-range",
 frame=@{func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/devo/myproject/try.c",line="10"@}
+fullname="/home/foo/bar/try.c",line="10"@}
 (@value{GDBP})
 -exec-step-instruction
 ^running
@@ -19232,7 +19249,7 @@ fullname="/home/foo/bar/devo/myproject/try.c",line="10"@}
 (@value{GDBP})
 *stopped,reason="end-stepping-range",
 frame=@{addr="0x000100f4",func="foo",args=[],file="try.c",
-fullname="/home/foo/bar/devo/myproject/try.c",line="10"@}
+fullname="/home/foo/bar/try.c",line="10"@}
 (@value{GDBP})
 @end smallexample
 
@@ -19264,7 +19281,7 @@ The corresponding @value{GDBN} command is @samp{until}.
 (@value{GDBP})
 x = 55
 *stopped,reason="location-reached",frame=@{func="main",args=[],
-file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="6"@}
+file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="6"@}
 (@value{GDBP})
 @end smallexample
 
@@ -19918,29 +19935,29 @@ Full stack backtrace:
 -stack-list-frames
 ^done,stack=
 [frame=@{level="0",addr="0x0001076c",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="11"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="11"@},
 frame=@{level="1",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="2",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="4",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="5",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="6",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="7",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="8",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="9",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="10",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="11",addr="0x00010738",func="main",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="4"@}]
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="4"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -19951,11 +19968,11 @@ Show frames between @var{low_frame} and @var{high_frame}:
 -stack-list-frames 3 5
 ^done,stack=
 [frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="4",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@},
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@},
 frame=@{level="5",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@}]
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@}]
 (@value{GDBP})
 @end smallexample
 
@@ -19966,7 +19983,7 @@ Show a single frame:
 -stack-list-frames 3 3
 ^done,stack=
 [frame=@{level="3",addr="0x000107a4",func="foo",
-  file="recursive2.c",fullname="/home/foo/bar/devo/myproject/recursive2.c",line="14"@}]
+  file="recursive2.c",fullname="/home/foo/bar/recursive2.c",line="14"@}]
 (@value{GDBP})
 @end smallexample
 
