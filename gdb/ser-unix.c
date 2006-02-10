@@ -31,6 +31,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 
+#include "gdb_select.h"
 #include "gdb_string.h"
 
 #ifdef HAVE_TERMIOS
@@ -365,7 +366,7 @@ hardwire_send_break (struct serial *scb)
        the full length of time.  I think that is OK.  */
     timeout.tv_sec = 0;
     timeout.tv_usec = 250000;
-    select (0, 0, 0, 0, &timeout);
+    gdb_select (0, 0, 0, 0, &timeout);
     status = ioctl (scb->fd, TIOCCBRK, 0);
     return status;
   }
@@ -448,9 +449,9 @@ wait_for (struct serial *scb, int timeout)
       FD_SET (scb->fd, &readfds);
 
       if (timeout >= 0)
-	numfds = select (scb->fd + 1, &readfds, 0, 0, &tv);
+	numfds = gdb_select (scb->fd + 1, &readfds, 0, 0, &tv);
       else
-	numfds = select (scb->fd + 1, &readfds, 0, 0, 0);
+	numfds = gdb_select (scb->fd + 1, &readfds, 0, 0, 0);
 
       if (numfds <= 0)
 	if (numfds == 0)

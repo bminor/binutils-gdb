@@ -1,4 +1,4 @@
-/* Host support routines for MinGW, for GDB, the GNU debugger.
+/* Slightly more portable version of <sys/select.h>.
 
    Copyright (C) 2006
    Free Software Foundation, Inc.
@@ -20,36 +20,18 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-#include "defs.h"
+#if !defined(GDB_SELECT_H)
+#define GDB_SELECT_H
 
-#include "gdb_string.h"
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
-#include "gdb_select.h"
+#ifdef USE_WIN32API
+#include <winsock2.h>
+#endif
 
-/* The strerror() function can return NULL for errno values that are
-   out of range.  Provide a "safe" version that always returns a
-   printable string. */
+extern int gdb_select (int n, fd_set *readfds, fd_set *writefds,
+		       fd_set *exceptfds, struct timeval *timeout);
 
-char *
-safe_strerror (int errnum)
-{
-  char *msg;
-
-  msg = strerror (errnum);
-  if (msg == NULL)
-    {
-      static char buf[32];
-      xsnprintf (buf, sizeof buf, "(undocumented errno %d)", errnum);
-      msg = buf;
-    }
-  return (msg);
-}
-
-/* Wrapper for select.  Nothing special needed on POSIX platforms.  */
-
-int
-gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
-	    struct timeval *timeout)
-{
-  return select (n, readfds, writefds, exceptfds, timeout);
-}
+#endif /* !defined(GDB_SELECT_H) */

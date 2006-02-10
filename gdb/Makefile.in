@@ -694,6 +694,7 @@ gdb_obstack_h = gdb_obstack.h $(obstack_h)
 gdb_proc_service_h = gdb_proc_service.h $(gregset_h)
 gdb_ptrace_h = gdb_ptrace.h
 gdb_regex_h = gdb_regex.h $(xregex_h)
+gdb_select_h = gdb_select.h
 gdb_stabs_h = gdb-stabs.h
 gdb_stat_h = gdb_stat.h
 gdb_string_h = gdb_string.h
@@ -767,6 +768,7 @@ scm_tags_h = scm-tags.h
 sentinel_frame_h = sentinel-frame.h
 serial_h = serial.h
 ser_base_h = ser-base.h
+ser_tcp_h = ser-tcp.h
 ser_unix_h = ser-unix.h
 shnbsd_tdep_h = shnbsd-tdep.h
 sh_tdep_h = sh-tdep.h
@@ -1445,7 +1447,7 @@ ALLDEPFILES = \
 	remote-st.c remote-utils.c dcache.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
-	ser-go32.c ser-pipe.c ser-tcp.c \
+	ser-go32.c ser-pipe.c ser-tcp.c ser-mingw.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	sol2-tdep.c \
 	solib-irix.c solib-svr4.c solib-sunos.c \
@@ -1922,7 +1924,7 @@ eval.o: eval.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(f_lang_h) $(cp_abi_h) $(infcall_h) $(objc_lang_h) $(block_h) \
 	$(parser_defs_h) $(cp_support_h)
 event-loop.o: event-loop.c $(defs_h) $(event_loop_h) $(event_top_h) \
-	$(gdb_string_h) $(exceptions_h) $(gdb_assert_h)
+	$(gdb_string_h) $(exceptions_h) $(gdb_assert_h) $(gdb_select_h)
 event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
 	$(terminal_h) $(event_loop_h) $(event_top_h) $(interps_h) \
 	$(exceptions_h) $(gdbcmd_h) $(readline_h) $(readline_history_h)
@@ -2129,7 +2131,7 @@ inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h)
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(serial_h) $(terminal_h) $(target_h) $(gdbthread_h) $(gdb_string_h) \
-	$(inflow_h)
+	$(inflow_h) $(gdb_select_h)
 inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
 	$(gdbcore_h) $(regcache_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(gdb_ptrace_h) $(gdb_wait_h) $(inf_child_h)
@@ -2282,7 +2284,8 @@ memattr.o: memattr.c $(defs_h) $(command_h) $(gdbcmd_h) $(memattr_h) \
 	$(target_h) $(value_h) $(language_h) $(gdb_string_h)
 mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
 	$(target_h)
-mingw-hdep.o: mingw-hdep.c $(defs_h) $(gdb_string_h)
+mingw-hdep.o: mingw-hdep.c $(defs_h) $(serial_h) $(gdb_assert_h) \
+	$(gdb_select_h) $(gdb_string_h)
 minsyms.o: minsyms.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(cp_abi_h)
 mips64obsd-nat.o: mips64obsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
@@ -2378,7 +2381,7 @@ p-exp.o: p-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 p-lang.o: p-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(p_lang_h) \
 	$(valprint_h) $(value_h)
-posix-hdep.o: posix-hdep.c $(defs_h) $(gdb_string_h)
+posix-hdep.o: posix-hdep.c $(defs_h) $(gdb_string_h) $(gdb_select_h)
 ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(bfd_h) $(symfile_h) $(target_h) $(gdbcmd_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(serial_h) $(ocd_h) $(ppc_tdep_h) \
@@ -2517,13 +2520,15 @@ ser-e7kpc.o: ser-e7kpc.c $(defs_h) $(serial_h) $(gdb_string_h)
 ser-go32.o: ser-go32.c $(defs_h) $(gdbcmd_h) $(serial_h) $(gdb_string_h)
 serial.o: serial.c $(defs_h) $(serial_h) $(gdb_string_h) $(gdbcmd_h)
 ser-base.o: ser-base.c $(defs_h) $(serial_h) $(ser_base_h) $(event_loop_h) \
-	$(gdb_string_h)
+	$(gdb_select_h) $(gdb_string_h)
 ser-pipe.o: ser-pipe.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
 	$(gdb_vfork_h) $(gdb_string_h)
-ser-tcp.o: ser-tcp.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
+ser-tcp.o: ser-tcp.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_tcp_h) \
 	$(gdb_string_h)
 ser-unix.o: ser-unix.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
-	$(terminal_h) $(gdb_string_h)
+	$(terminal_h) $(gdb_select_h) $(gdb_string_h)
+ser-mingw.o: ser-mingw.c $(defs_h) $(serial_h) $(ser_base_h) \
+	$(ser_tcp_h) $(gdb_assert_h) $(gdb_string_h)
 sh3-rom.o: sh3-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(srec_h) $(arch_utils_h) $(regcache_h) $(gdb_string_h) \
 	$(sh_tdep_h)

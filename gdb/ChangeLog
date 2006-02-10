@@ -1,5 +1,47 @@
 2006-02-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention native Windows support.
+	* Makefile.in (gdb_select_h, ser_tcp_h): New.
+	(ALLDEPFILES): Add ser-mingw.c.
+	(event-loop.o, inflow.o, mingw-hdep.o, posix-hdep.o, ser-base.o)
+	(ser-tcp.o, ser-unix.o): Update.
+	(ser-mingw.o): New rule.
+	* configure: Regenerated.
+	* configure.ac: Add ser-mingw.o for mingw32.
+	* ser-mingw.c: New file.
+	* event-loop.c: Include "gdb_select.h".
+	(gdb_select): Remove, moved to mingw-hdep.c and posix-hdep.c.
+	* ser-base.c: Include "gdb_select.h".
+	(ser_base_wait_for): Use gdb_select.
+	* serial.c (serial_for_fd): New function.
+	(serial_fdopen): Try "terminal" before "hardwire".  Initialize
+	the allocated struct serial.
+	(serial_wait_handle): New function.
+	* serial.h (serial_for_fd, serial_wait_handle): New prototypes.
+	(struct serial_ops) [USE_WIN32API]: Add wait_handle.
+	* gdb_select.h: New file.
+	* ser-tcp.c: Include "ser-tcp.h".  Remove unused "ser-unix.h" include.
+	(net_close, net_read_prim, net_write_prim): Make global.
+	(net_open): Likewise.  Pass an exception set to select.  Whitespace fix.
+	Document why we can not use gdb_select.
+	(_initialize_ser_tcp) [USE_WIN32API]: Do not register TCP support here.
+	* ser-tcp.h: New file.
+	* inflow.c (gdb_has_a_terminal): Don't initialize stdin_serial here.
+	(handle_sigio): Use gdb_select.
+	(initialize_stdin_serial): New function.
+	* terminal.h (initialize_stdin_serial): New prototype.
+	* top.c (gdb_init): Call initialize_stdin_serial.
+	* mingw-hdep.c (gdb_select): New function, moved from gdb_select in
+	event-loop.c.  Add exception condition support.  Use serial_for_fd
+	and serial_wait_handle.  Fix timeout handling.
+	* posix-hdep.c: Include "gdb_select.h".
+	(gdb_select): New function.
+	* remote-st.c (connect_command): Use gdb_select.
+	* ser-unix.c: Include "gdb_select.h".
+	(hardwire_send_break, wait_for): Use gdb_select.
+
+2006-02-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (mingw-hdep.o, posix-hdep.o): New dependencies.
 	(ALLDEPFILES): Add mingw-hdep.c and posix-hdep.c.
 	* configure.ac: Add gdb_host_obs to CONFIG_OBS.  Set gdb_host_obs

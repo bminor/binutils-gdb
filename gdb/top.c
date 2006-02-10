@@ -1550,6 +1550,8 @@ gdb_init (char *argv0)
   init_cli_cmds();
   init_main ();			/* But that omits this file!  Do it now */
 
+  initialize_stdin_serial ();
+
   async_init_signals ();
 
   /* We need a default language for parsing expressions, so simple things like

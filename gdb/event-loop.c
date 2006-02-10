@@ -1,5 +1,6 @@
 /* Event loop machinery for GDB, the GNU debugger.
-   Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000, 2001, 2002, 2005, 2006
+   Free Software Foundation, Inc.
    Written by Elena Zannoni <ezannoni@cygnus.com> of Cygnus Solutions.
 
    This file is part of GDB.
@@ -37,6 +38,7 @@
 #include <sys/time.h>
 #include "exceptions.h"
 #include "gdb_assert.h"
+#include "gdb_select.h"
 
 typedef struct gdb_event gdb_event;
 typedef void (event_handler_func) (int);
@@ -729,97 +731,6 @@ handle_file_event (int event_file_desc)
 	  break;
 	}
     }
-}
-
-/* Wrapper for select.  This function is not yet exported from this
-   file because it is not sufficiently general.  For example,
-   ser-base.c uses select to check for socket activity, and this
-   function does not support sockets under Windows, so we do not want
-   to use gdb_select in ser-base.c.  */
-
-static int 
-gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
-	    struct timeval *timeout)
-{
-#ifdef USE_WIN32API
-  HANDLE handles[MAXIMUM_WAIT_OBJECTS];
-  HANDLE h;
-  DWORD event;
-  DWORD num_handles;
-  int fd;
-  int num_ready;
-
-  num_ready = 0;
-  num_handles = 0;
-  for (fd = 0; fd < n; ++fd)
-    {
-      /* There is no support yet for WRITEFDS.  At present, this isn't
-	 used by GDB -- but we do not want to silently ignore WRITEFDS
-	 if something starts using it.  */
-      gdb_assert (!FD_ISSET (fd, writefds));
-      if (!FD_ISSET (fd, readfds) 
-	  && !FD_ISSET (fd, exceptfds))
-	continue;
-      h = (HANDLE) _get_osfhandle (fd);
-      if (h == INVALID_HANDLE_VALUE)
-	{
-	  /* If the underlying handle is INVALID_HANDLE_VALUE, then
-	     this descriptor is no more.  */
-	  if (FD_ISSET (fd, exceptfds))
-	    ++num_ready;
-	  continue;
-	}
-      /* The only exceptional condition we recognize is a closed file
-	 descriptor.  Since we have already checked for that
-	 condition, clear the exceptional bit for this descriptor.  */
-      FD_CLR (fd, exceptfds);
-      if (FD_ISSET (fd, readfds))
-      {
-	gdb_assert (num_handles < MAXIMUM_WAIT_OBJECTS);
-	handles[num_handles++] = h;
-      }
-    }
-  /* If we don't need to wait for any handles, we are done.  */
-  if (!num_handles)
-    return num_ready;
-  event = WaitForMultipleObjects (num_handles,
-				  handles,
-				  FALSE,
-				  timeout 
-				  ? (timeout->tv_sec * 1000 + timeout->tv_usec)
-				  : INFINITE);
-  /* EVENT can only be a value in the WAIT_ABANDONED_0 range if the
-     HANDLES included an abandoned mutex.  Since GDB doesn't use
-     mutexes, that should never occur.  */
-  gdb_assert (!(WAIT_ABANDONED_0 <= event
-		&& event < WAIT_ABANDONED_0 + num_handles));
-  if (event == WAIT_FAILED)
-    return -1;
-  if (event == WAIT_TIMEOUT)
-    return num_ready;
-  /* Run through the READFDS, clearing bits corresponding to descriptors
-     for which input is unavailable.  */
-  num_ready += num_handles; 
-  h = handles[event - WAIT_OBJECT_0];
-  for (fd = 0; fd < n; ++fd)
-    {
-      HANDLE fd_h;
-      if (!FD_ISSET (fd, readfds))
-	continue;
-      fd_h = (HANDLE) _get_osfhandle (fd);
-      /* This handle might be ready, even though it wasn't the handle
-	 returned by WaitForMultipleObjects.  */
-      if (fd_h != h && WaitForSingleObject (fd_h, 0) != WAIT_OBJECT_0)
-	{
-	  FD_CLR (fd, readfds);
-	  --num_ready;
-	}
-    }
-
-  return num_ready;
-#else
-  return select (n, readfds, writefds, exceptfds, timeout);
-#endif
 }
 
 /* Called by gdb_do_one_event to wait for new events on the 

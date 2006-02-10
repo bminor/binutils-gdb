@@ -704,7 +704,7 @@ connect_command (char *args, int fromtty)
 	{
 	  FD_SET (0, &readfds);
 	  FD_SET (deprecated_serial_fd (st2000_desc), &readfds);
-	  numfds = select (sizeof (readfds) * 8, &readfds, 0, 0, 0);
+	  numfds = gdb_select (sizeof (readfds) * 8, &readfds, 0, 0, 0);
 	}
       while (numfds == 0);
 

@@ -41,6 +41,12 @@ detach-fork <n>			Delete a fork from the list of forks
 
 Morpho Technologies ms2		ms1-elf
 
+* Improved Windows host support
+
+GDB now builds as a cross debugger hosted on i686-mingw32, including
+native console support, and remote communications using either
+network sockets or serial ports.
+
 * REMOVED features
 
 The ARM rdi-share module.

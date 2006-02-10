@@ -1,7 +1,7 @@
 /* Generic serial interface routines
 
    Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -233,6 +233,22 @@ serial_open (const char *name)
   return scb;
 }
 
+/* Return the open serial device for FD, if found, or NULL if FD
+   is not already opened.  */
+
+struct serial *
+serial_for_fd (int fd)
+{
+  struct serial *scb;
+  struct serial_ops *ops;
+
+  for (scb = scb_base; scb; scb = scb->next)
+    if (scb->fd == fd)
+      return scb;
+
+  return NULL;
+}
+
 struct serial *
 serial_fdopen (const int fd)
 {
@@ -246,12 +262,14 @@ serial_fdopen (const int fd)
 	return scb;
       }
 
-  ops = serial_interface_lookup ("hardwire");
+  ops = serial_interface_lookup ("terminal");
+  if (!ops)
+    ops = serial_interface_lookup ("hardwire");
 
   if (!ops)
     return NULL;
 
-  scb = XMALLOC (struct serial);
+  scb = XCALLOC (1, struct serial);
 
   scb->ops = ops;
 
@@ -524,6 +542,19 @@ serial_debug_p (struct serial *scb)
   return scb->debug_p || global_serial_debug_p;
 }
 
+#ifdef USE_WIN32API
+void
+serial_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
+{
+  if (scb->ops->wait_handle)
+    scb->ops->wait_handle (scb, read, except);
+  else
+    {
+      *read = (HANDLE) _get_osfhandle (scb->fd);
+      *except = NULL;
+    }
+}
+#endif
 
 #if 0
 /* The connect command is #if 0 because I hadn't thought of an elegant
