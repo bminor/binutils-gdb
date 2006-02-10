@@ -1,3 +1,8 @@
+2006-02-09  David Heine  <dlheine@tensilica.com>
+
+	* config/tc-xtensa.c (xg_assembly_relax): Increment steps_taken for
+	each relaxation step.
+
 2006-02-09  Eric Botcazou  <ebotcazou@libertysurf.fr>
 	
 	* configure.in (CHECK_DECLS): Add vsnprintf.

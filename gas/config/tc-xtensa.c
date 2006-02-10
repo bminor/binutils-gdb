@@ -3563,10 +3563,10 @@ xg_assembly_relax (IStack *istack,
   /* Walk through all of the single instruction expansions.  */
   while (xg_is_single_relaxable_insn (&current_insn, &single_target, FALSE))
     {
+      steps_taken++;
       if (xg_symbolic_immeds_fit (&single_target, pc_seg, pc_frag, pc_offset,
 				  stretch))
 	{
-	  steps_taken++;
 	  if (steps_taken >= min_steps)
 	    {
 	      istack_push (istack, &single_target);
