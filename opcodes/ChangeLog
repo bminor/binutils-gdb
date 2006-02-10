@@ -1,3 +1,7 @@
+2006-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* iq2000-asm.c: Regenerate.
+
 2006-02-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* m68k-dis.c (print_insn_m68k): Use bfd_m68k_mach_to_features.

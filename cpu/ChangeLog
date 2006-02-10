@@ -1,3 +1,7 @@
+2006-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* iq2000.opc (parse_hi16): Truncate shifted values to 16 bits.
+
 2006-01-06  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (mov.w:q): Fix mode.
