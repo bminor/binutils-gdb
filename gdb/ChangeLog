@@ -1,3 +1,9 @@
+2006-02-10  Joel Brobecker  <brobecker@adacore.com>
+
+        * aix-thread.c (_initialize_aix_thread): Use add_setshow_boolean_cmd
+        instead of add_setshow_zinteger_cmd to defined the aix-thread
+        boolean setting.
+
 2006-02-10  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el: Update to reflect changes in Emacs 22.0.50.

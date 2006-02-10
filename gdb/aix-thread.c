@@ -1777,7 +1777,7 @@ _initialize_aix_thread (void)
   target_new_objfile_chain = deprecated_target_new_objfile_hook;
   deprecated_target_new_objfile_hook = new_objfile;
 
-  add_setshow_zinteger_cmd ("aix-thread", no_class, (char *) &debug_aix_thread,
+  add_setshow_boolean_cmd ("aix-thread", class_maintenance, &debug_aix_thread,
 			    _("Set debugging of AIX thread module."),
 			    _("Show debugging of AIX thread module."),
 			    _("Enables debugging output (used to debug GDB)."),
