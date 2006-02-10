@@ -4,7 +4,7 @@
 ;; Maintainer: Nick Roberts <nickrob@gnu.org>
 ;; Keywords: unix, tools
 
-;; Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+;; Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
 ;; This file is part of GNU GDB.
 
@@ -43,8 +43,8 @@
 ;; GUD buffer you must not use run, step, next or continue etc but their MI
 ;; counterparts through gud-run, gud-step etc, e.g clicking on the appropriate
 ;; icon in the toolbar.
-;;
 ;; 2) Some commands send extra prompts to the GUD buffer.
+;; 3) Doesn't list catchpoints in breakpoints buffer.
 ;;
 ;; TODO:
 ;; 1) Prefix MI commands with a token instead of queueing commands.
@@ -216,6 +216,7 @@ detailed description of this mode.
   (gdb-enqueue-input
    (list "-gdb-show prompt\n" 'gdb-get-prompt))
   ;;
+  (setq gdb-locals-font-lock-keywords gdb-locals-font-lock-keywords-2)
   (run-hooks 'gdbmi-mode-hook))
 
 ; Force nil till fixed.
@@ -467,7 +468,8 @@ value=\\(\".*?\"\\),type=\"\\(.+?\\)\"}")
 
 (defconst gdb-break-list-regexp
 "number=\"\\(.*?\\)\",type=\"\\(.*?\\)\",disp=\"\\(.*?\\)\",enabled=\"\\(.\\)\",\
-addr=\"\\(.*?\\)\",func=\"\\(.*?\\)\",file=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
+addr=\"\\(.*?\\)\",func=\"\\(.*?\\)\",file=\"\\(.*?\\)\",fullname=\".*?\",\
+line=\"\\(.*?\\)\"")
 
 (defun gdb-break-list-handler ()
   (setq gdb-pending-triggers (delq 'gdbmi-invalidate-breakpoints
@@ -553,14 +555,14 @@ addr=\"\\(.*?\\)\",func=\"\\(.*?\\)\",file=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
       (end-of-line)))
   (if (gdb-get-buffer 'gdb-assembler-buffer) (gdb-assembler-custom)))
 
-(defvar gdb-source-file-regexp "fullname=\"\\(.*?\\)\"")
+(defvar gdbmi-source-file-regexp "fullname=\"\\(.*?\\)\"")
 
 (defun gdbmi-get-location (bptno line flag)
   "Find the directory containing the relevant source file.
 Put in buffer and place breakpoint icon."
   (goto-char (point-min))
   (catch 'file-not-found
-    (if (re-search-forward gdb-source-file-regexp nil t)
+    (if (re-search-forward gdbmi-source-file-regexp nil t)
 	(delete (cons bptno "File not found") gdb-location-alist)
 	(push (cons bptno (match-string 1)) gdb-location-alist)
       (gdb-resync)
@@ -773,7 +775,7 @@ file=\".*?\",fullname=\"\\(.*?\\)\",line=\"\\(.*?\\)\"")
   "Find the source file where the program starts and display it with related
 buffers, if required."
   (goto-char (point-min))
-  (if (re-search-forward gdb-source-file-regexp nil t)
+  (if (re-search-forward gdbmi-source-file-regexp nil t)
       (setq gdb-main-file (match-string 1)))
  (if gdb-many-windows
       (gdb-setup-windows)
@@ -785,7 +787,7 @@ buffers, if required."
 (defun gdb-get-source-file-list ()
   "Create list of source files for current GDB session."
   (goto-char (point-min))
-  (while (re-search-forward gdb-source-file-regexp nil t)
+  (while (re-search-forward gdbmi-source-file-regexp nil t)
     (push (match-string 1) gdb-source-file-list)))
 
 (defun gdbmi-get-selected-frame ()
