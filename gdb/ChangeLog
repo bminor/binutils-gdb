@@ -1,3 +1,7 @@
+2006-02-10  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el: Update to reflect changes in Emacs 22.0.50.
+
 2006-02-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (struct dwarf2_per_cu_data): Reduce length to
