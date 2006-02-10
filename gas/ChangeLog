@@ -1,5 +1,8 @@
 2006-02-10  Nick Clifton  <nickc@redhat.com>
 
+	* config/tc-crx.c (check_range): Ensure that the sign bit of a
+	32-bit value is propagated into the upper bits of a 64-bit long.
+
 	* config/tc-arc.c (init_opcode_tables): Fix cast.
 	(arc_extoper, md_operand): Likewise.
 

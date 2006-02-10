@@ -1378,6 +1378,12 @@ check_range (long *num, int bits, int unsigned flags, int update)
   long upper_64kb = 0xFFFF0000;
   long value = *num;
 
+  /* For hosts witah longs bigger than 32-bits make sure that the top 
+     bits of a 32-bit negative value read in by the parser are set,
+     so that the correct comparisons are made.  */
+  if (value & 0x80000000)
+    value |= (-1L << 31);
+
   /* Verify operand value is even.  */
   if (flags & OP_EVEN)
     {
