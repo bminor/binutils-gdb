@@ -1,5 +1,9 @@
 2006-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (copy_private_bfd_data): Minor update.
+
+2006-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/2258
 	* elf.c (copy_private_bfd_data): Renamed to ...
 	(rewrite_elf_program_header): This.

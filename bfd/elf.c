@@ -5731,8 +5731,6 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 static bfd_boolean
 copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  Elf_Internal_Phdr *segment;
-
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
@@ -5744,6 +5742,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
     {
       /* Check if any sections in the input BFD covered by ELF program
 	 header are changed.  */
+      Elf_Internal_Phdr *segment;
       asection *section, *osec;
       unsigned int i, num_segments;
       Elf_Internal_Shdr *this_hdr;
