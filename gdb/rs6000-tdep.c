@@ -60,6 +60,7 @@
 #include "frame-base.h"
 
 #include "reggroups.h"
+#include "rs6000-tdep.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -3516,16 +3517,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       frame_unwind_append_sniffer (gdbarch, rs6000_frame_sniffer);
       set_gdbarch_unwind_dummy_id (gdbarch, rs6000_unwind_dummy_id);
       frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
-    }
-
-  if (from_xcoff_exec)
-    {
-      /* NOTE: jimix/2003-06-09: This test should really check for
-	 GDB_OSABI_AIX when that is defined and becomes
-	 available. (Actually, once things are properly split apart,
-	 the test goes away.) */
-       /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
-       set_gdbarch_software_single_step (gdbarch, rs6000_software_single_step);
     }
 
   init_sim_regno_table (gdbarch);

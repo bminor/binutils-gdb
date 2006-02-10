@@ -1,5 +1,19 @@
 2006-02-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* defs.h (gdb_osabi): New enum value GDB_OSABI_AIX.
+	* osabi.c (gdb_osabi_name): Add name of new value GDB_OSABI_AIX.
+	* rs6000-tdep.h: New file.
+	* rs6000-tdep.c: Include "rs6000-tdep.h".
+	(rs6000_gdbarch_init): Remove enabling of software single step.
+	Will be done in the AIX-specific initialization routine.
+	* rs6000-aix-tdep.c: New file.
+	* config/powerpc/aix.mt (TDEPFILES): Add rs6000-aix-tdep.o.
+	* Makefile.in (rs6000_tdep_h): New variable.
+	(rs6000-tdep.o): Update dependencies.
+	(rs6000-aix-tdep.o): New rule.
+
+2006-02-10  Joel Brobecker  <brobecker@adacore.com>
+
         * aix-thread.c (_initialize_aix_thread): Use add_setshow_boolean_cmd
         instead of add_setshow_zinteger_cmd to defined the aix-thread
         boolean setting.

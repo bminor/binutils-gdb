@@ -74,6 +74,7 @@ static const char * const gdb_osabi_names[] =
   "QNX Neutrino",
 
   "Cygwin",
+  "AIX",
 
   "<invalid>"
 };
