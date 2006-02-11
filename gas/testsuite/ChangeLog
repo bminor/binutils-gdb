@@ -1,5 +1,15 @@
 2006-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/i386.exp: Add "x86-64-drx" and "x86-64-drx-suffix".
+
+	* gas/i386/x86-64-crx-suffix.d: Minor update.
+
+	* gas/i386/x86-64-drx-suffix.d: New file.
+	* gas/i386/x86-64-drx.d: Likewise.
+	* gas/i386/x86-64-drx.s: Likewise.
+
+2006-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/i386.exp: Add "x86-64-crx" and "x86-64-crx-suffix".
 
 	* gas/i386/x86-64-crx-suffix.d: New file.

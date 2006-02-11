@@ -1,5 +1,10 @@
 2006-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (dis386_twobyte): Use "movZ" for debug register
+	moves.
+
+2006-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c ('Z'): Add a new macro.
 	(dis386_twobyte): Use "movZ" for control register moves.
 

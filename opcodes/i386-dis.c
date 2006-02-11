@@ -832,9 +832,9 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		XX, XX, XX },
   /* 20 */
   { "movZ",		Rm, Cm, XX },
-  { "movL",		Rm, Dm, XX },
+  { "movZ",		Rm, Dm, XX },
   { "movZ",		Cm, Rm, XX },
-  { "movL",		Dm, Rm, XX },
+  { "movZ",		Dm, Rm, XX },
   { "movL",		Rd, Td, XX },
   { "(bad)",		XX, XX, XX },
   { "movL",		Td, Rd, XX },
