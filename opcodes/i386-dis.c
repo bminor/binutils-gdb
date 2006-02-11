@@ -491,6 +491,7 @@ struct dis386 {
    'W' => print 'b' or 'w' ("w" or "de" in intel mode)
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
    'Y' => 'q' if instruction has an REX 64bit overwrite prefix
+   'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
 
    Many of the above letters print nothing in Intel mode.  See "putop"
    for the details.
@@ -830,9 +831,9 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		XX, XX, XX },
   { "(bad)",		XX, XX, XX },
   /* 20 */
-  { "movL",		Rm, Cm, XX },
+  { "movZ",		Rm, Cm, XX },
   { "movL",		Rm, Dm, XX },
-  { "movL",		Cm, Rm, XX },
+  { "movZ",		Cm, Rm, XX },
   { "movL",		Dm, Rm, XX },
   { "movL",		Rd, Td, XX },
   { "(bad)",		XX, XX, XX },
@@ -2856,6 +2857,15 @@ putop (const char *template, int sizeflag)
 	    break;
 	  *obufp++ = 'l';
 	  break;
+	case 'Z':
+	  if (intel_syntax)
+	    break;
+	  if (address_mode == mode_64bit && (sizeflag & SUFFIX_ALWAYS))
+	    {
+	      *obufp++ = 'q';
+	      break;
+	    }
+	  /* Fall through.  */
 	case 'L':
 	  if (intel_syntax)
 	    break;

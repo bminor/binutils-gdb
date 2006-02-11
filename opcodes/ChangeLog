@@ -1,3 +1,8 @@
+2006-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c ('Z'): Add a new macro.
+	(dis386_twobyte): Use "movZ" for control register moves.
+
 2006-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* iq2000-asm.c: Regenerate.
