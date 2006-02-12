@@ -1,3 +1,7 @@
+2006-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-crx-suffix.d: Undo the last change.
+
 2006-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Add "x86-64-drx" and "x86-64-drx-suffix".

@@ -1,5 +1,6 @@
 #objdump: -dwMsuffix
 #name: x86-64 control register related opcodes (with suffixes)
+#source: x86-64-crx.s
 
 .*: +file format elf64-x86-64
 
