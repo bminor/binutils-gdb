@@ -1,3 +1,7 @@
+2006-02-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.exp: Add testcase for PR breakpoints/2080.
+
 2006-02-13  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/scope.exp (test_at_main): Remove logic to handle the
