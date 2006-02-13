@@ -63,8 +63,18 @@ proc test_at_main {} {
 
     # skip past init.  There may be a call to __main at the start of
     # main, so the first next may only get us to the init0 call.
-    if [gdb_test "next" "$decimal.*foo \\(\\);" "next over init0() in main"  "$decimal.*init0 \\(\\);" "next"] { 
-      gdb_suppress_tests ; 
+    gdb_test_multiple "next" "next over init0() in main" {
+	-re "$decimal.*foo \\(\\).*$gdb_prompt $" {
+	    pass "next over init0() in main"
+	}
+	-re "$decimal.*init0 \\(\\).*$gdb_prompt $" {
+	    send_gdb "next\n"
+	    exp_continue
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "next over init0() in main"
+	    gdb_suppress_tests
+	}
     }
 
 
