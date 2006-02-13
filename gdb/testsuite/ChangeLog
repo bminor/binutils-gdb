@@ -1,3 +1,9 @@
+2006-02-13  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/scope.exp (test_at_main): Remove logic to handle the
+	case where it takes two "next" commands to skip past the init
+	call.
+
 2006-02-12  Fred Fish  <fnf@specifix.com>
 
 	* gdb.base/scope.exp (test_at_main): Use gdb_test_multiple
