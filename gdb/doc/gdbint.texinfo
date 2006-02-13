@@ -465,13 +465,6 @@ the same time).
 Return non-zero if hardware watchpoints can be used to watch a region
 whose address is @var{addr} and whose length in bytes is @var{len}.
 
-@findex TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT
-@item TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT (@var{size})
-Return non-zero if hardware watchpoints can be used to watch a region
-whose size is @var{size}.  @value{GDBN} only uses this macro as a
-fall-back, in case @code{TARGET_REGION_OK_FOR_HW_WATCHPOINT} is not
-defined.
-
 @cindex insert or remove hardware watchpoint
 @findex target_insert_watchpoint
 @findex target_remove_watchpoint
