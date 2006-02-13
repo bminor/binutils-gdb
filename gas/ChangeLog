@@ -1,3 +1,8 @@
+2006-02-13  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* configure.tgt (arm-*-linux-gnueabi*): Change to
+	arm-*-linux-*eabi*.
+
 2006-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-crx.c (check_range): Ensure that the sign bit of a

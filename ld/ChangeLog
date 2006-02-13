@@ -1,3 +1,9 @@
+2006-02-13  Joseph S. Myers  <joseph@codesourcery.com>
+
+	* configure.tgt (arm*b-*-linux-gnueabi): Change to
+	arm*b-*-linux-*eabi.
+	(arm*-*-linux-gnueabi): Change to arm*-*-linux-*eabi.
+
 2006-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2290
