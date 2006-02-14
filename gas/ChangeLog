@@ -1,3 +1,11 @@
+2006-02-13  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xg_add_opcode_fix): Number operands starting
+	from 1, not 0, in error messages.
+	(md_assemble): Simplify special-case check for ENTRY instructions.
+	(tinsn_has_invalid_symbolic_operands): Do not include opcode and
+	operand in error message.
+
 2006-02-13  Joseph S. Myers  <joseph@codesourcery.com>
 
 	* configure.tgt (arm-*-linux-gnueabi*): Change to

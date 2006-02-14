@@ -4131,7 +4131,7 @@ xg_add_opcode_fix (TInsn *tinsn,
   if (opnum != get_relaxable_immed (opcode))
     {
       as_bad (_("invalid relocation for operand %i of '%s'"),
-	      opnum, xtensa_opcode_name (xtensa_default_isa, opcode));
+	      opnum + 1, xtensa_opcode_name (xtensa_default_isa, opcode));
       return FALSE;
     }
 
@@ -4141,7 +4141,7 @@ xg_add_opcode_fix (TInsn *tinsn,
   if (expr->X_op == O_lo16 || expr->X_op == O_hi16)
     {
       as_bad (_("invalid expression for operand %i of '%s'"),
-	      opnum, xtensa_opcode_name (xtensa_default_isa, opcode));
+	      opnum + 1, xtensa_opcode_name (xtensa_default_isa, opcode));
       return FALSE;
     }
 
@@ -5252,24 +5252,12 @@ md_assemble (char *str)
 
   xg_add_branch_and_loop_targets (&orig_insn);
 
-  /* Special-case for "entry" instruction.  */
-  if (orig_insn.opcode == xtensa_entry_opcode)
+  /* Check that immediate value for ENTRY is >= 16.  */
+  if (orig_insn.opcode == xtensa_entry_opcode && orig_insn.ntok >= 3)
     {
-      /* Check that the third opcode (#2) is >= 16.  */
-      if (orig_insn.ntok >= 3)
-	{
-	  expressionS *exp = &orig_insn.tok[2];
-	  switch (exp->X_op)
-	    {
-	    case O_constant:
-	      if (exp->X_add_number < 16)
-		as_warn (_("entry instruction with stack decrement < 16"));
-	      break;
-
-	    default:
-	      as_warn (_("entry instruction with non-constant decrement"));
-	    }
-	}
+      expressionS *exp = &orig_insn.tok[2];
+      if (exp->X_op == O_constant && exp->X_add_number < 16)
+	as_warn (_("entry instruction with stack decrement < 16"));
     }
 
   /* Finish it off:
@@ -11045,8 +11033,7 @@ tinsn_has_invalid_symbolic_operands (const TInsn *insn)
 	      || (xtensa_operand_is_PCrelative (isa, insn->opcode, i) != 1
 		  && insn->opcode != xtensa_const16_opcode))
 	    {
-	      as_bad (_("invalid symbolic operand %d on '%s'"),
-		      i, xtensa_opcode_name (isa, insn->opcode));
+	      as_bad (_("invalid symbolic operand"));
 	      return TRUE;
 	    }
 	}
