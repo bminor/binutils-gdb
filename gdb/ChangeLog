@@ -1,3 +1,11 @@
+2006-02-13  Mark Kettenis  <kettenis@gnu.org>
+
+	Fix PR breakpoints/2080.
+	* i386-tdep.c (struct i386_frame_cache): Add stack_align member.
+	(i386_analyze_stack_align): New function.
+	(i386_analyze_prologue): Use i386_analyze_stack_align.
+	(i386_frame_cache): Deal with stack realignment.
+
 2006-02-14  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el: Use more functions from gdb-ui.el.

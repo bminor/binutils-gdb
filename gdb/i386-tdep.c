@@ -308,6 +308,7 @@ struct i386_frame_cache
   /* Saved registers.  */
   CORE_ADDR saved_regs[I386_NUM_SAVED_REGS];
   CORE_ADDR saved_sp;
+  int stack_align;
   int pc_in_eax;
 
   /* Stack space reserved for local variables.  */
@@ -334,6 +335,7 @@ i386_alloc_frame_cache (void)
   for (i = 0; i < I386_NUM_SAVED_REGS; i++)
     cache->saved_regs[i] = -1;
   cache->saved_sp = 0;
+  cache->stack_align = 0;
   cache->pc_in_eax = 0;
 
   /* Frameless until proven otherwise.  */
@@ -483,6 +485,33 @@ i386_skip_probe (CORE_ADDR pc)
     }
 
   return pc;
+}
+
+/* GCC 4.1 and later, can put code in the prologue to realign the
+   stack pointer.  Check whether PC points to such code, and update
+   CACHE accordingly.  Return the first instruction after the code
+   sequence or CURRENT_PC, whichever is smaller.  If we don't
+   recognize the code, return PC.  */
+
+static CORE_ADDR
+i386_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
+			  struct i386_frame_cache *cache)
+{
+  static const gdb_byte insns[10] = { 
+    0x8d, 0x4c, 0x24, 0x04,	/* leal  4(%esp), %ecx */
+    0x83, 0xe4, 0xf0,		/* andl  $-16, %esp */
+    0xff, 0x71, 0xfc		/* pushl -4(%ecx) */
+  };
+  gdb_byte buf[10];
+
+  if (target_read_memory (pc, buf, sizeof buf)
+      || memcmp (buf, insns, sizeof buf) != 0)
+    return pc;
+
+  if (current_pc > pc + 4)
+    cache->stack_align = 1;
+
+  return min (pc + 10, current_pc);
 }
 
 /* Maximum instruction length we need to handle.  */
@@ -777,6 +806,7 @@ i386_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
   pc = i386_follow_jump (pc);
   pc = i386_analyze_struct_return (pc, current_pc, cache);
   pc = i386_skip_probe (pc);
+  pc = i386_analyze_stack_align (pc, current_pc, cache);
   pc = i386_analyze_frame_setup (pc, current_pc, cache);
   return i386_analyze_register_saves (pc, current_pc, cache);
 }
@@ -907,6 +937,13 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (cache->pc != 0)
     i386_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
 
+  if (cache->stack_align)
+    {
+      /* Saved stack pointer has been saved in %ecx.  */
+      frame_unwind_register (next_frame, I386_ECX_REGNUM, buf);
+      cache->saved_sp = extract_unsigned_integer(buf, 4);
+    }
+
   if (cache->locals < 0)
     {
       /* We didn't find a valid frame, which means that CACHE->base
@@ -917,13 +954,26 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
 	 frame by looking at the stack pointer.  For truly "frameless"
 	 functions this might work too.  */
 
-      frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
-      cache->base = extract_unsigned_integer (buf, 4) + cache->sp_offset;
+      if (cache->stack_align)
+	{
+	  /* We're halfway aligning the stack.  */
+	  cache->base = ((cache->saved_sp - 4) & 0xfffffff0) - 4;
+	  cache->saved_regs[I386_EIP_REGNUM] = cache->saved_sp - 4;
+
+	  /* This will be added back below.  */
+	  cache->saved_regs[I386_EIP_REGNUM] -= cache->base;
+	}
+      else
+	{
+	  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+	  cache->base = extract_unsigned_integer (buf, 4) + cache->sp_offset;
+	}
     }
 
   /* Now that we have the base address for the stack frame we can
      calculate the value of %esp in the calling frame.  */
-  cache->saved_sp = cache->base + 8;
+  if (cache->saved_sp == 0)
+    cache->saved_sp = cache->base + 8;
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
