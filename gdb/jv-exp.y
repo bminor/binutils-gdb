@@ -713,23 +713,8 @@ parse_number (p, len, parsed_float, putithere)
       char saved_char = p[len];
 
       p[len] = 0;	/* null-terminate the token */
-      if (sizeof (putithere->typed_val_float.dval) <= sizeof (float))
-	num = sscanf (p, "%g%c", (float *) &putithere->typed_val_float.dval, &c);
-      else if (sizeof (putithere->typed_val_float.dval) <= sizeof (double))
-	num = sscanf (p, "%lg%c", (double *) &putithere->typed_val_float.dval, &c);
-      else
-	{
-#ifdef SCANF_HAS_LONG_DOUBLE
-	  num = sscanf (p, "%Lg%c", &putithere->typed_val_float.dval, &c);
-#else
-	  /* Scan it into a double, then assign it to the long double.
-	     This at least wins with values representable in the range
-	     of doubles. */
-	  double temp;
-	  num = sscanf (p, "%lg%c", &temp, &c);
-	  putithere->typed_val_float.dval = temp;
-#endif
-	}
+      num = sscanf (p, DOUBLEST_FORMAT "%c",
+		    &putithere->typed_val_float.dval, &c);
       p[len] = saved_char;	/* restore the input stream */
       if (num != 1) 		/* check scanf found ONLY a float ... */
 	return ERROR;

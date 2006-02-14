@@ -110,7 +110,7 @@ enum tui_scroll_direction
 /* General list struct.  */
 struct tui_list
 {
-  void **list;
+  struct tui_win_info **list;
   int count;
 };
 

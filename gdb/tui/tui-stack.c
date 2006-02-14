@@ -343,7 +343,7 @@ tui_show_frame_info (struct frame_info *fi)
       for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
 	  union tui_which_element *item;
-	  win_info = (struct tui_win_info *) (tui_source_windows ())->list[i];
+	  win_info = (tui_source_windows ())->list[i];
 
 	  item = &((struct tui_win_element *) locator->content[0])->which_element;
 	  if (win_info == TUI_SRC_WIN)
@@ -401,7 +401,7 @@ tui_show_frame_info (struct frame_info *fi)
       tui_show_locator_content ();
       for (i = 0; i < (tui_source_windows ())->count; i++)
 	{
-	  win_info = (struct tui_win_info *) (tui_source_windows ())->list[i];
+	  win_info = (tui_source_windows ())->list[i];
 	  tui_clear_source_content (win_info, EMPTY_SOURCE_PROMPT);
 	  tui_update_exec_info (win_info);
 	}

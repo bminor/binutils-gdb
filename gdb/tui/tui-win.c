@@ -1119,7 +1119,7 @@ tui_adjust_win_heights (struct tui_win_info * primary_win_info, int new_height)
 	      make_invisible_and_set_new_height (primary_win_info, new_height);
 	      if (primary_win_info->generic.type == CMD_WIN)
 		{
-		  win_info = (struct tui_win_info *) (tui_source_windows ())->list[0];
+		  win_info = (tui_source_windows ())->list[0];
 		  src_win_info = win_info;
 		}
 	      else
@@ -1148,7 +1148,7 @@ tui_adjust_win_heights (struct tui_win_info * primary_win_info, int new_height)
 	      else
 		{
 		  first_win = TUI_DATA_WIN;
-		  second_win = (struct tui_win_info *) (tui_source_windows ())->list[0];
+		  second_win = (tui_source_windows ())->list[0];
 		}
 	      if (primary_win_info == TUI_CMD_WIN)
 		{		/*
@@ -1393,7 +1393,7 @@ new_height_ok (struct tui_win_info * primary_win_info, int new_height)
 	      struct tui_win_info * win_info;
 
 	      if (primary_win_info == TUI_CMD_WIN)
-		win_info = (struct tui_win_info *) (tui_source_windows ())->list[0];
+		win_info = (tui_source_windows ())->list[0];
 	      else
 		win_info = TUI_CMD_WIN;
 	      ok = ((new_height +
@@ -1414,7 +1414,7 @@ new_height_ok (struct tui_win_info * primary_win_info, int new_height)
 	  else
 	    {
 	      first_win = TUI_DATA_WIN;
-	      second_win = (struct tui_win_info *) (tui_source_windows ())->list[0];
+	      second_win = (tui_source_windows ())->list[0];
 	    }
 	  /*
 	     ** We could simply add all the heights to obtain the same result
@@ -1543,7 +1543,7 @@ parse_scrolling_args (char *arg, struct tui_win_info * * win_to_scroll,
 	    error (_("Invalid window specified. \n\
 The window name specified must be valid and visible.\n"));
 	  else if (*win_to_scroll == TUI_CMD_WIN)
-	    *win_to_scroll = (struct tui_win_info *) (tui_source_windows ())->list[0];
+	    *win_to_scroll = (tui_source_windows ())->list[0];
 	}
       xfree (buf);
     }

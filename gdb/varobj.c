@@ -1374,7 +1374,7 @@ free_variable (struct varobj *var)
   /* Free the expression if this is a root variable. */
   if (var->root->rootvar == var)
     {
-      free_current_contents ((char **) &var->root->exp);
+      free_current_contents (&var->root->exp);
       xfree (var->root);
     }
 

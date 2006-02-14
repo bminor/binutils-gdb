@@ -1,3 +1,18 @@
+2006-02-14  Alexandre Oliva  <aoliva@redhat.com>
+
+	* doublest.h (DOUBLEST): Use long double only if we can scan
+	it in.  Undefine HAVE_LONG_DOUBLE otherwise.
+	(DOUBLEST_FORMAT): New.
+	* c-exp.y (parse_number): Use it.
+	* jv-exp.y (parse_number): Likewise.
+	* objc-exp.y (parse_number): Likewise.
+	* p-exp.y (parse_number): Likewise.
+	* varobj.c (free_variable): Silence type-punning warnings.
+	* tui/tui-data.h (struct tui_list): Change type of list member.
+	* tui/tui-data.c: Remove no-longer-needed type casts.
+	(source_windows): Silence type-punning warnings.
+	* tui/tui-stack.c, tui/tui-win.c, tui/tui-winsource.c: Likewise.
+
 2006-02-13  Mark Kettenis  <kettenis@gnu.org>
 
 	Fix PR breakpoints/2080.

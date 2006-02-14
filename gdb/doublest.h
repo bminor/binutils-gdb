@@ -48,10 +48,15 @@ struct floatformat;
    host's `long double'.  In general, we'll probably reduce the precision of
    any such values and print a warning.  */
 
-#ifdef HAVE_LONG_DOUBLE
+#if defined HAVE_LONG_DOUBLE && defined SCANF_HAS_LONG_DOUBLE
 typedef long double DOUBLEST;
+# define DOUBLEST_FORMAT "%Lg"
 #else
 typedef double DOUBLEST;
+# define DOUBLEST_FORMAT "%g"
+/* If we can't scan or print long double, we don't want to use it
+   anywhere.  */
+# undef HAVE_LONG_DOUBLE
 #endif
 
 extern void floatformat_to_doublest (const struct floatformat *,
