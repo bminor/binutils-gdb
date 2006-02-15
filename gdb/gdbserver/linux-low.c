@@ -1,5 +1,6 @@
 /* Low level interface to ptrace, for the remote server for GDB.
-   Copyright (C) 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright (C) 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1286,8 +1287,21 @@ regsets_store_inferior_registers ()
 	}
 
       buf = malloc (regset->size);
-      regset->fill_function (buf);
-      res = ptrace (regset->set_request, inferior_pid, 0, buf);
+
+      /* First fill the buffer with the current register set contents,
+	 in case there are any items in the kernel's regset that are
+	 not in gdbserver's regcache.  */
+      res = ptrace (regset->get_request, inferior_pid, 0, buf);
+
+      if (res == 0)
+	{
+	  /* Then overlay our cached registers on that.  */
+	  regset->fill_function (buf);
+
+	  /* Only now do we write the register set.  */
+	  res = ptrace (regset->set_request, inferior_pid, 0, buf);
+	}
+
       if (res < 0)
 	{
 	  if (errno == EIO)
