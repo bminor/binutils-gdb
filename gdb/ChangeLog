@@ -1,3 +1,8 @@
+2006-02-15  Paul Brook  <paul@codesourcery.com>
+
+	* arm-tdep.c (arm_skip_prologue, thumb_get_next_pc, arm_get_next_pc):
+	Load insn opcodes as unsigned values.
+
 2006-02-14  Alexandre Oliva  <aoliva@redhat.com>
 
 	* doublest.h (DOUBLEST): Use long double only if we can scan

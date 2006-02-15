@@ -360,7 +360,7 @@ arm_skip_prologue (CORE_ADDR pc)
 
   for (skip_pc = pc; skip_pc < func_end; skip_pc += 4)
     {
-      inst = read_memory_integer (skip_pc, 4);
+      inst = read_memory_unsigned_integer (skip_pc, 4);
 
       /* "mov ip, sp" is no longer a required part of the prologue.  */
       if (inst == 0xe1a0c00d)			/* mov ip, sp */
@@ -1540,7 +1540,7 @@ CORE_ADDR
 thumb_get_next_pc (CORE_ADDR pc)
 {
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
-  unsigned short inst1 = read_memory_integer (pc, 2);
+  unsigned short inst1 = read_memory_unsigned_integer (pc, 2);
   CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
   unsigned long offset;
 
@@ -1552,7 +1552,7 @@ thumb_get_next_pc (CORE_ADDR pc)
          all of the other registers.  */
       offset = bitcount (bits (inst1, 0, 7)) * DEPRECATED_REGISTER_SIZE;
       sp = read_register (ARM_SP_REGNUM);
-      nextpc = (CORE_ADDR) read_memory_integer (sp + offset, 4);
+      nextpc = (CORE_ADDR) read_memory_unsigned_integer (sp + offset, 4);
       nextpc = ADDR_BITS_REMOVE (nextpc);
       if (nextpc == pc)
 	error (_("Infinite loop detected"));
@@ -1570,7 +1570,7 @@ thumb_get_next_pc (CORE_ADDR pc)
     }
   else if ((inst1 & 0xf800) == 0xf000)	/* long branch with link, and blx */
     {
-      unsigned short inst2 = read_memory_integer (pc + 2, 2);
+      unsigned short inst2 = read_memory_unsigned_integer (pc + 2, 2);
       offset = (sbits (inst1, 0, 10) << 12) + (bits (inst2, 0, 10) << 1);
       nextpc = pc_val + offset;
       /* For BLX make sure to clear the low bits.  */
@@ -1604,7 +1604,7 @@ arm_get_next_pc (CORE_ADDR pc)
     return thumb_get_next_pc (pc);
 
   pc_val = (unsigned long) pc;
-  this_instr = read_memory_integer (pc, 4);
+  this_instr = read_memory_unsigned_integer (pc, 4);
   status = read_register (ARM_PS_REGNUM);
   nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
 
