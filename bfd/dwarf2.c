@@ -2179,6 +2179,34 @@ find_debug_info (bfd *abfd, asection *after_sec)
   return NULL;
 }
 
+/* Return TRUE if there is no mismatch bewteen function FUNC and
+   section SECTION from symbol table SYMBOLS in ABFD.  */
+
+static bfd_boolean
+check_function_name (bfd *abfd, asection *section, asymbol **symbols,
+		     const char *func)
+{
+  /* Mismatch can only happen when we have 2 functions with the same
+     address. It can only occur in a relocatable file.  */
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
+      && func != NULL
+      && section != NULL
+      && symbols != NULL)
+    {
+      asymbol **p;
+
+      for (p = symbols; *p != NULL; p++)
+	{
+	  if (((*p)->flags & BSF_FUNCTION) != 0
+	      && (*p)->name != NULL
+	      && strcmp ((*p)->name, func) == 0)
+	    return (*p)->section == section;
+	}
+    }
+
+  return TRUE;
+}
+
 /* The DWARF2 version of find_nearest_line.  Return TRUE if the line
    is found without error.  ADDR_SIZE is the number of bytes in the
    initial .debug_info length field and in the abbreviation offset.
@@ -2300,7 +2328,9 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     if (comp_unit_contains_address (each, addr)
 	&& comp_unit_find_nearest_line (each, addr, filename_ptr,
 					functionname_ptr,
-					linenumber_ptr, stash))
+					linenumber_ptr, stash)
+	&& check_function_name (abfd, section, symbols,
+				*functionname_ptr))
       return TRUE;
 
   /* Read each remaining comp. units checking each as they are read.  */
@@ -2368,7 +2398,9 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 						  filename_ptr,
 						  functionname_ptr,
 						  linenumber_ptr,
-						  stash))
+						  stash)
+		  && check_function_name (abfd, section, symbols,
+					  *functionname_ptr))
 		return TRUE;
 	    }
 	}

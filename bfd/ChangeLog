@@ -1,3 +1,10 @@
+2006-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2338
+	* dwarf2.c (check_function_name): New function.
+	(_bfd_dwarf2_find_nearest_line): Use check_function_name to
+	check if function is correct.
+
 2006-02-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_default_action_discarded): Return 0 for
