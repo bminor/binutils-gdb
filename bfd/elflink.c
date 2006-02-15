@@ -6691,7 +6691,7 @@ unsigned int
 _bfd_elf_default_action_discarded (asection *sec)
 {
   if (sec->flags & SEC_DEBUGGING)
-    return PRETEND;
+    return 0;
 
   if (strcmp (".eh_frame", sec->name) == 0)
     return 0;
@@ -7007,8 +7007,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	     from discarded sections and section symbols from
 	     removed link-once sections.  Complain about relocs
 	     against discarded sections.  Zero relocs against removed
-	     link-once sections.  Preserve debug information as much
-	     as we can.  */
+	     link-once sections.  */
 	  if (!elf_section_ignore_discarded_relocs (o))
 	    {
 	      Elf_Internal_Rela *rel, *relend;
@@ -7080,16 +7079,11 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			   sym_name, o, input_bfd, sec, sec->owner);
 
 		      /* Try to do the best we can to support buggy old
-			 versions of gcc.  If we've warned, or this is
-			 debugging info, pretend that the symbol is
+			 versions of gcc.  Pretend that the symbol is
 			 really defined in the kept linkonce section.
 			 FIXME: This is quite broken.  Modifying the
 			 symbol here means we will be changing all later
-			 uses of the symbol, not just in this section.
-			 The only thing that makes this half reasonable
-			 is that we warn in non-debug sections, and
-			 debug sections tend to come after other
-			 sections.  */
+			 uses of the symbol, not just in this section.  */
 		      if (action & PRETEND)
 			{
 			  asection *kept;

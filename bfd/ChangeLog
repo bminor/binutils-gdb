@@ -1,3 +1,9 @@
+2006-02-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_default_action_discarded): Return 0 for
+	debug sections.
+	(elf_link_input_bfd): Adjust comments.
+
 2006-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (copy_private_bfd_data): Minor update.
