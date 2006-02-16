@@ -1068,6 +1068,28 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
+static const char *
+get_segment_type (unsigned int p_type)
+{
+  const char *pt;
+  switch (p_type)
+    {
+    case PT_NULL: pt = "NULL"; break;
+    case PT_LOAD: pt = "LOAD"; break;
+    case PT_DYNAMIC: pt = "DYNAMIC"; break;
+    case PT_INTERP: pt = "INTERP"; break;
+    case PT_NOTE: pt = "NOTE"; break;
+    case PT_SHLIB: pt = "SHLIB"; break;
+    case PT_PHDR: pt = "PHDR"; break;
+    case PT_TLS: pt = "TLS"; break;
+    case PT_GNU_EH_FRAME: pt = "EH_FRAME"; break;
+    case PT_GNU_STACK: pt = "STACK"; break;
+    case PT_GNU_RELRO: pt = "RELRO"; break;
+    default: pt = NULL; break;
+    }
+  return pt;
+}
+
 /* Print out the program headers.  */
 
 bfd_boolean
@@ -1087,23 +1109,13 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
       c = elf_elfheader (abfd)->e_phnum;
       for (i = 0; i < c; i++, p++)
 	{
-	  const char *pt;
+	  const char *pt = get_segment_type (p->p_type);
 	  char buf[20];
 
-	  switch (p->p_type)
+	  if (pt == NULL)
 	    {
-	    case PT_NULL: pt = "NULL"; break;
-	    case PT_LOAD: pt = "LOAD"; break;
-	    case PT_DYNAMIC: pt = "DYNAMIC"; break;
-	    case PT_INTERP: pt = "INTERP"; break;
-	    case PT_NOTE: pt = "NOTE"; break;
-	    case PT_SHLIB: pt = "SHLIB"; break;
-	    case PT_PHDR: pt = "PHDR"; break;
-	    case PT_TLS: pt = "TLS"; break;
-	    case PT_GNU_EH_FRAME: pt = "EH_FRAME"; break;
-	    case PT_GNU_STACK: pt = "STACK"; break;
-	    case PT_GNU_RELRO: pt = "RELRO"; break;
-	    default: sprintf (buf, "0x%lx", p->p_type); pt = buf; break;
+	      sprintf (buf, "0x%lx", p->p_type);
+	      pt = buf;
 	    }
 	  fprintf (f, "%8s off    0x", pt);
 	  bfd_fprintf_vma (abfd, f, p->p_offset);
@@ -4018,6 +4030,42 @@ vma_page_aligned_bias (bfd_vma vma, ufile_ptr off, bfd_vma maxpagesize)
   return ((vma - off) % maxpagesize);
 }
 
+static void
+print_segment_map (bfd *abfd)
+{
+  struct elf_segment_map *m;
+  unsigned int i, j;
+
+  fprintf (stderr, _(" Section to Segment mapping:\n"));
+  fprintf (stderr, _("  Segment              Sections...\n"));
+
+  for (i= 0, m = elf_tdata (abfd)->segment_map;
+       m != NULL;
+       i++, m = m->next)
+    {
+      const char *pt = get_segment_type (m->p_type);
+      char buf[32];
+
+      if (pt == NULL)
+	{
+	  if (m->p_type >= PT_LOPROC && m->p_type <= PT_HIPROC)
+	    sprintf (buf, "LOPROC+%7.7x",
+		     (unsigned int) (m->p_type - PT_LOPROC));
+	  else if (m->p_type >= PT_LOOS && m->p_type <= PT_HIOS)
+	    sprintf (buf, "LOOS+%7.7x",
+		     (unsigned int) (m->p_type - PT_LOOS));
+	  else
+	    snprintf (buf, sizeof (buf), "%8.8x",
+		      (unsigned int) m->p_type);
+	  pt = buf;
+	}
+      fprintf (stderr, "  %2.2d: %14.14s:  ", i, pt);
+      for (j = 0; j < m->count; j++)
+	fprintf (stderr, "%s ", m->sections [j]->name);
+      putc ('\n',stderr);
+    }
+}
+
 /* Assign file positions to the sections based on the mapping from
    sections to segments.  This function also sets up some fields in
    the file header, and writes out the program headers.  */
@@ -4101,6 +4149,7 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
       ((*_bfd_error_handler)
        (_("%B: Not enough room for program headers (allocated %u, need %u)"),
 	abfd, alloc, count));
+      print_segment_map (abfd);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
