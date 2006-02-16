@@ -1,3 +1,7 @@
+2006-02-16  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	* configure.tgt: set emulation for mips-*-netbsd*
+
 2006-02-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* config.in: Rebuilt.
