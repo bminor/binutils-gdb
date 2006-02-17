@@ -78,6 +78,10 @@ static bfd_boolean frv_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 static bfd_boolean frv_elf_print_private_bfd_data
   PARAMS ((bfd *, PTR));
+static bfd_boolean elf32_frv_grok_prstatus (bfd * abfd,
+					    Elf_Internal_Note * note);
+static bfd_boolean elf32_frv_grok_psinfo (bfd * abfd,
+					  Elf_Internal_Note * note);
 
 static reloc_howto_type elf32_frv_howto_table [] =
 {
@@ -6823,6 +6827,86 @@ frv_elf_print_private_bfd_data (abfd, ptr)
 }
 
 
+/* Support for core dump NOTE sections.  */
+
+static bfd_boolean
+elf32_frv_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  int offset;
+  unsigned int raw_size;
+
+  switch (note->descsz)
+    {
+      default:
+	return FALSE;
+
+      /* The Linux/FRV elf_prstatus struct is 268 bytes long.  The other
+         hardcoded offsets and sizes listed below (and contained within
+	 this lexical block) refer to fields in the target's elf_prstatus
+	 struct.  */
+      case 268:	
+	/* `pr_cursig' is at offset 12.  */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* `pr_pid' is at offset 24.  */
+	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 24);
+
+	/* `pr_reg' is at offset 72.  */
+	offset = 72;
+
+	/* Most grok_prstatus implementations set `raw_size' to the size
+	   of the pr_reg field.  For Linux/FRV, we set `raw_size' to be
+	   the size of `pr_reg' plus the size of `pr_exec_fdpic_loadmap'
+	   and `pr_interp_fdpic_loadmap', both of which (by design)
+	   immediately follow `pr_reg'.  This will allow these fields to
+	   be viewed by GDB as registers.
+	   
+	   `pr_reg' is 184 bytes long.  `pr_exec_fdpic_loadmap' and
+	   `pr_interp_fdpic_loadmap' are 4 bytes each.  */
+	raw_size = 184 + 4 + 4;
+
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg", raw_size,
+					  note->descpos + offset);
+}
+
+static bfd_boolean
+elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
+{
+  switch (note->descsz)
+    {
+      default:
+	return FALSE;
+
+      /* The Linux/FRV elf_prpsinfo struct is 124 bytes long.  */
+      case 124:
+
+	/* `pr_fname' is found at offset 28 and is 16 bytes long.  */
+	elf_tdata (abfd)->core_program
+	  = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+
+	/* `pr_psargs' is found at offset 44 and is 80 bytes long.  */
+	elf_tdata (abfd)->core_command
+	  = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+    }
+
+  /* Note that for some reason, a spurious space is tacked
+     onto the end of the args in some (at least one anyway)
+     implementations, so strip it off if it exists.  */
+
+  {
+    char *command = elf_tdata (abfd)->core_command;
+    int n = strlen (command);
+
+    if (0 < n && command[n - 1] == ' ')
+      command[n - 1] = '\0';
+  }
+
+  return TRUE;
+}
 #define ELF_ARCH		bfd_arch_frv
 #define ELF_MACHINE_CODE	EM_CYGNUS_FRV
 #define ELF_MAXPAGESIZE		0x1000
@@ -6856,6 +6940,9 @@ frv_elf_print_private_bfd_data (abfd, ptr)
 
 #define elf_backend_finish_dynamic_sections \
 		elf32_frv_finish_dynamic_sections
+
+#define elf_backend_grok_prstatus	elf32_frv_grok_prstatus
+#define elf_backend_grok_psinfo		elf32_frv_grok_psinfo
 
 #include "elf32-target.h"
 

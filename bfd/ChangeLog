@@ -1,3 +1,9 @@
+2006-02-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* elf32-frv.c (elf32_frv_grok_prstatus, elf32_frv_grok_psinfo):
+	New functions.
+	* elf_backend_grok_prstatus, elf_backend_grok_psinfo): Define.
+
 2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
             Anil Paranjape   <anilp1@kpitcummins.com>
             Shilin Shakti    <shilins@kpitcummins.com>
