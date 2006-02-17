@@ -1,3 +1,7 @@
+2006-02-17  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+	* readelf.c (get_machine_flags): Add logic for missing EF_SH flags.
+
 2006-02-14  Jakub Jelinek  <jakub@redhat.com>
 
 	* config.in: Rebuilt.
