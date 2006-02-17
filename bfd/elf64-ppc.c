@@ -7582,9 +7582,20 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	  && h->root.type == bfd_link_hash_undefweak)
-	eh->dyn_relocs = NULL;
+      if (h->root.type == bfd_link_hash_undefweak)
+	{
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	    eh->dyn_relocs = NULL;
+
+	  /* Make sure this symbol is output as a dynamic symbol.
+	     Undefined weak syms won't yet be marked as dynamic.  */
+	  else if (h->dynindx == -1
+		   && !h->forced_local)
+	    {
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
+	}
     }
   else if (ELIMINATE_COPY_RELOCS)
     {
@@ -10757,6 +10768,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (sreloc == NULL)
 		abort ();
 
+	      if (sreloc->reloc_count * sizeof (Elf64_External_Rela)
+		  >= sreloc->size)
+		abort ();
 	      loc = sreloc->contents;
 	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
 	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);

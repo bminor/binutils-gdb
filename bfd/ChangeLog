@@ -1,3 +1,11 @@
+2006-02-17  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/2218
+	* elf64-ppc.c (allocate_dynrelocs): Ensure undef weak sym is
+	dynamic.
+	(ppc64_elf_relocate_section): Check output reloc section size.
+	* elf32-ppc.c (allocate_dynrelocs): Simplify undef weak test.
+
 2006-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2322

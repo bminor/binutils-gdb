@@ -4546,20 +4546,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	  && h->root.type == bfd_link_hash_undefweak)
-	eh->dyn_relocs = NULL;
-
-      /* Make sure undefined weak symbols are output as a dynamic symbol
-	 in PIEs.  */
-      if (info->pie
-	  && eh->dyn_relocs != NULL
-	  && h->dynindx == -1
-	  && h->root.type == bfd_link_hash_undefweak
-	  && !h->forced_local)
+      if (h->root.type == bfd_link_hash_undefweak)
 	{
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	    eh->dyn_relocs = NULL;
+
+	  /* Make sure undefined weak symbols are output as a dynamic
+	     symbol in PIEs.  */
+	  else if (h->dynindx == -1
+		   && !h->forced_local)
+	    {
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
 	}
     }
   else if (ELIMINATE_COPY_RELOCS)
