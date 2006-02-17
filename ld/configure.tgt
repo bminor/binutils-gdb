@@ -554,6 +554,9 @@ vax-*-linux-*)  	targ_emul=elf32vax
 			;;
 w65-*-*)		targ_emul=w65
 			;;
+xc16x-*-elf)		targ_emul=elf32xc16x 
+                        targ_extra_emuls="elf32xc16xl elf32xc16xs"
+                        ;;
 xstormy16-*-*)		targ_emul=elf32xstormy16
 			;;
 xtensa-*-*)		targ_emul=elf32xtensa

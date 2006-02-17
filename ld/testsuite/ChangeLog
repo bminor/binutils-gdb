@@ -1,3 +1,16 @@
+2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
+            Anil Paranjape   <anilp1@kpitcummins.com>
+            Shilin Shakti    <shilins@kpitcummins.com>
+
+	* ld-xc16x: New directory.
+	* ld-xc16x/absrel.d: New file.
+	* ld-xc16x/absrel.s: New file.
+	* ld-xc16x/offset.d: New file.
+	* ld-xc16x/offset.s: New file.
+	* ld-xc16x/pcreloc.d: New file.
+	* ld-xc16x/pcreloc.s: New file.
+	* ld-xc16x/xc16x.exp: New file.
+
 2006-02-07  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-elf.exp: Add thumb-entry test.

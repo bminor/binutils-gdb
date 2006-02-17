@@ -636,6 +636,7 @@ extern const bfd_target bfd_elf32_tradlittlemips_vec;
 extern const bfd_target bfd_elf32_us_cris_vec;
 extern const bfd_target bfd_elf32_v850_vec;
 extern const bfd_target bfd_elf32_vax_vec;
+extern const bfd_target bfd_elf32_xc16x_vec;
 extern const bfd_target bfd_elf32_xstormy16_vec;
 extern const bfd_target bfd_elf32_xtensa_be_vec;
 extern const bfd_target bfd_elf32_xtensa_le_vec;
@@ -946,6 +947,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_us_cris_vec,
 	&bfd_elf32_v850_vec,
 	&bfd_elf32_vax_vec,
+	&bfd_elf32_xc16x_vec,
 	&bfd_elf32_xstormy16_vec,
 	&bfd_elf32_xtensa_be_vec,
 	&bfd_elf32_xtensa_le_vec,
@@ -975,7 +977,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf64_tradbigmips_vec,
 	&bfd_elf64_tradlittlemips_vec,
 	&bfd_elf64_x86_64_vec,
-	&bfd_mmo_vec, 
+	&bfd_mmo_vec,
 #endif
 	&bfd_powerpc_pe_vec,
 	&bfd_powerpc_pei_vec,

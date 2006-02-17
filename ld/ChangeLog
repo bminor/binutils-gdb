@@ -1,3 +1,19 @@
+2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
+            Anil Paranjape   <anilp1@kpitcummins.com>
+            Shilin Shakti    <shilins@kpitcummins.com>
+
+	* scripttemp/elf32xc16x.sc: Default linker script for tiny model.
+	* scripttemp/elf32xc16xl.sc: Default linker script for large model.
+	* scripttemp/elf32xc16xs.sc: Default linker script for small model.
+	* emulparams/elf32xc16x.sh: Emulation script for tiny model.
+	* emulparams/elf32xc16xl.sh: Emulation script for large model.
+	* emulparams/elf32xc16xs.sh: Emulation script for small model.
+	* Makefile.am: Add entry to make xc16x target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Specify default and other emulation parameters
+	for xc16x.
+	* NEWS: Announce the support for the new target.
+
 2006-02-16  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
 	* configure.tgt (mips*el-*-netbsd*, mips*-*-netbsd*):

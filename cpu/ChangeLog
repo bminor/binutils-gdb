@@ -1,3 +1,11 @@
+2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
+            Anil Paranjape   <anilp1@kpitcummins.com>
+            Shilin Shakti    <shilins@kpitcummins.com>
+
+	* xc16x.cpu: New file containing complete CGEN specific XC16X CPU
+	description.
+	* xc16x.opc: New file containing supporting XC16C routines.
+
 2006-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* iq2000.opc (parse_hi16): Truncate shifted values to 16 bits.

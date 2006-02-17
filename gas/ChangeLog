@@ -1,3 +1,18 @@
+2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
+            Anil Paranjape   <anilp1@kpitcummins.com>
+            Shilin Shakti    <shilins@kpitcummins.com>
+
+	* Makefile.am: Add xc16x related entry.
+	* Makefile.in: Regenerate.
+	* configure.in: Added xc16x related entry.
+	* configure: Regenerate.
+	* config/tc-xc16x.h: New file
+	* config/tc-xc16x.c: New file
+	* doc/c-xc16x.texi: New file for xc16x
+	* doc/all.texi: Entry for xc16x
+	* doc/Makefile.texi: Added c-xc16x.texi 
+	* NEWS: Announce the support for the new target.
+
 2006-02-16  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
 	* configure.tgt: set emulation for mips-*-netbsd*

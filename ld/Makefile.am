@@ -183,6 +183,9 @@ ALL_EMULATIONS = \
 	eelf32ppcwindiss.o \
 	eelf32ppcvxworks.o \
 	eelf32vax.o \
+        eelf32xc16x.o \
+        eelf32xc16xl.o \
+        eelf32xc16xs.o \
 	eelf32xstormy16.o \
 	eelf32xtensa.o \
 	eelf_i386.o \
@@ -624,6 +627,18 @@ eelf32bfin.c: $(srcdir)/emulparams/bfin.sh \
 eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/dlx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_dlx "$(tdir_elf32_dlx)"
+eelf32xc16x.c: $(srcdir)/emulparams/elf32xc16x.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32xc16x "$(tdir_xc16x)"
+eelf32xc16xl.c: $(srcdir)/emulparams/elf32xc16xl.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32xc16xl "$(tdir_xc16xl)"
+eelf32xc16xs.c: $(srcdir)/emulparams/elf32xc16xs.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32xc16xs "$(tdir_xc16xs)"		
 eelf32xstormy16.c: $(srcdir)/emulparams/elf32xstormy16.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/xstormy16.sc ${GEN_DEPENDS}

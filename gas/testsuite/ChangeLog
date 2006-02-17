@@ -1,3 +1,54 @@
+2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
+            Anil Paranjape   <anilp1@kpitcummins.com>
+            Shilin Shakti    <shilins@kpitcummins.com>
+
+	* gas/xc16x: New directory.
+	* gas/xc16x/xc16x.exp: New file
+	* gas/xc16x/add.s: New file
+	* gas/xc16x/add_test.s: New file
+	* gas/xc16x/addb.s: New file
+	* gas/xc16x/addc.s: New file
+	* gas/xc16x/addcb.s: New file   
+	* gas/xc16x/and.s: New file
+	* gas/xc16x/andb.s: New file
+	* gas/xc16x/bfldl.s: New file
+	* gas/xc16x/bit.s: New file
+	* gas/xc16x/calla.s: New file
+	* gas/xc16x/calli.s: New file
+	* gas/xc16x/cmp.s: New file  
+	* gas/xc16x/cmp_test.s: New file
+	* gas/xc16x/cmpb.s: New file
+	* gas/xc16x/cmpi.s: New file
+	* gas/xc16x/cpl.s: New file
+	* gas/xc16x/div.s: New file
+	* gas/xc16x/jmpa.s: New file
+	* gas/xc16x/jmpi.s: New file
+	* gas/xc16x/jmpr.s: New file
+	* gas/xc16x/mov.s: New file
+	* gas/xc16x/mov_test.s: New file 
+	* gas/xc16x/movb.s: New file
+	* gas/xc16x/movbs.s: New file
+	* gas/xc16x/movbz.s: New file  
+	* gas/xc16x/mul.s: New file
+	* gas/xc16x/neg.s: New file
+	* gas/xc16x/nop.s: New file
+	* gas/xc16x/or.s: New file
+	* gas/xc16x/orb.s: New file
+	* gas/xc16x/prior.s: New file
+	* gas/xc16x/pushpop.s: New file
+	* gas/xc16x/ret.s: New file
+	* gas/xc16x/scxt.s: New file
+	* gas/xc16x/shlrol.s: New file
+	* gas/xc16x/sub.s: New file
+	* gas/xc16x/sub_test.s: New file 
+	* gas/xc16x/subb.s: New file
+	* gas/xc16x/subcb.s: New file
+	* gas/xc16x/syscontrol1.s: New file
+	* gas/xc16x/syscontrol2.s: New file
+	* gas/xc16x/trap.s: New file
+	* gas/xc16x/xor.s: New file
+	* gas/xc16x/xorb.s: New file
+
 2006-02-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/x86-64-crx-suffix.d: Undo the last change.

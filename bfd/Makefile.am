@@ -111,6 +111,7 @@ ALL_MACHINES = \
 	cpu-w65.lo \
 	cpu-xstormy16.lo \
 	cpu-xtensa.lo \
+	cpu-xc16x.lo \
 	cpu-z80.lo \
 	cpu-z8k.lo
 
@@ -172,6 +173,7 @@ ALL_MACHINES_CFILES = \
 	cpu-w65.c \
 	cpu-xstormy16.c \
 	cpu-xtensa.c \
+	cpu-xc16x.c \
 	cpu-z80.c \
 	cpu-z8k.c
 
@@ -275,6 +277,7 @@ BFD32_BACKENDS = \
 	elf32-vax.lo \
 	elf32-xstormy16.lo \
 	elf32-xtensa.lo \
+	elf32-xc16x.lo \
 	elf32.lo \
 	elflink.lo \
 	elf-strtab.lo \
@@ -446,6 +449,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-vax.c \
 	elf32-xstormy16.c \
 	elf32-xtensa.c \
+	elf32-xc16x.c \
 	elf32.c \
 	elflink.c \
 	elf-strtab.c \
@@ -1032,6 +1036,7 @@ cpu-w65.lo: cpu-w65.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-xstormy16.lo: cpu-xstormy16.c $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
 cpu-xtensa.lo: cpu-xtensa.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
+cpu-xc16x.lo: cpu-xc16x.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-z80.lo: cpu-z80.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 cpu-z8k.lo: cpu-z8k.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
 aout-adobe.lo: aout-adobe.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
@@ -1433,6 +1438,11 @@ elf32-xtensa.lo: elf32-xtensa.c $(INCDIR)/filenames.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/xtensa.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/xtensa-isa.h \
   $(INCDIR)/xtensa-config.h elf32-target.h
+elf32-xc16x.lo: elf32-xc16x.c $(INCDIR)/filenames.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/xc16x.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/libiberty.h \
+  elf32-target.h
 elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h

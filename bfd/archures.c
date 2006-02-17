@@ -358,7 +358,7 @@ DESCRIPTION
 .#define bfd_mach_msp13          13
 .#define bfd_mach_msp14          14
 .#define bfd_mach_msp15          15
-.#define bfd_mach_msp16          16  
+.#define bfd_mach_msp16          16
 .#define bfd_mach_msp21          21
 .#define bfd_mach_msp31          31
 .#define bfd_mach_msp32          32
@@ -367,6 +367,10 @@ DESCRIPTION
 .#define bfd_mach_msp42          42
 .#define bfd_mach_msp43          43
 .#define bfd_mach_msp44          44
+.  bfd_arch_xc16x,     {* Infineon's XC16X Series.               *}
+.#define bfd_mach_xc16x         1
+.#define bfd_mach_xc16xl        2
+.#define bfd_mach_xc16xs         3
 .  bfd_arch_xtensa,    {* Tensilica's Xtensa cores.  *}
 .#define bfd_mach_xtensa	1
 .   bfd_arch_maxq,     {* Dallas MAXQ 10/20 *}
@@ -473,6 +477,7 @@ extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
 extern const bfd_arch_info_type bfd_xtensa_arch;
+extern const bfd_arch_info_type bfd_xc16x_arch;
 extern const bfd_arch_info_type bfd_z80_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
 
@@ -537,6 +542,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_we32k_arch,
     &bfd_xstormy16_arch,
     &bfd_xtensa_arch,
+    &bfd_xc16x_arch,
     &bfd_z80_arch,
     &bfd_z8k_arch,
 #endif

@@ -1952,7 +1952,7 @@ enum bfd_architecture
 #define bfd_mach_msp13          13
 #define bfd_mach_msp14          14
 #define bfd_mach_msp15          15
-#define bfd_mach_msp16          16  
+#define bfd_mach_msp16          16
 #define bfd_mach_msp21          21
 #define bfd_mach_msp31          31
 #define bfd_mach_msp32          32
@@ -1961,6 +1961,10 @@ enum bfd_architecture
 #define bfd_mach_msp42          42
 #define bfd_mach_msp43          43
 #define bfd_mach_msp44          44
+  bfd_arch_xc16x,     /* Infineon's XC16X Series.               */
+#define bfd_mach_xc16x         1
+#define bfd_mach_xc16xl        2
+#define bfd_mach_xc16xs         3
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
    bfd_arch_maxq,     /* Dallas MAXQ 10/20 */
@@ -3976,6 +3980,12 @@ This is the 5 bits of a value.  */
   BFD_RELOC_XSTORMY16_24,
   BFD_RELOC_XSTORMY16_FPTR16,
 
+/* Infineon Relocations.  */
+  BFD_RELOC_XC16X_PAG,
+  BFD_RELOC_XC16X_POF,
+  BFD_RELOC_XC16X_SEG,
+  BFD_RELOC_XC16X_SOF,
+
 /* Relocations used by VAX ELF.  */
   BFD_RELOC_VAX_GLOB_DAT,
   BFD_RELOC_VAX_JMP_SLOT,
@@ -4081,14 +4091,14 @@ replaced by BFD_RELOC_XTENSA_SLOT0_OP.  */
   BFD_RELOC_XTENSA_OP1,
   BFD_RELOC_XTENSA_OP2,
 
-/* Xtensa relocation to mark that the assembler expanded the 
+/* Xtensa relocation to mark that the assembler expanded the
 instructions from an original target.  The expansion size is
 encoded in the reloc size.  */
   BFD_RELOC_XTENSA_ASM_EXPAND,
 
-/* Xtensa relocation to mark that the linker should simplify 
-assembler-expanded instructions.  This is commonly used 
-internally by the linker after analysis of a 
+/* Xtensa relocation to mark that the linker should simplify
+assembler-expanded instructions.  This is commonly used
+internally by the linker after analysis of a
 BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_XTENSA_ASM_SIMPLIFY,
 

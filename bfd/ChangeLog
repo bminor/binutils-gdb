@@ -1,3 +1,21 @@
+2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
+            Anil Paranjape   <anilp1@kpitcummins.com>
+            Shilin Shakti    <shilins@kpitcummins.com>
+
+	* Makefile.am: Add xc16x related entry 
+	* Makefile.in: Regenerate 
+	* archures.c: Add bfd_xc16x_arch 
+	* bfd-in2.h: Regenerate
+	* config.bfd: Add xc16x-*-elf
+	* configure.in: Add bfd_elf32_xc16x_vec
+	* configure: Regenerate.
+	* targets.c: Added xc16x related information
+	* cpu-xc16x.c: New file
+	* reloc.c: Add new relocations specific to xc16x:
+	BFD_RELOC_XC16X_PAG, BFD_RELOC_XC16X_POF, BFD_RELOC_XC16X_SEG,
+	BFD_RELOC_XC16X_SOF	
+	* elf32-xc16x.c: New file.
+
 2006-02-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (allocate_dynrelocs): Tweak undef weak handling.

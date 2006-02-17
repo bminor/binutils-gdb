@@ -263,6 +263,7 @@ HFILES = \
 	sh64-opc.h \
 	sysdep.h \
 	w65-opc.h \
+	xc16x-desc.h xc16x-opc.h \
 	xstormy16-desc.h xstormy16-opc.h \
 	z8k-opc.h
 
@@ -395,6 +396,11 @@ CFILES = \
 	v850-opc.c \
 	vax-dis.c \
 	w65-dis.c \
+	xc16x-asm.c \
+	xc16x-desc.c \
+	xc16x-dis.c \
+	xc16x-ibld.c \
+	xc16x-opc.c \
 	xstormy16-asm.c \
 	xstormy16-desc.c \
 	xstormy16-dis.c \
@@ -521,6 +527,11 @@ ALL_MACHINES = \
 	v850-opc.lo \
 	vax-dis.lo \
 	w65-dis.lo \
+	xc16x-asm.lo \
+	xc16x-desc.lo \
+	xc16x-dis.lo \
+	xc16x-ibld.lo \
+	xc16x-opc.lo \
 	xstormy16-asm.lo \
 	xstormy16-desc.lo \
 	xstormy16-dis.lo \
@@ -554,7 +565,7 @@ noinst_LIBRARIES = libopcodes.a
 POTFILES = $(HFILES) $(CFILES)
 CLEANFILES = \
 	stamp-ip2k stamp-m32c stamp-m32r stamp-fr30 stamp-frv \
-	stamp-openrisc stamp-iq2000 stamp-mt stamp-xstormy16 \
+	stamp-openrisc stamp-iq2000 stamp-mt stamp-xstormy16 stamp-xc16x\
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 CGENDIR = @cgendir@
@@ -568,7 +579,7 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = fr30 frv ip2k m32c m32r mt openrisc xstormy16
+CGEN_CPUS = fr30 frv ip2k m32c m32r mt openrisc xc16x xstormy16
 @CGEN_MAINT_FALSE@IP2K_DEPS = 
 @CGEN_MAINT_TRUE@IP2K_DEPS = stamp-ip2k
 @CGEN_MAINT_FALSE@M32C_DEPS = 
@@ -585,6 +596,8 @@ CGEN_CPUS = fr30 frv ip2k m32c m32r mt openrisc xstormy16
 @CGEN_MAINT_TRUE@OPENRISC_DEPS = stamp-openrisc
 @CGEN_MAINT_FALSE@IQ2000_DEPS = 
 @CGEN_MAINT_TRUE@IQ2000_DEPS = stamp-iq2000
+@CGEN_MAINT_FALSE@XC16X_DEPS = 
+@CGEN_MAINT_TRUE@XC16X_DEPS = stamp-xc16x
 @CGEN_MAINT_FALSE@XSTORMY16_DEPS = 
 @CGEN_MAINT_TRUE@XSTORMY16_DEPS = stamp-xstormy16
 m32c_opc_h = m32c-opc.h cgen-types.h cgen-ops.h
@@ -1054,6 +1067,12 @@ stamp-xstormy16: $(CGENDEPS) $(CPUDIR)/xstormy16.cpu $(CPUDIR)/xstormy16.opc
 	$(MAKE) run-cgen arch=xstormy16 prefix=xstormy16 options= \
 		archfile=$(CPUDIR)/xstormy16.cpu opcfile=$(CPUDIR)/xstormy16.opc extrafiles=
 
+$(srcdir)/xc16x-desc.h $(srcdir)/xc16x-desc.c $(srcdir)/xc16x-opc.h $(srcdir)/xc16x-opc.c $(srcdir)/xc16x-ibld.c $(srcdir)/xc16x-asm.c $(srcdir)/xc16x-dis.c: $(XC16X_DEPS)
+	@true
+stamp-xc16x: $(CGENDEPS) $(CPUDIR)/xc16x.cpu $(CPUDIR)/xc16x.opc
+	$(MAKE) run-cgen arch=xc16x prefix=xc16x options= \
+		archfile=$(CPUDIR)/xc16x.cpu opcfile=$(CPUDIR)/xc16x.opc extrafiles=
+
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)
 
@@ -1516,6 +1535,23 @@ xstormy16-opc.lo: xstormy16-opc.c sysdep.h config.h \
   $(INCDIR)/ansidecl.h $(BFD_H) $(INCDIR)/symcat.h xstormy16-desc.h \
   $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
   xstormy16-opc.h $(INCDIR)/libiberty.h
+xc16x-asm.lo: xc16x-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h xc16x-desc.h $(INCDIR)/opcode/cgen.h \
+  xc16x-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+xc16x-desc.lo: xc16x-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h xc16x-desc.h $(INCDIR)/opcode/cgen.h \
+  xc16x-opc.h opintl.h $(INCDIR)/libiberty.h $(INCDIR)/xregex.h \
+  $(INCDIR)/xregex2.h
+xc16x-dis.lo: xc16x-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
+  xc16x-desc.h $(INCDIR)/opcode/cgen.h xc16x-opc.h opintl.h
+xc16x-ibld.lo: xc16x-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h xc16x-desc.h \
+  $(INCDIR)/opcode/cgen.h xc16x-opc.h opintl.h $(INCDIR)/safe-ctype.h
+xc16x-opc.lo: xc16x-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h xc16x-desc.h $(INCDIR)/opcode/cgen.h \
+  xc16x-opc.h $(INCDIR)/libiberty.h 
 xtensa-dis.lo: xtensa-dis.c $(INCDIR)/xtensa-isa.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h

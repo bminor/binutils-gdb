@@ -1,3 +1,20 @@
+2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
+            Anil Paranjape   <anilp1@kpitcummins.com>
+            Shilin Shakti    <shilins@kpitcummins.com>
+
+	* xc16x-desc.h: New file
+	* xc16x-desc.c: New file
+	* xc16x-opc.h: New file	
+	* xc16x-opc.c: New file
+	* xc16x-ibld.c: New file
+	* xc16x-asm.c: New file
+	* xc16x-dis.c: New file
+	* Makefile.am: Entries for xc16x 
+	* Makefile.in: Regenerate 
+	* cofigure.in: Add xc16x target information.
+	* configure: Regenerate.
+	* disassemble.c: Add xc16x target information.
+
 2006-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (dis386_twobyte): Use "movZ" for debug register

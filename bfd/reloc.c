@@ -2622,11 +2622,11 @@ ENUMDOC
   Thumb 22 bit pc-relative branch.  The lowest bit must be zero and is
   not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
   field in the instruction.
-ENUM 
+ENUM
   BFD_RELOC_ARM_PCREL_CALL
 ENUMDOC
   ARM 26-bit pc-relative branch for an unconditional BL or BLX instruction.
-ENUM 
+ENUM
   BFD_RELOC_ARM_PCREL_JUMP
 ENUMDOC
   ARM 26-bit pc-relative branch for B or conditional BL instruction.
@@ -4221,7 +4221,7 @@ ENUMX
   BFD_RELOC_CRX_SWITCH16
 ENUMX
   BFD_RELOC_CRX_SWITCH32
-ENUMDOC 
+ENUMDOC
   NS CRX Relocations.
 
 ENUM
@@ -4385,6 +4385,17 @@ ENUMDOC
   Sony Xstormy16 Relocations.
 
 ENUM
+  BFD_RELOC_XC16X_PAG
+ENUMX
+  BFD_RELOC_XC16X_POF
+ENUMX
+  BFD_RELOC_XC16X_SEG
+ENUMX
+  BFD_RELOC_XC16X_SOF
+ENUMDOC
+  Infineon Relocations.
+
+ENUM
   BFD_RELOC_VAX_GLOB_DAT
 ENUMX
   BFD_RELOC_VAX_JMP_SLOT
@@ -4392,19 +4403,19 @@ ENUMX
   BFD_RELOC_VAX_RELATIVE
 ENUMDOC
   Relocations used by VAX ELF.
-  
+
 ENUM
   BFD_RELOC_MT_PC16
 ENUMDOC
-  Morpho MT - 16 bit immediate relocation. 
+  Morpho MT - 16 bit immediate relocation.
 ENUM
   BFD_RELOC_MT_HI16
 ENUMDOC
-  Morpho MT - Hi 16 bits of an address. 
+  Morpho MT - Hi 16 bits of an address.
 ENUM
   BFD_RELOC_MT_LO16
 ENUMDOC
-  Morpho MT - Low 16 bits of an address. 
+  Morpho MT - Low 16 bits of an address.
 ENUM
   BFD_RELOC_MT_GNU_VTINHERIT
 ENUMDOC
@@ -4416,7 +4427,7 @@ ENUMDOC
 ENUM
   BFD_RELOC_MT_PCINSN8
 ENUMDOC
-  Morpho MT - 8 bit immediate relocation. 
+  Morpho MT - 8 bit immediate relocation.
 
 ENUM
   BFD_RELOC_MSP430_10_PCREL
@@ -4556,15 +4567,15 @@ ENUMDOC
 ENUM
   BFD_RELOC_XTENSA_ASM_EXPAND
 ENUMDOC
-  Xtensa relocation to mark that the assembler expanded the 
+  Xtensa relocation to mark that the assembler expanded the
   instructions from an original target.  The expansion size is
   encoded in the reloc size.
 ENUM
   BFD_RELOC_XTENSA_ASM_SIMPLIFY
 ENUMDOC
-  Xtensa relocation to mark that the linker should simplify 
-  assembler-expanded instructions.  This is commonly used 
-  internally by the linker after analysis of a 
+  Xtensa relocation to mark that the linker should simplify
+  assembler-expanded instructions.  This is commonly used
+  internally by the linker after analysis of a
   BFD_RELOC_XTENSA_ASM_EXPAND.
 
 ENUM

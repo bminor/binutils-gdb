@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for the Infineon XC16X has been added by KPIT Cummins Infosystems.
+
 * Modify the Linux linker to seach /etc/ld.so.conf first before
   checking default search directories for DT_NEEDED entries.
 

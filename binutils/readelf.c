@@ -1695,6 +1695,7 @@ get_machine_name (unsigned e_machine)
     case EM_BLACKFIN:		return "Analog Devices Blackfin";
     case EM_NIOS32:		return "Altera Nios";
     case EM_ALTERA_NIOS2:	return "Altera Nios II";
+    case EM_XC16X:		return "Infineon Technologies xc16x";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: %x"), e_machine);
       return buff;
@@ -7760,7 +7761,7 @@ static const char *arm_attr_tag_ABI_FP_optimization_goals[] =
 
 #define LOOKUP(id, name) \
   {id, #name, 0x80 | ARRAY_SIZE(arm_attr_tag_##name), arm_attr_tag_##name}
-static arm_attr_public_tag arm_attr_public_tags[] = 
+static arm_attr_public_tag arm_attr_public_tags[] =
 {
   {4, "CPU_raw_name", 1, NULL},
   {5, "CPU_name", 1, NULL},
@@ -7937,7 +7938,7 @@ process_arm_specific (FILE *file)
 
       contents = get_data (NULL, file, sect->sh_offset, 1, sect->sh_size,
 			   _("attributes"));
-      
+
       if (!contents)
 	continue;
       p = contents;
@@ -8027,7 +8028,7 @@ process_arm_specific (FILE *file)
 	{
 	  printf (_("Unknown format '%c'\n"), *p);
 	}
-	
+
       free(contents);
     }
   return 1;
@@ -8951,7 +8952,7 @@ process_object (char *file_name, FILE *file)
       assert (num_dump_sects >= num_cmdline_dump_sects);
       memcpy (dump_sects, cmdline_dump_sects, num_cmdline_dump_sects);
     }
-  
+
   if (! process_file_header ())
     return 1;
 
@@ -9197,7 +9198,7 @@ process_archive (char *file_name, FILE *file)
 
       archive_file_offset = ftell (file);
       archive_file_size = strtoul (arhdr.ar_size, NULL, 10);
-      
+
       ret |= process_object (namealc, file);
 
       free (namealc);

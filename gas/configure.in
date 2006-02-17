@@ -335,6 +335,10 @@ changequote([,])dnl
 	using_cgen=yes
 	;;
 
+      xc16x)
+	using_cgen=yes
+	;;
+
       xtensa)
 	echo ${extra_objects} | grep -s "xtensa-relax.o"
 	if test $? -ne 0 ; then
