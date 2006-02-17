@@ -1,5 +1,10 @@
 2006-02-17  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (allocate_dynrelocs): Tweak undef weak handling.
+	* elf64-ppc.c (allocate_dynrelocs): Likewise.
+
+2006-02-17  Alan Modra  <amodra@bigpond.net.au>
+
 	PR ld/2218
 	* elf64-ppc.c (allocate_dynrelocs): Ensure undef weak sym is
 	dynamic.
