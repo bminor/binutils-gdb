@@ -10363,27 +10363,23 @@ This is the opposite of the @code{info address} command.  You can use
 it to find out the name of a variable or a function given its address.
 
 @kindex whatis
-@item whatis @var{expr}
-Print the data type of expression @var{expr}.  @var{expr} is not
-actually evaluated, and any side-effecting operations (such as
-assignments or function calls) inside it do not take place.
+@item whatis [@var{arg}]
+Print the data type of @var{arg}, which can be either an expression or
+a data type.  With no argument, print the data type of @code{$}, the
+last value in the value history.  If @var{arg} is an expression, it is
+not actually evaluated, and any side-effecting operations (such as
+assignments or function calls) inside it do not take place.  If
+@var{arg} is a type name, it may be the name of a type or typedef, or
+for C code it may have the form @samp{class @var{class-name}},
+@samp{struct @var{struct-tag}}, @samp{union @var{union-tag}} or
+@samp{enum @var{enum-tag}}.
 @xref{Expressions, ,Expressions}.
 
-@item whatis
-Print the data type of @code{$}, the last value in the value history.
-
 @kindex ptype
-@item ptype @var{typename}
-Print a description of data type @var{typename}.  @var{typename} may be
-the name of a type, or for C code it may have the form @samp{class
-@var{class-name}}, @samp{struct @var{struct-tag}}, @samp{union
-@var{union-tag}} or @samp{enum @var{enum-tag}}.
-
-@item ptype @var{expr}
-@itemx ptype
-Print a description of the type of expression @var{expr}.  @code{ptype}
-differs from @code{whatis} by printing a detailed description, instead
-of just the name of the type.
+@item ptype [@var{arg}]
+@code{ptype} accepts the same arguments as @code{whatis}, but prints a
+detailed description of the type, instead of just the name of the type.
+@xref{Expressions, ,Expressions}.
 
 For example, for this variable declaration:
 
