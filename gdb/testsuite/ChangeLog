@@ -1,3 +1,11 @@
+2006-02-16  Fred Fish  <fnf@specifix.com>
+
+	* gdb.base/whatis.c: Define variables using typedefs char_addr,
+	ushort_addr, and slong_addr, so the typedefs are not optimized
+	away.
+	* gdb.base/whatis.exp: Add tests using type name for struct type,
+	union type, enum type, and typedef.
+	
 2006-02-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/i386-prologue.exp: Add testcase for PR breakpoints/2080.
