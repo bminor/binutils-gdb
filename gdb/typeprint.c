@@ -45,8 +45,6 @@ extern void _initialize_typeprint (void);
 
 static void ptype_command (char *, int);
 
-static struct type *ptype_eval (struct expression *);
-
 static void whatis_command (char *, int);
 
 static void whatis_exp (char *, int);
@@ -182,55 +180,12 @@ whatis_command (char *exp, int from_tty)
   whatis_exp (exp, -1);
 }
 
-/* Simple subroutine for ptype_command.  */
-
-static struct type *
-ptype_eval (struct expression *exp)
-{
-  if (exp->elts[0].opcode == OP_TYPE)
-    {
-      return (exp->elts[1].type);
-    }
-  else
-    {
-      return (NULL);
-    }
-}
-
 /* TYPENAME is either the name of a type, or an expression.  */
 
 static void
 ptype_command (char *typename, int from_tty)
 {
-  struct type *type;
-  struct expression *expr;
-  struct cleanup *old_chain;
-
-  if (typename == NULL)
-    {
-      /* Print type of last thing in value history. */
-      whatis_exp (typename, 1);
-    }
-  else
-    {
-      expr = parse_expression (typename);
-      old_chain = make_cleanup (free_current_contents, &expr);
-      type = ptype_eval (expr);
-      if (type != NULL)
-	{
-	  /* User did "ptype <typename>" */
-	  printf_filtered ("type = ");
-	  type_print (type, "", gdb_stdout, 1);
-	  printf_filtered ("\n");
-	  do_cleanups (old_chain);
-	}
-      else
-	{
-	  /* User did "ptype <symbolname>" */
-	  do_cleanups (old_chain);
-	  whatis_exp (typename, 1);
-	}
-    }
+  whatis_exp (typename, 1);
 }
 
 /* Print integral scalar data VAL, of type TYPE, onto stdio stream STREAM.

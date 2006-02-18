@@ -2086,7 +2086,15 @@ evaluate_subexp_standard (struct type *expect_type,
       return value_of_local ("self", 1);
 
     case OP_TYPE:
-      error (_("Attempt to use a type name as an expression"));
+      /* The value is not supposed to be used.  This is here to make it
+         easier to accommodate expressions that contain types.  */
+      (*pos) += 2;
+      if (noside == EVAL_SKIP)
+        goto nosideret;
+      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+        return allocate_value (exp->elts[pc + 1].type);
+      else
+        error (_("Attempt to use a type name as an expression"));
 
     default:
       /* Removing this case and compiling with gcc -Wall reveals that
