@@ -1,3 +1,9 @@
+2006-02-19  Fred Fish  <fnf@specifix.com>
+
+	* gdb.base/pc-fp.exp (get_valueofx): Don't print environment
+	specifix hex value as part of results.
+	* gdb.base/shreloc.exp (get_msym_addrs): Ditto.
+	
 2006-02-16  Fred Fish  <fnf@specifix.com>
 
 	* gdb.base/whatis.c: Define variables using typedefs char_addr,
