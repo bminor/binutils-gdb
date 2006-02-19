@@ -2886,7 +2886,7 @@ hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
      quite slow, so bail out if we do have an unwind entry.  */
 
   u = find_unwind_entry (pc);
-  if (u == NULL)
+  if (u != NULL)
     return 0;
 
   return (hppa_match_insns_relaxed (pc, hppa_import_stub, insn)
