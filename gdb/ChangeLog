@@ -1,3 +1,25 @@
+2006-02-19  Christopher Faylor  <cgf@timesys.com>
+
+	* win32_nat.c (cygwin_load_start): New variable.
+	(cygwin_load_end): Ditto.
+	(have_saved_context): Ditto.
+	(saved_context): Ditto.
+	(max_dll_name_len): Delete obsolete variable.
+	(do_win32_fetch_inferior_registers): Use context saved from cygwin1.dll
+	if we are in a cygwin signal rather than a windows signal.
+	(solib_symbols_add): Detect and store beginning and end of cygwin DLL
+	if dll being loaded is the cygwin DLL.
+	(register_loaded_dll): Remove calculation of max_dll_name_len.
+	(win32_clear_solib): Ditto.
+	(handle_load_dll): Delete obsolete variable.  Remove unneeded call to
+	solib_add.
+	(handle_output_debug_string): Detect and store signal information sent
+	by Cygwin here.
+	(handle_exception): Silently pass on errors in the cygwin DLL.  Return
+	-1 on first pass exception.
+	(win32_continue): Remove spurious clearing of continue_status.
+	(get_win32_debug_event): Deal differently first chance exception.
+
 2006-02-19  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_in_solib_call_trampoline): Only use if no
