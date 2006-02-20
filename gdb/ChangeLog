@@ -1,5 +1,10 @@
 2006-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-nat.c (lin_thread_get_thread_signals): Default to __SIGRTMIN
+	and __SIGRTMIN + 1.
+
+2006-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* remote.c: Add an enumeration for configurable remote
 	packets.
 	(remote_protocol_packets, set_remote_protocol_packet_cmd)

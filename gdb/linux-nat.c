@@ -3413,12 +3413,18 @@ lin_thread_get_thread_signals (sigset_t *set)
   sigemptyset (set);
 
   restart = get_signo ("__pthread_sig_restart");
-  if (restart == 0)
-    return;
-
   cancel = get_signo ("__pthread_sig_cancel");
+
+  /* LinuxThreads normally uses the first two RT signals, but in some legacy
+     cases may use SIGUSR1/SIGUSR2.  NPTL always uses RT signals, but does
+     not provide any way for the debugger to query the signal numbers -
+     fortunately they don't change!  */
+
+  if (restart == 0)
+    restart = __SIGRTMIN;
+
   if (cancel == 0)
-    return;
+    cancel = __SIGRTMIN + 1;
 
   sigaddset (set, restart);
   sigaddset (set, cancel);
