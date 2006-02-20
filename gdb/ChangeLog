@@ -1,5 +1,57 @@
 2006-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote.c: Add an enumeration for configurable remote
+	packets.
+	(remote_protocol_packets, set_remote_protocol_packet_cmd)
+	(show_remote_protocol_packet_cmd): New.
+	(remote_protocol_vcont)
+	(set_remote_protocol_vcont_packet_cmd)
+	(show_remote_protocol_vcont_packet_cmd)
+	(remote_protocol_qSymbol)
+	(set_remote_protocol_qSymbol_packet_cmd)
+	(show_remote_protocol_qSymbol_packet_cmd)
+	(remote_protocol_P, set_remote_protocol_P_packet_cmd)
+	(show_remote_protocol_P_packet_cmd)
+	(remote_protocol_Z)
+	(set_remote_protocol_Z_software_bp_packet_cmd)
+	(show_remote_protocol_Z_software_bp_packet_cmd)
+	(set_remote_protocol_Z_hardware_bp_packet_cmd)
+	(show_remote_protocol_Z_hardware_bp_packet_cmd)
+	(set_remote_protocol_Z_write_wp_packet_cmd)
+	(show_remote_protocol_Z_write_wp_packet_cmd)
+	(set_remote_protocol_Z_read_wp_packet_cmd)
+	(show_remote_protocol_Z_read_wp_packet_cmd)
+	(set_remote_protocol_Z_access_wp_packet_cmd)
+	(show_remote_protocol_Z_access_wp_packet_cmd)
+	(remote_protocol_binary_download)
+	(set_remote_protocol_binary_download_cmd)
+	(show_remote_protocol_binary_download_cmd)
+	(remote_protocol_qPart_auxv)
+	(set_remote_protocol_qPart_auxv_packet_cmd)
+	(show_remote_protocol_qPart_auxv_packet_cmd)
+	(remote_protocol_qGetTLSAddr)
+	(set_remote_protocol_qGetTLSAddr_packet_cmd)
+	(show_remote_protocol_qGetTLSAddr_packet_cmd)
+	(remote_protocol_p)
+	(set_remote_protocol_p_packet_cmd)
+	(show_remote_protocol_p_packet_cmd): Delete.
+
+	(init_all_packet_configs): Simplify.
+	(set_remote_protocol_Z_packet_cmd)
+	(show_remote_protocol_Z_packet_cmd)
+	(remote_check_symbols, remote_vcont_probe, remote_vcont_resume)
+	(remote_fetch_registers, remote_prepare_to_store)
+	(remote_store_registers, check_binary_download)
+	(remote_write_bytes, remote_insert_breakpoint)
+	(remote_remove_breakpoint, remote_insert_watchpoint)
+	(remote_remove_watchpoint, remote_insert_hw_breakpoint)
+	(remote_remove_hw_breakpoint, remote_xfer_partial)
+	(remote_get_thread_local_address): Update for packet array.
+	(_initialize_remote): Likewise; also update for common
+	set/show commands.
+
+2006-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* symfile.c (place_section): Correct retry logic.
 
 2006-02-19  Christopher Faylor  <cgf@timesys.com>

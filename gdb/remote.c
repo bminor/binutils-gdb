@@ -729,59 +729,63 @@ packet_ok (const char *buf, struct packet_config *config)
     }
 }
 
-/* Should we try the 'vCont' (descriptive resume) request?  */
-static struct packet_config remote_protocol_vcont;
+enum {
+  PACKET_vCont = 0,
+  PACKET_X,
+  PACKET_qSymbol,
+  PACKET_P,
+  PACKET_p,
+  PACKET_Z0,
+  PACKET_Z1,
+  PACKET_Z2,
+  PACKET_Z3,
+  PACKET_Z4,
+  PACKET_qPart_auxv,
+  PACKET_qGetTLSAddr,
+  PACKET_MAX
+};
+
+static struct packet_config remote_protocol_packets[PACKET_MAX];
 
 static void
-set_remote_protocol_vcont_packet_cmd (char *args, int from_tty,
-				      struct cmd_list_element *c)
+set_remote_protocol_packet_cmd (char *args, int from_tty,
+				struct cmd_list_element *c)
 {
-  update_packet_config (&remote_protocol_vcont);
+  struct packet_config *packet;
+
+  for (packet = remote_protocol_packets;
+       packet < &remote_protocol_packets[PACKET_MAX];
+       packet++)
+    {
+      if (&packet->detect == c->var)
+	{
+	  update_packet_config (packet);
+	  return;
+	}
+    }
+  internal_error (__FILE__, __LINE__, "Could not find config for %s",
+		  c->name);
 }
 
 static void
-show_remote_protocol_vcont_packet_cmd (struct ui_file *file, int from_tty,
-				       struct cmd_list_element *c,
-				       const char *value)
+show_remote_protocol_packet_cmd (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c,
+				 const char *value)
 {
-  show_packet_config_cmd (&remote_protocol_vcont);
-}
+  struct packet_config *packet;
 
-/* Should we try the 'qSymbol' (target symbol lookup service) request?  */
-static struct packet_config remote_protocol_qSymbol;
-
-static void
-set_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_qSymbol);
-}
-
-static void
-show_remote_protocol_qSymbol_packet_cmd (struct ui_file *file, int from_tty,
-					 struct cmd_list_element *c,
-					 const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_qSymbol);
-}
-
-/* Should we try the 'P' (set register) request?  */
-
-static struct packet_config remote_protocol_P;
-
-static void
-set_remote_protocol_P_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_P);
-}
-
-static void
-show_remote_protocol_P_packet_cmd (struct ui_file *file, int from_tty,
-				   struct cmd_list_element *c,
-				   const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_P);
+  for (packet = remote_protocol_packets;
+       packet < &remote_protocol_packets[PACKET_MAX];
+       packet++)
+    {
+      if (&packet->detect == c->var)
+	{
+	  show_packet_config_cmd (packet);
+	  return;
+	}
+    }
+  internal_error (__FILE__, __LINE__, "Could not find config for %s",
+		  c->name);
 }
 
 /* Should we try one of the 'Z' requests?  */
@@ -796,86 +800,6 @@ enum Z_packet_type
   NR_Z_PACKET_TYPES
 };
 
-static struct packet_config remote_protocol_Z[NR_Z_PACKET_TYPES];
-
-/* FIXME: Instead of having all these boiler plate functions, the
-   command callback should include a context argument.  */
-
-static void
-set_remote_protocol_Z_software_bp_packet_cmd (char *args, int from_tty,
-					      struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_Z[Z_PACKET_SOFTWARE_BP]);
-}
-
-static void
-show_remote_protocol_Z_software_bp_packet_cmd (struct ui_file *file, int from_tty,
-					       struct cmd_list_element *c,
-					       const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_SOFTWARE_BP]);
-}
-
-static void
-set_remote_protocol_Z_hardware_bp_packet_cmd (char *args, int from_tty,
-					      struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_Z[Z_PACKET_HARDWARE_BP]);
-}
-
-static void
-show_remote_protocol_Z_hardware_bp_packet_cmd (struct ui_file *file, int from_tty,
-					       struct cmd_list_element *c,
-					       const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_HARDWARE_BP]);
-}
-
-static void
-set_remote_protocol_Z_write_wp_packet_cmd (char *args, int from_tty,
-					      struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_Z[Z_PACKET_WRITE_WP]);
-}
-
-static void
-show_remote_protocol_Z_write_wp_packet_cmd (struct ui_file *file, int from_tty,
-					    struct cmd_list_element *c,
-					    const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_WRITE_WP]);
-}
-
-static void
-set_remote_protocol_Z_read_wp_packet_cmd (char *args, int from_tty,
-					      struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_Z[Z_PACKET_READ_WP]);
-}
-
-static void
-show_remote_protocol_Z_read_wp_packet_cmd (struct ui_file *file, int from_tty,
-					   struct cmd_list_element *c,
-					   const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_READ_WP]);
-}
-
-static void
-set_remote_protocol_Z_access_wp_packet_cmd (char *args, int from_tty,
-					      struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_Z[Z_PACKET_ACCESS_WP]);
-}
-
-static void
-show_remote_protocol_Z_access_wp_packet_cmd (struct ui_file *file, int from_tty,
-					     struct cmd_list_element *c,
-					     const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_Z[Z_PACKET_ACCESS_WP]);
-}
-
 /* For compatibility with older distributions.  Provide a ``set remote
    Z-packet ...'' command that updates all the Z packet types.  */
 
@@ -888,8 +812,8 @@ set_remote_protocol_Z_packet_cmd (char *args, int from_tty,
   int i;
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     {
-      remote_protocol_Z[i].detect = remote_Z_packet_detect;
-      update_packet_config (&remote_protocol_Z[i]);
+      remote_protocol_packets[PACKET_Z0 + i].detect = remote_Z_packet_detect;
+      update_packet_config (&remote_protocol_packets[PACKET_Z0 + i]);
     }
 }
 
@@ -901,21 +825,9 @@ show_remote_protocol_Z_packet_cmd (struct ui_file *file, int from_tty,
   int i;
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     {
-      show_packet_config_cmd (&remote_protocol_Z[i]);
+      show_packet_config_cmd (&remote_protocol_packets[PACKET_Z0 + i]);
     }
 }
-
-/* Should we try the 'X' (remote binary download) packet?
-
-   This variable (available to the user via "set remote X-packet")
-   dictates whether downloads are sent in binary (via the 'X' packet).
-   We assume that the stub can, and attempt to do it. This will be
-   cleared if the stub does not understand it. This switch is still
-   needed, though in cases when the packet is supported in the stub,
-   but the connection does not allow it (i.e., 7-bit serial connection
-   only).  */
-
-static struct packet_config remote_protocol_binary_download;
 
 /* Should we try the 'ThreadInfo' query packet?
 
@@ -927,77 +839,6 @@ static struct packet_config remote_protocol_binary_download;
 
 static int use_threadinfo_query;
 static int use_threadextra_query;
-
-static void
-set_remote_protocol_binary_download_cmd (char *args,
-					 int from_tty,
-					 struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_binary_download);
-}
-
-static void
-show_remote_protocol_binary_download_cmd (struct ui_file *file, int from_tty,
-					  struct cmd_list_element *c,
-					  const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_binary_download);
-}
-
-/* Should we try the 'qPart:auxv' (target auxiliary vector read) request?  */
-static struct packet_config remote_protocol_qPart_auxv;
-
-static void
-set_remote_protocol_qPart_auxv_packet_cmd (char *args, int from_tty,
-					   struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_qPart_auxv);
-}
-
-static void
-show_remote_protocol_qPart_auxv_packet_cmd (struct ui_file *file, int from_tty,
-					    struct cmd_list_element *c,
-					    const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_qPart_auxv);
-}
-
-/* Should we try the 'qGetTLSAddr' (Get Thread Local Storage Address) request? */
-static struct packet_config remote_protocol_qGetTLSAddr;
-
-static void
-set_remote_protocol_qGetTLSAddr_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_qGetTLSAddr);
-}
-
-static void
-show_remote_protocol_qGetTLSAddr_packet_cmd (struct ui_file *file, int from_tty,
-					     struct cmd_list_element *c,
-					     const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_qGetTLSAddr);
-}
-
-static struct packet_config remote_protocol_p;
-
-static void
-set_remote_protocol_p_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_p);
-}
-
-static void
-show_remote_protocol_p_packet_cmd (struct ui_file *file, int from_tty,
-				   struct cmd_list_element *c,
-				   const char *value)
-{
-  show_packet_config_cmd (&remote_protocol_p);
-}
-
-
 
 /* Tokens for use by the asynchronous signal handlers for SIGINT.  */
 static void *sigint_remote_twice_token;
@@ -2098,17 +1939,8 @@ static void
 init_all_packet_configs (void)
 {
   int i;
-  update_packet_config (&remote_protocol_P);
-  update_packet_config (&remote_protocol_p);
-  update_packet_config (&remote_protocol_qSymbol);
-  update_packet_config (&remote_protocol_vcont);
-  for (i = 0; i < NR_Z_PACKET_TYPES; i++)
-    update_packet_config (&remote_protocol_Z[i]);
-  /* Force remote_write_bytes to check whether target supports binary
-     downloading.  */
-  update_packet_config (&remote_protocol_binary_download);
-  update_packet_config (&remote_protocol_qPart_auxv);
-  update_packet_config (&remote_protocol_qGetTLSAddr);
+  for (i = 0; i < PACKET_MAX; i++)
+    update_packet_config (&remote_protocol_packets[i]);
 }
 
 /* Symbol look-up.  */
@@ -2121,7 +1953,7 @@ remote_check_symbols (struct objfile *objfile)
   struct minimal_symbol *sym;
   int end;
 
-  if (remote_protocol_qSymbol.support == PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_qSymbol].support == PACKET_DISABLE)
     return;
 
   msg   = alloca (rs->remote_packet_size);
@@ -2131,7 +1963,7 @@ remote_check_symbols (struct objfile *objfile)
 
   putpkt ("qSymbol::");
   getpkt (reply, rs->remote_packet_size, 0);
-  packet_ok (reply, &remote_protocol_qSymbol);
+  packet_ok (reply, &remote_protocol_packets[PACKET_qSymbol]);
 
   while (strncmp (reply, "qSymbol:", 8) == 0)
     {
@@ -2450,7 +2282,7 @@ remote_vcont_probe (struct remote_state *rs, char *buf)
 	buf[0] = 0;
     }
 
-  packet_ok (buf, &remote_protocol_vcont);
+  packet_ok (buf, &remote_protocol_packets[PACKET_vCont]);
 }
 
 /* Resume the remote inferior by using a "vCont" packet.  The thread
@@ -2474,10 +2306,10 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
   buf = xmalloc (rs->remote_packet_size);
   old_cleanup = make_cleanup (xfree, buf);
 
-  if (remote_protocol_vcont.support == PACKET_SUPPORT_UNKNOWN)
+  if (remote_protocol_packets[PACKET_vCont].support == PACKET_SUPPORT_UNKNOWN)
     remote_vcont_probe (rs, buf);
 
-  if (remote_protocol_vcont.support == PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_vCont].support == PACKET_DISABLE)
     {
       do_cleanups (old_cleanup);
       return 0;
@@ -3271,7 +3103,7 @@ remote_fetch_registers (int regnum)
 			_("Attempt to fetch a non G-packet register when this "
 			"remote.c does not support the p-packet."));
     }
-      switch (remote_protocol_p.support)
+      switch (remote_protocol_packets[PACKET_p].support)
 	{
 	case PACKET_DISABLE:
 	  break;
@@ -3284,7 +3116,7 @@ remote_fetch_registers (int regnum)
 	  if (fetch_register_using_p (regnum))
 	    {
 	      /* The stub recognized the 'p' packet.  Remember this.  */
-	      remote_protocol_p.support = PACKET_ENABLE;
+	      remote_protocol_packets[PACKET_p].support = PACKET_ENABLE;
 	      return;
 	    }
 	  else
@@ -3292,7 +3124,7 @@ remote_fetch_registers (int regnum)
 	      /* The stub does not support the 'P' packet.  Use 'G'
 	         instead, and don't try using 'P' in the future (it
 	         will just waste our time).  */
-	      remote_protocol_p.support = PACKET_DISABLE;
+	      remote_protocol_packets[PACKET_p].support = PACKET_DISABLE;
 	      break;
 	    }
 	}
@@ -3396,7 +3228,7 @@ remote_prepare_to_store (void)
   gdb_byte buf[MAX_REGISTER_SIZE];
 
   /* Make sure the entire registers array is valid.  */
-  switch (remote_protocol_P.support)
+  switch (remote_protocol_packets[PACKET_P].support)
     {
     case PACKET_DISABLE:
     case PACKET_SUPPORT_UNKNOWN:
@@ -3448,7 +3280,7 @@ remote_store_registers (int regnum)
 
   if (regnum >= 0)
     {
-      switch (remote_protocol_P.support)
+      switch (remote_protocol_packets[PACKET_P].support)
 	{
 	case PACKET_DISABLE:
 	  break;
@@ -3461,7 +3293,7 @@ remote_store_registers (int regnum)
 	  if (store_register_using_P (regnum))
 	    {
 	      /* The stub recognized the 'P' packet.  Remember this.  */
-	      remote_protocol_P.support = PACKET_ENABLE;
+	      remote_protocol_packets[PACKET_P].support = PACKET_ENABLE;
 	      return;
 	    }
 	  else
@@ -3469,7 +3301,7 @@ remote_store_registers (int regnum)
 	      /* The stub does not support the 'P' packet.  Use 'G'
 	         instead, and don't try using 'P' in the future (it
 	         will just waste our time).  */
-	      remote_protocol_P.support = PACKET_DISABLE;
+	      remote_protocol_packets[PACKET_P].support = PACKET_DISABLE;
 	      break;
 	    }
 	}
@@ -3574,7 +3406,7 @@ check_binary_download (CORE_ADDR addr)
 {
   struct remote_state *rs = get_remote_state ();
 
-  switch (remote_protocol_binary_download.support)
+  switch (remote_protocol_packets[PACKET_X].support)
     {
     case PACKET_DISABLE:
       break;
@@ -3601,14 +3433,14 @@ check_binary_download (CORE_ADDR addr)
 	    if (remote_debug)
 	      fprintf_unfiltered (gdb_stdlog,
 				  "binary downloading NOT suppported by target\n");
-	    remote_protocol_binary_download.support = PACKET_DISABLE;
+	    remote_protocol_packets[PACKET_X].support = PACKET_DISABLE;
 	  }
 	else
 	  {
 	    if (remote_debug)
 	      fprintf_unfiltered (gdb_stdlog,
 				  "binary downloading suppported by target\n");
-	    remote_protocol_binary_download.support = PACKET_ENABLE;
+	    remote_protocol_packets[PACKET_X].support = PACKET_ENABLE;
 	  }
 	break;
       }
@@ -3658,7 +3490,7 @@ remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   /* Append "[XM]".  Compute a best guess of the number of bytes
      actually transfered.  */
   p = buf;
-  switch (remote_protocol_binary_download.support)
+  switch (remote_protocol_packets[PACKET_X].support)
     {
     case PACKET_ENABLE:
       *p++ = 'X';
@@ -3703,7 +3535,7 @@ remote_write_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 
   /* Append the packet body.  */
   payload_start = p;
-  switch (remote_protocol_binary_download.support)
+  switch (remote_protocol_packets[PACKET_X].support)
     {
     case PACKET_ENABLE:
       /* Binary mode.  Send target system values byte by byte, in
@@ -4490,7 +4322,7 @@ remote_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
      fails, and the user has explicitly requested the Z support then
      report an error, otherwise, mark it disabled and go on.  */
 
-  if (remote_protocol_Z[Z_PACKET_SOFTWARE_BP].support != PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_Z0].support != PACKET_DISABLE)
     {
       char *buf = alloca (rs->remote_packet_size);
       char *p = buf;
@@ -4506,7 +4338,7 @@ remote_insert_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
       putpkt (buf);
       getpkt (buf, rs->remote_packet_size, 0);
 
-      switch (packet_ok (buf, &remote_protocol_Z[Z_PACKET_SOFTWARE_BP]))
+      switch (packet_ok (buf, &remote_protocol_packets[PACKET_Z0]))
 	{
 	case PACKET_ERROR:
 	  return -1;
@@ -4542,7 +4374,7 @@ remote_remove_breakpoint (CORE_ADDR addr, bfd_byte *contents_cache)
   struct remote_state *rs = get_remote_state ();
   int bp_size;
 
-  if (remote_protocol_Z[Z_PACKET_SOFTWARE_BP].support != PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_Z0].support != PACKET_DISABLE)
     {
       char *buf = alloca (rs->remote_packet_size);
       char *p = buf;
@@ -4597,10 +4429,10 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
   char *p;
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
-  if (remote_protocol_Z[packet].support == PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_Z0 + packet].support == PACKET_DISABLE)
     error (_("Can't set hardware watchpoints without the '%s' (%s) packet."),
-	   remote_protocol_Z[packet].name,
-	   remote_protocol_Z[packet].title);
+	   remote_protocol_packets[PACKET_Z0 + packet].name,
+	   remote_protocol_packets[PACKET_Z0 + packet].title);
 
   sprintf (buf, "Z%x,", packet);
   p = strchr (buf, '\0');
@@ -4611,7 +4443,7 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
   putpkt (buf);
   getpkt (buf, rs->remote_packet_size, 0);
 
-  switch (packet_ok (buf, &remote_protocol_Z[packet]))
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_Z0 + packet]))
     {
     case PACKET_ERROR:
     case PACKET_UNKNOWN:
@@ -4632,10 +4464,10 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
   char *p;
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
-  if (remote_protocol_Z[packet].support == PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_Z0 + packet].support == PACKET_DISABLE)
     error (_("Can't clear hardware watchpoints without the '%s' (%s) packet."),
-	   remote_protocol_Z[packet].name,
-	   remote_protocol_Z[packet].title);
+	   remote_protocol_packets[PACKET_Z0 + packet].name,
+	   remote_protocol_packets[PACKET_Z0 + packet].title);
 
   sprintf (buf, "z%x,", packet);
   p = strchr (buf, '\0');
@@ -4645,7 +4477,7 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
   putpkt (buf);
   getpkt (buf, rs->remote_packet_size, 0);
 
-  switch (packet_ok (buf, &remote_protocol_Z[packet]))
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_Z0 + packet]))
     {
     case PACKET_ERROR:
     case PACKET_UNKNOWN:
@@ -4723,10 +4555,10 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 
   BREAKPOINT_FROM_PC (&addr, &len);
 
-  if (remote_protocol_Z[Z_PACKET_HARDWARE_BP].support == PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     error (_("Can't set hardware breakpoint without the '%s' (%s) packet."),
-	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].name,
-	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].title);
+	   remote_protocol_packets[PACKET_Z1].name,
+	   remote_protocol_packets[PACKET_Z1].title);
 
   *(p++) = 'Z';
   *(p++) = '1';
@@ -4739,7 +4571,7 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
   putpkt (buf);
   getpkt (buf, rs->remote_packet_size, 0);
 
-  switch (packet_ok (buf, &remote_protocol_Z[Z_PACKET_HARDWARE_BP]))
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_Z1]))
     {
     case PACKET_ERROR:
     case PACKET_UNKNOWN:
@@ -4765,10 +4597,10 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
 
   BREAKPOINT_FROM_PC (&addr, &len);
 
-  if (remote_protocol_Z[Z_PACKET_HARDWARE_BP].support == PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     error (_("Can't clear hardware breakpoint without the '%s' (%s) packet."),
-	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].name,
-	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].title);
+	   remote_protocol_packets[PACKET_Z1].name,
+	   remote_protocol_packets[PACKET_Z1].title);
 
   *(p++) = 'z';
   *(p++) = '1';
@@ -4781,7 +4613,7 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, gdb_byte *shadow)
   putpkt(buf);
   getpkt (buf, rs->remote_packet_size, 0);
 
-  switch (packet_ok (buf, &remote_protocol_Z[Z_PACKET_HARDWARE_BP]))
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_Z1]))
     {
     case PACKET_ERROR:
     case PACKET_UNKNOWN:
@@ -4983,7 +4815,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       break;
 
     case TARGET_OBJECT_AUXV:
-      if (remote_protocol_qPart_auxv.support != PACKET_DISABLE)
+      if (remote_protocol_packets[PACKET_qPart_auxv].support != PACKET_DISABLE)
 	{
 	  unsigned int total = 0;
 	  while (len > 0)
@@ -4998,7 +4830,8 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 		return total > 0 ? total : i;
 	      buf2[0] = '\0';
 	      getpkt (buf2, rs->remote_packet_size, 0);
-	      if (packet_ok (buf2, &remote_protocol_qPart_auxv) != PACKET_OK)
+	      if (packet_ok (buf2, &remote_protocol_packets[PACKET_qPart_auxv])
+		  != PACKET_OK)
 		return total > 0 ? total : -1;
 	      if (buf2[0] == 'O' && buf2[1] == 'K' && buf2[2] == '\0')
 		break;		/* Got EOF indicator.  */
@@ -5308,7 +5141,7 @@ remote_pid_to_str (ptid_t ptid)
 static CORE_ADDR
 remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
 {
-  if (remote_protocol_qGetTLSAddr.support != PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_qGetTLSAddr].support != PACKET_DISABLE)
     {
       struct remote_state *rs = get_remote_state ();
       char *buf = alloca (rs->remote_packet_size);
@@ -5326,7 +5159,7 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
 
       putpkt (buf);
       getpkt (buf, rs->remote_packet_size, 0);
-      result = packet_ok (buf, &remote_protocol_qGetTLSAddr);
+      result = packet_ok (buf, &remote_protocol_packets[PACKET_qGetTLSAddr]);
       if (result == PACKET_OK)
 	{
 	  ULONGEST result;
@@ -5725,87 +5558,87 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
 
-  add_packet_config_cmd (&remote_protocol_binary_download,
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_X],
 			 "X", "binary-download",
-			 set_remote_protocol_binary_download_cmd,
-			 show_remote_protocol_binary_download_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 1);
 
-  add_packet_config_cmd (&remote_protocol_vcont,
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_vCont],
 			 "vCont", "verbose-resume",
-			 set_remote_protocol_vcont_packet_cmd,
-			 show_remote_protocol_vcont_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  add_packet_config_cmd (&remote_protocol_qSymbol,
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qSymbol],
 			 "qSymbol", "symbol-lookup",
-			 set_remote_protocol_qSymbol_packet_cmd,
-			 show_remote_protocol_qSymbol_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  add_packet_config_cmd (&remote_protocol_P,
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_P],
 			 "P", "set-register",
-			 set_remote_protocol_P_packet_cmd,
-			 show_remote_protocol_P_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 1);
 
-  add_packet_config_cmd (&remote_protocol_p,
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_p],
 			 "p", "fetch-register",
-			 set_remote_protocol_p_packet_cmd,
-			 show_remote_protocol_p_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 1);
 
-  add_packet_config_cmd (&remote_protocol_Z[Z_PACKET_SOFTWARE_BP],
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Z0],
 			 "Z0", "software-breakpoint",
-			 set_remote_protocol_Z_software_bp_packet_cmd,
-			 show_remote_protocol_Z_software_bp_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  add_packet_config_cmd (&remote_protocol_Z[Z_PACKET_HARDWARE_BP],
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Z1],
 			 "Z1", "hardware-breakpoint",
-			 set_remote_protocol_Z_hardware_bp_packet_cmd,
-			 show_remote_protocol_Z_hardware_bp_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  add_packet_config_cmd (&remote_protocol_Z[Z_PACKET_WRITE_WP],
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Z2],
 			 "Z2", "write-watchpoint",
-			 set_remote_protocol_Z_write_wp_packet_cmd,
-			 show_remote_protocol_Z_write_wp_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  add_packet_config_cmd (&remote_protocol_Z[Z_PACKET_READ_WP],
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Z3],
 			 "Z3", "read-watchpoint",
-			 set_remote_protocol_Z_read_wp_packet_cmd,
-			 show_remote_protocol_Z_read_wp_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  add_packet_config_cmd (&remote_protocol_Z[Z_PACKET_ACCESS_WP],
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Z4],
 			 "Z4", "access-watchpoint",
-			 set_remote_protocol_Z_access_wp_packet_cmd,
-			 show_remote_protocol_Z_access_wp_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  add_packet_config_cmd (&remote_protocol_qPart_auxv,
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qPart_auxv],
 			 "qPart_auxv", "read-aux-vector",
-			 set_remote_protocol_qPart_auxv_packet_cmd,
-			 show_remote_protocol_qPart_auxv_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
-  add_packet_config_cmd (&remote_protocol_qGetTLSAddr,
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",
-			 set_remote_protocol_qGetTLSAddr_packet_cmd,
-			 show_remote_protocol_qGetTLSAddr_packet_cmd,
+			 set_remote_protocol_packet_cmd,
+			 show_remote_protocol_packet_cmd,
 			 &remote_set_cmdlist, &remote_show_cmdlist,
 			 0);
 
