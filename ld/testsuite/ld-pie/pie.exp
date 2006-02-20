@@ -26,6 +26,7 @@ if { ![istarget *-*-linux*] } {
 
 set array_tests {
     {"weak undefined" "-pie" "" {weakundef.c} "weakundef" "weakundef.out" "-fPIC"}
+    {"weak undefined data" "-pie" "" {weakundef-data.c} "weakundef-data" "weakundef.out" "-fPIC"}
 }
 
 run_ld_link_exec_tests [] $array_tests

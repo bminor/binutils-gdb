@@ -1,6 +1,13 @@
+2006-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2218
+	* ld-pie/pie.exp: Add the weak undefined data test.
+
+	* ld-pie/weakundef-data.c: New file.
+
 2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
-            Anil Paranjape   <anilp1@kpitcummins.com>
-            Shilin Shakti    <shilins@kpitcummins.com>
+	    Anil Paranjape   <anilp1@kpitcummins.com>
+	    Shilin Shakti    <shilins@kpitcummins.com>
 
 	* ld-xc16x: New directory.
 	* ld-xc16x/absrel.d: New file.
