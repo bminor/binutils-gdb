@@ -1,3 +1,7 @@
+2006-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* symfile.c (place_section): Correct retry logic.
+
 2006-02-19  Christopher Faylor  <cgf@timesys.com>
 
 	* win32_nat.c (cygwin_load_start): New variable.

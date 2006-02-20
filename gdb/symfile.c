@@ -476,6 +476,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
   struct place_section_arg *arg = obj;
   CORE_ADDR *offsets = arg->offsets->offsets, start_addr;
   int done;
+  ULONGEST align = ((ULONGEST) 1) << bfd_get_section_alignment (abfd, sect);
 
   /* We are only interested in loadable sections.  */
   if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
@@ -486,11 +487,11 @@ place_section (bfd *abfd, asection *sect, void *obj)
     return;
 
   /* Otherwise, let's try to find a place for the section.  */
+  start_addr = (arg->lowest + align - 1) & -align;
+
   do {
     asection *cur_sec;
-    ULONGEST align = 1 << bfd_get_section_alignment (abfd, sect);
 
-    start_addr = (arg->lowest + align - 1) & -align;
     done = 1;
 
     for (cur_sec = abfd->sections; cur_sec != NULL; cur_sec = cur_sec->next)
@@ -524,7 +525,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
 	    start_addr = offsets[indx] + bfd_get_section_size (cur_sec);
 	    start_addr = (start_addr + align - 1) & -align;
 	    done = 0;
-	    continue;
+	    break;
 	  }
 
 	/* Otherwise, we appear to be OK.  So far.  */
