@@ -1,3 +1,8 @@
+2006-02-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+        * elfread.c (elf_symtab_read): Skip symbols which BFD considers
+	special.
+
 2006-02-21  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* defs.h (directory_switch): Add prototype.

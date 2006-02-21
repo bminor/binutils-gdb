@@ -1,7 +1,7 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
 
    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 
@@ -173,6 +173,12 @@ elf_symtab_read (struct objfile *objfile, int dynamic,
 	     that are null strings (may happen). */
 	  continue;
 	}
+
+      /* Skip "special" symbols, e.g. ARM mapping symbols.  These are
+	 symbols which do not correspond to objects in the symbol table,
+	 but have some other target-specific meaning.  */
+      if (bfd_is_target_special_symbol (objfile->obfd, sym))
+	continue;
 
       offset = ANOFFSET (objfile->section_offsets, sym->section->index);
       if (dynamic
