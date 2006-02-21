@@ -611,6 +611,8 @@ extern void add_path (char *, char **, int);
 
 extern void directory_command (char *, int);
 
+extern void directory_switch (char *, int);
+
 extern char *source_path;
 
 extern void init_source_path (void);

@@ -1,5 +1,14 @@
 2006-02-21  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* defs.h (directory_switch): Add prototype.
+	* main.c (captured_main): Use directory_switch() instead of
+	directory_command() to add directories from the -d switch.
+	* source.c (directory_switch): New function.
+	(add_path): Use buildargv() to parse spaces in filenames properly.
+	Strip multiple trailing '/' rather than just one.
+
+2006-02-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* symfile.c (add_symbol_file_command): Use buildargv(), instead of
 	hand decoding the command line, to allow use of quotes and spaces.
 	(_initialize_symfile): Reorganize the help message for add-symbol-file

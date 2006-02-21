@@ -667,7 +667,7 @@ extern int gdbtk_test (char *);
     }
 
   for (i = 0; i < ndir; i++)
-    catch_command_errors (directory_command, dirarg[i], 0, RETURN_MASK_ALL);
+    catch_command_errors (directory_switch, dirarg[i], 0, RETURN_MASK_ALL);
   xfree (dirarg);
 
   if (execarg != NULL
