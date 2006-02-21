@@ -1,3 +1,9 @@
+2006-02-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c: (_bfd_default_error_handler): Don't call abort on
+	error, instead call _exit.
+	(_bfd_abort): Call _exit not xexit.
+
 2006-02-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* elf32-frv.c (elf32_frv_grok_prstatus, elf32_frv_grok_psinfo):

@@ -1,6 +1,6 @@
 /* Generic BFD library interface and support routines.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -216,6 +216,11 @@ CODE_FRAGMENT
 #include "libecoff.h"
 #undef obj_symbols
 #include "elf-bfd.h"
+
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
 
 /* provide storage for subsystem, stack and heap data which may have been
    passed in on the command line.  Ld puts this data into a bfd_link_info
@@ -437,7 +442,7 @@ _bfd_default_error_handler (const char *fmt, ...)
   /* Reserve enough space for the existing format string.  */
   avail -= strlen (fmt) + 1;
   if (avail > 1000)
-    abort ();
+    _exit (EXIT_FAILURE);
 
   p = fmt;
   while (1)
@@ -775,10 +780,6 @@ bfd_assert (const char *file, int line)
 /* A more or less friendly abort message.  In libbfd.h abort is
    defined to call this function.  */
 
-#ifndef EXIT_FAILURE
-#define EXIT_FAILURE 1
-#endif
-
 void
 _bfd_abort (const char *file, int line, const char *fn)
 {
@@ -791,7 +792,7 @@ _bfd_abort (const char *file, int line, const char *fn)
       (_("BFD %s internal error, aborting at %s line %d\n"),
        BFD_VERSION_STRING, file, line);
   (*_bfd_error_handler) (_("Please report this bug.\n"));
-  xexit (EXIT_FAILURE);
+  _exit (EXIT_FAILURE);
 }
 
 /*
