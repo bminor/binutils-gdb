@@ -1,5 +1,20 @@
 2006-02-21  Alan Modra  <amodra@bigpond.net.au>
 
+	PR ld/2218
+	* elf32-arm.c (allocate_dynrelocs): Ensure undef weak sym in pie
+	is dynamic.
+	* elf32-hppa.c (allocate_dynrelocs): Likewise.
+	* elf32-i386.c (allocate_dynrelocs): Likewise.
+	* elf32-s390.c (allocate_dynrelocs): Likewise.
+	* elf32-sh.c (allocate_dynrelocs): Likewise.
+	* elf64-s390.c (allocate_dynrelocs): Likewise.
+	* elf64-x86-64.c (allocate_dynrelocs): Likewise.
+	* elf32-m32r.c (allocate_dynrelocs): Likewise.  Discard relocs
+	on undef weak with non-default visibility too.
+	* elfxx-sparc.c (allocate_dynrelocs): Ditto.
+
+2006-02-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd.c: (_bfd_default_error_handler): Don't call abort on
 	error, instead call _exit.
 	(_bfd_abort): Call _exit not xexit.

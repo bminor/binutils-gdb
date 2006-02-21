@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
@@ -1881,9 +1881,21 @@ allocate_dynrelocs (h, inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+      if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
-	eh->dyn_relocs = NULL;
+	{
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	    eh->dyn_relocs = NULL;
+
+	  /* Make sure undefined weak symbols are output as a dynamic
+	     symbol in PIEs.  */
+	  else if (h->dynindx == -1
+		   && !h->forced_local)
+	    {
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
+	}
     }
   else if (ELIMINATE_COPY_RELOCS)
     {

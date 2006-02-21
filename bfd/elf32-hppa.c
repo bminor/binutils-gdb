@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -2020,9 +2020,21 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT
+      if (hh->dyn_relocs != NULL
 	  && eh->root.type == bfd_link_hash_undefweak)
-	hh->dyn_relocs = NULL;
+	{
+	  if (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
+	    hh->dyn_relocs = NULL;
+
+	  /* Make sure undefined weak symbols are output as a dynamic
+	     symbol in PIEs.  */
+	  else if (eh->dynindx == -1
+		   && !eh->forced_local)
+	    {
+	      if (! bfd_elf_link_record_dynamic_symbol (info, eh))
+		return FALSE;
+	    }
+	}
     }
   else
     {
