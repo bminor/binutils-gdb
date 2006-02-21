@@ -1467,7 +1467,42 @@ static void
 load_command (char *arg, int from_tty)
 {
   if (arg == NULL)
-    arg = get_exec_file (1);
+    {
+      char *parg;
+      int count = 0;
+
+      parg = arg = get_exec_file (1);
+
+      /* Count how many \ " ' tab space there are in the name.  */
+      while ((parg = strpbrk (parg, "\\\"'\t ")))
+	{
+	  parg++;
+	  count++;
+	}
+
+      if (count)
+	{
+	  /* We need to quote this string so buildargv can pull it apart.  */
+	  char *temp = xmalloc (strlen (arg) + count + 1 );
+	  char *ptemp = temp;
+	  char *prev;
+
+	  make_cleanup (xfree, temp);
+
+	  prev = parg = arg;
+	  while ((parg = strpbrk (parg, "\\\"'\t ")))
+	    {
+	      strncpy (ptemp, prev, parg - prev);
+	      ptemp += parg - prev;
+	      prev = parg++;
+	      *ptemp++ = '\\';
+	    }
+	  strcpy (ptemp, prev);
+
+	  arg = temp;
+	}
+    }
+
   target_load (arg, from_tty);
 
   /* After re-loading the executable, we don't really know which
@@ -1614,33 +1649,40 @@ generic_load (char *args, int from_tty)
   bfd *loadfile_bfd;
   struct timeval start_time, end_time;
   char *filename;
-  struct cleanup *old_cleanups;
-  char *offptr;
+  struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   struct load_section_data cbdata;
   CORE_ADDR entry;
+  char **argv;
 
   cbdata.load_offset = 0;	/* Offset to add to vma for each section. */
   cbdata.write_count = 0;	/* Number of writes needed. */
   cbdata.data_count = 0;	/* Number of bytes written to target memory. */
   cbdata.total_size = 0;	/* Total size of all bfd sectors. */
 
-  /* Parse the input argument - the user can specify a load offset as
-     a second argument. */
-  filename = xmalloc (strlen (args) + 1);
-  old_cleanups = make_cleanup (xfree, filename);
-  strcpy (filename, args);
-  offptr = strchr (filename, ' ');
-  if (offptr != NULL)
+  argv = buildargv (args);
+
+  if (argv == NULL)
+    nomem(0);
+
+  make_cleanup_freeargv (argv);
+
+  filename = tilde_expand (argv[0]);
+  make_cleanup (xfree, filename);
+
+  if (argv[1] != NULL)
     {
       char *endptr;
 
-      cbdata.load_offset = strtoul (offptr, &endptr, 0);
-      if (offptr == endptr)
-	error (_("Invalid download offset:%s."), offptr);
-      *offptr = '\0';
+      cbdata.load_offset = strtoul (argv[1], &endptr, 0);
+
+      /* If the last word was not a valid number then
+         treat it as a file name with spaces in.  */
+      if (argv[1] == endptr)
+        error (_("Invalid download offset:%s."), argv[1]);
+
+      if (argv[2] != NULL)
+	error (_("Too many parameters."));
     }
-  else
-    cbdata.load_offset = 0;
 
   /* Open the file for loading. */
   loadfile_bfd = bfd_openr (filename, gnutarget);
@@ -3724,7 +3766,8 @@ Load the symbols from shared objects in the dynamic linker's link map."),
 
   c = add_cmd ("load", class_files, load_command, _("\
 Dynamically load FILE into the running program, and record its symbols\n\
-for access from GDB."), &cmdlist);
+for access from GDB.\n\
+A load OFFSET may also be given."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_setshow_boolean_cmd ("symbol-reloading", class_support,

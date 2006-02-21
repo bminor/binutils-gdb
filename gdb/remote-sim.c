@@ -43,6 +43,7 @@
 #include "gdb_assert.h"
 #include "sim-regno.h"
 #include "arch-utils.h"
+#include "readline/readline.h"
 
 /* Prototypes */
 
@@ -391,8 +392,21 @@ gdbsim_kill (void)
    GDB's symbol tables to match.  */
 
 static void
-gdbsim_load (char *prog, int fromtty)
+gdbsim_load (char *args, int fromtty)
 {
+  char **argv = buildargv (args);
+  char *prog;
+
+  if (argv == NULL)
+    nomem (0);
+
+  make_cleanup_freeargv (argv);
+
+  prog = tilde_expand (argv[0]);
+
+  if (argv[1] != NULL)
+    error (_("GDB sim does not yet support a load offset."));
+
   if (sr_get_debug ())
     printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
 

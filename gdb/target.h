@@ -680,7 +680,14 @@ extern void print_section_info (struct target_ops *, bfd *);
 
 /* Load an executable file into the target process.  This is expected
    to not only bring new code into the target process, but also to
-   update GDB's symbol tables to match.  */
+   update GDB's symbol tables to match.
+
+   ARG contains command-line arguments, to be broken down with
+   buildargv ().  The first non-switch argument is the filename to
+   load, FILE; the second is a number (as parsed by strtoul (..., ...,
+   0)), which is an offset to apply to the load addresses of FILE's
+   sections.  The target may define switches, or other non-switch
+   arguments, as it pleases.  */
 
 extern void target_load (char *arg, int from_tty);
 

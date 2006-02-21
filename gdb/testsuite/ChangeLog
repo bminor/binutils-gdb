@@ -1,3 +1,7 @@
+2006-02-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gdb.base/help.exp (help load): Update expected results.
+
 2006-02-19  Fred Fish  <fnf@specifix.com>
 
 	* gdb.base/pc-fp.exp (get_valueofx): Don't print environment
