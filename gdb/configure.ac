@@ -1114,6 +1114,24 @@ AC_ARG_WITH(sysroot,
 AC_SUBST(TARGET_SYSTEM_ROOT)
 AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 
+AC_ARG_ENABLE(werror,
+  [  --enable-werror    treat compile warnings as errors],
+  [case "${enableval}" in
+     yes | y) ERROR_ON_WARNING="yes" ;;
+     no | n)  ERROR_ON_WARNING="no" ;;
+     *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
+   esac])
+
+# Enable -Werror by default when using gcc
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+    ERROR_ON_WARNING=yes
+fi
+
+WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+    WERROR_CFLAGS="-Werror"
+fi
+
 # NOTE: Don't add -Wall or -Wunused, they both include
 # -Wunused-parameter which reports bogus warnings.
 # NOTE: If you add to this list, remember to update
@@ -1169,7 +1187,6 @@ if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
   echo "Setting GDB specific compiler warning flags = $build_warnings" 6>&1
 fi])dnl
 WARN_CFLAGS=""
-WERROR_CFLAGS=""
 if test "x${build_warnings}" != x -a "x$GCC" = xyes
 then
     AC_MSG_CHECKING(compiler warning flags)

@@ -1,3 +1,10 @@
+2006-02-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.ac: Introduce ---enable-werror, which adds -Werror to
+	the compiler command line.  Enabled by default.  Disable with
+	--disable-werror.
+	* configure regenerate.
+
 2006-02-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
         * elfread.c (elf_symtab_read): Skip symbols which BFD considers

@@ -867,6 +867,7 @@ Optional Features:
   --enable-tui            enable full-screen terminal user interface (TUI)
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
   --enable-profiling      enable profiling of GDB
+  --enable-werror    treat compile warnings as errors
   --enable-build-warnings Enable build-time compiler warnings if gcc is used
   --enable-gdb-build-warnings Enable GDB specific build-time compiler warnings if gcc is used
   --enable-sim            Link gdb with simulator
@@ -19941,6 +19942,28 @@ fi;
 
 
 
+# Check whether --enable-werror or --disable-werror was given.
+if test "${enable_werror+set}" = set; then
+  enableval="$enable_werror"
+  case "${enableval}" in
+     yes | y) ERROR_ON_WARNING="yes" ;;
+     no | n)  ERROR_ON_WARNING="no" ;;
+     *) { { echo "$as_me:$LINENO: error: bad value ${enableval} for --enable-werror" >&5
+echo "$as_me: error: bad value ${enableval} for --enable-werror" >&2;}
+   { (exit 1); exit 1; }; } ;;
+   esac
+fi;
+
+# Enable -Werror by default when using gcc
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+    ERROR_ON_WARNING=yes
+fi
+
+WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+    WERROR_CFLAGS="-Werror"
+fi
+
 # NOTE: Don't add -Wall or -Wunused, they both include
 # -Wunused-parameter which reports bogus warnings.
 # NOTE: If you add to this list, remember to update
@@ -19998,7 +20021,6 @@ if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
   echo "Setting GDB specific compiler warning flags = $build_warnings" 6>&1
 fi
 fi; WARN_CFLAGS=""
-WERROR_CFLAGS=""
 if test "x${build_warnings}" != x -a "x$GCC" = xyes
 then
     echo "$as_me:$LINENO: checking compiler warning flags" >&5
