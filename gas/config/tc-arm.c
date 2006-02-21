@@ -11431,7 +11431,7 @@ md_apply_fix (fixS *	fixP,
 	      break;
 	    }
 	  value /= 4;
-	  if (value >= 0xff)
+	  if (value > 0xff)
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("offset out of range"));
@@ -11446,7 +11446,7 @@ md_apply_fix (fixS *	fixP,
 	    newval |= (1 << 23);
 	  else
 	    value = -value;
-	  if (value >= 0xfff)
+	  if (value > 0xfff)
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("offset out of range"));
@@ -11461,7 +11461,7 @@ md_apply_fix (fixS *	fixP,
 	    newval |= (1 << 9);
 	  else
 	    value = -value;
-	  if (value >= 0xff)
+	  if (value > 0xff)
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("offset out of range"));
@@ -11472,7 +11472,7 @@ md_apply_fix (fixS *	fixP,
       else if ((newval & 0x00000f00) == 0x00000e00)
 	{
 	  /* T-instruction: positive 8-bit offset.  */
-	  if (value < 0 || value >= 0xff)
+	  if (value < 0 || value > 0xff)
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("offset out of range"));
