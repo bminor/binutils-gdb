@@ -1,3 +1,10 @@
+2006-02-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* sh-tdep.c (sh_generic_show_regs): Reformat both code and output.
+	(sh3_show_regs, sh2e_show_regs, sh2a_show_regs): Likewise.
+	(sh2a_nofpu_show_regs, sh3e_show_regs, sh3_dsp_show_regs): Likewise.
+	(sh4_show_regs, sh4_nofpu_show_regs, sh_dsp_show_regs): Likewise.
+
 2006-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (lin_thread_get_thread_signals): Default to __SIGRTMIN
