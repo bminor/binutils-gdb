@@ -1,5 +1,12 @@
 2006-02-21  Andrew Stubbs  <andrew.stubbs@st.com>
 
+	* symfile.c (add_symbol_file_command): Use buildargv(), instead of
+	hand decoding the command line, to allow use of quotes and spaces.
+	(_initialize_symfile): Reorganize the help message for add-symbol-file
+	such that 'help files' shows a better message.
+
+2006-02-21  Andrew Stubbs  <andrew.stubbs@st.com>
+
 	* sh-tdep.c (sh_generic_show_regs): Reformat both code and output.
 	(sh3_show_regs, sh2e_show_regs, sh2a_show_regs): Likewise.
 	(sh2a_nofpu_show_regs, sh3e_show_regs, sh3_dsp_show_regs): Likewise.

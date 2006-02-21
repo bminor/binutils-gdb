@@ -1811,6 +1811,7 @@ add_symbol_file_command (char *args, int from_tty)
   int i;
   int expecting_sec_name = 0;
   int expecting_sec_addr = 0;
+  char **argv;
 
   struct sect_opt
   {
@@ -1832,28 +1833,15 @@ add_symbol_file_command (char *args, int from_tty)
   if (args == NULL)
     error (_("add-symbol-file takes a file name and an address"));
 
-  /* Make a copy of the string that we can safely write into. */
-  args = xstrdup (args);
+  argv = buildargv (args);
+  make_cleanup_freeargv (argv);
 
-  while (*args != '\000')
+  if (argv == NULL)
+    nomem (0);
+
+  for (arg = argv[0], argcnt = 0; arg != NULL; arg = argv[++argcnt])
     {
-      /* Any leading spaces? */
-      while (isspace (*args))
-	args++;
-
-      /* Point arg to the beginning of the argument. */
-      arg = args;
-
-      /* Move args pointer over the argument. */
-      while ((*args != '\000') && !isspace (*args))
-	args++;
-
-      /* If there are more arguments, terminate arg and
-         proceed past it. */
-      if (*args != '\000')
-	*args++ = '\000';
-
-      /* Now process the argument. */
+      /* Process the argument. */
       if (argcnt == 0)
 	{
 	  /* The first argument is the file name. */
@@ -1916,7 +1904,6 @@ add_symbol_file_command (char *args, int from_tty)
 		    error (_("USAGE: add-symbol-file <filename> <textaddress> [-mapped] [-readnow] [-s <secname> <addr>]*"));
 	      }
 	  }
-      argcnt++;
     }
 
   /* This command takes at least two arguments.  The first one is a
@@ -3748,8 +3735,8 @@ to execute."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
+Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
 Usage: add-symbol-file FILE ADDR [-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> ...]\n\
-Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
 ADDR is the starting address of the file's text.\n\
 The optional arguments are section-name section-address pairs and\n\
 should be specified if the data and bss segments are not contiguous\n\

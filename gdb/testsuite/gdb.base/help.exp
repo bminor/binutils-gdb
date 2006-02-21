@@ -35,7 +35,7 @@ gdb_test "set height 400" "" "test set height"
 
 # use a larger expect input buffer for long help outputs.
 # test help add-symbol-file
-gdb_test "help add-symbol-file" "Usage: add-symbol-file FILE ADDR \\\[-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> \.\.\.\\\]\[\r\n\]+Load the symbols from FILE, assuming FILE has been dynamically loaded\.\[\r\n\]+ADDR is the starting address of the file's text\.\[\r\n\]+The optional arguments are section-name section-address pairs and\[\r\n\]+should be specified if the data and bss segments are not contiguous\[\r\n\]+with the text\.  SECT is a section name to be loaded at SECT_ADDR\." "help add-symbol-file"
+gdb_test "help add-symbol-file" "Load symbols from FILE, assuming FILE has been dynamically loaded\.\[\r\n\]+Usage: add-symbol-file FILE ADDR \\\[-s <SECT> <SECT_ADDR> -s <SECT> <SECT_ADDR> \.\.\.\\\]\[\r\n\]+ADDR is the starting address of the file's text\.\[\r\n\]+The optional arguments are section-name section-address pairs and\[\r\n\]+should be specified if the data and bss segments are not contiguous\[\r\n\]+with the text\.  SECT is a section name to be loaded at SECT_ADDR\." "help add-symbol-file"
 # test help advance
 gdb_test "help advance" "Continue the program up to the given location \\(same form as args for break command\\)\.\[\r\n]+Execution will also stop upon exit from the current stack frame\." "help advance"
 # test help aliases
