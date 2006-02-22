@@ -1,3 +1,9 @@
+2006-02-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-pie/pie.c: New file.
+
+	* ld-pie/pie.exp: Check if compiler supports -pie.
+
 2006-02-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2218

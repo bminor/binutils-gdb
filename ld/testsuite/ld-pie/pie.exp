@@ -24,6 +24,14 @@ if { ![istarget *-*-linux*] } {
     return
 }
 
+# Check if -pie is supported or not.
+send_log "$CC -pie $srcdir/$subdir/pie.c -o tmpdir/pie"
+catch "exec $CC -pie $srcdir/$subdir/pie.c -o tmpdir/pie" exec_output
+send_log "$exec_output\n"
+if { ![string match "" $exec_output] } {
+    return
+}
+
 set array_tests {
     {"weak undefined" "-pie" "" {weakundef.c} "weakundef" "weakundef.out" "-fPIC"}
     {"weak undefined data" "-pie" "" {weakundef-data.c} "weakundef-data" "weakundef.out" "-fPIC"}
