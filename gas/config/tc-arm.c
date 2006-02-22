@@ -5181,7 +5181,6 @@ do_pld (void)
 	      _("writeback used in preload instruction"));
   constraint (!inst.operands[0].preind,
 	      _("unindexed addressing used in preload instruction"));
-  inst.instruction |= inst.operands[0].reg;
   encode_arm_addr_mode_2 (0, /*is_t=*/FALSE);
 }
 
@@ -5900,7 +5899,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
       constraint (inst.operands[i].shifted && inst.operands[i].shift_kind != SHIFT_LSL,
 		  _("Thumb supports only LSL in shifted register indexing"));
 
-      inst.instruction |= inst.operands[1].imm;
+      inst.instruction |= inst.operands[i].imm;
       if (inst.operands[i].shifted)
 	{
 	  constraint (inst.reloc.exp.X_op != O_constant,
@@ -5916,7 +5915,7 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
     {
       constraint (is_pc && inst.operands[i].writeback,
 		  _("cannot use writeback with PC-relative addressing"));
-      constraint (is_t && inst.operands[1].writeback,
+      constraint (is_t && inst.operands[i].writeback,
 		  _("cannot use writeback with this instruction"));
 
       if (is_d)

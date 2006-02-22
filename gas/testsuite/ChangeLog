@@ -1,3 +1,7 @@
+2005-02-22  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.d: Fix expected pld opcode.
+
 2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
             Anil Paranjape   <anilp1@kpitcummins.com>
             Shilin Shakti    <shilins@kpitcummins.com>

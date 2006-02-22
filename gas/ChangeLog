@@ -1,3 +1,9 @@
+2005-02-22  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_pld): Remove incorrect write to
+	inst.instruction.
+	(encode_thumb32_addr_mode): Use correct operand.
+
 2006-02-21  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (md_apply_fix): Fix off-by-one errors.
