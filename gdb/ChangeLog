@@ -1,5 +1,18 @@
 2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* doublest.h: Conditionalize DOUBLEST on PRINTF_HAS_LONG_DOUBLE
+	also.
+	(DOUBLEST_FORMAT): Rename to DOUBLEST_PRINT_FORMAT.
+	(DOUBLEST_SCAN_FORMAT): New.
+	* ada-lex.l (PRINTF_HAS_LONG_DOUBLE): Remove redefinitions.
+	(processReal): Use DOUBLEST_SCAN_FORMAT.
+	* c-exp.y (parse_number): Likewise.
+	* jv-exp.y (parse_number): Likewise.
+	* objc-exp.y (parse_number): Likewise.
+	* p-exp.y (parse_number): Likewise.
+
+2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* event-top.c (async_do_nothing, async_disconnect)
 	(async_stop_sig, async_float_handler): Remove duplicated
 	prototypes.

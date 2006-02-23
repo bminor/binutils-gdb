@@ -432,26 +432,10 @@ processInt (const char *base0, const char *num0, const char *exp0)
   return INT;
 }
 
-#if defined (PRINTF_HAS_LONG_DOUBLE)
-#  undef PRINTF_HAS_LONG_DOUBLE
-#  define PRINTF_HAS_LONG_DOUBLE 1
-#else
-#  define PRINTF_HAS_LONG_DOUBLE 0
-#endif
-
 static int
 processReal (const char *num0)
 {
-#if defined (PRINTF_HAS_LONG_DOUBLE)
-  if (sizeof (DOUBLEST) > sizeof (double))
-    sscanf (num0, "%Lg", &yylval.typed_val_float.dval);
-  else
-#endif
-    {
-      double temp;
-      sscanf (num0, "%lg", &temp);
-      yylval.typed_val_float.dval = temp;
-    }
+  sscanf (num0, DOUBLEST_SCAN_FORMAT, &yylval.typed_val_float.dval);
 
   yylval.typed_val_float.type = type_float ();
   if (sizeof(DOUBLEST) >= TARGET_DOUBLE_BIT / TARGET_CHAR_BIT)
