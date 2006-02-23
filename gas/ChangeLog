@@ -1,3 +1,7 @@
+2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c: Update copyright years.
+
 2006-02-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (specify_resource): Add the rule 17 from
