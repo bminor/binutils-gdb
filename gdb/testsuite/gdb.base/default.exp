@@ -1,5 +1,5 @@
 #   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 1999,
-#   2000, 2001, 2002, 2003
+#   2000, 2001, 2002, 2003, 2005, 2006
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -149,7 +149,7 @@ gdb_expect {
     -re "Reinitialize source path to empty.*y or n. $"  {
 	send_gdb "y\n"
 	gdb_expect {
-	    -re "Source directories searched: .cdir:.cwd.*$gdb_prompt $"\
+	    -re "Source directories searched: .cdir\[:;\].cwd.*$gdb_prompt $"\
 		    { pass "directory prompt" }
 	    timeout		{ fail "(timeout) directory prompt" }
 	}
@@ -604,7 +604,7 @@ gdb_test "show confirm" "Whether to confirm potentially dangerous operations is 
 #test show convenience
 gdb_test "show convenience" "No debugger convenience variables now defined.(\[^\r\n\]*\[\r\n\])+Convenience variables have names starting with \".\";(\[^\r\n\]*\[\r\n\])+use \"set\" as in \"set .foo = 5\" to define them." "show convenience"
 #test show directories
-gdb_test "show directories" "Source directories searched: .cdir:.cwd" "show directories"
+gdb_test "show directories" "Source directories searched: .cdir\[:;\].cwd" "show directories"
 #test show editing
 gdb_test "show editing" "Editing of command lines as they are typed is o\[a-z\]*." "show editing"
 #test show height
