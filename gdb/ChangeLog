@@ -1,5 +1,9 @@
 2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* maint.c (maintenance_dump_me): Remove unnecessary prototype.
+
+2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* win32-termcap.c (tputs): Return 0.
 
 2006-02-21  Mark Kettenis  <kettenis@gnu.org>

@@ -44,8 +44,6 @@ extern void _initialize_maint_cmds (void);
 
 static void maintenance_command (char *, int);
 
-static void maintenance_dump_me (char *, int);
-
 static void maintenance_internal_error (char *args, int from_tty);
 
 static void maintenance_demangle (char *, int);
