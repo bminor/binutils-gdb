@@ -2,8 +2,8 @@
 
 #pragma weak undef_data
 
-extern int undef_data (void);
-int (*ptr_to_data)(void) = undef_data;
+extern int undef_data;
+int *ptr_to_data = &undef_data;
 
 int
 main (void)
