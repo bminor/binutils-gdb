@@ -25,3 +25,5 @@ Disassembly of section \.text:
 [[:space:]]*[[:xdigit:]]*:[[:space:][:xdigit:]]+(\[[[:upper:]]+\])?[[:space:]]+st16 \[r0\]=r0,ar\.csd
 [[:space:]]*[[:xdigit:]]*:[[:space:][:xdigit:]]+(\[[[:upper:]]+\])?[[:space:]]+tbit\.z p0,p12=r0,0
 [[:space:]]*[[:xdigit:]]*:[[:space:][:xdigit:]]+(\[[[:upper:]]+\])?[[:space:]]+tnat\.z p0,p13=r0(;;)?
+#...
+[[:space:]]*[[:xdigit:]]*:[[:space:][:xdigit:]]+(\[[[:upper:]]+\])?[[:space:]]+tf\.z p3,p2=33(;;)?

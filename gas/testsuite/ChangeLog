@@ -1,3 +1,10 @@
+2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/opc-i.s: Add tests for tf.
+	* gas/ia64/pseudo.s: Likewise.
+	* gas/ia64/opc-i.d: Updated.
+	* gas/ia64/pseudo.d: Likewise.
+
 2006-02-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/dv-raw-err.s: Add check for vmsw.0.

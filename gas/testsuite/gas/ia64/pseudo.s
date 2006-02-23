@@ -13,3 +13,7 @@ _start:
 	st16		[r0] = r0
 	tbit.nz		p12 = r0, 0
 	tnat.nz		p13 = r0
+
+	# instructions added by SDM2.2:
+
+	tf.nz p2, p3 = 33

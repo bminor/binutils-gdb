@@ -1,5 +1,9 @@
 2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-ia64.c (operand_match): Handle IA64_OPND_IMMU5b.
+
+2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-ia64.c: Update copyright years.
 
 2006-02-22  H.J. Lu  <hongjiu.lu@intel.com>

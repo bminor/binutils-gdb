@@ -1,5 +1,18 @@
 2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ia64-opc-i.c (bXc): New.
+	(mXc): Likewise.
+	(OpX2TaTbYaXcC): Likewise.
+	(TF). Likewise.
+	(TFCM). Likewise.
+	(ia64_opcodes_i): Add instructions for tf.
+
+	* ia64-opc.h (IMMU5b): New.
+
+	* ia64-asmtab.c: Regenerated.
+
+2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ia64-gen.c: Update copyright years.
 	* ia64-opc-b.c: Likewise.
 

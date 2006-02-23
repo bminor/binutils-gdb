@@ -1,3 +1,9 @@
+2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* cpu-ia64-opc.c (ins_immu5b): New.
+	(ext_immu5b): Likewise.
+	(elf64_ia64_operands): Add IMMU5b.
+
 2006-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/2218

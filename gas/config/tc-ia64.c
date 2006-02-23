@@ -5914,6 +5914,17 @@ operand_match (idesc, index, e)
 	return OPERAND_MATCH;
       break;
 
+    case IA64_OPND_IMMU5b:
+      if (e->X_op == O_constant)
+	{
+	  val = e->X_add_number;
+	  if (val >= 32 && val <= 63)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
+      break;
+
     case IA64_OPND_CCNT5:
     case IA64_OPND_CNT5:
     case IA64_OPND_CNT6:
