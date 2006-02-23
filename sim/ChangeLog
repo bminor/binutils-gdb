@@ -1,3 +1,9 @@
+2006-02-23  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/traps.c (syscall_map): Remove CB_SYS_time / TARGET_SYS_time
+	mapping.
+	(cris_break_13_handler) <case TARGET_SYS_time>: New case.
+
 2006-01-23  Jim Blandy  <jimb@redhat.com>
 
 	Add simulator for Renesas M32C and M16C.

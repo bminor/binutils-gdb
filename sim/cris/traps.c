@@ -244,7 +244,6 @@ static const CB_TARGET_DEFS_MAP syscall_map[] =
   { CB_SYS_lstat, TARGET_SYS_lstat64 },
   { CB_SYS_stat, TARGET_SYS_stat64 },
   { CB_SYS_pipe, TARGET_SYS_pipe },
-  { CB_SYS_time, TARGET_SYS_time },
   { CB_SYS_rename, TARGET_SYS_rename },
   { CB_SYS_truncate, TARGET_SYS_truncate },
   { CB_SYS_ftruncate, TARGET_SYS_ftruncate },
@@ -2041,6 +2040,17 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 
 	    sim_core_write_unaligned_2 (current_cpu, pc, 0, ufds + 4 + 2,
 					revents);
+	    break;
+	  }
+
+	case TARGET_SYS_time:
+	  {
+	    retval = (int) (*cb->time) (cb, 0L);
+
+	    /* At time of this writing, CB_SYSCALL_time doesn't do the
+	       part of setting *arg1 to the return value.  */
+	    if (arg1)
+	      sim_core_write_unaligned_4 (current_cpu, pc, 0, arg1, retval);
 	    break;
 	  }
 
