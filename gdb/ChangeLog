@@ -1,5 +1,16 @@
 2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* event-top.c (async_do_nothing, async_disconnect)
+	(async_stop_sig, async_float_handler): Remove duplicated
+	prototypes.
+	(handle_sighup): Guard prototype with SIGHUP.
+	(async_do_nothing): Guard function and prototype with
+	SIGQUIT || SIGHUP.
+	(async_disconnect): Guard prototype with SIGHUP.
+	(async_stop_sig): Guard prototype with STOP_SIGNAL.
+
+2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* maint.c (maintenance_dump_me): Remove unnecessary prototype.
 
 2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>

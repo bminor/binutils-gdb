@@ -49,16 +49,14 @@ static void command_line_handler_continuation (struct continuation_arg *arg);
 static void change_line_handler (void);
 static void change_annotation_level (void);
 static void command_handler (char *command);
-static void async_do_nothing (gdb_client_data arg);
-static void async_disconnect (gdb_client_data arg);
-static void async_stop_sig (gdb_client_data arg);
-static void async_float_handler (gdb_client_data arg);
 
 /* Signal handlers. */
 #ifdef SIGQUIT
 static void handle_sigquit (int sig);
 #endif
+#ifdef SIGHUP
 static void handle_sighup (int sig);
+#endif
 static void handle_sigfpe (int sig);
 #if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
 static void handle_sigwinch (int sig);
@@ -66,10 +64,16 @@ static void handle_sigwinch (int sig);
 
 /* Functions to be invoked by the event loop in response to
    signals. */
+#if defined (SIGQUIT) || defined (SIGHUP)
 static void async_do_nothing (gdb_client_data);
+#endif
+#ifdef SIGHUP
 static void async_disconnect (gdb_client_data);
+#endif
 static void async_float_handler (gdb_client_data);
+#ifdef STOP_SIGNAL
 static void async_stop_sig (gdb_client_data);
+#endif
 
 /* Readline offers an alternate interface, via callback
    functions. These are all included in the file callback.c in the
@@ -993,12 +997,15 @@ handle_sigquit (int sig)
 }
 #endif
 
-/* Called by the event loop in response to a SIGQUIT. */
+#if defined (SIGQUIT) || defined (SIGHUP)
+/* Called by the event loop in response to a SIGQUIT or an
+   ignored SIGHUP.  */
 static void
 async_do_nothing (gdb_client_data arg)
 {
   /* Empty function body. */
 }
+#endif
 
 #ifdef SIGHUP
 /* Tell the event loop what to do if SIGHUP is received. 
