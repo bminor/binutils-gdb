@@ -1,3 +1,8 @@
+2005-02-10  Denis Pilat  <denis.pilat@st.com>
+
+	* readline/terminal.c (_rl_get_screen_size): Get console size from
+	the Windows API when compiling with MinGW.
+
 2005-07-25  Mark Mitchell <mark@codesourcery.com>
 
 	* input.c (rl_getc): Use getch to read console input on

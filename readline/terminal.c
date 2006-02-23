@@ -70,6 +70,11 @@
 #include "rlshell.h"
 #include "xmalloc.h"
 
+#if defined (__MINGW32__)
+# include <windows.h>
+# include <wincon.h>
+#endif
+
 #define CUSTOM_REDISPLAY_FUNC() (rl_redisplay_function != rl_redisplay)
 #define CUSTOM_INPUT_FUNC() (rl_getc_function != rl_getc)
 
@@ -208,6 +213,20 @@ _rl_get_screen_size (tty, ignore_env)
       _rl_screenheight = (int) window_size.ws_row;
     }
 #endif /* TIOCGWINSZ */
+
+  /* For MinGW, we get the console size from the Windows API.  */
+#if defined (__MINGW32__)
+  HANDLE hConOut = GetStdHandle (STD_OUTPUT_HANDLE);
+  if (hConOut != INVALID_HANDLE_VALUE)
+    {
+      CONSOLE_SCREEN_BUFFER_INFO scr;
+      if (GetConsoleScreenBufferInfo (hConOut, &scr))
+	{
+	  _rl_screenwidth = scr.dwSize.X;
+	  _rl_screenheight = scr.srWindow.Bottom - scr.srWindow.Top + 1;
+	}
+    }
+#endif
 
 #if defined (__EMX__)
   _emx_get_screensize (&_rl_screenwidth, &_rl_screenheight);
