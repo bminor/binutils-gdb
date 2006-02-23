@@ -291,3 +291,5 @@
 .*:592: Warning: This is the location of the conflicting usage
 .*:593: Warning: Use of 'ldfd' .* WAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 6
 .*:592: Warning: This is the location of the conflicting usage
+.*:601: Warning: Use of 'ld8' .* RAW dependency 'PSR\.vm' \(implied\)
+.*:600: Warning: This is the location of the conflicting usage

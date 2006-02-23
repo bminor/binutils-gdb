@@ -1,3 +1,11 @@
+2006-02-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/dv-raw-err.s: Add check for vmsw.0.
+	* gas/ia64/dv-raw-err.l: Updated.
+
+	* gas/ia64/opc-b.s: Add vmsw.0 and vmsw.1.
+	* gas/ia64/opc-b.d: Updated.
+
 2005-02-22  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb32.d: Fix expected pld opcode.

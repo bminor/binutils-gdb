@@ -594,3 +594,9 @@
 	;;
 
 L:
+	br.ret.sptk     rp
+
+// PSR.vm. New in SDM 2.2
+	vmsw.0
+	ld8	r2 = [r1]
+	;;

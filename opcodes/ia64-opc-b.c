@@ -197,6 +197,8 @@ struct ia64_opcode ia64_opcodes_b[] =
     {"bsw.0",		B0, OpX6 (0, 0x0c), {0, }, NO_PRED | LAST | PRIV, 0, NULL},
     {"bsw.1",		B0, OpX6 (0, 0x0d), {0, }, NO_PRED | LAST | PRIV, 0, NULL},
     {"epc",		B0, OpX6 (0, 0x10), {0, }, NO_PRED, 0, NULL},
+    {"vmsw.0",		B0, OpX6 (0, 0x18), {0, }, NO_PRED | PRIV, 0, NULL},
+    {"vmsw.1",		B0, OpX6 (0, 0x19), {0, }, NO_PRED | PRIV, 0, NULL},
 
     {"break.b",		B0, OpX6 (0, 0x00), {IMMU21}, EMPTY},
 

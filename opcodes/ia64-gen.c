@@ -1409,6 +1409,8 @@ lookup_regindex (const char *name, int specifier)
         return 44;
       else if (strstr (name, ".ia"))
         return 45;
+      else if (strstr (name, ".vm"))
+        return 46;
       else
         abort ();
     default:
@@ -1569,7 +1571,20 @@ print_dependency_table ()
               rdeps[i]->name, specifier,
               (int)rdeps[i]->mode, (int)rdeps[i]->semantics, regindex);
       if (rdeps[i]->semantics == IA64_DVS_OTHER)
-        printf ("\"%s\", ", rdeps[i]->extra);
+	{
+	  const char *quote, *rest;
+
+	  putchar ('\"');
+	  rest = rdeps[i]->extra;
+	  quote = strchr (rest, '\"');
+	  while (quote != NULL)
+	    {
+	      printf ("%.*s\\\"", (int) (quote - rest), rest);
+	      rest = quote + 1;
+	      quote = strchr (rest, '\"');
+	    }
+	  printf ("%s\", ", rest);
+	}
       else
 	printf ("NULL, ");
       printf("},\n");

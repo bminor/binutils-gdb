@@ -8327,6 +8327,8 @@ depends_on (depind, idesc)
    IC:rse-writers.
    15+16) Represents reserved instructions, which the assembler does not
    generate.
+   17) CR[TPR] has a RAW dependency only between mov-to-CR-TPR and
+   mov-to-PSR-l or ssm instructions that set PSR.i, PSR.pp or PSR.up.
 
    Memory resources (i.e. locations in memory) are *not* marked or tracked by
    this code; there are no dependency violations based on memory access.
@@ -9415,8 +9417,9 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
       break;
 
     case IA64_RS_CRX:
-      /* Handle all CR[REG] resources */
-      if (note == 0 || note == 1)
+      /* Handle all CR[REG] resources.
+	 ??? FIXME: The rule 17 isn't really handled correctly.   */
+      if (note == 0 || note == 1 || note == 17)
 	{
 	  if (idesc->operands[!rsrc_write] == IA64_OPND_CR3)
 	    {
