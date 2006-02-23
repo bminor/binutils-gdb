@@ -1,6 +1,6 @@
 /* Portable <curses.h>.
 
-   Copyright (C) 2004 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,6 +36,12 @@
 #include <ncurses/term.h>
 #elif defined (HAVE_TERM_H)
 #include <term.h>
+#else
+/* On MinGW, a real termcap library is usually not present.  Stub versions
+   of the termcap functions will be built from win32-termcap.c.  Readline
+   provides its own extern declarations when there's no termcap.h; do the
+   same here for the termcap functions used in GDB.  */
+extern int tgetnum (const char *);
 #endif
 
 #endif /* gdb_curses.h */

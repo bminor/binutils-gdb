@@ -1,5 +1,9 @@
 2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb_curses.h: Provide a fallback prototype for tgetnum.
+
+2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* doublest.h: Conditionalize DOUBLEST on PRINTF_HAS_LONG_DOUBLE
 	also.
 	(DOUBLEST_FORMAT): Rename to DOUBLEST_PRINT_FORMAT.
