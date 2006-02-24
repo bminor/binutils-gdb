@@ -1,3 +1,20 @@
+2006-02-24  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	* f-exp.y: Symbol '%' is not used as the modulus operator in
+	Fortran.  Delete this from Fortran expression.
+	It is now used by Fortran 90 and later to access the member
+	of derived type.  Add this into Fortran expression.
+	* f-valprint.c (f_val_print): Add code to handle TYPE_CODE_STRUCT.
+	Print each elements in the derived type.
+	* f-typeprint.c (print_equivalent_f77_float_type): Add a parameter
+	level into the function definition to do indented printing.  And
+	call fprintfi_filtered instead to do indented printing.
+	(f_type_print_base): Replace fprintf_filtered with the indented
+	version (fprintfi_filtered).
+	(f_type_print_base): Call indented print_equivalent_f77_float_type.
+	(f_type_print_base): Add code to handle TYPE_CODE_STRUCT.  Print
+	the definition of the derived type.
+
 2006-02-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb_curses.h: Provide a fallback prototype for tgetnum.

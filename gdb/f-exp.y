@@ -1,6 +1,6 @@
 /* YACC parser for Fortran expressions, for GDB.
    Copyright (C) 1986, 1989, 1990, 1991, 1993, 1994, 1995, 1996, 2000, 2001,
-   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C parser by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -178,6 +178,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %token <lval> BOOLEAN_LITERAL
 %token <ssym> NAME 
 %token <tsym> TYPENAME
+%type <sval> name
 %type <ssym> name_not_typename
 
 /* A NAME_OR_INT is a symbol which is not known in the symbol table,
@@ -217,8 +218,9 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %left LSH RSH
 %left '@'
 %left '+' '-'
-%left '*' '/' '%'
+%left '*' '/'
 %right STARSTAR
+%right '%'
 %right UNARY 
 %right '('
 
@@ -332,6 +334,12 @@ exp	:	'(' type ')' exp  %prec UNARY
 			  write_exp_elt_opcode (UNOP_CAST); }
 	;
 
+exp     :       exp '%' name
+                        { write_exp_elt_opcode (STRUCTOP_STRUCT);
+                          write_exp_string ($3);
+                          write_exp_elt_opcode (STRUCTOP_STRUCT); }
+        ;
+
 /* Binary operators in order of decreasing precedence.  */
 
 exp	:	exp '@' exp
@@ -348,10 +356,6 @@ exp	:	exp '*' exp
 
 exp	:	exp '/' exp
 			{ write_exp_elt_opcode (BINOP_DIV); }
-	;
-
-exp	:	exp '%' exp
-			{ write_exp_elt_opcode (BINOP_REM); }
 	;
 
 exp	:	exp '+' exp
@@ -633,6 +637,10 @@ nonempty_typelist
 		  $$ = (struct type **) realloc ((char *) $1, len);
 		  $$[$<ivec>$[0]] = $3;
 		}
+	;
+
+name	:	NAME
+		{  $$ = $1.stoken; }
 	;
 
 name_not_typename :	NAME

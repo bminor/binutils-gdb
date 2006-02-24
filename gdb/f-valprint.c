@@ -366,6 +366,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   struct type *elttype;
   LONGEST val;
   CORE_ADDR addr;
+  int index;
 
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -582,6 +583,22 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
          and no complete type for struct foo in that file.  */
       fprintf_filtered (stream, "<incomplete type>");
       break;
+
+    case TYPE_CODE_STRUCT:
+      /* Starting from the Fortran 90 standard, Fortran supports derived
+         types.  */
+      fprintf_filtered (stream, "{ ");
+      for (index = 0; index < TYPE_NFIELDS (type); index++)
+        {
+          int offset = TYPE_FIELD_BITPOS (type, index) / 8;
+          f_val_print (TYPE_FIELD_TYPE (type, index), valaddr + offset,
+                       embedded_offset, address, stream,
+                       format, deref_ref, recurse, pretty);
+          if (index != TYPE_NFIELDS (type) - 1)
+            fputs_filtered (", ", stream);
+        }
+      fprintf_filtered (stream, "}");
+      break;     
 
     default:
       error (_("Invalid F77 type code %d in symbol table."), TYPE_CODE (type));
