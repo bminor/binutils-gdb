@@ -1,6 +1,6 @@
 ; Renesas M32C CPU description.  -*- Scheme -*-
 ;
-; Copyright 2005 Free Software Foundation, Inc.
+; Copyright 2005, 2006 Free Software Foundation, Inc.
 ;
 ; Contributed by Red Hat Inc; developed under contract from Renesas.
 ;
@@ -139,6 +139,13 @@
 	)
 )
 
+(define-attr
+  (type enum)
+  (name RL_TYPE)
+  (values NONE JUMP 1ADDR 2ADDR)
+  (default NONE)
+  )
+
 ; Macros to simplify MACH attribute specification.
 
 (define-pmacro all-isas () (ISA m16c,m32c))
@@ -150,6 +157,11 @@
 
 (define-pmacro (machine size)
   (MACH (.sym m size c)) (ISA (.sym m size c)))
+
+(define-pmacro RL_JUMP  (RL_TYPE JUMP))
+(define-pmacro RL_1ADDR (RL_TYPE 1ADDR))
+(define-pmacro RL_2ADDR (RL_TYPE 2ADDR))
+
 
 ;=============================================================
 ; Fields
@@ -2097,7 +2109,7 @@
 
 (dnop Lab-8-8     "8 bit label"  (all-isas RELAX) h-iaddr f-lab-8-8)
 (dnop Lab-8-16    "16 bit label" (all-isas RELAX) h-iaddr f-lab-8-16)
-(dnop Lab-8-24    "24 bit label" (all-isas) h-iaddr f-lab-8-24)
+(dnop Lab-8-24    "24 bit label" (all-isas RELAX) h-iaddr f-lab-8-24)
 (dnop Lab-16-8    "8 bit label"  (all-isas RELAX) h-iaddr f-lab-16-8)
 (dnop Lab-24-8    "8 bit label"  (all-isas) h-iaddr f-lab-24-8)
 (dnop Lab-32-8    "8 bit label"  (all-isas) h-iaddr f-lab-32-8)
@@ -5859,7 +5871,7 @@
 (define-pmacro (unary-insn-defn-g mach group mode wstr op encoding sem opg)
   (dni (.sym op mach wstr - group)
        (.str op wstr opg " dst" mach "-" group "-" mode)
-       ((machine mach))
+       ((machine mach) RL_1ADDR)
        (.str op wstr opg " ${dst" mach "-" group "-" mode "}")
        encoding
        (sem mode (.sym dst mach - group - mode))
@@ -6075,7 +6087,7 @@
 (define-pmacro (binary-arith-imm-dst-defn mach src dstgroup dmode wstr op suffix encoding sem)
   (dni (.sym op mach wstr - imm-G - dstgroup)
        (.str op wstr " " mach "-imm-G-" dstgroup "-" dmode)
-       ((machine mach))
+       ((machine mach) RL_1ADDR)
        (.str op wstr "$"suffix " #${" src "},${dst" mach "-" dstgroup "-" dmode "}")
        encoding
        (sem dmode src (.sym dst mach - dstgroup - dmode))
@@ -6185,7 +6197,7 @@
 (define-pmacro (binary-arith-imm4-dst-defn mach src dstgroup mode wstr op encoding sem)
   (dni (.sym op mach wstr - imm4-Q - dstgroup)
        (.str op wstr " " mach "-imm4-Q-" dstgroup "-" mode)
-       ((machine mach))
+       ((machine mach) RL_1ADDR)
        (.str op wstr "$Q #${" src "},${dst" mach "-" dstgroup "-" mode "}")
        encoding
        (sem mode src (.sym dst mach - dstgroup - mode))
@@ -6261,7 +6273,7 @@
 (define-pmacro (binary-arith-src-dst-defn mach srcgroup dstgroup smode dmode wstr op suffix encoding sem)
   (dni (.sym op mach wstr - srcgroup - dstgroup)
        (.str op wstr " dst" mach "-" srcgroup "-" dstgroup "-" dmode)
-       ((machine mach))
+       ((machine mach) RL_2ADDR)
        (.str op wstr "$" suffix " ${src" mach "-" srcgroup "-" smode "},${dst" mach "-" dstgroup "-" dmode "}")
        encoding
        (sem dmode (.sym src mach - srcgroup - smode) (.sym dst mach - dstgroup - dmode))
@@ -8058,7 +8070,7 @@
 
 (dni jcnd16-5
      "jCnd label"
-     (RELAXABLE (machine 16))
+     (RL_JUMP RELAXABLE (machine 16))
      "j$cond16j5 ${Lab-8-8}"
      (+ (f-0-4 #x6) (f-4-1 1) cond16j5 Lab-8-8)
      (jcnd16-sem cond16j5 Lab-8-8)
@@ -8067,7 +8079,7 @@
 
 (dni jcnd16
      "jCnd label"
-     (RELAXABLE (machine 16))
+     (RL_JUMP RELAXABLE (machine 16))
      "j$cond16j ${Lab-16-8}"
      (+ (f-0-4 #x7) (f-4-4 #xD) (f-8-4 #xC) cond16j Lab-16-8)
      (jcnd16-sem cond16j Lab-16-8)
@@ -8076,7 +8088,7 @@
 
 (dni jcnd32
      "jCnd label"
-     (RELAXABLE (machine 32))
+     (RL_JUMP RELAXABLE (machine 32))
      "j$cond32j ${Lab-8-8}"
      (+ (f-0-1 1) (f-4-3 5) cond32j Lab-8-8)
      (jcnd32-sem cond32j Lab-8-8)
@@ -8088,25 +8100,25 @@
 ;-------------------------------------------------------------
 
 ; jmp.s label3 (m16 #1)
-(dni jmp16.s "jmp.s Lab-5-3" (RELAXABLE (machine 16))
+(dni jmp16.s "jmp.s Lab-5-3" (RL_JUMP RELAXABLE (machine 16))
      ("jmp.s ${Lab-5-3}")
      (+ (f-0-4 6) (f-4-1 0) Lab-5-3)
      (sequence () (set pc Lab-5-3))
      ())
 ; jmp.b label8 (m16 #2)
-(dni jmp16.b "jmp.b Lab-8-8" (RELAXABLE (machine 16))
+(dni jmp16.b "jmp.b Lab-8-8" (RL_JUMP RELAXABLE (machine 16))
      ("jmp.b ${Lab-8-8}")
      (+ (f-0-4 #xF) (f-4-4 #xE) Lab-8-8)
      (sequence () (set pc Lab-8-8))
      ())
 ; jmp.w label16 (m16 #3)
-(dni jmp16.w "jmp.w Lab-8-16" (RELAXABLE (machine 16))
+(dni jmp16.w "jmp.w Lab-8-16" (RL_JUMP RELAXABLE (machine 16))
      ("jmp.w ${Lab-8-16}")
      (+ (f-0-4 #xF) (f-4-4 4) Lab-8-16)
      (sequence () (set pc Lab-8-16))
      ())
 ; jmp.a label24 (m16 #4)
-(dni jmp16.a "jmp.a Lab-8-24" ((machine 16))
+(dni jmp16.a "jmp.a Lab-8-24" (RL_JUMP RELAXABLE (machine 16))
      ("jmp.a ${Lab-8-24}")
      (+ (f-0-4 #xF) (f-4-4 #xC) Lab-8-24)
      (sequence () (set pc Lab-8-24))
@@ -8133,32 +8145,32 @@
 ; jmp.s label3 (m32 #1)
 (dni jmp32.s
      "jmp.s label"
-     (RELAXABLE (machine 32))
+     (RL_JUMP RELAXABLE (machine 32))
      "jmp.s ${Lab32-jmp-s}"
      (+ (f-0-2 1) (f-4-3 5) Lab32-jmp-s)
      (set pc Lab32-jmp-s)
      ()
 )
 ; jmp.b label8 (m32 #2)
-(dni jmp32.b "jmp.b Lab-8-8" (RELAXABLE (machine 32))
+(dni jmp32.b "jmp.b Lab-8-8" (RL_JUMP RELAXABLE (machine 32))
      ("jmp.b ${Lab-8-8}")
      (+ (f-0-4 #xB) (f-4-4 #xB) Lab-8-8)
      (set pc Lab-8-8)
      ())
 ; jmp.w label16 (m32 #3)
-(dni jmp32.w "jmp.w Lab-8-16" (RELAXABLE (machine 32))
+(dni jmp32.w "jmp.w Lab-8-16" (RL_JUMP RELAXABLE (machine 32))
      ("jmp.w ${Lab-8-16}")
      (+ (f-0-4 #xC) (f-4-4 #xE) Lab-8-16)
      (set pc Lab-8-16)
      ())
 ; jmp.a label24 (m32 #4)
-(dni jmp32.a "jmp.a Lab-8-24" ((machine 32))
+(dni jmp32.a "jmp.a Lab-8-24" (RL_JUMP RELAXABLE (machine 32))
      ("jmp.a ${Lab-8-24}")
      (+ (f-0-4 #xC) (f-4-4 #xC) Lab-8-24)
      (set pc Lab-8-24)
      ())
 ; jmp.s imm8 (m32 #1)
-(dni jmps32 "jmps Imm-8-QI" ((machine 32))
+(dni jmps32 "jmps Imm-8-QI" (RL_JUMP (machine 32))
      ("jmps #${Imm-8-QI}")
      (+ (f-0-4 #xD) (f-4-4 #xC) Imm-8-QI)
      (set pc Imm-8-QI)
@@ -8190,13 +8202,13 @@
 )
 
 ; jsr.w label16 (m16 #1)
-(dni jsr16.w "jsr.w Lab-8-16" (RELAXABLE (machine 16))
+(dni jsr16.w "jsr.w Lab-8-16" (RL_JUMP RELAXABLE (machine 16))
      ("jsr.w ${Lab-8-16}")
      (+ (f-0-4 #xF) (f-4-4 5) Lab-8-16)
      (jsr16-sem 3 Lab-8-16)
      ())
 ; jsr.a label24 (m16 #2)
-(dni jsr16.a "jsr.a Lab-8-24" ((machine 16))
+(dni jsr16.a "jsr.a Lab-8-24" (RL_JUMP RELAXABLE (machine 16))
      ("jsr.a ${Lab-8-24}")
      (+ (f-0-4 #xF) (f-4-4 #xD) Lab-8-24)
      (jsr16-sem 4 Lab-8-24)
@@ -8206,14 +8218,14 @@
   (begin
     (dni (.sym jsri16 mode - op16)
 	 (.str "jsri." mode " " op16)
-	 ((machine 16))
+	 (RL_1ADDR (machine 16))
 	 (.str "jsri." mode " ${" op16 "}")
 	 (+ op16-1 op16-2 op16-3 op16)
 	 (op16-sem len op16)
 	 ())
     (dni (.sym jsri32 mode - op32)
 	 (.str "jsri." mode " " op32)
-	 ((machine 32))
+	 (RL_1ADDR (machine 32))
 	 (.str "jsri." mode " ${" op32 "}")
 	 (+ op32-1 op32-2 op32-3 op32-4 op32)
 	 (op32-sem len op32)
@@ -8227,7 +8239,7 @@
 	      dst32-16-16-Unprefixed-HI (f-0-4 #xC) (f-7-1 1) (f-10-2 #x1) (f-12-4 #xF) jsr32-sem 4)
 (jsri-defn w dst16-basic-HI (f-0-4 #x7) (f-4-4 #xD) (f-8-4 #x3) jsr16-sem 
 	      dst32-basic-Unprefixed-HI (f-0-4 #xC) (f-7-1 1) (f-10-2 #x1) (f-12-4 #xF) jsr32-sem 2)
-(dni jsri32.w "jsr.w dst32-16-24-Unprefixed-HI" ((machine 32))
+(dni jsri32.w "jsr.w dst32-16-24-Unprefixed-HI" (RL_1ADDR (machine 32))
      ("jsri.w ${dst32-16-24-Unprefixed-HI}")
      (+ (f-0-4 #xC) (f-7-1 1) dst32-16-24-Unprefixed-HI (f-10-2 #x1) (f-12-4 #xF))
      (jsr32-sem 6 dst32-16-24-Unprefixed-HI)
@@ -8241,19 +8253,19 @@
 (jsri-defn a dst16-basic-SI (f-0-4 #x7) (f-4-4 #xD) (f-8-4 #x1) jsr16-sem 
 	      dst32-basic-Unprefixed-SI (f-0-4 #x9) (f-7-1 0) (f-10-2 #x0) (f-12-4 #x1) jsr32-sem 2)
 
-(dni jsri32.a "jsr.w dst32-16-24-Unprefixed-HI" ((machine 32))
+(dni jsri32.a "jsr.w dst32-16-24-Unprefixed-HI" (RL_1ADDR (machine 32))
      ("jsri.w ${dst32-16-24-Unprefixed-SI}")
      (+ (f-0-4 #x9) (f-7-1 0) dst32-16-24-Unprefixed-SI (f-10-2 #x0) (f-12-4 #x1))
      (jsr32-sem 6 dst32-16-24-Unprefixed-SI)
      ())
 ; jsr.w label16 (m32 #1)
-(dni jsr32.w "jsr.w label" (RELAXABLE (machine 32))
+(dni jsr32.w "jsr.w label" (RL_JUMP RELAXABLE (machine 32))
      ("jsr.w ${Lab-8-16}")
      (+ (f-0-4 #xC) (f-4-4 #xF) Lab-8-16)
      (jsr32-sem 3 Lab-8-16)
      ())
 ; jsr.a label16 (m32 #2)
-(dni jsr32.a "jsr.a label" ((machine 32))
+(dni jsr32.a "jsr.a label" (RL_JUMP (machine 32))
      ("jsr.a ${Lab-8-24}")
      (+ (f-0-4 #xC) (f-4-4 #xD) Lab-8-24)
      (jsr32-sem 4 Lab-8-24)

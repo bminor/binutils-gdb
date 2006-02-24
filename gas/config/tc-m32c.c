@@ -55,6 +55,9 @@ typedef struct
 }
 m32c_insn;
 
+#define rl_for(insn) (CGEN_ATTR_CGEN_INSN_RL_TYPE_VALUE (&(insn.insn->base->attrs)))
+#define relaxable(insn) (CGEN_ATTR_CGEN_INSN_RELAXABLE_VALUE (&(insn.insn->base->attrs)))
+
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "#";
 const char line_separator_chars[] = "|";
@@ -67,11 +70,13 @@ const char * md_shortopts = M32C_SHORTOPTS;
 /* assembler options */
 #define OPTION_CPU_M16C	       (OPTION_MD_BASE)
 #define OPTION_CPU_M32C        (OPTION_MD_BASE + 1)
+#define OPTION_LINKRELAX       (OPTION_MD_BASE + 2)
 
 struct option md_longopts[] =
 {
   { "m16c",       no_argument,	      NULL, OPTION_CPU_M16C   },
   { "m32c",       no_argument,	      NULL, OPTION_CPU_M32C   },
+  { "relax",      no_argument,	      NULL, OPTION_LINKRELAX   },
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -84,6 +89,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 static unsigned long m32c_mach = bfd_mach_m16c;
 static int cpu_mach = (1 << MACH_M16C);
 static int insn_size;
+static int m32c_relax = 0;
 
 /* Flags to set in the elf header */
 static flagword m32c_flags = DEFAULT_FLAGS;
@@ -116,6 +122,10 @@ md_parse_option (int c, char * arg ATTRIBUTE_UNUSED)
       m32c_mach = bfd_mach_m32c;
       cpu_mach = (1 << MACH_M32C);
       set_isa (ISA_M32C);
+      break;
+
+    case OPTION_LINKRELAX:
+      m32c_relax = 1;
       break;
 
     default:
@@ -153,7 +163,7 @@ void
 md_begin (void)
 {
   /* Initialize the `cgen' interface.  */
-  
+
   /* Set the machine number and endian.  */
   gas_cgen_cpu_desc = m32c_cgen_cpu_open (CGEN_CPU_OPEN_MACHS, cpu_mach,
 					  CGEN_CPU_OPEN_ENDIAN,
@@ -320,6 +330,8 @@ md_assemble (char * str)
   static int last_insn_had_delay_slot = 0;
   m32c_insn insn;
   char *    errmsg;
+  finished_insnS results;
+  int rl_type;
 
   if (m32c_mach == bfd_mach_m32c && m32c_indirect_operand (str))
     return;
@@ -336,13 +348,46 @@ md_assemble (char * str)
       return;
     }
 
+  results.num_fixups = 0;
   /* Doesn't really matter what we pass for RELAX_P here.  */
   gas_cgen_finish_insn (insn.insn, insn.buffer,
-			CGEN_FIELDS_BITSIZE (& insn.fields), 1, NULL);
+			CGEN_FIELDS_BITSIZE (& insn.fields), 1, &results);
 
   last_insn_had_delay_slot
     = CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_DELAY_SLOT);
   insn_size = CGEN_INSN_BITSIZE(insn.insn);
+
+  rl_type = rl_for (insn);
+
+  /* We have to mark all the jumps, because we need to adjust them
+     when we delete bytes, but we only need to mark the displacements
+     if they're symbolic - if they're not, we've already picked the
+     shortest opcode by now.  The linker, however, will still have to
+     check any operands to see if they're the displacement type, since
+     we don't know (nor record) *which* operands are relaxable.  */
+  if (m32c_relax
+      && rl_type != RL_TYPE_NONE
+      && (rl_type == RL_TYPE_JUMP || results.num_fixups)
+      && !relaxable (insn))
+    {
+      int reloc = 0;
+      int addend = results.num_fixups + 16 * insn_size/8;
+
+      switch (rl_for (insn))
+	{
+	case RL_TYPE_JUMP:  reloc = BFD_RELOC_M32C_RL_JUMP;  break;
+	case RL_TYPE_1ADDR: reloc = BFD_RELOC_M32C_RL_1ADDR; break;
+	case RL_TYPE_2ADDR: reloc = BFD_RELOC_M32C_RL_2ADDR; break;
+	}
+      if (insn.insn->base->num == M32C_INSN_JMP16_S
+	  || insn.insn->base->num == M32C_INSN_JMP32_S)
+	addend = 0x10;
+
+      fix_new (results.frag,
+	       results.addr - results.frag->fr_literal,
+	       0, abs_section_sym, addend, 0,
+	       reloc);
+    }
 }
 
 /* The syntax in the manual says constants begin with '#'.
@@ -551,18 +596,26 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
   int operand;
   int new_insn;
   int where = fragP->fr_opcode - fragP->fr_literal;
+  int rl_where = fragP->fr_opcode - fragP->fr_literal;
   unsigned char *op = (unsigned char *)fragP->fr_opcode;
+  int op_base = 0;
+  int op_op = 0;
+  int rl_addend = 0;
 
   addend = target_address_for (fragP) - (fragP->fr_address + where);
   new_insn = subtype_mappings[fragP->fr_subtype].insn;
 
   fragP->fr_fix = where + subtype_mappings[fragP->fr_subtype].bytes;
 
+  op_base = 0;
+
   switch (subtype_mappings[fragP->fr_subtype].insn)
     {
     case M32C_INSN_JCND16_5:
       op[1] = addend - 1;
       operand = M32C_OPERAND_LAB_8_8;
+      op_op = 1;
+      rl_addend = 0x21;
       break;
 
     case -M32C_MACRO_JCND16_5_W:
@@ -574,6 +627,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       operand = M32C_OPERAND_LAB_8_16;
       where += 2;
       new_insn = M32C_INSN_JMP16_W;
+      op_base = 2;
+      op_op = 3;
+      rl_addend = 0x51;
       break;
 
     case -M32C_MACRO_JCND16_5_A:
@@ -583,12 +639,18 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       operand = M32C_OPERAND_LAB_8_24;
       where += 2;
       new_insn = M32C_INSN_JMP16_A;
+      op_base = 2;
+      op_op = 3;
+      rl_addend = 0x61;
       break;
 
 
     case M32C_INSN_JCND16:
       op[2] = addend - 2;
       operand = M32C_OPERAND_LAB_16_8;
+      op_base = 0;
+      op_op = 2;
+      rl_addend = 0x31;
       break;
 
     case -M32C_MACRO_JCND16_W:
@@ -600,6 +662,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       operand = M32C_OPERAND_LAB_8_16;
       where += 3;
       new_insn = M32C_INSN_JMP16_W;
+      op_base = 3;
+      op_op = 4;
+      rl_addend = 0x61;
       break;
 
     case -M32C_MACRO_JCND16_A:
@@ -609,17 +674,26 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       operand = M32C_OPERAND_LAB_8_24;
       where += 3;
       new_insn = M32C_INSN_JMP16_A;
+      op_base = 3;
+      op_op = 4;
+      rl_addend = 0x71;
       break;
 
     case M32C_INSN_JMP16_S:
       op[0] = 0x60 | ((addend-2) & 0x07);
       operand = M32C_OPERAND_LAB_5_3;
+      op_base = 0;
+      op_op = 0;
+      rl_addend = 0x10;
       break;
 
     case M32C_INSN_JMP16_B:
       op[0] = 0xfe;
       op[1] = addend - 1;
       operand = M32C_OPERAND_LAB_8_8;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x21;
       break;
 
     case M32C_INSN_JMP16_W:
@@ -627,6 +701,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[1] = addend - 1;
       op[2] = (addend - 1) >> 8;
       operand = M32C_OPERAND_LAB_8_16;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x31;
       break;
 
     case M32C_INSN_JMP16_A:
@@ -635,11 +712,17 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[2] = 0;
       op[3] = 0;
       operand = M32C_OPERAND_LAB_8_24;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x41;
       break;
 
     case M32C_INSN_JCND32:
       op[1] = addend - 1;
       operand = M32C_OPERAND_LAB_8_8;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x21;
       break;
 
     case -M32C_MACRO_JCND32_W:
@@ -651,6 +734,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       operand = M32C_OPERAND_LAB_8_16;
       where += 2;
       new_insn = M32C_INSN_JMP32_W;
+      op_base = 2;
+      op_op = 3;
+      rl_addend = 0x51;
       break;
 
     case -M32C_MACRO_JCND32_A:
@@ -660,6 +746,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       operand = M32C_OPERAND_LAB_8_24;
       where += 2;
       new_insn = M32C_INSN_JMP32_A;
+      op_base = 2;
+      op_op = 3;
+      rl_addend = 0x61;
       break;
 
 
@@ -668,12 +757,18 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       addend = ((addend-2) & 0x07);
       op[0] = 0x4a | (addend & 0x01) | ((addend << 3) & 0x30);
       operand = M32C_OPERAND_LAB32_JMP_S;
+      op_base = 0;
+      op_op = 0;
+      rl_addend = 0x10;
       break;
 
     case M32C_INSN_JMP32_B:
       op[0] = 0xbb;
       op[1] = addend - 1;
       operand = M32C_OPERAND_LAB_8_8;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x21;
       break;
 
     case M32C_INSN_JMP32_W:
@@ -681,6 +776,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[1] = addend - 1;
       op[2] = (addend - 1) >> 8;
       operand = M32C_OPERAND_LAB_8_16;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x31;
       break;
 
     case M32C_INSN_JMP32_A:
@@ -689,6 +787,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[2] = 0;
       op[3] = 0;
       operand = M32C_OPERAND_LAB_8_24;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x41;
       break;
 
 
@@ -697,6 +798,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[1] = addend - 1;
       op[2] = (addend - 1) >> 8;
       operand = M32C_OPERAND_LAB_8_16;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x31;
       break;
 
     case M32C_INSN_JSR16_A:
@@ -705,6 +809,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[2] = 0;
       op[3] = 0;
       operand = M32C_OPERAND_LAB_8_24;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x41;
       break;
 
     case M32C_INSN_JSR32_W:
@@ -712,6 +819,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[1] = addend - 1;
       op[2] = (addend - 1) >> 8;
       operand = M32C_OPERAND_LAB_8_16;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x31;
       break;
 
     case M32C_INSN_JSR32_A:
@@ -720,6 +830,9 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       op[2] = 0;
       op[3] = 0;
       operand = M32C_OPERAND_LAB_8_24;
+      op_base = 0;
+      op_op = 1;
+      rl_addend = 0x41;
       break;
 
 
@@ -731,8 +844,21 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
       abort();
     }
 
+  if (m32c_relax)
+    {
+      if (operand != M32C_OPERAND_LAB_8_24)
+	fragP->fr_offset = (fragP->fr_address + where);
+
+      fix_new (fragP,
+	       rl_where,
+	       0, abs_section_sym, rl_addend, 0,
+	       BFD_RELOC_M32C_RL_JUMP);
+    }
+
   if (S_GET_SEGMENT (fragP->fr_symbol) != sec
-      || operand == M32C_OPERAND_LAB_8_24)
+      || operand == M32C_OPERAND_LAB_8_24
+      || (m32c_relax && (operand != M32C_OPERAND_LAB_5_3
+			 && operand != M32C_OPERAND_LAB32_JMP_S)))
     {
       assert (fragP->fr_cgen.insn != 0);
       gas_cgen_record_fixup (fragP,
@@ -786,10 +912,14 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
   } op_reloc_table[] = {
 
     /* PC-REL relocs for 8-bit fields.  */
+    { M32C_OPERAND_LAB_8_8,    BFD_RELOC_8_PCREL, 1 },
     { M32C_OPERAND_LAB_16_8,   BFD_RELOC_8_PCREL, 2 },
     { M32C_OPERAND_LAB_24_8,   BFD_RELOC_8_PCREL, 3 },
     { M32C_OPERAND_LAB_32_8,   BFD_RELOC_8_PCREL, 4 },
     { M32C_OPERAND_LAB_40_8,   BFD_RELOC_8_PCREL, 5 },
+
+    /* PC-REL relocs for 16-bit fields.  */
+    { M32C_OPERAND_LAB_8_16,   BFD_RELOC_16_PCREL, 1 },
 
     /* Absolute relocs for 8-bit fields.  */
     { M32C_OPERAND_IMM_8_QI,   BFD_RELOC_8, 1 },
@@ -890,6 +1020,38 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn ATTRIBUTE_UNUSED,
   return BFD_RELOC_NONE;
 }
 
+void
+m32c_apply_fix (struct fix *f, valueT *t, segT s)
+{
+  if (f->fx_r_type == BFD_RELOC_M32C_RL_JUMP
+      || f->fx_r_type == BFD_RELOC_M32C_RL_1ADDR
+      || f->fx_r_type == BFD_RELOC_M32C_RL_2ADDR)
+    return;
+  gas_cgen_md_apply_fix (f, t, s);
+}
+
+arelent *
+tc_gen_reloc (asection *sec, fixS *fx)
+{
+  if (fx->fx_r_type == BFD_RELOC_M32C_RL_JUMP
+      || fx->fx_r_type == BFD_RELOC_M32C_RL_1ADDR
+      || fx->fx_r_type == BFD_RELOC_M32C_RL_2ADDR)
+    {
+      arelent * reloc;
+ 
+      reloc = xmalloc (sizeof (* reloc));
+ 
+      reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fx->fx_addsy);
+      reloc->address = fx->fx_frag->fr_address + fx->fx_where;
+      reloc->howto = bfd_reloc_type_lookup (stdoutput, fx->fx_r_type);
+      reloc->addend = fx->fx_offset;
+      return reloc;
+
+    }
+  return gas_cgen_tc_gen_reloc (sec, fx);
+}
+
 /* See whether we need to force a relocation into the output file.
    This is used to force out switch and PC relative relocations when
    relaxing.  */
@@ -914,12 +1076,40 @@ m32c_force_relocation (fixS * fixp)
 	case M32C_OPERAND_DSP_24_U16:
 	case M32C_OPERAND_IMM_24_HI:
 	  return 1;
+
+        /* If we're doing linker relaxing, we need to keep all the
+	   pc-relative jumps in case we need to fix them due to
+	   deleted bytes between the jump and its destination.  */
+	case M32C_OPERAND_LAB_8_8:
+	case M32C_OPERAND_LAB_8_16:
+	case M32C_OPERAND_LAB_8_24:
+	case M32C_OPERAND_LAB_16_8:
+	case M32C_OPERAND_LAB_24_8:
+	case M32C_OPERAND_LAB_32_8:
+	case M32C_OPERAND_LAB_40_8:
+	  if (m32c_relax)
+	    return 1;
+	default:
+	  break;
 	}
     }
   else
     {
-      if (fixp->fx_r_type == BFD_RELOC_16)
-	return 1;
+      switch (fixp->fx_r_type)
+	{
+	case BFD_RELOC_16:
+	  return 1;
+
+	case BFD_RELOC_M32C_RL_JUMP:
+	case BFD_RELOC_M32C_RL_1ADDR:
+	case BFD_RELOC_M32C_RL_2ADDR:
+	case BFD_RELOC_8_PCREL:
+	case BFD_RELOC_16_PCREL:
+	  if (m32c_relax)
+	    return 1;
+	default:
+	  break;
+	}
     }
 
   return generic_force_reloc (fixp);
@@ -1063,6 +1253,9 @@ m32c_fix_adjustable (fixS * fixP)
 
      This only affects object size a little bit.  */
   if (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE)
+    return 0;
+
+  if (m32c_relax)
     return 0;
 
   return 1;

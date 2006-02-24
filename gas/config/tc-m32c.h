@@ -47,7 +47,8 @@ long md_pcrel_from_section PARAMS ((struct fix *, segT));
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-#define md_apply_fix gas_cgen_md_apply_fix
+#define md_apply_fix m32c_apply_fix
+extern void m32c_apply_fix PARAMS ((struct fix *, valueT *, segT));
 
 #define tc_fix_adjustable(fixP) m32c_fix_adjustable (fixP)
 extern bfd_boolean m32c_fix_adjustable PARAMS ((struct fix *));
@@ -65,8 +66,6 @@ extern void m32c_prepare_relax_scan PARAMS ((fragS *, offsetT *, relax_substateT
 
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
-
-#define tc_gen_reloc gas_cgen_tc_gen_reloc
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)

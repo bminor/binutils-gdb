@@ -79916,7 +79916,7 @@ static const CGEN_IBASE m32c_cgen_macro_insn_table[] =
 /* add.b:q #${Imm-12-s4},sp */
   {
     -1, "add16-bQ-sp", "add.b:q", 16,
-    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(ALIAS), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } }, { { RL_TYPE_NONE, 0 } } } }
   },
 };
 

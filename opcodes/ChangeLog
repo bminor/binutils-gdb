@@ -1,3 +1,10 @@
+2006-02-24  DJ Delorie  <dj@redhat.com>
+
+	* m32c-desc.c: Regenerate with linker relaxation attributes.
+	* m32c-desc.h: Likewise.
+	* m32c-dis.c: Likewise.
+	* m32c-opc.c: Likewise.
+
 2006-02-24  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (arm_opcodes): Add V7 instructions.

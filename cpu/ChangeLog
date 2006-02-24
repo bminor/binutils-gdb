@@ -1,3 +1,16 @@
+2006-02-24  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (RL_TYPE): New attribute, with macros.
+	(Lab-8-24): Add RELAX.
+	(unary-insn-defn-g, binary-arith-imm-dst-defn,
+	binary-arith-imm4-dst-defn): Add 1ADDR attribute.
+	(binary-arith-src-dst-defn): Add 2ADDR attribute.
+	(jcnd16-5, jcnd16, jcnd32, jmp16.s, jmp16.b, jmp16.w, jmp16.a,
+	jmp32.s, jmp32.b, jmp32.w, jmp32.a, jsr16.w, jsr16.a): Add JUMP
+	attribute.
+	(jsri16, jsri32): Add 1ADDR attribute.
+	(jsr32.w, jsr32.a): Add JUMP attribute.
+	
 2006-02-17  Shrirang Khisti  <shrirangk@kpitcummins.com>
             Anil Paranjape   <anilp1@kpitcummins.com>
             Shilin Shakti    <shilins@kpitcummins.com>

@@ -1,3 +1,21 @@
+2006-02-24  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (m32c_elf_howto_table): Add relaxation relocs.
+	(m32c_elf_relocate_section): Don't relocate them.
+	(compare_reloc): New.
+	(relax_reloc): Remove.
+	(m32c_offset_for_reloc): New.
+	(m16c_addr_encodings): New.
+	(m16c_jmpaddr_encodings): New.
+	(m32c_addr_encodings): New.
+	(m32c_elf_relax_section): Relax jumps and address displacements.
+	(m32c_elf_relax_delete_bytes): Adjust for internal syms.  Fix up
+	short jumps.
+
+	* reloc.c: Add m32c relax relocs.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	
 2006-02-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2218

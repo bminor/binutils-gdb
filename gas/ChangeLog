@@ -1,3 +1,20 @@
+2006-02-24  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-m32c.h (md_apply_fix): Define to m32c_apply_fix.
+	(tc_gen_reloc): Don't define.
+	* config/tc-m32c.c (rl_for, relaxable): New convenience macros.
+	(OPTION_LINKRELAX): New.
+	(md_longopts): Add it.
+	(m32c_relax): New.
+	(md_parse_options): Set it.
+	(md_assemble): Emit relaxation relocs as needed.
+	(md_convert_frag): Emit relaxation relocs as needed.
+	(md_cgen_lookup_reloc): Add LAB_8_8 and LAB_8_16.
+	(m32c_apply_fix): New.
+	(tc_gen_reloc): New.
+	(m32c_force_relocation): Force out jump relocs when relaxing.
+	(m32c_fix_adjustable): Return false if relaxing.
+
 2006-02-24  Paul Brook  <paul@codesourcery.com>
 
 	* config/arm/tc-arm.c (arm_ext_v6_notm, arm_ext_div, arm_ext_v7,

@@ -8,8 +8,7 @@
 /* Main header file for the bfd library -- portable access to object files.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -3217,6 +3216,9 @@ of the container.  */
 
 /* Renesas M16C/M32C Relocations.  */
   BFD_RELOC_M32C_HI8,
+  BFD_RELOC_M32C_RL_JUMP,
+  BFD_RELOC_M32C_RL_1ADDR,
+  BFD_RELOC_M32C_RL_2ADDR,
 
 /* Renesas M32R (formerly Mitsubishi M32R) relocs.
 This is a 24 bit absolute address.  */
