@@ -420,6 +420,9 @@
 #ifndef elf_backend_hide_symbol
 #define elf_backend_hide_symbol		_bfd_elf_link_hash_hide_symbol
 #endif
+#ifndef elf_backend_fixup_symbol
+#define elf_backend_fixup_symbol		NULL	
+#endif
 #ifndef elf_backend_merge_symbol_attribute
 #define elf_backend_merge_symbol_attribute	NULL
 #endif
@@ -598,6 +601,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_output_arch_syms,
   elf_backend_copy_indirect_symbol,
   elf_backend_hide_symbol,
+  elf_backend_fixup_symbol,
   elf_backend_merge_symbol_attribute,
   elf_backend_ignore_undef_symbol,
   elf_backend_emit_relocs,

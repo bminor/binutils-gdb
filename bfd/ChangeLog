@@ -1,3 +1,18 @@
+2006-02-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2218
+	* elf-bfd.h (elf_backend_data): Add elf_backend_fixup_symbol.
+	(_bfd_elf_link_hash_fixup_symbol): New.
+
+	* elflink.c (_bfd_elf_link_hash_fixup_symbol): New.
+	(_bfd_elf_fix_symbol_flags): Call elf_backend_fixup_symbol if
+	it isn't NULL.
+
+	* elfxx-ia64.c (elf_backend_fixup_symbol): Defined.
+
+	* elfxx-target.h (elf_backend_fixup_symbol): New.
+	(elfNN_bed): Initialize elf_backend_fixup_symbol.
+
 2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* cpu-ia64-opc.c (ins_immu5b): New.

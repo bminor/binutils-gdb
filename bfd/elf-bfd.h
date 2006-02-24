@@ -883,6 +883,11 @@ struct elf_backend_data
   void (*elf_backend_hide_symbol)
     (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
 
+  /* A function to do additional symbol fixup, called by
+     _bfd_elf_fix_symbol_flags.  */
+  bfd_boolean (*elf_backend_fixup_symbol)
+    (struct bfd_link_info *, struct elf_link_hash_entry *);
+
   /* Merge the backend specific symbol attribute.  */
   void (*elf_backend_merge_symbol_attribute)
     (struct elf_link_hash_entry *, const Elf_Internal_Sym *, bfd_boolean,
@@ -1476,6 +1481,8 @@ extern void _bfd_elf_link_hash_copy_indirect
    struct elf_link_hash_entry *);
 extern void _bfd_elf_link_hash_hide_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
+extern bfd_boolean _bfd_elf_link_hash_fixup_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
 extern bfd_boolean _bfd_elf_link_hash_table_init
   (struct elf_link_hash_table *, bfd *,
    struct bfd_hash_entry *(*)

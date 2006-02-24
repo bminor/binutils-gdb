@@ -2187,6 +2187,20 @@ _bfd_elf_link_output_relocs (bfd *output_bfd,
   return TRUE;
 }
 
+/* Make weak undefined symbols in PIE dynamic.  */
+
+bfd_boolean
+_bfd_elf_link_hash_fixup_symbol (struct bfd_link_info *info,
+				 struct elf_link_hash_entry *h)
+{
+  if (info->pie
+      && h->dynindx == -1
+      && h->root.type == bfd_link_hash_undefweak)
+    return bfd_elf_link_record_dynamic_symbol (info, h);
+
+  return TRUE;
+}
+
 /* Fix up the flags for a symbol.  This handles various cases which
    can only be fixed after all the input files are seen.  This is
    currently called by both adjust_dynamic_symbol and
@@ -2197,6 +2211,8 @@ bfd_boolean
 _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 			   struct elf_info_failed *eif)
 {
+  const struct elf_backend_data *bed = NULL;
+
   /* If this symbol was mentioned in a non-ELF file, try to set
      DEF_REGULAR and REF_REGULAR correctly.  This is the only way to
      permit a non-ELF file to correctly refer to a symbol defined in
@@ -2255,6 +2271,15 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 	h->def_regular = 1;
     }
 
+  /* Backend specific symbol fixup.  */
+  if (elf_hash_table (eif->info)->dynobj)
+    {
+      bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
+      if (bed->elf_backend_fixup_symbol
+	  && !(*bed->elf_backend_fixup_symbol) (eif->info, h))
+	return FALSE;
+    }
+
   /* If this is a final link, and the symbol was defined as a common
      symbol in a regular object file, and there was no definition in
      any dynamic object, then the linker will have allocated space for
@@ -2280,10 +2305,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
 	  || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
       && h->def_regular)
     {
-      const struct elf_backend_data *bed;
       bfd_boolean force_local;
-
-      bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
 
       force_local = (ELF_ST_VISIBILITY (h->other) == STV_INTERNAL
 		     || ELF_ST_VISIBILITY (h->other) == STV_HIDDEN);
@@ -2323,12 +2345,8 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
       if (weakdef->def_regular)
 	h->u.weakdef = NULL;
       else
-	{
-	  const struct elf_backend_data *bed;
-
-	  bed = get_elf_backend_data (elf_hash_table (eif->info)->dynobj);
-	  (*bed->elf_backend_copy_indirect_symbol) (eif->info, weakdef, h);
-	}
+	(*bed->elf_backend_copy_indirect_symbol) (eif->info, weakdef,
+						  h);
     }
 
   return TRUE;
