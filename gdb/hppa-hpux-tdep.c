@@ -1659,7 +1659,7 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 			   CORE_ADDR *real_pc, CORE_ADDR *bp_addr)
 {
   CORE_ADDR pc, stubaddr;
-  int argreg;
+  int argreg = 0;
 
   pc = read_pc ();
 

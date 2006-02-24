@@ -1,3 +1,10 @@
+2006-02-24  Randolph Chung  <tausq@debian.org>
+
+        * hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Initialize 
+	argreg.
+        * solib-som.c (som_solib_remove_inferior_hook): Remove unused 
+	function.
+
 2006-02-24  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* f-exp.y: Symbol '%' is not used as the modulus operator in

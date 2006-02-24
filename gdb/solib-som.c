@@ -313,50 +313,6 @@ keep_going:
   clear_symtab_users ();
 }
 
-/* This operation removes the "hook" between GDB and the dynamic linker,
-   which causes the dld to notify GDB of shared library events.
-
-   After this operation completes, the dld will no longer notify GDB of
-   shared library events.  To resume notifications, GDB must call
-   som_solib_create_inferior_hook.
-
-   This operation does not remove any knowledge of shared libraries
-   of which GDB may already have been notified.
- */
-static void
-som_solib_remove_inferior_hook (int pid)
-{
-  CORE_ADDR addr;
-  struct minimal_symbol *msymbol;
-  int status;
-  char dld_flags_buffer[4];
-  unsigned int dld_flags_value;
-  struct cleanup *old_cleanups = save_inferior_ptid ();
-
-  /* Ensure that we're really operating on the specified process. */
-  inferior_ptid = pid_to_ptid (pid);
-
-  /* We won't bother to remove the solib breakpoints from this process.
-
-     In fact, on PA64 the breakpoint is hard-coded into the dld callback,
-     and thus we're not supposed to remove it.
-
-     Rather, we'll merely clear the dld_flags bit that enables callbacks.
-   */
-  msymbol = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
-
-  addr = SYMBOL_VALUE_ADDRESS (msymbol);
-  status = target_read_memory (addr, dld_flags_buffer, 4);
-
-  dld_flags_value = extract_unsigned_integer (dld_flags_buffer, 4);
-
-  dld_flags_value &= ~DLD_FLAGS_HOOKVALID;
-  store_unsigned_integer (dld_flags_buffer, 4, dld_flags_value);
-  status = target_write_memory (addr, dld_flags_buffer, 4);
-
-  do_cleanups (old_cleanups);
-}
-
 static void
 som_special_symbol_handling (void)
 {
