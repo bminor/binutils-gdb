@@ -9252,17 +9252,17 @@ static const struct asm_opcode insns[] =
  tCE(sev,	320f004, sev,      0, (), noargs, t_hint),
 
 #undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_v6_notm
+ TCE(ldrexd,	1b00f9f, e8d0007f, 3, (RRnpc, oRRnpc, RRnpcb),        ldrexd, t_ldrexd),
+ TCE(strexd,	1a00f90, e8c00070, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb), strexd, t_strexd),
+
+#undef THUMB_VARIANT
 #define THUMB_VARIANT &arm_ext_v6t2
  TCE(ldrexb,	1d00f9f, e8d00f4f, 2, (RRnpc, RRnpcb),	              rd_rn,  rd_rn),
  TCE(ldrexh,	1f00f9f, e8d00f5f, 2, (RRnpc, RRnpcb),	              rd_rn,  rd_rn),
  TCE(strexb,	1c00f90, e8c00f40, 3, (RRnpc, RRnpc, ADDR),           strex,  rm_rd_rn),
  TCE(strexh,	1e00f90, e8c00f50, 3, (RRnpc, RRnpc, ADDR),           strex,  rm_rd_rn),
  TUF(clrex,	57ff01f, f3bf8f2f, 0, (),			      noargs, noargs),
-
-#undef THUMB_VARIANT
-#define THUMB_VARIANT &arm_ext_v6_notm
- TCE(ldrexd,	1b00f9f, e8d0007f, 3, (RRnpc, oRRnpc, RRnpcb),        ldrexd, t_ldrexd),
- TCE(strexd,	1a00f90, e8c00070, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb), strexd, t_strexd),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v6z
