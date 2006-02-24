@@ -1,3 +1,12 @@
+2006-02-24  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.d: Fix expected msr and mrs output.
+	* gas/arm/arch7.d: New test.
+	* gas/arm/arch7.s: New test.
+	* gas/arm/arch7m-bad.l: New test.
+	* gas/arm/arch7m-bad.d: New test.
+	* gas/arm/arch7m-bad.s: New test.
+
 2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/opc-i.s: Add tests for tf.

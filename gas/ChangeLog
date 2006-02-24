@@ -1,3 +1,29 @@
+2006-02-24  Paul Brook  <paul@codesourcery.com>
+
+	* config/arm/tc-arm.c (arm_ext_v6_notm, arm_ext_div, arm_ext_v7,
+	arm_ext_v7a, arm_ext_v7r, arm_ext_v7m): New variables.
+	(struct asm_barrier_opt): Define.
+	(arm_v7m_psr_hsh, arm_barrier_opt_hsh): New variables.
+	(parse_psr): Accept V7M psr names.
+	(parse_barrier): New function.
+	(enum operand_parse_code): Add OP_oBARRIER.
+	(parse_operands): Implement OP_oBARRIER.
+	(do_barrier): New function.
+	(do_dbg, do_pli, do_t_barrier, do_t_dbg, do_t_div): New functions.
+	(do_t_cpsi): Add V7M restrictions.
+	(do_t_mrs, do_t_msr): Validate V7M variants.
+	(md_assemble): Check for NULL variants.
+	(v7m_psrs, barrier_opt_names): New tables.
+	(insns): Add V7 instructions.  Mark V6 instructions absent from V7M.
+	(md_begin): Initialize arm_v7m_psr_hsh and arm_barrier_opt_hsh.
+	(arm_cpu_option_table): Add Cortex-M3, R4 and A8.
+	(arm_arch_option_table): Add armv7, armv7a, armv7r and armv7m.
+	(struct cpu_arch_ver_table): Define.
+	(cpu_arch_ver): New.
+	(aeabi_set_public_attributes): Use cpu_arch_ver.  Set
+	Tag_CPU_arch_profile.
+	* doc/c-arm.texi: Document new cpu and arch options.
+
 2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (operand_match): Handle IA64_OPND_IMMU5b.

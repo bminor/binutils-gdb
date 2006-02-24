@@ -182,6 +182,12 @@ static const arm_feature_set arm_ext_v6 = ARM_FEATURE (ARM_EXT_V6, 0);
 static const arm_feature_set arm_ext_v6k = ARM_FEATURE (ARM_EXT_V6K, 0);
 static const arm_feature_set arm_ext_v6z = ARM_FEATURE (ARM_EXT_V6Z, 0);
 static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE (ARM_EXT_V6T2, 0);
+static const arm_feature_set arm_ext_v6_notm = ARM_FEATURE (ARM_EXT_V6_NOTM, 0);
+static const arm_feature_set arm_ext_div = ARM_FEATURE (ARM_EXT_DIV, 0);
+static const arm_feature_set arm_ext_v7 = ARM_FEATURE (ARM_EXT_V7, 0);
+static const arm_feature_set arm_ext_v7a = ARM_FEATURE (ARM_EXT_V7A, 0);
+static const arm_feature_set arm_ext_v7r = ARM_FEATURE (ARM_EXT_V7R, 0);
+static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
@@ -326,6 +332,12 @@ struct asm_psr
 {
   const char *template;
   unsigned long field;
+};
+
+struct asm_barrier_opt
+{
+  const char *template;
+  unsigned long value;
 };
 
 /* The bit that distinguishes CPSR and SPSR.  */
@@ -561,8 +573,10 @@ static struct hash_control *arm_ops_hsh;
 static struct hash_control *arm_cond_hsh;
 static struct hash_control *arm_shift_hsh;
 static struct hash_control *arm_psr_hsh;
+static struct hash_control *arm_v7m_psr_hsh;
 static struct hash_control *arm_reg_hsh;
 static struct hash_control *arm_reloc_hsh;
+static struct hash_control *arm_barrier_opt_hsh;
 
 /* Stuff needed to resolve the label ambiguity
    As:
@@ -3481,28 +3495,35 @@ parse_psr (char **str)
 {
   char *p;
   unsigned long psr_field;
+  const struct asm_psr *psr;
+  char *start;
 
   /* CPSR's and SPSR's can now be lowercase.  This is just a convenience
      feature for ease of use and backwards compatibility.  */
   p = *str;
-  if (*p == 's' || *p == 'S')
+  if (strncasecmp (p, "SPSR", 4) == 0)
     psr_field = SPSR_BIT;
-  else if (*p == 'c' || *p == 'C')
+  else if (strncasecmp (p, "CPSR", 4) == 0)
     psr_field = 0;
   else
-    goto error;
+    {
+      start = p;
+      do
+	p++;
+      while (ISALNUM (*p) || *p == '_');
 
-  p++;
-  if (strncasecmp (p, "PSR", 3) != 0)
-    goto error;
-  p += 3;
+      psr = hash_find_n (arm_v7m_psr_hsh, start, p - start);
+      if (!psr)
+	return FAIL;
 
+      *str = p;
+      return psr->field;
+    }
+
+  p += 4;
   if (*p == '_')
     {
       /* A suffix follows.  */
-      const struct asm_psr *psr;
-      char *start;
-
       p++;
       start = p;
 
@@ -3653,6 +3674,26 @@ parse_cond (char **str)
   return c->value;
 }
 
+/* Parse an option for a barrier instruction.  Returns the encoding for the
+   option, or FAIL.  */
+static int
+parse_barrier (char **str)
+{
+  char *p, *q;
+  const struct asm_barrier_opt *o;
+
+  p = q = *str;
+  while (ISALPHA (*q))
+    q++;
+
+  o = hash_find_n (arm_barrier_opt_hsh, p, q - p);
+  if (!o)
+    return FAIL;
+
+  *str = q;
+  return o->value;
+}
+
 /* Parse the operands of a table branch instruction.  Similar to a memory
    operand.  */
 static int
@@ -3777,6 +3818,7 @@ enum operand_parse_code
   OP_oSHar,	 /* ASR immediate */
   OP_oSHllar,	 /* LSL or ASR immediate */
   OP_oROR,	 /* ROR 0/8/16/24 */
+  OP_oBARRIER,	 /* Option argument for a barrier instruction.  */
 
   OP_FIRST_OPTIONAL = OP_oI7b
 };
@@ -3998,6 +4040,7 @@ parse_operands (char *str, const unsigned char *pattern)
 	case OP_oROR:	 val = parse_ror (&str);		break;
 	case OP_PSR:	 val = parse_psr (&str);		break;
 	case OP_COND:	 val = parse_cond (&str);		break;
+	case OP_oBARRIER:val = parse_barrier (&str);		break;
 
 	case OP_TB:
 	  po_misc_or_fail (parse_tb (&str));
@@ -4065,6 +4108,7 @@ parse_operands (char *str, const unsigned char *pattern)
 	case OP_oROR:
 	case OP_PSR:
 	case OP_COND:
+	case OP_oBARRIER:
 	case OP_REGLST:
 	case OP_VRSLST:
 	case OP_VRDLST:
@@ -4586,6 +4630,20 @@ do_arit (void)
 }
 
 static void
+do_barrier (void)
+{
+  if (inst.operands[0].present)
+    {
+      constraint ((inst.instruction & 0xf0) != 0x40
+		  && inst.operands[0].imm != 0xf,
+		  "bad barrier type");
+      inst.instruction |= inst.operands[0].imm;
+    }
+  else
+    inst.instruction |= 0xf;
+}
+
+static void
 do_bfc (void)
 {
   unsigned int msb = inst.operands[1].imm + inst.operands[2].imm;
@@ -4811,6 +4869,12 @@ do_cpsi (void)
 {
   inst.instruction |= inst.operands[0].imm << 6;
   inst.instruction |= inst.operands[1].imm;
+}
+
+static void
+do_dbg (void)
+{
+  inst.instruction |= inst.operands[0].imm;
 }
 
 static void
@@ -5182,6 +5246,22 @@ do_pld (void)
   constraint (!inst.operands[0].preind,
 	      _("unindexed addressing used in preload instruction"));
   encode_arm_addr_mode_2 (0, /*is_t=*/FALSE);
+}
+
+/* ARMv7: PLI <addr_mode>  */
+static void
+do_pli (void)
+{
+  constraint (!inst.operands[0].isreg,
+	      _("'[' expected after PLI mnemonic"));
+  constraint (inst.operands[0].postind,
+	      _("post-indexed expression used in preload instruction"));
+  constraint (inst.operands[0].writeback,
+	      _("writeback used in preload instruction"));
+  constraint (!inst.operands[0].preind,
+	      _("unindexed addressing used in preload instruction"));
+  encode_arm_addr_mode_2 (0, /*is_t=*/FALSE);
+  inst.instruction &= ~PRE_INDEX;
 }
 
 static void
@@ -6445,6 +6525,20 @@ do_t_arit3c (void)
 }
 
 static void
+do_t_barrier (void)
+{
+  if (inst.operands[0].present)
+    {
+      constraint ((inst.instruction & 0xf0) != 0x40
+		  && inst.operands[0].imm != 0xf,
+		  "bad barrier type");
+      inst.instruction |= inst.operands[0].imm;
+    }
+  else
+    inst.instruction |= 0xf;
+}
+
+static void
 do_t_bfc (void)
 {
   unsigned int msb = inst.operands[1].imm + inst.operands[2].imm;
@@ -6618,7 +6712,8 @@ static void
 do_t_cpsi (void)
 {
   if (unified_syntax
-      && (inst.operands[1].present || inst.size_req == 4))
+      && (inst.operands[1].present || inst.size_req == 4)
+      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6_notm))
     {
       unsigned int imod = (inst.instruction & 0x0030) >> 4;
       inst.instruction = 0xf3af8000;
@@ -6629,7 +6724,11 @@ do_t_cpsi (void)
     }
   else
     {
-      constraint (inst.operands[1].present,
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1)
+		  && (inst.operands[0].imm & 4),
+		  _("selected processor does not support 'A' form "
+		    "of this instruction"));
+      constraint (inst.operands[1].present || inst.size_req == 4,
 		  _("Thumb does not support the 2-argument "
 		    "form of this instruction"));
       inst.instruction |= inst.operands[0].imm;
@@ -6662,6 +6761,22 @@ do_t_czb (void)
   inst.instruction |= inst.operands[0].reg;
   inst.reloc.pc_rel = 1;
   inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH7;
+}
+
+static void
+do_t_dbg (void)
+{
+  inst.instruction |= inst.operands[0].imm;
+}
+
+static void
+do_t_div (void)
+{
+  if (!inst.operands[1].present)
+    inst.operands[1].reg = inst.operands[0].reg;
+  inst.instruction |= inst.operands[0].reg << 8;
+  inst.instruction |= inst.operands[1].reg << 16;
+  inst.instruction |= inst.operands[2].reg;
 }
 
 static void
@@ -7211,21 +7326,53 @@ do_t_mvn_tst (void)
 static void
 do_t_mrs (void)
 {
-  /* mrs only accepts CPSR/SPSR/CPSR_all/SPSR_all.  */
-  constraint ((inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f))
-	      != (PSR_c|PSR_f),
-	      _("'CPSR' or 'SPSR' expected"));
+  int flags;
+  flags = inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f|SPSR_BIT);
+  if (flags == 0)
+    {
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v7m),
+		  _("selected processor does not support "
+		    "requested special purpose register"));
+    }
+  else
+    {
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1),
+		  _("selected processor does not support "
+		    "requested special purpose register %x"));
+      /* mrs only accepts CPSR/SPSR/CPSR_all/SPSR_all.  */
+      constraint ((flags & ~SPSR_BIT) != (PSR_c|PSR_f),
+		  _("'CPSR' or 'SPSR' expected"));
+    }
+    
   inst.instruction |= inst.operands[0].reg << 8;
-  inst.instruction |= (inst.operands[1].imm & SPSR_BIT) >> 2;
+  inst.instruction |= (flags & SPSR_BIT) >> 2;
+  inst.instruction |= inst.operands[1].imm & 0xff;
 }
 
 static void
 do_t_msr (void)
 {
+  int flags;
+
   constraint (!inst.operands[1].isreg,
 	      _("Thumb encoding does not support an immediate here"));
-  inst.instruction |= (inst.operands[0].imm & SPSR_BIT) >> 2;
-  inst.instruction |= (inst.operands[0].imm & ~SPSR_BIT) >> 8;
+  flags = inst.operands[0].imm;
+  if (flags & ~0xff)
+    {
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1),
+		  _("selected processor does not support "
+		    "requested special purpose register"));
+    }
+  else
+    {
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v7m),
+		  _("selected processor does not support "
+		    "requested special purpose register"));
+      flags |= PSR_f;
+    }
+  inst.instruction |= (flags & SPSR_BIT) >> 2;
+  inst.instruction |= (flags & ~SPSR_BIT) >> 8;
+  inst.instruction |= (flags & 0xff);
   inst.instruction |= inst.operands[1].reg << 16;
 }
 
@@ -8154,8 +8301,9 @@ md_assemble (char *str)
       if (!ARM_CPU_HAS_FEATURE (variant, arm_arch_t2))
 	ARM_CLEAR_FEATURE (variant, variant, fpu_any_hard);
       /* Check that this instruction is supported for this CPU.  */
-      if (thumb_mode == 1
-	  && !ARM_CPU_HAS_FEATURE (variant, *opcode->tvariant))
+      if (!opcode->tvariant
+	  || (thumb_mode == 1
+	      && !ARM_CPU_HAS_FEATURE (variant, *opcode->tvariant)))
 	{
 	  as_bad (_("selected processor does not support `%s'"), str);
 	  return;
@@ -8220,7 +8368,8 @@ md_assemble (char *str)
   else
     {
       /* Check that this instruction is supported for this CPU.  */
-      if (!ARM_CPU_HAS_FEATURE (cpu_variant, *opcode->avariant))
+      if (!opcode->avariant ||
+	  !ARM_CPU_HAS_FEATURE (cpu_variant, *opcode->avariant))
 	{
 	  as_bad (_("selected processor does not support `%s'"), str);
 	  return;
@@ -8526,6 +8675,25 @@ static const struct asm_psr psrs[] =
   {"cxsf", PSR_c | PSR_x | PSR_s | PSR_f},
 };
 
+/* Table of V7M psr names.  */
+static const struct asm_psr v7m_psrs[] =
+{
+  {"apsr",	0 },
+  {"iapsr",	1 },
+  {"eapsr",	2 },
+  {"psr",	3 },
+  {"ipsr",	5 },
+  {"epsr",	6 },
+  {"iepsr",	7 },
+  {"msp",	8 },
+  {"psp",	9 },
+  {"primask",	16},
+  {"basepri",	17},
+  {"basepri_max", 18},
+  {"faultmask",	19},
+  {"control",	20}
+};
+
 /* Table of all shift-in-operand names.	 */
 static const struct asm_shift_name shift_names [] =
 {
@@ -8573,6 +8741,14 @@ static const struct asm_cond conds[] =
   {"gt", 0xc},
   {"le", 0xd},
   {"al", 0xe}
+};
+
+static struct asm_barrier_opt barrier_opt_names[] =
+{
+  { "sy",   0xf },
+  { "un",   0x7 },
+  { "st",   0xe },
+  { "unst", 0x6 }
 };
 
 /* Table of ARM-format instructions.	*/
@@ -8971,10 +9147,17 @@ static const struct asm_opcode insns[] =
 
 #undef THUMB_VARIANT
 #define THUMB_VARIANT &arm_ext_v6t2
- TUF(cps,	1020000, f3af8100, 1, (I31b),			  imm0, imm0),
  TCE(ldrex,	1900f9f, e8500f00, 2, (RRnpc, ADDR),		  ldrex, t_ldrex),
  TUF(mcrr2,	c400000, fc400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
  TUF(mrrc2,	c500000, fc500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
+
+ TCE(ssat,	6a00010, f3000000, 4, (RRnpc, I32, RRnpc, oSHllar),ssat,   t_ssat),
+ TCE(usat,	6e00010, f3800000, 4, (RRnpc, I31, RRnpc, oSHllar),usat,   t_usat),
+
+/*  ARM V6 not included in V7M (eg. integer SIMD).  */
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_v6_notm
+ TUF(cps,	1020000, f3af8100, 1, (I31b),			  imm0, imm0),
  TCE(pkhbt,	6800010, eac00000, 4, (RRnpc, RRnpc, RRnpc, oSHll),   pkhbt, t_pkhbt),
  TCE(pkhtb,	6800050, eac00020, 4, (RRnpc, RRnpc, RRnpc, oSHar),   pkhtb, t_pkhtb),
  TCE(qadd16,	6200f10, fa90f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
@@ -9052,13 +9235,11 @@ static const struct asm_opcode insns[] =
   UF(srsib,	9cd0500,           1, (I31w),			   srs),
   UF(srsda,	84d0500,	   1, (I31w),			   srs),
  TUF(srsdb,	94d0500, e800c000, 1, (I31w),			   srs,  srs),
- TCE(ssat,	6a00010, f3000000, 4, (RRnpc, I32, RRnpc, oSHllar),ssat,   t_ssat),
  TCE(ssat16,	6a00f30, f3200000, 3, (RRnpc, I16, RRnpc),	   ssat16, t_ssat16),
  TCE(strex,	1800f90, e8400000, 3, (RRnpc, RRnpc, ADDR),	   strex,  t_strex),
  TCE(umaal,	0400090, fbe00060, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,  t_mlal),
  TCE(usad8,	780f010, fb70f000, 3, (RRnpc, RRnpc, RRnpc),	   smul,   t_simd),
  TCE(usada8,	7800010, fb700000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla,   t_mla),
- TCE(usat,	6e00010, f3800000, 4, (RRnpc, I31, RRnpc, oSHllar),usat,   t_usat),
  TCE(usat16,	6e00f30, f3a00000, 3, (RRnpc, I15, RRnpc),	   usat16, t_usat16),
 
 #undef ARM_VARIANT
@@ -9074,11 +9255,14 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT &arm_ext_v6t2
  TCE(ldrexb,	1d00f9f, e8d00f4f, 2, (RRnpc, RRnpcb),	              rd_rn,  rd_rn),
  TCE(ldrexh,	1f00f9f, e8d00f5f, 2, (RRnpc, RRnpcb),	              rd_rn,  rd_rn),
- TCE(ldrexd,	1b00f9f, e8d0007f, 3, (RRnpc, oRRnpc, RRnpcb),        ldrexd, t_ldrexd),
  TCE(strexb,	1c00f90, e8c00f40, 3, (RRnpc, RRnpc, ADDR),           strex,  rm_rd_rn),
  TCE(strexh,	1e00f90, e8c00f50, 3, (RRnpc, RRnpc, ADDR),           strex,  rm_rd_rn),
- TCE(strexd,	1a00f90, e8c00070, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb), strexd, t_strexd),
  TUF(clrex,	57ff01f, f3bf8f2f, 0, (),			      noargs, noargs),
+
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_v6_notm
+ TCE(ldrexd,	1b00f9f, e8d0007f, 3, (RRnpc, oRRnpc, RRnpcb),        ldrexd, t_ldrexd),
+ TCE(strexd,	1a00f90, e8c00070, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb), strexd, t_strexd),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v6z
@@ -9128,6 +9312,23 @@ static const struct asm_opcode insns[] =
  TCE(subw,	0, f2a00000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
  TCE(tbb,       0, e8d0f000, 1, (TB), 0, t_tb),
  TCE(tbh,       0, e8d0f010, 1, (TB), 0, t_tb),
+
+ /* Thumb-2 hardware division instructions (R and M profiles only).  */
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_div
+ TCE(sdiv,	0, fb90f0f0, 3, (RR, oRR, RR), 0, t_div),
+ TCE(udiv,	0, fbb0f0f0, 3, (RR, oRR, RR), 0, t_div),
+
+ /* ARM V7 instructions.  */
+#undef ARM_VARIANT
+#define ARM_VARIANT &arm_ext_v7
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_v7
+ TUF(pli,	450f000, f910f000, 1, (ADDR),	  pli,	    t_pld),
+ TCE(dbg,	320f0f0, f3af80f0, 1, (I15),	  dbg,	    t_dbg),
+ TUF(dmb,	57ff050, f3bf8f50, 1, (oBARRIER), barrier,  t_barrier),
+ TUF(dsb,	57ff040, f3bf8f40, 1, (oBARRIER), barrier,  t_barrier),
+ TUF(isb,	57ff060, f3bf8f60, 1, (oBARRIER), barrier,  t_barrier),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
@@ -12503,8 +12704,10 @@ md_begin (void)
       || (arm_cond_hsh = hash_new ()) == NULL
       || (arm_shift_hsh = hash_new ()) == NULL
       || (arm_psr_hsh = hash_new ()) == NULL
+      || (arm_v7m_psr_hsh = hash_new ()) == NULL
       || (arm_reg_hsh = hash_new ()) == NULL
-      || (arm_reloc_hsh = hash_new ()) == NULL)
+      || (arm_reloc_hsh = hash_new ()) == NULL
+      || (arm_barrier_opt_hsh = hash_new ()) == NULL)
     as_fatal (_("virtual memory exhausted"));
 
   for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
@@ -12515,8 +12718,15 @@ md_begin (void)
     hash_insert (arm_shift_hsh, shift_names[i].name, (PTR) (shift_names + i));
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)
     hash_insert (arm_psr_hsh, psrs[i].template, (PTR) (psrs + i));
+  for (i = 0; i < sizeof (v7m_psrs) / sizeof (struct asm_psr); i++)
+    hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template, (PTR) (v7m_psrs + i));
   for (i = 0; i < sizeof (reg_names) / sizeof (struct reg_entry); i++)
     hash_insert (arm_reg_hsh, reg_names[i].name, (PTR) (reg_names + i));
+  for (i = 0;
+       i < sizeof (barrier_opt_names) / sizeof (struct asm_barrier_opt);
+       i++)
+    hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template,
+		 (PTR) (barrier_opt_names + i));
 #ifdef OBJ_ELF
   for (i = 0; i < sizeof (reloc_names) / sizeof (struct reloc_entry); i++)
     hash_insert (arm_reloc_hsh, reloc_names[i].name, (PTR) (reloc_names + i));
@@ -13028,6 +13238,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"arm1156t2f-s",	ARM_ARCH_V6T2,	 FPU_ARCH_VFP_V2, NULL},
   {"arm1176jz-s",	ARM_ARCH_V6ZK,	 FPU_NONE,	  NULL},
   {"arm1176jzf-s",	ARM_ARCH_V6ZK,	 FPU_ARCH_VFP_V2, NULL},
+  {"cortex-a8",		ARM_ARCH_V7A,	 FPU_ARCH_VFP_V2, NULL},
+  {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  NULL},
+  {"cortex-m3",		ARM_ARCH_V7M,	 FPU_NONE,	  NULL},
   /* ??? XSCALE is really an architecture.  */
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL},
   /* ??? iwmmxt is not a processor.  */
@@ -13075,6 +13288,10 @@ static const struct arm_arch_option_table arm_archs[] =
   {"armv6kt2",		ARM_ARCH_V6KT2,	 FPU_ARCH_VFP},
   {"armv6zt2",		ARM_ARCH_V6ZT2,	 FPU_ARCH_VFP},
   {"armv6zkt2",		ARM_ARCH_V6ZKT2, FPU_ARCH_VFP},
+  {"armv7",		ARM_ARCH_V7,	 FPU_ARCH_VFP},
+  {"armv7a",		ARM_ARCH_V7A,	 FPU_ARCH_VFP},
+  {"armv7r",		ARM_ARCH_V7R,	 FPU_ARCH_VFP},
+  {"armv7m",		ARM_ARCH_V7M,	 FPU_ARCH_VFP},
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP},
   {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP},
   {NULL,		ARM_ARCH_NONE,	 ARM_ARCH_NONE}
@@ -13474,37 +13691,56 @@ md_show_usage (FILE * fp)
 
 
 #ifdef OBJ_ELF
+typedef struct
+{
+  int val;
+  arm_feature_set flags;
+} cpu_arch_ver_table;
+
+/* Mapping from CPU features to EABI CPU arch values.  Table must be sorted
+   least features first.  */
+static const cpu_arch_ver_table cpu_arch_ver[] =
+{
+    {1, ARM_ARCH_V4},
+    {2, ARM_ARCH_V4T},
+    {3, ARM_ARCH_V5},
+    {4, ARM_ARCH_V5TE},
+    {5, ARM_ARCH_V5TEJ},
+    {6, ARM_ARCH_V6},
+    {7, ARM_ARCH_V6Z},
+    {8, ARM_ARCH_V6K},
+    {9, ARM_ARCH_V6T2},
+    {10, ARM_ARCH_V7A},
+    {10, ARM_ARCH_V7R},
+    {10, ARM_ARCH_V7M},
+    {0, ARM_ARCH_NONE}
+};
+
 /* Set the public EABI object attributes.  */
 static void
 aeabi_set_public_attributes (void)
 {
   int arch;
   arm_feature_set flags;
+  arm_feature_set tmp;
+  const cpu_arch_ver_table *p;
 
   /* Choose the architecture based on the capabilities of the requested cpu
      (if any) and/or the instructions actually used.  */
   ARM_MERGE_FEATURE_SETS (flags, arm_arch_used, thumb_arch_used);
   ARM_MERGE_FEATURE_SETS (flags, flags, *mfpu_opt);
   ARM_MERGE_FEATURE_SETS (flags, flags, selected_cpu);
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v6t2))
-    arch = 8;
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v6z))
-    arch = 7;
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v6k))
-    arch = 9;
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v6))
-    arch = 6;
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v5e))
-    arch = 4;
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v5)
-	   || ARM_CPU_HAS_FEATURE (flags, arm_ext_v5t))
-    arch = 3;
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v4t))
-    arch = 2;
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v4))
-    arch = 1;
-  else
-    arch = 0;
+  
+  tmp = flags;
+  arch = 0;
+  for (p = cpu_arch_ver; p->val; p++)
+    {
+      if (ARM_CPU_HAS_FEATURE (tmp, p->flags))
+	{
+	  arch = p->val;
+	  ARM_CLEAR_FEATURE (tmp, tmp, p->flags);
+	}
+    }
 
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])
@@ -13524,6 +13760,13 @@ aeabi_set_public_attributes (void)
     }
   /* Tag_CPU_arch.  */
   elf32_arm_add_eabi_attr_int (stdoutput, 6, arch);
+  /* Tag_CPU_arch_profile.  */
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a))
+    elf32_arm_add_eabi_attr_int (stdoutput, 7, 'A');
+  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
+    elf32_arm_add_eabi_attr_int (stdoutput, 7, 'R');
+  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m))
+    elf32_arm_add_eabi_attr_int (stdoutput, 7, 'M');
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_full))
     elf32_arm_add_eabi_attr_int (stdoutput, 8, 1);

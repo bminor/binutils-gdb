@@ -402,6 +402,8 @@ static const struct opcode32 coprocessor_opcodes[] =
    %t			print 't' iff bit 21 set and bit 24 clear
    %B			print arm BLX(1) destination
    %C			print the PSR sub type.
+   %U			print barrier type.
+   %P			print address for pli instruction.
 
    %<bitfield>r		print as an ARM register
    %<bitfield>d		print the bitfield in decimal
@@ -427,6 +429,13 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V2S, 0x01000090, 0x0fb00ff0, "swp%c%22'b\t%12-15r, %0-3r, [%16-19r]"},
   {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
   {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
+
+  /* V7 instructions.  */
+  {ARM_EXT_V7, 0xf450f000, 0xfd70f000, "pli\t%P"},
+  {ARM_EXT_V7, 0x0320f0f0, 0x0ffffff0, "dbg%c\t#%0-3d"},
+  {ARM_EXT_V7, 0xf57ff050, 0xfffffff0, "dmb\t%U"},
+  {ARM_EXT_V7, 0xf57ff040, 0xfffffff0, "dsb\t%U"},
+  {ARM_EXT_V7, 0xf57ff060, 0xfffffff0, "isb\t%U"},
 
   /* ARM V6T2 instructions.  */
   {ARM_EXT_V6T2, 0x07c0001f, 0x0fe0007f, "bfc%c\t%12-15r, %E"},
@@ -827,6 +836,8 @@ static const struct opcode16 thumb_opcodes[] =
        %B		print an unconditional branch offset
        %s		print the shift field of an SSAT instruction
        %R		print the rotation field of an SXT instruction
+       %U		print barrier type.
+       %P		print address for pli instruction.
 
        %<bitfield>d	print bitfield in decimal
        %<bitfield>W	print bitfield*4 in decimal
@@ -847,6 +858,15 @@ static const struct opcode16 thumb_opcodes[] =
    makes heavy use of special-case bit patterns.  */
 static const struct opcode32 thumb32_opcodes[] =
 {
+  /* V7 instructions.  */
+  {ARM_EXT_V7, 0xf910f000, 0xff70f000, "pli\t%a"},
+  {ARM_EXT_V7, 0xf3af80f0, 0xfffffff0, "dbg\t#%0-3d"},
+  {ARM_EXT_V7, 0xf3bf8f50, 0xfffffff0, "dmb\t%U"},
+  {ARM_EXT_V7, 0xf3bf8f40, 0xfffffff0, "dsb\t%U"},
+  {ARM_EXT_V7, 0xf3bf8f60, 0xfffffff0, "isb\t%U"},
+  {ARM_EXT_DIV, 0xfb90f0f0, 0xfff0f0f0, "sdiv\t%8-11r, %16-19r, %0-3r"},
+  {ARM_EXT_DIV, 0xfbb0f0f0, 0xfff0f0f0, "udiv\t%8-11r, %16-19r, %0-3r"},
+
   /* Instructions defined in the basic V6T2 set.  */
   {ARM_EXT_V6T2, 0xf3af8000, 0xffffffff, "nop.w"},
   {ARM_EXT_V6T2, 0xf3af8001, 0xffffffff, "yield.w"},
@@ -861,14 +881,14 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_EXT_V6T2, 0xf3c08f00, 0xfff0ffff, "bxj\t%16-19r"},
   {ARM_EXT_V6T2, 0xe810c000, 0xffd0ffff, "rfedb\t%16-19r%21'!"},
   {ARM_EXT_V6T2, 0xe990c000, 0xffd0ffff, "rfeia\t%16-19r%21'!"},
-  {ARM_EXT_V6T2, 0xf3ef8000, 0xffeff0ff, "mrs\t%8-11r, %20?CSPSR"},
+  {ARM_EXT_V6T2, 0xf3ef8000, 0xffeff000, "mrs\t%8-11r, %D"},
   {ARM_EXT_V6T2, 0xf3af8100, 0xffffffe0, "cps\t#%0-4d"},
   {ARM_EXT_V6T2, 0xe8d0f000, 0xfff0fff0, "tbb\t[%16-19r, %0-3r]"},
   {ARM_EXT_V6T2, 0xe8d0f010, 0xfff0fff0, "tbh\t[%16-19r, %0-3r, lsl #1]"},
   {ARM_EXT_V6T2, 0xf3af8500, 0xffffff00, "cpsie\t%7'a%6'i%5'f, #%0-4d"},
   {ARM_EXT_V6T2, 0xf3af8700, 0xffffff00, "cpsid\t%7'a%6'i%5'f, #%0-4d"},
   {ARM_EXT_V6T2, 0xf3de8f00, 0xffffff00, "subs\tpc, lr, #%0-7d"},
-  {ARM_EXT_V6T2, 0xf3808000, 0xffe0f0ff, "msr\t%20?CSPSR_%8'c%9'x%10's%11'f, %16-19r"},
+  {ARM_EXT_V6T2, 0xf3808000, 0xffe0f000, "msr\t%C, %16-19r"},
   {ARM_EXT_V6T2, 0xe8500f00, 0xfff00fff, "ldrex\t%12-15r, [%16-19r]"},
   {ARM_EXT_V6T2, 0xe8d00f4f, 0xfff00fef, "ldrex%4?hb\t%12-15r, [%16-19r]"},
   {ARM_EXT_V6T2, 0xe800c000, 0xffd0ffe0, "srsdb\t#%0-4d%21'!"},
@@ -1602,6 +1622,96 @@ print_insn_coprocessor (struct disassemble_info *info, long given,
   return FALSE;
 }
 
+static void
+print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
+{
+  void *stream = info->stream;
+  fprintf_ftype func = info->fprintf_func;
+
+  if (((given & 0x000f0000) == 0x000f0000)
+      && ((given & 0x02000000) == 0))
+    {
+      int offset = given & 0xfff;
+
+      func (stream, "[pc");
+
+      if (given & 0x01000000)
+	{
+	  if ((given & 0x00800000) == 0)
+	    offset = - offset;
+
+	  /* Pre-indexed.  */
+	  func (stream, ", #%d]", offset);
+
+	  offset += pc + 8;
+
+	  /* Cope with the possibility of write-back
+	     being used.  Probably a very dangerous thing
+	     for the programmer to do, but who are we to
+	     argue ?  */
+	  if (given & 0x00200000)
+	    func (stream, "!");
+	}
+      else
+	{
+	  /* Post indexed.  */
+	  func (stream, "], #%d", offset);
+
+	  /* ie ignore the offset.  */
+	  offset = pc + 8;
+	}
+
+      func (stream, "\t; ");
+      info->print_address_func (offset, info);
+    }
+  else
+    {
+      func (stream, "[%s",
+	    arm_regnames[(given >> 16) & 0xf]);
+      if ((given & 0x01000000) != 0)
+	{
+	  if ((given & 0x02000000) == 0)
+	    {
+	      int offset = given & 0xfff;
+	      if (offset)
+		func (stream, ", #%s%d",
+		      (((given & 0x00800000) == 0)
+		       ? "-" : ""), offset);
+	    }
+	  else
+	    {
+	      func (stream, ", %s",
+		    (((given & 0x00800000) == 0)
+		     ? "-" : ""));
+	      arm_decode_shift (given, func, stream);
+	    }
+
+	  func (stream, "]%s",
+		((given & 0x00200000) != 0) ? "!" : "");
+	}
+      else
+	{
+	  if ((given & 0x02000000) == 0)
+	    {
+	      int offset = given & 0xfff;
+	      if (offset)
+		func (stream, "], #%s%d",
+		      (((given & 0x00800000) == 0)
+		       ? "-" : ""), offset);
+	      else
+		func (stream, "]");
+	    }
+	  else
+	    {
+	      func (stream, "], %s",
+		    (((given & 0x00800000) == 0)
+		     ? "-" : ""));
+	      arm_decode_shift (given, func, stream);
+	    }
+	}
+    }
+}
+
 /* Print one ARM instruction from PC on INFO->STREAM.  */
 
 static void
@@ -1642,88 +1752,13 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		      break;
 
 		    case 'a':
-		      if (((given & 0x000f0000) == 0x000f0000)
-			  && ((given & 0x02000000) == 0))
-			{
-			  int offset = given & 0xfff;
+		      print_arm_address (pc, info, given);
+		      break;
 
-			  func (stream, "[pc");
-
-			  if (given & 0x01000000)
-			    {
-			      if ((given & 0x00800000) == 0)
-				offset = - offset;
-
-			      /* Pre-indexed.  */
-			      func (stream, ", #%d]", offset);
-
-			      offset += pc + 8;
-
-			      /* Cope with the possibility of write-back
-				 being used.  Probably a very dangerous thing
-				 for the programmer to do, but who are we to
-				 argue ?  */
-			      if (given & 0x00200000)
-				func (stream, "!");
-			    }
-			  else
-			    {
-			      /* Post indexed.  */
-			      func (stream, "], #%d", offset);
-
-			      /* ie ignore the offset.  */
-			      offset = pc + 8;
-			    }
-
-			  func (stream, "\t; ");
-			  info->print_address_func (offset, info);
-			}
-		      else
-			{
-			  func (stream, "[%s",
-				arm_regnames[(given >> 16) & 0xf]);
-			  if ((given & 0x01000000) != 0)
-			    {
-			      if ((given & 0x02000000) == 0)
-				{
-				  int offset = given & 0xfff;
-				  if (offset)
-				    func (stream, ", #%s%d",
-					  (((given & 0x00800000) == 0)
-					   ? "-" : ""), offset);
-				}
-			      else
-				{
-				  func (stream, ", %s",
-					(((given & 0x00800000) == 0)
-					 ? "-" : ""));
-				  arm_decode_shift (given, func, stream);
-				}
-
-			      func (stream, "]%s",
-				    ((given & 0x00200000) != 0) ? "!" : "");
-			    }
-			  else
-			    {
-			      if ((given & 0x02000000) == 0)
-				{
-				  int offset = given & 0xfff;
-				  if (offset)
-				    func (stream, "], #%s%d",
-					  (((given & 0x00800000) == 0)
-					   ? "-" : ""), offset);
-				  else
-				    func (stream, "]");
-				}
-			      else
-				{
-				  func (stream, "], %s",
-					(((given & 0x00800000) == 0)
-					 ? "-" : ""));
-				  arm_decode_shift (given, func, stream);
-				}
-			    }
-			}
+		    case 'P':
+		      /* Set P address bit and use normal address
+			 printing routine.  */
+		      print_arm_address (pc, info, given | (1 << 24));
 		      break;
 
 		    case 's':
@@ -1911,6 +1946,19 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			func (stream, "x");
 		      if (given & 0x10000)
 			func (stream, "c");
+		      break;
+
+		    case 'U':
+		      switch (given & 0xf)
+			{
+			case 0xf: func(stream, "sy"); break;
+			case 0x7: func(stream, "un"); break;
+			case 0xe: func(stream, "st"); break;
+			case 0x6: func(stream, "unst"); break;
+			default:
+			  func(stream, "#%d", (int)given & 0xf);
+			  break;
+			}
 		      break;
 
 		    case '0': case '1': case '2': case '3': case '4':
@@ -2292,6 +2340,30 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
   abort ();
 }
 
+/* Return the name of an V7M special register.  */
+static const char *
+psr_name (int regno)
+{
+  switch (regno)
+    {
+    case 0: return "APSR";
+    case 1: return "IAPSR";
+    case 2: return "EAPSR";
+    case 3: return "PSR";
+    case 5: return "IPSR";
+    case 6: return "EPSR";
+    case 7: return "IEPSR";
+    case 8: return "MSP";
+    case 9: return "PSP";
+    case 16: return "PRIMASK";
+    case 17: return "BASEPRI";
+    case 18: return "BASEPRI_MASK";
+    case 19: return "FAULTMASK";
+    case 20: return "CONTROL";
+    default: return "<unknown>";
+    }
+}
+
 /* Print one 32-bit Thumb instruction from PC on INFO->STREAM.  */
 
 static void
@@ -2636,6 +2708,45 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  if (rot)
 		    func (stream, ", ror #%u", rot * 8);
 		}
+		break;
+
+	      case 'U':
+		switch (given & 0xf)
+		  {
+		  case 0xf: func(stream, "sy"); break;
+		  case 0x7: func(stream, "un"); break;
+		  case 0xe: func(stream, "st"); break;
+		  case 0x6: func(stream, "unst"); break;
+		  default:
+		    func(stream, "#%d", (int)given & 0xf);
+		    break;
+		  }
+		break;
+
+	      case 'C':
+		if ((given & 0xff) == 0)
+		  {
+		    func (stream, "%cPSR_", (given & 0x100000) ? 'S' : 'C');
+		    if (given & 0x800)
+		      func (stream, "f");
+		    if (given & 0x400)
+		      func (stream, "s");
+		    if (given & 0x200)
+		      func (stream, "x");
+		    if (given & 0x100)
+		      func (stream, "c");
+		  }
+		else
+		  {
+		    func (stream, psr_name (given & 0xff));
+		  }
+		break;
+
+	      case 'D':
+		if ((given & 0xff) == 0)
+		  func (stream, "%cPSR", (given & 0x100000) ? 'S' : 'C');
+		else
+		  func (stream, psr_name (given & 0xff));
 		break;
 
 	      case '0': case '1': case '2': case '3': case '4':

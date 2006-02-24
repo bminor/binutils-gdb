@@ -1,3 +1,12 @@
+2006-02-24  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (arm_opcodes): Add V7 instructions.
+	(thumb32_opcodes): Ditto.  Handle V7M MSR/MRS variants.
+	(print_arm_address): New function.
+	(print_insn_arm): Use it.  Add 'P' and 'U' cases.
+	(psr_name): New function.
+	(print_insn_thumb32): Add 'U', 'C' and 'D' cases.
+
 2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ia64-opc-i.c (bXc): New.

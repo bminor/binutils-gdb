@@ -631,16 +631,16 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f240 5000 	movw	r0, #1280	; 0x500
 0[0-9a-f]+ <[^>]+> f240 0081 	movw	r0, #129	; 0x81
 0[0-9a-f]+ <[^>]+> f64f 70ff 	movw	r0, #65535	; 0xffff
-0[0-9a-f]+ <[^>]+> f3ef 8000 	mrs	r0, SPSR
-0[0-9a-f]+ <[^>]+> f3ff 8000 	mrs	r0, CPSR
-0[0-9a-f]+ <[^>]+> f3ef 8900 	mrs	r9, SPSR
-0[0-9a-f]+ <[^>]+> f3ff 8900 	mrs	r9, CPSR
-0[0-9a-f]+ <[^>]+> f380 8100 	msr	SPSR_c, r0
-0[0-9a-f]+ <[^>]+> f390 8100 	msr	CPSR_c, r0
-0[0-9a-f]+ <[^>]+> f389 8100 	msr	SPSR_c, r9
-0[0-9a-f]+ <[^>]+> f380 8200 	msr	SPSR_x, r0
-0[0-9a-f]+ <[^>]+> f380 8400 	msr	SPSR_s, r0
-0[0-9a-f]+ <[^>]+> f380 8800 	msr	SPSR_f, r0
+0[0-9a-f]+ <[^>]+> f3ef 8000 	mrs	r0, CPSR
+0[0-9a-f]+ <[^>]+> f3ff 8000 	mrs	r0, SPSR
+0[0-9a-f]+ <[^>]+> f3ef 8900 	mrs	r9, CPSR
+0[0-9a-f]+ <[^>]+> f3ff 8900 	mrs	r9, SPSR
+0[0-9a-f]+ <[^>]+> f380 8100 	msr	CPSR_c, r0
+0[0-9a-f]+ <[^>]+> f390 8100 	msr	SPSR_c, r0
+0[0-9a-f]+ <[^>]+> f389 8100 	msr	CPSR_c, r9
+0[0-9a-f]+ <[^>]+> f380 8200 	msr	CPSR_x, r0
+0[0-9a-f]+ <[^>]+> f380 8400 	msr	CPSR_s, r0
+0[0-9a-f]+ <[^>]+> f380 8800 	msr	CPSR_f, r0
 0[0-9a-f]+ <[^>]+> fb00 f000 	mul\.w	r0, r0, r0
 0[0-9a-f]+ <[^>]+> fb09 f000 	mul\.w	r0, r9, r0
 0[0-9a-f]+ <[^>]+> fb00 f009 	mul\.w	r0, r0, r9
