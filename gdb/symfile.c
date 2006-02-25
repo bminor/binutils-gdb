@@ -60,9 +60,6 @@
 #include <time.h>
 #include <sys/time.h>
 
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
 
 int (*deprecated_ui_load_progress_hook) (const char *section, unsigned long num);
 void (*deprecated_show_load_progress) (const char *section,

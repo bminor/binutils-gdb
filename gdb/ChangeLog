@@ -1,3 +1,15 @@
+2006-02-24  Charles Wilson  <cygwin@cwilson.fastmail.fm>
+
+	* gdb/defs.h: unconditionally include <fcntl.h>, and
+	ensure that O_BINARY is defined.
+	* gdb/solib.c(solib_open): ensure solib files are opened in
+	binary mode.
+	* gdb/corelow.c: Remove O_BINARY macro definition.
+	* gdb/exec.c: Remove O_BINARY macro definition
+	* gdb/remote-rdp.c: Remove O_BINARY macro definition
+	* gdb/source.c: Remove O_BINARY macro definition
+	* gdb/symfile.c: Remove O_BINARY macro definition
+
 2006-02-24  Randolph Chung  <tausq@debian.org>
 
         * hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Initialize 

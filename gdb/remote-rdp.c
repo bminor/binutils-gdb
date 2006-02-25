@@ -791,9 +791,6 @@ argsin;
 #define SWI_GenerateError               0x71
 
 
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
 
 static int translate_open_mode[] =
 {

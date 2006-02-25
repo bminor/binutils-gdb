@@ -46,9 +46,6 @@
 #include "ui-out.h"
 #include "readline/readline.h"
 
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB

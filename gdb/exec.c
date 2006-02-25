@@ -42,9 +42,6 @@
 
 #include <ctype.h>
 #include "gdb_stat.h"
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
 
 #include "xcoffsolib.h"
 

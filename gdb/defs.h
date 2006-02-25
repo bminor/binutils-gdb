@@ -39,6 +39,8 @@
 #include <unistd.h>
 #endif
 
+#include <fcntl.h>
+
 /* First include ansidecl.h so we can use the various macro definitions
    here and in all subsequent file inclusions.  */
 
@@ -56,6 +58,16 @@
 #endif
 #ifndef SEEK_CUR
 #define SEEK_CUR 1
+#endif
+
+/* The O_BINARY flag is defined in fcntl.h on some non-Posix platforms.
+   It is used as an access modifier in calls to open(), where it acts
+   similarly to the "b" character in fopen()'s MODE argument. On Posix
+   platforms it should be a no-op, so it is defined as 0 here. This 
+   ensures that the symbol may be used freely elsewhere in gdb. */
+
+#ifndef O_BINARY
+#define O_BINARY 0
 #endif
 
 #include <stdarg.h>		/* For va_list.  */
