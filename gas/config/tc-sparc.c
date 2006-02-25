@@ -724,7 +724,7 @@ struct
   {NULL, NULL, NULL},
 };
 
-/* sparc64 privileged registers.  */
+/* sparc64 privileged and hyperprivileged registers.  */
 
 struct priv_reg_entry
 {
@@ -750,7 +750,19 @@ struct priv_reg_entry priv_reg_table[] =
   {"otherwin", 13},
   {"wstate", 14},
   {"fq", 15},
+  {"gl", 16},
   {"ver", 31},
+  {"", -1},			/* End marker.  */
+};
+
+struct priv_reg_entry hpriv_reg_table[] =
+{
+  {"hpstate", 0},
+  {"htstate", 1},
+  {"hintp", 3},
+  {"htba", 5},
+  {"hver", 6},
+  {"hstick_cmpr", 31},
   {"", -1},			/* End marker.  */
 };
 
@@ -1569,6 +1581,42 @@ sparc_ip (str, pinsn)
 	      else
 		{
 		  error_message = _(": unrecognizable privileged register");
+		  goto error;
+		}
+
+	    case '$':
+	    case '%':
+	      /* Parse a sparc64 hyperprivileged register.  */
+	      if (*s == '%')
+		{
+		  struct priv_reg_entry *p = hpriv_reg_table;
+		  unsigned int len = 9999999; /* Init to make gcc happy.  */
+
+		  s += 1;
+		  while (p->name[0] > s[0])
+		    p++;
+		  while (p->name[0] == s[0])
+		    {
+		      len = strlen (p->name);
+		      if (strncmp (p->name, s, len) == 0)
+			break;
+		      p++;
+		    }
+		  if (p->name[0] != s[0])
+		    {
+		      error_message = _(": unrecognizable hyperprivileged register");
+		      goto error;
+		    }
+		  if (*args == '$')
+		    opcode |= (p->regnum << 14);
+		  else
+		    opcode |= (p->regnum << 25);
+		  s += len;
+		  continue;
+		}
+	      else
+		{
+		  error_message = _(": unrecognizable hyperprivileged register");
 		  goto error;
 		}
 

@@ -1,3 +1,10 @@
+2006-02-24  David S. Miller  <davem@sunset.davemloft.net>
+
+	* config/tc-sparc.c (priv_reg_table): Add entry for "gl".
+	(hpriv_reg_table): New table for hyperprivileged registers.
+	(sparc_ip): New cases '$' and '%' for wrhpr/rdhpr hyperprivileged
+	register encoding.
+
 2006-02-24  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.h (md_apply_fix): Define to m32c_apply_fix.
