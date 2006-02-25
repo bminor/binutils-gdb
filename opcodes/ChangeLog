@@ -1,3 +1,12 @@
+2006-02-24  David S. Miller  <davem@sunset.davemloft.net>
+
+	* sparc-dis.c (v9_priv_reg_names): Add "gl" entry.
+	(v9_hpriv_reg_names): New table.
+	(print_insn_sparc): Allow values up to 16 for '?' and '!'.
+	New cases '$' and '%' for read/write hyperprivileged register.
+	* sparc-opc.c (sparc_opcodes): Add new entries for UA2005
+	window handling and rdhpr/wrhpr instructions.
+	
 2006-02-24  DJ Delorie  <dj@redhat.com>
 
 	* m32c-desc.c: Regenerate with linker relaxation attributes.
