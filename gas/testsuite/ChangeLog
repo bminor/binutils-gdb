@@ -1,3 +1,17 @@
+2006-02-24  David S. Miller  <davem@sunset.davemloft.net>
+
+	* gas/sparc/rdhpr.s: New test.
+	* gas/sparc/rdhpr.d: New test.
+	* gas/sparc/wrhpr.s: New test.
+	* gas/sparc/wrhpr.d: New test.
+	* gas/sparc/window.s: New test.
+	* gas/sparc/window.d: New test.
+	* gas/sparc/rdpr.s: Add case for reading %gl register.
+	* gas/sparc/rdpr.d: Likewise.
+	* gas/sparc/wrpr.s: Add case for writing %gl register.
+	* gas/sparc/wrpr.d: Likewise.
+	* gas/sparc/sparc.exp: Update for new tests.
+	
 2006-02-24  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb32.d: Fix expected msr and mrs output.
