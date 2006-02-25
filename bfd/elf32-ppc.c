@@ -2365,9 +2365,6 @@ struct ppc_elf_link_hash_table
   /* The .got.plt section (VxWorks only)*/
   asection *sgotplt;
 
-  /* Short-cuts to frequently used symbols on VxWorks targets.  */
-  struct elf_link_hash_entry *hplt;
-
   /* True if the target system is VxWorks.  */
   int is_vxworks;
 
@@ -4762,21 +4759,17 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (htab->is_vxworks)
     {
-      /* Save the PLT symbol in the hash table for easy access.
-	 Mark GOT and PLT syms as having relocations; they might not,
-	 but we won't know for sure until we build the GOT in
+      /* Mark the GOT and PLT symbols as having relocations; they might
+	 not, but we won't know for sure until we build the GOT in
 	 finish_dynamic_symbol.  */
-
       if (htab->elf.hgot)
 	htab->elf.hgot->indx = -2;
-      htab->hplt = elf_link_hash_lookup (elf_hash_table (info),
-					 "_PROCEDURE_LINKAGE_TABLE_",
-					 FALSE, FALSE, FALSE);
-      if (htab->hplt)
-	htab->hplt->indx = -2;
-      /* If the PLT is executable then give the symbol function type.  */
-      if (htab->hplt && htab->plt->flags & SEC_CODE)
-       htab->hplt->type = STT_FUNC;
+      if (htab->elf.hplt)
+	{
+	  htab->elf.hplt->indx = -2;
+	  if (htab->plt->flags & SEC_CODE)
+	    htab->elf.hplt->type = STT_FUNC;
+	}
     }
 
   /* Allocate space for global sym dynamic relocs.  */
@@ -4867,7 +4860,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* We'd like to strip these sections if they aren't needed, but if
 	     we've exported dynamic symbols from them we must leave them.
 	     It's too late to tell BFD to get rid of the symbols.  */
-	  if ((s == htab->plt || s == htab->got) && htab->hplt != NULL)
+	  if ((s == htab->plt || s == htab->got) && htab->elf.hplt != NULL)
 	    strip_section = FALSE;
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -6880,7 +6873,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		    rela.r_offset = (htab->sgotplt->output_section->vma
 				     + htab->sgotplt->output_offset
 				     + got_offset);
-		    rela.r_info = ELF32_R_INFO (htab->hplt->indx,
+		    rela.r_info = ELF32_R_INFO (htab->elf.hplt->indx,
 						R_PPC_ADDR32);
 		    rela.r_addend = ent->plt.offset + 16;
 		    bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
@@ -7248,7 +7241,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      loc += sizeof (Elf32_External_Rela);
 
 	      bfd_elf32_swap_reloc_in (output_bfd, loc, &rel);
-	      rel.r_info = ELF32_R_INFO (htab->hplt->indx, R_PPC_ADDR32);
+	      rel.r_info = ELF32_R_INFO (htab->elf.hplt->indx, R_PPC_ADDR32);
 	      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
 	      loc += sizeof (Elf32_External_Rela);
 	    }

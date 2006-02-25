@@ -3240,6 +3240,7 @@ sh64_elf64_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       h = (struct elf_link_hash_entry *) bh;
       h->def_regular = 1;
       h->type = STT_OBJECT;
+      elf_hash_table (info)->hplt = h;
 
       if (info->shared
 	  && ! bfd_elf_link_record_dynamic_symbol (info, h))

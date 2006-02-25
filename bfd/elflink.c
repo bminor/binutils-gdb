@@ -263,6 +263,7 @@ bfd_boolean
 _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags, pltflags;
+  struct elf_link_hash_entry *h;
   asection *s;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
@@ -288,10 +289,14 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
      .plt section.  */
-  if (bed->want_plt_sym
-      && !_bfd_elf_define_linkage_sym (abfd, info, s,
-				       "_PROCEDURE_LINKAGE_TABLE_"))
-    return FALSE;
+  if (bed->want_plt_sym)
+    {
+      h = _bfd_elf_define_linkage_sym (abfd, info, s,
+				       "_PROCEDURE_LINKAGE_TABLE_");
+      elf_hash_table (info)->hplt = h;
+      if (h == NULL)
+	return FALSE;
+    }
 
   s = bfd_make_section_with_flags (abfd,
 				   (bed->default_use_rela_p

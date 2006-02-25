@@ -582,10 +582,14 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
 
   /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
      .plt section.  */
-  if (bed->want_plt_sym
-      && !_bfd_elf_define_linkage_sym (abfd, info, s,
-				       "_PROCEDURE_LINKAGE_TABLE_"))
-    return FALSE;
+  if (bed->want_plt_sym)
+    {
+      h = _bfd_elf_define_linkage_sym (abfd, info, s,
+				       "_PROCEDURE_LINKAGE_TABLE_");
+      elf_hash_table (info)->hplt = h;
+      if (h == NULL)
+	return FALSE;
+    }
 
   s = bfd_make_section_with_flags (abfd, ".got", flags);
   if (s == NULL

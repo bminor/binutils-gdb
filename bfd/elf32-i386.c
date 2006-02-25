@@ -647,9 +647,6 @@ struct elf_i386_link_hash_table
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.  */
   asection *srelplt2;
 
-  /* Short-cuts to frequently used symbols for VxWorks targets.  */
-  struct elf_link_hash_entry *hgot, *hplt;
-
   /* True if the target system is VxWorks.  */
   int is_vxworks;
 
@@ -739,8 +736,6 @@ elf_i386_link_hash_table_create (bfd *abfd)
   ret->sym_sec.abfd = NULL;
   ret->is_vxworks = 0;
   ret->srelplt2 = NULL;
-  ret->hgot = NULL;
-  ret->hplt = NULL;
   ret->plt0_pad_byte = 0;
 
   return &ret->elf.root;
@@ -2003,23 +1998,17 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (htab->is_vxworks)
     {
-      /* Save the GOT and PLT symbols in the hash table for easy access.
-	 Mark them as having relocations; they might not, but we won't
-	 know for sure until we build the GOT in finish_dynamic_symbol.  */
-
-      htab->hgot = elf_link_hash_lookup (elf_hash_table (info),
-					"_GLOBAL_OFFSET_TABLE_",
-					FALSE, FALSE, FALSE);
-      if (htab->hgot)
-	htab->hgot->indx = -2;
-      htab->hplt = elf_link_hash_lookup (elf_hash_table (info),
-					"_PROCEDURE_LINKAGE_TABLE_",
-					FALSE, FALSE, FALSE);
-      if (htab->hplt)
-	htab->hplt->indx = -2;
-
-      if (htab->is_vxworks && htab->hplt && htab->splt->flags & SEC_CODE)
-	htab->hplt->type = STT_FUNC;
+      /* Mark the GOT and PLT symbols as having relocations; they might
+	 not, but we won't know for sure until we build the GOT in
+	 finish_dynamic_symbol.  */
+      if (htab->elf.hgot)
+	htab->elf.hgot->indx = -2;
+      if (htab->elf.hplt)
+	{
+	  htab->elf.hplt->indx = -2;
+	  if (htab->splt->flags & SEC_CODE)
+	    htab->elf.hplt->type = STT_FUNC;
+	}
     }
 
   /* Allocate global sym .plt and .got entries, and space for global
@@ -2055,7 +2044,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	     we've exported dynamic symbols from them we must leave them.
 	     It's too late to tell BFD to get rid of the symbols.  */
 
-	  if (htab->hplt != NULL)
+	  if (htab->elf.hplt != NULL)
 	    strip_section = FALSE;
 	}
       else if (strncmp (bfd_get_section_name (dynobj, s), ".rel", 4) == 0)
@@ -3524,7 +3513,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	      rel.r_offset = (htab->splt->output_section->vma
 			      + htab->splt->output_offset
 			      + h->plt.offset + 2),
-	      rel.r_info = ELF32_R_INFO (htab->hgot->indx, R_386_32);
+	      rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_386_32);
 	      bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
 
 	      /* Create the R_386_32 relocation referencing the beginning of
@@ -3532,7 +3521,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	      rel.r_offset = (htab->sgotplt->output_section->vma
 			      + htab->sgotplt->output_offset
 			      + got_offset);
-	      rel.r_info = ELF32_R_INFO (htab->hplt->indx, R_386_32);
+	      rel.r_info = ELF32_R_INFO (htab->elf.hplt->indx, R_386_32);
 	      bfd_elf32_swap_reloc_out (output_bfd, &rel,
 	      loc + sizeof (Elf32_External_Rel));
 	    }
@@ -3786,28 +3775,21 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	      if (htab->is_vxworks)
 		{
 		  Elf_Internal_Rela rel;
-		  struct elf_link_hash_entry *hgot;
 
-		  /* The VxWorks GOT is relocated by the dynamic linker.
-		     Therefore, we must emit relocations rather than
-		     simply computing the values now.  */
-		  hgot = elf_link_hash_lookup (elf_hash_table (info),
-					       "_GLOBAL_OFFSET_TABLE_",
-					       FALSE, FALSE, FALSE);
 		  /* Generate a relocation for _GLOBAL_OFFSET_TABLE_ + 4.
 		     On IA32 we use REL relocations so the addend goes in
 		     the PLT directly.  */
 		  rel.r_offset = (htab->splt->output_section->vma
 				  + htab->splt->output_offset
 				  + 2);
-		  rel.r_info = ELF32_R_INFO (hgot->indx, R_386_32);
+		  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_386_32);
 		  bfd_elf32_swap_reloc_out (output_bfd, &rel,
 					    htab->srelplt2->contents);
 		  /* Generate a relocation for _GLOBAL_OFFSET_TABLE_ + 8.  */
 		  rel.r_offset = (htab->splt->output_section->vma
 				  + htab->splt->output_offset
 				  + 8);
-		  rel.r_info = ELF32_R_INFO (hgot->indx, R_386_32);
+		  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_386_32);
 		  bfd_elf32_swap_reloc_out (output_bfd, &rel,
 					    htab->srelplt2->contents +
 					    sizeof (Elf32_External_Rel));
@@ -3835,12 +3817,12 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 		{
 		  Elf_Internal_Rela rel;
 		  bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
-		  rel.r_info = ELF32_R_INFO (htab->hgot->indx, R_386_32);
+		  rel.r_info = ELF32_R_INFO (htab->elf.hgot->indx, R_386_32);
 		  bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
 		  p += sizeof (Elf32_External_Rel);
 
 		  bfd_elf32_swap_reloc_in (output_bfd, p, &rel);
-		  rel.r_info = ELF32_R_INFO (htab->hplt->indx, R_386_32);
+		  rel.r_info = ELF32_R_INFO (htab->elf.hplt->indx, R_386_32);
 		  bfd_elf32_swap_reloc_out (output_bfd, &rel, p);
 		  p += sizeof (Elf32_External_Rel);
 		}

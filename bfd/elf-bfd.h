@@ -378,6 +378,9 @@ struct elf_link_hash_table
   /* The _GLOBAL_OFFSET_TABLE_ symbol.  */
   struct elf_link_hash_entry *hgot;
 
+  /* The _PROCEDURE_LINKAGE_TABLE_ symbol.  */
+  struct elf_link_hash_entry *hplt;
+
   /* A pointer to information used to merge SEC_MERGE sections.  */
   void *merge_info;
 

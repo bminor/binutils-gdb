@@ -1244,8 +1244,10 @@ elf64_alpha_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
      .plt section.  */
-  if (!_bfd_elf_define_linkage_sym (abfd, info, s,
-				    "_PROCEDURE_LINKAGE_TABLE_"))
+  h = _bfd_elf_define_linkage_sym (abfd, info, s,
+				   "_PROCEDURE_LINKAGE_TABLE_");
+  elf_hash_table (info)->hplt = h;
+  if (h == NULL)
     return FALSE;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
