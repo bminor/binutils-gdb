@@ -1,3 +1,8 @@
+2006-02-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-linux-nat.c (ppc_linux_insert_watchpoint): Correct return type.
+	(ppc_linux_remove_watchpoint): Likewise, and args.
+
 2006-02-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-tdep.c (i386obsd_trapframe_sniffer): Also recognize

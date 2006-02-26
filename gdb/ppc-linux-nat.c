@@ -826,7 +826,7 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 }
 
 /* Set a watchpoint of type TYPE at address ADDR.  */
-static long
+static int
 ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
 {
   int tid;
@@ -857,8 +857,8 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
   return ptrace (PTRACE_SET_DEBUGREG, tid, 0, dabr_value);
 }
 
-static long
-ppc_linux_remove_watchpoint (CORE_ADDR addr, int len)
+static int
+ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw)
 {
   int tid;
   ptid_t ptid = inferior_ptid;
