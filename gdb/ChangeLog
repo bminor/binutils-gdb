@@ -1,3 +1,8 @@
+2006-02-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386obsd-tdep.c (i386obsd_trapframe_sniffer): Also recognize
+	"soft" interrupts.
+
 2006-02-24  Charles Wilson  <cygwin@cwilson.fastmail.fm>
 
 	* gdb/defs.h: unconditionally include <fcntl.h>, and

@@ -1,7 +1,7 @@
 /* Target-dependent code for OpenBSD/i386.
 
    Copyright (C) 1988, 1989, 1991, 1992, 1994, 1996, 2000, 2001, 2002,
-   2003, 2004, 2005
+   2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -423,9 +423,10 @@ i386obsd_trapframe_sniffer (const struct frame_unwind *self,
     return 0;
 
   find_pc_partial_function (frame_pc_unwind (next_frame), &name, NULL, NULL);
-  return (name && ((strcmp (name, "calltrap") == 0)
-		   || (strcmp (name, "syscall1") == 0)
-		   || (strncmp (name, "Xintr", 5) == 0)));
+  return (name && (strcmp (name, "calltrap") == 0
+		   || strcmp (name, "syscall1") == 0
+		   || strncmp (name, "Xintr", 5) == 0
+		   || strncmp (name, "Xsoft", 5) == 0));
 }
 
 static const struct frame_unwind i386obsd_trapframe_unwind = {
