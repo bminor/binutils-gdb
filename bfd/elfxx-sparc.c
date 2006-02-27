@@ -3578,8 +3578,8 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
   /* Mark some specially defined symbols as absolute.  */
   if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-      || strcmp (h->root.root.string, "_PROCEDURE_LINKAGE_TABLE_") == 0)
+      || h == htab->elf.hgot
+      || h == htab->elf.hplt)
     sym->st_shndx = SHN_ABS;
 
   return TRUE;

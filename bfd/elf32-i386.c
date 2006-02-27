@@ -3638,8 +3638,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
      On VxWorks, the _GLOBAL_OFFSET_TABLE_ symbol is not absolute: it
      is relative to the ".got" section.  */
   if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || (strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-	  && !htab->is_vxworks))
+      || (!htab->is_vxworks && h == htab->elf.hgot))
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
