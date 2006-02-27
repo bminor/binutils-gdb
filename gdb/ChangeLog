@@ -1,3 +1,8 @@
+2006-02-26  David S. Miller  <davem@sunset.davemloft.net>
+
+	* config/sparc/linux.mt (TDEPFILES): Add sol2-tdep.o.
+	* config/sparc/linux64.mt (TDEPFILES): Likewise.
+
 2006-02-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-linux-nat.c (ppc_linux_insert_watchpoint): Correct return type.
