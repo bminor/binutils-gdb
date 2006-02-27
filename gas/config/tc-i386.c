@@ -3474,23 +3474,31 @@ output_insn ()
       /* Output normal instructions here.  */
       char *p;
       unsigned char *q;
+      unsigned int prefix;
 
-      /* All opcodes on i386 have either 1 or 2 bytes.  We may use one
-	 more higher byte to specify a prefix the instruction
-	 requires.  */
-      if ((i.tm.base_opcode & 0xff0000) != 0)
+      /* All opcodes on i386 have either 1 or 2 bytes.  Merom New
+	 Instructions have 3 bytes.  We may use one more higher byte
+	 to specify a prefix the instruction requires.  */
+      if ((i.tm.cpu_flags & CpuMNI) != 0)
 	{
+	  if (i.tm.base_opcode & 0xff000000)
+	    {
+	      prefix = (i.tm.base_opcode >> 24) & 0xff;
+	      goto check_prefix;
+	    }
+	}
+      else if ((i.tm.base_opcode & 0xff0000) != 0)
+	{
+	  prefix = (i.tm.base_opcode >> 16) & 0xff;
 	  if ((i.tm.cpu_flags & CpuPadLock) != 0)
 	    {
-	      unsigned int prefix;
-	      prefix = (i.tm.base_opcode >> 16) & 0xff;
-
+check_prefix:
 	      if (prefix != REPE_PREFIX_OPCODE
 		  || i.prefix[LOCKREP_PREFIX] != REPE_PREFIX_OPCODE)
 		add_prefix (prefix);
 	    }
 	  else
-	    add_prefix ((i.tm.base_opcode >> 16) & 0xff);
+	    add_prefix (prefix);
 	}
 
       /* The prefix bytes.  */
@@ -3512,7 +3520,13 @@ output_insn ()
 	}
       else
 	{
-	  p = frag_more (2);
+	  if ((i.tm.cpu_flags & CpuMNI) != 0)
+	    {
+	      p = frag_more (3);
+	      *p++ = (i.tm.base_opcode >> 16) & 0xff;
+	    }
+	  else
+	    p = frag_more (2);
 
 	  /* Put out high byte first: can't use md_number_to_chars!  */
 	  *p++ = (i.tm.base_opcode >> 8) & 0xff;
