@@ -149,7 +149,7 @@ uninstall:
 	  rm -f $(gettextsrcdir)/$$file; \
 	done
 
-info dvi:
+html info dvi:
 
 $(OBJECTS): config.h libgettext.h
 bindtextdom.$lo finddomain.$lo loadmsgcat.$lo: gettextP.h gettext.h loadinfo.h

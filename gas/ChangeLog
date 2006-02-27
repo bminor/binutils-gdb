@@ -1,3 +1,9 @@
+2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* doc/Makefile.am: Add html target.
+	* doc/Makefile.in: Regenerate.
+	* po/Make-in: Add html target.
+
 2006-02-27  H.J. Lu <hongjiu.lu@intel.com>
 
 	* gas/config/tc-i386.c (output_insn): Support Intel Merom New

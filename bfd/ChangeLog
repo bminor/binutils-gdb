@@ -1,3 +1,7 @@
+2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* po/Make-in: Add html target.
+
 2006-02-27  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf-m10300.c (_bfd_mn10300_elf_finish_dynamic_symbol): Use the

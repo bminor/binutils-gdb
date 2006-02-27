@@ -1676,8 +1676,7 @@ ldver.texi: $(srcdir)/../bfd/configure
 	eval `grep '^ *VERSION=' $(srcdir)/../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
 
-$(srcdir)/ld.info: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
-ld.dvi: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
+$(srcdir)/ld.info ld.dvi ld.html: $(srcdir)/ld.texinfo configdoc.texi ldver.texi
 
 # Build the man page from the texinfo file
 # The sed command removes the no-adjust Nroff command so that

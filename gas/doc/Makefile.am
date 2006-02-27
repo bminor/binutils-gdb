@@ -64,8 +64,7 @@ gasver.texi: $(srcdir)/../../bfd/configure
 	eval `grep '^ *VERSION=' $(srcdir)/../../bfd/configure`; \
 	  echo "@set VERSION $$VERSION" > $@
 
-$(srcdir)/as.info: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
-as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
+$(srcdir)/as.info as.dvi as.html: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
