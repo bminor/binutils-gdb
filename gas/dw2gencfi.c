@@ -1,5 +1,5 @@
 /* dw2gencfi.c - Support for generating Dwarf2 CFI information.
-   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    Contributed by Michal Ludvig <mludvig@suse.cz>
 
    This file is part of GAS, the GNU Assembler.
@@ -88,6 +88,7 @@ struct fde_entry
   struct cfi_insn_data *data;
   struct cfi_insn_data **last;
   unsigned int return_column;
+  unsigned int signal_frame;
 };
 
 struct cie_entry
@@ -95,6 +96,7 @@ struct cie_entry
   struct cie_entry *next;
   symbolS *start_address;
   unsigned int return_column;
+  unsigned int signal_frame;
   struct cfi_insn_data *first, *last;
 };
 
@@ -354,6 +356,7 @@ static void dot_cfi_endproc (int);
 #define CFI_return_column	0x101
 #define CFI_rel_offset		0x102
 #define CFI_escape		0x103
+#define CFI_signal_frame	0x104
 
 const pseudo_typeS cfi_pseudo_table[] =
   {
@@ -374,6 +377,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_restore_state", dot_cfi, DW_CFA_restore_state },
     { "cfi_window_save", dot_cfi, DW_CFA_GNU_window_save },
     { "cfi_escape", dot_cfi_escape, 0 },
+    { "cfi_signal_frame", dot_cfi, CFI_signal_frame },
     { NULL, NULL, 0 }
   };
 
@@ -545,6 +549,10 @@ dot_cfi (int arg)
 
     case DW_CFA_GNU_window_save:
       cfi_add_CFA_insn (DW_CFA_GNU_window_save);
+      break;
+
+    case CFI_signal_frame:
+      cur_fde_data->signal_frame = 1;
       break;
 
     default:
@@ -864,6 +872,8 @@ output_cie (struct cie_entry *cie)
   out_one (DW_CIE_VERSION);			/* Version.  */
   out_one ('z');				/* Augmentation.  */
   out_one ('R');
+  if (cie->signal_frame)
+    out_one ('S');
   out_one (0);
   out_uleb128 (DWARF2_LINE_MIN_INSN_LENGTH);	/* Code alignment.  */
   out_sleb128 (DWARF2_CIE_DATA_ALIGNMENT);	/* Data alignment.  */
@@ -944,7 +954,8 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
 
   for (cie = cie_root; cie; cie = cie->next)
     {
-      if (cie->return_column != fde->return_column)
+      if (cie->return_column != fde->return_column
+	  || cie->signal_frame != fde->signal_frame)
 	continue;
       for (i = cie->first, j = fde->data;
 	   i != cie->last && j != NULL;
@@ -1017,6 +1028,7 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
   cie->next = cie_root;
   cie_root = cie;
   cie->return_column = fde->return_column;
+  cie->signal_frame = fde->signal_frame;
   cie->first = fde->data;
 
   for (i = cie->first; i ; i = i->next)

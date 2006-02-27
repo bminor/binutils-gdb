@@ -1,3 +1,15 @@
+2006-02-27  Jakub Jelinek  <jakub@redhat.com>
+
+	* dw2gencfi.c (struct fde_entry, struct cie_entry): Add signal_frame
+	field.
+	(CFI_signal_frame): Define.
+	(cfi_pseudo_table): Add .cfi_signal_frame.
+	(dot_cfi): Handle CFI_signal_frame.
+	(output_cie): Handle cie->signal_frame.
+	(select_cie_for_fde): Don't share CIE if signal_frame flag is
+	different.  Copy signal_frame from FDE to newly created CIE.
+	* doc/as.texinfo: Document .cfi_signal_frame.
+
 2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* doc/Makefile.am: Add html target.

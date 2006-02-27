@@ -4102,6 +4102,9 @@ using the known displacement of the CFA register from the CFA.
 This is often easier to use, because the number will match the
 code it's annotating.
 
+@section @code{.cfi_signal_frame}
+Mark current function as signal trampoline.
+
 @section @code{.cfi_window_save}
 SPARC register window has been saved.
 
