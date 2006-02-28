@@ -19,6 +19,20 @@
 # Test i386 linking; all types of relocs.  This tests the assembler and
 # tools like objdump as well as the linker.
 
+if {[istarget "i?86-*-vxworks"]} {
+    set i386tests {
+	{"VxWorks shared library test 1" "-shared -Tvxworks1.ld"
+	 "" {vxworks1-lib.s}
+	 {{readelf --relocs vxworks1-lib.rd} {objdump -dr vxworks1-lib.dd}}
+	 "libvxworks1.so"}
+	{"VxWorks dynamic executable test 1" \
+	 "tmpdir/libvxworks1.so -Tvxworks1.ld -q" "" {vxworks1.s}
+	 {{readelf --relocs vxworks1.rd} {objdump -dr vxworks1.dd}}
+	 "vxworks1"}
+    }
+    run_ld_link_tests $i386tests
+}
+
 if { !([istarget "i?86-*-elf*"]		
        || ([istarget "i?86-*-linux*"]
 	   && ![istarget "*-*-*aout*"]
