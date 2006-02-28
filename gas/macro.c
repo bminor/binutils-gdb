@@ -303,18 +303,14 @@ getstring (int idx, sb *in, sb *acc)
 {
   while (idx < in->len
 	 && (in->ptr[idx] == '"'
-	     || in->ptr[idx] == '('
 	     || (in->ptr[idx] == '<' && (macro_alternate || macro_mri))
 	     || (in->ptr[idx] == '\'' && macro_alternate)))
     {
       if (in->ptr[idx] == '<')
 	{
 	  int nest = 0;
-	  char start_char = '>';
-	  char end_char = '>';
-
 	  idx++;
-	  while ((in->ptr[idx] != end_char || nest)
+	  while ((in->ptr[idx] != '>' || nest)
 		 && idx < in->len)
 	    {
 	      if (in->ptr[idx] == '!')
@@ -324,36 +320,14 @@ getstring (int idx, sb *in, sb *acc)
 		}
 	      else
 		{
-		  if (in->ptr[idx] == end_char)
+		  if (in->ptr[idx] == '>')
 		    nest--;
-		  if (in->ptr[idx] == start_char)
+		  if (in->ptr[idx] == '<')
 		    nest++;
 		  sb_add_char (acc, in->ptr[idx++]);
 		}
 	    }
 	  idx++;
-	}
-      else if (in->ptr[idx] == '(')
-	{
-	  int nest = 0;
-	  char c;
-
-	  do
-	    {
-	      c = in->ptr[idx];
-
-	      if (c == '!')
-		c = in->ptr[++idx];
-	      else if (c == ')')
-		nest--;
-	      else if (c == '(')
-		nest++;
-
-	      sb_add_char (acc, c);
-	      idx++;
-	    }
-	  while ((c != ')' || nest)
-		 && idx < in->len);
 	}
       else if (in->ptr[idx] == '"' || in->ptr[idx] == '\'')
 	{
@@ -438,7 +412,6 @@ get_any_string (int idx, sb *in, sb *out)
 	  sb_add_string (out, buf);
 	}
       else if (in->ptr[idx] == '"'
-	       || in->ptr[idx] == '('
 	       || (in->ptr[idx] == '<' && (macro_alternate || macro_mri))
 	       || (macro_alternate && in->ptr[idx] == '\''))
 	{
@@ -457,27 +430,57 @@ get_any_string (int idx, sb *in, sb *out)
 	}
       else
 	{
+	  char *br_buf = xmalloc(1);
+	  char *in_br = br_buf;
+
+	  *in_br = '\0';
 	  while (idx < in->len
-		 && in->ptr[idx] != ' '
-		 && in->ptr[idx] != '\t'
+		 && (*in_br
+		     || (in->ptr[idx] != ' '
+			 && in->ptr[idx] != '\t'))
 		 && in->ptr[idx] != ','
 		 && (in->ptr[idx] != '<'
 		     || (! macro_alternate && ! macro_mri)))
 	    {
-	      if (in->ptr[idx] == '"'
-		  || in->ptr[idx] == '\'')
-		{
-		  char tchar = in->ptr[idx];
+	      char tchar = in->ptr[idx];
 
+	      switch (tchar)
+		{
+		case '"':
+		case '\'':
 		  sb_add_char (out, in->ptr[idx++]);
 		  while (idx < in->len
 			 && in->ptr[idx] != tchar)
 		    sb_add_char (out, in->ptr[idx++]);
 		  if (idx == in->len)
 		    return idx;
+		  break;
+		case '(':
+		case '[':
+		  if (in_br > br_buf)
+		    --in_br;
+		  else
+		    {
+		      br_buf = xmalloc(strlen(in_br) + 2);
+		      strcpy(br_buf + 1, in_br);
+		      free(in_br);
+		      in_br = br_buf;
+		    }
+		  *in_br = tchar;
+		  break;
+		case ')':
+		  if (*in_br == '(')
+		    ++in_br;
+		  break;
+		case ']':
+		  if (*in_br == '[')
+		    ++in_br;
+		  break;
 		}
-	      sb_add_char (out, in->ptr[idx++]);
+	      sb_add_char (out, tchar);
+	      ++idx;
 	    }
+	  free(br_buf);
 	}
     }
 
