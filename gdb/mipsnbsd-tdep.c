@@ -339,6 +339,8 @@ mipsnbsd_ilp32_fetch_link_map_offsets (void)
       lmo.l_addr_size = 4;
       lmo.l_name_offset = 8;
       lmo.l_name_size = 4;
+      lmo.l_ld_offset = 12;
+      lmo.l_ld_size = 4;
       lmo.l_next_offset = 16;
       lmo.l_next_size = 4;
       lmo.l_prev_offset = 20;
@@ -369,6 +371,8 @@ mipsnbsd_lp64_fetch_link_map_offsets (void)
       lmo.l_addr_size = 8;
       lmo.l_name_offset = 16; 
       lmo.l_name_size = 8;
+      lmo.l_ld_offset = 24;
+      lmo.l_ld_size = 8;
       lmo.l_next_offset = 32;
       lmo.l_next_size = 8;
       lmo.l_prev_offset = 40;

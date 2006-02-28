@@ -1,3 +1,21 @@
+2006-02-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* solib-svr4.h (struct link_map_offsets): Add l_ld_offset and
+	l_ld_size fields.
+	* solib-svr4.c (struct lm_info): Add l_addr field.
+	(LM_ADDR_FROM_LINK_MAP): Renamed from LM_ADDR.
+	(HAS_LM_DYNAMIC_FROM_LINK_MAP): New.
+	(LM_DYNAMIC_FROM_LINK_MAP): New.
+	(LM_ADDR_CHECK): New.  Use it instead of LM_ADDR.
+	(svr4_current_sos): Initialize l_addr.  Adjust.
+	(svr4_relocate_section_addresses): Adjust.
+	(svr4_ilp32_fetch_link_map_offsets): Define new members.
+	(svr4_lp64_fetch_link_map_offsets): Likewise.
+	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_ilp32_fetch_link_map_offsets): Likewise.
+	(mipsnbsd_lp64_fetch_link_map_offsets): Likewise.
+	* Makefile.in (solib-svr4.o): Depend on $(elf_bfd_h).
+
 2006-02-26  David S. Miller  <davem@sunset.davemloft.net>
 
 	* config/sparc/linux.mt (TDEPFILES): Add sol2-tdep.o.

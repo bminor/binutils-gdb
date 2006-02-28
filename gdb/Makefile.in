@@ -2582,7 +2582,8 @@ solib-sunos.o: solib-sunos.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
 solib-svr4.o: solib-svr4.c $(defs_h) $(elf_external_h) $(elf_common_h) \
 	$(elf_mips_h) $(symtab_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdbcore_h) $(target_h) $(inferior_h) $(gdb_assert_h) \
-	$(solist_h) $(solib_h) $(solib_svr4_h) $(bfd_target_h) $(exec_h)
+	$(solist_h) $(solib_h) $(solib_svr4_h) $(bfd_target_h) $(elf_bfd_h) \
+	$(exec_h)
 sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) \
 	$(inferior_h) $(gdb_stat_h) $(gdbcmd_h) $(gdbcore_h) $(regcache_h) \
 	$(solib_h) $(symfile_h) $(gdb_string_h) $(gregset_h)
