@@ -1,5 +1,25 @@
 2006-02-28  Kevin Buettner  <kevinb@redhat.com>
 
+	* Makefile.in (mn10300-linux-tdep.o): Update dependencies.
+	* mn10300-linux-tdep.c (frame.h, trad-frame.h, tramp-frame.h):
+	Include.
+	(am33_linux_sigframe_cache_init): New function.
+	(am33_linux_sigframe, am33_linux_rt_sigframe): New signal frame
+	descriptions.
+	(AM33_SIGCONTEXT_D0, AM33_SIGCONTEXT_D1, AM33_SIGCONTEXT_D2)
+	(AM33_SIGCONTEXT_D3, AM33_SIGCONTEXT_A0, AM33_SIGCONTEXT_A1)
+	(AM33_SIGCONTEXT_A2, AM33_SIGCONTEXT_A3, AM33_SIGCONTEXT_E0)
+	(AM33_SIGCONTEXT_E1, AM33_SIGCONTEXT_E2, AM33_SIGCONTEXT_E3)
+	(AM33_SIGCONTEXT_E4, AM33_SIGCONTEXT_E5, AM33_SIGCONTEXT_E6)
+	(AM33_SIGCONTEXT_E7, AM33_SIGCONTEXT_LAR, AM33_SIGCONTEXT_LIR)
+	(AM33_SIGCONTEXT_MDR, AM33_SIGCONTEXT_MCVF, AM33_SIGCONTEXT_MCRL)
+	(AM33_SIGCONTEXT_MCRH, AM33_SIGCONTEXT_MDRQ, AM33_SIGCONTEXT_SP)
+	(AM33_SIGCONTEXT_EPSW, AM33_SIGCONTEXT_PC, AM33_SIGCONTEXT_FPUCONTEXT):
+	New constants.
+	(am33_linux_init_osabi): Register signal frame unwinders.
+
+2006-02-28  Kevin Buettner  <kevinb@redhat.com>
+
 	* mn10300-tdep.c (mn10300_analyze_prologue):  Implement backtrack
 	out of pattern match by saving relevant state.  Fix stack size
 	adjustment bug.
