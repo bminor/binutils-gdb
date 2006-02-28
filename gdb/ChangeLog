@@ -1,3 +1,9 @@
+2006-02-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_analyze_prologue):  Implement backtrack
+	out of pattern match by saving relevant state.  Fix stack size
+	adjustment bug.
+
 2006-02-28  Alexandre Oliva  <aoliva@redhat.com>
 
 	* solib-svr4.h (struct link_map_offsets): Add l_ld_offset and
