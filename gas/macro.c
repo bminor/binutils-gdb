@@ -415,13 +415,12 @@ get_any_string (int idx, sb *in, sb *out)
 	       || (in->ptr[idx] == '<' && (macro_alternate || macro_mri))
 	       || (macro_alternate && in->ptr[idx] == '\''))
 	{
-	  if (macro_alternate && ! macro_strip_at)
+	  if (macro_alternate && ! macro_strip_at && in->ptr[idx] != '<')
 	    {
 	      /* Keep the quotes.  */
-	      sb_add_char (out, '\"');
-
+	      sb_add_char (out, '"');
 	      idx = getstring (idx, in, out);
-	      sb_add_char (out, '\"');
+	      sb_add_char (out, '"');
 	    }
 	  else
 	    {

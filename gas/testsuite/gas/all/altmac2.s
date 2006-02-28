@@ -1,5 +1,5 @@
 .macro	m1 str
-	.ascii	&str
+	.ascii	"&str"
 .endm
 
 	.data

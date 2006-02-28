@@ -1,5 +1,9 @@
 2006-02-28  Jan Beulich  <jbeulich@novell.com>
 
+	* macro.c (get_any_string): Don't insert quotes for <>-quoted input.
+
+2006-02-28  Jan Beulich  <jbeulich@novell.com>
+
 	PR/1070
 	* macro.c (getstring): Don't treat parentheses special anymore.
 	(get_any_string): Don't consider '(' and ')' as quoting anymore.

@@ -1,5 +1,10 @@
 2006-02-28  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/all/altmacro.s: Adjust.
+	* gas/all/altmac2.s: Adjust.
+
+2006-02-28  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/macros/paren[sd]: New.
 	* gas/macros/macros.exp: Run new test.
 
