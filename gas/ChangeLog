@@ -1,3 +1,7 @@
+2006-02-28  Mat <mat@csail.mit.edu>
+
+	* dwarf2dbg.c (get_filenum): Don't inadvertently decrease files_in_use.
+
 2006-02-27  Jakub Jelinek  <jakub@redhat.com>
 
 	* dw2gencfi.c (struct fde_entry, struct cie_entry): Add signal_frame

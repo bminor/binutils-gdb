@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -484,7 +484,8 @@ get_filenum (const char *filename, unsigned int num)
 
   files[i].filename = num ? file : xstrdup (file);
   files[i].dir = dir;
-  files_in_use = i + 1;
+  if (files_in_use < i + 1)
+    files_in_use = i + 1;
   last_used = i;
   last_used_dir_len = dir_len;
 
