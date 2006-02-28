@@ -1,3 +1,14 @@
+2006-02-28  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (use_alt_mach_code): Change type to unsigned long.
+	(copy_object):  If bfd_alt_mach_code fails emit a more helpful
+	message and if the target architecture is ELF use the alternative
+	as replacement value for the e_machine number.
+	(copy_main): Use strtoul to parse the number provided with the
+	--alt-mach-code switch.
+	* doc/binutils.texi (--alt-mach-code): Document that this switch
+	can now set the absolute e_machine value.
+
 2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* po/Make-in: Add html target.

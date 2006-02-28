@@ -1399,7 +1399,9 @@ If the output architecture has alternate machine codes, use the
 @var{index}th code instead of the default one.  This is useful in case
 a machine is assigned an official code and the tool-chain adopts the 
 new code, but other applications still depend on the original code
-being used.
+being used.  For ELF based architectures if the @var{index}
+alternative does not exist then the value is treated as an absolute
+number to be stored in the e_machine field of the ELF header.
 
 @item --writable-text
 Mark the output text as writable.  This option isn't meaningful for all

@@ -147,8 +147,8 @@ static bfd_byte gap_fill = 0;
 static bfd_boolean pad_to_set = FALSE;
 static bfd_vma pad_to;
 
-/* Use alternate machine code?  */
-static int use_alt_mach_code = 0;
+/* Use alternative machine code?  */
+static unsigned long use_alt_mach_code = 0;
 
 /* Output BFD flags user wants to set or clear */
 static flagword bfd_flags_to_set;
@@ -473,7 +473,7 @@ copy_usage (FILE *stream, int exit_status)
      --globalize-symbols <file>    --globalize-symbol for all in <file>\n\
      --keep-global-symbols <file>  -G for all symbols listed in <file>\n\
      --weaken-symbols <file>       -W for all symbols listed in <file>\n\
-     --alt-machine-code <index>    Use alternate machine code for output\n\
+     --alt-machine-code <index>    Use the target's <index>'th alternative machine\n\
      --writable-text               Mark the output text as writable\n\
      --readonly-text               Make the output text write protected\n\
      --pure                        Mark the output file as demand paged\n\
@@ -1667,9 +1667,21 @@ copy_object (bfd *ibfd, bfd *obfd)
   /* Switch to the alternate machine code.  We have to do this at the
      very end, because we only initialize the header when we create
      the first section.  */
-  if (use_alt_mach_code != 0
-      && ! bfd_alt_mach_code (obfd, use_alt_mach_code))
-    non_fatal (_("unknown alternate machine code, ignored"));
+  if (use_alt_mach_code != 0)
+    {
+      if (! bfd_alt_mach_code (obfd, use_alt_mach_code))
+	{
+	  non_fatal (_("this target does not support %lu alternative machine codes"),
+		     use_alt_mach_code);
+	  if (bfd_get_flavour (obfd) == bfd_target_elf_flavour)
+	    {
+	      non_fatal (_("treating that number as an absolute e_machine value instead"));
+	      elf_elfheader (obfd)->e_machine = use_alt_mach_code;
+	    }
+	  else
+	    non_fatal (_("ignoring the alternative value"));
+	}
+    }
 
   return TRUE;
 }
@@ -3069,9 +3081,9 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_ALT_MACH_CODE:
-	  use_alt_mach_code = atoi (optarg);
-	  if (use_alt_mach_code <= 0)
-	    fatal (_("alternate machine code index must be positive"));
+	  use_alt_mach_code = strtoul (optarg, NULL, 0);
+	  if (use_alt_mach_code == 0)
+	    fatal (_("unable to parse alternative machine code"));
 	  break;
 
 	case OPTION_PREFIX_SYMBOLS:
