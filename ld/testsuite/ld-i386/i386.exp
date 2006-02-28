@@ -75,6 +75,8 @@ set i386tests {
      {{objdump -drj.text tlsindntpoff.dd}} "tlsindntpoff"}
     {"Reloc section order" "-shared -melf_i386 -z nocombreloc" "--32"
      {reloc.s} {{objdump -hw reloc.d}} "reloc.so"}
+    {"Basic --emit-relocs support" "-shared -melf_i386 --emit-relocs" "--32"
+     {emit-relocs.s} {{readelf --relocs emit-relocs.d}} "emit-relocs.so"}
     {"-z combreloc relocation sections" "-shared -melf_i386 -z combreloc"
      "--32" {combreloc.s} {{readelf -r combreloc.d}} "combreloc.so"}
 }

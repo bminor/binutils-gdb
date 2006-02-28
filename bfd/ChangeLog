@@ -1,3 +1,13 @@
+2006-02-28  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-i386.c (elf_i386_link_hash_table): Add next_tls_desc_index.
+	(elf_i386_link_hash_table_create): Initialize it.
+	(elf_i386_compute_jump_table_size): Use it instead of
+	srelplt->reloc_count.
+	(allocate_dynrelocs): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	
 2006-02-27  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Handle S flag.

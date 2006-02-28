@@ -1,3 +1,8 @@
+2006-02-28  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-i386/emit-relocs.s, ld-i386/emit-relocs.d: New test.
+	* ld-i386/i386.exp: Run it.
+
 2006-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-pie/weakundef-data.c: Fix the typo.

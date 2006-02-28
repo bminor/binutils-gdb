@@ -653,6 +653,9 @@ struct elf_i386_link_hash_table
   /* Value used to fill the last word of the first plt entry.  */
   bfd_byte plt0_pad_byte;
 
+  /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  */
+  bfd_vma next_tls_desc_index;
+
   union {
     bfd_signed_vma refcount;
     bfd_vma offset;
@@ -672,7 +675,7 @@ struct elf_i386_link_hash_table
   ((struct elf_i386_link_hash_table *) ((p)->hash))
 
 #define elf_i386_compute_jump_table_size(htab) \
-  ((htab)->srelplt->reloc_count * 4)
+  ((htab)->next_tls_desc_index * 4)
 
 /* Create an entry in an i386 ELF linker hash table.  */
 
@@ -732,6 +735,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
   ret->tls_ldm_got.refcount = 0;
+  ret->next_tls_desc_index = 0;
   ret->sgotplt_jump_table_size = 0;
   ret->sym_sec.abfd = NULL;
   ret->is_vxworks = 0;
@@ -1639,7 +1643,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  /* We also need to make an entry in the .rel.plt section.  */
 	  htab->srelplt->size += sizeof (Elf32_External_Rel);
-	  htab->srelplt->reloc_count++;
+	  htab->next_tls_desc_index++;
 
 	  if (htab->is_vxworks && !info->shared)
 	    {
@@ -2021,7 +2025,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
      for them, it suffices to multiply the reloc count by the jump
      slot size.  */
   if (htab->srelplt)
-    htab->sgotplt_jump_table_size = htab->srelplt->reloc_count * 4;
+    htab->sgotplt_jump_table_size = htab->next_tls_desc_index * 4;
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
@@ -2054,8 +2058,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	  /* We use the reloc_count field as a counter if we need
 	     to copy relocs into the output file.  */
-	  if (s != htab->srelplt)
-	    s->reloc_count = 0;
+	  s->reloc_count = 0;
 	}
       else
 	{
@@ -2997,8 +3000,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 				     + htab->sgotplt_jump_table_size);
 		  sreloc = htab->srelplt;
 		  loc = sreloc->contents;
-		  loc += sreloc->reloc_count++
-		    * sizeof (Elf32_External_Rel);
+		  loc += (htab->next_tls_desc_index++
+			  * sizeof (Elf32_External_Rel));
 		  BFD_ASSERT (loc + sizeof (Elf32_External_Rel)
 			      <= sreloc->contents + sreloc->size);
 		  bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
