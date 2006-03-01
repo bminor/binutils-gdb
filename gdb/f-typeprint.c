@@ -416,7 +416,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
          the type name is, as recorded in the type itself.  If there
          is no type name, then complain. */
       if (TYPE_NAME (type) != NULL)
-	fprintfi_filtered (level, stream, "%s ", TYPE_NAME (type));
+	fprintfi_filtered (level, stream, "%s", TYPE_NAME (type));
       else
 	error (_("Invalid type code (%d) in symbol table."), TYPE_CODE (type));
       break;

@@ -1,3 +1,7 @@
+2006-03-01  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	 * f-typeprint.c (f_type_print_base): Delete the redundant space.
+
 2006-02-28  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (mn10300-linux-tdep.o): Update dependencies.
