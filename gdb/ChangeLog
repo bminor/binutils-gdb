@@ -1,3 +1,11 @@
+2006-03-01  Randolph Chung  <tausq@debian.org>
+
+	* hppa-hpux-tdep.c (initialize_hp_cxx_exception_support): Use
+	TDEP->is_elf to determine if we are working with a SOM binary.
+	(null_symtab_and_line): Remove unused variable.
+	* config/pa/hppa64.mt: Use tm-hppa.h.
+	* config/pa/tm-hppa64.h: Remove file.
+
 2006-03-01  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	 * f-typeprint.c (f_type_print_base): Delete the redundant space.

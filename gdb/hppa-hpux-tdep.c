@@ -844,52 +844,54 @@ GDB will be unable to intercept exception events."),
       return 0;
     }
 
-#ifndef GDB_TARGET_IS_HPPA_20W
-  /* Check whether the executable is dynamically linked or archive bound */
-  /* With an archive-bound executable we can use the raw addresses we find
-     for the callback function, etc. without modification. For an executable
-     with shared libraries, we have to do more work to find the plabel, which
-     can be the target of a call through $$dyncall from the aCC runtime support
-     library (libCsup) which is linked shared by default by aCC. */
-  /* This test below was copied from somsolib.c/somread.c.  It may not be a very
-     reliable one to test that an executable is linked shared. pai/1997-07-18 */
-  shlib_info = bfd_get_section_by_name (symfile_objfile->obfd, "$SHLIB_INFO$");
-  if (shlib_info && (bfd_section_size (symfile_objfile->obfd, shlib_info) != 0))
+  if (!gdbarch_tdep (current_gdbarch)->is_elf)
     {
-      /* The minsym we have has the local code address, but that's not
-         the plabel that can be used by an inter-load-module call.  */
-      /* Find solib handle for main image (which has end.o), and use
-         that and the min sym as arguments to __d_shl_get() (which
-         does the equivalent of shl_findsym()) to find the plabel.  */
+    /* Check whether the executable is dynamically linked or archive bound */
+    /* With an archive-bound executable we can use the raw addresses we find
+       for the callback function, etc. without modification. For an executable
+       with shared libraries, we have to do more work to find the plabel, which
+       can be the target of a call through $$dyncall from the aCC runtime 
+       support library (libCsup) which is linked shared by default by aCC. */
+    /* This test below was copied from somsolib.c/somread.c.  It may not be a very
+       reliable one to test that an executable is linked shared. 
+       pai/1997-07-18 */
+    shlib_info = bfd_get_section_by_name (symfile_objfile->obfd, "$SHLIB_INFO$");
+    if (shlib_info && (bfd_section_size (symfile_objfile->obfd, shlib_info) != 0))
+      {
+        /* The minsym we have has the local code address, but that's not
+           the plabel that can be used by an inter-load-module call.  */
+        /* Find solib handle for main image (which has end.o), and use
+           that and the min sym as arguments to __d_shl_get() (which
+           does the equivalent of shl_findsym()) to find the plabel.  */
 
-      args_for_find_stub args;
-      static char message[] = "Error while finding exception callback hook:\n";
+        args_for_find_stub args;
+        static char message[] = _("Error while finding exception callback hook:\n");
 
-      args.solib_handle = gdbarch_tdep (current_gdbarch)->solib_get_solib_by_pc (eh_notify_callback_addr);
-      args.msym = msym;
-      args.return_val = 0;
+        args.solib_handle = gdbarch_tdep (current_gdbarch)->solib_get_solib_by_pc (eh_notify_callback_addr);
+        args.msym = msym;
+        args.return_val = 0;
 
-      recurse++;
-      catch_errors (cover_find_stub_with_shl_get, &args, message,
-		    RETURN_MASK_ALL);
-      eh_notify_callback_addr = args.return_val;
-      recurse--;
+        recurse++;
+        catch_errors (cover_find_stub_with_shl_get, &args, message,
+		      RETURN_MASK_ALL);
+        eh_notify_callback_addr = args.return_val;
+        recurse--;
 
-      deprecated_exception_catchpoints_are_fragile = 1;
+        deprecated_exception_catchpoints_are_fragile = 1;
 
-      if (!eh_notify_callback_addr)
-	{
-	  /* We can get here either if there is no plabel in the export list
-	     for the main image, or if something strange happened (?) */
-	  warning (_("\
+        if (!eh_notify_callback_addr)
+	  {
+	    /* We can get here either if there is no plabel in the export list
+	       for the main image, or if something strange happened (?) */
+	    warning (_("\
 Couldn't find a plabel (indirect function label) for the exception callback.\n\
 GDB will not be able to intercept exception events."));
-	  return 0;
-	}
+	    return 0;
+	  }
+      }
+    else
+      deprecated_exception_catchpoints_are_fragile = 0;
     }
-  else
-    deprecated_exception_catchpoints_are_fragile = 0;
-#endif
 
   /* Now, look for the breakpointable routine in end.o */
   /* This should also be available in the SOM symbol dict. if end.o linked in */
@@ -1063,9 +1065,6 @@ Interception of exception events may not work."));
 
 /* Record some information about the current exception event */
 static struct exception_event_record current_ex_event;
-/* Convenience struct */
-static struct symtab_and_line null_symtab_and_line =
-{NULL, 0, 0, 0};
 
 /* Report current exception event.  Returns a pointer to a record
    that describes the kind of the event, where it was thrown from,
