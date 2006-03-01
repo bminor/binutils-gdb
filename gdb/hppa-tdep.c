@@ -280,7 +280,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 	  table[i].Millicode = (tmp >> 30) & 0x1;
 	  table[i].Millicode_save_sr0 = (tmp >> 29) & 0x1;
 	  table[i].Region_description = (tmp >> 27) & 0x3;
-	  table[i].reserved1 = (tmp >> 26) & 0x1;
+	  table[i].reserved = (tmp >> 26) & 0x1;
 	  table[i].Entry_SR = (tmp >> 25) & 0x1;
 	  table[i].Entry_FR = (tmp >> 21) & 0xf;
 	  table[i].Entry_GR = (tmp >> 16) & 0x1f;
@@ -290,23 +290,23 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 	  table[i].Frame_Extension_Millicode = (tmp >> 12) & 0x1;
 	  table[i].Stack_Overflow_Check = (tmp >> 11) & 0x1;
 	  table[i].Two_Instruction_SP_Increment = (tmp >> 10) & 0x1;
-	  table[i].Ada_Region = (tmp >> 9) & 0x1;
+	  table[i].sr4export = (tmp >> 9) & 0x1;
 	  table[i].cxx_info = (tmp >> 8) & 0x1;
 	  table[i].cxx_try_catch = (tmp >> 7) & 0x1;
 	  table[i].sched_entry_seq = (tmp >> 6) & 0x1;
-	  table[i].reserved2 = (tmp >> 5) & 0x1;
+	  table[i].reserved1 = (tmp >> 5) & 0x1;
 	  table[i].Save_SP = (tmp >> 4) & 0x1;
 	  table[i].Save_RP = (tmp >> 3) & 0x1;
 	  table[i].Save_MRP_in_frame = (tmp >> 2) & 0x1;
-	  table[i].extn_ptr_defined = (tmp >> 1) & 0x1;
+	  table[i].save_r19 = (tmp >> 1) & 0x1;
 	  table[i].Cleanup_defined = tmp & 0x1;
 	  tmp = bfd_get_32 (objfile->obfd, (bfd_byte *) buf);
 	  buf += 4;
 	  table[i].MPE_XL_interrupt_marker = (tmp >> 31) & 0x1;
 	  table[i].HP_UX_interrupt_marker = (tmp >> 30) & 0x1;
 	  table[i].Large_frame = (tmp >> 29) & 0x1;
-	  table[i].Pseudo_SP_Set = (tmp >> 28) & 0x1;
-	  table[i].reserved4 = (tmp >> 27) & 0x1;
+	  table[i].alloca_frame = (tmp >> 28) & 0x1;
+	  table[i].reserved2 = (tmp >> 27) & 0x1;
 	  table[i].Total_frame_size = tmp & 0x7ffffff;
 
 	  /* Stub unwinds are handled elsewhere. */
@@ -2065,11 +2065,11 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
  
      fp = frame_unwind_register_unsigned (next_frame, HPPA_FP_REGNUM);
 
-     if (u->Pseudo_SP_Set)
+     if (u->alloca_frame)
        fp -= u->Total_frame_size << 3;
  
      if (frame_pc_unwind (next_frame) >= prologue_end
-         && (u->Save_SP || u->Pseudo_SP_Set) && fp != 0)
+         && (u->Save_SP || u->alloca_frame) && fp != 0)
       {
  	cache->base = fp;
  
@@ -2540,15 +2540,19 @@ unwind_command (char *exp, int from_tty)
   pif (Frame_Extension_Millicode);
   pif (Stack_Overflow_Check);
   pif (Two_Instruction_SP_Increment);
-  pif (Ada_Region);
+  pif (sr4export);
+  pif (cxx_info);
+  pif (cxx_try_catch);
+  pif (sched_entry_seq);
   pif (Save_SP);
   pif (Save_RP);
   pif (Save_MRP_in_frame);
-  pif (extn_ptr_defined);
+  pif (save_r19);
   pif (Cleanup_defined);
   pif (MPE_XL_interrupt_marker);
   pif (HP_UX_interrupt_marker);
   pif (Large_frame);
+  pif (alloca_frame);
 
   putchar_unfiltered ('\n');
 
