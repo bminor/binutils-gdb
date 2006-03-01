@@ -1,5 +1,10 @@
 2006-03-01  Randolph Chung  <tausq@debian.org>
 
+	* somread.c (som_symfile_read): Update comment and remove unneeded 
+	use of a deprecated variable.
+
+2006-03-01  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.h (unwind_table_entry): Update field names to match HP
 	runtime specification.
 	* hppa-tdep.c (internalize_unwinds, hppa_frame_cache): Likewise.

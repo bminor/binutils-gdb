@@ -353,9 +353,7 @@ som_symfile_read (struct objfile *objfile, int mainline)
   do_cleanups (back_to);
 
   /* Now read information from the stabs debug sections.
-     This is a no-op for SOM.
-     Perhaps it is intended for some kind of mixed STABS/SOM
-     situation? */
+     This is emitted by gcc.  */
   stabsect_build_psymtabs (objfile, mainline,
 			   "$GDB_SYMBOLS$", "$GDB_STRINGS$", "$TEXT$");
 
@@ -364,9 +362,6 @@ som_symfile_read (struct objfile *objfile, int mainline)
      the DNTT, but is now done via the PXDB-built quick-lookup tables
      together with a scan of the GNTT. See hp-psymtab-read.c. */
   hpread_build_psymtabs (objfile, mainline);
-
-  /* Force hppa-tdep.c to re-read the unwind descriptors.  */
-  objfile->deprecated_obj_private = NULL;
 }
 
 /* Initialize anything that needs initializing when a completely new symbol
