@@ -1857,7 +1857,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
      GCC code.  */
   {
     int final_iteration = 0;
-    CORE_ADDR pc, end_pc;
+    CORE_ADDR pc, start_pc, end_pc;
     int looking_for_sp = u->Save_SP;
     int looking_for_rp = u->Save_RP;
     int fp_loc = -1;
@@ -1877,9 +1877,19 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
     /* We used to use frame_func_unwind () to locate the beginning of the
        function to pass to skip_prologue ().  However, when objects are 
        compiled without debug symbols, frame_func_unwind can return the wrong 
-       function (or 0).  We can do better than that by using unwind records.  */
+       function (or 0).  We can do better than that by using unwind records.  
+       This only works if the Region_description of the unwind record
+       indicates that it includes the entry point of the function.  
+       HP compilers sometimes generate unwind records for regions that
+       do not include the entry or exit point of a function.  GNU tools
+       do not do this.  */
 
-    prologue_end = skip_prologue_hard_way (u->region_start, 0);
+    if ((u->Region_description & 0x2) == 0)
+      start_pc = u->region_start;
+    else
+      start_pc = frame_func_unwind (next_frame);
+
+    prologue_end = skip_prologue_hard_way (start_pc, 0);
     end_pc = frame_pc_unwind (next_frame);
 
     if (prologue_end != 0 && end_pc > prologue_end)
@@ -1887,7 +1897,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 
     frame_size = 0;
 
-    for (pc = u->region_start;
+    for (pc = start_pc;
 	 ((saved_gr_mask || saved_fr_mask
 	   || looking_for_sp || looking_for_rp
 	   || frame_size < (u->Total_frame_size << 3))
@@ -2054,9 +2064,12 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	instead of Save_SP.  */
  
      fp = frame_unwind_register_unsigned (next_frame, HPPA_FP_REGNUM);
+
+     if (u->Pseudo_SP_Set)
+       fp -= u->Total_frame_size << 3;
  
      if (frame_pc_unwind (next_frame) >= prologue_end
-         && u->Save_SP && fp != 0)
+         && (u->Save_SP || u->Pseudo_SP_Set) && fp != 0)
       {
  	cache->base = fp;
  

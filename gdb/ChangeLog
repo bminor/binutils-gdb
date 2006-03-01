@@ -1,5 +1,10 @@
 2006-03-01  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (hppa_frame_cache): Handle Region_Description and
+	Pseudo_SP_Set in unwind record.
+
+2006-03-01  Randolph Chung  <tausq@debian.org>
+
 	* hppa-hpux-tdep.c (initialize_hp_cxx_exception_support): Use
 	TDEP->is_elf to determine if we are working with a SOM binary.
 	(null_symtab_and_line): Remove unused variable.
