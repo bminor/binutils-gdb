@@ -1,5 +1,12 @@
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-i386/ld-i386/vxworks1-lib.nd: New test.
+	* ld-i386/i386.exp: Run it.
+	* ld-powerpc/ld-powerpc/vxworks1-lib.nd: New test.
+	* ld-powerpc/powerc.exp: Run it.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-i386/vxworks1.ld: Use bigger alignments.  Make sure .bss isn't
 	placed as an orphan.
 	* ld-i386/vxworks1-lib.dd, ld-i386/vxworks1.dd,

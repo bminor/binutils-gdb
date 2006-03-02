@@ -782,9 +782,6 @@ static bfd_boolean
 elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf_i386_link_hash_table *htab;
-  asection * s;
-  int flags;
-  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
 
   htab = elf_i386_hash_table (info);
   if (!htab->sgot && !create_got_section (dynobj, info))
@@ -803,17 +800,9 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
       || (!info->shared && !htab->srelbss))
     abort ();
 
-  if (htab->is_vxworks && !info->shared)
-    {
-      s = bfd_make_section (dynobj, ".rel.plt.unloaded");
-      flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_READONLY
-	      | SEC_LINKER_CREATED);
-      if (s == NULL
-	 || ! bfd_set_section_flags (dynobj, s, flags)
-	 || ! bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
-       return FALSE;
-      htab->srelplt2 = s;
-    }
+  if (htab->is_vxworks
+      && !elf_vxworks_create_dynamic_sections (dynobj, info, &htab->srelplt2))
+    return FALSE;
 
   return TRUE;
 }
@@ -1999,21 +1988,6 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     }
   else
     htab->tls_ldm_got.offset = -1;
-
-  if (htab->is_vxworks)
-    {
-      /* Mark the GOT and PLT symbols as having relocations; they might
-	 not, but we won't know for sure until we build the GOT in
-	 finish_dynamic_symbol.  */
-      if (htab->elf.hgot)
-	htab->elf.hgot->indx = -2;
-      if (htab->elf.hplt)
-	{
-	  htab->elf.hplt->indx = -2;
-	  if (htab->splt->flags & SEC_CODE)
-	    htab->elf.hplt->type = STT_FUNC;
-	}
-    }
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */

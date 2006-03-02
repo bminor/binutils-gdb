@@ -1,5 +1,18 @@
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Use
+	elf_vxworks_create_dynamic_sections.
+	(elf_i386_size_dynamic_sections): Remove VxWorks GOT and PLT
+	symbol handling.
+	* elf32-ppc.c (ppc_elf_create_dynamic_sections): Use
+	elf_vxworks_create_dynamic_sections.
+	(ppc_elf_size_dynamic_sections): Remove VxWorks GOT and PLT
+	symbol handling.
+	* elf-vxworks.c (elf_vxworks_create_dynamic_sections): New function.
+	* elf-vxworks.h (elf_vxworks_create_dynamic_sections): Declare.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
 	* elf32-i386.c (elf_i386_vxworks_link_output_symbol_hook): Delete.
 	(elf_backend_link_output_symbol_hook): Use
 	elf_vxworks_link_output_symbol_hook instead.

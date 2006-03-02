@@ -2548,19 +2548,9 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  /* Create the section for VxWorks static plt relocations.  */
-  if (htab->is_vxworks && !info->shared)
-    {
-      s = bfd_make_section (abfd, ".rela.plt.unloaded");
-      flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_READONLY
-	       | SEC_LINKER_CREATED);
-      if (s == NULL
-	  || ! bfd_set_section_flags (abfd, s, flags)
-	  || ! bfd_set_section_alignment (abfd, s,
-		  get_elf_backend_data (abfd)->s->log_file_align))
-	return FALSE;
-      htab->srelplt2 = s;
-    }
+  if (htab->is_vxworks
+      && !elf_vxworks_create_dynamic_sections (abfd, info, &htab->srelplt2))
+    return FALSE;
 
   htab->relplt = bfd_get_section_by_name (abfd, ".rela.plt");
   htab->plt = s = bfd_get_section_by_name (abfd, ".plt");
@@ -4763,21 +4753,6 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
     }
   else
     htab->tlsld_got.offset = (bfd_vma) -1;
-
-  if (htab->is_vxworks)
-    {
-      /* Mark the GOT and PLT symbols as having relocations; they might
-	 not, but we won't know for sure until we build the GOT in
-	 finish_dynamic_symbol.  */
-      if (htab->elf.hgot)
-	htab->elf.hgot->indx = -2;
-      if (htab->elf.hplt)
-	{
-	  htab->elf.hplt->indx = -2;
-	  if (htab->plt->flags & SEC_CODE)
-	    htab->elf.hplt->type = STT_FUNC;
-	}
-    }
 
   /* Allocate space for global sym dynamic relocs.  */
   elf_link_hash_traverse (elf_hash_table (info), allocate_dynrelocs, info);

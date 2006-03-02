@@ -55,6 +55,57 @@ elf_vxworks_add_symbol_hook (bfd *abfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+/* Perform VxWorks-specific handling of the create_dynamic_sections hook.
+   When creating an executable, set *SRELPLT2_OUT to the .rel(a).plt.unloaded
+   section.  */
+
+bfd_boolean
+elf_vxworks_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info,
+				     asection **srelplt2_out)
+{
+  struct elf_link_hash_table *htab;
+  const struct elf_backend_data *bed;
+  asection *s;
+
+  htab = elf_hash_table (info);
+  bed = get_elf_backend_data (dynobj);
+
+  if (!info->shared)
+    {
+      s = bfd_make_section_with_flags (dynobj,
+				       bed->default_use_rela_p
+				       ? ".rela.plt.unloaded"
+				       : ".rel.plt.unloaded",
+				       SEC_HAS_CONTENTS | SEC_IN_MEMORY
+				       | SEC_READONLY | SEC_LINKER_CREATED);
+      if (s == NULL
+	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
+	return FALSE;
+
+      *srelplt2_out = s;
+    }
+
+  /* Mark the GOT and PLT symbols as having relocations; they might
+     not, but we won't know for sure until we build the GOT in
+     finish_dynamic_symbol.  Also make sure that the GOT symbol
+     is entered into the dynamic symbol table; the loader uses it
+     to initialize __GOTT_BASE__[__GOTT_INDEX__].  */
+  if (htab->hgot)
+    {
+      htab->hgot->indx = -2;
+      htab->hgot->other &= ~ELF_ST_VISIBILITY (-1);
+      htab->hgot->forced_local = 0;
+      if (!bfd_elf_link_record_dynamic_symbol (info, htab->hgot))
+	return FALSE;
+    }
+  if (htab->hplt)
+    {
+      htab->hplt->indx = -2;
+      htab->hplt->type = STT_FUNC;
+    }
+
+  return TRUE;
+}
 
 /* Tweak magic VxWorks symbols as they are written to the output file.  */
 bfd_boolean
