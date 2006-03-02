@@ -1,5 +1,18 @@
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
+	* elf32-i386.c (elf_i386_vxworks_link_output_symbol_hook): Delete.
+	(elf_backend_link_output_symbol_hook): Use
+	elf_vxworks_link_output_symbol_hook instead.
+	* elf32-ppc.c (elf_i386_vxworks_link_output_symbol_hook): Delete.
+	(elf_backend_link_output_symbol_hook): Use
+	elf_vxworks_link_output_symbol_hook instead.
+	* elf-vxworks.c (elf_vxworks_link_output_symbol_hook): Provide the
+	same interface as elf_backend_link_output_symbol_hook.
+	* elf-vxworks.h (elf_vxworks_link_output_symbol_hook): Update
+	prototype accordingly.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
 	* elf32-ppc.c (ppc_elf_plt_type): New enumeration.
 	(ppc_elf_link_hash_table): Replace old_got and new_got with
 	plt_type and can_use_new_plt.

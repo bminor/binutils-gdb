@@ -7558,23 +7558,6 @@ ppc_elf_vxworks_add_symbol_hook (bfd *abfd,
   return ppc_elf_add_symbol_hook(abfd, info, sym,namep, flagsp, secp, valp);
 }
 
-/* Tweak magic VxWorks symbols as they are written to the output file.  */
-static bfd_boolean
-elf_i386_vxworks_link_output_symbol_hook (struct bfd_link_info *info
-					   ATTRIBUTE_UNUSED,
-					 const char *name,
-					 Elf_Internal_Sym *sym,
-					 asection *input_sec ATTRIBUTE_UNUSED,
-					 struct elf_link_hash_entry *h
-					   ATTRIBUTE_UNUSED)
-{
-  /* Ignore the first dummy symbol.  */
-  if (!name)
-    return TRUE;
-
-  return elf_vxworks_link_output_symbol_hook (name, sym);
-}
-
 static void
 ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 {
@@ -7605,7 +7588,7 @@ ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
   ppc_elf_vxworks_add_symbol_hook
 #undef elf_backend_link_output_symbol_hook
 #define elf_backend_link_output_symbol_hook \
-  elf_i386_vxworks_link_output_symbol_hook
+  elf_vxworks_link_output_symbol_hook
 #undef elf_backend_final_write_processing
 #define elf_backend_final_write_processing \
   ppc_elf_vxworks_final_write_processing

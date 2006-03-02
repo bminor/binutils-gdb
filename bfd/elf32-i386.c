@@ -3969,23 +3969,6 @@ elf_i386_vxworks_link_hash_table_create (bfd *abfd)
 }
 
 
-/* Tweak magic VxWorks symbols as they are written to the output file.  */
-static bfd_boolean
-elf_i386_vxworks_link_output_symbol_hook (struct bfd_link_info *info
-					    ATTRIBUTE_UNUSED,
-					  const char *name,
-					  Elf_Internal_Sym *sym,
-					  asection *input_sec ATTRIBUTE_UNUSED,
-					  struct elf_link_hash_entry *h
-					    ATTRIBUTE_UNUSED)
-{
-  /* Ignore the first dummy symbol.  */
-  if (!name)
-    return TRUE;
-
-  return elf_vxworks_link_output_symbol_hook (name, sym);
-}
-
 #undef	elf_backend_post_process_headers
 #undef bfd_elf32_bfd_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_create \
@@ -3995,7 +3978,7 @@ elf_i386_vxworks_link_output_symbol_hook (struct bfd_link_info *info
   elf_vxworks_add_symbol_hook
 #undef elf_backend_link_output_symbol_hook
 #define elf_backend_link_output_symbol_hook \
-  elf_i386_vxworks_link_output_symbol_hook
+  elf_vxworks_link_output_symbol_hook
 #undef elf_backend_emit_relocs
 #define elf_backend_emit_relocs			elf_vxworks_emit_relocs
 #undef elf_backend_final_write_processing

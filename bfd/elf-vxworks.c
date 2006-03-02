@@ -58,9 +58,18 @@ elf_vxworks_add_symbol_hook (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Tweak magic VxWorks symbols as they are written to the output file.  */
 bfd_boolean
-elf_vxworks_link_output_symbol_hook (const char *name,
-				     Elf_Internal_Sym *sym)
+elf_vxworks_link_output_symbol_hook (struct bfd_link_info *info
+				       ATTRIBUTE_UNUSED,
+				     const char *name,
+				     Elf_Internal_Sym *sym,
+				     asection *input_sec ATTRIBUTE_UNUSED,
+				     struct elf_link_hash_entry *h
+				       ATTRIBUTE_UNUSED)
 {
+  /* Ignore the first dummy symbol.  */
+  if (!name)
+    return TRUE;
+
   /* Reverse the effects of the hack in elf_vxworks_add_symbol_hook.  */
   if (strcmp (name, "__GOTT_INDEX__") == 0
       || strcmp (name, "__GOTT_BASE__") == 0)
