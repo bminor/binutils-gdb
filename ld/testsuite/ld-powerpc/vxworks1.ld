@@ -16,7 +16,7 @@ SECTIONS
   . = ALIGN (0x400);
   .text : { *(.text) }
 
-  . = ALIGN (0x1000);
+  . = ALIGN (0x10000);
   .dynamic : { *(.dynamic) }
 
   . = ALIGN (0x400);

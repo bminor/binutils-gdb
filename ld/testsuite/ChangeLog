@@ -1,5 +1,13 @@
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-powerpc/vxworks1.ld: Use a page alignment of 0x10000.
+	* ld-powerpc/vxworks1.dd: Update accordingly.
+	* ld-powerpc/vxworks1-lib.nd: Likewise.
+	* ld-powerpc/vxworks1-lib.rd: Likewise.
+	* ld-powerpc/vxworks1.rd: Likewise.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-i386/vxworks1.ld (.data): New section.
 	* ld-i386/vxworks1-lib.s: Add a pointer to a local symbol.
 	* ld-i386/vxworks1-lib.rd: Test for the associated reloc.
