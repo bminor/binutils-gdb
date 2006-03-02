@@ -1055,6 +1055,11 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
   /* Push the return address that contains the magic breakpoint.  */
   sp -= 4;
   write_memory_unsigned_integer (sp, push_size, bp_addr);
+
+  /* The CPU also writes the return address always into the
+     MDR register on "call".  */
+  regcache_cooked_write_unsigned (regcache, E_MDR_REGNUM, bp_addr);
+
   /* Update $sp.  */
   regcache_cooked_write_unsigned (regcache, E_SP_REGNUM, sp);
   return sp;

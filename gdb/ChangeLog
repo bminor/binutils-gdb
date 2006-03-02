@@ -1,3 +1,8 @@
+2006-03-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* mn10300-tdep.c (mn10300_push_dummy_call): Write breakpoint
+	address to MDR register.
+
 2006-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbtypes.c (lookup_struct_elt_type): Correct noerr for recursive
