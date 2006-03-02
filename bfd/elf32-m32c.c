@@ -1532,6 +1532,7 @@ m32c_elf_relax_section
       /* Setting gap_size nonzero is the flag which means "something
 	 shrunk".  */
       gap_size = 0;
+      gap = NULL;
       new_type = ELF32_R_TYPE(srel->r_info);
 
       pc = sec->output_section->vma + sec->output_offset

@@ -1,3 +1,7 @@
+2006-03-02  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-m32c.c (m32c_elf_relax_section): Initialise 'gap'.
+
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf32-i386.c (elf_i386_create_dynamic_sections): Use
