@@ -1,3 +1,25 @@
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_plt_type): New enumeration.
+	(ppc_elf_link_hash_table): Replace old_got and new_got with
+	plt_type and can_use_new_plt.
+	(ppc_elf_create_dynamic_sections): Add SEC_HAS_CONTENTS,
+	SEC_LOAD and SEC_READONLY to the VxWorks .plt flags.
+	(ppc_elf_check_relocs): Set can_use_new_plt instead of new_plt.
+	Move from plt_type == PLT_UNSET to PLT_OLD instead of setting old_plt.
+	(ppc_elf_select_plt_layout): Move from plt_type == PLT_UNSET to
+	either plt_type == PLT_OLD or plt_type == PLT_NEW.  Assert that
+	this function should not be called for VxWorks targets.
+	(ppc_elf_tls_setup): Use plt_type instead of old_got.
+	(allocate_got): Likewise.  Rearrange so that max_before_header
+	is only used for PLT_OLD and PLT_NEW.
+	(allocate_dynrelocs): Use plt_type instead of old_got and is_vxworks.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relax_section): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(ppc_elf_finish_dynamic_symbol): Likewise.
+	(ppc_elf_vxworks_link_hash_table_create): Initialize plt_type.
+
 2006-02-28  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf32-i386.c (elf_i386_link_hash_table): Add next_tls_desc_index.

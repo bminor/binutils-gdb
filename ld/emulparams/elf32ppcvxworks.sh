@@ -1,4 +1,3 @@
-. ${srcdir}/emulparams/elf32ppc.sh
+. ${srcdir}/emulparams/elf32ppccommon.sh
 OUTPUT_FORMAT="elf32-powerpc-vxworks"
-unset BSS_PLT
 . ${srcdir}/emulparams/vxworks.sh

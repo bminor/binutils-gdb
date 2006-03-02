@@ -20,6 +20,25 @@ if { ![istarget "powerpc*-*-*"]	} {
     return
 }
 
+if {[istarget "*-*-vxworks"]} {
+    set ppcvxtests {
+	{"VxWorks shared library test 1 (default script)" "-shared"
+	 "-mregnames" {vxworks1-lib.s}
+	 {{readelf --segments vxworks1-lib.sd}}
+	 "libvxworks1.so"}
+	{"VxWorks shared library test 1" "-shared -Tvxworks1.ld"
+	 "-mregnames" {vxworks1-lib.s}
+	 {{readelf --relocs vxworks1-lib.rd} {objdump -dr vxworks1-lib.dd}}
+	 "libvxworks1.so"}
+	{"VxWorks dynamic executable test 1" \
+	 "tmpdir/libvxworks1.so -Tvxworks1.ld -q" "-mregnames" {vxworks1.s}
+	 {{readelf --relocs vxworks1.rd} {objdump -dr vxworks1.dd}}
+	 "vxworks1"}
+    }
+    run_ld_link_tests $ppcvxtests
+    return
+}
+
 # powerpc ELF only at the moment.
 
 if { [istarget "*-*-macos*"] || [istarget "*-*-netware*"]

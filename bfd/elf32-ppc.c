@@ -2313,6 +2313,13 @@ struct ppc_elf_link_hash_entry
 
 #define ppc_elf_hash_entry(ent) ((struct ppc_elf_link_hash_entry *) (ent))
 
+enum ppc_elf_plt_type {
+  PLT_UNSET,
+  PLT_OLD,
+  PLT_NEW,
+  PLT_VXWORKS
+};
+
 /* PPC ELF linker hash table.  */
 
 struct ppc_elf_link_hash_table
@@ -2349,9 +2356,11 @@ struct ppc_elf_link_hash_table
   /* Non-zero if allocating the header left a gap.  */
   unsigned int got_gap;
 
-  /* Whether to use new plt/got layout or not.  */
-  unsigned int new_plt:1;
-  unsigned int old_plt:1;
+  /* The type of PLT we have chosen to use.  */
+  enum ppc_elf_plt_type plt_type;
+
+  /* Whether we can use the new PLT layout.  */
+  unsigned int can_use_new_plt:1;
 
   /* Set if we should emit symbols for stubs.  */
   unsigned int emit_stub_syms:1;
@@ -2559,6 +2568,9 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     abort ();
 
   flags = SEC_ALLOC | SEC_CODE | SEC_LINKER_CREATED;
+  if (htab->plt_type == PLT_VXWORKS)
+    /* The VxWorks PLT is a loaded section with contents.  */
+    flags |= SEC_HAS_CONTENTS | SEC_LOAD | SEC_READONLY;
   return bfd_set_section_flags (abfd, s, flags);
 }
 
@@ -3245,7 +3257,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_REL16_LO:
 	case R_PPC_REL16_HI:
 	case R_PPC_REL16_HA:
-	  htab->new_plt = 1;
+	  htab->can_use_new_plt = 1;
 	  break;
 
 	  /* These are just markers.  */
@@ -3273,8 +3285,8 @@ ppc_elf_check_relocs (bfd *abfd,
 
 	  /* This refers only to functions defined in the shared library.  */
 	case R_PPC_LOCAL24PC:
-	  if (h && h == htab->elf.hgot)
-	    htab->old_plt = 1;
+	  if (h && h == htab->elf.hgot && htab->plt_type == PLT_UNSET)
+	    htab->plt_type = PLT_OLD;
 	  break;
 
 	  /* This relocation describes the C++ object vtable hierarchy.
@@ -3315,7 +3327,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	      && got2 != NULL
 	      && (sec->flags & SEC_CODE) != 0
 	      && (info->shared || info->pie)
-	      && !htab->old_plt)
+	      && htab->plt_type == PLT_UNSET)
 	    {
 	      /* Old -fPIC gcc code has .long LCTOC1-LCFx just before
 		 the start of a function, which assembles to a REL32
@@ -3328,7 +3340,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	      s = bfd_section_from_r_symndx (abfd, &htab->sym_sec, sec,
 					     r_symndx);
 	      if (s == got2)
-		htab->old_plt = 1;
+		htab->plt_type = PLT_OLD;
 	    }
 	  /* fall through */
 
@@ -3338,9 +3350,9 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_REL14_BRNTAKEN:
 	  if (h == NULL)
 	    break;
-	  if (h == htab->elf.hgot)
+	  if (h == htab->elf.hgot && htab->plt_type == PLT_UNSET)
 	    {
-	      htab->old_plt = 1;
+	      htab->plt_type = PLT_OLD;
 	      break;
 	    }
 	  /* fall through */
@@ -3600,22 +3612,16 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
   flagword flags;
 
   htab = ppc_elf_hash_table (info);
-  if (force_old_plt || !htab->new_plt)
-    htab->old_plt = 1;
+
+  if (htab->plt_type == PLT_UNSET)
+    htab->plt_type = (force_old_plt || !htab->can_use_new_plt
+		      ? PLT_OLD : PLT_NEW);
 
   htab->emit_stub_syms = emit_stub_syms;
 
-  if (htab->is_vxworks)
-    {
-      /* The VxWorks PLT is a loaded section with contents.  */
-      flags = SEC_ALLOC | SEC_CODE | SEC_IN_MEMORY | SEC_LINKER_CREATED
-	      | SEC_HAS_CONTENTS | SEC_LOAD | SEC_READONLY;
+  BFD_ASSERT (htab->plt_type != PLT_VXWORKS);
 
-      if (htab->plt != NULL
-	  && !bfd_set_section_flags (htab->elf.dynobj, htab->plt, flags))
-	return -1;
-    }
-  else if (!htab->old_plt)
+  if (htab->plt_type == PLT_NEW)
     {
       flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
 	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
@@ -3637,7 +3643,7 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  && !bfd_set_section_alignment (htab->elf.dynobj, htab->glink, 0))
 	return -1;
     }
-  return !htab->old_plt;
+  return htab->plt_type == PLT_NEW;
 }
 
 /* Return the section that should be marked against GC for a given
@@ -3825,7 +3831,7 @@ ppc_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
   struct ppc_elf_link_hash_table *htab;
 
   htab = ppc_elf_hash_table (info);
-  if (!htab->old_plt
+  if (htab->plt_type == PLT_NEW
       && htab->plt != NULL
       && htab->plt->output_section != NULL)
     {
@@ -4269,31 +4275,32 @@ static bfd_vma
 allocate_got (struct ppc_elf_link_hash_table *htab, unsigned int need)
 {
   bfd_vma where;
-  unsigned int max_before_header = 32768;
+  unsigned int max_before_header;
 
-  if (htab->old_plt)
-    max_before_header = 32764;
-
-  if (htab->is_vxworks)
+  if (htab->plt_type == PLT_VXWORKS)
     {
       where = htab->got->size;
       htab->got->size += need;
-    }
-  else if (need <= htab->got_gap)
-    {
-      where = max_before_header - htab->got_gap;
-      htab->got_gap -= need;
     }
   else
     {
-      if (htab->got->size + need > max_before_header
-	  && htab->got->size <= max_before_header)
+      max_before_header = htab->plt_type == PLT_NEW ? 32768 : 32764;
+      if (need <= htab->got_gap)
 	{
-	  htab->got_gap = max_before_header - htab->got->size;
-	  htab->got->size = max_before_header + htab->got_header_size;
+	  where = max_before_header - htab->got_gap;
+	  htab->got_gap -= need;
 	}
-      where = htab->got->size;
-      htab->got->size += need;
+      else
+	{
+	  if (htab->got->size + need > max_before_header
+	      && htab->got->size <= max_before_header)
+	    {
+	      htab->got_gap = max_before_header - htab->got->size;
+	      htab->got->size = max_before_header + htab->got_header_size;
+	    }
+	  where = htab->got->size;
+	  htab->got->size += need;
+	}
     }
   return where;
 }
@@ -4340,7 +4347,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      {
 		asection *s = htab->plt;
 
-		if (!(htab->old_plt || htab->is_vxworks))
+		if (htab->plt_type == PLT_NEW)
 		  {
 		    if (!doneone)
 		      {
@@ -4404,7 +4411,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 			s->size += htab->plt_entry_size;
 			/* After the 8192nd entry, room for two entries
 			   is allocated.  */
-			if (!htab->is_vxworks
+			if (htab->plt_type == PLT_OLD
 			    && (s->size - htab->plt_initial_entry_size)
 				/ htab->plt_entry_size
 			       > PLT_NUM_SINGLE_ENTRIES)
@@ -4418,7 +4425,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		  {
 		    htab->relplt->size += sizeof (Elf32_External_Rela);
 
-		    if (htab->is_vxworks)
+		    if (htab->plt_type == PLT_VXWORKS)
 		      {
 			/* Allocate space for the unloaded relocations.  */
 			if (!info->shared)
@@ -4659,9 +4666,9 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
     }
 
-  if (htab->old_plt)
+  if (htab->plt_type == PLT_OLD)
     htab->got_header_size = 16;
-  else
+  else if (htab->plt_type == PLT_NEW)
     htab->got_header_size = 12;
 
   /* Set up .got offsets for local syms, and space for local dynamic
@@ -4775,7 +4782,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   /* Allocate space for global sym dynamic relocs.  */
   elf_link_hash_traverse (elf_hash_table (info), allocate_dynrelocs, info);
 
-  if (htab->got != NULL && !htab->is_vxworks)
+  if (htab->got != NULL && htab->plt_type != PLT_VXWORKS)
     {
       unsigned int g_o_t = 32768;
 
@@ -4786,7 +4793,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (htab->got->size <= 32768)
 	{
 	  g_o_t = htab->got->size;
-	  if (htab->old_plt)
+	  if (htab->plt_type == PLT_OLD)
 	    g_o_t += 4;
 	  htab->got->size += htab->got_header_size;
 	}
@@ -5122,7 +5129,7 @@ ppc_elf_relax_section (bfd *abfd,
 
 	      if (ent != NULL)
 		{
-		  if (!htab->old_plt)
+		  if (htab->plt_type == PLT_NEW)
 		    {
 		      tsec = htab->glink;
 		      toff = ent->glink_offset;
@@ -6337,7 +6344,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  {
 	    struct plt_entry *ent = find_plt_ent (h, got2, addend);
 
-	    if (!htab->old_plt)
+	    if (htab->plt_type == PLT_NEW)
 	      relocation = (htab->glink->output_section->vma
 			    + htab->glink->output_offset
 			    + ent->glink_offset);
@@ -6427,7 +6434,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 
 	    unresolved_reloc = FALSE;
-	    if (!htab->old_plt)
+	    if (htab->plt_type == PLT_NEW)
 	      relocation = (htab->glink->output_section->vma
 			    + htab->glink->output_offset
 			    + ent->glink_offset);
@@ -6747,20 +6754,20 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	    bfd_byte *loc;
 	    bfd_vma reloc_index;
 
-	    if (!(htab->old_plt || htab->is_vxworks))
+	    if (htab->plt_type == PLT_NEW)
 	      reloc_index = ent->plt.offset / 4;
 	    else
 	      {
 		reloc_index = ((ent->plt.offset - htab->plt_initial_entry_size)
 			       / htab->plt_slot_size);
 		if (reloc_index > PLT_NUM_SINGLE_ENTRIES
-		    && !htab->is_vxworks)
+		    && htab->plt_type == PLT_OLD)
 		  reloc_index -= (reloc_index - PLT_NUM_SINGLE_ENTRIES) / 2;
 	      }
 
 	    /* This symbol has an entry in the procedure linkage table.
 	       Set it up.  */
-	    if (htab->is_vxworks)
+	    if (htab->plt_type == PLT_VXWORKS)
 	      {
 		bfd_vma got_offset;
 		const bfd_vma *plt_entry;
@@ -6894,7 +6901,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		rela.r_offset = (htab->plt->output_section->vma
 				 + htab->plt->output_offset
 				 + ent->plt.offset);
-		if (htab->old_plt)
+		if (htab->plt_type == PLT_OLD)
 		  {
 		    /* We don't need to fill in the .plt.  The ppc dynamic
 		       linker will fill it in.  */
@@ -6932,7 +6939,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	    doneone = TRUE;
 	  }
 
-	if (!htab->old_plt)
+	if (htab->plt_type == PLT_NEW)
 	  {
 	    bfd_vma plt;
 	    unsigned char *p;
@@ -7154,7 +7161,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       bfd_vma val;
 
       p += htab->elf.hgot->root.u.def.value;
-      if (htab->old_plt && !htab->is_vxworks)
+      if (htab->plt_type == PLT_OLD)
 	bfd_put_32 (output_bfd, 0x4e800021 /* blrl */, p - 4);
 
       val = 0;
@@ -7526,6 +7533,7 @@ ppc_elf_vxworks_link_hash_table_create (bfd *abfd)
       struct ppc_elf_link_hash_table *htab
         = (struct ppc_elf_link_hash_table *)ret;
       htab->is_vxworks = 1;
+      htab->plt_type = PLT_VXWORKS;
       htab->plt_entry_size = VXWORKS_PLT_ENTRY_SIZE;
       htab->plt_slot_size = VXWORKS_PLT_ENTRY_SIZE;
       htab->plt_initial_entry_size = VXWORKS_PLT_INITIAL_ENTRY_SIZE;

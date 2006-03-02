@@ -1,3 +1,17 @@
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
+	* emulparams/elf32ppccommon.sh: New file, extracted from...
+	* emulparams/elf32ppc.sh: ...here.
+	* emulparams/elf32ppcvxworks.sh: Include elf32ppccommon.sh
+	instead of elf32ppc.sh.
+	(BSS_PLT): Remove override.
+	* Makefile.am (eelf32lppc.c): Depend on elf32ppccommons.h.
+	(eelf32lppcnto.c, eelf32lppcsim.c, eelf32ppcnto.c): Likewise.
+	(eelf32ppc.c, eelf32ppc_fbsd.c, eelf32ppcsimm): Likewise.
+	(eelf32ppclinux.c): Likewise.
+	(eelf32ppcvxworks.c): Likewise.  Add missing vxworks.sh dependency.
+	* Makefile.in: Regenerate.
+
 2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.am: Add html target.
