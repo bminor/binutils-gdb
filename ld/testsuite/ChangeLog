@@ -1,5 +1,13 @@
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-i386/vxworks1.ld: Use bigger alignments.  Make sure .bss isn't
+	placed as an orphan.
+	* ld-i386/vxworks1-lib.dd, ld-i386/vxworks1.dd,
+	* ld-i386/vxworks1.rd: Update accordingly.
+	* ld-i386/vxworks1-lib.rd: Likewise.  Remove symbol indexes.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-powerpc/vxworks1-lib.s, ld-powerpc/vxworks1-lib.dd,
 	* ld-powerpc/vxworks1-lib.rd, ld-powerpc/vxworks1.s,
 	* ld-powerpc/vxworks1.dd, ld-powerpc/vxworks1.rd,

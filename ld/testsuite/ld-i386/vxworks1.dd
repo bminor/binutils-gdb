@@ -3,36 +3,36 @@
 
 Disassembly of section \.plt:
 
-00080200 <_PROCEDURE_LINKAGE_TABLE_>:
-   80200:	ff 35 04 11 08 00    	pushl  0x81104
-			80202: R_386_32	_GLOBAL_OFFSET_TABLE_
-   80206:	ff 25 08 11 08 00    	jmp    \*0x81108
-			80208: R_386_32	_GLOBAL_OFFSET_TABLE_
-   8020c:	90                   	nop    
-   8020d:	90                   	nop    
-   8020e:	90                   	nop    
-   8020f:	90                   	nop    
+00080800 <_PROCEDURE_LINKAGE_TABLE_>:
+   80800:	ff 35 04 14 08 00    	pushl  0x81404
+			80802: R_386_32	_GLOBAL_OFFSET_TABLE_
+   80806:	ff 25 08 14 08 00    	jmp    \*0x81408
+			80808: R_386_32	_GLOBAL_OFFSET_TABLE_
+   8080c:	90                   	nop    
+   8080d:	90                   	nop    
+   8080e:	90                   	nop    
+   8080f:	90                   	nop    
 
-00080210 <sglobal@plt>:
-   80210:	ff 25 0c 11 08 00    	jmp    \*0x8110c
-			80212: R_386_32	_GLOBAL_OFFSET_TABLE_
-   80216:	68 00 00 00 00       	push   \$0x0
-   8021b:	e9 e0 ff ff ff       	jmp    80200 <_PROCEDURE_LINKAGE_TABLE_>
+00080810 <sglobal@plt>:
+   80810:	ff 25 0c 14 08 00    	jmp    \*0x8140c
+			80812: R_386_32	_GLOBAL_OFFSET_TABLE_
+   80816:	68 00 00 00 00       	push   \$0x0
+   8081b:	e9 e0 ff ff ff       	jmp    80800 <_PROCEDURE_LINKAGE_TABLE_>
 
-00080220 <foo@plt>:
-   80220:	ff 25 10 11 08 00    	jmp    \*0x81110
-			80222: R_386_32	_GLOBAL_OFFSET_TABLE_
-   80226:	68 08 00 00 00       	push   \$0x8
-   8022b:	e9 d0 ff ff ff       	jmp    80200 <_PROCEDURE_LINKAGE_TABLE_>
+00080820 <foo@plt>:
+   80820:	ff 25 10 14 08 00    	jmp    \*0x81410
+			80822: R_386_32	_GLOBAL_OFFSET_TABLE_
+   80826:	68 08 00 00 00       	push   \$0x8
+   8082b:	e9 d0 ff ff ff       	jmp    80800 <_PROCEDURE_LINKAGE_TABLE_>
 Disassembly of section \.text:
 
-00080300 <_start>:
-   80300:	e8 1b ff ff ff       	call   80220 <foo@plt>
-			80301: R_386_PLT32	\.plt
-   80305:	e8 05 00 00 00       	call   8030f <sexternal>
-			80306: R_386_PLT32	sexternal
-   8030a:	e9 01 ff ff ff       	jmp    80210 <sglobal@plt>
-			8030b: R_386_PLT32	\.plt
+00080c00 <_start>:
+   80c00:	e8 1b fc ff ff       	call   80820 <foo@plt>
+			80c01: R_386_PLT32	\.plt
+   80c05:	e8 05 00 00 00       	call   80c0f <sexternal>
+			80c06: R_386_PLT32	sexternal
+   80c0a:	e9 01 fc ff ff       	jmp    80810 <sglobal@plt>
+			80c0b: R_386_PLT32	\.plt
 
-0008030f <sexternal>:
-   8030f:	c3                   	ret    
+00080c0f <sexternal>:
+   80c0f:	c3                   	ret    
