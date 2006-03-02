@@ -1,5 +1,14 @@
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
+	* ld-i386/vxworks1.ld (.data): New section.
+	* ld-i386/vxworks1-lib.s: Add a pointer to a local symbol.
+	* ld-i386/vxworks1-lib.rd: Test for the associated reloc.
+	* ld-powerpc/vxworks1.ld (.data): New section.
+	* ld-powerpc/vxworks1-lib.s: Add a pointer to a local symbol.
+	* ld-powerpc/vxworks1-lib.rd: Test for the associated reloc.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
 	* ld-i386/ld-i386/vxworks1-lib.nd: New test.
 	* ld-i386/i386.exp: Run it.
 	* ld-powerpc/ld-powerpc/vxworks1-lib.nd: New test.

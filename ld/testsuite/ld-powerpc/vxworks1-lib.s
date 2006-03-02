@@ -32,4 +32,7 @@ sglobal:
 	blr
 	.size	sglobal, .-sglobal
 
+	.data
+	.4byte	slocal
+
 	.comm	x,4,4

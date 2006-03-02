@@ -2679,9 +2679,12 @@ static bfd_boolean
 is_ppc_elf_target (const struct bfd_target *targ)
 {
   extern const bfd_target bfd_elf32_powerpc_vec;
+  extern const bfd_target bfd_elf32_powerpc_vxworks_vec;
   extern const bfd_target bfd_elf32_powerpcle_vec;
 
-  return targ == &bfd_elf32_powerpc_vec || targ == &bfd_elf32_powerpcle_vec;
+  return (targ == &bfd_elf32_powerpc_vec
+	  || targ == &bfd_elf32_powerpc_vxworks_vec
+	  || targ == &bfd_elf32_powerpcle_vec);
 }
 
 /* Hook called by the linker routine which adds symbols from an object

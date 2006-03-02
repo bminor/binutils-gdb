@@ -24,4 +24,7 @@ SECTIONS
 
   . = ALIGN (0x400);
   .bss : { *(.bss) }
+
+  . = ALIGN (0x400);
+  .data : { *(.data) }
 }
