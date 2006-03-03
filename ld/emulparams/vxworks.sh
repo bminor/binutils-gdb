@@ -23,3 +23,5 @@ FINI_END='KEEP (*(.fini$99));
 ETEXT_NAME=etext_unrelocated
 OTHER_SYMBOLS="PROVIDE (_ehdr = ${TEXT_START_ADDR});"
 DATA_END_SYMBOLS=".edata : { PROVIDE (_edata = .); }"
+VXWORKS_BASE_EM_FILE=$EXTRA_EM_FILE
+EXTRA_EM_FILE=vxworks

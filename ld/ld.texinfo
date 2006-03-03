@@ -772,6 +772,12 @@ in larger executables.
 
 This option is currently only supported on ELF platforms.
 
+@kindex --force-dynamic
+@cindex forcing the creation of dynamic sections
+@item --force-dynamic
+Force the output file to have dynamic sections.  This option is specific
+to VxWorks targets.
+
 @cindex partial link
 @cindex relocatable output
 @kindex -r

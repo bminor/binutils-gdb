@@ -1,3 +1,13 @@
+2006-03-03  Richard Sandiford  <richard@codesourcery.com>
+
+	* emulparams/vxworks.sh (VXWORKS_BASE_EM_FILE): New variable.
+	(EXTRA_EM_FILE): Define.
+	* emultempl/vxworks.em: New file.
+	* ld.texinfo (--force-dynamic): Document.
+	* Makefile.am (eelf32ppcvxworks.cm, eelf_i386_vxworks.c): Depend
+	on vxworks.em.
+	* Makefile.in: Regenerate.
+
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
 	* emulparams/elf32ppccommon.sh: New file, extracted from...

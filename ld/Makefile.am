@@ -768,7 +768,8 @@ eelf32ppcwindiss.c: $(srcdir)/emulparams/elf32ppcwindiss.sh \
 	${GENSCRIPTS} elf32ppcwindiss "$(tdir_elf32ppcwindiss)"
 eelf32ppcvxworks.c: $(srcdir)/emulparams/elf32ppcvxworks.sh \
   $(srcdir)/emulparams/elf32ppccommon.sh $(srcdir)/emulparams/vxworks.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/vxworks.em $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppcvxworks "$(tdir_elf32ppcvxworks)"
 eelf32lsmip.c: $(srcdir)/emulparams/elf32lsmip.sh \
   $(srcdir)/emulparams/elf32lmip.sh $(srcdir)/emulparams/elf32bmip.sh \
@@ -901,7 +902,7 @@ eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_ldso "$(tdir_elf_i386_ldso)"
 eelf_i386_vxworks.c: $(srcdir)/emulparams/elf_i386_vxworks.sh \
-  $(srcdir)/emulparams/vxworks.sh \
+  $(srcdir)/emulparams/vxworks.sh $(srcdir)/emultempl/vxworks.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_vxworks "$(tdir_elf_i386_vxworks)"
 eelf_s390.c: $(srcdir)/emulparams/elf_s390.sh \

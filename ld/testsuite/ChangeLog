@@ -1,3 +1,12 @@
+2006-03-03  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-i386/vxworks1-static.d, ld-i386/vxworks2.s,
+	* ld-i386/vxworks2.sd, ld-i386/vxworks2-static.sd: New tests.
+	* ld-i386/i386.exp: Run them.
+	* ld-powerpc/vxworks1-static.d, ld-powerpc/vxworks2.s,
+	* ld-powerpc/vxworks2.sd, ld-powerpc/vxworks2-static.sd: New tests.
+	* ld-powerpc/powerpc.exp: Run them.
+
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-powerpc/vxworks1.ld: Use a page alignment of 0x10000.
