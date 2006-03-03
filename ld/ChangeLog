@@ -1,3 +1,10 @@
+2006-03-03  Bjoern Haase  <bjoern.m.haase@web.de>
+
+	* scripttempl/avr.sc:  Add *(.jumptables) *(.lowtext) sections.
+	Add KEEP() directives.
+	Add *(.data*) *(.rodata) and *(.rodata*) and *(.bss*) to .data and
+	.bss output sections.
+
 2006-03-03  Richard Sandiford  <richard@codesourcery.com>
 
 	* emulparams/vxworks.sh (VXWORKS_BASE_EM_FILE): New variable.

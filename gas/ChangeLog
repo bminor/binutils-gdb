@@ -1,3 +1,16 @@
+2006-03-03  Bjoern Haase  <bjoern.m.haase@web.de>
+
+	* config/tc-avr.c (avr_mod_hash_value): New function.
+	(md_apply_fix, exp_mod): Use BFD_RELOC_HH8_LDI and
+	BFD_RELOC_MS8_LDI for hlo8() and hhi8() 
+	(md_begin): Set linkrelax variable to 1, use avr_mod_hash_value
+	instead of int avr_ldi_expression: use avr_mod_hash_value instead
+	of (int).
+	(tc_gen_reloc): Handle substractions of symbols, if possible do
+	fixups, abort otherwise.	
+	* config/tc-avr.h (TC_LINKRELAX_FIXUP, TC_VALIDATE_FIX,
+	tc_fix_adjustable): Define.
+	
 2006-03-02  James E Wilson  <wilson@specifix.com>
 
 	* config/tc-ia64.c (emit_one_bundle): For IA64_OPCODE_LAST, if we

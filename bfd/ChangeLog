@@ -1,3 +1,19 @@
+2006-03-03  Bjoern Haase  <bjoern.m.haase@web.de>
+
+	* elf32-avr.c (avr_reloc_map): Insert BFD_RELOC_AVR_MS8_LDI
+	and R_AVR_MS8_LDI 
+	(bfd_elf_avr_final_write_processing): Set
+	EF_AVR_LINKRELAX_PREPARED in e_flags field.
+	(elf32_avr_relax_section): New function.
+	(elf32_avr_relax_delete_bytes): New function.
+	(elf32_avr_get_relocated_section_contents): New function.
+	(avr_pc_wrap_around): New function.
+	(avr_relative_distance_considering_wrap_around): New function.
+	(avr_final_link_relocate): Handle negative int8t_t immediate for R_AVR_LDI.
+	* reloc.c: Add BFD_RELOC_AVR_MS8_LDI and BFD_RELOC_AVR_LDI_NEG
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2006-03-02  DJ Delorie  <dj@redhat.com>
 
 	* elf32-m32c.c (m32c_offset_for_reloc): Fix local symbol

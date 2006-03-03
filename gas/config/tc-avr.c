@@ -170,8 +170,8 @@ static struct exp_mod_s exp_mod[] =
   {"pm_hi8", BFD_RELOC_AVR_HI8_LDI_PM, BFD_RELOC_AVR_HI8_LDI_PM_NEG, 0},
   {"lo8",    BFD_RELOC_AVR_LO8_LDI,    BFD_RELOC_AVR_LO8_LDI_NEG,    1},
   {"pm_lo8", BFD_RELOC_AVR_LO8_LDI_PM, BFD_RELOC_AVR_LO8_LDI_PM_NEG, 0},
-  {"hlo8",   -BFD_RELOC_AVR_LO8_LDI,   -BFD_RELOC_AVR_LO8_LDI_NEG,   0},
-  {"hhi8",   -BFD_RELOC_AVR_HI8_LDI,   -BFD_RELOC_AVR_HI8_LDI_NEG,   0},
+  {"hlo8",   BFD_RELOC_AVR_HH8_LDI,    BFD_RELOC_AVR_HH8_LDI_NEG,    0},
+  {"hhi8",   BFD_RELOC_AVR_MS8_LDI,    BFD_RELOC_AVR_MS8_LDI_NEG,    0},
 };
 
 /* A union used to store indicies into the exp_mod[] array
@@ -1081,15 +1081,11 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value), where);
 	  break;
 
-	case -BFD_RELOC_AVR_LO8_LDI:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 16), where);
-	  break;
-
 	case BFD_RELOC_AVR_HI8_LDI:
 	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 8), where);
 	  break;
 
-	case -BFD_RELOC_AVR_HI8_LDI:
+	case BFD_RELOC_AVR_MS8_LDI:
 	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value >> 24), where);
 	  break;
 
@@ -1101,15 +1097,11 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value), where);
 	  break;
 
-	case -BFD_RELOC_AVR_LO8_LDI_NEG:
-	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 16), where);
-	  break;
-
 	case BFD_RELOC_AVR_HI8_LDI_NEG:
 	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 8), where);
 	  break;
 
-	case -BFD_RELOC_AVR_HI8_LDI_NEG:
+	case BFD_RELOC_AVR_MS8_LDI_NEG:
 	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (-value >> 24), where);
 	  break;
 
@@ -1194,6 +1186,32 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
 	      fixS *fixp)
 {
   arelent *reloc;
+
+  if (fixp->fx_addsy && fixp->fx_subsy)
+    {
+      long value = 0;
+
+      if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
+          || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
+        {
+          as_bad_where (fixp->fx_file, fixp->fx_line,
+              "Difference of symbols in different sections is not supported");
+          return NULL;
+        }
+
+      /* We are dealing with two symbols defined in the same section. 
+         Let us fix-up them here.  */
+      value += S_GET_VALUE (fixp->fx_addsy);
+      value -= S_GET_VALUE (fixp->fx_subsy);
+
+      /* When fx_addsy and fx_subsy both are zero, md_apply_fix
+         only takes it's second operands for the fixup value.  */
+      fixp->fx_addsy = NULL;
+      fixp->fx_subsy = NULL;
+      md_apply_fix (fixp, (valueT *) &value, NULL);
+
+      return NULL;
+    }
 
   reloc = xmalloc (sizeof (arelent));
 
