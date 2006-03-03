@@ -1,3 +1,8 @@
+2006-03-03  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (frame_display_row, display_debug_frames): Handle
+	DW_CFA_val_offset, DW_CFA_val_offset_sf and DW_CFA_val_expression.
+
 2006-02-28  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (use_alt_mach_code): Change type to unsigned long.

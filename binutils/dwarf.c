@@ -1,5 +1,5 @@
 /* dwarf.c -- display DWARF contents of a BFD binary file
-   Copyright 2005
+   Copyright 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -2904,11 +2904,17 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
 	    case DW_CFA_offset:
 	      sprintf (tmp, "c%+d", fc->col_offset[r]);
 	      break;
+	    case DW_CFA_val_offset:
+	      sprintf (tmp, "v%+d", fc->col_offset[r]);
+	      break;
 	    case DW_CFA_register:
 	      sprintf (tmp, "r%d", fc->col_offset[r]);
 	      break;
 	    case DW_CFA_expression:
 	      strcpy (tmp, "exp");
+	      break;
+	    case DW_CFA_val_expression:
+	      strcpy (tmp, "vexp");
 	      break;
 	    default:
 	      strcpy (tmp, "n/a");
@@ -3252,6 +3258,7 @@ display_debug_frames (struct dwarf_section *section,
 		  start += 4;
 		  break;
 		case DW_CFA_offset_extended:
+		case DW_CFA_val_offset:
 		  reg = LEB (); LEB ();
 		  frame_need_space (fc, reg);
 		  fc->col_type[reg] = DW_CFA_undefined;
@@ -3290,6 +3297,7 @@ display_debug_frames (struct dwarf_section *section,
 		  start += tmp;
 		  break;
 		case DW_CFA_expression:
+		case DW_CFA_val_expression:
 		  reg = LEB ();
 		  tmp = LEB ();
 		  start += tmp;
@@ -3297,6 +3305,7 @@ display_debug_frames (struct dwarf_section *section,
 		  fc->col_type[reg] = DW_CFA_undefined;
 		  break;
 		case DW_CFA_offset_extended_sf:
+		case DW_CFA_val_offset_sf:
 		  reg = LEB (); SLEB ();
 		  frame_need_space (fc, reg);
 		  fc->col_type[reg] = DW_CFA_undefined;
@@ -3426,6 +3435,16 @@ display_debug_frames (struct dwarf_section *section,
 	      fc->col_offset[reg] = roffs * fc->data_factor;
 	      break;
 
+	    case DW_CFA_val_offset:
+	      reg = LEB ();
+	      roffs = LEB ();
+	      if (! do_debug_frames_interp)
+		printf ("  DW_CFA_val_offset: r%ld at cfa%+ld\n",
+			reg, roffs * fc->data_factor);
+	      fc->col_type[reg] = DW_CFA_val_offset;
+	      fc->col_offset[reg] = roffs * fc->data_factor;
+	      break;
+
 	    case DW_CFA_restore_extended:
 	      reg = LEB ();
 	      if (! do_debug_frames_interp)
@@ -3543,6 +3562,19 @@ display_debug_frames (struct dwarf_section *section,
 	      start += ul;
 	      break;
 
+	    case DW_CFA_val_expression:
+	      reg = LEB ();
+	      ul = LEB ();
+	      if (! do_debug_frames_interp)
+		{
+		  printf ("  DW_CFA_val_expression: r%ld (", reg);
+		  decode_location_expression (start, eh_addr_size, ul, 0);
+		  printf (")\n");
+		}
+	      fc->col_type[reg] = DW_CFA_val_expression;
+	      start += ul;
+	      break;
+
 	    case DW_CFA_offset_extended_sf:
 	      reg = LEB ();
 	      l = SLEB ();
@@ -3551,6 +3583,17 @@ display_debug_frames (struct dwarf_section *section,
 		printf ("  DW_CFA_offset_extended_sf: r%ld at cfa%+ld\n",
 			reg, l * fc->data_factor);
 	      fc->col_type[reg] = DW_CFA_offset;
+	      fc->col_offset[reg] = l * fc->data_factor;
+	      break;
+
+	    case DW_CFA_val_offset_sf:
+	      reg = LEB ();
+	      l = SLEB ();
+	      frame_need_space (fc, reg);
+	      if (! do_debug_frames_interp)
+		printf ("  DW_CFA_val_offset_sf: r%ld at cfa%+ld\n",
+			reg, l * fc->data_factor);
+	      fc->col_type[reg] = DW_CFA_val_offset;
 	      fc->col_offset[reg] = l * fc->data_factor;
 	      break;
 
