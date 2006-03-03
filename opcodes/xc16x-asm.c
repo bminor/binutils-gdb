@@ -58,8 +58,11 @@ parse_hash (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	    long *valuep ATTRIBUTE_UNUSED)
 {
   if (**strp == '#')
-    ++*strp;
-  return NULL;
+    {
+      ++*strp;
+      return NULL;
+    }
+  return _("Missing '#' prefix");
 }
 
 /* Handle '.' prefixes (i.e. skip over them).  */
@@ -71,11 +74,14 @@ parse_dot (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	   long *valuep ATTRIBUTE_UNUSED)
 {
   if (**strp == '.')
-    ++*strp;
-  return NULL;
+    {
+      ++*strp;
+      return NULL;
+    }
+  return _("Missing '.' prefix");
 }
 
-/* Handle '.' prefixes (i.e. skip over them).  */
+/* Handle 'pof:' prefixes (i.e. skip over them).  */
 
 static const char *
 parse_pof (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -83,12 +89,15 @@ parse_pof (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	   int opindex ATTRIBUTE_UNUSED,
 	   long *valuep ATTRIBUTE_UNUSED)
 {
-  if (!strncasecmp (*strp, "pof:", 4))
-    *strp += 4;
-  return NULL;
+  if (strncasecmp (*strp, "pof:", 4) == 0)
+    {
+      *strp += 4;
+      return NULL;
+    }
+  return _("Missing 'pof:' prefix");  
 }
 
-/* Handle '.' prefixes (i.e. skip over them).  */
+/* Handle 'pag:' prefixes (i.e. skip over them).  */
 
 static const char *
 parse_pag (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -96,33 +105,44 @@ parse_pag (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	   int opindex ATTRIBUTE_UNUSED,
 	   long *valuep ATTRIBUTE_UNUSED)
 {
-  if (!strncasecmp (*strp, "pag:", 4))
-    *strp += 4;
-  return NULL;
+  if (strncasecmp (*strp, "pag:", 4) == 0)
+    {
+      *strp += 4;
+      return NULL;
+    }
+  return _("Missing 'pag:' prefix");
 }
 
 /* Handle 'sof' prefixes (i.e. skip over them).  */
+
 static const char *
 parse_sof (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	   const char **strp,
 	   int opindex ATTRIBUTE_UNUSED,
 	   long *valuep ATTRIBUTE_UNUSED)
 {
-  if (!strncasecmp (*strp, "sof:", 4))
-    *strp += 4;
-  return NULL;
+  if (strncasecmp (*strp, "sof:", 4) == 0)
+    {
+      *strp += 4;
+      return NULL;
+    }
+  return _("Missing 'sof:' prefix");
 }
 
 /* Handle 'seg' prefixes (i.e. skip over them).  */
+
 static const char *
 parse_seg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 	   const char **strp,
 	   int opindex ATTRIBUTE_UNUSED,
 	   long *valuep ATTRIBUTE_UNUSED)
 {
-  if (!strncasecmp (*strp, "seg:", 4))
-    *strp += 4;
-  return NULL;
+  if (strncasecmp (*strp, "seg:", 4) == 0)
+    {
+      *strp += 4;
+      return NULL;
+    }
+  return _("Missing 'seg:' prefix");
 }
 /* -- */
 

@@ -72,7 +72,7 @@ static int read_insn
     }								\
   while (0)
 
-/* Handle '.' prefixes as operands.  */
+/* Print a 'pof:' prefix to an operand.  */
 
 static void
 print_pof (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -84,7 +84,7 @@ print_pof (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 {
 }
 
-/* Handle '.' prefixes as operands.  */
+/* Print a 'pag:' prefix to an operand.  */
 
 static void
 print_pag (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -96,7 +96,7 @@ print_pag (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 {
 }
 
-/* Handle '.' prefixes as operands.  */
+/* Print a 'sof:' prefix to an operand.  */
 
 static void
 print_sof (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -111,7 +111,7 @@ print_sof (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   info->fprintf_func (info->stream, "sof:");
 }
 
-/* Handle '.' prefixes as operands.  */
+/* Print a 'seg:' prefix to an operand.  */
 
 static void
 print_seg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -126,7 +126,7 @@ print_seg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   info->fprintf_func (info->stream, "seg:");
 }
 
-/* Handle '#' prefixes as operands.  */
+/* Print a '#' prefix to an operand.  */
 
 static void
 print_hash (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
@@ -141,7 +141,7 @@ print_hash (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   info->fprintf_func (info->stream, "#");
 }
 
-/* Handle '.' prefixes as operands.  */
+/* Print a '.' prefix to an operand.  */
 
 static void
 print_dot (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
