@@ -653,6 +653,9 @@ struct elf_i386_link_hash_table
   /* Value used to fill the last word of the first plt entry.  */
   bfd_byte plt0_pad_byte;
 
+  /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  */
+  bfd_vma next_tls_desc_index;
+
   union {
     bfd_signed_vma refcount;
     bfd_vma offset;
@@ -672,7 +675,7 @@ struct elf_i386_link_hash_table
   ((struct elf_i386_link_hash_table *) ((p)->hash))
 
 #define elf_i386_compute_jump_table_size(htab) \
-  ((htab)->srelplt->reloc_count * 4)
+  ((htab)->next_tls_desc_index * 4)
 
 /* Create an entry in an i386 ELF linker hash table.  */
 
@@ -732,6 +735,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
   ret->tls_ldm_got.refcount = 0;
+  ret->next_tls_desc_index = 0;
   ret->sgotplt_jump_table_size = 0;
   ret->sym_sec.abfd = NULL;
   ret->is_vxworks = 0;
@@ -778,9 +782,6 @@ static bfd_boolean
 elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf_i386_link_hash_table *htab;
-  asection * s;
-  int flags;
-  const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
 
   htab = elf_i386_hash_table (info);
   if (!htab->sgot && !create_got_section (dynobj, info))
@@ -799,17 +800,9 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
       || (!info->shared && !htab->srelbss))
     abort ();
 
-  if (htab->is_vxworks && !info->shared)
-    {
-      s = bfd_make_section (dynobj, ".rel.plt.unloaded");
-      flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_READONLY
-	      | SEC_LINKER_CREATED);
-      if (s == NULL
-	 || ! bfd_set_section_flags (dynobj, s, flags)
-	 || ! bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
-       return FALSE;
-      htab->srelplt2 = s;
-    }
+  if (htab->is_vxworks
+      && !elf_vxworks_create_dynamic_sections (dynobj, info, &htab->srelplt2))
+    return FALSE;
 
   return TRUE;
 }
@@ -1639,7 +1632,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  /* We also need to make an entry in the .rel.plt section.  */
 	  htab->srelplt->size += sizeof (Elf32_External_Rel);
-	  htab->srelplt->reloc_count++;
+	  htab->next_tls_desc_index++;
 
 	  if (htab->is_vxworks && !info->shared)
 	    {
@@ -1996,21 +1989,6 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   else
     htab->tls_ldm_got.offset = -1;
 
-  if (htab->is_vxworks)
-    {
-      /* Mark the GOT and PLT symbols as having relocations; they might
-	 not, but we won't know for sure until we build the GOT in
-	 finish_dynamic_symbol.  */
-      if (htab->elf.hgot)
-	htab->elf.hgot->indx = -2;
-      if (htab->elf.hplt)
-	{
-	  htab->elf.hplt->indx = -2;
-	  if (htab->splt->flags & SEC_CODE)
-	    htab->elf.hplt->type = STT_FUNC;
-	}
-    }
-
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, (PTR) info);
@@ -2021,7 +1999,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
      for them, it suffices to multiply the reloc count by the jump
      slot size.  */
   if (htab->srelplt)
-    htab->sgotplt_jump_table_size = htab->srelplt->reloc_count * 4;
+    htab->sgotplt_jump_table_size = htab->next_tls_desc_index * 4;
 
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
@@ -2054,8 +2032,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	  /* We use the reloc_count field as a counter if we need
 	     to copy relocs into the output file.  */
-	  if (s != htab->srelplt)
-	    s->reloc_count = 0;
+	  s->reloc_count = 0;
 	}
       else
 	{
@@ -2997,8 +2974,8 @@ elf_i386_relocate_section (bfd *output_bfd,
 				     + htab->sgotplt_jump_table_size);
 		  sreloc = htab->srelplt;
 		  loc = sreloc->contents;
-		  loc += sreloc->reloc_count++
-		    * sizeof (Elf32_External_Rel);
+		  loc += (htab->next_tls_desc_index++
+			  * sizeof (Elf32_External_Rel));
 		  BFD_ASSERT (loc + sizeof (Elf32_External_Rel)
 			      <= sreloc->contents + sreloc->size);
 		  bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
@@ -3638,8 +3615,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
      On VxWorks, the _GLOBAL_OFFSET_TABLE_ symbol is not absolute: it
      is relative to the ".got" section.  */
   if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || (strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-	  && !htab->is_vxworks))
+      || (!htab->is_vxworks && h == htab->elf.hgot))
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
@@ -3967,23 +3943,6 @@ elf_i386_vxworks_link_hash_table_create (bfd *abfd)
 }
 
 
-/* Tweak magic VxWorks symbols as they are written to the output file.  */
-static bfd_boolean
-elf_i386_vxworks_link_output_symbol_hook (struct bfd_link_info *info
-					    ATTRIBUTE_UNUSED,
-					  const char *name,
-					  Elf_Internal_Sym *sym,
-					  asection *input_sec ATTRIBUTE_UNUSED,
-					  struct elf_link_hash_entry *h
-					    ATTRIBUTE_UNUSED)
-{
-  /* Ignore the first dummy symbol.  */
-  if (!name)
-    return TRUE;
-
-  return elf_vxworks_link_output_symbol_hook (name, sym);
-}
-
 #undef	elf_backend_post_process_headers
 #undef bfd_elf32_bfd_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_create \
@@ -3993,7 +3952,7 @@ elf_i386_vxworks_link_output_symbol_hook (struct bfd_link_info *info
   elf_vxworks_add_symbol_hook
 #undef elf_backend_link_output_symbol_hook
 #define elf_backend_link_output_symbol_hook \
-  elf_i386_vxworks_link_output_symbol_hook
+  elf_vxworks_link_output_symbol_hook
 #undef elf_backend_emit_relocs
 #define elf_backend_emit_relocs			elf_vxworks_emit_relocs
 #undef elf_backend_final_write_processing

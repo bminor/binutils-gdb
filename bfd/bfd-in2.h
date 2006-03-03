@@ -8,7 +8,8 @@
 /* Main header file for the bfd library -- portable access to object files.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -3483,6 +3484,10 @@ of data memory address) into 8 bit immediate value of LDI insn.  */
 of program memory address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_HH8_LDI,
 
+/* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
+of 32 bit value) into 8 bit immediate value of LDI insn.  */
+  BFD_RELOC_AVR_MS8_LDI,
+
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (usually data memory address) into 8 bit immediate value of SUBI insn.  */
   BFD_RELOC_AVR_LO8_LDI_NEG,
@@ -3496,6 +3501,10 @@ SUBI insn.  */
 (most high 8 bit of program memory address) into 8 bit immediate value
 of LDI or SUBI insn.  */
   BFD_RELOC_AVR_HH8_LDI_NEG,
+
+/* This is a 16 bit reloc for the AVR that stores negated 8 bit value (msb
+of 32 bit value) into 8 bit immediate value of LDI insn.  */
+  BFD_RELOC_AVR_MS8_LDI_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
 command address) into 8 bit immediate value of LDI insn.  */

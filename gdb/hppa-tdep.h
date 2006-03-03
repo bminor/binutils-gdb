@@ -129,7 +129,7 @@ struct unwind_table_entry
     unsigned int Millicode:1;	/* 1 */
     unsigned int Millicode_save_sr0:1;	/* 2 */
     unsigned int Region_description:2;	/* 3..4 */
-    unsigned int reserved1:1;	/* 5 */
+    unsigned int reserved:1;	/* 5 */
     unsigned int Entry_SR:1;	/* 6 */
     unsigned int Entry_FR:4;	/* number saved *//* 7..10 */
     unsigned int Entry_GR:5;	/* number saved *//* 11..15 */
@@ -139,22 +139,22 @@ struct unwind_table_entry
     unsigned int Frame_Extension_Millicode:1;	/* 19 */
     unsigned int Stack_Overflow_Check:1;	/* 20 */
     unsigned int Two_Instruction_SP_Increment:1;	/* 21 */
-    unsigned int Ada_Region:1;	/* 22 */
+    unsigned int sr4export:1;	/* 22 */
     unsigned int cxx_info:1;	/* 23 */
     unsigned int cxx_try_catch:1;	/* 24 */
     unsigned int sched_entry_seq:1;	/* 25 */
-    unsigned int reserved2:1;	/* 26 */
+    unsigned int reserved1:1;	/* 26 */
     unsigned int Save_SP:1;	/* 27 */
     unsigned int Save_RP:1;	/* 28 */
     unsigned int Save_MRP_in_frame:1;	/* 29 */
-    unsigned int extn_ptr_defined:1;	/* 30 */
+    unsigned int save_r19:1;	/* 30 */
     unsigned int Cleanup_defined:1;	/* 31 */
 
     unsigned int MPE_XL_interrupt_marker:1;	/* 0 */
     unsigned int HP_UX_interrupt_marker:1;	/* 1 */
     unsigned int Large_frame:1;	/* 2 */
-    unsigned int Pseudo_SP_Set:1;	/* 3 */
-    unsigned int reserved4:1;	/* 4 */
+    unsigned int alloca_frame:1;	/* 3 */
+    unsigned int reserved2:1;	/* 4 */
     unsigned int Total_frame_size:27;	/* 5..31 */
 
     /* This is *NOT* part of an actual unwind_descriptor in an object

@@ -681,9 +681,11 @@ prepare_resume_reply (char *buf, char status, unsigned char signo)
 
       if (using_threads)
 	{
+	  unsigned int gdb_id_from_wait;
+
 	  /* FIXME right place to set this? */
 	  thread_from_wait = ((struct inferior_list_entry *)current_inferior)->id;
-	  unsigned int gdb_id_from_wait = thread_to_gdb_id (current_inferior);
+	  gdb_id_from_wait = thread_to_gdb_id (current_inferior);
 
 	  if (debug_threads)
 	    fprintf (stderr, "Writing resume reply for %ld\n\n", thread_from_wait);

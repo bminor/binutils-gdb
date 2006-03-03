@@ -1,3 +1,13 @@
+2006-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/inherit.exp (test_print_mi_member_types): New function.
+	(do_tests): Call it.
+
+2006-02-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gdb.base/prelink.exp: New test.
+	* gdb.base/prelink.c, gdb.base/prelink-lib.c: New sources.
+
 2006-02-24  Wu Zhou  <woodzltc@cn.ibm.com>
 
 	* gdb.fortran/derived-type.f90: New file.

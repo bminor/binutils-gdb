@@ -3586,6 +3586,11 @@ ENUMDOC
   This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
   of program memory address) into 8 bit immediate value of LDI insn.
 ENUM
+  BFD_RELOC_AVR_MS8_LDI
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
+  of 32 bit value) into 8 bit immediate value of LDI insn.
+ENUM
   BFD_RELOC_AVR_LO8_LDI_NEG
 ENUMDOC
   This is a 16 bit reloc for the AVR that stores negated 8 bit value
@@ -3602,6 +3607,11 @@ ENUMDOC
   This is a 16 bit reloc for the AVR that stores negated 8 bit value
   (most high 8 bit of program memory address) into 8 bit immediate value
   of LDI or SUBI insn.
+ENUM
+  BFD_RELOC_AVR_MS8_LDI_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value (msb
+  of 32 bit value) into 8 bit immediate value of LDI insn.
 ENUM
   BFD_RELOC_AVR_LO8_LDI_PM
 ENUMDOC

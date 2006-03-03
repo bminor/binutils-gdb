@@ -50,6 +50,12 @@ struct link_map_offsets
     /* Size of l_addr field in struct link_map.  */
     int l_addr_size;
 
+    /* Offset to l_ld field in struct link_map.  */
+    int l_ld_offset;
+
+    /* Size of l_ld field in struct link_map.  */
+    int l_ld_size;
+
     /* Offset to l_next field in struct link_map.  */
     int l_next_offset;
 

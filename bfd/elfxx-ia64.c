@@ -4835,8 +4835,8 @@ elfNN_ia64_finish_dynamic_symbol (output_bfd, info, h, sym)
 
   /* Mark some specially defined symbols as absolute.  */
   if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0
-      || strcmp (h->root.root.string, "_PROCEDURE_LINKAGE_TABLE_") == 0)
+      || h == ia64_info->root.hgot
+      || h == ia64_info->root.hplt)
     sym->st_shndx = SHN_ABS;
 
   return TRUE;

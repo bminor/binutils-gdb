@@ -4057,7 +4057,7 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
   if (eh->root.root.string[0] == '_'
       && (strcmp (eh->root.root.string, "_DYNAMIC") == 0
-	  || strcmp (eh->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0))
+	  || eh == htab->etab.hgot))
     {
       sym->st_shndx = SHN_ABS;
     }

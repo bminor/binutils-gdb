@@ -1,3 +1,129 @@
+2006-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* cpu-avr.c: Update to ISO-C90 formatting.
+	* elf32-avr.c: Likewise.
+
+2006-03-03  Bjoern Haase  <bjoern.m.haase@web.de>
+
+	* elf32-avr.c (avr_reloc_map): Insert BFD_RELOC_AVR_MS8_LDI
+	and R_AVR_MS8_LDI 
+	(bfd_elf_avr_final_write_processing): Set
+	EF_AVR_LINKRELAX_PREPARED in e_flags field.
+	(elf32_avr_relax_section): New function.
+	(elf32_avr_relax_delete_bytes): New function.
+	(elf32_avr_get_relocated_section_contents): New function.
+	(avr_pc_wrap_around): New function.
+	(avr_relative_distance_considering_wrap_around): New function.
+	(avr_final_link_relocate): Handle negative int8t_t immediate for R_AVR_LDI.
+	* reloc.c: Add BFD_RELOC_AVR_MS8_LDI and BFD_RELOC_AVR_LDI_NEG
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
+2006-03-02  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (m32c_offset_for_reloc): Fix local symbol
+	calculations.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-ppc.c (is_ppc_elf_target): Return true if the target is
+	bfd_elf32_powerpc_vxworks_vec.
+
+2006-03-02  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-m32c.c (m32c_elf_relax_section): Initialise 'gap'.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Use
+	elf_vxworks_create_dynamic_sections.
+	(elf_i386_size_dynamic_sections): Remove VxWorks GOT and PLT
+	symbol handling.
+	* elf32-ppc.c (ppc_elf_create_dynamic_sections): Use
+	elf_vxworks_create_dynamic_sections.
+	(ppc_elf_size_dynamic_sections): Remove VxWorks GOT and PLT
+	symbol handling.
+	* elf-vxworks.c (elf_vxworks_create_dynamic_sections): New function.
+	* elf-vxworks.h (elf_vxworks_create_dynamic_sections): Declare.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-i386.c (elf_i386_vxworks_link_output_symbol_hook): Delete.
+	(elf_backend_link_output_symbol_hook): Use
+	elf_vxworks_link_output_symbol_hook instead.
+	* elf32-ppc.c (elf_i386_vxworks_link_output_symbol_hook): Delete.
+	(elf_backend_link_output_symbol_hook): Use
+	elf_vxworks_link_output_symbol_hook instead.
+	* elf-vxworks.c (elf_vxworks_link_output_symbol_hook): Provide the
+	same interface as elf_backend_link_output_symbol_hook.
+	* elf-vxworks.h (elf_vxworks_link_output_symbol_hook): Update
+	prototype accordingly.
+
+2006-03-02  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_plt_type): New enumeration.
+	(ppc_elf_link_hash_table): Replace old_got and new_got with
+	plt_type and can_use_new_plt.
+	(ppc_elf_create_dynamic_sections): Add SEC_HAS_CONTENTS,
+	SEC_LOAD and SEC_READONLY to the VxWorks .plt flags.
+	(ppc_elf_check_relocs): Set can_use_new_plt instead of new_plt.
+	Move from plt_type == PLT_UNSET to PLT_OLD instead of setting old_plt.
+	(ppc_elf_select_plt_layout): Move from plt_type == PLT_UNSET to
+	either plt_type == PLT_OLD or plt_type == PLT_NEW.  Assert that
+	this function should not be called for VxWorks targets.
+	(ppc_elf_tls_setup): Use plt_type instead of old_got.
+	(allocate_got): Likewise.  Rearrange so that max_before_header
+	is only used for PLT_OLD and PLT_NEW.
+	(allocate_dynrelocs): Use plt_type instead of old_got and is_vxworks.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relax_section): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(ppc_elf_finish_dynamic_symbol): Likewise.
+	(ppc_elf_vxworks_link_hash_table_create): Initialize plt_type.
+
+2006-02-28  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-i386.c (elf_i386_link_hash_table): Add next_tls_desc_index.
+	(elf_i386_link_hash_table_create): Initialize it.
+	(elf_i386_compute_jump_table_size): Use it instead of
+	srelplt->reloc_count.
+	(allocate_dynrelocs): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	
+2006-02-27  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Handle S flag.
+	(_bfd_elf_write_section_eh_frame): Likewise.
+
+2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* po/Make-in: Add html target.
+
+2006-02-27  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf-m10300.c (_bfd_mn10300_elf_finish_dynamic_symbol): Use the
+	cached hgot entry to check for _GLOBAL_OFFSET_TABLE_.
+	* elf32-arm.c (elf32_arm_finish_dynamic_symbol): Likewise.
+	* elf32-bfin.c (bfin_finish_dynamic_symbol): Likewise.
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_symbol): Likewise.
+	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_finish_dynamic_symbol): Likewise.
+	* elf32-m68k.c (elf_m68k_finish_dynamic_symbol): Likewise.
+	* elf32-sh.c (sh_elf_finish_dynamic_symbol): Likewise.
+	* elf32-vax.c (elf_vax_finish_dynamic_symbol): Likewise.
+	* elf32-xtensa.c (elf_xtensa_finish_dynamic_symbol): Likewise.
+	* elf64-sh64.c (sh64_elf64_finish_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_symbol): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	* elf32-s390.c (elf_s390_finish_dynamic_symbol): Likewise.  Also use
+	the cached hplt entry to check for _PROCEDURE_LINKAGE_TABLE_.
+	* elf64-alpha.c (elf64_alpha_finish_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_finish_dynamic_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): Likewise.
+
 2006-02-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf-bfd.h (elf_link_hash_table): Add hplt field.

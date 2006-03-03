@@ -1,3 +1,96 @@
+2006-03-02  Corinna Vinschen  <vinschen@redhat.com>
+
+	* mn10300-tdep.c (mn10300_push_dummy_call): Write breakpoint
+	address to MDR register.
+
+2006-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbtypes.c (lookup_struct_elt_type): Correct noerr for recursive
+	calls.
+
+2006-03-01  Randolph Chung  <tausq@debian.org>
+
+	* somread.c (som_symfile_read): Update comment and remove unneeded 
+	use of a deprecated variable.
+
+2006-03-01  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.h (unwind_table_entry): Update field names to match HP
+	runtime specification.
+	* hppa-tdep.c (internalize_unwinds, hppa_frame_cache): Likewise.
+	(unwind_command): Likewise.
+
+2006-03-01  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_frame_cache): Handle Region_Description and
+	Pseudo_SP_Set in unwind record.
+
+2006-03-01  Randolph Chung  <tausq@debian.org>
+
+	* hppa-hpux-tdep.c (initialize_hp_cxx_exception_support): Use
+	TDEP->is_elf to determine if we are working with a SOM binary.
+	(null_symtab_and_line): Remove unused variable.
+	* config/pa/hppa64.mt: Use tm-hppa.h.
+	* config/pa/tm-hppa64.h: Remove file.
+
+2006-03-01  Wu Zhou  <woodzltc@cn.ibm.com>
+
+	 * f-typeprint.c (f_type_print_base): Delete the redundant space.
+
+2006-02-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (mn10300-linux-tdep.o): Update dependencies.
+	* mn10300-linux-tdep.c (frame.h, trad-frame.h, tramp-frame.h):
+	Include.
+	(am33_linux_sigframe_cache_init): New function.
+	(am33_linux_sigframe, am33_linux_rt_sigframe): New signal frame
+	descriptions.
+	(AM33_SIGCONTEXT_D0, AM33_SIGCONTEXT_D1, AM33_SIGCONTEXT_D2)
+	(AM33_SIGCONTEXT_D3, AM33_SIGCONTEXT_A0, AM33_SIGCONTEXT_A1)
+	(AM33_SIGCONTEXT_A2, AM33_SIGCONTEXT_A3, AM33_SIGCONTEXT_E0)
+	(AM33_SIGCONTEXT_E1, AM33_SIGCONTEXT_E2, AM33_SIGCONTEXT_E3)
+	(AM33_SIGCONTEXT_E4, AM33_SIGCONTEXT_E5, AM33_SIGCONTEXT_E6)
+	(AM33_SIGCONTEXT_E7, AM33_SIGCONTEXT_LAR, AM33_SIGCONTEXT_LIR)
+	(AM33_SIGCONTEXT_MDR, AM33_SIGCONTEXT_MCVF, AM33_SIGCONTEXT_MCRL)
+	(AM33_SIGCONTEXT_MCRH, AM33_SIGCONTEXT_MDRQ, AM33_SIGCONTEXT_SP)
+	(AM33_SIGCONTEXT_EPSW, AM33_SIGCONTEXT_PC, AM33_SIGCONTEXT_FPUCONTEXT):
+	New constants.
+	(am33_linux_init_osabi): Register signal frame unwinders.
+
+2006-02-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_analyze_prologue):  Implement backtrack
+	out of pattern match by saving relevant state.  Fix stack size
+	adjustment bug.
+
+2006-02-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* solib-svr4.h (struct link_map_offsets): Add l_ld_offset and
+	l_ld_size fields.
+	* solib-svr4.c (struct lm_info): Add l_addr field.
+	(LM_ADDR_FROM_LINK_MAP): Renamed from LM_ADDR.
+	(HAS_LM_DYNAMIC_FROM_LINK_MAP): New.
+	(LM_DYNAMIC_FROM_LINK_MAP): New.
+	(LM_ADDR_CHECK): New.  Use it instead of LM_ADDR.
+	(svr4_current_sos): Initialize l_addr.  Adjust.
+	(svr4_relocate_section_addresses): Adjust.
+	(svr4_ilp32_fetch_link_map_offsets): Define new members.
+	(svr4_lp64_fetch_link_map_offsets): Likewise.
+	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets): Likewise.
+	* mipsnbsd-tdep.c (mipsnbsd_ilp32_fetch_link_map_offsets): Likewise.
+	(mipsnbsd_lp64_fetch_link_map_offsets): Likewise.
+	* Makefile.in (solib-svr4.o): Depend on $(elf_bfd_h).
+
+2006-02-26  David S. Miller  <davem@sunset.davemloft.net>
+
+	* config/sparc/linux.mt (TDEPFILES): Add sol2-tdep.o.
+	* config/sparc/linux64.mt (TDEPFILES): Likewise.
+
+2006-02-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-linux-nat.c (ppc_linux_insert_watchpoint): Correct return type.
+	(ppc_linux_remove_watchpoint): Likewise, and args.
+
 2006-02-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-tdep.c (i386obsd_trapframe_sniffer): Also recognize

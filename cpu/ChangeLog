@@ -1,3 +1,10 @@
+2006-03-03 Shrirang Khisti <shrirangk@kpitcummins.com)
+
+	* xc16x.opc (parse_hash): Return NULL if the input was parsed or
+	an error message otherwise.
+	(parse_dot, parse_pof, parse_pag, parse_sof, parse_seg): Likewise.
+	Fix up comments to correctly describe the functions.
+
 2006-02-24  DJ Delorie  <dj@redhat.com>
 
 	* m32c.cpu (RL_TYPE): New attribute, with macros.
