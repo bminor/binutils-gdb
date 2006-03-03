@@ -6855,6 +6855,10 @@ emit_one_bundle ()
 	         changing NOPs in front of this slot.  */
 	      for (j = i; j < 3; ++j)
 	        insn[j] = nop[ia64_templ_desc[required_template].exec_unit[j]];
+
+	      /* We just picked a template that includes the stop bit in the
+		 middle, so we don't need another one emitted later.  */
+	      md.slot[curr].end_of_insn_group = 0;
 	    }
 	  template = required_template;
 	}

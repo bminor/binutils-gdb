@@ -1,3 +1,8 @@
+2006-03-02  James E Wilson  <wilson@specifix.com>
+
+	* config/tc-ia64.c (emit_one_bundle): For IA64_OPCODE_LAST, if we
+	change the template, then clear md.slot[curr].end_of_insn_group.
+
 2006-02-28  Jan Beulich  <jbeulich@novell.com>
 
 	* macro.c (get_any_string): Don't insert quotes for <>-quoted input.
