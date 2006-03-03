@@ -6122,7 +6122,8 @@ procfs_make_note_section (bfd *obfd, int *note_size)
       note_data = thread_args.note_data;
     }
 
-  auxv_len = target_auxv_read (&current_target, &auxv);
+  auxv_len = target_read_whole (&current_target, TARGET_OBJECT_AUXV, NULL,
+				&auxv);
   if (auxv_len > 0)
     {
       note_data = elfcore_write_note (obfd, note_data, note_size,

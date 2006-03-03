@@ -40,6 +40,7 @@
 #include "trad-frame.h"
 #include "objfiles.h"
 #include "dwarf2-frame.h"
+#include "available.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -1343,6 +1344,12 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 static struct type *
 arm_register_type (struct gdbarch *gdbarch, int regnum)
 {
+  struct type *avail_type;
+
+  avail_type = available_register_type (gdbarch, regnum);
+  if (avail_type)
+    return avail_type;
+
   if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
     {
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -1352,23 +1359,6 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
     }
   else
     return builtin_type_int32;
-}
-
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-static int
-arm_register_byte (int regnum)
-{
-  if (regnum < ARM_F0_REGNUM)
-    return regnum * INT_REGISTER_SIZE;
-  else if (regnum < ARM_PS_REGNUM)
-    return (NUM_GREGS * INT_REGISTER_SIZE
-	    + (regnum - ARM_F0_REGNUM) * FP_REGISTER_SIZE);
-  else
-    return (NUM_GREGS * INT_REGISTER_SIZE
-	    + NUM_FREGS * FP_REGISTER_SIZE
-	    + (regnum - ARM_FPS_REGNUM) * STATUS_REGISTER_SIZE);
 }
 
 /* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
@@ -2466,6 +2456,12 @@ set_disassembly_style_sfunc (char *args, int from_tty,
 static const char *
 arm_register_name (int i)
 {
+  const char *avail_name;
+
+  avail_name = available_register_name (current_gdbarch, i);
+  if (avail_name)
+    return avail_name;
+
   return arm_register_names[i];
 }
 
@@ -2769,9 +2765,13 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
-  set_gdbarch_deprecated_register_byte (gdbarch, arm_register_byte);
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
+  set_gdbarch_remote_num_g_packet_regs (gdbarch,
+					NUM_GREGS + NUM_FREGS + NUM_SREGS);
   set_gdbarch_register_type (gdbarch, arm_register_type);
+
+  if (info.feature_set)
+    record_available_features (gdbarch, info.feature_set);
 
   /* Internal <-> external register number maps.  */
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
@@ -2839,6 +2839,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       internal_error (__FILE__, __LINE__,
 		      _("arm_gdbarch_init: bad byte order for float format"));
     }
+
+  set_gdbarch_available_features_support (gdbarch, 1);
 
   return gdbarch;
 }

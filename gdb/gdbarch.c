@@ -41,6 +41,7 @@
 #include "gdbcmd.h"
 #include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
 #include "symcat.h"
+#include "available.h"
 
 #include "floatformat.h"
 
@@ -152,6 +153,7 @@ struct gdbarch
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
   int num_regs;
   int num_pseudo_regs;
+  int remote_num_g_packet_regs;
   int sp_regnum;
   int pc_regnum;
   int ps_regnum;
@@ -235,6 +237,8 @@ struct gdbarch
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
+  int available_features_support;
+  const struct gdb_feature_set * feature_set;
 };
 
 
@@ -278,6 +282,7 @@ struct gdbarch startup_gdbarch =
   0,  /* pseudo_register_write */
   0,  /* num_regs */
   0,  /* num_pseudo_regs */
+  0,  /* remote_num_g_packet_regs */
   -1,  /* sp_regnum */
   -1,  /* pc_regnum */
   -1,  /* ps_regnum */
@@ -361,6 +366,8 @@ struct gdbarch startup_gdbarch =
   default_register_reggroup_p,  /* register_reggroup_p */
   0,  /* fetch_pointer_argument */
   0,  /* regset_from_core_section */
+  0,  /* available_features_support */
+  0,  /* feature_set */
   /* startup_gdbarch() */
 };
 
@@ -536,6 +543,7 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   if (current_gdbarch->num_regs == -1)
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
+  /* Skip verify of remote_num_g_packet_regs, has predicate */
   /* Skip verify of sp_regnum, invalid_p == 0 */
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
@@ -719,6 +727,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: adjust_breakpoint_address = <0x%lx>\n",
                       (long) current_gdbarch->adjust_breakpoint_address);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: available_features_support = %s\n",
+                      paddr_d (current_gdbarch->available_features_support));
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: BELIEVE_PCC_PROMOTION # %s\n",
@@ -1054,6 +1065,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: extract_return_value = <0x%lx>\n",
                       (long) current_gdbarch->extract_return_value);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: feature_set = %s\n",
+                      paddr_nz ((long) current_gdbarch->feature_set));
 #ifdef FETCH_POINTER_ARGUMENT_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1475,6 +1489,12 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: regset_from_core_section = <0x%lx>\n",
                       (long) current_gdbarch->regset_from_core_section);
   fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_remote_num_g_packet_regs_p() = %d\n",
+                      gdbarch_remote_num_g_packet_regs_p (current_gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: remote_num_g_packet_regs = %s\n",
+                      paddr_d (current_gdbarch->remote_num_g_packet_regs));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: remote_translate_xfer_address = <0x%lx>\n",
                       (long) current_gdbarch->remote_translate_xfer_address);
   fprintf_unfiltered (file,
@@ -1638,6 +1658,14 @@ gdbarch_tdep (struct gdbarch *gdbarch)
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_tdep called\n");
   return gdbarch->tdep;
+}
+
+struct obstack *
+gdbarch_obstack (struct gdbarch *gdbarch)
+{
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_obstack called\n");
+  return gdbarch->obstack;
 }
 
 
@@ -2068,6 +2096,29 @@ set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch,
                              int num_pseudo_regs)
 {
   gdbarch->num_pseudo_regs = num_pseudo_regs;
+}
+
+int
+gdbarch_remote_num_g_packet_regs_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->remote_num_g_packet_regs != 0;
+}
+
+int
+gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_remote_num_g_packet_regs called\n");
+  return gdbarch->remote_num_g_packet_regs;
+}
+
+void
+set_gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch,
+                                      int remote_num_g_packet_regs)
+{
+  gdbarch->remote_num_g_packet_regs = remote_num_g_packet_regs;
 }
 
 int
@@ -3683,6 +3734,38 @@ set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch,
   gdbarch->regset_from_core_section = regset_from_core_section;
 }
 
+int
+gdbarch_available_features_support (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_available_features_support called\n");
+  return gdbarch->available_features_support;
+}
+
+void
+set_gdbarch_available_features_support (struct gdbarch *gdbarch,
+                                        int available_features_support)
+{
+  gdbarch->available_features_support = available_features_support;
+}
+
+const struct gdb_feature_set *
+gdbarch_feature_set (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_feature_set called\n");
+  return gdbarch->feature_set;
+}
+
+void
+set_gdbarch_feature_set (struct gdbarch *gdbarch,
+                         const struct gdb_feature_set * feature_set)
+{
+  gdbarch->feature_set = feature_set;
+}
+
 
 /* Keep a registry of per-architecture data-pointers required by GDB
    modules. */
@@ -4006,8 +4089,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 }
 
 
-/* Look for an architecture using gdbarch_info.  Base search on only
-   BFD_ARCH_INFO and BYTE_ORDER. */
+/* Look for an architecture using gdbarch_info.  */
 
 struct gdbarch_list *
 gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
@@ -4021,6 +4103,15 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
 	continue;
       if (info->osabi != arches->gdbarch->osabi)
 	continue;
+
+      if (info->feature_set && !arches->gdbarch->feature_set)
+	continue;
+      if (!info->feature_set && arches->gdbarch->feature_set)
+	continue;
+      if (info->feature_set
+	  && !features_same_p (info->feature_set, arches->gdbarch->feature_set))
+	continue;
+
       return arches;
     }
   return NULL;

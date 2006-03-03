@@ -30,6 +30,7 @@ struct objfile;
 struct ui_file;
 struct mem_attrib;
 struct target_ops;
+struct gdb_feature_set;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -230,7 +231,12 @@ enum target_object
   /* Transfer auxilliary vector.  */
   TARGET_OBJECT_AUXV,
   /* StackGhost cookie.  See "sparc-tdep.c".  */
-  TARGET_OBJECT_WCOOKIE
+  TARGET_OBJECT_WCOOKIE,
+  /* Available target-specific features, e.g. registers and coprocessors.
+     See "available.c".  With an empty ANNEX this fetches a list of
+     features; with a comma-separated list of features in ANNEX this
+     fetches the details of the listed features.  */
+  TARGET_OBJECT_AVAILABLE_FEATURES
 
   /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
 };
@@ -245,7 +251,10 @@ extern LONGEST target_write_partial (struct target_ops *ops,
 				     const char *annex, const gdb_byte *buf,
 				     ULONGEST offset, LONGEST len);
 
-/* Wrappers to perform the full transfer.  */
+/* Wrappers to perform a full transfer.  These functions take the
+   same arguments as the partial versions, above, but a return
+   value of a positive number less than LEN implies that no more
+   data can be read or written.  */
 extern LONGEST target_read (struct target_ops *ops,
 			    enum target_object object,
 			    const char *annex, gdb_byte *buf,
@@ -255,6 +264,22 @@ extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,
 			     const char *annex, const gdb_byte *buf,
 			     ULONGEST offset, LONGEST len);
+
+/* Wrappers to perform a full read of unknown size.  OBJECT/ANNEX will
+   be read using OPS.  The return value will be -1 if the transfer
+   fails or is not supported; 0 if the object is empty; and the length
+   of the object otherwise.  If a positive value is returned, a
+   sufficiently large buffer will be allocated using xmalloc and
+   returned in *BUF_P containing the contents of the object.
+
+   This method should be used for objects sufficiently small to store
+   in a single xmalloced buffer, when no fixed bound on the object's
+   size is known in advance.  Don't try to read TARGET_OBJECT_MEMORY
+   through this function.  */
+
+extern LONGEST target_read_whole (struct target_ops *ops,
+				  enum target_object object,
+				  const char *annex, gdb_byte **buf_p);
 
 /* Wrappers to target read/write that perform memory transfers.  They
    throw an error if the memory transfer fails.
@@ -422,6 +447,13 @@ struct target_ops
 				enum target_object object, const char *annex,
 				gdb_byte *readbuf, const gdb_byte *writebuf,
 				ULONGEST offset, LONGEST len);
+
+    /* Describe the architecture-specific features of this target.
+       Returns the features found.  All pointers refer either to
+       constants or temporary memory allocated on the provided
+       obstack.  */
+    struct gdb_feature_set *(*to_available_features) (struct target_ops *ops,
+						      struct obstack *obstack);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1073,6 +1105,9 @@ extern int target_stopped_data_address_p (struct target_ops *);
 /* Horrible hack to get around existing macros :-(.  */
 #define target_stopped_data_address_p(CURRENT_TARGET) (1)
 #endif
+
+extern struct gdb_feature_set *target_available_features (struct target_ops *,
+							  struct obstack *);
 
 /* This will only be defined by a target that supports catching vfork events,
    such as HP-UX.

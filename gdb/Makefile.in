@@ -127,6 +127,10 @@ READLINE = $(READLINE_DIR)/libreadline.a
 READLINE_SRC = $(srcdir)/$(READLINE_DIR)
 READLINE_CFLAGS = -I$(READLINE_SRC)/..
 
+# Where is the expat library?  Typically in ../expat.
+EXPAT = ../expat/.libs/libexpat.a
+EXPAT_CFLAGS = -I$(srcdir)/expat/lib -I../expat
+
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
 GDB_WARN_CFLAGS = $(WARN_CFLAGS)
@@ -350,6 +354,7 @@ INTERNAL_CFLAGS_BASE = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
+	$(EXPAT_CFLAGS) \
 	$(INTL_CFLAGS) $(ENABLE_CFLAGS)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
@@ -378,9 +383,9 @@ INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty \
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) \
 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
 	$(LIBICONV) \
-	$(LIBIBERTY) $(WIN32LIBS)
+	$(LIBIBERTY) $(WIN32LIBS) $(EXPAT)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
-	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
+	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(EXPAT)
 
 ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
@@ -390,7 +395,7 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= $(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS)
+	$(INTL_CFLAGS) $(EXPAT_CFLAGS)
 
 RUNTEST = runtest
 RUNTESTFLAGS=
@@ -511,6 +516,7 @@ TARGET_FLAGS_TO_PASS = \
 # SFILES is used in building the distribution archive.
 
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
+	auxv.c available.c \
 	ax-general.c ax-gdb.c \
 	bcache.c \
 	bfd-target.c \
@@ -542,6 +548,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
+	parse-avail.c \
 	regcache.c reggroups.c remote.c remote-fileio.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
@@ -638,6 +645,7 @@ annotate_h = annotate.h $(symtab_h) $(gdbtypes_h)
 arch_utils_h = arch-utils.h
 arm_tdep_h = arm-tdep.h
 auxv_h = auxv.h
+available_h = available.h
 ax_gdb_h = ax-gdb.h
 ax_h = ax.h $(doublest_h)
 bcache_h = bcache.h
@@ -786,7 +794,7 @@ sparc_tdep_h = sparc-tdep.h
 srec_h = srec.h
 stabsread_h = stabsread.h
 stack_h = stack.h
-symfile_h = symfile.h
+symfile_h = symfile.h $(symtab_h)
 symtab_h = symtab.h
 target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 terminal_h = terminal.h
@@ -902,6 +910,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	version.o \
 	annotate.o \
 	auxv.o \
+	available.o parse-avail.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
 	charset.o disasm.o dummy-frame.o \
@@ -1759,10 +1768,13 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(arm_tdep_h) \
 	$(gdb_sim_arm_h) $(elf_bfd_h) $(coff_internal_h) $(elf_arm_h) \
 	$(gdb_assert_h) $(bfd_in2_h) $(libcoff_h) $(objfiles_h) \
-	$(dwarf2_frame_h)
+	$(dwarf2_frame_h) $(available_h)
 auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
 	$(inferior_h) $(valprint_h) $(gdb_assert_h) $(auxv_h) \
 	$(elf_common_h)
+available.o: available.c $(defs_h) $(symfile_h) $(target_h) $(available_h) \
+	$(arch_utils_h) $(gdbtypes_h) \
+	$(gdb_string) $(gdb_assert) $(gdb_obstack_h)
 avr-tdep.o: avr-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symfile_h) $(arch_utils_h) $(regcache_h) \
@@ -1982,7 +1994,8 @@ gcore.o: gcore.c $(defs_h) $(elf_bfd_h) $(infcall_h) $(inferior_h) \
 	$(gdb_assert_h)
 gdbarch.o: gdbarch.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) $(inferior_h) \
 	$(symcat_h) $(floatformat_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(gdb_events_h) $(reggroups_h) $(osabi_h) $(gdb_obstack_h)
+	$(gdb_events_h) $(reggroups_h) $(osabi_h) $(gdb_obstack_h) \
+	$(available_h)
 gdb.o: gdb.c $(defs_h) $(main_h) $(gdb_string_h) $(interps_h)
 gdb-events.o: gdb-events.c $(defs_h) $(gdb_events_h) $(gdbcmd_h)
 gdbtypes.o: gdbtypes.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
@@ -2126,7 +2139,7 @@ infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(symfile_h) $(gdbcore_h) $(target_h) $(language_h) $(symfile_h) \
 	$(objfiles_h) $(completer_h) $(ui_out_h) $(event_top_h) \
 	$(parser_defs_h) $(regcache_h) $(reggroups_h) $(block_h) \
-	$(solib_h) $(gdb_assert_h) $(observer_h)
+	$(solib_h) $(gdb_assert_h) $(gdb_obstack_h) $(observer_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h)
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
@@ -2376,6 +2389,8 @@ parse.o: parse.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(frame_h) $(expression_h) $(value_h) $(command_h) $(language_h) \
 	$(parser_defs_h) $(gdbcmd_h) $(symfile_h) $(inferior_h) \
 	$(doublest_h) $(gdb_assert_h) $(block_h)
+parse-avail.o: parse-avail.c $(defs_h) $(available_h) \
+	$(gdb_string) $(gdb_obstack_h)
 p-exp.o: p-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(p_lang_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(block_h)
@@ -2450,7 +2465,7 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(gdb_stabs_h) $(gdbthread_h) $(remote_h) $(regcache_h) $(value_h) \
 	$(gdb_assert_h) $(event_loop_h) $(event_top_h) $(inf_loop_h) \
 	$(serial_h) $(gdbcore_h) $(remote_fileio_h) $(solib_h) $(observer_h) \
-	$(cli_decode_h) $(cli_setshow_h)
+	$(cli_decode_h) $(cli_setshow_h) $(available_h)
 remote-e7000.o: remote-e7000.c $(defs_h) $(gdbcore_h) $(gdbarch_h) \
 	$(inferior_h) $(target_h) $(value_h) $(command_h) $(gdb_string_h) \
 	$(exceptions_h) $(gdbcmd_h) $(serial_h) $(remote_utils_h) \

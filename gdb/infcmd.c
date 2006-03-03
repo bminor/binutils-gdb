@@ -48,6 +48,9 @@
 #include <ctype.h>
 #include "gdb_assert.h"
 #include "observer.h"
+#include "available.h"
+
+#include "gdb_obstack.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -405,6 +408,25 @@ tty_command (char *file, int from_tty)
 void
 post_create_inferior (struct target_ops *target, int from_tty)
 {
+  /* The first thing we do after creating an inferior is update the
+     architecture with information provided by the target.
+
+     FIXME: In some cases we could do this after target_open
+     instead; should we?  */
+  if (gdbarch_available_features_support (current_gdbarch))
+    {
+      struct gdb_feature_set *features;
+      struct obstack tmp_obstack;
+
+      obstack_init (&tmp_obstack);
+      features = target_available_features (target, &tmp_obstack);
+
+      if (features)
+	arch_set_available_features (features);
+
+      obstack_free (&tmp_obstack, NULL);
+    }
+
   if (exec_bfd)
     {
       /* Sometimes the platform-specific hook loads initial shared

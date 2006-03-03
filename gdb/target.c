@@ -457,6 +457,7 @@ update_current_target (void)
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
+      /* Do not inherit to_available_features.  */
       INHERIT (to_magic, t);
     }
 #undef INHERIT
@@ -634,6 +635,7 @@ update_current_target (void)
   de_fault (to_async, 
 	    (void (*) (void (*) (enum inferior_event_type, void*), void*)) 
 	    tcomplain);
+  current_target.to_available_features = NULL;
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed
@@ -1378,8 +1380,9 @@ target_read (struct target_ops *ops,
 					  (gdb_byte *) buf + xfered,
 					  offset + xfered, len - xfered);
       /* Call an observer, notifying them of the xfer progress?  */
-      if (xfer <= 0)
-	/* Call memory_error?  */
+      if (xfer == 0)
+	return xfered;
+      if (xfer < 0)
 	return -1;
       xfered += xfer;
       QUIT;
@@ -1400,13 +1403,53 @@ target_write (struct target_ops *ops,
 					   (gdb_byte *) buf + xfered,
 					   offset + xfered, len - xfered);
       /* Call an observer, notifying them of the xfer progress?  */
-      if (xfer <= 0)
-	/* Call memory_error?  */
+      if (xfer == 0)
+	return xfered;
+      if (xfer < 0)
 	return -1;
       xfered += xfer;
       QUIT;
     }
   return len;
+}
+
+/* Perform a full target read of unknown size.  */
+
+LONGEST
+target_read_whole (struct target_ops *ops,
+		   enum target_object object,
+		   const char *annex, gdb_byte **buf_p)
+{
+  size_t buf_alloc = 512, buf_pos = 0;
+  gdb_byte *buf = xmalloc (buf_alloc);
+  LONGEST n, total;
+
+  total = 0;
+  while (1)
+    {
+      n = target_read (ops, object, annex, &buf[buf_pos],
+		       buf_pos, buf_alloc - buf_pos);
+      if (n < 0)
+	{
+	  /* An error occurred.  */
+	  xfree (buf);
+	  return -1;
+	}
+
+      buf_pos += n;
+      if (buf_pos < buf_alloc)
+	{
+	  /* Read all there was.  */
+	  if (buf_pos == 0)
+	    xfree (buf);
+	  else
+	    *buf_p = buf;
+	  return buf_pos;
+	}
+
+      buf_alloc *= 2;
+      buf = xrealloc (buf, buf_alloc);
+    }
 }
 
 /* Memory transfer methods.  */
@@ -1524,6 +1567,28 @@ target_follow_fork (int follow_child)
   /* Some target returned a fork event, but did not know how to follow it.  */
   internal_error (__FILE__, __LINE__,
 		  "could not find a target to follow fork");
+}
+
+/* Look for a target which can report architectural features, starting
+   from TARGET.  If we find one, return its features, using OBSTACK
+   for any temporary allocation.  */
+
+struct gdb_feature_set *
+target_available_features (struct target_ops *target, struct obstack *obstack)
+{
+  struct target_ops *t;
+
+  for (t = target; t != NULL; t = t->beneath)
+    if (t->to_available_features != NULL)
+      {
+	struct gdb_feature_set *features;
+
+	features = t->to_available_features (t, obstack);
+	if (features)
+	  return features;
+      }
+
+  return NULL;
 }
 
 /* Look through the list of possible targets for a target that can

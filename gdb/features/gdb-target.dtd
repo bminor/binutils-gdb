@@ -1,0 +1,50 @@
+<!-- The root element of a GDB target description is <target>.  It
+     contains a list of feature definitions, followed by a feature-set.
+     This is also the only point at which xi:include is supported;
+     it must be used with xpointer to fetch a feature, from a
+     document whose root element is either target or feature.  -->
+
+<!ELEMENT target	(feature*, feature-set)>
+<!ATTLIST target
+	xmlns:xi	CDATA	#FIXED "http://www.w3.org/2001/XInclude">
+
+<!ELEMENT feature-set	(description*, feature-ref+)>
+
+<!-- QUESTION: Is there any reason for feature-ref to have its own
+     descriptions?  Or a short name field (descriptive)?  -->
+<!ELEMENT feature-ref	EMPTY>
+<!ATTLIST feature-ref
+	name		IDREF	#REQUIRED
+	base-regnum	CDATA	#IMPLIED>
+
+<!-- TODO: Handle arch_data, maybe as unvalidated fields; do we want
+    to define a namespace for arch-specific fields?  Issue for feature
+    and for reg.  -->
+
+<!-- QUESTION: Should the feature also have a short description to identify
+     it?  The format of its "name" field is restricted and probably not
+     user-appropriate.  -->
+<!ELEMENT feature	(description*, reg*)>
+<!ATTLIST feature
+	name		ID	#REQUIRED>
+
+<!-- TODO: GDB does not yet support descriptions.  -->
+
+<!-- Registers do not have an explicit register number field; they
+     are numbered sequentially from the containing feature's base-regnum
+     when the feature is referenced.  -->
+<!-- arch_data; see above -->
+<!-- Kill save-restore in favor of a more complete scheme -->
+<!ELEMENT reg		(description*)>
+<!ATTLIST reg
+	name		CDATA	#REQUIRED
+	bitsize		CDATA	#REQUIRED
+	readonly	(yes | no) 'no'
+	save-restore	(yes | no) 'yes'
+	type		CDATA	'int'
+	group		CDATA	#IMPLIED
+	>
+
+<!ELEMENT description	(#PCDATA)>
+<!ATTLIST description
+	xml:lang	CDATA	#IMPLIED>
