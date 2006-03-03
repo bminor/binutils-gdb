@@ -1,3 +1,8 @@
+2006-03-02  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (m32c_offset_for_reloc): Fix local symbol
+	calculations.
+
 2006-03-02  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf32-ppc.c (is_ppc_elf_target): Return true if the target is

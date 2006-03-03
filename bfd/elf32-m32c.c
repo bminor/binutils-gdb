@@ -493,14 +493,15 @@ m32c_elf_relocate_section
 	}
 
 #if 0
-      printf("relocate %s at %06lx relocation %06lx addend %ld  ",
-	     m32c_elf_howto_table[ELF32_R_TYPE(rel->r_info)].name,
-	     rel->r_offset, relocation, rel->r_addend);
+      printf ("relocate %s at %06lx relocation %06lx addend %ld  ",
+	      m32c_elf_howto_table[ELF32_R_TYPE(rel->r_info)].name,
+	      rel->r_offset + input_section->output_section->vma + input_section->output_offset,
+	      relocation, rel->r_addend);
       {
 	int i;
 	for (i=0; i<4; i++)
-	  printf(" %02x", contents[rel->r_offset+i]);
-	printf("\n");
+	  printf (" %02x", contents[rel->r_offset+i]);
+	printf ("\n");
       }
 #endif
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
@@ -1219,10 +1220,9 @@ compare_reloc (const void *e1, const void *e2)
     return i1->r_offset < i2->r_offset ? -1 : 1;
 }
 
-#define OFFSET_FOR_RELOC(rel) m32c_offset_for_reloc (abfd, sec, rel, symtab_hdr, shndx_buf, intsyms)
+#define OFFSET_FOR_RELOC(rel) m32c_offset_for_reloc (abfd, rel, symtab_hdr, shndx_buf, intsyms)
 static bfd_vma
 m32c_offset_for_reloc (bfd *abfd,
-		       asection * sec,
 		       Elf_Internal_Rela *rel,
 		       Elf_Internal_Shdr *symtab_hdr,
 		       Elf_External_Sym_Shndx *shndx_buf,
@@ -1236,13 +1236,17 @@ m32c_offset_for_reloc (bfd *abfd,
       /* A local symbol.  */
       Elf_Internal_Sym *isym;
       Elf_External_Sym_Shndx *shndx;
+      asection *ssec;
+
 
       isym = intsyms + ELF32_R_SYM (rel->r_info);
+      ssec = bfd_section_from_elf_index (abfd, isym->st_shndx);
       shndx = shndx_buf + (shndx_buf ? ELF32_R_SYM (rel->r_info) : 0);
 
-      symval = (isym->st_value
-		+ sec->output_section->vma
-		+ sec->output_offset);
+      symval = isym->st_value;
+      if (ssec)
+	symval += ssec->output_section->vma
+	  + ssec->output_offset;
     }
   else
     {
