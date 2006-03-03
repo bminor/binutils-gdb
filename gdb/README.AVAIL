@@ -81,6 +81,9 @@ the document after XInclude processing.
 TODO items and unsettled (or unasked) questions
 -----------------------------------------------
 
+When finished this documentation needs to move into the user and internals
+manual.
+
 The "ro" and "save-restore" tags may not express enough information about
 how to treat system registers.  Richard Earnshaw suggested a more detailed
 categorization; I need to consider it.
