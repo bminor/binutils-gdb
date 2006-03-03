@@ -1,3 +1,8 @@
+2006-03-03  Khem Raj <khem@mvista.com>
+
+	* remote-rdp.c (remote_rdp_xfer_inferior_memory): Use gdb_byte.
+	Committed by Andrew Cagney.
+	
 2006-03-02  Corinna Vinschen  <vinschen@redhat.com>
 
 	* mn10300-tdep.c (mn10300_push_dummy_call): Write breakpoint

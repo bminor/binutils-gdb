@@ -172,7 +172,7 @@ static int timeout = 2;
 static char *commandline = NULL;
 
 static int
-remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 				 int write, 
 				 struct mem_attrib *attrib,
 				 struct target_ops *target);
@@ -1261,7 +1261,7 @@ remote_rdp_prepare_to_store (void)
    Returns the number of bytes transferred. */
 
 static int
-remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len,
+remote_rdp_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 				 int write, struct mem_attrib *attrib,
 				 struct target_ops *target)
 {
