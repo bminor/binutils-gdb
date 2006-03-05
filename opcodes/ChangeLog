@@ -1,8 +1,23 @@
+2006-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* cgen-ibld.in (insert_normal): Cope with attempts to insert a
+	signed 32-bit value into an unsigned 32-bit field when the host is
+	a 64-bit machine.
+	* fr30-ibld.c: Regenerate.
+	* frv-ibld.c: Regenerate.
+	* ip2k-ibld.c: Regenerate.
+	* iq2000-asm.c: Regenerate.
+	* iq2000-ibld.c: Regenerate.
+	* m32c-ibld.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* openrisc-ibld.c: Regenerate.
+	* xc16x-ibld.c: Regenerate.
+	* xstormy16-ibld.c: Regenerate.
+
 2006-03-03 Shrirang Khisti <shrirangk@kpitcummins.com)
 
 	* xc16x-asm.c: Regenerate.
 	* xc16x-dis.c: Regenerate.
-	* xc16x-ibld.c: Regenerate.
 
 2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
 
