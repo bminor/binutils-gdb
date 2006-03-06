@@ -1,3 +1,20 @@
+2006-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	PR binutils/2338
+	* dwarf2.c (loadable_section): New struct.
+	(dwarf2_debug): Add loadable_section_count and
+	loadable_sections.
+	(new_line_sorts_after): New.
+	(add_line_info): Use new_line_sorts_after to compare line
+	addresses.
+	(check_function_name): Removed.
+	(unset_sections): New.
+	(place_sections): New.
+	(_bfd_dwarf2_find_nearest_line): Updated. Call place_sections
+	and unset_sections on relocatable files.
+	(_bfd_dwarf2_find_line): Likewise.
+
 2006-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* cpu-avr.c: Update to ISO-C90 formatting.
