@@ -1,3 +1,8 @@
+2006-03-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gas/m68k/arch-cpu-1.s: Tweak.
+	* gas/m68k/arch-cpu-1.d: Tweak.
+
 2006-02-28  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/all/altmacro.s: Adjust.

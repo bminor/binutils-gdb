@@ -1,3 +1,7 @@
+2006-03-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* readelf.c (get_machine_flags): Adjust.
+
 2006-03-03  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (frame_display_row, display_debug_frames): Handle

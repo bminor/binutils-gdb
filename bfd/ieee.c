@@ -3466,22 +3466,22 @@ ieee_write_processor (bfd *abfd)
 	  case bfd_mach_m68040: id = "68040"; break;
 	  case bfd_mach_m68060: id = "68060"; break;
 	  case bfd_mach_cpu32:  id = "cpu32"; break;
+	  case bfd_mach_mcf_isa_a_nodiv: id = "isa-a:nodiv"; break;
 	  case bfd_mach_mcf_isa_a: id = "isa-a"; break;
-	  case bfd_mach_mcf_isa_a_div: id = "isa-a:div"; break;
-	  case bfd_mach_mcf_isa_a_div_mac: id = "isa-a:div:mac"; break;
-	  case bfd_mach_mcf_isa_a_div_emac: id = "isa-a:div:emac"; break;
-	  case bfd_mach_mcf_isa_aplus: id = "isa-a+"; break;
-	  case bfd_mach_mcf_isa_aplus_mac: id = "isa-a+:mac"; break;
-	  case bfd_mach_mcf_isa_aplus_emac: id = "isa-a+:mac"; break;
-	  case bfd_mach_mcf_isa_aplus_usp: id = "isa-a+:usp"; break;
-	  case bfd_mach_mcf_isa_aplus_usp_mac: id = "isa-a+:usp:mac"; break;
-	  case bfd_mach_mcf_isa_aplus_usp_emac: id = "isa-a+:usp:emac"; break;
+	  case bfd_mach_mcf_isa_a_mac: id = "isa-a:mac"; break;
+	  case bfd_mach_mcf_isa_a_emac: id = "isa-a:emac"; break;
+	  case bfd_mach_mcf_isa_aplus: id = "isa-aplus"; break;
+	  case bfd_mach_mcf_isa_aplus_mac: id = "isa-aplus:mac"; break;
+	  case bfd_mach_mcf_isa_aplus_emac: id = "isa-aplus:mac"; break;
+	  case bfd_mach_mcf_isa_b_nousp: id = "isa-b:nousp"; break;
+	  case bfd_mach_mcf_isa_b_nousp_mac: id = "isa-b:nousp:mac"; break;
+	  case bfd_mach_mcf_isa_b_nousp_emac: id = "isa-b:nousp:emac"; break;
 	  case bfd_mach_mcf_isa_b: id = "isa-b"; break;
 	  case bfd_mach_mcf_isa_b_mac: id = "isa-b:mac"; break;
 	  case bfd_mach_mcf_isa_b_emac: id = "isa-b:emac"; break;
-	  case bfd_mach_mcf_isa_b_usp_float: id = "isa-b:usp:float"; break;
-	  case bfd_mach_mcf_isa_b_usp_float_mac: id = "isa-b:usp:float:mac"; break;
-	  case bfd_mach_mcf_isa_b_usp_float_emac: id = "isa-b:usp:float:emac"; break;
+	  case bfd_mach_mcf_isa_b_float: id = "isa-b:float"; break;
+	  case bfd_mach_mcf_isa_b_float_mac: id = "isa-b:float:mac"; break;
+	  case bfd_mach_mcf_isa_b_float_emac: id = "isa-b:float:emac"; break;
 	  }
 
 	if (! ieee_write_id (abfd, id))

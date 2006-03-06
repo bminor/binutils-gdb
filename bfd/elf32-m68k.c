@@ -390,18 +390,22 @@ elf32_m68k_object_p (bfd *abfd)
     {
       switch (eflags & EF_M68K_ISA_MASK)
 	{
-	case EF_M68K_ISA_B:
-	  features |= mcfisa_b;
-	  /* FALLTHROUGH */
-	case EF_M68K_ISA_A_PLUS:
-	  features |= mcfisa_aa;
-	  /* FALLTHROUGH */
-	case EF_M68K_ISA_A:
+	case EF_M68K_ISA_A_NODIV:
 	  features |= mcfisa_a;
 	  break;
+	case EF_M68K_ISA_A:
+	  features |= mcfisa_a|mcfhwdiv;
+	  break;
+	case EF_M68K_ISA_A_PLUS:
+	  features |= mcfisa_a|mcfisa_aa|mcfhwdiv|mcfusp;
+	  break;
+	case EF_M68K_ISA_B_NOUSP:
+	  features |= mcfisa_a|mcfisa_b|mcfhwdiv;
+	  break;
+	case EF_M68K_ISA_B:
+	  features |= mcfisa_a|mcfisa_b|mcfhwdiv|mcfusp;
+	  break;
 	}
-      if (eflags & EF_M68K_HW_DIV)
-	features |= mcfhwdiv;
       switch (eflags & EF_M68K_MAC_MASK)
 	{
 	case EF_M68K_MAC:
@@ -411,8 +415,6 @@ elf32_m68k_object_p (bfd *abfd)
 	  features |= mcfemac;
 	  break;
 	}
-      if (eflags & EF_M68K_USP)
-	features |= mcfusp;
       if (eflags & EF_M68K_FLOAT)
 	features |= cfloat;
     }
@@ -462,7 +464,8 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
 	  if (in_mach > out_mach)
 	    out_mach = in_mach;
 	}
-      else if (in_mach >= bfd_mach_mcf_isa_a && out_mach >= bfd_mach_mcf_isa_a)
+      else if (in_mach >= bfd_mach_mcf_isa_a_nodiv
+	       && out_mach >= bfd_mach_mcf_isa_a_nodiv)
 	/* Merge cf machine.  */
 	out_mach = bfd_m68k_features_to_mach
 	  (bfd_m68k_mach_to_features (in_mach)
@@ -483,27 +486,37 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
     }
   else
     {
+      flagword isa_in = in_flags & EF_M68K_ISA_MASK;
+      flagword isa_out = out_flags & EF_M68K_ISA_MASK;
+      
+      
       /* Copy legacy flags.  */
       out_flags |= in_flags & (EF_M68K_CPU32 | EF_M68K_M68000 | EF_M68K_CFV4E);
 
-      if (((in_flags | out_flags) & EF_M68K_ISA_MASK)
+      if ((isa_in | isa_out)
 	  && ((in_flags | out_flags) & (EF_M68K_CPU32 | EF_M68K_M68000)))
 	/* Mixing m68k and cf is not allowed */
 	return FALSE;
       
-      if (in_flags & EF_M68K_ISA_MASK)
+      if (isa_in)
 	{
-	  if (out_flags & EF_M68K_ISA_MASK)
+	  if (isa_out)
 	    {
-	      /* Merge cf specific flags */
-	      if ((in_flags & EF_M68K_ISA_MASK)
-		  > (out_flags & EF_M68K_ISA_MASK))
-		{
-		  out_flags ^= out_flags & EF_M68K_ISA_MASK;
-		  out_flags |= in_flags & EF_M68K_ISA_MASK;
-		}
-	      out_flags |= in_flags
-		& (EF_M68K_HW_DIV | EF_M68K_USP | EF_M68K_FLOAT);
+	      if (isa_out == EF_M68K_ISA_A_PLUS
+		  && (isa_in == EF_M68K_ISA_B_NOUSP
+		      || isa_in == EF_M68K_ISA_B))
+		/* Cannot mix A+ and B */
+		return FALSE;
+	      if (isa_in == EF_M68K_ISA_A_PLUS
+		  && (isa_out == EF_M68K_ISA_B_NOUSP
+		      || isa_out == EF_M68K_ISA_B))
+		/* Cannot mix B and A+ */
+		return FALSE;
+	      
+	      if (isa_in > isa_out)
+		out_flags ^= isa_in ^ isa_out;
+
+	      out_flags |= in_flags & EF_M68K_FLOAT;
 	      if (in_flags & EF_M68K_MAC_MASK)
 		{
 		  if (!(out_flags & EF_M68K_MAC_MASK))
@@ -559,22 +572,31 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
     {
       char const *isa = _("unknown");
       char const *mac = _("unknown");
+      char const *additional = "";
       
       switch (eflags & EF_M68K_ISA_MASK)
 	{
+	case EF_M68K_ISA_A_NODIV:
+	  isa = "A";
+	  additional = " [nodiv]";
+	  break;
 	case EF_M68K_ISA_A:
 	  isa = "A";
 	  break;
 	case EF_M68K_ISA_A_PLUS:
 	  isa = "A+";
 	  break;
+	case EF_M68K_ISA_B_NOUSP:
+	  isa = "B";
+	  additional = " [nousp]";
+	  break;
 	case EF_M68K_ISA_B:
 	  isa = "B";
 	  break;
 	}
-      fprintf (file, " [isa %s]", isa);
-      if (eflags & EF_M68K_HW_DIV)
-	fprintf (file, " [hwdiv]");
+      fprintf (file, " [isa %s]%s", isa, additional);
+      if (eflags & EF_M68K_FLOAT)
+	fprintf (file, " [float]");
       switch (eflags & EF_M68K_MAC_MASK)
 	{
 	case 0:
@@ -589,10 +611,6 @@ elf32_m68k_print_private_bfd_data (abfd, ptr)
 	}
       if (mac)
 	fprintf (file, " [%s]", mac);
-      if (eflags & EF_M68K_USP)
-	fprintf (file, " [usp");
-      if (eflags & EF_M68K_FLOAT)
-	fprintf (file, " [float]");
     }
   
   fputc ('\n', file);

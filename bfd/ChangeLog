@@ -1,3 +1,17 @@
+2006-03-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* archures.c (bfd_mach_mcf_isa_a_nodiv, bfd_mach_mcf_isa_b_nousp):
+	New.  Adjust other variants.
+	(bfd_default_scan): Update.
+	* bfd-in2.h: Rebuilt.
+	* cpu-m68k.c: Adjust.
+	(bfd_m68k_compatible): New. Use it for architectures.
+	* elf32-m68k.c (elf32_m68k_object_p): Adjust.
+	(elf32_m68k_merge_private_bfd_data): Adjust.  Correct isa-a/b
+	mismatch.
+	(elf32_m68k_print_private_bfd_data): Adjust.
+	* ieee.c (ieee_write_processor): Adjust.
+	
 2006-03-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2.c: Formatting.

@@ -3,7 +3,7 @@
 
 
 .*:     file format elf32-m68k
-private flags = 22: \[isa A\+\] \[emac\]
+private flags = 21: \[isa A\] \[nodiv\] \[emac\]
 
 Disassembly of section .text:
 

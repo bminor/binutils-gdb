@@ -368,7 +368,11 @@ struct m68k_cpu
   unsigned long arch;	/* Architecture features.  */
   unsigned long chip;	/* Specific chip */
   const char *name;	/* Name */
-  unsigned alias;
+  int alias;       	/* Alias for a cannonical name.  If 1, then
+			   succeeds canonical name, if -1 then
+			   succeeds canonical name, if <-1 ||>1 this is a
+			   deprecated name, and the next/previous name
+			   should be used. */
 };
 
 /* We hold flags for features explicitly enabled and explicitly
@@ -391,23 +395,25 @@ static const struct m68k_cpu m68k_archs[] =
   {m68060,					cpu_m68060, "68060", 0},
   {cpu32|m68881,				cpu_cpu32, "cpu32", 0},
   {mcfisa_a|mcfhwdiv,				0, "isaa", 0},
-  {mcfisa_a|mcfhwdiv|mcfisa_aa,			0, "isaaplus", 0},
-  {mcfisa_a|mcfhwdiv|mcfisa_b,			0, "isab", 0},
+  {mcfisa_a|mcfhwdiv|mcfisa_aa|mcfusp,		0, "isaaplus", 0},
+  {mcfisa_a|mcfhwdiv|mcfisa_b|mcfusp,		0, "isab", 0},
   {mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
    cpu_cf547x, "cfv4e", 0},
   {0,0,NULL, 0}
 };
 
-/* Architecture extensions.  */
+/* Architecture extensions, here 'alias' -1 for m68k, +1 for cf and 0
+   for either.  */
 static const struct m68k_cpu m68k_extensions[] =
 {
-  {m68851,					0, "68851", 0},
-  {m68881,					0, "68881", 0},
-  {m68881,					0, "68882", 0},
+  {m68851,					0, "68851", -1},
+  {m68881,					0, "68881", -1},
+  {m68881,					0, "68882", -1},
+  
+  {cfloat|m68881,				0, "float", 0},
   
   {mcfhwdiv,					0, "div", 1},
   {mcfusp,					0, "usp", 1},
-  {cfloat,					0, "float", 1},
   {mcfmac,					0, "mac", 1},
   {mcfemac,					0, "emac", 1},
    
@@ -426,13 +432,13 @@ static const struct m68k_cpu m68k_cpus[] =
   { cpu32|m68881,				cpu_cpu32, "cpu32",  0},
   { mcfisa_a,					cpu_cf5200, "5200", 0},
   { mcfisa_a|mcfhwdiv|mcfmac,			cpu_cf5206e, "5206e", 0},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac,	cpu_cf5208, "5208", 0},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac,	cpu_cf5213, "5213", 0},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	cpu_cf5208, "5208", 0},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	cpu_cf5213, "5213", 0},
   { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,cpu_cf521x, "521x", 0},
   { mcfisa_a|mcfhwdiv|mcfemac,		cpu_cf5249, "5249", 0},
   { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,cpu_cf528x, "528x", 0},
   { mcfisa_a|mcfhwdiv|mcfmac,			cpu_cf5307, "5307", 0},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,	cpu_cf5329, "5329", 0},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf5329, "5329", 0},
   { mcfisa_a|mcfhwdiv|mcfisa_b|mcfmac,	cpu_cf5407, "5407",0},
   { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
     cpu_cf547x, "547x", 0},
@@ -467,16 +473,16 @@ static const struct m68k_cpu m68k_cpus[] =
   { mcfisa_a,					cpu_cf5200, "5202", 1},
   { mcfisa_a,					cpu_cf5200, "5204", 1},
   { mcfisa_a,					cpu_cf5200, "5206", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac,		cpu_cf5208, "5207", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac,		cpu_cf5213, "5211", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac,		cpu_cf5213, "5212", 1},
-  { mcfisa_a|mcfhwdiv|mcfisa_aa|mcfemac,	cpu_cf521x, "5214", 1},
-  { mcfisa_a|mcfhwdiv|mcfisa_aa|mcfemac,	cpu_cf521x, "5216", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,	cpu_cf5329, "5327", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,	cpu_cf5329, "5328", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,	cpu_cf528x, "5280", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,	cpu_cf528x, "5281", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac,	cpu_cf528x, "5282", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	cpu_cf5208, "5207", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	cpu_cf5213, "5211", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	cpu_cf5213, "5212", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf521x, "5214", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf521x, "5216", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf5329, "5327", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf5329, "5328", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf528x, "5280", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf528x, "5281", 1},
+  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf528x, "5282", 1},
   { mcfisa_a|mcfhwdiv|mcfisa_b|mcfmac,	cpu_cf5407,	"cfv4", 1 },
   { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
     cpu_cf547x, "cfv4e", 1 },
@@ -1700,11 +1706,13 @@ m68k_ip (char *instring)
 		case 'J':
 		  if (opP->mode != CONTROL
 		      || opP->reg < USP
-		      || opP->reg > last_movec_reg)
+		      || opP->reg > last_movec_reg
+		      || !control_regs)
 		    losing++;
 		  else
 		    {
 		      const enum m68k_register *rp;
+		      
 		      for (rp = control_regs; *rp; rp++)
 			if (*rp == opP->reg)
 			  break;
@@ -7271,6 +7279,8 @@ md_parse_option (int c, char *arg)
 	m68k_set_cpu (arg + 4, 1, 0);
       else if (m68k_set_extension (arg, 0, 1))
 	;
+      else if (m68k_set_arch (arg, 0, 1))
+	;
       else if (m68k_set_cpu (arg, 0, 1))
 	;
       else
@@ -7289,35 +7299,42 @@ md_parse_option (int c, char *arg)
 static void
 m68k_init_arch (void)
 {
-  unsigned arch_of_chip = 0;
-  
   if (not_current_architecture & current_architecture)
     {
       as_bad (_("architecture features both enabled and disabled"));
       not_current_architecture &= ~current_architecture;
     }
   if (selected_arch)
+    current_architecture |= selected_arch->arch;
+  else
+    current_architecture |= selected_cpu->arch;
+
+  current_architecture &= ~not_current_architecture;
+  
+  if (selected_cpu)
     {
-      arch_of_chip = selected_arch->arch;
-      current_chip = selected_arch->chip;
-      if (selected_cpu && (arch_of_chip & ~selected_cpu->arch))
+      if (current_architecture & ~selected_cpu->arch)
 	{
-	  as_bad (_("selected processor is not from selected architecture"));
-	  arch_of_chip = selected_cpu->arch;
+	  as_bad (_("selected processor does not have all features of selected architecture"));
+	  current_architecture
+	    = selected_cpu->arch & ~not_current_architecture;
 	}
     }
-  else
-    arch_of_chip = selected_cpu->arch;
-  if (selected_cpu)
-    current_chip = selected_cpu->chip;
 
-  current_architecture |= arch_of_chip;
-  current_architecture &= ~not_current_architecture;
+  if ((current_architecture & (cfloat | m68881)) == (cfloat | m68881))
+    {
+      /* Determine which float is really meant.  */
+      if (current_architecture & (m68k_mask & ~m68881))
+	current_architecture ^= cfloat;
+      else
+	current_architecture ^= m68881;
+    }
+
   if ((current_architecture & m68k_mask)
       && (current_architecture & ~m68k_mask))
     {
       as_bad (_ ("m68k and cf features both selected"));
-      if (arch_of_chip & m68k_mask)
+      if (current_architecture & m68k_mask)
 	current_architecture &= m68k_mask;
       else
 	current_architecture &= ~m68k_mask;
@@ -7375,8 +7392,10 @@ md_show_usage (FILE *stream)
 "), default_cpu);
   for (i = 0; m68k_extensions[i].name; i++)
     fprintf (stream, _("\
--m[no-]%-16s enable/disable %s architecture extension\n\
-"), m68k_extensions[i].name, m68k_extensions[i].alias ? "ColdFire" : "m68k");
+-m[no-]%-16s enable/disable%s architecture extension\n\
+"), m68k_extensions[i].name,
+	     m68k_extensions[i].alias > 0 ? " ColdFire"
+	     : m68k_extensions[i].alias < 0 ? " m68k" : "");
   
   fprintf (stream, _("\
 -l			use 1 word for refs to undefined symbols [default 2]\n\
@@ -7568,27 +7587,59 @@ m68k_elf_final_processing (void)
   
   if (current_architecture & mcfisa_a)
     {
-      /* Set coldfire specific elf flags */
-      if (current_architecture & mcfisa_b)
-	flags |= EF_M68K_ISA_B;
-      else if (current_architecture & mcfisa_aa)
-	flags |= EF_M68K_ISA_A_PLUS;
-      else
-	flags |= EF_M68K_ISA_A;
-
-      if (current_architecture & mcfhwdiv)
-	flags |= EF_M68K_HW_DIV;
-
-      if (current_architecture & mcfusp)
-	flags |= EF_M68K_USP;
+      static const unsigned isa_features[][2] =
+      {
+	{EF_M68K_ISA_A_NODIV, mcfisa_a},
+	{EF_M68K_ISA_A,	mcfisa_a|mcfhwdiv},
+	{EF_M68K_ISA_A_PLUS,mcfisa_a|mcfisa_aa|mcfhwdiv|mcfusp},
+	{EF_M68K_ISA_B_NOUSP,mcfisa_a|mcfisa_b|mcfhwdiv},
+	{EF_M68K_ISA_B,	mcfisa_a|mcfisa_b|mcfhwdiv|mcfusp},
+	{0,0},
+      };
+      static const unsigned mac_features[][2] =
+      {
+	{EF_M68K_MAC, mcfmac},
+	{EF_M68K_EMAC, mcfemac},
+	{0,0},
+      };
+      unsigned ix;
+      unsigned pattern;
       
-      if (current_architecture & cfloat)
-	flags |= EF_M68K_FLOAT;
+      pattern = (current_architecture
+		 & (mcfisa_a|mcfisa_aa|mcfisa_b|mcfhwdiv|mcfusp));
+      for (ix = 0; isa_features[ix][1]; ix++)
+	{
+	  if (pattern == isa_features[ix][1])
+	    {
+	      flags |= isa_features[ix][0];
+	      break;
+	    }
+	}
+      if (!isa_features[ix][1])
+	{
+	cf_bad:
+	  as_warn (_("Not a defined coldfire architecture"));
+	}
+      else
+	{
+	  if (current_architecture & cfloat)
+	    flags |= EF_M68K_FLOAT | EF_M68K_CFV4E;
 
-      if (current_architecture & mcfmac)
-	flags |= EF_M68K_MAC;
-      else if (current_architecture & mcfemac)
-	flags |= EF_M68K_EMAC;
+	  pattern = current_architecture & (mcfmac|mcfemac);
+	  if (pattern)
+	    {
+	      for (ix = 0; mac_features[ix][1]; ix++)
+		{
+		  if (pattern == mac_features[ix][1])
+		    {
+		      flags |= mac_features[ix][0];
+		      break;
+		    }
+		}
+	      if (!mac_features[ix][1])
+		goto cf_bad;
+	    }
+	}
     }
   elf_elfheader (stdoutput)->e_flags |= flags;
 }

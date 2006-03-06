@@ -1949,14 +1949,23 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    {
 	      char const *isa = _("unknown");
 	      char const *mac = _("unknown mac");
+	      char const *additional = NULL;
       
 	      switch (e_flags & EF_M68K_ISA_MASK)
 		{
+		case EF_M68K_ISA_A_NODIV:
+		  isa = "A";
+		  additional = ", nodiv";
+		  break;
 		case EF_M68K_ISA_A:
 		  isa = "A";
 		  break;
 		case EF_M68K_ISA_A_PLUS:
 		  isa = "A+";
+		  break;
+		case EF_M68K_ISA_B_NOUSP:
+		  isa = "B";
+		  additional = ", nousp";
 		  break;
 		case EF_M68K_ISA_B:
 		  isa = "B";
@@ -1964,8 +1973,10 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 		}
 	      strcat (buf, ", cf, isa ");
 	      strcat (buf, isa);
-	      if (e_flags & EF_M68K_HW_DIV)
-		strcat (buf, ", hwdiv");
+	      if (additional)
+		strcat (buf, additional);
+	      if (e_flags & EF_M68K_FLOAT)
+		strcat (buf, ", float");
 	      switch (e_flags & EF_M68K_MAC_MASK)
 		{
 		case 0:
@@ -1983,10 +1994,6 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 		  strcat (buf, ", ");
 		  strcat (buf, mac);
 		}
-	      if (e_flags & EF_M68K_USP)
-		strcat (buf, ", usp");
-	      if (e_flags & EF_M68K_FLOAT)
-		strcat (buf, ", float");
 	    }
 	  break;
 

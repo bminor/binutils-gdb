@@ -1,3 +1,7 @@
+2006-03-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-m68k: New tests.
+
 2006-03-03  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-i386/vxworks1-static.d, ld-i386/vxworks2.s,

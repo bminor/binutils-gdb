@@ -1674,22 +1674,22 @@ enum bfd_architecture
 #define bfd_mach_m68040 6
 #define bfd_mach_m68060 7
 #define bfd_mach_cpu32  8
-#define bfd_mach_mcf_isa_a 9
-#define bfd_mach_mcf_isa_a_div 10
-#define bfd_mach_mcf_isa_a_div_mac 11
-#define bfd_mach_mcf_isa_a_div_emac 12
+#define bfd_mach_mcf_isa_a_nodiv 9
+#define bfd_mach_mcf_isa_a 10
+#define bfd_mach_mcf_isa_a_mac 11
+#define bfd_mach_mcf_isa_a_emac 12
 #define bfd_mach_mcf_isa_aplus 13
 #define bfd_mach_mcf_isa_aplus_mac 14
 #define bfd_mach_mcf_isa_aplus_emac 15
-#define bfd_mach_mcf_isa_aplus_usp 16
-#define bfd_mach_mcf_isa_aplus_usp_mac 17
-#define bfd_mach_mcf_isa_aplus_usp_emac 18
+#define bfd_mach_mcf_isa_b_nousp 16
+#define bfd_mach_mcf_isa_b_nousp_mac 17
+#define bfd_mach_mcf_isa_b_nousp_emac 18
 #define bfd_mach_mcf_isa_b 19
 #define bfd_mach_mcf_isa_b_mac 20
 #define bfd_mach_mcf_isa_b_emac 21
-#define bfd_mach_mcf_isa_b_usp_float 22
-#define bfd_mach_mcf_isa_b_usp_float_mac 23
-#define bfd_mach_mcf_isa_b_usp_float_emac 24
+#define bfd_mach_mcf_isa_b_float 22
+#define bfd_mach_mcf_isa_b_float_mac 23
+#define bfd_mach_mcf_isa_b_float_emac 24
   bfd_arch_vax,       /* DEC Vax */
   bfd_arch_i960,      /* Intel 960 */
     /* The order of the following is important.

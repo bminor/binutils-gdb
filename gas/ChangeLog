@@ -1,3 +1,14 @@
+2006-03-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (m68k_extensions): Allow 'float' on both m68k
+	and cf.
+	(m68k_ip): <case 'J'> Check we have some control regs.
+	(md_parse_option): Allow raw arch switch.
+	(m68k_init_arch): Better detection of arch/cpu mismatch.  Detect
+	whether 68881 or cfloat was meant by -mfloat.
+	(md_show_usage): Adjust extension display.
+	(m68k_elf_final_processing): Adjust.
+
 2006-03-03  Bjoern Haase  <bjoern.m.haase@web.de>
 
 	* config/tc-avr.c (avr_mod_hash_value): New function.
