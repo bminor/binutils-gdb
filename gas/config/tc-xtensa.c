@@ -10078,11 +10078,10 @@ xtensa_post_relax_hook (void)
 
   xtensa_find_unmarked_state_frags ();
 
-  if (use_literal_section)
-    xtensa_create_property_segments (get_frag_is_literal,
-				     NULL,
-				     XTENSA_LIT_SEC_NAME,
-				     xt_literal_sec);
+  xtensa_create_property_segments (get_frag_is_literal,
+				   NULL,
+				   XTENSA_LIT_SEC_NAME,
+				   xt_literal_sec);
   xtensa_create_xproperty_segments (get_frag_property_flags,
 				    XTENSA_PROP_SEC_NAME,
 				    xt_prop_sec);
