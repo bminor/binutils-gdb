@@ -1,3 +1,8 @@
+2006-03-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2.c: Formatting.
+	(add_line_info): Remove outer loop.
+
 2006-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

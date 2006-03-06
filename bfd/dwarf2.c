@@ -1,6 +1,6 @@
 /* DWARF 2 support.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -493,21 +493,21 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 	      amt *= sizeof (struct attr_abbrev);
 	      tmp = bfd_realloc (cur_abbrev->attrs, amt);
 	      if (tmp == NULL)
-	        {
-	          size_t i;
+		{
+		  size_t i;
 
-	          for (i = 0; i < ABBREV_HASH_SIZE; i++)
-	            {
-	            struct abbrev_info *abbrev = abbrevs[i];
+		  for (i = 0; i < ABBREV_HASH_SIZE; i++)
+		    {
+		      struct abbrev_info *abbrev = abbrevs[i];
 
-	            while (abbrev)
-	              {
-	                free (abbrev->attrs);
-	                abbrev = abbrev->next;
-	              }
-	            }
-	          return NULL;
-	        }
+		      while (abbrev)
+			{
+			  free (abbrev->attrs);
+			  abbrev = abbrev->next;
+			}
+		    }
+		  return NULL;
+		}
 	      cur_abbrev->attrs = tmp;
 	    }
 
@@ -533,7 +533,7 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 	 for the next compile unit) or if the end of the abbreviation
 	 table is reached.  */
       if ((unsigned int) (abbrev_ptr - stash->dwarf_abbrev_buffer)
-	    >= stash->dwarf_abbrev_size)
+	  >= stash->dwarf_abbrev_size)
 	break;
       abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
       abbrev_ptr += bytes_read;
@@ -813,56 +813,45 @@ add_line_info (struct line_info_table *table,
 
      Note: we may receive duplicate entries from 'decode_line_info'.  */
 
-  while (1)
-    if (!table->last_line
-	|| new_line_sorts_after (info, table->last_line))
-      {
-	/* Normal case: add 'info' to the beginning of the list */
-	info->prev_line = table->last_line;
-	table->last_line = info;
+  if (!table->last_line
+      || new_line_sorts_after (info, table->last_line))
+    {
+      /* Normal case: add 'info' to the beginning of the list */
+      info->prev_line = table->last_line;
+      table->last_line = info;
 
-	/* lcl_head: initialize to head a *possible* sequence at the end.  */
-	if (!table->lcl_head)
-	  table->lcl_head = info;
-	break;
-      }
-    else if (!table->lcl_head->prev_line
-	     && !new_line_sorts_after (info, table->lcl_head))
-      {
-	/* Abnormal but easy: lcl_head is 1) at the *end* of the line
-	   list and 2) the head of 'info'.  */
-	info->prev_line = NULL;
-	table->lcl_head->prev_line = info;
-	break;
-      }
-    else if (table->lcl_head->prev_line
-	     && !new_line_sorts_after (info, table->lcl_head)
-	     && new_line_sorts_after (info, table->lcl_head->prev_line))
-      {
-	/* Abnormal but easy: lcl_head is 1) in the *middle* of the line
-	   list and 2) the head of 'info'.  */
-	info->prev_line = table->lcl_head->prev_line;
-	table->lcl_head->prev_line = info;
-	break;
-      }
-    else
-      {
-	/* Abnormal and hard: Neither 'last_line' nor 'lcl_head' are valid
-	   heads for 'info'.  Reset 'lcl_head' and repeat.  */
-	struct line_info* li2 = table->last_line; /* always non-NULL */
-	struct line_info* li1 = li2->prev_line;
+      /* lcl_head: initialize to head a *possible* sequence at the end.  */
+      if (!table->lcl_head)
+	table->lcl_head = info;
+    }
+  else if (!new_line_sorts_after (info, table->lcl_head)
+	   && (!table->lcl_head->prev_line
+	       || new_line_sorts_after (info, table->lcl_head->prev_line)))
+    {
+      /* Abnormal but easy: lcl_head is the head of 'info'.  */
+      info->prev_line = table->lcl_head->prev_line;
+      table->lcl_head->prev_line = info;
+    }
+  else
+    {
+      /* Abnormal and hard: Neither 'last_line' nor 'lcl_head' are valid
+	 heads for 'info'.  Reset 'lcl_head'.  */
+      struct line_info* li2 = table->last_line; /* always non-NULL */
+      struct line_info* li1 = li2->prev_line;
 
-	while (li1)
-	  {
-	    if (!new_line_sorts_after (info, li2)
-		&& new_line_sorts_after (info, li1))
-	      break;
+      while (li1)
+	{
+	  if (!new_line_sorts_after (info, li2)
+	      && new_line_sorts_after (info, li1))
+	    break;
 
-	    li2 = li1; /* always non-NULL */
-	    li1 = li1->prev_line;
-	  }
-	table->lcl_head = li2;
-      }
+	  li2 = li1; /* always non-NULL */
+	  li1 = li1->prev_line;
+	}
+      table->lcl_head = li2;
+      info->prev_line = table->lcl_head->prev_line;
+      table->lcl_head->prev_line = info;
+    }
 }
 
 /* Extract a fully qualified filename from a line info table.
@@ -1192,12 +1181,12 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		      amt *= sizeof (struct fileinfo);
 		      tmp = bfd_realloc (table->files, amt);
 		      if (tmp == NULL)
-		        {
+			{
 			  free (table->files);
 			  free (table->dirs);
 			  free (filename);
 			  return NULL;
-		        }
+			}
 		      table->files = tmp;
 		    }
 		  table->files[table->num_files].name = cur_file;
@@ -1609,7 +1598,7 @@ read_rangelist (struct comp_unit *unit, struct arange *arange, bfd_uint64_t offs
 	return;
     }
   ranges_ptr = unit->stash->dwarf_ranges_buffer + offset;
-    
+
   for (;;)
     {
       bfd_vma low_pc;
@@ -1826,7 +1815,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 						 attr.u.blk->data + 1);
 			}
 		      break;
-		    
+
 		    default:
 		      break;
 		    }
@@ -2784,21 +2773,21 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd)
       size_t i;
 
       for (i = 0; i < ABBREV_HASH_SIZE; i++)
-        {
-          struct abbrev_info *abbrev = abbrevs[i];
+	{
+	  struct abbrev_info *abbrev = abbrevs[i];
 
-          while (abbrev)
-            {
-              free (abbrev->attrs);
-              abbrev = abbrev->next;
-            }
-        }
+	  while (abbrev)
+	    {
+	      free (abbrev->attrs);
+	      abbrev = abbrev->next;
+	    }
+	}
 
       if (each->line_table)
-        {
-          free (each->line_table->dirs);
-          free (each->line_table->files);
-        }
+	{
+	  free (each->line_table->dirs);
+	  free (each->line_table->files);
+	}
     }
 
   free (stash->dwarf_abbrev_buffer);
