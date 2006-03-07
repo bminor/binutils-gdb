@@ -1,3 +1,7 @@
+2006-03-07  Paul Brook  <paul@codesourcery.com>
+
+	* elfos.c (ARMul_OSHandleSWI): Call correct function for IsTTY.
+
 2006-02-01  Shaun Jackman  <sjackman@gmail.com>
 
 	* armos.c (ARMul_OSHandleSWI): Handle the RedBoot system
