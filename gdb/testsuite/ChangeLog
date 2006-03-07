@@ -1,5 +1,10 @@
 2006-03-07  Paul Brook  <paul@codesourcery.com>
 
+	* lib/compiler.c: Extract armcc version number.
+	* lib/compiler.cc: Ditto.
+
+2006-03-07  Paul Brook  <paul@codesourcery.com>
+
 	* gdb.arch/altivec-abi.exp: Use nowarnings instead of
 	additional_flags=-w.
 	* gdb.arch/altivec-regs.exp: Ditto.
