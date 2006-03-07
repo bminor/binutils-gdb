@@ -1,3 +1,11 @@
+2006-03-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gdb.base/prelink.c, gdb.base/prelink-lib.c: Update FSF address.
+	* gdb.base/prelink.exp: Likewise.  Add -q to prelink runs.
+	Rename executable to prelinkt.  Don't re-prelink if we didn't
+	get a core file.  Test prelink -u exit status to tell whether
+	prelinking failed.  Use gdb_test_multiple.
+
 2006-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/inherit.exp (test_print_mi_member_types): New function.

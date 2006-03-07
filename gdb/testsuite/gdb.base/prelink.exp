@@ -12,10 +12,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA.
 
 # Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
+# bug-gdb@gnu.org
 
 # This file was written by Alexandre Oliva <aoliva@redhat.com>
 
@@ -40,8 +40,6 @@ if {$gcc_compiled == 0} {
 }
 
 set testfile "prelink"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
 
 set libsrcfile ${testfile}-lib.c
 set libfile ${objdir}/${subdir}/${testfile}.so
@@ -50,13 +48,13 @@ if { [gdb_compile "${srcdir}/${subdir}/${libsrcfile}" "${libfile}" executable [l
     return -1
 }
 
-if {[catch "system \"prelink -NR ${libfile}\""] != 0} {
+if {[catch "system \"prelink -qNR ${libfile}\""] != 0} {
     # Maybe we don't have prelink.
     return -1
 }
 
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/${testfile}t
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${libfile}" "${binfile}" executable [list debug "additional_flags=-Wl,-rpath,${objdir}/${subdir}"]] != ""} {
     return -1;
 }
@@ -82,9 +80,6 @@ if { $found == 0 } {
     }
 }
 
-catch "system \"prelink -u ${libfile}\""
-catch "system \"prelink -NR ${libfile}\""
-
 # Try to clean up after ourselves.
 remote_file build delete [file join $coredir coremmap.data]
 remote_exec build "rmdir $coredir"
@@ -94,6 +89,12 @@ if { $found == 0  } {
     return 0
 }
 
+if {[catch "system \"prelink -uN ${libfile}\""] != 0} {
+    untested "${libfile} was not prelinked, maybe system libraries are not prelinked?"
+    return 0
+}
+catch "system \"prelink -qNR ${libfile}\""
+
 # Start with a fresh gdb
 
 gdb_exit
@@ -101,26 +102,12 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-set oldtimeout $timeout
-set timeout [expr "$timeout + 60"]
-verbose "Timeout is now $timeout seconds" 2
-send_gdb "core-file $objdir/$subdir/prelink.core\n"
-gdb_expect {
-    -re "warning: \.dynamic section.*not at the expected address" {
-	pass "changed base address"
+set test "prelink"
+gdb_test_multiple "core-file $objdir/$subdir/prelink.core" "$test" {
+    -re "warning: \.dynamic section.*not at the expected address.*warning: difference.*caused by prelink, adjusting expectations." {
+	pass "$test"
     }
-    -re ".*$gdb_prompt $"	{ fail "changed base address" }
-    timeout 		{ fail "(timeout) changed base address" }
 }
-gdb_expect {
-    -re "warning: difference.*caused by prelink, adjusting" {
-	pass "prelink adjustment"
-    }
-    -re ".*$gdb_prompt $"	{ fail "prelink adjustment" }
-    timeout 		{ fail "(timeout) prelink adjustment" }
-}
-set timeout $oldtimeout
-verbose "Timeout is now $timeout seconds" 2
 
 gdb_exit
 
