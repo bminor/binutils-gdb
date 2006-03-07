@@ -1,3 +1,10 @@
+2006-03-07  Richard Sandiford  <richard@codesourcery.com>
+
+	* gas/arm/abs12.s, gas/arm/abs12.d: New test.
+	* gas/arm/pic.d: Skip for *-*-vxworks*...
+	* gas/arm/pic_vxworks.d: ...use this version instead.
+	* gas/arm/unwind_vxworks.d: Fix expected output.
+
 2006-03-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/m68k/arch-cpu-1.s: Tweak.

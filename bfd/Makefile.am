@@ -1220,8 +1220,8 @@ elf32-arc.lo: elf32-arc.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf32-target.h
 elf32-arm.lo: elf32-arm.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/arm.h \
-  $(INCDIR)/elf/reloc-macros.h elf32-target.h
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf-vxworks.h \
+  $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-avr.lo: elf32-avr.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/avr.h \

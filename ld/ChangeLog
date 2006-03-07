@@ -1,3 +1,17 @@
+2006-03-07  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Zack Weinberg  <zack@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+	    Paul Brook  <paul@codesourcery.com>
+	    Ricardo Anguiano  <anguiano@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* emulparams/armelf_vxworks.sh: Include vxworks.sh.
+	(MAXPAGESIZE): Define.
+	* emulparams/vxworks.sh: Undefine EMBEDDED.
+	* Makefile.am (earmelf_vxworks.c): Depend on vxworks.sh and vxworks.em.
+	* Makefile.in: Regenerate.
+
 2006-03-03  Bjoern Haase  <bjoern.m.haase@web.de>
 
 	* scripttempl/avr.sc:  Add *(.jumptables) *(.lowtext) sections.

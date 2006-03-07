@@ -1,3 +1,75 @@
+2006-03-07  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Zack Weinberg  <zack@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+	    Paul Brook  <paul@codesourcery.com>
+	    Ricardo Anguiano  <anguiano@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* configure.in (bfd_elf32_bigarm_vec): Include elf-vxworks.lo.
+	(bfd_elf32_bigarm_symbian_vec): Likewise.
+	(bfd_elf32_bigarm_vxworks_vec): Likewise.
+	(bfd_elf32_littlearm_vec): Likewise.
+	(bfd_elf32_littlearm_symbian_vec): Likewise.
+	(bfd_elf32_littlearm_vxworks_vec): Likewise.
+	* configure: Regenerate.
+	* elf32-arm.c: Include libiberty.h and elf-vxworks.h.
+	(RELOC_SECTION, RELOC_SIZE, SWAP_RELOC_IN, SWAP_RELOC_OUT): New macros.
+	(elf32_arm_vxworks_bed): Add forward declaration.
+	(elf32_arm_howto_table_1): Fix the masks for R_ASM_ABS12.
+	(elf32_arm_vxworks_exec_plt0_entry): New table.
+	(elf32_arm_vxworks_exec_plt_entry): Likewise.
+	(elf32_arm_vxworks_shared_plt_entry): Likewise.
+	(elf32_arm_link_hash_table): Add vxworks_p and srelplt2 fields.
+	(reloc_section_p): New function.
+	(create_got_section): Use RELOC_SECTION.
+	(elf32_arm_create_dynamic_sections): Likewise.  Call
+	elf_vxworks_create_dynamic_sections for VxWorks targets.
+	Choose between the two possible values of plt_header_size
+	and plt_entry_size.
+	(elf32_arm_link_hash_table_create): Initialize vxworks_p and srelplt2.
+	(elf32_arm_abs12_reloc): New function.
+	(elf32_arm_final_link_relocate): Call it.  Allow the creation of
+	dynamic R_ARM_ABS12 relocs on VxWorks.  Use reloc_section_p,
+	RELOC_SIZE, SWAP_RELOC_OUT and RELOC_SECTION.  Initialize the
+	r_addend fields of relocs.  On rela targets, skip any code that
+	adjusts in-place addends.  When using _bfd_link_final_relocate
+	to perform a final relocation, pass rel->r_addend as the addend
+	argument.
+	(elf32_arm_merge_private_bfd_data): If one of the bfds is a VxWorks
+	object, ignore flags that are not standard on VxWorks.
+	(elf32_arm_check_relocs): Allow the creation of dynamic R_ARM_ABS12
+	relocs on VxWorks.  Use reloc_section_p.
+	(elf32_arm_adjust_dynamic_symbol): Use RELOC_SECTION and RELOC_SIZE.
+	(allocate_dynrelocs): Use RELOC_SIZE.  Account for the size of
+	.rela.plt.unloaded relocs on VxWorks targets.
+	(elf32_arm_size_dynamic_sections): Use RELOC_SIZE.  Check for
+	.rela.plt.unloaded as well as .rel(a).plt.  Add DT_RELA* tags
+	instead of DT_REL* tags on RELA targets.
+	(elf32_arm_finish_dynamic_symbol): Use RELOC_SECTION, RELOC_SIZE
+	and SWAP_RELOC_OUT.  Initialize r_addend fields.  Handle VxWorks
+	PLT entries.  Do not make _GLOBAL_OFFSET_TABLE_ absolute on VxWorks.
+	(elf32_arm_finish_dynamic_sections): Use RELOC_SECTION, RELOC_SIZE
+	and SWAP_RELOC_OUT.  Initialize r_addend fields.  Handle DT_RELASZ
+	like DT_RELSZ.  Handle the VxWorks form of initial PLT entry.
+	Correct the .rela.plt.unreloaded symbol indexes.
+	(elf32_arm_output_symbol_hook): Call the VxWorks version of this
+	hook on VxWorks targets.
+	(elf32_arm_vxworks_link_hash_table_create): Set vxworks_p to true.
+	Minor formatting tweak.
+	(elf32_arm_vxworks_final_write_processing): New function.
+	(elf_backend_add_symbol_hook): Override for VxWorks and reset
+	for Symbian.
+	(elf_backend_final_write_processing): Likewise.
+	(elf_backend_emit_relocs): Likewise.
+	(elf_backend_want_plt_sym): Likewise.
+	(ELF_MAXPAGESIZE): Likewise.
+	(elf_backend_may_use_rel_p): Minor formatting tweak.
+	(elf_backend_may_use_rela_p): Likewise.
+	(elf_backend_default_use_rela_p): Likewise.
+	(elf_backend_rela_normal): Likewise.
+	* Makefile.in (elf32-arm.lo): Depend on elf-vxworks.h.
+
 2006-03-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* archures.c (bfd_mach_mcf_isa_a_nodiv, bfd_mach_mcf_isa_b_nousp):

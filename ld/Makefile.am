@@ -539,7 +539,8 @@ earmelfb_nbsd.c: $(srcdir)/emulparams/armelfb_nbsd.sh \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelfb_nbsd "$(tdir_armelfb_nbsd)"
 earmelf_vxworks.c: $(srcdir)/emulparams/armelf_vxworks.sh \
-  $(srcdir)/emulparams/armelf.sh $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/emulparams/vxworks.sh $(srcdir)/emulparams/armelf.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/vxworks.em \
   $(srcdir)/emultempl/armelf.em $(srcdir)/scripttempl/elf.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf_vxworks "$(tdir_armelf)"

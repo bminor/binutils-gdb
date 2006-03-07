@@ -11535,6 +11535,9 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_OFFSET_IMM:
+      if (!fixP->fx_done && seg->use_rela_p)
+	value = 0;
+
     case BFD_RELOC_ARM_LITERAL:
       sign = value >= 0;
 
@@ -12256,8 +12259,7 @@ md_apply_fix (fixS *	fixP,
    format.  */
 
 arelent *
-tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
-	      fixS *	 fixp)
+tc_gen_reloc (asection *section, fixS *fixp)
 {
   arelent * reloc;
   bfd_reloc_code_real_type code;
@@ -12269,7 +12271,12 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
   if (fixp->fx_pcrel)
-    fixp->fx_offset = reloc->address;
+    {
+      if (section->use_rela_p)
+	fixp->fx_offset -= md_pcrel_from_section (fixp, section);
+      else
+	fixp->fx_offset = reloc->address;
+    }
   reloc->addend = fixp->fx_offset;
 
   switch (fixp->fx_r_type)
@@ -12357,6 +12364,12 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
       return NULL;
 
     case BFD_RELOC_ARM_OFFSET_IMM:
+      if (section->use_rela_p)
+	{
+	  code = fixp->fx_r_type;
+	  break;
+	}
+
       if (fixp->fx_addsy != NULL
 	  && !S_IS_DEFINED (fixp->fx_addsy)
 	  && S_IS_LOCAL (fixp->fx_addsy))

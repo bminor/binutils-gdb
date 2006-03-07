@@ -1,7 +1,5 @@
 #objdump: -sr
 #name: Unwind table generation
-# This test is only valid on ELF based ports.
-#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 # This is the VxWorks variant of this file.
 #source: unwind.s
 #not-skip: *-*-vxworks*
@@ -10,22 +8,22 @@
 
 RELOCATION RECORDS FOR \[.ARM.extab\]:
 OFFSET   TYPE              VALUE 
-0000000c R_ARM_PREL31      .text\+0x0+c
+0000000c R_ARM_PREL31      .text
 
 
 RELOCATION RECORDS FOR \[.ARM.exidx\]:
 OFFSET   TYPE              VALUE 
 00000000 R_ARM_PREL31      .text
 00000000 R_ARM_NONE        __aeabi_unwind_cpp_pr0
-00000008 R_ARM_PREL31      .text.*
-00000008 R_ARM_NONE        __aeabi_unwind_cpp_pr1\+0x0+8
-0000000c R_ARM_PREL31      .ARM.extab\+0x0+c
-00000010 R_ARM_PREL31      .text.*
-00000014 R_ARM_PREL31      .ARM.extab.*
-00000018 R_ARM_PREL31      .text.*
-0000001c R_ARM_PREL31      .ARM.extab.*
-00000020 R_ARM_PREL31      .text.*
-00000028 R_ARM_PREL31      .text.*
+00000008 R_ARM_PREL31      .text.*\+0x00000004
+00000008 R_ARM_NONE        __aeabi_unwind_cpp_pr1
+0000000c R_ARM_PREL31      .ARM.extab
+00000010 R_ARM_PREL31      .text.*\+0x00000008
+00000014 R_ARM_PREL31      .ARM.extab.*\+0x0000000c
+00000018 R_ARM_PREL31      .text.*\+0x0000000c
+0000001c R_ARM_PREL31      .ARM.extab.*\+0x0000001c
+00000020 R_ARM_PREL31      .text.*\+0x00000010
+00000028 R_ARM_PREL31      .text.*\+0x00000012
 
 
 Contents of section .text:
@@ -36,8 +34,8 @@ Contents of section .ARM.extab:
  0010 (8402b101 b0b0b005 2a000000 00c60181|01b10284 05b0b0b0 0000002a 8101c600)  .*
  0020 (b0b0c1c1|c1c1b0b0) 00000000                    .*
 Contents of section .ARM.exidx:
- 0000 00000000 (b0b0a880 00000000|80a8b0b0 00000000) 00000000  .*
+ 0000 00000000 (b0b0a880|80a8b0b0) 00000000 00000000  .*
  0010 00000000 00000000 00000000 00000000  .*
- 0020 (00000000 08849780 00000000 b00fb180|00000000 80978408 00000000 80b10fb0)  .*
+ 0020 00000000 (08849780|80978408) 00000000 (b00fb180|80b10fb0)  .*
 # Ignore .ARM.attributes section
 #...

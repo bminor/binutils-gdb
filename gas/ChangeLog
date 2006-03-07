@@ -1,3 +1,18 @@
+2006-03-07  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Zack Weinberg  <zack@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+	    Paul Brook  <paul@codesourcery.com>
+	    Ricardo Anguiano  <anguiano@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+
+	* config/tc-arm.c (md_apply_fix): Install a value of zero into a
+	BFD_RELOC_ARM_OFFSET_IMM field if we're going to generate a RELA
+	R_ARM_ABS12 reloc.
+	(tc_gen_reloc): Keep the original fx_offset for RELA pc-relative
+	relocs, but adjust by md_pcrel_from_section.  Create R_ARM_ABS12
+	relocations for BFD_RELOC_ARM_OFFSET_IMM on RELA targets.
+
 2006-03-06  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_post_relax_hook): Generate literal tables
