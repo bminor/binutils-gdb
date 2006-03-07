@@ -1,5 +1,9 @@
 2006-03-07  Paul Brook  <paul@codesourcery.com>
 
+	* gdb.base/assign.exp: Correct fail message.
+
+2006-03-07  Paul Brook  <paul@codesourcery.com>
+
 	* lib/compiler.c: Extract armcc version number.
 	* lib/compiler.cc: Ditto.
 

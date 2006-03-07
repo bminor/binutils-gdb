@@ -439,7 +439,7 @@ gdb_expect {
             timeout           { fail "(timeout) v_int+=v_double" }    
          }
          }
-    -re ".*$gdb_prompt $" { fail "v_int+=v_signed_long" }
+    -re ".*$gdb_prompt $" { fail "v_int+=v_double" }
     timeout           { fail "(timeout) v_int+=v_double" }    
   }
 
