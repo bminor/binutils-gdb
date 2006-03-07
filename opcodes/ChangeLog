@@ -1,3 +1,17 @@
+2006-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2428
+	* i386-dis.c (REP_Fixup): New function.
+	(AL): Remove duplicate.
+	(Xbr): New.
+	(Xvr): Likewise.
+	(Ybr): Likewise.
+	(Yvr): Likewise.
+	(indirDXr): Likewise.
+	(ALr): Likewise.
+	(eAXr): Likewise.
+	(dis386): Updated entries of ins, outs, movs, lods and stos.
+
 2006-03-05  Nick Clifton  <nickc@redhat.com>
 
 	* cgen-ibld.in (insert_normal): Cope with attempts to insert a

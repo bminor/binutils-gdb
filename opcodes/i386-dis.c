@@ -101,6 +101,7 @@ static void INVLPG_Fixup (int, int);
 static void BadOp (void);
 static void SEG_Fixup (int, int);
 static void VMX_Fixup (int, int);
+static void REP_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -276,7 +277,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define eSI OP_IMREG, eSI_reg
 #define eDI OP_IMREG, eDI_reg
 #define AL OP_IMREG, al_reg
-#define AL OP_IMREG, al_reg
 #define CL OP_IMREG, cl_reg
 #define DL OP_IMREG, dl_reg
 #define BL OP_IMREG, bl_reg
@@ -314,6 +314,15 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VM OP_VMX, q_mode
 #define OPSUF OP_3DNowSuffix, 0
 #define OPSIMD OP_SIMD_Suffix, 0
+
+/* Used handle "rep" prefix for string instructions.  */
+#define Xbr REP_Fixup, eSI_reg
+#define Xvr REP_Fixup, eSI_reg
+#define Ybr REP_Fixup, eDI_reg
+#define Yvr REP_Fixup, eDI_reg
+#define indirDXr REP_Fixup, indir_dx_reg
+#define ALr REP_Fixup, al_reg
+#define eAXr REP_Fixup, eAX_reg
 
 #define cond_jump_flag NULL, cond_jump_mode
 #define loop_jcxz_flag NULL, loop_jcxz_mode
@@ -629,10 +638,10 @@ static const struct dis386 dis386[] = {
   { "imulS",		Gv, Ev, Iv },
   { "pushT",		sIb, XX, XX },
   { "imulS",		Gv, Ev, sIb },
-  { "ins{b||b|}",	Yb, indirDX, XX },
-  { "ins{R||R|}",	Yv, indirDX, XX },
-  { "outs{b||b|}",	indirDX, Xb, XX },
-  { "outs{R||R|}",	indirDX, Xv, XX },
+  { "ins{b||b|}",	Ybr, indirDX, XX },
+  { "ins{R||R|}",	Yvr, indirDX, XX },
+  { "outs{b||b|}",	indirDXr, Xb, XX },
+  { "outs{R||R|}",	indirDXr, Xv, XX },
   /* 70 */
   { "joH",		Jb, XX, cond_jump_flag },
   { "jnoH",		Jb, XX, cond_jump_flag },
@@ -692,17 +701,17 @@ static const struct dis386 dis386[] = {
   { "movS",		eAX, Ov, XX },
   { "movB",		Ob, AL, XX },
   { "movS",		Ov, eAX, XX },
-  { "movs{b||b|}",	Yb, Xb, XX },
-  { "movs{R||R|}",	Yv, Xv, XX },
+  { "movs{b||b|}",	Ybr, Xb, XX },
+  { "movs{R||R|}",	Yvr, Xv, XX },
   { "cmps{b||b|}",	Xb, Yb, XX },
   { "cmps{R||R|}",	Xv, Yv, XX },
   /* a8 */
   { "testB",		AL, Ib, XX },
   { "testS",		eAX, Iv, XX },
-  { "stosB",		Yb, AL, XX },
-  { "stosS",		Yv, eAX, XX },
-  { "lodsB",		AL, Xb, XX },
-  { "lodsS",		eAX, Xv, XX },
+  { "stosB",		Ybr, AL, XX },
+  { "stosS",		Yvr, eAX, XX },
+  { "lodsB",		ALr, Xb, XX },
+  { "lodsS",		eAXr, Xv, XX },
   { "scasB",		AL, Yb, XX },
   { "scasS",		eAX, Yv, XX },
   /* b0 */
@@ -4776,4 +4785,77 @@ OP_VMX (int bytemode, int sizeflag)
   else
     strcpy (obuf, "vmptrld");
   OP_E (bytemode, sizeflag);
+}
+
+static void
+REP_Fixup (int bytemode, int sizeflag)
+{
+  /* The 0xf3 prefix should be displayed as "rep" for ins, outs, movs,
+     lods and stos.  */
+  size_t ilen = 0;
+
+  if (prefixes & PREFIX_REPZ)
+    switch (*insn_codep) 
+      {
+      case 0x6e:	/* outsb */
+      case 0x6f:	/* outsw/outsl */
+      case 0xa4:	/* movsb */
+      case 0xa5:	/* movsw/movsl/movsq */
+	if (!intel_syntax)
+	  ilen = 5;
+	else
+	  ilen = 4;
+	break;
+      case 0xaa:	/* stosb */
+      case 0xab:	/* stosw/stosl/stosq */
+      case 0xac:	/* lodsb */
+      case 0xad:	/* lodsw/lodsl/lodsq */
+	if (!intel_syntax && (sizeflag & SUFFIX_ALWAYS))
+	  ilen = 5;
+	else
+	  ilen = 4;
+	break;
+      case 0x6c:	/* insb */
+      case 0x6d:	/* insl/insw */
+	if (!intel_syntax)
+	  ilen = 4;
+	else
+	  ilen = 3;
+	break;
+      default:
+	abort ();
+	break;
+      }
+
+  if (ilen != 0)
+    {
+      size_t olen;
+      char *p;
+
+      olen = strlen (obuf);
+      p = obuf + olen - ilen - 1 - 4;
+      /* Handle "repz [addr16|addr32]".  */
+      if ((prefixes & PREFIX_ADDR))
+	p -= 1 + 6;
+
+      memmove (p + 3, p + 4, olen - (p + 3 - obuf));
+    }
+
+  switch (bytemode)
+    {
+    case al_reg:
+    case eAX_reg:
+    case indir_dx_reg:
+      OP_IMREG (bytemode, sizeflag);
+      break;
+    case eDI_reg:
+      OP_ESreg (bytemode, sizeflag);
+      break;
+    case eSI_reg:
+      OP_DSreg (bytemode, sizeflag);
+      break;
+    default:
+      abort ();
+      break;
+    }
 }

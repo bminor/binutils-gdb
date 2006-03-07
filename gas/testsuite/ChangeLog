@@ -1,3 +1,21 @@
+2006-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2428
+	* gas/i386/i386.exp: Add rep, rep-suffix, x86-64-rep and
+	x86-64-rep-suffix.
+
+	* gas/i386/naked.d: Replace repz with rep.
+	* gas/i386/x86_64.d: Likewise.
+
+	* gas/i386/rep-suffix.d: New file. 
+	* gas/i386/rep-suffix.s: Likewise.
+	* gas/i386/rep.d: Likewise.
+	* gas/i386/rep.s: Likewise.
+	* gas/i386/x86-64-rep-suffix.d: Likewise.
+	* gas/i386/x86-64-rep-suffix.s: Likewise.
+	* gas/i386/x86-64-rep.d: Likewise.
+	* gas/i386/x86-64-rep.s: Likewise.
+
 2006-03-07  Richard Sandiford  <richard@codesourcery.com>
 
 	* gas/arm/abs12.s, gas/arm/abs12.d: New test.
