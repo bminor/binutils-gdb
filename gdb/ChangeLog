@@ -1,3 +1,14 @@
+2006-03-08  Andreas Schwab  <schwab@suse.de>
+
+	* ia64-tdep.c (ia64_libunwind_frame_this_id): Adapt use of
+	libunwind_frame_prev_register to use a gdb_byte buffer and
+	extract_unsigned_integer.
+	(ia64_libunwind_sigtramp_frame_prev_register): Likewise.
+
+	* libunwind-frame.c (libunwind_frame_prev_register): Change type
+	of last argument to `gdb_byte *'
+	* libunwind-frame.h: Adjust declaration.
+
 2006-03-08  Paul Brook  <paul@codesourcery.com>
 
 	* arm-tdep.c (arm_push_dummy_call): Remove stack alignment.
