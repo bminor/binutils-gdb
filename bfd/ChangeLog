@@ -1,3 +1,7 @@
+2006-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_choose_gp): Properly choose gp.
+
 2006-03-07  Richard Sandiford  <richard@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 	    Zack Weinberg  <zack@codesourcery.com>

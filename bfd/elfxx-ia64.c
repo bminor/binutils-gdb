@@ -3928,14 +3928,16 @@ elfNN_ia64_choose_gp (abfd, info)
 	gp_val = got_sec->output_section->vma;
       else if (max_short_vma != 0)
 	gp_val = min_short_vma;
-      else
+      else if (max_vma - min_vma < 0x200000)
 	gp_val = min_vma;
+      else
+	gp_val = max_vma - 0x200000 + 8;
 
       /* If it is possible to address the entire image, but we
 	 don't with the choice above, adjust.  */
       if (max_vma - min_vma < 0x400000
-	  && max_vma - gp_val <= 0x200000
-	  && gp_val - min_vma > 0x200000)
+	  && (max_vma - gp_val >= 0x200000
+	      || gp_val - min_vma > 0x200000))
 	gp_val = min_vma + 0x200000;
       else if (max_short_vma != 0)
 	{
