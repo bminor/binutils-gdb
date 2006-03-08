@@ -1,3 +1,9 @@
+2006-03-08  Paul Brook  <paul@codesourcery.com>
+
+	* arm-tdep.c (arm_push_dummy_call): Remove stack alignment.
+	(arm_frame_align): New function.
+	(arm_gdbarch_init): Use it.
+
 2006-03-03  Khem Raj <khem@mvista.com>
 
 	* remote-rdp.c (remote_rdp_xfer_inferior_memory): Use gdb_byte.
