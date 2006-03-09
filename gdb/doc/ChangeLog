@@ -1,3 +1,9 @@
+2006-03-07  Jim Blandy  <jimb@red-bean.com>
+
+	* gdb.texinfo (Connecting): Organize the different 'target remote'
+	connection methods into a table.  Add a 'target remote' index
+	entry. (!!!)
+
 2006-02-17  Fred Fish  <fnf@specifix.com>
 
 	* gdb.texinfo (Symbols): Update descriptions of 'whatis' and

@@ -12143,37 +12143,51 @@ your program, since @value{GDBN} needs symobl and debugging information.
 Start up @value{GDBN} as usual, using the name of the local copy of your
 program as the first argument.
 
-@cindex serial line, @code{target remote}
-If you're using a serial line, you may want to give @value{GDBN} the
-@w{@samp{--baud}} option, or use the @code{set remotebaud} command
-(@pxref{Remote configuration, set remotebaud}) before the
-@code{target} command.
+@cindex @code{target remote}
+@value{GDBN} can communicate with the target over a serial line, or
+over an @acronym{IP} network using @acronym{TCP} or @acronym{UDP}.  In
+each case, @value{GDBN} uses the same protocol for debugging your
+program; only the medium carrying the debugging packets varies.  The
+@code{target remote} command establishes a connection to the target.
+Its arguments indicate which medium to use:
 
-After that, use @code{target remote} to establish communications with
-the target machine.  Its argument specifies how to communicate---either
-via a devicename attached to a direct serial line, or a TCP or UDP port
-(possibly to a terminal server which in turn has a serial line to the
-target).  For example, to use a serial line connected to the device
-named @file{/dev/ttyb}:
+@table @code
+
+@item target remote @var{serial-device}
+@cindex serial line, @code{target remote}
+Use @var{serial-device} to communicate with the target.  For example,
+to use a serial line connected to the device named @file{/dev/ttyb}:
 
 @smallexample
 target remote /dev/ttyb
 @end smallexample
 
-@cindex TCP port, @code{target remote}
-To use a TCP connection, use an argument of the form
-@code{@var{host}:@var{port}} or @code{tcp:@var{host}:@var{port}}.
-For example, to connect to port 2828 on a
-terminal server named @code{manyfarms}:
+If you're using a serial line, you may want to give @value{GDBN} the
+@w{@samp{--baud}} option, or use the @code{set remotebaud} command
+(@pxref{Remote configuration, set remotebaud}) before the
+@code{target} command.
+
+@item target remote @code{@var{host}:@var{port}}
+@itemx target remote @code{tcp:@var{host}:@var{port}}
+@cindex @acronym{TCP} port, @code{target remote}
+Debug using a @acronym{TCP} connection to @var{port} on @var{host}.
+The @var{host} may be either a host name or a numeric @acronym{IP}
+address; @var{port} must be a decimal number.  The @var{host} could be
+the target machine itself, if it is directly connected to the net, or
+it might be a terminal server which in turn has a serial line to the
+target.
+
+For example, to connect to port 2828 on a terminal server named
+@code{manyfarms}:
 
 @smallexample
 target remote manyfarms:2828
 @end smallexample
 
-If your remote target is actually running on the same machine as
-your debugger session (e.g.@: a simulator of your target running on
-the same host), you can omit the hostname.  For example, to connect
-to port 1234 on your local machine:
+If your remote target is actually running on the same machine as your
+debugger session (e.g.@: a simulator for your target running on the
+same host), you can omit the hostname.  For example, to connect to
+port 1234 on your local machine:
 
 @smallexample
 target remote :1234
@@ -12182,22 +12196,25 @@ target remote :1234
 
 Note that the colon is still required here.
 
-@cindex UDP port, @code{target remote}
-To use a UDP connection, use an argument of the form
-@code{udp:@var{host}:@var{port}}.  For example, to connect to UDP port 2828
-on a terminal server named @code{manyfarms}:
+@item target remote @code{udp:@var{host}:@var{port}}
+@cindex @acronym{UDP} port, @code{target remote}
+Debug using @acronym{UDP} packets to @var{port} on @var{host}.  For example, to
+connect to @acronym{UDP} port 2828 on a terminal server named @code{manyfarms}:
 
 @smallexample
 target remote udp:manyfarms:2828
 @end smallexample
 
-When using a UDP connection for remote debugging, you should keep in mind
-that the `U' stands for ``Unreliable''.  UDP can silently drop packets on
-busy or unreliable networks, which will cause havoc with your debugging
-session.
+When using a @acronym{UDP} connection for remote debugging, you should
+keep in mind that the `U' stands for ``Unreliable''.  @acronym{UDP}
+can silently drop packets on busy or unreliable networks, which will
+cause havoc with your debugging session.
 
-Now you can use all the usual commands to examine and change data and to
-step and continue the remote program.
+@end table
+
+Once the connection has been established, you can use all the usual
+commands to examine and change data and to step and continue the
+remote program.
 
 @cindex interrupting remote programs
 @cindex remote programs, interrupting
