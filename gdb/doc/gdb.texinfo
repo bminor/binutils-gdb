@@ -11906,14 +11906,23 @@ An executable file.  @samp{target exec @var{program}} is the same as
 A core dump file.  @samp{target core @var{filename}} is the same as
 @samp{core-file @var{filename}}.
 
-@item target remote @var{dev}
+@item target remote @var{medium}
 @cindex remote target
-Remote serial target in GDB-specific protocol.  The argument @var{dev}
-specifies what serial device to use for the connection (e.g.@:
-@file{/dev/ttya}). @xref{Remote, ,Remote debugging}.  @code{target remote}
-supports the @code{load} command.  This is only useful if you have
-some other way of getting the stub to the target system, and you can put
-it somewhere in memory where it won't get clobbered by the download.
+A remote system connected to @value{GDBN} via a serial line or network
+connection.  This command tells @value{GDBN} to use its own remote
+protocol over @var{medium} for debugging.  @xref{Remote Debugging}.
+
+For example, if you have a board connected to @file{/dev/ttya} on the
+machine running @value{GDBN}, you could say:
+
+@smallexample
+target remote /dev/ttya
+@end smallexample
+
+@code{target remote} supports the @code{load} command.  This is only
+useful if you have some other way of getting the stub to the target
+system, and you can put it somewhere in memory where it won't get
+clobbered by the download.
 
 @item target sim
 @cindex built-in simulator target

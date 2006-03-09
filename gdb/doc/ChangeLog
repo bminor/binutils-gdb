@@ -1,5 +1,9 @@
 2006-03-07  Jim Blandy  <jimb@red-bean.com>
 
+	* gdb.texinfo (Target Commands): Update text describing how to
+	specify a target.  Refer to the detailed section on remote
+	debugging, not the brief mention.
+
 	* gdb.texinfo (Connecting): Organize the different 'target remote'
 	connection methods into a table.  Add a 'target remote' index
 	entry. (!!!)
