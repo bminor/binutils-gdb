@@ -1,3 +1,8 @@
+2006-03-09  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/nomapping.d: New test.
+	* gas/arm/nomapping.s: New test.
+
 2006-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/2428

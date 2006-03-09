@@ -404,9 +404,12 @@ bfd_arm_get_mach_from_notes (bfd *abfd, const char *note_section)
 bfd_boolean
 bfd_is_arm_mapping_symbol_name (const char * name)
 {
+  /* The ARM compiler outputs several obsolete forms.  Recognize them
+     in addition to the standard $a, $t and $d.  */
   return (name != NULL)
     && (name[0] == '$')
-    && ((name[1] == 'a') || (name[1] == 't') || (name[1] == 'd'))
-    && (name[2] == 0);
+    && ((name[1] == 'a') || (name[1] == 't') || (name[1] == 'd')
+	|| (name[1] == 'm') || (name[1] == 'f') || (name[1] == 'p'))
+    && (name[2] == 0 || name[2] == '.');
 }
 

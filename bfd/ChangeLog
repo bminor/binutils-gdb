@@ -1,3 +1,8 @@
+2006-03-09  Paul Brook  <paul@codesourcery.com>
+
+	* cpu-arm.c (bfd_is_arm_mapping_symbol_name): Recognise additional
+	mapping symbols.
+
 2006-03-09  Khem Raj  <khem@mvista.com>
 
 	* elf32-arm.c(elf32_arm_finish_dynamic_sections): Use unsigned
