@@ -7351,7 +7351,7 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	  /* Correct the .rel(a).plt.unloaded relocations.  They will have
 	     incorrect symbol indexes.  */
 	  int num_plts;
-	  char *p;
+	  unsigned char *p;
 
 	  num_plts = ((htab->splt->size - htab->plt_header_size)
 		      / htab->plt_entry_size);

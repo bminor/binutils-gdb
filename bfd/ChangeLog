@@ -1,3 +1,8 @@
+2006-03-09  Khem Raj  <khem@mvista.com>
+
+	* elf32-arm.c(elf32_arm_finish_dynamic_sections): Use unsigned
+	char type.
+
 2006-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_choose_gp): Properly choose gp.
