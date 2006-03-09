@@ -354,6 +354,7 @@ static char *dll_name;
 
 static int add_indirect = 0;
 static int add_underscore = 0;
+static int add_stdcall_underscore = 0;
 static int dontdeltemps = 0;
 
 /* TRUE if we should export all symbols.  Otherwise, we only export
@@ -1994,7 +1995,9 @@ xlate (const char *name)
 {
   int lead_at = (*name == '@');
 
-  if (add_underscore &&  !lead_at)
+  if (!lead_at && (add_underscore
+		   || (add_stdcall_underscore
+		       && strchr (name, '@'))))
     {
       char *copy = xmalloc (strlen (name) + 2);
 
@@ -3046,7 +3049,8 @@ usage (FILE *file, int status)
   fprintf (file, _("   -b --base-file <basefile> Read linker generated base file.\n"));
   fprintf (file, _("   -x --no-idata4            Don't generate idata$4 section.\n"));
   fprintf (file, _("   -c --no-idata5            Don't generate idata$5 section.\n"));
-  fprintf (file, _("   -U --add-underscore       Add underscores to symbols in interface library.\n"));
+  fprintf (file, _("   -U --add-underscore       Add underscores to all symbols in interface library.\n"));
+  fprintf (file, _("      --add-stdcall-underscore Add underscores to stdcall symbols in interface library.\n"));
   fprintf (file, _("   -k --kill-at              Kill @<n> from exported names.\n"));
   fprintf (file, _("   -A --add-stdcall-alias    Add aliases without @<n>.\n"));
   fprintf (file, _("   -p --ext-prefix-alias <prefix> Add aliases with <prefix>.\n"));
@@ -3071,6 +3075,7 @@ usage (FILE *file, int status)
 #define OPTION_NO_EXPORT_ALL_SYMS	(OPTION_EXPORT_ALL_SYMS + 1)
 #define OPTION_EXCLUDE_SYMS		(OPTION_NO_EXPORT_ALL_SYMS + 1)
 #define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_EXCLUDE_SYMS + 1)
+#define OPTION_ADD_STDCALL_UNDERSCORE	(OPTION_NO_DEFAULT_EXCLUDES + 1)
 
 static const struct option long_options[] =
 {
@@ -3088,6 +3093,7 @@ static const struct option long_options[] =
   {"def", required_argument, NULL, 'd'}, /* for compatibility with older versions */
   {"input-def", required_argument, NULL, 'd'},
   {"add-underscore", no_argument, NULL, 'U'},
+  {"add-stdcall-underscore", no_argument, NULL, OPTION_ADD_STDCALL_UNDERSCORE},
   {"kill-at", no_argument, NULL, 'k'},
   {"add-stdcall-alias", no_argument, NULL, 'A'},
   {"ext-prefix-alias", required_argument, NULL, 'p'},
@@ -3149,6 +3155,9 @@ main (int ac, char **av)
 	  break;
 	case OPTION_NO_DEFAULT_EXCLUDES:
 	  do_default_excludes = FALSE;
+	  break;
+	case OPTION_ADD_STDCALL_UNDERSCORE:
+	  add_stdcall_underscore = 1;
 	  break;
 	case 'x':
 	  no_idata4 = 1;

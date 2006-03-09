@@ -3013,8 +3013,9 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{--no-default-excludes}]
         [@option{-S}|@option{--as} @var{path-to-assembler}] [@option{-f}|@option{--as-flags} @var{options}]
         [@option{-D}|@option{--dllname} @var{name}] [@option{-m}|@option{--machine} @var{machine}]
-        [@option{-a}|@option{--add-indirect}] [@option{-U}|@option{--add-underscore}] [@option{-k}|@option{--kill-at}]
-        [@option{-A}|@option{--add-stdcall-alias}]
+        [@option{-a}|@option{--add-indirect}]
+        [@option{-U}|@option{--add-underscore}] [@option{--add-stdcall-underscore}]
+        [@option{-k}|@option{--kill-at}] [@option{-A}|@option{--add-stdcall-alias}]
         [@option{-p}|@option{--ext-prefix-alias} @var{prefix}]
         [@option{-x}|@option{--no-idata4}] [@option{-c}|@option{--no-idata5}] [@option{-i}|@option{--interwork}]
         [@option{-n}|@option{--nodelete}] [@option{-t}|@option{--temp-prefix} @var{prefix}]
@@ -3190,7 +3191,14 @@ means!
 @item -U
 @itemx --add-underscore
 Specifies that when @command{dlltool} is creating the exports file it
-should prepend an underscore to the names of the exported functions. 
+should prepend an underscore to the names of @emph{all} exported symbols. 
+
+@item --add-stdcall-underscore
+Specifies that when @command{dlltool} is creating the exports file it
+should prepend an underscore to the names of exported @emph{stdcall}
+functions. Variable names and non-stdcall function names are not modified.
+This option is useful when creating GNU-compatible import libs for third
+party DLLs that were built with MS-Windows tools.
 
 @item -k
 @itemx --kill-at

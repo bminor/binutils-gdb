@@ -1,3 +1,15 @@
+2006-03-09  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* dlltool.c (add_stdcall_underscore): New flag.
+	(xlate): Also add underscore to stdcall symbol if
+	add_stdcall_underscore set.
+	(usage): Document --add-stdcall-underscore option.
+	(OPTION_ADD_STDCALL_UNDERSCORE): New define.
+	(long_options): Use it for --add-stdcall-underscore option.
+	(main): Handle it.
+	* doc/binutils.texi: Document --add-stdcall-underscore option
+	and differentiate from --add-underscore.
+
 2006-03-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* readelf.c (get_machine_flags): Adjust.
