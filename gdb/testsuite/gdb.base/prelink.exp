@@ -103,8 +103,9 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 set test "prelink"
+global gdb_prompt
 gdb_test_multiple "core-file $objdir/$subdir/prelink.core" "$test" {
-    -re "warning: \.dynamic section.*not at the expected address.*warning: difference.*caused by prelink, adjusting expectations." {
+    -re "warning: \.dynamic section.*not at the expected address.*warning: difference.*caused by prelink, adjusting expectations.*$gdb_prompt $" {
 	pass "$test"
     }
 }

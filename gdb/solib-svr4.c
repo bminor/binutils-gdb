@@ -704,6 +704,7 @@ svr4_current_sos (void)
       new->lm_info = xmalloc (sizeof (struct lm_info));
       make_cleanup (xfree, new->lm_info);
 
+      new->lm_info->l_addr = (CORE_ADDR)-1;
       new->lm_info->lm = xzalloc (lmo->link_map_size);
       make_cleanup (xfree, new->lm_info->lm);
 
@@ -744,8 +745,6 @@ svr4_current_sos (void)
 	    free_so (new);
 	  else
 	    {
-	      new->lm_info->l_addr = (CORE_ADDR)-1;
-
 	      new->next = 0;
 	      *link_ptr = new;
 	      link_ptr = &new->next;
