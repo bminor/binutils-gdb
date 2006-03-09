@@ -12219,6 +12219,20 @@ keep in mind that the `U' stands for ``Unreliable''.  @acronym{UDP}
 can silently drop packets on busy or unreliable networks, which will
 cause havoc with your debugging session.
 
+@item target remote | @var{command}
+@cindex pipe, @code{target remote} to
+Run @var{command} in the background and communicate with it using a
+pipe.  The @var{command} is a shell command, to be parsed and expanded
+by the system's command shell, @code{/bin/sh}; it should expect remote
+protocol packets on its standard input, and send replies on its
+standard output.  You could use this to run a stand-alone simulator
+that speaks the remote debugging protocol, to make net connections
+using programs like @code{ssh}, or for other similar tricks.
+
+If @var{command} closes its standard output (perhaps by exiting),
+@value{GDBN} will try to send it a @code{SIGTERM} signal.  (If the
+program has already exited, this will have no effect.)
+
 @end table
 
 Once the connection has been established, you can use all the usual
