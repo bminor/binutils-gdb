@@ -1,5 +1,10 @@
 2006-03-09  Danny Smith  <dannysmith@users.sourceforge.net>
 
+	* dlltool.c: Update copyright year.
+	* doc/binutils.texi: Likewise.
+
+2006-03-09  Danny Smith  <dannysmith@users.sourceforge.net>
+
 	* dlltool.c (add_stdcall_underscore): New flag.
 	(xlate): Also add underscore to stdcall symbol if
 	add_stdcall_underscore set.

@@ -1,6 +1,6 @@
 \input texinfo       @c                    -*- Texinfo -*-
 @setfilename binutils.info
-@c Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+@c Copyright 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 @c man begin INCLUDE
 @include config.texi
@@ -32,7 +32,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1
@@ -57,7 +57,7 @@ notice identical to this one except for the removal of this paragraph
 @c  "objdump", "nm", "size", "strings", "strip", "readelf" and "ranlib".
 @c
 @c Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-@c 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+@c 2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c Free Documentation License.
@@ -83,7 +83,7 @@ notice identical to this one except for the removal of this paragraph
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+2000, 2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.1
