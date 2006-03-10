@@ -1,3 +1,7 @@
+2006-03-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Patch Champions): Remove self.
+
 2006-03-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* solib-svr4.c (svr4_current_sos): Move up initialization of
