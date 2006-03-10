@@ -12851,6 +12851,7 @@ md_begin (void)
 	break;
 
       case EF_ARM_EABI_VER4:
+      case EF_ARM_EABI_VER5:
 	/* No additional flags to set.	*/
 	break;
 
@@ -13367,11 +13368,12 @@ static const struct arm_option_value_table arm_float_abis[] =
 };
 
 #ifdef OBJ_ELF
-/* We only know how to output GNU and ver 4 (AAELF) formats.  */
+/* We only know how to output GNU and ver 4/5 (AAELF) formats.  */
 static const struct arm_option_value_table arm_eabis[] =
 {
   {"gnu",	EF_ARM_EABI_UNKNOWN},
   {"4",		EF_ARM_EABI_VER4},
+  {"5",		EF_ARM_EABI_VER5},
   {NULL,	0}
 };
 #endif

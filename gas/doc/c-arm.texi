@@ -255,9 +255,10 @@ and
 This option specifies which EABI version the produced object files should
 conform to.
 The following values are recognised:
-@code{gnu}
+@code{gnu},
+@code{4}
 and
-@code{4}.
+@code{5}.
 
 @cindex @code{-EB} command line option, ARM
 @item -EB

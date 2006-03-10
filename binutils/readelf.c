@@ -1793,6 +1793,11 @@ decode_ARM_machine_flags (unsigned e_flags, char buf[])
 
     case EF_ARM_EABI_VER4:
       strcat (buf, ", Version4 EABI");
+      goto eabi;
+
+    case EF_ARM_EABI_VER5:
+      strcat (buf, ", Version5 EABI");
+    eabi:
       while (e_flags)
 	{
 	  unsigned flag;

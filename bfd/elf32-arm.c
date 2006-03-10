@@ -1452,9 +1452,10 @@ elf32_arm_nabi_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
-/* In lieu of proper flags, assume all EABIv4 objects are interworkable.  */
+/* In lieu of proper flags, assume all EABIv4 or later objects are
+   interworkable.  */
 #define INTERWORK_FLAG(abfd)  \
-  (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) == EF_ARM_EABI_VER4 \
+  (EF_ARM_EABI_VERSION (elf_elfheader (abfd)->e_flags) >= EF_ARM_EABI_VER4 \
   || (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK))
 
 /* The linker script knows the section names for placement.
@@ -5153,6 +5154,21 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   return TRUE;
 }
 
+
+/* Return TRUE if the two EABI versions are incompatible.  */
+
+static bfd_boolean
+elf32_arm_versions_compatible (unsigned iver, unsigned over)
+{
+  /* v4 and v5 are the same spec before and after it was released,
+     so allow mixing them.  */
+  if ((iver == EF_ARM_EABI_VER4 && over == EF_ARM_EABI_VER5)
+      || (iver == EF_ARM_EABI_VER5 && over == EF_ARM_EABI_VER4))
+    return TRUE;
+
+  return (iver == over);
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -5251,7 +5267,8 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
     }
 
   /* Complain about various flag mismatches.  */
-  if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
+  if (!elf32_arm_versions_compatible (EF_ARM_EABI_VERSION (in_flags),
+				      EF_ARM_EABI_VERSION (out_flags)))
     {
       _bfd_error_handler
 	(_("ERROR: Source object %B has EABI version %d, but target %B has EABI version %d"),
@@ -5462,7 +5479,11 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
 
     case EF_ARM_EABI_VER4:
       fprintf (file, _(" [Version4 EABI]"));
+      goto eabi;
 
+    case EF_ARM_EABI_VER5:
+      fprintf (file, _(" [Version5 EABI]"));
+    eabi:
       if (flags & EF_ARM_BE8)
 	fprintf (file, _(" [BE8]"));
 

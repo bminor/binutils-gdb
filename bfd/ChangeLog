@@ -1,3 +1,8 @@
+2006-03-10  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (INTERWORK_FLAG): Handle EABIv5.
+	(elf32_arm_print_private_bfd_data): Ditto.
+
 2006-03-09  Paul Brook  <paul@codesourcery.com>
 
 	* cpu-arm.c (bfd_is_arm_mapping_symbol_name): Recognise additional
