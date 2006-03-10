@@ -72,8 +72,7 @@ add_fork (pid_t pid)
 {
   struct fork_info *fp;
 
-  if (fork_list == NULL &&
-      pid != PIDGET (inferior_ptid))
+  if (fork_list == NULL && pid != PIDGET (inferior_ptid))
     {
       /* Special case -- if this is the first fork in the list
 	 (the list is hitherto empty), and if this new fork is
@@ -322,17 +321,22 @@ linux_fork_killall (void)
      status for it) -- however any process may be a child
      or a parent, so may get a SIGCHLD from a previously
      killed child.  Wait them all out.  */
+  struct fork_info *fp;
   pid_t pid, ret;
   int status;
 
-  do {
-    pid = PIDGET (fork_list->ptid);
-    do {
-      ptrace (PT_KILL, pid, 0, 0);
-      ret = waitpid (pid, &status, 0);
-    } while (ret == pid && WIFSTOPPED (status));
-    delete_fork (fork_list->ptid);
-  } while (fork_list != NULL);
+  for (fp = fork_list; fp; fp = fp->next)
+    {
+      pid = PIDGET (fp->ptid);
+      do {
+	ptrace (PT_KILL, pid, 0, 0);
+	ret = waitpid (pid, &status, 0);
+	/* We might get a SIGCHLD instead of an exit status.  This is
+	 aggravated by the first kill above - a child has just
+	 died.  MVS comment cut-and-pasted from linux-nat.  */
+      } while (ret == pid && WIFSTOPPED (status));
+    }
+  init_fork_list ();	/* Clear list, prepare to start fresh.  */
 }
 
 /* The current inferior_ptid has exited, but there are other viable

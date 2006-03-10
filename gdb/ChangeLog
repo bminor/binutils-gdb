@@ -1,6 +1,9 @@
-2006-03-09  Joel Brobecker  <brobecker@adacore.com>
+2006-03-09  Michael Snyder  <msnyder@redhat.com>
 
-	* MAINTAINERS (Patch Champions): Remove self.
+	* linux-nat.c (kill_inferior): Just call target_mourn_inferior
+	instead of getting tricky for the multi-fork case.
+	* linux-fork.c (linux_fork_killall): Call PT_KILL and waitpid
+	for each fork, and then use init_fork_list to delete them.
 
 2006-03-08  Alexandre Oliva  <aoliva@redhat.com>
 
