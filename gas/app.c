@@ -1335,26 +1335,9 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      if (len > 0)
 		{
 		  PUT (ch);
-		  if (len > 8)
-		    {
-		      memcpy (to, from, len);
-		      to += len;
-		      from += len;
-		    }
-		  else
-		    {
-		      switch (len)
-			{
-			case 8: *to++ = *from++;
-			case 7: *to++ = *from++;
-			case 6: *to++ = *from++;
-			case 5: *to++ = *from++;
-			case 4: *to++ = *from++;
-			case 3: *to++ = *from++;
-			case 2: *to++ = *from++;
-			case 1: *to++ = *from++;
-			}
-		    }
+		  memcpy (to, from, len);
+		  to += len;
+		  from += len;
 		  if (to >= toend)
 		    goto tofull;
 		  ch = GET ();
