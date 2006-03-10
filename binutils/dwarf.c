@@ -221,7 +221,7 @@ reset_state_machine (int is_stmt)
    Returns the number of bytes read.  */
 
 static int
-process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
+process_extended_line_op (unsigned char *data, int is_stmt)
 {
   unsigned char op_code;
   unsigned int bytes_read;
@@ -251,7 +251,7 @@ process_extended_line_op (unsigned char *data, int is_stmt, int pointer_size)
       break;
 
     case DW_LNE_set_address:
-      adr = byte_get (data, pointer_size);
+      adr = byte_get (data, len - bytes_read - 1);
       printf (_("set Address to 0x%lx\n"), adr);
       state_machine_regs.address = adr;
       break;
@@ -1766,55 +1766,12 @@ load_debug_info (void * file)
     return 0;
 }
 
-/* Retrieve the pointer size associated with the given compilation unit.
-   Optionally the offset of this unit into the .debug_info section is
-   also retutned.  If there is no .debug_info section then an error
-   message is issued and 0 is returned.  If the requested comp unit has
-   not been defined in the .debug_info section then a warning message
-   is issued and the last know pointer size is returned.  This message
-   is only issued once per section dumped per file dumped.  */
-
-static unsigned int
-get_pointer_size_and_offset_of_comp_unit (unsigned int comp_unit,
-					  const char * section_name,
-					  unsigned long * offset_return)
-{
-  unsigned long offset = 0;
-
-  if (num_debug_info_entries == 0)
-    error (_("%s section needs a populated .debug_info section\n"),
-	   section_name);
-
-  else if (comp_unit >= num_debug_info_entries)
-    {
-      if (!warned_about_missing_comp_units)
-	{
-	  warn (_("%s section has more comp units than .debug_info section\n"),
-		section_name);
-	  warn (_("assuming that the pointer size is %d, from the last comp unit in .debug_info\n\n"),
-		last_pointer_size);
-	  warned_about_missing_comp_units = TRUE;
-	}
-    }
-  else
-    {
-      last_pointer_size = debug_information [comp_unit].pointer_size;
-      offset = debug_information [comp_unit].cu_offset;
-    }
-
-  if (offset_return != NULL)
-    * offset_return = offset;
-
-  return last_pointer_size;
-}
-
 static int
 display_debug_lines (struct dwarf_section *section, void *file)
 {
   unsigned char *start = section->start;
   unsigned char *data = start;
   unsigned char *end = start + section->size;
-  unsigned int comp_unit = 0;
 
   printf (_("\nDump of debug contents of section %s:\n\n"),
 	  section->name);
@@ -1827,7 +1784,6 @@ display_debug_lines (struct dwarf_section *section, void *file)
       unsigned char *standard_opcodes;
       unsigned char *end_of_sequence;
       unsigned char *hdrptr;
-      unsigned int pointer_size;
       int initial_length_size;
       int offset_size;
       int i;
@@ -1885,12 +1841,6 @@ display_debug_lines (struct dwarf_section *section, void *file)
       info.li_line_base <<= 24;
       info.li_line_base >>= 24;
 
-      /* Get the pointer size from the comp unit associated
-	 with this block of line number information.  */
-      pointer_size = get_pointer_size_and_offset_of_comp_unit
-	(comp_unit, ".debug_line", NULL);
-      comp_unit ++;
-
       printf (_("  Length:                      %ld\n"), info.li_length);
       printf (_("  DWARF Version:               %d\n"), info.li_version);
       printf (_("  Prologue Length:             %d\n"), info.li_prologue_length);
@@ -1899,9 +1849,6 @@ display_debug_lines (struct dwarf_section *section, void *file)
       printf (_("  Line Base:                   %d\n"), info.li_line_base);
       printf (_("  Line Range:                  %d\n"), info.li_line_range);
       printf (_("  Opcode Base:                 %d\n"), info.li_opcode_base);
-      printf (_("  (Pointer size:               %u)%s\n"),
-	      pointer_size,
-	      warned_about_missing_comp_units ? " [assumed]" : "" );
 
       end_of_sequence = data + info.li_length + initial_length_size;
 
@@ -1993,14 +1940,7 @@ display_debug_lines (struct dwarf_section *section, void *file)
 	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
-	      if (pointer_size == 0)
-		{
-		  warn (_("Extend line ops need a valid pointer size, guessing at 4\n"));
-		  pointer_size = 4;
-		}
-
-	      data += process_extended_line_op (data, info.li_default_is_stmt,
-						pointer_size);
+	      data += process_extended_line_op (data, info.li_default_is_stmt);
 	      break;
 
 	    case DW_LNS_copy:
@@ -2634,7 +2574,9 @@ display_debug_aranges (struct dwarf_section *section,
       if (excess)
 	ranges += (2 * arange.ar_pointer_size) - excess;
 
-      for (;;)
+      start += arange.ar_length + initial_length_size;
+
+      while (ranges + 2 * arange.ar_pointer_size <= start)
 	{
 	  address = byte_get (ranges, arange.ar_pointer_size);
 
@@ -2644,14 +2586,8 @@ display_debug_aranges (struct dwarf_section *section,
 
 	  ranges += arange.ar_pointer_size;
 
-	  /* A pair of zeros marks the end of the list.  */
-	  if (address == 0 && length == 0)
-	    break;
-
 	  printf ("    %8.8lx %lu\n", address, length);
 	}
-
-      start += arange.ar_length + initial_length_size;
     }
 
   printf ("\n");
@@ -3142,8 +3078,8 @@ display_debug_frames (struct dwarf_section *section,
 
 	  if (!cie)
 	    {
-	      warn ("Invalid CIE pointer %08lx in FDE at %p\n",
-		    cie_id, saved_start);
+	      warn ("Invalid CIE pointer %08lx in FDE at %08lx\n",
+		    cie_id, (unsigned long)(saved_start - section_start));
 	      start = block_end;
 	      fc->ncols = 0;
 	      fc->col_type = xmalloc (sizeof (short int));

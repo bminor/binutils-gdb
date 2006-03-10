@@ -1,3 +1,12 @@
+2006-03-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf.c (process_extended_line_op): Remove pointer_size param.
+	Use length instead to determine address size.
+	(get_pointer_size_and_offset_of_comp_unit): Delete.
+	(display_debug_lines): Adjust for above.
+	(display_debug_aranges): Don't stop on finding two zeros.
+	(display_debug_frames): For warning, print offset not pointer.
+
 2006-03-09  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* dlltool.c: Update copyright year.
