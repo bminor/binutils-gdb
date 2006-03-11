@@ -865,8 +865,10 @@ concat_filename (struct line_info_table *table, unsigned int file)
 
   if (file - 1 >= table->num_files)
     {
-      (*_bfd_error_handler)
-	(_("Dwarf Error: mangled line number section (bad file number)."));
+      /* FILE == 0 means unknown.  */
+      if (file)
+	(*_bfd_error_handler)
+	  (_("Dwarf Error: mangled line number section (bad file number)."));
       return strdup ("<unknown>");
     }
 
