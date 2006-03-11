@@ -8909,6 +8909,17 @@
 ; mul.BW src,dst
 (binary-arith-src-dst mul G (f-0-4 #x7) (f-4-3 4) #x1 #xC mul-sem)
 
+(dni mul_l "mul.l src,r2r0" ((machine 32))
+     ("mul.l ${dst32-24-Prefixed-SI},r2r0")
+     (+ (f-0-4 #x0) (f-4-4 #x1) (f-8-4 #x8) (f-15-1 #x1) (f-18-2 #x1) (f-20-4 #xf)
+	dst32-24-Prefixed-SI)
+     () ())
+
+(dni mulu_l "mulu.l src,r2r0" ((machine 32))
+     ("mulu.l ${dst32-24-Prefixed-SI},r2r0")
+     (+ (f-0-4 #x0) (f-4-4 #x1) (f-8-4 #x8) (f-15-1 #x1) (f-18-2 #x0) (f-20-4 #xf)
+	dst32-24-Prefixed-SI)
+     () ())
 ;-------------------------------------------------------------
 ; mulex - multiple extend sign (m32)
 ;-------------------------------------------------------------
