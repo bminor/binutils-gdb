@@ -1,3 +1,9 @@
+2006-03-13  Ben Elliston  <bje@au.ibm.com>
+
+	* bucomm.c (display_target_list): Make local variable `a' to be of
+	type enum bfd_architecture.  Thus no need to cast enums to int.
+	(display_info_table): Likewise.
+
 2006-03-10  Paul Brook  <paul@codesourcery.com>
 
 	* readelf.c (decode_ARM_machine_flags):  Handle EABIv5.
