@@ -3576,6 +3576,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info,
   h->non_elf = 0;
   h->def_regular = 1;
   h->type = STT_OBJECT;
+  elf_hash_table (info)->hgot = h;
 
   if (info->shared
       && ! bfd_elf_link_record_dynamic_symbol (info, h))
