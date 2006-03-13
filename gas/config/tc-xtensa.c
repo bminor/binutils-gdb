@@ -2180,14 +2180,10 @@ xg_translate_sysreg_op (char **popname, int *pnum_args, char **arg_strings)
   char *opname, *new_opname;
   const char *sr_name;
   int is_user, is_write;
-  bfd_boolean has_underbar = FALSE;
 
   opname = *popname;
   if (*opname == '_')
-    {
-      has_underbar = TRUE;
-      opname += 1;
-    }
+    opname += 1;
   is_user = (opname[1] == 'u');
   is_write = (opname[0] == 'w');
 
@@ -2233,8 +2229,7 @@ xg_translate_sysreg_op (char **popname, int *pnum_args, char **arg_strings)
   if (is_write && !is_user && !strcasecmp ("interrupt", sr_name))
     sr_name = "intset";
   new_opname = (char *) xmalloc (strlen (sr_name) + 6);
-  sprintf (new_opname, "%s%s.%s", (has_underbar ? "_" : ""),
-	   *popname, sr_name);
+  sprintf (new_opname, "%s.%s", *popname, sr_name);
   free (*popname);
   *popname = new_opname;
 
