@@ -6934,6 +6934,48 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
+/* REL is a relocation in INPUT_BFD that is being copied to OUTPUT_BFD.
+   Adjust its R_ADDEND field so that it is correct for the output file.
+   LOCAL_SYMS and LOCAL_SECTIONS are arrays of INPUT_BFD's local symbols
+   and sections respectively; both use symbol indexes.  */
+
+static void
+mips_elf_adjust_addend (bfd *output_bfd, struct bfd_link_info *info,
+			bfd *input_bfd, Elf_Internal_Sym *local_syms,
+			asection **local_sections, Elf_Internal_Rela *rel)
+{
+  unsigned int r_type, r_symndx;
+  Elf_Internal_Sym *sym;
+  asection *sec;
+
+  if (mips_elf_local_relocation_p (input_bfd, rel, local_sections, FALSE))
+    {
+      r_type = ELF_R_TYPE (output_bfd, rel->r_info);
+      if (r_type == R_MIPS16_GPREL
+	  || r_type == R_MIPS_GPREL16
+	  || r_type == R_MIPS_GPREL32
+	  || r_type == R_MIPS_LITERAL)
+	{
+	  rel->r_addend += _bfd_get_gp_value (input_bfd);
+	  rel->r_addend -= _bfd_get_gp_value (output_bfd);
+	}
+
+      r_symndx = ELF_R_SYM (output_bfd, rel->r_info);
+      sym = local_syms + r_symndx;
+
+      /* Adjust REL's addend to account for section merging.  */
+      if (!info->relocatable)
+	{
+	  sec = local_sections[r_symndx];
+	  _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
+	}
+
+      /* This would normally be done by the rela_normal code in elflink.c.  */
+      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	rel->r_addend += local_sections[r_symndx]->output_offset;
+    }
+}
+
 /* Relocate a MIPS ELF section.  */
 
 bfd_boolean
@@ -7084,47 +7126,19 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    }
 	  else
 	    addend = rel->r_addend;
+	  mips_elf_adjust_addend (output_bfd, info, input_bfd,
+				  local_syms, local_sections, rel);
 	}
 
       if (info->relocatable)
 	{
-	  Elf_Internal_Sym *sym;
-	  unsigned long r_symndx;
-
 	  if (r_type == R_MIPS_64 && ! NEWABI_P (output_bfd)
 	      && bfd_big_endian (input_bfd))
 	    rel->r_offset -= 4;
 
-	  /* Since we're just relocating, all we need to do is copy
-	     the relocations back out to the object file, unless
-	     they're against a section symbol, in which case we need
-	     to adjust by the section offset, or unless they're GP
-	     relative in which case we need to adjust by the amount
-	     that we're adjusting GP in this relocatable object.  */
-
-	  if (! mips_elf_local_relocation_p (input_bfd, rel, local_sections,
-					     FALSE))
-	    /* There's nothing to do for non-local relocations.  */
-	    continue;
-
-	  if (r_type == R_MIPS16_GPREL
-	      || r_type == R_MIPS_GPREL16
-	      || r_type == R_MIPS_GPREL32
-	      || r_type == R_MIPS_LITERAL)
-	    addend -= (_bfd_get_gp_value (output_bfd)
-		       - _bfd_get_gp_value (input_bfd));
-
-	  r_symndx = ELF_R_SYM (output_bfd, rel->r_info);
-	  sym = local_syms + r_symndx;
-	  if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-	    /* Adjust the addend appropriately.  */
-	    addend += local_sections[r_symndx]->output_offset;
-
-	  if (rela_relocation_p)
-	    /* If this is a RELA relocation, just update the addend.  */
-	    rel->r_addend = addend;
-	  else
+	  if (!rela_relocation_p && rel->r_addend)
 	    {
+	      addend += rel->r_addend;
 	      if (r_type == R_MIPS_HI16
 		  || r_type == R_MIPS_GOT16)
 		addend = mips_elf_high (addend);

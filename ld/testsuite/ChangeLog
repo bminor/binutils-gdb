@@ -1,3 +1,9 @@
+2006-03-14  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips/emit-relocs-1a.s, ld-mips/emit-relocs-1b.s,
+	* ld-mips/emit-relocs-1.ld, ld-mips/emit-relocs-1.d: New test.
+	* ld-mips/mips-elf.exp: Run it.
+
 2006-03-07  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-arm/vxworks1.dd, ld-arm/vxworks1.ld, ld-arm/vxworks1-lib.dd,

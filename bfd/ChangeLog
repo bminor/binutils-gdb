@@ -1,3 +1,10 @@
+2006-03-14  Richard Sandiford  <richard@codesourcery.com>
+
+	* elf32-mips.c (mips_elf_adjust_addend): New function, mostly split
+	out from...
+	(_bfd_mips_elf_relocate_section): ...here.  Use it to adjust r_addend
+	for final links too.
+
 2006-03-13  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_create_got_section): Initialize hgot.
