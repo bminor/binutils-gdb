@@ -1,3 +1,7 @@
+2006-03-13  DJ Delorie  <dj@redhat.com>
+
+	* MAINTAINERS: Add self as m32c sim maintainer.
+
 2006-02-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/traps.c (syscall_map): Remove CB_SYS_time / TARGET_SYS_time
