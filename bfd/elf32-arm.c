@@ -5146,10 +5146,12 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   for (; in_list; in_list = in_list->next)
     {
       if ((in_list->tag & 128) < 64)
-	_bfd_error_handler
-	  (_("Warning: %B: Unknown EABI object attribute %d"),
-	   ibfd, in_list->tag);
-      break;
+	{
+	  _bfd_error_handler
+	    (_("Warning: %B: Unknown EABI object attribute %d"),
+	     ibfd, in_list->tag);
+	  break;
+	}
     }
   return TRUE;
 }

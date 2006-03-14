@@ -1,3 +1,8 @@
+2006-03-15  Ben Elliston  <bje@au.ibm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Iterate over all
+	in_list elements, not just the first.
+	
 2006-03-14  Richard Sandiford  <richard@codesourcery.com>
 
 	* elf32-mips.c (mips_elf_adjust_addend): New function, mostly split
