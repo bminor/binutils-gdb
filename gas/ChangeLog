@@ -1,3 +1,10 @@
+2006-03-14  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (std_longopts[]): Add an entry for "al" to prevent -al from
+	being confused with --alternate.
+	(parse_args): Update code to find the start of the parameters to
+	the -a switch.
+	
 2005-06-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Backport from mainline:

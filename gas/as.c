@@ -437,11 +437,12 @@ parse_args (int * pargc, char *** pargv)
        the end of the preceeding line so that it is simpler to
        selectively add and remove lines from this list.  */
     {"alternate", no_argument, NULL, OPTION_ALTERNATE}
-    /* The entry for "a" is here to prevent getopt_long_only() from
-       considering that -a is an abbreviation for --alternate.  This is
-       necessary because -a=<FILE> is a valid switch but getopt would
-       normally reject it since --alternate does not take an argument.  */
+    /* The next two entries are here to prevent getopt_long_only() from
+       considering that -a or -al is an abbreviation for --alternate.
+       This is necessary because -a=<FILE> is a valid switch but getopt
+       would normally reject it since --alternate does not take an argument.  */
     ,{"a", optional_argument, NULL, 'a'}
+    ,{"al", optional_argument, NULL, 'a'}
     ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
     ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
     ,{"emulation", required_argument, NULL, OPTION_EMULATION}
@@ -791,8 +792,15 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case 'a':
 	  if (optarg)
 	    {
-	      if (optarg != old_argv[optind] && optarg[-1] == '=')
-		--optarg;
+	      /* If optarg is part of the -a switch and not a separate argument
+		 in its own right, then scan backwards to the just after the -a.
+		 This means skipping over both '=' and 'l' which might have been
+		 taken to be part of the -a switch itself.  */
+	      if (optarg != old_argv[optind])
+		{
+		  while (optarg[-1] == '=' || optarg[-1] == 'l')
+		    --optarg;
+		}
 
 	      if (md_parse_option (optc, optarg) != 0)
 		break;
@@ -1205,7 +1213,7 @@ main (int argc, char ** argv)
     keep_it = 0;
 
   if (!keep_it)
-    unlink_if_ordinary (out_file_name);
+    unlink (out_file_name);
 
   input_scrub_end ();
 
