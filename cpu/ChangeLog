@@ -1,5 +1,9 @@
 2006-03-13  DJ Delorie  <dj@redhat.com>
 
+	* m32c.cpu (Bit3-S): New.
+	(btst:s): New.
+	* m32c.opc (parse_bit3_S): New.
+
 	* m32c.cpu (decimal-subtraction16-insn): Add second operand.
 	(btst): Add optional :G suffix for MACH32.
 	(or.b:S): New.

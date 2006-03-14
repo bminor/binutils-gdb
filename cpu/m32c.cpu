@@ -2026,6 +2026,10 @@
   h-sint DFLT f-imm3-S
   ((parse "imm3_S")) () ()
 )
+(define-full-operand Bit3-S "3 bit bit number" (m32c-isa)
+  h-sint DFLT f-imm3-S
+  ((parse "bit3_S")) () ()
+)
 
 ;-------------------------------------------------------------
 ; Bit numbers
@@ -7568,7 +7572,10 @@
 	       (+ (f-0-4 #xD) bit32-16-Unprefixed (f-7-1 #x0) (f-10-3 #x0))
 	       btst-sem)
 
-; fixme: add btst.s
+(dni btst.s "btst:s" ((machine 32))
+     "btst:s ${Bit3-S},${Dsp-8-u16}"
+     (+ (f-0-2 #x0) (f-4-3 #x5) Bit3-S Dsp-8-u16)
+     () ())
 
 ;-------------------------------------------------------------
 ; btstc
