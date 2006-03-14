@@ -347,7 +347,7 @@ condition_true (int cond_id)
 	"(S^O)|Z", "O", "!(S^O)", "unk",
 	"!((S^O)|Z)", "!O", "S^O", "unk"
       };
-      switch (cond_id)
+      switch (cond_id & 15)
 	{
 	case 0:
 	  f = FLAG_C;
@@ -409,7 +409,7 @@ condition_true (int cond_id)
 	"C", "GTU", "Z", "N",
 	"O", "LE", "LT", "!?"
       };
-      switch (cond_id)
+      switch (cond_id & 15)
 	{
 	case 0:
 	  f = !FLAG_C;

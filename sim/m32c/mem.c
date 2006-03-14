@@ -202,6 +202,23 @@ mem_put_byte (int address, unsigned char value)
       }
       break;
 
+    case 0x3aa: /* uart1tx */
+      {
+	static int pending_exit = 0;
+	if (value == 0)
+	  {
+	    if (pending_exit)
+	      {
+		step_result = M32C_MAKE_EXITED(value);
+		return;
+	      }
+	    pending_exit = 1;
+	  }
+	else
+	  putchar(value);
+      }
+      break;
+
     case 0x400:
       m32c_syscall (value);
       break;
@@ -232,6 +249,11 @@ mem_put_qi (int address, unsigned char value)
 void
 mem_put_hi (int address, unsigned short value)
 {
+  if (address == 0x402)
+    {
+      printf ("SimTrace: %06lx %04x\n", regs.r_pc, value);
+      return;
+    }
   S ("<=");
   mem_put_byte (address, value & 0xff);
   mem_put_byte (address + 1, value >> 8);
@@ -288,16 +310,16 @@ mem_get_byte (int address)
   address &= membus_mask;
   S ("=>");
   m = mem_ptr (address);
-  if (trace)
+  switch (address)
     {
-      if (tpr)
+    case 0x3ad: /* uart1c1 */
+      E();
+      return 2; /* transmitter empty */
+      break;
+    default: 
+      if (trace)
 	printf (" %02x", *m);
-      else
-	{
-	  S ("=>");
-	  printf (" %02x", *m);
-	  E ();
-	}
+      break;
     }
   E ();
   return *m;
