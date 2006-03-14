@@ -1,3 +1,9 @@
+2006-03-13  DJ Delorie  <dj@redhat.com>
+
+	* m32c-desc.c: Regenerate.
+	* m32c-opc.c: Likewise.
+	* m32c-opc.h: Likewise.
+
 2006-03-10  DJ Delorie  <dj@redhat.com>
 
 	* m32c-desc.c: Regenerate with mul.l, mulu.l.
