@@ -578,6 +578,20 @@ m32c_cgen_insert_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_BIT16RN :
       errmsg = insert_normal (cd, fields->f_dst16_rn, 0, 0, 14, 2, 32, total_length, buffer);
       break;
+    case M32C_OPERAND_BIT3_S :
+      {
+{
+  FLD (f_7_1) = ((((FLD (f_imm3_S)) - (1))) & (1));
+  FLD (f_2_2) = ((((unsigned int) (((FLD (f_imm3_S)) - (1))) >> (1))) & (3));
+}
+        errmsg = insert_normal (cd, fields->f_2_2, 0, 0, 2, 2, 32, total_length, buffer);
+        if (errmsg)
+          break;
+        errmsg = insert_normal (cd, fields->f_7_1, 0, 0, 7, 1, 32, total_length, buffer);
+        if (errmsg)
+          break;
+      }
+      break;
     case M32C_OPERAND_BIT32ANPREFIXED :
       errmsg = insert_normal (cd, fields->f_dst32_an_prefixed, 0, 0, 17, 1, 32, total_length, buffer);
       break;
@@ -1738,6 +1752,17 @@ m32c_cgen_extract_operand (CGEN_CPU_DESC cd,
     case M32C_OPERAND_BIT16RN :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 14, 2, 32, total_length, pc, & fields->f_dst16_rn);
       break;
+    case M32C_OPERAND_BIT3_S :
+      {
+        length = extract_normal (cd, ex_info, insn_value, 0, 0, 2, 2, 32, total_length, pc, & fields->f_2_2);
+        if (length <= 0) break;
+        length = extract_normal (cd, ex_info, insn_value, 0, 0, 7, 1, 32, total_length, pc, & fields->f_7_1);
+        if (length <= 0) break;
+{
+  FLD (f_imm3_S) = ((((((FLD (f_2_2)) << (1))) | (FLD (f_7_1)))) + (1));
+}
+      }
+      break;
     case M32C_OPERAND_BIT32ANPREFIXED :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 17, 1, 32, total_length, pc, & fields->f_dst32_an_prefixed);
       break;
@@ -2861,6 +2886,9 @@ m32c_cgen_get_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case M32C_OPERAND_BIT16RN :
       value = fields->f_dst16_rn;
       break;
+    case M32C_OPERAND_BIT3_S :
+      value = fields->f_imm3_S;
+      break;
     case M32C_OPERAND_BIT32ANPREFIXED :
       value = fields->f_dst32_an_prefixed;
       break;
@@ -3450,6 +3478,9 @@ m32c_cgen_get_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case M32C_OPERAND_BIT16RN :
       value = fields->f_dst16_rn;
+      break;
+    case M32C_OPERAND_BIT3_S :
+      value = fields->f_imm3_S;
       break;
     case M32C_OPERAND_BIT32ANPREFIXED :
       value = fields->f_dst32_an_prefixed;
@@ -4046,6 +4077,9 @@ m32c_cgen_set_int_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     case M32C_OPERAND_BIT16RN :
       fields->f_dst16_rn = value;
       break;
+    case M32C_OPERAND_BIT3_S :
+      fields->f_imm3_S = value;
+      break;
     case M32C_OPERAND_BIT32ANPREFIXED :
       fields->f_dst32_an_prefixed = value;
       break;
@@ -4613,6 +4647,9 @@ m32c_cgen_set_vma_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       break;
     case M32C_OPERAND_BIT16RN :
       fields->f_dst16_rn = value;
+      break;
+    case M32C_OPERAND_BIT3_S :
+      fields->f_imm3_S = value;
       break;
     case M32C_OPERAND_BIT32ANPREFIXED :
       fields->f_dst32_an_prefixed = value;

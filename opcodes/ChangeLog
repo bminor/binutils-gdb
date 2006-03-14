@@ -1,6 +1,10 @@
 2006-03-13  DJ Delorie  <dj@redhat.com>
 
-	* m32c-desc.c: Regenerate.
+	* m32c-asm.c: Regenerate.
+	* m32c-desc.c: Likewise.
+	* m32c-desc.h: Likewise.
+	* m32c-dis.c: Likewise.
+	* m32c-ibld.c: Likewise.
 	* m32c-opc.c: Likewise.
 	* m32c-opc.h: Likewise.
 

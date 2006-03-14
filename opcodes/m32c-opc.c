@@ -7709,6 +7709,10 @@ static const CGEN_IFMT ifmt_brk16 ATTRIBUTE_UNUSED = {
   8, 8, 0xff, { { F (F_0_4) }, { F (F_4_4) }, { 0 } }
 };
 
+static const CGEN_IFMT ifmt_btst_s ATTRIBUTE_UNUSED = {
+  24, 24, 0xce0000, { { F (F_0_2) }, { F (F_IMM3_S) }, { F (F_4_3) }, { F (F_DSP_8_U16) }, { 0 } }
+};
+
 static const CGEN_IFMT ifmt_dec16_w ATTRIBUTE_UNUSED = {
   8, 8, 0xf7, { { F (F_0_4) }, { F (F_DST16_AN_S) }, { F (F_5_3) }, { 0 } }
 };
@@ -79201,6 +79205,12 @@ static const CGEN_OPCODE m32c_cgen_insn_opcode_table[MAX_INSNS] =
     { 0, 0, 0, 0 },
     { { MNEM, 0 } },
     & ifmt_brk16, { 0x8 }
+  },
+/* btst:s ${Bit3-S},${Dsp-8-u16} */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (BIT3_S), ',', OP (DSP_8_U16), 0 } },
+    & ifmt_btst_s, { 0xa0000 }
   },
 /* dec.w ${Dst16An-S} */
   {
