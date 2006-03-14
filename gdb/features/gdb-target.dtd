@@ -30,15 +30,18 @@
 
 <!-- TODO: GDB does not yet support descriptions.  -->
 
-<!-- Registers do not have an explicit register number field; they
-     are numbered sequentially from the containing feature's base-regnum
-     when the feature is referenced.  -->
+<!-- Registers are not required to have an explicit register number field;
+     they are numbered sequentially starting at zero.  If a register does
+     have an explicit number, the next register will be assigned the next
+     sequential number by default.  When the feature is referenced, register
+     numbers are adjusted by the reference's base-regnum.  -->
 <!-- arch_data; see above -->
 <!-- Kill save-restore in favor of a more complete scheme -->
 <!ELEMENT reg		(description*)>
 <!ATTLIST reg
 	name		CDATA	#REQUIRED
 	bitsize		CDATA	#REQUIRED
+	regnum		CDATA	#IMPLIED
 	readonly	(yes | no) 'no'
 	save-restore	(yes | no) 'yes'
 	type		CDATA	'int'

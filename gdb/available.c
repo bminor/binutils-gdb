@@ -27,12 +27,14 @@
 #include "gdbtypes.h"
 #include "symfile.h"
 #include "target.h"
+#include "sha1.h"
 
 #include "available.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb_obstack.h"
+#include "gdb_stdint.h"
 
 /* TODO: Remote target "guess" features from g packet size */
 
@@ -53,26 +55,184 @@
    to initialize a gdbarch, which leads to later failures when we expect
    e.g. current_regcache to have been initialized.  */
 
+
+
+/* Support for caching XML objects read from the target.
+
+   TODO ITEMS:
+   - Support caching to disk.
+   - Support compiled-in feature cache.
+   - Figure out memory management for feature contents strings.
+*/
+
+
+/* Saved information about cached XML objects.  Each cache entry
+   corresponds to a file in the cache, or an object fetched from
+   the target with one particular annex.  */
+
+struct xml_cache_entry
+{
+  const char *annex;
+  const char *contents;
+
+  union
+  {
+    /* We use a union to represent the checksum in order to guarantee
+       sufficient alignment.  */
+    uint32_t words[5];
+    unsigned char bytes[20];
+  } sha1sum;
+
+  struct xml_cache_entry *next;
+};
+
+/* A list of all the cached objects.  */
+
+static struct xml_cache_entry *xml_global_cache;
+
+/* Look for a feature in the cache with ANNEX and CHECKSUM.  If no
+   entry is found, return NULL.  */
+
+static const char *
+find_xml_feature_in_cache (const char *annex, const unsigned char *checksum)
+{
+  struct xml_cache_entry *ent;
+
+  for (ent = xml_global_cache; ent != NULL; ent = ent->next)
+    {
+      if (strcmp (ent->annex, annex) != 0)
+	continue;
+      if (memcmp (ent->sha1sum.bytes, checksum, 20) != 0)
+	continue;
+
+      return ent->contents;
+    }
+
+  return NULL;
+}
+
+/* Add CONTENTS, which represents the object named ANNEX, to the
+   cache if it is not already cached.  */
+
+static void
+add_xml_feature_to_cache (const char *annex, const char *contents)
+{
+  struct xml_cache_entry new_ent;
+
+  /* FIXME: Again, memory allocation?  */
+  new_ent.annex = xstrdup (annex);
+  new_ent.contents = xstrdup (contents);
+
+  sha1_buffer (new_ent.contents, strlen (new_ent.contents),
+	       new_ent.sha1sum.bytes);
+
+  /* If this entry is already in the cache, do not add it again.  */
+  if (find_xml_feature_in_cache (annex, new_ent.sha1sum.bytes))
+    return;
+
+  new_ent.next = xml_global_cache;
+
+  xml_global_cache = xmalloc (sizeof (struct xml_cache_entry));
+  memcpy (xml_global_cache, &new_ent, sizeof (struct xml_cache_entry));
+}
+
+/* Convert an ASCII checksum string, CHECKSUM, to a binary blob,
+   BYTES.  Returns 0 for success, or -1 if a bad character is
+   encountered.  CHECKSUM does not need to be NUL terminated.  */
+
+static int
+checksum_to_bytes (char *checksum, unsigned char *bytes)
+{
+  int i;
+
+  for (i = 0; i < 20; i++)
+    {
+      int n;
+      char c1, c2;
+
+      c1 = checksum[2 * i];
+      if (c1 >= '0' && c1 <= '9')
+	n = c1 - '0';
+      else if (c1 >= 'a' && c1 <= 'f')
+	n = c1 - 'a' + 10;
+      else if (c1 >= 'A' && c1 <= 'F')
+	n = c1 - 'A' + 10;
+      else
+	return -1;
+
+      n *= 16;
+
+      c2 = checksum[2 * i + 1];
+      if (c2 >= '0' && c2 <= '9')
+	n += c2 - '0';
+      else if (c2 >= 'a' && c2 <= 'f')
+	n += c2 - 'a' + 10;
+      else if (c2 >= 'A' && c2 <= 'F')
+	n += c2 - 'A' + 10;
+      else
+	return -1;
+
+      bytes[i] = n;
+    }
+
+  return 0;
+}
+
+/* Baton passed to fetch_available_features_from_target.  */
+
+struct fetch_features_baton
+{
+  struct target_ops *ops;
+
+  struct fetch_features_checksum
+  {
+    const char *annex;
+    unsigned char checksum[20];
+  } *checksums;
+};
+
 /* Read a string representation of available features from the target,
    using TARGET_OBJECT_AVAILABLE_FEATURES.  The returned string is
-   malloc allocated and NUL-terminated.  If NAME is NULL, the overall
-   feature set is read; otherwise the specified name is read (e.g.
-   resolving xi:include).  */
+   malloc allocated and NUL-terminated.  NAME should be a non-NULL
+   string identifying the XML document we want; the top level document
+   is "target.xml".  Other calls may be performed for the DTD or
+   for xi:include.  */
 
 static char *
-fetch_available_features_from_target (const char *name, void *ops_)
+fetch_available_features_from_target (const char *name, void *baton_)
 {
-  struct target_ops *ops = ops_;
+  struct fetch_features_baton *baton = baton_;
   char *features_str;
   gdb_byte *features_buf;
   LONGEST len;
 
-  struct gdb_feature_set *features;
-  struct gdb_available_feature **slot;
-  int ret;
+  if (baton->checksums)
+    {
+      struct fetch_features_checksum *checksum_ent;
 
-  len = target_read_whole (ops, TARGET_OBJECT_AVAILABLE_FEATURES,
-			   NULL, &features_buf);
+      for (checksum_ent = baton->checksums;
+	   checksum_ent->annex != NULL;
+	   checksum_ent++)
+	if (strcmp (checksum_ent->annex, name) == 0)
+	  break;
+
+      if (checksum_ent)
+	{
+	  const char *cached_str;
+
+	  cached_str = find_xml_feature_in_cache (name,
+						  checksum_ent->checksum);
+
+	  /* This function always returns something which the caller is
+	     responsible for freeing.  So, if we got a match, return a
+	     copy of it.  */
+	  if (cached_str)
+	    return xstrdup (cached_str);
+	}
+    }
+
+  len = target_read_whole (baton->ops, TARGET_OBJECT_AVAILABLE_FEATURES,
+			   name, &features_buf);
   if (len <= 0)
     return NULL;
 
@@ -85,6 +245,9 @@ fetch_available_features_from_target (const char *name, void *ops_)
       features_str[len] = '\0';
     }
 
+  if (baton->checksums)
+    add_xml_feature_to_cache (name, features_str);
+
   return features_str;
 }
 
@@ -92,25 +255,120 @@ fetch_available_features_from_target (const char *name, void *ops_)
    to a binary representation.  The string representation is fetched using
    TARGET_OBJECT_AVAILABLE_FEATURES.  */
 
+/* TODO: Document \n conventions */
+
 struct gdb_feature_set *
 available_features_from_target_object (struct target_ops *ops,
 				       struct obstack *obstack)
 {
+  struct fetch_features_baton baton;
   struct gdb_feature_set *features;
-  char *features_str, *cur;
-  gdb_byte *features_buf;
-  LONGEST len;
-  struct gdb_available_feature **slot;
+  char *features_str, *checksums_str;
   int ret;
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
-  features_str = fetch_available_features_from_target (NULL, ops);
+  /* Initialize the baton.  */
+  baton.ops = ops;
+  baton.checksums = NULL;
+
+  /* Attempt to read checksums from the target.  */
+  checksums_str = fetch_available_features_from_target ("CHECKSUMS", &baton);
+  if (checksums_str)
+    {
+      char *p;
+      int n_checksums;
+
+      make_cleanup (xfree, checksums_str);
+
+      /* Allow for one checksum in case there is no trailing newline,
+	 and one to serve as a NULL terminator.  */
+      n_checksums = 2;
+
+      /* Allocate one additional checksum per newline.  */
+      for (p = checksums_str; *p; p++)
+	if (*p == '\n')
+	  n_checksums++;
+
+      baton.checksums = xmalloc (n_checksums
+				 * sizeof (struct fetch_features_checksum));
+      make_cleanup (xfree, baton.checksums);
+
+      n_checksums = 0;
+      p = checksums_str;
+      while (*p)
+	{
+	  char *field_end;
+
+	  /* Find the first space on the line, marking the end of the
+	     checksum.  */
+	  field_end = p;
+	  while (*field_end && *field_end != '\n'
+		 && *field_end != ' ')
+	    field_end++;
+
+	  /* Check for a malformed checksum.  */
+	  if (*field_end != ' '
+	      || field_end - p != 40
+	      || checksum_to_bytes (p, baton.checksums[n_checksums].checksum))
+	    {
+	      /* Skip this line.  */
+	      p = field_end;
+	      while (*p && *p != '\n')
+		p++;
+	      if (*p == '\n')
+		p++;
+	      continue;
+	    }
+
+	  *field_end = '\0';
+
+	  /* Skip whitespace after the checksum.  */
+	  p = field_end + 1;
+	  while (*p == ' ')
+	    p++;
+
+	  field_end = p;
+	  while (*field_end && *field_end != '\n')
+	    field_end++;
+
+	  if (field_end == p)
+	    {
+	      /* Malformed line; skip it.  */
+	      if (*p == '\n')
+		p++;
+	      continue;
+	    }
+
+	  baton.checksums[n_checksums++].annex = p;
+
+	  /* Advance to the next line, inserting a NUL for the end of
+	     the annex name if necessary.  */
+	  if (*field_end)
+	    {
+	      *field_end = '\0';
+	      p = field_end + 1;
+	    }
+	  else
+	    break;
+	}
+
+      baton.checksums[n_checksums].annex = NULL;
+    }
+
+  /* FIXME: Memory management: what happens to features_str?  */
+
+  features_str = fetch_available_features_from_target ("target.xml", &baton);
+  if (features_str == NULL)
+    return NULL;
 
   features = OBSTACK_ZALLOC (obstack, struct gdb_feature_set);
   features->obstack = obstack;
   ret = available_features_from_xml_string (&features->features, obstack,
 					    features_str,
 					    fetch_available_features_from_target,
-					    ops, 0);
+					    &baton, 0);
+
+  do_cleanups (back_to);
 
   if (ret < 0)
     {

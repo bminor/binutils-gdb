@@ -609,6 +609,7 @@ gdb_sim_sh_h =	$(INCLUDE_DIR)/gdb/sim-sh.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
 safe_ctype_h =  $(INCLUDE_DIR)/safe-ctype.h
 hashtab_h =	$(INCLUDE_DIR)/hashtab.h
+filenames_h =	$(INCLUDE_DIR)/filenames.h
 
 #
 # $BUILD/ headers
@@ -1794,8 +1795,8 @@ auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
 	$(inferior_h) $(valprint_h) $(gdb_assert_h) $(auxv_h) \
 	$(elf_common_h)
 available.o: available.c $(defs_h) $(symfile_h) $(target_h) $(available_h) \
-	$(arch_utils_h) $(gdbtypes_h) \
-	$(gdb_string) $(gdb_assert) $(gdb_obstack_h)
+	$(arch_utils_h) $(gdbtypes_h) $(sha1_h) \
+	$(gdb_string) $(gdb_assert) $(gdb_obstack_h) $(gdb_stdint_h)
 avr-tdep.o: avr-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(symfile_h) $(arch_utils_h) $(regcache_h) \
@@ -2410,8 +2411,8 @@ parse.o: parse.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(frame_h) $(expression_h) $(value_h) $(command_h) $(language_h) \
 	$(parser_defs_h) $(gdbcmd_h) $(symfile_h) $(inferior_h) \
 	$(doublest_h) $(gdb_assert_h) $(block_h)
-parse-avail.o: parse-avail.c $(defs_h) $(available_h) \
-	$(gdb_string) $(gdb_obstack_h)
+parse-avail.o: parse-avail.c $(defs_h) $(available_h) $(gdb_assert_h) \
+	$(filenames_h) $(gdb_string) $(gdb_obstack_h)
 p-exp.o: p-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(p_lang_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(block_h)

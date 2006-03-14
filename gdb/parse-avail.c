@@ -328,6 +328,7 @@ xml_start_reg (struct xml_feature_parse_data *data,
 		       sizeof (struct gdb_available_register));
   memset (reg, 0, sizeof (struct gdb_available_register));
 
+  reg->protocol_number = -1;
   reg->bitsize = -1;
   reg->readonly = -1;
   reg->save_restore = -1;
@@ -342,6 +343,12 @@ xml_start_reg (struct xml_feature_parse_data *data,
 
       else if (strcmp (name, "name") == 0)
 	reg->name = obstrdup (data->obstack, val);
+
+      else if (strcmp (name, "regnum") == 0)
+	{
+	  if (xml_parse_one_integer (val, &reg->protocol_number) < 0)
+	    data->unhandled++;
+	}
 
       else if (strcmp (name, "bitsize") == 0)
 	{
@@ -457,10 +464,8 @@ xml_start_feature_ref (struct xml_feature_parse_data *data,
     }
 
   /* Set register numbers in the new feature.  */
-  for (i = new_feature->protocol_number, reg = new_feature->registers;
-       reg != NULL;
-       i++, reg = reg->next)
-    reg->protocol_number = i;
+  for (reg = new_feature->registers; reg != NULL; reg = reg->next)
+    reg->protocol_number += new_feature->protocol_number;
 
   new_feature->next = data->target_features;
   data->target_features = new_feature;
@@ -682,10 +687,11 @@ xml_feature_end_element (void *data_, const XML_Char *name)
       feature->next = data->seen_features;
       data->seen_features = feature;
 
-      /* Reverse the list of registers.  */
       if (feature->registers)
 	{
+	  /* Reverse the list of registers.  */
 	  struct gdb_available_register *reg1, *reg2, *reg3;
+	  int next;
 
 	  reg1 = NULL;
 	  reg2 = feature->registers;
@@ -699,6 +705,13 @@ xml_feature_end_element (void *data_, const XML_Char *name)
 	    }
 
 	  feature->registers = reg1;
+
+	  next = 0;
+	  for (reg1 = feature->registers; reg1; reg1 = reg1->next)
+	    if (reg1->protocol_number == -1)
+	      reg1->protocol_number = next++;
+	    else
+	      next = reg1->protocol_number + 1;
 	}
 
       break;
@@ -765,14 +778,15 @@ xml_parser_cleanup (void *parser)
   struct xml_feature_parse_data *data;
 
   data = XML_GetUserData (parser);
-  while (data->state)
-    {
-      struct xml_state_stack *prev;
+  if (data)
+    while (data->state)
+      {
+	struct xml_state_stack *prev;
 
-      prev = data->state->prev;
-      xfree (data->state);
-      data->state = prev;
-    }
+	prev = data->state->prev;
+	xfree (data->state);
+	data->state = prev;
+      }
 
   XML_ParserFree (parser);
 }
@@ -801,6 +815,7 @@ xml_feature_external_entity (XML_Parser parser,
   back_to = make_cleanup (xml_parser_cleanup, entity_parser);
 
   XML_SetElementHandler (entity_parser, NULL, NULL);
+  XML_SetUserData (entity_parser, NULL);
 
   if (XML_Parse (entity_parser, text, strlen (text), 1) != XML_STATUS_OK)
     {

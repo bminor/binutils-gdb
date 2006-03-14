@@ -83,7 +83,7 @@ struct gdb_available_register
   /* The protocol number used by this target to provide this
      feature.  For instance, the register number used for remote
      p/P packets to access this register.  */
-  int protocol_number;
+  long protocol_number;
 
   /* Data private to the architecture associated with this feature.
      This is a NUL-terminated string.  */
@@ -157,7 +157,6 @@ const char *available_register_name (struct gdbarch *, int);
 /* Find the target-supplied register number of a target-described register.  */
 
 int available_register_target_regnum (struct gdbarch *, int);
-
 
 /* Internal routines shared by available.c and parse-avail.c.  */
 
