@@ -1,5 +1,5 @@
 /* <proc_service.h> replacement for systems that don't have it.
-   Copyright (C) 2000 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -48,10 +48,11 @@ typedef enum
 typedef unsigned int lwpid_t;
 #endif
 
-typedef unsigned long paddr_t;
-
 #ifndef HAVE_PSADDR_T
 typedef unsigned long psaddr_t;
+typedef unsigned long paddr_t;
+#else
+typedef psaddr_t paddr_t;
 #endif
 
 #ifndef HAVE_PRGREGSET_T

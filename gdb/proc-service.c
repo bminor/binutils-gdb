@@ -75,9 +75,9 @@ ps_xfer_memory (const struct ps_prochandle *ph, paddr_t addr,
   inferior_ptid = pid_to_ptid (ph->pid);
 
   if (write)
-    ret = target_write_memory (addr, buf, len);
+    ret = target_write_memory ((unsigned long) addr, buf, len);
   else
-    ret = target_read_memory (addr, buf, len);
+    ret = target_read_memory ((unsigned long) addr, buf, len);
 
   do_cleanups (old_chain);
 
@@ -181,7 +181,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
   if (ms == NULL)
     return PS_NOSYM;
 
-  *sym_addr = SYMBOL_VALUE_ADDRESS (ms);
+  *sym_addr = (paddr_t) (unsigned long) SYMBOL_VALUE_ADDRESS (ms);
   return PS_OK;
 }
 
