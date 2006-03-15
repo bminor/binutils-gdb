@@ -3335,7 +3335,9 @@ ppc_elf_check_relocs (bfd *abfd,
 	      if (s == got2)
 		htab->plt_type = PLT_OLD;
 	    }
-	  /* fall through */
+	  if (h == NULL)
+	    break;
+	  goto dodyn;
 
 	case R_PPC_REL24:
 	case R_PPC_REL14:
