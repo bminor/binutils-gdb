@@ -57,7 +57,8 @@
 
 	* mips-linux-tdep.c: Include "floatformat.h".
 	(mips_linux_init_abi): Use 128-bit long double for N32 and N64.
-	(mips_n32n64_return_value): Support 128-bit long double.
+	* mips-tdep.c (mips_n32n64_return_value): Support 128-bit long
+	double.
 	(print_gp_register_row): Don't print spaces before ignored
 	or floating point registers.
 
