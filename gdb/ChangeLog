@@ -61,6 +61,7 @@
 	double.
 	(print_gp_register_row): Don't print spaces before ignored
 	or floating point registers.
+	* Makefile.in (mips-linux-tdep.o): Update.
 
 2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
