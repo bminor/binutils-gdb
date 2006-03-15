@@ -1,7 +1,7 @@
 /* Target-dependent code for the MIPS architecture, for GDB, the GNU Debugger.
 
    Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    Contributed by Alessandro Forin(af@cs.cmu.edu) at CMU
@@ -2911,6 +2911,24 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
       || TYPE_LENGTH (type) > 2 * mips_abi_regsize (gdbarch))
     return RETURN_VALUE_STRUCT_CONVENTION;
   else if (TYPE_CODE (type) == TYPE_CODE_FLT
+	   && TYPE_LENGTH (type) == 16
+	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
+    {
+      /* A 128-bit floating-point value fills both $f0 and $f2.  The
+	 two registers are used in the same as memory order, so the
+	 eight bytes with the lower memory address are in $f0.  */
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stderr, "Return float in $f0 and $f2\n");
+      mips_xfer_register (regcache,
+			  NUM_REGS + mips_regnum (current_gdbarch)->fp0,
+			  8, TARGET_BYTE_ORDER, readbuf, writebuf, 0);
+      mips_xfer_register (regcache,
+			  NUM_REGS + mips_regnum (current_gdbarch)->fp0 + 2,
+			  8, TARGET_BYTE_ORDER, readbuf ? readbuf + 8 : readbuf,
+			  writebuf ? writebuf + 8 : writebuf, 0);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_FLT
 	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
       /* A floating-point value belongs in the least significant part
@@ -4037,7 +4055,6 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
   int regnum;
 
   /* For GP registers, we print a separate row of names above the vals */
-  fprintf_filtered (file, "     ");
   for (col = 0, regnum = start_regnum;
        col < ncols && regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
     {
@@ -4046,11 +4063,17 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       if (TYPE_CODE (gdbarch_register_type (gdbarch, regnum)) ==
 	  TYPE_CODE_FLT)
 	break;			/* end the row: reached FP register */
+      if (col == 0)
+	fprintf_filtered (file, "     ");
       fprintf_filtered (file,
 			mips_abi_regsize (current_gdbarch) == 8 ? "%17s" : "%9s",
 			REGISTER_NAME (regnum));
       col++;
     }
+
+  if (col == 0)
+    return regnum;
+
   /* print the R0 to R31 names */
   if ((start_regnum % NUM_REGS) < MIPS_NUMREGS)
     fprintf_filtered (file, "\n R%-4d", start_regnum % NUM_REGS);

@@ -32,6 +32,7 @@
 #include "regcache.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
+#include "floatformat.h"
 
 /* Copied from <asm/elf.h>.  */
 #define ELF_NGREG       45
@@ -1110,6 +1111,15 @@ mips_linux_init_abi (struct gdbarch_info info,
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 	set_mips_linux_register_addr (gdbarch, mips64_linux_register_addr);
+	set_gdbarch_long_double_bit (gdbarch, 128);
+	/* These floatformats should probably be renamed.  MIPS uses
+	   the same 128-bit IEEE floating point format that IA-64 uses,
+	   except that the quiet/signalling NaN bit is reversed (GDB
+	   does not distinguish between quiet and signalling NaNs).  */
+	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_big);
+	else
+	  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_little);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n32_rt_sigframe);
 	break;
       case MIPS_ABI_N64:
@@ -1118,6 +1128,15 @@ mips_linux_init_abi (struct gdbarch_info info,
 	set_solib_svr4_fetch_link_map_offsets
 	  (gdbarch, svr4_lp64_fetch_link_map_offsets);
 	set_mips_linux_register_addr (gdbarch, mips64_linux_register_addr);
+	set_gdbarch_long_double_bit (gdbarch, 128);
+	/* These floatformats should probably be renamed.  MIPS uses
+	   the same 128-bit IEEE floating point format that IA-64 uses,
+	   except that the quiet/signalling NaN bit is reversed (GDB
+	   does not distinguish between quiet and signalling NaNs).  */
+	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+	  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_big);
+	else
+	  set_gdbarch_long_double_format (gdbarch, &floatformat_ia64_quad_little);
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n64_rt_sigframe);
 	break;
       default:
