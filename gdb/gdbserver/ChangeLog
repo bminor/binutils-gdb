@@ -1,5 +1,13 @@
 2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-mips-low.c: Include <sys/ptrace.h> and "gdb_proc_service.h".
+	(PTRACE_GET_THREAD_AREA): Define.
+	(ps_get_thread_area): New function.
+	* Makefile.in (linux-i386-low.o, linux-mips-low.o)
+	(linux-x86-64-low.o): Update.
+
+2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* configure.ac: Remove checks for prfpregset_t.
 	* gdb_proc_service.h: New file.
 	* linux-i386-low.c, linux-x86-64-low.c, thread-db.c: Use the
