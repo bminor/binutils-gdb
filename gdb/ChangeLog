@@ -1,5 +1,15 @@
 2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* mips-linux-tdep.c (mips_supply_gregset): Renamed from supply_gregset.
+	(mips_fill_gregset): Renamed from fill_gregset.
+	(mips_supply_fpregset): Renamed from supply_fpregset.
+	(mips_fill_fpregset): Renamed from fill_fpregset.
+	(fetch_core_registers): Update calls.
+	(supply_gregset, fill_gregset, supply_fpregset, fill_fpregset): New
+	functions.
+
+2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* mips-tdep.c (mips_gdbarch_init): Default 64-bit ELF files to N64.
 
 2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>

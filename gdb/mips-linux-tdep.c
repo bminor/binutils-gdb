@@ -107,8 +107,8 @@ supply_32bit_reg (int regnum, const void *addr)
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
-void 
-supply_gregset (elf_gregset_t *gregsetp)
+static void
+mips_supply_gregset (elf_gregset_t *gregsetp)
 {
   int regi;
   elf_greg_t *regp = *gregsetp;
@@ -142,8 +142,8 @@ supply_gregset (elf_gregset_t *gregsetp)
 
 /* Pack our registers (or one register) into an elf_gregset_t.  */
 
-void
-fill_gregset (elf_gregset_t *gregsetp, int regno)
+static void
+mips_fill_gregset (elf_gregset_t *gregsetp, int regno)
 {
   int regaddr, regi;
   elf_greg_t *regp = *gregsetp;
@@ -153,13 +153,13 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
     {
       memset (regp, 0, sizeof (elf_gregset_t));
       for (regi = 0; regi < 32; regi++)
-        fill_gregset (gregsetp, regi);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->lo);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->hi);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->pc);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->badvaddr);
-      fill_gregset (gregsetp, MIPS_PS_REGNUM);
-      fill_gregset (gregsetp, mips_regnum (current_gdbarch)->cause);
+	mips_fill_gregset (gregsetp, regi);
+      mips_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->lo);
+      mips_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->hi);
+      mips_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->pc);
+      mips_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->badvaddr);
+      mips_fill_gregset (gregsetp, MIPS_PS_REGNUM);
+      mips_fill_gregset (gregsetp, mips_regnum (current_gdbarch)->cause);
 
       return;
    }
@@ -195,8 +195,8 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
 
 /* Likewise, unpack an elf_fpregset_t.  */
 
-void
-supply_fpregset (elf_fpregset_t *fpregsetp)
+static void
+mips_supply_fpregset (elf_fpregset_t *fpregsetp)
 {
   int regi;
   char zerobuf[MAX_REGISTER_SIZE];
@@ -220,8 +220,8 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
 /* Likewise, pack one or all floating point registers into an
    elf_fpregset_t.  */
 
-void
-fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
+static void
+mips_fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
 {
   char *from, *to;
 
@@ -240,9 +240,9 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
       int regi;
 
       for (regi = 0; regi < 32; regi++)
-	fill_fpregset (fpregsetp, FP0_REGNUM + regi);
-      fill_fpregset (fpregsetp,
-		     mips_regnum (current_gdbarch)->fp_control_status);
+	mips_fill_fpregset (fpregsetp, FP0_REGNUM + regi);
+      mips_fill_fpregset (fpregsetp,
+			  mips_regnum (current_gdbarch)->fp_control_status);
     }
 }
 
@@ -547,7 +547,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size == sizeof (gregset))
 	{
 	  memcpy ((char *) &gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (&gregset);
+	  mips_supply_gregset (&gregset);
 	}
       else if (core_reg_size == sizeof (gregset64))
 	{
@@ -564,7 +564,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
       if (core_reg_size == sizeof (fpregset))
 	{
 	  memcpy ((char *) &fpregset, core_reg_sect, sizeof (fpregset));
-	  supply_fpregset (&fpregset);
+	  mips_supply_fpregset (&fpregset);
 	}
       else if (core_reg_size == sizeof (fpregset64))
 	{
@@ -1083,6 +1083,49 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache,
 		     frame_id_build (func - SIGFRAME_CODE_OFFSET,
 				     func));
+}
+
+/* Wrapper functions.  These are only used by libthread_db.  */
+
+void
+supply_gregset (elf_gregset_t *gregsetp)
+{
+  if (mips_isa_regsize (current_gdbarch) == 4)
+    mips_supply_gregset (gregsetp);
+  else
+    mips64_supply_gregset ((void *) gregsetp);
+}
+
+void
+fill_gregset (elf_gregset_t *gregsetp, int regno)
+{
+  if (mips_isa_regsize (current_gdbarch) == 4)
+    mips_fill_gregset (gregsetp, regno);
+  else
+    mips64_fill_gregset ((void *) gregsetp, regno);
+}
+
+/* Likewise, unpack an elf_fpregset_t.  */
+
+void
+supply_fpregset (elf_fpregset_t *fpregsetp)
+{
+  if (mips_isa_regsize (current_gdbarch) == 4)
+    mips_supply_fpregset (fpregsetp);
+  else
+    mips64_supply_fpregset ((void *) fpregsetp);
+}
+
+/* Likewise, pack one or all floating point registers into an
+   elf_fpregset_t.  */
+
+void
+fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
+{
+  if (mips_isa_regsize (current_gdbarch) == 4)
+    mips_fill_fpregset (fpregsetp, regno);
+  else
+    mips64_fill_fpregset ((void *) fpregsetp, regno);
 }
 
 /* Initialize one of the GNU/Linux OS ABIs.  */
