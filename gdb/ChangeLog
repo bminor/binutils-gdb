@@ -1,5 +1,10 @@
 2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* mips-tdep.c (is_mips16_addr, mips32_next_pc, add_offset_16):
+	Correct arithmetic for 64-bit CORE_ADDR.
+
+2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* mips-linux-tdep.c: Include "floatformat.h".
 	(mips_linux_init_abi): Use 128-bit long double for N32 and N64.
 	(mips_n32n64_return_value): Support 128-bit long double.

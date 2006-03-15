@@ -202,7 +202,7 @@ is_mips16_addr (CORE_ADDR addr)
 static CORE_ADDR
 unmake_mips16_addr (CORE_ADDR addr)
 {
-  return ((addr) & ~1);
+  return ((addr) & ~(CORE_ADDR) 1);
 }
 
 /* Return the contents of register REGNUM as a signed integer.  */
@@ -989,14 +989,14 @@ mips32_next_pc (CORE_ADDR pc)
 	    unsigned long reg;
 	    reg = jtype_target (inst) << 2;
 	    /* Upper four bits get never changed... */
-	    pc = reg + ((pc + 4) & 0xf0000000);
+	    pc = reg + ((pc + 4) & ~(CORE_ADDR) 0x0fffffff);
 	  }
 	  break;
 	  /* FIXME case JALX : */
 	  {
 	    unsigned long reg;
 	    reg = jtype_target (inst) << 2;
-	    pc = reg + ((pc + 4) & 0xf0000000) + 1;	/* yes, +1 */
+	    pc = reg + ((pc + 4) & ~(CORE_ADDR) 0x0fffffff) + 1;	/* yes, +1 */
 	    /* Add 1 to indicate 16 bit mode - Invert ISA mode */
 	  }
 	  break;		/* The new PC will be alternate mode */
@@ -1202,7 +1202,7 @@ unpack_mips16 (CORE_ADDR pc,
 static CORE_ADDR
 add_offset_16 (CORE_ADDR pc, int offset)
 {
-  return ((offset << 2) | ((pc + 2) & (0xf0000000)));
+  return ((offset << 2) | ((pc + 2) & (~(CORE_ADDR) 0x0fffffff)));
 }
 
 static CORE_ADDR
