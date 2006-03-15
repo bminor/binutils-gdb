@@ -242,7 +242,7 @@ version.o: version.c $(server_h)
 # will remove them.
 MAKEOVERRIDES=
 
-gdb_proc_service_h = $(srcdir)/../gdb_proc_service.h $(srcdir)/../gregset.h
+gdb_proc_service_h = $(srcdir)/gdb_proc_service.h
 regdat_sh = $(srcdir)/../regformats/regdat.sh
 regdef_h = $(srcdir)/../regformats/regdef.h
 regcache_h = $(srcdir)/regcache.h
