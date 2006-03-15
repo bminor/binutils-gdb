@@ -3335,9 +3335,9 @@ ppc_elf_check_relocs (bfd *abfd,
 	      if (s == got2)
 		htab->plt_type = PLT_OLD;
 	    }
-	  if (h == NULL)
+	  if (h == NULL || h == htab->elf.hgot)
 	    break;
-	  goto dodyn;
+	  goto dodyn1;
 
 	case R_PPC_REL24:
 	case R_PPC_REL14:
@@ -3345,9 +3345,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_REL14_BRNTAKEN:
 	  if (h == NULL)
 	    break;
-	  if (h == htab->elf.hgot && htab->plt_type == PLT_UNSET)
+	  if (h == htab->elf.hgot)
 	    {
-	      htab->plt_type = PLT_OLD;
+	      if (htab->plt_type == PLT_UNSET)
+		htab->plt_type = PLT_OLD;
 	      break;
 	    }
 	  /* fall through */
@@ -3363,6 +3364,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_UADDR32:
 	case R_PPC_UADDR16:
+	dodyn1:
 	  if (h != NULL && !info->shared)
 	    {
 	      /* We may need a plt entry if the symbol turns out to be

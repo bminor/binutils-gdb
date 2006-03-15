@@ -1,5 +1,12 @@
 2006-03-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_check_relocs): REL24 and REL14 relocs
+	against __GLOBAL_OFFSET_TABLE__ need never be dynamic.  Tweak
+	last change to REL32 relocs so that they are counted as
+	possibly dynamic as per REL24 and REL14.
+
+2006-03-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_check_relocs): Don't fall into REL24
 	checks from REL32.
 
