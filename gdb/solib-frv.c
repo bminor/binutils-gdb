@@ -421,6 +421,22 @@ frv_current_sos (void)
   struct so_list *sos_head = NULL;
   struct so_list **sos_next_ptr = &sos_head;
 
+  /* Make sure that the main executable has been relocated.  This is
+     required in order to find the address of the global offset table,
+     which in turn is used to find the link map info.  (See lm_base()
+     for details.)
+
+     Note that the relocation of the main executable is also performed
+     by SOLIB_CREATE_INFERIOR_HOOK(), however, in the case of core
+     files, this hook is called too late in order to be of benefit to
+     SOLIB_ADD.  SOLIB_ADD eventually calls this this function,
+     frv_current_sos, and also precedes the call to
+     SOLIB_CREATE_INFERIOR_HOOK().   (See post_create_inferior() in
+     infcmd.c.)  */
+  if (main_executable_lm_info == 0 && core_bfd != NULL)
+    frv_relocate_main_executable ();
+
+  /* Fetch the GOT corresponding to the main executable.  */
   mgot = main_got ();
 
   /* Locate the address of the first link map struct.  */
@@ -960,6 +976,14 @@ frv_clear_solib (void)
   enable_break1_done = 0;
   enable_break2_done = 0;
   main_lm_addr = 0;
+  if (main_executable_lm_info != 0)
+    {
+      xfree (main_executable_lm_info->map);
+      xfree (main_executable_lm_info->dyn_syms);
+      xfree (main_executable_lm_info->dyn_relocs);
+      xfree (main_executable_lm_info);
+      main_executable_lm_info = 0;
+    }
 }
 
 static void

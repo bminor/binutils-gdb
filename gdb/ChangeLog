@@ -1,3 +1,24 @@
+2006-03-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-linux-tdep.c (gdbcore.h, regcache.h, regset.h, gdb_string.h):
+	Include.
+	(FRV_ELF_NGREG, FRV_PT_PSR, FRV_PT_ISR, FRV_PT_CCR, FRV_PT_CCCR)
+	(FRV_PT_LR, FRV_PT_LCR, FRV_PT_PC, FRV_PT_GNER0, FRV_PT_GNER1)
+	(FRV_PT_IACC0H, FRV_PT_IACC0L, FRV_PT_GR, FRV_PT_TBR)
+	(FRV_PT_EXEC_FDPIC_LOADMAP, FRV_PT_INTERP_FDPIC_LOADMAP): Define.
+	(frv_elf_greg_t, frv_elf_gregset_t, frv_elf_fpreg_t)
+	(frv_elf_fpregset_t): Define types.
+	(frv_linux_supply_gregset, frv_linux_supply_fpregset)
+	(frv_linux_regset_from_core_section: New functions.
+	(frv_linux_gregset, frv_linux_fpregset): New static globals.
+	(frv_linux_init_abi): Register the `regset_from_core_section' method.
+	* Makefile.in (frv-linux-tdep.o): Update dependencies.
+	* solib-frv.c (frv_current_sos): Relocate main executable after
+	loading core file.
+	(frv_clear_solib): Clean up space associated with
+	`main_executable_lm_info'.
+	* config/frv/frv.mt (TDEPFILES): Add corelow.o to this list.
+
 2006-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (mips_linux_tdep_h): New.
