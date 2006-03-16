@@ -1,3 +1,7 @@
+2006-03-16  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (insns): Add "svc".
+
 2006-03-13  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xg_translate_sysreg_op): Remove has_underbar

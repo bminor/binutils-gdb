@@ -1,3 +1,8 @@
+2006-03-16  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (arm_opcodes): Rename swi to svc.
+	(thumb_opcodes): Ditto.
+
 2006-03-13  DJ Delorie  <dj@redhat.com>
 
 	* m32c-asm.c: Regenerate.

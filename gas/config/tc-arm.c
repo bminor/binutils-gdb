@@ -8950,6 +8950,7 @@ static const struct asm_opcode insns[] =
  tC3(ldmfd,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
 
  TCE(swi,	f000000, df00,     1, (EXPi),        swi, t_swi),
+ TCE(svc,	f000000, df00,     1, (EXPi),        swi, t_swi),
  tCE(b,		a000000, b,	   1, (EXPr),	     branch, t_branch),
  TCE(bl,	b000000, f000f800, 1, (EXPr),	     bl, t_branch23),
 

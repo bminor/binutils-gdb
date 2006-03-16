@@ -1,3 +1,11 @@
+2006-03-16  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/svc.d: New test.
+	* gas/arm/svc.s: New test.
+	* gas/arm/inst.d: Accept svc mnemonic.
+	* gas/arm/thumb.d: Ditto.
+	* gas/arm/wince_inst.d: Ditto.
+
 2006-03-09  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/nomapping.d: New test.
