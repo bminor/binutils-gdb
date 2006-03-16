@@ -1,5 +1,5 @@
 /* ADI Blackfin BFD support for 32-bit ELF. 
-   Copyright 2005 Free Software Foundation, Inc.
+   Copyright 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2224,7 +2224,8 @@ bfin_link_hash_table_create (bfd * abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      bfin_link_hash_newfunc))
+				      bfin_link_hash_newfunc,
+				      sizeof (struct bfin_link_hash_entry)))
     {
       free (ret);
       return NULL;

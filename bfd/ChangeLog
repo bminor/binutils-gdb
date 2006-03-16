@@ -1,5 +1,75 @@
 2006-03-16  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 2434
+	* elflink.c (struct elf_smash_syms_data, elf_smash_syms): Delete.
+	(elf_link_add_object_symbols): Delete unnecessary locals.  Rename
+	hash_table -> htab.  Formatting.  Save entire symbol table
+	before loading as-needed syms, and restore afterwards if lib not
+	needed.  Use bfd_hash_allocate rather than bfd_alloc for sym
+	name.  Free some buffers earlier.
+	* bfd-in.h (struct bfd_hash_table): Add entsize.
+	(bfd_hash_table_init, bfd_hash_table_init_n): Adjust prototype.
+	* elf-bfd.h (_bfd_elf_link_hash_table_init): Likewise
+	* hash.c (bfd_hash_table_init_n): Add entsize param, save to
+	hash table.
+	(bfd_hash_table_init): Add param, adjust calls.
+	* aoutx.h: Adjust all hash_table_init functions and calls.
+	* bfd.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* coff-ppc.c: Likewise.
+	* cofflink.c: Likewise.
+	* ecoff.c: Likewise.
+	* ecofflink.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf-strtab.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* i386linux.c: Likewise.
+	* libaout.h: Likewise.
+	* libbfd-in.h: Likewise.
+	* libcoff-in.h: Likewise.
+	* linker.c: Likewise.
+	* m68klinux.c: Likewise.
+	* merge.c: Likewise.
+	* opncls.c: Likewise.
+	* pdp11.c: Likewise.
+	* sparclinux.c: Likewise.
+	* stabs.c: Likewise.
+	* sunos.c: Likewise.
+	* vms.c: Likewise.
+	* xcofflink.c: Likewise.
+	* section.c (struct section_hash_entry): Move to..
+	* libbfd-in.h: ..here.
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+2006-03-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_check_relocs): REL24 and REL14 relocs
 	against __GLOBAL_OFFSET_TABLE__ need never be dynamic.  Tweak
 	last change to REL32 relocs so that they are counted as

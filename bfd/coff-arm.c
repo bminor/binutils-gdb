@@ -1,6 +1,6 @@
 /* BFD back-end for ARM COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -879,8 +879,10 @@ coff_arm_link_hash_table_create (bfd * abfd)
   if (ret == NULL)
     return NULL;
 
-  if (! _bfd_coff_link_hash_table_init
-      (& ret->root, abfd, _bfd_coff_link_hash_newfunc))
+  if (!_bfd_coff_link_hash_table_init (&ret->root,
+				       abfd,
+				       _bfd_coff_link_hash_newfunc,
+				       sizeof (struct coff_link_hash_entry)))
     {
       free (ret);
       return NULL;

@@ -1967,7 +1967,8 @@ elf32_arm_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (& ret->root, abfd,
-				      elf32_arm_link_hash_newfunc))
+				      elf32_arm_link_hash_newfunc,
+				      sizeof (struct elf32_arm_link_hash_entry)))
     {
       free (ret);
       return NULL;

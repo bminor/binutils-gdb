@@ -1,5 +1,5 @@
 /* Support for HPPA 64-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -157,9 +157,6 @@ struct elf64_hppa_link_hash_table
 typedef struct bfd_hash_entry *(*new_hash_entry_func)
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 
-static bfd_boolean elf64_hppa_dyn_hash_table_init
-  PARAMS ((struct elf64_hppa_dyn_hash_table *ht, bfd *abfd,
-	   new_hash_entry_func new));
 static struct bfd_hash_entry *elf64_hppa_new_dyn_hash_entry
   PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
 	   const char *string));
@@ -276,13 +273,13 @@ static int elf64_hppa_elf_get_symbol_type
   PARAMS ((Elf_Internal_Sym *, int));
 
 static bfd_boolean
-elf64_hppa_dyn_hash_table_init (ht, abfd, new)
-     struct elf64_hppa_dyn_hash_table *ht;
-     bfd *abfd ATTRIBUTE_UNUSED;
-     new_hash_entry_func new;
+elf64_hppa_dyn_hash_table_init (struct elf64_hppa_dyn_hash_table *ht,
+				bfd *abfd ATTRIBUTE_UNUSED,
+				new_hash_entry_func new,
+				unsigned int entsize)
 {
   memset (ht, 0, sizeof (*ht));
-  return bfd_hash_table_init (&ht->root, new);
+  return bfd_hash_table_init (&ht->root, new, entsize);
 }
 
 static struct bfd_hash_entry*
@@ -328,14 +325,16 @@ elf64_hppa_hash_table_create (abfd)
   if (!ret)
     return 0;
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      _bfd_elf_link_hash_newfunc))
+				      _bfd_elf_link_hash_newfunc,
+				      sizeof (struct elf_link_hash_entry)))
     {
       bfd_release (abfd, ret);
       return 0;
     }
 
   if (!elf64_hppa_dyn_hash_table_init (&ret->dyn_hash_table, abfd,
-				       elf64_hppa_new_dyn_hash_entry))
+				       elf64_hppa_new_dyn_hash_entry,
+				       sizeof (struct elf64_hppa_dyn_hash_entry)))
     return 0;
   return &ret->root.root;
 }

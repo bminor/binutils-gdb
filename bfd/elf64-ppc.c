@@ -3464,18 +3464,21 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
   if (htab == NULL)
     return NULL;
 
-  if (! _bfd_elf_link_hash_table_init (&htab->elf, abfd, link_hash_newfunc))
+  if (!_bfd_elf_link_hash_table_init (&htab->elf, abfd, link_hash_newfunc,
+				      sizeof (struct ppc_link_hash_entry)))
     {
       free (htab);
       return NULL;
     }
 
   /* Init the stub hash table too.  */
-  if (!bfd_hash_table_init (&htab->stub_hash_table, stub_hash_newfunc))
+  if (!bfd_hash_table_init (&htab->stub_hash_table, stub_hash_newfunc,
+			    sizeof (struct ppc_stub_hash_entry)))
     return NULL;
 
   /* And the branch hash table.  */
-  if (!bfd_hash_table_init (&htab->branch_hash_table, branch_hash_newfunc))
+  if (!bfd_hash_table_init (&htab->branch_hash_table, branch_hash_newfunc,
+			    sizeof (struct ppc_branch_hash_entry)))
     return NULL;
 
   /* Initializing two fields of the union is just cosmetic.  We really

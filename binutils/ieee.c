@@ -1,5 +1,5 @@
 /* ieee.c -- Read and write IEEE-695 debugging information.
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2006
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -4594,8 +4594,10 @@ write_ieee_debugging_info (bfd *abfd, void *dhandle)
   info.type_indx = 256;
   info.name_indx = 32;
 
-  if (! bfd_hash_table_init (&info.typedefs.root, ieee_name_type_newfunc)
-      || ! bfd_hash_table_init (&info.tags.root, ieee_name_type_newfunc))
+  if (!bfd_hash_table_init (&info.typedefs.root, ieee_name_type_newfunc,
+			    sizeof (struct ieee_name_type_hash_entry))
+      || !bfd_hash_table_init (&info.tags.root, ieee_name_type_newfunc,
+			       sizeof (struct ieee_name_type_hash_entry)))
     return FALSE;
 
   if (! ieee_init_buffer (&info, &info.global_types)

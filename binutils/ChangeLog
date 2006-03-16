@@ -1,3 +1,9 @@
+2006-03-16  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 2434
+	* ieee.c (write_ieee_debugging_info): Adjust bfd_hash_table_init calls.
+	* wrstabs.c (write_stabs_in_sections_debugging_info): Likewise.
+
 2006-03-13  Ben Elliston  <bje@au.ibm.com>
 
 	* bucomm.c (display_target_list): Make local variable `a' to be of

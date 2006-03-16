@@ -1,6 +1,6 @@
 /* Main program of GNU linker.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005
+   2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -777,9 +777,10 @@ add_ysym (const char *name)
   if (link_info.notice_hash == NULL)
     {
       link_info.notice_hash = xmalloc (sizeof (struct bfd_hash_table));
-      if (! bfd_hash_table_init_n (link_info.notice_hash,
-				   bfd_hash_newfunc,
-				   61))
+      if (!bfd_hash_table_init_n (link_info.notice_hash,
+				  bfd_hash_newfunc,
+				  sizeof (struct bfd_hash_entry),
+				  61))
 	einfo (_("%P%F: bfd_hash_table_init failed: %E\n"));
     }
 
@@ -795,9 +796,10 @@ add_wrap (const char *name)
   if (link_info.wrap_hash == NULL)
     {
       link_info.wrap_hash = xmalloc (sizeof (struct bfd_hash_table));
-      if (! bfd_hash_table_init_n (link_info.wrap_hash,
-				   bfd_hash_newfunc,
-				   61))
+      if (!bfd_hash_table_init_n (link_info.wrap_hash,
+				  bfd_hash_newfunc,
+				  sizeof (struct bfd_hash_entry),
+				  61))
 	einfo (_("%P%F: bfd_hash_table_init failed: %E\n"));
     }
 
@@ -827,7 +829,8 @@ add_keepsyms_file (const char *filename)
     }
 
   link_info.keep_hash = xmalloc (sizeof (struct bfd_hash_table));
-  if (! bfd_hash_table_init (link_info.keep_hash, bfd_hash_newfunc))
+  if (!bfd_hash_table_init (link_info.keep_hash, bfd_hash_newfunc,
+			    sizeof (struct bfd_hash_entry)))
     einfo (_("%P%F: bfd_hash_table_init failed: %E\n"));
 
   bufsize = 100;
@@ -1326,7 +1329,8 @@ undefined_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       if (hash == NULL)
 	{
 	  hash = xmalloc (sizeof (struct bfd_hash_table));
-	  if (! bfd_hash_table_init (hash, bfd_hash_newfunc))
+	  if (!bfd_hash_table_init (hash, bfd_hash_newfunc,
+				    sizeof (struct bfd_hash_entry)))
 	    einfo (_("%F%P: bfd_hash_table_init failed: %E\n"));
 	}
 

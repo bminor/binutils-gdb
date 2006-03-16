@@ -1,6 +1,6 @@
 /* Routines to link ECOFF debugging information.
    Copyright 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -501,8 +501,8 @@ bfd_ecoff_debug_init (output_bfd, output_debug, output_swap, info)
   ainfo = (struct accumulate *) bfd_malloc (amt);
   if (!ainfo)
     return NULL;
-  if (! bfd_hash_table_init_n (&ainfo->fdr_hash.table, string_hash_newfunc,
-			       1021))
+  if (!bfd_hash_table_init_n (&ainfo->fdr_hash.table, string_hash_newfunc,
+			      sizeof (struct string_hash_entry), 1021))
     return NULL;
 
   ainfo->line = NULL;
@@ -528,7 +528,8 @@ bfd_ecoff_debug_init (output_bfd, output_debug, output_swap, info)
 
   if (! info->relocatable)
     {
-      if (! bfd_hash_table_init (&ainfo->str_hash.table, string_hash_newfunc))
+      if (!bfd_hash_table_init (&ainfo->str_hash.table, string_hash_newfunc,
+				sizeof (struct string_hash_entry)))
 	return NULL;
 
       /* The first entry in the string table is the empty string.  */

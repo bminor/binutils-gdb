@@ -1,6 +1,6 @@
 /* hash.c -- hash table routines for BFD
-   Copyright 1993, 1994, 1995, 1997, 1999, 2001, 2002, 2003, 2004, 2005
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1997, 1999, 2001, 2002, 2003, 2004, 2005,
+   2006 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -308,6 +308,7 @@ bfd_hash_table_init_n (struct bfd_hash_table *table,
 		       struct bfd_hash_entry *(*newfunc) (struct bfd_hash_entry *,
 							  struct bfd_hash_table *,
 							  const char *),
+		       unsigned int entsize,
 		       unsigned int size)
 {
   unsigned int alloc;
@@ -328,6 +329,7 @@ bfd_hash_table_init_n (struct bfd_hash_table *table,
     }
   memset ((void *) table->table, 0, alloc);
   table->size = size;
+  table->entsize = entsize;
   table->newfunc = newfunc;
   return TRUE;
 }
@@ -338,9 +340,11 @@ bfd_boolean
 bfd_hash_table_init (struct bfd_hash_table *table,
 		     struct bfd_hash_entry *(*newfunc) (struct bfd_hash_entry *,
 							struct bfd_hash_table *,
-							const char *))
+							const char *),
+		     unsigned int entsize)
 {
-  return bfd_hash_table_init_n (table, newfunc, bfd_default_hash_table_size);
+  return bfd_hash_table_init_n (table, newfunc, entsize,
+				bfd_default_hash_table_size);
 }
 
 /* Free a hash table.  */
@@ -591,7 +595,8 @@ _bfd_stringtab_init (void)
   if (table == NULL)
     return NULL;
 
-  if (! bfd_hash_table_init (& table->table, strtab_hash_newfunc))
+  if (!bfd_hash_table_init (&table->table, strtab_hash_newfunc,
+			    sizeof (struct strtab_hash_entry)))
     {
       free (table);
       return NULL;

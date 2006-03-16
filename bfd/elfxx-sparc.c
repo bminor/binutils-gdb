@@ -810,7 +810,8 @@ _bfd_sparc_elf_link_hash_table_create (bfd *abfd)
       ret->dynamic_interpreter_size = sizeof ELF32_DYNAMIC_INTERPRETER;
     }
 
-  if (! _bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc))
+  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc,
+				      sizeof (struct _bfd_sparc_elf_link_hash_entry)))
     {
       free (ret);
       return NULL;

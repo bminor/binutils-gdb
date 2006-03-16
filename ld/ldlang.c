@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005
+   2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
@@ -933,8 +933,10 @@ output_statement_newfunc (struct bfd_hash_entry *entry,
 static void
 output_statement_table_init (void)
 {
-  if (! bfd_hash_table_init_n (&output_statement_table,
-			       output_statement_newfunc, 61))
+  if (!bfd_hash_table_init_n (&output_statement_table,
+			      output_statement_newfunc,
+			      sizeof (struct output_statement_hash_entry),
+			      61))
     einfo (_("%P%F: can not create hash table: %E\n"));
 }
 
@@ -974,7 +976,9 @@ lang_init (void)
      of code-complexity here in ld, besides the initialization which just
      looks like other code here.  */
   if (!bfd_hash_table_init_n (&lang_definedness_table,
-			      lang_definedness_newfunc, 3))
+			      lang_definedness_newfunc,
+			      sizeof (struct lang_definedness_hash_entry),
+			      3))
     einfo (_("%P%F: can not create hash table: %E\n"));
 }
 

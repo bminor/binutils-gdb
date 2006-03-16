@@ -394,14 +394,16 @@ elf32_hppa_link_hash_table_create (bfd *abfd)
   if (htab == NULL)
     return NULL;
 
-  if (!_bfd_elf_link_hash_table_init (&htab->etab, abfd, hppa_link_hash_newfunc))
+  if (!_bfd_elf_link_hash_table_init (&htab->etab, abfd, hppa_link_hash_newfunc,
+				      sizeof (struct elf32_hppa_link_hash_entry)))
     {
       free (htab);
       return NULL;
     }
 
   /* Init the stub hash table too.  */
-  if (!bfd_hash_table_init (&htab->bstab, stub_hash_newfunc))
+  if (!bfd_hash_table_init (&htab->bstab, stub_hash_newfunc,
+			    sizeof (struct elf32_hppa_stub_hash_entry)))
     return NULL;
 
   htab->stub_bfd = NULL;

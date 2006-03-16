@@ -1,5 +1,5 @@
 /* ldcref.c -- output a cross reference table
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>
 
@@ -149,7 +149,8 @@ add_cref (const char *name,
 
   if (! cref_initialized)
     {
-      if (! bfd_hash_table_init (&cref_table.root, cref_hash_newfunc))
+      if (!bfd_hash_table_init (&cref_table.root, cref_hash_newfunc,
+				sizeof (struct cref_hash_entry)))
 	einfo (_("%X%P: bfd_hash_table_init of cref table failed: %E\n"));
       cref_initialized = TRUE;
     }

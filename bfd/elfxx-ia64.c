@@ -1,5 +1,5 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -1918,7 +1918,8 @@ elfNN_ia64_hash_table_create (abfd)
     return 0;
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      elfNN_ia64_new_elf_hash_entry))
+				      elfNN_ia64_new_elf_hash_entry,
+				      sizeof (struct elfNN_ia64_link_hash_entry)))
     {
       free (ret);
       return 0;

@@ -2,7 +2,7 @@
    (This include file is not for users of the library.)
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -51,6 +51,12 @@ struct bfd_in_memory
   bfd_size_type size;
   /* Buffer holding contents of BFD.  */
   bfd_byte *buffer;
+};
+
+struct section_hash_entry
+{
+  struct bfd_hash_entry root;
+  asection section;
 };
 
 /* tdata for an archive.  For an input archive, cache
@@ -468,7 +474,8 @@ extern bfd_boolean _bfd_link_hash_table_init
   (struct bfd_link_hash_table *, bfd *,
    struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
 			       struct bfd_hash_table *,
-			       const char *));
+			       const char *),
+   unsigned int);
 
 /* Generic link hash table creation routine.  */
 extern struct bfd_link_hash_table *_bfd_generic_link_hash_table_create

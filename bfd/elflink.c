@@ -26,6 +26,7 @@
 #include "elf-bfd.h"
 #include "safe-ctype.h"
 #include "libiberty.h"
+#include "objalloc.h"
 
 /* Define a symbol in a dynamic linkage section.  */
 
@@ -2875,98 +2876,6 @@ elf_add_dt_needed_tag (bfd *abfd,
   return 0;
 }
 
-/* Called via elf_link_hash_traverse, elf_smash_syms sets all symbols
-   belonging to NOT_NEEDED to bfd_link_hash_new.  We know there are no
-   references from regular objects to these symbols.
-
-   ??? Should we do something about references from other dynamic
-   obects?  If not, we potentially lose some warnings about undefined
-   symbols.  But how can we recover the initial undefined / undefweak
-   state?  */
-
-struct elf_smash_syms_data
-{
-  bfd *not_needed;
-  struct elf_link_hash_table *htab;
-  bfd_boolean twiddled;
-};
-
-static bfd_boolean
-elf_smash_syms (struct elf_link_hash_entry *h, void *data)
-{
-  struct elf_smash_syms_data *inf = (struct elf_smash_syms_data *) data;
-  struct bfd_link_hash_entry *bh;
-
-  switch (h->root.type)
-    {
-    default:
-    case bfd_link_hash_new:
-      return TRUE;
-
-    case bfd_link_hash_undefined:
-      if (h->root.u.undef.abfd != inf->not_needed)
-	return TRUE;
-      if (h->root.u.undef.weak != NULL
-	  && h->root.u.undef.weak != inf->not_needed)
-	{
-	  /* Symbol was undefweak in u.undef.weak bfd, and has become
-	     undefined in as-needed lib.  Restore weak.  */
-	  h->root.type = bfd_link_hash_undefweak;
-	  h->root.u.undef.abfd = h->root.u.undef.weak;
-	  if (h->root.u.undef.next != NULL
-	      || inf->htab->root.undefs_tail == &h->root)
-	    inf->twiddled = TRUE;
-	  return TRUE;
-	}
-      break;
-
-    case bfd_link_hash_undefweak:
-      if (h->root.u.undef.abfd != inf->not_needed)
-	return TRUE;
-      break;
-
-    case bfd_link_hash_defined:
-    case bfd_link_hash_defweak:
-      if (h->root.u.def.section->owner != inf->not_needed)
-	return TRUE;
-      break;
-
-    case bfd_link_hash_common:
-      if (h->root.u.c.p->section->owner != inf->not_needed)
-	return TRUE;
-      break;
-
-    case bfd_link_hash_warning:
-    case bfd_link_hash_indirect:
-      elf_smash_syms ((struct elf_link_hash_entry *) h->root.u.i.link, data);
-      if (h->root.u.i.link->type != bfd_link_hash_new)
-	return TRUE;
-      if (h->root.u.i.link->u.undef.abfd != inf->not_needed)
-	return TRUE;
-      break;
-    }
-
-  /* There is no way we can undo symbol table state from defined or
-     defweak back to undefined.  */
-  if (h->ref_regular)
-    abort ();
-
-  /* Set sym back to newly created state, but keep undef.next if it is
-     being used as a list pointer.  */
-  bh = h->root.u.undef.next;
-  if (bh == &h->root)
-    bh = NULL;
-  if (bh != NULL || inf->htab->root.undefs_tail == &h->root)
-    inf->twiddled = TRUE;
-  (*inf->htab->root.table.newfunc) (&h->root.root,
-				    &inf->htab->root.table,
-				    h->root.root.string);
-  h->root.u.undef.next = bh;
-  h->root.u.undef.abfd = inf->not_needed;
-  h->non_elf = 0;
-  return TRUE;
-}
-
 /* Sort symbol by value and section.  */
 static int
 elf_sort_symbol (const void *arg1, const void *arg2)
@@ -3136,14 +3045,6 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 static bfd_boolean
 elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 {
-  bfd_boolean (*add_symbol_hook)
-    (bfd *, struct bfd_link_info *, Elf_Internal_Sym *,
-     const char **, flagword *, asection **, bfd_vma *);
-  bfd_boolean (*check_relocs)
-    (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
-  bfd_boolean (*check_directives)
-    (bfd *, struct bfd_link_info *);
-  bfd_boolean collect;
   Elf_Internal_Shdr *hdr;
   bfd_size_type symcount;
   bfd_size_type extsymcount;
@@ -3160,14 +3061,20 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   Elf_Internal_Sym *isymend;
   const struct elf_backend_data *bed;
   bfd_boolean add_needed;
-  struct elf_link_hash_table * hash_table;
+  struct elf_link_hash_table *htab;
   bfd_size_type amt;
+  void *alloc_mark = NULL;
+  void *old_tab = NULL;
+  void *old_hash;
+  void *old_ent;
+  struct bfd_link_hash_entry *old_undefs = NULL;
+  struct bfd_link_hash_entry *old_undefs_tail = NULL;
+  long old_dynsymcount = 0;
+  size_t tabsize = 0;
+  size_t hashsize = 0;
 
-  hash_table = elf_hash_table (info);
-
+  htab = elf_hash_table (info);
   bed = get_elf_backend_data (abfd);
-  add_symbol_hook = bed->elf_add_symbol_hook;
-  collect = bed->collect;
 
   if ((abfd->flags & DYNAMIC) == 0)
     dynamic = FALSE;
@@ -3179,8 +3086,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 hope of using a dynamic object which does not exactly match
 	 the format of the output file.  */
       if (info->relocatable
-	  || !is_elf_hash_table (hash_table)
-	  || hash_table->root.creator != abfd->xvec)
+	  || !is_elf_hash_table (htab)
+	  || htab->root.creator != abfd->xvec)
 	{
 	  if (info->relocatable)
 	    bfd_set_error (bfd_error_invalid_operation);
@@ -3223,8 +3130,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  struct elf_link_hash_entry *h;
 
-		  h = elf_link_hash_lookup (hash_table, name,
-					    FALSE, FALSE, TRUE);
+		  h = elf_link_hash_lookup (htab, name, FALSE, FALSE, TRUE);
 
 		  /* FIXME: What about bfd_link_hash_common?  */
 		  if (h != NULL
@@ -3251,7 +3157,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	      if (! (_bfd_generic_link_add_one_symbol
 		     (info, abfd, name, BSF_WARNING, s, 0, msg,
-		      FALSE, collect, NULL)))
+		      FALSE, bed->collect, NULL)))
 		goto error_return;
 
 	      if (! info->relocatable)
@@ -3277,15 +3183,15 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 format.  FIXME: If there are no input BFD's of the same
 	 format as the output, we can't make a shared library.  */
       if (info->shared
-	  && is_elf_hash_table (hash_table)
-	  && hash_table->root.creator == abfd->xvec
-	  && ! hash_table->dynamic_sections_created)
+	  && is_elf_hash_table (htab)
+	  && htab->root.creator == abfd->xvec
+	  && !htab->dynamic_sections_created)
 	{
 	  if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
 	    goto error_return;
 	}
     }
-  else if (!is_elf_hash_table (hash_table))
+  else if (!is_elf_hash_table (htab))
     goto error_return;
   else
     {
@@ -3360,9 +3266,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  n->name = anm;
 		  n->by = abfd;
 		  n->next = NULL;
-		  for (pn = & hash_table->needed;
-		       *pn != NULL;
-		       pn = &(*pn)->next)
+		  for (pn = &htab->needed; *pn != NULL; pn = &(*pn)->next)
 		    ;
 		  *pn = n;
 		}
@@ -3434,9 +3338,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       if (rpath)
 	{
 	  struct bfd_link_needed_list **pn;
-	  for (pn = & hash_table->runpath;
-	       *pn != NULL;
-	       pn = &(*pn)->next)
+	  for (pn = &htab->runpath; *pn != NULL; pn = &(*pn)->next)
 	    ;
 	  *pn = rpath;
 	}
@@ -3544,8 +3446,57 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  weaks = NULL;
+  /* If we are loading an as-needed shared lib, save the symbol table
+     state before we start adding symbols.  If the lib turns out
+     to be unneeded, restore the state.  */
+  if ((elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0)
+    {
+      unsigned int i;
+      size_t entsize;
 
+      for (entsize = 0, i = 0; i < htab->root.table.size; i++)
+	{
+	  struct bfd_hash_entry *p;
+
+	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
+	    entsize += htab->root.table.entsize;
+	}
+
+      tabsize = htab->root.table.size * sizeof (struct bfd_hash_entry *);
+      hashsize = extsymcount * sizeof (struct elf_link_hash_entry *);
+      old_tab = bfd_malloc (tabsize + entsize + hashsize);
+      if (old_tab == NULL)
+	goto error_free_vers;
+
+      /* Remember the current objalloc pointer, so that all mem for
+	 symbols added can later be reclaimed.  */
+      alloc_mark = bfd_hash_allocate (&htab->root.table, 1);
+      if (alloc_mark == NULL)
+	goto error_free_vers;
+
+      /* Clone the symbol table and sym hashes.  Remember some
+	 pointers into the symbol table, and dynamic symbol count.  */
+      old_hash = (char *) old_tab + tabsize;
+      old_ent = (char *) old_hash + hashsize;
+      memcpy (old_tab, htab->root.table.table, tabsize);
+      memcpy (old_hash, sym_hash, hashsize);
+      old_undefs = htab->root.undefs;
+      old_undefs_tail = htab->root.undefs_tail;
+      old_dynsymcount = htab->dynsymcount;
+
+      for (i = 0; i < htab->root.table.size; i++)
+	{
+	  struct bfd_hash_entry *p;
+
+	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
+	    {
+	      memcpy (old_ent, p, htab->root.table.entsize);
+	      old_ent = (char *) old_ent + htab->root.table.entsize;
+	    }
+	}
+    }
+
+  weaks = NULL;
   ever = extversym != NULL ? extversym + extsymoff : NULL;
   for (isym = isymbuf, isymend = isymbuf + extsymcount;
        isym < isymend;
@@ -3597,7 +3548,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       if (isym->st_shndx == SHN_UNDEF)
 	sec = bfd_und_section_ptr;
-      else if (isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
+      else if (isym->st_shndx < SHN_LORESERVE
+	       || isym->st_shndx > SHN_HIRESERVE)
 	{
 	  sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	  if (sec == NULL)
@@ -3608,8 +3560,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		 default visibility.  */
 	      sec = bfd_und_section_ptr;
 	      isym->st_shndx = SHN_UNDEF;
-	      isym->st_other = STV_DEFAULT
-			       | (isym->st_other & ~ ELF_ST_VISIBILITY(-1));
+	      isym->st_other = (STV_DEFAULT
+				| (isym->st_other & ~ ELF_ST_VISIBILITY (-1)));
 	    }
 	  else if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
 	    value -= sec->vma;
@@ -3650,10 +3602,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    }
 	  sec = tcomm;
 	}
-      else if (add_symbol_hook)
+      else if (bed->elf_add_symbol_hook)
 	{
-	  if (! (*add_symbol_hook) (abfd, info, isym, &name, &flags, &sec,
-				    &value))
+	  if (! (*bed->elf_add_symbol_hook) (abfd, info, isym, &name, &flags,
+					     &sec, &value))
 	    goto error_free_vers;
 
 	  /* The hook function sets the name to NULL if this symbol
@@ -3676,12 +3628,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	definition = TRUE;
 
       size_change_ok = FALSE;
-      type_change_ok = get_elf_backend_data (abfd)->type_change_ok;
+      type_change_ok = bed->type_change_ok;
       old_alignment = 0;
       old_bfd = NULL;
       new_sec = sec;
 
-      if (is_elf_hash_table (hash_table))
+      if (is_elf_hash_table (htab))
 	{
 	  Elf_Internal_Versym iver;
 	  unsigned int vernum = 0;
@@ -3776,7 +3728,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  && isym->st_shndx != SHN_UNDEF)
 		++newlen;
 
-	      newname = bfd_alloc (abfd, newlen);
+	      newname = bfd_hash_allocate (&htab->root.table, newlen);
 	      if (newname == NULL)
 		goto error_free_vers;
 	      memcpy (newname, name, namelen);
@@ -3840,7 +3792,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
 
       if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, name, flags, sec, value, NULL, FALSE, collect,
+	     (info, abfd, name, flags, sec, value, NULL, FALSE, bed->collect,
 	      (struct bfd_link_hash_entry **) sym_hash)))
 	goto error_free_vers;
 
@@ -3855,7 +3807,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  && definition
 	  && (flags & BSF_WEAK) != 0
 	  && ELF_ST_TYPE (isym->st_info) != STT_FUNC
-	  && is_elf_hash_table (hash_table)
+	  && is_elf_hash_table (htab)
 	  && h->u.weakdef == NULL)
 	{
 	  /* Keep a list of all weak defined non function symbols from
@@ -3898,7 +3850,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    h->root.u.c.p->alignment_power = old_alignment;
 	}
 
-      if (is_elf_hash_table (hash_table))
+      if (is_elf_hash_table (htab))
 	{
 	  bfd_boolean dynsym;
 
@@ -3998,7 +3950,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      && (abfd->no_export
 		  || (abfd->my_archive && abfd->my_archive->no_export))
 	      && ELF_ST_VISIBILITY (isym->st_other) != STV_INTERNAL)
-	    isym->st_other = STV_HIDDEN | (isym->st_other & ~ ELF_ST_VISIBILITY (-1));
+	    isym->st_other = (STV_HIDDEN
+			      | (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
 
 	  if (isym->st_other != 0 && !dynamic)
 	    {
@@ -4071,13 +4024,13 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		{
 		  /* Queue non-default versions so that .symver x, x@FOO
 		     aliases can be checked.  */
-		  if (! nondeflt_vers)
+		  if (!nondeflt_vers)
 		    {
-		      amt = (isymend - isym + 1)
-			    * sizeof (struct elf_link_hash_entry *);
+		      amt = ((isymend - isym + 1)
+			     * sizeof (struct elf_link_hash_entry *));
 		      nondeflt_vers = bfd_malloc (amt);
 		    }
-		  nondeflt_vers [nondeflt_vers_cnt++] = h;
+		  nondeflt_vers[nondeflt_vers_cnt++] = h;
 		}
 	    }
 
@@ -4089,7 +4042,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  && ! new_weakdef
 		  && h->u.weakdef->dynindx == -1)
 		{
-		  if (! bfd_elf_link_record_dynamic_symbol (info, h->u.weakdef))
+		  if (!bfd_elf_link_record_dynamic_symbol (info, h->u.weakdef))
 		    goto error_free_vers;
 		}
 	    }
@@ -4139,6 +4092,59 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
+  if (extversym != NULL)
+    {
+      free (extversym);
+      extversym = NULL;
+    }
+
+  if (isymbuf != NULL)
+    {
+      free (isymbuf);
+      isymbuf = NULL;
+    }
+
+  if ((elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0)
+    {
+      unsigned int i;
+
+      /* Restore the symbol table.  */
+      old_hash = (char *) old_tab + tabsize;
+      old_ent = (char *) old_hash + hashsize;
+      sym_hash = elf_sym_hashes (abfd);
+      memcpy (htab->root.table.table, old_tab, tabsize);
+      memcpy (sym_hash, old_hash, hashsize);
+      htab->root.undefs = old_undefs;
+      htab->root.undefs_tail = old_undefs_tail;
+      for (i = 0; i < htab->root.table.size; i++)
+	{
+	  struct bfd_hash_entry *p;
+	  struct elf_link_hash_entry *h;
+
+	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
+	    {
+	      h = (struct elf_link_hash_entry *) p;
+	      if (h->dynindx >= old_dynsymcount)
+		_bfd_elf_strtab_delref (htab->dynstr, h->dynstr_index);
+	      memcpy (p, old_ent, htab->root.table.entsize);
+	      old_ent = (char *) old_ent + htab->root.table.entsize;
+	    }
+	}
+
+      free (old_tab);
+      objalloc_free_block ((struct objalloc *) htab->root.table.memory,
+			   alloc_mark);
+      if (nondeflt_vers != NULL)
+	free (nondeflt_vers);
+      return TRUE;
+    }
+ 
+  if (old_tab != NULL)
+    {
+      free (old_tab);
+      old_tab = NULL;
+    }
+
   /* Now that all the symbols from this input file are created, handle
      .symver foo, foo@BAR such that any relocs against foo become foo@BAR.  */
   if (nondeflt_vers != NULL)
@@ -4162,7 +4168,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  shortname[amt] = '\0';
 
 	  hi = (struct elf_link_hash_entry *)
-	       bfd_link_hash_lookup (&hash_table->root, shortname,
+	       bfd_link_hash_lookup (&htab->root, shortname,
 				     FALSE, FALSE, FALSE);
 	  if (hi != NULL
 	      && hi->root.type == h->root.type
@@ -4186,31 +4192,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
       free (nondeflt_vers);
       nondeflt_vers = NULL;
-    }
-
-  if (extversym != NULL)
-    {
-      free (extversym);
-      extversym = NULL;
-    }
-
-  if (isymbuf != NULL)
-    free (isymbuf);
-  isymbuf = NULL;
-
-  if (!add_needed
-      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0)
-    {
-      /* Remove symbols defined in an as-needed shared lib that wasn't
-	 needed.  */
-      struct elf_smash_syms_data inf;
-      inf.not_needed = abfd;
-      inf.htab = hash_table;
-      inf.twiddled = FALSE;
-      elf_link_hash_traverse (hash_table, elf_smash_syms, &inf);
-      if (inf.twiddled)
-	bfd_link_repair_undef_list (&hash_table->root);
-      weaks = NULL;
     }
 
   /* Now set the weakdefs field correctly for all the weak defined
@@ -4352,9 +4333,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       free (sorted_sym_hash);
     }
 
-  check_directives = get_elf_backend_data (abfd)->check_directives;
-  if (check_directives)
-    check_directives (abfd, info);
+  if (bed->check_directives)
+    (*bed->check_directives) (abfd, info);
 
   /* If this object is the same format as the output object, and it is
      not a shared library, then let the backend look through the
@@ -4373,11 +4353,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
      I have no idea how to handle linking PIC code into a file of a
      different format.  It probably can't be done.  */
-  check_relocs = get_elf_backend_data (abfd)->check_relocs;
   if (! dynamic
-      && is_elf_hash_table (hash_table)
-      && hash_table->root.creator == abfd->xvec
-      && check_relocs != NULL)
+      && is_elf_hash_table (htab)
+      && htab->root.creator == abfd->xvec
+      && bed->check_relocs != NULL)
     {
       asection *o;
 
@@ -4398,7 +4377,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (internal_relocs == NULL)
 	    goto error_return;
 
-	  ok = (*check_relocs) (abfd, info, o, internal_relocs);
+	  ok = (*bed->check_relocs) (abfd, info, o, internal_relocs);
 
 	  if (elf_section_data (o)->relocs != internal_relocs)
 	    free (internal_relocs);
@@ -4412,7 +4391,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      of the .stab/.stabstr sections.  */
   if (! dynamic
       && ! info->traditional_format
-      && is_elf_hash_table (hash_table)
+      && is_elf_hash_table (htab)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
       asection *stabstr;
@@ -4433,10 +4412,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		struct bfd_elf_section_data *secdata;
 
 		secdata = elf_section_data (stab);
-		if (! _bfd_link_section_stabs (abfd,
-					       &hash_table->stab_info,
-					       stab, stabstr,
-					       &secdata->sec_info,
+		if (! _bfd_link_section_stabs (abfd, &htab->stab_info, stab,
+					       stabstr, &secdata->sec_info,
 					       &string_offset))
 		  goto error_return;
 		if (secdata->sec_info)
@@ -4445,7 +4422,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (is_elf_hash_table (hash_table) && add_needed)
+  if (is_elf_hash_table (htab) && add_needed)
     {
       /* Add this bfd to the loaded list.  */
       struct elf_link_loaded_list *n;
@@ -4454,13 +4431,15 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       if (n == NULL)
 	goto error_return;
       n->abfd = abfd;
-      n->next = hash_table->loaded;
-      hash_table->loaded = n;
+      n->next = htab->loaded;
+      htab->loaded = n;
     }
 
   return TRUE;
 
  error_free_vers:
+  if (old_tab != NULL)
+    free (old_tab);
   if (nondeflt_vers != NULL)
     free (nondeflt_vers);
   if (extversym != NULL)

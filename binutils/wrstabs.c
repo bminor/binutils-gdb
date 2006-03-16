@@ -1,5 +1,5 @@
 /* wrstabs.c -- Output stabs debugging information
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2006
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -480,8 +480,10 @@ write_stabs_in_sections_debugging_info (bfd *abfd, void *dhandle,
   /* Reserve 1 byte for a null byte.  */
   info.strings_size = 1;
 
-  if (! bfd_hash_table_init (&info.strhash.table, string_hash_newfunc)
-      || ! bfd_hash_table_init (&info.typedef_hash.table, string_hash_newfunc))
+  if (!bfd_hash_table_init (&info.strhash.table, string_hash_newfunc,
+			    sizeof (struct string_hash_entry))
+      || !bfd_hash_table_init (&info.typedef_hash.table, string_hash_newfunc,
+			       sizeof (struct string_hash_entry)))
     {
       non_fatal ("bfd_hash_table_init_failed: %s",
 		 bfd_errmsg (bfd_get_error ()));

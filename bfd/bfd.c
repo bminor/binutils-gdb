@@ -1440,7 +1440,8 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve)
   preserve->section_count = abfd->section_count;
   preserve->section_htab = abfd->section_htab;
 
-  if (! bfd_hash_table_init (&abfd->section_htab, bfd_section_hash_newfunc))
+  if (! bfd_hash_table_init (&abfd->section_htab, bfd_section_hash_newfunc,
+			     sizeof (struct section_hash_entry)))
     return FALSE;
 
   abfd->tdata.any = NULL;

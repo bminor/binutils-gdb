@@ -425,7 +425,8 @@ struct coff_debug_merge_hash_table
 /* Initialize a COFF debug merge hash table.  */
 
 #define coff_debug_merge_hash_table_init(table) \
-  (bfd_hash_table_init (&(table)->root, _bfd_coff_debug_merge_hash_newfunc))
+  (bfd_hash_table_init (&(table)->root, _bfd_coff_debug_merge_hash_newfunc, \
+			sizeof (struct coff_debug_merge_hash_entry)))
 
 /* Free a COFF debug merge hash table.  */
 
@@ -541,7 +542,8 @@ extern bfd_boolean _bfd_coff_link_hash_table_init
   (struct coff_link_hash_table *, bfd *,
    struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
 			       struct bfd_hash_table *,
-			       const char *));
+			       const char *),
+   unsigned int);
 extern struct bfd_link_hash_table *_bfd_coff_link_hash_table_create
   (bfd *);
 extern const char *_bfd_coff_internal_syment_name
