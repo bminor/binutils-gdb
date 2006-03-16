@@ -71,9 +71,9 @@ Disassembly of section .text:
   fc:	c0 b9 00 00 
  100:	82 ce 52 07 	R3=R2>>>0x16 \|\| R0=\[FP-12\] \|\| NOP;
  104:	d0 b9 00 00 
- 108:	80 ce 7a 52 	R1.L=R2.H<<0xf\(S\) \|\| R0=\[FP-8\] \|\| NOP;
+ 108:	80 ce 7a 52 	R1.L = R2.H << 0xf \(S\) \|\| R0=\[FP-8\] \|\| NOP;
  10c:	e0 b9 00 00 
- 110:	80 ce f2 2b 	R5.H=R2.L>>>0x2 \|\| R0=\[FP-4\] \|\| NOP;
+ 110:	80 ce f2 2b 	R5.H = R2.L >>> 0x2 \|\| R0=\[FP-4\] \|\| NOP;
  114:	f0 b9 00 00 
  118:	00 ce 14 16 	R3.L= ASHIFT R4.H BY R2.L \|\| R0=\[FP-100\] \|\| NOP;
  11c:	70 b8 00 00 
@@ -91,9 +91,9 @@ Disassembly of section .text:
  14c:	10 b8 00 00 
  150:	03 ce 00 10 	A1= ASHIFT A1 BY R0.L \|\| R0=\[FP-128\] \|\| NOP;
  154:	00 b8 00 00 
- 158:	80 ce 8a a3 	R1.H=R2.L>>0xf \|\| R5=W\[P1--\] \(Z\) \|\| NOP;
+ 158:	80 ce 8a a3 	R1.H = R2.L >> 0xf \|\| R5=W\[P1--\] \(Z\) \|\| NOP;
  15c:	8d 94 00 00 
- 160:	80 ce 00 8e 	R7.L=R0.L<<0x0 \|\| R5=W\[P2\] \(Z\) \|\| NOP;
+ 160:	80 ce 00 8e 	R7.L = R0.L << 0x0 \|\| R5=W\[P2\] \(Z\) \|\| NOP;
  164:	15 95 00 00 
  168:	82 ce 0d 8b 	R5=R5>>0x1f \|\| R7=W\[P2\+\+\] \(Z\) \|\| NOP;
  16c:	17 94 00 00 

@@ -21,8 +21,8 @@ Disassembly of section .text:
   18:	83 c6 00 10 	A1=A1<<0x0;
   1c:	82 c6 fd 4e 	R7=R5<<0x1f\(S\);
   20:	82 c6 52 07 	R3=R2>>>0x16;
-  24:	80 c6 7a 52 	R1.L=R2.H<<0xf\(S\);
-  28:	80 c6 f2 2b 	R5.H=R2.L>>>0x2;
+  24:	80 c6 7a 52 	R1.L = R2.H << 0xf \(S\);
+  28:	80 c6 f2 2b 	R5.H = R2.L >>> 0x2;
   2c:	00 4f       	R0<<=0x0;
   2e:	f9 4d       	R1>>>=0x1f;
   30:	08 40       	R0>>>=R1;
@@ -43,8 +43,8 @@ Disassembly of section .text:
   5a:	6c 44       	P4=P5<<2;
   5c:	f8 4e       	R0>>=0x1f;
   5e:	ff 4f       	R7<<=0x1f;
-  60:	80 c6 8a a3 	R1.H=R2.L>>0xf;
-  64:	80 c6 00 8e 	R7.L=R0.L<<0x0;
+  60:	80 c6 8a a3 	R1.H = R2.L >> 0xf;
+  64:	80 c6 00 8e 	R7.L = R0.L << 0x0;
   68:	82 c6 0d 8b 	R5=R5>>0x1f;
   6c:	82 c6 60 80 	R0=R0<<0xc;
   70:	83 c6 f8 41 	A0=A0>>0x1;

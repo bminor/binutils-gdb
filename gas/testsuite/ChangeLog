@@ -1,3 +1,10 @@
+2006-03-16  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* gas/bfin/shift2.s: Add new tests.
+	* gas/bfin/shift.d: Match changed disassembler behaviour.
+	* gas/bfin/parallel2.d: Likewise.
+	* gas/bfin/shift2.d: Likewise; also match new tests.
+
 2006-03-16  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/svc.d: New test.
