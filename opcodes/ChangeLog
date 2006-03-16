@@ -1,3 +1,8 @@
+2006-03-16  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* bfin-dis.c (decode_dsp32shiftimm_0): Simplify and correct the
+	logic to identify halfword shifts.
+
 2006-03-16  Paul Brook  <paul@codesourcery.com>
 
 	* arm-dis.c (arm_opcodes): Rename swi to svc.
