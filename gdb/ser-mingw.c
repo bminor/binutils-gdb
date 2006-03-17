@@ -571,6 +571,214 @@ ser_console_get_tty_state (struct serial *scb)
     return NULL;
 }
 
+struct pipe_state
+{
+  /* Since we use the pipe_select_thread for our select emulation,
+     we need to place the state structure it requires at the front
+     of our state.  */
+  struct ser_console_state wait;
+
+  /* The pex obj for our (one-stage) pipeline.  */
+  struct pex_obj *pex;
+
+  /* Streams for the pipeline's input and output.  */
+  FILE *input, *output;
+};
+
+static struct pipe_state *
+make_pipe_state (void)
+{
+  struct pipe_state *ps = XMALLOC (struct pipe_state);
+
+  memset (ps, 0, sizeof (*ps));
+  ps->wait.read_event = INVALID_HANDLE_VALUE;
+  ps->wait.except_event = INVALID_HANDLE_VALUE;
+  ps->wait.start_select = INVALID_HANDLE_VALUE;
+  ps->wait.stop_select = INVALID_HANDLE_VALUE;
+
+  return ps;
+}
+
+static void
+free_pipe_state (struct pipe_state *ps)
+{
+  int saved_errno = errno;
+
+  if (ps->wait.read_event != INVALID_HANDLE_VALUE)
+    CloseHandle (ps->wait.read_event);
+  if (ps->wait.except_event != INVALID_HANDLE_VALUE)
+    CloseHandle (ps->wait.except_event);
+  if (ps->wait.start_select != INVALID_HANDLE_VALUE)
+    CloseHandle (ps->wait.start_select);
+
+  /* If we have a select thread running, let the select thread free
+     the stop event.  */
+  if (ps->wait.stop_select != INVALID_HANDLE_VALUE)
+    SetEvent (ps->wait.stop_select);
+
+  if (ps->pex)
+    pex_free (ps->pex);
+  if (ps->input)
+    fclose (ps->input);
+  /* pex_free closes ps->output.  */
+
+  xfree (ps);
+
+  errno = saved_errno;
+}
+
+static void
+cleanup_pipe_state (void *untyped)
+{
+  struct pipe_state *ps = untyped;
+
+  free_pipe_state (ps);
+}
+
+static int
+pipe_windows_open (struct serial *scb, const char *name)
+{
+  char **argv = buildargv (name);
+  struct cleanup *back_to = make_cleanup_freeargv (argv);
+  if (! argv[0] || argv[0][0] == '\0')
+    error ("missing child command");
+
+  struct pipe_state *ps = make_pipe_state ();
+  make_cleanup (cleanup_pipe_state, ps);
+
+  ps->pex = pex_init (PEX_USE_PIPES, "target remote pipe", NULL);
+  if (! ps->pex)
+    goto fail;
+  ps->input = pex_write_input (ps->pex, 1);
+  if (! ps->input)
+    goto fail;
+
+  {
+    int err;
+    const char *err_msg
+      = pex_run (ps->pex, PEX_SEARCH | PEX_BINARY_INPUT | PEX_BINARY_OUTPUT,
+                 argv[0], argv, NULL, NULL,
+                 &err);
+
+    if (err_msg)
+      {
+        /* Our caller expects us to return -1, but all they'll do with
+           it generally is print the message based on errno.  We have
+           all the same information here, plus err_msg provided by
+           pex_run, so we just raise the error here.  */
+        if (err)
+          error ("error starting child process '%s': %s: %s",
+                 name, err_msg, safe_strerror (err));
+        else
+          error ("error starting child process '%s': %s",
+                 name, err_msg);
+      }
+  }
+
+  ps->output = pex_read_output (ps->pex, 1);
+  if (! ps->output)
+    goto fail;
+
+  scb->fd = fileno (ps->output);
+  scb->state = (void *) ps;
+
+  discard_cleanups (back_to);
+  return 0;
+
+ fail:
+  do_cleanups (back_to);
+  return -1;
+}
+
+
+static void
+pipe_windows_close (struct serial *scb)
+{
+  struct pipe_state *ps = scb->state;
+
+  /* In theory, we should try to kill the subprocess here, but the pex
+     interface doesn't give us enough information to do that.  Usually
+     closing the input pipe will get the message across.  */
+
+  free_pipe_state (ps);
+}
+
+
+static int
+pipe_windows_read (struct serial *scb, size_t count)
+{
+  HANDLE pipeline_out = (HANDLE) _get_osfhandle (scb->fd);
+  if (pipeline_out == INVALID_HANDLE_VALUE)
+    return -1;
+
+  DWORD available;
+  if (! PeekNamedPipe (pipeline_out, NULL, 0, NULL, &available, NULL))
+    return -1;
+
+  if (count > available)
+    count = available;
+
+  DWORD bytes_read;
+  if (! ReadFile (pipeline_out, scb->buf, count, &bytes_read, NULL))
+    return -1;
+
+  return bytes_read;
+}
+
+
+static int
+pipe_windows_write (struct serial *scb, const void *buf, size_t count)
+{
+  struct pipe_state *ps = scb->state;
+  int pipeline_in_fd = fileno (ps->input);
+  if (pipeline_in_fd < 0)
+    return -1;
+
+  HANDLE pipeline_in = (HANDLE) _get_osfhandle (pipeline_in_fd);
+  if (pipeline_in == INVALID_HANDLE_VALUE)
+    return -1;
+
+  DWORD written;
+  if (! WriteFile (pipeline_in, buf, count, &written, NULL))
+    return -1;
+
+  return written;
+}
+
+
+static void
+pipe_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
+{
+  struct pipe_state *ps = scb->state;
+
+  /* Have we allocated our events yet?  */
+  if (ps->wait.read_event == INVALID_HANDLE_VALUE)
+    {
+      DWORD threadId;
+
+      /* Create auto reset events to wake and terminate the select thread.  */
+      ps->wait.start_select = CreateEvent (0, FALSE, FALSE, 0);
+      ps->wait.stop_select = CreateEvent (0, FALSE, FALSE, 0);
+
+      /* Create our own events to report read and exceptions separately.
+	 The exception event is currently never used.  */
+      ps->wait.read_event = CreateEvent (0, FALSE, FALSE, 0);
+      ps->wait.except_event = CreateEvent (0, FALSE, FALSE, 0);
+
+      /* Start the select thread.  */
+      CreateThread (NULL, 0, pipe_select_thread, scb, 0, &threadId);
+    }
+
+  ResetEvent (ps->wait.read_event);
+  ResetEvent (ps->wait.except_event);
+
+  SetEvent (ps->wait.start_select);
+
+  *read = ps->wait.read_event;
+  *except = ps->wait.except_event;
+}
+
+
 struct net_windows_state
 {
   HANDLE read_event;
@@ -760,6 +968,34 @@ _initialize_ser_windows (void)
   ops->noflush_set_tty_state = ser_base_noflush_set_tty_state;
   ops->drain_output = ser_base_drain_output;
   ops->wait_handle = ser_console_wait_handle;
+
+  serial_add_interface (ops);
+
+  /* The pipe interface.  */
+
+  ops = XMALLOC (struct serial_ops);
+  memset (ops, 0, sizeof (struct serial_ops));
+  ops->name = "pipe";
+  ops->next = 0;
+  ops->open = pipe_windows_open;
+  ops->close = pipe_windows_close;
+  ops->readchar = ser_base_readchar;
+  ops->write = ser_base_write;
+  ops->flush_output = ser_base_flush_output;
+  ops->flush_input = ser_base_flush_input;
+  ops->send_break = ser_base_send_break;
+  ops->go_raw = ser_base_raw;
+  ops->get_tty_state = ser_base_get_tty_state;
+  ops->set_tty_state = ser_base_set_tty_state;
+  ops->print_tty_state = ser_base_print_tty_state;
+  ops->noflush_set_tty_state = ser_base_noflush_set_tty_state;
+  ops->setbaudrate = ser_base_setbaudrate;
+  ops->setstopbits = ser_base_setstopbits;
+  ops->drain_output = ser_base_drain_output;
+  ops->async = ser_base_async;
+  ops->read_prim = pipe_windows_read;
+  ops->write_prim = pipe_windows_write;
+  ops->wait_handle = pipe_wait_handle;
 
   serial_add_interface (ops);
 

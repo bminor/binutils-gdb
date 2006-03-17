@@ -1,3 +1,4 @@
+@c -*- mode: texinfo -*-
 @deftypefn Extension {struct pex_obj *} pex_init (int @var{flags}, const char *@var{pname}, const char *@var{tempbase})
 
 Prepare to execute one or more programs, with standard output of each
@@ -126,6 +127,34 @@ Otherwise, standard error is written to the named file.
 
 On an error return, the code sets @code{*@var{err}} to an @code{errno}
 value, or to 0 if there is no relevant @code{errno}.
+
+@end deftypefn
+
+@deftypefn Extension {FILE *} pex_write_input (struct pex_obj *@var{obj}, int @var{binary})
+
+Return a @code{FILE} pointer @var{fp} for the standard input of the
+first program in the pipeline; @var{fp} is opened for writing.  You
+must have passed @code{PEX_USE_PIPES} to the @code{pex_init} call that
+returned @var{obj}.  You must close @var{fp} yourself with
+@code{fclose} to indicate that the pipeline's input is complete.
+
+The file descriptor underlying @var{fp} is marked not to be inherited
+by child processes.
+
+This call is not supported on systems which do not support pipes; it
+returns with an error.  (We could implement it by writing a temporary
+file, but then you would need to write all your data and close
+@var{fp} before your first call to @code{pex_run} --- and that
+wouldn't work on systems that do support pipes: the pipe would fill
+up, and you would block.  So there isn't any easy way to conceal the
+differences between the two types of systems.)
+
+If you call both @code{pex_write_input} and @code{pex_read_output}, be
+careful to avoid deadlock.  If the output pipe fills up, so that each
+program in the pipeline is waiting for the next to read more data, and
+you fill the input pipe by writing more data to @var{fp}, then there
+is no way to make progress: the only process that could read data from
+the output pipe is you, but you are blocked on the input pipe.
 
 @end deftypefn
 
