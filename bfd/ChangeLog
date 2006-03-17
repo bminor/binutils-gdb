@@ -1,3 +1,9 @@
+2006-03-17  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Copy addend from
+	first relocation to the second when relaxing TLS GD to LE;
+	zero it out when relaxing to IE.
+
 2006-03-17  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2434

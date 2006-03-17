@@ -1,3 +1,8 @@
+2006-03-17  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-powerpc/tls32.s: Verify that +32768 @plt addend is
+	discarded.
+
 2006-03-14  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips/emit-relocs-1a.s, ld-mips/emit-relocs-1b.s,

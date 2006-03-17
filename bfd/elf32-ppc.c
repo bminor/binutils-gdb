@@ -5768,6 +5768,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		      insn1 |= 32 << 26;	/* lwz */
 		      insn2 = 0x7c631214;	/* add 3,3,2 */
 		      rel[1].r_info = ELF32_R_INFO (r_symndx2, R_PPC_NONE);
+		      rel[1].r_addend = 0;
 		      r_type = (((r_type - (R_PPC_GOT_TLSGD16 & 3)) & 3)
 				+ R_PPC_GOT_TPREL16);
 		      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
@@ -5782,13 +5783,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			  /* Was an LD reloc.  */
 			  r_symndx = 0;
 			  rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-			  rel[1].r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
 			}
 		      r_type = R_PPC_TPREL16_HA;
 		      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
 		      rel[1].r_info = ELF32_R_INFO (r_symndx,
 						    R_PPC_TPREL16_LO);
 		      rel[1].r_offset += 2;
+		      rel[1].r_addend = rel->r_addend;
 		    }
 		  bfd_put_32 (output_bfd, insn1, contents + rel->r_offset - 2);
 		  bfd_put_32 (output_bfd, insn2, contents + offset);
