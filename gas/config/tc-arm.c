@@ -8944,8 +8944,10 @@ static const struct asm_opcode insns[] =
  tCE(str,	4000000, str,	   2, (RR, ADDR),    ldst, t_ldst),
  tC3(strb,	4400000, strb,	   2, (RR, ADDR),    ldst, t_ldst),
 
+ tCE(stm,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
  tC3(stmia,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
  tC3(stmea,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tCE(ldm,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
  tC3(ldmia,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
  tC3(ldmfd,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
 

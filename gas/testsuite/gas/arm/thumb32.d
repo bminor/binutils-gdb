@@ -944,3 +944,13 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f85d 8b04 	ldr.w	r8, \[sp\], #4
 0[0-9a-f]+ <[^>]+> e930 0580 	ldmdb	r0!, \{r7, r8, sl\}
 0[0-9a-f]+ <[^>]+> e920 0580 	stmdb	r0!, \{r7, r8, sl\}
+0[0-9a-f]+ <[^>]+> c806      	ldmia	r0!, \{r1, r2\}
+0[0-9a-f]+ <[^>]+> c006      	stmia	r0!, \{r1, r2\}
+0[0-9a-f]+ <[^>]+> e890 0300 	ldmia.w	r0, \{r8, r9\}
+0[0-9a-f]+ <[^>]+> e880 0300 	stmia.w	r0, \{r8, r9\}
+0[0-9a-f]+ <[^>]+> bf01      	itttt	eq
+0[0-9a-f]+ <[^>]+> c806      	ldmia	r0!, \{r1, r2\}
+0[0-9a-f]+ <[^>]+> c006      	stmia	r0!, \{r1, r2\}
+0[0-9a-f]+ <[^>]+> e890 0300 	ldmia.w	r0, \{r8, r9\}
+0[0-9a-f]+ <[^>]+> e880 0300 	stmia.w	r0, \{r8, r9\}
+0[0-9a-f]+ <[^>]+> bf00      	nop

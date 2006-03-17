@@ -1,3 +1,7 @@
+2006-03-17  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (insns): Add ldm and stm.
+
 2006-03-17  Ben Elliston  <bje@au.ibm.com>
 
 	PR gas/2446

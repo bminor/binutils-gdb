@@ -1,3 +1,8 @@
+2006-03-17  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.d: Add ldm and stm tests.
+	* gas/arm/thumb32.s: Ditto.
+
 2006-03-16  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* gas/bfin/shift2.s: Add new tests.

@@ -758,3 +758,14 @@ xta:
 
 	ldmdb	r0!, {r7,r8,r10}
 	stmdb	r0!, {r7,r8,r10}
+
+	ldm	r0!, {r1, r2}
+	stm	r0!, {r1, r2}
+	ldm	r0, {r8, r9}
+	stm	r0, {r8, r9}
+	itttt eq
+	ldmeq	r0!, {r1, r2}
+	stmeq	r0!, {r1, r2}
+	ldmeq	r0, {r8, r9}
+	stmeq	r0, {r8, r9}
+	nop
