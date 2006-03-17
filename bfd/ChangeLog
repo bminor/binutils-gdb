@@ -1,3 +1,9 @@
+2006-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR ld/2462
+	* elflink.c (bfd_elf_final_link): Remove
+	bed->elf_backend_emit_relocs from emit_relocs.
+
 2006-03-17  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): Copy addend from

@@ -7782,8 +7782,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   dynobj = elf_hash_table (info)->dynobj;
 
   emit_relocs = (info->relocatable
-		 || info->emitrelocations
-		 || bed->elf_backend_emit_relocs);
+		 || info->emitrelocations);
 
   finfo.info = info;
   finfo.output_bfd = abfd;
