@@ -3457,9 +3457,15 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       for (entsize = 0, i = 0; i < htab->root.table.size; i++)
 	{
 	  struct bfd_hash_entry *p;
+	  struct elf_link_hash_entry *h;
 
 	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
-	    entsize += htab->root.table.entsize;
+	    {
+	      h = (struct elf_link_hash_entry *) p;
+	      entsize += htab->root.table.entsize;
+	      if (h->root.type == bfd_link_hash_warning)
+		entsize += htab->root.table.entsize;
+	    }
 	}
 
       tabsize = htab->root.table.size * sizeof (struct bfd_hash_entry *);
@@ -3487,11 +3493,18 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       for (i = 0; i < htab->root.table.size; i++)
 	{
 	  struct bfd_hash_entry *p;
+	  struct elf_link_hash_entry *h;
 
 	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
 	    {
 	      memcpy (old_ent, p, htab->root.table.entsize);
 	      old_ent = (char *) old_ent + htab->root.table.entsize;
+	      h = (struct elf_link_hash_entry *) p;
+	      if (h->root.type == bfd_link_hash_warning)
+		{
+		  memcpy (old_ent, h->root.u.i.link, htab->root.table.entsize);
+		  old_ent = (char *) old_ent + htab->root.table.entsize;
+		}
 	    }
 	}
     }
@@ -4124,10 +4137,19 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
 	    {
 	      h = (struct elf_link_hash_entry *) p;
+	      if (h->root.type == bfd_link_hash_warning)
+		h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	      if (h->dynindx >= old_dynsymcount)
 		_bfd_elf_strtab_delref (htab->dynstr, h->dynstr_index);
+
 	      memcpy (p, old_ent, htab->root.table.entsize);
 	      old_ent = (char *) old_ent + htab->root.table.entsize;
+	      h = (struct elf_link_hash_entry *) p;
+	      if (h->root.type == bfd_link_hash_warning)
+		{
+		  memcpy (h->root.u.i.link, old_ent, htab->root.table.entsize);
+		  old_ent = (char *) old_ent + htab->root.table.entsize;
+		}
 	    }
 	}
 
@@ -4138,7 +4160,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	free (nondeflt_vers);
       return TRUE;
     }
- 
+
   if (old_tab != NULL)
     {
       free (old_tab);
@@ -9149,7 +9171,7 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 
       /* Keep .gcc_except_table.* if the associated .text.* is
 	 marked.  This isn't very nice, but the proper solution,
-	 splitting .eh_frame up and using comdat doesn't pan out 
+	 splitting .eh_frame up and using comdat doesn't pan out
 	 easily due to needing special relocs to handle the
 	 difference of two symbols in separate sections.
 	 Don't keep code sections referenced by .eh_frame.  */
