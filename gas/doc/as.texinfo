@@ -4530,10 +4530,14 @@ This directive is a synonym for both @samp{.short} and @samp{.word}.
 @section @code{.ident}
 
 @cindex @code{ident} directive
-This directive is used by some assemblers to place tags in object files.
-@command{@value{AS}} simply accepts the directive for source-file
-compatibility with such assemblers, but does not actually emit anything
-for it.
+
+This directive is used by some assemblers to place tags in object files.  The
+behavior of this directive varies depending on the target.  When using the
+a.out object file format, @command{@value{AS}} simply accepts the directive for
+source-file compatibility with existing assemblers, but does not emit anything
+for it.  When using COFF, comments are emitted to the @code{.comment} or
+@code{.rdata} section, depending on the target.  When using ELF, comments are
+emitted to the @code{.comment} section.
 
 @node If
 @section @code{.if @var{absolute expression}}
