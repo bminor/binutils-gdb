@@ -1,13 +1,3 @@
-2006-03-17  Jim Blandy  <jimb@codesourcery.com>
-
-	Add support for 'target remote |' on MinGW.
-	* ser-mingw.c (struct pipe_state): New structure.
-	(make_pipe_state, free_pipe_state, cleanup_pipe_state)
-	(pipe_windows_open, pipe_windows_close, pipe_windows_read)
-	(pipe_windows_write, pipe_wait_handle): New functions.
-	(_initialize_ser_windows): Register a "pipe" interface based on
-	them.
-
 2006-02-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-tdep.c (i386obsd_trapframe_sniffer): Also recognize
