@@ -1,3 +1,7 @@
+2006-03-16  Michael Snyder  <msnyder@redhat.com>
+
+	* i386-tdep.c (i386_push_dummy_call): Fix typo in comment.
+
 2006-03-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-linux-tdep.c (gdbcore.h, regcache.h, regset.h, gdb_string.h):

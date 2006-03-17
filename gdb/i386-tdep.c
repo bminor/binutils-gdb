@@ -1296,7 +1296,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 multiple of [32-bit] words.  This may require tail padding,
 	 depending on the size of the argument."
 
-	 This makes sure the stack says word-aligned.  */
+	 This makes sure the stack stays word-aligned.  */
       sp -= (len + 3) & ~3;
       write_memory (sp, value_contents_all (args[i]), len);
     }
