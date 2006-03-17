@@ -323,9 +323,8 @@ packet_reg_from_pnum (struct remote_state *rs, LONGEST pnum)
    to stop for a watchpoint.  */
 static CORE_ADDR remote_watch_data_address;
 
-/* This is non-zero if taregt stopped for a watchpoint.  */
+/* This is non-zero if target stopped for a watchpoint.  */
 static int remote_stopped_by_watchpoint_p;
-
 
 static struct target_ops remote_ops;
 

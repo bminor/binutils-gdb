@@ -1,5 +1,6 @@
 2006-03-16  Michael Snyder  <msnyder@redhat.com>
 
+	* remote.c (remote_watch_data_address): Fix typo in comment.
 	* i386-tdep.c (i386_push_dummy_call): Fix typo in comment.
 
 2006-03-15  Kevin Buettner  <kevinb@redhat.com>
