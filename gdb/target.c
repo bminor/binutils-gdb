@@ -675,7 +675,7 @@ push_target (struct target_ops *t)
     }
 
   /* If there's already targets at this stratum, remove them.  */
-  /* FIXME: cagney/2003-10-15: I think this should be poping all
+  /* FIXME: cagney/2003-10-15: I think this should be popping all
      targets to CUR, and not just those at this stratum level.  */
   while ((*cur) != NULL && t->to_stratum == (*cur)->to_stratum)
     {
