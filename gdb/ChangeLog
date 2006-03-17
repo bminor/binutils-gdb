@@ -1,5 +1,6 @@
 2006-03-16  Michael Snyder  <msnyder@redhat.com>
 
+	* tracepoint.c (tracepoint_save_command): Fix typo in error msg.
 	* target.c (push_target): Fix typo in comment.
 	* remote.c (remote_watch_data_address): Fix typo in comment.
 	* i386-tdep.c (i386_push_dummy_call): Fix typo in comment.

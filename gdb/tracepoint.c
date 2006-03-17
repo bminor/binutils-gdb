@@ -2318,7 +2318,7 @@ tracepoint_save_command (char *args, int from_tty)
   char tmp[40];
 
   if (args == 0 || *args == 0)
-    error (_("Argument required (file name in which to save tracepoints"));
+    error (_("Argument required (file name in which to save tracepoints)"));
 
   if (tracepoint_chain == 0)
     {
