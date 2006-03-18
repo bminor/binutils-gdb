@@ -1,3 +1,7 @@
+2006-03-18  Jim Blandy  <jimb@codesourcery.com>
+
+	* symtab.h (enum address_class): Doc fix.
+
 2006-03-16  Michael Snyder  <msnyder@redhat.com>
 
 	* tracepoint.c (tracepoint_save_command): Fix typo in error msg.
