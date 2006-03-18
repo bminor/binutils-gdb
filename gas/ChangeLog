@@ -1,5 +1,10 @@
 2006-03-18  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
+	* config/tc-vax.c: Update copyright year.
+	* config/tc-vax.h: Likewise.
+
+2006-03-18  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
 	* config/tc-vax.c (md_chars_to_number): Used only locally, so
 	make it static.
 	* config/tc-vax.h (md_chars_to_number): Remove obsolete declaration.
