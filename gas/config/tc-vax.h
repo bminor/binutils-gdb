@@ -47,8 +47,6 @@
 
 #define md_operand(x)
 
-long md_chars_to_number PARAMS ((unsigned char *, int));
-
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 

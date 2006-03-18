@@ -295,7 +295,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
    into host byte order.
    con		is the buffer to convert,
    nbytes	is the length of the given buffer.  */
-long
+static long
 md_chars_to_number (unsigned char con[], int nbytes)
 {
   long retval;
