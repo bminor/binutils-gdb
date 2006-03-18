@@ -1129,6 +1129,7 @@ allocate_global_data_opd (dyn_h, data)
       /* We never need an opd entry for a symbol which is not
 	 defined by this output file.  */
       if (h && (h->root.type == bfd_link_hash_undefined
+		|| h->root.type == bfd_link_hash_undefweak
 		|| h->root.u.def.section->output_section == NULL))
 	dyn_h->want_opd = 0;
 

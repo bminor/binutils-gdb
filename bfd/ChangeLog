@@ -1,3 +1,8 @@
+2006-03-18  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf64-hppa.c (allocate_global_data_opd): Don't create an OPD entry
+	for undefined weak symbols.
+
 2006-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR ld/2462
