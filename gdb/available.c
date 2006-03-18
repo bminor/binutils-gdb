@@ -75,6 +75,12 @@ struct xml_cache_entry
   const char *annex;
   const char *contents;
 
+  /* This flag is cleared when we begin reading features, and set
+     for new features when they are read.  It is used to prevent
+     reading the same file from the target twice (for multiple
+     xi:include's or DTD references).  */
+  int recently_used;
+
   union
   {
     /* We use a union to represent the checksum in order to guarantee
@@ -90,8 +96,10 @@ struct xml_cache_entry
 
 static struct xml_cache_entry *xml_global_cache;
 
-/* Look for a feature in the cache with ANNEX and CHECKSUM.  If no
-   entry is found, return NULL.  */
+/* Look for a feature in the cache with ANNEX and CHECKSUM.  If
+   CHECKSUM is NULL, then look for a feature in the cache which has
+   already been used this session.  If no entry is found, return
+   NULL.  */
 
 static const char *
 find_xml_feature_in_cache (const char *annex, const unsigned char *checksum)
@@ -102,9 +110,14 @@ find_xml_feature_in_cache (const char *annex, const unsigned char *checksum)
     {
       if (strcmp (ent->annex, annex) != 0)
 	continue;
-      if (memcmp (ent->sha1sum.bytes, checksum, 20) != 0)
+
+      if (checksum == NULL && !ent->recently_used)
 	continue;
 
+      if (checksum != NULL && memcmp (ent->sha1sum.bytes, checksum, 20) != 0)
+	continue;
+
+      ent->recently_used = 1;
       return ent->contents;
     }
 
@@ -126,10 +139,12 @@ add_xml_feature_to_cache (const char *annex, const char *contents)
   sha1_buffer (new_ent.contents, strlen (new_ent.contents),
 	       new_ent.sha1sum.bytes);
 
-  /* If this entry is already in the cache, do not add it again.  */
+  /* If this entry is already in the cache, do not add it again.  This
+     call also marks the cache entry as used.  */
   if (find_xml_feature_in_cache (annex, new_ent.sha1sum.bytes))
     return;
 
+  new_ent.recently_used = 1;
   new_ent.next = xml_global_cache;
 
   xml_global_cache = xmalloc (sizeof (struct xml_cache_entry));
@@ -205,6 +220,8 @@ fetch_available_features_from_target (const char *name, void *baton_)
   char *features_str;
   gdb_byte *features_buf;
   LONGEST len;
+  const unsigned char *checksum = NULL;
+  const char *cached_str;
 
   if (baton->checksums)
     {
@@ -216,20 +233,17 @@ fetch_available_features_from_target (const char *name, void *baton_)
 	if (strcmp (checksum_ent->annex, name) == 0)
 	  break;
 
-      if (checksum_ent)
-	{
-	  const char *cached_str;
-
-	  cached_str = find_xml_feature_in_cache (name,
-						  checksum_ent->checksum);
-
-	  /* This function always returns something which the caller is
-	     responsible for freeing.  So, if we got a match, return a
-	     copy of it.  */
-	  if (cached_str)
-	    return xstrdup (cached_str);
-	}
+      if (checksum_ent->annex)
+	checksum = checksum_ent->checksum;
     }
+
+  cached_str = find_xml_feature_in_cache (name, checksum);
+
+  /* This function always returns something which the caller is
+     responsible for freeing.  So, if we got a match, return a
+     copy of it.  */
+  if (cached_str)
+    return xstrdup (cached_str);
 
   len = target_read_whole (baton->ops, TARGET_OBJECT_AVAILABLE_FEATURES,
 			   name, &features_buf);
@@ -265,7 +279,13 @@ available_features_from_target_object (struct target_ops *ops,
   struct gdb_feature_set *features;
   char *features_str, *checksums_str;
   int ret;
+  struct xml_cache_entry *ent;
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+
+  /* Reset the recently used flag so that we read any objects
+     without checksums from the target.  */
+  for (ent = xml_global_cache; ent != NULL; ent = ent->next)
+    ent->recently_used = 0;
 
   /* Initialize the baton.  */
   baton.ops = ops;
