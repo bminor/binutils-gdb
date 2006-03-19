@@ -1,3 +1,7 @@
+2006-03-20  Paul Brook  <paul@codesourcery.com>
+
+	* BRANCHES: Mention binutils-csl-arm-2006q1-branch.
+
 2006-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2434

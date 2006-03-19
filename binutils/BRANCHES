@@ -13,8 +13,9 @@ for the branch (e.g., "no commits without permission of X or Y").
 Organization Branches	Description
 ---------------------	-----------
 binutils-csl-arm-2005q1-branch
-			CodeSourcery 2005-Q1 ARM toolchain release branch.
-			Please do not commit to this branch without
+binutils-csl-arm-2006q1-branch
+			CodeSourcery toolchain release branches.
+			Please do not commit to these branches without
 			permission from a CodeSourcery developer.
 
 binutils-csl-gxxpro-3_4-branch
