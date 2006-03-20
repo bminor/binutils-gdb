@@ -4139,7 +4139,13 @@ parse_operands (char *str, const unsigned char *pattern)
 
     failure:
       if (!backtrack_pos)
-	return FAIL;
+	{
+	  /* The parse routine should already have set inst.error, but set a
+	     defaut here just in case.  */
+	  if (!inst.error)
+	    inst.error = _("syntax error");
+	  return FAIL;
+	}
 
       /* Do not backtrack over a trailing optional argument that
 	 absorbed some text.  We will only fail again, with the
@@ -4147,7 +4153,11 @@ parse_operands (char *str, const unsigned char *pattern)
 	 probably less helpful than the current one.  */
       if (backtrack_index == i && backtrack_pos != str
 	  && upat[i+1] == OP_stop)
-	return FAIL;
+	{
+	  if (!inst.error)
+	    inst.error = _("syntax error");
+	  return FAIL;
+	}
 
       /* Try again, skipping the optional argument at backtrack_pos.  */
       str = backtrack_pos;
