@@ -3706,7 +3706,10 @@ parse_tb (char **str)
   int reg;
 
   if (skip_past_char (&p, '[') == FAIL)
-    return FAIL;
+    {
+      inst.error = _("'[' expected");
+      return FAIL;
+    }
 
   if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
     {
@@ -3716,7 +3719,10 @@ parse_tb (char **str)
   inst.operands[0].reg = reg;
 
   if (skip_past_comma (&p) == FAIL)
-    return FAIL;
+    {
+      inst.error = _("',' expected");
+      return FAIL;
+    }
   
   if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
     {
