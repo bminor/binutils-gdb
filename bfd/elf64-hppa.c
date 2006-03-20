@@ -2703,7 +2703,7 @@ static const struct bfd_elf_special_section elf64_hppa_special_sections[] =
   { ".dlt",    4, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_PARISC_SHORT },
   { ".sdata",  6, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_PARISC_SHORT },
   { ".sbss",   5, 0, SHT_NOBITS, SHF_ALLOC + SHF_WRITE + SHF_PARISC_SHORT },
-  { ".tbss",   5, 0, SHT_NOBITS, SHF_ALLOC + SHF_WRITE + SHF_PARISC_WEAKORDER },
+  { ".tbss",   5, 0, SHT_NOBITS, SHF_ALLOC + SHF_WRITE + SHF_HP_TLS },
   { NULL,      0, 0, 0,            0 }
 };
 
@@ -2813,8 +2813,6 @@ const struct elf_size_info hppa64_elf_size_info =
 #define TARGET_BIG_SYM			bfd_elf64_hppa_linux_vec
 #undef TARGET_BIG_NAME
 #define TARGET_BIG_NAME			"elf64-hppa-linux"
-
-#undef elf_backend_special_sections
 
 #define INCLUDED_TARGET_FILE 1
 #include "elf64-target.h"

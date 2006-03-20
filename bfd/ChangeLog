@@ -1,3 +1,9 @@
+2006-03-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf64-hppa.c (elf64_hppa_special_sections): Change flags for .tbss
+	section from SHF_PARISC_WEAKORDER to SHF_HP_TLS.
+	(elf_backend_special_sections): Remove #undef.
+
 2006-03-18  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf64-hppa.c (allocate_global_data_opd): Don't create an OPD entry
