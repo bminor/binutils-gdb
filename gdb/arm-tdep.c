@@ -115,7 +115,13 @@ static char * arm_register_name_strings[] =
  "r12", "sp",  "lr",  "pc",	/* 12 13 14 15 */
  "f0",  "f1",  "f2",  "f3",	/* 16 17 18 19 */
  "f4",  "f5",  "f6",  "f7",	/* 20 21 22 23 */
- "fps", "cpsr" };		/* 24 25       */
+ "fps",                         /* 24 */
+#ifndef ARM_V7M
+ "cpsr"                         /* 25 */
+#else
+ "xPSR"                         /* 25 */
+#endif
+};
 static char **arm_register_names = arm_register_name_strings;
 
 /* Valid register name styles.  */
@@ -175,6 +181,7 @@ int arm_apcs_32 = 1;
 int
 arm_pc_is_thumb (CORE_ADDR memaddr)
 {
+#ifndef ARM_V7M
   struct minimal_symbol *sym;
 
   /* If bit 0 of the address is set, assume this is a Thumb address.  */
@@ -191,6 +198,10 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
     {
       return 0;
     }
+#else
+  /* ARMV7M processors are always in Thumb mode.  */
+  return 1;
+#endif
 }
 
 /* Remove useless bits from addresses in a running program.  */
@@ -2497,12 +2508,24 @@ set_disassembly_style (void)
   if (isupper (*regnames[ARM_PC_REGNUM]))
     {
       arm_register_names[ARM_FPS_REGNUM] = "FPS";
-      arm_register_names[ARM_PS_REGNUM] = "CPSR";
+      arm_register_names[ARM_PS_REGNUM] = 
+#ifndef ARM_V7M
+	"CPSR"
+#else
+	"xPSR"
+#endif
+	;
     }
   else
     {
       arm_register_names[ARM_FPS_REGNUM] = "fps";
-      arm_register_names[ARM_PS_REGNUM] = "cpsr";
+      arm_register_names[ARM_PS_REGNUM] = 
+#ifndef ARM_V7M
+	"cpsr"
+#else
+	"xPSR"
+#endif
+	;
     }
 
   /* Synchronize the disassembler.  */
@@ -2551,6 +2574,7 @@ arm_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
   write_register_pid (ARM_PC_REGNUM, pc, ptid);
 
+#ifndef ARM_V7M
   /* If necessary, set the T bit.  */
   if (arm_apcs_32)
     {
@@ -2560,6 +2584,7 @@ arm_write_pc (CORE_ADDR pc, ptid_t ptid)
       else
 	write_register_pid (ARM_PS_REGNUM, val & ~(CORE_ADDR) 0x20, ptid);
     }
+#endif
 }
 
 static enum gdb_osabi
