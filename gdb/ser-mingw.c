@@ -616,10 +616,13 @@ free_pipe_state (struct pipe_state *ps)
   if (ps->wait.stop_select != INVALID_HANDLE_VALUE)
     SetEvent (ps->wait.stop_select);
 
-  if (ps->pex)
-    pex_free (ps->pex);
+  /* Close the pipe to the child.  We must close the pipe before
+     calling pex_free because pex_free will wait for the child to exit
+     and the child will not exit until the pipe is closed.  */
   if (ps->input)
     fclose (ps->input);
+  if (ps->pex)
+    pex_free (ps->pex);
   /* pex_free closes ps->output.  */
 
   xfree (ps);
