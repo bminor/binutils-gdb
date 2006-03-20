@@ -1,5 +1,17 @@
 2006-03-20  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (BAD_BRANCH, BAD_NOT_IT): Define.
+	(do_t_branch): Encode branches inside IT blocks as unconditional.
+	(do_t_cps): New function.
+	(do_t_blx, do_t_bkpt, do_t_branch23, do_t_bx, do_t_bxj, do_t_cpsi,
+	do_t_czb, do_t_it, do_t_setend, do_t_tb): Add IT constaints.
+	(opcode_lookup): Allow conditional suffixes on all instructions in
+	Thumb mode.
+	(md_assemble): Advance condexec state before checking for errors.
+	(insns): Use do_t_cps.
+
+2006-03-20  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (output_relax_insn): Call dwarf2_emit_insn before
 	outputting the insn.
 

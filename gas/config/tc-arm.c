@@ -568,6 +568,8 @@ struct asm_opcode
 #define BAD_HIREG	_("lo register required")
 #define BAD_THUMB32	_("instruction not supported in Thumb16 mode")
 #define BAD_ADDR_MODE   _("instruction does not accept this addressing mode");
+#define BAD_BRANCH	_("branch must be last instruction in IT block")
+#define BAD_NOT_IT	_("instruction not allowed in IT block")
 
 static struct hash_control *arm_ops_hsh;
 static struct hash_control *arm_cond_hsh;
@@ -6597,6 +6599,7 @@ do_t_bfx (void)
 static void
 do_t_blx (void)
 {
+  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
   if (inst.operands[0].isreg)
     /* We have a register, so this is BLX(2).  */
     inst.instruction |= inst.operands[0].reg << 3;
@@ -6618,7 +6621,20 @@ static void
 do_t_branch (void)
 {
   int opcode;
-  if (inst.cond != COND_ALWAYS)
+  int cond;
+
+  if (current_it_mask)
+    {
+      /* Conditional branches inside IT blocks are encoded as unconditional
+         branches.  */
+      cond = COND_ALWAYS;
+      /* A branch must be the last instruction in an IT block.  */
+      constraint (current_it_mask != 0x10, BAD_BRANCH);
+    }
+  else
+    cond = inst.cond;
+
+  if (cond != COND_ALWAYS)
     opcode = T_MNEM_bcond;
   else
     opcode = inst.instruction;
@@ -6626,23 +6642,23 @@ do_t_branch (void)
   if (unified_syntax && inst.size_req == 4)
     {
       inst.instruction = THUMB_OP32(opcode);
-      if (inst.cond == COND_ALWAYS)
+      if (cond == COND_ALWAYS)
 	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH25;
       else
 	{
-	  assert (inst.cond != 0xF);
-	  inst.instruction |= inst.cond << 22;
+	  assert (cond != 0xF);
+	  inst.instruction |= cond << 22;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH20;
 	}
     }
   else
     {
       inst.instruction = THUMB_OP16(opcode);
-      if (inst.cond == COND_ALWAYS)
+      if (cond == COND_ALWAYS)
 	inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH12;
       else
 	{
-	  inst.instruction |= inst.cond << 8;
+	  inst.instruction |= cond << 8;
 	  inst.reloc.type = BFD_RELOC_THUMB_PCREL_BRANCH9;
 	}
       /* Allow section relaxation.  */
@@ -6656,6 +6672,8 @@ do_t_branch (void)
 static void
 do_t_bkpt (void)
 {
+  constraint (inst.cond != COND_ALWAYS,
+	      _("instruction is always unconditional"));
   if (inst.operands[0].present)
     {
       constraint (inst.operands[0].imm > 255,
@@ -6667,6 +6685,7 @@ do_t_bkpt (void)
 static void
 do_t_branch23 (void)
 {
+  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
   inst.reloc.type   = BFD_RELOC_THUMB_PCREL_BRANCH23;
   inst.reloc.pc_rel = 1;
 
@@ -6685,6 +6704,7 @@ do_t_branch23 (void)
 static void
 do_t_bx (void)
 {
+  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
   inst.instruction |= inst.operands[0].reg << 3;
   /* ??? FIXME: Should add a hacky reloc here if reg is REG_PC.	 The reloc
      should cause the alignment to be checked once it is known.	 This is
@@ -6694,6 +6714,7 @@ do_t_bx (void)
 static void
 do_t_bxj (void)
 {
+  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
   if (inst.operands[0].reg == REG_PC)
     as_tsktsk (_("use of r15 in bxj is not really useful"));
 
@@ -6709,8 +6730,16 @@ do_t_clz (void)
 }
 
 static void
+do_t_cps (void)
+{
+  constraint (current_it_mask, BAD_NOT_IT);
+  inst.instruction |= inst.operands[0].imm;
+}
+
+static void
 do_t_cpsi (void)
 {
+  constraint (current_it_mask, BAD_NOT_IT);
   if (unified_syntax
       && (inst.operands[1].present || inst.size_req == 4)
       && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6_notm))
@@ -6757,6 +6786,7 @@ do_t_cpy (void)
 static void
 do_t_czb (void)
 {
+  constraint (current_it_mask, BAD_NOT_IT);
   constraint (inst.operands[0].reg > 7, BAD_HIREG);
   inst.instruction |= inst.operands[0].reg;
   inst.reloc.pc_rel = 1;
@@ -6793,6 +6823,7 @@ do_t_it (void)
 {
   unsigned int cond = inst.operands[0].imm;
 
+  constraint (current_it_mask, BAD_NOT_IT);
   current_it_mask = (inst.instruction & 0xf) | 0x10;
   current_cc = cond;
 
@@ -7627,6 +7658,7 @@ do_t_rsb (void)
 static void
 do_t_setend (void)
 {
+  constraint (current_it_mask, BAD_NOT_IT);
   if (inst.operands[0].imm)
     inst.instruction |= 0x8;
 }
@@ -7895,12 +7927,13 @@ do_t_tb (void)
   int half;
 
   half = (inst.instruction & 0x10) != 0;
+  constraint (current_it_mask && current_it_mask != 0x10, BAD_BRANCH);
+  constraint (inst.operands[0].immisreg,
+	      _("instruction requires register index"));
   constraint (inst.operands[0].imm == 15,
 	      _("PC is not a valid index register"));
   constraint (!half && inst.operands[0].shifted,
 	      _("instruction does not allow shifted index"));
-  constraint (half && !inst.operands[0].shifted,
-	      _("instruction requires shifted index"));
   inst.instruction |= (inst.operands[0].reg << 16) | inst.operands[0].imm;
 }
 
@@ -8225,9 +8258,16 @@ opcode_lookup (char **str)
 
 	case OT_unconditional:
 	case OT_unconditionalF:
-	  /* delayed diagnostic */
-	  inst.error = BAD_COND;
-	  inst.cond = COND_ALWAYS;
+	  if (thumb_mode)
+	    {
+	      inst.cond = cond->value;
+	    }
+	  else
+	    {
+	      /* delayed diagnostic */
+	      inst.error = BAD_COND;
+	      inst.cond = COND_ALWAYS;
+	    }
 	  return opcode;
 
 	default:
@@ -8322,13 +8362,15 @@ md_assemble (char *str)
 	{
 	  int cond;
 	  cond = current_cc ^ ((current_it_mask >> 4) & 1) ^ 1;
-	  if (cond != inst.cond)
+	  current_it_mask <<= 1;
+	  current_it_mask &= 0x1f;
+	  /* The BKPT instruction is unconditional even in an IT block.  */
+	  if (!inst.error
+	      && cond != inst.cond && opcode->tencode != do_t_bkpt)
 	    {
 	      as_bad (_("incorrect condition in IT block"));
 	      return;
 	    }
-	  current_it_mask <<= 1;
-	  current_it_mask &= 0x1f;
 	}
       else if (inst.cond != COND_ALWAYS && opcode->tencode != do_t_branch)
 	{
@@ -8824,7 +8866,8 @@ static struct asm_barrier_opt barrier_opt_names[] =
        TxCM(m1,m2, aop, T_MNEM_##top, nops, ops, ae, te)
 
 /* Mnemonic that cannot be conditionalized.  The ARM condition-code
-   field is still 0xE.  */
+   field is still 0xE.  Many of the Thumb variants can be executed
+   conditionally, so this is checked separately.  */
 #define TUE(mnem, op, top, nops, ops, ae, te)				\
   { #mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
@@ -9162,7 +9205,7 @@ static const struct asm_opcode insns[] =
 /*  ARM V6 not included in V7M (eg. integer SIMD).  */
 #undef THUMB_VARIANT
 #define THUMB_VARIANT &arm_ext_v6_notm
- TUF(cps,	1020000, f3af8100, 1, (I31b),			  imm0, imm0),
+ TUF(cps,	1020000, f3af8100, 1, (I31b),			  imm0, t_cps),
  TCE(pkhbt,	6800010, eac00000, 4, (RRnpc, RRnpc, RRnpc, oSHll),   pkhbt, t_pkhbt),
  TCE(pkhtb,	6800050, eac00020, 4, (RRnpc, RRnpc, RRnpc, oSHar),   pkhtb, t_pkhtb),
  TCE(qadd16,	6200f10, fa90f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),

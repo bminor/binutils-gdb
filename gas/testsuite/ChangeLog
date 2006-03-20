@@ -1,3 +1,11 @@
+2006-03-20  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb2_bcond.d: New test.
+	* gas/arm/thumb2_bcond.s: New test.
+	* gas/arm/thumb2_it_bad.d: New test.
+	* gas/arm/thumb2_it_bad.l: New test.
+	* gas/arm/thumb2_it_bad.s: New test.
+
 2006-03-17  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb32.d: Add ldm and stm tests.
