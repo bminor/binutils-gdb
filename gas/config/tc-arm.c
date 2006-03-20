@@ -9065,9 +9065,9 @@ static const struct asm_opcode insns[] =
   CL(teqp,	130f000,           2, (RR, SH),      cmp),
 
  TC3(ldrt,	4300000, f8500e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TC3(ldrbt,	4700000, f8300e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3(ldrbt,	4700000, f8100e00, 2, (RR, ADDR),    ldstt, t_ldstt),
  TC3(strt,	4200000, f8400e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TC3(strbt,	4600000, f8200e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3(strbt,	4600000, f8000e00, 2, (RR, ADDR),    ldstt, t_ldstt),
 
  TC3(stmdb,	9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
  TC3(stmfd,     9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
