@@ -1,3 +1,8 @@
+2006-03-20  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (output_relax_insn): Call dwarf2_emit_insn before
+	outputting the insn.
+
 2006-03-18  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* config/tc-vax.c: Update copyright year.

@@ -7982,6 +7982,12 @@ output_relax_insn (void)
   symbolS *sym;
   int offset;
 
+#ifdef OBJ_ELF
+  /* The size of the instruction is unknown, so tie the debug info to the
+     start of the instruction.  */
+  dwarf2_emit_insn (0);
+#endif
+
   switch (inst.reloc.exp.X_op)
     {
     case O_symbol:
@@ -8000,10 +8006,6 @@ output_relax_insn (void)
   to = frag_var (rs_machine_dependent, INSN_SIZE, THUMB_SIZE,
 		 inst.relax, sym, offset, NULL/*offset, opcode*/);
   md_number_to_chars (to, inst.instruction, THUMB_SIZE);
-
-#ifdef OBJ_ELF
-  dwarf2_emit_insn (INSN_SIZE);
-#endif
 }
 
 /* Write a 32-bit thumb instruction to buf.  */
