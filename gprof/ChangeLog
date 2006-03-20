@@ -1,16 +1,0 @@
-2006-03-09  Nick Clifton  <nickc@redhat.com>
-
-	* po/sv.po: Updated Swedish translation.
-
-2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
-
-	* po/Make-in: Add html target.
-
-For older changes see ChangeLog-2005
-
-Local Variables:
-mode: change-log
-left-margin: 8
-fill-column: 74
-version-control: never
-End:
