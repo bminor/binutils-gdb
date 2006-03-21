@@ -1,3 +1,7 @@
+2006-03-21  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (md_apply_fix): Fix typo in offset mask.
+
 2006-03-21  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (enforce_three_byte_loop_align): New flag.
