@@ -11964,7 +11964,7 @@ md_apply_fix (fixS *	fixP,
       if (fixP->fx_done || !seg->use_rela_p)
 	{
 	  newval = md_chars_to_number (buf, THUMB_SIZE);
-	  newval |= ((value & 0x2e) << 2) | ((value & 0x40) << 3);
+	  newval |= ((value & 0x3e) << 2) | ((value & 0x40) << 3);
 	  md_number_to_chars (buf, newval, THUMB_SIZE);
 	}
       break;
