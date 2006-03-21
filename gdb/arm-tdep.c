@@ -40,6 +40,7 @@
 #include "trad-frame.h"
 #include "objfiles.h"
 #include "dwarf2-frame.h"
+#include "prologue-value.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -233,84 +234,152 @@ arm_saved_pc_after_call (struct frame_info *frame)
   return ADDR_BITS_REMOVE (read_register (ARM_LR_REGNUM));
 }
 
-/* A typical Thumb prologue looks like this:
-   push    {r7, lr}
-   add     sp, sp, #-28
-   add     r7, sp, #12
-   Sometimes the latter instruction may be replaced by:
-   mov     r7, sp
-   
-   or like this:
-   push    {r7, lr}
-   mov     r7, sp
-   sub	   sp, #12
-   
-   or, on tpcs, like this:
-   sub     sp,#16
-   push    {r7, lr}
-   (many instructions)
-   mov     r7, sp
-   sub	   sp, #12
-
-   There is always one instruction of three classes:
-   1 - push
-   2 - setting of r7
-   3 - adjusting of sp
-   
-   When we have found at least one of each class we are done with the prolog.
-   Note that the "sub sp, #NN" before the push does not count.
-   */
-
-static CORE_ADDR
-thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
+CORE_ADDR
+thumb_analyze_prologue (struct gdbarch *gdbarch,
+			CORE_ADDR start, CORE_ADDR limit,
+			struct arm_prologue_cache *cache)
 {
-  CORE_ADDR current_pc;
-  /* findmask:
-     bit 0 - push { rlist }
-     bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
-     bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
-  */
-  int findmask = 0;
+  int i;
+  pv_t regs[16];
+  struct pv_area *stack;
+  struct cleanup *back_to;
+  CORE_ADDR offset;
 
-  for (current_pc = pc;
-       current_pc + 2 < func_end && current_pc < pc + 40;
-       current_pc += 2)
+  for (i = 0; i < 16; i++)
+    regs[i] = pv_register (i, 0);
+  stack = make_pv_area (ARM_SP_REGNUM);
+  back_to = make_cleanup_free_pv_area (stack);
+
+  /* The call instruction saved PC in LR, and the current PC is not
+     interesting.  Due to this file's conventions, we want the value
+     of LR at this function's entry, not at the call site, so we do
+     not record the save of the PC - when the ARM prologue analyzer
+     has also been converted to the pv mechanism, we could record the
+     save here and remove the hack in prev_register.  */
+  regs[ARM_PC_REGNUM] = pv_unknown ();
+
+  while (start < limit)
     {
-      unsigned short insn = read_memory_unsigned_integer (current_pc, 2);
+      unsigned short insn;
 
-      if ((insn & 0xfe00) == 0xb400)		/* push { rlist } */
+      insn = read_memory_unsigned_integer (start, 2);
+
+      if ((insn & 0xfe00) == 0xb400)
 	{
-	  findmask |= 1;			/* push found */
+	  int regno;
+	  int mask;
+	  int stop = 0;
+
+	  /* Bits 0-7 contain a mask for registers R0-R7.  Bit 8 says
+	     whether to save LR (R14).  */
+	  mask = (insn & 0xff) | ((insn & 0x100) << 6);
+
+	  /* Calculate offsets of saved R0-R7 and LR.  */
+	  for (regno = ARM_LR_REGNUM; regno >= 0; regno--)
+	    if (mask & (1 << regno))
+	      {
+		if (pv_area_store_would_trash (stack, regs[ARM_SP_REGNUM]))
+		  {
+		    stop = 1;
+		    break;
+		  }
+
+		regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
+						       -4);
+		pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[regno]);
+	      }
+
+	  if (stop)
+	    break;
 	}
       else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
 						   sub sp, #simm */
 	{
-	  if ((findmask & 1) == 0)		/* before push ? */
-	    continue;
+	  offset = (insn & 0x7f) << 2;		/* get scaled offset */
+	  if (insn & 0x80)			/* Check for SUB.  */
+	    regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
+						   -offset);
 	  else
-	    findmask |= 4;			/* add/sub sp found */
+	    regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
+						   offset);
 	}
       else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
+	regs[THUMB_FP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM],
+						 (insn & 0xff) << 2);
+      else if ((insn & 0xff00) == 0x4600)	/* mov hi, lo or mov lo, hi */
 	{
-	  findmask |= 2;			/* setting of r7 found */
+	  int dst_reg = (insn & 0x7) + ((insn & 0x80) >> 4);
+	  int src_reg = (insn & 0x78) >> 3;
+	  regs[dst_reg] = regs[src_reg];
 	}
-      else if (insn == 0x466f)			/* mov r7, sp */
+      else if ((insn & 0xf800) == 0x9000)	/* str rd, [sp, #off] */
 	{
-	  findmask |= 2;			/* setting of r7 found */
-	}
-      else if (findmask == (4+2+1))
-	{
-	  /* We have found one of each type of prologue instruction */
-	  break;
+	  /* Handle stores to the stack.  Normally pushes are used,
+	     but with GCC -mtpcs-frame, there may be other stores
+	     in the prologue to create the frame.  */
+	  int regno = (insn >> 8) & 0x7;
+	  pv_t addr;
+
+	  offset = (insn & 0xff) << 2;
+	  addr = pv_add_constant (regs[ARM_SP_REGNUM], offset);
+
+	  if (pv_area_store_would_trash (stack, addr))
+	    break;
+
+	  pv_area_store (stack, addr, 4, regs[regno]);
 	}
       else
-	/* Something in the prolog that we don't care about or some
-	   instruction from outside the prolog scheduled here for
-	   optimization.  */
-	continue;
+	{
+	  /* We don't know what this instruction is.  We're finished
+	     scanning.  NOTE: Recognizing more safe-to-ignore
+	     instructions here will improve support for optimized
+	     code.  */
+	  break;
+	}
+
+      start += 2;
     }
 
-  return current_pc;
+  if (cache == NULL)
+    {
+      do_cleanups (back_to);
+      return start;
+    }
+
+  /* frameoffset is unused for this unwinder.  */
+  cache->frameoffset = 0;
+
+  if (pv_is_register (regs[ARM_FP_REGNUM], ARM_SP_REGNUM))
+    {
+      /* Frame pointer is fp.  Frame size is constant.  */
+      cache->framereg = ARM_FP_REGNUM;
+      cache->framesize = -regs[ARM_FP_REGNUM].k;
+    }
+  else if (pv_is_register (regs[THUMB_FP_REGNUM], ARM_SP_REGNUM))
+    {
+      /* Frame pointer is r7.  Frame size is constant.  */
+      cache->framereg = THUMB_FP_REGNUM;
+      cache->framesize = -regs[THUMB_FP_REGNUM].k;
+    }
+  else if (pv_is_register (regs[ARM_SP_REGNUM], ARM_SP_REGNUM))
+    {
+      /* Try the stack pointer... this is a bit desperate.  */
+      cache->framereg = ARM_SP_REGNUM;
+      cache->framesize = -regs[ARM_SP_REGNUM].k;
+    }
+  else
+    {
+      /* We're just out of luck.  We don't know where the frame is.  */
+      cache->framereg = -1;
+      cache->framesize = 0;
+    }
+
+  for (i = 0; i < 16; i++)
+    if (pv_area_find_reg (stack, gdbarch, i, &offset))
+      cache->saved_regs[i].addr = offset;
+
+  do_cleanups (back_to);
+  return start;
 }
 
 /* Advance the PC across any function entry prologue instructions to
@@ -358,16 +427,16 @@ arm_skip_prologue (CORE_ADDR pc)
         }
     }
 
-  /* Check if this is Thumb code.  */
-  if (arm_pc_is_thumb (pc))
-    return thumb_skip_prologue (pc, func_end);
-
   /* Can't find the prologue end in the symbol table, try it the hard way
      by disassembling the instructions.  */
 
   /* Like arm_scan_prologue, stop no later than pc + 64. */
   if (func_end == 0 || func_end > pc + 64)
     func_end = pc + 64;
+
+  /* Check if this is Thumb code.  */
+  if (arm_pc_is_thumb (pc))
+    return thumb_analyze_prologue (current_gdbarch, pc, func_end, NULL);
 
   for (skip_pc = pc; skip_pc < func_end; skip_pc += 4)
     {
@@ -483,86 +552,8 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 
   prologue_end = min (prologue_end, prev_pc);
 
-  /* Initialize the saved register map.  When register H is copied to
-     register L, we will put H in saved_reg[L].  */
-  for (i = 0; i < 16; i++)
-    saved_reg[i] = i;
-
-  /* Search the prologue looking for instructions that set up the
-     frame pointer, adjust the stack pointer, and save registers.
-     Do this until all basic prolog instructions are found.  */
-
-  cache->framesize = 0;
-  for (current_pc = prologue_start;
-       (current_pc < prologue_end) && ((findmask & 7) != 7);
-       current_pc += 2)
-    {
-      unsigned short insn;
-      int regno;
-      int offset;
-
-      insn = read_memory_unsigned_integer (current_pc, 2);
-
-      if ((insn & 0xfe00) == 0xb400)	/* push { rlist } */
-	{
-	  int mask;
-	  findmask |= 1;		/* push found */
-	  /* Bits 0-7 contain a mask for registers R0-R7.  Bit 8 says
-	     whether to save LR (R14).  */
-	  mask = (insn & 0xff) | ((insn & 0x100) << 6);
-
-	  /* Calculate offsets of saved R0-R7 and LR.  */
-	  for (regno = ARM_LR_REGNUM; regno >= 0; regno--)
-	    if (mask & (1 << regno))
-	      {
-		cache->framesize += 4;
-		cache->saved_regs[saved_reg[regno]].addr = -cache->framesize;
-		/* Reset saved register map.  */
-		saved_reg[regno] = regno;
-	      }
-	}
-      else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
-						   sub sp, #simm */
-	{
-	  if ((findmask & 1) == 0)		/* before push?  */
-	    continue;
-	  else
-	    findmask |= 4;			/* add/sub sp found */
-	  
-	  offset = (insn & 0x7f) << 2;		/* get scaled offset */
-	  if (insn & 0x80)		/* is it signed? (==subtracting) */
-	    {
-	      cache->frameoffset += offset;
-	      offset = -offset;
-	    }
-	  cache->framesize -= offset;
-	}
-      else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
-	{
-	  findmask |= 2;			/* setting of r7 found */
-	  cache->framereg = THUMB_FP_REGNUM;
-	  /* get scaled offset */
-	  cache->frameoffset = (insn & 0xff) << 2;
-	}
-      else if (insn == 0x466f)			/* mov r7, sp */
-	{
-	  findmask |= 2;			/* setting of r7 found */
-	  cache->framereg = THUMB_FP_REGNUM;
-	  cache->frameoffset = 0;
-	  saved_reg[THUMB_FP_REGNUM] = ARM_SP_REGNUM;
-	}
-      else if ((insn & 0xffc0) == 0x4640)	/* mov r0-r7, r8-r15 */
-	{
-	  int lo_reg = insn & 7;		/* dest.  register (r0-r7) */
-	  int hi_reg = ((insn >> 3) & 7) + 8;	/* source register (r8-15) */
-	  saved_reg[lo_reg] = hi_reg;		/* remember hi reg was saved */
-	}
-      else
-	/* Something in the prolog that we don't care about or some
-	   instruction from outside the prolog scheduled here for
-	   optimization.  */ 
-	continue;
-    }
+  thumb_analyze_prologue (current_gdbarch, prologue_start, prologue_end,
+			  cache);
 }
 
 /* This function decodes an ARM function prologue to determine:
