@@ -108,6 +108,8 @@ pex_run (struct pex_obj *obj, int flags, const char *executable,
   in = -1;
   out = -1;
   errdes = -1;
+  p[READ_PORT] = -1;
+  p[WRITE_PORT] = -1;
   outname = (char *) orig_outname;
   outname_allocated = 0;
 
@@ -276,6 +278,8 @@ pex_run (struct pex_obj *obj, int flags, const char *executable,
 
   pid = obj->funcs->exec_child (obj, flags, executable, argv, in, out, errdes,
 				&errmsg, err);
+  if (p[WRITE_PORT] != -1)
+    obj->funcs->close (obj, p[WRITE_PORT]);
   if (pid < 0)
     goto error_exit;
 
