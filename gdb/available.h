@@ -49,6 +49,11 @@ struct gdb_feature_set
   struct gdb_available_feature *features;
 
   struct obstack *obstack;
+
+  /* The checksum of the XML which generated this feature set.  */
+  /* FIXME: Should we just save the entire XML instead?  We're going
+     to need to have it around to show the frontend in the future.  */
+  unsigned char checksum[20];
 };
 
 struct gdb_available_feature
@@ -158,12 +163,16 @@ const char *available_register_name (struct gdbarch *, int);
 
 int available_register_target_regnum (struct gdbarch *, int);
 
+/* Find a compiled-in XML file, e.g. the standard DTD.  */
+
+const char *fetch_xml_builtin (const char *);
+
 /* Internal routines shared by available.c and parse-avail.c.  */
 
 typedef char *(*xml_fetch_another) (const char *, void *);
 
-int available_features_from_xml_string (struct gdb_available_feature **,
-					struct obstack *, const char *,
+int available_features_from_xml_string (struct gdb_feature_set *,
+					const char *,
 					xml_fetch_another, void *,
 					int);
 

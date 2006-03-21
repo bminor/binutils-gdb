@@ -25,6 +25,7 @@
 #include "defs.h"
 
 #include "available.h"
+#include "sha1.h"
 
 #include "filenames.h"
 #include "gdb_assert.h"
@@ -32,6 +33,15 @@
 #include "gdb_obstack.h"
 
 #include <expat.h>
+
+/* From xml-builtin.c.  */
+extern const char *xml_builtin[][2];
+
+/* Prototypes.  */
+
+static int xml_process_xincludes (char **output_p, const char *text,
+				  xml_fetch_another fetcher, void *fetcher_baton,
+				  int nested);
 
 /* General notes for this file:
 
@@ -154,7 +164,6 @@ enum xml_phase {
   PHASE_IN_REG,
   PHASE_IN_FEATURE_SET,
   PHASE_IN_FEATURE_REF,
-  PHASE_IN_XINCLUDE,
   PHASE_UNKNOWN
 };
 
@@ -197,11 +206,6 @@ struct xml_feature_parse_data
   /* The obstack to allocate new features from.  */
   struct obstack *obstack;
 
-  /* A function to call to obtain additional features, and its
-     baton.  */
-  xml_fetch_another fetcher;
-  void *fetcher_baton;
-
   struct gdb_available_feature *seen_features;
 
   struct gdb_available_feature *target_features;
@@ -213,74 +217,6 @@ struct xml_feature_parse_data
 
   struct xml_state_stack *state;
 };
-
-static void
-xml_start_xinclude (struct xml_feature_parse_data *data,
-		    const XML_Char **attrs)
-{
-  struct gdb_available_feature *features, *f;
-  struct cleanup *back_to;
-  char *text;
-  int ret;
-  const char *href, *id, **p;
-
-  href = id = NULL;
-  for (p = attrs; *p; p += 2)
-    {
-      const char *name = p[0], *val = p[1];
-
-      if (strcmp (name, "href") == 0)
-	href = val;
-      else if (strcmp (name, "xpointer") == 0)
-	id = val;
-      else
-	data->unhandled++;
-    }
-
-  if (id == NULL)
-    {
-      data->unhandled++;
-      return;
-    }
-
-  for (f = data->seen_features; f; f = f->next)
-    if (strcmp (f->name, id) == 0)
-      /* Success.  We found a match already loaded; we don't need to
-	 include the document.  */
-      return;
-
-  if (href == NULL || data->fetcher == NULL)
-    {
-      data->unhandled++;
-      return;
-    }
-
-  text = data->fetcher (href, data->fetcher_baton);
-  if (text == NULL)
-    {
-      data->unhandled++;
-      return;
-    }
-
-  back_to = make_cleanup (xfree, text);
-
-  ret = available_features_from_xml_string (&features, data->obstack,
-					    text, data->fetcher,
-					    data->fetcher_baton, 1);
-  if (ret == 0)
-    {
-      f = features;
-      while (f->next)
-	f = f->next;
-      f->next = data->seen_features;
-      data->seen_features = f;
-    }
-  else
-    /* Something went wrong parsing the document.  */
-    data->unhandled++;
-
-  do_cleanups (back_to);
-}
 
 static void
 xml_start_feature (struct xml_feature_parse_data *data,
@@ -511,8 +447,6 @@ xml_feature_start_element (void *data_, const XML_Char *name,
     next_phase = PHASE_IN_FEATURE_SET;
   else if (strcmp (name, "feature-ref") == 0)
     next_phase = PHASE_IN_FEATURE_REF;
-  else if (strcmp (name, "http://www.w3.org/2001/XInclude!include") == 0)
-    next_phase = PHASE_IN_XINCLUDE;
   else
     next_phase = PHASE_UNKNOWN;
 
@@ -538,9 +472,6 @@ xml_feature_start_element (void *data_, const XML_Char *name,
 
     case PHASE_IN_TARGET:
       if (next_phase == PHASE_IN_FEATURE
-	  && !data->state->u.target.seen_feature_set)
-	break;
-      if (next_phase == PHASE_IN_XINCLUDE
 	  && !data->state->u.target.seen_feature_set)
 	break;
       if (next_phase == PHASE_IN_FEATURE_SET
@@ -590,7 +521,6 @@ xml_feature_start_element (void *data_, const XML_Char *name,
       break;
 
     case PHASE_IN_FEATURE_REF:
-    case PHASE_IN_XINCLUDE:
       next_phase = PHASE_UNKNOWN;
       break;
 
@@ -636,10 +566,6 @@ xml_feature_start_element (void *data_, const XML_Char *name,
 
     case PHASE_IN_FEATURE_REF:
       xml_start_feature_ref (data, attrs);
-      break;
-
-    case PHASE_IN_XINCLUDE:
-      xml_start_xinclude (data, attrs);
       break;
 
     case PHASE_UNKNOWN:
@@ -757,7 +683,6 @@ xml_feature_end_element (void *data_, const XML_Char *name)
       break;
 
     case PHASE_IN_FEATURE_REF:
-    case PHASE_IN_XINCLUDE:
       /* Nothing needed.  */
       break;
 
@@ -779,42 +704,51 @@ xml_parser_cleanup (void *parser)
 
   data = XML_GetUserData (parser);
   if (data)
-    while (data->state)
-      {
-	struct xml_state_stack *prev;
+    {
+      while (data->state)
+	{
+	  struct xml_state_stack *prev;
 
-	prev = data->state->prev;
-	xfree (data->state);
-	data->state = prev;
-      }
+	  prev = data->state->prev;
+	  xfree (data->state);
+	  data->state = prev;
+	}
+
+      xfree (data);
+    }
 
   XML_ParserFree (parser);
 }
 
 static int XMLCALL
-xml_feature_external_entity (XML_Parser parser,
-			     const XML_Char *context,
-			     const XML_Char *base,
-			     const XML_Char *systemId,
-			     const XML_Char *publicId)
+xml_fetch_external_entity (XML_Parser parser,
+			   const XML_Char *context,
+			   const XML_Char *base,
+			   const XML_Char *systemId,
+			   const XML_Char *publicId)
 {
-  struct xml_feature_parse_data *data;
   XML_Parser entity_parser;
-  char *text;
+  const char *text;
   struct cleanup *back_to;
 
-  data = XML_GetUserData (parser);
-  if (data->fetcher == NULL)
+  if (publicId != NULL)
     return XML_STATUS_ERROR;
 
-  text = data->fetcher (systemId, data->fetcher_baton);
-  if (text == NULL)
+  if (systemId != NULL && strcmp (systemId, "gdb-target.dtd") != 0)
     return XML_STATUS_ERROR;
+
+  text = fetch_xml_builtin ("gdb-target.dtd");
+  if (text == NULL)
+    internal_error (__FILE__, __LINE__, "could not locate built-in DTD");
 
   entity_parser = XML_ExternalEntityParserCreate (parser, context, NULL);
   back_to = make_cleanup (xml_parser_cleanup, entity_parser);
 
+  /* Don't use our handlers for the contents of the DTD.  */
   XML_SetElementHandler (entity_parser, NULL, NULL);
+  XML_SetDoctypeDeclHandler (entity_parser, NULL, NULL);
+  XML_SetXmlDeclHandler (entity_parser, NULL);
+  XML_SetDefaultHandler (entity_parser, NULL);
   XML_SetUserData (entity_parser, NULL);
 
   if (XML_Parse (entity_parser, text, strlen (text), 1) != XML_STATUS_OK)
@@ -830,8 +764,7 @@ xml_feature_external_entity (XML_Parser parser,
 /* FIXME: Error check more XML_* calls.  */
 
 int
-available_features_from_xml_string (struct gdb_available_feature **features_p,
-				    struct obstack *obstack,
+available_features_from_xml_string (struct gdb_feature_set *feature_set,
 				    const char *text, xml_fetch_another fetcher,
 				    void *fetcher_baton,
 				    int nested)
@@ -839,6 +772,25 @@ available_features_from_xml_string (struct gdb_available_feature **features_p,
   XML_Parser parser;
   struct xml_feature_parse_data *data;
   struct cleanup *back_to;
+  char *expanded_text;
+  int ret;
+  union
+  {
+    /* We use a union to represent the checksum in order to guarantee
+       sufficient alignment.  */
+    uint32_t words[5];
+    unsigned char bytes[20];
+  } sha1sum;
+
+  /* Expand all XInclude directives.  */
+  ret = xml_process_xincludes (&expanded_text, text, fetcher, fetcher_baton,
+			       0);
+  if (ret != 0)
+    return -1;
+
+  /* Save the checksum.  */
+  sha1_buffer (expanded_text, strlen (expanded_text), sha1sum.bytes);
+  memcpy (feature_set->checksum, sha1sum.bytes, 20);
 
   parser = XML_ParserCreateNS (NULL, '!');
   if (parser == NULL)
@@ -846,43 +798,42 @@ available_features_from_xml_string (struct gdb_available_feature **features_p,
   back_to = make_cleanup (xml_parser_cleanup, parser);
 
   data = XCALLOC (1, struct xml_feature_parse_data);
-  make_cleanup (xfree, data);
   XML_SetUserData (parser, data);
 
-  data->obstack = obstack;
+  data->obstack = feature_set->obstack;
   data->state = XCALLOC (1, struct xml_state_stack);
   data->state->phase = PHASE_TOP;
   data->state->u.top.nested = nested;
-
-  data->fetcher = fetcher;
-  data->fetcher_baton = fetcher_baton;
 
   XML_SetElementHandler (parser, xml_feature_start_element,
 			 xml_feature_end_element);
 
   XML_SetParamEntityParsing (parser,
 			     XML_PARAM_ENTITY_PARSING_UNLESS_STANDALONE);
-  XML_SetExternalEntityRefHandler (parser, xml_feature_external_entity);
+  XML_SetExternalEntityRefHandler (parser, xml_fetch_external_entity);
 
-  /* FIXME: Enable this after we compile in the DTD?  */
-  /* XML_UseForeignDTD (parser, XML_TRUE); */
+  /* Even if no DTD is provided, use the built-in DTD anyway.  */
+  XML_UseForeignDTD (parser, XML_TRUE);
 
-  if (XML_Parse (parser, text, strlen (text), 1) != XML_STATUS_OK)
+  if (XML_Parse (parser, expanded_text, strlen (expanded_text), 1)
+      != XML_STATUS_OK)
     {
       enum XML_Error err = XML_GetErrorCode (parser);
 
       warning (_("XML parsing error: %s"), XML_ErrorString (err));
+
+      do_cleanups (back_to);
       return -1;
     }
 
   if (nested)
-    *features_p = data->seen_features;
+    feature_set->features = data->seen_features;
   else
-    *features_p = data->target_features;
+    feature_set->features = data->target_features;
 
   /* TODO: If data->unhandled, warn?  */
   /* TODO: Can other errors be fatal?  */
-  /* TODO: Should *features_p == NULL be an error?  */
+  /* TODO: Should target_features == NULL be an error?  */
 
   do_cleanups (back_to);
 
@@ -951,8 +902,7 @@ fetch_available_features_from_file (const char *filename, void *base_)
 }
 
 int
-available_features_from_xml_file (struct gdb_available_feature **feature_p,
-				  struct obstack *obstack,
+available_features_from_xml_file (struct gdb_feature_set *feature_set,
 				  const char *filename)
 {
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
@@ -978,9 +928,11 @@ available_features_from_xml_file (struct gdb_available_feature **feature_p,
   else
     dirname = NULL;
 
-  available_features_from_xml_string (feature_p, obstack, text,
+  available_features_from_xml_string (feature_set, text,
 				      fetch_available_features_from_file,
 				      dirname, 0);
+
+  /* FIXME: We ignored the return value!  */
 
   do_cleanups (back_to);
 
@@ -992,13 +944,345 @@ available_features_from_xml_file (struct gdb_available_feature **feature_p,
 int
 try_available_features_from_xml_file (const char *filename)
 {
+  struct gdb_feature_set feature_set;
   struct obstack obstack;
-  struct gdb_available_feature *feature;
   int ret;
 
   obstack_init (&obstack);
-  ret = available_features_from_xml_file (&feature, &obstack, filename);
+  feature_set.obstack = &obstack;
+  ret = available_features_from_xml_file (&feature_set, filename);
   obstack_free (&obstack, NULL);
 
   return ret;
+}
+
+/* XInclude processing.  This is done as a separate step from actually
+   parsing the document, so that we can produce a single combined XML
+   document to hand to a front end (and to simplify comparing two
+   documents).  The DTD is also processed in this stage, and default
+   values for attributes are filled in.  */
+
+struct xml_xinclude_parse_data
+{
+  /* The obstack to build the output in.  */
+  struct obstack obstack;
+
+  /* The current parser.  */
+  XML_Parser parser;
+
+  /* The external DTD subset, if one has been loaded.  */
+  char *external_dtd;
+
+  /* A count indicating whether we are in an element whose
+     children should not be copied to the output, and if so,
+     how deep we are nested.  This is used for any (unexpected)
+     children of XInclude directives, and for the DTD.  */
+  int skip_depth;
+
+  /* A function to call to obtain additional features, and its
+     baton.  */
+  xml_fetch_another fetcher;
+  void *fetcher_baton;
+
+  /* Rough count of unrecognized or invalid items found while
+     processing.  These are non-fatal; however, some data from the
+     input has been skipped.  */
+  int unhandled;
+};
+
+static void
+xml_xinclude_start_xinclude (struct xml_xinclude_parse_data *data,
+			     const XML_Char **attrs)
+{
+  struct cleanup *back_to;
+  char *text, *output;
+  int ret;
+  const char *href, **p;
+
+  href = NULL;
+  for (p = attrs; *p; p += 2)
+    {
+      const char *name = p[0], *val = p[1];
+
+      if (strcmp (name, "href") == 0)
+	href = val;
+      else
+	data->unhandled++;
+    }
+
+  if (href == NULL || data->fetcher == NULL)
+    {
+      data->unhandled++;
+      return;
+    }
+
+  text = data->fetcher (href, data->fetcher_baton);
+  if (text == NULL)
+    {
+      data->unhandled++;
+      return;
+    }
+
+  back_to = make_cleanup (xfree, text);
+
+  ret = xml_process_xincludes (&output, text,
+			       data->fetcher, data->fetcher_baton,
+			       1);
+
+  if (ret == 0)
+    obstack_grow (&data->obstack, output, strlen (output));
+  else
+    /* Something went wrong parsing the document.  */
+    data->unhandled++;
+
+  do_cleanups (back_to);
+}
+
+/* TODO: We output the doctype and <?xml> declaration for the first
+   document unchanged, if present, and discard those for included
+   documents.  Should we always generate doctype and version
+   information?  Never?  Should we include the external DTD subset
+   in the output document?
+
+   Issues to consider:
+   - We can not simply include the external DTD subset in the document
+   as an internal subset, because <!IGNORE> and <!INCLUDE> are valid
+   only in external subsets.  We may ignore this...
+   - Passing through the outer <?xml> declaration is incorrect because
+   we generate UTF-8, not whatever the input encoding was.
+   - If we do not pass the DTD into the output, default values will not
+   be filled in.  */
+
+static void XMLCALL
+xml_xinclude_start_element (void *data_, const XML_Char *name,
+			    const XML_Char **attrs)
+{
+  struct xml_xinclude_parse_data *data = data_;
+
+  /* If we are already skipping, keep on going.  */
+  if (data->skip_depth)
+    {
+      data->skip_depth++;
+      return;
+    }
+
+  if (strcmp (name, "http://www.w3.org/2001/XInclude!include") == 0)
+    {
+      xml_xinclude_start_xinclude (data, attrs);
+
+      /* Skip any children of this element (and its end).  */
+      data->skip_depth = 1;
+    }
+  else
+    XML_DefaultCurrent (data->parser);
+}
+
+static void XMLCALL
+xml_xinclude_end_element (void *data_, const XML_Char *name)
+{
+  struct xml_xinclude_parse_data *data = data_;
+
+  /* If we are skipping, update the depth.  */
+  if (data->skip_depth)
+    {
+      data->skip_depth--;
+      return;
+    }
+
+  /* Otherwise just print it out.  If this is the "end" of an empty element,
+     we don't need to do anything special - the default handler will get
+     called with LEN == 0.  */
+  XML_DefaultCurrent (data->parser);
+}
+
+static void XMLCALL
+xml_xinclude_default (void *data_, const XML_Char *s, int len)
+{
+  struct xml_xinclude_parse_data *data = data_;
+
+  /* If we are inside of e.g. xi:include or the DTD, don't save this
+     string.  */
+  if (data->skip_depth)
+    return;
+
+  obstack_grow (&data->obstack, s, len);
+}
+
+static void XMLCALL
+xml_xinclude_start_doctype (void *data_, const XML_Char *doctypeName,
+			    const XML_Char *sysid, const XML_Char *pubid,
+			    int has_internal_subset)
+{
+  struct xml_xinclude_parse_data *data = data_;
+
+  /* Don't print out the doctype, or the contents of the DTD internal
+     subset, if any.  */
+  data->skip_depth++;
+}
+
+static void XMLCALL
+xml_xinclude_end_doctype (void *data_)
+{
+  struct xml_xinclude_parse_data *data = data_;
+
+  data->skip_depth--;
+}
+
+static void XMLCALL
+xml_xinclude_xml_decl (void *data_, const XML_Char *version,
+		       const XML_Char *encoding, int standalone)
+{
+  /* Do nothing - this prevents the default handler from being called.  */
+}
+
+static void
+xml_xinclude_parser_cleanup (void *parser)
+{
+  struct xml_xinclude_parse_data *data;
+
+  data = XML_GetUserData (parser);
+  if (data)
+    {
+      obstack_free (&data->obstack, NULL);
+
+      if (data->external_dtd)
+	xfree (data->external_dtd);
+
+      xfree (data);
+    }
+
+  XML_ParserFree (parser);
+}
+
+/* FIXME: Error check more XML_* calls.  */
+
+int
+xml_process_xincludes (char **output_p, const char *text,
+		       xml_fetch_another fetcher, void *fetcher_baton,
+		       int nested)
+{
+  XML_Parser parser;
+  struct xml_xinclude_parse_data *data;
+  struct cleanup *back_to;
+
+  parser = XML_ParserCreateNS (NULL, '!');
+  if (parser == NULL)
+    return -1;
+  back_to = make_cleanup (xml_xinclude_parser_cleanup, parser);
+
+  data = XCALLOC (1, struct xml_xinclude_parse_data);
+  XML_SetUserData (parser, data);
+
+  obstack_init (&data->obstack);
+
+  data->parser = parser;
+  data->fetcher = fetcher;
+  data->fetcher_baton = fetcher_baton;
+
+  XML_SetElementHandler (parser, xml_xinclude_start_element,
+			 xml_xinclude_end_element);
+  XML_SetDefaultHandler (parser, xml_xinclude_default);
+
+  /* Always discard the XML version declarations; the only important
+     thing this provides is encoding, and our result will have been
+     converted to UTF-8.  */
+  XML_SetXmlDeclHandler (parser, xml_xinclude_xml_decl);
+
+  if (nested)
+    /* Discard the doctype for included documents.  */
+    XML_SetDoctypeDeclHandler (parser, xml_xinclude_start_doctype,
+			       xml_xinclude_end_doctype);
+
+  XML_SetParamEntityParsing (parser,
+			     XML_PARAM_ENTITY_PARSING_UNLESS_STANDALONE);
+  XML_SetExternalEntityRefHandler (parser, xml_fetch_external_entity);
+
+  /* Even if no DTD is provided, use the built-in DTD anyway.  */
+  XML_UseForeignDTD (parser, XML_TRUE);
+
+  if (XML_Parse (parser, text, strlen (text), 1) != XML_STATUS_OK)
+    {
+      enum XML_Error err = XML_GetErrorCode (parser);
+
+      warning (_("XML parsing error: %s"), XML_ErrorString (err));
+
+      do_cleanups (back_to);
+      return -1;
+    }
+
+  /* TODO: If data->unhandled, warn?  */
+  /* TODO: Can other errors be fatal?  */
+
+  obstack_1grow (&data->obstack, '\0');
+  *output_p = xstrdup (obstack_finish (&data->obstack));
+
+  do_cleanups (back_to);
+
+  return 0;
+}
+
+int
+xml_xinclude_from_file (char **output_p, const char *filename)
+{
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+  const char *p;
+  char *dirname, *text;
+  int ret;
+
+  text = fetch_available_features_from_file (filename, NULL);
+  if (text == NULL)
+    return -1;
+
+  /* Simple, portable version of dirname that does not modify its
+     argument.  */
+  p = lbasename (filename);
+  while (p > filename && IS_DIR_SEPARATOR (p[-1]))
+    --p;
+  if (p > filename)
+    {
+      dirname = xmalloc (p - filename + 1);
+      memcpy (dirname, filename, p - filename);
+      dirname[p - filename] = '\0';
+      make_cleanup (xfree, dirname);
+    }
+  else
+    dirname = NULL;
+
+  ret = xml_process_xincludes (output_p, text,
+			       fetch_available_features_from_file,
+			       dirname, 0);
+
+  do_cleanups (back_to);
+  return ret;
+}
+
+/* For debugging.  */
+
+int
+try_xml_xinclude_from_xml_file (const char *filename)
+{
+  char *output;
+  int ret;
+
+  ret = xml_xinclude_from_file (&output, filename);
+
+  if (ret == 0)
+    printf_unfiltered ("%s", output);
+
+  return ret;
+}
+
+/* Return the XML corresponding to the given filename, if it
+   was compiled in to GDB, and NULL otherwise.  */
+
+const char *
+fetch_xml_builtin (const char *name)
+{
+  const char *(*p)[2];
+
+  for (p = xml_builtin; (*p)[0]; p++)
+    if (strcmp ((*p)[0], name) == 0)
+      return (*p)[1];
+
+  return NULL;
 }

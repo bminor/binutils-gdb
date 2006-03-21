@@ -383,7 +383,7 @@ available_features_from_target_object (struct target_ops *ops,
 
   features = OBSTACK_ZALLOC (obstack, struct gdb_feature_set);
   features->obstack = obstack;
-  ret = available_features_from_xml_string (&features->features, obstack,
+  ret = available_features_from_xml_string (features,
 					    features_str,
 					    fetch_available_features_from_target,
 					    &baton, 0);
@@ -407,32 +407,13 @@ features_same_p (const struct gdb_feature_set *lhs,
 {
   const struct gdb_available_feature *lhs_p, *rhs_p;
 
-  lhs_p = lhs->features;
-  rhs_p = rhs->features;
-  while (lhs_p && rhs_p)
-    {
-      lhs_p = lhs_p->next;
-      rhs_p = rhs_p->next;
-    }
-  if (lhs_p || rhs_p)
+  /* Two feature sets are the same if and only if they are described
+     by the same XML.  */
+
+  if (memcmp (lhs->checksum, rhs->checksum, 20) == 0)
+    return 1;
+  else
     return 0;
-
-  /* FIXME: This checking assumes that there are no features with
-     duplicate names in either set; enforce that when creating sets.  */
-
-  for (lhs_p = lhs->features; lhs_p; lhs_p = lhs_p->next)
-    {
-      for (rhs_p = rhs->features; rhs_p; rhs_p = rhs_p->next)
-	if (strcmp (lhs_p->name, rhs_p->name) == 0)
-	  break;
-      if (rhs_p == NULL)
-	return 0;
-
-      /* FIXME: Check feature contents, especially for "custom" features
-	 which don't have a standard meaning!  */
-    }
-
-  return 1;
 }
 
 /* Switch the architecture (gdbarch) to one which supports FEATURES.  */

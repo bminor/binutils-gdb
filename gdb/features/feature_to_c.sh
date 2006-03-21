@@ -8,10 +8,10 @@ if test -z "$input" || test -z "$output"; then
   exit 1
 fi
 
-arrayname=xml_feature_`basename $input | sed 's/\..*//g; s/-/_/g'`
+arrayname=xml_feature_`echo $input | sed 's,.*/,,; s/[-.]/_/g'`
 
 gawk 'BEGIN { n = 0
-  print "const char '$arrayname'[] = {"
+  print "static const char '$arrayname'[] = {"
   for (i = 0; i < 255; i++)
     _ord_[sprintf("%c", i)] = i
 } {
