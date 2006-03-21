@@ -60,12 +60,10 @@ This describes a simple target feature set which only contains two registers,
 named s0 (32-bit, integer) and s1 (32-bit, floating point).
 
 You can spread a description over multiple files by using the standardized
-XInclude mechanism - but only a very simplistic form of XInclude is supported.
-The xpointer attribute must be provided, using a bare ID rather than a more
-complicated XPointer expression.  The href argument should also be provided,
+XInclude mechanism - but only whole-file XInclude is supported.  The
+xpointer attribute should not be used, and the href attribute should be,
 using a bare basename.  GDB will query the target for the file, if it has
-not already seen it.  Presently only <feature> elements may be read using
-XInclude.
+not already seen it.
 
 You can validate the description using any XML validator which supports XInclude.
 For instance, with "xmllint" (shipped as part of the GNOME libxml2 package):
