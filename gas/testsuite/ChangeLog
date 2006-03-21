@@ -1,3 +1,7 @@
+2006-03-21  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/thumb32.d: Correct expected output.
+
 2006-03-20  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb2_bcond.d: New test.
