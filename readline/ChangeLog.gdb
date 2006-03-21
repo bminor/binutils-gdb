@@ -1,3 +1,8 @@
+2006-03-21  Denis Pilat  <denis.pilat@st.com>
+
+	* histfile.c (read_history_range): Remove '\r' character from
+	history lines.
+
 2005-02-10  Denis Pilat  <denis.pilat@st.com>
 
 	* readline/terminal.c (_rl_get_screen_size): Get console size from
