@@ -1,3 +1,14 @@
+2006-03-21  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (enforce_three_byte_loop_align): New flag.
+	(xtensa_setup_hw_workarounds): Set this new flag for older hardware.
+	(get_loop_align_size): New.
+	(xtensa_end): Skip xtensa_mark_narrow_branches when not aligning.
+	(xtensa_mark_zcl_first_insns): Prevent widening of first loop frag.
+	(get_text_align_power): Rewrite to handle inputs in the range 2-8.
+	(get_noop_aligned_address): Use get_loop_align_size.
+	(get_aligned_diff): Likewise.
+
 2006-03-21  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (insns): Correct opcodes for ldrbt and strbt.

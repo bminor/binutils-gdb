@@ -566,6 +566,7 @@ static bfd_boolean workaround_short_loop = FALSE;
 static bfd_boolean maybe_has_short_loop = FALSE;
 static bfd_boolean workaround_close_loop_end = FALSE;
 static bfd_boolean maybe_has_close_loop_end = FALSE;
+static bfd_boolean enforce_three_byte_loop_align = FALSE;
 
 /* When workaround_short_loops is TRUE, all loops with early exits must
    have at least 3 instructions.  workaround_all_short_loops is a modifier
@@ -590,6 +591,7 @@ xtensa_setup_hw_workarounds (int earliest, int latest)
       workaround_short_loop |= TRUE;
       workaround_close_loop_end |= TRUE;
       workaround_all_short_loops |= TRUE;
+      enforce_three_byte_loop_align = TRUE;
     }
 }
 
@@ -4430,6 +4432,26 @@ next_frag_format_size (const fragS *fragP)
 }
 
 
+/* In early Xtensa Processors, for reasons that are unclear, the ISA
+   required two-byte instructions to be treated as three-byte instructions
+   for loop instruction alignment.  This restriction was removed beginning
+   with Xtensa LX.  Now the only requirement on loop instruction alignment
+   is that the first instruction of the loop must appear at an address that
+   does not cross a fetch boundary.  */
+
+static int
+get_loop_align_size (int insn_size)
+{
+  if (insn_size == XTENSA_UNDEFINED)
+    return xtensa_fetch_width;
+
+  if (enforce_three_byte_loop_align && insn_size == 2)
+    return 3;
+
+  return insn_size;
+}
+
+
 /* If the next legit fragment is an end-of-loop marker,
    switch its state so it will instantiate a NOP.  */
 
@@ -6918,7 +6940,8 @@ xtensa_end (void)
 
   if (workaround_short_loop && maybe_has_short_loop)
     xtensa_fix_short_loop_frags ();
-  xtensa_mark_narrow_branches ();
+  if (align_targets)
+    xtensa_mark_narrow_branches ();
   xtensa_mark_zcl_first_insns ();
 
   xtensa_sanity_check ();
@@ -7113,7 +7136,24 @@ xtensa_mark_zcl_first_insns (void)
 	      /* Of course, sometimes (mostly for toy test cases) a
 		 zero-cost loop instruction is the last in a section.  */
 	      if (targ_frag)
-		targ_frag->tc_frag_data.is_first_loop_insn = TRUE;
+		{
+		  targ_frag->tc_frag_data.is_first_loop_insn = TRUE;
+		  /* Do not widen a frag that is the first instruction of a
+		     zero-cost loop.  It makes that loop harder to align.  */
+		  if (targ_frag->fr_type == rs_machine_dependent
+		      && targ_frag->fr_subtype == RELAX_SLOTS
+		      && (targ_frag->tc_frag_data.slot_subtypes[0]
+			  == RELAX_NARROW))
+		    {
+		      if (targ_frag->tc_frag_data.is_aligning_branch)
+			targ_frag->tc_frag_data.slot_subtypes[0] = RELAX_IMMED;
+		      else
+			{
+			  frag_wane (targ_frag);
+			  targ_frag->tc_frag_data.slot_subtypes[0] = 0;
+			}
+		    }
+		}
 	      if (fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE)
 		frag_wane (fragP);
 	    }
@@ -7835,16 +7875,10 @@ is_local_forward_loop (const TInsn *insn, fragS *fragP)
 static int
 get_text_align_power (unsigned target_size)
 {
-  int i = 0;
-  unsigned power = 1;
-
-  assert (target_size <= INT_MAX);
-  while (target_size > power)
-    {
-      power <<= 1;
-      i += 1;
-    }
-  return i;
+  if (target_size <= 4)
+    return 2;
+  assert (target_size == 8);
+  return 3;
 }
 
 
@@ -8038,14 +8072,9 @@ get_noop_aligned_address (fragS *fragP, addressT address)
      instruction following the loop, not the LOOP instruction.  */
 
   if (first_insn == NULL)
-    return address;
-
-  assert (first_insn->tc_frag_data.is_first_loop_insn);
-
-  first_insn_size = frag_format_size (first_insn);
-
-  if (first_insn_size == 2 || first_insn_size == XTENSA_UNDEFINED)
-    first_insn_size = 3;	/* ISA specifies this */
+    first_insn_size = xtensa_fetch_width;
+  else
+    first_insn_size = get_loop_align_size (frag_format_size (first_insn));
 
   /* If it was 8, then we'll need a larger alignment for the section.  */
   align_power = get_text_align_power (first_insn_size);
@@ -8108,7 +8137,7 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
       return opt_diff;
 
     case RELAX_ALIGN_NEXT_OPCODE:
-      target_size = next_frag_format_size (fragP);
+      target_size = get_loop_align_size (next_frag_format_size (fragP));
       loop_insn_offset = 0;
       is_loop = next_frag_opcode_is_loop (fragP, &loop_opcode);
       assert (is_loop);
@@ -8118,9 +8147,6 @@ get_aligned_diff (fragS *fragP, addressT address, offsetT *max_diff)
       if (next_non_empty_frag(fragP)->tc_frag_data.slot_subtypes[0]
 	  != RELAX_IMMED)
 	loop_insn_offset = get_expanded_loop_offset (loop_opcode);
-
-      if (target_size == 2)
-	target_size = 3; /* ISA specifies this */
 
       /* In an ideal world, which is what we are shooting for here,
 	 we wouldn't need to use any NOPs immediately prior to the
@@ -8725,7 +8751,7 @@ bytes_to_stretch (fragS *this_frag,
       /* We will need a NOP no matter what, but should we widen
 	 this instruction to help?
 
-	 This is a RELAX_FRAG_NARROW frag.  */
+	 This is a RELAX_NARROW frag.  */
       switch (desired_diff)
 	{
 	case 1:
