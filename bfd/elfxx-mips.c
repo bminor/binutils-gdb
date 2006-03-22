@@ -8161,7 +8161,7 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 
   if (h->plt.offset != (bfd_vma) -1)
     {
-      char *loc;
+      bfd_byte *loc;
       bfd_vma plt_address, plt_index, got_address, got_offset, branch_offset;
       Elf_Internal_Rela rel;
       static const bfd_vma *plt_entry;

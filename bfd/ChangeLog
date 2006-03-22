@@ -1,4 +1,9 @@
 2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_vxworks_finish_dynamic_symbol): Fix type
+	of "loc".
+
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 	    Zack Weinberg  <zack@codesourcery.com>
