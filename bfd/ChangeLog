@@ -1,3 +1,162 @@
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+	    Zack Weinberg  <zack@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* bfd-in2.h: Regenerate.
+	* config.bfd (mips*-*-vxworks*, mips*el-*-vxworks*): New stanzas.
+	* configure.in (bfd_elf32_bigmips_vxworks_vec): New stanza.
+	(bfd_elf32_littlemips_vxworks_vec): Likewise.
+	(bfd_elf32_bigmips_vec): Add elf-vxworks.lo.
+	(bfd_elf32_littlemips_vec): Likewise.
+	(bfd_elf32_nbigmips_vec): Likewise.
+	(bfd_elf32_nlittlemips_vec): Likewise.
+	(bfd_elf32_ntradbigmips_vec): Likewise.
+	(bfd_elf32_ntradlittlemips_vec): Likewise.
+	(bfd_elf32_tradbigmips_vec): Likewise.
+	(bfd_elf32_tradlittlemips_vec): Likewise.
+	(bfd_elf64_bigmips_vec): Likewise.
+	(bfd_elf64_littlemips_vec): Likewise.
+	(bfd_elf64_tradbigmips_vec): Likewise.
+	(bfd_elf64_tradlittlemips_vec): Likewise.
+	* elf32-mips.c: Include elf-vxworks.h.
+	(mips_info_to_howto_rel): Use elf_backend_mips_rtype_to_howto
+	instead of calling mips_elf32_rtype_to_howto directly.
+	(mips_vxworks_copy_howto_rela): New reloc howto.
+	(mips_vxworks_jump_slot_howto_rela): Likewise.
+	(mips_vxworks_bfd_reloc_type_lookup): New function.
+	(mips_vxworks_rtype_to_howto): Likewise.
+	(mips_vxworks_final_write_processing): Likewise.
+	(TARGET_LITTLE_SYM, TARGET_LITTLE_NAME): Override for VxWorks.
+	(TARGET_BIG_SYM, TARGET_BIG_NAME, elf_bed, ELF_MAXPAGESIZE): Likewise.
+	(elf_backend_want_got_plt): Likewise.
+	(elf_backend_want_plt_sym): Likewise.
+	(elf_backend_got_symbol_offset): Likewise.
+	(elf_backend_want_dynbss): Likewise.
+	(elf_backend_may_use_rel_p): Likewise.
+	(elf_backend_may_use_rela_p): Likewise.
+	(elf_backend_default_use_rela_p): Likewise.
+	(elf_backend_got_header_size: Likewise.
+	(elf_backend_plt_readonly): Likewise.
+	(bfd_elf32_bfd_reloc_type_lookup): Likewise.
+	(elf_backend_mips_rtype_to_howto): Likewise.
+	(elf_backend_adjust_dynamic_symbol): Likewise.
+	(elf_backend_finish_dynamic_symbol): Likewise.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(elf_backend_add_symbol_hook): Likewise.
+	(elf_backend_link_output_symbol_hook): Likewise.
+	(elf_backend_emit_relocs): Likewise.
+	(elf_backend_final_write_processing: Likewise.
+	(elf_backend_additional_program_headers): Likewise.
+	(elf_backend_modify_segment_map): Likewise.
+	(elf_backend_symbol_processing): Likewise.
+	* elfxx-mips.c: Include elf-vxworks.h.
+	(mips_elf_link_hash_entry): Add is_relocation_target and
+	is_branch_target fields.
+	(mips_elf_link_hash_table): Add is_vxworks, srelbss, sdynbss, srelplt,
+	srelplt2, sgotplt, splt, plt_header_size and plt_entry_size fields.
+	(MIPS_ELF_RELA_SIZE, MIPS_ELF_REL_DYN_NAME): New macros.
+	(MIPS_RESERVED_GOTNO): Take a mips_elf_link_hash_table argument.
+	Return 3 for VxWorks.
+	(ELF_MIPS_GP_OFFSET): Change the argument from a bfd to a
+	mips_elf_link_hash_table.  Return 0 for VxWorks.
+	(MIPS_ELF_GOT_MAX_SIZE): Change the argument from a bfd to a
+	mips_elf_link_hash_table.  Update the call to ELF_MIPS_GP_OFFSET.
+	(mips_vxworks_exec_plt0_entry): New variable.
+	(mips_vxworks_exec_plt_entry): Likewise.
+	(mips_vxworks_shared_plt0_entry): Likewise.
+	(mips_vxworks_shared_plt_entry): Likewise.
+	(mips_elf_link_hash_newfunc): Initialize the new hash_entry fields.
+	(mips_elf_rel_dyn_section): Change the bfd argument to a
+	mips_elf_link_hash_table.  Use MIPS_ELF_REL_DYN_NAME to get
+	the name of the section.
+	(mips_elf_initialize_tls_slots): Update the call to
+	mips_elf_rel_dyn_section.
+	(mips_elf_gotplt_index): New function.
+	(mips_elf_local_got_index): Add an input_section argument.
+	Update the call to mips_elf_create_local_got_entry.
+	(mips_elf_got_page): Likewise.
+	(mips_elf_got16_entry): Likewise.
+	(mips_elf_create_local_got_entry): Add bfd_link_info and input_section
+	arguments.  Create dynamic relocations for each entry on VxWorks.
+	(mips_elf_merge_gots): Update the use of MIPS_ELF_GOT_MAX_SIZE.
+	(mips_elf_multi_got): Update the uses of MIPS_ELF_GOT_MAX_SIZE
+	and MIPS_RESERVED_GOTNO.
+	(mips_elf_create_got_section): Update the uses of
+	MIPS_ELF_GOT_MAX_SIZE.  Create .got.plt on VxWorks.
+	(is_gott_symbol): New function.
+	(mips_elf_calculate_relocation): Use a dynobj local variable.
+	Update the calls to mips_elf_local_got_index, mips_elf_got16_entry and
+	mips_elf_got_page_entry.  Set G to the .got.plt entry when calculating
+	VxWorks R_MIPS_CALL* relocations.  Calculate and use G for all GOT
+	relocations on VxWorks.  Add dynamic relocations for references
+	to the VxWorks __GOTT_BASE__ and __GOTT_INDEX__ symbols.  Don't
+	create dynamic relocations for R_MIPS_32, R_MIPS_REL32 or R_MIPS_64
+	in VxWorks executables.
+	(mips_elf_allocate_dynamic_relocations): Add a bfd_link_info argument.
+	Use MIPS_ELF_RELA_SIZE to calculate the size of a VxWorks entry.
+	Don't allocate a null entry on VxWorks.
+	(mips_elf_create_dynamic_relocation): Update the call to
+	mips_elf_rel_dyn_section.  Use absolute rather than relative
+	relocations for VxWorks, and make them RELA rather than REL.
+	(_bfd_mips_elf_create_dynamic_sections): Don't make .dynamic
+	read-only on VxWorks.  Update the call to mips_elf_rel_dyn_section.
+	Create the .plt, .rela.plt, .dynbss and .rela.bss sections on
+	VxWorks.  Likewise create the _PROCEDURE_LINKAGE_TABLE symbol.
+	Call elf_vxworks_create_dynamic_sections for VxWorks and
+	initialize the plt_header_size and plt_entry_size fields.
+	(_bfd_mips_elf_check_relocs): Don't allow GOT relocations to be
+	used in VxWorks executables.  Don't allocate dynamic relocations
+	for R_MIPS_32, R_MIPS_REL32 or R_MIPS_64 in VxWorks executables.
+	Set is_relocation_target for each symbol referenced by a relocation.
+	Allocate .rela.dyn entries for relocations against the special
+	VxWorks __GOTT_BASE__ and __GOTT_INDEX__ symbols.  Create GOT
+	entries for all VxWorks R_MIPS_GOT16 relocations.  Don't allocate
+	a global GOT entry for symbols mentioned in VxWorks R_MIPS_CALL*,
+	R_MIPS_32, R_MIPS_REL32 or R_MIPS_64 relocations.  Update the calls
+	to mips_elf_rel_dyn_section and mips_elf_allocate_dynamic_relocations.
+	Set is_branch_target for symbols mentioned in R_MIPS_PC16 or R_MIPS_26
+	relocations.  Don't set no_fn_stub on VxWorks.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Update the call to
+	mips_elf_allocate_dynamic_relocations.
+	(_bfd_mips_vxworks_adjust_dynamic_symbol): New function.
+	(_bfd_mips_elf_always_size_sections): Do not allocate GOT page
+	entries for VxWorks, and do not create multiple GOTs.
+	(_bfd_mips_elf_size_dynamic_sections): Use MIPS_ELF_REL_DYN_NAME.
+	Handle .got specially for VxWorks.  Update the uses of
+	MIPS_RESERVED_GOTNO and mips_elf_allocate_dynamic_relocations.
+	Check for sgotplt and splt.  Allocate the .rel(a).dyn contents last,
+	once its final size is known.  Set DF_TEXTREL for VxWorks.  Add
+	DT_RELA, DT_RELASZ, DT_RELAENT, DT_PLTREL, DT_PLTRELSZ and DT_JMPREL
+	tags on VxWorks.  Do not add the MIPS-specific tags for VxWorks.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): New function.
+	(mips_vxworks_finish_exec_plt): Likewise.
+	(mips_vxworks_finish_shared_plt): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Remove an unncessary call
+	to mips_elf_rel_dyn_section.  Use a VxWorks-specific value of
+	DT_PLTGOT.  Handle DT_RELA, DT_RELASZ, DT_RELAENT, DT_PLTREL,
+	DT_PLTRELSZ and DT_JMPREL.  Update the uses of MIPS_RESERVED_GOTNO
+	and mips_elf_rel_dyn_section.  Use a different GOT header for
+	VxWorks.  Don't sort .rela.dyn on VxWorks.  Finish the PLT on VxWorks.
+	(_bfd_mips_elf_link_hash_table_create): Initialize the new
+	mips_elf_link_hash_table fields.
+	(_bfd_mips_vxworks_link_hash_table_create): New function.
+	(_bfd_mips_elf_final_link): Set the GP value to _GLOBAL_OFFSET_TABLE_
+	on VxWorks.  Update the call to ELF_MIPS_GP_OFFSET.
+	* elfxx-mips.h (_bfd_mips_vxworks_adjust_dynamic_symbol): Declare.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_vxworks_link_hash_table_create): Likewise.
+	* libbfd.h: Regenerate.
+	* Makefile.am (elfxx-mips.lo): Depend on elf-vxworks.h.
+	(elf32-mips.lo): Likewise.
+	* Makefile.in: Regenerate.
+	* reloc.c (BFD_RELOC_MIPS_COPY, BFD_RELOC_MIPS_JUMP_SLOT): Declare.
+	* targets.c (bfd_elf32_bigmips_vxworks_vec): Declare.
+	(bfd_elf32_littlemips_vxworks_vec): Likewise.
+	(_bfd_target_vector): Add entries for them.
+
 2006-03-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf64-hppa.c (elf64_hppa_special_sections): Change flags for .tbss

@@ -381,7 +381,9 @@ ALL_EMULATIONS = \
 	eelf32ltsmip.o \
 	eelf32ltsmipn32.o \
 	eelf32ebmip.o \
+	eelf32ebmipvxworks.o \
 	eelf32elmip.o \
+	eelf32elmipvxworks.o \
 	eelf32fr30.o \
 	eelf32frv.o \
 	eelf32i370.o \
@@ -1531,10 +1533,20 @@ eelf32ebmip.c: $(srcdir)/emulparams/elf32ebmip.sh \
   $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ebmip "$(tdir_elf32ebmip)"
+eelf32ebmipvxworks.c: $(srcdir)/emulparams/elf32ebmipvxworks.sh \
+  $(srcdir)/emulparams/elf32ebmip.sh $(srcdir)/emulparams/vxworks.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/vxworks.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32ebmipvxworks "$(tdir_elf32ebmipvxworks)"
 eelf32elmip.c: $(srcdir)/emulparams/elf32elmip.sh \
   $(srcdir)/emulparams/elf32lmip.sh $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32elmip "$(tdir_elf32elmip)"
+eelf32elmipvxworks.c: $(srcdir)/emulparams/elf32elmipvxworks.sh \
+  $(srcdir)/emulparams/elf32elmip.sh $(srcdir)/emulparams/vxworks.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/vxworks.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32elmipvxworks "$(tdir_elf32elmipvxworks)"
 eelf32bmipn32.c: $(srcdir)/emulparams/elf32bmipn32.sh \
   $(srcdir)/emultempl/irix.em \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

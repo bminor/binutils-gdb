@@ -1350,14 +1350,14 @@ elfxx-mips.lo: elfxx-mips.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elfxx-mips.h $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/coff/mips.h $(INCDIR)/coff/external.h
+  $(INCDIR)/coff/mips.h $(INCDIR)/coff/external.h elf-vxworks.h
 elf32-mips.lo: elf32-mips.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/bfdlink.h genlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfxx-mips.h \
   $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/sym.h \
   $(INCDIR)/coff/symconst.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/ecoff.h $(INCDIR)/coff/mips.h $(INCDIR)/coff/external.h \
-  ecoffswap.h elf32-target.h
+  ecoffswap.h elf32-target.h elf-vxworks.h
 elf32-mt.lo: elf32-mt.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/mt.h \

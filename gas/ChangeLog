@@ -1,3 +1,26 @@
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+	    Zack Weinberg  <zack@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-mips.c (mips_target_format): Handle vxworks targets.
+	(md_begin): Complain about -G being used for PIC.  Don't change
+	the text, data and bss alignments on VxWorks.
+	(reloc_needs_lo_p): Don't return true for R_MIPS_GOT16 when
+	generating VxWorks PIC.
+	(load_address): Extend SVR4_PIC handling to VXWORKS_PIC.
+	(macro): Likewise, but do not treat la $25 specially for
+	VxWorks PIC, and do not handle jal.
+	(OPTION_MVXWORKS_PIC): New macro.
+	(md_longopts): Add -mvxworks-pic.
+	(md_parse_option): Don't complain about using PIC and -G together here.
+	Handle OPTION_MVXWORKS_PIC.
+	(md_estimate_size_before_relax): Always use the first relaxation
+	sequence on VxWorks.
+	* config/tc-mips.h (VXWORKS_PIC): New.
+
 2006-03-21  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (md_apply_fix): Fix typo in offset mask.

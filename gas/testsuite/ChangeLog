@@ -1,3 +1,9 @@
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+
+	* gas/mips/vxworks1.s, gas/mips/vxworks1.d,
+	* gas/mips/vxworks1-xgot.d: New tests.
+	* gas/mips/mips.exp: Run them.  Do not run other tests on VxWorks.
+	
 2006-03-21  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/thumb32.d: Correct expected output.

@@ -16,6 +16,34 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
+if {[istarget "mips*-*-vxworks"]} {
+    set mipsvxtests {
+	{"VxWorks shared library test 1" "-shared -Tvxworks1.ld"
+	 "-mips2" {vxworks1-lib.s}
+	 {{readelf --relocs vxworks1-lib.rd} {objdump -dr vxworks1-lib.dd}
+	  {readelf --symbols vxworks1-lib.nd}}
+	 "libvxworks1.so"}
+	{"VxWorks executable test 1 (dynamic)" \
+	 "tmpdir/libvxworks1.so -Tvxworks1.ld -q --force-dynamic"
+	 "-mips2" {vxworks1.s}
+	 {{readelf --relocs vxworks1.rd} {objdump -dr vxworks1.dd}}
+	 "vxworks1"}
+	{"VxWorks executable test 2 (dynamic)" \
+	 "-Tvxworks1.ld -q --force-dynamic"
+	 "-mips2" {vxworks2.s}
+	 {{readelf --segments vxworks2.sd}}
+	 "vxworks2"}
+	{"VxWorks executable test 2 (static)"
+	 "-Tvxworks1.ld"
+	 "-mips2" {vxworks2.s}
+	 {{readelf --segments vxworks2-static.sd}}
+	 "vxworks2"}
+    }
+    run_ld_link_tests $mipsvxtests
+    run_dump_test "vxworks1-static"
+    return
+}
+
 if {![istarget mips*-*-*] || ![is_elf_format]} {
     return
 }

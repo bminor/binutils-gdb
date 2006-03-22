@@ -1,3 +1,12 @@
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips/vxworks1.dd, ld-mips/vxworks1.ld, ld-mips/vxworks1-lib.dd,
+	* ld-mips/vxworks1-lib.nd, ld-mips/vxworks1-lib.rd,
+	* ld-mips/vxworks1-lib.s, ld-mips/vxworks1.rd, ld-mips/vxworks1.s,
+	* ld-mips/vxworks1-static.d, ld-mips/vxworks2.s, ld-mips/vxworks2.sd,
+	* ld-mips/vxworks2-static.sd: New tests.
+	* ld-mips/mips-elf.exp: Run them.
+
 2006-03-17  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-powerpc/tls32.s: Verify that +32768 @plt addend is

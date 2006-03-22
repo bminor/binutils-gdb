@@ -1191,6 +1191,12 @@ mips_target_format (void)
     case bfd_target_coff_flavour:
       return "pe-mips";
     case bfd_target_elf_flavour:
+#ifdef TE_VXWORKS
+      if (!HAVE_64BIT_OBJECTS && !HAVE_NEWABI)
+	return (target_big_endian
+		? "elf32-bigmips-vxworks"
+		: "elf32-littlemips-vxworks");
+#endif
 #ifdef TE_TMIPS
       /* This is traditional mips.  */
       return (target_big_endian
@@ -1397,6 +1403,13 @@ md_begin (void)
   int i = 0;
   int broken = 0;
 
+  if (mips_pic != NO_PIC)
+    {
+      if (g_switch_seen && g_switch_value != 0)
+	as_bad (_("-G may not be used in position-independent code"));
+      g_switch_value = 0;
+    }
+
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, file_mips_arch))
     as_warn (_("Could not set architecture and machine"));
 
@@ -1524,10 +1537,11 @@ md_begin (void)
 
   if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
     {
-      /* On a native system, sections must be aligned to 16 byte
-	 boundaries.  When configured for an embedded ELF target, we
-	 don't bother.  */
-      if (strcmp (TARGET_OS, "elf") != 0)
+      /* On a native system other than VxWorks, sections must be aligned
+	 to 16 byte boundaries.  When configured for an embedded ELF
+	 target, we don't bother.  */
+      if (strcmp (TARGET_OS, "elf") != 0
+	  && strcmp (TARGET_OS, "vxworks") != 0)
 	{
 	  (void) bfd_set_section_alignment (stdoutput, text_section, 4);
 	  (void) bfd_set_section_alignment (stdoutput, data_section, 4);
@@ -1680,16 +1694,18 @@ md_assemble (char *str)
 }
 
 /* Return true if the given relocation might need a matching %lo().
-   Note that R_MIPS_GOT16 relocations only need a matching %lo() when
-   applied to local symbols.  */
+   This is only "might" because SVR4 R_MIPS_GOT16 relocations only
+   need a matching %lo() when applied to local symbols.  */
 
 static inline bfd_boolean
 reloc_needs_lo_p (bfd_reloc_code_real_type reloc)
 {
   return (HAVE_IN_PLACE_ADDENDS
 	  && (reloc == BFD_RELOC_HI16_S
-	      || reloc == BFD_RELOC_MIPS_GOT16
-	      || reloc == BFD_RELOC_MIPS16_HI16_S));
+	      || reloc == BFD_RELOC_MIPS16_HI16_S
+	      /* VxWorks R_MIPS_GOT16 relocs never need a matching %lo();
+		 all GOT16 relocations evaluate to "G".  */
+	      || (reloc == BFD_RELOC_MIPS_GOT16 && mips_pic != VXWORKS_PIC)));
 }
 
 /* Return true if the given fixup is followed by a matching R_MIPS_LO16
@@ -3898,7 +3914,7 @@ load_address (int reg, expressionS *ep, int *used_at)
 	    relax_end ();
 	}
     }
-  else if (mips_pic == SVR4_PIC && ! mips_big_got)
+  else if (!mips_big_got)
     {
       expressionS ex;
 
@@ -3959,7 +3975,7 @@ load_address (int reg, expressionS *ep, int *used_at)
 	    }
 	}
     }
-  else if (mips_pic == SVR4_PIC)
+  else if (mips_big_got)
     {
       expressionS ex;
 
@@ -5011,7 +5027,7 @@ macro (struct mips_cl_insn *ip)
 		relax_end ();
 	    }
 	}
-      else if (mips_pic == SVR4_PIC && ! mips_big_got && ! HAVE_NEWABI)
+      else if (!mips_big_got && !HAVE_NEWABI)
 	{
 	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT16;
 
@@ -5047,7 +5063,9 @@ macro (struct mips_cl_insn *ip)
 
 	  if (offset_expr.X_add_number == 0)
 	    {
-	      if (breg == 0 && (call || tempreg == PIC_CALL_REG))
+	      if (mips_pic == SVR4_PIC
+		  && breg == 0
+		  && (call || tempreg == PIC_CALL_REG))
 		lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
 
 	      relax_start (offset_expr.X_add_symbol);
@@ -5104,7 +5122,7 @@ macro (struct mips_cl_insn *ip)
 	      used_at = 1;
 	    }
 	}
-      else if (mips_pic == SVR4_PIC && ! mips_big_got && HAVE_NEWABI)
+      else if (!mips_big_got && HAVE_NEWABI)
 	{
 	  int add_breg_early = 0;
 
@@ -5207,7 +5225,7 @@ macro (struct mips_cl_insn *ip)
 			   BFD_RELOC_MIPS_GOT_DISP, mips_gp_register);
 	    }
 	}
-      else if (mips_pic == SVR4_PIC && ! HAVE_NEWABI)
+      else if (mips_big_got && !HAVE_NEWABI)
 	{
 	  int gpdelay;
 	  int lui_reloc_type = (int) BFD_RELOC_MIPS_GOT_HI16;
@@ -5364,7 +5382,7 @@ macro (struct mips_cl_insn *ip)
 	    }
 	  relax_end ();
 	}
-      else if (mips_pic == SVR4_PIC && HAVE_NEWABI)
+      else if (mips_big_got && HAVE_NEWABI)
 	{
 	  int lui_reloc_type = (int) BFD_RELOC_MIPS_GOT_HI16;
 	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT_LO16;
@@ -5497,13 +5515,13 @@ macro (struct mips_cl_insn *ip)
     case M_JAL_2:
       if (mips_pic == NO_PIC)
 	macro_build (NULL, "jalr", "d,s", dreg, sreg);
-      else if (mips_pic == SVR4_PIC)
+      else
 	{
 	  if (sreg != PIC_CALL_REG)
 	    as_warn (_("MIPS PIC call to register other than $25"));
 
 	  macro_build (NULL, "jalr", "d,s", dreg, sreg);
-	  if (! HAVE_NEWABI)
+	  if (mips_pic == SVR4_PIC && !HAVE_NEWABI)
 	    {
 	      if (mips_cprestore_offset < 0)
 		as_warn (_("No .cprestore pseudo-op used in PIC code"));
@@ -5529,8 +5547,6 @@ macro (struct mips_cl_insn *ip)
 		}
 	    }
 	}
-      else
-	abort ();
 
       break;
 
@@ -5666,6 +5682,8 @@ macro (struct mips_cl_insn *ip)
 		}
 	    }
 	}
+      else if (mips_pic == VXWORKS_PIC)
+	as_bad (_("Non-PIC jump used in PIC library"));
       else
 	abort ();
 
@@ -6026,7 +6044,7 @@ macro (struct mips_cl_insn *ip)
 		relax_end ();
 	    }
 	}
-      else if (mips_pic == SVR4_PIC && ! mips_big_got)
+      else if (!mips_big_got)
 	{
 	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT16;
 
@@ -6080,7 +6098,7 @@ macro (struct mips_cl_insn *ip)
 			 tempreg, tempreg, breg);
 	  macro_build (&expr1, s, fmt, treg, BFD_RELOC_LO16, tempreg);
 	}
-      else if (mips_pic == SVR4_PIC && ! HAVE_NEWABI)
+      else if (mips_big_got && !HAVE_NEWABI)
 	{
 	  int gpdelay;
 
@@ -6129,7 +6147,7 @@ macro (struct mips_cl_insn *ip)
 			 tempreg, tempreg, breg);
 	  macro_build (&expr1, s, fmt, treg, BFD_RELOC_LO16, tempreg);
 	}
-      else if (mips_pic == SVR4_PIC && HAVE_NEWABI)
+      else if (mips_big_got && HAVE_NEWABI)
 	{
 	  /* If this is a reference to an external symbol, we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_GOT_HI16)
@@ -6249,14 +6267,12 @@ macro (struct mips_cl_insn *ip)
 	  macro_build_lui (&offset_expr, AT);
 	  used_at = 1;
 	}
-      else if (mips_pic == SVR4_PIC)
+      else
 	{
 	  macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)", AT,
 		       BFD_RELOC_MIPS_GOT16, mips_gp_register);
 	  used_at = 1;
 	}
-      else
-	abort ();
 
       /* Now we load the register(s).  */
       if (HAVE_64BIT_GPRS)
@@ -6328,7 +6344,7 @@ macro (struct mips_cl_insn *ip)
 	{
 	  assert (strcmp (s, RDATA_SECTION_NAME) == 0);
 	  used_at = 1;
-	  if (mips_pic == SVR4_PIC)
+	  if (mips_pic != NO_PIC)
 	    macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)", AT,
 			 BFD_RELOC_MIPS_GOT16, mips_gp_register);
 	  else
@@ -6547,7 +6563,7 @@ macro (struct mips_cl_insn *ip)
 	  if (mips_relax.sequence)
 	    relax_end ();
 	}
-      else if (mips_pic == SVR4_PIC && ! mips_big_got)
+      else if (!mips_big_got)
 	{
 	  /* If this is a reference to an external symbol, we want
 	       lw	$at,<sym>($gp)		(BFD_RELOC_MIPS_GOT16)
@@ -6594,7 +6610,7 @@ macro (struct mips_cl_insn *ip)
 
 	  mips_optimize = hold_mips_optimize;
 	}
-      else if (mips_pic == SVR4_PIC)
+      else if (mips_big_got)
 	{
 	  int gpdelay;
 
@@ -10646,6 +10662,8 @@ struct option md_longopts[] =
   {"mpdr", no_argument, NULL, OPTION_PDR},
 #define OPTION_NO_PDR	   (OPTION_ELF_BASE + 10)
   {"mno-pdr", no_argument, NULL, OPTION_NO_PDR},
+#define OPTION_MVXWORKS_PIC (OPTION_ELF_BASE + 11)
+  {"mvxworks-pic", no_argument, NULL, OPTION_MVXWORKS_PIC},
 #endif /* OBJ_ELF */
 
   {NULL, no_argument, NULL, 0}
@@ -10887,12 +10905,6 @@ md_parse_option (int c, char *arg)
 	}
       mips_pic = SVR4_PIC;
       mips_abicalls = TRUE;
-      if (g_switch_seen && g_switch_value != 0)
-	{
-	  as_bad (_("-G may not be used with SVR4 PIC code"));
-	  return 0;
-	}
-      g_switch_value = 0;
       break;
 
     case OPTION_NON_SHARED:
@@ -10916,11 +10928,6 @@ md_parse_option (int c, char *arg)
     case 'G':
       g_switch_value = atoi (arg);
       g_switch_seen = 1;
-      if (mips_pic == SVR4_PIC && g_switch_value != 0)
-	{
-	  as_bad (_("-G may not be used with SVR4 PIC code"));
-	  return 0;
-	}
       break;
 
 #ifdef OBJ_ELF
@@ -11025,6 +11032,10 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_PDR:
       mips_flag_pdr = FALSE;
+      break;
+
+    case OPTION_MVXWORKS_PIC:
+      mips_pic = VXWORKS_PIC;
       break;
 #endif /* OBJ_ELF */
 
@@ -13166,6 +13177,9 @@ md_estimate_size_before_relax (fragS *fragp, asection *segtype)
     change = nopic_need_relax (fragp->fr_symbol, 0);
   else if (mips_pic == SVR4_PIC)
     change = pic_need_relax (fragp->fr_symbol, segtype);
+  else if (mips_pic == VXWORKS_PIC)
+    /* For vxworks, GOT16 relocations never have a corresponding LO16.  */
+    change = 0;
   else
     abort ();
 

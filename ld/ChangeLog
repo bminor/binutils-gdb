@@ -1,3 +1,19 @@
+2006-03-22  Richard Sandiford  <richard@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Phil Edwards  <phil@codesourcery.com>
+	    Zack Weinberg  <zack@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* configure.tgt (mips*el-*-vxworks*, mips*-*-vxworks*): Use
+	separate VxWorks emulations.
+	* emulparams/elf32ebmipvxworks.sh: New file.
+	* emulparams/elf32elmipvxworks.sh: New file.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32ebmipvxworks.o and
+	eelf32elmipvxworks.o.
+	(eelf32ebmipvxworks.c, eelf32elmipvxworks.c): New rules.
+	* Makefile.in: Regenerate.
+
 2006-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2434
