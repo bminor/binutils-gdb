@@ -784,6 +784,8 @@ pipe_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 
 struct net_windows_state
 {
+  /* Every access to read_event is guarded by this mutex.  */
+  HANDLE mutex;
   HANDLE read_event;
   HANDLE except_event;
 
@@ -841,10 +843,11 @@ net_windows_select_thread (void *arg)
 
       /* Enumerate the internal network events, and reset the object that
 	 signalled us to catch the next event.  */
+      WaitForSingleObject (state->mutex, INFINITE);
       WSAEnumNetworkEvents (fd, state->sock_event, &events);
-
       if (events.lNetworkEvents & FD_READ)
 	SetEvent (state->read_event);
+      ReleaseMutex (state->mutex);
 
       if (events.lNetworkEvents & FD_CLOSE)
 	SetEvent (state->except_event);
@@ -856,7 +859,6 @@ net_windows_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
 {
   struct net_windows_state *state = scb->state;
 
-  ResetEvent (state->read_event);
   ResetEvent (state->except_event);
 
   SetEvent (state->start_select);
@@ -892,6 +894,9 @@ net_windows_open (struct serial *scb, const char *name)
   state->read_event = CreateEvent (0, FALSE, FALSE, 0);
   state->except_event = CreateEvent (0, FALSE, FALSE, 0);
 
+  /* Guard access to the read_event.  */
+  state->mutex = CreateMutex (NULL, FALSE, NULL);
+
   /* And finally start the select thread.  */
   CreateThread (NULL, 0, net_windows_select_thread, scb, 0, &threadId);
 
@@ -914,6 +919,27 @@ net_windows_close (struct serial *scb)
   xfree (scb->state);
 
   net_close (scb);
+}
+
+static int
+net_windows_read_prim (struct serial *scb, size_t count)
+{
+  struct net_windows_state *state = scb->state;
+  int ret;
+
+  /* We're about to call recv.  If any bytes appear after this point,
+     we need to be told about them.  So, we must reset the read event.
+     However, if we reset the event, then read, we could read all the
+     bytes -- and leave the event signaled if the thread notices new
+     bytes arriving between the reset and the read.  Similarly, if we
+     read, then reset, we could miss new bytes arriving between the
+     read and the reset.  So, we must make the read and reset atomic.  */
+  WaitForSingleObject (state->mutex, INFINITE);
+  ResetEvent (state->read_event);
+  ret = net_read_prim (scb, count);
+  ReleaseMutex (state->mutex);
+
+  return ret;
 }
 
 void
@@ -1028,7 +1054,7 @@ _initialize_ser_windows (void)
   ops->setstopbits = ser_base_setstopbits;
   ops->drain_output = ser_base_drain_output;
   ops->async = ser_base_async;
-  ops->read_prim = net_read_prim;
+  ops->read_prim = net_windows_read_prim;
   ops->write_prim = net_write_prim;
   ops->wait_handle = net_windows_wait_handle;
   serial_add_interface (ops);
