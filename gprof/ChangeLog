@@ -1,3 +1,8 @@
+2006-03-21  Ben Elliston  <bje@au.ibm.com>
+
+	* corefile.c (core_init): Report that the executable is not in the
+	expected executable format rather than "a.out" format.
+
 2006-03-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
