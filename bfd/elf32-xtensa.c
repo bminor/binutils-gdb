@@ -640,7 +640,6 @@ xtensa_read_table_entries (bfd *abfd,
 	    {
 	      bfd_vma sym_off = get_elf_r_symndx_offset (abfd, r_symndx);
 	      BFD_ASSERT (sym_off == 0);
-	      BFD_ASSERT (rel->r_addend == 0);
 	      blocks[block_count].address =
 		(section_addr + sym_off + rel->r_addend
 		 + bfd_get_32 (abfd, table_data + rel->r_offset));
