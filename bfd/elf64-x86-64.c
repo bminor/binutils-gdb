@@ -31,8 +31,8 @@
 #define MINUS_ONE (~ (bfd_vma) 0)
 
 /* The relocation "howto" table.  Order of fields:
-   type, size, bitsize, pc_relative, complain_on_overflow,
-   special_function, name, partial_inplace, src_mask, dst_pack, pcrel_offset.  */
+   type, rightshift, size, bitsize, pc_relative, bitpos, complain_on_overflow,
+   special_function, name, partial_inplace, src_mask, dst_mask, pcrel_offset.  */
 static reloc_howto_type x86_64_elf_howto_table[] =
 {
   HOWTO(R_X86_64_NONE, 0, 0, 0, FALSE, 0, complain_overflow_dont,
@@ -112,11 +112,21 @@ static reloc_howto_type x86_64_elf_howto_table[] =
   HOWTO(R_X86_64_GOTPC32, 0, 2, 32, TRUE, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_GOTPC32",
 	FALSE, 0xffffffff, 0xffffffff, TRUE),
-  EMPTY_HOWTO (27),
-  EMPTY_HOWTO (28),
-  EMPTY_HOWTO (29),
-  EMPTY_HOWTO (30),
-  EMPTY_HOWTO (31),
+  HOWTO(R_X86_64_GOT64, 0, 4, 64, FALSE, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_GOT64", FALSE, MINUS_ONE, MINUS_ONE,
+	FALSE),
+  HOWTO(R_X86_64_GOTPCREL64, 0, 4, 64, TRUE, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_GOTPCREL64", FALSE, MINUS_ONE,
+	MINUS_ONE, TRUE),
+  HOWTO(R_X86_64_GOTPC64, 0, 4, 64, TRUE, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_GOTPC64",
+	FALSE, MINUS_ONE, MINUS_ONE, TRUE),
+  HOWTO(R_X86_64_GOTPLT64, 0, 4, 64, FALSE, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_GOTPLT64", FALSE, MINUS_ONE,
+	MINUS_ONE, FALSE),
+  HOWTO(R_X86_64_PLTOFF64, 0, 4, 64, FALSE, 0, complain_overflow_signed,
+	bfd_elf_generic_reloc, "R_X86_64_PLTOFF64", FALSE, MINUS_ONE,
+	MINUS_ONE, FALSE),
   EMPTY_HOWTO (32),
   EMPTY_HOWTO (33),
   HOWTO(R_X86_64_GOTPC32_TLSDESC, 0, 2, 32, TRUE, 0,
@@ -185,6 +195,11 @@ static const struct elf_reloc_map x86_64_reloc_map[] =
   { BFD_RELOC_64_PCREL,		R_X86_64_PC64, },
   { BFD_RELOC_X86_64_GOTOFF64,	R_X86_64_GOTOFF64, },
   { BFD_RELOC_X86_64_GOTPC32,	R_X86_64_GOTPC32, },
+  { BFD_RELOC_X86_64_GOT64,	R_X86_64_GOT64, },
+  { BFD_RELOC_X86_64_GOTPCREL64,R_X86_64_GOTPCREL64, },
+  { BFD_RELOC_X86_64_GOTPC64,	R_X86_64_GOTPC64, },
+  { BFD_RELOC_X86_64_GOTPLT64,	R_X86_64_GOTPLT64, },
+  { BFD_RELOC_X86_64_PLTOFF64,	R_X86_64_PLTOFF64, },
   { BFD_RELOC_X86_64_GOTPC32_TLSDESC, R_X86_64_GOTPC32_TLSDESC, },
   { BFD_RELOC_X86_64_TLSDESC_CALL, R_X86_64_TLSDESC_CALL, },
   { BFD_RELOC_X86_64_TLSDESC,	R_X86_64_TLSDESC, },
@@ -777,6 +792,9 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	case R_X86_64_GOT32:
 	case R_X86_64_GOTPCREL:
 	case R_X86_64_TLSGD:
+	case R_X86_64_GOT64:
+	case R_X86_64_GOTPCREL64:
+	case R_X86_64_GOTPLT64:
 	case R_X86_64_GOTPC32_TLSDESC:
 	case R_X86_64_TLSDESC_CALL:
 	  /* This symbol requires a global offset table entry.	*/
@@ -795,6 +813,14 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
 	    if (h != NULL)
 	      {
+		if (r_type == R_X86_64_GOTPLT64)
+		  {
+		    /* This relocation indicates that we also need
+		       a PLT entry, as this is a function.  We don't need
+		       a PLT entry for local symbols.  */
+		    h->needs_plt = 1;
+		    h->plt.refcount += 1;
+		  }
 		h->got.refcount += 1;
 		old_tls_type = elf64_x86_64_hash_entry (h)->tls_type;
 	      }
@@ -858,6 +884,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
 	case R_X86_64_GOTOFF64:
 	case R_X86_64_GOTPC32:
+	case R_X86_64_GOTPC64:
 	create_got:
 	  if (htab->sgot == NULL)
 	    {
@@ -884,6 +911,16 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	  h->needs_plt = 1;
 	  h->plt.refcount += 1;
 	  break;
+
+	case R_X86_64_PLTOFF64:
+	  /* This tries to form the 'address' of a function relative
+	     to GOT.  For global symbols we need a PLT entry.  */
+	  if (h != NULL)
+	    {
+	      h->needs_plt = 1;
+	      h->plt.refcount += 1;
+	    }
+	  goto create_got;
 
 	case R_X86_64_8:
 	case R_X86_64_16:
@@ -1189,8 +1226,13 @@ elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_GOTTPOFF:
 	case R_X86_64_GOT32:
 	case R_X86_64_GOTPCREL:
+	case R_X86_64_GOT64:
+	case R_X86_64_GOTPCREL64:
+	case R_X86_64_GOTPLT64:
 	  if (h != NULL)
 	    {
+	      if (r_type == R_X86_64_GOTPLT64 && h->plt.refcount > 0)
+	        h->plt.refcount -= 1;
 	      if (h->got.refcount > 0)
 		h->got.refcount -= 1;
 	    }
@@ -1215,6 +1257,7 @@ elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	  /* Fall thru */
 
 	case R_X86_64_PLT32:
+	case R_X86_64_PLTOFF64:
 	  if (h != NULL)
 	    {
 	      if (h->plt.refcount > 0)
@@ -2096,11 +2139,23 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	 copied into the output file to be resolved at run time.  */
       switch (r_type)
 	{
+	asection *base_got;
 	case R_X86_64_GOT32:
+	case R_X86_64_GOT64:
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */
 	case R_X86_64_GOTPCREL:
-	  /* Use global offset table as symbol value.  */
+	case R_X86_64_GOTPCREL64:
+	  /* Use global offset table entry as symbol value.  */
+	case R_X86_64_GOTPLT64:
+	  /* This is the same as GOT64 for relocation purposes, but
+	     indicates the existence of a PLT entry.  The difficulty is,
+	     that we must calculate the GOT slot offset from the PLT
+	     offset, if this symbol got a PLT entry (it was global).
+	     Additionally if it's computed from the PLT entry, then that
+	     GOT offset is relative to .got.plt, not to .got.  */
+	  base_got = htab->sgot;
+
 	  if (htab->sgot == NULL)
 	    abort ();
 
@@ -2109,6 +2164,19 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      bfd_boolean dyn;
 
 	      off = h->got.offset;
+	      if (h->needs_plt
+	          && h->plt.offset != (bfd_vma)-1
+		  && off == (bfd_vma)-1)
+		{
+		  /* We can't use h->got.offset here to save
+		     state, or even just remember the offset, as
+		     finish_dynamic_symbol would use that as offset into
+		     .got.  */
+		  bfd_vma plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
+		  off = (plt_index + 3) * GOT_ENTRY_SIZE;
+		  base_got = htab->sgotplt;
+		}
+
 	      dyn = htab->elf.dynamic_sections_created;
 
 	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
@@ -2133,7 +2201,9 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  else
 		    {
 		      bfd_put_64 (output_bfd, relocation,
-				  htab->sgot->contents + off);
+				  base_got->contents + off);
+		      /* Note that this is harmless for the GOTPLT64 case,
+		         as -1 | 1 still is -1.  */
 		      h->got.offset |= 1;
 		    }
 		}
@@ -2155,7 +2225,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      else
 		{
 		  bfd_put_64 (output_bfd, relocation,
-			      htab->sgot->contents + off);
+			      base_got->contents + off);
 
 		  if (info->shared)
 		    {
@@ -2169,8 +2239,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      if (s == NULL)
 			abort ();
 
-		      outrel.r_offset = (htab->sgot->output_section->vma
-					 + htab->sgot->output_offset
+		      outrel.r_offset = (base_got->output_section->vma
+					 + base_got->output_offset
 					 + off);
 		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
 		      outrel.r_addend = relocation;
@@ -2186,9 +2256,9 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = htab->sgot->output_section->vma
-		       + htab->sgot->output_offset + off;
-	  if (r_type != R_X86_64_GOTPCREL)
+	  relocation = base_got->output_section->vma
+		       + base_got->output_offset + off;
+	  if (r_type != R_X86_64_GOTPCREL && r_type != R_X86_64_GOTPCREL64)
 	    relocation -= htab->sgotplt->output_section->vma
 			  - htab->sgotplt->output_offset;
 
@@ -2224,10 +2294,29 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 
 	case R_X86_64_GOTPC32:
+	case R_X86_64_GOTPC64:
 	  /* Use global offset table as symbol value.  */
 	  relocation = htab->sgotplt->output_section->vma
 		       + htab->sgotplt->output_offset;
 	  unresolved_reloc = FALSE;
+	  break;
+
+	case R_X86_64_PLTOFF64:
+	  /* Relocation is PLT entry relative to GOT.  For local
+	     symbols it's the symbol itself relative to GOT.  */
+          if (h != NULL
+	      /* See PLT32 handling.  */
+	      && h->plt.offset != (bfd_vma) -1
+	      && htab->splt != NULL)
+	    {
+	      relocation = (htab->splt->output_section->vma
+			    + htab->splt->output_offset
+			    + h->plt.offset);
+	      unresolved_reloc = FALSE;
+	    }
+
+	  relocation -= htab->sgotplt->output_section->vma
+			+ htab->sgotplt->output_offset;
 	  break;
 
 	case R_X86_64_PLT32:

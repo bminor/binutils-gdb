@@ -1169,13 +1169,12 @@ ps (s)
 	   segment_name (S_GET_SEGMENT (s)));
 }
 
-struct type_name
+static struct type_name
   {
     unsigned int mask;
     char *tname;
   }
-
-static const type_names[] =
+const type_names[] =
 {
   { Reg8, "r8" },
   { Reg16, "r16" },
@@ -1238,6 +1237,18 @@ reloc (unsigned int size,
       if (size == 8)
 	switch (other)
 	  {
+	    case BFD_RELOC_X86_64_GOT32:
+	      return BFD_RELOC_X86_64_GOT64;
+	      break;
+	    case BFD_RELOC_X86_64_PLTOFF64:
+	      return BFD_RELOC_X86_64_PLTOFF64;
+	      break;
+	    case BFD_RELOC_X86_64_GOTPC32:
+	      other = BFD_RELOC_X86_64_GOTPC64;
+	      break;
+	    case BFD_RELOC_X86_64_GOTPCREL:
+	      other = BFD_RELOC_X86_64_GOTPCREL64;
+	      break;
 	    case BFD_RELOC_X86_64_TPOFF32:
 	      other = BFD_RELOC_X86_64_TPOFF64;
 	      break;
@@ -3569,7 +3580,7 @@ check_prefix:
 #ifdef DEBUG386
   if (flag_debug)
     {
-      pi (line, &i);
+      pi ("" /*line*/, &i);
     }
 #endif /* DEBUG386  */
 }
@@ -3654,7 +3665,9 @@ output_disp (insn_start_frag, insn_start_off)
 	      if (GOT_symbol
 		  && GOT_symbol == i.op[n].disps->X_add_symbol
 		  && (((reloc_type == BFD_RELOC_32
-			|| reloc_type == BFD_RELOC_X86_64_32S)
+			|| reloc_type == BFD_RELOC_X86_64_32S
+			|| (reloc_type == BFD_RELOC_64
+			    && object_64bit))
 		       && (i.op[n].disps->X_op == O_symbol
 			   || (i.op[n].disps->X_op == O_add
 			       && ((symbol_get_value_expression
@@ -3678,10 +3691,17 @@ output_disp (insn_start_frag, insn_start_off)
 		    }
 
 		  if (!object_64bit)
-		    reloc_type = BFD_RELOC_386_GOTPC;
+		    {
+		      reloc_type = BFD_RELOC_386_GOTPC;
+		      i.op[n].imms->X_add_number += add;
+		    }
+		  else if (reloc_type == BFD_RELOC_64)
+		    reloc_type = BFD_RELOC_X86_64_GOTPC64;
 		  else
+		    /* Don't do the adjustment for x86-64, as there
+		       the pcrel addressing is relative to the _next_
+		       insn, and that is taken care of in other code.  */
 		    reloc_type = BFD_RELOC_X86_64_GOTPC32;
-		  i.op[n].disps->X_add_number += add;
 		}
 	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
 			   i.op[n].disps, pcrel, reloc_type);
@@ -3790,7 +3810,8 @@ output_imm (insn_start_frag, insn_start_off)
 	       * confusing to do it this way.  */
 
 	      if ((reloc_type == BFD_RELOC_32
-		   || reloc_type == BFD_RELOC_X86_64_32S)
+		   || reloc_type == BFD_RELOC_X86_64_32S
+		   || reloc_type == BFD_RELOC_64)
 		  && GOT_symbol
 		  && GOT_symbol == i.op[n].imms->X_add_symbol
 		  && (i.op[n].imms->X_op == O_symbol
@@ -3816,8 +3837,10 @@ output_imm (insn_start_frag, insn_start_off)
 
 		  if (!object_64bit)
 		    reloc_type = BFD_RELOC_386_GOTPC;
-		  else
+		  else if (size == 4)
 		    reloc_type = BFD_RELOC_X86_64_GOTPC32;
+		  else if (size == 8)
+		    reloc_type = BFD_RELOC_X86_64_GOTPC64;
 		  i.op[n].imms->X_add_number += add;
 		}
 	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
@@ -3870,12 +3893,19 @@ lex_got (enum bfd_reloc_code_real *reloc,
      int *adjust,
      unsigned int *types)
 {
+  /* Some of the relocations depend on the size of what field is to
+     be relocated.  But in our callers i386_immediate and i386_displacement
+     we don't yet know the operand size (this will be set by insn
+     matching).  Hence we record the word32 relocation here,
+     and adjust the reloc according to the real size in reloc().  */
   static const struct {
     const char *str;
     const enum bfd_reloc_code_real rel[2];
     const unsigned int types64;
   } gotrel[] = {
+    { "PLTOFF",   { 0,                        BFD_RELOC_X86_64_PLTOFF64 }, Imm64 },
     { "PLT",      { BFD_RELOC_386_PLT32,      BFD_RELOC_X86_64_PLT32    }, Imm32|Imm32S|Disp32 },
+    { "GOTPLT",   { 0,                        BFD_RELOC_X86_64_GOTPLT64 }, Imm64|Disp64 },
     { "GOTOFF",   { BFD_RELOC_386_GOTOFF,     BFD_RELOC_X86_64_GOTOFF64 }, Imm64|Disp64 },
     { "GOTPCREL", { 0,                        BFD_RELOC_X86_64_GOTPCREL }, Imm32|Imm32S|Disp32 },
     { "TLSGD",    { BFD_RELOC_386_TLS_GD,     BFD_RELOC_X86_64_TLSGD    }, Imm32|Imm32S|Disp32 },
@@ -3887,7 +3917,7 @@ lex_got (enum bfd_reloc_code_real *reloc,
     { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32, BFD_RELOC_X86_64_DTPOFF32 }, Imm32|Imm32S|Imm64|Disp32|Disp64 },
     { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,  0                         }, 0 },
     { "INDNTPOFF",{ BFD_RELOC_386_TLS_IE,     0                         }, 0 },
-    { "GOT",      { BFD_RELOC_386_GOT32,      BFD_RELOC_X86_64_GOT32    }, Imm32|Imm32S|Disp32 },
+    { "GOT",      { BFD_RELOC_386_GOT32,      BFD_RELOC_X86_64_GOT32    }, Imm32|Imm32S|Disp32|Imm64 },
     { "TLSDESC",  { BFD_RELOC_386_TLS_GOTDESC, BFD_RELOC_X86_64_GOTPC32_TLSDESC }, Imm32|Imm32S|Disp32 },
     { "TLSCALL",  { BFD_RELOC_386_TLS_DESC_CALL, BFD_RELOC_X86_64_TLSDESC_CALL }, Imm32|Imm32S|Disp32 }
   };
@@ -4947,6 +4977,20 @@ md_convert_frag (abfd, sec, fragP)
 	}
     }
 
+  /* If size if less then four we are sure that the operand fits,
+     but if it's 4, then it could be that the displacement is larger
+     then -/+ 2GB.  */
+  if (DISP_SIZE_FROM_RELAX_STATE (fragP->fr_subtype) == 4
+      && object_64bit
+      && ((addressT) (displacement_from_opcode_start - extension
+                      + ((addressT) 1 << 31))
+          > (((addressT) 2 << 31) - 1)))
+    {
+      as_bad_where (fragP->fr_file, fragP->fr_line,
+		    _("jump target out of range"));
+      /* Make us emit 0.  */
+      displacement_from_opcode_start = extension;
+    }
   /* Now put displacement after opcode.  */
   md_number_to_chars ((char *) where_to_put_displacement,
 		      (valueT) (displacement_from_opcode_start - extension),
@@ -5708,6 +5752,11 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_X86_64_TPOFF64:
     case BFD_RELOC_X86_64_GOTOFF64:
     case BFD_RELOC_X86_64_GOTPC32:
+    case BFD_RELOC_X86_64_GOT64:
+    case BFD_RELOC_X86_64_GOTPCREL64:
+    case BFD_RELOC_X86_64_GOTPC64:
+    case BFD_RELOC_X86_64_GOTPLT64:
+    case BFD_RELOC_X86_64_PLTOFF64:
     case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
     case BFD_RELOC_X86_64_TLSDESC_CALL:
     case BFD_RELOC_RVA:
@@ -5775,6 +5824,12 @@ tc_gen_reloc (section, fixp)
 	code = BFD_RELOC_386_GOTPC;
       else
 	code = BFD_RELOC_X86_64_GOTPC32;
+    }
+  if ((code == BFD_RELOC_64 || code == BFD_RELOC_64_PCREL)
+      && GOT_symbol
+      && fixp->fx_addsy == GOT_symbol)
+    {
+      code = BFD_RELOC_X86_64_GOTPC64;
     }
 
   rel = (arelent *) xmalloc (sizeof (arelent));

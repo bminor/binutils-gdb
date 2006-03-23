@@ -7,7 +7,7 @@
    (This include file is not for users of the library.)
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -1065,6 +1065,11 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_X86_64_TPOFF32",
   "BFD_RELOC_X86_64_GOTOFF64",
   "BFD_RELOC_X86_64_GOTPC32",
+  "BFD_RELOC_X86_64_GOT64",
+  "BFD_RELOC_X86_64_GOTPCREL64",
+  "BFD_RELOC_X86_64_GOTPC64",
+  "BFD_RELOC_X86_64_GOTPLT64",
+  "BFD_RELOC_X86_64_PLTOFF64",
   "BFD_RELOC_X86_64_GOTPC32_TLSDESC",
   "BFD_RELOC_X86_64_TLSDESC_CALL",
   "BFD_RELOC_X86_64_TLSDESC",
