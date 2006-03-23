@@ -131,6 +131,8 @@ struct gdbarch_tdep
 
   enum arm_float_model fp_model; /* Floating point calling conventions.  */
 
+  int have_fpa_registers;	/* Does the target report the FPA registers?  */
+
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */
 

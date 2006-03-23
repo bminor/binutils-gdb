@@ -238,7 +238,7 @@ struct gdbarch
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
   int available_features_support;
-  const struct gdb_feature_set * feature_set;
+  struct gdb_feature_set * feature_set;
 };
 
 
@@ -3750,7 +3750,7 @@ set_gdbarch_available_features_support (struct gdbarch *gdbarch,
   gdbarch->available_features_support = available_features_support;
 }
 
-const struct gdb_feature_set *
+struct gdb_feature_set *
 gdbarch_feature_set (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -3761,7 +3761,7 @@ gdbarch_feature_set (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_feature_set (struct gdbarch *gdbarch,
-                         const struct gdb_feature_set * feature_set)
+                         struct gdb_feature_set * feature_set)
 {
   gdbarch->feature_set = feature_set;
 }
@@ -3978,8 +3978,9 @@ current_gdbarch_swap_out_hack (void)
 }
 
 static void
-current_gdbarch_swap_in_hack (struct gdbarch *new_gdbarch)
+current_gdbarch_swap_in_hack (void *argument)
 {
+  struct gdbarch *new_gdbarch = argument;
   struct gdbarch_swap *curr;
 
   gdb_assert (current_gdbarch == NULL);
@@ -4264,13 +4265,18 @@ gdbarch_find_by_info (struct gdbarch_info info)
      architecture of the same family is found at the head of the
      rego->arches list.  */
   struct gdbarch *old_gdbarch = current_gdbarch_swap_out_hack ();
+  struct cleanup *back_to;
+
+  /* Make sure we restore current_gdbarch on our way out if an error
+     occurs.  */
+  back_to = make_cleanup (current_gdbarch_swap_in_hack, old_gdbarch);
 
   /* Find the specified architecture.  */
   struct gdbarch *new_gdbarch = find_arch_by_info (old_gdbarch, info);
 
   /* Restore the existing architecture.  */
   gdb_assert (current_gdbarch == NULL);
-  current_gdbarch_swap_in_hack (old_gdbarch);
+  do_cleanups (back_to);
 
   return new_gdbarch;
 }

@@ -24,6 +24,7 @@
 
 #include "defs.h"
 #include "arch-utils.h"
+#include "exceptions.h"
 #include "gdbtypes.h"
 #include "symfile.h"
 #include "target.h"
@@ -405,8 +406,6 @@ int
 features_same_p (const struct gdb_feature_set *lhs,
 		 const struct gdb_feature_set *rhs)
 {
-  const struct gdb_available_feature *lhs_p, *rhs_p;
-
   /* Two feature sets are the same if and only if they are described
      by the same XML.  */
 
@@ -419,14 +418,23 @@ features_same_p (const struct gdb_feature_set *lhs,
 /* Switch the architecture (gdbarch) to one which supports FEATURES.  */
 
 void
-arch_set_available_features (const struct gdb_feature_set *features)
+arch_set_available_features (struct gdb_feature_set *features)
 {
+  volatile struct gdb_exception e;
   struct gdbarch_info info;
 
-  gdbarch_info_init (&info);
-  info.feature_set = features;
-  if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, "could not update architecture");
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      gdbarch_info_init (&info);
+      info.feature_set = features;
+
+      if (!gdbarch_update_p (info))
+	internal_error (__FILE__, __LINE__, "could not update architecture");
+    }
+
+  if (e.reason == RETURN_ERROR)
+    exception_fprintf (gdb_stderr, e,
+		       _("warning: could not use supplied target description: "));
 }
 
 static struct gdb_feature_set *
@@ -491,20 +499,20 @@ copy_features_to_obstack (struct obstack *obstack,
 /* Set an architecture's feature set.  Store BASE_FEATURES in GDBARCH,
    and on the correct obstack.
 
-   This function will update num_regs.  It is the architecture's
-   responsibility to handle this if it has pseudo registers.
-
-   FIXME: This interface may need to go away; what if we want to add
-   a single additional feature to that provided by the target?  */
+   This function will update GDBARCH's num_regs.  It is the
+   architecture's responsibility to handle this if it has pseudo
+   registers.  Before calling this function, num_regs should be
+   the number of fixed registers handled by the target code; all
+   unassigned registers will be given numbers above that point.  */
 
 void
 record_available_features (struct gdbarch *gdbarch,
-			   const struct gdb_feature_set *base_features)
+			   struct gdb_feature_set *base_features)
 {
   struct gdb_available_feature *feature;
   struct gdb_available_register *reg;
   struct gdb_feature_set *features;
-  int gdb_regnum, protocol_number;
+  int gdb_regnum;
 
   features = copy_features_to_obstack (gdbarch_obstack (gdbarch),
 				       base_features);
@@ -513,21 +521,16 @@ record_available_features (struct gdbarch *gdbarch,
   gdb_regnum = gdbarch_num_regs (gdbarch);
 
   for (feature = features->features; feature; feature = feature->next)
-    {
-      protocol_number = feature->protocol_number;
-      for (reg = feature->registers; reg; reg = reg->next)
-	{
-	  reg->gdb_regnum = gdb_regnum++;
-	  reg->protocol_number = protocol_number++;
-	}
-    }
+    for (reg = feature->registers; reg; reg = reg->next)
+      if (reg->gdb_regnum == -1)
+	reg->gdb_regnum = gdb_regnum++;
 
   set_gdbarch_num_regs (gdbarch, gdb_regnum);
 }
 
 /* Search FEATURES for a register with GDB register number REGNUM.  */
 
-struct gdb_available_register *
+static struct gdb_available_register *
 find_register (const struct gdb_feature_set *features, int regnum)
 {
   struct gdb_available_feature *feature;
@@ -542,6 +545,55 @@ find_register (const struct gdb_feature_set *features, int regnum)
 	return reg;
 
   return NULL;
+}
+
+/* Search FEATURES for a register with target-specified name NAME,
+   and set its GDB register number to REGNUM.  Return 1 if the
+   register was found, and 0 if it was not.  This function should
+   only be used while initializing a gdbarch.  */
+
+int
+available_find_named_register (struct gdb_feature_set *features,
+			       const char *name, int regnum)
+{
+  struct gdb_available_feature *feature;
+  struct gdb_available_register *reg;
+
+  if (features == NULL)
+    return 0;
+
+  for (feature = features->features; feature; feature = feature->next)
+    for (reg = feature->registers; reg; reg = reg->next)
+      if (strcmp (reg->name, name) == 0)
+	{
+	  reg->gdb_regnum = regnum;
+	  return 1;
+	}
+
+  /* FIXME: Should we sanity check the target-supplied data here for
+     duplicate register names?  Right now GDB can't handle duplicated
+     register names at all, but in the future it may.  */
+
+  return 0;
+}
+
+/* Search FEATURES for a feature with the well-known name NAME,
+   which GDB may have special support for.  */
+
+int
+available_find_named_feature (struct gdb_feature_set *features,
+			      const char *name)
+{
+  struct gdb_available_feature *feature;
+
+  if (features == NULL)
+    return 0;
+
+  for (feature = features->features; feature; feature = feature->next)
+    if (strcmp (feature->name, name) == 0)
+      return 1;
+
+  return 0;
 }
 
 /* Return the type of target-described register REGNUM, if the feature set

@@ -1421,8 +1421,8 @@ extern void set_gdbarch_available_features_support (struct gdbarch *gdbarch, int
 
 /* The architecture's currently associated feature set. */
 
-extern const struct gdb_feature_set * gdbarch_feature_set (struct gdbarch *gdbarch);
-extern void set_gdbarch_feature_set (struct gdbarch *gdbarch, const struct gdb_feature_set * feature_set);
+extern struct gdb_feature_set * gdbarch_feature_set (struct gdbarch *gdbarch);
+extern void set_gdbarch_feature_set (struct gdbarch *gdbarch, struct gdb_feature_set * feature_set);
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
@@ -1511,7 +1511,7 @@ struct gdbarch_info
   enum gdb_osabi osabi;
 
   /* Use default: NULL.  */
-  const struct gdb_feature_set *feature_set;
+  struct gdb_feature_set *feature_set;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);

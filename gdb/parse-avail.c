@@ -264,6 +264,7 @@ xml_start_reg (struct xml_feature_parse_data *data,
 		       sizeof (struct gdb_available_register));
   memset (reg, 0, sizeof (struct gdb_available_register));
 
+  reg->gdb_regnum = -1;
   reg->protocol_number = -1;
   reg->bitsize = -1;
   reg->readonly = -1;

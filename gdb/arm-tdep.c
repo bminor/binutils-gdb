@@ -805,13 +805,15 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
 	  imm = (imm >> rot) | (imm << (32 - rot));
 	  sp_offset -= imm;
 	}
-      else if ((insn & 0xffff7fff) == 0xed6d0103)	/* stfe f?, [sp, -#c]! */
+      else if ((insn & 0xffff7fff) == 0xed6d0103	/* stfe f?, [sp, -#c]! */
+	       && gdbarch_tdep (current_gdbarch)->have_fpa_registers)
 	{
 	  sp_offset -= 12;
 	  regno = ARM_F0_REGNUM + ((insn >> 12) & 0x07);
 	  cache->saved_regs[regno].addr = sp_offset;
 	}
-      else if ((insn & 0xffbf0fff) == 0xec2d0200)	/* sfmfd f0, 4, [sp!] */
+      else if ((insn & 0xffbf0fff) == 0xec2d0200	/* sfmfd f0, 4, [sp!] */
+	       && gdbarch_tdep (current_gdbarch)->have_fpa_registers)
 	{
 	  int n_saved_fp_regs;
 	  unsigned int fp_start_reg, fp_bound_reg;
@@ -1352,6 +1354,9 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
 
   if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
     {
+      if (!gdbarch_tdep (gdbarch)->have_fpa_registers)
+	return builtin_type_void;
+
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	return builtin_type_arm_ext_big;
       else
@@ -2458,11 +2463,20 @@ arm_register_name (int i)
 {
   const char *avail_name;
 
-  avail_name = available_register_name (current_gdbarch, i);
-  if (avail_name)
-    return avail_name;
+  /* Allow arm_register_names to override the names for standard
+     registers from the target, for "set arm disassembler".  */
+  if (i <= ARM_PC_REGNUM || i == ARM_PS_REGNUM)
+    return arm_register_names[i];
+  if (i <= ARM_FPS_REGNUM)
+    {
+      if (gdbarch_tdep (current_gdbarch)->have_fpa_registers)
+	return arm_register_names[i];
+      else
+	return "";
+    }
 
-  return arm_register_names[i];
+  /* Check for target-supplied register numbers.  */
+  return available_register_name (current_gdbarch, i);
 }
 
 static void
@@ -2569,6 +2583,51 @@ arm_elf_osabi_sniffer (bfd *abfd)
 
   /* Anything else will be handled by the generic ELF sniffer.  */
   return osabi;
+}
+
+static void
+arm_require_register (struct gdb_feature_set *feature_set,
+		      const char *name, int regnum)
+{
+  if (!available_find_named_register (feature_set, name, regnum))
+    error (_("target does not provide required register \"%s\""), name);
+}
+
+static void
+arm_check_feature_set (struct gdbarch *gdbarch,
+		       struct gdb_feature_set *feature_set)
+{
+  static const char *const arm_standard_names[] =
+    {
+      "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+      "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "fps",
+      "cpsr"
+    };
+  int i;
+
+  if (!available_find_named_feature (feature_set, "org.gnu.gdb.arm.core"))
+    error (_("target does not provide ARM core registers"));
+
+  for (i = 0; i < 16; i++)
+    arm_require_register (feature_set, arm_standard_names[i], i);
+
+  arm_require_register (feature_set, arm_standard_names[ARM_PS_REGNUM],
+			ARM_PS_REGNUM);
+
+  /* If we have an FPA unit, require the FPA registers and assign them
+     fixed numbers.  If we don't have FPA, these register numbers will
+     remain unused, since various ARM subtargets hardcode the
+     numbering.  */
+
+  if (available_find_named_feature (feature_set, "org.gnu.gdb.arm.fpa"))
+    {
+      for (i = ARM_F0_REGNUM; i <= ARM_FPS_REGNUM; i++)
+	arm_require_register (feature_set, arm_standard_names[i], i);
+      gdbarch_tdep (gdbarch)->have_fpa_registers = 1;
+    }
+  else
+    gdbarch_tdep (gdbarch)->have_fpa_registers = 0;
 }
 
 
@@ -2761,7 +2820,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, arm_breakpoint_from_pc);
 
   /* Information about registers, etc.  */
-  set_gdbarch_print_float_info (gdbarch, arm_print_float_info);
   set_gdbarch_deprecated_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
@@ -2771,7 +2829,19 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, arm_register_type);
 
   if (info.feature_set)
-    record_available_features (gdbarch, info.feature_set);
+    {
+      arm_check_feature_set (gdbarch, info.feature_set);
+      record_available_features (gdbarch, info.feature_set);
+    }
+  else
+    /* The legacy layout of the remote "g" packet assumes we have
+       the FPA registers, as do some native targets.  */
+    gdbarch_tdep (gdbarch)->have_fpa_registers = 1;
+
+  /* This "info float" is FPA-specific.  Use the generic version if we
+     do not have FPA.  */
+  if (gdbarch_tdep (gdbarch)->have_fpa_registers)
+    set_gdbarch_print_float_info (gdbarch, arm_print_float_info);
 
   /* Internal <-> external register number maps.  */
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);

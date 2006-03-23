@@ -139,7 +139,7 @@ struct gdb_feature_set *available_features_from_target_object
 /* Standard method to update an architecture based on detected available
    features.  */
 
-void arch_set_available_features (const struct gdb_feature_set *);
+void arch_set_available_features (struct gdb_feature_set *);
 
 /* Compare two sets of available features.  */
 
@@ -149,7 +149,18 @@ int features_same_p (const struct gdb_feature_set *,
 /* Set an architecture's feature set.  */
 
 void record_available_features (struct gdbarch *,
-				const struct gdb_feature_set *);
+				struct gdb_feature_set *);
+
+/* Find a register with the given name, and set its internal register
+   number.  */
+
+int available_find_named_register (struct gdb_feature_set *,
+				   const char *, int);
+
+/* Find a feature with the given name.  */
+
+int available_find_named_feature (struct gdb_feature_set *,
+				  const char *);
 
 /* Find the type of a target-described register.  */
 

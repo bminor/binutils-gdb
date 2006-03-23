@@ -1686,21 +1686,7 @@ po/$(PACKAGE).pot: force
 xml-builtin.c: stamp-xml; @true
 stamp-xml: $(srcdir)/features/feature_to_c.sh Makefile $(XMLFILES)
 	rm -f xml-builtin.tmp
-	for f in dummy $(XMLFILES); do \
-	  if test $$f != dummy; then \
-	    $(SHELL) $(srcdir)/features/feature_to_c.sh "$$f" xml-builtin.tmp; \
-	  fi; \
-	done
-	echo "const char *const xml_builtin[][2] = {" >> xml-builtin.tmp
-	for f in dummy $(XMLFILES); do \
-	  if test $$f != dummy; then \
-	    basename=`echo $$f | sed 's,.*/,,'`; \
-            arrayname=xml_feature_`echo $$basename | sed 's/[-.]/_/g'`; \
-	    echo "  { \"$$basename\", $$arrayname }," >> xml-builtin.tmp; \
-	  fi; \
-	done
-	echo "  { 0, 0 }" >> xml-builtin.tmp
-	echo "};" >> xml-builtin.tmp
+	$(SHELL) $(srcdir)/features/feature_to_c.sh xml-builtin.tmp $(XMLFILES)
 	$(SHELL) $(srcdir)/../move-if-change xml-builtin.tmp xml-builtin.c
 	echo stamp > stamp-xml
 
@@ -1825,7 +1811,7 @@ auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
 	$(inferior_h) $(valprint_h) $(gdb_assert_h) $(auxv_h) \
 	$(elf_common_h)
 available.o: available.c $(defs_h) $(symfile_h) $(target_h) $(available_h) \
-	$(arch_utils_h) $(gdbtypes_h) $(sha1_h) \
+	$(arch_utils_h) $(exceptions_h) $(gdbtypes_h) $(sha1_h) \
 	$(gdb_string) $(gdb_assert) $(gdb_obstack_h) $(gdb_stdint_h)
 avr-tdep.o: avr-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(gdbcmd_h) $(gdbcore_h) \
