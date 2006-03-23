@@ -1,3 +1,7 @@
+2006-03-23  Andreas Schwab  <schwab@suse.de>
+
+	* config/s390/s390.mh (NATDEPFILES): Add linux-fork.o.
+
 2006-03-18  Jim Blandy  <jimb@codesourcery.com>
 
 	* symtab.h (enum address_class): Doc fix.
