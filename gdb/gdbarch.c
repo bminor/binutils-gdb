@@ -153,7 +153,6 @@ struct gdbarch
   gdbarch_pseudo_register_write_ftype *pseudo_register_write;
   int num_regs;
   int num_pseudo_regs;
-  int remote_num_g_packet_regs;
   int sp_regnum;
   int pc_regnum;
   int ps_regnum;
@@ -282,7 +281,6 @@ struct gdbarch startup_gdbarch =
   0,  /* pseudo_register_write */
   0,  /* num_regs */
   0,  /* num_pseudo_regs */
-  0,  /* remote_num_g_packet_regs */
   -1,  /* sp_regnum */
   -1,  /* pc_regnum */
   -1,  /* ps_regnum */
@@ -543,7 +541,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   if (current_gdbarch->num_regs == -1)
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
-  /* Skip verify of remote_num_g_packet_regs, has predicate */
   /* Skip verify of sp_regnum, invalid_p == 0 */
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
@@ -1489,12 +1486,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: regset_from_core_section = <0x%lx>\n",
                       (long) current_gdbarch->regset_from_core_section);
   fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_remote_num_g_packet_regs_p() = %d\n",
-                      gdbarch_remote_num_g_packet_regs_p (current_gdbarch));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: remote_num_g_packet_regs = %s\n",
-                      paddr_d (current_gdbarch->remote_num_g_packet_regs));
-  fprintf_unfiltered (file,
                       "gdbarch_dump: remote_translate_xfer_address = <0x%lx>\n",
                       (long) current_gdbarch->remote_translate_xfer_address);
   fprintf_unfiltered (file,
@@ -2096,29 +2087,6 @@ set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch,
                              int num_pseudo_regs)
 {
   gdbarch->num_pseudo_regs = num_pseudo_regs;
-}
-
-int
-gdbarch_remote_num_g_packet_regs_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->remote_num_g_packet_regs != 0;
-}
-
-int
-gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_remote_num_g_packet_regs called\n");
-  return gdbarch->remote_num_g_packet_regs;
-}
-
-void
-set_gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch,
-                                      int remote_num_g_packet_regs)
-{
-  gdbarch->remote_num_g_packet_regs = remote_num_g_packet_regs;
 }
 
 int

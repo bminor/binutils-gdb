@@ -49,12 +49,10 @@
    - Handle unexpected changes to _num_regs.
    - Call record_available_features from _gdbarch_init.
    - Do not override the default _register_byte
-   - Provide gdbarch_remote_num_g_packet_regs
-*/
 
-/* FIXME: Everywhere we call internal_error from this file leads to a failure
-   to initialize a gdbarch, which leads to later failures when we expect
-   e.g. current_regcache to have been initialized.  */
+  (WARNING: This list is out of date and should be redone before submission.
+  And moved into gdbint.texi.)
+*/
 
 
 
@@ -662,17 +660,20 @@ available_register_name (struct gdbarch *gdbarch, int regnum)
 }
 
 /* Return the target-supplied register of target-described register
-   REGNUM, if the feature set for GDBARCH describes that register.
-   Otherwise return REGNUM (the legacy 1:1 mapping).  */
+   REGNUM, or -1 if the register can not be accessed.  */
 
 int
 available_register_target_regnum (struct gdbarch *gdbarch, int regnum)
 {
   struct gdb_available_register *reg;
 
+  /* If there is no feature set, use the legacy 1:1 mapping.  */
+  if (gdbarch_feature_set (gdbarch) == NULL)
+    return regnum;
+
   reg = find_register (gdbarch_feature_set (gdbarch), regnum);
   if (reg == NULL)
-    return regnum;
+    return -1;
 
   return reg->protocol_number;
 }

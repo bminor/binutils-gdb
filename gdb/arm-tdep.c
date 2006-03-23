@@ -2824,8 +2824,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
-  set_gdbarch_remote_num_g_packet_regs (gdbarch,
-					NUM_GREGS + NUM_FREGS + NUM_SREGS);
   set_gdbarch_register_type (gdbarch, arm_register_type);
 
   if (info.feature_set)

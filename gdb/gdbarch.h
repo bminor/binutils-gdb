@@ -356,16 +356,6 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 #define NUM_PSEUDO_REGS (gdbarch_num_pseudo_regs (current_gdbarch))
 #endif
 
-/* The number of registers fetched or stored using this target's
-   traditional g/G packet.
-   FIXME: Could we do without this by asking the target for a
-   g packet, and just seeing what's there?  We surely could! */
-
-extern int gdbarch_remote_num_g_packet_regs_p (struct gdbarch *gdbarch);
-
-extern int gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch);
-extern void set_gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch, int remote_num_g_packet_regs);
-
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at
    all (-1).
