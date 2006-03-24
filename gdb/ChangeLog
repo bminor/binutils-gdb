@@ -1,3 +1,14 @@
+2006-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-fork.c: Include "gdb_assert.h".
+	(fork_load_infrun_state): Set inferior_ptid and stop_pc here.
+	Update the register cache and selected frame also.
+	(linux_fork_mourn_inferior): Use fork_load_infrun_state.  Return
+	to single fork mode if necessary.
+	(linux_fork_context): Remove bits handled by fork_load_infrun_state.
+	* Makefile.in (linux_fork_h): New.
+	(linux-fork.o, linux-nat.o): Update.
+
 2006-03-23  Andreas Schwab  <schwab@suse.de>
 
 	* config/s390/s390.mh (NATDEPFILES): Add linux-fork.o.

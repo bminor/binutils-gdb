@@ -24,6 +24,7 @@
 #include "regcache.h"
 #include "gdbcmd.h"
 #include "infcall.h"
+#include "gdb_assert.h"
 #include "gdb_string.h"
 #include "linux-fork.h"
 
@@ -238,9 +239,19 @@ fork_load_infrun_state (struct fork_info *fp)
   extern void nullify_last_target_wait_ptid ();
   int i;
 
+  inferior_ptid = fp->ptid;
+
   if (fp->savedregs && fp->clobber_regs)
     regcache_cpy (current_regcache, fp->savedregs);
 
+  registers_changed ();
+  reinit_frame_cache ();
+
+  /* We must select a new frame before making any inferior calls to
+     avoid warnings.  */
+  select_frame (get_current_frame ());
+
+  stop_pc = read_pc ();
   nullify_last_target_wait_ptid ();
 
   /* Now restore the file positions of open file descriptors.  */
@@ -358,12 +369,19 @@ linux_fork_mourn_inferior (void)
      We need to delete that one from the fork_list, and switch
      to the next available fork.  */
   delete_fork (inferior_ptid);
-  if (fork_list)	/* Paranoia, shouldn't happen.  */
-    {
-      inferior_ptid = fork_list[0].ptid;
-      printf_filtered (_("[Switching to %s]\n"), 
-		       target_pid_to_str (inferior_ptid));
-    }
+
+  /* There should still be a fork - if there's only one left,
+     delete_fork won't remove it, because we haven't updated
+     inferior_ptid yet.  */
+  gdb_assert (fork_list);
+
+  fork_load_infrun_state (fork_list);
+  printf_filtered (_("[Switching to %s]\n"),
+		   target_pid_to_str (inferior_ptid));
+
+  /* If there's only one fork, switch back to non-fork mode.  */
+  if (fork_list->next == NULL)
+    delete_fork (inferior_ptid);
 }
 
 /* Fork list <-> user interface.  */
@@ -559,17 +577,10 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
     error (_("No such fork/process"));
 
   if (!oldfp)
-    {
-      oldfp = add_fork (ptid_get_pid (inferior_ptid));
-    }
+    oldfp = add_fork (ptid_get_pid (inferior_ptid));
 
   fork_save_infrun_state (oldfp, 1);
-  inferior_ptid = newfp->ptid;
   fork_load_infrun_state (newfp);
-  registers_changed ();
-  reinit_frame_cache ();
-  stop_pc = read_pc ();
-  select_frame (get_current_frame ());
 
   printf_filtered (_("Switching to %s\n"), 
 		   target_pid_to_str (inferior_ptid));
