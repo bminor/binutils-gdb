@@ -1,6 +1,6 @@
 /* Motorola m68k native support for GNU/Linux.
 
-   Copyright (C) 1996, 1998, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright (C) 1996, 1998, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -633,7 +633,7 @@ _initialize_m68k_linux_nat (void)
   t->to_store_registers = m68k_linux_store_inferior_registers;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 
   deprecated_add_core_fns (&linux_elf_core_fns);
 }

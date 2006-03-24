@@ -1,6 +1,7 @@
 /* Native-dependent code for GNU/Linux x86-64.
 
-   Copyright (C) 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -399,5 +400,5 @@ _initialize_amd64_linux_nat (void)
   t->to_store_registers = amd64_linux_store_inferior_registers;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 }

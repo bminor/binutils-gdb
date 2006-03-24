@@ -27,6 +27,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "linux-fork.h"
+#include "linux-nat.h"
 
 #include <sys/ptrace.h>
 #include <sys/wait.h>
@@ -84,7 +85,7 @@ add_fork (pid_t pid)
     }
 
   fp = XZALLOC (struct fork_info);
-  fp->ptid = pid_to_ptid (pid);
+  fp->ptid = ptid_build (pid, pid, 0);
   fp->num = ++highest_fork_num;
   fp->next = fork_list;
   fork_list = fp;
@@ -240,6 +241,8 @@ fork_load_infrun_state (struct fork_info *fp)
   int i;
 
   inferior_ptid = fp->ptid;
+
+  linux_nat_switch_fork (inferior_ptid);
 
   if (fp->savedregs && fp->clobber_regs)
     regcache_cpy (current_regcache, fp->savedregs);

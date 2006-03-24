@@ -259,5 +259,5 @@ _initialize_mips_linux_nat (void)
   t->to_fetch_registers = mips64_linux_fetch_registers;
   t->to_store_registers = mips64_linux_store_registers;
 
-  add_target (t);
+  linux_nat_add_target (t);
 }

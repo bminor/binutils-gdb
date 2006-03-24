@@ -388,5 +388,5 @@ _initialize_s390_nat (void)
   t->to_remove_watchpoint = s390_remove_watchpoint;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 }

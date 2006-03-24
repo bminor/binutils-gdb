@@ -1,5 +1,5 @@
 /* Native-dependent code for GNU/Linux SPARC.
-   Copyright (C) 2005
+   Copyright (C) 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -39,5 +39,5 @@ _initialize_sparc_linux_nat (void)
   t->to_store_registers = store_inferior_registers;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 }

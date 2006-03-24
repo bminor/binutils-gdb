@@ -1,5 +1,49 @@
 2006-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-nat.c (linux_ops_saved): New.
+	(super_mourn_inferior, kill_inferior, threaded, linux_nat_ops)
+	(child_mourn_inferior, child_wait, linux_nat_create_inferior)
+	(linux_nat_fetch_registers, linux_nat_store_registers)
+	(linux_nat_child_post_startup_inferior, init_linux_nat_ops): Delete.
+	(init_lwp_list): Don't set threaded.
+	(add_lwp): Don't modify threaded.
+	(delete_lwp): Don't mention non-threaded mode.
+	(linux_nat_switch_fork): New.
+	(linux_nat_attach): Update inferior_ptid.
+	(linux_nat_wait): Handle num_lwps == 0 at entry.  Don't check
+	threaded flag.
+	(linux_nat_kill): Handle pending forks and saved forks.
+	(linux_nat_mourn_inferior): Handle saved forks.
+	(linux_nat_pid_to_str): Don't use the LWP form when there is
+	only one thread.
+	(linux_target): Don't set to_wait, to_kill, or to_mourn_inferior.
+	(linux_nat_add_target): New.
+	(_initialize_linux_nat): Don't initialize the linux native target
+	here.
+	* linux-nat.h (linux_nat_add_target, linux_nat_switch_fork): New
+	prototypes.
+	* linux-fork.c: Include "linux-nat.h".
+	(add_fork): Update initial PID.
+	(fork_load_infrun_state): Call linux_nat_switch_fork.
+	* Makefile.in (linux-fork.o): Update.
+
+	* alpha-linux-nat.c (_initialize_alpha_linux_nat): Use
+	linux_nat_add_target instead of add_target.
+	* amd64-linux-nat.c (_initialize_amd64_linux_nat): Likewise.
+	* arm-linux-nat.c (_initialize_arm_linux_nat): Likewise.
+	* hppa-linux-nat.c (_initialize_hppa_linux_nat): Likewise.
+	* ia64-linux-nat.c (_initialize_ia64_linux_nat): Likewise.
+	* i386-linux-nat.c (_initialize_i386_linux_nat): Likewise.
+	* m32r-linux-nat.c (_initialize_m32r_linux_nat): Likewise.
+	* m68klinux-nat.c (_initialize_m68k_linux_nat): Likewise.
+	* mips-linux-nat.c (_initialize_mips_linux_nat): Likewise.
+	* ppc-linux-nat.c (_initialize_ppc_linux_nat): Likewise.
+	* s390-nat.c (_initialize_s390_nat): Likewise.
+	* sparc-linux-nat.c (_initialize_sparc_linux_nat): Likewise.
+	* sparc64-linux-nat.c (_initialize_sparc64_linux_nat): Likewise.
+
+2006-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-fork.c: Include "gdb_assert.h".
 	(fork_load_infrun_state): Set inferior_ptid and stop_pc here.
 	Update the register cache and selected frame also.

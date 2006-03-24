@@ -88,6 +88,7 @@
 /* The single-threaded native GNU/Linux target_ops.  We save a pointer for
    the use of the multi-threaded target.  */
 static struct target_ops *linux_ops;
+static struct target_ops linux_ops_saved;
 
 /* The saved to_xfer_partial method, inherited from inf-ptrace.c.
    Called by our to_xfer_partial.  */
@@ -96,10 +97,6 @@ static LONGEST (*super_xfer_partial) (struct target_ops *,
 				      const char *, gdb_byte *, 
 				      const gdb_byte *,
 				      ULONGEST, LONGEST);
-
-/* The saved to_mourn_inferior method, inherited from inf-ptrace.c.
-   Called by our to_mourn_inferior.  */
-static void (*super_mourn_inferior) (void);
 
 static int debug_linux_nat;
 static void
@@ -600,54 +597,6 @@ child_insert_exec_catchpoint (int pid)
     error (_("Your system does not support exec catchpoints."));
 }
 
-void
-kill_inferior (void)
-{
-  int status;
-  int pid =  PIDGET (inferior_ptid);
-  struct target_waitstatus last;
-  ptid_t last_ptid;
-  int ret;
-
-  if (pid == 0)
-    return;
-
-  /* First cut -- let's crudely do everything inline.  */
-  if (forks_exist_p ())
-    {
-      linux_fork_killall ();
-    }
-  else
-    {
-      /* If we're stopped while forking and we haven't followed yet,
-	 kill the other task.  We need to do this first because the
-	 parent will be sleeping if this is a vfork.  */
-
-      get_last_target_status (&last_ptid, &last);
-
-      if (last.kind == TARGET_WAITKIND_FORKED
-	  || last.kind == TARGET_WAITKIND_VFORKED)
-	{
-	  ptrace (PT_KILL, last.value.related_pid, 0, 0);
-	  wait (&status);
-	}
-
-      /* Kill the current process.  */
-      ptrace (PT_KILL, pid, 0, 0);
-      ret = wait (&status);
-
-      /* We might get a SIGCHLD instead of an exit status.  This is
-	 aggravated by the first kill above - a child has just died.  */
-
-      while (ret == pid && WIFSTOPPED (status))
-	{
-	  ptrace (PT_KILL, pid, 0, 0);
-	  ret = wait (&status);
-	}
-    }
-  target_mourn_inferior ();
-}
-
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
    are processes sharing the same VM space.  A multi-threaded process
    is basically a group of such processes.  However, such a grouping
@@ -686,9 +635,6 @@ static struct lwp_info *lwp_list;
 
 /* Number of LWPs in the list.  */
 static int num_lwps;
-
-/* Non-zero if we're running in "threaded" mode.  */
-static int threaded;
 
 
 #define GET_LWP(ptid)		ptid_get_lwp (ptid)
@@ -700,9 +646,6 @@ static int threaded;
    the process id of the LWP/thread that got it.  */
 ptid_t trap_ptid;
 
-
-/* This module's target-specific operations.  */
-static struct target_ops linux_nat_ops;
 
 /* Since we cannot wait (in linux_nat_wait) for the initial process and
    any cloned processes with a single call to waitpid, we have to use
@@ -768,12 +711,10 @@ init_lwp_list (void)
 
   lwp_list = NULL;
   num_lwps = 0;
-  threaded = 0;
 }
 
-/* Add the LWP specified by PID to the list.  If this causes the
-   number of LWPs to become larger than one, go into "threaded" mode.
-   Return a pointer to the structure describing the new LWP.  */
+/* Add the LWP specified by PID to the list.  Return a pointer to the
+   structure describing the new LWP.  */
 
 static struct lwp_info *
 add_lwp (ptid_t ptid)
@@ -792,8 +733,7 @@ add_lwp (ptid_t ptid)
 
   lp->next = lwp_list;
   lwp_list = lp;
-  if (++num_lwps > 1)
-    threaded = 1;
+  ++num_lwps;
 
   return lp;
 }
@@ -814,8 +754,6 @@ delete_lwp (ptid_t ptid)
   if (!lp)
     return;
 
-  /* We don't go back to "non-threaded" mode if the number of threads
-     becomes less than two.  */
   num_lwps--;
 
   if (lpprev)
@@ -865,6 +803,21 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
     }
 
   return NULL;
+}
+
+/* Update our internal state when changing from one fork (checkpoint,
+   et cetera) to another indicated by NEW_PTID.  We can only switch
+   single-threaded applications, so we only create one new LWP, and
+   the previous list is discarded.  */
+
+void
+linux_nat_switch_fork (ptid_t new_ptid)
+{
+  struct lwp_info *lp;
+
+  init_lwp_list ();
+  lp = add_lwp (new_ptid);
+  lp->stopped = 1;
 }
 
 /* Record a PTID for later deletion.  */
@@ -1046,7 +999,8 @@ linux_nat_attach (char *args, int from_tty)
   linux_ops->to_attach (args, from_tty);
 
   /* Add the initial process as the first LWP to the list.  */
-  lp = add_lwp (BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid)));
+  inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid));
+  lp = add_lwp (inferior_ptid);
 
   /* Make sure the initial process is stopped.  The user-level threads
      layer might want to poke around in the inferior, and that won't
@@ -1848,134 +1802,6 @@ resumed_callback (struct lwp_info *lp, void *data)
   return lp->resumed;
 }
 
-/* Local mourn_inferior -- we need to override mourn_inferior
-   so that we can do something clever if one of several forks
-   has exited.  */
-
-static void
-child_mourn_inferior (void)
-{
-  int status;
-
-  if (! forks_exist_p ())
-    {
-      /* Normal case, no other forks available.  */
-      super_mourn_inferior ();
-      return;
-    }
-  else
-    {
-      /* Multi-fork case.  The current inferior_ptid has exited, but
-	 there are other viable forks to debug.  Delete the exiting
-	 one and context-switch to the first available.  */
-      linux_fork_mourn_inferior ();
-    }
-}
-
-/* We need to override child_wait to support attaching to cloned
-   processes, since a normal wait (as done by the default version)
-   ignores those processes.  */
-
-/* Wait for child PTID to do something.  Return id of the child,
-   minus_one_ptid in case of error; store status into *OURSTATUS.  */
-
-ptid_t
-child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
-{
-  int save_errno;
-  int status;
-  pid_t pid;
-
-  ourstatus->kind = TARGET_WAITKIND_IGNORE;
-
-  do
-    {
-      set_sigint_trap ();	/* Causes SIGINT to be passed on to the
-				   attached process.  */
-      set_sigio_trap ();
-
-      pid = my_waitpid (GET_PID (ptid), &status, 0);
-      if (pid == -1 && errno == ECHILD)
-	/* Try again with __WCLONE to check cloned processes.  */
-	pid = my_waitpid (GET_PID (ptid), &status, __WCLONE);
-
-      if (debug_linux_nat)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "CW:  waitpid %ld received %s\n",
-			      (long) pid, status_to_str (status));
-	}
-
-      save_errno = errno;
-
-      /* Make sure we don't report an event for the exit of the
-         original program, if we've detached from it.  */
-      if (pid != -1 && !WIFSTOPPED (status) && pid != GET_PID (inferior_ptid))
-	{
-	  pid = -1;
-	  save_errno = EINTR;
-	}
-
-      /* Check for stop events reported by a process we didn't already
-	 know about - in this case, anything other than inferior_ptid.
-
-	 If we're expecting to receive stopped processes after fork,
-	 vfork, and clone events, then we'll just add the new one to
-	 our list and go back to waiting for the event to be reported
-	 - the stopped process might be returned from waitpid before
-	 or after the event is.  If we want to handle debugging of
-	 CLONE_PTRACE processes we need to do more here, i.e. switch
-	 to multi-threaded mode.  */
-      if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP
-	  && pid != GET_PID (inferior_ptid))
-	{
-	  linux_record_stopped_pid (pid);
-	  pid = -1;
-	  save_errno = EINTR;
-	}
-
-      /* Handle GNU/Linux's extended waitstatus for trace events.  */
-      if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP
-	  && status >> 16 != 0)
-	{
-	  linux_handle_extended_wait (pid, status, ourstatus);
-
-	  /* If we see a clone event, detach the child, and don't
-	     report the event.  It would be nice to offer some way to
-	     switch into a non-thread-db based threaded mode at this
-	     point.  */
-	  if (ourstatus->kind == TARGET_WAITKIND_SPURIOUS)
-	    {
-	      ptrace (PTRACE_DETACH, ourstatus->value.related_pid, 0, 0);
-	      ourstatus->kind = TARGET_WAITKIND_IGNORE;
-	      ptrace (PTRACE_CONT, pid, 0, 0);
-	      pid = -1;
-	      save_errno = EINTR;
-	    }
-	}
-
-      clear_sigio_trap ();
-      clear_sigint_trap ();
-    }
-  while (pid == -1 && save_errno == EINTR);
-
-  if (pid == -1)
-    {
-      warning (_("Child process unexpectedly missing: %s"),
-	       safe_strerror (errno));
-
-      /* Claim it exited with unknown signal.  */
-      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-      ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
-      return minus_one_ptid;
-    }
-
-  if (ourstatus->kind == TARGET_WAITKIND_IGNORE)
-    store_waitstatus (ourstatus, status);
-
-  return pid_to_ptid (pid);
-}
-
 /* Stop an active thread, verify it still exists, then resume it.  */
 
 static int
@@ -2007,6 +1833,19 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   pid_t pid = PIDGET (ptid);
   sigset_t flush_mask;
 
+  /* The first time we get here after starting a new inferior, we may
+     not have added it to the LWP list yet - this is the earliest
+     moment at which we know its PID.  */
+  if (num_lwps == 0)
+    {
+      gdb_assert (!is_lwp (inferior_ptid));
+
+      inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid),
+				 GET_PID (inferior_ptid));
+      lp = add_lwp (inferior_ptid);
+      lp->resumed = 1;
+    }
+
   sigemptyset (&flush_mask);
 
   /* Make sure SIGCHLD is blocked.  */
@@ -2018,9 +1857,8 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
 retry:
 
-  /* Make sure there is at least one LWP that has been resumed, at
-     least if there are any LWPs at all.  */
-  gdb_assert (num_lwps == 0 || iterate_over_lwps (resumed_callback, NULL));
+  /* Make sure there is at least one LWP that has been resumed.  */
+  gdb_assert (iterate_over_lwps (resumed_callback, NULL));
 
   /* First check if there is a LWP with a wait status pending.  */
   if (pid == -1)
@@ -2159,23 +1997,20 @@ retry:
 	      if (options & __WCLONE)
 		lp->cloned = 1;
 
-	      if (threaded)
+	      gdb_assert (WIFSTOPPED (status)
+			  && WSTOPSIG (status) == SIGSTOP);
+	      lp->signalled = 1;
+
+	      if (!in_thread_list (inferior_ptid))
 		{
-		  gdb_assert (WIFSTOPPED (status)
-			      && WSTOPSIG (status) == SIGSTOP);
-		  lp->signalled = 1;
-
-		  if (!in_thread_list (inferior_ptid))
-		    {
-		      inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid),
-						 GET_PID (inferior_ptid));
-		      add_thread (inferior_ptid);
-		    }
-
-		  add_thread (lp->ptid);
-		  printf_unfiltered (_("[New %s]\n"),
-				     target_pid_to_str (lp->ptid));
+		  inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid),
+					     GET_PID (inferior_ptid));
+		  add_thread (inferior_ptid);
 		}
+
+	      add_thread (lp->ptid);
+	      printf_unfiltered (_("[New %s]\n"),
+				 target_pid_to_str (lp->ptid));
 	    }
 
 	  /* Handle GNU/Linux's extended waitstatus for trace events.  */
@@ -2377,12 +2212,9 @@ retry:
      the comment in cancel_breakpoints_callback to find out why.  */
   iterate_over_lwps (cancel_breakpoints_callback, lp);
 
-  /* If we're not running in "threaded" mode, we'll report the bare
-     process id.  */
-
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
     {
-      trap_ptid = (threaded ? lp->ptid : pid_to_ptid (GET_LWP (lp->ptid)));
+      trap_ptid = lp->ptid;
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: trap_ptid is %s.\n",
@@ -2399,7 +2231,7 @@ retry:
   else
     store_waitstatus (ourstatus, status);
 
-  return (threaded ? lp->ptid : pid_to_ptid (GET_LWP (lp->ptid)));
+  return lp->ptid;
 }
 
 static int
@@ -2464,20 +2296,35 @@ kill_wait_callback (struct lwp_info *lp, void *data)
 static void
 linux_nat_kill (void)
 {
-  /* Kill all LWP's ...  */
-  iterate_over_lwps (kill_callback, NULL);
+  struct target_waitstatus last;
+  ptid_t last_ptid;
+  int status;
 
-  /* ... and wait until we've flushed all events.  */
-  iterate_over_lwps (kill_wait_callback, NULL);
+  /* If we're stopped while forking and we haven't followed yet,
+     kill the other task.  We need to do this first because the
+     parent will be sleeping if this is a vfork.  */
+
+  get_last_target_status (&last_ptid, &last);
+
+  if (last.kind == TARGET_WAITKIND_FORKED
+      || last.kind == TARGET_WAITKIND_VFORKED)
+    {
+      ptrace (PT_KILL, last.value.related_pid, 0, 0);
+      wait (&status);
+    }
+
+  if (forks_exist_p ())
+    linux_fork_killall ();
+  else
+    {
+      /* Kill all LWP's ...  */
+      iterate_over_lwps (kill_callback, NULL);
+
+      /* ... and wait until we've flushed all events.  */
+      iterate_over_lwps (kill_wait_callback, NULL);
+    }
 
   target_mourn_inferior ();
-}
-
-static void
-linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
-			 int from_tty)
-{
-  linux_ops->to_create_inferior (exec_file, allargs, env, from_tty);
 }
 
 static void
@@ -2492,7 +2339,14 @@ linux_nat_mourn_inferior (void)
   sigprocmask (SIG_SETMASK, &normal_mask, NULL);
   sigemptyset (&blocked_mask);
 
-  linux_ops->to_mourn_inferior ();
+  if (! forks_exist_p ())
+    /* Normal case, no other forks available.  */
+    linux_ops->to_mourn_inferior ();
+  else
+    /* Multi-fork case.  The current inferior_ptid has exited, but
+       there are other viable forks to debug.  Delete the exiting
+       one and context-switch to the first available.  */
+    linux_fork_mourn_inferior ();
 }
 
 static LONGEST
@@ -2537,66 +2391,13 @@ linux_nat_pid_to_str (ptid_t ptid)
 {
   static char buf[64];
 
-  if (is_lwp (ptid))
+  if (lwp_list && lwp_list->next && is_lwp (ptid))
     {
       snprintf (buf, sizeof (buf), "LWP %ld", GET_LWP (ptid));
       return buf;
     }
 
   return normal_pid_to_str (ptid);
-}
-
-static void
-linux_nat_fetch_registers (int regnum)
-{
-  /* to_fetch_registers will honor the LWP ID, so we can use it directly.  */
-  linux_ops->to_fetch_registers (regnum);
-}
-
-static void
-linux_nat_store_registers (int regnum)
-{
-  /* to_store_registers will honor the LWP ID, so we can use it directly.  */
-  linux_ops->to_store_registers (regnum);
-}
-
-static void
-linux_nat_child_post_startup_inferior (ptid_t ptid)
-{
-  linux_ops->to_post_startup_inferior (ptid);
-}
-
-static void
-init_linux_nat_ops (void)
-{
-#if 0
-  linux_nat_ops.to_open = linux_nat_open;
-#endif
-  linux_nat_ops.to_shortname = "lwp-layer";
-  linux_nat_ops.to_longname = "lwp-layer";
-  linux_nat_ops.to_doc = "Low level threads support (LWP layer)";
-  linux_nat_ops.to_attach = linux_nat_attach;
-  linux_nat_ops.to_detach = linux_nat_detach;
-  linux_nat_ops.to_resume = linux_nat_resume;
-  linux_nat_ops.to_wait = linux_nat_wait;
-  linux_nat_ops.to_fetch_registers = linux_nat_fetch_registers;
-  linux_nat_ops.to_store_registers = linux_nat_store_registers;
-  linux_nat_ops.to_xfer_partial = linux_nat_xfer_partial;
-  linux_nat_ops.to_kill = linux_nat_kill;
-  linux_nat_ops.to_create_inferior = linux_nat_create_inferior;
-  linux_nat_ops.to_mourn_inferior = linux_nat_mourn_inferior;
-  linux_nat_ops.to_thread_alive = linux_nat_thread_alive;
-  linux_nat_ops.to_pid_to_str = linux_nat_pid_to_str;
-  linux_nat_ops.to_post_startup_inferior
-    = linux_nat_child_post_startup_inferior;
-  linux_nat_ops.to_post_attach = child_post_attach;
-  linux_nat_ops.to_insert_fork_catchpoint = child_insert_fork_catchpoint;
-  linux_nat_ops.to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
-  linux_nat_ops.to_insert_exec_catchpoint = child_insert_exec_catchpoint;
-
-  linux_nat_ops.to_stratum = thread_stratum;
-  linux_nat_ops.to_has_thread_control = tc_schedlock;
-  linux_nat_ops.to_magic = OPS_MAGIC;
 }
 
 static void
@@ -3310,8 +3111,6 @@ linux_target (void)
 #else
   t = inf_ptrace_trad_target (linux_register_u_offset);
 #endif
-  t->to_wait = child_wait;
-  t->to_kill = kill_inferior;
   t->to_insert_fork_catchpoint = child_insert_fork_catchpoint;
   t->to_insert_vfork_catchpoint = child_insert_vfork_catchpoint;
   t->to_insert_exec_catchpoint = child_insert_exec_catchpoint;
@@ -3325,18 +3124,50 @@ linux_target (void)
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = linux_xfer_partial;
 
-  super_mourn_inferior = t->to_mourn_inferior;
-  t->to_mourn_inferior = child_mourn_inferior;
-
-  linux_ops = t;
   return t;
+}
+
+void
+linux_nat_add_target (struct target_ops *t)
+{
+  extern void thread_db_init (struct target_ops *);
+
+  /* Save the provided single-threaded target.  We save this in a separate
+     variable because another target we've inherited from (e.g. inf-ptrace)
+     may have saved a pointer to T; we want to use it for the final
+     process stratum target.  */
+  linux_ops_saved = *t;
+  linux_ops = &linux_ops_saved;
+
+  /* Override some methods for multithreading.  */
+  t->to_attach = linux_nat_attach;
+  t->to_detach = linux_nat_detach;
+  t->to_resume = linux_nat_resume;
+  t->to_wait = linux_nat_wait;
+  t->to_xfer_partial = linux_nat_xfer_partial;
+  t->to_kill = linux_nat_kill;
+  t->to_mourn_inferior = linux_nat_mourn_inferior;
+  t->to_thread_alive = linux_nat_thread_alive;
+  t->to_pid_to_str = linux_nat_pid_to_str;
+  t->to_has_thread_control = tc_schedlock;
+
+  /* We don't change the stratum; this target will sit at
+     process_stratum and thread_db will set at thread_stratum.  This
+     is a little strange, since this is a multi-threaded-capable
+     target, but we want to be on the stack below thread_db, and we
+     also want to be used for single-threaded processes.  */
+
+  add_target (t);
+
+  /* TODO: Eliminate this and have libthread_db use
+     find_target_beneath.  */
+  thread_db_init (t);
 }
 
 void
 _initialize_linux_nat (void)
 {
   struct sigaction action;
-  extern void thread_db_init (struct target_ops *);
 
   add_info ("proc", linux_nat_info_proc_cmd, _("\
 Show /proc process information about any running process.\n\
@@ -3346,10 +3177,6 @@ Specify any of the following keywords for detailed info:\n\
   stat     -- list a bunch of random process info.\n\
   status   -- list a different bunch of random process info.\n\
   all      -- list all available /proc info."));
-
-  init_linux_nat_ops ();
-  add_target (&linux_nat_ops);
-  thread_db_init (&linux_nat_ops);
 
   /* Save the original signal mask.  */
   sigprocmask (SIG_SETMASK, NULL, &normal_mask);

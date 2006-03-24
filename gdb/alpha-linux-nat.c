@@ -1,5 +1,5 @@
 /* Low level Alpha GNU/Linux interface, for GDB when running native.
-   Copyright (C) 2005
+   Copyright (C) 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -28,5 +28,5 @@ void _initialialize_alpha_linux_nat (void);
 void
 _initialize_alpha_linux_nat (void)
 {
-  add_target (linux_target ());
+  linux_nat_add_target (linux_target ());
 }
