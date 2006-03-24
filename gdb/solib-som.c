@@ -520,7 +520,7 @@ link_map_start (void)
   read_memory (addr, buf, 4);
   addr = extract_unsigned_integer (buf, 4);
   if (addr == 0)
-    error (_("Debugging dynamic executables loaded via the hpux8 dld.sl is not supported."));
+    return 0;
 
   read_memory (addr, buf, 4);
   return extract_unsigned_integer (buf, 4);

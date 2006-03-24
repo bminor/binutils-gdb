@@ -1,3 +1,8 @@
+2006-03-24  Randolph Chung  <tausq@debian.org>
+
+	* solib-som.c (link_map_start): Don't error out if there is
+	not yet a link map.
+
 2006-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (linux_ops_saved): New.
