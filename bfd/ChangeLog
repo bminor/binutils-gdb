@@ -1,3 +1,15 @@
+2006-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfd_const_reloc, bfd_oper_reloc, bfin_push_reloc,
+	RELOC_STACK_SIZE, reloc_stack, reloc_stack_tos, is_reloc_stack_empty,
+	reloc_stack_push, reloc_stack_pop, reloc_stack_operate,
+	bfin_areloc_howto_table): Delete.  All
+	uses deleted as well.
+	(bfin_reloc_map): Delete all stack relocs.
+	(bfin_info_to_howto, bfin_bfd_reloc_type_lookup,
+	bfin_reloc_type_lookup): Don't support them.
+	(bfin_relocate_section): Don't try to handle them.
+
 2006-03-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* cpu-m68k.c (bfd_m68k_compatible): Treat ISA A+ and ISA B code as
