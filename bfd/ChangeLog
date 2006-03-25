@@ -1,3 +1,11 @@
+2006-03-25  Richard Sandiford  <richard@codesourcery.com>
+
+	* cpu-m68k.c (bfd_m68k_compatible): Treat ISA A+ and ISA B code as
+	incompatible.  Likewise MAC and EMAC code.
+	* elf32-m68k.c (elf32_m68k_merge_private_bfd_data): Use
+	bfd_get_compatible to set the new bfd architecture.  Rely on it
+	to detect incompatibilities.
+
 2006-03-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_read_table_entries): Remove assertion that

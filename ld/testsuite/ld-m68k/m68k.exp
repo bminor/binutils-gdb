@@ -45,3 +45,11 @@ set m68k_mergeok_tests {
 	{isab.s isab-float.s} {{objdump -p isab-float.d}} "isab-float"}}
 
 run_ld_link_tests $m68k_mergeok_tests
+
+run_dump_test "merge-error-1a"
+run_dump_test "merge-error-1b"
+run_dump_test "merge-error-1c"
+run_dump_test "merge-error-1d"
+run_dump_test "merge-error-1e"
+run_dump_test "merge-ok-1a"
+run_dump_test "merge-ok-1b"

@@ -446,40 +446,24 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
 {
   flagword out_flags;
   flagword in_flags;
-  unsigned in_mach, out_mach;
+  flagword out_isa;
+  flagword in_isa;
+  const bfd_arch_info_type *arch_info;
   
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return FALSE;
 
-  in_mach = bfd_get_mach (ibfd);
-  out_mach = bfd_get_mach (obfd);
-  if (!out_mach || !in_mach)
-    /* One is unknown, copy the input machine.  */
-    out_mach = in_mach;
-  else if (in_mach != out_mach)
-    {
-      if (in_mach <= bfd_mach_m68060 && out_mach <= bfd_mach_m68060)
-	{
-	  /* Merge m68k machine. */
-	  if (in_mach > out_mach)
-	    out_mach = in_mach;
-	}
-      else if (in_mach >= bfd_mach_mcf_isa_a_nodiv
-	       && out_mach >= bfd_mach_mcf_isa_a_nodiv)
-	/* Merge cf machine.  */
-	out_mach = bfd_m68k_features_to_mach
-	  (bfd_m68k_mach_to_features (in_mach)
-	   | bfd_m68k_mach_to_features (out_mach));
-      else
-	/* They are incompatible.  */
-	return FALSE;
-    }
-  bfd_set_arch_mach (obfd, bfd_arch_m68k, out_mach);
-  
-  in_flags  = elf_elfheader (ibfd)->e_flags;
-  out_flags = elf_elfheader (obfd)->e_flags;
+  /* Get the merged machine.  This checks for incompatibility between
+     Coldfire & non-Coldfire flags, incompability between different
+     Coldfire ISAs, and incompability between different MAC types.  */
+  arch_info = bfd_arch_get_compatible (ibfd, obfd, FALSE);
+  if (!arch_info)
+    return FALSE;
 
+  bfd_set_arch_mach (obfd, bfd_arch_m68k, arch_info->mach);
+  
+  in_flags = elf_elfheader (ibfd)->e_flags;
   if (!elf_flags_init (obfd))
     {
       elf_flags_init (obfd) = TRUE;
@@ -487,54 +471,12 @@ elf32_m68k_merge_private_bfd_data (ibfd, obfd)
     }
   else
     {
-      flagword isa_in = in_flags & EF_M68K_ISA_MASK;
-      flagword isa_out = out_flags & EF_M68K_ISA_MASK;
-      
-      
-      /* Copy legacy flags.  */
-      out_flags |= in_flags & (EF_M68K_CPU32 | EF_M68K_M68000 | EF_M68K_CFV4E);
-
-      if ((isa_in | isa_out)
-	  && ((in_flags | out_flags) & (EF_M68K_CPU32 | EF_M68K_M68000)))
-	/* Mixing m68k and cf is not allowed */
-	return FALSE;
-      
-      if (isa_in)
-	{
-	  if (isa_out)
-	    {
-	      if (isa_out == EF_M68K_ISA_A_PLUS
-		  && (isa_in == EF_M68K_ISA_B_NOUSP
-		      || isa_in == EF_M68K_ISA_B))
-		/* Cannot mix A+ and B */
-		return FALSE;
-	      if (isa_in == EF_M68K_ISA_A_PLUS
-		  && (isa_out == EF_M68K_ISA_B_NOUSP
-		      || isa_out == EF_M68K_ISA_B))
-		/* Cannot mix B and A+ */
-		return FALSE;
-	      
-	      if (isa_in > isa_out)
-		out_flags ^= isa_in ^ isa_out;
-
-	      out_flags |= in_flags & EF_M68K_FLOAT;
-	      if (in_flags & EF_M68K_MAC_MASK)
-		{
-		  if (!(out_flags & EF_M68K_MAC_MASK))
-		    out_flags |= in_flags & EF_M68K_MAC_MASK;
-		  else if ((out_flags & EF_M68K_MAC_MASK)
-			   != (in_flags & EF_M68K_MAC_MASK))
-		    /* Cannot mix MACs */
-		    return FALSE;
-		}
-	    }
-	  else
-	    {
-	      /* Copy the coldfire bits.  */
-	      out_flags &= ~EF_M68K_CF_MASK;
-	      out_flags |= in_flags & EF_M68K_CF_MASK;
-	    }
-	}
+      out_flags = elf_elfheader (obfd)->e_flags;
+      in_isa = (in_flags & EF_M68K_ISA_MASK);
+      out_isa = (out_flags & EF_M68K_ISA_MASK);
+      if (in_isa > out_isa)
+	out_flags ^= in_isa ^ out_isa;
+      out_flags |= in_flags ^ in_isa;
     }
   elf_elfheader (obfd)->e_flags = out_flags;
 

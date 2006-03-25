@@ -1,3 +1,12 @@
+2006-03-25  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-m68k/merge-error-1a.s, ld-m68k/merge-error-1b.s,
+	* ld-m68k/merge-error-1a.d, ld-m68k/merge-error-1b.d,
+	* ld-m68k/merge-error-1c.d, ld-m68k/merge-error-1d.d,
+	* ld-m68k/merge-error-1e.d, ld-m68k/merge-ok-1a.d,
+	* ld-m68k/merge-ok-1b.d: New tests.
+	* ld-m68k/m68k.exp: Run them.
+
 2006-03-22  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-mips/vxworks1.dd, ld-mips/vxworks1.ld, ld-mips/vxworks1-lib.dd,
