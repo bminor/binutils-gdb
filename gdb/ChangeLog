@@ -1,3 +1,17 @@
+2006-03-25  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el (gdbmi-send): Improve regexp to repeat commands.
+	Try to deal with continuation line.
+	(gdbmi, gdbmi-prompt1, gud-gdbmi-marker-filter): Update to new
+	variable names.
+	(gdb-break-list-regexp, gdb-stack-list-frames-regexp): 
+	Future proof against new fields being added to MI output.
+	(gdbmi-prompt2, gdb-break-list-handler,gdb-get-source-file)
+	(gdbmi-frame-handler): Update to new variable name
+	gdb-get-buffer-create.
+	(gdbmi-frame-handler): Use hollow-right-triangle for all selected
+	frames which except the innermost (where execution has stopped).
+
 2006-03-24  Randolph Chung  <tausq@debian.org>
 
 	* solib-som.c (link_map_start): Don't error out if there is
@@ -543,7 +557,7 @@
 
 	* mi/gdb-mi.el: Use more functions from gdb-ui.el.
 	(gdb-break-list-regexp): Match "what" field if present.
-	(gdb-stack-list-frames-regexp): Match "from" if present field.
+	(gdb-stack-list-frames-regexp): Match "from" field if present.
 	(gdb-stack-list-frames-handler): Present output like "info
 	breakpoints" so regexps can be shared with gdb-ui
 
