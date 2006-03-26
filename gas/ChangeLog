@@ -1,3 +1,28 @@
+2006-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* config/bfin-defs.h (Expr_Node_Type enum): Add Expr_Node_GOT_Reloc.
+	* config/bfin-lex.l: Recognize GOT17M4 and FUNCDESC_GOT17M4.
+	* config/bfin-parse.y: Include "libbfd.h", "elf/common.h" and
+	"elf/bfin.h".
+	(GOT17M4, FUNCDESC_GOT17M4): New tokens of type <value>.
+	(any_gotrel): New rule.
+	(got): Use it, and create Expr_Node_GOT_Reloc nodes.
+	* config/tc-bfin.c: Include "libbfd.h", "elf/common.h" and
+	"elf/bfin.h".
+	(DEFAULT_FLAGS, bfin_flags, bfin_pic_flag): New.
+	(bfin_pic_ptr): New function.
+	(md_pseudo_table): Add it for ".picptr".
+	(OPTION_FDPIC): New macro.
+	(md_longopts): Add -mfdpic.
+	(md_parse_option): Handle it.
+	(md_begin): Set BFD flags.
+	(md_apply_fix3, bfin_fix_adjustable): Handle new relocs.
+	(bfin_gen_ldstidxi): Adjust to match the trees that the parser gives
+	us for GOT relocs.
+	* Makefile.am (bfin-parse.o): Update dependencies.
+	(DEPTC_bfin_elf): Likewise.
+	* Makefile.in: Regenerate.
+
 2006-03-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* config/tc-m68k.c (m68k_cpus): Change cpu_cf5208 entries to use
