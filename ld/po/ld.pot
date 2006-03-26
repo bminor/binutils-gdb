@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-24 11:45+0930\n"
+"POT-Creation-Date: 2006-03-25 18:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -333,20 +333,20 @@ msgstr ""
 msgid "Errors encountered processing file %s for interworking"
 msgstr ""
 
-#: emultempl/pe.em:1345 ldexp.c:522 ldlang.c:2928 ldlang.c:5785 ldlang.c:5816
-#: ldmain.c:1164
+#: emultempl/pe.em:1345 ldexp.c:522 ldlang.c:2946 ldlang.c:5800 ldlang.c:5831
+#: ldmain.c:1167
 msgid "%P%F: bfd_link_hash_lookup failed: %E\n"
 msgstr ""
 
-#: ldcref.c:153
+#: ldcref.c:154
 msgid "%X%P: bfd_hash_table_init of cref table failed: %E\n"
 msgstr ""
 
-#: ldcref.c:159
+#: ldcref.c:160
 msgid "%X%P: cref_hash_lookup failed: %E\n"
 msgstr ""
 
-#: ldcref.c:225
+#: ldcref.c:226
 #, c-format
 msgid ""
 "\n"
@@ -354,33 +354,33 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ldcref.c:226
+#: ldcref.c:227
 msgid "Symbol"
 msgstr ""
 
-#: ldcref.c:234
+#: ldcref.c:235
 #, c-format
 msgid "File\n"
 msgstr ""
 
-#: ldcref.c:238
+#: ldcref.c:239
 #, c-format
 msgid "No symbols\n"
 msgstr ""
 
-#: ldcref.c:359 ldcref.c:481
+#: ldcref.c:360 ldcref.c:482
 msgid "%B%F: could not read symbols; %E\n"
 msgstr ""
 
-#: ldcref.c:363 ldcref.c:485 ldmain.c:1229 ldmain.c:1233
+#: ldcref.c:364 ldcref.c:486 ldmain.c:1232 ldmain.c:1236
 msgid "%B%F: could not read symbols: %E\n"
 msgstr ""
 
-#: ldcref.c:414
+#: ldcref.c:415
 msgid "%P: symbol `%T' missing from main hash table\n"
 msgstr ""
 
-#: ldcref.c:556 ldcref.c:563 ldmain.c:1276 ldmain.c:1283
+#: ldcref.c:557 ldcref.c:564 ldmain.c:1279 ldmain.c:1286
 msgid "%B%F: could not read relocs: %E\n"
 msgstr ""
 
@@ -388,7 +388,7 @@ msgstr ""
 #. in OUTSECNAME.  This reloc is from a section which is
 #. mapped into a section from which references to OUTSECNAME
 #. are prohibited.  We must report an error.
-#: ldcref.c:590
+#: ldcref.c:591
 msgid "%X%C: prohibited cross reference from %s to `%T' in %s\n"
 msgstr ""
 
@@ -482,16 +482,16 @@ msgstr ""
 msgid "%F%S cannot move location counter backwards (from %V to %V)\n"
 msgstr ""
 
-#: ldexp.c:750
+#: ldexp.c:748
 msgid "%P%F:%s: hash creation failed\n"
 msgstr ""
 
-#: ldexp.c:1002 ldexp.c:1027
+#: ldexp.c:1000 ldexp.c:1025
 #, c-format
 msgid "%F%S nonconstant expression for %s\n"
 msgstr ""
 
-#: ldexp.c:1084
+#: ldexp.c:1082
 #, c-format
 msgid "%F%S non constant expression for %s\n"
 msgstr ""
@@ -552,50 +552,46 @@ msgstr ""
 msgid "%P%F: cannot represent machine `%s'\n"
 msgstr ""
 
-#: ldlang.c:901 ldlang.c:5388
-msgid "%P%F: Failed to create hash table\n"
+#: ldlang.c:940 ldlang.c:982 ldlang.c:2695
+msgid "%P%F: can not create hash table: %E\n"
 msgstr ""
 
-#: ldlang.c:941
-msgid "%P%F: out of memory during initialization"
-msgstr ""
-
-#: ldlang.c:984
+#: ldlang.c:1025
 msgid "%P:%S: warning: redeclaration of memory region '%s'\n"
 msgstr ""
 
-#: ldlang.c:990
+#: ldlang.c:1031
 msgid "%P:%S: warning: memory region %s not declared\n"
 msgstr ""
 
-#: ldlang.c:1107
-msgid "%P%F: bfd_hash_lookup failed creating section `%s'\n"
+#: ldlang.c:1108 ldlang.c:1135
+msgid "%P%F: failed creating section `%s': %E\n"
 msgstr ""
 
-#: ldlang.c:1575
+#: ldlang.c:1601
 msgid ""
 "\n"
 "Memory Configuration\n"
 "\n"
 msgstr ""
 
-#: ldlang.c:1577
+#: ldlang.c:1603
 msgid "Name"
 msgstr ""
 
-#: ldlang.c:1577
+#: ldlang.c:1603
 msgid "Origin"
 msgstr ""
 
-#: ldlang.c:1577
+#: ldlang.c:1603
 msgid "Length"
 msgstr ""
 
-#: ldlang.c:1577
+#: ldlang.c:1603
 msgid "Attributes"
 msgstr ""
 
-#: ldlang.c:1617
+#: ldlang.c:1643
 #, c-format
 msgid ""
 "\n"
@@ -603,217 +599,217 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ldlang.c:1683
+#: ldlang.c:1709
 msgid "%P%F: Illegal use of `%s' section\n"
 msgstr ""
 
-#: ldlang.c:1690
+#: ldlang.c:1716
 msgid "%P%F: output format %s cannot represent section called %s\n"
 msgstr ""
 
-#: ldlang.c:2295
+#: ldlang.c:2313
 msgid "%B: file not recognized: %E\n"
 msgstr ""
 
-#: ldlang.c:2296
+#: ldlang.c:2314
 msgid "%B: matching formats:"
 msgstr ""
 
-#: ldlang.c:2303
+#: ldlang.c:2321
 msgid "%F%B: file not recognized: %E\n"
 msgstr ""
 
-#: ldlang.c:2367
+#: ldlang.c:2385
 msgid "%F%B: member %B in archive is not an object\n"
 msgstr ""
 
-#: ldlang.c:2378 ldlang.c:2392
+#: ldlang.c:2396 ldlang.c:2410
 msgid "%F%B: could not read symbols: %E\n"
 msgstr ""
 
-#: ldlang.c:2647
+#: ldlang.c:2665
 msgid ""
 "%P: warning: could not find any targets that match endianness requirement\n"
 msgstr ""
 
-#: ldlang.c:2661
+#: ldlang.c:2679
 msgid "%P%F: target %s not found\n"
 msgstr ""
 
-#: ldlang.c:2663
+#: ldlang.c:2681
 msgid "%P%F: cannot open output file %s: %E\n"
 msgstr ""
 
-#: ldlang.c:2669
+#: ldlang.c:2687
 msgid "%P%F:%s: can not make object file: %E\n"
 msgstr ""
 
-#: ldlang.c:2673
+#: ldlang.c:2691
 msgid "%P%F:%s: can not set architecture: %E\n"
 msgstr ""
 
-#: ldlang.c:2677
-msgid "%P%F: can not create link hash table: %E\n"
-msgstr ""
-
-#: ldlang.c:2821
+#: ldlang.c:2839
 msgid "%P%F: bfd_hash_lookup failed creating symbol %s\n"
 msgstr ""
 
-#: ldlang.c:2839
+#: ldlang.c:2857
 msgid "%P%F: bfd_hash_allocate failed creating symbol %s\n"
 msgstr ""
 
-#: ldlang.c:3270
+#: ldlang.c:3288
 msgid " load address 0x%V"
 msgstr ""
 
-#: ldlang.c:3510
+#: ldlang.c:3528
 msgid "%W (size before relaxing)\n"
 msgstr ""
 
-#: ldlang.c:3597
+#: ldlang.c:3615
 #, c-format
 msgid "Address of section %s set to "
 msgstr ""
 
-#: ldlang.c:3750
+#: ldlang.c:3768
 #, c-format
 msgid "Fail with %d\n"
 msgstr ""
 
-#: ldlang.c:4021
+#: ldlang.c:4040
 msgid "%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"
 msgstr ""
 
-#: ldlang.c:4046
+#: ldlang.c:4065
 msgid "%X%P: address 0x%v of %B section %s is not within region %s\n"
 msgstr ""
 
-#: ldlang.c:4055
+#: ldlang.c:4074
 msgid "%X%P: region %s is full (%B section %s)\n"
 msgstr ""
 
-#: ldlang.c:4095
+#: ldlang.c:4114
 #, c-format
 msgid ""
 "%F%S: non constant or forward reference address expression for section %s\n"
 msgstr ""
 
-#: ldlang.c:4120
+#: ldlang.c:4139
 msgid "%P%X: Internal error on COFF shared library section %s\n"
 msgstr ""
 
-#: ldlang.c:4176
+#: ldlang.c:4197
 msgid "%P%F: error: no memory region specified for loadable section `%s'\n"
 msgstr ""
 
-#: ldlang.c:4181
+#: ldlang.c:4202
 msgid "%P: warning: no memory region specified for loadable section `%s'\n"
 msgstr ""
 
-#: ldlang.c:4198
+#: ldlang.c:4224
 msgid "%P: warning: changing start of section %s by %lu bytes\n"
 msgstr ""
 
-#: ldlang.c:4369
+#: ldlang.c:4388
 msgid "%P%F: can't relax section: %E\n"
 msgstr ""
 
-#: ldlang.c:4617
+#: ldlang.c:4636
 msgid "%F%P: invalid data statement\n"
 msgstr ""
 
-#: ldlang.c:4650
+#: ldlang.c:4669
 msgid "%F%P: invalid reloc statement\n"
 msgstr ""
 
-#: ldlang.c:4783
+#: ldlang.c:4802
 msgid "%P%F:%s: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:4796 ldlang.c:4815
+#: ldlang.c:4815 ldlang.c:4834
 msgid "%P%F: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:4808
+#: ldlang.c:4827
 msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
 msgstr ""
 
-#: ldlang.c:4820
+#: ldlang.c:4839
 msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
 msgstr ""
 
-#: ldlang.c:4869
+#: ldlang.c:4888
 msgid ""
 "%P%F: Relocatable linking with relocations from format %s (%B) to format %s "
 "(%B) is not supported\n"
 msgstr ""
 
-#: ldlang.c:4879
+#: ldlang.c:4898
 msgid ""
 "%P: warning: %s architecture of input file `%B' is incompatible with %s "
 "output\n"
 msgstr ""
 
-#: ldlang.c:4901
+#: ldlang.c:4920
 msgid "%P%X: failed to merge target specific data of file %B\n"
 msgstr ""
 
-#: ldlang.c:4985
+#: ldlang.c:5004
 msgid ""
 "\n"
 "Allocating common symbols\n"
 msgstr ""
 
-#: ldlang.c:4986
+#: ldlang.c:5005
 msgid ""
 "Common symbol       size              file\n"
 "\n"
 msgstr ""
 
-#: ldlang.c:5112
+#: ldlang.c:5131
 msgid "%P%F: invalid syntax in flags\n"
 msgstr ""
 
-#: ldlang.c:5707
+#: ldlang.c:5406
+msgid "%P%F: Failed to create hash table\n"
+msgstr ""
+
+#: ldlang.c:5722
 msgid "%P%F: multiple STARTUP files\n"
 msgstr ""
 
-#: ldlang.c:5755
+#: ldlang.c:5770
 msgid "%X%P:%S: section has both a load address and a load region\n"
 msgstr ""
 
-#: ldlang.c:5992
+#: ldlang.c:6007
 msgid "%F%P: bfd_record_phdr failed: %E\n"
 msgstr ""
 
-#: ldlang.c:6012
+#: ldlang.c:6027
 msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
 msgstr ""
 
-#: ldlang.c:6403
+#: ldlang.c:6418
 msgid "%X%P: unknown language `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:6545
+#: ldlang.c:6560
 msgid ""
 "%X%P: anonymous version tag cannot be combined with other version tags\n"
 msgstr ""
 
-#: ldlang.c:6554
+#: ldlang.c:6569
 msgid "%X%P: duplicate version tag `%s'\n"
 msgstr ""
 
-#: ldlang.c:6574 ldlang.c:6583 ldlang.c:6600 ldlang.c:6610
+#: ldlang.c:6589 ldlang.c:6598 ldlang.c:6615 ldlang.c:6625
 msgid "%X%P: duplicate expression `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:6650
+#: ldlang.c:6665
 msgid "%X%P: unable to find version dependency `%s'\n"
 msgstr ""
 
-#: ldlang.c:6672
+#: ldlang.c:6687
 msgid "%X%P: unable to read .exports section contents\n"
 msgstr ""
 
@@ -877,7 +873,7 @@ msgstr ""
 msgid "%P: Error writing file `%s'\n"
 msgstr ""
 
-#: ldmain.c:535 pe-dll.c:1447
+#: ldmain.c:535 pe-dll.c:1494
 #, c-format
 msgid "%P: Error closing file `%s'\n"
 msgstr ""
@@ -896,196 +892,196 @@ msgstr ""
 msgid "%P%F: missing argument to -m\n"
 msgstr ""
 
-#: ldmain.c:783 ldmain.c:801 ldmain.c:831
+#: ldmain.c:784 ldmain.c:803 ldmain.c:834
 msgid "%P%F: bfd_hash_table_init failed: %E\n"
 msgstr ""
 
-#: ldmain.c:787 ldmain.c:805
+#: ldmain.c:788 ldmain.c:807
 msgid "%P%F: bfd_hash_lookup failed: %E\n"
 msgstr ""
 
-#: ldmain.c:819
+#: ldmain.c:821
 msgid "%X%P: error: duplicate retain-symbols-file\n"
 msgstr ""
 
-#: ldmain.c:861
+#: ldmain.c:864
 msgid "%P%F: bfd_hash_lookup for insertion failed: %E\n"
 msgstr ""
 
-#: ldmain.c:866
+#: ldmain.c:869
 msgid "%P: `-retain-symbols-file' overrides `-s' and `-S'\n"
 msgstr ""
 
-#: ldmain.c:941
+#: ldmain.c:944
 #, c-format
 msgid ""
 "Archive member included because of file (symbol)\n"
 "\n"
 msgstr ""
 
-#: ldmain.c:1011
+#: ldmain.c:1014
 msgid "%X%C: multiple definition of `%T'\n"
 msgstr ""
 
-#: ldmain.c:1014
+#: ldmain.c:1017
 msgid "%D: first defined here\n"
 msgstr ""
 
-#: ldmain.c:1018
+#: ldmain.c:1021
 msgid "%P: Disabling relaxation: it will not work with multiple definitions\n"
 msgstr ""
 
-#: ldmain.c:1048
+#: ldmain.c:1051
 msgid "%B: warning: definition of `%T' overriding common\n"
 msgstr ""
 
-#: ldmain.c:1051
+#: ldmain.c:1054
 msgid "%B: warning: common is here\n"
 msgstr ""
 
-#: ldmain.c:1058
+#: ldmain.c:1061
 msgid "%B: warning: common of `%T' overridden by definition\n"
 msgstr ""
 
-#: ldmain.c:1061
+#: ldmain.c:1064
 msgid "%B: warning: defined here\n"
 msgstr ""
 
-#: ldmain.c:1068
+#: ldmain.c:1071
 msgid "%B: warning: common of `%T' overridden by larger common\n"
 msgstr ""
 
-#: ldmain.c:1071
+#: ldmain.c:1074
 msgid "%B: warning: larger common is here\n"
 msgstr ""
 
-#: ldmain.c:1075
+#: ldmain.c:1078
 msgid "%B: warning: common of `%T' overriding smaller common\n"
 msgstr ""
 
-#: ldmain.c:1078
+#: ldmain.c:1081
 msgid "%B: warning: smaller common is here\n"
 msgstr ""
 
-#: ldmain.c:1082
+#: ldmain.c:1085
 msgid "%B: warning: multiple common of `%T'\n"
 msgstr ""
 
-#: ldmain.c:1084
+#: ldmain.c:1087
 msgid "%B: warning: previous common is here\n"
 msgstr ""
 
-#: ldmain.c:1104 ldmain.c:1142
+#: ldmain.c:1107 ldmain.c:1145
 msgid "%P: warning: global constructor %s used\n"
 msgstr ""
 
-#: ldmain.c:1152
+#: ldmain.c:1155
 msgid "%P%F: BFD backend error: BFD_RELOC_CTOR unsupported\n"
 msgstr ""
 
 #. We found a reloc for the symbol we are looking for.
-#: ldmain.c:1206 ldmain.c:1208 ldmain.c:1210 ldmain.c:1248 ldmain.c:1296
+#: ldmain.c:1209 ldmain.c:1211 ldmain.c:1213 ldmain.c:1251 ldmain.c:1299
 msgid "warning: "
 msgstr ""
 
-#: ldmain.c:1330
+#: ldmain.c:1334
 msgid "%F%P: bfd_hash_table_init failed: %E\n"
 msgstr ""
 
-#: ldmain.c:1337
+#: ldmain.c:1341
 msgid "%F%P: bfd_hash_lookup failed: %E\n"
 msgstr ""
 
-#: ldmain.c:1358
+#: ldmain.c:1362
 msgid "%X%C: undefined reference to `%T'\n"
 msgstr ""
 
-#: ldmain.c:1361
+#: ldmain.c:1365
 msgid "%C: warning: undefined reference to `%T'\n"
 msgstr ""
 
-#: ldmain.c:1367
+#: ldmain.c:1371
 msgid "%X%D: more undefined references to `%T' follow\n"
 msgstr ""
 
-#: ldmain.c:1370
+#: ldmain.c:1374
 msgid "%D: warning: more undefined references to `%T' follow\n"
 msgstr ""
 
-#: ldmain.c:1381
+#: ldmain.c:1385
 msgid "%X%B: undefined reference to `%T'\n"
 msgstr ""
 
-#: ldmain.c:1384
+#: ldmain.c:1388
 msgid "%B: warning: undefined reference to `%T'\n"
 msgstr ""
 
-#: ldmain.c:1390
+#: ldmain.c:1394
 msgid "%X%B: more undefined references to `%T' follow\n"
 msgstr ""
 
-#: ldmain.c:1393
+#: ldmain.c:1397
 msgid "%B: warning: more undefined references to `%T' follow\n"
 msgstr ""
 
-#: ldmain.c:1432
+#: ldmain.c:1436
 msgid " additional relocation overflows omitted from the output\n"
 msgstr ""
 
-#: ldmain.c:1445
+#: ldmain.c:1449
 msgid " relocation truncated to fit: %s against undefined symbol `%T'"
 msgstr ""
 
-#: ldmain.c:1450
+#: ldmain.c:1454
 msgid ""
 " relocation truncated to fit: %s against symbol `%T' defined in %A section "
 "in %B"
 msgstr ""
 
-#: ldmain.c:1462
+#: ldmain.c:1466
 msgid " relocation truncated to fit: %s against `%T'"
 msgstr ""
 
-#: ldmain.c:1479
+#: ldmain.c:1483
 #, c-format
 msgid "%X%C: dangerous relocation: %s\n"
 msgstr ""
 
-#: ldmain.c:1494
+#: ldmain.c:1498
 msgid "%X%C: reloc refers to symbol `%T' which is not being output\n"
 msgstr ""
 
-#: ldmisc.c:149
+#: ldmisc.c:147
 #, c-format
 msgid "no symbol"
 msgstr ""
 
-#: ldmisc.c:240
+#: ldmisc.c:238
 #, c-format
 msgid "built in linker script:%u"
 msgstr ""
 
-#: ldmisc.c:296 ldmisc.c:300
+#: ldmisc.c:294 ldmisc.c:298
 msgid "%B%F: could not read symbols\n"
 msgstr ""
 
-#: ldmisc.c:342
+#: ldmisc.c:340
 msgid "%B: In function `%T'"
 msgstr ""
 
-#: ldmisc.c:493
+#: ldmisc.c:510
 msgid "%F%P: internal error %s %d\n"
 msgstr ""
 
-#: ldmisc.c:539
+#: ldmisc.c:556
 msgid "%P: internal error: aborting at %s line %d in %s\n"
 msgstr ""
 
-#: ldmisc.c:542
+#: ldmisc.c:559
 msgid "%P: internal error: aborting at %s line %d\n"
 msgstr ""
 
-#: ldmisc.c:544
+#: ldmisc.c:561
 msgid "%P%F: please report this bug\n"
 msgstr ""
 
@@ -1116,20 +1112,20 @@ msgstr ""
 msgid "%P%F: bfd_new_link_order failed\n"
 msgstr ""
 
-#: ldwrite.c:341
+#: ldwrite.c:344
 msgid "%F%P: cannot create split section name for %s\n"
 msgstr ""
 
-#: ldwrite.c:353
+#: ldwrite.c:356
 msgid "%F%P: clone section failed: %E\n"
 msgstr ""
 
-#: ldwrite.c:391
+#: ldwrite.c:394
 #, c-format
 msgid "%8x something else\n"
 msgstr ""
 
-#: ldwrite.c:561
+#: ldwrite.c:564
 msgid "%F%P: final link failed: %E\n"
 msgstr ""
 
@@ -1802,34 +1798,44 @@ msgstr ""
 msgid "%P%F: invalid hex number `%s'\n"
 msgstr ""
 
-#: lexsup.c:1446
+#: lexsup.c:1447
 #, c-format
 msgid "Usage: %s [options] file...\n"
 msgstr ""
 
-#: lexsup.c:1448
+#: lexsup.c:1449
 #, c-format
 msgid "Options:\n"
 msgstr ""
 
+#: lexsup.c:1527
+#, c-format
+msgid "  @FILE"
+msgstr ""
+
+#: lexsup.c:1530
+#, c-format
+msgid "Read options from FILE\n"
+msgstr ""
+
 #. Note: Various tools (such as libtool) depend upon the
 #. format of the listings below - do not change them.
-#: lexsup.c:1531
+#: lexsup.c:1535
 #, c-format
 msgid "%s: supported targets:"
 msgstr ""
 
-#: lexsup.c:1539
+#: lexsup.c:1543
 #, c-format
 msgid "%s: supported emulations: "
 msgstr ""
 
-#: lexsup.c:1544
+#: lexsup.c:1548
 #, c-format
 msgid "%s: emulation specific options:\n"
 msgstr ""
 
-#: lexsup.c:1548
+#: lexsup.c:1552
 #, c-format
 msgid "Report bugs to %s\n"
 msgstr ""
@@ -1843,63 +1849,68 @@ msgstr ""
 msgid "%XUnsupported PEI architecture: %s\n"
 msgstr ""
 
-#: pe-dll.c:652
+#: pe-dll.c:604
+#, c-format
+msgid "%XCannot export %s: invalid export name\n"
+msgstr ""
+
+#: pe-dll.c:657
 #, c-format
 msgid "%XError, duplicate EXPORT with ordinals: %s (%d vs %d)\n"
 msgstr ""
 
-#: pe-dll.c:659
+#: pe-dll.c:664
 #, c-format
 msgid "Warning, duplicate EXPORT: %s\n"
 msgstr ""
 
-#: pe-dll.c:725
+#: pe-dll.c:751
 #, c-format
 msgid "%XCannot export %s: symbol not defined\n"
 msgstr ""
 
-#: pe-dll.c:731
+#: pe-dll.c:757
 #, c-format
 msgid "%XCannot export %s: symbol wrong type (%d vs %d)\n"
 msgstr ""
 
-#: pe-dll.c:738
+#: pe-dll.c:764
 #, c-format
 msgid "%XCannot export %s: symbol not found\n"
 msgstr ""
 
-#: pe-dll.c:850
+#: pe-dll.c:877
 #, c-format
 msgid "%XError, ordinal used twice: %d (%s vs %s)\n"
 msgstr ""
 
-#: pe-dll.c:1172
+#: pe-dll.c:1219
 #, c-format
 msgid "%XError: %d-bit reloc in dll\n"
 msgstr ""
 
-#: pe-dll.c:1300
+#: pe-dll.c:1347
 #, c-format
 msgid "%s: Can't open output def file %s\n"
 msgstr ""
 
-#: pe-dll.c:1443
+#: pe-dll.c:1490
 #, c-format
 msgid "; no contents available\n"
 msgstr ""
 
-#: pe-dll.c:2205
+#: pe-dll.c:2252
 msgid ""
 "%C: variable '%T' can't be auto-imported. Please read the documentation for "
 "ld's --enable-auto-import for details.\n"
 msgstr ""
 
-#: pe-dll.c:2235
+#: pe-dll.c:2282
 #, c-format
 msgid "%XCan't open .lib file: %s\n"
 msgstr ""
 
-#: pe-dll.c:2240
+#: pe-dll.c:2287
 #, c-format
 msgid "Creating library file: %s\n"
 msgstr ""

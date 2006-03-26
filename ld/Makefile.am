@@ -149,6 +149,7 @@ ALL_EMULATIONS = \
 	eelf32_sparc.o \
 	eelf32b4300.o \
 	eelf32bfin.o \
+	eelf32bfinfd.o \
 	eelf32cr16c.o \
 	eelf32bmip.o \
 	eelf32bmipn32.o \
@@ -624,9 +625,13 @@ edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68 "$(tdir_delta68)"
 eelf32bfin.c: $(srcdir)/emulparams/bfin.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/bfin.em \
+  $(srcdir)/emultempl/elf32.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bfin "$(tdir_elf32bfin)" bfin
+eelf32bfinfd.c: $(srcdir)/emulparams/elf32bfinfd.sh $(srcdir)/emulparams/bfin.sh \
+  $(srcdir)/emultempl/elf32.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32bfinfd "$(tdir_elf32bfinfd)" elf32bfinfd
 eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/dlx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_dlx "$(tdir_elf32_dlx)"

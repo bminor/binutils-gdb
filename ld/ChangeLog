@@ -1,3 +1,14 @@
+2006-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* emulparams/elf32bfinfd.sh: New file.
+	* emultempl/bfin.em: Delete.
+	* emulparams/bfin.sh: Lose reference to bfin.em.
+	* Makefile.am (eelf32bfin.c): Likewise.
+	(eelf32bfinfd.c): New.
+	* Makefile.in: Regenerate.
+	* configure.tgt (bfin-*-elf, bfin-*-uclinux): Add elf32bfinfd to
+	targ_extra_emuls.
+
 2006-03-22  Richard Sandiford  <richard@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
