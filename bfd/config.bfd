@@ -313,7 +313,8 @@ case "${targ}" in
 
   bfin-*-*)
     targ_defvec=bfd_elf32_bfin_vec
-    tar_underscore=yes
+    targ_selvecs=bfd_elf32_bfinfdpic_vec
+    targ_underscore=yes
     ;;
 
   c30-*-*aout* | tic30-*-*aout*)

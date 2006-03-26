@@ -10,6 +10,76 @@
 	bfin_reloc_type_lookup): Don't support them.
 	(bfin_relocate_section): Don't try to handle them.
 
+	* config.bfd (bfin-*-*): Add bfd_elf32_bfinfdpic_vec.
+	* configure.in: Likewise.
+	* configure: Regenerate.
+	* elf32-bfin.c: Include "elf/dwarf2.h" and "hashtab.h".
+	(BFIN_RELOC_MAX): Now 0x21.
+	(bfin_howto_table, bfin_reloc_map): Add FD-PIC relocs.
+	(bfd_elf32_bfinfdpic_vec): Declare.
+	(IS_FDPIC): New macro.
+	(struct bfinfdpic_elf_link_hash_table): New struct.
+	(bfinfdpic_hash_table, bfinfdpic_got_section,
+	bfinfdpic_gotrel_section, bfinfdpic_gotfixup_section,
+	bfinfdpic_plt_setion, bfinfdpic_pltrel_section,
+	bfinfdpic_relocs_info, bfinfdpic_got_initial_offset,
+	bfinfdpic_plt_initial_offset): Accessor macros for it.
+	(BFINFDPIC_SYM_LOCAL, BFINFDPIC_FUNCDESC_LOCAL): New macros.
+	(struct bfinfdpic_relocs_info): New struct.
+	(LZPLT_RESOLVER_EXTRA, LZPLT_NORMAL_SIZE, LZPLT_ENTRIES,
+	BFINFDPIC_LZPLT_BLOCK_SIZE, BFINFDPIC_LZPLT_RESOLV_LOC,
+	DEFAULT_STACK_SIZE): New macros.
+	(bfinfdpic_elf_link_hash_table_create, bfinfdpic_relocs_info_hash,
+	bfinfdpic_relocs_info_eq, bfinfdpics_relocs_info_find,
+	bfinfdpic_relocs_info_for_global, bfinfdpic_relocs_info_for_local,
+	bfinfdpic_pic_merge_early_relocs_info, _bfinfdpic_add_dyn_reloc,
+	_bfinfdpic_add_rofixup, _bfinfdpic_osec_to_segment,
+	_bfinfdpic_osec_readonly_p, bfinfdpic_relocate_section,
+	bfinfdpic_check_relocs, bfinfdpic_gc_sweep_hook,
+	_bfinfdpic_link_omit_section_dynsym, _bfin_create_got_section,
+	elf32_bfinfdpic_create_dynamic_sections, _bfinfdpic_get_fd_entry,
+	_bfinfdpic_compute_got_alloc_data, _bfinfdpic_get_got_entry,
+	_bfinfdpic_assign_got_entries, _bfinfdpic_assign_plt_entries,
+	_bfinfdpic_resolve_final_relocs_info,
+	elf32_bfinfdpic_size_dynamic_sections,
+	elf32_bfinfdpic_always_size_sections,
+	elf32_bfinfdpic_modify_segment_map,
+	_bfinfdpic_count_got_plt_entries,
+	elf32_bfinfdpic_finish_dynamic_sections,
+	elf32_bfinfdpic_adjust_dynamic_symbol,
+	elf32_bfinfdpic_finish_dynamic_symbol,
+	elf32_bfinfdpic_elf_use_relative_eh_frame,
+	elf32_bfinfdpic_elf_encode_eh_address,
+	elf32_bfin_object_p, bfin_elf_copy_private_bfd_data,
+	elf32_bfinfdpic_copy_private_bfd_data,
+	(struct _bfinfdpic_dynamic_got_info,
+	struct _bfinfdpic_dynamic_got_plt_info): New structs.
+	(elf32_bfin_print_private_bfd_data): Print PIC flags.
+	(elf32_bfin_merge_private_bfd_data): Extend to support FD-PIC.
+	(TARGET_LITTLE_SYM, TARGET_LITTLE_NAME, elf32_bed,
+	elf_backend_got_header_size, bfd_elf32_bfd_link_hash_table_create,
+	elf_backend_always_size_sectinos, elf_backend_modify_segment_map,
+	bfd_elf32_bfd_copy_private_bfd_data,
+	elf_backend_create_dynamic_sections, elf_backend_adjust_dynamic_symbol,
+	elf_backend_size_dynamic_sections, elf_backend_finish_dynamic_symbol,
+	elf_backend_finish_dynamic_sections, elf_backend_relocate_section,
+	elf_backend_can_make_relative_eh_frame, elf_backend_check_relocs,
+	elf_backend_can_make_ldsa_relative_eh_frame, elf_backend_may_use_rel_p,
+	elf_backend_may_use_rela_p, elf_backend_default_use_rela_p,
+	elf_backend_omit_section_dynsym): Redefine these macros and include
+	"elf32-target.h" again to create the elf32-bfinfdpic target.
+	* reloc.c (BFD_RELOC_BFIN_GOT17M4, BFD_RELOC_BFIN_GOTHI,
+	BFD_RELOC_BFIN_GOTLO, BFD_RELOC_BFIN_FUNCDESC,
+	BFD_RELOC_BFIN_FUNCDESC_GOT17M4, BFD_RELOC_BFIN_FUNCDESC_GOTHI,
+	BFD_RELOC_BFIN_FUNCDESC_GOTLO, BFD_RELOC_BFIN_FUNCDESC_VALUE,
+	BFD_RELOC_BFIN_FUNCDESC_GOTOFF17M4, BFD_RELOC_BFIN_FUNCDESC_GOTOFFHI,
+	BFD_RELOC_BFIN_FUNCDESC_GOTOFFLO, BFD_RELOC_BFIN_GOTOFFHI,
+	BFD_RELOC_BFIN_GOTOFFLO): New.
+	* targets.c (bfd_elf32_bfinfdpic_vec): New bfd_target.
+	(_bfd_target_vector): Add it.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2006-03-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* cpu-m68k.c (bfd_m68k_compatible): Treat ISA A+ and ISA B code as
