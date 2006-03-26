@@ -1,3 +1,7 @@
+2006-03-26  Randolph Chung  <tausq@debian.org>
+
+	* config/pa/hppa64.mt: Use HPUX version of the tm file.
+
 2006-03-25  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el (gdbmi-send): Improve regexp to repeat commands.
