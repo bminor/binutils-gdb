@@ -695,6 +695,13 @@ pex_win32_exec_child (struct pex_obj *obj ATTRIBUTE_UNUSED, int flags,
       *errmsg = "CreateProcess";
     }
 
+  /* Close the standard output and standard error handles in the
+     parent.  */ 
+  if (out != STDOUT_FILENO)
+    obj->funcs->close (obj, out);
+  if (errdes != STDERR_FILENO)
+    obj->funcs->close (obj, errdes);
+
   return pid;
 }
 
