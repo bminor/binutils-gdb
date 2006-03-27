@@ -26,6 +26,7 @@
 #include "arch-utils.h"
 #include "exceptions.h"
 #include "gdbtypes.h"
+#include "reggroups.h"
 #include "symfile.h"
 #include "target.h"
 #include "sha1.h"
@@ -676,4 +677,45 @@ available_register_target_regnum (struct gdbarch *gdbarch, int regnum)
     return -1;
 
   return reg->protocol_number;
+}
+
+/* Check whether REGNUM is a member of REGGROUP.  */
+
+/* TODO: This function only supports "info registers", "info float",
+   and "info vector".  Registers with group="general" go in general;
+   group="float" and group="vector" are similar.  Other specified
+   values of group go into all-registers only.  Registers with no
+   group specified go to the default function and are handled by
+   type.  When we have a hierarchy of features, it may make more
+   sense to use that to show registers.  */
+
+int
+available_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			       struct reggroup *reggroup)
+{
+  struct gdb_available_register *reg;
+
+  reg = find_register (gdbarch_feature_set (gdbarch), regnum);
+  if (reg != NULL && reg->group != NULL)
+    {
+      int general_p, float_p, vector_p;
+
+      if (strcmp (reg->group, "general") == 0)
+	general_p = 1;
+      else if (strcmp (reg->group, "float") == 0)
+	float_p = 1;
+      else if (strcmp (reg->group, "vector") == 0)
+	vector_p = 1;
+
+      if (reggroup == float_reggroup)
+	return float_p;
+
+      if (reggroup == vector_reggroup)
+	return vector_p;
+
+      if (reggroup == general_reggroup)
+	return general_p;
+    }
+
+  return default_register_reggroup_p (gdbarch, regnum, reggroup);
 }

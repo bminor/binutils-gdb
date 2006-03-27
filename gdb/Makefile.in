@@ -1812,6 +1812,7 @@ auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
 	$(elf_common_h)
 available.o: available.c $(defs_h) $(symfile_h) $(target_h) $(available_h) \
 	$(arch_utils_h) $(exceptions_h) $(gdbtypes_h) $(sha1_h) \
+	$(reggroups_h) \
 	$(gdb_string) $(gdb_assert) $(gdb_obstack_h) $(gdb_stdint_h)
 avr-tdep.o: avr-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(gdbcmd_h) $(gdbcore_h) \

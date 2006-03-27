@@ -26,6 +26,7 @@
 #define AVAILABLE_H 1
 
 struct obstack;
+struct reggroup;
 
 /* A GDB target interface can use these types to communicate to the
    architecture support (gdbarch) what new or optional features
@@ -173,6 +174,11 @@ const char *available_register_name (struct gdbarch *, int);
 /* Find the target-supplied register number of a target-described register.  */
 
 int available_register_target_regnum (struct gdbarch *, int);
+
+/* Check the register group of a target-described register.  */
+
+int available_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+				   struct reggroup *reggroup);
 
 /* Find a compiled-in XML file, e.g. the standard DTD.  */
 

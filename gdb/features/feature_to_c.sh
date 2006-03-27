@@ -8,6 +8,11 @@ if test -z "$output" || test -z "$1"; then
   exit 1
 fi
 
+if test -e "$output"; then
+  echo "Output file \"$output\" already exists; refusing to overwrite."
+  exit 1
+fi
+
 for input in dummy "$@"; do
   if test $input != dummy; then
     arrayname=xml_feature_`echo $input | sed 's,.*/,,; s/[-.]/_/g'`
