@@ -1,3 +1,7 @@
+2006-03-27  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* sh-tdep.c (sh_gdbarch_init): Add missing architectures.
+
 2006-03-27  Nick Roberts  <nickrob@snap.net.nz>
 
 	* varobj.c (c_name_of_child, c_value_of_child): Allow non-zero
