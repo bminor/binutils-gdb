@@ -1,3 +1,8 @@
+2006-03-27  Nick Roberts  <nickrob@snap.net.nz>
+
+	* varobj.c (c_name_of_child, c_value_of_child): Allow non-zero
+	offsets for languages like Fortran.
+
 2006-03-26  Randolph Chung  <tausq@debian.org>
 
 	* config/pa/hppa64.mt: Use HPUX version of the tm file.
