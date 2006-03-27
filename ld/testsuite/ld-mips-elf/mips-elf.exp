@@ -199,6 +199,17 @@ set mips_tls_tests {
      "-EB -march=mips1 -32 -KPIC" {tls-hidden2a.s tls-hidden2b.s}
      {{objdump -drj.text tls-hidden2.d} {objdump -sj.got tls-hidden2-got.d}}
      "tls-hidden2.so"}
+    {"Shared library with TLS and hidden symbols (3)"
+     "-shared -melf32btsmip -T tls-hidden3.ld"
+     "-EB -march=mips2 -32 -KPIC" {tls-hidden3a.s tls-hidden3b.s}
+     {{objdump -dj.text tls-hidden3.d} {objdump -sj.got tls-hidden3.got}
+      {readelf --relocs tls-hidden3.r}}
+     "tls-hidden3.so"}
+    {"Shared library with TLS and hidden symbols (4)"
+     "-shared -melf32btsmip -T tls-hidden3.ld"
+     "-EB -march=mips2 -32 -KPIC" {tls-hidden4a.s tls-hidden4b.s}
+     {{objdump -sj.got tls-hidden4.got} {readelf --relocs tls-hidden4.r}}
+     "tls-hidden4.so"}
 }
 
 if {[istarget mips*-*-linux*]} {

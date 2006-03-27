@@ -44,8 +44,39 @@
 
 #include "hashtab.h"
 
-/* This structure is used to hold .got entries while estimating got
-   sizes.  */
+/* This structure is used to hold information about one GOT entry.
+   There are three types of entry:
+
+      (1) absolute addresses
+	    (abfd == NULL)
+      (2) SYMBOL + OFFSET addresses, where SYMBOL is local to an input bfd
+	    (abfd != NULL, symndx >= 0)
+      (3) global and forced-local symbols
+	    (abfd != NULL, symndx == -1)
+
+   Type (3) entries are treated differently for different types of GOT.
+   In the "master" GOT -- i.e.  the one that describes every GOT
+   reference needed in the link -- the mips_got_entry is keyed on both
+   the symbol and the input bfd that references it.  If it turns out
+   that we need multiple GOTs, we can then use this information to
+   create separate GOTs for each input bfd.
+
+   However, we want each of these separate GOTs to have at most one
+   entry for a given symbol, so their type (3) entries are keyed only
+   on the symbol.  The input bfd given by the "abfd" field is somewhat
+   arbitrary in this case.
+
+   This means that when there are multiple GOTs, each GOT has a unique
+   mips_got_entry for every symbol within it.  We can therefore use the
+   mips_got_entry fields (tls_type and gotidx) to track the symbol's
+   GOT index.
+
+   However, if it turns out that we need only a single GOT, we continue
+   to use the master GOT to describe it.  There may therefore be several
+   mips_got_entries for the same symbol, each with a different input bfd.
+   We want to make sure that each symbol gets a unique GOT entry, so when
+   there's a single GOT, we use the symbol's hash entry, not the
+   mips_got_entry fields, to track a symbol's GOT index.  */
 struct mips_got_entry
 {
   /* The input bfd in which the symbol is defined.  */
@@ -2371,8 +2402,16 @@ mips_elf_local_got_index (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
     return MINUS_ONE;
 
   if (TLS_RELOC_P (r_type))
-    return mips_tls_got_index (abfd, entry->gotidx, &entry->tls_type, r_type,
-			       info, h, value);
+    {
+      if (entry->symndx == -1 && g->next == NULL)
+	/* A type (3) entry in the single-GOT case.  We use the symbol's
+	   hash table entry to track the index.  */
+	return mips_tls_got_index (abfd, h->tls_got_offset, &h->tls_type,
+				   r_type, info, h, value);
+      else
+	return mips_tls_got_index (abfd, entry->gotidx, &entry->tls_type,
+				   r_type, info, h, value);
+    }
   else
     return entry->gotidx;
 }
@@ -3118,54 +3157,53 @@ mips_elf_merge_gots (void **bfd2got_, void *p)
   return 1;
 }
 
-/* Set the TLS GOT index for the GOT entry in ENTRYP.  */
+/* Set the TLS GOT index for the GOT entry in ENTRYP.  ENTRYP's NEXT field
+   is null iff there is just a single GOT.  */
 
 static int
 mips_elf_initialize_tls_index (void **entryp, void *p)
 {
   struct mips_got_entry *entry = (struct mips_got_entry *)*entryp;
   struct mips_got_info *g = p;
+  bfd_vma next_index;
 
   /* We're only interested in TLS symbols.  */
   if (entry->tls_type == 0)
     return 1;
 
-  if (entry->symndx == -1)
+  next_index = MIPS_ELF_GOT_SIZE (entry->abfd) * (long) g->tls_assigned_gotno;
+
+  if (entry->symndx == -1 && g->next == NULL)
     {
-      /* There may be multiple mips_got_entry structs for a global variable
-	 if there is just one GOT.  Just do this once.  */
-      if (g->next == NULL)
+      /* A type (3) got entry in the single-GOT case.  We use the symbol's
+	 hash table entry to track its index.  */
+      if (entry->d.h->tls_type & GOT_TLS_OFFSET_DONE)
+	return 1;
+      entry->d.h->tls_type |= GOT_TLS_OFFSET_DONE;
+      entry->d.h->tls_got_offset = next_index;
+    }
+  else
+    {
+      if (entry->tls_type & GOT_TLS_LDM)
 	{
-	  if (entry->d.h->tls_type & GOT_TLS_OFFSET_DONE)
+	  /* There are separate mips_got_entry objects for each input bfd
+	     that requires an LDM entry.  Make sure that all LDM entries in
+	     a GOT resolve to the same index.  */
+	  if (g->tls_ldm_offset != MINUS_TWO && g->tls_ldm_offset != MINUS_ONE)
 	    {
-	      entry->gotidx = entry->d.h->tls_got_offset;
+	      entry->gotidx = g->tls_ldm_offset;
 	      return 1;
 	    }
-	  entry->d.h->tls_type |= GOT_TLS_OFFSET_DONE;
+	  g->tls_ldm_offset = next_index;
 	}
-    }
-  else if (entry->tls_type & GOT_TLS_LDM)
-    {
-      /* Similarly, there may be multiple structs for the LDM entry.  */
-      if (g->tls_ldm_offset != MINUS_TWO && g->tls_ldm_offset != MINUS_ONE)
-	{
-	  entry->gotidx = g->tls_ldm_offset;
-	  return 1;
-	}
+      entry->gotidx = next_index;
     }
 
-  /* Initialize the GOT offset.  */
-  entry->gotidx = MIPS_ELF_GOT_SIZE (entry->abfd) * (long) g->tls_assigned_gotno;
-  if (g->next == NULL && entry->symndx == -1)
-    entry->d.h->tls_got_offset = entry->gotidx;
-
+  /* Account for the entries we've just allocated.  */
   if (entry->tls_type & (GOT_TLS_GD | GOT_TLS_LDM))
     g->tls_assigned_gotno += 2;
   if (entry->tls_type & GOT_TLS_IE)
     g->tls_assigned_gotno += 1;
-
-  if (entry->tls_type & GOT_TLS_LDM)
-    g->tls_ldm_offset = entry->gotidx;
 
   return 1;
 }
@@ -3492,16 +3530,19 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
       g->local_gotno += assign + pages;
       assign = g->local_gotno + g->global_gotno + g->tls_gotno;
 
+      /* Take g out of the direct list, and push it onto the reversed
+	 list that gg points to.  g->next is guaranteed to be nonnull after
+	 this operation, as required by mips_elf_initialize_tls_index. */
+      gn = g->next;
+      g->next = gg->next;
+      gg->next = g;
+
       /* Set up any TLS entries.  We always place the TLS entries after
 	 all non-TLS entries.  */
       g->tls_assigned_gotno = g->local_gotno + g->global_gotno;
       htab_traverse (g->got_entries, mips_elf_initialize_tls_index, g);
 
-      /* Take g out of the direct list, and push it onto the reversed
-	 list that gg points to.  */
-      gn = g->next;
-      g->next = gg->next;
-      gg->next = g;
+      /* Move onto the next GOT.  It will be a secondary GOT if nonull.  */
       g = gn;
 
       /* Mark global symbols in every non-primary GOT as ineligible for

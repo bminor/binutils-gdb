@@ -1,3 +1,14 @@
+2006-03-27  Richard Sandiford  <richard@codesourcery.com>
+
+	* elfxx-mips.c (mips_got_entry): Add more commentary.
+	(mips_elf_local_got_index): Use the hash table entry to record
+	the GOT index of forced-local symbols.
+	(mips_elf_initialize_tls_index): Rearrange code.  Store the index
+	in either the hash table entry or the mips_got_entry, not both.
+	Add more commentary.
+	(mips_elf_multi_got): Make sure the g->next is nonnull when calling
+	mips_elf_initialize_tls_index.
+
 2006-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* elf32-bfin.c (bfd_const_reloc, bfd_oper_reloc, bfin_push_reloc,

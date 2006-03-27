@@ -1,3 +1,12 @@
+2006-03-27  Richard Sandiford  <richard@codesourcery.com>
+
+	* ld-mips-elf/tls-hidden3a.s, ld-mips-elf/tls-hidden3b.s,
+	* ld-mips-elf/tls-hidden3.d, ld-mips-elf/tls-hidden3.got,
+	* ld-mips-elf/tls-hidden3.ld, ld-mips-elf/tls-hidden3.r,
+	* ld-mips-elf/tls-hidden4a.s, ld-mips-elf/tls-hidden4b.s,
+	* ld-mips-elf/tls-hidden4.got, ld-mips-elf/tls-hidden4.r: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2006-03-25  Richard Sandiford  <richard@codesourcery.com>
 
 	* ld-m68k/merge-error-1a.s, ld-m68k/merge-error-1b.s,
