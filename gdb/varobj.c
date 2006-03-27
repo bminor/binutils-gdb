@@ -817,9 +817,7 @@ varobj_set_value (struct varobj *var, char *expression)
       int i;
 
       input_radix = 10;		/* ALWAYS reset to decimal temporarily */
-      if (!gdb_parse_exp_1 (&s, 0, 0, &exp))
-	/* We cannot proceed without a well-formed expression. */
-	return 0;
+      exp = parse_exp_1 (&s, 0, 0);
       if (!gdb_evaluate_expression (exp, &value))
 	{
 	  /* We cannot proceed without a valid expression. */
@@ -1833,7 +1831,8 @@ c_name_of_child (struct varobj *parent, int index)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
-      name = xstrprintf ("%d", index);
+      name = xstrprintf ("%d", index
+			 + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)));
       break;
 
     case TYPE_CODE_STRUCT:
@@ -1931,6 +1930,7 @@ c_value_of_child (struct varobj *parent, int index)
   struct value *indval;
   struct type *type, *target;
   char *name;
+  int real_index;
 
   type = get_type (parent);
   target = get_target_type (type);
@@ -1943,13 +1943,14 @@ c_value_of_child (struct varobj *parent, int index)
       switch (TYPE_CODE (type))
 	{
 	case TYPE_CODE_ARRAY:
+	  real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
 #if 0
 	  /* This breaks if the array lives in a (vector) register. */
-	  value = value_slice (temp, index, 1);
+	  value = value_slice (temp, real_index, 1);
 	  temp = value_coerce_array (value);
 	  gdb_value_ind (temp, &value);
 #else
-	  indval = value_from_longest (builtin_type_int, (LONGEST) index);
+	  indval = value_from_longest (builtin_type_int, (LONGEST) real_index);
 	  gdb_value_subscript (temp, indval, &value);
 #endif
 	  break;
