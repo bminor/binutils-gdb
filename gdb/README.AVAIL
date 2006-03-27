@@ -73,7 +73,29 @@ For instance, with "xmllint" (shipped as part of the GNOME libxml2 package):
 Post validation is usually appropriate when using XInclude; the DTD describes
 the document after XInclude processing.
 
+GDB fetches CHECKSUMS initially.  Files with a listed checksum may be
+fetched from a cache instead of from the target (currently only RAM caching
+is implemented).  Next, GDB fetches "target.xml", and then any files
+included using XInclude.  Files not listed in CHECKSUMS will not be fetched
+from the cache - they may be e.g. generated on the fly.  The target
+description is fetched on connect, and again after application restart in
+case it has changed (TODO: is this wasteful, should it be fetched only
+once?  This only matters for target extended-remote, so it isn't a big
+deal right now.)
 
+By default, feature names must be unique within the document (XML "ID"
+constraint), but not globally unique.  However, GDB must recognize some
+features explicitly to enable additional support for them.  It uses the
+feature name to detect their presence.  These features should have
+unambiguous, globally unique names.  If the feature is described in the GDB
+manual, use the name listed there.  If not, and you are adding code to a
+local version of GDB to recognize the feature by name, please use a name
+which includes your organization.  For instance, "org.gnu.gdb.arm.core", or
+"com.codesourcery.foovendor.coproc". This method prevents conflicts with
+other names chosen by other groups.
+
+The target description should specify every register provided by the
+target, including the GDB standard ones.
 
 
 TODO items and unsettled (or unasked) questions
@@ -84,18 +106,20 @@ manual.
 
 The "ro" and "save-restore" tags may not express enough information about
 how to treat system registers.  Richard Earnshaw suggested a more detailed
-categorization; I need to consider it.
+categorization; I need to consider it; I think it's a good idea at first
+glance.
 
-Reading and writing registers using the 'p' and 'P' packets is very inefficient;
-a target mechanism and remote protocol packets for multiple register batching
-would probably help a lot.
+Reading and writing registers using the 'p' and 'P' packets is very
+inefficient; a target mechanism and remote protocol packets for multiple
+register batching would probably help a lot.  Note, the branch now does a
+simple subset of this assuming a reasonable 'g' packet.
 
 For ARM VFP, there are two views of some registers: s0 / s1 are single precision
 registers overlayed in storage with d0, a double precision register.  Many
 other targets do the same thing.  Should we express this to GDB, or just
 allow it to read them both from the target (somewhat wasteful)?  GDB already
 assumes that modifying one register may modify another unpredictably, so
-writing is OK.
+writing is OK - the only problem is a waste of bandwidth.
 
 The DTD allows for description fields, including multi-lingual ones, but
 there is no GDB support for descriptions.  It would be good to present
@@ -103,40 +127,26 @@ them to the user.
 
 Should we convey the information read from the target (after e.g. XInclude
 processing) to MI front ends, or are the changes to the register cache
-sufficient?  For instance, Eclipse would probably be happy to display
-most of this data (especially descriptions).
+sufficient?  For instance, Eclipse would probably be happy to display most
+of this data (especially descriptions).  I think there should be one MI
+command to fetch the DTD used, and another to fetch the description used. 
+XInclude processing has been moved into a separate phase to facilitate this.
+Because other external entities are not supported, these two are guaranteed
+to convey the entire description.
 
 The current DTD and GDB support does not allow for nested features.  This
-is probably useful.
+is probably useful.  I think this will be a must-have in the long term.
 
 GDB needs additional error checking for its assumptions of unique names.
 For instance, there may be multiple registers with the same name in
 GDB's feature database, but they had better not be instantiated in
 the same feature set.
 
-Feature sets should probably have names, so that they can be referenced
-uniquely and cached, to minimize data the target has to supply.
-
-We need a naming scheme for features (and maybe feature sets).  Some
-considerations:
-  - Names should generally be globally unique, so that we can efficiently
-    cache features and even ship their descriptions with GDB.  Having the
-    feature on the target not match GDB's cached value is likely to
-    lead to mayhem.  When caching is implemented, perhaps we should
-    also have a maint command to check that the cache is correct, for
-    targets which can supply their features in detail (it's possible
-    that the target can't, and instead relies on GDB loading them
-    from files).
-  - It should be hierarchical, so that vendors may create their
-    own names without risk of interfering with future GDB development
-    or other vendors.
-  - There should probably be a namespace which will not be cached,
-    for convenience during development, or for features which
-    dynamically reconfigure on the target.
-
 Should known features be compiled in to GDB, or loaded from the filesystem?
-The most essential features should probably be compiled in, so that the
-GDB binary is useful standalone.
+The most essential features should probably be compiled in, so that the GDB
+binary is useful standalone.  The DTD is already compiled in, but there's no
+support for a target to supply default features by XML instead of hand
+coding.
 
 GDB should support reading features and feature sets from disk instead of
 from the target.
@@ -145,26 +155,49 @@ GDB should support caching features read from the target in a user-specified
 directory.
 
 Should GDB warn about unrecognized features which require additional GDB
-support, or silently ignore them?
+support, or silently ignore them?  Currently there is no way to detect
+this.  It's not a big deal.
 
-If the name field of features is hierarchical, and the description is free-form,
-there should probably be a "short description" field - a user label without
-the uniqueness constraint.
+Since the name field of features may be hierarchical, and the description is
+free-form (more like "help text"), there should probably be a "short
+description" field - a user label without the uniqueness constraint.
 
 Another suggested type of feature is a memory map - which areas of memory
 the debugger may read from / write to.
 
-How should features interact with the standard architecture support?  Basic
-options:
-  - Target features must not specify the standard registers.
-  - Target features may specify the standard registers, and GDB will handle
-    any duplication.
-  - Target features must specify the standard registers.  GDB can provide
-    a standard feature for the architecture, which must be referenced
-    (or a set of such standard features, at least one of which must be
-    referenced).
-I'm somewhat leaning towards #3, but it requires buy-in from target maintainers
-who wish to support this feature.  It's nice in that it moves a bit of code
-from the tdep files out into a description file; but less nice in that
-it might lose flexibility that we need; the target might have to run-time
-generate the XML.  Are there any examples where that would be necessary?
+Targets could use XML to supply their default feature set.  It's nice in that
+it moves a bit of code from the tdep files out into a description file; but
+less nice in that it might lose flexibility that we need; the target might
+have to run-time generate the XML.  Currently there are no plans to require
+this, but it may turn out to be a simplifying assumption later.
+
+Register group handling right now is somewhat simplistic; only
+group="general", group="float", group="vector", and no explicit group
+setting (use type to categorize) are supported.  We could extend this, or
+we could limit it to those and provide an alternate hierarchy based on
+the containing features.
+
+Eventually supporting multiple instances of a feature is desirable. This
+requires some instance-name on the feature reference, and using that to
+prefix the registers for that feature.  Maybe treat the registers as a large
+struct.  This would be sort of useful anyway, to avoid clobbering
+the convenience variable namespace.  Maybe only "core" registers should
+be in the default namespace?  Maybe key that off the description, empty
+or missing instance-name -> default namespace?
+
+In the mean time, GDB should check for duplicated register names, and
+warn that it can not support them.
+
+Should hardware MMIO registers be treated as registers, or as memory, or
+using new read/write packets that can guarantee appropriate I/O width?
+If as registers, we need to be careful with ones where reading them
+triggers an action (e.g. resetting some state).
+
+A nice-to-have item would be a basic architecture identifier:
+  (gdb) target remote board:2345
+  warning: This GDB does not support the "arm" architecture.
+
+Should the current extended-remote be changed from a client-requested
+property ("!" packet) to a target-announced property?  Some stubs
+should always be used in extended mode, some don't support it.  Some
+get by with either, but usually, not very well.
