@@ -1,3 +1,12 @@
+2006-03-28  Jim Blandy  <jimb@codesourcery.com>
+
+	* prologue-value.c, prologue-value.h: New files.
+	* Makefile.in (prologue_value_h): New variable.
+	(HFILES_NO_SRCDIR): List prologue-value.h.
+	(SFILES): List prologue-value.c.
+	(COMMON_OBS): List prologue-value.o.
+	(prologue-value.o): New rule.
+
 2006-03-27  Michael Snyder  <msnyder@redhat.com>
 
 	* xstormy16-tdep.c (xstormy16_return_value, xstormy16_push_dummy_call,

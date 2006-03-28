@@ -1,3 +1,7 @@
+2006-03-28  Jim Blandy  <jimb@codesourcery.com>
+
+	* gdbint.texinfo (Prologue Analysis): New section.
+
 2006-03-07  Jim Blandy  <jimb@red-bean.com>
 
 	* gdb.texinfo (Connecting): Document 'target remote pipe'.

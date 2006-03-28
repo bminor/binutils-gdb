@@ -542,6 +542,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
+	prologue-value.c \
 	regcache.c reggroups.c remote.c remote-fileio.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
@@ -757,6 +758,7 @@ ppcnbsd_tdep_h = ppcnbsd-tdep.h
 ppcobsd_tdep_h = ppcobsd-tdep.h
 ppc_tdep_h = ppc-tdep.h
 proc_utils_h = proc-utils.h
+prologue_value_h = prologue-value.h
 regcache_h = regcache.h
 reggroups_h = reggroups.h
 regset_h = regset.h
@@ -867,6 +869,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h \
 	xcoffsolib.h \
 	macrotab.h macroexp.h macroscope.h \
+	prologue-value.h \
 	ada-lang.h c-lang.h f-lang.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
@@ -2437,6 +2440,8 @@ procfs.o: procfs.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 proc-service.o: proc-service.c $(defs_h) $(gdb_proc_service_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gregset_h)
 proc-why.o: proc-why.c $(defs_h) $(proc_utils_h)
+prologue-value.o: prologue-value.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
+	$(prologue_value_h) $(regcache_h)
 p-typeprint.o: p-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(language_h) $(p_lang_h) $(typeprint_h) $(gdb_string_h)
