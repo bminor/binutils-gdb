@@ -1,3 +1,11 @@
+2006-03-27  Michael Snyder  <msnyder@redhat.com>
+
+	* xstormy16-tdep.c (xstormy16_return_value, xstormy16_push_dummy_call,
+	xstormy16_pointer_to_address, xstormy16_address_to_pointer, 
+	xstormy16_frame_prev_register): Change void* to gdb_byte*.
+	(xstormy16_push_dummy_call): Add block-local char* val, 
+	to avoid type conflict with outer scope variable.
+
 2006-03-27  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* sh-tdep.c (sh_gdbarch_init): Add missing architectures.
