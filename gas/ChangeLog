@@ -1,3 +1,30 @@
+2006-03-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (m68000_control_regs, m68010_control_regs,
+	m68020_control_regs, m68040_control_regs, m68060_control_regs,
+	mcf_control_regs, mcf5208_control_regs, mcf5213_control_regs,
+	mcf5329_control_regs, mcf5249_control_regs, mcf528x_control_regs,
+	mcfv4e_control_regs, m68010_control_regs): Rename and reorder to ...
+	(m68000_ctrl, m68010_ctrl, m68020_ctrl, m68040_ctrl, m68060_ctrl,
+	mcf_ctrl, mcf5208_ctrl, mcf5213_ctrl, mcf5235_ctrl, mcf5249_ctrl, 
+	mcf5216_ctrl, mcf5250_ctrl, mcf5271_ctrl, mcf5272_ctrl,
+	mcf5282_ctrl, mcfv4e_ctrl): ... these.
+	(mcf5275_ctrl, mcf5329_ctrl, mcf5373_ctrl): New.
+	(struct m68k_cpu): Change chip field to control_regs.
+	(current_chip): Remove.
+	(control_regs): New.
+	(m68k_archs, m68k_extensions): Adjust.
+	(m68k_cpus): Reorder to be in cpu number order.  Adjust.
+	(CPU_ALLOW_MC, CPU_ALLOW_NEGATION): Remove.
+	(find_cf_chip): Reimplement for new organization of cpu table.
+	(select_control_regs): Remove.
+	(mri_chip): Adjust.
+	(struct save_opts): Save control regs, not chip.
+	(s_save, s_restore): Adjust.
+	(m68k_lookup_cpu): Give deprecated warning when necessary.
+	(m68k_init_arch): Adjust.
+	(md_show_usage): Adjust for new cpu table organization.
+
 2006-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* config/bfin-defs.h (Expr_Node_Type enum): Add Expr_Node_GOT_Reloc.

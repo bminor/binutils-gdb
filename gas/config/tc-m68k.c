@@ -152,58 +152,86 @@ struct m68k_incant
 #define getone(x)	((((x)->m_opcode)>>16)&0xffff)
 #define gettwo(x)	(((x)->m_opcode)&0xffff)
 
-static const enum m68k_register m68000_control_regs[] = { 0 };
-static const enum m68k_register m68010_control_regs[] = {
+static const enum m68k_register m68000_ctrl[] = { 0 };
+static const enum m68k_register m68010_ctrl[] = {
   SFC, DFC, USP, VBR,
   0
 };
-static const enum m68k_register m68020_control_regs[] = {
+static const enum m68k_register m68020_ctrl[] = {
   SFC, DFC, USP, VBR, CACR, CAAR, MSP, ISP,
   0
 };
-static const enum m68k_register m68040_control_regs[] = {
+static const enum m68k_register m68040_ctrl[] = {
   SFC, DFC, CACR, TC, ITT0, ITT1, DTT0, DTT1,
   USP, VBR, MSP, ISP, MMUSR, URP, SRP,
   0
 };
-static const enum m68k_register m68060_control_regs[] = {
+static const enum m68k_register m68060_ctrl[] = {
   SFC, DFC, CACR, TC, ITT0, ITT1, DTT0, DTT1, BUSCR,
   USP, VBR, URP, SRP, PCR,
   0
 };
-static const enum m68k_register mcf_control_regs[] = {
+static const enum m68k_register mcf_ctrl[] = {
   CACR, TC, ACR0, ACR1, ACR2, ACR3, VBR, ROMBAR,
   RAMBAR0, RAMBAR1, MBAR,
   0
 };
-static const enum m68k_register mcf5208_control_regs[] = {
+static const enum m68k_register mcf5208_ctrl[] = {
   CACR, ACR0, ACR1, VBR, RAMBAR1,
   0
 };
-static const enum m68k_register mcf5213_control_regs[] = {
+static const enum m68k_register mcf5213_ctrl[] = {
   VBR, RAMBAR, FLASHBAR,
   0
 };
-static const enum m68k_register mcf5329_control_regs[] = {
-  CACR, ACR0, ACR1, VBR, RAMBAR,
+static const enum m68k_register mcf5216_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR,
   0
 };
-static const enum m68k_register mcf5249_control_regs[] = {
-  CACR, ACR0, ACR1, VBR, RAMBAR0, RAMBAR1, MBAR, MBAR2,
+static const enum m68k_register mcf5235_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR,
   0
 };
-static const enum m68k_register mcf528x_control_regs[] = {
-  CACR, ACR0, ACR1, VBR, FLASHBAR, RAMBAR,
+static const enum m68k_register mcf5249_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR1, MBAR, MBAR2,
   0
 };
-static const enum m68k_register mcfv4e_control_regs[] = {
+static const enum m68k_register mcf5250_ctrl[] = {
+  VBR,
+  0
+};
+static const enum m68k_register mcf5271_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR,
+  0
+};
+static const enum m68k_register mcf5272_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, ROMBAR, RAMBAR, MBAR,
+  0
+};
+static const enum m68k_register mcf5275_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR,
+  0
+};
+static const enum m68k_register mcf5282_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR,
+  0
+};
+static const enum m68k_register mcf5329_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR,
+  0
+};
+static const enum m68k_register mcf5373_ctrl[] = {
+  VBR, CACR, ACR0, ACR1, RAMBAR,
+  0
+};
+static const enum m68k_register mcfv4e_ctrl[] = {
   CACR, TC, ITT0, ITT1, DTT0, DTT1, BUSCR, VBR, PC, ROMBAR,
   ROMBAR1, RAMBAR0, RAMBAR1, MPCR, EDRAMBAR, SECMBAR, MBAR, MBAR0, MBAR1,
   PCR1U0, PCR1L0, PCR1U1, PCR1L1, PCR2U0, PCR2L0, PCR2U1, PCR2L1,
   PCR3U0, PCR3L0, PCR3U1, PCR3L1,
   0
 };
-#define cpu32_control_regs m68010_control_regs
+#define cpu32_ctrl m68010_ctrl
 
 static const enum m68k_register *control_regs;
 
@@ -366,7 +394,7 @@ static void s_m68k_arch (int);
 struct m68k_cpu
 {
   unsigned long arch;	/* Architecture features.  */
-  unsigned long chip;	/* Specific chip */
+  const enum m68k_register *control_regs;	/* Control regs on chip */
   const char *name;	/* Name */
   int alias;       	/* Alias for a cannonical name.  If 1, then
 			   succeeds canonical name, if -1 then
@@ -379,7 +407,6 @@ struct m68k_cpu
    disabled.  */
 static int current_architecture;
 static int not_current_architecture;
-static int current_chip;
 static const struct m68k_cpu *selected_arch;
 static const struct m68k_cpu *selected_cpu;
 static int initialized;
@@ -387,18 +414,18 @@ static int initialized;
 /* Architecture models.  */
 static const struct m68k_cpu m68k_archs[] =
 {
-  {m68000,					cpu_m68000, "68000", 0},
-  {m68010,					cpu_m68010, "68010", 0},
-  {m68020|m68881|m68851,			cpu_m68020, "68020", 0},
-  {m68030|m68881|m68851,			cpu_m68030, "68030", 0},
-  {m68040,					cpu_m68040, "68040", 0},
-  {m68060,					cpu_m68060, "68060", 0},
-  {cpu32|m68881,				cpu_cpu32, "cpu32", 0},
-  {mcfisa_a|mcfhwdiv,				0, "isaa", 0},
-  {mcfisa_a|mcfhwdiv|mcfisa_aa|mcfusp,		0, "isaaplus", 0},
-  {mcfisa_a|mcfhwdiv|mcfisa_b|mcfusp,		0, "isab", 0},
-  {mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-   cpu_cf547x, "cfv4e", 0},
+  {m68000,					m68000_ctrl, "68000", 0},
+  {m68010,					m68010_ctrl, "68010", 0},
+  {m68020|m68881|m68851,			m68020_ctrl, "68020", 0},
+  {m68030|m68881|m68851,			m68020_ctrl, "68030", 0},
+  {m68040,					m68040_ctrl, "68040", 0},
+  {m68060,					m68060_ctrl, "68060", 0},
+  {cpu32|m68881,				cpu32_ctrl, "cpu32", 0},
+  {mcfisa_a|mcfhwdiv,				NULL, "isaa", 0},
+  {mcfisa_a|mcfhwdiv|mcfisa_aa|mcfusp,		NULL, "isaaplus", 0},
+  {mcfisa_a|mcfhwdiv|mcfisa_b|mcfusp,		NULL, "isab", 0},
+  {mcfisa_a|mcfhwdiv|mcfisa_b|mcfmac|mcfusp,	mcf_ctrl, "cfv4", 0},
+  {mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "cfv4e", 0},
   {0,0,NULL, 0}
 };
 
@@ -406,115 +433,127 @@ static const struct m68k_cpu m68k_archs[] =
    for either.  */
 static const struct m68k_cpu m68k_extensions[] =
 {
-  {m68851,					0, "68851", -1},
-  {m68881,					0, "68881", -1},
-  {m68881,					0, "68882", -1},
+  {m68851,					NULL, "68851", -1},
+  {m68881,					NULL, "68881", -1},
+  {m68881,					NULL, "68882", -1},
   
-  {cfloat|m68881,				0, "float", 0},
+  {cfloat|m68881,				NULL, "float", 0},
   
-  {mcfhwdiv,					0, "div", 1},
-  {mcfusp,					0, "usp", 1},
-  {mcfmac,					0, "mac", 1},
-  {mcfemac,					0, "emac", 1},
+  {mcfhwdiv,					NULL, "div", 1},
+  {mcfusp,					NULL, "usp", 1},
+  {mcfmac,					NULL, "mac", 1},
+  {mcfemac,					NULL, "emac", 1},
    
-  {0,0,NULL, 0}
+  {0,NULL,NULL, 0}
 };
 
 /* Processor list */
 static const struct m68k_cpu m68k_cpus[] =
 {
-  { m68000,					cpu_m68000, "68000", 0},
-  { m68010,					cpu_m68010, "68010", 0},
-  { m68020|m68881|m68851,			cpu_m68020, "68020", 0},
-  { m68030|m68881|m68851,			cpu_m68030, "68030", 0},
-  { m68040,					cpu_m68040, "68040", 0},
-  { m68060,					cpu_m68060, "68060", 0},
-  { cpu32|m68881,				cpu_cpu32, "cpu32",  0},
-  { mcfisa_a,					cpu_cf5200, "5200", 0},
-  { mcfisa_a|mcfhwdiv|mcfmac,			cpu_cf5206e, "5206e", 0},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf5208, "5208", 0},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	cpu_cf5213, "5213", 0},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,cpu_cf521x, "521x", 0},
-  { mcfisa_a|mcfhwdiv|mcfemac,		cpu_cf5249, "5249", 0},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,cpu_cf528x, "528x", 0},
-  { mcfisa_a|mcfhwdiv|mcfmac,			cpu_cf5307, "5307", 0},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf5329, "5329", 0},
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfmac,	cpu_cf5407, "5407",0},
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf547x, "547x", 0},
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-      						cpu_cf548x, "548x", 0},
-  /* Aliases (effectively, so far as gas is concerned) for the above
-     cpus.  */
-  { m68020|m68881|m68851,			cpu_m68020, "68k", 1},
-  { m68000,					cpu_m68000, "68008", 1},
-  { m68000,					cpu_m68000, "68302", 1},
-  { m68000,					cpu_m68000, "68306", 1},
-  { m68000,					cpu_m68000, "68307", 1},
-  { m68000,					cpu_m68000, "68322", 1},
-  { m68000,					cpu_m68000, "68356", 1},
-  { m68000,					cpu_m68000, "68ec000", 1},
-  { m68000,					cpu_m68000, "68hc000", 1},
-  { m68000,					cpu_m68000, "68hc001", 1},
-  { m68020|m68881|m68851,			cpu_m68020, "68ec020", 1},
-  { m68030|m68881|m68851,			cpu_m68030, "68ec030", 1},
-  { m68040,					cpu_m68040, "68ec040", 1},
-  { m68060,					cpu_m68060, "68ec060", 1},
-  { cpu32|m68881,				cpu_cpu32, "68330", 1},
-  { cpu32|m68881,				cpu_cpu32, "68331", 1},
-  { cpu32|m68881,				cpu_cpu32, "68332", 1},
-  { cpu32|m68881,				cpu_cpu32, "68333", 1},
-  { cpu32|m68881,				cpu_cpu32, "68334", 1},
-  { cpu32|m68881,				cpu_cpu32, "68336", 1},
-  { cpu32|m68881,				cpu_cpu32, "68340", 1},
-  { cpu32|m68881,				cpu_cpu32, "68341", 1},
-  { cpu32|m68881,				cpu_cpu32, "68349", 1},
-  { cpu32|m68881,				cpu_cpu32, "68360", 1},
-  { mcfisa_a,					cpu_cf5200, "5202", 1},
-  { mcfisa_a,					cpu_cf5200, "5204", 1},
-  { mcfisa_a,					cpu_cf5200, "5206", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf5208, "5207", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	cpu_cf5213, "5211", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	cpu_cf5213, "5212", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf521x, "5214", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf521x, "5216", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf5329, "5327", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf5329, "5328", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf528x, "5280", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf528x, "5281", 1},
-  { mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	cpu_cf528x, "5282", 1},
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfmac,	cpu_cf5407,	"cfv4", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf547x, "cfv4e", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf547x, "5470", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf547x, "5471", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf547x, "5472", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf547x, "5473", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf547x, "5474", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf547x, "5475", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf548x, "5480", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf548x, "5481", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf548x, "5482", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf548x, "5483", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf548x, "5484", 1 },
-  { mcfisa_a|mcfhwdiv|mcfisa_b|mcfemac|mcfusp|cfloat,
-    cpu_cf548x, "5485", 1 },
-  {0,0,NULL, 0}
-  };
+  {m68000,					m68000_ctrl, "68000", 0},
+  {m68000,					m68000_ctrl, "68ec000", 1},
+  {m68000,					m68000_ctrl, "68hc000", 1},
+  {m68000,					m68000_ctrl, "68hc001", 1},
+  {m68000,					m68000_ctrl, "68008", 1},
+  {m68000,					m68000_ctrl, "68302", 1},
+  {m68000,					m68000_ctrl, "68306", 1},
+  {m68000,					m68000_ctrl, "68307", 1},
+  {m68000,					m68000_ctrl, "68322", 1},
+  {m68000,					m68000_ctrl, "68356", 1},
+  {m68010,					m68010_ctrl, "68010", 0},
+  {m68020|m68881|m68851,			m68020_ctrl, "68020", 0},
+  {m68020|m68881|m68851,			m68020_ctrl, "68k", 1},
+  {m68020|m68881|m68851,			m68020_ctrl, "68ec020", 1},
+  {m68030|m68881|m68851,			m68020_ctrl, "68030", 0},
+  {m68030|m68881|m68851,			m68020_ctrl, "68ec030", 1},
+  {m68040,					m68040_ctrl, "68040", 0},
+  {m68040,					m68040_ctrl, "68ec040", 1},
+  {m68060,					m68060_ctrl, "68060", 0},
+  {m68060,					m68060_ctrl, "68ec060", 1},
+  
+  {cpu32|m68881,				cpu32_ctrl, "cpu32",  0},
+  {cpu32|m68881,				cpu32_ctrl, "68330", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68331", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68332", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68333", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68334", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68336", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68340", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68341", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68349", 1},
+  {cpu32|m68881,				cpu32_ctrl, "68360", 1},
+  
+  {mcfisa_a,					mcf_ctrl, "5200", 0},
+  {mcfisa_a,					mcf_ctrl, "5202", 1},
+  {mcfisa_a,					mcf_ctrl, "5204", 1},
+  {mcfisa_a,					mcf_ctrl, "5206", 1},
+  
+  {mcfisa_a|mcfhwdiv|mcfmac,			mcf_ctrl, "5206e", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5208_ctrl, "5207", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5208_ctrl, "5208", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5213_ctrl, "5211", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5213_ctrl, "5212", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfmac|mcfusp,	mcf5213_ctrl, "5213", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5216_ctrl, "5214", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5216_ctrl, "5216", 0},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5216_ctrl, "521x", 2},
 
-#define CPU_ALLOW_MC 1
-#define CPU_ALLOW_NEGATION 4
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5232", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5233", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5234", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "5235", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5235_ctrl, "523x", 0},
+  
+  {mcfisa_a|mcfhwdiv|mcfemac,			mcf5249_ctrl, "5249", 0},
+  {mcfisa_a|mcfhwdiv|mcfemac,			mcf5250_ctrl, "5250", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5271_ctrl, "5270", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5271_ctrl, "5271", 0},
+  
+  {mcfisa_a|mcfhwdiv|mcfmac,			mcf5272_ctrl, "5272", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5275_ctrl, "5274", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5275_ctrl, "5275", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "5280", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "5281", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "5282", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5282_ctrl, "528x", 0},
+  
+  {mcfisa_a|mcfhwdiv|mcfmac,			mcf_ctrl, "5307", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5329_ctrl, "5327", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5329_ctrl, "5328", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5329_ctrl, "5329", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5329_ctrl, "532x", 0},
+  
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5373_ctrl, "5372", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5373_ctrl, "5373", -1},
+  {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5373_ctrl, "537x", 0},
+  
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfmac,		mcf_ctrl, "5407",0},
+  
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5470", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5471", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5472", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5473", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5474", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5475", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "547x", 0},
+  
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5480", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5481", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5482", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5483", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5484", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "5485", -1},
+  {mcfisa_a|mcfisa_b|mcfhwdiv|mcfemac|mcfusp|cfloat, mcfv4e_ctrl, "548x", 0},
+  
+  {0,NULL,NULL, 0}
+  };
 
 static const struct m68k_cpu *m68k_lookup_cpu
 (const char *, const struct m68k_cpu *, int, int *);
@@ -771,62 +810,57 @@ static char *
 find_cf_chip (int architecture)
 {
   static char buf[1024];
-  int i, j, n_chips, n_alias;
   char *cp;
-
+  const struct m68k_cpu *cpu;
+  int any = 0;
+  
   strcpy (buf, " (");
   cp = buf + strlen (buf);
 
-  for (i = 0, n_chips = 0, n_alias = 0; m68k_cpus[i].name; ++i)
-    if (m68k_cpus[i].arch & architecture)
+  for (cpu = m68k_cpus; cpu->name; cpu++)
+    if (!cpu->alias && (cpu->arch & architecture))
       {
-	n_chips++;
-	if (m68k_cpus[i].alias)
-	  n_alias++;
-      }
-
-  if (n_chips == 0)
-    as_fatal (_("no matching ColdFire architectures found"));
-
-  if (n_alias > 1)
-    n_chips -= n_alias;
-      
-  for (i = 0, j = 0; m68k_cpus[i].name && j < n_chips; ++i)
-    if (m68k_cpus[i].arch & architecture)
-      {
-	if (j)
+	const struct m68k_cpu *alias;
+	if (any)
 	  {
-	    if ((j == n_chips - 1 && !(n_alias > 1)) || ! n_alias)
-	      {
-		if (n_chips == 2)
-		  {
-		    strncpy (cp, _(" or "), (sizeof (buf) - (cp - buf)));
-		    cp += strlen (cp);
-		  }
-		else
-		  {
-		    strncpy (cp, _(", or "), (sizeof (buf) - (cp - buf)));
-		    cp += strlen (cp);
-		  }
-	      }
-	    else
-	      {
-		strncpy (cp, ", ", (sizeof (buf) - (cp - buf)));
-		cp += strlen (cp);
-	      }
+	    strcpy (cp, ", ");
+	    cp += 2;
 	  }
-	strncpy (cp, m68k_cpus[i].name, (sizeof (buf) - (cp - buf)));
+	any = 0;
+	strcpy (cp, cpu->name);
 	cp += strlen (cp);
-	j++;
+	strcpy (cp, " [");
+	cp += 2;
+	if (cpu != m68k_cpus)
+	  for (alias = cpu - 1; alias->alias; alias--)
+	    {	
+	      if (any)
+		{
+		  strcpy (cp, ", ");
+		  cp += 2;
+		}
+	      strcpy (cp, alias->name);
+	      cp += strlen (cp);
+	      any = 1;
+	    }
+	for (alias = cpu + 1; alias->alias; alias++)
+	  {
+	    if (any)
+	      {
+		strcpy (cp, ", ");
+		cp += 2;
+	      }
+	    strcpy (cp, alias->name);
+	    cp += strlen (cp);
+	    any = 1;
+	  }
+	
+	strcpy (cp, "]");
+	any = 1;
+	if ((unsigned)(cp - buf) >= sizeof (buf))
+	  as_fatal (_("coldfire string overflow"));
       }
-
-  if (n_alias > 1)
-    {
-      strncpy (cp, _(", or aliases"), (sizeof (buf) - (cp - buf)));
-      cp += strlen (cp);
-    }
-
-  strncpy (cp, ")", (sizeof (buf) - (cp - buf)));
+  strcat (cp, ")");
 
   return buf;
 }
@@ -4375,68 +4409,6 @@ md_begin (void)
 #endif
 }
 
-static void
-select_control_regs (void)
-{
-  /* Note which set of "movec" control registers is available.  */
-  switch (current_chip)
-    {
-    case 0:
-      if (verbose)
-	as_warn (_("architecture not yet selected: defaulting to 68020"));
-      control_regs = m68020_control_regs;
-      break;
-      
-    case cpu_m68000:
-      control_regs = m68000_control_regs;
-      break;
-    case cpu_m68010:
-      control_regs = m68010_control_regs;
-      break;
-    case cpu_m68020:
-    case cpu_m68030:
-      control_regs = m68020_control_regs;
-      break;
-    case cpu_m68040:
-      control_regs = m68040_control_regs;
-      break;
-    case cpu_m68060:
-      control_regs = m68060_control_regs;
-      break;
-    case cpu_cpu32:
-      control_regs = cpu32_control_regs;
-      break;
-    case cpu_cf5200:
-    case cpu_cf5206e:
-    case cpu_cf5307:
-    case cpu_cf5407:
-      control_regs = mcf_control_regs;
-      break;
-    case cpu_cf5249:
-      control_regs = mcf5249_control_regs;
-      break;
-    case cpu_cf528x:
-    case cpu_cf521x:
-      control_regs = mcf528x_control_regs;
-      break;
-    case cpu_cf547x:
-    case cpu_cf548x:
-      control_regs = mcfv4e_control_regs;
-      break;
-    case cpu_cf5208:
-      control_regs = mcf5208_control_regs;
-      break;
-    case cpu_cf5213:
-      control_regs = mcf5213_control_regs;
-      break;
-    case cpu_cf5329:
-      control_regs = mcf5329_control_regs;
-      break;
-    default:
-      abort ();
-    }
-}
-
 
 /* This is called when a label is defined.  */
 
@@ -5366,7 +5338,7 @@ mri_chip (void)
   else
     current_architecture &= m68881 | m68851;
   current_architecture |= m68k_cpus[i].arch & ~(m68881 | m68851);
-  current_chip = m68k_cpus[i].chip;
+  control_regs = m68k_cpus[i].control_regs;
 
   while (*input_line_pointer == '/')
     {
@@ -5383,9 +5355,6 @@ mri_chip (void)
 	current_architecture |= m68851;
       *input_line_pointer = c;
     }
-
-  /* Update info about available control registers.  */
-  select_control_regs ();
 }
 
 /* The MRI CHIP pseudo-op.  */
@@ -5731,7 +5700,7 @@ struct save_opts
   int keep_locals;
   int short_refs;
   int architecture;
-  int chip;
+  const enum m68k_register *control_regs;
   int quick;
   int rel32;
   int listing;
@@ -5756,7 +5725,7 @@ s_save (int ignore ATTRIBUTE_UNUSED)
   s->keep_locals = flag_keep_locals;
   s->short_refs = flag_short_refs;
   s->architecture = current_architecture;
-  s->chip = current_chip;
+  s->control_regs = control_regs;
   s->quick = m68k_quick;
   s->rel32 = m68k_rel32;
   s->listing = listing;
@@ -5790,7 +5759,7 @@ s_restore (int ignore ATTRIBUTE_UNUSED)
   flag_keep_locals = s->keep_locals;
   flag_short_refs = s->short_refs;
   current_architecture = s->architecture;
-  current_chip = s->chip;
+  control_regs = s->control_regs;
   m68k_quick = s->quick;
   m68k_rel32 = s->rel32;
   listing = s->listing;
@@ -7079,7 +7048,12 @@ m68k_lookup_cpu (const char *arg, const struct m68k_cpu *table,
 
   for (; table->name; table++)
     if (!strcmp (arg, table->name))
-      return table;
+      {
+	if (table->alias < -1 || table->alias > 1)
+	  as_bad (_("`%s' is deprecated, use `%s'"),
+		  table->name, table[table->alias < 0 ? 1 : -1].name);
+	return table;
+      }
   return 0;
 }
 
@@ -7305,14 +7279,18 @@ m68k_init_arch (void)
       not_current_architecture &= ~current_architecture;
     }
   if (selected_arch)
-    current_architecture |= selected_arch->arch;
+    {
+      current_architecture |= selected_arch->arch;
+      control_regs = selected_arch->control_regs;
+    }
   else
     current_architecture |= selected_cpu->arch;
-
-  current_architecture &= ~not_current_architecture;
   
+  current_architecture &= ~not_current_architecture;
+
   if (selected_cpu)
     {
+      control_regs = selected_cpu->control_regs;
       if (current_architecture & ~selected_cpu->arch)
 	{
 	  as_bad (_("selected processor does not have all features of selected architecture"));
@@ -7349,9 +7327,6 @@ m68k_init_arch (void)
     }
   /* What other incompatibilities could we check for?  */
 
-  /* Note which set of "movec" control registers is available.  */
-  select_control_regs ();
-
   if (cpu_of_arch (current_architecture) < m68020
       || arch_coldfire_p (current_architecture))
     md_relax_table[TAB (PCINDEX, BYTE)].rlx_more = 0;
@@ -7374,15 +7349,11 @@ md_show_usage (FILE *stream)
       if (strcasecmp (default_cpu, m68k_cpus[i].name) == 0)
 	{
 	  default_arch = m68k_cpus[i].arch;
-	  for (i = 0; m68k_cpus[i].name; i++)
-	    {
-	      if (m68k_cpus[i].arch == default_arch
-		  && !m68k_cpus[i].alias)
-		{
-		  default_cpu = m68k_cpus[i].name;
-		  break;
-		}
-	    }
+	  while (m68k_cpus[i].alias > 0)
+	    i--;
+	  while (m68k_cpus[i].alias < 0)
+	    i++;
+	  default_cpu = m68k_cpus[i].name;
 	}
     }
 
