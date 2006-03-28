@@ -802,69 +802,6 @@ static char alt_notend_table[256];
       || (*s == ':'						\
 	  && alt_notend_table[(unsigned char) s[1]])))
 
-/* Return a human readable string holding the list of chips that are
-   valid for a particular architecture, suppressing aliases (unless
-   there is only one of them).  */
-
-static char *
-find_cf_chip (int architecture)
-{
-  static char buf[1024];
-  char *cp;
-  const struct m68k_cpu *cpu;
-  int any = 0;
-  
-  strcpy (buf, " (");
-  cp = buf + strlen (buf);
-
-  for (cpu = m68k_cpus; cpu->name; cpu++)
-    if (!cpu->alias && (cpu->arch & architecture))
-      {
-	const struct m68k_cpu *alias;
-	if (any)
-	  {
-	    strcpy (cp, ", ");
-	    cp += 2;
-	  }
-	any = 0;
-	strcpy (cp, cpu->name);
-	cp += strlen (cp);
-	strcpy (cp, " [");
-	cp += 2;
-	if (cpu != m68k_cpus)
-	  for (alias = cpu - 1; alias->alias; alias--)
-	    {	
-	      if (any)
-		{
-		  strcpy (cp, ", ");
-		  cp += 2;
-		}
-	      strcpy (cp, alias->name);
-	      cp += strlen (cp);
-	      any = 1;
-	    }
-	for (alias = cpu + 1; alias->alias; alias++)
-	  {
-	    if (any)
-	      {
-		strcpy (cp, ", ");
-		cp += 2;
-	      }
-	    strcpy (cp, alias->name);
-	    cp += strlen (cp);
-	    any = 1;
-	  }
-	
-	strcpy (cp, "]");
-	any = 1;
-	if ((unsigned)(cp - buf) >= sizeof (buf))
-	  as_fatal (_("coldfire string overflow"));
-      }
-  strcat (cp, ")");
-
-  return buf;
-}
-
 #ifdef OBJ_ELF
 
 /* Return zero if the reference to SYMBOL from within the same segment may
@@ -2067,92 +2004,100 @@ m68k_ip (char *instring)
 	  if (ok_arch
 	      && !(ok_arch & current_architecture))
 	    {
-	      char buf[200], *cp;
+	      const struct m68k_cpu *cpu;
+	      int any = 0;
+	      size_t space = 400;
+	      char *buf = xmalloc (space + 1);
+	      size_t len;
+	      int paren = 1;
 
-	      strncpy (buf,
-		       _("invalid instruction for this architecture; needs "),
-		       sizeof (buf));
-	      cp = buf + strlen (buf);
+	      the_ins.error = buf;
+	      /* Make sure there's a NUL at the end of the buffer -- strncpy
+		 won't write one when it runs out of buffer */
+	      buf[space] = 0;
+#define APPEND(STRING) \
+  (strncpy (buf, STRING, space), len = strlen (buf), buf += len, space -= len)
+
+	      APPEND (_("invalid instruction for this architecture; needs "));
 	      switch (ok_arch)
 		{
 		case mcfisa_a:
-		  strncpy (cp, _("ColdFire ISA_A"),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
+		  APPEND (_("ColdFire ISA_A"));
 		  break;
 		case mcfhwdiv:
-		  strncpy (cp, _("ColdFire hardware divide"),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
+		  APPEND (_("ColdFire hardware divide"));
 		  break;
 		case mcfisa_aa:
-		  strncpy (cp, _("ColdFire ISA_A+"),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
+		  APPEND (_("ColdFire ISA_A+"));
 		  break;
 		case mcfisa_b:
-		  strncpy (cp, _("ColdFire ISA_B"),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
+		  APPEND (_("ColdFire ISA_B"));
 		  break;
 		case cfloat:
-		  strncpy (cp, _("ColdFire fpu"), sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
-		  strncpy (cp, find_cf_chip (ok_arch),
-			   sizeof (buf) - (cp - buf));
-		  cp += strlen (cp);
+		  APPEND (_("ColdFire fpu"));
 		  break;
 		case mfloat:
-		  strcpy (cp, _("fpu (68040, 68060 or 68881/68882)"));
+		  APPEND (_("M68K fpu"));
 		  break;
 		case mmmu:
-		  strcpy (cp, _("mmu (68030 or 68851)"));
+		  APPEND (_("M68K mmu"));
 		  break;
 		case m68020up:
-		  strcpy (cp, _("68020 or higher"));
+		  APPEND (_("68020 or higher"));
 		  break;
 		case m68000up:
-		  strcpy (cp, _("68000 or higher"));
+		  APPEND (_("68000 or higher"));
 		  break;
 		case m68010up:
-		  strcpy (cp, _("68010 or higher"));
+		  APPEND (_("68010 or higher"));
 		  break;
 		default:
-		  {
-		    int got_one = 0, idx;
-
-		    for (idx = 0; m68k_cpus[idx].name; idx++)
-		      {
-			if ((m68k_cpus[idx].arch & ok_arch)
-			    && ! m68k_cpus[idx].alias)
-			  {
-			    if (got_one)
-			      {
-				strcpy (cp, " or ");
-				cp += strlen (cp);
-			      }
-			    got_one = 1;
-			    strcpy (cp, m68k_cpus[idx].name);
-			    cp += strlen (cp);
-			  }
-		      }
-		  }
+		  paren = 0;
 		}
-	      cp = xmalloc (strlen (buf) + 1);
-	      strcpy (cp, buf);
-	      the_ins.error = cp;
+	      if (paren)
+		APPEND (" (");
+
+	      for (cpu = m68k_cpus; cpu->name; cpu++)
+		if (!cpu->alias && (cpu->arch & ok_arch))
+		  {
+		    const struct m68k_cpu *alias;
+
+		    if (any)
+		      APPEND (", ");
+		    any = 0;
+		    APPEND (cpu->name);
+		    APPEND (" [");
+		    if (cpu != m68k_cpus)
+		      for (alias = cpu - 1; alias->alias; alias--)
+			{
+			  if (any)
+			    APPEND (", ");
+			  APPEND (alias->name);
+			  any = 1;
+			}
+		    for (alias = cpu + 1; alias->alias; alias++)
+		      {
+			if (any)
+			  APPEND (", ");
+			APPEND (alias->name);
+			any = 1;
+		      }
+		    
+		    APPEND ("]");
+		    any = 1;
+		  }
+	      if (paren)
+		APPEND (")");
+#undef APPEND
+	      if (!space)
+		{
+		  /* we ran out of space, so replace the end of the list
+		     with ellipsis.  */
+		  buf -= 4;
+		  while (*buf != ' ')
+		    buf--;
+		  strcpy (buf, " ...");
+		}
 	    }
 	  else
 	    the_ins.error = _("operands mismatch");
