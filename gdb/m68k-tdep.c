@@ -39,6 +39,17 @@
 
 #include "m68k-tdep.h"
 
+/* Set the floating point register type.  This is a stop gap measure
+   until we can implement a more flexible general solution.  */
+#if 0
+#define M68K_FPREG_TYPE builtin_type_m68881_ext
+#define M68K_LONG_DOUBLE_FORMAT floatformat_m68881_ext
+#define M68K_RETURN_FP0 1
+#else
+#define M68K_FPREG_TYPE builtin_type_double
+#define M68K_LONG_DOUBLE_FORMAT floatformat_ieee_double_big
+#define M68K_RETURN_FP0 0
+#endif
 
 #define P_LINKL_FP	0x480e
 #define P_LINKW_FP	0x4e56
@@ -93,7 +104,7 @@ static struct type *
 m68k_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= FP0_REGNUM && regnum <= FP0_REGNUM + 7)
-    return builtin_type_m68881_ext;
+    return M68K_FPREG_TYPE;
 
   if (regnum == M68K_FPI_REGNUM || regnum == PC_REGNUM)
     return builtin_type_void_func_ptr;
@@ -158,7 +169,7 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
   /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
      the extended floating-point format used by the FPU.  */
   get_frame_register (frame, regnum, from);
-  convert_typed_floating (from, builtin_type_m68881_ext, to, type);
+  convert_typed_floating (from, M68K_FPREG_TYPE, to, type);
 }
 
 /* Write the contents FROM of a value of type TYPE into register
@@ -180,7 +191,7 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
 
   /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
      to the extended floating-point format used by the FPU.  */
-  convert_typed_floating (from, type, to, builtin_type_m68881_ext);
+  convert_typed_floating (from, type, to, M68K_FPREG_TYPE);
   put_frame_register (frame, regnum, to);
 }
 
@@ -247,10 +258,10 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
   int len = TYPE_LENGTH (type);
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (M68K_RETURN_FP0 && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
-      convert_typed_floating (buf, builtin_type_m68881_ext, valbuf, type);
+      convert_typed_floating (buf, M68K_FPREG_TYPE, valbuf, type);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
     regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
@@ -285,10 +296,10 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
 {
   int len = TYPE_LENGTH (type);
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (M68K_RETURN_FP0 && TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       gdb_byte buf[M68K_MAX_REGISTER_SIZE];
-      convert_typed_floating (valbuf, type, buf, builtin_type_m68881_ext);
+      convert_typed_floating (valbuf, type, buf, M68K_FPREG_TYPE);
       regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
@@ -1125,8 +1136,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  set_gdbarch_long_double_format (gdbarch, &floatformat_m68881_ext);
-  set_gdbarch_long_double_bit (gdbarch, 96);
+  set_gdbarch_long_double_format (gdbarch, &M68K_LONG_DOUBLE_FORMAT);
+  set_gdbarch_long_double_bit (gdbarch, M68K_LONG_DOUBLE_FORMAT.totalsize);
 
   set_gdbarch_skip_prologue (gdbarch, m68k_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68k_local_breakpoint_from_pc);
