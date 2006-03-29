@@ -159,6 +159,8 @@ Copyright (C) 1988-2005 Free Software Foundation, Inc.
 * Maintenance Commands::        Maintenance Commands
 * Remote Protocol::             GDB Remote Serial Protocol
 * Agent Expressions::           The GDB Agent Expression Mechanism
+* Self-Describing Targets::     How targets can describe themselves to
+                                @value{GDBN}
 * Copying::			GNU General Public License says
                                 how you can copy and share GDB
 * GNU Free Documentation License::  The license for this documentation
@@ -24851,6 +24853,12 @@ actually describe its own features.  This lets @value{GDBN} support
 processor variants it has never seen before --- to the extent that the
 descriptions are accurate, and that @value{GDBN} understands them.
 
+
+@menu
+* Retrieving Self-Descriptions::    How descriptions are fetched from a
+                                    target.
+* Self-Description Format::         The contents of a self-description.
+@end menu
 
 @node Retrieving Self-Descriptions
 @section Retrieving Self-Descriptions
