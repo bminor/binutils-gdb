@@ -23252,7 +23252,7 @@ Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
 @item qPart:@var{object}:read:@var{annex}:@var{offset},@var{length}
 @cindex read special object, remote request
 @cindex @samp{qPart} packet
-@anchor{qPart request}
+@anchor{the qPart request}
 Read uninterpreted bytes from the target's special data area
 identified by the keyword @var{object}.  Request @var{length} bytes
 starting at @var{offset} bytes into the data.  The content and
@@ -24830,21 +24830,17 @@ architectures have hundreds of variants, available from dozens of
 vendors.  This leads to a number of problems:
 
 @itemize @bullet
-
 @item
 With so many different customized processors, it is difficult for
 the @value{GDBN} maintainers to keep up with the changes.
-
 @item
 Since individual variants may have short lifetimes or limited
 audiences, it may not be worthwhile to carry information about every
 variant in the @value{GDBN} source tree.
-
 @item
 When @value{GDBN} does support the architecture of the embedded system
 at hand, the task of finding the correct architecture name to give the
 @command{set architecture} command can be error-prone.
-
 @end itemize
 
 To address these problems, the @value{GDBN} remote protocol allows a
@@ -24853,47 +24849,49 @@ actually describe its own features.  This lets @value{GDBN} support
 processor variants it has never seen before --- to the extent that the
 descriptions are accurate, and that @value{GDBN} understands them.
 
-
 @menu
-* Retrieving Self-Descriptions::    How descriptions are fetched from a
-                                    target.
+* Retrieving Self-Descriptions::    How descriptions are fetched from a target.
 * Self-Description Format::         The contents of a self-description.
 @end menu
 
 @node Retrieving Self-Descriptions
 @section Retrieving Self-Descriptions
 
-@value{GDBN} retrieves a target's self-description via the remote
-protocol using a @code{qPart} request (@pxref{qPart request,, the
-@code{qPart} request}) of the form:
+A target can split its self-description into one or more pieces,
+called @dfn{annexes}.  @value{GDBN} retrieves each annex via the
+remote protocol using @code{qPart} requests (@pxref{the qPart
+request}) of the form:
+
 @example
 qPart:features:read:@var{annex}:@var{offset},@var{length}
 @end example
+
 @noindent
-where @var{annex} is the string @samp{target.xml}.  The @var{offset}
-and @var{length} parameters are the offset into the description and
-the number of bytes to transfer, as for other @code{qPart} requests.
+where @var{annex} is the name of the annex, and the @var{offset} and
+@var{length} parameters are the offset into the description and the
+number of bytes to transfer, as for other @code{qPart} requests.
 
-The @samp{target.xml} annex contains an XML document describing the
-target's features; its form is described in @ref{Self-Description
-Format}.
-
-Feature descriptions may be split into several annexes, which
-@value{GDBN} retrieves and assembles into a complete description.  An
-annex may use @uref{http://www.w3.org/TR/xinclude/, XML Inclusions} to
-incorporate other annexes, much as a C header file refers to other
-headers using @code{#include}.  @value{GDBN} first retrieves
-@samp{target.xml}, and then makes further @code{qPart} requests as
-needed to retrieve the annexes referred to by any @code{xi:include}
-elements it finds.  Naturally, annexes brought in by @code{xi:include}
-may use @code{xi:include} themselves.
+To retrieve a target's self-description, @value{GDBN} first fetches
+the annex named @samp{target.xml}.  This is an XML document, of the
+form described in @ref{Self-Description Format}.  Just as C header
+files can refer to other header files using @code{#include}, target
+description annexes can use @uref{http://www.w3.org/TR/xinclude/, XML
+Inclusions} to incorporate other annexes.  Starting with
+@samp{target.xml}, @value{GDBN} makes further @code{qPart} requests as
+needed to resolve all the inclusions and assemble the complete
+description.
 
 To reduce protocol overhead, a target may supply a special annex named
-@samp{CHECKSUMS} that provides 160-bit SHA1 checksum values for the
-annexes it has available.  The @samp{CHECKSUMS} annex contains a
-series of newline-terminated lines, each of which contains a 40-digit
-hexidecimal checksum, two spaces, and the name of an annex with the
-given checksum.  Here is an example @samp{CHECKSUM} annex:
+@samp{CHECKSUMS} that provides 160-bit SHA-1@footnote{The SHA-1 hash
+function is defined in
+@uref{http://www.itl.nist.gov/fipspubs/fip180-1.htm, Federal
+Information Processing Standards Publication 180-1}.  The GNU
+coreutils contain a Free implementation of SHA-1.}  checksum values
+for the annexes it has available.  The @samp{CHECKSUMS} annex contains
+a series of newline-terminated lines, each of which contains a
+40-digit hexidecimal checksum, two spaces, and the name of an annex
+with the given checksum.  Here is an example @samp{CHECKSUMS} annex:
+
 @example
 68c94ffc34f8ad2d7bfae3f5a6b996409211c1b1  target.xml
 0e8e850b0580fbaaa0872326cb1b8ad6adda9b0d  mmu.xml
@@ -24935,6 +24933,7 @@ be accessed via the remote protocol @code{g}, @code{G}, @code{p} and
 kinds of information, like memory maps.
 
 Here is a simple sample target description:
+
 @example
 <?xml version="1.0"?>
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
@@ -24949,11 +24948,14 @@ Here is a simple sample target description:
   </feature-set>
 </target>
 @end example
+
+@noindent
 This describes a simple target feature set which only contains two
 registers, named @code{s0} (a 32-bit integer register) and @code{s1}
 (a 32-bit floating point register).
 
 A target description has the overall form:
+
 @example
 <?xml version="1.0"?>
 <!DOCTYPE target SYSTEM "gdb-target.dtd">
@@ -24962,6 +24964,7 @@ A target description has the overall form:
   @var{feature-set}
 </target>
 @end example
+
 @noindent
 The description is generally insensitive to whitespace and line
 breaks, under the usual common-sense rules.  The ellipsis
@@ -24972,16 +24975,19 @@ Each @var{feature} names and describes a single feature of the target;
 at the moment, features can only describe register sets.  The
 @var{feature-set} cites particular features by name, pulling together
 a complete description of the target.  A @var{feature} has the form:
+
 @example
 <feature name="@var{name}">
   @var{reg}@dots{}
 </feature>
 @end example
+
 @noindent
 This defines a feature named @var{name}; each feature's name must be
 unique across the description.
 
 Each @var{reg} has the form:
+
 @example
 <reg name="@var{name}"
      bitsize="@var{size}"
@@ -24991,6 +24997,7 @@ Each @var{reg} has the form:
      @r{[}type="@var{type}"@r{]}
      @r{[}group="@var{group}"@r{]}/>
 @end example
+
 @noindent
 Items in @r{[}brackets@r{]} are optional.  The components are as follows:
 
@@ -25033,16 +25040,21 @@ select a register group based on the register's type.
 A @var{feature-set} binds together a set of features to describe
 a complete target.  There can be only one @var{feature-set} in a
 target.  Each @var{feature-set} has the form:
+
 @example
 <feature-set>
   @var{feature-ref}@dots{}
 </feature-set>
 @end example
+
 @noindent
 where each @var{feature-ref} has the form:
+
 @example
 <feature-ref name="@var{name}" @r{[}base-regnum="@var{n}"@r{]}/>
 @end example
+
+@noindent
 This means that the target includes the feature named @var{name}.  If
 the @code{base-regnum} is present, that means that registers in the
 given feature are numbered starting with @var{n}, until overridden by
@@ -25053,9 +25065,12 @@ several different annexes, either for organizational purposes, or to
 allow @value{GDBN} to cache portions of the description that change
 rarely.  To make this possible, you can replace any feature
 description with an inclusion directive of the form:
+
 @example
 <xi:include href="@var{annex}"/>
 @end example
+
+@noindent
 When @value{GDBN} encounters an element of this form, it will retrieve
 the annex named @var{annex} (or use its cached copy), and replace the
 inclusion directive with the contents of that annex.
