@@ -1,5 +1,18 @@
 2006-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention the removal of NLM.
+
+2006-03-29  Steve Ellcey  <sje@cup.hp.com>
+
+	* Makefile.in (nlm): Remove target.
+	* configure.tgt (i[34567]86-*-netware*): Do not set build_nlm.
+	* configure.ac: Remove AC_CONFIG_SUBDIRS of nlm.
+	* configure: Regenerate.
+	* doc/gdb.texinfo: Remove gdbserve.nlm documentation.
+	* nlm: Remove directory.
+
+2006-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (utils.o): Update.
 	* top.c (in_user_command): New.
 	(command_line_input): Use input_from_terminal_p.

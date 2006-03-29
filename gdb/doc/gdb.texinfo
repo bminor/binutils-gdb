@@ -12139,7 +12139,6 @@ want to try.
 @menu
 * Connecting::                  Connecting to a remote target
 * Server::	                Using the gdbserver program
-* NetWare::                     Using the gdbserve.nlm program
 * Remote configuration::        Remote configuration
 * remote stub::                 Implementing a remote stub
 @end menu
@@ -12393,51 +12392,6 @@ you normally would), do that with the @code{file} command, and issue
 it @emph{before} connecting to the server; otherwise, you will get an
 error message saying @code{"Program is already running"}, since the
 program is considered running after the connection.
-
-@end table
-
-@node NetWare
-@section Using the @code{gdbserve.nlm} program
-
-@kindex gdbserve.nlm
-@code{gdbserve.nlm} is a control program for NetWare systems, which
-allows you to connect your program with a remote @value{GDBN} via
-@code{target remote}.
-
-@value{GDBN} and @code{gdbserve.nlm} communicate via a serial line,
-using the standard @value{GDBN} remote serial protocol.
-
-@table @emph
-@item On the target machine,
-you need to have a copy of the program you want to debug.
-@code{gdbserve.nlm} does not need your program's symbol table, so you
-can strip the program if necessary to save space.  @value{GDBN} on the
-host system does all the symbol handling.
-
-To use the server, you must tell it how to communicate with
-@value{GDBN}; the name of your program; and the arguments for your
-program.  The syntax is:
-
-@smallexample
-load gdbserve [ BOARD=@var{board} ] [ PORT=@var{port} ]
-              [ BAUD=@var{baud} ] @var{program} [ @var{args} @dots{} ]
-@end smallexample
-
-@var{board} and @var{port} specify the serial line; @var{baud} specifies
-the baud rate used by the connection.  @var{port} and @var{node} default
-to 0, @var{baud} defaults to 9600@dmn{bps}.
-
-For example, to debug Emacs with the argument @samp{foo.txt}and
-communicate with @value{GDBN} over serial port number 2 or board 1
-using a 19200@dmn{bps} connection:
-
-@smallexample
-load gdbserve BOARD=1 PORT=2 BAUD=19200 emacs foo.txt
-@end smallexample
-
-@item
-On the @value{GDBN} host machine, connect to your target (@pxref{Connecting,,
-Connecting to a remote target}).
 
 @end table
 

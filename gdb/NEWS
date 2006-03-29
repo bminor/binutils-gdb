@@ -51,6 +51,8 @@ network sockets or serial ports.
 
 The ARM rdi-share module.
 
+The Netware NLM debug server.
+
 *** Changes in GDB 6.4
 
 * New native configurations
