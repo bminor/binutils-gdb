@@ -1,3 +1,8 @@
+2006-03-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-nat.c (s390_insert_watchpoint): Add missing argument.
+	(s390_remove_watchpoint): Likewise.
+
 2006-03-28  Jim Blandy  <jimb@codesourcery.com>
 
 	* prologue-value.c, prologue-value.h: New files.
