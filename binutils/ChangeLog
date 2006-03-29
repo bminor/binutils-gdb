@@ -1,3 +1,7 @@
+2006-03-29  Ben Elliston  <bje@au.ibm.com>
+
+	* resbin.c: Avoid duplicating constants in calls to reswr_alloc.
+
 2006-03-20  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* BRANCHES: Remove binutils-csl-arm-2006q1-branch.  Document
