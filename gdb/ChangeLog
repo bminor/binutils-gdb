@@ -1,3 +1,24 @@
+2006-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (utils.o): Update.
+	* top.c (in_user_command): New.
+	(command_line_input): Use input_from_terminal_p.
+	(input_from_terminal_p): Don't check caution.  Handle
+	stdin == NULL for Insight.
+	* top.h (in_user_command, caution): New declarations.
+	* utils.c: Include "top.h".
+	(query, defaulted_query): Check caution here.  Move the call
+	to input_from_terminal_p higher.
+	* cli/cli-script.c (do_restore_user_call_depth): Only decrement
+	the depth.  Update in_user_command if necessary.
+	(execute_user_command): Don't clobber old_chain.  Set
+	in_user_command.  Let do_restore_user_call_depth handle
+	user_call_depth.
+	(read_command_lines): Check whether to prompt before calling
+	Insight hooks.
+	* tui/tui-hooks.c (tui_query_hook): Remove newly unnecessary
+	input_from_terminal_p check.
+
 2006-03-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-nat.c (s390_insert_watchpoint): Add missing argument.

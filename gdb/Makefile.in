@@ -2744,7 +2744,7 @@ user-regs.o: user-regs.c $(defs_h) $(user_regs_h) $(gdbtypes_h) \
 utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(exceptions_h) $(tui_h) $(gdbcmd_h) $(serial_h) $(bfd_h) \
 	$(target_h) $(demangle_h) $(expression_h) $(language_h) $(charset_h) \
-	$(annotate_h) $(filenames_h) $(symfile_h) $(inferior_h) \
+	$(annotate_h) $(filenames_h) $(symfile_h) $(inferior_h) $(top_h) \
 	$(gdb_curses_h) $(readline_h) $(gdb_obstack_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)

@@ -1,6 +1,7 @@
 /* GDB hooks for TUI.
 
-   Copyright (C) 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -76,10 +77,6 @@ tui_query_hook (const char * msg, va_list argp)
   int retval;
   int ans2;
   int answer;
-
-  /* Automatically answer "yes" if input is not from a terminal.  */
-  if (!input_from_terminal_p ())
-    return 1;
 
   echo ();
   while (1)
