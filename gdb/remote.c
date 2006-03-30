@@ -4461,13 +4461,13 @@ watchpoint_to_Z_packet (int type)
   switch (type)
     {
     case hw_write:
-      return 2;
+      return Z_PACKET_WRITE_WP;
       break;
     case hw_read:
-      return 3;
+      return Z_PACKET_READ_WP;
       break;
     case hw_access:
-      return 4;
+      return Z_PACKET_ACCESS_WP;
       break;
     default:
       internal_error (__FILE__, __LINE__,

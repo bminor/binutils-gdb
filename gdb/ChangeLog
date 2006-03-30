@@ -1,3 +1,8 @@
+2006-03-30  Vladimir Prus  <ghost@cs.msu.su>
+
+	* remote.c (watchpoint_to_Z_packet): Use values of Z_packet_type enum
+	instead of hardcoded integer literals.
+
 2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cli/cli-script.c (insert_args): Handle NULL user_args.
