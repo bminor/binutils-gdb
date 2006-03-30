@@ -334,12 +334,14 @@ void
 child_post_attach (int pid)
 {
   linux_enable_event_reporting (pid_to_ptid (pid));
+  check_for_thread_db ();
 }
 
 static void
 linux_child_post_startup_inferior (ptid_t ptid)
 {
   linux_enable_event_reporting (ptid);
+  check_for_thread_db ();
 }
 
 int
@@ -963,7 +965,7 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
       gdb_assert (pid == GET_LWP (ptid)
 		  && WIFSTOPPED (status) && WSTOPSIG (status));
 
-      child_post_attach (pid);
+      target_post_attach (pid);
 
       lp->stopped = 1;
 

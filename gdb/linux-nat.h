@@ -65,6 +65,8 @@ struct lwp_info
   struct lwp_info *next;
 };
 
+/* Attempt to initialize libthread_db.  */
+void check_for_thread_db (void);
 
 /* Find process PID's pending signal set from /proc/pid/status.  */
 void linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored);

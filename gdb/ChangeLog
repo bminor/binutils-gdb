@@ -1,5 +1,19 @@
 2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-thread-db.c: Include "linux-nat.h".
+	(check_for_thread_db): New function, split out from
+	thread_db_new_objfile.  Remove dead check for active
+	thread_db on inapplicable targets.
+	(thread_db_new_objfile): Call check_for_thread_db.
+	* Makefile.in (linux-thread-db.o): Update.
+	* linux-nat.c (child_post_attach): Call check_for_thread_db.
+	(linux_child_post_startup_inferior): Likewise.
+	(lin_lwp_attach_lwp): Call target_post_attach instead of
+	child_post_attach.
+	* linux-nat.h (check_for_thread_db): New prototype.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* remote.c (struct remote_state): Add BUF and BUF_SIZE.
 	(init_remote_state): Initialize the new fields.
 	(get_memory_packet_size): Update BUF and BUF_SIZE if necessary.
