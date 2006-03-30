@@ -61,8 +61,6 @@ static void print_frame (struct frame_info *frame, int print_level,
 			 enum print_what print_what,  int print_args,
 			 struct symtab_and_line sal);
 
-static void set_current_sal_from_frame (struct frame_info *, int);
-
 /* Zero means do things normally; we are interacting directly with the
    user.  One means print the full filename and linenumber when a
    frame is printed, and do so in a format emacs18/emacs19.22 can
@@ -373,7 +371,7 @@ print_args_stub (void *args)
    FRAME, if possible.  When CENTER is true, adjust so the relevant
    line is in the center of the next 'list'.  */
 
-static void
+void
 set_current_sal_from_frame (struct frame_info *frame, int center)
 {
   struct symtab_and_line sal;

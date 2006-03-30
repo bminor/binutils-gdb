@@ -1,4 +1,10 @@
 2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+ 
+	* frame.h (set_current_sal_from_frame): New prototype.
+	* stack.c (set_current_sal_from_frame): Make global.
+	* infrun.c (normal_stop): Call set_current_sal_from_frame.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-thread-db.c: Include "linux-nat.h".
 	(check_for_thread_db): New function, split out from
