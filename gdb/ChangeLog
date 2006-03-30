@@ -1,3 +1,11 @@
+2006-03-30  Adrien Kunysz  <a_kunysz@yahoo.com>
+
+	* i386-stub.c (getpacket): Fix array overflow.
+	* m32r-stub.c (getpacket): Likewise.
+	* m68k-stub.c (getpacket): Likewise.
+	* sh-stub.c (getpacket): Likewise.
+	* sparc-stub.c (getpacket): Likewise.
+
 2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
  
 	* frame.h (set_current_sal_from_frame): New prototype.
