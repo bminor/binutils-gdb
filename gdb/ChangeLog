@@ -1,3 +1,16 @@
+2005-03-30  Randolph Chung  <tausq@debian.org>
+
+	* hppa-linux-tdep.c: Include regset.h.
+	(GR_REGNUM, TR_REGNUM, greg_map): New.
+	(hppa_linux_supply_regset, hppa_linux_supply_fpregset): New.
+	(hppa_linux_regset, hppa_linux_fpregset): New.
+	(hppa_linux_regset_from_core_section): New.
+	(hppa_linux_init_abi): Set regset_from_core_section.
+	(_initialize_hppa_linux_tdep): Register osabi handler for
+	64-bit Linux.
+	* Makefile.in (hppa-linux-tdep.o): Update dependencies.
+	* config/pa/linux.mh: Stop using core-regset.o
+
 2006-03-30  Randolph Chung  <tausq@debian.org>
 
 	* hppa-tdep.c (hppa_find_unwind_entry_in_block): New.

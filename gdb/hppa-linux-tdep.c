@@ -30,6 +30,7 @@
 #include "trad-frame.h"
 #include "dwarf2-frame.h"
 #include "value.h"
+#include "regset.h"
 #include "hppa-tdep.h"
 
 #include "elf/common.h"
@@ -400,6 +401,112 @@ hppa_linux_find_global_pointer (struct value *function)
     }
   return 0;
 }
+
+/*
+ * Registers saved in a coredump:
+ * gr0..gr31
+ * sr0..sr7
+ * iaoq0..iaoq1
+ * iasq0..iasq1
+ * sar, iir, isr, ior, ipsw
+ * cr0, cr24..cr31
+ * cr8,9,12,13
+ * cr10, cr15
+ */
+
+#define GR_REGNUM(_n)	(HPPA_R0_REGNUM+_n)
+#define TR_REGNUM(_n)	(HPPA_TR0_REGNUM+_n)
+static const int greg_map[] =
+  {
+    GR_REGNUM(0), GR_REGNUM(1), GR_REGNUM(2), GR_REGNUM(3),
+    GR_REGNUM(4), GR_REGNUM(5), GR_REGNUM(6), GR_REGNUM(7),
+    GR_REGNUM(8), GR_REGNUM(9), GR_REGNUM(10), GR_REGNUM(11),
+    GR_REGNUM(12), GR_REGNUM(13), GR_REGNUM(14), GR_REGNUM(15),
+    GR_REGNUM(16), GR_REGNUM(17), GR_REGNUM(18), GR_REGNUM(19),
+    GR_REGNUM(20), GR_REGNUM(21), GR_REGNUM(22), GR_REGNUM(23),
+    GR_REGNUM(24), GR_REGNUM(25), GR_REGNUM(26), GR_REGNUM(27),
+    GR_REGNUM(28), GR_REGNUM(29), GR_REGNUM(30), GR_REGNUM(31),
+
+    HPPA_SR4_REGNUM+1, HPPA_SR4_REGNUM+2, HPPA_SR4_REGNUM+3, HPPA_SR4_REGNUM+4,
+    HPPA_SR4_REGNUM, HPPA_SR4_REGNUM+5, HPPA_SR4_REGNUM+6, HPPA_SR4_REGNUM+7,
+
+    HPPA_PCOQ_HEAD_REGNUM, HPPA_PCOQ_TAIL_REGNUM,
+    HPPA_PCSQ_HEAD_REGNUM, HPPA_PCSQ_TAIL_REGNUM,
+
+    HPPA_SAR_REGNUM, HPPA_IIR_REGNUM, HPPA_ISR_REGNUM, HPPA_IOR_REGNUM,
+    HPPA_IPSW_REGNUM, HPPA_RCR_REGNUM,
+
+    TR_REGNUM(0), TR_REGNUM(1), TR_REGNUM(2), TR_REGNUM(3),
+    TR_REGNUM(4), TR_REGNUM(5), TR_REGNUM(6), TR_REGNUM(7),
+
+    HPPA_PID0_REGNUM, HPPA_PID1_REGNUM, HPPA_PID2_REGNUM, HPPA_PID3_REGNUM,
+    HPPA_CCR_REGNUM, HPPA_EIEM_REGNUM,
+  };
+
+static void
+hppa_linux_supply_regset (const struct regset *regset,
+			  struct regcache *regcache,
+			  int regnum, const void *regs, size_t len)
+{
+  struct gdbarch *arch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
+  const char *buf = regs;
+  int i, offset;
+
+  offset = 0;
+  for (i = 0; i < ARRAY_SIZE (greg_map); i++)
+    {
+      if (regnum == greg_map[i] || regnum == -1)
+        regcache_raw_supply (regcache, greg_map[i], buf + offset);
+
+      offset += tdep->bytes_per_address;
+    }
+}
+
+static void
+hppa_linux_supply_fpregset (const struct regset *regset,
+			    struct regcache *regcache,
+			    int regnum, const void *regs, size_t len)
+{
+  const char *buf = regs;
+  int i, offset;
+
+  offset = 0;
+  for (i = 0; i < 31; i++)
+    {
+      if (regnum == HPPA_FP0_REGNUM + i || regnum == -1)
+        regcache_raw_supply (regcache, HPPA_FP0_REGNUM + i, 
+			     buf + offset);
+      offset += 8;
+    }
+}
+
+/* Linux register set.  */
+static struct regset hppa_linux_regset =
+{
+  NULL,
+  hppa_linux_supply_regset
+};
+
+static struct regset hppa_linux_fpregset =
+{
+  NULL,
+  hppa_linux_supply_fpregset
+};
+
+static const struct regset *
+hppa_linux_regset_from_core_section (struct gdbarch *gdbarch,
+				     const char *sect_name,
+				     size_t sect_size)
+{
+  if (strcmp (sect_name, ".reg") == 0)
+    return &hppa_linux_regset;
+  else if (strcmp (sect_name, ".reg2") == 0)
+    return &hppa_linux_fpregset;
+
+  return NULL;
+}
+
 
 /* Forward declarations.  */
 extern initialize_file_ftype _initialize_hppa_linux_tdep;
@@ -433,6 +540,9 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      more work in gcc and glibc first.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
 
+  set_gdbarch_regset_from_core_section
+    (gdbarch, hppa_linux_regset_from_core_section);
+
 #if 0
   /* Dwarf-2 unwinding support.  Not yet working.  */
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, hppa_dwarf_reg_to_regnum);
@@ -450,4 +560,5 @@ void
 _initialize_hppa_linux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_LINUX, hppa_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_hppa, bfd_mach_hppa20w, GDB_OSABI_LINUX, hppa_linux_init_abi);
 }

@@ -2033,7 +2033,7 @@ hppa-linux-nat.o: hppa-linux-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 hppa-linux-tdep.o: hppa-linux-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
 	$(target_h) $(objfiles_h) $(solib_svr4_h) $(glibc_tdep_h) \
 	$(frame_unwind_h) $(trad_frame_h) $(dwarf2_frame_h) $(value_h) \
-	$(hppa_tdep_h) $(elf_common_h)
+	$(hppa_tdep_h) $(elf_common_h) $(regset_h)
 hppa-tdep.o: hppa-tdep.c $(defs_h) $(bfd_h) $(inferior_h) $(regcache_h) \
 	$(completer_h) $(osabi_h) $(gdb_assert_h) $(arch_utils_h) \
 	$(symtab_h) $(dis_asm_h) $(trad_frame_h) $(frame_unwind_h) \
