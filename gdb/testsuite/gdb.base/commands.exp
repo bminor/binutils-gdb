@@ -1,5 +1,5 @@
 #   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1997, 1998, 1999, 2000,
-#   2001, 2002, 2003 Free Software Foundation, Inc.
+#   2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -563,6 +563,26 @@ proc temporary_breakpoint_commands {} {
 	timeout { fail "(timeout) run factorial until temporary breakpoint" }
     }
 }
+
+# Test that GDB can handle $arg0 outside of user functions without
+# crashing.
+proc stray_arg0_test { } {
+    gdb_test "print \$arg0" \
+	"\\\$\[0-9\]* = void" \
+	"stray_arg0_test #1"
+
+    gdb_test "if 1 == 1\nprint \$arg0\nend" \
+	"\\\$\[0-9\]* = void" \
+	"stray_arg0_test #2"
+
+    gdb_test "print \$arg0 = 1" \
+	"\\\$\[0-9\]* = 1" \
+	"stray_arg0_test #3"
+
+    gdb_test "print \$arg0" \
+	"\\\$\[0-9\]* = 1" \
+	"stray_arg0_test #4"
+}
   
 gdbvar_simple_if_test
 gdbvar_simple_while_test
@@ -579,3 +599,4 @@ test_command_prompt_position
 deprecated_command_test
 bp_deleted_in_command_test
 temporary_breakpoint_commands
+stray_arg0_test

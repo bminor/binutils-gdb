@@ -1,5 +1,9 @@
 2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* cli/cli-script.c (insert_args): Handle NULL user_args.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-tdep.c (thumb_scan_prologue): Don't try to analyze
 	the function at zero if we have no symbols.
 

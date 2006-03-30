@@ -593,6 +593,11 @@ insert_args (char *line)
   char *p, *save_line, *new_line;
   unsigned len, i;
 
+  /* If we are not in a user-defined function, treat $argc, $arg0, et
+     cetera as normal convenience variables.  */
+  if (user_args == NULL)
+    return xstrdup (line);
+
   /* First we need to know how much memory to allocate for the new line.  */
   save_line = line;
   len = 0;
