@@ -1,3 +1,8 @@
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (thumb_scan_prologue): Don't try to analyze
+	the function at zero if we have no symbols.
+
 2006-03-30  Adrien Kunysz  <a_kunysz@yahoo.com>
 
 	* i386-stub.c (getpacket): Fix array overflow.

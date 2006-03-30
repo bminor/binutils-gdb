@@ -466,9 +466,9 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 	prologue_end = sal.end;		/* (probably means no prologue)  */
     }
   else
-    /* We're in the boondocks: allow for 
-       16 pushes, an add, and "mv fp,sp".  */
-    prologue_end = prologue_start + 40;
+    /* We're in the boondocks: we have no idea where the start of the
+       function is.  */
+    return;
 
   prologue_end = min (prologue_end, prev_pc);
 
