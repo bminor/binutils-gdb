@@ -7665,7 +7665,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   struct bfd_link_order *p;
   bfd *sub;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  int elfsec;
+  unsigned elfsec;
   struct bfd_link_order **sections;
   asection *s, *other_sec, *linkorder_sec;
   bfd_vma offset;
@@ -7682,7 +7682,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
 	  sub = s->owner;
 	  if (bfd_get_flavour (sub) == bfd_target_elf_flavour
 	      && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass
-	      && (elfsec = _bfd_elf_section_from_bfd_section (sub, s)) != -1
+	      && (elfsec = _bfd_elf_section_from_bfd_section (sub, s))
+	      && elfsec < elf_numsections (sub)
 	      && elf_elfsections (sub)[elfsec]->sh_flags & SHF_LINK_ORDER)
 	    {
 	      seen_linkorder++;

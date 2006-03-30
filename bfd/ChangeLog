@@ -1,3 +1,10 @@
+2006-03-30  Ben Elliston  <bje@au.ibm.com>
+
+	PR ld/2267
+	* elflink.c (elf_fixup_link_order): Ensure `elfsec' is not a
+	special section number that exceeds the number of ELF sections
+	(eg. SHN_MIPS_SCOMMON).
+
 2006-03-27  Richard Sandiford  <richard@codesourcery.com>
 
 	* elfxx-mips.c (mips_got_entry): Add more commentary.
