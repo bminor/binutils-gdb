@@ -1782,6 +1782,17 @@ hppa_skip_prologue (CORE_ADDR pc)
     return (skip_prologue_hard_way (pc, 1));
 }
 
+/* Return an unwind entry that falls within the frame's code block.  */
+static struct unwind_table_entry *
+hppa_find_unwind_entry_in_block (struct frame_info *f)
+{
+  CORE_ADDR pc;
+
+  pc = frame_unwind_address_in_block (f);
+  pc = gdbarch_addr_bits_remove (get_frame_arch (f), pc);
+  return find_unwind_entry (pc);
+}
+
 struct hppa_frame_cache
 {
   CORE_ADDR base;
@@ -1817,7 +1828,7 @@ hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   /* Yow! */
-  u = find_unwind_entry (frame_pc_unwind (next_frame));
+  u = hppa_find_unwind_entry_in_block (next_frame);
   if (!u)
     {
       if (hppa_debug)
@@ -2197,7 +2208,7 @@ hppa_frame_this_id (struct frame_info *next_frame, void **this_cache,
   struct unwind_table_entry *u;
 
   info = hppa_frame_cache (next_frame, this_cache);
-  u = find_unwind_entry (pc);
+  u = hppa_find_unwind_entry_in_block (next_frame);
 
   (*this_id) = frame_id_build (info->base, u->region_start);
 }
@@ -2224,9 +2235,7 @@ static const struct frame_unwind hppa_frame_unwind =
 static const struct frame_unwind *
 hppa_frame_unwind_sniffer (struct frame_info *next_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-
-  if (find_unwind_entry (pc))
+  if (hppa_find_unwind_entry_in_block (next_frame))
     return &hppa_frame_unwind;
 
   return NULL;

@@ -1,3 +1,10 @@
+2006-03-30  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_find_unwind_entry_in_block): New.
+	(hppa_frame_cache): Use new function to find unwind entry.
+	(hppa_frame_this_id): Likewise.
+	(hppa_frame_unwind_sniffer): Likewise.
+
 2006-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention the removal of NLM.
