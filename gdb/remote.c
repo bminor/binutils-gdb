@@ -3178,7 +3178,7 @@ remote_fetch_registers (int regnum)
       p += 2;
     }
 
-  if (register_bytes_found && i != register_bytes_found)
+  if (i != register_bytes_found)
     {
       register_bytes_found = i;
       if (REGISTER_BYTES_OK_P ()
