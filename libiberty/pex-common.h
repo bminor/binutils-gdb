@@ -121,6 +121,11 @@ struct pex_funcs
      PEX_USE_PIPES is set).  If BINARY is non-zero, open in binary
      mode.  Return pointer on success, NULL on error.  */
   FILE * (*fdopenr) (struct pex_obj *, int /* fd */, int /* binary */);
+  /* Get a FILE pointer to write to the file descriptor FD (only
+     called if PEX_USE_PIPES is set).  If BINARY is non-zero, open in
+     binary mode.  Arrange for FD not to be inherited by the child
+     processes.  Return pointer on success, NULL on error.  */
+  FILE * (*fdopenw) (struct pex_obj *, int /* fd */, int /* binary */);
   /* Free any system dependent data associated with OBJ.  May be
      NULL if there is nothing to do.  */
   void (*cleanup) (struct pex_obj *);
