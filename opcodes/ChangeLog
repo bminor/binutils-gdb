@@ -1,3 +1,7 @@
+2006-03-31  Paul Koning  <ni1d@arrl.net>
+
+	* pdp11-opc.c (pdp11_opcodes): Fix opcode for SEC instruction.
+
 2006-03-16  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* bfin-dis.c (decode_dsp32shiftimm_0): Simplify and correct the
