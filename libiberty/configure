@@ -8205,6 +8205,20 @@ case "${host}" in
 esac
 
 
+# On MinGW, add support for Cygwin paths.
+case "${host}" in
+     *-*-mingw*)
+	case $LIBOBJS in
+    "cygpath.$ac_objext"   | \
+  *" cygpath.$ac_objext"   | \
+    "cygpath.$ac_objext "* | \
+  *" cygpath.$ac_objext "* ) ;;
+  *) LIBOBJS="$LIBOBJS cygpath.$ac_objext" ;;
+esac
+
+	;;
+esac
+
 if test x$gcc_no_link = xyes; then
   if test "x${ac_cv_func_mmap_fixed_mapped+set}" != xset; then
     ac_cv_func_mmap_fixed_mapped=no

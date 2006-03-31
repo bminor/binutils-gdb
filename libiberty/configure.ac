@@ -618,6 +618,13 @@ case "${host}" in
 esac
 AC_SUBST(pexecute)
 
+# On MinGW, add support for Cygwin paths.
+case "${host}" in
+     *-*-mingw*)
+	AC_LIBOBJ([cygpath])
+	;;
+esac
+
 libiberty_AC_FUNC_STRNCMP
 
 # Install a library built with a cross compiler in $(tooldir) rather
