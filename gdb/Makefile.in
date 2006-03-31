@@ -129,7 +129,7 @@ READLINE_CFLAGS = -I$(READLINE_SRC)/..
 
 # Where is the expat library?  Typically in ../expat.
 EXPAT = ../expat/.libs/libexpat.a
-EXPAT_CFLAGS = -I$(srcdir)/expat/lib -I../expat
+EXPAT_CFLAGS = -I$(srcdir)/../expat/lib -I../expat
 
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
