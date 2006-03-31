@@ -1,3 +1,128 @@
+2006-03-31  Michael Snyder  <msnyder@redhat.com>
+
+	Target interface for reverse execution.
+	* target.h (enum target_waitkind): 
+	Add new wait event, TARGET_WAITKIND_NO_HISTORY.
+	(enum exec_direction_kind): New enum.
+	(struct target_ops): New methods to_set_execdir, to_get_execdir.
+	(target_set_execution_direction): New macro.
+	(target_get_execution_direction): New macro.
+	* target.c (update_current_target): Inherit new execdir methods.
+
+2006-03-31  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* value.h (struct internalvar): Add field 'endian'.
+	* value.c (lookup_internalvar): Initialise endian.
+	(value_of_internalvar): Flip the endian of built-in types if required.
+	(set_internalvar): Set the endian.
+	(show_convenience): Access the value through value_of_internalvar().
+
+2006-03-30  Vladimir Prus  <ghost@cs.msu.su>
+
+	* remote.c (watchpoint_to_Z_packet): Use values of Z_packet_type enum
+	instead of hardcoded integer literals.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cli/cli-script.c (insert_args): Handle NULL user_args.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (thumb_scan_prologue): Don't try to analyze
+	the function at zero if we have no symbols.
+
+2006-03-30  Adrien Kunysz  <a_kunysz@yahoo.com>
+
+	* i386-stub.c (getpacket): Fix array overflow.
+	* m32r-stub.c (getpacket): Likewise.
+	* m68k-stub.c (getpacket): Likewise.
+	* sh-stub.c (getpacket): Likewise.
+	* sparc-stub.c (getpacket): Likewise.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+ 
+	* frame.h (set_current_sal_from_frame): New prototype.
+	* stack.c (set_current_sal_from_frame): Make global.
+	* infrun.c (normal_stop): Call set_current_sal_from_frame.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-thread-db.c: Include "linux-nat.h".
+	(check_for_thread_db): New function, split out from
+	thread_db_new_objfile.  Remove dead check for active
+	thread_db on inapplicable targets.
+	(thread_db_new_objfile): Call check_for_thread_db.
+	* Makefile.in (linux-thread-db.o): Update.
+	* linux-nat.c (child_post_attach): Call check_for_thread_db.
+	(linux_child_post_startup_inferior): Likewise.
+	(lin_lwp_attach_lwp): Call target_post_attach instead of
+	child_post_attach.
+	* linux-nat.h (check_for_thread_db): New prototype.
+
+2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (struct remote_state): Add BUF and BUF_SIZE.
+	(init_remote_state): Initialize the new fields.
+	(get_memory_packet_size): Update BUF and BUF_SIZE if necessary.
+	(set_thread, remote_thread_alive, remote_unpack_thread_info_response)
+	(remote_get_threadinfo, parse_threadlist_response)
+	(remote_get_threadlist, remote_current_thread, remote_threads_info)
+	(remote_threads_extra_info, extended_remote_restart, get_offsets)
+	(remote_check_symbols, remote_open_1, remote_detach)
+	(remove_vcont_probe, remote_vcont_resume, remote_resume)
+	(remote_wait, remote_async_wait, fetch_register_using_p)
+	(remote_fetch_registers, store_register_using_P)
+	(remote_store_registers, check_binary_download, remote_write_bytes)
+	(remote_read_bytes, remote_insert_breakpoint)
+	(remote_remove_breakpoint, remote_insert_watchpoint)
+	(remote_remove_watchpoint, remote_insert_hw_breakpoint)
+	(remote_remove_hw_breakpoint, compare_sections_command)
+	(remote_xfer_partial, remote_rcmd, packet_command)
+	(remote_get_thread_local_address): Use the global incoming buffer
+	instead of alloca or xmalloc.  Limit outgoing packets to
+	rs->remote_packet_size and incoming packets to rs->buf_size.
+	Update calls to getpkt and remote_send.
+	(remote_send): Take arguments by reference.
+	(putpkt_binary): Eliminate junkbuf.  Use skip_frame.
+	(skip_frame): New function.
+	(read_frame): Take arguments by reference.  Expand the packet
+	buffer instead of issuing an error.
+	(getpkt, getpkt_sane): Take arguments by reference.
+	* remote.h (getpkt): Update prototype and doc.
+	* tracepoint.c (remote_get_noisy_reply): Take arguments by
+	reference.
+	(target_buf): Change from array to pointer.
+	(target_buf_size): New variable.
+	(remote_set_transparent_ranges): Update call to getpkt.
+	(trace_start_command, trace_stop_command, trace_status_command):
+	Update calls to remote_get_noisy_reply.
+	(finish_tfind_command): Take arguments by reference.
+	(trace_find_command, trace_find_pc_command)
+	(trace_find_tracepoint_command, trace_find_line_command):
+	(trace_find_range_command, trace_find_outside_command): Update
+	calls to finish_tfind_command.
+	(_initialize_tracepoint): Initialize target_buf_size and target_buf.
+
+2005-03-30  Randolph Chung  <tausq@debian.org>
+
+	* hppa-linux-tdep.c: Include regset.h.
+	(GR_REGNUM, TR_REGNUM, greg_map): New.
+	(hppa_linux_supply_regset, hppa_linux_supply_fpregset): New.
+	(hppa_linux_regset, hppa_linux_fpregset): New.
+	(hppa_linux_regset_from_core_section): New.
+	(hppa_linux_init_abi): Set regset_from_core_section.
+	(_initialize_hppa_linux_tdep): Register osabi handler for
+	64-bit Linux.
+	* Makefile.in (hppa-linux-tdep.o): Update dependencies.
+	* config/pa/linux.mh: Stop using core-regset.o
+
+2006-03-30  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_find_unwind_entry_in_block): New.
+	(hppa_frame_cache): Use new function to find unwind entry.
+	(hppa_frame_this_id): Likewise.
+	(hppa_frame_unwind_sniffer): Likewise.
+
 2006-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention the removal of NLM.
