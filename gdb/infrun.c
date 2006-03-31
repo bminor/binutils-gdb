@@ -2439,13 +2439,7 @@ process_event_stop_test:
 	     get there, we'll need to single-step back to the
 	     caller.  */
 
-	  /* FIXME EXEC_ERROR */
-	  if (target_get_execution_direction () == EXEC_FORWARD)
-	    {
-	      insert_step_resume_breakpoint_at_frame
-		(get_prev_frame (get_current_frame ()));
-	    }
-	  else
+	  if (target_get_execution_direction () == EXEC_REVERSE)
 	    {
 	      /* FIXME: I'm not sure if we've handled the frame for
 		 recursion.  */
@@ -2454,6 +2448,11 @@ process_event_stop_test:
 	      init_sal (&sr_sal);
 	      sr_sal.pc = ecs->stop_func_start;
 	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	    }
+	  else
+	    {
+	      insert_step_resume_breakpoint_at_frame
+		(get_prev_frame (get_current_frame ()));
 	    }
 	  keep_going (ecs);
 	  return;
@@ -2515,15 +2514,7 @@ process_event_stop_test:
 	  return;
 	}
 
-      /* FIXME EXEC_ERROR */
-      if (target_get_execution_direction () == EXEC_FORWARD)
-	{
-	  /* Set a breakpoint at callee's return address (the address
-	     at which the caller will resume).  */
-	  insert_step_resume_breakpoint_at_frame
-	    (get_prev_frame (get_current_frame ()));
-	}
-      else
+      if (target_get_execution_direction () == EXEC_REVERSE)
 	{
 	  /* Set a breakpoint at callee's start address.
 	     From there we can step once and be back in the caller.  */
@@ -2532,6 +2523,13 @@ process_event_stop_test:
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
 	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	}
+      else
+	{
+	  /* Set a breakpoint at callee's return address (the address
+	     at which the caller will resume).  */
+	  insert_step_resume_breakpoint_at_frame
+	    (get_prev_frame (get_current_frame ()));
 	}
       keep_going (ecs);
       return;
@@ -2658,8 +2656,7 @@ process_event_stop_test:
 
   if (ecs->stop_func_end && ecs->sal.end >= ecs->stop_func_end)
     {
-      /* FIXME EXEC_ERROR */
-      if (target_get_execution_direction () == EXEC_FORWARD)
+      if (target_get_execution_direction () != EXEC_REVERSE)
 	{
 	  /* If this is the last line of the function, don't keep
 	     stepping (it would probably step us out of the function).
