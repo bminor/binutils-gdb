@@ -1516,7 +1516,10 @@ load_command (char *arg, int from_tty)
    we don't want to run a subprocess.  On the other hand, I'm not sure how
    performance compares.  */
 
-static int download_write_size = 512;
+/* FIXME drow/2006-03-30: This used to be 512.  The remote target will
+   throttle it if it's too large; is there any use in having a small
+   value here?  */
+static int download_write_size = 16384;
 static void
 show_download_write_size (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)

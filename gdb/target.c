@@ -1420,7 +1420,9 @@ target_read_whole (struct target_ops *ops,
 		   enum target_object object,
 		   const char *annex, gdb_byte **buf_p)
 {
-  size_t buf_alloc = 512, buf_pos = 0;
+  /* FIXME: Should we use the memory write size parameters for this
+     too?  Or something at another level entirely?  */
+  size_t buf_alloc = 32768, buf_pos = 0;
   gdb_byte *buf = xmalloc (buf_alloc);
   LONGEST n, total;
 
