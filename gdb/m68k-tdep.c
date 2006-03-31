@@ -43,10 +43,12 @@
    until we can implement a more flexible general solution.  */
 #if 0
 #define M68K_FPREG_TYPE builtin_type_m68881_ext
+#define M68K_FPREG_SIZE 12
 #define M68K_LONG_DOUBLE_FORMAT floatformat_m68881_ext
 #define M68K_RETURN_FP0 1
 #else
 #define M68K_FPREG_TYPE builtin_type_double
+#define M68K_FPREG_SIZE 8
 #define M68K_LONG_DOUBLE_FORMAT floatformat_ieee_double_big
 #define M68K_RETURN_FP0 0
 #endif
@@ -65,9 +67,8 @@
 #define P_MOVEL_SP	0x2f00
 #define P_MOVEML_SP	0x48e7
 
-
-#define REGISTER_BYTES_FP (16*4 + 8 + 8*12 + 3*4)
 #define REGISTER_BYTES_NOFP (16*4 + 8)
+#define REGISTER_BYTES_FP (REGISTER_BYTES_NOFP + 8*M68K_FPREG_SIZE + 3*4)
 
 /* Offset from SP to first arg on stack at first instruction of a function */
 #define SP_ARG0 (1 * 4)

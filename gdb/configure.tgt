@@ -128,7 +128,8 @@ m68*-*-netbsd* | m68*-*-knetbsd*-gnu)
 			gdb_target=nbsd ;;
 m68*-*-openbsd*)	gdb_target=obsd ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
-m68*-*-uclinux*)	gdb_target=monitor ;;
+m68*-*-uclinux*)	gdb_target=linux
+			build_gdbserver=yes ;;
 
 m88*-*-openbsd*)	gdb_target=obsd ;;
 
