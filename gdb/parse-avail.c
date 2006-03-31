@@ -267,7 +267,6 @@ xml_start_reg (struct xml_feature_parse_data *data,
   reg->gdb_regnum = -1;
   reg->protocol_number = -1;
   reg->bitsize = -1;
-  reg->readonly = -1;
   reg->save_restore = -1;
 
   for (p = attrs; *p; p += 2)
@@ -299,12 +298,6 @@ xml_start_reg (struct xml_feature_parse_data *data,
       else if (strcmp (name, "group") == 0)
 	reg->group = obstrdup (data->obstack, val);
 
-      else if (strcmp (name, "readonly") == 0)
-	{
-	  if (xml_parse_one_boolean (val, &reg->readonly) < 0)
-	    data->unhandled++;
-	}
-
       else if (strcmp (name, "save-restore") == 0)
 	{
 	  if (xml_parse_one_boolean (val, &reg->save_restore) < 0)
@@ -316,9 +309,8 @@ xml_start_reg (struct xml_feature_parse_data *data,
     }
 
   /* Fill in optional fields with defaults.  */
-  /* FIXME: If we always provide the DTD, we don't need to do this.  */
-  if (reg->readonly == -1)
-    reg->readonly = 0;
+  /* FIXME: Now that we always provide the DTD, we may not need to do
+     this; that would make these into internal errors.  */
   if (reg->save_restore == -1)
     reg->save_restore = 1;
   if (reg->type == NULL)

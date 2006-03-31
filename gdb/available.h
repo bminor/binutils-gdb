@@ -95,15 +95,8 @@ struct gdb_available_register
      This is a NUL-terminated string.  */
   const char *arch_data;
 
-  /* If this flag is set, GDB should never try to write to this
-     register.  Otherwise, the user may modify the value in the
-     register.  */
-  int readonly;
-
   /* If this flag is set, GDB should save and restore this register
      around calls to an inferior function.  */
-  /* FIXME: Richard Earnshaw proposed an alternate, more thourough
-     categorization.  Should we use that instead?  */
   int save_restore;
 
   /* The name of the register group containing this register.  If this

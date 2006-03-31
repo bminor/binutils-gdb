@@ -24992,7 +24992,6 @@ Each @var{reg} has the form:
 <reg name="@var{name}"
      bitsize="@var{size}"
      @r{[}regnum="@var{num}"@r{]}
-     @r{[}readonly="@var{read-only}"@r{]}
      @r{[}save-restore="@var{save-restore}"@r{]}
      @r{[}type="@var{type}"@r{]}
      @r{[}group="@var{group}"@r{]}/>
@@ -25015,10 +25014,6 @@ than that of the previous register; the first register's number
 defaults to zero.  But also see the @code{feature-ref} element's
 @code{base-regnum} attribute, below---these register numbers are relative
 to the @code{base-regnum}.
-
-@item readonly
-Whether the register is read-only or not; this must be either
-@code{yes} or @code{no}.  The default is @code{no}.
 
 @item save-restore
 Whether the register should be preserved across inferior function

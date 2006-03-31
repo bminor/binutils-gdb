@@ -717,5 +717,8 @@ available_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	return general_p;
     }
 
+  if (reg != NULL && (group == save_reggroup || group == restore_reggroup))
+    return reg->save_restore;
+
   return default_register_reggroup_p (gdbarch, regnum, reggroup);
 }
