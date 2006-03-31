@@ -1589,8 +1589,6 @@ linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
          data base-address from it (which is just the length of the
          text segment).  BSS immediately follows data in both
          cases.  */
-      printf ("%lx, %lx, %lx\n", text, text_end, data);
-      
       *text_p = text;
       *data_p = data - (text_end - text);
       
