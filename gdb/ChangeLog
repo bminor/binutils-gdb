@@ -9,6 +9,12 @@
 	(target_get_execution_direction): New macro.
 	* target.c (update_current_target): Inherit new execdir methods.
 
+	* remote.c (remote_get_execdir, remote_set_execdir): New methods.
+	(_initialize_remote): Add new methods to remote target vector.
+	(remote_resume): Check for reverse exec direction, and send
+	appropriate command to target.
+	(remote_wait): Check target response for NO_HISTORY status.
+
 2006-03-31  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* value.h (struct internalvar): Add field 'endian'.

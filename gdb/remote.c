@@ -2400,7 +2400,15 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
   else
     set_thread (pid, 0);	/* Run this thread.  */
 
-  if (siggnal != TARGET_SIGNAL_0)
+  if (target_get_execution_direction () == EXEC_REVERSE)
+    {
+      /* We don't pass signals to the target in reverse exec mode.  */
+      if (info_verbose && siggnal != TARGET_SIGNAL_0)
+	warning (" - Can't pass signal %d to target in reverse: ignored.\n",
+		 siggnal);
+      strcpy (buf, step ? "bs" : "bc");
+    }
+  else if (siggnal != TARGET_SIGNAL_0)
     {
       buf[0] = step ? 'S' : 'C';
       buf[1] = tohex (((int) siggnal >> 4) & 0xf);
@@ -2674,6 +2682,11 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
       switch (buf[0])
 	{
 	case 'E':		/* Error of some sort.  */
+	  if (buf[1] == '0' && buf[2] == '6')
+	    {
+	      status->kind = TARGET_WAITKIND_NO_HISTORY;
+	      goto got_status;
+	    }
 	  warning (_("Remote failure reply: %s"), buf);
 	  continue;
 	case 'F':		/* File-I/O request.  */
@@ -5180,6 +5193,35 @@ remote_get_thread_local_address (ptid_t ptid, CORE_ADDR lm, CORE_ADDR offset)
   return 0;
 }
 
+/* Reverse execution.  
+   FIXME: set up as a capability.  */
+static enum exec_direction_kind remote_execdir = EXEC_FORWARD;
+
+static enum exec_direction_kind remote_get_execdir (void)
+{
+  if (remote_debug && info_verbose)
+    printf_filtered ("remote execdir is %s\n", 
+		     remote_execdir == EXEC_FORWARD ? "forward" :
+		     remote_execdir == EXEC_REVERSE ? "reverse" :
+		     "unknown");
+  return remote_execdir;
+}
+
+static int remote_set_execdir (enum exec_direction_kind dir)
+{
+  if (remote_debug && info_verbose)
+    printf_filtered ("Set remote execdir: %s\n",
+		     dir == EXEC_FORWARD ? "forward" :
+		     dir == EXEC_REVERSE ? "reverse" :
+		     "bad direction");
+
+  /* FIXME: check target for capability.  */
+  if (dir == EXEC_FORWARD || dir == EXEC_REVERSE)
+    return (remote_execdir = dir);
+  else
+    return EXEC_ERROR;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -5227,6 +5269,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_has_registers = 1;
   remote_ops.to_has_execution = 1;
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
+  remote_ops.to_get_execdir = remote_get_execdir;
+  remote_ops.to_set_execdir = remote_set_execdir;
   remote_ops.to_magic = OPS_MAGIC;
 }
 
