@@ -1037,5 +1037,5 @@ _initialize_ppc_linux_nat (void)
   t->to_stopped_data_address = ppc_linux_stopped_data_address;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 }

@@ -383,6 +383,8 @@ struct bfd_hash_table
   struct bfd_hash_entry **table;
   /* The number of slots in the hash table.  */
   unsigned int size;
+  /* The size of elements.  */
+  unsigned int entsize;
   /* A function used to create new elements in the hash table.  The
      first entry is itself a pointer to an element.  When this
      function is first invoked, this pointer will be NULL.  However,
@@ -402,7 +404,8 @@ extern bfd_boolean bfd_hash_table_init
   (struct bfd_hash_table *,
    struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
 			       struct bfd_hash_table *,
-			       const char *));
+			       const char *),
+   unsigned int);
 
 /* Initialize a hash table specifying a size.  */
 extern bfd_boolean bfd_hash_table_init_n
@@ -410,7 +413,7 @@ extern bfd_boolean bfd_hash_table_init_n
    struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
 			       struct bfd_hash_table *,
 			       const char *),
-   unsigned int size);
+   unsigned int, unsigned int);
 
 /* Free up a hash table.  */
 extern void bfd_hash_table_free
@@ -1674,22 +1677,22 @@ enum bfd_architecture
 #define bfd_mach_m68040 6
 #define bfd_mach_m68060 7
 #define bfd_mach_cpu32  8
-#define bfd_mach_mcf_isa_a 9
-#define bfd_mach_mcf_isa_a_div 10
-#define bfd_mach_mcf_isa_a_div_mac 11
-#define bfd_mach_mcf_isa_a_div_emac 12
+#define bfd_mach_mcf_isa_a_nodiv 9
+#define bfd_mach_mcf_isa_a 10
+#define bfd_mach_mcf_isa_a_mac 11
+#define bfd_mach_mcf_isa_a_emac 12
 #define bfd_mach_mcf_isa_aplus 13
 #define bfd_mach_mcf_isa_aplus_mac 14
 #define bfd_mach_mcf_isa_aplus_emac 15
-#define bfd_mach_mcf_isa_aplus_usp 16
-#define bfd_mach_mcf_isa_aplus_usp_mac 17
-#define bfd_mach_mcf_isa_aplus_usp_emac 18
+#define bfd_mach_mcf_isa_b_nousp 16
+#define bfd_mach_mcf_isa_b_nousp_mac 17
+#define bfd_mach_mcf_isa_b_nousp_emac 18
 #define bfd_mach_mcf_isa_b 19
 #define bfd_mach_mcf_isa_b_mac 20
 #define bfd_mach_mcf_isa_b_emac 21
-#define bfd_mach_mcf_isa_b_usp_float 22
-#define bfd_mach_mcf_isa_b_usp_float_mac 23
-#define bfd_mach_mcf_isa_b_usp_float_emac 24
+#define bfd_mach_mcf_isa_b_float 22
+#define bfd_mach_mcf_isa_b_float_mac 23
+#define bfd_mach_mcf_isa_b_float_emac 24
   bfd_arch_vax,       /* DEC Vax */
   bfd_arch_i960,      /* Intel 960 */
     /* The order of the following is important.
@@ -2585,6 +2588,11 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS_TLS_TPREL_LO16,
 
 
+/* MIPS ELF relocations (VxWorks extensions).  */
+  BFD_RELOC_MIPS_COPY,
+  BFD_RELOC_MIPS_JUMP_SLOT,
+
+
 /* Fujitsu Frv Relocations.  */
   BFD_RELOC_FRV_LABEL16,
   BFD_RELOC_FRV_LABEL24,
@@ -2699,6 +2707,11 @@ in the instruction.  */
   BFD_RELOC_X86_64_TPOFF32,
   BFD_RELOC_X86_64_GOTOFF64,
   BFD_RELOC_X86_64_GOTPC32,
+  BFD_RELOC_X86_64_GOT64,
+  BFD_RELOC_X86_64_GOTPCREL64,
+  BFD_RELOC_X86_64_GOTPC64,
+  BFD_RELOC_X86_64_GOTPLT64,
+  BFD_RELOC_X86_64_PLTOFF64,
   BFD_RELOC_X86_64_GOTPC32_TLSDESC,
   BFD_RELOC_X86_64_TLSDESC_CALL,
   BFD_RELOC_X86_64_TLSDESC,
@@ -3071,6 +3084,22 @@ through 0.  */
 
 /* ADI Blackfin Long Jump pcrel.  */
   BFD_RELOC_BFIN_24_PCREL_JUMP_L,
+
+/* ADI Blackfin FD-PIC relocations.  */
+  BFD_RELOC_BFIN_GOT17M4,
+  BFD_RELOC_BFIN_GOTHI,
+  BFD_RELOC_BFIN_GOTLO,
+  BFD_RELOC_BFIN_FUNCDESC,
+  BFD_RELOC_BFIN_FUNCDESC_GOT17M4,
+  BFD_RELOC_BFIN_FUNCDESC_GOTHI,
+  BFD_RELOC_BFIN_FUNCDESC_GOTLO,
+  BFD_RELOC_BFIN_FUNCDESC_VALUE,
+  BFD_RELOC_BFIN_FUNCDESC_GOTOFF17M4,
+  BFD_RELOC_BFIN_FUNCDESC_GOTOFFHI,
+  BFD_RELOC_BFIN_FUNCDESC_GOTOFFLO,
+  BFD_RELOC_BFIN_GOTOFF17M4,
+  BFD_RELOC_BFIN_GOTOFFHI,
+  BFD_RELOC_BFIN_GOTOFFLO,
 
 /* ADI Blackfin GOT relocation.  */
   BFD_RELOC_BFIN_GOT,

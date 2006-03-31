@@ -1,5 +1,6 @@
 /* BFD back-end for PDP-11 a.out binaries.
-   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2446,9 +2447,10 @@ NAME (aout, link_hash_table_init) (struct aout_link_hash_table *table,
 				   bfd *abfd,
 				   struct bfd_hash_entry *(*newfunc) (struct bfd_hash_entry *,
 								     struct bfd_hash_table *,
-								     const char *))
+								     const char *),
+				   unsigned int entsize)
 {
-  return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
+  return _bfd_link_hash_table_init (&table->root, abfd, newfunc, entsize);
 }
 
 /* Create an a.out link hash table.  */
@@ -2463,7 +2465,8 @@ NAME (aout, link_hash_table_create) (bfd *abfd)
   if (ret == NULL)
     return NULL;
   if (! NAME (aout, link_hash_table_init) (ret, abfd,
-					   NAME (aout, link_hash_newfunc)))
+					   NAME (aout, link_hash_newfunc),
+					   sizeof (struct aout_link_hash_entry)))
     {
       free (ret);
       return NULL;
@@ -3657,9 +3660,10 @@ NAME (aout, final_link) (bfd *abfd,
   aout_info.symbol_map = NULL;
   aout_info.output_syms = NULL;
 
-  if (! bfd_hash_table_init_n (&aout_info.includes.root,
-			       aout_link_includes_newfunc,
-			       251))
+  if (!bfd_hash_table_init_n (&aout_info.includes.root,
+			      aout_link_includes_newfunc,
+			      sizeof (struct aout_link_includes_entry),
+			      251))
     goto error_return;
   includes_hash_initialized = TRUE;
 

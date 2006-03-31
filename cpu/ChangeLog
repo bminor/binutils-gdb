@@ -1,3 +1,20 @@
+2006-03-13  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (Bit3-S): New.
+	(btst:s): New.
+	* m32c.opc (parse_bit3_S): New.
+
+	* m32c.cpu (decimal-subtraction16-insn): Add second operand.
+	(btst): Add optional :G suffix for MACH32.
+	(or.b:S): New.
+	(pop.w:G): Add optional :G suffix for MACH16.
+	(push.b.imm): Fix syntax.
+
+2006-03-10  DJ Delorie  <dj@redhat.com>
+
+	* m32c.cpu (mul.l): New.
+	(mulu.l): New.
+
 2006-03-03 Shrirang Khisti <shrirangk@kpitcummins.com)
 
 	* xc16x.opc (parse_hash): Return NULL if the input was parsed or

@@ -747,8 +747,8 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	      break;
 
 	    case AngelSWI_Reason_IsTTY:
-	      state->Reg[0] = sim_callback->close (sim_callback,
-						   ARMul_ReadWord (state, addr));
+	      state->Reg[0] = sim_callback->isatty (sim_callback,
+						    ARMul_ReadWord (state, addr));
 	      OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	      break;
 

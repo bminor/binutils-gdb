@@ -1,7 +1,7 @@
 /* Top level stuff for GDB, the GNU debugger.
 
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1996, 1997, 1998, 1999, 2000, 2005 Free Software Foundation, Inc.
+   1996, 1997, 1998, 1999, 2000, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,8 @@
 extern char *line;
 extern int linesize;
 extern FILE *instream;
+extern int in_user_command;
+extern int caution;
 extern char gdb_dirbuf[1024];
 extern int inhibit_gdbinit;
 extern int epoch_interface;

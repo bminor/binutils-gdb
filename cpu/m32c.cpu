@@ -2026,6 +2026,10 @@
   h-sint DFLT f-imm3-S
   ((parse "imm3_S")) () ()
 )
+(define-full-operand Bit3-S "3 bit bit number" (m32c-isa)
+  h-sint DFLT f-imm3-S
+  ((parse "bit3_S")) () ()
+)
 
 ;-------------------------------------------------------------
 ; Bit numbers
@@ -7243,7 +7247,7 @@
     (dni (.sym op 16.b-imm8)
 	 (.str op ".b #imm8")
 	 ((machine 16))
-	 (.str op ".b #${Imm-16-QI}")
+	 (.str op ".b #${Imm-16-QI},r0l")
 	 (+ (f-0-4 #x7) (f-4-4 #xC) (f-8-4 #xE) (f-12-4 opc1) Imm-16-QI)
 	 ((.sym op -sem) QI Imm-16-QI R0l)
 	 ())
@@ -7251,7 +7255,7 @@
     (dni (.sym op 16.w-imm16)
 	 (.str op ".b #imm16")
 	 ((machine 16))
-	 (.str op ".w #${Imm-16-HI}")
+	 (.str op ".w #${Imm-16-HI},r0")
 	 (+ (f-0-4 #x7) (f-4-4 #xD) (f-8-4 #xE) (f-12-4 opc1) Imm-16-HI)
 	 ((.sym op -sem) HI Imm-16-HI R0)
 	 ())
@@ -7562,7 +7566,16 @@
   (set zbit (inv dst))
   (set cbit dst)
 )
-(bitdst-insn btst (f-0-4 7) (f-4-4 #xE) (f-8-4 #xB) (f-0-2 1) (f-2-2 1) (f-4-1 1) #xD #x0 #x0 btst-sem)
+(bitdst16-defn btst (f-0-4 7) (f-4-4 #xE) (f-8-4 #xB) (f-0-2 1) (f-2-2 1) (f-4-1 1) btst-sem)
+
+(bit-insn-defn 32 btst G bit32-16-Unprefixed
+	       (+ (f-0-4 #xD) bit32-16-Unprefixed (f-7-1 #x0) (f-10-3 #x0))
+	       btst-sem)
+
+(dni btst.s "btst:s" ((machine 32))
+     "btst:s ${Bit3-S},${Dsp-8-u16}"
+     (+ (f-0-2 #x0) (f-4-3 #x5) Bit3-S Dsp-8-u16)
+     () ())
 
 ;-------------------------------------------------------------
 ; btstc
@@ -8554,6 +8567,7 @@
 
 ; ??? semantics
 ; ldintb <==> ldc #imm,intbh ; ldc #imm,intbl
+
 (dni ldipl16.imm "ldipl #imm" ((machine 16))
      ("ldipl #${Imm-13-u3}")
      (+ (f-0-4 #x7) (f-4-4 #xD) (f-8-4 #xA) (f-12-1 0) Imm-13-u3)
@@ -8909,6 +8923,17 @@
 ; mul.BW src,dst
 (binary-arith-src-dst mul G (f-0-4 #x7) (f-4-3 4) #x1 #xC mul-sem)
 
+(dni mul_l "mul.l src,r2r0" ((machine 32))
+     ("mul.l ${dst32-24-Prefixed-SI},r2r0")
+     (+ (f-0-4 #x0) (f-4-4 #x1) (f-8-4 #x8) (f-15-1 #x1) (f-18-2 #x1) (f-20-4 #xf)
+	dst32-24-Prefixed-SI)
+     () ())
+
+(dni mulu_l "mulu.l src,r2r0" ((machine 32))
+     ("mulu.l ${dst32-24-Prefixed-SI},r2r0")
+     (+ (f-0-4 #x0) (f-4-4 #x1) (f-8-4 #x8) (f-15-1 #x1) (f-18-2 #x0) (f-20-4 #xf)
+	dst32-24-Prefixed-SI)
+     () ())
 ;-------------------------------------------------------------
 ; mulex - multiple extend sign (m32)
 ;-------------------------------------------------------------
@@ -9021,6 +9046,8 @@
 (binary-arith32-s-imm-dst HI .w 1 or #x1 #x2 or-sem)
 ; or.BW src,dst (m16 #3 m32 #3)
 (binary-arith-src-dst or G (f-0-4 #x9) (f-4-3 4) #x1 #x5 or-sem)
+; or.b:S src,r0[lh] (m16)
+(binary-arith16-b-S-src2 or (f-0-4 1) (f-4-1 1) or-sem)
 
 ;-------------------------------------------------------------
 ; pop - restore register/memory
@@ -9046,7 +9073,7 @@
 (define-pmacro (pop-sem32 mode dest) (pop-sem-mach 32 mode dest))
 
 ; pop.BW:G (m16 #1)
-(unary-insn-mach 16 pop (f-0-4 7) (f-4-3 2) (f-8-4 #xD) pop-sem16)
+(unary-insn-mach-g 16 pop (f-0-4 7) (f-4-3 2) (f-8-4 #xD) pop-sem16 $G)
 ; pop.BW:G (m32 #1)
 (unary-insn-mach 32 pop #xB #x2 #xF pop-sem32)
 
@@ -9357,7 +9384,7 @@
      ())
 
 (dni push32.b.imm "push.b #Imm-8-QI" ((machine 32))
-     ("push.b #Imm-8-QI")
+     ("push.b #${Imm-8-QI}")
      (+ (f-0-4 #xA) (f-4-4 #xE) Imm-8-QI)
      (push-sem32 QI Imm-8-QI)
      ())

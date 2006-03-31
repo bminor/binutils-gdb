@@ -1173,11 +1173,6 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   argreg = ARM_A1_REGNUM;
   nstack = 0;
 
-  /* Some platforms require a double-word aligned stack.  Make sure sp
-     is correctly aligned before we start.  We always do this even if
-     it isn't really needed -- it can never hurt things.  */
-  sp &= ~(CORE_ADDR)(2 * DEPRECATED_REGISTER_SIZE - 1);
-
   /* The struct_return pointer occupies the first parameter
      passing register.  */
   if (struct_return)
@@ -1297,6 +1292,17 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   regcache_cooked_write_unsigned (regcache, ARM_SP_REGNUM, sp);
 
   return sp;
+}
+
+
+/* Always align the frame to an 8-byte boundary.  This is required on
+   some platforms and harmless on the rest.  */
+
+static CORE_ADDR
+arm_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  /* Align the stack to eight bytes.  */
+  return sp & ~ (CORE_ADDR) 7;
 }
 
 static void
@@ -2738,6 +2744,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
+  set_gdbarch_frame_align (gdbarch, arm_frame_align);
 
   set_gdbarch_write_pc (gdbarch, arm_write_pc);
 

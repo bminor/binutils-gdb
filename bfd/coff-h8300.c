@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas H8/300 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005
+   2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -62,13 +62,6 @@ struct funcvec_hash_table
 static struct bfd_hash_entry *
 funcvec_hash_newfunc
   (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
-
-static bfd_boolean
-funcvec_hash_table_init
-  (struct funcvec_hash_table *, bfd *,
-   struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
-			       struct bfd_hash_table *,
-			       const char *));
 
 static bfd_reloc_status_type special
   (bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **);
@@ -181,13 +174,14 @@ funcvec_hash_table_init (struct funcvec_hash_table *table,
 			 struct bfd_hash_entry *(*newfunc)
 			   (struct bfd_hash_entry *,
 			    struct bfd_hash_table *,
-			    const char *))
+			    const char *),
+			 unsigned int entsize)
 {
   /* Initialize our local fields, then call the generic initialization
      routine.  */
   table->offset = 0;
   table->abfd = abfd;
-  return (bfd_hash_table_init (&table->root, newfunc));
+  return (bfd_hash_table_init (&table->root, newfunc, entsize));
 }
 
 /* Create the derived linker hash table.  We use a derived hash table
@@ -204,7 +198,8 @@ h8300_coff_link_hash_table_create (bfd *abfd)
   if (ret == NULL)
     return NULL;
   if (!_bfd_link_hash_table_init (&ret->root.root, abfd,
-				  _bfd_generic_link_hash_newfunc))
+				  _bfd_generic_link_hash_newfunc,
+				  sizeof (struct generic_link_hash_entry)))
     {
       free (ret);
       return NULL;
@@ -1298,7 +1293,8 @@ h8300_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
       /* And initialize the funcvec hash table.  */
       if (!funcvec_hash_table_init (funcvec_hash_table, abfd,
-				    funcvec_hash_newfunc))
+				    funcvec_hash_newfunc,
+				    sizeof (struct funcvec_hash_entry)))
 	{
 	  bfd_release (abfd, funcvec_hash_table);
 	  return FALSE;

@@ -1,6 +1,6 @@
 /* Functions specific to running GDB native on HPPA running GNU/Linux.
 
-   Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -392,5 +392,5 @@ _initialize_hppa_linux_nat (void)
   t->to_store_registers = hppa_linux_store_inferior_registers;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 }

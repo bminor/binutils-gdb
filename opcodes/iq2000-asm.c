@@ -213,8 +213,8 @@ parse_hi16 (CGEN_CPU_DESC cd,
 	     1 to the resultant %hi value.  */
 	  if (value & 0x8000)
 	    value += 0x10000;
-	  value &= 0xffff;
 	  value >>= 16;
+	  value &= 0xffff;
 	}
       *valuep = value;
 

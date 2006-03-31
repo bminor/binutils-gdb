@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux UltraSPARC.
 
-   Copyright (C) 2003, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2005, 2006 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,7 +57,7 @@ _initialize_sparc64_linux_nat (void)
   t->to_store_registers = store_inferior_registers;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 
   sparc_gregset = &sparc64_linux_ptrace_gregset;
 }

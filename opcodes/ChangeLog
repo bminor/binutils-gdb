@@ -1,8 +1,68 @@
+2006-03-16  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* bfin-dis.c (decode_dsp32shiftimm_0): Simplify and correct the
+	logic to identify halfword shifts.
+
+2006-03-16  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (arm_opcodes): Rename swi to svc.
+	(thumb_opcodes): Ditto.
+
+2006-03-13  DJ Delorie  <dj@redhat.com>
+
+	* m32c-asm.c: Regenerate.
+	* m32c-desc.c: Likewise.
+	* m32c-desc.h: Likewise.
+	* m32c-dis.c: Likewise.
+	* m32c-ibld.c: Likewise.
+	* m32c-opc.c: Likewise.
+	* m32c-opc.h: Likewise.
+
+2006-03-10  DJ Delorie  <dj@redhat.com>
+
+	* m32c-desc.c: Regenerate with mul.l, mulu.l.
+	* m32c-opc.c: Likewise.
+	* m32c-opc.h: Likewise.
+
+
+2006-03-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2006-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/2428
+	* i386-dis.c (REP_Fixup): New function.
+	(AL): Remove duplicate.
+	(Xbr): New.
+	(Xvr): Likewise.
+	(Ybr): Likewise.
+	(Yvr): Likewise.
+	(indirDXr): Likewise.
+	(ALr): Likewise.
+	(eAXr): Likewise.
+	(dis386): Updated entries of ins, outs, movs, lods and stos.
+
+2006-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* cgen-ibld.in (insert_normal): Cope with attempts to insert a
+	signed 32-bit value into an unsigned 32-bit field when the host is
+	a 64-bit machine.
+	* fr30-ibld.c: Regenerate.
+	* frv-ibld.c: Regenerate.
+	* ip2k-ibld.c: Regenerate.
+	* iq2000-asm.c: Regenerate.
+	* iq2000-ibld.c: Regenerate.
+	* m32c-ibld.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* openrisc-ibld.c: Regenerate.
+	* xc16x-ibld.c: Regenerate.
+	* xstormy16-ibld.c: Regenerate.
+
 2006-03-03 Shrirang Khisti <shrirangk@kpitcummins.com)
 
 	* xc16x-asm.c: Regenerate.
 	* xc16x-dis.c: Regenerate.
-	* xc16x-ibld.c: Regenerate.
 
 2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
 

@@ -48,6 +48,8 @@ extern bfd_boolean _bfd_mips_elf_check_relocs
   (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
 extern bfd_boolean _bfd_mips_elf_adjust_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);
+extern bfd_boolean _bfd_mips_vxworks_adjust_dynamic_symbol
+  (struct bfd_link_info *, struct elf_link_hash_entry *);
 extern bfd_boolean _bfd_mips_elf_always_size_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_size_dynamic_sections
@@ -56,6 +58,9 @@ extern bfd_boolean _bfd_mips_elf_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
 extern bfd_boolean _bfd_mips_elf_finish_dynamic_symbol
+  (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
+   Elf_Internal_Sym *);
+extern bfd_boolean _bfd_mips_vxworks_finish_dynamic_symbol
   (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
    Elf_Internal_Sym *);
 extern bfd_boolean _bfd_mips_elf_finish_dynamic_sections
@@ -89,6 +94,8 @@ extern bfd_byte *_bfd_elf_mips_get_relocated_section_contents
   (bfd *, struct bfd_link_info *, struct bfd_link_order *,
    bfd_byte *, bfd_boolean, asymbol **);
 extern struct bfd_link_hash_table *_bfd_mips_elf_link_hash_table_create
+  (bfd *);
+extern struct bfd_link_hash_table *_bfd_mips_vxworks_link_hash_table_create
   (bfd *);
 extern bfd_boolean _bfd_mips_elf_final_link
   (bfd *, struct bfd_link_info *);

@@ -1,6 +1,6 @@
 /* Matsushita 10300 specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+   2006 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -3695,8 +3695,9 @@ elf32_mn10300_link_hash_table_create (abfd)
   if (ret == (struct elf32_mn10300_link_hash_table *) NULL)
     return NULL;
 
-  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
-				       elf32_mn10300_link_hash_newfunc))
+  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
+				      elf32_mn10300_link_hash_newfunc,
+				      sizeof (struct elf32_mn10300_link_hash_entry)))
     {
       free (ret);
       return NULL;
@@ -3712,8 +3713,9 @@ elf32_mn10300_link_hash_table_create (abfd)
       return NULL;
     }
 
-  if (! _bfd_elf_link_hash_table_init (&ret->static_hash_table->root, abfd,
-				       elf32_mn10300_link_hash_newfunc))
+  if (!_bfd_elf_link_hash_table_init (&ret->static_hash_table->root, abfd,
+				      elf32_mn10300_link_hash_newfunc,
+				      sizeof (struct elf32_mn10300_link_hash_entry)))
     {
       free (ret->static_hash_table);
       free (ret);

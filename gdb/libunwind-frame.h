@@ -1,6 +1,6 @@
 /* Frame unwinder for frames with libunwind frame information.
 
-   Copyright (C) 2003 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2006 Free Software Foundation, Inc.
 
    Contributed by Jeff Johnston.
 
@@ -51,7 +51,7 @@ void libunwind_frame_this_id (struct frame_info *next_frame, void **this_cache,
 void libunwind_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 				    int regnum, int *optimizedp,
 				    enum lval_type *lvalp, CORE_ADDR *addrp,
-				    int *realnump, void *valuep);
+				    int *realnump, gdb_byte *valuep);
 CORE_ADDR libunwind_frame_base_address (struct frame_info *next_frame, void **this_cache);
 
 int libunwind_is_initialized (void);

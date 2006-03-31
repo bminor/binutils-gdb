@@ -1572,8 +1572,9 @@ m32r_elf_link_hash_table_create (bfd *abfd)
   if (ret == NULL)
     return NULL;
 
-  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
-                                       m32r_elf_link_hash_newfunc))
+  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
+				      m32r_elf_link_hash_newfunc,
+				      sizeof (struct elf_m32r_link_hash_entry)))
     {
       free (ret);
       return NULL;

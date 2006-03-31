@@ -542,6 +542,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
+	prologue-value.c \
 	regcache.c reggroups.c remote.c remote-fileio.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
@@ -726,6 +727,7 @@ kod_h = kod.h
 language_h = language.h
 libunwind_frame_h = libunwind-frame.h $(libunwind_h)
 linespec_h = linespec.h
+linux_fork_h = linux-fork.h
 linux_nat_h = linux-nat.h $(target_h)
 m2_lang_h = m2-lang.h
 m32r_tdep_h = m32r-tdep.h
@@ -737,6 +739,7 @@ macrotab_h = macrotab.h
 main_h = main.h
 mdebugread_h = mdebugread.h $(coff_sym_h) $(coff_symconst_h)
 memattr_h = memattr.h
+mips_linux_tdep_h = mips-linux-tdep.h
 mips_mdebug_tdep_h = mips-mdebug-tdep.h
 mipsnbsd_tdep_h = mipsnbsd-tdep.h
 mips_tdep_h = mips-tdep.h
@@ -755,6 +758,7 @@ ppcnbsd_tdep_h = ppcnbsd-tdep.h
 ppcobsd_tdep_h = ppcobsd-tdep.h
 ppc_tdep_h = ppc-tdep.h
 proc_utils_h = proc-utils.h
+prologue_value_h = prologue-value.h
 regcache_h = regcache.h
 reggroups_h = reggroups.h
 regset_h = regset.h
@@ -865,6 +869,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h \
 	xcoffsolib.h \
 	macrotab.h macroexp.h macroscope.h \
+	prologue-value.h \
 	ada-lang.h c-lang.h f-lang.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
@@ -1200,9 +1205,6 @@ $(TUI)$(EXEEXT): tui-main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
 		-o $(TUI)$(EXEEXT) tui-main.o libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
-
-nlm:	force
-	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
 
 # Create a library of the gdb object files and build GDB by linking
 # against that.
@@ -1963,9 +1965,10 @@ frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(command_h) $(gdbcmd_h) $(observer_h) $(objfiles_h) $(exceptions_h)
 frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdb_assert_h) $(dummy_frame_h) $(gdb_obstack_h)
-frv-linux-tdep.o: frv-linux-tdep.c $(defs_h) $(target_h) $(frame_h) \
-	$(osabi_h) $(elf_bfd_h) $(elf_frv_h) $(frv_tdep_h) $(trad_frame_h) \
-	$(frame_unwind_h)
+frv-linux-tdep.o: frv-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
+	$(frame_h) $(osabi_h) $(regcache_h) $(elf_bfd_h) $(elf_frv_h) \
+	$(frv_tdep_h) $(trad_frame_h) $(frame_unwind_h) $(regset_h) \
+	$(gdb_string_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(gdb_string_h) $(inferior_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(dis_asm_h) $(gdb_assert_h) \
@@ -2186,12 +2189,14 @@ linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(source_h) $(demangle_h) $(value_h) \
 	$(completer_h) $(cp_abi_h) $(parser_defs_h) $(block_h) \
 	$(objc_lang_h) $(linespec_h) $(exceptions_h)
-linux-fork.o: linux-fork.c linux-fork.h $(defs_h) $(inferior_h) \
-	$(regcache_h) $(gdbcmd_h) $(infcall_h)
+linux-fork.o: linux-fork.c $(defs_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) \
+	$(infcall_h) $(gdb_assert_h) $(gdb_string_h) $(linux_fork_h) \
+	$(linux_nat_h)
 linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_wait_h) $(gdb_assert_h) $(linux_nat_h) $(gdbthread_h) \
 	$(gdbcmd_h) $(regcache_h) $(inf_ptrace.h) $(auxv.h) $(elf_bfd_h) \
-	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h) linux-fork.h
+	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h) \
+	$(linux_fork_h)
 linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h) \
 	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(exceptions_h) \
 	$(gdbthread_h) $(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) \
@@ -2295,11 +2300,12 @@ mips64obsd-tdep.o: mips64obsd-tdep.c $(defs_h) $(osabi_h) $(regcache_h) \
 	$(gdb_string_h) $(mips_tdep_h) $(solib_svr4_h)
 mips-irix-tdep.o: mips-irix-tdep.c $(defs_h) $(osabi_h) $(elf_bfd_h)
 mips-linux-nat.o: mips-linux-nat.c $(defs_h) $(mips_tdep_h) $(target_h) \
-	$(linux_nat_h)
+	$(linux_nat_h) $(gdb_proc_service_h) $(mips_linux_tdep_h) \
+	$(inferior_h)
 mips-linux-tdep.o: mips-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(solib_svr4_h) $(osabi_h) $(mips_tdep_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(frame_h) $(regcache_h) $(trad_frame_h) \
-	$(tramp_frame_h)
+	$(tramp_frame_h) $(floatformat_h) $(mips_linux_tdep_h)
 mips-mdebug-tdep.o: mips-mdebug-tdep.c $(defs_h) $(frame_h) $(mips_tdep_h) \
 	$(trad_frame_h) $(block_h) $(symtab_h) $(objfiles_h) $(elf_mips_h) \
 	$(elf_bfd_h) $(gdb_assert_h) $(frame_unwind_h) $(frame_base_h) \
@@ -2431,6 +2437,8 @@ procfs.o: procfs.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 proc-service.o: proc-service.c $(defs_h) $(gdb_proc_service_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gregset_h)
 proc-why.o: proc-why.c $(defs_h) $(proc_utils_h)
+prologue-value.o: prologue-value.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
+	$(prologue_value_h) $(regcache_h)
 p-typeprint.o: p-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(language_h) $(p_lang_h) $(typeprint_h) $(gdb_string_h)
@@ -2733,7 +2741,7 @@ user-regs.o: user-regs.c $(defs_h) $(user_regs_h) $(gdbtypes_h) \
 utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(exceptions_h) $(tui_h) $(gdbcmd_h) $(serial_h) $(bfd_h) \
 	$(target_h) $(demangle_h) $(expression_h) $(language_h) $(charset_h) \
-	$(annotate_h) $(filenames_h) $(symfile_h) $(inferior_h) \
+	$(annotate_h) $(filenames_h) $(symfile_h) $(inferior_h) $(top_h) \
 	$(gdb_curses_h) $(readline_h) $(gdb_obstack_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)

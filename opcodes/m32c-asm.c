@@ -504,6 +504,24 @@ parse_imm3_S (CGEN_CPU_DESC cd, const char **strp,
 }
 
 static const char *
+parse_bit3_S (CGEN_CPU_DESC cd, const char **strp,
+	     int opindex, signed long *valuep)
+{
+  const char *errmsg = 0;
+  signed long value;
+  
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
+  if (errmsg)
+    return errmsg;
+
+  if (value < 0 || value > 7)
+    return _("immediate is out of range 0-7");
+
+  *valuep = value;
+  return 0;
+}
+
+static const char *
 parse_lab_5_3 (CGEN_CPU_DESC cd,
 	       const char **strp,
 	       int opindex ATTRIBUTE_UNUSED,
@@ -932,6 +950,9 @@ m32c_cgen_parse_operand (CGEN_CPU_DESC cd,
       break;
     case M32C_OPERAND_BIT16RN :
       errmsg = cgen_parse_keyword (cd, strp, & m32c_cgen_opval_h_gr_HI, & fields->f_dst16_rn);
+      break;
+    case M32C_OPERAND_BIT3_S :
+      errmsg = parse_bit3_S (cd, strp, M32C_OPERAND_BIT3_S, (long *) (& fields->f_imm3_S));
       break;
     case M32C_OPERAND_BIT32ANPREFIXED :
       errmsg = cgen_parse_keyword (cd, strp, & m32c_cgen_opval_h_ar, & fields->f_dst32_an_prefixed);

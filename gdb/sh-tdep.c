@@ -2541,10 +2541,13 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case bfd_mach_sh3:
+    case bfd_mach_sh3_nommu:
+    case bfd_mach_sh2a_nofpu_or_sh3_nommu:
       set_gdbarch_register_name (gdbarch, sh_sh3_register_name);
       break;
 
     case bfd_mach_sh3e:
+    case bfd_mach_sh2a_or_sh3e:
       /* doubles on sh2e and sh3e are actually 4 byte. */
       set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
@@ -2574,6 +2577,9 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     case bfd_mach_sh4_nofpu:
     case bfd_mach_sh4a_nofpu:
+    case bfd_mach_sh4_nommu_nofpu:
+    case bfd_mach_sh2a_nofpu_or_sh4_nommu_nofpu:
+    case bfd_mach_sh2a_or_sh4:
       set_gdbarch_register_name (gdbarch, sh_sh4_nofpu_register_name);
       break;
 

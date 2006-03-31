@@ -54,6 +54,7 @@
 #include "filenames.h"
 #include "symfile.h"
 #include "gdb_obstack.h"
+#include "top.h"
 
 #include "inferior.h"		/* for signed_pointer_to_address */
 
@@ -1141,15 +1142,16 @@ query (const char *ctlstr, ...)
   int ans2;
   int retval;
 
+  /* Automatically answer "yes" if input is not from the user
+     directly, or if the user did not want prompts.  */
+  if (!input_from_terminal_p () || !caution)
+    return 1;
+
   if (deprecated_query_hook)
     {
       va_start (args, ctlstr);
       return deprecated_query_hook (ctlstr, args);
     }
-
-  /* Automatically answer "yes" if input is not from a terminal.  */
-  if (!input_from_terminal_p ())
-    return 1;
 
   while (1)
     {
@@ -1244,14 +1246,15 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       n_string = "[n]";
     }
 
+  /* Automatically answer the default value if input is not from the user
+     directly, or if the user did not want prompts.  */
+  if (!input_from_terminal_p () || !caution)
+    return def_value;
+
   if (deprecated_query_hook)
     {
       return deprecated_query_hook (ctlstr, args);
     }
-
-  /* Automatically answer default value if input is not from a terminal.  */
-  if (!input_from_terminal_p ())
-    return def_value;
 
   while (1)
     {

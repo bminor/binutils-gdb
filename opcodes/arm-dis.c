@@ -659,7 +659,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V1, 0x08000000, 0x0e100000, "stm%c%23?id%24?ba\t%16-19r%21'!, %m%22'^"},
   {ARM_EXT_V1, 0x08100000, 0x0e100000, "ldm%c%23?id%24?ba\t%16-19r%21'!, %m%22'^"},
   {ARM_EXT_V1, 0x0a000000, 0x0e000000, "b%24'l%c\t%b"},
-  {ARM_EXT_V1, 0x0f000000, 0x0f000000, "swi%c\t%0-23x"},
+  {ARM_EXT_V1, 0x0f000000, 0x0f000000, "svc%c\t%0-23x"},
 
   /* The rest.  */
   {ARM_EXT_V1, 0x00000000, 0x00000000, "undefined instruction %0-31x"},
@@ -798,7 +798,7 @@ static const struct opcode16 thumb_opcodes[] =
   {ARM_EXT_V4T, 0xC000, 0xF800, "stmia\t%8-10r!, %M"},
   {ARM_EXT_V4T, 0xC800, 0xF800, "ldmia\t%8-10r!, %M"},
   /* format 17 */
-  {ARM_EXT_V4T, 0xDF00, 0xFF00, "swi\t%0-7d"},
+  {ARM_EXT_V4T, 0xDF00, 0xFF00, "svc\t%0-7d"},
   /* format 16 */
   {ARM_EXT_V4T, 0xD000, 0xF000, "b%8-11c.n\t%0-7B"},
   /* format 18 */

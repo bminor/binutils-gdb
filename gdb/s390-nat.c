@@ -311,7 +311,7 @@ s390_fix_watch_points (void)
 }
 
 static int
-s390_insert_watchpoint (CORE_ADDR addr, int len)
+s390_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   struct watch_area *area = xmalloc (sizeof (struct watch_area));
   if (!area)
@@ -328,7 +328,7 @@ s390_insert_watchpoint (CORE_ADDR addr, int len)
 }
 
 static int
-s390_remove_watchpoint (CORE_ADDR addr, int len)
+s390_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
   struct watch_area *area, **parea;
 
@@ -388,5 +388,5 @@ _initialize_s390_nat (void)
   t->to_remove_watchpoint = s390_remove_watchpoint;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 }

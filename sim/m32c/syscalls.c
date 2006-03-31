@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "mem.h"
 #include "syscalls.h"
 
-#include "../../libgloss/syscall.h"
+#include "syscall.h"
 
 /* The current syscall callbacks we're using.  */
 static struct host_callback_struct *callbacks;

@@ -1,7 +1,7 @@
 /* Functions specific to running gdb native on IA-64 running
    GNU/Linux.
 
-   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -700,5 +700,5 @@ _initialize_ia64_linux_nat (void)
   t->to_xfer_partial = ia64_linux_xfer_partial;
 
   /* Register the target.  */
-  add_target (t);
+  linux_nat_add_target (t);
 }

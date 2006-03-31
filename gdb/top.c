@@ -112,6 +112,10 @@ Whether to confirm potentially dangerous operations is %s.\n"),
 
 FILE *instream;
 
+/* Flag to indicate whether a user defined command is currently running.  */
+
+int in_user_command;
+
 /* Current working directory.  */
 
 char *current_directory;
@@ -909,11 +913,11 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	}
 
       /* Don't use fancy stuff if not talking to stdin.  */
-      if (deprecated_readline_hook && instream == NULL)
+      if (deprecated_readline_hook && input_from_terminal_p ())
 	{
 	  rl = (*deprecated_readline_hook) (local_prompt);
 	}
-      else if (command_editing_p && instream == stdin && ISATTY (instream))
+      else if (command_editing_p && input_from_terminal_p ())
 	{
 	  rl = gdb_readline_wrapper (local_prompt);
 	}
@@ -1197,13 +1201,22 @@ quit_force (char *args, int from_tty)
   exit (exit_code);
 }
 
-/* Returns whether GDB is running on a terminal and whether the user
-   desires that questions be asked of them on that terminal.  */
+/* Returns whether GDB is running on a terminal and input is
+   currently coming from that terminal.  */
 
 int
 input_from_terminal_p (void)
 {
-  return gdb_has_a_terminal () && (instream == stdin) & caution;
+  if (gdb_has_a_terminal () && instream == stdin)
+    return 1;
+
+  /* If INSTREAM is unset, and we are not in a user command, we
+     must be in Insight.  That's like having a terminal, for our
+     purposes.  */
+  if (instream == NULL && !in_user_command)
+    return 1;
+
+  return 0;
 }
 
 static void

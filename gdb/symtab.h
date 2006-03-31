@@ -554,7 +554,7 @@ enum address_class
   LOC_INDIRECT,
 
   /* The variable's address is computed by a set of location
-     functions (see "struct location_funcs" below).  */
+     functions (see "struct symbol_ops" below).  */
   LOC_COMPUTED,
 
   /* Same as LOC_COMPUTED, but for function arguments.  */

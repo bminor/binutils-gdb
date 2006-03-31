@@ -1,6 +1,6 @@
 /* PowerPC-specific support for 32-bit ELF
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005 Free Software Foundation, Inc.
+   2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2430,8 +2430,9 @@ ppc_elf_link_hash_table_create (bfd *abfd)
   if (ret == NULL)
     return NULL;
 
-  if (! _bfd_elf_link_hash_table_init (&ret->elf, abfd,
-				       ppc_elf_link_hash_newfunc))
+  if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
+				      ppc_elf_link_hash_newfunc,
+				      sizeof (struct ppc_elf_link_hash_entry)))
     {
       free (ret);
       return NULL;
@@ -3335,7 +3336,9 @@ ppc_elf_check_relocs (bfd *abfd,
 	      if (s == got2)
 		htab->plt_type = PLT_OLD;
 	    }
-	  /* fall through */
+	  if (h == NULL || h == htab->elf.hgot)
+	    break;
+	  goto dodyn1;
 
 	case R_PPC_REL24:
 	case R_PPC_REL14:
@@ -3343,9 +3346,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_REL14_BRNTAKEN:
 	  if (h == NULL)
 	    break;
-	  if (h == htab->elf.hgot && htab->plt_type == PLT_UNSET)
+	  if (h == htab->elf.hgot)
 	    {
-	      htab->plt_type = PLT_OLD;
+	      if (htab->plt_type == PLT_UNSET)
+		htab->plt_type = PLT_OLD;
 	      break;
 	    }
 	  /* fall through */
@@ -3361,6 +3365,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_UADDR32:
 	case R_PPC_UADDR16:
+	dodyn1:
 	  if (h != NULL && !info->shared)
 	    {
 	      /* We may need a plt entry if the symbol turns out to be
@@ -5763,6 +5768,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		      insn1 |= 32 << 26;	/* lwz */
 		      insn2 = 0x7c631214;	/* add 3,3,2 */
 		      rel[1].r_info = ELF32_R_INFO (r_symndx2, R_PPC_NONE);
+		      rel[1].r_addend = 0;
 		      r_type = (((r_type - (R_PPC_GOT_TLSGD16 & 3)) & 3)
 				+ R_PPC_GOT_TPREL16);
 		      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
@@ -5777,13 +5783,13 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			  /* Was an LD reloc.  */
 			  r_symndx = 0;
 			  rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-			  rel[1].r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
 			}
 		      r_type = R_PPC_TPREL16_HA;
 		      rel->r_info = ELF32_R_INFO (r_symndx, r_type);
 		      rel[1].r_info = ELF32_R_INFO (r_symndx,
 						    R_PPC_TPREL16_LO);
 		      rel[1].r_offset += 2;
+		      rel[1].r_addend = rel->r_addend;
 		    }
 		  bfd_put_32 (output_bfd, insn1, contents + rel->r_offset - 2);
 		  bfd_put_32 (output_bfd, insn2, contents + offset);

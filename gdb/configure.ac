@@ -1513,12 +1513,6 @@ if test "x$target" = "x$host"; then
   fi
 fi
 
-# We configure the nlm subdirectory on netware targets, as instructed
-# by configure.tgt.
-if test "x$build_nlm" = xyes; then
-   AC_CONFIG_SUBDIRS(nlm)
-fi
-
 # If hostfile (XM_FILE) and/or targetfile (DEPRECATED_TM_FILE) and/or
 # nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
 # to an empty version.

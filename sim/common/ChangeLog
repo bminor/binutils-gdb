@@ -1,3 +1,8 @@
+2006-03-29  Hans-Peter Nilsson  <hp@axis.com>
+
+	* aclocal.m4 (SIM_AC_OPTION_HARDWARE): Correct duplicate-
+	option-contents test.
+
 2005-11-28  Mark Mitchell  <mark@codesourcery.com>
 
 	* sim-signal.c (sim_signal_to_target): Fix typos.

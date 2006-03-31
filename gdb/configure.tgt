@@ -96,9 +96,7 @@ i[34567]86-*-linux*)	gdb_target=linux
 			build_gdbserver=yes
 			;;
 i[34567]86-*-gnu*)	gdb_target=i386gnu ;;
-i[34567]86-*-netware*)	gdb_target=i386
-			build_nlm=yes
-			;;
+i[34567]86-*-netware*)	gdb_target=i386 ;;
 i[34567]86-*-cygwin*)	gdb_target=cygwin  ;;
 i[34567]86-*-*)		gdb_target=i386 ;;
 

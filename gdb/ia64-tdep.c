@@ -2732,7 +2732,8 @@ ia64_libunwind_frame_this_id (struct frame_info *next_frame, void **this_cache,
      and don't want to unwind past this frame.  We return a null frame_id to
      indicate this.  */
   libunwind_frame_prev_register (next_frame, this_cache, IA64_IP_REGNUM, 
-		  		 &optimized, &lval, &addr, &realnum, &prev_ip);
+		  		 &optimized, &lval, &addr, &realnum, buf);
+  prev_ip = extract_unsigned_integer (buf, 8);
 
   if (prev_ip != 0)
     (*this_id) = frame_id_build_special (id.stack_addr, id.code_addr, bsp);
@@ -2892,6 +2893,7 @@ ia64_libunwind_sigtramp_frame_prev_register (struct frame_info *next_frame,
 					     int *realnump, gdb_byte *valuep)
 
 {
+  gdb_byte buf[8];
   CORE_ADDR prev_ip, addr;
   int realnum, optimized;
   enum lval_type lval;
@@ -2900,7 +2902,8 @@ ia64_libunwind_sigtramp_frame_prev_register (struct frame_info *next_frame,
   /* If the previous frame pc value is 0, then we want to use the SIGCONTEXT
      method of getting previous registers.  */
   libunwind_frame_prev_register (next_frame, this_cache, IA64_IP_REGNUM, 
-		  		 &optimized, &lval, &addr, &realnum, &prev_ip);
+		  		 &optimized, &lval, &addr, &realnum, buf);
+  prev_ip = extract_unsigned_integer (buf, 8);
 
   if (prev_ip == 0)
     {

@@ -1,3 +1,15 @@
+2006-03-13  DJ Delorie  <dj@redhat.com>
+
+	* mem.c (mem_put_byte): Hook simulated UART to stdout.
+	(mem_put_hi): Hook in simulated trace port.
+	(mem_get_byte): Hook in simulated uart control port.
+	* opc2c: Be more picky about matching special comments.
+	* r8c.opc (shift_op): Limit shift counts to -16..16.
+	(BMcnd): Map conditional codes.
+	* reg.c (condition_true): Mask condition code to 4 bits.
+	* syscalls.c: Include local syscall.h.
+	* syscall.h: New, copied from libgloss.
+
 2005-10-06  Jim Blandy  <jimb@redhat.com>
 
 	Simulator for Renesas M32C and M16C, by DJ Delorie <dj@redhat.com>,

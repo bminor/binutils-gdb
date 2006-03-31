@@ -1561,7 +1561,8 @@ _bfd_elf_link_hash_table_init
    bfd *abfd,
    struct bfd_hash_entry *(*newfunc) (struct bfd_hash_entry *,
 				      struct bfd_hash_table *,
-				      const char *))
+				      const char *),
+   unsigned int entsize)
 {
   bfd_boolean ret;
   int can_refcount = get_elf_backend_data (abfd)->can_refcount;
@@ -1588,7 +1589,7 @@ _bfd_elf_link_hash_table_init
   table->loaded = NULL;
   table->is_relocatable_executable = FALSE;
 
-  ret = _bfd_link_hash_table_init (&table->root, abfd, newfunc);
+  ret = _bfd_link_hash_table_init (&table->root, abfd, newfunc, entsize);
   table->root.type = bfd_link_elf_hash_table;
 
   return ret;
@@ -1606,7 +1607,8 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
   if (ret == NULL)
     return NULL;
 
-  if (! _bfd_elf_link_hash_table_init (ret, abfd, _bfd_elf_link_hash_newfunc))
+  if (! _bfd_elf_link_hash_table_init (ret, abfd, _bfd_elf_link_hash_newfunc,
+				       sizeof (struct elf_link_hash_entry)))
     {
       free (ret);
       return NULL;

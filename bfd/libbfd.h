@@ -7,7 +7,7 @@
    (This include file is not for users of the library.)
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -56,6 +56,12 @@ struct bfd_in_memory
   bfd_size_type size;
   /* Buffer holding contents of BFD.  */
   bfd_byte *buffer;
+};
+
+struct section_hash_entry
+{
+  struct bfd_hash_entry root;
+  asection section;
 };
 
 /* tdata for an archive.  For an input archive, cache
@@ -473,7 +479,8 @@ extern bfd_boolean _bfd_link_hash_table_init
   (struct bfd_link_hash_table *, bfd *,
    struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
 			       struct bfd_hash_table *,
-			       const char *));
+			       const char *),
+   unsigned int);
 
 /* Generic link hash table creation routine.  */
 extern struct bfd_link_hash_table *_bfd_generic_link_hash_table_create
@@ -965,6 +972,9 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MIPS_TLS_TPREL_HI16",
   "BFD_RELOC_MIPS_TLS_TPREL_LO16",
 
+  "BFD_RELOC_MIPS_COPY",
+  "BFD_RELOC_MIPS_JUMP_SLOT",
+
   "BFD_RELOC_FRV_LABEL16",
   "BFD_RELOC_FRV_LABEL24",
   "BFD_RELOC_FRV_LO16",
@@ -1055,6 +1065,11 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_X86_64_TPOFF32",
   "BFD_RELOC_X86_64_GOTOFF64",
   "BFD_RELOC_X86_64_GOTPC32",
+  "BFD_RELOC_X86_64_GOT64",
+  "BFD_RELOC_X86_64_GOTPCREL64",
+  "BFD_RELOC_X86_64_GOTPC64",
+  "BFD_RELOC_X86_64_GOTPLT64",
+  "BFD_RELOC_X86_64_PLTOFF64",
   "BFD_RELOC_X86_64_GOTPC32_TLSDESC",
   "BFD_RELOC_X86_64_TLSDESC_CALL",
   "BFD_RELOC_X86_64_TLSDESC",
@@ -1333,6 +1348,20 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_BFIN_12_PCREL_JUMP_S",
   "BFD_RELOC_BFIN_24_PCREL_CALL_X",
   "BFD_RELOC_BFIN_24_PCREL_JUMP_L",
+  "BFD_RELOC_BFIN_GOT17M4",
+  "BFD_RELOC_BFIN_GOTHI",
+  "BFD_RELOC_BFIN_GOTLO",
+  "BFD_RELOC_BFIN_FUNCDESC",
+  "BFD_RELOC_BFIN_FUNCDESC_GOT17M4",
+  "BFD_RELOC_BFIN_FUNCDESC_GOTHI",
+  "BFD_RELOC_BFIN_FUNCDESC_GOTLO",
+  "BFD_RELOC_BFIN_FUNCDESC_VALUE",
+  "BFD_RELOC_BFIN_FUNCDESC_GOTOFF17M4",
+  "BFD_RELOC_BFIN_FUNCDESC_GOTOFFHI",
+  "BFD_RELOC_BFIN_FUNCDESC_GOTOFFLO",
+  "BFD_RELOC_BFIN_GOTOFF17M4",
+  "BFD_RELOC_BFIN_GOTOFFHI",
+  "BFD_RELOC_BFIN_GOTOFFLO",
   "BFD_RELOC_BFIN_GOT",
   "BFD_RELOC_BFIN_PLTPC",
   "BFD_ARELOC_BFIN_PUSH",

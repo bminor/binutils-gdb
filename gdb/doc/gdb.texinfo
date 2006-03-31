@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001, 2002, 2003, 2004, 2005
+@c 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -52,7 +52,7 @@ This is the @value{EDITION} Edition, of @cite{Debugging with
 Version @value{GDBVN}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
-              1999, 2000, 2001, 2002, 2003, 2004, 2005@*
+              1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006@*
               Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -85,7 +85,7 @@ development.''
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 
+1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006 
 Free Software Foundation, Inc.
 @sp 2
 Published by the Free Software Foundation @*
@@ -117,7 +117,7 @@ This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 This is the @value{EDITION} Edition, for @value{GDBN} Version
 @value{GDBVN}.
 
-Copyright (C) 1988-2005 Free Software Foundation, Inc.
+Copyright (C) 1988-2006 Free Software Foundation, Inc.
 
 @menu
 * Summary::                     Summary of @value{GDBN}
@@ -11906,14 +11906,23 @@ An executable file.  @samp{target exec @var{program}} is the same as
 A core dump file.  @samp{target core @var{filename}} is the same as
 @samp{core-file @var{filename}}.
 
-@item target remote @var{dev}
+@item target remote @var{medium}
 @cindex remote target
-Remote serial target in GDB-specific protocol.  The argument @var{dev}
-specifies what serial device to use for the connection (e.g.@:
-@file{/dev/ttya}). @xref{Remote, ,Remote debugging}.  @code{target remote}
-supports the @code{load} command.  This is only useful if you have
-some other way of getting the stub to the target system, and you can put
-it somewhere in memory where it won't get clobbered by the download.
+A remote system connected to @value{GDBN} via a serial line or network
+connection.  This command tells @value{GDBN} to use its own remote
+protocol over @var{medium} for debugging.  @xref{Remote Debugging}.
+
+For example, if you have a board connected to @file{/dev/ttya} on the
+machine running @value{GDBN}, you could say:
+
+@smallexample
+target remote /dev/ttya
+@end smallexample
+
+@code{target remote} supports the @code{load} command.  This is only
+useful if you have some other way of getting the stub to the target
+system, and you can put it somewhere in memory where it won't get
+clobbered by the download.
 
 @item target sim
 @cindex built-in simulator target
@@ -12130,7 +12139,6 @@ want to try.
 @menu
 * Connecting::                  Connecting to a remote target
 * Server::	                Using the gdbserver program
-* NetWare::                     Using the gdbserve.nlm program
 * Remote configuration::        Remote configuration
 * remote stub::                 Implementing a remote stub
 @end menu
@@ -12143,37 +12151,51 @@ your program, since @value{GDBN} needs symobl and debugging information.
 Start up @value{GDBN} as usual, using the name of the local copy of your
 program as the first argument.
 
-@cindex serial line, @code{target remote}
-If you're using a serial line, you may want to give @value{GDBN} the
-@w{@samp{--baud}} option, or use the @code{set remotebaud} command
-(@pxref{Remote configuration, set remotebaud}) before the
-@code{target} command.
+@cindex @code{target remote}
+@value{GDBN} can communicate with the target over a serial line, or
+over an @acronym{IP} network using @acronym{TCP} or @acronym{UDP}.  In
+each case, @value{GDBN} uses the same protocol for debugging your
+program; only the medium carrying the debugging packets varies.  The
+@code{target remote} command establishes a connection to the target.
+Its arguments indicate which medium to use:
 
-After that, use @code{target remote} to establish communications with
-the target machine.  Its argument specifies how to communicate---either
-via a devicename attached to a direct serial line, or a TCP or UDP port
-(possibly to a terminal server which in turn has a serial line to the
-target).  For example, to use a serial line connected to the device
-named @file{/dev/ttyb}:
+@table @code
+
+@item target remote @var{serial-device}
+@cindex serial line, @code{target remote}
+Use @var{serial-device} to communicate with the target.  For example,
+to use a serial line connected to the device named @file{/dev/ttyb}:
 
 @smallexample
 target remote /dev/ttyb
 @end smallexample
 
-@cindex TCP port, @code{target remote}
-To use a TCP connection, use an argument of the form
-@code{@var{host}:@var{port}} or @code{tcp:@var{host}:@var{port}}.
-For example, to connect to port 2828 on a
-terminal server named @code{manyfarms}:
+If you're using a serial line, you may want to give @value{GDBN} the
+@w{@samp{--baud}} option, or use the @code{set remotebaud} command
+(@pxref{Remote configuration, set remotebaud}) before the
+@code{target} command.
+
+@item target remote @code{@var{host}:@var{port}}
+@itemx target remote @code{tcp:@var{host}:@var{port}}
+@cindex @acronym{TCP} port, @code{target remote}
+Debug using a @acronym{TCP} connection to @var{port} on @var{host}.
+The @var{host} may be either a host name or a numeric @acronym{IP}
+address; @var{port} must be a decimal number.  The @var{host} could be
+the target machine itself, if it is directly connected to the net, or
+it might be a terminal server which in turn has a serial line to the
+target.
+
+For example, to connect to port 2828 on a terminal server named
+@code{manyfarms}:
 
 @smallexample
 target remote manyfarms:2828
 @end smallexample
 
-If your remote target is actually running on the same machine as
-your debugger session (e.g.@: a simulator of your target running on
-the same host), you can omit the hostname.  For example, to connect
-to port 1234 on your local machine:
+If your remote target is actually running on the same machine as your
+debugger session (e.g.@: a simulator for your target running on the
+same host), you can omit the hostname.  For example, to connect to
+port 1234 on your local machine:
 
 @smallexample
 target remote :1234
@@ -12182,22 +12204,39 @@ target remote :1234
 
 Note that the colon is still required here.
 
-@cindex UDP port, @code{target remote}
-To use a UDP connection, use an argument of the form
-@code{udp:@var{host}:@var{port}}.  For example, to connect to UDP port 2828
-on a terminal server named @code{manyfarms}:
+@item target remote @code{udp:@var{host}:@var{port}}
+@cindex @acronym{UDP} port, @code{target remote}
+Debug using @acronym{UDP} packets to @var{port} on @var{host}.  For example, to
+connect to @acronym{UDP} port 2828 on a terminal server named @code{manyfarms}:
 
 @smallexample
 target remote udp:manyfarms:2828
 @end smallexample
 
-When using a UDP connection for remote debugging, you should keep in mind
-that the `U' stands for ``Unreliable''.  UDP can silently drop packets on
-busy or unreliable networks, which will cause havoc with your debugging
-session.
+When using a @acronym{UDP} connection for remote debugging, you should
+keep in mind that the `U' stands for ``Unreliable''.  @acronym{UDP}
+can silently drop packets on busy or unreliable networks, which will
+cause havoc with your debugging session.
 
-Now you can use all the usual commands to examine and change data and to
-step and continue the remote program.
+@item target remote | @var{command}
+@cindex pipe, @code{target remote} to
+Run @var{command} in the background and communicate with it using a
+pipe.  The @var{command} is a shell command, to be parsed and expanded
+by the system's command shell, @code{/bin/sh}; it should expect remote
+protocol packets on its standard input, and send replies on its
+standard output.  You could use this to run a stand-alone simulator
+that speaks the remote debugging protocol, to make net connections
+using programs like @code{ssh}, or for other similar tricks.
+
+If @var{command} closes its standard output (perhaps by exiting),
+@value{GDBN} will try to send it a @code{SIGTERM} signal.  (If the
+program has already exited, this will have no effect.)
+
+@end table
+
+Once the connection has been established, you can use all the usual
+commands to examine and change data and to step and continue the
+remote program.
 
 @cindex interrupting remote programs
 @cindex remote programs, interrupting
@@ -12353,51 +12392,6 @@ you normally would), do that with the @code{file} command, and issue
 it @emph{before} connecting to the server; otherwise, you will get an
 error message saying @code{"Program is already running"}, since the
 program is considered running after the connection.
-
-@end table
-
-@node NetWare
-@section Using the @code{gdbserve.nlm} program
-
-@kindex gdbserve.nlm
-@code{gdbserve.nlm} is a control program for NetWare systems, which
-allows you to connect your program with a remote @value{GDBN} via
-@code{target remote}.
-
-@value{GDBN} and @code{gdbserve.nlm} communicate via a serial line,
-using the standard @value{GDBN} remote serial protocol.
-
-@table @emph
-@item On the target machine,
-you need to have a copy of the program you want to debug.
-@code{gdbserve.nlm} does not need your program's symbol table, so you
-can strip the program if necessary to save space.  @value{GDBN} on the
-host system does all the symbol handling.
-
-To use the server, you must tell it how to communicate with
-@value{GDBN}; the name of your program; and the arguments for your
-program.  The syntax is:
-
-@smallexample
-load gdbserve [ BOARD=@var{board} ] [ PORT=@var{port} ]
-              [ BAUD=@var{baud} ] @var{program} [ @var{args} @dots{} ]
-@end smallexample
-
-@var{board} and @var{port} specify the serial line; @var{baud} specifies
-the baud rate used by the connection.  @var{port} and @var{node} default
-to 0, @var{baud} defaults to 9600@dmn{bps}.
-
-For example, to debug Emacs with the argument @samp{foo.txt}and
-communicate with @value{GDBN} over serial port number 2 or board 1
-using a 19200@dmn{bps} connection:
-
-@smallexample
-load gdbserve BOARD=1 PORT=2 BAUD=19200 emacs foo.txt
-@end smallexample
-
-@item
-On the @value{GDBN} host machine, connect to your target (@pxref{Connecting,,
-Connecting to a remote target}).
 
 @end table
 
@@ -22468,6 +22462,7 @@ means the same as "0000".
 The error response returned for some packets includes a two character
 error number.  That number is not well defined.
 
+@cindex empty response, for unsupported packets
 For any @var{command} not supported by the stub, an empty response
 (@samp{$#00}) should be returned.  That way it is possible to extend the
 protocol.  A newer @value{GDBN} can tell if a packet is supported based

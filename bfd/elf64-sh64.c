@@ -1,5 +1,5 @@
 /* SuperH SH64-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -3138,8 +3138,9 @@ sh64_elf64_link_hash_table_create (bfd *abfd)
   if (ret == (struct elf_sh64_link_hash_table *) NULL)
     return NULL;
 
-  if (! _bfd_elf_link_hash_table_init (&ret->root, abfd,
-				       sh64_elf64_link_hash_newfunc))
+  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
+				      sh64_elf64_link_hash_newfunc,
+				      sizeof (struct elf_sh64_link_hash_entry)))
     {
       free (ret);
       return NULL;

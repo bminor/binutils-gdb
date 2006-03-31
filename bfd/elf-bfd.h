@@ -1489,7 +1489,8 @@ extern bfd_boolean _bfd_elf_link_hash_fixup_symbol
 extern bfd_boolean _bfd_elf_link_hash_table_init
   (struct elf_link_hash_table *, bfd *,
    struct bfd_hash_entry *(*)
-     (struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+     (struct bfd_hash_entry *, struct bfd_hash_table *, const char *),
+   unsigned int);
 extern bfd_boolean _bfd_elf_slurp_version_tables
   (bfd *, bfd_boolean);
 extern bfd_boolean _bfd_elf_merge_sections

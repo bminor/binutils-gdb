@@ -1,6 +1,6 @@
 /* Generic ECOFF (Extended-COFF) routines.
    Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -3285,8 +3285,9 @@ _bfd_ecoff_bfd_link_hash_table_create (bfd *abfd)
   ret = bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
-  if (! _bfd_link_hash_table_init (&ret->root, abfd,
-				   ecoff_link_hash_newfunc))
+  if (!_bfd_link_hash_table_init (&ret->root, abfd,
+				  ecoff_link_hash_newfunc,
+				  sizeof (struct ecoff_link_hash_entry)))
     {
       free (ret);
       return NULL;

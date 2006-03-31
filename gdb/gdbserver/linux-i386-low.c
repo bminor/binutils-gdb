@@ -1,5 +1,5 @@
 /* GNU/Linux/i386 specific low level interface, for the remote server for GDB.
-   Copyright (C) 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2004, 2005
+   Copyright (C) 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -23,19 +23,7 @@
 #include "linux-low.h"
 #include "i387-fp.h"
 
-/* Correct for all GNU/Linux targets (for quite some time).  */
-#define GDB_GREGSET_T elf_gregset_t
-#define GDB_FPREGSET_T elf_fpregset_t
-
-#ifndef HAVE_ELF_FPREGSET_T
-/* Make sure we have said types.  Not all platforms bring in <linux/elf.h>
-   via <sys/procfs.h>.  */
-#ifdef HAVE_LINUX_ELF_H   
-#include <linux/elf.h>    
-#endif
-#endif
-   
-#include "../gdb_proc_service.h"
+#include "gdb_proc_service.h"
 
 #include <sys/ptrace.h>
 
