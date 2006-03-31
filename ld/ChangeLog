@@ -1,3 +1,9 @@
+2006-03-31  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldmisc.c (vfinfo): Revert 2005-10-05 changes.  If
+	bfd_find_nearest_line succeeded for %C or %D, but filename
+	is NULL, print section+offset at the end.
+
 2006-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* emulparams/elf32bfinfd.sh: New file.
