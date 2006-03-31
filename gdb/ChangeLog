@@ -34,6 +34,12 @@
 	* infrun.c: Make sure to check for EXEC_REVERSE not EXEC_FORWARD,
 	since targets that don't implement execdir will return EXEC_ERROR.
 
+2006-03-31  Michael Snyder  <msnyder@redhat.com>
+
+	User interface for reverse execution.
+	* Makefile.in (reverse.c): New file.
+	* reverse.c: New file.  User interface for reverse execution.
+
 2006-03-31  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* value.h (struct internalvar): Add field 'endian'.

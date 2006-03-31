@@ -543,7 +543,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	objfiles.c osabi.c observer.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
 	prologue-value.c \
-	regcache.c reggroups.c remote.c remote-fileio.c \
+	regcache.c reggroups.c remote.c remote-fileio.c reverse.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
 	serial.c ser-base.c ser-unix.c \
@@ -927,7 +927,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	signals.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
-	exec.o bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
+	exec.o reverse.o \
+	bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o coff-pe-read.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
 	dwarf2expr.o dwarf2loc.o dwarf2-frame.o \
@@ -2493,6 +2494,8 @@ remote-st.o: remote-st.c $(defs_h) $(gdbcore_h) $(target_h) $(gdb_string_h) \
 remote-utils.o: remote-utils.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) \
 	$(target_h) $(serial_h) $(gdbcore_h) $(inferior_h) $(remote_utils_h) \
 	$(regcache_h)
+reverse.o: reverse.c $(defs_h) $(gdb_string_h) $(target_h) $(cli_cmds_h) \
+	$(cli_decode_h) $(top_h)
 rom68k-rom.o: rom68k-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(value_h) $(m68k_tdep_h)
 rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
