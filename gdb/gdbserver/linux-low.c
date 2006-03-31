@@ -140,7 +140,11 @@ linux_create_inferior (char *program, char **allargs)
   void *new_process;
   int pid;
 
+#if defined(__UCLIBC__) && !defined(__UCLIBC_HAS_MMU__)
+  pid = vfork ();
+#else
   pid = fork ();
+#endif
   if (pid < 0)
     perror_with_name ("fork");
 
@@ -896,7 +900,7 @@ linux_resume_one_process (struct inferior_list_entry *entry,
   if (debug_threads && the_low_target.get_pc != NULL)
     {
       fprintf (stderr, "  ");
-      (long) (*the_low_target.get_pc) ();
+      (*the_low_target.get_pc) ();
     }
 
   /* If we have pending signals, consume one unless we are trying to reinsert
@@ -1550,6 +1554,53 @@ linux_stopped_data_address (void)
     return 0;
 }
 
+#if defined(__UCLIBC__) && !defined(__UCLIBC_HAS_MMU__)
+#if defined(__mcoldfire__)
+/* These should really be defined in the kernel's ptrace.h header.  */
+#define PT_TEXT_ADDR 49*4
+#define PT_DATA_ADDR 50*4
+#define PT_TEXT_END_ADDR  51*4
+#endif
+
+/* Under uClinux, programs are loaded at non-zero offsets, which we need
+   to tell gdb about.  */
+
+static int
+linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
+{
+#if defined(PT_TEXT_ADDR) && defined(PT_DATA_ADDR) && defined(PT_TEXT_END_ADDR)
+  unsigned long text, text_end, data;
+  int pid = get_thread_process (current_inferior)->head.id;
+
+  errno = 0;
+
+  text = ptrace (PTRACE_PEEKUSER, pid, (long)PT_TEXT_ADDR, 0);
+  text_end = ptrace (PTRACE_PEEKUSER, pid, (long)PT_TEXT_END_ADDR, 0);
+  data = ptrace (PTRACE_PEEKUSER, pid, (long)PT_DATA_ADDR, 0);
+
+  if (errno == 0)
+    {
+      /* Both text and data offsets produced at compile-time (and so
+         used by gdb) are relative to the beginning of the program,
+         with the data segment immediately following the text segment.
+         However, the actual runtime layout in memory may put the data
+         somewhere else, so when we send gdb a data base-address, we
+         use the real data base address and subtract the compile-time
+         data base-address from it (which is just the length of the
+         text segment).  BSS immediately follows data in both
+         cases.  */
+      printf ("%lx, %lx, %lx\n", text, text_end, data);
+      
+      *text_p = text;
+      *data_p = data - (text_end - text);
+      
+      return 1;
+    }
+#endif
+ return 0;
+}
+#endif
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -1569,6 +1620,9 @@ static struct target_ops linux_target_ops = {
   linux_remove_watchpoint,
   linux_stopped_by_watchpoint,
   linux_stopped_data_address,
+#if defined(__UCLIBC__) && !defined(__UCLIBC_HAS_MMU__)
+  linux_read_offsets,
+#endif
 };
 
 static void

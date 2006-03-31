@@ -156,6 +156,11 @@ struct target_ops
 
   CORE_ADDR (*stopped_data_address) (void);
 
+  /* Reports the text, data offsets of the executable.  This is
+     needed for uclinux where the executable is relocated during load
+     time.  */
+  
+  int (*read_offsets) (CORE_ADDR *text, CORE_ADDR *data);
 };
 
 extern struct target_ops *the_target;
