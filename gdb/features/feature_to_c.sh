@@ -24,7 +24,7 @@ for input in dummy "$@"; do
     } {
       split($0, line, "");
       printf "  "
-      for (i = 1; i <= length(line); i++) {
+      for (i = 1; i <= length($0); i++) {
         c = line[i]
         if (c == "'\''") {
           printf "'\''\\'\'''\'', "
