@@ -189,7 +189,20 @@ static void show_packet_config_cmd (struct packet_config *config);
 
 static void update_packet_config (struct packet_config *config);
 
+static void set_remote_protocol_packet_cmd (char *args, int from_tty,
+					    struct cmd_list_element *c);
+
+static void show_remote_protocol_packet_cmd (struct ui_file *file,
+					     int from_tty,
+					     struct cmd_list_element *c,
+					     const char *value);
+
 void _initialize_remote (void);
+
+/* For "set remote" and "show remote".  */
+
+static struct cmd_list_element *remote_set_cmdlist;
+static struct cmd_list_element *remote_show_cmdlist;
 
 /* Description of the remote protocol.  Strictly speaking, when the
    target is open()ed, remote.c should create a per-target description
@@ -229,6 +242,10 @@ struct remote_state
   /* This is the maximum size (in chars) of a non read/write packet.
      It is also used as a cap on the size of read/write packets.  */
   long remote_packet_size;
+
+  /* This flag is set if we negotiated packet size explicitly (and
+     can bypass various heuristics).  */
+  int explicit_packet_size;
 };
 
 
@@ -457,10 +474,13 @@ get_memory_packet_size (struct memory_packet_config *config)
       if (config->size > 0
 	  && what_they_get > config->size)
 	what_they_get = config->size;
-      /* Limit it to the size of the targets ``g'' response.  */
-      if ((rs->actual_register_packet_size) > 0
-	  && what_they_get > (rs->actual_register_packet_size))
-	what_they_get = (rs->actual_register_packet_size);
+
+      /* Limit it to the size of the targets ``g'' response unless we have
+	 permission from the stub to use a larger packet size.  */
+      if (!rs->explicit_packet_size
+	  && rs->actual_register_packet_size > 0
+	  && what_they_get > rs->actual_register_packet_size)
+	what_they_get = rs->actual_register_packet_size;
     }
   if (what_they_get > MAX_REMOTE_PACKET_SIZE)
     what_they_get = MAX_REMOTE_PACKET_SIZE;
@@ -596,6 +616,7 @@ struct packet_config
     char *title;
     enum auto_boolean detect;
     enum packet_support support;
+    int must_be_reported;
   };
 
 /* Analyze a packet's return value and update the packet config
@@ -659,11 +680,8 @@ static void
 add_packet_config_cmd (struct packet_config *config,
 		       char *name,
 		       char *title,
-		       cmd_sfunc_ftype *set_func,
-		       show_value_ftype *show_func,
-		       struct cmd_list_element **set_remote_list,
-		       struct cmd_list_element **show_remote_list,
-		       int legacy)
+		       int legacy,
+		       int must_be_reported)
 {
   char *set_doc;
   char *show_doc;
@@ -673,6 +691,7 @@ add_packet_config_cmd (struct packet_config *config,
   config->title = title;
   config->detect = AUTO_BOOLEAN_AUTO;
   config->support = PACKET_SUPPORT_UNKNOWN;
+  config->must_be_reported = must_be_reported;
   set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet",
 			name, title);
   show_doc = xstrprintf ("Show current use of remote protocol `%s' (%s) packet",
@@ -681,17 +700,18 @@ add_packet_config_cmd (struct packet_config *config,
   cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc, show_doc, NULL, /* help_doc */
-				set_func, show_func,
-				set_remote_list, show_remote_list);
+				set_remote_protocol_packet_cmd,
+				show_remote_protocol_packet_cmd,
+				&remote_set_cmdlist, &remote_show_cmdlist);
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
   if (legacy)
     {
       char *legacy_name;
       legacy_name = xstrprintf ("%s-packet", name);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
-		     set_remote_list);
+		     &remote_set_cmdlist);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
-		     show_remote_list);
+		     &remote_show_cmdlist);
     }
 }
 
@@ -762,6 +782,7 @@ packet_ok (const char *buf, struct packet_config *config)
 enum {
   PACKET_vCont = 0,
   PACKET_X,
+  PACKET_qOffsets,
   PACKET_qSymbol,
   PACKET_P,
   PACKET_p,
@@ -1827,14 +1848,20 @@ get_offsets (void)
   CORE_ADDR text_addr, data_addr, bss_addr;
   struct section_offsets *offs;
 
+  if (remote_protocol_packets[PACKET_qOffsets].support == PACKET_DISABLE)
+    return;
+
   putpkt ("qOffsets");
   getpkt (buf, rs->remote_packet_size, 0);
 
-  if (buf[0] == '\000')
-    return;			/* Return silently.  Stub doesn't support
-				   this command.  */
-  if (buf[0] == 'E')
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_qOffsets]))
     {
+    case PACKET_OK:
+      break;
+    case PACKET_UNKNOWN:
+      return;			/* Return silently.  Stub doesn't support
+				   this command.  */
+    case PACKET_ERROR:
       warning (_("Remote failure reply: %s"), buf);
       return;
     }
@@ -2034,6 +2061,108 @@ Some events may be lost, rendering further debugging impossible."));
 }
 
 static void
+remote_query_packet_info (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *reply, *next;
+  int i;
+
+  reply = alloca (rs->remote_packet_size);
+
+  putpkt ("qPacketInfo");
+  getpkt (reply, rs->remote_packet_size, 0);
+
+  next = reply;
+  while (*next)
+    {
+      enum packet_support is_supported;
+      char *p, *end, *name_end;
+
+      p = next;
+      end = strchr (p, ';');
+      if (end == NULL)
+	{
+	  end = p + strlen (p);
+	  next = end;
+	}
+      else
+	{
+	  if (end == p)
+	    {
+	      warning (_("empty item in \"qPacketInfo\" response"));
+	      continue;
+	    }
+
+	  *end = '\0';
+	  next = end + 1;
+	}
+
+      name_end = strchr (p, '=');
+      if (name_end)
+	{
+	  /* This is a name=value entry.  */
+	  char *value;
+
+	  value = name_end + 1;
+	  *name_end = '\0';
+
+	  if (strcmp (p, "PacketSize") == 0)
+	    {
+	      int packet_size;
+	      char *value_end;
+
+	      packet_size = strtol (value, &value_end, 16);
+	      if (*value != '\0' && *value_end == '\0')
+		{
+		  /* MERGE WARNING: This needs the infinite length
+		     incoming packet support, which in turn needs us
+		     to adjust rs->buf_size here.  */
+		  if (packet_size >= MAX_REMOTE_PACKET_SIZE)
+		    {
+		      warning (_("limiting remote suggested packet size (%d bytes) to %d"),
+			       packet_size, MAX_REMOTE_PACKET_SIZE);
+		      packet_size = MAX_REMOTE_PACKET_SIZE;
+		    }
+		  rs->remote_packet_size = packet_size;
+		  rs->explicit_packet_size = 1;
+
+		  continue;
+		}
+	    }
+
+	  /* Should we even warn about this?  For testing, at least, yes.  */
+	  warning (_("unrecognized item \"%s=%s\" in \"qPacketInfo\" response"),
+		   p, value);
+	  continue;
+	}
+
+      if (end[-1] != '+' && end[-1] != '-')
+	{
+	  warning (_("unrecognized item \"%s\" in \"qPacketInfo\" response"), p);
+	  continue;
+	}
+
+      is_supported = (end[-1] == '+') ? PACKET_ENABLE : PACKET_DISABLE;
+      end[-1] = '\0';
+
+      for (i = 0; i < PACKET_MAX; i++)
+	if (strcmp (remote_protocol_packets[i].name, p) == 0)
+	  {
+	    if (remote_protocol_packets[i].support == PACKET_SUPPORT_UNKNOWN)
+	      remote_protocol_packets[i].support = is_supported;
+	    break;
+	  }
+    }
+
+  /* Default some unmentioned packets to unsupported.  */
+  for (i = 0; i < PACKET_MAX; i++)
+    if (remote_protocol_packets[i].must_be_reported
+	&& remote_protocol_packets[i].support == PACKET_SUPPORT_UNKNOWN)
+      remote_protocol_packets[i].support = PACKET_DISABLE;
+}
+
+
+static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	       int extended_p, int async_p)
 {
@@ -2094,6 +2223,11 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   /* Probe for ability to use "ThreadInfo" query, as required.  */
   use_threadinfo_query = 1;
   use_threadextra_query = 1;
+
+  /* The first packet we send to the target is the optional "supported
+     packets" request.  If the target can answer this, it will tell us
+     which later probes to skip.  */
+  remote_query_packet_info ();
 
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
@@ -3138,7 +3272,7 @@ fetch_registers_using_g (void)
     error (_("remote 'g' packet reply is too large: %s"), buf);
   if (buf_len % 2 != 0)
     error (_("Remote 'g' packet reply is of odd length: %s"), buf);
-  if (REGISTER_BYTES_OK_P () && !REGISTER_BYTES_OK (i))
+  if (REGISTER_BYTES_OK_P () && !REGISTER_BYTES_OK (buf_len / 2))
     error (_("Remote 'g' packet reply is too short: %s"), buf);
 
   /* Save the size of the packet sent to us by the target.  It is used
@@ -5485,9 +5619,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   extended_async_remote_ops.to_mourn_inferior = extended_remote_mourn;
 }
 
-static struct cmd_list_element *remote_set_cmdlist;
-static struct cmd_list_element *remote_show_cmdlist;
-
 static void
 set_remote_cmd (char *args, int from_tty)
 {
@@ -5665,95 +5796,47 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			   &setlist, &showlist);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_X],
-			 "X", "binary-download",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "X", "binary-download", 1, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vCont],
-			 "vCont", "verbose-resume",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "vCont", "verbose-resume", 0, 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qOffsets],
+			 "qOffsets", "load-offsets", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSymbol],
-			 "qSymbol", "symbol-lookup",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "qSymbol", "symbol-lookup", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_P],
-			 "P", "set-register",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "P", "set-register", 1, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_p],
-			 "p", "fetch-register",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "p", "fetch-register", 1, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z0],
-			 "Z0", "software-breakpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z0", "software-breakpoint", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z1],
-			 "Z1", "hardware-breakpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z1", "hardware-breakpoint", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z2],
-			 "Z2", "write-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z2", "write-watchpoint", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z3],
-			 "Z3", "read-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z3", "read-watchpoint", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z4],
-			 "Z4", "access-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z4", "access-watchpoint",  0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qPart_auxv],
-			 "qPart_auxv", "read-aux-vector",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "qPart:auxv", "read-aux-vector", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qPart_features],
-			 "qPart_features", "target-features",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "qPart:features", "target-features", 0, 1);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 0, 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may
