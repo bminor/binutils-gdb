@@ -755,6 +755,7 @@ lookup_internalvar (char *name)
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
   var->name = concat (name, (char *)NULL);
   var->value = allocate_value (builtin_type_void);
+  var->endian = TARGET_BYTE_ORDER;
   release_value (var->value);
   var->next = internalvars;
   internalvars = var;
@@ -765,12 +766,46 @@ struct value *
 value_of_internalvar (struct internalvar *var)
 {
   struct value *val;
+  int i, j;
+  gdb_byte temp;
 
   val = value_copy (var->value);
   if (value_lazy (val))
     value_fetch_lazy (val);
   VALUE_LVAL (val) = lval_internalvar;
   VALUE_INTERNALVAR (val) = var;
+
+  /* Values are always stored in the target's byte order.  When connected to a
+     target this will most likely always be correct, so there's normally no
+     need to worry about it.
+
+     However, internal variables can be set up before the target endian is
+     known and so may become out of date.  Fix it up before anybody sees.
+
+     Internal variables usually hold simple scalar values, and we can
+     correct those.  More complex values (e.g. structures and floating
+     point types) are left alone, because they would be too complicated
+     to correct.  */
+
+  if (var->endian != TARGET_BYTE_ORDER)
+    {
+      gdb_byte *array = value_contents_raw (val);
+      struct type *type = check_typedef (value_enclosing_type (val));
+      switch (TYPE_CODE (type))
+	{
+	case TYPE_CODE_INT:
+	case TYPE_CODE_PTR:
+	  /* Reverse the bytes.  */
+	  for (i = 0, j = TYPE_LENGTH (type) - 1; i < j; i++, j--)
+	    {
+	      temp = array[j];
+	      array[j] = array[i];
+	      array[i] = temp;
+	    }
+	  break;
+	}
+    }
+
   return val;
 }
 
@@ -809,6 +844,7 @@ set_internalvar (struct internalvar *var, struct value *val)
      long.  */
   xfree (var->value);
   var->value = newval;
+  var->endian = TARGET_BYTE_ORDER;
   release_value (newval);
   /* End code which must not call error().  */
 }
@@ -877,7 +913,8 @@ show_convenience (char *ignore, int from_tty)
 	  varseen = 1;
 	}
       printf_filtered (("$%s = "), var->name);
-      value_print (var->value, gdb_stdout, 0, Val_pretty_default);
+      value_print (value_of_internalvar (var), gdb_stdout,
+		   0, Val_pretty_default);
       printf_filtered (("\n"));
     }
   if (!varseen)

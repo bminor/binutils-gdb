@@ -1,3 +1,11 @@
+2006-03-31  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* value.h (struct internalvar): Add field 'endian'.
+	* value.c (lookup_internalvar): Initialise endian.
+	(value_of_internalvar): Flip the endian of built-in types if required.
+	(set_internalvar): Set the endian.
+	(show_convenience): Access the value through value_of_internalvar().
+
 2006-03-30  Vladimir Prus  <ghost@cs.msu.su>
 
 	* remote.c (watchpoint_to_Z_packet): Use values of Z_packet_type enum
