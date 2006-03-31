@@ -1,3 +1,7 @@
+2006-03-31  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Overview): Add an index entry to "empty response".
+
 2006-03-28  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdbint.texinfo (Prologue Analysis): New section.

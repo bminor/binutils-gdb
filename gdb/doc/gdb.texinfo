@@ -22462,6 +22462,7 @@ means the same as "0000".
 The error response returned for some packets includes a two character
 error number.  That number is not well defined.
 
+@cindex empty response, to unsupported packets
 For any @var{command} not supported by the stub, an empty response
 (@samp{$#00}) should be returned.  That way it is possible to extend the
 protocol.  A newer @value{GDBN} can tell if a packet is supported based
