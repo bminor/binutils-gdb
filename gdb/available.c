@@ -698,7 +698,7 @@ available_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   reg = find_register (gdbarch_feature_set (gdbarch), regnum);
   if (reg != NULL && reg->group != NULL)
     {
-      int general_p, float_p, vector_p;
+      int general_p = 0, float_p = 0, vector_p = 0;
 
       if (strcmp (reg->group, "general") == 0)
 	general_p = 1;
@@ -717,7 +717,8 @@ available_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	return general_p;
     }
 
-  if (reg != NULL && (group == save_reggroup || group == restore_reggroup))
+  if (reg != NULL
+      && (reggroup == save_reggroup || reggroup == restore_reggroup))
     return reg->save_restore;
 
   return default_register_reggroup_p (gdbarch, regnum, reggroup);
