@@ -2117,7 +2117,7 @@ remote_query_packet_info (void)
 		  /* MERGE WARNING: This needs the infinite length
 		     incoming packet support, which in turn needs us
 		     to adjust rs->buf_size here.  */
-		  if (packet_size >= MAX_REMOTE_PACKET_SIZE)
+		  if (packet_size > MAX_REMOTE_PACKET_SIZE)
 		    {
 		      warning (_("limiting remote suggested packet size (%d bytes) to %d"),
 			       packet_size, MAX_REMOTE_PACKET_SIZE);
