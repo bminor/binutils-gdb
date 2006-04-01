@@ -5618,7 +5618,8 @@ specification @code{BASE = <number>} may be used to specify a
 non-default base address for the image. 
 
 If neither @code{LIBRARY <name>} nor  @code{NAME <name>} is specified,
-the internal name is the same as the filename specified on the command line. 
+or they specify an empty string, the internal name is the same as the
+filename specified on the command line.
 
 The complete specification of an export symbol is:
 

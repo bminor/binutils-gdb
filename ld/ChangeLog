@@ -1,3 +1,10 @@
+2006-04-01  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* deffilep.y (def_image_name): If LIBRARY or NAME statement
+	specifies an empty string, retain the name specified on command
+	line.
+	* ld.texinfo: Document above.
+
 2006-03-31  Jakub Jelinek  <jakub@redhat.com>
 
 	* ldmisc.c (vfinfo): Revert 2005-10-05 changes.  If
