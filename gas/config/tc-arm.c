@@ -12614,9 +12614,9 @@ arm_fix_adjustable (fixS * fixP)
 #endif
 
 #ifdef OBJ_ELF
-/* Relocations against Thumb function names must be left unadjusted,
-   so that the linker can use this information to correctly set the
-   bottom bit of their addresses.  The MIPS version of this function
+/* Relocations against function names must be left unadjusted,
+   so that the linker can use this information to generate interworking
+   stubs.  The MIPS version of this function
    also prevents relocations that are mips-16 specific, but I do not
    know why it does this.
 
@@ -12632,6 +12632,10 @@ arm_fix_adjustable (fixS * fixP)
 {
   if (fixP->fx_addsy == NULL)
     return 1;
+
+  /* Preserve relocations against symbols with function type.  */
+  if (symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_FUNCTION)
+    return 0;
 
   if (THUMB_IS_FUNC (fixP->fx_addsy)
       && fixP->fx_subsy == NULL)
