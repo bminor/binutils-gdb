@@ -1308,10 +1308,8 @@ finish_command (char *arg, int from_tty)
     error (_("The \"finish\" command does not take any arguments."));
   if (!target_has_execution)
     error (_("The program is not running."));
-  if (deprecated_selected_frame == NULL)
-    error (_("No selected frame."));
 
-  frame = get_prev_frame (deprecated_selected_frame);
+  frame = get_prev_frame (get_selected_frame (_("No selected frame.")));
   if (frame == 0)
     error (_("\"finish\" not meaningful in the outermost frame."));
 
@@ -1329,7 +1327,7 @@ finish_command (char *arg, int from_tty)
 
   /* Find the function we will return from.  */
 
-  function = find_pc_function (get_frame_pc (deprecated_selected_frame));
+  function = find_pc_function (get_frame_pc (get_selected_frame (NULL)));
 
   /* Print info on the selected frame, including level number but not
      source.  */
@@ -1695,13 +1693,12 @@ registers_info (char *addr_exp, int fpregs)
 
   if (!target_has_registers)
     error (_("The program has no registers now."));
-  if (deprecated_selected_frame == NULL)
-    error (_("No selected frame."));
 
   if (!addr_exp)
     {
       gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
-				    deprecated_selected_frame, -1, fpregs);
+				    get_selected_frame (_("No selected frame.")),
+				    -1, fpregs);
       return;
     }
 
@@ -1734,12 +1731,12 @@ registers_info (char *addr_exp, int fpregs)
 
       /* A register name?  */
       {
-	int regnum = frame_map_name_to_regnum (deprecated_selected_frame,
+	int regnum = frame_map_name_to_regnum (get_selected_frame (_("No selected frame.")),
 					       start, end - start);
 	if (regnum >= 0)
 	  {
 	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
-					  deprecated_selected_frame, regnum, fpregs);
+					  get_selected_frame (NULL), regnum, fpregs);
 	    continue;
 	  }
       }
@@ -1753,7 +1750,7 @@ registers_info (char *addr_exp, int fpregs)
 	    && regnum < NUM_REGS + NUM_PSEUDO_REGS)
 	  {
 	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
-					  deprecated_selected_frame, regnum, fpregs);
+					  get_selected_frame (NULL), regnum, fpregs);
 	    continue;
 	  }
       }
@@ -1779,7 +1776,7 @@ registers_info (char *addr_exp, int fpregs)
 		if (gdbarch_register_reggroup_p (current_gdbarch, regnum,
 						 group))
 		  gdbarch_print_registers_info (current_gdbarch,
-						gdb_stdout, deprecated_selected_frame,
+						gdb_stdout, get_selected_frame (NULL),
 						regnum, fpregs);
 	      }
 	    continue;
@@ -1809,8 +1806,6 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
 {
   if (!target_has_registers)
     error (_("The program has no registers now."));
-  if (deprecated_selected_frame == NULL)
-    error (_("No selected frame."));
 
   if (gdbarch_print_vector_info_p (gdbarch))
     gdbarch_print_vector_info (gdbarch, file, frame, args);
@@ -1835,7 +1830,7 @@ print_vector_info (struct gdbarch *gdbarch, struct ui_file *file,
 static void
 vector_info (char *args, int from_tty)
 {
-  print_vector_info (current_gdbarch, gdb_stdout, deprecated_selected_frame, args);
+  print_vector_info (current_gdbarch, gdb_stdout, get_selected_frame (NULL), args);
 }
 
 
@@ -2023,8 +2018,6 @@ print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 {
   if (!target_has_registers)
     error (_("The program has no registers now."));
-  if (deprecated_selected_frame == NULL)
-    error (_("No selected frame."));
 
   if (gdbarch_print_float_info_p (gdbarch))
     gdbarch_print_float_info (gdbarch, file, frame, args);
@@ -2051,7 +2044,7 @@ static void
 float_info (char *args, int from_tty)
 {
   print_float_info (current_gdbarch, gdb_stdout, 
-		    deprecated_selected_frame, args);
+		    get_selected_frame (NULL), args);
 }
 
 static void

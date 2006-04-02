@@ -167,7 +167,7 @@ gdb_test "disable breakpoints" "" "disable breakpoints"
 #test disable display
 gdb_test "disable display" "" "disable display"
 #test disassemble
-gdb_test "disassemble" "No frame selected." "disassemble"
+gdb_test "disassemble" "No (frame selected|registers)." "disassemble"
 #test display
 gdb_test "display" "" "display"
 #test do
@@ -229,9 +229,9 @@ gdb_expect {
 }
 
 #test frame "f" abbreviation
-gdb_test "f" "No stack." "frame \"f\" abbreviation"
+gdb_test "f" "No (stack|registers)." "frame \"f\" abbreviation"
 #test frame
-gdb_test "frame" "No stack." "frame"
+gdb_test "frame" "No (stack|registers)." "frame"
 #test fg
 gdb_test "fg" "The program is not being run." "fg"
 # FIXME: fg kills the udi connection
@@ -294,9 +294,9 @@ gdb_test "ignore" "Argument required .a breakpoint number.*" "ignore"
 #test info address
 gdb_test "info address" "Argument required." "info address"
 #test info all-registers
-gdb_test "info all-registers" "The program has no registers now." "info all-registers"
+gdb_test "info all-registers" "(The program has no registers now|No registers)." "info all-registers"
 #test info args
-gdb_test "info args" "No frame selected." "info args"
+gdb_test "info args" "No (frame selected|registers)." "info args"
 #test info bogus-gdb-command
 gdb_test "info bogus-gdb-command" "Undefined info command: \"bogus-gdb-command\".  Try \"help info\".*" "info bogus-gdb-command"
 #test info breakpoints
@@ -320,11 +320,11 @@ gdb_test "info frame" "No stack.|No selected frame." "info frame"
 #test info files
 gdb_test "info files" "" "info files"
 #test info float
-gdb_test "info float" "The program has no registers now." "info float"
+gdb_test "info float" "(The program has no registers now|No registers)." "info float"
 #test info functions
 gdb_test "info functions" "All defined functions:" "info functions"
 #test info locals
-gdb_test "info locals" "No frame selected." "info locals"
+gdb_test "info locals" "(No frame selected|No registers)." "info locals"
 #test info program
 gdb_test "info program" "The program being debugged is not being run." "info program"
 #test info registers
@@ -352,7 +352,7 @@ gdb_test "info types" "All defined types:" "info types"
 #test info variables
 gdb_test "info variables" "All defined variables:" "info variables"
 #test info vector
-gdb_test "info vector" "The program has no registers now." "info vector"
+gdb_test "info vector" "(The program has no registers now|No registers)." "info vector"
 #test info warranty
 gdb_test "info warranty" "NO WARRANTY(\[^\r\n\]*\[\r\n\])+  *11.  *BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY(\[^\r\n\]*\[\r\n\])+FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN(\[^\r\n\]*\[\r\n\])+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES(\[^\r\n\]*\[\r\n\])+PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED(\[^\r\n\]*\[\r\n\])+OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF(\[^\r\n\]*\[\r\n\])+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS(\[^\r\n\]*\[\r\n\])+TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE(\[^\r\n\]*\[\r\n\])+PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,(\[^\r\n\]*\[\r\n\])+REPAIR OR CORRECTION.(\[^\r\n\]*\[\r\n\])+  *12.  *IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING(\[^\r\n\]*\[\r\n\])+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR(\[^\r\n\]*\[\r\n\])+REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,(\[^\r\n\]*\[\r\n\])+INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING(\[^\r\n\]*\[\r\n\])+OUT OF THE USE OR INABILITY TO USE THE PROGRAM .INCLUDING BUT NOT LIMITED(\[^\r\n\]*\[\r\n\])+TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY(\[^\r\n\]*\[\r\n\])+YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER(\[^\r\n\]*\[\r\n\])+PROGRAMS., EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE(\[^\r\n\]*\[\r\n\])+POSSIBILITY OF SUCH DAMAGES.*" "info warranty"
 #test info watchpoints
