@@ -411,14 +411,14 @@ xml_feature_start_element (void *data_, const XML_Char *name,
 
   if (data->state->phase == PHASE_UNKNOWN)
     {
-#if 1
+#if 0
       fprintf_unfiltered (gdb_stderr, "skipping, name %s\n", name);
 #endif
       data->state->u.unknown.depth++;
       return;
     }
 
-#if 1
+#if 0
   fprintf_unfiltered (gdb_stderr, "entering, name %s\n", name);
   for (p = attrs; *p; p += 2)
     fprintf_unfiltered (gdb_stderr, "  attr %s=\"%s\"\n", p[0], p[1]);
@@ -580,7 +580,7 @@ xml_feature_end_element (void *data_, const XML_Char *name)
   struct gdb_available_feature *feature;
   struct gdb_available_register *reg;
 
-#if 1
+#if 0
   fprintf_unfiltered (gdb_stderr, "leaving, name %s\n", name);
 #endif
 
