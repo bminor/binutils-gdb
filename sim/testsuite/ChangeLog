@@ -1,5 +1,9 @@
 2006-04-02  Hans-Peter Nilsson  <hp@axis.com>
 
+	* sim/cris/asm/testutils.inc (test_h_mem): Use register prefix.
+	(testr_h_dr, test_h_dr, ldmem_h_gr, mvr_h_mem): Ditto.  Correct
+	syntax.
+
 	* sim/cris/asm/x0-v10.ms, sim/cris/asm/x0-v32.ms: Widen regexp for
 	stack pointer values.
 

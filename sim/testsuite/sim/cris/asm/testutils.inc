@@ -89,7 +89,8 @@ _start:
 
 ; Store a register into a word in memory
 	.macro mvr_h_mem reg addr
-	move.d \reg,@\addr
+	move.d \addr,$r13
+	move.d \reg,[$r13]
 	.endm
 
 ; Store the current ps on the stack
@@ -104,7 +105,8 @@ _start:
 
 ; Load a word value from memory
 	.macro ldmem_h_gr addr reg
-	move.d @\addr,\reg
+	move.d \addr,$r13
+	move.d [$r13],\reg
 	.endm
 
 ; Add 2 general registers
@@ -137,20 +139,20 @@ _start:
 
 ; Test the value of an immediate against a dedicated register
 	.macro test_h_dr val reg
-	move.d \reg,r12
-	test_h_gr \val r12
+	move \reg,$r12
+	test_h_gr \val $r12
 	.endm
 
 ; Test the value of an general register against a dedicated register
 	.macro testr_h_dr gr dr
-	move.d \dr,r12
-	testr_h_gr \gr r12
+	move \dr,$r12
+	testr_h_gr \gr $r12
 	.endm
 
 ; Compare an immediate with word in memory
 	.macro test_h_mem val addr
-	ldmem_h_gr \addr r12
-	test_h_gr \val r12
+	ldmem_h_gr \addr $r12
+	test_h_gr \val $r12
 	.endm
 
 ; Compare a general register with word in memory
