@@ -421,8 +421,10 @@ post_create_inferior (struct target_ops *target, int from_tty)
       obstack_init (&tmp_obstack);
       features = target_available_features (target, &tmp_obstack);
 
-      if (features)
-	arch_set_available_features (features);
+      /* Switch to a new architecture.  We must call this even if
+	 the target could not return features; if the previous
+	 target could, we may have the wrong architecture selected.  */
+      arch_set_available_features (features);
 
       obstack_free (&tmp_obstack, NULL);
     }
