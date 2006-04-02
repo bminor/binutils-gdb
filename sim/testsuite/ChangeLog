@@ -1,3 +1,8 @@
+2006-04-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/asm/x0-v10.ms, sim/cris/asm/x0-v32.ms: Widen regexp for
+	stack pointer values.
+
 2006-02-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/c/time2.c: New test.
