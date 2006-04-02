@@ -20,8 +20,8 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-CRISV10F_OBJS = crisv10f.o cpuv10.o decodev10.o semcrisv10f-switch.o modelv10.o mloopv10f.o
-CRISV32F_OBJS = crisv32f.o cpuv32.o decodev32.o semcrisv32f-switch.o modelv32.o mloopv32f.o
+CRISV10F_OBJS = crisv10f.o cpuv10.o decodev10.o modelv10.o mloopv10f.o
+CRISV32F_OBJS = crisv32f.o cpuv32.o decodev32.o modelv32.o mloopv32f.o
 
 CONFIG_DEVICES = dv-sockser.o
 CONFIG_DEVICES =
@@ -89,7 +89,6 @@ mloopv10f.o: mloopv10f.c semcrisv10f-switch.c $(CRISV10F_INCLUDE_DEPS)
 
 cpuv10.o: cpuv10.c $(CRISV10F_INCLUDE_DEPS)
 decodev10.o: decodev10.c $(CRISV10F_INCLUDE_DEPS)
-semcrisv10f-switch.o: semcrisv10f-switch.c $(CRISV10F_INCLUDE_DEPS)
 modelv10.o: modelv10.c $(CRISV10F_INCLUDE_DEPS)
 
 # CRISV32 objs
@@ -116,7 +115,6 @@ mloopv32f.o: mloopv32f.c semcrisv32f-switch.c $(CRISV32F_INCLUDE_DEPS)
 
 cpuv32.o: cpuv32.c $(CRISV32F_INCLUDE_DEPS)
 decodev32.o: decodev32.c $(CRISV32F_INCLUDE_DEPS)
-semcrisv32f-switch.o: semcrisv32f-switch.c $(CRISV32F_INCLUDE_DEPS)
 modelv32.o: modelv32.c $(CRISV32F_INCLUDE_DEPS)
 
 cris-clean:

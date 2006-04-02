@@ -1,3 +1,9 @@
+2006-04-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/Makefile.in (CRISV10F_OBJS): Remove semcrisv10f-switch.o.
+	(CRISV32F_OBJS): Remove semcrisv32f-switch.o.
+	(semcrisv10f-switch.o, semcrisv32f-switch.o: Remove dependency rules.
+
 2006-03-13  DJ Delorie  <dj@redhat.com>
 
 	* MAINTAINERS: Add self as m32c sim maintainer.
