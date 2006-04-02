@@ -1806,7 +1806,7 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(arm_tdep_h) \
 	$(gdb_sim_arm_h) $(elf_bfd_h) $(coff_internal_h) $(elf_arm_h) \
 	$(gdb_assert_h) $(bfd_in2_h) $(libcoff_h) $(objfiles_h) \
-	$(dwarf2_frame_h) $(available_h)
+	$(dwarf2_frame_h) $(available_h) $(user_regs_h)
 auxv.o: auxv.c $(defs_h) $(target_h) $(gdbtypes_h) $(command_h) \
 	$(inferior_h) $(valprint_h) $(gdb_assert_h) $(auxv_h) \
 	$(elf_common_h)

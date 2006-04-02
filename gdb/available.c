@@ -546,9 +546,10 @@ find_register (const struct gdb_feature_set *features, int regnum)
   return NULL;
 }
 
-/* Search FEATURES for a register with target-specified name NAME,
-   and set its GDB register number to REGNUM.  Return 1 if the
-   register was found, and 0 if it was not.  This function should
+/* Search FEATURES for a register with target-specified name NAME, and
+   set its GDB register number to REGNUM.  Pass REGNUM == -1 if you do
+   not need to fix a register number for this register.  Return 1 if
+   the register was found, and 0 if it was not.  This function should
    only be used while initializing a gdbarch.  */
 
 int

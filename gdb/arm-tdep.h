@@ -132,6 +132,9 @@ struct gdbarch_tdep
   enum arm_float_model fp_model; /* Floating point calling conventions.  */
 
   int have_fpa_registers;	/* Does the target report the FPA registers?  */
+  int have_vfp_registers;	/* Does the target report the VFP registers?  */
+  int have_vfp_pseudos;		/* Are we synthesizing the single precision
+				   VFP registers?  */
 
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */

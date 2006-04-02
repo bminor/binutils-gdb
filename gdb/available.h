@@ -145,8 +145,8 @@ int features_same_p (const struct gdb_feature_set *,
 void record_available_features (struct gdbarch *,
 				struct gdb_feature_set *);
 
-/* Find a register with the given name, and set its internal register
-   number.  */
+/* Find a register with the given name, and optionally set its
+   internal register number.  */
 
 int available_find_named_register (struct gdb_feature_set *,
 				   const char *, int);

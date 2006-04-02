@@ -41,6 +41,7 @@
 #include "objfiles.h"
 #include "dwarf2-frame.h"
 #include "available.h"
+#include "user-regs.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -1352,6 +1353,10 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
   if (avail_type)
     return avail_type;
 
+  if (gdbarch_tdep (current_gdbarch)->have_vfp_pseudos
+      && regnum >= NUM_REGS && regnum < NUM_REGS + 32)
+    return builtin_type_float;
+
   if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
     {
       if (!gdbarch_tdep (gdbarch)->have_fpa_registers)
@@ -1364,6 +1369,56 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
     }
   else
     return builtin_type_int32;
+}
+
+/* Map DWARF register numbers onto internal GDB register numbers.  */
+static int
+arm_dwarf_reg_to_regnum (int reg)
+{
+  /* Core integer regs.  */
+  if (reg >= 0 && reg <= 15)
+    return reg;
+
+  /* Legacy FPA encoding.  These were once used in a way which
+     overlapped with VFP register numbering, so their use is
+     discouraged, but GDB doesn't support the ARM toolchain
+     which did that.  */
+  if (reg >= 16 && reg <= 23)
+    return ARM_F0_REGNUM + reg - 16;
+
+  /* New assignments for the FPA registers.  */
+  if (reg >= 96 && reg <= 103)
+    return ARM_F0_REGNUM + reg - 96;
+
+  /* VFP v2 registers.  A double precision value is actually
+     in d1 rather than s2, but the ABI only defines numbering
+     for the single precision registers.  This will "just work"
+     in GDB for little endian targets (we'll read eight bytes,
+     starting in s0 and then progressing to s1), but will be
+     reversed on big endian targets with VFP.  This won't
+     be a problem for the new Neon quad registers; you're supposed
+     to use DW_OP_piece for those.  */
+  if (reg >= 64 && reg <= 95)
+    {
+      char name_buf[4];
+
+      sprintf (name_buf, "s%d", reg - 64);
+      return user_reg_map_name_to_regnum (current_gdbarch, name_buf,
+					  strlen (name_buf));
+    }
+
+  /* VFP v3 / Neon registers.  This range is also used for VFP v2
+     registers, except that it now describes d0 instead of s0.  */
+  if (reg >= 256 && reg <= 287)
+    {
+      char name_buf[4];
+
+      sprintf (name_buf, "d%d", reg - 256);
+      return user_reg_map_name_to_regnum (current_gdbarch, name_buf,
+					  strlen (name_buf));
+    }
+
+  return -1;
 }
 
 /* Map GDB internal REGNUM onto the Arm simulator register numbers.  */
@@ -2475,6 +2530,19 @@ arm_register_name (int i)
 	return "";
     }
 
+  if (gdbarch_tdep (current_gdbarch)->have_vfp_pseudos
+      && i >= NUM_REGS && i < NUM_REGS + 32)
+    {
+      static const char *const vfp_pseudo_names[] = {
+	"s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
+	"s8", "s9", "s10", "s11", "s12", "s13", "s14", "s15",
+	"s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23",
+	"s24", "s25", "s26", "s27", "s28", "s29", "s30", "s31",
+      };
+
+      return vfp_pseudo_names[i - NUM_REGS];
+    }
+
   /* Check for target-supplied register numbers.  */
   return available_register_name (current_gdbarch, i);
 }
@@ -2565,6 +2633,57 @@ arm_write_pc (CORE_ADDR pc, ptid_t ptid)
 	write_register_pid (ARM_PS_REGNUM, val & ~(CORE_ADDR) 0x20, ptid);
     }
 }
+
+static void
+arm_pseudo_vfp_read (struct gdbarch *gdbarch, struct regcache *regcache,
+		     int regnum, gdb_byte *buf)
+{
+  char name_buf[4];
+  gdb_byte reg_buf[8];
+  int offset, double_regnum;
+
+  gdb_assert (regnum >= NUM_REGS && regnum <= NUM_REGS + 32);
+  regnum -= NUM_REGS;
+
+  /* s0 is always the least significant half of d0.  */
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    offset = (regnum & 1) ? 0 : 4;
+  else
+    offset = (regnum & 1) ? 4 : 0;
+
+  sprintf (name_buf, "d%d", regnum >> 1);
+  double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
+					       strlen (name_buf));
+
+  regcache_raw_read (regcache, double_regnum, reg_buf);
+  memcpy (buf, reg_buf + offset, 4);
+}
+
+static void
+arm_pseudo_vfp_write (struct gdbarch *gdbarch, struct regcache *regcache,
+		      int regnum, const gdb_byte *buf)
+{
+  char name_buf[4];
+  gdb_byte reg_buf[8];
+  int offset, double_regnum;
+
+  gdb_assert (regnum >= NUM_REGS && regnum <= NUM_REGS + 32);
+  regnum -= NUM_REGS;
+
+  /* s0 is always the least significant half of d0.  */
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    offset = (regnum & 1) ? 0 : 4;
+  else
+    offset = (regnum & 1) ? 4 : 0;
+
+  sprintf (name_buf, "d%d", regnum >> 1);
+  double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
+					       strlen (name_buf));
+
+  regcache_raw_read (regcache, double_regnum, reg_buf);
+  memcpy (reg_buf + offset, buf, 4);
+  regcache_raw_write (regcache, double_regnum, reg_buf);
+}
 
 static enum gdb_osabi
 arm_elf_osabi_sniffer (bfd *abfd)
@@ -2628,6 +2747,27 @@ arm_check_feature_set (struct gdbarch *gdbarch,
     }
   else
     gdbarch_tdep (gdbarch)->have_fpa_registers = 0;
+
+  /* If we have a VFP unit, check whether the single precision registers
+     are present.  If not, then we will synthesize them as pseudo
+     registers.  */
+
+  if (available_find_named_feature (feature_set, "org.gnu.gdb.arm.vfp"))
+    {
+      if (available_find_named_register (feature_set, "d0", -1)
+	  && !available_find_named_register (feature_set, "s0", -1))
+	{
+	  /* NOTE: This is the only set of pseudo registers used by
+	     the ARM target at the moment.  If more are added, a
+	     little more care in numbering will be needed.  */
+
+	  set_gdbarch_num_pseudo_regs (gdbarch, 32);
+	  set_gdbarch_pseudo_register_read (gdbarch, arm_pseudo_vfp_read);
+	  set_gdbarch_pseudo_register_write (gdbarch, arm_pseudo_vfp_write);
+	  gdbarch_tdep (gdbarch)->have_vfp_pseudos = 1;
+	}
+      gdbarch_tdep (gdbarch)->have_vfp_registers = 1;
+    }
 }
 
 
@@ -2843,6 +2983,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_print_float_info (gdbarch, arm_print_float_info);
 
   /* Internal <-> external register number maps.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, arm_dwarf_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, arm_dwarf_reg_to_regnum);
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
 
   /* Integer registers are 4 bytes.  */
