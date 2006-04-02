@@ -2253,6 +2253,14 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
       wait_forever_enabled_p = 0;
     }
 
+  /* FIXME: This is a hack.  Default to an architecture with no
+     available features here, and set the real one further down.
+     Ideally, we ought to set the real architecture here (and
+     also in remote_create_inferior maybe?) but not redo it
+     in post_inferior_created below.  That will take some rearranging
+     that I don't have time for right now.  */
+  arch_set_available_features (NULL);
+
   /* First delete any symbols previously loaded from shared libraries.  */
   no_shared_libraries (NULL, 0);
 
@@ -3268,8 +3276,6 @@ fetch_registers_using_g (void)
   buf_len = strlen (buf);
 
   /* Sanity check the received packet.  */
-  if (buf_len > 2 * rs->sizeof_g_packet)
-    error (_("remote 'g' packet reply is too large: %s"), buf);
   if (buf_len % 2 != 0)
     error (_("Remote 'g' packet reply is of odd length: %s"), buf);
   if (REGISTER_BYTES_OK_P () && !REGISTER_BYTES_OK (buf_len / 2))
@@ -3285,14 +3291,26 @@ fetch_registers_using_g (void)
      update our records.  A 'g' reply that doesn't include a register's
      value implies either that the register is not available, or that
      the 'p' packet must be used.  */
-  if (buf_len < 2 * rs->sizeof_g_packet)
+  /* FIXME: Allow bigger, too.  We have no choice.  We might not have the right
+     architecture selected, because we haven't yet sent qPart:features, and
+     in turn that means we might clobber the no-features architecture
+     with the g packet from a feature-ful architecture.  Really, sending a
+     g packet at all before we know the target features is asking for
+     trouble.  Order of initialization needs to be changed.  */
+  if (buf_len != 2 * rs->sizeof_g_packet)
     {
       rs->sizeof_g_packet = buf_len / 2;
 
       for (i = 0; i < NUM_REGS; i++)
-	if (rs->regs[i].in_g_packet
-	    && rs->regs[i].offset >= rs->sizeof_g_packet)
-	  rs->regs[i].in_g_packet = 0;
+	{
+	  if (rs->regs[i].pnum == -1)
+	    continue;
+
+	  if (rs->regs[i].offset >= rs->sizeof_g_packet)
+	    rs->regs[i].in_g_packet = 0;
+	  else
+	    rs->regs[i].in_g_packet = 1;
+	}
     }
 
   regs = alloca (rs->sizeof_g_packet);
