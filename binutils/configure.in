@@ -346,6 +346,11 @@ done
 AC_SUBST(EMULATION)
 AC_SUBST(EMULATION_VECTOR)
 
+# Required for html and install-html
+AC_SUBST(datarootdir)
+AC_SUBST(docdir)
+AC_SUBST(htmldir)
+
 AC_OUTPUT(Makefile doc/Makefile po/Makefile.in:po/Make-in,
 [
 case "x$CONFIG_FILES" in

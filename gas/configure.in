@@ -669,6 +669,11 @@ GAS_CHECK_DECL_NEEDED(strstr, f, char *(*f)(), $gas_test_headers)
 
 AC_CHECK_DECLS([vsnprintf])
 
+dnl Required for html and install-html targets.
+AC_SUBST(datarootdir)
+AC_SUBST(docdir)
+AC_SUBST(htmldir)
+
 dnl This must come last.
 
 dnl We used to make symlinks to files in the source directory, but now

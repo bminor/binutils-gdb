@@ -1,4 +1,4 @@
-2006-02-27  Carlos O'Donell  <carlos@codesourcery.com
+2006-02-27  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* Makefile.am: Add html target.
 	* Makefile.in: Regenerate.
