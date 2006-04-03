@@ -1,3 +1,8 @@
+2006-04-03  Hans-Peter Nilsson  <hp@axis.com>
+
+	* sim/cris/hw: New directory for subdirectories with tests.
+	* sim/cris/hw/rv-n-cris: New directory with tests.
+
 2006-04-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/asm/testutils.inc (test_h_mem): Use register prefix.
