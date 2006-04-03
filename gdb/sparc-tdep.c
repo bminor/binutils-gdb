@@ -157,7 +157,7 @@ sparc_fetch_wcookie (void)
   gdb_byte buf[8];
   int len;
 
-  len = target_read_partial (ops, TARGET_OBJECT_WCOOKIE, NULL, buf, 0, 8);
+  len = target_read (ops, TARGET_OBJECT_WCOOKIE, NULL, buf, 0, 8);
   if (len == -1)
     return 0;
 

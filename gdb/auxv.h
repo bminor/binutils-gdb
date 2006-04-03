@@ -31,12 +31,6 @@
 struct target_ops;		/* Forward declaration.  */
 
 
-/* Read all the auxv data into a contiguous xmalloc'd buffer,
-   stored in *DATA.  Return the size in bytes of this data.
-   If zero, there is no data and *DATA is null.
-   if < 0, there was an error and *DATA is null.  */
-extern LONGEST target_auxv_read (struct target_ops *ops, gdb_byte **data);
-
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
    Return 0 if *READPTR is already at the end of the buffer.
    Return -1 if there is insufficient buffer for a whole entry.

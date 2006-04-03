@@ -1,0 +1,203 @@
+Notes for the branch "gdb-csl-available-20060303-branch"
+--------------------------------------------------------
+
+This branch implements a new mechanism which allows GDB to ask a target
+"what features do you have?" GDB can then interpret the response and
+dynamically present those features to the user.  Some features require
+corresponding support in GDB, and must be specially recognized by the target
+architecture.  Others do not require additional GDB support, e.g. additional
+registers (the only type of feature implemented so far).
+
+The branch does not have a ChangeLog relative to mainline; one will be written
+later.  So far, only the ARM target has any support for available features.
+
+The most interesting portion of this document is the TODO list; the rest may
+get somewhat out of date.
+
+Control flow in GDB
+-------------------
+
+After connecting to the target, we check the new architecture-provided setting
+gdbarch_available_features_support.  If it is set, we query the target
+for its available features, interpret the response, and switch to a new
+gdbarch, derived from the current one, with these features recorded.
+
+In order for the derivation process to work, the architecture's gdbarch_init
+must correctly support filling in defaults based on the last used architecture.
+If it does not, for example, cache something read from the ELF binary in
+gdbarch_tdep, the architecture is likely to get out of sync with the
+debuggee.
+
+During debugging, GDB can query information from the current set of
+features.  This is currently done in architecture-specific hooks, but may be
+done in common code in the future.
+
+Writing a feature description
+-----------------------------
+
+Feature descriptions are written in XML.  The current DTD is in
+gdb/features/gdb-target.dtd.  There are some limits beyond those
+expressed in the DTD - many of these limits are not yet documented
+and not yet relevant until additional GDB support has been implemented.
+See the TODO.
+
+Here's a simple sample description:
+
+<?xml version="1.0"?>
+<!DOCTYPE target SYSTEM "gdb-target.dtd">
+<target>
+  <feature name="bar">
+    <reg name="s0" bitsize="32"/>
+    <reg name="s1" bitsize="32" type="float"/>
+  </feature>
+
+  <feature-set>
+    <feature-ref name="bar" base-regnum="1"/>
+  </feature-set>
+</target>
+
+This describes a simple target feature set which only contains two registers,
+named s0 (32-bit, integer) and s1 (32-bit, floating point).
+
+You can spread a description over multiple files by using the standardized
+XInclude mechanism - but only whole-file XInclude is supported.  The
+xpointer attribute should not be used, and the href attribute should be,
+using a bare basename.  GDB will query the target for the file, if it has
+not already seen it.
+
+You can validate the description using any XML validator which supports XInclude.
+For instance, with "xmllint" (shipped as part of the GNOME libxml2 package):
+
+	xmllint --xinclude --postvalid my-target.xml
+
+Post validation is usually appropriate when using XInclude; the DTD describes
+the document after XInclude processing.
+
+GDB fetches CHECKSUMS initially.  Files with a listed checksum may be
+fetched from a cache instead of from the target (currently only RAM caching
+is implemented).  Next, GDB fetches "target.xml", and then any files
+included using XInclude.  Files not listed in CHECKSUMS will not be fetched
+from the cache - they may be e.g. generated on the fly.  The target
+description is fetched on connect, and again after application restart in
+case it has changed (TODO: is this wasteful, should it be fetched only
+once?  This only matters for target extended-remote, so it isn't a big
+deal right now.)
+
+By default, feature names must be unique within the document (XML "ID"
+constraint), but not globally unique.  However, GDB must recognize some
+features explicitly to enable additional support for them.  It uses the
+feature name to detect their presence.  These features should have
+unambiguous, globally unique names.  If the feature is described in the GDB
+manual, use the name listed there.  If not, and you are adding code to a
+local version of GDB to recognize the feature by name, please use a name
+which includes your organization.  For instance, "org.gnu.gdb.arm.core", or
+"com.codesourcery.foovendor.coproc". This method prevents conflicts with
+other names chosen by other groups.
+
+The target description should specify every register provided by the
+target, including the GDB standard ones.
+
+
+TODO items and unsettled (or unasked) questions
+-----------------------------------------------
+
+When finished this documentation needs to move into the user and internals
+manual.
+
+The "ro" and "save-restore" tags may not express enough information about
+how to treat system registers.  Richard Earnshaw suggested a more detailed
+categorization; I need to consider it; I think it's a good idea at first
+glance.
+
+Reading and writing registers using the 'p' and 'P' packets is very
+inefficient; a target mechanism and remote protocol packets for multiple
+register batching would probably help a lot.  Note, the branch now does a
+simple subset of this assuming a reasonable 'g' packet.
+
+For ARM VFP, there are two views of some registers: s0 / s1 are single precision
+registers overlayed in storage with d0, a double precision register.  Many
+other targets do the same thing.  Should we express this to GDB, or just
+allow it to read them both from the target (somewhat wasteful)?  GDB already
+assumes that modifying one register may modify another unpredictably, so
+writing is OK - the only problem is a waste of bandwidth.
+
+The DTD allows for description fields, including multi-lingual ones, but
+there is no GDB support for descriptions.  It would be good to present
+them to the user.
+
+Should we convey the information read from the target (after e.g. XInclude
+processing) to MI front ends, or are the changes to the register cache
+sufficient?  For instance, Eclipse would probably be happy to display most
+of this data (especially descriptions).  I think there should be one MI
+command to fetch the DTD used, and another to fetch the description used. 
+XInclude processing has been moved into a separate phase to facilitate this.
+Because other external entities are not supported, these two are guaranteed
+to convey the entire description.
+
+The current DTD and GDB support does not allow for nested features.  This
+is probably useful.  I think this will be a must-have in the long term.
+
+GDB needs additional error checking for its assumptions of unique names.
+For instance, there may be multiple registers with the same name in
+GDB's feature database, but they had better not be instantiated in
+the same feature set.
+
+Should known features be compiled in to GDB, or loaded from the filesystem?
+The most essential features should probably be compiled in, so that the GDB
+binary is useful standalone.  The DTD is already compiled in, but there's no
+support for a target to supply default features by XML instead of hand
+coding.
+
+GDB should support reading features and feature sets from disk instead of
+from the target.
+
+GDB should support caching features read from the target in a user-specified
+directory.
+
+Should GDB warn about unrecognized features which require additional GDB
+support, or silently ignore them?  Currently there is no way to detect
+this.  It's not a big deal.
+
+Since the name field of features may be hierarchical, and the description is
+free-form (more like "help text"), there should probably be a "short
+description" field - a user label without the uniqueness constraint.
+
+Another suggested type of feature is a memory map - which areas of memory
+the debugger may read from / write to.
+
+Targets could use XML to supply their default feature set.  It's nice in that
+it moves a bit of code from the tdep files out into a description file; but
+less nice in that it might lose flexibility that we need; the target might
+have to run-time generate the XML.  Currently there are no plans to require
+this, but it may turn out to be a simplifying assumption later.
+
+Register group handling right now is somewhat simplistic; only
+group="general", group="float", group="vector", and no explicit group
+setting (use type to categorize) are supported.  We could extend this, or
+we could limit it to those and provide an alternate hierarchy based on
+the containing features.
+
+Eventually supporting multiple instances of a feature is desirable. This
+requires some instance-name on the feature reference, and using that to
+prefix the registers for that feature.  Maybe treat the registers as a large
+struct.  This would be sort of useful anyway, to avoid clobbering
+the convenience variable namespace.  Maybe only "core" registers should
+be in the default namespace?  Maybe key that off the description, empty
+or missing instance-name -> default namespace?
+
+In the mean time, GDB should check for duplicated register names, and
+warn that it can not support them.
+
+Should hardware MMIO registers be treated as registers, or as memory, or
+using new read/write packets that can guarantee appropriate I/O width?
+If as registers, we need to be careful with ones where reading them
+triggers an action (e.g. resetting some state).
+
+A nice-to-have item would be a basic architecture identifier:
+  (gdb) target remote board:2345
+  warning: This GDB does not support the "arm" architecture.
+
+Should the current extended-remote be changed from a client-requested
+property ("!" packet) to a target-announced property?  Some stubs
+should always be used in extended mode, some don't support it.  Some
+get by with either, but usually, not very well.

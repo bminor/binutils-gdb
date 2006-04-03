@@ -14,6 +14,8 @@ ifelse(yes,no,[
 AC_DEFUN([CY_GNU_GETTEXT],)
 ])
 
+sinclude(../config/stdint.m4)
+
 dnl CYGNUS LOCAL: This gets the right posix flag for gcc
 AC_DEFUN([CY_AC_TCL_LYNX_POSIX],
 [AC_REQUIRE([AC_PROG_CC])AC_REQUIRE([AC_PROG_CPP])

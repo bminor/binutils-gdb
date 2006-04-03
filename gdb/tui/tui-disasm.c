@@ -386,7 +386,7 @@ tui_vertical_disassem_scroll (enum tui_scroll_direction scroll_direction,
 
       content = (tui_win_content) TUI_DISASM_WIN->generic.content;
       if (cursal.symtab == (struct symtab *) NULL)
-	s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
+	s = find_pc_symtab (get_frame_pc (get_selected_frame (NULL)));
       else
 	s = cursal.symtab;
 

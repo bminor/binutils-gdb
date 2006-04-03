@@ -41,6 +41,7 @@
 #include "gdbcmd.h"
 #include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
 #include "symcat.h"
+#include "available.h"
 
 #include "floatformat.h"
 
@@ -235,6 +236,8 @@ struct gdbarch
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
+  int available_features_support;
+  struct gdb_feature_set * feature_set;
 };
 
 
@@ -361,6 +364,8 @@ struct gdbarch startup_gdbarch =
   default_register_reggroup_p,  /* register_reggroup_p */
   0,  /* fetch_pointer_argument */
   0,  /* regset_from_core_section */
+  0,  /* available_features_support */
+  0,  /* feature_set */
   /* startup_gdbarch() */
 };
 
@@ -719,6 +724,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: adjust_breakpoint_address = <0x%lx>\n",
                       (long) current_gdbarch->adjust_breakpoint_address);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: available_features_support = %s\n",
+                      paddr_d (current_gdbarch->available_features_support));
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
                       "gdbarch_dump: BELIEVE_PCC_PROMOTION # %s\n",
@@ -1054,6 +1062,9 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: extract_return_value = <0x%lx>\n",
                       (long) current_gdbarch->extract_return_value);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: feature_set = %s\n",
+                      paddr_nz ((long) current_gdbarch->feature_set));
 #ifdef FETCH_POINTER_ARGUMENT_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1638,6 +1649,14 @@ gdbarch_tdep (struct gdbarch *gdbarch)
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_tdep called\n");
   return gdbarch->tdep;
+}
+
+struct obstack *
+gdbarch_obstack (struct gdbarch *gdbarch)
+{
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_obstack called\n");
+  return gdbarch->obstack;
 }
 
 
@@ -3683,6 +3702,38 @@ set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch,
   gdbarch->regset_from_core_section = regset_from_core_section;
 }
 
+int
+gdbarch_available_features_support (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_available_features_support called\n");
+  return gdbarch->available_features_support;
+}
+
+void
+set_gdbarch_available_features_support (struct gdbarch *gdbarch,
+                                        int available_features_support)
+{
+  gdbarch->available_features_support = available_features_support;
+}
+
+struct gdb_feature_set *
+gdbarch_feature_set (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_feature_set called\n");
+  return gdbarch->feature_set;
+}
+
+void
+set_gdbarch_feature_set (struct gdbarch *gdbarch,
+                         struct gdb_feature_set * feature_set)
+{
+  gdbarch->feature_set = feature_set;
+}
+
 
 /* Keep a registry of per-architecture data-pointers required by GDB
    modules. */
@@ -3895,8 +3946,9 @@ current_gdbarch_swap_out_hack (void)
 }
 
 static void
-current_gdbarch_swap_in_hack (struct gdbarch *new_gdbarch)
+current_gdbarch_swap_in_hack (void *argument)
 {
+  struct gdbarch *new_gdbarch = argument;
   struct gdbarch_swap *curr;
 
   gdb_assert (current_gdbarch == NULL);
@@ -4006,8 +4058,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 }
 
 
-/* Look for an architecture using gdbarch_info.  Base search on only
-   BFD_ARCH_INFO and BYTE_ORDER. */
+/* Look for an architecture using gdbarch_info.  */
 
 struct gdbarch_list *
 gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
@@ -4021,6 +4072,15 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
 	continue;
       if (info->osabi != arches->gdbarch->osabi)
 	continue;
+
+      if (info->feature_set && !arches->gdbarch->feature_set)
+	continue;
+      if (!info->feature_set && arches->gdbarch->feature_set)
+	continue;
+      if (info->feature_set
+	  && !features_same_p (info->feature_set, arches->gdbarch->feature_set))
+	continue;
+
       return arches;
     }
   return NULL;
@@ -4173,13 +4233,18 @@ gdbarch_find_by_info (struct gdbarch_info info)
      architecture of the same family is found at the head of the
      rego->arches list.  */
   struct gdbarch *old_gdbarch = current_gdbarch_swap_out_hack ();
+  struct cleanup *back_to;
+
+  /* Make sure we restore current_gdbarch on our way out if an error
+     occurs.  */
+  back_to = make_cleanup (current_gdbarch_swap_in_hack, old_gdbarch);
 
   /* Find the specified architecture.  */
   struct gdbarch *new_gdbarch = find_arch_by_info (old_gdbarch, info);
 
   /* Restore the existing architecture.  */
   gdb_assert (current_gdbarch == NULL);
-  current_gdbarch_swap_in_hack (old_gdbarch);
+  do_cleanups (back_to);
 
   return new_gdbarch;
 }

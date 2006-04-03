@@ -45,6 +45,7 @@
 #include "solib.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
+#include "available.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -188,7 +189,20 @@ static void show_packet_config_cmd (struct packet_config *config);
 
 static void update_packet_config (struct packet_config *config);
 
+static void set_remote_protocol_packet_cmd (char *args, int from_tty,
+					    struct cmd_list_element *c);
+
+static void show_remote_protocol_packet_cmd (struct ui_file *file,
+					     int from_tty,
+					     struct cmd_list_element *c,
+					     const char *value);
+
 void _initialize_remote (void);
+
+/* For "set remote" and "show remote".  */
+
+static struct cmd_list_element *remote_set_cmdlist;
+static struct cmd_list_element *remote_show_cmdlist;
 
 /* Description of the remote protocol.  Strictly speaking, when the
    target is open()ed, remote.c should create a per-target description
@@ -214,7 +228,7 @@ struct remote_state
   long sizeof_g_packet;
 
   /* Description of the remote protocol registers indexed by REGNUM
-     (making an array of NUM_REGS + NUM_PSEUDO_REGS in size).  */
+     (making an array NUM_REGS in size).  */
   struct packet_reg *regs;
 
   /* This is the size (in chars) of the first response to the ``g''
@@ -228,6 +242,10 @@ struct remote_state
   /* This is the maximum size (in chars) of a non read/write packet.
      It is also used as a cap on the size of read/write packets.  */
   long remote_packet_size;
+
+  /* This flag is set if we negotiated packet size explicitly (and
+     can bypass various heuristics).  */
+  int explicit_packet_size;
 };
 
 
@@ -240,30 +258,59 @@ get_remote_state (void)
   return gdbarch_data (current_gdbarch, remote_gdbarch_data_handle);
 }
 
+static int
+compare_pnums (const void *lhs_, const void *rhs_)
+{
+  const struct packet_reg * const *lhs = lhs_;
+  const struct packet_reg * const *rhs = rhs_;
+
+  if ((*lhs)->pnum < (*rhs)->pnum)
+    return -1;
+  else if ((*lhs)->pnum == (*rhs)->pnum)
+    return 0;
+  else
+    return 1;
+}
+
 static void *
 init_remote_state (struct gdbarch *gdbarch)
 {
-  int regnum;
+  int regnum, num_remote_regs, offset;
   struct remote_state *rs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_state);
+  struct packet_reg **remote_regs;
 
-  rs->sizeof_g_packet = 0;
-
-  /* Assume a 1:1 regnum<->pnum table.  */
-  rs->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS + NUM_PSEUDO_REGS,
-				     struct packet_reg);
-  for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+  /* Assume a 1:1 regnum<->pnum table unless the available registers
+     interface informs us otherwise.  */
+  rs->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS, struct packet_reg);
+  for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       struct packet_reg *r = &rs->regs[regnum];
-      r->pnum = regnum;
+      r->pnum = available_register_target_regnum (gdbarch, regnum);
       r->regnum = regnum;
-      r->offset = DEPRECATED_REGISTER_BYTE (regnum);
-      r->in_g_packet = (regnum < NUM_REGS);
-      /* ...name = REGISTER_NAME (regnum); */
-
-      /* Compute packet size by accumulating the size of all registers.  */
-      if (regnum < NUM_REGS)
-	rs->sizeof_g_packet += register_size (current_gdbarch, regnum);
     }
+
+  /* Define the g/G packet format as the contents of each register
+     with a remote protocol number, in order of ascending protocol
+     number.  */
+
+  remote_regs = alloca (NUM_REGS * sizeof (struct packet_reg *));
+  for (num_remote_regs = 0, regnum = 0; regnum < NUM_REGS; regnum++)
+    if (rs->regs[regnum].pnum != -1)
+      remote_regs[num_remote_regs++] = &rs->regs[regnum];
+
+  qsort (remote_regs, num_remote_regs, sizeof (struct packet_reg *),
+	 compare_pnums);
+
+  for (regnum = 0, offset = 0; regnum < num_remote_regs; regnum++)
+    {
+      remote_regs[regnum]->in_g_packet = 1;
+      remote_regs[regnum]->offset = offset;
+      offset += register_size (current_gdbarch, remote_regs[regnum]->regnum);
+    }
+
+  /* Record the maximum possible size of the g packet - it may turn out
+     to be smaller.  */
+  rs->sizeof_g_packet = offset;
 
   /* Default maximum number of characters in a packet body. Many
      remote stubs have a hardwired buffer size of 400 bytes
@@ -292,7 +339,7 @@ init_remote_state (struct gdbarch *gdbarch)
 static struct packet_reg *
 packet_reg_from_regnum (struct remote_state *rs, long regnum)
 {
-  if (regnum < 0 && regnum >= NUM_REGS + NUM_PSEUDO_REGS)
+  if (regnum < 0 && regnum >= NUM_REGS)
     return NULL;
   else
     {
@@ -306,7 +353,7 @@ static struct packet_reg *
 packet_reg_from_pnum (struct remote_state *rs, LONGEST pnum)
 {
   int i;
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+  for (i = 0; i < NUM_REGS; i++)
     {
       struct packet_reg *r = &rs->regs[i];
       if (r->pnum == pnum)
@@ -427,10 +474,13 @@ get_memory_packet_size (struct memory_packet_config *config)
       if (config->size > 0
 	  && what_they_get > config->size)
 	what_they_get = config->size;
-      /* Limit it to the size of the targets ``g'' response.  */
-      if ((rs->actual_register_packet_size) > 0
-	  && what_they_get > (rs->actual_register_packet_size))
-	what_they_get = (rs->actual_register_packet_size);
+
+      /* Limit it to the size of the targets ``g'' response unless we have
+	 permission from the stub to use a larger packet size.  */
+      if (!rs->explicit_packet_size
+	  && rs->actual_register_packet_size > 0
+	  && what_they_get > rs->actual_register_packet_size)
+	what_they_get = rs->actual_register_packet_size;
     }
   if (what_they_get > MAX_REMOTE_PACKET_SIZE)
     what_they_get = MAX_REMOTE_PACKET_SIZE;
@@ -566,6 +616,7 @@ struct packet_config
     char *title;
     enum auto_boolean detect;
     enum packet_support support;
+    int must_be_reported;
   };
 
 /* Analyze a packet's return value and update the packet config
@@ -629,11 +680,8 @@ static void
 add_packet_config_cmd (struct packet_config *config,
 		       char *name,
 		       char *title,
-		       cmd_sfunc_ftype *set_func,
-		       show_value_ftype *show_func,
-		       struct cmd_list_element **set_remote_list,
-		       struct cmd_list_element **show_remote_list,
-		       int legacy)
+		       int legacy,
+		       int must_be_reported)
 {
   char *set_doc;
   char *show_doc;
@@ -643,6 +691,7 @@ add_packet_config_cmd (struct packet_config *config,
   config->title = title;
   config->detect = AUTO_BOOLEAN_AUTO;
   config->support = PACKET_SUPPORT_UNKNOWN;
+  config->must_be_reported = must_be_reported;
   set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet",
 			name, title);
   show_doc = xstrprintf ("Show current use of remote protocol `%s' (%s) packet",
@@ -651,17 +700,18 @@ add_packet_config_cmd (struct packet_config *config,
   cmd_name = xstrprintf ("%s-packet", title);
   add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
 				&config->detect, set_doc, show_doc, NULL, /* help_doc */
-				set_func, show_func,
-				set_remote_list, show_remote_list);
+				set_remote_protocol_packet_cmd,
+				show_remote_protocol_packet_cmd,
+				&remote_set_cmdlist, &remote_show_cmdlist);
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
   if (legacy)
     {
       char *legacy_name;
       legacy_name = xstrprintf ("%s-packet", name);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
-		     set_remote_list);
+		     &remote_set_cmdlist);
       add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
-		     show_remote_list);
+		     &remote_show_cmdlist);
     }
 }
 
@@ -732,6 +782,7 @@ packet_ok (const char *buf, struct packet_config *config)
 enum {
   PACKET_vCont = 0,
   PACKET_X,
+  PACKET_qOffsets,
   PACKET_qSymbol,
   PACKET_P,
   PACKET_p,
@@ -741,6 +792,7 @@ enum {
   PACKET_Z3,
   PACKET_Z4,
   PACKET_qPart_auxv,
+  PACKET_qPart_features,
   PACKET_qGetTLSAddr,
   PACKET_MAX
 };
@@ -1796,14 +1848,20 @@ get_offsets (void)
   CORE_ADDR text_addr, data_addr, bss_addr;
   struct section_offsets *offs;
 
+  if (remote_protocol_packets[PACKET_qOffsets].support == PACKET_DISABLE)
+    return;
+
   putpkt ("qOffsets");
   getpkt (buf, rs->remote_packet_size, 0);
 
-  if (buf[0] == '\000')
-    return;			/* Return silently.  Stub doesn't support
-				   this command.  */
-  if (buf[0] == 'E')
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_qOffsets]))
     {
+    case PACKET_OK:
+      break;
+    case PACKET_UNKNOWN:
+      return;			/* Return silently.  Stub doesn't support
+				   this command.  */
+    case PACKET_ERROR:
       warning (_("Remote failure reply: %s"), buf);
       return;
     }
@@ -2003,6 +2061,108 @@ Some events may be lost, rendering further debugging impossible."));
 }
 
 static void
+remote_query_packet_info (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *reply, *next;
+  int i;
+
+  reply = alloca (rs->remote_packet_size);
+
+  putpkt ("qPacketInfo");
+  getpkt (reply, rs->remote_packet_size, 0);
+
+  next = reply;
+  while (*next)
+    {
+      enum packet_support is_supported;
+      char *p, *end, *name_end;
+
+      p = next;
+      end = strchr (p, ';');
+      if (end == NULL)
+	{
+	  end = p + strlen (p);
+	  next = end;
+	}
+      else
+	{
+	  if (end == p)
+	    {
+	      warning (_("empty item in \"qPacketInfo\" response"));
+	      continue;
+	    }
+
+	  *end = '\0';
+	  next = end + 1;
+	}
+
+      name_end = strchr (p, '=');
+      if (name_end)
+	{
+	  /* This is a name=value entry.  */
+	  char *value;
+
+	  value = name_end + 1;
+	  *name_end = '\0';
+
+	  if (strcmp (p, "PacketSize") == 0)
+	    {
+	      int packet_size;
+	      char *value_end;
+
+	      packet_size = strtol (value, &value_end, 16);
+	      if (*value != '\0' && *value_end == '\0')
+		{
+		  /* MERGE WARNING: This needs the infinite length
+		     incoming packet support, which in turn needs us
+		     to adjust rs->buf_size here.  */
+		  if (packet_size > MAX_REMOTE_PACKET_SIZE)
+		    {
+		      warning (_("limiting remote suggested packet size (%d bytes) to %d"),
+			       packet_size, MAX_REMOTE_PACKET_SIZE);
+		      packet_size = MAX_REMOTE_PACKET_SIZE;
+		    }
+		  rs->remote_packet_size = packet_size;
+		  rs->explicit_packet_size = 1;
+
+		  continue;
+		}
+	    }
+
+	  /* Should we even warn about this?  For testing, at least, yes.  */
+	  warning (_("unrecognized item \"%s=%s\" in \"qPacketInfo\" response"),
+		   p, value);
+	  continue;
+	}
+
+      if (end[-1] != '+' && end[-1] != '-')
+	{
+	  warning (_("unrecognized item \"%s\" in \"qPacketInfo\" response"), p);
+	  continue;
+	}
+
+      is_supported = (end[-1] == '+') ? PACKET_ENABLE : PACKET_DISABLE;
+      end[-1] = '\0';
+
+      for (i = 0; i < PACKET_MAX; i++)
+	if (strcmp (remote_protocol_packets[i].name, p) == 0)
+	  {
+	    if (remote_protocol_packets[i].support == PACKET_SUPPORT_UNKNOWN)
+	      remote_protocol_packets[i].support = is_supported;
+	    break;
+	  }
+    }
+
+  /* Default some unmentioned packets to unsupported.  */
+  for (i = 0; i < PACKET_MAX; i++)
+    if (remote_protocol_packets[i].must_be_reported
+	&& remote_protocol_packets[i].support == PACKET_SUPPORT_UNKNOWN)
+      remote_protocol_packets[i].support = PACKET_DISABLE;
+}
+
+
+static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	       int extended_p, int async_p)
 {
@@ -2064,6 +2224,11 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   use_threadinfo_query = 1;
   use_threadextra_query = 1;
 
+  /* The first packet we send to the target is the optional "supported
+     packets" request.  If the target can answer this, it will tell us
+     which later probes to skip.  */
+  remote_query_packet_info ();
+
   /* Without this, some commands which require an active target (such
      as kill) won't work.  This variable serves (at least) double duty
      as both the pid of the target process (if it has such), and as a
@@ -2087,6 +2252,14 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	 implemented.  */
       wait_forever_enabled_p = 0;
     }
+
+  /* FIXME: This is a hack.  Default to an architecture with no
+     available features here, and set the real one further down.
+     Ideally, we ought to set the real architecture here (and
+     also in remote_create_inferior maybe?) but not redo it
+     in post_inferior_created below.  That will take some rearranging
+     that I don't have time for right now.  */
+  arch_set_available_features (NULL);
 
   /* First delete any symbols previously loaded from shared libraries.  */
   no_shared_libraries (NULL, 0);
@@ -3031,112 +3204,116 @@ got_status:
   return inferior_ptid;
 }
 
-/* Number of bytes of registers this stub implements.  */
-
-static int register_bytes_found;
-
-/* Read the remote registers into the block REGS.  */
-/* Currently we just read all the registers, so we don't use regnum.  */
+/* Fetch a single register using a 'p' packet.  */
 
 static int
-fetch_register_using_p (int regnum)
+fetch_register_using_p (struct packet_reg *reg)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size), *p;
   char regp[MAX_REGISTER_SIZE];
   int i;
 
+  if (remote_protocol_packets[PACKET_p].support == PACKET_DISABLE)
+    return 0;
+
+  if (reg->pnum == -1)
+    return 0;
+
   p = buf;
   *p++ = 'p';
-  p += hexnumstr (p, regnum);
+  p += hexnumstr (p, reg->pnum);
   *p++ = '\0';
   remote_send (buf, rs->remote_packet_size);
 
-  /* If the stub didn't recognize the packet, or if we got an error,
-     tell our caller.  */
-  if (buf[0] == '\0' || buf[0] == 'E')
-    return 0;
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_p]))
+    {
+    case PACKET_OK:
+      break;
+    case PACKET_UNKNOWN:
+      return 0;
+    case PACKET_ERROR:
+      error (_("Could not fetch register \"%s\""),
+	     gdbarch_register_name (current_gdbarch, reg->regnum));
+    }
 
-  /* If this register is unfetchable, tell the regcache.  */
   if (buf[0] == 'x')
     {
-      regcache_raw_supply (current_regcache, regnum, NULL);
-      set_register_cached (regnum, -1);
+      regcache_raw_supply (current_regcache, reg->regnum, NULL);
+      set_register_cached (reg->regnum, -1);
       return 1;
     }
 
-  /* Otherwise, parse and supply the value.  */
   p = buf;
   i = 0;
   while (p[0] != 0)
     {
       if (p[1] == 0)
-        {
-          error (_("fetch_register_using_p: early buf termination"));
-          return 0;
-        }
-
+	error (_("fetch_register_using_p: early buf termination"));
       regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
       p += 2;
     }
-  regcache_raw_supply (current_regcache, regnum, regp);
+  regcache_raw_supply (current_regcache, reg->regnum, regp);
   return 1;
 }
 
+/* Fetch the registers included in the target's 'g' packet.  */
+
 static void
-remote_fetch_registers (int regnum)
+fetch_registers_using_g (void)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size);
-  int i;
+  int i, buf_len;
   char *p;
-  char *regs = alloca (rs->sizeof_g_packet);
+  char *regs;
 
   set_thread (PIDGET (inferior_ptid), 1);
-
-  if (regnum >= 0)
-    {
-      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
-      gdb_assert (reg != NULL);
-      if (!reg->in_g_packet)
-	internal_error (__FILE__, __LINE__,
-			_("Attempt to fetch a non G-packet register when this "
-			"remote.c does not support the p-packet."));
-    }
-      switch (remote_protocol_packets[PACKET_p].support)
-	{
-	case PACKET_DISABLE:
-	  break;
-	case PACKET_ENABLE:
-	  if (fetch_register_using_p (regnum))
-	    return;
-	  else
-	    error (_("Protocol error: p packet not recognized by stub"));
-	case PACKET_SUPPORT_UNKNOWN:
-	  if (fetch_register_using_p (regnum))
-	    {
-	      /* The stub recognized the 'p' packet.  Remember this.  */
-	      remote_protocol_packets[PACKET_p].support = PACKET_ENABLE;
-	      return;
-	    }
-	  else
-	    {
-	      /* The stub does not support the 'P' packet.  Use 'G'
-	         instead, and don't try using 'P' in the future (it
-	         will just waste our time).  */
-	      remote_protocol_packets[PACKET_p].support = PACKET_DISABLE;
-	      break;
-	    }
-	}
 
   sprintf (buf, "g");
   remote_send (buf, rs->remote_packet_size);
 
-  /* Save the size of the packet sent to us by the target.  Its used
+  buf_len = strlen (buf);
+
+  /* Sanity check the received packet.  */
+  if (buf_len % 2 != 0)
+    error (_("Remote 'g' packet reply is of odd length: %s"), buf);
+  if (REGISTER_BYTES_OK_P () && !REGISTER_BYTES_OK (buf_len / 2))
+    error (_("Remote 'g' packet reply is too short: %s"), buf);
+
+  /* Save the size of the packet sent to us by the target.  It is used
      as a heuristic when determining the max size of packets that the
      target can safely receive.  */
-  if ((rs->actual_register_packet_size) == 0)
-    (rs->actual_register_packet_size) = strlen (buf);
+  if (rs->actual_register_packet_size == 0)
+    rs->actual_register_packet_size = buf_len;
+
+  /* If this is smaller than we guessed the 'g' packet would be,
+     update our records.  A 'g' reply that doesn't include a register's
+     value implies either that the register is not available, or that
+     the 'p' packet must be used.  */
+  /* FIXME: Allow bigger, too.  We have no choice.  We might not have the right
+     architecture selected, because we haven't yet sent qPart:features, and
+     in turn that means we might clobber the no-features architecture
+     with the g packet from a feature-ful architecture.  Really, sending a
+     g packet at all before we know the target features is asking for
+     trouble.  Order of initialization needs to be changed.  */
+  if (buf_len != 2 * rs->sizeof_g_packet)
+    {
+      rs->sizeof_g_packet = buf_len / 2;
+
+      for (i = 0; i < NUM_REGS; i++)
+	{
+	  if (rs->regs[i].pnum == -1)
+	    continue;
+
+	  if (rs->regs[i].offset >= rs->sizeof_g_packet)
+	    rs->regs[i].in_g_packet = 0;
+	  else
+	    rs->regs[i].in_g_packet = 1;
+	}
+    }
+
+  regs = alloca (rs->sizeof_g_packet);
 
   /* Unimplemented registers read as all bits zero.  */
   memset (regs, 0, rs->sizeof_g_packet);
@@ -3162,15 +3339,11 @@ remote_fetch_registers (int regnum)
   p = buf;
   for (i = 0; i < rs->sizeof_g_packet; i++)
     {
-      if (p[0] == 0)
-	break;
-      if (p[1] == 0)
-	{
-	  warning (_("Remote reply is of odd length: %s"), buf);
-	  /* Don't change register_bytes_found in this case, and don't
-	     print a second warning.  */
-	  goto supply_them;
-	}
+      if (p[0] == 0 || p[1] == 0)
+	/* This shouldn't happen - we adjusted sizeof_g_packet above.  */
+	internal_error (__FILE__, __LINE__,
+			"unexpected end of 'g' packet reply");
+
       if (p[0] == 'x' && p[1] == 'x')
 	regs[i] = 0;		/* 'x' */
       else
@@ -3178,28 +3351,17 @@ remote_fetch_registers (int regnum)
       p += 2;
     }
 
-  if (i != register_bytes_found)
-    {
-      register_bytes_found = i;
-      if (REGISTER_BYTES_OK_P ()
-	  && !REGISTER_BYTES_OK (i))
-	warning (_("Remote reply is too short: %s"), buf);
-    }
-
- supply_them:
   {
     int i;
-    for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    for (i = 0; i < NUM_REGS; i++)
       {
 	struct packet_reg *r = &rs->regs[i];
 	if (r->in_g_packet)
 	  {
 	    if (r->offset * 2 >= strlen (buf))
-	      /* A short packet that didn't include the register's
-                 value, this implies that the register is zero (and
-                 not that the register is unavailable).  Supply that
-                 zero value.  */
-	      regcache_raw_supply (current_regcache, r->regnum, NULL);
+	      /* This shouldn't happen - we adjusted in_g_packet above.  */
+	      internal_error (__FILE__, __LINE__,
+			      "unexpected end of 'g' packet reply");
 	    else if (buf[r->offset * 2] == 'x')
 	      {
 		gdb_assert (r->offset * 2 < strlen (buf));
@@ -3214,6 +3376,52 @@ remote_fetch_registers (int regnum)
 	  }
       }
   }
+}
+
+static void
+remote_fetch_registers (int regnum)
+{
+  struct remote_state *rs = get_remote_state ();
+  int i;
+
+  set_thread (PIDGET (inferior_ptid), 1);
+
+  if (regnum >= 0)
+    {
+      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
+      gdb_assert (reg != NULL);
+
+      /* If this register might be in the 'g' packet, try that first -
+	 we are likely to read more than one register.  If this is the
+	 first 'g' packet, we might be overly optimistic about its
+	 contents, so fall back to 'p'.  */
+      if (reg->in_g_packet)
+	{
+	  fetch_registers_using_g ();
+	  if (reg->in_g_packet)
+	    return;
+	}
+
+      if (fetch_register_using_p (reg))
+	return;
+
+      /* This register is not available.  */
+      regcache_raw_supply (current_regcache, reg->regnum, NULL);
+      set_register_cached (reg->regnum, -1);
+
+      return;
+    }
+
+  fetch_registers_using_g ();
+
+  for (i = 0; i < NUM_REGS; i++)
+    if (!rs->regs[i].in_g_packet)
+      if (!fetch_register_using_p (&rs->regs[i]))
+	{
+	  /* This register is not available.  */
+	  regcache_raw_supply (current_regcache, i, NULL);
+	  set_register_cached (i, -1);
+	}
 }
 
 /* Prepare to store registers.  Since we may send them all (using a
@@ -3246,14 +3454,19 @@ remote_prepare_to_store (void)
    packet was not recognized.  */
 
 static int
-store_register_using_P (int regnum)
+store_register_using_P (struct packet_reg *reg)
 {
   struct remote_state *rs = get_remote_state ();
-  struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
   /* Try storing a single register.  */
   char *buf = alloca (rs->remote_packet_size);
   gdb_byte regp[MAX_REGISTER_SIZE];
   char *p;
+
+  if (remote_protocol_packets[PACKET_P].support == PACKET_DISABLE)
+    return 0;
+
+  if (reg->pnum == -1)
+    return 0;
 
   xsnprintf (buf, rs->remote_packet_size, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
@@ -3261,51 +3474,30 @@ store_register_using_P (int regnum)
   bin2hex (regp, p, register_size (current_gdbarch, reg->regnum));
   remote_send (buf, rs->remote_packet_size);
 
-  return buf[0] != '\0';
+  switch (packet_ok (buf, &remote_protocol_packets[PACKET_P]))
+    {
+    case PACKET_OK:
+      return 1;
+    case PACKET_ERROR:
+      error (_("Could not write register \"%s\""),
+	     gdbarch_register_name (current_gdbarch, reg->regnum));
+    case PACKET_UNKNOWN:
+      return 0;
+    default:
+      internal_error (__FILE__, __LINE__, _("Bad result from packet_ok"));
+    }
 }
-
 
 /* Store register REGNUM, or all registers if REGNUM == -1, from the
    contents of the register cache buffer.  FIXME: ignores errors.  */
 
 static void
-remote_store_registers (int regnum)
+store_registers_using_G ()
 {
   struct remote_state *rs = get_remote_state ();
   char *buf;
   gdb_byte *regs;
   char *p;
-
-  set_thread (PIDGET (inferior_ptid), 1);
-
-  if (regnum >= 0)
-    {
-      switch (remote_protocol_packets[PACKET_P].support)
-	{
-	case PACKET_DISABLE:
-	  break;
-	case PACKET_ENABLE:
-	  if (store_register_using_P (regnum))
-	    return;
-	  else
-	    error (_("Protocol error: P packet not recognized by stub"));
-	case PACKET_SUPPORT_UNKNOWN:
-	  if (store_register_using_P (regnum))
-	    {
-	      /* The stub recognized the 'P' packet.  Remember this.  */
-	      remote_protocol_packets[PACKET_P].support = PACKET_ENABLE;
-	      return;
-	    }
-	  else
-	    {
-	      /* The stub does not support the 'P' packet.  Use 'G'
-	         instead, and don't try using 'P' in the future (it
-	         will just waste our time).  */
-	      remote_protocol_packets[PACKET_P].support = PACKET_DISABLE;
-	      break;
-	    }
-	}
-    }
 
   /* Extract all the registers in the regcache copying them into a
      local buffer.  */
@@ -3313,7 +3505,7 @@ remote_store_registers (int regnum)
     int i;
     regs = alloca (rs->sizeof_g_packet);
     memset (regs, 0, rs->sizeof_g_packet);
-    for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    for (i = 0; i < NUM_REGS; i++)
       {
 	struct packet_reg *r = &rs->regs[i];
 	if (r->in_g_packet)
@@ -3326,9 +3518,53 @@ remote_store_registers (int regnum)
   buf = alloca (rs->remote_packet_size);
   p = buf;
   *p++ = 'G';
-  /* remote_prepare_to_store insures that register_bytes_found gets set.  */
-  bin2hex (regs, p, register_bytes_found);
+  /* remote_prepare_to_store insures that rs->sizeof_g_packet gets
+     updated.  */
+  bin2hex (regs, p, rs->sizeof_g_packet);
   remote_send (buf, rs->remote_packet_size);
+}
+
+/* Store register REGNUM, or all registers if REGNUM == -1, from the contents
+   of the register cache buffer.  FIXME: ignores errors.  */
+
+static void
+remote_store_registers (int regnum)
+{
+  struct remote_state *rs = get_remote_state ();
+  int i;
+
+  set_thread (PIDGET (inferior_ptid), 1);
+
+  if (regnum >= 0)
+    {
+      struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
+      gdb_assert (reg != NULL);
+
+      /* Always prefer to store registers using the 'P' packet if
+	 possible; we often change only a small number of registers.
+         Sometimes we change a larger number; we'd need help from a
+	 higher layer to know to use 'G'.  */
+      if (store_register_using_P (reg))
+	return;
+
+      /* For now, don't complain if we have no way to write the
+	 register.  GDB loses track of unavailable registers too
+	 easily.  Some day, this may be an error.  We don't have
+	 any way to read the register, either... */
+      if (!reg->in_g_packet)
+	return;
+
+      store_registers_using_G ();
+      return;
+    }
+
+  store_registers_using_G ();
+
+  for (i = 0; i < NUM_REGS; i++)
+    if (!rs->regs[i].in_g_packet)
+      if (!store_register_using_P (&rs->regs[i]))
+	/* See above for why we do not issue an error here.  */
+	continue;
 }
 
 
@@ -4763,6 +4999,49 @@ the loaded file\n"));
     printf_filtered (_("No loaded section named '%s'.\n"), args);
 }
 
+/* Read OBJECT_NAME/ANNEX from the remote target using a qPart packet.
+   Data at OFFSET, of up to LEN bytes, is read into READBUF; the
+   number of bytes read is returned, or 0 for EOF, or -1 for error.
+   The number of bytes read may be less than LEN without indicating an
+   EOF.  PACKET is checked and updated to indicate whether the remote
+   target supports this object.  */
+
+static LONGEST
+remote_read_qpart (struct target_ops *ops, const char *object_name,
+		   const char *annex,
+		   gdb_byte *readbuf, ULONGEST offset, LONGEST len,
+		   struct packet_config *packet)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *buf2 = alloca (rs->remote_packet_size);
+  unsigned int total = 0;
+  LONGEST i, n;
+
+  if (packet->support == PACKET_DISABLE)
+    return -1;
+
+  n = min ((rs->remote_packet_size - 2) / 2, len);
+  snprintf (buf2, rs->remote_packet_size, "qPart:%s:read:%s:%s,%s",
+	    object_name, annex ? annex : "",
+	    phex_nz (offset, sizeof offset),
+	    phex_nz (n, sizeof n));
+  i = putpkt (buf2);
+  if (i < 0)
+    return -1;
+
+  buf2[0] = '\0';
+  getpkt (buf2, rs->remote_packet_size, 0);
+  if (packet_ok (buf2, packet) != PACKET_OK)
+    return -1;
+
+  if (buf2[0] == 'O' && buf2[1] == 'K' && buf2[2] == '\0')
+    return 0;		/* Got EOF indicator.  */
+
+  /* Got some data.  */
+  i = hex2bin (buf2, readbuf, len);
+  return i;
+}
+
 static LONGEST
 remote_xfer_partial (struct target_ops *ops, enum target_object object,
 		     const char *annex, gdb_byte *readbuf,
@@ -4770,8 +5049,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 {
   struct remote_state *rs = get_remote_state ();
   int i;
-  char *buf2 = alloca (rs->remote_packet_size);
-  char *p2 = &buf2[0];
+  char *buf2, *p2;
   char query_type;
 
   /* Handle memory using remote_xfer_memory.  */
@@ -4815,39 +5093,13 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       break;
 
     case TARGET_OBJECT_AUXV:
-      if (remote_protocol_packets[PACKET_qPart_auxv].support != PACKET_DISABLE)
-	{
-	  unsigned int total = 0;
-	  while (len > 0)
-	    {
-	      LONGEST n = min ((rs->remote_packet_size - 2) / 2, len);
-	      snprintf (buf2, rs->remote_packet_size,
-			"qPart:auxv:read::%s,%s",
-			phex_nz (offset, sizeof offset),
-			phex_nz (n, sizeof n));
-	      i = putpkt (buf2);
-	      if (i < 0)
-		return total > 0 ? total : i;
-	      buf2[0] = '\0';
-	      getpkt (buf2, rs->remote_packet_size, 0);
-	      if (packet_ok (buf2, &remote_protocol_packets[PACKET_qPart_auxv])
-		  != PACKET_OK)
-		return total > 0 ? total : -1;
-	      if (buf2[0] == 'O' && buf2[1] == 'K' && buf2[2] == '\0')
-		break;		/* Got EOF indicator.  */
-	      /* Got some data.  */
-	      i = hex2bin (buf2, readbuf, len);
-	      if (i > 0)
-		{
-		  readbuf = (void *) ((char *) readbuf + i);
-		  offset += i;
-		  len -= i;
-		  total += i;
-		}
-	    }
-	  return total;
-	}
-      return -1;
+      gdb_assert (annex == NULL);
+      return remote_read_qpart (ops, "auxv", annex, readbuf, offset, len,
+				&remote_protocol_packets[PACKET_qPart_auxv]);
+
+    case TARGET_OBJECT_AVAILABLE_FEATURES:
+      return remote_read_qpart (ops, "features", annex, readbuf, offset, len,
+				&remote_protocol_packets[PACKET_qPart_features]);
 
     default:
       return -1;
@@ -4869,6 +5121,9 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 
   gdb_assert (annex != NULL);
   gdb_assert (readbuf != NULL);
+
+  buf2 = alloca (rs->remote_packet_size);
+  p2 = &buf2[0];
 
   *p2++ = 'q';
   *p2++ = query_type;
@@ -5221,6 +5476,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_get_thread_local_address = remote_get_thread_local_address;
+  remote_ops.to_available_features = available_features_from_target_object;
   remote_ops.to_stratum = process_stratum;
   remote_ops.to_has_all_memory = 1;
   remote_ops.to_has_memory = 1;
@@ -5346,6 +5602,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_stop = remote_stop;
   remote_async_ops.to_xfer_partial = remote_xfer_partial;
   remote_async_ops.to_rcmd = remote_rcmd;
+  remote_async_ops.to_available_features
+    = available_features_from_target_object;
   remote_async_ops.to_stratum = process_stratum;
   remote_async_ops.to_has_all_memory = 1;
   remote_async_ops.to_has_memory = 1;
@@ -5378,9 +5636,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   extended_async_remote_ops.to_create_inferior = extended_remote_async_create_inferior;
   extended_async_remote_ops.to_mourn_inferior = extended_remote_mourn;
 }
-
-static struct cmd_list_element *remote_set_cmdlist;
-static struct cmd_list_element *remote_show_cmdlist;
 
 static void
 set_remote_cmd (char *args, int from_tty)
@@ -5559,88 +5814,47 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			   &setlist, &showlist);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_X],
-			 "X", "binary-download",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "X", "binary-download", 1, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vCont],
-			 "vCont", "verbose-resume",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "vCont", "verbose-resume", 0, 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qOffsets],
+			 "qOffsets", "load-offsets", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSymbol],
-			 "qSymbol", "symbol-lookup",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "qSymbol", "symbol-lookup", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_P],
-			 "P", "set-register",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "P", "set-register", 1, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_p],
-			 "p", "fetch-register",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 1);
+			 "p", "fetch-register", 1, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z0],
-			 "Z0", "software-breakpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z0", "software-breakpoint", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z1],
-			 "Z1", "hardware-breakpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z1", "hardware-breakpoint", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z2],
-			 "Z2", "write-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z2", "write-watchpoint", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z3],
-			 "Z3", "read-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z3", "read-watchpoint", 0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_Z4],
-			 "Z4", "access-watchpoint",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "Z4", "access-watchpoint",  0, 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qPart_auxv],
-			 "qPart_auxv", "read-aux-vector",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 "qPart:auxv", "read-aux-vector", 0, 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qPart_features],
+			 "qPart:features", "target-features", 0, 1);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",
-			 set_remote_protocol_packet_cmd,
-			 show_remote_protocol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
+			 0, 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

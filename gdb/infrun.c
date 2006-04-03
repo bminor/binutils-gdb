@@ -3590,7 +3590,7 @@ save_inferior_status (int restore_stack_info)
 
   inf_status->registers = regcache_dup (current_regcache);
 
-  inf_status->selected_frame_id = get_frame_id (deprecated_selected_frame);
+  inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
   return inf_status;
 }
 

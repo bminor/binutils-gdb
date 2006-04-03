@@ -1909,7 +1909,7 @@ func_command (char *arg, int from_tty)
 
   if (!found)
     printf_filtered (_("'%s' not within current stack frame.\n"), arg);
-  else if (frame != deprecated_selected_frame)
+  else if (frame != get_selected_frame (NULL))
     select_and_print_frame (frame);
 }
 
@@ -1918,7 +1918,7 @@ func_command (char *arg, int from_tty)
 enum language
 get_frame_language (void)
 {
-  struct frame_info *frame = deprecated_selected_frame;
+  struct frame_info *frame = deprecated_safe_get_selected_frame ();
 
   if (frame)
     {

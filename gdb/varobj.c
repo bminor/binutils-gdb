@@ -498,7 +498,7 @@ varobj_create (char *objname,
       if (fi != NULL)
 	{
 	  var->root->frame = get_frame_id (fi);
-	  old_fi = deprecated_selected_frame;
+	  old_fi = get_selected_frame (NULL);
 	  select_frame (fi);
 	}
 

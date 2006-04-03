@@ -33,6 +33,9 @@ AC_AIX
 AC_ISC_POSIX
 AM_PROG_CC_STDC
 
+dnl The SHA-1 implementation needs to know the host endianness.
+AC_C_BIGENDIAN
+
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 
@@ -421,6 +424,9 @@ AC_CHECK_HEADERS(term.h, [], [],
 # FIXME: kettenis/20030102: In most cases we include these
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
+
+# Create a header we can use portably to get the standard integer types.
+GCC_HEADER_STDINT(gdb_stdint.h)
 
 # ------------------------- #
 # Checks for declarations.  #

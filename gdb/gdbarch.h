@@ -49,6 +49,7 @@ struct regset;
 struct disassemble_info;
 struct target_ops;
 struct obstack;
+struct gdb_feature_set;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -1403,8 +1404,19 @@ typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct g
 extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
 extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
 
+/* Non-zero if the architecture supports target feature sets. */
+
+extern int gdbarch_available_features_support (struct gdbarch *gdbarch);
+extern void set_gdbarch_available_features_support (struct gdbarch *gdbarch, int available_features_support);
+
+/* The architecture's currently associated feature set. */
+
+extern struct gdb_feature_set * gdbarch_feature_set (struct gdbarch *gdbarch);
+extern void set_gdbarch_feature_set (struct gdbarch *gdbarch, struct gdb_feature_set * feature_set);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
+extern struct obstack *gdbarch_obstack (struct gdbarch *gdbarch);
 
 /* Mechanism for co-ordinating the selection of a specific
    architecture.
@@ -1487,6 +1499,9 @@ struct gdbarch_info
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;
+
+  /* Use default: NULL.  */
+  struct gdb_feature_set *feature_set;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
@@ -1511,11 +1526,11 @@ extern const char **gdbarch_printable_names (void);
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
    matches the information provided by INFO. */
 
-extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches,  const struct gdbarch_info *info);
+extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches, const struct gdbarch_info *info);
 
 
 /* Helper function.  Create a preliminary ``struct gdbarch''.  Perform
-   basic initialization using values obtained from the INFO andTDEP
+   basic initialization using values obtained from the INFO and TDEP
    parameters.  set_gdbarch_*() functions are called to complete the
    initialization of the object. */
 

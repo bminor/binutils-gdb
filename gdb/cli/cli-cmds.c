@@ -862,10 +862,7 @@ disassemble_command (char *arg, int from_tty)
   name = NULL;
   if (!arg)
     {
-      if (!deprecated_selected_frame)
-	error (_("No frame selected."));
-
-      pc = get_frame_pc (deprecated_selected_frame);
+      pc = get_frame_pc (get_selected_frame (_("No frame selected.")));
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
 	error (_("No function contains program counter for selected frame."));
 #if defined(TUI)

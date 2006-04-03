@@ -330,7 +330,7 @@ tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       if (cursal.symtab == (struct symtab *) NULL)
-	s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
+	s = find_pc_symtab (get_frame_pc (get_selected_frame (NULL)));
       else
 	s = cursal.symtab;
 

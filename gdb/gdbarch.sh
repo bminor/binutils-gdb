@@ -662,6 +662,12 @@ F:=:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct 
 # Return the appropriate register set for a core file section with
 # name SECT_NAME and size SECT_SIZE.
 M::const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
+
+# Non-zero if the architecture supports target feature sets.
+v::int:available_features_support
+
+# The architecture's currently associated feature set.
+v::struct gdb_feature_set *:feature_set:::::::paddr_nz ((long) current_gdbarch->feature_set)
 EOF
 }
 
@@ -771,6 +777,7 @@ struct regset;
 struct disassemble_info;
 struct target_ops;
 struct obstack;
+struct gdb_feature_set;
 
 extern struct gdbarch *current_gdbarch;
 EOF
@@ -904,6 +911,7 @@ cat <<EOF
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
+extern struct obstack *gdbarch_obstack (struct gdbarch *gdbarch);
 
 /* Mechanism for co-ordinating the selection of a specific
    architecture.
@@ -986,6 +994,9 @@ struct gdbarch_info
 
   /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
   enum gdb_osabi osabi;
+
+  /* Use default: NULL.  */
+  struct gdb_feature_set *feature_set;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
@@ -1010,11 +1021,11 @@ extern const char **gdbarch_printable_names (void);
 /* Helper function.  Search the list of ARCHES for a GDBARCH that
    matches the information provided by INFO. */
 
-extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches,  const struct gdbarch_info *info);
+extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *arches, const struct gdbarch_info *info);
 
 
 /* Helper function.  Create a preliminary \`\`struct gdbarch''.  Perform
-   basic initialization using values obtained from the INFO andTDEP
+   basic initialization using values obtained from the INFO and TDEP
    parameters.  set_gdbarch_*() functions are called to complete the
    initialization of the object. */
 
@@ -1157,6 +1168,7 @@ cat <<EOF
 #include "gdbcmd.h"
 #include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
 #include "symcat.h"
+#include "available.h"
 
 #include "floatformat.h"
 
@@ -1590,6 +1602,14 @@ gdbarch_tdep (struct gdbarch *gdbarch)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_tdep called\\n");
   return gdbarch->tdep;
 }
+
+struct obstack *
+gdbarch_obstack (struct gdbarch *gdbarch)
+{
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_obstack called\\n");
+  return gdbarch->obstack;
+}
 EOF
 printf "\n"
 function_list | while do_read
@@ -1913,8 +1933,9 @@ current_gdbarch_swap_out_hack (void)
 }
 
 static void
-current_gdbarch_swap_in_hack (struct gdbarch *new_gdbarch)
+current_gdbarch_swap_in_hack (void *argument)
 {
+  struct gdbarch *new_gdbarch = argument;
   struct gdbarch_swap *curr;
 
   gdb_assert (current_gdbarch == NULL);
@@ -2024,8 +2045,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 }
 
 
-/* Look for an architecture using gdbarch_info.  Base search on only
-   BFD_ARCH_INFO and BYTE_ORDER. */
+/* Look for an architecture using gdbarch_info.  */
 
 struct gdbarch_list *
 gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
@@ -2039,6 +2059,15 @@ gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
 	continue;
       if (info->osabi != arches->gdbarch->osabi)
 	continue;
+
+      if (info->feature_set && !arches->gdbarch->feature_set)
+	continue;
+      if (!info->feature_set && arches->gdbarch->feature_set)
+	continue;
+      if (info->feature_set
+	  && !features_same_p (info->feature_set, arches->gdbarch->feature_set))
+	continue;
+
       return arches;
     }
   return NULL;
@@ -2191,13 +2220,18 @@ gdbarch_find_by_info (struct gdbarch_info info)
      architecture of the same family is found at the head of the
      rego->arches list.  */
   struct gdbarch *old_gdbarch = current_gdbarch_swap_out_hack ();
+  struct cleanup *back_to;
+
+  /* Make sure we restore current_gdbarch on our way out if an error
+     occurs.  */
+  back_to = make_cleanup (current_gdbarch_swap_in_hack, old_gdbarch);
 
   /* Find the specified architecture.  */
   struct gdbarch *new_gdbarch = find_arch_by_info (old_gdbarch, info);
 
   /* Restore the existing architecture.  */
   gdb_assert (current_gdbarch == NULL);
-  current_gdbarch_swap_in_hack (old_gdbarch);
+  do_cleanups (back_to);
 
   return new_gdbarch;
 }

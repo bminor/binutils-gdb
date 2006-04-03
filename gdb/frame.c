@@ -395,16 +395,26 @@ frame_find_by_id (struct frame_id id)
 {
   struct frame_info *frame;
 
+#if 0
   /* ZERO denotes the null frame, let the caller decide what to do
      about it.  Should it instead return get_current_frame()?  */
   if (!frame_id_p (id))
     return NULL;
+#endif
 
   for (frame = get_current_frame ();
        frame != NULL;
        frame = get_prev_frame (frame))
     {
       struct frame_id this = get_frame_id (frame);
+#if 1
+      /* We use an invalid frame id to mean "could not unwind from
+	 here"!  This hack fixes the "value being assigned to is
+	 no longer active" problem.  This strongly suggests that
+	 we need to change the representation.  */
+      if (!frame_id_p (id) && !frame_id_p (this))
+	return frame;
+#endif
       if (frame_id_eq (id, this))
 	/* An exact match.  */
 	return frame;
