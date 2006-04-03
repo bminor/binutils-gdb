@@ -1,3 +1,8 @@
+2006-04-03  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* sh-tdep.c (sh_dwarf2_frame_init_reg): New function.
+	(sh_gdbarch_init): Call dwarf2_frame_set_init_reg().
+
 2006-03-31  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* value.h (struct internalvar): Add field 'endian'.

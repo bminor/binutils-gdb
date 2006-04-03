@@ -2114,6 +2114,57 @@ sh_sh2a_register_sim_regno (int nr)
   return legacy_register_sim_regno (nr);
 }
 
+/* Set up the register unwinding such that call-clobbered registers are
+   not displayed in frames >0 because the true value is not certain.
+   The 'undefined' registers will show up as 'not available' unless the
+   CFI says otherwise.
+
+   This function is currently set up for SH4 and compatible only.  */
+
+static void
+sh_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+                          struct dwarf2_frame_state_reg *reg)
+{
+  /* Mark the PC as the destination for the return address.  */
+  if (regnum == PC_REGNUM)
+    reg->how = DWARF2_FRAME_REG_RA;
+
+  /* Mark the stack pointer as the call frame address.  */
+  else if (regnum == SP_REGNUM)
+    reg->how = DWARF2_FRAME_REG_CFA;
+
+  /* The above was taken from the default init_reg in dwarf2-frame.c
+     while the below is SH specific.  */
+
+  /* Caller save registers.  */
+  else if ((regnum >= R0_REGNUM && regnum <= R0_REGNUM+7)
+	   || (regnum >= FR0_REGNUM && regnum <= FR0_REGNUM+11)
+	   || (regnum >= DR0_REGNUM && regnum <= DR0_REGNUM+5)
+	   || (regnum >= FV0_REGNUM && regnum <= FV0_REGNUM+2)
+	   || (regnum == MACH_REGNUM)
+	   || (regnum == MACL_REGNUM)
+	   || (regnum == FPUL_REGNUM)
+	   || (regnum == SR_REGNUM))
+    reg->how = DWARF2_FRAME_REG_UNDEFINED;
+
+  /* Callee save registers.  */
+  else if ((regnum >= R0_REGNUM+8 && regnum <= R0_REGNUM+15)
+	   || (regnum >= FR0_REGNUM+12 && regnum <= FR0_REGNUM+15)
+	   || (regnum >= DR0_REGNUM+6 && regnum <= DR0_REGNUM+8)
+	   || (regnum == FV0_REGNUM+3))
+    reg->how = DWARF2_FRAME_REG_SAME_VALUE;
+
+  /* Other registers.  These are not in the ABI and may or may not
+     mean anything in frames >0 so don't show them.  */
+  else if ((regnum >= R0_BANK0_REGNUM && regnum <= R0_BANK0_REGNUM+15)
+	   || (regnum == GBR_REGNUM)
+	   || (regnum == VBR_REGNUM)
+	   || (regnum == FPSCR_REGNUM)
+	   || (regnum == SSR_REGNUM)
+	   || (regnum == SPC_REGNUM))
+    reg->how = DWARF2_FRAME_REG_UNDEFINED;
+}
+
 static struct sh_frame_cache *
 sh_alloc_frame_cache (void)
 {
@@ -2491,6 +2542,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_set_default (gdbarch, &sh_frame_base);
 
   set_gdbarch_in_function_epilogue_p (gdbarch, sh_in_function_epilogue_p);
+
+  dwarf2_frame_set_init_reg (gdbarch, sh_dwarf2_frame_init_reg);
 
   switch (info.bfd_arch_info->mach)
     {
