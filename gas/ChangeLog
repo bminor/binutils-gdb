@@ -1,3 +1,8 @@
+2006-04-03  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (init_op_placement_info_table): Check for formats
+	of the same length but different numbers of slots.
+
 2006-03-30  Andreas Schwab  <schwab@suse.de>
 
 	* configure.in: Fix help string for --enable-targets option.

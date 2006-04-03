@@ -10852,8 +10852,11 @@ init_op_placement_info_table (void)
 		  opi->issuef++;
 		  set_bit (fmt, opi->formats);
 		  set_bit (slot, opi->slots[fmt]);
-		  /* opi->slot_count[fmt]++; */
-		  if (fmt_length < opi->narrowest_size)
+		  if (fmt_length < opi->narrowest_size
+		      || (fmt_length == opi->narrowest_size
+			  && (xtensa_format_num_slots (isa, fmt)
+			      < xtensa_format_num_slots (isa,
+							 opi->narrowest))))
 		    {
 		      opi->narrowest = fmt;
 		      opi->narrowest_size = fmt_length;
