@@ -1,5 +1,5 @@
 /* Main header for the CRIS simulator, based on the m32r header.
-   Copyright (C) 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2006 Free Software Foundation, Inc.
    Contributed by Axis Communications.
 
 This file is part of the GNU simulators.
@@ -117,6 +117,10 @@ struct cris_thread_info {
   char sigsuspended;
 };
 
+typedef int (*cris_interrupt_delivery_fn) (SIM_CPU *,
+					   enum cris_interrupt_type,
+					   unsigned int);
+
 struct _sim_cpu {
   /* sim/common cpu base.  */
   sim_cpu_base base;
@@ -131,6 +135,11 @@ struct _sim_cpu {
      each insn.  */
   CRIS_MISC_PROFILE cris_prev_misc_profile;
 #define CPU_CRIS_PREV_MISC_PROFILE(cpu) (& (cpu)->cris_prev_misc_profile)
+
+#if WITH_HW
+  cris_interrupt_delivery_fn deliver_interrupt;
+#define CPU_CRIS_DELIVER_INTERRUPT(cpu) (cpu->deliver_interrupt)
+#endif
 
   /* Simulator environment data.  */
   USI endmem;

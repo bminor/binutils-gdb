@@ -178,6 +178,18 @@ MY (f_model_insn_after) (SIM_CPU *current_cpu, int last_p ATTRIBUTE_UNUSED,
   PROFILE_MODEL_TOTAL_CYCLES (p) += cycles;
   CPU_CRIS_MISC_PROFILE (current_cpu)->basic_cycle_count += cycles;
   PROFILE_MODEL_CUR_INSN_CYCLES (p) = cycles;
+
+#if WITH_HW
+  /* For some reason, we don't get to the sim_events_tick call in
+     cgen-run.c:engine_run_1.  Besides, more than one cycle has
+     passed, so we want sim_events_tickn anyway.  The "events we want
+     to process" is usually to initiate an interrupt, but might also
+     be other events.  We can't do the former until the main loop is
+     at point where it accepts changing the PC without internal
+     inconsistency, so just set a flag and wait.  */
+  if (sim_events_tickn (CPU_STATE (current_cpu), cycles))
+    STATE_EVENTS (CPU_STATE (current_cpu))->work_pending = 1;
+#endif
 }
 
 /* Initialize cycle counting for an insn.
@@ -245,6 +257,9 @@ MY (f_specific_init) (SIM_CPU *current_cpu)
 {
   current_cpu->make_thread_cpu_data = MY (make_thread_cpu_data);
   current_cpu->thread_cpu_data_size = sizeof (current_cpu->cpu_data);
+#if WITH_HW
+  current_cpu->deliver_interrupt = MY (deliver_interrupt);
+#endif
 }
 
 /* Model function for arbitrary single stall cycles.  */
