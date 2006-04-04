@@ -1,3 +1,7 @@
+2006-04-04  David S. Miller  <davem@sunset.davemloft.net>
+
+	* gdb.base/float.exp: Add pattern for sparc targets.
+
 2006-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/commands.exp (stray_arg0_test): New test.
