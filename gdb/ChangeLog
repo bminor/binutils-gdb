@@ -6,7 +6,9 @@
 	fill_fpregset): New.
 	* sparc64-linux-nat.c (supply_gregset, supply_fpregset, fill_gregset,
 	fill_fpregset): New.
-
+	* Makefile.in (sparc-linux-nat.o, sparc64-linux-nat.o): Update for
+	new includes.
+	
 2006-04-04  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (elf_common_h): Define.

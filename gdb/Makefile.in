@@ -2612,7 +2612,8 @@ sparc64fbsd-tdep.o: sparc64fbsd-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbcore_h) $(osabi_h) $(regcache_h) $(regset_h) \
 	$(target_h) $(trad_frame_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(sparc64_tdep_h) $(solib_svr4_h)
-sparc64-linux-nat.o: sparc64-linux-nat.c $(defs_h) $(sparc64_tdep_h) \
+sparc64-linux-nat.o: sparc64-linux-nat.c $(defs_h) $(regcache_h) \
+	$(gregset_h) $(sparc64_tdep_h) $(sparc_tdep_h) \
 	$(sparc_nat_h) $(inferior_h) $(target_h) $(linux_nat_h)
 sparc64-linux-tdep.o: sparc64-linux-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(osabi_h) $(solib_svr4_h) \
@@ -2637,7 +2638,8 @@ sparc64-tdep.o: sparc64-tdep.c $(defs_h) $(arch_utils_h) $(dwarf2_frame_h) \
 	$(gdbcore_h) $(gdbtypes_h) $(inferior_h) $(symtab_h) $(objfiles_h) \
 	$(osabi_h) $(regcache_h) $(target_h) $(value_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(sparc64_tdep_h)
-sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(inferior_h) $(target_h) \
+sparc-linux-nat.o: sparc-linux-nat.c $(defs_h) $(regcache_h) $(gregset_h) \
+	$(sparc_tdep_h) $(sparc_nat_h) $(inferior_h) $(target_h) \
 	$(linux_nat_h)
 sparc-linux-tdep.o: sparc-linux-tdep.c $(defs_h) $(floatformat_h) $(frame_h) \
 	$(frame_unwind_h) $(gdbarch_h) $(gdbcore_h) $(osabi_h) $(regcache_h) \
