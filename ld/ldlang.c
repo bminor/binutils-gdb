@@ -81,6 +81,7 @@ static void print_statement (lang_statement_union_type *,
 static void print_statement_list (lang_statement_union_type *,
 				  lang_output_section_statement_type *);
 static void print_statements (void);
+static void print_input_section (asection *);
 static bfd_boolean lang_one_common (struct bfd_link_hash_entry *, void *);
 static void lang_record_phdrs (void);
 static void lang_do_version_exports_section (void);
@@ -1596,7 +1597,30 @@ void
 lang_map (void)
 {
   lang_memory_region_type *m;
+  bfd_boolean dis_header_printed = FALSE;
   bfd *p;
+
+  LANG_FOR_EACH_INPUT_STATEMENT (file)
+    {
+      asection *s;
+
+      if ((file->the_bfd->flags & (BFD_LINKER_CREATED | DYNAMIC)) != 0
+	  || file->just_syms_flag)
+	continue;
+
+      for (s = file->the_bfd->sections; s != NULL; s = s->next)
+	if (s->output_section == NULL
+	    || s->output_section->owner != output_bfd)
+	  {
+	    if (! dis_header_printed)
+	      {
+		fprintf (config.map_file, _("\nDiscarded input sections\n\n"));
+		dis_header_printed = TRUE;
+	      }
+
+	    print_input_section (s);
+	  }
+    }
 
   minfo (_("\nMemory Configuration\n\n"));
   fprintf (config.map_file, "%-16s %-18s %-18s %s\n",
@@ -3475,13 +3499,12 @@ print_all_symbols (sec)
 /* Print information about an input section to the map file.  */
 
 static void
-print_input_section (lang_input_section_type *in)
+print_input_section (asection *i)
 {
-  asection *i = in->section;
   bfd_size_type size = i->size;
 
   init_opb ();
-  if (size != 0)
+
     {
       int len;
       bfd_vma addr;
@@ -3501,7 +3524,7 @@ print_input_section (lang_input_section_type *in)
 	  ++len;
 	}
 
-      if (i->output_section != NULL && (i->flags & SEC_EXCLUDE) == 0)
+      if (i->output_section != NULL && i->output_section->owner == output_bfd)
 	addr = i->output_section->vma + i->output_offset;
       else
 	{
@@ -3528,7 +3551,7 @@ print_input_section (lang_input_section_type *in)
 	  minfo (_("%W (size before relaxing)\n"), i->rawsize);
 	}
 
-      if (i->output_section != NULL && (i->flags & SEC_EXCLUDE) == 0)
+      if (i->output_section != NULL && i->output_section->owner == output_bfd)
 	{
 	  if (command_line.reduce_memory_overheads)
 	    bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
@@ -3797,7 +3820,7 @@ print_statement (lang_statement_union_type *s,
       print_reloc_statement (&s->reloc_statement);
       break;
     case lang_input_section_enum:
-      print_input_section (&s->input_section);
+      print_input_section (s->input_section.section);
       break;
     case lang_padding_statement_enum:
       print_padding_statement (&s->padding_statement);
