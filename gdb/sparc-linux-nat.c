@@ -20,9 +20,40 @@
    Boston, MA 02110-1301, USA.  */
 
 #include "defs.h"
+#include "regcache.h"
+
+#include <sys/procfs.h>
+#include "gregset.h"
+
+#include "sparc-tdep.h"
+#include "sparc-nat.h"
 #include "inferior.h"
 #include "target.h"
 #include "linux-nat.h"
+
+void
+supply_gregset (prgregset_t *gregs)
+{
+  sparc32_supply_gregset (sparc_gregset, current_regcache, -1, gregs);
+}
+
+void
+supply_fpregset (prfpregset_t *fpregs)
+{
+  sparc32_supply_fpregset (current_regcache, -1, fpregs);
+}
+
+void
+fill_gregset (prgregset_t *gregs, int regnum)
+{
+  sparc32_collect_gregset (sparc_gregset, current_regcache, regnum, gregs);
+}
+
+void
+fill_fpregset (prfpregset_t *fpregs, int regnum)
+{
+  sparc32_collect_fpregset (current_regcache, regnum, fpregs);
+}
 
 void _initialialize_sparc_linux_nat (void);
 
