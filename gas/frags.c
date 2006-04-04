@@ -1,6 +1,6 @@
 /* frags.c - manage frags -
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2003, 2004
+   1999, 2000, 2001, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -382,4 +382,56 @@ frag_append_1_char (int datum)
       frag_new (0);
     }
   obstack_1grow (&frchain_now->frch_obstack, datum);
+}
+
+/* Return TRUE if FRAG1 and FRAG2 have a fixed relationship between
+   their start addresses.  Set OFFSET to the difference in address
+   not already accounted for in the frag FR_ADDRESS.  */
+
+bfd_boolean
+frag_offset_fixed_p (fragS *frag1, fragS *frag2, bfd_vma *offset)
+{
+  fragS *frag;
+  bfd_vma off;
+
+  /* Start with offset initialised to difference between the two frags.
+     Prior to assigning frag addresses this will be zero.  */
+  off = frag1->fr_address - frag2->fr_address;
+  if (frag1 == frag2)
+    {
+      *offset = off;
+      return TRUE;
+    }
+
+  /* Maybe frag2 is after frag1.  */
+  frag = frag1;
+  while (frag->fr_type == rs_fill)
+    {
+      off += frag->fr_fix + frag->fr_offset * frag->fr_var;
+      frag = frag->fr_next;
+      if (frag == NULL)
+	break;
+      if (frag == frag2)
+	{
+	  *offset = off;
+	  return TRUE;
+	}
+    }
+
+  /* Maybe frag1 is after frag2.  */
+  frag = frag2;
+  while (frag->fr_type == rs_fill)
+    {
+      off -= frag->fr_fix + frag->fr_offset * frag->fr_var;
+      frag = frag->fr_next;
+      if (frag == NULL)
+	break;
+      if (frag == frag1)
+	{
+	  *offset = off;
+	  return TRUE;
+	}
+    }
+
+  return FALSE;
 }

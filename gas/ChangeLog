@@ -1,3 +1,11 @@
+2006-04-04  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 997
+	* frags.c (frag_offset_fixed_p): New function.
+	* frags.h (frag_offset_fixed_p): Declare.
+	* expr.c (expr): Use frag_offset_fixed_p when simplifying subtraction.
+	(resolve_expression): Likewise.
+
 2006-04-03  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (init_op_placement_info_table): Check for formats
