@@ -576,6 +576,7 @@ coff_symconst_h =	$(INCLUDE_DIR)/coff/symconst.h
 coff_ecoff_h =	$(INCLUDE_DIR)/coff/ecoff.h
 coff_internal_h =	$(INCLUDE_DIR)/coff/internal.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h $(bfd_h)
+elf_common_h =	$(INCLUDE_DIR)/elf/common.h
 elf_reloc_macros_h =	$(INCLUDE_DIR)/elf/reloc-macros.h
 elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_arm_h =	$(INCLUDE_DIR)/elf/arm.h $(elf_reloc_macros_h)

@@ -1,3 +1,7 @@
+2006-04-04  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (elf_common_h): Define.
+
 2006-04-03  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* sh-tdep.c (sh_dwarf2_frame_init_reg): New function.
