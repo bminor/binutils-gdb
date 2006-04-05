@@ -1,3 +1,10 @@
+2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/2404
+	* elflink.c (_bfd_elf_merge_symbol): Skip the default indirect
+	symbol from the dynamic definition with the default version if
+	its type and the type of existing regular definition mismatch.
+
 2006-04-05  Richard Sandiford  <richard@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

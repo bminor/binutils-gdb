@@ -889,6 +889,26 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	    && h->root.type != bfd_link_hash_undefweak
 	    && h->root.type != bfd_link_hash_common);
 
+  /* When we try to create a default indirect symbol from the dynamic
+     definition with the default version, we skip it if its type and
+     the type of existing regular definition mismatch.  We only do it
+     if the existing regular definition won't be dynamic.  */
+  if (pold_alignment == NULL
+      && !info->shared
+      && !info->export_dynamic
+      && !h->ref_dynamic
+      && newdyn
+      && newdef
+      && !olddyn
+      && (olddef || h->root.type == bfd_link_hash_common)
+      && ELF_ST_TYPE (sym->st_info) != h->type
+      && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+      && h->type != STT_NOTYPE)
+    {
+      *skip = TRUE;
+      return TRUE;
+    }
+
   /* Check TLS symbol.  We don't check undefined symbol introduced by
      "ld -u".  */
   if ((ELF_ST_TYPE (sym->st_info) == STT_TLS || h->type == STT_TLS)
