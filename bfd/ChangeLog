@@ -1,3 +1,8 @@
+2006-04-05  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (_bfin_create_got_section): Don't generate a _gp
+	symbol.
+
 2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/2411
