@@ -13,7 +13,7 @@ cat >e${EMULATION_NAME}.c <<EOF
 
 /* ${ELFSIZE} bit ELF emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    ELF support by Ian Lance Taylor <ian@cygnus.com>
 
@@ -541,7 +541,7 @@ struct gld${EMULATION_NAME}_ld_so_conf
   size_t len, alloc;
 };
 
-static void
+static bfd_boolean
 gld${EMULATION_NAME}_parse_ld_so_conf
      (struct gld${EMULATION_NAME}_ld_so_conf *info, const char *filename);
 
@@ -584,7 +584,7 @@ gld${EMULATION_NAME}_parse_ld_so_conf_include
     free (newp);
 }
 
-static void
+static bfd_boolean
 gld${EMULATION_NAME}_parse_ld_so_conf
      (struct gld${EMULATION_NAME}_ld_so_conf *info, const char *filename)
 {
@@ -593,7 +593,7 @@ gld${EMULATION_NAME}_parse_ld_so_conf
   size_t linelen;
 
   if (f == NULL)
-    return;
+    return FALSE;
 
   linelen = 256;
   line = xmalloc (linelen);
@@ -691,6 +691,7 @@ gld${EMULATION_NAME}_parse_ld_so_conf
   while (! feof (f));
   free (line);
   fclose (f);
+  return TRUE;
 }
 
 static bfd_boolean
@@ -705,11 +706,17 @@ gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
       char *tmppath;
       struct gld${EMULATION_NAME}_ld_so_conf info;
 
-      tmppath = concat (ld_sysroot, "/etc/ld.so.conf", NULL);
       info.path = NULL;
       info.len = info.alloc = 0;
-      gld${EMULATION_NAME}_parse_ld_so_conf (&info, tmppath);
+      tmppath = concat (ld_sysroot, "${prefix}/etc/ld.so.conf", NULL);
+      if (!gld${EMULATION_NAME}_parse_ld_so_conf (&info, tmppath))
+	{
+	  free (tmppath);
+	  tmppath = concat (ld_sysroot, "/etc/ld.so.conf", NULL);
+	  gld${EMULATION_NAME}_parse_ld_so_conf (&info, tmppath);
+	}
       free (tmppath);
+
       if (info.path)
 	{
 	  char *d = gld${EMULATION_NAME}_add_sysroot (info.path);

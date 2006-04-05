@@ -1,3 +1,13 @@
+2006-04-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (GENSCRIPTS): Pass prefix.
+	* Makefile.in: Regenerate.
+	* genscripts.sh: Adjust for extra parameter.
+	* emultempl/elf32.em (parse_ld_so_conf): Return true iff file
+	exists.
+	(check_ld_so_conf): Use ${prefix}/etc/ld.so.conf if it exists.
+	* NEWS: Update.
+
 2006-04-05  Richard Sandiford  <richard@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
