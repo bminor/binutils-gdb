@@ -80,9 +80,6 @@ struct elfNN_ia64_dyn_sym_info
   /* The addend for which this entry is relevant.  */
   bfd_vma addend;
 
-  /* Next addend in the list.  */
-  struct elfNN_ia64_dyn_sym_info *next;
-
   bfd_vma got_offset;
   bfd_vma fptr_offset;
   bfd_vma pltoff_offset;
@@ -133,6 +130,13 @@ struct elfNN_ia64_local_hash_entry
 {
   int id;
   unsigned int r_sym;
+  /* The number of elements in elfNN_ia64_dyn_sym_info array.  */
+  unsigned int count;
+  /* The number of sorted elements in elfNN_ia64_dyn_sym_info array.  */
+  unsigned int sorted_count;
+  /* The size of elfNN_ia64_dyn_sym_info array.  */
+  unsigned int size;
+  /* The array of elfNN_ia64_dyn_sym_info.  */
   struct elfNN_ia64_dyn_sym_info *info;
 
   /* TRUE if this hash entry's addends was translated for
@@ -143,6 +147,13 @@ struct elfNN_ia64_local_hash_entry
 struct elfNN_ia64_link_hash_entry
 {
   struct elf_link_hash_entry root;
+  /* The number of elements in elfNN_ia64_dyn_sym_info array.  */
+  unsigned int count;
+  /* The number of sorted elements in elfNN_ia64_dyn_sym_info array.  */
+  unsigned int sorted_count;
+  /* The size of elfNN_ia64_dyn_sym_info array.  */
+  unsigned int size;
+  /* The array of elfNN_ia64_dyn_sym_info.  */
   struct elfNN_ia64_dyn_sym_info *info;
 };
 
@@ -1799,6 +1810,9 @@ elfNN_ia64_new_elf_hash_entry (entry, table, string)
 				     table, string));
 
   ret->info = NULL;
+  ret->count = 0;
+  ret->sorted_count = 0;
+  ret->size = 0;
   return (struct bfd_hash_entry *) ret;
 }
 
@@ -1829,16 +1843,25 @@ elfNN_ia64_hash_copy_indirect (info, xdir, xind)
   if (ind->info != NULL)
     {
       struct elfNN_ia64_dyn_sym_info *dyn_i;
-      struct elfNN_ia64_dyn_sym_info **pdyn;
+      unsigned int count;
 
-      pdyn = &dir->info;
-      while ((dyn_i = *pdyn) != NULL)
-	pdyn = &dyn_i->next;
-      *pdyn = dyn_i = ind->info;
+      if (dir->info)
+	free (dir->info);
+
+      dir->info = ind->info;
+      dir->count = ind->count;
+      dir->sorted_count = ind->sorted_count;
+      dir->size = ind->size;
+
       ind->info = NULL;
+      ind->count = 0;
+      ind->sorted_count = 0;
+      ind->size = 0;
 
       /* Fix up the dyn_sym_info pointers to the global symbol.  */
-      for (; dyn_i; dyn_i = dyn_i->next)
+      for (count = dir->count, dyn_i = dir->info;
+	   count != 0;
+	   count--, dyn_i++)
 	dyn_i->h = &dir->root;
     }
 
@@ -1864,12 +1887,15 @@ elfNN_ia64_hash_hide_symbol (info, xh, force_local)
 {
   struct elfNN_ia64_link_hash_entry *h;
   struct elfNN_ia64_dyn_sym_info *dyn_i;
+  unsigned int count;
 
   h = (struct elfNN_ia64_link_hash_entry *)xh;
 
   _bfd_elf_link_hash_hide_symbol (info, &h->root, force_local);
 
-  for (dyn_i = h->info; dyn_i; dyn_i = dyn_i->next)
+  for (count = h->count, dyn_i = h->info;
+       count != 0;
+       count--, dyn_i++)
     {
       dyn_i->want_plt2 = 0;
       dyn_i->want_plt = 0;
@@ -1937,6 +1963,51 @@ elfNN_ia64_hash_table_create (abfd)
   return &ret->root.root;
 }
 
+/* Free the global elfNN_ia64_dyn_sym_info array.  */
+
+static bfd_boolean
+elfNN_ia64_global_dyn_info_free (void **xentry,
+				PTR unused ATTRIBUTE_UNUSED)
+{
+  struct elfNN_ia64_link_hash_entry *entry
+    = (struct elfNN_ia64_link_hash_entry *) xentry;
+
+  if (entry->root.root.type == bfd_link_hash_warning)
+    entry = (struct elfNN_ia64_link_hash_entry *) entry->root.root.u.i.link;
+
+  if (entry->info)
+    {
+      free (entry->info);
+      entry->info = NULL;
+      entry->count = 0;
+      entry->sorted_count = 0;
+      entry->size = 0;
+    }
+
+  return TRUE;
+}
+
+/* Free the local elfNN_ia64_dyn_sym_info array.  */
+
+static bfd_boolean
+elfNN_ia64_local_dyn_info_free (void **slot,
+				PTR unused ATTRIBUTE_UNUSED)
+{
+  struct elfNN_ia64_local_hash_entry *entry
+    = (struct elfNN_ia64_local_hash_entry *) *slot;
+
+  if (entry->info)
+    {
+      free (entry->info);
+      entry->info = NULL;
+      entry->count = 0;
+      entry->sorted_count = 0;
+      entry->size = 0;
+    }
+
+  return TRUE;
+}
+
 /* Destroy IA-64 linker hash table.  */
 
 static void
@@ -1946,9 +2017,15 @@ elfNN_ia64_hash_table_free (hash)
   struct elfNN_ia64_link_hash_table *ia64_info
     = (struct elfNN_ia64_link_hash_table *) hash;
   if (ia64_info->loc_hash_table)
-    htab_delete (ia64_info->loc_hash_table);
+    {
+      htab_traverse (ia64_info->loc_hash_table,
+		     elfNN_ia64_local_dyn_info_free, NULL);
+      htab_delete (ia64_info->loc_hash_table);
+    }
   if (ia64_info->loc_hash_memory)
     objalloc_free ((struct objalloc *) ia64_info->loc_hash_memory);
+  elf_link_hash_traverse (&ia64_info->root,
+			  elfNN_ia64_global_dyn_info_free, NULL);
   _bfd_generic_link_hash_table_free (hash);
 }
 
@@ -1970,11 +2047,14 @@ elfNN_ia64_global_dyn_sym_thunk (xentry, xdata)
   struct elfNN_ia64_dyn_sym_traverse_data *data
     = (struct elfNN_ia64_dyn_sym_traverse_data *) xdata;
   struct elfNN_ia64_dyn_sym_info *dyn_i;
+  unsigned int count;
 
   if (entry->root.root.type == bfd_link_hash_warning)
     entry = (struct elfNN_ia64_link_hash_entry *) entry->root.root.u.i.link;
 
-  for (dyn_i = entry->info; dyn_i; dyn_i = dyn_i->next)
+  for (count = entry->count, dyn_i = entry->info;
+       count != 0;
+       count--, dyn_i++)
     if (! (*data->func) (dyn_i, data->data))
       return FALSE;
   return TRUE;
@@ -1990,11 +2070,14 @@ elfNN_ia64_local_dyn_sym_thunk (slot, xdata)
   struct elfNN_ia64_dyn_sym_traverse_data *data
     = (struct elfNN_ia64_dyn_sym_traverse_data *) xdata;
   struct elfNN_ia64_dyn_sym_info *dyn_i;
+  unsigned int count;
 
-  for (dyn_i = entry->info; dyn_i; dyn_i = dyn_i->next)
+  for (count = entry->count, dyn_i = entry->info;
+       count != 0;
+       count--, dyn_i++)
     if (! (*data->func) (dyn_i, data->data))
-      return 0;
-  return 1;
+      return FALSE;
+  return TRUE;
 }
 
 static void
@@ -2103,8 +2186,129 @@ get_local_sym_hash (ia64_info, abfd, rel, create)
   return ret;
 }
 
+/* Used to sort elfNN_ia64_dyn_sym_info array.  */
+
+static int
+addend_compare (const void *xp, const void *yp)
+{
+  const struct elfNN_ia64_dyn_sym_info *x
+    = (const struct elfNN_ia64_dyn_sym_info *) xp;
+  const struct elfNN_ia64_dyn_sym_info *y
+    = (const struct elfNN_ia64_dyn_sym_info *) yp;
+
+  return x->addend - y->addend;
+}
+
+/* Sort elfNN_ia64_dyn_sym_info array and remove duplicates.  */
+
+static unsigned int
+sort_dyn_sym_info (struct elfNN_ia64_dyn_sym_info *info,
+		   unsigned int count)
+{
+  bfd_vma curr, prev;
+  unsigned int i, dup, diff, dest, src, len;
+
+  qsort (info, count, sizeof (*info), addend_compare);
+
+  /* Find the first duplicate.  */
+  prev = info [0].addend;
+  for (i = 1; i < count; i++)
+    {
+      curr = info [i].addend;
+      if (curr == prev)
+	break;
+      prev = curr;
+    }
+
+  /* Remove duplicates.  */
+  if (i < count)
+    {
+      /* We need to move a block of elements to here.  */
+      dest = i++;
+      while (i < count)
+	{
+	  curr = info [i].addend;
+
+	  /* Move a block of elements whose first one is different from
+	     the previous.  */
+	  if (curr == prev)
+	    {
+	      for (src = i + 1; src < count; src++)
+		if (info [src].addend != curr)
+		  break;
+	    }
+	  else
+	    src = i;
+
+	  if (src >= count)
+	    break;
+
+	  /* Find the next duplicate.  */
+	  prev = info [src].addend;
+	  for (dup = src + 1; dup < count; dup++)
+	    {
+	      curr = info [dup].addend;
+	      if (curr == prev)
+		break;
+	      prev = curr;
+	    }
+
+	  /* How much to move.  */
+	  len = dup - src;
+	  i = dup + 1;
+
+	  if (len == 1 && dup < count)
+	    {
+	      /* If we only move 1 element, we combine it with the next
+		 one.  Find the next different one.  */
+	      for (diff = dup + 1, src++; diff < count; diff++, src++)
+		if (info [diff].addend != curr)
+		  break;
+
+	      if (diff < count)
+		{
+		  /* Find the next duplicate.  */
+		  prev = info [diff].addend;
+		  for (dup = diff + 1; dup < count; dup++)
+		    {
+		      curr = info [dup].addend;
+		      if (curr == prev)
+			break;
+		      prev = curr;
+		      diff++;
+		    }
+
+		  len = diff - src + 1;
+		  i = diff + 1;
+		}
+	    }
+
+	  memmove (&info [dest], &info [src], len * sizeof (*info));
+
+	  dest += len;
+	}
+
+      count = dest;
+    }
+
+  return count;
+}
+
 /* Find and/or create a descriptor for dynamic symbol info.  This will
-   vary based on global or local symbol, and the addend to the reloc.  */
+   vary based on global or local symbol, and the addend to the reloc.
+
+   We don't sort when inserting.  Also, we sort and eliminate
+   duplicates if there is an unsorted section.  Typically, this will
+   only happen once, because we do all insertions before lookups.  We
+   then use bsearch to do a lookup.  This also allows lookups to be
+   fast.  So we have fast insertion (O(log N) due to duplicate check),
+   fast lookup (O(log N)) and one sort (O(N log N) expected time).
+   Previously, all lookups were O(N) because of the use of the linked
+   list and also all insertions were O(N) because of the check for
+   duplicates.  There are some complications here because the array
+   size grows occasionally, which may add an O(N) factor, but this
+   should be rare.  Also,  we free the excess array allocation, which
+   requires a copy which is O(N), but this only happens once.  */
 
 static struct elfNN_ia64_dyn_sym_info *
 get_dyn_sym_info (ia64_info, h, abfd, rel, create)
@@ -2114,12 +2318,22 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
      const Elf_Internal_Rela *rel;
      bfd_boolean create;
 {
-  struct elfNN_ia64_dyn_sym_info **pp;
-  struct elfNN_ia64_dyn_sym_info *dyn_i;
+  struct elfNN_ia64_dyn_sym_info **info_p, *info, *dyn_i, key;
+  unsigned int *count_p, *sorted_count_p, *size_p;
+  unsigned int count, sorted_count, size;
   bfd_vma addend = rel ? rel->r_addend : 0;
+  bfd_size_type amt;
 
   if (h)
-    pp = &((struct elfNN_ia64_link_hash_entry *)h)->info;
+    {
+      struct elfNN_ia64_link_hash_entry *global_h;
+
+      global_h = (struct elfNN_ia64_link_hash_entry *) h;
+      info_p = &global_h->info;
+      count_p = &global_h->count;
+      sorted_count_p = &global_h->sorted_count;
+      size_p = &global_h->size;
+    }
   else
     {
       struct elfNN_ia64_local_hash_entry *loc_h;
@@ -2131,18 +2345,107 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
 	  return NULL;
 	}
 
-      pp = &loc_h->info;
+      info_p = &loc_h->info;
+      count_p = &loc_h->count;
+      sorted_count_p = &loc_h->sorted_count;
+      size_p = &loc_h->size;
     }
 
-  for (dyn_i = *pp; dyn_i && dyn_i->addend != addend; dyn_i = *pp)
-    pp = &dyn_i->next;
-
-  if (dyn_i == NULL && create)
+  count = *count_p;
+  sorted_count = *sorted_count_p;
+  size = *size_p;
+  info = *info_p;
+  if (create)
     {
-      dyn_i = ((struct elfNN_ia64_dyn_sym_info *)
-	       bfd_zalloc (abfd, (bfd_size_type) sizeof *dyn_i));
-      *pp = dyn_i;
+      /* When we create the array, we don't check for duplicates,
+         except in the previously sorted section if one exists, and
+	 against the last inserted entry.  This allows insertions to
+	 be fast.  */
+      if (info)
+	{
+	  if (sorted_count)
+	    {
+	      /* Try bsearch first on the sorted section.  */
+	      key.addend = addend;
+	      dyn_i = bsearch (&key, info, sorted_count,
+			       sizeof (*info), addend_compare);
+
+	      if (dyn_i)
+		{
+		  return dyn_i;
+		}
+	    }
+
+	  /* Do a quick check for the last inserted entry.  */
+	  dyn_i = info + count - 1;
+	  if (dyn_i->addend == addend)
+	    {
+	      return dyn_i;
+	    }
+	}
+
+      if (size == 0)
+	{
+	  /* It is the very first element. We create the array of size
+	     1.  */
+	  size = 1;
+	  amt = size * sizeof (*info);
+	  info = bfd_malloc (amt);
+	}
+      else if (size <= count)
+	{
+	  /* We double the array size every time when we reach the
+	     size limit.  */
+	  size += size;
+	  amt = size * sizeof (*info);
+	  info = bfd_realloc (info, amt);
+	}
+      else
+	goto has_space;
+
+      if (info == NULL)
+	return NULL;
+      *size_p = size;
+      *info_p = info;
+
+has_space:
+      /* Append the new one to the array.  */
+      dyn_i = info + count;
+      memset (dyn_i, 0, sizeof (*dyn_i));
       dyn_i->addend = addend;
+      
+      /* We increment count only since the new ones are unsorted and
+	 may have duplicate.  */
+      (*count_p)++;
+    }
+  else
+    {
+      /* It is a lookup without insertion.  Sort array if part of the
+	 array isn't sorted.  */
+      if (count != sorted_count)
+	{
+	  count = sort_dyn_sym_info (info, count);
+	  *count_p = count;
+	  *sorted_count_p = count;
+	}
+
+      /* Free unused memory.  */
+      if (size != count)
+	{
+	  amt = count * sizeof (*info);
+	  info = bfd_malloc (amt);
+	  if (info != NULL)
+	    {
+	      memcpy (info, *info_p, amt);
+	      free (*info_p);
+	      *size_p = count;
+	      *info_p = info;
+	    }
+	}
+
+      key.addend = addend;
+      dyn_i = bsearch (&key, info, count,
+		       sizeof (*info), addend_compare);
     }
 
   return dyn_i;
@@ -2368,6 +2671,23 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
   Elf_Internal_Shdr *symtab_hdr;
   const Elf_Internal_Rela *rel;
   asection *got, *fptr, *srel, *pltoff;
+  enum {
+    NEED_GOT = 1,
+    NEED_GOTX = 2,
+    NEED_FPTR = 4,
+    NEED_PLTOFF = 8,
+    NEED_MIN_PLT = 16,
+    NEED_FULL_PLT = 32,
+    NEED_DYNREL = 64,
+    NEED_LTOFF_FPTR = 128,
+    NEED_TPREL = 256,
+    NEED_DTPMOD = 512,
+    NEED_DTPREL = 1024
+  };
+  int need_entry;
+  struct elf_link_hash_entry *h;
+  unsigned long r_symndx;
+  bfd_boolean maybe_dynamic;
 
   if (info->relocatable)
     return TRUE;
@@ -2378,29 +2698,181 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
   got = fptr = srel = pltoff = NULL;
 
   relend = relocs + sec->reloc_count;
+
+  /* We scan relocations first to create dynamic relocation arrays.  We
+     modified get_dyn_sym_info to allow fast insertion and support fast
+     lookup in the next loop.  */
   for (rel = relocs; rel < relend; ++rel)
     {
-      enum {
-	NEED_GOT = 1,
-	NEED_GOTX = 2,
-	NEED_FPTR = 4,
-	NEED_PLTOFF = 8,
-	NEED_MIN_PLT = 16,
-	NEED_FULL_PLT = 32,
-	NEED_DYNREL = 64,
-	NEED_LTOFF_FPTR = 128,
-	NEED_TPREL = 256,
-	NEED_DTPMOD = 512,
-	NEED_DTPREL = 1024
-      };
+      r_symndx = ELFNN_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  long indx = r_symndx - symtab_hdr->sh_info;
+	  h = elf_sym_hashes (abfd)[indx];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
+      else
+	h = NULL;
 
-      struct elf_link_hash_entry *h = NULL;
-      unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
+      /* We can only get preliminary data on whether a symbol is
+	 locally or externally defined, as not all of the input files
+	 have yet been processed.  Do something with what we know, as
+	 this may help reduce memory usage and processing time later.  */
+      maybe_dynamic = (h && ((!info->executable
+			      && (!info->symbolic
+				  || info->unresolved_syms_in_shared_libs == RM_IGNORE))
+			     || !h->def_regular
+			     || h->root.type == bfd_link_hash_defweak));
+
+      need_entry = 0;
+      switch (ELFNN_R_TYPE (rel->r_info))
+	{
+	case R_IA64_TPREL64MSB:
+	case R_IA64_TPREL64LSB:
+	  if (info->shared || maybe_dynamic)
+	    need_entry = NEED_DYNREL;
+	  break;
+
+	case R_IA64_LTOFF_TPREL22:
+	  need_entry = NEED_TPREL;
+	  if (info->shared)
+	    info->flags |= DF_STATIC_TLS;
+	  break;
+
+	case R_IA64_DTPREL32MSB:
+	case R_IA64_DTPREL32LSB:
+	case R_IA64_DTPREL64MSB:
+	case R_IA64_DTPREL64LSB:
+	  if (info->shared || maybe_dynamic)
+	    need_entry = NEED_DYNREL;
+	  break;
+
+	case R_IA64_LTOFF_DTPREL22:
+	  need_entry = NEED_DTPREL;
+	  break;
+
+	case R_IA64_DTPMOD64MSB:
+	case R_IA64_DTPMOD64LSB:
+	  if (info->shared || maybe_dynamic)
+	    need_entry = NEED_DYNREL;
+	  break;
+
+	case R_IA64_LTOFF_DTPMOD22:
+	  need_entry = NEED_DTPMOD;
+	  break;
+
+	case R_IA64_LTOFF_FPTR22:
+	case R_IA64_LTOFF_FPTR64I:
+	case R_IA64_LTOFF_FPTR32MSB:
+	case R_IA64_LTOFF_FPTR32LSB:
+	case R_IA64_LTOFF_FPTR64MSB:
+	case R_IA64_LTOFF_FPTR64LSB:
+	  need_entry = NEED_FPTR | NEED_GOT | NEED_LTOFF_FPTR;
+	  break;
+
+	case R_IA64_FPTR64I:
+	case R_IA64_FPTR32MSB:
+	case R_IA64_FPTR32LSB:
+	case R_IA64_FPTR64MSB:
+	case R_IA64_FPTR64LSB:
+	  if (info->shared || h)
+	    need_entry = NEED_FPTR | NEED_DYNREL;
+	  else
+	    need_entry = NEED_FPTR;
+	  break;
+
+	case R_IA64_LTOFF22:
+	case R_IA64_LTOFF64I:
+	  need_entry = NEED_GOT;
+	  break;
+
+	case R_IA64_LTOFF22X:
+	  need_entry = NEED_GOTX;
+	  break;
+
+	case R_IA64_PLTOFF22:
+	case R_IA64_PLTOFF64I:
+	case R_IA64_PLTOFF64MSB:
+	case R_IA64_PLTOFF64LSB:
+	  need_entry = NEED_PLTOFF;
+	  if (h)
+	    {
+	      if (maybe_dynamic)
+		need_entry |= NEED_MIN_PLT;
+	    }
+	  else
+	    {
+	      (*info->callbacks->warning)
+		(info, _("@pltoff reloc against local symbol"), 0,
+		 abfd, 0, (bfd_vma) 0);
+	    }
+	  break;
+
+	case R_IA64_PCREL21B:
+        case R_IA64_PCREL60B:
+	  /* Depending on where this symbol is defined, we may or may not
+	     need a full plt entry.  Only skip if we know we'll not need
+	     the entry -- static or symbolic, and the symbol definition
+	     has already been seen.  */
+	  if (maybe_dynamic && rel->r_addend == 0)
+	    need_entry = NEED_FULL_PLT;
+	  break;
+
+	case R_IA64_IMM14:
+	case R_IA64_IMM22:
+	case R_IA64_IMM64:
+	case R_IA64_DIR32MSB:
+	case R_IA64_DIR32LSB:
+	case R_IA64_DIR64MSB:
+	case R_IA64_DIR64LSB:
+	  /* Shared objects will always need at least a REL relocation.  */
+	  if (info->shared || maybe_dynamic)
+	    need_entry = NEED_DYNREL;
+	  break;
+
+	case R_IA64_IPLTMSB:
+	case R_IA64_IPLTLSB:
+	  /* Shared objects will always need at least a REL relocation.  */
+	  if (info->shared || maybe_dynamic)
+	    need_entry = NEED_DYNREL;
+	  break;
+
+	case R_IA64_PCREL22:
+	case R_IA64_PCREL64I:
+	case R_IA64_PCREL32MSB:
+	case R_IA64_PCREL32LSB:
+	case R_IA64_PCREL64MSB:
+	case R_IA64_PCREL64LSB:
+	  if (maybe_dynamic)
+	    need_entry = NEED_DYNREL;
+	  break;
+	}
+
+      if (!need_entry)
+	continue;
+
+      if ((need_entry & NEED_FPTR) != 0
+	  && rel->r_addend)
+	{
+	  (*info->callbacks->warning)
+	    (info, _("non-zero addend in @fptr reloc"), 0,
+	     abfd, 0, (bfd_vma) 0);
+	}
+
+      if (get_dyn_sym_info (ia64_info, h, abfd, rel, TRUE) == NULL)
+	return FALSE;
+    }
+
+  /* Now, we only do lookup without insertion, which is very fast
+     with the modified get_dyn_sym_info.  */ 
+  for (rel = relocs; rel < relend; ++rel)
+    {
       struct elfNN_ia64_dyn_sym_info *dyn_i;
-      int need_entry;
-      bfd_boolean maybe_dynamic;
       int dynrel_type = R_IA64_NONE;
 
+      r_symndx = ELFNN_R_SYM (rel->r_info);
       if (r_symndx >= symtab_hdr->sh_info)
 	{
 	  /* We're dealing with a global symbol -- find its hash entry
@@ -2413,18 +2885,18 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 
 	  h->ref_regular = 1;
 	}
+      else
+	h = NULL;
 
       /* We can only get preliminary data on whether a symbol is
 	 locally or externally defined, as not all of the input files
 	 have yet been processed.  Do something with what we know, as
 	 this may help reduce memory usage and processing time later.  */
-      maybe_dynamic = FALSE;
-      if (h && ((!info->executable
-		 && (!info->symbolic
-		     || info->unresolved_syms_in_shared_libs == RM_IGNORE))
-		|| !h->def_regular
-		|| h->root.type == bfd_link_hash_defweak))
-	maybe_dynamic = TRUE;
+      maybe_dynamic = (h && ((!info->executable
+			      && (!info->symbolic
+				  || info->unresolved_syms_in_shared_libs == RM_IGNORE))
+			     || !h->def_regular
+			     || h->root.type == bfd_link_hash_defweak));
 
       need_entry = 0;
       switch (ELFNN_R_TYPE (rel->r_info))
@@ -2508,12 +2980,6 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	      if (maybe_dynamic)
 		need_entry |= NEED_MIN_PLT;
 	    }
-	  else
-	    {
-	      (*info->callbacks->warning)
-		(info, _("@pltoff reloc against local symbol"), 0,
-		 abfd, 0, (bfd_vma) 0);
-	    }
 	  break;
 
 	case R_IA64_PCREL21B:
@@ -2562,15 +3028,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
       if (!need_entry)
 	continue;
 
-      if ((need_entry & NEED_FPTR) != 0
-	  && rel->r_addend)
-	{
-	  (*info->callbacks->warning)
-	    (info, _("non-zero addend in @fptr reloc"), 0,
-	     abfd, 0, (bfd_vma) 0);
-	}
-
-      dyn_i = get_dyn_sym_info (ia64_info, h, abfd, rel, TRUE);
+      dyn_i = get_dyn_sym_info (ia64_info, h, abfd, rel, FALSE);
 
       /* Record whether or not this is a local symbol.  */
       dyn_i->h = h;
@@ -4145,8 +4603,11 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (loc_h && ! loc_h->sec_merge_done)
 		{
 		  struct elfNN_ia64_dyn_sym_info *dynent;
+		  unsigned int count;
 
-		  for (dynent = loc_h->info; dynent; dynent = dynent->next)
+		  for (count = loc_h->count, dynent = loc_h->info;
+		       count != 0;
+		       count--, dynent++)
 		    {
 		      msec = sym_sec;
 		      dynent->addend =
@@ -4161,6 +4622,10 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 					- sym_sec->output_section->vma
 					- sym_sec->output_offset;
 		    }
+		  
+		  qsort (loc_h->info, loc_h->count,
+			 sizeof (*loc_h->info), addend_compare);
+
 		  loc_h->sec_merge_done = 1;
 		}
 	    }

@@ -1,3 +1,28 @@
+2006-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+	    James E Wilson  <wilson@specifixinc.com>
+
+	PR ld/2442
+	* elfxx-ia64.c (elfNN_ia64_dyn_sym_info): Remove next.
+	(elfNN_ia64_local_hash_entry): Add count, sorted_count and
+	size.
+	(elfNN_ia64_link_hash_entry): Likewise.
+	(elfNN_ia64_new_elf_hash_entry): Initialize count, sorted_count
+	and size.
+	(elfNN_ia64_hash_copy_indirect): Updated elfNN_ia64_dyn_sym_info
+	processing.
+	(elfNN_ia64_hash_hide_symbol): Likewise.
+	(elfNN_ia64_global_dyn_sym_thunk): Likewise.
+	(elfNN_ia64_local_dyn_sym_thunk): Likewise.
+	(elfNN_ia64_global_dyn_info_free): New function.
+	(elfNN_ia64_local_dyn_info_free): Likewise.
+	(elfNN_ia64_hash_table_free): Free local and global
+	elfNN_ia64_dyn_sym_info.
+	(addend_compare): New function.
+	(sort_dyn_sym_info): Likewise.
+	(get_dyn_sym_info): Updated to use binary search for addend.
+	(elfNN_ia64_check_relocs): Scan relocations to create dynamic
+	relocation arrays first.
+
 2006-04-05  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* elf32-bfin.c (_bfin_create_got_section): Don't generate a _gp
